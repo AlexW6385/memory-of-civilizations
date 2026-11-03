@@ -57,7 +57,7 @@ export const SITES = [
   { id: 'edfu', name: { en: 'Ptolemaic Egypt', zh: '托勒密埃及' }, era: '1st c. BC', region: 'egypt', lat: 24.98, lon: 32.87, radius: 160,
     legacy: { region: 'nile', center: [0, -6], buildings: ['edfu'] } },
   { id: 'mamluk-cairo', name: { en: 'Mamluk Cairo', zh: '马穆鲁克开罗' }, era: '14th c.', region: 'egypt', lat: 30.03, lon: 31.26 },
-  { id: 'djenne', name: { en: 'The Sahel', zh: '萨赫勒' }, era: '14th c.', region: 'sahel', lat: 13.90, lon: -4.56 },
+  { id: 'djenne', name: { en: 'The Sahel', zh: '萨赫勒' }, era: '14th c.', region: 'sahel', lat: 13.90, lon: -4.56, radius: 360 },
   { id: 'lalibela', name: { en: 'Ethiopia', zh: '埃塞俄比亚' }, era: '13th c.', region: 'ethiopia', lat: 12.03, lon: 39.04 },
   { id: 'kilwa', name: { en: 'The Swahili Coast', zh: '斯瓦希里海岸' }, era: '15th c.', region: 'swahili', lat: -8.96, lon: 39.51, water: true },
   { id: 'great-zimbabwe', name: { en: 'Zimbabwe', zh: '大津巴布韦' }, era: '14th c.', region: 'zimbabwe', lat: -20.27, lon: 30.93 },

@@ -159,6 +159,10 @@ export const MATERIALS = {
   limestone_core:   { color: '#b59a6e', roughness: 0.92, kind: 'ashlar', course: 0.75, block: 1.2 },
   basalt:           { color: '#3b3a38', roughness: 0.6, kind: 'paving', course: 1.0, block: 1.3 },
   mud_plaster:      { color: '#a68a66', roughness: 0.95, kind: 'smooth' },
+  // the Sahel (Djenné): banco — mud plaster renewed every year, warm brown, its surface smoothed
+  // by hand; palm-wood beams (toron) standing out of the walls
+  banco:            { color: '#9c7451', roughness: 0.97, kind: 'rock' },
+  banco_smooth:     { color: '#a47b56', roughness: 0.95, kind: 'smooth' },
 };
 
 export function albedo(key) {

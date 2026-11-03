@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.7 — Djenné (2026-11-03)
+- New settlement: Djenné in the Mali Empire — the Great Mosque on its high platform, its qibla wall with three towers crowned by ostrich eggs, pilasters and palm-wood toron, the prayer hall's pillars and the court; the market below the qibla wall; the town of two-storey banco houses with their pinnacled facades on an island in the Bani's floodplain (dossier: `docs/settlements/djenne.md`). New style `sahel`.
+
 ## v8.6 — Giza (2026-11-03)
 - New settlement: Giza in Khufu's reign — the Great Pyramid in its white casing (230.3 m square, 146.6 m high; one can climb its faces), its court and enclosure wall, the mortuary temple with granite pillars round a basalt court, the three queens' pyramids, the covered causeway down to the valley temple and the harbour, the cemeteries of mastabas, the Wall of the Crow and the workers' town of galleries and houses (dossier: `docs/settlements/giza.md`). New style `oldkingdom`.
 
