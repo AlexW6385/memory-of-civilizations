@@ -53,7 +53,7 @@ export const SITES = [
     legacy: { region: 'byzantium', center: [268, -258], buildings: ['hagia-sophia'] } },
   { id: 'ottoman-istanbul', name: { en: 'Ottoman Istanbul', zh: '奥斯曼伊斯坦布尔' }, era: '16th c.', region: 'bosphorus', lat: 41.02, lon: 28.96, nudge: 300 },
   // ── Egypt and Africa ──
-  { id: 'giza', name: { en: 'Old Kingdom Egypt', zh: '古王国埃及' }, era: '26th c. BC', region: 'egypt', lat: 29.98, lon: 31.13, radius: 220 },
+  { id: 'giza', name: { en: 'Old Kingdom Egypt', zh: '古王国埃及' }, era: '26th c. BC', region: 'egypt', lat: 29.98, lon: 31.13, radius: 420 },
   { id: 'edfu', name: { en: 'Ptolemaic Egypt', zh: '托勒密埃及' }, era: '1st c. BC', region: 'egypt', lat: 24.98, lon: 32.87, radius: 160,
     legacy: { region: 'nile', center: [0, -6], buildings: ['edfu'] } },
   { id: 'mamluk-cairo', name: { en: 'Mamluk Cairo', zh: '马穆鲁克开罗' }, era: '14th c.', region: 'egypt', lat: 30.03, lon: 31.26 },

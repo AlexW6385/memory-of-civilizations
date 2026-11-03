@@ -6,12 +6,14 @@ import { ground as mingSuzhou } from './ming-suzhou/ground.js';
 import { ground as qingBeijing } from './qing-beijing/ground.js';
 import { ground as angkor } from './angkor/ground.js';
 import { ground as chichenItza } from './chichen-itza/ground.js';
+import { ground as giza } from './giza/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
   angkor,
   'chichen-itza': chichenItza,
+  giza,
 };
 
 export const MODULES = {
@@ -19,4 +21,5 @@ export const MODULES = {
   'qing-beijing': () => import('./qing-beijing/index.js'),
   angkor: () => import('./angkor/index.js'),
   'chichen-itza': () => import('./chichen-itza/index.js'),
+  giza: () => import('./giza/index.js'),
 };

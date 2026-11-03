@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.6 — Giza (2026-11-03)
+- New settlement: Giza in Khufu's reign — the Great Pyramid in its white casing (230.3 m square, 146.6 m high; one can climb its faces), its court and enclosure wall, the mortuary temple with granite pillars round a basalt court, the three queens' pyramids, the covered causeway down to the valley temple and the harbour, the cemeteries of mastabas, the Wall of the Crow and the workers' town of galleries and houses (dossier: `docs/settlements/giza.md`). New style `oldkingdom`.
+
 ## v8.5 — Chichén Itzá (2026-11-03)
 - New settlement: Chichén Itzá, c. 1000 — the Castillo with its nine terraces, four stairways and serpent heads, the Great Ball Court with its rings and temples, the Temple of the Warriors with its colonnades, the Group of the Thousand Columns, the Platform of Venus, the Tzompantli, the white road to the Sacred Cenote, and the town of walled house lots with oval thatched houses (dossier: `docs/settlements/chichen-itza.md`). New style `maya`.
 - Fix: beams, ridges, rails and raised walks (Ming, Qing, Khmer) had their top faces turned inward and could look hollow from above.

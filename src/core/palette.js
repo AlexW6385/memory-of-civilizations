@@ -152,6 +152,13 @@ export const MATERIALS = {
   stucco_red:       { color: '#a1452f', roughness: 0.85, kind: 'smooth' },
   maya_blue:        { color: '#4f8fa1', roughness: 0.8, kind: 'smooth' },
   rubble:           { color: '#9c9585', roughness: 0.95, kind: 'rock' },
+  // Old Kingdom Egypt (Giza, 26th c. BC): the pyramid's casing of fine white Tura limestone, its
+  // core of local yellow-brown limestone, red Aswan granite, black basalt paving, mudbrick and mud
+  // plaster in the workers' town
+  tura_limestone:   { color: '#e2d9c4', roughness: 0.55, kind: 'ashlar', course: 1.2, block: 1.6 },
+  limestone_core:   { color: '#b59a6e', roughness: 0.92, kind: 'ashlar', course: 0.75, block: 1.2 },
+  basalt:           { color: '#3b3a38', roughness: 0.6, kind: 'paving', course: 1.0, block: 1.3 },
+  mud_plaster:      { color: '#a68a66', roughness: 0.95, kind: 'smooth' },
 };
 
 export function albedo(key) {
