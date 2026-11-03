@@ -104,7 +104,7 @@ async function main() {
   climate.setTime(settings.timeRuns ? 'cycle' : 'held');
   const tq = params.get('time');
   const floraScale = { high: 1, medium: 0.7, low: 0.45 };
-  world.flora.scale = floraScale[settings.quality] ?? 1;
+  world.flora.scale = world.openFlora.scale = floraScale[settings.quality] ?? 1;
   const controls = new Controls(R.camera, canvas, world.collide);
   world.onCollide = (c) => { controls.collide = c; };
   controls.sensitivity = settings.sensitivity;
@@ -296,7 +296,7 @@ async function main() {
   };
   setInterval(paintSpeed, 250);
   onLang(() => { paintSpeed(); paintClock(); });
-  q.onchange = () => { settings.quality = q.value; R.setQuality(q.value); world.flora.scale = floraScale[q.value] ?? 1; world.flora.dirty = true; save(); };
+  q.onchange = () => { settings.quality = q.value; R.setQuality(q.value); world.flora.scale = world.openFlora.scale = floraScale[q.value] ?? 1; world.flora.dirty = true; save(); };
   mv.oninput = () => { settings.music = +mv.value; music.setVolume(settings.music); save(); };
   sv.oninput = () => { settings.sensitivity = +sv.value; controls.sensitivity = settings.sensitivity; save(); };
   lang.onchange = () => setLang(lang.value);

@@ -19,6 +19,7 @@ import { ENV } from './env.js';
 import { loadLand } from '../planet/land.js';
 import { BUILT, BUILT_BY_ID, initRelief, surface, groundInFrame, seaInFrame, PLANET_RADIUS as R, BLEND } from '../planet/relief.js';
 import { PlanetTerrain } from '../planet/terrain.js';
+import { OpenFlora } from '../planet/open-flora.js';
 import { toPlanet, toLocal, dirToPlanet, dirToLocal, transportFrame, enuFrame, norm, dot, unit } from '../planet/geo.js';
 import { withFocus, terrainHeight, inWater as legacyWater, waterLevel as legacyWaterLevel } from '../world/regions.js';
 
@@ -152,6 +153,7 @@ export class World {
     this.planet.matrixAutoUpdate = false;
     this.scene.add(this.planet);
     this.terrain = new PlanetTerrain(this.planet, land);
+    this.openFlora = new OpenFlora(this.planet, land);
     this.settlements = BUILT.map((S) => new Settlement(S, this));
     this.byId = Object.fromEntries(this.settlements.map((s) => [s.id, s]));
     // the plants of the settlement the visitor is in (src/engine/flora), drawn in its frame
@@ -334,6 +336,7 @@ export class World {
     const camP = toPlanet(this.anchor.frame, camera.position.toArray());
     if (!this._next || now > this._next) { this._next = now + 400; this.ensureNear(u); }
     if (!this._nextT || now > this._nextT) { this._nextT = now + 120; this.terrain.update(camP); }
+    if (!this._nextF || now > this._nextF) { this._nextF = now + 300; this.openFlora.update(camP, Math.hypot(camP[0], camP[1], camP[2]) - R); }
     this.camAlt = Math.hypot(camP[0], camP[1], camP[2]) - R;
     ENV.camAlt.value = this.camAlt;
     // the plants: of the settlement whose zone the visitor is in, or the nearest within reach

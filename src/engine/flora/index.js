@@ -25,7 +25,7 @@ function swayNode(amount) {
 }
 
 const mats = new Map();
-function foliageMaterial(kind, amount) {
+export function foliageMaterial(kind, amount) {
   const key = `f:${kind}`;
   if (mats.has(key)) return mats.get(key);
   const tex = foliageTexture(FOLIAGE_TEX[kind] || kind);
@@ -46,7 +46,7 @@ function foliageMaterial(kind, amount) {
   mats.set(key, m);
   return m;
 }
-function solidMaterial(key, amount) {
+export function solidMaterial(key, amount) {
   const k = `s:${key}:${amount}`;
   if (mats.has(k)) return mats.get(k);
   const m = paletteMaterial(key).clone();

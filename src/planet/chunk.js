@@ -23,6 +23,14 @@ export function faceDir(f, s, t) {
   return [x / l, y / l, z / l];
 }
 
+/** Face and face coordinates of a direction: [face, s, t]. */
+export function dirFace(u) {
+  let best = 0, bd = -2;
+  for (let f = 0; f < 6; f++) { const n = FACES[f].n, d = u[0] * n[0] + u[1] * n[1] + u[2] * n[2]; if (d > bd) { bd = d; best = f; } }
+  const F = FACES[best], a = u[0] * F.a[0] + u[1] * F.a[1] + u[2] * F.a[2], b = u[0] * F.b[0] + u[1] * F.b[1] + u[2] * F.b[2];
+  return [best, Math.atan(a / bd) / (Math.PI / 4), Math.atan(b / bd) / (Math.PI / 4)];
+}
+
 /** The square of a tile in face coordinates: [s0, t0, size]. */
 export function tileRect(level, i, j) { const size = 2 / (1 << level); return [-1 + i * size, -1 + j * size, size]; }
 
