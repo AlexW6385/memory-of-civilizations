@@ -60,7 +60,9 @@ export class MiniMap {
       g.fillStyle = 'rgba(214, 196, 160, 0.55)'; g.strokeStyle = 'rgba(255, 240, 210, 0.9)'; g.lineWidth = 1.5 * dpr;
       g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill(); g.stroke();
       g.fillStyle = '#fff8e8'; g.shadowColor = 'rgba(0,0,0,0.7)'; g.shadowBlur = 3 * dpr;
-      g.fillText(tr(S.site.name), x, y - rr - 4 * dpr);
+      // the name above the disc, kept inside the map
+      const name = tr(S.site.name), tw = g.measureText(name).width;
+      g.fillText(name, Math.max(tw / 2 + 4 * dpr, Math.min(W - tw / 2 - 4 * dpr, x)), Math.max(14 * dpr, y - rr - 4 * dpr));
       g.shadowBlur = 0;
       if (Math.hypot(x - W / 2, y - H / 2) < rr) here = S;
     }

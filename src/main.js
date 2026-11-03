@@ -285,6 +285,7 @@ async function main() {
 
   const closePanels = () => {
     mapPanel.hidden = true;
+    document.body.classList.remove('panel-open');
     controls.enabled = true;
     if (!controls.touch) { controls.lock(); hint.hidden = !!document.pointerLockElement; }
   };
@@ -292,6 +293,7 @@ async function main() {
     controls.enabled = false; controls.unlock();
     hint.hidden = true;
     p.hidden = false;
+    document.body.classList.add('panel-open');
     if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
   const minimap = new MiniMap(world, mapView, () => openPanel(mapPanel), () => sunPlanet(climate.utc));

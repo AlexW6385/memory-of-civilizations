@@ -156,7 +156,12 @@ export class GlobeView {
       g.fillStyle = '#ffd36b'; g.strokeStyle = '#2a2116'; g.lineWidth = 1.5 * dpr;
       g.beginPath(); g.arc(p[0], p[1], 4.5 * dpr, 0, Math.PI * 2); g.fill(); g.stroke();
       g.fillStyle = '#fff8e8'; g.shadowColor = 'rgba(0,0,0,0.8)'; g.shadowBlur = 4 * dpr;
-      g.fillText(tr(S.site.name), p[0] + 8 * dpr, p[1] + 4 * dpr);
+      // the name to the right of the mark, or to its left where it would run off the edge
+      const name = tr(S.site.name), tw = g.measureText(name).width, left = p[0] + 8 * dpr + tw > W - 4 * dpr;
+      let tx = left ? p[0] - 8 * dpr - tw : p[0] + 8 * dpr;
+      tx = Math.max(4 * dpr, Math.min(W - 4 * dpr - tw, tx));
+      g.fillText(name, tx, p[1] + 4 * dpr);
+      g.textAlign = 'left';
       g.shadowBlur = 0;
     }
     if (this.you) {
