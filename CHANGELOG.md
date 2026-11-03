@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.5 — Chichén Itzá (2026-11-03)
+- New settlement: Chichén Itzá, c. 1000 — the Castillo with its nine terraces, four stairways and serpent heads, the Great Ball Court with its rings and temples, the Temple of the Warriors with its colonnades, the Group of the Thousand Columns, the Platform of Venus, the Tzompantli, the white road to the Sacred Cenote, and the town of walled house lots with oval thatched houses (dossier: `docs/settlements/chichen-itza.md`). New style `maya`.
+- Fix: beams, ridges, rails and raised walks (Ming, Qing, Khmer) had their top faces turned inward and could look hollow from above.
+
 ## v8.4 — Angkor (2026-11-03)
 - New settlement: Angkor Wat, c. 1150 — the three levels of galleries, the quincunx of lotus-bud towers, the steep stairs of the central level, the libraries and basins, the causeway bordered by seven-headed serpents, the laterite enclosure with its western gate, the moat — and a village of houses on stilts among sugar palms, rice fields beyond (dossier: `docs/settlements/angkor.md`). New style `khmer`.
 

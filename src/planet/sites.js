@@ -86,7 +86,7 @@ export const SITES = [
   { id: 'muscovy', name: { en: 'Muscovy', zh: '莫斯科公国' }, era: '16th c.', region: 'russia', lat: 55.75, lon: 37.62 },
   // ── the Americas ──
   { id: 'teotihuacan', name: { en: 'Teotihuacan', zh: '特奥蒂瓦坎' }, era: '4th c.', region: 'mexico', lat: 19.69, lon: -98.84, radius: 220 },
-  { id: 'chichen-itza', name: { en: 'The Maya', zh: '玛雅' }, era: '10th c.', region: 'yucatan', lat: 20.68, lon: -88.57 },
+  { id: 'chichen-itza', name: { en: 'The Maya', zh: '玛雅' }, era: '10th c.', region: 'yucatan', lat: 20.68, lon: -88.57, radius: 340 },
   { id: 'tenochtitlan', name: { en: 'The Aztecs', zh: '阿兹特克' }, era: '15th c.', region: 'mexico', lat: 19.43, lon: -99.13, radius: 220 },
   { id: 'machu-picchu', name: { en: 'The Inca', zh: '印加' }, era: '15th c.', region: 'andes', lat: -13.16, lon: -72.55 },
   { id: 'cahokia', name: { en: 'Mississippian Cahokia', zh: '密西西比卡霍基亚' }, era: '12th c.', region: 'mississippi', lat: 38.66, lon: -90.06 },

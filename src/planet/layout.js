@@ -53,7 +53,7 @@ export const PLACED = {
   'norse-borgund': [66.27277, 5.99853],
   'muscovy': [59.2276, 45.59297],
   'teotihuacan': [21.98351, -100.78386],
-  'chichen-itza': [19.84572, -89.14498],
+  'chichen-itza': [19.87399, -89.14152],
   'tenochtitlan': [17.73269, -97.23577],
   'machu-picchu': [-13.16002, -72.55002],
   'cahokia': [38.65644, -90.0651],

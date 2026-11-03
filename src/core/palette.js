@@ -146,6 +146,12 @@ export const MATERIALS = {
   sandstone_carved: { color: '#857b6c', roughness: 0.92, kind: 'rock' },
   laterite:         { color: '#8b5a3d', roughness: 0.95, kind: 'ashlar', course: 0.4, block: 0.6 },
   thatch_palm:      { color: '#8a7350', roughness: 1.0, kind: 'bark' },
+  // the Maya (Chichén Itzá, 10th–11th c.): pale limestone, lime-plastered and painted (red, with
+  // blue and yellow details), dry-stone rubble walls, palm thatch on the houses
+  limestone_maya:   { color: '#cbc3b1', roughness: 0.88, kind: 'ashlar', course: 0.4, block: 0.7 },
+  stucco_red:       { color: '#a1452f', roughness: 0.85, kind: 'smooth' },
+  maya_blue:        { color: '#4f8fa1', roughness: 0.8, kind: 'smooth' },
+  rubble:           { color: '#9c9585', roughness: 0.95, kind: 'rock' },
 };
 
 export function albedo(key) {

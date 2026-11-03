@@ -10,7 +10,7 @@
 
 import { BufferGeometry, Float32BufferAttribute, Shape, Path, ExtrudeGeometry, Matrix4 } from 'three';
 import { registerStyle } from '../../core/build.js';
-import { box, lathe, fromTriangles, frustum } from '../../core/geom.js';
+import { box, lathe, fromTriangles, frustum, orientOutward } from '../../core/geom.js';
 
 // The materials of the vocabulary; an element may change them (el.pal), e.g. the palace halls of
 // Beijing: red columns, yellow glazed tiles, white marble (src/styles/qing/).
@@ -86,8 +86,10 @@ function beamTris(out, p0, p1, w, h) {
   const dx = p1[0] - p0[0], dz = p1[2] - p0[2], l = Math.hypot(dx, dz) || 1, nx = -dz / l * w, nz = dx / l * w;
   const b = [[p0[0] - nx, p0[1], p0[2] - nz], [p0[0] + nx, p0[1], p0[2] + nz], [p1[0] + nx, p1[1], p1[2] + nz], [p1[0] - nx, p1[1], p1[2] - nz]];
   const t = b.map((q) => [q[0], q[1] + h, q[2]]);
-  const q = (a, bb, c, d) => out.push(...a, ...bb, ...c, ...a, ...c, ...d);
-  q(t[0], t[3], t[2], t[1]); q(b[0], t[0], t[1], b[1]); q(b[2], t[2], t[3], b[3]); q(b[1], t[1], t[2], b[2]); q(b[3], t[3], t[0], b[0]);
+  // the six faces, each turned to face out of the (convex) beam
+  const loc = [], q = (a, bb, c, d) => loc.push(...a, ...bb, ...c, ...a, ...c, ...d);
+  q(t[0], t[3], t[2], t[1]); q(b[0], t[0], t[1], b[1]); q(b[2], t[2], t[3], b[3]); q(b[1], t[1], t[2], b[2]); q(b[3], t[3], t[0], b[0]); q(b[0], b[1], b[2], b[3]);
+  for (const v of orientOutward(loc)) out.push(v);
 }
 
 /**
