@@ -1,205 +1,336 @@
-# Memory Palace — Design
+# Memory of Civilizations — Design
 
-> **This document is the brief for the whole project.** It is written so that an implementing agent can work from it, alone, indefinitely, without further direction from the author. Read it in full before touching anything, follow it, and keep §11 (status) and §10 (decisions) current. If something is unclear, decide in the spirit of §3 and record the decision in §10 — do not stop to ask.
+> **This document is the brief for the whole project.** It is written so that an implementing agent can work from it, alone, indefinitely, without further direction from the author. Read it in full before touching anything, follow it, and keep §13 (status) and §12 (decisions) current. If something is unclear, decide in the spirit of §3 and record the decision in §12 — do not stop to ask.
+>
+> This is the third brief. The first built a study tool (Knowledge Universe), the second a flat compact city of districts (Memory Palace, v5–v7). This one replaces the second: the world becomes a **small planet**, a civilization is **a place at a time**, each is present as a **settlement** (a landmark *and* its townscape, in depth), and most of the world code is rebuilt. §10 says exactly what is kept.
 
 ## 1. What this is
 
-A walkable, realistic 3D world of **architecture**: buildings of every age, civilization and style, each built after real examples and planned the way the real thing was actually used — a temple, a cathedral, a bathhouse, a mosque, a palace hall, a monastery, a theatre, a railway station, a library — with rich, finely detailed interiors, real materials, real light and shadow, and music in the manner of the building's civilization and time.
+**A small planet you can walk and fly over, on which the civilizations of Earth — each a place at a time — stand where they stood, as real, detailed settlements.**
 
-The name is kept because it is apt in a second sense: these buildings are the memory of civilizations — each one holds centuries of use, belief and story. A visitor who walks them learns them; anyone who wants to use them as a memory palace in the classical sense can, because a well-planned building already gives every room and object a place and an order. **But the project builds buildings, not a study tool**: there are no notes, no markers, no numbered stops, no features about memory at all.
+A **civilization** here is a place *and* an era: Tang China and Ming Jiangnan are two; so are Justinian's Constantinople and Ottoman Istanbul, which stand on the same shore. Each is present as a **settlement**: a famous **landmark** built after the real building, with its full interior, and round it the **townscape** of its people and time — the streets, houses, courtyards, markets, gardens, walls, water and fields the landmark actually stood among. The Forbidden City with the hutongs; a Ming garden with the canals and whitewashed houses of Suzhou, and a little way off the Southern Song capital on its lake; the Sainte-Chapelle and Notre-Dame on their island among the timber-framed lanes; Angkor among stilt houses and rice; Machu Picchu among its terraces. The townscape matters as much as the landmark: a visitor should feel what it was to live there, not only to visit the monument.
 
-Every building stands in its own **region** — a small world of its own: the landform it was built on, the ground, plants and water of its country, the settlement or precinct around it, and its own sky: a time of day, a climate and weather that changes while you are there (Egyptian late-afternoon dust, an Athenian clear noon, a Roman morning with passing showers). Walking from one region to the next — over a ridge, along the river — is a passage between worlds.
+**Detail is the point.** A settlement is finished only when it bears looking at from a metre away: the coursing of the masonry, the wear on the threshold, the goods in the market, the pots by the well, the laundry in the court, the lamp in the niche, the boats at the quay, the moss on the north wall. §5 is the standard.
 
-The world is **completely free**: you walk where you like. If a building has a route, it is conveyed the way real buildings convey it — by axis, threshold, light, sequence of rooms — never by signs, numbers or highlights.
+The settlements sit on a planet whose continents, oceans and latitudes follow Earth's. Walk out of Rome and the Mediterranean is there; fly east over Persia and India to China; the sun stands higher at Sanchi than in Paris; it is evening in Kyoto while it is morning in Athens. Civilizations of one region stand near each other, roughly in order of age, so that walking from Tang Foguang to Song Kaifeng to Ming Suzhou is a walk through Chinese history. Between regions the land is open — coasts, hills, forest, steppe, desert by latitude and continent — sparse but never blank. The planet is small enough to fly across in a few minutes, and the globe map jumps anywhere at once.
 
-**Live site:** https://alexw6385.github.io/Memory-Palace/
+The look is realistic: true proportions, physically based materials, baked global illumination indoors, real sun and sky, a real atmosphere seen from height. Each settlement has music in the manner of its civilization and time.
+
+The name: the buildings are the memory of civilizations. Nothing more is meant by it — there are no study features (§2).
+
+**Names:** English *Memory of Civilizations*, Chinese 文明的记忆. Repository `AlexW6385/memory-of-civilizations`. **Live site:** https://alexw6385.github.io/memory-of-civilizations/
 
 ## 2. What this is NOT
 
-- **Not a note-taking or study app.** No annotations, no binding of knowledge to objects, no spaced repetition, no "places" list of loci, no numbered route, no N/B stepping. The earlier versions had these; they are gone and stay gone.
+- **Not a note-taking or study app.** No annotations, no loci, no numbered routes, no markers in the world. The map may name a place; nothing in the world carries a label.
 - **Not a game.** No objectives, collectibles, puzzles or NPC dialogue.
-- **Not cartoon or simplified.** The look is realistic: true proportions, physically based materials, global-illumination-quality lighting, decoration at the density the real buildings have. The former "refined toy diorama" style is retired.
-- **Not invented architecture.** Every building follows a real building type and, by default, a specific real example, with sources. Variation and composition are allowed; "fantasy" styles are not.
-- **Not a product for every device.** Targets the author's own computer and phone, both with WebGPU.
-- **Not connected** to the author's other projects (绒球世界, 展览馆); no shared code or obligations.
+- **Not a scale model of Earth.** Topology is true (what borders what, which sea lies where, latitude), proportions are not: the planet is thousands of times smaller and crowded regions are pushed apart (§4.2).
+- **Not cartoon, simplified or empty.** Realistic, dense, lived-in.
+- **Not invented architecture.** Every landmark follows a specific real building; every townscape follows the documented urban form and house type of its place and period, with sources. Detail is composed in the manner of the sources, never copied from a copyrighted reproduction.
+- **Not a product for every device.** Targets the author's own computer (Apple M2, 8 GB) and phone.
+- **Not connected** to the author's other projects.
 
 ## 3. What to get right, in order
 
-When goals conflict, resolve in this order.
+Resolve conflicts in this order, but the first three are near-equals: none is sacrificed wholesale for another.
 
-1. **Architecturally true.** Plan, section, structure, proportion, materials and decoration follow the real building type and example. The building must make sense as a building: rooms where they belong, for the reasons they were there. This is both the point of the project and what makes a building memorable.
-2. **Realistic and beautiful.** Materials, light, shadow and detail as close to real as the web allows. Quality may win over smoothness within reason; it must not be unplayably laggy on the author's machine. Optimise, bake and cache before lowering quality.
-3. **Rich.** Many buildings, many civilizations, many eras; dense interiors; more is better; there is no "enough".
-4. **Free and quiet.** Walk, look, a map to jump between buildings, a few settings. Nothing else on screen. The architecture does the guiding.
-5. **Light to load.** Budgets in §6.
+1. **Detailed and true.** Richness of real detail, in landmark and townscape, to the standard of §5, and all of it traceable to the sources (§6). Thin or generic is the one unacceptable result.
+2. **Realistic and beautiful.** Materials, light, shadow, atmosphere as close to real as the web allows. Picture quality on the author's machine never goes down silently (§14).
+3. **Smooth.** Aim at 60 fps on the author's machine; 40 is acceptable in the densest interiors, 30 in high flight; never a stall or a hitch. Smoothness is reached by streaming, LOD, instancing, baking, impostors and culling — by engineering, not by removing detail. Only when all of those are exhausted may detail be thinned, and then the far and the small go first, recorded in §12. Budgets in §8.
+4. **Civilizations, not monuments.** Every settlement has a townscape; a bare landmark is unfinished. The set of settlements covers the world's places and eras; nearby civilizations of one region stand together.
+5. **Free and quiet.** Walk, fly, look, a map, a clock, a few settings. Nothing else on screen.
+6. **Light to start.** The first frame comes fast; the rest streams.
 
-## 4. The building dossiers (archive)
+## 4. The planet
 
-Before a building is built, its dossier is written. Dossiers live in this repo under `docs/buildings/<id>.md` (English; they contain no copyrighted text, only our own notes and references).
+### 4.1 Shape, size, movement
 
-Each dossier records, with sources: the real example(s) it follows (name, place, dates, builders); the building type and its typology; the plan with dimensions (overall, each room, wall thicknesses, column spacing, storey heights); the section and structural system; the sequence of spaces and how the building was used (who entered where, what happened in each room); materials and finishes per surface; the decorative programme (orders, mouldings, reliefs, paintings, inscriptions, furnishings) and where each element belongs; lighting (openings, orientation, lamps); surroundings (precinct, gardens, approach, neighbouring buildings); the music of its civilization and period (scales, instruments, forms, tempo, where music was heard in such buildings); and what is **[stated]** by sources versus **[inferred]** by us.
+- A sphere of **radius 4 km** (circumference ≈ 25 km). Ground is the sphere plus relief (≤ 300 m: hills, a few mountains, coasts). The whole planet is walkable except open water and slopes over ~40°.
+- Gravity points to the centre; the walker's "up" is the local normal. Settlements are built on their local tangent plane (flat ground, like now) blended into the sphere at their edge — nothing in a settlement needs to know the world is round.
+- **Walk, run, fly.** Flight as now (hold Space to rise, release to glide), but speed grows with height: ~9 m/s near the ground, up to ~80 m/s above 400 m, so a crossing from Athens to Kyoto takes about four minutes and the ground below reads as a landscape, not a blur. Ceiling ~1.5 km, high enough to see the curve and the atmosphere.
+- **The map is a globe.** The corner map shows the land round you (north up, as now); the large map is the planet itself, turnable, with the settlements marked and named by civilization and date; a click flies you there (fade, load, arrive at the landmark's approach).
+- **The clock** as now: drag to set the hour, let the days run. One global time; what differs by place is the sun (§4.3).
 
-Sources: architectural histories and typologies, published plans and surveys, museum and heritage-site documentation, scholarly articles, Wikipedia for orientation. Cite them. Drawings and photographs are references to study, never assets to copy.
+### 4.2 Geography
 
-Rule: no building or major change is built without its dossier. Reading the dossier should be enough to rebuild the building from scratch.
+- **Continents follow Earth's outlines** — Eurasia, Africa, the Americas, Australia, the main islands (Britain, Japan, Java, Sri Lanka, Crete, Sicily, New Zealand) and the main seas (Mediterranean, Red Sea, Persian Gulf, Black Sea, the Sea of Japan, the Caribbean). Simplified to what reads at this scale; nothing smaller than ~200 m across.
+- **Regions.** Settlements group by **region** (the Nile valley, Mesopotamia, the Aegean, Latium, the Bosphorus, the Île-de-France, Jiangnan, the Kansai, the Valley of Mexico…). The region is placed at its true latitude and longitude; its settlements stand within ~1–2 km of each other, roughly in order of age along the land, each keeping its real relation to water (Venice on the sea, Istanbul on the strait, Edfu by the Nile, Hangzhou on its lake). Regions are pushed apart until no two settlement centres are closer than ~700 m, keeping their bearings; the Mediterranean and western Europe are the crowded cases, and the sea is widened to hold them. Final positions live in `docs/world.md`.
+- **Between regions** the land is open country by latitude and continent: tundra, taiga, temperate forest and field, steppe, desert, savanna, rain forest, with the great rivers (Nile, Tigris–Euphrates, Indus, Ganges, Yangtze, Yellow River, Danube, Rhine, Amazon, Mississippi) as water you cannot wade, and coasts with beaches or cliffs. Relief is gentle except for named ranges that frame the geography (Alps, Himalaya, Andes, Zagros, Atlas) as low ridges. This landscape is seen mostly from the air and crossed on foot now and then; it is built for the view — ground material, scattered vegetation, rivers, shoreline, haze, the odd rock or ruin-free hill — not for walking detail. No houses or roads outside settlements, except the roads and fields that join settlements of one region.
+- **Oceans** are water with reflection, waves and foam at the shore; not walkable; flyable.
 
-## 5. Architecture
+### 4.3 Sun, sky, climate
 
-- **Pure JavaScript, static.** No Python, no bundler, no server. ES modules served as-is from GitHub Pages; three.js from a CDN. Node is used only for tests and offline baking. (The Python planner, `world.json` pipeline and parity tests are retired — see §10.)
-- **Plan is data, look is code.** Each building is a module under `src/buildings/<id>/` with (a) its plan — walls, openings, floors, levels, roofs, vaults, columns, furnishings and decoration as placed data in metres — and (b) its style modules — the civilization's architectural vocabulary (orders, mouldings, capitals, arches, vaults, window types, surface treatments) as reusable generators under `src/styles/<civilization>/`. A new building of a known civilization mostly reuses its style modules.
-- **Renderer: three.js WebGPU.** PBR materials; GTAO; cascaded shadow maps for sun; **baked lighting** for interiors (lightmaps and light probes computed offline in Node or in a baking page, shipped as compressed textures) combined with real-time direct light and shadows; screen-space or probe reflections for polished surfaces; bloom and tone mapping. Browsers without WebGPU get a notice.
-- **Materials and assets.** PBR material sets (stone, marble, brick, timber, plaster, gold leaf, textiles, glass) from CC0 sources (Poly Haven, ambientCG), loaded from CDN and listed in `ASSETS.md`. Decorative elements are generated (profiles swept along paths, lathes, instanced ornaments, relief via displacement/normal maps) and, where generation cannot reach the quality, CC0 scanned pieces. No copyrighted models.
-- **World layout: one compact city of districts.** The world is a single dense, walkable city — a palace-city of civilizations — not a landscape. It is made of **districts**, one per civilization or period, each about 200 × 200 m (larger or smaller as its core needs; any shape), each holding its **core building** at true scale and, round it, a small surrounding of its own time: streets and lanes, houses, courtyards, squares, wells, walls, gardens, the plants and the ground of the place, and the little terrain the core stands on (the Acropolis rock, the Haram platform, the pond of Byōdō-in) — cut to the district where it is larger in reality. Districts touch directly: the lanes of one run into the lanes of the next, the ground and the houses change over a few metres; no walls, ridges, rivers or empty land between them. The whole reads as one natural city, each district with its own character; it grows outward as districts are added. One sky over the whole city: one time of day (adjustable), one weather. No mountains, valleys or long roads; water only where a district needs it (a quay, a pond, a harbour). The layout is planned, not random; the agent designs it (§9) and records it in the world dossier (`docs/world.md`); each district's surroundings are recorded in its building's dossier (§4, surroundings) with sources.
-- **Climate and weather.** Each region has its own sun (time of day, chosen per region and fixed so lighting can be baked), sky, haze and clouds, and a weather cycle drawn from its real climate (clear, fair, cloudy, overcast, showers, dust), with moving cloud shadows. Climate blends across region boundaries.
-- **Navigation.** First-person walk, run, look, and fly (hold Space to rise, let go to glide down); stairs, ramps and doors work; collision everywhere; a small map with the clock in a corner, and a large map that shows the districts and buildings and jumps anywhere. Phone: joystick, drag, a fly button. Nothing else.
-- **Music.** Synthesised in the browser, per building and civilization: scale/mode, rhythm, instrumentation and form drawn from the dossier (e.g. plainchant-like lines under Gothic vaults, maqam-based lines in a mosque courtyard, gagaku-like textures in a Japanese temple), crossfading at thresholds, reacting to interior/exterior and time of day. Small CC0 instrument samples are allowed where synthesis cannot reach the timbre; listed in `ASSETS.md`.
-- **Dev tooling.** Headless screenshot script at fixed viewpoints per building; a lighting-bake script; a plan-check script (walkability, every room reachable, every opening connects, no floating or intersecting elements).
+- **One sun, one date.** The sun's direction at any point follows from that point's latitude, the global hour and a fixed date (the equinox). The day lasts half an hour of real time. Night: moon, stars, the Milky Way, eye adaptation — as now.
+- **Atmosphere.** A physically based sky and aerial perspective (Rayleigh + Mie, one model for the whole planet): blue haze over distance, the red limb at dusk, the curve of the horizon and the thin blue rim seen from height.
+- **Climate by settlement** drives ground, vegetation, haze and the weather cycle (clear, fair, cloudy, overcast, showers, dust, snow, monsoon), chosen from the real climate of the place; between regions the biome follows latitude and continent. Weather belongs to a region and moves slowly.
+- **Baked light** per settlement at its own chosen hour (as now), scaled by the live daylight; the bake separates sun, sky and lamps when affordable (Phase D).
 
-## 6. Assets, baking and budgets
+### 4.4 A settlement
 
-Use whatever makes the picture better, as long as the page stays light to load.
+A settlement is ~300 × 300 m (larger where the landmark or the urban form needs it — Beijing, Venice, Tenochtitlan, Hangzhou; smaller for a monastery or a village). It holds:
 
-- Third-party assets: CC0/MIT only, via CDN, listed in `ASSETS.md`; never commit large third-party binaries.
-- Baked data (lightmaps, probes, impostors, merged geometry) under `data/`, compressed (KTX2/Basis), **loaded per building/district on demand**, never all at startup; cached with content-hashed names and Cache Storage.
-- Budgets (hard unless §10 records a change): initial load to first frame ≤ 15 MB and ≤ 5 s on the author's desktop; one building's on-demand data ≤ 25 MB; any committed file ≤ 50 MB, no Git LFS; whole repository ≤ 500 MB.
-- Techniques worth studying for the renderer: three.js WebGPU + TSL examples; GPU culling with indirect draws for instanced ornament; `compileAsync` warm-up to avoid hitches when entering a building.
+- **The landmark** at true scale, built to its dossier, with its interior.
+- **The townscape:** the real urban pattern (grid, organic, canal, walled compound, terraces), the house types of the place and period (plan, storeys, roof, materials), the public spaces (square, market, well, bathhouse, precinct, walls, gates), the gardens, fields or orchards at the edge, the water (quay, canal, pond, river bank), and the plants of the place. Houses are instances of a few sourced types with variation, built from the same style modules as the landmark. Several houses, a shop, a workshop and an inn or the like can be entered and are furnished.
+- **Life as objects and sound** (§5): the things of daily use in their places, animals, figures where the dossier describes them, the sounds of the place.
+- **Its music**, by zone (inside the landmark, in the streets, at the edge), and ambience.
+- **Its own hour for baking,** its climate and its weather set.
+- **A boundary** that blends the settlement's ground into the open country over ~30 m, or into the next settlement of its region along a road or a river.
 
-## 7. Constraints and rules
+Two landmarks that stood in one city at one time (Sainte-Chapelle and Notre-Dame; the Forbidden City and the Temple of Heaven) share one settlement.
 
-- Dossier first (§4). Every element in a building traces to its dossier.
-- Units are metres; buildings at true scale.
-- No memory/study features, no markers, no numbered routes, no on-screen labels in the world. The map may name buildings.
-- UI stays: walk, look, map, settings. A new on-screen element needs a reason recorded in §10.
-- Picture quality on the author's machine never goes down silently; a change that lowers it is recorded in §10 with the reason.
-- Checks are tiered: per change, one screenshot of the thing changed and the plan-check script; per task end and before every release, screenshots at all fixed viewpoints compared with the previous set, the budget check and a walk through every building on both layouts; only for high-risk changes (renderer, lighting pipeline, module structure) full comparison after each step. Tool output is summarised, never pasted whole into the working context.
-- Repository text (code, docs, commits) in English; the site's UI bilingual, English default, Chinese available.
-- Commits are authored as the repository owner (Alex Wang <alex119122114@gmail.com>) with no AI co-author or session trailers; messages in English, saying what changed and why.
+## 5. The detail standard
 
-## 8. Depth is layered
+What "detailed" means. Every settlement reaches all of this by L3 (§11); L1 and L2 are the steps there.
 
-Build each building to L1, then deepen; never leave a building at a lower level than the previous one for long.
+**Surfaces.** Masonry follows the real coursing, block sizes and joints; timber shows its grain, joints and pegs; plaster is uneven and patched; tiles and shingles are laid as they were, with the odd slipped or broken one. Every material responds to light as the real one does (polish, roughness, subsurface in marble and jade, sheen on silk and lacquer, dust on cloth). Weathering and use everywhere they would be: wear on thresholds, steps and handrails; soot over lamps and hearths; damp, moss and lichen on the shady and the wet side; dust in corners; rain streaks under sills; patina on bronze; the darker lower metre of walls along a street.
 
-**Per building**
-- L1 — correct plan, section, structure and proportions; walkable; main surfaces with correct materials; daylight through real openings; its music.
-- L2 — the full decorative programme: orders, mouldings, capitals, vaults, ceilings, floors, doors, windows, as the dossier gives them; baked lighting; furnishings and fittings in place.
-- L3 — fine detail: reliefs, inscriptions, paintings (original work in the manner of, never copies of specific copyrighted reproductions), textiles, wear and patina, small objects of use; precise light (lamps, candles, coloured glass).
-- L4 — surroundings: precinct, gardens, approach, neighbouring structures; life in the building where the dossier describes it (people and animals as figures, sound).
+**Decoration.** The full programme the dossier gives — orders, mouldings, capitals, friezes, reliefs, inscriptions, painted ceilings, mosaics, tiles, screens, lattices, gilding — at the density the real building has, composed in the manner of the sources. Nothing left as a flat colour where the original had pattern.
 
-**World**
-- L1 — a first district with the first buildings joined by a street or court; the map.
-- L2 — districts for several civilizations; streets, squares, gardens, water; walking between buildings is itself designed.
-- L3 — the world as a whole reads as a planned city of civilizations; vistas, axes and thresholds between districts; time of day and weather.
+**Objects of use.** Every room holds the things it was used with: altars and their vessels, thrones, beds, chests, tables and stools, lamps and candles, books and scrolls, looms, pots, tools, weapons, baskets, mats, carpets, hangings, incense, offerings. Streets hold carts, barrels, bales, market stalls with their goods, signs and banners of the period, wells with buckets, troughs, benches, laundry, firewood, nets and boats at water, ladders, ropes, animals (horses, oxen, donkeys, camels, dogs, chickens, pigeons, cats — as figures). Gardens hold the right plants, pots, paths, lanterns, stones, water.
+
+**Light.** Daylight through the real openings; lamps, candles, braziers and hearths where they were, with their warm pools and smoke; coloured light through glass and lattice; dust and incense in beams of sun; reflections on polished floors and water; wet ground after rain.
+
+**Sound.** Music by zone (§4.4) and ambience of the place: wind, water, birds, bells, the market, animals, rain on tiles, the reverberation of each hall measured to its volume and materials.
+
+**Plants.** The species of the place and time, at the right size and spacing, with wind; grass, weeds in cracks, ivy, moss; crops in their fields; trees with real bark and canopy density.
+
+**Figures and life.** Where the dossier describes who was there and what they did, still figures in the right dress may stand in their places (a priest at the altar, a merchant at the stall, a monk in the cloister), kept few and quiet; never animated crowds, never dialogue.
+
+**Scale of care.** Anything within 20 m of a walkable spot must bear a close look; anything within 200 m must read correctly in form, material and colour; beyond that, impostors and simplified shells are allowed as long as the skyline and the colours are right.
+
+## 6. The dossiers (archive)
+
+Every settlement is built from a sourced dossier under `docs/settlements/<id>.md` (English; our own notes and references only). Nothing is built without its dossier; reading it should be enough to rebuild the settlement from scratch.
+
+A dossier has three parts:
+
+**Landmark** — the real example (name, place, dates, builders); type and typology; plan with dimensions (overall, each room, wall thicknesses, column spacing, storey heights); section and structure; sequence of spaces and use; materials per surface; decorative programme and where each element belongs; furnishings and objects of use per room; lighting; what is **[stated]** by sources versus **[inferred]** by us.
+
+**Townscape** — the city or village at the chosen date: extent and population; street pattern and widths; block and plot sizes; house types (plan, storeys, roof, materials, courtyards) with at least one documented example each, and their furnishings; public buildings and spaces; walls and gates; water; gardens and fields; vegetation; climate and weather; the street life of the place (trades, markets, animals, vehicles, dress) with sources.
+
+**Sound** — the music of the civilization and period (scales, instruments, forms, where music was heard) and the ambience.
+
+Sources: architectural and urban histories, published plans and surveys, archaeology reports, heritage documentation, scholarly articles, museum collections for objects and dress, Wikipedia for orientation. Drawings and photographs are references to study, never assets to copy.
+
+## 7. The civilizations
+
+The target set, grouped by region; within a region, by era. Chosen so that (a) each is a distinct place-and-time, (b) each region has at least one landmark most people know, (c) the planet has no empty continent, (d) the eras of each region stand together, from prehistory to the modern, and (e) sources exist to build it truthfully. ★ = landmark already built (to be re-sited and given its townscape). Coordinates are true; placed positions are in `docs/world.md`.
+
+**China**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Tang (9th c.) | Foguang East Hall ★ | Chang'an-style walled wards, ward gates | 39 N 113 E |
+| Northern Song Kaifeng (12th c.) | Iron Pagoda, Rainbow Bridge | Riverside street market after the *Qingming* scroll | 35 N 114 E |
+| Southern Song Jiangnan (13th c.) | Liuhe Pagoda / West Lake, Hangzhou (Lin'an) | Lakeside capital: markets, tea houses, boats | 30 N 120 E |
+| Ming Jiangnan (16th c.) | Humble Administrator's Garden, Suzhou | Canal lanes, whitewashed walls, black tiles, stone bridges | 31 N 121 E |
+| Ming–Qing Beijing (17th c.) | Forbidden City, Temple of Heaven | Hutongs and courtyard houses | 40 N 116 E |
+| Tibet (17th c.) | Potala Palace | Barkhor street of Lhasa | 30 N 91 E |
+
+**Japan and Korea**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Nara (8th c.) | Hōryū-ji | Temple town | 35 N 136 E |
+| Heian (11th c.) | Phoenix Hall of Byōdō-in ★ | Timber village of Uji | 35 N 136 E |
+| Edo (17th c.) | Himeji Castle | Castle town: machiya, samurai quarter | 35 N 135 E |
+| Joseon (15th c.) | Gyeongbokgung | Hanok village | 38 N 127 E |
+
+**India and South-East Asia**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Early Buddhist (1st c.) | Great Stupa at Sanchi ★ | Limewashed village | 23 N 78 E |
+| Medieval Hindu (11th c.) | Khajuraho | Temple town | 25 N 80 E |
+| Dravidian (17th c.) | Meenakshi Temple, Madurai | Concentric temple streets | 10 N 78 E |
+| Mughal (17th c.) | Taj Mahal | Mughal bazaar town, Agra | 27 N 78 E |
+| Khmer (12th c.) | Angkor Wat | Stilt houses, rice, reservoirs | 13 N 104 E |
+| Java (9th c.) | Borobudur | Javanese village | 8 S 110 E |
+
+**Mesopotamia and Persia**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Sumer (21st c. BC) | Ziggurat of Ur | Mud-brick city | 31 N 46 E |
+| Babylon (6th c. BC) | Ishtar Gate, Processional Way | Walled city, Euphrates quay | 32 N 44 E |
+| Achaemenid (5th c. BC) | Persepolis | Palace terrace, provincial quarters | 30 N 53 E |
+| Safavid (17th c.) | Naqsh-e Jahan Square, Isfahan | Bazaar and courtyard houses | 33 N 52 E |
+
+**The Levant and Anatolia**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Nabataean (1st c.) | Petra (the Treasury, the Siq) | Rock-cut tombs, caravan town | 30 N 35 E |
+| Umayyad Jerusalem (7th c.) | Dome of the Rock ★ | Old city of stone houses | 32 N 35 E |
+| Justinian's Constantinople (6th c.) | Hagia Sophia ★ | Constantinople quarter | 41 N 29 E |
+| Ottoman Istanbul (16th c.) | Süleymaniye Mosque | Wooden houses, bazaar, the Horn | 41 N 29 E |
+
+**Egypt and Africa**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Old Kingdom (26th c. BC) | Giza: pyramids, Sphinx, valley temple | Workers' town, Nile harbour | 30 N 31 E |
+| Ptolemaic (1st c. BC) | Temple of Horus at Edfu ★ | Mud-brick tower houses | 25 N 33 E |
+| Mamluk Cairo (14th c.) | Sultan Hassan Mosque | Cairo's lanes, mashrabiya, bazaar | 30 N 31 E |
+| Sahel (14th c.) | Great Mosque of Djenné | Adobe town | 14 N 5 W |
+| Ethiopia (13th c.) | Rock-hewn churches of Lalibela | Highland round-house village | 12 N 39 E |
+| Swahili coast (15th c.) | Great Mosque of Kilwa | Coral-stone town, dhows | 9 S 40 E |
+| Zimbabwe (14th c.) | Great Zimbabwe | Dry-stone enclosures, huts | 20 S 31 E |
+
+**Greece and Rome**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Minoan (16th c. BC) | Knossos | Palace town, Crete | 35 N 25 E |
+| Classical Athens (5th c. BC) | Parthenon ★ | Athenian town, agora | 38 N 24 E |
+| Imperial Rome (2nd c.) | Pantheon ★ | Pompeii-type streets: atrium houses, insulae, shops | 42 N 12 E |
+| Baroque Rome (17th c.) | St Peter's Square | Baroque streets, fountains | 42 N 12 E |
+
+**Western Europe**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Neolithic Britain (25th c. BC) | Stonehenge | Durrington-type houses | 51 N 2 W |
+| Romanesque (12th c.) | Sainte-Foy de Conques ★ | Medieval hill village | 45 N 2 E |
+| Gothic Paris (13th c.) | Sainte-Chapelle ★, Notre-Dame | Île de la Cité: timber-framed houses, lanes | 49 N 2 E |
+| Al-Andalus (14th c.) | Alhambra | Granada's white houses and patios | 37 N 4 W |
+| Renaissance Florence (15th c.) | Florence Cathedral | Tuscan city | 44 N 11 E |
+| Venice (16th c.) | St Mark's Basilica | Canal city | 45 N 12 E |
+| Dutch Golden Age (17th c.) | Amsterdam canal houses (townscape-led) | Canal ring | 52 N 5 E |
+| French classical (17th c.) | Versailles | Formal gardens, the town | 49 N 2 E |
+| Victorian London (19th c.) | Palace of Westminster, St Pancras | London terraces | 51 N 0 |
+| Art Nouveau Barcelona (20th c.) | Sagrada Família | Eixample blocks | 41 N 2 E |
+
+**Northern and Eastern Europe**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Norse (12th c.) | Borgund stave church | Bryggen wooden wharf, Bergen | 61 N 8 E |
+| Muscovy (16th c.) | St Basil's Cathedral | Log-house village | 56 N 38 E |
+
+**The Americas**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Teotihuacan (4th c.) | Pyramid of the Sun, Avenue of the Dead | Apartment compounds | 20 N 99 W |
+| Maya (10th c.) | Chichén Itzá | Maya village | 21 N 89 W |
+| Aztec (15th c.) | Templo Mayor, Tenochtitlan | Lake city: canals, chinampas | 19 N 99 W |
+| Inca (15th c.) | Machu Picchu | Terraces and stone houses | 13 S 73 W |
+| Mississippian (12th c.) | Cahokia (Monks Mound) | Plaza, palisade, houses | 39 N 90 W |
+| Pueblo (15th c.) | Taos Pueblo (townscape-led) | Multi-storey adobe | 36 N 106 W |
+| Modern New York (20th c.) | Empire State Building | Manhattan blocks; Fallingwater as an outlier | 41 N 74 W |
+
+**Oceania**
+| Civilization | Landmark | Townscape | Lat, lon |
+|---|---|---|---|
+| Rapa Nui (15th c.) | Ahu Tongariki moai | Stone houses, quarry | 27 S 109 W |
+| Māori (18th c.) | Wharenui | Pā village | 38 S 176 E |
+| Modern Sydney (20th c.) | Sydney Opera House | Harbour | 34 S 151 E |
+
+About 55 civilizations. The list is a target, not a cage: the agent may substitute within a civilization for a better-documented example, and adds places and eras that are missing (Thai, Burmese, Ottoman provinces, Hanseatic Germany, colonial Latin America, West African kingdoms, Polynesia, Arctic…) once the list is built.
+
+## 8. Performance and budgets
+
+Targets on the author's machine (Apple M2, 8 GB, native resolution, "high"). They are met by engineering (§3.3); detail is thinned only as the last resort and recorded.
+
+- **Frame:** aim 60 fps in a settlement; ≥ 40 in the densest interior; ≥ 30 in high flight; no frame over 50 ms ever. Visible triangles ≤ 3 M; draw calls ≤ 800; GPU memory ≤ 1.5 GB; three shadow cascades.
+- **Start:** first frame ≤ 6 s on a warm cache, ≤ 20 MB transferred; only the start settlement and the planet's base are loaded.
+- **Streaming:** settlements load within ~800 m and unload beyond ~1500 m; a settlement's data ≤ 40 MB; loading is time-sliced and never costs a frame more than 4 ms. Far settlements are **impostors** (baked billboards or a low shell) so the skyline is there from across the sea.
+- **Terrain:** chunked quadtree LOD on the sphere, built in workers; ≤ 400 k triangles on screen in flight.
+- **Vegetation and objects:** instanced, LOD, culled on the GPU; ≤ 600 k instances on screen.
+- **Files:** any committed file ≤ 50 MB, no LFS; repository ≤ 1 GB; baked data under `data/`, loaded on demand.
+- **Phone:** the same world at "medium" (half shadow resolution, no GTAO, shorter streaming radius, fewer small objects), ≥ 30 fps.
+
+`tools/budget.mjs` measures the load; `tools/perf.mjs` (new) measures frame time at fixed viewpoints headless and fails the test when a budget is broken.
+
+## 9. Technical architecture
+
+- **Pure JavaScript, static.** ES modules from GitHub Pages; three.js WebGPU with the WebGL 2 fallback; Node only for tests, checks and offline baking.
+- **Plan is data, look is code.** A settlement is a module under `src/settlements/<id>/` with `plan.js` (the landmark), `town.js` (the townscape: street network, blocks, house placements, public spaces, water, planting), `life.js` (objects, animals, figures, ambience), `music.js` and `index.js`. Civilization vocabularies stay in `src/styles/<civilization>/` and are reused by landmark and houses alike; a shared library of objects of use lives in `src/objects/` (generated geometry, parameterised by period and material). The planet is `src/planet/` (sphere, relief, continents, biomes, rivers, ocean, atmosphere, sun).
+- **Renderer:** PBR materials (procedural TSL, as now, with CC0 scanned micro-detail layered in where it helps); cascaded sun shadows; GTAO; baked irradiance volumes for interiors (as now); atmosphere pass; bloom; AgX tone mapping; eye adaptation. Shaders are shared through uniforms and instanced attributes (pipelines stay under ~120).
+- **Materials and assets:** CC0/MIT only, listed in `ASSETS.md`; no copyrighted models.
+- **Music:** synthesised in the browser per settlement and zone, as now; small CC0 samples where synthesis cannot reach the timbre.
+- **Tooling:** `tools/shot.mjs` (fixed viewpoints), `tools/bake.mjs`, `tools/plan-check.mjs`, `tools/walk-check.mjs`, `tools/budget.mjs`, `tools/perf.mjs` (new), `tools/globe-check.mjs` (new: every settlement on land, none overlapping, every landmark approach reachable from its settlement edge). `npm test` runs the checks.
+
+## 10. What is kept from v7, what is rebuilt
+
+Keep only what still fits; do not bend the new world round old code.
+
+**Kept (migrate, do not rewrite)**
+- The ten landmarks and their dossiers, plans, style modules and music (`src/buildings/*`, `src/styles/*`, `docs/buildings/*` → `src/settlements/*`, `docs/settlements/*`).
+- The renderer core: materials, shadows, GTAO, bloom, tone mapping, eye adaptation, the bake pipeline and the `.gi` volumes (rebake only where a settlement's hour changes).
+- Movement: the walker (body, step height, collision), flight (extended with height-scaled speed), the controls layout (corner map + clock top left, settings top right), the phone controls.
+- The clock, day/night, moon and stars.
+- Bilingual UI and i18n; the loading sequence (open when the near things are ready; time-sliced building; cache of left buildings).
+- The vegetation species system.
+- Tools: shot, bake, plan-check, walk-check, budget, audio-check.
+
+**Rebuilt**
+- The world: `src/world/*` (city layout, Voronoi districts, avenue grid, house-block grid, flat terrain grid, the city edge) is deleted and replaced by `src/planet/*` and per-settlement `town.js`.
+- Terrain: flat chunked grid → spherical quadtree with relief, coasts, rivers, ocean.
+- Sky: per-district fixed sky and the city sky → one atmosphere model with the sun by latitude.
+- Houses: one city-wide block grid with per-district house type → per-settlement townscape designed from its dossier.
+- Vegetation placement: flat-terrain rules → biome-by-latitude on the sphere plus per-settlement planting.
+- Map: 2D city map → globe. Corner map stays.
+- The `*-wip` branches are deleted; `v2` is kept as history.
+
+**Dropped**
+- District squares with wells (the dossier decides each settlement's public space).
+- The `?time=baked` view.
+- Separate "regions" with blended climates (the word *region* now means a group of civilizations, §4.2).
+
+## 11. Depth is layered
+
+**Per settlement**
+- L1 — landmark at correct plan, section, structure, proportions, walkable, main materials, daylight, music; townscape as street network, house shells of the right type and public spaces; the settlement on the planet with its boundary.
+- L2 — landmark's full decorative programme and baked light; townscape with house variation, courtyards, walls, gates, gardens, water, planting; several buildings enterable and furnished; the principal objects of use in place; ambience.
+- L3 — the full detail standard of §5: weathering and wear, fine decoration, every room's objects, street life, animals and figures, lamps and coloured light, sound of the place.
+
+**Planet**
+- L1 — sphere, continents, oceans, sun by latitude, flight, globe map, streaming, impostors.
+- L2 — biomes with vegetation, rivers, coasts, atmosphere, weather regions, roads and fields between a region's settlements.
+- L3 — named ranges, seasons, set pieces (monsoon over Angkor, snow on Borgund, dust over Djenné, mist on West Lake).
 
 **Visual**
-- L1 — PBR materials, sun shadows, GTAO, tone mapping.
-- L2 — baked GI for interiors, probes, reflections on polished surfaces, bloom; wet and worn material response.
-- L3 — set pieces: light through stained glass, incense haze, candlelit halls, moonlit courts.
+- L1 — PBR, shadows, GTAO, tone mapping, atmosphere.
+- L2 — baked GI, reflections, bloom, wet and worn materials.
+- L3 — stained glass, incense haze, candlelit halls, moonlit water, dust in sunbeams.
 
-## 9. Decisions delegated to the implementing agent
+## 12. Decisions log
 
-Decide without asking, within the rules; record each in §10.
+Append-only: date, decision, reason. The log of the Memory Palace era (2026-10) is in `docs/history.md`; its decisions on individual landmarks (which example, which date, what was inferred) still hold.
 
-- The world layout (districts, how civilizations sit together, streets, water) and the order of civilizations and buildings — from architectural importance and variety, aiming for breadth across eras and cultures early.
-- Which real buildings to follow for each type, and how much to compose or vary.
-- Module layout, the style-generator design, the lighting bake method, which assets to use.
-- What to do with the existing Edfu temple: its plan and dossier-grade reasoning are good; rebuild it to the new look and structure as the first building, dropping the loci UI.
-- Any implementation detail not fixed here.
+- 2026-11-03 — **Renamed to Memory of Civilizations / 文明的记忆;** repository `memory-of-civilizations`. Reason: the project is about civilizations, not one palace or a memory technique.
+- 2026-11-03 — **The world is a small planet** (r = 4 km) with Earth's continents and latitudes; regions at true positions, pushed apart where crowded; open country between them. Supersedes the compact city of 2026-10-28. Reason: author's vision — every civilization where it stood; sun, climate and the globe map come for free; sparsity helps frame times.
+- 2026-11-03 — **A civilization is a place at a time;** one region holds several civilizations of different eras, standing near each other in order of age. Reason: author's instruction (Southern Song and Ming Jiangnan are two civilizations).
+- 2026-11-03 — **A settlement is a landmark plus its townscape,** both to the dossier; a bare landmark is unfinished. Reason: the author wants the feeling of a civilization, not a collection of monuments.
+- 2026-11-03 — **Detail first** (§5 standard), picture quality second, smoothness third and reached by engineering; budgets in §8 are targets met by streaming, LOD and baking, and detail is thinned only as the last resort. Reason: author's instruction — the current level of detail is far too low; the author's machine is an M2 with 8 GB, so engineering must carry the detail.
+- 2026-11-03 — The target list of ~55 civilizations (§7), balancing well-known landmarks with the places and eras history needs. Reason: author's instruction.
+- 2026-11-03 — v7's world code is rebuilt; landmarks, styles, renderer, movement, clock, UI and tools are kept (§10). Reason: the author asked to keep only the main mechanisms and rebuild the rest.
 
-## 10. Decisions log
+## 13. Roadmap and status
 
-Append-only: date, decision, reason.
+**Status — 2026-11-03.** v7.1 is the last Memory Palace release: ten landmarks (Edfu, Parthenon, Pantheon, Hagia Sophia, Dome of the Rock, Sainte-Chapelle, Sainte-Foy de Conques, Foguang East Hall, Phoenix Hall, Sanchi) at Building L2 in a flat compact city. This brief adopted; nothing of the planet built yet.
 
-- 2026-10 — Rebuilt from scratch as a memory palace, replacing the Knowledge Universe. Reason: spatial, built places are what memory needs; graph/RAG was the wrong tool.
-- 2026-10 — Buildings must be real, functional, planned designs. Reason: only that holds memory and interest.
-- 2026-10 — Renamed to Memory Palace; bilingual with English primary.
-- 2026-10-26 — The project is a world of architecture across civilizations and eras; "memory palace" is the name and the inspiration, not a feature. No notes, markers, numbered routes or study tools. Reason: author's vision; the architecture itself is the point.
-- 2026-10-26 — The world is completely free to walk; routes are conveyed only by design, as in real buildings. Reason: explicit markers feel contrived.
-- 2026-10-26 — Realistic look adopted (PBR, baked GI, light and shadow); the toy-diorama style and `docs/modeling-guide.md` are retired. Reason: author's instruction.
-- 2026-10-26 — Pure JavaScript; the Python planner, `world.json` pipeline and parity tests are retired. Reason: no LLM generation needed; one language halves the work.
-- 2026-10-26 — LLM-driven runtime generation dropped; the implementing agent is the designer. Reason: same result, no keys, no server.
-- 2026-10-26 — Each building follows a real example with a sourced dossier (`docs/buildings/`). Reason: truth and memorability; researchable.
-- 2026-10-26 — Music synthesised per building from its civilization and period. Reason: author's wish; keeps the site asset-free.
-- 2026-10-26 — Open-ended: keep adding buildings and depth indefinitely; release in versions.
-- 2026-10-26 — This document is the brief for autonomous work; the agent decides §9 items itself.
-- 2026-10-26 — Without WebGPU the site still runs, on three.js's WebGL 2 backend, with a notice. Reason: same TSL code path; better than a dead page on older browsers and in headless test runs.
-- 2026-10-26 — Materials are procedural TSL shaders (ashlar, drums, paving, granite, cedar, metal, ground, water) rather than CDN texture sets for now. Reason: masonry must follow each wall's real coursing and block sizes from the dossier, which a tiling photo texture cannot; it also keeps loads small and needs no third-party assets. CC0 scanned sets may be layered in later for micro-detail.
-- 2026-10-26 — Baked indirect light is an irradiance volume per building: L1 spherical-harmonic probes on a 1 m grid, ray traced offline in Node (three-mesh-bvh) with sun, sky, oil lamps and two bounces; sampled per fragment and also used for blurry reflections. Shipped as half-float data compressed by HTTP gzip, not KTX2 (KTX2/Basis is for colour textures). Lightmaps may follow at Visual L2 where volumes are too coarse. Reason: no UV unwrapping, robust for procedural geometry, fast to bake (minutes).
-- 2026-10-26 — Eye adaptation driven by the baked ambient light at the viewer (up to ~3 stops). Reason: a fixed exposure leaves sanctuaries black or courts blown out; real eyes adapt.
-- 2026-10-26 — One fixed time of day (clear mid-morning, sun azimuth 115°, elevation 38°) because baked light depends on it. Time of day (World L3) will need a bake per time.
-- 2026-10-26 — Interface uses system fonts; no web fonts. Reason: Google Fonts are OFL, not CC0/MIT.
-- 2026-10-26 — The world is a city of civilizations along a river running north–south (docs/world.md); the Nile district comes first, with Edfu at the origin in its true orientation. The river is brought closer to Edfu than in reality so the district reads as a river city.
-- 2026-10-26 — Edfu is shown complete and in use (57 BC), with unpainted stone until L3 (extent of original paint uncertain). Published dimensions conflict (UNESCO 47 m width vs a 40 m pronaos); we take a 50 m enclosure (docs/buildings/edfu.md §4).
-- 2026-10-26 — Terrain: one height function for the whole world (flat plain, river, rock landforms with cliffs and walkable slopes), meshed finely over landforms; open ground steeper than ~40° cannot be climbed. The Acropolis is 40 m high instead of ~70 m so the climb stays a short walk. Reason: districts need their real settings (an acropolis, later hills and harbours); buildings keep true scale, landscape is allowed to be compressed.
-- 2026-10-26 — Greek order built straight (no stylobate curvature or column inclination) at L1–L2; entasis is modelled from a measured profile. Refinements recorded for L3. Reason: every element above the stylobate would have to follow the curvature.
-- 2026-10-26 — Second building: the Parthenon, the canonical Doric temple, with the most published measurements of any Greek building.
-- 2026-10-26 — Third building: the Pantheon (Roman Imperial; the Corinthian order, concrete vaulting, the coffered dome). New style module `src/styles/roman/` (Corinthian column, entablature with modillions, ring walls, niches, coffered dome with stepped coffers).
-- 2026-10-26 — Buildings are built on demand: plans load at start, geometry and baked light within 650 m of the visitor. The budget check counts everything within that radius of the start as the initial load. Reason: §6 budgets as the world grows.
-- 2026-10-26 — Regions (author's instruction): no building stands bare; each is a self-contained small world with its terrain, plants, settlement, light and weather. The world becomes a river valley whose regions are basins on the west bank divided by ridge spurs, each with its own fixed time of day and a weather cycle. Buildings are moved to their regions (Edfu at the origin; Rome north of it; Greece beyond). Exposure is lowered: the earlier picture was too bright.
-- 2026-10-27 — Hagia Sophia in the state of 562 (Justinian's interior with Isidore the Younger's higher dome), without the Ottoman buttresses and minarets, so that the building is shown as one coherent design of its own age. Its domes, semidomes, exedrae and pendentives are modelled as spheres cut by planes (exact Byzantine geometry rather than approximations), and the axis is laid due east–west (the real one is turned about 33°). Arch springing (24.5 m) and dome base (40 m) inferred from the 55.6 m crown and the ~15 m rise of the 562 dome; pallasweb's 120 ft arch height is recorded as conflicting.
-- 2026-10-27 — Plan check is multi-storey: a cell may be reached at several floor heights (galleries over aisles). Pads lie 12 cm below their base so paving never fights the ground.
-- 2026-10-27 — The Dome of the Rock first among Islamic buildings: the oldest standing monument of the tradition and the bridge from Byzantine to Islamic building; shown as of 691/92 (Umayyad exterior mosaic instead of the Ottoman tiles; its colour inferred). The Islamic style reuses the Byzantine geometry (planar walls, cut spheres) and the Roman Corinthian column for the reused capitals. The world's regions continue northward (the Levant after Byzantium) so that each region keeps the river and a pass at both ends.
-- 2026-10-27 — Start-up (author's request): no Enter button — the world opens when ready and the first click starts looking and the music (browsers need a gesture for both); a loading bar with stages and time left; only what is near is made before opening. Material parameters are uniforms and plant batches use instanced attributes so that shaders are shared (pipelines ~314 → ~89). The map travels to any point on the land.
-- 2026-10-27 — Gothic begins with the Sainte-Chapelle (1248): the purest Rayonnant building and the most telling for light, compact enough to build to L2 at once; shown with a Rayonnant rose instead of the later Flamboyant one, and with a stair from the courtyard to the upper porch standing for the palace galleries. Stained glass is lit from behind (emissive) and colours the sun through `shadowMap.transmitted`; the baker passes rays through glass with its tint.
-- 2026-10-27 — Chinese timber architecture begins with the Foguang East Hall (857), the grandest surviving Tang hall and a dated one; shown as of 857 without the later halls of its lower courts. Bay widths, column height and roof rise inferred (central five bays 5.04 m, end bays 4.40 m to make 34 m; Tang rise a fifth of the span); the statues as massing at L2.
-- 2026-10-27 — Japanese architecture begins with the Phoenix Hall of Byōdō-in (1053) rather than Hōryū-ji: it is the purest image of the Heian aristocratic hall and of the Pure Land garden, and it adds water to the world (the first garden pond). Shown painted red as restored in 2012–14. Core bays, heights and wing levels inferred from the 14.24 m width, the 3.94 m wing bays and the statue; the Japanese style reuses the Chinese bracket sets and gabled roofs, from which it descends. Ponds are unions of ellipses dug into the ground below the water, with water that cannot be waded.
-- 2026-10-27 — Indian architecture begins with the Great Stupa at Sanchi rather than Khajuraho: the earliest monumental stone building of India and the root of the stupa and gateway forms that travel east to the pagodas and torii already in the world; shown as of the 1st century CE with all four gateways, without the Gupta additions. Drum height, railing radius and gateway dimensions inferred; the reliefs are L3.
-- 2026-10-27 — The world's layout changes from a line of regions along one valley to a patch that grows outward (author's request): regions are cells of a grid (1600 × 1200 m), the Nile in the middle and the others in a spiral by age, new ones on the outside. Ridges along the cells' edges with passes; a river down each column of cells with its region's width and meander, through gorges; bridges where roads cross rivers. Each region's landforms count only within its cell. The regions' contents moved with their cells unchanged, so the buildings' plans did not change.
-- 2026-10-28 — **The world is one compact city of districts** (author's correction; supersedes the river valley of 2026-10-26 and the grid of regions of 2026-10-27, which misread "surroundings" as whole landscapes): districts of about 200 × 200 m, any shape, touching directly, each a core building with a small surrounding of its own time; one sky and time for the whole city; no ridges, rivers, mountains or long roads. Movement is walking and running at true speed, with flight (hold Space) instead of speed levels and jumping.
-- 2026-10-28 — Controls gathered in one corner (author's request): a small map with the clock beside it (top left), the large map for travel, the settings top right; the time is set by dragging the clock. Movement: four speeds chosen by wheel or keys, and a jump; the walker's body and step height are unchanged, so the plan and walk checks still hold.
-- 2026-10-27 — Time of day (author's request: not always day with fixed light): days pass, the sun follows each region's course from its latitude and season (`sunAt`), the full moon lights the night with stars and the Milky Way; the baked light stays baked at each region's own hour and is scaled with the daylight (a fifth remains at night for moon and lamps) — the direction of its bounce light is only right at the baked hour, accepted until the bake separates sun, sky and lamps (Phase 3).
-- 2026-10-27 — Start and travel (author's request: about a minute was too long): one scene pass (GTAO from depth alone) instead of a normal pre-pass and a scene pass; the start waits only for what is near and compiles by drawing the four directions round the viewer; towns are planned when near; far buildings are unloaded; the default quality follows the machine. Timings of each stage are logged to the console.
-- 2026-10-28 — The city as built: districts are the nearest of nine centres (a soft, noise-warped Voronoi), avenues on a loose grid along their borders; the hills scaled to the city (Acropolis 24 m, Sanchi 22 m, the first hill and Moriah 14 m, down from 24–40 m) each with a gentle side that its street climbs at no more than about a third; one grid of house blocks (40 × 34 m, lanes of 5 m) for the whole city, each block built with its district's house type, one in seven a garden; one sky (`CITY`), with `?time=baked` still showing each district under its bake sky; beyond the edge fields and low hills, not walkable. Flight: rising at 4.5 m/s while held, 9 m/s aloft (18 with Shift), gliding down at 3.5 m/s, at most 160 m above the ground, landing on roofs and wall tops; the corner shows the gait, speed and height instead of speed levels. Building is time-sliced and buildings left behind are cached up to 1.5 M triangles.
-- 2026-10-28 — Romanesque begins with Sainte-Foy de Conques (c. 1050–1120) rather than Saint-Sernin or Cluny: the oldest and most compact of the pilgrimage churches (ambulatory, radiating chapels, tribunes, barrel vault on half-barrels, crossing lantern) with the best-known Romanesque tympanum, and its cloister and village make a district. Shown about 1120 with a Romanesque lantern and west towers standing for the later ones, and plain glass for Soulages's. Its district, Rouergue, is the first added at the city's edge: the city's ground became a union of rectangles, its edge their outline.
-- 2026-10-28 — World L2 detail: each district gets a paved square with a well where the way to its building leaves the avenue — the nearest level block, left open; nothing grows on it.
-- 2026-10-26 — Edfu's roof stairs and roof terrace, the New Year court, the nilometer and the pylon's internal stairs are deferred to L2 of the building; the mammisi is a separate building for later.
+**Phase A — The planet, with the ten** *(next)*
+- Rename and restructure (§9, §10); `docs/history.md`; README in both languages.
+- `src/planet/`: sphere with relief, continents and oceans from a hand-drawn low-resolution mask, sun by latitude, atmosphere, spherical walker and flight with height-scaled speed, globe map, streaming with impostors, `tools/globe-check.mjs`, `tools/perf.mjs`.
+- Re-site the ten landmarks at their positions with a provisional townscape each (ported house types), one bake pass; biome L1 ground between them.
+- Release v8.0 when the ten are reachable, the perf test passes and the live site works on desktop and phone.
 
-## 11. Roadmap and status
+**Phase B — The ten to the standard, and the empty continents**
+- Rewrite the ten's dossiers with townscape and sound parts; bring each settlement to L2 with its true townscape and objects of use (Pompeii-type Rome, Île de la Cité with Notre-Dame, Chang'an wards, the agora…). The first of these (Edfu) sets the bar for §5.
+- Then, each to L1 then L2 with dossier, townscape, life and music, in this order: Ming Suzhou, Forbidden City, Angkor, Chichén Itzá, Giza, Djenné, Machu Picchu, Taj Mahal, Isfahan, Himeji, Southern Song Hangzhou, Borobudur, Ur, Lalibela, Tenochtitlan, Teotihuacan, Taos, Gyeongbokgung, Kaifeng, Potala, Madurai, Persepolis, Petra, Knossos, Rapa Nui, Māori pā.
 
-The implementing agent updates this section at the end of every session. Phases run in order; within a phase, order is the agent's choice. A phase is done when its items are built, pass the release-tier checks of §7, are pushed, and the live site works on desktop and phone.
+**Phase C — Later Europe, the modern world, the rest of the list**
+- Florence, Venice, Alhambra, Versailles, Baroque Rome, Ottoman Istanbul, Mamluk Cairo, Borgund/Bryggen, St Basil's, Amsterdam, Westminster/St Pancras, Sagrada Família, Stonehenge, Khajuraho, Hōryū-ji, Babylon, Kilwa, Great Zimbabwe, Cahokia, New York, Sydney.
 
-**Status — 2026-10-26 (v5.0)**
-- Phase 0 done: pure-JS ES modules (`src/core`, `src/engine`, `src/styles`, `src/buildings`, `src/ui`), WebGPU renderer with WebGL 2 fallback, procedural PBR materials, cascaded sun shadows, GTAO, bloom, AgX tone mapping, eye adaptation, first-person walking with collision, steps and ramps, map, settings, bilingual UI. Python package, `world.json` pipeline, loci UI, props catalogue and modeling guide removed. README (both languages), `ASSETS.md`, `docs/world.md`, `CHANGELOG.md`; tools: `tools/shot.mjs` (fixed viewpoints, headless WebGPU via SwiftShader), `tools/plan-check.mjs`, `tools/bake.mjs`, `tools/budget.mjs`.
-- Lighting pipeline done: offline bake to an irradiance volume (sun, sky, lamps, two bounces), verified on Edfu's halls.
-- Phase 1 done: Edfu dossier rewritten to §4 standard; Edfu built to Building L2 — plan, section and structure at true scale; torus rolls and cavetto cornices; door frames with winged sun discs; uraeus frieze on the pronaos screen walls; cedar doors on the pylon and the inner halls; the naos and the sacred barque; both stairs to the roof (dog-leg, route inferred) and the walkable stepped roof; oil lamps baked into the inner rooms; music by zone. World L1: the Nile district with the river and palms.
-- Edfu's L2 items still open (recorded, not blocking): the New Year court and kiosk, the nilometer, the pylon's internal stairs and chambers, the mammisi (separate building). L3 next: reliefs and inscriptions, painted ceilings.
-- Checks: `npm test` runs the plan check and a walk-through of every building's routes (`tools/walk-check.mjs`, same body and movement as the viewer). Budget: initial load 5.2 MB; Edfu's baked light 4.3 MB.
-- Phase 2 in progress (2026-10-26): terrain (one height function; the Acropolis plateau); the Parthenon (Greek Doric, Building L2: the full order with entasis, pediments, coffered pteron, two-tier interior colonnade, Athena Parthenos massing, pool, Ionic west room); the Pantheon (Roman, Building L2: portico of 16 Corinthian columns in three aisles, intermediate block with the second pediment, bronze doors, rotunda with seven niches and eight aediculae, opus sectile floor, coffered dome of 140 stepped coffers and open oculus, stepped and gilt-bronze exterior). On-demand building load. Budget: initial load 8.6 MB.
+**Phase D — Depth**
+- All settlements to L3 (§5 in full); Planet L3; Visual L3; the bake separates sun, sky and lamps.
 
-- Regions (2026-10-26, v5.2): the world is a river valley with one basin per civilization (Nile, Rome, Greece), separated by ridge spurs with passes and joined by roads; chunked LOD terrain built in workers; ground cover by region (sand, fields, grass, red earth, rock, silt, roads); procedural vegetation (14 species, instanced, LOD, wind); the town of Edfu (381 mud-brick houses, `src/world/features/`); per-region climate (fixed sun, sky, haze, exposure) with a weather cycle (clouds and their shadows, dust, rain with wet ground, wind); ambience sounds; the Pantheon's forecourt porticoes. All three bakes redone with their regions' suns. Budget: initial load 5.2 MB.
-- Byzantium (2026-10-27, v5.3): a fourth region north of Greece over the pass of Parnes — the city's hills above the water, a grey maritime climate (drizzle, sea mist, the poyraz), cypresses, plane trees, figs, gardens, a town of ~500 tiled houses with jettied upper storeys. **Hagia Sophia** (Byzantine, Building L2): pendentive dome with its 40 windows and ribs, semidomes, four exedrae with porphyry and verde antico colonnades, two-storey aisles and galleries reached by the ramp tower, tympana with 24 windows, apse with synthronon, bema and ciborium, chancel screen, ambo and solea, polykandela, the two narthexes, the atrium with its phiale, the Augustaion square; gold mosaic, book-matched revetment and Proconnesian floor materials; chant with an ison and a 12-second reverberation. 
-- The Levant (2026-10-27, v5.4): a fifth region — Mount Moriah, the Kidron, the Mount of Olives, olive terraces, a town of domed stone houses; the **Dome of the Rock** (Umayyad, Building L2: octagon with 36 windows and four porches, octagonal and circular arcades with gilded tie-beams, drum with 16 windows, double gilded dome, painted ceilings, the Rock and its screen, the platform with stairs) and the **Dome of the Chain**; voice, oud, ney and daff. 
-- Francia (2026-10-27, v5.6): a sixth region — the Seine's plain, timber-framed town, orchards; the **Sainte-Chapelle** (Gothic, Building L2: lower chapel with painted columns and rib vaults, upper chapel with 15 traceried stained-glass windows, apse vault, tribune of the relics, apostles, buttresses, gables, rose, roof and spire); organum and bells. Start-up and map travel improved (v5.5). 
-- Tang China (2026-10-27, v5.7): a seventh region — loess hills, terraced fields, pines, a village; the **Foguang East Hall** (Chinese, Building L2: 7×4 bays on two rings of columns with rise toward the corners, seven-rank bracket sets with descending cantilevers on every column and intercolumnar sets, painted architraves, eave purlin, deep eaves, hipped roof with chiwei and hip ridges, latticed ceilings, the altar with Buddhas, bodhisattvas on their mounts, attendants and guardians), the three terraces, the Tang pillar and the pagoda; chant with wooden fish and bell.
-- Heian Japan (2026-10-27, v5.8): an eighth region — the plain of Uji, red pines, cryptomerias, autumn maples, bamboo, rice fields, a village of timber houses; the first garden pond (water dug into the ground, not to be waded) with an arched bridge; the **Phoenix Hall of Byōdō-in** (Japanese, Building L2: central hall of 3×2 bays with its pent roof raised at the front, three-stepped bracket sets, hip-and-gable roof with gilt phoenixes, the wing corridors of two levels with railings and corner towers under pyramidal roofs, the tail corridor, coffered ceilings, the gilt Amida on his lotus pedestal with nimbus and canopy, 52 bodhisattvas on clouds), the stone lantern; gagaku outside, chant inside. 
-- India (2026-10-27, v5.9): a ninth region — the plain of Malwa, banyans, teak, neem, palmyras, a village of limewashed houses; the **Great Stupa at Sanchi** (Indian, Building L2: drum with its walk and railing, the dome, harmika and triple parasol, double stairway, ground railing of posts, crossbars and coping, four gateways with capitals and three volute architraves), Stupa 3, Ashoka's pillar, a monastery. 
-- World layout and speed (2026-10-27, v6.0): the regions as a 3 × 3 patch round the Nile, ridges and passes between them, a river per column with bridges, roads walked end to end by `tools/road-check.mjs` (in `npm test`); one scene pass, near-only start, travel with a fade and unloading far buildings; all bakes redone. Next: Romanesque, then Renaissance.
+**Phase E onward — Keep going**
+- More civilizations (places and eras not yet present), deeper townscapes, more enterable houses, more objects. Prefer what adds the most civilization per unit of work. Stop only when the author says so.
 
-- The compact city (2026-10-28, v7.0): the world rebuilt as one palace-city of nine districts (~1000 × 830 m) round their buildings, with ~1400 houses of each district's time in blocks between avenues and lanes, district planting, one shared sky and time set on the clock, flight instead of speed levels and jumping; the river valleys, ridges, passes, bridges and separate towns removed; sites moved, the first hill and Moriah lowered; streets walked end to end; all bakes redone. Next: Romanesque, then Renaissance, each as a new district at the city's edge.
+## 14. Rules
 
-- Rouergue (2026-10-28, v7.1): a tenth district west of Francia — a slope with schist houses under lauzes, oaks, walnuts and orchards; **Sainte-Foy de Conques** (Romanesque, Building L2: nave of five bays with aisles and tribunes under a barrel vault on half-barrels, piers with half-columns and block capitals, aisled transept with apsidioles, the crossing on squinches with its octagonal lantern, choir with hemicycle, ambulatory and three radiating chapels under half-domes, the west portal with the tympanum of the Last Judgment as massing, two west towers, roofs of lauzes; the cloister of Bégon with its serpentine basin); chant over an organistrum drone. Next: Renaissance.
+- Dossier first (§6). Every element traces to its dossier.
+- Metres; true scale for buildings and townscapes; the planet and open country are compressed.
+- No study features, markers, labels in the world. UI: corner map, clock, globe map, settings — nothing else without a reason in §12.
+- Budgets (§8) are targets; a change that breaks one is fixed by engineering before merge, and only as a last resort by thinning detail, recorded in §12.
+- Picture quality on the author's machine never goes down silently; a change that lowers it is recorded in §12.
+- Checks per change: a screenshot of the thing changed and the plan check; per task end and before release: all viewpoints compared, budget, perf, walk and globe checks.
+- Repository text in English; the site UI bilingual, English default, Chinese available. Commits authored as the repository owner (Alex Wang <alex119122114@gmail.com>), no AI co-author or session trailers, messages in English.
 
-**Done (previous version, replaced)**
-- Python planner, Edfu temple plan with 47 loci, three.js viewer with loci UI, toy-style props, bilingual UI, Pages deployment.
+## 15. Releases
 
-**Phase 0 — New foundation**
-- New repo structure: pure JS ES modules, WebGPU renderer, PBR material loading, GTAO, shadows, first-person navigation with collision and stairs, map, settings, bilingual UI. Remove the Python package, `world.json` pipeline, loci UI, props catalogue and modeling guide; update README (both languages) to the new description; add `ASSETS.md`, `docs/world.md` (initial), the screenshot, plan-check and bake scripts.
-- Lighting pipeline: offline bake producing lightmaps/probes; verify on a test room.
-
-**Phase 1 — The first building, as the quality bar**
-- Rewrite the Edfu dossier to §4 standard. Rebuild the Temple of Horus at Edfu to Building L1 → L2 with the new renderer, materials and baked light; its music. This building sets the bar every later one must meet.
-
-**Phase 2 — Breadth: one building per major tradition** *(in progress: Egyptian, Greek, Roman, Byzantine, Islamic, Romanesque, Gothic, Chinese, Japanese, Indian built; next Renaissance, Mesoamerican, Baroque, iron-and-glass, early Modern)*
-- Plan the world layout (`docs/world.md`). Add, each to L1 then L2 with dossier and music, a first building from each of a wide spread of traditions — e.g. Greek, Roman, Byzantine, Islamic, Romanesque, Gothic, Renaissance, Chinese, Japanese, Indian, Mesoamerican, Baroque, 19th-century iron-and-glass, early Modern — in the order the agent judges best for variety and importance. World L1 → L2.
-
-**Phase 3 — Depth**
-- All buildings to L3; Visual L2 → L3; World L3.
-
-**Phase 4 onward — Keep going**
-- No final state. Loop: add buildings (more examples within each tradition, more traditions and periods, vernacular and civic types as well as monumental), deepen existing ones to L4, improve materials, light and music. Prefer what adds the most architectural truth and richness per unit of work. Stop only when the author says so.
-
-## 12. Releases
-
-Every push to the default branch deploys to GitHub Pages. In addition, cut a **release** whenever a meaningful chunk is done — a phase, a new building, a visible quality jump:
-- Tag `vMAJOR.MINOR` and create a GitHub release with a short note and a few screenshots.
-- Keep `CHANGELOG.md`, newest first, in plain language (what you can now visit, what looks better), not a list of commits.
-- Never release with a known regression in the picture, a broken walk, or a budget breach; fix first.
+Every push to the default branch deploys to GitHub Pages. Cut a release (tag `vMAJOR.MINOR`, GitHub release with a note and screenshots, `CHANGELOG.md` entry in plain words) for every phase, new settlement or visible quality jump. Never release with a regression in the picture, a broken walk, or a budget breach.

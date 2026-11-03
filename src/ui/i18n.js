@@ -2,8 +2,8 @@
 
 const STRINGS = {
   en: {
-    title: 'Memory Palace',
-    lede: 'A world of architecture, from every age and civilization.',
+    title: 'Memory of Civilizations',
+    lede: 'A small planet of the civilizations of Earth, each where it stood.',
     loading: 'Preparing the world…',
     compiling: 'Lighting the halls…',
     'st-start': 'Starting the renderer', 'st-land': 'Shaping the land', 'st-build': 'Raising the buildings', 'st-plants': 'Planting', 'st-shaders': 'Preparing the light',
@@ -30,8 +30,8 @@ const STRINGS = {
     districts: { nile: 'The Nile', greece: 'Greece', rome: 'Rome', byzantium: 'Byzantium', levant: 'The Levant', francia: 'Francia', tang: 'Tang China', heian: 'Heian Japan', india: 'India' },
   },
   zh: {
-    title: '记忆宫殿',
-    lede: '一座由各个时代、各个文明的建筑组成的世界。',
+    title: '文明的记忆',
+    lede: '一颗小小的星球，地球上的各个文明各在其位。',
     loading: '正在准备世界……',
     compiling: '正在点亮殿堂……',
     'st-start': '正在启动渲染器', 'st-land': '正在塑造地形', 'st-build': '正在建造建筑', 'st-plants': '正在种植植物', 'st-shaders': '正在准备光照',

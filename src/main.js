@@ -1,4 +1,4 @@
-// Memory Palace — boot, interface and the frame loop.
+// Memory of Civilizations — boot, interface and the frame loop.
 
 import { Renderer } from './engine/renderer.js';
 import { World } from './engine/world.js';

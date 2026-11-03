@@ -1,8 +1,8 @@
 {
-  "name": "memory-palace",
+  "name": "memory-of-civilizations",
   "private": true,
   "type": "module",
-  "description": "A walkable, realistic 3D world of architecture. The site is static ES modules; Node is only for tests, checks and offline baking.",
+  "description": "A small planet of the civilizations of Earth, each a walkable, realistic 3D settlement. The site is static ES modules; Node is only for tests, checks and offline baking.",
   "scripts": {
     "serve": "node tools/serve.mjs",
     "check": "node tools/plan-check.mjs",

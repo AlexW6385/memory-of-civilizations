@@ -1,12 +1,14 @@
-# Memory Palace
+# Memory of Civilizations
 
 [中文说明](README.zh-CN.md)
 
-A walkable, realistic 3D world of **architecture**: buildings of every age, civilization and style, each built after a real example and planned the way the real thing was used, with real materials, light and shadow, and music in the manner of its civilization and time.
+A small planet you can walk and fly over, on which the civilizations of Earth — each a place at a time — stand where they stood, as realistic, detailed 3D **settlements**: a famous landmark built after the real building, with its full interior, and round it the townscape of its people and time — streets, houses, markets, gardens, walls, water, the things of daily use — with real materials, light and shadow, and music in the manner of its civilization.
 
-**Walk it: <https://alexw6385.github.io/Memory-Palace/>** — desktop or phone, a browser with WebGPU (Chrome, Edge, Safari 26). English or Chinese.
+**Walk it: <https://alexw6385.github.io/memory-of-civilizations/>** — desktop or phone, a browser with WebGPU (Chrome, Edge, Safari 26). English or Chinese.
 
-The name is meant in two senses. These buildings are the memory of civilizations; and a well-planned building already gives every room and object a place and an order, which is what the classical memory palace needs. But this is a world to walk, not a study tool: no notes, no markers, no route. Where a building has a route, its architecture shows it.
+The name means only that these buildings are the memory of civilizations. This is a world to walk, not a study tool: no notes, no markers, no route.
+
+> **State of the site (2026-11-03):** the live site is still v7.1, the last release of the previous design — ten landmarks in one flat compact city. The planet (the third brief, [DESIGN.md](DESIGN.md)) is being built; v8.0 will put the ten on it.
 
 ## What you can visit
 
@@ -22,9 +24,7 @@ The name is meant in two senses. These buildings are the memory of civilizations
 - **Sainte-Foy de Conques** (c. 1050–1120), a pilgrimage church on the road to Santiago: under the carved Last Judgment of its west portal into the tall, dim barrel-vaulted nave between its tribunes, to the crossing lit by its lantern, and round the ambulatory past three chapels; the cloister with its green serpentine basin. Among schist houses under stone-slab roofs on a slope.
 - **Hagia Sophia** (Constantinople, 532–537, dome rebuilt 562): the dome on its ring of forty windows over pendentives, semidomes and exedrae, galleries, gold mosaic and marble, the chancel and ambo, the narthexes and the atrium — on its hill among tiled houses.
 
-The buildings stand together in **one compact palace-city**, each in a **district** of about 200 × 200 m with a small surrounding of its own time — streets and lanes, houses of the period, gardens, its trees and ground, the rock, hill or pond it stands on. The districts touch, so a few minutes' walk takes you from Edfu to the Pantheon or up to the Parthenon. One sky over the whole city: the day passes into night (moon, stars), or you set the hour yourself; the weather changes (drifting cloud shadows, haze, rain and wet ground, wind). The city grows outward as districts are added.
-
-More buildings, one from each major tradition, are next (see [DESIGN.md](DESIGN.md) §11).
+In v7.1 the buildings stand together in one compact city of districts. In v8.0 they move to **the planet**: a sphere of 4 km radius with Earth's continents and latitudes, each civilization at its true place, nearby civilizations of one region standing together in order of age, open country between regions, one sun whose height follows the latitude, a globe to jump anywhere, and flight that speeds up with height. The target list of about 55 civilizations is in [DESIGN.md](DESIGN.md) §7.
 
 ## Controls
 
@@ -32,11 +32,11 @@ W A S D or arrows to walk, mouse to look (click to capture the mouse), Shift to 
 
 ## How it is made
 
-- **Dossier first.** Every building is built from a sourced dossier in [`docs/buildings/`](docs/buildings) (real example, plan and dimensions, structure, use, materials, decoration, light, music; what is stated by sources and what is inferred). The world layout is in [`docs/world.md`](docs/world.md).
+- **Dossier first.** Every building is built from a sourced dossier in [`docs/buildings/`](docs/buildings) (moving to `docs/settlements/`, with a townscape part) (real example, plan and dimensions, structure, use, materials, decoration, light, music; what is stated by sources and what is inferred). The world layout is in [`docs/world.md`](docs/world.md).
 - **Plan is data, look is code.** A building is a plan of walls, openings, floors, roofs, columns and objects in metres (`src/buildings/<id>/plan.js`), drawn by the reusable vocabulary of its civilization (`src/styles/<civilization>/`: columns and capitals, torus and cornice, pylons, door frames, statues).
 - **Renderer:** three.js WebGPU (WebGL 2 fallback), procedural physically based materials aligned to each wall's real coursing, cascaded sun shadows, GTAO, bloom, AgX tone mapping, and eye adaptation.
 - **Baked light:** indirect light (sky, sun bounced off stone, oil lamps) is ray traced offline into an irradiance volume per building (`tools/bake.mjs` → `data/gi/`), loaded with the building.
-- **City:** one height function for the city and the fields beyond, drawn as terrain chunks with levels of detail built in workers; the houses of each district laid out on one grid of blocks (`src/world/city.js`); ground cover and planting by district; trees, palms and grass instanced, with levels of detail and wind (`src/world/`, `src/engine/flora/`).
+- **World:** v7.1 — one height function for the city, terrain chunks with levels of detail built in workers, houses on one grid of blocks (`src/world/`); v8.0 — the planet (`src/planet/`: sphere, continents, biomes, ocean, atmosphere, sun by latitude) and a designed townscape per settlement. Trees and grass instanced, with levels of detail and wind (`src/engine/flora/`).
 - **Music:** synthesised in the browser from each building's score (`src/buildings/<id>/music.js`); it changes as you pass from open courts to halls to the sanctuary.
 
 Pure static ES modules — no build step, no server. three.js comes from a CDN.
