@@ -9,7 +9,6 @@ import { foliageTexture } from './textures.js';
 import { MAX_DENSITY, NEAR_ONLY } from '../../world/flora-rules.js';
 import { material as paletteMaterial } from '../materials.js';
 import { ENV } from '../env.js';
-import { WORLD } from '../../world/regions.js';
 
 const BIG = 128, SMALL = 16, NEAR_R = 64;
 
@@ -75,19 +74,31 @@ export class Flora {
         if (e.data.species) { this.species = e.data.species; this.pump(); return; }
         w.idle = true;
         const c = this.cells.get(e.data.id);
-        if (c) { c.data = e.data.data; c.state = 'done'; this.dirty = true; }
+        if (c && e.data.gen === this.gen) { c.data = e.data.data; c.state = 'done'; this.dirty = true; }
+        else if (c) c.state = 'queued';
         this.pump();
       };
       return w;
     });
     this.maxLod = Math.max(...Object.values(SPECIES).map((s) => s.lod[1]));
+    this.focus = null;               // the settlement whose plants these are (src/world/regions.js focus)
     this.scale = 1;                 // view distance of plants, by picture quality
+  }
+
+  /** Plant the settlement with this focus ({ region, center, radius }), or none (null). */
+  setSite(focus) {
+    this.focus = focus;
+    for (const [k, c] of this.cells) if (c.state !== 'pending') this.cells.delete(k);
+    this.gen = (this.gen || 0) + 1;
+    this.dirty = true;
   }
 
   /** Cells wanted around (x, z): far cells for trees, near cells for grass. */
   update(x, z) {
     const want = new Set();
-    const [X0, Z0, X1, Z1] = WORLD.bounds;
+    if (!this.focus) { if (this.dirty) { this.rebuild(x, z); this.dirty = false; } return 0; }
+    const [fx, fz] = this.focus.center, fr = this.focus.radius;
+    const [X0, Z0, X1, Z1] = [fx - fr + 400, fz - fr + 400, fx + fr - 400, fz + fr - 400];
     const R = this.maxLod;
     for (let cx = Math.floor((x - R) / BIG) * BIG; cx < x + R; cx += BIG) for (let cz = Math.floor((z - R) / BIG) * BIG; cz < z + R; cz += BIG) {
       if (cx + BIG < X0 - 400 || cx > X1 + 400 || cz + BIG < Z0 - 400 || cz > Z1 + 400) continue;
@@ -132,7 +143,7 @@ export class Flora {
       const k = this.queue.shift(), c = this.cells.get(k);
       if (!c) continue;
       c.state = 'pending'; w.idle = false;
-      w.postMessage({ id: k, rect: c.rect, near: c.near });
+      w.postMessage({ id: k, rect: c.rect, near: c.near, focus: this.focus, gen: this.gen });
     }
   }
 

@@ -1,20 +1,26 @@
-// The small map in the corner: the land round the visitor (north up), the buildings, the visitor's
-// arrow and the name of the region. Click it to open the large map; it can be hidden.
+// The small map in the corner: the land round the visitor (north up) — sea, coast, the open
+// country's colours, the settlements' discs with their names — and the visitor's arrow. Click it
+// to open the globe; it can be hidden.
 
 import { tr } from './i18n.js';
-import { regionAt } from '../world/regions.js';
+import { coastAt, climateAt } from '../planet/land.js';
+import { PLANET_RADIUS as R, BUILT } from '../planet/relief.js';
+import { eastNorth, dot } from '../planet/geo.js';
+import { landColour } from './globe.js';
 
-const RADIUS = 160;                     // metres from the centre to the edge of the small map
+const RADIUS = 600;                     // metres from the centre to the edge of the small map
+const RES = 88;                         // samples across
 
 export class MiniMap {
   constructor(world, mapView, onOpen) {
     this.world = world;
-    this.mapView = mapView;
     this.box = document.getElementById('minimap');
     this.canvas = document.getElementById('minimap-canvas');
     this.label = document.getElementById('minimap-region');
     this.showBtn = document.getElementById('mm-show');
     this.next = 0;
+    this.off = document.createElement('canvas');
+    this.off.width = this.off.height = RES;
     this.box.addEventListener('click', (e) => { if (!e.target.closest('.mm-btn')) onOpen(); });
     document.getElementById('mm-hide').onclick = (e) => { e.stopPropagation(); this.setHidden(true); };
     this.showBtn.onclick = () => this.setHidden(false);
@@ -26,42 +32,51 @@ export class MiniMap {
     try { localStorage.setItem('mp.minimap', h ? 'hidden' : 'shown'); } catch { /* storage unavailable */ }
   }
 
-  /** Redraw (at most a few times a second) for the visitor at (x, z) facing yaw. */
-  update(x, z, yaw) {
+  /** Redraw (a few times a second) for the visitor at planet direction u, heading (radians from north). */
+  update(u, heading) {
     const now = performance.now();
     if (this.box.hidden || now < this.next) return;
-    this.next = now + 200;
+    this.next = now + 250;
     const cv = this.canvas, dpr = devicePixelRatio || 1, W = Math.round(cv.clientWidth * dpr), H = Math.round(cv.clientHeight * dpr);
     if (!W || !H) return;
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
-    const g = cv.getContext('2d'), s = (W / 2) / RADIUS;
-    const P = (wx, wz) => [W / 2 + (wx - x) * s, H / 2 + (wz - z) * s];
-    g.fillStyle = '#2f281f'; g.fillRect(0, 0, W, H);
-    // the relief, once the large map has made it (in idle time after the start)
-    const rel = this.mapView._relief;
-    if (rel) {
-      const [r0, r1, r2, r3] = rel.rect, kx = rel.canvas.width / (r2 - r0), kz = rel.canvas.height / (r3 - r1);
-      const sx = (x - RADIUS - r0) * kx, sz = (z - RADIUS * H / W - r1) * kz;
-      g.imageSmoothingEnabled = true;
-      g.drawImage(rel.canvas, sx, sz, 2 * RADIUS * kx, 2 * RADIUS * (H / W) * kz, 0, 0, W, H);
+    const [e, n] = eastNorth(u);
+    // the land, sampled coarsely and drawn smooth
+    const og = this.off.getContext('2d'), img = og.createImageData(RES, RES);
+    for (let j = 0; j < RES; j++) for (let i = 0; i < RES; i++) {
+      const dx = ((i + 0.5) / RES * 2 - 1) * RADIUS / R, dy = (1 - (j + 0.5) / RES * 2) * RADIUS / R;
+      const v = [u[0] + e[0] * dx + n[0] * dy, u[1] + e[1] * dx + n[1] * dy, u[2] + e[2] * dx + n[2] * dy];
+      const l = Math.hypot(v[0], v[1], v[2]); v[0] /= l; v[1] /= l; v[2] /= l;
+      const c = landColour(coastAt(v), climateAt(v));
+      img.data.set([c[0], c[1], c[2], 255], (j * RES + i) * 4);
     }
-    // the buildings: their outline, and a mark at each entrance
-    for (const rec of this.world.plans.values()) {
-      const b = this.world.constructor.worldBounds(rec.plan);
-      const [a, c] = P(b[0], b[1]), [d, e] = P(b[2], b[3]);
-      if (d < 0 || a > W || e < 0 || c > H) continue;
-      if (rec.plan.feature) { g.fillStyle = 'rgba(214, 190, 150, 0.25)'; g.fillRect(a, c, d - a, e - c); continue; }
-      g.strokeStyle = 'rgba(243, 234, 217, 0.85)'; g.lineWidth = 1.5 * dpr; g.strokeRect(a, c, d - a, e - c);
-      const en = this.world.entrance(rec.plan), [nx, ny] = P(en[0], en[2]);
-      g.fillStyle = '#f3ead9'; g.beginPath(); g.arc(nx, ny, 3 * dpr, 0, Math.PI * 2); g.fill();
+    og.putImageData(img, 0, 0);
+    const g = cv.getContext('2d');
+    g.imageSmoothingEnabled = true;
+    g.drawImage(this.off, 0, 0, W, H);
+    const s = (W / 2) / RADIUS;
+    // the settlements
+    let here = null;
+    g.font = `${Math.round(11 * dpr)}px system-ui, sans-serif`;
+    g.textAlign = 'center';
+    for (const S of BUILT) {
+      const d = [S.u[0] - u[0], S.u[1] - u[1], S.u[2] - u[2]];
+      const x = W / 2 + dot(d, e) * R * s, y = H / 2 - dot(d, n) * R * s;
+      if (dot(S.u, u) < 0.9) continue;
+      const rr = S.radius * s;
+      if (x < -rr || y < -rr || x > W + rr || y > H + rr) continue;
+      g.fillStyle = 'rgba(214, 196, 160, 0.55)'; g.strokeStyle = 'rgba(255, 240, 210, 0.9)'; g.lineWidth = 1.5 * dpr;
+      g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.fillStyle = '#fff8e8'; g.shadowColor = 'rgba(0,0,0,0.7)'; g.shadowBlur = 3 * dpr;
+      g.fillText(tr(S.site.name), x, y - rr - 4 * dpr);
+      g.shadowBlur = 0;
+      if (Math.hypot(x - W / 2, y - H / 2) < rr) here = S;
     }
     // the visitor
-    g.save(); g.translate(W / 2, H / 2); g.rotate(-yaw);
-    const k = 8 * dpr;
-    g.fillStyle = '#ffcf6e'; g.strokeStyle = '#2f281f'; g.lineWidth = 1.5 * dpr;
-    g.beginPath(); g.moveTo(0, -k); g.lineTo(k * 0.62, k * 0.72); g.lineTo(0, k * 0.36); g.lineTo(-k * 0.62, k * 0.72); g.closePath(); g.fill(); g.stroke();
+    g.save(); g.translate(W / 2, H / 2); g.rotate(heading);
+    g.fillStyle = '#ffd36b'; g.strokeStyle = '#2a2116'; g.lineWidth = 1.5 * dpr;
+    g.beginPath(); g.moveTo(0, -9 * dpr); g.lineTo(6 * dpr, 7 * dpr); g.lineTo(0, 3.5 * dpr); g.lineTo(-6 * dpr, 7 * dpr); g.closePath(); g.fill(); g.stroke();
     g.restore();
-    const name = tr(regionAt(x, z).name);
-    if (this.label.textContent !== name) this.label.textContent = name;
+    this.label.textContent = here ? `${tr(here.site.name)} · ${here.site.era}` : '';
   }
 }

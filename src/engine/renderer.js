@@ -8,7 +8,8 @@ import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { smaa } from 'three/addons/tsl/display/SMAANode.js';
 import { CSMShadowNode } from 'three/addons/csm/CSMShadowNode.js';
-import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
+import { SkyMesh } from './sky.js';
+import { PLANET_RADIUS } from '../planet/sites.js';
 import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
 import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
@@ -128,6 +129,18 @@ export class Renderer {
     this.camera.aspect = w / h;
     this.camera.fov = w < h ? 78 : 68;
     this.camera.updateProjectionMatrix();
+  }
+
+  /**
+   * The camera's depth range for a height above the sea: from the eye to past the horizon (and
+   * the mountains beyond it), the near plane pushed out as the camera rises.
+   */
+  setRange(alt) {
+    const cam = this.camera, a = Math.max(0, alt);
+    const horizon = Math.sqrt((PLANET_RADIUS + a) ** 2 - PLANET_RADIUS ** 2) + Math.sqrt((PLANET_RADIUS + 240) ** 2 - PLANET_RADIUS ** 2);
+    const near = Math.min(4, Math.max(0.08, a * 0.002)), far = Math.max(4000, horizon * 1.05);
+    if (Math.abs(cam.near - near) > near * 0.1 || Math.abs(cam.far - far) > far * 0.05) { cam.near = near; cam.far = far; cam.updateProjectionMatrix(); }
+    this.sky.horizonDip.value = Math.acos(Math.min(1, PLANET_RADIUS / (PLANET_RADIUS + a)));
   }
 
   /** Keep the sun's shadow cascades and the sky centred on the viewer. */

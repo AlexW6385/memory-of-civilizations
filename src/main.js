@@ -4,11 +4,16 @@ import { Renderer } from './engine/renderer.js';
 import { World } from './engine/world.js';
 import { Controls } from './engine/controls.js';
 import { Music } from './engine/audio.js';
-import { Climate } from './engine/climate.js';
+import { Climate, sunPlanet, moonPlanet } from './engine/climate.js';
 import { Rain } from './engine/rain.js';
-import { MapView } from './ui/map.js';
+import { GlobeView } from './ui/globe.js';
 import { MiniMap } from './ui/minimap.js';
 import { initLang, setLang, t, onLang } from './ui/i18n.js';
+import { dirToLocal, toPlanet, latLon, norm, enuFrame, unit } from './planet/geo.js';
+import { climateAt } from './planet/land.js';
+import { PLANET_RADIUS, BLEND } from './planet/relief.js';
+import { REGION } from './world/regions.js';
+import { openClimate } from './planet/climates.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -16,9 +21,10 @@ const params = new URLSearchParams(location.search);
 // the default picture quality follows the machine: 'high' only on machines with many cores and
 // much memory (a laptop with 8 cores and 8 GB starts at 'medium'; the setting can be changed)
 const strong = (navigator.hardwareConcurrency || 4) >= 10 && (navigator.deviceMemory || 8) >= 8;
-const settings = load('mp.settings', { quality: strong ? 'high' : 'medium', music: 0.6, sensitivity: 1, timeRuns: true, hour: 16.5 });
+const settings = load('mp.settings', { quality: strong ? 'high' : 'medium', music: 0.6, sensitivity: 1, timeRuns: true, utc: 14 });
 if (params.get('quality')) settings.quality = params.get('quality');
 
+function sm(e0, e1, x) { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); }
 function load(k, d) { try { return { ...d, ...JSON.parse(localStorage.getItem(k) || '{}') }; } catch { return d; } }
 function save() { try { localStorage.setItem('mp.settings', JSON.stringify(settings)); } catch { /* ignore */ } }
 
@@ -93,56 +99,87 @@ async function main() {
   progress.set('start', 1);
   const climate = new Climate(R);
   // the time of day: it runs (days pass) or is held, from the hour the visitor last chose; the URL
-  // may hold it (?time=21.5), run it (?time=cycle) or set each region at its baked moment (?time=baked)
-  climate.hour = Number.isFinite(+settings.hour) ? +settings.hour : 16.5;
-  climate.setTime(settings.timeRuns ? 'cycle' : climate.hour);
+  // may hold it (?time=21.5, the hour where one arrives) or run it (?time=cycle)
+  climate.utc = Number.isFinite(+settings.utc) ? +settings.utc : 14;
+  climate.setTime(settings.timeRuns ? 'cycle' : 'held');
   const tq = params.get('time');
-  if (tq) { const h = parseFloat(tq); climate.setTime(Number.isFinite(h) ? h : tq === 'baked' ? 'baked' : 'cycle'); }
   const floraScale = { high: 1, medium: 0.7, low: 0.45 };
   world.flora.scale = floraScale[settings.quality] ?? 1;
   const controls = new Controls(R.camera, canvas, world.collide);
+  world.onCollide = (c) => { controls.collide = c; };
   controls.sensitivity = settings.sensitivity;
   const music = new Music();
   music.setVolume(settings.music);
+  let exposure = 0.55, snap = true, last = performance.now();
+  const stats = { frames: 0, ms: 0 };
+  const rain = new Rain(R.scene, R.camera);
 
-  // start at the first building's entrance, or at a pose given in the URL (x,y,z,yaw,pitch)
-  const first = [...world.plans.values()].find((p) => !p.plan.feature && p.id === 'edfu') || [...world.plans.values()].find((p) => !p.plan.feature);
-  // arriving somewhere: the buildings and the ground near it are made before the view is shown;
-  // the far land and plants keep coming in afterwards
-  // only what is close is waited for (the buildings within sight, the ground and the plants
-  // round the visitor's feet); everything further comes in while walking
-  const arrive = async (x, z, report = null) => {
-    world.unloadFar(x, z);                            // what is far from the new place is let go first
-    const near = [...world.plans.values()].filter((p) => World.distance(p.plan, x, z) < 220);
-    let built = 0;
-    const buildings = Promise.all(near.map((p) => world.loadBuilding(p.entry).then(() => { built++; report?.('build', built / near.length); })));
-    if (!near.length) report?.('build', 1);
+  // the planet position of the camera, for the ground's detail
+  const camPlanet = () => toPlanet(world.anchor.frame, R.camera.position.toArray());
+  // arriving somewhere: the settlement (if any), the ground and the plants round are made before
+  // the view is shown; everything further comes in while walking
+  const arrive = async (report = null) => {
+    const site = world.anchor.site;
+    const u = world.here(controls);
     await Promise.all([
-      buildings.then(() => mark('buildings')),
-      world.terrain.ready(x, z, (f) => report?.('land', f), 260).then(() => mark('land')),
-      world.flora.ready(x, z, (f) => report?.('plants', f), 140).then(() => mark('plants')),
+      (site ? site.load() : Promise.resolve()).then(() => { report?.('build', 1); mark('buildings'); }),
+      world.terrain.readyAt(camPlanet, (f) => report?.('land', f)).then(() => mark('land')),
     ]);
-    world.ensureNear(x, z);                           // the rest within range, in the background
-    climate.update(x, z, 0);
+    world.ensureNear(u);
+    world.update(R.camera, controls);
+    if (site) { const F = controls.feet; const L = [F.x, F.z]; await world.flora.ready(L[0], L[1], (f) => report?.('plants', f), 140); }
+    report?.('plants', 1); mark('plants');
   };
   const boot = (stage, f) => progress.set(stage, f);
+  // to a building's entrance: into its settlement's frame
   const goTo = async (rec, report) => {
+    const site = rec.site;
+    world.setAnchor(site.S.frame, site);
     const [x, y, z, yaw] = world.entrance(rec.plan);
-    await arrive(x, z, report);
+    controls.feet = { x, y, z }; controls.yaw = yaw; controls.pitch = 0.04;
+    world.tilt.identity();
+    await site.load();
+    controls.setPose(x, y, z, yaw, 0.04);
+    world.place(R.camera);
+    await arrive(report);
     controls.setPose(x, y, z, yaw, 0.04);
   };
+  // to any point of the planet (lat, lon): stand on the ground there, facing `yaw` from north
+  const goToPlace = async (lat, lon, report, yaw = 0) => {
+    world.setAnchor(enuFrame(unit(lat, lon), PLANET_RADIUS), null);
+    world.tilt.identity();
+    const g = world.collide.groundAt(0, 0, 1e4);
+    controls.setPose(0, Math.max(g, world.collide.waterLevel(0, 0)) + 0.05, 0, yaw, 0.02);
+    world.reanchor(controls);                   // into a settlement's frame if this is in its zone
+    controls.apply(); world.place(R.camera);
+    await arrive(report);
+  };
+  const first = world.plans.get(params.get('start') || 'edfu') || world.plans.get('edfu');
   if (params.get('pose')) {
-    const p = params.get('pose').split(',').map(Number);
-    await arrive(p[0], p[2], boot);
-    controls.setPose(p[0], p[1], p[2], p[3] || 0, p[4] || 0);
+    // ?pose=site,x,y,z,yaw,pitch (in the settlement's frame) or ?pose=lat,lon (on the planet)
+    const p = params.get('pose').split(',');
+    if (world.byId[p[0]]) {
+      const site = world.byId[p[0]], v = p.slice(1).map(Number);
+      world.setAnchor(site.S.frame, site);
+      await site.load();
+      controls.setPose(v[0], v[1], v[2], v[3] || 0, v[4] || 0);
+      world.place(R.camera);
+      await arrive(boot);
+      controls.setPose(v[0], v[1], v[2], v[3] || 0, v[4] || 0);
+    } else await goToPlace(+p[0], +p[1], boot, +(p[2] || 0));
   } else await goTo(first, boot);
+  if (tq) {
+    const h = parseFloat(tq);
+    climate.lonHours = latLon(world.here(controls))[1] / 15;
+    if (Number.isFinite(h)) { climate.hour = h; climate.setTime('held'); } else climate.setTime('cycle');
+  }
 
   progress.set('shaders', 0);
   progress.shaderT0 = performance.now();
-  world.update(R.camera.position);
+  frameOnce(0);
   await R.warmup();
   mark('shaders');
-  console.info('[memory palace] start (ms):', JSON.stringify(times));
+  console.info('[memory of civilizations] start (ms):', JSON.stringify(times));
   progress.set('shaders', 1);
   progress.finish();
 
@@ -180,27 +217,16 @@ async function main() {
     const report = (stage, v) => { f[stage] = v; toast(`${t('travelling')} ${Math.round((f.build * 0.45 + f.land * 0.35 + f.plants * 0.2) * 90)}%`); };
     try {
       await fn(report);
-      world.update(R.camera.position);
+      frameOnce(0);
       toast(`${t('travelling')} 95%`);
       await R.warmup();
       mark('shaders');
-      console.info('[memory palace] travel (ms):', JSON.stringify(times));
+      console.info('[memory of civilizations] travel (ms):', JSON.stringify(times));
     } finally {
       toast(''); fade.classList.remove('on'); setTimeout(() => { fade.hidden = true; }, 400);
     }
   };
-  const mapView = new MapView(world, (rec) => travel((report) => goTo(rec, report)), (x, z) => travel(async (report) => {
-    await arrive(x, z, report);
-    const y = world.collide.groundAt(x, z, world.collide.terrain(x, z) + 2);
-    // face the nearest building, so that one arrives looking at something
-    let yaw = controls.yaw, best = Infinity;
-    for (const rec of world.plans.values()) {
-      if (rec.plan.feature) continue;
-      const e = world.entrance(rec.plan), d = Math.hypot(e[0] - x, e[2] - z);
-      if (d < best && d < 900) { best = d; yaw = Math.atan2(-(e[0] - x), -(e[2] - z)); }
-    }
-    controls.setPose(x, y, z, yaw, 0.02);
-  }));
+  const mapView = new GlobeView(world, (rec) => travel((report) => goTo(rec, report)), (lat, lon) => travel((report) => goToPlace(lat, lon, report)));
 
   const closePanels = () => {
     mapPanel.hidden = true; setPanel.hidden = true;
@@ -211,7 +237,7 @@ async function main() {
     controls.enabled = false; controls.unlock();
     hint.hidden = true;
     p.hidden = false;
-    if (p === mapPanel) mapView.open({ x: controls.feet.x, z: controls.feet.z, yaw: controls.yaw });
+    if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
   const minimap = new MiniMap(world, mapView, () => { setPanel.hidden = true; openPanel(mapPanel); });
   $('btn-map').onclick = () => (mapPanel.hidden ? (setPanel.hidden = true, openPanel(mapPanel)) : closePanels());
@@ -221,8 +247,6 @@ async function main() {
     if (e.code === 'KeyM') mapPanel.hidden ? (setPanel.hidden = true, openPanel(mapPanel)) : closePanels();
     if (e.code === 'Escape' && panelsOpen()) closePanels();
   });
-  // the map's shaded relief is drawn while the visitor looks around, not when it is first opened
-  (window.requestIdleCallback || setTimeout)(() => mapView.relief(), { timeout: 4000 });
 
   // settings
   const q = $('set-quality'), mv = $('set-music'), sv = $('set-sens'), lang = $('set-lang');
@@ -244,15 +268,14 @@ async function main() {
   };
   clockHour.oninput = () => {
     climate.hour = +clockHour.value % 24;
-    if (climate.mode !== 'cycle') climate.setTime(climate.hour);
-    settings.hour = climate.hour; save(); paintClock();
+    settings.utc = climate.utc; save(); paintClock();
   };
   clockPlay.onclick = () => {
     const runs = climate.mode !== 'cycle';
-    climate.setTime(runs ? 'cycle' : climate.hour);
-    settings.timeRuns = runs; settings.hour = climate.hour; save(); paintClock();
+    climate.setTime(runs ? 'cycle' : 'held');
+    settings.timeRuns = runs; settings.utc = climate.utc; save(); paintClock();
   };
-  setInterval(() => { paintClock(); settings.hour = climate.hour; }, 1000);
+  setInterval(() => { paintClock(); settings.utc = climate.utc; }, 1000);
   setInterval(save, 15000);
   paintClock();
   // how the visitor is moving, under the clock: walking, running or flying, how fast, how high
@@ -266,8 +289,9 @@ async function main() {
     const kmh = Math.round(controls.speedNow * 3.6);
     speedKmh.textContent = String(kmh);
     const up = g === 'fly' ? Math.max(0, F.y - world.collide.groundAt(F.x, F.z, F.y + 0.01)) : 0;
+    void F;
     speedAlt.textContent = up >= 1 ? `${Math.round(up)} ${t('above-ground')}` : '';
-    speedBar.style.width = `${Math.min(100, kmh / 65 * 100)}%`;
+    speedBar.style.width = `${Math.min(100, Math.sqrt(kmh / 400) * 100)}%`;
     speedBar.classList.toggle('fly', g === 'fly');
   };
   setInterval(paintSpeed, 250);
@@ -277,42 +301,82 @@ async function main() {
   sv.oninput = () => { settings.sensitivity = +sv.value; controls.sensitivity = settings.sensitivity; save(); };
   lang.onchange = () => setLang(lang.value);
 
+  // the visitor's heading: the angle of the view from north, clockwise (for the maps)
+  const heading = () => {
+    const u = world.here(controls), f = world.anchor.frame;
+    const fwd = [-Math.sin(controls.yaw), 0, -Math.cos(controls.yaw)];
+    const fp = [0, 1, 2].map((i) => f.x[i] * fwd[0] + f.y[i] * fwd[1] + f.z[i] * fwd[2]);
+    const e = norm([u[2], 0, -u[0]]), n = [-u[1] * u[0] / Math.hypot(u[0], u[2] || 1e-9) || 0, Math.hypot(u[0], u[2]), -u[1] * u[2] / (Math.hypot(u[0], u[2]) || 1e-9)];
+    return Math.atan2(fp[0] * e[0] + fp[1] * e[1] + fp[2] * e[2], fp[0] * n[0] + fp[1] * n[1] + fp[2] * n[2]);
+  };
+
   // frame loop
-  let exposure = 0.55, snap = true;
-  let last = performance.now();
-  const frame = () => {
-    const now = performance.now(), dt = (now - last) / 1000;
-    last = now;
-    controls.update(dt);
-    const here = world.update(R.camera.position);
+  function frameOnce(dt) {
+    if (!controls.free) { world.reanchor(controls); controls.apply(); }
+    world.place(R.camera, !controls.free);
+    const here = world.update(R.camera, controls);
     const c = R.camera.position;
+    const u = world.here(controls), f = world.anchor.frame;
+    R.setRange(world.camAlt ?? 2);
     const outdoors = !here.room || here.room.kind === 'open';
     climate.indoors += ((outdoors ? 0 : 1) - climate.indoors) * Math.min(1, dt / 1.5);
-    const cl = climate.update(c.x, c.z, Math.min(dt, 0.25));
+    // the sky: the settlement's own in its zone, blended out into the open country's
+    climate.lonHours = latLon(u)[1] / 15;
+    const zones = [];
+    const near = world.nearestSite(u);
+    const open = openClimate(climateAt(u));
+    if (near) {
+      const w = 1 - sm(near.s.S.radius + BLEND * 0.5, near.s.S.radius + BLEND + 250, near.r);
+      zones.push({ zone: { id: near.s.id, climate: REGION[near.s.S.focus.region].climate }, w });
+      for (const z of open) zones.push({ zone: z.zone, w: z.w * (1 - w) });
+    } else zones.push(...open);
+    const cl = climate.update({ sun: dirToLocal(f, sunPlanet(climate.utc)), moon: dirToLocal(f, moonPlanet(climate.utc)), up: dirToLocal(f, u), zones }, Math.min(dt, 0.25));
     rain.update(dt, cl.rain, outdoors);
     music.ambience(cl.rain, cl.windy, !outdoors);
     // eye adaptation: open up in dark rooms (at most ~3 stops), close down outdoors
     const amb = R.gi.ambientAt(c.x, c.y, c.z);
-    // at night the eye opens further (dark-adapted), though the night stays dark
     const target = cl.exposure * (1 + 2.6 * (1 - cl.day)) * Math.min(8 + 6 * (1 - cl.day), Math.max(1, Math.pow(R.gi.openAmbient() / Math.max(amb, 1e-4), 0.55)));
     exposure = snap ? target : exposure + (target - exposure) * (1 - Math.exp(-dt / (target > exposure ? 1.6 : 0.6)));
     snap = false;
     R.renderer.toneMappingExposure = exposure;
     if (here.building) music.set(here.building.music, here.room?.kind || 'open');
-    minimap?.update(controls.feet.x, controls.feet.z, controls.yaw);
+    else music.set(null, 'open');
+    return here;
+  }
+  const frame = () => {
+    const now = performance.now(), dt = (now - last) / 1000;
+    last = now;
+    controls.update(dt);
+    frameOnce(dt);
+    minimap?.update(world.here(controls), heading());
     R.render();
     stats.frames++; stats.ms = stats.ms * 0.9 + (performance.now() - now) * 0.1;
   };
-  const stats = { frames: 0, ms: 0 };
-  const rain = new Rain(R.scene, R.camera);
   R.renderer.setAnimationLoop(frame);
 
-  // hooks for the screenshot and walk-through tools
+  // hooks for the screenshot and walk-through tools (poses in a settlement's frame, or on the planet)
   window.palace = {
-    pose: async (x, y, z, yaw = 0, pitch = 0) => { await arrive(x, z); controls.setPose(x, y, z, yaw, pitch); snap = true; },
+    pose: async (site, x, y, z, yaw = 0, pitch = 0) => {
+      const s = world.byId[site];
+      world.setAnchor(s.S.frame, s); world.tilt.identity();
+      await s.load(); controls.setPose(x, y, z, yaw, pitch); world.place(R.camera); await arrive(); controls.setPose(x, y, z, yaw, pitch); snap = true;
+    },
+    place: async (lat, lon, yaw = 0) => { await goToPlace(lat, lon, null, yaw); snap = true; },
     settle: () => { snap = true; },
-    camera: async (x, y, z, yaw = 0, pitch = 0) => {
-      await arrive(x, z); controls.free = true; R.camera.position.set(x, y, z); R.camera.rotation.set(pitch, yaw, 0, 'YXZ'); },
+    camera: async (site, x, y, z, yaw = 0, pitch = 0) => {
+      await window.palace.pose(site, x, Math.max(y, 0), z, yaw, pitch);
+      controls.free = true; R.camera.position.set(x, y, z); R.camera.rotation.set(pitch, yaw, 0, 'YXZ'); world.place(R.camera, false);
+      await world.terrain.readyAt(camPlanet);
+    },
+    fly: async (lat, lon, height, yaw = 0, pitch = -0.3) => {
+      await goToPlace(lat, lon, null, yaw);
+      controls.free = true;
+      const g = controls.feet.y;
+      R.camera.position.set(controls.feet.x, g + height, controls.feet.z); R.camera.rotation.set(pitch, yaw, 0, 'YXZ');
+      world.place(R.camera, false);
+      await world.terrain.readyAt(camPlanet);
+      snap = true;
+    },
     entrance: (id) => goTo(world.plans.get(id)),
     walk: async (keys, ms) => { controls.enabled = true; for (const k of keys) controls.keys.add(k); await new Promise((r) => setTimeout(r, ms)); controls.keys.clear(); },
     feet: () => ({ ...controls.feet }),

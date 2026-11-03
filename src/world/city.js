@@ -9,7 +9,7 @@
 // where it would touch a street, a building's site or a pond, or where the ground is too steep;
 // about one block in seven is a garden. Deterministic: the same lots every time.
 
-import { REGIONS, REGION, WORLD, SITES, ROADS, terrainHeight, nearRoad, inPond, regionAt, inCity } from './regions.js';
+import { REGIONS, REGION, WORLD, SITES, ROADS, terrainHeight, nearRoad, inPond, regionAt, inCity, getFocus } from './regions.js';
 import { inSite } from './flora-rules.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -19,9 +19,33 @@ function hash(i, j) { let h = (i * 374761393 + j * 668265263) >>> 0; h = ((h ^ (
 const BX = 40, BZ = 34, LANE = 5;
 
 let BLOCKS = null, NI = 0, NJ = 0;
+const TOWNS = new Map();
+
+/**
+ * The blocks of one settlement (while a focus is set, src/world/regions.js): the city's grid of
+ * blocks over the settlement's disc, every block wholly inside it built with the settlement's own
+ * houses. Keyed by the block's grid indices. Computed once per settlement.
+ */
+function town(F) {
+  const key = `${F.region}:${F.center}:${F.radius}`;
+  if (TOWNS.has(key)) return TOWNS.get(key);
+  const T = new Map();
+  TOWNS.set(key, T);
+  const [X0, Z0] = WORLD.bounds, [cx, cz] = F.center, R = F.radius - 10;
+  for (let i = Math.floor((cx - R - X0 - 6) / BX); X0 + 6 + i * BX < cx + R; i++) for (let j = Math.floor((cz - R - Z0 - 6) / BZ); Z0 + 6 + j * BZ < cz + R; j++) {
+    const bx = X0 + 6 + i * BX, bz = Z0 + 6 + j * BZ;
+    const rect = [bx, bz, bx + BX - LANE, bz + BZ - LANE];
+    if ([[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]].some(([x, z]) => Math.hypot(x - cx, z - cz) > R)) continue;
+    const seed = hash(i + 1000, j + 1000), garden = (seed % 7) === 0;
+    T.set(`${i},${j}`, { rect, region: F.region, garden, houses: garden ? [] : buildBlock(rect, F.region, rng(seed)) });
+  }
+  return T;
+}
 
 /** Every block of the city: { rect, region, garden, houses: [elements] } (computed once). */
 export function blocks() {
+  const F = getFocus();
+  if (F) return [...town(F).values()];
   if (BLOCKS) return BLOCKS;
   BLOCKS = [];
   const [X0, Z0, X1, Z1] = WORLD.bounds;
@@ -125,6 +149,11 @@ function house(type, r, lo, hi, front, rand) {
 export function blockAt(x, z) {
   const [X0, Z0] = WORLD.bounds;
   const i = Math.floor((x - X0 - 6) / BX), j = Math.floor((z - Z0 - 6) / BZ);
+  const F = getFocus();
+  if (F) {
+    const b = town(F).get(`${i},${j}`);
+    return b && x >= b.rect[0] && x <= b.rect[2] && z >= b.rect[1] && z <= b.rect[3] ? b : null;
+  }
   const B = blocks();
   if (i < 0 || j < 0 || i >= NI || j >= NJ) return null;
   const b = B[i * NJ + j];

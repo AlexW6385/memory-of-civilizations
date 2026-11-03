@@ -1,11 +1,19 @@
-// Climate, weather and the time of day. The city has one sky (CITY in regions.js): days pass (a
-// day lasts DAY_SECONDS), the sun follows its course, sets, and the full moon and the stars come
-// out; or an hour is held; or `baked`: each district under the sky of the moment its building's
-// light was baked. The weather walks slowly through the city's states. Drives the sun and moon light, the sky, the fog, cloud
-// shadows, rain and wetness, the strength of the baked light, and gives the base exposure.
+// Climate, weather and the time of day on the planet (DESIGN §4.3). One sun: it stands over the
+// planet's equator (a fixed date, the equinox) at the longitude where it is noon, and moves west as
+// the day passes (a day lasts DAY_SECONDS) — so it is high at Sanchi and low at Paris, evening in
+// Uji while morning in Athens. The full moon stands opposite. The time is kept as the hour at the
+// prime meridian; the clock shows (and sets) the hour where the visitor is. The sky, haze and
+// weather are each settlement's own (its region's climate), blended out over its zone into the
+// open country's. Drives the sun and moon light, the sky, the fog, cloud shadows, rain and
+// wetness, the strength of the baked light, and gives the base exposure.
 
-import { CITY, regionAt, sunDirection, sunAt, skyRadiance } from '../world/regions.js';
+import { CITY, sunDirection, skyRadiance } from '../world/regions.js';
 import { ENV } from './env.js';
+import { unit } from '../planet/geo.js';
+
+/** Direction toward the sun in planet coordinates at an hour of the prime meridian (and the moon's). */
+export function sunPlanet(utc) { return unit(0, (12 - utc) * 15); }
+export function moonPlanet(utc) { return unit(-4, (24 - utc) * 15); }
 
 const params = new URLSearchParams(location.search);
 const FORCE = params.get('weather');            // e.g. ?weather=shower (screenshots, tests)
@@ -55,13 +63,23 @@ export class Climate {
   constructor(renderer) {
     this.R = renderer;
     this.indoors = 0;              // 0 outdoors … 1 under a roof (set by the frame loop)
-    this.weather = new RegionWeather(CITY, 7919 + (Date.now() / 3.6e6 | 0));
+    this.weathers = new Map();
     this.hemis = new Map();
     this.state = null;
     this.wet = 0;
-    // the time: 'cycle' (days pass), 'baked' (each district's baked moment) or an hour held fixed
+    // the time: 'cycle' (days pass) or an hour held fixed; kept as the hour at the prime meridian
     this.mode = 'cycle';
-    this.hour = 16.5;
+    this.utc = 12;
+    this.lonHours = 0;               // the visitor's longitude, in hours (set by the frame loop)
+  }
+
+  /** The hour where the visitor is (local solar time). */
+  get hour() { return ((this.utc + this.lonHours) % 24 + 24) % 24; }
+  set hour(h) { this.utc = ((h - this.lonHours) % 24 + 24) % 24; }
+
+  weatherOf(zone) {
+    if (!this.weathers.has(zone.id)) this.weathers.set(zone.id, new RegionWeather(zone, 7919 + zone.id.length * 131 + (Date.now() / 3.6e6 | 0)));
+    return this.weathers.get(zone.id);
   }
 
   /** Set how time runs: 'cycle', 'baked', or a number (an hour held). */
@@ -71,31 +89,34 @@ export class Climate {
     else if (hour !== undefined) this.hour = hour;
   }
 
-  /** The sky at (x, z) now: the city's, or (baked) the district's. Applies it and returns the state. */
-  update(x, z, dt) {
-    this.weather.update(dt);
-    if (this.mode === 'cycle') this.hour = (this.hour + dt * 24 / DAY_SECONDS) % 24;
-    const zone = this.mode === 'baked' ? regionAt(x, z) : CITY;
-    if (!this.hemis.has(zone.id)) this.hemis.set(zone.id, hemisphere(zone.climate));
-    const hemi = this.hemis.get(zone.id);
+  /**
+   * The sky now, for ctx = { sun, moon (directions in the scene), up (the true up in the scene),
+   * zones: [{ zone (an id and a climate), w }] (weights summing to 1) }. Applies it and returns the state.
+   */
+  update(ctx, dt) {
+    if (this.mode === 'cycle') this.utc = (this.utc + dt * 24 / DAY_SECONDS) % 24;
     const acc = { sun: [0, 0, 0], sunColor: [0, 0, 0], zen: [0, 0, 0], hor: [0, 0, 0], fogColor: [0, 0, 0], fog: 0, falloff: 0, clouds: 0, density: 0,
       turb: 0, ray: 0, mie: 0, mieG: 0, exposure: 0, wind: [0, 0], rain: 0, sunFactor: 0, sky: [0, 0, 0], ground: [0, 0, 0], windy: 0,
       day: 0, moon: [0, 0, 0], moonLight: 0, sunEl: 0 };
-    {
-      const w = 1;
-      const c = zone.climate, wx = this.weather.get();
-      // the sun at this hour; its light reddens and fades as it sinks, and is gone below the horizon
-      const baked = this.mode === 'baked';
-      const S = baked ? { dir: sunDirection(c), el: c.sun.el } : sunAt(c, this.hour);
-      const el = S.el, s = S.dir;
-      const day = smooth(-10, 8, el);                       // daylight in the sky (twilight included)
-      const low = smooth(0, 25, el), up = smooth(-2, 6, el) * (0.55 + 0.45 * smooth(0, 20, el));
+    const up = ctx.up || [0, 1, 0];
+    const el = Math.asin(Math.max(-1, Math.min(1, ctx.sun[0] * up[0] + ctx.sun[1] * up[1] + ctx.sun[2] * up[2]))) * 180 / Math.PI;
+    const moonEl = Math.asin(Math.max(-1, Math.min(1, ctx.moon[0] * up[0] + ctx.moon[1] * up[1] + ctx.moon[2] * up[2]))) * 180 / Math.PI;
+    const ids = [];
+    for (const { zone, w } of ctx.zones) {
+      if (w < 1e-4) continue;
+      const W = this.weatherOf(zone);
+      W.update(dt);
+      if (!this.hemis.has(zone.id)) this.hemis.set(zone.id, hemisphere(zone.climate));
+      const hemi = this.hemis.get(zone.id);
+      const c = zone.climate, wx = W.get();
+      ids.push(wx.id);
+      // the sun's light reddens and fades as it sinks, and is gone below the horizon
+      const day = smooth(-10, 8, el);
+      const low = smooth(0, 25, el), upF = smooth(-2, 6, el) * (0.55 + 0.45 * smooth(0, 20, el));
       const sunCol = [1.0, 0.52, 0.28].map((v, k) => lerp(v, c.sun.color[k], low));
-      const Mo = sunAt(c, this.hour, true), moonUp = baked ? 0 : smooth(-2, 10, Mo.el) * (1 - smooth(-6, 2, el));
+      const moonUp = smooth(-2, 10, moonEl) * (1 - smooth(-6, 2, el));
       for (let k = 0; k < 3; k++) {
-        acc.sun[k] += w * s[k];
-        acc.moon[k] += w * Mo.dir[k];
-        acc.sunColor[k] += w * sunCol[k] * c.sun.intensity * up * wx.sun;
+        acc.sunColor[k] += w * sunCol[k] * c.sun.intensity * upF * wx.sun;
         acc.zen[k] += w * lerp(0.004 + k * 0.002, c.sky.zenith[k] * lerp(1, 0.8, wx.clouds), day);
         acc.hor[k] += w * lerp(0.006 + k * 0.003, lerp(c.sky.horizon[k], 0.3, wx.clouds * 0.6), day);
         acc.fogColor[k] += w * wx.fogColor[k] * (0.06 + 0.94 * day) * (k === 2 ? 1 : 0.85 + 0.15 * day);
@@ -110,15 +131,13 @@ export class Climate {
       acc.exposure += w * c.exposure; acc.wind[0] += w * c.wind[0] * (1 + 2 * wx.windy); acc.wind[1] += w * c.wind[1] * (1 + 2 * wx.windy);
       acc.rain += w * wx.rain; acc.sunFactor += w * wx.sun; acc.windy += w * wx.windy;
     }
-    const l = Math.hypot(...acc.sun) || 1;
-    acc.sun = acc.sun.map((v) => v / l);
-    const lm = Math.hypot(...acc.moon) || 1;
-    acc.moon = acc.moon.map((v) => v / lm);
+    acc.sun = ctx.sun.slice();
+    acc.moon = ctx.moon.slice();
     // wetness: soaks in under rain within a minute, dries over several
     this.wet += (acc.rain > 0.3 ? (1 - this.wet) * dt / 50 : -this.wet * dt / 400);
     this.wet = Math.min(1, Math.max(0, this.wet));
     this.apply(acc, dt);
-    this.state = { ...acc, wet: this.wet, ids: [this.weather.get().id], zone: zone.id };
+    this.state = { ...acc, wet: this.wet, ids, zone: ctx.zones[0]?.zone.id };
     return this.state;
   }
 

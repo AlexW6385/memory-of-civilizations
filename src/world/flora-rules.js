@@ -4,7 +4,7 @@
 // the districts' hills and by the ponds; between the houses of a built block only grass grows.
 // The reasoning for each district's planting is in its building's dossier (§10) and docs/world.md.
 
-import { REGIONS, regionWeights, pondDistance, SITES, fbm, nearRoad } from './regions.js';
+import { REGIONS, regionWeights, pondDistance, SITES, fbm, nearRoad, getFocus } from './regions.js';
 import { inQuarter, inGarden, inSquare } from './city.js';
 
 const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -13,8 +13,8 @@ const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1
 export function fromWater(x, z) { const d = pondDistance(x, z).d; return Number.isFinite(d) ? d : 999; }
 
 /** Inside a building's levelled site (no planting there, except what the plan places). */
-const PADS = Object.values(SITES).map((s) => { const [x0, z0, x1, z1] = s.pad || [0, 0, 0, 0]; return [s.origin[0] + x0 - 4, s.origin[1] + z0 - 4, s.origin[0] + x1 + 4, s.origin[1] + z1 + 4]; });
-export function inSite(x, z) { return PADS.some((r) => x > r[0] && x < r[2] && z > r[1] && z < r[3]); }
+const PADS = Object.values(SITES).map((s) => { const [x0, z0, x1, z1] = s.pad || [0, 0, 0, 0]; const r = [s.origin[0] + x0 - 4, s.origin[1] + z0 - 4, s.origin[0] + x1 + 4, s.origin[1] + z1 + 4]; r.region = s.region; return r; });
+export function inSite(x, z) { const F = getFocus(); return PADS.some((r) => (!F || r.region === F.region) && x > r[0] && x < r[2] && z > r[1] && z < r[3]); }
 
 /** Keep-clear corridors (processional ways) registered by features. */
 const CLEAR = [];

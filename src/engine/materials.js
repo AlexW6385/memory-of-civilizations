@@ -1,11 +1,12 @@
-// Procedural PBR materials (TSL). Masonry is generated from world position so that courses
-// and joints line up with the real block sizes recorded in each dossier (a tiling photo
-// texture cannot follow a wall's coursing). Average colours come from src/core/palette.js,
+// Procedural PBR materials (TSL). Masonry is generated from the position in the settlement's own
+// coordinates (positionLocal: a settlement's meshes are built in its coordinates, the settlement's
+// group places them on the planet) so that courses and joints line up with the real block sizes
+// recorded in each dossier (a tiling photo texture cannot follow a wall's coursing). Average colours come from src/core/palette.js,
 // which the light baker shares.
 
 import { MeshStandardNodeMaterial, DoubleSide, Color } from 'three/webgpu';
 import {
-  Fn, float, vec2, vec3, vec4, positionWorld, normalWorld, normalView, positionView, abs, floor, fract, min, max,
+  Fn, float, vec2, vec3, vec4, positionWorld, positionLocal, normalWorld, normalLocal, normalView, positionView, abs, floor, fract, min, max,
   mix, smoothstep, hash, mx_noise_float, mx_fractal_noise_float, mx_worley_noise_float, dot, cross, normalize,
   sign, select, time, sin, clamp, length, cameraPosition, uniform, attribute, reflect, pow, fwidth,
 } from 'three/tsl';
@@ -48,11 +49,11 @@ const detailFade = () => clamp(float(1).sub(length(positionWorld.sub(cameraPosit
 
 /** Planar coordinates for a wall-like surface: u along the wall, v up; horizontal faces use x/z. */
 const wallUV = () => {
-  const n = abs(normalWorld);
+  const n = abs(normalLocal);
   const isTop = n.y.greaterThan(0.7);
   const alongX = n.z.greaterThan(n.x);
-  const u = select(alongX, positionWorld.x, positionWorld.z);
-  return { u: select(isTop, positionWorld.x, u), v: select(isTop, positionWorld.z, positionWorld.y), isTop };
+  const u = select(alongX, positionLocal.x, positionLocal.z);
+  return { u: select(isTop, positionLocal.x, u), v: select(isTop, positionLocal.z, positionLocal.y), isTop };
 };
 
 /** Ashlar / paving / drums / brick pattern: returns { id (block hash), joint (0..1), edge } */
@@ -105,7 +106,7 @@ function make(spec) {
   m.roughness = spec.roughness ?? 0.8;
   if (spec.side === 'double') { m.side = DoubleSide; m.shadowSide = DoubleSide; }
   m.metalness = spec.metalness ?? 0;
-  const P = positionWorld;
+  const P = positionLocal;
 
   switch (spec.kind) {
     case 'ashlar':
@@ -260,7 +261,7 @@ function make(spec) {
     }
     case 'tiles': {
       // roof of curved tiles (imbrex and tegula): channels down the slope, courses across it
-      const n = normalWorld;
+      const n = normalLocal;
       const alongX = abs(n.x).lessThan(abs(n.z));
       const u = select(alongX, P.x, P.z);
       const ph = u.mul(Math.PI * 2 / 0.42);
@@ -366,7 +367,7 @@ function make(spec) {
     }
     case 'rock': {
       const n = mx_fractal_noise_float(P.mul(1.2), 4, 2.0, 0.5), f = mx_noise_float(P.mul(9.0)).mul(detailFade());
-      const lichen = smoothstep(0.25, 0.5, mx_noise_float(P.mul(0.8).add(3))).mul(smoothstep(0.3, 0.9, normalWorld.y));
+      const lichen = smoothstep(0.25, 0.5, mx_noise_float(P.mul(0.8).add(3))).mul(smoothstep(0.3, 0.9, normalLocal.y));
       m.colorNode = mix(baseNode.mul(n.mul(0.25).add(1)), vec3(0.42, 0.42, 0.33), lichen.mul(0.35)).mul(f.mul(0.08).add(1));
       m.normalNode = bump(n.mul(0.05).add(f.mul(0.004)), 1);
       break;
@@ -418,7 +419,7 @@ function make(spec) {
       let col3 = sand.mul(g.x).add(grass.mul(g.y)).add(rock.mul(g.z)).add(soil.mul(g.w)).add(fieldCol.mul(g2.x)).div(wsum);
       col3 = col3.mul(fine.mul(0.06).add(1));
       // rain: darker and glossier where the ground faces the sky; puddles in the low spots
-      const flat = smoothstep(0.75, 0.95, normalWorld.y);
+      const flat = smoothstep(0.75, 0.95, normalLocal.y);
       const puddle = smoothstep(0.55, 0.75, mx_fractal_noise_float(P.mul(0.12), 2, 2.0, 0.5).mul(-1).add(0.5)).mul(ENV.wet).mul(flat).mul(float(1).sub(g.z));
       const wet = ENV.wet.mul(flat.mul(0.6).add(0.4));
       m.colorNode = col3.mul(float(1).sub(wet.mul(0.38))).mul(float(1).sub(puddle.mul(0.5)));
@@ -436,7 +437,7 @@ function make(spec) {
       const w2 = mx_noise_float(vec3(P.x.mul(0.9), P.z.mul(0.7).add(flow.y.mul(2.0)), t.mul(0.4)));
       const w3 = mx_noise_float(vec3(P.x.mul(3.1), P.z.mul(2.6).add(flow.y.mul(4.0)), t)).mul(detailFade());
       const nrm = normalize(vec3(w1.mul(0.06).add(w2.mul(0.04)).add(w3.mul(0.03)), 1, w1.mul(0.05).add(w2.mul(0.035)).add(w3.mul(0.03))));
-      const v = normalize(P.sub(cameraPosition));
+      const v = normalize(positionWorld.sub(cameraPosition));
       const r = reflect(v, nrm);
       const fres = float(0.02).add(float(0.98).mul(pow(float(1).sub(max(dot(nrm, v.negate()), 0)), 5)));
       const skyCol = mix(ENV.horizon, ENV.zenith, pow(clamp(r.y, 0, 1), 0.5)).mul(4.5);

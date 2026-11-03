@@ -1,120 +1,101 @@
-// The world: open ground, the river, and the buildings, loaded on demand by distance.
-// Layout and reasoning: docs/world.md.
+// The world: the planet's ground and sea, the settlements on it (loaded when near), and the frame
+// in which the scene is drawn. DESIGN §4, docs/world.md.
+//
+// The scene is always drawn in a local frame round the visitor (an "anchor"): +y the local up.
+// In or near a settlement the anchor is that settlement's own frame — its coordinates are those its
+// plans, collision, baked light and plants are made in (for the ten settlements of the previous
+// design, the old city's coordinates), and everything of it works unchanged. In the open country
+// the anchor follows the visitor, re-centred under the feet every frame. Between the two, over the
+// settlement's blend, the view is turned little by little from the settlement's up to the true up
+// of the place, so that the switch from one frame to the other cannot be seen.
 
 import * as THREE from 'three/webgpu';
 import { BUILDINGS } from '../buildings/index.js';
-import { FEATURES } from '../world/features/index.js';
-import { buildPlanAsync, toWorld, subtractRects } from '../core/build.js';
-import { Terrain } from './terrain.js';
-import { Flora } from './flora/index.js';
-import { WORLD, terrainHeight, inWater, waterLevel, cityEdges } from '../world/regions.js';
+import { buildPlanAsync, toWorld } from '../core/build.js';
 import { CollisionWorld } from '../core/collide.js';
-import { GeoBag, frustum, fromTriangles, quad } from '../core/geom.js';
+import { Flora } from './flora/index.js';
 import { material, flameMaterial } from './materials.js';
+import { ENV } from './env.js';
+import { loadLand } from '../planet/land.js';
+import { BUILT, BUILT_BY_ID, initRelief, surface, groundInFrame, seaInFrame, PLANET_RADIUS as R, BLEND } from '../planet/relief.js';
+import { PlanetTerrain } from '../planet/terrain.js';
+import { toPlanet, toLocal, dirToPlanet, dirToLocal, transportFrame, enuFrame, norm, dot, unit } from '../planet/geo.js';
+import { withFocus, terrainHeight, inWater as legacyWater, waterLevel as legacyWaterLevel } from '../world/regions.js';
 
-export { WORLD };
+/** A settlement is built when the visitor comes within LOAD of its rim and let go beyond UNLOAD. */
+export const LOAD = 700, UNLOAD = 1300;
+const sm = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
-/** Buildings closer than this (m, to their bounds) are built and lit; those further than
- *  UNLOAD_RADIUS are taken down again, so that memory does not grow as the visitor travels. */
-export const LOAD_RADIUS = 650;
-export const UNLOAD_RADIUS = 1100;
-/** How many triangles of buildings left behind are kept ready for going back. */
-export const CACHE_TRIANGLES = 1_500_000;
+/** Matrix taking planet coordinates to a frame's local ones. */
+function sceneFromPlanet(f, m = new THREE.Matrix4()) {
+  const { x, y, z, o } = f;
+  return m.set(
+    x[0], x[1], x[2], -(x[0] * o[0] + x[1] * o[1] + x[2] * o[2]),
+    y[0], y[1], y[2], -(y[0] * o[0] + y[1] * o[1] + y[2] * o[2]),
+    z[0], z[1], z[2], -(z[0] * o[0] + z[1] * o[1] + z[2] * o[2]),
+    0, 0, 0, 1);
+}
+/** Matrix taking a frame's local coordinates to planet ones. */
+function planetFromFrame(f, m = new THREE.Matrix4()) {
+  const { x, y, z, o } = f;
+  return m.set(x[0], y[0], z[0], o[0], x[1], y[1], z[1], o[1], x[2], y[2], z[2], o[2], 0, 0, 0, 1);
+}
 
-export class World {
-  constructor(renderer) {
-    this.r = renderer;
-    this.scene = renderer.scene;
-    this.collide = new CollisionWorld();
-    this.collide.terrain = terrainHeight;
-    this.collide.water = inWater;
-    this.collide.waterLevel = waterLevel;
-    this.plans = new Map();           // id → { id, entry, plan, music }: every building, small
-    this.buildings = new Map();       // id → { plan, music, group, built, gi }: those built so far
-    this.loading = new Map();
-    this.cache = new Map();           // id → rec: buildings left behind, kept ready (oldest first)
+/** Where u stands relative to a settlement: { r (m from the disc's centre, on its plane), x, z (local), uy }. */
+function relTo(S, u) {
+  const uy = dot(S.enu.y, u);
+  if (uy <= 0.5) return { r: Infinity };
+  const k = (R + S.base) / uy, x = dot(S.enu.x, u) * k, z = dot(S.enu.z, u) * k;
+  return { r: Math.hypot(x, z), x, z, uy };
+}
+
+/** One settlement in the viewer: its group, its collision world, its buildings and houses. */
+class Settlement {
+  constructor(S, world) {
+    this.S = S; this.world = world;
+    this.id = S.id;
+    this.group = new THREE.Group();
+    this.group.name = 'settlement:' + S.id;
+    this.group.matrixAutoUpdate = false;
+    this.parts = [];                       // { id, plan, music, group, built, gi }
+    this.state = 'idle';
+    const C = this.collide = new CollisionWorld();
+    const [cx, cz] = S.focus.center;
+    // the ground: the settlement's own on its disc, the planet's beyond (in the settlement's frame)
+    C.terrain = (x, z) => (Math.hypot(x - cx, z - cz) < S.radius ? withFocus(S.focus, () => terrainHeight(x, z)) : groundInFrame(S.frame, x, z));
+    C.water = (x, z, y) => (Math.hypot(x - cx, z - cz) < S.radius ? withFocus(S.focus, () => legacyWater(x, z, y)) : (groundInFrame(S.frame, x, z) < seaInFrame(S.frame, x, z) - 0.3 && y < seaInFrame(S.frame, x, z) + 0.3));
+    C.waterLevel = (x, z) => (Math.hypot(x - cx, z - cz) < S.radius ? withFocus(S.focus, () => legacyWaterLevel(x, z)) : (groundInFrame(S.frame, x, z) < seaInFrame(S.frame, x, z) ? seaInFrame(S.frame, x, z) : -Infinity));
   }
 
-  /** Load every building's plan (small modules); geometry and light are built on demand. A
-   *  feature (a town, a bridge) gives only its bounds here: its plan is made when it is wanted. */
-  async init() {
-    this.addLand();
-    for (const entry of FEATURES) this.plans.set(entry.id, { id: entry.id, entry, plan: { id: entry.id, feature: true, origin: [0, 0], yaw: 0, base: 0, bounds: entry.bounds, rooms: [] } });
-    await Promise.all(BUILDINGS.map(async (entry) => {
-      const mod = await entry.load();
-      this.plans.set(entry.id, { id: entry.id, entry, plan: mod.plan, music: mod.music });
-    }));
+  /** The building entries and the quarter of houses that make up this settlement. */
+  entries() {
+    const region = this.S.focus.region;
+    return BUILDINGS.filter((b) => b.district === region);
   }
 
-  /** Distance from (x, z) to a plan's bounds. */
-  static distance(plan, x, z) {
-    const [x0, z0, x1, z1] = World.worldBounds(plan);
-    return Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(z0 - z, 0, z - z1));
+  load() {
+    if (this.loading) return this.loading;
+    this.state = 'loading';
+    this.world.scene.add(this.group);
+    this.loading = (async () => {
+      const S = this.S;
+      for (const entry of this.entries()) {
+        const mod = await entry.load();
+        await this.addPart(entry.id, mod.plan, mod.music);
+      }
+      // the houses of the settlement, of its own time (src/world/city.js), on its disc
+      await import('../styles/vernacular/index.js');
+      const city = await import('../world/city.js');
+      const plan = withFocus(S.focus, () => city.plan(S.focus.region));
+      plan.id = `${S.id}-town`;
+      await this.addPart(plan.id, plan, null);
+      this.state = 'ready';
+      return this;
+    })();
+    return this.loading;
   }
 
-  /**
-   * Take down the buildings far from (x, z): out of the scene and the colliders. The most recently
-   * left are kept ready (up to CACHE_TRIANGLES in all), so that going back is immediate; older
-   * ones are freed.
-   */
-  unloadFar(x, z, radius = UNLOAD_RADIUS) {
-    for (const [id, rec] of this.buildings) {
-      if (World.distance(rec.plan, x, z) < radius) continue;
-      this.scene.remove(rec.group);
-      this.collide.remove(rec.built.colliders);
-      this.buildings.delete(id);
-      this.loading.delete(id);
-      this.cache.delete(id);
-      this.cache.set(id, rec);                       // most recent last
-    }
-    let total = 0;
-    for (const rec of this.cache.values()) total += rec.triangles;
-    for (const [id, rec] of this.cache) {
-      if (total <= CACHE_TRIANGLES) break;
-      rec.group.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
-      this.cache.delete(id);
-      total -= rec.triangles;
-    }
-  }
-
-  /** Build every building within `radius` of (x, z); resolves when they are in the scene. */
-  async ensureNear(x, z, radius = LOAD_RADIUS) {
-    const wanted = [...this.plans.values()].filter((p) => World.distance(p.plan, x, z) < radius);
-    await Promise.all(wanted.map((p) => this.loadBuilding(p.entry)));
-  }
-
-  addLand() {
-    this.terrain = new Terrain(this.scene);
-    this.flora = new Flora(this.scene);
-    // the edge of the walkable city: a thin wall along every side of it that faces the land outside
-    const e = 2;
-    this.collide.add({
-      floors: [],
-      obstacles: cityEdges().map(([a, b]) => {
-        const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz), nx = dz / L * e, nz = -dx / L * e;
-        return { poly: [a, b, [b[0] + nx, b[1] + nz], [a[0] + nx, a[1] + nz]], y0: -50, y1: 400 };
-      }),
-    });
-  }
-
-  loadBuilding(entry) {
-    if (this.buildings.has(entry.id)) return Promise.resolve(this.buildings.get(entry.id));
-    if (!this.loading.has(entry.id)) this.loading.set(entry.id, this._load(entry));
-    return this.loading.get(entry.id);
-  }
-
-  async _load(entry) {
-    // left a moment ago and still kept: put it back
-    const kept = this.cache.get(entry.id);
-    if (kept) {
-      this.cache.delete(entry.id);
-      this.scene.add(kept.group);
-      this.collide.add(kept.built.colliders);
-      this.buildings.set(entry.id, kept);
-      return kept;
-    }
-    const mod = await entry.load();
-    const plan = mod.plan;
+  async addPart(id, plan, music) {
     const built = await buildPlanAsync(plan);
     const group = new THREE.Group();
     group.name = plan.id;
@@ -125,7 +106,6 @@ export class World {
       m.name = `${plan.id}:${mat}`;
       group.add(m);
     }
-    // oil lamp flames (their light is baked into the irradiance volume)
     if (built.lights.length) {
       const flame = new THREE.ConeGeometry(0.035, 0.13, 8);
       const inst = new THREE.InstancedMesh(flame, flameMaterial(), built.lights.length);
@@ -133,32 +113,168 @@ export class World {
       built.lights.forEach((l, i) => inst.setMatrixAt(i, m4.makeTranslation(l.at[0], l.at[1] + 0.02, l.at[2])));
       group.add(inst);
     }
-    this.scene.add(group);
+    this.group.add(group);
     this.collide.add(built.colliders);
-    let triangles = 0;
-    for (const p of built.parts) triangles += p.geometry.attributes.position.count / 3;
-    const rec = { id: plan.id, plan, music: mod.music, group, built, triangles };
-    this.buildings.set(plan.id, rec);
-    if (plan.feature) this.plans.get(entry.id).plan = plan;
-    // baked light for this building, if it has been baked
-    if (!plan.feature) try { rec.gi = await this.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
+    const rec = { id, plan, music, group, built, settlement: this };
+    if (!plan.feature) try { rec.gi = await this.world.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
+    this.parts.push(rec);
     return rec;
   }
 
-  /** Bounds of a building in world coordinates [x0, z0, x1, z1]. */
-  static worldBounds(plan) {
-    const a = toWorld(plan, plan.bounds[0], plan.bounds[1]), b = toWorld(plan, plan.bounds[2], plan.bounds[3]);
-    return [Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])];
+  unload() {
+    if (this.state === 'idle') return;
+    this.world.scene.remove(this.group);
+    this.group.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
+    this.group.clear();
+    this.parts = [];
+    this.collide = Object.assign(new CollisionWorld(), { terrain: this.collide.terrain, water: this.collide.water, waterLevel: this.collide.waterLevel });
+    this.loading = null;
+    this.state = 'idle';
+  }
+}
+
+export class World {
+  constructor(renderer) {
+    this.r = renderer;
+    this.scene = renderer.scene;
+    this.plans = new Map();               // building id → { id, entry, plan, music, site }
+    this.anchor = null;                   // { frame, site (a Settlement or null) }
+    this.tilt = new THREE.Quaternion();
+    this._m = new THREE.Matrix4();
+    this._m2 = new THREE.Matrix4();
   }
 
-  /** The building nearest to (x, z) and the room the point is in, if any. */
+  async init() {
+    const land = await loadLand('data/planet/land.bin');
+    initRelief();
+    this.planet = new THREE.Group();
+    this.planet.name = 'planet';
+    this.planet.matrixAutoUpdate = false;
+    this.scene.add(this.planet);
+    this.terrain = new PlanetTerrain(this.planet, land);
+    this.settlements = BUILT.map((S) => new Settlement(S, this));
+    this.byId = Object.fromEntries(this.settlements.map((s) => [s.id, s]));
+    // the plants of the settlement the visitor is in (src/engine/flora), drawn in its frame
+    this.legacy = new THREE.Group();
+    this.legacy.name = 'flora-frame';
+    this.legacy.matrixAutoUpdate = false;
+    this.scene.add(this.legacy);
+    this.flora = new Flora(this.legacy);
+    // the open country's collision: the planet's ground and the sea in the current frame
+    this.open = new CollisionWorld();
+    this.open.terrain = (x, z) => groundInFrame(this.anchor.frame, x, z);
+    this.open.water = (x, z, y) => { const s = seaInFrame(this.anchor.frame, x, z); return groundInFrame(this.anchor.frame, x, z) < s - 0.3 && y < s + 0.3; };
+    this.open.waterLevel = (x, z) => { const s = seaInFrame(this.anchor.frame, x, z); return groundInFrame(this.anchor.frame, x, z) < s ? s : -Infinity; };
+    // every building's plan (small modules), to know where its entrance is
+    await Promise.all(BUILDINGS.map(async (entry) => {
+      const mod = await entry.load();
+      const site = this.settlements.find((s) => s.S.focus.region === entry.district);
+      this.plans.set(entry.id, { id: entry.id, entry, plan: mod.plan, music: mod.music, site });
+    }));
+    this.setAnchor(this.byId.edfu.S.frame, this.byId.edfu);
+  }
+
+  /** The collision world in force (the settlement's in its frame, the open country's elsewhere). */
+  get collide() { return this.anchor?.site ? this.anchor.site.collide : this.open; }
+
+  setAnchor(frame, site) {
+    this.anchor = { frame, site };
+    const f = frame;
+    ENV.planetO.value.set(f.o[0], f.o[1], f.o[2]);
+    ENV.planetM.value.set(f.x[0], f.y[0], f.z[0], f.x[1], f.y[1], f.z[1], f.x[2], f.y[2], f.z[2]);
+    this.r.gi.clear?.();
+    this.onCollide?.(this.collide);
+  }
+
+  /** Planet coordinates of a scene point (and back). */
+  toPlanet(p) { return toPlanet(this.anchor.frame, p); }
+  toScene(P) { return toLocal(this.anchor.frame, P); }
+
+  /** The settlement whose zone (disc and blend) a planet direction is in: { s, r } or null. */
+  zoneOf(u) {
+    for (const s of this.settlements) {
+      const q = relTo(s.S, u);
+      if (q.r < s.S.radius + BLEND) return { s, r: q.r };
+    }
+    return null;
+  }
+
+  /** The nearest settlement within `reach` metres beyond its zone: { s, r } or null. */
+  nearestSite(u, reach = 260) {
+    let best = null;
+    for (const s of this.settlements) {
+      const q = relTo(s.S, u);
+      if (q.r < s.S.radius + BLEND + reach && (!best || q.r - s.S.radius < best.r - best.s.S.radius)) best = { s, r: q.r };
+    }
+    return best;
+  }
+
+  /** Tilt of the view in a settlement's frame toward the true up at u (none on the disc, all at the zone's edge). */
+  tiltFor(site, u, out = new THREE.Quaternion()) {
+    if (!site) return out.identity();
+    const q = relTo(site.S, u), w = sm(site.S.radius, site.S.radius + BLEND, q.r);
+    const up = dirToLocal(site.S.frame, u);
+    out.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(up[0], up[1], up[2]).normalize());
+    return out.slerp(new THREE.Quaternion(), 1 - w);
+  }
+
+  /**
+   * Keep the anchor right for the visitor (controls: feet, yaw, pitch): the settlement's frame in
+   * its zone, else a frame under the feet; the pose is carried over so that nothing moves.
+   */
+  reanchor(controls) {
+    const F = controls.feet;
+    const P = toPlanet(this.anchor.frame, [F.x, F.y, F.z]);
+    const u = norm(P);
+    const z = this.zoneOf(u);
+    const site = z ? z.s : null;
+    if (site && site === this.anchor.site) { this.tiltFor(site, u, this.tilt); return; }
+    const frame = site ? site.S.frame : transportFrame(this.anchor.frame, u, R);
+    const newTilt = this.tiltFor(site, u, new THREE.Quaternion());
+    this.carry(controls, frame, newTilt);
+    this.setAnchor(frame, site);
+    this.tilt.copy(newTilt);
+  }
+
+  /** Carry the visitor's pose over to another frame (with the view's tilt there). */
+  carry(controls, frame, newTilt) {
+    const F = controls.feet;
+    const P = toPlanet(this.anchor.frame, [F.x, F.y, F.z]);
+    const fwd = new THREE.Vector3(-Math.sin(controls.yaw) * Math.cos(controls.pitch), Math.sin(controls.pitch), -Math.cos(controls.yaw) * Math.cos(controls.pitch)).applyQuaternion(this.tilt);
+    const fp = dirToPlanet(this.anchor.frame, [fwd.x, fwd.y, fwd.z]);
+    const fl = dirToLocal(frame, fp);
+    const f2 = new THREE.Vector3(fl[0], fl[1], fl[2]).applyQuaternion(newTilt.clone().invert());
+    const L = toLocal(frame, P);
+    F.x = L[0]; F.y = L[1]; F.z = L[2];
+    controls.yaw = Math.atan2(-f2.x, -f2.z);
+    controls.pitch = Math.asin(Math.max(-1, Math.min(1, f2.y)));
+  }
+
+  /** Put the scene's objects where the anchor says, and the camera's tilt. */
+  place(camera, tilt = true) {
+    const S = sceneFromPlanet(this.anchor.frame, this._m);
+    this.planet.matrix.copy(S);
+    this.planet.matrixWorldNeedsUpdate = true;
+    for (const s of this.settlements) {
+      if (s.state === 'idle') continue;
+      s.group.matrix.multiplyMatrices(S, planetFromFrame(s.S.frame, this._m2));
+      s.group.matrixWorldNeedsUpdate = true;
+    }
+    const fs = this.floraSite;
+    if (fs) { this.legacy.matrix.multiplyMatrices(S, planetFromFrame(fs.S.frame, this._m2)); this.legacy.matrixWorldNeedsUpdate = true; }
+    if (tilt) camera.quaternion.premultiply(this.tilt);
+    camera.updateMatrixWorld();
+  }
+
+  /** The building the visitor is near (in the anchor's settlement) and the room the point is in. */
   locate(x, y, z) {
+    const site = this.anchor?.site;
+    if (!site) return { building: null, room: null, distance: Infinity };
     let best = null, bd = Infinity;
-    for (const rec of this.buildings.values()) {
+    for (const rec of site.parts) {
       if (rec.plan.feature) continue;
       const [x0, z0, x1, z1] = World.worldBounds(rec.plan);
-      const dx = Math.max(x0 - x, 0, x - x1), dz = Math.max(z0 - z, 0, z - z1);
-      const d = Math.hypot(dx, dz);
+      const d = Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(z0 - z, 0, z - z1));
       if (d < bd) { bd = d; best = rec; }
     }
     if (!best) return { building: null, room: null, distance: Infinity };
@@ -170,7 +286,12 @@ export class World {
     return { building: best, room, distance: bd };
   }
 
-  /** World-space entrance of a building: [x, y, z, yaw]. */
+  static worldBounds(plan) {
+    const a = toWorld(plan, plan.bounds[0], plan.bounds[1]), b = toWorld(plan, plan.bounds[2], plan.bounds[3]);
+    return [Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])];
+  }
+
+  /** A building's entrance in its settlement's frame: [x, y, z, yaw]. */
   entrance(plan) {
     const e = plan.entrance;
     const p = toWorld(plan, e.at[0], e.at[1], e.y || 0);
@@ -178,15 +299,51 @@ export class World {
     return [p[0], p[1], p[2], (yaws[e.facing] ?? 0) - (plan.yaw || 0) * Math.PI / 180];
   }
 
-  update(pos) {
-    // build what is coming into range, a little at a time
+  /** Planet direction of the visitor's feet. */
+  here(controls) { const F = controls.feet; return norm(toPlanet(this.anchor.frame, [F.x, F.y, F.z])); }
+
+  /** Distance (m, along the ground) from u to a settlement's rim. */
+  static rimDistance(s, u) { return Math.max(0, Math.acos(Math.max(-1, Math.min(1, dot(s.S.u, u)))) * R - s.S.radius); }
+
+  /** Load the settlements near u, let go of those far; resolves when the near ones are built. */
+  async ensureNear(u, radius = LOAD) {
+    const wanted = [];
+    for (const s of this.settlements) {
+      const d = World.rimDistance(s, u);
+      if (d < radius) wanted.push(s.load());
+      else if (d > UNLOAD) s.unload();
+    }
+    await Promise.all(wanted);
+  }
+
+  /**
+   * Arrive at a settlement's building entrance (or a pose in its frame): the anchor becomes the
+   * settlement's frame, and the settlement, the ground and the plants round are made ready.
+   */
+  async arriveAt(site, report) {
+    await site.load();
+    report?.('build', 1);
+  }
+
+  /** Called every frame: load and unload by distance, the ground's detail, the plants, the baked light. */
+  update(camera, controls) {
     const now = performance.now();
-    if (!this._next || now > this._next) { this._next = now + 500; this.unloadFar(pos.x, pos.z); this.ensureNear(pos.x, pos.z); this.terrain.update(pos.x, pos.z); }
-    this.flora.update(pos.x, pos.z);
-    const here = this.locate(pos.x, pos.y, pos.z);
-    if (here.building?.gi) this.r.gi.use(here.building.gi);
+    const u = this.here(controls);
+    const camP = toPlanet(this.anchor.frame, camera.position.toArray());
+    if (!this._next || now > this._next) { this._next = now + 400; this.ensureNear(u); }
+    if (!this._nextT || now > this._nextT) { this._nextT = now + 120; this.terrain.update(camP); }
+    this.camAlt = Math.hypot(camP[0], camP[1], camP[2]) - R;
+    ENV.camAlt.value = this.camAlt;
+    // the plants: of the settlement whose zone the visitor is in, or the nearest within reach
+    let fs = this.anchor.site;
+    if (!fs) { let bd = 900; for (const s of this.settlements) { const d = World.rimDistance(s, u); if (d < bd) { bd = d; fs = s; } } }
+    if (fs !== this.floraSite) { this.floraSite = fs; this.flora.setSite(fs ? fs.S.focus : null); }
+    if (fs) {
+      const L = toLocal(fs.S.frame, camP);
+      this.flora.update(L[0], L[2]);
+    }
+    const here = this.locate(camera.position.x, camera.position.y, camera.position.z);
+    if (here.building?.gi) this.r.gi.use(here.building.gi); else this.r.gi.clear?.();
     return here;
   }
 }
-
-export { GeoBag, frustum };

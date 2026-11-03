@@ -1,7 +1,7 @@
 // Worker: scatters plants in a cell, deterministically from the cell's position, following the
 // regions' rules. Returns flat arrays: species index, variant, x, y, z, yaw, scale, tint.
 
-import { terrainHeight, groundCover } from '../../world/regions.js';
+import { terrainHeight, groundCover, setFocus } from '../../world/regions.js';
 import { densities, fromWater, MAX_DENSITY, NEAR_ONLY, ROWS } from '../../world/flora-rules.js';
 
 const SPECIES = Object.keys(MAX_DENSITY);
@@ -16,7 +16,10 @@ function place(x, z) {
 }
 
 self.onmessage = (e) => {
-  const { id, rect, near } = e.data;
+  const { id, rect, near, focus, gen } = e.data;
+  setFocus(focus);
+  // only on the settlement's disc (a little inside its rim): beyond it lies the open country
+  const inside = (x, z) => !focus || Math.hypot(x - focus.center[0], z - focus.center[1]) < focus.radius - 6;
   const [x0, z0, x1, z1] = rect, area = (x1 - x0) * (z1 - z0);
   const rand = rng(Math.floor(x0 * 73856093) ^ Math.floor(z0 * 19349663) ^ (near ? 0x5bd1e995 : 0));
   const out = [];
@@ -39,6 +42,7 @@ self.onmessage = (e) => {
       for (let i = 0; i < n; i++) pts.push([x0 + rand() * (x1 - x0), z0 + rand() * (z1 - z0), rand()]);
     }
     for (const [x, z, r] of pts) {
+      if (!inside(x, z)) continue;
       const p = at(x, z);
       if (p.ny < 0.35) continue;
       const d = densities(x, z, p);
@@ -49,7 +53,7 @@ self.onmessage = (e) => {
     }
   });
   const data = new Float32Array(out);
-  self.postMessage({ id, data }, [data.buffer]);
+  self.postMessage({ id, data, gen }, [data.buffer]);
 };
 
 self.postMessage({ species: SPECIES });

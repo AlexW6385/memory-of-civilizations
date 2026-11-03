@@ -84,6 +84,9 @@ export class GIVolume {
     this.uActive.value = 1;
   }
 
+  /** No volume in force (outside every building, or away from the settlement it belongs to). */
+  clear() { this.current = null; this.uActive.value = 0; }
+
   /**
    * Mean indirect luminance around a point (for eye adaptation): the DC term of the nearest
    * volume, trilinearly interpolated; the open-air value outside.

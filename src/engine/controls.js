@@ -3,7 +3,7 @@
 // obstacles; steps, stairs and ramps are climbed by following the floor height. Holding Space (or
 // the fly button) rises into the air; letting go comes gently down again.
 
-import { EYE, STEP, WALK, RUN, FLY, FLY_FAST, move } from '../core/walk.js';
+import { EYE, STEP, WALK, RUN, flightSpeeds, move } from '../core/walk.js';
 
 export class Controls {
   constructor(camera, canvas, collide) {
@@ -136,7 +136,12 @@ export class Controls {
     const run = this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || Math.hypot(this.stick.x, this.stick.y) > 0.92;
     const lift = this.enabled && (this.flyHeld || this.keys.has('Space'));
     if (lift) this.glide = true;
-    const speed = this.glide ? (run ? FLY_FAST : FLY) : run ? RUN : WALK;
+    // aloft, faster the higher (src/core/walk.js)
+    const alt = this.glide ? this.feet.y - this.collide.terrain(this.feet.x, this.feet.z) : 0;
+    this.altitude = alt;
+    const fs = flightSpeeds(alt);
+    const speed = this.glide ? (run ? fs.fast : fs.fly) : run ? RUN : WALK;
+    this.feet.liftSpeed = fs.lift; this.feet.glideSpeed = fs.glide;
     const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
     let dx = (-sin * f + cos * s) * speed * dt, dz = (-cos * f - sin * s) * speed * dt;
 

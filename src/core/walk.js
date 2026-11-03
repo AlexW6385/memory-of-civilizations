@@ -3,8 +3,14 @@
 export const EYE = 1.62, RADIUS = 0.3, STEP = 0.5, HEAD = 1.75, LOW = 0.25;
 export const WALK = 2.6, RUN = 6.5, GRAVITY = 18;
 /** Flight: rising while held (m/s), the horizontal speeds aloft, the gentle descent when let go,
- *  and the highest the feet may rise above the open ground. */
-export const LIFT = 4.5, FLY = 9, FLY_FAST = 18, GLIDE = 3.5, CEILING = 160;
+ *  and the highest the feet may rise above the open ground. Aloft, all of them grow with the height
+ *  above the ground (flightSpeeds), so that the planet can be crossed in minutes. */
+export const LIFT = 4.5, FLY = 9, FLY_FAST = 18, GLIDE = 3.5, CEILING = 1500;
+/** Speeds of flight at a height above the ground: { fly, fast, lift, glide } (m/s). */
+export function flightSpeeds(alt) {
+  const a = Math.max(0, alt);
+  return { fly: Math.min(110, FLY + a * 0.2), fast: Math.min(200, FLY_FAST + a * 0.4), lift: Math.min(60, LIFT + a * 0.09), glide: Math.min(45, GLIDE + a * 0.07) };
+}
 
 /**
  * Move feet {x, y, z, vy} by (dx, dz) metres this frame against the collision world,
@@ -33,9 +39,10 @@ export function move(P, dx, dz, dt, C) {
     // of a wall or a roof
     if (C.topAt) g = Math.max(g, C.topAt(P.x, P.z, RADIUS * 0.6, P.y + 0.01));
     if (C.waterLevel) g = Math.max(g, C.waterLevel(P.x, P.z));
-    if (P.lift) P.vy = Math.min(LIFT, Math.max(P.vy, 0) + 14 * dt);
+    const lift = P.liftSpeed ?? LIFT, glide = P.glideSpeed ?? GLIDE;
+    if (P.lift) P.vy = Math.min(lift, Math.max(P.vy, 0) + Math.max(14, lift * 1.5) * dt);
     else P.vy -= GRAVITY * dt;
-    if (P.glide) P.vy = Math.max(P.vy, -GLIDE);
+    if (P.glide) P.vy = Math.max(P.vy, -glide);
     if (P.vy > 0) {
       const top = C.terrain(P.x, P.z) + CEILING, dy = P.vy * dt;
       if (P.y + dy > top || (C.ceilingBetween && C.ceilingBetween(P.x, P.z, RADIUS, P.y + HEAD, P.y + HEAD + dy))) P.vy = 0;

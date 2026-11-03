@@ -12,6 +12,25 @@
 
 // ── regions and their climates ───────────────────────────────────────────────
 
+// ── focus: one district as a settlement of the planet ─────────────────────────
+//
+// On the planet (DESIGN §10) each district of the old city stands alone as a settlement: a disc
+// round its building, its own ground, houses and plants, nothing of its neighbours. While a focus
+// is set, everything here answers for that district alone: its weight is the only one, only its
+// landforms, building pads and ponds shape the ground, and the ground fades to the settlement's
+// level at the disc's rim. The focus is { region, center: [x, z], radius } (old city coordinates).
+
+let FOCUS = null;
+/** Set (or clear, with null) the district everything answers for. */
+export function setFocus(f) { FOCUS = f; }
+export function getFocus() { return FOCUS; }
+/** Run fn with a focus set, restoring the previous one after. */
+export function withFocus(f, fn) { const p = FOCUS; FOCUS = f; try { return fn(); } finally { FOCUS = p; } }
+/** Distance from the focus's centre (Infinity without a focus). */
+export function focusDistance(x, z) { return FOCUS ? Math.hypot(x - FOCUS.center[0], z - FOCUS.center[1]) : Infinity; }
+/** Width of the band inside a settlement's rim over which its ground fades to the settlement's level. */
+export const RIM_FADE = 30;
+
 /**
  * Each district has a centre and a kind of house for its lanes. Its own climate is the sun and sky
  * its building's light is baked for (`az`, `el`, `hour`; `lat`, `dec` give its course through a day);
@@ -285,6 +304,7 @@ function warp(x, z) { return [x + 22 * fbm(x * 0.008 + 3.1, z * 0.008), z + 22 *
  * blend across the border (about 15 m) so that ground and planting change over a few steps. Sums to 1.
  */
 export function regionWeights(x, z, blend = 7) {
+  if (FOCUS) return REGIONS.map((r) => (r.id === FOCUS.region ? 1 : 0));
   const [wx, wz] = warp(x, z);
   const d = REGIONS.map((r) => Math.hypot(wx - r.center[0], wz - r.center[1]));
   const m = Math.min(...d);
@@ -294,6 +314,7 @@ export function regionWeights(x, z, blend = 7) {
 }
 
 export function regionAt(x, z) {
+  if (FOCUS) return REGION[FOCUS.region];
   const w = regionWeights(x, z);
   let best = 0;
   for (let i = 1; i < w.length; i++) if (w[i] > w[best]) best = i;
@@ -303,6 +324,7 @@ export function regionAt(x, z) {
 /** How far (x, z) is inside the city (negative outside its edge), in metres. */
 let EDGES = null;
 export function inCity(x, z) {
+  if (FOCUS) return 1000;
   EDGES ||= cityEdges();
   let d = Infinity;
   for (const [[ax, az], [bx, bz]] of EDGES) {
@@ -525,24 +547,25 @@ for (const L of LANDFORMS) L.box = landformBox(L);
 
 /** Building pads: the ground is flattened to the site's base around each building. */
 const PADS = [];
-export function registerPad(rect, base, margin = 12, blend = 30) { PADS.push({ rect, base, margin, blend }); }
+export function registerPad(rect, base, margin = 12, blend = 30, region = null) { PADS.push({ rect, base, margin, blend, region }); }
 
 for (const site of Object.values(SITES)) {
   if (!site.pad || site.yaw) continue;
   const [x0, z0, x1, z1] = site.pad, [ox, oz] = site.origin;
   // a site raised on its rock is levelled only on the rock; one on the plain blends out widely
-  if (site.base > 3) registerPad([ox + x0, oz + z0, ox + x1, oz + z1], site.base, 4, 10);
-  else registerPad([ox + x0, oz + z0, ox + x1, oz + z1], site.base);
+  if (site.base > 3) registerPad([ox + x0, oz + z0, ox + x1, oz + z1], site.base, 4, 10, site.region);
+  else registerPad([ox + x0, oz + z0, ox + x1, oz + z1], site.base, 12, 30, site.region);
 }
 const POND_SHAPES = [];
 for (const p of PONDS) {
   const s = SITES[p.site], [ox, oz] = s.origin;
-  for (const { c, r } of p.shapes) POND_SHAPES.push({ c: [ox + c[0], oz + c[1]], r, y: s.base + p.level });
+  for (const { c, r } of p.shapes) POND_SHAPES.push({ c: [ox + c[0], oz + c[1]], r, y: s.base + p.level, region: s.region });
 }
 /** Signed distance (m, approximate) from the shore of the nearest pond: negative in the water. */
 export function pondDistance(x, z) {
   let best = Infinity, y = 0;
   for (const P of POND_SHAPES) {
+    if (FOCUS && P.region !== FOCUS.region) continue;
     const dx = (x - P.c[0]) / P.r[0], dz = (z - P.c[1]) / P.r[1];
     const d = (Math.hypot(dx, dz) - 1) * Math.min(P.r[0], P.r[1]);
     if (d < best) { best = d; y = P.y; }
@@ -574,9 +597,11 @@ function naturalHeight(x, z) {
   for (const L of LANDFORMS) {
     const b = L.box;
     if (x < b[0] || x > b[2] || z < b[1] || z > b[3]) continue;
+    if (FOCUS && L.region !== FOCUS.region) continue;
     h = Math.max(h, landformHeight(L, x, z));
   }
   h += 0.6 * fbm(x * 0.012 + 5, z * 0.012);
+  if (FOCUS) return h;
   const out = -inCity(x, z);
   if (out > 0) h += smooth(30, 700, out) * (55 + 70 * (0.5 + 0.5 * fbm(x * 0.002 + 9, z * 0.002))) + smooth(0, 60, out) * 3 * fbm(x * 0.02, z * 0.02);
   return h;
@@ -586,6 +611,7 @@ function naturalHeight(x, z) {
 export function terrainHeight(x, z) {
   let h = naturalHeight(x, z);
   for (const p of PADS) {
+    if (FOCUS && p.region && p.region !== FOCUS.region) continue;
     const [x0, z0, x1, z1] = p.rect;
     const dx = Math.max(x0 - p.margin - x, 0, x - x1 - p.margin), dz = Math.max(z0 - p.margin - z, 0, z - z1 - p.margin);
     if (dx > p.blend || dz > p.blend) continue;
@@ -597,6 +623,8 @@ export function terrainHeight(x, z) {
     const p = pondDistance(x, z);
     if (p.d < 5) { const bed = p.y - 1.2; h = bed + (Math.max(h, bed) - bed) * smooth(-1, 5, p.d); }
   }
+  // a settlement's ground fades to its level (0) toward the rim of its disc
+  if (FOCUS) h *= 1 - smooth(FOCUS.radius - RIM_FADE, FOCUS.radius, focusDistance(x, z));
   return h;
 }
 
