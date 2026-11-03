@@ -85,6 +85,23 @@ export class Flora {
     this.scale = 1;                 // view distance of plants, by picture quality
   }
 
+  /** The trees within r of (x, z) as { x, z, r } (r: a crown's half-width, roughly), for keeping the view clear. */
+  trees(x, z, r) {
+    const out = [];
+    if (!this.species) return out;
+    for (const c of this.cells.values()) {
+      if (c.state !== 'done' || !c.data) continue;
+      const d = c.data;
+      for (let i = 0; i < d.length; i += 8) {
+        const S = SPECIES[this.species[d[i]]];
+        if (!S || S.lod[1] < 900) continue;                    // grass, reeds and shrubs do not hide a building
+        if (Math.hypot(d[i + 2] - x, d[i + 4] - z) > r) continue;
+        out.push({ x: d[i + 2], z: d[i + 4], r: 2.6 * (S.scale[0] + (S.scale[1] - S.scale[0]) * d[i + 6]) });
+      }
+    }
+    return out;
+  }
+
   /** Plant the settlement with this focus ({ region, center, radius }), or none (null). */
   setSite(focus) {
     this.focus = focus;

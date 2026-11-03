@@ -10,6 +10,7 @@ import { GlobeView } from './ui/globe.js';
 import { MiniMap } from './ui/minimap.js';
 import { initLang, setLang, getLang, t, onLang } from './ui/i18n.js';
 import { toWorld } from './core/build.js';
+import { viewpoint, openYaw, standAt } from './core/arrival.js';
 import { dirToLocal, toPlanet, latLon, norm, enuFrame, unit } from './planet/geo.js';
 import { climateAt } from './planet/land.js';
 import { PLANET_RADIUS, BLEND } from './planet/relief.js';
@@ -153,12 +154,8 @@ async function main() {
     for (let r = 0; r <= 45; r += 1.5) {
       const n = r === 0 ? 1 : Math.ceil(r * 2);
       for (let k = 0; k < n; k++) {
-        const a = k / n * Math.PI * 2, px = x + Math.cos(a) * r, pz = z + Math.sin(a) * r;
-        const g = Math.max(C.groundAt(px, pz, 1e4), C.waterLevel?.(px, pz) ?? -Infinity);
-        if (!Number.isFinite(g) || C.water?.(px, pz, g)) continue;
-        if (C.topAt(px, pz, 0.4, 1e4) > g + 0.3) continue;
-        if (C.blockedAt(px, pz, 0.4, g + 0.2, g + 1.9)) continue;
-        return [px, g, pz];
+        const a = k / n * Math.PI * 2, px = x + Math.cos(a) * r, pz = z + Math.sin(a) * r, g = standAt(C, px, pz);
+        if (g !== null) return [px, g, pz];
       }
     }
     return [x, Math.max(C.groundAt(x, z, 1e4), C.topAt(x, z, 0.3, 1e4)), z];
@@ -191,25 +188,46 @@ async function main() {
     controls.apply(); world.place(R.camera);
     await arrive(report);
     settle();
+    // face the widest view (leaning toward the nearest settlement, if any is close)
+    const F = controls.feet, near = world.anchor.site;
+    const prefer = near ? Math.atan2(-(near.S.local.center[0] - F.x), -(near.S.local.center[1] - F.z)) : null;
+    controls.setPose(F.x, F.y, F.z, openYaw(world.collide, F.x, F.y, F.z, prefer), 0.03);
+    world.place(R.camera);
   };
   // from the map: beside the settlement's landmark, a little way in front of it and facing it
   const goNear = async (rec, report) => {
     const site = rec.site, plan = rec.plan;
-    world.setAnchor(site.S.frame, site);
-    world.tilt.identity();
+    // the landmark's main body (a rectangle in the settlement's frame)
+    const b = plan.view || plan.bakeBounds || plan.bounds;
+    const c0 = toWorld(plan, b[0], b[1]), c1 = toWorld(plan, b[2], b[3]);
+    const core = [Math.min(c0[0], c1[0]), Math.min(c0[2], c1[2]), Math.max(c0[0], c1[0]), Math.max(c0[2], c1[2])];
+    // into the settlement's frame, standing in its zone at once (the frame loop runs during the
+    // waits below, and would otherwise carry the visitor out into the open country's frame)
+    const inFrame = () => { world.setAnchor(site.S.frame, site); world.tilt.identity(); };
+    inFrame();
+    const [lx, lz] = site.S.local.center;
+    controls.setPose(lx, 1e4, lz, 0, 0);
     await site.load();
-    const b = plan.bakeBounds || plan.bounds, e = plan.entrance;
-    const dir = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[e.facing] || [0, -1];
-    const half = Math.abs(dir[0]) * (b[2] - b[0]) / 2 + Math.abs(dir[1]) * (b[3] - b[1]) / 2;
-    const cx = (b[0] + b[2]) / 2, cz = (b[1] + b[3]) / 2, back = half + 14;
-    const P = toWorld(plan, cx - dir[0] * back, cz - dir[1] * back), C = toWorld(plan, cx, cz);
-    const yaw = Math.atan2(-(C[0] - P[0]), -(C[2] - P[2]));
-    const y = Math.max(world.collide.groundAt(P[0], P[2], 1e4), world.collide.waterLevel?.(P[0], P[2]) ?? -Infinity) + 0.02;
-    controls.setPose(P[0], y, P[2], yaw, 0.08);
+    inFrame();
+    const part = site.parts.find((p) => p.plan === plan);
+    let top = (plan.base || 0) + (plan.bakeTop || 15);
+    if (part) for (const { geometry } of part.built.parts) top = Math.max(top, Math.min(geometry.boundingBox.max.y, (plan.base || 0) + 60));
+    const dir = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[plan.entrance?.facing] || [0, -1];
+    const fw = toWorld(plan, -dir[0], -dir[1]), o = toWorld(plan, 0, 0), front = [fw[0] - o[0], fw[2] - o[2]];
+    const cxw = (core[0] + core[2]) / 2, czw = (core[1] + core[3]) / 2;
+    const place = () => viewpoint(world.collide, core, top, front, world.flora.trees(cxw, czw, 260));
+    let v = place();
+    const cx = (core[0] + core[2]) / 2, cz = (core[1] + core[3]) / 2;
+    const start = v || { x: cx + front[0] * 30, y: world.collide.groundAt(cx + front[0] * 30, cz + front[1] * 30, 1e4), z: cz + front[1] * 30, yaw: Math.atan2(front[0], front[1]), pitch: 0.08 };
+    controls.setPose(start.x, start.y + 0.02, start.z, start.yaw, start.pitch);
     world.place(R.camera);
     await arrive(report);
-    controls.setPose(P[0], y, P[2], yaw, 0.08);
-    settle();
+    inFrame();
+    // the ground and the plants are in now: choose again (nothing changes for the buildings)
+    v = place() || start;
+    controls.setPose(v.x, v.y + 0.01, v.z, v.yaw, v.pitch);
+    if (!place()) settle();
+    world.place(R.camera);
   };
   const first = world.plans.get(params.get('start') || 'edfu') || world.plans.get('edfu');
   if (params.get('pose')) {

@@ -146,6 +146,7 @@ export const garden = {
   entrance: { at: [0, 65], facing: 'n' },
   bounds: [GARDEN[0] - 2, GARDEN[1] - 2, GARDEN[2] + 2, RESIDENCE[3] + 2],
   bakeBounds: [-48, -62, 48, 24],
+  view: [-9, -27, 9, -9],          // what one arrives to see: the Hall of Distant Fragrance and its terrace
   bakeTop: 14,
   bakeSpacing: 1.2,
   elements: E,

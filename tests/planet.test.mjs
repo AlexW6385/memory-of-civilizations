@@ -97,3 +97,29 @@ test('the settlements of their own build, finite, inside their discs', async () 
     for (const l of mod.landmarks) for (const r of l.plan.rooms) assert.ok(l.music.zones[r.kind], `${l.plan.id}: room kind ${r.kind} has music`);
   }
 });
+
+test('arriving at a settlement of its own: a free place in clear view of its landmark', async () => {
+  const { MODULES, GROUNDS } = await import('../src/settlements/grounds.js');
+  const { CollisionWorld, topField } = await import('../src/core/collide.js');
+  const { viewpoint, standAt, clearLine } = await import('../src/core/arrival.js');
+  for (const S of BUILT.filter((s) => !s.site.legacy)) {
+    const G = GROUNDS[S.id], mod = await MODULES[S.id]();
+    const C = new CollisionWorld();
+    Object.assign(C, { terrain: G.height, water: G.water, waterLevel: G.waterLevel });
+    for (const plan of [...mod.landmarks.map((l) => l.plan), ...(await mod.town())]) {
+      const built = buildPlan(plan);
+      built.colliders.tops = await topField(built.parts);
+      C.add(built.colliders);
+    }
+    const plan = mod.landmarks[0].plan, b = plan.view || plan.bakeBounds;
+    const v = viewpoint(C, b, 12, [0, 1]);
+    assert.ok(v, `${S.id}: no viewpoint`);
+    const d = Math.max(b[0] - v.x, v.x - b[2], b[1] - v.z, v.z - b[3]);
+    assert.ok(d > 0 && d < 50, `${S.id}: viewpoint ${d.toFixed(1)} m from the landmark`);
+    assert.ok(standAt(C, v.x, v.z) !== null, `${S.id}: viewpoint not free`);
+    // looking at it: the yaw points at the landmark's middle
+    const fx = -Math.sin(v.yaw), fz = -Math.cos(v.yaw), cx = (b[0] + b[2]) / 2 - v.x, cz = (b[1] + b[3]) / 2 - v.z;
+    assert.ok((fx * cx + fz * cz) / Math.hypot(cx, cz) > 0.99, `${S.id}: not facing the landmark`);
+    void clearLine;
+  }
+});
