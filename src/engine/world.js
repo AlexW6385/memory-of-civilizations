@@ -12,7 +12,7 @@
 import * as THREE from 'three/webgpu';
 import { BUILDINGS } from '../buildings/index.js';
 import { buildPlanAsync, toWorld } from '../core/build.js';
-import { CollisionWorld } from '../core/collide.js';
+import { CollisionWorld, topField } from '../core/collide.js';
 import { Flora } from './flora/index.js';
 import { material, flameMaterial } from './materials.js';
 import { ENV } from './env.js';
@@ -21,7 +21,8 @@ import { BUILT, BUILT_BY_ID, initRelief, surface, groundInFrame, seaInFrame, PLA
 import { PlanetTerrain } from '../planet/terrain.js';
 import { OpenFlora } from '../planet/open-flora.js';
 import { toPlanet, toLocal, dirToPlanet, dirToLocal, transportFrame, enuFrame, norm, dot, unit } from '../planet/geo.js';
-import { withFocus, terrainHeight, inWater as legacyWater, waterLevel as legacyWaterLevel } from '../world/regions.js';
+import { withFocus } from '../world/regions.js';
+import { MODULES } from '../settlements/grounds.js';
 
 /** A settlement is built when the visitor comes within LOAD of its rim and let go beyond UNLOAD. */
 export const LOAD = 700, UNLOAD = 1300;
@@ -61,17 +62,13 @@ class Settlement {
     this.parts = [];                       // { id, plan, music, group, built, gi }
     this.state = 'idle';
     const C = this.collide = new CollisionWorld();
-    const [cx, cz] = S.focus.center;
+    const [cx, cz] = S.local.center, L = S.local;
     // the ground: the settlement's own on its disc, the planet's beyond (in the settlement's frame)
-    C.terrain = (x, z) => (Math.hypot(x - cx, z - cz) < S.radius ? withFocus(S.focus, () => terrainHeight(x, z)) : groundInFrame(S.frame, x, z));
-    C.water = (x, z, y) => (Math.hypot(x - cx, z - cz) < S.radius ? withFocus(S.focus, () => legacyWater(x, z, y)) : (groundInFrame(S.frame, x, z) < seaInFrame(S.frame, x, z) - 0.3 && y < seaInFrame(S.frame, x, z) + 0.3));
-    C.waterLevel = (x, z) => (Math.hypot(x - cx, z - cz) < S.radius ? withFocus(S.focus, () => legacyWaterLevel(x, z)) : (groundInFrame(S.frame, x, z) < seaInFrame(S.frame, x, z) ? seaInFrame(S.frame, x, z) : -Infinity));
-  }
-
-  /** The building entries and the quarter of houses that make up this settlement. */
-  entries() {
-    const region = this.S.focus.region;
-    return BUILDINGS.filter((b) => b.district === region);
+    const on = (x, z) => Math.hypot(x - cx, z - cz) < S.radius;
+    C.terrain = (x, z) => (on(x, z) ? L.height(x, z) : groundInFrame(S.frame, x, z));
+    C.water = (x, z, y) => (on(x, z) ? L.water(x, z, y) : (groundInFrame(S.frame, x, z) < seaInFrame(S.frame, x, z) - 0.3 && y < seaInFrame(S.frame, x, z) + 0.3));
+    C.waterLevel = (x, z) => (on(x, z) ? L.waterLevel(x, z) : (groundInFrame(S.frame, x, z) < seaInFrame(S.frame, x, z) ? seaInFrame(S.frame, x, z) : -Infinity));
+    this.music = null;                     // the settlement's own music, in its streets (its module's)
   }
 
   load() {
@@ -80,16 +77,24 @@ class Settlement {
     this.world.scene.add(this.group);
     this.loading = (async () => {
       const S = this.S;
-      for (const entry of this.entries()) {
-        const mod = await entry.load();
-        await this.addPart(entry.id, mod.plan, mod.music);
+      if (S.focus.region) {
+        for (const entry of BUILDINGS.filter((b) => b.district === S.focus.region)) {
+          const mod = await entry.load();
+          await this.addPart(entry.id, mod.plan, mod.music);
+        }
+        // the houses of the settlement, of its own time (src/world/city.js), on its disc
+        await import('../styles/vernacular/index.js');
+        const city = await import('../world/city.js');
+        const plan = withFocus(S.focus, () => city.plan(S.focus.region));
+        plan.id = `${S.id}-town`;
+        await this.addPart(plan.id, plan, null);
+      } else {
+        // a settlement of its own: its landmarks, then its townscape (src/settlements/<id>/)
+        const mod = await MODULES[S.id]();
+        this.music = mod.music;
+        for (const p of mod.landmarks) await this.addPart(p.plan.id, p.plan, p.music);
+        for (const plan of await mod.town()) await this.addPart(plan.id, plan, null);
       }
-      // the houses of the settlement, of its own time (src/world/city.js), on its disc
-      await import('../styles/vernacular/index.js');
-      const city = await import('../world/city.js');
-      const plan = withFocus(S.focus, () => city.plan(S.focus.region));
-      plan.id = `${S.id}-town`;
-      await this.addPart(plan.id, plan, null);
       this.state = 'ready';
       return this;
     })();
@@ -115,6 +120,8 @@ class Settlement {
       group.add(inst);
     }
     this.group.add(group);
+    // the upper surfaces, to land and walk on (roofs, wall tops)
+    built.colliders.tops = await topField(built.parts);
     this.collide.add(built.colliders);
     const rec = { id, plan, music, group, built, settlement: this };
     if (!plan.feature) try { rec.gi = await this.world.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
@@ -203,6 +210,11 @@ export class World {
       const site = this.settlements.find((s) => s.S.focus.region === entry.district);
       this.plans.set(entry.id, { id: entry.id, entry, plan: mod.plan, music: mod.music, site });
     }));
+    for (const site of this.settlements) {
+      if (!MODULES[site.id]) continue;
+      const mod = await MODULES[site.id]();
+      for (const p of mod.landmarks) this.plans.set(p.plan.id, { id: p.plan.id, plan: p.plan, music: p.music, site });
+    }
     this.setAnchor(this.byId.edfu.S.frame, this.byId.edfu);
   }
 

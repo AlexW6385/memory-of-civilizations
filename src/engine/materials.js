@@ -372,6 +372,54 @@ function make(spec) {
       m.normalNode = bump(n.mul(0.05).add(f.mul(0.004)), 1);
       break;
     }
+    case 'lattice': {
+      // a latticed door or window: thin wooden bars on a fine grid (or an "ice-crack" pattern of
+      // broken lines), paper behind them, lit through when the sun is on the other side
+      const { u, v } = wallUV();
+      const c = float(spec.cell ?? 0.09);
+      let d;
+      if (spec.ice) {
+        const w = mx_worley_noise_float(vec3(u.div(c), v.div(c), 0.5));
+        d = smoothstep(0.03, 0.07, w);
+      } else {
+        const fu = fract(u.div(c)), fv = fract(v.div(c));
+        const du = min(fu, float(1).sub(fu)), dv = min(fv, float(1).sub(fv));
+        d = smoothstep(0.06, 0.14, min(du, dv));
+      }
+      const paper = uniform(new Color(spec.paper || '#e9e2cf'));
+      m.colorNode = mix(baseNode, paper, d);
+      m.roughnessNode = mix(roughU, float(0.95), d);
+      m.normalNode = bump(float(1).sub(d).mul(0.006), 1);
+      break;
+    }
+    case 'taihu': {
+      // Taihu stone: grey limestone eaten by water into hollows and holes, pale on its ridges
+      const w1 = mx_worley_noise_float(P.mul(1.3)), w2 = mx_worley_noise_float(P.mul(4.1).add(3));
+      const n = mx_fractal_noise_float(P.mul(2.0), 3, 2.0, 0.5), f = mx_noise_float(P.mul(14.0)).mul(detailFade());
+      const pit = smoothstep(0.12, 0.0, w1).add(smoothstep(0.1, 0.0, w2).mul(0.5));
+      m.colorNode = baseNode.mul(n.mul(0.18).add(1)).mul(float(1).sub(pit.mul(0.55))).mul(f.mul(0.06).add(1));
+      m.normalNode = bump(n.mul(0.04).sub(pit.mul(0.05)).add(f.mul(0.003)), 1);
+      break;
+    }
+    case 'pebbles': {
+      // a pebble mosaic path (huajie pudi): grey and white pebbles set on edge in a pattern of
+      // interlocking coins, bordered by roof tiles laid on edge
+      const g = vec2(P.x, P.z);
+      const q = g.div(0.6), cell = floor(q), f = fract(q).sub(0.5);
+      const ring = abs(length(f).sub(0.36));
+      const line = smoothstep(0.035, 0.015, ring);
+      const pq = g.div(0.045), pc = floor(pq), pf = fract(pq).sub(0.5);
+      const peb = smoothstep(0.5, 0.25, length(pf));
+      const shade = hash(pc.x.mul(12.9898).add(pc.y.mul(78.233)));
+      const inner = length(f).lessThan(0.36);
+      const tone = select(inner, mix(float(0.55), float(0.7), shade), mix(float(0.78), float(0.95), shade));
+      const col = mix(vec3(0.32, 0.31, 0.29), vec3(tone, tone, tone.mul(0.97)), peb.mul(0.85).add(0.15));
+      m.colorNode = mix(col, vec3(0.27, 0.28, 0.3), line).mul(baseNode.mul(1.6));
+      m.roughnessNode = float(0.9);
+      m.normalNode = bump(peb.mul(0.006).add(line.mul(0.003)).mul(detailFade().mul(0.7).add(0.3)), 1);
+      void cell;
+      break;
+    }
     case 'terrain': {
       // ground cover comes per vertex from the region's rules (src/world/regions.js)
       const g = attribute('ground', 'vec4'), g2 = attribute('ground2', 'vec4'), rd = attribute('road', 'float');

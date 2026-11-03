@@ -6,14 +6,16 @@
 // A settlement stands on a flat disc of its own (its local ground, at its own level `base` above
 // the sea), blended into the open country over BLEND metres beyond the rim. The ten settlements of
 // the previous design take their local ground from their district of the old city
-// (src/world/regions.js, with its focus set), in the old city's coordinates.
+// (src/world/regions.js, with its focus set), in the old city's coordinates; the others from their
+// own module (src/settlements/<id>/ground.js), in their own coordinates round the disc's centre.
 
 import { PLANET_RADIUS as R, SITES, BLEND } from './sites.js';
 import { PLACED } from './layout.js';
 import { coastAt, climateAt } from './land.js';
 import { fbm3, ridged3, noise3 } from './noise.js';
 import { unit, enuFrame, add, sub, scale, dot } from './geo.js';
-import { withFocus, terrainHeight, groundCover } from '../world/regions.js';
+import { withFocus, terrainHeight, groundCover, inWater as legacyWater, waterLevel as legacyWaterLevel, RIM_FADE } from '../world/regions.js';
+import { GROUNDS } from '../settlements/grounds.js';
 
 export { R as PLANET_RADIUS, BLEND };
 const sm = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -23,11 +25,33 @@ const sm = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e
  * above the sea, m), enu (frame at the disc's centre), frame (local = old city coordinates) }.
  * Their levels and frames are set by initRelief() once the land map is loaded.
  */
-export const BUILT = SITES.filter((s) => s.legacy).map((s) => ({
-  id: s.id, site: s, u: unit(...PLACED[s.id]), radius: s.radius,
-  focus: { region: s.legacy.region, center: s.legacy.center, radius: s.radius },
-  base: 0, enu: null, frame: null, cosMax: Math.cos((s.radius + BLEND + 20) / R),
-}));
+export const BUILT = SITES.filter((s) => s.legacy || GROUNDS[s.id]).map((s) => {
+  const S = { id: s.id, site: s, u: unit(...PLACED[s.id]), radius: s.radius, base: 0, enu: null, frame: null, cosMax: Math.cos((s.radius + BLEND + 20) / R) };
+  if (s.legacy) {
+    // the ten of the previous design: their district of the old city, under a focus
+    const focus = S.focus = { region: s.legacy.region, center: s.legacy.center, radius: s.radius };
+    S.local = {
+      center: s.legacy.center,
+      height: (x, z) => withFocus(focus, () => terrainHeight(x, z)),
+      cover: (x, z, h, ny) => withFocus(focus, () => groundCover(x, z, h, ny)),
+      water: (x, z, y) => withFocus(focus, () => legacyWater(x, z, y)),
+      waterLevel: (x, z) => withFocus(focus, () => legacyWaterLevel(x, z)),
+    };
+  } else {
+    // a settlement of its own (src/settlements/<id>/ground.js), in its own coordinates round its centre
+    const G = GROUNDS[s.id];
+    S.focus = { settlement: s.id, center: [0, 0], radius: s.radius };
+    S.ground = G;
+    S.local = {
+      center: [0, 0],
+      height: (x, z) => G.height(x, z),            // (the module fades its ground to 0 at its rim)
+      cover: (x, z, h, ny) => G.cover(x, z, h, ny),
+      water: (x, z, y) => G.water(x, z, y),
+      waterLevel: (x, z) => G.waterLevel(x, z),
+    };
+  }
+  return S;
+});
 export const BUILT_BY_ID = Object.fromEntries(BUILT.map((b) => [b.id, b]));
 
 /** Set the settlements' levels and frames (after the land map is loaded). */
@@ -35,7 +59,7 @@ export function initRelief() {
   for (const S of BUILT) {
     S.base = Math.max(2.5, natural(S.u).h);
     S.enu = enuFrame(S.u, R + S.base);
-    const [cx, cz] = S.focus.center;
+    const [cx, cz] = S.local.center;
     S.frame = { ...S.enu, o: sub(S.enu.o, add(scale(S.enu.x, cx), scale(S.enu.z, cz))) };
   }
 }
@@ -71,7 +95,7 @@ export function surface(u) {
     if (!S.enu) break;
     const uy = dot(S.enu.y, u);
     if (uy < S.cosMax) continue;
-    const ux = dot(S.enu.x, u), uz = dot(S.enu.z, u), [cx, cz] = S.focus.center;
+    const ux = dot(S.enu.x, u), uz = dot(S.enu.z, u), [cx, cz] = S.local.center;
     let k = (R + S.base) / uy, x = ux * k, z = uz * k;
     const r = Math.hypot(x, z);
     if (r > S.radius + BLEND) continue;
@@ -79,7 +103,7 @@ export function surface(u) {
     if (r < S.radius) {
       // the local ground along the ray: solved twice for the point where the ray meets it
       for (let i = 0; i < 2; i++) {
-        H = withFocus(S.focus, () => terrainHeight(x + cx, z + cz));
+        H = S.local.height(x + cx, z + cz);
         k = (R + S.base + H) / uy; x = ux * k; z = uz * k;
       }
     }
@@ -121,7 +145,7 @@ export function coverAt(g, ny, u) {
   // on a settlement's disc, its own ground cover (the old city's), blended out with its ground
   const s = g.s;
   if (s && s.w > 0) {
-    const L = withFocus(s.S.focus, () => groundCover(s.x, s.z, s.H, ny));
+    const L = s.S.local.cover(s.x, s.z, s.H, ny);
     for (const k in c) c[k] = c[k] * (1 - s.w) + (L[k] ?? 0) * s.w;
   }
   return c;

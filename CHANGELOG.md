@@ -2,6 +2,12 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.1 — A lean interface; night on the maps; standing on roofs (2026-11-03)
+- The interface is the small map (top left; click it for the globe), the clock-and-speed card (top right) and a language button. The settings panel is removed; quality is always the highest.
+- The globe and the small map shade night; settlements glow on the night side.
+- Choosing a settlement on the map (or clicking near it) lands beside its landmark, facing it.
+- Roofs and wall tops can be landed on from the air and walked on (a height field of each building's upper surfaces).
+
 ## v8.0 — The planet (2026-11-03)
 
 - **The world is now a small planet** — Memory of Civilizations / 文明的记忆. A sphere of 8 km radius with Earth's continents, seas and latitudes: walk out of a settlement into open country — beaches, rolling land, hills, the mountain ranges where Earth has them, deserts, forests, snow toward the poles — and fly over it; the higher you go, the faster, up to 1.5 km, where the ground curves away below.

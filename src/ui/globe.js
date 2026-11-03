@@ -5,12 +5,24 @@
 
 import { t, tr, onLang } from './i18n.js';
 import { coastAt, climateAt } from '../planet/land.js';
-import { BUILT } from '../planet/relief.js';
+import { BUILT, PLANET_RADIUS } from '../planet/relief.js';
 import { SITES } from '../planet/sites.js';
 import { PLACED } from '../planet/layout.js';
 import { unit, latLon, eastNorth, dot, norm, cross } from '../planet/geo.js';
 
 const sm = (e0, e1, x) => { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); };
+
+/**
+ * Day and night on the maps: the colour c lit by the sun (planet direction sun) at direction v — full
+ * day, a reddened band of twilight, and night (dim, blue).
+ */
+export function daylight(c, v, sun) {
+  if (!sun) return c;
+  const d = v[0] * sun[0] + v[1] * sun[1] + v[2] * sun[2];
+  const day = sm(-0.1, 0.08, d), dusk = Math.max(0, 1 - Math.abs(d + 0.02) / 0.12) * 0.35;
+  const k = 0.22 + 0.78 * day;
+  return [c[0] * k * (1 + dusk * 0.5) + 6 * (1 - day), c[1] * k * (1 + dusk * 0.12) + 10 * (1 - day), c[2] * k * (1 - dusk * 0.2) + 26 * (1 - day), c[3]];
+}
 
 /** Colour of the land (or sea) for the maps, from the distance to the coast and the climate. */
 export function landColour(d, [mount, moist, warm]) {
@@ -27,7 +39,8 @@ export function landColour(d, [mount, moist, warm]) {
 }
 
 export class GlobeView {
-  constructor(world, onBuilding, onPlace) {
+  constructor(world, onBuilding, onPlace, sun = null) {
+    this.sun = sun;
     this.world = world;
     this.onBuilding = onBuilding;
     this.onPlace = onPlace;
@@ -66,6 +79,9 @@ export class GlobeView {
     this.up = n;
     this.zoom = 2.2;
     requestAnimationFrame(() => this.draw());
+    // the night moves on while the map is open
+    clearInterval(this._tick);
+    this._tick = setInterval(() => { if (this.canvas.offsetParent) this.draw(); else clearInterval(this._tick); }, 2000);
   }
 
   /** The view's basis: right, up, toward the viewer (the globe's point at the centre of the view). */
@@ -98,7 +114,7 @@ export class GlobeView {
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     const res = coarse ? 160 : 360, sx = Math.ceil(W / (Math.min(W, H) / res)), sy = Math.ceil(H / (Math.min(W, H) / res));
     this.off.width = sx; this.off.height = sy;
-    const og = this.off.getContext('2d'), img = og.createImageData(sx, sy);
+    const og = this.off.getContext('2d'), img = og.createImageData(sx, sy), sun = this.sun?.();
     for (let j = 0; j < sy; j++) for (let i = 0; i < sx; i++) {
       const v = this.unproject((i + 0.5) / sx * W, (j + 0.5) / sy * H);
       let c;
@@ -107,7 +123,7 @@ export class GlobeView {
         c = landColour(coastAt(v), climateAt(v));
         // a little shading toward the rim
         const z = dot(v, this.basis().c), sh = 0.55 + 0.45 * Math.sqrt(Math.max(0, z));
-        c = [c[0] * sh, c[1] * sh, c[2] * sh, 255];
+        c = daylight([c[0] * sh, c[1] * sh, c[2] * sh, 255], v, sun);
       }
       img.data.set(c, (j * sx + i) * 4);
     }
@@ -131,6 +147,12 @@ export class GlobeView {
       const p = this.project(S.u);
       if (!p) continue;
       this.marks.push({ S, p });
+      // at night the settlements glow with their lamps
+      if (sun && dot(S.u, sun) < 0.02) {
+        const gl = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], 14 * dpr);
+        gl.addColorStop(0, 'rgba(255, 200, 110, 0.75)'); gl.addColorStop(1, 'rgba(255, 170, 80, 0)');
+        g.fillStyle = gl; g.beginPath(); g.arc(p[0], p[1], 14 * dpr, 0, Math.PI * 2); g.fill();
+      }
       g.fillStyle = '#ffd36b'; g.strokeStyle = '#2a2116'; g.lineWidth = 1.5 * dpr;
       g.beginPath(); g.arc(p[0], p[1], 4.5 * dpr, 0, Math.PI * 2); g.fill(); g.stroke();
       g.fillStyle = '#fff8e8'; g.shadowColor = 'rgba(0,0,0,0.8)'; g.shadowBlur = 4 * dpr;
@@ -203,6 +225,14 @@ export class GlobeView {
     }
     const v = this.unproject(px, py);
     if (!v) return;
+    // near a settlement (within about a kilometre of its rim, or a few pixels of its mark): there
+    let near = null, nd = Infinity;
+    for (const S of BUILT) {
+      const d = Math.acos(Math.max(-1, Math.min(1, dot(v, S.u)))) * PLANET_RADIUS - S.radius;
+      if (d < nd) { nd = d; near = S; }
+    }
+    const perPx = 2 / (Math.min(this.canvas.width, this.canvas.height) * 0.46 * this.zoom) * PLANET_RADIUS / 2;
+    if (near && nd < Math.max(1000, 30 * dpr * perPx)) { const r = this.recFor(near); if (r) { this.onBuilding(r); return; } }
     const [la, lo] = latLon(v);
     this.onPlace(la, lo);
   }

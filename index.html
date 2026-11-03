@@ -21,24 +21,15 @@
 <body>
   <canvas id="view"></canvas>
 
-  <div id="hud" hidden>
-    <button id="btn-map" class="icon" aria-label="Map" data-i18n-label="map">
-      <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 2.2 6 2v11.6l-6-2V6.2Z"/></svg>
-    </button>
-    <button id="btn-settings" class="icon" aria-label="Settings" data-i18n-label="settings">
-      <svg viewBox="0 0 24 24"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8.6 2.1-1.9-.3a6.9 6.9 0 0 0-.7-1.7l1.1-1.6-1.9-1.9-1.6 1.1c-.5-.3-1.1-.6-1.7-.7L13.6 3h-2.7l-.3 1.9c-.6.2-1.2.4-1.7.7L7.3 4.5 5.4 6.4l1.1 1.6c-.3.5-.6 1.1-.7 1.7l-1.9.3v2.7l1.9.3c.2.6.4 1.2.7 1.7l-1.1 1.6 1.9 1.9 1.6-1.1c.5.3 1.1.6 1.7.7l.3 1.9h2.7l.3-1.9c.6-.2 1.2-.4 1.7-.7l1.6 1.1 1.9-1.9-1.1-1.6c.3-.5.6-1.1.7-1.7l1.9-.3v-2.7Z"/></svg>
-    </button>
-  </div>
-
   <div id="corner" hidden>
     <div id="minimap" class="minimap" title="Map (M)" data-i18n-title="map-open">
       <canvas id="minimap-canvas"></canvas>
       <div id="minimap-region" class="mm-region"></div>
-      <button id="mm-hide" class="mm-btn" aria-label="Hide the small map" data-i18n-label="mm-hide">&minus;</button>
     </div>
-    <button id="mm-show" class="icon" aria-label="Show the small map" data-i18n-label="mm-show" hidden>
-      <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 2.2 6 2v11.6l-6-2V6.2Z"/></svg>
-    </button>
+  </div>
+
+  <div id="hud" hidden>
+    <button id="btn-lang" class="icon lang" aria-label="中文 / English"></button>
     <div id="status" class="status-card">
       <div class="row time-row">
         <span id="clock-icon" class="clock-icon"></span>
@@ -77,19 +68,6 @@
     <ul id="map-list"></ul>
   </section>
 
-  <section id="settings" class="panel settings" hidden>
-    <header><h2 data-i18n="settings">Settings</h2><button class="close" aria-label="Close">×</button></header>
-    <label><span data-i18n="language">Language</span>
-      <select id="set-lang"><option value="en">English</option><option value="zh">中文</option></select></label>
-    <label><span data-i18n="quality">Picture quality</span>
-      <select id="set-quality">
-        <option value="high" data-i18n="q-high">High</option>
-        <option value="medium" data-i18n="q-medium">Medium</option>
-        <option value="low" data-i18n="q-low">Low</option>
-      </select></label>
-    <label><span data-i18n="music">Music</span><input id="set-music" type="range" min="0" max="1" step="0.05"></label>
-    <label><span data-i18n="sensitivity">Look sensitivity</span><input id="set-sens" type="range" min="0.3" max="2" step="0.05"></label>
-  </section>
 
   <div id="fade" class="fade" hidden></div>
   <div id="notice" class="notice" hidden></div>

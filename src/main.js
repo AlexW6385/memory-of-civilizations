@@ -8,7 +8,8 @@ import { Climate, sunPlanet, moonPlanet } from './engine/climate.js';
 import { Rain } from './engine/rain.js';
 import { GlobeView } from './ui/globe.js';
 import { MiniMap } from './ui/minimap.js';
-import { initLang, setLang, t, onLang } from './ui/i18n.js';
+import { initLang, setLang, getLang, t, onLang } from './ui/i18n.js';
+import { toWorld } from './core/build.js';
 import { dirToLocal, toPlanet, latLon, norm, enuFrame, unit } from './planet/geo.js';
 import { climateAt } from './planet/land.js';
 import { PLANET_RADIUS, BLEND } from './planet/relief.js';
@@ -18,15 +19,13 @@ import { openClimate } from './planet/climates.js';
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 
-// the default picture quality follows the machine: 'high' only on machines with many cores and
-// much memory (a laptop with 8 cores and 8 GB starts at 'medium'; the setting can be changed)
-const strong = (navigator.hardwareConcurrency || 4) >= 10 && (navigator.deviceMemory || 8) >= 8;
-const settings = load('mp.settings', { quality: strong ? 'high' : 'medium', music: 0.6, sensitivity: 1, timeRuns: true, utc: 14 });
-if (params.get('quality')) settings.quality = params.get('quality');
+// the picture is always made at the highest quality (?quality=medium|low for testing); the music's
+// level and the look sensitivity are fixed; only the time of day is remembered between visits
+const settings = { quality: params.get('quality') || 'high', music: 0.6, sensitivity: 1, timeRuns: true, utc: 14, ...load('mp.time', {}) };
 
 function sm(e0, e1, x) { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); }
 function load(k, d) { try { return { ...d, ...JSON.parse(localStorage.getItem(k) || '{}') }; } catch { return d; } }
-function save() { try { localStorage.setItem('mp.settings', JSON.stringify(settings)); } catch { /* ignore */ } }
+function save() { try { localStorage.setItem('mp.time', JSON.stringify({ timeRuns: settings.timeRuns, utc: settings.utc })); } catch { /* ignore */ } }
 
 /**
  * The loading bar: stages with weights, the fraction done of each, and the time left, estimated
@@ -154,6 +153,24 @@ async function main() {
     controls.apply(); world.place(R.camera);
     await arrive(report);
   };
+  // from the map: beside the settlement's landmark, a little way in front of it and facing it
+  const goNear = async (rec, report) => {
+    const site = rec.site, plan = rec.plan;
+    world.setAnchor(site.S.frame, site);
+    world.tilt.identity();
+    await site.load();
+    const b = plan.bakeBounds || plan.bounds, e = plan.entrance;
+    const dir = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[e.facing] || [0, -1];
+    const half = Math.abs(dir[0]) * (b[2] - b[0]) / 2 + Math.abs(dir[1]) * (b[3] - b[1]) / 2;
+    const cx = (b[0] + b[2]) / 2, cz = (b[1] + b[3]) / 2, back = half + 14;
+    const P = toWorld(plan, cx - dir[0] * back, cz - dir[1] * back), C = toWorld(plan, cx, cz);
+    const yaw = Math.atan2(-(C[0] - P[0]), -(C[2] - P[2]));
+    const y = Math.max(world.collide.groundAt(P[0], P[2], 1e4), world.collide.waterLevel?.(P[0], P[2]) ?? -Infinity) + 0.02;
+    controls.setPose(P[0], y, P[2], yaw, 0.08);
+    world.place(R.camera);
+    await arrive(report);
+    controls.setPose(P[0], y, P[2], yaw, 0.08);
+  };
   const first = world.plans.get(params.get('start') || 'edfu') || world.plans.get('edfu');
   if (params.get('pose')) {
     // ?pose=site,x,y,z,yaw,pitch (in the settlement's frame) or ?pose=lat,lon (on the planet)
@@ -184,7 +201,7 @@ async function main() {
   progress.finish();
 
   // interface: the world opens by itself; a click (or a key) starts looking and the music
-  const intro = $('intro'), hud = $('hud'), mapPanel = $('map'), setPanel = $('settings'), hint = $('click-hint');
+  const intro = $('intro'), hud = $('hud'), mapPanel = $('map'), hint = $('click-hint');
   intro.classList.add('fading');
   setTimeout(() => { intro.hidden = true; intro.classList.remove('fading'); }, 850);
   hud.hidden = false;
@@ -193,7 +210,7 @@ async function main() {
   $('touch-btns').hidden = !controls.touch;
   controls.enabled = true;
   hint.hidden = controls.touch;
-  const panelsOpen = () => !mapPanel.hidden || !setPanel.hidden;
+  const panelsOpen = () => !mapPanel.hidden;
   const begin = () => { music.start(); controls.enabled = true; hint.hidden = true; };
   canvas.addEventListener('pointerdown', () => { music.start(); if (!panelsOpen()) { controls.enabled = true; controls.lock(); } });
   addEventListener('keydown', () => music.start(), { once: true });
@@ -226,10 +243,10 @@ async function main() {
       toast(''); fade.classList.remove('on'); setTimeout(() => { fade.hidden = true; }, 400);
     }
   };
-  const mapView = new GlobeView(world, (rec) => travel((report) => goTo(rec, report)), (lat, lon) => travel((report) => goToPlace(lat, lon, report)));
+  const mapView = new GlobeView(world, (rec) => travel((report) => goNear(rec, report)), (lat, lon) => travel((report) => goToPlace(lat, lon, report)), () => sunPlanet(climate.utc));
 
   const closePanels = () => {
-    mapPanel.hidden = true; setPanel.hidden = true;
+    mapPanel.hidden = true;
     controls.enabled = true;
     if (!controls.touch) { controls.lock(); hint.hidden = !!document.pointerLockElement; }
   };
@@ -239,18 +256,18 @@ async function main() {
     p.hidden = false;
     if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
-  const minimap = new MiniMap(world, mapView, () => { setPanel.hidden = true; openPanel(mapPanel); });
-  $('btn-map').onclick = () => (mapPanel.hidden ? (setPanel.hidden = true, openPanel(mapPanel)) : closePanels());
-  $('btn-settings').onclick = () => (setPanel.hidden ? (mapPanel.hidden = true, openPanel(setPanel)) : closePanels());
+  const minimap = new MiniMap(world, mapView, () => openPanel(mapPanel), () => sunPlanet(climate.utc));
+  // the one button: the language
+  const langBtn = $('btn-lang');
+  const paintLang = () => { langBtn.textContent = getLang() === 'zh' ? 'EN' : '中'; };
+  langBtn.onclick = () => setLang(getLang() === 'zh' ? 'en' : 'zh');
+  onLang(paintLang); paintLang();
   for (const c of document.querySelectorAll('.panel .close')) c.onclick = closePanels;
   addEventListener('keydown', (e) => {
-    if (e.code === 'KeyM') mapPanel.hidden ? (setPanel.hidden = true, openPanel(mapPanel)) : closePanels();
+    if (e.code === 'KeyM') mapPanel.hidden ? openPanel(mapPanel) : closePanels();
     if (e.code === 'Escape' && panelsOpen()) closePanels();
   });
 
-  // settings
-  const q = $('set-quality'), mv = $('set-music'), sv = $('set-sens'), lang = $('set-lang');
-  q.value = settings.quality; mv.value = settings.music; sv.value = settings.sensitivity;
   // the clock beside the small map: the hour (drag to change it) and run / hold
   const clockTime = $('clock-time'), clockHour = $('clock-hour'), clockPlay = $('clock-play'), clockIcon = $('clock-icon'), clockPeriod = $('clock-period');
   const paintClock = () => {
@@ -296,10 +313,6 @@ async function main() {
   };
   setInterval(paintSpeed, 250);
   onLang(() => { paintSpeed(); paintClock(); });
-  q.onchange = () => { settings.quality = q.value; R.setQuality(q.value); world.flora.scale = world.openFlora.scale = floraScale[q.value] ?? 1; world.flora.dirty = true; save(); };
-  mv.oninput = () => { settings.music = +mv.value; music.setVolume(settings.music); save(); };
-  sv.oninput = () => { settings.sensitivity = +sv.value; controls.sensitivity = settings.sensitivity; save(); };
-  lang.onchange = () => setLang(lang.value);
 
   // the visitor's heading: the angle of the view from north, clockwise (for the maps)
   const heading = () => {
@@ -327,7 +340,7 @@ async function main() {
     const open = openClimate(climateAt(u));
     if (near) {
       const w = 1 - sm(near.s.S.radius + BLEND * 0.5, near.s.S.radius + BLEND + 250, near.r);
-      zones.push({ zone: { id: near.s.id, climate: REGION[near.s.S.focus.region].climate }, w });
+      zones.push({ zone: { id: near.s.id, climate: near.s.S.ground?.climate || REGION[near.s.S.focus.region].climate }, w });
       for (const z of open) zones.push({ zone: z.zone, w: z.w * (1 - w) });
     } else zones.push(...open);
     const cl = climate.update({ sun: dirToLocal(f, sunPlanet(climate.utc)), moon: dirToLocal(f, moonPlanet(climate.utc)), up: dirToLocal(f, u), zones }, Math.min(dt, 0.25));
@@ -340,7 +353,7 @@ async function main() {
     snap = false;
     R.renderer.toneMappingExposure = exposure;
     if (here.building) music.set(here.building.music, here.room?.kind || 'open');
-    else music.set(null, 'open');
+    else music.set(world.anchor.site?.music || null, 'open');
     return here;
   }
   const frame = () => {
@@ -378,6 +391,7 @@ async function main() {
       snap = true;
     },
     entrance: (id) => goTo(world.plans.get(id)),
+    near: (id) => goNear(world.plans.get(id)),
     walk: async (keys, ms) => { controls.enabled = true; for (const k of keys) controls.keys.add(k); await new Promise((r) => setTimeout(r, ms)); controls.keys.clear(); },
     feet: () => ({ ...controls.feet }),
     world, renderer: R, controls, stats, music, climate, mapView,

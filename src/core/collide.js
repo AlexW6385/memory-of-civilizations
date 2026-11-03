@@ -10,9 +10,11 @@ export class CollisionWorld {
     this.grid = new Map();
     this.floorGrid = new Map();
     this.terrain = () => 0;   // height of the open ground of the world at (x, z)
+    this.tops = [];           // the buildings' upper surfaces (topField), to stand on from above
   }
 
-  add({ floors, obstacles }) {
+  add({ floors, obstacles, tops }) {
+    if (tops) this.tops.push(tops);
     for (const f of floors) { this.floors.push(f); this._index(this.floorGrid, f.rect, f); }
     for (const o of obstacles) {
       if (o.circle) { const [x, z, r] = o.circle; o.bb = [x - r, z - r, x + r, z + r]; }
@@ -26,7 +28,8 @@ export class CollisionWorld {
   }
 
   /** Take out what add() put in (a building that is unloaded). */
-  remove({ floors, obstacles }) {
+  remove({ floors, obstacles, tops }) {
+    if (tops) this.tops = this.tops.filter((t) => t !== tops);
     const fs = new Set(floors), os = new Set(obstacles);
     this.floors = this.floors.filter((f) => !fs.has(f));
     this.obstacles = this.obstacles.filter((o) => !os.has(o));
@@ -83,6 +86,12 @@ export class CollisionWorld {
   /** Highest top of an obstacle under the circle (x, z, r) not above maxY (roofs and walls to land on). */
   topAt(x, z, r, maxY) {
     let best = -Infinity;
+    for (const T of this.tops) {
+      const i = Math.floor((x - T.x0) / T.res), j = Math.floor((z - T.z0) / T.res);
+      if (i < 0 || j < 0 || i >= T.w || j >= T.h) continue;
+      const h = T.data[j * T.w + i];
+      if (h <= maxY && h > best) best = h;
+    }
     for (const o of this._near(this.grid, x, z)) {
       if (o.y1 > maxY || o.y1 <= best) continue;
       if (x + r < o.bb[0] || x - r > o.bb[2] || z + r < o.bb[1] || z - r > o.bb[3]) continue;
@@ -134,6 +143,49 @@ export class CollisionWorld {
     }
     return [x, z];
   }
+}
+
+/**
+ * The upper surface of built geometry, as a height field: the highest upward-facing surface over
+ * each cell of `res` metres (roofs, wall tops, terraces). From above one lands and walks on it;
+ * from inside (below the roof) it is out of reach. parts: [{ mat, geometry }] (unindexed, in the
+ * collision world's coordinates). Gives the thread back every few milliseconds.
+ */
+export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer']) {
+  let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
+  for (const { mat, geometry } of parts) {
+    if (skip.includes(mat)) continue;
+    const b = geometry.boundingBox || (geometry.computeBoundingBox(), geometry.boundingBox);
+    x0 = Math.min(x0, b.min.x); z0 = Math.min(z0, b.min.z); x1 = Math.max(x1, b.max.x); z1 = Math.max(z1, b.max.z);
+  }
+  if (!Number.isFinite(x0)) return null;
+  const w = Math.ceil((x1 - x0) / res) + 1, h = Math.ceil((z1 - z0) / res) + 1;
+  const data = new Float32Array(w * h).fill(-Infinity);
+  let t = performance.now();
+  for (const { mat, geometry } of parts) {
+    if (skip.includes(mat)) continue;
+    const P = geometry.attributes.position.array;
+    for (let k = 0; k < P.length; k += 9) {
+      const ax = P[k], ay = P[k + 1], az = P[k + 2], bx = P[k + 3], by = P[k + 4], bz = P[k + 5], cx = P[k + 6], cy = P[k + 7], cz = P[k + 8];
+      // upward-facing only: the normal's y over its length
+      const ux = bx - ax, uy = by - ay, uz = bz - az, vx = cx - ax, vy = cy - ay, vz = cz - az;
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      if (ny <= 0.3 * Math.hypot(nx, ny, nz)) continue;
+      const det = ux * vz - uz * vx;
+      if (Math.abs(det) < 1e-9) continue;
+      const i0 = Math.max(0, Math.floor((Math.min(ax, bx, cx) - x0) / res)), i1 = Math.min(w - 1, Math.floor((Math.max(ax, bx, cx) - x0) / res));
+      const j0 = Math.max(0, Math.floor((Math.min(az, bz, cz) - z0) / res)), j1 = Math.min(h - 1, Math.floor((Math.max(az, bz, cz) - z0) / res));
+      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+        const px = x0 + (i + 0.5) * res - ax, pz = z0 + (j + 0.5) * res - az;
+        const s = (px * vz - pz * vx) / det, q = (ux * pz - uz * px) / det;
+        if (s < -0.02 || q < -0.02 || s + q > 1.02) continue;
+        const y = ay + uy * s + vy * q, o = j * w + i;
+        if (y > data[o]) data[o] = y;
+      }
+      if ((k & 1023) === 0 && performance.now() - t > 8) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); }
+    }
+  }
+  return { x0, z0, res, w, h, data };
 }
 
 function inside(x, z, poly) {

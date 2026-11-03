@@ -298,6 +298,9 @@ Append-only: date, decision, reason. The log of the Memory Palace era (2026-10) 
 - 2026-11-03 — The target list of ~55 civilizations (§7), balancing well-known landmarks with the places and eras history needs. Reason: author's instruction.
 - 2026-11-03 — v7's world code is rebuilt; landmarks, styles, renderer, movement, clock, UI and tools are kept (§10). Reason: the author asked to keep only the main mechanisms and rebuild the rest.
 
+- 2026-11-03 — **A lean interface:** the small map (top left; a click opens the globe), the clock-and-speed card (top right) and one language button; the settings panel is gone. Quality is always the highest; music level and look sensitivity are fixed. The maps shade night (the globe's terminator, the settlements glowing at night). A click on or near a settlement on the map (within about 1 km of its rim) lands beside its landmark, facing it, not at its far gate. Reason: author's instruction.
+- 2026-11-03 — **Roofs can be stood on:** every built part has a height field of its upper surfaces (`topField`, 0.5 m cells); one lands on it from the air and walks up and down its slopes; from inside, below the roof, it is out of reach. Reason: author's instruction (flying up to a building, one should be able to stand on it).
+
 ## 13. Roadmap and status
 
 **Status — 2026-11-03 (v8.0 in progress, branch `planet`).** v7.1 was the last Memory Palace release (ten landmarks in a flat compact city). Built since:
@@ -332,7 +335,7 @@ Append-only: date, decision, reason. The log of the Memory Palace era (2026-10) 
 
 - Dossier first (§6). Every element traces to its dossier.
 - Metres; true scale for buildings and townscapes; the planet and open country are compressed.
-- No study features, markers, labels in the world. UI: corner map, clock, globe map, settings — nothing else without a reason in §12.
+- No study features, markers, labels in the world. UI: corner map, clock-and-speed card, globe map, language button — nothing else without a reason in §12.
 - Budgets (§8) are targets; a change that breaks one is fixed by engineering before merge, and only as a last resort by thinning detail, recorded in §12.
 - Picture quality on the author's machine never goes down silently; a change that lowers it is recorded in §12.
 - Checks per change: a screenshot of the thing changed and the plan check; per task end and before release: all viewpoints compared, budget, perf, walk and globe checks.

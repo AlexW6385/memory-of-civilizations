@@ -37,7 +37,8 @@ export function move(P, dx, dz, dt, C) {
   if (P.vy > 0 || P.y > g + 1e-3) {
     // in the air: rising (held up by flight) or coming down — onto the ground, a floor, or the top
     // of a wall or a roof
-    if (C.topAt) g = Math.max(g, C.topAt(P.x, P.z, RADIUS * 0.6, P.y + 0.01));
+    // (a step up is allowed, so that one walks up a roof's slope rather than sinking into it)
+    if (C.topAt) g = Math.max(g, C.topAt(P.x, P.z, RADIUS * 0.6, P.y + (P.vy > 0 ? 0.01 : STEP)));
     if (C.waterLevel) g = Math.max(g, C.waterLevel(P.x, P.z));
     const lift = P.liftSpeed ?? LIFT, glide = P.glideSpeed ?? GLIDE;
     if (P.lift) P.vy = Math.min(lift, Math.max(P.vy, 0) + Math.max(14, lift * 1.5) * dt);

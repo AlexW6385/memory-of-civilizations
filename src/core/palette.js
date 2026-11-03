@@ -119,6 +119,18 @@ export const MATERIALS = {
   flagstone:        { color: '#998d7a', roughness: 0.85, kind: 'paving', course: 0.8, block: 1.0 },
   iron:             { color: '#3a3836', roughness: 0.5, metalness: 0.8, kind: 'metal' },
   serpentine:       { color: '#3f5b4c', roughness: 0.3, kind: 'veined', block: 1.0, course: 1.2, colors: ['#3f5b4c', '#2f4a3c', '#7e9686'] },
+  // Ming Jiangnan (Suzhou): chestnut-lacquered timber, latticed doors and windows over paper,
+  // white lime plaster, black tiles, grey-blue bluestone paving, granite canal walls, Taihu rock,
+  // pebble mosaic paths, lotus leaves
+  lacquer_chestnut: { color: '#4b2b1c', roughness: 0.42, kind: 'smooth' },
+  lattice:          { color: '#4b2b1c', roughness: 0.6, kind: 'lattice', paper: '#e9e2cf', cell: 0.09 },
+  lattice_ice:      { color: '#4b2b1c', roughness: 0.6, kind: 'lattice', paper: '#e9e2cf', cell: 0.16, ice: 1 },
+  taihu:            { color: '#a8a6a0', roughness: 0.92, kind: 'taihu' },
+  bluestone:        { color: '#5e6467', roughness: 0.8, kind: 'paving', course: 0.5, block: 1.1 },
+  granite_block:    { color: '#807c74', roughness: 0.85, kind: 'ashlar', course: 0.42, block: 1.1 },
+  pebble_mosaic:    { color: '#8e8a83', roughness: 0.9, kind: 'pebbles' },
+  lotus_leaf:       { color: '#4f7a3a', roughness: 0.6, kind: 'leaf', side: 'double' },
+  plaster_grey:     { color: '#bdb8ad', roughness: 0.92, kind: 'smooth' },
 };
 
 export function albedo(key) {

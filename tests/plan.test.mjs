@@ -40,3 +40,25 @@ test('every district has what the houses and the planting need', async () => {
     assert.ok(RULES[r.id], `${r.id}: planting rules`);
   }
 });
+
+test('one can land on a roof from the air and walk on it', async () => {
+  const { CollisionWorld, topField } = await import('../src/core/collide.js');
+  const { move, STEP } = await import('../src/core/walk.js');
+  const b = BUILDINGS.find((x) => x.id === 'foguang-east-hall');
+  const { plan } = await b.load();
+  const built = buildPlan(plan);
+  const C = new CollisionWorld();
+  C.terrain = () => -50;
+  built.colliders.tops = await topField(built.parts);
+  C.add(built.colliders);
+  const { toWorld } = await import('../src/core/build.js');
+  const c = toWorld(plan, 0, 0);
+  const roof = C.topAt(c[0], c[2], 0.2, 1e4);
+  const P = { x: c[0], y: roof + 20, z: c[2], vy: -0.01 };
+  for (let i = 0; i < 600; i++) move(P, 0, 0, 1 / 60, C);
+  assert.ok(Math.abs(P.y - roof) < 0.05, `landed at ${P.y}, roof ${roof}`);
+  // walk 4 m along the roof: still on it (within a step of its surface)
+  for (let i = 0; i < 90; i++) move(P, 0, 4 / 90, 1 / 60, C);
+  const here = C.topAt(P.x, P.z, 0.2, P.y + STEP);
+  assert.ok(P.y > roof - 4 && Math.abs(P.y - here) < 0.6, `on the roof: ${P.y} vs ${here}`);
+});

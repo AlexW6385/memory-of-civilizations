@@ -15,7 +15,8 @@ canvas#view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: b
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
-#hud { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); display: flex; gap: 8px; z-index: 5; }
+#hud { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); display: flex; gap: 8px; align-items: flex-start; z-index: 5; }
+button.icon.lang { font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; }
 #hud[hidden] { display: none; }
 button.icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: rgba(24, 20, 15, 0.42); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: grid; place-items: center; padding: 0; }
 button.icon svg { width: 20px; height: 20px; fill: var(--ink); opacity: 0.9; }

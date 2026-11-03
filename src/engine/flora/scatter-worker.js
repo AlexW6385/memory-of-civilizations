@@ -2,22 +2,31 @@
 // regions' rules. Returns flat arrays: species index, variant, x, y, z, yaw, scale, tint.
 
 import { terrainHeight, groundCover, setFocus } from '../../world/regions.js';
-import { densities, fromWater, MAX_DENSITY, NEAR_ONLY, ROWS } from '../../world/flora-rules.js';
+import { densities as legacyDensities, fromWater, MAX_DENSITY, NEAR_ONLY, ROWS } from '../../world/flora-rules.js';
+import { GROUNDS } from '../../settlements/grounds.js';
+
+// a settlement of its own plants by its module's rules (src/settlements/<id>/ground.js)
+let G = null;
+const height = (x, z) => (G ? G.height(x, z) : terrainHeight(x, z));
+const cover = (x, z, h, ny) => (G ? G.cover(x, z, h, ny) : groundCover(x, z, h, ny));
+const densities = (x, z, p) => (G ? G.planting(x, z, p) : legacyDensities(x, z, p));
+const waterDist = (x, z) => (G ? (G.fromWater ? G.fromWater(x, z) : 999) : fromWater(x, z));
 
 const SPECIES = Object.keys(MAX_DENSITY);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 function place(x, z) {
-  const h = terrainHeight(x, z);
+  const h = height(x, z);
   const e = 1.5;
-  const dx = (terrainHeight(x + e, z) - terrainHeight(x - e, z)) / (2 * e), dz = (terrainHeight(x, z + e) - terrainHeight(x, z - e)) / (2 * e);
+  const dx = (height(x + e, z) - height(x - e, z)) / (2 * e), dz = (height(x, z + e) - height(x, z - e)) / (2 * e);
   const ny = 1 / Math.hypot(dx, 1, dz);
-  return { x, z, h, ny, g: groundCover(x, z, h, ny), w: fromWater(x, z) };
+  return { x, z, h, ny, g: cover(x, z, h, ny), w: waterDist(x, z) };
 }
 
 self.onmessage = (e) => {
   const { id, rect, near, focus, gen } = e.data;
-  setFocus(focus);
+  G = focus?.settlement ? GROUNDS[focus.settlement] : null;
+  setFocus(G ? null : focus);
   // only on the settlement's disc (a little inside its rim): beyond it lies the open country
   const inside = (x, z) => !focus || Math.hypot(x - focus.center[0], z - focus.center[1]) < focus.radius - 6;
   const [x0, z0, x1, z1] = rect, area = (x1 - x0) * (z1 - z0);
@@ -31,7 +40,7 @@ self.onmessage = (e) => {
   };
   SPECIES.forEach((sp, si) => {
     if (NEAR_ONLY.has(sp) !== !!near) return;
-    const max = MAX_DENSITY[sp];
+    const max = (G && G.maxDensity && G.maxDensity[sp]) || MAX_DENSITY[sp];
     let pts = [];
     if (ROWS[sp]) {
       // orchards: a grid of trees, slightly irregular, kept where the density says so
