@@ -122,6 +122,36 @@ class Settlement {
     return rec;
   }
 
+  /** The far view (tools/impostors.mjs): the settlement simplified, shown until it is built in full. */
+  async loadImpostor() {
+    if (this.impostor !== undefined) return;
+    this.impostor = null;
+    try {
+      const buf = await (await fetch(`data/impostors/${this.id}.bin`)).arrayBuffer();
+      const h = new DataView(buf), n = h.getUint32(8, true), ni = h.getUint32(12, true);
+      const min = [h.getFloat32(16, true), h.getFloat32(20, true), h.getFloat32(24, true)], sc = h.getFloat32(28, true);
+      const bytes = await new Response(new Blob([buf.slice(32)]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+      const P = new Uint16Array(bytes, 0, n * 3), C = new Uint8Array(bytes, n * 6, n * 3);
+      const off = n * 9 + ((4 - ((n * 9) % 4)) % 4), I = new Uint32Array(bytes, off, ni);
+      const pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+      const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+      for (let i = 0; i < n * 3; i++) { pos[i] = min[i % 3] + P[i] * sc; col[i] = lin(C[i]); }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      g.setIndex(new THREE.BufferAttribute(I, 1));
+      g.computeBoundingSphere();
+      const m = new THREE.MeshStandardNodeMaterial({ vertexColors: true, flatShading: true, roughness: 0.85, side: THREE.DoubleSide });
+      const mesh = new THREE.Mesh(g, m);
+      mesh.name = 'impostor:' + this.id;
+      mesh.castShadow = true; mesh.receiveShadow = true;
+      this.impostor = new THREE.Group();
+      this.impostor.matrixAutoUpdate = false;
+      this.impostor.add(mesh);
+      this.world.scene.add(this.impostor);
+    } catch (e) { console.warn('no far view for', this.id, e); }
+  }
+
   unload() {
     if (this.state === 'idle') return;
     this.world.scene.remove(this.group);
@@ -262,6 +292,11 @@ export class World {
       s.group.matrix.multiplyMatrices(S, planetFromFrame(s.S.frame, this._m2));
       s.group.matrixWorldNeedsUpdate = true;
     }
+    for (const s of this.settlements) {
+      if (!s.impostor) continue;
+      s.impostor.visible = s.state !== 'ready';
+      if (s.impostor.visible) { s.impostor.matrix.multiplyMatrices(S, planetFromFrame(s.S.frame, this._m2)); s.impostor.matrixWorldNeedsUpdate = true; }
+    }
     const fs = this.floraSite;
     if (fs) { this.legacy.matrix.multiplyMatrices(S, planetFromFrame(fs.S.frame, this._m2)); this.legacy.matrixWorldNeedsUpdate = true; }
     if (tilt) camera.quaternion.premultiply(this.tilt);
@@ -316,6 +351,7 @@ export class World {
       const d = World.rimDistance(s, u);
       if (d < radius + lift) wanted.push(s.load());
       else if (d > UNLOAD + lift) s.unload();
+      if (d < 6000) s.loadImpostor();
     }
     await Promise.all(wanted);
   }
