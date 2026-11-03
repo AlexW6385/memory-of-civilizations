@@ -141,7 +141,7 @@ function rectRoof(el, bag) {
   beamTris(r, [a0[0], top - 0.08, a0[1]], [a1[0], top - 0.08, a1[1]], 0.16, 0.42);
   for (const s of [-1, 1]) {
     // the curl at each end of the ridge, rising and turning out
-    for (let k = 0; k < 5; k++) {
+    for (let k = 0; k < (el.curl === false ? 0 : 5); k++) {
       const e0 = rot(cx + s * (L + 0.3 + k * 0.12), cz), e1 = rot(cx + s * (L + 0.42 + k * 0.12), cz);
       beamTris(r, [e0[0], top + 0.2 + k * k * 0.07, e0[1]], [e1[0], top + 0.2 + (k + 1) * (k + 1) * 0.07, e1[1]], 0.13, 0.22);
     }

@@ -140,6 +140,12 @@ export const MATERIALS = {
   paint_caihua:     { color: '#2d5f63', roughness: 0.6, kind: 'smooth' },
   palace_wall:      { color: '#9a3826', roughness: 0.9, kind: 'smooth' },
   brick_paving:     { color: '#7c7870', roughness: 0.88, kind: 'paving', course: 0.34, block: 0.68 },
+  // Khmer (Angkor, 12th c.): grey-brown sandstone weathered dark with lichen, red laterite in the
+  // platforms and enclosure walls; the village: timber on stilts, palm-leaf thatch, woven walls
+  sandstone_khmer:  { color: '#8f8576', roughness: 0.9, kind: 'ashlar', course: 0.45, block: 0.95 },
+  sandstone_carved: { color: '#857b6c', roughness: 0.92, kind: 'rock' },
+  laterite:         { color: '#8b5a3d', roughness: 0.95, kind: 'ashlar', course: 0.4, block: 0.6 },
+  thatch_palm:      { color: '#8a7350', roughness: 1.0, kind: 'bark' },
 };
 
 export function albedo(key) {

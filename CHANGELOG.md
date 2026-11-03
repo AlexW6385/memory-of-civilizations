@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.4 — Angkor (2026-11-03)
+- New settlement: Angkor Wat, c. 1150 — the three levels of galleries, the quincunx of lotus-bud towers, the steep stairs of the central level, the libraries and basins, the causeway bordered by seven-headed serpents, the laterite enclosure with its western gate, the moat — and a village of houses on stilts among sugar palms, rice fields beyond (dossier: `docs/settlements/angkor.md`). New style `khmer`.
+
 ## v8.3 — Ming–Qing Beijing (2026-11-03)
 - New settlement: the Forbidden City's Outer Court — the Meridian Gate, the Inner Golden Water River with five marble bridges, the Gate of Supreme Harmony, the great courtyard with its galleries and pavilions, the three-tiered marble terrace with the Halls of Supreme, Central and Preserving Harmony (the first at its true 64 × 37 m), bronze vats, tripods and lions, the red wall with corner towers and the moat — and round it lanes of grey-brick courtyard houses with their gates, screen walls and courtyard trees (dossier: `docs/settlements/qing-beijing.md`). New style `qing`.
 - Far views for the settlements of their own (Ming Suzhou, Beijing).

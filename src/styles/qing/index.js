@@ -92,7 +92,7 @@ function stairs(el, { bag, col }) {
     else if (dir === 's') r = [x0, z0 + len * f0, x1, z0 + len * f1];
     else if (dir === 'e') r = [x0 + len * f0, z0, x0 + len * f1, z1];
     else r = [x1 - len * f1, z0, x1 - len * f0, z1];
-    bag.add('marble', box(r[0], y0 - 0.2, r[1], r[2], yy, r[3]));
+    bag.add(el.mat || 'marble', box(r[0], y0 - 0.2, r[1], r[2], yy, r[3]));
   }
   col.ramp([x0, z0, x1, z1], y0, y1, dir);
 }

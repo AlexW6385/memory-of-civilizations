@@ -4,13 +4,16 @@
 
 import { ground as mingSuzhou } from './ming-suzhou/ground.js';
 import { ground as qingBeijing } from './qing-beijing/ground.js';
+import { ground as angkor } from './angkor/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
+  angkor,
 };
 
 export const MODULES = {
   'ming-suzhou': () => import('./ming-suzhou/index.js'),
   'qing-beijing': () => import('./qing-beijing/index.js'),
+  angkor: () => import('./angkor/index.js'),
 };
