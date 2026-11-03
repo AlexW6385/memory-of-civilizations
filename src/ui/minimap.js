@@ -27,7 +27,7 @@ export class MiniMap {
   /** Redraw (a few times a second) for the visitor at planet direction u, heading (radians from north). */
   update(u, heading) {
     const now = performance.now();
-    if (this.box.hidden || now < this.next) return;
+    if (!this.box.offsetParent || now < this.next) return;
     this.next = now + 250;
     const cv = this.canvas, dpr = devicePixelRatio || 1, W = Math.round(cv.clientWidth * dpr), H = Math.round(cv.clientHeight * dpr);
     if (!W || !H) return;

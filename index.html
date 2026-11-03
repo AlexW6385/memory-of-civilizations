@@ -23,7 +23,11 @@
 
   <button id="btn-lang" class="icon lang" aria-label="中文 / English"></button>
 
+  <button id="corner-open" class="icon" aria-label="Show the map and the clock" data-i18n-label="card-show" hidden>
+    <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 2.2 6 2v11.6l-6-2V6.2Z"/></svg>
+  </button>
   <div id="corner" class="corner-card" hidden>
+    <button id="corner-fold" class="fold" aria-label="Fold the card" data-i18n-label="card-fold">&minus;</button>
     <div id="minimap" class="minimap" title="Map (M)" data-i18n-title="map-open">
       <canvas id="minimap-canvas"></canvas>
       <div id="minimap-region" class="mm-region"></div>

@@ -55,11 +55,15 @@ button.primary:disabled { opacity: 0.4; cursor: default; }
 
 /* the language button, top right */
 #btn-lang { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); z-index: 12; font-size: 14px; font-weight: 600; color: var(--ink); }
-body.panel-open #btn-lang, body.panel-open #corner { display: none; }
+body.panel-open #btn-lang, body.panel-open #corner, body.panel-open #corner-open { display: none; }
 
 /* the corner card, top left: the small map, the clock, how the visitor is moving */
 #corner { position: fixed; top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); width: 216px; z-index: 5; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: rgba(22, 18, 14, 0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.3); color: var(--ink); }
 #corner[hidden] { display: none; }
+#corner-open { position: fixed; top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); z-index: 5; width: 44px; height: 44px; }
+#corner-open[hidden] { display: none; }
+#corner .fold { position: absolute; top: 7px; right: 7px; z-index: 2; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: rgba(20, 16, 12, 0.62); color: var(--ink); font-size: 16px; line-height: 22px; padding: 0; text-align: center; }
+#corner .fold:hover { background: rgba(20, 16, 12, 0.85); }
 .minimap { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; background: #2f281f; cursor: pointer; }
 #minimap-canvas { width: 100%; height: 100%; display: block; }
 .mm-region { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 10px 6px; font-size: 12px; color: var(--ink); background: linear-gradient(transparent, rgba(20, 16, 12, 0.8)); pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

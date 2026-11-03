@@ -244,7 +244,17 @@ async function main() {
   const intro = $('intro'), mapPanel = $('map'), hint = $('click-hint');
   intro.classList.add('fading');
   setTimeout(() => { intro.hidden = true; intro.classList.remove('fading'); }, 850);
-  $('corner').hidden = false;
+  // the corner card folds into one button (remembered; folded by default on phones)
+  const corner = $('corner'), cornerOpen = $('corner-open');
+  let folded = matchMedia('(max-width: 560px)').matches;
+  try { const f = localStorage.getItem('mp.card'); if (f) folded = f === 'folded'; } catch { /* storage unavailable */ }
+  const fold = (f) => {
+    folded = f; corner.hidden = f; cornerOpen.hidden = !f;
+    try { localStorage.setItem('mp.card', f ? 'folded' : 'open'); } catch { /* ignore */ }
+  };
+  fold(folded);
+  $('corner-fold').onclick = (e) => { e.stopPropagation(); fold(true); };
+  cornerOpen.onclick = () => fold(false);
   $('stick').hidden = !controls.touch;
   $('touch-btns').hidden = !controls.touch;
   controls.enabled = true;
