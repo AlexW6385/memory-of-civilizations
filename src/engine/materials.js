@@ -386,6 +386,9 @@ function make(spec) {
         const du = min(fu, float(1).sub(fu)), dv = min(fv, float(1).sub(fv));
         d = smoothstep(0.06, 0.14, min(du, dv));
       }
+      // seen from afar the bars are finer than a pixel: fade to their average (no moiré)
+      const fw = max(fwidth(u.div(c)), fwidth(v.div(c)));
+      d = mix(d, float(spec.ice ? 0.82 : 0.62), smoothstep(0.25, 0.7, fw));
       const paper = uniform(new Color(spec.paper || '#e9e2cf'));
       m.colorNode = mix(baseNode, paper, d);
       m.roughnessNode = mix(roughU, float(0.95), d);

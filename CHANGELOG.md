@@ -2,6 +2,11 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.3 — Ming–Qing Beijing (2026-11-03)
+- New settlement: the Forbidden City's Outer Court — the Meridian Gate, the Inner Golden Water River with five marble bridges, the Gate of Supreme Harmony, the great courtyard with its galleries and pavilions, the three-tiered marble terrace with the Halls of Supreme, Central and Preserving Harmony (the first at its true 64 × 37 m), bronze vats, tripods and lions, the red wall with corner towers and the moat — and round it lanes of grey-brick courtyard houses with their gates, screen walls and courtyard trees (dossier: `docs/settlements/qing-beijing.md`). New style `qing`.
+- Far views for the settlements of their own (Ming Suzhou, Beijing).
+- Latticed doors and windows no longer shimmer from afar.
+
 ## v8.2 — Ming Suzhou; one corner card; no arriving inside things (2026-11-03)
 - New settlement: Ming Suzhou, c. 1530 — the Humble Administrator's Garden as Wen Zhengming painted it, its owner's residence, and a canal quarter of streets beside canals, whitewashed houses, humpbacked bridges and boats (dossier: `docs/settlements/ming-suzhou.md`). New style `ming`: halls with lattice doors, pavilions with swept roofs, galleries, garden walls with moon gates and leaky windows, Taihu rock, lotus, canal houses.
 - The small map, the clock and the speed are one card (top left); the language button is top right. The English period name no longer squeezes the pause button.

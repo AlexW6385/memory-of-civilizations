@@ -131,6 +131,15 @@ export const MATERIALS = {
   pebble_mosaic:    { color: '#8e8a83', roughness: 0.9, kind: 'pebbles' },
   lotus_leaf:       { color: '#4f7a3a', roughness: 0.6, kind: 'leaf', side: 'double' },
   plaster_grey:     { color: '#bdb8ad', roughness: 0.92, kind: 'smooth' },
+  // Ming–Qing Beijing: yellow glazed tiles, vermilion columns and walls, beams painted blue and
+  // green, white marble terraces, grey brick courtyards; the grey-brick courtyard houses
+  tile_yellow:      { color: '#c8932c', roughness: 0.32, kind: 'tiles' },
+  tile_green:       { color: '#3f6b45', roughness: 0.35, kind: 'tiles' },
+  lacquer_red:      { color: '#8e2a1c', roughness: 0.45, kind: 'smooth' },
+  lattice_red:      { color: '#8e2a1c', roughness: 0.6, kind: 'lattice', paper: '#e6dcc3', cell: 0.1 },
+  paint_caihua:     { color: '#2d5f63', roughness: 0.6, kind: 'smooth' },
+  palace_wall:      { color: '#9a3826', roughness: 0.9, kind: 'smooth' },
+  brick_paving:     { color: '#7c7870', roughness: 0.88, kind: 'paving', course: 0.34, block: 0.68 },
 };
 
 export function albedo(key) {

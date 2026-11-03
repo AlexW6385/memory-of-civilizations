@@ -16,8 +16,9 @@ import { buildPlan } from '../src/core/build.js';
 import { MATERIALS } from '../src/core/palette.js';
 import { SITES } from '../src/planet/sites.js';
 import { withFocus } from '../src/world/regions.js';
+import { MODULES } from '../src/settlements/grounds.js';
 
-const CELL = 1.0;
+let CELL = 1.0;                 // the vertex grid (m): 1 m for the ten, coarser for the large towns of their own
 const only = process.argv.slice(2);
 await import('../src/styles/vernacular/index.js');
 const city = await import('../src/world/city.js');
@@ -26,16 +27,24 @@ const hex = (k) => { const m = MATERIALS[k] || MATERIALS.sandstone, h = parseInt
 
 await mkdir(new URL('../data/impostors/', import.meta.url), { recursive: true });
 for (const s of SITES) {
-  if (!s.legacy || (only.length && !only.includes(s.id))) continue;
-  const focus = { region: s.legacy.region, center: s.legacy.center, radius: s.radius };
+  if ((!s.legacy && !MODULES[s.id]) || (only.length && !only.includes(s.id))) continue;
   const plans = [];
-  for (const id of s.legacy.buildings) plans.push((await BUILDINGS.find((b) => b.id === id).load()).plan);
-  plans.push(withFocus(focus, () => city.plan(focus.region)));
+  let focus = null;
+  CELL = s.legacy ? 1.0 : 2.4;
+  if (s.legacy) {
+    focus = { region: s.legacy.region, center: s.legacy.center, radius: s.radius };
+    for (const id of s.legacy.buildings) plans.push((await BUILDINGS.find((b) => b.id === id).load()).plan);
+    plans.push(withFocus(focus, () => city.plan(focus.region)));
+  } else {
+    // a settlement of its own (src/settlements/<id>/): its landmarks and its town
+    const mod = await MODULES[s.id]();
+    plans.push(...mod.landmarks.map((l) => l.plan), ...(await mod.town()));
+  }
   // gather triangles: [x, y, z] ×3 and a colour
   const cells = new Map(), verts = [], cols = [], idx = [];
   let tris = 0;
   for (const plan of plans) {
-    const built = withFocus(focus, () => buildPlan(plan));
+    const built = focus ? withFocus(focus, () => buildPlan(plan)) : buildPlan(plan);
     for (const { mat, geometry } of built.parts) {
       if (mat === 'glass_outer' || mat === 'water') continue;
       const c = hex(mat), g = geometry.index ? geometry.toNonIndexed() : geometry, p = g.attributes.position.array;

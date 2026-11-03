@@ -12,6 +12,13 @@ import { BufferGeometry, Float32BufferAttribute, Shape, Path, ExtrudeGeometry, M
 import { registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles, frustum } from '../../core/geom.js';
 
+// The materials of the vocabulary; an element may change them (el.pal), e.g. the palace halls of
+// Beijing: red columns, yellow glazed tiles, white marble (src/styles/qing/).
+export const DEFAULT_PAL = { wood: 'lacquer_chestnut', column: 'lacquer_chestnut', soffit: 'lacquer_chestnut', base: 'granite_block', floor: 'bluestone', lattice: 'lattice', leaky: 'lattice_ice', plaster: 'plaster_white', plinth: 'plaster_grey', roof: 'tile_dark' };
+let PAL = DEFAULT_PAL, LOW = false;           // LOW: fewer segments (houses of the town, seen in hundreds)
+/** Wrap an element builder so that it uses the element's materials (el.pal) over the defaults. */
+export const withPal = (fn) => (el, ctx) => { const prev = PAL, low = LOW; PAL = el.pal ? { ...DEFAULT_PAL, ...el.pal } : DEFAULT_PAL; LOW = low || !!el.simple; try { fn(el, ctx); } finally { PAL = prev; LOW = low; } };
+
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
@@ -91,9 +98,9 @@ function beamTris(out, p0, p1, w, h) {
  */
 function rectRoof(el, bag) {
   const [cx, cz] = el.c, A = el.A, B = el.B, y = el.y, R = el.rise, sw = el.sweep ?? 0.9, kind = el.kind || 'xieshan';
-  const mat = el.mat || 'tile_dark', soffit = el.soffit || 'lacquer_chestnut', p = el.p ?? 1.7, gAt = el.gableAt ?? 0.42;
+  const mat = el.mat || PAL.roof, soffit = el.soffit || PAL.soffit, p = el.p ?? 1.7, gAt = el.gableAt ?? 0.42;
   const L = kind === 'gable' ? A : A - B;                 // half-length of the ridge
-  const NX = Math.max(8, Math.round(A * 2)), NZ = 12;
+  const NX = LOW ? Math.max(4, Math.round(A * 0.8)) : Math.max(8, Math.round(A * 2)), NZ = LOW ? 6 : 12;
   const out = [], under = [];
   const rot = (x, z) => (el.alongZ ? [cx - (z - cz), cz + (x - cx)] : [x, z]);
   const P = (x, z, off = 0) => {
@@ -158,22 +165,27 @@ function rectRoof(el, bag) {
       const q0 = rot(cx + s * xg, cz - zz), q1 = rot(cx + s * xg, cz + zz), q2 = rot(cx + s * xg, cz);
       g.push(q0[0], yb, q0[1], q1[0], yb, q1[1], q2[0], top - 0.1, q2[1]);
     }
-    bag.add('plaster_white', fromTriangles(g.concat(flipTris(g))));
+    bag.add(PAL.plaster, fromTriangles(g.concat(flipTris(g))));
   }
 }
 
 /** A round column on a drum base. */
-function column(bag, col, x, z, y, h, d, mat = 'lacquer_chestnut') {
-  bag.add('granite_block', lathe([[d * 0.85, 0], [d * 0.85, 0.08], [d * 0.72, 0.2], [d * 0.6, 0.22], [0.001, 0.22]], 12, null, x, y, z));
-  bag.add(mat, lathe([[d / 2, 0], [d / 2 * 0.94, h], [0.001, h]], 10, null, x, y + 0.2, z));
+function column(bag, col, x, z, y, h, d, mat = PAL.column) {
+  if (LOW) {
+    bag.add(PAL.base, box(x - d * 0.75, y, z - d * 0.75, x + d * 0.75, y + 0.2, z + d * 0.75));
+    bag.add(mat, lathe([[d / 2, 0], [d / 2 * 0.94, h]], 6, null, x, y + 0.2, z));
+  } else {
+    bag.add(PAL.base, lathe([[d * 0.85, 0], [d * 0.85, 0.08], [d * 0.72, 0.2], [d * 0.6, 0.22], [0.001, 0.22]], 12, null, x, y, z));
+    bag.add(mat, lathe([[d / 2, 0], [d / 2 * 0.94, h], [0.001, h]], 10, null, x, y + 0.2, z));
+  }
   col?.circle(x, z, d / 2, y, y + h);
 }
 
 /** A stone platform with a bluestone top and a granite kerb. */
 function platform(bag, col, rect, y0, y1) {
   const [x0, z0, x1, z1] = rect;
-  bag.add('granite_block', box(x0, y0 - 0.6, z0, x1, y1 - 0.06, z1));
-  bag.add('bluestone', box(x0 + 0.02, y1 - 0.06, z0 + 0.02, x1 - 0.02, y1, z1 - 0.02));
+  bag.add(PAL.base, box(x0, y0 - 0.6, z0, x1, y1 - 0.06, z1));
+  bag.add(PAL.floor, box(x0 + 0.02, y1 - 0.06, z0 + 0.02, x1 - 0.02, y1, z1 - 0.02));
   col.floor(rect, y1);
   if (y1 - y0 > 0.25) col.rect(rect, y0 - 0.6, y1 - 0.31);
 }
@@ -181,7 +193,7 @@ function platform(bag, col, rect, y0, y1) {
 /** Lattice panels (long doors) between two posts, with a solid lower board; open (no panels) where `open`. */
 function latticeBay(bag, col, a, b, y, h, kind = 'door', th = 0.06) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz * th, nz = ux * th;
-  const n = Math.max(2, Math.round(L / 0.62));
+  const n = LOW ? Math.max(1, Math.round(L / 1.8)) : Math.max(2, Math.round(L / 0.62));
   const lowH = kind === 'window' ? 0.95 : 0.55, topH = h - 0.12;
   const slab = (s0, s1, y0, y1, mat) => {
     const p0 = [a[0] + ux * s0, a[1] + uz * s0], p1 = [a[0] + ux * s1, a[1] + uz * s1];
@@ -195,11 +207,11 @@ function latticeBay(bag, col, a, b, y, h, kind = 'door', th = 0.06) {
   };
   for (let k = 0; k < n; k++) {
     const s0 = k * L / n + 0.03, s1 = (k + 1) * L / n - 0.03;
-    slab(s0, s1, y + (kind === 'window' ? 0 : 0.05), y + lowH, kind === 'window' ? 'plaster_white' : 'lacquer_chestnut');
-    slab(s0, s1, y + lowH, y + topH, 'lattice');
-    slab(s0 - 0.03, s0 + 0.03, y, y + topH, 'lacquer_chestnut');
+    slab(s0, s1, y + (kind === 'window' ? 0 : 0.05), y + lowH, kind === 'window' ? PAL.plaster : PAL.wood);
+    slab(s0, s1, y + lowH, y + topH, PAL.lattice);
+    slab(s0 - 0.03, s0 + 0.03, y, y + topH, PAL.wood);
   }
-  slab(0, L, y + topH, y + h, 'lacquer_chestnut');
+  slab(0, L, y + topH, y + h, PAL.wood);
   if (col) col.segment(a, b, th * 2, y, y + h);
 }
 
@@ -212,8 +224,8 @@ function benchRail(bag, col, a, b, y) {
   const n = Math.max(2, Math.round(L / 0.5));
   for (let k = 0; k <= n; k++) { const s = k * L / n; beamTris(t, P(s, 0.12, y + 0.48), P(s + 0.0001, 0.3, y + 0.85), 0.025, 0.05); }
   beamTris(t, P(0, 0.3, y + 0.85), P(L, 0.3, y + 0.85), 0.03, 0.05);
-  bag.add('lacquer_chestnut', fromTriangles(t));
-  bag.add('plaster_white', box(Math.min(P(0, -0.12, 0)[0], P(L, 0.12, 0)[0]), y, Math.min(P(0, -0.12, 0)[2], P(L, 0.12, 0)[2]), Math.max(P(0, -0.12, 0)[0], P(L, 0.12, 0)[0]), y + 0.36, Math.max(P(0, -0.12, 0)[2], P(L, 0.12, 0)[2])));
+  bag.add(PAL.wood, fromTriangles(t));
+  bag.add(PAL.plaster, box(Math.min(P(0, -0.12, 0)[0], P(L, 0.12, 0)[0]), y, Math.min(P(0, -0.12, 0)[2], P(L, 0.12, 0)[2]), Math.max(P(0, -0.12, 0)[0], P(L, 0.12, 0)[0]), y + 0.36, Math.max(P(0, -0.12, 0)[2], P(L, 0.12, 0)[2])));
   col.segment(a, b, 0.3, y, y + 0.5);
 }
 
@@ -227,13 +239,13 @@ function mingHall(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, H = el.H ?? 4.2, ylo = y - (el.plat ?? y);
   platform(bag, col, [x0 - 0.9, z0 - 0.9, x1 + 0.9, z1 + 0.9], ylo, y);
   const along = (x1 - x0) >= (z1 - z0), Lx = x1 - x0, Lz = z1 - z0;
-  const nb = Math.max(1, Math.round((along ? Lx : Lz) / 3.6)), nd = Math.max(1, Math.round((along ? Lz : Lx) / 3.4));
+  const nb = el.bays?.[0] ?? Math.max(1, Math.round((along ? Lx : Lz) / 3.6)), nd = el.bays?.[1] ?? Math.max(1, Math.round((along ? Lz : Lx) / 3.4));
   const xs = [], zs = [];
   for (let i = 0; i <= (along ? nb : nd); i++) xs.push(x0 + Lx * i / (along ? nb : nd));
   for (let j = 0; j <= (along ? nd : nb); j++) zs.push(z0 + Lz * j / (along ? nd : nb));
   // the posts round the edge; the hall's floor of square bricks
   for (const x of xs) for (const z of zs) if (x === x0 || x === x1 || z === z0 || z === z1) column(bag, col, x, z, y, H - 0.2, 0.28);
-  bag.add('bluestone', box(x0, y - 0.04, z0, x1, y + 0.01, z1));
+  bag.add(PAL.floor, box(x0, y - 0.04, z0, x1, y + 0.01, z1));
   // lattice doors (or plaster walls with windows) between the posts
   const sides = { n: [[x0, z0], [x1, z0], xs], s: [[x1, z1], [x0, z1], xs], w: [[x0, z1], [x0, z0], zs], e: [[x1, z0], [x1, z1], zs] };
   for (const [k, [a, b, ticks]] of Object.entries(sides)) {
@@ -247,7 +259,7 @@ function mingHall(el, { bag, col }) {
         latticeBay(bag, col, A, B, y, H - 0.5, el.four && !isFront ? 'window' : 'door');
       } else {
         const L = Math.hypot(B[0] - A[0], B[1] - A[1]);
-        bag.add('plaster_white', box(Math.min(A[0], B[0]) - (k === 'w' || k === 'e' ? 0.14 : 0), y, Math.min(A[1], B[1]) - (k === 'n' || k === 's' ? 0.14 : 0), Math.max(A[0], B[0]) + (k === 'w' || k === 'e' ? 0.14 : 0), y + H - 0.4, Math.max(A[1], B[1]) + (k === 'n' || k === 's' ? 0.14 : 0)));
+        bag.add(PAL.plaster, box(Math.min(A[0], B[0]) - (k === 'w' || k === 'e' ? 0.14 : 0), y, Math.min(A[1], B[1]) - (k === 'n' || k === 's' ? 0.14 : 0), Math.max(A[0], B[0]) + (k === 'w' || k === 'e' ? 0.14 : 0), y + H - 0.4, Math.max(A[1], B[1]) + (k === 'n' || k === 's' ? 0.14 : 0)));
         col.segment(A, B, 0.28, y, y + H);
         void L;
       }
@@ -256,11 +268,11 @@ function mingHall(el, { bag, col }) {
   // a frieze (gua luo) of fretwork under the eaves and the beam
   const fr = [];
   for (const [a, b] of [[[x0, z0], [x1, z0]], [[x1, z0], [x1, z1]], [[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]]]) beamTris(fr, [a[0], y + H - 0.55, a[1]], [b[0], y + H - 0.55, b[1]], 0.14, 0.38);
-  bag.add('lacquer_chestnut', fromTriangles(fr));
+  bag.add(PAL.wood, fromTriangles(fr));
   // the ceiling and the roof
-  bag.add('lacquer_chestnut', box(x0, y + H - 0.2, z0, x1, y + H - 0.12, z1));
+  bag.add(PAL.wood, box(x0, y + H - 0.2, z0, x1, y + H - 0.12, z1));
   const o = el.eave ?? 1.25;
-  rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (along ? Lx : Lz) / 2 + o, B: (along ? Lz : Lx) / 2 + o, y: y + H - 0.25, rise: el.rise ?? ((along ? Lz : Lx) / 2 + o) * 0.62, kind: el.roof || 'xieshan', sweep: el.sweep ?? 1.0, alongZ: !along }, bag);
+  if (el.roof !== 'none') rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (along ? Lx : Lz) / 2 + o, B: (along ? Lz : Lx) / 2 + o, y: y + H - 0.25, rise: el.rise ?? ((along ? Lz : Lx) / 2 + o) * 0.62, kind: el.roof || 'xieshan', sweep: el.sweep ?? 1.0, alongZ: !along }, bag);
 }
 
 /** ming_pavilion: { c, shape ('hex'|'square'|'oct'|'rect'), r (or w, d), y, H, bench, moons (round openings: square only) } */
@@ -290,9 +302,9 @@ function mingPavilion(el, { bag, col }) {
   }
   const fr = [];
   for (let k = 0; k < n; k++) { const a = poly[k], b = poly[(k + 1) % n]; beamTris(fr, [a[0], y + H - 0.55, a[1]], [b[0], y + H - 0.55, b[1]], 0.12, 0.34); }
-  bag.add('lacquer_chestnut', fromTriangles(fr));
+  bag.add(PAL.wood, fromTriangles(fr));
   if (el.shape === 'rect') rectRoof({ c: [cx, cz], A: el.w / 2 + 1.0, B: (el.d ?? el.w) / 2 + 1.0, y: y + H - 0.2, rise: ((el.d ?? el.w) / 2 + 1) * 0.7, kind: 'xieshan', sweep: 0.9 }, bag);
-  else pyramidRoof(poly.map((p) => ext(p, 1.0)), y + H - 0.2, (el.r ?? el.w / 2) * 1.05 + 0.9, el.sweep ?? 1.0, bag, 'tile_dark', 'lacquer_chestnut');
+  else pyramidRoof(poly.map((p) => ext(p, 1.0)), y + H - 0.2, (el.r ?? el.w / 2) * 1.05 + 0.9, el.sweep ?? 1.0, bag, PAL.roof, PAL.wood);
 }
 
 /** A plastered wall from a to b with one round opening of radius rr at its middle (a moon gate or a round window). */
@@ -311,9 +323,9 @@ function roundWall(bag, col, a, b, y, h, th, rr, sill = null) {
   m.elements[0] = ux; m.elements[1] = 0; m.elements[2] = uz; m.elements[4] = 0; m.elements[5] = 1; m.elements[6] = 0; m.elements[8] = -uz; m.elements[9] = 0; m.elements[10] = ux;
   m.setPosition(a[0], y, a[1]);
   g.applyMatrix4(m);
-  bag.add('plaster_white', g);
+  bag.add(PAL.plaster, g);
   // the opening's rim of grey brick
-  bag.add('plaster_grey', lathe([[rr + 0.08, -th / 2 - 0.01], [rr + 0.08, th / 2 + 0.01], [rr, th / 2 + 0.01], [rr, -th / 2 - 0.01]], 32, null, 0, 0, 0).applyMatrix4(new Matrix4().makeRotationX(Math.PI / 2)).applyMatrix4(new Matrix4().makeBasis({ x: ux, y: 0, z: uz }, { x: 0, y: 1, z: 0 }, { x: -uz, y: 0, z: ux }).setPosition(a[0] + ux * L / 2, y + cy, a[1] + uz * L / 2)));
+  bag.add(PAL.plinth, lathe([[rr + 0.08, -th / 2 - 0.01], [rr + 0.08, th / 2 + 0.01], [rr, th / 2 + 0.01], [rr, -th / 2 - 0.01]], 32, null, 0, 0, 0).applyMatrix4(new Matrix4().makeRotationX(Math.PI / 2)).applyMatrix4(new Matrix4().makeBasis({ x: ux, y: 0, z: uz }, { x: 0, y: 1, z: 0 }, { x: -uz, y: 0, z: ux }).setPosition(a[0] + ux * L / 2, y + cy, a[1] + uz * L / 2)));
   // collision: the wall either side of the opening (and above and below it)
   const gap = sill === null ? rr * 0.85 : 0;
   const s0 = L / 2 - gap, s1 = L / 2 + gap;
@@ -348,17 +360,17 @@ function mingWall(el, { bag, col }) {
   g.translate(0, 0, -th / 2);
   const M = new Matrix4().makeBasis({ x: ux, y: 0, z: uz }, { x: 0, y: 1, z: 0 }, { x: -uz, y: 0, z: ux }).setPosition(ax, y, az);
   g.applyMatrix4(M);
-  bag.add('plaster_white', g);
+  bag.add(PAL.plaster, g);
   // the leaky windows' lattice (ice-crack and coin patterns), a dark grey plinth along the foot
   for (const w of lat) {
     const s = w.sill ?? 1.2, c = [ax + ux * w.at, az + uz * w.at];
     const t = [];
     beamTris(t, [c[0] - ux * w.w / 2, y + s, c[1] - uz * w.w / 2], [c[0] + ux * w.w / 2, y + s, c[1] + uz * w.w / 2], 0.03, w.h);
-    bag.add('lattice_ice', fromTriangles(t));
+    bag.add(PAL.leaky, fromTriangles(t));
   }
   const pl = [];
   beamTris(pl, [ax - ux * 0.02, y - 0.3, az - uz * 0.02], [bx + ux * 0.02, y - 0.3, bz + uz * 0.02], th / 2 + 0.03, 0.62);
-  bag.add('plaster_grey', fromTriangles(pl));
+  bag.add(PAL.plinth, fromTriangles(pl));
   // the coping: a little roof of black tiles on both sides of the wall's top
   const cp = [], o = th / 2 + 0.28;
   for (const sgn of [-1, 1]) {
@@ -367,10 +379,10 @@ function mingWall(el, { bag, col }) {
     const r0 = [ax, y + h + 0.38, az], r1 = [bx, y + h + 0.38, bz];
     cp.push(...e0, ...e1, ...r1, ...e0, ...r1, ...r0);
   }
-  bag.add('tile_dark', fromTriangles(cp.concat(flipTris(cp))));
+  bag.add(PAL.roof, fromTriangles(cp.concat(flipTris(cp))));
   const rd = [];
   beamTris(rd, [ax, y + h + 0.3, az], [bx, y + h + 0.3, bz], 0.09, 0.16);
-  bag.add('tile_dark', fromTriangles(rd));
+  bag.add(PAL.roof, fromTriangles(rd));
   // collision: the wall, with gaps at the gates
   let s = 0;
   for (const [s0, s1] of cuts.sort((p, q) => p[0] - q[0])) {
@@ -389,7 +401,7 @@ function mingGallery(el, { bag, col }) {
     // the floor
     const fl = [];
     beamTris(fl, [a[0], y - 0.35, a[1]], [b[0], y - 0.35, b[1]], w + 0.15, 0.35);
-    bag.add('bluestone', fromTriangles(fl));
+    bag.add(PAL.floor, fromTriangles(fl));
     for (let k = 0; k <= n; k++) {
       const s = k * L / n;
       for (const sg of [-1, 1]) column(bag, col, a[0] + ux * s + nx * w * sg, a[1] + uz * s + nz * w * sg, y, H - 0.1, 0.18);
@@ -403,11 +415,11 @@ function mingGallery(el, { bag, col }) {
       rf.push(...e0, ...r1, ...e1, ...e0, ...r0, ...r1);
       uf.push(e0[0], e0[1] - 0.1, e0[2], e1[0], e1[1] - 0.1, e1[2], r1[0], r1[1] - 0.1, r1[2], e0[0], e0[1] - 0.1, e0[2], r1[0], r1[1] - 0.1, r1[2], r0[0], r0[1] - 0.1, r0[2]);
     }
-    bag.add('tile_dark', fromTriangles(rf.concat(flipTris(rf))));
-    bag.add('lacquer_chestnut', fromTriangles(uf));
+    bag.add(PAL.roof, fromTriangles(rf.concat(flipTris(rf))));
+    bag.add(PAL.wood, fromTriangles(uf));
     const rd = [];
     beamTris(rd, [a[0] - ux * 0.3, y + H + 0.95, a[1] - uz * 0.3], [b[0] + ux * 0.3, y + H + 0.95, b[1] + uz * 0.3], 0.1, 0.18);
-    bag.add('tile_dark', fromTriangles(rd));
+    bag.add(PAL.roof, fromTriangles(rd));
     // a bench rail on the open side, a white wall with windows on the other
     if (el.side) {
       const sg = el.side, A = [a[0] + nx * (w + 0.1) * sg, a[1] + nz * (w + 0.1) * sg], B = [b[0] + nx * (w + 0.1) * sg, b[1] + nz * (w + 0.1) * sg];
@@ -431,13 +443,13 @@ function slabBridge(el, { bag, col }) {
     const a = el.pts[i], b = el.pts[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux;
     const t = [];
     beamTris(t, [a[0] - ux * 0.15, y - 0.25, a[1] - uz * 0.15], [b[0] + ux * 0.15, y - 0.25, b[1] + uz * 0.15], w, 0.25);
-    bag.add('granite_block', fromTriangles(t));
+    bag.add(PAL.base, fromTriangles(t));
     const p = [];
     for (const q of [a, b]) beamTris(p, [q[0] - ux * 0.25, bed, q[1] - uz * 0.25], [q[0] + ux * 0.25, bed, q[1] + uz * 0.25], w * 0.9, y - 0.25 - bed);
-    bag.add('granite_block', fromTriangles(p));
+    bag.add(PAL.base, fromTriangles(p));
     const r = [];
     for (const sg of [-1, 1]) beamTris(r, [a[0] + nx * (w - 0.08) * sg, y, a[1] + nz * (w - 0.08) * sg], [b[0] + nx * (w - 0.08) * sg, y, b[1] + nz * (w - 0.08) * sg], 0.07, 0.32);
-    bag.add('granite_block', fromTriangles(r));
+    bag.add(PAL.base, fromTriangles(r));
     // walk: a narrow floor along the segment (a few rectangles)
     const n = Math.max(1, Math.ceil(L / 0.8));
     for (let k = 0; k < n; k++) {
@@ -483,10 +495,10 @@ function archBridge(el, { bag, col }) {
     for (const o of [-W - 0.12, W - 0.12]) {
       const pp = [];
       beamTris(pp, P(s0, o + 0.12, t), P(s1, o + 0.12, t), 0.12, 0.5);
-      bag.add('granite_block', fromTriangles(pp));
+      bag.add(PAL.base, fromTriangles(pp));
     }
   }
-  bag.add('granite_block', fromTriangles(body.concat(flipTris(body))));
+  bag.add(PAL.base, fromTriangles(body.concat(flipTris(body))));
   // walk: ramps up and down the bridge
   const ramp = (sA, sB) => {
     const a = P(sA, -W, 0), b = P(sB, W, 0), yA = top(sA), yB = top(sB);
@@ -745,14 +757,24 @@ function lou(el, ctx) {
   rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (x1 - x0) / 2 + 0.9, B: (z1 - z0) / 2 + 0.9, y: y + 3.0, rise: 0.5, kind: 'hip', sweep: 0.4, p: 1 }, ctx.bag);
 }
 
-export { rectRoof, pyramidRoof, roundWall };
+export { rectRoof, pyramidRoof, roundWall, column, beamTris, flipTris, sheet, platform, latticeBay, mingHall, mingPavilion, mingWall, mingGallery };
 
 registerStyle('ming', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
-    ming_hall: mingHall, ming_pavilion: mingPavilion, ming_wall: mingWall, ming_gallery: mingGallery, ming_slab_bridge: slabBridge,
-    ming_arch_bridge: archBridge, canal_wall: canalWall, water_rect: waterRect, water_cells: waterCells, taihu, lotus,
-    house_jiangnan: houseJiangnan, water_steps: waterSteps, boat, paving, path, stone_boat: stoneBoat, lou,
+    ming_hall: withPal(mingHall),
+    ming_pavilion: withPal(mingPavilion),
+    ming_wall: withPal(mingWall),
+    ming_gallery: withPal(mingGallery),
+    ming_slab_bridge: withPal(slabBridge),
+    ming_arch_bridge: withPal(archBridge),
+    canal_wall: withPal(canalWall),
+    water_rect: withPal(waterRect),
+    water_cells: withPal(waterCells),
+    house_jiangnan: withPal(houseJiangnan),
+    water_steps: withPal(waterSteps),
+    stone_boat: withPal(stoneBoat),
+    taihu: withPal(taihu), lotus: withPal(lotus), boat: withPal(boat), paving: withPal(paving), path: withPal(path), lou: withPal(lou),
   },
   objects: {},
 });

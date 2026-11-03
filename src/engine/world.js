@@ -145,7 +145,9 @@ class Settlement {
     if (this.impostor !== undefined) return;
     this.impostor = null;
     try {
-      const buf = await (await fetch(`data/impostors/${this.id}.bin`)).arrayBuffer();
+      const res = await fetch(`data/impostors/${this.id}.bin`);
+      if (!res.ok) return;
+      const buf = await res.arrayBuffer();
       const h = new DataView(buf), n = h.getUint32(8, true), ni = h.getUint32(12, true);
       const min = [h.getFloat32(16, true), h.getFloat32(20, true), h.getFloat32(24, true)], sc = h.getFloat32(28, true);
       const bytes = await new Response(new Blob([buf.slice(32)]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();

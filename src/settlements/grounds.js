@@ -3,11 +3,14 @@
 // MODULES: their plans, towns and music (index.js: loaded when the settlement is built).
 
 import { ground as mingSuzhou } from './ming-suzhou/ground.js';
+import { ground as qingBeijing } from './qing-beijing/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
+  'qing-beijing': qingBeijing,
 };
 
 export const MODULES = {
   'ming-suzhou': () => import('./ming-suzhou/index.js'),
+  'qing-beijing': () => import('./qing-beijing/index.js'),
 };
