@@ -31,10 +31,16 @@ jobs:
       - name: Test
         run: npm test
 
+      # the code goes under a folder named for this commit, so that a visitor's browser never mixes
+      # cached files of the last version with the new ones (Pages lets browsers keep files 10 min)
       - name: Assemble the site
         run: |
-          mkdir _site
-          cp -r index.html src data _site/
+          V=${GITHUB_SHA::8}
+          mkdir -p _site/v/$V
+          cp -r data _site/
+          cp -r src _site/v/$V/
+          sed -e "s#\"src/#\"v/$V/src/#g" index.html > _site/index.html
+          grep -q "v/$V/src/main.js" _site/index.html
           touch _site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v5
