@@ -135,10 +135,12 @@ export class Renderer {
    * The camera's depth range for a height above the sea: from the eye to past the horizon (and
    * the mountains beyond it), the near plane pushed out as the camera rises.
    */
-  setRange(alt) {
-    const cam = this.camera, a = Math.max(0, alt);
+  setRange(alt, above = alt) {
+    // alt: the camera's height above the sea (for the horizon); above: its height over the ground
+    // under it (for the near plane, so that close walls are never cut away on high ground)
+    const cam = this.camera, a = Math.max(0, alt), h = Math.max(0, above);
     const horizon = Math.sqrt((PLANET_RADIUS + a) ** 2 - PLANET_RADIUS ** 2) + Math.sqrt((PLANET_RADIUS + 240) ** 2 - PLANET_RADIUS ** 2);
-    const near = Math.min(4, Math.max(0.08, a * 0.002)), far = Math.max(4000, horizon * 1.05);
+    const near = Math.min(4, Math.max(0.08, h * 0.002)), far = Math.max(4000, horizon * 1.05);
     if (Math.abs(cam.near - near) > near * 0.1 || Math.abs(cam.far - far) > far * 0.05) { cam.near = near; cam.far = far; cam.updateProjectionMatrix(); }
     this.sky.horizonDip.value = Math.acos(Math.min(1, PLANET_RADIUS / (PLANET_RADIUS + a)));
   }

@@ -39,7 +39,7 @@ test('built settlements stand apart, on land', () => {
 });
 
 test('each settlement holds its buildings on its disc', async () => {
-  for (const S of BUILT) {
+  for (const S of BUILT.filter((s) => s.site.legacy)) {
     for (const id of S.site.legacy.buildings) {
       const { plan } = await BUILDINGS.find((x) => x.id === id).load();
       const [cx, cz] = S.focus.center;
@@ -68,9 +68,32 @@ test('the ground joins the open country without a step', () => {
 test('the houses of each settlement build on its disc', async () => {
   await import('../src/styles/vernacular/index.js');
   const city = await import('../src/world/city.js');
-  for (const S of BUILT) {
+  for (const S of BUILT.filter((s) => s.site.legacy)) {
     const plan = withFocus(S.focus, () => city.plan(S.focus.region));
     assert.ok(plan.elements.length > 15, `${S.id}: ${plan.elements.length} houses`);
     for (const { geometry } of buildPlan(plan).parts) assert.ok(geometry.attributes.position.array.every(Number.isFinite), `${S.id}: non-finite vertex`);
+  }
+});
+
+test('the settlements of their own build, finite, inside their discs', async () => {
+  const { MODULES } = await import('../src/settlements/grounds.js');
+  const { MATERIALS } = await import('../src/core/palette.js');
+  for (const S of BUILT.filter((s) => !s.site.legacy)) {
+    const mod = await MODULES[S.id]();
+    const plans = [...mod.landmarks.map((l) => l.plan), ...(await mod.town())];
+    for (const plan of plans) {
+      const built = buildPlan(plan);
+      for (const { mat, geometry } of built.parts) {
+        assert.ok(MATERIALS[mat], `${plan.id}: unknown material ${mat}`);
+        const a = geometry.attributes.position.array;
+        assert.ok(a.every(Number.isFinite), `${plan.id}: non-finite vertex`);
+        geometry.computeBoundingBox();
+        const b = geometry.boundingBox;
+        for (const [x, z] of [[b.min.x, b.min.z], [b.max.x, b.min.z], [b.min.x, b.max.z], [b.max.x, b.max.z]]) {
+          assert.ok(Math.hypot(x, z) < S.radius * 1.42, `${plan.id}: ${mat} reaches (${x.toFixed(0)}, ${z.toFixed(0)})`);
+        }
+      }
+    }
+    for (const l of mod.landmarks) for (const r of l.plan.rooms) assert.ok(l.music.zones[r.kind], `${l.plan.id}: room kind ${r.kind} has music`);
   }
 });

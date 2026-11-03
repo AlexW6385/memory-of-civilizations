@@ -2,6 +2,12 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.2 — Ming Suzhou; one corner card; no arriving inside things (2026-11-03)
+- New settlement: Ming Suzhou, c. 1530 — the Humble Administrator's Garden as Wen Zhengming painted it, its owner's residence, and a canal quarter of streets beside canals, whitewashed houses, humpbacked bridges and boats (dossier: `docs/settlements/ming-suzhou.md`). New style `ming`: halls with lattice doors, pavilions with swept roofs, galleries, garden walls with moon gates and leaky windows, Taihu rock, lotus, canal houses.
+- The small map, the clock and the speed are one card (top left); the language button is top right. The English period name no longer squeezes the pause button.
+- A simpler loading screen; the bar is weighted by this machine's last load and never goes back.
+- After travel one is set on the nearest free spot (never inside a building, under a roof or below the ground); the walker cannot sink below the ground; close walls are no longer cut away on high ground.
+
 ## v8.1 — A lean interface; night on the maps; standing on roofs (2026-11-03)
 - The interface is the small map (top left; click it for the globe), the clock-and-speed card (top right) and a language button. The settings panel is removed; quality is always the highest.
 - The globe and the small map shade night; settlements glow on the night side.

@@ -71,14 +71,20 @@ class Settlement {
     this.music = null;                     // the settlement's own music, in its streets (its module's)
   }
 
+  /** How much of the settlement is built (0…1), while it loads. */
+  get fraction() { return this.state === 'ready' ? 1 : this.state === 'idle' ? 0 : Math.min(0.99, (this.done || 0) / (this.expected || 1)); }
+
   load() {
     if (this.loading) return this.loading;
     this.state = 'loading';
     this.world.scene.add(this.group);
+    this.done = 0; this.expected = 1;
     this.loading = (async () => {
       const S = this.S;
       if (S.focus.region) {
-        for (const entry of BUILDINGS.filter((b) => b.district === S.focus.region)) {
+        const entries = BUILDINGS.filter((b) => b.district === S.focus.region);
+        this.expected = entries.length + 1.5;
+        for (const entry of entries) {
           const mod = await entry.load();
           await this.addPart(entry.id, mod.plan, mod.music);
         }
@@ -92,9 +98,13 @@ class Settlement {
         // a settlement of its own: its landmarks, then its townscape (src/settlements/<id>/)
         const mod = await MODULES[S.id]();
         this.music = mod.music;
-        for (const p of mod.landmarks) await this.addPart(p.plan.id, p.plan, p.music);
-        for (const plan of await mod.town()) await this.addPart(plan.id, plan, null);
+        const town = await mod.town();
+        // the landmarks weigh more than a block of houses
+        this.expected = mod.landmarks.length * 3 + town.length;
+        for (const p of mod.landmarks) { await this.addPart(p.plan.id, p.plan, p.music); this.done += 2; }
+        for (const plan of town) await this.addPart(plan.id, plan, null);
       }
+      this.done = this.expected;
       this.state = 'ready';
       return this;
     })();
@@ -126,6 +136,7 @@ class Settlement {
     const rec = { id, plan, music, group, built, settlement: this };
     if (!plan.feature) try { rec.gi = await this.world.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
     this.parts.push(rec);
+    this.done = (this.done || 0) + 1;
     return rec;
   }
 

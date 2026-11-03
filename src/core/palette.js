@@ -125,7 +125,7 @@ export const MATERIALS = {
   lacquer_chestnut: { color: '#4b2b1c', roughness: 0.42, kind: 'smooth' },
   lattice:          { color: '#4b2b1c', roughness: 0.6, kind: 'lattice', paper: '#e9e2cf', cell: 0.09 },
   lattice_ice:      { color: '#4b2b1c', roughness: 0.6, kind: 'lattice', paper: '#e9e2cf', cell: 0.16, ice: 1 },
-  taihu:            { color: '#a8a6a0', roughness: 0.92, kind: 'taihu' },
+  taihu:            { color: '#77766f', roughness: 0.92, kind: 'taihu' },
   bluestone:        { color: '#5e6467', roughness: 0.8, kind: 'paving', course: 0.5, block: 1.1 },
   granite_block:    { color: '#807c74', roughness: 0.85, kind: 'ashlar', course: 0.42, block: 1.1 },
   pebble_mosaic:    { color: '#8e8a83', roughness: 0.9, kind: 'pebbles' },

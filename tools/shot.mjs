@@ -49,6 +49,13 @@ if (opt('pose') || opt('cam')) {
     if (only && !only.includes(v.name)) continue;
     views.push({ name: `planet-${v.name}`, fly: v.fly, place: v.place });
   }
+  for (const [site, list] of Object.entries(all.settlements || {})) {
+    if (opt('building') && opt('building') !== site) continue;
+    for (const v of list) {
+      if (only && !only.includes(v.name)) continue;
+      views.push({ name: `${site}-${v.name}`, site, world: v.at, yaw: v.yaw, pitch: v.pitch, free: !!v.cam });
+    }
+  }
   for (const b of BUILDINGS) {
     if (opt('building') && opt('building') !== b.id) continue;
     const { plan } = await b.load();
@@ -85,7 +92,7 @@ await page.goto(`http://127.0.0.1:${port}/index.html?${q}`);
 try { await page.waitForFunction('window.READY === true', null, { timeout: 600_000 }); }
 catch (e) { log.push('timeout waiting for READY'); }
 console.log(`ready after ${((Date.now() - t0) / 1000).toFixed(1)}s (${await page.evaluate(() => window.palace?.renderer.webgpu ? 'WebGPU' : 'WebGL2')})`);
-if (!flag('intro')) await page.evaluate(() => { document.getElementById('intro').hidden = true; document.getElementById('notice').hidden = true; const h = document.getElementById('click-hint'); if (h) h.style.display = 'none'; const hud = document.getElementById('hud'); if (hud) hud.style.display = 'none'; });
+if (!flag('intro')) await page.evaluate(() => { document.getElementById('intro').hidden = true; document.getElementById('notice').hidden = true; const h = document.getElementById('click-hint'); if (h) h.style.display = 'none'; for (const id of ['btn-lang', 'corner']) { const e = document.getElementById(id); if (e) e.style.display = 'none'; } });
 else await page.evaluate(() => { document.getElementById('stick').hidden = !matchMedia('(pointer: coarse)').matches; });
 if (opt('eval')) console.log('eval:', await page.evaluate(opt('eval')));
 if (flag('begin')) { await page.evaluate(() => window.palace.begin()); await page.waitForTimeout(8000); console.log('after begin:', await page.evaluate(() => JSON.stringify(window.palace.stats))); }

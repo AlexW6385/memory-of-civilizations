@@ -28,58 +28,72 @@ function load(k, d) { try { return { ...d, ...JSON.parse(localStorage.getItem(k)
 function save() { try { localStorage.setItem('mp.time', JSON.stringify({ timeRuns: settings.timeRuns, utc: settings.utc })); } catch { /* ignore */ } }
 
 /**
- * The loading bar: stages with weights, the fraction done of each, and the time left, estimated
- * from this load's pace and (when there is one) how long the last load took on this machine.
+ * The loading bar. The start is a row of stages — the renderer, then the buildings and the ground
+ * together, the plants, the shaders — each reporting its fraction done. Each stage's share of the
+ * bar is the time it took on this machine the last time (kept in storage), so that the bar moves
+ * at an even pace; without a last time, typical shares. The shaders report nothing while they
+ * compile: there the bar follows the time they took last time. The bar never goes back.
  */
 class Progress {
   constructor(bar, text) {
     this.bar = bar; this.text = text;
     this.t0 = performance.now();
-    this.w = { start: 0.1, land: 0.34, build: 0.2, plants: 0.12, shaders: 0.24 };
-    this.f = {}; this.stage = 'start'; this.marks = {};
-    try { this.prev = JSON.parse(localStorage.getItem('mp.loadtime') || 'null'); } catch { this.prev = null; }
-    this.timer = setInterval(() => this.paint(), 250);
+    this.order = ['start', 'world', 'plants', 'shaders'];
+    this.f = {}; this.end = {};
+    let prev = null;
+    try { prev = JSON.parse(localStorage.getItem('mp.loadtimes') || 'null'); } catch { /* storage unavailable */ }
+    this.prev = prev;
+    const d = prev?.d || { start: 2, world: 7, plants: 2.5, shaders: 9 };
+    const tot = this.order.reduce((s, k) => s + Math.max(0.3, d[k] || 1), 0);
+    this.w = Object.fromEntries(this.order.map((k) => [k, Math.max(0.3, d[k] || 1) / tot]));
+    this.d = d; this.shown = 0;
+    this.timer = setInterval(() => this.paint(), 100);
   }
+  /** stage: start | build | land | plants | shaders; build and land together make the 'world' stage. */
   set(stage, f) {
-    if (stage !== this.stage) { this.marks[this.stage] = performance.now(); this.stage = stage; }
+    if (stage === 'build' || stage === 'land') { this.f[stage] = Math.max(this.f[stage] || 0, f); f = 0.4 * (this.f.build || 0) + 0.6 * (this.f.land || 0); stage = 'world'; }
     this.f[stage] = Math.max(this.f[stage] || 0, Math.min(1, f));
-    this.paint();
+    if (this.f[stage] >= 1 && !this.end[stage]) this.end[stage] = performance.now();
+    if (stage === 'shaders' && !this.shaderT0) this.shaderT0 = performance.now();
   }
-  value() { let v = 0; for (const k in this.w) v += this.w[k] * (this.f[k] || 0); return v; }
+  value() {
+    if (this.shaderT0 && (this.f.shaders || 0) < 1) {
+      const exp = Math.max(2, this.d.shaders || 9), el = (performance.now() - this.shaderT0) / 1000;
+      // follow last time's duration, slowing toward 97% if it takes longer
+      this.f.shaders = el < exp ? 0.9 * el / exp : 0.9 + 0.07 * (1 - Math.exp(-(el - exp) / exp));
+    }
+    let v = 0; for (const k of this.order) v += this.w[k] * (this.f[k] || 0); return v;
+  }
   paint() {
-    const el = (performance.now() - this.t0) / 1000;
-    // while the shaders compile there is no fraction to report: creep toward the expected time
-    if (this.stage === 'shaders' && this.shaderT0) {
-      // without a previous load to go by, expect the shaders to take about as long again as everything before them
-      this.shaderExp ??= this.prev?.shaders || Math.max(4, (this.shaderT0 - this.t0) / 1000 * 1.2);
-      const exp = this.shaderExp;
-      this.f.shaders = Math.min(0.95, 1 - Math.exp(-((performance.now() - this.shaderT0) / 1000) / exp * 1.6));
-    }
     const p = this.value();
-    this.bar.style.width = `${(p * 100).toFixed(1)}%`;
+    this.shown = Math.max(this.shown, p);
+    this.bar.style.width = `${(this.shown * 100).toFixed(1)}%`;
+    const el = (performance.now() - this.t0) / 1000;
     let left = null;
-    if (this.stage === 'shaders' && this.shaderT0) {
-      left = Math.max(0, this.shaderExp * 1.15 - (performance.now() - this.shaderT0) / 1000);
-    } else if (p > 0.04) {
-      const est = el / p - el;
-      left = this.prev?.total ? Math.max(0, 0.5 * est + 0.5 * (this.prev.total - el)) : est;
-    }
+    if (this.prev?.total) left = Math.max(0, (1 - this.shown) * this.prev.total);
+    else if (this.shown > 0.08) left = el / this.shown - el;
     const tail = left === null ? '' : left < 1.5 ? ` · ${t('left-done')}` : ` · ${t('left-s').replace('{n}', Math.ceil(left))}`;
-    // name the first stage still under way (several run at once)
-    const stage = ['start', 'build', 'land', 'plants', 'shaders'].find((k) => (this.f[k] || 0) < 1) || this.stage;
-    this.text.textContent = `${t('st-' + stage)} · ${Math.round(p * 100)}%${tail}`;
+    this.text.textContent = `${Math.round(this.shown * 100)}%${tail}`;
   }
   finish() {
     clearInterval(this.timer);
-    const total = (performance.now() - this.t0) / 1000;
-    const shaders = this.shaderT0 ? (performance.now() - this.shaderT0) / 1000 : 0;
-    try { localStorage.setItem('mp.loadtime', JSON.stringify({ total, shaders })); } catch { /* ignore */ }
-    this.bar.style.width = '100%';
+    const now = performance.now(), total = (now - this.t0) / 1000;
+    // each stage's own time: from the end of the one before (the world after the start, …)
+    const d = {}; let from = this.t0;
+    for (const k of this.order) { const e = this.end[k] || now; d[k] = Math.max(0.2, (e - from) / 1000); from = Math.max(from, e); }
+    try { localStorage.setItem('mp.loadtimes', JSON.stringify({ total, d })); } catch { /* ignore */ }
+    this.shown = 1; this.bar.style.width = '100%';
+    this.text.textContent = '100%';
   }
 }
 
 async function main() {
   initLang();
+  // the one button: the language (there from the start, the loading included)
+  const langBtn = $('btn-lang');
+  const paintLang = () => { langBtn.textContent = getLang() === 'zh' ? 'EN' : '中'; };
+  langBtn.onclick = () => setLang(getLang() === 'zh' ? 'en' : 'zh');
+  onLang(paintLang); paintLang();
   const status = $('intro-status');
   const progress = new Progress($('progress-bar'), status);
   const canvas = $('view');
@@ -120,8 +134,9 @@ async function main() {
   const arrive = async (report = null) => {
     const site = world.anchor.site;
     const u = world.here(controls);
+    const poll = site && report ? setInterval(() => report('build', site.fraction), 150) : null;
     await Promise.all([
-      (site ? site.load() : Promise.resolve()).then(() => { report?.('build', 1); mark('buildings'); }),
+      (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 1); mark('buildings'); }),
       world.terrain.readyAt(camPlanet, (f) => report?.('land', f)).then(() => mark('land')),
     ]);
     world.ensureNear(u);
@@ -130,6 +145,29 @@ async function main() {
     report?.('plants', 1); mark('plants');
   };
   const boot = (stage, f) => progress.set(stage, f);
+  // a free place to stand near (x, z), once everything there is built: on the ground or a floor,
+  // not in water, with nothing built over the head and no wall in the body — so that one never
+  // arrives inside a building, under a roof or below the ground
+  const clearSpot = (x, z) => {
+    const C = world.collide;
+    for (let r = 0; r <= 45; r += 1.5) {
+      const n = r === 0 ? 1 : Math.ceil(r * 2);
+      for (let k = 0; k < n; k++) {
+        const a = k / n * Math.PI * 2, px = x + Math.cos(a) * r, pz = z + Math.sin(a) * r;
+        const g = Math.max(C.groundAt(px, pz, 1e4), C.waterLevel?.(px, pz) ?? -Infinity);
+        if (!Number.isFinite(g) || C.water?.(px, pz, g)) continue;
+        if (C.topAt(px, pz, 0.4, 1e4) > g + 0.3) continue;
+        if (C.blockedAt(px, pz, 0.4, g + 0.2, g + 1.9)) continue;
+        return [px, g, pz];
+      }
+    }
+    return [x, Math.max(C.groundAt(x, z, 1e4), C.topAt(x, z, 0.3, 1e4)), z];
+  };
+  const settle = () => {
+    const F = controls.feet, [x, y, z] = clearSpot(F.x, F.z);
+    controls.setPose(x, y + 0.01, z, controls.yaw, controls.pitch);
+    world.place(R.camera);
+  };
   // to a building's entrance: into its settlement's frame
   const goTo = async (rec, report) => {
     const site = rec.site;
@@ -152,6 +190,7 @@ async function main() {
     world.reanchor(controls);                   // into a settlement's frame if this is in its zone
     controls.apply(); world.place(R.camera);
     await arrive(report);
+    settle();
   };
   // from the map: beside the settlement's landmark, a little way in front of it and facing it
   const goNear = async (rec, report) => {
@@ -170,6 +209,7 @@ async function main() {
     world.place(R.camera);
     await arrive(report);
     controls.setPose(P[0], y, P[2], yaw, 0.08);
+    settle();
   };
   const first = world.plans.get(params.get('start') || 'edfu') || world.plans.get('edfu');
   if (params.get('pose')) {
@@ -201,10 +241,9 @@ async function main() {
   progress.finish();
 
   // interface: the world opens by itself; a click (or a key) starts looking and the music
-  const intro = $('intro'), hud = $('hud'), mapPanel = $('map'), hint = $('click-hint');
+  const intro = $('intro'), mapPanel = $('map'), hint = $('click-hint');
   intro.classList.add('fading');
   setTimeout(() => { intro.hidden = true; intro.classList.remove('fading'); }, 850);
-  hud.hidden = false;
   $('corner').hidden = false;
   $('stick').hidden = !controls.touch;
   $('touch-btns').hidden = !controls.touch;
@@ -218,7 +257,6 @@ async function main() {
     hint.hidden = locked || controls.touch || panelsOpen();
     if (locked) controls.enabled = true;
   };
-  for (const b of document.querySelectorAll('.lang-switch button')) b.onclick = () => setLang(b.dataset.lang);
 
   // going somewhere from the map: to a building's entrance, or to any point of the land
   const toast = (msg) => { const n = $('notice'); n.textContent = msg; n.hidden = !msg; };
@@ -257,11 +295,7 @@ async function main() {
     if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
   const minimap = new MiniMap(world, mapView, () => openPanel(mapPanel), () => sunPlanet(climate.utc));
-  // the one button: the language
-  const langBtn = $('btn-lang');
-  const paintLang = () => { langBtn.textContent = getLang() === 'zh' ? 'EN' : '中'; };
-  langBtn.onclick = () => setLang(getLang() === 'zh' ? 'en' : 'zh');
-  onLang(paintLang); paintLang();
+
   for (const c of document.querySelectorAll('.panel .close')) c.onclick = closePanels;
   addEventListener('keydown', (e) => {
     if (e.code === 'KeyM') mapPanel.hidden ? openPanel(mapPanel) : closePanels();
@@ -330,7 +364,7 @@ async function main() {
     const here = world.update(R.camera, controls);
     const c = R.camera.position;
     const u = world.here(controls), f = world.anchor.frame;
-    R.setRange(world.camAlt ?? 2);
+    R.setRange(world.camAlt ?? 2, c.y - world.collide.terrain(c.x, c.z));
     const outdoors = !here.room || here.room.kind === 'open';
     climate.indoors += ((outdoors ? 0 : 1) - climate.indoors) * Math.min(1, dt / 1.5);
     // the sky: the settlement's own in its zone, blended out into the open country's

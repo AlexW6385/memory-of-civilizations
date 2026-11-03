@@ -7,8 +7,8 @@ export const LENSES = [{"at":[40,18],"m":1.5,"r":26},{"at":[22,79],"m":1.3,"r":1
 export const PLACED = {
   'tang-wutai': [39.67815, 110.38703],
   'song-kaifeng': [34.98504, 112.53987],
-  'song-hangzhou': [27.41162, 120.05814],
-  'ming-suzhou': [32.38264, 119.33895],
+  'song-hangzhou': [27.36507, 120.04143],
+  'ming-suzhou': [32.49477, 119.14023],
   'qing-beijing': [42.23148, 116.35185],
   'lhasa': [30.03695, 91.88804],
   'nara': [31.76654, 139.03568],

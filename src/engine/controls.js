@@ -149,6 +149,12 @@ export class Controls {
     this.feet.vy = this.vy; this.feet.lift = lift; this.feet.glide = this.glide;
     move(this.feet, dx, dz, dt, this.collide);
     this.vy = this.feet.vy;
+    // never below the open ground (flying fast into a hillside, a frame of the ground not yet
+    // where it should be): unless standing on a floor there, up onto the ground
+    {
+      const F = this.feet, T = this.collide.terrain(F.x, F.z);
+      if (F.y < T - 0.05 && this.collide.groundAt(F.x, F.z, F.y + 0.05) < F.y - 0.05) { F.y = T; this.vy = F.vy = 0; }
+    }
     if (this.glide && this.vy === 0 && !lift) {          // landed?
       const C = this.collide, F = this.feet;
       const g = Math.max(C.groundAt(F.x, F.z, F.y + 0.01), C.topAt(F.x, F.z, 0.18, F.y + 0.01));

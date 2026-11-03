@@ -15,9 +15,7 @@ canvas#view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: b
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
-#hud { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); display: flex; gap: 8px; align-items: flex-start; z-index: 5; }
-button.icon.lang { font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; }
-#hud[hidden] { display: none; }
+#btn-lang { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); z-index: 12; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; }
 button.icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: rgba(24, 20, 15, 0.42); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: grid; place-items: center; padding: 0; }
 button.icon svg { width: 20px; height: 20px; fill: var(--ink); opacity: 0.9; }
 button.icon:hover { background: rgba(24, 20, 15, 0.65); }
@@ -77,21 +75,21 @@ button.primary:disabled { opacity: 0.4; cursor: default; }
 .fade.on { opacity: 1; }
 
 /* the corner: the small map, the clock beside it, how the visitor is moving */
-#corner { position: fixed; top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); display: flex; gap: 10px; align-items: flex-start; z-index: 5; }
+#corner { position: fixed; top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); width: 204px; z-index: 5; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(34, 28, 21, 0.74), rgba(20, 16, 12, 0.7)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.3); color: var(--ink); }
 #corner[hidden] { display: none; }
-.minimap { position: relative; width: 168px; height: 168px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #2f281f; cursor: pointer; box-shadow: 0 8px 26px rgba(0, 0, 0, 0.3); }
+.minimap { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; background: #2f281f; cursor: pointer; border-bottom: 1px solid var(--line); }
 .minimap[hidden] { display: none; }
 #minimap-canvas { width: 100%; height: 100%; display: block; }
 .mm-region { position: absolute; left: 0; right: 0; bottom: 0; padding: 4px 8px; font-size: 12px; color: var(--ink); background: linear-gradient(transparent, rgba(20, 16, 12, 0.75)); pointer-events: none; }
 .mm-btn { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); background: rgba(24, 20, 15, 0.6); color: var(--ink); font-size: 14px; line-height: 18px; padding: 0; cursor: pointer; }
-.status-card { width: 196px; padding: 10px 12px 9px; border-radius: 14px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(34, 28, 21, 0.72), rgba(20, 16, 12, 0.66)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.3); color: var(--ink); }
-.status-card .row { display: flex; align-items: center; gap: 8px; }
-.status-card .big { font-family: var(--serif); font-size: 21px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
-.status-card .dim { color: var(--ink-dim); font-size: 12px; }
+#corner .status { padding: 9px 12px 9px; }
+#corner .status .row { display: flex; align-items: center; gap: 8px; }
+#corner .status .big { font-family: var(--serif); font-size: 21px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+#corner .status .dim { color: var(--ink-dim); font-size: 12px; }
 .clock-icon { width: 14px; height: 14px; border-radius: 50%; flex: none; transition: background 1s, box-shadow 1s; }
-.status-card .round { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: rgba(243, 234, 217, 0.06); color: var(--ink); cursor: pointer; padding: 0; font-size: 10px; line-height: 24px; }
-.status-card .round:hover { background: rgba(243, 234, 217, 0.16); }
-.status-card .round.small { margin-left: 0; width: 22px; height: 22px; font-size: 15px; line-height: 19px; }
+#corner .status .round { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: rgba(243, 234, 217, 0.06); color: var(--ink); cursor: pointer; padding: 0; font-size: 10px; line-height: 24px; }
+#corner .status .round:hover { background: rgba(243, 234, 217, 0.16); }
+#corner .status .round.small { margin-left: 0; width: 22px; height: 22px; font-size: 15px; line-height: 19px; }
 .sky-range { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; margin: 10px 0 10px; border-radius: 4px; cursor: pointer;
   background: linear-gradient(90deg, #0b1124 0%, #141d3a 19%, #6b4a66 24%, #e59b62 27%, #9cc6ea 34%, #b6d7f1 50%, #9cc6ea 66%, #ee9a5c 74%, #5b3f63 78%, #141d3a 83%, #0b1124 100%); }
 .sky-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); border: 2px solid #2f281f; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5); }
@@ -110,5 +108,15 @@ button.primary:disabled { opacity: 0.4; cursor: default; }
 #touch-btns .icon { width: 60px; height: 60px; color: var(--ink); font-size: 22px; }
 #touch-btns .icon svg { width: 26px; height: 26px; }
 #touch-btns .icon.on { background: rgba(243, 234, 217, 0.3); }
-@media (max-width: 560px) { .minimap { width: 112px; height: 112px; } .status-card { width: 164px; padding: 8px 10px; } .status-card .big { font-size: 18px; } }
+@media (max-width: 560px) { #corner { width: 150px; } #corner .status { padding: 7px 9px; } #corner .status .big { font-size: 17px; } }
 #mm-show[hidden] { display: none; }
+
+#corner .status .row { min-width: 0; }
+#corner .status .period { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#corner .status .round { flex: none; margin-left: 0; }
+#corner .status .speed-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#corner .status .alt-row { min-height: 0; }
+#corner .status .alt-row:empty, #corner .status .alt-row:has(#speed-alt:empty) { display: none; }
+.intro { position: fixed; z-index: 10; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(420px, calc(100vw - 40px)); text-align: center; }
+.intro h1 { font-size: 40px; margin: 0 0 18px; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45); }
+.intro .status { margin: 10px 0 0; font-variant-numeric: tabular-nums; }
