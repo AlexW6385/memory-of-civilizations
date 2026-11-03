@@ -1105,6 +1105,60 @@
     "pitch": -0.38,
     "cam": true
    }
+  ],
+  "machu-picchu": [
+   {
+    "name": "classic",
+    "at": [
+     -55,
+     8,
+     150
+    ],
+    "yaw": 0.15,
+    "pitch": -0.1,
+    "cam": true
+   },
+   {
+    "name": "sun",
+    "at": [
+     -20,
+     0.1,
+     -10
+    ],
+    "yaw": -2.2,
+    "pitch": 0.05
+   },
+   {
+    "name": "sacred",
+    "at": [
+     -38,
+     0.7,
+     20
+    ],
+    "yaw": 3.1416,
+    "pitch": 0.03
+   },
+   {
+    "name": "terraces",
+    "at": [
+     97,
+     0.1,
+     -60
+    ],
+    "yaw": -1.5708,
+    "pitch": -0.25
+   },
+   {
+    "name": "air",
+    "at": [
+     260,
+     170,
+     200
+    ],
+    "yaw": 2.3,
+    "pitch": -0.4,
+    "cam": true
+   }
   ]
  }
 }

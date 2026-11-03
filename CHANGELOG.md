@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.8 — Machu Picchu (2026-11-03)
+- New settlement: Machu Picchu, Pachacuti's estate — the town on its saddle between Huayna Picchu and Machu Picchu mountain, fifteen rings of terraces with stairs, the Temple of the Sun on its rock, the Sacred Plaza with the Main Temple and the Temple of the Three Windows, the Intihuatana on its terraced hill, the Main Plaza, houses of granite under ichu thatch, the canyon below in cloud forest (dossier: `docs/settlements/machu-picchu.md`). New style `inca`.
+- Settlements can stand on a height above the open country (no more sea showing in deep valleys).
+
 ## v8.7 — Djenné (2026-11-03)
 - New settlement: Djenné in the Mali Empire — the Great Mosque on its high platform, its qibla wall with three towers crowned by ostrich eggs, pilasters and palm-wood toron, the prayer hall's pillars and the court; the market below the qibla wall; the town of two-storey banco houses with their pinnacled facades on an island in the Bani's floodplain (dossier: `docs/settlements/djenne.md`). New style `sahel`.
 

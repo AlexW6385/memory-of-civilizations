@@ -44,7 +44,7 @@ export const BUILT = SITES.filter((s) => s.legacy || GROUNDS[s.id]).map((s) => {
     S.ground = G;
     S.local = {
       center: [0, 0],
-      height: (x, z) => G.height(x, z),            // (the module fades its ground to 0 at its rim)
+      height: (x, z) => G.height(x, z),            // (the module fades its ground to its rim level, 0 or G.rim, at its rim)
       cover: (x, z, h, ny) => G.cover(x, z, h, ny),
       water: (x, z, y) => G.water(x, z, y),
       waterLevel: (x, z) => G.waterLevel(x, z),
@@ -57,7 +57,9 @@ export const BUILT_BY_ID = Object.fromEntries(BUILT.map((b) => [b.id, b]));
 /** Set the settlements' levels and frames (after the land map is loaded). */
 export function initRelief() {
   for (const S of BUILT) {
-    S.base = Math.max(2.5, natural(S.u).h);
+    // a settlement on a height (G.lift: Machu Picchu on its ridge) stands that much above the open
+    // country; its ground then comes down to -lift at its rim (G.rim), so that it meets the country
+    S.base = Math.max(2.5, natural(S.u).h) + (S.ground?.lift || 0);
     S.enu = enuFrame(S.u, R + S.base);
     const [cx, cz] = S.local.center;
     S.frame = { ...S.enu, o: sub(S.enu.o, add(scale(S.enu.x, cx), scale(S.enu.z, cz))) };
@@ -99,7 +101,7 @@ export function surface(u) {
     let k = (R + S.base) / uy, x = ux * k, z = uz * k;
     const r = Math.hypot(x, z);
     if (r > S.radius + BLEND) continue;
-    let H = 0;
+    let H = S.ground?.rim ?? 0;
     if (r < S.radius) {
       // the local ground along the ray: solved twice for the point where the ray meets it
       for (let i = 0; i < 2; i++) {

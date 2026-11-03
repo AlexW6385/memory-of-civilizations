@@ -163,6 +163,11 @@ export const MATERIALS = {
   // by hand; palm-wood beams (toron) standing out of the walls
   banco:            { color: '#9c7451', roughness: 0.97, kind: 'rock' },
   banco_smooth:     { color: '#a47b56', roughness: 0.95, kind: 'smooth' },
+  // the Inca (Machu Picchu): white granite, finely fitted in the temples, rougher in the houses;
+  // roofs of ichu grass thatch
+  granite_inca:     { color: '#a3a097', roughness: 0.8, kind: 'ashlar', course: 0.55, block: 0.8 },
+  granite_rough:    { color: '#8e8b82', roughness: 0.9, kind: 'rock' },
+  ichu:             { color: '#a28c5c', roughness: 1.0, kind: 'bark' },
 };
 
 export function albedo(key) {
