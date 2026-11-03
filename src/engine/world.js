@@ -307,11 +307,13 @@ export class World {
 
   /** Load the settlements near u, let go of those far; resolves when the near ones are built. */
   async ensureNear(u, radius = LOAD) {
+    // from the air one sees farther: the reach grows with the height
+    const lift = Math.min(1700, Math.max(0, (this.camAlt || 0) - 60) * 1.3);
     const wanted = [];
     for (const s of this.settlements) {
       const d = World.rimDistance(s, u);
-      if (d < radius) wanted.push(s.load());
-      else if (d > UNLOAD) s.unload();
+      if (d < radius + lift) wanted.push(s.load());
+      else if (d > UNLOAD + lift) s.unload();
     }
     await Promise.all(wanted);
   }

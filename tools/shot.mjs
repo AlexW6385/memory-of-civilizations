@@ -93,7 +93,7 @@ for (const v of views) {
   const t1 = Date.now();
   await page.evaluate(([v]) => (v.fly ? window.palace.fly(...v.fly) : v.place ? window.palace.place(...v.place)
     : v.free ? window.palace.camera(v.site, v.world[0], v.world[1], v.world[2], v.yaw, v.pitch) : window.palace.pose(v.site, v.world[0], v.world[1], v.world[2], v.yaw, v.pitch)), [v]);
-  if (opt('time')) await page.evaluate((h) => { const c = window.palace.climate; if (Number.isFinite(+h)) { c.hour = +h; c.setTime('held'); } }, opt('time'));
+  await page.evaluate((h) => { const c = window.palace.climate; if (Number.isFinite(+h)) { c.hour = +h; c.setTime('held'); } }, opt('time', '15.5'));
   await page.waitForTimeout(wait);
   const file = join(out, `${v.name}.png`);
   await page.screenshot({ path: file, timeout: 600_000 });

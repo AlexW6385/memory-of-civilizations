@@ -1,4 +1,52 @@
 {
+  "planet": [
+    {
+      "name": "edfu-from-air",
+      "fly": [
+        20.2,
+        36.356,
+        180,
+        0,
+        -0.45
+      ]
+    },
+    {
+      "name": "italy-high",
+      "fly": [
+        40.5,
+        13.5,
+        1200,
+        0.2,
+        -0.5
+      ]
+    },
+    {
+      "name": "asia-high",
+      "fly": [
+        33,
+        108,
+        1400,
+        0.6,
+        -0.45
+      ]
+    },
+    {
+      "name": "open-country",
+      "place": [
+        48,
+        10,
+        1.2
+      ]
+    },
+    {
+      "name": "paris-edge",
+      "place": [
+        51.952,
+        -0.93,
+        -1.6
+      ]
+    }
+  ],
   "edfu": [
     {
       "name": "approach",
@@ -293,128 +341,6 @@
       ],
       "yaw": -2.6,
       "pitch": -0.42
-    }
-  ],
-  "world": [
-    {
-      "name": "aerial-city",
-      "at": [
-        140,
-        420,
-        900
-      ],
-      "yaw": 0.0,
-      "pitch": -0.5
-    },
-    {
-      "name": "aerial-low",
-      "at": [
-        -260,
-        110,
-        470
-      ],
-      "yaw": -0.75,
-      "pitch": -0.28
-    },
-    {
-      "name": "edfu-way",
-      "at": [
-        2,
-        1.7,
-        146
-      ],
-      "yaw": 0.0,
-      "pitch": 0.06
-    },
-    {
-      "name": "upper-avenue",
-      "at": [
-        -100,
-        1.7,
-        -135
-      ],
-      "yaw": -1.5708,
-      "pitch": 0.02
-    },
-    {
-      "name": "byzantium-lanes",
-      "at": [
-        118,
-        1.7,
-        -300
-      ],
-      "yaw": -1.8,
-      "pitch": 0.06
-    },
-    {
-      "name": "jerusalem-slope",
-      "at": [
-        106,
-        1.7,
-        30
-      ],
-      "yaw": -1.5708,
-      "pitch": 0.08
-    },
-    {
-      "name": "paris-lanes",
-      "at": [
-        -118,
-        1.7,
-        -230
-      ],
-      "yaw": 1.5708,
-      "pitch": 0.05
-    },
-    {
-      "name": "tang-lane",
-      "at": [
-        100,
-        1.7,
-        300
-      ],
-      "yaw": -1.5708,
-      "pitch": 0.04
-    },
-    {
-      "name": "uji-lane",
-      "at": [
-        372,
-        1.7,
-        330
-      ],
-      "yaw": -1.5708,
-      "pitch": 0.04
-    },
-    {
-      "name": "sanchi-approach",
-      "at": [
-        -25,
-        1.7,
-        148
-      ],
-      "yaw": 3.1416,
-      "pitch": 0.1
-    },
-    {
-      "name": "acropolis-from-lanes",
-      "at": [
-        -225,
-        1.7,
-        -128
-      ],
-      "yaw": 3.1416,
-      "pitch": 0.12
-    },
-    {
-      "name": "rouergue-lane",
-      "at": [
-        -588,
-        1.7,
-        -200
-      ],
-      "yaw": 3.1416,
-      "pitch": 0.1
     }
   ],
   "hagia-sophia": [

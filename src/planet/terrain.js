@@ -8,10 +8,9 @@ import * as THREE from 'three/webgpu';
 import { PLANET_RADIUS as R } from './relief.js';
 import { faceDir, tileRect } from './chunk.js';
 import { groundMaterial, seaMaterial } from './materials.js';
+import { climateAt } from './land.js';
 
-const MAX_LEVEL = 8, N = 32, SPLIT = 2.6;
-/** Highest ground anywhere, for the horizon test before a tile's own height is known (m). */
-const HMAX = 230;
+const MAX_LEVEL = 8, N = 32, SPLIT = 2.1;
 
 const key = (f, L, i, j) => `${f}/${L}/${i}/${j}`;
 const parentKey = (f, L, i, j) => (L ? key(f, L - 1, i >> 1, j >> 1) : null);
@@ -49,6 +48,20 @@ export class PlanetTerrain {
     return { c: faceDir(f, s0 + size / 2, t0 + size / 2), size: size * Math.PI / 4 * R * 1.15 };
   }
 
+  /** The height range a tile can have, before it is built: from the mountains under it (the land map). */
+  guess(f, L, i, j, k) {
+    this.guesses ??= new Map();
+    let g = this.guesses.get(k);
+    if (g) return g;
+    const [s0, t0, size] = tileRect(L, i, j);
+    let m = 0;
+    for (const [a, b] of [[0.5, 0.5], [0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0], [0, 0.5], [1, 0.5], [0.5, 1]]) m = Math.max(m, climateAt(faceDir(f, s0 + size * a, t0 + size * b))[0]);
+    // hills, the settlements' rocks and the coarseness of the samples on top
+    g = [-30, m * 1.1 + 45 + (L < 4 ? 60 : 0)];
+    this.guesses.set(k, g);
+    return g;
+  }
+
   /**
    * The tiles wanted for a camera at planet position cam (metres from the centre): returns them,
    * nearest first, as [{ k, f, L, i, j, d }].
@@ -61,7 +74,7 @@ export class PlanetTerrain {
     const visit = (f, L, i, j) => {
       const { c, size } = PlanetTerrain.node(f, L, i, j);
       const k = key(f, L, i, j);
-      const hm = this.heights.get(k) || this.heights.get(parentKey(f, L, i, j)) || [-30, HMAX];
+      const hm = this.heights.get(k) || this.heights.get(parentKey(f, L, i, j)) || this.guess(f, L, i, j, k);
       const th = Math.acos(Math.max(-1, Math.min(1, c[0] * cu[0] + c[1] * cu[1] + c[2] * cu[2])));
       const half = size / R * 0.75;
       if (th - half > horizonCam + Math.acos(Math.min(1, R / (R + Math.max(1, hm[1]))))) return;   // beyond the horizon

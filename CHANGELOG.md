@@ -2,6 +2,14 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.0 — The planet (2026-11-03)
+
+- **The world is now a small planet** — Memory of Civilizations / 文明的记忆. A sphere of 8 km radius with Earth's continents, seas and latitudes: walk out of a settlement into open country — beaches, rolling land, hills, the mountain ranges where Earth has them, deserts, forests, snow toward the poles — and fly over it; the higher you go, the faster, up to 1.5 km, where the ground curves away below.
+- **The ten landmarks stand near their true places**, each in its settlement with its houses, plants and ground: Edfu by the Red Sea, the Parthenon in Greece, the Pantheon in Italy, Hagia Sophia by the straits, the Dome of the Rock in the Levant, the Sainte-Chapelle and Conques in France, Foguang in northern China, the Phoenix Hall in Japan, Sanchi in India.
+- **One sun for the whole planet:** it stands high over India and low over France; while it is afternoon in Athens it is evening in Uji. The clock shows the hour where you are. Each settlement keeps its own sky and weather; the open country has its own by climate.
+- **The globe** is the large map: turn it, come closer, click a settlement or any point of the land to go there. The small map shows the land round you.
+- More civilizations — about fifty in all, each a place and a time — come next, each a landmark with the townscape of its people.
+
 ## v7.1 — Romanesque: Sainte-Foy de Conques (2026-10-28)
 
 - **A new district, Rouergue,** at the west edge of the city beside Francia: a slope of schist and stone houses under steep stone-slab roofs, lanes, orchards, oaks and walnuts.

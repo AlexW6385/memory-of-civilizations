@@ -6,7 +6,6 @@ import { fileURLToPath } from 'node:url';
 import { BUILDINGS } from '../src/buildings/index.js';
 import { buildPlan } from '../src/core/build.js';
 import { MATERIALS } from '../src/core/palette.js';
-import { FEATURES } from '../src/world/features/index.js';
 import { REGIONS } from '../src/world/regions.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -34,29 +33,10 @@ test('walk-through check passes', () => {
   execFileSync('node', ['tools/walk-check.mjs'], { cwd: ROOT, stdio: 'pipe' });
 });
 
-test('road check passes (every street of the city walkable past the houses)', () => {
-  execFileSync('node', ['tools/road-check.mjs'], { cwd: ROOT, stdio: 'pipe' });
-});
-
-test('each district quarter builds, within the bounds given before it loads', async () => {
-  for (const f of FEATURES) {
-    const { plan } = await f.load();
-    assert.ok(plan.elements.length > 20, `${f.id}: too few houses`);
-    const [a, b, c, d] = plan.bounds, [A, B, C, D] = f.bounds;
-    assert.ok(a >= A && b >= B && c <= C && d <= D, `${f.id}: houses outside its bounds`);
-    for (const { mat, geometry } of buildPlan(plan).parts) {
-      assert.ok(MATERIALS[mat], `unknown material ${mat}`);
-      assert.ok(geometry.attributes.position.array.every(Number.isFinite), `${f.id}: non-finite vertex`);
-    }
-  }
-});
-
-test('every district has what the map, the houses and the planting need', async () => {
+test('every district has what the houses and the planting need', async () => {
   const { RULES } = await import('../src/world/flora-rules.js');
   for (const r of REGIONS) {
-    assert.ok(Array.isArray(r.tint) && r.tint.length === 3, `${r.id}: map tint`);
     assert.ok(r.house && r.climate && r.ground && r.center, `${r.id}: house, climate, ground, centre`);
     assert.ok(RULES[r.id], `${r.id}: planting rules`);
-    assert.ok(FEATURES.some((f) => f.id === `${r.id}-quarter` && f.bounds), `${r.id}: quarter bounds`);
   }
 });
