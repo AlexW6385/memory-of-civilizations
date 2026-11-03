@@ -60,10 +60,12 @@ body.panel-open #btn-lang, body.panel-open #corner, body.panel-open #corner-open
 /* the corner card, top left: the small map, the clock, how the visitor is moving */
 #corner { position: fixed; top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); width: 216px; z-index: 5; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: rgba(22, 18, 14, 0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.3); color: var(--ink); }
 #corner[hidden] { display: none; }
-#corner-open { position: fixed; top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); z-index: 5; width: 44px; height: 44px; }
+#corner-open { position: fixed; top: calc(max(14px, env(safe-area-inset-top)) + 6px); left: calc(max(14px, env(safe-area-inset-left)) + 6px); z-index: 5; width: 34px; height: 34px; }
+#corner-open svg { width: 18px; height: 18px; }
 #corner-open[hidden] { display: none; }
-#corner .fold { position: absolute; top: 7px; right: 7px; z-index: 2; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: rgba(20, 16, 12, 0.62); color: var(--ink); font-size: 16px; line-height: 22px; padding: 0; text-align: center; }
+#corner .fold { position: absolute; top: 5px; left: 5px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: rgba(20, 16, 12, 0.62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color: var(--ink); display: grid; place-items: center; padding: 0; }
 #corner .fold:hover { background: rgba(20, 16, 12, 0.85); }
+#corner .fold svg { width: 18px; height: 18px; fill: var(--ink); display: block; margin: auto; }
 .minimap { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; background: #2f281f; cursor: pointer; }
 #minimap-canvas { width: 100%; height: 100%; display: block; }
 .mm-region { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 10px 6px; font-size: 12px; color: var(--ink); background: linear-gradient(transparent, rgba(20, 16, 12, 0.8)); pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
