@@ -25,7 +25,7 @@ export const SITES = [
   { id: 'song-hangzhou', name: { en: 'Southern Song Lin\'an', zh: '南宋临安' }, era: '13th c.', region: 'china', lat: 30.20, lon: 120.13, radius: 400 },
   { id: 'ming-suzhou', name: { en: 'Ming Suzhou', zh: '明代苏州' }, era: '16th c.', region: 'china', lat: 31.32, lon: 120.63, radius: 215 },
   { id: 'qing-beijing', name: { en: 'Ming–Qing Beijing', zh: '明清北京' }, era: '17th c.', region: 'china', lat: 39.92, lon: 116.39, radius: 380 },
-  { id: 'lhasa', name: { en: 'Tibet', zh: '西藏' }, era: '17th c.', region: 'tibet', lat: 29.66, lon: 91.12 },
+  { id: 'lhasa', name: { en: 'Tibet', zh: '西藏' }, era: '17th c.', region: 'tibet', lat: 29.3, lon: 91.0, radius: 420 },
   // ── Japan and Korea ──
   { id: 'nara', name: { en: 'Nara Japan', zh: '奈良' }, era: '8th c.', region: 'japan', lat: 34.61, lon: 135.73, water: true },
   { id: 'heian-uji', name: { en: 'Heian Japan', zh: '平安日本' }, era: '11th c.', region: 'japan', lat: 34.89, lon: 135.81, radius: 160,

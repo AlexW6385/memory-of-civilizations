@@ -21,6 +21,7 @@ import { ground as teotihuacan } from './teotihuacan/ground.js';
 import { ground as taos } from './taos/ground.js';
 import { ground as joseonSeoul } from './joseon-seoul/ground.js';
 import { ground as songKaifeng } from './song-kaifeng/ground.js';
+import { ground as lhasa } from './lhasa/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -42,6 +43,7 @@ export const GROUNDS = {
   taos,
   'joseon-seoul': joseonSeoul,
   'song-kaifeng': songKaifeng,
+  lhasa,
 };
 
 export const MODULES = {
@@ -64,4 +66,5 @@ export const MODULES = {
   taos: () => import('./taos/index.js'),
   'joseon-seoul': () => import('./joseon-seoul/index.js'),
   'song-kaifeng': () => import('./song-kaifeng/index.js'),
+  lhasa: () => import('./lhasa/index.js'),
 };

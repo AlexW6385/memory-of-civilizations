@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.21 — The Potala (2026-11-03)
+- New settlement: Lhasa in 1694 — the Potala climbing its hill, white palaces either side of the Red Palace and its gilded roofs, walls leaning inward with rows of black-framed windows under dark friezes, stairs up the front; the walled village of Shöl at its foot; the valley ringed by mountains.
+
 ## v8.20 — Bianjing (2026-11-03)
 - New settlement: Northern Song Bianjing around 1120 — the slender Iron Pagoda of brown glazed brick rising thirteen storeys in its monastery; the Bian River of the Qingming scroll with its arched timber Rainbow Bridge and grain boats; the city's east wall with the water gate and gate tower; streets of shops, inns and houses.
 

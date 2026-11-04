@@ -201,6 +201,11 @@ export const MATERIALS = {
   granite_korea:    { color: '#a4a29b', roughness: 0.8, kind: 'ashlar', course: 0.5, block: 1.0 },
   // Northern Song: the Iron Pagoda's brown glazed brick
   tile_iron:        { color: '#6a4b35', roughness: 0.35, metalness: 0.05, kind: 'tiles' },
+  // Tibet: limewash white and red, the pembe frieze, the yellow court
+  limewash_white:   { color: '#e9e4d8', roughness: 0.92, kind: 'smooth' },
+  limewash_red:     { color: '#7e2a20', roughness: 0.9, kind: 'smooth' },
+  pembe:            { color: '#5a2a22', roughness: 1.0, kind: 'bark' },
+  limewash_yellow:  { color: '#c9a24e', roughness: 0.9, kind: 'smooth' },
 };
 
 export function albedo(key) {
