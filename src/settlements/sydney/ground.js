@@ -8,7 +8,7 @@ function cover(x, z, h) {
   const d = shore(x, z);
   if (d < 4) { c.rock = 0.7; c.sand = 0.3; c.road = 0; return c; }
   if (inRect(GARDEN, x, z)) { c.grass = 0.9; c.road = 0.1; return c; }
-  if (inRect(BENNELONG, x, z)) { c.road = 0.9; return c; }
+  if (inRect(BENNELONG, x, z)) { c.road = 1; c.grass = 0; c.sand = 0; c.dry = 0; return c; }
   return c;
 }
 function water(x, z, y) { return inWater(x, z) && y < LEVEL + 0.3; }

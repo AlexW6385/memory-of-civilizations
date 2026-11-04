@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.73 — The Opera House's podium (2026-11-04)
+- Detail: the Opera House's monumental stair has granite nosings and sloping cheek walls; the podium's sides are coursed and glazed with the long bands of the foyers and the concourse; Bennelong Point is paved; the arrival view looks along the podium to the shells.
+
 ## v8.72 — Lhasa's windows, flags and yaks (2026-11-04)
 - Detail: Lhasa and the Potala get their Tibetan windows — black trapezoid surrounds, red frames and lattices, painted lintels and striped cloth awnings — on every storey; the houses of Shöl have doors, windows on their street sides, and strings of prayer flags in the five colours from their poles; yaks, goats and sheep in the lanes, people in Tibetan robes.
 

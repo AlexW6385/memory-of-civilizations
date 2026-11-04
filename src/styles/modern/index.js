@@ -31,7 +31,22 @@ function operaHouse(el, { bag, col }) {
   bag.add('granite_podium', box(x0, y - 4, z0, x1, y + h, z1)); col.rect(el.rect, y - 4, y + h); col.floor(el.rect, y + h);
   // the monumental stair up the south side
   const n = 18;
-  for (let k = 0; k < n; k++) { const zz = z1 + st * (1 - k / n), yy = y + h * (k + 1) / n; bag.add('granite_podium', box(x0 + 8, y - 0.5, zz - st / n, x1 - 8, yy, zz)); col.floor([x0 + 8, zz - st / n, x1 - 8, zz], yy); }
+  for (let k = 0; k < n; k++) { const zz = z1 + st * (1 - k / n), yy = y + h * (k + 1) / n; bag.add('granite_podium', box(x0 + 8, y - 0.5, zz - st / n, x1 - 8, yy - 0.04, zz)); bag.add('granite_grey', box(x0 + 8, yy - 0.04, zz - st / n, x1 - 8, yy, zz + 0.04)); col.floor([x0 + 8, zz - st / n, x1 - 8, zz], yy); }
+  // the stair's cheeks: low granite walls stepping down with it
+  for (const sx of [x0 + 6.6, x1 - 8]) {
+    // a prism: its top sloping with the stair, 1 m above the treads
+    const a = sx, b = sx + 1.4, zA = z1, zB = z1 + st, yA = y + h + 1.0, yB = y + 1.0, yb = y - 0.5, T = [];
+    const q = (p1, p2, p3, p4) => T.push(...p1, ...p2, ...p3, ...p1, ...p3, ...p4, ...p1, ...p3, ...p2, ...p1, ...p4, ...p3);
+    q([a, yb, zA], [a, yA, zA], [a, yB, zB], [a, yb, zB]); q([b, yb, zA], [b, yA, zA], [b, yB, zB], [b, yb, zB]);
+    q([a, yA, zA], [b, yA, zA], [b, yB, zB], [a, yB, zB]); q([a, yb, zB], [a, yB, zB], [b, yB, zB], [b, yb, zB]);
+    bag.add('granite_grey', fromTriangles(T));
+  }
+  // the podium's sides: granite in courses, the long bands of the foyers' and the concourse's glazing under the broadwalk
+  for (const [xa, sg] of [[x0, -1], [x1, 1]]) {
+    for (let k = 1; k < 4; k++) bag.add('granite_grey', box(sg < 0 ? xa - 0.08 : xa, y + k * h / 4 - 0.05, z0, sg < 0 ? xa : xa + 0.08, y + k * h / 4 + 0.05, z1));
+    for (let zz = z0 + 6; zz < z1 - 6; zz += 7) bag.add('glass_outer', box(sg < 0 ? xa - 0.06 : xa, y + 1.2, zz, sg < 0 ? xa : xa + 0.06, y + h / 2 - 0.4, zz + 5.4));
+  }
+  for (let xx = x0 + 6; xx < x1 - 6; xx += 7) bag.add('glass_outer', box(xx, y + 1.2, z0 - 0.06, xx + 5.4, y + h / 2 - 0.4, z0));
   // the broadwalk round the podium's foot
   bag.add('granite_grey', box(x0 - 6, y - 4, z0 - 6, x1 + 6, y + 0.2, z1 + st + 2));
   for (const hall of el.halls ?? []) for (const [a, b, H, hw] of hall.shells) shell(bag, hall.x, a, b, hw ?? hall.hw, H, y + h);
