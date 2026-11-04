@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.54 — Baroque Rome (2026-11-04)
+- New settlement: Baroque Rome about 1670 — St Peter's with Michelangelo's block, Maderno's front and the ribbed dome, Bernini's oval piazza with its four-deep colonnades and statues, the obelisk and the fountains, the Vatican Palace, the Passetto, Castel Sant'Angelo, the Tiber and its bridge, the Borgo's houses and the Vatican gardens.
+
 ## v8.53 — Barcelona (2026-11-03)
 - New settlement: Barcelona about 1910 — the Eixample's grid of six-storey blocks with cut corners and iron balconies, plane trees along the streets, the Sagrada Família rising in scaffolding with its Nativity towers and a crane, La Pedrera's waves of stone and the scaled roof of Casa Batlló.
 

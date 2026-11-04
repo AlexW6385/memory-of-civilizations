@@ -53,6 +53,7 @@ import { ground as amsterdam } from './amsterdam/ground.js';
 import { ground as versailles } from './versailles/ground.js';
 import { ground as london } from './london/ground.js';
 import { ground as barcelona } from './barcelona/ground.js';
+import { ground as baroqueRome } from './baroque-rome/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -106,6 +107,7 @@ export const GROUNDS = {
   versailles,
   london,
   barcelona,
+  'baroque-rome': baroqueRome,
 };
 
 export const MODULES = {
@@ -160,4 +162,5 @@ export const MODULES = {
   versailles: () => import('./versailles/index.js'),
   london: () => import('./london/index.js'),
   barcelona: () => import('./barcelona/index.js'),
+  'baroque-rome': () => import('./baroque-rome/index.js'),
 };

@@ -60,7 +60,7 @@ export const SITES = [
   { id: 'knossos', name: { en: 'Minoan Crete', zh: '米诺斯克里特' }, era: '16th c. BC', region: 'aegean', lat: 35.30, lon: 25.16, radius: 350 },
   { id: 'athens', name: { en: 'Classical Athens', zh: '古典雅典' }, era: '5th c. BC', region: 'aegean', lat: 37.97, lon: 23.73, radius: 420 },
   { id: 'rome', name: { en: 'Imperial Rome', zh: '罗马帝国' }, era: '2nd c.', region: 'latium', lat: 41.90, lon: 12.48, radius: 420 },
-  { id: 'baroque-rome', name: { en: 'Baroque Rome', zh: '巴洛克罗马' }, era: '17th c.', region: 'latium', lat: 41.90, lon: 12.46, nudge: 315 },
+  { id: 'baroque-rome', name: { en: 'Baroque Rome', zh: '巴洛克罗马' }, era: '17th c.', region: 'latium', lat: 41.90, lon: 12.46, nudge: 60, radius: 380 },
   // ── western Europe ──
   { id: 'stonehenge', name: { en: 'Neolithic Britain', zh: '新石器时代不列颠' }, era: '25th c. BC', region: 'britain', lat: 51.18, lon: -1.83, radius: 360 },
   { id: 'conques', name: { en: 'Romanesque Rouergue', zh: '罗曼式鲁埃格' }, era: '12th c.', region: 'france', lat: 44.60, lon: 2.40, radius: 360 },

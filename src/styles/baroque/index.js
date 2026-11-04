@@ -1,0 +1,100 @@
+// Roman Baroque (17th c.; docs/settlements/baroque-rome.md §4): St Peter's — Michelangelo's
+// Greek-cross block with its giant pilasters and attic, Maderno's nave and front with its columns,
+// pediment and statues, the drum with paired columns, the ribbed lead dome and the lantern; Bernini's
+// colonnade of four rows of Tuscan columns under an entablature with statues; the obelisk and the
+// fountains; Castel Sant'Angelo's drum; travertine palaces and stuccoed houses.
+
+import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
+import { box, lathe } from '../../core/geom.js';
+import '../qing/index.js';
+import '../renaissance/index.js';
+
+const T = 'travertine', L = 'lead', ST = 'stucco_ochre';
+/** st_peter: { c (the crossing), s (side of the central block), nave (length east), w, h, d (dome diameter), y } — the church faces east. */
+function stPeter(el, { bag, col }) {
+  const [cx, cz] = el.c, S = el.s ?? 110, N = el.nave ?? 70, W = el.w ?? 56, H = el.h ?? 45, D = el.d ?? 42, y = el.y ?? 0, R0 = D / 2;
+  // Michelangelo's block: a Greek cross of four arms with apses
+  const arm = S / 2, aw = S * 0.42;
+  for (const r of [[cx - arm, cz - aw / 2, cx + arm, cz + aw / 2], [cx - aw / 2, cz - arm, cx + aw / 2, cz + arm]]) { bag.add(T, box(r[0], y - 0.5, r[1], r[2], y + H, r[3])); col.rect(r, y, y + H); }
+  for (const [ax, az] of [[cx - arm, cz], [cx, cz - arm], [cx, cz + arm]]) { bag.add(T, lathe([[aw / 2, 0], [aw / 2, H], [0.001, H]], 16, null, ax, y - 0.5, az)); col.circle(ax, az, aw / 2, y, y + H); }
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const r = [cx + dx * aw / 2, cz + dz * aw / 2, cx + dx * arm * 0.85, cz + dz * arm * 0.85]; const q = [Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.max(r[0], r[2]), Math.max(r[1], r[3])]; bag.add(T, box(q[0], y - 0.5, q[1], q[2], y + H * 0.8, q[3])); col.rect(q, y, y + H * 0.8); bag.add(L, lathe([[8, 0], [5, 6], [0.001, 9]], 12, null, (q[0] + q[2]) / 2, y + H * 0.8, (q[1] + q[3]) / 2)); }
+  // the attic and giant pilasters
+  bag.add(T, box(cx - arm - 1, y + H, cz - aw / 2 - 1, cx + arm + 1, y + H + 2.5, cz + aw / 2 + 1));
+  for (let k = -5; k <= 5; k++) for (const s of [-1, 1]) bag.add(T, box(cx + k * arm / 5 - 0.9, y, cz + s * (aw / 2 + 0.6) - 0.6, cx + k * arm / 5 + 0.9, y + H, cz + s * (aw / 2 + 0.6) + 0.6));
+  // Maderno's nave to the east, its front with eight columns, the pediment and the statues
+  const n0 = cx + arm, n1 = n0 + N;
+  bag.add(T, box(n0 - 1, y - 0.5, cz - W / 2, n1, y + H, cz + W / 2)); col.rect([n0 - 1, cz - W / 2, n1, cz + W / 2], y, y + H);
+  bag.add(L, box(n0, y + H, cz - W * 0.3, n1, y + H + 6, cz + W * 0.3));
+  const fw = W * 1.05;
+  bag.add(T, box(n1, y - 0.5, cz - fw, n1 + 4, y + H + 2, cz + fw)); col.rect([n1, cz - fw, n1 + 4, cz + fw], y, y + H + 2);
+  for (let k = 0; k < 8; k++) { const z = cz - fw * 0.55 + k * fw * 1.1 / 7; bag.add(T, lathe([[1.4, 0], [1.4, 1], [1.2, 1.4], [1.2, H - 4], [1.6, H - 3], [1.6, H - 2.5]], 12, null, n1 + 5.4, y, z)); col.circle(n1 + 5.4, z, 1.4, y, y + H); }
+  bag.add(T, box(n1 + 3.5, y + H - 2.5, cz - fw * 0.6, n1 + 7.2, y + H + 2, cz + fw * 0.6));
+  bag.add(T, orientedBox([n1 + 5, cz - 14], [n1 + 5, cz + 14], 4, y + H + 2, y + H + 3));
+  for (let k = 0; k < 13; k++) { const z = cz - fw * 0.9 + k * fw * 1.8 / 12; bag.add('marble', lathe([[0.6, 0], [0.5, 3], [0.6, 4.2], [0.001, 5.2]], 8, null, n1 + 2, y + H + 2, z)); }
+  for (const s of [-1, 1]) { const z = cz + s * (fw - 4); bag.add('opening', box(n1 + 4, y + 12, z - 3, n1 + 4.06, y + 22, z + 3)); }
+  for (const z of [cz - 10, cz, cz + 10]) bag.add('opening', box(n1 + 3.95, y, z - 2.5, n1 + 4.06, y + 12, z + 2.5));
+  // the drum with paired columns, the ribbed dome, the lantern
+  const dy = y + H + 2.5;
+  bag.add(T, lathe([[R0 + 3, 0], [R0 + 3, 4], [R0 + 1.5, 4], [R0 + 1.5, 20], [R0 + 2.5, 22], [R0 + 1, 24], [0.001, 24]], 32, null, cx, dy, cz));
+  for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; for (const d of [-0.05, 0.05]) { const b = a + d, x = cx + Math.cos(b) * (R0 + 2.4), z = cz + Math.sin(b) * (R0 + 2.4); bag.add(T, lathe([[0.7, 0], [0.7, 16], [0.001, 16]], 8, null, x, dy + 4, z)); } bag.add('opening', box(cx + Math.cos(a + Math.PI / 16) * (R0 + 1.5) - 1, dy + 8, cz + Math.sin(a + Math.PI / 16) * (R0 + 1.5) - 1, cx + Math.cos(a + Math.PI / 16) * (R0 + 1.5) + 1, dy + 15, cz + Math.sin(a + Math.PI / 16) * (R0 + 1.5) + 1)); }
+  const domeY = dy + 24, dome = [[R0 + 1, 0], [R0 * 0.98, R0 * 0.3], [R0 * 0.88, R0 * 0.62], [R0 * 0.68, R0 * 0.92], [R0 * 0.4, R0 * 1.14], [R0 * 0.15, R0 * 1.24]];
+  bag.add(L, lathe(dome, 32, null, cx, domeY, cz));
+  for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; for (let i = 0; i + 1 < dome.length; i++) { const [r0, h0] = dome[i], [r1, h1] = dome[i + 1]; const g = box(-0.6, 0, -0.6, 0.6, Math.hypot(r1 - r0, h1 - h0) + 0.3, 0.6); g.rotateZ(Math.atan2(r0 - r1, h1 - h0)); g.translate(r0 + 0.15, h0, 0); g.rotateY(-a); g.translate(cx, domeY, cz); bag.add(T, g); } }
+  const ly = domeY + R0 * 1.24;
+  bag.add(T, lathe([[R0 * 0.2, 0], [R0 * 0.2, 9], [R0 * 0.24, 10], [0.001, 10]], 16, null, cx, ly, cz));
+  bag.add(L, lathe([[R0 * 0.16, 0], [0.5, 6], [0.001, 7]], 16, null, cx, ly + 10, cz));
+  bag.add('gilt_bronze', lathe([[0.9, 0], [0.9, 1.8], [0.2, 2], [0.2, 4.5], [0.001, 4.5]], 10, null, cx, ly + 17, cz));
+}
+/** colonnade: { c (centre of the oval), ax, bz (semi-axes), rows, depth, h, y, from, to (angle of each arm, rad from +x) } — two curved arms of four rows of columns. */
+function colonnade(el, { bag, col }) {
+  const [ox, oz] = el.c, ax = el.ax ?? 70, bz = el.bz ?? 95, rows = el.rows ?? 4, depth = el.depth ?? 14, h = el.h ?? 13, y = el.y ?? 0;
+  const arms = el.arms ?? [[0.35, Math.PI - 0.55], [-Math.PI + 0.55, -0.35]];
+  for (const [a0, a1] of arms) {
+    const n = Math.round(Math.abs(a1 - a0) * (ax + bz) / 2 / 4.2);
+    const pt = (a, off) => { const s = 1 + off / ((ax + bz) / 2); return [ox + Math.cos(a) * ax * s, oz - Math.sin(a) * bz * s]; };
+    for (let i = 0; i <= n; i++) {
+      const a = a0 + (a1 - a0) * i / n;
+      for (let r = 0; r < rows; r++) { const [x, z] = pt(a, r * depth / (rows - 1)); bag.add(T, lathe([[0.9, 0], [0.9, 0.6], [0.75, 0.9], [0.65, h - 1.2], [0.95, h - 0.6], [0.95, h]], 10, null, x, y, z)); col.circle(x, z, 0.8, y, y + h); }
+      if (i < n) {
+        const b = a0 + (a1 - a0) * (i + 1) / n, [px, pz] = pt(a, depth / 2), [qx, qz] = pt(b, depth / 2);
+        bag.add(T, orientedBox([px, pz], [qx, qz], depth + 2.5, y + h, y + h + 3.2, 0.05));
+        bag.add(L, orientedBox([px, pz], [qx, qz], depth + 1.6, y + h + 3.2, y + h + 4.6, 0.05));
+        if (i % 2 === 0) { const [sx, sz] = pt(a, -1); bag.add('marble', lathe([[0.5, 0], [0.4, 2.4], [0.5, 3.2], [0.001, 3.9]], 8, null, sx, y + h + 3.2, sz)); }
+      }
+    }
+    // the end pavilions
+    for (const a of [a0, a1]) { const [px, pz] = pt(a, depth / 2), [qx, qz] = pt(a + (a1 > a0 ? -1 : 1) * 0.04, depth / 2); bag.add(T, orientedBox([px, pz], [qx, qz], depth + 4, y - 0.3, y + h + 5.5, 1.5)); col.segment([px, pz], [qx, qz], depth + 4, y, y + h + 5.5); }
+  }
+  bag.add('flagstone', box(ox - ax * 1.05, y - 0.4, oz - bz * 1.05, ox + ax * 1.05, y + 0.02, oz + bz * 1.05));
+}
+/** obelisk: { c, h, y } — the Egyptian obelisk on its base, the cross on top. */
+function obelisk(el, { bag, col }) {
+  const [x, z] = el.c, h = el.h ?? 25.5, y = el.y ?? 0;
+  bag.add(T, box(x - 3, y - 0.3, z - 3, x + 3, y + 1.2, z + 3)); bag.add(T, box(x - 2.2, y + 1.2, z - 2.2, x + 2.2, y + 8, z + 2.2)); col.rect([x - 3, z - 3, x + 3, z + 3], y, y + 8);
+  bag.add('granite_red', lathe([[1.9, 0], [1.3, h * 0.94], [0.001, h]], 4, null, x, y + 8, z));
+  bag.add('gilt_bronze', box(x - 0.1, y + 8 + h, z - 0.1, x + 0.1, y + 10.5 + h, z + 0.1));
+}
+/** fountain: { c, r, y } — a basin with a raised bowl and a jet. */
+function fountain(el, { bag, col }) {
+  const [x, z] = el.c, r = el.r ?? 6, y = el.y ?? 0;
+  bag.add(T, lathe([[r, 0], [r, 0.9], [r - 0.5, 0.9], [r - 0.5, 0.3], [0.001, 0.3]], 24, null, x, y - 0.2, z)); col.circle(x, z, r, y, y + 0.7);
+  bag.add('water', lathe([[r - 0.5, 0], [0.001, 0]], 24, null, x, y + 0.6, z));
+  bag.add(T, lathe([[0.8, 0], [0.6, 3], [3.2, 3.6], [3.2, 4], [0.5, 4.2], [0.3, 6], [1, 6.5], [0.001, 6.6]], 16, null, x, y + 0.3, z));
+  bag.add('water', lathe([[0.25, 0], [0.12, 2.6], [0.001, 2.8]], 8, null, x, y + 6.6, z));
+}
+/** castel: { c, r, h, y } — Castel Sant'Angelo: the square base with corner bastions, the great drum, the papal apartments and the angel. */
+function castel(el, { bag, col }) {
+  const [x, z] = el.c, r = el.r ?? 32, h = el.h ?? 22, y = el.y ?? 0, s = r * 1.5;
+  bag.add('rubble', box(x - s, y - 0.5, z - s, x + s, y + 8, z + s)); col.rect([x - s, z - s, x + s, z + s], y, y + 8); col.floor([x - s, z - s, x + s, z + s], y + 8);
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { bag.add('rubble', lathe([[8, 0], [8, 10], [0.001, 10]], 5, null, x + dx * s, y - 0.5, z + dz * s)); col.circle(x + dx * s, z + dz * s, 8, y, y + 10); }
+  bag.add('brick', lathe([[r, 0], [r, h], [r + 0.8, h + 0.6], [r + 0.8, h + 1.4], [0.001, h + 1.4]], 32, null, x, y + 8, z)); col.circle(x, z, r, y, y + 8 + h);
+  bag.add(ST, box(x - r * 0.5, y + 8 + h, z - r * 0.4, x + r * 0.5, y + 8 + h + 12, z + r * 0.4));
+  bag.add('gilt_bronze', lathe([[0.8, 0], [0.6, 3], [1.4, 4], [0.001, 6]], 8, null, x, y + 8 + h + 12, z));
+}
+/** paving: { rect, y } — travertine flags. */
+function paving(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('flagstone', box(x0, y - 0.4, z0, x1, y + 0.02, z1)); }
+registerStyle('baroque', {
+  trim: () => {}, opening: () => {}, column: () => {},
+  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel, paving },
+  objects: {},
+});
