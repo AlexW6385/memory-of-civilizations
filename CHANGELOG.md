@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.71 — Teotihuacan's avenue and fuller stalls (2026-11-04)
+- Detail: the Avenue of the Dead is lined on both sides with platform temples in talud-tablero, their stairs coming down to it, and people walk it; market stalls are laid with cloth and heaped with goods, baskets and sacks beneath and beside them.
+
 ## v8.70 — Khajuraho's temples (2026-11-04)
 - Detail: Khajuraho's temples get their sculpture — three bands of figures in niches between pilasters round every hall and the sanctum, couples among them, balconied windows on the great hall and the sanctum, moulded plinths with a frieze; the halls' roofs step up in ledged tiers with rows of finials; the tower is clustered with climbing towers in three rings. Carts and cars line up with the streets.
 

@@ -89,14 +89,18 @@ function well(el, { bag, col }) {
 function stall(el, { bag, col }) {
   const put = placer(el, bag), rand = rng(el.seed), W = el.w ?? 2.6, D = el.d ?? 1.4, aw = el.awning ?? 'cloth_white';
   for (const [px, pz] of [[-W / 2, -D / 2], [W / 2, -D / 2], [-W / 2, D / 2 + 0.6], [W / 2, D / 2 + 0.6]]) put('timber', box(px - 0.05, 0, pz - 0.05, px + 0.05, pz > 0 ? 2.1 : 2.4, pz + 0.05));
-  put('timber', box(-W / 2, 0.75, -D / 2, W / 2, 0.8, D / 2)); put('timber', box(-W / 2 + 0.05, 0, -D / 2 + 0.05, W / 2 - 0.05, 0.75, -D / 2 + 0.1));
+  put('timber', box(-W / 2, 0.75, -D / 2, W / 2, 0.8, D / 2)); for (const xx of [-W / 2 + 0.1, W / 2 - 0.1]) for (const zz of [-D / 2 + 0.1, D / 2 - 0.1]) put('timber', box(xx - 0.04, 0, zz - 0.04, xx + 0.04, 0.78, zz + 0.04));
   const g = box(-W / 2 - 0.2, -0.02, -D / 2 - 0.2, W / 2 + 0.2, 0.02, D / 2 + 0.8); g.rotateX(-0.2); g.translate(0, 2.3, 0); put(aw, g);
   const goods = el.goods ?? ['basket', 'produce', 'cloth'];
-  for (let i = 0; i < 4; i++) {
-    const kind = goods[Math.floor(rand() * goods.length)], x = -W / 2 + 0.4 + i * (W - 0.8) / 3, z = (rand() - 0.5) * 0.4;
+  put(['cloth_white', 'cloth_indigo', 'cloth_red', 'sacking'][Math.floor(rand() * 4)], box(-W / 2 - 0.02, 0.8, -D / 2 - 0.02, W / 2 + 0.02, 0.82, D / 2 + 0.02));      // the cloth on the table
+  // goods under the table and beside it
+  for (let i = 0; i < 3; i++) { const x = -W / 2 + 0.4 + rand() * (W - 0.8); put(rand() < 0.5 ? 'wicker' : 'sacking', at(lz([[0.2, 0], [0.24, 0.25], [0.18, 0.4], [0.001, 0.42]], 8), x, 0, D / 2 + 0.35 + rand() * 0.4)); }
+  for (let i = 0; i < 7; i++) {
+    const kind = goods[Math.floor(rand() * goods.length)], x = -W / 2 + 0.3 + (i % 4) * (W - 0.6) / 3 + (i >= 4 ? (W - 0.6) / 6 : 0), z = (i >= 4 ? 0.3 : -0.25) + (rand() - 0.5) * 0.15;
+    if (x > W / 2 - 0.2) continue;
     if (kind === 'cloth') for (let k = 0; k < 3; k++) put(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_green'][Math.floor(rand() * 5)], at(lying(0.08, 0.6, 8), x, 0.88 + k * 0.15, z));
-    else if (kind === 'produce') { put('wicker', at(lz([[0.22, 0], [0.26, 0.12], [0.001, 0.12]], 10), x, 0.8, z)); put(['cloth_green', 'cloth_red', 'cloth_ochre'][Math.floor(rand() * 3)], at(lz([[0.22, 0], [0.12, 0.12], [0.001, 0.15]], 8), x, 0.9, z)); }
-    else if (kind === 'basket') put('wicker', at(lz([[0.16, 0], [0.22, 0.2], [0.001, 0.2]], 10), x, 0.8, z));
+    else if (kind === 'produce') { put('wicker', at(lz([[0.22, 0], [0.26, 0.12], [0.001, 0.12]], 10), x, 0.82, z)); const pm = ['cloth_green', 'cloth_red', 'cloth_ochre', 'glaze_yellow'][Math.floor(rand() * 4)]; for (let q = 0; q < 5; q++) { const a = q * 1.26, r2 = q ? 0.11 : 0; put(pm, at(ball(0.06, 6), x + Math.cos(a) * r2, 0.88 + (q ? 0 : 0.07), z + Math.sin(a) * r2)); } }
+    else if (kind === 'basket') { put('wicker', at(lz([[0.16, 0], [0.22, 0.2], [0.2, 0.2], [0.14, 0.03], [0.001, 0.03]], 10), x, 0.82, z)); put(['cloth_ochre', 'hide_tan', 'cloth_brown', 'cloth_white'][Math.floor(rand() * 4)], at(lz([[0.2, 0], [0.13, 0.07], [0.001, 0.1]], 8), x, 1.0, z)); }
     else { const P = POTS[kind] ?? POTS.water_pot; put(P.m, at(lz(P.p.map(([r, h]) => [r * 0.6, h * 0.6])), x, 0.8, z)); }
   }
   const [x, z] = el.at, y = el.y ?? 0, c = Math.cos(el.rot ?? 0), s = Math.sin(el.rot ?? 0), R = Math.hypot(W, D) / 2;

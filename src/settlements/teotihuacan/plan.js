@@ -2,7 +2,7 @@
 // with its Adosada, the Pyramid of the Moon on its rise and the plaza's platform temples, the avenue
 // and its cross walls, the Ciudadela's banks with the Feathered Serpent Pyramid and its Adosada.
 
-import { AVENUE, MOON, PLAZA, SUN, CIUD } from './layout.js';
+import { AVENUE, MOON, PLAZA, SUN, CIUD, KEEP_CLEAR, RADIUS, inRect } from './layout.js';
 
 const E = [];
 E.push({ t: 'tt_pyramid', c: SUN.c, w: SUN.w, d: SUN.d, tw: SUN.tw, td: SUN.td, h: SUN.h, levels: 5, tablero: 0, stair: 'w', stairW: 14, temple: { w: 16, d: 16, h: 5 } });
@@ -18,6 +18,13 @@ for (const z of [-140, -10, 110, 240]) {
   E.push({ t: 'tt_wall', rect: [AVENUE[0] - 6, z, AVENUE[2] + 6, z + 5], h: 2.4 });
   E.push({ t: 'stairs', rect: [-6, z - 4, 6, z], y0: 0, y1: 2.4, dir: 's', mat: 'stucco_ochre' });
   E.push({ t: 'stairs', rect: [-6, z + 5, 6, z + 9], y0: 0, y1: 2.4, dir: 'n', mat: 'stucco_ochre' });
+}
+// the platform temples lining the avenue on both sides, their stairs to it, between the cross walls
+for (let z = -180; z < 380; z += 34) for (const sd of [-1, 1]) {
+  const x = sd * (AVENUE[2] + 13), clear = KEEP_CLEAR.some((k) => inRect(k, x, z, 12)) || [-140, -10, 110, 240].some((w) => Math.abs(z - w - 2) < 14);
+  if (clear || Math.hypot(x, z) > RADIUS - 40) continue;
+  const big = Math.abs(z % 102) < 20;
+  E.push({ t: 'tt_pyramid', c: [x + sd * (big ? 3 : 0), z], w: big ? 24 : 18, d: big ? 26 : 20, tw: big ? 14 : 10, td: big ? 16 : 12, h: big ? 9 : 6, levels: big ? 3 : 2, tablero: 0.5, stair: sd < 0 ? 'e' : 'w', stairW: 6, temple: big ? { w: 8, d: 8, h: 3 } : undefined });
 }
 // the Ciudadela: four banks, platform temples on them, the Feathered Serpent Pyramid and its Adosada
 const [cx0, cz0, cx1, cz1] = CIUD, bw = 22;

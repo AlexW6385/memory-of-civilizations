@@ -139,7 +139,7 @@ const MARKETS = {
 };
 // open places inside the landmarks where people gather (no stalls): forecourts, plazas, precincts
 const PEOPLE = {
-  rome: [[-40, -160, 40, -60]], 'chichen-itza': [[-150, -140, 170, 120]], teotihuacan: [[-70, -262, 70, -196]], tenochtitlan: [[-145, -145, 145, 145]],
+  rome: [[-40, -160, 40, -60]], 'chichen-itza': [[-150, -140, 170, 120]], teotihuacan: [[-70, -262, 70, -196], [-18, -190, 18, 380]], tenochtitlan: [[-145, -145, 145, 145]],
   babylon: [[-105, -55, 105, 145]], 'ottoman-istanbul': [[-70, -90, 70, 85]], ur: [[-48, -138, 48, -80]], london: [[-58, -213, 38, -152]],
   'qing-beijing': [], jerusalem: [[-145, -195, 145, 195, 14]], persepolis: [],
 };
