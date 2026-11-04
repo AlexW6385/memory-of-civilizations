@@ -172,7 +172,7 @@ export class Climate {
     ENV.moonDir.value.set(...a.moon);
     ENV.moonUp.value = a.moonLight;
     const sky = R.sky;
-    sky.turbidity.value = a.turb; sky.rayleigh.value = a.ray; sky.mieCoefficient.value = a.mie; sky.mieDirectionalG.value = a.mieG;
+    sky.turbidity.value = a.turb; sky.rayleigh.value = a.ray; sky.mieCoefficient.value = a.mie * 0.6; sky.mieDirectionalG.value = Math.min(a.mieG, 0.74);   // a softer, smaller halo round the sun
     sky.cloudCoverage.value = a.clouds; sky.cloudDensity.value = a.density;
     sky.cloudSpeed.value = 0.00002 * (1 + 2 * a.windy);
     sky.sunPosition.value.set(a.sun[0], a.sun[1], a.sun[2]).multiplyScalar(1000);

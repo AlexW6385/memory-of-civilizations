@@ -114,8 +114,8 @@ export class Renderer {
     }
     // the sun's disc is thousands of times brighter than the sky: clamp it before the bloom, or its
     // glow floods half the picture when one looks toward a low sun
-    const glowSrc = vec4(min(color.rgb, vec3(5)), 1);
-    let out = renderOutput(color.add(bloom(glowSrc, 0.1, 0.3, 1.2)));
+    const glowSrc = vec4(min(color.rgb, vec3(2.5)), 1);
+    let out = renderOutput(color.add(bloom(glowSrc, 0.07, 0.3, 1.4)));
     if (Q.aa) out = smaa(out);
     this.pipeline.outputColorTransform = false;
     this.pipeline.outputNode = out;

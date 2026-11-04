@@ -1,6 +1,8 @@
 // Memory of Civilizations — boot, interface and the frame loop.
 
+import { Vector3 } from 'three';
 import { Renderer } from './engine/renderer.js';
+import { ENV } from './engine/env.js';
 import { World } from './engine/world.js';
 import { Controls } from './engine/controls.js';
 import { Music } from './engine/audio.js';
@@ -125,6 +127,7 @@ async function main() {
   const music = new Music();
   music.setVolume(settings.music);
   let exposure = 0.55, snap = true, last = performance.now();
+  const _view = new Vector3();
   const stats = { frames: 0, ms: 0 };
   const rain = new Rain(R.scene, R.camera);
 
@@ -413,7 +416,12 @@ async function main() {
     // eye adaptation: open up in dark rooms (at most ~3 stops), close down outdoors
     const amb = R.gi.ambientAt(c.x, c.y, c.z);
     const target = cl.exposure * (1 + 2.6 * (1 - cl.day)) * Math.min(8 + 6 * (1 - cl.day), Math.max(1, Math.pow(R.gi.openAmbient() / Math.max(amb, 1e-4), 0.55)));
-    exposure = snap ? target : exposure + (target - exposure) * (1 - Math.exp(-dt / (target > exposure ? 1.6 : 0.6)));
+    // looking toward the sun the eye closes down (as a camera would), so the sky round it and the
+    // backlit haze are not one white glare
+    R.camera.getWorldDirection(_view);
+    const sunUp = Math.max(0, Math.min(1, ENV.sunDir.value.y * 6 + 0.3)), toward = Math.max(0, Math.min(1, (_view.dot(ENV.sunDir.value) - 0.55) / 0.4));
+    const target2 = target * (1 - 0.42 * sunUp * toward * toward * (3 - 2 * toward));
+    exposure = snap ? target2 : exposure + (target2 - exposure) * (1 - Math.exp(-dt / (target2 > exposure ? 1.2 : 0.5)));
     snap = false;
     R.renderer.toneMappingExposure = exposure;
     if (here.building) music.set(here.building.music, here.room?.kind || 'open');

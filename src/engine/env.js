@@ -64,7 +64,7 @@ export const fogFactor = Fn(() => {
 export const fogColor = Fn(() => {
   const v = normalize(positionWorld.sub(cameraPosition));
   const glow = pow(max(dot(v, ENV.sunDir), 0), 8);
-  return mix(ENV.fogColor, ENV.fogColor.mul(0.8).add(ENV.sunColor.mul(0.05)), glow);
+  return mix(ENV.fogColor, ENV.fogColor.mul(0.8).add(ENV.sunColor.mul(0.03)), glow);
 })();
 
 function select4(c, a, b) { return c.select(a, b); }

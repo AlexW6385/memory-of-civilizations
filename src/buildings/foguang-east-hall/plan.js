@@ -22,13 +22,13 @@ const TOP = F + H0 + BR;               // seat of the eave purlin
 
 // ── terraces, stairs, platform ───────────────────────────────────────────────
 floor([-118, -46, -62, 46], 0, 'travertine', { th: 0.3 });
-block([-62, -48, 34, 48], 0, 6.5, 'brick_grey', { walk: true });
+block([-62, -48, 34, 48], 0, 6.3, 'brick_grey');               // tops sit under the paving: no coplanar faces
 floor([-62, -48, -30, 48], 6.5, 'travertine', { th: 0.2 });
-block([-30, -48, 34, 48], 6.5, T, 'brick_grey', { walk: true });
+block([-30, -48, 34, 48], 6.3, T - 0.2, 'brick_grey');
 floor([-30, -48, 34, 48], T, 'travertine', { th: 0.2 });
 add({ t: 'stair', rect: [-74, -4, -62, 4], dir: 'e', y0: 0, y1: 6.5, riser: 0.171, base: 0, mat: 'limestone' });
 add({ t: 'stair', rect: [-42, -4, -30, 4], dir: 'e', y0: 6.5, y1: T, riser: 0.171, base: 6.5, mat: 'limestone' });
-block([-13.5, -20.0, 11.0, 20.0], T, F, 'limestone', { walk: true });
+block([-13.5, -20.0, 11.0, 20.0], T, F - 0.15, 'limestone');
 floor([-13.5, -20.0, 11.0, 20.0], F, 'sandstone_floor', { th: 0.15 });
 add({ t: 'stair', rect: [-16.0, -3.0, -13.5, 3.0], dir: 'e', y0: T, y1: F, riser: 0.167, base: T, mat: 'limestone' });
 
