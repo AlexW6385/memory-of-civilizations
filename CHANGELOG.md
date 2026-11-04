@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.67 — Amsterdam's houses and Town Hall (2026-11-04)
+- Detail and a fix: Amsterdam's canal-house windows were hidden behind their white frames — now dark sash windows with glazing bars in white frames, windows on the garden side too, stone stoops with iron rails at the doors, white stone copings and scrolls on the gables, an attic window in each gable. The Town Hall has its giant pilasters, its windows on every front (two main floors and their mezzanines), a plinth and cornices. Doors in the Mediterranean and French towns have their leaves, some ajar.
+
 ## v8.66 — Knossos loads again; lit windows (2026-11-04)
 - Fix: Knossos could not load (a marble missing its colours stopped it); a test now makes every material. Detail: at night about one window in four is lit warm from inside, and by day the dark of a window is a little lighter toward its sill.
 

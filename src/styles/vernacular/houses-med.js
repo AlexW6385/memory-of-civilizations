@@ -84,6 +84,8 @@ function houseMed(el, { bag, col }) {
             if (jet && main) { put('opening', u - w / 2, u + w / 2, 0.5, 0.5 + h, -jet - 0.01, -jet + 0.03); continue; }
             put(O.trim, u - w / 2 - 0.15, u + w / 2 + 0.15, 0.5, 0.65 + h, -0.01, 0.08);
             put('opening', u - w / 2, u + w / 2, 0.6, 0.6 + h, 0.07, 0.11);
+            // the door leaves (or a shop's shutters), one of them a little open now and then
+            if (b === Math.floor(bays / 2) || rand() < 0.5) { const open = rand() < 0.3; put(el.variant === 'french' || el.variant === 'venetian' ? 'shutter_brown' : 'wood_dark', u - w / 2 + 0.05, open ? u - 0.05 : u + w / 2 - 0.05, 0.62, 0.55 + h, 0.105, 0.13); if (open) put('wood_dark', u + w / 2 - 0.12, u + w / 2 - 0.04, 0.62, 0.55 + h, 0.13, 0.75); }
             if (O.arched && rand() < O.arched) put(O.trim, u - w / 2 - 0.05, u + w / 2 + 0.05, 0.6 + h - 0.35, 0.6 + h, 0.06, 0.12);
           } else if (el.variant !== 'moorish') put('opening', u - 0.35, u + 0.35, 1.4, 2.2, -0.01, 0.03);
           continue;
