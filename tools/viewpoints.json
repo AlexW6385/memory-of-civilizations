@@ -2326,6 +2326,29 @@
     "pitch": -0.4,
     "cam": true
    }
+  ],
+  "ottoman-istanbul": [
+   {
+    "name": "court",
+    "at": [
+     0,
+     22.1,
+     -90
+    ],
+    "yaw": 3.1416,
+    "pitch": 0.25
+   },
+   {
+    "name": "air",
+    "at": [
+     -250,
+     180,
+     -300
+    ],
+    "yaw": -2.4,
+    "pitch": -0.4,
+    "cam": true
+   }
   ]
  }
 }

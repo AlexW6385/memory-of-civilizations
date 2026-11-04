@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.42 — Ottoman Istanbul (2026-11-03)
+- New settlement: Ottoman Istanbul about 1560 — Sinan's Süleymaniye crowning the third hill, its great lead dome rising over half-domes and cascades of smaller domes, four pencil minarets, the domed courtyard; madrasas round it on the terrace; timber houses tumbling down the slopes.
+
 ## v8.41 — Babylon (2026-11-03)
 - New settlement: Babylon about 570 BC — the great seven-stage ziggurat Etemenanki in its precinct with Esagila beside it, the blue-glazed Ishtar Gate in the city's double wall, the Processional Way between glazed walls with lions, the Southern Palace, the Euphrates and a city of courtyard houses.
 
