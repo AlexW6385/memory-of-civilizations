@@ -33,6 +33,7 @@ import { ground as rome } from './rome/ground.js';
 import { ground as constantinople } from './constantinople/ground.js';
 import { ground as jerusalem } from './jerusalem/ground.js';
 import { ground as edfu } from './edfu/ground.js';
+import { ground as paris } from './paris/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -66,6 +67,7 @@ export const GROUNDS = {
   constantinople,
   jerusalem,
   edfu,
+  paris,
 };
 
 export const MODULES = {
@@ -100,4 +102,5 @@ export const MODULES = {
   constantinople: () => import('./constantinople/index.js'),
   jerusalem: () => import('./jerusalem/index.js'),
   edfu: () => import('./edfu/index.js'),
+  paris: () => import('./paris/index.js'),
 };

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.34 — Paris (2026-11-03)
+- Paris is now the Île de la Cité in 1248: the Sainte-Chapelle in the royal palace's court with the great hall and towers on the quay, Notre-Dame and its twin towers at the island's east end, the two arms of the Seine with their bridges, and rows of timber-framed houses on the island and both banks.
+
 ## v8.33 — Edfu (2026-11-03)
 - Edfu is now the temple and its town in the 1st century BC: the Temple of Horus inside its high mudbrick enclosure, the birth house before the pylon, the sacred lake, a town of mudbrick houses toward the Nile, palms, reeds and green fields.
 
