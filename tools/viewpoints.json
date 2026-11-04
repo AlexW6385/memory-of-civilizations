@@ -2395,6 +2395,29 @@
     "pitch": -0.35,
     "cam": true
    }
+  ],
+  "great-zimbabwe": [
+   {
+    "name": "enclosure",
+    "at": [
+     46,
+     0.1,
+     60
+    ],
+    "yaw": 3.1416,
+    "pitch": 0.1
+   },
+   {
+    "name": "air",
+    "at": [
+     200,
+     140,
+     280
+    ],
+    "yaw": 0.6,
+    "pitch": -0.4,
+    "cam": true
+   }
   ]
  }
 }

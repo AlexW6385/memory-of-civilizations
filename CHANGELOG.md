@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.45 — Great Zimbabwe (2026-11-03)
+- New settlement: Great Zimbabwe about 1350 — the Great Enclosure's towering curved granite wall with its chevron band, the narrow passage and the conical tower inside; walls winding among the boulders of the Hill Complex; smaller enclosures and round clay houses with thatched cones across the valley.
+
 ## v8.44 — Kilwa (2026-11-03)
 - New settlement: Kilwa Kisiwani about 1330 — the island town of white coral stone: the Great Mosque's hall of pillars under rows of small domes, the sultan's palace on its cliff with its octagonal pool, stone houses round courts, dhows on the beach, palms and the Indian Ocean all round.
 

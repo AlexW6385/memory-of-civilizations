@@ -44,6 +44,7 @@ import { ground as babylon } from './babylon/ground.js';
 import { ground as ottomanIstanbul } from './ottoman-istanbul/ground.js';
 import { ground as mamlukCairo } from './mamluk-cairo/ground.js';
 import { ground as kilwa } from './kilwa/ground.js';
+import { ground as greatZimbabwe } from './great-zimbabwe/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -88,6 +89,7 @@ export const GROUNDS = {
   'ottoman-istanbul': ottomanIstanbul,
   'mamluk-cairo': mamlukCairo,
   kilwa,
+  'great-zimbabwe': greatZimbabwe,
 };
 
 export const MODULES = {
@@ -133,4 +135,5 @@ export const MODULES = {
   'ottoman-istanbul': () => import('./ottoman-istanbul/index.js'),
   'mamluk-cairo': () => import('./mamluk-cairo/index.js'),
   kilwa: () => import('./kilwa/index.js'),
+  'great-zimbabwe': () => import('./great-zimbabwe/index.js'),
 };
