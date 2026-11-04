@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.36 — Mount Wutai (2026-11-03)
+- Tang China is now Foguang Monastery in 857 among the hills of Mount Wutai: the Great East Hall high on its terraces against the hill, the old brick pagoda on the slope, a village of earth-walled houses and fields in the valley below, pines on the hills.
+
 ## v8.35 — Conques (2026-11-03)
 - Conques is now the whole village about 1120: the abbey church of Sainte-Foy on its terrace on the steep hillside, the schist houses with stone-slab roofs above and below it, and the Dourdou far below with its stone bridge, woods all round.
 
