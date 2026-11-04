@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.11 — Himeji (2026-11-03)
+- New settlement: Himeji Castle around 1620 — the white keep of five tiers on its stone base atop the hill, its three small keeps and roofed passages, the baileys on curved stone ramparts with walls and turrets, the long gallery, the lord's residence below, the moat with its rampart and gate; the samurai quarter of walled compounds, and across the middle moat a street of merchants' townhouses.
+
 ## v8.10 — Isfahan (2026-11-03)
 - New settlement: Safavid Isfahan around 1630 — Naqsh-e Jahan Square at its full 560 m with two-storey arcades of shops, the canal and plane trees round the polo field and the stone goalposts; the Shah Mosque with its tiled portal and minarets, a court with four iwans turned toward Mecca and the great turquoise dome (walk in through the portal); the Sheikh Lotfollah Mosque with its cream dome; Ali Qapu with its columned terrace; the Qeysarieh portal and the vaulted bazaar under its little domes; the royal garden; a town of courtyard houses.
 - Distant brick and stone walls no longer shimmer.

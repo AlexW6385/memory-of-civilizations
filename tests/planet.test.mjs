@@ -112,7 +112,7 @@ test('arriving at a settlement of its own: a free place in clear view of its lan
       C.add(built.colliders);
     }
     const plan = mod.landmarks[0].plan, b = plan.view || plan.bakeBounds;
-    const v = viewpoint(C, b, 12, [0, 1]);
+    const v = viewpoint(C, b, 12, [0, 1], null, plan.viewY ?? null);
     assert.ok(v, `${S.id}: no viewpoint`);
     const d = Math.max(b[0] - v.x, v.x - b[2], b[1] - v.z, v.z - b[3]);
     assert.ok(d > 0 && d < 50, `${S.id}: viewpoint ${d.toFixed(1)} m from the landmark`);

@@ -174,6 +174,13 @@ export const MATERIALS = {
   tile_turquoise:   { color: '#3b9aa0', roughness: 0.25, metalness: 0.05, kind: 'mosaic' },
   tile_cream:       { color: '#c8b089', roughness: 0.3, metalness: 0.03, kind: 'mosaic' },
   kahgel:           { color: '#b59d7c', roughness: 0.97, kind: 'smooth' },
+  // Edo Japan: fitted granite of the ramparts, the castle's lime plaster, dark-stained wood, the
+  // townhouse lattice (koshi) and paper screens (shoji)
+  ishigaki:         { color: '#8a857a', roughness: 0.92, kind: 'ashlar', course: 0.5, block: 0.9 },
+  plaster_castle:   { color: '#eceae3', roughness: 0.88, kind: 'smooth' },
+  wood_dark:        { color: '#3a2b20', roughness: 0.8, kind: 'wood' },
+  koshi:            { color: '#4a3424', roughness: 0.7, kind: 'lattice', paper: '#6b5640', cell: 0.09 },
+  shoji:            { color: '#7a5a3c', roughness: 0.7, kind: 'lattice', paper: '#ece6d6', cell: 0.25 },
 };
 
 export function albedo(key) {

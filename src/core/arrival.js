@@ -40,12 +40,14 @@ export function clearLine(C, a, b, upTo = 1, trees = null) {
  * scores the clear line of sight to the building's middle, the front, and the distance. Returns
  * { x, y, z, yaw, pitch } (yaw from −z, as the controls take it) or null.
  */
-export function viewpoint(C, core, top, front, trees = null) {
+export function viewpoint(C, core, top, front, trees = null, viewY = null) {
   const [x0, z0, x1, z1] = core, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hx = (x1 - x0) / 2, hz = (z1 - z0) / 2;
   const span = Math.max(hx, hz);
   // far enough back to see the whole building (its height and some of its breadth in view),
   // trying nearer and farther rings when that one has no free place with a clear view
-  const ground = C.terrain(cx, cz), tall = Math.max(4, top - ground);
+  // the height to look at: the ground at the core's middle, or (a landmark raised on its own
+  // platform) the height its plan gives
+  const ground = viewY ?? C.terrain(cx, cz), tall = Math.max(4, top - ground);
   const pref = Math.max(12, Math.min(70, Math.max(tall * 0.95, span * 0.45)));
   let best = null;
   for (const extra of [pref, pref * 1.3, pref * 0.75, pref * 1.7, pref * 0.5, pref * 2.2].map((e) => Math.max(6, e))) {
@@ -59,7 +61,7 @@ export function viewpoint(C, core, top, front, trees = null) {
       // lines from the eye to the building at about its doors' height — the middle and either side
       // of its front — must be clear up to its edge (the middle and one side): nothing in the way, no wall
       const eye = [x, g + EYE, z], dist = Math.hypot(cx - x, cz - z), edge = Math.max(0.02, (s * 1.02) / dist);
-      const ty = Math.max(g + EYE, C.terrain(cx, cz) + 2.5), px = -dz, pz = dx, w = Math.min(hx * Math.abs(pz) + hz * Math.abs(px), 30) * 0.4;
+      const ty = Math.max(g + EYE, ground + 2.5), px = -dz, pz = dx, w = Math.min(hx * Math.abs(pz) + hz * Math.abs(px), 30) * 0.4;
       const upTo = Math.min(0.98, 1 - edge);
       if (!clearLine(C, eye, [cx, ty, cz], upTo, trees)) continue;
       const sides = [[cx + px * w, ty, cz + pz * w], [cx - px * w, ty, cz - pz * w]].filter((t) => clearLine(C, eye, t, upTo, trees)).length;

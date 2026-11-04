@@ -11,6 +11,7 @@ import { ground as djenne } from './djenne/ground.js';
 import { ground as machuPicchu } from './machu-picchu/ground.js';
 import { ground as mughalAgra } from './mughal-agra/ground.js';
 import { ground as isfahan } from './isfahan/ground.js';
+import { ground as edoHimeji } from './edo-himeji/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -22,6 +23,7 @@ export const GROUNDS = {
   'machu-picchu': machuPicchu,
   'mughal-agra': mughalAgra,
   isfahan,
+  'edo-himeji': edoHimeji,
 };
 
 export const MODULES = {
@@ -34,4 +36,5 @@ export const MODULES = {
   'machu-picchu': () => import('./machu-picchu/index.js'),
   'mughal-agra': () => import('./mughal-agra/index.js'),
   isfahan: () => import('./isfahan/index.js'),
+  'edo-himeji': () => import('./edo-himeji/index.js'),
 };

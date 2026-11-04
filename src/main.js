@@ -215,7 +215,7 @@ async function main() {
     const dir = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[plan.entrance?.facing] || [0, -1];
     const fw = toWorld(plan, -dir[0], -dir[1]), o = toWorld(plan, 0, 0), front = [fw[0] - o[0], fw[2] - o[2]];
     const cxw = (core[0] + core[2]) / 2, czw = (core[1] + core[3]) / 2;
-    const place = () => viewpoint(world.collide, core, top, front, world.flora.trees(cxw, czw, 260));
+    const place = () => viewpoint(world.collide, core, top, front, world.flora.trees(cxw, czw, 260), plan.viewY != null ? (plan.base || 0) + plan.viewY : null);
     let v = place();
     const cx = (core[0] + core[2]) / 2, cz = (core[1] + core[3]) / 2;
     const start = v || { x: cx + front[0] * 30, y: world.collide.groundAt(cx + front[0] * 30, cz + front[1] * 30, 1e4), z: cz + front[1] * 30, yaw: Math.atan2(front[0], front[1]), pitch: 0.08 };
