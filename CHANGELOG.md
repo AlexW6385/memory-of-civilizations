@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.50 — Amsterdam (2026-11-03)
+- New settlement: Amsterdam about 1670 — the half-rings of canals lined with elms and tall gabled brick houses, the Town Hall on the Dam with its cupola, the Westerkerk's stacked tower, bridges over the canals and ships crowding the IJ.
+
 ## v8.49 — Venice (2026-11-03)
 - New settlement: Venice about 1500 — the Piazza San Marco with the basilica's five lead domes and golden front, the tall brick campanile, the long arcaded Procuratie, the Piazzetta's two columns at the water, the Doge's Palace on its double arcade; canals and the Grand Canal winding between islands of houses in the lagoon.
 
