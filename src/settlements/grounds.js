@@ -40,6 +40,7 @@ import { ground as heianUji } from './heian-uji/ground.js';
 import { ground as sanchi } from './sanchi/ground.js';
 import { ground as nara } from './nara/ground.js';
 import { ground as khajuraho } from './khajuraho/ground.js';
+import { ground as babylon } from './babylon/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -80,6 +81,7 @@ export const GROUNDS = {
   sanchi,
   nara,
   khajuraho,
+  babylon,
 };
 
 export const MODULES = {
@@ -121,4 +123,5 @@ export const MODULES = {
   sanchi: () => import('./sanchi/index.js'),
   nara: () => import('./nara/index.js'),
   khajuraho: () => import('./khajuraho/index.js'),
+  babylon: () => import('./babylon/index.js'),
 };

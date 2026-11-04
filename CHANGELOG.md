@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.41 — Babylon (2026-11-03)
+- New settlement: Babylon about 570 BC — the great seven-stage ziggurat Etemenanki in its precinct with Esagila beside it, the blue-glazed Ishtar Gate in the city's double wall, the Processional Way between glazed walls with lions, the Southern Palace, the Euphrates and a city of courtyard houses.
+
 ## v8.40 — Khajuraho (2026-11-03)
 - New settlement: Khajuraho about 1050 — the Western Group of Chandela temples, each on its high terrace with halls under stepped roofs rising to a sanctum tower clustered with smaller towers like a mountain; the Shivsagar tank; a village among neem and palms.
 
