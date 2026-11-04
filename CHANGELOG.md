@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.37 — Uji (2026-11-03)
+- Heian Japan is now Uji in 1053: the Phoenix Hall across its pond in a garden of gravel, pines and maples, the swift Uji River with its long bridge, wooded hills beyond, and a village of timber houses with bark and thatch roofs.
+
 ## v8.36 — Mount Wutai (2026-11-03)
 - Tang China is now Foguang Monastery in 857 among the hills of Mount Wutai: the Great East Hall high on its terraces against the hill, the old brick pagoda on the slope, a village of earth-walled houses and fields in the valley below, pines on the hills.
 

@@ -36,6 +36,7 @@ import { ground as edfu } from './edfu/ground.js';
 import { ground as paris } from './paris/ground.js';
 import { ground as conques } from './conques/ground.js';
 import { ground as tangWutai } from './tang-wutai/ground.js';
+import { ground as heianUji } from './heian-uji/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -72,6 +73,7 @@ export const GROUNDS = {
   paris,
   conques,
   'tang-wutai': tangWutai,
+  'heian-uji': heianUji,
 };
 
 export const MODULES = {
@@ -109,4 +111,5 @@ export const MODULES = {
   paris: () => import('./paris/index.js'),
   conques: () => import('./conques/index.js'),
   'tang-wutai': () => import('./tang-wutai/index.js'),
+  'heian-uji': () => import('./heian-uji/index.js'),
 };
