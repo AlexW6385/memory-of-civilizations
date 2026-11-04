@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.31 — Constantinople (2026-11-03)
+- Constantinople is now the city's first hill in 562: Hagia Sophia with the Augustaion and Justinian's column before it, Hagia Eirene, the Baths of Zeuxippus, the Hippodrome, the Great Palace stepping down toward the sea, the colonnaded Mese to the Forum of Constantine and its porphyry column, and houses all round.
+
 ## v8.30 — Imperial Rome (2026-11-03)
 - Rome is now a quarter of the city under Hadrian: the Pantheon over its forecourt, the Baths of Agrippa behind it, the long porticoed Saepta Julia, the Stadium of Domitian with its tiers of seats, the Tiber's bend, and blocks of tall brick apartment houses.
 

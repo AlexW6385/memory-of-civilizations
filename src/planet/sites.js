@@ -50,8 +50,7 @@ export const SITES = [
   { id: 'petra', name: { en: 'Nabataea', zh: '纳巴泰' }, era: '1st c.', region: 'levant', lat: 30.33, lon: 35.44, radius: 330 },
   { id: 'jerusalem', name: { en: 'Umayyad Jerusalem', zh: '倭马亚耶路撒冷' }, era: '7th c.', region: 'levant', lat: 31.78, lon: 35.24, radius: 210,
     legacy: { region: 'levant', center: [296, 30], buildings: ['dome-of-the-rock'] } },
-  { id: 'constantinople', name: { en: 'Justinian\'s Constantinople', zh: '查士丁尼的君士坦丁堡' }, era: '6th c.', region: 'bosphorus', lat: 41.01, lon: 28.98, radius: 180,
-    legacy: { region: 'byzantium', center: [268, -258], buildings: ['hagia-sophia'] } },
+  { id: 'constantinople', name: { en: 'Justinian\'s Constantinople', zh: '查士丁尼的君士坦丁堡' }, era: '6th c.', region: 'bosphorus', lat: 41.01, lon: 28.98, radius: 420 },
   { id: 'ottoman-istanbul', name: { en: 'Ottoman Istanbul', zh: '奥斯曼伊斯坦布尔' }, era: '16th c.', region: 'bosphorus', lat: 41.02, lon: 28.96, nudge: 300 },
   // ── Egypt and Africa ──
   { id: 'giza', name: { en: 'Old Kingdom Egypt', zh: '古王国埃及' }, era: '26th c. BC', region: 'egypt', lat: 29.98, lon: 31.13, radius: 420 },

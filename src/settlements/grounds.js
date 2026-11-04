@@ -30,6 +30,7 @@ import { ground as rapaNui } from './rapa-nui/ground.js';
 import { ground as maori } from './maori/ground.js';
 import { ground as athens } from './athens/ground.js';
 import { ground as rome } from './rome/ground.js';
+import { ground as constantinople } from './constantinople/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -60,6 +61,7 @@ export const GROUNDS = {
   maori,
   athens,
   rome,
+  constantinople,
 };
 
 export const MODULES = {
@@ -91,4 +93,5 @@ export const MODULES = {
   maori: () => import('./maori/index.js'),
   athens: () => import('./athens/index.js'),
   rome: () => import('./rome/index.js'),
+  constantinople: () => import('./constantinople/index.js'),
 };
