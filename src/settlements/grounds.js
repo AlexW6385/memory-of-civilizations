@@ -23,6 +23,7 @@ import { ground as joseonSeoul } from './joseon-seoul/ground.js';
 import { ground as songKaifeng } from './song-kaifeng/ground.js';
 import { ground as lhasa } from './lhasa/ground.js';
 import { ground as madurai } from './madurai/ground.js';
+import { ground as persepolis } from './persepolis/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -46,6 +47,7 @@ export const GROUNDS = {
   'song-kaifeng': songKaifeng,
   lhasa,
   madurai,
+  persepolis,
 };
 
 export const MODULES = {
@@ -70,4 +72,5 @@ export const MODULES = {
   'song-kaifeng': () => import('./song-kaifeng/index.js'),
   lhasa: () => import('./lhasa/index.js'),
   madurai: () => import('./madurai/index.js'),
+  persepolis: () => import('./persepolis/index.js'),
 };

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.23 — Persepolis (2026-11-03)
+- New settlement: Persepolis about 480 BC — the great stone terrace against its mountain, the double stair, the Gate of All Nations with its winged bulls, the Apadana's forest of 20 m columns with bull capitals, the Hall of a Hundred Columns, the palaces and the treasury; the mudbrick town of Parsa on the plain.
+
 ## v8.22 — The Meenakshi temple (2026-11-03)
 - New settlement: Madurai about 1650 — the Meenakshi temple inside its granite wall with four painted gopurams up to 52 m, the inner shrines with their own gopurams and gilded towers, the stepped Golden Lotus tank in its colonnade, the Thousand-Pillar Hall; the city in square rings of streets round it, with verandahed tiled houses among palms.
 - Fixes: looking toward the sun no longer washes the view out white; the Foguang terraces no longer flicker.
