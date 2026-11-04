@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.49 — Venice (2026-11-03)
+- New settlement: Venice about 1500 — the Piazza San Marco with the basilica's five lead domes and golden front, the tall brick campanile, the long arcaded Procuratie, the Piazzetta's two columns at the water, the Doge's Palace on its double arcade; canals and the Grand Canal winding between islands of houses in the lagoon.
+
 ## v8.48 — Florence (2026-11-03)
 - New settlement: Florence about 1480 — the cathedral with Brunelleschi's great ribbed dome and lantern, Giotto's banded campanile, the octagonal Baptistery, the Palazzo della Signoria's tower over its square and the Loggia, the Ponte Vecchio with its shops over the Arno, and streets of tiled houses.
 

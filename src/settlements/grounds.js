@@ -48,6 +48,7 @@ import { ground as greatZimbabwe } from './great-zimbabwe/ground.js';
 import { ground as stonehenge } from './stonehenge/ground.js';
 import { ground as granada } from './granada/ground.js';
 import { ground as florence } from './florence/ground.js';
+import { ground as venice } from './venice/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -96,6 +97,7 @@ export const GROUNDS = {
   stonehenge,
   granada,
   florence,
+  venice,
 };
 
 export const MODULES = {
@@ -145,4 +147,5 @@ export const MODULES = {
   stonehenge: () => import('./stonehenge/index.js'),
   granada: () => import('./granada/index.js'),
   florence: () => import('./florence/index.js'),
+  venice: () => import('./venice/index.js'),
 };
