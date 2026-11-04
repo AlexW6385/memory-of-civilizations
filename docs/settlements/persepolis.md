@@ -10,7 +10,7 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **Landmark:** the terrace, about 455 m north–south by 300 m east–west and 14 m above the plain [stated: satyori; bananas-for-scale], part cut from and part built against the foot of Kuh-e Rahmat [stated: studiomatrx]. It is reached by a double stair of two flights [stated: universalis], about 7 m wide [stated: bananas-for-scale]. The Gate of All Nations stands at its head [stated: studiomatrx]. The Apadana had 72 columns of about 20 m [stated: geographyworlds, satyori], 8.65 m apart and 1.6 m thick [stated: peymanmeli]; Wikipedia gives 24 m. The Hall of a Hundred Columns is 70 × 70 m [stated: Wikipedia "Persian column"]. Column heights: about 17 m at the Gate, about 12 m in the Hundred Columns, 7 m in the Treasury, the Hadish and the Queen's Palace [stated: cgtrader text].
 - **Moment shown:** about 480 BC, under Xerxes: the Apadana and the Hadish finished, the Hundred Columns begun (shown complete).
 
-## 2. Layout of the settlement (radius 400 m)
+## 2. Layout of the settlement (radius 360 m)
 
 | Part | Where (m, +x east, +z south) | Notes |
 |---|---|---|

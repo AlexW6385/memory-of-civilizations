@@ -4,7 +4,7 @@
 // Hundred Columns; the palaces of Darius (Tachara) and Xerxes (Hadish); the Treasury; the town of
 // Parsa on the plain to the west. Pure data. +x east, +z south.
 
-export const RADIUS = 400;
+export const RADIUS = 360;
 export const TERRACE = { rect: [-150, -228, 150, 227], h: 14 };
 export const STAIR = { x: -150, z: -140, w: 7 };            // the double-return stair's centre on the west face
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;

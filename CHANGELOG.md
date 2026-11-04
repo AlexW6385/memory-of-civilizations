@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.24 — Petra (2026-11-03)
+- New settlement: Petra about AD 50 — down the narrow Siq between rock walls to the Khazneh's carved façade; the Outer Siq with its tomb façades and the rock-cut theatre; the valley with the Royal Tombs in its cliff, the colonnaded street, the Great Temple, Qasr al-Bint and houses of rose stone.
+
 ## v8.23 — Persepolis (2026-11-03)
 - New settlement: Persepolis about 480 BC — the great stone terrace against its mountain, the double stair, the Gate of All Nations with its winged bulls, the Apadana's forest of 20 m columns with bull capitals, the Hall of a Hundred Columns, the palaces and the treasury; the mudbrick town of Parsa on the plain.
 
