@@ -90,7 +90,7 @@ await page.route('**/*', async (route) => {
 });
 const t0 = Date.now();
 // the time of day: each region at its baked moment unless asked (--time 21.5)
-const q = `quality=${opt('quality', 'high')}&time=${opt('time', '15.5')}` + (opt('start') ? `&start=${opt('start')}` : '');
+const q = `quality=${opt('quality', 'high')}&time=${opt('time', '15.5')}&weather=${opt('weather', 'clear')}` + (opt('start') ? `&start=${opt('start')}` : '');
 if (flag('webgl')) await page.addInitScript(() => { Object.defineProperty(navigator, 'gpu', { get: () => undefined }); });
 await page.goto(`http://127.0.0.1:${port}/index.html?${q}`);
 try { await page.waitForFunction('window.READY === true', null, { timeout: 600_000 }); }
@@ -104,9 +104,9 @@ for (const v of views) {
   const t1 = Date.now();
   await page.evaluate(([v]) => (v.fly ? window.palace.fly(...v.fly) : v.place ? window.palace.place(...v.place)
     : v.free ? window.palace.camera(v.site, v.world[0], v.world[1], v.world[2], v.yaw, v.pitch) : window.palace.pose(v.site, v.world[0], v.world[1], v.world[2], v.yaw, v.pitch)), [v]);
-  // the hour: as asked (UTC), or for a settlement's view mid-morning there (10:30 local by its longitude)
-  const site = v.site && SITES.find((s) => s.id === v.site), hour = opt('time') ?? (site ? (((10.5 - site.lon / 15) % 24) + 24) % 24 : 15.5);
-  await page.evaluate((h) => { const c = window.palace.climate; if (Number.isFinite(+h)) { c.hour = +h; c.setTime('held'); } }, String(hour));
+  // the hour (local): as asked, or mid-morning for a settlement's view
+  const site = v.site && SITES.find((s) => s.id === v.site), hour = opt('time') ?? (site ? 10.5 : 15.5);   // (the clock's hour is local to the visitor)
+  for (let k = 0; k < 2; k++) { await page.evaluate((h) => { const c = window.palace.climate; if (Number.isFinite(+h)) { c.hour = +h; c.setTime('held'); } }, String(hour)); await page.waitForTimeout(400); }   // twice: the clock is local, and the frame loop sets the new longitude
   await page.waitForTimeout(wait);
   const file = join(out, `${v.name}.png`);
   await page.screenshot({ path: file, timeout: 600_000 });

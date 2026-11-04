@@ -172,6 +172,8 @@ export const MATERIALS = {
   ichu:             { color: '#a28c5c', roughness: 1.0, kind: 'bark' },
   // Safavid Isfahan: buff fired brick, tile mosaic (lapis, turquoise, cream), straw-mud plaster
   brick_buff:       { color: '#b39570', roughness: 0.9, kind: 'mudbrick', course: 0.07, block: 0.24 },
+  glaze_lapis:      { color: '#204b8c', roughness: 0.22, kind: 'mudbrick', course: 0.09, block: 0.34 },
+  glaze_yellow:     { clean: true, color: '#d2a23a', roughness: 0.25, kind: 'smooth' },
   tile_lapis:       { color: '#23497f', roughness: 0.28, metalness: 0.05, kind: 'mosaic' },
   tile_turquoise:   { color: '#3b9aa0', roughness: 0.25, metalness: 0.05, kind: 'mosaic' },
   tile_cream:       { color: '#c8b089', roughness: 0.3, metalness: 0.03, kind: 'mosaic' },

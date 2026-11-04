@@ -4,10 +4,10 @@
 // Processional Way; the city's double walls with towers.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box } from '../../core/geom.js';
+import { box, lathe, fromTriangles } from '../../core/geom.js';
 import '../sumerian/index.js';
 
-const G = 'tile_lapis', B = 'brick_baked';
+const G = 'glaze_lapis', B = 'brick_baked';
 function crenels(bag, r, y, mat, step = 1.4) {
   const [x0, z0, x1, z1] = r, along = x1 - x0 > z1 - z0, L = along ? x1 - x0 : z1 - z0, n = Math.floor(L / step);
   for (let i = 0; i < n; i += 2) {
@@ -15,13 +15,62 @@ function crenels(bag, r, y, mat, step = 1.4) {
     for (const s of [0, 1]) { const q = along ? [u0, s ? z1 - 0.6 : z0, u1, s ? z1 : z0 + 0.6] : [s ? x1 - 0.6 : x0, u0, s ? x1 : x0 + 0.6, u1]; bag.add(mat, box(q[0], y, q[1], q[2], y + 1.2, q[3])); bag.add(mat, box(q[0] + 0.15, y + 1.2, q[1] + 0.15, q[2] - 0.15, y + 1.7, q[3] - 0.15)); }
   }
 }
-/** A row of beasts on a glazed face: small raised yellow-brown panels at intervals. */
-function beasts(bag, r, face, y, step = 3) {
-  const [x0, z0, x1, z1] = r, along = face === 'n' || face === 's', L = along ? x1 - x0 : z1 - z0, n = Math.floor(L / step);
+// The beasts of the glazed walls in outline (walking toward +u, feet at 0, about 1 high): Ishtar's lion,
+// Marduk's dragon (mushhushshu) with its horned serpent head, eagle hind feet and scorpion tail, Adad's bull.
+const OUTLINES = {
+  lion: [[-0.8, 0.68], [-0.62, 0.74], [-0.2, 0.7], [0.25, 0.74], [0.42, 0.86], [0.58, 0.95], [0.72, 0.9], [0.8, 0.82], [0.86, 0.72], [0.78, 0.62], [0.66, 0.6], [0.58, 0.5], [0.56, 0.36], [0.62, 0], [0.5, 0], [0.45, 0.3], [0.38, 0.38], [0.34, 0], [0.22, 0], [0.24, 0.36], [-0.32, 0.36], [-0.36, 0], [-0.48, 0], [-0.48, 0.34], [-0.56, 0.38], [-0.64, 0], [-0.76, 0], [-0.7, 0.45], [-0.76, 0.6], [-0.92, 0.5], [-0.98, 0.56], [-0.9, 0.64]],
+  mane: [[0.28, 0.73], [0.42, 0.9], [0.6, 0.98], [0.7, 0.88], [0.64, 0.62], [0.52, 0.46], [0.36, 0.4]],
+  dragon: [[-0.95, 0.95], [-0.88, 0.98], [-0.85, 0.8], [-0.7, 0.68], [0.1, 0.66], [0.3, 0.72], [0.45, 0.95], [0.5, 1.15], [0.62, 1.25], [0.66, 1.4], [0.72, 1.26], [0.8, 1.22], [0.86, 1.16], [0.72, 1.1], [0.6, 1.0], [0.55, 0.8], [0.5, 0.6], [0.48, 0.36], [0.56, 0], [0.46, 0], [0.38, 0.34], [0.3, 0], [0.2, 0], [0.2, 0.38], [-0.4, 0.38], [-0.45, 0], [-0.58, 0], [-0.55, 0.36], [-0.62, 0], [-0.72, 0], [-0.68, 0.45], [-0.78, 0.62], [-0.92, 0.78]],
+  bull: [[-0.85, 0.8], [-0.6, 0.86], [0.3, 0.86], [0.5, 0.92], [0.6, 1.05], [0.66, 1.18], [0.7, 1.05], [0.82, 1.0], [0.9, 0.86], [0.86, 0.72], [0.7, 0.68], [0.6, 0.52], [0.56, 0], [0.46, 0], [0.42, 0.4], [0.34, 0], [0.24, 0], [0.26, 0.42], [-0.45, 0.42], [-0.5, 0], [-0.6, 0], [-0.6, 0.4], [-0.68, 0], [-0.78, 0], [-0.74, 0.5], [-0.86, 0.6], [-0.92, 0.45], [-0.96, 0.5], [-0.9, 0.68]],
+};
+/** Triangles of a simple polygon (ear clipping). */
+function earcut(P) {
+  const idx = P.map((_, i) => i), out = [];
+  let area = 0; for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length]; area += a[0] * b[1] - b[0] * a[1]; }
+  const ccw = area > 0, cross = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+  const inTri = (p, a, b, c) => { const d1 = cross(a, b, p), d2 = cross(b, c, p), d3 = cross(c, a, p); return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0)); };
+  let guard = 0;
+  while (idx.length > 3 && guard++ < 2000) {
+    let cut = false;
+    for (let i = 0; i < idx.length; i++) {
+      const ia = idx[(i + idx.length - 1) % idx.length], ib = idx[i], ic = idx[(i + 1) % idx.length], a = P[ia], b = P[ib], c = P[ic];
+      const cv = cross(a, b, c);
+      if (ccw ? cv <= 0 : cv >= 0) continue;
+      if (idx.some((j) => j !== ia && j !== ib && j !== ic && inTri(P[j], a, b, c))) continue;
+      out.push([ia, ib, ic]); idx.splice(i, 1); cut = true; break;
+    }
+    if (!cut) break;
+  }
+  if (idx.length === 3) out.push([idx[0], idx[1], idx[2]]);
+  return out;
+}
+const CUT = {};
+/** A beast in relief on a face: its outline extruded `d` out of the wall plane, its body `mat`. */
+function relief(bag, kind, mat, place, size, dir, d = 0.1) {
+  const P = OUTLINES[kind], tri = (CUT[kind] ??= earcut(P)), T = [];
+  const V = ([u, v], w) => place(dir * u * size, v * size, w);
+  for (const [a, b, c] of tri) T.push(...V(P[a], d), ...V(P[b], d), ...V(P[c], d), ...V(P[a], d), ...V(P[c], d), ...V(P[b], d));
+  for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length]; const p = [V(a, 0), V(b, 0), V(b, d), V(a, d)]; T.push(...p[0], ...p[1], ...p[2], ...p[0], ...p[2], ...p[3], ...p[0], ...p[2], ...p[1], ...p[0], ...p[3], ...p[2]); }
+  bag.add(mat, fromTriangles(T));
+}
+/** Rows of beasts on a glazed face, walking toward the gate, between bands of rosettes. kind: 'lion' | 'dragon' | 'bull' | 'gate' (dragons and bulls by turn). */
+function beasts(bag, r, face, y, step = 3, kind = 'lion') {
+  const [x0, z0, x1, z1] = r, along = face === 'n' || face === 's', L = along ? x1 - x0 : z1 - z0, n = Math.max(1, Math.floor(L / step));
+  const place = (u0) => (du, dv, w) => face === 'n' ? [u0 + du, y + dv, z0 - 0.02 - w] : face === 's' ? [u0 + du, y + dv, z1 + 0.02 + w] : face === 'w' ? [x0 - 0.02 - w, y + dv, u0 + du] : [x1 + 0.02 + w, y + dv, u0 + du];
+  const size = Math.min(1.25, step * 0.42), dir = face === 'n' || face === 'e' ? 1 : -1;
   for (let i = 0; i < n; i++) {
-    const u = (along ? x0 : z0) + (i + 0.5) * L / n;
-    const q = face === 'n' ? [u - 0.9, z0 - 0.08, u + 0.9, z0] : face === 's' ? [u - 0.9, z1, u + 0.9, z1 + 0.08] : face === 'w' ? [x0 - 0.08, u - 0.9, x0, u + 0.9] : [x1, u - 0.9, x1 + 0.08, u + 0.9];
-    bag.add('paint_ochre', box(q[0], y, q[1], q[2], y + 1.2, q[3]));
+    const u = (along ? x0 : z0) + (i + 0.5) * L / n, k = kind === 'gate' ? (i % 2 ? 'bull' : 'dragon') : kind;
+    relief(bag, k, k === 'bull' ? 'glaze_yellow' : 'glaze_white', place(u), size, dir);
+    if (k === 'lion') relief(bag, 'mane', 'glaze_yellow', place(u), size, dir, 0.13);
+  }
+  // the rosette bands above and below
+  for (const yy of [y - 0.35, y + size * (kind === 'gate' ? 1.5 : 1.1) + 0.2]) {
+    const m = Math.floor(L / 0.7);
+    for (let i = 0; i < m; i++) {
+      const u = (along ? x0 : z0) + (i + 0.5) * L / m, p = place(u)(0, yy - y, 0.03);
+      const g = lathe([[0.2, 0], [0.2, 0.05], [0.001, 0.05]], 8); g.rotateX(Math.PI / 2); if (!along) g.rotateY(Math.PI / 2); g.translate(...p); bag.add('glaze_white', g);
+      const c = lathe([[0.08, 0], [0.08, 0.08], [0.001, 0.08]], 6); c.rotateX(Math.PI / 2); if (!along) c.rotateY(Math.PI / 2); c.translate(...p); bag.add('glaze_yellow', c);
+    }
   }
 }
 /** ishtar_gate: { c, dir ('ns': the way runs along z), w (the passage), d (depth), h (outer), h2 (inner) } — the outer and inner gates, their towers, the arched passage. */
@@ -33,7 +82,7 @@ function ishtarGate(el, { bag, col }) {
       const r = s < 0 ? [cx - w / 2 - tw, z0, cx - w / 2, z1] : [cx + w / 2, z0, cx + w / 2 + tw, z1];
       bag.add(G, box(r[0], y - 0.5, r[1], r[2], y + H, r[3])); col.rect(r, y, y + H); col.floor(r, y + H);
       crenels(bag, r, y + H, G);
-      for (let k = 0; k < 4; k++) beasts(bag, r, 'n', y + 2 + k * (H - 4) / 4), beasts(bag, r, 's', y + 2 + k * (H - 4) / 4);
+      for (let k = 0; k < 4; k++) for (const f of ['n', 's', s < 0 ? 'w' : 'e']) beasts(bag, r, f, y + 2 + k * (H - 4) / 4, 3.2, 'gate');
       // the towers projecting at the corners
       for (const tz of [z0 - 1.5, z1 - 4.5]) { const t = [r[0] - 1.5, tz, r[2] + 1.5, tz + 6]; bag.add(G, box(t[0], y - 0.5, t[1], t[2], y + H + 2, t[3])); col.rect(t, y, y + H + 2); crenels(bag, t, y + H + 2, G); }
     }

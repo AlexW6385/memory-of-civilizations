@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.64 — Babylon's beasts and gathered people (2026-11-04)
+- Detail: Babylon's glazed walls are now glazed brick in their courses with Ishtar's lions striding in white with yellow manes between bands of rosettes, and the Ishtar Gate's towers carry rows of Marduk's dragons and Adad's bulls; people gather in the open places of the landmarks — the Pantheon's forecourt, Chichén Itzá's and Teotihuacan's plazas, Tenochtitlan's precinct, Babylon's, Ur's and the Süleymaniye's courts, Parliament Square — standing on the paving where it is raised.
+
 ## v8.63 — Markets and Florentine marble (2026-11-04)
 - Detail: the great squares hold markets — rows of stalls with sellers squatting and buyers talking in the Maidan of Isfahan, the Agora, the Rumayla, San Marco, Djenné's market, the Signoria, the parvis of Notre-Dame, Red Square and Cahokia's plaza — and stalls stand here and there in the streets. Florence's cathedral, campanile and Baptistery wear their green, white and pink marble — pilasters, bands, framed panels, tall pointed windows — and the cathedral's front is shown as it stood in 1480, Arnolfo's marble lower third with its portals and niches below the rough wall.
 

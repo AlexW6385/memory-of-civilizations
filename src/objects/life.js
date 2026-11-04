@@ -6,6 +6,7 @@
 // its plans (the footprints of every building) and its ground (water, slope). Deterministic.
 
 import { LIFE_KINDS } from './index.js';
+import { buildPlan } from '../core/build.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const hash = (str) => { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
@@ -136,6 +137,12 @@ const MARKETS = {
   isfahan: [[-70, -280, 70, 240]], athens: [[-285, -230, -165, -115]], 'mamluk-cairo': [[85, -75, 165, 115]], venice: [[-145, -35, 20, 25]],
   djenne: [[42, -43, 113, 43]], florence: [[5, 115, 105, 200]], paris: [[102, -38, 148, 38]], muscovy: [[-8, -140, 62, 110]], amsterdam: [], cahokia: [[-110, -35, 110, 145]],
 };
+// open places inside the landmarks where people gather (no stalls): forecourts, plazas, precincts
+const PEOPLE = {
+  rome: [[-40, -160, 40, -60]], 'chichen-itza': [[-150, -140, 170, 120]], teotihuacan: [[-70, -262, 70, -196]], tenochtitlan: [[-145, -145, 145, 145]],
+  babylon: [[-105, -55, 105, 145]], 'ottoman-istanbul': [[-70, -90, 70, 85]], ur: [[-48, -138, 48, -80]], london: [[-58, -213, 38, -152]],
+  'qing-beijing': [], jerusalem: [], persepolis: [],
+};
 const MARKET = /square|piazza|plaza|market|agora|forum|maidan|bazaar|parvis|court|forecourt|street|dam|rows/i;
 const FLAT = /paving|road|street|field|parterre|garden|park|lawn|water|cells|pavement|plaza|square|flag|carpet|bed\b|floor|ground|court\b|lamp/i;
 const HOUSE = /house|hut|home|insula|siheyuan|hanok|machiya|compound|izba|shop|cottage|_block|skyscraper|dwelling/i;
@@ -185,7 +192,12 @@ export function lifePlans(id, R, landmarks, town, G) {
       if ((HOUSE.test(el.t) || !SKIP.test(el.t)) && w * d >= 10 && w * d <= 6000 && w > 2 && d > 2) houses.push({ r, front: el.front, y: el.y });
     }
   }
-  const H = (x, z) => G.height(x, z), wet = (x, z) => { const l = G.waterLevel(x, z); return Number.isFinite(l) && H(x, z) < l + 0.05; };
+  // the landmarks' paved floors (forecourts, plazas raised a little): figures and stalls stand on them
+  const floors = [];
+  if (MARKETS[id]?.length || PEOPLE[id]?.length) for (const plan of landmarks) { try { for (const f of buildPlan(plan).colliders.floors) if (f.y1 === undefined) floors.push(f); } catch (e) { /* a plan that cannot build here keeps the ground */ } }
+  const ground = (x, z) => G.height(x, z);
+  const H = (x, z) => { const g = ground(x, z); let y = g; for (const f of floors) { const r = f.rect; if (x >= r[0] && x <= r[2] && z >= r[1] && z <= r[3] && f.y > y && f.y < g + 2.5) y = f.y; } return y; };
+  const wet = (x, z) => { const l = G.waterLevel(x, z); return Number.isFinite(l) && ground(x, z) < l + 0.05; };
   const flat = (x, z, s = 1.2) => Math.abs(H(x + s, z) - H(x - s, z)) < 0.5 && Math.abs(H(x, z + s) - H(x, z - s)) < 0.5;
   const inside = (x, z, m = 30) => Math.hypot(x, z) < R - m;
   const els = [];
@@ -275,6 +287,21 @@ export function lifePlans(id, R, landmarks, town, G) {
       egrid.fill(b, 2); grid.fill(b, 2); n++;
       if (rand() < 0.5) { const fx = px - Math.cos(rot) * 1.9, fz = pz + Math.sin(rot) * 1.9; if (egrid.free([fx - 0.3, fz - 0.3, fx + 0.3, fz + 0.3])) { put('figure', fx, fz, rot + Math.PI, { pose: 'squat' }); egrid.fill([fx - 0.3, fz - 0.3, fx + 0.3, fz + 0.3], 2); } }
       for (let q = 0; q < 2; q++) if (rand() < 0.6) { const fx = px + (rand() - 0.5) * 3, fz = pz + Math.cos(rot) * (2.6 + rand() * 1.2), bb = [fx - 0.35, fz - 0.35, fx + 0.35, fz + 0.35]; if (egrid.free(bb)) { put('figure', fx, fz, rot + Math.PI + (rand() - 0.5), { pose: rand() < 0.4 ? 'talk' : 'stand' }); egrid.fill(bb, 2); } }
+    }
+  }
+  // people in the open places of the landmarks: knots talking, some walking with loads
+  for (const [x0, z0, x1, z1] of PEOPLE[id] ?? []) {
+    const cap = Math.max(10, Math.min(70, Math.round((x1 - x0) * (z1 - z0) / 300)));
+    for (let k = 0, tries = 0; k < cap && tries < cap * 8; tries++) {
+      const cx = x0 + rand() * (x1 - x0), cz = z0 + rand() * (z1 - z0);
+      if (!inside(cx, cz, 20) || wet(cx, cz)) continue;
+      const n = rand() < 0.55 ? 2 + (rand() < 0.4 ? 1 : 0) : 1, a0 = rand() * 6.28;
+      for (let q = 0; q < n; q++) {
+        const a = a0 + q * 6.28 / n, r = n > 1 ? 0.55 : 0, x = cx + Math.cos(a) * r, z = cz + Math.sin(a) * r, b = [x - 0.35, z - 0.35, x + 0.35, z + 0.35];
+        if (!egrid.free(b) || !flat(x, z, 0.5)) continue;
+        put('figure', x, z, n > 1 ? Math.atan2(x - cx, z - cz) : rand() * 6.28, n > 1 ? { pose: q === 0 ? 'talk' : 'stand' } : {});
+        egrid.fill(b, 2); k++;
+      }
     }
   }
   // boats along the shores
