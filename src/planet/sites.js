@@ -80,7 +80,7 @@ export const SITES = [
   { id: 'chichen-itza', name: { en: 'The Maya', zh: '玛雅' }, era: '10th c.', region: 'yucatan', lat: 20.68, lon: -88.57, radius: 340 },
   { id: 'tenochtitlan', name: { en: 'The Aztecs', zh: '阿兹特克' }, era: '15th c.', region: 'mexico', lat: 19.43, lon: -99.13, radius: 400 },
   { id: 'machu-picchu', name: { en: 'The Inca', zh: '印加' }, era: '15th c.', region: 'andes', lat: -13.16, lon: -72.55, radius: 330 },
-  { id: 'cahokia', name: { en: 'Mississippian Cahokia', zh: '密西西比卡霍基亚' }, era: '12th c.', region: 'mississippi', lat: 38.66, lon: -90.06 },
+  { id: 'cahokia', name: { en: 'Mississippian Cahokia', zh: '密西西比卡霍基亚' }, era: '12th c.', region: 'mississippi', lat: 38.66, lon: -90.06, radius: 420 },
   { id: 'taos', name: { en: 'The Pueblo', zh: '普韦布洛' }, era: '15th c.', region: 'southwest', lat: 36.44, lon: -105.55, radius: 320 },
   { id: 'new-york', name: { en: 'Modern New York', zh: '现代纽约' }, era: '20th c.', region: 'northeast', lat: 40.75, lon: -73.99 },
   // ── Oceania ──
