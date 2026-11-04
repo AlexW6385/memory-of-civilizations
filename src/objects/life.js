@@ -206,6 +206,8 @@ export function lifePlans(id, R, landmarks, town, G) {
     if (!LIFE_KINDS.includes(t)) return;
     const el = { t, at: [x, z], y: H(x, z), rot, seed: Math.floor(rand() * 1e9), ...extra };
     if (sub) el.kind = sub;
+    if (t === 'car' || t === 'cart' || t === 'stall') el.rot = Math.round(rot / (Math.PI / 2)) * Math.PI / 2 + (t === 'cart' ? (rand() - 0.5) * 0.3 : 0);   // along the street's axes
+    if (t === 'car') el.era = id === 'sydney' ? 1970 : 1930;
     if (t === 'figure') { Object.assign(el, dressed(kit, rand)); if (extra.pose) el.carry = 'none'; }
     els.push(el);
   };

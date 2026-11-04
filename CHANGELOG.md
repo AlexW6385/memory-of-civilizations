@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.70 — Khajuraho's temples (2026-11-04)
+- Detail: Khajuraho's temples get their sculpture — three bands of figures in niches between pilasters round every hall and the sanctum, couples among them, balconied windows on the great hall and the sanctum, moulded plinths with a frieze; the halls' roofs step up in ledged tiers with rows of finials; the tower is clustered with climbing towers in three rings. Carts and cars line up with the streets.
+
 ## v8.69 — Jerusalem's esplanade (2026-11-04)
 - Detail: people walk and talk on the Haram esplanade round the Dome of the Rock; the esplanade's arrival view no longer faces a wall.
 
