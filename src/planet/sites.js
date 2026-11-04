@@ -39,7 +39,7 @@ export const SITES = [
   { id: 'madurai', name: { en: 'Dravidian South India', zh: '南印度达罗毗荼' }, era: '17th c.', region: 'india', lat: 9.92, lon: 78.12 },
   { id: 'mughal-agra', name: { en: 'Mughal India', zh: '莫卧儿' }, era: '17th c.', region: 'india', lat: 26.2, lon: 78.3, radius: 360 },
   { id: 'angkor', name: { en: 'Khmer Empire', zh: '高棉' }, era: '12th c.', region: 'indochina', lat: 13.41, lon: 103.87, radius: 400 },
-  { id: 'borobudur', name: { en: 'Java', zh: '爪哇' }, era: '9th c.', region: 'java', lat: -7.61, lon: 110.20 },
+  { id: 'borobudur', name: { en: 'Java', zh: '爪哇' }, era: '9th c.', region: 'java', lat: -7.61, lon: 110.20, radius: 380 },
   // ── Mesopotamia and Persia ──
   { id: 'ur', name: { en: 'Sumer', zh: '苏美尔' }, era: '21st c. BC', region: 'mesopotamia', lat: 30.96, lon: 46.10 },
   { id: 'babylon', name: { en: 'Babylon', zh: '巴比伦' }, era: '6th c. BC', region: 'mesopotamia', lat: 32.54, lon: 44.42 },

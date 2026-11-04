@@ -13,6 +13,7 @@ import { ground as mughalAgra } from './mughal-agra/ground.js';
 import { ground as isfahan } from './isfahan/ground.js';
 import { ground as edoHimeji } from './edo-himeji/ground.js';
 import { ground as songHangzhou } from './song-hangzhou/ground.js';
+import { ground as borobudur } from './borobudur/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -26,6 +27,7 @@ export const GROUNDS = {
   isfahan,
   'edo-himeji': edoHimeji,
   'song-hangzhou': songHangzhou,
+  borobudur,
 };
 
 export const MODULES = {
@@ -40,4 +42,5 @@ export const MODULES = {
   isfahan: () => import('./isfahan/index.js'),
   'edo-himeji': () => import('./edo-himeji/index.js'),
   'song-hangzhou': () => import('./song-hangzhou/index.js'),
+  borobudur: () => import('./borobudur/index.js'),
 };

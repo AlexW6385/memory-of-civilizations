@@ -181,6 +181,10 @@ export const MATERIALS = {
   wood_dark:        { color: '#3a2b20', roughness: 0.8, kind: 'wood' },
   koshi:            { color: '#4a3424', roughness: 0.7, kind: 'lattice', paper: '#6b5640', cell: 0.09 },
   shoji:            { color: '#7a5a3c', roughness: 0.7, kind: 'lattice', paper: '#ece6d6', cell: 0.25 },
+  // Sailendra Java: grey andesite, the latticed stupas, black palm-fibre thatch
+  andesite:         { color: '#6f6d67', roughness: 0.9, kind: 'ashlar', course: 0.32, block: 0.55 },
+  andesite_lattice: { color: '#6f6d67', roughness: 0.9, kind: 'lattice', paper: '#262422', cell: 0.42 },
+  ijuk:             { color: '#3a332b', roughness: 1.0, kind: 'bark' },
 };
 
 export function albedo(key) {
