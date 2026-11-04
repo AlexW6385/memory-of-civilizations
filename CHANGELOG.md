@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.47 — Granada (2026-11-03)
+- New settlement: Nasrid Granada about 1390 — the Alhambra's red walls and towers along its hill, the Court of the Myrtles with its long pool before the tall Comares Tower, the Court of the Lions with its forest of slender columns and the fountain, the Alcazaba at the west end; the white houses of the Albaicín across the Darro.
+
 ## v8.46 — Stonehenge (2026-11-03)
 - New settlement: Stonehenge about 2500 BC — the sarsen circle with its lintels and the great trilithons inside, the bluestones, the Heel Stone out on the Avenue toward the midsummer sunrise, the white chalk ditch and bank, barrows on the open down, and the builders' thatched houses.
 
