@@ -168,6 +168,12 @@ export const MATERIALS = {
   granite_inca:     { color: '#a3a097', roughness: 0.8, kind: 'ashlar', course: 0.55, block: 0.8 },
   granite_rough:    { color: '#8e8b82', roughness: 0.9, kind: 'rock' },
   ichu:             { color: '#a28c5c', roughness: 1.0, kind: 'bark' },
+  // Safavid Isfahan: buff fired brick, tile mosaic (lapis, turquoise, cream), straw-mud plaster
+  brick_buff:       { color: '#b39570', roughness: 0.9, kind: 'mudbrick', course: 0.07, block: 0.24 },
+  tile_lapis:       { color: '#23497f', roughness: 0.28, metalness: 0.05, kind: 'mosaic' },
+  tile_turquoise:   { color: '#3b9aa0', roughness: 0.25, metalness: 0.05, kind: 'mosaic' },
+  tile_cream:       { color: '#c8b089', roughness: 0.3, metalness: 0.03, kind: 'mosaic' },
+  kahgel:           { color: '#b59d7c', roughness: 0.97, kind: 'smooth' },
 };
 
 export function albedo(key) {

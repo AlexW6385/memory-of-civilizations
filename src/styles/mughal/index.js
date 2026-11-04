@@ -74,9 +74,18 @@ function arcadeWall(bag, col, a, b, y, h, th, mat, arches = [], inside = null) {
     const d = ar.depth ?? 1.2, c = [a[0] + ux * ar.at + nx * (th / 2 + d), a[1] + uz * ar.at + nz * (th / 2 + d)], sill = ar.sill ?? 0;
     const t = [];
     beamTris(t, [c[0] - ux * ar.w / 2, y + sill, c[1] - uz * ar.w / 2], [c[0] + ux * ar.w / 2, y + sill, c[1] + uz * ar.w / 2], 0.1, ar.h);
-    bag.add(ar.door ? 'lacquer_black' : mat, fromTriangles(t));
+    if (!ar.pass) bag.add(ar.door ? 'lacquer_black' : (ar.back || mat), fromTriangles(t));
   }
-  col.segment(a, b, th, y, y + h);
+  // an arch with `pass` is open: no back wall, and one walks through it
+  let u = 0;
+  const P = (s) => [a[0] + ux * s, a[1] + uz * s];
+  for (const ar of arches.filter((q) => q.pass).sort((p, q) => p.at - q.at)) {
+    const s0 = ar.at - ar.w / 2, s1 = ar.at + ar.w / 2;
+    if (s0 > u) col.segment(P(u), P(s0), th, y, y + h);
+    col.segment(P(s0), P(s1), th, y + (ar.sill ?? 0) + ar.h, y + h);
+    u = s1;
+  }
+  if (u < L) col.segment(P(u), P(L), th, y, y + h);
 }
 
 /**
@@ -84,22 +93,32 @@ function arcadeWall(bag, col, a, b, y, h, th, mat, arches = [], inside = null) {
  * storeys of niches either side), mat, trim }: the face with the great arch in its middle, the
  * niches beside it, a parapet with a frieze along the top.
  */
-function pishtaqFace(bag, col, a, b, y, h, iw, mat, niches = true, inside = null) {
+function pishtaqFace(bag, col, a, b, y, h, iw, mat, niches = true, inside = null, trim = 'marble_dark') {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
-  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: true }];
+  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass }];
   if (niches) for (const s of [-1, 1]) {
     const c = L / 2 + s * (iw.w / 2 + (L - iw.w) / 4);
     const nw = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45);
     arches.push({ at: c, w: nw, h: iw.h * 0.42, sill: 0.6, depth: 1.5 }, { at: c, w: nw, h: iw.h * 0.38, sill: iw.h * 0.52, depth: 1.5 });
   }
   arcadeWall(bag, col, a, b, y, h, 2.4, mat, arches, inside);
+  if (iw.pass) {
+    // an open iwan: its back wall has a door one walks through
+    const L0 = L, ux0 = (b[0] - a[0]) / L0, uz0 = (b[1] - a[1]) / L0;
+    let mx = -uz0, mz = ux0;
+    if (inside) { if ((inside[0] - (a[0] + b[0]) / 2) * mx + (inside[1] - (a[1] + b[1]) / 2) * mz < 0) { mx = -mx; mz = -mz; } }
+    const off = 1.2 + (iw.depth ?? 4) + 0.2, c0 = [a[0] + ux0 * L0 / 2 + mx * off, a[1] + uz0 * L0 / 2 + mz * off];
+    const p0 = [c0[0] - ux0 * iw.w / 2, c0[1] - uz0 * iw.w / 2], p1 = [c0[0] + ux0 * iw.w / 2, c0[1] + uz0 * iw.w / 2];
+    const dw = Math.min(5, iw.w * 0.45);
+    arcadeWall(bag, col, p0, p1, y, iw.h, 0.4, iw.backMat || mat, [{ at: iw.w / 2, w: dw, h: Math.min(iw.h * 0.5, dw * 1.6), pass: true }]);
+  }
   // the frame round the iwan (a band of inlaid stone), the parapet
   const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
   let nx = -uz, nz = ux;
   if (inside && (inside[0] - (a[0] + b[0]) / 2) * nx + (inside[1] - (a[1] + b[1]) / 2) * nz > 0) { nx = -nx; nz = -nz; }
   const c = [a[0] + ux * L / 2 + nx * 1.25, a[1] + uz * L / 2 + nz * 1.25];
-  for (const s of [-1, 1]) { const t = []; beamTris(t, [c[0] + ux * s * (iw.w / 2 + 0.6), y, c[1] + uz * s * (iw.w / 2 + 0.6)], [c[0] + ux * s * (iw.w / 2 + 1.1), y, c[1] + uz * s * (iw.w / 2 + 1.1)], 0.15, h); bag.add('marble_dark', fromTriangles(t)); }
-  const t2 = []; beamTris(t2, [c[0] - ux * (iw.w / 2 + 1.1), y + iw.h + 1.2, c[1] - uz * (iw.w / 2 + 1.1)], [c[0] + ux * (iw.w / 2 + 1.1), y + iw.h + 1.2, c[1] + uz * (iw.w / 2 + 1.1)], 0.15, 0.5); bag.add('marble_dark', fromTriangles(t2));
+  for (const s of [-1, 1]) { const t = []; beamTris(t, [c[0] + ux * s * (iw.w / 2 + 0.6), y, c[1] + uz * s * (iw.w / 2 + 0.6)], [c[0] + ux * s * (iw.w / 2 + 1.1), y, c[1] + uz * s * (iw.w / 2 + 1.1)], 0.15, h); bag.add(trim, fromTriangles(t)); }
+  const t2 = []; beamTris(t2, [c[0] - ux * (iw.w / 2 + 1.1), y + iw.h + 1.2, c[1] - uz * (iw.w / 2 + 1.1)], [c[0] + ux * (iw.w / 2 + 1.1), y + iw.h + 1.2, c[1] + uz * (iw.w / 2 + 1.1)], 0.15, 0.5); bag.add(trim, fromTriangles(t2));
 }
 
 /** chhatri: a domed kiosk { c, y, r, h, n (columns), mat } on a little platform. */
@@ -220,3 +239,4 @@ registerStyle('mughal', {
   objects: {},
 });
 void frustum;
+export { onion, dome, archPath, arcadeWall, pishtaqFace, chhatri };

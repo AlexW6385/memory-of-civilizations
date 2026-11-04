@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.10 — Isfahan (2026-11-03)
+- New settlement: Safavid Isfahan around 1630 — Naqsh-e Jahan Square at its full 560 m with two-storey arcades of shops, the canal and plane trees round the polo field and the stone goalposts; the Shah Mosque with its tiled portal and minarets, a court with four iwans turned toward Mecca and the great turquoise dome (walk in through the portal); the Sheikh Lotfollah Mosque with its cream dome; Ali Qapu with its columned terrace; the Qeysarieh portal and the vaulted bazaar under its little domes; the royal garden; a town of courtyard houses.
+- Distant brick and stone walls no longer shimmer.
+
 ## v8.9 — The Taj Mahal (2026-11-03)
 - New settlement: Mughal Agra in 1653 — the Taj Mahal on its marble plinth with the four minarets, the great dome and chhatris, pointed iwans; the red sandstone mosque and its twin; the four-part garden with its water channels, central pool and cypresses; the walled enclosure, the great gate and its forecourt; the bazaar town of Taj Ganj beside the river.
 

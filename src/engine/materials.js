@@ -117,12 +117,15 @@ function make(spec) {
       // floors and tops: flags laid in rows along x
       const b = spec.kind === 'paving' ? flags(u, v, blk.mul(1.5)) : blocks(u, v, course, blk, spec.kind === 'mudbrick' ? 0.5 : 0.37);
       const jointW = spec.kind === 'mudbrick' ? 0.014 : 0.006;
-      const joint = float(1).sub(smoothstep(jointW * 0.4, jointW * 2.2, b.d));
+      // far off, where a course is only a few pixels high, the joints and the block-to-block tones
+      // fade out (else they shimmer in moiré)
+      const far = float(1).sub(smoothstep(0.12, 0.45, max(fwidth(v), fwidth(u)).div(min(course, blk))));
+      const joint = float(1).sub(smoothstep(jointW * 0.4, jointW * 2.2, b.d)).mul(far);
       const stain = mx_fractal_noise_float(P.mul(0.11), 4, 2.0, 0.5);
       const streak = mx_noise_float(vec3(P.x.mul(1.3), P.y.mul(0.08), P.z.mul(1.3)));
       const grain = mx_noise_float(P.mul(9.0)).mul(detailFade());
       const fine = mx_noise_float(P.mul(41.0)).mul(detailFade());
-      const tone = b.id.sub(0.5).mul(spec.kind === 'paving' ? 0.24 : 0.16).add(1);
+      const tone = b.id.sub(0.5).mul(spec.kind === 'paving' ? 0.24 : 0.16).mul(far).add(1);
       const hueShift = vec3(1.02, 1.0, 0.96).mul(b.id).add(vec3(0.98, 1.0, 1.04).mul(float(1).sub(b.id)));
       let col = baseNode.mul(tone).mul(hueShift)
         .mul(stain.mul(0.18).add(1))
