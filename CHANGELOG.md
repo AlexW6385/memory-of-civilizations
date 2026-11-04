@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.29 — Athens (2026-11-03)
+- Athens is now a whole city of about 410 BC: the Parthenon stands on the Acropolis among the Propylaia, the little Nike temple on its bastion, the Erechtheion with its maidens and the bronze Athena; a ramp climbs the west end; below, the Agora with the Hephaisteion on its hill, the stoas and the round Tholos, the Panathenaic Way, and houses packed all round.
+
 ## v8.28 — A pā by Lake Rotorua (2026-11-03)
 - New settlement: a Māori pā of the later 18th century — a volcanic hill by the lake cut into terraces, each edged with palisades and fighting stages, carved gateways up the path, the chief's carved house and storehouse on the summit; houses and kūmara pits on the terraces; the open village, gardens and canoes below.
 

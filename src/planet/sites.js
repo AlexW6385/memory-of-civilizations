@@ -64,8 +64,7 @@ export const SITES = [
   { id: 'great-zimbabwe', name: { en: 'Zimbabwe', zh: '大津巴布韦' }, era: '14th c.', region: 'zimbabwe', lat: -20.27, lon: 30.93 },
   // ── Greece and Rome ──
   { id: 'knossos', name: { en: 'Minoan Crete', zh: '米诺斯克里特' }, era: '16th c. BC', region: 'aegean', lat: 35.30, lon: 25.16, radius: 350 },
-  { id: 'athens', name: { en: 'Classical Athens', zh: '古典雅典' }, era: '5th c. BC', region: 'aegean', lat: 37.97, lon: 23.73, radius: 170,
-    legacy: { region: 'greece', center: [-228, 4], buildings: ['parthenon'] } },
+  { id: 'athens', name: { en: 'Classical Athens', zh: '古典雅典' }, era: '5th c. BC', region: 'aegean', lat: 37.97, lon: 23.73, radius: 420 },
   { id: 'rome', name: { en: 'Imperial Rome', zh: '罗马帝国' }, era: '2nd c.', region: 'latium', lat: 41.90, lon: 12.48, radius: 165,
     legacy: { region: 'rome', center: [0, -232], buildings: ['pantheon'] } },
   { id: 'baroque-rome', name: { en: 'Baroque Rome', zh: '巴洛克罗马' }, era: '17th c.', region: 'latium', lat: 41.90, lon: 12.46, nudge: 315 },
