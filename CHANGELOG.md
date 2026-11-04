@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.19 — Gyeongbokgung (2026-11-03)
+- New settlement: Hanyang around 1430 — Gyeongbokgung on its axis: Gwanghwamun on its stone base, the inner gates and the bridge over the palace stream, the throne hall on its double terrace in its cloistered court, the inner halls, and Gyeonghoeru standing on 48 stone pillars in its pond; the ministries along the avenue outside the gate; quarters of hanok houses with tiled and thatched roofs in their walled yards.
+
 ## v8.18 — Taos Pueblo (2026-11-03)
 - New settlement: Taos Pueblo around 1500 — the North and South Houses rising in terraces of adobe rooms to five and four storeys, with ladders, parapets and beam ends; the plaza crossed by Red Willow Creek and its log bridges; round kivas; drying racks; the perimeter wall, with cottonwoods, willows and fields beyond and the land rising toward the mountain.
 

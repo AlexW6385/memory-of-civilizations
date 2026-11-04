@@ -111,7 +111,7 @@ function qingHall(el, ctx) {
   const H = el.H, y = el.y, inset = el.inset ?? Math.min((x1 - x0), (z1 - z0)) / ((el.bays?.[1] ?? 4) + 0.5);
   // the lower roof: a skirt of tiles from the eaves up to the upper body's wall
   const o = el.eave ?? 1.6, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, A = (along ? x1 - x0 : z1 - z0) / 2 + o, B = (along ? z1 - z0 : x1 - x0) / 2 + o;
-  rectRoof({ c: [cx, cz], A, B, y: y + H - 0.25, rise: (inset + o) * 0.55, p: 1.25, kind: 'hip', sweep: el.sweep ?? 0.5, alongZ: !along, mat: 'tile_yellow', soffit: 'paint_caihua' }, bag);
+  rectRoof({ c: [cx, cz], A, B, y: y + H - 0.25, rise: (inset + o) * 0.55, p: 1.25, kind: 'hip', sweep: el.sweep ?? 0.5, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua' }, bag);
   // the upper body: red walls with a band of lattice windows, the painted frieze, the upper eaves
   const u = [x0 + inset, z0 + inset, x1 - inset, z1 - inset], yb = y + H, D = el.double;
   bag.add('palace_wall', box(u[0], yb - 0.2, u[1], u[2], yb + D - 1.2, u[3]));
@@ -123,12 +123,12 @@ function qingHall(el, ctx) {
   const cols = along ? [xs, zs] : [zs, xs];
   for (const x of (along ? cols[0] : cols[1])) for (const z of [u[1], u[3]]) column(bag, null, x, z, yb - 0.2, D - 0.2, 0.42, 'lacquer_red');
   const A2 = (along ? u[2] - u[0] : u[3] - u[1]) / 2 + o * 1.1, B2 = (along ? u[3] - u[1] : u[2] - u[0]) / 2 + o * 1.1;
-  rectRoof({ c: [cx, cz], A: A2, B: B2, y: yb + D - 0.25, rise: el.rise ?? B2 * 0.78, kind: el.roof || 'hip', sweep: el.sweep ?? 0.6, alongZ: !along, mat: 'tile_yellow', soffit: 'paint_caihua', gableAt: 0.45 }, bag);
+  rectRoof({ c: [cx, cz], A: A2, B: B2, y: yb + D - 0.25, rise: el.rise ?? B2 * 0.78, kind: el.roof || 'hip', sweep: el.sweep ?? 0.6, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua', gableAt: 0.45 }, bag);
   // the guardian beasts on the hips (a row of little figures; here a row of knobs) and the ridge's dragon ends
   const R = el.rise ?? B2 * 0.78, top = yb + D - 0.25 + R, L = el.roof === 'hip' ? A2 - B2 : A2 * 0.6, beasts = [];
   for (const s of [-1, 1]) {
     const e = along ? [cx + s * (L + 0.2), cz] : [cx, cz + s * (L + 0.2)];
-    bag.add('tile_yellow', box(e[0] - 0.5, top - 0.1, e[1] - 0.5, e[0] + 0.5, top + 1.9, e[1] + 0.5));       // chiwen
+    bag.add(el.pal?.roof || 'tile_yellow', box(e[0] - 0.5, top - 0.1, e[1] - 0.5, e[0] + 0.5, top + 1.9, e[1] + 0.5));       // chiwen
   }
   void beasts; void col;
 }

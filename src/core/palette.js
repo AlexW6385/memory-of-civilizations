@@ -196,6 +196,9 @@ export const MATERIALS = {
   // Taos: red-brown adobe plaster, peeled vigas
   adobe_taos:       { color: '#9c7558', roughness: 0.96, kind: 'smooth' },
   viga:             { color: '#8a7a64', roughness: 0.85, kind: 'wood' },
+  // Joseon: dancheong (green-blue painted timber), granite
+  paint_dancheong:  { color: '#3e7564', roughness: 0.75, kind: 'smooth' },
+  granite_korea:    { color: '#a4a29b', roughness: 0.8, kind: 'ashlar', course: 0.5, block: 1.0 },
 };
 
 export function albedo(key) {
