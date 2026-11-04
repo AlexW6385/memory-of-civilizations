@@ -1,0 +1,37 @@
+// Madurai — the ground: the flat red-earth plain of the Vaigai; the temple's granite-paved courts;
+// beaten-earth streets; coconut palms (date palms stand in), neem and banyan by the houses; the
+// hot, bright sky of the south.
+
+import { RADIUS, WALL, TANK, inRect, inLot, onStreet, outside, smooth as sm } from './layout.js';
+
+function height(x, z) { return 0; }
+function cover(x, z) {
+  const c = { sand: 0.2, grass: 0.1, rock: 0, soil: 0.7, fields: 0, dry: 0.5, warmth: 0.9, red: 0.6, road: 0, snow: 0, forest: 0 };
+  if (inRect(WALL, x, z)) { c.road = 0.9; c.red = 0.1; return c; }
+  if (onStreet(x, z)) { c.road = 0.7; return c; }
+  if (Math.hypot(x, z) > RADIUS - 40) { c.fields = 0.6; c.grass = 0.4; return c; }
+  return c;
+}
+const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
+/** Plants per 100 m²: none in the temple or on the streets; palms, neem and the odd banyan in the yards. */
+function planting(x, z) {
+  if (Math.hypot(x, z) > RADIUS - 6 || inRect(WALL, x, z, 4) || onStreet(x, z, 1) || inLot(x, z, 1)) return null;
+  if (outside(x, z) < 30) return null;
+  return { date_palm: 0.5, neem: 0.08, banyan: 0.01, grass_dry: 12 };
+}
+export const ground = {
+  height, cover, water, waterLevel, planting, fromWater,
+  maxDensity: { date_palm: 0.5, neem: 0.08, banyan: 0.01 },
+  climate: {
+    sun: { az: 110, el: 48, color: [1.0, 0.95, 0.86], intensity: 3.5, lat: 10, dec: 5, hour: 9.5 },
+    sky: { turbidity: 4.5, rayleigh: 1.3, mie: 0.006, mieG: 0.78, zenith: [0.1, 0.18, 0.36], horizon: [0.6, 0.6, 0.58] },
+    fog: { color: [0.76, 0.75, 0.72], density: 0.0005, height: 0.012 },
+    exposure: 0.5,
+    wind: [0.3, 0.2],
+    weather: [
+      { id: 'bright', weight: 4, clouds: 0.25, cloudDensity: 0.4, sun: 1.0, fog: 1 },
+      { id: 'monsoon-cloud', weight: 1.5, clouds: 0.7, cloudDensity: 0.7, sun: 0.7, fog: 1.4 },
+      { id: 'shower', weight: 0.7, clouds: 0.92, cloudDensity: 0.85, sun: 0.35, fog: 1.8, rain: 0.7 },
+    ],
+  },
+};

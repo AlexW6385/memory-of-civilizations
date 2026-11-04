@@ -36,7 +36,7 @@ export const SITES = [
   { id: 'sanchi', name: { en: 'Early Buddhist India', zh: '早期佛教印度' }, era: '1st c.', region: 'india', lat: 23.48, lon: 77.74, radius: 175,
     legacy: { region: 'india', center: [-22, 300], buildings: ['sanchi-great-stupa'] } },
   { id: 'khajuraho', name: { en: 'Medieval Hindu India', zh: '中世纪印度教' }, era: '11th c.', region: 'india', lat: 24.85, lon: 79.92 },
-  { id: 'madurai', name: { en: 'Dravidian South India', zh: '南印度达罗毗荼' }, era: '17th c.', region: 'india', lat: 9.92, lon: 78.12 },
+  { id: 'madurai', name: { en: 'Dravidian South India', zh: '南印度达罗毗荼' }, era: '17th c.', region: 'india', lat: 9.92, lon: 78.12, radius: 400 },
   { id: 'mughal-agra', name: { en: 'Mughal India', zh: '莫卧儿' }, era: '17th c.', region: 'india', lat: 26.2, lon: 78.3, radius: 360 },
   { id: 'angkor', name: { en: 'Khmer Empire', zh: '高棉' }, era: '12th c.', region: 'indochina', lat: 13.41, lon: 103.87, radius: 400 },
   { id: 'borobudur', name: { en: 'Java', zh: '爪哇' }, era: '9th c.', region: 'java', lat: -7.61, lon: 110.20, radius: 380 },

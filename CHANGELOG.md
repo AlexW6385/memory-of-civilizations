@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.22 — The Meenakshi temple (2026-11-03)
+- New settlement: Madurai about 1650 — the Meenakshi temple inside its granite wall with four painted gopurams up to 52 m, the inner shrines with their own gopurams and gilded towers, the stepped Golden Lotus tank in its colonnade, the Thousand-Pillar Hall; the city in square rings of streets round it, with verandahed tiled houses among palms.
+- Fixes: looking toward the sun no longer washes the view out white; the Foguang terraces no longer flicker.
+
 ## v8.21 — The Potala (2026-11-03)
 - New settlement: Lhasa in 1694 — the Potala climbing its hill, white palaces either side of the Red Palace and its gilded roofs, walls leaning inward with rows of black-framed windows under dark friezes, stairs up the front; the walled village of Shöl at its foot; the valley ringed by mountains.
 

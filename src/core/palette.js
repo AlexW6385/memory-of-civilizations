@@ -206,6 +206,32 @@ export const MATERIALS = {
   limewash_red:     { color: '#7e2a20', roughness: 0.9, kind: 'smooth' },
   pembe:            { color: '#5a2a22', roughness: 1.0, kind: 'bark' },
   limewash_yellow:  { color: '#c9a24e', roughness: 0.9, kind: 'smooth' },
+  // Dravidian South India (Madurai): grey granite halls, gopurams of painted stucco, terracotta-tiled houses
+  granite_tamil:    { color: '#8a857c', roughness: 0.75, kind: 'ashlar', course: 0.6, block: 1.4 },
+  stucco_sky:       { color: '#5a8fb8', roughness: 0.85, kind: 'smooth' },
+  stucco_rose:      { color: '#c46a64', roughness: 0.85, kind: 'smooth' },
+  stucco_leaf:      { color: '#5f9a5a', roughness: 0.85, kind: 'smooth' },
+  stucco_saffron:   { color: '#d9a23e', roughness: 0.85, kind: 'smooth' },
+  stucco_cream:     { color: '#e2d6b8', roughness: 0.85, kind: 'smooth' },
+  // Achaemenid Persia (Persepolis): dark grey limestone, mudbrick walls plastered, cedar roofs
+  limestone_persian:{ color: '#77736c', roughness: 0.45, kind: 'ashlar', course: 0.9, block: 1.8 },
+  plaster_persian:  { color: '#b9a688', roughness: 0.92, kind: 'smooth' },
+  // Nabataea (Petra): the rose sandstone cut in the cliff, its ashlar in the free-standing buildings
+  sandstone_rose:   { color: '#b9786a', roughness: 0.95, kind: 'rock' },
+  sandstone_rose_ashlar: { color: '#b07868', roughness: 0.9, kind: 'ashlar', course: 0.45, block: 0.9 },
+  // Minoan Crete (Knossos): gypsum, red and black painted columns and walls, ochre plaster
+  gypsum_minoan:    { color: '#d8d2c4', roughness: 0.4, kind: 'veined' },
+  paint_minoan_red: { color: '#8e2c22', roughness: 0.7, kind: 'smooth' },
+  paint_minoan_black:{ color: '#1e1b1a', roughness: 0.6, kind: 'smooth' },
+  plaster_ochre:    { color: '#c9a46a', roughness: 0.9, kind: 'smooth' },
+  // Rapa Nui: the yellow-brown tuff of Rano Raraku, red scoria topknots, basalt ahu facing
+  tuff_moai:        { color: '#7c7060', roughness: 0.95, kind: 'rock' },
+  scoria_red:       { color: '#8a4430', roughness: 1.0, kind: 'rock' },
+  basalt_ahu:       { color: '#4a4744', roughness: 0.8, kind: 'ashlar', course: 0.7, block: 1.1 },
+  // Maori pa: carved timber in red ochre (kokowai), raupo thatch, palisade posts
+  kokowai:          { color: '#7a2d1e', roughness: 0.8, kind: 'wood' },
+  raupo:            { color: '#8a7a55', roughness: 1.0, kind: 'bark' },
+  palisade:         { color: '#5a4a3a', roughness: 0.95, kind: 'bark' },
 };
 
 export function albedo(key) {
