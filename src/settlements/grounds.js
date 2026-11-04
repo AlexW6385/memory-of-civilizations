@@ -38,6 +38,7 @@ import { ground as conques } from './conques/ground.js';
 import { ground as tangWutai } from './tang-wutai/ground.js';
 import { ground as heianUji } from './heian-uji/ground.js';
 import { ground as sanchi } from './sanchi/ground.js';
+import { ground as nara } from './nara/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -76,6 +77,7 @@ export const GROUNDS = {
   'tang-wutai': tangWutai,
   'heian-uji': heianUji,
   sanchi,
+  nara,
 };
 
 export const MODULES = {
@@ -115,4 +117,5 @@ export const MODULES = {
   'tang-wutai': () => import('./tang-wutai/index.js'),
   'heian-uji': () => import('./heian-uji/index.js'),
   sanchi: () => import('./sanchi/index.js'),
+  nara: () => import('./nara/index.js'),
 };

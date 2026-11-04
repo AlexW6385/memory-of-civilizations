@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.39 — Nara (2026-11-03)
+- New settlement: Nara in 752 — Tōdai-ji with the vast Great Buddha Hall in its corridored court, the Middle and Great South Gates, two seven-storey pagodas in their own courts, the lecture hall and monks' quarters, Wakakusa's grassy slope behind, and the capital's timber houses to the west.
+
 ## v8.38 — Sanchi (2026-11-03)
 - Early Buddhist India is now Sanchi in the 1st century: the Great Stupa with its gateways on the flat top of its hill, the path climbing the north slope, a village of mud houses at the foot among neem and palms, fields on the plain.
 
