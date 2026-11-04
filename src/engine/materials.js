@@ -258,9 +258,9 @@ function make(spec) {
     case 'veined': {
       // marble revetment: slabs sawn from one block and opened like a book, so that the veins of
       // each pair mirror each other; the slab's marble varies through the given colours
-      const C = spec.colors.map((c) => uniform(new Color(c)));
+      const C = (spec.colors ?? [spec.color, spec.color]).map((c) => uniform(new Color(c)));
       const { u, v } = wallUV();
-      const bw = uniform(spec.block), bh = uniform(spec.course);
+      const bw = uniform(spec.block ?? 1.2), bh = uniform(spec.course ?? 1.2);
       const cu = floor(u.div(bw)), cv = floor(v.div(bh));
       const fu = fract(u.div(bw)), lv = fract(v.div(bh));
       const odd = fract(cu.mul(0.5)).mul(2);
@@ -375,6 +375,16 @@ function make(spec) {
       const n = mx_fractal_noise_float(P.mul(0.8), 3, 2.0, 0.5);
       m.colorNode = mix(baseNode.mul(n.mul(0.12).add(1)), vec3(0.17, 0.11, 0.07), wood);
       m.roughnessNode = roughU;
+      break;
+    }
+    case 'opening': {
+      // a window or doorway: the dark of the room within, a little lighter toward its bottom (the
+      // floor catching the day); at night about one in four is lit from inside by a lamp or a fire
+      const P2 = positionLocal, cell = floor(P2.mul(0.45)), h = hash(cell.x.add(cell.y.mul(17.0)).add(cell.z.mul(131.0)));
+      const lit = smoothstep(0.72, 0.74, h).mul(smoothstep(0.2, 0.7, ENV.night));
+      const flick = sin(time.mul(3.0).add(h.mul(40.0))).mul(0.08).add(1);
+      m.colorNode = baseNode.mul(fract(P2.y.mul(0.3)).mul(0.15).add(0.92));
+      m.emissiveNode = vec3(1.0, 0.52, 0.2).mul(lit).mul(flick).mul(1.6);
       break;
     }
     case 'glow': {

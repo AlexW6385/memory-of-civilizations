@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.66 — Knossos loads again; lit windows (2026-11-04)
+- Fix: Knossos could not load (a marble missing its colours stopped it); a test now makes every material. Detail: at night about one window in four is lit warm from inside, and by day the dark of a window is a little lighter toward its sill.
+
 ## v8.65 — Madurai's gopurams (2026-11-04)
 - Detail: Madurai's gopurams are crowded with their painted gods and guardians — a row on every tier between pilasters, arms and gilt crowns, little vaulted shrines with their niches along the cornices — and the granite bases have pilasters, niches and moulded bands.
 

@@ -38,7 +38,7 @@ export const MATERIALS = {
   silt:             { color: '#6f5a43', roughness: 0.95, kind: 'ground' },
   mudbrick:         { color: '#8f7656', roughness: 0.96, kind: 'mudbrick', course: 0.12, block: 0.36 },
   plaster:          { color: '#d8cdb6', roughness: 0.9, kind: 'smooth' },
-  opening:          { clean: true, color: '#191512', roughness: 1, kind: 'smooth' },
+  opening:          { clean: true, color: '#191512', roughness: 0.9, kind: 'opening' },
   reed_mat:         { color: '#9c8a5e', roughness: 0.95, kind: 'smooth' },
   palm_trunk:       { color: '#6d5a44', roughness: 0.95, kind: 'smooth', side: 'double' },
   palm_leaf:        { color: '#55703a', roughness: 0.75, kind: 'leaf' },
@@ -224,7 +224,7 @@ export const MATERIALS = {
   sandstone_rose:   { color: '#b9786a', roughness: 0.95, kind: 'rock' },
   sandstone_rose_ashlar: { color: '#b07868', roughness: 0.9, kind: 'ashlar', course: 0.45, block: 0.9 },
   // Minoan Crete (Knossos): gypsum, red and black painted columns and walls, ochre plaster
-  gypsum_minoan:    { color: '#d8d2c4', roughness: 0.4, kind: 'veined' },
+  gypsum_minoan:    { color: '#d8d2c4', roughness: 0.4, kind: 'veined', block: 1.2, course: 0.9, colors: ['#ddd7ca', '#d2ccbd', '#bfb7a6'] },
   paint_minoan_red: { color: '#8e2c22', roughness: 0.7, kind: 'smooth' },
   paint_minoan_black:{ color: '#1e1b1a', roughness: 0.6, kind: 'smooth' },
   plaster_ochre:    { color: '#c9a46a', roughness: 0.9, kind: 'smooth' },
