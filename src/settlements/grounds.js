@@ -43,6 +43,7 @@ import { ground as khajuraho } from './khajuraho/ground.js';
 import { ground as babylon } from './babylon/ground.js';
 import { ground as ottomanIstanbul } from './ottoman-istanbul/ground.js';
 import { ground as mamlukCairo } from './mamluk-cairo/ground.js';
+import { ground as kilwa } from './kilwa/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -86,6 +87,7 @@ export const GROUNDS = {
   babylon,
   'ottoman-istanbul': ottomanIstanbul,
   'mamluk-cairo': mamlukCairo,
+  kilwa,
 };
 
 export const MODULES = {
@@ -130,4 +132,5 @@ export const MODULES = {
   babylon: () => import('./babylon/index.js'),
   'ottoman-istanbul': () => import('./ottoman-istanbul/index.js'),
   'mamluk-cairo': () => import('./mamluk-cairo/index.js'),
+  kilwa: () => import('./kilwa/index.js'),
 };

@@ -54,7 +54,7 @@ export const SITES = [
   { id: 'mamluk-cairo', name: { en: 'Mamluk Cairo', zh: '马穆鲁克开罗' }, era: '14th c.', region: 'egypt', lat: 30.03, lon: 31.26, radius: 400 },
   { id: 'djenne', name: { en: 'The Sahel', zh: '萨赫勒' }, era: '14th c.', region: 'sahel', lat: 13.90, lon: -4.56, radius: 360 },
   { id: 'lalibela', name: { en: 'Ethiopia', zh: '埃塞俄比亚' }, era: '13th c.', region: 'ethiopia', lat: 12.03, lon: 39.04, radius: 380 },
-  { id: 'kilwa', name: { en: 'The Swahili Coast', zh: '斯瓦希里海岸' }, era: '15th c.', region: 'swahili', lat: -8.96, lon: 39.51, water: true },
+  { id: 'kilwa', name: { en: 'The Swahili Coast', zh: '斯瓦希里海岸' }, era: '15th c.', region: 'swahili', lat: -8.96, lon: 39.51, water: true, island: true, radius: 340 },
   { id: 'great-zimbabwe', name: { en: 'Zimbabwe', zh: '大津巴布韦' }, era: '14th c.', region: 'zimbabwe', lat: -20.27, lon: 30.93 },
   // ── Greece and Rome ──
   { id: 'knossos', name: { en: 'Minoan Crete', zh: '米诺斯克里特' }, era: '16th c. BC', region: 'aegean', lat: 35.30, lon: 25.16, radius: 350 },
