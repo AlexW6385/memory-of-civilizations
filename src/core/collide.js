@@ -86,11 +86,15 @@ export class CollisionWorld {
   /** Highest top of an obstacle under the circle (x, z, r) not above maxY (roofs and walls to land on). */
   topAt(x, z, r, maxY) {
     let best = -Infinity;
+    // over the walker's footprint, so that a gap of a cell between roof tiles is not a hole
+    const f = Math.min(r, 0.2);
     for (const T of this.tops) {
-      const i = Math.floor((x - T.x0) / T.res), j = Math.floor((z - T.z0) / T.res);
-      if (i < 0 || j < 0 || i >= T.w || j >= T.h) continue;
-      const h = T.data[j * T.w + i];
-      if (h <= maxY && h > best) best = h;
+      const i0 = Math.max(0, Math.floor((x - f - T.x0) / T.res)), i1 = Math.min(T.w - 1, Math.floor((x + f - T.x0) / T.res));
+      const j0 = Math.max(0, Math.floor((z - f - T.z0) / T.res)), j1 = Math.min(T.h - 1, Math.floor((z + f - T.z0) / T.res));
+      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+        const h = T.data[j * T.w + i];
+        if (h <= maxY && h > best) best = h;
+      }
     }
     for (const o of this._near(this.grid, x, z)) {
       if (o.y1 > maxY || o.y1 <= best) continue;
@@ -106,6 +110,21 @@ export class CollisionWorld {
     for (const f of this._near(this.floorGrid, x, z)) {
       const h = CollisionWorld.floorHeight(f, x, z);
       if (h !== null && h > y0 && h <= y1) return true;
+    }
+    return false;
+  }
+
+  /** Would a body at (x, z) from y0 to y1 be inside a roof's shell (between a top higher than
+   *  `climb` and its underside)? Roofs are not obstacles; this keeps one from walking into a slope. */
+  inShell(x, z, r, y0, y1, climb) {
+    for (const T of this.tops) {
+      if (!T.under) continue;
+      for (const [dx, dz] of [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]]) {
+        const i = Math.floor((x + dx - T.x0) / T.res), j = Math.floor((z + dz - T.z0) / T.res);
+        if (i < 0 || j < 0 || i >= T.w || j >= T.h) continue;
+        const o = j * T.w + i, top = T.data[o];
+        if (top > climb && top > y0 && T.under[o] < y1) return true;
+      }
     }
     return false;
   }
@@ -167,10 +186,11 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer']
     const P = geometry.attributes.position.array;
     for (let k = 0; k < P.length; k += 9) {
       const ax = P[k], ay = P[k + 1], az = P[k + 2], bx = P[k + 3], by = P[k + 4], bz = P[k + 5], cx = P[k + 6], cy = P[k + 7], cz = P[k + 8];
-      // upward-facing only: the normal's y over its length
+      // faces less steep than about 72°, whichever way they are wound (some roofs are wound
+      // downward: the highest face over a spot is its top all the same)
       const ux = bx - ax, uy = by - ay, uz = bz - az, vx = cx - ax, vy = cy - ay, vz = cz - az;
       const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-      if (ny <= 0.3 * Math.hypot(nx, ny, nz)) continue;
+      if (Math.abs(ny) <= 0.3 * Math.hypot(nx, ny, nz)) continue;
       const det = ux * vz - uz * vx;
       if (Math.abs(det) < 1e-9) continue;
       const i0 = Math.max(0, Math.floor((Math.min(ax, bx, cx) - x0) / res)), i1 = Math.min(w - 1, Math.floor((Math.max(ax, bx, cx) - x0) / res));
@@ -185,7 +205,32 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer']
       if ((k & 1023) === 0 && performance.now() - t > 8) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); }
     }
   }
-  return { x0, z0, res, w, h, data };
+  // under each top, the underside of the same shell: the highest face below the top (none: solid
+  // down to the ground). Between the two one cannot stand or walk (a roof's slope).
+  const under = new Float32Array(w * h).fill(-Infinity);
+  for (const { mat, geometry } of parts) {
+    if (skip.includes(mat)) continue;
+    const P = geometry.attributes.position.array;
+    for (let k = 0; k < P.length; k += 9) {
+      const ax = P[k], ay = P[k + 1], az = P[k + 2], bx = P[k + 3], by = P[k + 4], bz = P[k + 5], cx = P[k + 6], cy = P[k + 7], cz = P[k + 8];
+      const ux = bx - ax, uy = by - ay, uz = bz - az, vx = cx - ax, vy = cy - ay, vz = cz - az;
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      if (Math.abs(ny) <= 0.3 * Math.hypot(nx, ny, nz)) continue;
+      const det = ux * vz - uz * vx;
+      if (Math.abs(det) < 1e-9) continue;
+      const i0 = Math.max(0, Math.floor((Math.min(ax, bx, cx) - x0) / res)), i1 = Math.min(w - 1, Math.floor((Math.max(ax, bx, cx) - x0) / res));
+      const j0 = Math.max(0, Math.floor((Math.min(az, bz, cz) - z0) / res)), j1 = Math.min(h - 1, Math.floor((Math.max(az, bz, cz) - z0) / res));
+      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+        const px = x0 + (i + 0.5) * res - ax, pz = z0 + (j + 0.5) * res - az;
+        const s = (px * vz - pz * vx) / det, q = (ux * pz - uz * px) / det;
+        if (s < -0.02 || q < -0.02 || s + q > 1.02) continue;
+        const y = ay + uy * s + vy * q, o = j * w + i;
+        if (y < data[o] - 0.05 && y > under[o]) under[o] = y;
+      }
+      if ((k & 1023) === 0 && performance.now() - t > 8) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); }
+    }
+  }
+  return { x0, z0, res, w, h, data, under };
 }
 
 function inside(x, z, poly) {

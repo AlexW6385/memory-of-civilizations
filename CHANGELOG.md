@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.27 — Firm roofs, steady surfaces (2026-11-04)
+- Roofs hold you everywhere: the ones that let you fall through (many tiled roofs, palace walls, bridges) now carry you, and you can no longer walk into a roof's slope from the side.
+- No more flickering: faces of two materials in the same plane no longer fight, and distant surfaces stay steady.
+
 ## v8.26 — Rapa Nui (2026-11-03)
 - New settlement: Rapa Nui about 1500 — Ahu Tongariki on the shore with its fifteen moai facing inland, some crowned with red topknots; Rano Raraku behind with its crater lake and its quarry of half-cut and buried moai; boat-shaped thatched houses, stone chicken houses and garden walls on the grassy plain; the sea all round.
 

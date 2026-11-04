@@ -195,6 +195,17 @@ function sub2(a, b) { return [a[0] - b[0], a[1] - b[1]]; }
 function norm2(a) { const l = Math.hypot(a[0], a[1]) || 1; return [a[0] / l, a[1] / l]; }
 
 /** Collects geometries by material key and merges them. */
+/** The stand-off rank of a material (0…15 from its name; 16 and up only by override); DEPTH_STEP metres per rank. */
+export const DEPTH_STEP = 0.0003;
+// overrides where two materials laid in one plane would otherwise share a rank (tools/surface-check.mjs finds them)
+const RANK_OVERRIDE = { plaster_white: 16, brick_paving: 6, stucco_ochre: 14, stucco_warm: 11, pavonazzetto: 5, vault_stars: 1, paint_dancheong: 8, stucco_cream: 15, plaster_castle: 17 };
+export function depthRank(mat) {
+  if (mat in RANK_OVERRIDE) return RANK_OVERRIDE[mat];
+  let h = 2166136261;
+  for (let i = 0; i < mat.length; i++) h = Math.imul(h ^ mat.charCodeAt(i), 16777619);
+  return (h >>> 0) % 16;
+}
+
 export class GeoBag {
   constructor() { this.parts = new Map(); }
   add(mat, g) {
@@ -215,6 +226,11 @@ export class GeoBag {
         nor.set(g.attributes.normal.array, o);
         o += g.attributes.position.array.length;
       }
+      // each material stands off its faces by its own fraction of a millimetre or so, so that two
+      // materials laid in the same plane (a lattice in its frame, paving on a terrace) never fight
+      // in the depth buffer
+      const d = depthRank(mat) * DEPTH_STEP;
+      if (d) for (let k = 0; k < pos.length; k++) pos[k] += nor[k] * d;
       const m = new BufferGeometry();
       m.setAttribute('position', new Float32BufferAttribute(pos, 3));
       m.setAttribute('normal', new Float32BufferAttribute(nor, 3));

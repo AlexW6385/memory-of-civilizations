@@ -27,7 +27,7 @@ export class Renderer {
   }
 
   async init(quality = 'high') {
-    const r = this.renderer = new THREE.WebGPURenderer({ canvas: this.canvas, antialias: false, forceWebGL: !this.webgpu, powerPreference: 'high-performance' });
+    const r = this.renderer = new THREE.WebGPURenderer({ canvas: this.canvas, antialias: false, forceWebGL: !this.webgpu, powerPreference: 'high-performance', logarithmicDepthBuffer: true });
     await r.init();
     this.webgpu = r.backend.isWebGPUBackend === true;
     r.toneMapping = THREE.AgXToneMapping;
