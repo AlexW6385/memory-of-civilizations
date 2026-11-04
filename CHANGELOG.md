@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.15 — Lalibela (2026-11-03)
+- New settlement: Lalibela around 1220 — the churches hewn down into the red rock: Bete Giyorgis, the great cross in its pit; Medhane Alem ringed by pillars, with Maryam and Golgotha; the rock-cut Jordan and the churches beyond it; trenches to walk down into them; a village of round stone houses with conical thatch on the slopes around.
+
 ## v8.14 — Ur (2026-11-03)
 - New settlement: Ur around 2050 BC — the great ziggurat with its three stages, the three stairways meeting at the gatehouse and the shrine on top, on its terrace before the Court of Nanna; the walled sacred precinct with the Giparu and the palace; a town of courtyard houses on narrow lanes; the harbour with its quay, reeds, date palms and boats.
 

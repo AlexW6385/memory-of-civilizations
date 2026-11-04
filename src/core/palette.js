@@ -187,6 +187,9 @@ export const MATERIALS = {
   ijuk:             { color: '#3a332b', roughness: 1.0, kind: 'bark' },
   // Ur III: baked brick set in bitumen over the mud-brick core
   brick_baked:      { color: '#8a6a4e', roughness: 0.92, kind: 'mudbrick', course: 0.085, block: 0.3 },
+  // Lalibela: red volcanic tuff, hewn
+  tuff_red:         { color: '#8a5a48', roughness: 0.92, kind: 'rock' },
+  tuff_hewn:        { color: '#94634f', roughness: 0.88, kind: 'smooth' },
 };
 
 export function albedo(key) {
