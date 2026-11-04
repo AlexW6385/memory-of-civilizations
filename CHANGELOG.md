@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.38 — Sanchi (2026-11-03)
+- Early Buddhist India is now Sanchi in the 1st century: the Great Stupa with its gateways on the flat top of its hill, the path climbing the north slope, a village of mud houses at the foot among neem and palms, fields on the plain.
+
 ## v8.37 — Uji (2026-11-03)
 - Heian Japan is now Uji in 1053: the Phoenix Hall across its pond in a garden of gravel, pines and maples, the swift Uji River with its long bridge, wooded hills beyond, and a village of timber houses with bark and thatch roofs.
 
