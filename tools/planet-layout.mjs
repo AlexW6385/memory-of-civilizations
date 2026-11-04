@@ -67,13 +67,24 @@ for (let it = 0; it < 7000; it++) {
   }
 }
 // last, spacing alone: settle any pair still too close (the pulls above can hold a crowded corner short)
-for (let it = 0; it < 1500; it++) for (let i = 0; i < x.length; i++) for (let j = i + 1; j < x.length; j++) {
-  const need = spacing(SITES[i], SITES[j]) / R * 1.01, a = angle(x[i], x[j]);
-  if (a >= need) continue;
-  const push = (need - a) / 2 * 0.5;
-  const bi = bearing(x[i], x[j]), bj = bearing(x[j], x[i]);
-  x[i] = travel(x[i], bi + Math.PI, push);
-  x[j] = travel(x[j], bj + Math.PI, push);
+// (still keeping centres on the land)
+for (let it = 0; it < 1500; it++) {
+  for (let i = 0; i < x.length; i++) for (let j = i + 1; j < x.length; j++) {
+    const need = spacing(SITES[i], SITES[j]) / R * 1.01, a = angle(x[i], x[j]);
+    if (a >= need) continue;
+    const push = (need - a) / 2 * 0.5;
+    const bi = bearing(x[i], x[j]), bj = bearing(x[j], x[i]);
+    x[i] = travel(x[i], bi + Math.PI, push);
+    x[j] = travel(x[j], bj + Math.PI, push);
+  }
+  for (let i = 0; i < x.length; i++) {
+    if (SITES[i].water) continue;
+    const d = coast(x[i]);
+    if (d > 30) continue;
+    const gx = coast(travel(x[i], Math.PI / 2, step)) - coast(travel(x[i], -Math.PI / 2, step));
+    const gy = coast(travel(x[i], 0, step)) - coast(travel(x[i], Math.PI, step));
+    if (Math.hypot(gx, gy) > 1e-9) x[i] = travel(x[i], Math.atan2(gx, gy), Math.min(30 - d, 20) / R * 0.5);
+  }
 }
 let worst = Infinity, pair = null;
 for (let i = 0; i < x.length; i++) for (let j = i + 1; j < x.length; j++) {

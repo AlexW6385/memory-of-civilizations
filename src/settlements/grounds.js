@@ -29,6 +29,7 @@ import { ground as knossos } from './knossos/ground.js';
 import { ground as rapaNui } from './rapa-nui/ground.js';
 import { ground as maori } from './maori/ground.js';
 import { ground as athens } from './athens/ground.js';
+import { ground as rome } from './rome/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -58,6 +59,7 @@ export const GROUNDS = {
   'rapa-nui': rapaNui,
   maori,
   athens,
+  rome,
 };
 
 export const MODULES = {
@@ -88,4 +90,5 @@ export const MODULES = {
   'rapa-nui': () => import('./rapa-nui/index.js'),
   maori: () => import('./maori/index.js'),
   athens: () => import('./athens/index.js'),
+  rome: () => import('./rome/index.js'),
 };

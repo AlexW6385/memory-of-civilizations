@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.30 — Imperial Rome (2026-11-03)
+- Rome is now a quarter of the city under Hadrian: the Pantheon over its forecourt, the Baths of Agrippa behind it, the long porticoed Saepta Julia, the Stadium of Domitian with its tiers of seats, the Tiber's bend, and blocks of tall brick apartment houses.
+
 ## v8.29 — Athens (2026-11-03)
 - Athens is now a whole city of about 410 BC: the Parthenon stands on the Acropolis among the Propylaia, the little Nike temple on its bastion, the Erechtheion with its maidens and the bronze Athena; a ramp climbs the west end; below, the Agora with the Hephaisteion on its hill, the stoas and the round Tholos, the Panathenaic Way, and houses packed all round.
 
