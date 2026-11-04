@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.69 — Jerusalem's esplanade (2026-11-04)
+- Detail: people walk and talk on the Haram esplanade round the Dome of the Rock; the esplanade's arrival view no longer faces a wall.
+
 ## v8.68 — London's terraces (2026-11-04)
 - Detail and a fix: London's terrace windows were hidden behind their stucco surrounds — now sash windows with their bars (taller on the first floor), front doors with fanlights and stone steps, a stucco band and cornice, iron area railings along the fronts; the terraces drawn in two levels of detail.
 

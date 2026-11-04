@@ -106,7 +106,12 @@ for (const v of views) {
     : v.free ? window.palace.camera(v.site, v.world[0], v.world[1], v.world[2], v.yaw, v.pitch) : window.palace.pose(v.site, v.world[0], v.world[1], v.world[2], v.yaw, v.pitch)), [v]);
   // the hour (local): as asked, or mid-morning for a settlement's view
   const site = v.site && SITES.find((s) => s.id === v.site), hour = opt('time') ?? (site ? 10.5 : 15.5);   // (the clock's hour is local to the visitor)
-  for (let k = 0; k < 2; k++) { await page.evaluate((h) => { const c = window.palace.climate; if (Number.isFinite(+h)) { c.hour = +h; c.setTime('held'); } }, String(hour)); await page.waitForTimeout(3000); }   // twice: the clock is local, and the frame loop sets the new longitude
+  // the clock is local: set it, let two frames pass (the frame loop takes the new longitude), set it again
+  for (let k = 0; k < 2; k++) {
+    await page.evaluate((h) => { const c = window.palace.climate; if (Number.isFinite(+h)) { c.hour = +h; c.setTime('held'); } }, String(hour));
+    const f0 = await page.evaluate(() => window.palace.stats.frames);
+    await page.waitForFunction((f) => window.palace.stats.frames >= f + 2, f0, { timeout: 600_000 });
+  }
   await page.waitForTimeout(wait);
   const file = join(out, `${v.name}.png`);
   await page.screenshot({ path: file, timeout: 600_000 });

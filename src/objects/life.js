@@ -141,7 +141,7 @@ const MARKETS = {
 const PEOPLE = {
   rome: [[-40, -160, 40, -60]], 'chichen-itza': [[-150, -140, 170, 120]], teotihuacan: [[-70, -262, 70, -196]], tenochtitlan: [[-145, -145, 145, 145]],
   babylon: [[-105, -55, 105, 145]], 'ottoman-istanbul': [[-70, -90, 70, 85]], ur: [[-48, -138, 48, -80]], london: [[-58, -213, 38, -152]],
-  'qing-beijing': [], jerusalem: [], persepolis: [],
+  'qing-beijing': [], jerusalem: [[-145, -195, 145, 195, 14]], persepolis: [],
 };
 const MARKET = /square|piazza|plaza|market|agora|forum|maidan|bazaar|parvis|court|forecourt|street|dam|rows/i;
 const FLAT = /paving|road|street|field|parterre|garden|park|lawn|water|cells|pavement|plaza|square|flag|carpet|bed\b|floor|ground|court\b|lamp/i;
@@ -290,16 +290,16 @@ export function lifePlans(id, R, landmarks, town, G) {
     }
   }
   // people in the open places of the landmarks: knots talking, some walking with loads
-  for (const [x0, z0, x1, z1] of PEOPLE[id] ?? []) {
+  for (const [x0, z0, x1, z1, yOver] of PEOPLE[id] ?? []) {
     const cap = Math.max(10, Math.min(70, Math.round((x1 - x0) * (z1 - z0) / 300)));
     for (let k = 0, tries = 0; k < cap && tries < cap * 8; tries++) {
       const cx = x0 + rand() * (x1 - x0), cz = z0 + rand() * (z1 - z0);
-      if (!inside(cx, cz, 20) || wet(cx, cz)) continue;
+      if (!inside(cx, cz, 20) || (yOver === undefined && wet(cx, cz))) continue;
       const n = rand() < 0.55 ? 2 + (rand() < 0.4 ? 1 : 0) : 1, a0 = rand() * 6.28;
       for (let q = 0; q < n; q++) {
         const a = a0 + q * 6.28 / n, r = n > 1 ? 0.55 : 0, x = cx + Math.cos(a) * r, z = cz + Math.sin(a) * r, b = [x - 0.35, z - 0.35, x + 0.35, z + 0.35];
-        if (!egrid.free(b) || !flat(x, z, 0.5)) continue;
-        put('figure', x, z, n > 1 ? Math.atan2(x - cx, z - cz) : rand() * 6.28, n > 1 ? { pose: q === 0 ? 'talk' : 'stand' } : {});
+        if (!egrid.free(b) || (yOver === undefined && !flat(x, z, 0.5))) continue;
+        put('figure', x, z, n > 1 ? Math.atan2(x - cx, z - cz) : rand() * 6.28, { ...(n > 1 ? { pose: q === 0 ? 'talk' : 'stand' } : {}), ...(yOver !== undefined ? { y: yOver } : {}) });
         egrid.fill(b, 2); k++;
       }
     }
