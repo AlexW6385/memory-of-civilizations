@@ -16,6 +16,7 @@ import { ground as songHangzhou } from './song-hangzhou/ground.js';
 import { ground as borobudur } from './borobudur/ground.js';
 import { ground as ur } from './ur/ground.js';
 import { ground as lalibela } from './lalibela/ground.js';
+import { ground as tenochtitlan } from './tenochtitlan/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -32,6 +33,7 @@ export const GROUNDS = {
   borobudur,
   ur,
   lalibela,
+  tenochtitlan,
 };
 
 export const MODULES = {
@@ -49,4 +51,5 @@ export const MODULES = {
   borobudur: () => import('./borobudur/index.js'),
   ur: () => import('./ur/index.js'),
   lalibela: () => import('./lalibela/index.js'),
+  tenochtitlan: () => import('./tenochtitlan/index.js'),
 };

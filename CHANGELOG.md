@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.16 — Tenochtitlan (2026-11-03)
+- New settlement: Tenochtitlan in 1519 — the Sacred Precinct inside its serpent wall, the Templo Mayor at full size with its twin stairways and the blue and red shrines of Tlaloc and Huitzilopochtli, the round temple of the wind god, smaller pyramids, the ballcourt and the skull rack; Moctezuma's palace; canals with canoes and bridges, white houses round patios, chinampa fields with willows, the lake and the causeway.
+
 ## v8.15 — Lalibela (2026-11-03)
 - New settlement: Lalibela around 1220 — the churches hewn down into the red rock: Bete Giyorgis, the great cross in its pit; Medhane Alem ringed by pillars, with Maryam and Golgotha; the rock-cut Jordan and the churches beyond it; trenches to walk down into them; a village of round stone houses with conical thatch on the slopes around.
 
