@@ -58,6 +58,7 @@ import { ground as norseBorgund } from './norse-borgund/ground.js';
 import { ground as muscovy } from './muscovy/ground.js';
 import { ground as cahokia } from './cahokia/ground.js';
 import { ground as newYork } from './new-york/ground.js';
+import { ground as sydney } from './sydney/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -116,6 +117,7 @@ export const GROUNDS = {
   muscovy,
   cahokia,
   'new-york': newYork,
+  sydney,
 };
 
 export const MODULES = {
@@ -175,4 +177,5 @@ export const MODULES = {
   muscovy: () => import('./muscovy/index.js'),
   cahokia: () => import('./cahokia/index.js'),
   'new-york': () => import('./new-york/index.js'),
+  sydney: () => import('./sydney/index.js'),
 };

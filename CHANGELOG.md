@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.59 — Modern Sydney (2026-11-04)
+- New settlement: Sydney at the Opera House's opening in 1973 — the shells on their granite podium above the harbour, the Harbour Bridge's steel arch, Circular Quay's wharves and the Cahill Expressway, Australia Square's round tower, the city and the Rocks, the Botanic Garden. Every site on the planet now has a settlement of its own.
+
 ## v8.58 — Modern New York (2026-11-04)
 - New settlement: Midtown Manhattan in 1931 — the Empire State Building at its true 381 m with its setbacks, steel piers and mooring mast, the Chrysler Building's stainless crown and spire, the Chanin and Lincoln towers, Grand Central, the Public Library and Bryant Park, Broadway, the Sixth Avenue El and ~800 buildings with water tanks; towers get windows from a new façade material.
 

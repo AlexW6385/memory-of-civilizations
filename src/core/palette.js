@@ -248,6 +248,10 @@ export const MATERIALS = {
   facade_glass:     { color: '#58646e', roughness: 0.3, kind: 'facade', glass: '#26313b', bay: 1.5, storey: 3.8, wu: 0.9, wv: 0.85 },
   steel_chrome:     { color: '#b8bcc0', roughness: 0.25, metalness: 0.9, kind: 'smooth' },
   asphalt:          { color: '#3a3a3c', roughness: 0.95, kind: 'smooth' },
+  // Modern Sydney: the Opera House's tiles and granite podium, the bridge's grey steel
+  tile_opera:       { color: '#ece7da', roughness: 0.35, kind: 'tiles' },
+  granite_podium:   { color: '#9a7a66', roughness: 0.6, kind: 'granite' },
+  steel_grey:       { color: '#7f8589', roughness: 0.55, metalness: 0.6, kind: 'smooth' },
 };
 
 export function albedo(key) {
