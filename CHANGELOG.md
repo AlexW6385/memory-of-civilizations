@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.35 — Conques (2026-11-03)
+- Conques is now the whole village about 1120: the abbey church of Sainte-Foy on its terrace on the steep hillside, the schist houses with stone-slab roofs above and below it, and the Dourdou far below with its stone bridge, woods all round.
+
 ## v8.34 — Paris (2026-11-03)
 - Paris is now the Île de la Cité in 1248: the Sainte-Chapelle in the royal palace's court with the great hall and towers on the quay, Notre-Dame and its twin towers at the island's east end, the two arms of the Seine with their bridges, and rows of timber-framed houses on the island and both banks.
 

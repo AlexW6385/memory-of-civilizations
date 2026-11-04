@@ -66,8 +66,7 @@ export const SITES = [
   { id: 'baroque-rome', name: { en: 'Baroque Rome', zh: '巴洛克罗马' }, era: '17th c.', region: 'latium', lat: 41.90, lon: 12.46, nudge: 315 },
   // ── western Europe ──
   { id: 'stonehenge', name: { en: 'Neolithic Britain', zh: '新石器时代不列颠' }, era: '25th c. BC', region: 'britain', lat: 51.18, lon: -1.83, water: true },
-  { id: 'conques', name: { en: 'Romanesque Rouergue', zh: '罗曼式鲁埃格' }, era: '12th c.', region: 'france', lat: 44.60, lon: 2.40, radius: 165,
-    legacy: { region: 'rouergue', center: [-540, -282], buildings: ['sainte-foy-conques'] } },
+  { id: 'conques', name: { en: 'Romanesque Rouergue', zh: '罗曼式鲁埃格' }, era: '12th c.', region: 'france', lat: 44.60, lon: 2.40, radius: 360 },
   { id: 'paris', name: { en: 'Gothic Paris', zh: '哥特式巴黎' }, era: '13th c.', region: 'france', lat: 48.85, lon: 2.35, radius: 420 },
   { id: 'granada', name: { en: 'Al-Andalus', zh: '安达卢斯' }, era: '14th c.', region: 'iberia', lat: 37.18, lon: -3.59 },
   { id: 'florence', name: { en: 'Renaissance Florence', zh: '文艺复兴佛罗伦萨' }, era: '15th c.', region: 'italy', lat: 43.77, lon: 11.26 },
