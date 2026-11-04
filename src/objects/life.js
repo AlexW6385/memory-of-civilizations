@@ -39,6 +39,12 @@ const KITS = {
     stall: ['pot:glazed_jar', 'basket', 'produce', 'cloth'], boats: ['sampan'], awnings: ['cloth_indigo', 'reed_mat', 'cloth_white'],
     figures: F(['robe', 'trousers'], ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_black'], ['skin_light', 'skin_medium'], ['straw', 'cap', 'none', 'none'], { carry: ['pole', 'basket', 'none', 'none'] }),
   },
+  tibet: {
+    door: [['lantern:oil', 0.4], ['firewood', 1.5], ['basket', 2], ['pot:dark_pot', 1.5], ['sacks', 1]],
+    street: [['animal:yak', 3], ['animal:goat', 1], ['animal:sheep', 1.2], ['animal:dog', 0.8], ['sacks', 0.8], ['figure', 3]],
+    stall: ['basket', 'cloth', 'produce', 'pot:dark_pot'], boats: [], awnings: ['cloth_red', 'cloth_ochre', 'cloth_white'],
+    figures: F(['robe'], ['cloth_brown', 'cloth_red', 'cloth_black', 'cloth_ochre', 'cloth_grey'], ['skin_medium', 'skin_dark'], ['cap', 'none', 'brim', 'none']),
+  },
   japan: {
     door: [['lantern:white', 1.6], ['pot:dark_pot', 2], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.5], ['ladder', 0.5]],
     street: [['barrow', 0.4], ['cart', 0.5], ['animal:ox', 0.7], ['animal:horse', 0.5], ['animal:dog', 0.5], ['figure', 3]],
@@ -122,7 +128,7 @@ const KIT_OF = {
   athens: 'mediterranean', rome: 'mediterranean', constantinople: 'mediterranean', knossos: 'mediterranean', florence: 'europe_early_modern', venice: 'venice', 'baroque-rome': 'europe_early_modern',
   jerusalem: 'near_east', petra: 'near_east', ur: 'near_east', babylon: 'near_east', persepolis: 'near_east', isfahan: 'near_east', 'mamluk-cairo': 'near_east', 'ottoman-istanbul': 'near_east', granada: 'near_east',
   giza: 'egypt', edfu: 'egypt',
-  'tang-wutai': 'east_asia', 'song-kaifeng': 'east_asia', 'song-hangzhou': 'east_asia', 'ming-suzhou': 'east_asia', 'qing-beijing': 'east_asia', 'joseon-seoul': 'east_asia', lhasa: 'east_asia',
+  'tang-wutai': 'east_asia', 'song-kaifeng': 'east_asia', 'song-hangzhou': 'east_asia', 'ming-suzhou': 'east_asia', 'qing-beijing': 'east_asia', 'joseon-seoul': 'east_asia', lhasa: 'tibet',
   'heian-uji': 'japan', nara: 'japan', 'edo-himeji': 'japan',
   sanchi: 'south_asia', madurai: 'south_asia', khajuraho: 'south_asia', 'mughal-agra': 'south_asia',
   angkor: 'southeast_asia', borobudur: 'southeast_asia',

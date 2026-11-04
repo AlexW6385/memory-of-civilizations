@@ -164,6 +164,7 @@ const BEASTS = {
   donkey: { L: 1.1, H: 1.12, B: 0.24, neck: 0.5, na: 40, head: 0.48, ha: -50, leg: 0.045, mats: ['hide_grey', 'hide_brown'], ears: 0.24, tail: 'thin', mane: 1 },
   ox: { L: 1.9, H: 1.45, B: 0.42, neck: 0.42, na: 12, head: 0.5, ha: -62, leg: 0.08, mats: ['hide_tan', 'hide_brown', 'hide_white', 'hide_black'], horns: 0.32, tail: 'thin', dewlap: 1 },
   buffalo: { L: 1.9, H: 1.4, B: 0.45, neck: 0.38, na: 8, head: 0.52, ha: -45, leg: 0.085, mats: ['hide_black', 'hide_grey'], horns: 0.6, sweep: 1, tail: 'thin' },
+  yak: { L: 1.7, H: 1.4, B: 0.46, neck: 0.3, na: 5, head: 0.45, ha: -60, leg: 0.075, mats: ['hide_black', 'hide_brown', 'hide_black'], horns: 0.38, hump: 0.18, tail: 'hair', dewlap: 1 },
   zebu: { L: 1.6, H: 1.35, B: 0.35, neck: 0.38, na: 15, head: 0.45, ha: -60, leg: 0.065, mats: ['hide_white', 'hide_grey'], horns: 0.28, hump: 0.28, tail: 'thin', dewlap: 1 },
   camel: { L: 1.6, H: 1.95, B: 0.36, neck: 1.05, na: 30, head: 0.5, ha: -15, leg: 0.065, mats: ['hide_tan'], hump: 0.45, ears: 0.06, tail: 'thin', bend: 1 },
   llama: { L: 1.0, H: 1.1, B: 0.25, neck: 0.75, na: 78, head: 0.3, ha: -25, leg: 0.045, mats: ['hide_white', 'hide_tan', 'hide_brown'], ears: 0.14, tail: 'stub' },

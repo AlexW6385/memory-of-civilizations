@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.72 — Lhasa's windows, flags and yaks (2026-11-04)
+- Detail: Lhasa and the Potala get their Tibetan windows — black trapezoid surrounds, red frames and lattices, painted lintels and striped cloth awnings — on every storey; the houses of Shöl have doors, windows on their street sides, and strings of prayer flags in the five colours from their poles; yaks, goats and sheep in the lanes, people in Tibetan robes.
+
 ## v8.71 — Teotihuacan's avenue and fuller stalls (2026-11-04)
 - Detail: the Avenue of the Dead is lined on both sides with platform temples in talud-tablero, their stairs coming down to it, and people walk it; market stalls are laid with cloth and heaped with goods, baskets and sacks beneath and beside them.
 
