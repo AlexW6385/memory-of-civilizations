@@ -1,0 +1,59 @@
+// Modern New York about 1931 — the layout (docs/settlements/new-york.md §2): Midtown Manhattan's
+// grid between 32nd and 44th Streets, Sixth Avenue to Lexington; the Empire State Building on Fifth
+// Avenue between 33rd and 34th; the Public Library and Bryant Park on Fifth between 40th and 42nd;
+// Grand Central on Park Avenue at 42nd; the Chrysler and Chanin Buildings at 42nd and Lexington;
+// Broadway's diagonal through Herald Square; the Sixth Avenue El. The grid is drawn north–south
+// (Manhattan's runs 29° east of north), the avenues and blocks compressed (the landmarks' heights
+// and the Empire State's plan true). Pure data. +x east, +z south.
+
+export const RADIUS = 460;
+export const AVENUES = [[-200, 18, '6th'], [0, 18, '5th'], [90, 14, 'Madison'], [180, 24, 'Park'], [270, 16, 'Lexington'], [360, 16, '3rd']];
+/** The cross streets: number → z of the centre line (34th at 200, 50 m apart, the Empire State's block 60). */
+export const streetZ = (n) => (n <= 33 ? 260 + (33 - n) * 50 : 200 - (n - 34) * 50);
+export const STREETS = Array.from({ length: 17 }, (_, i) => 30 + i).map((n) => [streetZ(n), 12, n]);
+export const ESB = [-119, 206, -9, 254];
+export const LIBRARY = [-78, -190, -9, -112];
+export const BRYANT = [-191, -194, -82, -106];
+export const GCT = [152, -244, 208, -206];
+export const CHRYSLER = [279, -244, 329, -206];
+export const CHANIN = [222, -194, 262, -160];
+export const LINCOLN = [110, -194, 150, -164];
+export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
+/** Broadway: from Herald Square (6th Avenue at 34th) north-west at the slope it really has. */
+export const broadwayX = (z) => -200 - (200 - z) * 0.5;
+export const onBroadway = (x, z, m = 0) => z < 230 && Math.abs(x - broadwayX(z)) < 12 + m;
+export const onStreet = (x, z, m = 0) => AVENUES.some(([ax, w]) => Math.abs(x - ax) < w / 2 + m) || STREETS.some(([sz, w]) => Math.abs(z - sz) < w / 2 + m) || onBroadway(x, z, m);
+export const height = (x, z) => 0.8 * smooth(-300, 300, -z) * (1 - smooth(RADIUS - 60, RADIUS - 30, Math.hypot(x, z)));   // Murray Hill's gentle rise
+const SPECIAL = [ESB, LIBRARY, BRYANT, GCT, CHRYSLER, CHANIN, LINCOLN];
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+let LOTS = null;
+/** The buildings: each block cut into lots along its two street fronts; heights by district (lofts west of Fifth, towers near 42nd, brownstones in Murray Hill). */
+export function lots() {
+  if (LOTS) return LOTS;
+  LOTS = [];
+  const rand = rng(1931), xs = [-460, ...AVENUES.map(([x]) => x), 460], zs = STREETS.map(([z]) => z).sort((a, b) => a - b);
+  for (let i = 0; i + 1 < xs.length; i++) for (let j = 0; j + 1 < zs.length; j++) {
+    const ai = AVENUES[i - 1], bi = AVENUES[i];
+    const bx0 = xs[i] + (ai ? ai[1] / 2 : 0) + 3, bx1 = xs[i + 1] - (bi ? bi[1] / 2 : 0) - 3, bz0 = zs[j] + 6 + 3, bz1 = zs[j + 1] - 6 - 3;
+    if (bx1 - bx0 < 10 || bz1 - bz0 < 10) continue;
+    const zm = (bz0 + bz1) / 2;
+    for (const [z0, z1] of [[bz0, zm], [zm, bz1]]) {
+      let x = bx0;
+      while (x < bx1 - 6) {
+        const w = Math.min(bx1 - x, 10 + rand() * 22), r = [x, z0, x + w - 0.3, z1 - 0.3], cx = x + w / 2, cz = (z0 + z1) / 2;
+        x += w;
+        if (Math.hypot(cx, cz) > RADIUS - 40 || SPECIAL.some((s) => inRect(s, cx, cz, 2) || inRect(s, r[0], cz) || inRect(s, r[2], cz)) || onBroadway(cx, cz, 2) || onBroadway(r[0], cz) || onBroadway(r[2], cz)) continue;
+        const near42 = Math.exp(-((cz + 200) ** 2) / (2 * 90 ** 2)), murray = cx > 60 && cz > -150 ? 1 : 0, garment = cx < -10 ? 1 : 0;
+        let h = 18 + rand() * 25;
+        if (garment) h = 40 + rand() * 45;
+        if (murray && rand() < 0.6) h = 12 + rand() * 8;
+        if (rand() < 0.04 + near42 * 0.3) h = 90 + rand() * (100 + near42 * 120);
+        const mats = garment ? ['facade_buff', 'facade_brick', 'facade_buff'] : murray ? ['facade_brick', 'facade_brick', 'facade_limestone'] : ['facade_limestone', 'facade_buff', 'facade_grey', 'facade_brick'];
+        LOTS.push({ rect: r, y: height(cx, cz), h: Math.round(h), mat: mats[Math.floor(rand() * mats.length)], seed: Math.floor(rand() * 1e6) });
+      }
+    }
+  }
+  return LOTS;
+}
+export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

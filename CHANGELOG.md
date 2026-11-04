@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.58 — Modern New York (2026-11-04)
+- New settlement: Midtown Manhattan in 1931 — the Empire State Building at its true 381 m with its setbacks, steel piers and mooring mast, the Chrysler Building's stainless crown and spire, the Chanin and Lincoln towers, Grand Central, the Public Library and Bryant Park, Broadway, the Sixth Avenue El and ~800 buildings with water tanks; towers get windows from a new façade material.
+
 ## v8.57 — Mississippian Cahokia (2026-11-04)
 - New settlement: Cahokia about 1175 — Monks Mound rising 30 m in its terraces with the great house on its summit and a ramp from the Grand Plaza, the twin mounds, the palisade with its bastions, Woodhenge's circle of cedar posts, smaller mounds, ~1,300 thatched houses, fields and Cahokia Creek.
 

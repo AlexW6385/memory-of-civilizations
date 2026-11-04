@@ -375,6 +375,22 @@ function make(spec) {
       m.normalNode = bump(n.mul(0.05).add(f.mul(0.004)), 1);
       break;
     }
+    case 'facade': {
+      // the face of a tall building: rows of windows (dark glass) in bays on the wall's colour; the
+      // tops and roofs plain; seen from afar the grid fades to its average (no moire)
+      const { u, v, isTop } = wallUV();
+      const g = vec2(u.div(spec.bay ?? 1.6), v.div(spec.storey ?? 3.6)), f = fract(g);
+      const hw = float((spec.wu ?? 0.55) / 2), hh = float((spec.wv ?? 0.6) / 2);
+      const wx = smoothstep(hw.add(0.04), hw.sub(0.04), abs(f.x.sub(0.5))), wy = smoothstep(hh.add(0.04), hh.sub(0.04), abs(f.y.sub(0.55)));
+      let d = wx.mul(wy);
+      const fw = max(fwidth(g.x), fwidth(g.y));
+      d = mix(d, float((spec.wu ?? 0.55) * (spec.wv ?? 0.6)), smoothstep(0.3, 0.8, fw));
+      d = select(isTop, float(0), d);
+      const glass = uniform(new Color(spec.glass || '#2a3038'));
+      m.colorNode = mix(baseNode, glass, d);
+      m.roughnessNode = mix(roughU, float(0.18), d);
+      break;
+    }
     case 'lattice': {
       // a latticed door or window: thin wooden bars on a fine grid (or an "ice-crack" pattern of
       // broken lines), paper behind them, lit through when the sun is on the other side

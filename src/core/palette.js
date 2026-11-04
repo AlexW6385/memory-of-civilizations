@@ -240,6 +240,14 @@ export const MATERIALS = {
   // Muscovy: the Kremlin's red brick, white stone trim, plank roofs
   brick_kremlin:    { color: '#8e3e2e', roughness: 0.9, kind: 'mudbrick', course: 0.09, block: 0.3 },
   planks_grey:      { color: '#6d665c', roughness: 0.95, kind: 'wood' },
+  // Modern New York: the towers' faces — limestone, buff and red brick, granite, glass curtain walls
+  facade_limestone: { color: '#c9bfa8', roughness: 0.85, kind: 'facade', glass: '#2b3139', bay: 1.6, storey: 3.7, wu: 0.5, wv: 0.6 },
+  facade_buff:      { color: '#b8a07a', roughness: 0.9, kind: 'facade', glass: '#2b3139', bay: 1.5, storey: 3.4, wu: 0.5, wv: 0.6 },
+  facade_brick:     { color: '#8a4f3a', roughness: 0.9, kind: 'facade', glass: '#262b33', bay: 1.5, storey: 3.3, wu: 0.5, wv: 0.6 },
+  facade_grey:      { color: '#9a9690', roughness: 0.8, kind: 'facade', glass: '#2b3139', bay: 1.7, storey: 3.8, wu: 0.55, wv: 0.6 },
+  facade_glass:     { color: '#58646e', roughness: 0.3, kind: 'facade', glass: '#26313b', bay: 1.5, storey: 3.8, wu: 0.9, wv: 0.85 },
+  steel_chrome:     { color: '#b8bcc0', roughness: 0.25, metalness: 0.9, kind: 'smooth' },
+  asphalt:          { color: '#3a3a3c', roughness: 0.95, kind: 'smooth' },
 };
 
 export function albedo(key) {
