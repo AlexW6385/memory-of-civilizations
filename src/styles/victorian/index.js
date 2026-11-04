@@ -48,10 +48,22 @@ function terraceHouse(el, { bag, col }) {
   const L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0, k = Math.max(1, Math.round(L / 5.5));
   for (let s = 0; s < n; s++) for (let i = 0; i < k * 2; i++) {
     const u = (along ? x0 : z0) + (i + 0.5) * L / (k * 2), yy = y + s * st + (s === 0 ? 0.6 : 0.9);
-    const q = f === 's' ? [u - 0.55, z1 - 0.02, u + 0.55, z1 + 0.06] : f === 'n' ? [u - 0.55, z0 - 0.06, u + 0.55, z0 + 0.02] : f === 'e' ? [x1 - 0.02, u - 0.55, x1 + 0.06, u + 0.55] : [x0 - 0.06, u - 0.55, x0 + 0.02, u + 0.55];
-    bag.add('plaster_white', box(q[0] - 0.08, yy - 0.08, q[1] - 0.08, q[2] + 0.08, yy + 2.0, q[3] + 0.08));
-    bag.add('opening', box(q[0] + (along ? 0.05 : 0), yy, q[1] + (along ? 0 : 0.05), q[2] - (along ? 0.05 : 0), yy + 1.9, q[3] - (along ? 0 : 0.05)));
+    // the stucco surround, the sash window within it (prouder), its bars; the door with its fanlight on the ground floor
+    const fr = (d0, d1, m) => (f === 's' ? [u - 0.55 - m, z1 + d0, u + 0.55 + m, z1 + d1] : f === 'n' ? [u - 0.55 - m, z0 - d1, u + 0.55 + m, z0 - d0] : f === 'e' ? [x1 + d0, u - 0.55 - m, x1 + d1, u + 0.55 + m] : [x0 - d1, u - 0.55 - m, x0 - d0, u + 0.55 + m]);
+    const door = s === 0 && i % 2 === 0, hh = door ? 2.6 : s === 1 ? 2.2 : 1.8, y0 = door ? y + 0.4 : yy;
+    const a1 = fr(-0.02, 0.05, 0.1), a2 = fr(0.05, 0.08, -0.04), bar = fr(0.08, 0.1, -0.5);
+    if (el.simple) { bag.add('opening', box(a2[0], y0, a2[1], a2[2], y0 + hh, a2[3])); continue; }
+    bag.add('plaster_white', box(a1[0], y0 - 0.1, a1[1], a1[2], y0 + hh + (s === 1 ? 0.35 : 0.1), a1[3]));
+    bag.add(door ? 'wood_dark' : 'opening', box(a2[0], y0, a2[1], a2[2], y0 + hh * (door ? 0.78 : 1), a2[3]));
+    if (door) { bag.add('opening', box(a2[0], y0 + hh * 0.8, a2[1], a2[2], y0 + hh, a2[3])); const st2 = fr(0.0, 0.9, 0.15); bag.add('limestone', box(st2[0], y - 0.3, st2[1], st2[2], y + 0.4, st2[3])); }
+    else { bag.add('plaster_white', box(bar[0], y0, bar[1], bar[2], y0 + hh, bar[3])); const hb = fr(0.08, 0.1, -0.04); bag.add('plaster_white', box(hb[0], y0 + hh / 2 - 0.03, hb[1], hb[2], y0 + hh / 2 + 0.03, hb[3])); }
   }
+  // a stucco cornice and parapet; the area railings in front
+  bag.add('plaster_white', box(x0 - 0.15, y + H - 0.4, z0 - 0.15, x1 + 0.15, y + H, z1 + 0.15));
+  bag.add('plaster_white', box(x0 - 0.05, y + 0.3, z0 - 0.05, x1 + 0.05, y + 0.6, z1 + 0.05));
+  { const off = 1.5, rl = f === 's' ? [x0, z1 + off, x1, z1 + off + 0.05] : f === 'n' ? [x0, z0 - off - 0.05, x1, z0 - off] : f === 'e' ? [x1 + off, z0, x1 + off + 0.05, z1] : [x0 - off - 0.05, z0, x0 - off, z1];
+    bag.add('iron', box(rl[0], y + 0.9, rl[1], rl[2], y + 0.95, rl[3]));
+    if (!el.simple) for (let u = (along ? x0 : z0) + 0.15; u < (along ? x1 : z1); u += 0.3) bag.add('iron', along ? box(u - 0.012, y, rl[1], u + 0.012, y + 1.0, rl[3]) : box(rl[0], y, u - 0.012, rl[2], y + 1.0, u + 0.012)); }
   bag.add(SL, frustum([x0 - 0.2, z0 - 0.2, x1 + 0.2, z1 + 0.2], y + H, y + H + D * 0.32, along ? 0 : D / 2 + 0.15, along ? 0 : D / 2 + 0.15, along ? D / 2 + 0.15 : 0, along ? D / 2 + 0.15 : 0));
   for (let i = 0; i <= k; i++) { const u = (along ? x0 : z0) + i * L / k, c = along ? [u - 0.5, (z0 + z1) / 2 - 0.4, u + 0.5, (z0 + z1) / 2 + 0.4] : [(x0 + x1) / 2 - 0.4, u - 0.5, (x0 + x1) / 2 + 0.4, u + 0.5]; bag.add(mat, box(c[0], y + H, c[1], c[2], y + H + D * 0.32 + 1.4, c[3])); }
 }

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.68 — London's terraces (2026-11-04)
+- Detail and a fix: London's terrace windows were hidden behind their stucco surrounds — now sash windows with their bars (taller on the first floor), front doors with fanlights and stone steps, a stucco band and cornice, iron area railings along the fronts; the terraces drawn in two levels of detail.
+
 ## v8.67 — Amsterdam's houses and Town Hall (2026-11-04)
 - Detail and a fix: Amsterdam's canal-house windows were hidden behind their white frames — now dark sash windows with glazing bars in white frames, windows on the garden side too, stone stoops with iron rails at the doors, white stone copings and scrolls on the gables, an attic window in each gable. The Town Hall has its giant pilasters, its windows on every front (two main floors and their mezzanines), a plinth and cornices. Doors in the Mediterranean and French towns have their leaves, some ajar.
 
