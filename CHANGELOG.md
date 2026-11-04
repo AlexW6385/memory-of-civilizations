@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.51 — Versailles (2026-11-03)
+- New settlement: Versailles about 1690 — the château's long pale garden front with its wings, the brick-and-stone courts under slate, the water parterre and fountains, the Tapis Vert down to the Apollo fountain and the cross-shaped Grand Canal between dense groves; the town beyond its three avenues.
+
 ## v8.50 — Amsterdam (2026-11-03)
 - New settlement: Amsterdam about 1670 — the half-rings of canals lined with elms and tall gabled brick houses, the Town Hall on the Dam with its cupola, the Westerkerk's stacked tower, bridges over the canals and ships crowding the IJ.
 
