@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.65 — Madurai's gopurams (2026-11-04)
+- Detail: Madurai's gopurams are crowded with their painted gods and guardians — a row on every tier between pilasters, arms and gilt crowns, little vaulted shrines with their niches along the cornices — and the granite bases have pilasters, niches and moulded bands.
+
 ## v8.64 — Babylon's beasts and gathered people (2026-11-04)
 - Detail: Babylon's glazed walls are now glazed brick in their courses with Ishtar's lions striding in white with yellow manes between bands of rosettes, and the Ishtar Gate's towers carry rows of Marduk's dragons and Adad's bulls; people gather in the open places of the landmarks — the Pantheon's forecourt, Chichén Itzá's and Teotihuacan's plazas, Tenochtitlan's precinct, Babylon's, Ur's and the Süleymaniye's courts, Parliament Square — standing on the paving where it is raised.
 

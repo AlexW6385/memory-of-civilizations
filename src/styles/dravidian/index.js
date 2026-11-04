@@ -24,6 +24,21 @@ function gopuram(el, { bag, col }) {
   { const r = R(-pw / 2, -D / 2, pw / 2, D / 2); bag.add(G, box(r[0], y + ph, r[1], r[2], y + base, r[3])); }
   { const r = R(-W / 2 - 0.4, -D / 2 - 0.4, W / 2 + 0.4, D / 2 + 0.4); bag.add(G, box(r[0], y, r[1], r[2], y + 1.2, r[3])); }
   { const r = R(-pw / 2, -D / 2, pw / 2, D / 2); bag.add('granite_tamil', box(r[0], y - 0.05, r[1], r[2], y + 0.02, r[3])); col.floor(r, y); }
+  // the granite base's faces: pilasters, niches with their guardians, the moulded bands
+  if (!el.simple) for (const s of [-1, 1]) {
+    const v = s * D / 2, m = Math.floor(W / 2.2);
+    for (let j = 0; j <= m; j++) {
+      const u = -W / 2 + j * W / m;
+      if (Math.abs(u) < pw / 2 + 0.4) continue;
+      const q = R(u - 0.22, v - (s < 0 ? 0.18 : 0), u + 0.22, v + (s > 0 ? 0.18 : 0));
+      bag.add(G, box(q[0], y + 1.2, q[1], q[2], y + base - 0.6, q[3]));
+      if (j < m && Math.abs(u + W / m / 2) > pw / 2 + 1.2) {
+        const c = u + W / m / 2, nq = R(c - 0.5, v - (s < 0 ? 0.04 : -0.02), c + 0.5, v + (s > 0 ? 0.04 : -0.02));
+        bag.add('opening', box(nq[0], y + 2.4, nq[1], nq[2], y + Math.min(base * 0.6, 4.6), nq[3])); bag.add(G, box(nq[0] - 0.15, y + Math.min(base * 0.6, 4.6), Math.min(nq[1], nq[3]) - 0.1, nq[2] + 0.15, y + Math.min(base * 0.6, 4.6) + 0.5, Math.max(nq[1], nq[3]) + 0.1));
+      }
+    }
+    for (const hh of [1.2, base * 0.66, base - 0.6]) { const q = R(-W / 2 - 0.1, v - (s < 0 ? 0.3 : 0), W / 2 + 0.1, v + (s > 0 ? 0.3 : 0)); bag.add(G, box(q[0], y + hh, q[1], q[2], y + hh + 0.35, q[3])); }
+  }
   // the storeys, each a little smaller, with a cornice and a row of little shrines along the faces
   const topW = W * 0.42, topD = D * 0.45, tierH = (h - base - 6) / n;
   for (let i = 0; i < n; i++) {
@@ -33,14 +48,40 @@ function gopuram(el, { bag, col }) {
     bag.add(mat, frustum(r, y0, y1 - 0.35, (w0 - w1) / 2, (w0 - w1) / 2, (d0 - d1) / 2, (d0 - d1) / 2));
     const c = R(-w1 / 2 - 0.35, -d1 / 2 - 0.35, w1 / 2 + 0.35, d1 / 2 + 0.35);
     bag.add('stucco_cream', box(c[0], y1 - 0.35, c[1], c[2], y1, c[3]));
+    // the gods and guardians standing in a row on the tier's faces, painted, between pilasters
+    if (!el.simple) {
+      const fh = Math.min(tierH * 0.62, 2.2), wm = (w0 + w1) / 2, dm = (d0 + d1) / 2;
+      for (const [len, depth, long] of [[wm, dm, true], [dm, wm, false]]) {
+        const m = Math.max(2, Math.floor(len / 1.25));
+        for (let j = 0; j < m; j++) {
+          const u = -len / 2 + (j + 0.5) * len / m;
+          for (const s of [-1, 1]) {
+            const v = s * (depth / 2 + 0.05), [px, pz] = long ? (alongX ? [cx + v, cz + u] : [cx + u, cz + v]) : (alongX ? [cx + u, cz + v] : [cx + v, cz + u]);
+            const k = fh / 1.15, prof = [[0.22 * k, 0], [0.17 * k, 0.5 * k], [0.13 * k, 0.75 * k], [0.08 * k, 0.8 * k], [0.11 * k, 0.88 * k], [0.09 * k, 1.0 * k], [0.06 * k, 1.08 * k], [0.001, 1.15 * k]];
+            const pm = PAINT[(i * 3 + j * 7 + (s > 0 ? 2 : 0)) % PAINT.length];
+            bag.add(pm, lathe(prof, 6, null, px, y0 + 0.25, pz));
+            const arm = long === !alongX ? box(px - 0.27 * k, y0 + 0.25 + 0.62 * k, pz - 0.05 * k, px + 0.27 * k, y0 + 0.25 + 0.72 * k, pz + 0.05 * k) : box(px - 0.05 * k, y0 + 0.25 + 0.62 * k, pz - 0.27 * k, px + 0.05 * k, y0 + 0.25 + 0.72 * k, pz + 0.27 * k);
+            bag.add(pm, arm);
+            bag.add('gilt_bronze', lathe([[0.075 * k, 0], [0.06 * k, 0.1 * k], [0.001, 0.2 * k]], 6, null, px, y0 + 0.25 + 1.08 * k, pz));
+            if (j % 2 === 0) { const q = long ? R(u - len / m / 2 - 0.08, v - 0.06, u - len / m / 2 + 0.08, v + 0.12) : (alongX ? [cx + u - len / m / 2 - 0.08, cz + v - 0.06, cx + u - len / m / 2 + 0.08, cz + v + 0.12] : [cx + v - 0.06, cz + u - len / m / 2 - 0.08, cx + v + 0.12, cz + u - len / m / 2 + 0.08]); bag.add('stucco_cream', box(Math.min(q[0], q[2]), y0, Math.min(q[1], q[3]), Math.max(q[0], q[2]), y0 + fh + 0.3, Math.max(q[1], q[3]))); }
+          }
+        }
+      }
+    }
     // the little pavilions (kudu, shala) along the two long faces
     if (!el.simple) {
       const k = Math.max(2, Math.floor(w1 / 3.2));
       for (let j = 0; j < k; j++) {
         const u = -w1 / 2 + (j + 0.5) * w1 / k;
         for (const s of [-1, 1]) {
-          const v = s * (d1 / 2 + 0.1), q = R(u - 0.7, v - 0.3, u + 0.7, v + 0.3);
-          bag.add(PAINT[(i + j + 1) % PAINT.length], box(q[0], y1 + 0.02, q[1], q[2], y1 + Math.min(1.4, tierH * 0.6), q[3]));
+          const v = s * (d1 / 2 + 0.1), q = R(u - 0.7, v - 0.3, u + 0.7, v + 0.3), kh = Math.min(1.4, tierH * 0.6);
+          // a little shrine (kudu / shala): a body, a horseshoe-arched niche, a vaulted roof with a finial
+          bag.add(PAINT[(i + j + 1) % PAINT.length], box(q[0], y1 + 0.02, q[1], q[2], y1 + kh * 0.6, q[3]));
+          const qa = R(u - 0.35, v - 0.32 * s - 0.02, u + 0.35, v - 0.32 * s + 0.02 + 0.62 * s);
+          bag.add('stucco_cream', frustum(q, y1 + kh * 0.6, y1 + kh, alongX ? 0 : 0.6, alongX ? 0 : 0.6, alongX ? 0.25 : 0, alongX ? 0.25 : 0, { noBottom: true }));
+          const nm = R(u - 0.25, v + s * 0.29, u + 0.25, v + s * 0.33);
+          bag.add('opening', box(Math.min(nm[0], nm[2]), y1 + 0.12, Math.min(nm[1], nm[3]), Math.max(nm[0], nm[2]), y1 + kh * 0.5, Math.max(nm[1], nm[3])));
+          void qa;
         }
       }
     }
