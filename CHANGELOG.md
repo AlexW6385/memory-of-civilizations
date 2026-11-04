@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.74 — Knossos's walls (2026-11-04)
+- Detail: the palace of Knossos shows its timber frame in the plaster — posts between the red-framed windows — and a painted frieze of blue, red and ochre under the roof's edge, below the horns of consecration.
+
 ## v8.73 — The Opera House's podium (2026-11-04)
 - Detail: the Opera House's monumental stair has granite nosings and sloping cheek walls; the podium's sides are coursed and glazed with the long bands of the foyers and the concourse; Bennelong Point is paved; the arrival view looks along the podium to the shells.
 

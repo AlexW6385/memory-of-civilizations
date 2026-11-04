@@ -45,6 +45,15 @@ function wing(el, { bag, col }) {
         bag.add('opening', box(ri[0], yy + 0.05, ri[1], ri[2], yy + 1.35, ri[3]));
       }
     }
+    // the timber frame showing in the plaster (posts and rails), and a painted frieze of running spirals under the roof's edge
+    for (const f of 'nesw') {
+      const alongX = f === 'n' || f === 's', L = alongX ? x1 - x0 : z1 - z0, a0 = alongX ? x0 : z0, fp = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
+      const at = (u0, u1, v0, v1, d) => { const p0 = fp + sg * 0.02, p1 = fp + sg * d; const q = alongX ? [a0 + u0, Math.min(p0, p1), a0 + u1, Math.max(p0, p1)] : [Math.min(p0, p1), a0 + u0, Math.max(p0, p1), a0 + u1]; return box(q[0], v0, q[1], q[2], v1, q[3]); };
+      const mw = Math.max(1, Math.floor(L / 4.2));
+      for (let i = 0; i <= mw; i++) { const u = Math.min(L - 0.2, Math.max(0.05, i * L / mw - 0.07)); bag.add('timber', at(u, u + 0.14, y + 1.2, y + H - 0.3, 0.05)); }
+      const m = Math.floor(L / 0.6);
+      for (let i = 0; i < m; i++) bag.add(i % 3 === 0 ? 'paint_blue' : i % 3 === 1 ? RED : 'paint_ochre', at(i * L / m, (i + 1) * L / m - 0.04, y + H - 0.85, y + H - 0.35, 0.09));
+    }
     if (el.horns !== false) {
       for (let x = x0 + 2; x < x1 - 1; x += 4) { horns(bag, x, y + H, z0 + 0.4); horns(bag, x, y + H, z1 - 0.4); }
       for (let z = z0 + 2; z < z1 - 1; z += 4) { horns(bag, x0 + 0.4, y + H, z, 1, false); horns(bag, x1 - 0.4, y + H, z, 1, false); }
