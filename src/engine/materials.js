@@ -97,6 +97,27 @@ const flags = (u, v, size) => {
   return { id, d };
 };
 
+// Weathering (DESIGN §5 "Surfaces"): the darker lower metre of walls along the ground, rain
+// streaks down the faces and moss on the north side near the ground, and on north-facing roofs —
+// streaks and moss by how damp the place's climate is (ENV.damp). In settlement coordinates (the
+// ground at y ≈ 0, north = −z).
+const WEATHERED = new Set(['ashlar', 'mudbrick', 'granite', 'smooth', 'facade', 'wood', 'timberframe', 'veined', 'drums', 'sectile', 'rock']);
+function weather(col, roof) {
+  const P = positionLocal, y = P.y, vertical = float(1).sub(smoothstep(0.5, 0.8, abs(normalLocal.y)));
+  const patch = mx_noise_float(P.mul(0.7)), fine = mx_noise_float(P.mul(3.1));
+  const north = smoothstep(0.2, 0.9, normalLocal.z.negate());
+  if (roof) {
+    const moss = north.mul(smoothstep(0.0, 0.5, patch.add(0.2))).mul(ENV.damp).mul(float(1).sub(vertical));
+    return mix(col, vec3(0.14, 0.17, 0.08), moss.mul(0.35));
+  }
+  const foot = smoothstep(1.3, 0.0, y.add(patch.mul(0.35))).mul(vertical);
+  const streak = smoothstep(0.3, 0.75, mx_noise_float(vec3(P.x.add(P.z).mul(1.7), y.mul(0.12), 0.3))).mul(vertical).mul(ENV.damp);
+  const moss = north.mul(smoothstep(2.4, 0.2, y.add(patch.mul(0.6)))).mul(smoothstep(0.0, 0.5, patch.add(0.25))).mul(ENV.damp).mul(vertical);
+  let c = col.mul(float(1).sub(foot.mul(0.22).mul(fine.mul(0.35).add(1))));
+  c = c.mul(float(1).sub(streak.mul(0.1)));
+  return mix(c, vec3(0.15, 0.19, 0.09), moss.mul(0.45));
+}
+
 function make(spec) {
   const m = new MeshStandardNodeMaterial();
   // the material's numbers are uniforms, not constants in the shader: materials of the same kind
@@ -356,6 +377,13 @@ function make(spec) {
       m.roughnessNode = roughU;
       break;
     }
+    case 'glow': {
+      // a lantern's shade: its own colour by day, lit from within at dusk and night (a slow flicker)
+      const flick = sin(time.mul(7.0).add(positionLocal.x.mul(3.1))).mul(0.06).add(sin(time.mul(2.3).add(positionLocal.z)).mul(0.04)).add(1);
+      m.colorNode = baseNode;
+      m.emissiveNode = uniform(new Color(spec.glow || spec.color)).mul(float(spec.power ?? 3)).mul(smoothstep(0.15, 0.6, ENV.night)).mul(flick);
+      break;
+    }
     case 'flame': {
       m.colorNode = vec3(0, 0, 0);
       m.emissiveNode = vec3(6.0, 3.2, 1.0).mul(sin(time.mul(9.0).add(P.x.mul(13.0))).mul(0.08).add(1));
@@ -542,6 +570,7 @@ function make(spec) {
       m.normalNode = bump(f.mul(0.0005), 1);
     }
   }
+  if (!spec.clean && m.colorNode && (WEATHERED.has(spec.kind ?? 'smooth') || spec.kind === 'tiles')) m.colorNode = weather(m.colorNode, spec.kind === 'tiles');
   return m;
 }
 

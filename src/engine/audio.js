@@ -86,6 +86,80 @@ export class Music {
     a.muffle.frequency.setTargetAtTime(indoors ? 900 : 18000, t, 0.8);
   }
 
+  /**
+   * The sounds of the place (DESIGN §5 "Sound"): water lapping at a shore or a quay, birds by day,
+   * crickets at night, the murmur of a town (voices, now and then a knock or a cart) or, in a
+   * modern city, the hum of traffic. Each 0…1; indoors muffles them with the weather.
+   */
+  place({ water = 0, birds = 0, crickets = 0, town = 0, traffic = 0 } = {}) {
+    const ctx = this.ctx;
+    if (!ctx || !this.amb) return;
+    if (!this.plc) {
+      const sr = ctx.sampleRate, n = sr * 4, b = ctx.createBuffer(1, n, sr), d = b.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      const noise = () => { const s = ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = Math.random() * 3; s.start(); return s; };
+      const out = ctx.createGain(); out.connect(this.amb.muffle);
+      // water: low noise swelling and ebbing like small waves
+      const wG = ctx.createGain(); wG.gain.value = 0;
+      const wLP = ctx.createBiquadFilter(); wLP.type = 'lowpass'; wLP.frequency.value = 520;
+      const wAM = ctx.createGain(); wAM.gain.value = 0.5;
+      const lfo = ctx.createOscillator(), lfoG = ctx.createGain(); lfo.frequency.value = 0.21; lfoG.gain.value = 0.45; lfo.connect(lfoG); lfoG.connect(wAM.gain); lfo.start();
+      noise().connect(wLP); wLP.connect(wAM); wAM.connect(wG); wG.connect(out);
+      // the town: a band of voices, its loudness wandering
+      const tG = ctx.createGain(); tG.gain.value = 0;
+      const tBP = ctx.createBiquadFilter(); tBP.type = 'bandpass'; tBP.frequency.value = 700; tBP.Q.value = 1.1;
+      const tAM = ctx.createGain(); tAM.gain.value = 0.6;
+      const l2 = ctx.createOscillator(), l2G = ctx.createGain(); l2.frequency.value = 0.37; l2G.gain.value = 0.35; l2.connect(l2G); l2G.connect(tAM.gain); l2.start();
+      noise().connect(tBP); tBP.connect(tAM); tAM.connect(tG); tG.connect(out);
+      // traffic: a low, steady roar
+      const rG = ctx.createGain(); rG.gain.value = 0;
+      const rLP = ctx.createBiquadFilter(); rLP.type = 'lowpass'; rLP.frequency.value = 260;
+      noise().connect(rLP); rLP.connect(rG); rG.connect(out);
+      this.plc = { out, wG, tG, rG, birds: 0, crickets: 0, town: 0, traffic: 0, nextBird: 0, nextCricket: 0, nextKnock: 0 };
+    }
+    const t = ctx.currentTime, P = this.plc;
+    P.wG.gain.setTargetAtTime(water * 0.05, t, 1.2);
+    P.tG.gain.setTargetAtTime(town * 0.02, t, 2);
+    P.rG.gain.setTargetAtTime(traffic * 0.06, t, 2);
+    P.birds = birds; P.crickets = crickets; P.town = town; P.traffic = traffic;
+  }
+  /** Scheduled each tick: chirps, crickets, knocks. */
+  placeEvents() {
+    const P = this.plc, ctx = this.ctx;
+    if (!P) return;
+    const t = ctx.currentTime;
+    if (P.birds > 0.02 && t > P.nextBird) {
+      // a bird: a few quick falling or rising chirps
+      const base = 2200 + Math.random() * 2600, n = 2 + Math.floor(Math.random() * 5), up = Math.random() < 0.5;
+      for (let k = 0; k < n; k++) {
+        const o = ctx.createOscillator(), g = ctx.createGain(), w = t + 0.05 + k * (0.09 + Math.random() * 0.05);
+        o.frequency.setValueAtTime(base * (up ? 0.85 : 1.15), w); o.frequency.exponentialRampToValueAtTime(base * (up ? 1.15 : 0.8), w + 0.07);
+        g.gain.setValueAtTime(0, w); g.gain.linearRampToValueAtTime(0.012 * P.birds, w + 0.01); g.gain.exponentialRampToValueAtTime(1e-4, w + 0.08);
+        o.connect(g); g.connect(P.out); o.start(w); o.stop(w + 0.1);
+      }
+      P.nextBird = t + (1.5 + Math.random() * 6) / (0.3 + P.birds);
+    }
+    if (P.crickets > 0.02 && t > P.nextCricket) {
+      const f = 4200 + Math.random() * 600;
+      for (let k = 0; k < 3; k++) {
+        const o = ctx.createOscillator(), g = ctx.createGain(), w = t + k * 0.06;
+        o.frequency.value = f; g.gain.setValueAtTime(0, w); g.gain.linearRampToValueAtTime(0.006 * P.crickets, w + 0.005); g.gain.linearRampToValueAtTime(0, w + 0.035);
+        o.connect(g); g.connect(P.out); o.start(w); o.stop(w + 0.05);
+      }
+      P.nextCricket = t + 0.35 + Math.random() * 0.9;
+    }
+    if (P.town > 0.05 && t > P.nextKnock) {
+      // a knock: a hammer, a door, a pot set down — a short filtered click
+      const sr = ctx.sampleRate, len = Math.floor(sr * 0.06), b = ctx.createBuffer(1, len, sr), d = b.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.008));
+      const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = b; f.type = 'bandpass'; f.frequency.value = 500 + Math.random() * 1500; f.Q.value = 3; g.gain.value = 0.05 * P.town;
+      s.connect(f); f.connect(g); g.connect(P.out); s.start(t + 0.02);
+      const n = Math.random() < 0.3 ? 3 : 1;
+      P.nextKnock = t + (n === 3 ? 0.4 : 2 + Math.random() * 7);
+    }
+  }
+
   /** Current output level (RMS, 0…1). */
   level() {
     if (!this.analyser) return 0;
@@ -405,6 +479,7 @@ export class Music {
   }
 
   tick() {
+    if (this.plc) this.placeEvents();
     const ctx = this.ctx, S = this.score;
     if (!ctx || !S || !this.zone || !this.layers.has(this.zone) || this.volume <= 0) return;
     const Z = S.zones[this.zone] || {};

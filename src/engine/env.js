@@ -20,6 +20,7 @@ export const ENV = {
   wind: uniform(new Vector2(1, 0)),             // cloud drift (m/s at ground scale)
   cloudOffset: uniform(new Vector2(0, 0)),      // integrated drift
   wet: uniform(0),                              // 0 dry … 1 soaked
+  damp: uniform(0.4),                           // how damp the place's climate is (moss, rain streaks): 0 desert … 1 Atlantic
   rain: uniform(0),
   night: uniform(0),                            // 0 day … 1 full night
   moonDir: uniform(new Vector3(0, -1, 0)),

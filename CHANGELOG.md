@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.60 — Life in the streets (2026-11-04)
+- Detail: every settlement now has the things of daily life — pots, baskets, firewood, ladders, laundry and lanterns by the doors; carts, barrows, beasts (horses, oxen, buffalo, camels, llamas, goats, dogs, hens…) and a few still figures in local dress in the streets; stalls in the market squares; boats along the shores — chosen by each culture's kit. Walls weather (a darker foot, rain streaks, moss on the north side where the climate is damp), lanterns glow at night, and each place has its sounds: water at the shore, birds by day, crickets at night, a town's murmur and knocks, traffic in the modern cities.
+
 ## v8.59 — Modern Sydney (2026-11-04)
 - New settlement: Sydney at the Opera House's opening in 1973 — the shells on their granite podium above the harbour, the Harbour Bridge's steel arch, Circular Quay's wharves and the Cahill Expressway, Australia Square's round tower, the city and the Rocks, the Botanic Garden. Every site on the planet now has a settlement of its own.
 

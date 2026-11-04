@@ -120,7 +120,7 @@ export const GROUNDS = {
   sydney,
 };
 
-export const MODULES = {
+const LOADERS = {
   'ming-suzhou': () => import('./ming-suzhou/index.js'),
   'qing-beijing': () => import('./qing-beijing/index.js'),
   angkor: () => import('./angkor/index.js'),
@@ -179,3 +179,12 @@ export const MODULES = {
   'new-york': () => import('./new-york/index.js'),
   sydney: () => import('./sydney/index.js'),
 };
+
+/** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */
+const RADII = {};
+export const MODULES = Object.fromEntries(Object.entries(LOADERS).map(([id, load]) => [id, async () => {
+  const [mod, life, sites] = await Promise.all([load(), import('../objects/life.js'), import('../planet/sites.js')]);
+  await import('../objects/index.js');
+  RADII[id] ??= sites.SITES.find((s) => s.id === id)?.radius ?? 400;
+  return life.withLife(id, mod, GROUNDS[id], RADII[id]);
+}]));

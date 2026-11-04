@@ -97,7 +97,7 @@ export class Climate {
     if (this.mode === 'cycle') this.utc = (this.utc + dt * 24 / DAY_SECONDS) % 24;
     const acc = { sun: [0, 0, 0], sunColor: [0, 0, 0], zen: [0, 0, 0], hor: [0, 0, 0], fogColor: [0, 0, 0], fog: 0, falloff: 0, clouds: 0, density: 0,
       turb: 0, ray: 0, mie: 0, mieG: 0, exposure: 0, wind: [0, 0], rain: 0, sunFactor: 0, sky: [0, 0, 0], ground: [0, 0, 0], windy: 0,
-      day: 0, moon: [0, 0, 0], moonLight: 0, sunEl: 0 };
+      day: 0, moon: [0, 0, 0], moonLight: 0, sunEl: 0, damp: 0 };
     const up = ctx.up || [0, 1, 0];
     const el = Math.asin(Math.max(-1, Math.min(1, ctx.sun[0] * up[0] + ctx.sun[1] * up[1] + ctx.sun[2] * up[2]))) * 180 / Math.PI;
     const moonEl = Math.asin(Math.max(-1, Math.min(1, ctx.moon[0] * up[0] + ctx.moon[1] * up[1] + ctx.moon[2] * up[2]))) * 180 / Math.PI;
@@ -130,6 +130,7 @@ export class Climate {
       acc.turb += w * c.sky.turbidity * (1 + wx.clouds); acc.ray += w * c.sky.rayleigh; acc.mie += w * c.sky.mie * (1 + wx.fog * 0.3); acc.mieG += w * c.sky.mieG;
       acc.exposure += w * c.exposure; acc.wind[0] += w * c.wind[0] * (1 + 2 * wx.windy); acc.wind[1] += w * c.wind[1] * (1 + 2 * wx.windy);
       acc.rain += w * wx.rain; acc.sunFactor += w * wx.sun; acc.windy += w * wx.windy;
+      acc.damp += w * dampOf(c);
     }
     acc.sun = ctx.sun.slice();
     acc.moon = ctx.moon.slice();
@@ -148,6 +149,7 @@ export class Climate {
     ENV.zenith.value.setRGB(...a.zen);
     ENV.horizon.value.setRGB(...a.hor);
     ENV.fogColor.value.setRGB(...a.fogColor);
+    ENV.damp.value = a.damp;
     // under a roof the haze is the room's own dust and smoke, far thinner than the weather outside
     ENV.fogDensity.value = a.fog * (1 - 0.8 * (this.indoors || 0));
     ENV.fogFalloff.value = a.falloff;
@@ -184,6 +186,12 @@ export class Climate {
   }
 }
 
+/** How damp a climate is (0 desert … 1 wet): its share of rainy weather and its haze. */
+function dampOf(c) {
+  if (c.damp !== undefined) return c.damp;
+  const tot = c.weather.reduce((a, w) => a + w.weight, 0) || 1, rainy = c.weather.reduce((a, w) => a + (w.rain ? w.weight * Math.min(1, w.rain + 0.3) : 0), 0) / tot;
+  return Math.max(0, Math.min(1, rainy * 2.4 + c.fog.density * 300));
+}
 /** Irradiance from the open sky above and the lit ground below, for a climate. */
 export function hemisphere(climate) {
   const sky = [0, 0, 0];

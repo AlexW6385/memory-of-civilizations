@@ -1,0 +1,37 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Objects showroom</title>
+<style>html,body{margin:0;background:#888;overflow:hidden}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.webgpu.js","three/webgpu":"/node_modules/three/build/three.webgpu.js","three/tsl":"/node_modules/three/build/three.tsl.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+// A showroom of the objects of life (src/objects/), lit simply, for tools/showroom.mjs.
+import * as THREE from 'three/webgpu';
+import { buildPlan } from '../src/core/build.js';
+import '../src/objects/index.js';
+import { material } from '../src/engine/materials.js';
+import { ENV } from '../src/engine/env.js';
+const q = new URLSearchParams(location.search);
+const items = JSON.parse(q.get('items'));
+const cols = +(q.get('cols') || 6), gap = +(q.get('gap') || 4);
+const elements = items.map((it, i) => ({ seed: 7 + i * 13, rot: 0.5, ...it, at: [(i % cols) * gap, Math.floor(i / cols) * gap], y: it.y ?? 0 }));
+const plan = { id: 'showroom', style: 'life', origin: [0, 0], base: 0, yaw: 0, elements, rooms: [], bounds: [-50, -50, 50, 50], entrance: { at: [0, 0], facing: 'n' } };
+const built = buildPlan(plan);
+const renderer = new THREE.WebGPURenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight); renderer.toneMapping = THREE.AgXToneMapping; renderer.toneMappingExposure = 1.1;
+document.body.appendChild(renderer.domElement);
+await renderer.init();
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x9fb4c8);
+for (const { mat, geometry } of built.parts) scene.add(new THREE.Mesh(geometry, material(mat)));
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x8a7a62, roughness: 1 }));
+scene.add(ground);
+const sun = new THREE.DirectionalLight(0xfff2dd, 3); sun.position.set(-20, 30, 15); scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xbfd2ea, 0x6b5a45, 1.2));
+ENV.night.value = +(q.get('night') || 0);
+const W = (cols - 1) * gap, H = Math.floor((items.length - 1) / cols) * gap;
+const cam = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 500);
+const [cx, cy, cz] = (q.get('cam') || `${W / 2},${Math.max(W, H) * 0.55 + 2},${H + Math.max(W, H) * 0.75 + 3}`).split(',').map(Number);
+cam.position.set(cx, cy, cz); cam.lookAt(W / 2, 0.6, H / 2);
+await renderer.renderAsync(scene, cam);
+await renderer.renderAsync(scene, cam);
+window.DONE = true;
+</script></body></html>

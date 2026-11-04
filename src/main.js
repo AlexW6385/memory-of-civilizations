@@ -122,6 +122,8 @@ async function main() {
   const music = new Music();
   music.setVolume(settings.music);
   let exposure = 0.55, snap = true, last = performance.now();
+  let placeT = 0;
+  const MODERN = new Set(['new-york', 'sydney', 'london', 'barcelona']);
   const _view = new Vector3();
   const stats = { frames: 0, ms: 0 };
   const rain = new Rain(R.scene, R.camera);
@@ -405,6 +407,23 @@ async function main() {
     const cl = climate.update({ sun: dirToLocal(f, sunPlanet(climate.utc)), moon: dirToLocal(f, moonPlanet(climate.utc)), up: dirToLocal(f, u), zones }, Math.min(dt, 0.25));
     rain.update(dt, cl.rain, outdoors);
     music.ambience(cl.rain, cl.windy, !outdoors);
+    // the sounds of the place, sampled twice a second: water near, a town round, birds by day
+    placeT -= dt;
+    if (placeT <= 0) {
+      placeT = 0.5;
+      let wetN = 0;
+      for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; for (const d of [5, 14]) if (Number.isFinite(world.collide.waterLevel(c.x + Math.cos(a) * d, c.z + Math.sin(a) * d)) && world.collide.waterLevel(c.x + Math.cos(a) * d, c.z + Math.sin(a) * d) > world.collide.terrain(c.x + Math.cos(a) * d, c.z + Math.sin(a) * d)) wetN++; }
+      const inTown = near ? 1 - sm(near.s.S.radius * 0.6, near.s.S.radius + 40, near.r) : 0, modern = near && MODERN.has(near.s.id);
+      const low = Math.max(0, 1 - Math.max(0, c.y - world.collide.terrain(c.x, c.z)) / 60);
+      const rainy = 1 - Math.min(1, cl.rain * 2);
+      music.place({
+        water: Math.min(1, wetN / 6) * low,
+        town: inTown * low * (modern ? 0.4 : 1) * (0.35 + 0.65 * cl.day),
+        traffic: modern ? inTown * low : 0,
+        birds: cl.day * low * rainy * (modern ? 0.25 : 1) * (0.25 + 0.75 * (ENV.damp.value ?? 0.4)),
+        crickets: (1 - cl.day) * low * rainy * (cl.sunEl > -30 ? 1 : 0.6) * (modern ? 0.2 : 1),
+      });
+    }
     // eye adaptation: open up in dark rooms (at most ~3 stops), close down outdoors
     const amb = R.gi.ambientAt(c.x, c.y, c.z);
     const target = cl.exposure * (1 + 2.6 * (1 - cl.day)) * Math.min(8 + 6 * (1 - cl.day), Math.max(1, Math.pow(R.gi.openAmbient() / Math.max(amb, 1e-4), 0.55)));
@@ -460,7 +479,6 @@ async function main() {
     feet: () => ({ ...controls.feet }),
     world, renderer: R, controls, stats, music, climate, mapView,
     ground: (x, z) => world.collide.terrain(x, z),
-    begin,
   };
   window.READY = true;
 }
