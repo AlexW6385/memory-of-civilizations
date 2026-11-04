@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.75 — Beijing's approach (2026-11-04)
+- Detail: the paved ring before the Forbidden City's walls and the approach to the gate are clear of trees; officials and visitors stand in the approach and in the palace's courts.
+
 ## v8.74 — Knossos's walls (2026-11-04)
 - Detail: the palace of Knossos shows its timber frame in the plaster — posts between the red-framed windows — and a painted frieze of blue, red and ochre under the roof's edge, below the horns of consecration.
 

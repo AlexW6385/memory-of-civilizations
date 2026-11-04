@@ -147,7 +147,7 @@ const MARKETS = {
 const PEOPLE = {
   rome: [[-40, -160, 40, -60]], 'chichen-itza': [[-150, -140, 170, 120]], teotihuacan: [[-70, -262, 70, -196], [-18, -190, 18, 380]], tenochtitlan: [[-145, -145, 145, 145]],
   babylon: [[-105, -55, 105, 145]], 'ottoman-istanbul': [[-70, -90, 70, 85]], ur: [[-48, -138, 48, -80]], london: [[-58, -213, 38, -152]],
-  'qing-beijing': [], jerusalem: [[-145, -195, 145, 195, 14]], persepolis: [],
+  'qing-beijing': [[-40, 210, 40, 300], [-60, 128, 60, 172], [-70, 30, 70, 98]], jerusalem: [[-145, -195, 145, 195, 14]], persepolis: [],
 };
 const MARKET = /square|piazza|plaza|market|agora|forum|maidan|bazaar|parvis|court|forecourt|street|dam|rows/i;
 const FLAT = /paving|road|street|field|parterre|garden|park|lawn|water|cells|pavement|plaza|square|flag|carpet|bed\b|floor|ground|court\b|lamp/i;

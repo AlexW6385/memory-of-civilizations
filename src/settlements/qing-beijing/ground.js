@@ -56,6 +56,7 @@ function planting(x, z, p) {
   if (inRect(MOAT.outer, x, z, 3) && !inRect(MOAT.outer, x, z, -0.01)) return { willow: 1.6 };
   if (courtyardAt(x, z)) return hash2(x * 0.05, z * 0.05) < 0.6 ? { elm: 1.2 } : { jujube: 1.6 };
   if (onLane(x, z) || inHouse(x, z, 0.4)) return null;
+  if (inRect(RING, x, z, 8) || inRect(AVENUE, x, z, 30)) return null;                     // the paved ring before the walls and the approach
   if (Math.hypot(x, z) > RADIUS - 28) return { grass: 30 };
   return { grass: 20, elm: 0.05 };
 }
