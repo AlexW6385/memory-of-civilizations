@@ -1,4 +1,5 @@
 // Venice about 1500: San Marco, the campanile, the Doge's Palace, canals and houses in the lagoon.
+import '../../styles/vernacular/houses-med.js';
 import '../../styles/venetian/index.js';
 import '../../styles/vernacular/index.js';
 import sanMarco from './plan.js';

@@ -3,6 +3,7 @@
 //
 // usage: node tools/shot.mjs [--building edfu] [--only name,name] [--size 1280x800] [--time 15.5|cycle]
 //                            [--out shots] [--webgl] [--quality high] [--wait 2500]
+//        node tools/shot.mjs --sites athens,rome --first   (each settlement's first view)
 //        node tools/shot.mjs --pose site,x,y,z,yaw,pitch --name custom   (a settlement's frame, feet)
 //        node tools/shot.mjs --cam site,x,y,z,yaw,pitch --name custom    (free camera in its frame)
 //        node tools/shot.mjs --fly lat,lon,height,yaw,pitch --name custom (camera above a place)
@@ -45,13 +46,15 @@ if (opt('pose') || opt('cam')) {
   const all = JSON.parse(await readFile(join(ROOT, 'tools/viewpoints.json'), 'utf8'));
   const only = opt('only') ? opt('only').split(',') : null;
   for (const v of all.planet || []) {
-    if (opt('building') && opt('building') !== 'planet') continue;
+    if ((opt('building') && opt('building') !== 'planet') || opt('sites')) continue;
     if (only && !only.includes(v.name)) continue;
     views.push({ name: `planet-${v.name}`, fly: v.fly, place: v.place });
   }
+  const sites = opt('sites') ? opt('sites').split(',') : null;
   for (const [site, list] of Object.entries(all.settlements || {})) {
     if (opt('building') && opt('building') !== site) continue;
-    for (const v of list) {
+    if (sites && !sites.includes(site)) continue;
+    for (const v of flag('first') ? list.slice(0, 1) : list) {
       if (only && !only.includes(v.name)) continue;
       views.push({ name: `${site}-${v.name}`, site, world: v.at, yaw: v.yaw, pitch: v.pitch, free: !!v.cam });
     }

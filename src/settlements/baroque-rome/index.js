@@ -1,4 +1,5 @@
 // Baroque Rome about 1670: St Peter's, Bernini's colonnade, the Borgo, Castel Sant'Angelo, the Tiber.
+import '../../styles/vernacular/houses-med.js';
 import '../../styles/baroque/index.js';
 import '../../styles/vernacular/index.js';
 import '../../styles/ming/index.js';

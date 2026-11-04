@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.62 — Town houses and people (2026-11-04)
+- Detail: the houses of Florence, Rome, Venice, Granada, Istanbul and Versailles are rebuilt each in its own manner — Tuscan and Roman stuccoes with stone surrounds, green shutters, shop arches and wide eaves; Venetian reds with funnel chimneys and roof loggias; whitewashed Granada with latticed balconies and flat roofs; Ottoman timber upper storeys with their bays; French limestone with slate roofs, dormers and tall chimneys — tower houses here and there. Figures now have shoulders, arms, hands and faces, and stand in knots talking, sit on benches, squat at their pots and by their stalls. Near houses are drawn in full, far ones simply.
+
 ## v8.61 — Crops and northern trees (2026-11-04)
 - Detail: fields carry their crops — wheat round the Mediterranean, the Near East, Europe and Africa, rice in East, South and Southeast Asia, maize in the Americas; spruce and birch are new species (Norway's slopes are now wooded, Moscow has its birches, the open taiga grows spruce instead of Japanese cedar).
 

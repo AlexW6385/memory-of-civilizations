@@ -285,6 +285,17 @@ export const MATERIALS = {
   lamp_paper:       { clean: true, color: '#b8432c', roughness: 0.8, kind: 'glow', glow: '#ff7a3a', power: 2.2 },
   lamp_white:       { clean: true, color: '#e8dcc0', roughness: 0.8, kind: 'glow', glow: '#ffc27a', power: 2.4 },
   lamp_glass:       { clean: true, color: '#c9c2a8', roughness: 0.2, kind: 'glow', glow: '#ffd08a', power: 3.2 },
+  // Mediterranean and French town houses: shutters, painted stuccoes, pietra serena, painted timber
+  shutter_green:    { color: '#3d5a3e', roughness: 0.7, kind: 'wood' },
+  shutter_brown:    { color: '#5a3c28', roughness: 0.7, kind: 'wood' },
+  shutter_grey:     { color: '#7c8584', roughness: 0.7, kind: 'wood' },
+  stucco_venice:    { color: '#b0573f', roughness: 0.88, kind: 'smooth' },
+  stucco_siena:     { color: '#b9814f', roughness: 0.88, kind: 'smooth' },
+  stucco_pale:      { color: '#dccfb2', roughness: 0.88, kind: 'smooth' },
+  stucco_rome:      { color: '#c88a46', roughness: 0.88, kind: 'smooth' },
+  pietra_serena:    { color: '#8d8e86', roughness: 0.75, kind: 'ashlar', course: 0.4, block: 0.8 },
+  wood_painted:     { color: '#8a5a3a', roughness: 0.8, kind: 'wood' },
+  wood_ochre:       { color: '#a8834a', roughness: 0.8, kind: 'wood' },
   rubber:           { clean: true, color: '#1a1a1a', roughness: 0.9, kind: 'smooth' },
 };
 

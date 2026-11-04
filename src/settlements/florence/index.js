@@ -1,4 +1,5 @@
 // Florence about 1480: the cathedral and its dome, the Baptistery and campanile, the Signoria, the Arno.
+import '../../styles/vernacular/houses-med.js';
 import '../../styles/renaissance/index.js';
 import '../../styles/vernacular/index.js';
 import '../../styles/ming/index.js';

@@ -1,4 +1,5 @@
 // Versailles about 1690: the château, its gardens and canal, the town.
+import '../../styles/vernacular/houses-med.js';
 import '../../styles/classical_fr/index.js';
 import '../../styles/vernacular/index.js';
 import '../../styles/ming/index.js';

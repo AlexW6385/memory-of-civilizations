@@ -224,29 +224,80 @@ function chickens(el, { bag }) {
 }
 
 // ---- figures -----------------------------------------------------------------------------------
-/** figure: { dress ('robe' | 'tunic' | 'trousers' | 'wrap'), cloth, cloth2, skin, hat ('none' | 'cap' | 'turban' | 'straw' | 'veil' | 'brim'), h (height), carry ('none' | 'pot' | 'basket' | 'pole') } — a still figure standing in its place. */
+/** A limb from a to b (3-D), radius r0 at a, r1 at b. */
+function seg(a, b, r0, r1, n = 6) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2], L = Math.hypot(dx, dy, dz) || 1e-6;
+  const g = lathe([[r0, 0], [r1, L], [0.001, L]], n);
+  // turn +y onto the direction a→b
+  const ax = Math.atan2(Math.hypot(dx, dz), dy), ay = Math.atan2(dx, dz);
+  g.rotateX(ax); g.rotateY(ay); g.translate(a[0], a[1], a[2]);
+  return g;
+}
+const ball = (r, n = 10) => lathe(Array.from({ length: 7 }, (_, i) => { const t = i / 6 * Math.PI; return [Math.max(0.001, Math.sin(t) * r), r - Math.cos(t) * r]; }), n);
+/**
+ * figure: { dress ('robe' | 'tunic' | 'trousers' | 'wrap'), cloth, cloth2, skin, hat ('none' | 'cap' | 'turban' |
+ * 'straw' | 'veil' | 'brim'), h (height), carry ('none' | 'pot' | 'basket' | 'pole'), pose ('stand' | 'talk' |
+ * 'sit' | 'squat') } — a still figure in its place, facing −z: shoulders, arms, hands and head; skirts that
+ * hang and flare; feet below.
+ */
 function figure(el, { bag, col }) {
-  const put = placer(el, bag), rand = rng(el.seed), H = el.h ?? 1.6 + rand() * 0.15, k = H / 1.65, c1 = el.cloth ?? 'cloth_white', c2 = el.cloth2 ?? c1, sk = el.skin ?? 'skin_medium', dress = el.dress ?? 'robe';
-  if (dress === 'robe' || dress === 'wrap') put(c1, lz([[0.24 * k, 0], [0.22 * k, 0.5 * k], [0.18 * k, 1.0 * k], [0.2 * k, 1.3 * k], [0.12 * k, 1.42 * k], [0.001, 1.42 * k]], 12));
-  else {
-    for (const s of [-1, 1]) put(dress === 'trousers' ? c2 : sk, at(lz([[0.07 * k, 0], [0.075 * k, 0.8 * k], [0.001, 0.8 * k]], 6), s * 0.09 * k, 0, 0));
-    put(c1, at(lz([[0.22 * k, 0], [0.19 * k, 0.25 * k], [0.18 * k, 0.55 * k], [0.21 * k, 0.65 * k], [0.12 * k, 0.72 * k], [0.001, 0.72 * k]], 12), 0, dress === 'tunic' ? 0.55 * k : 0.72 * k, 0));
+  const put = placer(el, bag), rand = rng(el.seed), H = el.h ?? 1.58 + rand() * 0.18, k = H / 1.65, c1 = el.cloth ?? 'cloth_white', c2 = el.cloth2 ?? c1, sk = el.skin ?? 'skin_medium', dress = el.dress ?? 'robe';
+  const pose = el.pose ?? 'stand', sit = pose === 'sit' || pose === 'squat', drop = pose === 'sit' ? 0.92 * k - 0.47 : pose === 'squat' ? 0.62 * k : 0;
+  const Y = (v) => v * k - drop, sw = 0.19 * k * (dress === 'wrap' ? 0.95 : 1);    // shoulder half-width
+  const flare = 1 + rand() * 0.15;
+  // the lower body: a skirt or robe, or legs
+  if (!sit && (dress === 'robe' || dress === 'wrap')) {
+    put(c1, lz([[0.25 * k * flare, 0], [0.235 * k * flare, 0.08 * k], [0.2 * k, 0.55 * k], [0.165 * k, 0.95 * k], [0.15 * k, 1.0 * k], [0.001, 1.0 * k]], 10));
+    for (const s of [-1, 1]) put('cloth_brown', box(s * 0.08 * k - 0.045, 0, -0.17 * k, s * 0.08 * k + 0.045, 0.06, -0.05 * k));
+  } else if (!sit) {
+    const legC = dress === 'trousers' ? c2 : sk;
+    for (const s of [-1, 1]) { put(legC, seg([s * 0.085 * k, 0.06, 0.01], [s * 0.095 * k, 0.88 * k, 0], 0.055 * k, 0.075 * k, 6)); put('cloth_brown', box(s * 0.085 * k - 0.045, 0, -0.16 * k, s * 0.085 * k + 0.045, 0.07, 0.05 * k)); }
+    if (dress === 'tunic') put(c1, lz([[0.21 * k, 0], [0.19 * k, 0.15 * k], [0.165 * k, 0.4 * k], [0.001, 0.4 * k]], 10).translate(0, 0.6 * k, 0));
+  } else {
+    // seated or squatting: thighs forward, shins down, the skirt over them
+    for (const s of [-1, 1]) {
+      const hip = [s * 0.09 * k, Y(0.92), 0], knee = [s * 0.11 * k, pose === 'sit' ? Y(0.92) : Y(0.98) - 0.25 * k, -0.4 * k], foot = [s * 0.11 * k, 0.04, -0.42 * k];
+      const legC = dress === 'robe' || dress === 'wrap' ? c1 : dress === 'trousers' ? c2 : sk;
+      put(legC, seg(hip, knee, 0.085 * k, 0.07 * k)); put(legC, seg(knee, foot, 0.065 * k, 0.05 * k));
+    }
+    if (dress === 'robe' || dress === 'wrap') put(c1, lz([[0.24 * k, 0], [0.2 * k, 0.12 * k], [0.001, 0.14 * k]], 10).translate(0, Y(0.86), -0.05 * k));
   }
-  // arms hanging, hands; the neck and head
-  for (const s of [-1, 1]) { const g = lz([[0.055 * k, 0], [0.045 * k, 0.6 * k], [0.001, 0.6 * k]], 6); g.rotateX(Math.PI); g.rotateZ(s * 0.12); put(c1, at(g, s * 0.22 * k, 1.36 * k, 0)); put(sk, at(lz([[0.04 * k, 0], [0.045 * k, 0.06 * k], [0.001, 0.1 * k]], 6), s * 0.29 * k, 0.68 * k, 0)); }
-  put(sk, at(lz([[0.05 * k, 0], [0.05 * k, 0.1 * k], [0.001, 0.1 * k]], 6), 0, 1.4 * k, 0));
-  put(sk, at(lz([[0.001, 0], [0.075 * k, 0.04 * k], [0.095 * k, 0.12 * k], [0.085 * k, 0.2 * k], [0.04 * k, 0.25 * k], [0.001, 0.26 * k]], 10), 0, 1.47 * k, 0));
-  const hat = el.hat ?? 'none', hy = 1.47 * k + 0.17 * k;
-  if (hat === 'cap') put(el.hatMat ?? c2, at(lz([[0.1 * k, 0], [0.09 * k, 0.08 * k], [0.001, 0.1 * k]], 10), 0, hy, 0));
-  else if (hat === 'turban') put(el.hatMat ?? 'cloth_white', at(lz([[0.11 * k, 0], [0.12 * k, 0.08 * k], [0.08 * k, 0.15 * k], [0.001, 0.16 * k]], 10), 0, hy - 0.02, 0));
-  else if (hat === 'straw') put('thatch', at(lz([[0.3 * k, 0], [0.06 * k, 0.15 * k], [0.001, 0.18 * k]], 12), 0, hy - 0.02, 0));
-  else if (hat === 'brim') { put(el.hatMat ?? 'cloth_black', at(lz([[0.17 * k, 0], [0.17 * k, 0.015], [0.1 * k, 0.02], [0.09 * k, 0.13 * k], [0.001, 0.13 * k]], 12), 0, hy - 0.02, 0)); }
-  else if (hat === 'veil') put(el.hatMat ?? c1, at(lz([[0.14 * k, -0.25 * k], [0.12 * k, 0], [0.11 * k, 0.1 * k], [0.001, 0.16 * k]], 10), 0, hy - 0.05, 0.01));
-  else put('hair_dark', at(lz([[0.09 * k, 0], [0.07 * k, 0.07 * k], [0.001, 0.1 * k]], 10), 0, hy - 0.06, 0.01));
-  const carry = el.carry ?? 'none';
-  if (carry === 'pot') put('terracotta', at(lz(POTS.water_pot.p.map(([r, y]) => [r * 0.7, y * 0.7])), 0, 1.73 * k, 0));
-  else if (carry === 'basket') put('wicker', at(lz([[0.18, 0], [0.24, 0.18], [0.001, 0.18]], 10), 0, 1.73 * k, 0));
-  else if (carry === 'pole') { put('bamboo_culm', at(lying(0.025, 1.8, 6), 0, 1.38 * k, 0)); for (const s of [-1, 1]) { put('timber', box(s * 0.85 - 0.004, 0.45 * k, -0.004, s * 0.85 + 0.004, 1.38 * k, 0.004)); put('wicker', at(lz([[0.17, 0], [0.22, 0.25], [0.001, 0.25]], 10), s * 0.85, 0.3 * k, 0)); } }
+  // the torso: hips, waist, chest, shoulders
+  put(c1, lz([[0.16 * k, 0], [0.145 * k, 0.12 * k], [0.165 * k, 0.32 * k], [sw * 0.98, 0.47 * k], [sw * 0.75, 0.52 * k], [0.06 * k, 0.56 * k], [0.001, 0.56 * k]], 10).scale(1, 1, 0.72).translate(0, Y(0.88), 0));
+  if (dress === 'robe' && rand() < 0.5) put(c2, box(-0.16 * k, Y(1.0), -0.13 * k, 0.16 * k, Y(1.05), 0.13 * k));   // a sash
+  // the arms: hanging, or one raised in talk, or holding the load
+  const sh = Y(1.38), carry = el.carry ?? 'none';
+  for (const s of [-1, 1]) {
+    const S = [s * sw, sh, 0];
+    let E, Hn;
+    if (carry === 'pot' || carry === 'basket') { E = [s * (sw + 0.06 * k), sh + 0.18 * k, -0.03]; Hn = [s * 0.1 * k, Y(1.75), 0]; if (s > 0) { E = [s * (sw + 0.02), sh - 0.28 * k, 0.02]; Hn = [s * (sw + 0.01), sh - 0.55 * k, -0.02]; } }
+    else if (carry === 'pole') { E = [s * (sw + 0.04), sh - 0.12 * k, -0.18 * k]; Hn = [s * (sw * 0.7), sh + 0.02 * k, -0.28 * k]; }
+    else if (pose === 'talk' && s > 0) { E = [s * (sw + 0.05), sh - 0.26 * k, -0.06 * k]; Hn = [s * (sw * 0.8), sh - 0.22 * k, -0.33 * k]; }
+    else if (sit) { E = [s * (sw + 0.03), sh - 0.27 * k, -0.08 * k]; Hn = [s * 0.12 * k, sh - 0.42 * k, -0.32 * k]; }
+    else { E = [s * (sw + 0.035), sh - 0.29 * k, 0.02]; Hn = [s * (sw + 0.025), sh - 0.56 * k, -0.02 - rand() * 0.04]; }
+    put(c1, seg(S, E, 0.06 * k, 0.05 * k)); put(dress === 'wrap' ? sk : c1, seg(E, Hn, 0.05 * k, 0.042 * k));
+    put(sk, at(ball(0.045 * k, 8).scale(0.8, 1.3, 0.9), Hn[0], Hn[1] - 0.07 * k, Hn[2]));
+  }
+  // neck and head: a skull, the face a little forward, nose, ears; hair or a covering
+  put(sk, seg([0, Y(1.42), 0], [0, Y(1.5), -0.005], 0.048 * k, 0.045 * k));
+  const hy = Y(1.48), hc = [0, hy + 0.11 * k, -0.01];
+  put(sk, at(ball(0.105 * k, 10).scale(0.86, 1.12, 0.98), hc[0], hy, hc[2]));
+  put(sk, at(lz([[0.018 * k, 0], [0.001, 0.035 * k]], 5).rotateX(-Math.PI / 2), 0, hy + 0.1 * k, hc[2] - 0.1 * k));
+  for (const s of [-1, 1]) put(sk, at(ball(0.022 * k, 6).scale(0.5, 1, 1), s * 0.09 * k, hy + 0.11 * k, hc[2] + 0.01));
+  const hat = el.hat ?? 'none', top = hy + 0.235 * k;
+  if (hat === 'cap') put(el.hatMat ?? c2, at(ball(0.1 * k, 8).scale(1, 0.6, 1.02), 0, top - 0.07 * k, hc[2]));
+  else if (hat === 'turban') put(el.hatMat ?? 'cloth_white', at(lz([[0.105 * k, 0], [0.125 * k, 0.05 * k], [0.12 * k, 0.1 * k], [0.08 * k, 0.15 * k], [0.001, 0.16 * k]], 8), 0, top - 0.09 * k, hc[2]));
+  else if (hat === 'straw') put('thatch', at(lz([[0.3 * k, 0], [0.29 * k, 0.012], [0.07 * k, 0.15 * k], [0.001, 0.19 * k]], 10), 0, top - 0.05 * k, hc[2]));
+  else if (hat === 'brim') put(el.hatMat ?? 'cloth_black', at(lz([[0.17 * k, 0], [0.17 * k, 0.012], [0.1 * k, 0.02], [0.095 * k, 0.13 * k], [0.001, 0.135 * k]], 10), 0, top - 0.05 * k, hc[2]));
+  else if (hat === 'veil') { const vm = el.hatMat ?? c1; put(vm, at(ball(0.118 * k, 10).scale(1, 1.06, 1.04), 0, hy - 0.005, hc[2] + 0.03)); put(vm, at(lz([[0.2 * k, 0], [0.14 * k, 0.2 * k], [0.09 * k, 0.3 * k], [0.001, 0.31 * k]], 10).scale(1, 1, 0.8), 0, hy - 0.2 * k, hc[2] + 0.045)); }
+  else put('hair_dark', at(ball(0.108 * k, 10).scale(0.9, 0.75, 1.0), 0, hy + 0.08 * k, hc[2] + 0.012));
+  if (carry === 'pot') put('terracotta', at(lz(POTS.water_pot.p.map(([r, y]) => [r * 0.7, y * 0.7]), 12), 0, top + 0.01, hc[2]));
+  else if (carry === 'basket') put('wicker', at(lz([[0.17, 0], [0.24, 0.18], [0.22, 0.18], [0.15, 0.03], [0.001, 0.03]], 8), 0, top + 0.01, hc[2]));
+  else if (carry === 'pole') {
+    const py = sh + 0.06 * k;
+    put('bamboo_culm', at(lying(0.022, 1.8, 6), 0, py, -0.03));
+    for (const s of [-1, 1]) { for (const d of [-0.06, 0.06]) put('timber', seg([s * 0.86, py, -0.03], [s * 0.86 + d, 0.6 * k, -0.03 + d], 0.004, 0.004, 4)); put('wicker', at(lz([[0.16, 0], [0.22, 0.24], [0.2, 0.24], [0.14, 0.03], [0.001, 0.03]], 8), s * 0.86, 0.36 * k, -0.03)); put(['cloth_green', 'cloth_ochre', 'cloth_red'][Math.floor(rand() * 3)], at(lz([[0.19, 0], [0.1, 0.08], [0.001, 0.1]], 10), s * 0.86, 0.58 * k, -0.03)); }
+  }
   const [x, z] = el.at, y = el.y ?? 0;
   col.circle(x, z, 0.25, y, y + H);
 }

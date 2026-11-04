@@ -8,13 +8,14 @@
 import * as THREE from 'three/webgpu';
 import { buildPlan } from '../src/core/build.js';
 import '../src/objects/index.js';
+import '../src/styles/vernacular/houses-med.js';
 import { material } from '../src/engine/materials.js';
 import { ENV } from '../src/engine/env.js';
 const q = new URLSearchParams(location.search);
 const items = JSON.parse(q.get('items'));
 const cols = +(q.get('cols') || 6), gap = +(q.get('gap') || 4);
-const elements = items.map((it, i) => ({ seed: 7 + i * 13, rot: 0.5, ...it, at: [(i % cols) * gap, Math.floor(i / cols) * gap], y: it.y ?? 0 }));
-const plan = { id: 'showroom', style: 'life', origin: [0, 0], base: 0, yaw: 0, elements, rooms: [], bounds: [-50, -50, 50, 50], entrance: { at: [0, 0], facing: 'n' } };
+const elements = items.map((it, i) => { const x = (i % cols) * gap, z = Math.floor(i / cols) * gap; return it.rect ? { seed: 7 + i * 13, y: 0, foot: -0.3, ...it, rect: [x + it.rect[0], z + it.rect[1], x + it.rect[2], z + it.rect[3]] } : { seed: 7 + i * 13, rot: 0.5, ...it, at: [x, z], y: it.y ?? 0 }; });
+const plan = { id: 'showroom', style: q.get('style') || 'life', origin: [0, 0], base: 0, yaw: 0, elements, rooms: [], bounds: [-50, -50, 50, 50], entrance: { at: [0, 0], facing: 'n' } };
 const built = buildPlan(plan);
 const renderer = new THREE.WebGPURenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight); renderer.toneMapping = THREE.AgXToneMapping; renderer.toneMappingExposure = 1.1;

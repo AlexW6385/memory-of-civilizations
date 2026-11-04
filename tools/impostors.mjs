@@ -38,7 +38,7 @@ for (const s of SITES) {
   } else {
     // a settlement of its own (src/settlements/<id>/): its landmarks and its town
     const mod = await MODULES[s.id]();
-    plans.push(...mod.landmarks.map((l) => l.plan), ...(await mod.town()));
+    plans.push(...mod.landmarks.map((l) => l.plan), ...(await mod.town()).filter((p) => p.style !== 'life' && !p.far));
   }
   // gather triangles: [x, y, z] ×3 and a colour
   const cells = new Map(), verts = [], cols = [], idx = [];

@@ -131,8 +131,10 @@ class Settlement {
     }
     this.group.add(group);
     // the upper surfaces, to land and walk on (roofs, wall tops)
-    built.colliders.tops = await topField(built.parts);
-    this.collide.add(built.colliders);
+    if (!plan.nocollide) {
+      built.colliders.tops = await topField(built.parts);
+      this.collide.add(built.colliders);
+    }
     const rec = { id, plan, music, group, built, settlement: this };
     if (!plan.feature) try { rec.gi = await this.world.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
     this.parts.push(rec);
@@ -407,6 +409,17 @@ export class World {
     if (fs) {
       const L = toLocal(fs.S.frame, camP);
       this.flora.update(L[0], L[2]);
+      // small things (the life of the streets) are drawn only near: each tile within its plan's reach
+      if (!this._nextN || now > this._nextN) {
+        this._nextN = now + 250;
+        const alt = Math.max(0, this.camAlt - (fs.S.base ?? 0));
+        for (const rec of fs.parts || []) {
+          const P = rec.plan;
+          if (!P.near && !P.far) continue;
+          const d = Math.hypot(L[0] - P.center[0], L[2] - P.center[1], alt * 0.7);
+          rec.group.visible = P.near ? d < P.near : d >= P.far;
+        }
+      }
     }
     const here = this.locate(camera.position.x, camera.position.y, camera.position.z);
     if (here.building?.gi) this.r.gi.use(here.building.gi); else this.r.gi.clear?.();

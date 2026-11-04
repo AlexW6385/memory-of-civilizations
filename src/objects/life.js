@@ -186,7 +186,7 @@ export function lifePlans(id, R, landmarks, town, G) {
     if (!LIFE_KINDS.includes(t)) return;
     const el = { t, at: [x, z], y: H(x, z), rot, seed: Math.floor(rand() * 1e9), ...extra };
     if (sub) el.kind = sub;
-    if (t === 'figure') Object.assign(el, dressed(kit, rand));
+    if (t === 'figure') { Object.assign(el, dressed(kit, rand)); if (extra.pose) el.carry = 'none'; }
     els.push(el);
   };
   const sz = (t) => ({ cart: 2.2, stall: 2.2, animal: 1.4, haystack: 1.6, car: 2.6, laundry: 1.8, well: 1, figure: 0.5, bench: 1, firewood: 1, crates: 0.8, ladder: 0.5, street_lamp: 0.4 }[t.split(':')[0]] ?? 0.6);
@@ -206,7 +206,12 @@ export function lifePlans(id, R, landmarks, town, G) {
       for (const f of order) {
         const [nx, nz] = sides[f], off = 0.25 + sz(spec) * 0.7 + rand() * 0.2;
         const x = nx ? (nx > 0 ? x1 + off : x0 - off) : x0 + (x1 - x0) * t, z = nz ? (nz > 0 ? z1 + off : z0 - off) : z0 + (z1 - z0) * t;
-        if (tryPut(spec, x, z, nx ? Math.PI / 2 : 0, {}, 0.7)) break;
+        if (tryPut(spec, x, z, nx ? Math.PI / 2 : 0, {}, 0.7)) {
+          // someone sitting on the bench, or squatting at the pots and baskets
+          if (spec === 'bench' && rand() < 0.45) put('figure', x, z, (nx ? Math.PI / 2 : 0) + (nx > 0 || nz > 0 ? Math.PI : 0), { pose: 'sit' });
+          else if (/^pot|^basket/.test(spec) && rand() < 0.18) { const ox = nx ? nx * 0.9 : 0.9, oz = nz ? nz * 0.9 : 0; tryPut('figure', x + ox, z + oz, Math.atan2(ox, oz), { pose: 'squat' }); }
+          break;
+        }
       }
     }
   }
@@ -217,7 +222,13 @@ export function lifePlans(id, R, landmarks, town, G) {
     if (!h) break;
     const [x0, z0, x1, z1] = h.r, a = rand() * 6.28, d = 3 + rand() * 6, cx = (x0 + x1) / 2 + Math.cos(a) * ((x1 - x0) / 2 + d), cz = (z0 + z1) / 2 + Math.sin(a) * ((z1 - z0) / 2 + d);
     const [spec] = pick(rand, rand() < 0.35 ? kit.door : kit.street);
-    if (tryPut(spec, cx, cz, rand() * 6.28)) k++;
+    if (spec === 'figure' && rand() < 0.45) {
+      // a knot of two or three talking, facing each other
+      const n = 2 + (rand() < 0.35 ? 1 : 0), a0 = rand() * 6.28;
+      let ok = 0;
+      for (let q = 0; q < n; q++) { const a = a0 + q * 6.28 / n, x = cx + Math.cos(a) * 0.55, z = cz + Math.sin(a) * 0.55; if (tryPut('figure', x, z, Math.atan2(x - cx, z - cz), { pose: q === 0 ? 'talk' : 'stand' }, 0.5)) ok++; }
+      if (ok) k++;
+    } else if (tryPut(spec, cx, cz, rand() * 6.28)) k++;
   }
   // the market squares: stalls along their edges, figures among them
   for (const sq of squares) {
@@ -231,7 +242,9 @@ export function lifePlans(id, R, landmarks, town, G) {
       if (!inside(x, z, 20) || !grid.free(box) || wet(x, z) || !flat(x, z, 1.6)) continue;
       els.push({ t: 'stall', at: [x, z], y: H(x, z), rot, seed: Math.floor(rand() * 1e9), awning: kit.awnings[Math.floor(rand() * kit.awnings.length)], goods: kit.stall });
       grid.fill(box, 2);
-      if (rand() < 0.7) tryPut('figure', x + Math.sin(rot) * 2.4, z + Math.cos(rot) * 2.4, rot + Math.PI);
+      // the seller squatting by the stall, a customer in front
+      if (rand() < 0.6) tryPut('figure', x - Math.cos(rot) * 1.9, z + Math.sin(rot) * 1.9, rot + Math.PI, { pose: 'squat' }, 0.5);
+      if (rand() < 0.7) tryPut('figure', x + Math.sin(rot) * 2.4, z + Math.cos(rot) * 2.4, rot + Math.PI, { pose: rand() < 0.5 ? 'talk' : 'stand' });
     }
     for (let k = 0; k < 12; k++) tryPut('figure', x0 + 8 + rand() * (x1 - x0 - 16), z0 + 8 + rand() * (z1 - z0 - 16), rand() * 6.28);
   }
@@ -256,8 +269,11 @@ export function lifePlans(id, R, landmarks, town, G) {
     }
   }
   // as plans of a few hundred objects each
+  // as plans of one 100 m tile each, so that what is out of view or far is not drawn
+  const tiles = new Map();
+  for (const e of els) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   const plans = [];
-  for (let i = 0; i < els.length; i += 300) plans.push({ id: `${id}-life-${i / 300}`, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: els.slice(i, i + 300), rooms: [], bounds: [-R, -R, R, R], entrance: { at: [0, 0], facing: 'n' } });
+  for (const [k, list] of tiles) { const [i, j] = k.split(',').map(Number); plans.push({ id: `${id}-life-${k}`, center: [i * 100 + 50, j * 100 + 50], near: 230, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: list, rooms: [], bounds: [-R, -R, R, R], entrance: { at: [0, 0], facing: 'n' } }); }
   return plans;
 }
 function dressed(kit, rand) {
