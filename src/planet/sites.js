@@ -21,7 +21,7 @@ export const SITES = [
   // ── China ──
   { id: 'tang-wutai', name: { en: 'Tang China', zh: '唐' }, era: '9th c.', region: 'china', lat: 38.95, lon: 113.38, radius: 180,
     legacy: { region: 'tang', center: [250, 330], buildings: ['foguang-east-hall'] } },
-  { id: 'song-kaifeng', name: { en: 'Northern Song Kaifeng', zh: '北宋汴京' }, era: '12th c.', region: 'china', lat: 34.80, lon: 114.31 },
+  { id: 'song-kaifeng', name: { en: 'Northern Song Kaifeng', zh: '北宋汴京' }, era: '12th c.', region: 'china', lat: 34.80, lon: 114.31, radius: 400 },
   { id: 'song-hangzhou', name: { en: 'Southern Song Lin\'an', zh: '南宋临安' }, era: '13th c.', region: 'china', lat: 30.20, lon: 120.13, radius: 400 },
   { id: 'ming-suzhou', name: { en: 'Ming Suzhou', zh: '明代苏州' }, era: '16th c.', region: 'china', lat: 31.32, lon: 120.63, radius: 215 },
   { id: 'qing-beijing', name: { en: 'Ming–Qing Beijing', zh: '明清北京' }, era: '17th c.', region: 'china', lat: 39.92, lon: 116.39, radius: 380 },

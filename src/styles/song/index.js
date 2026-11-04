@@ -4,7 +4,7 @@
 // houses, bridges, canals and boats of the ming style (the Jiangnan building tradition it grew from).
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { lathe, box, fromTriangles, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import '../qing/index.js';
 
@@ -51,15 +51,21 @@ function pagodaOct(el, { bag, col }) {
   col.circle(cx, cz, B.r, y, y + B.h);
   y += B.h;
   el.tiers.forEach((t, i) => {
-    const r = t.r, h = t.h, g = r + 2.4;
+    const r = t.r, h = t.h, gal = el.galleries !== false, g = gal ? r + 2.4 : r + 0.6, coreMat = el.core || 'plaster_white';
     // the core, its doors and windows (doors on the four sides facing the compass, windows on the diagonals)
-    prism(bag, 'plaster_white', ngon(cx, cz, r), ngon(cx, cz, r), y, y + h);
+    prism(bag, coreMat, ngon(cx, cz, r), ngon(cx, cz, r), y, y + h);
     col.circle(cx, cz, r * 0.95, y, y + h);
     const F = ngon(cx, cz, r + 0.03);
     for (let k = 0; k < 8; k++) {
       const a = F[k], b = F[(k + 1) % 8], m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], ux = (b[0] - a[0]), uz = (b[1] - a[1]), L = Math.hypot(ux, uz), w = (k % 2 === 0 ? 0.32 : 0.18) * L, hh = k % 2 === 0 ? Math.min(3, h * 0.45) : 1.2, y0 = k % 2 === 0 ? y + 0.4 : y + h * 0.35;
       const tr = []; beamTris(tr, [m[0] - ux / L * w / 2, y0, m[1] - uz / L * w / 2], [m[0] + ux / L * w / 2, y0, m[1] + uz / L * w / 2], 0.05, hh); bag.add('lacquer_black', fromTriangles(tr));
-      const fr = []; beamTris(fr, [a[0], y + h - 0.6, a[1]], [b[0], y + h - 0.6, b[1]], 0.08, 0.35); bag.add('timber_red', fromTriangles(fr));
+      const fr = []; beamTris(fr, [a[0], y + h - 0.6, a[1]], [b[0], y + h - 0.6, b[1]], 0.08, 0.35); bag.add(el.frame || 'timber_red', fromTriangles(fr));
+    }
+    if (!gal) {
+      prism(bag, coreMat, ngon(cx, cz, r + 0.15), ngon(cx, cz, r + 0.55), y + h - 0.5, y + h + 0.2);
+      octEave(bag, cx, cz, r + 0.3, y + h + 0.7, r + 1.6, y + h - 0.1, 0.35, el.eave || 'tile_dark', coreMat);
+      y += h;
+      return;
     }
     // the gallery: its floor, posts at the corners, the railing
     prism(bag, 'timber', ngon(cx, cz, g), ngon(cx, cz, g), y - 0.35, y);
@@ -77,13 +83,30 @@ function pagodaOct(el, { bag, col }) {
     y += h;
   });
   // the crowning roof and the spire
-  const rt = el.tiers[el.tiers.length - 1].r, R = rt + 3.6;
-  octEave(bag, cx, cz, 0.6, y + 4.2, R, y + 0.2, 0.8);
+  const rt = el.tiers[el.tiers.length - 1].r, R = el.galleries === false ? rt + 1.8 : rt + 3.6;
+  octEave(bag, cx, cz, 0.6, y + (el.galleries === false ? 2.6 : 4.2), R, y + 0.2, 0.8, el.eave || 'tile_dark', el.core && el.galleries === false ? el.core : 'lacquer_red');
   bag.add('gilt_bronze', lathe([[0.5, 0], [0.5, 0.6], [1.0, 0.8], [0.35, 1.2], [0.8, 1.6], [0.3, 2.0], [0.6, 2.4], [0.2, 2.8], [0.45, 3.1], [0.12, 3.6], [0.001, el.spire ?? 4.8]], 12, null, cx, y + 3.8, cz));
+}
+
+/** rainbow_bridge: the timber arch bridge of the Qingming scroll { at, across ('x'|'z': the direction it runs), span, width, rise }: arched ribs of logs, the deck on them following the arch, railings, abutments. */
+function rainbowBridge(el, { bag, col }) {
+  const [cx, cz] = el.at, S = el.span / 2, W = el.width / 2, R = el.rise, alongX = el.across === 'x', N = 14;
+  const P = (s, o, y) => (alongX ? [cx + s, y, cz + o] : [cx + o, y, cz + s]);
+  const yAt = (s) => R * (1 - (s / S) ** 2);
+  for (let k = 0; k < N; k++) {
+    const s0 = -S + 2 * S * k / N, s1 = -S + 2 * S * (k + 1) / N, t = [];
+    const a = P(s0, 0, yAt(s0)), b = P(s1, 0, yAt(s1));
+    beamTris(t, a, b, W, 0.35); bag.add('timber', fromTriangles(t));
+    for (const o of [-W + 0.2, W - 0.2]) { const r = [], q0 = P(s0, o, yAt(s0) + 0.35), q1 = P(s1, o, yAt(s1) + 0.35); beamTris(r, q0, q1, 0.06, 1.0); bag.add('timber_red', fromTriangles(r)); }
+    for (const o of [-W + 0.5, -W / 3, W / 3, W - 0.5]) { const r = [], q0 = P(s0, o, yAt(s0) - 0.7), q1 = P(s1, o, yAt(s1) - 0.7); beamTris(r, q0, q1, 0.18, 0.4); bag.add('timber', fromTriangles(r)); }
+  }
+  for (const s of [-1, 1]) { const q = P(s * (S + 2), 0, 0), r = alongX ? [q[0] - 2, q[2] - W - 0.5, q[0] + 2, q[2] + W + 0.5] : [q[0] - W - 0.5, q[2] - 2, q[0] + W + 0.5, q[2] + 2]; bag.add('granite_block', box(r[0], -3, r[1], r[2], 0.3, r[3])); }
+  const dr = alongX ? 'e' : 's';
+  void dr; void col;
 }
 
 registerStyle('song', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct },
+  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, rainbow_bridge: rainbowBridge },
   objects: {},
 });

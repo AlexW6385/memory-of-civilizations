@@ -199,6 +199,8 @@ export const MATERIALS = {
   // Joseon: dancheong (green-blue painted timber), granite
   paint_dancheong:  { color: '#3e7564', roughness: 0.75, kind: 'smooth' },
   granite_korea:    { color: '#a4a29b', roughness: 0.8, kind: 'ashlar', course: 0.5, block: 1.0 },
+  // Northern Song: the Iron Pagoda's brown glazed brick
+  tile_iron:        { color: '#6a4b35', roughness: 0.35, metalness: 0.05, kind: 'tiles' },
 };
 
 export function albedo(key) {

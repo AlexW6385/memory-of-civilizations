@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.20 — Bianjing (2026-11-03)
+- New settlement: Northern Song Bianjing around 1120 — the slender Iron Pagoda of brown glazed brick rising thirteen storeys in its monastery; the Bian River of the Qingming scroll with its arched timber Rainbow Bridge and grain boats; the city's east wall with the water gate and gate tower; streets of shops, inns and houses.
+
 ## v8.19 — Gyeongbokgung (2026-11-03)
 - New settlement: Hanyang around 1430 — Gyeongbokgung on its axis: Gwanghwamun on its stone base, the inner gates and the bridge over the palace stream, the throne hall on its double terrace in its cloistered court, the inner halls, and Gyeonghoeru standing on 48 stone pillars in its pond; the ministries along the avenue outside the gate; quarters of hanok houses with tiled and thatched roofs in their walled yards.
 

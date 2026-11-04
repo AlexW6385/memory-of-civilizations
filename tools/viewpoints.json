@@ -1723,6 +1723,39 @@
     "pitch": -0.42,
     "cam": true
    }
+  ],
+  "song-kaifeng": [
+   {
+    "name": "pagoda",
+    "at": [
+     160,
+     0.1,
+     -140
+    ],
+    "yaw": 0,
+    "pitch": 0.38
+   },
+   {
+    "name": "bridge",
+    "at": [
+     60,
+     0.1,
+     55
+    ],
+    "yaw": 1.2,
+    "pitch": 0.05
+   },
+   {
+    "name": "air",
+    "at": [
+     200,
+     150,
+     280
+    ],
+    "yaw": 0.4,
+    "pitch": -0.4,
+    "cam": true
+   }
   ]
  }
 }
