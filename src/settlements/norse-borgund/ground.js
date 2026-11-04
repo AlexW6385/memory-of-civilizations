@@ -17,13 +17,13 @@ function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inRect(YARD, x, z, 1) || inBuilding(x, z, 2)) return null;
   const h = height(x, z);
   if (Math.abs(z - riverZ(x)) < RIVER.w / 2 + 5) return { willow: 0.04, grass: 18 };
-  if (h > 8) return { sugi: 0.035, red_pine: 0.02, boulder: 0.004, grass: 10 };        // spruce and pine (stand-ins) on the slopes
+  if (h > 8) return { spruce: 0.5, red_pine: 0.15, birch: 0.05, boulder: 0.01, grass: 10 };   // spruce, Scots pine (red_pine) and birch on the slopes
   if (inFarm(x, z)) return { grass: 10 };
-  return { poplar: 0.002, grass: 24 };                                                    // birches (stand-in) in the meadows
+  return { birch: 0.003, grass: 24 };                                                     // birches in the meadows
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater, rim: RIM,
-  maxDensity: { sugi: 0.035, red_pine: 0.02, willow: 0.04, poplar: 0.002 },
+  maxDensity: { spruce: 0.5, red_pine: 0.15, willow: 0.04, birch: 0.05, boulder: 0.01 },
   climate: {
     sun: { az: 170, el: 40, color: [1.0, 0.95, 0.88], intensity: 3.2, lat: 61, dec: 18, hour: 12 },
     sky: { turbidity: 2.4, rayleigh: 1.1, mie: 0.004, mieG: 0.78, zenith: [0.08, 0.16, 0.42], horizon: [0.62, 0.68, 0.75] },

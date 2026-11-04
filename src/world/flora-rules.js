@@ -168,7 +168,7 @@ export function densities(x, z, place) {
 
 /** The largest density each species can reach (for rejection sampling). */
 export const MAX_DENSITY = { date_palm: 1.2, doum_palm: 0.15, sycamore_fig: 0.06, acacia: 0.08, tamarisk: 0.16, papyrus: 2.2, reeds: 3, halfa: 0.25, boulder: 0.7,
-  stone_pine: 0.17, cypress: 0.05, holm_oak: 0.14, oleander: 0.21, grass: 80, olive: 0.55, aleppo_pine: 0.08, maquis: 0.9, grass_dry: 45, plane_tree: 0.06, fig: 0.08, carob: 0.04, oak: 0.06, elm: 0.03, poplar: 0.13, willow: 0.18, apple: 0.32, chinese_pine: 0.08, arborvitae: 0.02, jujube: 0.07, red_pine: 0.07, sugi: 0.04, maple: 0.05, bamboo: 0.5, teak: 0.07, neem: 0.03, banyan: 0.016 };
+  stone_pine: 0.17, cypress: 0.05, holm_oak: 0.14, oleander: 0.21, grass: 80, olive: 0.55, aleppo_pine: 0.08, maquis: 0.9, grass_dry: 45, plane_tree: 0.06, fig: 0.08, carob: 0.04, oak: 0.06, elm: 0.03, poplar: 0.13, willow: 0.18, apple: 0.32, chinese_pine: 0.08, arborvitae: 0.02, jujube: 0.07, red_pine: 0.07, sugi: 0.04, maple: 0.05, bamboo: 0.5, teak: 0.07, neem: 0.03, banyan: 0.016, spruce: 0.05, birch: 0.06, wheat: 110, rice: 130, maize: 40 };
 
 /** Small plants scattered only near the viewer. */
-export const NEAR_ONLY = new Set(['grass', 'grass_dry']);
+export const NEAR_ONLY = new Set(['grass', 'grass_dry', 'wheat', 'rice', 'maize']);

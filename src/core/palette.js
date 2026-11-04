@@ -49,6 +49,7 @@ export const MATERIALS = {
   bark_grey:        { color: '#7a746a', roughness: 0.9, kind: 'bark' },
   bark_pine:        { color: '#6b4d3a', roughness: 0.95, kind: 'bark', plates: 1 },
   bark_plane:       { color: '#9c9783', roughness: 0.85, kind: 'bark' },            // plane tree: peeling, mottled
+  bark_birch:       { color: '#cfcac0', roughness: 0.85, kind: 'bark', plates: 0 },
   bark_olive:       { color: '#6f6a60', roughness: 0.92, kind: 'bark' },
   bark_redpine:     { color: '#8a5440', roughness: 0.92, kind: 'bark', plates: 1 },   // Japanese red pine: reddish, flaking above
   bamboo_culm:      { color: '#7f8b4d', roughness: 0.55, kind: 'smooth' },

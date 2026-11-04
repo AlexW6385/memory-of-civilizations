@@ -336,6 +336,11 @@ export const SPECIES = {
   oleander: { make: (s, l) => tree({ height: 3, trunk: { r: 0.06, lean: 0.15, fork: 0.15, limbs: 4, gnarl: 0.3 }, crown: { shape: 'round', w: 1.8, h: 1.3, y: 0.6, clumps: 6, cards: 24, card: 0.95, up: 0.1 } }, s, l), foliage: 'oleander', bark: 'bark_dark', scale: [0.7, 1.3], shadow: true, lod: [100, 700] },
   grass: { make: (s, l) => tuft(s, l, { h: 0.38, w: 0.75, cards: 3 }), foliage: 'grass', scale: [0.6, 1.5], shadow: false, lod: [35, 70] },
   grass_dry: { make: (s, l) => tuft(s, l, { h: 0.36, w: 0.7, cards: 3 }), foliage: 'grass_dry', scale: [0.6, 1.5], shadow: false, lod: [35, 70] },
+  spruce: { make: (s, l) => tree({ height: 24, trunk: { r: 0.35, lean: 0.01, fork: 0.12, limbs: 0 }, crown: { shape: 'spindle', w: 3.6, h: 10, y: 0.5, clumps: 18, cards: 40, card: 1.5, up: -0.2, clumpR: 1.5 } }, s, l), foliage: 'sugi', bark: 'bark_dark', scale: [0.7, 1.2], shadow: true, lod: [200, 1800] },
+  birch: { make: (s, l) => tree({ height: 15, trunk: { r: 0.18, lean: 0.05, fork: 0.4, limbs: 5, gnarl: 0.2 }, crown: { shape: 'round', w: 3.2, h: 4.2, y: 0.66, clumps: 11, cards: 38, card: 1.2, up: -0.1 } }, s, l), foliage: 'broad', bark: 'bark_birch', scale: [0.75, 1.2], shadow: true, lod: [170, 1500] },
+  wheat: { make: (s, l) => tuft(s, l, { h: 0.95, w: 0.6, cards: 3 }), foliage: 'grass_dry', scale: [0.85, 1.15], shadow: false, lod: [40, 80] },
+  rice: { make: (s, l) => tuft(s, l, { h: 0.7, w: 0.45, cards: 3 }), foliage: 'grass', scale: [0.85, 1.15], shadow: false, lod: [40, 80] },
+  maize: { make: (s, l) => tuft(s, l, { h: 2.1, w: 0.8, cards: 4 }), foliage: 'reed', scale: [0.85, 1.15], shadow: false, lod: [55, 110] },
   boulder: { make: boulder, bark: 'rock_boulder', scale: [0.4, 2.4], shadow: true, lod: [160, 1000] },
 };
 

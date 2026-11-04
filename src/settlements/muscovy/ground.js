@@ -16,11 +16,11 @@ function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inRect(SQUARE, x, z, 3) || Math.hypot(x - BASIL[0], z - BASIL[1]) < 32 || inLot(x, z, 1)) return null;
   if (inKremlin(x, z, -14) && !inKremlin(x, z, 10)) return null;                     // the wall's zone
   if (Math.abs(z - riverZ(x)) < RIVER.w / 2 + 8) return { willow: 0.04, reeds: 4, grass: 20 };
-  return { poplar: 0.004, apple: 0.01, elm: 0.003, grass: 14 };                         // birches (stand-in), orchards, limes (stand-in)
+  return { birch: 0.004, apple: 0.01, elm: 0.003, grass: 14 };                          // birches, orchards, limes (elm stands in)
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { poplar: 0.004, apple: 0.01, elm: 0.003, willow: 0.04 },
+  maxDensity: { birch: 0.004, apple: 0.01, elm: 0.003, willow: 0.04 },
   climate: {
     sun: { az: 165, el: 42, color: [1.0, 0.95, 0.86], intensity: 3.3, lat: 56, dec: 15, hour: 11.5 },
     sky: { turbidity: 2.6, rayleigh: 1.1, mie: 0.005, mieG: 0.78, zenith: [0.08, 0.16, 0.42], horizon: [0.64, 0.68, 0.74] },

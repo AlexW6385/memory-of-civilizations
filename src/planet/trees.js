@@ -30,7 +30,7 @@ export function mix(g, c) {
   const desert = sm(0.25, 0.12, moist);
   const temperate = Math.max(0, 1 - boreal - tropical - savanna - medit - desert);
   const dense = forest * 1.1 + open * 0.06;
-  add('sugi', dense * boreal * 0.55); add('chinese_pine', dense * boreal * 0.45 + c.rock * 0.03 * (1 - desert));
+  add('spruce', dense * boreal * 0.5); add('birch', (dense + open * 0.3) * boreal * 0.12); add('chinese_pine', dense * boreal * 0.45 + c.rock * 0.03 * (1 - desert));
   add('oak', dense * temperate * 0.45); add('elm', dense * temperate * 0.25); add('willow', temperate * sm(30, 6, n.d) * 0.05); add('poplar', open * temperate * 0.02);
   add('holm_oak', dense * medit * 0.35); add('stone_pine', dense * medit * 0.2); add('aleppo_pine', dense * medit * 0.2); add('cypress', open * medit * 0.03); add('olive', open * medit * 0.06); add('maquis', (open + c.rock) * medit * 0.4);
   add('teak', dense * tropical * 0.45); add('banyan', dense * tropical * 0.06); add('bamboo', dense * tropical * 0.2); add('neem', open * tropical * 0.06);

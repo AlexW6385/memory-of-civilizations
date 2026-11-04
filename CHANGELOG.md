@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.61 — Crops and northern trees (2026-11-04)
+- Detail: fields carry their crops — wheat round the Mediterranean, the Near East, Europe and Africa, rice in East, South and Southeast Asia, maize in the Americas; spruce and birch are new species (Norway's slopes are now wooded, Moscow has its birches, the open taiga grows spruce instead of Japanese cedar).
+
 ## v8.60 — Life in the streets (2026-11-04)
 - Detail: every settlement now has the things of daily life — pots, baskets, firewood, ladders, laundry and lanterns by the doors; carts, barrows, beasts (horses, oxen, buffalo, camels, llamas, goats, dogs, hens…) and a few still figures in local dress in the streets; stalls in the market squares; boats along the shores — chosen by each culture's kit. Walls weather (a darker foot, rain streaks, moss on the north side where the climate is damp), lanterns glow at night, and each place has its sounds: water at the shore, birds by day, crickets at night, a town's murmur and knocks, traffic in the modern cities.
 

@@ -2,6 +2,7 @@
 // GROUNDS: their grounds (ground.js: pure, imported everywhere, the workers included).
 // MODULES: their plans, towns and music (index.js: loaded when the settlement is built).
 
+import { withCrops } from './crops.js';
 import { ground as mingSuzhou } from './ming-suzhou/ground.js';
 import { ground as qingBeijing } from './qing-beijing/ground.js';
 import { ground as angkor } from './angkor/ground.js';
@@ -119,6 +120,9 @@ export const GROUNDS = {
   'new-york': newYork,
   sydney,
 };
+
+// every settlement's fields carry their crop (src/settlements/crops.js)
+for (const [id, G] of Object.entries(GROUNDS)) withCrops(id, G);
 
 const LOADERS = {
   'ming-suzhou': () => import('./ming-suzhou/index.js'),
