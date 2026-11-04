@@ -193,6 +193,9 @@ export const MATERIALS = {
   // Teotihuacan: stucco over rubble, ochre with red panels
   stucco_ochre:     { color: '#b49478', roughness: 0.9, kind: 'smooth' },
   rubble_teo:       { color: '#7d7368', roughness: 0.95, kind: 'ashlar', course: 0.3, block: 0.45 },
+  // Taos: red-brown adobe plaster, peeled vigas
+  adobe_taos:       { color: '#9c7558', roughness: 0.96, kind: 'smooth' },
+  viga:             { color: '#8a7a64', roughness: 0.85, kind: 'wood' },
 };
 
 export function albedo(key) {

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.18 — Taos Pueblo (2026-11-03)
+- New settlement: Taos Pueblo around 1500 — the North and South Houses rising in terraces of adobe rooms to five and four storeys, with ladders, parapets and beam ends; the plaza crossed by Red Willow Creek and its log bridges; round kivas; drying racks; the perimeter wall, with cottonwoods, willows and fields beyond and the land rising toward the mountain.
+
 ## v8.17 — Teotihuacan (2026-11-03)
 - New settlement: Teotihuacan around 400 — the Avenue of the Dead stepped by its cross walls, the Pyramid of the Sun at its full 225 m and 65 m, the Pyramid of the Moon closing the avenue with the platform temples of its plaza, the Ciudadela with the Feathered Serpent Pyramid, and walled apartment compounds round patios, all in the talud-tablero manner.
 
