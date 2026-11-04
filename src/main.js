@@ -257,7 +257,7 @@ async function main() {
   progress.finish();
 
   // interface: the world opens by itself; a click (or a key) starts looking and the music
-  const intro = $('intro'), mapPanel = $('map'), hint = $('click-hint');
+  const intro = $('intro'), mapPanel = $('map');
   intro.classList.add('fading');
   setTimeout(() => { intro.hidden = true; intro.classList.remove('fading'); }, 850);
   // the corner card folds into one button (remembered; folded by default on phones)
@@ -274,13 +274,12 @@ async function main() {
   $('stick').hidden = !controls.touch;
   $('touch-btns').hidden = !controls.touch;
   controls.enabled = true;
-  hint.hidden = controls.touch;
   const panelsOpen = () => !mapPanel.hidden;
-  const begin = () => { music.start(); controls.enabled = true; hint.hidden = true; };
-  canvas.addEventListener('pointerdown', () => { music.start(); if (!panelsOpen()) { controls.enabled = true; controls.lock(); } });
+  // a double click takes the mouse for looking round; Esc gives it back
+  canvas.addEventListener('pointerdown', () => music.start());
+  canvas.addEventListener('dblclick', () => { if (!panelsOpen()) { controls.enabled = true; controls.lock(); } });
   addEventListener('keydown', () => music.start(), { once: true });
   controls.onLockChange = (locked) => {
-    hint.hidden = locked || controls.touch || panelsOpen();
     if (locked) controls.enabled = true;
   };
 
@@ -313,11 +312,9 @@ async function main() {
     mapPanel.hidden = true;
     document.body.classList.remove('panel-open');
     controls.enabled = true;
-    if (!controls.touch) { controls.lock(); hint.hidden = !!document.pointerLockElement; }
   };
   const openPanel = (p) => {
     controls.enabled = false; controls.unlock();
-    hint.hidden = true;
     p.hidden = false;
     document.body.classList.add('panel-open');
     if (p === mapPanel) mapView.open(world.here(controls), heading());
