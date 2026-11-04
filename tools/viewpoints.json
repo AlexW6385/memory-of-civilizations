@@ -2579,6 +2579,29 @@
     "pitch": -0.4,
     "cam": true
    }
+  ],
+  "barcelona": [
+   {
+    "name": "nativity",
+    "at": [
+     250,
+     0.1,
+     -92
+    ],
+    "yaw": 1.5708,
+    "pitch": 0.35
+   },
+   {
+    "name": "air",
+    "at": [
+     300,
+     220,
+     250
+    ],
+    "yaw": 0.9,
+    "pitch": -0.45,
+    "cam": true
+   }
   ]
  }
 }

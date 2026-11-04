@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.53 — Barcelona (2026-11-03)
+- New settlement: Barcelona about 1910 — the Eixample's grid of six-storey blocks with cut corners and iron balconies, plane trees along the streets, the Sagrada Família rising in scaffolding with its Nativity towers and a crane, La Pedrera's waves of stone and the scaled roof of Casa Batlló.
+
 ## v8.52 — Victorian London (2026-11-03)
 - New settlement: Victorian London about 1870 — the Palace of Westminster's long pinnacled river front, the Clock Tower with its four faces and the great Victoria Tower, Westminster Hall and the Abbey, the bridge across the grey Thames, and rows of brick terraces with slate roofs and chimneys under a smoky sky.
 
