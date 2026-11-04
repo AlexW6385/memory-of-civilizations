@@ -66,7 +66,7 @@ export const SITES = [
   { id: 'conques', name: { en: 'Romanesque Rouergue', zh: '罗曼式鲁埃格' }, era: '12th c.', region: 'france', lat: 44.60, lon: 2.40, radius: 360 },
   { id: 'paris', name: { en: 'Gothic Paris', zh: '哥特式巴黎' }, era: '13th c.', region: 'france', lat: 48.85, lon: 2.35, radius: 420 },
   { id: 'granada', name: { en: 'Al-Andalus', zh: '安达卢斯' }, era: '14th c.', region: 'iberia', lat: 37.18, lon: -3.59, radius: 400 },
-  { id: 'florence', name: { en: 'Renaissance Florence', zh: '文艺复兴佛罗伦萨' }, era: '15th c.', region: 'italy', lat: 43.77, lon: 11.26 },
+  { id: 'florence', name: { en: 'Renaissance Florence', zh: '文艺复兴佛罗伦萨' }, era: '15th c.', region: 'italy', lat: 43.77, lon: 11.26, radius: 400 },
   { id: 'venice', name: { en: 'Venice', zh: '威尼斯' }, era: '16th c.', region: 'italy', lat: 45.43, lon: 12.34, water: true },
   { id: 'amsterdam', name: { en: 'Dutch Golden Age', zh: '荷兰黄金时代' }, era: '17th c.', region: 'lowlands', lat: 52.37, lon: 4.89 },
   { id: 'versailles', name: { en: 'French Classicism', zh: '法国古典主义' }, era: '17th c.', region: 'france', lat: 48.80, lon: 2.12, radius: 220 },

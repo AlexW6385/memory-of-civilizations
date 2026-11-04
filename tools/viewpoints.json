@@ -2464,6 +2464,29 @@
     "pitch": -0.4,
     "cam": true
    }
+  ],
+  "florence": [
+   {
+    "name": "piazza",
+    "at": [
+     -150,
+     0.1,
+     -20
+    ],
+    "yaw": -1.2,
+    "pitch": 0.3
+   },
+   {
+    "name": "air",
+    "at": [
+     250,
+     200,
+     250
+    ],
+    "yaw": 0.8,
+    "pitch": -0.4,
+    "cam": true
+   }
   ]
  }
 }

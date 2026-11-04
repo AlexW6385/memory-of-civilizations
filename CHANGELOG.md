@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.48 — Florence (2026-11-03)
+- New settlement: Florence about 1480 — the cathedral with Brunelleschi's great ribbed dome and lantern, Giotto's banded campanile, the octagonal Baptistery, the Palazzo della Signoria's tower over its square and the Loggia, the Ponte Vecchio with its shops over the Arno, and streets of tiled houses.
+
 ## v8.47 — Granada (2026-11-03)
 - New settlement: Nasrid Granada about 1390 — the Alhambra's red walls and towers along its hill, the Court of the Myrtles with its long pool before the tall Comares Tower, the Court of the Lions with its forest of slender columns and the fountain, the Alcazaba at the west end; the white houses of the Albaicín across the Darro.
 
