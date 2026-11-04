@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.12 — Lin'an and the Liuhe Pagoda (2026-11-03)
+- New settlement: Southern Song Lin'an around 1200 — the Liuhe Pagoda, seven storeys of red galleries and upturned eaves on its octagonal base above the Qiantang River, with the temple's halls and the wooded hill behind; the stone flood wall and the river road, boats on the river; a quarter of shophouses and tea houses along a canal that meets the river at its lock.
+
 ## v8.11 — Himeji (2026-11-03)
 - New settlement: Himeji Castle around 1620 — the white keep of five tiers on its stone base atop the hill, its three small keeps and roofed passages, the baileys on curved stone ramparts with walls and turrets, the long gallery, the lord's residence below, the moat with its rampart and gate; the samurai quarter of walled compounds, and across the middle moat a street of merchants' townhouses.
 
