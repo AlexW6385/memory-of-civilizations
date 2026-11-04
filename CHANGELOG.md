@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.76 — People at Angkor (2026-11-04)
+- Detail: people walk the causeway to Angkor Wat and the road along its moat, saffron and ochre among them.
+
 ## v8.75 — Beijing's approach (2026-11-04)
 - Detail: the paved ring before the Forbidden City's walls and the approach to the gate are clear of trees; officials and visitors stand in the approach and in the palace's courts.
 
