@@ -11,7 +11,7 @@ const browser = await chromium.launch({ args: ['--enable-unsafe-webgpu', '--enab
 const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) console.log(m.type(), m.text().slice(0, 300)); });
 page.on('pageerror', (e) => console.log('pageerror', e.message));
-const p = new URLSearchParams({ items: args[0], cols: opt('cols', '6'), gap: opt('gap', '4'), night: opt('night', '0'), style: opt('style', 'life') });
+const p = new URLSearchParams({ items: args[0], cols: opt('cols', '6'), gap: opt('gap', '4'), night: opt('night', '0'), style: opt('style', 'life'), imports: opt('imports', '') });
 if (opt('cam')) p.set('cam', opt('cam'));
 await page.goto(`http://127.0.0.1:${srv.address().port}/tools/showroom.html?${p}`);
 await page.waitForFunction('window.DONE === true', null, { timeout: 600_000 });

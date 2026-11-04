@@ -131,8 +131,13 @@ const KIT_OF = {
   'rapa-nui': 'pacific', maori: 'pacific',
   london: 'industrial', barcelona: 'industrial', 'new-york': 'modern', sydney: 'modern',
 };
+// the great market squares (settlement coordinates), from each settlement's layout
+const MARKETS = {
+  isfahan: [[-70, -280, 70, 240]], athens: [[-285, -230, -165, -115]], 'mamluk-cairo': [[85, -75, 165, 115]], venice: [[-145, -35, 20, 25]],
+  djenne: [[42, -43, 113, 43]], florence: [[5, 115, 105, 200]], paris: [[102, -38, 148, 38]], muscovy: [[-8, -140, 62, 110]], amsterdam: [], cahokia: [[-110, -35, 110, 145]],
+};
 const MARKET = /square|piazza|plaza|market|agora|forum|maidan|bazaar|parvis|court|forecourt|street|dam|rows/i;
-const FLAT = /paving|road|street|field|parterre|garden|park|lawn|water|cells|pavement|plaza|square|flag|carpet|bed\b/i;
+const FLAT = /paving|road|street|field|parterre|garden|park|lawn|water|cells|pavement|plaza|square|flag|carpet|bed\b|floor|ground|court\b|lamp/i;
 const HOUSE = /house|hut|home|insula|siheyuan|hanok|machiya|compound|izba|shop|cottage|_block|skyscraper|dwelling/i;
 const SKIP = /water|paving|park|wall|bridge|viaduct|wharf|fence|field|terrace|platform|road|street|canal|moat|ditch|bank|rim|pool|tank|lake|garden|parterre|ramp|stair|causeway|track|esplanade|precinct|enclosure|palisade|ring|circle|avenue|barrow|mound|cells/i;
 
@@ -157,22 +162,25 @@ const isFull = (plan, R) => TOWN_LANDMARKS.has(plan.id) || (plan.bounds && plan.
 
 /** The plans of a settlement's life, from its landmarks, its townscape and its ground. */
 export function lifePlans(id, R, landmarks, town, G) {
-  const kit = KITS[KIT_OF[id] ?? 'mediterranean'], rand = rng(hash(id)), grid = new Grid(R + 2), houses = [], squares = [];
+  const kit = KITS[KIT_OF[id] ?? 'mediterranean'], rand = rng(hash(id)), grid = new Grid(R + 2), egrid = new Grid(R + 2), houses = [], squares = [];
   // every footprint: whole landmark bounds, the townscape's elements
   for (const plan of [...landmarks, ...town]) {
     if (!isFull(plan, R) && plan.bounds) grid.fill(rectOf(plan, plan.bounds).map((v, i) => v + (i < 2 ? -1 : 1)), 1);
     for (const room of plan.rooms ?? []) if (room.kind === 'open' && room.rect && MARKET.test(room.id ?? '')) squares.push({ rect: rectOf(plan, room.rect), y: room.y ?? 0 });
-    if (!isFull(plan, R)) continue;
+    const full = isFull(plan, R);
     for (const el of plan.elements ?? []) {
       let r = null;
       if (el.rect) r = rectOf(plan, el.rect);
       else if (el.c && el.a && el.b) { const [x, z] = toSettle(plan, el.c[0], el.c[1]), h = Math.max(el.a, el.b); r = [x - h, z - h, x + h, z + h]; }
       else if (el.c && (el.r || el.s)) { const h = (el.r ?? el.s / 2) + 0.5, [x, z] = toSettle(plan, el.c[0], el.c[1]); r = [x - h, z - h, x + h, z + h]; }
-      else if (el.pts) { for (let i = 0; i + 1 < el.pts.length; i++) { const a = toSettle(plan, ...el.pts[i]), b = toSettle(plan, ...el.pts[i + 1]), L = Math.hypot(b[0] - a[0], b[1] - a[1]); for (let t = 0; t <= L; t += 1) { const x = a[0] + (b[0] - a[0]) * t / L, z = a[1] + (b[1] - a[1]) * t / L; grid.fill([x - 3, z - 3, x + 3, z + 3]); } } continue; }
+      else if (el.pts) { for (let i = 0; i + 1 < el.pts.length; i++) { const a = toSettle(plan, ...el.pts[i]), b = toSettle(plan, ...el.pts[i + 1]), L = Math.hypot(b[0] - a[0], b[1] - a[1]); for (let t = 0; t <= L; t += 1) { const x = a[0] + (b[0] - a[0]) * t / L, z = a[1] + (b[1] - a[1]) * t / L; egrid.fill([x - 3, z - 3, x + 3, z + 3]); if (full) grid.fill([x - 3, z - 3, x + 3, z + 3]); } } continue; }
+      else if (el.a && el.b && !el.c) { const a = toSettle(plan, ...el.a), b = toSettle(plan, ...el.b), L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, th = (el.th ?? 1) / 2 + 0.5; for (let t = 0; t <= L; t += 0.5) { const x = a[0] + (b[0] - a[0]) * t / L, z = a[1] + (b[1] - a[1]) * t / L; egrid.fill([x - th, z - th, x + th, z + th]); } continue; }
       if (!r) continue;
       const w = r[2] - r[0], d = r[3] - r[1];
       if (w * d > R * R) continue;                                          // a water or ground sheet over the disc
       if (FLAT.test(el.t)) continue;
+      egrid.fill([r[0] - 0.3, r[1] - 0.3, r[2] + 0.3, r[3] + 0.3]);
+      if (!full) continue;
       grid.fill([r[0] - 0.3, r[1] - 0.3, r[2] + 0.3, r[3] + 0.3]);
       if ((HOUSE.test(el.t) || !SKIP.test(el.t)) && w * d >= 10 && w * d <= 6000 && w > 2 && d > 2) houses.push({ r, front: el.front, y: el.y });
     }
@@ -228,6 +236,9 @@ export function lifePlans(id, R, landmarks, town, G) {
       let ok = 0;
       for (let q = 0; q < n; q++) { const a = a0 + q * 6.28 / n, x = cx + Math.cos(a) * 0.55, z = cz + Math.sin(a) * 0.55; if (tryPut('figure', x, z, Math.atan2(x - cx, z - cz), { pose: q === 0 ? 'talk' : 'stand' }, 0.5)) ok++; }
       if (ok) k++;
+    } else if (kit.stall.length && rand() < 0.07) {
+      // a stall set out in the street, facing the way
+      if (tryPut('stall', cx, cz, Math.round(rand() * 4) * Math.PI / 2, { awning: kit.awnings[Math.floor(rand() * kit.awnings.length)], goods: kit.stall })) k++;
     } else if (tryPut(spec, cx, cz, rand() * 6.28)) k++;
   }
   // the market squares: stalls along their edges, figures among them
@@ -247,6 +258,24 @@ export function lifePlans(id, R, landmarks, town, G) {
       if (rand() < 0.7) tryPut('figure', x + Math.sin(rot) * 2.4, z + Math.cos(rot) * 2.4, rot + Math.PI, { pose: rand() < 0.5 ? 'talk' : 'stand' });
     }
     for (let k = 0; k < 12; k++) tryPut('figure', x0 + 8 + rand() * (x1 - x0 - 16), z0 + 8 + rand() * (z1 - z0 - 16), rand() * 6.28);
+  }
+  // the great market squares: rows of stalls with aisles between, buyers and sellers among them
+  for (const [x0, z0, x1, z1] of MARKETS[id] ?? []) {
+    if (!kit.stall.length) break;
+    let n = 0;
+    const cand = [];
+    for (let z = z0 + 5; z < z1 - 4; z += 9) for (let x = x0 + 4 + (Math.floor(z) % 2) * 3; x < x1 - 4; x += 6.5) cand.push([x, z]);
+    for (let i = cand.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [cand[i], cand[j]] = [cand[j], cand[i]]; }
+    const cap = Math.max(25, Math.min(180, Math.round((x1 - x0) * (z1 - z0) / 380)));
+    for (const [x, z] of cand) {
+      if (n >= cap) break;
+      const px = x + (rand() - 0.5) * 1.5, pz = z + (rand() - 0.5) * 1.5, rot = (Math.floor((z - z0) / 9) % 2) * Math.PI, b = [px - 1.8, pz - 1.4, px + 1.8, pz + 1.4];
+      if (!inside(px, pz, 20) || !egrid.free(b) || !grid.free(b) && false || wet(px, pz) || !flat(px, pz, 1.6)) continue;
+      els.push({ t: 'stall', at: [px, pz], y: H(px, pz), rot, seed: Math.floor(rand() * 1e9), awning: kit.awnings[Math.floor(rand() * kit.awnings.length)], goods: kit.stall });
+      egrid.fill(b, 2); grid.fill(b, 2); n++;
+      if (rand() < 0.5) { const fx = px - Math.cos(rot) * 1.9, fz = pz + Math.sin(rot) * 1.9; if (egrid.free([fx - 0.3, fz - 0.3, fx + 0.3, fz + 0.3])) { put('figure', fx, fz, rot + Math.PI, { pose: 'squat' }); egrid.fill([fx - 0.3, fz - 0.3, fx + 0.3, fz + 0.3], 2); } }
+      for (let q = 0; q < 2; q++) if (rand() < 0.6) { const fx = px + (rand() - 0.5) * 3, fz = pz + Math.cos(rot) * (2.6 + rand() * 1.2), bb = [fx - 0.35, fz - 0.35, fx + 0.35, fz + 0.35]; if (egrid.free(bb)) { put('figure', fx, fz, rot + Math.PI + (rand() - 0.5), { pose: rand() < 0.4 ? 'talk' : 'stand' }); egrid.fill(bb, 2); } }
+    }
   }
   // boats along the shores
   if (kit.boats.length) {

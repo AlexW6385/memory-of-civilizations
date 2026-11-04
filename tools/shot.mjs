@@ -54,6 +54,7 @@ if (opt('pose') || opt('cam')) {
   for (const [site, list] of Object.entries(all.settlements || {})) {
     if (opt('building') && opt('building') !== site) continue;
     if (sites && !sites.includes(site)) continue;
+    if (!SITES.some((s) => s.id === site)) continue;
     for (const v of flag('first') ? list.slice(0, 1) : list) {
       if (only && !only.includes(v.name)) continue;
       views.push({ name: `${site}-${v.name}`, site, world: v.at, yaw: v.yaw, pitch: v.pitch, free: !!v.cam });
@@ -103,7 +104,9 @@ for (const v of views) {
   const t1 = Date.now();
   await page.evaluate(([v]) => (v.fly ? window.palace.fly(...v.fly) : v.place ? window.palace.place(...v.place)
     : v.free ? window.palace.camera(v.site, v.world[0], v.world[1], v.world[2], v.yaw, v.pitch) : window.palace.pose(v.site, v.world[0], v.world[1], v.world[2], v.yaw, v.pitch)), [v]);
-  await page.evaluate((h) => { const c = window.palace.climate; if (Number.isFinite(+h)) { c.hour = +h; c.setTime('held'); } }, opt('time', '15.5'));
+  // the hour: as asked (UTC), or for a settlement's view mid-morning there (10:30 local by its longitude)
+  const site = v.site && SITES.find((s) => s.id === v.site), hour = opt('time') ?? (site ? (((10.5 - site.lon / 15) % 24) + 24) % 24 : 15.5);
+  await page.evaluate((h) => { const c = window.palace.climate; if (Number.isFinite(+h)) { c.hour = +h; c.setTime('held'); } }, String(hour));
   await page.waitForTimeout(wait);
   const file = join(out, `${v.name}.png`);
   await page.screenshot({ path: file, timeout: 600_000 });

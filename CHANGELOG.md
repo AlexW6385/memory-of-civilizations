@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.63 — Markets and Florentine marble (2026-11-04)
+- Detail: the great squares hold markets — rows of stalls with sellers squatting and buyers talking in the Maidan of Isfahan, the Agora, the Rumayla, San Marco, Djenné's market, the Signoria, the parvis of Notre-Dame, Red Square and Cahokia's plaza — and stalls stand here and there in the streets. Florence's cathedral, campanile and Baptistery wear their green, white and pink marble — pilasters, bands, framed panels, tall pointed windows — and the cathedral's front is shown as it stood in 1480, Arnolfo's marble lower third with its portals and niches below the rough wall.
+
 ## v8.62 — Town houses and people (2026-11-04)
 - Detail: the houses of Florence, Rome, Venice, Granada, Istanbul and Versailles are rebuilt each in its own manner — Tuscan and Roman stuccoes with stone surrounds, green shutters, shop arches and wide eaves; Venetian reds with funnel chimneys and roof loggias; whitewashed Granada with latticed balconies and flat roofs; Ottoman timber upper storeys with their bays; French limestone with slate roofs, dormers and tall chimneys — tower houses here and there. Figures now have shoulders, arms, hands and faces, and stand in knots talking, sit on benches, squat at their pots and by their stalls. Near houses are drawn in full, far ones simply.
 

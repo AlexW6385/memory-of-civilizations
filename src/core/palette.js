@@ -60,6 +60,7 @@ export const MATERIALS = {
   verde_antico:     { color: '#3d5747', roughness: 0.28, kind: 'granite' },
   proconnesian:     { color: '#d6d4cf', roughness: 0.35, kind: 'veined', block: 1.6, course: 1.6, colors: ['#dcdad4', '#d2d1cc', '#8a8d91'] },
   revetment_byz:    { color: '#c9c2b4', roughness: 0.25, kind: 'veined', block: 1.05, course: 2.1, colors: ['#ddd6c8', '#c9cdc0', '#d6c3ad', '#c2c0ba', '#77736b'] },
+  marble_pink:      { color: '#c99c8f', roughness: 0.3, kind: 'veined', block: 1.2, course: 1.2, colors: ['#d1a597', '#c08f82', '#e2c8bc'] },
   revetment_green:  { color: '#6f8173', roughness: 0.25, kind: 'veined', block: 1.05, course: 2.1, colors: ['#71877a', '#5f7366', '#e5e2d8'] },
   lead:             { color: '#80868c', roughness: 0.55, metalness: 0.45, kind: 'metal' },
   roof_tile:        { color: '#a65c3d', roughness: 0.85, kind: 'tiles' },

@@ -15,8 +15,11 @@ const q = new URLSearchParams(location.search);
 const items = JSON.parse(q.get('items'));
 const cols = +(q.get('cols') || 6), gap = +(q.get('gap') || 4);
 const elements = items.map((it, i) => { const x = (i % cols) * gap, z = Math.floor(i / cols) * gap; return it.rect ? { seed: 7 + i * 13, y: 0, foot: -0.3, ...it, rect: [x + it.rect[0], z + it.rect[1], x + it.rect[2], z + it.rect[3]] } : { seed: 7 + i * 13, rot: 0.5, ...it, at: [x, z], y: it.y ?? 0 }; });
-const plan = { id: 'showroom', style: q.get('style') || 'life', origin: [0, 0], base: 0, yaw: 0, elements, rooms: [], bounds: [-50, -50, 50, 50], entrance: { at: [0, 0], facing: 'n' } };
-const built = buildPlan(plan);
+for (const st of (q.get('imports') || '').split(',').filter(Boolean)) await import(`../src/styles/${st}/index.js`);
+const groups = new Map();
+for (const e of elements) { const st = e.style || q.get('style') || 'life'; if (!groups.has(st)) groups.set(st, []); groups.get(st).push(e); }
+const built = { parts: [] };
+for (const [st, els] of groups) built.parts.push(...buildPlan({ id: 'showroom-' + st, style: st, origin: [0, 0], base: 0, yaw: 0, elements: els, rooms: [], bounds: [-500, -500, 500, 500], entrance: { at: [0, 0], facing: 'n' } }).parts);
 const renderer = new THREE.WebGPURenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight); renderer.toneMapping = THREE.AgXToneMapping; renderer.toneMappingExposure = 1.1;
 document.body.appendChild(renderer.domElement);
