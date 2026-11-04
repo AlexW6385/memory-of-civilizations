@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.40 — Khajuraho (2026-11-03)
+- New settlement: Khajuraho about 1050 — the Western Group of Chandela temples, each on its high terrace with halls under stepped roofs rising to a sanctum tower clustered with smaller towers like a mountain; the Shivsagar tank; a village among neem and palms.
+
 ## v8.39 — Nara (2026-11-03)
 - New settlement: Nara in 752 — Tōdai-ji with the vast Great Buddha Hall in its corridored court, the Middle and Great South Gates, two seven-storey pagodas in their own courts, the lecture hall and monks' quarters, Wakakusa's grassy slope behind, and the capital's timber houses to the west.
 
