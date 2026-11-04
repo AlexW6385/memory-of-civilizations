@@ -71,12 +71,7 @@ class Progress {
     const p = this.value();
     this.shown = Math.max(this.shown, p);
     this.bar.style.width = `${(this.shown * 100).toFixed(1)}%`;
-    const el = (performance.now() - this.t0) / 1000;
-    let left = null;
-    if (this.prev?.total) left = Math.max(0, (1 - this.shown) * this.prev.total);
-    else if (this.shown > 0.08) left = el / this.shown - el;
-    const tail = left === null ? '' : left < 1.5 ? ` · ${t('left-done')}` : ` · ${t('left-s').replace('{n}', Math.ceil(left))}`;
-    this.text.textContent = `${Math.round(this.shown * 100)}%${tail}`;
+    this.text.textContent = `${Math.round(this.shown * 100)}%`;
   }
   finish() {
     clearInterval(this.timer);
