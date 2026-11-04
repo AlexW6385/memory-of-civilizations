@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.26 — Rapa Nui (2026-11-03)
+- New settlement: Rapa Nui about 1500 — Ahu Tongariki on the shore with its fifteen moai facing inland, some crowned with red topknots; Rano Raraku behind with its crater lake and its quarry of half-cut and buried moai; boat-shaped thatched houses, stone chicken houses and garden walls on the grassy plain; the sea all round.
+
 ## v8.25 — Knossos (2026-11-03)
 - New settlement: Knossos about 1600 BC — the palace of Minos round its Central Court, wings of three and four storeys in ochre plaster over gypsum, porticoes of red columns that widen upward under black capitals, horns of consecration along the roofs, the north entrance under its bastion, the West Court and the stepped theatral area; the town of flat-roofed houses among olive groves.
 

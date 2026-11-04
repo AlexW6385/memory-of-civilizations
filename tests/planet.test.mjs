@@ -30,7 +30,7 @@ test('every site has a place, and the map of Earth goes there and back', () => {
 
 test('built settlements stand apart, on land', () => {
   for (let i = 0; i < BUILT.length; i++) {
-    assert.ok(coastAt(BUILT[i].u) > 0, `${BUILT[i].id}: centre on land`);
+    if (!BUILT[i].site.island) assert.ok(coastAt(BUILT[i].u) > 0, `${BUILT[i].id}: centre on land`);
     for (let j = i + 1; j < BUILT.length; j++) {
       const d = angle(BUILT[i].u, BUILT[j].u) * R;
       assert.ok(d >= spacing(BUILT[i].site, BUILT[j].site) * 0.97, `${BUILT[i].id} – ${BUILT[j].id}: ${Math.round(d)} m apart`);

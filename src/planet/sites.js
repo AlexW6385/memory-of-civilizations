@@ -13,6 +13,7 @@
 // nudge      bearing (degrees) in which a settlement sharing its true place with another is moved
 //            off it by the layout
 // water      stands in or by the water (an island, a lagoon): the layout does not move it onto land
+// island     an island too small for the land map: the settlement's ground makes the land itself
 // legacy     for the ten landmarks built under the previous design: the district of the old
 //            compact city they still use as their local space (src/world/regions.js) — its
 //            region id, the centre of the disc in the old city's coordinates, and the buildings
@@ -93,7 +94,7 @@ export const SITES = [
   { id: 'taos', name: { en: 'The Pueblo', zh: '普韦布洛' }, era: '15th c.', region: 'southwest', lat: 36.44, lon: -105.55, radius: 320 },
   { id: 'new-york', name: { en: 'Modern New York', zh: '现代纽约' }, era: '20th c.', region: 'northeast', lat: 40.75, lon: -73.99 },
   // ── Oceania ──
-  { id: 'rapa-nui', name: { en: 'Rapa Nui', zh: '拉帕努伊' }, era: '15th c.', region: 'polynesia', lat: -27.13, lon: -109.28, water: true },
+  { id: 'rapa-nui', name: { en: 'Rapa Nui', zh: '拉帕努伊' }, era: '15th c.', region: 'polynesia', lat: -27.13, lon: -109.28, water: true, island: true, radius: 320 },
   { id: 'maori', name: { en: 'Māori Aotearoa', zh: '毛利' }, era: '18th c.', region: 'aotearoa', lat: -38.14, lon: 176.25 },
   { id: 'sydney', name: { en: 'Modern Sydney', zh: '现代悉尼' }, era: '20th c.', region: 'australia', lat: -33.86, lon: 151.21 },
 ];

@@ -26,6 +26,7 @@ import { ground as madurai } from './madurai/ground.js';
 import { ground as persepolis } from './persepolis/ground.js';
 import { ground as petra } from './petra/ground.js';
 import { ground as knossos } from './knossos/ground.js';
+import { ground as rapaNui } from './rapa-nui/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -52,6 +53,7 @@ export const GROUNDS = {
   persepolis,
   petra,
   knossos,
+  'rapa-nui': rapaNui,
 };
 
 export const MODULES = {
@@ -79,4 +81,5 @@ export const MODULES = {
   persepolis: () => import('./persepolis/index.js'),
   petra: () => import('./petra/index.js'),
   knossos: () => import('./knossos/index.js'),
+  'rapa-nui': () => import('./rapa-nui/index.js'),
 };
