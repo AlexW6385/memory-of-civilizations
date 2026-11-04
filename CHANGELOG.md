@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.28 — A pā by Lake Rotorua (2026-11-03)
+- New settlement: a Māori pā of the later 18th century — a volcanic hill by the lake cut into terraces, each edged with palisades and fighting stages, carved gateways up the path, the chief's carved house and storehouse on the summit; houses and kūmara pits on the terraces; the open village, gardens and canoes below.
+
 ## v8.27 — Firm roofs, steady surfaces (2026-11-04)
 - Roofs hold you everywhere: the ones that let you fall through (many tiled roofs, palace walls, bridges) now carry you, and you can no longer walk into a roof's slope from the side.
 - No more flickering: faces of two materials in the same plane no longer fight, and distant surfaces stay steady.
