@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.32 — Jerusalem (2026-11-03)
+- Jerusalem is now the city about 700: the Dome of the Rock on the great esplanade raised on its retaining walls, the al-Aqsa mosque at its south end, the Kidron valley with olive groves below, and the city of stone courtyard houses climbing west to the Church of the Holy Sepulchre.
+
 ## v8.31 — Constantinople (2026-11-03)
 - Constantinople is now the city's first hill in 562: Hagia Sophia with the Augustaion and Justinian's column before it, Hagia Eirene, the Baths of Zeuxippus, the Hippodrome, the Great Palace stepping down toward the sea, the colonnaded Mese to the Forum of Constantine and its porphyry column, and houses all round.
 
