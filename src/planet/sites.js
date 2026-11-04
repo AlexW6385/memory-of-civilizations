@@ -70,7 +70,7 @@ export const SITES = [
   { id: 'venice', name: { en: 'Venice', zh: '威尼斯' }, era: '16th c.', region: 'italy', lat: 45.43, lon: 12.34, water: true, island: true, radius: 380 },
   { id: 'amsterdam', name: { en: 'Dutch Golden Age', zh: '荷兰黄金时代' }, era: '17th c.', region: 'lowlands', lat: 52.37, lon: 4.89, radius: 400 },
   { id: 'versailles', name: { en: 'French Classicism', zh: '法国古典主义' }, era: '17th c.', region: 'france', lat: 48.80, lon: 2.12, radius: 420 },
-  { id: 'london', name: { en: 'Victorian London', zh: '维多利亚伦敦' }, era: '19th c.', region: 'britain', lat: 51.50, lon: -0.12 },
+  { id: 'london', name: { en: 'Victorian London', zh: '维多利亚伦敦' }, era: '19th c.', region: 'britain', lat: 51.50, lon: -0.12, radius: 420 },
   { id: 'barcelona', name: { en: 'Art Nouveau Barcelona', zh: '新艺术巴塞罗那' }, era: '20th c.', region: 'iberia', lat: 41.40, lon: 2.17 },
   // ── northern and eastern Europe ──
   { id: 'norse-borgund', name: { en: 'Norse Norway', zh: '北欧挪威' }, era: '12th c.', region: 'scandinavia', lat: 61.05, lon: 7.81 },

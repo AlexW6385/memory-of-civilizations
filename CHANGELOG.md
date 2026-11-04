@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.52 — Victorian London (2026-11-03)
+- New settlement: Victorian London about 1870 — the Palace of Westminster's long pinnacled river front, the Clock Tower with its four faces and the great Victoria Tower, Westminster Hall and the Abbey, the bridge across the grey Thames, and rows of brick terraces with slate roofs and chimneys under a smoky sky.
+
 ## v8.51 — Versailles (2026-11-03)
 - New settlement: Versailles about 1690 — the château's long pale garden front with its wings, the brick-and-stone courts under slate, the water parterre and fountains, the Tapis Vert down to the Apollo fountain and the cross-shaped Grand Canal between dense groves; the town beyond its three avenues.
 
