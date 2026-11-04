@@ -219,13 +219,6 @@ function lane(el, { bag, col }) {
   col.floor(el.rect, el.y ?? 0.02);
 }
 
-/** block: a solid mass { rect, y0, y1, mat } with a walkable top. */
-function block(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect;
-  bag.add(el.mat || 'palace_wall', box(x0, el.y0 - 0.3, z0, x1, el.y1, z1));
-  col.floor(el.rect, el.y1);
-  if (el.y1 - el.y0 > 0.4) col.rect(el.rect, el.y0 - 0.3, el.y1 - 0.31);
-}
 /** pyramid: a pyramidal roof of yellow tiles over a polygon { poly, y, rise, sweep }. */
 function pyramid(el, { bag }) { pyramidRoof(el.poly, el.y, el.rise, el.sweep ?? 0.6, bag, el.mat || 'tile_yellow', el.soffit || 'paint_caihua'); }
 /** rail: a marble balustrade { a, b, y, open: [[from, to], …] }. */
@@ -238,7 +231,7 @@ registerStyle('qing', {
     terrace: withPal(terrace), stairs: withPal(stairs), bronze: withPal(bronze), lane: withPal(lane),
     qing_hall: (el, ctx) => withPal(qingHall)({ ...el, pal: el.pal || IMPERIAL }, ctx),
     palace_wall: (el, ctx) => withPal(palaceWall)({ ...el, pal: { plaster: 'palace_wall', roof: 'tile_yellow', plinth: 'marble' } }, ctx),
-    corner_tower: withPal(cornerTower), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), block: withPal(block), pyramid: withPal(pyramid), rail: withPal(rail),
+    corner_tower: withPal(cornerTower), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail),
   },
   objects: {},
 });

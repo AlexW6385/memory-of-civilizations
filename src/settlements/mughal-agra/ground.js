@@ -1,0 +1,55 @@
+// Mughal Agra — the ground: the level plain of the Yamuna, the riverbank falling to the water on
+// the north; the garden's beds, the town's dusty lanes; cypresses and fruit trees in the garden,
+// neem and peepal in the town; the hazy sky of the north Indian winter.
+
+import { RADIUS, RIVER_Z, TERRACE, GARDEN, inRect, inHouse, smooth as sm } from './layout.js';
+
+function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+const LEVEL = { water: -2.4, bed: -5 };
+function height(x, z) {
+  const r = Math.hypot(x, z);
+  if (r > RADIUS) return 0;
+  let h = 0;
+  if (z < RIVER_Z + 8 && !inRect(TERRACE.rect, x, z, 2)) h = LEVEL.bed + (0 - LEVEL.bed) * sm(RIVER_Z - 10, RIVER_Z + 8, z);
+  if (z < RIVER_Z - 10) h = LEVEL.bed;
+  return h * (1 - sm(RADIUS - 30, RADIUS, r));
+}
+const inRiver = (x, z) => z < RIVER_Z - 4 && !inRect(TERRACE.rect, x, z, 4);
+function cover(x, z, h, ny) {
+  const c = { sand: 0.2, grass: 0, rock: 0, soil: 0, fields: 0, dry: 0.5, warmth: 0.8, red: 0.25, road: 0, snow: 0, forest: 0 };
+  if (z < RIVER_Z + 10) { c.sand = 0.8; c.soil = 0.2; return c; }
+  if (inRect(GARDEN, x, z)) { c.grass = 0.85; c.soil = 0.15; c.dry = 0.2; return c; }
+  if (Math.hypot(x, z) > RADIUS - 28) { c.fields = 0.7; c.grass = 0.3; return c; }
+  c.soil = 0.65; c.sand = 0.25; c.grass = 0.1; c.road = inHouse(x, z, 0.5) ? 0 : 0.4; return c;
+}
+function water(x, z, y) { return inRiver(x, z) && y < LEVEL.water + 0.3; }
+function waterLevel(x, z) { return inRiver(x, z) ? LEVEL.water : -Infinity; }
+function fromWater(x, z) { return z - RIVER_Z; }
+/** Plants per 100 m²: in the garden's quarters cypresses along the paths and fruit trees in the beds (placed by the plan's beds), grass; neem in the town; none on the paths and terraces. */
+function planting(x, z, p) {
+  if (Math.hypot(x, z) > RADIUS - 6 || z < RIVER_Z + 6) return null;
+  if (inRect(GARDEN, x, z)) {
+    const ax = Math.abs(x), az = Math.abs(z);
+    if (ax < 12 || az < 12 || inRect([-150, -148, 150, -138], x, z) || ax > 145 || az > 145) return null;          // the channels' walks
+    const nearWalk = ax < 16 || az < 16 || Math.abs(ax - 75) < 3 || Math.abs(az - 75) < 3;
+    return nearWalk ? { cypress: 1.4, grass: 40 } : { apple: 0.6, grass: 45 };
+  }
+  if (inHouse(x, z, 0.6) || inRect([-172, -262, 172, 232], x, z, 2)) return null;
+  return { neem: 0.06, banyan: 0.01, grass: 15 };
+}
+export const ground = {
+  height, cover, water, waterLevel, planting, fromWater,
+  maxDensity: { cypress: 1.4, apple: 0.6, neem: 0.06, banyan: 0.01 },
+  climate: {
+    sun: { az: 160, el: 40, color: [1.0, 0.93, 0.82], intensity: 3.1, lat: 27, dec: -15, hour: 10.5 },
+    sky: { turbidity: 5, rayleigh: 1.2, mie: 0.007, mieG: 0.82, zenith: [0.13, 0.19, 0.32], horizon: [0.64, 0.62, 0.58] },
+    fog: { color: [0.76, 0.74, 0.7], density: 0.0007, height: 0.012 },
+    exposure: 0.5,
+    wind: [0.3, 0.1],
+    weather: [
+      { id: 'hazy', weight: 3, clouds: 0.2, cloudDensity: 0.35, sun: 0.9, fog: 1.4 },
+      { id: 'clear', weight: 2, clouds: 0.1, cloudDensity: 0.3, sun: 1.0, fog: 1 },
+      { id: 'winter-mist', weight: 1.2, clouds: 0.3, cloudDensity: 0.4, sun: 0.6, fog: 4, fogColor: [0.82, 0.8, 0.77] },
+    ],
+  },
+};

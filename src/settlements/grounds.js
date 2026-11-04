@@ -9,6 +9,7 @@ import { ground as chichenItza } from './chichen-itza/ground.js';
 import { ground as giza } from './giza/ground.js';
 import { ground as djenne } from './djenne/ground.js';
 import { ground as machuPicchu } from './machu-picchu/ground.js';
+import { ground as mughalAgra } from './mughal-agra/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -18,6 +19,7 @@ export const GROUNDS = {
   giza,
   djenne,
   'machu-picchu': machuPicchu,
+  'mughal-agra': mughalAgra,
 };
 
 export const MODULES = {
@@ -28,4 +30,5 @@ export const MODULES = {
   giza: () => import('./giza/index.js'),
   djenne: () => import('./djenne/index.js'),
   'machu-picchu': () => import('./machu-picchu/index.js'),
+  'mughal-agra': () => import('./mughal-agra/index.js'),
 };

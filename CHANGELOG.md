@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.9 — The Taj Mahal (2026-11-03)
+- New settlement: Mughal Agra in 1653 — the Taj Mahal on its marble plinth with the four minarets, the great dome and chhatris, pointed iwans; the red sandstone mosque and its twin; the four-part garden with its water channels, central pool and cypresses; the walled enclosure, the great gate and its forecourt; the bazaar town of Taj Ganj beside the river.
+
 ## v8.8 — Machu Picchu (2026-11-03)
 - New settlement: Machu Picchu, Pachacuti's estate — the town on its saddle between Huayna Picchu and Machu Picchu mountain, fifteen rings of terraces with stairs, the Temple of the Sun on its rock, the Sacred Plaza with the Main Temple and the Temple of the Three Windows, the Intihuatana on its terraced hill, the Main Plaza, houses of granite under ichu thatch, the canyon below in cloud forest (dossier: `docs/settlements/machu-picchu.md`). New style `inca`.
 - Settlements can stand on a height above the open country (no more sea showing in deep valleys).

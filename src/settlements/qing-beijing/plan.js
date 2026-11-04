@@ -27,10 +27,10 @@ E.push({ t: 'palace_wall', a: [38, wz1], b: [wx1, wz1], y: 0, h: WH, th: WT });
 // the Meridian Gate: its base a block of red wall 18 m deep pierced by three passages, the gate
 // hall on top with double eaves (the real gate is U-shaped with towers on its wings; here its centre)
 E.push({ t: 'palace_wall', a: [-38, wz1], b: [38, wz1], y: 0, h: 12, th: 18, gates: gates([[26, 5, 7.5], [38, 6, 8.5], [50, 5, 7.5]]) });
-E.push({ t: 'block', rect: [-38, wz1 - 9, 38, wz1 + 9], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
+E.push({ t: 'block', walk: true, rect: [-38, wz1 - 9, 38, wz1 + 9], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
 E.push({ t: 'qing_hall', rect: [-30, wz1 - 6.5, 30, wz1 + 6.5], y: 12.6, H: 7.5, double: 6, roof: 'xieshan', bays: [9, 5], front: 's', four: true, plat: 0.4 });
 for (const [x, z] of [[wx0, wz0], [wx1, wz0], [wx0, wz1], [wx1, wz1]]) {
-  E.push({ t: 'block', rect: [x - 9, z - 9, x + 9, z + 9], y0: 0, y1: WH, mat: 'palace_wall', solid: true });
+  E.push({ t: 'block', walk: true, rect: [x - 9, z - 9, x + 9, z + 9], y0: 0, y1: WH, mat: 'palace_wall', solid: true });
   E.push({ t: 'corner_tower', c: [x, z], y: WH, s: 1.0 });
 }
 
