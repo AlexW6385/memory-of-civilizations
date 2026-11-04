@@ -42,6 +42,7 @@ import { ground as nara } from './nara/ground.js';
 import { ground as khajuraho } from './khajuraho/ground.js';
 import { ground as babylon } from './babylon/ground.js';
 import { ground as ottomanIstanbul } from './ottoman-istanbul/ground.js';
+import { ground as mamlukCairo } from './mamluk-cairo/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -84,6 +85,7 @@ export const GROUNDS = {
   khajuraho,
   babylon,
   'ottoman-istanbul': ottomanIstanbul,
+  'mamluk-cairo': mamlukCairo,
 };
 
 export const MODULES = {
@@ -127,4 +129,5 @@ export const MODULES = {
   khajuraho: () => import('./khajuraho/index.js'),
   babylon: () => import('./babylon/index.js'),
   'ottoman-istanbul': () => import('./ottoman-istanbul/index.js'),
+  'mamluk-cairo': () => import('./mamluk-cairo/index.js'),
 };

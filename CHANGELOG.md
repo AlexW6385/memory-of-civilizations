@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.43 — Mamluk Cairo (2026-11-03)
+- New settlement: Mamluk Cairo about 1363 — the Madrasa of Sultan Hasan, a cliff of stone with tiers of tall windows, a crenellated crown, the deep portal and the founder's dome between two great minarets; the Citadel walled on its spur across the square; the crowded city of flat-roofed houses.
+
 ## v8.42 — Ottoman Istanbul (2026-11-03)
 - New settlement: Ottoman Istanbul about 1560 — Sinan's Süleymaniye crowning the third hill, its great lead dome rising over half-domes and cascades of smaller domes, four pencil minarets, the domed courtyard; madrasas round it on the terrace; timber houses tumbling down the slopes.
 
