@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.33 — Edfu (2026-11-03)
+- Edfu is now the temple and its town in the 1st century BC: the Temple of Horus inside its high mudbrick enclosure, the birth house before the pylon, the sacred lake, a town of mudbrick houses toward the Nile, palms, reeds and green fields.
+
 ## v8.32 — Jerusalem (2026-11-03)
 - Jerusalem is now the city about 700: the Dome of the Rock on the great esplanade raised on its retaining walls, the al-Aqsa mosque at its south end, the Kidron valley with olive groves below, and the city of stone courtyard houses climbing west to the Church of the Holy Sepulchre.
 
