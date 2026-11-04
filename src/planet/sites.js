@@ -73,7 +73,7 @@ export const SITES = [
   { id: 'london', name: { en: 'Victorian London', zh: '维多利亚伦敦' }, era: '19th c.', region: 'britain', lat: 51.50, lon: -0.12, radius: 420 },
   { id: 'barcelona', name: { en: 'Art Nouveau Barcelona', zh: '新艺术巴塞罗那' }, era: '20th c.', region: 'iberia', lat: 41.40, lon: 2.17, radius: 420 },
   // ── northern and eastern Europe ──
-  { id: 'norse-borgund', name: { en: 'Norse Norway', zh: '北欧挪威' }, era: '12th c.', region: 'scandinavia', lat: 61.05, lon: 7.81 },
+  { id: 'norse-borgund', name: { en: 'Norse Norway', zh: '北欧挪威' }, era: '12th c.', region: 'scandinavia', lat: 61.05, lon: 7.81, radius: 360 },
   { id: 'muscovy', name: { en: 'Muscovy', zh: '莫斯科公国' }, era: '16th c.', region: 'russia', lat: 55.75, lon: 37.62 },
   // ── the Americas ──
   { id: 'teotihuacan', name: { en: 'Teotihuacan', zh: '特奥蒂瓦坎' }, era: '4th c.', region: 'mexico', lat: 19.69, lon: -98.84, radius: 440 },

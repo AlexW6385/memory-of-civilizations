@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.55 — Norse Norway (2026-11-04)
+- New settlement: Borgund about 1250 — the stave church with its raised nave, ambulatory, apse tower, stacked shingle roofs, spire and dragon heads; the bell house and churchyard; eight farms of log buildings under sod, lofts on posts; fields and meadows on the floor of Lærdal, the river, the steep wooded sides.
+
 ## v8.54 — Baroque Rome (2026-11-04)
 - New settlement: Baroque Rome about 1670 — St Peter's with Michelangelo's block, Maderno's front and the ribbed dome, Bernini's oval piazza with its four-deep colonnades and statues, the obelisk and the fountains, the Vatican Palace, the Passetto, Castel Sant'Angelo, the Tiber and its bridge, the Borgo's houses and the Vatican gardens.
 

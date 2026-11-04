@@ -232,6 +232,11 @@ export const MATERIALS = {
   kokowai:          { color: '#7a2d1e', roughness: 0.8, kind: 'wood' },
   raupo:            { color: '#8a7a55', roughness: 1.0, kind: 'bark' },
   palisade:         { color: '#5a4a3a', roughness: 0.95, kind: 'bark' },
+  // Norse Norway: tarred pine staves and shingles, round-log walls, sod roofs
+  tar_shingle:      { color: '#2b221c', roughness: 0.85, kind: 'tiles' },
+  tar_wood:         { color: '#3a2c22', roughness: 0.8, kind: 'wood' },
+  log_pine:         { color: '#7a5a3e', roughness: 0.9, kind: 'wood' },
+  sod:              { color: '#5c6a38', roughness: 1.0, kind: 'bark' },
 };
 
 export function albedo(key) {
