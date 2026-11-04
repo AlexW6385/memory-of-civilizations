@@ -1,0 +1,9 @@
+// The town round the palace (docs/settlements/knossos.md §5): two- and three-storey flat-roofed houses.
+import { RADIUS, lots, height } from './layout.js';
+const base = (id, elements) => ({ id, style: 'minoan', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-100, 0], facing: 'e' } });
+export async function town() {
+  const all = lots(), plans = [];
+  const low = (r) => Math.min(height(r[0], r[1]), height(r[2], r[1]), height(r[0], r[3]), height(r[2], r[3]));
+  for (let i = 0; i < all.length; i += 160) plans.push(base(`knossos-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'minoan_house', simple: true, y: low(l.rect), ...l }))));
+  return plans;
+}

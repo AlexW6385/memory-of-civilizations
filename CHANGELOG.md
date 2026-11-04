@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.25 — Knossos (2026-11-03)
+- New settlement: Knossos about 1600 BC — the palace of Minos round its Central Court, wings of three and four storeys in ochre plaster over gypsum, porticoes of red columns that widen upward under black capitals, horns of consecration along the roofs, the north entrance under its bastion, the West Court and the stepped theatral area; the town of flat-roofed houses among olive groves.
+
 ## v8.24 — Petra (2026-11-03)
 - New settlement: Petra about AD 50 — down the narrow Siq between rock walls to the Khazneh's carved façade; the Outer Siq with its tomb façades and the rock-cut theatre; the valley with the Royal Tombs in its cliff, the colonnaded street, the Great Temple, Qasr al-Bint and houses of rose stone.
 
