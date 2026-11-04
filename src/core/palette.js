@@ -237,6 +237,9 @@ export const MATERIALS = {
   tar_wood:         { color: '#3a2c22', roughness: 0.8, kind: 'wood' },
   log_pine:         { color: '#7a5a3e', roughness: 0.9, kind: 'wood' },
   sod:              { color: '#5c6a38', roughness: 1.0, kind: 'bark' },
+  // Muscovy: the Kremlin's red brick, white stone trim, plank roofs
+  brick_kremlin:    { color: '#8e3e2e', roughness: 0.9, kind: 'mudbrick', course: 0.09, block: 0.3 },
+  planks_grey:      { color: '#6d665c', roughness: 0.95, kind: 'wood' },
 };
 
 export function albedo(key) {

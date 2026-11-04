@@ -55,6 +55,7 @@ import { ground as london } from './london/ground.js';
 import { ground as barcelona } from './barcelona/ground.js';
 import { ground as baroqueRome } from './baroque-rome/ground.js';
 import { ground as norseBorgund } from './norse-borgund/ground.js';
+import { ground as muscovy } from './muscovy/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -110,6 +111,7 @@ export const GROUNDS = {
   barcelona,
   'baroque-rome': baroqueRome,
   'norse-borgund': norseBorgund,
+  muscovy,
 };
 
 export const MODULES = {
@@ -166,4 +168,5 @@ export const MODULES = {
   barcelona: () => import('./barcelona/index.js'),
   'baroque-rome': () => import('./baroque-rome/index.js'),
   'norse-borgund': () => import('./norse-borgund/index.js'),
+  muscovy: () => import('./muscovy/index.js'),
 };

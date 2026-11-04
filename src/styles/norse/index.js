@@ -76,7 +76,7 @@ function bellHouse(el, { bag, col }) {
   for (const f of [-1, 1]) { bag.add('opening', box(x - s * 0.2, y + 4.9, z + f * s * 0.35 - 0.03, x + s * 0.2, y + 6.1, z + f * s * 0.35 + 0.03)); bag.add('opening', box(x + f * s * 0.35 - 0.03, y + 4.9, z - s * 0.2, x + f * s * 0.35 + 0.03, y + 6.1, z + s * 0.2)); }
   bag.add(SH, lathe([[s * 0.65, 0], [0.001, s * 0.9]], 4, null, x, y + 6.4, z));
 }
-/** log_house: { rect, y, foot, kind ('stue' | 'barn' | 'loft'), seed } — round-log walls notched at the corners; sod roofs on dwellings, shingles or boards on the rest; the loft on posts. */
+/** log_house: { rect, y, foot, kind ('stue' | 'barn' | 'loft'), roof (material, optional), seed } — round-log walls notched at the corners; sod roofs on dwellings, shingles or boards on the rest; the loft on posts. */
 function logHouse(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1), kind = el.kind ?? 'stue';
   if (kind === 'loft') {
@@ -96,7 +96,7 @@ function logHouse(el, { bag, col }) {
   const f = rand() < 0.5 ? z0 : z1, sg = f === z0 ? -1 : 1, mx = (x0 + x1) / 2;
   bag.add('opening', box(mx - 0.5, y + 0.4, f + sg * 0.01, mx + 0.5, y + 2.2, f + sg * 0.05));
   if (kind === 'stue') bag.add('opening', box(mx + 1.2, y + 1.3, f + sg * 0.01, mx + 2, y + 2, f + sg * 0.05));
-  const top = gable(bag, kind === 'stue' ? 'sod' : rand() < 0.5 ? 'sod' : SH, el.rect, y + H, kind === 'stue' ? 0.5 : 0.7, 0.45);
+  const top = gable(bag, el.roof ?? (kind === 'stue' ? 'sod' : rand() < 0.5 ? 'sod' : SH), el.rect, y + H, kind === 'stue' ? 0.5 : 0.7, 0.45);
   if (kind === 'stue' && rand() < 0.8) bag.add('rubble', box(mx - 1.6, top - 1.2, (z0 + z1) / 2 - 0.35, mx - 0.9, top + 0.6, (z0 + z1) / 2 + 0.35));
 }
 /** fence: { pts, y, h } — a fence of split staves along a polyline. */
