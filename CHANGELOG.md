@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.17 — Teotihuacan (2026-11-03)
+- New settlement: Teotihuacan around 400 — the Avenue of the Dead stepped by its cross walls, the Pyramid of the Sun at its full 225 m and 65 m, the Pyramid of the Moon closing the avenue with the platform temples of its plaza, the Ciudadela with the Feathered Serpent Pyramid, and walled apartment compounds round patios, all in the talud-tablero manner.
+
 ## v8.16 — Tenochtitlan (2026-11-03)
 - New settlement: Tenochtitlan in 1519 — the Sacred Precinct inside its serpent wall, the Templo Mayor at full size with its twin stairways and the blue and red shrines of Tlaloc and Huitzilopochtli, the round temple of the wind god, smaller pyramids, the ballcourt and the skull rack; Moctezuma's palace; canals with canoes and bridges, white houses round patios, chinampa fields with willows, the lake and the causeway.
 

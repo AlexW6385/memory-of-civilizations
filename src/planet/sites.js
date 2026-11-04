@@ -85,7 +85,7 @@ export const SITES = [
   { id: 'norse-borgund', name: { en: 'Norse Norway', zh: '北欧挪威' }, era: '12th c.', region: 'scandinavia', lat: 61.05, lon: 7.81 },
   { id: 'muscovy', name: { en: 'Muscovy', zh: '莫斯科公国' }, era: '16th c.', region: 'russia', lat: 55.75, lon: 37.62 },
   // ── the Americas ──
-  { id: 'teotihuacan', name: { en: 'Teotihuacan', zh: '特奥蒂瓦坎' }, era: '4th c.', region: 'mexico', lat: 19.69, lon: -98.84, radius: 220 },
+  { id: 'teotihuacan', name: { en: 'Teotihuacan', zh: '特奥蒂瓦坎' }, era: '4th c.', region: 'mexico', lat: 19.69, lon: -98.84, radius: 440 },
   { id: 'chichen-itza', name: { en: 'The Maya', zh: '玛雅' }, era: '10th c.', region: 'yucatan', lat: 20.68, lon: -88.57, radius: 340 },
   { id: 'tenochtitlan', name: { en: 'The Aztecs', zh: '阿兹特克' }, era: '15th c.', region: 'mexico', lat: 19.43, lon: -99.13, radius: 400 },
   { id: 'machu-picchu', name: { en: 'The Inca', zh: '印加' }, era: '15th c.', region: 'andes', lat: -13.16, lon: -72.55, radius: 330 },

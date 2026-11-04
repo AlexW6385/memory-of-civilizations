@@ -190,6 +190,9 @@ export const MATERIALS = {
   // Lalibela: red volcanic tuff, hewn
   tuff_red:         { color: '#8a5a48', roughness: 0.92, kind: 'rock' },
   tuff_hewn:        { color: '#94634f', roughness: 0.88, kind: 'smooth' },
+  // Teotihuacan: stucco over rubble, ochre with red panels
+  stucco_ochre:     { color: '#b49478', roughness: 0.9, kind: 'smooth' },
+  rubble_teo:       { color: '#7d7368', roughness: 0.95, kind: 'ashlar', course: 0.3, block: 0.45 },
 };
 
 export function albedo(key) {
