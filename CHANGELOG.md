@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.14 — Ur (2026-11-03)
+- New settlement: Ur around 2050 BC — the great ziggurat with its three stages, the three stairways meeting at the gatehouse and the shrine on top, on its terrace before the Court of Nanna; the walled sacred precinct with the Giparu and the palace; a town of courtyard houses on narrow lanes; the harbour with its quay, reeds, date palms and boats.
+
 ## v8.13 — Borobudur (2026-11-03)
 - New settlement: Java around 825 — Borobudur at its full 123 m: the terraces with their galleries, balustrades and little stupas, the stairs up the four sides, the three round terraces of 72 latticed stupas and the great stupa at the top; a monastery of open pavilions; hamlets of houses on stilts in palm and bamboo groves among the fields.
 

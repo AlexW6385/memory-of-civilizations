@@ -185,6 +185,8 @@ export const MATERIALS = {
   andesite:         { color: '#6f6d67', roughness: 0.9, kind: 'ashlar', course: 0.32, block: 0.55 },
   andesite_lattice: { color: '#6f6d67', roughness: 0.9, kind: 'lattice', paper: '#262422', cell: 0.42 },
   ijuk:             { color: '#3a332b', roughness: 1.0, kind: 'bark' },
+  // Ur III: baked brick set in bitumen over the mud-brick core
+  brick_baked:      { color: '#8a6a4e', roughness: 0.92, kind: 'mudbrick', course: 0.085, block: 0.3 },
 };
 
 export function albedo(key) {

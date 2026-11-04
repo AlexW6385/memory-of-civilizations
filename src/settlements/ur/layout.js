@@ -1,0 +1,42 @@
+// Ur of the Third Dynasty (c. 2050 BC) — the layout (docs/settlements/ur.md §2): the temenos with
+// the ziggurat on its terrace, the Court of Nanna before it, the Giparu and the palace; a quarter of
+// courtyard houses on lanes round it; the harbour on the west. Pure data. +x east, +z south; the
+// precinct turned so that the ziggurat's front faces our north.
+
+export const RADIUS = 380;
+export const TEMENOS = [-140, -170, 130, 120];
+export const TERRACE = { rect: [-62, -72, 62, 50], y: 2.5 };
+export const COURT = [-50, -140, 50, -78];
+export const GIPARU = [60, 40, 122, 104];
+export const PALACE = [70, -158, 122, -64];
+export const STORES = [-130, 40, -82, 108];
+export const HARBOUR = { rect: [-376, -150, -282, 70], bed: -3, water: -1.2 };
+export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
+export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+export const inHarbour = (x, z) => inRect(HARBOUR.rect, x, z) && Math.hypot(x, z) < RADIUS - 24;
+
+let HOUSES = null;
+/** Courtyard houses of 9–14 m on an irregular grid of lanes 2–4 m wide, outside the temenos and the harbour. */
+export function houses() {
+  if (HOUSES) return HOUSES;
+  HOUSES = [];
+  const rand = rng(2050), S = 16;
+  for (let x = -RADIUS; x < RADIUS; x += S) for (let z = -RADIUS; z < RADIUS; z += S) {
+    const w = 9 + rand() * 5, d = 9 + rand() * 5, ox = (rand() - 0.5) * (S - w - 2), oz = (rand() - 0.5) * (S - d - 2);
+    const cx = x + S / 2 + ox, cz = z + S / 2 + oz, r = [cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2];
+    if (Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) > RADIUS - 24) continue;
+    if (inRect(TEMENOS, cx, cz, w / 2 + 6) || inRect(HARBOUR.rect, cx, cz, w / 2 + 12)) continue;
+    if (Math.abs(cx) < 6 && cz < TEMENOS[1]) continue;               // the street to the north gate
+    if (Math.abs(cz + 20) < 5 && cx > TEMENOS[2]) continue;          // the street to the east gate
+    if (rand() < 0.08) continue;
+    HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6) });
+  }
+  return HOUSES;
+}
+let GRID = null;
+export function inHouse(x, z, m = 0) {
+  if (!GRID) { GRID = new Map(); for (const h of houses()) for (let i = Math.floor((h.rect[0] - 3) / 16); i <= Math.floor((h.rect[2] + 3) / 16); i++) for (let j = Math.floor((h.rect[1] - 3) / 16); j <= Math.floor((h.rect[3] + 3) / 16); j++) { const k = i + ',' + j; if (!GRID.has(k)) GRID.set(k, []); GRID.get(k).push(h); } }
+  const l = GRID.get(Math.floor(x / 16) + ',' + Math.floor(z / 16));
+  return !!l && l.some((h) => inRect(h.rect, x, z, m));
+}

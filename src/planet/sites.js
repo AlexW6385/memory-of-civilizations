@@ -41,7 +41,7 @@ export const SITES = [
   { id: 'angkor', name: { en: 'Khmer Empire', zh: '高棉' }, era: '12th c.', region: 'indochina', lat: 13.41, lon: 103.87, radius: 400 },
   { id: 'borobudur', name: { en: 'Java', zh: '爪哇' }, era: '9th c.', region: 'java', lat: -7.61, lon: 110.20, radius: 380 },
   // ── Mesopotamia and Persia ──
-  { id: 'ur', name: { en: 'Sumer', zh: '苏美尔' }, era: '21st c. BC', region: 'mesopotamia', lat: 30.96, lon: 46.10 },
+  { id: 'ur', name: { en: 'Sumer', zh: '苏美尔' }, era: '21st c. BC', region: 'mesopotamia', lat: 30.96, lon: 46.10, radius: 380 },
   { id: 'babylon', name: { en: 'Babylon', zh: '巴比伦' }, era: '6th c. BC', region: 'mesopotamia', lat: 32.54, lon: 44.42 },
   { id: 'persepolis', name: { en: 'Achaemenid Persia', zh: '阿契美尼德波斯' }, era: '5th c. BC', region: 'persia', lat: 29.93, lon: 52.89 },
   { id: 'isfahan', name: { en: 'Safavid Persia', zh: '萨法维波斯' }, era: '17th c.', region: 'persia', lat: 32.66, lon: 51.68, radius: 420 },
