@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.46 — Stonehenge (2026-11-03)
+- New settlement: Stonehenge about 2500 BC — the sarsen circle with its lintels and the great trilithons inside, the bluestones, the Heel Stone out on the Avenue toward the midsummer sunrise, the white chalk ditch and bank, barrows on the open down, and the builders' thatched houses.
+
 ## v8.45 — Great Zimbabwe (2026-11-03)
 - New settlement: Great Zimbabwe about 1350 — the Great Enclosure's towering curved granite wall with its chevron band, the narrow passage and the conical tower inside; walls winding among the boulders of the Hill Complex; smaller enclosures and round clay houses with thatched cones across the valley.
 

@@ -2418,6 +2418,29 @@
     "pitch": -0.4,
     "cam": true
    }
+  ],
+  "stonehenge": [
+   {
+    "name": "avenue",
+    "at": [
+     45,
+     0.1,
+     -45
+    ],
+    "yaw": -2.356,
+    "pitch": 0.05
+   },
+   {
+    "name": "air",
+    "at": [
+     150,
+     90,
+     150
+    ],
+    "yaw": 0.8,
+    "pitch": -0.4,
+    "cam": true
+   }
   ]
  }
 }
