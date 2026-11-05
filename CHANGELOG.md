@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.11 — The Hall of Supreme Harmony's throne room (2026-11-05)
+- Beijing: the Hall of Supreme Harmony is furnished inside — the inner columns of its grid (the six round the throne gilded, a dragon wound round each), the three-tiered dais in red lacquer edged with gilt and its three stairs, the dragon throne, the seven-leaved gilt screen, bronze cranes and incense burners on the dais, elephants bearing vases before it, the coffered ceiling with gilt bosses, the stepped caisson over the throne with the pearl hanging from it, and a floor of dark polished bricks.
+
 ## v9.10 — Arriving at the best view (2026-11-05)
 - Travelling to a settlement from the map now sets you down where its landmark is seen best: the Taj Mahal down its water channel, Angkor Wat at the end of its causeway, the Ishtar Gate down the Processional Way, the Opera House across the cove with the Harbour Bridge behind, the Phoenix Hall across its pond — chosen by eye for every one of the 57 settlements, instead of a spot worked out automatically that often stood too close, behind a wall or facing a blank side.
 

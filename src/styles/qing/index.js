@@ -9,7 +9,7 @@
 // Builds on the Ming Jiangnan vocabulary (src/styles/ming/), with the palace's materials.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import '../ming/index.js';
 import { rectRoof, pyramidRoof, column, beamTris, flipTris, latticeBay, mingHall, mingPavilion, mingWall, withPal } from '../ming/index.js';
 
@@ -224,6 +224,83 @@ function pyramid(el, { bag }) { pyramidRoof(el.poly, el.y, el.rise, el.sweep ?? 
 /** rail: a marble balustrade { a, b, y, open: [[from, to], …] }. */
 function rail(el, { bag, col }) { balustrade(bag, col, el.a, el.b, el.y, el.open || []); }
 
+/**
+ * throne_hall: the inside of the Hall of Supreme Harmony { rect, y (floor), H (to the ceiling), bays: [n, d],
+ * front }: the inner columns of the grid, the six round the throne gilded and wound with dragons; the
+ * dais of three tiers with its stairs, the dragon throne and the seven-leaved gilt screen behind it;
+ * cranes and incense burners on the dais, elephants bearing vases before it; the caisson above the
+ * throne with the pearl hanging from its dragon; the floor of dark polished "gold bricks".
+ */
+function throneHall(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, H = el.H, [nb, nd] = el.bays, cx = (x0 + x1) / 2;
+  const bx = (x1 - x0) / nb, bz = (z1 - z0) / nd;
+  bag.add('marble_dark', box(x0 + 0.3, y + 0.01, z0 + 0.3, x1 - 0.3, y + 0.03, z1 - 0.3));
+  // the throne's place: the back (north) middle bays
+  const tz = z0 + bz * 1.2, tw = bx * 1.6, td = bz * 0.95;
+  for (let i = 1; i < nb; i++) for (let j = 1; j < nd; j++) {
+    const x = x0 + i * bx, z = z0 + j * bz;
+    if (Math.abs(x - cx) < tw + 0.3 && Math.abs(z - tz) < td + 0.3) continue;
+    const gilt = Math.abs(x - cx) < bx * 1.6 && j <= 3;
+    column(bag, col, x, z, y, H - 0.2, 1.0, gilt ? 'gilt_bronze' : 'lacquer_red');
+    if (gilt) {                                       // the dragon wound round the column: its body a spiral rod, its head near the top
+      const pts = []; for (let k = 0; k <= 28; k++) { const a = k * 0.45, yy = y + 1.0 + k * (H - 3.2) / 28; pts.push([x + Math.cos(a) * 0.56, yy, z + Math.sin(a) * 0.56]); }
+      for (let k = 0; k < 28; k++) bag.add('gilt_bronze', rod(pts[k], pts[k + 1], 0.13 + 0.05 * Math.sin(k * 0.3), 6));
+      const hd = pts[28]; bag.add('gilt_bronze', lathe([[0.001, -0.3], [0.24, -0.15], [0.26, 0.15], [0.001, 0.35]], 8, null, hd[0], hd[1], hd[2]));
+    }
+  }
+  // the dais: three tiers of red lacquer edged with gilt, stairs on the front and sides
+  let dy = y;
+  for (const [hw, hd, h] of [[tw, td, 0.55], [tw - 0.9, td - 0.6, 0.55], [tw - 1.8, td - 1.2, 0.5]]) {
+    const r = [cx - hw, tz - hd, cx + hw, tz + hd];
+    bag.add('lacquer_red', box(r[0], dy, r[1], r[2], dy + h - 0.08, r[3]));
+    bag.add('gilt_bronze', box(r[0] - 0.05, dy + h - 0.08, r[1] - 0.05, r[2] + 0.05, dy + h, r[3] + 0.05));
+    col.rect(r, dy, dy + h); col.floor(r, dy + h);
+    dy += h;
+  }
+  const front = tz + td;
+  for (const sx of [-2.2, 0, 2.2]) for (let k = 0; k < 6; k++) {
+    const zz = front + 1.4 - k * 0.25, yy = y + (k + 1) * (dy - y) / 6;
+    bag.add('lacquer_red', box(cx + sx - 0.8, y, zz - 0.25, cx + sx + 0.8, yy, zz));
+  }
+  // the throne: seat, arms, back with the dragon crest, all gilt over red
+  const sy = dy, sz = tz - 0.3;
+  bag.add('gilt_bronze', box(cx - 1.0, sy, sz - 0.6, cx + 1.0, sy + 0.55, sz + 0.5));
+  bag.add('lacquer_red', box(cx - 0.85, sy + 0.55, sz - 0.5, cx + 0.85, sy + 0.62, sz + 0.4));
+  for (const s2 of [-1, 1]) bag.add('gilt_bronze', box(cx + s2 * 0.95 - 0.12, sy + 0.55, sz - 0.5, cx + s2 * 0.95 + 0.12, sy + 1.1, sz + 0.4));
+  bag.add('gilt_bronze', box(cx - 1.0, sy + 0.55, sz - 0.7, cx + 1.0, sy + 2.0, sz - 0.5));
+  for (let k = 0; k < 5; k++) bag.add('gilt_bronze', lathe([[0.001, 0], [0.12, 0.08], [0.06, 0.3], [0.001, 0.35]], 6, null, cx - 0.8 + k * 0.4, sy + 2.0, sz - 0.6));
+  // the screen behind: seven leaves, the middle tallest, gilt, with a carved cresting
+  for (let k = -3; k <= 3; k++) {
+    const w = 0.85, h = 3.6 - Math.abs(k) * 0.35, xx = cx + k * w;
+    bag.add('gilt_bronze', box(xx - w / 2 + 0.02, sy, sz - 1.25, xx + w / 2 - 0.02, sy + h, sz - 1.1));
+    bag.add('lacquer_red', box(xx - w / 2 + 0.12, sy + 0.4, sz - 1.1, xx + w / 2 - 0.12, sy + h - 0.5, sz - 1.07));
+    bag.add('gilt_bronze', lathe([[0.001, 0], [w * 0.4, 0.05], [w * 0.2, 0.35], [0.001, 0.55]], 4, null, xx, sy + h, sz - 1.17));
+  }
+  // on the dais: cranes and incense burners in pairs; before it, elephants with vases on their backs
+  for (const s2 of [-1, 1]) {
+    const xx = cx + s2 * (tw - 2.4);
+    bag.add('bronze', lathe([[0.001, 0], [0.22, 0.05], [0.28, 0.5], [0.2, 0.8], [0.06, 1.1], [0.05, 1.6], [0.1, 1.7], [0.001, 1.75]], 10, null, xx, dy, tz + 0.6));     // crane
+    bag.add('bronze', lathe([[0.3, 0], [0.45, 0.4], [0.4, 0.7], [0.18, 0.8], [0.3, 1.0], [0.001, 1.3]], 10, null, xx + s2 * 0.9, dy, tz - 0.4));                       // burner
+    const ex = cx + s2 * (tw + 1.6), ez = front - 1.2;
+    bag.add('gilt_bronze', box(ex - 0.45, y, ez - 0.25, ex + 0.45, y + 0.35, ez + 0.25));
+    bag.add('bronze', box(ex - 0.4, y + 0.85, ez - 0.7, ex + 0.4, y + 1.6, ez + 0.7));
+    for (const [lx, lz] of [[-0.25, -0.5], [0.25, -0.5], [-0.25, 0.5], [0.25, 0.5]]) bag.add('bronze', box(ex + lx - 0.12, y + 0.35, ez + lz - 0.12, ex + lx + 0.12, y + 0.9, ez + lz + 0.12));
+    bag.add('bronze', box(ex - 0.25, y + 1.1, ez + 0.7, ex + 0.25, y + 1.6, ez + 1.05));
+    bag.add('gilt_bronze', lathe([[0.15, 0], [0.3, 0.3], [0.14, 0.7], [0.2, 0.8], [0.001, 0.82]], 10, null, ex, y + 1.6, ez));
+    col.rect([ex - 0.5, ez - 0.8, ex + 0.5, ez + 1.1], y, y + 2.4);
+  }
+  // the coffered ceiling: a grid of ribs painted green and blue with gilt bosses at the crossings
+  const cyy = y + H - 0.2, nx = Math.round((x1 - x0) / 1.6), nz = Math.round((z1 - z0) / 1.6);
+  for (let i = 1; i < nx; i++) { const x = x0 + i * (x1 - x0) / nx; bag.add('paint_caihua', box(x - 0.08, cyy - 0.22, z0 + 0.2, x + 0.08, cyy - 0.02, z1 - 0.2)); }
+  for (let j = 1; j < nz; j++) { const z = z0 + j * (z1 - z0) / nz; bag.add('paint_caihua', box(x0 + 0.2, cyy - 0.2, z - 0.08, x1 - 0.2, cyy - 0.04, z + 0.08)); }
+  for (let i = 1; i < nx; i += 2) for (let j = 1; j < nz; j += 2) { const x = x0 + i * (x1 - x0) / nx, z = z0 + j * (z1 - z0) / nz; bag.add('gilt_bronze', box(x - 0.18, cyy - 0.26, z - 0.18, x + 0.18, cyy - 0.2, z + 0.18)); }
+  // the caisson over the throne: stepped frames rising, the dragon's pearl hanging from the middle
+  const cy = y + H - 0.2;
+  for (let k = 0; k < 4; k++) { const r = 2.6 - k * 0.55; bag.add('gilt_bronze', box(cx - r, cy - 0.9 + k * 0.2, tz - r, cx + r, cy - 0.7 + k * 0.2, tz - r + 0.3)); bag.add('gilt_bronze', box(cx - r, cy - 0.9 + k * 0.2, tz + r - 0.3, cx + r, cy - 0.7 + k * 0.2, tz + r)); bag.add('gilt_bronze', box(cx - r, cy - 0.9 + k * 0.2, tz - r, cx - r + 0.3, cy - 0.7 + k * 0.2, tz + r)); bag.add('gilt_bronze', box(cx + r - 0.3, cy - 0.9 + k * 0.2, tz - r, cx + r, cy - 0.7 + k * 0.2, tz + r)); }
+  bag.add('gilt_bronze', lathe([[0.03, 0], [0.03, 1.2]], 6, null, cx, cy - 1.9, tz));
+  bag.add('gilt_bronze', lathe([[0.001, -0.35], [0.3, -0.2], [0.35, 0], [0.3, 0.2], [0.001, 0.35]], 12, null, cx, cy - 2.2, tz));
+}
+
 registerStyle('qing', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
@@ -231,7 +308,7 @@ registerStyle('qing', {
     terrace: withPal(terrace), stairs: withPal(stairs), bronze: withPal(bronze), lane: withPal(lane),
     qing_hall: (el, ctx) => withPal(qingHall)({ ...el, pal: el.pal || IMPERIAL }, ctx),
     palace_wall: (el, ctx) => withPal(palaceWall)({ ...el, pal: { plaster: 'palace_wall', roof: 'tile_yellow', plinth: 'marble' } }, ctx),
-    corner_tower: withPal(cornerTower), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail),
+    corner_tower: withPal(cornerTower), throne_hall: (el, ctx) => withPal(throneHall)({ ...el, pal: el.pal || IMPERIAL }, ctx), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail),
   },
   objects: {},
 });

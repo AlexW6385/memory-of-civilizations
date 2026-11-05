@@ -95,6 +95,7 @@ for (const s of [-1, 1]) {
 // ── the Three Great Halls ──
 const th = HALLS.taihe, zh = HALLS.zhonghe, bh = HALLS.baohe;
 E.push({ t: 'qing_hall', rect: th.rect, y: th.y, H: 9.2, double: 7.5, roof: 'hip', bays: [11, 5], front: 's', four: false, plat: 0.5, eave: 2.2, sweep: 0.55 });
+E.push({ t: 'throne_hall', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5] });
 E.push({ t: 'qing_hall', rect: zh.rect, y: zh.y, H: 6.4, roof: 'none', bays: [5, 5], front: 's', four: true, plat: 0.4 });
 E.push({ t: 'pyramid', poly: [[zh.rect[0] - 2, zh.rect[1] - 2], [zh.rect[2] + 2, zh.rect[1] - 2], [zh.rect[2] + 2, zh.rect[3] + 2], [zh.rect[0] - 2, zh.rect[3] + 2]], y: zh.y + 6.2, rise: 9, sweep: 0.6 });
 E.push({ t: 'qing_hall', rect: bh.rect, y: bh.y, H: 7.6, double: 6, roof: 'xieshan', bays: [9, 5], front: 's', four: false, plat: 0.4, eave: 1.9 });
