@@ -344,6 +344,19 @@ function make(spec) {
       m.roughnessNode = float(0.2);
       break;
     }
+    case 'daylight': {
+      // a window seen from inside, glazed clear in a plaster grille of round panes (the Ottoman
+      // revzen): the panes lit by the sky behind them, the grille dark against it
+      const along = dot(P.xz, vec2(0.7071, 0.7071));
+      const g = vec2(along, P.y).mul(3.5);
+      const f = fract(g).sub(0.5);
+      const pane = smoothstep(0.36, 0.3, length(f)).mul(float(1).sub(smoothstep(0.3, 0.8, fwidth(g.x).add(fwidth(g.y)))).mul(0.6).add(0.4));
+      const light = ENV.horizon.mul(1.1).add(ENV.zenith.mul(0.8)).add(ENV.sunColor.mul(0.03));
+      m.colorNode = vec3(0.55, 0.53, 0.48).mul(float(1).sub(pane));
+      m.emissiveNode = light.mul(pane).mul(vec3(1.0, 0.97, 0.9));
+      m.roughnessNode = float(0.3);
+      break;
+    }
     case 'fleur': {
       // painted stone: a ground colour with a gilded motif in a diaper (fleurs-de-lis, castles), or stars
       const C = spec.colors.map((c) => uniform(new Color(c)));

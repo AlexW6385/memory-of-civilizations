@@ -35,12 +35,49 @@ function minaret(el, { bag, col }) {
 function mosque(el, ctx) {
   const { bag, col } = ctx, [cx, cz] = el.c, D = el.d, R = D / 2, y = el.y ?? 0, H = el.h, W = D * 2.2, Dp = D * 2.0, cd = el.court ?? D * 1.8;
   const hall = [cx - W / 2, cz - Dp / 2, cx + W / 2, cz + Dp / 2], wallH = H * 0.42;
-  bag.add(S, box(hall[0], y - 0.5, hall[1], hall[2], y + wallH, hall[3])); col.rect(hall, y, y + wallH);
-  // rows of windows in the walls
-  for (const f of 'nsew') { const along = f === 'n' || f === 's', Lw = along ? W : Dp, n = Math.floor(Lw / 4); for (let i = 1; i < n; i++) for (const yy of [y + 3, y + wallH * 0.55]) { const u = (along ? hall[0] : hall[1]) + i * Lw / n; const q = f === 'n' ? [u - 0.8, hall[1] - 0.06, u + 0.8, hall[1] + 0.02] : f === 's' ? [u - 0.8, hall[3] - 0.02, u + 0.8, hall[3] + 0.06] : f === 'w' ? [hall[0] - 0.06, u - 0.8, hall[0] + 0.02, u + 0.8] : [hall[2] - 0.02, u - 0.8, hall[2] + 0.06, u + 0.8]; bag.add('opening', box(q[0], yy, q[1], q[2], yy + 2.6, q[3])); } }
-  // the drum and the central dome; the semidomes on the axis; the small domes and the weight towers
-  const dy = H - R * 1.2;
-  bag.add(S, box(cx - R - 1.5, y + wallH, cz - R - 1.5, cx + R + 1.5, y + dy - R * 0.1, cz + R + 1.5));
+  // the prayer hall, hollow: its walls (the door from the court in the north wall), the roof over the side
+  // spaces, four great piers carrying the drum, the dome seen from inside
+  const T = 2.6, dw = 2.4, dh = 6.5, [hx0, hz0, hx1, hz1] = hall;
+  const wall = (r) => { bag.add(S, box(r[0], y - 0.5, r[1], r[2], y + wallH, r[3])); col.rect(r, y, y + wallH); };
+  wall([hx0, hz1 - T, hx1, hz1]); wall([hx0, hz0 + T, hx0 + T, hz1 - T]); wall([hx1 - T, hz0 + T, hx1, hz1 - T]);
+  wall([hx0, hz0, cx - dw, hz0 + T]); wall([cx + dw, hz0, hx1, hz0 + T]);
+  bag.add(S, box(cx - dw, y + dh, hz0, cx + dw, y + wallH, hz0 + T));
+  bag.add('opening', box(cx - dw * 0.8, y, hz0 + T - 0.05, cx + dw * 0.8, y + dh, hz0 + T - 0.02));
+  // the windows: rows in the walls, seen from both sides
+  for (const f of 'nsew') { const along = f === 'n' || f === 's', Lw = along ? W : Dp, n = Math.floor(Lw / 4); for (let i = 1; i < n; i++) for (const yy of [y + 3, y + wallH * 0.55]) { const u = (along ? hx0 : hz0) + i * Lw / n; if (f === 'n' && Math.abs(u - cx) < dw + 1) continue; for (const [o0, o1, wm] of [[-0.06, 0.02, 'opening'], [T - 0.02, T + 0.02, 'daylight']]) { const q = f === 'n' ? [u - 0.8, hz0 + o0, u + 0.8, hz0 + o1] : f === 's' ? [u - 0.8, hz1 - o1, u + 0.8, hz1 - o0] : f === 'w' ? [hx0 + o0, u - 0.8, hx0 + o1, u + 0.8] : [hx1 - o1, u - 0.8, hx1 - o0, u + 0.8]; bag.add(wm, box(q[0], yy, q[1], q[2], yy + 2.6, q[3])); } } }
+  const dy = H - R * 1.2, q = R + 1.5;
+  // the roof over the side spaces (the hall less the central square), its ceiling painted
+  for (const r of [[hx0 + T, hz0 + T, cx - q, hz1 - T], [cx + q, hz0 + T, hx1 - T, hz1 - T], [cx - q, hz0 + T, cx + q, cz - q], [cx - q, cz + q, cx + q, hz1 - T]]) { bag.add(S, box(r[0], y + wallH - 1.2, r[1], r[2], y + wallH, r[3])); bag.add('stucco', box(r[0], y + wallH - 1.24, r[1], r[2], y + wallH - 1.2, r[3])); }
+  // the piers at the square's corners and the arches between them; the drum as four walls round the dome's foot
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const px = cx + sx * q, pz = cz + sz * q; bag.add(S, box(px - 2.2, y - 0.5, pz - 2.2, px + 2.2, y + dy, pz + 2.2)); col.rect([px - 2.2, pz - 2.2, px + 2.2, pz + 2.2], y, y + dy); }
+  for (const r of [[cx - q - 1.5, cz - q - 1.5, cx + q + 1.5, cz - q], [cx - q - 1.5, cz + q, cx + q + 1.5, cz + q + 1.5], [cx - q - 1.5, cz - q, cx - q, cz + q], [cx + q, cz - q, cx + q + 1.5, cz + q]]) bag.add(S, box(r[0], y + wallH - 1.2, r[1], r[2], y + dy + R * 0.26, r[3]));
+  // the pendentives' place: a flat ring from the dome's foot out to the square's corners, seen from below and above
+  const yr = y + dy + R * 0.26 - 0.02;
+  bag.add('stucco', lathe([[R * 0.99, 0], [q * 1.45, 0]], 32, null, cx, yr, cz));
+  bag.add(S, lathe([[q * 1.45, 0.02], [R * 0.99, 0.02]], 32, null, cx, yr, cz));
+  // the inner shell of the dome, painted; its ring of windows; the great chandelier ring on chains
+  const inner = [[0.001, R * 0.92], [R * 0.5, R * 0.82], [R * 0.78, R * 0.58], [R * 0.94, R * 0.28], [R * 0.99, 0], [R * 0.99, -R * 0.1]];
+  bag.add('stucco', lathe(inner, 32, null, cx, y + dy + R * 0.26, cz));
+  for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2, xx = cx + Math.cos(a) * R * 0.97, zz = cz + Math.sin(a) * R * 0.97; bag.add('daylight', box(xx - 0.5, y + dy + R * 0.02, zz - 0.5, xx + 0.5, y + dy + R * 0.22, zz + 0.5)); }
+  bag.add('glaze_blue', lathe([[0.001, R * 0.9], [R * 0.18, R * 0.86], [R * 0.18, R * 0.85], [0.001, R * 0.89]], 24, null, cx, y + dy + R * 0.26, cz));
+  const ly = y + 5.2;
+  bag.add('iron', lathe([[R * 0.72, 0], [R * 0.72, 0.15], [R * 0.7, 0.15], [R * 0.7, 0]], 48, null, cx, ly, cz));
+  for (let k = 0; k < 48; k++) { const a = k / 48 * Math.PI * 2; bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.08], [0.1, 0.3], [0.001, 0.32]], 6, null, cx + Math.cos(a) * R * 0.71, ly + 0.15, cz + Math.sin(a) * R * 0.71)); }
+  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; bag.add('iron', box(cx + Math.cos(a) * R * 0.71 - 0.02, ly, cz + Math.sin(a) * R * 0.71 - 0.02, cx + Math.cos(a) * R * 0.71 + 0.02, y + dy, cz + Math.sin(a) * R * 0.71 + 0.02)); }
+  // the floor in carpets; the mihrab in the qibla (south) wall with its tiled frame, the marble minbar beside it
+  bag.add('marble', box(hx0 + T, y - 0.3, hz0 + T, hx1 - T, y + 0.05, hz1 - T)); col.floor([hx0 + T, hz0 + T, hx1 - T, hz1 - T], y + 0.05);
+  bag.add('cloth_red', box(hx0 + T + 0.6, y + 0.05, hz0 + T + 0.6, hx1 - T - 0.6, y + 0.07, hz1 - T - 0.6));
+  const qz = hz1 - T;
+  bag.add('glaze_white', box(cx - 3.2, y, qz - 0.3, cx + 3.2, y + 9, qz));
+  bag.add('glaze_blue', box(cx - 2.6, y + 0.4, qz - 0.34, cx + 2.6, y + 8.4, qz - 0.3));
+  bag.add('marble', box(cx - 1.8, y, qz - 0.6, cx + 1.8, y + 6.6, qz - 0.34));
+  bag.add('opening', box(cx - 1.1, y + 0.1, qz - 0.64, cx + 1.1, y + 4.6, qz - 0.6));
+  for (let k = 0; k < 5; k++) { const w = 1.1 * (1 - k * 0.19); bag.add('opening', box(cx - w, y + 4.6 + k * 0.3, qz - 0.64, cx + w, y + 4.9 + k * 0.3, qz - 0.6)); }
+  for (let k = 0; k < 10; k++) bag.add('marble', box(cx + 4, y, qz - 1.2 - k * 0.55, cx + 5.2, y + 0.3 + k * 0.3, qz - 0.65 - k * 0.55));
+  bag.add('marble', box(cx + 4, y, qz - 1.4, cx + 5.2, y + 3.3, qz - 0.65)); bag.add('marble', lathe([[0.75, 0], [0.001, 2.0]], 8, null, cx + 4.6, y + 3.3, qz - 1.0));
+  col.rect([cx + 4, qz - 6.8, cx + 5.2, qz - 0.6], y, y + 3.4);
+  // outside: the drum's crown band, the weight towers, the domes and semidomes
+  bag.add(S, lathe([[R + 1.5, 0], [R + 1.5, R * 0.1]], 24, null, cx, y + dy - R * 0.1, cz));
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const tx = cx + sx * (R + 1.5), tz = cz + sz * (R + 1.5); bag.add(S, box(tx - 2, y + wallH, tz - 2, tx + 2, y + dy + 1, tz + 2)); bag.add(L, lathe([[2.2, 0], [0.001, 3.5]], 8, null, tx, y + dy + 1, tz)); }
   dome(bag, cx, y + dy, cz, R);
   semidome(bag, cx, y + dy - R * 0.25, cz - R, R, 'n'); semidome(bag, cx, y + dy - R * 0.25, cz + R, R, 's');

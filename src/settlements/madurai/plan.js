@@ -51,7 +51,7 @@ for (const g of OG) E.push({ t: 'gopuram', c: g.c, dir: g.s === 'n' || g.s === '
 }
 // the Golden Lotus tank and the Thousand-Pillar Hall
 E.push({ t: 'tank', rect: TANK, depth: 4, water: 2.4 });
-E.push({ t: 'mandapa', rect: HALL, h: 6, step: 2.6 });
+E.push({ t: 'mandapa', rect: HALL, h: 6, step: 2.6, carved: true });
 // the open pillared halls along the inner side of the south and west gates
 E.push({ t: 'mandapa', rect: [GATES.s[0] - 8, 82, GATES.s[0] + 8, GATES.s[1] - 12], h: 6, step: 3.4 });
 E.push({ t: 'mandapa', rect: [WALL[0] + 12, GATES.w[1] - 7, MEENAKSHI[0] - 6, GATES.w[1] + 7], h: 6, step: 3.4 });

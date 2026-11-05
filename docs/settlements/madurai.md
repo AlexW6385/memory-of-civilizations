@@ -30,6 +30,8 @@ The temple and both shrines face east; the city's square streets run with the ca
 
 Granite bases with the gate passage, storeys of brick and painted stucco stepping in, crowned by a barrel-vaulted roof and a row of finials (kalasha); granite enclosure walls; flat-roofed pillared halls (mandapa); gilded vimanas; the stepped tank. Colours shown as bands of sky blue, rose, saffron, green and cream (the figures on each storey are L3). [stated: painted stucco; inferred: banding]
 
+**The Thousand-Pillar Hall inside (L3, built).** Built in 1569 by Ariyanatha Mudaliar, general of Vishwanatha Nayaka; 985 pillars, each carved as its own composition (yalis, deities, portraits) [stated: anantamias]. Two rows of pillars carry yalis, the lion-bodied, elephant-headed beast of the Nayakas [stated: tamilnadu-favtourism]; about 110 yali pillars [stated: come2india]. A Nataraja stands in the hall [stated: esamskriti; lotussculpture]; the ceiling is painted [stated: backpackersunited]; the musical pillars are just outside to the west [stated: scribd text]. Ours: about 290 pillars on a 2.6 m grid (fewer than the real 985: the hall is smaller), each in square blocks with relief panels between octagonal bands under a lotus-bud bracket capital (pushpapotika) [inferred: the Nayaka pillar type]; the two yali rows face across a widened central aisle; a lotus medallion painted in every bay; standing brass lamps down the aisle (the hall's 1008 lamp holders [stated: come2india], abridged); the bronze Nataraja in his ring of fire on a lotus pedestal at the north end [inferred: placement].
+
 ## 5. The town
 
 Single-storey houses of plastered brick with a raised pillared verandah (thinnai) on the street and tiled roofs, in blocks between the ring streets. [inferred]
@@ -58,5 +60,9 @@ The nadaswaram (a double reed) and the tavil drum are the temple's music; a Carn
 - [Madurai Meenakshi & Brihadeeswarar Temples — visiearth](https://visiearth.pages.dev/in-s/tamil-nadu-madurai-meenakshi-and-brihadeeswarar/)
 - [Meenakshi Temple — scribd presentation](https://www.scribd.com/presentation/425789103/Meenakshi-Temple)
 - [MEENAKSHI AMMAN — slideshare](https://www.slideshare.net/slideshow/meenakshi-amman-37990794/37990794)
+- [Thousand Pillar Hall — tamilnadu-favtourism](https://tamilnadu-favtourism.blogspot.com/2015/12/meenakshi-amman-temple-thousand-pillar.html)
+- [Madurai Meenakshi temple — come2india](https://www.come2india.org/madurai-meenakshi-temple.html)
+- [Meenakshi Temple Inside — esamskriti](https://www.esamskriti.com/a/TamilNadu/Meenakshi-Temple-Inside.aspx)
+- [Aayiram Kaal Mandapam — backpackersunited](https://backpackersunited.in/destinations/madurai/attraction/aayiram-kaal-mandapam)
 - [praveenmusafir.com](https://praveenmusafir.com/?p=9505)
 - [southindiantempleguide](https://southindiantempleguide.blogspot.com/2015/02/madurai-meenakshi-temple.html)

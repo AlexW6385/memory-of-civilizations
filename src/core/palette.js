@@ -73,6 +73,7 @@ export const MATERIALS = {
   mosaic_green:     { color: '#4f7a5c', roughness: 0.3, metalness: 0.2, kind: 'mosaic' },
   // Gothic (Sainte-Chapelle, 1248): stained glass, painted and gilded stone
   stained_glass:    { color: '#2a2440', roughness: 0.2, kind: 'glass', side: 'double' },
+  daylight:         { clean: true, color: '#202020', roughness: 0.3, kind: 'daylight' },
   glass_outer:      { clean: true, color: '#1c1f24', roughness: 0.12, metalness: 0.0, kind: 'smooth' },
   paint_fleur:      { color: '#22336e', roughness: 0.55, kind: 'fleur', colors: ['#1f2f6a', '#c9a24a'] },
   paint_castle:     { color: '#7a2a22', roughness: 0.55, kind: 'fleur', colors: ['#7b2620', '#c9a24a'] },

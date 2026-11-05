@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.15 — Interiors: the Süleymaniye and the Thousand-Pillar Hall (2026-11-05)
+- The Süleymaniye's prayer hall is hollow: thick walls with a north door, four piers, the drum closed to the dome, the painted inner dome with its ring of windows and blue medallion, the great iron chandelier ring of 48 lamps, marble floor under red carpet, the tiled mihrab and the marble minbar; windows seen from inside are a new clear-glass material in a grille of round panes, lit by the sky. Madurai's Thousand-Pillar Hall is carved: some 290 Nayaka pillars in square blocks with framed reliefs between octagonal bands under lotus-bud bracket capitals, a widened central aisle lined both sides with rearing yalis, the ceiling beamed and painted with a lotus in every bay, standing brass lamps, and the bronze Nataraja in his ring of fire at the north end (dossier §4 extended, sourced).
+
 ## v9.14 — Kilwa's prayer hall (2026-11-05)
 - Kilwa: the Great Mosque's prayer hall is furnished — the mihrab in the middle of the north (qibla) wall in a stepped frame of dressed coral, its niche dark under a pointed head and a band of inset blue bowls above, the wooden minbar of three steps beside it, reed mats in rows facing the qibla across the hall, and glass lamps hanging on chains in the bays.
 

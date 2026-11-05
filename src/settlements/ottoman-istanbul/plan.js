@@ -12,7 +12,8 @@ const [t0, u0, t1, u1] = TERRACE;
 E.push({ t: 'block', rect: [t0, u0 - 2, t1, u0], y0: 0, y1: TOP + 1, mat: 'limestone' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('outer court', PRECINCT, TOP, 'open')];
+const hw = MOSQUE.d * 1.1 - 2.6, hd = MOSQUE.d - 2.6;
+const rooms = [room('prayer hall', [MOSQUE.c[0] - hw, MOSQUE.c[1] - hd, MOSQUE.c[0] + hw, MOSQUE.c[1] + hd], TOP + 0.05, 'hall'), room('outer court', PRECINCT, TOP, 'open')];
 const walks = [[[0, -100], [0, -80], [0, -40]]];
 walks[0].y0 = TOP;
 
