@@ -2,7 +2,7 @@
 // basin holding water below its quay; date palms in groves by the water and at the edges, reeds in
 // the shallows; the hot, hazy sky of southern Mesopotamia.
 
-import { RADIUS, TEMENOS, HARBOUR, inRect, inHarbour, inHouse, smooth as sm } from './layout.js';
+import { RADIUS, TEMENOS, COURT, HARBOUR, inRect, inHarbour, inHouse, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function height(x, z) {
@@ -14,6 +14,7 @@ function height(x, z) {
 function cover(x, z) {
   const c = { sand: 0.55, grass: 0, rock: 0, soil: 0.45, fields: 0, dry: 0.85, warmth: 0.8, red: 0.05, road: 0, snow: 0, forest: 0 };
   if (inHarbour(x, z)) { c.soil = 0.8; c.sand = 0.2; return c; }
+  if (inRect(COURT, x, z)) { c.sand = 0; c.soil = 0.1; c.road = 1; return c; }               // the Court of Nanna, paved in baked brick
   if (inRect(TEMENOS, x, z)) { c.sand = 0.4; c.soil = 0.6; c.road = 0.3; return c; }
   if (Math.hypot(x, z) > RADIUS - 30) { c.fields = 0.5; c.grass = 0.2; return c; }
   c.road = inHouse(x, z, 0.3) ? 0 : 0.5; return c;

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.80 — Giza's pyramidion, Ur's court (2026-11-04)
+- Detail: the Great Pyramid's pyramidion is gilded; the Court of Nanna at Ur is paved; people gather at Giza's mortuary temple, along the queens' pyramids and at the valley temple.
+
 ## v8.79 — Great Zimbabwe's chevrons and savanna (2026-11-04)
 - Detail: the Great Enclosure's wall carries its chevron band — blocks set on edge in a zigzag between plain courses — on both faces; the valley is miombo savanna, long dry grass with open woodland, wild figs and granite boulders.
 

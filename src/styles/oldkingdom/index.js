@@ -26,7 +26,10 @@ function frust(bag, mat, cx, cz, a0, b0, a1, b1, y0, y1) {
  */
 function okPyramid(el, { bag, col }) {
   const [cx, cz] = el.c, a = el.a, h = el.h, y = el.y ?? 0;
-  frust(bag, el.mat || 'tura_limestone', cx, cz, a, a, 0, 0, y, y + h);
+  // the casing up to the foot of the pyramidion, the pyramidion gilded (electrum) at the top
+  const ph = Math.min(3, h * 0.03), ap = a * ph / h;
+  frust(bag, el.mat || 'tura_limestone', cx, cz, a, a, ap, ap, y, y + h - ph);
+  frust(bag, 'gilt_bronze', cx, cz, ap, ap, 0, 0, y + h - ph, y + h);
   frust(bag, 'tura_limestone', cx, cz, a + 0.6, a + 0.6, a, a, y - 0.4, y + 0.3);                 // the pavement's edge
   // climbing the faces: each face as strips of ramps, from the foot up to where the strip meets the
   // arrises (the triangle of the face, approximated)
