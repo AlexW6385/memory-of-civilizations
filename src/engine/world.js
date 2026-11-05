@@ -26,6 +26,8 @@ import { MODULES } from '../settlements/grounds.js';
 
 /** A settlement is built when the visitor comes within LOAD of its rim and let go beyond UNLOAD. */
 export const LOAD = 700, UNLOAD = 1300;
+/** At most this many settlements are built at once (the nearest); from the air the reach grows, the count does not. */
+export const MAX_BUILT = 4;
 const sm = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
 /** Matrix taking planet coordinates to a frame's local ones. */
@@ -61,6 +63,7 @@ class Settlement {
     this.group.matrixAutoUpdate = false;
     this.parts = [];                       // { id, plan, music, group, built, gi }
     this.state = 'idle';
+    this.gen = 0;                          // bumped by unload(): a load begun before it stops adding parts
     const C = this.collide = new CollisionWorld();
     const [cx, cz] = S.local.center, L = S.local;
     // the ground: the settlement's own on its disc, the planet's beyond (in the settlement's frame)
@@ -79,6 +82,8 @@ class Settlement {
     this.state = 'loading';
     this.world.scene.add(this.group);
     this.done = 0; this.expected = 1;
+    const gen = this.gen;
+    const stale = () => gen !== this.gen;
     this.loading = (async () => {
       const S = this.S;
       if (S.focus.region) {
@@ -86,24 +91,29 @@ class Settlement {
         this.expected = entries.length + 1.5;
         for (const entry of entries) {
           const mod = await entry.load();
-          await this.addPart(entry.id, mod.plan, mod.music);
+          if (stale()) return this;
+          await this.addPart(entry.id, mod.plan, mod.music, gen);
         }
         // the houses of the settlement, of its own time (src/world/city.js), on its disc
         await import('../styles/vernacular/index.js');
         const city = await import('../world/city.js');
+        if (stale()) return this;
         const plan = withFocus(S.focus, () => city.plan(S.focus.region));
         plan.id = `${S.id}-town`;
-        await this.addPart(plan.id, plan, null);
+        await this.addPart(plan.id, plan, null, gen);
       } else {
         // a settlement of its own: its landmarks, then its townscape (src/settlements/<id>/)
         const mod = await MODULES[S.id]();
         this.music = mod.music;
         const town = await mod.town();
+        if (stale()) return this;
         // the landmarks weigh more than a block of houses
         this.expected = mod.landmarks.length * 3 + town.length;
-        for (const p of mod.landmarks) { await this.addPart(p.plan.id, p.plan, p.music); this.done += 2; }
-        for (const plan of town) await this.addPart(plan.id, plan, null);
+        for (const p of mod.landmarks) { if (stale()) return this; await this.addPart(p.plan.id, p.plan, p.music, gen); this.done += 2; }
+        for (const plan of town) { if (stale()) return this; await this.addPart(plan.id, plan, null, gen); }
       }
+      // let go of while it was being built (the visitor moved away): unload() has cleaned up
+      if (stale()) return this;
       this.done = this.expected;
       this.state = 'ready';
       return this;
@@ -111,8 +121,9 @@ class Settlement {
     return this.loading;
   }
 
-  async addPart(id, plan, music) {
+  async addPart(id, plan, music, gen = this.gen) {
     const built = await buildPlanAsync(plan);
+    if (gen !== this.gen) { for (const { geometry } of built.parts) geometry.dispose(); return null; }
     const group = new THREE.Group();
     group.name = plan.id;
     for (const { mat, geometry } of built.parts) {
@@ -137,6 +148,8 @@ class Settlement {
     }
     const rec = { id, plan, music, group, built, settlement: this };
     if (!plan.feature) try { rec.gi = await this.world.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
+    // unloaded while the collision or the light was being made: unload() already cleared the group
+    if (gen !== this.gen) { this.world.r.gi.release?.(plan.id); return null; }
     this.parts.push(rec);
     this.done = (this.done || 0) + 1;
     return rec;
@@ -176,9 +189,11 @@ class Settlement {
 
   unload() {
     if (this.state === 'idle') return;
+    this.gen++;                            // a load still running stops adding parts
     this.world.scene.remove(this.group);
-    this.group.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
+    this.group.traverse((o) => { if (o.isInstancedMesh) o.dispose(); else if (o.geometry) o.geometry.dispose(); });
     this.group.clear();
+    for (const rec of this.parts) this.world.r.gi.release?.(rec.plan.id);
     this.parts = [];
     this.collide = Object.assign(new CollisionWorld(), { terrain: this.collide.terrain, water: this.collide.water, waterLevel: this.collide.waterLevel });
     this.loading = null;
@@ -374,12 +389,14 @@ export class World {
     // from the air one sees farther: the reach grows with the height
     const lift = Math.min(1700, Math.max(0, (this.camAlt || 0) - 60) * 1.3);
     const wanted = [];
-    for (const s of this.settlements) {
-      const d = World.rimDistance(s, u);
-      if (d < radius + lift) wanted.push(s.load());
-      else if (d > UNLOAD + lift) s.unload();
+    // nearest first: only the MAX_BUILT nearest are built; one more is kept if already built
+    // (so a settlement at the edge of the count does not flicker), the rest let go
+    const near = this.settlements.map((s) => [World.rimDistance(s, u), s]).sort((a, b) => a[0] - b[0]);
+    near.forEach(([d, s], i) => {
+      if (d < radius + lift && (i < MAX_BUILT || s === this.anchor?.site)) wanted.push(s.load());
+      else if (d > UNLOAD + lift || i > MAX_BUILT) { if (s !== this.anchor?.site) s.unload(); }
       if (d < 6000) s.loadImpostor();
-    }
+    });
     await Promise.all(wanted);
   }
 
@@ -418,6 +435,12 @@ export class World {
           if (!P.near && !P.far) continue;
           const d = Math.hypot(L[0] - P.center[0], L[2] - P.center[1], alt * 0.7);
           rec.group.visible = P.near ? d < P.near : d >= P.far;
+          // the small things of the streets cast shadows only in the tiles round the visitor: farther
+          // off their shadows are a few texels in the outer cascades but cost a draw each
+          if (P.style === 'life') {
+            const cast = d < 120;
+            if (rec.cast !== cast) { rec.cast = cast; rec.group.traverse((o) => { if (o.isMesh) o.castShadow = cast; }); }
+          }
         }
       }
     }

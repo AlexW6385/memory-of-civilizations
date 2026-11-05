@@ -465,8 +465,18 @@ async function main() {
     else music.set(world.anchor.site?.music || null, 'open');
     return here;
   }
+  // the view moves when one looks round, walks, flies or falls; tools (controls.free) hold it still
+  let lookYaw = 0, lookPitch = 0;
   const frame = () => {
-    const now = performance.now(), dt = (now - last) / 1000;
+    const now = performance.now();
+    const looked = controls.yaw !== lookYaw || controls.pitch !== lookPitch;
+    lookYaw = controls.yaw; lookPitch = controls.pitch;
+    const moving = !controls.free && (looked || controls.keys.size > 0 || controls.flyHeld || controls.stick.x !== 0 || controls.stick.y !== 0 || controls.speedNow > 0.05 || controls.vy !== 0 || controls.glide);
+    R.setMotion(moving, now);
+    // held still for a second: the scene only sways, flickers and drifts, so it is drawn at
+    // ~24 fps instead of 60, leaving the machine (and the rest of the picture) its breath
+    if (!controls.free && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
+    const dt = (now - last) / 1000;
     last = now;
     controls.update(dt);
     frameOnce(dt);

@@ -15,9 +15,10 @@ import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
 
 export const QUALITY = {
-  high: { pixelRatio: 1.5, shadowMap: 4096, cascades: 4, ao: true, aa: true },
-  medium: { pixelRatio: 1.0, shadowMap: 2048, cascades: 3, ao: true, aa: true },
-  low: { pixelRatio: 0.75, shadowMap: 1024, cascades: 2, ao: false, aa: false },
+  // motionRatio: the pixel ratio while the view moves; the full one returns once it holds still
+  high: { pixelRatio: 1.5, motionRatio: 1.0, shadowMap: 2048, cascades: 3, ao: true, aa: true },
+  medium: { pixelRatio: 1.0, motionRatio: 0.85, shadowMap: 2048, cascades: 3, ao: true, aa: true },
+  low: { pixelRatio: 0.75, motionRatio: 0.75, shadowMap: 1024, cascades: 2, ao: false, aa: false },
 };
 
 export class Renderer {
@@ -120,6 +121,20 @@ export class Renderer {
     this.pipeline.outputColorTransform = false;
     this.pipeline.outputNode = out;
     this.pipeline.needsUpdate = true;
+  }
+
+  /**
+   * Resolution follows movement: while the view turns or travels the picture is drawn at the
+   * motion ratio (a quarter to half fewer pixels for the occlusion, bloom and edge passes), and
+   * at the full ratio again once it has held still for a moment — what one stops to look at is
+   * always drawn at full quality.
+   */
+  setMotion(moving, now = performance.now()) {
+    if (moving) this.movedAt = now;
+    const Q = this.Q, still = now - (this.movedAt ?? -1e9) > 300;
+    const pr = Math.min(devicePixelRatio, still ? Q.pixelRatio : Math.min(Q.pixelRatio, Q.motionRatio ?? Q.pixelRatio));
+    if (pr !== this.renderer.getPixelRatio()) this.renderer.setPixelRatio(pr);
+    return still;
   }
 
   resize() {

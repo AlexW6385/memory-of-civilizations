@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.84 — Smoother to move through (2026-11-04)
+- Turning and walking are smoother: while the view moves the picture is drawn at a slightly lower resolution and snaps back to full sharpness as soon as you stop; shadows are lighter to draw; small street objects far away no longer cast shadows; a still view no longer redraws 60 times a second.
+- Memory no longer creeps up while flying: a town you leave while it is still loading is dropped completely, and at most four towns are built at once.
+
 ## v8.83 — Mute button, steady eyes, Great Zimbabwe's walls (2026-11-04)
 - A sound button top right (muted by default, remembered; muting suspends the audio context). Eye adaptation samples six points round the eye and takes the brightest, treats a near-zero reading as open air, and opens up at most 1.6× outdoors (night 3×) instead of 8×, more slowly (2 s): a probe inside a wall, column or tree, or a GI volume not yet lit, no longer whites out the view. Great Zimbabwe: dry walls as smooth battered curves with rounded ends at the entrances and an uneven top; the chevron band only on the north-east fifth of the outer wall. Plants kept off every landmark's paved ways (lanes, paving, causeways, sacbe, paths); Borobudur's eastern way is clear.
 

@@ -72,6 +72,14 @@ export class GIVolume {
     return vol;
   }
 
+  /** Let go of a volume whose building was unloaded (kept while it is the active one). */
+  release(id) {
+    const vol = this.cache.get(id);
+    if (!vol || vol === this.current) return;
+    for (const t of vol.tex) t.dispose();
+    this.cache.delete(id);
+  }
+
   /** Make a loaded volume the active one. */
   use(vol) {
     if (!vol || this.current === vol) return;
