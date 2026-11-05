@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.78 — Peaks, red rock, coral stone (2026-11-04)
+- Detail: Huayna Picchu and Machu Picchu mountain are craggy sugarloaves with ribs, ledges and crags; rock where the ground is red (Petra) is rose and ochre sandstone in wavy bands; Kilwa's Great Mosque has its coral-stone walls with doorways in stone frames, small windows, buttresses and a cresting of merlons, and the stone houses carved doors in their frames, barred windows, mangrove pole ends and parapets.
+
 ## v8.77 — The Castillo's panels and busier plazas (2026-11-04)
 - Detail: the Castillo's terraces carry their framed panels in rows, the stairs' runs left clear; plazas and courts paved as lanes (Chichén Itzá's Great Plaza, Isfahan's walks, Beijing's lanes) now fill with people too; market stalls held to a sensible number per square.
 

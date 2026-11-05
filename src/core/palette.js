@@ -299,6 +299,7 @@ export const MATERIALS = {
   pietra_serena:    { color: '#8d8e86', roughness: 0.75, kind: 'ashlar', course: 0.4, block: 0.8 },
   wood_painted:     { color: '#8a5a3a', roughness: 0.8, kind: 'wood' },
   wood_ochre:       { color: '#a8834a', roughness: 0.8, kind: 'wood' },
+  coral_plaster:    { color: '#d9d2c2', roughness: 0.92, kind: 'mudbrick', course: 0.32, block: 0.55 },
   rubber:           { clean: true, color: '#1a1a1a', roughness: 0.9, kind: 'smooth' },
 };
 

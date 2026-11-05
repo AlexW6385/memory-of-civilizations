@@ -61,7 +61,10 @@ export function groundMaterial() {
   const grass = grassBase.mul(smoothstep(0.0, 0.5, clump).mul(0.28).add(0.78));
   // rock: grey or buff, in strata
   const strata = mx_noise_float(vec3(P.x.mul(0.04), P.y.mul(1.1), P.z.mul(0.04)));
-  const rock = mix(C('#9e9a91'), C('#b29470'), g2.z).mul(strata.mul(0.16).add(1)).mul(mid.mul(0.14).add(1));
+  // red sandstone (Petra, Rajasthan) where the ground is red: rose to ochre in wavy bands
+  const bands = sin(P.y.mul(1.7).add(mx_noise_float(vec3(P.x.mul(0.05), P.y.mul(0.2), P.z.mul(0.05))).mul(4.0)));
+  const sandstone = mix(C('#a35c45'), C('#c08a5c'), bands.mul(0.5).add(0.5)).mul(strata.mul(0.12).add(1));
+  const rock = mix(mix(C('#9e9a91'), C('#b29470'), g2.z), sandstone, smoothstep(0.35, 0.75, g2.w)).mul(strata.mul(0.16).add(1)).mul(mid.mul(0.14).add(1));
   let soil = mix(mix(C('#6e5845'), C('#94502e'), g2.w), C('#5b4a39'), g2.z.mul(0.7)).mul(mid.mul(0.15).add(1));
   const roadCol = mix(C('#a08a6c'), C('#c2a982'), g2.z).mul(mid.mul(0.12).add(1)).mul(mx_noise_float(P.mul(1.7)).mul(0.08).add(1));
   soil = mix(soil, roadCol, g3.x);

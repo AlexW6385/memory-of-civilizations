@@ -8,7 +8,7 @@ export const RADIUS = 330;
 export const SITE = { a: 95, b: 175 };                     // the saddle's top: an ellipse (x half-width, z half-length)
 export const TERRACE = { w: 3, h: 2.6, n: 15 };           // terraces round it: 3 m deep, 2.6 m high, 15 of them
 export const PLAZA = [-18, -8, 22, 52];
-export const PEAKS = [{ c: [0, -210], r: 76, h: 235 }, { c: [-14, 210], r: 76, h: 285 }];   // Huayna Picchu (north), Machu Picchu mountain (south)
+export const PEAKS = [{ c: [0, -208], r: 88, h: 175 }, { c: [-14, 208], r: 88, h: 205 }];   // Huayna Picchu (north), Machu Picchu mountain (south)
 export const HILL = { c: [-45, 82], r: 16, h: 11 };       // the Intihuatana's hill
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 

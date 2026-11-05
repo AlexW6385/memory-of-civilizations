@@ -35,8 +35,12 @@ function height(x, z) {
   for (const p of PEAKS) {
     const q = Math.hypot(x - p.c[0], z - p.c[1]) / p.r;
     if (q < 1) {
-      const rib = 1 + 0.18 * fbm(x * 0.05 + p.c[0], z * 0.05) + 0.08 * Math.sin(Math.atan2(z - p.c[1], x - p.c[0]) * 7);
-      h = Math.max(h, RIM + (p.h - RIM) * Math.pow(1 - q, 1.15) * rib);
+      // a sugarloaf: steep flanks, a rounded summit, ribs and buttresses down the sides, crags and ledges
+      const a = Math.atan2(z - p.c[1], x - p.c[0]);
+      const rib = 1 + 0.16 * fbm(x * 0.05 + p.c[0], z * 0.05) + 0.07 * Math.sin(a * 7) + 0.04 * Math.sin(a * 17 + q * 9);
+      const crag = 0.06 * Math.abs(fbm(x * 0.13 + 3, z * 0.13 - 2)) * (1 - q);
+      const prof = (1 - Math.pow(q, 1.35)) * (1 - 0.25 * q);
+      h = Math.max(h, RIM + (p.h - RIM) * prof * (rib - crag) - 6 * Math.floor(Math.max(0, fbm(x * 0.08, z * 0.08)) * 2) * q);
     }
   }
   return RIM + (h - RIM) * (1 - sm(RADIUS - 25, RADIUS, r));
