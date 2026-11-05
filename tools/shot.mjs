@@ -61,7 +61,8 @@ if (opt('pose') || opt('cam')) {
     }
   }
   for (const b of BUILDINGS) {
-    if (opt('building') && opt('building') !== b.id) continue;
+    if (opt('sites') || (opt('building') && opt('building') !== b.id)) continue;
+    if (!siteOf(b.id)) continue;                          // a building of the old design no settlement carries
     const { plan } = await b.load();
     for (const v of all[b.id] || []) {
       if (only && !only.includes(v.name)) continue;

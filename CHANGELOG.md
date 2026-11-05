@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.96 — Screenshot tool fix (2026-11-05)
+- Tools: shot.mjs no longer adds the old design's per-building views (no settlement carries them, and they crashed the run at its end); interiors are shot with --pose in the settlement's frame.
+
 ## v8.95 — Gyeongbokgung's rank stones (2026-11-05)
 - Seoul: Geunjeongjeon's court has its royal path in three lanes (the king's in the middle, a little higher) from the gate to the platform's stair, and the two rows of twelve rank stones beside it, the civil ranks east and the military west.
 
