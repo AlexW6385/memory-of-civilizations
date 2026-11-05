@@ -8,7 +8,7 @@
 
 import { EYE, STEP, WALK, RUN, flightSpeeds, move } from '../core/walk.js';
 
-const DOUBLE_TAP = 0.32;   // s
+const DOUBLE_TAP = 0.32, STOP_FLY = 2.5, STOP_CRUISE = 5;   // s
 
 export class Controls {
   constructor(camera, canvas, collide) {
@@ -134,7 +134,7 @@ export class Controls {
   setCruise(on) {
     on = !!on && this.glide;
     if (on === this.cruise) return;
-    this.cruise = on;
+    this.cruise = on; this._brake = 0;
     document.getElementById('btn-fly')?.classList.toggle('cruise', on);
     this.onCruise?.(on);
   }
@@ -187,12 +187,17 @@ export class Controls {
     let dx = (-sin * f + cos * s) * speed * dt, dz = (-cos * f - sin * s) * speed * dt;
     if (this.glide) {
       // aloft there is momentum: the velocity eases toward what the keys ask for, and without them
-      // dies away, slowly when cruising
+      // slows to a full stop: in STOP_FLY seconds, STOP_CRUISE when cruising
       const V = this.vel, tx = dx / dt, tz = dz / dt, steer = l > 0.01;
       if (!this._aloft) { V.x = tx; V.z = tz; }        // taking off keeps the pace one had
-      const rate = steer ? 1.6 : this.cruise ? 0.35 : 1.1;
-      const k = 1 - Math.exp(-rate * dt);
-      V.x += (tx - V.x) * k; V.z += (tz - V.z) * k;
+      if (steer) { const k = 1 - Math.exp(-1.6 * dt); V.x += (tx - V.x) * k; V.z += (tz - V.z) * k; this._brake = 0; }
+      else {
+        const v = Math.hypot(V.x, V.z);
+        if (!this._brake) this._brake = v / (this.cruise ? STOP_CRUISE : STOP_FLY);   // m/s²: steady, to zero
+        const r = v > 1e-3 ? Math.max(0, v - this._brake * dt) / v : 0;
+        V.x *= r; V.z *= r;
+        if (r === 0) this._brake = 0;
+      }
       dx = V.x * dt; dz = V.z * dt;
     } else this.vel.x = this.vel.z = 0;
     this._aloft = this.glide;
