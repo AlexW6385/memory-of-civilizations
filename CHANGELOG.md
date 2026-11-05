@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.87 — Foguang's terrace walls (2026-11-05)
+- Foguang Monastery: the two terrace walls stand on a footing of dressed stone under a stone coping, with a low brick parapet capped in grey tiles along their fronts (open at the stairs), and stepped stone cheek walls flank both flights of stairs.
+
 ## v8.86 — The Alhambra's Court of the Myrtles, Versailles' water parterre (2026-11-04)
 - Granada: the Court of the Myrtles' pool now shows (its kerb had covered the water), wider, with a round basin and jet at each end and the myrtle hedges clipped in lengths; both courts' porticoes carry stilted round arches cut in the stucco under a frieze and eaves; the courts' walls have a dado of green glazed tile with a lapis border, and the long sides doors in stucco frames with paired windows above; the Comares Tower has paired arched windows high on every face. Versailles: the parterre by the château is the water parterre of 1690 — two great basins with stone kerbs and bronze figures reclining round their rims; the Latona fountain rises in four marble tiers ringed with bronze frogs to the figure at the top; the Apollo fountain has the god's gilded chariot, four horses plunging and two tritons. Stonehenge's avenue view now looks at the stones.
 

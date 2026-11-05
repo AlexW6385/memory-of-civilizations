@@ -28,6 +28,23 @@ block([-30, -48, 34, 48], 6.3, T - 0.2, 'brick_grey');
 floor([-30, -48, 34, 48], T, 'travertine', { th: 0.2 });
 add({ t: 'stair', rect: [-74, -4, -62, 4], dir: 'e', y0: 0, y1: 6.5, riser: 0.171, base: 0, mat: 'limestone' });
 add({ t: 'stair', rect: [-42, -4, -30, 4], dir: 'e', y0: 6.5, y1: T, riser: 0.171, base: 6.5, mat: 'limestone' });
+// the terrace walls: a footing of dressed stone, the brick face, a stone coping, and along the
+// fronts a low parapet of brick under grey tiles, open where the stairs come up; cheek walls by the stairs
+for (const [x, y0, y1] of [[-62, 0, 6.5], [-30, 6.5, T]]) {
+  block([x - 0.25, -48.25, x + 0.6, 48.25], y0 - 0.2, y0 + 0.9, 'limestone', { collide: false });
+  block([x - 0.15, -48.15, x + 0.4, 48.15], y1 - 0.25, y1 + 0.02, 'limestone', { collide: false });
+  for (const [z0, z1] of [[-48, -4.4], [4.4, 48]]) {
+    block([x, z0, x + 0.5, z1], y1, y1 + 0.85, 'brick_grey');
+    block([x - 0.08, z0 - 0.08, x + 0.58, z1 + 0.08], y1 + 0.85, y1 + 1.0, 'tile_grey', { collide: false });
+  }
+  for (const sz of [-1, 1]) {
+    const run = 12, zc = sz * 4.25;
+    for (let i = 0; i < 6; i++) {
+      const t0 = i / 6, t1 = (i + 1) / 6;
+      block([x - run * (1 - t0), zc - 0.3, x - run * (1 - t1), zc + 0.3], y0, y0 + (y1 - y0) * t1 + 0.6, 'limestone', { collide: false });
+    }
+  }
+}
 block([-13.5, -20.0, 11.0, 20.0], T, F - 0.15, 'limestone');
 floor([-13.5, -20.0, 11.0, 20.0], F, 'sandstone_floor', { th: 0.15 });
 add({ t: 'stair', rect: [-16.0, -3.0, -13.5, 3.0], dir: 'e', y0: T, y1: F, riser: 0.167, base: T, mat: 'limestone' });
