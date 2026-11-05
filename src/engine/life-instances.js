@@ -7,6 +7,7 @@
 
 import * as THREE from 'three/webgpu';
 import { material } from './materials.js';
+import { SMALL } from './layers.js';
 
 /** A shape is instanced settlement-wide from this many copies; rarer ones are merged per tile. */
 export const LIFE_MIN = 16;
@@ -88,6 +89,7 @@ export class LifeInstances {
           mesh.castShadow = cast && this.castsShadow(s.mat);
           mesh.receiveShadow = true;
           mesh.name = `life:${s.mat}${cast ? '' : ':far'}`;
+          mesh.layers.set(SMALL);
           this.group.add(mesh);
           return mesh;
         };

@@ -8,7 +8,7 @@ import * as THREE from 'three/webgpu';
 import { releaseAfterUpload } from '../engine/release.js';
 
 /** Ground tiles nearer than this (m) cast shadows. */
-const SHADOW_REACH = 420;
+const SHADOW_REACH = 340;
 import { PLANET_RADIUS as R } from './relief.js';
 import { faceDir, tileRect } from './chunk.js';
 import { groundMaterial, seaMaterial } from './materials.js';

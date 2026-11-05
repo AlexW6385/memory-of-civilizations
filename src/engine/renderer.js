@@ -13,6 +13,7 @@ import { PLANET_RADIUS } from '../planet/sites.js';
 import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
 import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
+import { SMALL } from './layers.js';
 
 /** The depth buffer unless the address asks for another (see init). */
 const DEPTH_DEFAULT = 'reversed';
@@ -55,6 +56,7 @@ export class Renderer {
 
     const scene = this.scene = new THREE.Scene();
     const camera = this.camera = new THREE.PerspectiveCamera(68, 1, 0.08, 4000);
+    camera.layers.enable(SMALL);           // small things: seen, but shadowed by the first cascade only
     camera.rotation.order = 'YXZ';
 
     // sky
@@ -258,7 +260,13 @@ export class Renderer {
     const csm = this.sun.shadow.shadowNode, L = csm?.lights;
     if (L?.length && this.sun.castShadow) {
       const n = this.frameNo = (this.frameNo || 0) + 1;
-      for (let i = 0; i < L.length; i++) { L[i].shadow.autoUpdate = false; if (i === 0 || n % (i + 1) === 0) L[i].shadow.needsUpdate = true; }
+      for (let i = 0; i < L.length; i++) {
+        L[i].shadow.autoUpdate = false; if (i === 0 || n % (i + 1) === 0) L[i].shadow.needsUpdate = true;
+        // the small things (layer SMALL) cast into the first cascade only: in the outer ones their
+        // shadows are a texel or two but cost a draw each. (A mask of layer 0 alone would be taken
+        // by three for "unset" and replaced by the camera's, so the outer ones carry an unused bit.)
+        L[i].shadow.camera.layers.mask = i === 0 ? (1 | (1 << SMALL)) : (1 | (1 << 3));
+      }
     }
     this.pipeline.render();
   }

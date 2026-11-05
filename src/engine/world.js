@@ -18,6 +18,7 @@ import { material, flameMaterial } from './materials.js';
 import { MATERIALS } from '../core/palette.js';
 import { releaseAfterUpload } from './release.js';
 import { LifeInstances } from './life-instances.js';
+import { SMALL } from './layers.js';
 import { Builder } from './builder.js';
 import { ENV } from './env.js';
 import { loadLand } from '../planet/land.js';
@@ -211,7 +212,7 @@ class Settlement {
       const m = buildingMesh(geometry, mat);
       m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
-      if (detail) m.userData.detail = true;
+      if (detail) { m.userData.detail = true; m.layers.set(SMALL); }
       m.name = `${plan.id}:${mat}`;
       group.add(m);
     }
@@ -223,7 +224,7 @@ class Settlement {
       m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
       m.name = `${plan.id}:${mat}:inst`;
-      if (detail) m.userData.detail = true;
+      if (detail) { m.userData.detail = true; m.layers.set(SMALL); }
       group.add(m);
     }
     if (built.lights.length) {
@@ -264,6 +265,7 @@ class Settlement {
       for (const { mat, geometry } of list) {
         const m = buildingMesh(geometry, mat);
         m.castShadow = castsShadow(mat); m.receiveShadow = true; m.name = `${rec.plan.id}:${mat}:rare`;
+        m.layers.set(SMALL);
         releaseAfterUpload(m);
         rec.group.add(m);
       }
