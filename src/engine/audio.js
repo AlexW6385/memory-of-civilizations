@@ -48,7 +48,9 @@ export class Music {
     this.longReverb = ctx.createConvolver();
     this.longReverb.buffer = this.impulse(12, 3.2);
     this.wetLong = ctx.createGain(); this.wetLong.gain.value = 0;
-    this.bus.connect(this.longReverb); this.longReverb.connect(this.wetLong); this.wetLong.connect(this.master);
+    // fed only in the zones that ask for it: a 12 s convolution costs the audio thread all the time
+    this.longReverb.connect(this.wetLong); this.wetLong.connect(this.master);
+    this.longOn = false;
     // a meter for the tests: RMS of what reaches the speakers
     this.analyser = ctx.createAnalyser();
     this.analyser.fftSize = 2048;
@@ -203,6 +205,14 @@ export class Music {
     this.wet.gain.setTargetAtTime((Z.reverb ?? 0.4) * 0.9, t, 1.5);
     this.dry.gain.setTargetAtTime(1 - (Z.reverb ?? 0.4) * 0.5 - (Z.reverbLong ?? 0) * 0.25, t, 1.5);
     this.wetLong.gain.setTargetAtTime((Z.reverbLong ?? 0) * 0.8, t, 2.0);
+    this.longReverbFor(!!Z.reverbLong);
+  }
+
+  /** Feed the long reverberation only where it is heard (cut off after its tail has died away). */
+  longReverbFor(on) {
+    clearTimeout(this.longOff);
+    if (on && !this.longOn) { this.bus.connect(this.longReverb); this.longOn = true; }
+    else if (!on && this.longOn) this.longOff = setTimeout(() => { try { this.bus.disconnect(this.longReverb); } catch { /* not connected */ } this.longOn = false; }, 14000);
   }
 
   fadeOut(l) {
@@ -479,6 +489,7 @@ export class Music {
   }
 
   tick() {
+    if (this.ctx?.state !== 'running') return;          // muted (suspended): nothing to schedule
     if (this.plc) this.placeEvents();
     const ctx = this.ctx, S = this.score;
     if (!ctx || !S || !this.zone || !this.layers.has(this.zone) || this.volume <= 0) return;

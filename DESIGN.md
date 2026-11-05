@@ -355,6 +355,8 @@ Append-only: date, decision, reason. The log of the Memory Palace era (2026-10) 
 
 - 2026-11-05 — **Fine detail drawn near; indoor shadows** (phase 5): the viewer's bags put the pieces of a material under 0.4 m (and instanced shapes under 0.4 m) into meshes of their own, drawn within 160 m of their part's bounds and casting shadows within 50 m; indoors in a landmark, the other parts of the settlement cast no shadows (their light comes in through the building's own openings). Finer chunks of the town meshes were not made: the town is already in 100 m tiles with near and far versions, and smaller chunks would add draw calls (§8: ≤ 800) for little culling. Picture changes (§14): pieces under 0.4 m are not drawn beyond ~160 m from their building (3–5 pixels there) and cast no shadow beyond ~50 m.
 
+- 2026-11-05 — **Quieter audio thread** (phase 6): the 12 s convolution (great domed spaces) is fed only in zones that ask for it and cut off 14 s after leaving them; the scheduler does nothing while the sound is muted. The shader work of phase 6 (fading procedural detail with distance, merging material variants) waits for `?bench&plain=1` on the author's machine: only if flat materials are markedly faster is it worth the risk to the picture.
+
 ## 13. Roadmap and status
 
 - 2026-11-03 — **Prototypes first** (the owner: build the remaining settlements quickly at prototype level, then raise detail and fix problems together; screenshots skipped meanwhile, tests still run before each push). **Glare**: exposure drops up to ~40% when looking toward a high sun; the sky's Mie halo and the bloom are weaker. **Madurai** (radius 400 m; temple at true plan size; date palms stand in for coconut palms).
@@ -459,7 +461,7 @@ Append-only: date, decision, reason. The log of the Memory Palace era (2026-10) 
 
 - 2026-11-04 — Sound is muted by default with a button top right (the music costs the audio thread, not the frame, but many visitors want silence first). Eye adaptation takes the brightest of six samples and caps outdoor opening at 1.6×, because single buried probes produced white flashes.
 
-- 2026-11-05 — **Performance plan** (phases 0–6, the owner's): phase 0 (bench, switches, geometry budget), 1 (arrays released, shadow casters), 2 (automatic instancing), 3 (the life of the streets instanced settlement-wide), 4 (building in workers) and 5 (fine detail near, indoor shadows) done; baseline on the author's machine to be taken with `?bench` (Safari and Chrome). Next: shaders and audio (6).
+- 2026-11-05 — **Performance plan** (phases 0–6, the owner's): phase 0 (bench, switches, geometry budget), 1 (arrays released, shadow casters), 2 (automatic instancing), 3 (the life of the streets instanced settlement-wide), 4 (building in workers), 5 (fine detail near, indoor shadows) and the audio part of 6 done; baseline on the author's machine to be taken with `?bench` (Safari and Chrome). Next: the owner's `?bench` numbers (Safari and Chrome, with `logdepth=0` and `plain=1`) decide the shader work and whether the logarithmic depth buffer gives way to reversed-Z (three.js 0.186 has `reversedDepthBuffer`).
 
 - 2026-11-05 — Nara palette: doors 'plank' — latticeBay builds board doors with studs and renji windows for the Nara (Tang-manner) halls instead of Ming lattice.
 
