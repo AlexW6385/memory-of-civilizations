@@ -27,7 +27,7 @@ function tint(mat) {
   return null;
 }
 /** How far off an object is still drawn (m): the small things nearer. */
-const REACH = { figure: 170, animal: 190, chickens: 90, pot: 120, basket: 110, sacks: 120, firewood: 110, crates: 140, barrel: 140, ladder: 140, laundry: 150, lantern: 120 };
+const REACH = { shop_sign: 160, hang_lantern: 120, laundry_pole: 150, tea_table: 120, drying_tray: 90, oar: 150, figure: 170, animal: 190, chickens: 90, pot: 120, basket: 110, sacks: 120, firewood: 110, crates: 140, barrel: 140, ladder: 140, laundry: 150, lantern: 120 };
 const _m = new Matrix4(), _q = new Quaternion(), _up = new Vector3(0, 1, 0), _p = new Vector3(), _s = new Vector3();
 function placer(el, bag, k = 1) {
   const [x, z] = el.at, y = el.y ?? 0, rot = el.rot ?? 0, s = (el.s ?? 1) * k;
@@ -392,9 +392,80 @@ function lantern(el, { bag }) {
   else if (kind === 'oil') { put('terracotta', at(lz([[0.05, 0], [0.09, 0.04], [0.07, 0.07], [0.001, 0.07]], 10), 0, h - 0.05, 0.42)); put('lamp_white', at(lz([[0.02, 0], [0.001, 0.07]], 6), 0.06, h + 0.02, 0.42)); }
   else { put('iron', box(-0.13, h - 0.25, 0.29, 0.13, h - 0.22, 0.55)); put('lamp_glass', box(-0.1, h - 0.22, 0.32, 0.1, h + 0.08, 0.52)); put('iron', at(lz([[0.17, 0], [0.001, 0.15]], 4), 0, h + 0.08, 0.42)); }
 }
+// ---- the life of a street front and a canal ----------------------------------------------------
+/** shop_sign: a shop's cloth banner hanging from a bracket out of the wall (the bracket along +z), turned edge-on to the wall so it reads along the street; h the bracket's height; cloth, letters. */
+function shopSign(el, { bag }) {
+  const put = placer(el, bag), h = el.h ?? 2.9, c = el.cloth ?? 'cloth_indigo', len = el.len ?? 1.5, out = el.out ?? 0.95, z0 = 0.3, z1 = out - 0.05, zm = (z0 + z1) / 2;
+  put('timber', box(-0.04, h - 0.05, 0, 0.04, h + 0.04, out));
+  put('timber', seg([0, h - 0.6, 0.02], [0, h, out * 0.6], 0.025, 0.025, 4));
+  put('timber', box(-0.035, h - 0.13, z0 - 0.04, 0.035, h - 0.07, z1 + 0.04));
+  put(c, box(-0.012, h - 0.13 - len, z0, 0.012, h - 0.13, z1));
+  put(el.trim ?? 'cloth_white', box(-0.014, h - 0.13 - len - 0.1, z0, 0.014, h - 0.13 - len, z1));
+  const letters = el.letters ?? 3;
+  for (let k = 0; k < letters; k++) { const yy = h - 0.32 - k * (len - 0.25) / letters, hh = Math.min(0.28, (len - 0.3) / letters - 0.08); put(el.ink ?? 'cloth_white', box(-0.016, yy - hh, zm - 0.13, 0.016, yy, zm + 0.13)); put(c, box(-0.019, yy - hh + 0.04, zm - 0.025, 0.019, yy - 0.04, zm + 0.025)); put(c, box(-0.019, yy - hh / 2 - 0.02, zm - 0.09, 0.019, yy - hh / 2 + 0.02, zm + 0.09)); }
+  for (const zz of [z0 + 0.05, z1 - 0.05]) put('cloth_red', seg([0, h - 0.13 - len - 0.1, zz], [0, h - 0.13 - len - 0.4, zz], 0.02, 0.012, 4));
+}
+/** hang_lantern: a lantern on a cord from an eave { kind ('paper' | 'white'), drop }; y is the hook. */
+function hangLantern(el, { bag }) {
+  const put = placer(el, bag), d = el.drop ?? 0.35, m = el.kind === 'white' ? 'lamp_white' : 'lamp_paper';
+  put('timber', box(-0.006, -d, -0.006, 0.006, 0, 0.006));
+  put('lacquer_black', at(lz([[0.08, 0], [0.08, 0.05], [0.001, 0.05]], 10), 0, -d - 0.05, 0));
+  put(m, at(lz([[0.07, 0], [0.18, 0.07], [0.21, 0.22], [0.18, 0.37], [0.07, 0.44], [0.001, 0.44]], 12), 0, -d - 0.5, 0));
+  put('lacquer_black', at(lz([[0.07, 0], [0.07, 0.05], [0.001, 0.05]], 10), 0, -d - 0.55, 0));
+  put('cloth_red', seg([0, -d - 0.55, 0], [0, -d - 0.85, 0], 0.025, 0.01, 4));
+}
+/** laundry_pole: a bamboo pole pushed out of a window over the street or the water (along +z), clothes hanging from it; y is the window sill. */
+function laundryPole(el, { bag }) {
+  const put = placer(el, bag), rand = rng(el.seed), L = el.len ?? 2.4, CL = ['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_red', 'cloth_brown', 'cloth_indigo', 'cloth_green'];
+  const yb = 0.1, ye = 0.45;
+  put('bamboo_culm', seg([0, yb, -0.3], [0, ye, L], 0.025, 0.02, 6));
+  const n = 2 + Math.floor(rand() * 3);
+  for (let k = 0; k < n; k++) {
+    const t = 0.25 + k * 0.7 / n + rand() * 0.05, zz = -0.3 + (L + 0.3) * t, yy = yb + (ye - yb) * t, w = 0.25 + rand() * 0.35, h = 0.4 + rand() * 0.6, c = CL[Math.floor(rand() * CL.length)];
+    const xo = (k % 2 ? 1 : -1) * 0.045;                                      // alternate sides of the pole, so neighbours never share a plane
+    put(c, box(xo - 0.015, yy - h, zz - w / 2, xo + 0.015, yy, zz + w / 2));
+    if (rand() < 0.4) for (const s of [-1, 1]) put(c, box(xo - 0.014, yy - h * 0.55, zz + s * (w / 2 + 0.1) - 0.08, xo + 0.014, yy - 0.05, zz + s * (w / 2 + 0.1) + 0.08));   // a jacket's sleeves
+  }
+  if (el.prop !== false) put('bamboo_culm', seg([0, -1.6, L * 0.8], [0, ye - 0.02, L * 0.8], 0.018, 0.018, 5));
+}
+/** tea_table: a square table with stools (or benches) round it, a teapot and cups. */
+function teaTable(el, { bag, col }) {
+  const put = placer(el, bag), rand = rng(el.seed);
+  put('wood_dark', box(-0.45, 0.74, -0.45, 0.45, 0.8, 0.45));
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) put('wood_dark', box(sx * 0.4 - 0.03, 0, sz * 0.4 - 0.03, sx * 0.4 + 0.03, 0.74, sz * 0.4 + 0.03));
+  put('wood_dark', box(-0.42, 0.62, -0.42, 0.42, 0.66, 0.42));
+  for (const [dx, dz] of [[0, -0.85], [0, 0.85], [-0.85, 0], [0.85, 0]]) {
+    if (rand() < 0.2) continue;
+    const b = dx === 0 ? box(-0.5, 0.42, dz - 0.13, 0.5, 0.46, dz + 0.13) : box(dx - 0.13, 0.42, -0.5, dx + 0.13, 0.46, 0.5);
+    put('timber', b);
+    for (const s of [-1, 1]) put('timber', dx === 0 ? box(s * 0.42 - 0.025, 0, dz - 0.1, s * 0.42 + 0.025, 0.42, dz + 0.1) : box(dx - 0.1, 0, s * 0.42 - 0.025, dx + 0.1, 0.42, s * 0.42 + 0.025));
+  }
+  put('pottery_dark', at(lz([[0.06, 0], [0.09, 0.04], [0.09, 0.09], [0.04, 0.13], [0.05, 0.15], [0.001, 0.15]], 10), 0.05, 0.8, 0.05));
+  put('pottery_dark', seg([0.14, 0.86, 0.05], [0.21, 0.92, 0.05], 0.012, 0.008, 4));
+  for (const [cx2, cz2] of [[-0.25, -0.2], [0.25, -0.22], [-0.22, 0.25], [0.2, 0.26]]) if (rand() < 0.8) put('glaze_white', at(lz([[0.025, 0], [0.04, 0.05], [0.001, 0.05]], 8), cx2, 0.8, cz2));
+  if (rand() < 0.5) put('basket', at(lz([[0.1, 0], [0.13, 0.08], [0.001, 0.08]], 8), -0.2, 0.8, 0.12));
+  const [x, z] = el.at, y = el.y ?? 0; col.circle(x, z, 0.55, y, y + 0.8);
+}
+/** drying_tray: a round flat bamboo tray on a trestle, things laid out to dry (greens, red peppers, beans). */
+function dryingTray(el, { bag }) {
+  const put = placer(el, bag), rand = rng(el.seed), r = 0.45 + rand() * 0.15, h = el.h ?? 0.55;
+  for (const s of [-1, 1]) { put('bamboo_culm', seg([s * 0.35, 0, -0.3], [s * 0.25, h, 0.3], 0.02, 0.02, 4)); put('bamboo_culm', seg([s * 0.35, 0, 0.3], [s * 0.25, h, -0.3], 0.02, 0.02, 4)); }
+  put('wicker', lz([[0.001, h], [r, h], [r, h + 0.06], [r - 0.03, h + 0.06], [r - 0.03, h + 0.025], [0.001, h + 0.025]], 14));
+  const goods = ['cloth_green', 'cloth_red', 'cloth_ochre', 'cloth_brown'][Math.floor(rand() * 4)];
+  for (let k = 0; k < 14; k++) { const a = rand() * 6.28, d = Math.sqrt(rand()) * (r - 0.08); put(goods, box(Math.cos(a) * d - 0.05, h + 0.025, Math.sin(a) * d - 0.03, Math.cos(a) * d + 0.05, h + 0.045, Math.sin(a) * d + 0.03)); }
+}
+/** oar: the long sculling oar (yuloh) over a boat's stern, its blade in the water, along −z from the pin. */
+function oar(el, { bag }) {
+  const put = placer(el, bag);
+  put('timber', seg([0, 0.95, 0.9], [0, 0.05, -0.9], 0.035, 0.03, 5));
+  put('timber', seg([0, 0.05, -0.9], [0, -0.4, -2.2], 0.03, 0.03, 5));
+  put('timber', box(-0.09, -0.6, -2.6, 0.09, -0.3, -1.9));
+  put('cloth_brown', seg([0, 0.95, 0.9], [0, 0.1, 0.4], 0.006, 0.006, 3));
+}
+
 registerStyle('life', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { pot, basket, sacks, barrel, crates, firewood, bench, trough, well, stall, cart, barrow, ladder, laundry, haystack, animal, chickens, figure, boat, car, street_lamp: streetLamp, lantern },
+  elements: { pot, basket, sacks, barrel, crates, firewood, bench, trough, well, stall, cart, barrow, ladder, laundry, haystack, animal, chickens, figure, boat, car, street_lamp: streetLamp, lantern, shop_sign: shopSign, hang_lantern: hangLantern, laundry_pole: laundryPole, tea_table: teaTable, drying_tray: dryingTray, oar },
   objects: {},
 });
-export const LIFE_KINDS = ['pot', 'basket', 'sacks', 'barrel', 'crates', 'firewood', 'bench', 'trough', 'well', 'stall', 'cart', 'barrow', 'ladder', 'laundry', 'haystack', 'animal', 'chickens', 'figure', 'boat', 'car', 'street_lamp', 'lantern'];
+export const LIFE_KINDS = ['pot', 'basket', 'sacks', 'barrel', 'crates', 'firewood', 'bench', 'trough', 'well', 'stall', 'cart', 'barrow', 'ladder', 'laundry', 'haystack', 'animal', 'chickens', 'figure', 'boat', 'car', 'street_lamp', 'lantern', 'shop_sign', 'hang_lantern', 'laundry_pole', 'tea_table', 'drying_tray', 'oar'];

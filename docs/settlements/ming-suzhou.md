@@ -61,6 +61,8 @@ The garden's main hall faces north over the pond, as the Hall of Distant Fragran
 
 Streets level at 0; the garden 0.15 m above; canal water 0.75 m below the street over a bed 2.6 m down, between granite walls; the pond 0.35 m below the garden over a bed 1.6 m down; islands rising 2.6–3.4 m; rockery mounds 1.2–2.2 m. The canals and the pond cannot be waded; bridges cross them. (`ground.js`)
 
+**The life of the canals and streets (L3, built).** Qiu Ying, who lived in Suzhou, painted his version of *Along the River during the Qingming Festival* with Ming customs, costumes, boats and carts in place of the Song ones [stated: Wikipedia]; the Liaoning version is called an encyclopedia of Suzhou's urban life in the Ming, with busy markets, workshops side by side and over 2,200 figures [stated: iLiaoning, 2026]. Ours, after that picture and the town as it survives: shops with cloth banners on brackets, read along the street, pairs of paper lanterns under the eaves, goods on the counters (jars, baskets, sacks), shopkeepers and customers; tea tables set out in the street with people at them; washing on bamboo poles pushed out of the upper windows over the water; waterside houses with their own steps down to the canal, women washing at the bottom; boats with the boatman at the stern's sculling oar, carrying jars, sacks or baskets, or a passenger; people along the streets with shoulder poles and baskets, knots talking, dogs, hens, wheelbarrows; benches on the canal side with old men sitting [inferred: the scenes common to the Suzhou scrolls and Jiangnan canal towns].
+
 ## 7. Planting
 
 Willows along the canals and the pond; on the islands and hills pines, maples and flowering fruit trees (plum, standing in for the garden's plums and crab-apples); bamboo by the garden walls; holm oak and camphor; loquats in their court; lotus in the pond north of the main hall and in the bays; moss and grass under the trees. [stated: lotus, bamboo, willow, loquat court — present garden; species stand-ins from our plant library are named in `ground.js`]
@@ -78,6 +80,9 @@ In the garden, slow pentatonic phrases on a plucked zither (the qin, played here
 Furniture and the scholar's objects in the halls; inscribed boards and couplets; the penjing; the paving's patterns (crane, lotus, coins); people, the market's life, boats moving; lamps at night in the streets; interiors of the houses; the western and eastern parts of the garden as they were in the Ming.
 
 ## Sources
+
+- [Along the River During the Qingming Festival — Wikipedia](https://wikipedia.com/wiki/Qingming_Shanghe_tu)
+- [Qiu Ying's scroll at the Suzhou Museum — iLiaoning](https://licc.lnd.com.cn/system/2026/03/25/030551300.shtml)
 
 - [Humble Administrator's Garden — Wikipedia](https://en.wikipedia.org/wiki/Humble_Administrator%27s_Garden)
 - [Wen Zhengming — Wikipedia](https://en.wikipedia.org/wiki/Wen_Zhengming)
