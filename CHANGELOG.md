@@ -2,8 +2,8 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
-## v8.92 — Persepolis' winged bulls, Petra's cliffs (2026-11-05)
-- Persepolis: the Gate of All Nations' winged bulls are carved instead of stacked blocks — striding legs, the body and chest, one great curved wing along the outer flank with the ridges of its feathers rising behind the head, the long square beard in curled rows, the tall horned crown. Petra: at the foot of the Siq's cliffs the ground is rock with drifted sand, so the walls stay rose down to the floor instead of fading pale.
+## v8.92 — Builder import fix (2026-11-05)
+- The Persepolis style imports three.js through src/core/three.js, as builders must (they also run in a worker).
 
 ## v8.91 — Persepolis' winged bulls, Petra's cliffs (2026-11-05)
 - Persepolis: the Gate of All Nations' winged bulls are carved instead of stacked blocks — striding legs, the body and chest, one great curved wing along the outer flank with the ridges of its feathers rising behind the head, the long square beard in curled rows, the tall horned crown. Petra: at the foot of the Siq's cliffs the ground is rock with drifted sand, so the walls stay rose down to the floor instead of fading pale.
