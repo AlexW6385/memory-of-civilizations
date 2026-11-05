@@ -34,6 +34,24 @@ function mosque(el, { bag, col }) {
     bag.add(C, lathe([[r, 0], [r * 0.92, r * 0.38], [r * 0.6, r * 0.75], [0.001, r * 0.9]], big ? 20 : 10, null, x, y + h + 0.6, z));
   }
   bag.add('flagstone', box(x0, y - 0.3, z0, x1, y + 0.05, z1)); col.floor([x0, z0, x1, z1], y + 0.05);
+  if (el.simple) return;
+  // the mihrab in the middle of the qibla (north) wall: a stepped frame of dressed coral, the niche dark
+  // within under its pointed head, a band of inset bowls over it; the minbar of three steps beside it
+  const mx = (x0 + x1) / 2, qz = z0 + 0.8;
+  for (let k = 0; k < 3; k++) bag.add('limestone', box(mx - 1.5 + k * 0.25, y, qz, mx + 1.5 - k * 0.25, y + 3.6 - k * 0.2, qz + 0.35 - k * 0.1));
+  bag.add('opening', box(mx - 0.75, y + 0.05, qz + 0.36, mx + 0.75, y + 2.2, qz + 0.4));
+  for (let k = 0; k < 5; k++) { const t0 = k / 5, w = 0.75 * (1 - t0 * 0.9); bag.add('opening', box(mx - w, y + 2.2 + k * 0.16, qz + 0.36, mx + w, y + 2.36 + k * 0.16, qz + 0.4)); }
+  for (let k = -3; k <= 3; k++) { const g = lathe([[0.001, 0], [0.16, 0.01], [0.16, 0.05], [0.001, 0.05]], 10); g.rotateX(Math.PI / 2); g.translate(mx + k * 0.42, y + 3.85, qz + 0.36); bag.add('glaze_blue', g); }
+  for (let k = 0; k < 3; k++) bag.add('wood_dark', box(mx + 2.0, y, qz + 0.4 + k * 0.5, mx + 2.8, y + 0.4 + k * 0.4, qz + 0.9 + k * 0.5));
+  bag.add('wood_dark', box(mx + 2.0, y, qz + 0.4, mx + 2.8, y + 1.9, qz + 0.7));
+  for (const sx of [2.0, 2.72]) bag.add('wood_dark', box(mx + sx, y + 0.4, qz + 0.7, mx + sx + 0.08, y + 1.6, qz + 1.9));
+  // reed mats in rows facing the qibla, and lamps hanging in the bays on chains
+  for (let z = qz + 2.2; z < z1 - 2; z += 1.6) for (let x = x0 + 1.6; x < x1 - 2.4; x += 2.6) bag.add('reed_mat', box(x, y + 0.05, z, x + 2.3, y + 0.075, z + 1.25));
+  for (let i = 0; i < nx; i += 2) for (let k = 0; k < nz; k += 2) {
+    const x = x0 + (i + 0.5) * (x1 - x0) / nx, z = z0 + (k + 0.5) * (z1 - z0) / nz;
+    bag.add('iron', box(x - 0.01, y + 2.9, z - 0.01, x + 0.01, y + h, z + 0.01));
+    bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.16, 0.2], [0.1, 0.32], [0.001, 0.34]], 8, null, x, y + 2.6, z));
+  }
 }
 /** swahili_house: { rect, seed, y } — rooms of coral stone round a sunken court, flat roofs, a carved door. */
 function house(el, { bag, col }) {

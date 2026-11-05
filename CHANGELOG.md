@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.14 — Kilwa's prayer hall (2026-11-05)
+- Kilwa: the Great Mosque's prayer hall is furnished — the mihrab in the middle of the north (qibla) wall in a stepped frame of dressed coral, its niche dark under a pointed head and a band of inset blue bowls above, the wooden minbar of three steps beside it, reed mats in rows facing the qibla across the hall, and glass lamps hanging on chains in the bays.
+
 ## v9.13 — The Apadana's throne (2026-11-05)
 - Persepolis: the Apadana has the king's place inside — a carpet down the aisle from the north door, a dais of two steps, the throne on lion feet with its high back and cushion, the footstool, the canopy on four gilded posts with its fringe, and two incense burners on tall stands; the hall's south wall is closed behind the throne.
 
