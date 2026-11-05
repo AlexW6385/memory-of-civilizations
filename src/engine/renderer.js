@@ -143,23 +143,24 @@ export class Renderer {
     this.pipeline.needsUpdate = true;
   }
 
-  /** A depth-aware 3×3 average of the half-resolution occlusion, taps 3 of its texels apart. */
+  /** A depth-aware 5×5 average of the half-resolution occlusion, one of its texels apart: its
+   *  noise pattern repeats every 5 texels, so a 5-wide average takes it out. */
   aoBlur(aoTex, depthTex, camera) {
     const projInv = uniform(camera.projectionMatrixInverse), texel = uniform(new THREE.Vector2());
-    this.onResize = () => { const s = new THREE.Vector2(); this.renderer.getDrawingBufferSize(s); texel.value.set(3 / Math.max(1, s.x), 3 / Math.max(1, s.y)); };
+    this.onResize = () => { const s = new THREE.Vector2(); this.renderer.getDrawingBufferSize(s); texel.value.set(2 / Math.max(1, s.x), 2 / Math.max(1, s.y)); };
     this.onResize();
     const c = uv(), zc = getViewPosition(c, depthTex.sample(c).r, projInv).z;
     const tol = abs(zc).mul(0.02).add(0.05);
     let sum = float(0), wsum = float(0);
-    for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+    for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++) {
       const q = c.add(vec2(i, j).mul(texel));
       const z = getViewPosition(q, depthTex.sample(q).r, projInv).z;
       const w = max(float(1).sub(abs(z.sub(zc)).div(tol)), 0).add(i === 0 && j === 0 ? 1e-3 : 0);
       sum = sum.add(aoTex.sample(q).r.mul(w)); wsum = wsum.add(w);
     }
-    // far off the occlusion's radius (0.9 m) is under a pixel, and what it finds there is only the
-    // depth's own error darkening open ground: faded out with distance
-    return mix(sum.div(wsum), 1, smoothstep(50, 140, zc.negate()));
+    // farther than a few tens of metres the occlusion's radius (0.9 m) is a few pixels, and what it
+    // finds there is mostly the noise and the depth's own error mottling open ground: faded out
+    return mix(sum.div(wsum), 1, smoothstep(25, 70, zc.negate()));
   }
 
   /**

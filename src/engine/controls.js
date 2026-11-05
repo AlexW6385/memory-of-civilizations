@@ -10,8 +10,8 @@ import { EYE, STEP, WALK, RUN, flightSpeeds, move } from '../core/walk.js';
 
 const DOUBLE_TAP = 0.32;   // s
 // Braking aloft without keys, dv/dt = -(c + k v): from v0 it stops in ln(1 + k v0 / c) / k seconds;
-// c is chosen so that the top speed (200 m/s) stops in T.
-const brake = (k, T) => ({ k, c: 200 * k / (Math.exp(k * T) - 1) });
+// c is chosen so that the top speed (300 m/s) stops in T.
+const brake = (k, T) => ({ k, c: 300 * k / (Math.exp(k * T) - 1) });
 const BRAKE_FLY = brake(1.2, 3), BRAKE_CRUISE = brake(0.6, 5);
 
 export class Controls {
