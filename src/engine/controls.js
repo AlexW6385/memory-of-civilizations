@@ -8,7 +8,11 @@
 
 import { EYE, STEP, WALK, RUN, flightSpeeds, move } from '../core/walk.js';
 
-const DOUBLE_TAP = 0.32, STOP_FLY = 2.5, STOP_CRUISE = 5;   // s
+const DOUBLE_TAP = 0.32;   // s
+// Braking aloft without keys, dv/dt = -(c + k v): from v0 it stops in ln(1 + k v0 / c) / k seconds;
+// c is chosen so that the top speed (200 m/s) stops in T.
+const brake = (k, T) => ({ k, c: 200 * k / (Math.exp(k * T) - 1) });
+const BRAKE_FLY = brake(1.2, 3), BRAKE_CRUISE = brake(0.6, 5);
 
 export class Controls {
   constructor(camera, canvas, collide) {
@@ -134,7 +138,7 @@ export class Controls {
   setCruise(on) {
     on = !!on && this.glide;
     if (on === this.cruise) return;
-    this.cruise = on; this._brake = 0;
+    this.cruise = on;
     document.getElementById('btn-fly')?.classList.toggle('cruise', on);
     this.onCruise?.(on);
   }
@@ -187,16 +191,16 @@ export class Controls {
     let dx = (-sin * f + cos * s) * speed * dt, dz = (-cos * f - sin * s) * speed * dt;
     if (this.glide) {
       // aloft there is momentum: the velocity eases toward what the keys ask for, and without them
-      // slows to a full stop: in STOP_FLY seconds, STOP_CRUISE when cruising
+      // slows to a full stop: within 3 s, 5 s when cruising
       const V = this.vel, tx = dx / dt, tz = dz / dt, steer = l > 0.01;
       if (!this._aloft) { V.x = tx; V.z = tz; }        // taking off keeps the pace one had
-      if (steer) { const k = 1 - Math.exp(-1.6 * dt); V.x += (tx - V.x) * k; V.z += (tz - V.z) * k; this._brake = 0; }
+      if (steer) { const k = 1 - Math.exp(-1.6 * dt); V.x += (tx - V.x) * k; V.z += (tz - V.z) * k; }
       else {
-        const v = Math.hypot(V.x, V.z);
-        if (!this._brake) this._brake = v / (this.cruise ? STOP_CRUISE : STOP_FLY);   // m/s²: steady, to zero
-        const r = v > 1e-3 ? Math.max(0, v - this._brake * dt) / v : 0;
+        // slowing by a small fixed part and a part in proportion to the speed: natural, and a
+        // full stop from even the top speed within the time given
+        const B = this.cruise ? BRAKE_CRUISE : BRAKE_FLY, v = Math.hypot(V.x, V.z);
+        const r = v > 1e-3 ? Math.max(0, v - (B.c + B.k * v) * dt) / v : 0;
         V.x *= r; V.z *= r;
-        if (r === 0) this._brake = 0;
       }
       dx = V.x * dt; dz = V.z * dt;
     } else this.vel.x = this.vel.z = 0;
