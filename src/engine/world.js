@@ -350,16 +350,10 @@ export class World {
     this.open.water = (x, z, y) => { const s = seaInFrame(this.anchor.frame, x, z); return groundInFrame(this.anchor.frame, x, z) < s - 0.3 && y < s + 0.3; };
     this.open.waterLevel = (x, z) => { const s = seaInFrame(this.anchor.frame, x, z); return groundInFrame(this.anchor.frame, x, z) < s ? s : -Infinity; };
     // every building's plan (small modules), to know where its entrance is
-    let n = 0;
-    await Promise.all(BUILDINGS.map(async (entry) => {
-      const mod = await retry(entry.load);
-      const site = this.settlements.find((s) => s.S.focus.region === entry.district);
-      this.plans.set(entry.id, { id: entry.id, entry, plan: mod.plan, music: mod.music, site });
-      onStep('plans', ++n / BUILDINGS.length);
-    }));
-    // only the starting settlement's module now; the others' (each with its styles: most of the
-    // site's code) are fetched after the start, in parallel (loadPlans) — fetching all of them one
-    // after another before the first frame took seconds on a fast machine and much longer on a phone
+    // only the starting settlement's module now (the ten buildings of the old city, src/buildings,
+    // are fetched by the settlements that use them); the others' come after the start: fetched by
+    // the build workers when they are idle, nearest first (warm), so that the page never evaluates
+    // them while one walks and a click on the map finds them in the cache
     this.setAnchor(this.byId.edfu.S.frame, this.byId.edfu);
     await this.plansOf(this.byId.edfu);
     onStep('plans', 1);
@@ -382,10 +376,21 @@ export class World {
     await Promise.all(Array.from({ length: 4 }, async () => { while (queue.length) { try { await this.plansOf(queue.shift()); } catch (e) { console.warn(e); } } }));
   }
 
-  /** The same, one at a time when the page is idle (after the start: no hitch while walking). */
-  async loadPlansIdle() {
+  /**
+   * After the start: the other settlements' modules fetched ahead, nearest to u first — by the
+   * build workers when they are idle (into the browser's cache, evaluated off the main thread), or
+   * without workers by the page when it is idle.
+   */
+  prefetch(u) {
+    const order = this.settlements.filter((s) => MODULES[s.id] && !s.plansLoaded).map((s) => [World.rimDistance(s, u), s]).sort((a, b) => a[0] - b[0]).map(([, s]) => s);
+    if (this.builder?.ok) this.builder.warm(order.map((s) => s.id));
+    else this.loadPlansIdle(order);
+  }
+
+  /** The page's own prefetch, one module at a time when the page is idle. */
+  async loadPlansIdle(order = this.settlements) {
     const idle = () => new Promise((r) => (globalThis.requestIdleCallback ? requestIdleCallback(r, { timeout: 2000 }) : setTimeout(r, 200)));
-    for (const s of this.settlements) {
+    for (const s of order) {
       if (!MODULES[s.id] || s.plansLoaded) continue;
       await idle();
       try { await this.plansOf(s); } catch (e) { console.warn(e); }

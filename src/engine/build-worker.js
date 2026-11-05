@@ -23,7 +23,9 @@ self.onmessage = async (e) => {
     return;
   }
   if (d.cancel !== undefined) { cancelled.add(d.cancel); return; }
+  if (d.warm) { warmQueue.push(d.warm); pumpWarm(); return; }
   const { job, id } = d;
+  active++;
   try {
     await ready;
     let mod;
@@ -41,8 +43,25 @@ self.onmessage = async (e) => {
     done(job);
   } catch (err) {
     self.postMessage({ job, error: String(err?.stack || err) });
-  }
+  } finally { active--; }
 };
+
+// modules fetched ahead (Builder.warm), one at a time and only while no settlement is being built
+const warmQueue = [];
+let active = 0, warming = false;
+async function pumpWarm() {
+  if (warming) return;
+  warming = true;
+  try {
+    await ready;
+    while (warmQueue.length) {
+      while (active > 0) await new Promise((r) => setTimeout(r, 250));
+      const id = warmQueue.shift();
+      try { await grounds.MODULES[id]?.(); } catch { /* fetched again when needed */ }
+      await new Promise((r) => setTimeout(r, 30));
+    }
+  } finally { warming = false; }
+}
 
 function done(job) { cancelled.delete(job); self.postMessage({ job, done: true }); }
 

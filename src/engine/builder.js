@@ -76,6 +76,12 @@ export class Builder {
     }
   }
 
+  /** Fetch these settlements' modules in the workers when they have no job (into the cache). */
+  warm(ids) {
+    if (!this.ok) return;
+    ids.forEach((id, i) => this.workers[i % this.workers.length].postMessage({ warm: id }));
+  }
+
   receive(d) {
     const j = this.jobs.get(d.job);
     if (j) j.heard = performance.now();

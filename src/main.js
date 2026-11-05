@@ -564,7 +564,7 @@ async function main() {
   };
   window.READY = true;
   // the other settlements' landmark plans (for the map), now that the world is open
-  setTimeout(() => world.loadPlansIdle().catch((e) => console.warn('plans', e)), 3000);
+  setTimeout(() => world.prefetch(world.here(controls)), 2000);
   if (params.has('bench')) setTimeout(() => runBench(window.palace), 1000);
 }
 
