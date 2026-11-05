@@ -65,9 +65,12 @@ export function groundMaterial() {
   // sand: wind ripples across the wind, in patches
   const along = P.x.mul(0.8).add(P.z.mul(0.6)), across = P.z.mul(0.8).sub(P.x.mul(0.6));
   const sandOn = g.x.greaterThan(ON);
-  const rnoise = when(sandOn, () => mx_noise_float(vec3(P.x.mul(0.6), 0, P.z.mul(0.6))));
+  // (what feeds the bump's height — ripples, strata, the grass's relief — is computed everywhere:
+  // derivatives of values computed in only some pixels of a 2×2 quad are undefined on the GPU and
+  // showed as black specks)
+  const rnoise = mx_noise_float(vec3(P.x.mul(0.6), 0, P.z.mul(0.6)));
   const rphase = along.mul(48.0).add(rnoise.mul(5.0));
-  const patch = when(sandOn, () => smoothstep(-0.15, 0.45, mx_noise_float(vec3(P.x.mul(0.07), 0, P.z.mul(0.07)))));
+  const patch = smoothstep(-0.15, 0.45, mx_noise_float(vec3(P.x.mul(0.07), 0, P.z.mul(0.07))));
   const ripple = sin(rphase).mul(aaFade(fwidth(along.mul(48.0)))).mul(patch);
   const sandN = when(sandOn, () => mx_noise_float(vec3(across.mul(0.08), 0, along.mul(0.6))));
   const sand = C('#c8aa80').mul(big.mul(0.16).add(1)).mul(huge.mul(0.12).add(1)).mul(sandN.mul(0.06).add(1));
@@ -77,7 +80,7 @@ export function groundMaterial() {
   const grass = grassBase.mul(smoothstep(0.0, 0.5, clump).mul(0.28).add(0.78));
   // rock: grey or buff, in strata
   const rockOn = g.z.greaterThan(ON);
-  const strata = when(rockOn, () => mx_noise_float(vec3(P.x.mul(0.04), P.y.mul(1.1), P.z.mul(0.04))));
+  const strata = mx_noise_float(vec3(P.x.mul(0.04), P.y.mul(1.1), P.z.mul(0.04)));
   // red sandstone (Petra, Rajasthan) where the ground is red: rose to ochre in wavy bands
   const bands = when(rockOn.and(g2.w.greaterThan(0.3)), () => sin(P.y.mul(1.7).add(mx_noise_float(vec3(P.x.mul(0.05), P.y.mul(0.2), P.z.mul(0.05))).mul(4.0))));
   const sandstone = mix(C('#8e4433'), C('#b56f47'), bands.mul(0.5).add(0.5)).mul(strata.mul(0.12).add(1));
@@ -120,7 +123,7 @@ export function groundMaterial() {
   m.colorNode = col3.mul(float(1).sub(wet.mul(0.38))).mul(float(1).sub(puddle.mul(0.5)));
   m.roughnessNode = float(0.95).sub(wet.mul(0.4)).sub(puddle.mul(0.5)).sub(g.z.mul(0.1)).sub(snowA.mul(0.25));
   const h = ripple.mul(0.0035).mul(g.x).add(mid.mul(0.04)).add(strata.mul(g.z).mul(0.08)).add(rows.mul(g2.x).mul(0.02)).add(bank.mul(g2.x).mul(0.05))
-    .add(float(1).sub(smoothstep(0.0, 0.5, clump)).mul(g.y).mul(0.015)).mul(float(1).sub(puddle)).mul(float(1).sub(snowA.mul(0.7)));
+    .add(float(1).sub(smoothstep(-0.3, 0.3, mx_noise_float(P.mul(0.9)))).mul(g.y).mul(0.015)).mul(float(1).sub(puddle)).mul(float(1).sub(snowA.mul(0.7)));
   m.normalNode = bump(h, 1);
   m.name = 'planet-ground';
   return m;
