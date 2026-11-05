@@ -228,6 +228,9 @@ class Settlement {
       built.lights.forEach((l, i) => inst.setMatrixAt(i, m4.makeTranslation(l.at[0], l.at[1] + 0.02, l.at[2])));
       group.add(inst);
     }
+    // its shaders compiled before it shows, not in the frame that first draws it (a hitch)
+    await this.world.r.precompile?.(group);
+    if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
     this.group.add(group);
     // the upper surfaces, to land and walk on (roofs, wall tops)
     if (!plan.nocollide) {

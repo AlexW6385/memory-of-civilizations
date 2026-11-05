@@ -143,6 +143,42 @@ export class Renderer {
     this.pipeline.needsUpdate = true;
   }
 
+  /**
+   * Compile, off the frame, the shaders and pipelines that the meshes under `root` will need, before
+   * they are shown: three otherwise compiles them in the frame that first draws them, a hitch of a
+   * tenth of a second to a second. One mesh of each kind (material, attributes, instancing) not
+   * seen before is compiled, with the scene pass's own target, outputs and context, so that what is
+   * compiled is what the frame will look for. Resolves when done (never rejects).
+   */
+  precompile(root) {
+    const r = this.renderer, sp = this.scenePass, ctx = sp?._contextNodeCache?.context;
+    if (!r || !sp?.renderTarget || !ctx) return Promise.resolve();      // before the first frame
+    const seen = this._compiled ??= new Set(), reps = [];
+    root.traverse((o) => {
+      if (!o.isMesh || !o.material || !o.geometry) return;
+      const g = o.geometry;
+      const key = `${o.material.uuid}|${o.isInstancedMesh ? 1 : 0}${o.instanceColor ? 1 : 0}${g.index ? 1 : 0}${o.receiveShadow ? 1 : 0}|${Object.keys(g.attributes).sort().join()}`;
+      if (seen.has(key)) return;
+      seen.add(key); reps.push(o);
+    });
+    if (!reps.length) return Promise.resolve();
+    // set up as the scene pass does; three's compileAsync gathers what to compile synchronously and
+    // only then awaits, so all of this is put back before any frame can see it
+    const prev = { rt: r.getRenderTarget(), mrt: r.getMRT(), ctx: r.contextNode };
+    const tmp = new THREE.Group(), homes = reps.map((o) => [o, o.parent, o.frustumCulled, o.visible]);
+    for (const o of reps) { tmp.add(o); o.frustumCulled = false; o.visible = true; }
+    let done;
+    try {
+      r.setRenderTarget(sp.renderTarget); r.setMRT(sp.getMRT?.() ?? sp._mrt ?? null); r.contextNode = ctx;
+      done = r.compileAsync(tmp, this.camera, this.scene);
+    } catch (e) { done = Promise.reject(e); }
+    finally {
+      r.setRenderTarget(prev.rt); r.setMRT(prev.mrt); r.contextNode = prev.ctx;
+      for (const [o, parent, fc, vis] of homes) { parent ? parent.add(o) : tmp.remove(o); o.frustumCulled = fc; o.visible = vis; }
+    }
+    return done.catch((e) => console.warn('precompile:', e.message));
+  }
+
   /** A depth-aware 5×5 average of the half-resolution occlusion, one of its texels apart: its
    *  noise pattern repeats every 5 texels, so a 5-wide average takes it out. */
   aoBlur(aoTex, depthTex, camera) {
