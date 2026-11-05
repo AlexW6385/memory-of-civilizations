@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.01 — Knossos' west façade (2026-11-05)
+- Knossos: the West Wing's long front breaks into setbacks — blocks standing forward of the line by one to three metres at two and three storeys, some crowned with horns — and the west entrance has its porch with a single red column, so the façade over the West Court is no longer one flat wall.
+
 ## v9.0 — Sultan Hasan's façade, Athens' roofs (2026-11-05)
 - Cairo: the madrasa's façades stand in bays between pilasters, each bay with tiers of paired windows (the lower square under iron grilles, the upper with pointed heads) and a muqarnas cap stepping out at its top; the portal is two piers with a hood of muqarnas stepping out across the recess, the door at the back under a grilled window — no longer a black slot and a grid of black panes. Athens: the town's courtyard houses keep their tiled roofs at a distance too (they had been dropped in the simple houses). Athens' first view is from the west, above the town, with the Acropolis and its temples in sight.
 

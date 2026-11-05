@@ -11,6 +11,10 @@ const E = [];
 E.push({ t: 'floor', rect: COURT, y: 0.05, th: 0.3, mat: 'flagstone' });
 // the wings
 E.push({ t: 'wing', rect: [-62, -60, -19, 58], storeys: 3, windows: 'w', seed: 1 });
+// the west façade in setbacks: blocks standing forward of the line by a metre or three, at different heights,
+// so that the long front breaks into sun and shadow; the west entrance with its porch in the south part
+for (const [z0, z1, out, st, sd] of [[-60, -38, 2.4, 3, 11], [-30, -12, 1.2, 2, 12], [-4, 14, 3.0, 3, 13], [22, 30, 1.6, 2, 14], [48, 58, 2.2, 3, 15]]) E.push({ t: 'wing', rect: [-62 - out, z0, -62, z1], storeys: st, windows: 'wns', seed: sd, horns: st === 3 });
+E.push({ t: 'portico', a: [-62, 34], b: [-62, 44], n: 1, depth: 4, side: -1, h: 3.6 });
 E.push({ t: 'wing', rect: [-19, -62, -3, -28], storeys: 2, windows: 'n', seed: 2 }, { t: 'wing', rect: [3, -62, 40, -28], storeys: 2, windows: 'ne', seed: 3 });
 E.push({ t: 'wing', rect: [19, -28, 62, 58], storeys: 4, windows: 'es', seed: 4 });
 E.push({ t: 'wing', rect: [-19, 28, -3, 58], storeys: 2, windows: 's', seed: 5 }, { t: 'wing', rect: [3, 28, 19, 58], storeys: 2, windows: 's', seed: 6 });
