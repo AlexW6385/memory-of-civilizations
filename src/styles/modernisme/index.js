@@ -5,7 +5,7 @@
 // and scaled roof.
 
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
-import { box, lathe } from '../../core/geom.js';
+import { box, lathe, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 
 const S = 'limestone_yellow', P = 'stucco_cream';
@@ -39,7 +39,43 @@ function sagrada(el, { bag, col }) {
   // the Nativity façade (east): three portals and four tapering towers, rising unevenly
   const fx = cx + 22;
   bag.add(S, box(fx, y - 0.5, cz - 26, fx + 8, y + 32, cz + 26)); col.rect([fx, cz - 26, fx + 8, cz + 26], y, y + 32);
-  for (const [k, w] of [[-14, 7], [0, 9], [14, 7]]) bag.add('opening', box(fx + 7.95, y + 6, cz + k - w / 2, fx + 8.06, y + 22, cz + k + w / 2));
+  // the three portals (Hope, Charity, Faith): tall parabolic arches, deep in stepped archivolts, a dark
+  // doorway at the back, a trumeau in the middle one; over each a steep gable fringed with crockets
+  const F = fx + 8, tri = [], dark = [], q = (A, B, C, D, arr = tri) => arr.push(...A, ...B, ...C, ...A, ...C, ...D);
+  const P3 = (xx, u, v, zc) => [xx, y + v, zc + u];
+  for (const [k, w, top] of [[-14, 7, 21], [0, 9, 24], [14, 7, 21]]) {
+    const zc = cz + k, spring = 6;
+    const arch = (hw, t) => { const u = -hw + 2 * hw * t; return [u, top - (top - spring) * (u / hw) ** 2]; };
+    const N = 20;
+    // the doorway's darkness, a parabola filled
+    for (let i = 0; i < N; i++) { const [u0, v0] = arch(w / 2, i / N), [u1, v1] = arch(w / 2, (i + 1) / N); q(P3(F + 0.03, u0, spring - 6, zc), P3(F + 0.03, u0, v0, zc), P3(F + 0.03, u1, v1, zc), P3(F + 0.03, u1, spring - 6, zc), dark); }
+    // the archivolts: three rings stepping out and forward
+    for (let r = 0; r < 3; r++) {
+      const hw = w / 2 + 0.55 + r * 0.7, d0 = F + 0.03 + (2 - r) * 0.45, d1 = d0 + 0.45, th = 0.55, tp = top + r * 0.9;
+      const ring = (t) => { const u = -hw + 2 * hw * t; return [u, Math.max(0, tp - (tp - spring) * (u / hw) ** 2)]; };
+      for (let i = 0; i < N; i++) {
+        const [u0, v0] = ring(i / N), [u1, v1] = ring((i + 1) / N);
+        const a0 = [u0, v0], a1 = [u1, v1];
+        const A0 = [u0 * (hw + th) / hw, v0 + th * 0.6], A1 = [u1 * (hw + th) / hw, v1 + th * 0.6];
+        q(P3(d1, a0[0], a0[1], zc), P3(d1, a1[0], a1[1], zc), P3(d1, A1[0], A1[1], zc), P3(d1, A0[0], A0[1], zc));
+        q(P3(d0, a0[0], a0[1], zc), P3(d1, a0[0], a0[1], zc), P3(d1, a1[0], a1[1], zc), P3(d0, a1[0], a1[1], zc));
+        q(P3(d0, A0[0], A0[1], zc), P3(d0, A1[0], A1[1], zc), P3(d1, A1[0], A1[1], zc), P3(d1, A0[0], A0[1], zc));
+      }
+    }
+    if (k === 0) bag.add(S, lathe([[0.55, 0], [0.45, 4.5], [0.7, 5], [0.7, 5.4]], 10, null, F + 0.6, y + 0.2, zc));
+    // the gable above, steep, its edges fringed with crockets
+    const g0 = top + 1.5, g1 = top + (k === 0 ? 14 : 10), gw = w / 2 + 2.6;
+    q(P3(F + 0.6, -gw, g0, zc), P3(F + 0.6, 0, g1, zc), P3(F + 0.6, 0, g1, zc), P3(F + 0.6, gw, g0, zc));
+    for (const xx of [F, F + 0.6]) tri.push(...P3(xx, -gw, g0, zc), ...P3(xx, gw, g0, zc), ...P3(xx, 0, g1, zc));
+    for (const sgn of [-1, 1]) {
+      q(P3(F, sgn * gw, g0, zc), P3(F + 0.6, sgn * gw, g0, zc), P3(F + 0.6, 0, g1, zc), P3(F, 0, g1, zc));
+      for (let i = 1; i < 8; i++) { const t = i / 8; bag.add(S, lathe([[0.32, 0], [0.18, 0.5], [0.001, 0.9]], 6, null, F + 0.3, y + g0 + (g1 - g0) * t + 0.1, zc + sgn * gw * (1 - t))); }
+    }
+    bag.add(S, lathe([[0.5, 0], [0.3, 1.2], [0.001, 2.2]], 8, null, F + 0.3, y + g1, zc));
+  }
+  const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
+  bag.add(S, fromTriangles(both(tri)));
+  bag.add('opening', fromTriangles(both(dark)));
   [[-22, 70], [-8, 58], [8, 52], [22, 40]].forEach(([dz, h]) => {
     const z = cz + dz;
     bag.add(S, lathe([[4.2, 0], [3.8, h * 0.5], [3.0, h * 0.8], [1.6, h], [0.001, h + 4]], 12, null, fx + 4, y + 32, z));

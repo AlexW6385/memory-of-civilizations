@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.99 — Sagrada Família's Nativity portals (2026-11-05)
+- Barcelona: the Nativity façade's three portals are tall parabolic arches set deep in three stepped archivolts, dark doorways at the back and a trumeau in the middle one, each under a steep gable fringed with crockets and a finial — instead of three black rectangles. The Cairo portal view is moved out of the house it stood in.
+
 ## v8.98 — Borgund's dragons and portal (2026-11-05)
 - Borgund: the stave church's dragons are carved heads on curving necks rising from the nave's gable ends, with open jaws and crests curling back; the west portal has broad carved jambs with capitals and a round head; crosses stand on the porch and chancel gables. The Barcelona view is moved out of the wall it stood in.
 
