@@ -8,7 +8,7 @@
 // The village: houses of timber on stilts with steep roofs of palm thatch.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import '../qing/index.js';
 import { rectRoof, beamTris, flipTris } from '../ming/index.js';
 
@@ -39,6 +39,15 @@ function kTower(el, { bag, col }) {
   bag.add(S, box(cx - hw, y + 0.8, cz - hw, cx + hw, y + body, cz + hw));
   bag.add('sandstone_carved', box(cx - hw - 0.25, y + body - 0.6, cz - hw - 0.25, cx + hw + 0.25, y + body, cz + hw + 0.25));
   col.rect([cx - hw - 0.6, cz - hw - 0.6, cx + hw + 0.6, cz + hw + 0.6], y, y + body);
+  // a doorway on each face (el.doors: the faces, default all): dark, in a frame of colonnettes under a lintel
+  for (const f of el.doors ?? 'nesw') {
+    const [dx, dz] = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] }[f], dw = Math.min(1.1, w * 0.12), dh = Math.min(3.2, body * 0.55);
+    const R = (u, d0, d1) => (dx ? [cx + dx * (hw + d0), cz - u, cx + dx * (hw + d1), cz + u] : [cx - u, cz + dz * (hw + d0), cx + u, cz + dz * (hw + d1)]);
+    const fix = (r) => [Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.max(r[0], r[2]), Math.max(r[1], r[3])];
+    let r = fix(R(dw + 0.45, 0, 0.12)); bag.add('sandstone_carved', box(r[0], y + 0.8, r[1], r[2], y + 0.8 + dh + 0.5, r[3]));
+    r = fix(R(dw, 0, 0.16)); bag.add('opening', box(r[0], y + 0.8, r[1], r[2], y + 0.8 + dh, r[3]));
+    r = fix(R(dw + 0.6, 0, 0.2)); bag.add(S, box(r[0], y + 0.8 + dh + 0.5, r[1], r[2], y + 0.8 + dh + 0.85, r[3]));
+  }
   // porticoes: on each side a projecting porch with its own little gabled vault and pediment
   if (el.porches !== false) for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
     const pw = w * 0.38, pd = w * 0.28, ph = body * 0.75;
@@ -82,7 +91,8 @@ function kGallery(el, ctx) {
   for (const [a, b, n] of sides) {
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
     const out = el.solid === 'out' ? 1 : -1;               // the wall's side: outward (n) or inward
-    const gate = el.gates ? el.gate ?? Math.min(18, L * 0.18) : 0;
+    const side = n[0] ? (n[0] > 0 ? 'e' : 'w') : (n[1] > 0 ? 's' : 'n');
+    const gate = el.gates && (!el.gateSides || el.gateSides.includes(side)) ? el.gate ?? Math.min(18, L * 0.18) : 0;
     const pieces = gate ? [[0, L / 2 - gate / 2], [L / 2 + gate / 2, L]] : [[0, L]];
     for (const [s0, s1] of pieces) {
       const A = [a[0] + ux * s0, a[1] + uz * s0], B = [a[0] + ux * s1, a[1] + uz * s1], len = s1 - s0;
@@ -147,11 +157,17 @@ function kTerrace(el, { bag, col }) {
  */
 function nagaRail(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, y = el.y, h = el.h ?? 1.0;
-  const t = [];
-  beamTris(t, [ax, y + h - 0.35, az], [bx, y + h - 0.35, bz], 0.28, 0.5);
-  bag.add(S, fromTriangles(t));
+  // the serpent's body: round, ringed with its scales' bands, carried on short posts with moulded caps
+  const yb = y + h - 0.12;
+  bag.add(S, rod([ax, yb, az], [bx, yb, bz], 0.27, 12));
+  for (let s = 0.6; s < L - 0.3; s += 0.9) { const x = ax + ux * s, z = az + uz * s; bag.add(S, rod([x - ux * 0.06, yb, z - uz * 0.06], [x + ux * 0.06, yb, z + uz * 0.06], 0.3, 12)); }
   const n = Math.max(1, Math.round(L / 2.2));
-  for (let k = 0; k <= n; k++) { const s = k / n, x = ax + (bx - ax) * s, z = az + (bz - az) * s; bag.add(S, box(x - 0.2, y, z - 0.2, x + 0.2, y + h - 0.35, z + 0.2)); }
+  for (let k = 0; k <= n; k++) {
+    const s = k / n, x = ax + (bx - ax) * s, z = az + (bz - az) * s;
+    bag.add(S, box(x - 0.17, y, z - 0.17, x + 0.17, yb - 0.38, z + 0.17));
+    bag.add(S, box(x - 0.24, yb - 0.38, z - 0.24, x + 0.24, yb - 0.22, z + 0.24));
+    bag.add(S, box(x - 0.24, y, z - 0.24, x + 0.24, y + 0.14, z + 0.24));
+  }
   col.segment(el.a, el.b, 0.5, y, y + h + 0.2);
   for (const [p, sg] of [[el.a, -1], [el.b, 1]]) {
     if (el.ends === false) continue;

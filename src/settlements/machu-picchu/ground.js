@@ -37,9 +37,12 @@ function height(x, z) {
     if (q < 1) {
       // a sugarloaf: steep flanks, a rounded summit, ribs and buttresses down the sides, crags and ledges
       const a = Math.atan2(z - p.c[1], x - p.c[0]);
-      const rib = 1 + 0.16 * fbm(x * 0.05 + p.c[0], z * 0.05) + 0.07 * Math.sin(a * 7) + 0.04 * Math.sin(a * 17 + q * 9);
-      const crag = 0.06 * Math.abs(fbm(x * 0.13 + 3, z * 0.13 - 2)) * (1 - q);
-      const prof = (1 - Math.pow(q, 1.35)) * (1 - 0.25 * q);
+      // the ribs and crags on the flanks only; the summit stays a rounded dome, not a cluster of spires
+      const flank = sm(0.08, 0.45, q);
+      const rib = 1 + (0.12 * fbm(x * 0.05 + p.c[0], z * 0.05) + 0.06 * Math.sin(a * 7) + 0.03 * Math.sin(a * 17 + q * 9)) * flank;
+      const crag = 0.05 * Math.abs(fbm(x * 0.13 + 3, z * 0.13 - 2)) * q * (1 - q) * 4;
+      const qs = Math.sqrt(q * q + 0.012);
+      const prof = (1 - Math.pow(qs, 1.35)) * (1 - 0.25 * qs) / (1 - Math.pow(0.11, 1.35));
       h = Math.max(h, RIM + (p.h - RIM) * prof * (rib - crag) - 6 * Math.floor(Math.max(0, fbm(x * 0.08, z * 0.08)) * 2) * q);
     }
   }
@@ -48,7 +51,7 @@ function height(x, z) {
 function cover(x, z, h, ny) {
   const c = { sand: 0, grass: 0, rock: 0, soil: 0, fields: 0, dry: 0.2, warmth: 0.45, red: 0.1, road: 0, snow: 0, forest: 0 };
   const d = outside(x, z);
-  if (ny < 0.55) { c.rock = 0.7; c.grass = 0.3; return c; }
+  if (ny < 0.55) { c.rock = 0.55; c.grass = 0.3; c.soil = 0.15; c.forest = 0.45; return c; }      // the cloud forest clings to all but the sheerest rock
   if (d < TERRACE.w * TERRACE.n) { c.grass = 0.85; c.soil = 0.15; if (inHouse(x, z, 1)) { c.grass = 0.3; c.soil = 0.7; } return c; }
   c.grass = 0.3; c.forest = 0.85; c.rock = 0.1; c.soil = 0.6; return c;
 }

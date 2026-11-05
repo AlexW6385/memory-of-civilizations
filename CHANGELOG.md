@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.94 — Angkor's naga rails and gate, Huayna Picchu (2026-11-05)
+- Angkor: the causeway's naga balustrades are round serpent bodies ringed with their scales' bands on short posts with moulded caps; the western gate opens at its middle, and the gate's and temple's towers have doorways framed in colonnettes under a lintel; the causeway view now stands on the causeway over the moat. Machu Picchu: the peaks keep their ribs and crags on the flanks but rise to a rounded summit instead of a cluster of spires, and the cloud forest clings to their steep slopes.
+
 ## v8.93 — The Potala's windows (2026-11-05)
 - Lhasa: the Potala's windows stand in vertical bands with plain wall between them, the bands of varying width, a few missing at random, the top two rows larger (the halls and chapels) — the palace no longer reads as a regular grid of windows.
 

@@ -17,7 +17,7 @@ E.push({ t: 'ming_wall', a: [ex0, ez1], b: [ex1, ez1], y: 0, h: 4.5, th: 1.2, pa
 E.push({ t: 'ming_wall', a: [ex1, ez0], b: [ex1, ez1], y: 0, h: 4.5, th: 1.2, gates: [{ at: ez1 - ez0 >> 1, w: 6, h: 3.5 }], pal: wallPal });
 E.push({ t: 'ming_wall', a: [ex0, ez0], b: [ex0, -22], y: 0, h: 4.5, th: 1.2, pal: wallPal });
 E.push({ t: 'ming_wall', a: [ex0, 22], b: [ex0, ez1], y: 0, h: 4.5, th: 1.2, pal: wallPal });
-E.push({ t: 'k_gallery', rect: [ex0 - 3, -22, ex0 + 3, 22], y: 1.0, w: 4, h: 3.6, solid: 'out', gates: false });
+E.push({ t: 'k_gallery', rect: [ex0 - 3, -22, ex0 + 3, 22], y: 1.0, w: 4, h: 3.6, solid: 'out', gates: true, gate: 5, gateSides: 'w' });
 for (const z of [-14, 14]) E.push({ t: 'k_tower', c: [ex0, z], y: 1.0, w: 7, h: 16, tiers: 3, porches: false });
 E.push({ t: 'k_tower', c: [ex0, 0], y: 1.0, w: 9, h: 21, tiers: 4 });
 
