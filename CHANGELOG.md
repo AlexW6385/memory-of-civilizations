@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.06 — San Marco's west front (2026-11-05)
+- Venice: San Marco's west front has its five portals — round arches set deep in three stepped archivolts (the middle ring in pink marble), dark doors under lunettes of gold mosaic, two tiers of coloured colonnettes on the piers between them — the loggia's balustrade with the four gilded horses, and over it five gold lunettes under ogee crowns with crockets and statues at their tips, with pinnacled tabernacles between them.
+
 ## v9.05 — The Opera House's shells (2026-11-05)
 - Sydney: the Opera House's shells are cut as from one sphere — each half of their section an arc, the two meeting in a sharp ridge along the top, narrowing as they rise to the mouth — instead of smooth round domes; a rib of cream tiles runs along each ridge and lighter ribs fan down the faces.
 
