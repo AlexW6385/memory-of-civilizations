@@ -82,7 +82,8 @@ export class LifeInstances {
         const make = (cast) => {
           const mesh = new THREE.InstancedMesh(s.geometry, material(s.mat), s.n);
           mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-          if (colors) { mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(s.n * 3), 3); mesh.instanceColor.setUsage(THREE.DynamicDrawUsage); }
+          // always with instance colours (white where untinted): one form of each material (world.js buildingMesh)
+          mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(s.n * 3).fill(1), 3); mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
           mesh.count = 0; mesh.visible = false;
           mesh.castShadow = cast && this.castsShadow(s.mat);
           mesh.receiveShadow = true;

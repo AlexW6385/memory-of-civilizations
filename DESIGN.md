@@ -357,6 +357,8 @@ Append-only: date, decision, reason. The log of the Memory Palace era (2026-10) 
 
 - 2026-11-05 — **Quieter audio thread** (phase 6): the 12 s convolution (great domed spaces) is fed only in zones that ask for it and cut off 14 s after leaving them; the scheduler does nothing while the sound is muted. The shader work of phase 6 (fading procedural detail with distance, merging material variants) waits for `?bench&plain=1` on the author's machine: only if flat materials are markedly faster is it worth the risk to the picture.
 
+- 2026-11-05 — **One form of each material** (the owner: loading had become slow): instancing had made most materials appear both as plain and as instanced meshes, and as instanced meshes with and without instance colours — each form its own shader and pipeline, so the start-up's compiling grew by about a quarter (measured headless: 41 → 55 s of compiling; real GPUs compile faster, in proportion). Every building mesh is now an instanced mesh with instance colours (a merged part is one white copy at its place), and the life meshes always carry colours: back to 44 s with today's added detail. Picture unchanged.
+
 ## 13. Roadmap and status
 
 - 2026-11-03 — **Prototypes first** (the owner: build the remaining settlements quickly at prototype level, then raise detail and fix problems together; screenshots skipped meanwhile, tests still run before each push). **Glare**: exposure drops up to ~40% when looking toward a high sun; the sky's Mie halo and the bloom are weaker. **Madurai** (radius 400 m; temple at true plan size; date palms stand in for coconut palms).

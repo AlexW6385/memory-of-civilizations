@@ -33,6 +33,23 @@ export const LOAD = 700, UNLOAD = 1300;
 /** At most this many settlements are built at once (the nearest); from the air the reach grows, the count does not. */
 export const MAX_BUILT = 4;
 /**
+ * Every mesh of a building is an instanced mesh with instance colours — a merged part is one copy
+ * at its place, white — so that each material is compiled once, in one form: plain and instanced
+ * meshes of one material are two shaders and two pipelines (doubling the start-up's compiling).
+ */
+const IDENTITY = new THREE.Matrix4().elements, WHITE = [1, 1, 1];
+export function buildingMesh(geometry, mat, matrices = IDENTITY, colors = null) {
+  const n = matrices.length / 16;
+  const m = new THREE.InstancedMesh(geometry, material(mat), n);
+  m.instanceMatrix.array.set(matrices);
+  m.instanceMatrix.needsUpdate = true;
+  if (!colors) { colors = new Float32Array(n * 3); for (let i = 0; i < n; i++) colors.set(WHITE, i * 3); }
+  m.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
+  m.computeBoundingSphere();
+  return m;
+}
+
+/**
  * Materials whose shadow cannot be seen, or that should let the light through: window voids (dark
  * panels in the wall's thickness), clear glass, water, lamps. Fewer things to draw in each cascade.
  */
@@ -171,7 +188,7 @@ class Settlement {
     const group = new THREE.Group();
     group.name = plan.id;
     for (const { mat, geometry, detail } of built.parts) {
-      const m = new THREE.Mesh(geometry, material(mat));
+      const m = buildingMesh(geometry, mat);
       m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
       if (detail) m.userData.detail = true;
@@ -182,11 +199,7 @@ class Settlement {
     // streets is gathered settlement-wide once all its tiles are built (buildLife)
     const lifeList = plan.style === 'life' ? built.instanced : [];
     for (const { mat, geometry, matrices, colors, detail } of plan.style === 'life' ? [] : built.instanced) {
-      const m = new THREE.InstancedMesh(geometry, material(mat), matrices.length / 16);
-      m.instanceMatrix.array.set(matrices);
-      m.instanceMatrix.needsUpdate = true;
-      if (colors) m.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
-      m.computeBoundingSphere();
+      const m = buildingMesh(geometry, mat, matrices, colors);
       m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
       m.name = `${plan.id}:${mat}:inst`;
@@ -226,7 +239,7 @@ class Settlement {
     const rare = this.life.build(this.lifeParts);
     for (const [rec, list] of rare) {
       for (const { mat, geometry } of list) {
-        const m = new THREE.Mesh(geometry, material(mat));
+        const m = buildingMesh(geometry, mat);
         m.castShadow = castsShadow(mat); m.receiveShadow = true; m.name = `${rec.plan.id}:${mat}:rare`;
         releaseAfterUpload(m);
         rec.group.add(m);
