@@ -29,13 +29,53 @@ function gothicTower(el, { bag, col }) {
   const [x, z] = el.c, s = el.s ?? 12, h = el.h ?? 96, y = el.y ?? 0, body = el.clock ? h * 0.58 : h * 0.86;
   bag.add(S, box(x - s / 2, y - 0.5, z - s / 2, x + s / 2, y + body, z + s / 2)); col.rect([x - s / 2, z - s / 2, x + s / 2, z + s / 2], y, y + h);
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const tx = x + dx * s / 2, tz = z + dz * s / 2; bag.add(S, lathe([[s * 0.09, 0], [s * 0.09, body + 2]], 8, null, tx, y, tz)); pinnacle(bag, tx, y + body + 2, tz, s * 0.12, s * 0.5); }
-  for (const f of 'nsew') for (let k = 0; k < 6; k++) { const yy = y + body * (0.12 + k * 0.14), q = f === 'n' ? [x - s * 0.3, z - s / 2 - 0.06, x + s * 0.3, z - s / 2 + 0.02] : f === 's' ? [x - s * 0.3, z + s / 2 - 0.02, x + s * 0.3, z + s / 2 + 0.06] : f === 'w' ? [x - s / 2 - 0.06, z - s * 0.3, x - s / 2 + 0.02, z + s * 0.3] : [x + s / 2 - 0.02, z - s * 0.3, x + s / 2 + 0.06, z + s * 0.3]; bag.add('opening', box(q[0], yy, q[1], q[2], yy + body * 0.07, q[3])); }
+  // each face in a frame: R(u0, u1, y0, y1, d0, d1) a box with u along the face, d outward from it
+  const face = (f) => { const sg = f === 'n' || f === 'w' ? -1 : 1, along = f === 'n' || f === 's', o = along ? z + sg * s / 2 : x + sg * s / 2, c = along ? x : z;
+    return (u0, u1, y0, y1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? box(c + u0, y0, Math.min(a, b), c + u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, c + u0, Math.max(a, b), y1, c + u1); }; };
+  // the faces in storeys of Perpendicular panelling: tall narrow panels between mullions, a string course
+  // over each storey, the windows dark within the panels
+  const storeys = el.clock ? 7 : 8, sh = (body - 2) / storeys;
+  for (const f of 'nsew') {
+    const R = face(f), np = 4, pw = s * 0.62 / np;
+    for (let k = 0; k < storeys; k++) {
+      const y0 = y + 2 + k * sh;
+      bag.add(S, R(-s / 2, s / 2, y0 + sh - 0.35, y0 + sh, 0, 0.18));
+      for (let i = 0; i <= np; i++) { const u = -s * 0.31 + i * pw; bag.add(S, R(u - 0.09, u + 0.09, y0 + 0.2, y0 + sh - 0.35, 0, 0.12)); }
+      if (k % 2 === 1 || k === storeys - 1) for (let i = 0; i < np; i++) { const u = -s * 0.31 + (i + 0.5) * pw; bag.add('opening', R(u - pw * 0.3, u + pw * 0.3, y0 + sh * 0.25, y0 + sh * 0.8, -0.02, 0.04)); }
+    }
+  }
   if (el.clock) {
-    const cy = y + body, cs = s * 1.08;
-    bag.add(S, box(x - cs / 2, cy, z - cs / 2, x + cs / 2, cy + h * 0.12, z + cs / 2));
-    for (const [nx, nz] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) { const fx = x + nx * (cs / 2 + 0.05), fz = z + nz * (cs / 2 + 0.05); bag.add('plaster_white', box(fx - (nz ? cs * 0.35 : 0.04), cy + h * 0.02, fz - (nx ? cs * 0.35 : 0.04), fx + (nz ? cs * 0.35 : 0.04), cy + h * 0.02 + cs * 0.7, fz + (nx ? cs * 0.35 : 0.04))); bag.add('gilt_bronze', box(fx - (nz ? 0.15 : 0.08), cy + h * 0.02 + cs * 0.35, fz - (nx ? 0.15 : 0.08), fx + (nz ? 0.15 : 0.08), cy + h * 0.02 + cs * 0.62, fz + (nx ? 0.15 : 0.08))); }
-    bag.add(S, box(x - s * 0.42, cy + h * 0.12, z - s * 0.42, x + s * 0.42, cy + h * 0.2, z + s * 0.42));
-    bag.add('lead', frustum([x - s * 0.45, z - s * 0.45, x + s * 0.45, z + s * 0.45], cy + h * 0.2, y + h - 3, s * 0.44, s * 0.44, s * 0.44, s * 0.44));
+    const cy = y + body, cs = s * 1.08, ch = h * 0.12;
+    bag.add(S, box(x - cs / 2, cy, z - cs / 2, x + cs / 2, cy + ch, z + cs / 2));
+    // the dials: round, white, in a square gilded frame with its tracery corners; the hands
+    for (const f of 'nsew') {
+      const sg = f === 'n' || f === 'w' ? -1 : 1, along = f === 'n' || f === 's', R = cs * 0.34, yc = cy + ch * 0.5;
+      const fx = along ? x : x + sg * (cs / 2), fz = along ? z + sg * (cs / 2) : z;
+      const disc = (r, d, t, m) => { const g = lathe([[0.001, 0], [r, 0], [r, t], [0.001, t]], 32); g.rotateX(Math.PI / 2); if (!along) g.rotateY(Math.PI / 2); g.translate(fx + (along ? 0 : sg * d), yc, fz + (along ? sg * d : 0)); if (sg < 0) g.translate(along ? 0 : -t, 0, along ? -t : 0); bag.add(m, g); };
+      const F = (u0, u1, y0, y1, d0, d1) => (along ? box(x + u0, y0, Math.min(fz + sg * d0, fz + sg * d1), x + u1, y1, Math.max(fz + sg * d0, fz + sg * d1)) : box(Math.min(fx + sg * d0, fx + sg * d1), y0, z + u0, Math.max(fx + sg * d0, fx + sg * d1), y1, z + u1));
+      bag.add('gilt_bronze', F(-R * 1.18, R * 1.18, yc - R * 1.18, yc + R * 1.18, 0, 0.12));
+      disc(R * 1.06, 0.12, 0.06, 'gilt_bronze');
+      disc(R, 0.18, 0.04, 'plaster_white');
+      for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6, r1 = R * 0.82, r2 = R * 0.95, u = Math.cos(a), v = Math.sin(a); bag.add('lacquer_black', F(u * r1 - 0.08, u * r1 + 0.08, yc + v * r1 - 0.08, yc + v * r1 + 0.08, 0.22, 0.26)); void r2; }
+      bag.add('lacquer_black', F(-0.09, 0.09, yc, yc + R * 0.55, 0.26, 0.3));
+      bag.add('lacquer_black', F(-0.07, R * 0.75, yc - 0.07, yc + 0.07, 0.3, 0.33));
+    }
+    // the belfry: an open arcade of pointed openings on each face, louvres within; pinnacles at its corners
+    const by = cy + ch, bh = h * 0.08, bs = s * 0.88;
+    bag.add(S, box(x - bs / 2, by, z - bs / 2, x + bs / 2, by + bh, z + bs / 2));
+    for (const f of 'nsew') {
+      const sg = f === 'n' || f === 'w' ? -1 : 1, along = f === 'n' || f === 's', o = along ? z + sg * bs / 2 : x + sg * bs / 2;
+      for (let i = -1; i <= 1; i++) {
+        const u = i * bs * 0.3, w = bs * 0.11;
+        const B = (u0, u1, y0, y1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? box(x + u0, y0, Math.min(a, b), x + u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, z + u0, Math.max(a, b), y1, z + u1); };
+        bag.add('opening', B(u - w, u + w, by + bh * 0.15, by + bh * 0.8, -0.02, 0.04));
+        for (let l = 1; l < 6; l++) bag.add('lead', B(u - w, u + w, by + bh * (0.15 + l * 0.11) - 0.05, by + bh * (0.15 + l * 0.11) + 0.05, 0.05, 0.12));
+      }
+    }
+    for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) pinnacle(bag, x + dx * bs / 2, by + bh, z + dz * bs / 2, s * 0.08, s * 0.45);
+    bag.add('lead', frustum([x - s * 0.45, z - s * 0.45, x + s * 0.45, z + s * 0.45], by + bh, y + h - 3, s * 0.44, s * 0.44, s * 0.44, s * 0.44));
+    // small gabled lucarnes on the spire
+    for (const f of 'nsew') { const R = face(f); const yy = by + bh + (h - 3 - body - ch - bh) * 0.25; bag.add('lead', R(-0.8, 0.8, yy, yy + 2.4, -s * 0.17, -s * 0.05)); }
     bag.add('gilt_bronze', lathe([[0.3, 0], [0.15, 3], [0.001, 3.6]], 6, null, x, y + h - 3, z));
   } else if (el.spire) bag.add('lead', lathe([[s * 0.5, 0], [0.001, h - body]], 8, null, x, y + body, z));
   else { bag.add(S, box(x - s / 2 - 0.3, y + body, z - s / 2 - 0.3, x + s / 2 + 0.3, y + body + 1, z + s / 2 + 0.3)); bag.add('iron', lathe([[0.1, 0], [0.08, h - body]], 6, null, x, y + body, z)); }

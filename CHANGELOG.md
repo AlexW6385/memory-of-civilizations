@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.02 — The Clock Tower's dials and belfry (2026-11-05)
+- London: the Palace of Westminster's towers are panelled in storeys of Perpendicular tracery — mullions, string courses, dark windows in alternate storeys — instead of bare slots; the Clock Tower has round white dials in square gilded frames with hour marks and hands, a belfry of louvred openings with pinnacles at its corners, and lucarnes on its spire.
+
 ## v9.01 — Knossos' west façade (2026-11-05)
 - Knossos: the West Wing's long front breaks into setbacks — blocks standing forward of the line by one to three metres at two and three storeys, some crowned with horns — and the west entrance has its porch with a single red column, so the façade over the West Court is no longer one flat wall.
 
