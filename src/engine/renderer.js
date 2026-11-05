@@ -3,7 +3,7 @@
 // same scene pass (one pass draws colour and normals), bloom, AgX tone mapping.
 
 import * as THREE from 'three/webgpu';
-import { pass, context, renderOutput, fog, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
+import { pass, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { smaa } from 'three/addons/tsl/display/SMAANode.js';
@@ -126,7 +126,10 @@ export class Renderer {
       aoPass.radius.value = 0.9;
       aoPass.thickness.value = 1.0;
       // occlusion darkens the shaded and half-lit parts; in full sun it is mostly hidden
-      const a = aoPass.getTextureNode().r;
+      // the occlusion comes out of GTAO speckled (a 5×5 noise pattern turns its sample directions,
+      // meant to be averaged by a denoiser): averaged here over about 5×5 of its texels, each
+      // weighted by how near its depth lies to this pixel's, so that it does not bleed across edges
+      const a = this.aoBlur(aoPass.getTextureNode(), scenePass.getTextureNode('depth'), camera);
       const lit = smoothstep(0.6, 3.0, luminance(color.rgb));
       color = vec4(color.rgb.mul(mix(a, mix(1, a, 0.35), lit)), color.a);
     }
@@ -138,6 +141,23 @@ export class Renderer {
     this.pipeline.outputColorTransform = false;
     this.pipeline.outputNode = out;
     this.pipeline.needsUpdate = true;
+  }
+
+  /** A depth-aware 3×3 average of the half-resolution occlusion, taps 3 of its texels apart. */
+  aoBlur(aoTex, depthTex, camera) {
+    const projInv = uniform(camera.projectionMatrixInverse), texel = uniform(new THREE.Vector2());
+    this.onResize = () => { const s = new THREE.Vector2(); this.renderer.getDrawingBufferSize(s); texel.value.set(3 / Math.max(1, s.x), 3 / Math.max(1, s.y)); };
+    this.onResize();
+    const c = uv(), zc = getViewPosition(c, depthTex.sample(c).r, projInv).z;
+    const tol = abs(zc).mul(0.02).add(0.05);
+    let sum = float(0), wsum = float(0);
+    for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+      const q = c.add(vec2(i, j).mul(texel));
+      const z = getViewPosition(q, depthTex.sample(q).r, projInv).z;
+      const w = max(float(1).sub(abs(z.sub(zc)).div(tol)), 0).add(i === 0 && j === 0 ? 1e-3 : 0);
+      sum = sum.add(aoTex.sample(q).r.mul(w)); wsum = wsum.add(w);
+    }
+    return sum.div(wsum);
   }
 
   /**
@@ -154,6 +174,7 @@ export class Renderer {
     if (!this.renderer) return;
     const w = innerWidth, h = innerHeight;
     this.renderer.setSize(w, h, false);
+    this.onResize?.();
     this.camera.aspect = w / h;
     this.camera.fov = w < h ? 78 : 68;
     this.camera.updateProjectionMatrix();
