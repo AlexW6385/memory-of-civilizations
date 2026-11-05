@@ -518,6 +518,7 @@ Append-only: date, decision, reason. The log of the Memory Palace era (2026-10) 
 
 **Phase E onward — Keep going**
 - More civilizations (places and eras not yet present), deeper townscapes, more enterable houses, more objects. Prefer what adds the most civilization per unit of work. Stop only when the author says so.
+- 2026-11-05 — **Performance, after the plan**: reversed-Z, shadow cascades throttled, flight with momentum and cruising, the occlusion's noise averaged, shaders of a new part (and of a new open-country species) compiled before it shows, a neighbour's street life drawn only near, small things shadowed by the first cascade only, the last 12 versions' code kept on deploy. Still: the shadow pass's depth shaders compile on first use (a small catch when a new material first casts); about 12–18 ms of the frame is the CPU submitting ~700 draws (fewer draws would need merging parts per material, not begun); the author's pixel-ratio choice (1.5 now) not yet made.
 
 ## 14. Rules
 
