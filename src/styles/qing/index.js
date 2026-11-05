@@ -236,12 +236,12 @@ function throneHall(el, { bag, col }) {
   const bx = (x1 - x0) / nb, bz = (z1 - z0) / nd;
   bag.add('marble_dark', box(x0 + 0.3, y + 0.01, z0 + 0.3, x1 - 0.3, y + 0.03, z1 - 0.3));
   // the throne's place: the back (north) middle bays
-  const tz = z0 + bz * 1.2, tw = bx * 1.6, td = bz * 0.95;
+  const tw = el.daisW ?? bx * 1.6, td = el.daisD ?? bz * 0.95, tz = el.daisD ? z0 + td + 1.2 : z0 + bz * 1.2;
   for (let i = 1; i < nb; i++) for (let j = 1; j < nd; j++) {
     const x = x0 + i * bx, z = z0 + j * bz;
     if (Math.abs(x - cx) < tw + 0.3 && Math.abs(z - tz) < td + 0.3) continue;
-    const gilt = Math.abs(x - cx) < bx * 1.6 && j <= 3;
-    column(bag, col, x, z, y, H - 0.2, 1.0, gilt ? 'gilt_bronze' : 'lacquer_red');
+    const gilt = el.gilt !== false && Math.abs(x - cx) < bx * 1.6 && j <= 3;
+    column(bag, col, x, z, y, H - 0.2, el.d ?? 1.0, gilt ? 'gilt_bronze' : 'lacquer_red');
     if (gilt) {                                       // the dragon wound round the column: its body a spiral rod, its head near the top
       const pts = []; for (let k = 0; k <= 28; k++) { const a = k * 0.45, yy = y + 1.0 + k * (H - 3.2) / 28; pts.push([x + Math.cos(a) * 0.56, yy, z + Math.sin(a) * 0.56]); }
       for (let k = 0; k < 28; k++) bag.add('gilt_bronze', rod(pts[k], pts[k + 1], 0.13 + 0.05 * Math.sin(k * 0.3), 6));
@@ -258,9 +258,10 @@ function throneHall(el, { bag, col }) {
     dy += h;
   }
   const front = tz + td;
-  for (const sx of [-2.2, 0, 2.2]) for (let k = 0; k < 6; k++) {
+  const sw = Math.min(0.8, tw * 0.09);
+  for (const sx of tw > 6 ? [-2.2, 0, 2.2] : [0]) for (let k = 0; k < 6; k++) {
     const zz = front + 1.4 - k * 0.25, yy = y + (k + 1) * (dy - y) / 6;
-    bag.add('lacquer_red', box(cx + sx - 0.8, y, zz - 0.25, cx + sx + 0.8, yy, zz));
+    bag.add('lacquer_red', box(cx + sx - (tw > 6 ? 0.8 : sw * 1.6), y, zz - 0.25, cx + sx + (tw > 6 ? 0.8 : sw * 1.6), yy, zz));
   }
   // the throne: seat, arms, back with the dragon crest, all gilt over red
   const sy = dy, sz = tz - 0.3;
@@ -269,8 +270,18 @@ function throneHall(el, { bag, col }) {
   for (const s2 of [-1, 1]) bag.add('gilt_bronze', box(cx + s2 * 0.95 - 0.12, sy + 0.55, sz - 0.5, cx + s2 * 0.95 + 0.12, sy + 1.1, sz + 0.4));
   bag.add('gilt_bronze', box(cx - 1.0, sy + 0.55, sz - 0.7, cx + 1.0, sy + 2.0, sz - 0.5));
   for (let k = 0; k < 5; k++) bag.add('gilt_bronze', lathe([[0.001, 0], [0.12, 0.08], [0.06, 0.3], [0.001, 0.35]], 6, null, cx - 0.8 + k * 0.4, sy + 2.0, sz - 0.6));
-  // the screen behind: seven leaves, the middle tallest, gilt, with a carved cresting
-  for (let k = -3; k <= 3; k++) {
+  // the screen behind: seven leaves, the middle tallest, gilt, with a carved cresting; or (Joseon) the
+  // painted screen of the sun, the moon and the five peaks in its red frame
+  if (el.screen === 'irworo') {
+    const W = 4.2, Hs = 2.8, zb = sz - 1.15;
+    bag.add('lacquer_red', box(cx - W / 2 - 0.15, sy, zb - 0.12, cx + W / 2 + 0.15, sy + Hs + 0.2, zb));
+    bag.add('paint_blue', box(cx - W / 2, sy + 0.15, zb, cx + W / 2, sy + Hs, zb + 0.02));
+    const pk = [];
+    for (const [px, ph, pw] of [[-1.6, 1.3, 0.9], [-0.8, 1.7, 0.9], [0, 2.2, 1.0], [0.8, 1.7, 0.9], [1.6, 1.3, 0.9]]) pk.push(cx + px - pw, sy + 0.15, zb + 0.03, cx + px + pw, sy + 0.15, zb + 0.03, cx + px, sy + 0.15 + ph, zb + 0.03);
+    bag.add('glaze_green', fromTriangles(pk));
+    bag.add('stucco_ochre', box(cx - W / 2, sy + 0.15, zb + 0.035, cx + W / 2, sy + 0.45, zb + 0.05));      // the waves at the foot
+    for (const [sx2, m] of [[-1.3, 'paint_minoan_red'], [1.3, 'plaster_white']]) { const g = lathe([[0.001, 0], [0.32, 0], [0.32, 0.03], [0.001, 0.03]], 16); g.rotateX(Math.PI / 2); g.translate(cx + sx2, sy + Hs - 0.5, zb + 0.06); bag.add(m, g); }
+  } else for (let k = -3; k <= 3; k++) {
     const w = 0.85, h = 3.6 - Math.abs(k) * 0.35, xx = cx + k * w;
     bag.add('gilt_bronze', box(xx - w / 2 + 0.02, sy, sz - 1.25, xx + w / 2 - 0.02, sy + h, sz - 1.1));
     bag.add('lacquer_red', box(xx - w / 2 + 0.12, sy + 0.4, sz - 1.1, xx + w / 2 - 0.12, sy + h - 0.5, sz - 1.07));
@@ -280,7 +291,8 @@ function throneHall(el, { bag, col }) {
   for (const s2 of [-1, 1]) {
     const xx = cx + s2 * (tw - 2.4);
     bag.add('bronze', lathe([[0.001, 0], [0.22, 0.05], [0.28, 0.5], [0.2, 0.8], [0.06, 1.1], [0.05, 1.6], [0.1, 1.7], [0.001, 1.75]], 10, null, xx, dy, tz + 0.6));     // crane
-    bag.add('bronze', lathe([[0.3, 0], [0.45, 0.4], [0.4, 0.7], [0.18, 0.8], [0.3, 1.0], [0.001, 1.3]], 10, null, xx + s2 * 0.9, dy, tz - 0.4));                       // burner
+    bag.add('bronze', lathe([[0.3, 0], [0.45, 0.4], [0.4, 0.7], [0.18, 0.8], [0.3, 1.0], [0.001, 1.3]], 10, null, xx, dy, tz - 0.7));                       // burner
+    if (el.elephants === false) continue;
     const ex = cx + s2 * (tw + 1.6), ez = front - 1.2;
     bag.add('gilt_bronze', box(ex - 0.45, y, ez - 0.25, ex + 0.45, y + 0.35, ez + 0.25));
     bag.add('bronze', box(ex - 0.4, y + 0.85, ez - 0.7, ex + 0.4, y + 1.6, ez + 0.7));
@@ -296,7 +308,7 @@ function throneHall(el, { bag, col }) {
   for (let i = 1; i < nx; i += 2) for (let j = 1; j < nz; j += 2) { const x = x0 + i * (x1 - x0) / nx, z = z0 + j * (z1 - z0) / nz; bag.add('gilt_bronze', box(x - 0.18, cyy - 0.26, z - 0.18, x + 0.18, cyy - 0.2, z + 0.18)); }
   // the caisson over the throne: stepped frames rising, the dragon's pearl hanging from the middle
   const cy = y + H - 0.2;
-  for (let k = 0; k < 4; k++) { const r = 2.6 - k * 0.55; bag.add('gilt_bronze', box(cx - r, cy - 0.9 + k * 0.2, tz - r, cx + r, cy - 0.7 + k * 0.2, tz - r + 0.3)); bag.add('gilt_bronze', box(cx - r, cy - 0.9 + k * 0.2, tz + r - 0.3, cx + r, cy - 0.7 + k * 0.2, tz + r)); bag.add('gilt_bronze', box(cx - r, cy - 0.9 + k * 0.2, tz - r, cx - r + 0.3, cy - 0.7 + k * 0.2, tz + r)); bag.add('gilt_bronze', box(cx + r - 0.3, cy - 0.9 + k * 0.2, tz - r, cx + r, cy - 0.7 + k * 0.2, tz + r)); }
+  const cr = Math.min(2.6, tw * 0.45); for (let k = 0; k < 4; k++) { const r = cr - k * cr * 0.21; bag.add('gilt_bronze', box(cx - r, cy - 0.9 + k * 0.2, tz - r, cx + r, cy - 0.7 + k * 0.2, tz - r + 0.3)); bag.add('gilt_bronze', box(cx - r, cy - 0.9 + k * 0.2, tz + r - 0.3, cx + r, cy - 0.7 + k * 0.2, tz + r)); bag.add('gilt_bronze', box(cx - r, cy - 0.9 + k * 0.2, tz - r, cx - r + 0.3, cy - 0.7 + k * 0.2, tz + r)); bag.add('gilt_bronze', box(cx + r - 0.3, cy - 0.9 + k * 0.2, tz - r, cx + r, cy - 0.7 + k * 0.2, tz + r)); }
   bag.add('gilt_bronze', lathe([[0.03, 0], [0.03, 1.2]], 6, null, cx, cy - 1.9, tz));
   bag.add('gilt_bronze', lathe([[0.001, -0.35], [0.3, -0.2], [0.35, 0], [0.3, 0.2], [0.001, 0.35]], 12, null, cx, cy - 2.2, tz));
 }

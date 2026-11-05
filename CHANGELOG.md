@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.12 — Geunjeongjeon's throne (2026-11-05)
+- Seoul: Geunjeongjeon is furnished inside — its inner columns, the throne on a dais of three tiers with a single stair, the screen of the sun, the moon and the five peaks over the waves in its red frame, bronze cranes and incense burners, the coffered ceiling with gilt bosses and the caisson over the throne. (The throne hall builder now takes the dais's size, a screen kind, and leaves out the gilt dragon columns and the elephants where they do not belong.)
+
 ## v9.11 — The Hall of Supreme Harmony's throne room (2026-11-05)
 - Beijing: the Hall of Supreme Harmony is furnished inside — the inner columns of its grid (the six round the throne gilded, a dragon wound round each), the three-tiered dais in red lacquer edged with gilt and its three stairs, the dragon throne, the seven-leaved gilt screen, bronze cranes and incense burners on the dais, elephants bearing vases before it, the coffered ceiling with gilt bosses, the stepped caisson over the throne with the pearl hanging from it, and a floor of dark polished bricks.
 
