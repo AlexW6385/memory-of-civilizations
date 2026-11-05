@@ -143,6 +143,7 @@ export const MATERIALS = {
   lattice_red:      { color: '#8e2a1c', roughness: 0.6, kind: 'lattice', paper: '#e6dcc3', cell: 0.1 },
   paint_caihua:     { color: '#2d5f63', roughness: 0.6, kind: 'smooth' },
   palace_wall:      { color: '#9a3826', roughness: 0.9, kind: 'smooth' },
+  cotto_floor:      { color: '#9c624a', roughness: 0.85, kind: 'paving', course: 0.3, block: 0.3 },
   brick_paving:     { color: '#7c7870', roughness: 0.88, kind: 'paving', course: 0.34, block: 0.68 },
   // Khmer (Angkor, 12th c.): grey-brown sandstone weathered dark with lichen, red laterite in the
   // platforms and enclosure walls; the village: timber on stilts, palm-leaf thatch, woven walls

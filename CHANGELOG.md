@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.19 — Interiors: Santa Maria del Fiore (2026-11-05)
+- Florence's cathedral is hollow as it stood in 1480: the central west door open into the nave of four great bays; composite piers of pietra serena with half-columns and leaf capitals; pointed arcades to the aisles; groin rib vaults (two pointed barrels crossing, ribs of pietra serena); the walkway on corbels at the springing; round stained-glass windows in the clerestory and lancets in the aisles where the outer skin has its windows; a cotto floor; Uccello's 24-hour clock on the inner façade. Under the dome: the octagon's walls with great arches to the nave and the three tribunes, the drum's eight round windows of stained glass, the inner shell white between its ribs, open to the lantern; Brunelleschi's octagonal wooden choir round the high altar. The tribunes have five chapels each, lit by lancets, under ribbed half-domes, joined to the crossing by closed necks. The crossing and the tribunes now turn so that a face, not a corner, looks down each arm. Dossier §4 extended, sourced.
+
 ## v9.18 — Interiors: the Taj Mahal's tomb chamber (2026-11-05)
 - The Taj Mahal can be entered by the south iwan's door and a vestibule into the tomb chamber: an octagon of 7.3 m sides, each face with two storeys of arched niches, the axial ones glazed with light behind marble lattices (jali); carved dado panels with flower bosses, thin dark frames, inlay of red, green, gold and blue stones in the spandrels; a ring to the inner dome with the sun at its crown; an octagonal floor; at the centre the marble screen of 1643, three pierced panels a side between posts, one open on the south, round the cenotaph of Mumtaz Mahal on its platform (Shah Jahan's came in 1666, so it is not shown). Dossier §4 extended, sourced.
 

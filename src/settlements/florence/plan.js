@@ -2,7 +2,7 @@
 import { RADIUS, DUOMO, CAMPANILE, BAPTISTERY, PALAZZO, LOGGIA, ARNO, BRIDGE } from './layout.js';
 
 const E = [
-  { t: 'duomo', ...DUOMO },
+  { t: 'duomo', ...DUOMO, interior: true },
   { t: 'campanile', c: CAMPANILE, s: 14.5, h: 84 },
   { t: 'baptistery', c: BAPTISTERY, r: 13.5, h: 26 },
   { t: 'palazzo', rect: PALAZZO, h: 30, tower: { c: [82, 124], s: 7, h: 94 } },
@@ -19,7 +19,7 @@ export const centre = {
   view: [DUOMO.c[0] - DUOMO.nave - 25, DUOMO.c[1] - 22, DUOMO.c[0] + 34, DUOMO.c[1] + 22],
   bakeTop: 115,
   elements: E,
-  rooms: [{ id: 'piazza', rect: [-160, -110, 100, -10], y: 0, kind: 'open' }],
+  rooms: [{ id: 'nave', rect: [-70, -77.5, 17, -42.5], y: 0, kind: 'hall' }, { id: 'crossing', rect: [17, -103, 83, -17], y: 0, kind: 'hall' }, { id: 'piazza', rect: [-160, -110, 100, -10], y: 0, kind: 'open' }],
   walks: [Object.assign([[-150, -60], [-150, -20], [-80, -20]], { y0: 0 })],
 };
 const az = ARNO.z + 12 * Math.sin(BRIDGE.x / 130);

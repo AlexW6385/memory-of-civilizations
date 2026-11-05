@@ -31,6 +31,8 @@ The cathedral faces west toward the Baptistery. [stated]
 
 White, green and pink marble on the cathedral, campanile and Baptistery; red tile on the dome and roofs; rusticated stone on the Palazzo; plastered houses under tiled roofs. [stated]
 
+**Santa Maria del Fiore inside (L3, built).** A basilica with a wide nave of four square bays and an aisle either side, separated by wide pointed arches on composite piers [stated: Wikipedia]; the clerestory windows are round [stated: Wikipedia]; the interior cold and grey with pietra serena [stated: Horner 1877]. The polychrome marble floor dates from the 16th–17th centuries [stated: buffaloah], so in 1480 a brick floor is shown [inferred]. On the inner façade, Paolo Uccello's painted 24-hour clock of 1443, between the mosaic of the Coronation and the rose window [stated: Opera del Duomo]. The eight round windows of the drum were glazed 1434–45 to designs by Donatello, Ghiberti, Andrea del Castagno and Uccello [stated: Opera del Duomo], and Brunelleschi's choir enclosure stood under the dome [stated: Opera del Duomo]; the Last Judgment in the dome was painted only in 1572–79 [inferred: after our date], so the shell is shown white between its ribs. Ours: the four bays (oblong in our smaller building), piers of pietra serena with half-columns and leaf capitals, the arcades, a walkway on corbels at the springing [inferred from the ballatoio inside], rib vaults, lancets in the aisles where the outer skin has windows; the central west door open; under the dome an octagonal wooden choir round the high altar; the three tribunes with five chapels each, lit by lancets, under ribbed half-domes. Recorded for later: Uccello's Hawkwood (1436) and Castagno's Niccolò da Tolentino (1456) on the north aisle wall, the cantorie of Luca della Robbia and Donatello, the sacristies' doors.
+
 ## 5. The town
 
 About 1,500 houses and palaces. [inferred]
@@ -52,6 +54,12 @@ From the Baptistery's square along the cathedral to the Signoria and down to the
 Polyphony in the cathedral; the lute and the viol; carnival songs. [inferred]
 
 ## Sources
+
+- [The interior of the Cathedral — Opera di Santa Maria del Fiore](https://www.duomofirenze.it/en/cattedrale-interno/)
+- [The clock painted by Paolo Uccello — Opera magazine](https://duomo.firenze.it/en/opera-magazine/post/11558/the-clock-painted-by-paolo-uccello-for-the-cathedral-of-florence)
+- [The stained glass windows of the drum — Opera magazine](https://duomo.firenze.it/en/opera-magazine/post/6520/the-stained-glass-windows-of-the-drum-of-the-dome-of-santa-maria-del-fiore)
+- [Florence Cathedral interior — buffaloah](https://buffaloah.com/a/virtual/italy/flor/cath/int/index.html)
+- [Walks in Florence (Horner, 1877)](https://florin.ms/hwalks4.html)
 
 - [Florence Cathedral — Wikipedia](https://en.wikipedia.org/wiki/Florence_Cathedral)
 - [Giotto's Campanile — Wikipedia](https://en.wikipedia.org/wiki/Giotto%27s_Campanile)
