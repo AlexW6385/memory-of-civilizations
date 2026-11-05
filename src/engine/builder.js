@@ -4,6 +4,9 @@
 
 import * as THREE from 'three/webgpu';
 
+/** A job silent this long (ms) has failed (the first answer includes laying out the town). */
+const STALL = 25000;
+
 export class Builder {
   constructor(n = 2) {
     this.jobs = new Map();
@@ -14,6 +17,7 @@ export class Builder {
     let url = null;
     try { url = new URL(JSON.parse(document.querySelector('script[type="importmap"]').textContent).imports.three, location.href).href.replace(/three\.webgpu\.js$/, 'three.core.js'); } catch { /* no import map */ }
     if (!url) { this.ok = false; return; }
+    this.timer = setInterval(() => this.watch(), 2000);
     this.workers = Array.from({ length: n }, () => {
       const w = new Worker(new URL('./build-worker.js', import.meta.url), { type: 'module' });
       w.load = 0;
@@ -26,6 +30,7 @@ export class Builder {
 
   fail() {
     this.ok = false;
+    clearInterval(this.timer);
     for (const j of this.jobs.values()) j.reject(new Error('build worker failed'));
     this.jobs.clear();
   }
@@ -41,7 +46,7 @@ export class Builder {
     let chain = Promise.resolve();
     const done = new Promise((resolve, reject) => {
       this.jobs.set(job, {
-        worker: w, reject,
+        worker: w, reject, heard: performance.now(),
         on: (d) => {
           if (d.fatal || d.error) { reject(new Error(d.fatal || d.error)); return; }
           if (d.count !== undefined) chain = chain.then(() => onCount(d.count, d.landmarks));
@@ -54,7 +59,26 @@ export class Builder {
     return { done, cancel: () => w.postMessage({ cancel: job }) };
   }
 
+  /**
+   * A worker that falls silent (killed for its memory, a module that never arrives) would leave a
+   * settlement unbuilt for ever: a job that hears nothing for STALL ms fails, the workers are let go
+   * of, and the world builds on the main thread from then on.
+   */
+  watch() {
+    const now = performance.now();
+    for (const j of this.jobs.values()) {
+      if (now - j.heard > STALL) {
+        console.warn('build worker silent for', Math.round((now - j.heard) / 1000), 's: building in the page');
+        for (const w of this.workers) w.terminate();
+        this.fail();
+        return;
+      }
+    }
+  }
+
   receive(d) {
+    const j = this.jobs.get(d.job);
+    if (j) j.heard = performance.now();
     if (d.fatal) { console.warn('build worker:', d.fatal); this.fail(); return; }
     this.jobs.get(d.job)?.on(d);
   }
