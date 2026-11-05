@@ -169,6 +169,38 @@ function lamassu(bag, x, z, y, sx, sz) {
   for (const k of [0.2, 0.45, 0.68]) bag.add(S, lathe([[0.4, 0], [0.4, 0.06], [0.001, 0.06]], 12, null, hx, yb + 5.35 + k, hz));
 }
 
+/**
+ * audience: the king's place in a hall { c (the throne), y (floor), dir: [x, z] (the way he faces), aisle (its
+ * length) }: a dais of two steps, the throne with its lion feet and high back, the footstool, the canopy on
+ * four posts with its fringe, two incense burners on tall stands, and the long carpet down the aisle.
+ */
+function audience(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y, d = el.dir ?? [0, -1], u = [-d[1], d[0]], L = el.aisle ?? 40;
+  const P = (a, b) => [cx + d[0] * a + u[0] * b, cz + d[1] * a + u[1] * b];
+  const Bx = (a0, a1, b0, b1, y0, y1, m) => { const p = P(a0, b0), q = P(a1, b1); bag.add(m, box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1]))); };
+  // the carpet down the aisle, a border of another colour
+  Bx(2.6, 2.6 + L, -1.6, 1.6, y, y + 0.03, 'cloth_indigo');
+  Bx(2.6, 2.6 + L, -1.3, 1.3, y + 0.03, y + 0.045, 'cloth_red');
+  // the dais in two steps
+  Bx(-2.6, 2.6, -3, 3, y, y + 0.35, S); Bx(-2.0, 2.0, -2.4, 2.4, y + 0.35, y + 0.7, S);
+  const r = [P(-2.6, -3), P(2.6, 3)]; col.rect([Math.min(r[0][0], r[1][0]), Math.min(r[0][1], r[1][1]), Math.max(r[0][0], r[1][0]), Math.max(r[0][1], r[1][1])], y, y + 0.7);
+  const dy = y + 0.7;
+  // the throne: lion feet, the seat, the high back, cushions; the footstool before it
+  for (const [a, b] of [[0.45, -0.6], [0.45, 0.6], [-0.35, -0.6], [-0.35, 0.6]]) { const p = P(a, b); bag.add('gilt_bronze', lathe([[0.12, 0], [0.09, 0.15], [0.07, 0.5]], 8, null, p[0], dy, p[1])); }
+  Bx(-0.45, 0.55, -0.7, 0.7, dy + 0.5, dy + 0.62, 'gilt_bronze');
+  Bx(-0.4, 0.5, -0.62, 0.62, dy + 0.62, dy + 0.72, 'cloth_red');
+  Bx(-0.55, -0.42, -0.7, 0.7, dy + 0.5, dy + 1.9, 'gilt_bronze');
+  for (const b of [-0.7, 0.7]) { const p = P(-0.48, b); bag.add('gilt_bronze', lathe([[0.001, 0], [0.08, 0.04], [0.05, 0.15], [0.001, 0.2]], 6, null, p[0], dy + 1.9, p[1])); }
+  Bx(0.75, 1.25, -0.4, 0.4, dy, dy + 0.25, 'gilt_bronze');
+  // the canopy on four posts, its fringe hanging all round
+  const ch = dy + 3.8;
+  for (const [a, b] of [[-1.7, -2.1], [-1.7, 2.1], [1.7, -2.1], [1.7, 2.1]]) { const p = P(a, b); bag.add('gilt_bronze', lathe([[0.1, 0], [0.08, ch - dy]], 8, null, p[0], dy, p[1])); }
+  Bx(-1.9, 1.9, -2.3, 2.3, ch, ch + 0.12, 'cloth_red');
+  for (const [a0, a1, b0, b1] of [[-1.9, 1.9, -2.3, -2.25], [-1.9, 1.9, 2.25, 2.3], [-1.9, -1.85, -2.3, 2.3], [1.85, 1.9, -2.3, 2.3]]) Bx(a0, a1, b0, b1, ch - 0.45, ch, 'cloth_ochre');
+  // the incense burners on their tall stands, before the dais
+  for (const b of [-3.6, 3.6]) { const p = P(3.2, b); bag.add('bronze', lathe([[0.3, 0], [0.12, 0.2], [0.07, 1.1], [0.32, 1.25], [0.36, 1.5], [0.12, 1.65], [0.18, 1.9], [0.001, 2.1]], 10, null, p[0], y, p[1])); col.circle(p[0], p[1], 0.3, y, y + 2.1); }
+}
+
 /** persian_house: { rect, seed }: a flat-roofed mudbrick house round a small court, a parapet. */
 function house(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 3.2 + rand() * 0.8, t = 0.6;
@@ -180,6 +212,6 @@ function house(el, { bag, col }) {
 
 registerStyle('achaemenid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, persian_house: house },
+  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house },
   objects: {},
 });

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.13 — The Apadana's throne (2026-11-05)
+- Persepolis: the Apadana has the king's place inside — a carpet down the aisle from the north door, a dais of two steps, the throne on lion feet with its high back and cushion, the footstool, the canopy on four gilded posts with its fringe, and two incense burners on tall stands; the hall's south wall is closed behind the throne.
+
 ## v9.12 — Geunjeongjeon's throne (2026-11-05)
 - Seoul: Geunjeongjeon is furnished inside — its inner columns, the throne on a dais of three tiers with a single stair, the screen of the sun, the moon and the five peaks over the waves in its red frame, bronze cranes and incense burners, the coffered ceiling with gilt bosses and the caisson over the throne. (The throne hall builder now takes the dais's size, a screen kind, and leaves out the gilt dragon columns and the elephants where they do not belong.)
 

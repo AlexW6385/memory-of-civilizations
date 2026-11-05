@@ -24,7 +24,8 @@ E.push({ t: 'terrace', rect: TERRACE.rect, y0: -1, y1: T, gaps: [[tx0 - 2, STAIR
 // the Gate of All Nations
 E.push({ t: 'lamassu_gate', c: [-112, STAIR.z], s: 25, h: 17, y: T });
 // the Apadana on its 2.6 m plinth: 6 × 6 columns in the hall, porticoes north, west and east
-E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwes' });
+E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe' });
+E.push({ t: 'audience', c: [-30, -40], y: T + 2.75, dir: [0, -1], aisle: 44 });
 E.push({ t: 'stair', rect: [-50, -126, -10, -116], dir: 's', y0: T, y1: T + 2.6, riser: 0.12, base: T, mat: 'limestone_persian' });
 // the Hall of a Hundred Columns, 70 × 70 m, 10 × 10 columns, a portico north
 E.push({ t: 'hall', rect: [40, -130, 110, -60], y: T, plinth: 0.8, h: 13, grid: [10, 10], porticoes: 'n', portDepth: 14, walls: 3.5, doors: 'nesw' });
