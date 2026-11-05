@@ -14,7 +14,7 @@ export const FLY = 9, FLY_FAST = 18, VERTICAL_RISE = 1.2, CEILING = 1500;
  *  vertical speed, rising or falling { vertical }. */
 export function flightSpeeds(alt) {
   const a = Math.max(0, alt);
-  return { fly: Math.min(110, FLY + a * 0.2), fast: Math.min(200, FLY_FAST + a * 0.4), vertical: Math.min(160, 6 + a * 0.25) };
+  return { fly: Math.min(110, FLY + a * 0.2), fast: Math.min(200, FLY_FAST + a * 0.4), vertical: Math.min(250, 6 + a * 0.4) };
 }
 
 /** The vertical speed aloft after dt (P: vy, lift, cruise; fs from flightSpeeds). */
