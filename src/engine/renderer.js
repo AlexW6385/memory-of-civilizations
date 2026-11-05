@@ -14,6 +14,9 @@ import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
 import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
 
+/** The depth buffer unless the address asks for another (see init). */
+const DEPTH_DEFAULT = 'log';
+
 export const QUALITY = {
   high: { pixelRatio: 1.5, shadowMap: 2048, cascades: 3, ao: true, aa: true },
   medium: { pixelRatio: 1.0, shadowMap: 2048, cascades: 3, ao: true, aa: true },
@@ -27,7 +30,14 @@ export class Renderer {
   }
 
   async init(quality = 'high') {
-    const r = this.renderer = new THREE.WebGPURenderer({ canvas: this.canvas, antialias: false, forceWebGL: !this.webgpu, powerPreference: 'high-performance', logarithmicDepthBuffer: new URLSearchParams(location.search).get('logdepth') !== '0' });
+    // depth: a reversed float buffer (`?depth=reversed`) keeps the precision of a logarithmic one over
+    // the planet's distances without writing depth from every fragment, which turns off the GPU's
+    // early depth test (each hidden surface fully shaded); `?depth=log` (and `?logdepth=1`) the
+    // logarithmic buffer, `?depth=standard` (and `?logdepth=0`) a plain one, for comparison
+    const qp = new URLSearchParams(location.search);
+    const depthMode = qp.get('depth') || (qp.get('logdepth') === '0' ? 'standard' : qp.get('logdepth') === '1' ? 'log' : DEPTH_DEFAULT);
+    const r = this.renderer = new THREE.WebGPURenderer({ canvas: this.canvas, antialias: false, forceWebGL: !this.webgpu, powerPreference: 'high-performance',
+      logarithmicDepthBuffer: depthMode === 'log', reversedDepthBuffer: depthMode === 'reversed' });
     await r.init();
     // instance matrices always as vertex attributes: below 64 kB three.js puts them in a uniform
     // array whose length is written into the shader, so every instance count was a new shader and
@@ -107,6 +117,8 @@ export class Renderer {
     });
     let color = scenePass.getTextureNode('output');
     if (Q.ao) {
+      // with a reversed buffer the pass works unchanged: it rebuilds view positions through the
+      // camera's own (reversed) projection, and the sky, at depth 0, lies on the far plane
       const aoPass = ao(scenePass.getTextureNode('depth'), null, camera);
       aoPass.resolutionScale = 0.5;
       aoPass.distanceExponent.value = 1.0;
