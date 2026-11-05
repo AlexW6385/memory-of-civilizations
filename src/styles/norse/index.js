@@ -19,9 +19,18 @@ function gable(bag, mat, [x0, z0, x1, z1], y, pitch, o = 0.3, alongX = null) {
   const h = (x1 - x0 + 2 * o) / 2; bag.add(mat, frustum(r, y, y + h * pitch, h, h, 0, 0, { noBottom: true, noTop: true })); return y + h * pitch;
 }
 /** A carved dragon head leaning out from a gable end at (x, y, z), pointing along dir (+1/-1 on x). */
-function dragon(bag, x, y, z, dir) {
-  const g = box(-0.15, 0, -0.12, 0.15, 1.6, 0.12); g.rotateZ(-dir * 0.7); g.translate(x, y, z); bag.add(W, g);
+function dragon(bag, x, y, z, dir, s = 1) {
+  // the neck rising out from the gable's ridge in three curving pieces, the head with its open jaws and crest
+  const seg = (a, b, w) => { const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy); const g = box(0, -w, -w * 0.8, L, w, w * 0.8); g.rotateZ(Math.atan2(dy, dx * dir)); g.translate(x + a[0] * dir, y + a[1], z); bag.add(W, g); };
+  const P = [[0, 0], [0.45 * s, 0.35 * s], [0.75 * s, 0.85 * s], [0.95 * s, 1.35 * s]];
+  for (let i = 0; i < 3; i++) seg(P[i], P[i + 1], (0.14 - i * 0.02) * s);
+  const h0 = P[3];
+  seg(h0, [h0[0] + 0.55 * s, h0[1] + 0.12 * s], 0.11 * s);           // the upper jaw
+  seg([h0[0] + 0.05 * s, h0[1] - 0.06 * s], [h0[0] + 0.5 * s, h0[1] - 0.22 * s], 0.06 * s);     // the lower jaw, open
+  seg([h0[0] - 0.08 * s, h0[1] + 0.08 * s], [h0[0] - 0.25 * s, h0[1] + 0.4 * s], 0.05 * s);     // the crest curling back
 }
+/** A small cross on a gable's apex. */
+function cross(bag, x, y, z, s = 1) { bag.add(W, box(x - 0.05 * s, y, z - 0.05 * s, x + 0.05 * s, y + 1.0 * s, z + 0.05 * s)); bag.add(W, box(x - 0.05 * s, y + 0.55 * s, z - 0.3 * s, x + 0.05 * s, y + 0.65 * s, z + 0.3 * s)); }
 /** stave_church: { c, y, s (scale) } — the west door, the chancel and apse east. */
 function staveChurch(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y ?? 0, s = el.s ?? 1, X = (v) => cx + v * s, Z = (v) => cz + v * s, U = (v) => y + v * s;
@@ -39,20 +48,27 @@ function staveChurch(el, { bag, col }) {
   const co = [X(-4), Z(-3.4), X(4), Z(3.4)];
   bag.add(W, box(co[0], U(7.4), co[1], co[2], U(10.5), co[3]));
   const ridge = gable(bag, SH, co, U(10.5), 1.55, 0.35 * s, true);
-  for (const [x, d] of [[co[0] - 0.3, -1], [co[2] + 0.3, 1]]) { bag.add(W, box(x - 0.1, ridge - 0.3, cz - 0.1, x + 0.1, ridge + 0.6, cz + 0.1)); dragon(bag, x, ridge - 0.4, cz, d); }
-  // the lower gables over the aisles' ends, with their dragons
-  for (const [x, d] of [[ai[0] - 0.2, -1], [ai[2] + 0.2, 1]]) dragon(bag, x, U(7), cz, d);
+  for (const [x, d] of [[co[0] - 0.3, -1], [co[2] + 0.3, 1]]) { bag.add(W, box(x - 0.1, ridge - 0.3, cz - 0.1, x + 0.1, ridge + 0.6, cz + 0.1)); dragon(bag, x, ridge - 0.4, cz, d, s * 1.1); }
   // the west porch
   const po = [X(-8.8), Z(-1.6), sv[0], Z(1.6)];
   bag.add(W, box(po[0], y - 0.4, po[1], po[2], U(2.4), po[3])); col.rect(po, y, U(2.4));
-  gable(bag, SH, po, U(2.4), 1.2, 0.25, true);
-  bag.add('opening', box(po[0] - 0.04, y, cz - 0.7 * s, po[0], U(2), cz + 0.7 * s));
+  const pr = gable(bag, SH, po, U(2.4), 1.2, 0.25, true);
+  cross(bag, po[0] - 0.25, pr - 0.15, cz, s * 0.8);
+  // the west portal: the door under a round head, framed by broad carved jambs (the vine and dragon work) and a capital each side
+  bag.add('opening', box(po[0] - 0.04, y, cz - 0.6 * s, po[0], U(1.9), cz + 0.6 * s));
+  bag.add('opening', lathe([[0.6 * s, 0], [0.6 * s, 0.04], [0.001, 0.04]], 12, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(po[0] - 0.02, U(1.9), cz));
+  for (const sz of [-1, 1]) {
+    bag.add(W, box(po[0] - 0.14, y, cz + sz * 0.62 * s - (sz > 0 ? 0 : 0.42 * s), po[0] - 0.02, U(1.95), cz + sz * 0.62 * s + (sz > 0 ? 0.42 * s : 0)));
+    for (let k = 0; k < 6; k++) bag.add(W, box(po[0] - 0.2, U(0.2 + k * 0.3), cz + sz * 0.83 * s - 0.08 * s, po[0] - 0.12, U(0.36 + k * 0.3), cz + sz * 0.83 * s + 0.08 * s));
+    bag.add(W, box(po[0] - 0.22, U(1.95), cz + sz * 0.83 * s - 0.25 * s, po[0] - 0.02, U(2.1), cz + sz * 0.83 * s + 0.25 * s));
+  }
   // the chancel and the round apse with its tower
   const ch = [sv[2], Z(-2.6), X(9.6), Z(2.6)];
   bag.add(W, box(ch[0], y - 0.4, ch[1], ch[2], U(5.2), ch[3])); col.rect(ch, y, U(5.2));
   bag.add(SH, frustum([ch[0] - 0.3, ch[1] - 0.3, ch[2] + 0.3, ch[3] + 0.3], U(5.2), U(6), 0.3, 0.3, 0.9, 0.9, { noBottom: true }));
   bag.add(W, box(ch[0] + 0.5, U(6), Z(-1.8), ch[2] - 0.3, U(7.6), Z(1.8)));
-  gable(bag, SH, [ch[0] + 0.5, Z(-1.8), ch[2] - 0.3, Z(1.8)], U(7.6), 1.4, 0.3, true);
+  const cr = gable(bag, SH, [ch[0] + 0.5, Z(-1.8), ch[2] - 0.3, Z(1.8)], U(7.6), 1.4, 0.3, true);
+  cross(bag, ch[0] + 0.2, cr - 0.15, cz, s * 0.9);
   const ax = X(11);
   bag.add(W, lathe([[2 * s, 0], [2 * s, 4.6 * s], [0.001, 4.6 * s]], 16, null, ax, y - 0.4, cz)); col.circle(ax, cz, 2 * s, y, U(4.6));
   bag.add(SH, lathe([[2.3 * s, 0], [0.7 * s, 2.2 * s], [0.001, 2.4 * s]], 16, null, ax, U(4.2), cz));

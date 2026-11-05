@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.98 — Borgund's dragons and portal (2026-11-05)
+- Borgund: the stave church's dragons are carved heads on curving necks rising from the nave's gable ends, with open jaws and crests curling back; the west portal has broad carved jambs with capitals and a round head; crosses stand on the porch and chancel gables. The Barcelona view is moved out of the wall it stood in.
+
 ## v8.97 — Edfu's carved columns (2026-11-05)
 - Edfu: the columns of the pronaos and the hypostyle hall are carved in registers — in each a plain line, then the raised outlines of the king and a god facing each other (feet, legs, kilt and robe, body, head and crown) with a column of signs between the scenes — as the Ptolemaic shafts are; the court's colonnade stays plain. Costs about 80k triangles.
 
