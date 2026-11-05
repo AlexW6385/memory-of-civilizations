@@ -5,7 +5,7 @@
 // stepped merlons; the town's flat-roofed mudbrick houses.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { Matrix4 } from 'three';
+import { Matrix4 } from '../../core/three.js';
 import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 
