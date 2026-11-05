@@ -28,6 +28,15 @@ E.push({ t: 'ming_arch_bridge', at: [0, (STREAM.z0 + STREAM.z1) / 2], across: 'z
 const [cx0, cz0, cx1, cz1] = [-62, -18, 62, 88];
 for (const pts of [[[cx0, cz0], [cx0, cz1]], [[cx1, cz0], [cx1, cz1]], [[cx0, cz0], [-12, cz0]], [[12, cz0], [cx1, cz0]], [[cx0, cz1], [-10, cz1]], [[10, cz1], [cx1, cz1]]]) E.push({ t: 'ming_gallery', pts, y: 0.3, w: 4.4, H: 3.2, side: 0 });
 E.push({ t: 'lane', rect: [cx0 + 3, cz0 + 3, cx1 - 3, cz1 - 3], y: 0.04, mat: 'granite_korea' });
+// the royal path down the court in three lanes, the king's in the middle a little higher; the rank stones
+// in two rows beside it, from the platform's stair to the gate (the civil ranks east, the military west)
+E.push({ t: 'block', rect: [-1.6, 56, 1.6, cz1 - 3], y0: 0, y1: 0.2, mat: 'granite_korea', collide: false, walk: true });
+for (const sx of [-1, 1]) E.push({ t: 'block', rect: sx < 0 ? [-3.6, 56, -1.6, cz1 - 3] : [1.6, 56, 3.6, cz1 - 3], y0: 0, y1: 0.12, mat: 'granite_korea', collide: false, walk: true });
+for (let i = 0; i < 12; i++) for (const sx of [-1, 1]) {
+  const z = 59 + i * 2.25, x = sx * 7.5;
+  E.push({ t: 'block', rect: [x - 0.32, z - 0.22, x + 0.32, z + 0.22], y0: 0, y1: 0.14, mat: 'granite_korea', collide: false });
+  E.push({ t: 'block', rect: [x - 0.2, z - 0.07, x + 0.2, z + 0.07], y0: 0.14, y1: 0.72, mat: 'granite_korea' });
+}
 E.push({ t: 'terrace', rect: [-38, 4, 38, 50], y0: 0, y1: 1.6, open: { s: [[34, 42]] } });
 E.push({ t: 'terrace', rect: [-33, 7, 33, 42], y0: 1.6, y1: 3.2, open: { s: [[29, 37]] } });
 E.push({ t: 'stairs', rect: [-4, 50, 4, 56], y0: 0, y1: 1.6, dir: 'n' });

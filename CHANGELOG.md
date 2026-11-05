@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.95 — Gyeongbokgung's rank stones (2026-11-05)
+- Seoul: Geunjeongjeon's court has its royal path in three lanes (the king's in the middle, a little higher) from the gate to the platform's stair, and the two rows of twelve rank stones beside it, the civil ranks east and the military west.
+
 ## v8.94 — Angkor's naga rails and gate, Huayna Picchu (2026-11-05)
 - Angkor: the causeway's naga balustrades are round serpent bodies ringed with their scales' bands on short posts with moulded caps; the western gate opens at its middle, and the gate's and temple's towers have doorways framed in colonnettes under a lintel; the causeway view now stands on the causeway over the moat. Machu Picchu: the peaks keep their ribs and crags on the flanks but rise to a rounded summit instead of a cluster of spires, and the cloud forest clings to their steep slopes.
 
