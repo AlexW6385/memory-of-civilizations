@@ -2,13 +2,13 @@
 // drag-to-look and a fly button on touch screens. Collision against the world's floors and
 // obstacles; steps, stairs and ramps are climbed by following the floor height. Holding Space (or
 // the fly button) rises, faster the longer it is held; let go, one carries on a little and then
-// comes down, gathering pace, softly at the end. Cruising (Space twice quickly; on touch, hold the
-// fly button a second and slide onto the cruise button beside it) holds one aloft while the speed
+// comes down, gathering pace, softly at the end. Cruising (Space twice quickly; on touch, slide from the
+// fly button onto the cruise button that shows beside it) holds one aloft while the speed
 // dies away; flying again ends it.
 
 import { EYE, STEP, WALK, RUN, flightSpeeds, move } from '../core/walk.js';
 
-const DOUBLE_TAP = 0.32, CRUISE_SHOW = 1;   // s
+const DOUBLE_TAP = 0.32;   // s
 
 export class Controls {
   constructor(camera, canvas, collide) {
@@ -65,24 +65,23 @@ export class Controls {
     });
     addEventListener('keyup', (e) => { this.keys.delete(e.code); if (e.code === 'Space') this._spaceCruise = false; });
     addEventListener('blur', () => { this.keys.clear(); this.flyHeld = false; });
-    // the fly button: held to rise; held a second, the cruise button shows beside it, and letting
+    // the fly button: held to rise; while it is held the cruise button shows beside it, and letting
     // go on it cruises
     const fly = document.getElementById('btn-fly'), cb = document.getElementById('btn-cruise');
     if (fly) {
-      let timer = 0, over = false;
+      let over = false;
       const onCruise = (e) => { if (!cb || cb.hidden) return false; const r = cb.getBoundingClientRect(), m = 14;
         return e.clientX > r.left - m && e.clientX < r.right + m && e.clientY > r.top - m && e.clientY < r.bottom + m; };
       fly.addEventListener('pointerdown', (e) => {
         e.stopPropagation(); fly.setPointerCapture(e.pointerId);
         this.setCruise(false); this.flyHeld = true; fly.classList.add('on');
-        clearTimeout(timer); timer = setTimeout(() => { if (this.flyHeld && cb) cb.hidden = false; }, CRUISE_SHOW * 1000);
+        if (cb) cb.hidden = false;
       });
       fly.addEventListener('pointermove', (e) => {
         if (!this.flyHeld) return;
         over = onCruise(e); cb?.classList.toggle('on', over);
       });
       const off = (e) => {
-        clearTimeout(timer);
         const cruise = e.type === 'pointerup' && onCruise(e);
         this.flyHeld = false; over = false; fly.classList.remove('on');
         if (cb) { cb.hidden = true; cb.classList.remove('on'); }

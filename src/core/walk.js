@@ -17,7 +17,7 @@ export function flightSpeeds(alt) {
   return {
     fly: Math.min(110, FLY + a * 0.2), fast: Math.min(200, FLY_FAST + a * 0.4),
     lift: Math.min(160, 15 + a * 0.2), liftK: 1 + Math.min(3, a / 300),
-    fall: Math.min(30, 5 + a * 0.03), sink: Math.min(90, 3.5 + a * 0.14),
+    fall: Math.min(45, 9 + a * 0.05), sink: Math.min(160, 6 + a * 0.25),
   };
 }
 
@@ -31,7 +31,7 @@ export function flyVy(P, fs, dt) {
   } else if (P.cruise) vy *= Math.exp(-dt * 0.9);     // the climb or fall dies away
   else {
     vy -= (fs.fall + Math.max(0, vy) * 0.35) * dt;     // a climb carries on a little, then gives way
-    if (vy < -fs.sink) vy += (-fs.sink - vy) * Math.min(1, dt * 3);   // to the terminal speed, smoothly
+    if (vy < -fs.sink) vy += (-fs.sink - vy) * Math.min(1, dt * 4);   // to the terminal speed, smoothly
   }
   return vy;
 }
