@@ -6,6 +6,9 @@
 
 import * as THREE from 'three/webgpu';
 import { releaseAfterUpload } from '../engine/release.js';
+
+/** Ground tiles nearer than this (m) cast shadows. */
+const SHADOW_REACH = 420;
 import { PLANET_RADIUS as R } from './relief.js';
 import { faceDir, tileRect } from './chunk.js';
 import { groundMaterial, seaMaterial } from './materials.js';
@@ -118,8 +121,14 @@ export class PlanetTerrain {
       }
       show.add(a);
     }
+    // the ground casts shadows only within the shadow cascades' reach (CSM maxFar 320 m and its
+    // margin): farther tiles were drawn into every cascade they touched along the sun's direction,
+    // a third of the frame's draw calls, for shadows too far off to fall in view
+    const dist = new Map(want.map((w) => [w.k, w.d]));
     for (const [k, t] of this.tiles) {
       const on = show.has(k);
+      const cast = on && t.L >= 6 && (dist.get(k) ?? Infinity) < SHADOW_REACH;
+      if (t.mesh.castShadow !== cast) t.mesh.castShadow = cast;
       t.mesh.visible = on;
       if (t.sea) t.sea.visible = on;
       if (on) t.used = this.frame;
@@ -177,7 +186,7 @@ export class PlanetTerrain {
     g.computeBoundingSphere();
     const mesh = new THREE.Mesh(g, this.mat);
     mesh.receiveShadow = true;
-    mesh.castShadow = L >= 6;
+    mesh.castShadow = false;            // set by distance in update()
     mesh.name = 'ground:' + d.key;
     mesh.visible = false;
     mesh.matrixAutoUpdate = false;

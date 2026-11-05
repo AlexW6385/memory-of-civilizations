@@ -286,7 +286,8 @@ class Settlement {
       const m = new THREE.MeshStandardNodeMaterial({ vertexColors: true, flatShading: true, roughness: 0.85, side: THREE.DoubleSide });
       const mesh = new THREE.Mesh(g, m);
       mesh.name = 'impostor:' + this.id;
-      mesh.castShadow = true; mesh.receiveShadow = true;
+      // a far view lies beyond the shadow cascades' reach (it is shown only until the settlement is built)
+      mesh.castShadow = false; mesh.receiveShadow = true;
       releaseAfterUpload(mesh);
       this.impostor = new THREE.Group();
       this.impostor.matrixAutoUpdate = false;
