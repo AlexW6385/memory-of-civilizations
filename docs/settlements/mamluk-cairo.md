@@ -28,6 +28,8 @@ The qibla toward Mecca (south-east; ours on +z). [stated]
 
 Cut limestone; tiers of tall window recesses; a muqarnas cornice and crenellated crown; the portal's recess; a stone dome on a drum; minarets in tiers with balconies and a bulb. [stated: materials; inferred: details]
 
+**The court and the qibla iwan inside (L3, built).** A four-iwan plan round an open paved court with the four madrasas in the corners, entered through doors in the court's corners; the four iwans unequal, the south-eastern (qibla) the largest [stated: Smarthistory; mosqpedia]. The exterior is stone, the interior mostly brick with stucco [stated: Smarthistory]. The qibla iwan is spanned by an enormous pointed vault; its walls are panelled in coloured stone and marble below a stucco band of Kufic Qur'anic inscription [stated: mosqpedia], which runs round the iwan at the springing of the vault [stated: Kenyon slide, after Blair & Bloom]; the mihrab in marble panels of contrasting colours, the marble minbar to its right, the dikka on columns in front of the iwan [stated: Kenyon slide; Smarthistory]; windows with bronze grilles either side of the mihrab [stated: ask-aladdin] and an oculus above it [stated: sharm-club]; doors either side of the mihrab into the tomb behind, one original bronze door surviving [stated: Smarthistory]; about 155 oil lamps hung at one height [stated: Smarthistory]; the iwans' arches with red and black rims [stated: Wikipedia mirror]. The domed fountain at the centre is probably Ottoman [stated: Wikipedia mirror], so only a plain octagonal basin is shown. Ours: the qibla iwan 20 m wide and 16 deep with its vault springing at 14.5 m (our block is smaller than the real one); the other three iwans 14 and 12 m wide; the way in from the portal by a corridor through the north range to the court's corner [inferred: the real vestibule and bent passage, simplified]; glass lamps on chains in every iwan.
+
 ## 5. The town
 
 About 1,400 houses of mud brick and stone, two or three storeys, with roof beams and shelters. [inferred]
@@ -52,3 +54,8 @@ The call to prayer; the ney, the oud and the qanun in a maqam. [inferred]
 
 - [Mosque-Madrasa of Sultan Hasan — Wikipedia](https://en.wikipedia.org/wiki/Mosque-Madrasa_of_Sultan_Hasan)
 - [Al-Nasir Muhammad Mosque — Wikipedia](https://en.wikipedia.org/wiki/Al-Nasir_Muhammad_Mosque)
+- [Madrasa and Friday Mosque of Sultan Hasan — Smarthistory](https://smarthistory.org/madrasa-and-friday-mosque-of-sultan-hasan-cairo)
+- [Madrasa and Mosque of Sultan Hasan — mosqpedia](https://mosqpedia.org/en/mosque/980)
+- [Complex of Hasan, qibla iwan — Kenyon College slide](https://baly.kenyon.edu/slides/5027)
+- [Sultan Hassan Madrassa Mosque — ask-aladdin](https://www.ask-aladdin.com/all-destinations/egypt/category/egypt-islamic-monuments/page/sultan-hassan-madrassa-mosque)
+- [Sultan Hassan mosque — sharm-club](https://sharm-club.com/egypt/islamic-sightseeings/sultan-hassan-mosque-in-cairo)

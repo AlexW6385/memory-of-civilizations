@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.17 — Interiors: the court and iwans of Sultan Hasan (2026-11-05)
+- Sultan Hasan's madrasa can be entered: a corridor from the portal (its bronze doors open) through the north range to the court's corner. Round the court, four iwans cut into the block, the qibla iwan the greatest, each under a pointed barrel vault opening on the court through an arch rimmed in red and black voussoirs, with glass lamps on chains all at one height. The qibla iwan has a dado of white, rose and dark marble panels, the stucco Kufic band at the springing, the marble mihrab (niche, colonnettes, pointed hood), windows in bronze grilles either side and an oculus above, the bronze doors to the tomb, the marble minbar with its stair and domed canopy, and the dikka on eight columns in front. In the court: the octagonal basin, the madrasas' doors in the corners, a cornice round the top. The solid block is now carved by void boxes (carve()). Dossier §4 extended, sourced.
+
 ## v9.16 — Interiors: Himeji's main keep (2026-11-05)
 - Himeji's main keep is hollow: its stone base a ring round the basement, entered by a door on the west from the courtyard between the keeps; a stone sink and a grid of posts in the basement; every storey with plastered walls between posts, barred windows lit from outside, boarded floors on exposed joists, the warriors' corridor marked by a ring of posts, gun racks between the windows on the three lower storeys; steep open stairs from floor to floor on alternating sides; the two great pillars, east and west, from the basement to the top storey's floor. The lower roofs are now skirts round the storey above (rectRoof takes a hole), and two passages were shortened where they met the keep. Dossier §4 extended, sourced; the Osakabe shrine is left out (moved to the top floor only after 1945).
 
