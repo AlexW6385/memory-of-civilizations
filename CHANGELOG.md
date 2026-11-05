@@ -3,7 +3,7 @@
 Newest first. What you can visit and what looks better, in plain words.
 
 ## v8.84 — Smoother to move through (2026-11-04)
-- Turning and walking are smoother: while the view moves the picture is drawn at a slightly lower resolution and snaps back to full sharpness as soon as you stop; shadows are lighter to draw; small street objects far away no longer cast shadows; a still view no longer redraws 60 times a second.
+- Turning and walking are smoother: shadows are lighter to draw, small street objects far away no longer cast shadows (draw calls down by about a third), and a still view no longer redraws 60 times a second.
 - Memory no longer creeps up while flying: a town you leave while it is still loading is dropped completely, and at most four towns are built at once.
 
 ## v8.83 — Mute button, steady eyes, Great Zimbabwe's walls (2026-11-04)
