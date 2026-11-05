@@ -194,7 +194,7 @@ export class Controls {
       // slows to a full stop: within 3 s, 5 s when cruising
       const V = this.vel, tx = dx / dt, tz = dz / dt, steer = l > 0.01;
       if (!this._aloft) { V.x = tx; V.z = tz; }        // taking off keeps the pace one had
-      if (steer) { const k = 1 - Math.exp(-1.6 * dt); V.x += (tx - V.x) * k; V.z += (tz - V.z) * k; }
+      if (steer) { const k = 1 - Math.exp(-2.8 * dt); V.x += (tx - V.x) * k; V.z += (tz - V.z) * k; }
       else {
         // slowing by a small fixed part and a part in proportion to the speed: natural, and a
         // full stop from even the top speed within the time given
