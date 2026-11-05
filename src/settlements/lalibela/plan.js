@@ -2,7 +2,7 @@
 // on the floor of its pit, the pits' and trenches' rock walls (open where a trench joins), Bete
 // Giyorgis alone to the south-west.
 
-import { PITS, TRENCHES, EDGE, inRect } from './layout.js';
+import { PITS, TRENCHES, EDGE, inRect, slope } from './layout.js';
 
 const E = [];
 // ---- the walls of the cuts: each pit edge and trench side, broken where another cut opens onto it
@@ -26,7 +26,14 @@ for (const c of cuts) {
       if (!inner) continue;
       pieces = pieces.flatMap(([p, q]) => (b <= p || a >= q ? [[p, q]] : [[p, a + EDGE], [b - EDGE, q]].filter(([s, e]) => e - s > 0.5)));
     }
-    for (const [p, q] of pieces) E.push({ t: 'rock_cut', a: k === 'z' ? [p, v] : [v, p], b: k === 'z' ? [q, v] : [v, q], y0: -c.depth - 0.2, th: EDGE });
+    // in lengths of a few metres, each topped at the ground's level where it stands (the slopes rise outside the precinct)
+    for (const [p, q] of pieces) {
+      const n = Math.max(1, Math.ceil((q - p) / 2));
+      for (let i = 0; i < n; i++) {
+        const s0 = p + (q - p) * i / n, s1 = p + (q - p) * (i + 1) / n, m = (s0 + s1) / 2, [mx, mz] = k === 'z' ? [m, v] : [v, m];
+        E.push({ t: 'rock_cut', a: k === 'z' ? [s0, v] : [v, s0], b: k === 'z' ? [s1, v] : [v, s1], y0: -c.depth - 0.2, th: EDGE, top: slope(mx, mz) });
+      }
+    }
   }
 }
 void inRect;

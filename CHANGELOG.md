@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.90 — Lalibela's rims lie flush (2026-11-05)
+- Lalibela: the ground is cut only inside the rock walls' inner faces, so it stays level right up to the walls and their tops lie flush with it — no more raised slab with a visible edge round each pit; the walls are built in two-metre lengths, each topped at the ground's level, so the trenches climbing out onto the slopes beyond the precinct keep their walls up to the surface.
+
 ## v8.89 — Djenné's market and toron (2026-11-05)
 - Djenné: the market's stalls are real stalls — poles a little out of true under a sagging mat roof, a low table of sticks with its mat, calabashes, pots, baskets and heaps of grain and kola on it, sacks and a water jar beside — instead of a bare block; the mosque's walls bristle with toron, three palm sticks to a bay in every row, and the three towers carry them on all three outer faces, following their batter. Lalibela's rim view moved to the corner of Bet Giyorgis' pit.
 

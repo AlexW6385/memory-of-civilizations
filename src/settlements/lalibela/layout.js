@@ -31,13 +31,15 @@ export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >=
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 const edgeIn = (r, x, z) => Math.min(x - r[0], r[2] - x, z - r[1], r[3] - z);
 /** The depth of the cuts at (x, z) (0 outside them): full on their floors, falling to 0 across the wall band at their edges. */
+// the ground is cut only inside the rock walls' inner faces, so that it stays level up to the walls
+// and the walls' tops lie flush with it
 export function cutDepth(x, z) {
   let d = 0;
-  for (const p of Object.values(PITS)) if (inRect(p.rect, x, z)) d = Math.max(d, p.depth * Math.min(1, edgeIn(p.rect, x, z) / EDGE));
+  for (const p of Object.values(PITS)) if (inRect(p.rect, x, z)) d = Math.max(d, p.depth * Math.max(0, Math.min(1, (edgeIn(p.rect, x, z) - EDGE + 0.4) / 0.8)));
   for (const t of TRENCHES) if (inRect(t.rect, x, z)) {
     const [x0, z0, x1, z1] = t.rect, u = t.axis === 'x' ? (x - x0) / (x1 - x0) : (z - z0) / (z1 - z0);
     const side = t.axis === 'x' ? Math.min(z - z0, z1 - z) : Math.min(x - x0, x1 - x);
-    d = Math.max(d, (t.d0 + (t.d1 - t.d0) * u) * Math.min(1, side / EDGE));
+    d = Math.max(d, (t.d0 + (t.d1 - t.d0) * u) * Math.max(0, Math.min(1, (side - EDGE + 0.4) / 0.8)));
   }
   return d;
 }
