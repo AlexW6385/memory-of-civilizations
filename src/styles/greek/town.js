@@ -17,7 +17,7 @@ function house(el, { bag, col }) {
     bag.add('rubble', box(r[0], y - 0.6, r[1], r[2], y + 0.7, r[3]));
     bag.add('mud_plaster', box(r[0] + 0.02, y + 0.7, r[1] + 0.02, r[2] - 0.02, y + hh, r[3] - 0.02));
     col.rect(r, y - 0.6, y + hh);
-    if (i < 3 && !el.simple) {
+    if (i < 3) {                                   // the tiled roofs, kept even in the simple (far) houses: they are cheap and they are the town
       const along = r[2] - r[0] > r[3] - r[1], rise = (along ? r[3] - r[1] : r[2] - r[0]) * 0.3;
       bag.add('roof_tile', frustum([r[0] - 0.3, r[1] - 0.3, r[2] + 0.3, r[3] + 0.3], y + hh, y + hh + rise, along ? 0 : (r[2] - r[0]) / 2 + 0.25, along ? 0 : (r[2] - r[0]) / 2 + 0.25, along ? (r[3] - r[1]) / 2 + 0.25 : 0, along ? (r[3] - r[1]) / 2 + 0.25 : 0));
     }

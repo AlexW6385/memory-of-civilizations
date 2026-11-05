@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.0 — Sultan Hasan's façade, Athens' roofs (2026-11-05)
+- Cairo: the madrasa's façades stand in bays between pilasters, each bay with tiers of paired windows (the lower square under iron grilles, the upper with pointed heads) and a muqarnas cap stepping out at its top; the portal is two piers with a hood of muqarnas stepping out across the recess, the door at the back under a grilled window — no longer a black slot and a grid of black panes. Athens: the town's courtyard houses keep their tiled roofs at a distance too (they had been dropped in the simple houses). Athens' first view is from the west, above the town, with the Acropolis and its temples in sight.
+
 ## v8.99 — Sagrada Família's Nativity portals (2026-11-05)
 - Barcelona: the Nativity façade's three portals are tall parabolic arches set deep in three stepped archivolts, dark doorways at the back and a trumeau in the middle one, each under a steep gable fringed with crockets and a finial — instead of three black rectangles. The Cairo portal view is moved out of the house it stood in.
 

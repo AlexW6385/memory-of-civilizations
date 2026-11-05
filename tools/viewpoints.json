@@ -1990,14 +1990,15 @@
   ],
   "athens": [
    {
-    "name": "ramp",
+    "name": "west",
     "at": [
-     -250,
-     0.1,
-     50
+     -330,
+     45,
+     165
     ],
-    "yaw": -1.2,
-    "pitch": 0.3
+    "yaw": -1.107,
+    "pitch": 0.04,
+    "cam": true
    },
    {
     "name": "parthenon",

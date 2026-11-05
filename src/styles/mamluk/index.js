@@ -48,22 +48,45 @@ function block(el, { bag, col }) {
   for (const r of parts) { if (r[2] - r[0] < 0.5 || r[3] - r[1] < 0.5) continue; bag.add(S, box(r[0], y - 0.5, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h); }
   if (court) { bag.add('marble', box(court[0], y - 0.3, court[1], court[2], y + 0.06, court[3])); col.floor(court, y + 0.06); }
   crest(bag, [x0, z0, x1, z1], y + h);
-  // the tall recessed window bays
+  // a frame on each face: u along it, d outward from it; R(u0, u1, y0, y1, d0, d1) is a box in that frame
+  const frame = (face) => {
+    const along = face === 'n' || face === 's', o = face === 'n' ? z0 : face === 's' ? z1 : face === 'w' ? x0 : x1, sg = face === 'n' || face === 'w' ? -1 : 1;
+    return (u0, u1, y0, y1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? box(u0, y0, Math.min(a, b), u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, u0, Math.max(a, b), y1, u1); };
+  };
+  // the bays: pilasters standing out between them; in each, tiers of paired windows — the lower square
+  // under grilles, the upper with pointed heads — and a muqarnas cap stepping out at the top of the bay
+  const pm = f === 'n' || f === 's' ? (x0 + x1) / 2 - (x1 - x0) * 0.25 : (z0 + z1) / 2;
+  const inPortal = (face, u, half) => face === f && Math.abs(u - pm) < 5 + half + 0.6;
   for (const face of 'nsew') {
-    const along = face === 'n' || face === 's', L = along ? x1 - x0 : z1 - z0, n = Math.floor(L / 7);
+    const R = frame(face), along = face === 'n' || face === 's', a0 = along ? x0 : z0, L = along ? x1 - x0 : z1 - z0, n = Math.floor(L / 7);
+    for (let i = 0; i <= n; i++) { const u = a0 + i * L / n; if (!inPortal(face, u, 0.7)) bag.add(S, R(u - 0.7, u + 0.7, y, y + h - 1.6, 0, 0.45)); }
     for (let i = 0; i < n; i++) {
-      const u = (along ? x0 : z0) + (i + 0.5) * L / n;
-      for (const [yy, hh] of [[y + 4, 6], [y + 14, 7], [y + 25, 6]]) {
-        const q = face === 'n' ? [u - 1.6, z0 - 0.06, u + 1.6, z0 + 0.02] : face === 's' ? [u - 1.6, z1 - 0.02, u + 1.6, z1 + 0.06] : face === 'w' ? [x0 - 0.06, u - 1.6, x0 + 0.02, u + 1.6] : [x1 - 0.02, u - 1.6, x1 + 0.06, u + 1.6];
-        bag.add('opening', box(q[0], yy, q[1], q[2], yy + hh, q[3]));
+      const u = a0 + (i + 0.5) * L / n, bw = L / n / 2 - 0.9;
+      if (inPortal(face, u, bw)) continue;
+      for (const [yy, hh, pointed] of [[y + 4, 4.2, false], [y + 13, 5.5, true], [y + 23, 4.8, true]]) for (const s2 of [-0.9, 0.9]) {
+        bag.add('opening', R(u + s2 - 0.55, u + s2 + 0.55, yy, yy + hh, -0.02, 0.05));
+        bag.add(S, R(u + s2 - 0.75, u + s2 + 0.75, yy - 0.25, yy, 0, 0.12));
+        if (pointed) bag.add(S, R(u + s2 - 0.28, u + s2 + 0.28, yy + hh, yy + hh + 0.5, -0.02, 0.06));
+        if (!pointed) for (let g = 1; g < 4; g++) bag.add('iron', R(u + s2 - 0.55, u + s2 + 0.55, yy + g * hh / 4 - 0.03, yy + g * hh / 4 + 0.03, 0.05, 0.1));
       }
+      for (let k = 0; k < 4; k++) bag.add(S, R(u - bw + k * 0.25, u + bw - k * 0.25, y + h - 5.5 + k * 0.9, y + h - 4.6 + k * 0.9, 0, 0.12 + k * 0.1));
     }
   }
-  // the portal: a tall recess with its half-dome hood
-  const m = f === 'n' || f === 's' ? (x0 + x1) / 2 - (x1 - x0) * 0.25 : (z0 + z1) / 2, ph = h * 1.05;
-  const q = f === 'n' ? [m - 5, z0 - 3, m + 5, z0 + 0.02] : f === 's' ? [m - 5, z1 - 0.02, m + 5, z1 + 3] : f === 'w' ? [x0 - 3, m - 5, x0 + 0.02, m + 5] : [x1 - 0.02, m - 5, x1 + 3, m + 5];
-  bag.add(S, box(q[0], y - 0.5, q[1], q[2], y + ph, q[3]));
-  bag.add('opening', box(q[0] + (f === 'w' || f === 'e' ? 0 : 1.5), y, q[1] + (f === 'n' || f === 's' ? 0 : 1.5), q[2] - (f === 'w' || f === 'e' ? 0 : 1.5), y + ph * 0.8, q[3] - (f === 'n' || f === 's' ? 0 : 1.5)));
+  // the portal: two piers standing out from the face, the hood of muqarnas stepping out across the top
+  // of the recess between them, the door at the back under a grilled window, frames of moulding
+  const R = frame(f), m = f === 'n' || f === 's' ? (x0 + x1) / 2 - (x1 - x0) * 0.25 : (z0 + z1) / 2, ph = h * 1.05, D = 3, W = 5;
+  for (const s2 of [-1, 1]) bag.add(S, R(s2 < 0 ? m - W : m + W - 1.6, s2 < 0 ? m - W + 1.6 : m + W, y - 0.5, y + ph, 0, D));
+  bag.add(S, R(m - W, m + W, y + ph * 0.8, y + ph, 0, D));
+  bag.add(S, R(m - W - 0.3, m + W + 0.3, y + ph - 1.2, y + ph - 0.6, D - 0.2, D + 0.3));
+  for (let k = 0; k < 7; k++) {
+    const yy = y + ph * 0.58 + k * (ph * 0.22) / 7, out = D * (k + 1) / 7, n2 = 7 - Math.floor(k / 2);
+    for (let i = 0; i < n2; i++) { const u0 = m - W + 1.6 + i * (2 * W - 3.2) / n2, u1 = u0 + (2 * W - 3.2) / n2 - 0.08; bag.add(S, R(u0, u1, yy, yy + ph * 0.22 / 7, 0, out)); }
+  }
+  bag.add('opening', R(m - 1.3, m + 1.3, y, y + 5.2, -0.02, 0.06));
+  bag.add(S, R(m - 1.7, m + 1.7, y + 5.2, y + 5.9, 0, 0.2));
+  bag.add('opening', R(m - 1.0, m + 1.0, y + 7.5, y + 10.5, -0.02, 0.06));
+  for (let g = 1; g < 5; g++) bag.add('iron', R(m - 1.0, m + 1.0, y + 7.5 + g * 0.6 - 0.03, y + 7.5 + g * 0.6 + 0.03, 0.06, 0.1));
+  for (const s2 of [-1, 1]) bag.add(S, R(s2 < 0 ? m - W + 1.6 : m + W - 1.9, s2 < 0 ? m - W + 1.9 : m + W - 1.6, y, y + ph * 0.58, 0, 0.3));
 }
 /** citadel_wall: a→b { h, th, y } with round towers. */
 function citadelWall(el, { bag, col }) {
