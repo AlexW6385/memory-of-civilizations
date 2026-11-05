@@ -58,6 +58,8 @@ export class GlobeView {
 
   /** The entrance record of each built settlement's first building. */
   recFor(S) { return [...this.world.plans.values()].find((r) => r.site?.S === S); }
+  /** Go to a settlement: its record, its module fetched first if it has not come yet. */
+  go(S) { this.world.recordFor(S).then((r) => { if (r) this.onBuilding(r); }); }
 
   fillList() {
     this.list.innerHTML = '';
@@ -66,7 +68,7 @@ export class GlobeView {
       b.innerHTML = `<span class="name"></span><span class="era"></span>`;
       b.querySelector('.name').textContent = tr(S.site.name);
       b.querySelector('.era').textContent = S.site.era;
-      b.onclick = () => { const r = this.recFor(S); if (r) this.onBuilding(r); };
+      b.onclick = () => this.go(S);
       li.appendChild(b); this.list.appendChild(li);
     }
   }
@@ -226,7 +228,7 @@ export class GlobeView {
     const rect = this.canvas.getBoundingClientRect(), dpr = devicePixelRatio || 1;
     const px = (e.clientX - rect.left) * dpr, py = (e.clientY - rect.top) * dpr;
     for (const m of this.marks || []) {
-      if (Math.hypot(m.p[0] - px, m.p[1] - py) < 14 * dpr) { const r = this.recFor(m.S); if (r) this.onBuilding(r); return; }
+      if (Math.hypot(m.p[0] - px, m.p[1] - py) < 14 * dpr) { this.go(m.S); return; }
     }
     const v = this.unproject(px, py);
     if (!v) return;
@@ -237,7 +239,7 @@ export class GlobeView {
       if (d < nd) { nd = d; near = S; }
     }
     const perPx = 2 / (Math.min(this.canvas.width, this.canvas.height) * 0.46 * this.zoom) * PLANET_RADIUS / 2;
-    if (near && nd < Math.max(1000, 30 * dpr * perPx)) { const r = this.recFor(near); if (r) { this.onBuilding(r); return; } }
+    if (near && nd < Math.max(1000, 30 * dpr * perPx)) { this.go(near); return; }
     const [la, lo] = latLon(v);
     this.onPlace(la, lo);
   }

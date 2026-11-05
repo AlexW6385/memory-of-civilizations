@@ -323,9 +323,12 @@ export class World {
     this._m2 = new THREE.Matrix4();
   }
 
-  async init() {
+  /** onStep(label, fraction): the loading bar's detail (src/main.js Progress). */
+  async init(onStep = () => {}) {
     this.builder = new Builder(2);
+    onStep('map', 0);
     const land = await loadLand('data/planet/land.bin');
+    onStep('map', 1);
     initRelief();
     this.planet = new THREE.Group();
     this.planet.name = 'planet';
@@ -347,17 +350,55 @@ export class World {
     this.open.water = (x, z, y) => { const s = seaInFrame(this.anchor.frame, x, z); return groundInFrame(this.anchor.frame, x, z) < s - 0.3 && y < s + 0.3; };
     this.open.waterLevel = (x, z) => { const s = seaInFrame(this.anchor.frame, x, z); return groundInFrame(this.anchor.frame, x, z) < s ? s : -Infinity; };
     // every building's plan (small modules), to know where its entrance is
+    let n = 0;
     await Promise.all(BUILDINGS.map(async (entry) => {
       const mod = await retry(entry.load);
       const site = this.settlements.find((s) => s.S.focus.region === entry.district);
       this.plans.set(entry.id, { id: entry.id, entry, plan: mod.plan, music: mod.music, site });
+      onStep('plans', ++n / BUILDINGS.length);
     }));
-    for (const site of this.settlements) {
-      if (!MODULES[site.id]) continue;
+    // only the starting settlement's module now; the others' (each with its styles: most of the
+    // site's code) are fetched after the start, in parallel (loadPlans) — fetching all of them one
+    // after another before the first frame took seconds on a fast machine and much longer on a phone
+    this.setAnchor(this.byId.edfu.S.frame, this.byId.edfu);
+    await this.plansOf(this.byId.edfu);
+    onStep('plans', 1);
+  }
+
+  /** The landmark plans of a settlement of its own (fetched once). */
+  async plansOf(site) {
+    if (!MODULES[site.id]) return;
+    site.plansLoaded ??= (async () => {
       const mod = await retry(MODULES[site.id]);
       for (const p of mod.landmarks) this.plans.set(p.plan.id, { id: p.plan.id, plan: p.plan, music: p.music, site });
+    })();
+    return site.plansLoaded;
+  }
+
+  /** Every settlement's landmark plans, a few at a time (after the start). */
+  async loadPlans(start = null) {
+    if (start) await this.plansOf(start);
+    const queue = this.settlements.filter((s) => MODULES[s.id]);
+    await Promise.all(Array.from({ length: 4 }, async () => { while (queue.length) { try { await this.plansOf(queue.shift()); } catch (e) { console.warn(e); } } }));
+  }
+
+  /** The same, one at a time when the page is idle (after the start: no hitch while walking). */
+  async loadPlansIdle() {
+    const idle = () => new Promise((r) => (globalThis.requestIdleCallback ? requestIdleCallback(r, { timeout: 2000 }) : setTimeout(r, 200)));
+    for (const s of this.settlements) {
+      if (!MODULES[s.id] || s.plansLoaded) continue;
+      await idle();
+      try { await this.plansOf(s); } catch (e) { console.warn(e); }
     }
-    this.setAnchor(this.byId.edfu.S.frame, this.byId.edfu);
+  }
+
+  /** The entrance record of a settlement's first landmark, its module fetched if need be. */
+  async recordFor(S) {
+    const find = () => [...this.plans.values()].find((r) => r.site?.S === S);
+    if (find()) return find();
+    const site = this.settlements.find((s) => s.S === S);
+    if (site) await this.plansOf(site);
+    return find();
   }
 
   /** The collision world in force (the settlement's in its frame, the open country's elsewhere). */

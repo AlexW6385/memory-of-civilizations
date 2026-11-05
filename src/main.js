@@ -55,7 +55,14 @@ class Progress {
     this.timer = setInterval(() => this.paint(), 100);
   }
   /** stage: start | build | land | plants | shaders; build and land together make the 'world' stage. */
-  set(stage, f) {
+  set(stage, f, detail = '') {
+    this.label = stage; this.detail = detail;
+    (this.details ||= {})[stage] = detail;
+    if (stage === 'renderer' || stage === 'map' || stage === 'plans') {
+      // the start's own steps: the renderer, the land map, the plans of the first buildings
+      f = stage === 'renderer' ? 0.05 + 0.3 * f : stage === 'map' ? 0.35 + 0.15 * f : 0.5 + 0.5 * f;
+      stage = 'start';
+    }
     if (stage === 'build' || stage === 'land') { this.f[stage] = Math.max(this.f[stage] || 0, f); f = 0.4 * (this.f.build || 0) + 0.6 * (this.f.land || 0); stage = 'world'; }
     this.f[stage] = Math.max(this.f[stage] || 0, Math.min(1, f));
     if (this.f[stage] >= 1 && !this.end[stage]) this.end[stage] = performance.now();
@@ -70,10 +77,24 @@ class Progress {
     let v = 0; for (const k of this.order) v += this.w[k] * (this.f[k] || 0); return v;
   }
   paint() {
-    const p = this.value();
+    const p = this.value(), now = performance.now();
+    if (p > this.shown + 1e-4 || this.label !== this.lastLabel) { this.movedAt = now; this.lastLabel = this.label; }
     this.shown = Math.max(this.shown, p);
     this.bar.style.width = `${(this.shown * 100).toFixed(1)}%`;
-    this.text.textContent = `${Math.round(this.shown * 100)}%`;
+    if (this.error) return;
+    // the step in hand, so that a bar that stops says where: "37% · buildings 12/44"; after five
+    // seconds without moving, how long it has waited there
+    const name = (k) => `${t('ld')[k] || k}${this.details?.[k] ? ' ' + this.details[k] : ''}`;
+    // the buildings and the ground come in together: both are shown while either is coming
+    const step = !this.label ? '' : (this.label === 'build' || this.label === 'land') ? ` · ${name('build')} · ${name('land')}` : ` · ${name(this.label)}`;
+    const wait = now - (this.movedAt || now) > 5000 ? ` (${Math.round((now - this.movedAt) / 1000)} s)` : '';
+    this.text.textContent = `${(this.shown * 100).toFixed(this.shown < 0.1 ? 1 : 0)}%${step}${wait}`;
+  }
+  /** Something failed during the start: say what and where, and stop pretending to move. */
+  fail(msg) {
+    this.error = true;
+    this.text.textContent = `${Math.round(this.shown * 100)}% · ${t('ld')[this.label] || this.label || ''} — ${t('error')}${msg}`;
+    this.text.style.whiteSpace = 'normal';
   }
   finish() {
     clearInterval(this.timer);
@@ -95,24 +116,27 @@ async function main() {
   langBtn.onclick = () => setLang(getLang() === 'zh' ? 'en' : 'zh');
   onLang(paintLang); paintLang();
   const status = $('intro-status');
-  const progress = new Progress($('progress-bar'), status);
+  const progress = window.__progress = new Progress($('progress-bar'), status);
   const canvas = $('view');
   if (!navigator.gpu) { $('notice').textContent = t('no-webgpu'); $('notice').hidden = false; setTimeout(() => { $('notice').hidden = true; }, 12000); }
 
   // timings of the start, in the console (and kept for the next visit's estimate)
   let T0 = performance.now(), times = {};
   const mark = (k) => { times[k] = Math.round(performance.now() - T0); };
-  progress.set('start', 0.15);
+  // any error during the start shows on the loading screen with the step it stopped at
+  const onErr = (e) => { if (!window.READY) progress.fail(String(e?.reason?.message || e?.message || e?.reason || e)); };
+  addEventListener('error', onErr); addEventListener('unhandledrejection', onErr);
+  progress.set('renderer', 0);
   const R = await new Renderer(canvas).init(settings.quality);
   mark('renderer');
-  progress.set('start', 0.7);
+  progress.set('renderer', 1);
   const world = new World(R);
-  await world.init();
+  await world.init((step, f) => progress.set(step, f, step === 'plans' ? '' : ''));
   // frame costs (`?perf` shows the panel; tools/perf.mjs uses window.palace.perf)
   const perf = new Perf(world, R);
   if (params.has('perf')) perf.show();
   mark('plans');
-  progress.set('start', 1);
+  progress.set('plans', 1);
   const climate = new Climate(R);
   // the time of day: it runs (days pass) or is held, from the hour the visitor last chose; the URL
   // may hold it (?time=21.5, the hour where one arrives) or run it (?time=cycle)
@@ -141,17 +165,17 @@ async function main() {
   const arrive = async (report = null) => {
     const site = world.anchor.site;
     const u = world.here(controls);
-    const poll = site && report ? setInterval(() => report('build', site.fraction), 150) : null;
+    const poll = site && report ? setInterval(() => report('build', site.fraction, `${Math.min(site.done | 0, site.expected | 0)}/${site.expected | 0}`), 150) : null;
     await Promise.all([
       (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 1); mark('buildings'); }),
-      world.terrain.readyAt(camPlanet, (f) => report?.('land', f)).then(() => mark('land')),
+      world.terrain.readyAt(camPlanet, (f) => report?.('land', f, `${Math.round(f * 100)}%`)).then(() => mark('land')),
     ]);
     world.ensureNear(u);
     world.update(R.camera, controls);
     if (site) { const F = controls.feet; const L = [F.x, F.z]; await world.flora.ready(L[0], L[1], (f) => report?.('plants', f), 140); }
     report?.('plants', 1); mark('plants');
   };
-  const boot = (stage, f) => progress.set(stage, f);
+  const boot = (stage, f, detail) => progress.set(stage, f, detail);
   // a free place to stand near (x, z), once everything there is built: on the ground or a floor,
   // not in water, with nothing built over the head and no wall in the body — so that one never
   // arrives inside a building, under a roof or below the ground
@@ -235,7 +259,9 @@ async function main() {
     if (!place()) settle();
     world.place(R.camera);
   };
-  const first = world.plans.get(params.get('start') || 'edfu') || world.plans.get('edfu');
+  let first = world.plans.get(params.get('start') || 'edfu');
+  if (!first && params.get('start')) { await world.loadPlans(); first = world.plans.get(params.get('start')); }
+  first ||= world.plans.get('edfu');
   if (params.get('pose')) {
     // ?pose=site,x,y,z,yaw,pitch (in the settlement's frame) or ?pose=lat,lon (on the planet)
     const p = params.get('pose').split(',');
@@ -515,18 +541,21 @@ async function main() {
       await world.terrain.readyAt(camPlanet);
       snap = true;
     },
-    entrance: (id) => goTo(world.plans.get(id)),
-    near: (id) => goNear(world.plans.get(id)),
+    entrance: async (id) => { if (!world.plans.has(id)) await world.loadPlans(); return goTo(world.plans.get(id)); },
+    near: async (id) => { if (!world.plans.has(id)) await world.loadPlans(); return goNear(world.plans.get(id)); },
     walk: async (keys, ms) => { controls.enabled = true; for (const k of keys) controls.keys.add(k); await new Promise((r) => setTimeout(r, ms)); controls.keys.clear(); },
     feet: () => ({ ...controls.feet }),
     world, renderer: R, controls, stats, music, climate, mapView, perf,
     ground: (x, z) => world.collide.terrain(x, z),
   };
   window.READY = true;
+  // the other settlements' landmark plans (for the map), now that the world is open
+  setTimeout(() => world.loadPlansIdle().catch((e) => console.warn('plans', e)), 3000);
   if (params.has('bench')) setTimeout(() => runBench(window.palace), 1000);
 }
 
 main().catch((e) => {
   console.error(e);
-  $('intro-status').textContent = t('error') + (e.message || e);
+  const p = window.__progress;
+  if (p) p.fail(e.message || e); else $('intro-status').textContent = t('error') + (e.message || e);
 });
