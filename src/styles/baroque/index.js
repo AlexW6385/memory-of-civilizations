@@ -36,6 +36,8 @@ function stPeter(el, { bag, col }) {
   for (const zz of [-1, -0.85, -0.68, 0.68, 0.85, 1]) bag.add(T, F(cz + zz * fw * 0.98 - 1.1, cz + zz * fw * 0.98 + 1.1, y, y + H - 2.5, 0, 0.6));
   bag.add(T, F(cz - fw, cz + fw, y + H + 2.4, y + H + 9, 0, 0.3));
   for (let k = 0; k < 9; k++) { const z = cz - fw * 0.8 + k * fw * 1.6 / 8; bag.add('opening', F(z - 1.0, z + 1.0, y + H + 4, y + H + 7.2, 0.25, 0.35)); }
+  // the statues of Christ, John the Baptist and the apostles standing along the attic
+  for (let k = 0; k < 13; k++) { const z = cz - fw * 0.9 + k * fw * 1.8 / 12; bag.add('marble', lathe([[0.6, 0], [0.5, 3], [0.6, 4.2], [0.001, 5.2]], 8, null, fx - 0.3, y + H + 9, z)); }
   // the pediment over the four middle columns: a triangle, its raking cornices
   const pz = fw * 0.6 * 0.5 + 2, py = y + H + 2.4;
   for (let i = 0; i < 8; i++) { const t0 = i / 8, t1 = (i + 1) / 8; bag.add(T, F(cz - pz * (1 - t0), cz + pz * (1 - t0), py + 7 * t0, py + 7 * t1, 0.6, 3.2)); }
