@@ -188,6 +188,14 @@ export class Renderer {
 
   render() {
     this.update();
+    // the shadow cascades: the nearest drawn every frame, the middle one every second frame, the
+    // farthest every third — far shadows move by a texel or less in a frame; each map keeps the
+    // matrix it was drawn with, so a map drawn a frame ago still falls where it should
+    const csm = this.sun.shadow.shadowNode, L = csm?.lights;
+    if (L?.length && this.sun.castShadow) {
+      const n = this.frameNo = (this.frameNo || 0) + 1;
+      for (let i = 0; i < L.length; i++) { L[i].shadow.autoUpdate = false; if (i === 0 || n % (i + 1) === 0) L[i].shadow.needsUpdate = true; }
+    }
     this.pipeline.render();
   }
 

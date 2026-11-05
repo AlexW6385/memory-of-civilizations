@@ -26,7 +26,8 @@ self.onmessage = async (e) => {
   const { job, id } = d;
   try {
     await ready;
-    const mod = await grounds.MODULES[id]();
+    let mod;
+    for (let i = 0; ; i++) { try { mod = await grounds.MODULES[id](); break; } catch (err) { if (i >= 3) throw err; await new Promise((r) => setTimeout(r, 600 * (i + 1))); } }
     const town = await mod.town();
     if (cancelled.has(job)) return done(job);
     const plans = [...mod.landmarks.map((p) => p.plan), ...town];

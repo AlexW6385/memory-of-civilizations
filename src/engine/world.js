@@ -58,6 +58,20 @@ const DETAIL_REACH = 160, DETAIL_SHADOW = 50;
 const NO_SHADOW = new Set(['water', 'glass_outer', 'opening']);
 const castsShadow = (mat) => !NO_SHADOW.has(mat) && MATERIALS[mat]?.kind !== 'glow' && MATERIALS[mat]?.kind !== 'water';
 
+/**
+ * A module fetched on demand, tried again if its download fails (a dropped connection, or the site
+ * being redeployed at that moment): one failed fetch used to stop the loading for good.
+ */
+export async function retry(load, tries = 4) {
+  for (let i = 0; ; i++) {
+    try { return await load(); } catch (e) {
+      if (i >= tries - 1) throw e;
+      console.warn('retrying a module:', e.message);
+      await new Promise((r) => setTimeout(r, 600 * (i + 1)));
+    }
+  }
+}
+
 const sm = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
 /** Matrix taking planet coordinates to a frame's local ones. */
@@ -121,7 +135,7 @@ class Settlement {
         const entries = BUILDINGS.filter((b) => b.district === S.focus.region);
         this.expected = entries.length + 1.5;
         for (const entry of entries) {
-          const mod = await entry.load();
+          const mod = await retry(entry.load);
           if (stale()) return this;
           await this.addPart(entry.id, mod.plan, mod.music, gen);
         }
@@ -134,7 +148,7 @@ class Settlement {
         await this.addPart(plan.id, plan, null, gen);
       } else {
         // a settlement of its own: its landmarks, then its townscape (src/settlements/<id>/)
-        const mod = await MODULES[S.id]();
+        const mod = await retry(MODULES[S.id]);
         this.music = mod.music;
         const B = this.world.builder;
         let inWorker = false;
@@ -333,13 +347,13 @@ export class World {
     this.open.waterLevel = (x, z) => { const s = seaInFrame(this.anchor.frame, x, z); return groundInFrame(this.anchor.frame, x, z) < s ? s : -Infinity; };
     // every building's plan (small modules), to know where its entrance is
     await Promise.all(BUILDINGS.map(async (entry) => {
-      const mod = await entry.load();
+      const mod = await retry(entry.load);
       const site = this.settlements.find((s) => s.S.focus.region === entry.district);
       this.plans.set(entry.id, { id: entry.id, entry, plan: mod.plan, music: mod.music, site });
     }));
     for (const site of this.settlements) {
       if (!MODULES[site.id]) continue;
-      const mod = await MODULES[site.id]();
+      const mod = await retry(MODULES[site.id]);
       for (const p of mod.landmarks) this.plans.set(p.plan.id, { id: p.plan.id, plan: p.plan, music: p.music, site });
     }
     this.setAnchor(this.byId.edfu.S.frame, this.byId.edfu);
