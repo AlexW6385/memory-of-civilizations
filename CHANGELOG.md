@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.04 — Giotto's windows (2026-11-05)
+- Florence: Giotto's campanile has its windows — two storeys of paired two-light windows and the tall three-light belfry above, each light dark under a pointed head, the lights parted by slender shafts, each window framed in white marble under a gable with a small rose — instead of three plain slots a face.
+
 ## v9.03 — New York's shopfronts and cornices (2026-11-05)
 - New York: every block has its ground-floor shops — plate-glass windows between short piers under a cornice, here and there an awning — and its lower buildings a frieze under the cornice and a belt course over the base; the towers have a parapet at each setback and vertical piers standing out on their lowest and top stages, so the streets read less as stacked boxes.
 

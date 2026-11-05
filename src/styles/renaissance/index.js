@@ -5,7 +5,7 @@
 // with cornices; tiled roofs; houses of plaster and stone.
 
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
-import { box, frustum, lathe } from '../../core/geom.js';
+import { box, frustum, lathe, rod } from '../../core/geom.js';
 import '../qing/index.js';
 
 const M = 'marble', G = 'verde_antico', R = 'roof_tile', ST = 'limestone_yellow';
@@ -92,7 +92,31 @@ function campanile(el, { bag, col }) {
   const faces = [[[r[0], r[1]], [r[2], r[1]]], [[r[2], r[1]], [r[2], r[3]]], [[r[2], r[3]], [r[0], r[3]]], [[r[0], r[3]], [r[0], r[1]]]];
   for (const [a, b] of faces) { inlay(bag, a, b, y, y + h * 0.47, { pitch: s / 3, bands: 4 }); inlay(bag, a, b, y + h * 0.47, y + h, { pitch: s, bands: 3, pink: false }); }
   for (const [x0, x1, z0, z1] of [[r[0] - 0.4, r[0] + 0.6, r[1] - 0.4, r[1] + 0.6], [r[2] - 0.6, r[2] + 0.4, r[1] - 0.4, r[1] + 0.6], [r[0] - 0.4, r[0] + 0.6, r[3] - 0.6, r[3] + 0.4], [r[2] - 0.6, r[2] + 0.4, r[3] - 0.6, r[3] + 0.4]]) bag.add(M, box(x0, y, z0, x1, y + h, z1));
-  for (const f of 'nsew') for (const [yy, hh] of [[h * 0.52, 7], [h * 0.68, 8], [h * 0.84, 10]]) { const m = f === 'n' || f === 's' ? x : z; const q = f === 'n' ? [m - 2, r[1] - 0.06, m + 2, r[1] + 0.02] : f === 's' ? [m - 2, r[3] - 0.02, m + 2, r[3] + 0.06] : f === 'w' ? [r[0] - 0.06, m - 2, r[0] + 0.02, m + 2] : [r[2] - 0.02, m - 2, r[2] + 0.06, m + 2]; bag.add('opening', box(q[0], y + yy, q[1], q[2], y + yy + hh, q[3])); }
+  // Giotto's windows: two storeys of paired two-light windows, then the tall three-light belfry; each light
+  // dark under a pointed head, the lights parted by slender twisted shafts, the window framed in white
+  // marble under a gable with a small rose in it
+  for (const f of 'nsew') {
+    const along = f === 'n' || f === 's', o = f === 'n' ? r[1] : f === 's' ? r[3] : f === 'w' ? r[0] : r[2], sg = f === 'n' || f === 'w' ? -1 : 1, c = along ? x : z;
+    const B = (u0, u1, y0, y1, d0, d1) => { const a2 = o + sg * d0, b2 = o + sg * d1; return along ? box(c + u0, y0, Math.min(a2, b2), c + u1, y1, Math.max(a2, b2)) : box(Math.min(a2, b2), y0, c + u0, Math.max(a2, b2), y1, c + u1); };
+    const P = (u, yy, d) => (along ? [c + u, yy, o + sg * d] : [o + sg * d, yy, c + u]);
+    const win = (uc, w, y0, hh, lights) => {
+      bag.add(M, B(uc - w / 2 - 0.35, uc + w / 2 + 0.35, y0 - 0.3, y0 + hh + 0.4, 0, 0.12));
+      const lw = w / lights;
+      for (let i = 0; i < lights; i++) {
+        const u0 = uc - w / 2 + i * lw + 0.08, u1 = u0 + lw - 0.16;
+        bag.add('opening', B(u0, u1, y0, y0 + hh * 0.82, 0.1, 0.16));
+        for (let k = 0; k < 5; k++) { const t = (k + 0.5) / 5, hw = (u1 - u0) / 2 * Math.sqrt(1 - t * t); bag.add('opening', B((u0 + u1) / 2 - hw, (u0 + u1) / 2 + hw, y0 + hh * 0.82 + k * hh * 0.036, y0 + hh * 0.82 + (k + 1) * hh * 0.036, 0.1, 0.16)); }
+      }
+      for (let i = 1; i < lights; i++) { const u = uc - w / 2 + i * lw; bag.add(M, rod(P(u, y0, 0.2), P(u, y0 + hh * 0.82, 0.2), 0.1, 8)); }
+      // the gable over it: a triangle of white marble, a little rose in its middle
+      const gy = y0 + hh + 0.4, gw = w / 2 + 0.5, gh = gw * 0.75;
+      for (let k = 0; k < 6; k++) { const t0 = k / 6, t1 = (k + 1) / 6; bag.add(M, B(uc - gw * (1 - t0), uc + gw * (1 - t0), gy + gh * t0, gy + gh * t1, 0, 0.16)); }
+      const rose = lathe([[0.001, 0], [gw * 0.28, 0], [gw * 0.28, 0.05], [0.001, 0.05]], 16); rose.rotateX(Math.PI / 2); if (!along) rose.rotateY(Math.PI / 2);
+      const pc = P(uc, gy + gh * 0.35, 0.17); rose.translate(...pc); bag.add('opening', rose);
+    };
+    for (const yy of [h * 0.5, h * 0.66]) for (const du of [-s * 0.2, s * 0.2]) win(du, s * 0.22, y + yy, 8, 2);
+    win(0, s * 0.42, y + h * 0.81, 12, 3);
+  }
   bag.add(M, box(r[0] - 1, y + h, r[1] - 1, r[2] + 1, y + h + 1.2, r[3] + 1));
 }
 /** baptistery: { c, r, h, y } — the octagon in white and green marble, its pyramidal roof and lantern. */
