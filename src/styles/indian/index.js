@@ -7,7 +7,7 @@
 // capital; a monastery of cells round a court.
 
 import { registerStyle, orientedBox } from '../../core/build.js';
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod, orientOutward } from '../../core/geom.js';
 import { hexa, obox } from '../chinese/index.js';
 
 const STONE = 'sandstone_dressed', RAIL = 'sandstone_rail', DOME = 'lime_plaster';
@@ -41,49 +41,110 @@ function railRing(bag, col, c, r, y, h, gaps = [], gap = 1.8, mat = RAIL, walls 
   bag.add(mat, fromTriangles(bars));
 }
 
+// a beam along u through `at`, its ends rising (rise at the ends), section depth ±d in n, height h
+function curvedBeam(out, at, u, n, half, d, y0, h, rise, segs = 12) {
+  const P = (t, dn, dy) => { const yy = y0 + rise * t * t + dy; return [at[0] + u[0] * t * half + n[0] * dn, yy, at[1] + u[1] * t * half + n[1] * dn]; };
+  const q = (A, B, C, D) => out.push(...A, ...B, ...C, ...A, ...C, ...D);
+  for (let i = 0; i < segs; i++) {
+    const t0 = -1 + 2 * i / segs, t1 = -1 + 2 * (i + 1) / segs;
+    q(P(t0, d, 0), P(t1, d, 0), P(t1, d, h), P(t0, d, h));
+    q(P(t1, -d, 0), P(t0, -d, 0), P(t0, -d, h), P(t1, -d, h));
+    q(P(t0, -d, h), P(t0, d, h), P(t1, d, h), P(t1, -d, h));
+    q(P(t0, d, 0), P(t0, -d, 0), P(t1, -d, 0), P(t1, d, 0));
+  }
+  for (const t of [-1, 1]) q(P(t, -d, 0), P(t, d, 0), P(t, d, h), P(t, -d, h));
+}
+
 /**
- * A gateway (torana) at { at, dir (outward), y, s (scale) }: two square posts with capitals of
- * elephants (blocks), three architraves with curled ends, uprights between them, emblems above.
+ * A gateway (torana) at { at, dir (outward), y, s (scale) }: two square posts carved in panels,
+ * capitals of four elephants back to back, three architraves curving up to their spiral ends and
+ * carved with processions on both faces, the bracket figures (yakshis) leaning out from the posts
+ * under the lowest one, uprights and small figures between them, the wheel and triratnas above.
  */
 function torana(bag, col, at, dir, y, s = 1) {
-  const u = [-dir[1], dir[0]], out = [], caps = [];
+  const u = [-dir[1], dir[0]], out = [], caps = [], carve = [];
   const W = 2.1 * s, P = 0.35 * s, H = 6.4 * s;
+  const at2 = (k, d = 0) => [at[0] + u[0] * k + dir[0] * d, at[1] + u[1] * k + dir[1] * d];
   for (const k of [-1, 1]) {
-    const c = [at[0] + u[0] * k * W, at[1] + u[1] * k * W];
+    const c = at2(k * W);
     obox(out, c, u, dir, P, P, y, y + H);
-    // the capital: a block of four animals back to back
-    obox(caps, c, u, dir, P * 1.9, P * 1.9, y + H, y + H + 1.2 * s);
+    // the carved panels on the front and back faces of the post
+    for (const f of [-1, 1]) for (const [p0, p1] of [[0.8, 2.4], [2.6, 4.2], [4.4, 6.0]]) {
+      obox(carve, [c[0] + dir[0] * f * (P + 0.025 * s), c[1] + dir[1] * f * (P + 0.025 * s)], u, dir, P * 0.82, 0.025 * s, y + p0 * s, y + p1 * s);
+      obox(carve, [c[0] + dir[0] * f * (P + 0.06 * s), c[1] + dir[1] * f * (P + 0.06 * s)], u, dir, P * 0.42, 0.02 * s, y + (p0 + 0.3) * s, y + (p1 - 0.3) * s);
+    }
+    // the capital: an abacus, four elephants standing back to back
     obox(caps, c, u, dir, P * 1.2, P * 1.2, y + H - 0.25 * s, y + H);
-    if (col) col.rect([c[0] - P, c[1] - P, c[0] + P, c[1] + P].map((v, i) => v), y, y + H);
+    obox(caps, c, u, dir, P * 1.9, P * 1.9, y + H, y + H + 0.18 * s);
+    for (const [ax, an] of [[u, dir], [[-u[0], -u[1]], dir], [dir, u], [[-dir[0], -dir[1]], u]]) {
+      const o = (r) => [c[0] + ax[0] * r * s, c[1] + ax[1] * r * s];
+      obox(caps, o(0.33), ax, an, 0.3 * s, 0.24 * s, y + H + 0.18 * s, y + H + 0.85 * s);
+      obox(caps, o(0.7), ax, an, 0.12 * s, 0.2 * s, y + H + 0.5 * s, y + H + 1.05 * s);
+      obox(caps, o(0.86), ax, an, 0.05 * s, 0.06 * s, y + H + 0.2 * s, y + H + 0.62 * s);
+    }
+    obox(caps, c, u, dir, P * 1.7, P * 1.7, y + H + 1.05 * s, y + H + 1.2 * s);
+    if (col) col.rect([c[0] - P, c[1] - P, c[0] + P, c[1] + P], y, y + H);
+    // the bracket figure: a woman leaning out from the post under a tree, one arm up to its branch
+    const foot = [...at2(k * (W + P + 0.08 * s)), y + H - 1.7 * s], hip = [...at2(k * (W + P + 0.45 * s)), y + H - 0.75 * s];
+    const head = [...at2(k * (W + P + 0.85 * s)), y + H + 0.25 * s], hand = [...at2(k * (W + P + 1.15 * s)), y + H + 0.8 * s];
+    const R3 = (p) => [p[0], p[2], p[1]];
+    bag.add(RAIL, rod(R3(foot), R3(hip), 0.17 * s, 8));
+    bag.add(RAIL, rod(R3(hip), R3(head), 0.2 * s, 8));
+    bag.add(RAIL, rod(R3(hip), R3(hand), 0.07 * s, 6));
+    bag.add(RAIL, lathe([[0.001, -0.17 * s], [0.15 * s, -0.1 * s], [0.16 * s, 0.05 * s], [0.001, 0.17 * s]], 8, null, head[0], head[2] + 0.2 * s, head[1]));
+    // the tree's crown, filling the angle under the architrave's end
+    const crown = at2(k * (W + P + 1.0 * s));
+    bag.add(RAIL, lathe([[0.001, -0.3 * s], [0.45 * s, -0.18 * s], [0.5 * s, 0.05 * s], [0.3 * s, 0.25 * s], [0.001, 0.3 * s]], 10, (th) => 1 + 0.12 * Math.cos(th * 5), crown[0], y + H + 0.85 * s, crown[1]));
   }
-  // the three architraves, each with a volute at either end
+  // the three architraves, curving up to the ends, a spiral at either end, a procession on each face
   for (let b = 0; b < 3; b++) {
-    const yb = y + H + 1.2 * s + b * 1.5 * s, half = 4.3 * s;
-    obox(out, at, u, dir, half, 0.32 * s, yb, yb + 0.6 * s);
+    const yb = y + H + 1.2 * s + b * 1.5 * s, half = 4.3 * s, rise = 0.22 * s, d = 0.32 * s;
+    const beam = []; curvedBeam(beam, at, u, dir, half, d, yb, 0.6 * s, rise); out.push(...orientOutward(beam));
+    for (const f of [-1, 1]) for (let t = -0.88; t <= 0.89; t += 0.105) {
+      if (Math.abs(Math.abs(t * half) - W) < 0.45 * s) continue;     // not where the posts and uprights cross
+      const hgt = (Math.round(t * 20) % 2 ? 0.34 : 0.26) * s, yy = yb + rise * t * t + 0.12 * s;
+      obox(carve, [at[0] + u[0] * t * half + dir[0] * f * (d + 0.03 * s), at[1] + u[1] * t * half + dir[1] * f * (d + 0.03 * s)], u, dir, 0.13 * s, 0.03 * s, yy, yy + hgt);
+    }
     for (const k of [-1, 1]) {
-      const e = [at[0] + u[0] * k * half, at[1] + u[1] * k * half];
-      const vol = lathe([[0.001, -0.36 * s], [0.3 * s, -0.3 * s], [0.42 * s, 0], [0.3 * s, 0.3 * s], [0.001, 0.36 * s]], 12, null, 0, 0, 0);
-      vol.rotateX(Math.PI / 2).rotateY(Math.atan2(u[0], u[1]) + Math.PI / 2).translate(e[0], yb + 0.3 * s, e[1]);
-      bag.add(STONE, vol);
+      const e = at2(k * half), ye = yb + rise + 0.3 * s;
+      for (const [r, th] of [[0.5, 0.36], [0.3, 0.42], [0.12, 0.46]]) {
+        const vol = lathe([[0.001, -th * s], [r * s, -th * s], [r * s, th * s], [0.001, th * s]], 14, null, 0, 0, 0);
+        vol.rotateX(Math.PI / 2).rotateY(Math.atan2(u[0], u[1]) + Math.PI / 2).translate(e[0], ye, e[1]);
+        bag.add(STONE, vol);
+      }
     }
     // short uprights and small figures between the architraves
     if (b < 2) for (const k of [-1, -0.33, 0.33, 1]) {
-      const d = k * W * (Math.abs(k) === 1 ? 1 : 1.3);
-      obox(out, [at[0] + u[0] * d, at[1] + u[1] * d], u, dir, 0.22 * s, 0.22 * s, yb + 0.6 * s, yb + 1.5 * s);
+      const dd = k * W * (Math.abs(k) === 1 ? 1 : 1.3), tt = dd / half;
+      obox(out, at2(dd), u, dir, 0.22 * s, 0.22 * s, yb + rise * tt * tt + 0.55 * s, yb + 1.55 * s);
+    }
+    if (b < 2) for (const k of [-0.66, 0, 0.66]) {
+      const dd = k * W * 1.15, tt = dd / half;
+      obox(carve, at2(dd), u, dir, 0.12 * s, 0.14 * s, yb + rise * tt * tt + 0.6 * s, yb + 1.35 * s);
+      bag.add(RAIL, lathe([[0.001, -0.1 * s], [0.1 * s, 0], [0.001, 0.1 * s]], 8, null, ...((p) => [p[0], yb + 1.42 * s, p[1]])(at2(dd))));
     }
   }
   // the emblems on top: a wheel in the middle, a triratna over each post
   const top = y + H + 1.2 * s + 2 * 1.5 * s + 0.6 * s;
-  const wheel = lathe([[0.001, -0.1 * s], [0.75 * s, -0.1 * s], [0.75 * s, 0.1 * s], [0.001, 0.1 * s]], 16, null, 0, 0, 0);
-  wheel.rotateX(Math.PI / 2).rotateY(Math.atan2(dir[0], dir[1])).translate(at[0], top + 0.85 * s, at[1]);
-  bag.add(STONE, wheel);
+  for (const [r, th] of [[0.75, 0.1], [0.62, 0.13], [0.16, 0.18]]) {
+    const wheel = lathe([[0.001, -th * s], [r * s, -th * s], [r * s, th * s], [0.001, th * s]], 20, null, 0, 0, 0);
+    wheel.rotateX(Math.PI / 2).rotateY(Math.atan2(dir[0], dir[1])).translate(at[0], top + 0.85 * s, at[1]);
+    bag.add(r === 0.62 ? RAIL : STONE, wheel);
+  }
+  for (let i = 0; i < 12; i++) {
+    const a = i * Math.PI / 6, p0 = [at[0] + u[0] * Math.cos(a) * 0.16 * s, top + 0.85 * s + Math.sin(a) * 0.16 * s, at[1] + u[1] * Math.cos(a) * 0.16 * s];
+    const p1 = [at[0] + u[0] * Math.cos(a) * 0.62 * s, top + 0.85 * s + Math.sin(a) * 0.62 * s, at[1] + u[1] * Math.cos(a) * 0.62 * s];
+    bag.add(STONE, rod(p0, p1, 0.035 * s, 5));
+  }
+  obox(caps, at, u, dir, 0.18 * s, 0.14 * s, top, top + 0.12 * s);
   for (const k of [-1, 1]) {
-    const c = [at[0] + u[0] * k * W, at[1] + u[1] * k * W];
+    const c = at2(k * W);
     obox(caps, c, u, dir, 0.4 * s, 0.12 * s, top, top + 0.9 * s);
     obox(caps, c, u, dir, 0.15 * s, 0.12 * s, top + 0.9 * s, top + 1.3 * s);
   }
   bag.add(STONE, fromTriangles(out));
   bag.add(RAIL, fromTriangles(caps));
+  bag.add(RAIL, fromTriangles(carve));
 }
 
 /**

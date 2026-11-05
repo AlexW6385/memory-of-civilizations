@@ -104,7 +104,8 @@ function tree(T, seed, lod) {
       const a = rand() * Math.PI * 2, r = Math.sqrt(rand()) * cr.w;
       p = V(Math.cos(a) * r, (rand() - 0.5) * cr.h * (1 - (r / cr.w) ** 2 * 0.6), Math.sin(a) * r);
     } else if (cr.shape === 'spindle') {
-      const y = (rand() * 2 - 1) * cr.h, rr = cr.w * Math.sqrt(Math.max(0, 1 - (y / cr.h) ** 2)) * (0.6 + 0.4 * rand());
+      // stratified up the height, so that a tall narrow crown has no gaps
+      const y = (-1 + 2 * (i + 0.15 + 0.7 * rand()) / nC) * cr.h * 0.92, rr = cr.w * Math.sqrt(Math.max(0, 1 - (y / cr.h) ** 2)) * (cr.tight ? 0.85 + 0.15 * rand() : 0.6 + 0.4 * rand());
       const a = rand() * Math.PI * 2;
       p = V(Math.cos(a) * rr * 0.6, y, Math.sin(a) * rr * 0.6);
     } else {
@@ -113,6 +114,8 @@ function tree(T, seed, lod) {
     }
     clumps.push(p.add(centre));
   }
+  // a spindle crown stands on a leader carried up through it
+  if (cr.shape === 'spindle') tube(trunk, [[top[0], top[1] - 0.1, top[2], top[3]], [centre.x, centre.y, centre.z, top[3] * 0.7], [centre.x, centre.y + cr.h * 0.8, centre.z, top[3] * 0.25]], lod ? 4 : 6, H);
   // limbs from the fork to the clumps (fewer at low detail)
   const nL = Math.min(clumps.length, lod ? Math.ceil((tr.limbs ?? 4) / 2) : (tr.limbs ?? 4));
   for (let i = 0; i < nL; i++) {
@@ -310,7 +313,7 @@ export const SPECIES = {
   reeds: { make: (s, l) => tuft(s, l, { h: 2.8, w: 1.6, cards: 6 }), foliage: 'reed', scale: [0.8, 1.3], shadow: false, lod: [70, 500] },
   halfa: { make: (s, l) => tuft(s, l, { h: 0.7, w: 0.9, cards: 4 }), foliage: 'grass_dry', scale: [0.7, 1.4], shadow: false, lod: [45, 200] },
   stone_pine: { make: (s, l) => tree({ height: 15, trunk: { r: 0.32, lean: 0.12, fork: 0.72, limbs: 6, gnarl: 0.2 }, crown: { shape: 'umbrella', w: 6.2, h: 1.6, y: 0.88, clumps: 13, cards: 40, card: 1.7, up: 0.6 } }, s, l), foliage: 'needles', bark: 'bark_pine', scale: [0.8, 1.2], shadow: true, lod: [180, 1600] },
-  cypress: { make: (s, l) => tree({ height: 14, trunk: { r: 0.18, lean: 0.01, fork: 0.12, limbs: 0 }, crown: { shape: 'spindle', w: 1.4, h: 6.2, y: 0.55, clumps: 14, cards: 26, card: 1.0, up: 0.0, clumpR: 0.9 } }, s, l), foliage: 'scale', bark: 'bark_dark', scale: [0.8, 1.2], shadow: true, lod: [180, 1600] },
+  cypress: { make: (s, l) => tree({ height: 14, trunk: { r: 0.18, lean: 0.01, fork: 0.12, limbs: 0 }, crown: { shape: 'spindle', w: 1.15, h: 6.2, y: 0.55, clumps: 26, cards: 17, card: 0.9, up: 0.0, clumpR: 0.62, tight: true } }, s, l), foliage: 'scale', bark: 'bark_dark', scale: [0.8, 1.2], shadow: true, lod: [180, 1600] },
   holm_oak: { make: (s, l) => tree({ height: 10, trunk: { r: 0.32, lean: 0.06, fork: 0.35, limbs: 5, gnarl: 0.4 }, crown: { shape: 'round', w: 4.8, h: 3.6, y: 0.62, clumps: 12, cards: 46, card: 1.3, up: 0.2 } }, s, l), foliage: 'broad', bark: 'bark_grey', scale: [0.8, 1.2], shadow: true, lod: [160, 1400] },
   plane_tree: { make: (s, l) => tree({ height: 21, trunk: { r: 0.62, lean: 0.05, fork: 0.38, limbs: 7, gnarl: 0.35 }, crown: { shape: 'round', w: 9, h: 7.5, y: 0.6, clumps: 16, cards: 58, card: 2.1, up: 0.2 } }, s, l), foliage: 'broad', bark: 'bark_plane', scale: [0.75, 1.2], shadow: true, lod: [190, 1700] },
   carob: { make: (s, l) => tree({ height: 8, trunk: { r: 0.35, lean: 0.08, fork: 0.25, limbs: 6, gnarl: 0.7 }, crown: { shape: 'round', w: 5.2, h: 3.6, y: 0.55, clumps: 12, cards: 48, card: 1.4, up: 0.15 } }, s, l), foliage: 'broad_dark', bark: 'bark_grey', scale: [0.75, 1.2], shadow: true, lod: [160, 1400] },

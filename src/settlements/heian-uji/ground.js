@@ -2,11 +2,16 @@
 // garden, the swift Uji River with its pebbled banks, wooded hills of cedar and maple beyond; the
 // soft, humid light of the Kyoto basin.
 
-import { RADIUS, GARDEN, RIVER, POND_LEVEL, height, inPond, inRiver, inRect, inLot } from './layout.js';
+import { RADIUS, GARDEN, RIVER, POND_LEVEL, height, inPond, inRiver, inRect, inLot, pondDistance } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.1, grass: 0.55, rock: 0, soil: 0.35, fields: 0, dry: 0.15, warmth: 0.5, red: 0.05, road: 0, snow: 0, forest: 0.1 };
-  if (inRect(GARDEN, x, z)) { c.sand = 0.6; c.grass = 0.4; return c; }
+  // the garden: a beach of gravel round the pond, moss under the pines and maples beyond it
+  if (inRect(GARDEN, x, z)) {
+    const d = pondDistance(x, z);
+    if (d < 5 || Math.hypot(x + 40, z) < 26) { c.sand = 0.85; c.grass = 0.1; c.soil = 0.05; c.dry = 0.05; return c; }
+    c.sand = 0.05; c.grass = 0.85; c.soil = 0.1; c.dry = 0; c.warmth = 0.4; return c;
+  }
   if (h < -1 && !inPond(x, z)) { c.rock = 0.4; c.sand = 0.4; return c; }
   if (h > 4) { c.forest = 0.7; c.grass = 0.3; return c; }
   return c;
@@ -16,13 +21,17 @@ function waterLevel(x, z) { return inRiver(x, z) ? RIVER.level : inPond(x, z) ? 
 function fromWater(x, z) { return inRiver(x, z) || inPond(x, z) ? -2 : Math.max(-5, Math.min(40, height(x, z) - RIVER.level)); }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inPond(x, z) || inLot(x, z, 1)) return null;
-  if (inRect(GARDEN, x, z)) return Math.hypot(x + 40, z) > 28 ? { red_pine: 0.03, maple: 0.02, grass: 10 } : null;
+  if (inRect(GARDEN, x, z)) {
+    const d = pondDistance(x, z);
+    if (d < 5 || Math.hypot(x + 40, z) < 28) return null;
+    return d < 16 ? { red_pine: 0.06, grass: 3 } : { red_pine: 0.1, maple: 0.08, grass: 4 };
+  }
   if (height(x, z) > 4) return { sugi: 0.2, maple: 0.06, red_pine: 0.05, grass: 15 };
   return { red_pine: 0.02, grass: 20 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { sugi: 0.2, maple: 0.06, red_pine: 0.05 },
+  maxDensity: { sugi: 0.2, maple: 0.08, red_pine: 0.1 },
   climate: {
     sun: { az: 110, el: 42, color: [1.0, 0.96, 0.9], intensity: 3.3, lat: 35, dec: 5, hour: 9 },
     sky: { turbidity: 3.2, rayleigh: 1.1, mie: 0.006, mieG: 0.78, zenith: [0.08, 0.15, 0.38], horizon: [0.64, 0.68, 0.72] },

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.85 — Sanchi's gateways, cypresses, Uji's garden (2026-11-04)
+- Sanchi: the toranas carved — posts in panels, capitals of four elephants back to back, architraves curving up to triple spiral ends with processions in relief on both faces, bracket figures under trees leaning from the posts, figures between the architraves, a spoked wheel. Spindle crowns (cypress, poplar, arborvitae, sugi, spruce) stand on a leader carried up through them, their clumps spread evenly up the height; the cypress tighter and narrower (no more floating lumps in Agra's garden). Uji: the garden in moss with a gravel beach round the pond and more pines and maples (dossier: gravel and moss, pines and maples).
+
 ## v8.84 — Smoother to move through (2026-11-04)
 - Turning and walking are smoother: shadows are lighter to draw, small street objects far away no longer cast shadows (draw calls down by about a third), and a still view no longer redraws 60 times a second.
 - Memory no longer creeps up while flying: a town you leave while it is still loading is dropped completely, and at most four towns are built at once.
