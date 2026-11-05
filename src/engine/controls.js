@@ -1,8 +1,8 @@
 // First-person walking and flying: keyboard and mouse (pointer lock) on desktop, a thumb stick,
 // drag-to-look and a fly button on touch screens. Collision against the world's floors and
 // obstacles; steps, stairs and ramps are climbed by following the floor height. Holding Space (or
-// the fly button) rises, faster the longer it is held; let go, one carries on a little and then
-// comes down, gathering pace, softly at the end. Cruising (Space twice quickly; on touch, slide from the
+// the fly button) rises, let go one falls, both at a top speed set by the height above the ground,
+// reached smoothly in a second or so, slow near the ground. Cruising (Space twice quickly; on touch, slide from the
 // fly button onto the cruise button that shows beside it) holds one aloft while the speed
 // dies away; flying again ends it.
 
@@ -27,7 +27,6 @@ export class Controls {
     this.flyHeld = false;           // Space or the fly button held
     this.glide = false;             // came up by flying: comes down gently
     this.cruise = false;            // aloft, the speed dying away, nothing pulling down
-    this.held = 0;                  // seconds the fly key has been held
     this.vel = { x: 0, z: 0 };      // horizontal velocity aloft (m/s): flight has momentum
     this.speedNow = 0;              // horizontal speed (m/s), smoothed, for the display
     this._bind();
@@ -177,14 +176,13 @@ export class Controls {
     if (l > 1) { f /= l; s /= l; }
     const run = this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || Math.hypot(this.stick.x, this.stick.y) > 0.92;
     const lift = this.enabled && (this.flyHeld || (this.keys.has('Space') && !this._spaceCruise));
-    this.held = lift ? this.held + dt : 0;
     if (lift) { this.glide = true; this.setCruise(false); }
     // aloft, faster the higher (src/core/walk.js)
     const alt = this.glide ? this.feet.y - this.collide.terrain(this.feet.x, this.feet.z) : 0;
     this.altitude = alt;
     const fs = flightSpeeds(alt);
     const speed = this.glide ? (run ? fs.fast : fs.fly) : run ? RUN : WALK;
-    this.feet.fs = fs; this.feet.held = this.held; this.feet.cruise = this.cruise;
+    this.feet.fs = fs; this.feet.cruise = this.cruise;
     const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
     let dx = (-sin * f + cos * s) * speed * dt, dz = (-cos * f - sin * s) * speed * dt;
     if (this.glide) {

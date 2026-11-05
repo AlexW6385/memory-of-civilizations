@@ -2,38 +2,28 @@
 
 export const EYE = 1.62, RADIUS = 0.3, STEP = 0.5, HEAD = 1.75, LOW = 0.25;
 export const WALK = 2.6, RUN = 6.5, GRAVITY = 18;
-/** Flight. Rising is an acceleration that grows while the fly key is held (LIFT_ACC, plus
- *  LIFT_GROW for every second held), up to a top speed; let go, flight gravity takes over from the
- *  speed one has, and the fall gathers pace to a terminal speed that shrinks near the ground, so
- *  that one comes down softly. Cruising holds the height: the climb or fall dies away and nothing
- *  pulls down. Aloft, all of it grows with the height above the ground (flightSpeeds), so that the
- *  planet can be crossed in minutes. CEILING is the highest the feet may rise above the open ground. */
-export const FLY = 9, FLY_FAST = 18, LIFT_ACC = 7, LIFT_GROW = 5, CEILING = 1500;
-/** Flight at a height above the ground (m, m/s, m/s²): horizontal speeds { fly, fast }, the top
- *  climbing speed and its acceleration scale { lift, liftK }, flight gravity and the terminal fall
- *  speed { fall, sink }. */
+/** Flight. The height above the ground sets the top vertical speed, the same up and down
+ *  (flightSpeeds().vertical: slow near the ground, so that take-off and landing are gentle, fast
+ *  high up); held, one rises toward it, let go, one falls toward it, and the acceleration only
+ *  smooths the start, reaching the top speed in about VERTICAL_RISE seconds. Cruising holds the
+ *  height: the climb or fall dies away and nothing pulls down. The horizontal speeds grow with the
+ *  height too, so that the planet can be crossed in minutes. CEILING is the highest the feet may
+ *  rise above the open ground. */
+export const FLY = 9, FLY_FAST = 18, VERTICAL_RISE = 1.2, CEILING = 1500;
+/** Flight speeds at a height above the ground (m/s): horizontal { fly, fast }, and the top
+ *  vertical speed, rising or falling { vertical }. */
 export function flightSpeeds(alt) {
   const a = Math.max(0, alt);
-  return {
-    fly: Math.min(110, FLY + a * 0.2), fast: Math.min(200, FLY_FAST + a * 0.4),
-    lift: Math.min(160, 15 + a * 0.2), liftK: 1 + Math.min(3, a / 300),
-    fall: Math.min(45, 9 + a * 0.05), sink: Math.min(160, 6 + a * 0.25),
-  };
+  return { fly: Math.min(110, FLY + a * 0.2), fast: Math.min(200, FLY_FAST + a * 0.4), vertical: Math.min(160, 6 + a * 0.25) };
 }
 
-/** The vertical speed aloft after dt (P: vy, lift, cruise, held = seconds held, and the
- *  flightSpeeds fs). */
+/** The vertical speed aloft after dt (P: vy, lift, cruise; fs from flightSpeeds). */
 export function flyVy(P, fs, dt) {
   let vy = P.vy;
-  if (P.lift) {
-    const acc = (LIFT_ACC + LIFT_GROW * Math.min(P.held || 0, 6)) * fs.liftK;
-    if (vy < fs.lift) vy = Math.min(fs.lift, vy + acc * (vy < 0 ? 2.5 : 1) * dt);   // a fall is braked harder
-  } else if (P.cruise) vy *= Math.exp(-dt * 0.9);     // the climb or fall dies away
-  else {
-    vy -= (fs.fall + Math.max(0, vy) * 0.35) * dt;     // a climb carries on a little, then gives way
-    if (vy < -fs.sink) vy += (-fs.sink - vy) * Math.min(1, dt * 4);   // to the terminal speed, smoothly
-  }
-  return vy;
+  if (P.cruise && !P.lift) return vy * Math.exp(-dt * 0.9);   // the climb or fall dies away
+  const top = fs.vertical, target = P.lift ? top : -top;
+  const acc = Math.max(8, top / VERTICAL_RISE) * dt;          // also slows one to a lower top speed
+  return vy < target ? Math.min(target, vy + acc) : Math.max(target, vy - acc);
 }
 
 /**
