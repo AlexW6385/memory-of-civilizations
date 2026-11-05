@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.09 — Borobudur's reliefs and niche Buddhas (2026-11-05)
+- Borobudur: the terrace walls carry their narrative reliefs — one or two registers of framed panels along every straight side, figures standing out in each — and the niches in the upper part of the walls hold seated Buddhas instead of standing empty.
+
 ## v9.08 — Kaifeng's Iron Pagoda (2026-11-05)
 - Kaifeng: the Iron Pagoda's thirteen storeys are skinned in moulded glazed tiles — rows of raised tile panels on every face, clear round the doors and windows — with engaged columns at the corners and a row of brick bracket sets under each eave, instead of plain brown walls.
 

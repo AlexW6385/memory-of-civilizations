@@ -70,12 +70,28 @@ function borobudur(el, { bag, col }) {
     level(s.a, prevY, s.y);
     // the main wall's niches (dark) along each straight side of this terrace's face
     for (const [sx, sz, nx, nz] of [[1, 0, 0, -1], [1, 0, 0, 1], [0, 1, -1, 0], [0, 1, 1, 0]]) {
+      const H = s.y - prevY;
+      if (H < 2.6) continue;
+      // the niches with their seated Buddhas in the upper part of the wall
       for (let u = -s.a + 3; u < s.a - 2; u += 4.5) {
         if (Math.abs(u) < s.a / 3 + 1) continue;
-        const px = cx + sx * u + nx * (s.a + 0.02), pz = cz + sz * u + nz * (s.a + 0.02), t = [];
-        if (s.y - prevY < 2.6) continue;
-        beamTris(t, [px - sx * 0.7, prevY + 0.9, pz - sz * 0.7], [px + sx * 0.7, prevY + 0.9, pz + sz * 0.7], 0.05, Math.min(1.6, s.y - prevY - 1.2));
+        const px = cx + sx * u + nx * (s.a + 0.02), pz = cz + sz * u + nz * (s.a + 0.02), t = [], nh = Math.min(1.5, H * 0.32), ny0 = s.y - nh - 0.35;
+        beamTris(t, [px - sx * 0.7, ny0, pz - sz * 0.7], [px + sx * 0.7, ny0, pz + sz * 0.7], 0.05, nh);
         bag.add('lacquer_black', fromTriangles(t));
+        bag.add(A, lathe([[0.42, 0], [0.4, 0.25], [0.24, 0.45], [0.26, 0.75], [0.14, 0.95], [0.001, 1.0]], 8, null, px + nx * 0.25, ny0 + 0.05, pz + nz * 0.25));
+      }
+      // the narrative reliefs below them: two registers of framed panels, figures standing out in each
+      const regs = H > 3.6 ? 2 : 1, rh = (H - Math.min(1.5, H * 0.32) - 0.9) / regs;
+      for (let r2 = 0; r2 < regs; r2++) {
+        const y0 = prevY + 0.35 + r2 * rh, t = [], fig = [];
+        for (let u = -s.a + 1.6; u < s.a - 1.6; u += 2.7) {
+          if (Math.abs(u) < s.a / 3 + 1.2 && Math.abs(u) > 2.4) { /* the projections are plain where the stair passes */ }
+          if (Math.abs(u) < 2.4) continue;
+          const px = cx + sx * u + nx * (s.a + 0.04), pz = cz + sz * u + nz * (s.a + 0.04);
+          beamTris(t, [px - sx * 1.25, y0, pz - sz * 1.25], [px + sx * 1.25, y0, pz + sz * 1.25], 0.06, rh - 0.25);
+          for (const d of [-0.75, -0.2, 0.4, 0.85]) { const fx = px + sx * d + nx * 0.07, fz = pz + sz * d + nz * 0.07, fh = (rh - 0.6) * (d === 0.4 ? 0.7 : 1); beamTris(fig, [fx - sx * 0.14, y0 + 0.12, fz - sz * 0.14], [fx + sx * 0.14, y0 + 0.12, fz + sz * 0.14], 0.05, fh); }
+        }
+        bag.add(A, fromTriangles(t)); bag.add(A, fromTriangles(fig));
       }
     }
     balustrade(s.a, s.y, 1.5);
