@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.07 — St Peter's front (2026-11-05)
+- Rome: St Peter's front has its entablature and attic with windows, giant pilasters on the outer bays, the pediment over the middle columns, five doors in marble surrounds, windows over them under alternating triangular and flat pediments, the benediction loggia with its balcony in the middle, and the statues standing on the attic instead of hidden behind it.
+
 ## v9.06 — San Marco's west front (2026-11-05)
 - Venice: San Marco's west front has its five portals — round arches set deep in three stepped archivolts (the middle ring in pink marble), dark doors under lunettes of gold mosaic, two tiers of coloured colonnettes on the piers between them — the loggia's balustrade with the four gilded horses, and over it five gold lunettes under ogee crowns with crockets and statues at their tips, with pinnacled tabernacles between them.
 
