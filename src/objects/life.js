@@ -350,8 +350,40 @@ function dressed(kit, rand) {
 
 const DONE = new Map();
 /** The settlement's module with its life added to its townscape. */
+/** A test for the paved ways of some plans (lanes, paving, causeways, paths): nothing grows on them. */
+const PAVED = /^(lane|paving|brick_paving|causeway|sacbe|path)$/;
+export function pavedTest(plans) {
+  const shapes = [];
+  for (const plan of plans) {
+    const a = (plan.yaw || 0) * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a), [ox, oz] = plan.origin || [0, 0];
+    const local = (x, z) => { const dx = x - ox, dz = z - oz; return [dx * c + dz * sn, -dx * sn + dz * c]; };
+    for (const e of plan.elements || []) {
+      if (!PAVED.test(e.t)) continue;
+      if (e.rect) { const [x0, z0, x1, z1] = e.rect; shapes.push({ local, rect: [Math.min(x0, x1) - 0.4, Math.min(z0, z1) - 0.4, Math.max(x0, x1) + 0.4, Math.max(z0, z1) + 0.4] }); }
+      else if (e.a && e.b) shapes.push({ local, segs: [[e.a, e.b]], w: (e.w || 3) / 2 + 0.4 });
+      else if (e.pts) shapes.push({ local, segs: e.pts.slice(1).map((q, i) => [e.pts[i], q]), w: (e.w || 2) / 2 + 0.4 });
+    }
+  }
+  if (!shapes.length) return null;
+  const near = ([px, pz], [[ax, az], [bx, bz]], w) => {
+    const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((px - ax) * dx + (pz - az) * dz) / (dx * dx + dz * dz || 1)));
+    return Math.hypot(px - ax - dx * t, pz - az - dz * t) < w;
+  };
+  return (x, z) => shapes.some((sh) => {
+    const p = sh.local(x, z);
+    return sh.rect ? p[0] > sh.rect[0] && p[0] < sh.rect[2] && p[1] > sh.rect[1] && p[1] < sh.rect[3] : sh.segs.some((g) => near(p, g, sh.w));
+  });
+}
+
 export function withLife(id, mod, G, R) {
   if (DONE.has(id)) return DONE.get(id);
+  // keep the plants off the paved ways of the landmarks
+  const paved = G && !G.pavedMask && pavedTest(mod.landmarks.map((l) => l.plan));
+  if (paved) {
+    const plant = G.planting;
+    G.planting = (x, z, p) => (paved(x, z) ? null : plant(x, z, p));
+    G.pavedMask = true;
+  }
   const out = { ...mod, town: async () => { const town = await mod.town(); return [...town, ...lifePlans(id, R, mod.landmarks.map((l) => l.plan), town, G)]; } };
   let cached = null;
   const once = { ...out, town: () => (cached ??= out.town()) };

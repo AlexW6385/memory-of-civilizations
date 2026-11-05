@@ -24,6 +24,7 @@ function fromWater() { return 1e4; }
 /** Plants per 100 m²: groves round the hamlets (palms, bamboo, banyan, teak), a few trees by the monastery, scattered palms in the fields, nothing on the monument's ground. */
 function planting(x, z) {
   const r = Math.hypot(x, z);
+  if (x > 60 && Math.abs(z) < 3.5) return null;      // the paved way from the east
   if (r > RADIUS - 6 || r < 100) return r < 100 && r > 75 ? { grass: 30 } : null;
   if (inHouse(x, z, 1.5) || inRect(MONASTERY, x, z, 1)) return null;
   if (nearHamlet(x, z)) return { date_palm: 1.0, bamboo: 0.8, banyan: 0.08, teak: 0.25, grass: 25 };

@@ -8,7 +8,7 @@ const E = [];
 const ellipse = (c, r, n, a0 = 0, a1 = Math.PI * 2) => Array.from({ length: n + 1 }, (_, k) => { const a = a0 + (a1 - a0) * k / n; return [c[0] + Math.cos(a) * r[0], c[1] + Math.sin(a) * r[1]]; });
 const [ex, ez] = ENCLOSURE.c, [ra, rb] = ENCLOSURE.r;
 // the outer wall (11 m high at its greatest, chevron band on the north-east), with the north entrance
-E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, ENCLOSURE.r, 40, -Math.PI * 0.42, Math.PI * 1.45), h: 10, th: 4.5, y: 0, chevron: true });
+E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, ENCLOSURE.r, 40, -Math.PI * 0.42, Math.PI * 1.45), h: 10, th: 4.5, y: 0, chevron: [0, 0.2] });
 // the inner wall forming the narrow parallel passage on the east, and an inner ring round the tower's court
 E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, [ra - 7, rb - 7], 14, -Math.PI * 0.35, Math.PI * 0.35), h: 8, th: 2.5, y: 0 });
 E.push({ t: 'dry_wall', pts: ellipse([ex + 25, ez - 5], [16, 14], 14, Math.PI * 0.6, Math.PI * 1.9), h: 4, th: 1.6, y: 0 });

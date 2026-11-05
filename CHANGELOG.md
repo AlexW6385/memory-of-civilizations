@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.83 — Mute button, steady eyes, Great Zimbabwe's walls (2026-11-04)
+- A sound button top right (muted by default, remembered; muting suspends the audio context). Eye adaptation samples six points round the eye and takes the brightest, treats a near-zero reading as open air, and opens up at most 1.6× outdoors (night 3×) instead of 8×, more slowly (2 s): a probe inside a wall, column or tree, or a GI volume not yet lit, no longer whites out the view. Great Zimbabwe: dry walls as smooth battered curves with rounded ends at the entrances and an uneven top; the chevron band only on the north-east fifth of the outer wall. Plants kept off every landmark's paved ways (lanes, paving, causeways, sacbe, paths); Borobudur's eastern way is clear.
+
 ## v8.82 — Nara's Great Buddha and the hall's interior (2026-11-04)
 - Nara: the Great Buddha rebuilt in detail (lotus throne of upturned petals, crossed legs with soles up, raised right hand and open left on the knee, robe hem, curls and topknot, long lobes, flame-edged mandorla with haloes and thirteen small Buddhas) with two gilt attendants on a stone dais behind an altar; the hall's inner two rings of posts, a coffered ceiling of great beams and painted panels, silk banners; tall halls (H > 8) now stand on posts that thicken with height and have doors at the foot, a tie beam and plaster above with a band of lattice windows (Tōdai-ji, the gates, the Forbidden City's Hall of Supreme Harmony). Showroom takes --look.
 

@@ -124,6 +124,7 @@ async function main() {
   let exposure = 0.55, snap = true, last = performance.now();
   let placeT = 0;
   const MODERN = new Set(['new-york', 'sydney', 'london', 'barcelona']);
+  const AMB_TAPS = [[0, 0, 0], [1.2, 0, 0], [-1.2, 0, 0], [0, 0, 1.2], [0, 0, -1.2], [0, 0.9, 0]];
   const _view = new Vector3();
   const stats = { frames: 0, ms: 0 };
   const rain = new Rain(R.scene, R.camera);
@@ -278,9 +279,27 @@ async function main() {
   controls.enabled = true;
   const panelsOpen = () => !mapPanel.hidden;
   // a double click takes the mouse for looking round; Esc gives it back
-  canvas.addEventListener('pointerdown', () => music.start());
+  // the sound: muted by default (remembered); the button top right turns it on and off
+  let muted = true;
+  try { muted = localStorage.getItem('mp.sound') !== 'on'; } catch { /* storage unavailable */ }
+  const muteBtn = $('btn-mute');
+  const paintMute = () => {
+    muteBtn.classList.toggle('sound', !muted);
+    const k = muted ? 'sound-on' : 'sound-off';
+    muteBtn.dataset.i18nLabel = k; muteBtn.dataset.i18nTitle = k; muteBtn.title = t(k); muteBtn.setAttribute('aria-label', t(k));
+  };
+  muteBtn.onclick = (e) => {
+    e.stopPropagation();
+    muted = !muted;
+    try { localStorage.setItem('mp.sound', muted ? 'off' : 'on'); } catch { /* ignore */ }
+    if (muted) music.ctx?.suspend(); else music.start();
+    paintMute();
+  };
+  onLang(paintMute); paintMute();
+  const startSound = () => { if (!muted) music.start(); };
+  canvas.addEventListener('pointerdown', startSound);
   canvas.addEventListener('dblclick', () => { if (!panelsOpen()) { controls.enabled = true; controls.lock(); } });
-  addEventListener('keydown', () => music.start(), { once: true });
+  addEventListener('keydown', startSound, { once: true });
   controls.onLockChange = (locked) => {
     if (locked) controls.enabled = true;
   };
@@ -425,14 +444,21 @@ async function main() {
       });
     }
     // eye adaptation: open up in dark rooms (at most ~3 stops), close down outdoors
-    const amb = R.gi.ambientAt(c.x, c.y, c.z);
-    const target = cl.exposure * (1 + 2.6 * (1 - cl.day)) * Math.min(8 + 6 * (1 - cl.day), Math.max(1, Math.pow(R.gi.openAmbient() / Math.max(amb, 1e-4), 0.55)));
+    // the light round the eye: the brightest of a few samples a step apart, so that one probe buried
+    // in a wall, a column or a tree (or a volume not lit yet, all zero) cannot read as a dark room and
+    // blow the view out white; outdoors and in the streets the eye opens up very little
+    const openAmb = R.gi.openAmbient();
+    let amb = 0;
+    for (const [dx, dy, dz] of AMB_TAPS) amb = Math.max(amb, R.gi.ambientAt(c.x + dx, c.y + dy, c.z + dz));
+    if (!(amb > openAmb * 0.004)) amb = openAmb;
+    const cap = here.building ? 8 + 6 * (1 - cl.day) : 1.6 + 1.4 * (1 - cl.day);
+    const target = cl.exposure * (1 + 2.6 * (1 - cl.day)) * Math.min(cap, Math.max(1, Math.pow(openAmb / Math.max(amb, 1e-4), 0.55)));
     // looking toward the sun the eye closes down (as a camera would), so the sky round it and the
     // backlit haze are not one white glare
     R.camera.getWorldDirection(_view);
     const sunUp = Math.max(0, Math.min(1, ENV.sunDir.value.y * 6 + 0.3)), toward = Math.max(0, Math.min(1, (_view.dot(ENV.sunDir.value) - 0.55) / 0.4));
     const target2 = target * (1 - 0.42 * sunUp * toward * toward * (3 - 2 * toward));
-    exposure = snap ? target2 : exposure + (target2 - exposure) * (1 - Math.exp(-dt / (target2 > exposure ? 1.2 : 0.5)));
+    exposure = snap ? target2 : exposure + (target2 - exposure) * (1 - Math.exp(-dt / (target2 > exposure ? 2.0 : 0.5)));
     snap = false;
     R.renderer.toneMappingExposure = exposure;
     if (here.building) music.set(here.building.music, here.room?.kind || 'open');
