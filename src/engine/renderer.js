@@ -27,8 +27,13 @@ export class Renderer {
   }
 
   async init(quality = 'high') {
-    const r = this.renderer = new THREE.WebGPURenderer({ canvas: this.canvas, antialias: false, forceWebGL: !this.webgpu, powerPreference: 'high-performance', logarithmicDepthBuffer: true });
+    const r = this.renderer = new THREE.WebGPURenderer({ canvas: this.canvas, antialias: false, forceWebGL: !this.webgpu, powerPreference: 'high-performance', logarithmicDepthBuffer: new URLSearchParams(location.search).get('logdepth') !== '0' });
     await r.init();
+    // instance matrices always as vertex attributes: below 64 kB three.js puts them in a uniform
+    // array whose length is written into the shader, so every instance count was a new shader and
+    // pipeline to compile (the repeated pieces of buildings come in hundreds of different counts)
+    const caps = r.backend.capabilities;
+    if (caps?.getUniformBufferLimit) caps.getUniformBufferLimit = () => 0;
     this.webgpu = r.backend.isWebGPUBackend === true;
     r.toneMapping = THREE.AgXToneMapping;
     r.toneMappingExposure = 0.55;          // set each frame from the climate and the eye's adaptation

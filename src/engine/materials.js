@@ -15,6 +15,13 @@ import { MATERIALS } from '../core/palette.js';
 import { GISpecularNode } from './gi.js';
 
 const cache = new Map();
+const PLAIN = typeof location !== 'undefined' && new URLSearchParams(location.search).get('plain') === '1';
+function plainMaterial(spec) {
+  const m = new MeshStandardNodeMaterial({ color: new Color(spec.color), roughness: spec.roughness ?? 0.8, metalness: spec.metalness ?? 0 });
+  if (spec.side === 'double') { m.side = DoubleSide; m.shadowSide = DoubleSide; }
+  if (spec.transparent || spec.opacity !== undefined) { m.transparent = true; m.opacity = spec.opacity ?? 0.5; }
+  return m;
+}
 let GI = null;
 /** The baked-light volume used for reflections (set once by the renderer). */
 export function useGI(gi) { GI = gi; }
@@ -23,7 +30,8 @@ export function useGI(gi) { GI = gi; }
 export function material(key) {
   if (cache.has(key)) return cache.get(key);
   const spec = MATERIALS[key] || MATERIALS.sandstone;
-  const m = make(spec);
+  // ?plain=1 (benchmark only): flat materials, to measure what the procedural detail costs
+  const m = PLAIN ? plainMaterial(spec) : make(spec);
   m.name = key;
   if (GI) {
     const spec2 = GI.radianceNode();

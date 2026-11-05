@@ -4,6 +4,8 @@ import { Vector3 } from 'three';
 import { Renderer } from './engine/renderer.js';
 import { ENV } from './engine/env.js';
 import { World } from './engine/world.js';
+import { Perf } from './engine/perf.js';
+import { runBench } from './engine/bench.js';
 import { Controls } from './engine/controls.js';
 import { Music } from './engine/audio.js';
 import { Climate, sunPlanet, moonPlanet } from './engine/climate.js';
@@ -106,6 +108,9 @@ async function main() {
   progress.set('start', 0.7);
   const world = new World(R);
   await world.init();
+  // frame costs (`?perf` shows the panel; tools/perf.mjs uses window.palace.perf)
+  const perf = new Perf(world, R);
+  if (params.has('perf')) perf.show();
   mark('plans');
   progress.set('start', 1);
   const climate = new Climate(R);
@@ -475,7 +480,7 @@ async function main() {
     R.setMotion(moving, now);
     // held still for a second: the scene only sways, flickers and drifts, so it is drawn at
     // ~24 fps instead of 60, leaving the machine (and the rest of the picture) its breath
-    if (!controls.free && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
+    if (!perf.panel && !perf.record && !controls.free && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
     const dt = (now - last) / 1000;
     last = now;
     controls.update(dt);
@@ -483,6 +488,7 @@ async function main() {
     minimap?.update(world.here(controls), heading());
     R.render();
     stats.frames++; stats.ms = stats.ms * 0.9 + (performance.now() - now) * 0.1;
+    perf.tick(now, performance.now() - now);
   };
   R.renderer.setAnimationLoop(frame);
 
@@ -513,10 +519,11 @@ async function main() {
     near: (id) => goNear(world.plans.get(id)),
     walk: async (keys, ms) => { controls.enabled = true; for (const k of keys) controls.keys.add(k); await new Promise((r) => setTimeout(r, ms)); controls.keys.clear(); },
     feet: () => ({ ...controls.feet }),
-    world, renderer: R, controls, stats, music, climate, mapView,
+    world, renderer: R, controls, stats, music, climate, mapView, perf,
     ground: (x, z) => world.collide.terrain(x, z),
   };
   window.READY = true;
+  if (params.has('bench')) setTimeout(() => runBench(window.palace), 1000);
 }
 
 main().catch((e) => {
