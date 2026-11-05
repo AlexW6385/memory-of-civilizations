@@ -4,7 +4,7 @@
 // Plan coordinates are local to the building: +x east, +y up, +z south. The plan's
 // `origin` [x, z] places it in the world; `yaw` (multiple of 90°) turns it.
 
-import { Matrix4 } from 'three';
+import { Matrix4, BufferGeometry, Float32BufferAttribute } from 'three';
 import { GeoBag, box, frustum, fromTriangles, quad, lathe } from './geom.js';
 
 export const STYLES = {};
@@ -33,21 +33,24 @@ export class Colliders {
 function norm([x0, z0, x1, z1]) { return [Math.min(x0, x1), Math.min(z0, z1), Math.max(x0, x1), Math.max(z0, z1)]; }
 
 /**
- * Build a plan. Returns { parts: [{mat, geometry}], lights, colliders, matrix }.
- * Geometry is in world coordinates (the placement is applied); colliders too.
+ * Build a plan. Returns { parts: [{mat, geometry}], instanced, lights, colliders, matrix }.
+ * Geometry is in world coordinates (the placement is applied); colliders too. With
+ * `{ instancing: true }` (the viewer) repeated pieces come back in `instanced`
+ * ([{ mat, geometry, matrices }], see GeoBag) instead of merged into `parts`; `flatParts` expands
+ * them again where every triangle is needed (the top field one stands on).
  */
-export function buildPlan(plan) {
-  const ctx = startBuild(plan);
+export function buildPlan(plan, opts = {}) {
+  const ctx = startBuild(plan, opts);
   for (const el of plan.elements) buildElement(el, ctx);
   return finishBuild(ctx);
 }
 
 /**
- * The same, a little at a time: it gives the browser back its frame every `budget` ms, so that a
+ * The same, a little at a time: it gives the browser back its frame every `budget` ms (DESIGN §8: 4), so that a
  * large building being raised does not freeze the view (the travel fade, the walking).
  */
-export async function buildPlanAsync(plan, budget = 6) {
-  const ctx = startBuild(plan);
+export async function buildPlanAsync(plan, budget = 4, opts = {}) {
+  const ctx = startBuild(plan, opts);
   let t = performance.now();
   for (const el of plan.elements) {
     buildElement(el, ctx);
@@ -56,10 +59,10 @@ export async function buildPlanAsync(plan, budget = 6) {
   return finishBuild(ctx);
 }
 
-function startBuild(plan) {
+function startBuild(plan, { instancing = false } = {}) {
   const style = STYLES[plan.style];
   if (!style) throw new Error(`style ${plan.style} not registered`);
-  return { bag: new GeoBag(), col: new Colliders(), lights: [], style, plan };
+  return { bag: new GeoBag({ instancing }), col: new Colliders(), lights: [], style, plan };
 }
 function buildElement(el, ctx) {
   const fn = GENERIC[el.t] || ctx.style.elements?.[el.t];
@@ -70,9 +73,46 @@ function finishBuild({ bag, col, lights, plan }) {
   const m = placement(plan);
   const parts = bag.merged();
   for (const p of parts) { p.geometry.applyMatrix4(m); p.geometry.computeBoundingBox(); p.geometry.computeBoundingSphere(); }
+  // repeated pieces (instancing): their matrices placed with the plan
+  const instanced = bag.instanced || [];
+  const A = new Matrix4(), B = new Matrix4();
+  for (const p of instanced) {
+    const M = p.matrices;
+    for (let o = 0; o < M.length; o += 16) { B.fromArray(M, o); A.multiplyMatrices(m, B); A.toArray(M, o); }
+  }
   const colliders = transformColliders(col, plan);
   for (const l of lights) l.at = toWorld(plan, l.at[0], l.at[2], l.at[1]);
-  return { parts, lights, colliders, matrix: m };
+  return { parts, instanced, lights, colliders, matrix: m };
+}
+
+/** Every triangle of a built plan as merged parts (instanced copies expanded). */
+export function flatParts(built) {
+  const out = [...built.parts];
+  const M = new Matrix4();
+  for (const p of built.instanced || []) {
+    const P0 = p.geometry.attributes.position.array, N0 = p.geometry.attributes.normal.array, I = p.geometry.index.array;
+    const k = p.matrices.length / 16, n = I.length;
+    const pos = new Float32Array(n * 3 * k), nor = new Float32Array(n * 3 * k);
+    const e = M.elements;
+    for (let c = 0; c < k; c++) {
+      M.fromArray(p.matrices, c * 16);
+      for (let t = 0; t < n; t++) {
+        const v = I[t] * 3, o = (c * n + t) * 3, x = P0[v], y = P0[v + 1], z = P0[v + 2];
+        pos[o] = e[0] * x + e[4] * y + e[8] * z + e[12];
+        pos[o + 1] = e[1] * x + e[5] * y + e[9] * z + e[13];
+        pos[o + 2] = e[2] * x + e[6] * y + e[10] * z + e[14];
+        // normals: the matrices are rotations by quarter turns and stretches along the axes
+        const nx = N0[v] / (Math.hypot(e[0], e[1], e[2]) ** 2), ny = N0[v + 1] / (Math.hypot(e[4], e[5], e[6]) ** 2), nz = N0[v + 2] / (Math.hypot(e[8], e[9], e[10]) ** 2);
+        const wx = e[0] * nx + e[4] * ny + e[8] * nz, wy = e[1] * nx + e[5] * ny + e[9] * nz, wz = e[2] * nx + e[6] * ny + e[10] * nz, l = Math.hypot(wx, wy, wz) || 1;
+        nor[o] = wx / l; nor[o + 1] = wy / l; nor[o + 2] = wz / l;
+      }
+    }
+    const g = new BufferGeometry();
+    g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+    g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+    out.push({ mat: p.mat, geometry: g });
+  }
+  return out;
 }
 
 export function placement(plan) {

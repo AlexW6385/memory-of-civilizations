@@ -4,7 +4,7 @@
 // Every primitive returns a non-indexed BufferGeometry with `position` and `normal` only.
 // Materials are procedural and work from world position, so no UVs are needed.
 
-import { BufferGeometry, Float32BufferAttribute, Vector3, Matrix4 } from 'three';
+import { BufferGeometry, BufferAttribute, Float32BufferAttribute, Vector3, Matrix4 } from 'three';
 
 const _a = new Vector3(), _b = new Vector3(), _c = new Vector3(), _n = new Vector3();
 
@@ -206,30 +206,163 @@ export function depthRank(mat) {
   return (h >>> 0) % 16;
 }
 
+/**
+ * Repeated pieces (DESIGN §8: instancing): a piece added to a bag is matched against the others of
+ * its material by shape. Two pieces are the same prototype when one is the other moved
+ * (translation), or — for pieces whose faces all face along the axes, as every box does — moved
+ * and stretched along the axes. A prototype repeated often enough in one plan is drawn as one
+ * instanced mesh (its shape once, indexed, plus a matrix per copy) instead of as copies merged
+ * into the material's mesh. The picture is the same; the memory is not.
+ */
+export const INSTANCING = { minCount: 12, minSaved: 2400, maxVerts: 40000 };
+const AXIS_EPS = 1e-4;
+
+/** A piece's shape key (null for pieces too large or too small to be worth it) and its placement. */
+function shapeOf(mat, g) {
+  const P = g.attributes.position.array, N = g.attributes.normal.array, n = P.length / 3;
+  if (n < 6 || n > INSTANCING.maxVerts) return null;
+  let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
+  for (let i = 0; i < P.length; i += 3) {
+    const x = P[i], y = P[i + 1], z = P[i + 2];
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z;
+  }
+  let axis = true;
+  for (let i = 0; i < N.length; i++) { const v = Math.abs(N[i]); if (v > AXIS_EPS && Math.abs(v - 1) > AXIS_EPS) { axis = false; break; } }
+  const sx = x1 - x0, sy = y1 - y0, sz = z1 - z0;
+  if (!(sx + sy + sz > 0) || !Number.isFinite(sx + sy + sz)) return null;
+  // stretched pieces are normalised to their box; moved ones keep their size (to 0.1 mm)
+  const ix = axis && sx > 1e-6 ? 1 / sx : 1, iy = axis && sy > 1e-6 ? 1 / sy : 1, iz = axis && sz > 1e-6 ? 1 / sz : 1;
+  // a coarse key (vertex count, size, centroid and spread to the millimetre): pieces that share it
+  // are then compared vertex by vertex (sameShape), so float rounding cannot split or merge them
+  let cx = 0, cy = 0, cz = 0, qx = 0, qy = 0, qz = 0, nx = 0, ny = 0, nz = 0;
+  for (let i = 0; i < P.length; i += 3) {
+    const a = (P[i] - x0) * ix, b = (P[i + 1] - y0) * iy, c = (P[i + 2] - z0) * iz;
+    cx += a; cy += b; cz += c; qx += a * a; qy += b * b; qz += c * c;
+    nx += N[i] * (i % 7); ny += N[i + 1] * (i % 5); nz += N[i + 2] * (i % 3);
+  }
+  const r = (v) => Math.round((v / n) * 1000);
+  const size = axis ? '' : `${Math.round(sx * 1000)},${Math.round(sy * 1000)},${Math.round(sz * 1000)}`;
+  return {
+    key: `${mat}|${n}|${axis ? 's' : 't'}|${size}|${r(cx)},${r(cy)},${r(cz)},${r(qx)},${r(qy)},${r(qz)}|${r(nx * 10)},${r(ny * 10)},${r(nz * 10)}`,
+    axis, t: [x0, y0, z0], s: axis ? [ix === 1 && !(sx > 1e-6) ? 1 : sx, iy === 1 && !(sy > 1e-6) ? 1 : sy, iz === 1 && !(sz > 1e-6) ? 1 : sz] : [1, 1, 1],
+    inv: [ix, iy, iz],
+  };
+}
+
+/** Are two pieces of one coarse key the same shape (to a tenth of a millimetre, or of their box)? */
+function sameShape(ga, a, gb, b) {
+  const PA = ga.attributes.position.array, PB = gb.attributes.position.array;
+  const NA = ga.attributes.normal.array, NB = gb.attributes.normal.array;
+  if (PA.length !== PB.length) return false;
+  const tol = 2e-4;
+  for (let i = 0; i < PA.length; i += 3) {
+    for (let k = 0; k < 3; k++) {
+      if (Math.abs((PA[i + k] - a.t[k]) * a.inv[k] - (PB[i + k] - b.t[k]) * b.inv[k]) > tol) return false;
+      if (Math.abs(NA[i + k] - NB[i + k]) > 2e-3) return false;
+    }
+  }
+  return true;
+}
+
+/** The prototype of a piece: its shape at the origin (normalised if stretched), indexed. */
+function prototypeOf(g, sh, d) {
+  const P = g.attributes.position.array, N = g.attributes.normal.array, n = P.length / 3;
+  const [x0, y0, z0] = sh.t, [ix, iy, iz] = sh.inv;
+  const pos = [], nor = [], index = new (n > 65535 ? Uint32Array : Uint16Array)(n), seen = new Map();
+  for (let i = 0; i < n; i++) {
+    let x = (P[3 * i] - x0) * ix, y = (P[3 * i + 1] - y0) * iy, z = (P[3 * i + 2] - z0) * iz;
+    // moved pieces take the material's stand-off here; stretched ones in their matrices
+    if (!sh.axis && d) { x += N[3 * i] * d; y += N[3 * i + 1] * d; z += N[3 * i + 2] * d; }
+    const k = `${Math.round(x * 1e5)},${Math.round(y * 1e5)},${Math.round(z * 1e5)},${Math.round(N[3 * i] * 1e3)},${Math.round(N[3 * i + 1] * 1e3)},${Math.round(N[3 * i + 2] * 1e3)}`;
+    let j = seen.get(k);
+    if (j === undefined) { j = pos.length / 3; seen.set(k, j); pos.push(x, y, z); nor.push(N[3 * i], N[3 * i + 1], N[3 * i + 2]); }
+    index[i] = j;
+  }
+  const m = new BufferGeometry();
+  m.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  m.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  m.setIndex(new BufferAttribute(index, 1));
+  m.computeBoundingBox(); m.computeBoundingSphere();
+  // the stand-off of a stretched piece: its box grown by d where it has depth, moved by d toward
+  // its faces where it is flat
+  let flat = [0, 0, 0];
+  if (sh.axis && d) for (let a = 0; a < 3; a++) { if (sh.s[a] === 1 && !(m.boundingBox.max.getComponent(a) > 0)) { let sum = 0; for (let i = a; i < N.length; i += 3) sum += N[i]; flat[a] = Math.sign(sum); } }
+  return { geometry: m, flat };
+}
+
 export class GeoBag {
-  constructor() { this.parts = new Map(); }
+  /** instancing: find repeated pieces (the viewer); without it every piece is merged (the tools). */
+  constructor({ instancing = false } = {}) { this.parts = new Map(); this.instancing = instancing; }
   add(mat, g) {
     if (!g) return;
     if (!this.parts.has(mat)) this.parts.set(mat, []);
     this.parts.get(mat).push(g.index ? g.toNonIndexed() : g);
   }
-  /** Merge into one geometry per material. */
+  /**
+   * Merge into one geometry per material; with instancing, also the repeated prototypes:
+   * `this.instanced` = [{ mat, geometry (prototype, indexed), matrices (16 per copy, column-major) }].
+   */
   merged() {
     const res = [];
-    for (const [mat, list] of this.parts) {
+    this.instanced = [];
+    for (const [mat, all] of this.parts) {
+      const d = depthRank(mat) * DEPTH_STEP;
+      let list = all;
+      if (this.instancing && all.length >= INSTANCING.minCount) {
+        // pieces by coarse key, then split into groups of the same shape
+        const byKey = new Map(), shapes = new Array(all.length), groups = [];
+        for (let i = 0; i < all.length; i++) {
+          const sh = shapeOf(mat, all[i]);
+          shapes[i] = sh;
+          if (!sh) continue;
+          let list = byKey.get(sh.key);
+          if (!list) byKey.set(sh.key, (list = []));
+          let gr = list.find((g) => sameShape(all[g[0]], shapes[g[0]], all[i], sh));
+          if (!gr) { gr = []; list.push(gr); groups.push(gr); }
+          gr.push(i);
+        }
+        const take = new Set();
+        for (const idx of groups) {
+          const n = all[idx[0]].attributes.position.count;
+          if (idx.length < INSTANCING.minCount || (idx.length - 1) * n < INSTANCING.minSaved) continue;
+          const first = shapes[idx[0]];
+          const { geometry, flat } = prototypeOf(all[idx[0]], first, d);
+          const M = new Float32Array(idx.length * 16);
+          idx.forEach((i, k) => {
+            const sh = shapes[i], o = k * 16;
+            let [tx, ty, tz] = sh.t, [sx, sy, sz] = sh.s;
+            if (sh.axis && d) {
+              // grown where it has depth, moved toward its faces where it is flat
+              const T = [tx, ty, tz], S = [sx, sy, sz];
+              for (let a = 0; a < 3; a++) {
+                if (flat[a]) T[a] += flat[a] * d;
+                else if (geometry.boundingBox.max.getComponent(a) > 0) { T[a] -= d; S[a] += 2 * d; }
+              }
+              [tx, ty, tz] = T; [sx, sy, sz] = S;
+            }
+            M[o] = sx; M[o + 5] = sy; M[o + 10] = sz; M[o + 12] = tx; M[o + 13] = ty; M[o + 14] = tz; M[o + 15] = 1;
+          });
+          this.instanced.push({ mat, geometry, matrices: M });
+          for (const i of idx) take.add(i);
+        }
+        if (take.size) list = all.filter((_, i) => !take.has(i));
+      }
+      if (!list.length) continue;
       let count = 0;
       for (const g of list) count += g.attributes.position.count;
       const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3);
       let o = 0;
-      for (const g of list) {
+      // copy and let go of each piece as it is copied, so the peak is one merged copy, not two
+      for (let i = 0; i < list.length; i++) {
+        const g = list[i];
         pos.set(g.attributes.position.array, o);
         nor.set(g.attributes.normal.array, o);
         o += g.attributes.position.array.length;
+        list[i] = null;
       }
       // each material stands off its faces by its own fraction of a millimetre or so, so that two
       // materials laid in the same plane (a lattice in its frame, paving on a terrace) never fight
       // in the depth buffer
-      const d = depthRank(mat) * DEPTH_STEP;
       if (d) for (let k = 0; k < pos.length; k++) pos[k] += nor[k] * d;
       const m = new BufferGeometry();
       m.setAttribute('position', new Float32BufferAttribute(pos, 3));
@@ -237,6 +370,7 @@ export class GeoBag {
       m.computeBoundingBox(); m.computeBoundingSphere();
       res.push({ mat, geometry: m });
     }
+    this.parts.clear();
     return res;
   }
 }

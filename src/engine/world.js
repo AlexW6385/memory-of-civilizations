@@ -11,10 +11,11 @@
 
 import * as THREE from 'three/webgpu';
 import { BUILDINGS } from '../buildings/index.js';
-import { buildPlanAsync, toWorld } from '../core/build.js';
+import { buildPlanAsync, toWorld, flatParts } from '../core/build.js';
 import { CollisionWorld, topField } from '../core/collide.js';
 import { Flora } from './flora/index.js';
 import { material, flameMaterial } from './materials.js';
+import { MATERIALS } from '../core/palette.js';
 import { ENV } from './env.js';
 import { loadLand } from '../planet/land.js';
 import { BUILT, BUILT_BY_ID, initRelief, surface, groundInFrame, seaInFrame, PLANET_RADIUS as R, BLEND } from '../planet/relief.js';
@@ -28,6 +29,34 @@ import { MODULES } from '../settlements/grounds.js';
 export const LOAD = 700, UNLOAD = 1300;
 /** At most this many settlements are built at once (the nearest); from the air the reach grows, the count does not. */
 export const MAX_BUILT = 4;
+/**
+ * Materials whose shadow cannot be seen, or that should let the light through: window voids (dark
+ * panels in the wall's thickness), clear glass, water, lamps. Fewer things to draw in each cascade.
+ */
+const NO_SHADOW = new Set(['water', 'glass_outer', 'opening']);
+const castsShadow = (mat) => !NO_SHADOW.has(mat) && MATERIALS[mat]?.kind !== 'glow' && MATERIALS[mat]?.kind !== 'water';
+
+/**
+ * Let go of a mesh's vertex arrays once they are on the GPU (the first time it is drawn): on the
+ * author's machine memory is shared between CPU and GPU, so keeping them held every vertex twice.
+ * The attribute keeps its count and its array type (empty), which is all the renderer reads after
+ * the upload; nothing reads the vertices of a built part after its collision is made.
+ */
+export function releaseAfterUpload(o) {
+  if (!o.isMesh || o.userData.released) return;
+  const before = o.onAfterRender;
+  o.onAfterRender = function (renderer, ...a) {
+    before.call(this, renderer, ...a);
+    const g = this.geometry, attrs = [...Object.values(g.attributes), g.index].filter(Boolean);
+    // only once every attribute is on the GPU (a shadow pass uploads the positions alone)
+    const be = renderer.backend;
+    if (!attrs.every((at) => { const d = be.get(at); return d.buffer !== undefined || d.bufferGPU !== undefined; })) return;
+    this.onAfterRender = before;
+    for (const at of attrs) if (at.array?.length) at.array = new at.array.constructor(0);
+    this.userData.released = true;
+  };
+}
+
 const sm = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
 /** Matrix taking planet coordinates to a frame's local ones. */
@@ -122,15 +151,26 @@ class Settlement {
   }
 
   async addPart(id, plan, music, gen = this.gen) {
-    const built = await buildPlanAsync(plan);
-    if (gen !== this.gen) { for (const { geometry } of built.parts) geometry.dispose(); return null; }
+    const built = await buildPlanAsync(plan, undefined, { instancing: true });
+    if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
     const group = new THREE.Group();
     group.name = plan.id;
     for (const { mat, geometry } of built.parts) {
       const m = new THREE.Mesh(geometry, material(mat));
-      m.castShadow = mat !== 'water' && mat !== 'glass_outer';
+      m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
       m.name = `${plan.id}:${mat}`;
+      group.add(m);
+    }
+    // repeated pieces: one prototype, a matrix per copy (src/core/geom.js, GeoBag)
+    for (const { mat, geometry, matrices } of built.instanced) {
+      const m = new THREE.InstancedMesh(geometry, material(mat), matrices.length / 16);
+      m.instanceMatrix.array.set(matrices);
+      m.instanceMatrix.needsUpdate = true;
+      m.computeBoundingSphere();
+      m.castShadow = castsShadow(mat);
+      m.receiveShadow = true;
+      m.name = `${plan.id}:${mat}:inst`;
       group.add(m);
     }
     if (built.lights.length) {
@@ -143,13 +183,15 @@ class Settlement {
     this.group.add(group);
     // the upper surfaces, to land and walk on (roofs, wall tops)
     if (!plan.nocollide) {
-      built.colliders.tops = await topField(built.parts);
+      built.colliders.tops = await topField(built.instanced.length ? flatParts(built) : built.parts);
       this.collide.add(built.colliders);
     }
     const rec = { id, plan, music, group, built, settlement: this };
     if (!plan.feature) try { rec.gi = await this.world.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
     // unloaded while the collision or the light was being made: unload() already cleared the group
     if (gen !== this.gen) { this.world.r.gi.release?.(plan.id); return null; }
+    // the collision and the bounds are made: the vertex arrays are not needed once on the GPU
+    group.traverse(releaseAfterUpload);
     this.parts.push(rec);
     this.done = (this.done || 0) + 1;
     return rec;
