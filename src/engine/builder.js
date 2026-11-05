@@ -37,26 +37,34 @@ export class Builder {
 
   /**
    * Lay out and build a settlement of its own. onCount(count, landmarks) once, then onPlan(index,
-   * header, built) for each plan in order (awaited one after another). Returns { done, cancel }.
+   * header, built) for each plan as it comes (awaited one after another, in no fixed order).
+   * Returns { done, cancel }.
    */
   settlement(id, onCount, onPlan) {
-    const job = this.next++;
-    const w = this.workers.reduce((a, b) => (b.load < a.load ? b : a));
-    w.load++;
-    let chain = Promise.resolve();
-    const done = new Promise((resolve, reject) => {
-      this.jobs.set(job, {
-        worker: w, reject, heard: performance.now(),
-        on: (d) => {
-          if (d.fatal || d.error) { reject(new Error(d.fatal || d.error)); return; }
-          if (d.count !== undefined) chain = chain.then(() => onCount(d.count, d.landmarks));
-          else if (d.index !== undefined) chain = chain.then(() => onPlan(d.index, d.header, rebuild(d.built)));
-          else if (d.done) chain.then(resolve, reject);
-        },
-      });
-    }).finally(() => { w.load--; this.jobs.delete(job); });
-    w.postMessage({ job, id });
-    return { done, cancel: () => w.postMessage({ cancel: job }) };
+    // the plans are shared out between the workers (each lays out the town itself, the same way,
+    // and builds every n-th plan); the page takes them as they come
+    let chain = Promise.resolve(), counted = false;
+    const subs = this.workers.map((w, part) => {
+      const job = this.next++;
+      w.load++;
+      const done = new Promise((resolve, reject) => {
+        this.jobs.set(job, {
+          worker: w, reject, heard: performance.now(),
+          on: (d) => {
+            if (d.fatal || d.error) { reject(new Error(d.fatal || d.error)); return; }
+            if (d.count !== undefined) { if (!counted) { counted = true; chain = chain.then(() => onCount(d.count, d.landmarks)); } }
+            else if (d.index !== undefined) chain = chain.then(() => onPlan(d.index, d.header, rebuild(d.built)));
+            else if (d.done) chain.then(resolve, reject);
+          },
+        });
+      }).finally(() => { w.load--; this.jobs.delete(job); });
+      w.postMessage({ job, id, part, of: this.workers.length });
+      return { job, w, done };
+    });
+    return {
+      done: Promise.all(subs.map((x) => x.done)).then(() => chain),
+      cancel: () => { for (const x of subs) x.w.postMessage({ cancel: x.job }); },
+    };
   }
 
   /**

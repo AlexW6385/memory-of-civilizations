@@ -24,7 +24,7 @@ self.onmessage = async (e) => {
   }
   if (d.cancel !== undefined) { cancelled.add(d.cancel); return; }
   if (d.warm) { warmQueue.push(d.warm); pumpWarm(); return; }
-  const { job, id } = d;
+  const { job, id, part = 0, of = 1 } = d;
   active++;
   try {
     await ready;
@@ -34,7 +34,7 @@ self.onmessage = async (e) => {
     if (cancelled.has(job)) return done(job);
     const plans = [...mod.landmarks.map((p) => p.plan), ...town];
     self.postMessage({ job, count: plans.length, landmarks: mod.landmarks.length });
-    for (let i = 0; i < plans.length; i++) {
+    for (let i = part; i < plans.length; i += of) {
       if (cancelled.has(job)) return done(job);
       const plan = plans[i];
       const out = await buildOne(plan);

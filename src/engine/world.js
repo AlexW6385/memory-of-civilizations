@@ -155,7 +155,7 @@ class Settlement {
         if (B?.ok) {
           // laid out and built in a worker (src/engine/build-worker.js); the main thread only makes
           // the meshes. A failure falls back to building here, from what is not yet built.
-          let from = 0;
+          const got = new Set();
           const job = B.settlement(S.id,
             (count, nl) => { this.expected = nl * 3 + (count - nl); },
             async (i, header, built) => {
@@ -163,13 +163,13 @@ class Settlement {
               const L = mod.landmarks[i];
               await this.addPart((L ? L.plan : header).id, L ? L.plan : header, L ? L.music : null, gen, built);
               if (L) this.done += 2;
-              from = i + 1;
+              got.add(i);
             });
           this.job = job;
           try { await job.done; inWorker = true; } catch (e) { console.warn('building', S.id, 'in the page:', e.message); }
           this.job = null;
           if (stale()) return this;
-          if (!inWorker) this.skip = from;
+          if (!inWorker) this.got = got;
         }
         if (!inWorker) {
           const town = await mod.town();
@@ -177,13 +177,14 @@ class Settlement {
           // the landmarks weigh more than a block of houses
           this.expected = mod.landmarks.length * 3 + town.length;
           const all = [...mod.landmarks.map((p) => [p.plan, p.music]), ...town.map((p) => [p, null])];
-          for (let i = this.skip || 0; i < all.length; i++) {
+          for (let i = 0; i < all.length; i++) {
             if (stale()) return this;
+            if (this.got?.has(i)) continue;            // built by a worker before it failed
             const [plan, music] = all[i];
             await this.addPart(plan.id, plan, music, gen);
             if (i < mod.landmarks.length) this.done += 2;
           }
-          this.skip = 0;
+          this.got = null;
         }
       }
       // let go of while it was being built (the visitor moved away): unload() has cleaned up
