@@ -8,7 +8,7 @@ import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { smaa } from 'three/addons/tsl/display/SMAANode.js';
 import { CSMShadowNode } from 'three/addons/csm/CSMShadowNode.js';
-import { SkyMesh } from './sky.js';
+import { SkyMesh, SKY_FAR } from './sky.js';
 import { PLANET_RADIUS } from '../planet/sites.js';
 import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
 import { GIVolume } from './gi.js';
@@ -39,6 +39,7 @@ export class Renderer {
     const r = this.renderer = new THREE.WebGPURenderer({ canvas: this.canvas, antialias: false, forceWebGL: !this.webgpu, powerPreference: 'high-performance',
       logarithmicDepthBuffer: depthMode === 'log', reversedDepthBuffer: depthMode === 'reversed' });
     await r.init();
+    SKY_FAR.value = r.reversedDepthBuffer ? 0 : 1;
     // instance matrices always as vertex attributes: below 64 kB three.js puts them in a uniform
     // array whose length is written into the shader, so every instance count was a new shader and
     // pipeline to compile (the repeated pieces of buildings come in hundreds of different counts)

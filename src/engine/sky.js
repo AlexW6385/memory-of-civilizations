@@ -222,7 +222,9 @@ class SkyMesh extends Mesh {
 			// position
 
 			const position = modelViewProjection;
-			position.z.assign( position.w ); // set z to camera.far
+			// on the far plane: z = w in a standard depth buffer, z = 0 in a reversed one (where z = w
+			// is the near plane, and the sky drew over whatever was drawn before it)
+			position.z.assign( position.w.mul( SKY_FAR ) );
 
 			return position;
 
@@ -407,4 +409,7 @@ class SkyMesh extends Mesh {
 
 }
 
-export { SkyMesh };
+/** 1 for a standard depth buffer, 0 for a reversed one (set by the renderer). */
+const SKY_FAR = uniform( 1 );
+
+export { SkyMesh, SKY_FAR };
