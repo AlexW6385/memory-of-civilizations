@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.05 — The Opera House's shells (2026-11-05)
+- Sydney: the Opera House's shells are cut as from one sphere — each half of their section an arc, the two meeting in a sharp ridge along the top, narrowing as they rise to the mouth — instead of smooth round domes; a rib of cream tiles runs along each ridge and lighter ribs fan down the faces.
+
 ## v9.04 — Giotto's windows (2026-11-05)
 - Florence: Giotto's campanile has its windows — two storeys of paired two-light windows and the tall three-light belfry above, each light dark under a pointed head, the lights parted by slender shafts, each window framed in white marble under a gable with a small rose — instead of three plain slots a face.
 

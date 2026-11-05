@@ -5,7 +5,7 @@
 // sandstone terraces.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import '../qing/index.js';
 import '../artdeco/index.js';
 
@@ -13,13 +13,22 @@ import '../artdeco/index.js';
 const tri2 = (t, a, b, c) => t.push(...a, ...b, ...c, ...a, ...c, ...b);
 /** One shell: from the south base at z0 to the mouth at z1 (z1 < z0: it opens north), half-width hw, height H, on y. */
 function shell(bag, cx, z0, z1, hw, H, y) {
-  const nu = 14, nv = 12, P = (i, j) => {
-    const s = -1 + 2 * i / nu, t = j / nv, h = H * (1 - (1 - t) ** 2), w = hw * (1 - 0.22 * t);
-    return [cx + s * w, y + h * Math.pow(Math.max(0, 1 - Math.abs(s) ** 1.35), 0.75), z0 + (z1 - z0) * t + (z1 - z0) * 0.12 * t * t * (1 - Math.abs(s))];
+  // each half of the shell's section is an arc of a circle (the shells are cut from one sphere), the two
+  // meeting in a sharp ridge along the top
+  const c = 0.55, R = 1 + c, arc = (a) => Math.sqrt(Math.max(0, R * R - (a + c) * (a + c))), a0 = arc(0), a1 = arc(1);
+  const sect = (s) => (arc(Math.abs(s)) - a1) / (a0 - a1);
+  const nu = 16, nv = 14, P = (i, j) => {
+    const s = -1 + 2 * i / nu, t = j / nv, h = H * (1 - (1 - t) ** 2.2), w = hw * (1 - 0.3 * t);
+    return [cx + s * w, y + h * sect(s), z0 + (z1 - z0) * t + (z1 - z0) * 0.16 * t * t * (1 - Math.abs(s))];
   };
   const T = [];
   for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { tri2(T, P(i, j), P(i + 1, j), P(i + 1, j + 1)); tri2(T, P(i, j), P(i + 1, j + 1), P(i, j + 1)); }
   bag.add('tile_opera', fromTriangles(T));
+  // the ridge: a rib of the cream tiles along the top, and the ribs fanning down the shell's face
+  const rib = [];
+  for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.28, 6)); }
+  for (const i of [3, 6, 10, 13]) for (let j = 2; j < nv; j++) { const a = P(i, j), b = P(i, j + 1); rib.push(rod(a, b, 0.12, 4)); }
+  for (const g of rib) bag.add('tile_cream', g);
   // the glazed mouth: a fan down to the podium, set back a little
   const G = [], base = [cx, y, z1 + (z0 - z1) * 0.08];
   for (let i = 0; i < nu; i++) { const a = P(i, nv), b = P(i + 1, nv); tri2(G, base, [a[0], a[1], a[2] + (z0 - z1) * 0.04], [b[0], b[1], b[2] + (z0 - z1) * 0.04]); }
