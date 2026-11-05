@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.88 — Nara's doors and windows (2026-11-05)
+- Nara: the halls, gates and galleries have the older doors and windows — board doors in two leaves with rows of bronze studs, and windows of upright square bars (renji) before a dark opening — instead of Ming-style lattice; the Great Buddha Hall's front no longer reads as a wall of lattice.
+
 ## v8.87 — Foguang's terrace walls (2026-11-05)
 - Foguang Monastery: the two terrace walls stand on a footing of dressed stone under a stone coping, with a low brick parapet capped in grey tiles along their fronts (open at the stairs), and stepped stone cheek walls flank both flights of stairs.
 

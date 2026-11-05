@@ -197,9 +197,9 @@ function latticeBay(bag, col, a, b, y, h, kind = 'door', th = 0.06) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz * th, nz = ux * th;
   const n = LOW ? Math.max(1, Math.round(L / 1.8)) : Math.max(2, Math.round(L / 0.62));
   const lowH = kind === 'window' ? 0.95 : 0.55, topH = h - 0.12;
-  const slab = (s0, s1, y0, y1, mat) => {
+  const slab = (s0, s1, y0, y1, mat, k = 1) => {
     const p0 = [a[0] + ux * s0, a[1] + uz * s0], p1 = [a[0] + ux * s1, a[1] + uz * s1];
-    const q = [[p0[0] - nx, p0[1] - nz], [p1[0] - nx, p1[1] - nz], [p1[0] + nx, p1[1] + nz], [p0[0] + nx, p0[1] + nz]];
+    const q = [[p0[0] - nx * k, p0[1] - nz * k], [p1[0] - nx * k, p1[1] - nz * k], [p1[0] + nx * k, p1[1] + nz * k], [p0[0] + nx * k, p0[1] + nz * k]];
     const tri = [];
     const v = (p, yy) => [p[0], yy, p[1]];
     const qd = (A, B, C, D) => tri.push(...A, ...B, ...C, ...A, ...C, ...D);
@@ -207,6 +207,29 @@ function latticeBay(bag, col, a, b, y, h, kind = 'door', th = 0.06) {
     qd(v(q[0], y1), v(q[1], y1), v(q[2], y1), v(q[3], y1)); qd(v(q[1], y0), v(q[2], y0), v(q[2], y1), v(q[1], y1)); qd(v(q[3], y0), v(q[0], y0), v(q[0], y1), v(q[3], y1));
     bag.add(mat, fromTriangles(tri.concat(flipTris(tri))));
   };
+  if (PAL.doors === 'plank') {
+    // the older manner (Nara, Tang): doors of boards in two leaves with rows of bronze studs; windows
+    // of upright square bars (renji) before a dark opening
+    if (kind === 'door') {
+      for (let j = 0; j < 2; j++) {
+        const s0 = j * L / 2 + 0.04, s1 = (j + 1) * L / 2 - 0.04;
+        slab(s0, s1, y + 0.05, y + topH, PAL.wood);
+        if (!LOW) for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) {
+          const ss = s0 + (s1 - s0) * (c + 0.5) / 3, yy = y + 0.35 + (topH - 0.7) * r / 4;
+          slab(ss - 0.05, ss + 0.05, yy - 0.05, yy + 0.05, 'gilt_bronze', 1.9);
+        }
+      }
+      slab(L / 2 - 0.04, L / 2 + 0.04, y, y + topH, PAL.wood, 1.4);
+    } else {
+      slab(0.03, L - 0.03, y, y + lowH, PAL.plaster);
+      slab(0.03, L - 0.03, y + lowH, y + topH, 'opening', 0.4);
+      const nb = LOW ? Math.round(L / 0.5) : Math.round(L / 0.2);
+      for (let k = 1; k < nb; k++) { const ss = k * L / nb; slab(ss - 0.04, ss + 0.04, y + lowH, y + topH, PAL.wood); }
+    }
+    slab(0, L, y + topH, y + h, PAL.wood);
+    if (col) col.segment(a, b, th * 2, y, y + h);
+    return;
+  }
   for (let k = 0; k < n; k++) {
     const s0 = k * L / n + 0.03, s1 = (k + 1) * L / n - 0.03;
     slab(s0, s1, y + (kind === 'window' ? 0 : 0.05), y + lowH, kind === 'window' ? PAL.plaster : PAL.wood);
