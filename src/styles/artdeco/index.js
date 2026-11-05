@@ -18,15 +18,45 @@ function tank(bag, x, y, z, r = 2.2) {
   bag.add('timber', lathe([[r, 0], [r, 4], [0.001, 4]], 12, null, x, y + 3, z));
   bag.add('timber', lathe([[r + 0.1, 0], [0.001, 1.3]], 12, null, x, y + 7, z));
 }
+const PLAIN = 'limestone';
+/** Ground-floor shops: a granite base course, plate-glass windows along each face between short piers, a
+ * cornice over them, and here and there an awning. */
+function storefronts(bag, [x0, z0, x1, z1], y, rand) {
+  for (const f of 'nsew') {
+    const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, a0 = along ? x0 : z0, o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
+    const R = (u0, u1, y0, y1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? box(a0 + u0, y0, Math.min(a, b), a0 + u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, a0 + u0, Math.max(a, b), y1, a0 + u1); };
+    const n = Math.max(1, Math.floor(L / 6));
+    for (let i = 0; i < n; i++) {
+      const u0 = i * L / n + 0.6, u1 = (i + 1) * L / n - 0.6;
+      bag.add('opening', R(u0, u1, y + 0.6, y + 3.6, 0.15, 0.2));
+      if (rand() < 0.25) bag.add(['cloth_green', 'cloth_red', 'cloth_indigo'][Math.floor(rand() * 3)], R(u0, u1, y + 3.4, y + 3.55, 0.2, 1.6));
+    }
+    bag.add(PLAIN, R(0, L, y + 3.7, y + 4.3, 0, 0.4));
+  }
+}
+/** Vertical piers standing out from a stage's faces, the windows between them in recessed strips. */
+function piers(bag, [x0, z0, x1, z1], y0, y1) {
+  for (const f of 'nsew') {
+    const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, a0 = along ? x0 : z0, o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
+    const n = Math.max(2, Math.round(L / 3.2));
+    for (let i = 0; i <= n; i++) {
+      const u = a0 + i * L / n, a = o, b = o + sg * 0.35;
+      bag.add(PLAIN, along ? box(u - 0.3, y0, Math.min(a, b), u + 0.3, y1 + 0.4, Math.max(a, b)) : box(Math.min(a, b), y0, u - 0.3, Math.max(a, b), y1 + 0.4, u + 0.3));
+    }
+  }
+}
 /** skyscraper: { rect, y, h, mat, seed } — a block that steps back as it rises when tall; a cornice or a crown; a tank on lower roofs. */
 function skyscraper(el, { bag, col }) {
   const rand = rng(el.seed || 1), y = el.y ?? 0, h = el.h ?? 40, mat = el.mat ?? LS;
   let r = el.rect;
   col.rect(r, y - 0.5, y + h);
+  storefronts(bag, r, y, rand);
   if (h < 70) {
     block(bag, mat, r, y - 0.5, y + h);
     block(bag, 'granite_grey', inset(r, -0.15), y - 0.5, y + 4.5);
     block(bag, mat, inset(r, -0.5), y + h - 0.2, y + h + 0.8);
+    block(bag, PLAIN, inset(r, -0.2), y + h - 1.6, y + h - 0.2);                // the frieze under the cornice
+    if (h > 20) block(bag, PLAIN, inset(r, -0.25), y + 12.2, y + 12.8);              // a belt course over the base
     if (rand() < 0.4) tank(bag, (r[0] + r[2]) / 2 + (rand() - 0.5) * 4, y + h + 0.8, (r[1] + r[3]) / 2 + (rand() - 0.5) * 4);
     return;
   }
@@ -39,7 +69,10 @@ function skyscraper(el, { bag, col }) {
     const f = s === steps - 1 ? 1 : 0.55 + s * 0.25, top = y + h * f, k = 0.12 + s * 0.08;
     r = inset(r, w * k / 1.3, d * k / 1.3);
     if (r[2] - r[0] < 6 || r[3] - r[1] < 6) break;
-    block(bag, mat, r, yy - 0.3, top); yy = top;
+    block(bag, mat, r, yy - 0.3, top);
+    if (s === steps - 1 || s === 0) piers(bag, r, yy, top);
+    block(bag, PLAIN, inset(r, -0.3), yy - 0.6, yy + 0.2);                          // the parapet at each setback
+    yy = top;
   }
   if (h > 150) { const c = [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], s0 = Math.min(r[2] - r[0], r[3] - r[1]) / 2; bag.add(rand() < 0.5 ? 'lead' : mat, frustum([c[0] - s0, c[1] - s0, c[0] + s0, c[1] + s0], yy, yy + s0 * 1.4, s0 * 0.9, s0 * 0.9, s0 * 0.9, s0 * 0.9, { noBottom: true })); }
   else block(bag, mat, inset(r, -0.4), yy - 0.2, yy + 0.8);
