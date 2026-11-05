@@ -34,6 +34,8 @@ The castle faces south: the main gate and the high-ranking residences on the sou
 
 White plaster walls (hence "White Heron Castle") [stated: Wikipedia]; grey tiled roofs, hip-and-gable (irimoya) at the top, triangular gables (chidori-hafu) on the lower roofs [inferred from the castle as it stands]; stone ramparts with the curved batter (ōgi-no-kōbai) [inferred]; plastered earthen walls with tile copings (dobei).
 
+**The main keep inside (L3, built).** Five storeys outside, six floors and a basement inside [stated: Wikipedia; himejicastle.jp]; the basement, about 385 m², in the stone base, with lavatories, a drain board and a kitchen [stated: Wikipedia]; two great pillars, east and west, rising from the foundation to the bottom of the sixth floor [stated: web-japan], about 24.5 m and about 1 m across, the east one of fir [stated: ermakvagus]; weapon racks (bugukake) on the floors, the first floor once holding over 280 matchlocks and 90 spears [stated: photoguide.jp; rss pplpod]; 605 gun racks in the complex [stated: jpsearch]. The Osakabe shrine on the top floor was moved there only after the Second World War [stated: MLIT], so it is left out. Ours: the base is a stone ring round the basement, entered by a door on its west side from the courtyard between the keeps [inferred: the real entrance is from that side through the basement]; a stone sink in the basement; each storey hollow, the walls plastered between posts, barred windows lit from outside, boarded floors on exposed joists, a ring of posts 1.85 m in from the walls marking the warriors' corridor (musha-bashiri) [inferred], gun racks between the windows on the three lower storeys, steep open stairs from floor to floor on alternating sides, the two great pillars from the basement to the top storey's floor (our five storeys stand for the six floors).
+
 ## 5. The town
 
 Samurai residences: walled compounds with a gate-house (nagaya-mon), a main house under an irimoya roof, a storehouse. Merchants' machiya: two storeys, narrow fronts of wooden lattice, a pent roof between the storeys, tiled gable roofs with the ridge along the street. [inferred from Edo practice; All About Japan for proportions]
@@ -71,3 +73,7 @@ The settlement's position in `src/planet/sites.js` may be nudged inland so that 
 - [Painting of Himeji Castle Town — Hyogo Prefectural Museum of History](https://www.hyogo-c.ed.jp/~rekihaku-bo/historystation/sp/exhibit-meihin/meihin18_en.html)
 - [Historic Himeji — MLIT](https://www.mlit.go.jp/tagengo-db/common/001563743.pdf)
 - [Himeji — All About Japan](https://allabout-japan.com/en/article/11282)
+- [Himeji Castle's pillars — web-japan (Nipponia)](https://web-japan.org/nipponia/nipponia17/en/feature/feature04.html)
+- [Inside the keep — photoguide.jp](https://www.photoguide.jp/pix/thumbnails.php?album=192)
+- [Osakabe Shrine — MLIT](https://www.mlit.go.jp/tagengo-db/common/001561132.pdf)
+- [Main keep guide — himejicastle.jp](https://himejicastle.jp/en/guide/pdf/tou01.pdf)

@@ -23,9 +23,10 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
 /** A quad strip surface from a grid of points P[i][j] (each [x, y, z]); both sides when twoSided. */
-function sheet(P, flip = false) {
+function sheet(P, flip = false, skip = null) {
   const tris = [];
   for (let i = 0; i + 1 < P.length; i++) for (let j = 0; j + 1 < P[i].length; j++) {
+    if (skip && skip(i, j)) continue;
     const a = P[i][j], b = P[i + 1][j], c = P[i + 1][j + 1], d = P[i][j + 1];
     if (flip) tris.push(...a, ...c, ...b, ...a, ...d, ...c); else tris.push(...a, ...b, ...c, ...a, ...c, ...d);
   }
@@ -96,7 +97,9 @@ function beamTris(out, p0, p1, w, h) {
  * A roof over a rectangle { c [x, z], A (half-length along x), B (half-depth), y (eave), rise,
  * kind ('hip', 'xieshan' hip-and-gable, 'gable'), sweep, alongZ }. Rings from the eave to the
  * ridge; the xieshan's hips rise only to `gableAt` of the height, the triangle above them closed
- * by a plastered gable board set back from the eave.
+ * by a plastered gable board set back from the eave. hole [x0, z0, x1, z1]: the part of the roof
+ * inside it is left out (a skirt round the storey above, which stands in the hole), and so are the
+ * ridge and the hips' stretches inside it.
  */
 function rectRoof(el, bag) {
   const [cx, cz] = el.c, A = el.A, B = el.B, y = el.y, R = el.rise, sw = el.sweep ?? 0.9, kind = el.kind || 'xieshan';
@@ -122,9 +125,18 @@ function rectRoof(el, bag) {
   if (kind === 'xieshan') { const xg = A - gAt * B; xs.push(cx - xg - 0.02, cx - xg + 0.02, cx + xg - 0.02, cx + xg + 0.02); }
   xs.sort((a, b) => a - b);
   for (let j = 0; j <= NZ; j++) zs.push(cz - B + 2 * B * j / NZ);
+  let hole = null;
+  if (el.hole) {
+    const inv = (wx, wz) => (el.alongZ ? [cx + (wz - cz), cz - (wx - cx)] : [wx, wz]);
+    const a = inv(el.hole[0], el.hole[1]), b = inv(el.hole[2], el.hole[3]);
+    hole = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
+    xs.push(hole[0], hole[2]); zs.push(hole[1], hole[3]); xs.sort((a2, b2) => a2 - b2); zs.sort((a2, b2) => a2 - b2);
+  }
+  const inHole = (x, z) => hole && x > hole[0] + 0.01 && x < hole[2] - 0.01 && z > hole[1] + 0.01 && z < hole[3] - 0.01;
+  const skip = hole ? (i, j) => inHole((xs[i] + xs[i + 1]) / 2, (zs[j] + zs[j + 1]) / 2) : null;
   const G = xs.map((x) => zs.map((z) => P(x, z))), GU = xs.map((x) => zs.map((z) => P(x, z, -0.14)));
-  bag.add(mat, sheet(G, true));
-  bag.add(soffit, sheet(GU, false));
+  bag.add(mat, sheet(G, true, skip));
+  bag.add(soffit, sheet(GU, false, skip));
   // the eave's edge
   const ring = [];
   for (const x of xs) ring.push([x, cz - B]);
@@ -140,10 +152,10 @@ function rectRoof(el, bag) {
   // ridge: the main ridge with curled ends; hips
   const top = y + R, r = [];
   const a0 = rot(cx - L - 0.3, cz), a1 = rot(cx + L + 0.3, cz);
-  beamTris(r, [a0[0], top - 0.08, a0[1]], [a1[0], top - 0.08, a1[1]], 0.16, 0.42);
+  if (!hole) beamTris(r, [a0[0], top - 0.08, a0[1]], [a1[0], top - 0.08, a1[1]], 0.16, 0.42);
   for (const s of [-1, 1]) {
     // the curl at each end of the ridge, rising and turning out
-    for (let k = 0; k < (el.curl === false ? 0 : 5); k++) {
+    for (let k = 0; k < (el.curl === false || hole ? 0 : 5); k++) {
       const e0 = rot(cx + s * (L + 0.3 + k * 0.12), cz), e1 = rot(cx + s * (L + 0.42 + k * 0.12), cz);
       beamTris(r, [e0[0], top + 0.2 + k * k * 0.07, e0[1]], [e1[0], top + 0.2 + (k + 1) * (k + 1) * 0.07, e1[1]], 0.13, 0.22);
     }
@@ -152,6 +164,7 @@ function rectRoof(el, bag) {
       const tEnd = kind === 'xieshan' ? gAt : 1;
       for (let k = 0; k <= 12; k++) {
         const t = tEnd * k / 12;
+        if (inHole(cx + s * (A - t * B), cz + sz * (B - t * B))) break;
         pts.push(P(cx + s * (A - t * B), cz + sz * (B - t * B), 0.08));
       }
       for (let k = 0; k + 1 < pts.length; k++) beamTris(r, pts[k], pts[k + 1], 0.08, 0.14);

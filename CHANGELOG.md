@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.16 — Interiors: Himeji's main keep (2026-11-05)
+- Himeji's main keep is hollow: its stone base a ring round the basement, entered by a door on the west from the courtyard between the keeps; a stone sink and a grid of posts in the basement; every storey with plastered walls between posts, barred windows lit from outside, boarded floors on exposed joists, the warriors' corridor marked by a ring of posts, gun racks between the windows on the three lower storeys; steep open stairs from floor to floor on alternating sides; the two great pillars, east and west, from the basement to the top storey's floor. The lower roofs are now skirts round the storey above (rectRoof takes a hole), and two passages were shortened where they met the keep. Dossier §4 extended, sourced; the Osakabe shrine is left out (moved to the top floor only after 1945).
+
 ## v9.15 — Interiors: the Süleymaniye and the Thousand-Pillar Hall (2026-11-05)
 - The Süleymaniye's prayer hall is hollow: thick walls with a north door, four piers, the drum closed to the dome, the painted inner dome with its ring of windows and blue medallion, the great iron chandelier ring of 48 lamps, marble floor under red carpet, the tiled mihrab and the marble minbar; windows seen from inside are a new clear-glass material in a grille of round panes, lit by the sky. Madurai's Thousand-Pillar Hall is carved: some 290 Nayaka pillars in square blocks with framed reliefs between octagonal bands under lotus-bud bracket capitals, a widened central aisle lined both sides with rearing yalis, the ceiling beamed and painted with a lotus in every bay, standing brass lamps, and the bronze Nataraja in his ring of fire at the north end (dossier §4 extended, sourced).
 

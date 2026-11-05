@@ -6,7 +6,7 @@
 // the ming style's rectRoof with a Japanese palette and a gentler curve.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, frustum, fromTriangles, orientOutward } from '../../core/geom.js';
+import { box, frustum, fromTriangles, orientOutward, rod } from '../../core/geom.js';
 import { rectRoof, withPal, beamTris } from '../ming/index.js';
 import '../qing/index.js';
 
@@ -18,7 +18,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 function roof(bag, rect, y, o, kind, rise, opt = {}) {
   const [x0, z0, x1, z1] = rect, w = x1 - x0 + 2 * o, d = z1 - z0 + 2 * o, alongZ = opt.alongZ ?? d > w;
   const A = (alongZ ? d : w) / 2, B = (alongZ ? w : d) / 2;
-  rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A, B, y, rise: rise ?? B * 0.62, kind, sweep: opt.sweep ?? 0.3, p: opt.p ?? 1.25, alongZ, curl: false, gableAt: opt.gableAt ?? 0.5, mat: opt.mat }, bag);
+  rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A, B, y, rise: rise ?? B * 0.62, kind, sweep: opt.sweep ?? 0.3, p: opt.p ?? 1.25, alongZ, curl: false, gableAt: opt.gableAt ?? 0.5, mat: opt.mat, hole: opt.hole }, bag);
 }
 /** A section [[offset, y]…] swept along a→b, capped at the ends. */
 function sweepSection(bag, mat, a, b, sec) {
@@ -56,7 +56,17 @@ function ishigaki(el, { bag, col }) {
   if (el.ring) {
     const w = el.ring;
     band([x0, z0, x1, z0 + w], { n: 1, w: 1, e: 1 }); band([x0, z1 - w, x1, z1], { s: 1, w: 1, e: 1 });
-    band([x0, z0 + w, x0 + w, z1 - w], { w: 1 }); band([x1 - w, z0 + w, x1, z1 - w], { e: 1 });
+    // door { at (z), w, h }: a passage through the west side into the hollow (a keep's basement), under a stone lintel
+    const dr = el.door;
+    if (dr) {
+      band([x0, z0 + w, x0 + w, dr.at - dr.w / 2], { w: 1 }); band([x0, dr.at + dr.w / 2, x0 + w, z1 - w], { w: 1 });
+      const tb = (dr.h) / (y1 - y0), o = out(tb);
+      bag.add(el.mat ?? ST, frustum([x0 - o, dr.at - dr.w / 2, x0 + w, dr.at + dr.w / 2], y0 + dr.h, y1, o, 0, 0, 0)); col.rect([x0 - o, dr.at - dr.w / 2, x0 + w, dr.at + dr.w / 2], y0 + dr.h, y1);
+      bag.add('wood_dark', box(x0 + w - 0.25, y0, dr.at - dr.w / 2 - 0.2, x0 + w - 0.05, y0 + dr.h + 0.3, dr.at - dr.w / 2));
+      bag.add('wood_dark', box(x0 + w - 0.25, y0, dr.at + dr.w / 2, x0 + w - 0.05, y0 + dr.h + 0.3, dr.at + dr.w / 2 + 0.2));
+      bag.add('wood_dark', box(x0 + w - 0.3, y0 + dr.h, dr.at - dr.w / 2 - 0.2, x0 + w, y0 + dr.h + 0.35, dr.at + dr.w / 2 + 0.2));
+    } else band([x0, z0 + w, x0 + w, z1 - w], { w: 1 });
+    band([x1 - w, z0 + w, x1, z1 - w], { e: 1 });
     for (const r of [[x0, z0, x1, z0 + w], [x0, z1 - w, x1, z1], [x0, z0, x0 + w, z1], [x1 - w, z0, x1, z1]]) if (el.walk !== false) col.floor(r, y1);
   } else {
     const sd = el.sides ? Object.fromEntries([...el.sides].map((c) => [c, 1])) : { n: 1, s: 1, e: 1, w: 1 };
@@ -99,23 +109,39 @@ function shachi(bag, a, b, y) {
 
 /**
  * tenshu: a keep { c, base (y of its first floor), tiers: [{ hw, hd, h }], top ('xieshan'),
- * chidori: [tier indices] }: each tier a plastered box with windows; the lower tiers skirted by
- * hipped roofs, the top under a hip-and-gable roof; gables on the slopes; fish on the ridge.
+ * chidori: [tier indices], hollow, below (y of a basement floor inside the base) }: each tier a
+ * plastered box with windows; the lower tiers skirted by hipped roofs, the top under a
+ * hip-and-gable roof; gables on the slopes; fish on the ridge. hollow: the keep inside
+ * (docs/settlements/edo-himeji.md §4): floors of boards on exposed joists, walls of plaster
+ * between posts with barred windows lit from outside, gun racks, the warriors' corridor
+ * (musha-bashiri) round each floor inside a ring of posts, the two great pillars (east and west)
+ * rising from the basement to the floor of the top storey, steep stairs up from the basement to the
+ * top, a stone sink in the basement. (The Osakabe shrine came to the top floor only after 1945.)
  */
 function tenshu(el, { bag, col }) {
-  const [cx, cz] = el.c;
+  const [cx, cz] = el.c, H = !!el.hollow, T = 0.45, RISE = 0.31, RUN = 0.3;
   let y = el.base;
+  const rects = el.tiers.map((t) => [cx - t.hw, cz - t.hd, cx + t.hw, cz + t.hd]);
+  // the stairs: from the basement to the first floor (north side), then each floor to the next, alternating sides
+  const stairs = [];
+  if (H) {
+    let yy = el.base;
+    if (el.below != null) { const n = Math.ceil((el.base - el.below) / RISE), hd = el.basementHd ?? el.tiers[0].hd - 2; stairs.push({ y0: el.below, y1: el.base, n, z: cz - (hd - 1.3), into: 0 }); }
+    el.tiers.forEach((t, i) => { if (i + 1 < el.tiers.length) { const n = Math.ceil(t.h / RISE), up = el.tiers[i + 1]; stairs.push({ y0: yy, y1: yy + t.h, n, z: cz + (i % 2 ? -1 : 1) * (up.hd - T - 1.4), into: i + 1 }); } yy += t.h; });
+    for (const st of stairs) { st.x0 = cx - st.n * RUN / 2; st.x1 = cx + st.n * RUN / 2; st.hole = [st.x0 - 0.15, st.z - 0.6, st.x1 + 0.1, st.z + 0.6]; }
+  }
   el.tiers.forEach((t, i) => {
-    const rect = [cx - t.hw, cz - t.hd, cx + t.hw, cz + t.hd], last = i === el.tiers.length - 1;
-    tierBox(bag, col, rect, y, t.h);
-    col.floor(rect, y);
+    const rect = rects[i], last = i === el.tiers.length - 1;
+    if (H) hollowTier(bag, col, rect, y, t.h, i, { T, below: i ? rects[i - 1] : el.basementRect ?? rect, hole: stairs.find((s) => s.into === i)?.hole, keep: stairs.filter((s) => s.into === i || s.y0 === y).map((s) => s.hole), racks: i < 3 });
+    else { tierBox(bag, col, rect, y, t.h); col.floor(rect, y); }
     const ov = last ? 1.6 : 1.9;
     if (last) {
       roof(bag, rect, y + t.h - 0.2, ov, 'xieshan', (Math.min(t.hw, t.hd) + ov) * 0.75);
       const alongZ = t.hd > t.hw, L = (alongZ ? t.hd : t.hw) + ov - (Math.min(t.hw, t.hd) + ov), top = y + t.h - 0.2 + (Math.min(t.hw, t.hd) + ov) * 0.75;
       shachi(bag, alongZ ? [cx, cz - L] : [cx - L, cz], alongZ ? [cx, cz + L] : [cx + L, cz], top + 0.2);
+      if (H) { bag.add(WD, box(rect[0] + T, y + t.h - 0.3, rect[1] + T, rect[2] - T, y + t.h, rect[3] - T)); }
     } else {
-      roof(bag, rect, y + t.h - 0.2, ov, 'hip', (Math.min(t.hw, t.hd) + ov) * 0.62);
+      roof(bag, rect, y + t.h - 0.2, ov, 'hip', (Math.min(t.hw, t.hd) + ov) * 0.62, H ? { hole: rects[i + 1] } : {});
       if ((el.chidori || []).includes(i)) {
         const n = el.tiers[i + 1], ye = y + t.h - 0.2 + ov * 0.5;
         for (const dir of ['n', 's', 'e', 'w']) {
@@ -126,7 +152,94 @@ function tenshu(el, { bag, col }) {
     }
     y += t.h;
   });
+  if (!H) return;
+  // the great pillars, east and west, from the basement floor to the floor of the top storey
+  const y0 = el.below ?? el.base, yp = y - el.tiers[el.tiers.length - 1].h;
+  for (const s of [-1, 1]) { const px = cx + s * 3; bag.add(WD, box(px - 0.48, y0, cz - 0.48, px + 0.48, yp, cz + 0.48)); col.rect([px - 0.48, cz - 0.48, px + 0.48, cz + 0.48], y0, yp); }
+  for (const st of stairs) stair(bag, col, st, RISE, RUN);
+  // the basement: posts on a grid round the pillars, a sink of stone by the wall
+  if (el.below != null) {
+    const br = el.basementRect;
+    for (let px = br[0] + 2.4; px < br[2] - 1.5; px += 3.2) for (let pz = br[1] + 2.4; pz < br[3] - 1.5; pz += 3.4) {
+      if (Math.abs(pz - cz) < 1.2 && Math.abs(Math.abs(px - cx) - 3) < 1.6) continue;
+      if (stairs.some((st) => px > st.hole[0] - 0.5 && px < st.hole[2] + 0.5 && pz > st.hole[1] - 0.5 && pz < st.hole[3] + 0.5)) continue;
+      bag.add(WD, box(px - 0.18, y0, pz - 0.18, px + 0.18, el.base - 0.35, pz + 0.18)); col.rect([px - 0.18, pz - 0.18, px + 0.18, pz + 0.18], y0, el.base);
+    }
+    bag.add(ST, box(br[2] - 2.4, y0, br[3] - 1.4, br[2] - 0.2, y0 + 0.7, br[3] - 0.1)); bag.add('water', box(br[2] - 2.2, y0 + 0.55, br[3] - 1.2, br[2] - 0.4, y0 + 0.62, br[3] - 0.3));
+    col.rect([br[2] - 2.4, br[3] - 1.4, br[2] - 0.2, br[3] - 0.1], y0, y0 + 0.7);
+  }
 }
+
+/** One floor of a hollow keep: walls with posts and barred windows, the floor and its joists, the warriors' corridor's ring of posts, gun racks. */
+function hollowTier(bag, col, rect, y, h, i, { T, below, hole, keep, racks }) {
+  const [x0, z0, x1, z1] = rect, inn = [x0 + T, z0 + T, x1 - T, z1 - T];
+  // the walls
+  for (const r of [[x0, z0, x1, z0 + T], [x0, z1 - T, x1, z1], [x0, z0 + T, x0 + T, z1 - T], [x1 - T, z0 + T, x1, z1 - T]]) { bag.add(PL, box(r[0], y, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h); }
+  // the floor (over the storey below, its hole for the stair up into this one) and the joists under it
+  const cut = (r, q) => q ? [[r[0], r[1], r[2], q[1]], [r[0], q[3], r[2], r[3]], [r[0], q[1], q[0], q[3]], [q[2], q[1], r[2], q[3]]].filter((a) => a[2] - a[0] > 0.05 && a[3] - a[1] > 0.05) : [r];
+  const fb = [Math.min(below[0], x0), Math.min(below[1], z0), Math.max(below[2], x1), Math.max(below[3], z1)];
+  for (const r of cut(fb, hole)) bag.add(WD, box(r[0], y - 0.36, r[1], r[2], y - 0.06, r[3]));
+  for (const r of cut(inn, hole)) { bag.add('cedar', box(r[0], y - 0.06, r[1], r[2], y, r[3])); col.floor(r, y); }
+  for (let zz = fb[1] + 0.9; zz < fb[3] - 0.5; zz += 0.9) for (const r of cut([fb[0] + 0.3, zz - 0.09, fb[2] - 0.3, zz + 0.09], hole)) if (!hole || r[3] < hole[1] || r[1] > hole[3] || r[0] >= hole[2] || r[2] <= hole[0]) bag.add(WD, box(r[0], y - 0.6, r[1], r[2], y - 0.36, r[3]));
+  for (const xx of [x0 + T + 1.85, x1 - T - 1.85]) bag.add(WD, box(xx - 0.2, y - 0.82, fb[1] + 0.3, xx + 0.2, y - 0.36, fb[3] - 0.3));
+  // the walls inside: posts, a rail at the windows' sill and a beam at the top; the barred windows lit from outside
+  const faceIn = [[[x0 + T, z0 + T], [x1 - T, z0 + T], [0, 1]], [[x1 - T, z1 - T], [x0 + T, z1 - T], [0, -1]], [[x0 + T, z1 - T], [x0 + T, z0 + T], [1, 0]], [[x1 - T, z0 + T], [x1 - T, z1 - T], [-1, 0]]];
+  const wy = y + h * 0.42, wh = h * 0.3;
+  for (const [a, b, n] of faceIn) {
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, Lo = L + 2 * T;
+    const P = (s, o) => [a[0] + ux * s + n[0] * o, a[1] + uz * s + n[1] * o];
+    const nw = Math.max(1, Math.round(Lo / 3.2)), w = Math.min(1.2, Lo / 8);
+    const t = [];
+    const bar = (s0, s1, o, yb, hh, ww) => { const p = P(s0, o), q = P(s1, o); beamTris(t, [p[0], yb, p[1]], [q[0], yb, q[1]], ww, hh); };
+    bar(0, L, 0.06, wy - 0.14, 0.14, 0.06); bar(0, L, 0.08, y + h - 0.42, 0.36, 0.08); bar(0, L, 0.04, y, 0.12, 0.04);
+    for (let s = 0; s <= L + 0.01; s += L / Math.max(1, Math.round(L / 1.9))) { const p = P(s, 0.12); bag.add(WD, box(p[0] - 0.12, y, p[1] - 0.12, p[0] + 0.12, y + h, p[1] + 0.12)); }
+    for (let k = 0; k < nw; k++) {
+      const sc = (k + 0.5) * Lo / nw - T;
+      const g = P(sc - w / 2, 0.02), g2 = P(sc + w / 2, 0.02), gt = [];
+      beamTris(gt, [g[0], wy, g[1]], [g2[0], wy, g2[1]], 0.02, wh); bag.add('daylight_plain', fromTriangles(gt));
+      for (let j = 0; j <= 8; j++) bar(sc - w / 2 + j * w / 8 - 0.025, sc - w / 2 + j * w / 8 + 0.025, 0.07, wy, wh, 0.05);
+      bar(sc - w / 2 - 0.08, sc + w / 2 + 0.08, 0.06, wy + wh, 0.1, 0.06);
+      // the gun racks between the windows
+      if (racks && k + 1 < nw) {
+        const sm = (k + 1) * Lo / nw - T;
+        bar(sm - 0.7, sm + 0.7, 0.16, y + 0.55, 0.08, 0.05); bar(sm - 0.7, sm + 0.7, 0.16, y + 1.55, 0.08, 0.05);
+        for (let j = 0; j < 5; j++) {
+          const sj = sm - 0.56 + j * 0.28, p = P(sj, 0.22), q = P(sj + 0.06, 0.3);
+          bag.add(WD, rod([p[0], y + 0.05, p[1]], [q[0], y + 1.0, q[1]], 0.035, 5));
+          bag.add('iron', rod([q[0], y + 1.0, q[1]], [q[0] + (q[0] - p[0]) * 0.8, y + 1.75, q[1] + (q[1] - p[1]) * 0.8], 0.018, 5));
+        }
+      }
+    }
+    bag.add(WD, fromTriangles(t));
+  }
+  // the warriors' corridor: a ring of posts 1.85 m in from the walls, tied by beams at the top
+  const rg = [inn[0] + 1.85, inn[1] + 1.85, inn[2] - 1.85, inn[3] - 1.85];
+  const inKeep = (px, pz) => keep.some((q) => px > q[0] - 0.35 && px < q[2] + 0.35 && pz > q[1] - 0.35 && pz < q[3] + 0.35);
+  const posts = [];
+  for (const [ax, az, bx, bz] of [[rg[0], rg[1], rg[2], rg[1]], [rg[0], rg[3], rg[2], rg[3]], [rg[0], rg[1], rg[0], rg[3]], [rg[2], rg[1], rg[2], rg[3]]]) {
+    const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(L / 1.9));
+    for (let k = 0; k <= n; k++) posts.push([ax + (bx - ax) * k / n, az + (bz - az) * k / n]);
+    bag.add(WD, box(Math.min(ax, bx) - 0.13, y + h - 0.62, Math.min(az, bz) - 0.13, Math.max(ax, bx) + 0.13, y + h - 0.3, Math.max(az, bz) + 0.13));
+  }
+  for (const [px, pz] of posts) { if (inKeep(px, pz)) continue; bag.add(WD, box(px - 0.13, y, pz - 0.13, px + 0.13, y + h - 0.3, pz + 0.13)); col.rect([px - 0.13, pz - 0.13, px + 0.13, pz + 0.13], y, y + h); }
+  void i;
+}
+
+/** A steep stair of open treads between two stringers { x0, x1, z, y0, n }, climbing along +x; a handrail on the open side. */
+function stair(bag, col, st, RISE, RUN) {
+  const rise = (st.y1 - st.y0) / st.n, t = [];
+  for (let k = 0; k < st.n; k++) {
+    const xa = st.x0 + k * RUN, yt = st.y0 + (k + 1) * rise;
+    bag.add('cedar', box(xa, yt - 0.06, st.z - 0.5, xa + RUN + 0.04, yt, st.z + 0.5));
+    col.floor([xa, st.z - 0.5, xa + RUN, st.z + 0.5], yt);
+  }
+  for (const s of [-1, 1]) beamTris(t, [st.x0 - 0.1, st.y0, st.z + s * 0.56], [st.x1 + 0.05, st.y1 - 0.25, st.z + s * 0.56], 0.05, 0.3);
+  bag.add(WD, fromTriangles(t));
+  bag.add(WD, rod([st.x0 + 0.1, st.y0 + 0.95, st.z + 0.62], [st.x1, st.y1 + 0.8, st.z + 0.62], 0.035, 6));
+  for (let k = 0; k <= 3; k++) { const xa = st.x0 + 0.1 + k * (st.x1 - st.x0 - 0.1) / 3, ya = st.y0 + (xa - st.x0) / RUN * rise; bag.add(WD, box(xa - 0.03, ya, st.z + 0.59, xa + 0.03, ya + 0.95, st.z + 0.65)); }
+  void RISE;
+}
+
 
 /** yagura: a turret { rect, y, storeys (1–3), top ('xieshan'|'hip') }: plastered storeys stepping in, each under a tiled roof. */
 function yagura(el, { bag, col }) {
