@@ -1,9 +1,14 @@
 // First-person walking and flying: keyboard and mouse (pointer lock) on desktop, a thumb stick,
 // drag-to-look and a fly button on touch screens. Collision against the world's floors and
 // obstacles; steps, stairs and ramps are climbed by following the floor height. Holding Space (or
-// the fly button) rises into the air; letting go comes gently down again.
+// the fly button) rises, faster the longer it is held; let go, one carries on a little and then
+// comes down, gathering pace, softly at the end. Cruising (Space twice quickly; on touch, hold the
+// fly button a second and slide onto the cruise button beside it) holds one aloft while the speed
+// dies away; flying again ends it.
 
 import { EYE, STEP, WALK, RUN, flightSpeeds, move } from '../core/walk.js';
+
+const DOUBLE_TAP = 0.32, CRUISE_SHOW = 1;   // s
 
 export class Controls {
   constructor(camera, canvas, collide) {
@@ -21,6 +26,9 @@ export class Controls {
     this.touch = matchMedia('(pointer: coarse)').matches;
     this.flyHeld = false;           // Space or the fly button held
     this.glide = false;             // came up by flying: comes down gently
+    this.cruise = false;            // aloft, the speed dying away, nothing pulling down
+    this.held = 0;                  // seconds the fly key has been held
+    this.vel = { x: 0, z: 0 };      // horizontal velocity aloft (m/s): flight has momentum
     this.speedNow = 0;              // horizontal speed (m/s), smoothed, for the display
     this._bind();
   }
@@ -30,7 +38,7 @@ export class Controls {
     this.feet = { x, y, z };
     this.feet.y = this.collide.groundAt(x, z, y + STEP);
     if (!Number.isFinite(this.feet.y)) this.feet.y = y;
-    this.yaw = yaw; this.pitch = pitch; this.vy = 0; this.glide = false;
+    this.yaw = yaw; this.pitch = pitch; this.vy = 0; this.glide = false; this.setCruise(false); this.vel = { x: 0, z: 0 };
     this.apply();
   }
 
@@ -46,15 +54,40 @@ export class Controls {
       if (e.target.closest && e.target.closest('input, select')) return;
       this.keys.add(e.code);
       if (!this.enabled) return;
-      if (e.code === 'Space') e.preventDefault();
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (e.repeat) return;
+        const now = performance.now() / 1000, twice = now - (this._spaceAt ?? -9) < DOUBLE_TAP;
+        this._spaceAt = twice ? -9 : now;
+        if (twice && this.glide) { this.setCruise(true); this._spaceCruise = true; }   // this press does not lift
+        else this.setCruise(false);
+      }
     });
-    addEventListener('keyup', (e) => this.keys.delete(e.code));
+    addEventListener('keyup', (e) => { this.keys.delete(e.code); if (e.code === 'Space') this._spaceCruise = false; });
     addEventListener('blur', () => { this.keys.clear(); this.flyHeld = false; });
-    // the fly button: held to rise
-    const fly = document.getElementById('btn-fly');
+    // the fly button: held to rise; held a second, the cruise button shows beside it, and letting
+    // go on it cruises
+    const fly = document.getElementById('btn-fly'), cb = document.getElementById('btn-cruise');
     if (fly) {
-      fly.addEventListener('pointerdown', (e) => { e.stopPropagation(); fly.setPointerCapture(e.pointerId); this.flyHeld = true; fly.classList.add('on'); });
-      const off = () => { this.flyHeld = false; fly.classList.remove('on'); };
+      let timer = 0, over = false;
+      const onCruise = (e) => { if (!cb || cb.hidden) return false; const r = cb.getBoundingClientRect(), m = 14;
+        return e.clientX > r.left - m && e.clientX < r.right + m && e.clientY > r.top - m && e.clientY < r.bottom + m; };
+      fly.addEventListener('pointerdown', (e) => {
+        e.stopPropagation(); fly.setPointerCapture(e.pointerId);
+        this.setCruise(false); this.flyHeld = true; fly.classList.add('on');
+        clearTimeout(timer); timer = setTimeout(() => { if (this.flyHeld && cb) cb.hidden = false; }, CRUISE_SHOW * 1000);
+      });
+      fly.addEventListener('pointermove', (e) => {
+        if (!this.flyHeld) return;
+        over = onCruise(e); cb?.classList.toggle('on', over);
+      });
+      const off = (e) => {
+        clearTimeout(timer);
+        const cruise = e.type === 'pointerup' && onCruise(e);
+        this.flyHeld = false; over = false; fly.classList.remove('on');
+        if (cb) { cb.hidden = true; cb.classList.remove('on'); }
+        if (cruise) this.setCruise(true);
+      };
       fly.addEventListener('pointerup', off);
       fly.addEventListener('pointercancel', off);
     }
@@ -99,11 +132,21 @@ export class Controls {
     stick.addEventListener('pointercancel', stop);
   }
 
+  /** Cruise on or off (only aloft). */
+  setCruise(on) {
+    on = !!on && this.glide;
+    if (on === this.cruise) return;
+    this.cruise = on;
+    document.getElementById('btn-fly')?.classList.toggle('cruise', on);
+    this.onCruise?.(on);
+  }
+
   /** Is the visitor off the ground (flying or coming down)? */
   get airborne() { return this.glide || this.vy !== 0; }
 
   /** How the visitor is moving now: 'still', 'walk', 'run' or 'fly'. */
   get gait() {
+    if (this.cruise) return 'cruise';
     if (this.airborne) return 'fly';
     if (this.speedNow < 0.3) return 'still';
     return this.speedNow > (WALK + RUN) / 2 ? 'run' : 'walk';
@@ -134,16 +177,28 @@ export class Controls {
     const l = Math.hypot(f, s);
     if (l > 1) { f /= l; s /= l; }
     const run = this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || Math.hypot(this.stick.x, this.stick.y) > 0.92;
-    const lift = this.enabled && (this.flyHeld || this.keys.has('Space'));
-    if (lift) this.glide = true;
+    const lift = this.enabled && (this.flyHeld || (this.keys.has('Space') && !this._spaceCruise));
+    this.held = lift ? this.held + dt : 0;
+    if (lift) { this.glide = true; this.setCruise(false); }
     // aloft, faster the higher (src/core/walk.js)
     const alt = this.glide ? this.feet.y - this.collide.terrain(this.feet.x, this.feet.z) : 0;
     this.altitude = alt;
     const fs = flightSpeeds(alt);
     const speed = this.glide ? (run ? fs.fast : fs.fly) : run ? RUN : WALK;
-    this.feet.liftSpeed = fs.lift; this.feet.glideSpeed = fs.glide;
+    this.feet.fs = fs; this.feet.held = this.held; this.feet.cruise = this.cruise;
     const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
     let dx = (-sin * f + cos * s) * speed * dt, dz = (-cos * f - sin * s) * speed * dt;
+    if (this.glide) {
+      // aloft there is momentum: the velocity eases toward what the keys ask for, and without them
+      // dies away, slowly when cruising
+      const V = this.vel, tx = dx / dt, tz = dz / dt, steer = l > 0.01;
+      if (!this._aloft) { V.x = tx; V.z = tz; }        // taking off keeps the pace one had
+      const rate = steer ? 1.6 : this.cruise ? 0.35 : 1.1;
+      const k = 1 - Math.exp(-rate * dt);
+      V.x += (tx - V.x) * k; V.z += (tz - V.z) * k;
+      dx = V.x * dt; dz = V.z * dt;
+    } else this.vel.x = this.vel.z = 0;
+    this._aloft = this.glide;
 
     const x0 = this.feet.x, z0 = this.feet.z;
     this.feet.vy = this.vy; this.feet.lift = lift; this.feet.glide = this.glide;
@@ -158,9 +213,13 @@ export class Controls {
     if (this.glide && this.vy === 0 && !lift) {          // landed?
       const C = this.collide, F = this.feet;
       const g = Math.max(C.groundAt(F.x, F.z, F.y + 0.01), C.topAt(F.x, F.z, 0.18, F.y + 0.01));
-      if (F.y <= g + 1e-3) this.glide = false;
+      if (F.y <= g + 1e-3) { this.glide = false; this.setCruise(false); }
     }
     const v = Math.hypot(this.feet.x - x0, this.feet.z - z0) / Math.max(dt, 1e-3);
+    if (this.glide) {                  // blocked aloft (a wall, a tower): the momentum goes with it
+      const want = Math.hypot(dx, dz) / Math.max(dt, 1e-3);
+      if (want > 0.1 && v < want * 0.5) { const r = v / want; this.vel.x *= r; this.vel.z *= r; }
+    }
     this.speedNow += (v - this.speedNow) * Math.min(1, dt * 6);
     this.apply();
   }

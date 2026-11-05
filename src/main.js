@@ -422,7 +422,7 @@ async function main() {
   paintClock();
   // how the visitor is moving, under the clock: walking, running or flying, how fast, how high
   const gaitIcon = $('gait-icon'), speedName = $('speed-name'), speedKmh = $('speed-kmh'), speedAlt = $('speed-alt'), speedBar = $('speed-bar');
-  const GLYPH = { still: '•', walk: '›', run: '»', fly: '⌃' };
+  const GLYPH = { still: '•', walk: '›', run: '»', fly: '⌃', cruise: '≈' };
   const paintSpeed = () => {
     const g = controls.gait, F = controls.feet;
     if (gaitIcon.textContent !== GLYPH[g]) gaitIcon.textContent = GLYPH[g];
@@ -430,11 +430,12 @@ async function main() {
     if (speedName.textContent !== name) speedName.textContent = name;
     const kmh = Math.round(controls.speedNow * 3.6);
     speedKmh.textContent = String(kmh);
-    const up = g === 'fly' ? Math.max(0, F.y - world.collide.groundAt(F.x, F.z, F.y + 0.01)) : 0;
+    const air = g === 'fly' || g === 'cruise';
+    const up = air ? Math.max(0, F.y - world.collide.groundAt(F.x, F.z, F.y + 0.01)) : 0;
     void F;
     speedAlt.textContent = up >= 1 ? `${Math.round(up)} ${t('above-ground')}` : '';
     speedBar.style.width = `${Math.min(100, Math.sqrt(kmh / 400) * 100)}%`;
-    speedBar.classList.toggle('fly', g === 'fly');
+    speedBar.classList.toggle('fly', air);
   };
   setInterval(paintSpeed, 250);
   onLang(() => { paintSpeed(); paintClock(); });

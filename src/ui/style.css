@@ -107,6 +107,11 @@ body.panel-open #btn-mute, body.panel-open #btn-lang, body.panel-open #corner, b
 #touch-btns .icon { width: 60px; height: 60px; color: var(--ink); font-size: 22px; }
 #touch-btns .icon svg { width: 26px; height: 26px; }
 #touch-btns .icon.on { background: rgba(243, 234, 217, 0.3); }
+#touch-btns { align-items: center; }
+#touch-btns #btn-cruise { width: 46px; height: 46px; }
+#touch-btns #btn-cruise[hidden] { display: none; }
+#touch-btns #btn-cruise.on { background: rgba(243, 234, 217, 0.45); transform: scale(1.12); }
+#touch-btns #btn-fly.cruise { box-shadow: 0 0 0 2px rgba(243, 234, 217, 0.7); }
 
 /* phones */
 @media (max-width: 700px) {
