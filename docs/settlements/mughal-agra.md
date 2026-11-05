@@ -33,6 +33,8 @@ The axis runs north–south: the tomb on the river at the north end, the gate on
 
 White Makrana marble for the tomb [stated: visiearth]; red sandstone for the terrace, walls, gate, mosque and jawab; bulbous double dome with lotus crown and brass finial [stated: dream-it24]; chhatris; minarets leaning slightly outward [stated: Wikipedia] — ours stand straight.
 
+**The tomb chamber inside (L3, built).** An octagon of 7.3 m sides, entered from each face in design but only by the south door from the garden; the walls about 25 m high under a false inner dome with a sun motif [stated: middleheight; thetilesofindia]. Double-height, each face with two storeys of niches; the niches on the axes have jali screens on the outer face that let in light; muqarnas at the upper level turn the octagon toward the dome's ring [stated: Archnet]. The dado frames and spandrels carry pietra dura of yellow marble, jasper and jade [stated: slideshare after Koch]. The octagonal marble screen was set up in 1643 in place of the first one of enamelled gold; each side has three panels, one opening to the cenotaph [stated: tajmahal.gov.in; Archnet]. Mumtaz's cenotaph is exactly in the centre of the hall [stated: tajmahal.gov.in]; Shah Jahan's was added after his death (1666), so in 1653 only hers stands [inferred from the dates]. Ours: walls to 20 m and a flat ring to the inner dome (our mausoleum is a little smaller); the axial niches glazed with light behind a marble lattice; carved dado panels with flower bosses; inlay of red, green, gold and blue stones in the spandrels; the screen as a grid of slender bars between posts; a vestibule from the south iwan's door to the chamber.
+
 ## 5. The town
 
 Flat-roofed houses of two or three storeys, plastered brick or red sandstone, with a jharokha balcony over the door. [inferred]
@@ -58,6 +60,11 @@ A raga on plucked strings over a drone; the shehnai at the gate (an oud-like str
 The settlement's latitude in `src/planet/sites.js` is set a little south and east of the true place (26.2°, 78.3°), so that the layout keeps its disc off the foothills the warped map puts north of Agra. [inferred]
 
 ## Sources
+
+- [Interior decoration — tajmahal.gov.in](https://tajmahal.gov.in/the-taj-interiors.aspx)
+- [Taj Mahal mausoleum — Archnet](https://archnet.org/sites/1557)
+- [Taj Mahal — middleheight](https://middleheight.com/?p=3849)
+- [The Taj Mahal — thetilesofindia](https://www.thetilesofindia.com/global-architects/the-taj-mahal/)
 
 - [Taj Mahal — Wikipedia](https://en.wikipedia.org/wiki/Taj_Mahal)
 - [Taj Mahal — Wikipedia (wikipedia.com mirror)](https://wikipedia.com/wiki/Tajmahal)

@@ -13,7 +13,7 @@ E.push({ t: 'block', walk: true, rect: [PLINTH.c[0] - PLINTH.a, PLINTH.c[1] - PL
 E.push({ t: 'stairs', rect: [-6, PLINTH.c[1] + PLINTH.a, 6, PLINTH.c[1] + PLINTH.a + 9], y0: ty, y1: PLINTH.y, dir: 'n', mat: 'marble' });
 E.push({ t: 'stairs', rect: [-10, tz1, 10, tz1 + 4], y0: 0, y1: ty, dir: 'n', mat: 'sandstone_red' });
 // the mausoleum: 56.6 m square with chamfered corners, its dome rising 73 m above the plinth
-E.push({ t: 'mausoleum', c: PLINTH.c, y: PLINTH.y, a: 28.3, chamfer: 8.5, h: 33, dome: { r: 17.7, h: 28, drum: 7 } });
+E.push({ t: 'mausoleum', c: PLINTH.c, y: PLINTH.y, a: 28.3, chamfer: 8.5, h: 33, dome: { r: 17.7, h: 28, drum: 7 }, interior: true });
 for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) E.push({ t: 'minaret', c: [PLINTH.c[0] + sx * (PLINTH.a - 3), PLINTH.c[1] + sz * (PLINTH.a - 3)], y: PLINTH.y, h: 40, r: 2.6 });
 // the mosque (west, facing east) and its twin (east, facing west), on the terrace
 E.push({ t: 'red_hall', rect: [-138, -232, -115, -174], y: ty, h: 12, front: 'e' });
@@ -41,7 +41,7 @@ wall([fx0, fz0], [fx0, fz1]); wall([fx1, fz0], [fx1, fz1]);
 wall([fx0, fz1], [-8, fz1]); wall([8, fz1], [fx1, fz1]);
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('plinth', [-47.5, -250.5, 47.5, -155.5], PLINTH.y, 'open'), room('garden', GARDEN, 0, 'open')];
+const rooms = [room('tomb chamber', [-11, -214, 11, -192], PLINTH.y, 'hall'), room('plinth', [-47.5, -250.5, 47.5, -155.5], PLINTH.y, 'open'), room('garden', GARDEN, 0, 'open')];
 const walks = [[[0, 240], [0, 200], [0, 172], [0, 140], [0, 18], [0, -18], [0, -146], [0, -152], [0, -158]]];
 walks[0].y0 = 0;
 

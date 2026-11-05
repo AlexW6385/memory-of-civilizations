@@ -8,7 +8,7 @@
 
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles, frustum } from '../../core/geom.js';
+import { box, lathe, fromTriangles, frustum, disc, rod } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
 
@@ -148,8 +148,9 @@ function mausoleum(el, { bag, col }) {
   const P = [[-A + C, -A], [A - C, -A], [A, -A + C], [A, A - C], [A - C, A], [-A + C, A], [-A, A - C], [-A, -A + C]].map(([x, z]) => [cx + x, cz + z]);
   for (let k = 0; k < 8; k++) {
     const a = P[k], b = P[(k + 1) % 8], main = k % 2 === 0;
-    pishtaqFace(bag, col, a, b, y, H, main ? { w: (A - C) * 2 * 0.42, h: H * 0.82, depth: 5 } : { w: C * 1.4 * 0.5, h: H * 0.42 }, W, main, [cx, cz]);
+    pishtaqFace(bag, col, a, b, y, H, main ? { w: (A - C) * 2 * 0.42, h: H * 0.82, depth: 5, pass: el.interior && k === 4 } : { w: C * 1.4 * 0.5, h: H * 0.42 }, W, main, [cx, cz]);
   }
+  if (el.interior) tombChamber(bag, col, cx, cz, y, A);
   bag.add(W, box(cx - A + 2, y + H - 0.8, cz - A + 2, cx + A - 2, y + H, cz + A - 2));
   col.floor([cx - A, cz - A, cx + A, cz + A], y + H);
   // the drum and the dome
@@ -159,6 +160,106 @@ function mausoleum(el, { bag, col }) {
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) chhatri(bag, null, cx + sx * (A - C) * 0.75, y + H, cz + sz * (A - C) * 0.75, 3.4, 4.6, 8);
   // pinnacles at the corners of the chamfers
   for (const p of P) bag.add(W, lathe([[0.7, 0], [0.55, H + 4 - y + y], [0.001, H + 5.5]], 8, null, p[0], y, p[1]));
+}
+
+/**
+ * The tomb chamber (docs/settlements/mughal-agra.md §4): an octagon of 7.3 m sides, each face with
+ * two storeys of arched niches, those on the axes opening through jali screens to the light (the
+ * south one the way in, by a vestibule from the great iwan); a ring closing the octagon to the inner
+ * dome with its sun at the crown; a dado of carved panels, inlay of coloured stones in the
+ * spandrels; at the centre the octagonal marble screen (1643), three panels a side, one open, round
+ * the cenotaph of Mumtaz Mahal on its platform. (Shah Jahan's cenotaph came only in 1666.)
+ */
+function tombChamber(bag, col, cx, cz, y, A) {
+  const side = 7.3, ap = side / 2 / Math.tan(Math.PI / 8), th = 1.5, Hw = 20, rc = ap / Math.cos(Math.PI / 8);
+  const vtx = (k, r) => { const a = Math.PI / 8 + k * Math.PI / 4 - Math.PI / 2; return [cx + Math.cos(a) * r, cz + Math.sin(a) * r]; };
+  const rw = (ap + th / 2) / Math.cos(Math.PI / 8);
+  for (let k = 0; k < 8; k++) {
+    const a = vtx(k, rw), b = vtx(k + 1, rw), mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2, out = [cx + (mx - cx) * 3, cz + (mz - cz) * 3];
+    const axis = k % 2 === 1, south = mz - cz > ap * 0.9 && Math.abs(mx - cx) < 1, L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    arcadeWall(bag, col, a, b, y, Hw, th, W, [
+      { at: L / 2, w: axis ? 5 : 4.2, h: 9, depth: 0.7, pass: south, back: axis ? 'daylight' : W },
+      { at: L / 2, w: 4.2, h: 6, sill: 11, depth: 0.7, back: axis ? 'daylight' : W },
+    ], out);
+    // the inner face: a dado of carved panels, the niches' frames and their spandrels inlaid
+    const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = (cx - mx) / Math.hypot(cx - mx, cz - mz), nz = (cz - mz) / Math.hypot(cx - mx, cz - mz);
+    const Q = (s2, o) => [a[0] + ux * s2 + nx * (th / 2 + o), a[1] + uz * s2 + nz * (th / 2 + o)];
+    const slab = (s0, s1, ya, yb, o0, o1, m) => { const t = [], p = Q((s0 + s1) / 2, (o0 + o1) / 2); beamTris(t, [p[0] - ux * (s1 - s0) / 2, ya, p[1] - uz * (s1 - s0) / 2], [p[0] + ux * (s1 - s0) / 2, ya, p[1] + uz * (s1 - s0) / 2], (o1 - o0) / 2, yb - ya); bag.add(m, fromTriangles(t)); };
+    const nw = axis ? 5 : 4.2;
+    for (const [s0, s1] of [[0.25, L / 2 - nw / 2 - 0.35], [L / 2 + nw / 2 + 0.35, L - 0.25]]) {
+      if (s1 - s0 < 0.3) continue;
+      slab(s0, s1, y, y + 1.6, 0, 0.05, 'marble_dark');
+      slab(s0 + 0.08, s1 - 0.08, y + 0.08, y + 1.52, 0.05, 0.09, W);
+      const fc = (s0 + s1) / 2; for (const [dy, r2] of [[0.8, 0.22], [0.45, 0.12], [1.15, 0.12]]) { const p = Q(fc, 0.1); bag.add('marble_column', lathe([[0.001, 0], [r2, 0.04], [r2 * 0.7, 0.09], [0.001, 0.1]], 8, null, p[0], y + dy - 0.05, p[1])); }
+      slab(s0, s1, y + 1.6, y + 1.72, 0, 0.1, 'marble_dark');
+    }
+    // the frames round both niches; the spandrels' inlay (red, green, gold and blue stones)
+    for (const [ya, hh] of [[y, 9], [y + 11, 6]]) {
+      for (const sg of [-1, 1]) slab(L / 2 + sg * (nw / 2 + 0.3) - 0.05, L / 2 + sg * (nw / 2 + 0.3) + 0.05, ya, ya + hh + 0.85, 0, 0.05, 'marble_dark');
+      slab(L / 2 - nw / 2 - 0.35, L / 2 + nw / 2 + 0.35, ya + hh + 0.75, ya + hh + 0.85, 0, 0.05, 'marble_dark');
+      for (const sg of [-1, 1]) for (let j = 0; j < 5; j++) {
+        const p = Q(L / 2 + sg * (nw / 2 - 0.2 - j * 0.12), 0.06), yy = ya + hh - 0.6 + (j % 2) * 0.25 - j * 0.05;
+        const m = ['stucco_rose', 'stucco_leaf', 'stucco_saffron', 'stucco_sky', 'stucco_rose'][j];
+        const t = []; beamTris(t, [p[0] - ux * 0.05, yy, p[1] - uz * 0.05], [p[0] + ux * 0.05, yy, p[1] + uz * 0.05], 0.015, 0.14); bag.add(m, fromTriangles(t));
+        const t2 = []; beamTris(t2, [p[0] - ux * 0.11, yy + 0.05, p[1] - uz * 0.11], [p[0] + ux * 0.11, yy + 0.05, p[1] + uz * 0.11], 0.015, 0.04); bag.add('stucco_leaf', fromTriangles(t2));
+      }
+    }
+    // the jali in the axial niches: a lattice of marble over the light
+    if (axis) for (const [ya, hh, ww] of [[y, 9, 5], [y + 11, 6, 4.2]]) {
+      if (south && ya === y) continue;
+      const bk = (s0, s1, yb0, yb1) => { const p = Q((s0 + s1) / 2, -(th + 0.7) + 0.12), t = []; beamTris(t, [p[0] - ux * (s1 - s0) / 2, yb0, p[1] - uz * (s1 - s0) / 2], [p[0] + ux * (s1 - s0) / 2, yb0, p[1] + uz * (s1 - s0) / 2], 0.05, yb1 - yb0); bag.add(W, fromTriangles(t)); };
+      const top = ya + hh - ww * 0.5;
+      for (let g = 0; g <= 12; g++) bk(L / 2 - ww / 2 + g * ww / 12 - 0.04, L / 2 - ww / 2 + g * ww / 12 + 0.04, ya, top);
+      for (let g = 0; g <= Math.floor((top - ya) / 0.42); g++) bk(L / 2 - ww / 2, L / 2 + ww / 2, ya + g * 0.42 - 0.04, ya + g * 0.42 + 0.04);
+    }
+  }
+  // the ring from the octagon to the dome's circle, the inner dome with its sun
+  const yr = y + Hw - 0.02;
+  bag.add(W, lathe([[rc + th * 1.2, 0], [ap * 0.995, 0]], 32, null, cx, yr, cz));
+  bag.add(W, lathe([[ap * 0.995, 0.02], [rc + th * 1.2, 0.02]], 32, null, cx, yr, cz));
+  const inner = [[0.001, ap * 0.62], [ap * 0.45, ap * 0.56], [ap * 0.75, ap * 0.4], [ap * 0.92, ap * 0.2], [ap * 0.99, 0], [ap * 0.99, -0.6]];
+  bag.add(W, lathe(inner, 32, null, cx, y + Hw, cz));
+  bag.add('marble_dark', lathe([[ap * 0.99, -0.62], [ap * 0.99, -0.02], [ap * 0.985, -0.02], [ap * 0.985, -0.62]], 32, null, cx, y + Hw, cz));
+  const ys = y + Hw + ap * 0.62 - 0.03;
+  bag.add('gilt_bronze', disc(0.9, ys, 24, cx, cz, false));
+  for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2, r0 = 0.9, r1 = k % 2 ? 2.2 : 3.0; const p0 = [cx + Math.cos(a) * r0, cz + Math.sin(a) * r0], p1 = [cx + Math.cos(a) * r1, cz + Math.sin(a) * r1], yy = (r) => y + Hw + ap * 0.62 - 0.05 - (r / ap) ** 2 * ap * 0.5; bag.add(k % 2 ? 'stucco_saffron' : 'gilt_bronze', rod([p0[0], yy(r0), p0[1]], [p1[0], yy(r1), p1[1]], 0.07, 4)); }
+  // the floor: an octagon of white in dark borders
+  bag.add('marble_dark', disc(rc, 0, 8).rotateY(Math.PI / 8).translate(cx, y + 0.03, cz));
+  bag.add('marble_floor', disc(rc * (ap - 0.45) / ap, 0, 8).rotateY(Math.PI / 8).translate(cx, y + 0.05, cz));
+  // the vestibule from the great iwan's door to the chamber
+  const z0 = cz + ap + th, z1 = cz + A - 6.4 - 0.2;
+  for (const sg of [-1, 1]) { bag.add(W, box(cx + sg * 2.5 - (sg > 0 ? 0 : 0.6), y, z0, cx + sg * 2.5 + (sg > 0 ? 0.6 : 0), y + 9.4, z1)); col.rect([Math.min(cx + sg * 2.5, cx + sg * 3.1), z0, Math.max(cx + sg * 2.5, cx + sg * 3.1), z1], y, y + 9.4); }
+  bag.add(W, box(cx - 2.5, y + 9, z0, cx + 2.5, y + 9.4, z1));
+  for (let zz = z0 + 1; zz < z1 - 0.5; zz += 1.8) bag.add('marble_dark', box(cx - 2.5, y + 8.85, zz - 0.1, cx + 2.5, y + 9, zz + 0.1));
+  for (const sg of [-1, 1]) for (let zz = z0 + 0.6; zz < z1 - 1; zz += 2.6) { bag.add('marble_dark', box(cx + sg * 2.5 - (sg > 0 ? 0.06 : 0), y, zz, cx + sg * 2.5 + (sg < 0 ? 0.06 : 0), y + 1.6, zz + 2.2)); bag.add(W, box(cx + sg * 2.5 - (sg > 0 ? 0.1 : 0), y + 0.08, zz + 0.08, cx + sg * 2.5 + (sg < 0 ? 0.1 : 0), y + 1.52, zz + 2.12)); }
+  // the screen: an octagon of three pierced panels a side between posts, one panel open on the south
+  const sa = 3.6, sr = sa / Math.cos(Math.PI / 8), sh = 1.9;
+  const sv = (k) => { const a = Math.PI / 8 + k * Math.PI / 4 - Math.PI / 2; return [cx + Math.cos(a) * sr, cz + Math.sin(a) * sr]; };
+  for (let k = 0; k < 8; k++) {
+    const a = sv(k), b = sv(k + 1), L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, isS = (a[1] + b[1]) / 2 - cz > sa * 0.9;
+    for (let j = 0; j <= 3; j++) { const p = [a[0] + ux * L * j / 3, a[1] + uz * L * j / 3]; bag.add(W, lathe([[0.12, 0], [0.12, 0.2], [0.08, 0.3], [0.08, sh - 0.15], [0.12, sh], [0.06, sh + 0.25], [0.001, sh + 0.4]], 8, null, p[0], y, p[1])); }
+    for (let j = 0; j < 3; j++) {
+      const s0 = L * j / 3 + 0.1, s1 = L * (j + 1) / 3 - 0.1, P2 = (s2) => [a[0] + ux * s2, a[1] + uz * s2];
+      const rail = (ya, yb, m) => { const t = []; const p0 = P2(s0), p1 = P2(s1); beamTris(t, [p0[0], ya, p0[1]], [p1[0], ya, p1[1]], 0.06, yb - ya); bag.add(m, fromTriangles(t)); };
+      rail(y, y + 0.22, W); rail(sh + y - 0.22, sh + y, W); rail(sh + y - 0.17, sh + y - 0.12, 'stucco_rose');
+      if (isS && j === 1) { const p0 = P2(s0), p1 = P2(s1); col.segment(P2(0.05), p0, 0.12, y, y + sh); void p1; continue; }
+      const p0 = P2(s0), p1 = P2(s1); col.segment(p0, p1, 0.12, y, y + sh);
+      // the piercing: a lattice of small hexagons, here a fine grid of slender bars
+      const nb = 9;
+      for (let g = 1; g < nb; g++) { const q = P2(s0 + (s1 - s0) * g / nb), t = []; beamTris(t, [q[0] - ux * 0.02, y + 0.22, q[1] - uz * 0.02], [q[0] + ux * 0.02, y + 0.22, q[1] + uz * 0.02], 0.03, sh - 0.44); bag.add(W, fromTriangles(t)); }
+      for (let g = 1; g < 8; g++) rail(y + 0.22 + g * (sh - 0.44) / 8 - 0.02, y + 0.22 + g * (sh - 0.44) / 8 + 0.02, W);
+      for (const [dx, dy, m] of [[0.25, 0.5, 'stucco_leaf'], [0.5, 0.75, 'stucco_rose'], [0.75, 0.5, 'stucco_saffron']]) { const q = P2(s0 + (s1 - s0) * dx), t = []; beamTris(t, [q[0] - ux * 0.045, y + 0.22 + (sh - 0.44) * dy - 0.045, q[1] - uz * 0.045], [q[0] + ux * 0.045, y + 0.22 + (sh - 0.44) * dy - 0.045, q[1] + uz * 0.045], 0.04, 0.09); bag.add(m, fromTriangles(t)); }
+    }
+  }
+  // the cenotaph of Mumtaz Mahal at the very centre, on its platform, inlaid with inscriptions and flowers
+  bag.add(W, box(cx - 1.25, y, cz - 2.1, cx + 1.25, y + 0.35, cz + 2.1));
+  bag.add('marble_dark', box(cx - 1.27, y + 0.2, cz - 2.12, cx + 1.27, y + 0.25, cz + 2.12));
+  bag.add(W, box(cx - 0.85, y + 0.35, cz - 1.55, cx + 0.85, y + 0.75, cz + 1.55));
+  bag.add(W, frustum([cx - 0.6, cz - 1.25, cx + 0.6, cz + 1.25], y + 0.75, y + 1.45, 0.1, 0.1, 0.1, 0.1));
+  bag.add(W, frustum([cx - 0.5, cz - 1.15, cx + 0.5, cz + 1.15], y + 1.45, y + 1.65, 0.3, 0.3, 0.05, 0.05));
+  for (const yy of [y + 0.5, y + 1.0]) for (const sg of [-1, 1]) { bag.add('marble_dark', box(cx + sg * (yy < y + 0.6 ? 0.86 : 0.57) - 0.01, yy, cz - (yy < y + 0.6 ? 1.4 : 1.1), cx + sg * (yy < y + 0.6 ? 0.86 : 0.57) + 0.01, yy + 0.06, cz + (yy < y + 0.6 ? 1.4 : 1.1))); }
+  for (let j = 0; j < 7; j++) for (const sg of [-1, 1]) bag.add(['stucco_rose', 'stucco_leaf', 'stucco_saffron'][j % 3], box(cx + sg * 0.86 - 0.012, y + 0.6, cz - 1.2 + j * 0.4, cx + sg * 0.86 + 0.012, y + 0.68, cz - 1.12 + j * 0.4));
+  col.rect([cx - 1.25, cz - 2.1, cx + 1.25, cz + 2.1], y, y + 1.65);
 }
 
 /** red_hall: the mosque or its twin (the jawab) { rect, y, h, front, domes: 3 }: a hall of red sandstone with arched openings, three white domes. */

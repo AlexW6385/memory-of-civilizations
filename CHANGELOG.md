@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.18 — Interiors: the Taj Mahal's tomb chamber (2026-11-05)
+- The Taj Mahal can be entered by the south iwan's door and a vestibule into the tomb chamber: an octagon of 7.3 m sides, each face with two storeys of arched niches, the axial ones glazed with light behind marble lattices (jali); carved dado panels with flower bosses, thin dark frames, inlay of red, green, gold and blue stones in the spandrels; a ring to the inner dome with the sun at its crown; an octagonal floor; at the centre the marble screen of 1643, three pierced panels a side between posts, one open on the south, round the cenotaph of Mumtaz Mahal on its platform (Shah Jahan's came in 1666, so it is not shown). Dossier §4 extended, sourced.
+
 ## v9.17 — Interiors: the court and iwans of Sultan Hasan (2026-11-05)
 - Sultan Hasan's madrasa can be entered: a corridor from the portal (its bronze doors open) through the north range to the court's corner. Round the court, four iwans cut into the block, the qibla iwan the greatest, each under a pointed barrel vault opening on the court through an arch rimmed in red and black voussoirs, with glass lamps on chains all at one height. The qibla iwan has a dado of white, rose and dark marble panels, the stucco Kufic band at the springing, the marble mihrab (niche, colonnettes, pointed hood), windows in bronze grilles either side and an oculus above, the bronze doors to the tomb, the marble minbar with its stair and domed canopy, and the dikka on eight columns in front. In the court: the octagonal basin, the madrasas' doors in the corners, a cornice round the top. The solid block is now carved by void boxes (carve()). Dossier §4 extended, sourced.
 
