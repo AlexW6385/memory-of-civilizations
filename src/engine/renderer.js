@@ -157,7 +157,9 @@ export class Renderer {
       const w = max(float(1).sub(abs(z.sub(zc)).div(tol)), 0).add(i === 0 && j === 0 ? 1e-3 : 0);
       sum = sum.add(aoTex.sample(q).r.mul(w)); wsum = wsum.add(w);
     }
-    return sum.div(wsum);
+    // far off the occlusion's radius (0.9 m) is under a pixel, and what it finds there is only the
+    // depth's own error darkening open ground: faded out with distance
+    return mix(sum.div(wsum), 1, smoothstep(50, 140, zc.negate()));
   }
 
   /**
