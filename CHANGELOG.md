@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.10 — Arriving at the best view (2026-11-05)
+- Travelling to a settlement from the map now sets you down where its landmark is seen best: the Taj Mahal down its water channel, Angkor Wat at the end of its causeway, the Ishtar Gate down the Processional Way, the Opera House across the cove with the Harbour Bridge behind, the Phoenix Hall across its pond — chosen by eye for every one of the 57 settlements, instead of a spot worked out automatically that often stood too close, behind a wall or facing a blank side.
+
 ## v9.09 — Borobudur's reliefs and niche Buddhas (2026-11-05)
 - Borobudur: the terrace walls carry their narrative reliefs — one or two registers of framed panels along every straight side, figures standing out in each — and the niches in the upper part of the walls hold seated Buddhas instead of standing empty.
 

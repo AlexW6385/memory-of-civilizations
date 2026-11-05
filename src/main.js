@@ -20,6 +20,7 @@ import { climateAt } from './planet/land.js';
 import { PLANET_RADIUS, BLEND } from './planet/relief.js';
 import { REGION } from './world/regions.js';
 import { openClimate } from './planet/climates.js';
+import { ARRIVALS } from './planet/arrivals.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -239,6 +240,18 @@ async function main() {
     controls.setPose(lx, 1e4, lz, 0, 0);
     await site.load();
     inFrame();
+    // the settlement's chosen arrival (src/planet/arrivals.js): exactly there, facing its view
+    const A = ARRIVALS[site.id];
+    if (A) {
+      const [ax, ay, az, ayaw, apitch] = A, feet = () => (ay ?? world.collide.terrain(ax, az));
+      controls.setPose(ax, feet() + 0.02, az, ayaw, apitch);
+      world.place(R.camera);
+      await arrive(report);
+      inFrame();
+      controls.setPose(ax, feet() + 0.01, az, ayaw, apitch);
+      world.place(R.camera);
+      return;
+    }
     const part = site.parts.find((p) => p.plan === plan);
     let top = (plan.base || 0) + (plan.bakeTop || 15);
     if (part) for (const { geometry } of part.built.parts) top = Math.max(top, Math.min(geometry.boundingBox.max.y, (plan.base || 0) + 60));
