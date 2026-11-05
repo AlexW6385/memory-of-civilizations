@@ -5,7 +5,7 @@
 // windows; steep roofs and a slender spire. Planar walls (with pointed arches and round holes)
 // come from the shared Byzantine vocabulary.
 
-import { BufferGeometry, Float32BufferAttribute } from 'three';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { byzantineElements, planarWall, archHalf, archRise } from '../byzantine/index.js';

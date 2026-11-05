@@ -6,7 +6,7 @@
 
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
-import { Matrix4 } from 'three';
+import { Matrix4 } from '../../core/three.js';
 import '../qing/index.js';
 
 const K = 'kokowai', P = 'palisade', TH = 'raupo';

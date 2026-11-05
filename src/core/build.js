@@ -4,7 +4,7 @@
 // Plan coordinates are local to the building: +x east, +y up, +z south. The plan's
 // `origin` [x, z] places it in the world; `yaw` (multiple of 90°) turns it.
 
-import { Matrix4, BufferGeometry, Float32BufferAttribute } from 'three';
+import { Matrix4, BufferGeometry, Float32BufferAttribute } from './three.js';
 import { GeoBag, box, frustum, fromTriangles, quad, lathe } from './geom.js';
 
 export const STYLES = {};
@@ -59,12 +59,12 @@ export async function buildPlanAsync(plan, budget = 4, opts = {}) {
   return finishBuild(ctx);
 }
 
-function startBuild(plan, { instancing = false } = {}) {
+function startBuild(plan, { instancing = false, detail = false } = {}) {
   const style = STYLES[plan.style];
   if (!style) throw new Error(`style ${plan.style} not registered`);
   // the life of the streets is gathered settlement-wide by the viewer (src/engine/life-instances.js),
   // so every placed piece of it is instanced however few there are in one tile
-  return { bag: new GeoBag({ instancing, always: instancing && plan.style === 'life' }), col: new Colliders(), lights: [], style, plan };
+  return { bag: new GeoBag({ instancing, detail, always: instancing && plan.style === 'life' }), col: new Colliders(), lights: [], style, plan };
 }
 function buildElement(el, ctx) {
   const fn = GENERIC[el.t] || ctx.style.elements?.[el.t];

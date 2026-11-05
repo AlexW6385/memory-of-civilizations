@@ -4,7 +4,7 @@
 // tiers, with descending cantilevers; deep eaves of rafters; a hipped roof of grey tiles on a
 // concave profile, its corners turned up, the ridge ending in chiwei; a stone-faced platform.
 
-import { BufferGeometry, Float32BufferAttribute, Matrix4, Vector3 } from 'three';
+import { BufferGeometry, Float32BufferAttribute, Matrix4, Vector3 } from '../../core/three.js';
 import { registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import { byzantineElements } from '../byzantine/index.js';

@@ -6,7 +6,7 @@
 
 import { registerStyle } from '../core/build.js';
 import { box, lathe, fromTriangles } from '../core/geom.js';
-import { Matrix4, Quaternion, Vector3, Color } from 'three';
+import { Matrix4, Quaternion, Vector3, Color } from '../core/three.js';
 import { MATERIALS } from '../core/palette.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }

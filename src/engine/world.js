@@ -18,6 +18,7 @@ import { material, flameMaterial } from './materials.js';
 import { MATERIALS } from '../core/palette.js';
 import { releaseAfterUpload } from './release.js';
 import { LifeInstances } from './life-instances.js';
+import { Builder } from './builder.js';
 import { ENV } from './env.js';
 import { loadLand } from '../planet/land.js';
 import { BUILT, BUILT_BY_ID, initRelief, surface, groundInFrame, seaInFrame, PLANET_RADIUS as R, BLEND } from '../planet/relief.js';
@@ -35,6 +36,8 @@ export const MAX_BUILT = 4;
  * Materials whose shadow cannot be seen, or that should let the light through: window voids (dark
  * panels in the wall's thickness), clear glass, water, lamps. Fewer things to draw in each cascade.
  */
+/** Fine detail is drawn within this distance (m) of its part's bounds, and casts shadows within the second. */
+const DETAIL_REACH = 160, DETAIL_SHADOW = 50;
 const NO_SHADOW = new Set(['water', 'glass_outer', 'opening']);
 const castsShadow = (mat) => !NO_SHADOW.has(mat) && MATERIALS[mat]?.kind !== 'glow' && MATERIALS[mat]?.kind !== 'water';
 
@@ -116,12 +119,41 @@ class Settlement {
         // a settlement of its own: its landmarks, then its townscape (src/settlements/<id>/)
         const mod = await MODULES[S.id]();
         this.music = mod.music;
-        const town = await mod.town();
-        if (stale()) return this;
-        // the landmarks weigh more than a block of houses
-        this.expected = mod.landmarks.length * 3 + town.length;
-        for (const p of mod.landmarks) { if (stale()) return this; await this.addPart(p.plan.id, p.plan, p.music, gen); this.done += 2; }
-        for (const plan of town) { if (stale()) return this; await this.addPart(plan.id, plan, null, gen); }
+        const B = this.world.builder;
+        let inWorker = false;
+        if (B?.ok) {
+          // laid out and built in a worker (src/engine/build-worker.js); the main thread only makes
+          // the meshes. A failure falls back to building here, from what is not yet built.
+          let from = 0;
+          const job = B.settlement(S.id,
+            (count, nl) => { this.expected = nl * 3 + (count - nl); },
+            async (i, header, built) => {
+              if (stale()) return;
+              const L = mod.landmarks[i];
+              await this.addPart((L ? L.plan : header).id, L ? L.plan : header, L ? L.music : null, gen, built);
+              if (L) this.done += 2;
+              from = i + 1;
+            });
+          this.job = job;
+          try { await job.done; inWorker = true; } catch (e) { console.warn('building', S.id, 'in the page:', e.message); }
+          this.job = null;
+          if (stale()) return this;
+          if (!inWorker) this.skip = from;
+        }
+        if (!inWorker) {
+          const town = await mod.town();
+          if (stale()) return this;
+          // the landmarks weigh more than a block of houses
+          this.expected = mod.landmarks.length * 3 + town.length;
+          const all = [...mod.landmarks.map((p) => [p.plan, p.music]), ...town.map((p) => [p, null])];
+          for (let i = this.skip || 0; i < all.length; i++) {
+            if (stale()) return this;
+            const [plan, music] = all[i];
+            await this.addPart(plan.id, plan, music, gen);
+            if (i < mod.landmarks.length) this.done += 2;
+          }
+          this.skip = 0;
+        }
       }
       // let go of while it was being built (the visitor moved away): unload() has cleaned up
       if (stale()) return this;
@@ -133,22 +165,23 @@ class Settlement {
     return this.loading;
   }
 
-  async addPart(id, plan, music, gen = this.gen) {
-    const built = await buildPlanAsync(plan, undefined, { instancing: true });
+  async addPart(id, plan, music, gen = this.gen, prebuilt = null) {
+    const built = prebuilt ?? await buildPlanAsync(plan, undefined, { instancing: true, detail: true });
     if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
     const group = new THREE.Group();
     group.name = plan.id;
-    for (const { mat, geometry } of built.parts) {
+    for (const { mat, geometry, detail } of built.parts) {
       const m = new THREE.Mesh(geometry, material(mat));
       m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
+      if (detail) m.userData.detail = true;
       m.name = `${plan.id}:${mat}`;
       group.add(m);
     }
     // repeated pieces: one prototype, a matrix per copy (src/core/geom.js, GeoBag); the life of the
     // streets is gathered settlement-wide once all its tiles are built (buildLife)
     const lifeList = plan.style === 'life' ? built.instanced : [];
-    for (const { mat, geometry, matrices, colors } of plan.style === 'life' ? [] : built.instanced) {
+    for (const { mat, geometry, matrices, colors, detail } of plan.style === 'life' ? [] : built.instanced) {
       const m = new THREE.InstancedMesh(geometry, material(mat), matrices.length / 16);
       m.instanceMatrix.array.set(matrices);
       m.instanceMatrix.needsUpdate = true;
@@ -157,6 +190,7 @@ class Settlement {
       m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
       m.name = `${plan.id}:${mat}:inst`;
+      if (detail) m.userData.detail = true;
       group.add(m);
     }
     if (built.lights.length) {
@@ -169,10 +203,11 @@ class Settlement {
     this.group.add(group);
     // the upper surfaces, to land and walk on (roofs, wall tops)
     if (!plan.nocollide) {
-      built.colliders.tops = await topField(built.instanced.length ? flatParts(built) : built.parts);
+      if (!prebuilt) built.colliders.tops = await topField(built.instanced.length ? flatParts(built) : built.parts);
       this.collide.add(built.colliders);
     }
-    const rec = { id, plan, music, group, built, settlement: this };
+    const rec = { id, plan, music, group, built, settlement: this, detail: group.children.filter((o) => o.userData.detail) };
+    for (const o of rec.detail) { o.visible = false; o.castShadow = false; }
     if (!plan.feature) try { rec.gi = await this.world.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
     // unloaded while the collision or the light was being made: unload() already cleared the group
     if (gen !== this.gen) { this.world.r.gi.release?.(plan.id); return null; }
@@ -236,6 +271,7 @@ class Settlement {
   unload() {
     if (this.state === 'idle') return;
     this.gen++;                            // a load still running stops adding parts
+    this.job?.cancel(); this.job = null;
     this.world.scene.remove(this.group);
     this.group.traverse((o) => { if (o.isInstancedMesh) o.dispose(); else if (o.geometry) o.geometry.dispose(); });
     this.group.clear();
@@ -260,6 +296,7 @@ export class World {
   }
 
   async init() {
+    this.builder = new Builder(2);
     const land = await loadLand('data/planet/land.bin');
     initRelief();
     this.planet = new THREE.Group();
@@ -491,6 +528,33 @@ export class World {
         }
       }
     }
+    // fine detail (pieces under 0.4 m, src/core/geom.js): drawn within DETAIL_REACH of the part's
+    // bounds, casting shadows within DETAIL_SHADOW; indoors, only the building one is in casts
+    if (!this._nextD || now > this._nextD) {
+      this._nextD = now + 250;
+      const inside = this.indoorsIn;
+      for (const s of this.settlements) {
+        if (s.state === 'idle' || !s.parts.length) continue;
+        const L = toLocal(s.S.frame, camP);
+        for (const rec of s.parts) {
+          for (const o of rec.detail) {
+            const b = o.boundingSphere || o.geometry.boundingSphere;
+            const d = Math.hypot(L[0] - b.center.x, L[1] - b.center.y, L[2] - b.center.z) - b.radius;
+            const vis = d < DETAIL_REACH, cast = vis && d < DETAIL_SHADOW && castsShadow(o.material.name);
+            if (o.visible !== vis) o.visible = vis;
+            if (o.castShadow !== cast) o.castShadow = cast;
+          }
+          // indoors in a landmark: the other parts' shadows cannot reach in (their light comes
+          // through the building's own openings, which its own walls frame)
+          const quiet = inside && rec !== inside && rec.settlement === inside.settlement;
+          if (rec.quiet !== quiet) {
+            rec.quiet = quiet;
+            rec.group.traverse((o) => { if (o.isMesh && !o.userData.detail) o.castShadow = quiet ? false : (rec.plan.style === 'life' ? rec.cast !== false : castsShadow(o.material.name)); });
+            if (s.life) for (const L2 of s.life.meshes) L2.near.castShadow = !quiet && castsShadow(L2.near.material.name);
+          }
+        }
+      }
+    }
     // the life of the streets: the copies within reach, chosen four times a second
     if (!this._nextL || now > this._nextL) {
       this._nextL = now + 250;
@@ -502,6 +566,7 @@ export class World {
       }
     }
     const here = this.locate(camera.position.x, camera.position.y, camera.position.z);
+    this.indoorsIn = here.room && here.room.kind !== 'open' && here.distance === 0 ? here.building : null;
     if (here.building?.gi) this.r.gi.use(here.building.gi); else this.r.gi.clear?.();
     return here;
   }

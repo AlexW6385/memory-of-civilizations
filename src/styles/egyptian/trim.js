@@ -2,7 +2,7 @@
 // cornice, and the cavetto ("gorge") cornice that crowns walls, pylons, gates and shrines.
 // Door frames: projecting jambs and a lintel crowned by its own small cornice.
 
-import { Matrix4 } from 'three';
+import { Matrix4 } from '../../core/three.js';
 import { sweep, rod, box, lathe, quad, fromTriangles } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
 

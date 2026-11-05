@@ -1,6 +1,6 @@
 // The Roman architectural vocabulary (Imperial, 2nd century AD): the Corinthian order, the
 // entablature with modillions, round walls with niches, the coffered dome.
-import { Matrix4 } from 'three';
+import { Matrix4 } from '../../core/three.js';
 import { registerStyle, orientedBox } from '../../core/build.js';
 import { box, lathe, disc, fromTriangles, quad, orientOutward, GeoBag } from '../../core/geom.js';
 import { merge } from '../greek/columns.js';

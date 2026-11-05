@@ -2,7 +2,7 @@
 // cedar flagpoles, granite falcons of Horus, the granite naos, barque and barque stand,
 // altars, cedar door leaves, date palms.
 
-import { Matrix4, BufferGeometry, Float32BufferAttribute } from 'three';
+import { Matrix4, BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { box, frustum, lathe, disc, rod, place, fromTriangles, quad } from '../../core/geom.js';
 import { trim, wingedDisc } from './trim.js';
 

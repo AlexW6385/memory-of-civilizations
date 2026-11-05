@@ -4,7 +4,7 @@
 
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
-import { Matrix4 } from 'three';
+import { Matrix4 } from '../../core/three.js';
 import '../qing/index.js';
 
 const SAR = 'sandstone', BLUE = 'basalt';

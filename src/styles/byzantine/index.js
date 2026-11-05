@@ -4,7 +4,7 @@
 // horizontal bands so that every curved edge follows its circle; columns with Attic bases,
 // monolithic shafts and basket capitals under an impost block.
 
-import { BufferGeometry, Float32BufferAttribute } from 'three';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { registerStyle } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles, orientOutward, rod, disc } from '../../core/geom.js';
 import { doors } from '../greek/objects.js';

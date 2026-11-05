@@ -4,7 +4,7 @@
 // Every primitive returns a non-indexed BufferGeometry with `position` and `normal` only.
 // Materials are procedural and work from world position, so no UVs are needed.
 
-import { BufferGeometry, BufferAttribute, Float32BufferAttribute, Vector3, Matrix4 } from 'three';
+import { BufferGeometry, BufferAttribute, Float32BufferAttribute, Vector3, Matrix4 } from './three.js';
 
 const _a = new Vector3(), _b = new Vector3(), _c = new Vector3(), _n = new Vector3();
 
@@ -290,9 +290,39 @@ function prototypeOf(g, sh, d) {
   return { geometry: m, flat };
 }
 
+/** Pieces smaller than this (m, their box's largest side) are fine detail, drawn only near. */
+export const DETAIL_SIZE = 0.4;
+function pieceSize(g) {
+  const P = g.attributes.position.array;
+  let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
+  for (let i = 0; i < P.length; i += 3) {
+    const x = P[i], y = P[i + 1], z = P[i + 2];
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z;
+  }
+  return Math.max(x1 - x0, y1 - y0, z1 - z0);
+}
+/** Is an instanced prototype, at the scale of its first copy, fine detail? */
+function isSmall(geometry, M) {
+  const b = geometry.boundingBox, s = Math.max(Math.hypot(M[0], M[1], M[2]), Math.hypot(M[4], M[5], M[6]), Math.hypot(M[8], M[9], M[10]));
+  return Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z) * s < DETAIL_SIZE;
+}
+function mergeInto(mat, list, d, detail) {
+  let count = 0;
+  for (const g of list) count += g.attributes.position.count;
+  const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3);
+  let o = 0;
+  for (let i = 0; i < list.length; i++) { const g = list[i]; pos.set(g.attributes.position.array, o); nor.set(g.attributes.normal.array, o); o += g.attributes.position.array.length; list[i] = null; }
+  if (d) for (let k = 0; k < pos.length; k++) pos[k] += nor[k] * d;
+  const m = new BufferGeometry();
+  m.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  m.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  m.computeBoundingBox(); m.computeBoundingSphere();
+  return [{ mat, geometry: m, detail }];
+}
+
 export class GeoBag {
   /** instancing: find repeated pieces (the viewer); without it every piece is merged (the tools). */
-  constructor({ instancing = false, always = false } = {}) { this.parts = new Map(); this.instancing = instancing; this.always = always; this.explicit = new Map(); }
+  constructor({ instancing = false, always = false, detail = false } = {}) { this.parts = new Map(); this.instancing = instancing; this.always = always; this.detail = detail; this.explicit = new Map(); }
   /**
    * A piece built at its object's origin and placed by a matrix (rotation, uniform scale,
    * translation): the objects of use and the figures (src/objects/index.js). Pieces of the same
@@ -343,7 +373,7 @@ export class GeoBag {
         const colors = e.items.some((it) => it.color) ? new Float32Array(k * 3).fill(1) : null;
         const reals = e.items.map((it) => it.real);
         e.items.forEach((it, i) => { matrices.set(it.m, i * 16); reach[i] = it.reach; if (it.color && colors) colors.set(it.color, i * 3); });
-        this.instanced.push({ mat: e.mat, key: e.key, geometry, matrices, colors, reach, reals });
+        this.instanced.push({ mat: e.mat, key: e.key, geometry, matrices, colors, reach, reals, detail: this.detail && isSmall(geometry, matrices) });
       }
     }
     this.explicit.clear();
@@ -384,12 +414,20 @@ export class GeoBag {
             }
             M[o] = sx; M[o + 5] = sy; M[o + 10] = sz; M[o + 12] = tx; M[o + 13] = ty; M[o + 14] = tz; M[o + 15] = 1;
           });
-          this.instanced.push({ mat, geometry, matrices: M });
+          this.instanced.push({ mat, geometry, matrices: M, detail: this.detail && isSmall(geometry, M) });
           for (const i of idx) take.add(i);
         }
         if (take.size) list = all.filter((_, i) => !take.has(i));
       }
       if (!list.length) continue;
+      // with `detail` (the viewer), the small pieces of a material (under DETAIL_SIZE) are a mesh of
+      // their own, which the world draws only near (src/engine/world.js)
+      if (this.detail) {
+        const small = [], big = [];
+        for (const g of list) (pieceSize(g) < DETAIL_SIZE ? small : big).push(g);
+        if (small.length && big.length) { res.push(...mergeInto(mat, small, d, true)); list = big; }
+        else if (small.length) { res.push(...mergeInto(mat, small, d, true)); continue; }
+      }
       let count = 0;
       for (const g of list) count += g.attributes.position.count;
       const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3);

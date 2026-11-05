@@ -6,7 +6,7 @@
 // three white domes; the great gate; walls with octagonal towers; the charbagh garden with its
 // raised channels and the central pool; the town of flat-roofed houses with balconies (jharokha).
 
-import { Shape, Path, ExtrudeGeometry, Matrix4 } from 'three';
+import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, frustum } from '../../core/geom.js';
 import '../qing/index.js';

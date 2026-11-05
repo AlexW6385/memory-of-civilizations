@@ -7,7 +7,7 @@
 // and a stone lantern in the garden. Bracket sets and gabled roofs come from the Chinese style,
 // from which this architecture descends.
 
-import { BufferGeometry, Float32BufferAttribute } from 'three';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { byzantineElements } from '../byzantine/index.js';

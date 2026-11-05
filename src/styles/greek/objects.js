@@ -1,7 +1,7 @@
 // Greek fittings and sculpture: door frames and bronze-clad doors, the shallow water basin
 // before the cult statue, and the Athena Parthenos of Pheidias (docs/buildings/parthenon.md §8).
 
-import { Matrix4 } from 'three';
+import { Matrix4 } from '../../core/three.js';
 import { box, lathe, rod, disc, place } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
 import { merge } from './columns.js';

@@ -8,7 +8,7 @@
 // Pieces may be turned (the Shah Mosque faces Mecca, 45° off the square), so most take points a, b
 // rather than axis-aligned rectangles.
 
-import { Shape, Path, ExtrudeGeometry } from 'three';
+import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';

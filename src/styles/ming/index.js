@@ -8,7 +8,7 @@
 // Taihu rock along the shores and piled into hills; canal houses of one or two storeys on granite
 // plinths; boats with bamboo-mat awnings.
 
-import { BufferGeometry, Float32BufferAttribute, Shape, Path, ExtrudeGeometry, Matrix4 } from 'three';
+import { BufferGeometry, Float32BufferAttribute, Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import { registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles, frustum, orientOutward } from '../../core/geom.js';
 

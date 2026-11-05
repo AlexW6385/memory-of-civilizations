@@ -51,7 +51,7 @@ export async function measureSite(id) {
   const S = { id, plans: plans.length, verts: 0, protoVerts: 0, instances: 0, tris: 0, meshes: 0, bytes: 0, ms: 0 };
   for (const plan of plans) {
     const t0 = performance.now();
-    const b = buildPlan(plan, { instancing: true });
+    const b = buildPlan(plan, { instancing: true, detail: true });
     S.ms += performance.now() - t0;
     const c = countBuilt(b, plan.style === 'life' ? life : null);
     for (const k of ['verts', 'protoVerts', 'instances', 'tris', 'meshes', 'bytes']) S[k] += c[k];

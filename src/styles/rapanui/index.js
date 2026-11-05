@@ -4,7 +4,7 @@
 // quarry and standing buried to the shoulders on its slopes; boat-shaped thatched houses (hare
 // paenga) on curbs of dressed basalt; stone chicken houses (hare moa); round garden walls (manavai).
 
-import { Matrix4 } from 'three';
+import { Matrix4 } from '../../core/three.js';
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import '../qing/index.js';

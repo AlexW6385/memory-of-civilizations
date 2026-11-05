@@ -9,7 +9,7 @@
 // Ionic: Attic base (torus, scotia, torus), 24 flutes separated by fillets, a capital with
 // two volutes joined by the cushion (pulvinus) at the sides, and a thin abacus.
 
-import { Matrix4, BufferGeometry, Float32BufferAttribute } from 'three';
+import { Matrix4, BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { lathe, disc, box, fromTriangles, quad } from '../../core/geom.js';
 
 const TAU = Math.PI * 2;
