@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.89 — Djenné's market and toron (2026-11-05)
+- Djenné: the market's stalls are real stalls — poles a little out of true under a sagging mat roof, a low table of sticks with its mat, calabashes, pots, baskets and heaps of grain and kola on it, sacks and a water jar beside — instead of a bare block; the mosque's walls bristle with toron, three palm sticks to a bay in every row, and the three towers carry them on all three outer faces, following their batter. Lalibela's rim view moved to the corner of Bet Giyorgis' pit.
+
 ## v8.88 — Nara's doors and windows (2026-11-05)
 - Nara: the halls, gates and galleries have the older doors and windows — board doors in two leaves with rows of bronze studs, and windows of upright square bars (renji) before a dark opening — instead of Ming-style lattice; the Great Buddha Hall's front no longer reads as a wall of lattice.
 

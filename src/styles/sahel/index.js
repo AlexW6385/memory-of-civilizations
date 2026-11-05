@@ -33,12 +33,14 @@ function bancoWall(bag, col, a, b, y, h, th, opts = {}) {
     // the pilaster, battered: wider at its foot
     taper(bag, x, z, y, y + h, pw * 0.8, pw * 0.6, ph);
     // toron: palm sticks standing out in rows
-    if (opts.toron !== false) for (let r = 1; r <= Math.floor(h / 1.8); r++) if (rand() < 0.8) {
-      const ty = y + r * 1.8 - 0.4, tx = a[0] + ux * (s + step * 0.5) + nx * (th / 2) * out, tz = a[1] + uz * (s + step * 0.5) + nz * (th / 2) * out;
-      if (s + step * 0.5 > L) continue;
+    if (opts.toron !== false) {
       const tt = [];
-      beamTris(tt, [tx, ty, tz], [tx + nx * 0.7 * out, ty, tz + nz * 0.7 * out], 0.05, 0.08);
-      bag.add('timber', fromTriangles(tt));
+      for (let r = 1; r <= Math.floor(h / 1.5); r++) for (const f of [0.25, 0.5, 0.75]) {
+        if (rand() < 0.15 || s + step * f > L) continue;
+        const ty = y + r * 1.5 - 0.35 + (rand() - 0.5) * 0.12, tx = a[0] + ux * (s + step * f) + nx * (th / 2) * out, tz = a[1] + uz * (s + step * f) + nz * (th / 2) * out, len = 0.75 + rand() * 0.35;
+        beamTris(tt, [tx, ty, tz], [tx + nx * len * out, ty + 0.03, tz + nz * len * out], 0.06, 0.1);
+      }
+      if (tt.length) bag.add('timber', fromTriangles(tt));
     }
   }
 }
@@ -85,11 +87,16 @@ function greatMosque(el, { bag, col }) {
       bag.add(B, lathe([[0.55, 0], [0.4, ph * 0.7], [0.08, ph]], 8, null, px, py + th, pz));
       bag.add('tura_limestone', lathe([[0.001, 0], [0.18, 0.12], [0.2, 0.28], [0.001, 0.48]], 8, null, px, py + th + ph, pz));     // the ostrich egg
     }
-    for (let r = 1; r < 8; r++) for (let k = -1; k <= 1; k++) {
-      const tt = [];
-      beamTris(tt, [x1 + 1.6 + tw * 1.15, py + r * 2, zz + k * tw * 0.5], [x1 + 1.6 + tw * 1.15 + 0.8, py + r * 2, zz + k * tw * 0.5], 0.06, 0.09);
-      bag.add('timber', fromTriangles(tt));
+    // toron on the tower's three outer faces, following the batter
+    const tt = [];
+    for (let r = 1; r < Math.floor(th / 1.6); r++) {
+      const yy = py + r * 1.6, f = tw * (1.2 - 0.2 * (yy - py) / th), tx = x1 + 1.6;
+      for (const k of [-0.66, 0, 0.66]) {
+        beamTris(tt, [tx + f - 0.05, yy, zz + k * f], [tx + f + 0.85, yy + 0.03, zz + k * f], 0.06, 0.1);
+        for (const sz of [-1, 1]) beamTris(tt, [tx + k * f, yy, zz + sz * (f - 0.05)], [tx + k * f, yy + 0.03, zz + sz * (f + 0.85)], 0.06, 0.1);
+      }
     }
+    bag.add('timber', fromTriangles(tt));
     col.rect([x1 + 1.6 - tw * 1.2, zz - tw * 1.2, x1 + 1.6 + tw * 1.2, zz + tw * 1.2], py, py + th);
   }
   // the north entrance towers
@@ -140,12 +147,41 @@ function sahelHouse(el, { bag, col }) {
 /** sahel_wall: a plain banco wall (courts, the market) { a, b, h }. */
 function sahelWall(el, { bag, col }) { bancoWall(bag, col, el.a, el.b, el.y ?? 0, el.h ?? 2.6, 0.45, { step: 4, ph: 0.6, toron: false, pw: 0.4, pd: 0.3 }); }
 
-/** market_stall: a stall of the market { c, s }: four poles and a mat roof, goods on a low table. */
+/** market_stall: a stall of the market { c, s }: four poles and a sagging mat roof, a low table of
+ * sticks with its mat, goods laid out on it — calabashes, pots, baskets, heaps of grain and kola —
+ * and sacks and jars on the ground beside it. */
 function marketStall(el, { bag }) {
-  const [x, z] = el.c, s = el.s ?? 1.6;
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bag.add('timber', box(x + dx * s - 0.05, 0, z + dz * s - 0.05, x + dx * s + 0.05, 2.2, z + dz * s + 0.05));
-  bag.add('reed_mat', box(x - s - 0.3, 2.2, z - s - 0.3, x + s + 0.3, 2.28, z + s + 0.3));
-  bag.add('timber', box(x - s * 0.8, 0, z - s * 0.5, x + s * 0.8, 0.6, z + s * 0.5));
+  const [x, z] = el.c, s = el.s ?? 1.6, rand = rng(Math.floor((x * 73 + z * 31) * 10) >>> 0);
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const lean = (rand() - 0.5) * 0.08;
+    bag.add('timber', lathe([[0.06, 0], [0.05, 2.25]], 6, null, x + dx * s + lean, 0, z + dz * s));
+  }
+  for (const dz of [-1, 1]) bag.add('timber', box(x - s - 0.1, 2.2, z + dz * s - 0.04, x + s + 0.1, 2.28, z + dz * s + 0.04));
+  // the mat roof, sagging a little in the middle
+  const roof = [], N = 6, R = s + 0.35, Y = (u, v) => 2.3 - 0.12 * (1 - u * u) * (1 - v * v);
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    const u0 = -1 + 2 * i / N, u1 = -1 + 2 * (i + 1) / N, v0 = -1 + 2 * j / N, v1 = -1 + 2 * (j + 1) / N;
+    const P = (u, v) => [x + u * R, Y(u, v), z + v * R];
+    roof.push(...P(u0, v0), ...P(u0, v1), ...P(u1, v1), ...P(u0, v0), ...P(u1, v1), ...P(u1, v0));
+    roof.push(...P(u0, v0), ...P(u1, v1), ...P(u0, v1), ...P(u0, v0), ...P(u1, v0), ...P(u1, v1));
+  }
+  bag.add('reed_mat', fromTriangles(roof));
+  // the table: a top of sticks on four legs, a mat on it
+  const tw = s * 0.8, td = s * 0.5, ty = 0.55;
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bag.add('timber', box(x + dx * (tw - 0.08) - 0.04, 0, z + dz * (td - 0.08) - 0.04, x + dx * (tw - 0.08) + 0.04, ty, z + dz * (td - 0.08) + 0.04));
+  bag.add('timber', box(x - tw, ty, z - td, x + tw, ty + 0.06, z + td));
+  bag.add(['reed_mat', 'cloth_indigo', 'cloth_ochre', 'sacking'][Math.floor(rand() * 4)], box(x - tw + 0.05, ty + 0.06, z - td + 0.05, x + tw - 0.05, ty + 0.075, z + td - 0.05));
+  const top = ty + 0.075;
+  for (let i = 0; i < 6; i++) {
+    const gx = x - tw + 0.3 + (i % 3) * (tw * 2 - 0.6) / 2, gz = z + (i < 3 ? -td * 0.45 : td * 0.45), k = rand();
+    if (k < 0.3) bag.add('hide_tan', lathe([[0.001, 0], [0.18, 0.04], [0.24, 0.13], [0.22, 0.14], [0.001, 0.05]], 10, null, gx, top, gz));                  // a calabash bowl
+    else if (k < 0.55) bag.add(rand() < 0.5 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.12, 0.03], [0.17, 0.15], [0.1, 0.3], [0.08, 0.34], [0.001, 0.34]], 10, null, gx, top, gz));
+    else if (k < 0.8) { bag.add('wicker', lathe([[0.001, 0], [0.2, 0.02], [0.24, 0.14], [0.22, 0.14], [0.001, 0.04]], 10, null, gx, top, gz)); bag.add(['cloth_ochre', 'terracotta', 'cloth_green'][Math.floor(rand() * 3)], lathe([[0.2, 0], [0.12, 0.08], [0.001, 0.12]], 8, null, gx, top + 0.1, gz)); }
+    else bag.add(['cloth_ochre', 'sacking', 'hide_tan'][Math.floor(rand() * 3)], lathe([[0.22, 0], [0.14, 0.1], [0.001, 0.16]], 10, null, gx, top, gz));         // a heap of grain or kola
+  }
+  // beside the table: sacks and a water jar
+  for (let i = 0; i < 2; i++) bag.add('sacking', lathe([[0.2, 0], [0.24, 0.25], [0.2, 0.45], [0.06, 0.52], [0.001, 0.52]], 8, null, x + tw + 0.3, 0, z - td + 0.3 + i * 0.5));
+  bag.add('terracotta', lathe([[0.001, 0], [0.2, 0.05], [0.3, 0.3], [0.2, 0.55], [0.12, 0.6], [0.14, 0.66], [0.001, 0.62]], 10, null, x - tw - 0.35, 0, z + td * 0.4));
 }
 
 registerStyle('sahel', {
