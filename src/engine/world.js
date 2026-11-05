@@ -371,7 +371,7 @@ export class World {
     site.plansLoaded ??= (async () => {
       const mod = await retry(MODULES[site.id]);
       for (const p of mod.landmarks) this.plans.set(p.plan.id, { id: p.plan.id, plan: p.plan, music: p.music, site });
-    })();
+    })().catch((e) => { site.plansLoaded = null; throw e; });   // a failed fetch is tried again next time
     return site.plansLoaded;
   }
 

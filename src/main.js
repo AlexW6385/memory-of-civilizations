@@ -371,7 +371,8 @@ async function main() {
       toast(''); fade.classList.remove('on'); setTimeout(() => { fade.hidden = true; }, 400);
     }
   };
-  const mapView = new GlobeView(world, (rec) => travel((report) => goNear(rec, report)), (lat, lon) => travel((report) => goToPlace(lat, lon, report)), () => sunPlanet(climate.utc));
+  // from the map: a settlement (its landmark's record fetched during the travel if not yet here)
+  const mapView = new GlobeView(world, (x) => travel(async (report) => { const rec = x.plan ? x : await world.recordFor(x); if (rec) await goNear(rec, report); }), (lat, lon) => travel((report) => goToPlace(lat, lon, report)), () => sunPlanet(climate.utc));
 
   const closePanels = () => {
     mapPanel.hidden = true;

@@ -58,8 +58,8 @@ export class GlobeView {
 
   /** The entrance record of each built settlement's first building. */
   recFor(S) { return [...this.world.plans.values()].find((r) => r.site?.S === S); }
-  /** Go to a settlement: its record, its module fetched first if it has not come yet. */
-  go(S) { this.world.recordFor(S).then((r) => { if (r) this.onBuilding(r); }); }
+  /** Go to a settlement at once (the travel fetches its plans if they have not come yet). */
+  go(S) { this.onBuilding(S); }
 
   fillList() {
     this.list.innerHTML = '';
