@@ -167,16 +167,29 @@ export class Renderer {
     const prev = { rt: r.getRenderTarget(), mrt: r.getMRT(), ctx: r.contextNode };
     const tmp = new THREE.Group(), homes = reps.map((o) => [o, o.parent, o.frustumCulled, o.visible]);
     for (const o of reps) { tmp.add(o); o.frustumCulled = false; o.visible = true; }
-    let done;
+    const jobs = [];
+    const scene = this.scene, bg = { b: scene.background, bn: scene.backgroundNode, o: scene.overrideMaterial };
     try {
       r.setRenderTarget(sp.renderTarget); r.setMRT(sp.getMRT?.() ?? sp._mrt ?? null); r.contextNode = ctx;
-      done = r.compileAsync(tmp, this.camera, this.scene);
-    } catch (e) { done = Promise.reject(e); }
+      jobs.push(r.compileAsync(tmp, this.camera, scene));
+      // and the sun's shadow pass for those that cast one: as three's ShadowNode draws it (the
+      // scene pass's context, no outputs or background, the light's depth material over all),
+      // with the first cascade (the others share its pipelines)
+      const sh = this.sun.castShadow && this.sun.shadow.shadowNode?._shadowNodes?.[0];
+      const casters = reps.filter((o) => o.castShadow);
+      if (sh?.shadowMap && casters.length) {
+        for (const o of reps) if (!o.castShadow) o.visible = false;
+        r.setRenderTarget(sh.shadowMap); r.setMRT(null);
+        scene.background = null; scene.backgroundNode = null; scene.overrideMaterial = sh.getShadowMaterial();
+        jobs.push(r.compileAsync(tmp, sh.shadow.camera, scene));
+      }
+    } catch (e) { jobs.push(Promise.reject(e)); }
     finally {
+      scene.background = bg.b; scene.backgroundNode = bg.bn; scene.overrideMaterial = bg.o;
       r.setRenderTarget(prev.rt); r.setMRT(prev.mrt); r.contextNode = prev.ctx;
       for (const [o, parent, fc, vis] of homes) { parent ? parent.add(o) : tmp.remove(o); o.frustumCulled = fc; o.visible = vis; }
     }
-    return done.catch((e) => console.warn('precompile:', e.message));
+    return Promise.all(jobs).catch((e) => console.warn('precompile:', e.message));
   }
 
   /** A depth-aware 5×5 average of the half-resolution occlusion, one of its texels apart: its
