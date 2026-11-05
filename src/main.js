@@ -349,7 +349,9 @@ async function main() {
   };
 
   // going somewhere from the map: to a building's entrance, or to any point of the land
-  const toast = (msg) => { const n = $('notice'); n.textContent = msg; n.hidden = !msg; };
+  let stale = false;                    // the site was deployed again: the notice says so and stays
+  const toast = (msg) => { const n = $('notice'); if (stale) msg = t('stale'); n.textContent = msg; n.hidden = !msg; };
+  addEventListener('mp-stale', () => { stale = true; toast(''); });
   // travelling: the view fades out, the new place is made ready (ground, plants, buildings, their
   // shaders), and the view fades in there
   const fade = $('fade');

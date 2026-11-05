@@ -65,7 +65,12 @@ const castsShadow = (mat) => !NO_SHADOW.has(mat) && MATERIALS[mat]?.kind !== 'gl
 export async function retry(load, tries = 4) {
   for (let i = 0; ; i++) {
     try { return await load(); } catch (e) {
-      if (i >= tries - 1) throw e;
+      if (i >= tries - 1) {
+        // a module that cannot be fetched at all: most likely the site was deployed again since this
+        // page opened and its folder is gone (the last versions are kept, src/../pages.yml): say so
+        if (/dynamically imported module|Importing a module script failed|error loading dynamically/i.test(e.message)) globalThis.dispatchEvent?.(new Event('mp-stale'));
+        throw e;
+      }
       console.warn('retrying a module:', e.message);
       await new Promise((r) => setTimeout(r, 600 * (i + 1)));
     }

@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 16
 
       - uses: actions/setup-node@v5
         with:
@@ -39,6 +41,12 @@ jobs:
           mkdir -p _site/v/$V
           cp -r data _site/
           cp -r src _site/v/$V/
+          # the code of the last versions too: a page opened before this deploy still finds the
+          # modules it fetches later (a settlement, a worker) under its own folder
+          for C in $(git rev-list --skip=1 --max-count=12 HEAD); do
+            O=${C::8}; mkdir -p _site/v/$O
+            git archive "$C" src | tar -x -C _site/v/$O || rm -rf _site/v/$O
+          done
           sed -e "s#\"src/#\"v/$V/src/#g" -e "s#\"\./src/#\"./v/$V/src/#g" index.html > _site/index.html
           grep -q "./v/$V/src/vendor/three/build/three.webgpu.js" _site/index.html
           grep -q "v/$V/src/main.js" _site/index.html
