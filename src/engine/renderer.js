@@ -15,7 +15,7 @@ import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
 
 /** The depth buffer unless the address asks for another (see init). */
-const DEPTH_DEFAULT = 'log';
+const DEPTH_DEFAULT = 'reversed';
 
 export const QUALITY = {
   high: { pixelRatio: 1.5, shadowMap: 2048, cascades: 3, ao: true, aa: true },
