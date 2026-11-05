@@ -16,6 +16,8 @@ import { CollisionWorld, topField } from '../core/collide.js';
 import { Flora } from './flora/index.js';
 import { material, flameMaterial } from './materials.js';
 import { MATERIALS } from '../core/palette.js';
+import { releaseAfterUpload } from './release.js';
+import { LifeInstances } from './life-instances.js';
 import { ENV } from './env.js';
 import { loadLand } from '../planet/land.js';
 import { BUILT, BUILT_BY_ID, initRelief, surface, groundInFrame, seaInFrame, PLANET_RADIUS as R, BLEND } from '../planet/relief.js';
@@ -35,27 +37,6 @@ export const MAX_BUILT = 4;
  */
 const NO_SHADOW = new Set(['water', 'glass_outer', 'opening']);
 const castsShadow = (mat) => !NO_SHADOW.has(mat) && MATERIALS[mat]?.kind !== 'glow' && MATERIALS[mat]?.kind !== 'water';
-
-/**
- * Let go of a mesh's vertex arrays once they are on the GPU (the first time it is drawn): on the
- * author's machine memory is shared between CPU and GPU, so keeping them held every vertex twice.
- * The attribute keeps its count and its array type (empty), which is all the renderer reads after
- * the upload; nothing reads the vertices of a built part after its collision is made.
- */
-export function releaseAfterUpload(o) {
-  if (!o.isMesh || o.userData.released) return;
-  const before = o.onAfterRender;
-  o.onAfterRender = function (renderer, ...a) {
-    before.call(this, renderer, ...a);
-    const g = this.geometry, attrs = [...Object.values(g.attributes), g.index].filter(Boolean);
-    // only once every attribute is on the GPU (a shadow pass uploads the positions alone)
-    const be = renderer.backend;
-    if (!attrs.every((at) => { const d = be.get(at); return d.buffer !== undefined || d.bufferGPU !== undefined; })) return;
-    this.onAfterRender = before;
-    for (const at of attrs) if (at.array?.length) at.array = new at.array.constructor(0);
-    this.userData.released = true;
-  };
-}
 
 const sm = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
@@ -111,6 +92,7 @@ class Settlement {
     this.state = 'loading';
     this.world.scene.add(this.group);
     this.done = 0; this.expected = 1;
+    this.lifeParts = [];
     const gen = this.gen;
     const stale = () => gen !== this.gen;
     this.loading = (async () => {
@@ -143,6 +125,7 @@ class Settlement {
       }
       // let go of while it was being built (the visitor moved away): unload() has cleaned up
       if (stale()) return this;
+      this.buildLife();
       this.done = this.expected;
       this.state = 'ready';
       return this;
@@ -162,11 +145,14 @@ class Settlement {
       m.name = `${plan.id}:${mat}`;
       group.add(m);
     }
-    // repeated pieces: one prototype, a matrix per copy (src/core/geom.js, GeoBag)
-    for (const { mat, geometry, matrices } of built.instanced) {
+    // repeated pieces: one prototype, a matrix per copy (src/core/geom.js, GeoBag); the life of the
+    // streets is gathered settlement-wide once all its tiles are built (buildLife)
+    const lifeList = plan.style === 'life' ? built.instanced : [];
+    for (const { mat, geometry, matrices, colors } of plan.style === 'life' ? [] : built.instanced) {
       const m = new THREE.InstancedMesh(geometry, material(mat), matrices.length / 16);
       m.instanceMatrix.array.set(matrices);
       m.instanceMatrix.needsUpdate = true;
+      if (colors) m.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
       m.computeBoundingSphere();
       m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
@@ -192,9 +178,26 @@ class Settlement {
     if (gen !== this.gen) { this.world.r.gi.release?.(plan.id); return null; }
     // the collision and the bounds are made: the vertex arrays are not needed once on the GPU
     group.traverse(releaseAfterUpload);
+    if (lifeList.length) this.lifeParts.push({ rec, list: lifeList });
     this.parts.push(rec);
     this.done = (this.done || 0) + 1;
     return rec;
+  }
+
+  /** The life of the streets, settlement-wide (src/engine/life-instances.js). */
+  buildLife() {
+    if (!this.lifeParts?.length) return;
+    this.life = new LifeInstances(this.group, castsShadow);
+    const rare = this.life.build(this.lifeParts);
+    for (const [rec, list] of rare) {
+      for (const { mat, geometry } of list) {
+        const m = new THREE.Mesh(geometry, material(mat));
+        m.castShadow = castsShadow(mat); m.receiveShadow = true; m.name = `${rec.plan.id}:${mat}:rare`;
+        releaseAfterUpload(m);
+        rec.group.add(m);
+      }
+    }
+    this.lifeParts = [];
   }
 
   /** The far view (tools/impostors.mjs): the settlement simplified, shown until it is built in full. */
@@ -222,6 +225,7 @@ class Settlement {
       const mesh = new THREE.Mesh(g, m);
       mesh.name = 'impostor:' + this.id;
       mesh.castShadow = true; mesh.receiveShadow = true;
+      releaseAfterUpload(mesh);
       this.impostor = new THREE.Group();
       this.impostor.matrixAutoUpdate = false;
       this.impostor.add(mesh);
@@ -235,6 +239,7 @@ class Settlement {
     this.world.scene.remove(this.group);
     this.group.traverse((o) => { if (o.isInstancedMesh) o.dispose(); else if (o.geometry) o.geometry.dispose(); });
     this.group.clear();
+    this.life?.dispose(); this.life = null; this.lifeParts = [];
     for (const rec of this.parts) this.world.r.gi.release?.(rec.plan.id);
     this.parts = [];
     this.collide = Object.assign(new CollisionWorld(), { terrain: this.collide.terrain, water: this.collide.water, waterLevel: this.collide.waterLevel });
@@ -484,6 +489,16 @@ export class World {
             if (rec.cast !== cast) { rec.cast = cast; rec.group.traverse((o) => { if (o.isMesh) o.castShadow = cast; }); }
           }
         }
+      }
+    }
+    // the life of the streets: the copies within reach, chosen four times a second
+    if (!this._nextL || now > this._nextL) {
+      this._nextL = now + 250;
+      for (const s of this.settlements) {
+        if (!s.life) continue;
+        const L = toLocal(s.S.frame, camP);
+        s.life.group.visible = !this.lifeHidden;
+        s.life.update(L[0], L[1], L[2]);
       }
     }
     const here = this.locate(camera.position.x, camera.position.y, camera.position.z);

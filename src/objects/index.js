@@ -6,12 +6,35 @@
 
 import { registerStyle } from '../core/build.js';
 import { box, lathe, fromTriangles } from '../core/geom.js';
+import { Matrix4, Quaternion, Vector3, Color } from 'three';
+import { MATERIALS } from '../core/palette.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-/** A placer: builds at the origin, then scales, turns and moves each piece to the object's place. */
-function placer(el, bag) {
-  const [x, z] = el.at, y = el.y ?? 0, rot = el.rot ?? 0, s = el.s ?? 1;
-  return (mat, g) => { if (s !== 1) g.scale(s, s, s); g.rotateY(rot); g.translate(x, y, z); bag.add(mat, g); };
+/**
+ * A placer: builds at the origin, then scales, turns and moves each piece to the object's place —
+ * as an instance of the piece's shape (GeoBag.addInstance), so the same pot, limb or head in a
+ * hundred places is held once. Cloth, skin and hide are each one material tinted per piece
+ * (`k` scales the object further: a figure's height).
+ */
+const FAMILY = { cloth_: 'cloth_white', hide_: 'hide_white', skin_: 'skin_light' };
+const _lin = new Color();
+function tint(mat) {
+  for (const [pre, base] of Object.entries(FAMILY)) {
+    if (!mat.startsWith(pre) || !MATERIALS[mat] || !MATERIALS[base]) continue;
+    const a = _lin.set(MATERIALS[mat].color).toArray(), b = new Color(MATERIALS[base].color).toArray();
+    return { base, color: [a[0] / b[0], a[1] / b[1], a[2] / b[2]] };
+  }
+  return null;
+}
+/** How far off an object is still drawn (m): the small things nearer. */
+const REACH = { figure: 170, animal: 190, chickens: 90, pot: 120, basket: 110, sacks: 120, firewood: 110, crates: 140, barrel: 140, ladder: 140, laundry: 150, lantern: 120 };
+const _m = new Matrix4(), _q = new Quaternion(), _up = new Vector3(0, 1, 0), _p = new Vector3(), _s = new Vector3();
+function placer(el, bag, k = 1) {
+  const [x, z] = el.at, y = el.y ?? 0, rot = el.rot ?? 0, s = (el.s ?? 1) * k;
+  if (!bag.addInstance) return (mat, g) => { if (s !== 1) g.scale(s, s, s); g.rotateY(rot); g.translate(x, y, z); bag.add(mat, g); };
+  const M = _m.compose(_p.set(x, y, z), _q.setFromAxisAngle(_up, rot), _s.set(s, s, s)).clone();
+  const reach = REACH[el.t] ?? 230;
+  return (mat, g) => { const t = tint(mat); bag.addInstance(t ? t.base : mat, g, M, { color: t?.color ?? null, real: mat, reach }); };
 }
 const at = (g, x, y, z) => { g.translate(x, y, z); return g; };
 const lz = (profile, seg = 12) => lathe(profile, seg);
@@ -33,12 +56,12 @@ const POTS = {
 /** pot: { kind, n (a cluster of n) } */
 function pot(el, { bag }) {
   const put = placer(el, bag), rand = rng(el.seed), P = POTS[el.kind] ?? POTS.water_pot, n = el.n ?? 1;
-  for (let i = 0; i < n; i++) { const a = rand() * 6.28, r = i ? 0.35 + rand() * 0.35 : 0, k = 0.75 + rand() * 0.35; const g = lz(P.p.map(([pr, py]) => [pr * k, py * k])); put(P.m, at(g, Math.cos(a) * r, 0, Math.sin(a) * r)); }
+  for (let i = 0; i < n; i++) { const a = rand() * 6.28, r = i ? 0.35 + rand() * 0.35 : 0, k = 0.75 + Math.floor(rand() * 4) * 0.115; const g = lz(P.p.map(([pr, py]) => [pr * k, py * k])); put(P.m, at(g, Math.cos(a) * r, 0, Math.sin(a) * r)); }
 }
 function basket(el, { bag }) {
   const put = placer(el, bag), rand = rng(el.seed), n = el.n ?? 1;
   for (let i = 0; i < n; i++) {
-    const r = 0.22 + rand() * 0.18, h = 0.2 + rand() * 0.25, a = rand() * 6.28, d = i ? 0.45 + rand() * 0.2 : 0, x = Math.cos(a) * d, z = Math.sin(a) * d;
+    const r = 0.22 + Math.floor(rand() * 4) * 0.06, h = 0.2 + Math.floor(rand() * 4) * 0.083, a = rand() * 6.28, d = i ? 0.45 + rand() * 0.2 : 0, x = Math.cos(a) * d, z = Math.sin(a) * d;
     put('wicker', at(lz([[r * 0.75, 0], [r, h], [r * 0.92, h], [r * 0.7, 0.03], [0.001, 0.03]], 12), x, 0, z));
     if (rand() < 0.6) put(el.goods ?? ['cloth_ochre', 'cloth_red', 'cloth_green', 'hide_tan'][Math.floor(rand() * 4)], at(lz([[r * 0.9, 0], [r * 0.5, 0.1], [0.001, 0.13]], 10), x, h - 0.06, z));
   }
@@ -220,7 +243,7 @@ function animal(el, { bag, col }) {
 function chickens(el, { bag }) {
   const put = placer(el, bag), rand = rng(el.seed), n = el.n ?? 4;
   for (let i = 0; i < n; i++) {
-    const x = (rand() - 0.5) * 1.6, z = (rand() - 0.5) * 1.6, m = ['hide_white', 'hide_brown', 'hide_tan', 'hide_black'][Math.floor(rand() * 4)], a = rand() * 6.28;
+    const x = (rand() - 0.5) * 1.6, z = (rand() - 0.5) * 1.6, m = ['hide_white', 'hide_brown', 'hide_tan', 'hide_black'][Math.floor(rand() * 4)], a = Math.floor(rand() * 8) * Math.PI / 4;
     const g = body(0.15, 0.1, 8); g.rotateY(a); put(m, at(g, x, 0.18, z));
     const h = lz([[0.05, 0], [0.04, 0.08], [0.001, 0.1]], 6); put(m, at(h, x - Math.sin(a) * 0.14, 0.22, z - Math.cos(a) * 0.14));
     put('cloth_red', at(box(-0.01, 0, -0.02, 0.01, 0.035, 0.02), x - Math.sin(a) * 0.14, 0.31, z - Math.cos(a) * 0.14));
@@ -246,7 +269,10 @@ const ball = (r, n = 10) => lathe(Array.from({ length: 7 }, (_, i) => { const t 
  * hang and flare; feet below.
  */
 function figure(el, { bag, col }) {
-  const put = placer(el, bag), rand = rng(el.seed), H = el.h ?? 1.58 + rand() * 0.18, k = H / 1.65, c1 = el.cloth ?? 'cloth_white', c2 = el.cloth2 ?? c1, sk = el.skin ?? 'skin_medium', dress = el.dress ?? 'robe';
+  // the figure is built at one height and scaled to its own, and its small irregularities (flare,
+  // hands, sash) come in four variants, so that figures share their pieces as instances
+  const r0 = rng(el.seed), H = el.h ?? 1.58 + r0() * 0.18, rand = rng(1 + Math.floor(r0() * 4) * 7919), k = 1;
+  const put = placer(el, bag, H / 1.65), c1 = el.cloth ?? 'cloth_white', c2 = el.cloth2 ?? c1, sk = el.skin ?? 'skin_medium', dress = el.dress ?? 'robe';
   const pose = el.pose ?? 'stand', sit = pose === 'sit' || pose === 'squat', drop = pose === 'sit' ? 0.92 * k - 0.47 : pose === 'squat' ? 0.62 * k : 0;
   const Y = (v) => v * k - drop, sw = 0.19 * k * (dress === 'wrap' ? 0.95 : 1);    // shoulder half-width
   const flare = 1 + rand() * 0.15;

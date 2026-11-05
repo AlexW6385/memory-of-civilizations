@@ -5,6 +5,7 @@
 // place until every finer one that replaces it is there.
 
 import * as THREE from 'three/webgpu';
+import { releaseAfterUpload } from '../engine/release.js';
 import { PLANET_RADIUS as R } from './relief.js';
 import { faceDir, tileRect } from './chunk.js';
 import { groundMaterial, seaMaterial } from './materials.js';
@@ -180,6 +181,7 @@ export class PlanetTerrain {
     mesh.name = 'ground:' + d.key;
     mesh.visible = false;
     mesh.matrixAutoUpdate = false;
+    releaseAfterUpload(mesh);
     this.group.add(mesh);
     let sea = null;
     if (d.water) {
@@ -193,6 +195,7 @@ export class PlanetTerrain {
       sea.name = 'sea:' + d.key;
       sea.visible = false;
       sea.matrixAutoUpdate = false;
+      releaseAfterUpload(sea);
       this.group.add(sea);
     }
     this.tiles.set(d.key, { mesh, sea, minH: d.minH, maxH: d.maxH, f, L, i, j, used: this.frame });

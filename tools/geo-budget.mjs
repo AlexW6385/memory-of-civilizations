@@ -14,16 +14,17 @@
 import { writeFile } from 'node:fs/promises';
 import { MODULES } from '../src/settlements/grounds.js';
 import { buildPlan } from '../src/core/build.js';
+import { LIFE_MIN } from '../src/engine/life-instances.js';
 
 /** Per settlement, everything resident (near and far tiles both). */
-export const LIMITS = { gpuMB: 80, meshes: 2000 };
+export const LIMITS = { gpuMB: 45, meshes: 1500 };
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const flag = (k) => args.includes('--' + k);
 
 /** Count one built plan (the output of buildPlan). */
-export function countBuilt(b) {
+export function countBuilt(b, life = null) {
   const c = { verts: 0, tris: 0, meshes: 0, instances: 0, protoVerts: 0, bytes: 0 };
   for (const p of b.parts) {
     const g = p.geometry, n = g.attributes.position.count;
@@ -33,8 +34,11 @@ export function countBuilt(b) {
   }
   for (const p of b.instanced || []) {
     const g = p.geometry, n = g.attributes.position.count, idx = g.index ? g.index.count : n, k = p.matrices.length / 16;
-    c.meshes++; c.protoVerts += n; c.instances += k; c.tris += (idx / 3) * k;
-    c.bytes += n * 24 + (g.index ? g.index.array.byteLength : 0) + k * 64;
+    // the life of the streets is gathered settlement-wide (src/engine/life-instances.js): counted
+    // per shape at the end (measureSite)
+    if (life) { const e = life.get(p.key) || life.set(p.key, { n: 0, v: n, idx, colors: !!p.colors, bytes: n * 24 + (g.index ? g.index.array.byteLength : 0) }).get(p.key); e.n += k; continue; }
+    c.meshes++; c.protoVerts += n; c.bytes += n * 24 + (g.index ? g.index.array.byteLength : 0);
+    c.instances += k; c.tris += (idx / 3) * k; c.bytes += k * (64 + (p.colors ? 12 : 0));
   }
   return c;
 }
@@ -43,13 +47,21 @@ export async function measureSite(id) {
   const mod = await MODULES[id]();
   const town = await mod.town();
   const plans = [...mod.landmarks.map((p) => p.plan), ...town];
+  const life = new Map();
   const S = { id, plans: plans.length, verts: 0, protoVerts: 0, instances: 0, tris: 0, meshes: 0, bytes: 0, ms: 0 };
   for (const plan of plans) {
     const t0 = performance.now();
     const b = buildPlan(plan, { instancing: true });
     S.ms += performance.now() - t0;
-    const c = countBuilt(b);
+    const c = countBuilt(b, plan.style === 'life' ? life : null);
     for (const k of ['verts', 'protoVerts', 'instances', 'tris', 'meshes', 'bytes']) S[k] += c[k];
+  }
+  // life: shapes of LIFE_MIN copies or more are one instanced mesh each; rarer ones are merged into
+  // their tiles' meshes (vertices as copies; their tiles' meshes are already counted)
+  for (const e of life.values()) {
+    S.tris += (e.idx / 3) * e.n;
+    if (e.n >= LIFE_MIN) { S.meshes += 2; S.protoVerts += e.v; S.instances += e.n; S.bytes += e.bytes + e.n * (64 + (e.colors ? 12 : 0)); }
+    else { S.verts += e.idx * e.n; S.bytes += e.idx * e.n * 24; }
   }
   return S;
 }

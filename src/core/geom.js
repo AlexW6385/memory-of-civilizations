@@ -218,7 +218,7 @@ export const INSTANCING = { minCount: 12, minSaved: 2400, maxVerts: 40000 };
 const AXIS_EPS = 1e-4;
 
 /** A piece's shape key (null for pieces too large or too small to be worth it) and its placement. */
-function shapeOf(mat, g) {
+function shapeOf(mat, g, moveOnly = false) {
   const P = g.attributes.position.array, N = g.attributes.normal.array, n = P.length / 3;
   if (n < 6 || n > INSTANCING.maxVerts) return null;
   let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
@@ -226,8 +226,8 @@ function shapeOf(mat, g) {
     const x = P[i], y = P[i + 1], z = P[i + 2];
     if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z;
   }
-  let axis = true;
-  for (let i = 0; i < N.length; i++) { const v = Math.abs(N[i]); if (v > AXIS_EPS && Math.abs(v - 1) > AXIS_EPS) { axis = false; break; } }
+  let axis = !moveOnly;
+  if (axis) for (let i = 0; i < N.length; i++) { const v = Math.abs(N[i]); if (v > AXIS_EPS && Math.abs(v - 1) > AXIS_EPS) { axis = false; break; } }
   const sx = x1 - x0, sy = y1 - y0, sz = z1 - z0;
   if (!(sx + sy + sz > 0) || !Number.isFinite(sx + sy + sz)) return null;
   // stretched pieces are normalised to their box; moved ones keep their size (to 0.1 mm)
@@ -292,7 +292,28 @@ function prototypeOf(g, sh, d) {
 
 export class GeoBag {
   /** instancing: find repeated pieces (the viewer); without it every piece is merged (the tools). */
-  constructor({ instancing = false } = {}) { this.parts = new Map(); this.instancing = instancing; }
+  constructor({ instancing = false, always = false } = {}) { this.parts = new Map(); this.instancing = instancing; this.always = always; this.explicit = new Map(); }
+  /**
+   * A piece built at its object's origin and placed by a matrix (rotation, uniform scale,
+   * translation): the objects of use and the figures (src/objects/index.js). Pieces of the same
+   * shape share one prototype whatever their turn; `color` (linear RGB, relative to the material's
+   * own) lets one material stand for a family (cloth, skin, hide) and `real` names the material the
+   * piece has when it is merged instead. `reach` (m): how far off the piece is still drawn.
+   * Without instancing (the tools), or too few of a shape in a plan, the pieces are merged as usual.
+   */
+  addInstance(mat, g, matrix, { color = null, real = mat, reach = 230 } = {}) {
+    if (!g) return;
+    if (g.index) g = g.toNonIndexed();
+    const sh = shapeOf(mat, g, true);
+    if (!sh) { this.add(real, g.applyMatrix4(matrix)); return; }
+    let list = this.explicit.get(sh.key);
+    if (!list) this.explicit.set(sh.key, (list = []));
+    let e = list.find((x) => sameShape(x.g, x.sh, g, sh));
+    if (!e) { e = { mat, g, sh, key: `${sh.key}#${list.length}`, items: [] }; list.push(e); }
+    // the copy's matrix takes the prototype (at its box's corner) to the place
+    const M = new Matrix4().makeTranslation(sh.t[0], sh.t[1], sh.t[2]).premultiply(matrix);
+    e.items.push({ m: M.elements.slice(), color, real, reach });
+  }
   add(mat, g) {
     if (!g) return;
     if (!this.parts.has(mat)) this.parts.set(mat, []);
@@ -305,6 +326,27 @@ export class GeoBag {
   merged() {
     const res = [];
     this.instanced = [];
+    // placed pieces: instanced, or merged into their real materials
+    for (const list of this.explicit.values()) {
+      for (const e of list) {
+        const n = e.g.attributes.position.count;
+        const worth = this.instancing && (this.always || (e.items.length >= INSTANCING.minCount && (e.items.length - 1) * n >= INSTANCING.minSaved));
+        if (!worth) {
+          const local = prototypeOf(e.g, e.sh, 0).geometry.toNonIndexed();
+          const M = new Matrix4();
+          for (const it of e.items) this.add(it.real, local.clone().applyMatrix4(M.fromArray(it.m)));
+          continue;
+        }
+        const d = depthRank(e.mat) * DEPTH_STEP;
+        const { geometry } = prototypeOf(e.g, e.sh, d);
+        const k = e.items.length, matrices = new Float32Array(k * 16), reach = new Float32Array(k);
+        const colors = e.items.some((it) => it.color) ? new Float32Array(k * 3).fill(1) : null;
+        const reals = e.items.map((it) => it.real);
+        e.items.forEach((it, i) => { matrices.set(it.m, i * 16); reach[i] = it.reach; if (it.color && colors) colors.set(it.color, i * 3); });
+        this.instanced.push({ mat: e.mat, key: e.key, geometry, matrices, colors, reach, reals });
+      }
+    }
+    this.explicit.clear();
     for (const [mat, all] of this.parts) {
       const d = depthRank(mat) * DEPTH_STEP;
       let list = all;

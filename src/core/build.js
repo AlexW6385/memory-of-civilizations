@@ -62,7 +62,9 @@ export async function buildPlanAsync(plan, budget = 4, opts = {}) {
 function startBuild(plan, { instancing = false } = {}) {
   const style = STYLES[plan.style];
   if (!style) throw new Error(`style ${plan.style} not registered`);
-  return { bag: new GeoBag({ instancing }), col: new Colliders(), lights: [], style, plan };
+  // the life of the streets is gathered settlement-wide by the viewer (src/engine/life-instances.js),
+  // so every placed piece of it is instanced however few there are in one tile
+  return { bag: new GeoBag({ instancing, always: instancing && plan.style === 'life' }), col: new Colliders(), lights: [], style, plan };
 }
 function buildElement(el, ctx) {
   const fn = GENERIC[el.t] || ctx.style.elements?.[el.t];
