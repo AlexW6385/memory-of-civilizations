@@ -39,7 +39,8 @@ jobs:
           mkdir -p _site/v/$V
           cp -r data _site/
           cp -r src _site/v/$V/
-          sed -e "s#\"src/#\"v/$V/src/#g" index.html > _site/index.html
+          sed -e "s#\"src/#\"v/$V/src/#g" -e "s#\"\./src/#\"./v/$V/src/#g" index.html > _site/index.html
+          grep -q "./v/$V/src/vendor/three/build/three.webgpu.js" _site/index.html
           grep -q "v/$V/src/main.js" _site/index.html
           touch _site/.nojekyll
 
