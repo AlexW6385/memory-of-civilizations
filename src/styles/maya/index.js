@@ -51,6 +51,20 @@ function mPyramid(el, { bag, col }) {
     frust(bag, L, cx, cz, a0, a0, ap, ap, y0, y0 + th * 0.55);                                                    // the talud
     frust(bag, L, cx, cz, ap, ap, ap - step * 0.04, ap - step * 0.04, y0 + th * 0.55, y0 + th * 0.9);             // the panel
     frust(bag, L, cx, cz, ap + step * 0.06, ap + step * 0.06, ap + step * 0.06, ap + step * 0.06, y0 + th * 0.9, y0 + th);   // the moulding
+    // the panels on each tier's face: recessed rectangles in a row, the stair's run left clear
+    if (!el.simple) {
+      const pw = 2.2, py0 = y0 + th * 0.6, py1 = y0 + th * 0.86, d = ap - step * 0.04 + 0.05;
+      for (const [fx, fz] of [[0, -1], [0, 1], [1, 0], [-1, 0]]) {
+        const m = Math.floor((2 * d) / (pw + 0.9));
+        for (let i = 0; i < m; i++) {
+          const u = -d + (i + 0.5) * (2 * d) / m;
+          if (Math.abs(u) < sw + 1.6) continue;
+          const [qx, qz] = fz ? [cx + u, cz + fz * d] : [cx + fx * d, cz + u];
+          const t = 0.2, d0 = 0.15, bar = (u0, u1, v0, v1) => bag.add(L, fz ? box(qx + u0, v0, qz - d0, qx + u1, v1, qz + d0) : box(qx - d0, v0, qz + u0, qx + d0, v1, qz + u1));
+          bar(-pw / 2, pw / 2, py0, py0 + t); bar(-pw / 2, pw / 2, py1 - t, py1); bar(-pw / 2, -pw / 2 + t, py0 + t, py1 - t); bar(pw / 2 - t, pw / 2, py0 + t, py1 - t);
+        }
+      }
+    }
     col.rect([cx - a0, cz - a0, cx + a0, cz + a0], y0 - 0.3, y0 + th - 0.31);
     col.floor([cx - a1, cz - a1, cx + a1, cz + a1], y0 + th);
   }

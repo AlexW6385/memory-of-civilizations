@@ -151,7 +151,7 @@ const PEOPLE = {
   'qing-beijing': [[-40, 210, 40, 300], [-60, 128, 60, 172], [-70, 30, 70, 98]], jerusalem: [[-145, -195, 145, 195, 14]], persepolis: [],
 };
 const MARKET = /square|piazza|plaza|market|agora|forum|maidan|bazaar|parvis|court|forecourt|street|dam|rows/i;
-const FLAT = /paving|road|street|causeway|terrace|field|parterre|garden|park|lawn|water|cells|pavement|plaza|square|flag|carpet|bed\b|floor|ground|court\b|lamp/i;
+const FLAT = /paving|road|street|causeway|terrace|lane|sacbe|field|parterre|garden|park|lawn|water|cells|pavement|plaza|square|flag|carpet|bed\b|floor|ground|court\b|lamp/i;
 const HOUSE = /house|hut|home|insula|siheyuan|hanok|machiya|compound|izba|shop|cottage|_block|skyscraper|dwelling/i;
 const SKIP = /water|paving|park|wall|bridge|viaduct|wharf|fence|field|terrace|platform|road|street|canal|moat|ditch|bank|rim|pool|tank|lake|garden|parterre|ramp|stair|causeway|track|esplanade|precinct|enclosure|palisade|ring|circle|avenue|barrow|mound|cells/i;
 
@@ -287,7 +287,7 @@ export function lifePlans(id, R, landmarks, town, G) {
     const cand = [];
     for (let z = z0 + 5; z < z1 - 4; z += 9) for (let x = x0 + 4 + (Math.floor(z) % 2) * 3; x < x1 - 4; x += 6.5) cand.push([x, z]);
     for (let i = cand.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [cand[i], cand[j]] = [cand[j], cand[i]]; }
-    const cap = Math.max(25, Math.min(180, Math.round((x1 - x0) * (z1 - z0) / 380)));
+    const cap = Math.max(25, Math.min(110, Math.round((x1 - x0) * (z1 - z0) / 420)));
     for (const [x, z] of cand) {
       if (n >= cap) break;
       const px = x + (rand() - 0.5) * 1.5, pz = z + (rand() - 0.5) * 1.5, rot = (Math.floor((z - z0) / 9) % 2) * Math.PI, b = [px - 1.8, pz - 1.4, px + 1.8, pz + 1.4];

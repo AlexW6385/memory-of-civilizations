@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.77 — The Castillo's panels and busier plazas (2026-11-04)
+- Detail: the Castillo's terraces carry their framed panels in rows, the stairs' runs left clear; plazas and courts paved as lanes (Chichén Itzá's Great Plaza, Isfahan's walks, Beijing's lanes) now fill with people too; market stalls held to a sensible number per square.
+
 ## v8.76 — People at Angkor (2026-11-04)
 - Detail: people walk the causeway to Angkor Wat and the road along its moat, saffron and ochre among them.
 
