@@ -12,7 +12,7 @@ const wall = (a, b, th, y0, y1, openings = [], mat = 'sandstone') => add({ t: 'w
 const block = (rect, y0, y1, extra = {}) => add({ t: 'block', rect, y0, y1, mat: 'sandstone', ...extra });
 const slab = (rect, y0, y1, holes = [], extra = {}) => add({ t: 'slab', rect, y0, y1, holes, mat: 'sandstone', ...extra });
 const trim = (rect, y0, y1, trimSpec) => add({ t: 'trim', rect, y0, y1, trim: trimSpec, mat: 'sandstone' });
-const column = (x, z, y, h, d, cap) => add({ t: 'column', at: [x, z], y, h, d, cap, mat: 'sandstone_column' });
+const column = (x, z, y, h, d, cap, registers = 0) => add({ t: 'column', at: [x, z], y, h, d, cap, mat: 'sandstone_column', registers });
 const beam = (a, b, y, w, h, ext = 0) => add({ t: 'beam', a, b, y, w, h, ext, mat: 'sandstone' });
 const stair = (rect, dir, y0, y1, riser) => add({ t: 'stair', rect, dir, y0, y1, riser });
 const obj = (kind, x, z, y, extra = {}) => add({ t: 'obj', kind, at: [x, z], y, ...extra });
@@ -87,7 +87,7 @@ obj('door_leaves', 0, -75.5, Y.hypo, { yaw: PI, w: 4.4, h: 8.6 - (Y.hypo - Y.pro
 // 18 columns, 3 rows of 6; every capital different (Ptolemaic variety), pairs across the axis
 const PRO_CAPS = ['composite_b', 'palm', 'composite_c', 'papyrus_open', 'composite_a', 'lotus', 'composite_c', 'papyrus_bud', 'composite_b'];
 const PX = [3.4, 9.0, 14.6], PZ = [-58.0, -63.8, -69.6];
-PZ.forEach((z, r) => PX.forEach((x, c) => { for (const s of [-1, 1]) column(s * x, z, Y.pronaos, PRO_COL_H, 2.0, PRO_CAPS[r * 3 + c]); }));
+PZ.forEach((z, r) => PX.forEach((x, c) => { for (const s of [-1, 1]) column(s * x, z, Y.pronaos, PRO_COL_H, 2.0, PRO_CAPS[r * 3 + c], 4); }));
 const PRO_ARCH = Y.pronaos + PRO_COL_H;
 for (const x of [...PX, ...PX.map((v) => -v)]) beam([x, -57.0], [x, -73.0], PRO_ARCH, 1.6, 1.3);
 beam([-17.5, -58.0], [17.5, -58.0], PRO_ARCH, 1.6, 1.3);
@@ -124,7 +124,7 @@ trim([-16.5, -128.5, 16.5, -75.5], 0, NAOS_H, { torus: 0.35, cornice: 1.6, cap: 
 floor([-14.3, -88.2, 14.3, -75.5], Y.hypo);
 const HY_H = 9.6, HY_ARCH = Y.hypo + HY_H;
 const HY_CAPS = ['composite_a', 'palm', 'papyrus_open', 'composite_c', 'lotus', 'composite_b'];
-[-78.5, -81.5, -84.5].forEach((z, r) => [2.9, 7.3].forEach((x, c) => { for (const s of [-1, 1]) column(s * x, z, Y.hypo, HY_H, 1.45, HY_CAPS[r * 2 + c]); }));
+[-78.5, -81.5, -84.5].forEach((z, r) => [2.9, 7.3].forEach((x, c) => { for (const s of [-1, 1]) column(s * x, z, Y.hypo, HY_H, 1.45, HY_CAPS[r * 2 + c], 3); }));
 for (const x of [-7.3, -2.9, 2.9, 7.3]) beam([x, -75.5], [x, -87.5], HY_ARCH, 1.3, 1.0);
 slab([-10.9, -88.9, 10.9, -75.5], HY_ARCH + 1.0, HY_ARCH + 1.9, [[-1.6, -80.3, 1.6, -79.6], [-1.6, -83.4, 1.6, -82.7]], { walk: true });
 for (const s of [-1, 1]) {

@@ -93,15 +93,38 @@ export function column(el, { bag, col }) {
   // shaft, slightly convex at the foot (a curved "Ptolemaic" foot), five bands below the capital
   const s0 = y + baseH, bandsTop = s0 + shaftH, bandH = Math.min(0.11, shaftH * 0.012);
   const nb = el.bands ?? 5;
-  const prof = [[R * 0.94, 0], [R * 1.0, shaftH * 0.04], [R * 0.995, shaftH * 0.3], [(R + topR) / 2, shaftH * 0.6]];
   const bandStart = shaftH - nb * bandH * 2 - 0.05;
-  prof.push([topR, bandStart]);
+  const rAt = (t) => (t < 0.04 ? R * (0.94 + 1.5 * t) : t < 0.3 ? R * (1.0 - 0.02 * (t - 0.04)) : t < 0.6 ? R * 0.995 + ((R + topR) / 2 - R * 0.995) * (t - 0.3) / 0.3 : (R + topR) / 2 + (topR - (R + topR) / 2) * Math.min(1, (t - 0.6) / (bandStart / shaftH - 0.6)));
+  // the shaft carved in registers (the king before the gods, a column of signs between the scenes):
+  // each register a raised band of figures standing out a little from the drum, a plain line between
+  const prof = [[R * 0.94, 0], [R * 1.0, shaftH * 0.04]], carved = new Map();
+  const nr = el.registers ?? 0, r0 = shaftH * 0.14, r1 = bandStart - 0.25;
+  // each register: a plain line, then rows of the figures' outlines — feet, legs, the kilt or robe, the
+  // body and arms, the head and crown — each row a band of raised windows round the drum
+  const rowsOf = [[0.06, 'feet'], [0.22, 'legs'], [0.42, 'robe'], [0.66, 'body'], [0.8, 'head'], [0.92, 'crown'], [0.97, null]];
+  for (let k = 0; k < nr; k++) {
+    const a = r0 + (r1 - r0) * k / nr, b = r0 + (r1 - r0) * (k + 1) / nr, Hh = b - a;
+    prof.push([rAt(a / shaftH), a]);
+    for (const [f, part] of rowsOf) { const yy = a + Hh * f; if (part) carved.set(prof.length, part); prof.push([rAt(yy / shaftH), yy]); }
+  }  prof.push([topR, bandStart]);
   for (let i = 0; i < nb; i++) {
     const y0 = bandStart + i * bandH * 2;
     prof.push([topR * 1.025, y0 + 0.01], [topR * 1.025, y0 + bandH], [topR, y0 + bandH + 0.01], [topR, y0 + bandH * 2]);
   }
   prof.push([topR, shaftH]);
-  bag.add(mat, lathe(prof, seg, null, x, s0, z));
+  const figs = el.figures ?? 4;
+  // the half-widths of each part (fractions of a figure's slot); two figures to a slot: the king, a god
+  const W = { feet: [0.11, 0.1], legs: [0.08, 0.075], robe: [0.13, 0.11], body: [0.11, 0.1], head: [0.06, 0.055], crown: [0.045, 0.07] };
+  const carve = (th, i) => {
+    const part = carved.get(i);
+    if (!part) return 1;
+    const u = (th * figs / (Math.PI * 2)) % 1;
+    const [wk, wg] = W[part];
+    if (Math.abs(u - 0.25) < wk || Math.abs(u - 0.62) < wg) return 1.05;
+    if (Math.abs(u - 0.89) < 0.035 && part !== 'feet') return 1.035;          // the column of signs
+    return 1;
+  };
+  bag.add(mat, lathe(prof, nr ? 48 : seg, nr ? carve : null, x, s0, z));
 
   // capital
   const cy = bandsTop;

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.97 — Edfu's carved columns (2026-11-05)
+- Edfu: the columns of the pronaos and the hypostyle hall are carved in registers — in each a plain line, then the raised outlines of the king and a god facing each other (feet, legs, kilt and robe, body, head and crown) with a column of signs between the scenes — as the Ptolemaic shafts are; the court's colonnade stays plain. Costs about 80k triangles.
+
 ## v8.96 — Screenshot tool fix (2026-11-05)
 - Tools: shot.mjs no longer adds the old design's per-building views (no settlement carries them, and they crashed the run at its end); interiors are shot with --pose in the settlement's frame.
 
