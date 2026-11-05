@@ -34,12 +34,18 @@ function windows(bag, [x0, z0, x1, z1], y0, y1, b, faces = 'nesw', rand = Math.r
   for (const f of faces) {
     const [ax, az, bx, bz, nx, nz] = { s: [x0, z1, x1, z1, 0, 1], n: [x0, z0, x1, z0, 0, -1], e: [x1, z0, x1, z1, 1, 0], w: [x0, z0, x0, z1, -1, 0] }[f];
     const L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / step);
+    // columns of windows in bands with plain wall between, the bands' widths varying; the top two rows
+    // larger (the halls and chapels), the lower walls sparsely lit
+    const band = []; { let on = rand() < 0.7, left = 2 + Math.floor(rand() * 4); for (let k = 0; k <= n; k++) { band.push(on); if (--left <= 0) { on = !on; left = on ? 3 + Math.floor(rand() * 5) : 1 + Math.floor(rand() * 3); } } }
+    const rows = Math.floor((H - 3) / rowH);
     for (let r = 1; r * rowH < H - 3; r++) {
-      const y = y0 + r * rowH, inset = b * (y - y0) / H, upper = y > y0 + H * 0.45;
+      const y = y0 + r * rowH, inset = b * (y - y0) / H, upper = y > y0 + H * 0.45, top = r >= rows - 1;
       for (let k = 1; k < n; k++) {
-        if (!upper && rand() < 0.75) continue;
+        if (!upper && rand() < 0.8) continue;
+        if (upper && !top && (!band[k] || rand() < 0.12)) continue;
+        if (top && k % 2 === 0 && L > 30) continue;
         const s = k * L / n, px = ax + (bx - ax) * s / L - nx * (inset - 0.03), pz = az + (bz - az) * s / L - nz * (inset - 0.03), ux = (bx - ax) / L, uz = (bz - az) / L;
-        win(bag, [px, pz], [ux, uz], [nx, nz], y, upper ? 1.0 : 0.8, rand);
+        win(bag, [px, pz], [ux, uz], [nx, nz], y, top ? 1.35 : upper ? 1.0 : 0.8, rand);
       }
     }
   }

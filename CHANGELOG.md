@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.93 — The Potala's windows (2026-11-05)
+- Lhasa: the Potala's windows stand in vertical bands with plain wall between them, the bands of varying width, a few missing at random, the top two rows larger (the halls and chapels) — the palace no longer reads as a regular grid of windows.
+
 ## v8.92 — Builder import fix (2026-11-05)
 - The Persepolis style imports three.js through src/core/three.js, as builders must (they also run in a worker).
 
