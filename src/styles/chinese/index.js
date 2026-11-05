@@ -4,9 +4,9 @@
 // tiers, with descending cantilevers; deep eaves of rafters; a hipped roof of grey tiles on a
 // concave profile, its corners turned up, the ridge ending in chiwei; a stone-faced platform.
 
-import { BufferGeometry, Float32BufferAttribute } from 'three';
+import { BufferGeometry, Float32BufferAttribute, Matrix4, Vector3 } from 'three';
 import { registerStyle } from '../../core/build.js';
-import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { box, lathe, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import { byzantineElements } from '../byzantine/index.js';
 
 export function hexa(out, b, t) {
@@ -191,24 +191,134 @@ function column(el, { bag, col }) {
   col.circle(x, z, r * 1.2, y, y + h);
 }
 
-/** A seated Buddha on a lotus throne { at, y, h, yaw }: massing of throne, crossed legs, robe, head and halo. */
+// an ellipsoid of radii rx, ry, rz at c (low-poly by default)
+function ellipsoid(c, rx, ry, rz, seg = 10, rows = 6) {
+  const prof = [];
+  for (let i = 0; i <= rows; i++) { const a = -Math.PI / 2 + (i / rows) * Math.PI; prof.push([Math.max(0.001, Math.cos(a)), Math.sin(a)]); }
+  const g = lathe(prof, seg); g.scale(rx, ry, rz); g.translate(c[0], c[1], c[2]); return g;
+}
+// a limb segment: a rod from a to b with a ball at the joint b
+function limb(out, a, b, r0, r1) {
+  const d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], L = Math.hypot(...d);
+  const g = lathe([[r0, 0], [r1, L]], 10);
+  const up = [0, 1, 0], n = d.map((v) => v / L), ax = [up[1] * n[2] - up[2] * n[1], up[2] * n[0] - up[0] * n[2], up[0] * n[1] - up[1] * n[0]];
+  const al = Math.hypot(...ax), ang = Math.acos(Math.max(-1, Math.min(1, n[1])));
+  if (al > 1e-6) g.applyMatrix4(new Matrix4().makeRotationAxis(new Vector3(ax[0] / al, ax[1] / al, ax[2] / al), ang));
+  g.translate(...a); out.push(g, ellipsoid(b, r1, r1, r1, 8, 4));
+}
+// a lotus petal: a curved, pointed shell rising from radius r0 at height y0, outward and up, at angle th
+function petal(th, r0, y0, len, w, lift) {
+  const tri = [], N = 7, pts = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, half = w * Math.sqrt(Math.sin(Math.PI * Math.min(1, 0.08 + t * 0.92))), out = r0 + len * Math.cos(lift * t), up = y0 + len * Math.sin(lift * t) * 0.9;
+    pts.push([[-half, out - 0.04, up], [0, out + 0.03 * Math.sin(Math.PI * t), up + 0.02], [half, out - 0.04, up]]);
+  }
+  const P = ([a, r, y]) => [Math.cos(th) * r - Math.sin(th) * a, y, Math.sin(th) * r + Math.cos(th) * a];
+  for (let i = 0; i < N; i++) for (let k = 0; k < 2; k++) {
+    const a = P(pts[i][k]), b = P(pts[i][k + 1]), c = P(pts[i + 1][k + 1]), d = P(pts[i + 1][k]);
+    tri.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c);
+  }
+  return tri;
+}
+
+/**
+ * A seated Buddha on a lotus throne { at, y, h, dir, robe, gilt, noThrone, noHalo, simple }:
+ * a drum and two rows of upturned petals; the legs crossed with the soles up; the right hand
+ * raised (fear not), the left open on the knee (granting); the robe in folds; the head with its
+ * snail-shell curls, the topknot, the long lobes, the mark between the brows; behind, a pointed
+ * mandorla with flame edge, head and body haloes and small seated Buddhas. Built at h = 5.2.
+ */
 export function buddha(el, { bag }) {
-  const [x, z] = el.at, y = el.y, H = el.h || 5.2, s = H / 5.2, dir = el.dir || [-1, 0];
-  const robe = el.robe || 'clay_robe', gilt = el.gilt || 'clay_gilt';
-  if (!el.noThrone) bag.add(robe, lathe([[1.5 * s, 0], [1.4 * s, 0.4 * s], [1.0 * s, 0.6 * s], [1.0 * s, 1.0 * s]], 16, null, x, y, z));
-  if (!el.noThrone) bag.add(gilt, lathe([[0.9 * s, 0], [1.55 * s, 0.25 * s], [1.6 * s, 0.45 * s], [1.3 * s, 0.6 * s]], 24, (th) => 1 + 0.07 * Math.abs(Math.cos(th * 8)), x, y + 1.0 * s, z));
-  const b = y + 1.6 * s;
-  // the crossed legs: an oval wider across than deep; then the body, the shoulders, the neck
-  const legs = lathe([[1.0 * s, 0], [1.02 * s, 0.25 * s], [0.85 * s, 0.48 * s], [0.001, 0.52 * s]], 24, null, 0, 0, 0);
-  legs.scale(Math.abs(dir[1]) > 0.5 ? 1.35 : 0.8, 1, Math.abs(dir[1]) > 0.5 ? 0.8 : 1.35); legs.translate(x, b, z);
-  bag.add(robe, legs);
-  bag.add(robe, lathe([[0.62 * s, 0.4 * s], [0.6 * s, 1.0 * s], [0.66 * s, 1.5 * s], [0.68 * s, 1.68 * s], [0.42 * s, 1.92 * s], [0.18 * s, 2.05 * s]], 20, null, x, b, z));
-  bag.add(gilt, lathe([[0.001, 2.05 * s], [0.3 * s, 2.15 * s], [0.34 * s, 2.45 * s], [0.25 * s, 2.7 * s], [0.12 * s, 2.85 * s], [0.001, 2.92 * s]], 16, null, x, b, z));
-  // the halo, a disc behind the head
+  const [x, z] = el.at, H = el.h || 5.2, s = H / 5.2, dir = el.dir || [-1, 0];
+  const robe = el.robe || 'clay_robe', gilt = el.gilt || 'clay_gilt', simple = el.simple;
+  const R = [], G = [], tri = [];
+  const b = 1.6;
+  if (!el.noThrone) {
+    R.push(lathe([[0.001, 0], [1.55, 0], [1.55, 0.14], [1.38, 0.22], [1.38, 0.3], [1.15, 0.4], [1.0, 0.48], [1.0, 0.86], [1.12, 0.94], [0.001, 0.94]], 24));
+    for (let i = 0; i < 14; i++) tri.push(...petal((i / 14) * Math.PI * 2, 0.98, 0.92, 0.62, 0.3, 1.32));
+    for (let i = 0; i < 14; i++) tri.push(...petal(((i + 0.5) / 14) * Math.PI * 2, 0.9, 1.06, 0.58, 0.28, 1.42));
+    G.push(lathe([[1.0, 1.0], [1.2, 1.5], [1.18, b], [0.001, b]], 24));
+  }
+  // the crossed legs, knees out to the sides; the soles turned up on the thighs
+  const legs = lathe([[0.001, 0], [1.0, 0], [1.04, 0.2], [0.92, 0.42], [0.55, 0.52], [0.001, 0.54]], 24, (th) => 1 + 0.035 * Math.cos(th * 11));
+  legs.scale(1.3, 1, 0.78); legs.translate(0, b, 0.08); R.push(legs);
+  for (const k of [-1, 1]) R.push(ellipsoid([k * 1.0, b + 0.24, 0.22], 0.36, 0.25, 0.4, 12, 6));
+  G.push(ellipsoid([0.36, b + 0.46, 0.38], 0.3, 0.07, 0.12, 10, 4), ellipsoid([-0.3, b + 0.44, 0.3], 0.28, 0.07, 0.12, 10, 4));
+  // the body: robe folds in the lower part, the chest, the shoulders
+  const body = lathe([[0.001, 0.4], [0.66, 0.4], [0.62, 0.8], [0.6, 1.1], [0.68, 1.45], [0.7, 1.64], [0.5, 1.88], [0.2, 2.02], [0.001, 2.04]], 24,
+    (th, i) => 1 + (i <= 3 ? 0.03 * Math.cos(th * 13) : 0));
+  body.scale(1, 1, 0.74); body.translate(0, b, -0.02); R.push(body);
+  // the hem of the robe across the chest, from the left shoulder down under the right breast
+  const hem = [];
+  for (let i = 0; i <= 8; i++) { const t = i / 8; hem.push([0.62 - 1.0 * t, b + 1.66 - 0.5 * t - 0.12 * Math.sin(Math.PI * t)]); }
+  for (let i = 0; i < 8; i++) {
+    const [x0, y0] = hem[i], [x1, y1] = hem[i + 1], zf = (xx) => 0.52 * Math.sqrt(Math.max(0.05, 1 - (xx / 0.74) ** 2)) + 0.01;
+    tri.push(x0, y0, zf(x0), x1, y1, zf(x1), x1, y1 + 0.06, zf(x1) + 0.035, x0, y0, zf(x0), x1, y1 + 0.06, zf(x1) + 0.035, x0, y0 + 0.06, zf(x0) + 0.035);
+  }
+  // arms: the right raised, palm out; the left on the knee, palm up
+  limb(R, [-0.66, b + 1.6, 0], [-0.92, b + 1.0, 0.2], 0.2, 0.17);
+  limb(R, [-0.92, b + 1.0, 0.2], [-0.8, b + 1.42, 0.5], 0.17, 0.12);
+  limb(R, [0.66, b + 1.6, 0], [0.92, b + 0.98, 0.12], 0.2, 0.17);
+  limb(R, [0.92, b + 0.98, 0.12], [0.86, b + 0.56, 0.5], 0.17, 0.12);
+  // the sleeves hang from the forearms
+  for (const k of [-1, 1]) R.push(ellipsoid([k * 1.0, b + 0.82, 0.2], 0.16, 0.34, 0.24, 10, 5));
+  G.push(ellipsoid([-0.8, b + 1.6, 0.52], 0.13, 0.2, 0.05, 10, 4), ellipsoid([0.84, b + 0.56, 0.68], 0.13, 0.045, 0.2, 10, 4));
+  if (!simple) for (let f = 0; f < 4; f++) {
+    G.push(ellipsoid([-0.89 + f * 0.06, b + 1.83, 0.53], 0.026, 0.07, 0.026, 6, 3));
+    G.push(ellipsoid([0.78 + f * 0.06, b + 0.57, 0.88], 0.026, 0.024, 0.07, 6, 3));
+  }
+  // the neck with its three folds, the head, the face
+  G.push(lathe([[0.2, 1.98], [0.19, 2.04], [0.205, 2.06], [0.19, 2.1], [0.2, 2.12], [0.18, 2.16], [0.001, 2.17]], 16, null, 0, b, 0));
+  const head = lathe([[0.001, 2.12], [0.18, 2.14], [0.28, 2.24], [0.33, 2.4], [0.34, 2.56], [0.3, 2.7], [0.18, 2.8], [0.001, 2.83]], 18);
+  head.scale(1, 1, 0.92); head.translate(0, b, 0.02); G.push(head);
+  G.push(ellipsoid([0, b + 2.88, 0.0], 0.2, 0.14, 0.19, 12, 5));
+  G.push(ellipsoid([0, b + 2.4, 0.33], 0.035, 0.1, 0.05, 6, 4), ellipsoid([0, b + 2.53, 0.32], 0.022, 0.022, 0.02, 6, 3));
+  for (const k of [-1, 1]) {
+    G.push(ellipsoid([k * 0.34, b + 2.36, 0], 0.045, 0.2, 0.09, 8, 5));
+    G.push(ellipsoid([k * 0.12, b + 2.48, 0.29], 0.075, 0.018, 0.03, 8, 3));
+  }
+  if (!simple) {
+    // the curls: rings of small knots over the crown and the topknot
+    for (const [ry, rr, n, cy] of [[2.62, 0.32, 26, 0], [2.7, 0.28, 22, 0], [2.77, 0.21, 16, 0], [2.81, 0.12, 9, 0], [2.86, 0.19, 14, 1], [2.95, 0.14, 10, 1], [3.0, 0.06, 5, 1]]) {
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + ry;
+        if (!cy && Math.sin(a) > 0.55 && ry < 2.66) continue;
+        G.push(ellipsoid([Math.cos(a) * rr, b + ry, Math.sin(a) * rr * 0.92 + 0.02], 0.04, 0.035, 0.04, 6, 3));
+      }
+    }
+  }
+  const yaw = Math.atan2(dir[0], dir[1]);
+  const put = (g) => place(g, x, el.y, z, yaw, s);
+  for (const g of R) bag.add(robe, put(g));
+  for (const g of G) bag.add(gilt, put(g));
+  if (tri.length) bag.add(el.noThrone ? robe : gilt, put(fromTriangles(tri)));
   if (el.noHalo) return;
-  const hx = x - dir[0] * 0.45 * s, hz = z - dir[1] * 0.45 * s;
-  const R = 0.85 * s, yc = b + 2.45 * s;
-  bag.add(gilt, lathe([[0.001, -0.04], [R, -0.04], [R, 0.04], [0.001, 0.04]], 24, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(Math.atan2(dir[0], dir[1])).translate(hx, yc, hz));
+  // the mandorla: a pointed leaf with a flame edge, standing behind
+  const M = [], cy = 3.4, n = 72, zb = -0.6, outline = [];
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + (i / n) * Math.PI * 2, sn = Math.sin(a);
+    const w = 1.55 * (1 - 0.32 * Math.max(0, sn) ** 2), h = 1.85 + 0.55 * Math.max(0, sn) ** 6;
+    const f = 1 + 0.045 * Math.abs(Math.sin(a * 14)) * (sn > -0.6 ? 1 : 0);
+    outline.push([Math.cos(a) * w * f, cy + sn * h * f]);
+  }
+  for (let i = 0; i < n; i++) {
+    const p = outline[i], q = outline[(i + 1) % n];
+    M.push(0, cy, zb, p[0], p[1], zb, q[0], q[1], zb, 0, cy, zb - 0.06, q[0], q[1], zb - 0.06, p[0], p[1], zb - 0.06);
+    M.push(p[0], p[1], zb, p[0], p[1], zb - 0.06, q[0], q[1], zb - 0.06, p[0], p[1], zb, q[0], q[1], zb - 0.06, q[0], q[1], zb);
+  }
+  bag.add(gilt, put(fromTriangles(M)));
+  // head and body haloes as raised rings
+  const ring = (r0, r1, yc, dz) => lathe([[r0, -0.02], [r1, -0.02], [r1, 0.02], [r0, 0.02]], 32).rotateX(Math.PI / 2).translate(0, yc, zb + dz);
+  bag.add(gilt, put(ring(0.62, 0.7, b + 2.45, 0.03)));
+  bag.add(gilt, put(ring(0.3, 0.36, b + 2.45, 0.025)));
+  bag.add(gilt, put(ring(1.08, 1.16, 2.95, 0.03)));
+  if (simple) return;
+  // small seated Buddhas round the outer band
+  for (let i = 0; i < 13; i++) {
+    const a = Math.PI * (-0.12 + (i / 12) * 1.24), px = Math.cos(a) * 1.3, py = cy + Math.sin(a) * 1.62 - 0.1;
+    const lx = Math.cos(yaw) * px * s + Math.sin(yaw) * (zb + 0.05) * s, lz = -Math.sin(yaw) * px * s + Math.cos(yaw) * (zb + 0.05) * s;
+    buddha({ at: [x + lx, z + lz], y: el.y + (py - 1.6 * 0.07) * s, h: 0.36 * s, dir, robe: gilt, gilt, noThrone: true, noHalo: true, simple: true }, { bag });
+  }
 }
 
 /** A standing figure (attendant, heavenly king) { at, y, h, robe }. */

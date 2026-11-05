@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.82 — Nara's Great Buddha and the hall's interior (2026-11-04)
+- Nara: the Great Buddha rebuilt in detail (lotus throne of upturned petals, crossed legs with soles up, raised right hand and open left on the knee, robe hem, curls and topknot, long lobes, flame-edged mandorla with haloes and thirteen small Buddhas) with two gilt attendants on a stone dais behind an altar; the hall's inner two rings of posts, a coffered ceiling of great beams and painted panels, silk banners; tall halls (H > 8) now stand on posts that thicken with height and have doors at the foot, a tie beam and plaster above with a band of lattice windows (Tōdai-ji, the gates, the Forbidden City's Hall of Supreme Harmony). Showroom takes --look.
+
 ## v8.81 — Edfu's pylon reliefs (2026-11-04)
 - Detail: Edfu's pylon carries its reliefs — on each tower the king in the double crown smiting his enemies before the falcon god, and above them two registers of the king before standing and seated gods — and Petra's rock is a deeper rose.
 

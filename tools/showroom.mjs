@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Renders objects of the shared library (src/objects/) in a row, for a close look at them.
-// usage: node tools/showroom.mjs '<items json>' [--out shots/showroom.png] [--cols 6] [--gap 4] [--cam x,y,z] [--night 1] [--size 1280x720]
+// usage: node tools/showroom.mjs '<items json>' [--out shots/showroom.png] [--cols 6] [--gap 4] [--cam x,y,z] [--look x,y,z] [--night 1] [--size 1280x720]
 import { chromium } from 'playwright';
 import { serve } from './serve.mjs';
 process.env.PLAYWRIGHT_BROWSERS_PATH ||= '/opt/pw-browsers';
@@ -13,6 +13,7 @@ page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) console
 page.on('pageerror', (e) => console.log('pageerror', e.message));
 const p = new URLSearchParams({ items: args[0], cols: opt('cols', '6'), gap: opt('gap', '4'), night: opt('night', '0'), style: opt('style', 'life'), imports: opt('imports', '') });
 if (opt('cam')) p.set('cam', opt('cam'));
+if (opt('look')) p.set('look', opt('look'));
 await page.goto(`http://127.0.0.1:${srv.address().port}/tools/showroom.html?${p}`);
 await page.waitForFunction('window.DONE === true', null, { timeout: 600_000 });
 await page.screenshot({ path: opt('out', 'shots/showroom.png') });

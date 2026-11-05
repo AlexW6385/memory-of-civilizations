@@ -246,7 +246,9 @@ function mingHall(el, { bag, col }) {
   for (let i = 0; i <= (along ? nb : nd); i++) xs.push(x0 + Lx * i / (along ? nb : nd));
   for (let j = 0; j <= (along ? nd : nb); j++) zs.push(z0 + Lz * j / (along ? nd : nb));
   // the posts round the edge; the hall's floor of square bricks
-  for (const x of xs) for (const z of zs) if (x === x0 || x === x1 || z === z0 || z === z1) column(bag, col, x, z, y, H - 0.2, 0.28);
+  // posts thicken with the height of the hall (a 15 m hall stands on posts near a metre thick)
+  const d = H > 6 ? 0.28 + (H - 6) * 0.07 : 0.28, tall = H > 8, hd = Math.min(H - 0.5, 5.5 + (H - 8) * 0.15);
+  for (const x of xs) for (const z of zs) if (x === x0 || x === x1 || z === z0 || z === z1) column(bag, col, x, z, y, H - 0.2, d);
   bag.add(PAL.floor, box(x0, y - 0.04, z0, x1, y + 0.01, z1));
   // lattice doors (or plaster walls with windows) between the posts
   const sides = { n: [[x0, z0], [x1, z0], xs], s: [[x1, z1], [x0, z1], xs], w: [[x0, z1], [x0, z0], zs], e: [[x1, z0], [x1, z1], zs] };
@@ -257,8 +259,18 @@ function mingHall(el, { bag, col }) {
       const A = p(ticks[i]), B = p(ticks[i + 1]);
       if (el.four || isFront) {
         // the middle bay of the front stands open as the doorway
-        if (isFront && i === Math.floor((ticks.length - 1) / 2)) continue;
-        latticeBay(bag, col, A, B, y, H - 0.5, el.four && !isFront ? 'window' : 'door');
+        const doorway = isFront && i === Math.floor((ticks.length - 1) / 2);
+        if (doorway && !tall) continue;
+        if (!tall) { latticeBay(bag, col, A, B, y, H - 0.5, el.four && !isFront ? 'window' : 'door'); continue; }
+        // a tall hall: doors at the foot, a tie beam over them, plaster above with a band of lattice windows
+        if (!doorway) latticeBay(bag, col, A, B, y, hd, 'door');
+        const lo = [Math.min(A[0], B[0]), Math.min(A[1], B[1])], hi = [Math.max(A[0], B[0]), Math.max(A[1], B[1])], ns = k === 'n' || k === 's';
+        const wall = (y0, y1, t, mat) => bag.add(mat, box(lo[0] - (ns ? 0 : t), y0, lo[1] - (ns ? t : 0), hi[0] + (ns ? 0 : t), y1, hi[1] + (ns ? t : 0)));
+        wall(y + hd, y + hd + 0.45, 0.17, PAL.wood);
+        wall(y + hd + 0.45, y + H - 0.55, 0.11, PAL.plaster);
+        const span = H - 1.0 - hd;
+        latticeBay(bag, null, A, B, y + hd + 0.45 + span * 0.3, span * 0.42, 'window', 0.14);
+        col.segment(A, B, 0.3, y + (doorway ? hd : 0), y + H);
       } else {
         const L = Math.hypot(B[0] - A[0], B[1] - A[1]);
         bag.add(PAL.plaster, box(Math.min(A[0], B[0]) - (k === 'w' || k === 'e' ? 0.14 : 0), y, Math.min(A[1], B[1]) - (k === 'n' || k === 's' ? 0.14 : 0), Math.max(A[0], B[0]) + (k === 'w' || k === 'e' ? 0.14 : 0), y + H - 0.4, Math.max(A[1], B[1]) + (k === 'n' || k === 's' ? 0.14 : 0)));
