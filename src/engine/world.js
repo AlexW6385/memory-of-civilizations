@@ -340,6 +340,7 @@ export class World {
     this.scene.add(this.planet);
     this.terrain = new PlanetTerrain(this.planet, land);
     this.openFlora = new OpenFlora(this.planet, land);
+    this.openFlora.precompile = (o) => this.r.precompile(o);
     this.settlements = BUILT.map((S) => new Settlement(S, this));
     this.byId = Object.fromEntries(this.settlements.map((s) => [s.id, s]));
     // the plants of the settlement the visitor is in (src/engine/flora), drawn in its frame

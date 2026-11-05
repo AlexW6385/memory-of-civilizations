@@ -131,6 +131,12 @@ export class OpenFlora {
       mesh.name = `open-flora:${key}`;
       this.group.add(mesh);
     }
+    // a species not drawn before: hidden until its shaders are compiled (set by the world), so that
+    // the frame that first shows it does not stop to compile them
+    if (this.precompile) {
+      for (const mesh of meshes) mesh.visible = false;
+      this.precompile(meshes).then(() => { for (const mesh of meshes) mesh.visible = true; });
+    }
     b = { meshes, cap };
     this.batches.set(key, b);
     return b;

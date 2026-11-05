@@ -144,17 +144,17 @@ export class Renderer {
   }
 
   /**
-   * Compile, off the frame, the shaders and pipelines that the meshes under `root` will need, before
+   * Compile, off the frame, the shaders and pipelines that the meshes under `roots` (one or a list) will need, before
    * they are shown: three otherwise compiles them in the frame that first draws them, a hitch of a
    * tenth of a second to a second. One mesh of each kind (material, attributes, instancing) not
    * seen before is compiled, with the scene pass's own target, outputs and context, so that what is
    * compiled is what the frame will look for. Resolves when done (never rejects).
    */
-  precompile(root) {
+  precompile(roots) {
     const r = this.renderer, sp = this.scenePass, ctx = sp?._contextNodeCache?.context;
     if (!r || !sp?.renderTarget || !ctx) return Promise.resolve();      // before the first frame
     const seen = this._compiled ??= new Set(), reps = [];
-    root.traverse((o) => {
+    for (const root of Array.isArray(roots) ? roots : [roots]) root.traverse((o) => {
       if (!o.isMesh || !o.material || !o.geometry) return;
       const g = o.geometry;
       const key = `${o.material.uuid}|${o.isInstancedMesh ? 1 : 0}${o.instanceColor ? 1 : 0}${g.index ? 1 : 0}${o.receiveShadow ? 1 : 0}|${Object.keys(g.attributes).sort().join()}`;
@@ -165,29 +165,19 @@ export class Renderer {
     // set up as the scene pass does; three's compileAsync gathers what to compile synchronously and
     // only then awaits, so all of this is put back before any frame can see it
     const prev = { rt: r.getRenderTarget(), mrt: r.getMRT(), ctx: r.contextNode };
-    const tmp = new THREE.Group(), homes = reps.map((o) => [o, o.parent, o.frustumCulled, o.visible]);
-    for (const o of reps) { tmp.add(o); o.frustumCulled = false; o.visible = true; }
+    const tmp = new THREE.Group(), homes = reps.map((o) => [o, o.parent, o.frustumCulled, o.visible, o.count]);
+    for (const o of reps) { tmp.add(o); o.frustumCulled = false; o.visible = true; if (o.isInstancedMesh && !o.count) o.count = 1; }
     const jobs = [];
-    const scene = this.scene, bg = { b: scene.background, bn: scene.backgroundNode, o: scene.overrideMaterial };
     try {
       r.setRenderTarget(sp.renderTarget); r.setMRT(sp.getMRT?.() ?? sp._mrt ?? null); r.contextNode = ctx;
-      jobs.push(r.compileAsync(tmp, this.camera, scene));
-      // and the sun's shadow pass for those that cast one: as three's ShadowNode draws it (the
-      // scene pass's context, no outputs or background, the light's depth material over all),
-      // with the first cascade (the others share its pipelines)
-      const sh = this.sun.castShadow && this.sun.shadow.shadowNode?._shadowNodes?.[0];
-      const casters = reps.filter((o) => o.castShadow);
-      if (sh?.shadowMap && casters.length) {
-        for (const o of reps) if (!o.castShadow) o.visible = false;
-        r.setRenderTarget(sh.shadowMap); r.setMRT(null);
-        scene.background = null; scene.backgroundNode = null; scene.overrideMaterial = sh.getShadowMaterial();
-        jobs.push(r.compileAsync(tmp, sh.shadow.camera, scene));
-      }
+      jobs.push(r.compileAsync(tmp, this.camera, this.scene));
+      // (not the sun's shadow pass: three's compileAsync compiles each object later, after the
+      // shadow pass's shared depth material has been reset, so what it would compile is not what
+      // the shadow pass draws; those small shaders are still compiled on first use)
     } catch (e) { jobs.push(Promise.reject(e)); }
     finally {
-      scene.background = bg.b; scene.backgroundNode = bg.bn; scene.overrideMaterial = bg.o;
       r.setRenderTarget(prev.rt); r.setMRT(prev.mrt); r.contextNode = prev.ctx;
-      for (const [o, parent, fc, vis] of homes) { parent ? parent.add(o) : tmp.remove(o); o.frustumCulled = fc; o.visible = vis; }
+      for (const [o, parent, fc, vis, n] of homes) { parent ? parent.add(o) : tmp.remove(o); o.frustumCulled = fc; o.visible = vis; if (o.isInstancedMesh) o.count = n; }
     }
     return Promise.all(jobs).catch((e) => console.warn('precompile:', e.message));
   }
