@@ -4,7 +4,7 @@ import { HILL, MYRTLES, COMARES, LIONS, ALCAZABA, height } from './layout.js';
 
 const T = HILL.top, E = [];
 E.push({ t: 'court', rect: MYRTLES, y: T, kind: 'myrtles', h: 9 });
-E.push({ t: 'nasrid_tower', rect: COMARES, h: 45, y: T });
+E.push({ t: 'nasrid_tower', rect: COMARES, h: 45, y: T, windows: 3 });
 E.push({ t: 'court', rect: LIONS, y: T, kind: 'lions', h: 9 });
 // the Alcazaba: its walls and towers at the hill's west end, the Torre de la Vela the tallest
 const [a0, b0, a1, b1] = ALCAZABA;

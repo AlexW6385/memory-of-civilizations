@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.86 — The Alhambra's Court of the Myrtles, Versailles' water parterre (2026-11-04)
+- Granada: the Court of the Myrtles' pool now shows (its kerb had covered the water), wider, with a round basin and jet at each end and the myrtle hedges clipped in lengths; both courts' porticoes carry stilted round arches cut in the stucco under a frieze and eaves; the courts' walls have a dado of green glazed tile with a lapis border, and the long sides doors in stucco frames with paired windows above; the Comares Tower has paired arched windows high on every face. Versailles: the parterre by the château is the water parterre of 1690 — two great basins with stone kerbs and bronze figures reclining round their rims; the Latona fountain rises in four marble tiers ringed with bronze frogs to the figure at the top; the Apollo fountain has the god's gilded chariot, four horses plunging and two tritons. Stonehenge's avenue view now looks at the stones.
+
 ## v8.85 — Sanchi's gateways, cypresses, Uji's garden (2026-11-04)
 - Sanchi: the toranas carved — posts in panels, capitals of four elephants back to back, architraves curving up to triple spiral ends with processions in relief on both faces, bracket figures under trees leaning from the posts, figures between the architraves, a spoked wheel. Spindle crowns (cypress, poplar, arborvitae, sugi, spruce) stand on a leader carried up through them, their clumps spread evenly up the height; the cypress tighter and narrower (no more floating lumps in Agra's garden). Uji: the garden in moss with a gravel beach round the pond and more pines and maples (dossier: gravel and moss, pines and maples).
 
