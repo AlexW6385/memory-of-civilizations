@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.08 — Kaifeng's Iron Pagoda (2026-11-05)
+- Kaifeng: the Iron Pagoda's thirteen storeys are skinned in moulded glazed tiles — rows of raised tile panels on every face, clear round the doors and windows — with engaged columns at the corners and a row of brick bracket sets under each eave, instead of plain brown walls.
+
 ## v9.07 — St Peter's front (2026-11-05)
 - Rome: St Peter's front has its entablature and attic with windows, giant pilasters on the outer bays, the pediment over the middle columns, five doors in marble surrounds, windows over them under alternating triangular and flat pediments, the benediction loggia with its balcony in the middle, and the statues standing on the attic instead of hidden behind it.
 

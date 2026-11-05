@@ -61,6 +61,27 @@ function pagodaOct(el, { bag, col }) {
       const tr = []; beamTris(tr, [m[0] - ux / L * w / 2, y0, m[1] - uz / L * w / 2], [m[0] + ux / L * w / 2, y0, m[1] + uz / L * w / 2], 0.05, hh); bag.add('lacquer_black', fromTriangles(tr));
       const fr = []; beamTris(fr, [a[0], y + h - 0.6, a[1]], [b[0], y + h - 0.6, b[1]], 0.08, 0.35); bag.add(el.frame || 'timber_red', fromTriangles(fr));
     }
+    if (!gal && el.relief) {
+      // the glazed brick skin: each face in moulded tiles (seated Buddhas, flying figures, flowers) in
+      // rows, engaged columns at the corners, a row of bracket sets (in glazed brick) under the eave
+      const G = ngon(cx, cz, r), tiles = [], cols = [], br = [];
+      for (let k = 0; k < 8; k++) {
+        const a = G[k], b = G[(k + 1) % 8], ux = b[0] - a[0], uz = b[1] - a[1], L = Math.hypot(ux, uz), nx = uz / L, nz = -ux / L;
+        const sgn = ((a[0] + b[0]) / 2 - cx) * nx + ((a[1] + b[1]) / 2 - cz) * nz > 0 ? 1 : -1, o = 0.06 * sgn;
+        const rows = Math.max(2, Math.floor((h - 1.2) / 0.62)), per = Math.max(2, Math.floor(L / 0.62));
+        for (let i = 0; i < rows; i++) for (let j = 0; j < per; j++) {
+          const t = (j + 0.5) / per, yy = y + 0.3 + i * (h - 1.2) / rows, px = a[0] + ux * t, pz = a[1] + uz * t;
+          const w2 = 0.2, hh = (h - 1.2) / rows - 0.1;
+          if (Math.abs(t - 0.5) < (k % 2 === 0 ? 0.2 : 0.1) && yy > y + (k % 2 === 0 ? 0.2 : h * 0.3) && yy < y + (k % 2 === 0 ? 3.4 : h * 0.35 + 1.2)) continue;   // the door or window
+          beamTris(tiles, [px - ux / L * w2 + nx * o, yy, pz - uz / L * w2 + nz * o], [px + ux / L * w2 + nx * o, yy, pz + uz / L * w2 + nz * o], 0.06, hh);
+        }
+        cols.push(lathe([[0.16, 0], [0.14, h - 0.6], [0.24, h - 0.5]], 8, null, a[0], y, a[1]));
+        for (let j = 0; j < 3; j++) { const t = (j + 0.5) / 3, px = a[0] + ux * t, pz = a[1] + uz * t; beamTris(br, [px - ux / L * 0.25 + nx * sgn * 0.2, y + h - 0.55, pz - uz / L * 0.25 + nz * sgn * 0.2], [px + ux / L * 0.25 + nx * sgn * 0.2, y + h - 0.55, pz + uz / L * 0.25 + nz * sgn * 0.2], 0.25, 0.45); }
+      }
+      bag.add(coreMat, fromTriangles(tiles));
+      for (const g of cols) bag.add(coreMat, g);
+      bag.add(coreMat, fromTriangles(br));
+    }
     if (!gal) {
       prism(bag, coreMat, ngon(cx, cz, r + 0.15), ngon(cx, cz, r + 0.55), y + h - 0.5, y + h + 0.2);
       octEave(bag, cx, cz, r + 0.3, y + h + 0.7, r + 1.6, y + h - 0.1, 0.35, el.eave || 'tile_dark', coreMat);
