@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.81 — Edfu's pylon reliefs (2026-11-04)
+- Detail: Edfu's pylon carries its reliefs — on each tower the king in the double crown smiting his enemies before the falcon god, and above them two registers of the king before standing and seated gods — and Petra's rock is a deeper rose.
+
 ## v8.80 — Giza's pyramidion, Ur's court (2026-11-04)
 - Detail: the Great Pyramid's pyramidion is gilded; the Court of Nanna at Ur is paved; people gather at Giza's mortuary temple, along the queens' pyramids and at the valley temple.
 

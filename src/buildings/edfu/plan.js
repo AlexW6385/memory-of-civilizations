@@ -35,7 +35,7 @@ for (const s of [-1, 1]) {
     t: 'pylon_tower', rect: [x0, -12, x1, 0], y0: 0, h: PYLON_H, batter: PYLON_B, front: 'zp',
     batterEnds: s < 0 ? [PYLON_B, 0] : [0, PYLON_B],
     niches: [{ x: s * 12.0, w: 1.6, depth: 0.7, top: 26 }, { x: s * 18.5, w: 1.6, depth: 0.7, top: 26 }],
-    trim: { torus: 0.45, cornice: 2.4 }, mat: 'sandstone',
+    trim: { torus: 0.45, cornice: 2.4 }, mat: 'sandstone', towardDoor: -s,
   });
   for (const x of [12.0, 18.5]) obj('flagpole', s * x, -0.15, 0, { h: 40 });
   // granite falcons of Horus before the towers, facing the arriving visitor

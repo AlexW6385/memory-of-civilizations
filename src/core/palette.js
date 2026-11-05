@@ -300,6 +300,7 @@ export const MATERIALS = {
   wood_painted:     { color: '#8a5a3a', roughness: 0.8, kind: 'wood' },
   wood_ochre:       { color: '#a8834a', roughness: 0.8, kind: 'wood' },
   coral_plaster:    { color: '#d9d2c2', roughness: 0.92, kind: 'mudbrick', course: 0.32, block: 0.55 },
+  sandstone_relief: { color: '#a98d6c', roughness: 0.9, kind: 'rock' },
   rubber:           { clean: true, color: '#1a1a1a', roughness: 0.9, kind: 'smooth' },
 };
 
