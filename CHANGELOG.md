@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.91 — Persepolis' winged bulls, Petra's cliffs (2026-11-05)
+- Persepolis: the Gate of All Nations' winged bulls are carved instead of stacked blocks — striding legs, the body and chest, one great curved wing along the outer flank with the ridges of its feathers rising behind the head, the long square beard in curled rows, the tall horned crown. Petra: at the foot of the Siq's cliffs the ground is rock with drifted sand, so the walls stay rose down to the floor instead of fading pale.
+
 ## v8.90 — Lalibela's rims lie flush (2026-11-05)
 - Lalibela: the ground is cut only inside the rock walls' inner faces, so it stays level right up to the walls and their tops lie flush with it — no more raised slab with a visible edge round each pit; the walls are built in two-metre lengths, each topped at the ground's level, so the trenches climbing out onto the slopes beyond the precinct keep their walls up to the surface.
 

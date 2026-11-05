@@ -6,7 +6,10 @@ import { RADIUS, RIM, STREET, open, height, inLot } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.5, grass: 0, rock: 0, soil: 0.3, fields: 0, dry: 0.9, warmth: 0.85, red: 0.8, road: 0, snow: 0, forest: 0 };
-  if (open(x, z) < 0.5) { c.rock = 0.9; c.sand = 0.1; return c; }
+  const o = open(x, z);
+  if (o < 0.5) { c.rock = 0.9; c.sand = 0.1; return c; }
+  // the foot of the cliffs: rock with the sand drifted against it, so that the walls stay rose to the floor
+  if (o < 0.97) { c.rock = 0.75; c.sand = 0.15; c.soil = 0.1; return c; }
   if (Math.abs(z - STREET.a[1]) < 6 && x < STREET.a[0] && x > STREET.b[0]) { c.road = 0.7; return c; }
   return c;
 }

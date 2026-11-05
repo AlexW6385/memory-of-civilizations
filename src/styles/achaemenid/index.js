@@ -5,7 +5,8 @@
 // stepped merlons; the town's flat-roofed mudbrick houses.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, frustum, lathe } from '../../core/geom.js';
+import { Matrix4 } from 'three';
+import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 
 const S = 'limestone_persian', W = 'plaster_persian';
@@ -114,13 +115,58 @@ function hall(el, { bag, col }) {
 function gate(el, ctx) {
   const { bag } = ctx, [cx, cz] = el.c, s = el.s, h = el.h;
   hall({ rect: [cx - s / 2, cz - s / 2, cx + s / 2, cz + s / 2], y: el.y, h, grid: [2, 2], walls: 4, doors: 'we', d: 1.3, simple: el.simple }, ctx);
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    const x = cx + sx * (s / 2 + 3), z = cz + sz * 3.6, y = el.y ?? 0;
-    bag.add(S, box(x - 2.8, y, z - 0.9, x + 2.8, y + 2.2, z + 0.9));
-    bag.add(S, box(x - 2.4, y + 2.2, z - 0.85, x + 2.4, y + 4.6, z + 0.85));
-    bag.add(S, box(x + sx * 2.0 - 0.9, y + 4.6, z - 0.7, x + sx * 2.0 + 0.9, y + 6.4, z + 0.7));      // the bearded head
-    bag.add(S, box(x - sx * 1.5 - 1.4, y + 4.6, z - 0.5, x - sx * 1.5 + 1.4, y + 6.0, z + 0.5));     // the wing's sweep
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) lamassu(bag, cx + sx * (s / 2 + 3.2), cz + sz * 3.4, el.y ?? 0, sx, sz);
+}
+
+// an ellipsoid in a frame: centre c, radii along f (forward), y, l (lateral)
+function ell(c, f, l, rf, ry, rl, seg = 12) {
+  const g = lathe([[0.001, -1], [0.5, -0.87], [0.87, -0.5], [1, 0], [0.87, 0.5], [0.5, 0.87], [0.001, 1]], seg);
+  g.scale(rf, ry, rl);
+  // the lathe's x is along f, its z along l
+  g.applyMatrix4(new Matrix4().fromArray([f[0], 0, f[1], 0, 0, 1, 0, 0, l[0], 0, l[1], 0, c[0], c[1], c[2], 1]));
+  return g;
+}
+/**
+ * A winged bull with a man's head (lamassu) standing at a portal, facing out along x (sx), its outer
+ * side toward sz: the plinth, the body and its four legs, the chest, the great wing sweeping up and
+ * back along the outer flank in rows of feathers, the bearded head under its tall horned crown.
+ */
+function lamassu(bag, x, z, y, sx, sz) {
+  const f = [sx, 0], l = [0, sz], P = (a, b) => [x + f[0] * a + l[0] * b, z + f[1] * a + l[1] * b];
+  bag.add(S, box(x - 3.0, y, z - 1.0, x + 3.0, y + 0.6, z + 1.0));
+  const yb = y + 0.6;
+  // legs: the forelegs together under the chest, the hind legs striding
+  for (const [a, b] of [[1.9, -0.42], [1.9, 0.42], [-1.9, -0.42], [-1.3, 0.42]]) { const [lx, lz] = P(a, b); bag.add(S, lathe([[0.4, 0], [0.3, 0.3], [0.27, 1.6], [0.36, 2.2]], 10, null, lx, yb, lz)); }
+  const [bx, bz] = P(0, 0);
+  bag.add(S, ell([bx, yb + 3.0, bz], f, l, 2.6, 1.15, 0.85));
+  const [chx, chz] = P(1.85, 0);
+  bag.add(S, ell([chx, yb + 3.3, chz], f, l, 0.95, 1.35, 0.8));
+  // the wing: one great curved plate along the outer flank, sweeping up behind the head, with the
+  // ridges of its rows of feathers
+  const outline = [[1.7, 3.0], [0.2, 2.75], [-1.6, 2.85], [-2.55, 3.3], [-2.5, 4.3], [-1.9, 5.4], [-0.9, 6.0], [0.3, 6.05], [1.1, 5.5], [1.6, 4.3]];
+  const tri = [], cA = outline.reduce((q, p) => q + p[0], 0) / outline.length, cY = outline.reduce((q, p) => q + p[1], 0) / outline.length;
+  const W3 = (a, yy, o) => { const [px, pz] = P(a, o); return [px, yb + yy, pz]; };
+  for (let i = 0; i < outline.length; i++) {
+    const [a0, y0] = outline[i], [a1, y1] = outline[(i + 1) % outline.length];
+    for (const o of [0.78, 1.0]) tri.push(...W3(cA, cY, o), ...W3(a0, y0, o), ...W3(a1, y1, o));
+    tri.push(...W3(a0, y0, 0.78), ...W3(a0, y0, 1.0), ...W3(a1, y1, 1.0), ...W3(a0, y0, 0.78), ...W3(a1, y1, 1.0), ...W3(a1, y1, 0.78));
   }
+  const both = []; for (let i = 0; i < tri.length; i += 9) both.push(...tri.slice(i, i + 9), ...tri.slice(i, i + 3), ...tri.slice(i + 6, i + 9), ...tri.slice(i + 3, i + 6));
+  bag.add(S, fromTriangles(both));
+  for (let r = 0; r < 4; r++) {
+    const yy = 3.5 + r * 0.6, a0 = 1.4 - r * 0.1, a1 = -2.3 + r * 0.35, [p0x, p0z] = P(a0, 1.04), [p1x, p1z] = P(a1, 1.04);
+    const L = Math.hypot(p1x - p0x, p1z - p0z), g = box(-L / 2, 0, -0.04, L / 2, 0.1, 0.04);
+    g.translate((p0x + p1x) / 2, yb + yy, (p0z + p1z) / 2); bag.add(S, g);
+  }
+  // the head: neck, the face, the long square beard tapering to the chest, the tall horned crown
+  const [hx, hz] = P(2.3, 0);
+  bag.add(S, lathe([[0.55, 0], [0.48, 0.6], [0.001, 0.62]], 10, null, hx, yb + 4.0, hz));
+  bag.add(S, ell([hx, yb + 4.95, hz], f, l, 0.42, 0.55, 0.4));
+  const [bdx, bdz] = P(2.55, 0);
+  bag.add(S, frustum([bdx - 0.18, bdz - 0.32, bdx + 0.18, bdz + 0.32], yb + 3.7, yb + 4.75, 0.02, 0.02, -0.04, -0.04));
+  for (let k = 0; k < 5; k++) bag.add(S, box(bdx - 0.2, yb + 3.8 + k * 0.19, bdz - 0.33, bdx + 0.2, yb + 3.85 + k * 0.19, bdz + 0.33));     // the beard's curled rows
+  bag.add(S, lathe([[0.36, 0], [0.4, 0.75], [0.45, 0.8], [0.45, 0.88], [0.001, 0.88]], 12, null, hx, yb + 5.35, hz));
+  for (const k of [0.2, 0.45, 0.68]) bag.add(S, lathe([[0.4, 0], [0.4, 0.06], [0.001, 0.06]], 12, null, hx, yb + 5.35 + k, hz));
 }
 
 /** persian_house: { rect, seed }: a flat-roofed mudbrick house round a small court, a parapet. */
