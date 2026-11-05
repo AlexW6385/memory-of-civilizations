@@ -16,12 +16,14 @@ const pick = (rand, list) => { const tot = list.reduce((a, [, w]) => a + w, 0); 
 const F = (dress, cloths, skin, hats, extra = {}) => ({ dress, cloths, skin, hats, ...extra });
 const KITS = {
   mediterranean: {
+    fronts: [['laundry_pole', 1, 2], ['shop_sign:board', 0.4, 1]],
     door: [['lantern:oil', 0.7], ['pot:amphora', 3], ['pot:pithos', 1], ['basket', 2], ['bench', 1.5], ['firewood', 1], ['ladder', 0.6], ['laundry', 0.8]],
     street: [['cart', 1], ['animal:donkey', 2], ['animal:goat', 1], ['animal:dog', 0.6], ['chickens', 0.8], ['sacks', 1], ['figure', 2.5]],
     stall: ['pot:amphora', 'basket', 'produce', 'cloth'], boats: ['rowboat'], awnings: ['cloth_white', 'cloth_ochre', 'cloth_red'],
     figures: F(['robe', 'tunic'], ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red', 'cloth_indigo'], ['skin_medium', 'skin_light'], ['none', 'none', 'veil', 'cap']),
   },
   near_east: {
+    fronts: [['hang_lantern:white', 0.6, 1], ['laundry_pole', 0.4, 2]],
     door: [['lantern:oil', 0.7], ['pot:water_pot', 3], ['pot:pithos', 1], ['basket', 2], ['sacks', 1], ['bench', 1], ['laundry', 0.6]],
     street: [['animal:donkey', 2.5], ['animal:camel', 1.2], ['animal:goat', 1.2], ['animal:sheep', 0.8], ['chickens', 0.6], ['sacks', 1], ['figure', 2.5]],
     stall: ['pot:water_pot', 'basket', 'produce', 'cloth'], boats: ['dhow', 'reed'], awnings: ['cloth_white', 'cloth_ochre', 'cloth_indigo'],
@@ -34,6 +36,7 @@ const KITS = {
     figures: F(['wrap', 'tunic'], ['cloth_white', 'cloth_white', 'linen'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap']),
   },
   east_asia: {
+    fronts: [['hang_lantern:paper', 1.4, 1], ['shop_sign', 1, 1], ['laundry_pole', 1, 2]],
     door: [['lantern:paper', 1.6], ['pot:glazed_jar', 3], ['pot:blue_jar', 1], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.2], ['laundry', 1], ['ladder', 0.5]],
     street: [['barrow', 1.5], ['cart', 0.6], ['animal:ox', 0.8], ['animal:buffalo', 0.5], ['animal:dog', 0.6], ['chickens', 0.8], ['sacks', 0.6], ['figure', 3]],
     stall: ['pot:glazed_jar', 'basket', 'produce', 'cloth'], boats: ['sampan'], awnings: ['cloth_indigo', 'reed_mat', 'cloth_white'],
@@ -46,12 +49,14 @@ const KITS = {
     figures: F(['robe'], ['cloth_brown', 'cloth_red', 'cloth_black', 'cloth_ochre', 'cloth_grey'], ['skin_medium', 'skin_dark'], ['cap', 'none', 'brim', 'none']),
   },
   japan: {
+    fronts: [['hang_lantern:white', 1, 1], ['shop_sign', 0.7, 1]],
     door: [['lantern:white', 1.6], ['pot:dark_pot', 2], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.5], ['ladder', 0.5]],
     street: [['barrow', 0.4], ['cart', 0.5], ['animal:ox', 0.7], ['animal:horse', 0.5], ['animal:dog', 0.5], ['figure', 3]],
     stall: ['basket', 'produce', 'cloth', 'pot:dark_pot'], boats: ['sampan', 'rowboat'], awnings: ['cloth_indigo', 'reed_mat'],
     figures: F(['robe'], ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_black', 'cloth_white'], ['skin_light'], ['straw', 'none', 'none'], { carry: ['pole', 'none', 'none'] }),
   },
   south_asia: {
+    fronts: [['laundry_pole', 0.8, 2], ['hang_lantern:white', 0.4, 1]],
     door: [['lantern:oil', 0.7], ['pot:water_pot', 3.5], ['basket', 2], ['firewood', 0.8], ['bench', 0.8], ['laundry', 1]],
     street: [['cart', 1.2], ['animal:zebu', 2.2], ['animal:buffalo', 0.8], ['animal:goat', 1], ['animal:dog', 0.6], ['figure', 3]],
     stall: ['pot:water_pot', 'basket', 'produce', 'cloth'], boats: ['rowboat'], awnings: ['cloth_red', 'cloth_ochre', 'cloth_white'],
@@ -64,12 +69,14 @@ const KITS = {
     figures: F(['wrap'], ['cloth_ochre', 'cloth_red', 'cloth_brown', 'cloth_white'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { carry: ['pole', 'basket', 'none'] }),
   },
   europe_medieval: {
+    fronts: [['shop_sign:board', 1, 1], ['laundry_pole', 0.4, 2]],
     door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1], ['firewood', 2], ['bench', 1.2], ['ladder', 0.8], ['laundry', 0.8], ['basket', 1]],
     street: [['cart', 2], ['animal:horse', 1.2], ['animal:pig', 0.8], ['animal:dog', 0.6], ['chickens', 1], ['sacks', 1], ['barrel', 1], ['figure', 2.5]],
     stall: ['basket', 'produce', 'cloth', 'pot:dark_pot'], boats: ['rowboat', 'barge'], awnings: ['cloth_red', 'cloth_white', 'cloth_green', 'cloth_ochre'],
     figures: F(['robe', 'tunic'], ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_white'], ['skin_light'], ['cap', 'none', 'veil', 'brim']),
   },
   europe_early_modern: {
+    fronts: [['shop_sign:board', 1, 1], ['laundry_pole', 0.5, 2]],
     door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1.5], ['bench', 1.5], ['firewood', 0.8], ['ladder', 0.5], ['basket', 1]],
     street: [['cart', 2], ['animal:horse', 1.5], ['animal:dog', 0.6], ['barrel', 1], ['sacks', 0.8], ['figure', 3]],
     stall: ['basket', 'produce', 'cloth'], boats: ['rowboat', 'barge'], awnings: ['cloth_white', 'cloth_red', 'cloth_green'],
@@ -106,12 +113,14 @@ const KITS = {
     figures: F(['robe', 'tunic'], ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_white', 'cloth_indigo'], ['skin_light'], ['cap', 'none', 'veil']),
   },
   venice: {
+    fronts: [['laundry_pole', 1.2, 2], ['shop_sign:board', 0.5, 1]],
     door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1.5], ['bench', 1], ['basket', 1], ['laundry', 1.2], ['pot:water_pot', 0.6]],
     street: [['barrel', 1], ['sacks', 1], ['crates', 0.8], ['animal:dog', 0.4], ['well', 0.3], ['figure', 4]],
     stall: ['basket', 'produce', 'cloth'], boats: ['gondola', 'gondola', 'rowboat', 'barge'], awnings: ['cloth_red', 'cloth_white', 'cloth_ochre'],
     figures: F(['robe'], ['cloth_black', 'cloth_red', 'cloth_brown', 'cloth_indigo', 'cloth_white'], ['skin_light'], ['cap', 'veil', 'none']),
   },
   industrial: {
+    fronts: [['shop_sign:board', 0.8, 1]],
     door: [['lantern:iron', 0.7], ['barrel', 1.5], ['crates', 1.5], ['bench', 1], ['street_lamp', 0.4], ['pot:dark_pot', 0.5]],
     street: [['cart', 2], ['animal:horse', 1.5], ['street_lamp', 0.6], ['figure', 3], ['sacks', 0.6]],
     stall: ['produce', 'cloth', 'basket'], boats: ['barge', 'rowboat'], awnings: ['cloth_green', 'cloth_white', 'cloth_red'],
@@ -173,6 +182,7 @@ function toSettle(plan, x, z) {
 }
 const rectOf = (plan, [x0, z0, x1, z1]) => { const a = toSettle(plan, x0, z0), b = toSettle(plan, x1, z1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
 // landmarks whose plan is the town itself (their elements are read like a townscape's)
+const OWN_FRONTS = new Set(['ming-suzhou']);          // settlements that dress their own house fronts (their town.js)
 const TOWN_LANDMARKS = new Set(['machu-picchu-town', 'taos-pueblo']);
 const isFull = (plan, R) => TOWN_LANDMARKS.has(plan.id) || (plan.bounds && plan.bounds[2] - plan.bounds[0] >= R * 1.5);
 
@@ -198,7 +208,7 @@ export function lifePlans(id, R, landmarks, town, G) {
       egrid.fill([r[0] - 0.3, r[1] - 0.3, r[2] + 0.3, r[3] + 0.3]);
       if (!full) continue;
       grid.fill([r[0] - 0.3, r[1] - 0.3, r[2] + 0.3, r[3] + 0.3]);
-      if ((HOUSE.test(el.t) || !SKIP.test(el.t)) && w * d >= 10 && w * d <= 6000 && w > 2 && d > 2) houses.push({ r, front: el.front, y: el.y });
+      if ((HOUSE.test(el.t) || !SKIP.test(el.t)) && w * d >= 10 && w * d <= 6000 && w > 2 && d > 2) houses.push({ r, front: el.front, y: el.y, storeys: el.storeys ?? (el.h && el.h > 5 ? 2 : 1), shop: !!el.shop });
     }
   }
   // the landmarks' paved floors (forecourts, plazas raised a little): figures and stalls stand on them
@@ -245,6 +255,24 @@ export function lifePlans(id, R, landmarks, town, G) {
         }
       }
     }
+  }
+  // on the house fronts, above the street: lanterns under the eaves, shop signs out on brackets, washing on poles out of upper windows
+  const fronted = [];
+  if (kit.fronts?.length && !OWN_FRONTS.has(id)) for (const h of houses) {
+    if (!sides[h.front] || rand() > 0.55) continue;
+    const [x0, z0, x1, z1] = h.r, [nx, nz] = sides[h.front], L = nx ? z1 - z0 : x1 - x0, rot = Math.atan2(nx, nz), yb = h.y ?? H((x0 + x1) / 2, (z0 + z1) / 2);
+    const P = (t, off) => (nx ? [(nx > 0 ? x1 : x0) + nx * off, z0 + (z1 - z0) * t] : [x0 + (x1 - x0) * t, (nz > 0 ? z1 : z0) + nz * off]);
+    if (!inside(...P(0.5, 0)) || L < 3) continue;
+    const opts = kit.fronts.filter(([, , ms]) => (h.storeys ?? 1) >= ms), tot = opts.reduce((a, o) => a + o[1], 0);
+    let u = rand() * tot, spec = null; for (const o of opts) { if ((u -= o[1]) <= 0) { spec = o[0]; break; } }
+    if (!spec) continue;
+    const [t, sub] = spec.split(':'), seed = Math.floor(rand() * 1e9), sf = rand() < 0.5 ? 0.12 : 0.88;
+    const spot = t === 'shop_sign' ? P(sf, 0) : P(0.5, 0);
+    if (fronted.some((q) => Math.hypot(q[0] - spot[0], q[1] - spot[1]) < 2.2)) continue;
+    fronted.push(spot);
+    if (t === 'hang_lantern') for (const f of L > 6 ? [0.3, 0.7] : [0.5]) els.push({ t, at: P(f, 0.25), y: yb + 2.75, rot, kind: sub, seed: 1 });
+    else if (t === 'shop_sign') els.push({ t, at: P(sf, -0.05), y: yb, rot, h: sub === 'board' ? 3.1 : 2.75, board: sub === 'board', len: 1 + rand() * 0.6, cloth: sub === 'board' ? undefined : ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_black'][Math.floor(rand() * 4)], seed });
+    else if (t === 'laundry_pole') els.push({ t, at: P(0.3 + rand() * 0.4, -0.05), y: yb + 4.1, rot, len: 1.3 + rand() * 0.5, prop: false, seed });
   }
   // in the streets: free ground near houses
   const area = houses.reduce((a, h) => a + Math.min(1200, (h.r[2] - h.r[0]) * (h.r[3] - h.r[1])), 0), nStreet = Math.min(900, Math.round(area / 200));
@@ -331,7 +359,14 @@ export function lifePlans(id, R, landmarks, town, G) {
       let ok = true;
       for (const t of [-0.5, 0.5]) { const rot = land === null ? a : land + Math.PI / 2, px = x - Math.sin(rot) * len * t, pz = z - Math.cos(rot) * len * t; if (!wet(px, pz)) ok = false; }
       if (!ok) continue;
-      els.push({ t: 'boat', kind, at: [x, z], y: G.waterLevel(x, z) - 0.25, rot: land === null ? a : land + Math.PI / 2, seed: Math.floor(rand() * 1e9) });
+      const brot = land === null ? a : land + Math.PI / 2, wy = G.waterLevel(x, z) - 0.25;
+      els.push({ t: 'boat', kind, at: [x, z], y: wy, rot: brot, seed: Math.floor(rand() * 1e9) });
+      // the crew: someone standing at the stern (the gondolier, the boatman at his oar), or sitting amidships
+      if (kind !== 'ferry' && kind !== 'dhow' && rand() < 0.6) {
+        const dx = Math.sin(brot), dz = Math.cos(brot), stand = kind === 'gondola' || kind === 'sampan' || rand() < 0.4, f = stand ? 0.4 : 0.05;
+        put('figure', x + dx * len * f, z + dz * len * f, brot + Math.PI + (rand() - 0.5) * 0.5, { y: wy + (stand ? 0.28 : 0.15), ...(stand ? {} : { pose: 'sit' }) });
+        if (kind === 'sampan') els.push({ t: 'oar', at: [x + dx * (len * 0.43 + 0.2), z + dz * (len * 0.43 + 0.2)], y: wy + 0.3, rot: brot + Math.PI, seed: 3 });
+      }
       grid.fill(box, 2); nb++;
     }
   }

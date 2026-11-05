@@ -395,6 +395,7 @@ function lantern(el, { bag }) {
 // ---- the life of a street front and a canal ----------------------------------------------------
 /** shop_sign: a shop's cloth banner hanging from a bracket out of the wall (the bracket along +z), turned edge-on to the wall so it reads along the street; h the bracket's height; cloth, letters. */
 function shopSign(el, { bag }) {
+  if (el.board) return boardSign(el, bag);
   const put = placer(el, bag), h = el.h ?? 2.9, c = el.cloth ?? 'cloth_indigo', len = el.len ?? 1.5, out = el.out ?? 0.95, z0 = 0.3, z1 = out - 0.05, zm = (z0 + z1) / 2;
   put('timber', box(-0.04, h - 0.05, 0, 0.04, h + 0.04, out));
   put('timber', seg([0, h - 0.6, 0.02], [0, h, out * 0.6], 0.025, 0.025, 4));
@@ -404,6 +405,20 @@ function shopSign(el, { bag }) {
   const letters = el.letters ?? 3;
   for (let k = 0; k < letters; k++) { const yy = h - 0.32 - k * (len - 0.25) / letters, hh = Math.min(0.28, (len - 0.3) / letters - 0.08); put(el.ink ?? 'cloth_white', box(-0.016, yy - hh, zm - 0.13, 0.016, yy, zm + 0.13)); put(c, box(-0.019, yy - hh + 0.04, zm - 0.025, 0.019, yy - 0.04, zm + 0.025)); put(c, box(-0.019, yy - hh / 2 - 0.02, zm - 0.09, 0.019, yy - hh / 2 + 0.02, zm + 0.09)); }
   for (const zz of [z0 + 0.05, z1 - 0.05]) put('cloth_red', seg([0, h - 0.13 - len - 0.1, zz], [0, h - 0.13 - len - 0.4, zz], 0.02, 0.012, 4));
+}
+/** The European shop sign: an iron bracket with a scroll out of the wall (along +z), a painted board hanging edge-on to the wall, a device on it. */
+function boardSign(el, bag) {
+  const put = placer(el, bag), rand = rng(el.seed), h = el.h ?? 3.2, out = 1.1, c = el.cloth ?? ['wood_painted', 'stucco_red', 'stucco_leaf', 'stucco_sky', 'stucco_saffron'][Math.floor(rand() * 5)];
+  put('iron', box(-0.02, h - 0.02, 0, 0.02, h + 0.02, out));
+  put('iron', seg([0, h - 0.5, 0.02], [0, h, out * 0.55], 0.015, 0.015, 4));
+  for (let k = 0; k < 6; k++) { const a0 = k / 6 * Math.PI * 1.6, a1 = (k + 1) / 6 * Math.PI * 1.6, r = 0.12; put('iron', seg([0, h + 0.14 + Math.sin(a0) * r, out * 0.35 + Math.cos(a0) * r], [0, h + 0.14 + Math.sin(a1) * r, out * 0.35 + Math.cos(a1) * r], 0.01, 0.01, 3)); }
+  for (const zz of [0.42, 0.98]) put('iron', box(-0.006, h - 0.25, zz - 0.006, 0.006, h, zz + 0.006));
+  put(c, box(-0.025, h - 0.85, 0.36, 0.025, h - 0.25, 1.04));
+  put('gilt_bronze', box(-0.045, h - 0.81, 0.4, 0.045, h - 0.78, 1.0)); put('gilt_bronze', box(-0.045, h - 0.32, 0.4, 0.045, h - 0.29, 1.0));
+  const dev = Math.floor(rand() * 3);
+  if (dev === 0) put('gilt_bronze', at(lz([[0.001, 0], [0.12, 0.05], [0.13, 0.15], [0.06, 0.3], [0.001, 0.32]], 8).rotateZ(Math.PI / 2).rotateY(Math.PI / 2), 0, h - 0.55, 0.7));
+  else if (dev === 1) put('cloth_white', box(-0.06, h - 0.7, 0.55, 0.06, h - 0.4, 0.85));
+  else put('pottery_dark', at(lz([[0.07, 0], [0.12, 0.08], [0.12, 0.2], [0.05, 0.26], [0.001, 0.26]], 8), 0.04, h - 0.7, 0.7));
 }
 /** hang_lantern: a lantern on a cord from an eave { kind ('paper' | 'white'), drop }; y is the hook. */
 function hangLantern(el, { bag }) {

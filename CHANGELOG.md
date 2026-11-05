@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.21 — House fronts and boat crews in every town (2026-11-05)
+- The life pass dresses the house fronts of every town by its region: paper or white lanterns under the eaves and cloth banners (East Asia, Japan), white lanterns (the Near East), painted board signs on scrolled iron brackets (medieval and early-modern Europe, Venice, the industrial cities), washing on bamboo poles out of upper windows (the Mediterranean, East Asia, South Asia, Venice, Europe), spaced so neighbours' signs never clash. Boats along the shores now carry their crew: the gondolier or boatman standing at the stern (with the sculling oar on sampans), or someone sitting amidships. Suzhou keeps its own canal-side life.
+
 ## v9.20 — Life along Suzhou's canals (2026-11-05)
 - Suzhou's canal quarter is lived in: shops with cloth banners on brackets (read along the street), pairs of paper lanterns under the eaves, jars, baskets and sacks on the counters, shopkeepers and customers; tea tables set out in the street with people sitting at them; washing on bamboo poles pushed out of the upper windows over the water; waterside houses with their own steps down to the canal and women washing at the bottom; boats with the boatman standing at the sculling oar, carrying jars, sacks, baskets or a passenger (they replace the empty boats); people along the streets with shoulder poles and baskets, knots talking, dogs, hens, wheelbarrows; benches on the canal side with old men sitting. New shared objects: shop_sign, hang_lantern, laundry_pole, tea_table, drying_tray, oar. Dossier §6 extended, after Qiu Ying's Ming scroll.
 
