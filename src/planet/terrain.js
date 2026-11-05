@@ -14,7 +14,10 @@ import { faceDir, tileRect } from './chunk.js';
 import { groundMaterial, seaMaterial } from './materials.js';
 import { climateAt } from './land.js';
 
-const MAX_LEVEL = 8, N = 32, SPLIT = 2.1;
+// the finest level's tiles carry twice the samples (64) of the others (32): the same 2 m grid near
+// the visitor as eight levels of 32 gave, in a quarter of the tiles (each tile is a draw call, and
+// one more in each shadow cascade it touches)
+const MAX_LEVEL = 7, N = 32, N_FINE = 64, SPLIT = 2.1;
 
 const key = (f, L, i, j) => `${f}/${L}/${i}/${j}`;
 const parentKey = (f, L, i, j) => (L ? key(f, L - 1, i >> 1, j >> 1) : null);
@@ -168,7 +171,7 @@ export class PlanetTerrain {
       if (this.pending.has(job.k) || this.tiles.has(job.k)) continue;
       this.pending.add(job.k);
       w.idle = false;
-      w.postMessage({ key: job.k, f: job.f, L: job.L, i: job.i, j: job.j, n: N });
+      w.postMessage({ key: job.k, f: job.f, L: job.L, i: job.i, j: job.j, n: job.L === MAX_LEVEL ? N_FINE : N });
     }
   }
 
