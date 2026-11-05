@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v8.79 — Great Zimbabwe's chevrons and savanna (2026-11-04)
+- Detail: the Great Enclosure's wall carries its chevron band — blocks set on edge in a zigzag between plain courses — on both faces; the valley is miombo savanna, long dry grass with open woodland, wild figs and granite boulders.
+
 ## v8.78 — Peaks, red rock, coral stone (2026-11-04)
 - Detail: Huayna Picchu and Machu Picchu mountain are craggy sugarloaves with ribs, ledges and crags; rock where the ground is red (Petra) is rose and ochre sandstone in wavy bands; Kilwa's Great Mosque has its coral-stone walls with doorways in stone frames, small windows, buttresses and a cresting of merlons, and the stone houses carved doors in their frames, barred windows, mangrove pole ends and parapets.
 

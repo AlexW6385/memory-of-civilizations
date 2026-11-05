@@ -15,7 +15,21 @@ function dryWall(el, { bag, col }) {
     const a = pts[i], b = pts[(i + 1) % pts.length], ya = el.yAt ? el.yAt(...a) : el.y ?? 0, yb = el.yAt ? el.yAt(...b) : el.y ?? 0, y = Math.min(ya, yb);
     bag.add(G, orientedBox(a, b, th, y - 1, y + h * 0.5, 0.15));
     bag.add(G, orientedBox(a, b, th * 0.8, y + h * 0.5, y + h, 0.15));
-    if (el.chevron) bag.add('granite_grey', orientedBox(a, b, th * 0.8 + 0.06, y + h - 1.4, y + h - 0.6, 0.1));
+    if (el.chevron) {
+      // the chevron band: blocks set on edge in a zigzag between two plain courses, on both faces
+      const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L, nx = uz, nz = -ux, w = th * 0.4 + 0.04;
+      for (const s of [-1, 1]) {
+        bag.add('granite_grey', orientedBox([a[0] + nx * s * w, a[1] + nz * s * w], [b[0] + nx * s * w, b[1] + nz * s * w], 0.1, y + h - 1.55, y + h - 1.4));
+        bag.add('granite_grey', orientedBox([a[0] + nx * s * w, a[1] + nz * s * w], [b[0] + nx * s * w, b[1] + nz * s * w], 0.1, y + h - 0.6, y + h - 0.45));
+        for (let t = 0.2; t < L - 0.2; t += 0.4) {
+          const up = Math.floor(t / 0.4) % 2 === 0, p0 = [a[0] + ux * t + nx * s * w, a[1] + uz * t + nz * s * w], p1 = [a[0] + ux * (t + 0.4) + nx * s * w, a[1] + uz * (t + 0.4) + nz * s * w];
+          const g = orientedBox(p0, p1, 0.08, 0, 0.14); g.translate(0, 0, 0);
+          const mid = y + h - 1.0;
+          bag.add('granite_grey', orientedBox(p0, [(p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2], 0.09, up ? mid - 0.3 : mid + 0.16, up ? mid - 0.16 : mid + 0.3));
+          bag.add('granite_grey', orientedBox([(p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2], p1, 0.09, mid - 0.07, mid + 0.07));
+        }
+      }
+    }
     col.segment(a, b, th, y - 1, y + h);
   }
 }
