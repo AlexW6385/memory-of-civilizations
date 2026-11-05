@@ -594,11 +594,17 @@ export class World {
     if (fs) {
       const L = toLocal(fs.S.frame, camP);
       this.flora.update(L[0], L[2]);
-      // small things (the life of the streets) are drawn only near: each tile within its plan's reach
-      if (!this._nextN || now > this._nextN) {
-        this._nextN = now + 250;
-        const alt = Math.max(0, this.camAlt - (fs.S.base ?? 0));
-        for (const rec of fs.parts || []) {
+    }
+    // small things (the life of the streets) are drawn only near: each tile within its plan's reach,
+    // in every settlement built (a neighbour's too: its streets' small things were all drawn, from
+    // kilometres off, a draw call each)
+    if (!this._nextN || now > this._nextN) {
+      this._nextN = now + 250;
+      for (const st of this.settlements) {
+        if (st.state === 'idle' || !st.parts.length) continue;
+        const L = toLocal(st.S.frame, camP);
+        const alt = Math.max(0, this.camAlt - (st.S.base ?? 0));
+        for (const rec of st.parts) {
           const P = rec.plan;
           if (!P.near && !P.far) continue;
           const d = Math.hypot(L[0] - P.center[0], L[2] - P.center[1], alt * 0.7);
