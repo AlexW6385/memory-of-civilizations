@@ -7,7 +7,7 @@ import { Matrix4 } from '../../core/three.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { orientBy } from '../sahel/index.js';
 
-export const C = 'coral_plaster', RAG = 'rubble', DRESSED = 'limestone', CARVED = 'limestone_carved', SMOOTH = 'lime_plaster', POLE = 'wood_dark';
+export const C = 'lime_plaster_rough', RAG = 'coral_rag', DRESSED = 'limestone', CARVED = 'limestone_carved', SMOOTH = 'lime_plaster', POLE = 'wood_dark';
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** A solid block, and the same as an obstacle. */

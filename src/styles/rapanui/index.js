@@ -137,7 +137,7 @@ function moaiEyes() {
     coral.push(ball(14).scale(0.034, 0.0145, d).translate(s * ex, ey, c));
     pupil.push(ball(10).scale(0.0105, 0.0095, 0.004).translate(s * (ex - 0.004), ey - 0.001, c - d + 0.0028));
   }
-  return (EYES = [{ mat: 'limewash_white', g: merge(coral) }, { mat: 'lacquer_black', g: merge(pupil) }]);
+  return (EYES = [{ mat: 'coral', g: merge(coral) }, { mat: 'obsidian', g: merge(pupil) }]);
 }
 /** The pukao at unit statue height: a cylinder of red scoria, a dent below to sit on the head, a boss on top, grooves round its foot. */
 let PUKAO = null;
@@ -180,7 +180,7 @@ function moaiWalk(el, { bag, col }) {
   const yr = 0.585, sc = moaiSection(yr), n = sc.n, ring = [];
   const at = (ph, o) => { const sp = Math.sin(ph), cp = Math.cos(ph); return [(sc.w + o) * Math.sign(sp) * Math.abs(sp) ** (2 / n), yr, sc.zc - (sc.d + o) * Math.sign(cp) * Math.abs(cp) ** (2 / n)]; };
   for (let k = 0; k <= 28; k++) ring.push([...at(k / 28 * Math.PI * 2, 0.007), 0.0055]);
-  const g = tube(ring, 5); g.applyMatrix4(M); bag.add('sacking', g);
+  const g = tube(ring, 5); g.applyMatrix4(M); bag.add('rope_fibre', g);
   const world = (p) => { const v = new Vector3(...p).applyMatrix4(M); return [v.x, v.y, v.z]; };
   const anchor = { l: at(-Math.PI / 2, 0.012), r: at(Math.PI / 2, 0.012), b: at(Math.PI, 0.012) };
   for (const r of el.ropes ?? []) rope(bag, [world(anchor[r.side]), ...r.path], 0.028);

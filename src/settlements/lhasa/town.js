@@ -12,7 +12,7 @@ function people() {
   const rand = rng(1694), L = [], W = [];
   const pick = (a) => a[Math.floor(rand() * a.length)];
   // monks: the maroon skirt and shawl (zen) over the shirt, heads shaven; the odd one in the yellow outer robe (chögu)
-  const monk = (at, y, rot, pose = 'stand') => L.push({ t: 'figure', at, y, rot, h: 1.6 + rand() * 0.14, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_red', cloth2: rand() < 0.15 ? 'cloth_ochre' : 'cloth_red', over: rand() < 0.75 ? 'cape' : 'sash', skin: pick(['skin_medium', 'skin_medium', 'skin_dark']), hat: 'none', hair: 'shaven', hairMat: 'hair_dark', beard: false, feet: 'shod', pose });
+  const monk = (at, y, rot, pose = 'stand') => L.push({ t: 'figure', at, y, rot, h: 1.6 + rand() * 0.14, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_maroon', cloth2: rand() < 0.15 ? 'cloth_ochre' : 'cloth_maroon', over: rand() < 0.75 ? 'cape' : 'sash', skin: pick(['skin_medium', 'skin_medium', 'skin_dark']), hat: 'none', hair: 'shaven', hairMat: 'hair_dark', beard: false, feet: 'shod', pose });
   // pilgrims: the long chuba of wool or sheepskin belted with a sash, fur or felt hats, women in the striped apron; the
   // prayer wheel turning in the right hand (the forearm raised), walking the circuit sunwise
   const pilgrim = (at, rot, o = {}) => {
@@ -58,7 +58,7 @@ function people() {
   const yf = 3.86;
   for (const [bx, bz] of BENCHES) for (const sg of [-1, 1]) {
     const p = [bx + sg * 0.92, bz];
-    L.push({ t: 'figure', at: p, y: yf, rot: face(p, [bx, bz]), h: 1.6 + rand() * 0.1, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.5 ? 'cloth_red' : pick(['cloth_brown', 'cloth_grey']), cloth2: 'cloth_red', over: 'sash', skin: 'skin_medium', hat: 'none', hair: rand() < 0.5 ? 'shaven' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'sit' });
+    L.push({ t: 'figure', at: p, y: yf, rot: face(p, [bx, bz]), h: 1.6 + rand() * 0.1, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.5 ? 'cloth_maroon' : pick(['cloth_brown', 'cloth_grey']), cloth2: 'cloth_maroon', over: 'sash', skin: 'skin_medium', hat: 'none', hair: rand() < 0.5 ? 'shaven' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'sit' });
   }
   monk([PRINTERY[0] + 22.5, PRINTERY[1] + 3.6], yf, face([0, 0], [1, 0]));
   return [base('lhasa-people', L, 'life'), base('lhasa-wheels', W)];

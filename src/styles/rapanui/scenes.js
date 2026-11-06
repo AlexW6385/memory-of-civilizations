@@ -9,7 +9,7 @@ import { tube } from '../../objects/kit.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** A rope through world points [[x, y, z], …], of radius r, sagging a little between them. */
-export function rope(bag, pts, r = 0.025, mat = 'sacking') {
+export function rope(bag, pts, r = 0.025, mat = 'rope_fibre') {
   const P = [];
   for (let i = 0; i < pts.length - 1; i++) {
     const a = pts[i], b = pts[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), sag = Math.min(0.25, L * 0.02);
@@ -67,7 +67,7 @@ function vaka(el, { bag, col }) {
   for (const u of [-L * 0.2, L * 0.16]) {
     const h = sheer(u) + 0.03;
     add('timber', tube([[beam(u) + 0.1, h, u, 0.03], [-beam(u) - 0.1, h + 0.02, u, 0.032], [-bo + 0.15, h - 0.05, u, 0.03], [-bo, 0.22, u, 0.025]], 5));
-    add('sacking', lathe([[0.045, 0], [0.045, 0.08]], 6, null, 0, 0, 0).translate(beam(u) - 0.005, h - 0.04, u));
+    add('rope_fibre', lathe([[0.045, 0], [0.045, 0.08]], 6, null, 0, 0, 0).translate(beam(u) - 0.005, h - 0.04, u));
   }
   const fl = L * 0.62;
   add('timber', tube([[-bo, 0.12, -fl / 2, 0.03], [-bo, 0.1, -fl / 2 + 0.3, 0.07], [-bo, 0.1, fl / 2 - 0.3, 0.07], [-bo, 0.12, fl / 2, 0.03]], 7));

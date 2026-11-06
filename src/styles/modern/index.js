@@ -32,8 +32,8 @@ function shell(bag, cx, z0, z1, hw, H, y) {
   const Q = (i, j) => { const p = P(i, j); return [p[0], p[1] - 0.4, p[2]]; }, U = [], E = [];
   for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { tri2(U, Q(i, j), Q(i + 1, j), Q(i + 1, j + 1)); tri2(U, Q(i, j), Q(i + 1, j + 1), Q(i, j + 1)); }
   for (let i = 0; i < nu; i++) { tri2(E, P(i, nv), P(i + 1, nv), Q(i + 1, nv)); tri2(E, P(i, nv), Q(i + 1, nv), Q(i, nv)); }
-  bag.add('plaster_grey', fromTriangles(U)); bag.add('plaster_grey', fromTriangles(E));
-  for (let i = 1; i < nu; i++) for (let j = 1; j < nv; j++) { const a = Q(i, j), b = Q(i, j + 1); if (a[1] - y < 1.2) continue; bag.add('plaster_grey', rod([a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], 0.2, 4)); }
+  bag.add('concrete_light', fromTriangles(U)); bag.add('concrete_light', fromTriangles(E));
+  for (let i = 1; i < nu; i++) for (let j = 1; j < nv; j++) { const a = Q(i, j), b = Q(i, j + 1); if (a[1] - y < 1.2) continue; bag.add('concrete_light', rod([a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], 0.2, 4)); }
   // the ridge: a rib of the cream tiles along the top, and the ribs fanning down the shell's face
   const rib = [];
   for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.28, 6)); }
@@ -110,12 +110,12 @@ function operaHouse(el, { bag, col }) {
     for (let zz = zS; zz > zN; zz -= 4) {
       const zb = Math.max(zN, zz - 4), hh = Math.min(env(hall.x - aw, zz), env(hall.x - aw, zb), env(hall.x + aw, zz), env(hall.x + aw, zb)) * 0.82;
       if (hh < 3) continue;
-      bag.add('wood_ochre', box(hall.x - aw, yf, zb, hall.x + aw, yf + hh, zz));
+      bag.add('brushbox', box(hall.x - aw, yf, zb, hall.x + aw, yf + hh, zz));
     }
     // the north wall of the enclosure, in three tiers stepping back as they rise
     const hN = Math.min(env(hall.x - aw, zN), env(hall.x + aw, zN)) * 0.82;
-    for (let k = 0; k < 3; k++) bag.add('wood_ochre', box(hall.x - aw + k * 0.8, yf + hN * k / 3, zN - 3 + k * 1.0, hall.x + aw - k * 0.8, yf + hN * (k + 1) / 3 - 0.05, zN));
-    for (let k = 0; k < 3; k++) for (let u = hall.x - aw + k * 0.8 + 0.4; u < hall.x + aw - k * 0.8 - 0.3; u += 0.6) bag.add('wood_ochre', box(u - 0.08, yf + hN * k / 3 + (k ? 0.05 : 0.3), zN - 3 + k * 1.0 - 0.1, u + 0.08, yf + hN * (k + 1) / 3 - 0.4, zN - 3 + k * 1.0));   // the brush-box battens
+    for (let k = 0; k < 3; k++) bag.add('brushbox', box(hall.x - aw + k * 0.8, yf + hN * k / 3, zN - 3 + k * 1.0, hall.x + aw - k * 0.8, yf + hN * (k + 1) / 3 - 0.05, zN));
+    for (let k = 0; k < 3; k++) for (let u = hall.x - aw + k * 0.8 + 0.4; u < hall.x + aw - k * 0.8 - 0.3; u += 0.6) bag.add('brushbox', box(u - 0.08, yf + hN * k / 3 + (k ? 0.05 : 0.3), zN - 3 + k * 1.0 - 0.1, u + 0.08, yf + hN * (k + 1) / 3 - 0.4, zN - 3 + k * 1.0));   // the brush-box battens
     for (let k = 1; k < 3; k++) bag.add('glass_outer', box(hall.x - aw + 2, yf + hN * k / 3 - 0.05 - 1.4, zN - 3 + (k - 1) * 1.0 - 0.02, hall.x + aw - 2, yf + hN * k / 3 - 0.35, zN - 3 + (k - 1) * 1.0));
     col.rect([hall.x - aw, zN - 3, hall.x + aw, zS], yf, yf + 20);
     // the foyer's floor, the bar, benches facing the harbour, lamps on stands

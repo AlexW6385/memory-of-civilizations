@@ -54,16 +54,16 @@ export function clockDial(bag, F, u, v, R, { hour = 10.13 } = {}) {
   ring(bag, F, 'gilt_bronze', u, v, R + 0.3, R + 0.4, 0.06, 0.14, 48);
   // the opal glass, and on it the iron frame: the hub, rings, radial bars, the chapter ring with its minutes
   bag.add('lamp_white', prism(F, 0, ngon(u, v, R, 48), 0.06, 0.1));
-  for (const r of [0.34, 0.6, 0.8, 0.97]) ring(bag, F, 'iron', u, v, R * r - 0.035, R * r + 0.035, 0.1, 0.13, 48);
-  for (let k = 0; k < 36; k++) { const a = k * Math.PI / 18; bar(bag, F, 'iron', u + Math.sin(a) * R * 0.34, v + Math.cos(a) * R * 0.34, u + Math.sin(a) * R * 0.6, v + Math.cos(a) * R * 0.6, 0.05, 0.1, 0.13); }
-  for (let k = 0; k < 60; k++) { const a = k * Math.PI / 30, r0 = k % 5 ? 0.86 : 0.82; bar(bag, F, 'iron', u + Math.sin(a) * R * r0, v + Math.cos(a) * R * r0, u + Math.sin(a) * R * 0.97, v + Math.cos(a) * R * 0.97, k % 5 ? 0.04 : 0.08, 0.1, 0.13); }
+  for (const r of [0.34, 0.6, 0.8, 0.97]) ring(bag, F, 'prussian_blue', u, v, R * r - 0.035, R * r + 0.035, 0.1, 0.13, 48);
+  for (let k = 0; k < 36; k++) { const a = k * Math.PI / 18; bar(bag, F, 'prussian_blue', u + Math.sin(a) * R * 0.34, v + Math.cos(a) * R * 0.34, u + Math.sin(a) * R * 0.6, v + Math.cos(a) * R * 0.6, 0.05, 0.1, 0.13); }
+  for (let k = 0; k < 60; k++) { const a = k * Math.PI / 30, r0 = k % 5 ? 0.86 : 0.82; bar(bag, F, 'prussian_blue', u + Math.sin(a) * R * r0, v + Math.cos(a) * R * r0, u + Math.sin(a) * R * 0.97, v + Math.cos(a) * R * 0.97, k % 5 ? 0.04 : 0.08, 0.1, 0.13); }
   // the hour figures, radial, 60 cm long, between the rings
-  FIG.forEach((t, k) => { const a = k * Math.PI / 6, rr = R * 0.7; word(bag, F, 'iron', t, u + Math.sin(a) * rr, v + Math.cos(a) * rr, 0.6, a, 0.1, 0.14, 0.07, 0.5); });
+  FIG.forEach((t, k) => { const a = k * Math.PI / 6, rr = R * 0.7; word(bag, F, 'prussian_blue', t, u + Math.sin(a) * rr, v + Math.cos(a) * rr, 0.6, a, 0.1, 0.14, 0.07, 0.5); });
   // the hands: the hour hand 2.7 m, the minute hand 4.2 m with its counterweight, a leaf near each tip; the boss
   const hand = (ang, L, tail, w, d) => { const su = Math.sin(ang), cv = Math.cos(ang), P = (r, o) => [u + su * r + cv * o, v + cv * r - su * o];
-    bag.add('lacquer_black', prism(F, 0, [P(-tail, -w), P(L * 0.8, -w * 0.5), P(L * 0.8, w * 0.5), P(-tail, w)], d, d + 0.05));
-    bag.add('lacquer_black', prism(F, 0, [P(L * 0.72, 0), P(L * 0.84, -w * 1.8), P(L, 0), P(L * 0.84, w * 1.8)], d, d + 0.05));
-    bag.add('lacquer_black', prism(F, 0, ngon(...P(-tail, 0), w * 2.2, 8), d, d + 0.05)); };
+    bag.add('prussian_blue', prism(F, 0, [P(-tail, -w), P(L * 0.8, -w * 0.5), P(L * 0.8, w * 0.5), P(-tail, w)], d, d + 0.05));
+    bag.add('prussian_blue', prism(F, 0, [P(L * 0.72, 0), P(L * 0.84, -w * 1.8), P(L, 0), P(L * 0.84, w * 1.8)], d, d + 0.05));
+    bag.add('prussian_blue', prism(F, 0, ngon(...P(-tail, 0), w * 2.2, 8), d, d + 0.05)); };
   const hr = hour % 12, mn = (hour * 60) % 60;
   hand(hr / 12 * 2 * Math.PI, R * 0.77, R * 0.15, 0.09, 0.15);
   hand(mn / 60 * 2 * Math.PI, R * 0.93, R * 0.25, 0.06, 0.21);

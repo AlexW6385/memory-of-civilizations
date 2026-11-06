@@ -12,7 +12,7 @@ import { HUSUNI } from './husuni.js';
 import { house } from './house.js';
 import { wall } from './kit.js';
 
-const C = 'coral_plaster', R = 'rubble';
+const C = 'lime_plaster_rough', R = 'coral_rag';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** The points where rays from the centre at the given angles meet the rectangle (half sizes hx, hz). */

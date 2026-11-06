@@ -8,7 +8,7 @@ import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { planarWall } from '../byzantine/index.js';
 import { ext } from '../renaissance/face.js';
 
-export const GB = 'gilt_bronze', GD = 'gold', AG = 'silver', MS = 'marble_smooth', WM = 'pavonazzetto', RM = 'breccia_red', GM = 'revetment_green', DM = 'marble_dark', MI = 'steel_chrome', FR = 'paint_white', CR = 'glass_lamp';
+export const GB = 'gilt_bronze', GD = 'gold', AG = 'silver', MS = 'marble_smooth', WM = 'pavonazzetto', RM = 'breccia_red', GM = 'revetment_green', DM = 'marble_dark', MI = 'mirror_tin', FR = 'paint_white', CR = 'glass_lamp';
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /**

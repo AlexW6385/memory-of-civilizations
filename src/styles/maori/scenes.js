@@ -87,7 +87,7 @@ function harakeke(el, { bag, col }) {
     for (let k = 0; k < 9; k++) {
       const s = (k - 4) / 4, L = h * (0.65 + 0.35 * (1 - Math.abs(s))) * (0.85 + rand() * 0.25);
       const m = new Matrix4().makeTranslation(fx, y - 0.05, fz).multiply(new Matrix4().makeRotationY(fy + (s < 0 ? Math.PI : 0))).multiply(new Matrix4().makeRotationZ(-Math.abs(s) * 0.55)).multiply(new Matrix4().makeScale(L, L, L));
-      if (bag.addInstance) bag.addInstance('palm_leaf', FLAX[k % 3], m, { reach: 180 }); else bag.add('palm_leaf', FLAX[k % 3].clone().applyMatrix4(m));
+      if (bag.addInstance) bag.addInstance('flax_leaf', FLAX[k % 3], m, { reach: 180 }); else bag.add('flax_leaf', FLAX[k % 3].clone().applyMatrix4(m));
     }
   }
   if (rand() < 0.6) { const sx = x + 0.1, sz = z - 0.05, H = h * 1.6; bag.add('bark_dark', tube([[sx, y, sz, 0.02], [sx + 0.08, y + H * 0.6, sz, 0.015], [sx + 0.18, y + H, sz + 0.04, 0.01]], 4)); }
@@ -105,11 +105,11 @@ function weaving(el, { bag }) {
   add('reed_mat', box(-0.8, 0, -0.2, 0.8, 0.025, 1.1));
   for (let k = 0; k < 32; k++) {                                     // the loose strips at the working edge, crossing as plaited
     const u = -0.78 + k * 0.05, s = k % 2 ? 1 : -1, L = 0.25 + rand() * 0.25;
-    add('palm_leaf', box(u - 0.015, 0.012, -0.2 - L, u + 0.015, 0.02, -0.18).applyMatrix4(new Matrix4().makeRotationY(s * 0.12)));
+    add('flax_leaf', box(u - 0.015, 0.012, -0.2 - L, u + 0.015, 0.02, -0.18).applyMatrix4(new Matrix4().makeRotationY(s * 0.12)));
   }
   for (let k = 0; k < 2; k++) {                                      // bundles of prepared strips, tied at one end
     const bx = 1.1, bz = -0.3 + k * 0.5;
-    add('palm_leaf', tube([[bx, 0.05, bz, 0.04], [bx + 0.6, 0.05, bz + 0.05, 0.06], [bx + 1.1, 0.03, bz + 0.1, 0.03]], 6));
+    add('flax_leaf', tube([[bx, 0.05, bz, 0.04], [bx + 0.6, 0.05, bz + 0.05, 0.06], [bx + 1.1, 0.03, bz + 0.1, 0.03]], 6));
     add('sacking', lathe([[0.047, 0], [0.047, 0.04]], 6).rotateZ(Math.PI / 2).translate(bx + 0.2, 0.05, bz + 0.02));
   }
   const [kx, kz] = [x + Math.cos(yaw) * -1.1 + Math.sin(yaw) * 0.6, z + Math.sin(yaw) * 1.1 + Math.cos(yaw) * 0.6];

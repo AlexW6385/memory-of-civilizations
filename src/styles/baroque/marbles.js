@@ -14,7 +14,7 @@ import { ext, archOutline, headPts } from '../renaissance/face.js';
 import { human } from '../greek/sculpture.js';
 import { ball, T } from '../qing/carving.js';
 
-const PK = 'proconnesian', GI = 'giallo', AF = 'breccia_red', VA = 'verde_antico', WM = 'marble_smooth', GB = 'gilt_bronze', BR = 'bronze', ND = 'marble_dark', PO = 'porphyry', M = 'marble';
+const PK = 'proconnesian', GI = 'giallo', AF = 'marble_africano', VA = 'verde_antico', WM = 'marble_smooth', GB = 'gilt_bronze', BR = 'bronze', ND = 'marble_dark', PO = 'porphyry', M = 'marble';
 
 /** A frame on the plan line a → b at height y: u along it, d toward its left, y up. */
 export function lineFrame(a, b, y) {

@@ -297,13 +297,13 @@ export function commons(el, ctx) {
   for (const s of [-1, 1]) bag.add(SY, box(Math.min(ax + s * 7.1, ax + s * 7.85), y - 0.5, zc1, Math.max(ax + s * 7.1, ax + s * 7.85), P + 12.5, zc1 + 1));
   bag.add('reed_mat', box(ax - 2.5, P - 0.02, cz0 + 4.4, ax + 2.5, P + 0.02, cz1 - 1.2));
   // the benches of green leather on either side, four rows, the gangway across them
-  for (const s of [-1, 1]) benches(bag, col, { xf: ax + s * 2.6, s, z0: cz0 + 4.2, z1: cz1 - 2.2, rows: 4, y: P, cloth: 'cloth_green', breaks: [[cz0 + 11.1, cz0 + 12.0]] });
+  for (const s of [-1, 1]) benches(bag, col, { xf: ax + s * 2.6, s, z0: cz0 + 4.2, z1: cz1 - 2.2, rows: 4, y: P, cloth: 'leather_bench', breaks: [[cz0 + 11.1, cz0 + 12.0]] });
   // the Speaker's chair on its dais under the canopy, at the north end
   { const zb = cz0 + 0.6, X = ax;
     bag.add(OAK, box(X - 1.4, P, cz0 + 0.1, X + 1.4, P + 0.18, cz0 + 2.4)); bag.add(OAK, box(X - 1.1, P + 0.18, cz0 + 0.1, X + 1.1, P + 0.36, cz0 + 2.0)); col.rect([X - 1.4, cz0 + 0.1, X + 1.4, cz0 + 2.4], P, P + 0.36);
     bag.add(OAK, box(X - 0.75, P + 0.36, zb, X + 0.75, P + 3.6, zb + 0.4));
-    bag.add('cloth_green', box(X - 0.5, P + 0.92, zb + 0.4, X + 0.5, P + 2.0, zb + 0.47));
-    bag.add(OAK, box(X - 0.55, P + 0.36, zb + 0.4, X + 0.55, P + 0.82, zb + 1.2)); bag.add('cloth_green', box(X - 0.5, P + 0.82, zb + 0.42, X + 0.5, P + 0.92, zb + 1.15));
+    bag.add('leather_bench', box(X - 0.5, P + 0.92, zb + 0.4, X + 0.5, P + 2.0, zb + 0.47));
+    bag.add(OAK, box(X - 0.55, P + 0.36, zb + 0.4, X + 0.55, P + 0.82, zb + 1.2)); bag.add('leather_bench', box(X - 0.5, P + 0.82, zb + 0.42, X + 0.5, P + 0.92, zb + 1.15));
     for (const s of [-1, 1]) { bag.add(OAK, box(X + s * 0.55 - 0.08, P + 0.36, zb + 0.4, X + s * 0.55 + 0.08, P + 1.45, zb + 1.25)); bag.add(OAK, box(X + s * 0.8 - 0.05, P + 0.36, zb, X + s * 0.8 + 0.05, P + 3.6, zb + 1.3)); }
     const Fc = faceFrame([X - 0.75, zb, X + 0.75, zb + 0.4], 's');
     panels(bag, Fc, OAK, 0.15, 1.35, P + 2.1, P + 3.4, { n: 4, d: 0.05 });
@@ -319,7 +319,7 @@ export function commons(el, ctx) {
     for (const e of [t0 + 1.2, t0 + 2.4]) bag.add(G, box(ax - 0.06, P + 0.86, e - 0.04, ax + 0.06, P + 0.96, e + 0.04));
     bag.add(G, rod([ax, P + 1.0, t0 + 0.8], [ax, P + 1.0, t0 + 2.3], 0.035, 8)); bag.add(G, lathe([[0.001, 0], [0.09, 0.05], [0.11, 0.2], [0.07, 0.28], [0.1, 0.36], [0.001, 0.44]], 8, null, 0, 0, 0).rotateX(Math.PI / 2).translate(ax, P + 1.0, t0 + 2.3));
     for (const [dx, dz, w2, h2] of [[-0.35, 0.6, 0.18, 0.04], [0.3, 0.9, 0.16, 0.06], [-0.3, 3.2, 0.2, 0.03]]) bag.add(dz === 0.9 ? 'hide_brown' : 'paint_white', box(ax + dx - w2, P + 0.86, t0 + dz - 0.13, ax + dx + w2, P + 0.86 + h2, t0 + dz + 0.13));
-    for (const dx of [-0.5, 0, 0.5]) chair(bag, col, ax + dx, t0 - 0.45, P, 'cloth_green', 1); }
+    for (const dx of [-0.5, 0, 0.5]) chair(bag, col, ax + dx, t0 - 0.45, P, 'leather_bench', 1); }
   // the galleries: the members' along the sides on brackets, the strangers' over the bar at the south, the reporters'
   // over the Speaker's chair and above it the Ladies' Gallery behind its brass grille
   const gy = P + 4.4;
@@ -327,12 +327,12 @@ export function commons(el, ctx) {
     bag.add(OAK, box(Math.min(xw, xf), gy, za, Math.max(xw, xf), gy + 0.2, zb)); col.floor([Math.min(xw, xf), za, Math.max(xw, xf), zb], gy + 0.2);
     galleryFront(bag, s < 0 ? faceFrame([xf - 0.1, za, xf, zb], 'e') : faceFrame([xf, za, xf + 0.1, zb], 'w'), gy + 0.2);
     for (let z = za + 1.0; z < zb; z += 2.4) bag.add(OAK, rod([xw - s * 0.05, gy - 1.4, z], [xf + s * 0.3, gy + 0.02, z], 0.09, 6));
-    benches(bag, col, { xf: xf + s * 0.15, s, z0: za + 0.1, z1: zb - 0.1, rows: 2, dep: 0.95, rise: 0.36, y: gy + 0.2, cloth: 'cloth_green' }); }
+    benches(bag, col, { xf: xf + s * 0.15, s, z0: za + 0.1, z1: zb - 0.1, rows: 2, dep: 0.95, rise: 0.36, y: gy + 0.2, cloth: 'leather_bench' }); }
   { const zf = cz1 - 4.6;
     bag.add(OAK, box(x0, gy, zf, x1, gy + 0.2, cz1)); col.floor([x0, zf, x1, cz1], gy + 0.2);
     galleryFront(bag, faceFrame([x0, zf - 0.1, x1, zf], 'n'), gy + 0.2);
     for (let x = x0 + 1.2; x < x1; x += 2.3) bag.add(OAK, rod([x, gy - 1.4, cz1 - 0.05], [x, gy + 0.02, cz1 - 1.6], 0.09, 6));
-    benches(bag, col, { xf: zf + 0.15, s: 1, z0: x0 + 0.1, z1: x1 - 0.1, rows: 4, dep: 0.95, rise: 0.4, y: gy + 0.2, cloth: 'cloth_green', along: 'x', breaks: [[ax - 0.5, ax + 0.5]] }); }
+    benches(bag, col, { xf: zf + 0.15, s: 1, z0: x0 + 0.1, z1: x1 - 0.1, rows: 4, dep: 0.95, rise: 0.4, y: gy + 0.2, cloth: 'leather_bench', along: 'x', breaks: [[ax - 0.5, ax + 0.5]] }); }
   { const ry = P + 4.6, zf = cz0 + 1.8;
     bag.add(OAK, box(x0, ry, cz0, x1, ry + 0.2, zf)); col.floor([x0, cz0, x1, zf], ry + 0.2);
     galleryFront(bag, faceFrame([x0, zf, x1, zf + 0.1], 's'), ry + 0.2);

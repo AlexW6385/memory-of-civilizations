@@ -10,22 +10,22 @@ import { box, lathe, rod } from '../../core/geom.js';
 import { Local, ext } from './face.js';
 import { ball, limb, T } from '../qing/carving.js';
 
-const ST = 'plaster_damp', MS = 'marble_smooth', GR = 'granite_grey', SER = 'pietra_serena', PF = 'limestone_yellow', M = 'marble', TI = 'timber', W = 'wood_dark', R = 'roof_tile', FE = 'iron';
+const ST = 'plaster_damp', MS = 'marble_smooth', GR = 'granite_grey', SER = 'pietra_serena', PF = 'limestone_yellow', M = 'marble', TI = 'timber', W = 'wood_dark', R = 'roof_tile', FE = 'iron', SC = 'pietra_serena_carved', GE = 'granite_elba';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** Donatello's Dovizia, about 2.1 m, standing at the origin facing +z: the long gown, the cornucopia on her left arm, the basket of fruit on her head held by her right hand. */
 function dovizia(Lc) {
-  const B = (rx, ry, rz, x, y, z, n = 9) => Lc.add(ST, T(ball(rx, ry, rz, n), x, y, z));
-  const L2 = (a, b, r0, r1) => Lc.add(ST, limb(a, b, r0, r1, 9));
+  const B = (rx, ry, rz, x, y, z, n = 9) => Lc.add(SC, T(ball(rx, ry, rz, n), x, y, z));
+  const L2 = (a, b, r0, r1) => Lc.add(SC, limb(a, b, r0, r1, 9));
   // the gown falling in folds to the feet, girt under the breast; the mantle over the left shoulder
-  Lc.add(ST, lathe([[0.31, 0], [0.3, 0.08], [0.26, 0.4], [0.22, 0.8], [0.21, 1.0], [0.165, 1.16], [0.185, 1.3], [0.2, 1.42], [0.17, 1.5], [0.07, 1.57], [0.001, 1.6]], 18, (th, j) => (j < 5 ? 1 + 0.07 * Math.cos(th * 9) : 1), 0, 0, 0).scale(1, 1, 0.72));
-  Lc.add(ST, lathe([[0.17, 0], [0.18, 0.03], [0.17, 0.06]], 14, null, 0, 1.15, 0).scale(1, 1, 0.74));
+  Lc.add(SC, lathe([[0.31, 0], [0.3, 0.08], [0.26, 0.4], [0.22, 0.8], [0.21, 1.0], [0.165, 1.16], [0.185, 1.3], [0.2, 1.42], [0.17, 1.5], [0.07, 1.57], [0.001, 1.6]], 18, (th, j) => (j < 5 ? 1 + 0.07 * Math.cos(th * 9) : 1), 0, 0, 0).scale(1, 1, 0.72));
+  Lc.add(SC, lathe([[0.17, 0], [0.18, 0.03], [0.17, 0.06]], 14, null, 0, 1.15, 0).scale(1, 1, 0.74));
   L2([0.12, 1.5, -0.04], [0.25, 0.7, -0.1], 0.09, 0.14);
   B(0.06, 0.05, 0.1, -0.08, 0.04, 0.3, 7);
   // the neck, the head, the hair bound up
   L2([0, 1.6, 0], [0, 1.7, 0.01], 0.05, 0.05); B(0.085, 0.105, 0.095, 0, 1.79, 0.02); B(0.08, 0.06, 0.08, 0, 1.86, -0.03, 7);
   // the basket on her head: a flared basket, fruit heaped in it
-  Lc.add(ST, lathe([[0.001, 0], [0.13, 0], [0.22, 0.14], [0.24, 0.17], [0.001, 0.17]], 14, null, 0, 1.88, 0));
+  Lc.add(SC, lathe([[0.001, 0], [0.13, 0], [0.22, 0.14], [0.24, 0.17], [0.001, 0.17]], 14, null, 0, 1.88, 0));
   for (const [x, z, r] of [[0, 0, 0.09], [0.11, 0.05, 0.07], [-0.1, 0.06, 0.07], [0.05, -0.11, 0.07], [-0.07, -0.09, 0.065], [0.15, -0.05, 0.06], [-0.15, -0.02, 0.06]]) B(r, r, r, x, 2.08 + (r === 0.09 ? 0.06 : 0), z, 7);
   // the right arm raised to steady the basket
   L2([-0.17, 1.52, 0], [-0.25, 1.75, 0.02], 0.05, 0.045); L2([-0.25, 1.75, 0.02], [-0.2, 1.95, 0.04], 0.045, 0.04);
@@ -50,7 +50,7 @@ function abundance(bag, col, x, z, y) {
   // the base (torus, scotia, torus), the shaft with its entasis, the capital of acanthus, the abacus
   const yb = yp + 1.78, r = 0.42, hs = 7.2;
   bag.add(MS, lathe([[0.62, 0], [0.62, 0.12], [0.58, 0.2], [0.5, 0.24], [0.5, 0.3], [0.55, 0.36], [0.46, 0.44], [0.001, 0.44]], 18, null, x, yb, z));
-  bag.add(GR, lathe([[r, 0], [r * 1.0, hs * 0.33], [r * 0.9, hs], [0.001, hs]], 18, null, x, yb + 0.44, z));
+  bag.add(GE, lathe([[r, 0], [r * 1.0, hs * 0.33], [r * 0.9, hs], [0.001, hs]], 18, null, x, yb + 0.44, z));
   const yc = yb + 0.44 + hs;
   bag.add(MS, lathe([[r * 0.95, 0], [r * 1.0, 0.06], [r * 0.95, 0.1], [r * 1.05, 0.35], [r * 1.35, 0.6], [r * 1.55, 0.78], [r * 1.6, 0.8]], 16, (th, j) => (j >= 3 && j <= 5 ? 1 + 0.13 * Math.cos(th * 8) : 1), x, yc, z));
   for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4, g = box(-0.09, -0.1, -0.06, 0.09, 0.1, 0.06); g.rotateY(-a); g.translate(x + Math.cos(a) * r * 1.55, yc + 0.72, z + Math.sin(a) * r * 1.55); bag.add(MS, g); }   // the volutes

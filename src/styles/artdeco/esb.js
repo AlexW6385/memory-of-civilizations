@@ -8,7 +8,7 @@
 
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 
-const LS = 'limestone', CH = 'steel_chrome', AL = 'lead', GL = 'glass_outer';
+const LS = 'limestone', CH = 'steel_chrome', AL = 'aluminium_dull', GL = 'glass_outer';
 const FLOOR = 3.6, BASE = 22;
 /** The top of floor n (the base's five storeys to 22 m, then 3.6 m a floor). */
 const fl = (n) => BASE + (n - 5) * FLOOR;

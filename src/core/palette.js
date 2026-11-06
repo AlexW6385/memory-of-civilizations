@@ -305,7 +305,7 @@ export const MATERIALS = {
   pietra_serena:    { color: '#8d8e86', roughness: 0.75, kind: 'ashlar', course: 0.4, block: 0.8 },
   wood_painted:     { color: '#8a5a3a', roughness: 0.8, kind: 'wood' },
   wood_ochre:       { color: '#a8834a', roughness: 0.8, kind: 'wood' },
-  coral_plaster:    { color: '#d9d2c2', roughness: 0.92, kind: 'mudbrick', course: 0.32, block: 0.55 },
+  coral_plaster:    { color: '#d9d2c2', roughness: 0.92, kind: 'mud', straw: 0 },     // lime plaster over coral rag: no coursing shows
   sandstone_relief: { color: '#a98d6c', roughness: 0.9, kind: 'rock' },
   rubber:           { clean: true, color: '#1a1a1a', roughness: 0.9, kind: 'smooth' },
   // Stone for sculpture: a figure is cut from one block, so these carry no joints. Pale fine-grained
@@ -352,6 +352,39 @@ export const MATERIALS = {
   iron_galv:        { color: '#5f6569', roughness: 0.6, metalness: 0.4, kind: 'plates', block: 0.6, course: 0.9 },
   // Djenné: banco freshly hand-smeared at the crépissage: lumps, palm strokes, rain runnels
   banco_rough:      { color: '#9a7250', roughness: 0.97, kind: 'mud' },
+  // materials asked for by the settlements (stand-ins replaced):
+  // Versailles: 17th-c. tin–mercury mirror glass, a little warm and grey, very smooth
+  mirror_tin:       { clean: true, color: '#c4beb2', roughness: 0.05, metalness: 1, kind: 'smooth' },
+  // Lhasa: the monks' maroon (zen and shamthab)
+  cloth_maroon:     { color: '#5c1e1c', roughness: 0.95, kind: 'smooth' },
+  // Rome: africano, grey-black breccia with red and pale veins (marmor Luculleum)
+  marble_africano:  { color: '#3c3330', roughness: 0.3, kind: 'veined', block: 0.9, course: 0.9, colors: ['#2e2927', '#41383a', '#7d3a2f', '#b0a69b'] },
+  // London: Prussian blue paint (the Great Clock's dial frames and hands)
+  prussian_blue:    { color: '#1d3252', roughness: 0.5, kind: 'smooth' },
+  // London: the Commons' green leather benches
+  leather_bench:    { color: '#2e4632', roughness: 0.6, kind: 'smooth' },
+  // Kilwa: lime plaster laid by hand over coral rag, lumpy and uneven; the weathered rag itself
+  lime_plaster_rough: { color: '#ddd6c6', roughness: 0.93, kind: 'mud', straw: 0 },
+  coral_rag:        { color: '#8a8171', roughness: 0.96, kind: 'rock' },
+  // Florence: pietra serena cut as a figure (no joints); light grey Elba granite (columns)
+  pietra_serena_carved: { color: '#8b8c85', roughness: 0.78, kind: 'smooth' },
+  granite_elba:     { color: '#a9a8a2', roughness: 0.45, kind: 'granite' },
+  // Petra: the pale and yellow bands of the cliff's sandstone
+  sandstone_white:  { color: '#d6cab4', roughness: 0.95, kind: 'rock' },
+  sandstone_yellow: { color: '#c7a165', roughness: 0.95, kind: 'rock' },
+  // Stonehenge: chalk dug from the ditch, white and slightly rough
+  chalk:            { color: '#e6e2d6', roughness: 0.95, kind: 'mud', straw: 0 },
+  // Rapa Nui: the moai eyes of white coral with obsidian (or red scoria) pupils
+  coral:            { color: '#e4ddcc', roughness: 0.75, kind: 'smooth' },
+  obsidian:         { clean: true, color: '#121214', roughness: 0.08, kind: 'smooth' },
+  // Rapa Nui ropes of hau bark fibre; Māori harakeke (flax) leaves
+  rope_fibre:       { color: '#97815f', roughness: 0.95, kind: 'bark', plates: 0 },
+  flax_leaf:        { color: '#4c5f35', roughness: 0.7, kind: 'leaf' },
+  // New York: dull cast aluminium (the Empire State's spandrels); Sydney: light precast concrete
+  // (the shells' ribs), brush box timber (the halls' cladding)
+  aluminium_dull:   { color: '#a6a9a8', roughness: 0.45, metalness: 0.85, kind: 'metal' },
+  concrete_light:   { color: '#c8c3b7', roughness: 0.9, kind: 'smooth' },
+  brushbox:         { color: '#8b5a3b', roughness: 0.7, kind: 'wood' },
 };
 
 export function albedo(key) {

@@ -762,7 +762,7 @@ function make(spec) {
       const runnel = smoothstep(0.5, 0.8, mx_noise_float(vec3(P.x.add(P.z).mul(3.5), P.y.mul(0.22), 0.7))).mul(vertical);
       const fade = detailFade();
       const fine = mx_noise_float(P.mul(28.0)).mul(fade);
-      const straw = float(1).sub(smoothstep(0.0, 0.06, mx_worley_noise_float(P.mul(55.0)))).mul(fade);
+      const straw = float(1).sub(smoothstep(0.0, 0.06, mx_worley_noise_float(P.mul(55.0)))).mul(fade).mul(uniform(spec.straw ?? 1));   // lime plasters: no straw
       m.colorNode = baseNode.mul(lump.mul(0.14).add(1)).mul(smear.mul(0.08).add(0.94)).mul(float(1).sub(runnel.mul(0.12))).mul(fine.mul(0.05).add(1)).mul(straw.mul(0.18).add(1));
       m.roughnessNode = roughU;
       m.normalNode = bump(lump.mul(0.03).add(smear.mul(0.004)).sub(runnel.mul(0.006)).add(fine.mul(0.0008)), 1);

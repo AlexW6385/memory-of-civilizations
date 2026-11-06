@@ -35,7 +35,7 @@ const MAN = [[-0.09, 0], [0.1, 0], [0.07, 0.04], [0.07, 0.3], [0.09, 0.5], [0.12
   [-0.04, 0.99], [-0.06, 0.9], [-0.07, 0.75], [-0.1, 0.5], [-0.11, 0.3], [-0.07, 0.04]];
 
 // ---- the beds: from below the floor to above the rim, each with its colour, how far it has weathered back, and its swell
-const MATS = { rose: 'sandstone_rose', red: 'scoria_red', mauve: 'tuff_red', ochre: 'banco', yellow: 'sandstone_relief', grey: 'rubble', white: 'limestone_carved' };
+const MATS = { rose: 'sandstone_rose', red: 'scoria_red', mauve: 'tuff_red', ochre: 'banco', yellow: 'sandstone_yellow', grey: 'rubble', white: 'sandstone_white' };
 const BEDS = (() => {
   const rand = rng(1907), out = [];
   for (let y = -7; y < 74;) {
