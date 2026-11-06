@@ -115,8 +115,12 @@ const norm = ([x, y]) => { const l = Math.hypot(x, y) || 1; return [x / l, y / l
  * lies in the wall).
  */
 export function relief(bag, mat, kind, place, u0, v0, size, dir = 1, d = 0.06) {
-  const P = OUTLINES[kind], tri = (CUT[kind] ??= earcut(P)), T = [], key = kind + ':' + size;
-  const F = (INS[key] ??= inset(P, Math.min(0.012, 0.016 * size) / size));
+  return raise(bag, mat, OUTLINES[kind], kind, place, u0, v0, size, dir, d, DETAILS[kind]);
+}
+/** The same for any outline P (cached by `key`), with its carved lines `details` ([u0, v0, u1, v1]). */
+export function raise(bag, mat, P, key, place, u0, v0, size, dir = 1, d = 0.06, details = null) {
+  const tri = (CUT[key] ??= earcut(P)), T = [], k2 = key + ':' + size;
+  const F = (INS[k2] ??= inset(P, Math.min(0.012, 0.016 * size) / size));
   const V = ([u, v], w) => place(u0 + dir * u * size, v0 + v * size, w);
   const sub = (p, q) => [p[0] - q[0], p[1] - q[1], p[2] - q[2]], cross = (p, q) => [p[1] * q[2] - p[2] * q[1], p[2] * q[0] - p[0] * q[2], p[0] * q[1] - p[1] * q[0]], dot = (p, q) => p[0] * q[0] + p[1] * q[1] + p[2] * q[2];
   const n = sub(place(0, 0, 1), place(0, 0, 0));
@@ -127,7 +131,7 @@ export function relief(bag, mat, kind, place, u0, v0, size, dir = 1, d = 0.06) {
     if (ccw) T.push(...a0, ...b0, ...b1, ...a0, ...b1, ...a1); else T.push(...a0, ...b1, ...b0, ...a0, ...a1, ...b1);
   }
   bag.add(mat, fromTriangles(T));
-  for (const [ua, va, ub, vb] of DETAILS[kind] || []) strip(bag, mat, place, u0 + dir * ua * size, v0 + va * size, u0 + dir * ub * size, v0 + vb * size, Math.max(0.008, 0.016 * size), d + 0.01);
+  for (const [ua, va, ub, vb] of details || []) strip(bag, mat, place, u0 + dir * ua * size, v0 + va * size, u0 + dir * ub * size, v0 + vb * size, Math.max(0.008, 0.016 * size), d + 0.01);
 }
 const INS = {};
 
