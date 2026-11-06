@@ -101,6 +101,10 @@ Sources added:
 - [Maydan-i Naqsh-i Jahan — Archnet](https://archnet.org/sites/2717)
 - [Qeysarie Gate (Portal) — iranroute](https://iranroute.com/sights/14/qeysarie-gate-portal)
 
+## 15. The square's people and horses (third pass)
+
+"In the mornings pedlars, in the evenings polo" [stated: irannewsdaily, §5]. Ours (`life.js`): at each end of the polo field, a little in from the stone goalposts, six saddled horses held by grooms with riders talking by some of them; four horses of the guard held before Ali Qapu by men in red; people before the Qeysarieh portal and along the walks by the arcades — men in long robes with sashes and turbans, the red turban of the Qizilbash now and then, women veiled [inferred: the numbers and places; the dress after Safavid paintings]. Kept clear of the arrival view down the square to the Shah Mosque's portal. (The pedlars' stalls are the settlement-wide life's market.)
+
 ## Sources
 
 - [Naqsh-e Jahan Square — Wikipedia](https://en.wikipedia.org/wiki/Naqsh-e_Jahan_Square)
