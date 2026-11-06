@@ -11,6 +11,8 @@ import { palazzo, loggia, ponteVecchio } from './signoria.js';
 import { baptistery } from './baptistery.js';
 import { orsanmichele } from './orsanmichele.js';
 import { palazzoMedici } from './medici.js';
+import { mercato } from './mercato.js';
+import { novella } from './novella.js';
 
 const M = 'marble', G = 'verde_antico', R = 'roof_tile', ST = 'limestone_yellow';
 const oct = (bag, mat, cx, y, cz, r, h) => bag.add(mat, lathe([[r, 0], [r, h], [0.001, h]], 8, null, cx, y, cz));
@@ -335,6 +337,6 @@ function campanile(el, { bag, col }) {
 }
 registerStyle('renaissance', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, duomo, campanile, baptistery, orsanmichele, palazzo, loggia, ponte_vecchio: ponteVecchio, palazzo_medici: palazzoMedici },
+  elements: { ...STYLES.qing.elements, duomo, campanile, baptistery, orsanmichele, palazzo, loggia, ponte_vecchio: ponteVecchio, palazzo_medici: palazzoMedici, mercato, novella },
   objects: {},
 });

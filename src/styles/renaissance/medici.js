@@ -14,7 +14,7 @@ import { faceFrame, Local, ext, archOutline, voussoirs, wrect, merge } from './f
 import { rusticate, dropFace, bifora } from './signoria.js';
 import { ball, limb, T } from '../qing/carving.js';
 
-const PF = 'limestone_yellow', SER = 'pietra_serena', M = 'marble', R = 'roof_tile', W = 'wood_dark', O = 'opening', PL = 'plaster_white', STU = 'stucco', BR = 'bronze';
+const PF = 'limestone_yellow', SER = 'pietra_serena', M = 'marble_smooth', R = 'roof_tile', W = 'wood_dark', O = 'opening', PL = 'plaster_white', STU = 'stucco', BR = 'bronze';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** The rectangle `o` less the holes: boxes (as rects) covering what is left, merged along x in each row. */

@@ -14,6 +14,9 @@ export const PALAZZO = [62, 120, 102, 160];
 export const LOGGIA = [12, 165, 50, 182];
 export const ORSAN = [16, 20, 48.4, 42.1];                      // Orsanmichele, between the cathedral and the Signoria (32.4 × 22.1 m)
 export const MEDICI = [-12, -196, 28, -156];                   // the Palazzo Medici on the Via Larga, north of the cathedral (40 × 40 m)
+export const MERCATO = [-82, 8, -18, 72];                      // the Mercato Vecchio, on the Roman forum west of Orsanmichele
+export const NOVELLA = [-266, -222, -233, -150];               // Santa Maria Novella, its front on the south (33 m: the side of its square)
+export const NOVELLA_PIAZZA = [-292, -150, -205, -110];        // the piazza before it
 export const ARNO = { z: 275, w: 60, level: -4, bed: -7 };
 export const BRIDGE = { x: 40 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -38,6 +41,8 @@ export function lots() {
   // the block of Orsanmichele and its four streets (after the draw, so that the other lots stay as they were)
   LOTS = LOTS.filter((l) => !inRect(ORSAN, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 9));
   // the Palazzo Medici's block, the Via Larga before it and the Via de' Gori beside it
+  LOTS = LOTS.filter((l) => !overlaps(l.rect, MERCATO));
+  LOTS = LOTS.filter((l) => !overlaps(l.rect, [NOVELLA[0] - 4, NOVELLA[1] - 4, NOVELLA[2] + 4, NOVELLA[3]]) && !overlaps(l.rect, NOVELLA_PIAZZA));
   LOTS = LOTS.filter((l) => !overlaps(l.rect, [MEDICI[0] - 2, MEDICI[1] - 2, MEDICI[2] + 9, MEDICI[3] + 8]));
   return LOTS;
 }

@@ -1,5 +1,5 @@
 // Florence about 1480 (docs/settlements/florence.md §2–§4).
-import { RADIUS, DUOMO, CAMPANILE, BAPTISTERY, PALAZZO, LOGGIA, ORSAN, ARNO, BRIDGE, MEDICI } from './layout.js';
+import { RADIUS, DUOMO, CAMPANILE, BAPTISTERY, PALAZZO, LOGGIA, ORSAN, ARNO, BRIDGE, MEDICI, MERCATO, NOVELLA, NOVELLA_PIAZZA } from './layout.js';
 
 const E = [
   { t: 'duomo', ...DUOMO, interior: true },
@@ -40,5 +40,20 @@ export const medici = {
   entrance: { at: [MEDICI[2] + 4, (MEDICI[1] + MEDICI[3]) / 2], facing: 'w' }, bounds: [MEDICI[0] - 1, MEDICI[1] - 1, MEDICI[2] + 3, MEDICI[3] + 3],
   elements: [{ t: 'palazzo_medici', rect: MEDICI, y: 0 }],
   rooms: [{ id: 'medici-court', rect: [MEDICI[0] + 9.1, MEDICI[1] + 9.1, MEDICI[2] - 9.1, MEDICI[3] - 9.1], y: 0, kind: 'open' }],
+};
+// the Mercato Vecchio (docs/settlements/florence.md §4): the column of Abundance at the crossing of the Roman streets, the market hall on its south side
+const mc = [(MERCATO[0] + MERCATO[2]) / 2, (MERCATO[1] + MERCATO[3]) / 2];
+export const mercato = {
+  id: 'florence-mercato-vecchio', style: 'renaissance', origin: [0, 0], base: 0, yaw: 0, feature: true,
+  entrance: { at: [mc[0], MERCATO[1] + 2], facing: 's' }, bounds: [MERCATO[0], MERCATO[1], MERCATO[2], MERCATO[3]],
+  elements: [{ t: 'mercato', column: mc, hall: [MERCATO[0] + 8, MERCATO[3] - 14, MERCATO[2] - 22, MERCATO[3] - 7], y: 0 }],
+  rooms: [{ id: 'mercato-market', rect: [MERCATO[0] + 2, MERCATO[1] + 2, MERCATO[2] - 2, MERCATO[3] - 16], y: 0, kind: 'open' }],
+};
+// Santa Maria Novella (docs/settlements/florence.md §4): Alberti's front of 1470 on the south, its piazza before it
+export const novella = {
+  id: 'florence-santa-maria-novella', style: 'renaissance', origin: [0, 0], base: 0, yaw: 0, feature: true,
+  entrance: { at: [(NOVELLA[0] + NOVELLA[2]) / 2, NOVELLA[3] + 12], facing: 'n' }, bounds: [NOVELLA[0] - 1, NOVELLA[1] - 1, NOVELLA[2] + 1, NOVELLA[3] + 1],
+  elements: [{ t: 'novella', rect: NOVELLA, y: 0 }],
+  rooms: [{ id: 'novella-piazza', rect: NOVELLA_PIAZZA, y: 0, kind: 'open', market: false }],
 };
 export default centre;
