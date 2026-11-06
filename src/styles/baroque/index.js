@@ -10,6 +10,7 @@ import '../qing/index.js';
 import '../renaissance/index.js';
 import { obelisk, fountain, saint, ponteAngeli, palaceRoman } from './piazza.js';
 import { merge } from '../renaissance/face.js';
+import { stPeterFacade } from './facade.js';
 
 const T = 'travertine', L = 'lead', ST = 'stucco_ochre';
 /** st_peter: { c (the crossing), s (side of the central block), nave (length east), w, h, d (dome diameter), y } — the church faces east. */
@@ -28,35 +29,9 @@ function stPeter(el, { bag, col }) {
   bag.add(T, box(n0 - 1, y - 0.5, cz - W / 2, n1, y + H, cz + W / 2)); col.rect([n0 - 1, cz - W / 2, n1, cz + W / 2], y, y + H);
   bag.add(L, box(n0, y + H, cz - W * 0.3, n1, y + H + 6, cz + W * 0.3));
   const fw = W * 1.05;
-  bag.add(T, box(n1, y - 0.5, cz - fw, n1 + 4, y + H + 2, cz + fw)); col.rect([n1, cz - fw, n1 + 4, cz + fw], y, y + H + 2);
-  for (let k = 0; k < 8; k++) { const z = cz - fw * 0.55 + k * fw * 1.1 / 7; bag.add(T, lathe([[1.4, 0], [1.4, 1], [1.2, 1.4], [1.2, H - 4], [1.6, H - 3], [1.6, H - 2.5]], 12, null, n1 + 5.4, y, z)); col.circle(n1 + 5.4, z, 1.4, y, y + H); }
-  // the façade's face at x = n1 + 4: F(z0, z1, y0, y1, d0, d1) with d outward from it
-  const fx = n1 + 4, F = (z0, z1, y0, y1, d0, d1) => box(fx + d0, y0, z0, fx + d1, y1, z1);
-  // the entablature full width, the giant pilasters on the outer bays, the attic with its windows
-  bag.add(T, F(cz - fw, cz + fw, y + H - 2.5, y + H + 2, 0, 1.2));
-  bag.add(T, F(cz - fw - 0.4, cz + fw + 0.4, y + H + 1.6, y + H + 2.4, 0, 1.6));
-  for (const zz of [-1, -0.85, -0.68, 0.68, 0.85, 1]) bag.add(T, F(cz + zz * fw * 0.98 - 1.1, cz + zz * fw * 0.98 + 1.1, y, y + H - 2.5, 0, 0.6));
-  bag.add(T, F(cz - fw, cz + fw, y + H + 2.4, y + H + 9, 0, 0.3));
-  for (let k = 0; k < 9; k++) { const z = cz - fw * 0.8 + k * fw * 1.6 / 8; bag.add('opening', F(z - 1.0, z + 1.0, y + H + 4, y + H + 7.2, 0.25, 0.35)); }
-  // the statues of Christ, John the Baptist and the apostles standing along the attic
-  for (let k = 0; k < 13; k++) { const z = cz - fw * 0.9 + k * fw * 1.8 / 12; bag.add('marble', lathe([[0.6, 0], [0.5, 3], [0.6, 4.2], [0.001, 5.2]], 8, null, fx - 0.3, y + H + 9, z)); }
-  // the pediment over the four middle columns: a triangle, its raking cornices
-  const pz = fw * 0.6 * 0.5 + 2, py = y + H + 2.4;
-  for (let i = 0; i < 8; i++) { const t0 = i / 8, t1 = (i + 1) / 8; bag.add(T, F(cz - pz * (1 - t0), cz + pz * (1 - t0), py + 7 * t0, py + 7 * t1, 0.6, 3.2)); }
-  // five doors with their surrounds; over each a window under a pediment; the benediction loggia in the middle with its balcony
-  const bay = fw * 1.1 / 7;
-  for (const k of [-2, -1, 0, 1, 2]) {
-    const z = cz + k * bay * 1.6 * (Math.abs(k) === 2 ? 1.25 : 1), dw = k === 0 ? 2.8 : 2.2;
-    bag.add('marble', F(z - dw - 0.6, z + dw + 0.6, y, y + 12.6, 0, 0.35));
-    bag.add('opening', F(z - dw, z + dw, y, y + 11.8, 0.3, 0.4));
-    bag.add(T, F(z - dw - 1.2, z + dw + 1.2, y + 12.6, y + 13.6, 0, 0.9));
-    const wy = y + 18, ww = k === 0 ? 3.2 : 2.4;
-    bag.add('marble', F(z - ww - 0.5, z + ww + 0.5, wy - 0.6, wy + 9.6, 0, 0.3));
-    bag.add('opening', F(z - ww, z + ww, wy, wy + 9, 0.25, 0.35));
-    if (Math.abs(k) % 2 === 1) for (let i = 0; i < 4; i++) { const t0 = i / 4, t1 = (i + 1) / 4; bag.add(T, F(z - (ww + 0.9) * (1 - t0), z + (ww + 0.9) * (1 - t0), wy + 9.6 + 1.6 * t0, wy + 9.6 + 1.6 * t1, 0, 0.7)); }
-    else bag.add(T, F(z - ww - 0.9, z + ww + 0.9, wy + 9.6, wy + 10.4, 0, 0.7));
-    if (k === 0) { bag.add(T, F(z - 4.4, z + 4.4, wy - 0.9, wy - 0.4, 0, 2.6)); for (let b = -8; b <= 8; b++) bag.add(T, lathe([[0.16, 0], [0.24, 0.4], [0.12, 0.9]], 6, null, fx + 2.3, wy - 0.4, z + b * 0.5)); bag.add(T, F(z - 4.4, z + 4.4, wy + 0.5, wy + 0.7, 2.0, 2.6)); }
-  }
+  bag.add(T, box(n1, y - 0.5, cz - fw, n1 + 4, y + H, cz + fw)); col.rect([n1, cz - fw, n1 + 4, cz + fw], y, y + H);
+  // the front: the giant order, the entrances, the balconies and the Loggia of the Blessings, the inscription, the pediment, the attic and the statues (facade.js)
+  stPeterFacade(bag, col, { fx: n1 + 4, cz, fw, y, top: H });
   // the drum with paired columns, the ribbed dome, the lantern
   const dy = y + H + 2.5;
   bag.add(T, lathe([[R0 + 3, 0], [R0 + 3, 4], [R0 + 1.5, 4], [R0 + 1.5, 20], [R0 + 2.5, 22], [R0 + 1, 24], [0.001, 24]], 32, null, cx, dy, cz));
