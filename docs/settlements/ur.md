@@ -1,7 +1,7 @@
 # Ur of the Third Dynasty, c. 2050 BC — dossier
 
 Settlement id: `ur` · Style: `sumerian` · Region: Mesopotamia (the lower Euphrates) · Code: `src/settlements/ur/`
-Status of this dossier: L1–L2 (the Ziggurat of Ur-Nammu on its terrace — three stages, the three stairways meeting at the gatehouse, the shrine on top; the terrace's enclosure; the Court of Nanna; the Giparu and the palace E-hursag inside the temenos wall; a quarter of courtyard houses on winding lanes; the harbour on the west with reed boats; date palms; ground, weather, music). L3 recorded for later: the Royal Cemetery's mausolea, the Edublalmah gate, the city rampart and its oval wall, the canals, the brick stamps and bitumen, interiors, people.
+Status of this dossier: L2 for the houses and the temenos's terrace and gates (§4.1, §5); before that L1–L2 (the Ziggurat of Ur-Nammu on its terrace — three stages, the three stairways meeting at the gatehouse, the shrine on top; the terrace's enclosure; the Court of Nanna; the Giparu and the palace E-hursag inside the temenos wall; a quarter of courtyard houses on winding lanes; the harbour on the west with reed boats; date palms; ground, weather, music). L3 recorded for later: the Royal Cemetery's mausolea, the city rampart and its oval wall, the canals, the brick stamps and bitumen, interiors, people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -33,9 +33,18 @@ Mud brick with baked-brick facing, the walls broken by shallow buttresses and re
 
 The ziggurat's skin (L3, built): a mud-brick core with a casing about 2.4 m thick of baked brick set in bitumen, mats of reed every six to eight courses in the core, and many drains from the core [stated: stevewatson after Woolley]; "weeper holes" pierce the sloping walls so the core can dry out [stated: Britannica; Alberti's Window]. Ours: rows of small weeper holes every 1.8 m up each stage, midway between the buttresses (not behind the stairs); low parapets rising with the central stair [inferred].
 
+### 4.1 The temenos (L2, built)
+
+- **The terrace:** Ur-Nammu's terrace wall "a massive wall, buttressed and sloping sharply inwards", of unbaked brick, with rows of nail-shaped clay cones set in its face whose round heads formed a pattern, their stems inscribed with the king's name and the dedication to the Moon God [stated: Penn Museum Journal, "The Expedition to Ur"]. Ours: the terrace 2.5 m high in mud brick, its faces leaning in 0.6 m, buttresses every 4 m, two rows of cone heads every 0.32 m near the top following the slope; the rooms' walls stand on the terrace 2.5 m back from its edge so the face shows [inferred: spacing, rows, setback].
+- **The Edublalmah:** the gate tower in front of the ziggurat steps, a gateway with very thick burnt-brick walls and wide doors [stated: Penn Museum Journal]. Ours: a tower 16 × 12 m, 9 m high, of baked brick at the Court of Nanna's entrance, a passage 3 m wide through it, two cedar leaves bound in bronze standing open inside, buttressed faces; a like tower of mud brick at the temenos's north gate [inferred].
+- **Gateways of the courtyard buildings** (the Giparu, E-hursag, the stores; Babylon's Esagila too): a deep doorway in the middle of the side between two projecting towers, cedar doors at the back of the reveal, a brick threshold — after Koldewey's account of Esagila's gateways "elaborated with massive projecting towers" [stated for Babylon; inferred for Ur].
+- **Stairs:** brick steps on a wedge of brickwork (the ziggurat's flights and the terrace stair) [inferred].
+
 ## 5. The town
 
 Courtyard houses of one and two storeys, plastered mud brick, blank to the lanes, rooms round an open court. [inferred]
+
+Built (L2): after Woolley's houses (of the Isin–Larsa period, a little later than ours) — kiln-fired brick for the foundations and the lower courses, mud brick above, thick mud plaster sometimes whitewashed; the court paved in baked tiles sloping to a drain; a stairway in the court to the roof or the upper floor; postholes for a wooden gallery round the court; wooden doors and door frames; a narrow street door; windows to the street, if any, only upstairs, shuttered or latticed; mud roofs over matting on rafters, with projecting gutters [stated: odysseyadventures, "Ur of the Chaldees — Houses"]. Ours: a brick footing 0.8–1.25 m high, plaster or (about one house in three) whitewash above; the doorway 1 m wide and 2.1 m high in a reveal 0.3 m deep, with a cedar leaf, lintel and brick threshold, set near a corner of its side; in two-storey houses small latticed windows at 4.1 m; one to four clay spouts through the parapet; a brick stair along the court's longer side to the roof (one storey) or to a gallery of timber on posts round the other three sides (two storeys, courts at least 3.4 m across) [inferred: the dimensions and the share of each kind].
 
 ## 6. Ground and water
 
@@ -68,3 +77,6 @@ The lyre and the harp, a reed pipe, frame drums (a plucked string, the ney and a
 - [Great Ziggurat (Ur) — Madain Project](https://madainproject.com/great_ziggurat_(ur))
 - [Ziggurat of Ur — islamic-architecture.info](https://islamic-architecture.info/WA-IQ/WA-IQ-027.htm)
 - [Ziggurat of Ur — LLMpedia](https://llmpedia.scads.ai/deepseek/Great_Ziggurat_of_Ur.html)
+- [The Expedition to Ur — Penn Museum Journal](https://www.penn.museum/sites/journal?p=1297)
+- [Ur of the Chaldees — Houses (odysseyadventures)](https://odysseyadventures.ca/articles/ur%20of%20the%20chaldees/ur_article04houses.html)
+- [R. Koldewey, *The Excavations at Babylon* (1914) — Project Gutenberg](https://gutenberg.org/files/71398/71398-h/71398-h.htm)

@@ -306,7 +306,7 @@ function terrace(el, { bag, col }) {
 
 /**
  * gate_tower: { rect, door ('n'|'s'|'e'|'w': the passage runs across the tower from this side), w (the passage), h,
- * dh (the doorway) } — a massive gate tower of baked brick (the Edublalmah, Amar-Sin's gate before the ziggurat
+ * dh (the doorway) } — a massive gate tower of baked brick (the Edublalmah, the gate before the ziggurat
  * stair): a passage through it with doorways at both ends, cedar doors, buttressed faces.
  */
 function gateTower(el, { bag, col }) {
