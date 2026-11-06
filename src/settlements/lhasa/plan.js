@@ -17,8 +17,9 @@ const mass = (x0, x1, front, back, top, o = {}) => {
 };
 // the great white frontage (its middle the blank wall where the giant thangkas were hung)
 const STW = [-140, -100], STE = [46, 86];                     // the two zigzag stairs on its face
+const KOKU = [[-16.1, -9.1], [-8.9, -3.9]];                   // the great banner's two panels, the larger west
 mass(-186, -142, 28, 8, 19); mass(-142, -98, 30, 8, 22, { win: { skip: [[...STW, 23]] } }); mass(-98, -60, 29, 8, 21);
-mass(-60, 40, 30, 8, 24, { win: { from: 15, step: 4.2 } });
+mass(-60, 40, 30, 8, 24, { win: { from: 15, step: 4.2, skip: [[KOKU[0][0], KOKU[1][1], 23]] } });
 mass(40, 86, 30, 8, 22, { win: { skip: [[...STE, 23]] } }); mass(86, 132, 29, 8, 21); mass(132, 170, 27, 8, 18);
 // the second tier
 mass(-196, -150, 4, -26, 34); mass(-150, -104, 7, -26, 41); mass(-104, -60, 5, -26, 46);
@@ -28,13 +29,28 @@ mass(40, 96, 7, -26, 49); mass(96, 140, 4, -26, 44); mass(140, 176, 1, -26, 37);
 mass(-172, -128, -30, -62, 58); mass(-128, -60, -24, -62, 70, { windows: 'se' });
 mass(-56, 26, -22, -62, 66, { mat: 'limewash_red', split: 50, pembe: 2.0, gilt: true, capMat: 'limewash_white' });
 mass(26, 44, -30, -84, 86, { mat: 'limewash_yellow', windows: 's', pembe: 1.6 });
-mass(44, 100, -24, -62, 86, { windows: 'se' }); mass(100, 138, -28, -62, 78, { windows: 'se' }); mass(138, 162, -34, -62, 64, { windows: 'se' });
+mass(44, 100, -24, -62, 86, { windows: 'se' });
+// the Deyang Shar, the great eastern court before the White Palace (Richardson), raised on its
+// platform at 70 m: galleries along its south side, a long range on the north, the massive
+// three-storied building towering over its east end
+const DY = 70;
+mass(92, 150, -38, -90, DY, { windows: '', pembe: 0, batter: 0.4, mat: 'limewash_white', seed: 31 });
+mass(100, 160, -24, -42, DY + 8, { windows: 'sn', win: { from: 50 } });
+mass(146, 166, -36, -96, DY + 16, { windows: 'ew', win: { from: DY + 2 }, banners: 'black' });
+mass(100, 148, -86, -104, DY + 8, { windows: 's', win: { from: DY + 1.5 } });
 // the top tier: the Red Palace rising in two stages with its doubled, gilt-studded frieze; the White Palace east, its quarters' wide windows in the middle
 mass(-160, -118, -64, -96, 72, { windows: 'sw', banners: 'black' }); mass(-118, -58, -60, -98, 86, { windows: 'sw', banners: 'black' });
 mass(-52, 22, -56, -98, 104, { mat: 'limewash_red', split: 52, pembe: 2.6, gilt: true, windows: 'sew', banners: 'gilt' });
 mass(-42, 12, -64, -94, 117, { mat: 'limewash_red', pembe: 2.8, gilt: true, windows: 'sew', banners: 'gilt', bannerS: 1.2 });
 mass(44, 98, -60, -98, 100, { windows: 'se', pembe: 2.0, banners: 'black', win: { bay: [0.38, 0.66] } });
-mass(98, 134, -62, -96, 92, { windows: 'se', banners: 'black' }); mass(134, 152, -64, -92, 80, { windows: 'se' });
+
+// the triple stair from the Deyang Shar up the White Palace's east face, the middle flight the Dalai Lama's
+E.push({ t: 'triple_stair', xf: 114, xt: 98.5, zc: -74, y0: DY, y1: DY + 14, w: 2.2, land: 5.5 });
+// the great appliqué banner (koku) of the Golden Procession hung down the frontage's blank middle
+{
+  const y0 = foot(-60, 40, 30), yw = 24 - 1.3 - 0.4, b = (yw - y0) * 0.08;
+  E.push({ t: 'koku', panels: KOKU, y0: 1.2, y1: yw - 0.25, z0: 30, fy0: y0, k: b / (yw - y0) });
+}
 // the gilded roofs over the Red Palace's chapels and tombs
 for (const [x, z, w] of [[-28, -82, 8], [-15, -82, 9], [-2, -82, 8], [-32, -72.3, 4.4], [2, -72.3, 4.4]]) E.push({ t: 'golden_roof', rect: [x - w / 2, z - w / 2, x + w / 2, z + w / 2], y: 117 });
 // the round bastions at the ends, and the walls stepping up the rock behind them

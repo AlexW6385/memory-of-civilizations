@@ -9,6 +9,7 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof } from '../ming/index.js';
+import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
 import '../qing/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -345,8 +346,119 @@ function house(el, ctx) {
   }
 }
 
+
+/**
+ * triple_stair: the long, steep triple stair up a battered face into the White Palace from the
+ * Deyang Shar (Richardson: "entered by a long, steep, triple stair") { xf (the foot, east), xt (the
+ * top, west), zc, y0, y1, w (each flight), face: [x at y0, x at y1] of the wall it climbs to }:
+ * three flights side by side between whitewashed walls on a solid whitewashed base, treads of stone;
+ * at the top a landing running into the wall, a porch of two red pillars under a beam of painted
+ * ends and a pembe band, the door hung with a black yak-hair curtain bordered in white.
+ */
+function tripleStair(el, { bag, col }) {
+  const { xf, xt, zc, y0, y1 } = el, w = el.w ?? 2.2, T = 0.45, n = 3, W = n * w + (n + 1) * T, z0 = zc - W / 2, run = xf - xt;
+  const ns = Math.max(4, Math.round((y1 - y0) / 0.27)), ph = 1.0, land = el.land ?? 4.5, xl = xt - land;
+  // the solid base under the flights, its top following the slope; the landing block at the top
+  const t = [], q = (a, b, c, d) => t.push(...a, ...b, ...c, ...a, ...c, ...d);
+  { const ya = y0 - 0.4, yb = y1 - 0.4, B = [[xt, y0 - 1, z0], [xf, y0 - 1, z0], [xf, y0 - 1, z0 + W], [xt, y0 - 1, z0 + W]], U = [[xt, yb, z0], [xf, ya, z0], [xf, ya, z0 + W], [xt, yb, z0 + W]];
+    q(U[0], U[3], U[2], U[1]); q(B[0], B[1], U[1], U[0]); q(B[3], U[3], U[2], B[2]); q(B[1], B[2], U[2], U[1]); q(B[0], U[0], U[3], B[3]); }
+  bag.add('limewash_white', fromTriangles(fixOut(t)));
+  bag.add('limewash_white', box(xl, y0 - 1, z0, xt, y1 - 0.1, z0 + W)); bag.add('flagstone', box(xl, y1 - 0.1, z0 + T, xt, y1, z0 + W - T));
+  col.rect([xl, z0, xt, z0 + W], y0 - 1, y1 - 0.3); col.floor([xl, z0 + T, xt, z0 + W - T], y1);
+  // the steps of each flight
+  for (let f = 0; f < n; f++) {
+    const za = z0 + T + f * (w + T), zb = za + w;
+    for (let i = 0; i < ns; i++) {
+      const xa = xf - run * (i + 1) / ns, xb = xf - run * i / ns, yy = y0 + (y1 - y0) * (i + 1) / ns;
+      bag.add('limewash_white', box(xa, yy - 0.45, za, xb, yy - 0.07, zb)); bag.add('flagstone', box(xa - 0.03, yy - 0.07, za, xb, yy, zb));
+    }
+    col.ramp([xt, za, xf, zb], y0, y1, 'w');
+  }
+  // the four walls between and beside the flights, their tops a metre over the treads, stepped down at the foot
+  const par = [];
+  for (let k = 0; k <= n; k++) {
+    const za = z0 + k * (w + T), zb = za + T, ya = y0 + ph, yb = y1 + ph;
+    const P = [[xt, y0 - 0.4, za], [xf, y0 - 0.4, za], [xf, y0 - 0.4, zb], [xt, y0 - 0.4, zb]], U = [[xt, yb, za], [xf, ya, za], [xf, ya, zb], [xt, yb, zb]];
+    const qq = (a, b, c, d) => par.push(...a, ...b, ...c, ...a, ...c, ...d);
+    qq(U[0], U[3], U[2], U[1]); qq(P[0], P[1], U[1], U[0]); qq(P[3], U[3], U[2], P[2]); qq(P[1], P[2], U[2], U[1]); qq(P[0], U[0], U[3], P[3]);
+    col.segment([xt, za + T / 2], [xf, za + T / 2], T, y0, yb);
+    // a dark band along the top of each wall
+    { const S = [], qs = (a, b, c, d) => S.push(...a, ...b, ...c, ...a, ...c, ...d), e = 0.03;
+      const L = [[xt, yb - 0.02, za - e], [xf, ya - 0.02, za - e], [xf, ya - 0.02, zb + e], [xt, yb - 0.02, zb + e]], V = L.map(([x, y, z]) => [x, y + 0.1, z]);
+      qs(V[0], V[3], V[2], V[1]); qs(L[0], L[1], V[1], V[0]); qs(L[3], V[3], V[2], L[2]); qs(L[1], L[2], V[2], V[1]); qs(L[0], V[0], V[3], L[3]);
+      bag.add('lacquer_black', fromTriangles(fixOut(S))); }
+  }
+  bag.add('limewash_white', fromTriangles(fixOut(par)));
+  // the porch on the landing: two pillars, a beam with painted ends, a band of pembe, a cap; the curtained door
+  const xp = xl + land * 0.62, hp = 3.4, pz = [z0 + W * 0.28, z0 + W * 0.72];
+  for (const z of pz) { bag.add('lacquer_red', box(xp - 0.17, y1, z - 0.17, xp + 0.17, y1 + hp, z + 0.17)); bag.add('paint_dancheong', box(xp - 0.32, y1 + hp, z - 0.5, xp + 0.32, y1 + hp + 0.2, z + 0.5)); col.rect([xp - 0.17, z - 0.17, xp + 0.17, z + 0.17], y1, y1 + hp); }
+  bag.add('lacquer_red', box(xp - 0.3, y1 + hp + 0.2, z0 + 0.3, xp + 0.3, y1 + hp + 0.5, z0 + W - 0.3));
+  for (let k = 0; k < 14; k++) { const z = z0 + 0.6 + (W - 1.2) * k / 13; bag.add('paint_dancheong', box(xp + 0.3, y1 + hp + 0.52, z - 0.08, xp + 0.55, y1 + hp + 0.66, z + 0.08)); }
+  bag.add('lacquer_red', box(xp - 0.3, y1 + hp + 0.5, z0 + 0.3, xp + 0.3, y1 + hp + 0.7, z0 + W - 0.3));
+  bag.add('pembe', box(xl, y1 + hp + 0.7, z0 + 0.1, xp + 0.62, y1 + hp + 1.5, z0 + W - 0.1));
+  bag.add('limewash_white', box(xl, y1 + hp + 1.5, z0, xp + 0.75, y1 + hp + 1.75, z0 + W));
+  for (const [za, zb] of [[z0 + 0.1, z0 + T + 0.1], [z0 + W - T - 0.1, z0 + W - 0.1]]) { bag.add('limewash_white', box(xl, y1, za, xp - 0.4, y1 + hp + 0.7, zb)); col.rect([xl, za, xp - 0.4, zb], y1, y1 + hp); }
+  const xd = xl + 0.5;
+  bag.add('opening', box(xl, y1, zc - 1.1, xd, y1 + 2.8, zc + 1.1));
+  bag.add('cloth_black', box(xd, y1 + 0.2, zc - 1.3, xd + 0.06, y1 + 3.0, zc + 1.3));
+  for (const [za, zb, ya, yb] of [[zc - 1.3, zc + 1.3, y1 + 2.82, y1 + 3.0], [zc - 1.3, zc - 1.18, y1 + 0.2, y1 + 2.82], [zc + 1.18, zc + 1.3, y1 + 0.2, y1 + 2.82], [zc - 0.4, zc + 0.4, y1 + 1.3, y1 + 1.7]]) bag.add('cloth_white', box(xd + 0.06, ya, za, xd + 0.1, yb, zb));
+}
+
+/**
+ * koku: the great appliqué banner hung down the palace's lower face on the day of the Golden
+ * Procession (Richardson: "a great appliqué banner which covers the lower face of the Potala for a
+ * space of some 75 by 40 feet", in two panels, one rather larger than the other, each a huge figure
+ * among many deities and bodhisattvas) { panels: [[x0, x1], …] (the larger first), y0, y1 (its
+ * foot and its top), z0, fy0, k: the wall face it lies on, at z0 where y = fy0, leaning back k per metre }. Each panel a field of indigo in
+ * borders of red and ochre, the pleated valance and the pole at the top, a ground of green at the
+ * foot; the seated Buddha in his aureole on a lotus throne, rows of small seated figures round him.
+ */
+function koku(el, { bag }) {
+  const fz = (y) => el.z0 - el.k * (y - el.fy0), y0 = el.y0, y1 = el.y1, H = y1 - y0;
+  const slab = (mat, shape, d, x0) => {
+    const g = new ExtrudeGeometry(shape, { depth: 0.02, bevelEnabled: false, curveSegments: 10 }), P = g.attributes.position;
+    for (let i = 0; i < P.count; i++) { const u = P.getX(i), v = P.getY(i), dz = P.getZ(i), yy = y0 + v; P.setXYZ(i, x0 + u, yy, fz(yy) + d + dz); }
+    g.computeVertexNormals(); bag.add(mat, g);
+  };
+  const rect = (u0, v0, u1, v1) => { const s = new Shape(); s.moveTo(u0, v0); s.lineTo(u1, v0); s.lineTo(u1, v1); s.lineTo(u0, v1); s.closePath(); return s; };
+  const ell = (cu, cv, ru, rv, hole = 0) => { const s = new Shape(); s.absellipse(cu, cv, ru, rv, 0, Math.PI * 2, false); if (hole) { const h = new Path(); h.absellipse(cu, cv, ru - hole, rv - hole, 0, Math.PI * 2, true); s.holes.push(h); } return s; };
+  const poly = (pts) => { const s = new Shape(); s.moveTo(...pts[0]); for (const p of pts.slice(1)) s.lineTo(...p); s.closePath(); return s; };
+  /** A seated figure, centred at cu, its seat at v, size h: the lotus seat, crossed legs, the robe, the head, the halo; layered from d. */
+  const seatedFig = (x0, cu, v, h, robe, d, full) => {
+    if (full) slab('cloth_ochre', ell(cu, v + h * 0.62, h * 0.62, h * 0.72, h * 0.07), d, x0);                   // the aureole's rim
+    slab(full ? 'cloth_green' : 'cloth_ochre', ell(cu, v + h * 0.9, h * 0.2, h * 0.2), d + 0.035, x0);            // the halo
+    slab(robe, poly([[cu - h * 0.42, v + h * 0.04], [cu + h * 0.42, v + h * 0.04], [cu + h * 0.36, v + h * 0.22], [cu + h * 0.2, v + h * 0.3], [cu + h * 0.21, v + h * 0.66], [cu + h * 0.1, v + h * 0.74], [cu - h * 0.1, v + h * 0.74], [cu - h * 0.21, v + h * 0.66], [cu - h * 0.2, v + h * 0.3], [cu - h * 0.36, v + h * 0.22]]), d + 0.07, x0);
+    slab('paint_ochre', ell(cu, v + h * 0.88, h * 0.1, h * 0.12), d + 0.105, x0);                                  // the face, gilt
+    slab('paint_ochre', ell(cu, v + h * 0.3, h * 0.08, h * 0.05), d + 0.105, x0);                                  // the hands in the lap
+    if (full) slab('cloth_red', poly([[cu - h * 0.12, v + h * 0.62], [cu + h * 0.12, v + h * 0.62], [cu, v + h * 0.36]]), d + 0.105, x0);   // the robe's fold over the breast
+    const np = full ? 9 : 5;                                                                                         // the lotus seat's petals
+    for (let k = 0; k < np; k++) { const u = cu - h * 0.5 + h * (k + 0.5) / np; slab('cloth_white', poly([[u - h * 0.55 / np, v + h * 0.04], [u + h * 0.55 / np, v + h * 0.04], [u, v - h * 0.14]]), d + 0.07, x0); }
+    slab('cloth_red', rect(cu - h * 0.5, v - h * 0.22, cu + h * 0.5, v - h * 0.13), d + 0.035, x0);
+  };
+  el.panels.forEach(([x0, x1], i) => {
+    const W = x1 - x0, b = 0.45, ib = 0.16, robes = ['cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_green'];
+    slab('cloth_indigo', rect(0, 0, W, H - 0.6), 0.08, x0);                                                          // the field
+    for (const r of [[0, 0, W, b], [0, H - 0.6 - b, W, H - 0.6], [0, b, b, H - 0.6 - b], [W - b, b, W, H - 0.6 - b]]) slab('cloth_red', rect(...r), 0.115, x0);
+    for (const r of [[b, b, W - b, b + ib], [b, H - 0.6 - b - ib, W - b, H - 0.6 - b], [b, b + ib, b + ib, H - 0.6 - b - ib], [W - b - ib, b + ib, W - b, H - 0.6 - b - ib]]) slab('cloth_ochre', rect(...r), 0.115, x0);
+    slab('cloth_green', rect(b + ib, b + ib, W - b - ib, b + ib + H * 0.07), 0.115, x0);                            // the ground at the foot
+    // the valance across the top in pleats, and the pole it hangs from
+    const N = Math.round(W / 0.4);
+    for (let k = 0; k < N; k++) slab(k % 2 ? 'cloth_white' : 'cloth_red', rect(W * k / N, H - 1.5, W * (k + 1) / N, H - 0.25), 0.16 + (k % 2) * 0.035, x0);
+    slab('cloth_ochre', rect(-0.1, H - 0.3, W + 0.1, H - 0.05), 0.24, x0);
+    bag.add('timber', box(x0 - 0.5, y1 - 0.05, fz(y1) + 0.05, x1 + 0.5, y1 + 0.17, fz(y1) + 0.27));
+    // the great figure, and the small ones in rows round him (the larger panel's figure the larger)
+    const inner = W - 2 * (b + ib), gh = inner * 0.78, gv = b + ib + H * 0.11, cu = W / 2;
+    seatedFig(x0, cu, gv, gh, 'cloth_red', 0.115, true);
+    const sh = Math.min(1.3, inner / 4.2);
+    let n = 0;
+    for (let v = gv + gh * 1.36 + 0.3; v + sh < H - 1.8; v += sh * 1.3) for (let u = b + ib + sh * 0.7; u < W - b - ib - sh * 0.5; u += sh * 1.15) seatedFig(x0, u, v, sh, robes[n++ % 4], 0.115, false);
+    // two attendants standing at the foot beside the throne
+    for (const sg of [-1, 1]) seatedFig(x0, cu + sg * (inner / 2 - sh * 0.6), gv - gh * 0.05, sh * 1.1, robes[(n++) % 4], 0.155, false);
+  });
+}
+
 registerStyle('tibetan', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dzong, golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate },
+  elements: { ...STYLES.qing.elements, dzong, golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku },
   objects: {},
 });

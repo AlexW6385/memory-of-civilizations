@@ -36,3 +36,11 @@ export function lots() {
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** The pond behind the palace, left where the earth for the Potala's mortar was dug (now the Lukhang's lake); its little island. */
+export const POND = { c: [0, -292], rx: 68, rz: 32, level: -1.0, bed: -2.4, island: { c: [8, -288], rx: 9, rz: 6.5 } };
+/** Signed distance (m, roughly) to the pond's shore: negative over the water, positive on land and on the island. */
+export function pondDist(x, z) {
+  const e = Math.hypot((x - POND.c[0]) / POND.rx, (z - POND.c[1]) / POND.rz), d = (e - 1) * Math.min(POND.rx, POND.rz);
+  const I = POND.island, ei = Math.hypot((x - I.c[0]) / I.rx, (z - I.c[1]) / I.rz);
+  return ei < 1 ? (1 - ei) * Math.min(I.rx, I.rz) : d;
+}
