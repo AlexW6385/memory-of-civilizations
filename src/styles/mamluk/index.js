@@ -5,7 +5,7 @@
 // spur; the city's houses (src/styles/vernacular's mud-brick house).
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, rod, disc, fromTriangles, place } from '../../core/geom.js';
+import { box, lathe, rod, disc, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import '../qing/index.js';
 
 const S = 'limestone_yellow';
@@ -302,14 +302,151 @@ function courtFittings(bag, col, c, y, h) {
   for (let k = 0; k < 3; k++) { const e = 0.3 + k * 0.3, yy = y + h - 2.4 + k * 0.5; for (const r of [[c[0], c[1], c[2], c[1] + e], [c[0], c[3] - e, c[2], c[3]], [c[0], c[1], c[0] + e, c[3]], [c[2] - e, c[1], c[2], c[3]]]) bag.add(S, box(r[0], yy, r[1], r[2], yy + 0.5, r[3])); }
 }
 
-/** citadel_wall: a→b { h, th, y } with round towers. */
-function citadelWall(el, { bag, col }) {
-  const [ax, az] = el.a, [bx, bz] = el.b, h = el.h ?? 12, th = el.th ?? 3, y = el.y ?? 0, L = Math.hypot(bx - ax, bz - az);
-  const r = [Math.min(ax, bx) - th / 2, Math.min(az, bz) - th / 2, Math.max(ax, bx) + th / 2, Math.max(az, bz) + th / 2];
-  bag.add(S, box(r[0], y - 2, r[1], r[2], y + h, r[3])); col.rect(r, y - 2, y + h); col.floor(r, y + h);
-  const n = Math.max(1, Math.floor(L / 30));
-  for (let i = 0; i <= n; i++) { const x = ax + (bx - ax) * i / n, z = az + (bz - az) * i / n; bag.add(S, lathe([[th * 1.6, 0], [th * 1.5, h + 3 + 2]], 16, null, x, y - 2, z)); col.circle(x, z, th * 1.6, y - 2, y + h + 3); }
+/** An oriented box along a→b ([x, z]), thickness th, from y0 to y1, its geometry as triangles. */
+function slab(a, b, th, y0, y1) {
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, nx = -(b[1] - a[1]) / L * th / 2, nz = (b[0] - a[0]) / L * th / 2;
+  const P = (p, s, yy) => [p[0] + nx * s, yy, p[1] + nz * s], c = [[a, -1], [b, -1], [b, 1], [a, 1]];
+  const t = [], q = (p1, p2, p3, p4) => t.push(...p1, ...p2, ...p3, ...p1, ...p3, ...p4);
+  const B = c.map(([p, s]) => P(p, s, y0)), T = c.map(([p, s]) => P(p, s, y1));
+  q(B[0], B[1], B[2], B[3]); q(T[0], T[3], T[2], T[1]);
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; q(B[i], T[i], T[j], B[j]); }
+  return fromTriangles(orientOutward(t));
 }
+/**
+ * citadel_wall: a→b { h, th, y, gate (0…1 along, or none) } — the curtain of the Citadel in cut stone along
+ * its line, a walk behind square merlons, a round tower at a (the next segment's wall brings the next); a
+ * gate: an opening 4.4 m wide and 6.5 m high under the curtain, two half-round towers flanking it.
+ */
+function citadelWall(el, { bag, col }) {
+  const a = el.a, b = el.b, h = el.h ?? 12, th = el.th ?? 3, y = el.y ?? 0, L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, at = (u) => [a[0] + ux * u, a[1] + uz * u];
+  const runs = el.gate === undefined ? [[0, L]] : [[0, el.gate * L - 2.2], [el.gate * L + 2.2, L]];
+  for (const [u0, u1] of runs) { bag.add(S, slab(at(u0), at(u1), th, y - 3, y + h)); col.segment(at(u0), at(u1), th, y - 3, y + h); }
+  if (el.gate !== undefined) {
+    const g0 = at(el.gate * L - 2.2), g1 = at(el.gate * L + 2.2);
+    bag.add(S, slab(g0, g1, th, y + 6.5, y + h));
+    // the arch's voussoirs over the opening, red and white in turn on both faces
+    for (let k = 0; k < 7; k++) for (const sg of [-1, 1]) { const p = at(el.gate * L - 2.2 + k * 4.4 / 7), q = at(el.gate * L - 2.2 + (k + 1) * 4.4 / 7); bag.add(k % 2 ? 'stucco_red' : 'marble_smooth', slab([p[0] - uz * sg * (th / 2 + 0.05), p[1] + ux * sg * (th / 2 + 0.05)], [q[0] - uz * sg * (th / 2 + 0.05), q[1] + ux * sg * (th / 2 + 0.05)], 0.1, y + 6.5, y + 7.4)); }
+    for (const u of [el.gate * L - 2.2 - 3.0, el.gate * L + 2.2 + 3.0]) { const p = at(u); bag.add(S, lathe([[3.2, 0], [3.0, h + 5]], 16, null, p[0], y - 3, p[1])); col.circle(p[0], p[1], 3.2, y - 3, y + h + 5); for (let k = 0; k < 12; k += 2) { const t = k / 12 * Math.PI * 2; bag.add(S, box(p[0] + Math.cos(t) * 2.7 - 0.35, y + h + 5, p[1] + Math.sin(t) * 2.7 - 0.35, p[0] + Math.cos(t) * 2.7 + 0.35, y + h + 6.1, p[1] + Math.sin(t) * 2.7 + 0.35)); } }
+  }
+  // the merlons on the outer edge of the walk
+  const nx = -uz, nz = ux, mo = th / 2 - 0.3;
+  for (let u = 1; u < L - 1; u += 2.0) { if (el.gate !== undefined && Math.abs(u - el.gate * L) < 6) continue; const p = at(u), q = at(u + 1.1); bag.add(S, slab([p[0] + nx * mo, p[1] + nz * mo], [q[0] + nx * mo, q[1] + nz * mo], 0.6, y + h, y + h + 1.4)); }
+  // the round tower at the segment's start
+  bag.add(S, lathe([[th * 1.6, 0], [th * 1.5, h + 5]], 16, null, a[0], y - 3, a[1])); col.circle(a[0], a[1], th * 1.6, y - 3, y + h + 5);
+  for (let k = 0; k < 14; k += 2) { const t = k / 14 * Math.PI * 2; bag.add(S, box(a[0] + Math.cos(t) * (th * 1.5 - 0.4) - 0.35, y + h + 5, a[1] + Math.sin(t) * (th * 1.5 - 0.4) - 0.35, a[0] + Math.cos(t) * (th * 1.5 - 0.4) + 0.35, y + h + 6.2, a[1] + Math.sin(t) * (th * 1.5 - 0.4) + 0.35)); }
+}
+
+/** road_wall: { pts [[x, z, y] …], th, below, above } — a revetment or parapet of cut stone along the road up to the Citadel. */
+function roadWall(el, { bag, col }) {
+  const th = el.th ?? 0.6;
+  for (let i = 0; i + 1 < el.pts.length; i++) {
+    const [ax, az, ay] = el.pts[i], [bx, bz, by] = el.pts[i + 1], y0 = Math.min(ay, by) - (el.below ?? 1), y1 = Math.max(ay, by) + (el.above ?? 0.9);
+    bag.add(S, slab([ax, az], [bx, bz], th, y0, y1)); col.segment([ax, az], [bx, bz], th, y0, y1);
+    bag.add(S, slab([ax, az], [bx, bz], th + 0.2, y1, y1 + 0.15));
+  }
+}
+
+/**
+ * nasir_minaret: { c, y, h, kind ('nw'|'ne') } — the two minarets of al-Nasir Muhammad's mosque in the Citadel
+ * (1318; docs/settlements/mamluk-cairo.md §4.2), all of stone, their bases below the roof's line. 'nw' (over
+ * the west portal): a round shaft carved in bands, a balcony, the upper stage sheathed in faience mosaic of
+ * green, white and blue, the head a ribbed bulb shaped like a garlic, unique in Cairo. 'ne' (the taller, at the
+ * north-east corner): a round shaft carved in chevrons, two balconies on muqarnas, a carved bulbous stage, an
+ * open pavilion and a ribbed bulb with its finial.
+ */
+function nasirMinaret(el, { bag, col }) {
+  const [x, z] = el.c, y = el.y ?? 0, h = el.h ?? 40, r = el.r ?? 2.3;
+  col.circle(x, z, r, y, y + h * 0.5);
+  bag.add(S, box(x - r, y - 0.5, z - r, x + r, y + h * 0.12, z + r));
+  const y1 = y + h * 0.12, y2 = y + h * (el.kind === 'nw' ? 0.5 : 0.48);
+  // the first round stage: carved bands (nw) or chevrons (ne) in relief rings
+  bag.add(S, lathe([[r * 0.92, 0], [r * 0.9, y2 - y1]], 16, el.kind === 'ne' ? (t, i) => 1 + 0.03 * Math.abs(((t * 8 / Math.PI) % 2) - 1) : null, x, y1, z));
+  for (let k = 1; k < 6; k++) bag.add('limestone_carved', lathe([[r * 0.95, 0], [r * 0.95, 0.25]], 16, (t) => 1 + 0.02 * Math.cos(t * 16), x, y1 + (y2 - y1) * k / 6, z));
+  let yb = mBalcony(bag, x, z, y2 + 1.0, r * 0.9, 8, 0);
+  if (el.kind === 'nw') {
+    // the upper stage in faience: bands of green and white, a blue band of inscription at its head
+    const r2 = r * 0.7, y3 = yb + h * 0.2, n = 9;
+    for (let k = 0; k < n; k++) bag.add(k % 3 === 1 ? 'tile_white' : 'glaze_green', lathe([[r2, 0], [r2, (y3 - yb) / n]], 16, (t, i) => (k % 3 === 1 ? 1 + 0.015 * Math.cos(t * 12) : 1), x, yb + (y3 - yb) * k / n, z));
+    bag.add('tile_lapis', lathe([[r2 + 0.04, 0], [r2 + 0.04, 0.7]], 16, null, x, y3 - 0.7, z));
+    bag.add(S, lathe([[r2 + 0.35, 0], [r2 + 0.35, 0.3], [0.001, 0.3]], 16, null, x, y3, z));
+    // the neck and the garlic bulb in green faience, its ribs; the finial
+    bag.add('glaze_green', lathe([[r2 * 0.55, 0], [r2 * 0.55, 0.9]], 12, null, x, y3 + 0.3, z));
+    const rb = r2 * 1.15, yg = y3 + 1.2;
+    bag.add('glaze_green', lathe([[r2 * 0.5, 0], [rb * 0.95, rb * 0.55], [rb, rb * 0.95], [rb * 0.8, rb * 1.35], [rb * 0.35, rb * 1.75], [rb * 0.12, rb * 2.1], [0.001, rb * 2.4]], 24, (t) => 1 + 0.07 * Math.abs(Math.cos(t * 6)), x, yg, z));
+    yb = yg + rb * 2.4;
+  } else {
+    // the second round stage, a balcony, the carved bulbous stage, the pavilion and the ribbed bulb
+    const r2 = r * 0.7, y3 = yb + h * 0.18;
+    bag.add(S, lathe([[r2, 0], [r2, y3 - yb]], 16, (t) => 1 + 0.02 * Math.cos(t * 10), x, yb, z));
+    yb = mBalcony(bag, x, z, y3 + 1.0, r2, 8, 0);
+    bag.add('limestone_carved', lathe([[r2 * 0.8, 0], [r2 * 1.0, 0.9], [r2 * 0.9, 2.0], [r2 * 0.6, 2.6]], 16, (t) => 1 + 0.05 * Math.abs(Math.cos(t * 8)), x, yb, z));
+    const yp = yb + 2.6, rp = r2 * 0.55, hp = 2.8;
+    for (let k = 0; k < 8; k++) { const t = k / 8 * Math.PI * 2; bag.add('marble_column', lathe([[0.13, 0], [0.1, 0.2], [0.1, hp - 0.3], [0.15, hp]], 8, null, x + Math.cos(t) * rp, yp, z + Math.sin(t) * rp)); }
+    bag.add(S, lathe([[rp + 0.3, 0], [rp + 0.3, 0.35], [0.001, 0.35]], 16, null, x, yp + hp, z));
+    const rb = rp * 1.1, yg = yp + hp + 0.35;
+    bag.add(S, lathe([[rb * 0.6, 0], [rb, rb * 0.7], [rb * 0.85, rb * 1.3], [rb * 0.3, rb * 1.8], [0.001, rb * 2.1]], 20, (t) => 1 + 0.06 * Math.abs(Math.cos(t * 6)), x, yg, z));
+    yb = yg + rb * 2.1;
+  }
+  bag.add('bronze', rod([x, yb - 0.3, z], [x, yb + 1.8, z], 0.05, 6));
+  for (const [rr, yy] of [[0.2, 0.3], [0.28, 0.85]]) bag.add('bronze', lathe([[0.05, 0], [rr, 0.14], [0.05, 0.28]], 8, null, x, yb + yy, z));
+}
+
+/**
+ * suq_covered: { rect [x0, z0, x1, z1] (along z), y, street } — a market street covered with a timber roof, in the
+ * manner of the Qasaba's markets (al-Maqrizi counted 12,000 shops there; some markets were roofed with wood,
+ * one shaded with canvas drawn on ropes): a row of small shops each side, each a vaulted cell open to the
+ * street behind its stone bench (the mastaba) where the seller sat, wooden shutters folded up, goods on shelves
+ * and on the bench; over them a storey of rooms behind small lattice windows; across the street, beams with a
+ * plank and mat roof, openings left between for light and air; the gate at each end.
+ */
+function suqCovered(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, st = el.street ?? 5, D = (x1 - x0 - st) / 2, L = z1 - z0, sw = 3.0, n = Math.floor(L / sw), w = L / n;
+  const H1 = 3.6, H2 = 3.0, yr = y + H1 + H2 + 0.6, rng2 = rng(el.seed || 7);
+  const goods = [['pottery_dark', 'pot'], ['cloth_indigo', 'bolt'], ['cloth_red', 'bolt'], ['bronze', 'tray'], ['iron', 'blade'], ['wicker', 'basket'], ['cloth_ochre', 'bolt'], ['glaze_green', 'pot']];
+  for (const side of [-1, 1]) {
+    const xs = side < 0 ? x0 : x1 - D, xf = side < 0 ? x0 + D : x1 - D, out = side < 0 ? 1 : -1;   // the shops' fronts at xf, facing the street (out)
+    const X = (d) => xf + out * d, xr = (a, b) => [Math.min(X(a), X(b)), Math.max(X(a), X(b))];
+    // the back block of the row: the shops' party walls, back walls and the upper storey
+    bag.add(S, box(xs, y - 0.4, z0, xs + D, y + 0.05, z1));
+    bag.add('plaster_white', box(xs, y + H1 + 0.4, z0, xs + D, yr, z1));
+    bag.add(S, box(Math.min(xs, xs + D), y + H1, z0, Math.max(xs, xs + D), y + H1 + 0.4, z1));
+    const [bx0, bx1] = xr(-D, -D + 0.6); bag.add(S, box(bx0, y, z0, bx1, y + H1, z1));
+    col.rect([Math.min(xs, xs + D), z0, Math.max(xs, xs + D), z1], y, yr);
+    for (let i = 0; i < n; i++) {
+      const za = z0 + i * w, zb = za + w, zc = (za + zb) / 2;
+      // the piers between the shops, the lintel over each opening with its joggled voussoirs
+      { const [p0, p1] = xr(-D + 0.6, 0); bag.add(S, box(p0, y, za, p1, y + H1, za + 0.4)); }
+      for (let k = 0; k < 5; k++) { const [p0, p1] = xr(-0.05, 0.02); bag.add(k % 2 ? 'marble_dark' : S, box(p0, y + H1 - 0.6, za + 0.4 + k * (w - 0.4) / 5, p1, y + H1, za + 0.4 + (k + 1) * (w - 0.4) / 5)); }
+      // the mastaba before the shop, and the shutter boards folded up under the lintel
+      { const [m0, m1] = xr(0, 0.8); bag.add(S, box(m0, y, za + 0.45, m1, y + 0.7, zb - 0.05)); col.rect([m0, za + 0.45, m1, zb - 0.05], y, y + 0.7); }
+      { const [s0, s1] = xr(0.02, 0.5); bag.add('wood_dark', box(s0, y + H1 - 0.75, za + 0.5, s1, y + H1 - 0.62, zb - 0.1)); }
+      // the shop's floor raised, its shelves along the back, goods on them and on the bench
+      { const [f0, f1] = xr(-D + 0.6, 0); bag.add('wood_dark', box(f0, y + 0.05, za + 0.4, f1, y + 0.7, zb)); }
+      const [g, kind] = goods[Math.floor(rng2() * goods.length)];
+      for (const hy of [1.5, 2.4]) { const [h0, h1] = xr(-D + 0.6, -D + 1.0); bag.add('timber', box(h0, y + hy, za + 0.5, h1, y + hy + 0.05, zb - 0.1));
+        for (let k = 0; k < 3; k++) { const zz = za + 0.9 + k * (w - 1.2) / 3, xx = X(-D + 0.8); if (kind === 'pot') bag.add(g, lathe([[0.001, 0], [0.12, 0.03], [0.16, 0.18], [0.08, 0.32], [0.09, 0.38]], 8, null, xx, y + hy + 0.05, zz)); else if (kind === 'bolt') bag.add(g, box(xx - 0.18, y + hy + 0.05, zz - 0.25, xx + 0.18, y + hy + 0.3, zz + 0.25)); else if (kind === 'blade') bag.add(g, box(xx - 0.02, y + hy + 0.05, zz - 0.04, xx + 0.02, y + hy + 0.85, zz + 0.04)); else if (kind === 'tray') bag.add(g, lathe([[0.001, 0], [0.3, 0.01], [0.32, 0.05]], 12, null, xx, y + hy + 0.05, zz)); else bag.add(g, lathe([[0.001, 0], [0.2, 0.02], [0.24, 0.3]], 8, null, xx, y + hy + 0.05, zz)); } }
+      { const xx = X(0.4); for (let k = 0; k < 2; k++) { const zz = za + 0.9 + k * (w - 1.0) / 2; if (kind === 'bolt') bag.add(g, box(xx - 0.2, y + 0.7, zz - 0.3, xx + 0.2, y + 0.95, zz + 0.3)); else bag.add(g === 'iron' ? 'wicker' : g, lathe([[0.001, 0], [0.16, 0.03], [0.2, 0.22], [0.1, 0.4], [0.11, 0.46]], 8, null, xx, y + 0.7, zz)); } }
+      // the upper storey's window: a small projecting lattice on brackets
+      { const [l0, l1] = xr(0, 0.5); bag.add('lattice', box(l0, y + H1 + 1.0, zc - 0.55, l1, y + H1 + 2.2, zc + 0.55)); const [k0, k1] = xr(0, 0.6); bag.add('wood_dark', box(k0, y + H1 + 0.85, zc - 0.65, k1, y + H1 + 1.0, zc + 0.65)); bag.add('wood_dark', box(k0, y + H1 + 2.2, zc - 0.65, k1, y + H1 + 2.35, zc + 0.65)); }
+    }
+    { const [p0, p1] = xr(-D + 0.6, 0); bag.add(S, box(p0, y, z1 - 0.4, p1, y + H1, z1)); }
+    // the cornice of the row
+    { const [c0, c1] = xr(-D, 0.35); bag.add(S, box(c0, yr, z0, c1, yr + 0.3, z1)); }
+  }
+  // the roof over the street: beams across, planks and mats laid on them, a slot open every fourth bay
+  const xa = x0 + D, xb = x1 - D;
+  for (let k = 0; k <= Math.floor(L / 1.5); k++) bag.add('timber', box(xa - 0.3, yr - 0.25, z0 + k * 1.5 - 0.1, xb + 0.3, yr, z0 + k * 1.5 + 0.1));
+  for (let k = 0; k < Math.floor(L / 6); k++) { if (k % 4 === 3) continue; bag.add('reed_mat', box(xa - 0.3, yr, z0 + k * 6, xb + 0.3, yr + 0.06, z0 + (k + 1) * 6)); }
+  // the gates at the ends: an arch through a wall the street's width, the roof's end over it
+  for (const zz of [z0, z1]) {
+    for (const s of [-1, 1]) bag.add(S, box(s < 0 ? xa : xb - 0.9, y - 0.4, zz - 0.5, s < 0 ? xa + 0.9 : xb, yr + 0.9, zz + 0.5));
+    bag.add(S, box(xa + 0.9, y + 4.6, zz - 0.5, xb - 0.9, yr + 0.9, zz + 0.5));
+    for (let k = 0; k < 7; k++) bag.add(k % 2 ? 'marble_dark' : 'marble_smooth', box(xa + 0.9 + k * (st - 1.8) / 7, y + 4.6, zz - 0.53, xa + 0.9 + (k + 1) * (st - 1.8) / 7, y + 5.2, zz + 0.53));
+    col.rect([xa, zz - 0.5, xa + 0.9, zz + 0.5], y, yr); col.rect([xb - 0.9, zz - 0.5, xb, zz + 0.5], y, yr);
+  }
+}
+
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A face frame on rect r: f in 'nsew'; R(u0, u1, y0, y1, d0, d1) is a box with u along the face from its west/north end and d outward. */
 function faceFrame(r, f) {
@@ -418,6 +555,6 @@ function sabilKuttab(el, { bag, col }) {
 
 registerStyle('mamluk', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, cairo_front: cairoFront, sabil_kuttab: sabilKuttab },
+  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, road_wall: roadWall, nasir_minaret: nasirMinaret, suq_covered: suqCovered, cairo_front: cairoFront, sabil_kuttab: sabilKuttab },
   objects: {},
 });

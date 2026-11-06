@@ -1,7 +1,7 @@
 import { lodTiles } from '../lod.js';
 // The city's houses (docs/settlements/mamluk-cairo.md §5): Cairene town houses (house_mamluk, style
 // vernacular) — and sabil-kuttabs on three street corners in place of a house.
-import { RADIUS, lots, SABILS } from './layout.js';
+import { RADIUS, lots, SABILS, SUQ } from './layout.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-37, -30], facing: 's' } });
 const dist = (l, [x, z]) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
 export async function town() {
@@ -19,5 +19,7 @@ export async function town() {
     return { t: 'sabil_kuttab', rect: r, y: l.y, corner: [sx, sz] };
   });
   plans.push({ ...base('mamluk-cairo-sabils', sabils), style: 'mamluk' });
+  // the covered market street north from the madrasa's portal
+  plans.push({ ...base('mamluk-cairo-suq', [{ t: 'suq_covered', rect: SUQ, y: 0, street: 5, seed: 1363 }]), style: 'mamluk', bounds: [SUQ[0] - 2, SUQ[1] - 2, SUQ[2] + 2, SUQ[3] + 2] });
   return plans;
 }
