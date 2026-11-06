@@ -305,6 +305,28 @@ const GROUPS = {
     return out;
   },
 };
+// the battles of the Hephaisteion's friezes (Theseus and the Pallantids; Lapiths and centaurs): a warrior lunging
+// forward behind his round shield, the spear raised; his foe facing him; a centaur rearing with a rock
+GROUPS.fighter = (v = 0) => {
+  const out = [], k = [0, 0.03, -0.03][v % 3];
+  out.push([cap([-0.02, 0.45], [-0.2, 0.22], 0.05, 0.035), 0.55], [cap([-0.2, 0.22], [-0.3, 0.02], 0.035, 0.025), 0.55]);
+  out.push([cap([0.04, 0.45], [0.2, 0.28 + k], 0.05, 0.035), 0.85], [cap([0.2, 0.28 + k], [0.22, 0.02], 0.035, 0.025), 0.85]);
+  out.push([cap([0.0, 0.45], [0.07, 0.76], 0.08, 0.065), 0.85], [ell(0.1, 0.84, 0.05, 0.058, 9), 0.9], [poly([0.06, 0.88], [0.12, 0.92], [0.02, 0.97], [-0.04, 0.9]), 0.8]);
+  out.push([cap([0.04, 0.74], [-0.1, 0.86], 0.03, 0.025), 0.7], [cap([-0.32, 0.9], [0.36, 1.0], 0.012, 0.01), 0.75]);
+  if (v % 2 === 0) out.push([poly([-0.02, 0.76], [-0.18, 0.62], [-0.22, 0.48], [-0.06, 0.6]), 0.5]);
+  out.push([ell(0.2, 0.6, 0.13, 0.14, 12), 1.0]);
+  return out;
+};
+GROUPS.foe = (v = 0) => GROUPS.fighter(v + 1).map(([pts, f]) => [pts.map(([a, b]) => [-a, b]).reverse(), f]);
+GROUPS.centaurR = (v = 0) => {
+  const out = [];
+  out.push([cap([-0.28, 0.42], [-0.34, 0.02], 0.04, 0.025), 0.4], [cap([0.2, 0.44], [0.4, 0.3], 0.04, 0.03), 0.45], [cap([0.4, 0.3], [0.38, 0.1], 0.03, 0.02), 0.45]);
+  out.push([ell(0, 0.48, 0.34, 0.14, 12), 0.75], [cap([-0.3, 0.5], [-0.46, 0.3], 0.03, 0.015), 0.6]);
+  out.push([cap([-0.22, 0.4], [-0.26, 0.02], 0.045, 0.028), 0.65], [cap([0.24, 0.46], [0.46, 0.4 + (v % 2) * 0.1], 0.045, 0.03), 0.65]);
+  out.push([cap([0.26, 0.54], [0.32, 0.86], 0.075, 0.06), 0.9], [ell(0.34, 0.94, 0.05, 0.058, 9), 0.9]);
+  out.push([cap([0.3, 0.84], [0.42, 1.02], 0.03, 0.025), 1.0], [cap([0.3, 0.84], [0.18, 1.0], 0.03, 0.025), 1.0], [ell(0.31, 1.08, 0.12, 0.08, 9), 1.0]);
+  return out;
+};
 export const RELIEF_KINDS = Object.keys(GROUPS);
 
 /** One relief group as a geometry, in a plane: u along `u`, v up, out along `o` (unit 3-vectors), origin p, size s, depth d, facing −u when flipped. */

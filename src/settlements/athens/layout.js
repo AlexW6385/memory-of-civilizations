@@ -9,6 +9,9 @@ export const ACRO = { c: [0, 0], r: [140, 72], top: 70, slope: 70 };
 export const AREO = { c: [-175, -95], r: 38, h: 18 };
 export const KOLONOS = { c: [-300, -250], r: 55, h: 10 };
 export const AGORA = [-290, -235, -160, -110];
+// the court north of the Erechtheion, about 3 m below the summit (the temple stands on the slope: its north and west
+// sides about 3 m lower than the south and east), reached by a stair from the east
+export const NCOURT = { rect: [14, -72, 48, -51.2], drop: 3, edge: -52.6 };      // the ground lowered under the temple's north side too; `edge` the court's south wall
 export const RAMP = [[-310, 70], [-235, 45], [-175, 18], [-148, 2]];       // the Panathenaic ramp up the west end
 export const WAY = [[-390, -330], [-260, -220], [-180, -60], [-210, 55], [-310, 70]];   // the Panathenaic Way from the Dipylon
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -20,6 +23,7 @@ export const acroE = (x, z) => Math.hypot((x - ACRO.c[0]) / ACRO.r[0], (z - ACRO
 export function height(x, z) {
   const e = acroE(x, z), dist = (e - 1) * Math.min(ACRO.r[0], ACRO.r[1]);
   let h = e <= 1 ? ACRO.top : ACRO.top * smooth(ACRO.slope, 0, dist) ** 1.6;
+  if (e <= 1 && inRect(NCOURT.rect, x, z)) h = ACRO.top - NCOURT.drop - 0.15;
   const a = Math.hypot(x - AREO.c[0], z - AREO.c[1]) / AREO.r; if (a < 1) h = Math.max(h, AREO.h * smooth(1, 0.4, a));
   const k = Math.hypot(x - KOLONOS.c[0], z - KOLONOS.c[1]) / KOLONOS.r; if (k < 1) h = Math.max(h, KOLONOS.h * smooth(1, 0.3, k));
   // the ramp: rising evenly from the town to the Propylaia's foot

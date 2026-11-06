@@ -80,6 +80,18 @@ const PEDIMENTS = {
     { f: 0.76, pose: 'recline', drape: 'peplos', H: 2.8 },
     { f: 0.9, pose: 'recline', drape: 'nude', H: 2.6 },
   ],
+  // the Hephaisteion (small, ≈ 1.7 m under the apex): east, the birth of Athena; west, the return of Hephaistos to Olympos
+  'hephaisteion-east': [
+    { f: -0.85, pose: 'recline', drape: 'nude', mirror: true, H: 1.6 }, { f: -0.6, pose: 'seat', drape: 'peplos', H: 1.6 }, { f: -0.4, pose: 'ease', drape: 'peplos', H: 1.6 },
+    { f: -0.14, pose: 'seat', drape: 'mantle', H: 1.9 }, { f: 0.05, pose: 'stand', drape: 'peplos', helmet: true, shield: 'l', spear: 'r', H: 1.7 },
+    { f: 0.24, pose: 'stride', drape: 'chiton', axe: true, H: 1.6 }, { f: 0.45, pose: 'ease', drape: 'peplos', mirror: true, H: 1.6 }, { f: 0.62, pose: 'seat', drape: 'peplos', H: 1.5 },
+    { f: 0.86, pose: 'recline', drape: 'peplos', H: 1.5 },
+  ],
+  'hephaisteion-west': [
+    { f: -0.86, pose: 'recline', drape: 'nude', mirror: true, H: 1.5 }, { f: -0.6, pose: 'seat', drape: 'peplos', H: 1.5 }, { f: -0.38, pose: 'stride', drape: 'chiton', mirror: true, H: 1.6 },
+    { f: -0.1, kind: 'horse', pose: 'head', H: 1.0 }, { f: 0.04, pose: 'seat', drape: 'chiton', axe: true, H: 1.6 }, { f: 0.22, pose: 'stride', drape: 'nude', H: 1.6 },
+    { f: 0.42, pose: 'ease', drape: 'peplos', H: 1.6 }, { f: 0.62, pose: 'seat', drape: 'mantle', H: 1.5 }, { f: 0.86, pose: 'recline', drape: 'peplos', H: 1.5 },
+  ],
 };
 
 /**
@@ -151,6 +163,15 @@ const METOPES = {
     l: [{ pose: 'stride', drape: 'chiton', x: -0.27, H: 1.06, shield: 'r', helmet: true }, { pose: 'ease', drape: 'peplos', x: -0.3, H: 1.04 }, { pose: 'seat', drape: 'peplos', x: -0.25, H: 1.1 }],
     r: [{ pose: 'stride', drape: 'chiton', mirror: true, x: 0.27, H: 1.06, shield: 'r', helmet: true }, { pose: 'stand', drape: 'chiton', mirror: true, x: 0.28, H: 1.08, helmet: true, spear: 'r' }, { pose: 'ease', drape: 'peplos', mirror: true, x: 0.3, H: 1.04 }],
   },
+};
+// the Hephaisteion: the labours of Herakles on the east front, the deeds of Theseus on the first metopes of the flanks
+METOPES.herakles = {
+  l: [{ pose: 'stride', drape: 'nude', x: -0.27, H: 1.08 }, { pose: 'stride', drape: 'nude', x: -0.3, H: 1.06, axe: true }, { pose: 'stand', drape: 'nude', x: -0.28, H: 1.08 }],
+  r: [{ kind: 'horse', pose: 'rear', mirror: true, x: 0.14, H: 0.6 }, { pose: 'fallen', drape: 'nude', mirror: true, x: 0.24, H: 1.1, d: 0.04 }, { pose: 'stride', drape: 'chiton', mirror: true, x: 0.3, H: 1.04, shield: 'r', helmet: true }],
+};
+METOPES.theseus = {
+  l: [{ pose: 'stride', drape: 'nude', x: -0.28, H: 1.06 }, { pose: 'stride', drape: 'chiton', x: -0.27, H: 1.06 }, { pose: 'stride', drape: 'nude', x: -0.3, H: 1.04, axe: true }],
+  r: [{ pose: 'fallen', drape: 'nude', mirror: true, x: 0.25, H: 1.1, d: 0.04 }, { pose: 'stride', drape: 'nude', mirror: true, x: 0.3, H: 1.05 }, { kind: 'horse', pose: 'rear', mirror: true, x: 0.14, H: 0.6 }],
 };
 const FIG_CACHE = new Map();
 /** A metope figure built once (at the origin, local) and cloned. */
@@ -233,8 +254,12 @@ const SEQ = {
   gathering: (n) => Array.from({ length: n }, (_, i) => ['walker', 'maiden', 'god', 'maiden', 'walker'][i % 5]),
   // the parapet of Athena Nike: Victories leading cattle, setting up trophies — here Victories in a row
   nikai: (n) => Array.from({ length: n }, (_, i) => (i % 4 === 3 ? 'heifer' : 'nike')),
+  // the Hephaisteion: Theseus and the Pallantids fighting, two gods seated at either side watching (the east); the
+  // Lapiths and the centaurs (the west)
+  battle: (n) => Array.from({ length: n }, (_, i) => (i === 2 || i === n - 3 ? 'god' : i % 2 ? 'foe' : 'fighter')),
+  centaurs: (n) => Array.from({ length: n }, (_, i) => (i % 2 ? 'foe' : i % 4 === 0 ? 'centaurR' : 'fighter')),
 };
-const WIDTH = { horseman: 0.62, chariot: 1.25, walker: 0.4, maiden: 0.36, heifer: 1.0, god: 0.62, nike: 0.5 };
+const WIDTH = { horseman: 0.62, chariot: 1.25, walker: 0.4, maiden: 0.36, heifer: 1.0, god: 0.62, nike: 0.5, fighter: 0.5, foe: 0.5, centaurR: 0.8 };
 /**
  * frieze_relief: { runs: [{ a, b, o (outward unit, plan), seq ('procession' …), toward ('a' | 'b' | 'mid') }], y0, h, d
  * (relief depth), mat, bg (the painted ground, or none), off (the stand-off of the ground from the wall) }.

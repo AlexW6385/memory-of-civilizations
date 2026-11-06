@@ -57,7 +57,7 @@ function doricPieces(n, abacus, simple) {
   const H = H_REF;
   const R = D_REF / 2, capH = H * 0.082, abH = capH * 0.36, echH = capH - abH, shaftH = H - capH;
   // five facets to a flute keep its curve; two in the simple (far, plain) column
-  const seg = n * (simple ? 2 : 5), rows = simple ? 3 : 8;
+  const seg = n ? n * (simple ? 2 : 5) : (simple ? 12 : 24), rows = simple ? 3 : 8;
   const prof = [];
   for (let i = 0; i <= rows; i++) { const t = i / rows; prof.push([R * parthenonRadius(t), shaftH * t]); }
   const rTop = R * parthenonRadius(1);
@@ -80,7 +80,7 @@ function doricPieces(n, abacus, simple) {
       [L(0.08), echH * 0.28], [L(0.42), echH * 0.5], [L(0.76), echH * 0.72], [L(0.95), echH * 0.88], [EM, echH * 0.96], [EM * 0.97, echH], [0, echH]];
   const A = R * 1.07 * abacus;
   return [
-    lathe(shaft, seg, fluteMod(n, 0.045)),
+    lathe(shaft, seg, n ? fluteMod(n, 0.045) : null),
     lathe(ech, simple ? 20 : 48, null, 0, shaftH, 0),
     box(-A, shaftH + echH, -A, A, H, A),
   ];
@@ -88,7 +88,7 @@ function doricPieces(n, abacus, simple) {
 
 /**
  * Doric column: { at: [x, z], y, h (total, to the top of the abacus), d (lower diameter),
- *                 flutes (20), mat, abacus: width multiplier, simple (fewer facets, no neck grooves: stoas, far work) }
+ *                 flutes (20; 0: an unfluted shaft of stuccoed poros), mat, abacus: width multiplier, simple (fewer facets, no neck grooves: stoas, far work) }
  */
 export function doricColumn(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, H = el.h, R = el.d / 2;
