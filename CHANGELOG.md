@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.60 — Figures: dress and poses; elephants (2026-11-06)
+- The figure library gains loincloth, shendyt and sheath dresses, bare chests, broad collars and wigs; kneeling, cross-legged, praying, pulling, staff, rowing and punting poses (combinable with arms); a child on the hip; a detailed Asian or African elephant with tusks and caparison; regional dress defaults for Egypt, South and Southeast Asia, the Americas and the Pacific, with Ur, Knossos and Great Zimbabwe overrides; boat crews pole their boats.
+
 ## v9.59 — Ur's shrine and harbour; Giza's mastaba streets; Edfu's ceilings; Durrington (2026-11-06)
 - Ur: plain stairs in mud brick, the House of Nanna on the summit (towered entrance, cella with the crescent standard), the upper stages set back so the shrine is reached, Sumerian reed boats with horned ends, the harbour quay; Giza: mastabas re-laid on north–south streets with stelae and mud-brick chapels, funerary priests, offering bearers, bakers, painted relief registers and star ceilings in the temples; Edfu: the gate's winged disc at its true span with lintel and jamb reliefs, the granite naos of Nectanebo II, astronomical ceilings in both hypostyles, the Nile quay with barges and porters; Stonehenge: the Southern Circle's five timber rings, the Durrington avenue, long and bowl barrows.
 
