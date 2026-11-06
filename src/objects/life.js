@@ -23,7 +23,7 @@ const KITS = {
     figures: F(['robe', 'tunic'], ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red', 'cloth_indigo'], ['skin_medium', 'skin_light'], ['none', 'none', 'veil', 'cap']),
   },
   near_east: {
-    fronts: [['hang_lantern:white', 0.6, 1], ['laundry_pole', 0.4, 2]],
+    fronts: [['hang_lantern:white', 0.25, 1], ['laundry_pole', 0.5, 2]],
     door: [['lantern:oil', 0.7], ['pot:water_pot', 3], ['pot:pithos', 1], ['basket', 2], ['sacks', 1], ['bench', 1], ['laundry', 0.6]],
     street: [['animal:donkey', 2.5], ['animal:camel', 1.2], ['animal:goat', 1.2], ['animal:sheep', 0.8], ['chickens', 0.6], ['sacks', 1], ['figure', 2.5]],
     stall: ['pot:water_pot', 'basket', 'produce', 'cloth'], boats: ['dhow', 'reed'], awnings: ['cloth_white', 'cloth_ochre', 'cloth_indigo'],
@@ -161,7 +161,7 @@ const PEOPLE = {
   angkor: [[-195, -4, -152, 4], [-148, -4, -80, 4], [-225, -70, -200, 70]],
   'qing-beijing': [[-40, 210, 40, 300], [-60, 128, 60, 172], [-70, 30, 70, 98]], jerusalem: [[-145, -195, 145, 195, 14]], persepolis: [],
 };
-const MARKET = /square|piazza|plaza|market|agora|forum|maidan|bazaar|parvis|court|forecourt|street|dam|rows/i;
+const MARKET = /square|piazza|plaza|market|agora|forum|maidan|bazaar|parvis|street|dam|rows/i;     // (not courts: a palace's or a mosque's court has no stalls)
 const FLAT = /paving|road|street|causeway|terrace|lane|sacbe|field|parterre|garden|park|lawn|water|cells|pavement|plaza|square|flag|carpet|bed\b|floor|ground|court\b|lamp/i;
 const HOUSE = /house|hut|home|insula|siheyuan|hanok|machiya|compound|izba|shop|cottage|_block|skyscraper|dwelling/i;
 const SKIP = /water|paving|park|wall|bridge|viaduct|wharf|fence|field|terrace|platform|road|street|canal|moat|ditch|bank|rim|pool|tank|lake|garden|parterre|ramp|stair|causeway|track|esplanade|precinct|enclosure|palisade|ring|circle|avenue|barrow|mound|cells/i;
@@ -171,6 +171,7 @@ class Grid {
   constructor(R, c = 0.5) { this.c = c; this.R = Math.ceil(R); this.n = Math.ceil(this.R * 2 / c); this.a = new Uint8Array(this.n * this.n); }
   cell(v) { return Math.floor((v + this.R) / this.c); }
   get(x, z) { const i = this.cell(x), j = this.cell(z); return i < 0 || j < 0 || i >= this.n || j >= this.n ? 1 : this.a[j * this.n + i]; }
+  clear([x0, z0, x1, z1]) { const i0 = Math.max(0, this.cell(x0)), i1 = Math.min(this.n - 1, this.cell(x1)), j0 = Math.max(0, this.cell(z0)), j1 = Math.min(this.n - 1, this.cell(z1)); for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) this.a[j * this.n + i] = 0; }
   fill([x0, z0, x1, z1], v = 1) { const i0 = Math.max(0, this.cell(x0)), i1 = Math.min(this.n - 1, this.cell(x1)), j0 = Math.max(0, this.cell(z0)), j1 = Math.min(this.n - 1, this.cell(z1)); for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) this.a[j * this.n + i] = Math.max(this.a[j * this.n + i], v); }
   free([x0, z0, x1, z1]) { const i0 = this.cell(x0), i1 = this.cell(x1), j0 = this.cell(z0), j1 = this.cell(z1); if (i0 < 0 || j0 < 0 || i1 >= this.n || j1 >= this.n) return false; for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) if (this.a[j * this.n + i]) return false; return true; }
 }
@@ -188,13 +189,25 @@ const isFull = (plan, R) => TOWN_LANDMARKS.has(plan.id) || (plan.bounds && plan.
 
 /** The plans of a settlement's life, from its landmarks, its townscape and its ground. */
 export function lifePlans(id, R, landmarks, town, G) {
-  const kit = KITS[KIT_OF[id] ?? 'mediterranean'], rand = rng(hash(id)), grid = new Grid(R + 2), egrid = new Grid(R + 2), houses = [], squares = [];
+  const kit = KITS[KIT_OF[id] ?? 'mediterranean'], rand = rng(hash(id)), grid = new Grid(R + 2), egrid = new Grid(R + 2), houses = [], squares = [], strollAreas = [];
   // every footprint: whole landmark bounds, the townscape's elements
   for (const plan of [...landmarks, ...town]) {
     if (!isFull(plan, R) && plan.bounds) grid.fill(rectOf(plan, plan.bounds).map((v, i) => v + (i < 2 ? -1 : 1)), 1);
-    for (const room of plan.rooms ?? []) if (room.kind === 'open' && room.rect && MARKET.test(room.id ?? '')) squares.push({ rect: rectOf(plan, room.rect), y: room.y ?? 0 });
+    for (const room of plan.rooms ?? []) {
+      if (room.kind !== 'open' || !room.rect) continue;
+      if (MARKET.test(room.id ?? '')) squares.push({ rect: rectOf(plan, room.rect), y: room.y ?? 0 });
+      // the other open places of a landmark (precincts, terraces, gardens, plazas): people about in them
+      else if (landmarks.includes(plan)) strollAreas.push({ rect: rectOf(plan, room.rect), y: (room.y ?? 0) + (plan.base ?? 0), garden: /garden|parterre/i.test(room.id ?? ''), court: /court/i.test(room.id ?? '') });
+    }
     const full = isFull(plan, R);
-    for (const el of plan.elements ?? []) {
+    // an element whose rectangle holds one of the plan's open rooms (a block round its court) is marked first,
+    // then the room cleared again, so that people can stand in the court; the rest are marked after
+    const open = (plan.rooms ?? []).filter((q) => q.kind === 'open' && q.rect).map((q) => rectOf(plan, q.rect));
+    const holds = (el) => el.rect && open.some((o) => { const r = rectOf(plan, el.rect); return r[0] <= o[0] - 0.5 && r[1] <= o[1] - 0.5 && r[2] >= o[2] + 0.5 && r[3] >= o[3] + 0.5 && (r[2] - r[0]) * (r[3] - r[1]) < R * R; });
+    const ordered = [...(plan.elements ?? [])].sort((a, b) => holds(b) - holds(a)), nHold = ordered.filter(holds).length;
+    let seen = 0;
+    for (const el of ordered) {
+      if (seen++ === nHold && nHold) for (const o of open) { egrid.clear(o); if (full) grid.clear(o); }
       let r = null;
       if (el.rect) r = rectOf(plan, el.rect);
       else if (el.c && el.a && el.b) { const [x, z] = toSettle(plan, el.c[0], el.c[1]), h = Math.max(el.a, el.b); r = [x - h, z - h, x + h, z + h]; }
@@ -213,7 +226,7 @@ export function lifePlans(id, R, landmarks, town, G) {
   }
   // the landmarks' paved floors (forecourts, plazas raised a little): figures and stalls stand on them
   const floors = [];
-  if (MARKETS[id]?.length || PEOPLE[id]?.length) for (const plan of landmarks) { try { for (const f of buildPlan(plan).colliders.floors) if (f.y1 === undefined) floors.push(f); } catch (e) { /* a plan that cannot build here keeps the ground */ } }
+  if (MARKETS[id]?.length || PEOPLE[id]?.length || strollAreas.length) for (const plan of landmarks) { try { for (const f of buildPlan(plan).colliders.floors) if (f.y1 === undefined) floors.push(f); } catch (e) { /* a plan that cannot build here keeps the ground */ } }
   const ground = (x, z) => G.height(x, z);
   const H = (x, z) => { const g = ground(x, z); let y = g; for (const f of floors) { const r = f.rect; if (x >= r[0] && x <= r[2] && z >= r[1] && z <= r[3] && f.y > y && f.y < g + 2.5) y = f.y; } return y; };
   const wet = (x, z) => { const l = G.waterLevel(x, z); return Number.isFinite(l) && ground(x, z) < l + 0.05; };
@@ -259,20 +272,20 @@ export function lifePlans(id, R, landmarks, town, G) {
   // on the house fronts, above the street: lanterns under the eaves, shop signs out on brackets, washing on poles out of upper windows
   const fronted = [];
   if (kit.fronts?.length && !OWN_FRONTS.has(id)) for (const h of houses) {
-    if (!sides[h.front] || rand() > 0.55) continue;
+    if (!sides[h.front] || rand() > (h.shop ? 0.7 : 0.25)) continue;
     const [x0, z0, x1, z1] = h.r, [nx, nz] = sides[h.front], L = nx ? z1 - z0 : x1 - x0, rot = Math.atan2(nx, nz), yb = h.y ?? H((x0 + x1) / 2, (z0 + z1) / 2);
     const P = (t, off) => (nx ? [(nx > 0 ? x1 : x0) + nx * off, z0 + (z1 - z0) * t] : [x0 + (x1 - x0) * t, (nz > 0 ? z1 : z0) + nz * off]);
     if (!inside(...P(0.5, 0)) || L < 3) continue;
     const opts = kit.fronts.filter(([, , ms]) => (h.storeys ?? 1) >= ms), tot = opts.reduce((a, o) => a + o[1], 0);
     let u = rand() * tot, spec = null; for (const o of opts) { if ((u -= o[1]) <= 0) { spec = o[0]; break; } }
     if (!spec) continue;
-    const [t, sub] = spec.split(':'), seed = Math.floor(rand() * 1e9), sf = rand() < 0.5 ? 0.12 : 0.88;
-    const spot = t === 'shop_sign' ? P(sf, 0) : P(0.5, 0);
-    if (fronted.some((q) => Math.hypot(q[0] - spot[0], q[1] - spot[1]) < 2.2)) continue;
+    const [t, sub] = spec.split(':'), seed = Math.floor(rand() * 1e9), sf = rand() < 0.5 ? 0.12 : 0.88, lf = 0.3 + rand() * 0.4;
+    const spot = t === 'shop_sign' ? P(sf, 0) : t === 'laundry_pole' ? P(lf, 0) : P(0.5, 0);
+    if (fronted.some((q) => Math.hypot(q[0] - spot[0], q[1] - spot[1]) < 3.2)) continue;
     fronted.push(spot);
-    if (t === 'hang_lantern') for (const f of L > 6 ? [0.3, 0.7] : [0.5]) els.push({ t, at: P(f, 0.25), y: yb + 2.75, rot, kind: sub, seed: 1 });
+    if (t === 'hang_lantern') for (const f of L > 6 && sub === 'paper' ? [0.3, 0.7] : [0.5]) els.push({ t, at: P(f, 0.25), y: yb + 2.75, rot, kind: sub, seed: 1 });
     else if (t === 'shop_sign') els.push({ t, at: P(sf, -0.05), y: yb, rot, h: sub === 'board' ? 3.1 : 2.75, board: sub === 'board', len: 1 + rand() * 0.6, cloth: sub === 'board' ? undefined : ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_black'][Math.floor(rand() * 4)], seed });
-    else if (t === 'laundry_pole') els.push({ t, at: P(0.3 + rand() * 0.4, -0.05), y: yb + 4.1, rot, len: 1.3 + rand() * 0.5, prop: false, seed });
+    else if (t === 'laundry_pole') els.push({ t, at: P(lf, -0.05), y: yb + 4.1, rot, len: 1.3 + rand() * 0.5, prop: false, seed });
   }
   // in the streets: free ground near houses
   const area = houses.reduce((a, h) => a + Math.min(1200, (h.r[2] - h.r[0]) * (h.r[3] - h.r[1])), 0), nStreet = Math.min(900, Math.round(area / 200));
@@ -328,9 +341,12 @@ export function lifePlans(id, R, landmarks, town, G) {
       for (let q = 0; q < 2; q++) if (rand() < 0.6) { const fx = px + (rand() - 0.5) * 3, fz = pz + Math.cos(rot) * (2.6 + rand() * 1.2), bb = [fx - 0.35, fz - 0.35, fx + 0.35, fz + 0.35]; if (egrid.free(bb)) { put('figure', fx, fz, rot + Math.PI + (rand() - 0.5), { pose: rand() < 0.4 ? 'talk' : 'stand' }); egrid.fill(bb, 2); } }
     }
   }
-  // people in the open places of the landmarks: knots talking, some walking with loads
-  for (const [x0, z0, x1, z1, yOver] of PEOPLE[id] ?? []) {
-    const cap = Math.max(10, Math.min(70, Math.round((x1 - x0) * (z1 - z0) / 300)));
+  // people in the open places of the landmarks: knots talking, some walking with loads (the listed places, then the
+  // landmarks' other open rooms, more thinly; a terrace well above the ground keeps its own height)
+  const areas = (PEOPLE[id] ?? []).map((a) => ({ a, k: 300 }));
+  if (!PEOPLE[id]) for (const sa of strollAreas) { const [x0, z0, x1, z1] = sa.rect, g = ground((x0 + x1) / 2, (z0 + z1) / 2); areas.push({ a: [x0, z0, x1, z1, sa.y - g > 2.4 ? sa.y : undefined], k: sa.garden ? 900 : sa.court ? 260 : 550 }); }
+  for (const { a: [x0, z0, x1, z1, yOver], k: per } of areas) {
+    const cap = Math.max(per > 300 ? 4 : 10, Math.min(per > 300 ? 40 : 70, Math.round((x1 - x0) * (z1 - z0) / per)));
     for (let k = 0, tries = 0; k < cap && tries < cap * 8; tries++) {
       const cx = x0 + rand() * (x1 - x0), cz = z0 + rand() * (z1 - z0);
       if (!inside(cx, cz, 20) || (yOver === undefined && wet(cx, cz))) continue;

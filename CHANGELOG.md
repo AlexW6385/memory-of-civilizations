@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.22 — People in the landmarks' open places (2026-11-05)
+- Every landmark's open rooms (precincts, courts, terraces, plazas, gardens) now have people about in them, thinner in gardens and denser in courts; a terrace well above the ground keeps its own height. A building that encloses its court (Sultan Hasan's block, the Alhambra's courts) no longer blocks people from standing in it. Courts are no longer taken for markets, so no stalls in a mosque's or a palace's court. House-front fittings are sparser (a third of plain houses, most shops), the Near East's mostly washing, single lanterns outside East Asia, spaced 3 m apart.
+
 ## v9.21 — House fronts and boat crews in every town (2026-11-05)
 - The life pass dresses the house fronts of every town by its region: paper or white lanterns under the eaves and cloth banners (East Asia, Japan), white lanterns (the Near East), painted board signs on scrolled iron brackets (medieval and early-modern Europe, Venice, the industrial cities), washing on bamboo poles out of upper windows (the Mediterranean, East Asia, South Asia, Venice, Europe), spaced so neighbours' signs never clash. Boats along the shores now carry their crew: the gondolier or boatman standing at the stern (with the sculling oar on sampans), or someone sitting amidships. Suzhou keeps its own canal-side life.
 
