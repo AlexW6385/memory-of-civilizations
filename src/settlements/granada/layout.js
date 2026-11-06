@@ -10,6 +10,10 @@ export const MYRTLES = [8, -32, 31, 4];
 export const COMARES = [11.5, -57.6, 27.5, -41.6];   // the tower, 16 m square (§4.2)
 export const LIONS = [44, -22, 72, -6];
 export const ALCAZABA = [-170, -30, -120, 30];
+// the Partal (§4.5): the Tower of the Ladies in the line of the north wall, the portico before it, the pool
+export const PARTAL = { tower: [105, -48, 115, -38], pool: [103, -31.5, 117, -20.5] };
+// the Rauda (§4.6): the royal mausoleum by the Palace of the Lions and its garden of tombs
+export const RAUDA = { rect: [57, 8, 72, 18.2], garden: [57, 18.2, 72, 31] };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const hillE = (x, z) => Math.hypot((x - HILL.c[0]) / HILL.r[0], (z - HILL.c[1]) / HILL.r[1]);
@@ -32,6 +36,20 @@ export function lots() {
     if (Math.max(...ys) - Math.min(...ys) > 3) continue;
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.max(...ys), foot: Math.min(...ys), storeys: rand() < 0.6 ? 2 : 1, front: rand() < 0.5 ? 'n' : 's', plaster: true });
   }
+  // inside the walls (§5): the medina's houses along the streets east of the palaces and in the dip
+  // between the Alcazaba and the palaces; the military quarter's houses either side of its street in
+  // the Alcazaba — kept clear of the palaces, the Partal, the Rauda, the way in and the walls
+  const keep = [[-6, -66, 92, 6], [-6, 6, 44, 40], [96, -56, 124, -14], [52, 4, 77, 35], [-176, -36, -114, 36]];
+  const put = (x, z, w, d, front) => {
+    const r = [x, z, x + w, z + d];
+    if ([[x, z], [x + w, z], [x, z + d], [x + w, z + d]].some(([a, b]) => hillE(a, b) > 0.8)) return;
+    if (keep.some((k) => r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1])) return;
+    LOTS.push({ rect: r, seed: Math.floor(rand() * 1e6), y: HILL.top, foot: HILL.top, storeys: rand() < 0.5 ? 2 : 1, front, plaster: true });
+  };
+  for (let x = -104; x < 200; x += 12.5) for (const [z, f] of [[-34, 's'], [-23.5, 'n'], [-9, 's'], [1.5, 'n'], [16, 's'], [26.5, 'n'], [40, 's']]) if (rand() < 0.85) put(x + rand() * 1.5, z, 9 + rand() * 1.5, 9, f);
+  // the military quarter: a row of houses north of the street, storehouses south of it
+  for (let x = -162; x < -135; x += 11) { put2(x, -14, 9.5, 10, 's'); put2(x, 4, 9.5, 9, 'n'); }
+  function put2(x, z, w, d, front) { LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: HILL.top, foot: HILL.top, storeys: 1, front, plaster: true }); }
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
