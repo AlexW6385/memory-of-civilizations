@@ -8,6 +8,7 @@ export const RADIUS = 420;
 export const AXIS_Z = 0;
 export const CHATEAU = [0, -55, 40, 55];
 export const LOGIS = [40, -38, 92, 38];
+export const MARBLE = [52, -12, 74, 12], MARBLE_RISE = 0.85;     // the Marble Court, raised over the Royal Court
 export const WINGS = [[8, -200, 46, -55], [8, 55, 46, 200]];
 export const PARTERRE = [-70, -55, -4, 55];
 export const LATONA = [-120, 0];
