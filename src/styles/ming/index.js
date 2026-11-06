@@ -799,25 +799,78 @@ function waterCells(el, { bag }) {
   bag.add('water', fromTriangles(t));
 }
 
-/** taihu: a heap of Taihu rocks { c, r, h, seed, n } — lumpy, holed stones piled and leaning. */
+/**
+ * taihu: a heap of Taihu rocks { c, r, h, seed, n } — the limestone of Lake Tai worn by the water
+ * into the four qualities the connoisseurs prized: thin (shou), open (tou), perforated (lou) and
+ * wrinkled (zhou) (docs/settlements/ming-suzhou.md §5). Lumps leaning on each other; the tall stones
+ * of the hills (solid) stand as waisted uprights, some built of two legs leaning together under a
+ * cap, so that one sees through them.
+ */
 function taihu(el, { bag, col }) {
   const rand = rng(el.seed || 7), [cx, cz] = el.c, y = el.y ?? 0;
   const n = el.n ?? Math.max(1, Math.round(el.r * 1.6));
   for (let k = 0; k < n; k++) {
     const a = rand() * Math.PI * 2, d = rand() * el.r * 0.7, s = (0.35 + rand() * 0.65) * Math.min(1.6, el.r * 0.6 + 0.4);
     const x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d, hh = s * (0.8 + rand() * 1.4) * (el.h ? el.h / 1.2 : 1);
-    bag.add('taihu', rock(x, y + (rand() - 0.3) * 0.2, z, s, hh, rand));
+    const y0 = y - rand() * 0.15, tall = hh > s * 1.8;
+    if (el.solid && tall && rand() < 0.55) {
+      // an open stone: two legs leaning together, a cap across them, the light through the gap
+      const b = rand() * Math.PI, bu = Math.cos(b), bv = Math.sin(b), gap = s * 0.62, lh = hh * (0.6 + rand() * 0.1);
+      for (const sg of [-1, 1]) bag.add('taihu', rock(x + bu * gap * sg, y0, z + bv * gap * sg, s * 0.36, lh, rand, [-bu * sg * gap * 0.75 / lh, -bv * sg * gap * 0.75 / lh]));
+      bag.add('taihu', rock(x + (rand() - 0.5) * 0.2 * s, y0 + lh * 0.82, z + (rand() - 0.5) * 0.2 * s, s * 0.55, hh * 0.5, rand, [(rand() - 0.5) * 0.4, (rand() - 0.5) * 0.4]));
+    } else bag.add('taihu', rock(x, y0, z, s * (tall ? 0.75 : 1), hh, rand, tall ? [(rand() - 0.5) * 0.35, (rand() - 0.5) * 0.35] : [0, 0]));
   }
   if (el.solid) col.circle(cx, cz, el.r * 0.7, y, y + (el.h ?? 1.2));
 }
-/** One stone: a squashed, dented sphere leaning a little. */
-function rock(x, y, z, s, h, rand) {
+/**
+ * One stone: a waisted, lumpy body leaning by lean [dx, dz] per metre of height, its skin furrowed
+ * in vertical folds (the wrinkles) and pitted, its top rounded over (not a point).
+ */
+function rock(x, y, z, s, h, rand, lean = [0, 0]) {
+  const nn = LOW ? 8 : 14, NS = LOW ? 9 : 18, ph = rand() * 6.28, ph2 = rand() * 6.28, sz = 0.9 + 0.2 * rand();
   const prof = [];
-  const nn = 7;
-  for (let i = 0; i <= nn; i++) { const t = i / nn, r = Math.sin(Math.PI * (0.06 + 0.88 * t)) * s * (0.7 + 0.5 * rand()); prof.push([Math.max(0.001, r), t * h]); }
-  prof[nn][0] = 0.001;
-  const ph = rand() * 6.28, k1 = 2 + Math.floor(rand() * 3), k2 = 3 + Math.floor(rand() * 3);
-  return lathe(prof, 9, (th, i) => 1 + 0.28 * Math.sin(th * k1 + ph + i) + 0.18 * Math.sin(th * k2 - i * 1.7), x, y - 0.05, z);
+  for (let i = 0; i <= nn; i++) {
+    const t = i / nn, body = Math.sin(Math.PI * (0.08 + 0.84 * Math.min(1, t * 1.12)));
+    const waist = 1 + 0.26 * Math.sin(t * Math.PI * 2.4 + ph) + 0.1 * Math.sin(t * Math.PI * 5.2 + ph2);
+    prof.push([Math.max(0.02, s * sz * (0.35 + 0.65 * body) * waist), t * h]);
+  }
+  prof[nn][0] = s * 0.2; prof.push([s * 0.1, h + s * 0.08], [0, h + s * 0.11]);
+  // the folds wind slowly up the stone (a function of the height, not of the ring, so no banding);
+  // the axis wanders (the stone is not turned on a lathe); the section is flattened (a thin stone);
+  // then the whole leans and turns
+  const k1 = 2 + Math.floor(rand() * 2), k2 = 5 + Math.floor(rand() * 3), k3 = 9 + Math.floor(rand() * 4), p1 = rand() * 6.28, p2 = rand() * 6.28, tw = (rand() - 0.5) * 1.6 / Math.max(0.5, h);
+  const wa = s * 0.22, wf = 2.2 / Math.max(0.6, h), wp = rand() * 6.28, wp2 = rand() * 6.28, flat = 0.5 + 0.3 * rand(), turn = rand() * Math.PI;
+  const ct = Math.cos(turn), st = Math.sin(turn);
+  const G = prof.map(([r, yy]) => {
+    const row = [];
+    for (let k = 0; k < NS; k++) {
+      const th = k / NS * Math.PI * 2, q = th + yy * tw;
+      const m = 1 + 0.22 * Math.sin(q * k1 + p1 + yy * 0.9) + 0.11 * Math.sin(q * k2 + p2 - yy * 1.7) + 0.06 * Math.sin(q * k3 + yy * 3.1);
+      const lx = Math.cos(th) * r * m + wa * Math.sin(yy * wf * 3.1 + wp), lz = (Math.sin(th) * r * m + wa * Math.sin(yy * wf * 2.3 + wp2)) * flat;
+      const rx = lx * ct - lz * st, rz = lx * st + lz * ct;
+      row.push([x + rx + lean[0] * yy, y - 0.05 + yy, z + rz + lean[1] * yy]);
+    }
+    return row;
+  });
+  // smooth normals from the grid: across the ring and up the stone
+  const sub = (p, q) => [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
+  const N = G.map((row, i) => row.map((_, k) => {
+    const a = sub(row[(k + 1) % NS], row[(k + NS - 1) % NS]), b = sub(G[Math.min(nn + 2, i + 1)][k], G[Math.max(0, i - 1)][k]);
+    let n = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    if (i === nn + 2) return [0, 1, 0];
+    const l = Math.hypot(...n) || 1; return [-n[0] / l, -n[1] / l, -n[2] / l];
+  }));
+  const pos = [], nor = [];
+  for (let i = 0; i + 1 < G.length; i++) for (let k = 0; k < NS; k++) {
+    const k2b = (k + 1) % NS;
+    for (const [ii, kk] of [[i, k], [i + 1, k], [i + 1, k2b], [i, k], [i + 1, k2b], [i, k2b]]) { pos.push(...G[ii][kk]); nor.push(...N[ii][kk]); }
+  }
+  // the bottom, closed
+  for (let k = 0; k < NS; k++) { const c = G[0].reduce((s2, p) => [s2[0] + p[0] / NS, s2[1] + p[1] / NS, s2[2] + p[2] / NS], [0, 0, 0]); pos.push(...c, ...G[0][k], ...G[0][(k + 1) % NS]); nor.push(0, -1, 0, 0, -1, 0, 0, -1, 0); }
+  const g = new BufferGeometry();
+  g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  return g;
 }
 
 /** lotus: leaves floating on the pond (and a few on stems above it), with a bud or two { c, r, y, n, seed }. */
