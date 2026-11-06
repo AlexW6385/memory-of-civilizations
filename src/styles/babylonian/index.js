@@ -4,7 +4,7 @@
 // Processional Way; the city's double walls with towers.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import '../sumerian/index.js';
 
 const G = 'glaze_lapis', B = 'brick_baked', W = 'glaze_white', Y = 'glaze_yellow', K = 'lacquer_black';
@@ -45,6 +45,17 @@ const OUTLINES = {
   bull_hair: [[0.34, 0.43], [0.1, 0.41], [-0.28, 0.43], [-0.28, 0.5], [-0.1, 0.48], [0.1, 0.48], [0.34, 0.5]],
   bull_eye: [[0.78, 0.88], [0.81, 0.9], [0.83, 0.87], [0.8, 0.86]],
 };
+// the palmette of the throne room's frieze: a fan of seven lobes on a short stem (u across, v up, about 1 high)
+OUTLINES.palmette = (() => {
+  const P = [[0.07, 0], [0.07, 0.16]], c = [0, 0.3], N = 7;
+  for (let i = 0; i < N; i++) {
+    const a0 = Math.PI * (0.06 + 0.88 * i / N), a1 = Math.PI * (0.06 + 0.88 * (i + 0.5) / N), a2 = Math.PI * (0.06 + 0.88 * (i + 1) / N);
+    if (i === 0) P.push([c[0] + 0.24 * Math.cos(a0), c[1] + 0.24 * Math.sin(a0)]);
+    P.push([c[0] + 0.62 * Math.cos(a1 - 0.12), c[1] + 0.62 * Math.sin(a1 - 0.12)], [c[0] + 0.7 * Math.cos(a1), c[1] + 0.7 * Math.sin(a1)], [c[0] + 0.62 * Math.cos(a1 + 0.12), c[1] + 0.62 * Math.sin(a1 + 0.12)], [c[0] + 0.24 * Math.cos(a2), c[1] + 0.24 * Math.sin(a2)]);
+  }
+  P.push([-0.07, 0.16], [-0.07, 0]);
+  return P.map(([u, v]) => [-u, v]).reverse().map(([u, v]) => [-u, v]);
+})();
 /** Triangles of a simple polygon (ear clipping). */
 function earcut(P) {
   const idx = P.map((_, i) => i), out = [];
@@ -176,12 +187,12 @@ function archInfill(bag, col, x0, x1, ys, yt, z0, z1, mat) {
 function wayPaving(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0.12, C = el.centre ?? 7.4, xc = (x0 + x1) / 2, j = 0.035;
   const rand = rng(el.seed ?? 575);
-  bag.add('asphalt', box(x0, y - 0.3, z0, x1, y - 0.012, z1));                     // the bitumen in the joints, on the brick bed
+  bag.add('asphalt', frustum([x0, z0, x1, z1], y - 0.3, y - 0.012, 0, 0, 0, 0, { noBottom: true }));                     // the bitumen in the joints, on the brick bed
   const lane = (a, b, s, mat) => {
     const nx = Math.max(1, Math.round((b - a) / s)), sx = (b - a) / nx, nz = Math.max(1, Math.floor((z1 - z0) / s)), sz = (z1 - z0) / nz;
     for (let i = 0; i < nx; i++) for (let k = 0; k < nz; k++) {
       const dy = Math.round(rand() * 3) * 0.002;                                  // the flags settled by a few millimetres
-      bag.add(mat, box(a + i * sx + j / 2, y - 0.1, z0 + k * sz + j / 2, a + (i + 1) * sx - j / 2, y - dy, z0 + (k + 1) * sz - j / 2));
+      bag.add(mat, frustum([a + i * sx + j / 2, z0 + k * sz + j / 2, a + (i + 1) * sx - j / 2, z0 + (k + 1) * sz - j / 2], y - 0.06, y - dy, 0, 0, 0, 0, { noBottom: true }));
     }
   };
   const c0 = Math.max(x0, xc - C / 2), c1 = Math.min(x1, xc + C / 2);
@@ -273,13 +284,109 @@ function cityWall(el, { bag, col }) {
   for (const [o, hh, t] of [[0, h, th], [gap + th, h * 0.75, th * 0.65]]) {
     const r = alongX ? [Math.min(ax, bx), az - t / 2 + o, Math.max(ax, bx), az + t / 2 + o] : [ax - t / 2 + o, Math.min(az, bz), ax + t / 2 + o, Math.max(az, bz)];
     if (r[2] - r[0] < 0.5 || r[3] - r[1] < 0.5) continue;
-    bag.add(B, box(r[0], y - 0.5, r[1], r[2], y + hh, r[3])); col.rect(r, y, y + hh); col.floor(r, y + hh); crenels(bag, r, y + hh, B, 1.5);
+    bag.add(B, frustum(r, y - 0.5, y + hh, 0, 0, 0, 0, { noBottom: true })); col.rect(r, y, y + hh); col.floor(r, y + hh); crenels(bag, r, y + hh, B, 1.5);
     const L = alongX ? r[2] - r[0] : r[3] - r[1], n = Math.floor(L / 20);
-    for (let i = 0; i <= n; i++) { const u = (alongX ? r[0] : r[1]) + i * L / Math.max(1, n); const q = alongX ? [u - 4, r[1] - 2, u + 4, r[3] + 2] : [r[0] - 2, u - 4, r[2] + 2, u + 4]; bag.add(B, box(q[0], y - 0.5, q[1], q[2], y + hh + 3, q[3])); col.rect(q, y, y + hh + 3); crenels(bag, q, y + hh + 3, B, 1.5); }
+    for (let i = 0; i <= n; i++) { const u = (alongX ? r[0] : r[1]) + i * L / Math.max(1, n); const q = alongX ? [u - 4, r[1] - 2, u + 4, r[3] + 2] : [r[0] - 2, u - 4, r[2] + 2, u + 4]; bag.add(B, frustum(q, y - 0.5, y + hh + 3, 0, 0, 0, 0, { noBottom: true })); col.rect(q, y, y + hh + 3); crenels(bag, q, y + hh + 3, B, 1.5); }
   }
+}
+/**
+ * palace: { rect, h, courts: [rect], gates: [{ rect, h, towers ('n'|'s'|'e'|'w': the outer face it opens on) }],
+ * throne: { court (index into courts), doors: [u, …] (centres along the court's south face) } — a palace of baked
+ * brick round its courts (the Southern Palace): solid ranges of rooms between the courts, gateways through them,
+ * the outer faces in shallow vertical steps (Koldewey: 80 steps on an 80 m front), stepped battlements, the courts
+ * paved in brick; on the south side of the throne court the enamelled facade of the throne room (Koldewey: on a
+ * dark blue ground yellow columns with bright blue capitals, above them a frieze of white double palmettes over a
+ * band of yellow, black and white squares) with its three doors.
+ */
+function palace(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, h = el.h ?? 11, courts = el.courts || [], gates = el.gates || [];
+  const ins = (r, x, z) => x > r[0] && x < r[2] && z > r[1] && z < r[3];
+  const xs = [...new Set([x0, x1, ...courts.flatMap((r) => [r[0], r[2]]), ...gates.flatMap((g) => [g.rect[0], g.rect[2]])])].sort((a, b) => a - b);
+  const zs = [...new Set([z0, z1, ...courts.flatMap((r) => [r[1], r[3]]), ...gates.flatMap((g) => [g.rect[1], g.rect[3]])])].sort((a, b) => a - b);
+  // the cells of the grid of all edges, merged greedily into rectangles of one kind (fewer hidden faces)
+  const NX = xs.length - 1, NZ = zs.length - 1, kind = [], done = [];
+  for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) {
+    const mx = (xs[i] + xs[i + 1]) / 2, mz = (zs[j] + zs[j + 1]) / 2, g = gates.find((q) => ins(q.rect, mx, mz));
+    kind[j * NX + i] = courts.some((r) => ins(r, mx, mz)) ? 'court' : g ? 'gate:' + (g.h ?? 4.5) : 'solid';
+  }
+  for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) {
+    const k = kind[j * NX + i];
+    if (k === 'court' || done[j * NX + i]) continue;
+    let i1 = i; while (i1 + 1 < NX && kind[j * NX + i1 + 1] === k && !done[j * NX + i1 + 1]) i1++;
+    let j1 = j; for (;;) { const jj = j1 + 1; if (jj >= NZ) break; let ok = true; for (let ii = i; ii <= i1; ii++) if (kind[jj * NX + ii] !== k || done[jj * NX + ii]) { ok = false; break; } if (!ok) break; j1 = jj; }
+    for (let jj = j; jj <= j1; jj++) for (let ii = i; ii <= i1; ii++) done[jj * NX + ii] = true;
+    const c = [xs[i], zs[j], xs[i1 + 1], zs[j1 + 1]];
+    if (k === 'solid') { bag.add(B, frustum(c, -0.5, h, 0, 0, 0, 0, { noBottom: true })); col.rect(c, 0, h); col.floor(c, h); }
+    else { const gh = +k.slice(5); bag.add(B, box(c[0], gh, c[1], c[2], h, c[3])); col.rect(c, gh, h); col.floor(c, h); bag.add(B, frustum(c, -0.3, 0.08, 0, 0, 0, 0, { noBottom: true })); }
+  }
+  for (const r of courts) { bag.add(B, frustum(r, -0.3, 0.08, 0, 0, 0, 0, { noBottom: true })); col.floor(r, 0.08); }
+  // the outer faces in shallow vertical steps, broken by the gates; the battlements
+  const near = (x, z, m) => gates.some((g) => g.towers && x > g.rect[0] - m && x < g.rect[2] + m && z > g.rect[1] - m && z < g.rect[3] + m);
+  for (const [f, a, b] of [['n', x0, x1], ['s', x0, x1], ['w', z0, z1], ['e', z0, z1]]) {
+    for (let u = a + 1; u < b - 1.5; u += 2) {
+      const q = f === 'n' ? [u, z0 - 0.3, u + 1, z0] : f === 's' ? [u, z1, u + 1, z1 + 0.3] : f === 'w' ? [x0 - 0.3, u, x0, u + 1] : [x1, u, x1 + 0.3, u + 1];
+      if (near((q[0] + q[2]) / 2, (q[1] + q[3]) / 2, 5)) continue;
+      bag.add(B, box(q[0], -0.5, q[1], q[2], h, q[3]));
+    }
+    const t = f === 'n' ? [x0, z0, x1, z0 + 1.2] : f === 's' ? [x0, z1 - 1.2, x1, z1] : f === 'w' ? [x0, z0, x0 + 1.2, z1] : [x1 - 1.2, z0, x1, z1];
+    crenels(bag, t, h, B, 1.3);
+  }
+  // the gate towers
+  for (const g of gates) if (g.towers) {
+    const [a0, b0, a1, b1] = g.rect, f = g.towers, H = h + 2.5;
+    const tw = f === 'e' || f === 'w' ? [[f === 'e' ? x1 - 2 : x0 - 2.5, b0 - 4.5, f === 'e' ? x1 + 2.5 : x0 + 2, b0], [f === 'e' ? x1 - 2 : x0 - 2.5, b1, f === 'e' ? x1 + 2.5 : x0 + 2, b1 + 4.5]]
+      : [[a0 - 4.5, f === 'n' ? z0 - 2.5 : z1 - 2, a0, f === 'n' ? z0 + 2 : z1 + 2.5], [a1, f === 'n' ? z0 - 2.5 : z1 - 2, a1 + 4.5, f === 'n' ? z0 + 2 : z1 + 2.5]];
+    for (const t of tw) { bag.add(B, box(t[0], -0.5, t[1], t[2], H, t[3])); col.rect(t, 0, H); crenels(bag, t, H, B, 1.2); }
+  }
+  if (el.throne) throneFacade(bag, courts[el.throne.court], el.throne.doors || [0], h);
+}
+/** The enamelled facade of the throne room on the south side of court r (facing north into it). */
+function throneFacade(bag, r, doors, h) {
+  const [c0, , c1, zf] = r, xc = (c0 + c1) / 2, F = [c0, zf, c1, zf + 1], P = facePoint(F, 'n');
+  const plate = (mat, u0, v0, u1, v1, w0, w1) => { const a = P(u0, v0, w0), b = P(u1, v1, w1); bag.add(mat, box(Math.min(a[0], b[0]), a[1], Math.min(a[2], b[2]), Math.max(a[0], b[0]), b[1], Math.max(a[2], b[2]))); };
+  const top = h - 0.9;
+  plate(G, c0 + 0.4, 0.08, c1 - 0.4, top, 0, 0.06);                                  // the dark blue ground
+  const pan = [c0 + 0.4, zf, c1 - 0.4, zf + 1], PF = facePoint(pan, 'n'), pl = (mat, u0, v0, u1, v1, w) => { const a = PF(u0, v0, 0.06), b = PF(u1, v1, 0.06 + w); bag.add(mat, box(Math.min(a[0], b[0]), a[1], Math.min(a[2], b[2]), Math.max(a[0], b[0]), b[1], Math.max(a[2], b[2]))); };
+  const bandAt = (y0) => [W, K, W].forEach((m, k) => pl(m, pan[0], y0 + k * 0.09, pan[2], y0 + (k + 1) * 0.09, 0.025));
+  bandAt(0.35);
+  // the doors: a cedar leaf bound in bronze in a doorway rebated in three steps of glaze
+  const D = doors.map((u, i) => ({ u: xc + u, w: u === 0 ? 4.4 : 3.2, ht: u === 0 ? 7 : 5.4, i }));
+  for (const d of D) {
+    [[0.45, W, 1.05], [0.3, Y, 0.7], [0.15, W, 0.35]].forEach(([w, m, o]) => {
+      pl(m, d.u - d.w / 2 - o, 0.08, d.u - d.w / 2 - o + 0.35, d.ht + o, w); pl(m, d.u + d.w / 2 + o - 0.35, 0.08, d.u + d.w / 2 + o, d.ht + o, w);
+      pl(m, d.u - d.w / 2 - o, d.ht + o - 0.35, d.u + d.w / 2 + o, d.ht + o, w);
+    });
+    pl('cedar', d.u - d.w / 2, 0.08, d.u + d.w / 2, d.ht, 0.02);
+    for (const v of [0.6, d.ht * 0.5, d.ht - 0.6]) pl('bronze', d.u - d.w / 2, v - 0.08, d.u + d.w / 2, v + 0.08, 0.035);
+    pl(K, d.u - 0.02, 0.08, d.u + 0.02, d.ht, 0.03);                                  // the meeting of the two leaves
+  }
+  // the columns: a yellow shaft on a base, two tiers of bright blue volutes, an abacus
+  const VOL = (rr) => lathe([[rr, 0], [rr, 0.07], [rr * 0.55, 0.1], [0.001, 0.11]], 16);
+  const vol = VOL(0.3), eye = lathe([[0.1, 0.1], [0.001, 0.15]], 10), clear = (u) => D.every((d) => Math.abs(u - d.u) > d.w / 2 + 1.6);
+  const step = 2.4, n = Math.floor((pan[2] - pan[0]) / step);
+  for (let i = 0; i < n; i++) {
+    const u = pan[0] + (i + 0.5) * (pan[2] - pan[0]) / n;
+    if (!clear(u)) continue;
+    pl(Y, u - 0.38, 0.7, u + 0.38, 0.95, 0.16);                                          // the base
+    pl(Y, u - 0.2, 0.95, u + 0.2, 5.8, 0.12);                                            // the shaft
+    for (const [v, k] of [[6.15, 1], [6.8, 0.85]]) {
+      pl('tile_turquoise', u - 0.2, v - 0.33, u + 0.2, v + 0.3, 0.13);
+      for (const sx of [-1, 1]) { const p = PF(u + sx * 0.36 * k, v, 0.06); bag.add('tile_turquoise', turnTo(vol.clone().scale(k, 1, k), 'n').translate(...p)); bag.add(Y, turnTo(eye.clone(), 'n').translate(...p)); }
+    }
+    pl(Y, u - 0.55, 7.12, u + 0.55, 7.32, 0.15);                                         // the abacus
+  }
+  // the band of squares, then the frieze of double palmettes, then the top band
+  const sq = 0.3, m = Math.floor((pan[2] - pan[0]) / sq);
+  for (let i = 0; i < m; i++) pl([Y, K, W][i % 3], pan[0] + i * (pan[2] - pan[0]) / m, 7.7, pan[0] + (i + 1) * (pan[2] - pan[0]) / m, 7.7 + sq, 0.03);
+  const fy = 7.7 + sq + 0.75, np = Math.floor((pan[2] - pan[0]) / 1.1);
+  for (let i = 0; i < np; i++) {
+    const u = pan[0] + (i + 0.5) * (pan[2] - pan[0]) / np, place = (du, dv, w) => PF(u + du, fy + dv, 0.08 + w);
+    relief(bag, 'palmette', W, place, 0.62, 1, 0.06); relief(bag, 'palmette', W, place, -0.62, -1, 0.06);
+  }
+  bandAt(top - 0.35);
 }
 registerStyle('babylonian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.sumerian.elements, ishtar_gate: ishtarGate, glazed_wall: glazedWall, city_wall: cityWall, way_paving: wayPaving },
+  elements: { ...STYLES.sumerian.elements, ishtar_gate: ishtarGate, glazed_wall: glazedWall, city_wall: cityWall, way_paving: wayPaving, palace },
   objects: {},
 });

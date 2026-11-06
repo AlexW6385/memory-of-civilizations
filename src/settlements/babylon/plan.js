@@ -5,8 +5,9 @@
 import { RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER } from './layout.js';
 
 const E = [];
-// Etemenanki: seven stages from a base 91 m square, the shrine on top
-E.push({ t: 'ziggurat', c: ZIGGURAT.c, y: 0, stages: [{ w: 91, d: 91, h: 33, batter: 3 }, { w: 78, d: 78, h: 18, batter: 1.5 }, { w: 60, d: 60, h: 6, batter: 0.6 }, { w: 51, d: 51, h: 6, batter: 0.6 }, { w: 42, d: 42, h: 6, batter: 0.6 }, { w: 33, d: 33, h: 6, batter: 0.6 }], shrine: { w: 24, d: 21, h: 15 } });
+// Etemenanki: seven stages from a base 91 m square, the shrine on top, the great stairway rising from the
+// south (Koldewey), toward Esagila
+E.push({ t: 'ziggurat', c: ZIGGURAT.c, y: 0, front: 's', stages: [{ w: 91, d: 91, h: 33, batter: 3 }, { w: 78, d: 78, h: 18, batter: 1.5 }, { w: 60, d: 60, h: 6, batter: 0.6 }, { w: 51, d: 51, h: 6, batter: 0.6 }, { w: 42, d: 42, h: 6, batter: 0.6 }, { w: 33, d: 33, h: 6, batter: 0.6 }], shrine: { w: 24, d: 21, h: 15 } });
 // the precinct's wall
 const [p0, q0, p1, q1] = PRECINCT, gw = 12;
 for (const [a, b] of [[[p0, q0], [WAY.x - gw, q0]], [[WAY.x + gw, q0], [p1, q0]], [[p0, q1], [p1, q1]], [[p0, q0], [p0, q1]], [[p1, q0], [p1, q1]]]) E.push({ t: 'precinct_wall', a, b, h: 9, th: 4 });
@@ -24,11 +25,18 @@ for (const s of [-1, 1]) {
   E.push({ t: 'glazed_wall', a: [WAY.x + s * (WAY.w / 2 + 1.2), WAY.z0 + 20], b: [WAY.x + s * (WAY.w / 2 + 1.2), WALL_Z - 14], h: 9, th: 2.4 });
   E.push({ t: 'glazed_wall', a: [WAY.x + s * (WAY.w / 2 + 1.2), WALL_Z + 32], b: [WAY.x + s * (WAY.w / 2 + 1.2), PALACE[3]], h: 8, th: 2.4, lions: true });
 }
-// the Southern Palace: courts in a row behind a buttressed front
-for (let k = 0; k < 3; k++) E.push({ t: 'courtyard_block', rect: [PALACE[0] + k * 44, PALACE[1], PALACE[0] + k * 44 + 42, PALACE[3]], h: 11, ring: 12, door: 'e' });
+// the Southern Palace: its gate on the east, toward the Way; the east court, the throne court with the
+// enamelled facade of the throne room on its south side, a court of lodgings to the south-east
+const [pa0, pb0, pa1, pb1] = PALACE;
+E.push({
+  t: 'palace', rect: PALACE, h: 11,
+  courts: [[pa1 - 44, pb0 + 24, pa1 - 12, pb0 + 76], [pa0 + 28, pb0 + 18, pa0 + 74, pb0 + 72], [pa1 - 44, pb1 - 32, pa1 - 12, pb1 - 10]],
+  gates: [{ rect: [pa1 - 12, pb0 + 46, pa1, pb0 + 52], h: 5, towers: 'e' }, { rect: [pa0 + 74, pb0 + 46, pa1 - 44, pb0 + 52], h: 4.5 }, { rect: [pa1 - 31, pb0 + 76, pa1 - 25, pb1 - 32], h: 4.5 }],
+  throne: { court: 1, doors: [-15, 0, 15] },
+});
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('processional way', [WAY.x - WAY.w / 2, WAY.z0, WAY.x + WAY.w / 2, WAY.z1], 0, 'open'), room('precinct', PRECINCT, 0, 'open')];
+const rooms = [room('processional way', [WAY.x - WAY.w / 2, WAY.z0, WAY.x + WAY.w / 2, WAY.z1], 0, 'open'), room('precinct', PRECINCT, 0, 'open'), room('throne court', [pa0 + 28, pb0 + 18, pa0 + 74, pb0 + 72], 0.08, 'open')];
 const walks = [[[WAY.x, -370], [WAY.x, WALL_Z - 20], [WAY.x, WALL_Z + 40], [WAY.x, -80]]];
 walks[0].y0 = 0;
 
