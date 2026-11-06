@@ -687,3 +687,6 @@ function notreDame(el, ctx) {
 }
 
 Object.assign(STYLES.gothic.elements, { notre_dame: notreDame });
+
+// the carving helpers, for the Sainte-Chapelle and the palace (src/buildings/sainte-chapelle/style.js, ./palace.js)
+export { prism, bars, pinnacle, figure, pointedPts, ringPts };
