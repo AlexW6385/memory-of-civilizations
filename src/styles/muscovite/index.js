@@ -8,7 +8,7 @@ import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import { Shape, Path } from '../../core/three.js';
 import '../qing/index.js';
-import { slab, hexa, pitched, pyr } from '../norse/index.js';
+import { slab, hexa, pitched, pyr, wallShape } from '../norse/index.js';
 import { cathedralInside } from './dormition.js';
 
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
@@ -321,19 +321,133 @@ function izba(el, { bag, col }) {
   bag.add('timber', hexa([P(um - 0.1, yr + 0.05, wb + 0.1), P(um + 0.1, yr + 0.05, wb + 0.1), P(um + 0.1, yr + 0.05, wb + 0.42), P(um - 0.1, yr + 0.05, wb + 0.42), P(um - 0.1, yr + 0.75, wb + 0.32), P(um + 0.1, yr + 0.75, wb + 0.32), P(um + 0.1, yr + 0.75, wb + 0.56), P(um - 0.1, yr + 0.75, wb + 0.56)]));   // the neck
   bag.add('timber', hexa([P(um - 0.09, yr + 0.6, wb + 0.36), P(um + 0.09, yr + 0.6, wb + 0.36), P(um + 0.09, yr + 0.5, wb + 0.82), P(um - 0.09, yr + 0.5, wb + 0.82), P(um - 0.09, yr + 0.86, wb + 0.32), P(um + 0.09, yr + 0.86, wb + 0.32), P(um + 0.09, yr + 0.72, wb + 0.8), P(um - 0.09, yr + 0.72, wb + 0.8)]));   // the head
 }
-/** lobnoye: { c, r, y } — the round stone platform on the square. */
+/**
+ * lobnoye: { c, r, y } — the Lobnoye Mesto as rebuilt in stone in 1599: the round platform (13 m across,
+ * a metre high) of white stone, its parapet with the iron lattice on top, the stair up on the west
+ * with its cheeks and the lattice gate standing open.
+ */
 function lobnoye(el, { bag, col }) {
-  const [x, z] = el.c, r = el.r ?? 6.5, y = el.y ?? 0;
-  bag.add(WS, lathe([[r, 0], [r, 1.6], [r - 0.4, 1.6], [r - 0.4, 2.4], [r - 0.7, 2.4], [r - 0.7, 1.6], [0.001, 1.6]], 24, null, x, y - 0.3, z)); col.circle(x, z, r, y, y + 1.3); col.floor([x - r * 0.7, z - r * 0.7, x + r * 0.7, z + r * 0.7], y + 1.3);
+  const [x, z] = el.c, r = el.r ?? 6.5, y = el.y ?? 0, top = y + 1.0, gap = 0.85;
+  bag.add(WS, lathe([[r + 0.25, 0], [r + 0.25, 0.35], [r, 0.42], [r, 1.3], [r + 0.08, 1.3], [r + 0.08, 1.38], [0.001, 1.38]], 40, null, x, y - 0.38, z));
+  bag.add('flagstone', lathe([[r - 0.42, 0], [r - 0.42, 0.012], [0.001, 0.012]], 40, null, x, top, z));
+  col.circle(x, z, r + 0.25, y - 0.4, top);
+  for (const R of [[x - r * 0.7, z - r * 0.7, x + r * 0.7, z + r * 0.7], [x - r * 0.92, z - r * 0.36, x + r * 0.92, z + r * 0.36], [x - r * 0.36, z - r * 0.92, x + r * 0.36, z + r * 0.92]]) col.floor(R, top);
+  // the parapet round the edge, open at the stairhead, its coping, the lattice of iron bars on it
+  const n = 36, ga = Math.asin((gap + 0.1) / r);
+  for (let k = 0; k < n; k++) {
+    const a0 = Math.PI + ga + (2 * Math.PI - 2 * ga) * k / n, a1 = Math.PI + ga + (2 * Math.PI - 2 * ga) * (k + 1) / n, R = r - 0.22;
+    const p = [x + Math.cos(a0) * R, z + Math.sin(a0) * R], q = [x + Math.cos(a1) * R, z + Math.sin(a1) * R];
+    bag.add(WS, orientedBox(p, q, 0.44, top - 0.02, top + 0.8, 0.02)); bag.add(WS, orientedBox(p, q, 0.54, top + 0.8, top + 0.92, 0.02));
+    col.segment(p, q, 0.44, top - 0.02, top + 1.6);
+    const L = Math.hypot(q[0] - p[0], q[1] - p[1]), m = Math.max(2, Math.round(L / 0.22));
+    for (let i = 0; i < m; i++) { const t = (i + 0.5) / m, bx = p[0] + (q[0] - p[0]) * t, bz = p[1] + (q[1] - p[1]) * t; bag.add('iron', box(bx - 0.016, top + 0.92, bz - 0.016, bx + 0.016, top + 1.62 + (i % 2 ? 0 : 0.1), bz + 0.016)); }
+    bag.add('iron', orientedBox(p, q, 0.04, top + 1.5, top + 1.54, 0.02)); bag.add('iron', orientedBox(p, q, 0.04, top + 1.05, top + 1.09, 0.02));
+  }
+  // the stair on the west: five steps between low cheeks
+  const sx0 = x - r - 1.75;
+  for (let k = 0; k < 5; k++) bag.add(WS, box(sx0 + k * 0.35, y - 0.3, z - gap, x - r + 0.45, y + (k + 1) * 0.2, z + gap));
+  for (const e of [-1, 1]) { bag.add(WS, hexa([[sx0 - 0.1, y - 0.3, z + e * gap], [x - r + 0.3, y - 0.3, z + e * gap], [x - r + 0.3, y - 0.3, z + e * (gap + 0.35)], [sx0 - 0.1, y - 0.3, z + e * (gap + 0.35)], [sx0 - 0.1, y + 0.35, z + e * gap], [x - r + 0.3, top + 0.92, z + e * gap], [x - r + 0.3, top + 0.92, z + e * (gap + 0.35)], [sx0 - 0.1, y + 0.35, z + e * (gap + 0.35)]])); col.segment([sx0, z + e * (gap + 0.18)], [x - r + 0.3, z + e * (gap + 0.18)], 0.35, y, top + 0.9); }
+  col.ramp([sx0, z - gap, x - r + 0.45, z + gap], y, top, 'e');
+  // the gate in the lattice, standing open against the parapet
+  const gx = x - r + 0.35;
+  bag.add('iron', box(gx - 0.02, top + 0.02, z + gap + 0.15, gx + 0.02, top + 1.6, z + gap + 0.19).translate(0.5, 0, 0));
+  for (let i = 0; i < 6; i++) bag.add('iron', box(gx + 0.15 + i * 0.13, top + 0.05, z + gap + 0.1, gx + 0.18 + i * 0.13, top + 1.55, z + gap + 0.13));
+  for (const hh of [0.15, 1.5]) bag.add('iron', box(gx + 0.12, top + hh, z + gap + 0.1, gx + 0.85, top + hh + 0.04, z + gap + 0.13));
 }
-/** rows: { rect, y, n } — the trading rows: a long range of low timber shops under one plank roof, open on the square. */
+/**
+ * tsar_cannon: { c, y, rot } — the Tsar Cannon (Andrey Chokhov, 1586): the bronze barrel 5.34 m long,
+ * 1.2 m across, its bore 0.89 m, banded and with its eight lifting brackets, set at a fixed
+ * elevation in a heavy timber bed on a raised platform of logs and planks (a raskat) near the
+ * Lobnoye Mesto; aimed along +z.
+ */
+function tsarCannon(el, { bag, col }) {
+  const [x, z] = el.c, y = el.y ?? 0, ph = 1.2, hw = 1.9, hl = 4.2;
+  // the raskat: courses of logs round an earth fill, the plank deck, a log ramp up behind
+  for (let k = 0; k < 5; k++) {
+    const yy = y - 0.05 + k * 0.25;
+    for (const sx of [-1, 1]) bag.add(LOG, lathe([[0.13, 0], [0.13, 2 * hl + 0.5], [0.001, 2 * hl + 0.5]], 7).rotateX(Math.PI / 2).translate(x + sx * hw, yy + 0.12, z - hl - 0.25));
+    for (const sz of [-1, 1]) bag.add(LOG, lathe([[0.13, 0], [0.13, 2 * hw + 0.5], [0.001, 2 * hw + 0.5]], 7).rotateZ(-Math.PI / 2).translate(x - hw - 0.25, yy + 0.25, z + sz * hl));
+  }
+  bag.add('planks_grey', box(x - hw + 0.1, y - 0.1, z - hl + 0.1, x + hw - 0.1, y + ph - 0.06, z + hl - 0.1));
+  bag.add('planks_grey', box(x - hw - 0.15, y + ph - 0.06, z - hl - 0.15, x + hw + 0.15, y + ph + 0.04, z + hl + 0.15));
+  col.rect([x - hw - 0.3, z - hl - 0.3, x + hw + 0.3, z + hl + 0.3], y - 0.2, y + ph + 0.04);
+  const yd = y + ph + 0.04;
+  // the bed: two great timbers under the barrel, the cross pieces and the wedge raising the muzzle
+  const el0 = 0.06, L = 5.34, R = 0.6, cy = yd + 0.95, z0 = z - L / 2 + 0.3;
+  for (const sx of [-0.42, 0.42]) bag.add('timber', hexa([[x + sx - 0.18, yd, z0 - 0.4], [x + sx + 0.18, yd, z0 - 0.4], [x + sx + 0.18, yd, z0 + L - 0.2], [x + sx - 0.18, yd, z0 + L - 0.2], [x + sx - 0.18, cy - 0.45, z0 - 0.4], [x + sx + 0.18, cy - 0.45, z0 - 0.4], [x + sx + 0.18, cy - 0.45 + L * el0, z0 + L - 0.2], [x + sx - 0.18, cy - 0.45 + L * el0, z0 + L - 0.2]]));
+  for (const t of [0.1, 0.55, 0.92]) bag.add('timber', box(x - 0.75, yd, z0 + t * L - 0.15, x + 0.75, yd + 0.3, z0 + t * L + 0.15));
+  // the barrel: a lathe along +z, tilted up by el0; the bands, the breech, the muzzle with its dark bore
+  const prof = [[0.001, -0.35], [0.3, -0.33], [0.5, -0.2], [0.6, 0], [0.62, 0.05], [0.62, 0.18], [0.58, 0.22], [0.57, 1.6], [0.6, 1.62], [0.6, 1.74], [0.56, 1.76], [0.55, 3.6], [0.58, 3.62], [0.58, 3.72], [0.55, 3.74], [0.56, L - 0.32], [0.62, L - 0.25], [0.64, L - 0.12], [0.6, L - 0.05], [0.6, L], [0.445, L], [0.445, L - 0.4], [0.001, L - 0.4]];
+  const g = lathe(prof.map(([r, v]) => [r * (R / 0.6), v]), 28);
+  g.rotateX(Math.PI / 2 - el0).translate(x, cy, z0);
+  bag.add('bronze', g);
+  // the eight lifting brackets along the top, the reliefs (the tsar on horseback) as raised panels on the right flank
+  for (let k = 0; k < 4; k++) for (const sx of [-1, 1]) {
+    const v = 0.9 + k * 1.15, yy = cy + v * Math.sin(el0) + R * 0.86, zz = z0 + v * Math.cos(el0);
+    bag.add('bronze', hexa([[x + sx * 0.18 - 0.05, yy - 0.15, zz - 0.18], [x + sx * 0.18 + 0.05, yy - 0.15, zz - 0.18], [x + sx * 0.18 + 0.05, yy - 0.15, zz + 0.18], [x + sx * 0.18 - 0.05, yy - 0.15, zz + 0.18], [x + sx * 0.18 - 0.05, yy + 0.12, zz - 0.1], [x + sx * 0.18 + 0.05, yy + 0.12, zz - 0.1], [x + sx * 0.18 + 0.05, yy + 0.12, zz + 0.1], [x + sx * 0.18 - 0.05, yy + 0.12, zz + 0.1]]));
+  }
+  { const v = 2.6, yy = cy + v * Math.sin(el0), zz = z0 + v * Math.cos(el0);
+    bag.add('bronze', box(x + R * 0.9, yy - 0.3, zz - 0.45, x + R * 0.96, yy + 0.25, zz + 0.45));
+    bag.add('bronze', box(x + R * 0.95, yy - 0.12, zz - 0.25, x + R * 1.0, yy + 0.05, zz + 0.2));
+    bag.add('bronze', box(x + R * 0.95, yy + 0.05, zz - 0.05, x + R * 1.0, yy + 0.22, zz + 0.05)); }
+  col.rect([x - 0.75, z0 - 0.5, x + 0.75, z0 + L + 0.1], yd, cy + R + 0.4);
+}
+/**
+ * rows: { rect, y, seed } — the trading rows east of the square, rebuilt in stone in 1595: ranges of small
+ * brick shops (lavki) running north–south between narrow lanes and cut by cross passages — a range
+ * opening on the square, a double range back to back, a range at the back. Each shop an arched opening
+ * with its counter and its upper shutter propped out, shelves and goods inside; a plank pent over the
+ * shop fronts on brackets; plank roofs over the ranges.
+ */
+const GOODS = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'linen', 'cloth_brown'];
 function rows(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, n = el.n ?? 20;
-  bag.add('planks_grey', box(x0, y - 0.4, z0, x1, y + 3, z1)); col.rect(el.rect, y, y + 3);
-  const L = z1 - z0;
-  for (let i = 0; i < n; i++) { const z = z0 + (i + 0.5) * L / n; bag.add('opening', box(x0 - 0.05, y + 0.3, z - L / n * 0.35, x0, y + 2.4, z + L / n * 0.35)); }
-  bag.add('planks_grey', orientedBox([x0 - 1.5, z0], [x0 - 1.5, z1], 2.5, y + 2.6, y + 2.8));
-  bag.add('planks_grey', frustum([x0 - 0.3, z0 - 0.3, x1 + 0.3, z1 + 0.3], y + 3, y + 5, (x1 - x0) / 2 + 0.3, (x1 - x0) / 2 + 0.3, 0, 0, { noBottom: true, noTop: true }));
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed ?? 1595), W = x1 - x0;
+  // the ranges across the width: [from, to, open sides (-1 west, +1 east)]
+  const k = W / 20, R = [[x0, x0 + 4 * k, [-1]], [x0 + 7 * k, x0 + 14 * k, [-1, 1]], [x0 + 17 * k, x1, [-1]]];
+  const nb = 6, pass = 3.2, bl = (z1 - z0 - (nb - 1) * pass) / nb, H = 3.3, sw = 3.0;
+  for (let b = 0; b < nb; b++) {
+    const za = z0 + b * (bl + pass), zb = za + bl, n = Math.round(bl / sw), step = bl / n;
+    for (const [ra, rb, sides] of R) {
+      col.rect([ra, za, rb, zb], y, y + H);
+      // the back and end walls, the partitions between the shops, the ceiling; the roof over the range
+      if (sides.length === 1) bag.add(BR, box(rb - 0.45, y - 0.3, za, rb, y + H, zb)); else bag.add(BR, box((ra + rb) / 2 - 0.22, y - 0.3, za, (ra + rb) / 2 + 0.22, y + H, zb));
+      for (const zz of [za, zb - 0.45]) bag.add(BR, box(ra, y - 0.3, zz, rb, y + H, zz + 0.45));
+      for (let q = 1; q < n; q++) bag.add(BR, box(ra + 0.3, y - 0.3, za + q * step - 0.17, rb - 0.3, y + H - 0.02, za + q * step + 0.17));
+      bag.add('planks_grey', box(ra + 0.3, y + H - 0.2, za + 0.45, rb - 0.3, y + H - 0.02, zb - 0.45));
+      bag.add(BR, box(ra, y + H - 0.02, za, rb, y + H + 0.25, zb));                                           // the top course
+      bag.add(WS, box(ra - 0.08, y + H + 0.1, za - 0.08, rb + 0.08, y + H + 0.25, zb + 0.08));                    // its white coping
+      pitched(bag, 'planks_grey', BR, [ra, za, rb, zb], y + H + 0.25, 0.55, 0.3, false, 0.12);
+      for (const sg of sides) {
+        const fx = sg < 0 ? ra : rb, line = fx - sg * 0.2;
+        const doors = Array.from({ length: n }, (_, q) => ({ u: (q + 0.5) * step, w: 2.1, h: 1.85 }));
+        bag.add(BR, slab(wallShape(bl, H + 0.25, doors), 0.4, [line, za], [line, zb], y - 0.3 + 0.3, 10));
+        bag.add(WS, box(Math.min(fx, fx + sg * 0.06), y - 0.3, za, Math.max(fx, fx + sg * 0.06), y + 0.2, zb));        // the white-stone footing along the front
+        // the pent of planks over the fronts, on its brackets
+        const ox = fx + sg * 1.25;
+        bag.add('planks_grey', hexa([[fx, y + H - 0.05, za], [fx, y + H - 0.05, zb], [ox, y + H - 0.55, zb], [ox, y + H - 0.55, za], [fx, y + H + 0.05, za], [fx, y + H + 0.05, zb], [ox, y + H - 0.45, zb], [ox, y + H - 0.45, za]]));
+        for (let q = 0; q <= n; q++) { const zz = za + q * step; bag.add('timber', hexa([[fx, y + H - 1.0, zz - 0.06], [fx, y + H - 0.08, zz - 0.06], [ox - sg * 0.15, y + H - 0.56, zz - 0.06], [fx + sg * 0.2, y + H - 1.0, zz - 0.06], [fx, y + H - 1.0, zz + 0.06], [fx, y + H - 0.08, zz + 0.06], [ox - sg * 0.15, y + H - 0.56, zz + 0.06], [fx + sg * 0.2, y + H - 1.0, zz + 0.06]])); }
+        // each shop: the counter across its opening, the upper shutter propped out, shelves and goods
+        for (let q = 0; q < n; q++) {
+          const zc = za + (q + 0.5) * step, xi = fx - sg * 0.4, deep = (sides.length === 2 ? (rb - ra) / 2 - 0.22 : rb - ra - 0.45) - 0.4;
+          bag.add('timber', box(Math.min(xi, xi + sg * 0.55), y + 0.85, zc - 1.0, Math.max(xi, xi + sg * 0.55), y + 0.92, zc + 1.0));
+          bag.add('timber', box(Math.min(xi, xi + sg * 0.08), y, zc - 1.0, Math.max(xi, xi + sg * 0.08), y + 0.85, zc + 1.0));
+          const sx = fx + sg * 0.5, top = y + 1.85 + 1.05;
+          bag.add('timber', hexa([[fx + sg * 0.02, top - 0.02, zc - 1.05], [fx + sg * 0.02, top - 0.02, zc + 1.05], [sx + sg * 0.35, top - 0.95, zc + 1.05], [sx + sg * 0.35, top - 0.95, zc - 1.05], [fx + sg * 0.06, top + 0.02, zc - 1.05], [fx + sg * 0.06, top + 0.02, zc + 1.05], [sx + sg * 0.39, top - 0.91, zc + 1.05], [sx + sg * 0.39, top - 0.91, zc - 1.05]]));
+          const xb = fx - sg * (0.4 + deep);
+          for (const hh of [0.9, 1.5, 2.1]) bag.add('timber', box(Math.min(xb, xb + sg * 0.45), y + hh, zc - 1.2, Math.max(xb, xb + sg * 0.45), y + hh + 0.05, zc + 1.2));
+          const kind = Math.floor(rand() * 4);
+          for (let g = 0; g < 4; g++) {
+            const gz = zc - 0.75 + g * 0.5, gx = xi + sg * 0.28;
+            if (kind === 0) bag.add(GOODS[Math.floor(rand() * GOODS.length)], lathe([[0.1, 0], [0.1, 0.5], [0.001, 0.5]], 8).rotateX(Math.PI / 2).translate(gx, y + 1.02, gz - 0.25));        // bolts of cloth
+            else if (kind === 1) bag.add('terracotta', lathe([[0.06, 0], [0.13, 0.08], [0.14, 0.18], [0.07, 0.28], [0.08, 0.31], [0.001, 0.31]], 10, null, gx, y + 0.92, gz));
+            else if (kind === 2) bag.add(rand() < 0.5 ? 'hide_brown' : 'hide_tan', box(gx - 0.18, y + 0.92, gz - 0.2, gx + 0.18, y + 0.92 + 0.05 + rand() * 0.1, gz + 0.2));        // hides, folded
+            else bag.add('wicker', lathe([[0.12, 0], [0.17, 0.16], [0.001, 0.16]], 10, null, gx, y + 0.92, gz));
+            for (const hh of [0.95, 1.55]) if (rand() < 0.7) bag.add(kind === 1 ? 'pottery_dark' : GOODS[Math.floor(rand() * GOODS.length)], kind === 1 ? lathe([[0.05, 0], [0.1, 0.07], [0.1, 0.16], [0.001, 0.2]], 8, null, xb + sg * 0.22, y + hh, gz) : box(xb + sg * 0.05 - 0.15, y + hh, gz - 0.2, xb + sg * 0.05 + 0.15, y + hh + 0.22, gz + 0.2));
+          }
+        }
+      }
+    }
+  }
 }
 /**
  * moat: { wallX (fn of z: the wall's line; or line: [[x, z], [x, z]]), d0, d1 (the moat's sides, metres out from the wall), z0, z1, bed,
@@ -408,6 +522,6 @@ function beamBox(a, b, w, h) {
 }
 registerStyle('muscovite', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat },
+  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon },
   objects: {},
 });

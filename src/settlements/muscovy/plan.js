@@ -17,7 +17,9 @@ export const square = {
   elements: [
     { t: 'pokrov', c: BASIL, y: by, s: 1 },
     { t: 'lobnoye', c: LOBNOYE, y: height(...LOBNOYE) },
-    { t: 'rows', rect: ROWS, y: hy(ROWS), n: 40 },
+    // the Tsar Cannon (1586) on its platform near the Lobnoye Mesto, aimed south toward the river crossing
+    { t: 'tsar_cannon', c: [LOBNOYE[0], LOBNOYE[1] + 16], y: height(LOBNOYE[0], LOBNOYE[1] + 16) },
+    { t: 'rows', rect: ROWS, y: hy(ROWS), seed: 1595 },
   ],
   rooms: [{ id: 'square', rect: SQUARE, y: 0, kind: 'open' }],
   walks: [Object.assign([[40, 20], [40, 90], [BASIL[0], BASIL[1] - 26]], { y0: 0 })],
