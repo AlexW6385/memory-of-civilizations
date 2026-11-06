@@ -129,10 +129,14 @@ export function siqWalls(el, { bag, col }) {
     const cols = [];
     for (let c = 0; c <= (n - 1) * SUB; c++) {
       const i = c / SUB, p = sample(pts, i), ys = bounds(p[0], p[1], p[4], p[5], p[6]), rows = [];
+      // the beds pinched out below the column's foot or above its crest take the face of the nearest bed that is there
+      let kLo = 0, kHi = BEDS.length - 1;
+      while (kLo < kHi && ys[kLo + 1] - ys[kLo] < 1e-6) kLo++;
+      while (kHi > kLo && ys[kHi + 1] - ys[kHi] < 1e-6) kHi--;
       for (let k = 0; k < BEDS.length; k++) {
         const yA = ys[k], yB = ys[k + 1], g = Math.min(0.12, (yB - yA) * 0.3), m = Math.max(1, Math.round(BEDS[k].th / (BEDS[k].y0 > 28 ? 2.4 : 1.3)));
         for (let j = 0; j <= m; j++) {
-          const y = k === 0 && j === 0 ? yA : yA + g + (yB - yA - g) * j / m, d = faceAt(face, si, i * 2, p, ys, y, k);
+          const y = k === 0 && j === 0 ? yA : yA + g + (yB - yA - g) * j / m, d = faceAt(face, si, i * 2, p, ys, y, Math.min(kHi, Math.max(kLo, k)));
           rows.push({ k, v: [p[0] + p[2] * d, y, p[1] + p[3] * d] });
         }
       }
@@ -182,7 +186,8 @@ export function siqWalls(el, { bag, col }) {
       const mid = (dmin + face + 2.5) / 2, a = at(i, mid, 0), b = at(i + 1, mid, 0);
       col.segment([a[0], a[2]], [b[0], b[2]], face + 2.5 - dmin, Math.min(pts[i][4], pts[i + 1][4]) - 1, Math.max(pts[i][5], pts[i + 1][5]));
     }
-    if (channel) waterworks(bag, pts, s, face, channel, at, si);
+    // the channel or pipe runs on from the Siq along the walls it is joined to, as far as the first one raised over a monument
+    if (channel) { let m = pts.findIndex((p) => p[6] > p[4] + 0.5); if (m < 0) m = n; if (m >= 4) waterworks(bag, pts.slice(0, m), s, face, channel, at, si); }
     if (el.blocks !== false) fallen(bag, col, pts, s, face, channel, at, si, el.clear);
   }
   for (const [si, i] of el.niches || []) niche(bag, el.sides[si], face, i, si);
