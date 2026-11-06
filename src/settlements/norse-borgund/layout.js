@@ -7,7 +7,7 @@
 export const RADIUS = 360;
 export const RIM = 45;
 export const CHURCH = [0, -30];
-export const BELL = [-26, -42];
+export const BELL = [12, -13];                           // the stave bell tower stands south of the church
 export const YARD = [-22, -52, 22, -8];                      // the churchyard
 export const RIVER = { z: 140, w: 26, level: -3, bed: -5 };
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
