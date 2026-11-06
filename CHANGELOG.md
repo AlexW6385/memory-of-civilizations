@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.48 — Hagia Sophia, the Pantheon, Sainte-Foy and Sanchi (2026-11-06)
+- Hagia Sophia after Paul the Silentiary: the cross at the dome's crown, 80 lamps on the cornice, gilt-moulded marble cornices, porphyry spandrel discs, the silver chancel barrier with three doors, the silver ciborium over a gold altar, the lamp ring of silver discs; the Pantheon's eight aediculae with porphyry columns, the attic band, the bronze doorway with open leaves and lattice transom, the pediment eagle; Sainte-Foy's golden Majesty on its throne and the tribunes' twin arches; Sanchi's harmika railing and three-tiered parasol.
+
 ## v9.47 — Amsterdam's Dam (2026-11-06)
 - The Dam paved in setts with bluestone kerbs and stone-edged gutters; the Waag with its great balances, porch roofs and city arms; the Damrak harbour with moored boats and quay houses; fish benches, goods sledges with horses and carters (sledges, not carts, as sources record), greengrocers, porters and burghers; the houses round the square turned to face it; house backs everywhere with framed windows, back gables, annexes, yard walls and privies.
 
