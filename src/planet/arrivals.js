@@ -34,7 +34,7 @@ export const ARRIVALS = {
   'edfu':             [0, 0.1, 150, 0, 0.2],             // the pylon with its flagpoles, through the palms
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square
   'djenne':           [95, 0.1, 30, 1.25, 0.13],         // the Great Mosque over the market
-  'lalibela':         [-218, 0.1, 112, -2.42, -0.3],     // from the rim, down into the church's pit
+  'lalibela':         [-218, 0.1, 112, -2.356, -0.24],   // from the pit's north-west corner, down its diagonal onto the cross
   'kilwa':            [5, null, 30, 0.785, 0.15],        // in the Great Mosque, among its pillars
   'great-zimbabwe':   [46, 0.1, 60, 3.1416, 0.1],        // the Great Enclosure's curved walls
   'knossos':          [0, 0.2, 22, 0, 0.05],             // the central court between its red columns
@@ -44,13 +44,13 @@ export const ARRIVALS = {
   'stonehenge':       [34, null, -16, 2.01, 0.06],       // the circle, clear of the Heel Stone
   'conques':          [-29.8, 6.9, -52.9, -2.88, 0.166], // Sainte-Foy's towers up the village lane
   'paris':            [-250, 1.1, -10, -1.5708, 0.25],   // the Sainte-Chapelle's rose and spire from the palace court
-  'granada':          [19.5, 30.1, 0, 0, 0.25],          // the Court of the Myrtles to the Comares Tower
+  'granada':          [19.5, 30.1, 3, 0, 0.25],          // the Court of the Myrtles to the Comares Tower (by the south arcade, clear of the pool's end)
   'florence':         [-142.6, 0, -21.9, -1.309, 0.216], // the Baptistery, the cathedral front and the campanile
   'venice':           [-60, 1.3, -5, -1.5708, 0.2],      // San Marco across the piazza
   'amsterdam':        [20, 1.1, -210, 1.5708, 0.2],      // the Town Hall on the Dam
   'versailles':       [-60, 6.1, 0, -1.5708, 0.15],      // the garden front over the water parterre
   'london':           [200, 2.5, -170, 1.9, 0.2],        // the Clock Tower and Westminster from the bridge
-  'barcelona':        [224, null, -150, 2.493, 0.35],    // the Sagrada Família's towers from the corner
+  'barcelona':        [240.3, null, -92, 1.5708, 0.5],   // the Nativity façade's portals, from the far pavement of the Carrer de la Marina
   'norse-borgund':    [-24, 0.1, -28, -1.5708, 0.3],     // the stave church in its valley
   'muscovy':          [40, 0.1, 40, 3.1416, 0.3],        // St Basil's and the Kremlin wall across Red Square
   'teotihuacan':      [0, 0.1, 60, 0, 0.1],              // up the Avenue of the Dead

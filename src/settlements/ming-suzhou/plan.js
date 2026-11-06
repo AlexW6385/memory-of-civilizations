@@ -112,7 +112,11 @@ const [rx0, rz0, rx1, rz1] = RESIDENCE;
 E.push({ t: 'paving', rect: [rx0, rz0, rx1, rz1], y: G + 0.02, th: 0.3 });
 const rwall = (a, b, opts = {}) => E.push({ t: 'ming_wall', a, b, y: G, h: 5.2, th: 0.45, ...opts });
 rwall([rx0, rz1], [rx0, rz0]); rwall([rx1, rz0], [rx1, rz1]);
-rwall([rx0, rz1], [-6, rz1]); rwall([6, rz1], [rx1, rz1]);
+// the street front: the gate hall in the middle, and west of it the side door to the side passage
+// (bei long) by which the household goes from court to court without crossing the halls
+rwall([rx0, rz1], [-6, rz1], { gates: [{ at: -12 - rx0, w: 1.6, h: 2.6 }] }); rwall([6, rz1], [rx1, rz1]);
+// granite steps from the street up to the gate hall's platform
+E.push({ t: 'stair', rect: [-3, rz1 + 0.9, 3, rz1 + 2.1], y0: LEVEL.street, y1: G + 0.45, dir: 'n', riser: 0.15, mat: 'granite_block' });
 const halls = [
   { rect: [-6, 54, 6, 60], H: 4.0, roof: 'gable', four: false },      // the gate hall, its door on the street
   { rect: [-8, 43, 8, 49.5], H: 4.2, roof: 'gable', four: true },      // the sedan-chair hall

@@ -9,7 +9,9 @@ export const PYRAMID = { c: [0, -40], a: 115.15, h: 146.6 };
 export const ENCLOSURE = [-127, -167, 127, 87];
 export const TEMPLE = [127, -66, 168, -14];
 export const QUEENS = [[160, 18, 23, 30], [160, 70, 23, 29], [160, 118, 22, 28]];   // [x, z, half-base, height]
-export const CAUSEWAY = { a: [168, -40], b: [318, 52] };
+// the causeway runs level on the plateau, goes down its edge with the ground and enters the valley
+// temple by its west door (CAUSEWAY.down: where the descent begins and ends)
+export const CAUSEWAY = { a: [168, -40], b: [312.5, 52], down: [270, 300] };
 export const VALLEY_TEMPLE = [312, 34, 346, 70];
 export const HARBOUR = [346, 18, 400, 96];
 export const WEST_FIELD = [-330, -230, -150, 110];
@@ -31,10 +33,13 @@ export const BOAT_PITS = [
 export const SHIP = { at: [366, 57], len: 43.6, ang: -Math.PI / 2 };
 
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
-/** The plateau's height: level round the pyramid, falling east toward the valley and south toward the town. */
+/** The plateau's height: level round the pyramid, falling east toward the valley and south toward the
+ *  town. Its eastern edge lies at x 300 by the east cemetery and at x 270 from the causeway south, so
+ *  that the causeway goes down it with the ground and the valley temple stands on the valley floor. */
 export const VALLEY = -12, TOWN_Y = -5;
 export function plateau(x, z) {
-  const east = Math.max(0, x - 300), south = Math.max(0, z - 140);
+  const t = Math.max(0, Math.min(1, (z + 70) / 30)), edge = 300 - 30 * t * t * (3 - 2 * t);
+  const east = Math.max(0, x - edge), south = Math.max(0, z - 140);
   return -Math.min(-VALLEY, east * 0.4) - Math.min(-TOWN_Y, south * 0.2);
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }

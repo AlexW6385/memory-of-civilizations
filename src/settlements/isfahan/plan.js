@@ -32,6 +32,17 @@ for (const r of [[k0 - 1, q0 - 1, k0 + 1, q1 + 1], [k1 - 1, q0 - 1, k1 + 1, q1 +
   const [x0, z0, x1, z1] = r, vert = x1 - x0 < z1 - z0;
   for (const c of vert ? [[x0 - 0.4, z0, x0, z1], [x1, z0, x1 + 0.4, z1]] : [[x0, z0 - 0.4, x1, z0], [x0, z1, x1, z1 + 0.4]]) E.push({ t: 'block', walk: true, rect: c, y0: 0, y1: 0.35, mat: 'limestone' });
 }
+// a flat stone footbridge over the canal on each of the square's two axes (to the Qeysarieh and the
+// Shah Mosque, to Ali Qapu and Lotfollah): three low steps up over the curb, a slab over the water
+const AX = (LOTF.portal[0][1] + LOTF.portal[1][1]) / 2;
+const bridge = (vert, c, at) => {
+  // vert: the canal runs along z at x = c (cross it along x); otherwise along x at z = c (cross along z)
+  const B = 1.6, S = 1.0, half = 1.5, top = 0.45, R = (u0, v0, u1, v1) => (vert ? [u0, v0, u1, v1] : [v0, u0, v1, u1]);
+  E.push({ t: 'block', walk: true, rect: R(c - B, at - half, c + B, at + half), y0: 0.3, y1: top, mat: 'limestone' });
+  E.push({ t: 'stair', rect: R(c - B - S, at - half, c - B, at + half), y0: 0.04, y1: top, dir: vert ? 'e' : 's', riser: 0.137, mat: 'limestone' });
+  E.push({ t: 'stair', rect: R(c + B, at - half, c + B + S, at + half), y0: 0.04, y1: top, dir: vert ? 'w' : 'n', riser: 0.137, mat: 'limestone' });
+};
+bridge(false, q0, 0); bridge(false, q1, 0); bridge(true, k0, AX); bridge(true, k1, AX);
 E.push({ t: 'goalpost', c: [0, q0 + 6], along: 'x', gap: 7, h: 3.2 });
 E.push({ t: 'goalpost', c: [0, q1 - 6], along: 'x', gap: 7, h: 3.2 });
 

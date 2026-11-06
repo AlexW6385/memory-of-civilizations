@@ -46,6 +46,9 @@ E.push({ t: 'inca_house', rect: [-56, -32, -46, -20], y: 0, h: 3.0, front: 'e', 
 // the Sacred Plaza: the Main Temple (three walls, open to the south), the Temple of the Three Windows (open to the west)
 E.push({ t: 'inca_temple', rect: [-50, 34, -34, 46], y: 0.6, h: 3.8, open: 's', jamb: true });
 E.push({ t: 'inca_temple', rect: [-30, 34, -20, 48], y: 0.6, h: 3.6, open: 'w', windowSide: 'e', windows: 3 });
+// four low steps up to each temple's raised floor (0.6 m), before its open side
+E.push({ t: 'stair', rect: [-46, 47, -38, 48.2], y0: 0, y1: 0.6, dir: 'n', riser: 0.15, mat: 'granite_inca' });
+E.push({ t: 'stair', rect: [-32.2, 37, -31, 45], y0: 0, y1: 0.6, dir: 'e', riser: 0.15, mat: 'granite_inca' });
 E.push({ t: 'inca_house', rect: [-46, 52, -36, 60], y: 0.2, h: 2.8, front: 's', mat: 'granite_inca', roof: 'thatch', seed: 11 });
 // the Main Plaza's edge: a low wall with stairs down into it
 E.push({ t: 'lane', rect: [PLAZA[0] - 4, PLAZA[1] - 4, PLAZA[0] - 1, PLAZA[3] + 4], y: 0.02, mat: 'granite_rough' });

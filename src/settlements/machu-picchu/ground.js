@@ -23,7 +23,9 @@ function height(x, z) {
   let h;
   if (d < 0) {
     h = 0;
-    if (inRect(PLAZA, x, z, -2)) h = -2.4 * sm(0, 4, Math.min(x - PLAZA[0], PLAZA[2] - x, z - PLAZA[1], PLAZA[3] - z));
+    // the plaza sunk 2.4 m, its banks falling over 6 m from its edge (about 30° at the steepest: one
+    // walks down into it and up out of it)
+    if (inRect(PLAZA, x, z)) h = -2.4 * sm(0, 6, Math.min(x - PLAZA[0], PLAZA[2] - x, z - PLAZA[1], PLAZA[3] - z));
     const hd = Math.hypot(x - HILL.c[0], z - HILL.c[1]);
     if (hd < HILL.r + 8) h = Math.max(h, Math.floor(Math.max(0, HILL.h * (1 - Math.max(0, hd - 3) / (HILL.r + 6))) / 2.2) * 2.2);
   } else {

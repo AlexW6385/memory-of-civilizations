@@ -7,6 +7,18 @@ import { MONUMENT, SQUARES, CIRCLES, MONASTERY } from './layout.js';
 
 const E = [];
 E.push({ t: 'borobudur', c: MONUMENT.c, base: MONUMENT.base, squares: SQUARES, circles: CIRCLES, crown: { r: 5 } });
+// the stairs go on up through the round terraces on all four sides, to the top
+{
+  const [cx, cz] = MONUMENT.c, w = 1.4;
+  let y0 = SQUARES[SQUARES.length - 1].y;
+  for (const c of CIRCLES) {
+    const e0 = c.r + 1.6 - 0.06, e1 = c.r + 1.6 + 1.9;
+    for (const [dir, rect] of [['s', [cx - w, cz - e1, cx + w, cz - e0]], ['n', [cx - w, cz + e0, cx + w, cz + e1]], ['e', [cx - e1, cz - w, cx - e0, cz + w]], ['w', [cx + e0, cz - w, cx + e1, cz + w]]]) {
+      E.push({ t: 'stair', rect, y0, y1: c.y, dir, mat: 'andesite' });
+    }
+    y0 = c.y;
+  }
+}
 E.push({ t: 'lane', rect: [64, -2, 300, 2], y: 0.03, mat: 'andesite' });
 // the monastery: a walled compound with open pavilions and houses for the monks
 const [mx0, mz0, mx1, mz1] = MONASTERY, wall = (a, b) => E.push({ t: 'pagar', a, b, h: 2.2 });

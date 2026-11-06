@@ -13,12 +13,20 @@ const wall = (a, b, gates = []) => E.push({ t: 'ming_wall', a, b, y: 0, h: 8, th
 wall([ex0, ez0], [ex1, ez0]); wall([ex0, ez1], [ex1, ez1]); wall([ex0, ez0], [ex0, ez1]);
 wall([ex1, ez0], [ex1, -66]); wall([ex1, -14], [ex1, ez1]);
 E.push({ t: 'ok_pyramid', c: PYRAMID.c, a: PYRAMID.a, h: PYRAMID.h });
-E.push({ t: 'ok_temple', rect: TEMPLE, h: 7.5, court: [133, -58, 160, -22], pillars: 6, door: 'e' });
+// its east door takes the causeway; the west door opens into the pyramid's court
+E.push({ t: 'ok_temple', rect: TEMPLE, h: 7.5, court: [133, -58, 160, -22], pillars: 6, door: 'e', backDoor: true });
 for (const [x, z, a, h] of QUEENS) {
   E.push({ t: 'ok_pyramid', c: [x, z], a, h });
   E.push({ t: 'ok_temple', rect: [x + a + 2, z - 6, x + a + 12, z + 6], h: 4, court: [x + a + 4, z - 3, x + a + 10, z + 3], pillars: 2, door: 'e' });
 }
-E.push({ t: 'causeway', a: CAUSEWAY.a, b: CAUSEWAY.b, w: 4.6, h: 5, ya: 0, yb: VALLEY });
+// the causeway: level on the plateau, down its edge with the ground, level again into the valley temple
+{
+  const [ax, az] = CAUSEWAY.a, [bx, bz] = CAUSEWAY.b, at = (x) => [x, az + (bz - az) * (x - ax) / (bx - ax)];
+  const [d0, d1] = CAUSEWAY.down, p = at(d0), q = at(d1);
+  E.push({ t: 'causeway', a: CAUSEWAY.a, b: p, w: 4.6, h: 5, ya: 0, yb: 0 });
+  E.push({ t: 'causeway', a: p, b: q, w: 4.6, h: 5, ya: 0, yb: VALLEY });
+  E.push({ t: 'causeway', a: q, b: CAUSEWAY.b, w: 4.6, h: 5, ya: VALLEY, yb: VALLEY });
+}
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('court', ENCLOSURE, 0, 'open'), room('temple', TEMPLE, 0.12, 'hall')];

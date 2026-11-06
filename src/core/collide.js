@@ -13,7 +13,9 @@ export class CollisionWorld {
     this.tops = [];           // the buildings' upper surfaces (topField), to stand on from above
   }
 
-  add({ floors, obstacles, tops }) {
+  add(c) {
+    cutUnderRamps(c);
+    const { floors, obstacles, tops } = c;
     if (tops) this.tops.push(tops);
     for (const f of floors) { this.floors.push(f); this._index(this.floorGrid, f.rect, f); }
     for (const o of obstacles) {
@@ -115,7 +117,8 @@ export class CollisionWorld {
   }
 
   /** Would a body at (x, z) from y0 to y1 be inside a roof's shell (between a top higher than
-   *  `climb` and its underside)? Roofs are not obstacles; this keeps one from walking into a slope. */
+   *  `climb` and its underside, with no floor or ramp of its own up there)? Roofs are not
+   *  obstacles; this keeps one from walking into a slope. */
   inShell(x, z, r, y0, y1, climb) {
     for (const T of this.tops) {
       if (!T.under) continue;
@@ -123,7 +126,9 @@ export class CollisionWorld {
         const i = Math.floor((x + dx - T.x0) / T.res), j = Math.floor((z + dz - T.z0) / T.res);
         if (i < 0 || j < 0 || i >= T.w || j >= T.h) continue;
         const o = j * T.w + i, top = T.data[o];
-        if (top > climb && top > y0 && T.under[o] < y1) return true;
+        // (not where a floor or a ramp runs at about that height, at the cell's centre where the top
+        // was taken: the top is what one walks on there)
+        if (top > climb && top > y0 && T.under[o] < y1 && this.groundAt(T.x0 + (i + 0.5) * T.res, T.z0 + (j + 0.5) * T.res, top + 0.05) < top - 0.3) return true;
       }
     }
     return false;
@@ -231,6 +236,92 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer',
     }
   }
   return { x0, z0, res, w, h, data, under };
+}
+
+/**
+ * A stair or ramp declares where one walks: what its own plan built under it may not stand in the
+ * way. Many stairs are a flight of treads laid over a stepped or sloping mass (a pyramid's
+ * terraces, a podium, a platform) whose ledges rise through the treads by a little. For each ramp
+ * of one plan's colliders (in place, once):
+ * - an obstacle that reaches below the ramp where the two overlap and whose top does not rise more
+ *   than half a metre over the ramp's upper end (a mass under the stair, not a wall across it) is
+ *   cut back to what lies outside the ramp's rectangle (it still stands beside the stair);
+ * - in the top field, a cell over the ramp whose top lies above the ramp, no higher than half a
+ *   metre over its upper end, and whose underside is lower than a head over the ramp (the mass the
+ *   stair is built in, a ledge or moulding through it — not a roof or a floor over it) is lowered
+ *   to the ramp, so that one is not caught "inside a roof" on the steps.
+ * Walls and roofs over a stair (higher than its upper end, or with their underside above one's
+ * head) are kept.
+ */
+export function cutUnderRamps(c) {
+  if (c._cut || !c.floors) return;
+  c._cut = true;
+  const ramps = c.floors.filter((f) => f.y1 !== undefined);
+  if (!ramps.length) return;
+  for (const f of ramps) {
+    const hi = Math.max(f.y, f.y1);
+    if (f.rect[2] - f.rect[0] < 0.3 || f.rect[3] - f.rect[1] < 0.3) continue;
+    // the rectangle grown at its upper end by a little more than the walker's radius: a steep flight
+    // that ends against the mass it climbs onto is not stopped by its edge a few centimetres short
+    const up = f.y1 > f.y ? f.dir : { n: 's', s: 'n', e: 'w', w: 'e' }[f.dir], G = 0.35;
+    const [x0, z0, x1, z1] = [f.rect[0] - (up === 'w' ? G : 0), f.rect[1] - (up === 'n' ? G : 0), f.rect[2] + (up === 'e' ? G : 0), f.rect[3] + (up === 's' ? G : 0)];
+    const on = (x, z) => CollisionWorld.floorHeight(f, Math.min(f.rect[2], Math.max(f.rect[0], x)), Math.min(f.rect[3], Math.max(f.rect[1], z)));
+    const out = [];
+    let cut = false;
+    for (const o of c.obstacles) {
+      if (o.circle || o.y1 > hi + 0.5) { out.push(o); continue; }
+      const b = o.bb || (o.bb = polyBox(o.poly));
+      const ox0 = Math.max(x0, b[0]), ox1 = Math.min(x1, b[2]), oz0 = Math.max(z0, b[1]), oz1 = Math.min(z1, b[3]);
+      if (ox1 - ox0 < 0.05 || oz1 - oz0 < 0.05) { out.push(o); continue; }
+      // the ramp's lowest point over the overlap (it is linear: at a corner), and a walker's radius
+      // down the ramp from there: the mass must reach under the one and rise into a body on the other
+      const dx = up === 'e' ? -G : up === 'w' ? G : 0, dz = up === 's' ? -G : up === 'n' ? G : 0;
+      const corners = [[ox0, oz0], [ox1, oz0], [ox0, oz1], [ox1, oz1]];
+      const h = Math.min(...corners.map(([x, z]) => on(x, z))), hDown = Math.min(...corners.map(([x, z]) => on(x + dx, z + dz)));
+      if (!(o.y0 < h && o.y1 > Math.min(h, hDown) + 0.25)) { out.push(o); continue; }
+      cut = true;
+      const mid = clip(clip(o.poly, 0, -1, -x0), 0, 1, x1);           // x0 ≤ x ≤ x1
+      for (const piece of [clip(o.poly, 0, 1, x0), clip(o.poly, 0, -1, -x1), clip(mid, 1, 1, z0), clip(mid, 1, -1, -z1)]) {
+        if (piece.length >= 3 && Math.abs(area(piece)) > 1e-3) out.push({ ...o, poly: piece, bb: undefined });
+      }
+    }
+    if (cut) c.obstacles.splice(0, c.obstacles.length, ...out);
+    const T = c.tops;
+    if (!T?.under) continue;
+    const i0 = Math.max(0, Math.floor((x0 - T.x0) / T.res)), i1 = Math.min(T.w - 1, Math.floor((x1 - T.x0) / T.res));
+    const j0 = Math.max(0, Math.floor((z0 - T.z0) / T.res)), j1 = Math.min(T.h - 1, Math.floor((z1 - T.z0) / T.res));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const x = Math.min(x1, Math.max(x0, T.x0 + (i + 0.5) * T.res)), z = Math.min(z1, Math.max(z0, T.z0 + (j + 0.5) * T.res));
+      const h = on(x, z), o = j * T.w + i;
+      if (T.data[o] > h + 0.02 && T.under[o] < h + 1.9 && T.data[o] <= hi + 0.5) { T.data[o] = h; T.under[o] = Math.min(T.under[o], h - 0.06); }
+    }
+  }
+}
+
+/** The part of a polygon where s · p[axis] ≤ v (axis 0: x, 1: z; s = 1: p ≤ v, s = −1: p ≥ −v). */
+function clip(poly, axis, s, v) {
+  const out = [], inn = (p) => s * p[axis] <= v + 1e-9;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length], ia = inn(a), ib = inn(b);
+    if (ia) out.push(a);
+    if (ia !== ib) {
+      const t = (v - s * a[axis]) / (s * (b[axis] - a[axis]));
+      out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+    }
+  }
+  return out;
+}
+
+function polyBox(poly) {
+  let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
+  for (const [x, z] of poly) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z; }
+  return [x0, z0, x1, z1];
+}
+
+function area(poly) {
+  let s = 0;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) s += (poly[j][0] + poly[i][0]) * (poly[j][1] - poly[i][1]);
+  return s / 2;
 }
 
 function inside(x, z, poly) {

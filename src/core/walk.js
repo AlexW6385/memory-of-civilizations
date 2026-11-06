@@ -26,6 +26,14 @@ export function flyVy(P, fs, dt) {
   return vy < target ? Math.min(target, vy + acc) : Math.max(target, vy - acc);
 }
 
+/** Where the feet come to rest at (x, z), reaching no higher than maxY: the ground, a floor, or the
+ *  top of something built (a step, a terrace, a low wall) within reach. */
+export function footing(C, x, z, maxY) {
+  const g = C.groundAt(x, z, maxY);
+  // (over the whole body's circle for obstacles, which stop that circle; the top field over the feet)
+  return C.topAt ? Math.max(g, C.topAt(x, z, RADIUS, maxY)) : g;
+}
+
 /**
  * Move feet {x, y, z, vy} by (dx, dz) metres this frame against the collision world,
  * climbing and descending steps up to STEP, falling otherwise.
@@ -34,10 +42,18 @@ export function move(P, dx, dz, dt, C) {
   const n = Math.max(1, Math.ceil(Math.hypot(dx, dz) / 0.12));
   for (let i = 0; i < n; i++) {
     let nx = P.x + dx / n, nz = P.z + dz / n;
-    let g = C.groundAt(nx, nz, P.y + STEP);
+    let g = footing(C, nx, nz, P.y + STEP);
     [nx, nz] = C.resolve(nx, nz, RADIUS, Math.max(g, P.y) + LOW, Math.max(g, P.y) + HEAD);
-    g = C.groundAt(nx, nz, P.y + STEP);
+    g = footing(C, nx, nz, P.y + STEP);
     if (!Number.isFinite(g)) continue;
+    // a built surface with no floor of its own (a terrace, a causeway, a plinth, steps) is stepped
+    // onto like a floor, but not where it goes on rising steeper than about 50° (a dome, a wall's
+    // batter, a roof's slope from its eaves)
+    if (g > P.y + 0.02 && g > C.groundAt(nx, nz, P.y + STEP) + 1e-3) {
+      const run = Math.hypot(nx - P.x, nz - P.z) || 1, ux = (nx - P.x) / run, uz = (nz - P.z) / run;
+      const ax = nx + ux * 0.5, az = nz + uz * 0.5, ahead = C.topAt(ax, az, RADIUS * 0.6, g + 0.75);
+      if (ahead - g > 0.6 && C.groundAt(ax, az, g + 0.75) < g + 0.1) continue;   // (a floor or a ramp rising there: a stair)
+    }
     // the ponds cannot be waded (but can be flown over, and left by one who lands in them)
     if (C.water && P.y <= g + 0.3 && C.water(nx, nz, g) && !C.water(P.x, P.z, g)) continue;
     // open ground steeper than about 40° cannot be climbed (built steps and ramps can)
