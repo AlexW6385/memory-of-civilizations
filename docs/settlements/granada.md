@@ -1,7 +1,7 @@
 # Nasrid Granada (the Alhambra), about 1390 — dossier
 
 Settlement id: `granada` · Style: `nasrid` (with `vernacular` houses) · Region: Iberia (al-Andalus, Granada) · Code: `src/settlements/granada/`
-Status of this dossier: L2–L3 in the palaces (§4.2–§4.4: the Comares palace and the halls round the Court of the Lions, with their interiors); L1–L2 elsewhere (the Sabika hill with the Alhambra's red walls and square towers round its rim; the Alcazaba at the west end with the Torre de la Vela; the Court of the Myrtles with its long pool, hedges and arcades and the Comares Tower; the Court of the Lions with its arcades of slender paired columns, two pavilions and the fountain; gardens and woods; the Darro valley and the white Albaicín; ground, planting, weather, music). L3 recorded for later: the Mexuar, the Sala de los Mocárabes, the upper floor round the Two Sisters, the oratory in the Hall of the Ambassadors' entrance, the Partal, the Generalife, the medina inside the walls, the gates (Justice, Seven Floors), people.
+Status of this dossier: L2–L3 in the palaces (§4.2–§4.4: the Comares palace and the halls round the Court of the Lions, with their interiors); L1–L2 elsewhere (the Sabika hill with the Alhambra's red walls and square towers round its rim; the Alcazaba at the west end with the Torre de la Vela; the Court of the Myrtles with its long pool, hedges and arcades and the Comares Tower; the Court of the Lions with its arcades of slender paired columns, two pavilions and the fountain; gardens and woods; the Darro valley and the white Albaicín; ground, planting, weather, music). L3 in the Partal and the Rauda (§4.5–§4.6). L3 recorded for later: the Mexuar, the Sala de los Mocárabes, the upper floor round the Two Sisters, the oratory in the Hall of the Ambassadors' entrance, the Partal's oratory and houses, the Generalife, the Great Mosque and the medina's real plan, the gates (Justice, Seven Floors), people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -19,6 +19,8 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Alcazaba | the west end | [stated] |
 | Court of the Myrtles, Comares Tower | north side, middle; the court 23 × 36 m, the tower 16 m square at its north end standing in the line of the north wall | [stated: the tower over the Darro; sizes §4.2] |
 | Court of the Lions | east of the Myrtles | [stated] |
+| Partal | north wall, x 102–118, the tower at (110, −43) | [stated: east of the palaces on the north wall; the distance compressed — inferred] |
+| Rauda | south of the Palace of the Lions, (57…72, 8…31) with its garden | [stated: by the Palace of the Lions and the mosque] |
 | Darro, Albaicín | north | [stated] |
 
 ## 3. Orientation
@@ -60,9 +62,24 @@ Red rammed earth and brick walls and towers, crenellated; plain-walled palaces r
 - Muqarnas domes are tiers of niches, each tier a ring of concave cells stepping inward over a soffit, from the drum to the crown; the dome's base is filled across from the drum's polygon.
 - The unbuilt rooms round the halls are closed blocks under tiled roofs, so that nothing open or floating shows from outside.
 
+
+### 4.5 The Partal (L3, built)
+
+- **The real one.** Built in the early 14th century by Muhammad III (1302–1309), the oldest surviving palace of the Alhambra; the portico on the palace's north side, originally on brick pillars (the slender marble columns are of the 20th century), its arched façade carved in stucco; the large reflecting pool before it; behind the portico a mirador chamber projecting outward and northward from the walls with windows on three sides; the Torre de las Damas, whose larger top chamber had a wooden cupola ceiling (now in Berlin) [stated: Wikipedia "Partal Palace"]. "The portico, with its five arches, overlooks a large pool in the centre of the garden"; the portico built into the premises wall, as with Comares; the main room inside the tower [stated: Patronato de la Alhambra]. The small oratory east of the tower (4.16 × 3 m, Isma'il I and Yusuf I) and the four houses of the Partal without courtyards west of it [stated: ibid.] are not built.
+- **Ours.** The tower 10 m square standing in the line of the north wall (the run is cut round it and the mirador), red outside, 11.6 m to a tiled hipped roof [inferred: the roof form, the size]; the room 7.2 m square inside, dressed with the tile dado, stucco and bands of script, a floor of lustre tiles, paired windows on a marble colonnette east and west, a wooden star cupola (the Hall of the Ambassadors' kind, `starCeiling`) [inferred: its pattern]; the mirador 5.2 × 3.4 m beyond the wall on its own foot down the slope, paired windows on its three sides, a plank vault of cedar, a little tiled roof. The portico 18 m wide and 3.4 deep before the tower's south face: five stilted round arches on brick pillars, the middle one wider, sebka over the arches, a cedar ceiling on beams, a lean-to roof of tiles; the pool 14 × 11 m in a marble kerb, brimming, three small jets where the water enters at its south end, in a paving of brick [inferred: the pool's size, the jets, the paving].
+
+### 4.6 The Rauda (L3, built)
+
+- **The real one.** The royal cemetery by the Great Mosque, separated by the Calle Real Baja from the Partal palaces; founded by Isma'il I and used by the later sultans (Muhammad IV, Yusuf I, Yusuf III certainly, Muhammad V possibly). The building rectangular; a square space at its centre, probably a qubba open at the sides and covered with a dome; access through a slightly pointed, scalloped horseshoe arch to a small vestibule; three tombs below ground, two in the central room and one in each side room; an enclosed garden to the south-east with about seventy trapezoid tombs [stated: Patronato, "The Rauda at the Alhambra"]. A royal headstone of the Rawda: a block of marble slightly over 170 cm long, carved and polished, with epigraphy [stated: Patronato, "Burial stone from the Rawda"].
+- **Ours.** South of the Palace of the Lions, 15 × 10.2 m, long east–west [inferred: the real one runs south-east to north-west]: the door north under a horseshoe arch, the vestibule under a plank vault, the qubba 6 m square through a lobed arch, its walls rising above the rest to small windows and a star cupola of cedar under a tiled pyramid; the side rooms through double arches on marble columns, under plank vaults; the dado, stucco and script throughout; prismatic marble tombstones (maqabriyya) 1.7 m long over the graves, their sloping faces carved with script; the garden behind a low coped wall with a gate on its west side, twelve graves under smaller stones, beds of myrtle [inferred: the stones' prismatic form (the usual one in al-Andalus), the garden's planting; seventy graves thinned to twelve].
+
+### 4.7 The Alcazaba (L2, built)
+
+- The Torre de la Vela with four levels of chambers inside, each larger than the one below; the bell only since the Christian conquest (not built). The Torre del Homenaje, the keep, 26 m tall on a base of 12.12 × 10.46 m, at the north-east. The military quarter: a long east–west street, ten to seventeen houses of different sizes round patios on its north side, storehouses or quarters on a more regular plan on its south; the walls of rammed earth [stated: Wikipedia "Alcazaba of Granada"]. Ours: the keep at the Alcazaba's north-east corner at its true size, the Vela at the west, both with paired windows in deep frames high up; three houses either side of the quarter's street (the vernacular Moorish house) [inferred: the houses' form; the hammam, cistern and silos are not built].
+
 ## 5. The town
 
-About 1,000 houses in the Albaicín and below the hill. [inferred]
+About 1,000 houses in the Albaicín and below the hill. [inferred] Inside the walls, the medina's houses in rows along streets east of the palaces (to the Partal and the Rauda) and in the dip between the Alcazaba and the palaces, clear of the palaces, the way in and the walls [inferred: the medina of the Alhambra, its Calle Real and the Great Mosque are not built in their real plan].
 
 **Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): three houses with the divan round the walls (mattresses, cushions), a rug, the brass tray on its stand, a hanging lamp, a painted chest; a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
 
@@ -84,6 +101,11 @@ The oud and the Andalusian nawba over a drone; the fountains. [inferred]
 
 ## Sources
 
+- [Partal Palace — Wikipedia](https://en.wikipedia.org/wiki/Partal_Palace)
+- [The Partal — Patronato de la Alhambra y Generalife](https://www.alhambra-patronato.es/en/edificios-lugares/the-partal)
+- [The Rauda at the Alhambra, royal cemetery — Patronato](https://www.alhambra-patronato.es/en/the-rauda-at-the-alhambra-royal-cemetery)
+- [Burial stone from the Rawda of the Alhambra — Patronato](https://www.alhambra-patronato.es/en/elemento-del-mes/burial-stone-from-the-rawda-of-the-alhambra)
+- [Alcazaba of Granada — Wikipedia](https://en.wikipedia.org/wiki/Alcazaba_of_Granada)
 - [Alhambra — Wikipedia](https://en.wikipedia.org/wiki/Alhambra)
 - [Court of the Lions — Wikipedia](https://en.wikipedia.org/wiki/Court_of_the_Lions)
 - [Albaicín — Wikipedia](https://en.wikipedia.org/wiki/Albaic%C3%ADn)
