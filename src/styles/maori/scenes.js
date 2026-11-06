@@ -4,7 +4,7 @@
 // people hold (taiaha) and lay down in the challenge (rākau).
 
 import { Matrix4 } from '../../core/three.js';
-import { box, lathe, fromTriangles, orientOutward, rod } from '../../core/geom.js';
+import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { tube } from '../../objects/kit.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -34,7 +34,7 @@ function hangi(el, { bag, col }) {
   const [px, pz] = P(-1.4, 0);
   bag.add('banco', lathe([[1.35, -0.1], [1.25, 0.12], [1.0, 0.16], [0.85, 0.02], [0.8, -0.05]], 16, null, px, y, pz));
   bag.add('opening', lathe([[0.85, -0.04], [0.001, -0.06]], 16, null, px, y, pz));
-  for (let k = 0; k < 9; k++) { const a = rand() * 6.28, d = rand() * 0.45; bag.add('bark_dark', rod([px + Math.cos(a) * d, y, pz + Math.sin(a) * d], [px + Math.cos(a + 2) * (d + 0.3), y + 0.12, pz + Math.sin(a + 2) * (d + 0.3)], 0.05, 5)); }
+  for (let k = 0; k < 9; k++) { const a = rand() * 6.28, d = rand() * 0.45; bag.add('bark_dark', tube([[px + Math.cos(a) * d, y, pz + Math.sin(a) * d, 0.05], [px + Math.cos(a + 2) * (d + 0.3), y + 0.12, pz + Math.sin(a + 2) * (d + 0.3), 0.05]], 5)); }
   for (let k = 0; k < 16; k++) { const a = rand() * 6.28, d = Math.sqrt(rand()) * 0.55; stone(bag, 'basalt', px + Math.cos(a) * d, y + 0.12 + 0.12 * (1 - d / 0.55), pz + Math.sin(a) * d, 0.11 + rand() * 0.05, k + x); }
   for (let k = 0; k < 6; k++) { const a = k / 6 * 6.28 + rand(), d = 0.2 + rand() * 0.3; bag.add('flame', lathe([[0.07, 0], [0.04, 0.16], [0.001, 0.3 + rand() * 0.15]], 5, null, px + Math.cos(a) * d, y + 0.06, pz + Math.sin(a) * d)); }
   // the closed oven: a low mound of earth, the leaves showing at its foot
@@ -50,7 +50,7 @@ function hangi(el, { bag, col }) {
   // the firewood stacked
   for (let k = 0; k < 14; k++) {
     const row = Math.floor(k / 5), [fx, fz] = P(-3.2 + (k % 5) * 0.14 + row * 0.07, -0.9), fy = y + 0.06 + row * 0.11;
-    bag.add('bark_dark', rod([fx - sa * 0.0 - ca * 0, fy, fz], [fx + sa * 1.0, fy, fz + ca * 1.0], 0.055, 5));
+    bag.add('bark_dark', tube([[fx, fy, fz, 0.055], [fx + sa * 1.0, fy, fz + ca * 1.0, 0.055]], 6));
   }
   // the kāuta: four posts, a raupō roof sloping back, the back wall of raupō
   const kx = [-3.6, -1.6], kz = [-2.6, -1.3], hf = 2.0, hb = 1.3;
@@ -141,10 +141,10 @@ function whata(el, { bag, col }) {
  * of its length, the rest still solid; chips round it; adzes (toki) with their stone blades.
  */
 function wakaBuild(el, { bag, col }) {
-  const [x, z] = el.c, L = el.l ?? 12, yaw = el.yaw ?? 0, y0 = el.y ?? 0, B = 0.55 + L * 0.015, D = 0.75, lift = 0.3;
+  const [x, z] = el.c, L = el.l ?? 12, yaw = el.yaw ?? 0, y0 = el.y ?? 0, B = 0.55 + L * 0.015, D = 0.75, lift = 0.24;
   const M = new Matrix4().makeRotationY(yaw).setPosition(x, y0, z), add = (mat, g) => { g.applyMatrix4(M); bag.add(mat, g); };
-  for (const u of [-L * 0.32, 0, L * 0.32]) add('bark_dark', rod([-1.0, 0.13, u], [1.0, 0.13, u + 0.1], 0.14, 7));
-  const beam = (u) => B / 2 * Math.max(0.05, 1 - Math.abs(2 * u / L) ** 2.2) ** 0.6, h0 = lift + 0.14;
+  for (const u of [-L * 0.32, 0, L * 0.32]) add('bark_dark', tube([[-1.0, 0.12, u, 0.13], [1.0, 0.12, u + 0.1, 0.14]], 8));
+  const beam = (u) => B / 2 * Math.max(0.05, 1 - Math.abs(2 * u / L) ** 2.2) ** 0.6, h0 = 0.24;              // the hull's keel resting in the skids' tops
   const NU = 24, NS = 10, uh = -L * 0.05;                            // hollowed aft of uh (+z), solid forward
   const pt = (i, j, inner) => {
     const u = -L / 2 + L * i / NU, b = beam(u), a = Math.PI * j / NS;
@@ -197,4 +197,19 @@ function rakau(el, { bag }) {
   bag.add('wood_dark', tube([[x - c, y + 0.015, z + s, 0.012], [x, y + 0.02, z, 0.016], [x + c, y + 0.015, z - s, 0.01]], 5));
 }
 
-export const SCENES = { hangi, harakeke, weaving, whata, waka_build: wakaBuild, taiaha, rakau };
+/** paepae: a bench of split logs for the elders { a, b, y } — the flat face up at seat height on short posts. */
+function paepae(el, { bag, col }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, y = el.y ?? 0, L = Math.hypot(bx - ax, bz - az), yaw = -Math.atan2(bz - az, bx - ax);
+  const M = new Matrix4().makeRotationY(yaw).setPosition((ax + bx) / 2, y, (az + bz) / 2), add = (mat, g) => { g.applyMatrix4(M); bag.add(mat, g); };
+  const half = [];
+  for (let k = 0; k <= 8; k++) { const a = Math.PI * k / 8; half.push([Math.cos(a) * 0.2, 0.47 - Math.sin(a) * 0.17]); }
+  const t = [], q = (a, b, c, d) => t.push(...a, ...b, ...c, ...a, ...c, ...d);
+  for (let k = 0; k < 8; k++) { const [x0, y0] = half[k], [x1, y1] = half[k + 1]; q([-L / 2, y0, x0], [L / 2, y0, x0], [L / 2, y1, x1], [-L / 2, y1, x1]); }
+  q([-L / 2, 0.47, -0.2], [L / 2, 0.47, -0.2], [L / 2, 0.47, 0.2], [-L / 2, 0.47, 0.2]);
+  for (const s of [-1, 1]) for (let k = 0; k < 8; k++) { const [x0, y0] = half[k], [x1, y1] = half[k + 1]; t.push(s * L / 2, 0.47, 0, s * L / 2, y0, x0, s * L / 2, y1, x1); }
+  add('wood_dark', fromTriangles(orientOutward(t)));
+  for (let u = -L / 2 + 0.3; u < L / 2; u += Math.max(0.8, (L - 0.6) / Math.ceil((L - 0.6) / 1.4))) add('wood_dark', box(u - 0.07, -0.1, -0.08, u + 0.07, 0.31, 0.08));
+  col.segment(el.a, el.b, 0.4, y, y + 0.47);
+}
+
+export const SCENES = { paepae, hangi, harakeke, weaving, whata, waka_build: wakaBuild, taiaha, rakau };

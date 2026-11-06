@@ -60,7 +60,7 @@ export async function town() {
     const x = (rand() < 0.5 ? -1 : 1) * (4 + rand() * 40), z = 64 + rand() * 20, at = [x, z];
     if (P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 0.9)) continue;
     const r = rand();
-    fig({ at, y: 0.12, rot: face(at, [x * 0.6, 103]) + (rand() - 0.5) * 0.4, pose: r < 0.35 ? 'sit' : r < 0.5 ? 'talk' : 'stand' });
+    fig({ at, y: 0.12, rot: face(at, [x * 0.6, 103]) + (rand() - 0.5) * 0.4, pose: r < 0.3 ? 'squat' : r < 0.45 ? 'talk' : 'stand' });
   }
   // canoes drawn up above the shore east of the ahu, bow to the sea; a fisherman or two by each
   for (const [x, z] of [[66, 150], [74, 151], [86, 152]]) {

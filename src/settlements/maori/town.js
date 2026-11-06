@@ -50,7 +50,8 @@ export async function town() {
   // body, women in front, the men behind with their chief; between them the challenger, a dart
   // laid on the ground before the visitors' chief (docs/settlements/maori.md §4b)
   const H0 = v.houses[0], hxm = H0.c[0];
-  for (let k = 0; k < 7; k++) { const at = [hxm + 1.2 + k * 0.85, 13.3 + (k % 2) * 0.25]; man(at, top, face(at, [hxm + 2, 30]), { pose: 'sit', cloth: rand() < 0.5 ? CHIEF[k % 2] : undefined, beard: rand() < 0.3 }); }
+  E.push({ t: 'paepae', a: [hxm + 0.6, 13.3], b: [hxm + 7.4, 13.3], y: top });
+  for (let k = 0; k < 7; k++) { const at = [hxm + 1.2 + k * 0.95, 13.45]; man(at, top, 0 + Math.PI + (rand() - 0.5) * 0.15, { pose: 'sit', beard: rand() < 0.3, ...(rand() < 0.5 ? { cloth: CHIEF[k % 2] } : {}) }); }
   for (let k = 0; k < 9; k++) { const at = [hxm - 6.6 + k * 0.8, 14.2 + (k % 2) * 0.35]; woman(at, top, face(at, [hxm + 2, 30]), k === 4 ? { pose: 'talk' } : {}); }
   for (let k = 0; k < 6; k++) { const at = [hxm - 5.5 + k * 1.1, 12.2]; (k % 2 ? man : woman)(at, top, face(at, [hxm + 2, 30])); }
   const vc = [-6.2, 27.5];                                                // the visitors' body
@@ -69,7 +70,7 @@ export async function town() {
   for (const [x, z, yaw] of [[hx - 16, hz + 9, 0.3], [hx - 19, hz + 3, -0.4], [hx - 13, hz + 14, 0.9]]) {
     E.push({ t: 'weaving', at: [x, z], y: top, yaw, seed: Math.floor(rand() * 1e5) });
     const at = [x + Math.sin(yaw) * 1.6, z + Math.cos(yaw) * 1.6];
-    woman(at, top, face(at, [x, z]), { pose: 'sit', over: 'none' });
+    woman(at, top, face(at, [x, z]), { pose: 'squat', over: 'none' });
     if (rand() < 0.6) { const b = [x + Math.cos(yaw) * 1.5, z - Math.sin(yaw) * 1.5]; woman(b, top, face(b, [x, z]), { pose: 'squat', over: 'none' }); }
   }
 
@@ -83,23 +84,31 @@ export async function town() {
   // the lake shore: clumps of flax, racks of fish drying, a canoe being hollowed, its builders
   const taken = [...v.houses, ...v.pataka, ...v.pits].map((o) => o.c);
   const clear = (x, z, m) => taken.every(([a, b]) => Math.hypot(a - x, b - z) > m) && v.waka.every((w) => Math.hypot(w.c[0] - x, w.c[1] - z) > w.l / 2 + 3);
+  // the canoe being hollowed and the fish racks first, at the first clear places along the shore
+  const shore = [];
+  for (let x = -230; x <= 230; x += 6) shore.push(x);
+  shore.sort((p, q) => Math.abs(p + 160) - Math.abs(q + 160));                 // nearest first to the west end of the beach
+  for (const x of shore) {
+    const z = shoreZ(x) + 13, yaw = Math.PI / 2 + 0.2;
+    if (Math.hypot(x, z) > RADIUS - 50 || !clear(x, z, 9)) continue;
+    E.push({ t: 'waka_build', c: [x, z], y: height(x, z), yaw, l: 11 });
+    for (const u of [-4.5, -1.5, 1.5, 4.5]) taken.push([x + Math.sin(yaw) * u, z + Math.cos(yaw) * u]);
+    for (const [u, w, pose] of [[1.6, -1.5, 'stand'], [-1.6, 2.5, 'squat'], [1.5, 3.4, 'squat']]) { const at = [x + w, z + u]; const sk = skin(); P.push({ t: 'figure', at, y: height(at[0], at[1]), rot: face(at, [x + w * 0.5, z]), seed: Math.floor(rand() * 1e9), dress: 'tunic', cloth: sk, cloth2: 'cloth_brown', over: 'belt', skin: sk, hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose }); }
+    break;
+  }
+  let nw = 0;
+  for (const x of shore) {
+    if (nw >= 3) break;
+    const z = shoreZ(x) + 17;
+    if (Math.hypot(x, z) > RADIUS - 45 || !clear(x, z, 5.5)) continue;
+    E.push({ t: 'whata', a: [x - 2.2, z], b: [x + 2.2, z], y: height(x, z), h: 2.0 }); taken.push([x, z]); nw++;
+    if (nw === 1) { const at = [x + 0.6, z + 1.4]; woman(at, height(at[0], at[1]), face(at, [x, z]), { over: 'none' }); }
+  }
   let nf = 0;
   for (let k = 0; k < 600 && nf < 70; k++) {
     const x = -220 + rand() * 440, z = shoreZ(x) + 7 + rand() * 16;
     if (Math.hypot(x, z) > RADIUS - 45 || !clear(x, z, 5)) continue;
     E.push({ t: 'harakeke', at: [x, z], y: height(x, z), h: 1.5 + rand() * 0.8, seed: Math.floor(rand() * 1e5) }); taken.push([x, z]); nf++;
-  }
-  for (const x of [-150, -142, 128]) {
-    const z = shoreZ(x) + 14;
-    if (!clear(x, z, 4)) continue;
-    E.push({ t: 'whata', a: [x - 2.2, z], b: [x + 2.2, z], y: height(x, z), h: 2.0 }); taken.push([x, z]);
-  }
-  for (const x of [-185, -175, 150, 160]) {
-    const z = shoreZ(x) + 13, yaw = Math.PI / 2 + 0.2;
-    if (!clear(x, z, 8)) continue;
-    E.push({ t: 'waka_build', c: [x, z], y: height(x, z), yaw, l: 11 }); taken.push([x, z]);
-    for (const [u, w, pose] of [[1.6, -1.5, 'stand'], [-1.6, 2.5, 'squat'], [1.5, 3.4, 'squat']]) { const at = [x + w, z + u]; man(at, height(at[0], at[1]), face(at, [x + w * 0.5, z]), { pose, over: 'none', beard: rand() < 0.3 }); }
-    break;
   }
   return [plan('maori-kainga', 'maori', E), plan('maori-people', 'life', P)];
 }
