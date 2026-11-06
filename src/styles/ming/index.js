@@ -458,7 +458,7 @@ function inPoly(P, u, v) {
 function tracery(pattern, [u0, v0, u1, v1], rand) {
   const S = [], s = 0.2;
   if (pattern === 'coin') {
-    const r = s / Math.SQRT2, N = 10;
+    const r = s / Math.SQRT2, N = 8;
     for (let cu = u0 - s; cu < u1 + s; cu += s) for (let cv = v0 - s; cv < v1 + s; cv += s) for (let k = 0; k < N; k++) {
       const a = k / N * Math.PI * 2, b = (k + 1) / N * Math.PI * 2;
       S.push([[cu + Math.cos(a) * r, cv + Math.sin(a) * r], [cu + Math.cos(b) * r, cv + Math.sin(b) * r]]);
@@ -519,7 +519,8 @@ function wallBar(out, W, p, q, hw, d) {
   for (const o of [-d / 2, d / 2]) for (const [bu, bv] of [p, q]) for (const sg of [-1, 1]) c.push(W(bu + pu * sg, bv + pv * sg, o));
   // c: o-, p-, p+, q-, q+ ; o+ likewise (indices 0..3, 4..7)
   const loc = [], f = (a, b, cc, dd) => loc.push(...c[a], ...c[b], ...c[cc], ...c[a], ...c[cc], ...c[dd]);
-  f(0, 1, 3, 2); f(4, 6, 7, 5); f(0, 2, 6, 4); f(1, 5, 7, 3); f(0, 4, 5, 1); f(2, 3, 7, 6);
+  // the faces and the two sides; no end caps (each end runs into another bar or the frame)
+  f(0, 1, 3, 2); f(4, 6, 7, 5); f(0, 4, 5, 1); f(2, 3, 7, 6);
   for (const v of orientOutward(loc)) out.push(v);
 }
 /** A flat ring (a frame) between two outlines, extruded through the wall by depth, placed by the wall's matrix M. */
@@ -738,7 +739,9 @@ function archBridge(el, { bag, col }) {
   // the arch body: slices across the bridge, the arch cut out below (a half circle over the water)
   const N = 48, body = [];
   const archR = S / 2 * 0.92, springY = el.water ?? -0.75;
-  const under = (s) => (Math.abs(s) < archR ? springY + Math.sqrt(archR * archR - s * s) : bed);
+  // the arch a half circle, flattened where the deck over it would be too thin (its crown kept half a metre under the treads)
+  const kA = Math.max(0.3, Math.min(1, (top(0) - 0.55 - springY) / archR));
+  const under = (s) => (Math.abs(s) < archR ? springY + kA * Math.sqrt(archR * archR - s * s) : bed);
   for (let i = 0; i < N; i++) {
     const s0 = -half + 2 * half * i / N, s1 = -half + 2 * half * (i + 1) / N;
     const t0 = Math.round(top(s0) / 0.16) * 0.16, t1 = Math.round(top(s1) / 0.16) * 0.16;
@@ -757,14 +760,44 @@ function archBridge(el, { bag, col }) {
     const tn = i + 1 < N ? Math.round(top(-half + 2 * half * (i + 2) / N) / 0.16) * 0.16 : 0;
     const r = [P(s1, -W, t), P(s1, W, t), P(s1, W, Math.max(tn, t)), P(s1, -W, Math.max(tn, t))];
     body.push(...r[0], ...r[1], ...r[2], ...r[0], ...r[2], ...r[3]);
-    // parapets
-    for (const o of [-W - 0.12, W - 0.12]) {
-      const pp = [];
-      beamTris(pp, P(s0, o + 0.12, t), P(s1, o + 0.12, t), 0.12, 0.5);
-      bag.add(PAL.base, fromTriangles(pp));
-    }
   }
   bag.add(PAL.base, fromTriangles(body.concat(flipTris(body))));
+  // the parapets: slabs whose tops run in one smooth curve over the hump (not stepped with the
+  // treads), a rounded coping along them, square posts with round caps at the ends and over the
+  // springing of the arch
+  const pp = [], NP = 32, ptop = (s) => top(s) + 0.55;
+  for (const sg of [-1, 1]) {
+    for (let i = 0; i < NP; i++) {
+      const s0 = -half + 2 * half * i / NP, s1 = -half + 2 * half * (i + 1) / NP;
+      const c = [], q = (a, b, cc, d) => c.push(...a, ...b, ...cc, ...a, ...cc, ...d);
+      const o0 = sg * (W - 0.2), o1 = sg * (W + 0.005), A0 = top(s0) - 0.45, A1 = top(s1) - 0.45;
+      const v = [P(s0, o0, A0), P(s1, o0, A1), P(s1, o1, A1), P(s0, o1, A0), P(s0, o0, ptop(s0)), P(s1, o0, ptop(s1)), P(s1, o1, ptop(s1)), P(s0, o1, ptop(s0))];
+      q(v[4], v[5], v[6], v[7]); q(v[0], v[3], v[2], v[1]); q(v[0], v[1], v[5], v[4]); q(v[3], v[7], v[6], v[2]);
+      if (i === 0) q(v[0], v[4], v[7], v[3]);
+      if (i === NP - 1) q(v[1], v[2], v[6], v[5]);
+      pp.push(...orientOutward(c));
+      // the coping on the slab
+      beamTris(pp, P(s0, sg * (W - 0.095), ptop(s0) - 0.01), P(s1, sg * (W - 0.095), ptop(s1) - 0.01), 0.13, 0.09);
+    }
+    for (const s of [-half + 0.2, -S / 2 - 0.1, S / 2 + 0.1, half - 0.2]) {
+      const c = P(s, sg * (W - 0.095), 0);
+      const yb = Math.min(top(s - 0.15), top(s + 0.15)) - 0.2, yt = Math.max(ptop(s - 0.15), ptop(s + 0.15)) + 0.22;
+      bag.add(PAL.base, box(c[0] - 0.15, yb, c[2] - 0.15, c[0] + 0.15, yt, c[2] + 0.15));
+      bag.add(PAL.base, lathe([[0.16, 0], [0.17, 0.05], [0.13, 0.1], [0.12, 0.2], [0.07, 0.3], [0.001, 0.33]], 10, null, c[0], yt, c[2]));
+    }
+  }
+  bag.add(PAL.base, fromTriangles(pp));
+  // the arch ring: voussoirs standing a little proud of both faces, a hair apart
+  const ring = [], NV = 17, rIn = archR, rOut = archR + 0.42;
+  for (const sg of [-1, 1]) for (let k = 0; k < NV; k++) {
+    const a0 = Math.PI * k / NV + 0.004, a1 = Math.PI * (k + 1) / NV - 0.004, c = [], q = (a, b, cc, d) => c.push(...a, ...b, ...cc, ...a, ...cc, ...d);
+    const pt = (r, a, o) => P(Math.cos(a) * r, o, springY + Math.sin(a) * (kA * rIn + r - rIn));
+    const o0 = sg * (W - 0.03), o1 = sg * (W + 0.035);
+    const v = [pt(rIn, a0, o0), pt(rIn, a1, o0), pt(rOut, a1, o0), pt(rOut, a0, o0), pt(rIn, a0, o1), pt(rIn, a1, o1), pt(rOut, a1, o1), pt(rOut, a0, o1)];
+    q(v[4], v[5], v[6], v[7]); q(v[0], v[3], v[2], v[1]); q(v[0], v[1], v[5], v[4]); q(v[3], v[7], v[6], v[2]); q(v[0], v[4], v[7], v[3]); q(v[1], v[2], v[6], v[5]);
+    ring.push(...orientOutward(c));
+  }
+  bag.add(PAL.base, fromTriangles(ring));
   // walk: ramps up and down the bridge
   const ramp = (sA, sB) => {
     const a = P(sA, -W, 0), b = P(sB, W, 0), yA = top(sA), yB = top(sB);
@@ -776,11 +809,54 @@ function archBridge(el, { bag, col }) {
   for (const o of [-W - 0.12, W + 0.12]) { const a = P(-half, o, 0), b = P(half, o, 0); col.segment([a[0], a[2]], [b[0], b[2]], 0.24, y0 - 1, y0 + R + 0.6); }
 }
 
-/** canal_wall: a granite wall along a canal's edge { a, b, y (top), bed, th }. */
+/**
+ * canal_wall: a granite wall along a canal's edge { a, b, y (top), bed, th } — its body of coursed
+ * blocks under a coping of long slabs that overhang both faces a little, laid end to end. With
+ * water (the level) and toward (a point in the canal): the stone wet and dark in a ragged band at
+ * the waterline, and with moor (metres apart) the mooring stones set in the face, each a block
+ * carved with a ring for the boats' ropes (docs/settlements/ming-suzhou.md §6).
+ */
 function canalWall(el, { bag, col }) {
+  const y = el.y ?? 0.05, bed = el.bed ?? -2.6, th = el.th ?? 0.7, [ax, az] = el.a, [bx, bz] = el.b;
+  const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
+  const Pw = (s, o, yy) => [ax + ux * s + nx * o, yy, az + uz * s + nz * o];
   const t = [];
-  beamTris(t, [el.a[0], el.bed ?? -2.6, el.a[1]], [el.b[0], el.bed ?? -2.6, el.b[1]], (el.th ?? 0.7) / 2, (el.y ?? 0.05) - (el.bed ?? -2.6));
+  beamTris(t, [ax, bed, az], [bx, bed, bz], th / 2, (y - 0.19) - bed);
+  // the coping slabs, 1.1–1.9 m long, a hair apart
+  const rand = rng(Math.round(ax * 31 + az * 17 + bx * 7) + 3);
+  for (let s0 = 0; s0 < L - 0.05;) {
+    const s1 = Math.min(L, s0 + 1.1 + rand() * 0.8 > L - 0.6 ? L : s0 + 1.1 + rand() * 0.8);
+    beamTris(t, Pw(s0 + (s0 > 0 ? 0.006 : 0), 0, y - 0.2), Pw(s1 - (s1 < L ? 0.006 : 0), 0, y - 0.2), th / 2 + 0.07, 0.22);
+    s0 = s1;
+  }
   bag.add('granite_block', fromTriangles(t));
+  if (el.water === undefined) return;
+  const w = el.water, sg = el.toward ? (((el.toward[0] - ax) * nx + (el.toward[1] - az) * nz) > 0 ? 1 : -1) : 1;
+  const o = sg * (th / 2 + 0.006), ph = rand() * 6.28, ph2 = rand() * 6.28;
+  // the wet band: darker, glossier stone from below the water to a wandering line above it
+  const band = [], top = (s) => w + 0.2 + 0.07 * Math.sin(s * 0.9 + ph) + 0.035 * Math.sin(s * 2.7 + ph2);
+  for (let s0 = 0; s0 < L - 0.01; s0 += 0.3) {
+    const s1 = Math.min(L, s0 + 0.3), p0 = Pw(s0, o, w - 0.12), p1 = Pw(s1, o, w - 0.12), q0 = Pw(s0, o, top(s0)), q1 = Pw(s1, o, top(s1));
+    band.push(...p0, ...p1, ...q1, ...p0, ...q1, ...q0);
+  }
+  bag.add('granite_grey', fromTriangles(band.concat(flipTris(band))));
+  // the mooring stones, a block proud of the face with a stone ring standing out of it
+  if (el.moor) {
+    const ms = [];
+    for (let s = el.moor * (0.3 + rand() * 0.5); s < L - 0.6; s += el.moor * (0.7 + rand() * 0.6)) mooringStone(bag, Pw(s, sg * th / 2, w + 0.42), [ux, uz], [nx * sg, nz * sg]);
+    void ms;
+  }
+  void col;
+}
+/** A mooring stone in a canal wall's face at p (on the face), the wall running along u, its face out along n. */
+function mooringStone(bag, p, u, n) {
+  const t = [], c = [p[0] + n[0] * 0.02, p[1], p[2] + n[1] * 0.02];
+  beamTris(t, [c[0] - u[0] * 0.2, p[1] - 0.15, c[2] - u[1] * 0.2], [c[0] + u[0] * 0.2, p[1] - 0.15, c[2] + u[1] * 0.2], 0.04, 0.3);
+  bag.add('granite_block', fromTriangles(t));
+  // the ring: a stone torus, its axis upright, standing out from the block's face
+  const prof = [];
+  for (let k = 0; k <= 8; k++) { const a = k / 8 * Math.PI * 2; prof.push([0.075 + 0.026 * Math.cos(a), 0.026 * Math.sin(a)]); }
+  bag.add('granite_block', lathe(prof, 12, null, p[0] + n[0] * 0.13, p[1] - 0.02, p[2] + n[1] * 0.13));
 }
 
 /** water_rect: a still water surface over a rectangle { rect, y }. */
@@ -816,9 +892,9 @@ function taihu(el, { bag, col }) {
     if (el.solid && tall && rand() < 0.55) {
       // an open stone: two legs leaning together, a cap across them, the light through the gap
       const b = rand() * Math.PI, bu = Math.cos(b), bv = Math.sin(b), gap = s * 0.62, lh = hh * (0.6 + rand() * 0.1);
-      for (const sg of [-1, 1]) bag.add('taihu', rock(x + bu * gap * sg, y0, z + bv * gap * sg, s * 0.36, lh, rand, [-bu * sg * gap * 0.75 / lh, -bv * sg * gap * 0.75 / lh]));
-      bag.add('taihu', rock(x + (rand() - 0.5) * 0.2 * s, y0 + lh * 0.82, z + (rand() - 0.5) * 0.2 * s, s * 0.55, hh * 0.5, rand, [(rand() - 0.5) * 0.4, (rand() - 0.5) * 0.4]));
-    } else bag.add('taihu', rock(x, y0, z, s * (tall ? 0.75 : 1), hh, rand, tall ? [(rand() - 0.5) * 0.35, (rand() - 0.5) * 0.35] : [0, 0]));
+      for (const sg of [-1, 1]) bag.add('taihu', rock(x + bu * gap * sg, y0, z + bv * gap * sg, s * 0.36, lh, rand, [-bu * sg * gap * 0.75 / lh, -bv * sg * gap * 0.75 / lh], true));
+      bag.add('taihu', rock(x + (rand() - 0.5) * 0.2 * s, y0 + lh * 0.82, z + (rand() - 0.5) * 0.2 * s, s * 0.55, hh * 0.5, rand, [(rand() - 0.5) * 0.4, (rand() - 0.5) * 0.4], true));
+    } else bag.add('taihu', rock(x, y0, z, s * (tall ? 0.75 : 1), hh, rand, tall ? [(rand() - 0.5) * 0.35, (rand() - 0.5) * 0.35] : [0, 0], !!el.solid && !LOW));
   }
   if (el.solid) col.circle(cx, cz, el.r * 0.7, y, y + (el.h ?? 1.2));
 }
@@ -826,8 +902,8 @@ function taihu(el, { bag, col }) {
  * One stone: a waisted, lumpy body leaning by lean [dx, dz] per metre of height, its skin furrowed
  * in vertical folds (the wrinkles) and pitted, its top rounded over (not a point).
  */
-function rock(x, y, z, s, h, rand, lean = [0, 0]) {
-  const nn = LOW ? 8 : 14, NS = LOW ? 9 : 18, ph = rand() * 6.28, ph2 = rand() * 6.28, sz = 0.9 + 0.2 * rand();
+function rock(x, y, z, s, h, rand, lean = [0, 0], fine = false) {
+  const nn = fine ? 11 : 7, NS = fine ? 14 : 10, ph = rand() * 6.28, ph2 = rand() * 6.28, sz = 0.9 + 0.2 * rand();
   const prof = [];
   for (let i = 0; i <= nn; i++) {
     const t = i / nn, body = Math.sin(Math.PI * (0.08 + 0.84 * Math.min(1, t * 1.12)));
@@ -865,8 +941,7 @@ function rock(x, y, z, s, h, rand, lean = [0, 0]) {
     const k2b = (k + 1) % NS;
     for (const [ii, kk] of [[i, k], [i + 1, k], [i + 1, k2b], [i, k], [i + 1, k2b], [i, k2b]]) { pos.push(...G[ii][kk]); nor.push(...N[ii][kk]); }
   }
-  // the bottom, closed
-  for (let k = 0; k < NS; k++) { const c = G[0].reduce((s2, p) => [s2[0] + p[0] / NS, s2[1] + p[1] / NS, s2[2] + p[2] / NS], [0, 0, 0]); pos.push(...c, ...G[0][k], ...G[0][(k + 1) % NS]); nor.push(0, -1, 0, 0, -1, 0, 0, -1, 0); }
+  // (no bottom: every stone is bedded in the ground or the pond's bed)
   const g = new BufferGeometry();
   g.setAttribute('position', new Float32BufferAttribute(pos, 3));
   g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
@@ -1073,48 +1148,128 @@ function houseInterior(bag, col, { W, B, L, D, front, back, y, storey, storeys, 
   }
 }
 
-/** water_steps: steps down from the street into a canal (a landing for boats and for washing) { a, b (along the wall), dir (toward the water), y, water }. */
+/**
+ * water_steps: a landing (he bu tou) on a canal { a, b (along the wall's face, on the water side),
+ * dir (toward the water), y (street), water, double, moor }: a flight of granite steps laid along the
+ * wall, down from the street to a slab just above the water — or, double, two flights meeting at a
+ * slab in the middle (docs/settlements/ming-suzhou.md §6). Each step a solid block down into the
+ * water. With moor: a mooring stone in the wall over the slab.
+ */
 function waterSteps(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, [dx, dz] = el.dir;
-  const n = 6, rise = ((el.y ?? 0) - (el.water ?? -0.75) + 0.15) / n;
-  for (let k = 0; k < n; k++) {
-    const d0 = k * 0.32, d1 = (k + 1) * 0.32, yy = (el.y ?? 0) - k * rise;
-    const p = [ax + dx * d0, az + dz * d0], q = [bx + dx * d1, bz + dz * d1];
-    bag.add('granite_block', box(Math.min(p[0], q[0]), yy - rise - 0.4, Math.min(p[1], q[1]), Math.max(p[0], q[0]), yy, Math.max(p[1], q[1])));
+  const y = el.y ?? 0, w = el.water ?? -0.75, D = el.depth ?? 1.05, land = w + 0.14, foot = w - 0.7;
+  const n = Math.max(3, Math.round((y - land) / 0.17)), rise = (y - land) / n;
+  const flights = el.double ? [[0, 1], [L, -1]] : [[0, 1]];
+  const run = el.double ? Math.min(0.3, (L - 1.0) / 2 / n) : Math.min(0.3, (L - 0.8) / n);
+  const t = [];
+  const blk = (s0, s1, top, d0 = 0, d1 = D) => {
+    const p = (s, d) => [ax + ux * s + dx * d, az + uz * s + dz * d];
+    const q = [p(s0, d0), p(s1, d0), p(s1, d1), p(s0, d1)];
+    const loc = [], v = (k, yy) => [q[k][0], yy, q[k][1]], f = (A, B, C, Dd) => loc.push(...A, ...B, ...C, ...A, ...C, ...Dd);
+    f(v(0, top), v(1, top), v(2, top), v(3, top)); f(v(0, foot), v(3, foot), v(2, foot), v(1, foot));
+    for (let k = 0; k < 4; k++) f(v(k, foot), v((k + 1) % 4, foot), v((k + 1) % 4, top), v(k, top));
+    t.push(...orientOutward(loc));
+  };
+  // the treads: each a block from its own front to the landing (so the risers show), a nosing gap of nothing
+  let sEnd = [];
+  for (const [s0, dir] of flights) {
+    for (let k = 0; k < n; k++) {
+      const top = y - rise * (k + 1), sa = s0 + dir * k * run, sb = s0 + dir * (k + 1) * run;
+      blk(Math.min(sa, sb), Math.max(sa, sb), top);
+    }
+    sEnd.push(s0 + dir * n * run);
   }
-  void ux; void uz; void col;
+  // the landing slab
+  const l0 = el.double ? Math.min(...sEnd) : sEnd[0], l1 = el.double ? Math.max(...sEnd) : L;
+  blk(l0, l1, land);
+  bag.add('granite_block', fromTriangles(t));
+  if (el.moor) { const m = (l0 + l1) / 2; mooringStone(bag, [ax + ux * m - dx * 0.002, w + 0.62, az + uz * m - dz * 0.002], [ux, uz], [dx, dz]); }
+  void col;
 }
 
-/** boat: a canal boat with a bamboo-mat awning { at, dir ([dx, dz]), len, y (water) }. */
+/**
+ * boat: a canal boat with a bamboo-mat awning { at, dir ([dx, dz]), len, y (water), moor ([x, y, z]
+ * a mooring point: a rope from the bow) } — a flat-bottomed hull of planks, its sheer rising to a
+ * square bow and stern closed by transom boards, a wale along each side, a deck fore and aft, the
+ * awning in two overlapping hoods of matting on bamboo hoops, the sculling oar (yuloh) on its pin
+ * at the stern, a punting pole along the deck.
+ */
 function boat(el, { bag }) {
   const [x, z] = el.at, [dx, dz] = el.dir, L = el.len ?? 7, W = 1.25, y = el.y ?? -0.75;
   const nx = -dz, nz = dx;
   const P = (s, o, yy) => [x + dx * s + nx * o, yy, z + dz * s + nz * o];
-  const hull = [], N = 10;
+  const N = 12, keel = y - 0.28;
+  const half = (s) => W * (0.55 + 0.45 * Math.pow(Math.cos(Math.PI * s / L * 0.92), 0.7));      // half-beam: wide amidships, square ends
+  const sheer = (s) => y + 0.5 + 0.32 * Math.pow(Math.abs(s) / (L / 2), 2.2);
+  const hull = [], tim = [];
   for (let i = 0; i < N; i++) {
-    const s0 = -L / 2 + L * i / N, s1 = -L / 2 + L * (i + 1) / N;
-    const w0 = W * Math.sin(Math.PI * (0.08 + 0.84 * i / N)) ** 0.6, w1 = W * Math.sin(Math.PI * (0.08 + 0.84 * (i + 1) / N)) ** 0.6;
-    const r0 = y + 0.55 + 0.25 * Math.pow(Math.abs(s0) / (L / 2), 2), r1 = y + 0.55 + 0.25 * Math.pow(Math.abs(s1) / (L / 2), 2);
+    const s0 = -L / 2 + L * i / N, s1 = -L / 2 + L * (i + 1) / N, w0 = half(s0), w1 = half(s1), r0 = sheer(s0), r1 = sheer(s1);
+    const k0 = keel + 0.12 * Math.pow(Math.abs(s0) / (L / 2), 3), k1 = keel + 0.12 * Math.pow(Math.abs(s1) / (L / 2), 3);
     for (const sg of [-1, 1]) {
-      const q = [P(s0, sg * w0, r0), P(s1, sg * w1, r1), P(s1, sg * w1 * 0.55, y - 0.25), P(s0, sg * w0 * 0.55, y - 0.25)];
-      hull.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]);
+      // the side in two strakes, the lower turning in to the flat bottom (a chine)
+      const mid0 = (r0 + k0) / 2 - 0.05, mid1 = (r1 + k1) / 2 - 0.05;
+      hull.push(...P(s0, sg * w0, r0), ...P(s1, sg * w1, r1), ...P(s1, sg * w1 * 0.97, mid1), ...P(s0, sg * w0, r0), ...P(s1, sg * w1 * 0.97, mid1), ...P(s0, sg * w0 * 0.97, mid0));
+      hull.push(...P(s0, sg * w0 * 0.97, mid0), ...P(s1, sg * w1 * 0.97, mid1), ...P(s1, sg * w1 * 0.7, k1), ...P(s0, sg * w0 * 0.97, mid0), ...P(s1, sg * w1 * 0.7, k1), ...P(s0, sg * w0 * 0.7, k0));
+      // the wale: a heavy strake along the sheer
+      beamTris(tim, P(s0, sg * (w0 + 0.03), r0 - 0.16), P(s1, sg * (w1 + 0.03), r1 - 0.16), 0.045, 0.12);
     }
-    const dk = [P(s0, -w0, r0 - 0.15), P(s1, -w1, r1 - 0.15), P(s1, w1, r1 - 0.15), P(s0, w0, r0 - 0.15)];
-    hull.push(...dk[0], ...dk[1], ...dk[2], ...dk[0], ...dk[2], ...dk[3]);
+    hull.push(...P(s0, -w0 * 0.7, k0), ...P(s1, -w1 * 0.7, k1), ...P(s1, w1 * 0.7, k1), ...P(s0, -w0 * 0.7, k0), ...P(s1, w1 * 0.7, k1), ...P(s0, w0 * 0.7, k0));
+  }
+  // the transoms: boards closing the square bow and stern
+  for (const s of [-L / 2, L / 2]) {
+    const w0 = half(s), r = sheer(s), k = keel + 0.12, mid = (r + k) / 2 - 0.05;
+    hull.push(...P(s, -w0, r), ...P(s, w0, r), ...P(s, w0 * 0.97, mid), ...P(s, -w0, r), ...P(s, w0 * 0.97, mid), ...P(s, -w0 * 0.97, mid));
+    hull.push(...P(s, -w0 * 0.97, mid), ...P(s, w0 * 0.97, mid), ...P(s, w0 * 0.7, k), ...P(s, -w0 * 0.97, mid), ...P(s, w0 * 0.7, k), ...P(s, -w0 * 0.7, k));
+    beamTris(tim, P(s, -w0 - 0.04, r - 0.06), P(s, w0 + 0.04, r - 0.06), 0.05, 0.1);
+  }
+  // the floor boards inside, above the water the hull keeps out
+  for (let i = 0; i < N; i++) {
+    const s0 = -L / 2 + L * i / N + 0.02, s1 = -L / 2 + L * (i + 1) / N - 0.02, w0 = half(s0) * 0.86, w1 = half(s1) * 0.86, fy = y + 0.07;
+    hull.push(...P(s0, -w0, fy), ...P(s0, w0, fy), ...P(s1, w1, fy), ...P(s0, -w0, fy), ...P(s1, w1, fy), ...P(s1, -w1, fy));
   }
   bag.add('timber', fromTriangles(hull.concat(flipTris(hull))));
-  // the awning: a half-barrel of matting over the middle
-  const aw = [], M = 8;
-  for (let i = 0; i < M; i++) {
-    const a0 = Math.PI * i / M, a1 = Math.PI * (i + 1) / M;
-    const q = [P(-L * 0.2, Math.cos(a0) * W * 0.95, y + 0.6 + Math.sin(a0) * 1.0), P(L * 0.18, Math.cos(a0) * W * 0.95, y + 0.6 + Math.sin(a0) * 1.0), P(L * 0.18, Math.cos(a1) * W * 0.95, y + 0.6 + Math.sin(a1) * 1.0), P(-L * 0.2, Math.cos(a1) * W * 0.95, y + 0.6 + Math.sin(a1) * 1.0)];
-    aw.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]);
+  // the decks fore and aft (boards across), the thwarts amidships under the awning
+  const deck = (sa, sb) => { for (let s = sa; s < sb - 0.01; s += 0.24) { const sm = s + 0.11, ww = half(sm) - 0.04, yy = sheer(sm) - 0.1; beamTris(tim, P(sm, -ww, yy), P(sm, ww, yy), 0.11, 0.04); } };
+  deck(-L / 2 + 0.05, -L * 0.24); deck(L * 0.22, L / 2 - 0.05);
+  for (const f of [-0.12, 0.02, 0.14]) { const sm = L * f, ww = half(sm) - 0.06; beamTris(tim, P(sm, -ww, y + 0.12), P(sm, ww, y + 0.12), 0.08, 0.05); }
+  // the awning: two hoods of matting, the after one a little larger so the fore one slides under it, on bamboo hoops
+  const aw = [], M = 10;
+  for (const [sa, sb, R] of [[-L * 0.22, -L * 0.02, 1.0], [-L * 0.04, L * 0.2, 1.06]]) {
+    for (let i = 0; i < M; i++) {
+      const a0 = Math.PI * i / M, a1 = Math.PI * (i + 1) / M, ww = (s) => half(s) * R;
+      const q = [P(sa, Math.cos(a0) * ww(sa), sheer(sa) - 0.08 + Math.sin(a0) * 0.95 * R), P(sb, Math.cos(a0) * ww(sb), sheer(sb) - 0.08 + Math.sin(a0) * 0.95 * R), P(sb, Math.cos(a1) * ww(sb), sheer(sb) - 0.08 + Math.sin(a1) * 0.95 * R), P(sa, Math.cos(a1) * ww(sa), sheer(sa) - 0.08 + Math.sin(a1) * 0.95 * R)];
+      aw.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]);
+    }
+    for (const sh of [sa + 0.04, (sa + sb) / 2, sb - 0.04]) {
+      const ww = half(sh) * R + 0.02;
+      for (let i = 0; i < M; i++) {
+        const a0 = Math.PI * i / M, a1 = Math.PI * (i + 1) / M;
+        beamTris(tim, P(sh, Math.cos(a0) * ww, sheer(sh) - 0.08 + Math.sin(a0) * (0.95 * R + 0.02)), P(sh + 0.0001, Math.cos(a1) * ww, sheer(sh) - 0.08 + Math.sin(a1) * (0.95 * R + 0.02)), 0.025, 0.04);
+      }
+    }
   }
   bag.add('reed_mat', fromTriangles(aw.concat(flipTris(aw))));
-  // the stern oar (yuloh)
-  const oar = [];
-  beamTris(oar, P(L / 2 - 0.3, 0, y + 0.8), P(L / 2 + 1.8, 0.3, y - 0.2), 0.04, 0.06);
-  bag.add('timber', fromTriangles(oar));
+  // the sculling oar on its pin at the stern, its blade trailing in the water; a pole along the deck
+  const ps = L / 2 - 0.35, pin = P(ps, 0.2, sheer(ps) + 0.02);
+  beamTris(tim, [pin[0], pin[1] - 0.04, pin[2]], [pin[0], pin[1] + 0.08, pin[2]], 0.03, 0.04);
+  beamTris(tim, P(ps - 1.6, 0.35, sheer(ps) + 0.7), P(L / 2 + 2.1, 0.12, y - 0.15), 0.035, 0.07);
+  beamTris(tim, P(-L / 2 + 0.2, -half(0) + 0.12, sheer(0) - 0.05), P(L / 2 - 0.6, -half(0) + 0.12, sheer(0) - 0.05), 0.025, 0.05);
+  bag.add('timber', fromTriangles(tim));
+  // the mooring rope from the bow post, sagging to the stone
+  if (el.moor) {
+    const post = P(-L / 2 + 0.3, 0, sheer(-L / 2 + 0.3));
+    const pt = [], post2 = [post[0], post[1] + 0.3, post[2]];
+    const m = el.moor, NR = 10;
+    for (let k = 0; k < NR; k++) {
+      const f0 = k / NR, f1 = (k + 1) / NR, sag = (f) => 0.35 * 4 * f * (1 - f);
+      const A = [post2[0] + (m[0] - post2[0]) * f0, post2[1] + (m[1] - post2[1]) * f0 - sag(f0), post2[2] + (m[2] - post2[2]) * f0];
+      const B = [post2[0] + (m[0] - post2[0]) * f1, post2[1] + (m[1] - post2[1]) * f1 - sag(f1), post2[2] + (m[2] - post2[2]) * f1];
+      beamTris(pt, [A[0], A[1] - 0.015, A[2]], [B[0], B[1] - 0.015, B[2]], 0.015, 0.03);
+    }
+    const bp = []; beamTris(bp, [post[0] - dx * 0.05, post[1] - 0.12, post[2] - dz * 0.05], [post[0] + dx * 0.05, post[1] - 0.12, post[2] + dz * 0.05], 0.05, 0.45);
+    bag.add('timber', fromTriangles(bp));
+    bag.add('reed_mat', fromTriangles(pt));
+  }
 }
 
 /** A flat paved area { rect, y, mat } that can also step down (th). */

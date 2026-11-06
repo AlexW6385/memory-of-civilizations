@@ -49,16 +49,19 @@ for (const [c, r, n] of [[[0, -32], 9, 80], [[-38, -40], 6, 40], [[34, -42], 6, 
 // ── the walls, their gates and windows ───────────────────────────────────────
 const [gx0, gz0, gx1, gz1] = GARDEN;
 const wall = (a, b, opts = {}) => E.push({ t: 'ming_wall', a, b, y: G, h: 4.4, th: 0.42, ...opts });
-wall([gx0, gz0], [gx1, gz0], { windows: [-50, -20, 10, 40].map((at) => ({ at: at + 74, w: 1.1, h: 1.1, sill: 1.5 })) });
-wall([gx1, gz0], [gx1, gz1], { windows: [30, 60, 84].map((at) => ({ at, w: 1.1, h: 1.1, sill: 1.5 })) });
+// the leaky windows: frames of many outlines, each with its own tracery (docs/settlements/ming-suzhou.md §5)
+const SHAPES = ['rect', 'oct', 'round', 'begonia', 'hex', 'fan', 'rect'];
+const leaky = (at, k, w = 1.1, h = 1.1, sill = 1.5) => ({ at, w: SHAPES[k % 7] === 'fan' ? w * 1.25 : w, h: SHAPES[k % 7] === 'fan' ? h * 0.8 : h, sill, shape: SHAPES[k % 7] });
+wall([gx0, gz0], [gx1, gz0], { windows: [-50, -20, 10, 40].map((at, k) => leaky(at + 74, k)) });
+wall([gx1, gz0], [gx1, gz1], { windows: [30, 60, 84].map((at, k) => leaky(at, k + 4)) });
 wall([gx0, gz1], [gx0, gz0], { gates: [{ at: 52, r: 1.3 }] });                       // a moon gate west toward the town
 // the south wall: the door from the residence (the garden's own gate), leaky windows along it
-wall([gx1, gz1], [gx0, gz1], { gates: [{ at: 74, w: 2.2, h: 2.8 }], windows: [20, 34, 46, 102, 114, 128].map((at) => ({ at, w: 1.2, h: 1.2, sill: 1.4 })) });
+wall([gx1, gz1], [gx0, gz1], { gates: [{ at: 74, w: 2.2, h: 2.8, plaque: true }], windows: [20, 34, 46, 102, 114, 128].map((at, k) => leaky(at, k + 1, 1.2, 1.2, 1.4)) });
 // the loquat court: low walls with a moon gate on the west and a gate north to the pond
 const [lx0, lz0, lx1, lz1] = LOQUAT_COURT;
 const low = { h: 3.2, th: 0.32 };
-wall([lx0, lz1], [lx0, lz0], { ...low, gates: [{ at: 10.5, r: 1.15 }], windows: [{ at: 4, w: 0.9, h: 0.9, sill: 1.3 }, { at: 17, w: 0.9, h: 0.9, sill: 1.3 }] });
-wall([lx0, lz0], [lx1, lz0], { ...low, gates: [{ at: 9, w: 1.6, h: 2.3 }], windows: [{ at: 3.5, w: 0.9, h: 0.9, sill: 1.3 }, { at: 15, w: 0.9, h: 0.9, sill: 1.3 }] });
+wall([lx0, lz1], [lx0, lz0], { ...low, gates: [{ at: 10.5, r: 1.15 }], windows: [leaky(4, 2, 0.9, 0.9, 1.3), leaky(17, 3, 0.9, 0.9, 1.3)] });
+wall([lx0, lz0], [lx1, lz0], { ...low, gates: [{ at: 9, w: 1.6, h: 2.3 }], windows: [leaky(3.5, 1, 0.9, 0.9, 1.3), leaky(15, 4, 0.9, 0.9, 1.3)] });
 
 // ── the galleries, along the walls and between the halls ─────────────────────
 GALLERIES.forEach((pts, i) => E.push({ t: 'ming_gallery', pts, y: G + 0.3, w: 2.0, H: 2.8, side: i === 0 ? -1 : i === 1 ? 1 : i === 2 ? 1 : 0 }));

@@ -16,9 +16,12 @@ function clip([x0, z0, x1, z1], r = R) {
 }
 const base = (id, elements) => ({ id, style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 65], facing: 'n' } });
 
+/** The boats tied up at the landings (filled by waterways(), kept clear by the moving boats of riverLife()). */
+const MOORED = [];
 /** The streets, the canals with their walls and water, the bridges, steps and boats. */
 function waterways() {
   const E = [], rand = rng(1606);
+  MOORED.length = 0;
   for (const s of STREETS) { const r = clip(s); if (r) E.push({ t: 'paving', rect: r, y: LEVEL.street + 0.04, th: 0.3 }); }
   for (const c of CANALS) {
     const r = clip(c, R - 2);
@@ -37,21 +40,31 @@ function waterways() {
         if (!touches) continue;
         pieces = pieces.flatMap(([p0, p1]) => (o1 <= p0 || o0 >= p1 ? [[p0, p1]] : [[p0, o0], [o1, p1]].filter(([q0, q1]) => q1 - q0 > 0.5)));
       }
-      for (const [p0, p1] of pieces) E.push({ t: 'canal_wall', a: horiz ? [p0, a[1]] : [a[0], p0], b: horiz ? [p1, a[1]] : [a[0], p1], y: LEVEL.street + 0.05, bed: LEVEL.canalBed, th: 0.7 });
+      const mid = [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
+      for (const [p0, p1] of pieces) E.push({ t: 'canal_wall', a: horiz ? [p0, a[1]] : [a[0], p0], b: horiz ? [p1, a[1]] : [a[0], p1], y: LEVEL.street + 0.05, bed: LEVEL.canalBed, th: 0.7, water: LEVEL.canal, toward: mid, moor: 9 });
     }
-    // steps down to the water every 25–40 m on the street side, and boats
+    // landings down to the water every 25–40 m on the street side — a single flight along the wall or
+    // two flights meeting at a slab, a mooring stone over it — and at some a boat tied up
     const len = horiz ? r[2] - r[0] : r[3] - r[1];
     for (let s = 12 + rand() * 10; s < len - 8; s += 25 + rand() * 15) {
-      const at = (horiz ? r[0] : r[1]) + s;
+      const at = (horiz ? r[0] : r[1]) + s, double = rand() < 0.45, hl = double ? 2.2 : 1.1;
       const p = horiz ? [at, r[1]] : [r[0] < 0 ? r[2] : r[0], at];
-      if (onBridge(p[0], p[1], 3)) continue;
-      if (horiz) E.push({ t: 'water_steps', a: [at - 1.1, r[1] + 0.35], b: [at + 1.1, r[1] + 0.35], dir: [0, 1], y: LEVEL.street, water: LEVEL.canal });
-      else { const sx = r[0] < 0 ? r[2] - 0.35 : r[0] + 0.35; E.push({ t: 'water_steps', a: [sx, at - 1.1], b: [sx, at + 1.1], dir: [r[0] < 0 ? -1 : 1, 0], y: LEVEL.street, water: LEVEL.canal }); }
+      if (onBridge(p[0], p[1], 3 + hl)) continue;
+      const dir = horiz ? [0, 1] : [r[0] < 0 ? -1 : 1, 0], u = horiz ? [1, 0] : [0, 1];
+      const face = horiz ? [at, r[1] + 0.35] : [r[0] < 0 ? r[2] - 0.35 : r[0] + 0.35, at];
+      E.push({ t: 'water_steps', a: [face[0] - u[0] * hl, face[1] - u[1] * hl], b: [face[0] + u[0] * hl, face[1] + u[1] * hl], dir, y: LEVEL.street, water: LEVEL.canal, double, moor: true });
+      if (rand() < 0.5 && Math.hypot(...face) < R - 14) {
+        // the boat alongside the landing, its bow by the mooring stone, the rope to the stone's ring
+        const bl = 6.5 + rand(), c = [face[0] + u[0] * (bl / 2 - 0.4) + dir[0] * 2.45, face[1] + u[1] * (bl / 2 - 0.4) + dir[1] * 2.45];
+        const ring = [face[0] + dir[0] * 0.13, LEVEL.canal + 0.6, face[1] + dir[1] * 0.13];
+        E.push({ t: 'boat', at: c, dir: u, len: bl, y: LEVEL.canal, moor: [ring[0], ring[1], ring[2]] });
+        MOORED.push(c);
+      }
     }
   }
   for (const b of BRIDGES) {
     if (Math.hypot(...b.at) > R - 6) continue;
-    E.push({ t: 'ming_arch_bridge', at: b.at, across: b.across, span: b.span + 0.4, width: b.width, rise: 2.4, landing: 4.6, y: LEVEL.street + 0.04, water: LEVEL.canal, bed: LEVEL.canalBed });
+    E.push({ t: 'ming_arch_bridge', at: b.at, across: b.across, span: b.span + 0.4, width: b.width, rise: 3.0, landing: 4.6, y: LEVEL.street + 0.04, water: LEVEL.canal, bed: LEVEL.canalBed });
   }
   return base('ming-suzhou-waterways', E);
 }
@@ -132,7 +145,7 @@ function riverLife() {
     const horiz = r[2] - r[0] > r[3] - r[1], len = horiz ? r[2] - r[0] : r[3] - r[1], mid = horiz ? (r[1] + r[3]) / 2 : (r[0] + r[2]) / 2;
     for (let s0 = 15 + rand() * 15; s0 < len - 12; s0 += 22 + rand() * 30) {
       const a = (horiz ? r[0] : r[1]) + s0, lane = (rand() < 0.5 ? -1 : 1) * (0.9 + rand() * 0.9), at = horiz ? [a, mid + lane] : [mid + lane, a];
-      if (onBridge(at[0], at[1], 6)) continue;
+      if (onBridge(at[0], at[1], 6) || MOORED.some((m) => Math.hypot(m[0] - at[0], m[1] - at[1]) < 9)) continue;
       const fwd = rand() < 0.5 ? 1 : -1, rot = horiz ? (fwd > 0 ? Math.PI / 2 : -Math.PI / 2) : (fwd > 0 ? 0 : Math.PI), Lb = 6 + rand() * 1.8, yw = LEVEL.canal - 0.25;
       L.push({ t: 'boat', kind: 'sampan', at, c: at, r: Lb / 2, y: yw, rot, len: Lb, seed: Math.floor(rand() * 1e9) });
       const dir = [Math.sin(rot), Math.cos(rot)], stern = [at[0] + dir[0] * Lb * 0.43, at[1] + dir[1] * Lb * 0.43];
