@@ -245,51 +245,56 @@ function houseTimber(el, { bag, col }) {
   const OPEN = !!el.open && !el.simple;
   if (!OPEN) { bag.add('limestone', box(x0 - 0.1, el.foot - 0.6, z0 - 0.1, x1 + 0.1, y + st, z1 + 0.1)); col.rect([x0, z0, x1, z1], el.foot - 0.6, y + H); }
   else openTimber(bag, col, el, st, rng((el.seed || 1) + 3));
-  // each upper storey steps out 0.4 m over the street
+  // each upper storey steps out a little over the street (0.3–0.45 m, by the house), on the ends of its joists
+  const J = 0.3 + rand() * 0.15;
+  const RS = (s) => { const j = J * s; return f === 's' ? [x0, z0, x1, z1 + j] : f === 'n' ? [x0, z0 - j, x1, z1] : f === 'e' ? [x0, z0, x1 + j, z1] : [x0 - j, z0, x1, z1]; };
   let R = [x0, z0, x1, z1];
   for (let s = 1; s < el.storeys; s++) {
-    const J = 0.4 * s;
-    R = f === 's' ? [x0, z0, x1, z1 + J] : f === 'n' ? [x0, z0 - J, x1, z1] : f === 'e' ? [x0, z0, x1 + J, z1] : [x0 - J, z0, x1, z1];
+    R = RS(s);
     bag.add('half_timber', box(R[0], y + s * st, R[1], R[2], y + (s + 1) * st, R[3]));
     bag.add('timber', box(R[0] - 0.05, y + s * st - 0.12, R[1] - 0.05, R[2] + 0.05, y + s * st + 0.08, R[3] + 0.05));
   }
-  // windows and the door on the street front
+  // the openings on the street front, each on its own storey's face
   const L = along ? x1 - x0 : z1 - z0;
-  const open = (u, v0, w, h) => {
-    if (u + w > L - 0.25) return;
-    if (f === 's') bag.add('opening', box(x0 + u, y + v0, R[3], x0 + u + w, y + v0 + h, R[3] + 0.03));
-    if (f === 'n') bag.add('opening', box(x0 + u, y + v0, R[1] - 0.03, x0 + u + w, y + v0 + h, R[1]));
-    if (f === 'e') bag.add('opening', box(R[2], y + v0, z0 + u, R[2] + 0.03, y + v0 + h, z0 + u + w));
-    if (f === 'w') bag.add('opening', box(R[0] - 0.03, y + v0, z0 + u, R[0], y + v0 + h, z0 + u + w));
+  const put = (Rf, m, u0, u1, ya, yb, d0, d1) => {
+    const fp = f === 's' ? Rf[3] : f === 'n' ? Rf[1] : f === 'e' ? Rf[2] : Rf[0], sg = f === 's' || f === 'e' ? 1 : -1, p0 = fp + sg * d0, p1 = fp + sg * d1, lo = Math.min(p0, p1), hi = Math.max(p0, p1);
+    bag.add(m, along ? box(x0 + u0, y + ya, lo, x0 + u1, y + yb, hi) : box(lo, y + ya, z0 + u0, hi, y + yb, z0 + u1));
+  };
+  // a window: its frame, the dark opening, the mullion; now and then the shutters closed
+  const win = (s, u, v0, w, h) => {
+    if (u + w > L - 0.25 || u < 0.25) return;
+    const Rf = RS(s);
+    put(Rf, 'timber', u - 0.08, u + w + 0.08, v0 - 0.1, v0 + h + 0.08, 0, 0.03);
+    if (rand() < 0.2) { put(Rf, 'wood_dark', u, u + w, v0, v0 + h, 0.03, 0.06); return; }
+    put(Rf, 'opening', u, u + w, v0, v0 + h, 0.03, 0.04);
+    put(Rf, 'timber', u + w / 2 - 0.035, u + w / 2 + 0.035, v0, v0 + h, 0.03, 0.07);
   };
   const du = 0.6 + rand() * Math.max(0.2, L - 2.4);
-  if (OPEN) { /* the way in is cut in openTimber */ } else
-  if (f === 's') bag.add('opening', box(x0 + du, y + 0.2, z1, x0 + du + 1.2, y + 2.5, z1 + 0.03));
-  if (f === 'n') bag.add('opening', box(x0 + du, y + 0.2, z0 - 0.03, x0 + du + 1.2, y + 2.5, z0));
-  if (f === 'e') bag.add('opening', box(x1, y + 0.2, z0 + du, x1 + 0.03, y + 2.5, z0 + du + 1.2));
-  if (f === 'w') bag.add('opening', box(x0 - 0.03, y + 0.2, z0 + du, x0, y + 2.5, z0 + du + 1.2));
-  for (let s = 1; s < el.storeys; s++) { const n = Math.max(1, Math.floor(L / 2.2)); for (let k = 0; k < n; k++) open((k + 0.5) * L / n - 0.35, s * st + 0.9, 0.7, 1.2); }
-  // the steep roof: the ridge runs back from the street, so the gable faces it
-  const ye = y + H, o = 0.35;
-  const tris = [];
-  if (along) {
-    const xm = (R[0] + R[2]) / 2, rise = (R[2] - R[0]) / 2 * 1.5;
-    const a = [R[0] - o, ye, R[1] - o], b = [R[2] + o, ye, R[1] - o], c = [R[2] + o, ye, R[3] + o], d = [R[0] - o, ye, R[3] + o];
-    const t0 = [xm, ye + rise, R[1] - o], t1 = [xm, ye + rise, R[3] + o];
-    tris.push(...a, ...t0, ...t1, ...a, ...t1, ...d, ...b, ...c, ...t1, ...b, ...t1, ...t0);
-    bag.add('half_timber', fromTriangles([R[0], ye, R[1], R[2], ye, R[1], xm, ye + rise - 0.3, R[1], R[0], ye, R[3], xm, ye + rise - 0.3, R[3], R[2], ye, R[3]]));
-  } else {
-    const zm = (R[1] + R[3]) / 2, rise = (R[3] - R[1]) / 2 * 1.5;
-    const a = [R[0] - o, ye, R[1] - o], b = [R[2] + o, ye, R[1] - o], c = [R[2] + o, ye, R[3] + o], d = [R[0] - o, ye, R[3] + o];
-    const t0 = [R[0] - o, ye + rise, zm], t1 = [R[2] + o, ye + rise, zm];
-    tris.push(...a, ...b, ...t1, ...a, ...t1, ...t0, ...d, ...t0, ...t1, ...d, ...t1, ...c);
-    bag.add('half_timber', fromTriangles([R[0], ye, R[1], R[0], ye + rise - 0.3, zm, R[0], ye, R[3], R[2], ye, R[1], R[2], ye, R[3], R[2], ye + rise - 0.3, zm]));
+  if (!OPEN) {
+    // the door: a leaf of boards under a stone lintel
+    // (the stone storey's face stands 0.1 m out from the lot's line)
+    const R0 = [x0, z0, x1, z1];
+    put(R0, 'opening', du - 0.02, du + 1.22, 0.2, 2.52, 0.1, 0.11);
+    put(R0, 'wood_dark', du, du + 1.2, 0.2, 2.5, 0.11, 0.14);
+    put(R0, 'limestone', du - 0.15, du + 1.35, 2.5, 2.75, 0.1, 0.17);
   }
-  for (let i = 0; i < tris.length; i += 9) {
-    const ux = tris[i + 3] - tris[i], uz = tris[i + 5] - tris[i + 2], vx = tris[i + 6] - tris[i], vz = tris[i + 8] - tris[i + 2];
-    if (uz * vx - ux * vz < 0) for (let k = 0; k < 3; k++) { const t = tris[i + 3 + k]; tris[i + 3 + k] = tris[i + 6 + k]; tris[i + 6 + k] = t; }
+  for (let s = 1; s < el.storeys; s++) { const n = Math.max(1, Math.floor(L / 2.2)); for (let k = 0; k < n; k++) win(s, (k + 0.5) * L / n - 0.35, s * st + 0.9, 0.7, 1.2); }
+  // the steep roof: the ridge runs back from the street, so the gable faces it; slabs with their boards under the eaves
+  const ye = y + H, o = 0.35, roof = rand() < 0.5 ? 'slate' : 'roof_tile';
+  const ridgeZ = along, s0 = (ridgeZ ? R[1] : R[0]) - o, s1 = (ridgeZ ? R[3] : R[2]) + o, t0 = ridgeZ ? R[0] : R[1], t1 = ridgeZ ? R[2] : R[3], tm = (t0 + t1) / 2, hw = (t1 - t0) / 2, p = 1.5, yr = ye + hw * p;
+  const W = (sv, t, h) => (ridgeZ ? [t, h, sv] : [sv, h, t]);
+  // (the verge at the back, out of sight between the houses, is left without its edge board)
+  const backEdge = f === 's' || f === 'e' ? 3 : 1;
+  for (const side of [-1, 1]) { const te = side < 0 ? t0 - o : t1 + o, ee = ye - o * p; roofSlab(bag, roof, 'timber', [W(s0, te, ee), W(s1, te, ee), W(s1, tm, yr), W(s0, tm, yr)], 0.12, 2, backEdge); }
+  for (const [sw, sg] of [[s0 + o, -1], [s1 - o, 1]]) { const tr = [...W(sw, t0, ye), ...W(sw, tm, yr - 0.12), ...W(sw, t1, ye)]; bag.add('half_timber', fromTriangles(orientFrom(tr, W(sw - sg, tm, ye)))); }
+  bag.add('roof_ridge', ridgeZ ? box(tm - 0.12, yr - 0.06, s0 - 0.04, tm + 0.12, yr + 0.14, s1 + 0.04) : box(s0 - 0.04, yr - 0.06, tm - 0.12, s1 + 0.04, yr + 0.14, tm + 0.12));
+  // a stone chimney stack against one side wall, rising above the roof
+  if (rand() < 0.45) {
+    const t = rand() < 0.5 ? t0 + 0.35 : t1 - 0.35, sv = s0 + o + (s1 - s0 - 2 * o) * (0.55 + rand() * 0.25), c = W(sv, t, 0);
+    const top = ye + (hw - Math.abs(t - tm)) * p + 1.2;
+    bag.add('limestone', box(c[0] - 0.3, ye - 0.3, c[2] - 0.3, c[0] + 0.3, top, c[2] + 0.3));
+    bag.add('limestone', box(c[0] - 0.36, top, c[2] - 0.36, c[0] + 0.36, top + 0.12, c[2] + 0.36));
   }
-  bag.add(rand() < 0.5 ? 'slate' : 'roof_tile', fromTriangles(tris));
 }
 
 /**
@@ -403,13 +408,13 @@ function orientFrom(t, c) {
  * A sloping slab of roof between the four top corners q (in order round it), th thick: its top in
  * `top`, its underside and edges (the eave board, the verges) in `under`.
  */
-function roofSlab(bag, top, under, q, th, skipEdge = -1) {
+function roofSlab(bag, top, under, q, th, skipEdge = -1, skip2 = -1) {
   const b = q.map((p) => [p[0], p[1] - th, p[2]]), c = [0, 0, 0];
   for (const p of [...q, ...b]) for (let k = 0; k < 3; k++) c[k] += p[k] / 8;
   const T = [], U = [];
   T.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]);
   U.push(...b[0], ...b[2], ...b[1], ...b[0], ...b[3], ...b[2]);
-  for (let i = 0; i < 4; i++) { if (i === skipEdge) continue; const j = (i + 1) % 4; U.push(...q[i], ...q[j], ...b[j], ...q[i], ...b[j], ...b[i]); }
+  for (let i = 0; i < 4; i++) { if (i === skipEdge || i === skip2) continue; const j = (i + 1) % 4; U.push(...q[i], ...q[j], ...b[j], ...q[i], ...b[j], ...b[i]); }
   bag.add(top, fromTriangles(orientFrom(T, c)));
   bag.add(under, fromTriangles(orientFrom(U, c)));
 }
