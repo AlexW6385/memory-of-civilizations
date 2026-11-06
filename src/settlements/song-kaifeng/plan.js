@@ -10,7 +10,7 @@ const RW = RADIUS - 26, half = (z) => Math.sqrt(Math.max(0, RW * RW - z * z));
 // ---- the Iron Pagoda: base side 4.16 m (circumradius 5.4), thirteen storeys narrowing to the top
 const tiers = [];
 for (let i = 0; i < 13; i++) tiers.push({ r: 5.4 - i * 0.19, h: i === 0 ? 5.6 : 3.75 - i * 0.06 });
-E.push({ t: 'pagoda_oct', c: PAGODA, y: 0, base: { r: 7.2, h: 1.2 }, tiers, galleries: false, core: 'tile_iron', eave: 'tile_iron', frame: 'tile_iron', spire: 3.6, relief: true });
+E.push({ t: 'pagoda_oct', c: PAGODA, y: 0, base: { r: 7.2, h: 1.2 }, tiers, galleries: false, core: 'tile_iron', eave: 'tile_iron', frame: 'tile_iron', spire: 3.6, relief: true, bells: 'bronze' });
 // the monastery: its wall, gate hall, main hall behind the pagoda, side halls
 const [mx0, mz0, mx1, mz1] = MONASTERY, w = (a, b, gates = []) => E.push({ t: 'ming_wall', a, b, y: 0, h: 3.6, th: 0.8, gates });
 w([mx0, mz0], [mx1, mz0]); w([mx0, mz1], [mx1, mz1], [{ at: PAGODA[0] - mx0, w: 4, h: 3 }]); w([mx0, mz0], [mx0, mz1]); w([mx1, mz0], [mx1, mz1]);

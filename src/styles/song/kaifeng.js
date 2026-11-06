@@ -13,7 +13,7 @@ function face(out, pts, n) {
   for (let k = 1; k < pts.length - 1; k++) { const p = flip ? [pts[0], pts[k + 1], pts[k]] : [pts[0], pts[k], pts[k + 1]]; for (const q of p) out.push(...q); }
 }
 /** A six-faced convex solid from its eight corners (bottom four, then the top four, in the same order). */
-function hexa(out, c) {
+export function hexa(out, c) {
   const t = [], q = (i, j, k, l) => t.push(...c[i], ...c[j], ...c[k], ...c[i], ...c[k], ...c[l]);
   q(0, 1, 2, 3); q(4, 5, 6, 7); q(0, 1, 5, 4); q(1, 2, 6, 5); q(2, 3, 7, 6); q(3, 0, 4, 7);
   for (const v of orientOutward(t)) out.push(v);
@@ -203,7 +203,7 @@ function songBoat(el, { bag }) {
   const feet = pv.map((o) => P(sm, o, hp));
   for (const f of feet) bag.add('timber', rod([f[0] - (apex[0] - f[0]) * 0.03, f[1] - (apex[1] - f[1]) * 0.03, f[2] - (apex[2] - f[2]) * 0.03], apex, 0.13, 8));
   bag.add('iron', rod(P(sm, pv[0] - 0.15, hp), P(sm, pv[1] + 0.15, hp), 0.05, 6));
-  for (const f of [0.3, 0.55]) { const a0 = feet[0].map((v, i) => v + (apex[i] - v) * f), a1 = feet[1].map((v, i) => v + (apex[i] - v) * f); bag.add('timber', rod(a0, a1, 0.06, 6)); }
+  if (!el.sail) for (const f of [0.3, 0.55]) { const a0 = feet[0].map((v, i) => v + (apex[i] - v) * f), a1 = feet[1].map((v, i) => v + (apex[i] - v) * f); bag.add('timber', rod(a0, a1, 0.06, 6)); }
   bag.add('wood_dark', ballG(0.2, apex[0], apex[1] + 0.2, apex[2], 8));
   const bow = P(H - 0.3, 0, sheer(1) + 0.3);
   bag.add('timber', rod(P(H - 0.3, 0, sheer(0.95) - 0.3), bow, 0.1, 6));
@@ -215,12 +215,12 @@ function songBoat(el, { bag }) {
   }
   if (el.sail && th < 0.2) {
     // the batten lug sail of matting, bamboo battens across it
-    const sl = [], top = hp + mh * 0.95, bot = hp + 1.2, fw = 1.6, aft = 4.2, nb = 8;
+    const sl = [], top = hp + mh * 0.93, bot = hp + 1.0, fw = 0.3, aft = Math.min(5, H * 0.75), nb = 8;
     for (let i = 0; i < nb; i++) {
       const y0 = bot + (top - bot) * i / nb, y1 = bot + (top - bot) * (i + 1) / nb, f0 = 1 - 0.25 * i / nb, f1 = 1 - 0.25 * (i + 1) / nb;
-      const q = [P(sm + fw * f0, 0.32, y0), P(sm - aft * f0, 0.32, y0), P(sm - aft * f1, 0.32, y1), P(sm + fw * f1, 0.32, y1)];
+      const q = [P(sm + fw * f0, 0, y0), P(sm - aft * f0, 0, y0), P(sm - aft * f1, 0, y1), P(sm + fw * f1, 0, y1)];
       face(sl, q, [nx, 0, nz]); face(sl, q, [-nx, 0, -nz]);
-      bag.add('bamboo_culm', rod(P(sm + fw * f0 + 0.1, 0.36, y0), P(sm - aft * f0 - 0.1, 0.36, y0), 0.035, 4));
+      for (const so of [-0.04, 0.04]) bag.add('bamboo_culm', rod(P(sm + fw * f0 + 0.1, so, y0), P(sm - aft * f0 - 0.1, so, y0), 0.03, 4));
     }
     bag.add('reed_mat', fromTriangles(sl));
   }

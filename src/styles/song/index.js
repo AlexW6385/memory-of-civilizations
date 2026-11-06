@@ -8,7 +8,9 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { lathe, box, fromTriangles, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import '../qing/index.js';
-import { KAIFENG_ELEMENTS } from './kaifeng.js';
+import { KAIFENG_ELEMENTS, hexa } from './kaifeng.js';
+import { WUTAI_ELEMENTS } from './wutai.js';
+import { HANGZHOU_ELEMENTS } from './hangzhou.js';
 
 const ngon = (cx, cz, r, n = 8, rot = Math.PI / 8) => Array.from({ length: n }, (_, k) => [cx + Math.cos(rot + k / n * Math.PI * 2) * r, cz + Math.sin(rot + k / n * Math.PI * 2) * r]);
 /** A flat-faced frustum from the polygon `bot` at y0 to `top` at y1, capped. */
@@ -19,7 +21,7 @@ function prism(bag, mat, bot, top, y0, y1) {
   bag.add(mat, fromTriangles(orientOutward(t)));
 }
 /** An octagonal eave from the inner ring (r0 at y0) out and down to the outer ring (r1 at y1), the corners turned up by `sweep`: tiles above, painted soffit below. */
-function octEave(bag, cx, cz, r0, y0, r1, y1, sweep, top = 'tile_dark', under = 'lacquer_red') {
+function octEave(bag, cx, cz, r0, y0, r1, y1, sweep, top = 'tile_dark', under = 'lacquer_red', bells = null) {
   const I = ngon(cx, cz, r0), O = ngon(cx, cz, r1), m = 4, up = [], dn = [];
   const tri = (a, b, c) => {
     const n = (b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2]);   // the normal's y (sign)
@@ -37,11 +39,59 @@ function octEave(bag, cx, cz, r0, y0, r1, y1, sweep, top = 'tile_dark', under = 
     }
   }
   bag.add(top, fromTriangles(up)); bag.add(under, fromTriangles(dn));
+  if (bells) eaveBells(bag, cx, cz, r0, y0, r1, y1 + sweep, bells);
+}
+/**
+ * A wind bell under each of the eave's eight corners: the hook from the soffit, the bell, its clapper
+ * and the wind plate below.
+ */
+function eaveBells(bag, cx, cz, r0, y0, r1, yc, mat) {
+  const rr = r1 - 0.3, yy = y0 + (yc - y0) * (rr - r0) / (r1 - r0) - 0.14;
+  for (let k = 0; k < 8; k++) {
+    const a = Math.PI / 8 + k / 8 * Math.PI * 2, x = cx + Math.cos(a) * rr, z = cz + Math.sin(a) * rr;
+    bag.add(mat, lathe([[0.025, -0.3], [0.025, 0.04]], 5, null, x, yy, z));
+    bag.add(mat, lathe([[0.001, -0.3], [0.05, -0.3], [0.1, -0.36], [0.15, -0.6], [0.17, -0.7], [0.16, -0.71], [0.001, -0.66]], 10, null, x, yy, z));
+    bag.add(mat, lathe([[0.012, -0.95], [0.012, -0.62]], 4, null, x, yy, z));
+    bag.add(mat, box(x - 0.09, yy - 1.12, z - 0.012, x + 0.09, yy - 0.95, z + 0.012));
+  }
+}
+/**
+ * A row of bracket sets under an eave round the octagonal core (radius r, the sets' foot at y): a
+ * set at each corner (pointing out along the diagonal) and two between on each face — bearing
+ * block, the cross arm with its small blocks, two tiers of arms stepping out, the eave purlin's ring
+ * on their ends; the architrave below.
+ */
+function bracketRow(bag, cx, cz, r, y, arms = 'timber_red', blocks = 'paint_ochre') {
+  const G = ngon(cx, cz, r), A = [], B = [];
+  const set = (px, pz, ux, uz, nx, nz, s) => {
+    const Q = (u, n, yy) => [px + ux * u + nx * n, y + yy, pz + uz * u + nz * n];
+    const bx = (out, u0, u1, n0, n1, y0, y1) => hexa(out, [Q(u0, n0, y0), Q(u1, n0, y0), Q(u1, n1, y0), Q(u0, n1, y0), Q(u0, n0, y1), Q(u1, n0, y1), Q(u1, n1, y1), Q(u0, n1, y1)]);
+    bx(B, -0.24 * s, 0.24 * s, -0.05, 0.42 * s, 0, 0.26);
+    bx(A, -0.62 * s, 0.62 * s, 0.06, 0.3 * s, 0.26, 0.46);
+    for (const u of [-0.55 * s, 0.55 * s]) bx(B, u - 0.1, u + 0.1, 0.05, 0.31 * s, 0.46, 0.6);
+    bx(A, -0.1, 0.1, -0.05, 0.86 * s, 0.26, 0.5);
+    bx(B, -0.13, 0.13, 0.62 * s, 0.88 * s, 0.5, 0.62);
+    bx(A, -0.78 * s, 0.78 * s, 0.64 * s, 0.86 * s, 0.62, 0.8);
+    bx(A, -0.1, 0.1, 0.0, 1.34 * s, 0.6, 0.86);
+    bx(B, -0.13, 0.13, 1.08 * s, 1.36 * s, 0.86, 0.98);
+  };
+  for (let k = 0; k < 8; k++) {
+    const a = G[k], b = G[(k + 1) % 8], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+    let nx = uz, nz = -ux;
+    if (((a[0] + b[0]) / 2 - cx) * nx + ((a[1] + b[1]) / 2 - cz) * nz < 0) { nx = -nx; nz = -nz; }
+    for (const t of [1 / 3, 2 / 3]) set(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, ux, uz, nx, nz, 1);
+    const ra = Math.hypot(a[0] - cx, a[1] - cz), dx = (a[0] - cx) / ra, dz = (a[1] - cz) / ra;
+    set(a[0], a[1], -dz, dx, dx, dz, 1.15);
+  }
+  bag.add(arms, fromTriangles(A)); bag.add(blocks, fromTriangles(B));
+  // the architrave round the core under the sets, the ring on the arms' ends
+  prism(bag, arms, ngon(cx, cz, r + 0.12), ngon(cx, cz, r + 0.12), y - 0.45, y + 0.02);
+  prism(bag, arms, ngon(cx, cz, r + 1.15), ngon(cx, cz, r + 1.55), y + 0.96, y + 1.22);
 }
 
 /**
  * pagoda_oct: the Liuhe Pagoda { c, y, base: { r, h }, tiers: [{ r (the core's radius), h }],
- * spire }: the stone base; at every storey the white core with doors on four sides and windows
+ * spire, bells (the wind bells' material, or none) }: the stone base; at every storey the white core with doors on four sides and windows
  * on the others, a timber gallery with posts and a railing, the eave above; the crowning roof,
  * the spire.
  */
@@ -86,7 +136,7 @@ function pagodaOct(el, { bag, col }) {
     }
     if (!gal) {
       prism(bag, coreMat, ngon(cx, cz, r + 0.15), ngon(cx, cz, r + 0.55), y + h - 0.5, y + h + 0.2);
-      octEave(bag, cx, cz, r + 0.3, y + h + 0.7, r + 1.6, y + h - 0.1, 0.35, el.eave || 'tile_dark', coreMat);
+      octEave(bag, cx, cz, r + 0.3, y + h + 0.7, r + 1.6, y + h - 0.1, 0.35, el.eave || 'tile_dark', coreMat, el.bells || null);
       y += h;
       return;
     }
@@ -94,25 +144,25 @@ function pagodaOct(el, { bag, col }) {
     prism(bag, 'timber', ngon(cx, cz, g), ngon(cx, cz, g), y - 0.35, y);
     const P = ngon(cx, cz, g - 0.35), Rl = ngon(cx, cz, g - 0.15);
     for (let k = 0; k < 8; k++) {
-      bag.add('timber_red', lathe([[0.2, 0], [0.18, h - 0.4]], 8, null, P[k][0], y, P[k][1]));
+      bag.add('timber_red', lathe([[0.2, 0], [0.18, h + 0.7]], 8, null, P[k][0], y, P[k][1]));   // up into the eave's corner
       col.circle(P[k][0], P[k][1], 0.2, y, y + h);
       const a = Rl[k], b = Rl[(k + 1) % 8], rt = []; beamTris(rt, [a[0], y + 0.85, a[1]], [b[0], y + 0.85, b[1]], 0.06, 0.12); beamTris(rt, [a[0], y + 0.2, a[1]], [b[0], y + 0.2, b[1]], 0.04, 0.08);
       bag.add('timber_red', fromTriangles(rt));
       col.segment(a, b, 0.15, y, y + 1);
     }
-    // the bracket band under the eave, the eave
-    prism(bag, 'timber_red', ngon(cx, cz, r + 0.2), ngon(cx, cz, r + 0.9), y + h - 0.25, y + h + 0.5);
-    octEave(bag, cx, cz, r + 0.6, y + h + 1.1, g + 1.5, y + h - 0.2, 0.75);
+    // the bracket sets under the eave, the eave with its bells
+    bracketRow(bag, cx, cz, r, y + h - 0.35);
+    octEave(bag, cx, cz, r + 0.6, y + h + 1.1, g + 1.5, y + h - 0.2, 0.75, 'tile_dark', 'lacquer_red', el.bells || null);
     y += h;
   });
   // the crowning roof and the spire
   const rt = el.tiers[el.tiers.length - 1].r, R = el.galleries === false ? rt + 1.8 : rt + 3.6;
-  octEave(bag, cx, cz, 0.6, y + (el.galleries === false ? 2.6 : 4.2), R, y + 0.2, 0.8, el.eave || 'tile_dark', el.core && el.galleries === false ? el.core : 'lacquer_red');
+  octEave(bag, cx, cz, 0.6, y + (el.galleries === false ? 2.6 : 4.2), R, y + 0.2, 0.8, el.eave || 'tile_dark', el.core && el.galleries === false ? el.core : 'lacquer_red', el.bells || null);
   bag.add('gilt_bronze', lathe([[0.5, 0], [0.5, 0.6], [1.0, 0.8], [0.35, 1.2], [0.8, 1.6], [0.3, 2.0], [0.6, 2.4], [0.2, 2.8], [0.45, 3.1], [0.12, 3.6], [0.001, el.spire ?? 4.8]], 12, null, cx, y + 3.8, cz));
 }
 
 registerStyle('song', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, ...KAIFENG_ELEMENTS },
+  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, ...KAIFENG_ELEMENTS, ...WUTAI_ELEMENTS, ...HANGZHOU_ELEMENTS },
   objects: {},
 });

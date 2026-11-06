@@ -1,13 +1,13 @@
 // Mount Wutai in 857 — the layout (docs/settlements/tang-wutai.md §2): Foguang Monastery on the
 // west-facing slope of Foguang Hill — the lower courtyard, the middle terrace, the Great East Hall on
-// the upper terrace against the hill; the small brick pagoda of the founding master on the slope
-// to the south; a village of earth-walled houses and fields in the valley below to the west; pines
+// the upper terrace against the hill; the founding master's small pagoda south of the hall on the upper
+// terrace; a village of earth-walled houses and fields in the valley below to the west; pines
 // on the hills. Pure data. +x east, +z south.
 
 export const RADIUS = 360;
 export const HALL = { origin: [60, 0] };                  // the plan's origin (the hall's centre)
 export const PLAN = [-58, -48, 94, 48];                    // the plan's terraces in settlement coordinates
-export const PAGODA = [60, -78];
+export const PAGODA = [66, 32];                           // the Zushi pagoda, south of the hall on the upper terrace
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 /** The hill rising behind the monastery and round its sides, kept below the monastery's terraces; the valley floor west. */

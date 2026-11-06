@@ -15,9 +15,9 @@ for (const r of [[CANAL.x0 - 4, WALL.z0, CANAL.x0, WALL.z1], [CANAL.x1, WALL.z0,
 E.push({ t: 'block', rect: [CANAL.x0, WALL.z0 + 3, CANAL.x1, WALL.z0 + 3.5], y0: LEVEL.canalBed, y1: 0.6, mat: 'timber' });
 E.push({ t: 'block', walk: true, rect: [CANAL.x0 - 4, WALL.z0 + 5, CANAL.x1 + 4, WALL.z0 + 7], y0: 2.2, y1: 2.6, mat: 'timber' });
 E.push({ t: 'paving', rect: [-half(ROAD.z1), ROAD.z0, half(ROAD.z1), ROAD.z1], y: LEVEL.street + 0.04, th: 0.3 });
-// ---- the river, boats moored and under way
+// ---- the river: the river boats moored by the wall with their masts up and sails down, others under sail
 for (let z0 = WALL.z1; z0 < RW - 4; z0 += 10) { const z1 = Math.min(z0 + 10, RW - 4); E.push({ t: 'water_rect', rect: [-half(z1) + 2, z0, half(z1) - 2, z1], y: LEVEL.river }); }
-for (const [x, z, d, L] of [[-240, 160, 1, 12], [-60, 158, -1, 9], [20, 172, 1, 14], [100, 160, 1, 8], [190, 158, -1, 10], [250, 190, -1, 16], [-150, 215, 1, 18], [60, 240, -1, 11]]) E.push({ t: 'boat', at: [x, z], dir: [d, 0], len: L, y: LEVEL.river });
+for (const [x, z, d, L] of [[-240, 160, 1, 12], [-60, 158, -1, 9], [20, 172, 1, 14], [100, 160, 1, 8], [190, 158, -1, 10], [250, 190, -1, 16], [-150, 215, 1, 18], [60, 240, -1, 11]]) E.push({ t: 'song_boat', at: [x, z], dir: [d, 0], len: L + 4, beam: (L + 4) * 0.27, mast: 0, sail: z > 165, y: LEVEL.river, seed: x });
 // ---- the canal: water, walls, streets, bridges, boats
 E.push({ t: 'water_rect', rect: [CANAL.x0, CANAL.z0 + 4, CANAL.x1, WALL.z0 + 3], y: LEVEL.canal });
 for (const x of [CANAL.x0, CANAL.x1]) E.push({ t: 'canal_wall', a: [x, CANAL.z0 + 4], b: [x, ROAD.z0], y: LEVEL.street + 0.05, bed: LEVEL.canalBed, th: 0.7 });
@@ -32,7 +32,7 @@ E.push({ t: 'stairs', rect: [PAGODA.c[0] - 6, T1.rect[3], PAGODA.c[0] + 6, ROAD.
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 4, T2.rect[3], PAGODA.c[0] + 4, T1.rect[1]], y0: T1.y, y1: T2.y, dir: 'n', mat: 'granite_block' });
 const tiers = [{ r: 10.5, h: 9.5 }];
 for (let i = 1; i < 7; i++) tiers.push({ r: 10.5 - 0.6 * i, h: 6.7 });
-E.push({ t: 'pagoda_oct', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, spire: 4.4 });
+E.push({ t: 'pagoda_oct', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, spire: 4.4, bells: 'iron' });
 E.push({ t: 'ming_hall', rect: [-129, -4, -91, 24], y: T2.y, H: 6, front: 's', four: true, roof: 'xieshan', plat: 0.8, eave: 1.8, sweep: 0.9 });
 E.push({ t: 'ming_hall', rect: [-140.5, 58, -131, 94], y: T1.y, H: 4.4, front: 'e', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
 E.push({ t: 'ming_hall', rect: [-89, 58, -79.5, 94], y: T1.y, H: 4.4, front: 'w', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
