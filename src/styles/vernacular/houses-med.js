@@ -156,7 +156,15 @@ function houseMed(el, { bag, col }) {
             // the door leaves (or a shop's shutters), one of them a little open now and then
             if (b === Math.floor(bays / 2) || rand() < 0.5) { const open = rand() < 0.3; put(el.variant === 'french' || el.variant === 'venetian' ? 'shutter_brown' : 'wood_dark', u - w / 2 + 0.05, open ? u - 0.05 : u + w / 2 - 0.05, 0.62, 0.55 + h, 0.105, 0.13); if (open) put('wood_dark', u + w / 2 - 0.12, u + w / 2 - 0.04, 0.62, 0.55 + h, 0.13, 0.75); }
             if (O.arched && rand() < O.arched) put(O.trim, u - w / 2 - 0.05, u + w / 2 + 0.05, 0.6 + h - 0.35, 0.6 + h, 0.06, 0.12);
-          } else if (el.variant !== 'moorish') put('opening', u - 0.35, u + 0.35, 1.4, 2.2, -0.01, 0.03);
+          } else if (el.variant !== 'moorish') {
+            // a small window of the ground storey behind its grating (wooden bars in Florence's tiles, whose
+            // meshes are at their limit; iron elsewhere), a stone sill outside Florence
+            put('opening', u - 0.35, u + 0.35, 1.4, 2.2, -0.01, 0.03);
+            const gm = el.variant === 'tuscan' ? 'wood_dark' : 'iron';
+            for (const g of [-0.175, 0, 0.175]) put(gm, u + g - 0.018, u + g + 0.018, 1.4, 2.2, 0.03, 0.065);
+            for (const g of [1.6, 2.0]) put(gm, u - 0.35, u + 0.35, g - 0.018, g + 0.018, 0.065, 0.095);
+            if (el.variant !== 'tuscan') put(O.trim, u - 0.45, u + 0.45, 1.3, 1.4, -0.01, 0.12);
+          }
           continue;
         }
         if (el.variant === 'moorish' && rand() < 0.5) continue;
@@ -167,14 +175,41 @@ function houseMed(el, { bag, col }) {
         put(O.trim, u - ww / 2 - 0.18, u + ww / 2 + 0.18, v0 - 0.18, v0 - 0.06, -0.01, 0.16);
         const closed = rand() < 0.25;
         put(closed ? shut : 'opening', u - ww / 2, u + ww / 2, v0, v0 + wh, 0.04, 0.08);
+        // the casement's frame: a mullion and a transom
+        if (!closed) { put('wood_dark', u - 0.03, u + 0.03, v0, v0 + wh, 0.08, 0.1); put('wood_dark', u - ww / 2, u + ww / 2, v0 + wh * 0.66 - 0.03, v0 + wh * 0.66 + 0.03, 0.08, 0.1); }
         if (!closed && shut && el.variant !== 'moorish' && el.variant !== 'ottoman') for (const sd of [-1, 1]) put(shut, sd < 0 ? u - ww - 0.12 : u + ww / 2 + 0.12, sd < 0 ? u - ww / 2 - 0.12 : u + ww + 0.12, v0, v0 + wh, 0.03, 0.08);
         if (O.pointed && rand() < O.pointed) put(O.trim, u - 0.08, u + 0.08, v0 + wh, v0 + wh + 0.4, 0.0, 0.08);
-        if (el.variant === 'venetian' && s === 1 && b === Math.floor(bays / 2) && rand() < 0.35) put('iron', u - ww, u + ww, v0 - 0.2, v0 + 0.8, 0.05, 0.75);           // a balcony
+        if (el.variant === 'venetian' && s === 1 && b === Math.floor(bays / 2) && rand() < 0.35) {
+          // a balcony: a slab of Istrian stone on two brackets, an iron railing of bars between rails
+          const bw = ww, bd = 0.75;
+          put(O.trim, u - bw, u + bw, v0 - 0.22, v0 - 0.06, 0.05, bd + 0.05);
+          for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) put(O.trim, u + sx * (bw - 0.2) - 0.07, u + sx * (bw - 0.2) + 0.07, v0 - 0.52 + k * 0.1, v0 - 0.42 + k * 0.1, 0.05, 0.05 + bd * (k + 1) / 3);
+          put('iron', u - bw, u + bw, v0 + 0.84, v0 + 0.9, bd - 0.03, bd + 0.03);
+          put('iron', u - bw, u + bw, v0 + 0.02, v0 + 0.06, bd - 0.02, bd + 0.02);
+          for (let x = u - bw + 0.03; x <= u + bw - 0.02; x += 0.12) put('iron', x - 0.012, x + 0.012, v0 - 0.06, v0 + 0.84, bd - 0.012, bd + 0.012);
+          for (const sx of [-1, 1]) { put('iron', sx < 0 ? u - bw : u + bw - 0.03, sx < 0 ? u - bw + 0.03 : u + bw, v0 + 0.84, v0 + 0.9, 0.08, bd - 0.03); for (let d = 0.2; d < bd - 0.05; d += 0.15) put('iron', sx < 0 ? u - bw + 0.003 : u + bw - 0.027, sx < 0 ? u - bw + 0.027 : u + bw - 0.003, v0 - 0.06, v0 + 0.84, d - 0.012, d + 0.012); }
+        }
         if (el.variant === 'moorish' && main && s === 1 && rand() < 0.3) put('lattice', u - ww / 2 - 0.2, u + ww / 2 + 0.2, v0 - 0.2, v0 + wh + 0.2, 0.05, 0.6);   // the latticed balcony
       }
     }
     // the bay (cumba) of an Ottoman house on its front
-    if (!simple && el.variant === 'ottoman' && main && n > 1 && rand() < 0.6) { const u = L / 2, w = Math.min(3, L * 0.45); put(wall, u - w / 2, u + w / 2, st + 0.3, st * 2 - 0.2, 0, 0.75); put('opening', u - w / 2 + 0.25, u + w / 2 - 0.25, st + 1.0, st * 2 - 0.6, 0.74, 0.78); put('timber', u - w / 2 - 0.1, u + w / 2 + 0.1, st + 0.2, st + 0.32, -0.02, 0.85); }
+    if (!simple && el.variant === 'ottoman' && main && n > 1 && rand() < 0.6) {
+      // the cumba: a closed bay of boards on stepped brackets, a row of sash windows round its three faces,
+      // their lower parts behind wooden lattice (kafes), a cornice board above
+      const u = L / 2, w = Math.min(3, L * 0.45), a = u - w / 2, b = u + w / 2, D = 0.75, ya = st + 0.3, yb = st * 2 - 0.2, wa = st + 0.95, wb = st * 2 - 0.55;
+      put(wall, a, b, ya, yb, 0, D);
+      put('timber', a - 0.1, b + 0.1, st + 0.2, st + 0.32, -0.02, D + 0.1);
+      for (const ub of [a + 0.15, u, b - 0.15]) for (let k = 0; k < 3; k++) put('timber', ub - 0.07, ub + 0.07, st - 0.4 + k * 0.2, st - 0.2 + k * 0.2, 0, D * (k + 1) / 3);
+      const nw = Math.max(2, Math.round((w - 0.3) / 0.7)), ww2 = (w - 0.3) / nw;
+      for (let k = 0; k < nw; k++) {
+        const c0 = a + 0.15 + k * ww2 + 0.06, c1 = a + 0.15 + (k + 1) * ww2 - 0.06;
+        put('opening', c0, c1, wa, wb, D, D + 0.01);
+        put('koshi', c0, c1, wa, wa + (wb - wa) * 0.55, D + 0.01, D + 0.03);
+        put('timber', c0 - 0.06, c0, wa - 0.05, wb + 0.05, D, D + 0.05); put('timber', c1, c1 + 0.06, wa - 0.05, wb + 0.05, D, D + 0.05);
+      }
+      put('timber', a + 0.1, b - 0.1, wa - 0.1, wa - 0.02, D, D + 0.08); put('timber', a + 0.1, b - 0.1, wb, wb + 0.08, D, D + 0.06);
+      put('timber', a - 0.15, b + 0.15, yb, yb + 0.12, -0.02, D + 0.15);
+    }
   }
   // the top: a cornice and a roof (low tiled, steep slate, or flat behind a parapet)
   const ye = y + H, flat = O.flat && rand() < O.flat;
@@ -183,7 +218,7 @@ function houseMed(el, { bag, col }) {
     bag.add('brick_paving', box(R[0] + 0.25, ye - 0.05, R[1] + 0.25, R[2] - 0.25, ye + 0.02, R[3] - 0.25));
   } else {
     if (O.eave > 0.5) { bag.add('timber', box(R[0] - O.eave, ye - 0.22, R[1] - O.eave, R[2] + O.eave, ye, R[3] + O.eave)); if (!simple && (f === 'n' || f === 's')) for (let u = R[0] - O.eave + 0.3; u < R[2] + O.eave; u += 0.9) { const zz = f === 's' ? R[3] + 0.05 : R[1] - 0.17; bag.add('wood_dark', box(u, ye - 0.36, Math.min(zz, zz + (f === 's' ? 0 : 0)), u + 0.1, ye - 0.22, zz + 0.12 + (f === 's' ? O.eave - 0.2 : 0)).translate(0, 0, f === 's' ? 0 : -(O.eave - 0.2))); } }
-    else bag.add(O.trim, box(R[0] - 0.25, ye - 0.3, R[1] - 0.25, R[2] + 0.25, ye, R[3] + 0.25));
+    else { const ov = Math.max(0.35, O.eave); bag.add(O.trim, box(R[0] - ov, ye - 0.3, R[1] - ov, R[2] + ov, ye, R[3] + ov)); }   // the cornice, as deep as the roof's overhang
     const rise = hipRoof(bag, O.roof, R, ye, O.pitch + (rand() - 0.5) * 4, Math.max(0.35, O.eave));
     // dormers in a steep roof
     if (O.dormers && !simple) { const along = f === 'n' || f === 's', L = along ? R[2] - R[0] : R[3] - R[1], nd = Math.max(1, Math.floor(L / 3.5)); for (let k = 0; k < nd; k++) { const u = (k + 0.5) * L / nd, zf = f === 's' ? R[3] - 0.6 : f === 'n' ? R[1] + 0.6 : 0, xf = f === 'e' ? R[2] - 0.6 : f === 'w' ? R[0] + 0.6 : 0; const q = along ? [R[0] + u - 0.55, zf - 0.6, R[0] + u + 0.55, zf + 0.6] : [xf - 0.6, R[1] + u - 0.55, xf + 0.6, R[1] + u + 0.55]; bag.add('plaster_white', box(q[0], ye, q[1], q[2], ye + 1.7, q[3])); hipRoof(bag, 'slate', q, ye + 1.7, 45, 0.1); } }
