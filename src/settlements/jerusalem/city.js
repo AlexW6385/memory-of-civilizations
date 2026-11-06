@@ -4,7 +4,7 @@
 // its colonnades, porticoes and shops; the Church of the Holy Sepulchre on the Cardo's west side;
 // and the markets: stalls, people and beasts in the Cardo and in the street to the Haram.
 
-import { RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, height } from './layout.js';
+import { RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, PALACES, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-180, 0], facing: 'e' }, ...extra });
@@ -158,6 +158,21 @@ function sepulchre() {
   return E;
 }
 
+// ── the Umayyad palaces south of the Haram ──────────────────────────────────────────────────────────
+function palaces() {
+  const E = [];
+  for (const [i, p] of PALACES.entries()) {
+    const y = height((p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2);
+    E.push({ t: 'umayyad_palace', y, h: HARAM.top - y, seed: 705 + i, ...p });
+    // the paved street round it
+    const [x0, z0, x1, z1] = p.rect;
+    for (const r of [[x0 - 6, z0 - 6, x1 + 6, z0], [x0 - 6, z1, x1 + 6, z1 + 6], [x0 - 6, z0, x0, z1], [x1, z0, x1 + 6, z1]]) E.push({ t: 'floor', rect: r, y: y + 0.02, mat: 'flagstone', th: 0.4 });
+  }
+  const b = PALACES[0].bridge, y = height(b.x0, HARAM.rect[3] + 6);
+  E.push({ t: 'palace_bridge', x0: b.x0, x1: b.x1, z0: HARAM.rect[3] + 3, z1: PALACES[0].rect[1], g: y, top: HARAM.top });
+  return E;
+}
+
 // ── the markets and the people ───────────────────────────────────────────────────────────────────
 function markets() {
   const rand = rng(691), L = [], X = CARDO.x, hr = CARDO.road / 2;
@@ -200,6 +215,15 @@ function markets() {
     if ((Math.abs(x) < 82 && z > -92 && z < 52) || (Math.abs(x) < 46 && z > 110)) continue;
     fig([x, z], rand() * 6.28, { pose: rand() < 0.2 ? 'talk' : 'stand', y: HARAM.top });
   }
+  // the palaces: a cistern's well-head in each court, officials and servants in the courts and the
+  // portico, people in the street along the Haram's south wall and before the Double Gate
+  for (const p of PALACES) {
+    const [x0, z0, x1, z1] = p.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, y = height(cx, cz);
+    L.push({ t: 'well', kind: 'pulley', at: [cx, cz], y: y + 0.03, seed: Math.floor(rand() * 1e9) });
+    for (let k = 0; k < 9; k++) { const a = rand() * 6.28, r = 4 + rand() * 14; fig([cx + Math.cos(a) * r, cz + Math.sin(a) * r * 1.2], rand() * 6.28, { y: y + 0.03, pose: rand() < 0.4 ? 'talk' : 'stand', carry: rand() < 0.15 ? 'pot' : 'none' }); }
+  }
+  for (let x = -140; x < 140; x += 7 + rand() * 10) fig([x, HARAM.rect[3] + 5 + rand() * 6], rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2, { pose: rand() < 0.25 ? 'talk' : 'stand' });
+  L.push({ t: 'animal', kind: 'donkey', at: [20, 209], y: height(20, 209), rot: Math.PI / 2, seed: 3 });
   return L;
 }
 
@@ -208,6 +232,7 @@ export function city() {
     plan('jerusalem-walls', 'islamic', walls()),
     plan('jerusalem-cardo', 'islamic', cardo()),
     plan('jerusalem-sepulchre', 'islamic', sepulchre(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
+    plan('jerusalem-palaces', 'islamic', palaces()),
     plan('jerusalem-markets', 'life', markets()),
   ];
 }

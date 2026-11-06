@@ -7,6 +7,10 @@
 export const RADIUS = 420;
 export const HARAM = { rect: [-150, -200, 150, 200], top: 14 };
 export const AQSA = [-40, 118, 40, 194];
+/** The Umayyad palaces south of the Haram (§4c): al-Walid's palace with its bridge to the Haram, a pillared building east of it. */
+export const PALACES = [{ rect: [-110, 214, -26, 310], gates: ['e', 'w'], bridge: { x0: -45.5, x1: -41.5 } }, { rect: [-12, 216, 72, 290], gates: ['w', 'e'], piers: true, ring: 12, portico: 4 }];
+/** The Haram's gates (§4b): the Double and Triple Gates in the south wall, the Golden Gate in the east. */
+export const HGATES = { double: -12, triple: 60, golden: -35 };
 /** The Church of the Holy Sepulchre: from its propylaea on the Cardo west to the Anastasis (§1a). */
 export const SEPULCHRE = [-366, -112, -247, -52];
 /** The Cardo, the colonnaded street from the north gate to the south gate: roadway, porticoes, shops (§4a). */
@@ -51,7 +55,7 @@ export function lots() {
   for (let x = -RADIUS + 20; x < 150; x += 17) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 16) {
     const w = 12 + rand() * 4, d = 12 + rand() * 3, cx = x + w / 2, cz = z + d / 2;
     const corners = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]];
-    if (corners.some(([a, b]) => Math.hypot(a, b) > WALL.r - 5) || x + w > WALL.east - 6 || inRect(HARAM.rect, cx, cz, 16) || inRect(SEPULCHRE, cx, cz, 14)
+    if (corners.some(([a, b]) => Math.hypot(a, b) > WALL.r - 5) || x + w > WALL.east - 6 || inRect(HARAM.rect, cx, cz, 16) || inRect(SEPULCHRE, cx, cz, 14) || PALACES.some((p) => inRect(p.rect, cx, cz, 14))
       || (z < 5 && z + d > -5) || (x < CARDO.x + CARDO_HALF + 1 && x + w > CARDO.x - CARDO_HALF - 1) || GATES.some((g) => Math.hypot(g.at[0] - cx, g.at[1] - cz) < 28) || rand() < 0.15) continue;
     const ys = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]].map(([a, b]) => height(a, b));
     if (Math.max(...ys) - Math.min(...ys) > 2.5) continue;
