@@ -189,7 +189,16 @@ function dzong(el, { bag, col }) {
   const bx = (m, r, ya, yb) => bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3]));
   // (with a stairwell through the roof: the ledge and the friezes as rings round the edge, the
   // roof's fill and coping in cells round the opening)
-  const RB = roofVoids.length ? (m, r, ya, yb) => { const d = 0.8; for (const q of [[r[0], r[1], r[2], r[1] + d], [r[0], r[3] - d, r[2], r[3]], [r[0], r[1] + d, r[0] + d, r[3] - d], [r[2] - d, r[1] + d, r[2], r[3] - d]]) bx(m, q, ya, yb); } : bx;
+  // (a void open to the sky that runs out through a face — a courtyard open to the street — breaks the rings there)
+  const gaps = (q) => {
+    const along = q[2] - q[0] >= q[3] - q[1], lo = along ? q[0] : q[1], hi = along ? q[2] : q[3], cut = [];
+    for (const v of roofVoids) if (v.r[0] < q[2] && v.r[2] > q[0] && v.r[1] < q[3] && v.r[3] > q[1]) cut.push(along ? [v.r[0], v.r[2]] : [v.r[1], v.r[3]]);
+    cut.sort((a, c) => a[0] - c[0]); const out = []; let a = lo;
+    for (const [c0, c1] of cut) { if (c0 > a + 0.05) out.push([a, Math.min(c0, hi)]); a = Math.max(a, c1); }
+    if (hi > a + 0.05) out.push([a, hi]);
+    return out.map(([u0, u1]) => (along ? [u0, q[1], u1, q[3]] : [q[0], u0, q[2], u1]));
+  };
+  const RB = roofVoids.length ? (m, r, ya, yb) => { const d = 0.8; for (const q of [[r[0], r[1], r[2], r[1] + d], [r[0], r[3] - d, r[2], r[3]], [r[0], r[1] + d, r[0] + d, r[3] - d], [r[2] - d, r[1] + d, r[2], r[3] - d]]) for (const g of gaps(q)) bx(m, g, ya, yb); } : bx;
   if (roofVoids.length) cells(bag, col, 'limewash_white', r1, yw, y1 - cap, 0, 0, voids, { ci: 0 });
   if (pe > 0) {
     const po = pe > 1 ? 0.12 : 0.06, led = pe > 1 ? 0.2 : 0.1;
@@ -461,7 +470,7 @@ function house(el, ctx) {
       for (let px = ra + 0.2; px < rb - 0.1; px += 0.24) bag.add('wood_painted', box(px - 0.025, yf + 0.18, zb - 0.08, px + 0.025, yf + 0.85, zb - 0.04));
       col.rect([ra, zb - 0.14, rb, zb], yf, yf + 0.95);
     }
-    bag.add('timber', box(xa, yr - 0.08, za, xb, yr + 0.04, zb + 0.08)); bag.add('lacquer_black', box(xa, yr + 0.04, za, xb, y + H - 0.02, zb + 0.12));
+    bag.add('timber', box(xa, yr - 0.08, za, xb, yr + 0.04, zb + 0.08)); bag.add('pembe', box(xa, yr + 0.04, za, xb, y + H - 0.04, zb + 0.12));
     bag.add('paint_dancheong', box(xa, yr - 0.08, zb + 0.08, xb, yr + 0.04, zb + 0.12));
     // the steep ladder up to it at the courtyard's east end, from the ground beside the gallery
     if (ladder) skas({ rect: [lx, zb + 0.02, lx + 0.8, zb + 2.0], y0: y + 0.1, y1: yf + 0.05, up: 'n' }, ctx);
