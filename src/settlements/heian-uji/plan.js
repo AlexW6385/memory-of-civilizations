@@ -44,15 +44,15 @@ function riverLife() {
     E.push({ t: 'block', rect: [tip[0] - 1.0, tip[1] - 2.2, tip[0] + 1.0, tip[1] + 0.2], y0: W - 0.6, y1: W + 0.3, mat: 'wicker', collide: false });
     for (const [dx, dz] of [[-1.1, -2.3], [1.1, -2.3], [-1.1, 0.3], [1.1, 0.3]]) E.push({ t: 'block', rect: [tip[0] + dx - 0.08, tip[1] + dz - 0.08, tip[0] + dx + 0.08, tip[1] + dz + 0.08], y0: RIVER.bed - 0.3, y1: W + 0.95, mat: 'bark_dark', collide: false });
     E.push({ t: 'block', rect: [tip[0] - 1.2, tip[1] - 2.4, tip[0] + 1.2, tip[1] + 0.4], y0: W + 0.95, y1: W + 1.05, mat: 'timber', collide: false });
-    L.push({ t: 'figure', at: [tip[0] + 0.4, tip[1] - 1.0], y: W + 1.05, rot: Math.PI, seed: zc * 31, dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_brown', hat: 'straw', carry: 'pole', skin: 'skin_medium', pose: 'stand' });
+    L.push({ t: 'figure', at: [tip[0] + 0.4, tip[1] - 1.0], y: W + 1.05, rot: Math.PI, seed: zc * 31, dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_brown', hat: 'straw', carry: 'none', skin: 'skin_medium', pose: 'squat' });
   }
   // boats: a roofed boat moored by the west bank below the bridge, fishing boats in the stream, a barge poled upstream
   const boat = (kind, z, xo, rot, len) => { L.push({ t: 'boat', kind, at: [riverX(z) + xo, z], y: W, rot, len, seed: Math.round(z * 97) }); return [riverX(z) + xo, z]; };
   boat('sampan', -160, -23, 0.05, 7);
   const f1 = boat('rowboat', -70, 6, 0.4, 4.5), f2 = boat('rowboat', -40, -9, -0.3, 4.5), bg = boat('barge', 40, 4, Math.PI + 0.06, 12);
   const man = (at, y, rot, extra = {}) => L.push({ t: 'figure', at, y, rot, seed: Math.round(at[0] * 13 + at[1] * 7), dress: 'tunic', cloth: 'cloth_indigo', cloth2: 'cloth_brown', hat: 'straw', skin: 'skin_medium', carry: 'none', pose: 'stand', ...extra });
-  man([f1[0], f1[1] + 0.9], W - 0.1, 0.4, { carry: 'pole' }); man([f2[0], f2[1]], W - 0.1, -0.3, { pose: 'squat', hat: 'none' });
-  man([bg[0], bg[1] + 4.2], W + 0.1, Math.PI, { carry: 'pole', cloth: 'cloth_brown' });
+  man([f1[0], f1[1] + 0.9], W - 0.1, 0.4); man([f2[0], f2[1]], W - 0.1, -0.3, { pose: 'squat', hat: 'none' });
+  man([bg[0], bg[1] + 4.2], W + 0.1, Math.PI, { cloth: 'cloth_brown' });
   // on the bridge: travellers, a noblewoman's party under veiled hats, an ox cart of hay led by its driver
   const x0 = RIVER.x + 15 * Math.sin(BRIDGE.z / 110) - RIVER.w / 2 - 8, x1 = x0 + RIVER.w + 16;
   const Y = (x) => 0.2 + 1.4 * Math.sin(Math.PI * Math.max(0, Math.min(1, (x - x0) / (x1 - x0))));

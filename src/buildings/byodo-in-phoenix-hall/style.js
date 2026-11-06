@@ -256,12 +256,12 @@ function raigo(el, { bag }) {
   const [ax, az] = el.a, [bx, bz] = el.b, W = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / W, (bz - az) / W], n = el.dir, y0 = el.y0, H = el.y1 - el.y0;
   let sd = el.seed || 1; const rnd = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296);
   const lay = {};
-  let off = 0.004;
+  let off = 0.012;
   const P = (s, v, o) => [ax + u[0] * s + n[0] * o, y0 + v, az + u[1] * s + n[1] * o];
   const push = (mat, tris) => { (lay[mat] ||= []).push(...faceTo(tris, n)); };
-  const band = (mat, lo, hi, s0 = 0, s1 = W, N = 24) => { const o = off; off += 0.0015; const t = []; for (let i = 0; i < N; i++) { const sa = s0 + (s1 - s0) * i / N, sb = s0 + (s1 - s0) * (i + 1) / N; t.push(...P(sa, lo(sa), o), ...P(sb, lo(sb), o), ...P(sb, hi(sb), o), ...P(sa, lo(sa), o), ...P(sb, hi(sb), o), ...P(sa, hi(sa), o)); } push(mat, t); };
-  const disc = (mat, s, v, rs, rv, N = 14) => { const o = off; off += 0.0012; const t = []; for (let i = 0; i < N; i++) { const a0 = i / N * Math.PI * 2, a1 = (i + 1) / N * Math.PI * 2; t.push(...P(s, v, o), ...P(s + Math.cos(a0) * rs, v + Math.sin(a0) * rv, o), ...P(s + Math.cos(a1) * rs, v + Math.sin(a1) * rv, o)); } push(mat, t); };
-  const quadF = (mat, pts) => { const o = off; off += 0.0012; const q = pts.map(([s, v]) => P(s, v, o)); push(mat, [...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]]); };
+  const band = (mat, lo, hi, s0 = 0, s1 = W, N = 24) => { const o = off; off += 0.003; const t = []; for (let i = 0; i < N; i++) { const sa = s0 + (s1 - s0) * i / N, sb = s0 + (s1 - s0) * (i + 1) / N; t.push(...P(sa, lo(sa), o), ...P(sb, lo(sb), o), ...P(sb, hi(sb), o), ...P(sa, lo(sa), o), ...P(sb, hi(sb), o), ...P(sa, hi(sa), o)); } push(mat, t); };
+  const disc = (mat, s, v, rs, rv, N = 14) => { const o = off; off += 0.0015; const t = []; for (let i = 0; i < N; i++) { const a0 = i / N * Math.PI * 2, a1 = (i + 1) / N * Math.PI * 2; t.push(...P(s, v, o), ...P(s + Math.cos(a0) * rs, v + Math.sin(a0) * rv, o), ...P(s + Math.cos(a1) * rs, v + Math.sin(a1) * rv, o)); } push(mat, t); };
+  const quadF = (mat, pts) => { const o = off; off += 0.0015; const q = pts.map(([s, v]) => P(s, v, o)); push(mat, [...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]]); };
   const season = el.season || 'spring', ph = rnd() * 6, ph2 = rnd() * 6;
   // the far hills, then the near ones (snow-capped in winter), the river winding between
   band('stucco_leaf', () => 0.25 * H, (s) => H * (0.5 + 0.08 * Math.sin(s * 2.1 + ph) + 0.04 * Math.sin(s * 5.3 + ph2)));

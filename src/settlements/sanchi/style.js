@@ -43,7 +43,7 @@ function vedikaRun(L, a, b, y, h, pitch, carvedEnds = [false, false], skipFirst 
       // the medallions: a lotus (a disc with a ring of petals and a seed-pod boss) facing out of the post
       for (const [yy, half] of [[y + h * 0.42, 0], [y + 0.02, 1], [yc - 0.02, -1]]) {
         const c = P(t, side * pd, yy), r = 0.13, petals = 8 + 4 * ((k + (half + 1)) % 3);
-        const g = lathe([[r, 0], [r, 0.012], [r * 0.82, 0.028], [r * 0.45, 0.034], [r * 0.3, 0.045], [r * 0.18, 0.05], [0.001, 0.05]], 4 * petals,
+        const g = lathe([[r, 0], [r, 0.012], [r * 0.82, 0.028], [r * 0.45, 0.034], [r * 0.3, 0.045], [r * 0.18, 0.05], [0.001, 0.05]], 2 * petals,
           (th, i) => (i >= 1 && i <= 3 ? 0.88 + 0.12 * Math.abs(Math.cos(th * petals / 2)) : 1), 0, 0, 0);
         // turn the disc's axis (+y) to the face's normal, then keep only its upper or lower half for the half medallions
         g.rotateX(Math.PI / 2); g.rotateY(Math.atan2(n[0] * side, n[1] * side));

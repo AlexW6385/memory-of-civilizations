@@ -2,7 +2,7 @@
 
 Settlement id: `sanchi` · Style: `indian` (the stupa), `vernacular` (houses) · Region: India (Madhya Pradesh, the plain of the Betwa) · Code: `src/settlements/sanchi/`
 Replaces the legacy district of the previous design. The Great Stupa with its railings, gateways, companions, pillar and monasteries is the full building from that design (`src/buildings/sanchi-great-stupa`, dossier `docs/buildings/sanchi-great-stupa.md`).
-Status of this dossier: L1–L2 (the flat-topped hill, 22 m above the plain, with the stupa complex on its summit; the path up the north slope; the village at the foot to the south-east; fields on the plain; ground, planting, weather, music). L3 recorded for later: Stupa 2 on the west slope, the later temples, the town of Vidisha and the Betwa river, tanks, pilgrims and monks.
+Status of this dossier: L1–L2 (the flat-topped hill, 22 m above the plain, with the stupa complex on its summit; the path up the north slope; the village at the foot to the south-east; fields on the plain; ground, planting, weather, music). L3 built (second pass): Stupa 2, Temple 40, monks and pilgrims (§10). L3 recorded for later: the town of Vidisha and the Betwa river, tanks. Temple 17 (first quarter of the 5th century, Gupta) and the Gupta monasteries are later than the moment shown and are left out [stated: Wikipedia "Sanchi"].
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -20,6 +20,8 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Great Stupa | at the centre of the summit | [stated] |
 | Path | up the north slope | [inferred] |
 | Village | at the foot, south-east | [inferred] |
+| Stupa 2 | on a built terrace at the foot of the west slope, centre (−140, 0) | [stated: west, down the slope; distance compressed — inferred] |
+| Temple 40 | on the summit south-east of the Great Stupa, centre (40, 62) | [inferred: place] |
 
 ## 3. Orientation
 
@@ -56,7 +58,11 @@ From the plain up the north path to the summit and round the stupa. [inferred]
 
 As for the stupa (`docs/buildings/sanchi-great-stupa.md` §9).
 
-## Sources
+## 10. Detail (L3, second pass)
+
+- **Stupa 2.** About 300 m west of the main group on the slope of the hill; begun in the 2nd century BCE, its railing bears the oldest extensive stupa decoration — 455 medallions and half medallions, 293 of them simply a lotus, others a lotus with another motif or elephants, lions, griffins, centaurs, a camel, the triratna; the earliest about 115 BCE [stated: Wikipedia "Sanchi Stupa No. 2"]. It stands on an artificial terrace built against a rock shelf, about 320 m down the slope; its balustrade has four L-shaped (bent) entrances; each post carries one complete and two half medallions, except at the entrances, where the carving runs from top to bottom; it has no gateway; its double stairway faces east [stated: indianetzone "Sanchi Stupa 2"]. Ours: on a terrace 32 m square, 1.5 m high, of rubble with a dressed coping and a paved top, a flight up on the north; the stupa's dome, berm, railing on the berm and double stairway at 0.39 of the Great Stupa (a dome of about 14.3 m) [inferred: size], turned so that the stairway faces east; the ground railing 2.4 m high on a circle of 11.5 m: lens-section posts at about 0.95 m, three lens-shaped bars in each bay, a rounded coping; on both faces of each post a lotus medallion at mid-height and half medallions at the foot and head, their petals 8, 12 or 16 in turn [inferred: lotuses for all, the commonest kind]; the four openings each screened by an L-shaped wing of railing, all turning the same way, so that one enters along the railing and turns in; the posts at the openings carved over their full height in four framed panels [inferred: the panels' subjects not shown]; the processional path paved.
+- **Temple 40.** Partly of the 3rd century BCE (Maurya); first an apsidal hall, probably of timber, on a high rectangular stone platform 26.52 × 14 × 3.35 m with stairs on the east and west; later enlarged to 41.76 × 27.74 m, and a pillared hall of fifty columns (5 × 10) built, of which stumps remain, some pillars inscribed in the 2nd century BCE [stated: Wikipedia "Sanchi"]. Ours (the enlarged state, so standing by the 1st century): the platform 41.76 × 27.74 m and 3.35 m high [inferred: its height kept], faced with dressed stone, flights with cheek walls up its east and west ends; fifty pillars at 3.6 m in five rows of ten, square below and octagonal above, with a collar and a block capital, 4.6 m high; beams along the rows and across them; a barrel roof of thatch on curved rafters with a ridge, closed at its ends by timber gables of the horseshoe (caitya) outline with a barred window, as buildings appear in Sanchi's reliefs [inferred: the pillars' form, their spacing and height, the roof].
+- **Monks and pilgrims.** Monks in ochre robes, shaven and barefoot, walking round the Great Stupa on the ground walk and the terrace, in Temple 40's hall, at Stupa 2; lay pilgrims in white with turbans, women in red with offerings in baskets and pots, at the south gateway and climbing the north path [inferred: dress after the gateways' reliefs; foreign devotees in Greek dress also appear there — stated: Wikipedia "Sanchi" — not shown].
 
 - The stupa's own sources: `docs/buildings/sanchi-great-stupa.md`
 - [Sanchi — Wikipedia](https://en.wikipedia.org/wiki/Sanchi)
@@ -64,3 +70,5 @@ As for the stupa (`docs/buildings/sanchi-great-stupa.md` §9).
 - [A Guide to the Great Stupa of Sanchi — Lonely Planet](https://www.lonelyplanet.com/articles/a-guide-to-the-stupas-of-sanchi)
 - [Sanchi – Buddham Dhammam Sangahm (the South Gateway) — puratattva](https://www.puratattva.in/sanchi-buddham-dhammam-sangahm-5/)
 - [Sanchi pillar and capital — imp-art (MAP Academy)](https://imp-art.org/article/sanchi-pillar-and-capital/)
+- [Sanchi Stupa No. 2 — Wikipedia](https://en.wikipedia.org/wiki/Sanchi_Stupa_No._2)
+- [Sanchi Stupa 2 — indianetzone](https://www.indianetzone.com/sanchi_stupa_2)
