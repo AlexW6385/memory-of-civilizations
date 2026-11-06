@@ -3,6 +3,7 @@
 // of the west wall, +x east (the apse), +z south; y = 0 at the courtyard. Metres.
 
 import { SITES } from '../../world/regions.js';
+import './style.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -102,7 +103,15 @@ for (const [y0, y1, sp] of [[0, UP, 3.6], [UP, 13.0, UP + 3.4]]) {
 }
 add({ t: 'gable_roof', x0: -5.2, x1: -0.35, z0: -6.1, z1: 6.1, y: 13.0, ridge: 16.0, mat: 'lead' });
 // the two west turrets
-for (const sz of [-1, 1]) add({ t: 'tower', at: [0.5, sz * 7.9], y: 0, r: 1.35, h: 33.5, roof: 6.5, mat: 'limestone', roofMat: 'lead' });
+for (const sz of [-1, 1]) add({ t: 'sc_turret', at: [0.5, sz * 7.9], y: 0, r: 1.35, h: 33.5, spire: 6.5 });
+// the portals' sculpture: the Virgin below, the Last Judgement above; the balustrade at the foot of the gable;
+// gablets and pinnacles over the porch's upper arches
+const WO = [-T / 2, -HW - T];
+add({ t: 'sc_portal', o: WO, u: [0, 1], th: T, base: 0.15, arch: { uc: HW + T, r: 1.3, spring: 3.3, pointed: 0.8 }, doorTop: 0.15 + 3.9, kind: 'virgin' });
+add({ t: 'sc_portal', o: WO, u: [0, 1], th: T, base: UP, arch: { uc: HW + T, r: 1.3, spring: UP + 3.3, pointed: 0.8 }, doorTop: UP + 3.9, kind: 'judgement' });
+add({ t: 'sc_front', o: WO, u: [0, 1], uc: HW + T, eave: EAVE + 0.9, gw: 2 * (HW + T), th: T, rose: { yc: 19.6, r: 4.3 } });
+add({ t: 'sc_balustrade', o: WO, u: [0, 1], u0: 0, u1: 2 * (HW + T), y: EAVE, h: 0.9, d: T / 2 + 0.1 });
+for (const uc of [1.9, 5.7, 9.5]) add({ t: 'sc_gablet', o: [-4.85, -5.7], u: [0, 1], uc, w: 3.3, y0: 12.6, h: 2.5, d: 0.45, pinnacles: uc === 5.7 ? [] : [uc < 5 ? 0.12 : 11.28], pinH: 1.4 });
 // the stair from the courtyard to the upper porch (standing for the palace's galleries)
 add({ t: 'stair', rect: [-17.9, -9.6, -4.5, -7.6], dir: 'e', y0: 0, y1: UP, riser: 0.169, base: 0, mat: 'limestone' });
 add({ t: 'wall', a: [-17.9, -9.75], b: [-1.3, -9.75], th: 0.3, y0: 0, y1: UP + 1.0, openings: [], mat: 'limestone' });
@@ -126,8 +135,8 @@ add({ t: 'block', rect: [26.4, -1.2, 27.6, 1.2], y0: UP, y1: UP + 1.05, mat: 'ma
 }
 
 // ── the palace: two towers by the water ─────────────────────────────────────
-add({ t: 'tower', at: [8, 38], y: 0, r: 4.2, h: 22, roof: 11, mat: 'limestone', roofMat: 'slate' });
-add({ t: 'tower', at: [30, 40], y: 0, r: 4.6, h: 24, roof: 12, mat: 'limestone', roofMat: 'slate' });
+add({ t: 'sc_keep', at: [8, 38], y: 0, r: 4.2, h: 22, roof: 11, roofMat: 'slate' });
+add({ t: 'sc_keep', at: [30, 40], y: 0, r: 4.6, h: 24, roof: 12, roofMat: 'slate' });
 
 // ── rooms and walks ──────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -149,7 +158,7 @@ export const sainteChapelle = {
   id: 'sainte-chapelle',
   name: { en: 'The Sainte-Chapelle, Paris', zh: '巴黎圣礼拜堂' },
   era: { en: 'Rayonnant Gothic, 1242–1248', zh: '辐射式哥特，1242—1248年' },
-  style: 'gothic',
+  style: 'gothic-chapelle',
   district: 'francia',
   ...SITES['sainte-chapelle'],
   entrance: { at: [-34, 0], facing: 'e' },

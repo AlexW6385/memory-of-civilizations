@@ -44,6 +44,8 @@ A two-storey palace chapel (*Sainte-Chapelle* type): a low lower chapel for the 
 - *Apse:* the tribune of the relics (the *grande châsse*), a platform raised 2.6 m under a timber canopy, reached by stairs; [stated: relics kept in the upper chapel — europeforvisitors; form inferred].
 - *Spire:* a slender octagonal timber spire sheathed in lead over the roof, 30 m above the ridge, at the junction of nave and apse [inferred].
 
+- *The west front in detail (2026-11):* the two stair turrets — "on either side of the porch are towers which contain the narrow winding stairways to the upper chapel" [stated: Wikipedia, "Sainte-Chapelle", via exl.pages.dev] — octagonal, in five storeys parted by string courses, a blind lancet on each face of each storey, slits for the stair, a corbelled cornice, a ring of eight crocketed gablets, an octagonal spirelet with crockets and a finial [inferred: from photographs; the fleurs-de-lis under a crown of thorns on the spires are 15th-century and not shown, stated ibid.]; the portals with three moulded archivolts, jamb shafts, lintel and tympanum: above, Christ blessing between the Virgin and St John, two angels behind with the cross and the crown of thorns, St Michael weighing souls on the lintel with the saved and the damned [stated: ibid.; the present sculpture is Geoffroy-Dechaume's recreation, 1855–70]; below, the Virgin [stated: ibid., as the column statue] between two angels [inferred]; a moulded ring round the rose (the rose itself is the 15th-century Flamboyant one, 9 m, ibid.; kept as built); on the gable a blind pointed arch with an oculus in its head ("a pointed arch with an oculus window at the top", ibid.); an openwork balustrade at the gable's foot ("a balustrade around the base of the roof", ibid.); crocketed gablets and pinnacles over the porch's upper arches [inferred]. The palace's two round towers: a battered foot, slits, a corbel table and a crenellated parapet before the cone [inferred: 13th-century practice].
+
 ## 5. Section and structure
 
 Ashlar limestone; quadripartite rib vaults on wall shafts; the thrust carried by deep buttresses (no flyers), with iron tie-chains hidden in the masonry (standard Rayonnant practice) [inferred]; a steep timber roof covered in lead; the lower chapel's vaults carry the upper floor. [stated: buttresses — europeforvisitors]
@@ -79,6 +81,8 @@ The Palais de la Cité (towers with conical roofs, the great hall), a town of ti
 Paris in the 1240s: the polyphony of the Notre-Dame school — Léonin and Pérotin — organum: a plainchant tenor held in long notes while one to three upper voices move above it in the rhythmic modes (long–short patterns in triple time); plainchant alone in the daily office. [general musicology, e.g. R. Hoppin, *Medieval Music* (1978)] Our synthesis (`src/buildings/sainte-chapelle/music.js`): in the upper chapel a held tenor (on D) with an upper voice moving in the first rhythmic mode in a resonant room; in the lower chapel plainchant alone; outside, a vielle-like bowed drone and bells.
 
 ## 12. Sources
+
+- Wikipedia, "Sainte-Chapelle" (exterior, portals, turrets, rose), mirror. https://exl.pages.dev/Sainte-Chapelle
 
 - European Traveler, "Visit Sainte-Chapelle Paris to See the Best Stained-Glass Windows". https://www.european-traveler.com/france/visit-sainte-chapelle-paris-to-see-the-best-stained-glass-windows/
 - Europe for Visitors, "Sainte-Chapelle". https://europeforvisitors.com/paris/articles/sainte-chapelle.htm
