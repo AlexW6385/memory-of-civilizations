@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.79 — The Lotfollah dome inside; the Taj's screen and bazaars (2026-11-06)
+- Sheikh Lotfollah's chamber inside: the bent passage, lapis and marble walls, eight cable-outlined arches with script bands, squinch hoods, the windowed drum and the buff dome with twelve rings of lemon medallions round a sunburst, the muqarnas mihrab; the Qeysarieh portal's Sagittarius tile panel; horses and people on the square; the Taj's octagonal pierced-marble screen with inlaid frames and kanguras round Mumtaz Mahal's cenotaph; the forecourt's bazaar streets of cusped verandahs with gates; goods, keepers, buyers, horses and boats on the Yamuna.
+
 ## v9.78 — Athens: the Theatre of Dionysos, the Odeion, the houses (2026-11-06)
 - The Theatre of Dionysos of about 410 with its polygonal wooden seating on the slope, the orchestra with its altar and the wooden skene with painted panels, the stoa and the Older Temple behind; the Odeion of Pericles with its ninety columns and hipped roof; on the Acropolis the Brauronion, the bronze Trojan horse, the Chalkotheke with its armour, the Lemnian Athena, stelae and the Mycenaean wall; every house given a court wall, framed door, shuttered windows and plaster gables, those by the ways with a herm at the door and an altar, well-head and jar in the court.
 
