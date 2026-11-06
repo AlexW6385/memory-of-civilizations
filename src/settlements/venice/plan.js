@@ -1,15 +1,16 @@
 // The Piazza San Marco about 1500 (docs/settlements/venice.md §2–§4).
-import { PIAZZA, PIAZZETTA, BASILICA, CAMPANILE, PALACE, GROUND, SEA, BASIN_Z } from './layout.js';
+import { PIAZZA, PIAZZETTA, BASILICA, CAMPANILE, PALACE, CLOCK, GROUND, SEA, BASIN_Z } from './layout.js';
 
 const g = GROUND, E = [
   { t: 'basilica', c: BASILICA.c, s: BASILICA.s, w: BASILICA.w, h: 22, y: g },
   { t: 'bell_tower', c: CAMPANILE, s: 12, h: 98, y: g },
   { t: 'doges_palace', rect: PALACE, h: 25, y: g },
-  { t: 'procuratie', rect: [PIAZZA[0], PIAZZA[1] - 18, PIAZZA[2] - 5, PIAZZA[1]], h: 15, front: 's', y: g },
-  { t: 'procuratie', rect: [PIAZZA[0], PIAZZA[3], CAMPANILE[0] - 12, PIAZZA[3] + 16], h: 14, front: 'n', y: g },
-  { t: 'procuratie', rect: [PIAZZA[0] - 16, PIAZZA[1] - 18, PIAZZA[0], PIAZZA[3] + 16], h: 14, front: 'e', y: g },
-  { t: 'column_statue', c: [PIAZZETTA[0] + 12, PIAZZETTA[3] - 8], h: 14, y: g },
-  { t: 'column_statue', c: [PIAZZETTA[2] - 12, PIAZZETTA[3] - 8], h: 14, y: g },
+  { t: 'procuratie', rect: [PIAZZA[0], PIAZZA[1] - 18, CLOCK[0], PIAZZA[1]], h: 11, front: 's', y: g },
+  { t: 'clock_tower', rect: CLOCK, h: 24, front: 's', y: g },
+  { t: 'procuratie', rect: [PIAZZA[0], PIAZZA[3], CAMPANILE[0] - 12, PIAZZA[3] + 16], h: 11, front: 'n', y: g },
+  { t: 'procuratie', rect: [PIAZZA[0] - 16, PIAZZA[1] - 18, PIAZZA[0], PIAZZA[3] + 16], h: 11, front: 'e', y: g },
+  { t: 'column_statue', c: [PIAZZETTA[0] + 12, PIAZZETTA[3] - 8], h: 12.5, y: g, statue: 'theodore', granite: 'granite_red' },
+  { t: 'column_statue', c: [PIAZZETTA[2] - 12, PIAZZETTA[3] - 8], h: 12.5, y: g, statue: 'lion' },
 ];
 export const sanMarco = {
   id: 'venice-san-marco',

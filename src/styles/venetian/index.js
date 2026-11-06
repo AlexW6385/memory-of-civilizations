@@ -9,6 +9,7 @@ import { box, frustum, lathe, rod } from '../../core/geom.js';
 import '../qing/index.js';
 import { dogesPalace } from './palace.js';
 import { gondola, palo } from './boats.js';
+import { clockTower, procuratieOld, columnStatue } from './piazza.js';
 import { horse, limb } from '../greek/sculpture.js';
 
 const M = 'marble', B = 'brick', L = 'lead', I = 'limestone';
@@ -99,18 +100,8 @@ function bellTower(el, { bag, col }) {
   bag.add('tile_green', frustum([x - s / 2 + 0.5, z - s / 2 + 0.5, x + s / 2 - 0.5, z + s / 2 - 0.5], y + sh + 19, y + h - 2, s / 2 - 0.6, s / 2 - 0.6, s / 2 - 0.6, s / 2 - 0.6));
   bag.add('gilt_bronze', lathe([[0.4, 0], [0.3, 1.5], [0.001, 2.5]], 8, null, x, y + h - 2, z));
 }
-/** procuratie: { rect, h, y, front ('n'|'s'|'e'|'w') } — a long range over a ground-floor arcade. */
-function procuratie(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 15, f = el.front ?? 's', along = f === 'n' || f === 's';
-  bag.add(I, box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y, y + h); col.floor(el.rect, y + h);
-  const L = along ? x1 - x0 : z1 - z0, n = Math.floor(L / 4);
-  for (let i = 0; i < n; i++) for (const [yy, hh] of [[y, 4.5], [y + 6, 3], [y + 10.5, 2.6]]) { const u = (along ? x0 : z0) + (i + 0.5) * L / n; const q = f === 's' ? [u - 1.2, z1 - 0.02, u + 1.2, z1 + 0.06] : f === 'n' ? [u - 1.2, z0 - 0.06, u + 1.2, z0 + 0.02] : f === 'w' ? [x0 - 0.06, u - 1.2, x0 + 0.02, u + 1.2] : [x1 - 0.02, u - 1.2, x1 + 0.06, u + 1.2]; bag.add('opening', box(q[0], yy, q[1], q[2], yy + hh, q[3])); }
-  bag.add('roof_tile', frustum([x0 - 0.4, z0 - 0.4, x1 + 0.4, z1 + 0.4], y + h, y + h + 3, along ? 0 : (x1 - x0) / 2, along ? 0 : (x1 - x0) / 2, along ? (z1 - z0) / 2 : 0, along ? (z1 - z0) / 2 : 0));
-}
-/** column_statue: a tall column with a figure on top { c, h, y }. */
-function columnStatue(el, { bag, col }) { const [x, z] = el.c, h = el.h ?? 14, y = el.y ?? 0; bag.add(I, box(x - 1.6, y - 0.3, z - 1.6, x + 1.6, y + 1.5, z + 1.6)); bag.add('granite_grey', lathe([[0.75, 0], [0.65, h]], 14, null, x, y + 1.5, z)); bag.add('bronze', lathe([[0.6, 0], [0.4, 1.8], [0.001, 2.6]], 8, null, x, y + 1.5 + h, z)); col.circle(x, z, 1.6, y, y + h); }
 registerStyle('venetian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie, column_statue: columnStatue, gondola, palo },
+  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo },
   objects: {},
 });

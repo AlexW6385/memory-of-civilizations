@@ -10,6 +10,8 @@ export const PIAZZA = [-150, -40, 25, 30];
 export const PIAZZETTA = [25, 30, 76, 118];
 export const BASILICA = { c: [62, -5], s: 34, w: 22 };
 export const CAMPANILE = [12, 22];
+export const CLOCK = [6, -50, 14.5, -40];                      // the Clock Tower (1496–99) over the way into the Merceria
+export const MERCERIA = [4, -120, 17, -48];                    // the first stretch of the Merceria behind it, kept clear
 export const PALACE = [80, 32, 150, 100];
 export const BASIN_Z = 122;
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -42,6 +44,7 @@ export function lots() {
     if (inRect(PIAZZA, cx, cz, 8) || inRect(PIAZZETTA, cx, cz, 6) || inRect(PALACE, cx, cz, 6) || inRect([BASILICA.c[0] - 50, BASILICA.c[1] - 35, BASILICA.c[0] + 45, BASILICA.c[1] + 35], cx, cz) || Math.abs((cx + 400) % 44 - 22) < 2 || rand() < 0.1) continue;
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: GROUND, foot: GROUND - 0.5, storeys: 3 + (rand() < 0.5 ? 1 : 0), front: rand() < 0.5 ? 'n' : 's', plaster: true });
   }
+  LOTS = LOTS.filter((l) => !inRect(MERCERIA, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 4));   // after the draw: the other lots stay as they were
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
