@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.77 — The Süleymaniye inside; the Partal and the Rauda (2026-11-06)
+- The Süleymaniye's square prayer hall: four piers, great arches, pendentives with script roundels, the 32-window drum, the painted dome, semidomes and tympana on red granite columns, domed aisles, the muqarnas mihrab, Iznik panels and coloured-glass windows of the qibla wall, the marble minbar, the sultan's loge, the muezzins' platform, the great low lamp rings and carpets; Granada's Partal with its portico, pool and the Tower of the Ladies, the Rauda's mausoleum and garden of tombs, the Alcazaba's keep and Torre de la Vela with the military quarter, houses of the medina inside the walls.
+
 ## v9.76 — The Iron Pagoda's glazed skin; tea houses (2026-11-06)
 - The Iron Pagoda clad in moulded glazed bricks (seated Buddhas in niches, rosettes, flying figures with lions, arched framed openings, glazed bracket sets); the Kaibao gate hall's two clay guardians; horizontal name boards over shop fronts in Kaifeng and Hangzhou; tea houses with landscape scrolls, plum vases, braziers, kettles and black bowls, potted pines and customers; Buddhas on hexagonal thrones with altar tables and carved bases in the Liuhe Pagoda's chambers and corridors.
 
