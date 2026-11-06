@@ -297,7 +297,7 @@ function houseTimber(el, { bag, col }) {
  * tiles with a ridge, small latticed windows and a door on the courtyard side. { rect, y, foot, front, seed }
  */
 function houseChina(el, ctx) {
-  gabledHouse(el, ctx, { H: 3.2, foot: 'brick_grey', walls: ['brick_grey', 'earth_wall'], roof: 'tile_grey', o: 0.5, pitch: 0.62, door: 'timber_red', window: 'timber_red', horns: true, inside: 'china' });
+  gabledHouse(el, ctx, { H: 3.2, foot: 'brick_grey', walls: ['brick_grey', 'earth_wall'], roof: 'tile_grey', soffit: 'timber', o: 0.5, pitch: 0.62, door: 'timber_red', window: 'timber_red', infill: 'lattice', sill: 'brick_grey', frame: 'brick', chimney: true, horns: true, inside: 'china' });
 }
 
 /**
@@ -306,7 +306,8 @@ function houseChina(el, ctx) {
  */
 function houseJapan(el, ctx) {
   const rand = rng((el.seed || 1) + 7);
-  gabledHouse(el, ctx, { H: 2.9, foot: 'limestone', walls: ['timber', 'plaster_white'], roof: rand() < 0.5 ? 'roof_bark' : 'thatch', o: 0.9, pitch: 0.85, door: 'timber', window: 'timber', horns: false, inside: 'japan' });
+  const thatch = rand() >= 0.5;
+  gabledHouse(el, ctx, { H: 2.9, foot: 'limestone', walls: ['timber', 'plaster_white'], roof: thatch ? 'thatch' : 'roof_bark', boards: !thatch, soffit: 'timber', o: 0.9, pitch: thatch ? 1.0 : 0.8, door: 'timber', window: 'timber', frameMat: 'wood_dark', infill: 'koshi', frame: 'posts', gableVent: 'koshi', horns: false, inside: 'japan' });
 }
 
 /**
@@ -314,7 +315,7 @@ function houseJapan(el, ctx) {
  * brick, a low-pitched roof of half-round clay tiles over a verandah front. { rect, y, foot, front, seed }
  */
 function houseIndia(el, ctx) {
-  gabledHouse(el, ctx, { H: 2.8, foot: 'mudbrick', walls: ['plaster', 'earth_wall'], roof: 'roof_tile', o: 0.7, pitch: 0.45, door: 'timber', window: 'timber', horns: false, inside: 'india' });
+  gabledHouse(el, ctx, { H: 3.3, foot: 'mudbrick', walls: ['plaster', 'earth_wall'], roof: 'roof_tile', soffit: 'timber', o: 0.6, pitch: 0.45, door: 'timber', window: 'wood_dark', frameMat: 'timber', infill: 'bars', winW: 0.8, winH: 0.85, verandah: true, horns: false, inside: 'india' });
 }
 
 /**
@@ -322,7 +323,7 @@ function houseIndia(el, ctx) {
  * yellow stone, small windows, a steep roof of schist slabs (lauzes). { rect, y, foot, front, seed }
  */
 function houseRouergue(el, ctx) {
-  gabledHouse(el, ctx, { H: 3.0, foot: 'schist_rubble', walls: ['schist_rubble', 'limestone_yellow'], roof: 'lauze', o: 0.4, pitch: 1.0, door: 'timber', window: 'timber', horns: false });
+  gabledHouse(el, ctx, { H: 3.0, foot: 'schist_rubble', walls: ['schist_rubble', 'limestone_yellow'], roof: 'lauze', soffit: 'timber', o: 0.4, pitch: 1.0, door: 'timber', window: 'timber', frameMat: 'limestone_yellow', lintel: 'limestone_yellow', sill: 'limestone_yellow', infill: 'shutter', winW: 0.6, winH: 0.75, winY: 1.4, frame: 'quoins', horns: false });
 }
 
 /**
@@ -388,6 +389,40 @@ function openGabled(bag, col, el, O, mat, { L, f, H, nb }) {
   }
 }
 
+/** Orient each triangle of `t` away from the point c (for convex pieces); returns t. */
+function orientFrom(t, c) {
+  for (let i = 0; i < t.length; i += 9) {
+    const ux = t[i + 3] - t[i], uy = t[i + 4] - t[i + 1], uz = t[i + 5] - t[i + 2], vx = t[i + 6] - t[i], vy = t[i + 7] - t[i + 1], vz = t[i + 8] - t[i + 2];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const mx = (t[i] + t[i + 3] + t[i + 6]) / 3 - c[0], my = (t[i + 1] + t[i + 4] + t[i + 7]) / 3 - c[1], mz = (t[i + 2] + t[i + 5] + t[i + 8]) / 3 - c[2];
+    if (nx * mx + ny * my + nz * mz < 0) for (let k = 0; k < 3; k++) { const q = t[i + 3 + k]; t[i + 3 + k] = t[i + 6 + k]; t[i + 6 + k] = q; }
+  }
+  return t;
+}
+/**
+ * A sloping slab of roof between the four top corners q (in order round it), th thick: its top in
+ * `top`, its underside and edges (the eave board, the verges) in `under`.
+ */
+function roofSlab(bag, top, under, q, th, skipEdge = -1) {
+  const b = q.map((p) => [p[0], p[1] - th, p[2]]), c = [0, 0, 0];
+  for (const p of [...q, ...b]) for (let k = 0; k < 3; k++) c[k] += p[k] / 8;
+  const T = [], U = [];
+  T.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]);
+  U.push(...b[0], ...b[2], ...b[1], ...b[0], ...b[3], ...b[2]);
+  for (let i = 0; i < 4; i++) { if (i === skipEdge) continue; const j = (i + 1) % 4; U.push(...q[i], ...q[j], ...b[j], ...q[i], ...b[j], ...b[i]); }
+  bag.add(top, fromTriangles(orientFrom(T, c)));
+  bag.add(under, fromTriangles(orientFrom(U, c)));
+}
+
+/**
+ * The village house with a gabled roof (china, japan, india, rouergue): a footing, the walls (or the
+ * open house's hollow walls, openGabled), framed windows and a framed plank door, the region's wall
+ * frame (O.frame: 'posts' — the Japanese timber frame of posts, sill and head beams; 'brick' — grey
+ * brick piers and dado round earth walls; 'quoins' — dressed corner stones in rubble walls), a roof of
+ * real thickness — the slopes with their boards seen under the eaves, the verges, the ridge — and the
+ * region's extras (the kang's chimney, the thatch ridge's crossed poles, a board roof held by poles
+ * and stones, the verandah).
+ */
 function gabledHouse(el, { bag, col }, O) {
   const rand = rng(el.seed || 1);
   const [x0, z0, x1, z1] = el.rect, y = el.y, H = O.H;
@@ -396,46 +431,141 @@ function gabledHouse(el, { bag, col }, O) {
   const f = el.front || 's', along = f === 's' || f === 'n';
   const L = along ? x1 - x0 : z1 - z0;
   const OPEN = !!el.open && !el.simple;
-  if (!OPEN) { bag.add(mat, box(x0, y + 0.45, z0, x1, y + H, z1)); col.rect([x0, z0, x1, z1], el.foot - 0.6, y + H); }
-  else openGabled(bag, col, el, O, mat, { L, f, H, nb: Math.max(2, Math.floor(L / 3.2)) });
-  const open = (u, v0, w, h, m = 'opening') => {
-    if (u + w > L - 0.3) return;
-    if (f === 's') bag.add(m, box(x0 + u, y + v0, z1, x0 + u + w, y + v0 + h, z1 + 0.04));
-    if (f === 'n') bag.add(m, box(x0 + u, y + v0, z0 - 0.04, x0 + u + w, y + v0 + h, z0));
-    if (f === 'e') bag.add(m, box(x1, y + v0, z0 + u, x1 + 0.04, y + v0 + h, z0 + u + w));
-    if (f === 'w') bag.add(m, box(x0 - 0.04, y + v0, z0 + u, x0, y + v0 + h, z0 + u + w));
-  };
   const n = Math.max(2, Math.floor(L / 3.2));
+  if (!OPEN) { bag.add(mat, box(x0, y + 0.45, z0, x1, y + H, z1)); col.rect([x0, z0, x1, z1], el.foot - 0.6, y + H); }
+  else openGabled(bag, col, el, O, mat, { L, f, H, nb: n });
+  // a frame on each face: u along it from its low corner, d out from it, heights above y
+  const len = (fc) => (fc === 'n' || fc === 's' ? x1 - x0 : z1 - z0);
+  const put = (fc, m, u0, u1, ya, yb, d0, d1) => {
+    const al = fc === 'n' || fc === 's', a0 = al ? x0 : z0, fp = fc === 'n' ? z0 : fc === 's' ? z1 : fc === 'w' ? x0 : x1, sg = fc === 'n' || fc === 'w' ? -1 : 1;
+    const p0 = fp + sg * d0, p1 = fp + sg * d1, lo = Math.min(p0, p1), hi = Math.max(p0, p1);
+    bag.add(m, al ? box(a0 + u0, y + ya, lo, a0 + u1, y + yb, hi) : box(lo, y + ya, a0 + u0, hi, y + yb, a0 + u1));
+  };
+  const back = { n: 's', s: 'n', e: 'w', w: 'e' }[f], sides = along ? ['w', 'e'] : ['n', 's'];
+  const fm = O.frameMat ?? O.window;
+  // a window: the dark opening, the frame and sill, and the region's filling (lattice, bars, shutters)
+  const win = (fc, u, v0, w, h) => {
+    const Lf = len(fc), a = u - w / 2, b = u + w / 2, fr = 0.09;
+    if (a - fr < 0.3 || b + fr > Lf - 0.3) return;
+    put(fc, 'opening', a, b, v0, v0 + h, 0, 0.012);
+    put(fc, fm, a - fr, a, v0, v0 + h + fr, 0, 0.07); put(fc, fm, b, b + fr, v0, v0 + h + fr, 0, 0.07); put(fc, fm, a, b, v0 + h, v0 + h + fr, 0, 0.07);
+    put(fc, O.sill ?? fm, a - fr - 0.04, b + fr + 0.04, v0 - 0.08, v0, 0, 0.12);
+    if (O.infill === 'bars') for (let k = 1; k < 5; k++) put(fc, O.window, a + k * w / 5 - 0.02, a + k * w / 5 + 0.02, v0, v0 + h, 0.012, 0.05);
+    else if (O.infill === 'shutter') {
+      if (rand() < 0.35) put(fc, O.window, a, b, v0, v0 + h, 0.012, 0.05);
+      else for (const [s0, s1] of [[a - fr - w / 2, a - fr], [b + fr, b + fr + w / 2]]) if (s0 > 0.05 && s1 < Lf - 0.05) put(fc, O.window, s0, s1, v0, v0 + h, 0, 0.04);
+    } else put(fc, O.infill ?? O.window, a, b, v0, v0 + h, 0.012, 0.035);
+  };
+  // the closed house's door: a leaf of boards in its frame, a lintel, a step down to the ground
+  const door = (u) => {
+    const w = 1.0, h = 2.05, v0 = 0.45, a = u - w / 2, b = u + w / 2, fr = 0.1;
+    put(f, O.door, a, b, v0, v0 + h, 0, 0.03);
+    for (let k = 1; k < 5; k++) put(f, 'wood_dark', a + k * w / 5 - 0.008, a + k * w / 5 + 0.008, v0 + 0.02, v0 + h - 0.02, 0.03, 0.036);
+    put(f, fm, a - fr, a, v0, v0 + h, 0, 0.08); put(f, fm, b, b + fr, v0, v0 + h, 0, 0.08);
+    put(f, O.lintel ?? fm, a - fr - 0.12, b + fr + 0.12, v0 + h, v0 + h + 0.18, 0, 0.1);
+    put(f, O.sill ?? O.foot, a - 0.25, b + 0.25, el.foot - y - 0.3, 0.22, 0.1, 0.5);
+  };
+  // the door's bay (the open house's way in is cut by openGabled, whose frame runs the other way on
+  // the south and west fronts)
+  const dU0 = (Math.floor(n / 2) + 0.5) * L / n, doorU = OPEN && (f === 's' || f === 'w') ? L - dU0 : dU0;
   for (let k = 0; k < n; k++) {
     const u = (k + 0.5) * L / n;
-    if (k === Math.floor(n / 2)) { if (!OPEN) open(u - 0.55, 0.45, 1.1, 2.1, O.door); }
-    else open(u - 0.6, 1.2, 1.2, 1.1, O.window);
+    if (Math.abs(u - doorU) < 0.1) { if (!OPEN) door(u); }
+    else win(f, u, O.winY ?? 1.2, (O.winW ?? 1.0) * (1 + rand() * 0.25), O.winH ?? 1.0);
   }
-  // the roof: a gable over the long side, grey tiles, a ridge with raised ends
-  const o = O.o, ye = y + H;
-  const tris = [];
-  let ridge;
-  if ((x1 - x0) >= (z1 - z0)) {
-    const zm = (z0 + z1) / 2, rise = (z1 - z0) / 2 * O.pitch;
-    const a = [x0 - o, ye, z0 - o], b = [x1 + o, ye, z0 - o], c = [x1 + o, ye, z1 + o], d = [x0 - o, ye, z1 + o], t0 = [x0 - o, ye + rise, zm], t1 = [x1 + o, ye + rise, zm];
-    tris.push(...a, ...b, ...t1, ...a, ...t1, ...t0, ...d, ...t0, ...t1, ...d, ...t1, ...c);
-    bag.add(mat, fromTriangles([x0, ye, z0, x0, ye + rise - 0.2, zm, x0, ye, z1, x1, ye, z0, x1, ye, z1, x1, ye + rise - 0.2, zm]));
-    ridge = box(x0 - o, ye + rise - 0.05, zm - 0.18, x1 + o, ye + rise + 0.35, zm + 0.18);
-    if (O.horns) for (const xx of [x0 - o, x1 + o]) bag.add('tile_grey', box(xx - 0.25, ye + rise, zm - 0.2, xx + 0.25, ye + rise + 0.75, zm + 0.2));
-  } else {
-    const xm = (x0 + x1) / 2, rise = (x1 - x0) / 2 * O.pitch;
-    const a = [x0 - o, ye, z0 - o], b = [x1 + o, ye, z0 - o], c = [x1 + o, ye, z1 + o], d = [x0 - o, ye, z1 + o], t0 = [xm, ye + rise, z0 - o], t1 = [xm, ye + rise, z1 + o];
-    tris.push(...a, ...t0, ...t1, ...a, ...t1, ...d, ...b, ...c, ...t1, ...b, ...t1, ...t0);
-    bag.add(mat, fromTriangles([x0, ye, z0, x1, ye, z0, xm, ye + rise - 0.2, z0, x0, ye, z1, xm, ye + rise - 0.2, z1, x1, ye, z1]));
-    ridge = box(xm - 0.18, ye + rise - 0.05, z0 - o, xm + 0.18, ye + rise + 0.35, z1 + o);
-    if (O.horns) for (const zz of [z0 - o, z1 + o]) bag.add('tile_grey', box(xm - 0.2, ye + rise, zz - 0.25, xm + 0.2, ye + rise + 0.75, zz + 0.25));
+  // fewer, smaller windows at the back
+  for (let k = 0; k < n; k++) if (rand() < 0.45) win(back, (k + 0.5) * L / n, 1.5, 0.7, 0.7);
+  // the region's wall frame
+  if (O.frame === 'posts') {
+    // posts at the corners and between the bays, the sill beam on the stones and the head beam
+    for (const fc of [f, back, ...sides]) {
+      const Lf = len(fc), nb = fc === f || fc === back ? n : Math.max(1, Math.round(Lf / 2.4));
+      for (let k = 1; k < nb; k++) { const u = k * Lf / nb; put(fc, 'wood_dark', u - 0.08, u + 0.08, 0.45, H, 0, 0.05); }
+      put(fc, 'wood_dark', 0, Lf, 0.45, 0.62, 0, 0.06); put(fc, 'wood_dark', 0, Lf, H - 0.42, H - 0.26, 0, 0.06);
+    }
+    for (const [cx, cz] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) bag.add('wood_dark', box(cx - 0.11, y + 0.45, cz - 0.11, cx + 0.11, y + H, cz + 0.11));
+  } else if (O.frame === 'brick' && mat === 'earth_wall') {
+    // the grey brick frame of an earth-walled house: a dado, piers at the corners, a band under the eaves
+    for (const fc of [f, back, ...sides]) {
+      const Lf = len(fc);
+      if (fc === f) { put(fc, 'brick_grey', 0, doorU - 0.72, 0.45, 1.25, 0, 0.04); put(fc, 'brick_grey', doorU + 0.72, Lf, 0.45, 1.25, 0, 0.04); }
+      else put(fc, 'brick_grey', 0, Lf, 0.45, 1.25, 0, 0.04);
+      put(fc, 'brick_grey', 0, Lf, H - 0.35, H, 0, 0.04);
+    }
+    for (const [cx, cz] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) bag.add('brick_grey', box(cx - 0.32, y + 1.25, cz - 0.32, cx + 0.32, y + H - 0.35, cz + 0.32));
+  } else if (O.frame === 'quoins' && mat === 'schist_rubble') {
+    // dressed corner stones, long and short in turn, in the rubble walls
+    let k = 0;
+    for (let v = 0.45; v + 0.3 <= H; v += 0.32, k++) {
+      for (const [cx, sx] of [[x0, 1], [x1, -1]]) for (const [cz, sz] of [[z0, 1], [z1, -1]]) {
+        const lx = k % 2 ? 0.55 : 0.3, lz = k % 2 ? 0.3 : 0.55;
+        const xa = Math.min(cx - sx * 0.03, cx + sx * lx), xb = Math.max(cx - sx * 0.03, cx + sx * lx), za = Math.min(cz - sz * 0.03, cz + sz * lz), zb = Math.max(cz - sz * 0.03, cz + sz * lz);
+        bag.add('limestone_yellow', box(xa, y + v, za, xb, y + v + 0.3, zb));
+      }
+    }
   }
-  for (let i = 0; i < tris.length; i += 9) {
-    const ux = tris[i + 3] - tris[i], uz = tris[i + 5] - tris[i + 2], vx = tris[i + 6] - tris[i], vz = tris[i + 8] - tris[i + 2];
-    if (uz * vx - ux * vz < 0) for (let k = 0; k < 3; k++) { const t = tris[i + 3 + k]; tris[i + 3 + k] = tris[i + 6 + k]; tris[i + 6 + k] = t; }
+  // the verandah (India): a lean-to of tiles on posts over a raised mud platform along the front
+  let frontO = null;
+  if (O.verandah) {
+    const vd = 1.45, yv = H - 0.3, pv = 0.26, Lf = len(f);
+    put(f, O.foot, 0, Lf, el.foot - y - 0.6, 0.45, 0.1, vd + 0.15);
+    { const al = along, fp = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1, p0 = fp, p1 = fp + sg * (vd + 0.15);
+      col.floor(al ? [x0, Math.min(p0, p1), x1, Math.max(p0, p1)] : [Math.min(p0, p1), z0, Math.max(p0, p1), z1], y + 0.45); }
+    const np = Math.max(2, Math.round(Lf / 2.4) + 1);
+    for (let k = 0; k < np; k++) { const u = 0.25 + k * (Lf - 0.5) / (np - 1); put(f, 'timber', u - 0.08, u + 0.08, 0.45, yv - vd * pv - 0.14, vd - 0.2, vd - 0.04); }
+    put(f, 'timber', 0.1, Lf - 0.1, yv - vd * pv - 0.3, yv - (vd - 0.2) * pv - 0.13, vd - 0.24, vd);
+    const W = (u, d, h) => { const fp = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1; return along ? [x0 + u, y + h, fp + sg * d] : [fp + sg * d, y + h, z0 + u]; };
+    roofSlab(bag, O.roof, O.soffit, [W(-0.15, 0, yv), W(Lf + 0.15, 0, yv), W(Lf + 0.15, vd + 0.2, yv - (vd + 0.2) * pv), W(-0.15, vd + 0.2, yv - (vd + 0.2) * pv)], 0.1, 0);
+    frontO = 0.3;
   }
-  bag.add(O.roof, fromTriangles(tris));
-  bag.add(O.roof === 'tile_grey' ? 'tile_grey' : 'roof_ridge', ridge);
+  // the roof: two slabs from the eaves to the ridge, the gables walled up under them
+  const o = O.o * (0.9 + rand() * 0.2), p = O.pitch * (0.92 + rand() * 0.16), th = 0.16, ye = y + H;
+  const ridgeX = (x1 - x0) >= (z1 - z0);
+  const s0 = (ridgeX ? x0 : z0) - o, s1 = (ridgeX ? x1 : z1) + o, t0 = ridgeX ? z0 : x0, t1 = ridgeX ? z1 : x1, tm = (t0 + t1) / 2, hw = (t1 - t0) / 2, yr = ye + hw * p;
+  const Wr = (s, t, h) => (ridgeX ? [s, h, t] : [t, h, s]);
+  // which roof side faces the front (for the verandah's short front eave)
+  const frontSide = ridgeX ? (f === 's' ? 1 : f === 'n' ? -1 : 0) : (f === 'e' ? 1 : f === 'w' ? -1 : 0);
+  const shingle = O.boards && rand() < 0.4;
+  const roofMat = shingle ? 'planks_grey' : O.roof;
+  for (const side of [-1, 1]) {
+    const oo = frontO !== null && side === frontSide ? frontO : o, te = side < 0 ? t0 - oo : t1 + oo, ee = ye - oo * p;
+    roofSlab(bag, roofMat, O.soffit, [Wr(s0, te, ee), Wr(s1, te, ee), Wr(s1, tm, yr), Wr(s0, tm, yr)], th, 2);
+  }
+  for (const [sw, sg] of [[ridgeX ? x0 : z0, -1], [ridgeX ? x1 : z1, 1]]) {
+    const tr = [...Wr(sw, t0, ye), ...Wr(sw, tm, yr - th), ...Wr(sw, t1, ye)];
+    bag.add(mat, fromTriangles(orientFrom(tr, Wr(sw - sg, tm, ye))));
+    // a vent high in the gable (Japan: the smoke's way out under the ridge)
+    if (O.gableVent) { const g = (yr - ye) * 0.55; const q = ridgeX ? box(sw - (sg < 0 ? 0.04 : 0), ye + g - 0.25, tm - 0.4, sw + (sg > 0 ? 0.04 : 0), ye + g + 0.25, tm + 0.4) : box(tm - 0.4, ye + g - 0.25, sw - (sg < 0 ? 0.04 : 0), tm + 0.4, ye + g + 0.25, sw + (sg > 0 ? 0.04 : 0)); bag.add(O.gableVent, q); }
+  }
+  // the ridge, and the region's crown on it
+  const thick = O.roof === 'thatch' && !shingle;
+  const rw = thick ? 0.3 : 0.18, rh = thick ? 0.38 : 0.3;
+  bag.add(O.roof === 'tile_grey' ? 'tile_grey' : thick ? 'roof_bark' : 'roof_ridge', ridgeX ? box(s0 - 0.05, yr - 0.08, tm - rw, s1 + 0.05, yr + rh, tm + rw) : box(tm - rw, yr - 0.08, s0 - 0.05, tm + rw, yr + rh, s1 + 0.05));
+  if (O.horns) for (const ss of [s0, s1]) bag.add('tile_grey', ridgeX ? box(ss - 0.25, yr, tm - 0.2, ss + 0.25, yr + 0.75, tm + 0.2) : box(tm - 0.2, yr, ss - 0.25, tm + 0.2, yr + 0.75, ss + 0.25));
+  if (thick) {
+    // the thatch ridge's crossed poles (karasu-odori), pairs along it
+    const nk = Math.max(3, Math.round((s1 - s0) / 1.3));
+    for (let k = 0; k < nk; k++) {
+      const ss = s0 + 0.5 + k * (s1 - s0 - 1.0) / (nk - 1);
+      bag.add('wood_dark', rod(Wr(ss, tm - 0.42, yr + 0.05), Wr(ss, tm + 0.18, yr + 0.62), 0.045, 5));
+      bag.add('wood_dark', rod(Wr(ss, tm + 0.42, yr + 0.05), Wr(ss, tm - 0.18, yr + 0.62), 0.045, 5));
+    }
+  }
+  if (shingle) {
+    // boards held down by poles laid along the slopes and stones on them
+    for (const side of [-1, 1]) for (const fr of [0.3, 0.65]) {
+      const t = tm + side * fr * hw, h = yr - fr * hw * p + 0.06;
+      bag.add('wood_dark', rod(Wr(s0 + 0.1, t, h), Wr(s1 - 0.1, t, h), 0.06, 6));
+      for (let ss = s0 + 0.5 + rand() * 0.4; ss < s1 - 0.4; ss += 0.9 + rand() * 0.5) { const q = Wr(ss, t, h + 0.04); bag.add('rock_boulder', lathe([[0.17, 0], [0.19, 0.08], [0.12, 0.17], [0.001, 0.2]], 6, null, q[0], q[1], q[2])); }
+    }
+  }
+  if (O.chimney && rand() < 0.7) {
+    // the kang's flue rising at one gable end
+    const ss = rand() < 0.5 ? s0 + o + 0.35 : s1 - o - 0.35, t = tm + (rand() < 0.5 ? -1 : 1) * hw * 0.45, c = Wr(ss, t, 0);
+    const top = yr + 0.5;
+    bag.add('brick_grey', box(c[0] - 0.28, ye - 0.2, c[2] - 0.28, c[0] + 0.28, top, c[2] + 0.28));
+    bag.add('tile_grey', box(c[0] - 0.36, top, c[2] - 0.36, c[0] + 0.36, top + 0.1, c[2] + 0.36));
+  }
 }
 
 /**
