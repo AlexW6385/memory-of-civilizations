@@ -47,18 +47,62 @@ function okPyramid(el, { bag, col }) {
   }
 }
 
-/** mastaba: a tomb of stone (or mudbrick) { c, a, b (half-sizes), h, mat, door ('e' default) }: battered walls, a flat top, an offering niche (false door) on its east face. */
+/**
+ * mastaba: a tomb of Khufu's cemeteries (docs/settlements/giza.md §4.4) { c, a, b (half-sizes: a east–west, b
+ * north–south, the long axis), h, mat, seed }: the core of great limestone blocks in stepped courses (or, cased in
+ * fine Tura stone, a smooth battered face), a flat top; at the south end of the east face the slab stela set into the
+ * stone — the owner seated at the table of offerings, with the lists of his offerings — enclosed in a small chapel of
+ * mud brick with its door to the east and a roof of palm logs and mud; an offering basin before the stela, bread and
+ * a beer jar on it.
+ */
 function mastaba(el, { bag, col }) {
-  const [cx, cz] = el.c, { a, b, h } = el, batter = h * 0.13;
-  frust(bag, el.mat || 'limestone_core', cx, cz, a, b, a - batter, b - batter, 0, h);
-  bag.add('limestone_core', box(cx - a + batter - 0.2, h, cz - b + batter - 0.2, cx + a - batter + 0.2, h + 0.3, cz + b - batter + 0.2));
-  // the false door: a tall recessed panel on the east face, a little chapel before it
-  const ex = cx + a - batter * 0.6;
-  bag.add('lacquer_black', box(ex - 0.05, 0.1, cz - 0.6, ex + 0.05, h * 0.7, cz + 0.6));
-  bag.add(el.mat || 'limestone_core', box(ex, 0, cz - 2.2, ex + 2.6, 2.4, cz - 1.8));
-  bag.add(el.mat || 'limestone_core', box(ex, 0, cz + 1.8, ex + 2.6, 2.4, cz + 2.2));
+  const [cx, cz] = el.c, { a, b, h } = el, rand = rng(el.seed ?? Math.floor(cx * 31 + cz * 17)), cased = el.mat === 'tura_limestone';
+  const batter = h * 0.13, n = Math.max(3, Math.round(h / 0.8)), m = el.mat || 'limestone_core';
+  const half = (y) => (cased ? batter * y / h : batter * Math.min(n - 1, Math.floor(y / h * n)) / (n - 1));      // how far the face has stepped in at y
+  if (cased) frust(bag, m, cx, cz, a, b, a - batter, b - batter, 0, h);
+  else for (let k = 0; k < n; k++) { const i = batter * k / (n - 1), y0 = h * k / n, y1 = h * (k + 1) / n; bag.add(m, box(cx - a + i, k ? y0 : -0.3, cz - b + i, cx + a - i, y1, cz + b - i)); }
+  bag.add('limestone_core', box(cx - a + batter + 0.15, h, cz - b + batter + 0.15, cx + a - batter - 0.15, h + 0.12, cz + b - batter - 0.15));
   col.rect([cx - a, cz - b, cx + a, cz + b], 0, h);
-  col.floor([cx - a + batter, cz - b + batter, cx + a - batter, cz + b - batter], h + 0.3);
+  col.floor([cx - a + batter, cz - b + batter, cx + a - batter, cz + b - batter], h + 0.12);
+  // the slab stela in its emplacement near the south end of the east face, at the height of a kneeling offerer's eyes
+  const sz = cz + b - 2.6, sy = 1.05, sw = 0.53, sh = 0.38, fx = cx + a - half(sy + 0.2);
+  const S = (y0, z0, y1, z1, d0, d1, mat = 'limestone_carved') => bag.add(mat, box(fx + d0, sy + y0, sz + z0, fx + d1, sy + y1, sz + z1));
+  S(-0.04, -sw / 2 - 0.04, sh + 0.04, sw / 2 + 0.04, -0.02, 0.025, 'limestone_core');                         // the emplacement's frame
+  S(0, -sw / 2, sh, sw / 2, 0.025, 0.05);                                                                   // the slab
+  // in relief (facing east, the owner on the south looking north): the seat with its bull's legs, the figure, the table of loaves
+  // (painted, as the slab stelae were: the man red-brown, his kilt white, the loaves yellow, the signs blue and green)
+  const R = (y0, z0, y1, z1, mat, d = 0.068) => S(y0, z0, y1, z1, 0.05, d, mat);
+  R(0.04, 0.06, 0.09, 0.17, 'timber'); R(0.04, 0.16, 0.08, 0.18, 'timber');                                   // the stool and its leg
+  R(0.09, 0.08, 0.17, 0.15, 'plaster_white');                                                                // the kilt
+  R(0.17, 0.09, 0.27, 0.14, 'paint_robe'); R(0.27, 0.095, 0.31, 0.135, 'paint_robe'); R(0.2, 0.03, 0.22, 0.1, 'paint_robe');   // the body, the head, the arm reaching out
+  R(0.29, 0.1, 0.32, 0.14, 'lacquer_black', 0.074);                                                                 // the wig
+  R(0.035, 0.03, 0.1, 0.06, 'paint_robe'); R(0.02, 0.015, 0.035, 0.06, 'paint_robe');                        // the shins and the feet
+  R(0.04, -0.075, 0.1, -0.04, 'terracotta'); R(0.1, -0.068, 0.12, -0.047, 'terracotta');                      // a jar under the table
+  R(0.04, -0.02, 0.15, 0.0, 'paint_ochre'); R(0.15, -0.09, 0.165, 0.05, 'paint_ochre');                     // the table's stand and top
+  for (let k = 0; k < 6; k++) R(0.165, -0.08 + k * 0.022, 0.2 + 0.035 * Math.sin(k / 5 * Math.PI), -0.069 + k * 0.022, 'limewash_yellow');   // the half loaves standing on it
+  for (let k = 0; k < 4; k++) R(0.05, -0.24 + k * 0.035, 0.33, -0.225 + k * 0.035, k % 2 ? 'fresco_green' : 'egyptian_blue');   // the columns of the offering list
+  R(0.33, -0.25, 0.345, 0.25, 'egyptian_blue');
+  // the chapel of mud brick round it
+  const th = 0.45, cd = 2.9, cw = 3.4, H = 2.3, x0 = cx + a, x1 = x0 + cd, z0 = sz - cw / 2, z1 = sz + cw / 2, xin = cx + a - batter - 0.1;
+  const W = (r, y0, y1, mat = 'mudbrick') => { bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
+  W([xin, z0, x1, z0 + th], -0.2, H); W([xin, z1 - th, x1, z1], -0.2, H);
+  const dz = sz + (rand() - 0.5) * 0.6, dw = 0.85, dh = 1.75;
+  W([x1 - th, z0 + th, x1, dz - dw / 2], -0.2, H); W([x1 - th, dz + dw / 2, x1, z1 - th], -0.2, H); W([x1 - th, dz - dw / 2, x1, dz + dw / 2], dh + 0.15, H);
+  bag.add('palm_trunk', box(x1 - th - 0.05, dh, dz - dw / 2 - 0.25, x1 + 0.03, dh + 0.15, dz + dw / 2 + 0.25));                    // the lintel
+  bag.add('mud_plaster', box(x1 - th, -0.02, dz - dw / 2, x1, 0.04, dz + dw / 2));
+  // the roof: palm logs laid across from wall to wall under a skin of mud
+  const rx0 = cx + a - half(H) - 0.05;
+  for (let x = rx0 + 0.2; x < x1 - 0.1; x += 0.3) bag.add('palm_trunk', lathe([[0.1, 0], [0.1, cw]], 7).rotateX(Math.PI / 2).translate(x, H - 0.1, z0));
+  W([rx0, z0, x1, z1], H, H + 0.22, 'mud_plaster'); col.floor([rx0, z0, x1, z1], H + 0.22);
+  // inside: the offering basin of limestone before the stela, loaves and a jar on it; the floor of beaten mud
+  bag.add('mud_plaster', box(x0, -0.02, z0 + th, x1 - th, 0.03, z1 - th));
+  const bx = x0 + 0.55, bw = 0.42, bd = 0.32;
+  bag.add('limestone_core', box(bx - bd, 0.03, sz - bw, bx + bd, 0.12, sz + bw));
+  for (const [p, q] of [[[bx - bd, sz - bw], [bx + bd, sz - bw + 0.06]], [[bx - bd, sz + bw - 0.06], [bx + bd, sz + bw]], [[bx - bd, sz - bw], [bx - bd + 0.06, sz + bw]], [[bx + bd - 0.06, sz - bw], [bx + bd, sz + bw]]]) bag.add('limestone_core', box(p[0], 0.12, p[1], q[0], 0.2, q[1]));
+  col.rect([bx - bd, sz - bw, bx + bd, sz + bw], 0, 0.2);
+  for (let k = 0; k < 3; k++) bag.add('limewash_yellow', lathe([[0.06, 0], [0.065, 0.03], [0.04, 0.07], [0.001, 0.08]], 8, null, bx - 0.1 + k * 0.1, 0.12, sz - 0.15 + (k % 2) * 0.12));
+  bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.01], [0.11, 0.18], [0.1, 0.3], [0.05, 0.36], [0.055, 0.4], [0.001, 0.4]], 10, null, bx + 0.05, 0.12, sz + 0.2));
+  if (rand() < 0.5) bag.add('pottery_dark', lathe([[0.001, 0], [0.07, 0.02], [0.13, 0.1], [0.12, 0.13], [0.001, 0.06]], 10, null, x0 + 0.45, 0.03, z1 - th - 0.35));
 }
 
 /**
@@ -86,8 +130,73 @@ function okTemple(el, { bag, col }) {
       s = g1;
     }
   });
-  // roofed parts round the court: slabs from the walls to the pillars
-  for (const r of [[x0, z0, x1, d0], [x0, d1, x1, z1], [x0, d0, c0, d1], [c1, d0, x1, d1]]) if (r[2] - r[0] > 0.5 && r[3] - r[1] > 0.5) bag.add('tura_limestone', box(r[0], h - 0.9, r[1], r[2], h, r[3]));
+  // roofed parts round the court: slabs from the walls to the pillars, their undersides painted as the night sky
+  for (const [r, cs] of [[[x0, z0, x1, d0], 3], [[x0, d1, x1, z1], 1], [[x0, d0, c0, d1], 2], [[c1, d0, x1, d1], 0]]) if (r[2] - r[0] > 0.5 && r[3] - r[1] > 0.5) {
+    bag.add('tura_limestone', box(r[0], h - 0.9, r[1], r[2], h, r[3]));
+    const q = [Math.max(r[0], x0 + th / 2), Math.max(r[1], z0 + th / 2), Math.min(r[2], x1 - th / 2), Math.min(r[3], z1 - th / 2)];
+    q[cs] += cs < 2 ? 0.7 : -0.7;                                         // clear of the architrave over the pillars
+    if (q[2] > q[0] && q[3] > q[1]) bag.add('vault_stars', box(q[0], h - 0.93, q[1], q[2], h - 0.906, q[3]));
+  }
+  // the painted reliefs on the inner faces of the walls (the court's walls carried the king's jubilee): registers of
+  // figures walking toward the temple's axis on blue ground lines, under a band of blue and a frieze of khekher knots
+  const gapsOf = (i, L) => (i === doorSide || (i === back && el.backDoor) ? [[L / 2 - 2.6, L / 2 + 2.6]] : []);
+  walls.forEach(([a, b], i) => {
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux;   // the inward normal
+    const off = th / 2, gaps = gapsOf(i, L), regH = 1.95, top = h - 1.15, nReg = Math.max(1, Math.floor((top - 0.9) / regH)), F = Math.min(1.45, (top - 1.05) / 1.06);
+    const P = (s, d) => [a[0] + ux * s + nx * (off + d), a[1] + uz * s + nz * (off + d)];
+    const slab = (mat, s0, s1, y0, y1, d0, d1) => { const p = P(s0, d0), q = P(s1, d1); bag.add(mat, box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1]))); };
+    const free = (s0, s1) => s0 > off + 0.3 && s1 < L - off - 0.3 && !gaps.some(([g0, g1]) => s1 > g0 && s0 < g1);
+    // a polygon in the wall's plane — points [u (along the wall), v (up)] — raised d off the face
+    const relief = (mat, pts, d) => {
+      const T = [], W3 = (u, v, dd) => { const p = P(u, dd); return [p[0], v, p[1]]; };
+      let ar = 0; for (let j = 0; j < pts.length; j++) { const p = pts[j], q = pts[(j + 1) % pts.length]; ar += p[0] * q[1] - q[0] * p[1]; }
+      const Q = ar < 0 ? pts.slice().reverse() : pts;
+      for (let j = 1; j < Q.length - 1; j++) T.push(...W3(...Q[0], d), ...W3(...Q[j], d), ...W3(...Q[j + 1], d));
+      for (let j = 0; j < Q.length; j++) { const p = Q[j], q = Q[(j + 1) % Q.length]; T.push(...W3(...p, 0), ...W3(...q, 0), ...W3(...q, d), ...W3(...p, 0), ...W3(...q, d), ...W3(...p, d)); }
+      bag.add(mat, fromTriangles(T));                    // counter-clockwise in (u, v) faces off the wall, the sides outward
+    };
+    // an offering bearer striding toward the wall's middle (dir +1 along the wall, −1 back): the near leg forward,
+    // the kilt, the broad shoulders, the wig, one arm hanging and the other bringing what he carries
+    const bearer = (s, y, dir, n) => {
+      const G = (pts) => pts.map(([u, v]) => [s + dir * u * F, y + v * F]);
+      relief('paint_robe', G([[-0.02, 0.47], [0.03, 0.47], [0.165, 0.02], [0.11, 0.02]]), 0.02);                      // the forward leg
+      relief('paint_robe', G([[-0.04, 0.47], [0.01, 0.47], [-0.09, 0.02], [-0.14, 0.02]]), 0.018);                    // the back leg
+      relief('paint_robe', G([[0.1, 0], [0.22, 0], [0.2, 0.025], [0.11, 0.03]]), 0.02); relief('paint_robe', G([[-0.15, 0], [-0.04, 0], [-0.06, 0.025], [-0.14, 0.03]]), 0.018);
+      relief('plaster_white', G([[-0.075, 0.62], [0.075, 0.62], [0.15, 0.42], [-0.1, 0.43]]), 0.026);                // the kilt, its pleated front
+      relief('paint_robe', G([[-0.06, 0.615], [0.06, 0.615], [0.12, 0.82], [0.05, 0.845], [-0.05, 0.845], [-0.12, 0.82]]), 0.022);   // the body
+      relief('paint_robe', G([[-0.025, 0.84], [0.025, 0.84], [0.03, 0.87], [-0.025, 0.87]]), 0.022);                  // the neck
+      relief('paint_robe', G([[-0.045, 0.87], [0.04, 0.87], [0.06, 0.9], [0.072, 0.925], [0.055, 0.935], [0.05, 0.97], [0.0, 0.99], [-0.045, 0.97]]), 0.022);   // the face in profile
+      relief('lacquer_black', G([[-0.06, 0.885], [0.025, 0.95], [0.04, 0.985], [0.0, 1.005], [-0.055, 0.99], [-0.07, 0.94]]), 0.026);   // the wig
+      relief('paint_robe', G([[-0.12, 0.82], [-0.08, 0.82], [-0.075, 0.5], [-0.105, 0.5]]), 0.018);                   // the far arm, hanging
+      relief('paint_robe', G([[0.08, 0.82], [0.12, 0.8], [0.15, 0.68], [0.25, 0.71], [0.25, 0.74], [0.13, 0.725], [0.1, 0.8]]), 0.03);   // the near arm, held out
+      const it = n % 4;
+      if (it === 0) relief('limewash_yellow', G([[0.2, 0.74], [0.32, 0.74], [0.3, 0.78], [0.26, 0.8], [0.22, 0.78]]), 0.034);            // a loaf on the hand
+      else if (it === 1) relief('terracotta', G([[0.22, 0.73], [0.27, 0.73], [0.29, 0.78], [0.27, 0.84], [0.265, 0.87], [0.235, 0.87], [0.225, 0.84], [0.205, 0.78]]), 0.034);   // a beer jar
+      else if (it === 2) relief('fresco_green', G([[0.24, 0.74], [0.255, 0.74], [0.26, 0.9], [0.31, 0.97], [0.25, 0.94], [0.19, 0.97], [0.24, 0.9]]), 0.034);   // a lotus
+      else relief('paint_ochre', G([[0.18, 0.74], [0.33, 0.745], [0.36, 0.78], [0.3, 0.8], [0.2, 0.79]]), 0.034);                         // a trussed fowl
+    };
+    for (let k = 0; k < nReg; k++) {
+      const y = 0.9 + k * regH;
+      for (const [s0, s1] of [[off + 0.3, L - off - 0.3]]) {
+        let u = s0;
+        for (const [g0, g1] of [...gaps, [L, L]]) { const e = Math.min(s1, g0); if (e - u > 0.5) slab('egyptian_blue', u, e, y - 0.05, y, 0, 0.02); u = Math.max(u, g1); }
+      }
+      const mid = L / 2;
+      for (let s = off + 1.0; s < L - off - 0.8; s += 1.35) {
+        if (!free(s - 0.5, s + 0.5)) continue;
+        bearer(s, y, s < mid ? 1 : -1, Math.round(s / 1.35) + k);
+      }
+    }
+    let u = off;
+    for (const [g0, g1] of [...gaps, [L, L]]) {
+      const e = Math.min(L - off, g0);
+      if (e - u > 0.5) {
+        slab('egyptian_blue', u, e, top, top + 0.08, 0, 0.02);
+        for (let s = u + 0.15; s < e - 0.1; s += 0.22) slab('paint_ochre', s - 0.05, s + 0.05, top + 0.1, top + 0.2, 0, 0.02);
+      }
+      u = Math.max(u, g1);
+    }
+  });
   // the pillars of red granite round the court, their architraves
   const n = el.pillars ?? 6;
   for (const [a, b] of [[[c0, d0], [c1, d0]], [[c1, d0], [c1, d1]], [[c1, d1], [c0, d1]], [[c0, d1], [c0, d0]]]) {

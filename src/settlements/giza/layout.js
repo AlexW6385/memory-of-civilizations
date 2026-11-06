@@ -45,16 +45,18 @@ export function plateau(x, z) {
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 let MASTABAS = null;
-/** The mastabas in their streets: { c, a, b, h, mat } in the west and east fields. */
+/** The mastabas in their streets (docs/settlements/giza.md §4.4): { c, a (half east–west), b (half north–south), h, mat,
+ *  seed } — rows along streets running north–south, crossed by east–west streets, the long axis of each tomb north–south
+ *  and its chapel on the east face, in the West Field and the East Field. */
 export function mastabas() {
   if (MASTABAS) return MASTABAS;
   MASTABAS = [];
   const rand = rng(2560);
   for (const [F, mat] of [[WEST_FIELD, 'limestone_core'], [EAST_FIELD, 'tura_limestone']]) {
-    for (let x = F[0] + 12; x < F[2] - 12; x += 30) for (let z = F[1] + 10; z < F[3] - 10; z += 18) {
-      const c = [x + (rand() - 0.5) * 2, z + (rand() - 0.5) * 2];
-      if (Math.hypot(c[0], c[1]) > RADIUS - 30 || rand() < 0.15) continue;
-      MASTABAS.push({ c, a: 9 + rand() * 4, b: 4.5 + rand() * 1.5, h: 4 + rand() * 2.5, mat });
+    for (let x = F[0] + 10; x < F[2] - 14; x += 21) for (let z = F[1] + 16; z < F[3] - 14; z += 32) {
+      const c = [x + (rand() - 0.5) * 1.2, z + (rand() - 0.5) * 1.5], a = 4.6 + rand() * 1.4, b = 9 + rand() * 4.5;
+      if (Math.hypot(c[0] + a + 3, c[1]) > RADIUS - 30 || Math.hypot(c[0], c[1] + b) > RADIUS - 30 || Math.hypot(c[0], c[1] - b) > RADIUS - 30 || rand() < 0.12) continue;
+      MASTABAS.push({ c, a, b, h: 4.2 + rand() * 2.4, mat, seed: Math.floor(rand() * 1e6) });
     }
   }
   return MASTABAS;
