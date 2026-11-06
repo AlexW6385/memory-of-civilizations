@@ -1,10 +1,21 @@
 // Kilwa about 1330 (docs/settlements/kilwa.md §2–§4): the Great Mosque, Husuni Kubwa and its pool, dhows on the beach.
-import { MOSQUE, PALACE, POOL, height } from './layout.js';
+import { MOSQUE, PALACE, POOL, height, inLot } from './layout.js';
 
 const E = [];
 E.push({ t: 'swahili_mosque', rect: MOSQUE, bay: 4.6, big: [6, 5], y: height(-10, 15) });
 E.push({ t: 'husuni', rect: PALACE, pool: POOL, y: 10 });
-for (let k = 0; k < 6; k++) { const x = -150 + k * 32; E.push({ t: 'boat', at: [x, -128 - 15 * Math.sin(x / 60) + 6], dir: [0.3, 1], len: 12 + (k % 3) * 2, y: -0.4 }); }
+// mtepe, the sewn boats of the coast, drawn up along the top of the beach above the tide line
+// (the shore drops steeply below), clear of the houses
+const shoreAt = (x) => -120 - 15 * Math.sin(x / 60);
+for (let k = 0, x = -170; k < 7 && x < 60; x += 9) {
+  for (let d = 9.5; d < 16; d += 0.5) {
+    const z = shoreAt(x) + d, L = 11 + (k % 3) * 2, a = [x - L / 2 - 1, z], b = [x + L / 2 + 1, z];
+    const hs = [a, [x, z], b, [x, z - 2.2], [x, z + 2.2], [a[0], z - 2], [b[0], z + 2]].map(([p, q]) => height(p, q));
+    if (Math.max(...hs) - Math.min(...hs) > 0.25 || [a, [x, z], b].some(([p, q]) => inLot(p, q, 3.5))) continue;
+    E.push({ t: 'mtepe', at: [x, z], dir: [k % 2 ? 1 : -1, 0.08 * (k % 3 - 1)], len: L, y: Math.min(...hs) - 0.05, seed: 40 + k });
+    k++; x += L; break;
+  }
+}
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 export const kilwa = {
   id: 'kilwa-mosque',

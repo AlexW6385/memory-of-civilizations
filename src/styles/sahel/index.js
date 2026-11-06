@@ -19,7 +19,7 @@ function taper(bag, x, z, y0, y1, r0, r1, cap = 0) {
 }
 
 /** Flip each triangle so that it faces along want(centroid). */
-function orientBy(tris, want) {
+export function orientBy(tris, want) {
   for (let i = 0; i < tris.length; i += 9) {
     const a = [tris[i], tris[i + 1], tris[i + 2]], b = [tris[i + 3], tris[i + 4], tris[i + 5]], c = [tris[i + 6], tris[i + 7], tris[i + 8]];
     const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
@@ -33,8 +33,8 @@ function orientBy(tris, want) {
  * The solid over a pointed arch between zA and zB in a wall at x (half-thickness t): from the arch
  * (springing at ys, two arcs of radius 0.75 × the span) up to yT; its faces and the soffit.
  */
-export function pointedSpandrel(out, x, t, zA, zB, ys, yT, alongX = false) {
-  const span = zB - zA, R = span * 0.75, N = 10, P = [];
+export function pointedSpandrel(out, x, t, zA, zB, ys, yT, alongX = false, kR = 0.75) {
+  const span = zB - zA, R = span * kR, N = 10, P = [];
   for (let k = 0; k <= N; k++) {
     const z = zA + span * k / N, c = z <= zA + span / 2 ? zA + R : zB - R;
     P.push([z, Math.min(yT - 0.05, ys + Math.sqrt(Math.max(0, R * R - (z - c) * (z - c))))]);
