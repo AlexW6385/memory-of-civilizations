@@ -19,6 +19,14 @@ function wineShops() {
   const near = (l) => { const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2; return Math.hypot(cx - BRIDGE.at[0], cz - BRIDGE.at[1]); };
   return lots().filter((l) => l.shop && l.storeys === 2 && l.rect[2] - l.rect[0] > 0 && near(l) < 140).sort((a, b) => near(a) - near(b)).filter((l, i, all) => all.slice(0, i).every((m) => Math.hypot(m.rect[0] - l.rect[0], m.rect[1] - l.rect[1]) > 18)).slice(0, 5);
 }
+/** The tea houses: the two one-storey shops on the north riverside street nearest the bridge. */
+let TEA = null;
+function teaHouses() {
+  if (TEA) return TEA;
+  const near = (l) => Math.abs((l.rect[0] + l.rect[2]) / 2 - BRIDGE.at[0]);
+  TEA = lots().filter((l) => l.front === 's' && l.shop && l.storeys === 1 && Math.abs(l.rect[3] - (RIVER.z0 - 14)) < 1 && l.rect[2] - l.rect[0] > 8 && l.rect[3] - l.rect[1] > 11).sort((a, b) => near(a) - near(b)).slice(0, 2);
+  return TEA;
+}
 function frontLine(l) {
   const [x0, z0, x1, z1] = l.rect, f = l.front;
   if (f === 's') return { a: [x0 + 0.5, z1], b: [x1 - 0.5, z1], out: FR.s };
@@ -75,10 +83,21 @@ function scroll() {
   for (let k = 0; k < 5; k++) L.push({ t: 'animal', kind: 'camel', at: [WALL_X + 11 + k * 3.6, GATE.z + (k % 2 ? 0.3 : -0.3)], y: 0, rot: -Math.PI / 2 - (k % 2 ? 0.04 : -0.04), seed: 77 + k });
   person([WALL_X + 11 + 5 * 3.6 + 0.4, GATE.z - 0.9], 0, faceTo([1, 0]), { dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_ochre', hat: 'brim', skin: 'skin_medium' });
   person([WALL_X + 10, GATE.z + 1.4], 0, faceTo([1, 0]), { dress: 'robe', cloth: 'cloth_grey', hat: 'brim', skin: 'skin_medium' });
+  // ---- the tea houses on the riverside street by the bridge: tables and customers inside, the host at the counter, the name board
+  for (const l of teaHouses()) {
+    const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2 - 0.6, Y = 0.45;
+    S.push({ t: 'tea_house', rect: l.rect, y: 0, seed: l.seed });
+    S.push({ t: 'shop_plaque', at: [(x0 + x1) / 2, z1 - 0.435], y: 0, yb: 3.3, rot: 0, n: 2, scheme: 0, seed: l.seed >> 5 });
+    for (const zz of [z0 + 3.9, z0 + 7.5]) {
+      L.push({ t: 'tea_table', at: [cx, zz], y: Y, rot: 0, seed: Math.floor(rand() * 1e9) });
+      for (const [dx, dz] of [[0.85, 0], [-0.85, 0], [0, 0.85], [0, -0.85]]) if (rand() < 0.6) person([cx + dx, zz + dz], Y, faceTo([-dx, -dz]), { pose: 'sit', dress: 'robe', hat: rand() < 0.6 ? 'cap' : 'none' });
+    }
+    person([x1 - 1.15, z0 + 5.5], Y, faceTo([-1, 0]), { pose: 'stand', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_black', hat: 'cap' });
+  }
   // ---- the shops' name boards over their fronts (the wine shops have their colour gates and lantern boxes instead)
-  const wine = new Set(wineShops());
+  const wine = new Set(wineShops()), tea = new Set(teaHouses());
   for (const l of lots()) {
-    if (!l.shop || wine.has(l)) continue;
+    if (!l.shop || wine.has(l) || tea.has(l)) continue;
     const F = frontLine(l), m = [(F.a[0] + F.b[0]) / 2 - F.out[0] * 0.505, (F.a[1] + F.b[1]) / 2 - F.out[1] * 0.505], L = Math.hypot(F.b[0] - F.a[0], F.b[1] - F.a[1]);
     const n = Math.min(Math.floor((L - 0.6) / 0.36), 2 + (l.seed % 4));
     if (n >= 2) S.push({ t: 'shop_plaque', at: m, y: 0, rot: Math.atan2(F.out[0], F.out[1]), n, scheme: [0, 0, 1, 2][l.seed % 4 === 3 ? (l.seed >> 3) % 4 : (l.seed >> 2) % 3], seed: l.seed >> 5 });
@@ -168,7 +187,7 @@ function more(S, L, rand, person, pick) {
 }
 
 export async function town() {
-  const all = lots(), plans = [];
+  const tea = new Set(teaHouses()), all = lots().filter((l) => !tea.has(l)), plans = [];
   for (let i = 0; i < all.length; i += 150) plans.push(base(`song-kaifeng-houses-${i / 150}`, all.slice(i, i + 150).map((l) => ({ t: 'house_jiangnan', y: 0, ...l }))));
   plans.push(...scroll());
   return plans;
