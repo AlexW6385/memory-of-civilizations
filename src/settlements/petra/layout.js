@@ -32,7 +32,13 @@ export const EAST_WIDE = 0.035;
 export const KHAZNEH_ROCK = [88, -174, 111, -146];
 export const OUTER = { path: [[128, -160], [126, -120], [108, -82], [80, -52], [40, -20]], w: 34 };
 export const VALLEY = { c: [-70, 10], r: [175, 120] };
-export const STREET = { a: [60, 12], b: [-128, 12], w: 7 };
+export const STREET = { a: [60, 12], b: [-104, 12], w: 6 };
+/** The Great Temple's precinct south of the street, the temenos of Qasr al-Bint at its west end, the temple and its altar (plan.js). */
+export const GREAT_TEMPLE = [-86, 20.9, -30, 100];
+export const TEMENOS = [-172, -26, -104, 42];
+export const QASR = { rect: [-166, 8, -138, 36], altar: [-152, -14] };
+/** Inside the precincts (nothing planted, no houses). */
+export const sacred = (x, z, m = 0) => inRect([GREAT_TEMPLE[0] - 1, GREAT_TEMPLE[1], GREAT_TEMPLE[2] + 1, GREAT_TEMPLE[3] + 1], x, z, m) || inRect([TEMENOS[0] - 1, TEMENOS[1], TEMENOS[2], TEMENOS[3]], x, z, m);
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 function segDist(x, z, a, b) { const dx = b[0] - a[0], dz = b[1] - a[1], t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t); }
@@ -77,7 +83,7 @@ export function lots() {
   for (let x = -230; x < 60; x += 13) for (let z = -100; z < 120; z += 12) {
     const e = Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]);
     if (e > 0.9 || Math.abs(z - 12) < 22 || rand() < 0.35) continue;
-    if (inRect([-175, -20, -125, 30], x, z, 6) || inRect([-90, 26, -30, 76], x, z, 6) || x > 20 && z > -40) continue;
+    if (sacred(x, z, 6) || sacred(x + 11, z + 10, 6) || sacred(x + 11, z, 6) || sacred(x, z + 10, 6) || x > 20 && z > -40) continue;
     const w = 7 + rand() * 4, d = 7 + rand() * 3;
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
   }

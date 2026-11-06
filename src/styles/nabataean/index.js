@@ -2,7 +2,7 @@
 // the rose sandstone cliffs — the Khazneh's two storeys of columns with a tholos between broken
 // pediments; tombs with pilasters, a cornice and crow-step merlons; the theatre's cavea cut in the
 // rock; free-standing temples of ashlar on podiums (Qasr al-Bint); the colonnaded street; flat-
-// roofed stone houses.
+// roofed stone houses. The city's street and temples: city.js.
 
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
@@ -10,6 +10,7 @@ import '../qing/index.js';
 import { khazneh, floralCapital } from './khazneh.js';
 import { siqWalls } from './siq.js';
 import { crowTomb, royalTomb } from './tombs.js';
+import { colonnadeStreet as street, greatTemple, qasr } from './city.js';
 
 const R = 'sandstone_rose', A = 'sandstone_rose_ashlar';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -122,34 +123,6 @@ function theatre(el, { bag, col: C }) {
   }
 }
 
-/** podium_temple: Qasr al-Bint { rect, h, podium, dir ('n' — the portico's side) }: an ashlar temple on a podium, a portico of four columns in antis, a stair. */
-function podiumTemple(el, { bag, col: C }) {
-  const [x0, z0, x1, z1] = el.rect, pd = el.podium ?? 3, h = el.h ?? 23, pz = z0 + (z1 - z0) * 0.22;
-  bag.add(A, box(x0 - 1, -0.5, z0 - 1, x1 + 1, pd, z1 + 1)); C.rect([x0 - 1, z0 - 1, x1 + 1, z1 + 1], 0, pd); C.floor([x0 - 1, z0 - 1, x1 + 1, z1 + 1], pd);
-  bag.add(A, box(x0, pd, pz, x1, h - 3, z1)); C.rect([x0, pz, x1, z1], pd, h);
-  for (const xx of [x0, x1 - 1.6]) bag.add(A, box(xx, pd, z0, xx + 1.6, h - 3, pz));
-  for (let i = 1; i <= 4; i++) { const x = x0 + (x1 - x0) * i / 5; bag.add(A, lathe([[1, 0], [0.9, h - 3 - pd - 1], [1.2, h - 3 - pd]], 12, null, x, pd, (z0 + pz) / 2)); C.circle(x, (z0 + pz) / 2, 1, pd, h); }
-  bag.add(A, box(x0 - 0.4, h - 3, z0 - 0.4, x1 + 0.4, h - 1.4, z1 + 0.4));
-  bag.add('plaster', box(x0 + 0.5, h - 1.4, z0 + 0.5, x1 - 0.5, h, z1 - 0.5));
-  for (let i = 0; i < 10; i++) { const x = x0 + (i + 0.5) * (x1 - x0) / 10; bag.add(A, box(x - 0.6, h - 1.4, z0 - 0.3, x + 0.6, h - 0.2, z0 + 0.6)); }
-  E_stair(bag, C, [x0 + 4, z0 - 1 - pd * 2.5, x1 - 4, z0 - 1], pd);
-}
-function E_stair(bag, C, r, h) {
-  const n = Math.round(h / 0.2), d = (r[3] - r[1]) / n;
-  for (let i = 0; i < n; i++) { const y = (i + 1) * h / n, z = r[3] - (i + 1) * d; bag.add(A, box(r[0], -0.3, z, r[2], y, z + d + 0.01)); C.floor([r[0], z, r[2], z + d], y); }
-}
-
-/** colonnade_street: a paved street { a, b, w } between two rows of columns. */
-function colonnadeStreet(el, { bag, col: C }) {
-  const [ax, az] = el.a, [bx, bz] = el.b, w = el.w ?? 6, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
-  bag.add('flagstone', orientedBox(el.a, el.b, w, -0.3, 0.05));
-  const n = Math.floor(L / 3.5);
-  for (const s of [-1, 1]) for (let i = 0; i <= n; i++) {
-    const x = ax + ux * L * i / n + nx * s * (w / 2 + 1), z = az + uz * L * i / n + nz * s * (w / 2 + 1);
-    bag.add(A, lathe([[0.5, 0], [0.42, 6], [0.6, 6.5]], 10, null, x, 0, z)); C.circle(x, z, 0.45, 0, 6.5);
-  }
-}
-
 /** nabataean_house: { rect, seed, y }: a flat-roofed house of rose ashlar, a stair to the roof. */
 function house(el, { bag, col: C }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = rand() < 0.5 ? 3.4 : 6.4;
@@ -159,6 +132,6 @@ function house(el, { bag, col: C }) {
 
 registerStyle('nabataean', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, khazneh, siq_walls: siqWalls, rock_tomb: (el, ctx) => (['pylon', 'step', 'hegr', 'crowstep'].includes(el.kind ?? 'crowstep') ? crowTomb : ['urn', 'corinthian', 'palace'].includes(el.kind) ? royalTomb : rockTomb)(el, ctx), theatre, podium_temple: podiumTemple, colonnade_street: colonnadeStreet, nabataean_house: house },
+  elements: { ...STYLES.qing.elements, khazneh, siq_walls: siqWalls, rock_tomb: (el, ctx) => (['pylon', 'step', 'hegr', 'crowstep'].includes(el.kind ?? 'crowstep') ? crowTomb : ['urn', 'corinthian', 'palace'].includes(el.kind) ? royalTomb : rockTomb)(el, ctx), theatre, colonnade_street: street, great_temple: greatTemple, qasr, nabataean_house: house },
   objects: {},
 });

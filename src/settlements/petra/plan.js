@@ -2,7 +2,7 @@
 // mouth, the Street of Façades, the theatre, the Royal Tombs in the east cliff, the colonnaded
 // street, the Great Temple and Qasr al-Bint.
 
-import { PLAZA, OUTER, SIQ, STREET, RIM, VALLEY, SIQ_LINE, SIQ_WALL, KHAZNEH_ROCK, THEATRE, height, pathDist } from './layout.js';
+import { PLAZA, OUTER, SIQ, STREET, GREAT_TEMPLE, TEMENOS, QASR, RIM, VALLEY, SIQ_LINE, SIQ_WALL, KHAZNEH_ROCK, THEATRE, height, pathDist } from './layout.js';
 
 const E = [];
 let SIQ_EL = null;
@@ -145,14 +145,17 @@ const ROYAL = [];
   E.push({ t: 'siq_walls', face, sides, seed: 7, clear: [[100, -185, 160, -135]] });
 }
 // the colonnaded street, the Great Temple on the south, Qasr al-Bint at the west end
-E.push({ t: 'colonnade_street', a: STREET.a, b: STREET.b, w: STREET.w });
-E.push({ t: 'podium_temple', rect: [-72, 40, -44, 74], h: 18, podium: 2.5 });
-E.push({ t: 'podium_temple', rect: [-164, -6, -132, 26], h: 23, podium: 3 });
+// (no shops where the Great Temple's propylaeum opens off the southern portico)
+E.push({ t: 'colonnade_street', a: STREET.a, b: STREET.b, w: STREET.w, pd: 5, h: 6, gaps: [[GREAT_TEMPLE[0] - 1, GREAT_TEMPLE[2] + 1]] });
+E.push({ t: 'great_temple', rect: GREAT_TEMPLE });
+E.push({ t: 'qasr', rect: QASR.rect, podium: 3, h: 23, altar: QASR.altar, court: TEMENOS });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // the little square before the Khazneh is no market (and no street life spills into the Siq): its room is named so that the
 // life pass reads it as a forecourt (a few people about), and stops short of the Siq's mouth
-const rooms = [room('the forecourt of the Khazneh', [PLAZA.c[0] - PLAZA.r + 6, PLAZA.c[1] - PLAZA.r + 4, PLAZA.c[0] + PLAZA.r - 12, PLAZA.c[1] + PLAZA.r - 4], 0, 'open'), room('the city', [-200, -80, 60, 100], 0, 'open')];
+const rooms = [room('the forecourt of the Khazneh', [PLAZA.c[0] - PLAZA.r + 6, PLAZA.c[1] - PLAZA.r + 4, PLAZA.c[0] + PLAZA.r - 12, PLAZA.c[1] + PLAZA.r - 4], 0, 'open'), room('the city', [-200, -80, 60, 100], 0, 'open'),
+  room('the Great Temple', [GREAT_TEMPLE[0] + 7, GREAT_TEMPLE[1] + 52, GREAT_TEMPLE[2] - 7, GREAT_TEMPLE[1] + 64], 5.92, 'hall'),
+  room('Qasr al-Bint', [QASR.rect[0] + 3, QASR.rect[1] + 9, QASR.rect[2] - 3, QASR.rect[1] + 18], 3.02, 'hall')];
 const walks = [[[180, -152], [150, -161], [132, -160], [126, -125], [100, -80], [40, -10], [0, 12]]];
 walks[0].y0 = 0;
 

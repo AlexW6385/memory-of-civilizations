@@ -2,7 +2,7 @@
 // valley's dry slopes with oleander and tamarisk in the wadi bed, junipers and grass on the
 // heights; the desert sky.
 
-import { RADIUS, RIM, STREET, open, height, inLot, behindWalls } from './layout.js';
+import { RADIUS, RIM, STREET, open, height, inLot, behindWalls, sacred } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.5, grass: 0, rock: 0, soil: 0.3, fields: 0, dry: 0.9, warmth: 0.85, red: 0.8, road: 0, snow: 0, forest: 0 };
@@ -19,7 +19,7 @@ function planting(x, z) {
   const o = open(x, z);
   if (o < 0.2) return { grass_dry: 2, maquis: 0.05 };
   if (o < 0.95) return null;
-  if (Math.abs(z - STREET.a[1]) < 10) return null;
+  if (Math.abs(z - STREET.a[1]) < 17 || sacred(x, z, 2)) return null;
   return { oleander: 0.06, tamarisk: 0.04, grass_dry: 6 };
 }
 export const ground = {
