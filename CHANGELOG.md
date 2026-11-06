@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.43 — The Süleymaniye külliye (2026-11-06)
+- The four medreses with domed porticoes, chimneyed cells and dershanes, the arasta shops, the darüşşifa with its octagonal pool, the imaret's kitchens and bakery, the hamam with its 3×3 hot room and glass bulbs, the dar'ül-hadis; Iznik tiles in Hürrem Sultan's türbe.
+
 ## v9.42 — Third wave: materials, shared styles, tools and follow-ups (2026-11-06)
 - New materials (soapstone, carved limestone, spotted dolerite, breccia, bitumen, water jets and foam, pietra dura, Iznik tile, mirror work, pāua, tukutuku, kōwhaiwhai, cast-iron plates, rough banco) used across ten sites; the shared figures, animals, stalls, carts and boats rebuilt with regional dress; vernacular houses with framed windows, real eaves and a Mamluk Cairo house type; ming roofs laid along their hips, scroll ridge ends, leaky windows, Taihu rocks, canal walls and landings; surface-check rewritten (streams, reports failed builds, fits big sites), showroom --inplace/--ground/--timeout, plan-check and walk-check for settlements; Foguang's Tang bracket sets and altar, the Dome of the Rock's walls, the Phoenix Hall's Amida, Sainte-Chapelle's west front; Tenochtitlan's calli houses, tecpan palace, tzompantli and ballcourt; Persepolis' lamassu, throne-hall door reliefs and traces of colour; Babylon's palace against its wall; the Hephaisteion, Agora stoas, Tholos and the Erechtheion's north court; the Taj's closed iwan recesses, garden and riverfront; the Court of the Myrtles, Comares and the halls round the Lions; Joseon white upper walls, dancheong and brackets, Beijing's corner towers and moat wall, the Potala's Deyang Shar, triple stair and banner, Bete Giyorgis' pit re-proportioned; Nara's deep eaves; rare street-life shapes merged indexed.
 
