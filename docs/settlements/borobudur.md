@@ -62,6 +62,10 @@ Bronze gongs and metallophones in an interlocking pattern, a bamboo flute (a plu
 | Spouts | A makara spout at each outer corner of the base and of each square terrace, below the balustrade: a channel block, brow, hanging jaw, eyes and rising snout, pointing out along the corner's bisector | 100 spouts in the form of makaras at the corners of the tiers, draining the galleries [stated: arisguide; skylineaparthistory]; ours one per outer corner (72) [inferred] |
 | Pilgrims | Monks in ochre and red robes and lay pilgrims in wraps, some carrying offerings, walking each gallery clockwise (the monument on their right), now and then in pairs | pilgrims walk the path round the monument and climb terrace by terrace past the reliefs [stated: skylineaparthistory]; the clockwise circumambulation and the dress [inferred] |
 
+## 11. The round terraces' spacing (2026-11-06)
+
+The 72 stupas, 32, 24 and 16 on the three round terraces, the top tier's "slightly smaller" [stated: arisguide]; the stairs run up through the round terraces on the four axes [stated: arisguide]. Ours: in each quarter of a terrace the stupas spaced evenly between the axes, leaving 2.2 m between the cushions where the stairs (2 m wide) come up; every stupa set back so that its lotus cushion stands 0.25 m clear of its terrace's edge; the bells 1.45 m in radius on the two lower terraces and 1.35 m on the top one [inferred from photographs].
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)

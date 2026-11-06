@@ -73,6 +73,16 @@ Sources added:
 - [Ali Qapu — Encyclopaedia Iranica](https://iranicaonline.org/articles/ali-qapu)
 - [Ali Qapu — Wikipedia](https://en.wikipedia.org/wiki/Ali_Qapu)
 
+## 12. Ali Qapu inside; the arcade shops (2026-11-06)
+
+**Ali Qapu's interior.** Six floors, "each reached by a steep spiral staircase"; the music hall on the top floor, its walls set with deep niches and "cut-out plaster decorations ... depict[ing] pots and vessels", ornamental and said to carry sound clearly; the reception floors above with the largest rooms [stated: Wikipedia]. The gateway "a central vaulted passage flanked by two storeys of smaller rooms", the tālār on top; behind it a square building of three principal levels with its reception chamber on the tālār's level, flanked by storeys of smaller rooms; Della Valle (1617) climbed "a narrow stairway" to many small rooms; an enclosed stairway on the south side of the square building gave access to the tālār [stated: Encyclopaedia Iranica]. Ours: in the gate block a vaulted passage (a shallow segmental vault with two ribs) from the door on the square, solid piers either side, the hall of the chancellery over it on painted beams; in the tower behind, on the south side, an enclosed stair winding round a square newel in four steep flights a storey (riser 0.2 m, about 39°) with a door into every floor; the reception chamber at the tālār's level (13 m) opening on the tālār through three doors, with carpets and a low throne platform with bolsters; two storeys of rooms (19.5, 26 m); the music room at the top (32.5 m), its walls lined with stucco 0.22 m thick cut through in rows of vessels — long-necked bottles, vases, goblets, jars — under a row of arched niches, the cut-outs showing a darker plaster behind; wooden lattice in every window; hanging lamps. The square stair stands for the spiral ones, and the storey heights are ours [inferred].
+
+**The square's shops.** "A continuous two-story arcade of shops" round the square, about 200 shops [stated: audiala; iransafar]. Ours: behind each lower arch a shop front on the rooms behind the arcade's passage — door leaves folded open, a lattice transom — and a stone platform with wares (cloth, rolled carpets, copper vessels, jars), in each upper arch a lattice balustrade [inferred from Iranian bazaar practice].
+
+Sources added:
+- [Ali Qapu — Wikipedia](https://en.wikipedia.org/wiki/Ali_Qapu)
+- [Ali Qapu — Encyclopaedia Iranica](https://iranicaonline.org/articles/ali-qapu)
+
 ## Sources
 
 - [Naqsh-e Jahan Square — Wikipedia](https://en.wikipedia.org/wiki/Naqsh-e_Jahan_Square)

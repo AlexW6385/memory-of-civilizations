@@ -66,6 +66,17 @@ The temple ensemble (gong circles, xylophones, oboe) — a plucked string and a 
 | Libraries | A hall on a raised platform with steps on all four sides; porticoes on all four sides under pediments; the nave raised over half-vaulted aisles with a clerestory and its own vault and pediments | two "jewel-box" libraries either side of the causeway, and two smaller ones of "similar form" by the cloister [stated: factsanddetails]; the porticoes on four sides, the raised nave and the rectangular platform [inferred from the Khmer library type] |
 | Lions | Seated guardian lions on moulded pedestals flanking the steps on the three sides of the Terrace of Honour, which now has steps on its north and south sides | "lions on pedestals flank the steps on three sides of the Terrace of Honor" [stated: factsanddetails; Phnom Penh Post] |
 
+## 11. The cruciform cloister and the Bakan's stairs (2026-11-06)
+
+**Preah Poan.** The cross-shaped galleries "a Khmer architectural invention" linking the first and second levels; the Hall of a Thousand Buddhas reached from them [stated: penang-traveltips]. "Two covered galleries in a cross shape, supported by square columns", the court "divided into four equal parts with paved basins and steps"; the Hall of Echoes "the gallery on the left" of the cross-shaped galleries, named for its acoustics [stated: Phnom Penh Post]. A basin at each corner of the cruciform gallery; doorways north, east, south and west under carved pediments; praying ascetics carved on the pillar bases; rosettes on the beams [stated: helloangkor]. Ours: between the third gallery's west entrance and the second level, the axial gallery from the entrance to the foot of the stair up to the second level and the transverse gallery across it, both on square pillars on a moulded plinth, a square crossing under a taller vault with a pediment on each face; on the north (the left, coming in from the west) the Hall of Echoes walled on both sides, lit by balustered windows, entered only from the crossing gallery; on the south a gallery open on pillars to the court; in each of the four courts a sunken basin about 12.8 × 7.8 m, its sides stepped down in three tiers of 0.5 m to a paved floor, the water over the lowest tier [inferred: sizes and tiers ours].
+
+**The Bakan's stairs.** "Twelve sets of stairs with forty steps each, ascending at a seventy-degree angle" to the upper level [stated: Phnom Penh Post]; "breakneck steep" [stated: penang-traveltips]. Ours: the four axial stairs, forty steps of 0.325 m over 6.5 m (about 63°, a little gentler than stated, to stay walkable), 3.2 m wide between stepped cheek walls rising with them in flights of four steps; the eight others left for later [inferred].
+
+Sources added:
+- [The Architecture of Angkor Wat — Phnom Penh Post](https://phnompenhpost.com/national/architecture-angkor-wat)
+- [Angkor Wat – Preah Poan (Hall of a Thousand Buddhas) — helloangkor](https://helloangkor.com/attractions/angkor-wat-preah-poan-hall-of-a-thousand-buddhas)
+- [Angkor Wat inner sanctuary — penang-traveltips](https://penang-traveltips.com/cambodia/angkor/angkor-wat/inner-sanctuary.htm)
+
 ## Sources
 
 - [Angkor Wat — wondermondo](https://wondermondo.com/angkor-wat)
