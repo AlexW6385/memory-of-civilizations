@@ -12,12 +12,13 @@ import '../maya/index.js';
 import '../../objects/index.js';
 import { Kit, carved, serpentHeadKit, chacmoolKit } from '../maya/meso.js';
 import { calli, tecpan, tzompantli } from './houses.js';
+import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causewayStakes } from './precinct.js';
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const stairs = (el, ctx) => STYLES.qing.elements.stairs(el, ctx);
 /** A serpent's head in plaster at (x, y, z), jaws toward (dx, dz) (meso.js); `kind`: 'tlaloc' (goggled) or 'feathered'. */
-function serpentHead(bag, x, y, z, dx, dz, s = 1, kind = 'feathered') {
+export function serpentHead(bag, x, y, z, dx, dz, s = 1, kind = 'feathered') {
   serpentHeadKit({ stone: W, goggles: kind === 'tlaloc', plumes: kind !== 'tlaloc' }).emit(bag, x - dx * 0.3 * s, y, z - dz * 0.3 * s, dx, dz, s);
 }
 
@@ -25,7 +26,7 @@ function serpentHead(bag, x, y, z, dx, dz, s = 1, kind = 'feathered') {
  * Treads up a stair { rect, y0, y1, dir (the way up) }: each a block a little deeper than its riser,
  * in `mat`, with a band of `riser` paint on its face where given (Tlaloc's stair blue and white).
  */
-function treads(bag, col, [x0, z0, x1, z1], y0, y1, dir, mat, riser = null) {
+export function treads(bag, col, [x0, z0, x1, z1], y0, y1, dir, mat, riser = null) {
   const alongZ = dir === 'n' || dir === 's', len = alongZ ? z1 - z0 : x1 - x0, n = Math.max(1, Math.round((y1 - y0) / 0.22)), rs = (y1 - y0) / n;
   for (let k = 0; k < n; k++) {
     const f0 = k / n, f1 = (k + 1) / n, yy = y0 + rs * (k + 1), yl = Math.max(y0 - 0.1, yy - rs - 0.3);
@@ -301,6 +302,6 @@ function tianguis(el, { bag, col }) {
 
 registerStyle('aztec', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli },
+  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes },
   objects: {},
 });

@@ -14,11 +14,13 @@ export const MARKET = [-212, 22, -168, 92];
 export const LEVEL = { water: -0.7, canalBed: -2.4, lakeBed: -2.6 };
 export const ISLAND = 335;                              // the island's edge (chinampas from 300)
 export const CAUSEWAY = { z0: -9, z1: 9 };
+/** The opening cut through the causeway, spanned by a bridge of timbers that could be taken up (Cortés). */
+export const GAP = [-356, -350];
 export const CANALS = [[-RADIUS, 196, RADIUS, 204], [-RADIUS, -204, RADIUS, -196], [216, -RADIUS, 224, RADIUS], [-224, -RADIUS, -216, RADIUS]];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const inCanal = (x, z) => Math.hypot(x, z) < ISLAND && CANALS.some((c) => inRect(c, x, z));
-export const inLake = (x, z) => Math.hypot(x, z) > ISLAND && !(x < 0 && z > CAUSEWAY.z0 && z < CAUSEWAY.z1);
+export const inLake = (x, z) => Math.hypot(x, z) > ISLAND && !(x < 0 && z > CAUSEWAY.z0 && z < CAUSEWAY.z1 && !(x > GAP[0] && x < GAP[1]));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 let HOUSES = null;

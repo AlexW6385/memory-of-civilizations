@@ -4,33 +4,41 @@
 // Eagles, the calmecac; the palace of Moctezuma; the causeway west over the lake; the canals,
 // their walls, timber bridges and dugout canoes; the market by the west canal.
 
-import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI } from './layout.js';
+import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI, GAP } from './layout.js';
 
 const E = [];
 const [px0, pz0, px1, pz1] = PRECINCT;
-// ---- the serpent wall with gates north, west and south
-const sw = (a, b, out) => E.push({ t: 'serpent_wall', a, b, h: 3, out });
-sw([px0, pz0], [-8, pz0], -1); sw([8, pz0], [px1, pz0], -1); sw([px0, pz1], [-8, pz1], 1); sw([8, pz1], [px1, pz1], 1);
-sw([px0, pz0], [px0, -8], 1); sw([px0, 8], [px0, pz1], 1); sw([px1, pz0], [px1, pz1], -1);
+// ---- the platform that bounds the precinct, with gates north, west and south (its x runs carried over the corners)
+const sw = (a, b) => E.push({ t: 'mx_enclosure', a, b, w: 6, h: 3 });
+sw([px0 - 3, pz0], [-8, pz0]); sw([8, pz0], [px1 + 3, pz0]); sw([px0 - 3, pz1], [-8, pz1]); sw([8, pz1], [px1 + 3, pz1]);
+sw([px0, pz0], [px0, -8]); sw([px0, 8], [px0, pz1]); sw([px1, pz0], [px1, pz1]);
+// ---- the coatepantli: the two serpents round the Templo Mayor, Tlaloc's blue on the north, Huitzilopochtli's ochre on the south, their heads at the front
+E.push({ t: 'coatepantli', pts: [[58, -56], [142, -56], [142, -3]], paint: 'maya_blue', kind: 'tlaloc' });
+E.push({ t: 'coatepantli', pts: [[58, 56], [142, 56], [142, 3]], paint: 'paint_ochre', kind: 'feathered' });
 E.push({ t: 'lane', rect: [px0 + 2, pz0 + 2, px1 - 2, pz1 - 2], y: 0.03, mat: 'stucco' });
 // ---- the temples
 E.push({ t: 'templo_mayor', c: TM.c, w: TM.w, d: TM.d, h: TM.h, terraces: 4, top: TM.top });
-E.push({ t: 'round_temple', c: [10, 0], r: 9, h: 8 });
+E.push({ t: 'ehecatl_temple', c: [-4, -10], r: 9, h: 8, front: 24 });
 E.push({ t: 'm_pyramid', c: [-55, 75], base: 17, top: 8, h: 15, tiers: 4, stairs: 'e', steps: 60, stairW: 7, serpents: 'e', temple: { w: 10, d: 10, h: 5, doors: 'e' } });
 E.push({ t: 'm_pyramid', c: [25, -95], base: 15, top: 7, h: 13, tiers: 3, stairs: 's', steps: 50, stairW: 6, serpents: 's', temple: { w: 9, d: 9, h: 5, doors: 's' } });
-E.push({ t: 'm_pyramid', c: [25, 95], base: 12, top: 6, h: 10, tiers: 3, stairs: 'n', steps: 40, stairW: 5, temple: { w: 8, d: 8, h: 4.5, doors: 'n' } });
+E.push({ t: 'mx_temple', c: [42, 102], base: 26, top: 10, h: 17.6, tiers: 4, stairW: 8, god: 'tezcatlipoca' });
 E.push({ t: 'ballcourt', c: [-50, -65], len: 60, w: 9, h: 4 });
 // the Huey Tzompantli before Huitzilopochtli's side of the temple: its platform north–south, the tower of skulls at its north end
 E.push({ t: 'tzompantli', rect: TZOMPANTLI, h: 4.6 });
 E.push({ t: 'm_platform', c: [-30, 40], a: 9, h: 2.4, serpents: 'w' });
-E.push({ t: 'court_house', rect: [100, -135, 140, -72], h: 4.2, ring: 7, band: true, seed: 3 });
-E.push({ t: 'court_house', rect: [-138, -138, -82, -100], h: 3.8, ring: 8, seed: 5 });
+E.push({ t: 'eagle_house', rect: [84, -138, 136, -104], seed: 3 });
+E.push({ t: 'calmecac', rect: [-140, -140, -84, -104], seed: 5 });
 E.push({ t: 'court_house', rect: [-138, 100, -90, 138], h: 3.8, ring: 8, seed: 6 });
 // ---- the palace of Moctezuma
 E.push({ t: 'tecpan', rect: PALACE });
 // ---- the causeway west over the lake
 const cw = Math.sqrt((RADIUS - 26) ** 2 - CAUSEWAY.z1 ** 2);
-E.push({ t: 'block', walk: true, rect: [-cw, CAUSEWAY.z0, -ISLAND + 6, CAUSEWAY.z1], y0: LEVEL.lakeBed, y1: 0.4, mat: 'basalt' });
+for (const [a, b] of [[-cw, GAP[0]], [GAP[1], -ISLAND + 6]]) {
+  E.push({ t: 'block', walk: true, rect: [a, CAUSEWAY.z0, b, CAUSEWAY.z1], y0: LEVEL.lakeBed, y1: 0.4, mat: 'basalt' });
+  for (const z of [CAUSEWAY.z0 - 0.1, CAUSEWAY.z1 + 0.1]) E.push({ t: 'causeway_stakes', a: [a + 0.3, z], b: [b - 0.3, z], y0: LEVEL.lakeBed, y1: 0.55, seed: Math.round(-a) });
+}
+// the opening through it, the water passing, and the bridge of great timbers laid over it
+E.push({ t: 'beam_bridge', at: [(GAP[0] + GAP[1]) / 2, 0], across: 'x', span: GAP[1] - GAP[0], width: 8, y: 0.4 });
 // ---- the canals: water, stone walls, timber bridges at the avenues, canoes poled along or moored
 const clip = ([x0, z0, x1, z1]) => { const h = (v) => Math.sqrt(Math.max(0, (ISLAND - 6) ** 2 - v * v)); return x1 - x0 > z1 - z0 ? [Math.max(x0, -h(z1)), z0, Math.min(x1, h(z1)), z1] : [x0, Math.max(z0, -h(x1)), x1, Math.min(z1, h(x1))]; };
 let seed = 11;
@@ -51,7 +59,7 @@ for (const z of [34, 62]) E.push({ t: 'stairs', rect: [-219.6, z, -215.6, z + 6]
 for (const [z, cargo] of [[30, 'maize'], [44, 'pots'], [56, 'chile'], [74, 'reeds'], [84, 'cloth']]) E.push({ t: 'acalli', at: [-218.6, z], dir: [0, 1], len: 6, y: LEVEL.water, seed: seed++, cargo });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open'), room('palace', PALACE, 1.0, 'open')];
-const walks = [[[-260, 0], [-150, 0], [-60, 0], [10, 0], [50, 0]]];
+const walks = [[[-260, 0], [-150, 0], [-60, 0], [-20, 8], [20, 8], [34, 0]]];
 walks[0].y0 = 0;
 
 export const precinct = {
