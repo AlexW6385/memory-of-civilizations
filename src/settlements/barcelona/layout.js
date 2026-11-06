@@ -8,6 +8,10 @@ export const PITCH = 92;                                   // block + street
 export const BLOCK = 70;
 export const SAGRADA = [184, -92];
 export const GRACIA_X = -138;
+/** Casa Milà's block (its house on the block's north-west corner, at the Passeig and Provença). */
+export const PEDRERA = [-92, 0];
+/** Casa Batlló: 15 m of the Passeig's west side, on the block south-west of Casa Milà's. */
+export const BATLLO = { block: [-184, 92], s0: 17, s1: 32, a: [-149, 92 - 23 + 17], b: [-149, 92 - 23 + 32] };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export function height(x, z) { return 4 * smooth(250, -350, z) * (1 - smooth(RADIUS - 40, RADIUS - 5, Math.hypot(x, z))); }
@@ -18,7 +22,8 @@ export function blocks() {
   for (let i = -5; i <= 5; i++) for (let k = -5; k <= 5; k++) {
     const x = i * PITCH, z = k * PITCH;
     if (Math.hypot(x, z) > RADIUS - BLOCK * 0.8 || onDiagonal(x, z, 30)) continue;
-    out.push({ c: [x, z], special: Math.hypot(x - SAGRADA[0], z - SAGRADA[1]) < 10 ? 'sagrada' : Math.abs(x - GRACIA_X) < 50 && (k === 0 || k === 1) ? 'gracia' : null, seed: (i + 11) * 31 + (k + 11) });
+    const at = (c) => Math.hypot(x - c[0], z - c[1]) < 10;
+    out.push({ c: [x, z], special: at(SAGRADA) ? 'sagrada' : at(PEDRERA) ? 'pedrera' : at(BATLLO.block) ? 'batllo' : null, seed: (i + 11) * 31 + (k + 11) });
   }
   return out;
 }

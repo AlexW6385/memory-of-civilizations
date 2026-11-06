@@ -1,5 +1,5 @@
 // Barcelona about 1910 (docs/settlements/barcelona.md §2–§4).
-import { SAGRADA, GRACIA_X, PITCH, BLOCK } from './layout.js';
+import { SAGRADA, GRACIA_X, PITCH, BLOCK, PEDRERA, BATLLO, height } from './layout.js';
 
 export const sagrada = {
   id: 'barcelona-sagrada',
@@ -12,9 +12,9 @@ export const sagrada = {
   view: [SAGRADA[0] - 24, SAGRADA[1] - 46, SAGRADA[0] + 32, SAGRADA[1] + 46],
   bakeTop: 110,
   elements: [
-    { t: 'sagrada', c: SAGRADA },
-    { t: 'pedrera', rect: [GRACIA_X - BLOCK / 2, PITCH - BLOCK / 2, GRACIA_X - BLOCK / 2 + 34, PITCH - BLOCK / 2 + 26], h: 22 },
-    { t: 'batllo', rect: [GRACIA_X + BLOCK / 2 - 15, -BLOCK / 2, GRACIA_X + BLOCK / 2, -BLOCK / 2 + 18], h: 21 },
+    { t: 'sagrada', c: SAGRADA, y: height(...SAGRADA) },
+    { t: 'pedrera', c: PEDRERA, y: height(PEDRERA[0] - 26, PEDRERA[1] - 26) },
+    { t: 'batllo', a: BATLLO.a, b: BATLLO.b, y: height(...BATLLO.a), d: 18, h: 24 },
   ],
   rooms: [{ id: 'nativity', rect: [SAGRADA[0] + 30, SAGRADA[1] - 26, SAGRADA[0] + 50, SAGRADA[1] + 26], y: 0, kind: 'open' }],
   walks: [Object.assign([[SAGRADA[0] + 58, SAGRADA[1]], [SAGRADA[0] + 36, SAGRADA[1]]], { y0: 0 })],
