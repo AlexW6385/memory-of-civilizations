@@ -28,6 +28,8 @@ for (const s of [-1, 1]) {
   E.push({ t: 'naga_rail', a: [CAUSEWAY.outer[0] + 1, s * 4.3], b: [CAUSEWAY.outer[2] - 2, s * 4.3], y: 1.0, h: 1.0 });
   E.push({ t: 'naga_rail', a: [CAUSEWAY.inner[0] + 8, s * 4.3], b: [CAUSEWAY.inner[2] - 6, s * 4.3], y: 1.2, h: 0.9 });
 }
+// the giant stone lions guarding the causeway's western steps (§12)
+for (const s of [-1, 1]) E.push({ t: 'k_lion', at: [CAUSEWAY.outer[0] - 2.2, s * 5.2], y: 0, face: 'w', s: 1.15 });
 for (const [x, dir] of [[CAUSEWAY.outer[0] - 4, 'e'], [CAUSEWAY.inner[2] - 6, 'w']]) E.push({ t: 'stairs', rect: [x, -3.5, x + 4, 3.5], y0: 0, y1: 1.1, dir, mat: 'sandstone_khmer' });
 // the cross-shaped terrace before the temple's western entrance (the "terrace of honour")
 E.push({ t: 'k_terrace', rect: [CX - 99 - 14, -12, CX - 99, 12], y0: 0, y1: 1.4 });
@@ -62,7 +64,8 @@ E.push({ t: 'k_gallery', rect: T.second.line, y: T.second.y, w: T.second.w, h: T
 E.push({ t: 'k_terrace', rect: T.bakan.terrace, y0: T.second.y, y1: T.bakan.y });
 E.push({ t: 'k_gallery', rect: T.bakan.line, y: T.bakan.y, w: T.bakan.w, h: T.bakan.h, solid: 'out', gates: true, gate: 8, gateH: 10, windows: true });
 for (const [x, z] of [[CX - 28, -28], [CX + 28, -28], [CX - 28, 28], [CX + 28, 28]]) E.push({ t: 'k_tower', c: [x, z], y: T.bakan.y + T.bakan.h * 0.2, w: 9, h: 32, tiers: 5 });
-E.push({ t: 'k_tower', c: [CX, 0], y: T.bakan.y, w: 15, h: 65 - T.bakan.y, tiers: 6 });
+// the central sanctuary, open on its four sides as built, the standing eight-armed Vishnu in its cella (§12)
+E.push({ t: 'k_tower', c: [CX, 0], y: T.bakan.y, w: 15, h: 65 - T.bakan.y, tiers: 6, cella: { half: 2.6, dw: 1.0, dh: 3.6, image: { face: 'w', h: 3.3 } } });
 // the stairs: up the base terrace, up the second level, the steep stairs of the Bakan, on each axis
 const st = (rect, y0, y1, dir) => E.push({ t: 'stairs', rect, y0, y1, dir, mat: 'sandstone_khmer' });
 st([CX - 99 - 0.01 - 2.5, -6, CX - 99, 6], T.base.y - 0.2, T.base.y, 'e');
@@ -95,6 +98,7 @@ function carve(r, holes) {
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('bakan', T.bakan.terrace, T.bakan.y, 'open'),
+  room('sanctuary', [CX - 2.5, -2.5, CX + 2.5, 2.5], T.bakan.y + 0.7, 'hall'),
   room('second', T.second.terrace, T.second.y, 'open'),
   room('court', T.base.rect, T.base.y, 'open'),
   room('hall-of-echoes', [CL.rect[0] + 1, -18, CL.rect[2] - 1, -15], T.base.y + 0.4, 'hall'),

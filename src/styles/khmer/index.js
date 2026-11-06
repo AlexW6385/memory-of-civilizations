@@ -41,11 +41,11 @@ function redentSpots(a, n, d) {
   return out;
 }
 /** A stack of rings of polygon P (each [scale, y]) round (cx, cz) from y0, as triangles; capped if the last ring is not a point. */
-function stack(out, P, rings, cx, y0, cz) {
+function stack(out, P, rings, cx, y0, cz, skip = null) {
   const n = P.length, V = rings.map(([s, y]) => P.map(([x, z]) => [cx + x * s, y0 + y, cz + z * s]));
   for (let i = 0; i + 1 < V.length; i++) {
     const L = V[i], U = V[i + 1];
-    for (let j = 0; j < n; j++) { const k = (j + 1) % n; out.push(...L[j], ...U[k], ...L[k], ...L[j], ...U[j], ...U[k]); }
+    for (let j = 0; j < n; j++) { if (skip && skip(i, j)) continue; const k = (j + 1) % n; out.push(...L[j], ...U[k], ...L[k], ...L[j], ...U[j], ...U[k]); }
   }
   const T = V[V.length - 1], top = [cx, T[0][1], cz];
   if (rings[rings.length - 1][0] > 0.002) for (let j = 0; j < n; j++) { const k = (j + 1) % n; out.push(...top, ...T[k], ...T[j]); }
@@ -100,18 +100,38 @@ function doorway(bag, c, N, d, y, dw, dh) {
   bag.add(S, boxR(rUD(c, N, -dw - 0.6, dw + 0.6, d - 0.05, d + 0.2), y + dh + 0.5, y + dh + 0.85));
   for (const s of [-1, 1]) bag.add(C, lathe([[0.13, 0], [0.11, 0.2], [0.14, 0.3], [0.1, dh * 0.5], [0.14, dh * 0.55], [0.1, dh * 0.6], [0.11, dh + 0.3], [0.14, dh + 0.5]], 8, null, ...(() => { const p = along([c[0], 0, c[1]], N, d + 0.2, perp(N), s * (dw + 0.25)); return [p[0], y, p[2]]; })()));
 }
+/** An open doorway at the mouth of a passage (half-width dw, height dh) at d along N from c: carved jambs and head, the lintel, the colonnettes. */
+function openDoorway(bag, c, N, d, y, dw, dh) {
+  for (const sg of [-1, 1]) bag.add(C, boxR(rUD(c, N, sg < 0 ? -dw - 0.45 : dw, sg < 0 ? -dw : dw + 0.45, d - 0.05, d + 0.12), y, y + dh + 0.5));
+  bag.add(C, boxR(rUD(c, N, -dw, dw, d - 0.05, d + 0.12), y + dh, y + dh + 0.5));
+  bag.add(S, boxR(rUD(c, N, -dw - 0.6, dw + 0.6, d - 0.05, d + 0.2), y + dh + 0.5, y + dh + 0.85));
+  for (const s of [-1, 1]) { const p = along([c[0], 0, c[1]], N, d + 0.2, perp(N), s * (dw + 0.25)); bag.add(C, lathe([[0.13, 0], [0.11, 0.2], [0.14, 0.3], [0.1, dh * 0.5], [0.14, dh * 0.55], [0.1, dh * 0.6], [0.11, dh + 0.3], [0.14, dh + 0.5]], 8, null, p[0], y, p[2])); }
+}
 /**
  * A portico on a side N of a building centred at c whose wall face is d0 out: a vestibule
  * (depth, width, height h) with a doorway, its cornice, a corbelled vault ending in a pediment, and
  * (tiers 2) a taller vault set back behind it with its own pediment.
  */
-function portico(ctx, { c, N, y, d0, depth, width, h, tiers = 2, door = true }) {
+function portico(ctx, { c, N, y, d0, depth, width, h, tiers = 2, door = true, open = null }) {
   const { bag, col } = ctx, d1 = d0 + depth, Y = [c[0], y, c[1]];
-  bag.add(C, boxR(rUD(c, N, -width / 2 - 0.3, width / 2 + 0.3, d0 - 0.3, d1 + 0.3), y, y + 0.7));
-  bag.add(S, boxR(rUD(c, N, -width / 2, width / 2, d0 - 0.3, d1), y + 0.7, y + h - 0.45));
+  if (open) {
+    // a vestibule one walks through: the plinth (its top the floor), side walls, the lintel over the
+    // passage, the framed doorway at its mouth, and two steps up to it
+    const { dw, dh } = open, W = width / 2;
+    bag.add(C, boxR(rUD(c, N, -W - 0.3, W + 0.3, d0, d1 + 0.3), y, y + 0.7));
+    for (const sg of [-1, 1]) { const r = rUD(c, N, sg < 0 ? -W : dw, sg < 0 ? -dw : W, d0, d1); bag.add(S, boxR(r, y + 0.7, y + h - 0.45)); col.rect(r, y, y + h); }
+    bag.add(S, boxR(rUD(c, N, -dw, dw, d0, d1), y + 0.7 + dh, y + h - 0.45));
+    col.floor(rUD(c, N, -W - 0.3, W + 0.3, d0, d1 + 0.3), y + 0.7);
+    openDoorway(bag, c, N, d1, y + 0.7, dw, dh);
+    const r = rUD(c, N, -dw - 0.2, dw + 0.2, d1 + 0.3, d1 + 1.1), dir = N[0] > 0.5 ? 'w' : N[0] < -0.5 ? 'e' : N[1] > 0.5 ? 'n' : 's';
+    STYLES.qing.elements.stairs({ rect: r, y0: y, y1: y + 0.7, dir, mat: S }, ctx);
+  } else {
+    bag.add(C, boxR(rUD(c, N, -width / 2 - 0.3, width / 2 + 0.3, d0 - 0.3, d1 + 0.3), y, y + 0.7));
+    bag.add(S, boxR(rUD(c, N, -width / 2, width / 2, d0 - 0.3, d1), y + 0.7, y + h - 0.45));
+    col.rect(rUD(c, N, -width / 2 - 0.3, width / 2 + 0.3, d0 - 0.3, d1 + 0.3), y, y + h);
+  }
   bag.add(C, boxR(rUD(c, N, -width / 2 - 0.25, width / 2 + 0.25, d0 - 0.3, d1 + 0.25), y + h - 0.45, y + h));
-  col.rect(rUD(c, N, -width / 2 - 0.3, width / 2 + 0.3, d0 - 0.3, d1 + 0.3), y, y + h);
-  if (door) doorway(bag, c, N, d1, y + 0.7, Math.min(1.1, width * 0.16), Math.min(3.2, (h - 1.2) * 0.75));
+  if (door && !open) doorway(bag, c, N, d1, y + 0.7, Math.min(1.1, width * 0.16), Math.min(3.2, (h - 1.2) * 0.75));
   const U = perp(N), H1 = width * 0.42, f = Math.max(0.25, width * 0.05), v = [];
   prism(v, ARCH(width + 0.3, H1), [Y[0] + N[0] * (d0 - 0.3), y + h, Y[2] + N[1] * (d0 - 0.3)], U, N, depth + 0.3);
   pediment(bag, along([c[0], y + h, c[1]], N, d1 - 0.05), N, width + 0.3, H1, f);
@@ -167,14 +187,17 @@ function blindWindow(bag, p, N, y, ww, wh) {
 function kTower(el, ctx) {
   const { bag, col } = ctx, [cx, cz] = el.c, y = el.y, w = el.w, H = el.h, hw = w / 2;
   const body = Math.min(H * 0.28, w * 1.1), n = 3, d = hw * 0.09, P = redentPoly(hw, n, d);
-  const t = [], ca = [];
-  // the base mouldings and the walls of the sanctuary, its cornice
-  stack(t, P, [[1.12, 0], [1.12, 0.3], [1.08, 0.3], [1.06, 0.55], [1.03, 0.62], [1.03, 0.8], [1.0, 0.8], [1.0, body - 0.9], [1.05, body - 0.9]], cx, y, cz);
+  const t = [], ca = [], cel = el.cella, Lq = 2 * n + 1;
+  // the base mouldings and the walls of the sanctuary, its cornice; with a cella the long middle
+  // faces of the walls are left to the walls built below, pierced by the four doors
+  const skip = cel ? (i, j) => i === 6 && j % Lq === Lq - 1 : null;
+  stack(t, P, [[1.12, 0], [1.12, 0.3], [1.08, 0.3], [1.06, 0.55], [1.03, 0.62], [1.03, 0.8], [1.0, 0.8], [1.0, body - 0.9], [1.05, body - 0.9]], cx, y, cz, skip);
   stack(ca, P, [[1.05, body - 0.9], [1.08, body - 0.6], [1.08, body - 0.35], [1.02, body - 0.15], [1.02, body]], cx, y, cz);
-  col.rect([cx - hw * 1.12, cz - hw * 1.12, cx + hw * 1.12, cz + hw * 1.12], y, y + body);
+  if (cel) cella(ctx, { cx, cz, y, hw, c: hw - n * d, body, ...cel });
+  else col.rect([cx - hw * 1.12, cz - hw * 1.12, cx + hw * 1.12, cz + hw * 1.12], y, y + body);
   const sides = [['e', [1, 0]], ['w', [-1, 0]], ['s', [0, 1]], ['n', [0, -1]]];
   for (const [f, N] of sides) {
-    if (el.porches !== false) portico(ctx, { c: [cx, cz], N, y, d0: hw, depth: w * 0.24, width: w * 0.36, h: body * 0.7, tiers: w > 8 ? 2 : 1 });
+    if (el.porches !== false) portico(ctx, { c: [cx, cz], N, y, d0: hw, depth: w * 0.24, width: w * 0.36, h: body * 0.7, tiers: w > 8 ? 2 : 1, open: cel ? { dw: cel.dw, dh: cel.dh } : null });
     else if ((el.doors ?? 'nesw').includes(f)) doorway(bag, [cx, cz], N, hw, y + 0.8, Math.min(1.1, w * 0.12), Math.min(3.2, body * 0.55));
     // devatas on the wall either side of the door
     const s = Math.min(1.9, body * 0.16), U = perp(N);
@@ -216,6 +239,87 @@ function kTower(el, ctx) {
     for (const sp of redentSpots(hw, n, d)) prism(ca, scaled(LEAF, sp.mid ? pw * 2.2 : pw, bud * ph), [cx + sp.p[0] * sc - sp.dir[0] * th * 0.6, y + yy + bud * f - 0.05, cz + sp.p[1] * sc - sp.dir[1] * th * 0.6], perp(sp.dir), sp.dir, th);
   }
   bag.add(S, fromTriangles(t)); bag.add(C, fromTriangles(ca));
+}
+
+/**
+ * The cella of a sanctuary open to the four quarters (the central sanctuary of Angkor Wat as built:
+ * four porches opening to the cardinal directions): walls `hw − half` thick round a square room of
+ * half-width `half`, each pierced on its axis by a passage (half-width dw, height dh) through to its
+ * porch, with a moulded sill; the floor 0.7 up; the ceiling corbelled in, course over course, to a
+ * flat stone; and the image on its pedestal in the middle (`image`: a k_vishnu element's own params).
+ */
+function cella(ctx, { cx, cz, y, hw, c, body, half, dw, dh, image }) {
+  const { bag, col } = ctx, C0 = [cx, cz], fy = y + 0.7, top = y + body - 0.9;
+  bag.add(S, box(cx - half, y, cz - half, cx + half, fy, cz + half)); col.floor([cx - half, cz - half, cx + half, cz + half], fy);
+  for (const N of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    for (const sg of [-1, 1]) { const r = rUD(C0, N, sg < 0 ? -c : dw, sg < 0 ? -dw : c, half, hw); bag.add(S, boxR(r, y, top)); col.rect(r, y, top); }
+    bag.add(S, boxR(rUD(C0, N, -dw, dw, half, hw), fy + dh, top));
+    bag.add(S, boxR(rUD(C0, N, -dw, dw, half, hw - 0.02), y, fy)); col.floor(rUD(C0, N, -dw, dw, half, hw), fy);
+    bag.add(C, boxR(rUD(C0, N, -dw, dw, hw - 0.02, hw + 0.26), fy - 0.02, fy + 0.1));                 // the sill
+  }
+  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) col.rect([cx + Math.min(sx * c, sx * hw), cz + Math.min(sz * c, sz * hw), cx + Math.max(sx * c, sx * hw), cz + Math.max(sz * c, sz * hw)], y, top);
+  // the corbelled ceiling: four courses each stepping in 0.45, then the capstone
+  let e = half;
+  for (let k = 0; k < 4; k++) {
+    const w = half - (e - 0.45), y0 = top + 0.5 * k, y1 = y0 + 0.5; e -= 0.45;
+    bag.add(S, box(cx - half, y0, cz - half, cx + half, y1, cz - e)); bag.add(S, box(cx - half, y0, cz + e, cx + half, y1, cz + half));
+    bag.add(S, box(cx - half, y0, cz - e, cx - e, y1, cz + e)); bag.add(S, box(cx + e, y0, cz - e, cx + half, y1, cz + e));
+    void w;
+  }
+  bag.add(C, box(cx - half, top + 2.0, cz - half, cx + half, top + 2.3, cz + half));
+  if (image) kVishnu({ at: [cx, cz], y: fy, ...image }, ctx);
+}
+
+/**
+ * k_vishnu: the standing image of Vishnu with eight arms { at, y, face (e|w|n|s), h (the figure's
+ * height), mat } on a moulded pedestal whose spout runs out to the north: feet together, the sampot
+ * with its hanging fold, the bare chest, the cylindrical mitre; the eight arms in two fans, the hands
+ * holding the discus and the conch (the upper pair), the mace standing at the right and the earth
+ * as a ball at the left (the lower pair), the others raised empty (their attributes long lost).
+ */
+function kVishnu(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, H = el.h ?? 3.3, k = H / 3.3, f = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] }[el.face ?? 'w'], U = perp(f), M = el.mat ?? C;
+  // local: u to the figure's left, v up, w forward (along f)
+  const P = (u, v, w) => [x + (U[0] * -u + f[0] * w) * k, y + 0.9 + v * k, z + (U[1] * -u + f[1] * w) * k];
+  // the pedestal: three moulded courses, the spout of the ablution channel to the north
+  bag.add(C, box(x - 0.85, y, z - 0.85, x + 0.85, y + 0.18, z + 0.85));
+  bag.add(S, box(x - 0.75, y + 0.18, z - 0.75, x + 0.75, y + 0.72, z + 0.75));
+  bag.add(C, box(x - 0.82, y + 0.72, z - 0.82, x + 0.82, y + 0.9, z + 0.82));
+  bag.add(C, box(x - 0.12, y + 0.62, z - 1.25, x + 0.12, y + 0.76, z - 0.82));
+  col.rect([x - 0.85, z - 0.85, x + 0.85, z + 0.85], y, y + 0.9 + H);
+  const L = (a, b, r) => bag.add(M, limb(P(...a), P(...b), r * k, 10));
+  bag.add(M, box(...(() => { const a = P(-0.2, 0, -0.05), b = P(0.2, 0.08, 0.22); return [Math.min(a[0], b[0]), a[1], Math.min(a[2], b[2]), Math.max(a[0], b[0]), b[1], Math.max(a[2], b[2])]; })()));   // the feet
+  for (const s of [-1, 1]) { L([s * 0.1, 0.06, 0.03], [s * 0.11, 0.95, 0], 0.085); L([s * 0.11, 0.95, 0], [s * 0.13, 1.5, 0], 0.115); }   // shins, thighs
+  // the sampot: wrapped from the waist to the knee, its fold hanging in front; the body; the head and mitre
+  const turn = (g) => g.applyMatrix4(new Matrix4().makeRotationY(Math.atan2(f[0], f[1])));
+  bag.add(M, turn(lathe([[0.27, 0], [0.29, 0.25], [0.27, 0.5], [0.24, 0.62], [0.001, 0.62]], 14).scale(k, k, 0.72 * k)).translate(...P(0, 1.0, 0)));
+  bag.add(M, turn(box(-0.07, 0, 0.17, 0.07, 0.62, 0.23).scale(k, k, k)).translate(...P(0, 0.98, 0)));
+  bag.add(M, turn(lathe([[0.22, 0], [0.24, 0.2], [0.29, 0.55], [0.31, 0.72], [0.22, 0.86], [0.001, 0.88]], 14).scale(k, k, 0.62 * k)).translate(...P(0, 1.6, 0)));
+  bag.add(M, limb(P(0, 2.42, 0), P(0, 2.6, 0.01), 0.075 * k, 8));
+  bag.add(M, turn(lathe([[0.001, -0.17], [0.11, -0.13], [0.15, -0.02], [0.15, 0.06], [0.11, 0.15], [0.001, 0.18]], 12).scale(k, k, 1.05 * k)).translate(...P(0, 2.76, 0.02)));
+  bag.add(M, lathe([[0.15, 0], [0.16, 0.06], [0.14, 0.1], [0.14, 0.32], [0.11, 0.4], [0.06, 0.48], [0.001, 0.52]].map(([r, v]) => [r * k, v * k]), 12, null, ...P(0, 2.86, 0.01)));
+  for (const s of [-1, 1]) L([s * 0.15, 2.8, 0.02], [s * 0.16, 2.66, 0.02], 0.025);          // the long earlobes
+  // the eight arms, four from each shoulder fanning out; hands as balls holding their attributes
+  const arms = [
+    [[0.5, 2.2, -0.02], [0.62, 2.68, 0.1]], [[0.6, 2.05, 0.02], [0.82, 2.4, 0.12]],
+    [[0.58, 1.92, 0.06], [0.8, 1.86, 0.25]], [[0.44, 1.88, 0.02], [0.46, 1.5, 0.3]],
+  ];
+  for (const s of [-1, 1]) arms.forEach(([e, hd], i) => {
+    const sh = [s * 0.3, 2.42 - i * 0.06, -0.02 + i * 0.02], el2 = [s * e[0], e[1], e[2]], hn = [s * hd[0], hd[1], hd[2]];
+    L(sh, el2, 0.064 - i * 0.004); L(el2, hn, 0.05 - i * 0.003);
+    bag.add(M, ellipsoidK(P(hn[0], hn[1] + 0.05, hn[2] + 0.01), f, U, 0.045 * k, 0.075 * k, 0.04 * k));            // the hand
+  });
+  // the necklace and the belt of the sampot
+  bag.add(M, turn(lathe([[0.001, 0], [0.3, 0], [0.34, 0.03], [0.3, 0.06], [0.001, 0.06]], 16).scale(k, k, 0.64 * k)).translate(...P(0, 2.29, 0.0)));
+  bag.add(M, turn(lathe([[0.001, 0], [0.29, 0], [0.3, 0.04], [0.29, 0.08], [0.001, 0.08]], 16).scale(k, k, 0.73 * k)).translate(...P(0, 1.58, 0)));
+
+  // the attributes: the discus upright in the upper right hand, the conch in the upper left, the mace at the right, the earth at the left
+  const dRight = P(-0.62, 2.82, 0.1), conch = P(0.62, 2.8, 0.12);
+  bag.add(M, turn(lathe([[0.001, -0.025], [0.15, -0.025], [0.16, 0], [0.15, 0.025], [0.001, 0.025]], 16).rotateX(Math.PI / 2).scale(k, k, k)).translate(...dRight));
+  bag.add(M, turn(lathe([[0.001, 0], [0.06, 0.03], [0.08, 0.1], [0.05, 0.2], [0.001, 0.26]], 10).rotateZ(-0.5).scale(k, k, k)).translate(...conch));
+  L([-0.5, 0.0, 0.3], [-0.47, 1.45, 0.3], 0.04);                                                 // the mace's shaft, standing on the pedestal
+  bag.add(M, limb(P(-0.47, 1.42, 0.3), P(-0.47, 1.72, 0.3), 0.09 * k, 10));                       // its head
+  bag.add(M, ellipsoidK(P(0.46, 1.6, 0.34), f, U, 0.13 * k, 0.13 * k, 0.13 * k));                // the earth
 }
 
 /** A turned baluster of height h, as if of wood: rings and swellings along it. */
@@ -369,37 +473,93 @@ function kTerrace(el, { bag, col }) {
   col.rect([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], y0 - 0.3, y1 - 0.31);
 }
 
+/** A flat plate whose outline [[u, v]] is star-shaped about (cu, cv), stood at O (u along U, v up), thick t along N. */
+function starPlate(out, pts, cu, cv, O, U, N, t) {
+  const P = (u, v, w) => [O[0] + U[0] * u + N[0] * w, O[1] + v, O[2] + U[1] * u + N[1] * w], m = pts.length, T = [];
+  for (let i = 0; i < m; i++) {
+    const a = pts[i], b = pts[(i + 1) % m];
+    T.push(...P(cu, cv, 0), ...P(...b, 0), ...P(...a, 0), ...P(cu, cv, t), ...P(...a, t), ...P(...b, t));
+    T.push(...P(...a, 0), ...P(...b, 0), ...P(...b, t), ...P(...a, 0), ...P(...b, t), ...P(...a, t));
+  }
+  // each triangle turned to face away from the plate's middle plane or, on the rim, out from the centre
+  const C = P(cu, cv, t / 2);
+  for (let i = 0; i < T.length; i += 9) {
+    const ux = T[i + 3] - T[i], uy = T[i + 4] - T[i + 1], uz = T[i + 5] - T[i + 2], vx = T[i + 6] - T[i], vy = T[i + 7] - T[i + 1], vz = T[i + 8] - T[i + 2];
+    const n = [uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx], c = [(T[i] + T[i + 3] + T[i + 6]) / 3 - C[0], (T[i + 1] + T[i + 4] + T[i + 7]) / 3 - C[1], (T[i + 2] + T[i + 5] + T[i + 8]) / 3 - C[2]];
+    if (n[0] * c[0] + n[1] * c[1] + n[2] * c[2] < 0) for (let k = 0; k < 3; k++) { const tmp = T[i + 3 + k]; T[i + 3 + k] = T[i + 6 + k]; T[i + 6 + k] = tmp; }
+  }
+  for (const v of T) out.push(v);
+  return out;
+}
 /**
- * naga_rail: a serpent balustrade { a, b, y, h }: its body (a thick round beam) on short posts,
- * at each end the serpent rearing as a fan of seven heads.
+ * A naga's raised head end at p, the serpent's body coming in along −D (D: the unit, in plan, the
+ * heads look along), its body's axis at height yb: the body curving up out of the balustrade onto
+ * a moulded pedestal, rising as the neck, and opening into a fan of `heads` hooded heads (the middle
+ * one highest), each on its own neck, with the snout, the brow ridge and the eyes; behind them the
+ * hood spread as a halo whose rim breaks into flame points.
+ */
+function nagaHeads(bag, p, D, y, yb, heads = 9, R = 1.25) {
+  const U = perp(D), at = (d, u, v) => [p[0] + D[0] * d + U[0] * u, v, p[1] + D[1] * d + U[1] * u];
+  // the pedestal: a moulded block under the rising body
+  const pr = (d0, d1, u0, u1) => { const a = at(d0, u0, 0), b = at(d1, u1, 0); return [Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])]; };
+  bag.add(C, boxR(pr(-0.75, 0.55, -0.62, 0.62), y, y + 0.16));
+  bag.add(S, boxR(pr(-0.68, 0.48, -0.55, 0.55), y + 0.16, yb - 0.32));
+  bag.add(C, boxR(pr(-0.74, 0.54, -0.6, 0.6), yb - 0.32, yb - 0.2));
+  // the body bending up: a quarter turn from the balustrade's line to the upright neck
+  const bend = 0.6, d0 = -0.4, segs = 5, pts = [];
+  for (let i = 0; i <= segs; i++) { const a = i / segs * Math.PI / 2; pts.push(at(d0 + Math.sin(a) * bend, 0, yb + (1 - Math.cos(a)) * bend)); }
+  pts.push(at(d0 + bend, 0, yb + bend + 0.85));
+  for (let i = 0; i + 1 < pts.length; i++) bag.add(S, limb(pts[i], pts[i + 1], 0.27 - i * 0.008, 12));
+  const hub = [0, yb + bend + 0.8], t = [], H = [];
+  // the halo of the hood behind the heads, its rim in flame points
+  const halo = [], n = heads * 2 + 1;
+  for (let i = 0; i <= n; i++) { const a = Math.PI * (0.04 + 0.92 * i / n), r = R + (i % 2 ? 0.42 : 0.24); halo.push([Math.cos(a) * r, hub[1] + Math.sin(a) * r]); }
+  halo.push([-0.3, hub[1] - 0.25], [0.3, hub[1] - 0.25]);
+  starPlate(t, halo.reverse(), 0, hub[1] + 0.2, at(-0.3, 0, 0), U, D, 0.16);
+  // the heads on their necks, in a fan
+  for (let k = 0; k < heads; k++) {
+    const a = Math.PI * (0.14 + 0.72 * k / (heads - 1)), mid = Math.abs(k - (heads - 1) / 2) < 0.6, rr = mid ? R * 1.06 : R, s = mid ? 1.18 : 1;
+    const hc = at(0.08, Math.cos(a) * rr, hub[1] + Math.sin(a) * rr);
+    H.push(limb(at(0.0, Math.cos(a) * R * 0.45, hub[1] + Math.sin(a) * R * 0.45), hc, 0.11 * s, 8));
+    H.push(ellipsoidK(hc, D, U, 0.23 * s, 0.14 * s, 0.13 * s));                                                   // the head
+    H.push(ellipsoidK(along(hc, D, 0.17 * s), D, U, 0.11 * s, 0.075 * s, 0.1 * s));                             // the snout
+    for (const sg of [-1, 1]) H.push(ellipsoidK([hc[0] + D[0] * 0.08 * s + U[0] * sg * 0.075 * s, hc[1] + 0.08 * s, hc[2] + D[1] * 0.08 * s + U[1] * sg * 0.075 * s], D, U, 0.05 * s, 0.035 * s, 0.04 * s));   // the eyes under the brow
+  }
+  bag.add(S, fromTriangles(t));
+  for (const g of H) bag.add(C, g);
+}
+/** An ellipsoid at c with its long axis (radius a) along D in plan, b across (U), h up. */
+function ellipsoidK(c, D, U, a, h, b) {
+  const p = []; for (let i = 0; i <= 6; i++) { const t = i / 6 * Math.PI; p.push([Math.max(0.001, Math.sin(t)), -Math.cos(t)]); }
+  const g = lathe(p, 10).scale(b, h, a);                                                     // b across x, a along z
+  const m = new Matrix4().makeBasis(new Vector3(U[0], 0, U[1]), new Vector3(0, 1, 0), new Vector3(D[0], 0, D[1]));
+  return g.applyMatrix4(m).translate(c[0], c[1], c[2]);
+}
+
+/**
+ * naga_rail: a serpent balustrade { a, b, y, h, heads, ends }: the serpent's body, round and ringed
+ * with the bands of its scales, carried on short columns, and at each end (unless ends: false, or
+ * 'a' / 'b' for one) the serpent rearing up as a fan of hooded heads.
  */
 function nagaRail(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, y = el.y, h = el.h ?? 1.0;
-  // the serpent's body: round, ringed with its scales' bands, carried on short posts with moulded caps
-  const yb = y + h - 0.12;
-  bag.add(S, rod([ax, yb, az], [bx, yb, bz], 0.27, 12));
-  for (let s = 0.6; s < L - 0.3; s += 0.9) { const x = ax + ux * s, z = az + uz * s; bag.add(S, rod([x - ux * 0.06, yb, z - uz * 0.06], [x + ux * 0.06, yb, z + uz * 0.06], 0.3, 12)); }
-  const n = Math.max(1, Math.round(L / 2.2));
+  const yb = y + h - 0.12, r = Math.min(0.27, h * 0.27);
+  bag.add(S, rod([ax, yb, az], [bx, yb, bz], r, 12));
+  for (let s = 0.6; s < L - 0.3; s += 0.9) { const x = ax + ux * s, z = az + uz * s; bag.add(C, rod([x - ux * 0.06, yb, z - uz * 0.06], [x + ux * 0.06, yb, z + uz * 0.06], r + 0.03, 12)); }
+  // the short columns: a moulded foot, a round shaft, a capital cupped under the body
+  const n = Math.max(1, Math.round(L / 2.2)), ch = yb - r + 0.04 - y;
+  const colP = [[0.22, 0], [0.22, 0.1], [0.17, 0.16], [0.14, 0.24], [0.13, ch * 0.5], [0.14, ch - 0.26], [0.18, ch - 0.2], [0.2, ch - 0.12], [0.24, ch - 0.06], [0.24, ch], [0.001, ch]];
   for (let k = 0; k <= n; k++) {
+    if (el.ends !== false && (k === 0 || k === n)) continue;
     const s = k / n, x = ax + (bx - ax) * s, z = az + (bz - az) * s;
-    bag.add(S, box(x - 0.17, y, z - 0.17, x + 0.17, yb - 0.38, z + 0.17));
-    bag.add(S, box(x - 0.24, yb - 0.38, z - 0.24, x + 0.24, yb - 0.22, z + 0.24));
-    bag.add(S, box(x - 0.24, y, z - 0.24, x + 0.24, y + 0.14, z + 0.24));
+    bag.add(S, lathe(colP, 10, null, x, y, z));
   }
   col.segment(el.a, el.b, 0.5, y, y + h + 0.2);
-  for (const [p, sg] of [[el.a, -1], [el.b, 1]]) {
-    if (el.ends === false) continue;
-    // the fan of heads: a disc segment standing up, its rim scalloped into seven heads
-    const fan = [], cxp = p[0] + ux * sg * 0.4, czp = p[1] + uz * sg * 0.4, R = 1.6, nx = -uz, nz = ux;
-    for (let k = 0; k < 7; k++) {
-      const a0 = Math.PI * (0.12 + 0.76 * k / 7), a1 = Math.PI * (0.12 + 0.76 * (k + 1) / 7), am = (a0 + a1) / 2;
-      const P = (a, r) => [cxp + nx * Math.cos(a) * r, y + h + Math.sin(a) * r, czp + nz * Math.cos(a) * r];
-      fan.push(...P(a0, 0.2), ...P(a0, R), ...P(am, R * 1.12), ...P(a0, 0.2), ...P(am, R * 1.12), ...P(a1, R), ...P(a0, 0.2), ...P(a1, R), ...P(a1, 0.2));
-    }
-    // give the fan a thickness by drawing it twice, offset along the rail
-    const fan2 = fan.map((v, i) => (i % 3 === 0 ? v + ux * sg * 0.25 : i % 3 === 2 ? v + uz * sg * 0.25 : v));
-    bag.add(S, fromTriangles(fan.concat(flipTris(fan), fan2, flipTris(fan2))));
-    bag.add(S, box(cxp - 0.5, y, czp - 0.5, cxp + 0.5, y + h + 0.2, czp + 0.5));
+  for (const [p, sg, key] of [[el.a, -1, 'a'], [el.b, 1, 'b']]) {
+    if (el.ends === false || (typeof el.ends === 'string' && el.ends !== key)) continue;
+    const D = [ux * sg, uz * sg];
+    nagaHeads(bag, [p[0] + D[0] * 0.4, p[1] + D[1] * 0.4], D, y, yb, el.heads ?? 9, Math.max(0.6, h * 0.8));
+    col.rect([p[0] + D[0] * 0.4 - 0.8, p[1] + D[1] * 0.4 - 0.8, p[0] + D[0] * 0.4 + 0.8, p[1] + D[1] * 0.4 + 0.8], y, y + h + 2);
   }
 }
 
@@ -622,7 +782,7 @@ registerStyle('khmer', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse, k_cloister: kCloister, k_stair: kStair,
+    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu,
   },
   objects: {},
 });
