@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.63 — St Peter's in marble (2026-11-06)
+- St Peter's nave in polychrome marble: fluted proconnesian pilasters with gilt capitals, pier faces with Innocent X's medallions held by putti, coloured-marble niches and panels, reclining Virtues on the arches, the inlaid floor with its roundels and porphyry disc, the bronze St Peter, the tombs of Urban VIII and Paul III; the church raised on a travertine socle with three flights of front steps and its sagrato; the transepts opened into coffered apses.
+
 ## v9.62 — New York at 29°; arrivals re-checked (2026-11-06)
 - New York's grid turned 29° as Manhattan's is (a turned element rotates geometry, instances, lights and obstacles exactly; floors become strips), its arrival with it; every arrival surveyed with a new view-check script (rays over the view cone, nearest hits, the landmark's offset): Borgund, Machu Picchu (now from the saddle to Huayna Picchu), Kilwa, Barcelona, Isfahan and Tenochtitlan re-aimed.
 
