@@ -129,6 +129,42 @@ function incaWall(bag, col, F, o) {
     } else reveal(core, at(out, op.jamb ? DJ : 0), at(-out, 0));
   }
   bag.add(mat, fromTriangles(T));
+  // the great stones of the lowest courses (o.stones: their top, metres above the foot): polygonal
+  // blocks, each face cushioned, its edges bevelled back into the joints
+  if (o.stones) {
+    const S = [], rand = rng(o.seed || Math.round(L * 1000));
+    for (const sg of [1, -1]) {
+      const doorsU = ops.filter((d) => d.kind === 'door').map((d) => trap(d, !!d.jamb && sg === out)).map((t) => [t.c - t.wb - 0.04, t.c + t.wb + 0.04]);
+      const a = uL(sg, o.stones) + 0.04, b = uR(sg, o.stones) - 0.04;
+      // the spans of face between the doorways
+      const spans = [];
+      let s0 = a;
+      for (const [d0, d1] of doorsU.sort((p, q) => p[0] - q[0])) { if (d0 - s0 > 0.5) spans.push([s0, d0]); s0 = Math.max(s0, d1); }
+      if (b - s0 > 0.5) spans.push([s0, b]);
+      for (const [p, q] of spans) {
+        // joints: slanting, so the blocks are polygons; the course line between them kinked at each joint
+        const n = Math.max(1, Math.round((q - p) / (1.1 + rand() * 0.9)));
+        const ju = [], mid = [];
+        for (let i = 0; i <= n; i++) { const u = p + (q - p) * i / n; ju.push([u, i && i < n ? u + (rand() - 0.5) * 0.3 : u]); mid.push(o.stones * (0.42 + rand() * 0.2)); }
+        for (let i = 0; i < n; i++) {
+          const tall = rand() < 0.3;                         // now and then one stone the full height
+          for (const row of tall ? ['full'] : ['low', 'high']) {
+            const vb = (k) => (row === 'high' ? mid[k] : 0), vt = (k) => (row === 'low' ? mid[k] : o.stones);
+            const uAt = (k, v) => ju[k][0] + (ju[k][1] - ju[k][0]) * v / o.stones;
+            const C = [[uAt(i, vb(i)), vb(i)], [uAt(i + 1, vb(i + 1)), vb(i + 1)], [uAt(i + 1, vt(i + 1)), vt(i + 1)], [uAt(i, vt(i)), vt(i)]];
+            const cu = C.reduce((s, c) => s + c[0], 0) / 4, cv = C.reduce((s, c) => s + c[1], 0) / 4;
+            const bevel = 0.045 + rand() * 0.02, proud = 0.025 + rand() * 0.02;
+            const inner = C.map(([u, v]) => { const du = u - cu, dv = v - cv, l = Math.hypot(du, dv) || 1; return [u - du / l * bevel * 1.4, v - dv / l * bevel]; });
+            const P = ([u, v], k) => W(u, v, sg * (off(v) + k));
+            const want = nrm(cu, sg);
+            quad4(S, P(inner[0], proud), P(inner[1], proud), P(inner[2], proud), P(inner[3], proud), want);
+            for (let e = 0; e < 4; e++) { const f = (e + 1) % 4; quad4(S, P(C[e], -0.02), P(C[f], -0.02), P(inner[f], proud), P(inner[e], proud), want); }
+          }
+        }
+      }
+    }
+    bag.add(mat, fromTriangles(S));
+  }
   // collision: the wall but its doorways, which keep only their lintels
   const doors = ops.filter((d) => d.kind === 'door').map((d) => trap(d, false)).sort((p, q) => p.c - q.c);
   const solid = (s0, s1, y0, y1) => { const k = F.curved ? Math.max(1, Math.ceil((s1 - s0) / 1)) : 1; for (let j = 0; j < k; j++) col.segment(F.at(s0 + (s1 - s0) * j / k), F.at(s0 + (s1 - s0) * (j + 1) / k), th, y0, y1); };
@@ -147,7 +183,7 @@ function pegs(bag, F, y, list, k, dir, len = 0.24, r = 0.065) {
 }
 
 /** The four walls of a rectangle [x0, z0, x1, z1] (corners mitred), with openings per side { n, s, e, w }; `open` leaves one side out (the three-walled temples). */
-function rectWalls(bag, col, rect, y, h, th, mat, opsBySide, open = null) {
+function rectWalls(bag, col, rect, y, h, th, mat, opsBySide, open = null, extra = {}) {
   const [x0, z0, x1, z1] = rect;
   const sides = { n: [[x0, z0], [x1, z0]], e: [[x1, z0], [x1, z1]], s: [[x1, z1], [x0, z1]], w: [[x0, z1], [x0, z0]] }, order = ['n', 'e', 's', 'w'];
   const res = {};
@@ -155,7 +191,7 @@ function rectWalls(bag, col, rect, y, h, th, mat, opsBySide, open = null) {
     if (k === open) return;
     const ends = [order[(i + 3) % 4] === open ? 'cap' : 'mitre', order[(i + 1) % 4] === open ? 'cap' : 'mitre'];
     const F = lineFrame(...sides[k]);
-    res[k] = { F, ...incaWall(bag, col, F, { y, h, th, mat, openings: opsBySide[k] ?? [], ends, out: -1 }) };
+    res[k] = { F, ...incaWall(bag, col, F, { y, h, th, mat, openings: opsBySide[k] ?? [], ends, out: -1, ...extra, seed: (extra.seed ?? 1) * 5 + i }) };
   });
   return res;
 }
@@ -191,7 +227,12 @@ function incaHouse(el, { bag, col }) {
     pegs(bag, F, y, list, off(h - 0.32), 1, 0.16, 0.05);
   }
   if (el.roof === 'none') return;
-  // the gables at the short ends: the wall carried up in a triangle, its pegs along the rakes
+  gableRoof(bag, walls, el.rect, y, h, th, mat);
+}
+
+/** The stone gables at a building's short ends (the wall carried up in a triangle, its pegs along the rakes) and the steep roof of ichu thatch between them. */
+function gableRoof(bag, walls, rect, y, h, th, mat) {
+  const [x0, z0, x1, z1] = rect, along = x1 - x0 >= z1 - z0;
   const B = (along ? z1 - z0 : x1 - x0) / 2, A = (along ? x1 - x0 : z1 - z0) / 2, rise = B * 1.45;
   for (const k of along ? ['e', 'w'] : ['n', 's']) {
     const { F, off } = walls[k], o = off(h), L = F.L, g = [];
@@ -211,23 +252,72 @@ function incaHouse(el, { bag, col }) {
 
 /**
  * inca_temple: a temple of fine ashlar { rect, y, h, open (a side left open — the three-walled
- * temples of the Sacred Plaza), windowSide, windows, door ({ side, jamb }) } on a platform of large
- * blocks: niches in rows on the inner faces, double-jambed where `jamb`; trapezoid windows.
+ * temples of the Sacred Plaza and the wayronas), windowSide, windows, blind (blind windows — niches
+ * of the windows' size — either side of them), door ({ side, jamb }), niches ({ side: count }),
+ * pegs ({ side: count }: great stone pegs high on that wall's inner face), altar ({ side, w, d, h }:
+ * a great block against that wall), stones (the height of the great stones in the lowest courses),
+ * roof ('thatch': gables on the short sides, when the open side is a long one), seed } on a platform:
+ * niches in rows on the inner faces, double-jambed where `jamb`; trapezoid windows.
  */
 function incaTemple(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 3.4, th = el.th ?? 1.0, ops = {};
-  bag.add('granite_inca', box(x0 - th / 2 - 0.5, y - 1.2, z0 - th / 2 - 0.5, x1 + th / 2 + 0.5, y, z1 + th / 2 + 0.5));
-  col.floor([x0 - th / 2 - 0.5, z0 - th / 2 - 0.5, x1 + th / 2 + 0.5, z1 + th / 2 + 0.5], y);
-  col.rect([x0 - th / 2 - 0.5, z0 - th / 2 - 0.5, x1 + th / 2 + 0.5, z1 + th / 2 + 0.5], y - 1.2, y - 0.31);
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 3.4, th = el.th ?? 1.0, ops = {}, rand = rng(el.seed || 5);
+  // the platform: a slab of fine stone, its edge a course of long kerb blocks
+  const P = [x0 - th / 2 - 0.5, z0 - th / 2 - 0.5, x1 + th / 2 + 0.5, z1 + th / 2 + 0.5];
+  bag.add('granite_inca', box(P[0] + 0.02, y - 1.2, P[1] + 0.02, P[2] - 0.02, y - 0.03, P[3] - 0.02));
+  for (const [p, q, nx, nz] of [[[P[0], P[1]], [P[2], P[1]], 0, -1], [[P[2], P[1]], [P[2], P[3]], 1, 0], [[P[2], P[3]], [P[0], P[3]], 0, 1], [[P[0], P[3]], [P[0], P[1]], -1, 0]]) {
+    const L = Math.hypot(q[0] - p[0], q[1] - p[1]), ux = (q[0] - p[0]) / L, uz = (q[1] - p[1]) / L;
+    for (let u = 0.52; u < L - 0.05;) {
+      let l = Math.min(L - u, 0.9 + rand() * 1.1); if (L - u - l < 0.45) l = L - u;
+      const a = [p[0] + ux * (u + 0.015) - nx * 0.25, y - 1.2, p[1] + uz * (u + 0.015) - nz * 0.25], b = [p[0] + ux * (u + l - 0.015) - nx * 0.25, y - 1.2, p[1] + uz * (u + l - 0.015) - nz * 0.25];
+      const t = []; beamTris(t, a, b, 0.26, 1.2); bag.add('granite_inca', fromTriangles(t));
+      u += l;
+    }
+  }
+  col.floor(P, y);
+  col.rect(P, y - 1.2, y - 0.31);
   for (const k of ['n', 'e', 's', 'w']) {
     if (k === el.open) continue;
     const L = k === 'n' || k === 's' ? x1 - x0 : z1 - z0, list = (ops[k] = []);
-    const nw = k === el.windowSide ? (el.windows ?? 3) : 0;
-    for (let i = 0; i < nw; i++) list.push({ kind: 'window', at: (i + 1) * L / (nw + 1), w: 1.25, h: 1.45, sill: 0.95, jamb: !!el.jamb });
+    const nw = k === el.windowSide ? (el.windows ?? 3) : 0, nb = k === el.windowSide && el.blind ? 2 : 0;
+    for (let i = 0; i < nw + nb; i++) {
+      const at = (i + 1) * L / (nw + nb + 1), blind = nb && (i === 0 || i === nw + nb - 1);
+      list.push(blind ? { kind: 'niche', at, w: 1.0, h: 1.3, sill: 1.0, depth: 0.4, jamb: !!el.jamb } : { kind: 'window', at, w: 1.25, h: 1.45, sill: 0.95, jamb: !!el.jamb });
+    }
     if (el.door?.side === k) list.push({ kind: 'door', at: L / 2, w: 1.15, h: 2.3, jamb: !!el.door.jamb });
-    else if (!nw) { const n = Math.max(1, Math.floor((L - 1.4) / 1.6)); for (let i = 0; i < n; i++) list.push({ kind: 'niche', at: 0.7 + (i + 0.5) * (L - 1.4) / n, w: 0.72, h: 1.1, sill: 1.0, depth: 0.34, jamb: !!el.jamb }); }
+    else if (!nw) { const n = el.niches?.[k] ?? Math.max(1, Math.floor((L - 1.4) / 1.6)); for (let i = 0; i < n; i++) list.push({ kind: 'niche', at: 0.7 + (i + 0.5) * (L - 1.4) / n, w: 0.72, h: 1.1, sill: 1.0, depth: 0.34, jamb: !!el.jamb }); }
   }
-  rectWalls(bag, col, el.rect, y, h, th, 'granite_inca', ops, el.open);
+  const walls = {};
+  {
+    const sides = { n: [[x0, z0], [x1, z0]], e: [[x1, z0], [x1, z1]], s: [[x1, z1], [x0, z1]], w: [[x0, z1], [x0, z0]] }, order = ['n', 'e', 's', 'w'];
+    order.forEach((k, i) => {
+      if (k === el.open) return;
+      const ends = [order[(i + 3) % 4] === el.open ? 'cap' : 'mitre', order[(i + 1) % 4] === el.open ? 'cap' : 'mitre'];
+      const F = lineFrame(...sides[k]);
+      walls[k] = { F, ...incaWall(bag, col, F, { y, h, th, mat: 'granite_inca', openings: ops[k] ?? [], ends, out: -1, stones: el.stones, seed: (el.seed || 5) * 7 + i }) };
+    });
+  }
+  // great pegs high on a wall's inner face [stated: the Main Temple's six, theonlyperuguide]
+  for (const [k, n] of Object.entries(el.pegs ?? {})) {
+    const { F, off } = walls[k], list = [];
+    for (let i = 0; i < n; i++) list.push([0.9 + (i + 0.5) * (F.L - 1.8) / n, h - 0.45]);
+    pegs(bag, F, y, list, off(h - 0.45), 1, 0.3, 0.085);
+  }
+  // the altar: one great block of fine granite against the wall, its edges eased
+  if (el.altar) {
+    const { side, w = 4.2, d = 0.9, h: ah = 0.95 } = el.altar, { F, off } = walls[side], k0 = off(0) - 0.04;
+    const c = F.at(F.L / 2), n = F.n(F.L / 2), t = F.t(F.L / 2), q = (u, k) => [c[0] + t[0] * u + n[0] * k, c[1] + t[1] * u + n[1] * k];
+    const pts = [q(-w / 2, k0), q(w / 2, k0), q(w / 2, k0 + d), q(-w / 2, k0 + d)], xs = pts.map((p) => p[0]), zs = pts.map((p) => p[1]);
+    bag.add('granite_inca', frustum([Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)], y - 0.05, y + ah, 0.04, 0.04, 0.04, 0.04));
+    col.rect([Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)], y, y + ah);
+  }
+  if (el.roof === 'thatch') {
+    gableRoof(bag, walls, el.rect, y, h, th, 'granite_inca');
+    // over the open side, a beam from gable wall to gable wall carries the eaves
+    if (el.open) {
+      const [a, b] = { n: [[x0, z0], [x1, z0]], e: [[x1, z0], [x1, z1]], s: [[x1, z1], [x0, z1]], w: [[x0, z1], [x0, z0]] }[el.open];
+      bag.add('timber', rod([a[0], y + h - 0.2, a[1]], [b[0], y + h - 0.2, b[1]], 0.13, 8));
+    }
+  }
 }
 
 /**
@@ -255,9 +345,58 @@ function torreon(el, { bag, col }) {
   bag.add('granite_inca', frustum([cx - 1.5, cz - 0.55, cx + 1.3, cz + 0.55], y + 1.25, y + 1.62, 0.04, 0.04, 0.04, 0.04));
   bag.add('granite_inca', frustum([cx - 2.6, cz + 0.9, cx - 1.4, cz + 1.9], y + 0.4, y + 0.98, 0.03, 0.03, 0.03, 0.03));
   col.circle(cx, cz, rr * 0.8, y, y + 1.4);
+  if (el.tomb) { tombRock(el, { bag, col }); return; }
   // the platform under it, of large blocks
   bag.add('granite_inca', box(cx - r - 3, y - 3, cz - r - 3, cx + r + 3, y, cz + r + 3));
   col.floor([cx - r - 3, cz - r - 3, cx + r + 3, cz + r + 3], y);
+}
+
+/**
+ * The Torreón's rock and the Royal Tomb under it (el.tomb: { side 'e', at (along that side, from
+ * its start), w (the mouth's width), d (the cave's depth) }): the platform's faces of battered fine
+ * ashlar, great stones in their lowest courses, its top a slab of the living rock; in the east face
+ * the mouth of the cave, a trapezoid; inside, the cave lined with fine masonry — two great niches
+ * and two small, stone cylinders standing out high on the walls — the rock of its roof bulging
+ * down, and the altar carved in the rock, a hemicycle of three steps [stated: Terandes, "Royal Tomb"].
+ */
+function tombRock(el, { bag, col }) {
+  const [cx, cz] = el.c, r = el.r, y = el.y, T = el.tomb, R = [cx - r - 3, cz - r - 3, cx + r + 3, cz + r + 3], th = 1.0, base = -0.5, H = y - base;
+  const mouthAt = T.at, mw = T.w ?? 2.4, mh = 2.3 - base, cd = T.d ?? 4;
+  const walls = rectWalls(bag, col, R, base, H, th, 'granite_inca', { e: [{ kind: 'door', at: mouthAt, w: mw, h: mh }] }, null, { stones: 1.55, seed: 29 });
+  // the great stones of the faces, outside, below the mouth's head
+  const off = walls.e.off;
+  // the top: the rock, cut flat, the joints of the wall-heads round it
+  const ti = off(H), S = [R[0] + ti, R[1] + ti, R[2] - ti, R[3] - ti];
+  bag.add('granite_rough', box(S[0], y - 0.55, S[1], S[2], y, S[3]));
+  col.floor([R[0] - th / 2, R[1] - th / 2, R[2] + th / 2, R[3] + th / 2], y);
+  // the cave: its masonry lining (a back wall, two side walls running into the face's wall)
+  const ez = R[1] + mouthAt, ex = R[2] - off(0), bx = ex - cd, hw = mw / 2 + 0.9, ch = y - 0.5 - base, fl = 0.05;
+  const back = lineFrame([bx, ez + hw], [bx, ez - hw]);
+  const bw = incaWall(bag, col, back, { y: base, h: ch, th: 0.7, mat: 'granite_inca', ends: ['mitre', 'mitre'], out: -1, openings: [
+    { kind: 'niche', at: hw - 0.85, w: 0.75, h: 1.25, sill: 1.0 - base, depth: 0.32, jamb: true },
+    { kind: 'niche', at: hw + 0.85, w: 0.75, h: 1.25, sill: 1.0 - base, depth: 0.32, jamb: true },
+  ] });
+  for (const sd of [-1, 1]) {
+    const zz = ez + sd * hw, F = lineFrame(sd < 0 ? [bx, zz] : [ex + 0.35, zz], sd < 0 ? [ex + 0.35, zz] : [bx, zz]);
+    const sw = incaWall(bag, col, F, { y: base, h: ch, th: 0.7, mat: 'granite_inca', ends: sd < 0 ? ['mitre', 'cap'] : ['cap', 'mitre'], out: -1, openings: [
+      { kind: 'niche', at: sd < 0 ? cd * 0.45 : F.L - cd * 0.45, w: 0.42, h: 0.6, sill: 1.25 - base, depth: 0.26 },
+    ] });
+    // the stone cylinders high on the walls
+    const list = []; for (const f of [0.25, 0.75]) list.push([f * cd + (sd < 0 ? 0 : F.L - cd), ch - 0.4]);
+    pegs(bag, F, base, list, sw.off(ch - 0.4), 1, 0.22, 0.075);
+  }
+  { const list = [[hw - 1.7, ch - 0.4], [hw, ch - 0.4], [hw + 1.7, ch - 0.4]]; pegs(bag, back, base, list, bw.off(ch - 0.4), 1, 0.22, 0.075); }
+  // the rock of the roof, bulging down out of the slab
+  for (const [fx, fz, s] of [[0.35, -0.3, 1.0], [0.7, 0.35, 0.8], [0.15, 0.45, 0.6]]) {
+    const px = bx + 0.35 + (ex - bx - 0.7) * fx, pz = ez + fz * hw, rr = 0.9 * s;
+    bag.add('granite_rough', lathe([[0.001, 0], [rr * 0.7, 0.08], [rr, 0.28], [rr * 0.85, 0.5], [rr * 0.5, 0.62], [0.001, 0.66]], 10, (t, i) => 1 + 0.12 * Math.sin(t * 3 + i + fx * 9), px, y - 0.55 - 0.32 * s, pz));
+  }
+  // the altar carved in the rock, a hemicycle of three steps against the back wall
+  const a0 = bx + bw.off(0) - 0.05;
+  bag.add('granite_inca', lathe([[1.45, 0], [1.45, 0.3], [1.08, 0.3], [1.08, 0.6], [0.72, 0.6], [0.72, 0.9], [0.001, 0.9]], 28, null, a0, fl - 0.01, ez));
+  bag.add('granite_rough', box(bx + 0.2, -0.3, ez - hw - 0.1, ex + 0.2, fl, ez + hw + 0.1));
+  col.floor([bx + 0.2, ez - hw, ex, ez + hw], fl);
+  col.circle(a0, ez, 1.45, fl, fl + 0.9);
 }
 
 /**
@@ -333,8 +472,160 @@ function flyingStair(el, { bag, col }) {
   }
 }
 
+/** An upright block a→b (plan points) of half-width w from y0 to y1, as triangles into t. */
+const slab = (t, a, b, w, y0, y1) => beamTris(t, [a[0], y0, a[1]], [b[0], y0, b[1]], w, y1 - y0);
+
+/**
+ * inca_canal: the stone channel that brings the spring's water into the town { pts: [[x, z, y]…]
+ * (y: the ground under it) }: a channel 11 cm wide and 13 deep between kerbs of cut stone, its bed
+ * of stone, laid in blocks along the ground [stated: 749 m long, 10–12 cm wide, 10–16 cm deep,
+ * stone-lined, ~3% fall — waterhistory.org]; the water in it.
+ */
+function incaCanal(el, { bag }) {
+  const S = [], Wt = [], pts = el.pts, rand = rng(el.seed || 13);
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const [ax, az, ay] = pts[i], [bx, bz, by] = pts[i + 1], L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
+    const yy = Math.min(ay, by);
+    // the kerbs, in blocks with their joints; the bed
+    for (let u = 0; u < L - 0.02;) {
+      const l = Math.min(L - u, 0.55 + rand() * 0.5);
+      for (const sd of [-1, 1]) {
+        const k = sd * 0.125, a = [ax + ux * (u + 0.01) + nx * k, az + uz * (u + 0.01) + nz * k], b = [ax + ux * (u + l - 0.01) + nx * k, az + uz * (u + l - 0.01) + nz * k];
+        slab(S, a, b, 0.07 + rand() * 0.01, yy - 0.18, yy + 0.07 + rand() * 0.015);
+      }
+      u += l;
+    }
+    // the bed (running a little past the segment's ends so the corners close) and the water over it
+    const e = 0.06, A = [ax - ux * e, az - uz * e], B = [bx + ux * e, bz + uz * e];
+    slab(S, A, B, 0.06, yy - 0.2, yy - 0.06);
+    slab(Wt, A, B, 0.056, yy - 0.08, yy - 0.01);
+  }
+  bag.add('granite_rough', fromTriangles(S));
+  bag.add('water', fromTriangles(Wt));
+}
+
+/**
+ * inca_fountain: one of the sixteen fountains of the stairway { c: [x, z] (the court's centre), y
+ * (its floor), ox, oz (the unit vector from the back wall to the front), w (the court's width,
+ * across), d (its depth, back to front), stairSide (±1: the side, across, the stair is on), last }:
+ * a little court partly enclosed by walls about 1.2 m high, open at the front corners; in its back
+ * wall the channel comes out over a cut stone whose sharp lip throws a jet, to fill a jar; the water
+ * gathers in a stone basin in the floor and runs out by a round drain [stated: waterhistory.org;
+ * ancientengrtech.wisc.edu]. The back wall stands against the terrace wall behind it.
+ */
+function incaFountain(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y, ox = el.ox, oz = el.oz, px = -oz, pz = ox, w = el.w ?? 2.2, d = el.d ?? 1.8, H = 1.2;
+  // local (f: forward from the back wall, s: across) → plan
+  const Q = (f, s) => [cx + ox * (f - d / 2) + px * s, cz + oz * (f - d / 2) + pz * s];
+  const S = [];
+  // the back wall: from inside the terrace wall's batter out to its face, fine stones in courses
+  const bt = 0.5;
+  slab(S, Q(-bt / 2 - 0.25, -w / 2 - 0.2), Q(-bt / 2 - 0.25, w / 2 + 0.2), bt / 2 + 0.25, y - 0.2, y + H + 0.15);
+  col.segment(Q(-0.25, -w / 2), Q(-0.25, w / 2), 0.5, y, y + H + 0.15);
+  // the side walls, the front corners left open for the way in
+  for (const sd of [-1, 1]) {
+    const a = Q(-0.1, sd * (w / 2 + 0.2)), b = Q(d - 0.95, sd * (w / 2 + 0.2));
+    slab(S, a, b, 0.2, y - 0.2, y + H);
+    col.segment(a, b, 0.4, y, y + H);
+  }
+  // the parapet along the front, on the terrace wall's head
+  const fa = Q(d, -w / 2 - 0.4), fb = Q(d, w / 2 + 0.4);
+  slab(S, fa, fb, 0.2, y - 0.15, y + 0.95);
+  col.segment(fa, fb, 0.4, y, y + 0.95);
+  bag.add('granite_inca', fromTriangles(S));
+  // the spout: a cut stone on the back wall's head, its channel ending in a sharp lip over the basin
+  const sp = [];
+  const lipF = 0.16, yT = y + H + 0.15;
+  slab(sp, Q(-0.3, -0.24), Q(lipF, -0.24), 0.06, yT - 0.22, yT + 0.06);
+  slab(sp, Q(-0.3, 0.24), Q(lipF, 0.24), 0.06, yT - 0.22, yT + 0.06);
+  slab(sp, Q(-0.3, 0), Q(lipF, 0), 0.19, yT - 0.24, yT - 0.08);
+  bag.add('granite_inca', fromTriangles(sp));
+  // the water: in the channel, and the jet falling from the lip in a curve to the basin
+  const wv = []; slab(wv, Q(-0.3, 0), Q(lipF - 0.01, 0), 0.1, yT - 0.09, yT - 0.05); bag.add('water', fromTriangles(wv));
+  const bc = 0.52, by = y + 0.06;
+  // the jet: carried out at an even pace while it falls ever faster
+  let prev = [Q(lipF, 0), yT - 0.07];
+  for (let k = 1; k <= 6; k++) {
+    const t = k / 6, cur = [Q(lipF + (bc - lipF) * t, 0), yT - 0.07 - (yT - 0.07 - by) * t * t];
+    bag.add('water_jet', rod([prev[0][0], prev[1], prev[0][1]], [cur[0][0], cur[1], cur[0][1]], 0.026 - 0.008 * t, 5));
+    prev = cur;
+  }
+  // the basin: a block of stone sunk in the floor, its hollow holding the water; the drain beside it
+  const bf = lipF + 0.18, bw2 = 0.42, bd = 0.62;
+  const R = [Q(bf - 0.1, -bw2 - 0.1), Q(bf + bd + 0.1, bw2 + 0.1)], xs = [R[0][0], R[1][0]], zs = [R[0][1], R[1][1]];
+  const rim = [];
+  slab(rim, Q(bf - 0.1, -bw2 - 0.05), Q(bf + bd + 0.1, -bw2 - 0.05), 0.05, y - 0.25, y + 0.14);
+  slab(rim, Q(bf - 0.1, bw2 + 0.05), Q(bf + bd + 0.1, bw2 + 0.05), 0.05, y - 0.25, y + 0.14);
+  slab(rim, Q(bf - 0.05, -bw2), Q(bf - 0.05, bw2), 0.05, y - 0.25, y + 0.14);
+  slab(rim, Q(bf + bd + 0.05, -bw2), Q(bf + bd + 0.05, bw2), 0.05, y - 0.25, y + 0.14);
+  slab(rim, Q(bf, 0), Q(bf + bd, 0), bw2, y - 0.25, y - 0.05);
+  bag.add('granite_inca', fromTriangles(rim));
+  const wb = []; slab(wb, Q(bf, 0), Q(bf + bd, 0), bw2, y - 0.07, y + 0.08); bag.add('water', fromTriangles(wb));
+  col.rect([Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)], y, y + 0.14);
+  // the floor of the court: flags of stone
+  const fl = [];
+  slab(fl, Q(0.02, 0), Q(d, 0), w / 2 + 0.02, y - 0.12, y + 0.03);
+  bag.add('flagstone', fromTriangles(fl));
+  col.floor([Math.min(Q(0, -w / 2)[0], Q(d, w / 2)[0]), Math.min(Q(0, -w / 2)[1], Q(d, w / 2)[1]), Math.max(Q(0, -w / 2)[0], Q(d, w / 2)[0]), Math.max(Q(0, -w / 2)[1], Q(d, w / 2)[1])], y + 0.03);
+}
+
+/**
+ * sacred_rock: the Sacred Rock { c, y, yaw (the way its face looks), w, h }: a great slab of the
+ * granite standing on an altar-shaped base, its outline cut to the shape of the mountain behind it
+ * [stated: about 3 m high on a base about 7 m wide — Tierras Vivas]; thick at its foot, thinning
+ * to its edges, its faces a little irregular.
+ */
+function sacredRock(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y ?? 0, yaw = el.yaw ?? 0, W = el.w ?? 6.8, Ht = el.h ?? 3.0, rand = rng(el.seed || 17);
+  const cs = Math.cos(yaw), sn = Math.sin(yaw);
+  // local u (across), v (up), k (through: +k the face) → world; the face looks along (sin yaw, cos yaw)
+  const P = (u, v, k) => [cx + u * cs + k * sn, y + v, cz - u * sn + k * cs];
+  // the base: a low altar of two cut courses
+  const base = [];
+  const bk = (u0, u1, k0, k1, v0, v1) => { const a = P(u0, v0, k0), b = P(u1, v0, k0), c = P(u1, v0, k1), d = P(u0, v0, k1), e = (p) => [p[0], v1 + y, p[2]];
+    const tq = [a, b, c, d], tp = tq.map(e), T = [];
+    quad4(T, tp[0], tp[1], tp[2], tp[3], [0, 1, 0]);
+    for (let i = 0; i < 4; i++) { const j = (i + 1) % 4, m = [(tq[i][0] + tq[j][0]) / 2 - (a[0] + c[0]) / 2, 0, (tq[i][2] + tq[j][2]) / 2 - (a[2] + c[2]) / 2]; quad4(T, tq[i], tq[j], tp[j], tp[i], m); }
+    base.push(...T); };
+  bk(-W / 2 - 0.5, W / 2 + 0.5, -1.25, 1.25, -0.3, 0.32);
+  bk(-W / 2 - 0.15, W / 2 + 0.15, -0.95, 0.95, 0.3, 0.6);
+  bag.add('granite_inca', fromTriangles(base));
+  { const cs4 = [P(-W / 2 - 0.5, 0, -1.25), P(W / 2 + 0.5, 0, 1.25)]; col.rect([Math.min(cs4[0][0], cs4[1][0]), Math.min(cs4[0][2], cs4[1][2]), Math.max(cs4[0][0], cs4[1][0]), Math.max(cs4[0][2], cs4[1][2])], y, y + 0.6); }
+  // the outline: the mountain's profile — a long shoulder, the summit a little off the middle, a lower peak
+  const prof = [[-1, 0.02], [-0.92, 0.22], [-0.78, 0.42], [-0.62, 0.5], [-0.45, 0.72], [-0.28, 0.9], [-0.12, 1.0], [0.05, 0.93], [0.22, 0.8], [0.36, 0.78], [0.52, 0.62], [0.7, 0.42], [0.86, 0.22], [1, 0.02]];
+  const top = (u) => { const x = u / (W / 2); for (let i = 0; i + 1 < prof.length; i++) if (x <= prof[i + 1][0]) { const f = (x - prof[i][0]) / (prof[i + 1][0] - prof[i][0]); return Ht * (prof[i][1] + (prof[i + 1][1] - prof[i][1]) * f); } return 0.05; };
+  const NU = 30, NV = 9, T = [], noise = Array.from({ length: (NU + 1) * (NV + 1) }, () => rand());
+  // thick at the foot, thinning up to the outline, where the two faces meet
+  const thick = (i, j, u, v) => { if (i === 0 || i === NU || j === NV) return 0; const e = 1 - Math.abs(u) / (W / 2); return 0.5 * (1 - 0.55 * v / Ht) * Math.sqrt(1 - (j / NV) ** 2) * Math.min(1, e * 5) * (0.88 + 0.24 * noise[i * (NV + 1) + j]); };
+  const grid = (sg) => {
+    const G = [];
+    for (let i = 0; i <= NU; i++) {
+      const u = -W / 2 + W * i / NU, tv = Math.max(0.05, top(u));
+      const col2 = [];
+      for (let j = 0; j <= NV; j++) { const v = tv * j / NV; col2.push(P(u, 0.5 + v, sg * thick(i, j, u, v))); }
+      G.push(col2);
+    }
+    return G;
+  };
+  for (const sg of [1, -1]) {
+    const G = grid(sg);
+    for (let i = 0; i < NU; i++) for (let j = 0; j < NV; j++) {
+      const want = [sn * sg, 0.15, cs * sg];
+      tri(T, G[i][j], G[i + 1][j], G[i + 1][j + 1], want); tri(T, G[i][j], G[i + 1][j + 1], G[i][j + 1], want);
+    }
+  }
+  bag.add('granite_rough', fromTriangles(T));
+  col.segment(P(-W / 2, 0, 0), P(W / 2, 0, 0), 0.9, y + 0.6, y + 0.6 + Ht * 0.8);
+}
+
+/** stone_block: a battered wall of rough stones a→b { w (half-thickness), y0, y1 }, laid in two leaning faces. */
+function stoneBlock(el, { bag, col }) {
+  const L = Math.hypot(el.b[0] - el.a[0], el.b[1] - el.a[1]), F = lineFrame(el.a, el.b);
+  incaWall(bag, col, F, { y: el.y0, h: el.y1 - el.y0, th: el.w * 2, mat: 'granite_rough', ends: ['cap', 'cap'], out: -1, stones: Math.min(1.2, (el.y1 - el.y0) * 0.8), seed: Math.round(L * 77) });
+}
+
 registerStyle('inca', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair },
+  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock },
   objects: {},
 });

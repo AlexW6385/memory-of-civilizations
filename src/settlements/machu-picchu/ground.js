@@ -4,7 +4,7 @@
 // on the terraces, cloud forest on the slopes; mist and cloud of the eastern Andes.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, TERRACE, PLAZA, PEAKS, HILL, inRect, outside, terraceAt, inHouse, smooth as sm } from './layout.js';
+import { RADIUS, TERRACE, PLAZA, PEAKS, HILL, inRect, outside, terraceAt, inHouse, paved, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -62,7 +62,7 @@ function waterLevel() { return -Infinity; }
 function fromWater() { return 50; }
 /** Plants per 100 m²: grass on the terraces and the plaza, a few trees in the town; cloud forest on the slopes and the peaks. */
 function planting(x, z, p) {
-  if (Math.hypot(x, z) > RADIUS - 6) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || paved(x, z)) return null;
   const d = outside(x, z);
   if (d < 0) return inHouse(x, z, 0.6) ? null : { grass: 40, tamarisk: hash2(x * 0.2, z * 0.2) < 0.03 ? 0.3 : 0 };
   if (d < TERRACE.w * TERRACE.n) return { grass: 50 };
