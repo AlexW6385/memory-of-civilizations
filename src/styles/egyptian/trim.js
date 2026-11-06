@@ -117,36 +117,46 @@ export function ring(x, y, z, r, h) {
 export function wingedDisc(w, h, depth = 0.05) {
   const tris = [];
   const prism = (poly, z0, z1) => {
-    // extrude a convex-ish polygon in (x, y) between z0 and z1
+    // extrude a polygon in (x, y) between z0 and z1 (fan from the first point: convex or nearly)
     const n = poly.length;
+    let area = 0; for (let i = 0; i < n; i++) { const p = poly[i], q = poly[(i + 1) % n]; area += p[0] * q[1] - q[0] * p[1]; }
+    if (area < 0) poly = poly.slice().reverse();
     for (let i = 1; i < n - 1; i++) tris.push(poly[0][0], poly[0][1], z1, poly[i][0], poly[i][1], z1, poly[i + 1][0], poly[i + 1][1], z1);
     for (let i = 0; i < n; i++) {
       const a = poly[i], b = poly[(i + 1) % n];
       quad(tris, [a[0], a[1], z0], [b[0], b[1], z0], [b[0], b[1], z1], [a[0], a[1], z1]);
     }
   };
-  const r = h * 0.3;
-  // disc
-  const disc = [];
-  for (let i = 0; i < 20; i++) { const a = (i / 20) * Math.PI * 2; disc.push([Math.cos(a) * r, Math.sin(a) * r]); }
-  prism(disc, 0, depth * 1.4);
-  // uraei: two rearing cobras either side of the disc
-  for (const s of [-1, 1]) prism([[s * r * 0.9, -r * 0.9], [s * r * 1.25, -r * 0.9], [s * r * 1.3, r * 0.4], [s * r * 1.1, r * 0.75], [s * r * 0.95, r * 0.4]], 0, depth * 1.2);
-  // wings: three tiers of feathers, the lower tiers longer, the tips drooping
-  const half = w / 2;
-  const tiers = [[r * 0.15, r * 0.65, 0.82], [-r * 0.25, r * 0.15, 0.94], [-r * 0.65, -r * 0.25, 1.0]];
+  const r = h * 0.3, half = w / 2, x0 = r * 1.15, span = half - x0;
+  // the disc, with a raised rim
+  const disc = (rr) => Array.from({ length: 24 }, (_, i) => [Math.cos(i / 24 * Math.PI * 2) * rr, Math.sin(i / 24 * Math.PI * 2) * rr]);
+  prism(disc(r), 0, depth * 1.5);
+  prism(disc(r * 0.82), depth * 1.5, depth * 1.75);
+  // the two uraei hanging from the disc, their hoods spread, their tails curling up behind it
   for (const s of [-1, 1]) {
-    tiers.forEach(([y0, y1, len], k) => {
-      const x0 = r * 1.25, x1 = half * len;
-      const nf = Math.max(3, Math.round((x1 - x0) / (h * 0.16)));
-      for (let f = 0; f < nf; f++) {
-        const a = x0 + (x1 - x0) * (f / nf), b = x0 + (x1 - x0) * ((f + 0.88) / nf);
-        const droop = (t) => -Math.pow(t, 2.2) * r * 0.55;
-        const ta = (a - x0) / (half - x0), tb = (b - x0) / (half - x0);
-        prism([[s * a, y0 + droop(ta)], [s * b, y0 + droop(tb)], [s * b, y1 + droop(tb)], [s * a, y1 + droop(ta)]].map((p) => (s < 0 ? p : p)).reverse().map((p, i, arr) => (s > 0 ? arr[arr.length - 1 - i] : p)), 0, depth * (1 - k * 0.15));
-      }
-    });
+    const u = (x, y) => [s * x, y];
+    prism([u(r * 0.78, -r * 1.05), u(r * 1.08, -r * 1.05), u(r * 1.16, -r * 0.6), u(r * 1.1, -r * 0.25), u(r * 0.98, -r * 0.05), u(r * 0.86, -r * 0.25), u(r * 0.76, -r * 0.6)], 0, depth * 1.3);
+    prism([u(r * 0.86, -r * 1.3), u(r * 1.0, -r * 1.3), u(r * 1.0, -r * 1.05), u(r * 0.86, -r * 1.05)], 0, depth * 1.2);
   }
+  // the wings: the upper edge nearly level, the lower edge sweeping up to the tip; three tiers of
+  // feathers — the small coverts, the secondaries, the long primaries reaching the tip — each tier
+  // a little shallower than the one above it, every feather cut apart from the next
+  const top = (t) => r * 0.95 - r * 0.25 * t * t, bot = (t) => -r * 1.35 + r * 1.15 * Math.pow(t, 1.4);
+  const tiers = [[0, 0.3, 0.78, 0.55], [0.3, 0.6, 0.92, 0.8], [0.6, 1, 1, 1]];          // [from, to (fractions top→bottom), reach, feather width]
+  for (const s of [-1, 1]) tiers.forEach(([f0, f1, reach, fw], k) => {
+    const lerp = (t, f) => top(t) + (bot(t) - top(t)) * f;
+    const nf = Math.max(4, Math.round(span * reach / (h * 0.13 * fw)));
+    for (let i = 0; i < nf; i++) {
+      const ta = reach * i / nf, tb = reach * (i + 0.84) / nf, xa = x0 + span * ta, xb = x0 + span * tb;
+      const ya0 = lerp(ta, f0), ya1 = lerp(ta, f1), yb0 = lerp(tb, f0), yb1 = lerp(tb, f1);
+      // the feather's free end rounded (the lower end, or for the primaries the tip)
+      const poly = k === 0 ? [[xa, ya0], [xb, yb0], [xb, yb1 + (yb0 - yb1) * 0.15], [(xa + xb) / 2, (ya1 + yb1) / 2], [xa, ya1 + (ya0 - ya1) * 0.15]]
+        : [[xa, ya0], [xb, yb0], [xb, yb1 + (yb0 - yb1) * 0.08], [(xa + xb) / 2, (ya1 + yb1) / 2 - (ya0 - ya1) * 0.04], [xa, ya1 + (ya0 - ya1) * 0.08]];
+      prism(poly.map(([x, y]) => [s * x, y]), 0, depth * (1.12 - k * 0.14));
+    }
+    // the bone of the wing along its top, binding the tier of coverts
+    if (k === 0) prism([[x0 * 0.95, top(0)], [x0 + span * reach, top(reach)], [x0 + span * reach, top(reach) - r * 0.12], [x0 * 0.95, top(0) - r * 0.14]].map(([x, y]) => [s * x, y]), 0, depth * 1.25);
+  });
   return fromTriangles(tris);
 }
 

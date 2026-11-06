@@ -6,7 +6,7 @@
 export const RADIUS = 380;
 export const TEMPLE = { origin: [0, 60], bounds: [-44, -139, 44, 31] };     // pylon face at z = 60
 export const ENCLOSURE = [-64, -92, 64, 108];
-export const MAMMISI = [-62, 118, -22, 150];
+export const MAMMISI = [-58, 112, -32, 152];      // the birth house's podium (axis north–south, door north)
 export const LAKE = [78, -40, 118, 0];
 export const NILE = { x: -300, w: 90, level: -4 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;

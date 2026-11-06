@@ -2,7 +2,7 @@
 
 Settlement id: `edfu` · Style: `egyptian` (the temple) and `oldkingdom` (mudbrick building) · Region: Egypt (Upper Egypt, the Nile valley) · Code: `src/settlements/edfu/`
 Replaces the legacy district of the previous design. The Temple of Horus itself is the full building from that design (`src/buildings/edfu`, dossier `docs/buildings/edfu.md`).
-Status of this dossier: L1–L2 (the temple; its mudbrick enclosure; the birth house before the pylon; the sacred lake; the town of mudbrick houses to the north and west; the Nile with reeds and papyrus; palm groves and fields; ground, planting, weather, music). L3 recorded for later: the birth house's Hathor columns and reliefs, the nilometer, the town's tell rising round the temple over centuries, the quay and boats, granaries, people and the festival of the Beautiful Meeting.
+Status of this dossier: L1–L2 (the temple; the pylon's reliefs, flagpoles and falcons in detail; its mudbrick enclosure; the birth house before the pylon with its colonnade and Bes dados; the sacred lake; the town of mudbrick houses to the north and west; the Nile with reeds and papyrus; palm groves and fields; ground, planting, weather, music). L3 recorded for later: the birth house's Hathor figures on the pillars and its wall reliefs (the birth myth), the nilometer, the town's tell rising round the temple over centuries, the quay and boats, granaries, people and the festival of the Beautiful Meeting.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -33,6 +33,20 @@ The temple faces south; the river runs north–south on the west. [stated]
 
 Sandstone temple (see its dossier); mudbrick enclosure walls, battered; mudbrick houses round small courts. [stated: materials; inferred: details]
 
+### 4.1 The pylon, its flagpoles and its falcons
+
+- **Reliefs.** The pylon was erected by Ptolemy IX; its outer reliefs show Ptolemy XII "smiting foes before Horus the Elder" [stated: ancient-egypt.co.uk]. The two towers were planned as mirror images, in construction and in the carved scenes [stated: ancient-egypt.co.uk]; the pylon is "completely covered with inscriptions and reliefs both inside and outside" [stated: sharm-club]. Ours: in each tower's field clear of the flagpole niches, the colossal king in the double crown, his mace raised, holding three kneeling captives by the hair, facing a falcon-headed Horus in the double crown with the was-sceptre and the ankh; short columns of text between their heads; above, registers of the king (in the blue crown) offering to a seated god, each scene with its columns of text, on ruled ground lines up to the torus. The figures in relief stand out from the face (the real ones are sunk) [inferred: the engine cannot cut into the face; the shadowed outline reads the same at a distance]. The poses (the smiting king grasping the captives, the god before him) follow the standard pylon scene [inferred]; the register scenes are generic [inferred].
+- **The winged disc over the gate.** The winged sun disc on the gate lintel [stated: `docs/buildings/edfu.md` §6, "type"]. Ours (redrawn): the disc with a raised rim, two uraei hanging from it, the wings with a level upper edge and a lower edge sweeping up to the tip, in three tiers of separate feathers (coverts, secondaries, long primaries), carved deeper than the door frames' discs; drawn to the width of the lintel (11.6 m) [inferred: size].
+- **Flagpoles.** Poles stood on stone bases in square notches in the pylon's masonry, and clamps secured to the pylon steadied their upper parts; they carried coloured cloth banners [stated: Digital Karnak, of the Karnak pylons]. Ours: a stone base with a bronze collar at the foot; two cedar clamps per pole, one in the niche and one above it, each a beam out of a dark window in the face to a collar round the pole; two long pennants at the top, red and white [inferred: the windows, the materials and the colours].
+- **Falcons.** Two granite statues of Horus as a falcon flank the gate [stated: ancient-egypt.co.uk]; the surviving one wears the double crown [stated: sharm-club]. Ours (rebuilt): the bird upright and deep-chested, the folded wings wrapping the flanks and crossing over the tail, the tail falling to the plinth as the third support, short feathered legs with talons, the eye with its brow, the falcon's cheek stripe, the hooked beak, the red crown with its tall back and its curl, the white crown rising out of it [inferred: the anatomy from the statue as generally photographed].
+
+### 4.2 The birth house (mammisi)
+
+- **Builders.** Built under Ptolemy VIII (mid-2nd century BC), decorated under Ptolemy IX [stated: Madain Project]. Near the south-west corner of the temple, before the pylon [stated: sharm-club; Wikipedia].
+- **Plan.** A central birth room with an ambulatory round it, reached through a hall [stated: Madain Project]; a sanctuary surrounded by a colonnade, the forecourt enclosed by columns with stone screens between them [stated: sharm-club]. Aligned perpendicular to the temple's façade [stated: Madain Project] — ours on a north–south axis, the door to the north facing the pylon's forecourt [inferred].
+- **Columns.** Floral capitals [stated: sharm-club; Madain Project]; the abaci carry grotesque figures of Bes, god of birth and joy, to keep evil from women in labour [stated: sharm-club]. Ours: floral and composite capitals paired across the axis, each carrying a tall dado with Bes on all four faces (crown of plumes, lion's mane, hands on bowed legs) [inferred: the Bes figure's form].
+- **Ours, in all:** a podium 26 × 40 m, 1 m high, a stair from the north; 42 columns (13 down each side, 8 across front and back), the screen walls between them crowned with cornices and a frieze of cobras, open in the middle of the front; the sanctuary (12 × 25 m) of two rooms, its door framed and under a winged disc, an offering table in the birth room; the ambulatory roofed, the forecourt open under its architraves; a cavetto cornice round all. [inferred: sizes]
+
 ## 5. The town
 
 About 700 mudbrick houses. [inferred]
@@ -59,3 +73,7 @@ As for the temple (`docs/buildings/edfu.md` §9).
 - [Temple of Edfu — Wikipedia](https://en.wikipedia.org/wiki/Temple_of_Edfu)
 - [Edfu — Wikipedia](https://en.wikipedia.org/wiki/Edfu)
 - [Sacred lake — Wikipedia](https://en.wikipedia.org/wiki/Sacred_lake)
+- [Edfu pylon — ancient-egypt.co.uk](https://www.ancient-egypt.co.uk/edfu_main_temple/pages/edfu%20pylon.htm)
+- [Edfu temple of Horus — sharm-club.com](https://www.sharm-club.com/egypt/temples/edfu-horus-temple)
+- [Edfu Mammisi — Madain Project](https://madainproject.com/edfu_mammisi)
+- [1st Pylon — Digital Karnak (UCLA/UCSC)](https://digitalkarnak.ucsc.edu/1st-pylon)

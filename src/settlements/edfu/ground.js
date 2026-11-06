@@ -2,11 +2,11 @@
 // by the river, green fields of the floodplain to the south and east, the Nile, the desert's edge;
 // the hard light of Upper Egypt.
 
-import { RADIUS, ENCLOSURE, LAKE, NILE, height, inNile, inRect, inLot } from './layout.js';
+import { RADIUS, ENCLOSURE, LAKE, MAMMISI, NILE, height, inNile, inRect, inLot } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.5, grass: 0.05, rock: 0, soil: 0.45, fields: 0, dry: 0.9, warmth: 0.9, red: 0.25, road: 0, snow: 0, forest: 0 };
-  if (inRect(ENCLOSURE, x, z)) { c.road = 0.6; c.sand = 0.4; return c; }
+  if (inRect(ENCLOSURE, x, z) || inRect(MAMMISI, x, z, 3)) { c.road = 0.6; c.sand = 0.4; return c; }
   if (h < -1 && !inRect(LAKE, x, z)) { c.soil = 0.8; c.grass = 0.2; return c; }
   if (z > 160 || x > 200) { c.fields = 0.85; c.grass = 0.15; c.dry = 0.3; return c; }
   return c;
@@ -15,7 +15,7 @@ function water(x, z, y) { return (inNile(x, z) && y < NILE.level + 0.3) || (inRe
 function waterLevel(x, z) { return inNile(x, z) ? NILE.level : inRect(LAKE, x, z, -2) ? -1.5 : -Infinity; }
 function fromWater(x, z) { return inNile(x, z) ? -3 : Math.max(-5, Math.min(40, height(x, z) - NILE.level)); }
 function planting(x, z, p) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inNile(x, z) || inRect(ENCLOSURE, x, z, 4) || inRect(LAKE, x, z, 3) || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inNile(x, z) || inRect(ENCLOSURE, x, z, 4) || inRect(MAMMISI, x, z, 5) || inRect(LAKE, x, z, 3) || inLot(x, z, 1)) return null;
   if (height(x, z) < -1) return { papyrus: 6, reeds: 10, date_palm: 0.05 };
   if (z > 160 || x > 200) return { date_palm: 0.06, grass: 10 };
   if (x < -180) return { date_palm: 0.3, doum_palm: 0.06, grass: 8 };

@@ -2,9 +2,9 @@
 import '../../styles/egyptian/index.js';
 import '../../styles/oldkingdom/index.js';
 import '../../styles/ming/index.js';
-import { temple, precinct, lake } from './plan.js';
+import { temple, precinct, lake, mammisi } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';
 export { music };
 export const landmarks = [{ plan: temple, music }];
-export async function town() { return [precinct, lake, ...(await houses())]; }
+export async function town() { return [precinct, mammisi, lake, ...(await houses())]; }
