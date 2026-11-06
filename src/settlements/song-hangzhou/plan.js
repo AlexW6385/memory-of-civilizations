@@ -32,7 +32,9 @@ E.push({ t: 'stairs', rect: [PAGODA.c[0] - 6, T1.rect[3], PAGODA.c[0] + 6, ROAD.
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 4, T2.rect[3], PAGODA.c[0] + 4, T1.rect[1]], y0: T1.y, y1: T2.y, dir: 'n', mat: 'granite_block' });
 const tiers = [{ r: 10.5, h: 9.5 }];
 for (let i = 1; i < 7; i++) tiers.push({ r: 10.5 - 0.6 * i, h: 6.7 });
-E.push({ t: 'pagoda_oct', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, spire: 4.4, bells: 'iron' });
+E.push({ t: 'pagoda_oct', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, spire: 4.4, bells: 'iron', interior: true });
+// the steps up the base on the south, to the way onto the lowest gallery and the doors into the pagoda
+E.push({ t: 'stairs', rect: [PAGODA.c[0] - 3, PAGODA.c[1] + 15.3, PAGODA.c[0] + 3, PAGODA.c[1] + 19.3], y0: T1.y, y1: PAGODA.y + 2, dir: 'n', mat: 'granite_block' });
 E.push({ t: 'ming_hall', rect: [-129, -4, -91, 24], y: T2.y, H: 6, front: 's', four: true, roof: 'xieshan', plat: 0.8, eave: 1.8, sweep: 0.9 });
 E.push({ t: 'ming_hall', rect: [-140.5, 58, -131, 94], y: T1.y, H: 4.4, front: 'e', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
 E.push({ t: 'ming_hall', rect: [-89, 58, -79.5, 94], y: T1.y, H: 4.4, front: 'w', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
@@ -41,6 +43,12 @@ for (const r of WAREHOUSES) E.push({ t: 'house_jiangnan', rect: r, y: LEVEL.stre
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('terrace', T1.rect, T1.y, 'open'), room('hall', [-129, -4, -91, 24], T2.y, 'hall')];
+// each storey inside the pagoda, in the corridor's north-west corner (the stair arrives in the south-west one)
+{
+  const [px, pz] = PAGODA.c, aw = (tiers[6].r * Math.cos(Math.PI / 8)) * 0.78, sw = aw * Math.tan(Math.PI / 8);
+  let y = PAGODA.y + 2;
+  tiers.forEach((t, i) => { rooms.push(room(`storey-${i + 1}`, [px - aw + 0.6, pz - aw + 0.6, px - sw - 0.3, pz - sw - 0.3], y, 'hall')); y += t.h; });
+}
 const walks = [[[-110, 136], [-110, 104], [-110, 52], [-110, 36]]];
 walks[0].y0 = 0;
 

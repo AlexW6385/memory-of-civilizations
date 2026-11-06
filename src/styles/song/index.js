@@ -101,16 +101,18 @@ function pagodaOct(el, { bag, col }) {
   let y = el.y;
   const B = el.base;
   prism(bag, 'granite_block', ngon(cx, cz, B.r + 0.6), ngon(cx, cz, B.r), y, y + B.h);
-  col.circle(cx, cz, B.r, y, y + B.h);
+  col.circle(cx, cz, B.r * Math.cos(Math.PI / 8) - 0.4, y, y + B.h);   // (inside its faces: a stair can come up onto it)
   y += B.h;
   el.tiers.forEach((t, i) => {
     const last = i === el.tiers.length - 1, r = t.r, h = t.h, gal = el.galleries !== false, g = gal ? r + 2.4 : r + 0.6, coreMat = el.core || 'plaster_white';
     // the core, its doors and windows (doors on the four sides facing the compass, windows on the diagonals)
-    prism(bag, coreMat, ngon(cx, cz, r), ngon(cx, cz, r), y, y + h);
-    col.circle(cx, cz, r * 0.95, y, y + h);
+    const inside = el.interior && gal;
+    if (inside) interiorStorey(bag, col, el, cx, cz, i, y, coreMat);
+    else { prism(bag, coreMat, ngon(cx, cz, r), ngon(cx, cz, r), y, y + h); col.circle(cx, cz, r * 0.95, y, y + h); }
     const F = ngon(cx, cz, r + 0.03);
     for (let k = 0; k < 8; k++) {
       const a = F[k], b = F[(k + 1) % 8], m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], ux = (b[0] - a[0]), uz = (b[1] - a[1]), L = Math.hypot(ux, uz), w = (k % 2 === 0 ? 0.32 : 0.18) * L, hh = k % 2 === 0 ? Math.min(3, h * 0.45) : 1.2, y0 = k % 2 === 0 ? y + 0.4 : y + h * 0.35;
+      if (inside && OPEN_FACES.includes(k)) { const fr = []; beamTris(fr, [a[0], y + h - 0.6, a[1]], [b[0], y + h - 0.6, b[1]], 0.08, 0.35); bag.add(el.frame || 'timber_red', fromTriangles(fr)); continue; }
       const tr = []; beamTris(tr, [m[0] - ux / L * w / 2, y0, m[1] - uz / L * w / 2], [m[0] + ux / L * w / 2, y0, m[1] + uz / L * w / 2], 0.05, hh); bag.add('lacquer_black', fromTriangles(tr));
       const fr = []; beamTris(fr, [a[0], y + h - 0.6, a[1]], [b[0], y + h - 0.6, b[1]], 0.08, 0.35); bag.add(el.frame || 'timber_red', fromTriangles(fr));
     }
@@ -142,11 +144,13 @@ function pagodaOct(el, { bag, col }) {
       return;
     }
     // the gallery: its floor, posts at the corners, the railing
-    prism(bag, 'timber', ngon(cx, cz, g), ngon(cx, cz, g), y - 0.35, y);
+    if (inside) galleryFloor(bag, col, cx, cz, r, g, y);
+    else prism(bag, 'timber', ngon(cx, cz, g), ngon(cx, cz, g), y - 0.35, y);
     const P = ngon(cx, cz, g - 0.35), Rl = ngon(cx, cz, g - 0.15);
     for (let k = 0; k < 8; k++) {
       bag.add('timber_red', lathe([[0.2, 0], [0.18, last ? h + 0.7 : h - 0.55]], 8, null, P[k][0], y, P[k][1]));   // up into the eave's corner, or the gallery floor above
       col.circle(P[k][0], P[k][1], 0.2, y, y + h);
+      if (inside && i === 0 && k === 1) continue;   // the way onto the lowest gallery from the base, on the south
       const a = Rl[k], b = Rl[(k + 1) % 8], rt = []; beamTris(rt, [a[0], y + 0.85, a[1]], [b[0], y + 0.85, b[1]], 0.06, 0.12); beamTris(rt, [a[0], y + 0.2, a[1]], [b[0], y + 0.2, b[1]], 0.04, 0.08);
       bag.add('timber_red', fromTriangles(rt));
       col.segment(a, b, 0.15, y, y + 1);
@@ -167,6 +171,131 @@ function pagodaOct(el, { bag, col }) {
   octEave(bag, cx, cz, 0.6, y + (el.galleries === false ? 2.6 : 4.2), R, y + 0.2, 0.8, el.eave || 'tile_dark', el.core && el.galleries === false ? el.core : 'lacquer_red', el.bells || null);
   bag.add('gilt_bronze', lathe([[0.5, 0], [0.5, 0.6], [1.0, 0.8], [0.35, 1.2], [0.8, 1.6], [0.3, 2.0], [0.6, 2.4], [0.2, 2.8], [0.45, 3.1], [0.12, 3.6], [0.001, el.spire ?? 4.8]], 12, null, cx, y + 3.8, cz));
 }
+
+// ── the walkable inside of a pagoda (pagoda_oct with interior) ────────────────────────────────────
+// The Liuhe Pagoda's brick body is, from the outside in, an outer wall, a corridor, an inner wall and
+// the central chamber (docs/settlements/song-hangzhou.md §10). Ours: the corridor and the chamber are a
+// shaft of one plan up the whole height (the outer wall thickening downward as the tiers widen), and
+// in the corridor a stair climbs each storey: up the east side, a landing in the south-east corner, up
+// the south side, arriving in the south-west corner of the storey above. Doors through the outer wall
+// open onto the gallery on the three diagonals the stair leaves free (south-west, north-west,
+// north-east); the chamber is entered from the north side of the corridor. Faces of ngon(): k = 0 is
+// the south-east diagonal, 1 south, 2 south-west, 3 west, 4 north-west, 5 north, 6 north-east, 7 east.
+const OPEN_FACES = [2, 4, 6];
+const C8 = Math.cos(Math.PI / 8), T8 = Math.tan(Math.PI / 8);
+/** The shaft's plan from the top tier: the corridor's outer face (aw), its inner face (ac), the chamber (ai), all apothems. */
+function shaft(el) { const rt = el.tiers[el.tiers.length - 1].r * C8, aw = rt - Math.max(1.4, rt * 0.22), ac = aw - 2.0; return { aw, ac, ai: ac - 0.8, sw: aw * T8 }; }
+/** An octagonal ring's face k as a solid (inner apothem a0, outer a1, y0…y1), cut between u0 and u1 along the face (from its middle). */
+function ringPiece(out, cx, cz, k, a0, a1, y0, y1, u0, u1) {
+  const th = (k + 1) * Math.PI / 4, mx = Math.cos(th), mz = Math.sin(th), tx = -mz, tz = mx;
+  const Q = (a, u, yy) => [cx + mx * a + tx * u, yy, cz + mz * a + tz * u];
+  const l0 = a0 * T8, l1 = a1 * T8;
+  const ua0 = Math.max(-l0, u0), ub0 = Math.min(l0, u1), ua1 = Math.max(-l1, u0), ub1 = Math.min(l1, u1);
+  hexa(out, [Q(a0, ua0, y0), Q(a0, ub0, y0), Q(a1, ub1, y0), Q(a1, ua1, y0), Q(a0, ua0, y1), Q(a0, ub0, y1), Q(a1, ub1, y1), Q(a1, ua1, y1)]);
+  return [Q(a0, ua0, 0), Q(a0, ub0, 0), Q(a1, ub1, 0), Q(a1, ua1, 0)].map((q) => [q[0], q[2]]);
+}
+/** A wall ring (apothems a0…a1) of one storey with doorways (half-width dw, height dh) on the faces `doors`; its colliders (each piece's own plan). */
+function ringWall(out, col, cx, cz, a0, a1, y0, y1, doors, dw, dh) {
+  const solid = (poly, ya, yb) => col.obstacles.push({ poly, y0: ya, y1: yb });
+  for (let k = 0; k < 8; k++) {
+    if (!doors.includes(k)) { solid(ringPiece(out, cx, cz, k, a0, a1, y0, y1, -99, 99), y0, y1); continue; }
+    solid(ringPiece(out, cx, cz, k, a0, a1, y0, y1, -99, -dw), y0, y1); solid(ringPiece(out, cx, cz, k, a0, a1, y0, y1, dw, 99), y0, y1);
+    solid(ringPiece(out, cx, cz, k, a0, a1, y0 + dh, y1, -dw, dw), y0 + dh, y1);
+  }
+}
+/** A flat slab over a convex polygon (plan points) from y0 to y1. */
+function slab(out, pts, y0, y1) {
+  const t = [], n = pts.length, P = (q, yy) => [q[0], yy, q[1]];
+  for (let k = 0; k < n; k++) { const a = pts[k], b = pts[(k + 1) % n]; t.push(...P(a, y0), ...P(b, y0), ...P(b, y1), ...P(a, y0), ...P(b, y1), ...P(a, y1)); }
+  for (let k = 1; k < n - 1; k++) t.push(...P(pts[0], y1), ...P(pts[k], y1), ...P(pts[k + 1], y1), ...P(pts[0], y0), ...P(pts[k + 1], y0), ...P(pts[k], y0));
+  out.push(...orientOutward(t));
+}
+/** The gallery's floor as a ring outside the wall (r…g) and where one walks on it. */
+function galleryFloor(bag, col, cx, cz, r, g, y) {
+  const t = [];
+  for (let k = 0; k < 8; k++) ringPiece(t, cx, cz, k, r * C8 - 0.05, g * C8, y - 0.35, y, -99, 99);
+  bag.add('timber', fromTriangles(t));
+  const ga = g * C8, gs = ga * T8, a = r * C8 - 0.05;
+  for (const r4 of [[-gs, -ga, gs, -a], [-gs, a, gs, ga], [-ga, -gs, -a, gs], [a, -gs, ga, gs], [gs, gs, ga, ga], [-ga, gs, -gs, ga], [-ga, -ga, -gs, -gs], [gs, -ga, ga, -gs]]) col.floor([cx + r4[0], cz + r4[1], cx + r4[2], cz + r4[3]], y);
+}
+function interiorStorey(bag, col, el, cx, cz, i, y, coreMat) {
+  const t = el.tiers[i], h = t.h, last = i === el.tiers.length - 1, { aw, ac, ai, sw } = shaft(el), a = t.r * C8;
+  const wall = [], inner = [], floor = [], steps = [], ceil = [];
+  // the outer wall with its three doorways, the inner wall with the chamber's door on the north
+  ringWall(wall, col, cx, cz, aw, a, y, y + h, OPEN_FACES, 0.8, Math.min(2.9, h * 0.42));
+  ringWall(inner, col, cx, cz, ac - 0.8, ac, y, y + h, [5], 0.6, 2.4);
+  bag.add(coreMat, fromTriangles(wall)); bag.add('plaster_white', fromTriangles(inner));
+  // the doorways' frames on the outer face: red jambs, the lintel with its two door-pins (men zan), the threshold
+  {
+    const fr = [], dh = Math.min(2.9, h * 0.42);
+    for (const k of OPEN_FACES) {
+      const th = (k + 1) * Math.PI / 4, mx = Math.cos(th), mz = Math.sin(th), tx = -mz, tz = mx;
+      const B = (a0, a1, u0, u1, y0, y1) => { const Q = (aa, u, yy) => [cx + mx * aa + tx * u, yy, cz + mz * aa + tz * u]; hexa(fr, [Q(a0, u0, y0), Q(a0, u1, y0), Q(a1, u1, y0), Q(a1, u0, y0), Q(a0, u0, y1), Q(a0, u1, y1), Q(a1, u1, y1), Q(a1, u0, y1)]); };
+      for (const sg of [-1, 1]) B(a - 0.25, a + 0.06, sg > 0 ? 0.8 : -1.02, sg > 0 ? 1.02 : -0.8, y, y + dh + 0.24);
+      B(a - 0.25, a + 0.08, -1.12, 1.12, y + dh, y + dh + 0.3);
+      for (const u of [-0.45, 0.45]) B(a + 0.08, a + 0.16, u - 0.08, u + 0.08, y + dh + 0.07, y + dh + 0.23);
+      B(a - 0.3, a + 0.1, -0.8, 0.8, y, y + 0.05);
+    }
+    bag.add(el.frame && el.frame !== 'tile_iron' ? el.frame : 'timber_red', fromTriangles(fr));
+  }
+  // the floor of the storey: the north and west sides of the corridor, its three free corners, the chamber, the doorways
+  const R = (x0, z0, x1, z1) => [[cx + x0, cz + z0], [cx + x1, cz + z0], [cx + x1, cz + z1], [cx + x0, cz + z1]];
+  const fl = [[-sw, -aw, sw, -ai], [-aw, -sw, -ai, sw]];
+  for (const q of fl) { slab(floor, R(...q), y - 0.3, y); col.floor([cx + q[0], cz + q[1], cx + q[2], cz + q[3]], y); }
+  for (const [sx, sz] of [[1, -1], [-1, -1], [-1, 1]]) {
+    slab(floor, [[cx + sx * sw, cz + sz * sw], [cx + sx * aw, cz + sz * sw], [cx + sx * sw, cz + sz * aw]], y - 0.3, y);
+    col.floor([cx + Math.min(sx * sw, sx * aw), cz + Math.min(sz * sw, sz * aw), cx + Math.max(sx * sw, sx * aw), cz + Math.max(sz * sw, sz * aw)], y);
+    // through the doorway to the gallery
+    const d = (aw + a) / 2 / Math.SQRT2;
+    col.floor([cx + sx * d - 0.9, cz + sz * d - 0.9, cx + sx * d + 0.9, cz + sz * d + 0.9], y);
+    slab(floor, doorSill(cx, cz, sx, sz, aw - 0.02, a + 0.02), y - 0.3, y);
+  }
+  slab(floor, ngon(cx, cz, ac / C8), y - 0.3, y);
+  col.floor([cx - ai, cz - ai, cx + ai, cz + ai], y);
+  bag.add('brick_paving', fromTriangles(floor));
+  // the stair up to the next storey: treads up the east side, the landing, treads up the south side
+  if (!last) {
+    const ym = y + h / 2, y1 = y + h, rise = 0.2, n = Math.ceil(h / 2 / rise), run = 2 * sw / n;
+    for (let j = 0; j < n; j++) {
+      const top = y + (j + 1) * h / 2 / n;
+      hexaBox(steps, cx + ai + 0.05, top - h / 2 / n - 0.28, cz - sw + j * run, cx + aw + 0.3, top, cz - sw + (j + 1) * run + 0.001);
+      const top2 = ym + (j + 1) * h / 2 / n;
+      hexaBox(steps, cx + sw - (j + 1) * run - 0.001, top2 - h / 2 / n - 0.28, cz + ai + 0.05, cx + sw - j * run, top2, cz + aw + 0.3);
+    }
+    slab(steps, landing(cx, cz, sw, aw), ym - 0.32, ym);
+    col.ramp([cx + ai, cz - sw, cx + aw, cz + sw], y, ym, 's');
+    col.floor([cx + sw, cz + sw, cx + aw, cz + aw], ym);
+    col.ramp([cx - sw, cz + ai, cx + sw, cz + aw], ym, y1, 'w');
+    bag.add('granite_block', fromTriangles(steps));
+  } else {
+    // the top storey's ceiling over the corridor, and the chamber's caisson below it
+    slab(ceil, ngon(cx, cz, a / C8 - 0.01), y + h - 0.3, y + h - 0.02);
+    bag.add('timber_red', fromTriangles(ceil));
+  }
+  // the chamber's caisson ceiling (zaojing): an octagon stepping up in two tiers, painted, under the floor above
+  {
+    const r0 = (ac - 0.8) / C8, yc = y + h - 0.32, cz2 = [];
+    const ringT = (ra, rb, y0, y1) => { const tt = []; for (let k = 0; k < 8; k++) ringPiece(tt, cx, cz, k, ra * C8, rb * C8, y0, y1, -99, 99); return tt; };
+    bag.add('paint_caihua', fromTriangles(ringT(r0 * 0.72, r0 + 0.01, yc - 0.55, yc - 0.3)));
+    bag.add('paint_caihua', fromTriangles(ringT(r0 * 0.45, r0 * 0.74, yc - 0.3, yc - 0.06)));
+    slab(cz2, ngon(cx, cz, r0 * 0.47), yc - 0.08, yc);
+    bag.add('ceiling_coffer', fromTriangles(cz2));
+    // an offering table and its bronze censer against the south wall, facing the door (the chamber's images recorded for later)
+    const tb = [];
+    hexaBox(tb, cx - 0.6, y, cz + ac - 0.8 - 0.75, cx + 0.6, y + 0.82, cz + ac - 0.8 - 0.25);
+    bag.add('lacquer_red', fromTriangles(tb));
+    bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.16, 0.06], [0.18, 0.16], [0.14, 0.22], [0.15, 0.25], [0.001, 0.25]], 10, null, cx, y + 0.82, cz + ac - 0.8 - 0.5));
+    col.rect([cx - 0.6, cz + ac - 1.55, cx + 0.6, cz + ac - 1.05], y, y + 0.82);
+  }
+}
+/** The plan of the sill through a diagonal doorway (the outer wall's thickness, the door's width). */
+function doorSill(cx, cz, sx, sz, a0, a1) {
+  const mx = sx / Math.SQRT2, mz = sz / Math.SQRT2, tx = -mz, tz = mx, Q = (a, u) => [cx + mx * a + tx * u, cz + mz * a + tz * u];
+  return [Q(a0, -0.8), Q(a0, 0.8), Q(a1, 0.8), Q(a1, -0.8)];
+}
+/** The landing in the south-east corner of the corridor: the corner's wedge. */
+function landing(cx, cz, sw, aw) { const e = aw + 0.3, d = Math.SQRT2 * e - e; return [[cx + sw, cz + sw], [cx + e, cz + sw], [cx + e, cz + d], [cx + d, cz + e], [cx + sw, cz + e]]; }
+function hexaBox(out, x0, y0, z0, x1, y1, z1) { hexa(out, [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]]); }
 
 registerStyle('song', {
   trim: () => {}, opening: () => {}, column: () => {},
