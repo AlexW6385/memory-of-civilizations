@@ -5,7 +5,7 @@
 // spur; the city's houses (src/styles/vernacular's mud-brick house).
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, rod, disc, fromTriangles } from '../../core/geom.js';
+import { box, lathe, rod, disc, fromTriangles, place } from '../../core/geom.js';
 import '../qing/index.js';
 
 const S = 'limestone_yellow';
@@ -20,16 +20,76 @@ function crest(bag, r, y, mat = S) {
     }
   }
 }
-/** mamluk_minaret: { c, h, y } — square, octagonal and round tiers, balconies, a bulb. */
+/** A balcony on muqarnas round a shaft of radius ri (n sides): tiers of cells stepping out, the floor, a parapet of carved panels between posts, the rail. Returns the floor's top. */
+function mBalcony(bag, x, z, yb, ri, n, rot = 0) {
+  const out = 1.1, tiers = 4, step = out / tiers;
+  for (let k = 0; k < tiers; k++) {
+    const ra = ri + k * step, yy = yb - (tiers - k) * 0.45, cells = n * (k + 2);
+    bag.add(S, lathe([[k ? ra - step : ra * 0.97, 0], [ra, 0], [ra, 0.45]], n * 2, null, x, yy, z));
+    for (let i = 0; i < cells; i++) { const a = rot + (i + (k % 2) * 0.5) / cells * Math.PI * 2, w = ra * Math.PI / cells * 0.78; bag.add(S, place(box(-0.02, 0.06, -w, step, 0.45, w), x + Math.cos(a) * ra, yy, z + Math.sin(a) * ra, -a)); }
+  }
+  const rf = ri + out + 0.1;
+  bag.add(S, lathe([[ri + out - 0.02, 0], [rf, 0.06], [rf, 0.28], [0.001, 0.28]], n * 2, null, x, yb, z));
+  const np = n * 2;
+  for (let i = 0; i < np; i++) {
+    const a = rot + (i + 0.5) / np * Math.PI * 2, pr = rf * Math.cos(Math.PI / np) - 0.07, w = rf * Math.sin(Math.PI / np) - 0.08;
+    bag.add(S, place(box(-0.05, 0, -w, 0.05, 0.95, w), x + Math.cos(a) * pr, yb + 0.28, z + Math.sin(a) * pr, -a));
+    for (const [y0, y1] of [[0.15, 0.4], [0.55, 0.8]]) bag.add(S, place(box(0.05, y0, -w + 0.08, 0.075, y1, w - 0.08), x + Math.cos(a) * pr, yb + 0.28, z + Math.sin(a) * pr, -a));
+    const b = rot + i / np * Math.PI * 2; bag.add(S, box(x + Math.cos(b) * (rf - 0.1) - 0.08, yb + 0.28, z + Math.sin(b) * (rf - 0.1) - 0.08, x + Math.cos(b) * (rf - 0.1) + 0.08, yb + 1.23, z + Math.sin(b) * (rf - 0.1) + 0.08));
+  }
+  bag.add(S, lathe([[rf + 0.03, 0], [rf + 0.03, 0.12], [rf - 0.2, 0.12], [rf - 0.2, 0]], np, null, x, yb + 1.23, z));
+  return yb + 0.28;
+}
+/** A keel-arched niche framed in moulding on a face (frame R from the caller), its slit window: u across the face, y up. */
+function mNiche(bag, R, u, y0, w, hgt) {
+  for (const s of [-1, 1]) bag.add(S, R(u + s * w - 0.12, u + s * w + 0.12, y0, y0 + hgt, 0, 0.14));
+  bag.add(S, R(u - w - 0.12, u + w + 0.12, y0 - 0.2, y0, 0, 0.16));
+  for (let k = 0; k < 4; k++) { const ww = w * (1 - k * 0.24) + 0.12; bag.add(S, R(u - ww, u + ww, y0 + hgt + k * 0.32, y0 + hgt + (k + 1) * 0.32, 0, 0.14)); }
+  bag.add('opening', R(u - 0.22, u + 0.22, y0 + hgt * 0.25, y0 + hgt * 0.85, -0.02, 0.03));
+  for (let k = 0; k < 2; k++) bag.add('opening', R(u - 0.22 + (k + 1) * 0.07, u + 0.22 - (k + 1) * 0.07, y0 + hgt * 0.85 + k * 0.15, y0 + hgt * 0.85 + (k + 1) * 0.15, -0.02, 0.03));
+}
+/**
+ * mamluk_minaret: { c, h, y, r } (docs/settlements/mamluk-cairo.md §4.1) — the Mamluk type: a square
+ * stage, an octagonal stage and a round one, each closed by a balcony on muqarnas with a carved parapet;
+ * keel-arched niches with slit windows on the faces; on top a pavilion of eight slender columns
+ * carrying the bulb and its finial.
+ */
 function minaret(el, { bag, col }) {
   const [x, z] = el.c, y = el.y ?? 0, h = el.h ?? 70, r = el.r ?? 3;
-  bag.add(S, box(x - r, y - 0.5, z - r, x + r, y + h * 0.35, z + r)); col.rect([x - r, z - r, x + r, z + r], y, y + h * 0.9);
-  bag.add(S, lathe([[r * 1.35, 0], [r * 1.35, 1.3], [r * 0.85, 1.3]], 8, null, x, y + h * 0.35, z));
-  bag.add(S, lathe([[r * 0.85, 0], [r * 0.8, h * 0.28]], 8, null, x, y + h * 0.35 + 1.3, z));
-  bag.add(S, lathe([[r * 1.2, 0], [r * 1.2, 1.2], [r * 0.6, 1.2]], 12, null, x, y + h * 0.64, z));
-  bag.add(S, lathe([[r * 0.6, 0], [r * 0.55, h * 0.18]], 12, null, x, y + h * 0.64 + 1.2, z));
-  for (const [dx, dz] of [[-0.35, -0.35], [0.35, -0.35], [-0.35, 0.35], [0.35, 0.35]]) bag.add(S, lathe([[0.25, 0], [0.25, h * 0.06]], 6, null, x + dx * r, y + h * 0.84, z + dz * r));
-  bag.add(S, lathe([[r * 0.7, 0], [r * 0.8, r * 0.5], [r * 0.5, r * 1.1], [0.001, r * 1.4]], 12, null, x, y + h * 0.9, z));
+  const y1 = y + h * 0.4, y2 = y + h * 0.66, y3 = y + h * 0.81;
+  bag.add(S, box(x - r, y - 0.5, z - r, x + r, y1, z + r)); col.rect([x - r, z - r, x + r, z + r], y, y1);
+  for (const f of 'nsew') {
+    const R = (u0, u1, ya, yb, d0, d1) => f === 'n' ? box(x + u0, ya, z - r - d1, x + u1, yb, z - r - d0) : f === 's' ? box(x - u1, ya, z + r + d0, x - u0, yb, z + r + d1) : f === 'w' ? box(x - r - d1, ya, z - u1, x - r - d0, yb, z - u0) : box(x + r + d0, ya, z + u0, x + r + d1, yb, z + u1);
+    for (const yy of [y + h * 0.1, y + h * 0.24]) mNiche(bag, R, 0, yy, r * 0.42, h * 0.08);
+    bag.add(S, R(-r, r, y1 - 2.2, y1 - 1.9, 0, 0.12));
+  }
+  let yb = mBalcony(bag, x, z, y1 + 1.0, r * 1.0, 4, Math.PI / 4);
+  // the octagonal stage, its faces with niches
+  const a8 = r * 0.78, c8 = a8 / Math.cos(Math.PI / 8);
+  bag.add(S, place(lathe([[c8, 0], [c8, y2 - yb]], 8), x, yb, z, Math.PI / 8));
+  for (let k = 0; k < 8; k++) {
+    const a = k * Math.PI / 4, R = (u0, u1, ya, yb2, d0, d1) => place(box(a8 + d0, ya, u0, a8 + d1, yb2, u1), x, 0, z, -a);
+    mNiche(bag, R, 0, yb + (y2 - yb) * 0.2, a8 * 0.3, (y2 - yb) * 0.5);
+  }
+  yb = mBalcony(bag, x, z, y2 + 1.0, c8 * 0.98, 8, Math.PI / 8);
+  // the round stage
+  const r3 = r * 0.6;
+  bag.add(S, lathe([[r3, 0], [r3 * 0.96, y3 - yb]], 16, (t) => 1 + 0.025 * Math.cos(t * 12), x, yb, z));
+  yb = mBalcony(bag, x, z, y3 + 1.0, r3, 8, 0);
+  // the pavilion: eight columns under a ring, the bulb on its neck, the finial
+  const rp = r3 * 0.82, hp = h * 0.06;
+  bag.add(S, lathe([[rp + 0.25, 0], [rp + 0.25, 0.25], [0.001, 0.25]], 16, null, x, yb, z));
+  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; bag.add('marble_column', lathe([[0.16, 0], [0.12, 0.2], [0.11, hp - 0.4], [0.17, hp - 0.25], [0.17, hp]], 8, null, x + Math.cos(a) * rp, yb + 0.25, z + Math.sin(a) * rp)); }
+  bag.add(S, lathe([[r3 * 0.35, 0], [r3 * 0.35, hp + 0.02]], 12, null, x, yb + 0.25, z));
+  const yr = yb + 0.25 + hp;
+  bag.add(S, lathe([[rp + 0.3, 0], [rp + 0.45, 0.35], [rp + 0.45, 0.6], [0.001, 0.6]], 16, null, x, yr, z));
+  const rb = rp * 0.9;
+  bag.add(S, lathe([[rb * 0.55, 0], [rb * 0.6, 0.5], [rb, rb * 0.75 + 0.5], [rb * 0.95, rb * 1.2 + 0.5], [rb * 0.55, rb * 1.75 + 0.5], [rb * 0.18, rb * 2.15 + 0.5], [0.001, rb * 2.4 + 0.5]], 16, null, x, yr + 0.6, z));
+  const yt = yr + 0.6 + rb * 2.4 + 0.5;
+  bag.add('bronze', rod([x, yt - 0.3, z], [x, yt + 2.2, z], 0.05, 6));
+  for (const [rr, yy] of [[0.22, 0.3], [0.3, 0.9]]) bag.add('bronze', lathe([[0.05, 0], [rr, 0.15], [0.05, 0.3]], 8, null, x, yt + yy, z));
+  const cr = []; for (let k = 0; k <= 10; k++) { const t = -0.3 + (Math.PI * 2 - 2.2) * k / 10 + 1.4; cr.push([x + Math.cos(t) * 0.3, yt + 1.95 + Math.sin(t) * 0.3, z]); }
+  for (let k = 0; k + 1 < cr.length; k++) bag.add('bronze', rod(cr[k], cr[k + 1], 0.04, 5));
 }
 /** mamluk_dome: { c, r, y, drum } — a stone dome on a drum, its zone of transition as stepped corners. */
 function dome(el, { bag, col }) {
@@ -250,8 +310,114 @@ function citadelWall(el, { bag, col }) {
   const n = Math.max(1, Math.floor(L / 30));
   for (let i = 0; i <= n; i++) { const x = ax + (bx - ax) * i / n, z = az + (bz - az) * i / n; bag.add(S, lathe([[th * 1.6, 0], [th * 1.5, h + 3 + 2]], 16, null, x, y - 2, z)); col.circle(x, z, th * 1.6, y - 2, y + h + 3); }
 }
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** A face frame on rect r: f in 'nsew'; R(u0, u1, y0, y1, d0, d1) is a box with u along the face from its west/north end and d outward. */
+function faceFrame(r, f) {
+  const [x0, z0, x1, z1] = r;
+  return (u0, u1, y0, y1, d0, d1) => f === 's' ? box(x0 + u0, y0, z1 + d0, x0 + u1, y1, z1 + d1) : f === 'n' ? box(x0 + u0, y0, z0 - d1, x0 + u1, y1, z0 - d0)
+    : f === 'e' ? box(x1 + d0, y0, z0 + u0, x1 + d1, y1, z0 + u1) : box(x0 - d1, y0, z0 + u0, x0 - d0, y1, z0 + u1);
+}
+/**
+ * cairo_front: the street front of a Cairene house of the 14th century laid on the shell of house_egypt
+ * (the same lot fields: rect, y, storeys, front, seed) — docs/settlements/mamluk-cairo.md §5: a projecting
+ * mashrabiya of turned wooden lattice on stepped corbels at the upper storey, a stone door frame with the
+ * stone bench (mastaba) beside the door, and on some roofs a malqaf, the wind catcher open to the north.
+ */
+function cairoFront(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, f = el.front || 's', st = 3.1, H = el.storeys * st + 0.2;
+  const L = f === 'n' || f === 's' ? x1 - x0 : z1 - z0, R = faceFrame(el.rect, f);
+  const du = 0.6 + rng(el.seed || 1)() * Math.max(0.1, L - 2.2), r2 = rng(((el.seed || 1) * 7 + 3) >>> 0);
+  const bays = [];
+  if (r2() < 0.55 && L >= 4.2) bays.push(1);
+  if (el.storeys > 2 && r2() < 0.4 && L >= 4.2) bays.push(2);
+  for (const s of bays) {
+    const w = Math.min(2.8, L - 1.6), um = Math.max(0.8 + w / 2, Math.min(L - 0.8 - w / 2, L / 2 + (r2() - 0.5) * (L - w - 1.6))), yo = y + s * st + 0.35, D = 0.62, a = um - w / 2, b = um + w / 2;
+    if (el.simple) { bag.add('koshi', R(a, b, yo, yo + 2.3, 0, D)); continue; }
+    for (const u of [a + 0.12, um, b - 0.12]) for (let k = 0; k < 3; k++) bag.add('wood_dark', R(u - 0.07, u + 0.07, yo - 0.62 + k * 0.2, yo - 0.42 + k * 0.2, 0, D * (k + 1) / 3));
+    bag.add('wood_dark', R(a, b, yo - 0.12, yo + 0.05, 0, D));
+    bag.add('wood_painted', R(a, b, yo + 0.05, yo + 0.4, D - 0.06, D));
+    for (const s2 of [a, b]) bag.add('wood_painted', R(s2 - (s2 === a ? 0 : 0.06), s2 + (s2 === a ? 0.06 : 0), yo + 0.05, yo + 0.4, 0, D - 0.06));
+    bag.add('koshi', R(a + 0.08, b - 0.08, yo + 0.4, yo + 1.95, D - 0.05, D - 0.01));
+    for (const s2 of [a, b]) bag.add('koshi', R(s2 === a ? a : b - 0.04, s2 === a ? a + 0.04 : b, yo + 0.4, yo + 1.95, 0, D - 0.08));
+    for (const u of [a, b]) bag.add('wood_dark', R(u - (u === a ? 0 : 0.08), u + (u === a ? 0.08 : 0), yo + 0.05, yo + 2.3, D - 0.08, D));
+    bag.add('wood_dark', R(um - 0.04, um + 0.04, yo + 0.4, yo + 1.95, D - 0.08, D));
+    bag.add('lattice', R(a + 0.08, b - 0.08, yo + 1.95, yo + 2.3, D - 0.05, D - 0.01));
+    bag.add('wood_dark', R(a - 0.12, b + 0.12, yo + 2.3, yo + 2.44, 0, D + 0.16));
+  }
+  if (el.simple) return;
+  // the door's stone frame and the bench beside it
+  bag.add('limestone_yellow', R(du - 0.28, du, y + 0.35, y + 2.35, 0, 0.1)); bag.add('limestone_yellow', R(du + 1.0, du + 1.28, y + 0.35, y + 2.35, 0, 0.1));
+  const left = du > 1.8, bu = left ? du - 1.75 : du + 1.35;
+  if (left || L - (du + 1.28) > 1.6) { bag.add('limestone_yellow', R(bu, bu + 1.4, y + 0.35, y + 0.75, 0, 0.5)); bag.add('limestone_yellow', R(bu - 0.04, bu + 1.44, y + 0.75, y + 0.82, 0, 0.55)); }
+  // the malqaf: a hood on the roof, its mouth to the north
+  if (r2() < 0.32 && x1 - x0 > 4 && z1 - z0 > 4) {
+    const mx = (x0 + x1) / 2 + (r2() - 0.5) * (x1 - x0 - 3), m0 = z0 + 0.3, m1 = z0 + 1.3, yt = y + H + 1.6, t = [];
+    bag.add('plaster', box(mx - 0.75, y + H, m0 + 0.12, mx + 0.75, yt, m1));
+    for (const s2 of [-1, 1]) bag.add('plaster', box(mx + s2 * 0.75 - (s2 > 0 ? 0.12 : 0), y + H, m0, mx + s2 * 0.75 + (s2 < 0 ? 0.12 : 0), yt, m0 + 0.12));
+    bag.add('opening', box(mx - 0.63, y + H + 0.9, m0 + 0.1, mx + 0.63, yt - 0.05, m0 + 0.12));
+    const P = [[mx - 0.75, yt, m0], [mx + 0.75, yt, m0], [mx + 0.75, yt, m1], [mx - 0.75, yt, m1], [mx - 0.75, yt + 0.7, m0], [mx + 0.75, yt + 0.7, m0]];
+    t.push(...P[0], ...P[4], ...P[5], ...P[0], ...P[5], ...P[1], ...P[4], ...P[3], ...P[2], ...P[4], ...P[2], ...P[5], ...P[0], ...P[3], ...P[4], ...P[1], ...P[5], ...P[2]);
+    bag.add('reed_mat', dbl(t));
+  }
+}
+/**
+ * sabil_kuttab: { rect, y, corner ([sx, sz]: the street corner's side, ±1 each) } — the corner building of a
+ * public fountain below and a school above (docs/settlements/mamluk-cairo.md §5): the sabil room's great
+ * windows on the two street faces with bronze grilles in marble frames and a marble ledge under each, an
+ * engaged column at the corner, joggled voussoirs over the windows; above, the kuttab's loggia of arches
+ * on marble columns with a wooden balustrade, shaded by a wide wooden awning on brackets; the crest.
+ */
+function sabilKuttab(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, [sx, sz] = el.corner, h1 = 5.4, h2 = 4.4, dep = 1.7;
+  const fx = sx > 0 ? 'e' : 'w', fz = sz > 0 ? 's' : 'n', faces = [fx, fz];
+  bag.add(S, box(x0, y - 0.6, z0, x1, y + h1, z1)); col.rect(el.rect, y, y + h1);
+  // the kuttab's room, set back from the two street faces behind the loggia
+  const kr = [sx > 0 ? x0 : x0 + dep, sz > 0 ? z0 : z0 + dep, sx > 0 ? x1 - dep : x1, sz > 0 ? z1 - dep : z1];
+  bag.add(S, box(kr[0], y + h1, kr[1], kr[2], y + h1 + h2, kr[3]));
+  bag.add('marble_floor', box(x0, y + h1, z0, x1, y + h1 + 0.04, z1));
+  for (const f of faces) {
+    const R = faceFrame(el.rect, f), L = f === 'n' || f === 's' ? x1 - x0 : z1 - z0;
+    const atCorner = (f === 'e' || f === 'w') ? (sz > 0 ? L : 0) : (sx > 0 ? L : 0), m = L / 2;
+    // courses of dark stone in the lower wall, the sabil's window with its grille, ledge and voussoirs
+    for (const yy of [y + 0.6, y + 4.2]) bag.add('marble_dark', R(0, L, yy, yy + 0.18, 0, 0.03));
+    bag.add('opening', R(m - 1.0, m + 1.0, y + 1.1, y + 3.6, -0.02, 0.03));
+    bag.add('marble_smooth', R(m - 1.25, m - 1.0, y + 0.95, y + 3.85, 0, 0.12)); bag.add('marble_smooth', R(m + 1.0, m + 1.25, y + 0.95, y + 3.85, 0, 0.12));
+    bag.add('marble_smooth', R(m - 1.25, m + 1.25, y + 3.6, y + 3.85, 0, 0.12));
+    bag.add('marble_smooth', R(m - 1.15, m + 1.15, y + 0.8, y + 0.95, 0, 0.45)); bag.add('marble_smooth', R(m - 1.0, m + 1.0, y + 0.45, y + 0.8, 0, 0.3));
+    for (let g = 0; g <= 8; g++) bag.add('bronze', R(m - 1.0 + g * 0.25 - 0.025, m - 1.0 + g * 0.25 + 0.025, y + 1.1, y + 3.6, 0.03, 0.08));
+    for (let g = 1; g < 5; g++) bag.add('bronze', R(m - 1.0, m + 1.0, y + 1.1 + g * 0.5 - 0.025, y + 1.1 + g * 0.5 + 0.025, 0.03, 0.08));
+    for (let k = 0; k < 9; k++) bag.add(k % 2 ? 'marble_smooth' : 'marble_dark', R(m - 1.25 + k * 2.5 / 9, m - 1.25 + (k + 1) * 2.5 / 9, y + 3.85, y + 4.2, 0, 0.1));
+    // the loggia: piers at the ends, marble columns between, keel-headed arches, the balustrade, the awning on brackets
+    const yl = y + h1, ya = yl + 2.9, n = 2;
+    for (const u of [0, L]) bag.add(S, R(u === 0 ? 0 : L - 0.6, u === 0 ? 0.6 : L, yl, yl + h2, u === atCorner ? -0.6 : -dep, 0));
+    const colU = []; for (let i = 1; i < n; i++) colU.push(i * L / n);
+    for (const u of colU) { const g = R(u - 0.17, u + 0.17, yl, yl + 0.01, -0.37, -0.03), P = g.attributes.position.array; let cxq = 0, czq = 0; for (let k = 0; k < P.length; k += 3) { cxq += P[k]; czq += P[k + 2]; } cxq /= P.length / 3; czq /= P.length / 3; bag.add('marble_column', lathe([[0.18, 0], [0.18, 0.15], [0.13, 0.25], [0.12, ya - yl - 0.45], [0.2, ya - yl - 0.25], [0.2, ya - yl]], 10, null, cxq, yl, czq)); }
+    // the arch wall over the columns: posts down to the capitals, keel heads stepped in, the frieze
+    const posts = [[0.6, 0.6], ...colU.map((u) => [u - 0.2, u + 0.2]), [L - 0.6, L - 0.6]];
+    for (let i = 0; i + 1 < posts.length; i++) {
+      const u0 = posts[i][1], u1 = posts[i + 1][0], w = u1 - u0;
+      for (let k = 0; k < 5; k++) { const inset = w / 2 * (k + 1) / 6; bag.add(S, R(u0, u0 + inset, ya + k * 0.22, ya + (k + 1) * 0.22, -0.4, 0)); bag.add(S, R(u1 - inset, u1, ya + k * 0.22, ya + (k + 1) * 0.22, -0.4, 0)); }
+    }
+    for (const [p0, p1] of posts) if (p1 > p0) bag.add(S, R(p0, p1, ya, ya + 1.1, -0.4, 0));
+    bag.add(S, R(0, L, ya + 1.1, yl + h2, -0.4, 0));
+    for (let i = 0; i + 1 < posts.length; i++) { const u0 = posts[i][1], u1 = posts[i + 1][0]; bag.add('koshi', R(u0, u1, yl, yl + 1.0, -0.25, -0.2)); bag.add('wood_dark', R(u0, u1, yl + 1.0, yl + 1.08, -0.28, -0.17)); }
+    for (let u = 0.3; u < L; u += 0.9) for (let k = 0; k < 3; k++) bag.add('wood_dark', R(u - 0.06, u + 0.06, yl + h2 - 0.6 + k * 0.2, yl + h2 - 0.4 + k * 0.2, 0, 0.45 * (k + 1)));
+    bag.add('wood_painted', R(-(atCorner === 0 ? 1.4 : 0), L + (atCorner === L ? 1.4 : 0), yl + h2, yl + h2 + 0.14, 0, 1.4));
+    bag.add('wood_dark', R(-(atCorner === 0 ? 1.4 : 0), L + (atCorner === L ? 1.4 : 0), yl + h2 + 0.14, yl + h2 + 0.3, 1.25, 1.4));
+    // the loggia's back: the kuttab's door and windows
+    const back = (u0, u1, ya2, yb2, m2) => bag.add(m2, R(u0, u1, ya2, yb2, -dep - 0.03, -dep + 0.02));
+    back(m - 0.6, m + 0.6, yl + 0.04, yl + 2.3, 'opening');
+  }
+  bag.add(S, box(x0, y + h1 + h2, z0, x1, y + h1 + h2 + 0.5, z1));
+  for (let u = x0 + 0.4; u < x1 - 0.3; u += 1.1) for (const zz of [z0, z1 - 0.4]) bag.add(S, box(u, y + h1 + h2 + 0.5, zz, u + 0.6, y + h1 + h2 + 1.2, zz + 0.4));
+  for (let u = z0 + 1.5; u < z1 - 1.4; u += 1.1) for (const xx of [x0, x1 - 0.4]) bag.add(S, box(xx, y + h1 + h2 + 0.5, u, xx + 0.4, y + h1 + h2 + 1.2, u + 0.6));
+  // the engaged column at the street corner
+  const ccx = sx > 0 ? x1 : x0, ccz = sz > 0 ? z1 : z0;
+  bag.add('marble_column', lathe([[0.26, 0], [0.26, 0.3], [0.2, 0.45], [0.2, h1 - 0.6], [0.28, h1 - 0.4], [0.28, h1 - 0.05]], 12, null, ccx, y, ccz));
+}
+
 registerStyle('mamluk', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall },
+  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, cairo_front: cairoFront, sabil_kuttab: sabilKuttab },
   objects: {},
 });

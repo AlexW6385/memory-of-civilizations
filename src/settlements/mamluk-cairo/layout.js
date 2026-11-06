@@ -7,6 +7,8 @@ export const RADIUS = 400;
 export const HASAN = { rect: [-75, 6, 75, 74], court: [-17, 24, 17, 56], tomb: [-16, 74, 16, 106] };
 export const SQUARE = [80, -80, 170, 120];
 export const CITADEL = { c: [280, 0], r: 105, top: 36 };
+// sabil-kuttabs on street corners: the crossing of the two lanes west of the madrasa, and the square's north-west corner
+export const SABILS = [[-155.5, -115.5], [-165, -130], [74, -86]];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export function height(x, z) {
