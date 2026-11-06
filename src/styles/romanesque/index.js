@@ -261,10 +261,43 @@ function basin(el, { bag, col }) {
   col.circle(x, z, r, y, y + 0.85);
 }
 
+/**
+ * west_gable: the gable of a west front { x0, x1 (its thickness along x), w (half its width in z), y0 (the
+ * eave), y1 (the ridge), mat }: a stone triangle with a coping stepping out along both slopes, a cross at
+ * the apex, and a corbel table (a row of small carved corbels under a moulding) along its foot.
+ */
+function westGable(el, { bag }) {
+  const { x0, x1, w, y0, y1 } = el, m = el.mat || 'limestone_yellow';
+  const tri = [];
+  const P = (x, z, y) => [x, y, z];
+  const A = [P(x0, -w, y0), P(x0, w, y0), P(x0, 0, y1)], B = [P(x1, -w, y0), P(x1, w, y0), P(x1, 0, y1)];
+  tri.push(...A[0], ...A[2], ...A[1], ...B[0], ...B[1], ...B[2]);
+  for (const [i, j] of [[0, 2], [2, 1], [1, 0]]) tri.push(...A[i], ...B[i], ...B[j], ...A[i], ...B[j], ...A[j]);
+  bag.add(m, fromTriangles(orientOutward(tri)));
+  // the coping: a slab along each slope, standing out a little
+  const sl = Math.atan2(y1 - y0, w), c = [];
+  for (const s of [-1, 1]) {
+    const ox = 0.12, t = 0.28, nz = s * Math.sin(sl) * t, ny = Math.cos(sl) * t;
+    const b0 = [x0 - ox, y0, s * w], b1 = [x0 - ox, y1, 0], b2 = [x1 + ox, y1, 0], b3 = [x1 + ox, y0, s * w];
+    const up = (q) => [q[0], q[1] + ny, q[2] + nz];
+    const bb = [b0, b1, b2, b3].map((q) => [q[0], q[1], q[2]]), tt = bb.map(up);
+    const q = (a, b2_, cc, d) => c.push(...a, ...b2_, ...cc, ...a, ...cc, ...d);
+    q(bb[0], bb[1], bb[2], bb[3]); q(tt[0], tt[3], tt[2], tt[1]); q(bb[0], tt[0], tt[1], bb[1]); q(bb[3], bb[2], tt[2], tt[3]); q(bb[0], bb[3], tt[3], tt[0]); q(bb[1], tt[1], tt[2], bb[2]);
+  }
+  bag.add(m, fromTriangles(orientOutward(c)));
+  // the cross at the apex
+  const xm = (x0 + x1) / 2;
+  bag.add(m, box(xm - 0.15, y1 + 0.2, -0.12, xm + 0.15, y1 + 1.5, 0.12)); bag.add(m, box(xm - 0.15, y1 + 0.85, -0.5, xm + 0.15, y1 + 1.1, 0.5));
+  // the corbel table along the foot: corbels, then a moulding over them
+  const n = Math.max(6, Math.round(2 * w / 0.9));
+  for (let k = 0; k <= n; k++) { const z = -w + 0.2 + k * (2 * w - 0.4) / n; bag.add(m, box(x0 - 0.35, y0 - 0.55, z - 0.13, x0, y0 - 0.2, z + 0.13)); bag.add(m, box(x0 - 0.28, y0 - 0.75, z - 0.1, x0, y0 - 0.55, z + 0.1)); }
+  bag.add(m, box(x0 - 0.42, y0 - 0.2, -w - 0.3, x0, y0, w + 0.3));
+}
+
 registerStyle('romanesque', {
   column,
   trim: () => {},
   opening: () => {},
-  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille },
+  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille, west_gable: westGable },
   objects: { doors, reliquary, basin },
 });

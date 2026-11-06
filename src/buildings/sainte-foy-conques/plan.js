@@ -92,14 +92,12 @@ add({ t: 'tympanum', x: 1.0, zc: 0, y: 4.6, w: 6.7, h: 3.6 });
 add({ t: 'obj', kind: 'doors', at: [2.6, 0], y: 0, yaw: Math.PI / 2, w: 3.0, h: 4.6, th: 0.12, depth: 0 });
 add({ t: 'gable_roof', x0: 1.5, x1: XC0 - PS, z0: -AI - 0.25, z1: AI + 0.25, y: EAVE, ridge: RIDGE, ends: false });
 add({ t: 'block', rect: [0, -AI, 1.5, AI], y0: EAVE, y1: EAVE + 0.01, mat: 'limestone_yellow', collide: false });
-// the gable of the west front, in stone
-{
-  const tri = [];
-  for (let k = 0; k < 8; k++) {
-    const h0 = EAVE + (RIDGE - EAVE) * k / 8, h1 = EAVE + (RIDGE - EAVE) * (k + 1) / 8, w = AI * (1 - (k + 0.5) / 8);
-    tri.push({ t: 'block', rect: [0, -w, 1.5, w], y0: h0, y1: h1, mat: 'limestone_yellow', collide: false });
-  }
-  tri.forEach(add);
+// the gable of the west front, in stone: the triangle with its coping and cross, the corbel table at its foot
+add({ t: 'west_gable', x0: 0, x1: 1.5, w: AI, y0: EAVE, y1: RIDGE, mat: 'limestone_yellow' });
+// the two flat buttresses either side of the portal, up to the windows' sills, with a sloped cap
+for (const sz of [-1, 1]) {
+  add({ t: 'block', rect: [-0.7, sz * 5.4 - 0.6, 0, sz * 5.4 + 0.6], y0: 0, y1: 11.4, mat: 'limestone_yellow', collide: true });
+  add({ t: 'block', rect: [-0.55, sz * 5.4 - 0.5, 0, sz * 5.4 + 0.5], y0: 11.4, y1: 11.8, mat: 'limestone_yellow', collide: false });
 }
 // the two west towers over the aisles' first bays, with belfry openings and stone pyramids
 for (const sz of [-1, 1]) {

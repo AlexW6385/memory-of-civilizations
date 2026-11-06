@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.26 — Conques' west front (2026-11-05)
+- Sainte-Foy's west gable is no longer a stack of stepped slabs: a smooth stone triangle with a coping along both slopes, a stone cross at the apex, and a corbel table under a moulding along its foot; two flat buttresses flank the portal up to the windows' sills under sloped caps. New romanesque element: west_gable.
+
 ## v9.25 — Kilwa's ground, Ur's skin, the Taj's minarets (2026-11-05)
 - Kilwa's ground is no longer snow-white: inland the coral rag weathers to a grey-brown sandy soil under grass, only the beach stays white; round the mosque and palace less paving. Ur's ziggurat: rows of weeper holes through the baked-brick skin every 1.8 m up each stage, between the buttresses (dossier §4, sourced), and low parapets rising with the central stair. The Taj Mahal's minarets: an octagonal base, the shaft tapering, its marble blocks outlined by thin dark joints (rings and verticals), the three balconies on brackets with railings.
 
