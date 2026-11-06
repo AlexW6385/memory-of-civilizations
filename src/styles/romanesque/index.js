@@ -392,10 +392,20 @@ function westGable(el, { bag }) {
   bag.add(m, box(x0 - 0.42, y0 - 0.2, -w - 0.3, x0, y0, w + 0.3));
 }
 
+
+/** bourdon: a pilgrim's staff held upright { at [x, z] (the foot), y, h }: an ash staff with an iron ferrule, a knob, a gourd for water tied below the knob. */
+function bourdon(el, { bag }) {
+  const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 1.85;
+  bag.add('iron', lathe([[0.022, 0], [0.024, 0.08], [0.02, 0.1]], 6, null, x, y, z));
+  bag.add('timber', lathe([[0.02, 0], [0.018, h - 0.18]], 6, null, x, y + 0.1, z));
+  bag.add('timber', lathe([[0.018, 0], [0.04, 0.05], [0.04, 0.12], [0.001, 0.16]], 8, null, x, y + h - 0.1, z));
+  bag.add('wood_ochre', lathe([[0.001, 0], [0.06, 0.04], [0.065, 0.1], [0.035, 0.15], [0.045, 0.2], [0.025, 0.25], [0.001, 0.26]], 8, null, x + 0.05, y + h - 0.52, z));
+}
+
 registerStyle('romanesque', {
   column,
   trim: () => {},
   opening: () => {},
-  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille, west_gable: westGable },
+  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille, west_gable: westGable, bourdon },
   objects: { doors, reliquary, basin },
 });
