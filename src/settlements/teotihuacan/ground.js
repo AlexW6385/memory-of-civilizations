@@ -1,17 +1,19 @@
-// Teotihuacan — the ground: the valley floor, level, rising a little at the north under the Moon
-// Pyramid; dry soil and grass, maguey and nopal stand-ins between the compounds; the high valley's sky.
+// Teotihuacan — the ground: the valley floor, level, with the built terrace of the Moon Plaza at the
+// north end; dry soil and grass, maguey and nopal stand-ins between the compounds; the high valley's sky.
 
-import { RADIUS, MOON, AVENUE, inRect, inCompound, KEEP_CLEAR, smooth as sm } from './layout.js';
+import { RADIUS, MOON, AVENUE, PLAZA, STEP, inRect, inCompound, KEEP_CLEAR, smooth as sm } from './layout.js';
 
+// the Moon Plaza and the Moon stand on a level terrace MOON.rise up, built out to STEP at its south
+// edge (the platform across the avenue hides the drop) and falling away gently to the west and east
 function height(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS) return 0;
-  const q = Math.hypot((x - MOON.c[0]) / 110, (z - MOON.c[1]) / 100);
-  return MOON.rise * sm(1.6, 0.9, q) * (1 - sm(RADIUS - 40, RADIUS, r));
+  const out = Math.max(0, Math.abs(x) - STEP[2]), m = (1 - sm(STEP[2], STEP[2] + 26, Math.abs(x))) * (1 - sm(STEP[1] + 2, STEP[3] - 2 + out, z));
+  return MOON.rise * m * (1 - sm(RADIUS - 40, RADIUS, r));
 }
 function cover(x, z) {
   const c = { sand: 0.25, grass: 0.25, rock: 0, soil: 0.5, fields: 0, dry: 0.6, warmth: 0.6, red: 0.15, road: 0, snow: 0, forest: 0 };
-  if (inRect(AVENUE, x, z)) { c.road = 0.8; return c; }
+  if (inRect(AVENUE, x, z) || inRect(PLAZA, x, z)) { c.road = 0.8; return c; }
   if (Math.hypot(x, z) > RADIUS - 34) { c.fields = 0.6; c.grass = 0.4; return c; }
   return c;
 }

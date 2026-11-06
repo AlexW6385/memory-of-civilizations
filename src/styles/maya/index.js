@@ -10,6 +10,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
+import { serpentHeadKit, chaacKit, chacmoolKit, Kit } from './meso.js';
 
 const L = 'limestone_maya';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -23,16 +24,10 @@ function frust(bag, mat, cx, cz, a0, b0, a1, b1, y0, y1) {
   bag.add(mat, fromTriangles(t.concat(flipTris(t))));
 }
 
-/** A serpent's head at the foot of a balustrade: the open jaws facing out { at, dir, y, s }. */
-function serpentHead(bag, x, z, dir, y, s = 1) {
-  const [dx, dz] = dir, nx = -dz, nz = dx;
-  bag.add(L, box(x - 0.9 * s, y, z - 0.9 * s, x + 0.9 * s, y + 1.3 * s, z + 0.9 * s));
-  // the snout and the upper jaw, the fangs
-  const t = [];
-  beamTris(t, [x, y + 0.7 * s, z], [x + dx * 1.8 * s, y + 0.75 * s, z + dz * 1.8 * s], 0.75 * s, 0.6 * s);
-  beamTris(t, [x + dx * 1.4 * s + nx * 0.4 * s, y + 0.3 * s, z + dz * 1.4 * s + nz * 0.4 * s], [x + dx * 1.7 * s + nx * 0.4 * s, y + 0.3 * s, z + dz * 1.7 * s + nz * 0.4 * s], 0.08 * s, 0.4 * s);
-  beamTris(t, [x + dx * 1.4 * s - nx * 0.4 * s, y + 0.3 * s, z + dz * 1.4 * s - nz * 0.4 * s], [x + dx * 1.7 * s - nx * 0.4 * s, y + 0.3 * s, z + dz * 1.7 * s - nz * 0.4 * s], 0.08 * s, 0.4 * s);
-  bag.add('stucco_red', fromTriangles(t));
+/** A feathered serpent's head at the foot of a balustrade, its jaws facing out along dir, the back of its block at (x, z) (meso.js). */
+function serpentHead(bag, x, z, dir, y, s = 1, opts) {
+  const [dx, dz] = dir;
+  serpentHeadKit(opts).emit(bag, x - dx * 0.3 * s, y, z - dz * 0.3 * s, dx, dz, s);
 }
 
 /**
@@ -99,15 +94,34 @@ function mPyramid(el, { bag, col }) {
 }
 
 /**
+ * A feathered-serpent column (the Castillo's and the Warriors' doorways): the head on the floor with
+ * its jaws open toward (dx, dz), the body rising as a square shaft banded with feathers, the rattle
+ * tail bent out at the top under the lintel, its rattles turned up.
+ */
+function serpentColumn(bag, x, z, [dx, dz], y, H) {
+  const k = new Kit(), top = H - 0.55;
+  k.bx(L, -0.42, 0.42, 0.9, top, -0.42, 0.42);                                                         // the body
+  for (let yy = 1.2; yy < top - 0.2; yy += 0.42) {                                                     // the bands of feathers
+    k.bx('stucco_red', -0.46, 0.46, yy, yy + 0.12, -0.46, 0.46);
+    k.fz(L, [-0.36, 0.36, yy + 0.12, yy + 0.3], [-0.3, 0.3, yy + 0.12, yy + 0.22], 0.42, 0.5);
+  }
+  k.bx(L, -0.46, 0.46, top, H, -0.6, 0.62);                                                            // the tail, bent out under the lintel
+  k.fz(L, [-0.4, 0.4, top + 0.05, H], [-0.32, 0.32, top + 0.12, H], 0.62, 1.2);
+  for (let i = 0; i < 4; i++) { const zz = 0.72 + i * 0.13; k.bx('stucco_red', -0.44 + i * 0.02, 0.44 - i * 0.02, top + 0.02, H - 0.03, zz, zz + 0.06); }   // the rattles
+  k.emit(bag, x, y, z, dx, dz);
+  serpentHead(bag, x + dx * 0.4, z + dz * 0.4, [dx, dz], y, 0.64);
+}
+
+/**
  * m_temple: the temple on a pyramid or a platform { c, y, w, d, h, doors (the side of the main
- * doorway: 'n'…), serpentCols }: thick walls of plastered stone, doorways on all four sides (three
+ * doorway: 'n'…), serpentCols, masks (the rain god's masks on the frieze), chacmool }: thick walls of plastered stone, doorways on all four sides (three
  * bays at the front, divided by serpent columns), a frieze, a flat roof with a crest of merlons.
  */
 function mTemple(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y, w = el.w / 2, d = el.d / 2, h = el.h ?? 6, wt = 1.2;
   bag.add(L, box(cx - w - 0.6, y, cz - d - 0.6, cx + w + 0.6, y + 0.4, cz + d + 0.6));
   col.floor([cx - w - 0.6, cz - d - 0.6, cx + w + 0.6, cz + d + 0.6], y + 0.4);
-  const wallH = h * 0.62, y1 = y + 0.4;
+  const wallH = h * 0.62, y1 = y + 0.4, sides = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
   // the walls with a doorway in the middle of each (the front with three, between serpent columns)
   for (const [k, a, b] of [['n', [cx - w, cz - d], [cx + w, cz - d]], ['s', [cx + w, cz + d], [cx - w, cz + d]], ['w', [cx - w, cz + d], [cx - w, cz - d]], ['e', [cx + w, cz - d], [cx + w, cz + d]]]) {
     const len = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / len, uz = (b[1] - a[1]) / len;
@@ -119,20 +133,37 @@ function mTemple(el, { bag, col }) {
       col.segment(p, q, wt, y1, y1 + wallH);
     }
     if (front && el.serpentCols !== false) for (const s of [-1, 1]) {
-      // the serpent columns: the body upright, the head on the ground, the rattle tail holding the lintel
       const m = len / 2 + s * door / 6, px = a[0] + ux * m, pz = a[1] + uz * m;
-      bag.add('stucco_red', lathe([[0.45, 0], [0.42, wallH * 0.9], [0.55, wallH]], 10, null, px, y1, pz));
-      serpentHead(bag, px - (k === 'n' ? 0 : 0), pz, k === 'n' ? [0, -1] : k === 's' ? [0, 1] : k === 'e' ? [1, 0] : [-1, 0], y1, 0.6);
-      col.circle(px, pz, 0.5, y1, y1 + wallH);
+      serpentColumn(bag, px, pz, sides[k], y1, wallH);
+      col.rect([px - 0.45, pz - 0.45, px + 0.45, pz + 0.45], y1, y1 + wallH);
     }
   }
-  // the lintels, the frieze (a band of painted panels), the roof and its crest
-  bag.add('stucco_red', box(cx - w - 0.2, y1 + wallH, cz - d - 0.2, cx + w + 0.2, y1 + h * 0.9, cz + d + 0.2));
-  bag.add('maya_blue', box(cx - w - 0.25, y1 + wallH + 0.5, cz - d - 0.25, cx + w + 0.25, y1 + wallH + 0.8, cz + d + 0.25));
-  bag.add(L, box(cx - w - 0.3, y1 + h * 0.9, cz - d - 0.3, cx + w + 0.3, y1 + h, cz + d + 0.3));
+  // the lintels, the frieze (painted plaster, or stone carved with masks), the roof and its crest
+  const fy0 = y1 + wallH, fy1 = y1 + h * 0.9;
+  bag.add(el.masks ? L : 'stucco_red', box(cx - w - 0.2, fy0, cz - d - 0.2, cx + w + 0.2, fy1, cz + d + 0.2));
+  if (el.masks) {
+    // the rain god's long-nosed masks on the corners and the middle of each side (the Temple of the Warriors)
+    bag.add('stucco_red', box(cx - w - 0.24, fy0, cz - d - 0.24, cx + w + 0.24, fy0 + 0.16, cz + d + 0.24));
+    const ms = (fy1 - fy0 - 0.2) / 1.5, mw = 0.8 * ms;
+    for (const k of 'nsew') {
+      const [fx, fz] = sides[k], half = fx ? d : w, out = (fx ? w : d) + 0.2;
+      for (const u of [-half + mw + 0.05, 0, half - mw - 0.05]) {
+        if (u === 0 && k === el.doors) continue;
+        const x = fx ? cx + fx * out : cx + u, z = fx ? cz + u : cz + fz * out;
+        chaacKit().emit(bag, x, fy0 + 0.18, z, fx, fz, ms);
+      }
+    }
+  } else bag.add('maya_blue', box(cx - w - 0.25, fy0 + 0.5, cz - d - 0.25, cx + w + 0.25, fy0 + 0.8, cz + d + 0.25));
+  bag.add(L, box(cx - w - 0.3, fy1, cz - d - 0.3, cx + w + 0.3, y1 + h, cz + d + 0.3));
   for (let i = 0; i < Math.round(w * 2 / 1.2); i++) for (const z of [cz - d, cz + d]) {
     const x = cx - w + 0.6 + i * 1.2;
     bag.add('stucco', box(x - 0.3, y1 + h, z - 0.2, x + 0.3, y1 + h + 0.9, z + 0.2));
+  }
+  // the chacmool before the main doorway, looking out over the stair
+  if (el.chacmool) {
+    const [fx, fz] = sides[el.doors], off = (fx ? w : d) + 2.0;
+    chacmoolKit().emit(bag, cx + fx * off, y, cz + fz * off, fx, fz, 1);
+    col.rect(fx ? [cx + fx * off - 0.4, cz - 0.9, cx + fx * off + 0.4, cz + 0.9] : [cx - 0.9, cz + fz * off - 0.4, cx + 0.9, cz + fz * off + 0.4], y, y + 1);
   }
   col.floor([cx - w - 0.3, cz - d - 0.3, cx + w + 0.3, cz + d + 0.3], y1 + h);
 }

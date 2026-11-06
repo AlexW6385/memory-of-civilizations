@@ -5,7 +5,12 @@
 
 export const RADIUS = 440;
 export const AVENUE = [-20, -262, 20, 400];
-export const MOON = { c: [0, -330], w: 140, d: 128, tw: 40, td: 34, h: 43, rise: 6 };
+export const MOON = { c: [0, -330], w: 140, d: 128, tw: 40, td: 34, h: 43, rise: 3 };   // rise: the level of the Moon Plaza's terrace
+/** The platforms across the avenue (their south faces' z), stepping it into sunken plazas; the last, at the Moon Plaza's edge, carries its terrace. */
+export const CROSS = [-140, -10, 110, 240];
+export const STEP = [-92, -199, 92, -189];
+/** The platforms enclosing the plazas run from the avenue's edge out to BANK on either side. */
+export const BANK = 52;
 export const PLAZA = [-70, -262, 70, -196];
 export const SUN = { c: [180, -80], w: 225, d: 222, tw: 40, td: 40, h: 65 };
 export const CIUD = [30, 170, 210, 350];
