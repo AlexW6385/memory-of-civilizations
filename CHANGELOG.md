@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.55 — Westminster Hall; Versailles' Marble Court (2026-11-06)
+- Westminster Hall in its true section with Herland's thirteen hammerbeam trusses, carved angels, traceried windows, the north front and St Stephen's Porch, enterable; hansom cabs, knifeboard omnibuses, gas lamps, paddle steamers, lighters and a floating pier; terrace houses removed from inside the hall and New Palace Yard; Versailles' Marble Court in its U plan with the marble paving, brick-and-stone fronts with busts on consoles and gilded balconies, slate mansards with gilt cresting, the paired red marble columns and the clock pediment with Mars and Hercules, the gilded railings of the Royal Court and forecourt.
+
 ## v9.54 — Ming wall gates open; Suzhou's garden (2026-11-06)
 - Ming wall copings closed over gates so their passages are walkable (Suzhou, Seoul, Angkor and every wall gate); doorways no longer drawn filled in; plinths stop at gates; leaky-window bars given sides; Suzhou's garden: hanging fretwork under gallery and pavilion beams, gallery frames with leaky windows, zigzag granite bridges with landing slabs and rails, rockery paths among Taihu stones with a grotto, women washing at the public landings; the garden door moved off the back of the women's building.
 
