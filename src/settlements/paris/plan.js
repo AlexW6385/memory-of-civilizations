@@ -10,7 +10,7 @@ export const city = {
   id: 'paris-cite', style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [0, -60], facing: 'w' }, bounds: [PALACE[0] - 2, PALACE[1] - 2, CATHEDRAL[2] + 22, PALACE[3] + 2], rooms: [],
   elements: [
-    { t: 'cathedral', rect: CATHEDRAL, nave: 33, towers: 69, y: g },
+    { t: 'notre_dame', rect: CATHEDRAL, y: g },
     { t: 'great_hall', rect: [-290, -88, -230, -58], h: 16, y: g },
     { t: 'great_hall', rect: [-150, -60, -118, 40], h: 12, y: g },
     { t: 'tower', at: [-300, -85], r: 5, h: 22, roof: 10, y: g }, { t: 'tower', at: [-260, -92], r: 6, h: 24, roof: 11, y: g }, { t: 'tower', at: [-215, -92], r: 6, h: 24, roof: 11, y: g },
