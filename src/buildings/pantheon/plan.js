@@ -3,6 +3,7 @@
 // faces north (−z). Metres, true scale.
 
 import { SITES } from '../../world/regions.js';
+import './style.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -68,18 +69,10 @@ add({ t: 'ring_wall', c: [0, 0], r0: R - 0.55, r1: R + 0.2, y0: CORNICE1 - 2.2, 
 add({ t: 'ring_wall', c: [0, 0], r0: R - 0.85, r1: R - 0.5, y0: CORNICE1 - 0.35, y1: CORNICE1, gaps: [{ a: 0, w: 7.6 }, { a: 180, w: 10 }], mat: 'marble' });
 // the attic: a marble band, then the second cornice at the springing of the dome
 add({ t: 'ring_wall', c: [0, 0], r0: R - 0.4, r1: R + 0.1, y0: SPRING - 0.5, y1: SPRING, gaps: [], mat: 'marble' });
-// aediculae between the niches: podium, two small porphyry columns, pediment block
-for (let k = 0; k < 8; k++) {
-  const b = 22.5 + k * 45, a = (b - 90) * Math.PI / 180, ux = Math.cos(a), uz = Math.sin(a), tx = -uz, tz = ux;
-  const r = R - 0.9;
-  const c = [ux * r, uz * r];
-  const P = (s, o) => [c[0] + tx * s + ux * o, c[1] + tz * s + uz * o];
-  const pts = [P(-1.9, -0.9), P(1.9, -0.9), P(1.9, 0.95), P(-1.9, 0.95)];
-  const xs = pts.map((p) => p[0]), zs = pts.map((p) => p[1]);
-  block([Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)], F, F + 1.5, { mat: 'giallo' });
-  for (const s of [-1, 1]) { const p = P(s * 1.45, -0.55); column(p[0], p[1], F + 1.5, 4.6, 0.5, { shaftMat: 'porphyry' }); }
-  block([Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)], F + 6.1, F + 7.3, { mat: 'marble', collide: false });
-}
+// aediculae between the niches: podium, two porphyry columns, entablature, triangular and segmental pediments in turn
+for (let k = 0; k < 8; k++) add({ t: 'aedicula', c: [0, 0], R, bearing: 22.5 + k * 45, kind: k % 2 ? 'seg' : 'tri', y: F });
+// the attic as first faced: porphyry pilasters, framed blind windows, panels (none over the apse, which rises into it)
+add({ t: 'attic', c: [0, 0], R, y0: CORNICE1, y1: SPRING - 0.5, skip: [180] });
 
 // ── the dome ──────────────────────────────────────────────────────────────────
 add({
@@ -99,8 +92,7 @@ block([-3.8, BZ0, 3.8, BZ1], F + 12.2, F + 24.5, { mat: 'stucco' });
 // the passage narrows to the doorway (4.45 × 7.53) with a bronze grille in the transom above
 block([-3.8, -26.6, -2.225, -25.4], F, F + 12.2, { mat: 'marble' });
 block([2.225, -26.6, 3.8, -25.4], F, F + 12.2, { mat: 'marble' });
-block([-2.225, -26.4, 2.225, -25.6], F + 7.53, F + 12.2, { mat: 'bronze', collide: false });
-obj('doors', 0, -25.4, F, { yaw: 0, w: 4.45, h: 7.53, th: 0.18, depth: 0 });
+obj('pantheon_door', 0, -25.4, F, { w: 4.45, h: 7.53, top: F + 12.2 });
 // the second, higher pediment on the block
 add({ t: 'pediment_roof_z', rect: [-17.1, BZ0, 17.1, BZ1], y: F + 24.5, rise: 7.0, tympanumInset: 0.6, rakingGeison: 0.7, mat: 'marble', tileMat: 'gilt_bronze' });
 
@@ -120,6 +112,8 @@ for (const s of [-1, 1]) {
   add({ t: 'niche', c: [s * 8.85, -33.5 - 3.0], R: 3.0, bearing: 180, kind: 'semi', w: 3.4, d: 1.7, y0: F + 0.8, y1: F + 7.0, mat: 'marble' });
 }
 add({ t: 'pediment_roof_z', rect: [-17.1, FZ - 1.6, 17.1, BZ0], y: ET + EH, rise: 7.6, tympanumInset: 0.85, rakingGeison: 0.7, mat: 'marble', tileMat: 'gilt_bronze' });
+// the eagle in its wreath on the tympanum, in gilded bronze (the clamp holes; dossier §8)
+add({ t: 'eagle_wreath', at: [0, FZ - 1.6 + 0.88], y: ET + EH + 2.9, r: 2.0, face: -1 });
 
 // ── rooms and walks ───────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -142,7 +136,7 @@ export const pantheon = {
   id: 'pantheon',
   name: { en: 'The Pantheon, Rome', zh: '罗马万神殿' },
   era: { en: 'Imperial Rome, c. AD 114–128', zh: '罗马帝国，约公元114—128年' },
-  style: 'roman',
+  style: 'roman-pantheon',
   district: 'rome',
   ...SITES.pantheon,
   entrance: { at: [0, -160], facing: 's' },
