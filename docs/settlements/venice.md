@@ -36,6 +36,8 @@ Brick and Istrian stone; marble and gold mosaic on the basilica; lead domes; arc
 
 About 1,000 houses on the islands. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): a bacaro-like inn and two homes, furnished as in Florence; a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
+
 ## 6. Ground and water
 
 Paving of trachyte and brick; a few gardens; the canals and the lagoon. [inferred]

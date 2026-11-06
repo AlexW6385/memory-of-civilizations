@@ -34,6 +34,8 @@ Cut stone; lead domes; pencil minarets with balconies and lead cones; domed arca
 
 About 700 timber houses. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): three houses with the sedir (the raised divan) round the walls, rugs, the brass tray on its stand, a hanging lamp, a painted chest; a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
+
 ## 6. Ground and water
 
 Paved courts; gardens with cypresses and plane trees. [inferred]

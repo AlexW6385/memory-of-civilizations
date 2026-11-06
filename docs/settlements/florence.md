@@ -37,6 +37,8 @@ White, green and pink marble on the cathedral, campanile and Baptistery; red til
 
 About 1,500 houses and palaces. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): an osteria (tables and benches, the counter with jugs, wine barrels, the hearth, hams hanging) and two homes (table and stools, hearth, chest, bed, a cupboard of crockery); a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
+
 ## 6. Ground and water
 
 Stone paving; the Arno and its banks; cypresses and pines in gardens. [inferred]

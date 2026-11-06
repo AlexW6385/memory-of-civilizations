@@ -37,6 +37,8 @@ Travertine walls, lead roofs and a ribbed lead dome; Tuscan columns in the colon
 
 The Borgo's stuccoed houses of three or four storeys with tiled roofs, between the two Borgo streets and in the lanes. [stated: the houses; their number ours — inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): an osteria and two homes, furnished as in Florence; a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
+
 ## 6. Ground and water
 
 The piazza is paved in travertine and the streets are cobbled. The Tiber's banks were unembanked in 1670 (the embankments date from after 1870), so they are muddy here. The Vatican gardens rise to the west, with umbrella pines and cypresses. [stated: the embankments; inferred: the planting]

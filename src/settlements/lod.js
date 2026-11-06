@@ -21,3 +21,13 @@ export function lodTiles(id, style, elements, { near = 220, R = 460, entrance = 
   }
   return plans;
 }
+
+/**
+ * The houses that can be entered (DESIGN §4.3): the n lots nearest a point (the arrival), wide and
+ * deep enough, the first an inn and the rest homes. Returns a map from lot to its use.
+ */
+export function openLots(lots, [x, z], n = 3) {
+  const ok = lots.filter((l) => l.rect && l.rect[2] - l.rect[0] >= 4.5 && l.rect[3] - l.rect[1] >= 4.5 && !l.tower);
+  const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
+  return new Map(ok.sort((a, b) => d(a) - d(b)).slice(0, n).map((l, i) => [l, i === 0 ? 'inn' : 'home']));
+}

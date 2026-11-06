@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.30 — Houses to enter in six more towns (2026-11-05)
+- In Florence, Rome, Venice, Versailles, Granada and Istanbul the three houses nearest the arrival can be entered (openLots in src/settlements/lod.js; house_med takes open and use): a step up from the street, the door leaf standing open inside, a floor of terracotta, flags or brick, the ceiling's beams. The first is an inn in the Christian towns: tables with benches, the counter with jugs, wine barrels behind it, the hearth with its jambs, hood and pot, hams and cheeses hanging. Homes: table and stools, the hearth, a chest, a bed, a cupboard of crockery. In Granada and Istanbul: the divan round the walls with mattresses and cushions, a rug, the brass tray on its stand, a hanging lamp, a painted chest. Dossiers noted.
+
 ## v9.29 — Houses to enter in Suzhou (2026-11-05)
 - The first enterable houses (DESIGN §4.3): in Suzhou the two shops and two homes nearest the way in are open and furnished. Shops: the counter with a way in at one end, abacus and steelyard, a stool, shelves of glazed jars and bolts of cloth, a paper lantern. Homes: the door leaf folded open; the hall's long table against the back wall with incense burner, vase and a hanging scroll; the square table between two armchairs; a tall cabinet, a washstand with its basin, stools; a canopied bed with curtains half drawn behind a screen; a brick floor and the upper floor's boards and joists overhead. house_jiangnan takes open: true.
 

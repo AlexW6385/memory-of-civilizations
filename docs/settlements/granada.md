@@ -33,6 +33,8 @@ Red rammed earth and brick walls and towers, crenellated; plain-walled palaces r
 
 About 1,000 houses in the Albaicín and below the hill. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): three houses with the divan round the walls (mattresses, cushions), a rug, the brass tray on its stand, a hanging lamp, a painted chest; a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
+
 ## 6. Ground and water
 
 Red earth; elm woods on the slopes; cypresses, myrtle; poplars by the Darro; olives beyond. [inferred]

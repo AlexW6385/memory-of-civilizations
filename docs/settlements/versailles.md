@@ -34,6 +34,8 @@ Pale stone in three storeys with balustrades and trophies on the garden front; b
 
 About 450 houses. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): an auberge and two homes, with stone-flagged floors; a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
+
 ## 6. Ground and water
 
 Gravel walks; lawns; dense bosquets (elm and oak stand in for hornbeam and lime); the canal. [inferred]
