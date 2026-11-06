@@ -1,5 +1,5 @@
 // Muscovy about 1600 (docs/settlements/muscovy.md §2–§4).
-import { RADIUS, KREMLIN, SPASSKY, SQUARE, BASIL, LOBNOYE, ROWS, CATHEDRALS as C, height } from './layout.js';
+import { RADIUS, KREMLIN, SPASSKY, NIKOLSKY, SQUARE, BASIL, LOBNOYE, ROWS, MOAT, CATHEDRALS as C, height, wallX, gateZ } from './layout.js';
 
 const hy = (r) => height((r[0] + r[2]) / 2, (r[1] + r[3]) / 2);
 const five = (r, k = 1) => { const [x0, z0, x1, z1] = r, mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, dx = (x1 - x0) * 0.27, dz = (z1 - z0) * 0.27; return [[mx, mz, 3.4 * k, 6 * k], [mx - dx, mz - dz, 2.2 * k, 4 * k], [mx + dx, mz - dz, 2.2 * k, 4 * k], [mx - dx, mz + dz, 2.2 * k, 4 * k], [mx + dx, mz + dz, 2.2 * k, 4 * k]]; };
@@ -26,7 +26,8 @@ export const kremlin = {
   id: 'muscovy-kremlin', style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [40, 20], facing: 'w' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [
-    { t: 'kremlin_wall', pts: KREMLIN, h: 12, th: 4.5, y: height, every: 55, round: [0, 1, 2], gates: [SPASSKY, [2, 0.5]] },
+    { t: 'kremlin_wall', pts: KREMLIN, h: 12, th: 4.5, y: height, every: 55, round: [0, 1, 2], gates: [SPASSKY, NIKOLSKY, [2, 0.5]] },
+    { t: 'moat', wallX, ...MOAT, y: height, bridges: [gateZ(SPASSKY[1]), gateZ(NIKOLSKY[1])], bw: 3.2 },
     { t: 'russian_church', rect: C.archangel, h: 18, y: hy(C.archangel), domes: five(C.archangel, 0.8), dome: 'gilt_bronze' },
     { t: 'russian_church', rect: C.annunciation, h: 14, y: hy(C.annunciation), domes: five(C.annunciation, 0.6), dome: 'gilt_bronze' },
     { t: 'bell_tower', c: C.ivan, y: height(...C.ivan), tiers: [[8.5, 24], [7.2, 14], [6, 12], [4.8, 14], [3.8, 8]] },

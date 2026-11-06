@@ -14,6 +14,12 @@ export const BASIL = [26, 128];
 export const LOBNOYE = [20, 72];
 export const ROWS = [72, -140, 92, 90];
 export const CATHEDRALS = { dormition: [-190, -10, -158, 18], archangel: [-150, 40, -126, 62], annunciation: [-210, 40, -192, 58], ivan: [-140, 0], facets: [-238, -8, -214, 16] };
+// the moat (the Alevizov ditch) along the wall on the square: d0…d1 metres out from the wall's line, from z0 to z1
+export const MOAT = { d0: 10, d1: 24, z0: -168, z1: 166, level: -4.5, bed: -7 };
+export const NIKOLSKY = [0, 0.12];
+export const wallX = (z) => KREMLIN[0][0] + (KREMLIN[1][0] - KREMLIN[0][0]) * (z - KREMLIN[0][1]) / (KREMLIN[1][1] - KREMLIN[0][1]);
+export const gateZ = (t) => KREMLIN[0][1] + (KREMLIN[1][1] - KREMLIN[0][1]) * t;
+export const inMoat = (x, z, m = 0) => z > MOAT.z0 - m && z < MOAT.z1 + m && x - wallX(z) > MOAT.d0 - m && x - wallX(z) < MOAT.d1 + m;
 export const RIVER = { z: 250, w: 90, level: -7, bed: -10 };
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -30,16 +36,19 @@ export function inKremlin(x, z, m = 0) {
 }
 // the Borovitsky hill: the Kremlin stands ~8 m above the square's level, falling to the river
 export function height(x, z) {
-  const d = Math.abs(z - riverZ(x)), edge = smooth(RADIUS - 70, RADIUS - 40, Math.hypot(x, z));
+  const dr = Math.abs(z - riverZ(x)), edge = smooth(RADIUS - 70, RADIUS - 40, Math.hypot(x, z));
   const hill = 6 * smooth(-30, -120, x) * smooth(200, 150, z);
   const bank = -4 * smooth(170, RIVER.z - RIVER.w / 2 - 4, z) * smooth(RIVER.z + RIVER.w / 2 + 30, RIVER.z + RIVER.w / 2 + 4, z);
-  const river = (RIVER.bed - bank) * smooth(RIVER.w / 2 + 6, RIVER.w / 2 - 6, d);
-  return (hill + bank + river) * (1 - edge);
+  const river = (RIVER.bed - bank) * smooth(RIVER.w / 2 + 6, RIVER.w / 2 - 6, dr);
+  const d = x - wallX(z), carve = smooth(MOAT.d0, MOAT.d0 + 0.5, d) * smooth(MOAT.d1, MOAT.d1 - 0.5, d) * smooth(MOAT.z0, MOAT.z0 + 0.5, z) * smooth(MOAT.z1, MOAT.z1 - 0.5, z);
+  const h = (hill + bank + river) * (1 - edge);
+  return h + (MOAT.bed - h) * carve;
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const reserved = (cx, cz) => inRect(SQUARE, cx, cz, 6) || Math.hypot(cx - BASIL[0], cz - BASIL[1]) < 34 || inRect(ROWS, cx, cz, 6)
   || Object.values(CATHEDRALS).some((r) => r.length === 4 ? inRect(r, cx, cz, 14) : Math.hypot(cx - r[0], cz - r[1]) < 22)
-  || (inKremlin(cx, cz, -14) && !inKremlin(cx, cz, 12)) || Math.abs(cz - riverZ(cx)) < RIVER.w / 2 + 8;
+  || (inKremlin(cx, cz, -14) && !inKremlin(cx, cz, 12)) || Math.abs(cz - riverZ(cx)) < RIVER.w / 2 + 8
+  || (cz > KREMLIN[0][1] - 10 && cz < KREMLIN[1][1] + 10 && cx > wallX(cz) && cx < SQUARE[0] + 6);      // the open field cleared before the wall (1493–95), the moat in it
 let LOTS = null;
 /** The log houses: courts of the boyars inside the Kremlin, the posad outside. */
 export function lots() {

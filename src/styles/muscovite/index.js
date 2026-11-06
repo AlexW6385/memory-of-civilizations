@@ -335,8 +335,79 @@ function rows(el, { bag, col }) {
   bag.add('planks_grey', orientedBox([x0 - 1.5, z0], [x0 - 1.5, z1], 2.5, y + 2.6, y + 2.8));
   bag.add('planks_grey', frustum([x0 - 0.3, z0 - 0.3, x1 + 0.3, z1 + 0.3], y + 3, y + 5, (x1 - x0) / 2 + 0.3, (x1 - x0) / 2 + 0.3, 0, 0, { noBottom: true, noTop: true }));
 }
+/**
+ * moat: { wallX (fn of z: the wall's line; or line: [[x, z], [x, z]]), d0, d1 (the moat's sides, metres out from the wall), z0, z1, bed,
+ * y (fn of x, z: the ground), bridges: [z, …] } — the Alevizov ditch along the wall on the square (1508–16):
+ * its sides lined with white stone down to the water, the low brick walls along both edges (1533)
+ * with white copings, and at each gate the wooden bridge on its timber trestles, with its railings.
+ */
+function moat(el, { bag, col }) {
+  const L0 = el.line, wx = el.wallX ?? ((z) => L0[0][0] + (L0[1][0] - L0[0][0]) * (z - L0[0][1]) / (L0[1][1] - L0[0][1]));
+  const { d0, d1, z0, z1, bed } = el, yf = typeof el.y === 'function' ? el.y : () => el.y ?? 0, bridges = el.bridges ?? [], bw = el.bw ?? 3.2;
+  const X = (d, z) => wx(z) + d;
+  const quadPrism = (mat, a, b, c, d, ylo, yhiA, yhiB) => bag.add(mat, hexa([[a[0], ylo, a[1]], [b[0], ylo, b[1]], [c[0], ylo, c[1]], [d[0], ylo, d[1]], [a[0], yhiA, a[1]], [b[0], yhiB, b[1]], [c[0], yhiB, c[1]], [d[0], yhiA, d[1]]]));
+  // the two sides, in lengths of about 4 m, stopping where a bridge crosses (its abutments stand there)
+  const cuts = bridges.flatMap((zb) => [zb - bw, zb + bw]).sort((p, q) => p - q), spans = [];
+  let za = z0;
+  for (let i = 0; i < cuts.length; i += 2) { spans.push([za, cuts[i], true]); spans.push([cuts[i], cuts[i + 1], false]); za = cuts[i + 1]; }
+  spans.push([za, z1, true]);
+  for (const [s0, s1, parapet] of spans) {
+    const n = Math.max(1, Math.round((s1 - s0) / 4));
+    for (let k = 0; k < n; k++) {
+      const a = s0 + (s1 - s0) * k / n, b = s0 + (s1 - s0) * (k + 1) / n;
+      for (const [e0, e1] of [[d0 - 0.25, d0 + 0.6], [d1 - 0.6, d1 + 0.25]]) {
+        const edge = e0 < d0 ? e0 : e1, ya = yf(X(edge, a), a), yb = yf(X(edge, b), b);
+        quadPrism(WS, [X(e0, a), a], [X(e0, b), b], [X(e1, b), b], [X(e1, a), a], bed - 0.4, ya + 0.02, yb + 0.02);       // the white-stone lining
+        if (!parapet) continue;
+        const m0 = e0 < d0 ? d0 - 0.2 : d1 - 0.4, m1 = m0 + 0.6;
+        quadPrism(BR, [X(m0, a), a], [X(m0, b), b], [X(m1, b), b], [X(m1, a), a], Math.min(ya, yb) - 0.1, ya + 1.0, yb + 1.0);
+        quadPrism(WS, [X(m0 - 0.06, a), a], [X(m0 - 0.06, b), b], [X(m1 + 0.06, b), b], [X(m1 + 0.06, a), a], Math.min(ya, yb) + 0.9, ya + 1.12, yb + 1.12);
+        col.segment([X((m0 + m1) / 2, a), a], [X((m0 + m1) / 2, b), b], 0.6, Math.min(ya, yb) - 0.1, Math.max(ya, yb) + 1.12);
+      }
+    }
+  }
+  // the ends of the ditch, walled across
+  for (const [zz, sg] of [[z0, -1], [z1, 1]]) {
+    const ya = yf(X(d0, zz), zz), yb = yf(X(d1, zz), zz);
+    quadPrism(WS, [X(d0 - 0.25, zz), zz], [X(d1 + 0.25, zz), zz], [X(d1 + 0.25, zz + sg * 0.85), zz + sg * 0.85], [X(d0 - 0.25, zz + sg * 0.85), zz + sg * 0.85], bed - 0.4, ya + 0.02, yb + 0.02);
+    bag.add(BR, orientedBox([X(d0 - 0.2, zz + sg * 0.4), zz + sg * 0.4], [X(d1 + 0.2, zz + sg * 0.4), zz + sg * 0.4], 0.6, Math.min(ya, yb) - 0.1, Math.max(ya, yb) + 1.0));
+    bag.add(WS, orientedBox([X(d0 - 0.26, zz + sg * 0.4), zz + sg * 0.4], [X(d1 + 0.26, zz + sg * 0.4), zz + sg * 0.4], 0.72, Math.max(ya, yb) + 0.9, Math.max(ya, yb) + 1.12));
+    col.segment([X(d0, zz + sg * 0.4), zz + sg * 0.4], [X(d1, zz + sg * 0.4), zz + sg * 0.4], 0.6, bed, Math.max(ya, yb) + 1.12);
+  }
+  // the bridges: a plank deck from the gate tower's mouth across to the square, on trestles standing in the water
+  for (const zb of bridges) {
+    const da = el.from ?? 5.6, db = d1 + 2.4, xa = X(da, zb), xb = X(db, zb), ya = yf(xa, zb), yb = yf(xb, zb), Y = (x) => ya + (yb - ya) * (x - xa) / (xb - xa);
+    const hw = bw - 0.2, t = 0.22;
+    bag.add('planks_grey', hexa([[xa, ya - t, zb - hw], [xb, yb - t, zb - hw], [xb, yb - t, zb + hw], [xa, ya - t, zb + hw], [xa, ya + 0.02, zb - hw], [xb, yb + 0.02, zb - hw], [xb, yb + 0.02, zb + hw], [xa, ya + 0.02, zb + hw]]));
+    col.ramp([xa, zb - hw, xb, zb + hw], Math.min(ya, yb) + 0.02, Math.max(ya, yb) + 0.02, ya > yb ? 'w' : 'e');
+    // the stringers under the planks, and the trestles: four posts, a cap beam, crossed braces, in the water
+    for (const zz of [-hw + 0.3, -0.9, 0.9, hw - 0.3]) bag.add('timber', hexa([[xa, ya - t - 0.3, zb + zz - 0.13], [xb, yb - t - 0.3, zb + zz - 0.13], [xb, yb - t - 0.3, zb + zz + 0.13], [xa, ya - t - 0.3, zb + zz + 0.13], [xa, ya - t, zb + zz - 0.13], [xb, yb - t, zb + zz - 0.13], [xb, yb - t, zb + zz + 0.13], [xa, ya - t, zb + zz + 0.13]]));
+    const nb = Math.max(2, Math.round((d1 - d0 - 1.2) / 3.3));
+    for (let k = 0; k <= nb; k++) {
+      const x = X(d0 + 0.6 + 0.3 + k * (d1 - d0 - 1.8) / nb, zb), yt = Y(x) - t - 0.3;
+      for (const zz of [-hw + 0.3, -0.9, 0.9, hw - 0.3]) bag.add('timber', lathe([[0.16, 0], [0.16, yt - bed + 0.4], [0.001, yt - bed + 0.4]], 8, null, x, bed - 0.4, zb + zz));
+      bag.add('timber', box(x - 0.17, yt - 0.3, zb - hw - 0.05, x + 0.17, yt, zb + hw + 0.05));
+      for (const [p, q] of [[[x, bed + 0.5, zb - hw + 0.3], [x, yt - 0.3, zb + hw - 0.3]], [[x, yt - 0.3, zb - hw + 0.3], [x, bed + 0.5, zb + hw - 0.3]]]) bag.add('timber', beamBox(p, q, 0.1, 0.18));
+    }
+    // the railings: posts with a top rail and a mid rail on both sides
+    for (const sg of [-1, 1]) {
+      const zr = zb + sg * (hw - 0.08), np = Math.round((xb - xa) / 2);
+      for (let k = 0; k <= np; k++) { const x = xa + (xb - xa) * k / np; bag.add('timber', box(x - 0.08, Y(x), zr - 0.08, x + 0.08, Y(x) + 1.15, zr + 0.08)); }
+      for (const hh of [0.55, 1.05]) bag.add('timber', hexa([[xa, ya + hh, zr - 0.06], [xb, yb + hh, zr - 0.06], [xb, yb + hh, zr + 0.06], [xa, ya + hh, zr + 0.06], [xa, ya + hh + 0.1, zr - 0.06], [xb, yb + hh + 0.1, zr - 0.06], [xb, yb + hh + 0.1, zr + 0.06], [xa, ya + hh + 0.1, zr + 0.06]]));
+      col.segment([xa, zr], [xb, zr], 0.16, Math.min(ya, yb), Math.max(ya, yb) + 1.15);
+    }
+  }
+}
+/** A squared timber between two points (w across, h deep). */
+function beamBox(a, b, w, h) {
+  const d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], L = Math.hypot(...d), n = d.map((v) => v / L);
+  let sx = -n[2], sz = n[0], sl = Math.hypot(sx, sz); if (sl < 1e-3) { sx = 1; sz = 0; sl = 1; }
+  const side = [sx / sl, 0, sz / sl], up = [side[1] * n[2] - side[2] * n[1], side[2] * n[0] - side[0] * n[2], side[0] * n[1] - side[1] * n[0]];
+  const P = (o, p, q) => [o[0] + side[0] * p * w / 2 + up[0] * q * h / 2, o[1] + side[1] * p * w / 2 + up[1] * q * h / 2, o[2] + side[2] * p * w / 2 + up[2] * q * h / 2];
+  return hexa([P(a, -1, -1), P(a, 1, -1), P(a, 1, 1), P(a, -1, 1), P(b, -1, -1), P(b, 1, -1), P(b, 1, 1), P(b, -1, 1)]);
+}
 registerStyle('muscovite', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows },
+  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat },
   objects: {},
 });
