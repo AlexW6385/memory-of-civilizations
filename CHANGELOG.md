@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.59 — Ur's shrine and harbour; Giza's mastaba streets; Edfu's ceilings; Durrington (2026-11-06)
+- Ur: plain stairs in mud brick, the House of Nanna on the summit (towered entrance, cella with the crescent standard), the upper stages set back so the shrine is reached, Sumerian reed boats with horned ends, the harbour quay; Giza: mastabas re-laid on north–south streets with stelae and mud-brick chapels, funerary priests, offering bearers, bakers, painted relief registers and star ceilings in the temples; Edfu: the gate's winged disc at its true span with lintel and jamb reliefs, the granite naos of Nectanebo II, astronomical ceilings in both hypostyles, the Nile quay with barges and porters; Stonehenge: the Southern Circle's five timber rings, the Durrington avenue, long and bowl barrows.
+
 ## v9.58 — Florence's Baptistery and Orsanmichele; Venice's Clock Tower; St Peter's (2026-11-06)
 - The Baptistery in white and green marble with Ghiberti's gilt Gate of Paradise and the two quatrefoil doors; Orsanmichele with its fourteen guild tabernacles as about 1480; Venice's Clock Tower of 1499 with its dial, Magi doors, lion and giants; the old Procuratie after Bellini; the Piazzetta's lion and St Theodore on their columns; St Peter's front by Maderno with the Loggia of the Blessings and its inscription; St Peter's walkable inside: coffered nave, crossing piers with saints, the dome with its inscription, Bernini's baldacchino and the Cathedra Petri.
 
