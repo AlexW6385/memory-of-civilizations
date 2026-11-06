@@ -222,10 +222,18 @@ class Grid {
   get(x, z) { const i = this.cell(x), j = this.cell(z); return i < 0 || j < 0 || i >= this.n || j >= this.n ? 1 : this.a[j * this.n + i]; }
   clear([x0, z0, x1, z1]) { const i0 = Math.max(0, this.cell(x0)), i1 = Math.min(this.n - 1, this.cell(x1)), j0 = Math.max(0, this.cell(z0)), j1 = Math.min(this.n - 1, this.cell(z1)); for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) this.a[j * this.n + i] = 0; }
   fill([x0, z0, x1, z1], v = 1) { const i0 = Math.max(0, this.cell(x0)), i1 = Math.min(this.n - 1, this.cell(x1)), j0 = Math.max(0, this.cell(z0)), j1 = Math.min(this.n - 1, this.cell(z1)); for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) this.a[j * this.n + i] = Math.max(this.a[j * this.n + i], v); }
+  /** Mark the cells whose centres lie inside a convex polygon (settlement coordinates, either winding). */
+  fillPoly(poly, v = 1) {
+    const xs = poly.map((p) => p[0]), zs = poly.map((p) => p[1]), i0 = Math.max(0, this.cell(Math.min(...xs))), i1 = Math.min(this.n - 1, this.cell(Math.max(...xs))), j0 = Math.max(0, this.cell(Math.min(...zs))), j1 = Math.min(this.n - 1, this.cell(Math.max(...zs)));
+    const n = poly.length, inPoly = (x, z) => { let pos = false, neg = false; for (let k = 0; k < n; k++) { const [ax, az] = poly[k], [bx, bz] = poly[(k + 1) % n], c = (bx - ax) * (z - az) - (bz - az) * (x - ax); if (c > 0) pos = true; else if (c < 0) neg = true; if (pos && neg) return false; } return true; };
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) if (inPoly((i + 0.5) * this.c - this.R, (j + 0.5) * this.c - this.R)) this.a[j * this.n + i] = Math.max(this.a[j * this.n + i], v);
+  }
   free([x0, z0, x1, z1]) { const i0 = this.cell(x0), i1 = this.cell(x1), j0 = this.cell(z0), j1 = this.cell(z1); if (i0 < 0 || j0 < 0 || i1 >= this.n || j1 >= this.n) return false; for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) if (this.a[j * this.n + i]) return false; return true; }
 }
 /** A plan's point (local x, z) in settlement coordinates: as the plan is built (src/core/build.js toWorld), its origin and quarter-turn yaw. */
 function toSettle(plan, x, z) { const w = toWorld(plan, x, z); return [w[0], w[2]]; }
+/** A point of a `turned` element's frame (src/styles/artdeco/turn.js) in its plan's: turned by `a` as makeRotationY(a). */
+const turnPoint = (a, x, z) => { const c = Math.cos(a), s = Math.sin(a); return [c * x + s * z, -s * x + c * z]; };
 const rectOf = (plan, [x0, z0, x1, z1]) => { const a = toSettle(plan, x0, z0), b = toSettle(plan, x1, z1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
 // landmarks whose plan is the town itself (their elements are read like a townscape's)
 const OWN_FRONTS = new Set(['ming-suzhou']);          // settlements that dress their own house fronts (their town.js)
@@ -236,6 +244,28 @@ const isFull = (plan, R) => TOWN_LANDMARKS.has(plan.id) || (plan.bounds && plan.
 export function lifePlans(id, R, landmarks, town, G) {
   const kit = { ...KITS[KIT_OF[id] ?? 'mediterranean'], ...KIT_OVER[id] }, rand = rng(hash(id)), grid = new Grid(R + 2), egrid = new Grid(R + 2), houses = [], squares = [], strollAreas = [];
   let lmSquare = false;
+  // the lots of a `turned` element (New York's grid, 29° off the axes): each house kept in its own frame —
+  // its rectangle and front in the grid's, `T` its points into the settlement's, `ang` the turn of
+  // what is placed by it — and its footprint marked as the turned rectangle it is
+  const turnedLots = (plan, el, full) => {
+    const a = el.angle ?? 0, ang = a - (plan.yaw || 0) * Math.PI / 180, T = (x, z) => toSettle(plan, ...turnPoint(a, x, z));
+    // (widened by 0.55 m: the 0.3 m kept clear round every footprint, and the half cell that marking a
+    // rectangle's whole cells adds, so that the turned lots keep the clearance of the square ones)
+    const quad = ([x0, z0, x1, z1], m) => [[x0 - m, z0 - m], [x1 + m, z0 - m], [x1 + m, z1 + m], [x0 - m, z1 + m]].map(([x, z]) => T(x, z));
+    for (const e of el.elements ?? []) {
+      if (e.t === 'turned') continue;
+      let r = null;
+      if (e.rect) r = [Math.min(e.rect[0], e.rect[2]), Math.min(e.rect[1], e.rect[3]), Math.max(e.rect[0], e.rect[2]), Math.max(e.rect[1], e.rect[3])];
+      else if (e.c && (e.r || e.s)) { const h = (e.r ?? e.s / 2) + 0.5; r = [e.c[0] - h, e.c[1] - h, e.c[0] + h, e.c[1] + h]; }
+      if (!r || FLAT.test(e.t)) continue;
+      const w = r[2] - r[0], d = r[3] - r[1];
+      if (w * d > R * R) continue;
+      egrid.fillPoly(quad(r, 0.55));
+      if (!full) continue;
+      grid.fillPoly(quad(r, 0.55));
+      if ((HOUSE.test(e.t) || !SKIP.test(e.t)) && w * d >= 10 && w * d <= 6000 && w > 2 && d > 2) houses.push({ r, front: e.front, y: e.y, storeys: e.storeys ?? (e.h && e.h > 5 ? 2 : 1), shop: !!e.shop, T, ang });
+    }
+  };
   // every footprint: whole landmark bounds, the townscape's elements
   for (const plan of [...landmarks, ...town]) {
     if (!isFull(plan, R) && plan.bounds) grid.fill(rectOf(plan, plan.bounds).map((v, i) => v + (i < 2 ? -1 : 1)), 1);
@@ -254,6 +284,7 @@ export function lifePlans(id, R, landmarks, town, G) {
     let seen = 0;
     for (const el of ordered) {
       if (seen++ === nHold && nHold) for (const o of open) { egrid.clear(o); if (full) grid.clear(o); }
+      if (el.t === 'turned') { turnedLots(plan, el, full); continue; }
       let r = null;
       if (el.rect) r = rectOf(plan, el.rect);
       else if (el.c && el.a && el.b) { const [x, z] = toSettle(plan, el.c[0], el.c[1]), h = Math.max(el.a, el.b); r = [x - h, z - h, x + h, z + h]; }
@@ -308,14 +339,15 @@ export function lifePlans(id, R, landmarks, town, G) {
   const flat = (x, z, s = 1.2) => Math.abs(H(x + s, z) - H(x - s, z)) < 0.5 && Math.abs(H(x, z + s) - H(x, z - s)) < 0.5;
   const inside = (x, z, m = 30) => Math.hypot(x, z) < R - m;
   const els = [];
-  const put = (kindSpec, x, z, rot, extra = {}) => {
+  // (`ax`: the turn of the frame whose axes a car, a cart or a stall keeps to)
+  const put = (kindSpec, x, z, rot, extra = {}, ax = 0) => {
     const [t, sub] = kindSpec.split(':');
     if (!LIFE_KINDS.includes(t)) return;
     const el = { t, at: [x, z], y: H(x, z), rot, seed: Math.floor(rand() * 1e9), ...extra };
     if (sub) el.kind = sub;
     if (t === 'well') Object.assign(el, WELL_OF[id] ?? WELL[KIT_OF[id] ?? 'mediterranean'] ?? WELL.mediterranean, extra);
     if (t === 'sledge' && rand() < 0.5) el.beast = 'horse';                  // the sleigh-man walks at his horse's head
-    if (t === 'car' || t === 'cart' || t === 'sledge' || t === 'stall') el.rot = Math.round(rot / (Math.PI / 2)) * Math.PI / 2 + (t === 'cart' || t === 'sledge' ? (rand() - 0.5) * 0.3 : 0);   // along the street's axes
+    if (t === 'car' || t === 'cart' || t === 'sledge' || t === 'stall') el.rot = ax + Math.round((rot - ax) / (Math.PI / 2)) * Math.PI / 2 + (t === 'cart' || t === 'sledge' ? (rand() - 0.5) * 0.3 : 0);   // along the street's axes
     if (t === 'car') el.era = id === 'sydney' ? 1970 : 1930;
     if (t === 'cart') {
       // a wagon in the towns of wheeled traffic; a horse or a donkey in the shafts of some two-wheeled carts
@@ -327,26 +359,29 @@ export function lifePlans(id, R, landmarks, town, G) {
     els.push(el);
   };
   const sz = (t) => ({ cart: 2.2, sledge: 2.2, stall: 2.2, animal: 1.4, haystack: 1.6, car: 2.6, laundry: 1.8, well: (WELL_OF[id] ?? WELL[KIT_OF[id]])?.kind === 'shaduf' ? 3.1 : 1.1, figure: 0.5, bench: 1, firewood: 1, crates: 0.8, ladder: 0.5, street_lamp: 0.4 }[t.split(':')[0]] ?? 0.6);
-  const tryPut = (spec, x, z, rot, extra, k = 1) => {
+  const tryPut = (spec, x, z, rot, extra, k = 1, ax = 0) => {
     const s = sz(spec) * k, box = [x - s, z - s, x + s, z + s];
     if (!inside(x, z) || !grid.free(box) || wet(x, z) || !flat(x, z, s)) return false;
-    put(spec, x, z, rot, extra); grid.fill(box, 2); return true;
+    put(spec, x, z, rot, extra, ax); grid.fill(box, 2); return true;
   };
   // by the doors
   const sides = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+  // (a house's rectangle and front are in its frame: `T` its points into the settlement's, `ang` its turn; most houses' frame is the settlement's)
+  const ID = (x, z) => [x, z];
   for (const h of houses) {
     if (rand() > 0.45) continue;
+    const T = h.T ?? ID, ang = h.ang ?? 0;
     const [x0, z0, x1, z1] = h.r, order = sides[h.front] ? [h.front, ...'nsew'.replace(h.front, '')] : [...'nsew'].sort(() => rand() - 0.5);
     const n = 1 + Math.floor(rand() * 2);
     for (let k = 0; k < n; k++) {
       const [spec] = pick(rand, kit.door), t = 0.15 + rand() * 0.7;
       for (const f of order) {
         const [nx, nz] = sides[f], off = 0.25 + sz(spec) * 0.7 + rand() * 0.2;
-        const x = nx ? (nx > 0 ? x1 + off : x0 - off) : x0 + (x1 - x0) * t, z = nz ? (nz > 0 ? z1 + off : z0 - off) : z0 + (z1 - z0) * t;
-        if (tryPut(spec, x, z, nx ? Math.PI / 2 : 0, {}, 0.7)) {
+        const [x, z] = T(nx ? (nx > 0 ? x1 + off : x0 - off) : x0 + (x1 - x0) * t, nz ? (nz > 0 ? z1 + off : z0 - off) : z0 + (z1 - z0) * t);
+        if (tryPut(spec, x, z, (nx ? Math.PI / 2 : 0) + ang, {}, 0.7, ang)) {
           // someone sitting on the bench, or squatting at the pots and baskets
-          if (spec === 'bench' && rand() < 0.45) put('figure', x, z, (nx ? Math.PI / 2 : 0) + (nx > 0 || nz > 0 ? Math.PI : 0), { pose: 'sit' });
-          else if (/^pot|^basket/.test(spec) && rand() < 0.18) { const ox = nx ? nx * 0.9 : 0.9, oz = nz ? nz * 0.9 : 0; tryPut('figure', x + ox, z + oz, Math.atan2(ox, oz), { pose: 'squat' }); }
+          if (spec === 'bench' && rand() < 0.45) put('figure', x, z, (nx ? Math.PI / 2 : 0) + (nx > 0 || nz > 0 ? Math.PI : 0) + ang, { pose: 'sit' });
+          else if (/^pot|^basket/.test(spec) && rand() < 0.18) { const ox = nx ? nx * 0.9 : 0.9, oz = nz ? nz * 0.9 : 0; const [dx, dz] = h.T ? turnPoint(ang, ox, oz) : [ox, oz]; tryPut('figure', x + dx, z + dz, Math.atan2(dx, dz), { pose: 'squat' }); }
           break;
         }
       }
@@ -356,8 +391,8 @@ export function lifePlans(id, R, landmarks, town, G) {
   const fronted = [];
   if (kit.fronts?.length && !OWN_FRONTS.has(id)) for (const h of houses) {
     if (!sides[h.front] || rand() > (h.shop ? 0.7 : 0.25)) continue;
-    const [x0, z0, x1, z1] = h.r, [nx, nz] = sides[h.front], L = nx ? z1 - z0 : x1 - x0, rot = Math.atan2(nx, nz), yb = h.y ?? H((x0 + x1) / 2, (z0 + z1) / 2);
-    const P = (t, off) => (nx ? [(nx > 0 ? x1 : x0) + nx * off, z0 + (z1 - z0) * t] : [x0 + (x1 - x0) * t, (nz > 0 ? z1 : z0) + nz * off]);
+    const T = h.T ?? ID, [x0, z0, x1, z1] = h.r, [nx, nz] = sides[h.front], L = nx ? z1 - z0 : x1 - x0, rot = Math.atan2(nx, nz) + (h.ang ?? 0), yb = h.y ?? H(...T((x0 + x1) / 2, (z0 + z1) / 2));
+    const P = (t, off) => T(...(nx ? [(nx > 0 ? x1 : x0) + nx * off, z0 + (z1 - z0) * t] : [x0 + (x1 - x0) * t, (nz > 0 ? z1 : z0) + nz * off]));
     if (!inside(...P(0.5, 0)) || L < 3) continue;
     const opts = kit.fronts.filter(([, , ms]) => (h.storeys ?? 1) >= ms), tot = opts.reduce((a, o) => a + o[1], 0);
     let u = rand() * tot, spec = null; for (const o of opts) { if ((u -= o[1]) <= 0) { spec = o[0]; break; } }
@@ -374,13 +409,14 @@ export function lifePlans(id, R, landmarks, town, G) {
   const CRAFT = { east_asia: ['potter', 'basket', 'dyer', 'carpenter'], japan: ['potter', 'basket', 'carpenter'], south_asia: ['potter', 'dyer', 'basket'], southeast_asia: ['potter', 'basket'], near_east: ['potter', 'dyer', 'carpenter'], egypt: ['potter', 'basket'], africa: ['potter', 'basket', 'dyer'], americas: ['potter', 'basket'], andes: ['potter', 'dyer'], mediterranean: ['potter', 'carpenter'], europe_medieval: ['carpenter', 'potter', 'cooper'], europe_early_modern: ['cooper', 'carpenter'], venice: ['cooper', 'carpenter'], north: ['carpenter'], pacific: ['basket'] }[KIT_OF[id] ?? 'mediterranean'] ?? [];
   if (CRAFT.length) for (const h of houses) {
     if (!sides[h.front] || rand() > 0.07) continue;
-    const [x0, z0, x1, z1] = h.r, [nx, nz] = sides[h.front], t = 0.3 + rand() * 0.4, off = 1.6;
-    const x = nx ? (nx > 0 ? x1 + off : x0 - off) : x0 + (x1 - x0) * t, z = nz ? (nz > 0 ? z1 + off : z0 - off) : z0 + (z1 - z0) * t, b = [x - 1.4, z - 1.4, x + 1.4, z + 1.4];
+    const T = h.T ?? ID, ang = h.ang ?? 0, [x0, z0, x1, z1] = h.r, t = 0.3 + rand() * 0.4, off = 1.6;
+    const [lx, lz] = sides[h.front], [nx, nz] = h.T ? turnPoint(ang, lx, lz) : [lx, lz];
+    const [x, z] = T(lx ? (lx > 0 ? x1 + off : x0 - off) : x0 + (x1 - x0) * t, lz ? (lz > 0 ? z1 + off : z0 - off) : z0 + (z1 - z0) * t), b = [x - 1.4, z - 1.4, x + 1.4, z + 1.4];
     if (!inside(x, z) || !grid.free(b) || wet(x, z) || !flat(x, z, 1.2)) continue;
     const face = Math.atan2(nx, nz) + Math.PI, ux = nz, uz = -nx, craft = CRAFT[Math.floor(rand() * CRAFT.length)];
     const P = (u, v) => [x + ux * u + nx * v, z + uz * u + nz * v];
     if (craft === 'potter') { put('figure', ...P(0, 0), face, { pose: 'squat' }); for (let q = 0; q < 5; q++) put('pot:' + ['water_pot', 'dark_pot', 'water_pot', 'amphora'][q % 4], ...P(-1.1 + q * 0.5, (q % 2) * 0.5 - 0.3), rand() * 6.28); put('pot:pithos', ...P(1.2, 0.4), 0); }
-    else if (craft === 'basket') { put('figure', ...P(0, 0), face, { pose: 'sit' }); for (let q = 0; q < 4; q++) put('basket', ...P(-1 + q * 0.6, -0.5 + (q % 2) * 0.4), rand() * 6.28); }
+    else if (craft === 'basket') { put('figure', ...P(0, 0), face, { pose: 'sit_ground' }); for (let q = 0; q < 4; q++) put('basket', ...P(-1 + q * 0.6, -0.5 + (q % 2) * 0.4), rand() * 6.28); }
     else if (craft === 'dyer') { put('laundry', ...P(0, 0.3), face + Math.PI / 2); put('pot:dark_pot', ...P(-1.1, -0.6), 0); put('figure', ...P(0.9, -0.6), face + 0.8, { pose: 'stand' }); }
     else if (craft === 'carpenter') { put('firewood', ...P(-0.9, 0), face); put('ladder', ...P(1.1, 0.4), face); put('figure', ...P(0.2, -0.4), face, { pose: 'squat' }); }
     else if (craft === 'cooper') { for (let q = 0; q < 4; q++) put('barrel', ...P(-1 + q * 0.65, (q % 2) * 0.4), rand() * 6.28); put('figure', ...P(0.3, -0.7), face, { pose: 'stand' }); }
@@ -391,7 +427,7 @@ export function lifePlans(id, R, landmarks, town, G) {
   for (let k = 0, tries = 0; k < nStreet && tries < nStreet * 12; tries++) {
     const h = houses[Math.floor(rand() * houses.length)];
     if (!h) break;
-    const [x0, z0, x1, z1] = h.r, a = rand() * 6.28, d = 3 + rand() * 6, cx = (x0 + x1) / 2 + Math.cos(a) * ((x1 - x0) / 2 + d), cz = (z0 + z1) / 2 + Math.sin(a) * ((z1 - z0) / 2 + d);
+    const [x0, z0, x1, z1] = h.r, a = rand() * 6.28, d = 3 + rand() * 6, ax = h.ang ?? 0, [cx, cz] = (h.T ?? ID)((x0 + x1) / 2 + Math.cos(a) * ((x1 - x0) / 2 + d), (z0 + z1) / 2 + Math.sin(a) * ((z1 - z0) / 2 + d));
     const [spec] = pick(rand, rand() < 0.35 ? kit.door : kit.street);
     if (spec === 'figure' && rand() < 0.45) {
       // a knot of two or three talking, facing each other
@@ -401,8 +437,8 @@ export function lifePlans(id, R, landmarks, town, G) {
       if (ok) k++;
     } else if (kit.stall.length && rand() < 0.07) {
       // a stall set out in the street, facing the way
-      if (tryPut('stall', cx, cz, Math.round(rand() * 4) * Math.PI / 2, { awning: kit.awnings[Math.floor(rand() * kit.awnings.length)], goods: kit.stall })) k++;
-    } else if (tryPut(spec, cx, cz, rand() * 6.28)) k++;
+      if (tryPut('stall', cx, cz, Math.round(rand() * 4) * Math.PI / 2 + ax, { awning: kit.awnings[Math.floor(rand() * kit.awnings.length)], goods: kit.stall }, 1, ax)) k++;
+    } else if (tryPut(spec, cx, cz, rand() * 6.28, {}, 1, ax)) k++;
   }
   // the market squares: stalls along their edges, figures among them
   for (const sq of squares) {
@@ -518,7 +554,7 @@ export function lifePlans(id, R, landmarks, town, G) {
   const tiles = new Map();
   for (const e of els) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   const plans = [];
-  for (const [k, list] of tiles) { const [i, j] = k.split(',').map(Number); plans.push({ id: `${id}-life-${k}`, center: [i * 100 + 50, j * 100 + 50], near: 230, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: list, rooms: [], bounds: [-R, -R, R, R], entrance: { at: [0, 0], facing: 'n' } }); }
+  for (const [k, list] of tiles) { const [i, j] = k.split(',').map(Number); plans.push({ id: `${id}-street-life-${k}`, center: [i * 100 + 50, j * 100 + 50], near: 230, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: list, rooms: [], bounds: [-R, -R, R, R], entrance: { at: [0, 0], facing: 'n' } }); }
   return plans;
 }
 function dressed(kit, rand) {

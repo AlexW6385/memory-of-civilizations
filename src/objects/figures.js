@@ -26,6 +26,10 @@ const LEGS = {
   kneel: { drop: 0.36, lean: 0 },                // upright on both knees, the shins along the ground behind
   cross: { drop: 0.74, lean: -0.04 },            // seated cross-legged on the ground
   brace: { drop: 0.05, lean: 0.3 },              // hauling: one foot forward, the body leant back on the rope
+  // seated low (opt-in poses: 'sit' is at the height of a chair or a bench, its seat 0.46 m up)
+  low: { drop: 0.58, lean: -0.12 },              // on a step or a low stool (seat ~0.22 m), the knees up, the feet flat before it
+  ground: { drop: 0.75, lean: -0.04 },           // on the ground or a floor, the legs out before, a little bent, the heels down
+  seiza: { drop: 0.61, lean: 0 },                // kneeling sat back on the heels, the shins along the ground beneath
 };
 /** arm = [shoulder, elbow, wrist, hand direction] for the left (s = −1) and right (s = +1) arms. */
 function arms(pose, s) {
@@ -44,6 +48,9 @@ function arms(pose, s) {
     case 'row': return [S, [s * 0.2, 1.13, -0.17], [s * 0.12, 1.13, -0.45], [0, -0.1, -1]];                                     // the oar handles drawn to the chest
     case 'punt': return s > 0 ? [S, [0.26, 1.13, -0.08], [0.3, 1.0, -0.16], [-0.3, 0.9, 0.05]] : [S, [-0.08, 1.3, -0.2], [0.12, 1.5, -0.12], [-0.25, 0.95, 0]];
     case 'cross': return [S, [s * 0.22, 1.1, -0.07], [s * 0.25, 0.96, -0.2], [s * 0.25, -0.5, -0.6]];                          // the hands on the knees
+    case 'knees': return [S, [s * 0.21, 1.15, -0.1], [s * 0.12, 1.12, -0.34], [0, -0.5, -0.85]];                              // the forearms over the raised knees
+    case 'thighs': return [S, [s * 0.21, 1.12, 0.02], [s * 0.14, 1.02, -0.22], [0, -0.35, -0.94]];                            // the hands on the outstretched thighs
+    case 'lap': return [S, [s * 0.2, 1.1, -0.02], [s * 0.13, 0.89, -0.22], [0, -0.3, -0.95]];                                 // the hands on the thighs, sat on the heels
     case 'hoe': return s > 0 ? [S, [0.22, 1.1, -0.12], [0.08, 1.07, -0.33], [-0.4, -0.1, -0.9]] : [S, [-0.2, 1.06, -0.1], [-0.02, 0.88, -0.42], [0.4, -0.2, -0.9]];
     default: return [S, [s * 0.205, 1.085, 0.025], [s * 0.21, 0.84, -0.02], [s * 0.05, -1, -0.12]];
   }
@@ -117,6 +124,9 @@ function legsOf(legs, s) {
   if (legs === 'squat') return [[s * 0.1, 0.33, 0.03], [s * 0.15, 0.55, -0.28], [s * 0.11, 0.1, -0.15]];
   if (legs === 'kneel') return [[s * 0.09, 0.52, 0.0], [s * 0.1, 0.075, -0.05], [s * 0.095, 0.07, 0.36]];
   if (legs === 'cross') return [[s * 0.1, 0.15, 0.02], [s * 0.34, 0.12, -0.22], [-s * 0.07, s > 0 ? 0.135 : 0.075, -0.3]];
+  if (legs === 'low') return [[s * 0.09, 0.3, 0.0], [s * 0.1, 0.47, -0.38], [s * 0.095, 0.1, -0.36]];
+  if (legs === 'ground') return [[s * 0.09, 0.13, 0.0], [s * 0.1, 0.2, -0.4], [s * 0.09, 0.09, -0.77]];
+  if (legs === 'seiza') return [[s * 0.09, 0.27, 0.0], [s * 0.1, 0.08, -0.38], [s * 0.095, 0.07, 0.0]];
   if (legs === 'brace') return s < 0 ? [[-0.088, 0.82, 0.0], [-0.094, 0.47, -0.2], [-0.088, 0.1, -0.2]] : [[0.088, 0.82, 0.0], [0.094, 0.46, 0.17], [0.088, 0.1, 0.36]];
   return [[s * 0.088, 0.86, 0.0], [s * 0.094, 0.48, -0.012], [s * 0.088, 0.1, 0.005]];
 }
@@ -129,9 +139,11 @@ function legTubes(add, role, legs, { from = 0, to = 5, thick = 1 } = {}) {
 /** The feet (shoes or bare). */
 function feet(add, role, legs) {
   for (const s of [-1, 1]) {
-    const [, , A] = legsOf(legs, s), z = legs === 'sit' || legs === 'squat' || legs === 'brace' ? A[2] : 0.0;
+    const [, , A] = legsOf(legs, s), z = legs === 'sit' || legs === 'squat' || legs === 'brace' || legs === 'low' ? A[2] : 0.0;
     // kneeling: the feet lie behind, toes and instep on the ground; cross-legged: each foot under the other knee
-    if (legs === 'kneel') { add(role, tube([[A[0], 0.075, A[2] - 0.04, 0.038, 0.035], [A[0], 0.055, A[2] + 0.06, 0.044, 0.032], [A[0] + s * 0.004, 0.035, A[2] + 0.15, 0.04, 0.022], [A[0] + s * 0.006, 0.028, A[2] + 0.2, 0.028, 0.016]], 7)); continue; }
+    // legs out on the ground: the foot up from the heel, the toes turned a little out
+    if (legs === 'ground') { add(role, tube([[A[0], 0.07, A[2] + 0.045, 0.035, 0.035], [A[0], 0.09, A[2] - 0.015, 0.045, 0.04], [A[0] + s * 0.012, 0.165, A[2] - 0.06, 0.044, 0.03], [A[0] + s * 0.02, 0.215, A[2] - 0.075, 0.03, 0.022]], 7)); continue; }
+    if (legs === 'kneel' || legs === 'seiza') { add(role, tube([[A[0], 0.075, A[2] - 0.04, 0.038, 0.035], [A[0], 0.055, A[2] + 0.06, 0.044, 0.032], [A[0] + s * 0.004, 0.035, A[2] + 0.15, 0.04, 0.022], [A[0] + s * 0.006, 0.028, A[2] + 0.2, 0.028, 0.016]], 7)); continue; }
     if (legs === 'cross') { add(role, tube([[A[0], A[1], A[2] + 0.03, 0.035, 0.035], [A[0] - s * 0.06, A[1] - 0.01, A[2] + 0.02, 0.042, 0.038], [A[0] - s * 0.15, A[1] - 0.025, A[2] + 0.04, 0.04, 0.026], [A[0] - s * 0.2, A[1] - 0.03, A[2] + 0.05, 0.026, 0.018]], 7)); continue; }
     add(role, tube([[A[0], 0.045, z + 0.06, 0.035, 0.035], [A[0], 0.04, z - 0.02, 0.045, 0.04], [A[0] + s * 0.004, 0.032, z - 0.12, 0.044, 0.03], [A[0] + s * 0.006, 0.028, z - 0.175, 0.03, 0.022]], 7));
   }
@@ -149,7 +161,8 @@ function skirt(add, role, legs, { hem = 0.03, top = 1.0, flare = 1, seed = 1 } =
   const [, K, A] = legsOf(legs, 1), sq = legs === 'squat';
   add(role, tube([[0, K[1] + 0.02, K[2] - 0.03, 0.2, 0.07], [0, (K[1] + Math.max(hem, 0.06)) / 2, (K[2] + A[2]) / 2 - 0.06, 0.21, 0.06], [0, Math.max(hem, 0.05), A[2] - 0.08, 0.22, 0.05]], 10));
   const hipY = 0.88 - LEGS[legs].drop;
-  add(role, folded([[sq ? 0.24 : 0.2, sq ? 0.05 : Math.max(0.46, hem)], [0.19, hipY - 0.05], [0.16, hipY + 0.05], [0.001, hipY + 0.06]], 14, 6, 0.06, seed).scale(1, 1, 0.8).translate(0, 0, sq ? 0.05 : 0.04));
+  const bot = sq ? 0.05 : Math.min(Math.max(Math.min(0.46, hipY - 0.11), hem), hipY - 0.08);       // the seat (0.46 m on a bench), lower seated low
+  add(role, folded([[sq ? 0.24 : 0.2, bot], [0.19, hipY - 0.05], [0.16, hipY + 0.05], [0.001, hipY + 0.06]], 14, 6, 0.06, seed).scale(1, 1, 0.8).translate(0, 0, sq ? 0.05 : 0.04));
 }
 
 /** Bare arms, shoulder to wrist (a bare-chested figure, a sheath dress's straps). Skin. */
@@ -173,6 +186,11 @@ function pool(a, up, legs, seed, long = true) {
   if (legs === 'kneel') {
     up('c1', folded([[0.001, 0.395], [0.23, 0.39], [0.24, 0.41], [0.215, 0.62], [0.17, 0.8], [0.155, 1.0], [0.001, 1.01]], 16, 9, 0.06, seed).scale(1, 1, 0.86));
     if (long) legTubes(a, 'c1', 'kneel', { from: 2, thick: 1.45 });
+  } else if (legs === 'seiza') {
+    // sat on the heels: the cloth spread round the hips on the ground, over the thighs to the knees and the shins beneath
+    up('c1', folded([[0.001, 0.622], [0.23, 0.625], [0.25, 0.68], [0.215, 0.8], [0.165, 0.95], [0.155, 1.0], [0.001, 1.01]], 16, 7, 0.05, seed).scale(1, 1, 0.8));
+    legTubes(a, 'c1', 'seiza', { to: 3, thick: 1.3 });
+    if (long) legTubes(a, 'c1', 'seiza', { from: 2, thick: 1.3 });
   } else {
     // cross-legged: the cloth over the lap and along the thighs to the knees; a robe's down the shins too
     up('c1', folded([[0.001, 0.752], [0.22, 0.755], [0.245, 0.8], [0.21, 0.9], [0.16, 1.0], [0.001, 1.01]], 16, 7, 0.05, seed).scale(1, 1, 0.8));
@@ -196,7 +214,7 @@ function loinCloth(a, up, legs, seed) {
 function kilt(a, up, legs, seed) {
   if (legs === 'stand' || legs === 'brace') skirt(a, 'c1', 'stand', { hem: 0.53, top: 1.0, flare: 0.7, seed });
   else if (legs === 'kneel') up('c1', folded([[0.001, 0.545], [0.19, 0.54], [0.196, 0.555], [0.19, 0.7], [0.162, 0.92], [0.15, 1.0], [0.001, 1.01]], 16, 9, 0.04, seed).scale(1, 1, 0.86));
-  else { legTubes(a, 'c1', legs, { to: 3, thick: 1.28 }); up('c1', slathe([[0.2, 0.66], [0.16, 0.86], [0.15, 1.0], [0.001, 1.01]], 14).scale(1, 1, 0.82)); }
+  else { legTubes(a, 'c1', legs, { to: 3, thick: 1.28 }); up('c1', slathe([[0.2, Math.max(0.66, LEGS[legs].drop + 0.04)], [0.16, 0.86], [0.15, 1.0], [0.001, 1.01]], 14).scale(1, 1, 0.82)); }
   // the pleated front panel: the tucked end of the wrap, flaring to the hem (standing and kneeling)
   if (legs === 'stand' || legs === 'kneel') { const g = tube([[0.02, 0.97, -0.124, 0.03, 0.006], [0.03, 0.8, -0.15, 0.06, 0.006], [0.035, 0.575, -0.168, 0.085, 0.005]], 5); if (legs === 'stand') a('c1', g); else up('c1', g); }
 }
@@ -206,7 +224,7 @@ function sheath(a, up, legs, seed) {
   const body = TORSO.filter(([, y]) => y < top).map(([r, y]) => [r * k, y]);
   if (legs === 'stand') a('c1', slathe([[0.001, 0.065], [0.185, 0.06], [0.192, 0.1], [0.19, 0.4], [0.178, 0.7], ...body, [0.17 * k, top], [0.162, top + 0.004]], 16, torsoMod(1)));
   else {
-    if (legs === 'kneel' || legs === 'cross') pool(a, up, legs, seed); else skirt(a, 'c1', legs === 'brace' ? 'stand' : legs, { hem: 0.06, seed });
+    if (legs === 'kneel' || legs === 'cross' || legs === 'seiza') pool(a, up, legs, seed); else skirt(a, 'c1', legs === 'brace' ? 'stand' : legs, { hem: 0.06, seed });
     up('c1', slathe([[0.17, 0.8], ...body, [0.17 * k, top], [0.162, top + 0.004]], 16, torsoMod(1)));
   }
   // the two straps over the shoulders, front to back, lying on the skin
@@ -318,13 +336,15 @@ function veil(add) {
  * garment above the waist — the default of the loincloth and the shendyt; with a wrap or trousers too), cloth, cloth2,
  * skin, hat ('none' | 'cap' | 'turban' | 'straw' | 'veil' | 'brim'), hatMat, h (height), carry ('none' | 'pot' | 'basket' |
  * 'pole' | 'hoe' | 'staff' | 'rope' | 'child' | 'oars' | 'punt'), len (of the staff, rope, oars or pole), pose ('stand' |
- * 'talk' | 'sit' | 'squat' | 'kneel' | 'cross' (seated cross-legged) | 'pray' | 'pull' (hauling a rope) | 'staff' |
+ * 'talk' | 'sit' (on a chair or bench, seat 0.46 m) | 'sit_low' (on a step or low stool, seat ~0.22 m, y at the feet) | 'sit_ground' (on the
+ * ground or a floor, legs out) | 'seiza' (sat back on the heels) | 'squat' | 'kneel' | 'cross' (seated cross-legged) | 'pray' | 'pull' (hauling a rope) | 'staff' |
  * 'row' (seated at the oars) | 'punt' (standing, poling)), staffMat, poleMat (of the staff or oars, of the punting pole), arms (an arm pose of its own, e.g. 'pray' with pose 'kneel'),
  * hair ('short' | 'long' | 'bun' | 'shaven' | 'wig'), hairMat, beard, over ('sash' | 'collar' | 'cape' | 'apron' | 'belt' |
  * 'shawl' | 'wesekh' (the broad collar) | 'none'), legs ('hose' | 'bare'), feet ('bare' | 'shod') } — a still figure, facing −z.
  * The poses, dresses and things held beyond the first ones are opt-in: a figure without them is as it was.
  */
-const LEGS_OF = { sit: 'sit', squat: 'squat', row: 'sit', kneel: 'kneel', cross: 'cross', pull: 'brace' };
+const LEGS_OF = { sit: 'sit', squat: 'squat', row: 'sit', kneel: 'kneel', cross: 'cross', pull: 'brace', sit_low: 'low', sit_ground: 'ground', seiza: 'seiza' };
+const SEAT_ARMS = { low: 'knees', ground: 'thighs', seiza: 'lap' };
 const HELD = { staff: 'staff', rope: 'pull', oars: 'row', punt: 'punt', child: 'child' };
 const POSE_HELD = { staff: 'staff', pull: 'rope', punt: 'punt' };
 export function figure(el, { bag, col }) {
@@ -334,7 +354,7 @@ export function figure(el, { bag, col }) {
   const pose = el.pose ?? 'stand', carry = el.carry && el.carry !== 'none' ? el.carry : POSE_HELD[pose] ?? 'none', hat = el.hat ?? 'none';
   const legs = LEGS_OF[pose] ?? 'stand';
   const armPose = el.arms ?? (carry === 'pot' || carry === 'basket' ? 'head' : carry === 'pole' ? 'pole' : carry === 'hoe' ? 'hoe' : HELD[carry] ? HELD[carry]
-    : legs === 'sit' || legs === 'squat' ? legs : legs === 'cross' ? (pose === 'pray' ? 'pray' : 'cross') : ['pray', 'pull', 'staff', 'row', 'punt'].includes(pose) ? pose
+    : legs === 'sit' || legs === 'squat' ? legs : SEAT_ARMS[legs] ? SEAT_ARMS[legs] : legs === 'cross' ? (pose === 'pray' ? 'pray' : 'cross') : ['pray', 'pull', 'staff', 'row', 'punt'].includes(pose) ? pose
       : pose === 'talk' ? 'talk' : (r0() < 0.3 ? 'clasp' : 'hang'));
   const veiled = hat === 'veil';
   const style = veiled ? 'none' : hat === 'turban' ? 'under' : hat !== 'none' ? 'under' : el.hair ?? ['short', 'short', 'long', 'bun', 'short'][Math.floor(r0() * 5)];
@@ -371,11 +391,11 @@ export function figure(el, { bag, col }) {
     else if (dress === 'shendyt') kilt(a, up(a), legs, 4);
     else if (dress === 'sheath') sheath(a, up(a), legs, 6);
     // kneeling or cross-legged, a robe or a wrap lies pooled round the legs
-    else if ((legs === 'kneel' || legs === 'cross') && (dress === 'robe' || dress === 'wrap')) pool(a, up(a), legs, dress === 'robe' ? 5 : 7, dress === 'robe');
+    else if ((legs === 'kneel' || legs === 'cross' || legs === 'seiza') && (dress === 'robe' || dress === 'wrap')) pool(a, up(a), legs, dress === 'robe' ? 5 : 7, dress === 'robe');
     else if (dress === 'robe') skirt(a, 'c1', legs === 'brace' ? 'stand' : legs, { hem: 0.03, seed: 5 });
     else if (dress === 'wrap') skirt(a, 'c1', legs === 'brace' ? 'stand' : legs, { hem: legs === 'stand' || legs === 'brace' ? 0.22 : 0.2, seed: 7, flare: 0.6 });
-    else if (dress === 'tunic') { if (legs === 'stand' || legs === 'brace') skirt(a, 'c1', 'stand', { hem: 0.5, flare: 1.4, seed: 9 }); else up(a)('c1', slathe([[0.2, 0.62], [0.16, 0.86], [0.001, 0.87]], 14).scale(1, 1, 0.8)); }
-    else { if (legs === 'stand' || legs === 'brace') a('c1', folded([[0.2, 0.7], [0.19, 0.8], [0.165, 0.92], [0.001, 0.93]], 14, 5, 0.04, 11).scale(1, 1, 0.78)); else up(a)('c1', slathe([[0.19, 0.74], [0.165, 0.9], [0.001, 0.91]], 14).scale(1, 1, 0.8)); }
+    else if (dress === 'tunic') { if (legs === 'stand' || legs === 'brace') skirt(a, 'c1', 'stand', { hem: 0.5, flare: 1.4, seed: 9 }); else up(a)('c1', slathe([[0.2, Math.max(0.62, (LEGS[legs]?.drop ?? 0) + 0.04)], [0.16, 0.86], [0.001, 0.87]], 14).scale(1, 1, 0.8)); }
+    else { if (legs === 'stand' || legs === 'brace') a('c1', folded([[0.2, 0.7], [0.19, 0.8], [0.165, 0.92], [0.001, 0.93]], 14, 5, 0.04, 11).scale(1, 1, 0.78)); else up(a)('c1', slathe([[0.19, Math.max(0.74, (LEGS[legs]?.drop ?? 0) + 0.04)], [0.165, 0.9], [0.001, 0.91]], 14).scale(1, 1, 0.8)); }
   }).c1.clone(), cs);
   // the second cloth: trousers or hose, the sash, collar, cape, shawl, belt or broad collar
   const C = assembly(`fig-c2|${dress}|${over}|${legs}|${bareLegs ? 'L' : ''}`, (a) => {
@@ -410,7 +430,7 @@ export function figure(el, { bag, col }) {
     for (const [role, g] of Object.entries(K)) put(role, g.clone());
   }
   const [x, z] = el.at, y = el.y ?? 0;
-  col.circle(x, z, 0.25, y, y + H * (legs === 'kneel' ? 0.78 : legs === 'cross' ? 0.55 : 1));
+  col.circle(x, z, 0.25, y, y + H * (legs === 'kneel' ? 0.78 : legs === 'cross' || legs === 'ground' ? 0.55 : legs === 'seiza' ? 0.6 : legs === 'low' ? 0.68 : 1));
 }
 /** The things carried: a water pot or a basket on the head, the carrying pole with its two baskets, the hoe. */
 function carried(a, carry) {
