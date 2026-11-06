@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.81 — Seam fix (2026-11-06)
+- Fixed the line across the middle of the screen with the lower half darker: half-resolution ambient occlusion picked the farthest of four depth texels under the reversed depth buffer.
+
 ## v9.80 — No seam across the middle of the screen (2026-11-06)
 - The scene pass writes its view normals for the ambient occlusion (one more target in the same draw); GTAO rebuilding them from the reversed depth buffer had left a seam across the middle row of every view, the lower half darker.
 
