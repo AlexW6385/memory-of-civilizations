@@ -2,7 +2,7 @@
 
 Settlement id: `heian-uji` · Style: `japanese` (the hall), `vernacular` (houses, bridge) · Region: Japan (Uji, south of Kyoto) · Code: `src/settlements/heian-uji/`
 Replaces the legacy district of the previous design. The Phoenix Hall itself, with its pond and garden bridge, is the full building from that design (`src/buildings/byodo-in-phoenix-hall`, dossier `docs/buildings/byodo-in-phoenix-hall.md`).
-Status of this dossier: L1–L2, L3 in part (the phoenixes and the Uji Bridge, §4; the Phoenix Hall on its island facing east across the Aji pond; the garden of gravel, moss, pines and maples; the Uji River to the east with the Uji Bridge; wooded hills beyond; the village of timber houses with bark or thatch roofs; ground, planting, weather, music). L3 recorded for later: Byōdō-in's other halls (the main hall, the sutra repository, the bell), the Ujigami and Uji shrines on the far bank, boats and fishing weirs on the river, the villas of the Fujiwara, people.
+Status of this dossier: L1–L2, L3 in part (the phoenixes and the Uji Bridge, §4; the Phoenix Hall on its island facing east across the Aji pond; the garden of gravel, moss, pines and maples; the Uji River to the east with the Uji Bridge; wooded hills beyond; the village of timber houses with bark or thatch roofs; ground, planting, weather, music). L3 built (this pass): the pond's pebble beach, set stones, the small island and its two bridges (§6). L3 recorded for later: Byōdō-in's other halls (the main hall, the sutra repository, the bell), the Ujigami and Uji shrines on the far bank, boats and fishing weirs on the river, the villas of the Fujiwara, people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -47,6 +47,8 @@ About 200 houses. [inferred]
 
 Gravel and moss in the garden; the pond; the pebbled banks of the swift river; cedar, maple and pine on the hills. [inferred]
 
+**The pond's edges (L3, built).** Byōdō-in's garden is the oldest Pure Land garden completed in the Heian period, its Aji pond, the Uji River and the hills behind making the setting of the Western Paradise; the Sakuteiki describes the ideal of such a garden [stated: MLIT "Byōdō-in garden"]; the shallow Aji pond round the Phoenix Hall has a pebble beach (suhama) laid with gravel, and two bridges, a flat one (hirabashi) and an arched one (sorihashi), cross from the north shore to the north wing's side [stated: Travel Watch]; at Mujōkō-in, built after the Phoenix Hall, the central island was joined to the shore by a bridge by way of a small north island [stated: MLIT "Mujōkō-in: Nakajima"]. Ours: the pebble beach — about 20,000 rounded stones 0.18–0.4 m across, laid thick from 0.4 m above the water's edge to 0.3 m under it along every shore of the pond and round the small island; a dozen larger set stones at the beach's points and on the island; the small island (koshima) in the pond's north arm, about 10 × 6 m above the water, its middle in turf; an arched bridge (rise 1.3 m) from the hall's island to it and a flat one on to the north shore, each 2 m wide [inferred: sizes and stone counts; the arrangement after the stated bridges and Mujōkō-in's copy].
+
 ## 7. Sky and climate
 
 Soft and humid; mist on the river; rain. [inferred]
@@ -68,3 +70,6 @@ As for the hall (`docs/buildings/byodo-in-phoenix-hall.md` §9).
 - [Phoenix (Hō-ō) Statues — MLIT (JTA multilingual texts)](https://www.mlit.go.jp/tagengo-db/R1-00389.html)
 - [Ujibashi Bridge — GLTJP](https://www.gltjp.com/en/article/item/20524/)
 - [machiya — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/2637)
+- [Byōdō-in garden — MLIT (JTA multilingual texts)](https://www.mlit.go.jp/tagengo-db/common/001553421.pdf)
+- [Byōdō-in after the restoration — Travel Watch](https://travel.watch.impress.co.jp/docs/news/696291.html)
+- [Mujōkō-in: Nakajima — MLIT](https://www.mlit.go.jp/tagengo-db/common/001551696.pdf)

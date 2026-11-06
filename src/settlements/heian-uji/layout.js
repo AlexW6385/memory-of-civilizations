@@ -21,7 +21,11 @@ export function pondDistance(x, z) {
   for (const P of POND) { const dx = (x - P.c[0]) / P.r[0], dz = (z - P.c[1]) / P.r[1]; best = Math.min(best, (Math.hypot(dx, dz) - 1) * Math.min(P.r[0], P.r[1])); }
   return best;
 }
-export const inPond = (x, z) => pondDistance(x, z) < 0;
+/** The small island (koshima) in the pond's north arm, between the hall's island and the north shore, joined to both by bridges (docs/settlements/heian-uji.md §6). */
+export const ISLAND = { c: [-55, -53], r: [6, 3.8], top: 0.3 };
+/** Distance (m, negative inside) from the small island's outline at the ground's level. */
+export function islandDistance(x, z) { const dx = (x - ISLAND.c[0]) / ISLAND.r[0], dz = (z - ISLAND.c[1]) / ISLAND.r[1]; return (Math.hypot(dx, dz) - 1) * Math.min(...ISLAND.r); }
+export const inPond = (x, z) => pondDistance(x, z) < 0 && islandDistance(x, z) > -0.6;
 export const inRiver = (x, z) => Math.abs(x - riverX(z)) < RIVER.w / 2 - 3 && Math.hypot(x, z) < RADIUS - 70;
 export function height(x, z) {
   const r = Math.hypot(x, z), edge = smooth(RADIUS - 80, RADIUS - 40, r);
@@ -31,6 +35,8 @@ export function height(x, z) {
   if (x > riverX(z) + RIVER.w / 2) h = Math.max(h, 30 * smooth(riverX(z) + RIVER.w / 2 + 10, RADIUS - 40, x));   // the hills beyond the river
   const p = pondDistance(x, z);
   if (p < 5) { const bed = POND_LEVEL - 1.2; h = bed + (Math.max(h, bed) - bed) * smooth(-1, 5, p); }
+  const q = islandDistance(x, z);
+  if (q < 2) { const bed = POND_LEVEL - 1.2; h = Math.max(h, bed + (ISLAND.top - bed) * smooth(2, -2.5, q)); }
   return h * (1 - smooth(RADIUS - 40, RADIUS - 5, r));
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
