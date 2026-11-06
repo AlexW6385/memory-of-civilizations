@@ -4,8 +4,9 @@
 // buttressed precinct walls, courtyard buildings and courtyard houses of plastered mud brick.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
+import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
+import { loft, ring } from '../egyptian/objects.js';
 import '../qing/index.js';
 
 const BB = 'brick_baked', MB = 'mudbrick', MP = 'mud_plaster';
@@ -33,14 +34,14 @@ function stairs(el, { bag, col }) {
   col.ramp([x0, z0, x1, z1], y0, y1, dir);
 }
 /** Shallow buttresses along the faces of a sloping stage [x0, z0, x1, z1] from y to y + h (inset at the top by b). */
-function buttresses(bag, [x0, z0, x1, z1], y, h, b, step = 3.2, skip = null) {
+function buttresses(bag, [x0, z0, x1, z1], y, h, b, step = 3.2, skip = null, mat = BB, hw = 0.55) {
   for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
     const L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / step);
     for (let i = 1; i < n; i++) {
       const s = i * L / n, px = ax + (bx - ax) * s / L, pz = az + (bz - az) * s / L;
       if (skip && skip(px, pz)) continue;
-      const tx = nz !== 0 ? 0.55 : 0.35, tz = nx !== 0 ? 0.55 : 0.35;
-      bag.add(BB, frustum([px - tx + nx * 0.2, pz - tz + nz * 0.2, px + tx + nx * 0.2, pz + tz + nz * 0.2], y, y + h * 0.97, nx > 0 ? 0 : nx < 0 ? b : 0, nx > 0 ? b : 0, nz < 0 ? b : 0, nz > 0 ? b : 0));
+      const tx = nz !== 0 ? hw : 0.35, tz = nx !== 0 ? hw : 0.35;
+      bag.add(mat, frustum([px - tx + nx * 0.2, pz - tz + nz * 0.2, px + tx + nx * 0.2, pz + tz + nz * 0.2], y, y + h * 0.97, nx > 0 ? 0 : nx < 0 ? b : 0, nx > 0 ? b : 0, nz < 0 ? b : 0, nz > 0 ? b : 0));
     }
   }
 }
@@ -103,12 +104,75 @@ function ziggurat(el, ctx) {
     const T = tops[i], f = T.r[1], h = T.y1 - T.y0;
     stairs({ rect: [cx - 2.5, f - h * 1.6, cx + 2.5, f + T.b + 0.3], y0: T.y0, y1: T.y1, dir: 's', mat: BB }, { bag, col });
   }
-  // the shrine: a buttressed house of the god, plastered, with its door to the stair
-  const top = tops[tops.length - 1], sh = el.shrine, sr = [cx - sh.w / 2, cz - sh.d / 2 + 1, cx + sh.w / 2, cz + sh.d / 2 + 1];
-  bag.add(MP, box(sr[0], top.y1, sr[1], sr[2], top.y1 + sh.h, sr[3])); col.rect(sr, top.y1, top.y1 + sh.h);
-  buttresses(bag, sr, top.y1, sh.h, 0, 1.6, (px, pz) => Math.abs(px - cx) < 1.2 && pz < cz);
-  const t = []; beamTris(t, [cx - 0.9, top.y1, sr[1] - 0.03], [cx + 0.9, top.y1, sr[1] - 0.03], 0.04, 2.4); bag.add('lacquer_black', fromTriangles(t));
-  bag.add('paint_blue', box(sr[0] - 0.1, top.y1 + sh.h - 0.6, sr[1] - 0.1, sr[2] + 0.1, top.y1 + sh.h, sr[3] + 0.1));
+  // the shrine of Nanna on the top stage (§4.2)
+  shrine({ ...el.shrine, c: [cx, cz + 1], y: tops[tops.length - 1].y1 }, ctx);
+}
+
+/**
+ * The house of the god on the ziggurat's top (docs/settlements/ur.md §4.2) { c, y, w, d, h }: a small temple of the
+ * "house plan" — the entrance in the middle of the front between two towers, an antecella across the front, the
+ * cella behind it on the same axis with the god's podium against its back wall and an offering table before it,
+ * benches along its ends; walls of plastered mud brick broken outside by buttresses and recesses; a flat roof of
+ * mud on reed matting over palm-trunk beams. Front to the north (−z).
+ */
+function shrine(el, { bag, col, lights }) {
+  const [cx, cz] = el.c, y = el.y, W = el.w ?? 14, D = el.d ?? 11, H = el.h ?? 5, t = 1.3, ti = 1.0;
+  const x0 = cx - W / 2, x1 = cx + W / 2, z0 = cz - D / 2, z1 = cz + D / 2, dw = 1.6, dh = 2.9;
+  const zA = z0 + t + 3.0, zC = zA + ti;                                   // the cross wall between antecella and cella
+  const wall = (r, y0 = y, y1 = y + H, m = MP) => { bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
+  // the outer walls; the front and the cross wall pierced on the axis
+  wall([x0, z0, cx - dw / 2, z0 + t]); wall([cx + dw / 2, z0, x1, z0 + t]); wall([cx - dw / 2, z0, cx + dw / 2, z0 + t], y + dh, y + H);
+  wall([x0, z1 - t, x1, z1]); wall([x0, z0 + t, x0 + t, z1 - t]); wall([x1 - t, z0 + t, x1, z1 - t]);
+  const iw = 1.3, ih = 2.6;
+  wall([x0 + t, zA, cx - iw / 2, zC]); wall([cx + iw / 2, zA, x1 - t, zC]); wall([cx - iw / 2, zA, cx + iw / 2, zC], y + ih, y + H);
+  // the two towers either side of the entrance, standing proud of the front and above the roof
+  const TH = H + 1.4;
+  for (const s of [-1, 1]) {
+    const a = cx + s * dw / 2, b = cx + s * (dw / 2 + 2.0), r = [Math.min(a, b), z0 - 1.1, Math.max(a, b), z0];
+    wall(r, y, y + TH); col.floor(r, y + TH);
+    bag.add(MP, box(r[0] - 0.06, y + TH - 0.35, r[1] - 0.06, r[2] + 0.06, y + TH - 0.2, r[3]));            // a band under the tower's top
+  }
+  // the lintel of palm trunk over the doorway, deep in its reveal between the towers; the cedar doors, open
+  const lt = []; beamTris(lt, [cx - dw / 2 - 0.25, y + dh, z0 - 0.5], [cx + dw / 2 + 0.25, y + dh, z0 - 0.5], 0.14, 0.24); bag.add('palm_trunk', fromTriangles(lt));
+  for (const s of [-1, 1]) {
+    const q = [Math.min(cx + s * dw / 2, cx + s * (dw / 2 - 0.08)), z0 + 0.15, Math.max(cx + s * dw / 2, cx + s * (dw / 2 - 0.08)), z0 + 0.15 + dw / 2];
+    bag.add('cedar', box(q[0], y + 0.06, q[1], q[2], y + dh - 0.05, q[3]));
+    for (const v of [0.45, dh / 2, dh - 0.5]) bag.add('bronze', box(q[0] - 0.012, y + v - 0.05, q[1], q[2] + 0.012, y + v + 0.05, q[3]));
+  }
+  bag.add(BB, box(cx - dw / 2, y, z0 - 1.1, cx + dw / 2, y + 0.06, z0 + t));                            // the threshold
+  // buttresses and recesses round the outside, clear of the towers
+  buttresses(bag, [x0, z0, x1, z1], y, H, 0, 2.2, (px, pz) => pz < z0 + 0.01 && Math.abs(px - cx) < dw / 2 + 2.6, MP, 0.4);
+  // the parapet round the roof, the roof itself: mud over reed mats over palm trunks
+  for (const r of [[x0, z0, x1, z0 + 0.35], [x0, z1 - 0.35, x1, z1], [x0, z0, x0 + 0.35, z1], [x1 - 0.35, z0, x1, z1]]) bag.add(MP, box(r[0], y + H, r[1], r[2], y + H + 0.5, r[3]));
+  bag.add(MP, box(x0 + 0.35, y + H - 0.25, z0 + 0.35, x1 - 0.35, y + H, z1 - 0.35)); col.floor([x0, z0, x1, z1], y + H);
+  for (const [a, b] of [[z0 + t, zA], [zC, z1 - t]]) {
+    bag.add('reed_mat', box(x0 + t, y + H - 0.31, a, x1 - t, y + H - 0.25, b));
+    for (let x = x0 + t + 0.45; x < x1 - t - 0.2; x += 0.75) bag.add('palm_trunk', lathe([[0.13, 0], [0.13, b - a]], 8).rotateX(Math.PI / 2).translate(x, y + H - 0.44, a));
+  }
+  // inside: floor of baked brick; in the cella the podium of the god against the back wall, reached by two steps,
+  // the emblem of Nanna on it (the crescent on its standard), the offering table, benches at the ends, a lamp
+  bag.add(BB, box(x0 + t, y, z0 + t, x1 - t, y + 0.06, z1 - t));
+  const pz1 = z1 - t, pz0 = pz1 - 1.5, pw = 1.9, py = y + 1.0;
+  bag.add(MP, box(cx - pw, y + 0.06, pz0, cx + pw, py, pz1)); col.rect([cx - pw, pz0, cx + pw, pz1], y, py); col.floor([cx - pw, pz0, cx + pw, pz1], py);
+  for (let k = 0; k < 3; k++) { const h0 = y + 0.06 + k * 0.31, d = 0.32 * (3 - k); bag.add(BB, box(cx - 1.0, h0, pz0 - d, cx + 1.0, h0 + 0.31, pz0)); }
+  bag.add(MP, box(cx - pw - 0.1, py, pz1 - 0.5, cx + pw + 0.1, y + 3.2, pz1));                                  // the niche's back, raised behind the podium
+  bag.add('bronze', lathe([[0.06, 0], [0.05, 0.25], [0.025, 0.3], [0.025, 1.9]], 8, null, cx, py, pz1 - 0.75));
+  { const T = []; for (let i = 0; i < 14; i++) { const a0 = Math.PI * (0.08 + 0.84 * i / 14), a1 = Math.PI * (0.08 + 0.84 * (i + 1) / 14), r0 = 0.42, r1 = 0.3, P = (a, r, z) => [cx + Math.cos(a) * r, py + 1.9 + 0.38 - Math.sin(a) * r, z];
+    const zz = [pz1 - 0.79, pz1 - 0.71], S = [];
+    S.push(...P(a0, r0, zz[0]), ...P(a1, r0, zz[0]), ...P(a1, r1, zz[0]), ...P(a0, r0, zz[0]), ...P(a1, r1, zz[0]), ...P(a0, r1, zz[0]));
+    S.push(...P(a0, r0, zz[1]), ...P(a1, r1, zz[1]), ...P(a1, r0, zz[1]), ...P(a0, r0, zz[1]), ...P(a0, r1, zz[1]), ...P(a1, r1, zz[1]));
+    S.push(...P(a0, r0, zz[0]), ...P(a0, r0, zz[1]), ...P(a1, r0, zz[1]), ...P(a0, r0, zz[0]), ...P(a1, r0, zz[1]), ...P(a1, r0, zz[0]));
+    S.push(...P(a0, r1, zz[0]), ...P(a1, r1, zz[1]), ...P(a0, r1, zz[1]), ...P(a0, r1, zz[0]), ...P(a1, r1, zz[0]), ...P(a1, r1, zz[1]));
+    if (i === 0 || i === 13) { const a = i === 0 ? a0 : a1; S.push(...P(a, r0, zz[0]), ...P(a, r1, zz[0]), ...P(a, r1, zz[1]), ...P(a, r0, zz[0]), ...P(a, r1, zz[1]), ...P(a, r0, zz[1])); }
+    T.push(...orientOutward(S)); }
+    bag.add('gold', fromTriangles(T)); }
+  const oz = pz0 - 1.6;
+  bag.add(MP, box(cx - 0.55, y + 0.06, oz - 0.35, cx + 0.55, y + 0.9, oz + 0.35)); col.rect([cx - 0.55, oz - 0.35, cx + 0.55, oz + 0.35], y, y + 0.9);
+  for (const dx of [-0.3, 0, 0.3]) bag.add('terracotta', lathe([[0.001, 0], [0.08, 0.01], [0.12, 0.06], [0.11, 0.07], [0.001, 0.03]], 10, null, cx + dx, y + 0.9, oz));
+  for (const s of [-1, 1]) { const r = s < 0 ? [x0 + t, zC, x0 + t + 0.55, pz1] : [x1 - t - 0.55, zC, x1 - t, pz1]; bag.add(BB, box(r[0], y + 0.06, r[1], r[2], y + 0.45, r[3])); col.rect(r, y, y + 0.45); }
+  lights.push({ at: [cx + 1.4, y + 1.2, oz], color: '#ffb46b', intensity: 4, distance: 7 });
+  bag.add('terracotta', lathe([[0.001, 0], [0.09, 0.02], [0.1, 0.05], [0.04, 0.06]], 10, null, cx + 1.4, y + 0.9, oz));
+  bag.add(MP, box(cx + 1.2, y + 0.06, oz - 0.2, cx + 1.6, y + 0.9, oz + 0.2));
 }
 
 /** The build context seen in a mirror across the line z = cz: what is built north of it lands south, the stairs turned. */
@@ -328,11 +392,66 @@ function gateTower(el, { bag, col }) {
   }
 }
 
-/** reed_boat: a high-ended reed boat { at, dir, len, y }. */
-function reedBoat(el, ctx) { STYLES.qing.elements.boat({ ...el }, ctx); }
+/**
+ * reed_boat: a boat of the Euphrates (docs/settlements/ur.md §6.1) { at, dir ([dx, dz] toward the bow), len, y (the
+ * water), seed, cargo }: a long narrow hull of reed bundles coated with bitumen, open, its ends drawn up into high
+ * horns curving inboard, the bundles bound with cord at intervals; thwarts across it, a punting pole, and a load of
+ * jars or bundled reeds in some.
+ */
+function reedBoat(el, { bag }) {
+  const L = el.len ?? 8, B = el.beam ?? L * 0.16, [X0, Z0] = el.at, Y0 = el.y ?? 0, rand = rng(el.seed ?? Math.floor(X0 * 13 + Z0 * 7));
+  const dl = Math.hypot(el.dir?.[0] ?? 0, el.dir?.[1] ?? 1) || 1, ux = (el.dir?.[0] ?? 0) / dl, uz = (el.dir?.[1] ?? 1) / dl;
+  // local frame: z from the bow (−L/2) to the stern (+L/2), x across, y up from the water
+  const W = (x, y, z) => [X0 - ux * z - uz * x, Y0 + y, Z0 - uz * z + ux * x];
+  const parts = { bitumen: [], reed_mat: [], timber: [], terracotta: [] };
+  const wid = (t) => B / 2 * Math.pow(Math.max(0, 1 - Math.pow(Math.abs(t), 2.6)), 0.5) + 0.05;
+  const gun = (t) => 0.35 + 0.25 * t * t, keel = -0.32;
+  // the hull: U-shaped sections, the outer skin from gunwale to gunwale and the inner face back, a floor of reeds inside
+  const rings = [];
+  for (let i = 0; i <= 28; i++) {
+    const t = -0.92 + 1.84 * i / 28, w = wid(t), g = gun(t), r = [], th = Math.min(0.12, w * 0.4);
+    for (let j = 0; j <= 10; j++) { const a = Math.PI * j / 10; r.push([Math.cos(a) * w, g - Math.sin(a) * (g - keel * (1 - t * t * 0.6)), t * L / 2]); }
+    for (let j = 10; j >= 0; j--) { const a = Math.PI * j / 10; r.push([Math.cos(a) * (w - th), Math.max(0.02, g - Math.sin(a) * (g - keel * (1 - t * t * 0.6))) + (j === 0 || j === 10 ? 0 : th * 0.6), t * L / 2]); }
+    rings.push(r);
+  }
+  parts.bitumen.push(loft(rings));
+  // the horns: the hull's ends gathered into a tapering bundle rising and curving in over the boat, bound with cord
+  for (const e of [-1, 1]) {
+    const hgt = e < 0 ? 1.9 : 1.6, pts = [];
+    for (let k = 0; k <= 8; k++) { const f = k / 8, a = f * Math.PI * 0.62; pts.push([0, gun(0.92) - 0.1 + Math.sin(a) * hgt * 0.95, e * (L / 2 * 0.92 + Math.sin(a * 0.9) * 0.6 - (1 - Math.cos(a)) * 0.9)]); }
+    const rr = (f) => wid(0.92) * 0.75 * (1 - f * 0.7) + 0.02;
+    const frame = (k) => { const q = pts[Math.min(8, k + 1)], o = pts[Math.max(0, k - 1)], d = [q[1] - o[1], q[2] - o[2]], l = Math.hypot(...d) || 1; return [0, -d[1] / l, d[0] / l]; };
+    parts.bitumen.push(loft(pts.map((p, k) => ring(p, [1, 0, 0], frame(k), rr(k / 8), rr(k / 8), 10))));
+    for (let k = 1; k < 8; k += 1.5) {
+      const i = Math.floor(k), p = pts[i], n = frame(i), r = rr(i / 8) + 0.015, v = [0, n[2], -n[1]];
+      parts.reed_mat.push(loft([-0.04, 0.04].map((o) => ring([p[0], p[1] + v[1] * o, p[2] + v[2] * o], [1, 0, 0], n, r, r, 10))));
+    }
+  }
+  // thwarts across the hull, a floor of reed mats, the punting pole along the side
+  for (const t of [-0.45, -0.1, 0.25, 0.55]) { const w = wid(t) - 0.05, z = t * L / 2; parts.timber.push(box(-w, gun(t) - 0.12, z - 0.09, w, gun(t) - 0.04, z + 0.09)); }
+  parts.reed_mat.push(box(-B * 0.28, 0.06, -L * 0.3, B * 0.28, 0.1, L * 0.3));
+  { const T = []; beamTris(T, [B / 2 - 0.15, gun(0) + 0.03, -L * 0.42], [B / 2 - 0.25, gun(0) + 0.1, L * 0.5], 0.03, 0.06); parts.timber.push(fromTriangles(T)); }
+  // the load: jars bedded on the mats, or bundles of reeds
+  const cargo = el.cargo ?? (rand() < 0.4 ? 'jars' : rand() < 0.5 ? 'reeds' : 'none');
+  if (cargo === 'jars') for (let k = 0; k < 6; k++) {
+    const z = (-0.25 + (k >> 1) * 0.2) * L / 2 * 1.4, x = (k & 1 ? 1 : -1) * B * 0.14;
+    parts.terracotta.push(lathe([[0.001, 0], [0.12, 0.05], [0.2, 0.25], [0.18, 0.45], [0.09, 0.55], [0.1, 0.62], [0.001, 0.6]], 10, null, x, 0.1, z));
+  }
+  if (cargo === 'reeds') for (let k = 0; k < 4; k++) {
+    const T = []; beamTris(T, [-B * 0.2 + k * B * 0.13, 0.1, -L * 0.22], [-B * 0.2 + k * B * 0.13, 0.12, L * 0.22], 0.08, 0.16); parts.reed_mat.push(fromTriangles(T));
+  }
+  for (const [mat, list] of Object.entries(parts)) for (const g0 of list) {
+    const g = g0.index ? g0.toNonIndexed() : g0, P = g.attributes.position, N = g.attributes.normal;
+    for (let i = 0; i < P.count; i++) {
+      const w = W(P.getX(i), P.getY(i), P.getZ(i)); P.setXYZ(i, w[0], w[1], w[2]);
+      const nx = N.getX(i), nz = N.getZ(i); N.setXYZ(i, -uz * nx - ux * nz, N.getY(i), ux * nx - uz * nz);
+    }
+    bag.add(mat, g);
+  }
+}
 
 registerStyle('sumerian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, reed_boat: reedBoat, terrace, gate_tower: gateTower },
+  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs },
   objects: {},
 });

@@ -9,7 +9,7 @@ const E = [];
 const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
 E.push({ t: 'terrace', rect: TERRACE.rect, h: ty, batter: 0.6, gap: [-7, 7] });
 E.push({ t: 'stairs', rect: [-7, COURT[3], 7, tz0 + 0.6], y0: 0, y1: ty, dir: 's', mat: 'brick_baked' });
-E.push({ t: 'ziggurat', c: [0, 0], y: ty, stages: [{ w: 64, d: 46, h: 15, batter: 3 }, { w: 38, d: 28, h: 7, batter: 1.5 }, { w: 24, d: 18, h: 5, batter: 1 }], shrine: { w: 12, d: 9, h: 4 } });
+E.push({ t: 'ziggurat', c: [0, 0], y: ty, stages: [{ w: 64, d: 46, h: 15, batter: 3 }, { w: 38, d: 28, h: 7, batter: 1.5 }, { w: 24, d: 18, h: 5, batter: 1 }], shrine: { w: 14, d: 11, h: 5 } });
 // the terrace's enclosure (walls of rooms standing on it, back from its sloping face), the Court of Nanna with the
 // Edublalmah, the gate tower, at its entrance, the precinct wall and its north gate
 const w = (a, b, h, th, y) => E.push({ t: 'precinct_wall', a, b, h, th, y });
@@ -30,10 +30,14 @@ const [hx0, hz0, hx1, hz1] = HARBOUR.rect, hz = (x) => Math.sqrt(Math.max(0, (RA
 E.push({ t: 'water_rect', rect: [hx0 + 30, Math.max(hz0, -hz(hx0 + 30)), hx1, Math.min(hz1, hz(hx0 + 30))], y: HARBOUR.water });
 E.push({ t: 'water_rect', rect: [hx0 + 6, Math.max(hz0, -hz(hx0 + 6)), hx0 + 30, Math.min(hz1, hz(hx0 + 6))], y: HARBOUR.water });
 E.push({ t: 'block', walk: true, rect: [hx1 - 1.5, hz0 + 6, hx1 + 1.5, hz1 - 6], y0: HARBOUR.bed, y1: 0.6, mat: 'brick_baked' });
-for (const [x, z, d] of [[-300, -90, 1], [-310, -30, -1], [-296, 20, 1], [-330, -60, -1], [-318, 45, 1]]) E.push({ t: 'reed_boat', at: [x, z], dir: [0, d], len: 8, y: HARBOUR.water });
+// boats moored along the quay and out in the basin (§6.1); flights of brick steps down from the quay to the water;
+// mooring posts along its edge
+for (const [x, z, d, len] of [[-285.3, -96, 1, 8], [-285.3, -60, -1, 9], [-285.3, -8, 1, 7.5], [-286.8, 28, -1, 8.5], [-300, -90, 1, 8], [-310, -30, -1, 7], [-302, 20, 1, 8], [-330, -60, -1, 9], [-318, 45, 1, 7]]) E.push({ t: 'reed_boat', at: [x, z], dir: [0, d], len, y: HARBOUR.water, seed: Math.round(x * 7 + z * 3) });
+for (const z of [-80, -30, 12]) E.push({ t: 'stairs', rect: [hx1 - 4.6, z, hx1 - 1.5, z + 2.4], y0: HARBOUR.water - 0.5, y1: 0.6, dir: 'e', mat: 'brick_baked' });
+for (let z = hz0 + 10; z < hz1 - 8; z += 9) if (![-80, -30, 12].some((s) => z > s - 1.5 && z < s + 4)) E.push({ t: 'block', rect: [hx1 - 1.35, z - 0.14, hx1 - 1.07, z + 0.14], y0: 0.6, y1: 1.45, mat: 'palm_trunk' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('terrace', TERRACE.rect, ty, 'open'), room('court', COURT, 0, 'open')];
+const rooms = [room('terrace', TERRACE.rect, ty, 'open'), room('court', COURT, 0, 'open'), room('shrine', [-5.7, -3.2, 5.7, 5.2], ty + 27, 'hall')];
 const walks = [[[0, -240], [0, -170], [0, -110], [0, -78], [0, -60], [0, -40]]];
 walks[0].y0 = 0;
 
