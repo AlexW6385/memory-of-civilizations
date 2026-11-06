@@ -5,7 +5,10 @@
 // the entablature; the balustrade hiding the roof, set with trophies and vases. Each window is glazed in small
 // panes in white-painted frames, set back in its reveal.
 //
-// gardenFront(ctx, face, rect, y, h): builds the front on one face ('w' | 'e' | 'n' | 's') of a range's block.
+// gardenFront(ctx, face, rect, y, h, opts): builds the front on one face ('w' | 'e' | 'n' | 's') of a range's block.
+//   opts.door: the bay whose ground-floor arch is a doorway down to the ground (no glazing, open in the collision);
+//   opts.inside: { bays: [i…], storeys: 'g' | 'p' | 'gp' } — windows with a room behind them: seen from inside, each
+//   pane is lit by the sky (daylight) and crossed by its glazing bars, set just inside the outer glass.
 
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { planarWall } from '../byzantine/index.js';
@@ -19,7 +22,7 @@ function hexa(out, b, t) {
   out.push(...orientOutward(tris));
 }
 
-export function gardenFront(ctx, f, rect, y, h) {
+export function gardenFront(ctx, f, rect, y, h, opts = {}) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = rect;
   // the face's frame: origin, the direction along it, the outward normal
   const F = { w: { o: [x0, z0], u: [0, 1], n: [-1, 0], L: z1 - z0 }, e: { o: [x1, z0], u: [0, 1], n: [1, 0], L: z1 - z0 }, n: { o: [x0, z0], u: [1, 0], n: [0, -1], L: x1 - x0 }, s: { o: [x0, z1], u: [1, 0], n: [0, 1], L: x1 - x0 } }[f];
@@ -36,7 +39,8 @@ export function gardenFront(ctx, f, rect, y, h) {
   if (nb >= 15) { for (let i = mid - 2; i <= mid + 2; i++) avant.add(i); for (const i of [0, 1, 2, nb - 3, nb - 2, nb - 1]) avant.add(i); }
   const P = 0.55, TH = 0.6;                                                       // the avant-corps' projection, the wall's skin
   const gW = { r: 1.0, sill: y + 0.8, spring: G - 1.75 }, pW = { r: 1.1, sill: G + 0.55, spring: E - 1.7 }, aW = { w: 0.8, y0: A + 0.55, y1: T - 0.6 };
-  const archesFor = (list) => list.map((i) => [{ uc: uc(i), r: gW.r, spring: gW.spring, sill: gW.sill }, { uc: uc(i), r: pW.r, spring: pW.spring, sill: pW.sill }]).flat();
+  const door = opts.door ?? -1, gSill = (i) => (i === door ? y - 0.3 : gW.sill);
+  const archesFor = (list) => list.map((i) => [{ uc: uc(i), r: gW.r, spring: gW.spring, sill: gSill(i) }, { uc: uc(i), r: pW.r, spring: pW.spring, sill: pW.sill }]).flat();
   const holesFor = (list) => list.map((i) => ({ u0: uc(i) - aW.w, u1: uc(i) + aW.w, y0: aW.y0, y1: aW.y1 }));
   const all = Array.from({ length: nb }, (_, i) => i);
   // the skin of the wall with its openings, and over the avant-corps a second layer standing forward
@@ -44,23 +48,30 @@ export function gardenFront(ctx, f, rect, y, h) {
   const groups = []; for (const i of all) if (avant.has(i)) { if (groups.length && groups.at(-1)[1] === i - 1) groups.at(-1)[1] = i; else groups.push([i, i]); }
   for (const [a, b] of groups) wallSlab(TH - 0.01, TH + P, a * bw, (b + 1) * bw, y - 0.3, T, archesFor(Array.from({ length: b - a + 1 }, (_, k) => a + k)), holesFor(Array.from({ length: b - a + 1 }, (_, k) => a + k)));
   const dAt = (i) => TH + (avant.has(i) ? P : 0);
-  { const a = W(0, 0), b = W(L, TH + P + 1.2); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y, T); }
+  { const cr = (u0, u1, v0) => { const a = W(u0, 0), b = W(u1, TH + P + 1.2); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], v0, T); };
+    if (door < 0) cr(0, L, y);
+    else { cr(0, uc(door) - gW.r, y); cr(uc(door) + gW.r, L, y); cr(uc(door) - gW.r, uc(door) + gW.r, gW.spring + gW.r); } }
 
   for (const i of all) {
     const d = dAt(i), c = uc(i), u0 = i * bw, u1 = (i + 1) * bw;
     // the rustication of the ground floor: courses of 0.55 m parted by deep channels
     for (let v = y + 0.55; v < G - 0.3; v += 0.55) {
       const hw = v > gW.spring ? Math.sqrt(Math.max(0, gW.r * gW.r - (v - gW.spring) ** 2)) : gW.r;
-      if (v < gW.sill || v > gW.spring + gW.r) B(S, u0, u1, v - 0.06, v + 0.06, d - 0.01, d + 0.05);
+      if (v < gSill(i) || v > gW.spring + gW.r) B(S, u0, u1, v - 0.06, v + 0.06, d - 0.01, d + 0.05);
       else { B(S, u0, c - hw - 0.25, v - 0.06, v + 0.06, d - 0.01, d + 0.05); B(S, c + hw + 0.25, u1, v - 0.06, v + 0.06, d - 0.01, d + 0.05); }
     }
     // windows: glass in its reveal, the frames and glazing bars; the keystones carved as masks; a balcony rail to the long windows
-    for (const [w, sill, spring, key] of [[gW.r, gW.sill, gW.spring, 'mask'], [pW.r, pW.sill, pW.spring, 'key']]) {
-      const g = W(0, 0.14);
-      bag.add(GL, planarWall({ o: g, u, th: 0.03, u0: c - w, u1: c + w, y0: sill, y1: spring + w, outline: { uc: c, r: w, spring } }));
-      B(FR, c - 0.05, c + 0.05, sill, spring + w - 0.02, 0.16, 0.22);
-      for (let v = sill + 0.62; v < spring + w - 0.1; v += 0.62) { const hw = v > spring ? Math.sqrt(Math.max(0, w * w - (v - spring) ** 2)) : w; B(FR, c - hw + 0.02, c + hw - 0.02, v - 0.03, v + 0.03, 0.16, 0.22); }
-      for (const s of [-0.5, 0.5]) B(FR, c + s * w - 0.03, c + s * w + 0.03, sill, spring + Math.sqrt(w * w - (s * w) ** 2) - 0.02, 0.16, 0.22);
+    for (const [w, sill, spring, key] of [[gW.r, gSill(i), gW.spring, 'mask'], [pW.r, pW.sill, pW.spring, 'key']]) {
+      const g = W(0, 0.14), open = key === 'mask' && i === door;
+      if (!open) bag.add(GL, planarWall({ o: g, u, th: 0.03, u0: c - w, u1: c + w, y0: sill, y1: spring + w, outline: { uc: c, r: w, spring } }));
+      // the glazing bars outside, and (opts.inside) inside the glass the sky's light and the bars again
+      const inner = opts.inside && opts.inside.bays.includes(i) && opts.inside.storeys.includes(key === 'mask' ? 'g' : 'p');
+      for (const [d0, d1, pane] of open ? [] : inner ? [[0.16, 0.22], [0.06, 0.105, true]] : [[0.16, 0.22]]) {
+        if (pane) bag.add('daylight_plain', planarWall({ o: W(0, 0.11), u, th: 0.01, u0: c - w, u1: c + w, y0: sill, y1: spring + w, outline: { uc: c, r: w, spring } }));
+        B(FR, c - 0.05, c + 0.05, sill, spring + w - 0.02, d0, d1);
+        for (let v = sill + 0.62; v < spring + w - 0.1; v += 0.62) { const hw = v > spring ? Math.sqrt(Math.max(0, w * w - (v - spring) ** 2)) : w; B(FR, c - hw + 0.02, c + hw - 0.02, v - 0.03, v + 0.03, d0, d1); }
+        for (const s of [-0.5, 0.5]) B(FR, c + s * w - 0.03, c + s * w + 0.03, sill, spring + Math.sqrt(w * w - (s * w) ** 2) - 0.02, d0, d1);
+      }
       // the architrave round the arch, the keystone
       const ar = []; const N = 14;
       for (let k = 0; k < N; k++) {
@@ -71,7 +82,7 @@ export function gardenFront(ctx, f, rect, y, h) {
       bag.add(S, fromTriangles(ar));
       B(S, c - 0.24, c + 0.24, spring + w - 0.1, spring + w + 0.45, d - 0.02, d + 0.2);
       if (key === 'mask') lat(S, [[0.001, 0], [0.13, 0.04], [0.15, 0.2], [0.1, 0.32], [0.001, 0.36]], c, d + 0.2, spring + w - 0.05, 8);
-      B(S, c - w - 0.3, c + w + 0.3, sill - 0.18, sill, d - 0.02, d + 0.16);
+      if (!open) B(S, c - w - 0.3, c + w + 0.3, sill - 0.18, sill, d - 0.02, d + 0.16);
     }
     // the piano nobile's balcony rail of iron
     const rail = [];

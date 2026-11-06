@@ -17,7 +17,7 @@ import { faceFrame, prism, fbox, ngon } from '../dutch/facade.js';
 const ST = 'sandstone_dressed', BR = 'brick', GL = 'glass_outer', FR = 'paint_white', GI = 'gilt_bronze', SL = 'slate';
 
 /** a bust on its socle (centred on x, z, standing at y), facing outward along th (local +z turned by th about y) */
-function bust(bag, x, y, z, th, s = 1) {
+export function bust(bag, x, y, z, th, s = 1) {
   const M = 'marble_smooth';
   bag.add(M, lathe([[0.15 * s, 0], [0.15 * s, 0.05 * s], [0.09 * s, 0.1 * s], [0.07 * s, 0.2 * s], [0.001, 0.2 * s]], 10, null, x, y, z));
   // the chest and shoulders cut square under the arms, wider across than deep, the drapery over one shoulder

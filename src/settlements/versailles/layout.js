@@ -17,6 +17,16 @@ export const APOLLO = [-320, 0];
 export const CANAL = { x0: -340, w: 40, cross: -390, crossW: 24 };
 export const PLACE = [100, -70, 210, 70];
 export const RISE = 6;
+// the first floor (§1c): the Hall of Mirrors along the garden front (bays 4–20 of its 25), the Salons of War and Peace,
+// the King's Grand Apartment running east from the Salon of War into the block's extension, the Ambassadors' Staircase
+// in the court north of the Royal Court (its rect is the hall inside its walls; the fronts stand outside it)
+export const EXT = [40, -55, 49, -38], STAIR = [49.6, -54.4, 76.4, -40.6], FY = 14.3;
+export const STATE_ROOMS = [
+  ['hall of mirrors', [0.5, -37, 10, 37], FY], ['salon of war', [0.5, -50.2, 12, -38.6], FY], ['salon of peace', [0.5, 38.6, 12, 50.2], FY],
+  ['salon of apollo', [13.3, -48.7, 21.7, -39.3], FY], ['salon of mercury', [22.9, -48.7, 30.1, -39.3], FY], ['salon of mars', [31.3, -48.7, 38.5, -39.3], FY],
+  ['salon of diana', [39.7, -48.7, 46.9, -39.3], FY], ['salon of venus', [39.7, -54.1, 46.9, -49.9], FY],
+  ['ambassadors staircase landing', [49.8, -54.2, 51.6, -40.8], FY], ['ambassadors staircase vestibule', [71.6, -54.2, 76.2, -40.8], RISE + 0.06],
+];
 export const LATONA_Y = RISE * 0.352;                 // the ground at the Latona basin (the slope's height there)
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
