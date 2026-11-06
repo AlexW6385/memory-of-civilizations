@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.73 — Esagila and the Euphrates; Persepolis' wall and delegations (2026-11-06)
+- Esagila at Koldewey's size with its towered gates, court of altars and Marduk's gold-sheeted cella with the golden throne, table and image; Etemenanki's summit temple in blue glaze with Herodotus's couch and table; the Euphrates bridge on boat-shaped piers; the east-bank quay wall with towers; round hide boats; Babylonians, boatmen, porters and priests; Persepolis' mudbrick fortification with towers along the east edge and up the slope; guards with pomegranate spears at the gates; five delegations with ushers, gifts and animals walking to the Apadana.
+
 ## v9.72 — Street dressing turned with New York; seated poses; Māori dress; the kneeling Doge (2026-11-06)
 - Generic street dressing reads lots inside turned elements (New York's benches, crates, stalls and figures back, aligned with the 29° grid); distinct ids for generic life plans; new seated poses on steps, on the ground and seiza, used where people sat on chairs that weren't there; a Māori dress kit (flax rāpaki, cloaks, topknots with bone combs); Madurai's temple elephant on the shared model with ash stripes, bell and anklets; Doge Barbarigo kneeling before the lion on the Clock Tower.
 
