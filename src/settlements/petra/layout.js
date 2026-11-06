@@ -7,7 +7,20 @@
 
 export const RADIUS = 330;
 export const RIM = 60;                                        // the massif's top above the valley floor
-export const SIQ = { path: [[325, -150], [290, -152], [290, -160], [255, -142], [220, -165], [185, -150], [148, -162]], w: 12 };
+export const SIQ = { path: [[325, -150], [296, -154], [263, -147], [229, -160], [192, -151], [148, -162]], w: 12 };
+/** The Siq's line smoothed (two rounds of Chaikin's corner cutting, the ends kept): the floor and the built walls follow it. */
+function chaikin(P, n) {
+  for (let k = 0; k < n; k++) {
+    const Q = [P[0]];
+    for (let i = 0; i + 1 < P.length; i++) { const a = P[i], b = P[i + 1]; Q.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75]); }
+    Q.push(P[P.length - 1]); P = Q;
+  }
+  return P;
+}
+export const SIQ_LINE = chaikin(SIQ.path, 2);
+/** Where the Siq's walls are built (docs/settlements/petra.md §10): from the east down to x = 150, by the square; the floor runs on under them, 4.5 m wider on each side, so the ground's slope never shows in front of them. */
+export const SIQ_WALL = { x1: 150, face: 6.2, wide: 4.5 };
+export const siqHalf = (x) => SIQ.w / 2 + SIQ_WALL.wide * smooth(SIQ_WALL.x1 - 14, SIQ_WALL.x1, x);
 export const PLAZA = { c: [128, -160], r: 20 };
 export const OUTER = { path: [[128, -160], [126, -120], [108, -82], [80, -52], [40, -20]], w: 34 };
 export const VALLEY = { c: [-70, 10], r: [175, 120] };
@@ -19,7 +32,8 @@ const pathDist = (x, z, p) => { let d = Infinity; for (let i = 0; i + 1 < p.leng
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 /** How open the ground is (1 on a gorge or valley floor, 0 on the massif). */
 export function open(x, z) {
-  let m = smooth(SIQ.w / 2 + 3, SIQ.w / 2, pathDist(x, z, SIQ.path));
+  const hs = siqHalf(x);
+  let m = smooth(hs + 3, hs, pathDist(x, z, SIQ_LINE));
   m = Math.max(m, smooth(PLAZA.r + 4, PLAZA.r, Math.hypot(x - PLAZA.c[0], z - PLAZA.c[1])));
   m = Math.max(m, smooth(OUTER.w / 2 + 6, OUTER.w / 2, pathDist(x, z, OUTER.path)));
   const e = Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]);

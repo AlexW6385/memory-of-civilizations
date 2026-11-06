@@ -7,6 +7,8 @@
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
+import { khazneh } from './khazneh.js';
+import { siqWalls } from './siq.js';
 
 const R = 'sandstone_rose', A = 'sandstone_rose_ashlar';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -25,32 +27,6 @@ function pediment(bag, P, u0, u1, y, rise, v, mat = R) {
   t.push(a[0], y, a[1], c[0], y + rise, c[1], a0[0], y, a0[1]); t.push(a0[0], y, a0[1], c[0], y + rise, c[1], c0[0], y + rise, c0[1]);
   t.push(b[0], y, b[1], b0[0], y, b0[1], c[0], y + rise, c[1]); t.push(b0[0], y, b0[1], c0[0], y + rise, c0[1], c[0], y + rise, c[1]);
   bag.add(mat, fromTriangles(t));
-}
-
-/** khazneh: the Treasury { at, dir, w, h, back (depth of rock behind) }. */
-function khazneh(el, { bag, col: C }) {
-  const [x, z] = el.at, { P, B } = frame(x, z, el.dir), W = el.w ?? 25, H = el.h ?? 39, back = el.back ?? 30, top = el.top ?? H + 20;
-  // the rock the façade is cut into (flush with the frontal plane at v = 0)
-  bag.add(R, B(-W / 2 - 25, -back, W / 2 + 25, 0, -2, top)); { const a = P(-W / 2 - 25, -back), b = P(W / 2 + 25, 0); C.rect([a[0], a[1], b[0], b[1]], -2, top); }
-  // carve the recess: the façade stands forward of a deeper back plane — we model the forward parts
-  const y1 = H * 0.5, rc = 0.55;
-  bag.add(R, B(-W / 2, 0, W / 2, 1.0, 0, 1.4));                                  // the steps of the platform
-  for (const u of [-W / 2 + 1.2, -W / 2 + 5.4, -2.4, 2.4, W / 2 - 5.4, W / 2 - 1.2]) col(bag, P, u, 1.6, 1.4, y1 - 4.4, rc);
-  bag.add(R, B(-W / 2, 0, W / 2, 2.4, y1 - 3, y1 - 1.6));                        // architrave and frieze
-  bag.add(R, B(-W / 2 - 0.3, 0, W / 2 + 0.3, 2.6, y1 - 1.6, y1 - 1.0));          // cornice
-  pediment(bag, P, -7, 7, y1 - 1.0, 3.2, 2.4);
-  bag.add('opening', B(-1.8, 0.01, 1.8, 0.05, 1.4, 8.5));                          // the door
-  // the upper storey: the tholos between two half-pavilions with broken pediments
-  const u0 = y1 + 2.2;
-  bag.add(R, B(-W / 2, 0, W / 2, 1.2, y1 - 1.0, u0));
-  for (const s of [-1, 1]) {
-    for (const u of [s * (W / 2 - 1.2), s * (W / 2 - 5.2)]) col(bag, P, u, 1.6, u0, H * 0.32, rc * 0.9);
-    bag.add(R, B(s > 0 ? W / 2 - 7 : -W / 2, 0, s > 0 ? W / 2 : -W / 2 + 7, 2.2, u0 + H * 0.32, u0 + H * 0.32 + 1.4));
-    pediment(bag, P, s > 0 ? W / 2 - 7 : -W / 2, s > 0 ? W / 2 - 3.5 : -W / 2 + 3.5, u0 + H * 0.32 + 1.4, 1.6, 2.2);
-  }
-  const [tx, tz] = P(0, 3.2), tr = 3.6, th = H * 0.32;
-  bag.add(R, lathe([[tr, 0], [tr, th], [tr + 0.4, th + 0.3], [tr + 0.4, th + 1.2], [tr * 0.8, th + 1.5], [tr * 0.6, th + 2.8], [0.6, th + 4.2], [0.9, th + 5.6], [0.001, th + 6.2]], 16, null, tx, u0, tz));
-  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; if (Math.sin(a) < -0.2) continue; bag.add(R, lathe([[0.4, 0], [0.36, th]], 8, null, tx + Math.cos(a) * tr, u0, tz + Math.sin(a) * tr)); }
 }
 
 /** rock_tomb: a tomb façade cut in the cliff { at, dir, w, h, kind ('crowstep' | 'pediment' | 'palace'), back, top }. */
@@ -132,6 +108,6 @@ function house(el, { bag, col: C }) {
 
 registerStyle('nabataean', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, khazneh, rock_tomb: rockTomb, theatre, podium_temple: podiumTemple, colonnade_street: colonnadeStreet, nabataean_house: house },
+  elements: { ...STYLES.qing.elements, khazneh, siq_walls: siqWalls, rock_tomb: rockTomb, theatre, podium_temple: podiumTemple, colonnade_street: colonnadeStreet, nabataean_house: house },
   objects: {},
 });
