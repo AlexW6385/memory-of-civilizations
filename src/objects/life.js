@@ -240,7 +240,7 @@ export function lifePlans(id, R, landmarks, town, G) {
     if (sub) el.kind = sub;
     if (t === 'car' || t === 'cart' || t === 'stall') el.rot = Math.round(rot / (Math.PI / 2)) * Math.PI / 2 + (t === 'cart' ? (rand() - 0.5) * 0.3 : 0);   // along the street's axes
     if (t === 'car') el.era = id === 'sydney' ? 1970 : 1930;
-    if (t === 'figure') { Object.assign(el, dressed(kit, rand)); if (extra.pose) el.carry = 'none'; }
+    if (t === 'figure') { Object.assign(el, dressed(kit, rand)); if (extra.pose) el.carry = 'none'; if (extra.carry) el.carry = extra.carry; if (extra.y !== undefined) el.y = extra.y; }
     els.push(el);
   };
   const sz = (t) => ({ cart: 2.2, stall: 2.2, animal: 1.4, haystack: 1.6, car: 2.6, laundry: 1.8, well: 1, figure: 0.5, bench: 1, firewood: 1, crates: 0.8, ladder: 0.5, street_lamp: 0.4 }[t.split(':')[0]] ?? 0.6);
@@ -359,6 +359,23 @@ export function lifePlans(id, R, landmarks, town, G) {
       }
     }
   }
+  // work in the fields: people hoeing or bent over the crop in twos and threes, an ox or buffalo, a basket at the field's edge
+  if (G.cover) {
+    const beast = { east_asia: 'buffalo', southeast_asia: 'buffalo', south_asia: 'zebu', japan: 'ox' }[KIT_OF[id]] ?? 'ox';
+    let nf = 0;
+    for (let tries = 0; tries < 5000 && nf < 45; tries++) {
+      const a = rand() * 6.28, r = Math.sqrt(rand()) * (R - 35), x = Math.cos(a) * r, z = Math.sin(a) * r, g = ground(x, z), c = G.cover(x, z, g);
+      if (!c || !(c.fields > 0.45)) continue;
+      if (!grid.free([x - 4, z - 4, x + 4, z + 4])) continue;
+      const n = 1 + Math.floor(rand() * 3), rot = rand() * 6.28;
+      let ok = 0;
+      for (let q = 0; q < n; q++) { const px = x + Math.cos(rot) * q * 1.8, pz = z + Math.sin(rot) * q * 1.8; if (wet(px, pz) && KIT_OF[id] !== 'east_asia') continue; if (Math.hypot(px, pz) > R - 30) continue; put('figure', px, pz, rot + (rand() - 0.5) * 0.6, rand() < 0.65 ? { carry: 'hoe' } : { pose: 'squat', carry: 'none' }); ok++; }
+      if (!ok) continue;
+      grid.fill([x - 4, z - 4, x + 4, z + 4], 2); nf++;
+      if (rand() < 0.3) put('animal:' + beast, x + Math.cos(rot + 1.6) * 4, z + Math.sin(rot + 1.6) * 4, rot);
+      if (rand() < 0.5) put('basket', x - Math.cos(rot) * 1.5, z - Math.sin(rot) * 1.5, 0);
+    }
+  }
   // boats along the shores
   if (kit.boats.length) {
     let nb = 0;
@@ -377,6 +394,16 @@ export function lifePlans(id, R, landmarks, town, G) {
       if (!ok) continue;
       const brot = land === null ? a : land + Math.PI / 2, wy = G.waterLevel(x, z) - 0.25;
       els.push({ t: 'boat', kind, at: [x, z], y: wy, rot: brot, seed: Math.floor(rand() * 1e9) });
+      // by a boat moored at the shore: its goods set down on land, porters with poles and baskets
+      if (land !== null && rand() < 0.45) {
+        const lx = x + Math.cos(land) * 5.5, lz = z + Math.sin(land) * 5.5, gb = [lx - 1.5, lz - 1.5, lx + 1.5, lz + 1.5];
+        if (!wet(lx, lz) && grid.free(gb) && flat(lx, lz, 1)) {
+          const goods = KIT_OF[id] === 'east_asia' || KIT_OF[id] === 'japan' ? ['sacks', 'basket', 'pot'] : ['sacks', 'crates', 'barrel'];
+          for (let q = 0; q < 3; q++) { const gx = lx + (rand() - 0.5) * 2, gz = lz + (rand() - 0.5) * 2; put(goods[q % goods.length], gx, gz, rand() * 6.28); }
+          for (let q = 0; q < 2; q++) if (rand() < 0.75) { const gx = lx + Math.cos(land + 1.6 * (q ? 1 : -1)) * 1.8, gz = lz + Math.sin(land + 1.6 * (q ? 1 : -1)) * 1.8; if (!wet(gx, gz)) put('figure', gx, gz, rand() * 6.28, { carry: KIT_OF[id] === 'east_asia' ? 'pole' : rand() < 0.5 ? 'basket' : 'none' }); }
+          grid.fill(gb, 2);
+        }
+      }
       // the crew: someone standing at the stern (the gondolier, the boatman at his oar), or sitting amidships
       if (kind !== 'ferry' && kind !== 'dhow' && rand() < 0.6) {
         const dx = Math.sin(brot), dz = Math.cos(brot), stand = kind === 'gondola' || kind === 'sampan' || rand() < 0.4, f = stand ? 0.4 : 0.05;

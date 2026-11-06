@@ -264,7 +264,7 @@ function seg(a, b, r0, r1, n = 6) {
 const ball = (r, n = 10) => lathe(Array.from({ length: 7 }, (_, i) => { const t = i / 6 * Math.PI; return [Math.max(0.001, Math.sin(t) * r), r - Math.cos(t) * r]; }), n);
 /**
  * figure: { dress ('robe' | 'tunic' | 'trousers' | 'wrap'), cloth, cloth2, skin, hat ('none' | 'cap' | 'turban' |
- * 'straw' | 'veil' | 'brim'), h (height), carry ('none' | 'pot' | 'basket' | 'pole'), pose ('stand' | 'talk' |
+ * 'straw' | 'veil' | 'brim'), h (height), carry ('none' | 'pot' | 'basket' | 'pole' | 'hoe'), pose ('stand' | 'talk' |
  * 'sit' | 'squat') } — a still figure in its place, facing −z: shoulders, arms, hands and head; skirts that
  * hang and flare; feet below.
  */
@@ -303,6 +303,7 @@ function figure(el, { bag, col }) {
     let E, Hn;
     if (carry === 'pot' || carry === 'basket') { E = [s * (sw + 0.06 * k), sh + 0.18 * k, -0.03]; Hn = [s * 0.1 * k, Y(1.75), 0]; if (s > 0) { E = [s * (sw + 0.02), sh - 0.28 * k, 0.02]; Hn = [s * (sw + 0.01), sh - 0.55 * k, -0.02]; } }
     else if (carry === 'pole') { E = [s * (sw + 0.04), sh - 0.12 * k, -0.18 * k]; Hn = [s * (sw * 0.7), sh + 0.02 * k, -0.28 * k]; }
+    else if (carry === 'hoe') { E = [s * (sw + 0.02), sh - 0.24 * k, -0.12 * k]; Hn = [s * 0.06 * k + 0.02, sh - (s > 0 ? 0.3 : 0.5) * k, -(s > 0 ? 0.36 : 0.46) * k]; }
     else if (pose === 'talk' && s > 0) { E = [s * (sw + 0.05), sh - 0.26 * k, -0.06 * k]; Hn = [s * (sw * 0.8), sh - 0.22 * k, -0.33 * k]; }
     else if (sit) { E = [s * (sw + 0.03), sh - 0.27 * k, -0.08 * k]; Hn = [s * 0.12 * k, sh - 0.42 * k, -0.32 * k]; }
     else { E = [s * (sw + 0.035), sh - 0.29 * k, 0.02]; Hn = [s * (sw + 0.025), sh - 0.56 * k, -0.02 - rand() * 0.04]; }
@@ -324,6 +325,11 @@ function figure(el, { bag, col }) {
   else put('hair_dark', at(ball(0.108 * k, 10).scale(0.9, 0.75, 1.0), 0, hy + 0.08 * k, hc[2] + 0.012));
   if (carry === 'pot') put('terracotta', at(lz(POTS.water_pot.p.map(([r, y]) => [r * 0.7, y * 0.7]), 12), 0, top + 0.01, hc[2]));
   else if (carry === 'basket') put('wicker', at(lz([[0.17, 0], [0.24, 0.18], [0.22, 0.18], [0.15, 0.03], [0.001, 0.03]], 8), 0, top + 0.01, hc[2]));
+  else if (carry === 'hoe') {
+    // the hoe held in both hands, its blade on the ground before the feet
+    put('timber', seg([0.04 * k, sh - 0.12 * k, -0.28 * k], [0.08, 0.12, -0.95], 0.018, 0.018, 5));
+    put('iron', box(-0.04, 0.0, -0.995, 0.2, 0.17, -0.975));
+  }
   else if (carry === 'pole') {
     const py = sh + 0.06 * k;
     put('bamboo_culm', at(lying(0.022, 1.8, 6), 0, py, -0.03));

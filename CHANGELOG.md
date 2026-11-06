@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.23 — Work in the fields, goods on the quays (2026-11-05)
+- Field work in every settlement with fields: people hoeing or bent over the crop in twos and threes, an ox, buffalo or zebu by region, a basket at the edge (Giza, Angkor and others). By boats moored at the shore, their goods set down on land (sacks, crates, barrels; sacks, baskets and jars in East Asia) with porters. A new figure load: the hoe, held in both hands. Fixed: a figure's own load and height given by the life pass were overwritten by its dress (the porters' poles, the people on raised terraces).
+
 ## v9.22 — People in the landmarks' open places (2026-11-05)
 - Every landmark's open rooms (precincts, courts, terraces, plazas, gardens) now have people about in them, thinner in gardens and denser in courts; a terrace well above the ground keeps its own height. A building that encloses its court (Sultan Hasan's block, the Alhambra's courts) no longer blocks people from standing in it. Courts are no longer taken for markets, so no stalls in a mosque's or a palace's court. House-front fittings are sparser (a third of plain houses, most shops), the Near East's mostly washing, single lanterns outside East Asia, spaced 3 m apart.
 
