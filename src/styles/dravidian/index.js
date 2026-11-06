@@ -7,18 +7,27 @@
 
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles, rod, disc, place } from '../../core/geom.js';
+import { Shape, ExtrudeGeometry, Matrix4, Vector3 } from '../../core/three.js';
 import '../qing/index.js';
 
 const G = 'granite_tamil';
 const PAINT = ['stucco_sky', 'stucco_rose', 'stucco_saffron', 'stucco_leaf', 'stucco_cream'];
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const kalasha = (bag, x, y, z, s = 1, mat = 'gilt_bronze') => bag.add(mat, lathe([[0.32 * s, 0], [0.42 * s, 0.35 * s], [0.22 * s, 0.7 * s], [0.12 * s, 1.1 * s], [0.001, 1.4 * s]], 8, null, x, y, z));
+/** A gilded pot finial (kalasha): the foot ring, the pot, the neck, the lid and the flame-shaped tip. */
+const kalasha = (bag, x, y, z, s = 1, mat = 'gilt_bronze') => bag.add(mat, lathe([[0.3 * s, 0], [0.36 * s, 0.06 * s], [0.28 * s, 0.13 * s], [0.42 * s, 0.36 * s], [0.4 * s, 0.6 * s], [0.2 * s, 0.76 * s], [0.13 * s, 0.82 * s], [0.24 * s, 0.9 * s], [0.1 * s, 1.04 * s], [0.07 * s, 1.35 * s], [0.001, 1.6 * s]], s > 0.5 ? 12 : 6, null, x, y, z));
+const j3 = (u) => Math.abs(Math.round(u * 7)) % 3;
 
 /** gopuram: { c, dir ('ns' passage along z, 'ew' along x), w (along the wall), d (through), h, tiers, y }. */
 function gopuram(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y ?? 0, h = el.h, n = el.tiers ?? 9, alongX = el.dir === 'ew';
   const W = el.w, D = el.d, base = Math.max(8, h * 0.2), pw = Math.min(5, W * 0.18), ph = base * 0.75;
   const R = (u0, v0, u1, v1) => alongX ? [cx + v0, cz + u0, cx + v1, cz + u1] : [cx + u0, cz + v0, cx + u1, cz + v1];
+  // a shape extruded along the local direction (du, dv), its back at local (u, v), base at yy
+  const place2 = (bg, mat, g, u, v, yy, [du, dv]) => {
+    const [px, pz] = alongX ? [v, u] : [u, v], [zx, zz] = alongX ? [dv, du] : [du, dv];
+    g.applyMatrix4(new Matrix4().makeBasis(new Vector3(zz, 0, -zx), new Vector3(0, 1, 0), new Vector3(zx, 0, zz)).setPosition(cx + px, yy, cz + pz));
+    bg.add(mat, g);
+  };
   // the granite base: two piers either side of the passage, the lintel over it, a moulded plinth
   for (const [u0, u1] of [[-W / 2, -pw / 2], [pw / 2, W / 2]]) { const r = R(u0, -D / 2, u1, D / 2); bag.add(G, box(r[0], y, r[1], r[2], y + base, r[3])); col.rect(r, y, y + base); }
   { const r = R(-pw / 2, -D / 2, pw / 2, D / 2); bag.add(G, box(r[0], y + ph, r[1], r[2], y + base, r[3])); }
@@ -55,6 +64,7 @@ function gopuram(el, { bag, col }) {
         const m = Math.max(2, Math.floor(len / 1.25));
         for (let j = 0; j < m; j++) {
           const u = -len / 2 + (j + 0.5) * len / m;
+          if (long && Math.abs(u) < Math.min(2.2, w1 * 0.12) / 2 + 0.55) continue;     // the storey's window
           for (const s of [-1, 1]) {
             const v = s * (depth / 2 + 0.05), [px, pz] = long ? (alongX ? [cx + v, cz + u] : [cx + u, cz + v]) : (alongX ? [cx + u, cz + v] : [cx + v, cz + u]);
             const k = fh / 1.15, prof = [[0.22 * k, 0], [0.17 * k, 0.5 * k], [0.13 * k, 0.75 * k], [0.08 * k, 0.8 * k], [0.11 * k, 0.88 * k], [0.09 * k, 1.0 * k], [0.06 * k, 1.08 * k], [0.001, 1.15 * k]];
@@ -68,40 +78,86 @@ function gopuram(el, { bag, col }) {
         }
       }
     }
-    // the little pavilions (kudu, shala) along the two long faces
     if (!el.simple) {
-      const k = Math.max(2, Math.floor(w1 / 3.2));
-      for (let j = 0; j < k; j++) {
-        const u = -w1 / 2 + (j + 0.5) * w1 / k;
-        for (const s of [-1, 1]) {
-          const v = s * (d1 / 2 + 0.1), q = R(u - 0.7, v - 0.3, u + 0.7, v + 0.3), kh = Math.min(1.4, tierH * 0.6);
-          // a little shrine (kudu / shala): a body, a horseshoe-arched niche, a vaulted roof with a finial
-          bag.add(PAINT[(i + j + 1) % PAINT.length], box(q[0], y1 + 0.02, q[1], q[2], y1 + kh * 0.6, q[3]));
-          const qa = R(u - 0.35, v - 0.32 * s - 0.02, u + 0.35, v - 0.32 * s + 0.02 + 0.62 * s);
-          bag.add('stucco_cream', frustum(q, y1 + kh * 0.6, y1 + kh, alongX ? 0 : 0.6, alongX ? 0 : 0.6, alongX ? 0.25 : 0, alongX ? 0.25 : 0, { noBottom: true }));
-          const nm = R(u - 0.25, v + s * 0.29, u + 0.25, v + s * 0.33);
-          bag.add('opening', box(Math.min(nm[0], nm[2]), y1 + 0.12, Math.min(nm[1], nm[3]), Math.max(nm[0], nm[2]), y1 + kh * 0.5, Math.max(nm[1], nm[3])));
-          void qa;
+      // the storey's window on the axis of both long faces: a dark opening in a cream frame, leaning with the wall
+      const ow = Math.min(2.2, w1 * 0.12, tierH * 0.45), oh = tierH * 0.6 - (i > 0 ? Math.min(1.5, tierH * 0.42) * 0.3 : 0), ya = y0 + (i > 0 ? Math.min(1.5, tierH * 0.42) * 0.3 + 0.05 : 0.3), sl = (d0 - d1) / 2 / (tierH - 0.35), ex = Math.min(0.3, ow * 0.2);
+      for (const sv of [-1, 1]) {
+        const vf = d0 / 2 - sl * (ya - y0), dl = sl * oh;
+        // the horseshoe surround (nasi) behind the frame
+        const ga = ow / 2 + ex * 1.6;
+        place2(bag, 'stucco_saffron', nasiGeo(ga, ga * 1.08, Math.min(oh + ex * 2.5, tierH - 0.6), 0.34 + dl * 1.6), 0, sv * (vf - 0.3 - dl * 1.6), ya - 0.05, [0, sv]);
+        for (const [m2, o0, o1, e2] of [['stucco_cream', 0.03, 0.08, ex], ['opening', 0.08, 0.11, 0]]) {
+          const q = R(-ow / 2 - e2, sv > 0 ? vf + o0 : -vf - o1, ow / 2 + e2, sv > 0 ? vf + o1 : -vf - o0), hh = oh + e2;
+          const ins = [0, 0];
+          bag.add(m2, alongX ? frustum(q, ya, ya + hh, ins[0], ins[1], 0, 0) : frustum(q, ya, ya + hh, 0, 0, ins[0], ins[1]));
         }
+      }
+      // the parapet (hara) on the cornice: a little domed shrine (kuta) at each corner, a barrel-roofed one
+      // (shala) at the middle of each long side, apsidal ones (panjara) between, a low wall joining them
+      const kh = Math.min(1.5, tierH * 0.42), k = Math.min(0.7, kh * 0.5), mk = PAINT[(i + 2) % PAINT.length];
+      for (const [len, dep, long] of [[w1, d1, true], [d1, w1, false]]) for (const sv of [-1, 1]) {
+        const v = sv * (dep / 2 + 0.05), Q = (u0, v0, u1, v1) => long ? R(u0, v0, u1, v1) : R(v0, u0, v1, u1);
+        const wq = Q(-len / 2, v - 0.18, len / 2, v + 0.18); bag.add('stucco_cream', box(wq[0], y1, wq[1], wq[2], y1 + kh * 0.28, wq[3]));
+        const np = Math.max(1, Math.floor((len / 2 - k * 2.6) / (k * 3.2)));
+        const items = [];
+        for (let j = 1; j <= np; j++) for (const sg of [-1, 1]) { const uu = sg * (long ? k * 1.8 + j * (len / 2 - k * 3.2) / (np + 0.5) : j * (len / 2 - k * 1.6) / (np + 1)); items.push([uu, 'panjara']); }
+        for (const [uu, kind] of items) {
+          const hw = kind === 'shala' ? k * 1.4 : k * 0.6, q = Q(uu - hw, v - k * 0.5, uu + hw, v + k * 0.5), c2 = long ? (alongX ? [cx + v, cz + uu] : [cx + uu, cz + v]) : (alongX ? [cx + uu, cz + v] : [cx + v, cz + uu]);
+          const qa = [Math.min(q[0], q[2]), Math.min(q[1], q[3]), Math.max(q[0], q[2]), Math.max(q[1], q[3])];
+          bag.add(PAINT[(i + j3(uu)) % PAINT.length], box(qa[0], y1, qa[1], qa[2], y1 + kh * 0.5, qa[3]));
+          const ridgeAlongX = (qa[2] - qa[0]) > (qa[3] - qa[1]), sh = (ridgeAlongX ? qa[3] - qa[1] : qa[2] - qa[0]) / 2;
+          bag.add('stucco_cream', frustum([qa[0] - 0.05, qa[1] - 0.05, qa[2] + 0.05, qa[3] + 0.05], y1 + kh * 0.5, y1 + kh * 0.85, ridgeAlongX ? (kind === 'shala' ? 0 : sh) : sh + 0.05, ridgeAlongX ? (kind === 'shala' ? 0 : sh) : sh + 0.05, ridgeAlongX ? sh + 0.05 : (kind === 'shala' ? 0 : sh), ridgeAlongX ? sh + 0.05 : (kind === 'shala' ? 0 : sh), { noBottom: true }));
+          if (kind === 'shala') for (const t of [-0.6, 0, 0.6]) kalasha(bag, c2[0] + (ridgeAlongX ? t * hw : 0), y1 + kh * 0.85, c2[1] + (ridgeAlongX ? 0 : t * hw), 0.18);
+          else kalasha(bag, c2[0], y1 + kh * 0.85, c2[1], 0.15);
+        }
+      }
+      for (const [su, sv] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {
+        const q = R(su * w1 / 2 - k * 0.55, sv * d1 / 2 - k * 0.55, su * w1 / 2 + k * 0.55, sv * d1 / 2 + k * 0.55), qa = [Math.min(q[0], q[2]), Math.min(q[1], q[3]), Math.max(q[0], q[2]), Math.max(q[1], q[3])], ccx = (qa[0] + qa[2]) / 2, ccz = (qa[1] + qa[3]) / 2;
+        bag.add(mk, box(qa[0], y1, qa[1], qa[2], y1 + kh * 0.5, qa[3]));
+        bag.add('stucco_cream', lathe([[k * 0.8, 0], [k * 0.78, kh * 0.08], [k * 0.62, kh * 0.25], [k * 0.3, kh * 0.4], [0.001, kh * 0.44]], 8, null, ccx, y1 + kh * 0.5, ccz).rotateY(0));
+        kalasha(bag, ccx, y1 + kh * 0.92, ccz, 0.16);
       }
     }
   }
-  // the crowning barrel vault (shala) and its finials
-  const yv = y + base + n * tierH, vr = topD / 2;
-  const prof = []; for (let k = 0; k <= 8; k++) { const a = Math.PI * k / 8; prof.push([Math.cos(a) * vr, Math.sin(a) * vr * 1.3]); }
-  const L = topW / 2;
-  // the vault as a swept arch along the long axis (two triangles per strip)
+  // the crowning barrel vault (shala): the wagon roof, a great horseshoe gable (mahānāsī) at either end
+  // with a lion face (kīrtimukha) at its crown, a gable dormer on each long side, the ridge of gilded pots
+  const yv = y + base + n * tierH, vr = topD / 2, L = topW / 2, vh = vr * 1.3;
+  const prof = []; for (let k = 0; k <= 12; k++) { const a = Math.PI * k / 12; prof.push([Math.cos(a) * vr, Math.sin(a) * vh]); }
   const pos = [];
-  for (let k = 0; k < 8; k++) {
+  for (let k = 0; k < 12; k++) {
     const [a0, b0] = prof[k], [a1, b1] = prof[k + 1];
-    const p = (u, v, hh) => { const q = alongX ? [cx + v, yv + hh, cz + u] : [cx + u, yv + hh, cz + v]; return q; };
+    const p = (u, v, hh) => (alongX ? [cx + v, yv + hh, cz + u] : [cx + u, yv + hh, cz + v]);
     const A = p(-L, a0, b0), B = p(L, a0, b0), C = p(L, a1, b1), D2 = p(-L, a1, b1);
     pos.push(A, B, C, A, C, D2);
   }
   bag.add('stucco_saffron', vaultTris(pos));
-  for (const s of [-1, 1]) { const r = R(s > 0 ? L - 0.3 : -L, -vr, s > 0 ? L : -L + 0.3, vr); bag.add('stucco_rose', box(r[0], yv, r[1], r[2], yv + vr * 1.25, r[3])); }
-  const nk = Math.max(5, Math.round(topW / 2.2));
-  for (let j = 0; j < nk; j++) { const u = -L + 0.6 + j * (2 * L - 1.2) / (nk - 1), q = alongX ? [cx, cz + u] : [cx + u, cz]; kalasha(bag, q[0], yv + vr * 1.3 - 0.1, q[1], 1.4); }
+  for (const s2 of [-1, 1]) {
+    const gh = vh + vr * 0.5, ga = vr * 0.9, gr = vr * 1.1;
+    place2(bag, 'stucco_rose', nasiGeo(ga, gr, gh, 0.7), s2 * (L - 0.35), 0, yv, [s2, 0]);
+    if (!el.simple) {
+      place2(bag, 'stucco_sky', nasiGeo(ga * 0.62, gr * 0.66, gh * 0.8, 0.08), s2 * (L + 0.35), 0, yv, [s2, 0]);
+      place2(bag, 'opening', nasiGeo(ga * 0.3, gr * 0.36, gh * 0.55, 0.06), s2 * (L + 0.43), 0, yv, [s2, 0]);
+      // the lion face at the gable's crown: the head, the bulging eyes, the horns
+      const P2 = (u, v) => (alongX ? [cx + v, cz + u] : [cx + u, cz + v]), fy = yv + gh - gr * 0.42, f = P2(s2 * (L + 0.45), 0);
+      bag.add('stucco_saffron', lathe([[0.001, -0.55], [0.5, -0.4], [0.62, 0], [0.5, 0.4], [0.001, 0.55]], 10, null, f[0], fy, f[1]));
+      for (const sd of [-1, 1]) { const e = P2(s2 * (L + 0.95), sd * 0.24); bag.add('stucco_cream', lathe([[0.001, -0.1], [0.12, 0], [0.001, 0.1]], 6, null, e[0], fy + 0.12, e[1])); const h0 = P2(s2 * (L + 0.5), sd * 0.4), h1 = P2(s2 * (L + 0.6), sd * 0.9); bag.add('stucco_saffron', rod([h0[0], fy + 0.35, h0[1]], [h1[0], fy + 0.95, h1[1]], 0.1, 5)); }
+    }
+    // the dormer on each long side of the vault
+    place2(bag, 'stucco_rose', nasiGeo(vr * 0.42, vr * 0.5, vh * 0.95, vr * 0.9), 0, s2 * vr * 0.35, yv, [0, s2]);
+    if (!el.simple) place2(bag, 'opening', nasiGeo(vr * 0.22, vr * 0.27, vh * 0.68, 0.06), 0, s2 * (vr * 1.25 + 0.01), yv, [0, s2]);
+  }
+  // the ridge and its row of gilded pots (an odd number, about 1.35 m apart)
+  { const q = R(-L, -0.25, L, 0.25); bag.add('stucco_cream', box(q[0], yv + vh - 0.12, q[1], q[2], yv + vh + 0.2, q[3])); }
+  const nk = Math.max(3, 2 * Math.floor((2 * L - 1.6) / 2.7) + 1);
+  for (let j = 0; j < nk; j++) { const u = -L + 0.8 + j * (2 * L - 1.6) / (nk - 1), q = alongX ? [cx, cz + u] : [cx + u, cz]; kalasha(bag, q[0], yv + vh + 0.2, q[1], 1.15); }
+}
+/** A horseshoe-gable outline (nāsī): base half-width a, arch radius r, height h, extruded th (z 0…th). */
+function nasiGeo(a, r, h, th) {
+  const sh = new Shape(), b = Math.acos(Math.min(0.999, a / r)), yc = h - r, N = 16;
+  sh.moveTo(-a, 0); sh.lineTo(-a, Math.max(0, yc - r * Math.sin(b)));
+  for (let k = 0; k <= N; k++) { const ph = Math.PI + b - (Math.PI + 2 * b) * k / N; sh.lineTo(r * Math.cos(ph), yc + r * Math.sin(ph)); }
+  sh.lineTo(a, 0); sh.lineTo(-a, 0);
+  return new ExtrudeGeometry(sh, { depth: th, bevelEnabled: false, curveSegments: 4 });
 }
 function vaultTris(pos) { const t = []; for (let i = 0; i < pos.length; i += 3) { t.push(...pos[i], ...pos[i + 1], ...pos[i + 2], ...pos[i], ...pos[i + 2], ...pos[i + 1]); } return fromTriangles(t); }
 
@@ -155,10 +211,10 @@ function mandapa(el, { bag, col }) {
     const bx = (xs[i] + xs[i + 1]) / 2, bz = (zs[k] + zs[k + 1]) / 2, main = i === aisle[0];
     const r = Math.min(xs[i + 1] - xs[i], zs[k + 1] - zs[k]) * (main ? 0.4 : 0.3), c = (i * 3 + k * 5) % PAINT.length;
     bag.add(main ? 'stucco_sky' : PAINT[(c + 1) % PAINT.length], box(xs[i] + 0.3, yc - 0.045, zs[k] + 0.27, xs[i + 1] - 0.3, yc - 0.035, zs[k + 1] - 0.27));
-    bag.add(main ? 'stucco_rose' : PAINT[c], disc(r, yc - 0.05, 16, bx, bz, false));
-    bag.add(main ? 'stucco_saffron' : 'stucco_cream', disc(r * 0.62, yc - 0.055, 16, bx, bz, false));
-    bag.add(main ? 'gilt_bronze' : PAINT[(c + 2) % PAINT.length], disc(r * 0.25, yc - 0.06, 12, bx, bz, false));
-    if (main) for (let j = 0; j < 8; j++) { const a = j / 8 * Math.PI * 2; bag.add('stucco_leaf', disc(r * 0.16, yc - 0.058, 8, bx + Math.cos(a) * r * 0.82, bz + Math.sin(a) * r * 0.82, false)); }
+    bag.add(main ? 'stucco_rose' : PAINT[c], disc(r, yc - 0.06, 16, bx, bz, false));
+    bag.add(main ? 'stucco_saffron' : 'stucco_cream', disc(r * 0.62, yc - 0.075, 16, bx, bz, false));
+    bag.add(main ? 'gilt_bronze' : PAINT[(c + 2) % PAINT.length], disc(r * 0.25, yc - 0.09, 12, bx, bz, false));
+    if (main) for (let j = 0; j < 8; j++) { const a = j / 8 * Math.PI * 2; bag.add('stucco_leaf', disc(r * 0.16, yc - 0.075, 8, bx + Math.cos(a) * r * 0.82, bz + Math.sin(a) * r * 0.82, false)); }
   }
   // the yalis on the aisle's two rows of pillars, facing across it; the lamps down the middle
   for (let k = 1; k < nz; k++) for (const [i, f] of [[aisle[0], 1], [aisle[1], -1]]) {
