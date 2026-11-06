@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.78 — Athens: the Theatre of Dionysos, the Odeion, the houses (2026-11-06)
+- The Theatre of Dionysos of about 410 with its polygonal wooden seating on the slope, the orchestra with its altar and the wooden skene with painted panels, the stoa and the Older Temple behind; the Odeion of Pericles with its ninety columns and hipped roof; on the Acropolis the Brauronion, the bronze Trojan horse, the Chalkotheke with its armour, the Lemnian Athena, stelae and the Mycenaean wall; every house given a court wall, framed door, shuttered windows and plaster gables, those by the ways with a herm at the door and an altar, well-head and jar in the court.
+
 ## v9.77 — The Süleymaniye inside; the Partal and the Rauda (2026-11-06)
 - The Süleymaniye's square prayer hall: four piers, great arches, pendentives with script roundels, the 32-window drum, the painted dome, semidomes and tympana on red granite columns, domed aisles, the muqarnas mihrab, Iznik panels and coloured-glass windows of the qibla wall, the marble minbar, the sultan's loge, the muezzins' platform, the great low lamp rings and carpets; Granada's Partal with its portico, pool and the Tower of the Ladies, the Rauda's mausoleum and garden of tombs, the Alcazaba's keep and Torre de la Vela with the military quarter, houses of the medina inside the walls.
 
