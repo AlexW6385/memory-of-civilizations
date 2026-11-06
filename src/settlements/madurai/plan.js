@@ -26,7 +26,9 @@ const OG = [
   { s: 'e', c: GATES.e, h: 47, w: 34, d: 20, n: 9 }, { s: 's', c: GATES.s, h: 52, w: 34, d: 20, n: 9 },
   { s: 'w', c: GATES.w, h: 49, w: 33, d: 20, n: 9 }, { s: 'n', c: GATES.n, h: 48, w: 33, d: 20, n: 9 },
 ];
-wallLoop(WALL, OG.map((g) => ({ s: g.s, at: g.s === 'n' || g.s === 's' ? g.c[0] : g.c[1], w: g.w })), 9, 2);
+// (the Ashta Shakti Mandapam's entrance opens through the east wall south of the east gopuram)
+export const ASHTA = [104, 34, 128, 46];
+wallLoop(WALL, [...OG.map((g) => ({ s: g.s, at: g.s === 'n' || g.s === 's' ? g.c[0] : g.c[1], w: g.w })), { s: 'e', at: (ASHTA[1] + ASHTA[3]) / 2, w: ASHTA[3] - ASHTA[1] }], 9, 2);
 for (const g of OG) E.push({ t: 'gopuram', c: g.c, dir: g.s === 'n' || g.s === 's' ? 'ns' : 'ew', w: g.w, d: g.d, h: g.h, tiers: g.n });
 // Sundareswarar's enclosure: gopurams east, north and south, the vimana, the flagstaff
 {
@@ -51,6 +53,8 @@ for (const g of OG) E.push({ t: 'gopuram', c: g.c, dir: g.s === 'n' || g.s === '
 }
 // the Golden Lotus tank and the Thousand-Pillar Hall
 E.push({ t: 'tank', rect: TANK, depth: 4, water: 2.4 });
+// the hall of the eight goddesses, the entrance from the east to Meenakshi's shrine
+E.push({ t: 'ashta_shakti', rect: ASHTA, h: 7.6 });
 E.push({ t: 'mandapa', rect: HALL, h: 6, step: 2.6, carved: true });
 // the open pillared halls along the inner side of the south and west gates
 E.push({ t: 'mandapa', rect: [GATES.s[0] - 8, 82, GATES.s[0] + 8, GATES.s[1] - 12], h: 6, step: 3.4 });
@@ -61,6 +65,7 @@ const rooms = [
   room('outer court', WALL, 0, 'open'),
   room('golden lotus tank', [TANK[0] - 6, TANK[1] - 6, TANK[2] + 6, TANK[3] + 6], 0.5, 'hall'),
   room('thousand-pillar hall', HALL, 0.5, 'hall'),
+  room('ashta shakti mandapam', [ASHTA[0] + 2, ASHTA[1] + 2, ASHTA[2] - 2, ASHTA[3] - 2], 0.5, 'hall'),
 ];
 const walks = [[[GATES.s[0], 200], [GATES.s[0], 126], [GATES.s[0], 100], [GATES.s[0], 75]]];
 walks[0].y0 = 0;

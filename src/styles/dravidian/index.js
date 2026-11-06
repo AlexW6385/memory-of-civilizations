@@ -9,6 +9,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles, rod, disc, place } from '../../core/geom.js';
 import { Shape, ExtrudeGeometry, Matrix4, Vector3 } from '../../core/three.js';
 import '../qing/index.js';
+import '../../objects/index.js';
 
 const G = 'granite_tamil';
 const PAINT = ['stucco_sky', 'stucco_rose', 'stucco_saffron', 'stucco_leaf', 'stucco_cream'];
@@ -343,24 +344,270 @@ function vimana(el, { bag, col }) {
   kalasha(bag, x, yd + r * 1.5, z, 1.2);
 }
 
-/** tank: a stepped temple tank { rect, y, depth, water } in a colonnade one bay deep. */
-function tank(el, ctx) {
-  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, dep = el.depth ?? 4, steps = 10, st = dep / steps;
-  for (let i = 0; i < steps; i++) {
-    const m = 0.6 * i, ya = y - i * st;
-    const r = [x0 + m, z0 + m, x1 - m, z1 - m], ri = [r[0] + 0.6, r[1] + 0.6, r[2] - 0.6, r[3] - 0.6];
-    for (const q of [[r[0], r[1], r[2], ri[1]], [r[0], ri[3], r[2], r[3]], [r[0], ri[1], ri[0], ri[3]], [ri[2], ri[1], r[2], ri[3]]]) {
-      bag.add(G, box(q[0], ya - st, q[1], q[2], ya, q[3])); col.floor(q, ya);
-    }
+/** A painted panel on a wall face: the field at (px, pz) on the face (u along it, n out of it), from y, w × h:
+ *  a red ground in a cream frame, an arched shrine-frame in ochre, a couple seated in it under a flowering tree
+ *  (the Nayaka murals: "a vivid red background", black line, white, green and ochre). */
+function mural(bag, [px, pz], [ux, uz], [nx, nz], y, w, h, seed = 0) {
+  const P = (u, v, d) => [px + ux * u + nx * d, y + v, pz + uz * u + nz * d];
+  const R = (mat, u0, v0, u1, v1, d0, d1) => { const a = P(u0, v0, d0), b = P(u1, v1, d1); bag.add(mat, box(Math.min(a[0], b[0]), a[1], Math.min(a[2], b[2]), Math.max(a[0], b[0]), b[1], Math.max(a[2], b[2]))); };
+  const hw = w / 2;
+  R('stucco_cream', -hw - 0.08, -0.08, hw + 0.08, h + 0.08, 0, 0.02);
+  R('stucco_red', -hw, 0, hw, h, 0.02, 0.035);
+  R('paint_ochre', -hw * 0.8, h * 0.08, -hw * 0.72, h * 0.78, 0.035, 0.05); R('paint_ochre', hw * 0.72, h * 0.08, hw * 0.8, h * 0.78, 0.035, 0.05);
+  R('paint_ochre', -hw * 0.82, h * 0.78, hw * 0.82, h * 0.84, 0.035, 0.05);
+  R('stucco_leaf', -hw * 0.25, h * 0.84, hw * 0.25, h * 0.97, 0.035, 0.045);                 // the tree's crown over the shrine
+  const robes = ['stucco_saffron', 'stucco_leaf', 'stucco_sky', 'stucco_cream', 'stucco_rose'];
+  for (const [k, sg] of [[0, -1], [1, 1]]) {
+    const cu = sg * hw * 0.3, fh = h * 0.6, c = robes[(seed + k * 2) % robes.length];
+    R(c, cu - fh * 0.22, h * 0.1, cu + fh * 0.22, h * 0.1 + fh * 0.28, 0.035, 0.055);           // the seated legs
+    R(c, cu - fh * 0.12, h * 0.1 + fh * 0.28, cu + fh * 0.12, h * 0.1 + fh * 0.72, 0.035, 0.055);  // the body
+    R(k ? 'paint_ochre' : 'stucco_sky', cu - fh * 0.08, h * 0.1 + fh * 0.74, cu + fh * 0.08, h * 0.1 + fh * 0.9, 0.035, 0.06);   // the heads (his blue)
+    R('gilt_bronze', cu - fh * 0.06, h * 0.1 + fh * 0.9, cu + fh * 0.06, h * 0.1 + fh * 1.02, 0.035, 0.058);                   // the crowns
   }
-  const mi = 0.6 * steps;
+}
+
+/**
+ * tank: a stepped temple tank { rect, y, depth, water } in its cloister: steps of a quarter-metre
+ * down all four sides to the water; the corridor round it one bay deep on a granite plinth, a row
+ * of carved Nayaka pillars on the tank side, on the outer side a wall painted inside with murals
+ * in its bays and an opening in the middle of each side; beams from pillars to wall, painted
+ * ceiling panels with lotus medallions, the flat roof with its cream parapet.
+ */
+function tank(el, ctx) {
+  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, dep = el.depth ?? 4, st = 0.25, steps = Math.round(dep / st), tr = 0.35, D = el.cloister ?? 6, h = el.h ?? 5;
+  for (let i = 0; i < steps; i++) {
+    const m = tr * i, ya = y - i * st, r = [x0 + m, z0 + m, x1 - m, z1 - m], ri = [r[0] + tr, r[1] + tr, r[2] - tr, r[3] - tr];
+    for (const q of [[r[0], r[1], r[2], ri[1]], [r[0], ri[3], r[2], r[3]], [r[0], ri[1], ri[0], ri[3]], [ri[2], ri[1], r[2], ri[3]]]) { bag.add(G, box(q[0], ya - st, q[1], q[2], ya, q[3])); col.floor(q, ya); }
+  }
+  const mi = tr * steps;
   bag.add(G, box(x0 + mi, y - dep - 0.4, z0 + mi, x1 - mi, y - dep, z1 - mi));
   STYLES.qing.elements.water_rect({ rect: [x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3], y: y - (el.water ?? 2.2) }, ctx);
-  // the lamp pillar in the middle
-  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-  bag.add('gilt_bronze', lathe([[0.3, 0], [0.25, 4], [0.6, 4.3], [0.001, 5]], 8, null, cx, y - dep, cz));
-  // the colonnade round it
-  for (const r of [[x0 - 6, z0 - 6, x1 + 6, z0], [x0 - 6, z1, x1 + 6, z1 + 6], [x0 - 6, z0, x0, z1], [x1, z0, x1 + 6, z1]]) mandapa({ rect: r, y, h: 5, step: 3.4, simple: el.simple }, ctx);
+  // the cloister: plinth, roof, the inner row of pillars, the outer wall with its four openings
+  const O = [x0 - D, z0 - D, x1 + D, z1 + D], yf = y + 0.5, yt = y + h, T = 0.8, gap = 3.2, p = 0.6;
+  for (const q of [[O[0], O[1], O[2], z0], [O[0], z1, O[2], O[3]], [O[0], z0, x0, z1], [x1, z0, O[2], z1]]) {
+    bag.add(G, box(q[0], y - 0.6, q[1], q[2], yf, q[3])); col.floor(q, yf);
+    bag.add(G, box(q[0] - (q[0] === O[0] ? 0.4 : 0), yt, q[1] - (q[1] === O[1] ? 0.4 : 0), q[2] + (q[2] === O[2] ? 0.4 : 0), yt + 0.7, q[3] + (q[3] === O[3] ? 0.4 : 0))); col.floor(q, yt + 0.7);
+  }
+  // the parapet round the roof's outer and inner edges
+  for (const [a, b] of [[[O[0] - 0.4, O[1] - 0.4], [O[2] + 0.4, O[1] - 0.1]], [[O[0] - 0.4, O[3] + 0.1], [O[2] + 0.4, O[3] + 0.4]], [[O[0] - 0.4, O[1] - 0.1], [O[0] - 0.1, O[3] + 0.1]], [[O[2] + 0.1, O[1] - 0.1], [O[2] + 0.4, O[3] + 0.1]],
+    [[x0, z0 - 0.3], [x1, z0]], [[x0, z1], [x1, z1 + 0.3]], [[x0 - 0.3, z0], [x0, z1]], [[x1, z0], [x1 + 0.3, z1]]]) bag.add('stucco_cream', box(a[0], yt + 0.7, a[1], b[0], yt + 1.3, b[1]));
+  const sides = [
+    { a: [x0, z0], b: [x1, z0], n: [0, -1], len: x1 - x0 }, { a: [x1, z1], b: [x0, z1], n: [0, 1], len: x1 - x0 },
+    { a: [x0, z1], b: [x0, z0], n: [-1, 0], len: z1 - z0 }, { a: [x1, z0], b: [x1, z1], n: [1, 0], len: z1 - z0 },
+  ];
+  let seed = 0;
+  for (const S of sides) {
+    const [ax, az] = S.a, ux = (S.b[0] - ax) / S.len, uz = (S.b[1] - az) / S.len, [nx, nz] = S.n;
+    // pillars on the tank side, from corner to corner (the corners' pillars belong to the long sides)
+    const long = Math.abs(ux) > 0.5, ext = long ? D : 0, nb = Math.max(2, Math.round((S.len + 2 * ext) / 3.4));
+    const at = (u, d) => [ax + ux * u + nx * d, az + uz * u + nz * d];
+    for (let k = 0; k <= nb; k++) {
+      const u = -ext + 0.5 + (S.len + 2 * ext - 1) * k / nb;
+      if (!long && (k === 0 || k === nb)) continue;
+      const [px, pz] = at(u, 0.6);
+      carvedPillar(bag, px, pz, yf, yt, p); col.rect([px - p / 2, pz - p / 2, px + p / 2, pz + p / 2], y, yt);
+    }
+    // the beams over the pillars, along the side and across to the wall
+    { const a = at(-ext, 0.3), b = at(S.len + ext, 0.9); bag.add(G, box(Math.min(a[0], b[0]), yt - 0.45, Math.min(a[1], b[1]), Math.max(a[0], b[0]), yt, Math.max(a[1], b[1]))); }
+    // the outer wall, its opening in the middle; murals in the bays inside
+    const wa = long ? -D : T, wb = long ? S.len + D : S.len - T, mid = S.len / 2;
+    for (const [u0, u1] of [[wa, mid - gap / 2], [mid + gap / 2, wb]]) {
+      const a = at(u0, D - T), b = at(u1, D);
+      const r = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
+      bag.add(G, box(r[0], yf, r[1], r[2], yt, r[3])); col.rect(r, y, yt);
+      const nb2 = Math.floor((u1 - u0) / 3.4);
+      for (let k = 0; k < nb2; k++) { const u = u0 + (u1 - u0) * (k + 0.5) / nb2, q = at(u, D - T); mural(bag, [q[0], q[1]], [-ux, -uz], [-nx, -nz], yf + 1.0, 2.2, 2.4, seed++); }
+    }
+    // the ceiling: a painted panel and a lotus in each bay
+    for (let k = 0; k < Math.round(S.len / 3.4); k++) {
+      const u0 = S.len * k / Math.round(S.len / 3.4), u1 = S.len * (k + 1) / Math.round(S.len / 3.4), a = at(u0 + 0.2, 1.0), b = at(u1 - 0.2, D - T - 0.2), c = at((u0 + u1) / 2, (1 + D - T) / 2);
+      bag.add(PAINT[(k + seed) % PAINT.length], box(Math.min(a[0], b[0]), yt - 0.06, Math.min(a[1], b[1]), Math.max(a[0], b[0]), yt - 0.035, Math.max(a[1], b[1])));
+      bag.add('stucco_rose', disc(1.0, yt - 0.08, 16, c[0], c[1], false)); bag.add('stucco_cream', disc(0.6, yt - 0.1, 16, c[0], c[1], false)); bag.add('gilt_bronze', disc(0.22, yt - 0.12, 10, c[0], c[1], false));
+    }
+  }
+}
+
+/**
+ * ashta_shakti: the hall of the eight goddesses, the entrance from the east to Meenakshi's shrine,
+ * built by two consorts of Tirumala Nayaka { rect (its nave runs along x, the entrance at the east),
+ * y, h }: the tall entrance in the east, a nave between two rows of pillars against each of which
+ * one of the eight Shaktis stands carved and painted, four a side, Ganesha and Murugan at the west
+ * end; a barrel-vaulted ceiling painted in panels; aisles whose walls carry painted reliefs of the
+ * god's sacred sports (Tiruvilaiyadal); the flat roof outside with a cream parapet.
+ */
+function ashtaShakti(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 7.6, yf = y + 0.5, cz = (z0 + z1) / 2, W = z1 - z0, nave = el.nave ?? 7, za = cz - nave / 2, zb = cz + nave / 2, T = 0.9;
+  bag.add(G, box(x0, y - 0.6, z0, x1, yf, z1)); col.floor([x0, z0, x1, z1], yf);
+  // the walls: north, south, the west end with its doorway on; the east end open between the jambs
+  for (const r of [[x0, z0, x1, z0 + T], [x0, z1 - T, x1, z1]]) { bag.add(G, box(r[0], yf, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h); }
+  for (const r of [[x0, z0 + T, x0 + T, cz - 1.6], [x0, cz + 1.6, x0 + T, z1 - T]]) { bag.add(G, box(r[0], yf, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h); }
+  bag.add(G, box(x0, y + 3.6, cz - 1.6, x0 + T, y + h, cz + 1.6));
+  for (const r of [[x1 - T, z0 + T, x1, cz - 2.75], [x1 - T, cz + 2.75, x1, z1 - T]]) { bag.add(G, box(r[0], yf, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h); }
+  // the entrance's frame (25 ft high, 18 ft broad), a painted panel of the wedding over it
+  bag.add('stucco_cream', box(x1, y + h - 0.6, cz - 3.4, x1 + 0.35, y + h, cz + 3.4));
+  for (const s2 of [-1, 1]) bag.add(G, box(x1, yf, cz + s2 * 2.75 - (s2 > 0 ? 0 : 0.5), x1 + 0.3, y + h - 0.6, cz + s2 * 2.75 + (s2 > 0 ? 0.5 : 0)));
+  mural(bag, [x1 + 0.35, cz], [0, -1], [1, 0], y + h - 0.5 + 0.1, 5.2, 1.6, 3);
+  bag.add(G, box(x1 - T, y + h - 0.01, z0, x1 + 0.4, y + h + 0.8, z1));
+  // the roof and its parapet
+  bag.add(G, box(x0 - 0.3, y + h, z0 - 0.3, x1, y + h + 0.8, z1 + 0.3)); col.floor([x0, z0, x1, z1], y + h + 0.8);
+  for (const r of [[x0 - 0.3, z0 - 0.3, x1 + 0.4, z0], [x0 - 0.3, z1, x1 + 0.4, z1 + 0.3], [x0 - 0.3, z0, x0, z1], [x1 + 0.1, z0, x1 + 0.4, z1]]) bag.add('stucco_cream', box(r[0], y + h + 0.8, r[1], r[2], y + h + 1.4, r[3]));
+  // the nave's pillars, the goddesses against them facing across the nave
+  const n = 5, xs = []; for (let i = 0; i < n; i++) xs.push(x0 + 3 + (x1 - x0 - 6) * i / (n - 1));
+  const yv = y + h - 2.6;                       // the vault's springing
+  const robes = ['stucco_rose', 'stucco_leaf', 'stucco_sky', 'stucco_saffron'];
+  xs.forEach((x, i) => {
+    for (const [z, f] of [[za, 1], [zb, -1]]) {
+      carvedPillar(bag, x, z, yf, yv, 0.7); col.rect([x - 0.35, z - 0.35, x + 0.35, z + 0.35], y, yv);
+      if (i === 0) continue;                    // the four goddesses a side stand at the inner pillars
+      const fz = z + f * 0.6, k = (i * 2 + (f > 0 ? 0 : 1)) % 4;
+      bag.add(G, box(x - 0.45, yf, fz - 0.3, x + 0.45, yf + 0.35, fz + 0.3));
+      shakti(bag, x, yf + 0.35, fz, f, robes[k]);
+      col.rect([x - 0.45, Math.min(z, fz + 0.3 * f), x + 0.45, Math.max(z, fz + 0.3 * f)], y, yf + 2.6);
+    }
+  });
+  // Ganesha and Murugan in niches either side of the west doorway
+  for (const [s2, kind] of [[-1, 'g'], [1, 'm']]) {
+    const z = cz + s2 * 2.8; bag.add('opening', box(x0 + T, yf + 0.8, z - 0.8, x0 + T + 0.02, yf + 3.4, z + 0.8)); bag.add(G, box(x0 + T, yf, z - 0.9, x0 + T + 0.5, yf + 0.8, z + 0.9));
+    if (kind === 'g') { bag.add(G, lathe([[0.001, 0], [0.5, 0.05], [0.55, 0.5], [0.4, 0.95], [0.001, 1.0]], 10, null, x0 + T + 0.3, yf + 0.8, z)); bag.add(G, lathe([[0.001, 0], [0.3, 0.08], [0.32, 0.35], [0.12, 0.55], [0.001, 0.58]], 10, null, x0 + T + 0.3, yf + 1.75, z)); bag.add(G, rod([x0 + T + 0.55, yf + 2.0, z], [x0 + T + 0.7, yf + 1.4, z + 0.15], 0.08, 6)); bag.add('gilt_bronze', lathe([[0.18, 0], [0.12, 0.3], [0.001, 0.45]], 8, null, x0 + T + 0.3, yf + 2.3, z)); }
+    else shakti(bag, x0 + T + 0.3, yf + 0.8, z, 0, 'stucco_saffron', true);
+  }
+  // the vault over the nave: in each bay painted bands between the ribs, a cream band at the crown
+  const R = nave / 2, seg = 14, VP = (x, a) => [x, yv + Math.sin(a) * R * 0.75, cz - Math.cos(a) * R];
+  const bays = [x0 + T, ...xs.slice(1, -1), x1 - T];
+  for (let i = 0; i + 1 < bays.length; i++) for (let k = 0; k < seg; k++) {
+    const a0 = Math.PI * k / seg, a1 = Math.PI * (k + 1) / seg, xa = bays[i], xb = bays[i + 1];
+    bag.add(k === 6 || k === 7 ? 'stucco_cream' : PAINT[(i * 3 + Math.min(k, seg - 1 - k)) % PAINT.length], vaultTris([VP(xa, a0), VP(xb, a0), VP(xb, a1), VP(xa, a0), VP(xb, a1), VP(xa, a1)]));
+  }
+  for (const xr of xs.slice(1, -1)) { const rib = []; for (let k = 0; k <= seg; k++) { const a = Math.PI * k / seg; rib.push([xr, yv + Math.sin(a) * R * 0.75 - 0.08, cz - Math.cos(a) * (R - 0.08)]); } for (let k = 0; k < seg; k++) bag.add('stucco_saffron', rod(rib[k], rib[k + 1], 0.09, 5)); }
+  // the beams carrying the vault over the pillar rows, the aisles' flat ceilings
+  for (const z of [za, zb]) bag.add(G, box(x0 + T, yv - 0.5, z - 0.45, x1 - T, yv, z + 0.45));
+  for (const [q0, q1] of [[z0 + T, za - 0.45], [zb + 0.45, z1 - T]]) bag.add('stucco_cream', box(x0 + T, yv - 0.08, q0, x1 - T, yv, q1));
+  bag.add(G, box(x0 + T, yv, z0 + T, x1 - T, y + h, za - 0.45 + 0.001 - 0.001)); bag.add(G, box(x0 + T, yv, zb + 0.45, x1 - T, y + h, z1 - T));
+  // the painted reliefs of the sacred sports along the aisles' walls
+  let sd = 1;
+  for (const [zw, nz2] of [[z0 + T, 1], [z1 - T, -1]]) for (let x = x0 + 3.3; x < x1 - 2.6; x += 3.2) mural(bag, [x, zw], [nz2 > 0 ? 1 : -1, 0], [0, nz2], yf + 1.4, 2.4, 2.6, sd++);
+}
+/** A goddess standing on her pedestal at (x, y, z), facing +z (f = 1) or −z (f = −1) or +x (f = 0): the
+ *  pleated garment, the slender body, four arms, the tall crown; carved, the garment painted. */
+function shakti(bag, x, y, z, f, robe, small = false) {
+  const s = small ? 0.75 : 1, dir = f === 0 ? [1, 0] : [0, f], ux = -dir[1], uz = dir[0];
+  const Pp = (u, v, d) => [x + ux * u + dir[0] * d, y + v * s, z + uz * u + dir[1] * d];
+  bag.add(robe, lathe([[0.32 * s, 0], [0.3 * s, 0.25 * s], [0.24 * s, 0.75 * s], [0.2 * s, 1.0 * s], [0.001, 1.02 * s]], 10, null, x, y, z));
+  bag.add(G, lathe([[0.2 * s, 0], [0.16 * s, 0.25 * s], [0.2 * s, 0.45 * s], [0.13 * s, 0.6 * s], [0.06 * s, 0.66 * s], [0.001, 0.66 * s]], 10, null, x, y + 1.0 * s, z));
+  bag.add(G, lathe([[0.001, 0], [0.11 * s, 0.04 * s], [0.12 * s, 0.16 * s], [0.08 * s, 0.24 * s], [0.001, 0.25 * s]], 10, null, x, y + 1.66 * s, z));
+  bag.add('gilt_bronze', lathe([[0.11 * s, 0], [0.09 * s, 0.2 * s], [0.04 * s, 0.4 * s], [0.001, 0.48 * s]], 8, null, x, y + 1.86 * s, z));
+  bag.add('gilt_bronze', lathe([[0.215 * s, 0], [0.22 * s, 0.05 * s], [0.2 * s, 0.1 * s]], 10, null, x, y + 0.98 * s, z));
+  for (const su of [-1, 1]) {
+    bag.add(G, rod(Pp(su * 0.18, 1.55, 0), Pp(su * 0.3, 1.25, 0.1), 0.045 * s, 5)); bag.add(G, rod(Pp(su * 0.3, 1.25, 0.1), Pp(su * 0.22, 1.05, 0.25), 0.04 * s, 5));
+    bag.add(G, rod(Pp(su * 0.18, 1.55, -0.02), Pp(su * 0.36, 1.7, -0.05), 0.04 * s, 5)); bag.add(G, rod(Pp(su * 0.36, 1.7, -0.05), Pp(su * 0.38, 1.98, -0.05), 0.035 * s, 5));
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.04 * s, 0.05 * s], [0.001, 0.14 * s]], 6, null, ...Pp(su * 0.38, 1.98, -0.05)));
+  }
+}
+
+/**
+ * elephant: a temple elephant { at: [x, z], y, rot (it faces −z turned by rot), seed }: an Asian
+ * cow elephant some 2.6 m at the shoulder — the arched back, the domed twin bulges of the head,
+ * small ears, the trunk hanging and curling, short tusks; on the forehead the god's sacred marks
+ * painted in white and red, a brass bell on a rope round the neck, a red cloth over the back with a
+ * gilt border, rings on the ankles. Tied by a chain at one foot.
+ */
+function elephant(el, { bag, col }) {
+  const [ex, ez] = el.at, y = el.y ?? 0, rot = el.rot ?? 0, parts = [], add = (m, g) => parts.push([m, g]), H = 'hide_grey';
+  // built facing +x with the feet at the origin; turned so +x faces −z rotated by rot
+  const body = lathe([[0.001, -1.2], [0.55, -1.05], [0.78, -0.6], [0.82, 0], [0.78, 0.55], [0.5, 1.05], [0.001, 1.2]], 16, (th, i) => 1 + 0.08 * Math.sin(th), 0, 0, 0);
+  body.rotateZ(-Math.PI / 2); body.scale(1, 0.95, 0.85); body.translate(-0.1, 1.85, 0); add(H, body);
+  for (const [x, z] of [[0.7, 0.42], [0.7, -0.42], [-0.85, 0.4], [-0.85, -0.4]]) { add(H, lathe([[0.24, 0], [0.22, 0.1], [0.2, 0.9], [0.27, 1.6], [0.001, 1.65]], 10, null, x, 0, z)); add('gilt_bronze', lathe([[0.235, 0], [0.235, 0.06]], 10, null, x, 0.18, z)); }
+  // the head with its twin domes, the ears, the trunk, the tusks
+  add(H, lathe([[0.001, -0.5], [0.42, -0.35], [0.5, 0], [0.42, 0.35], [0.001, 0.5]], 12, null, 1.32, 2.15, 0));
+  for (const sz of [-1, 1]) add(H, lathe([[0.001, 0], [0.24, 0.05], [0.26, 0.2], [0.14, 0.34], [0.001, 0.36]], 10, null, 1.25, 2.45, sz * 0.18));
+  for (const sz of [-1, 1]) { const ear = lathe([[0.001, 0], [0.36, 0.01], [0.38, 0.04], [0.001, 0.05]], 14, null, 0, 0, 0); ear.rotateX(Math.PI / 2); ear.scale(0.85, 1.15, 1); ear.translate(1.02, 2.0, sz * 0.47 - 0.025); add(H, ear); }
+  const tk = [[1.72, 2.05, 0], [1.88, 1.6, 0], [1.9, 1.1, 0], [1.84, 0.6, 0], [1.9, 0.32, 0.02], [2.04, 0.24, 0.04]];
+  for (let i = 0; i + 1 < tk.length; i++) add(H, rod(tk[i], tk[i + 1], 0.2 - i * 0.03, 8));
+  for (const sz of [-1, 1]) add('ivory', rod([1.68, 1.75, sz * 0.2], [1.95, 1.52, sz * 0.24], 0.05, 6));
+  add(H, rod([-1.3, 2.1, 0], [-1.42, 1.1, 0], 0.04, 5));
+  // the sacred marks on the forehead, the bell, the cloth
+  add('paint_white', box(1.78, 2.15, -0.2, 1.84, 2.55, -0.14)); add('paint_white', box(1.78, 2.15, 0.14, 1.84, 2.55, 0.2)); add('stucco_red', box(1.785, 2.1, -0.05, 1.845, 2.6, 0.05));
+  add('cloth_white', rod([1.0, 2.45, -0.45], [1.25, 1.55, 0], 0.04, 5)); add('cloth_white', rod([1.0, 2.45, 0.45], [1.25, 1.55, 0], 0.04, 5));
+  add('bronze', lathe([[0.001, 0], [0.14, 0.04], [0.11, 0.25], [0.05, 0.3], [0.001, 0.32]], 10, null, 1.27, 1.25, 0));
+  // the cloth draped over the back (a shell just outside the body), hanging to a gilt hem on either side
+  { const t = [], hem = [], ry = 0.82 * 0.95 * 1.05, rz = 0.82 * 0.85 * 1.06, N = 10, at = (x, a) => [x, 1.85 + Math.cos(a) * ry, Math.sin(a) * rz];
+    const xa = -0.85, xb = 0.55, A = 1.45, pts = (x) => { const r = []; for (let k = 0; k <= N; k++) { const a = -A + 2 * A * k / N; r.push(at(x, a)); } const lo = r[0], hi = r[N]; return [[lo[0], 1.5, lo[2]], ...r, [hi[0], 1.5, hi[2]]]; };
+    const P0 = pts(xa), P1 = pts(xb);
+    for (let k = 0; k + 1 < P0.length; k++) t.push(...P0[k], ...P1[k], ...P1[k + 1], ...P0[k], ...P1[k + 1], ...P0[k + 1], ...P0[k], ...P1[k + 1], ...P1[k], ...P0[k], ...P0[k + 1], ...P1[k + 1]);
+    add('cloth_red', fromTriangles(t));
+    for (const k of [0, P0.length - 1]) { const a = P0[k], b = P1[k]; hem.push(box(a[0], 1.42, a[2] - 0.03, b[0], 1.52, a[2] + 0.03)); }
+    for (const g of hem) add('gilt_bronze', g); }
+  const a = rot;
+  for (const [m, g] of parts) bag.add(m, place(g, ex, y, ez, Math.PI / 2 + a, 1));
+  col.circle(ex, ez, 1.6, y, y + 3.1);
+  if (el.chain !== false) { const c = Math.cos(Math.PI / 2 + a), s2 = Math.sin(Math.PI / 2 + a), fx = ex + (0.7 * c + 0.42 * s2), fz = ez + (-0.7 * s2 + 0.42 * c); bag.add('iron', rod([fx, y + 0.15, fz], [fx + 1.6 * s2, y + 0.04, fz + 1.6 * c], 0.03, 5)); bag.add('granite_tamil', box(fx + 1.6 * s2 - 0.15, y, fz + 1.6 * c - 0.15, fx + 1.6 * s2 + 0.15, y + 0.5, fz + 1.6 * c + 0.15)); }
+}
+
+/**
+ * ther: the temple car, one of the two great cars Tirumala Nayaka had built and drawn round the
+ * Masi streets at the Chithirai festival { at: [x, z], dir ('e' | 'w' | 'n' | 's': the way it is drawn),
+ * rope (length) }: a carved wooden body on four solid wheels — tiers of panels, a frieze of small
+ * figures, a projecting seat platform with posts for the god — two wooden horses springing from its
+ * front with the charioteer between; over it the tall bamboo frame dressed in bands of coloured
+ * cloth, tier on tier, under a dome, the gilt pot and a parasol; the thick ropes run out ahead.
+ */
+function ther(el, { bag, col }) {
+  const [cx, cz] = el.at, d = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] }[el.dir || 'w'], ux = -d[1], uz = d[0];
+  const P = (a, b) => [cx + d[0] * a + ux * b, cz + d[1] * a + uz * b];   // a forward, b to the left
+  const B = (m, a0, a1, b0, b1, y0, y1) => { const p = P(a0, b0), q = P(a1, b1); bag.add(m, box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1]))); };
+  const L = 7.2, Wd = 6.4, yb = 1.1;
+  // the wheels: solid timber discs with iron tyres and hubs
+  for (const a of [-2.3, 2.3]) for (const sb of [-1, 1]) {
+    const [wx, wz] = P(a, sb * (Wd / 2 + 0.35)), g = lathe([[0.001, -0.3], [1.35, -0.3], [1.42, -0.22], [1.42, 0.22], [1.35, 0.3], [0.001, 0.3]], 20, null, 0, 0, 0), hub = lathe([[0.001, -0.42], [0.32, -0.42], [0.32, 0.42], [0.001, 0.42]], 10, null, 0, 0, 0);
+    for (const [m, gg] of [['wood_dark', g], ['iron', hub]]) { gg.rotateX(Math.PI / 2); if (d[1] !== 0) gg.rotateY(Math.PI / 2); gg.translate(wx, 1.42, wz); bag.add(m, gg); }
+    col.circle(wx, wz, 0.5, 0, 2.8);
+  }
+  // the carved body in tiers, stepping out as it rises, a frieze of little figures on each tier
+  const tiers = [[yb, yb + 1.0, 0], [yb + 1.0, yb + 1.9, 0.35], [yb + 1.9, yb + 2.7, 0.7], [yb + 2.7, yb + 3.1, 1.0]];
+  for (const [y0, y1, o] of tiers) {
+    B('wood_dark', -L / 2 - o, L / 2 + o, -Wd / 2 - o, Wd / 2 + o, y0, y1 - 0.12); B('timber', -L / 2 - o - 0.1, L / 2 + o + 0.1, -Wd / 2 - o - 0.1, Wd / 2 + o + 0.1, y1 - 0.12, y1);
+    const fh = (y1 - y0) * 0.6, k = fh / 1.1;
+    if (fh > 0.3) for (const [len, side] of [[L + 2 * o, 'ab'], [Wd + 2 * o, 'ba']]) for (let i = 0; i < Math.floor(len / 0.6); i++) for (const sg of [-1, 1]) {
+      const t = -len / 2 + (i + 0.5) * len / Math.floor(len / 0.6), [px, pz] = side === 'ab' ? P(t, sg * (Wd / 2 + o + 0.06)) : P(sg * (L / 2 + o + 0.06), t);
+      bag.add('wood_painted', lathe([[0.13 * k, 0], [0.1 * k, 0.5 * k], [0.07 * k, 0.75 * k], [0.09 * k, 0.86 * k], [0.001, 1.1 * k]], 5, null, px, y0 + 0.08, pz));
+    }
+  }
+  col.rect([...[P(-L / 2 - 1, -Wd / 2 - 1), P(L / 2 + 1, Wd / 2 + 1)].reduce((r, p) => [Math.min(r[0], p[0]), Math.min(r[1], p[1]), Math.max(r[2], p[0]), Math.max(r[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity])], 0, 9);
+  // the god's platform: posts at the corners and the middle of the sides, a cloth ceiling over it
+  const yp = yb + 3.1, hp = 2.6, o = 0.9;
+  for (const [a, b] of [[-L / 2 - o + 0.3, -Wd / 2 - o + 0.3], [L / 2 + o - 0.3, -Wd / 2 - o + 0.3], [-L / 2 - o + 0.3, Wd / 2 + o - 0.3], [L / 2 + o - 0.3, Wd / 2 + o - 0.3], [0, -Wd / 2 - o + 0.3], [0, Wd / 2 + o - 0.3]]) { const [px, pz] = P(a, b); bag.add('gilt_bronze', lathe([[0.12, 0], [0.09, 0.2], [0.09, hp - 0.2], [0.14, hp]], 8, null, px, yp, pz)); }
+  B('cloth_white', -L / 2 - o, L / 2 + o, -Wd / 2 - o, Wd / 2 + o, yp + hp, yp + hp + 0.2);
+  // the festival images of the god and goddess on their seat, garlanded, under the canopy
+  B('wood_painted', -1.2, 1.2, -1.6, 1.6, yp, yp + 0.6); B('cloth_red', -1.25, 1.25, -1.65, 1.65, yp + 0.45, yp + 0.62);
+  for (const sb of [-0.55, 0.55]) { const [gx, gz] = P(0, sb); bag.add('gilt_bronze', lathe([[0.36, 0], [0.32, 0.25], [0.2, 0.4], [0.24, 0.8], [0.12, 1.0], [0.001, 1.02]], 10, null, gx, yp + 0.62, gz)); bag.add('gilt_bronze', lathe([[0.001, 0], [0.12, 0.05], [0.12, 0.2], [0.07, 0.42], [0.001, 0.55]], 8, null, gx, yp + 1.62, gz)); bag.add('stucco_saffron', lathe([[0.3, 0], [0.33, 0.08], [0.28, 0.14]], 10, null, gx, yp + 1.3, gz)); }
+  for (let i = 0; i < 24; i++) { const t = -L / 2 - o + (L + 2 * o) * i / 24, c = ['cloth_red', 'cloth_ochre', 'cloth_white'][i % 3]; B(c, t, t + (L + 2 * o) / 24, -Wd / 2 - o - 0.05, -Wd / 2 - o, yp + hp - 0.6, yp + hp + 0.2); B(c, t, t + (L + 2 * o) / 24, Wd / 2 + o, Wd / 2 + o + 0.05, yp + hp - 0.6, yp + hp + 0.2); }
+  // the cloth tower: tiers of coloured bands drawing in, a dome, the gilt pot and a parasol
+  const cloths = ['cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_green', 'cloth_red', 'cloth_black', 'cloth_white', 'cloth_ochre', 'cloth_red'];
+  let yy = yp + hp + 0.2, wa = L / 2 + o - 0.2, wb = Wd / 2 + o - 0.2;
+  cloths.forEach((m, i) => {
+    const hh = 0.85, sh = 0.82 + 0.02 * Math.sin(i), r = [...P(-wa, -wb), ...P(wa, wb)], q = [Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.max(r[0], r[2]), Math.max(r[1], r[3])], dx = (q[2] - q[0]) * (1 - sh) / 2, dz = (q[3] - q[1]) * (1 - sh) / 2;
+    bag.add(m, frustum(q, yy, yy + hh, dx, dx, dz, dz, { noBottom: i > 0, noTop: i < cloths.length - 1 }));
+    bag.add(i % 2 ? 'cloth_ochre' : 'cloth_white', box(q[0] + dx - 0.06, yy + hh - 0.08, q[1] + dz - 0.06, q[2] - dx + 0.06, yy + hh + 0.04, q[3] - dz + 0.06));
+    yy += hh; wa *= sh; wb *= sh;
+  });
+  const [tx, tz] = P(0, 0), rr = Math.min(wa, wb);
+  bag.add('cloth_red', lathe([[rr * 1.05, 0], [rr * 1.0, rr * 0.4], [rr * 0.7, rr * 0.9], [rr * 0.3, rr * 1.15], [0.001, rr * 1.2]], 16, null, tx, yy, tz));
+  kalasha(bag, tx, yy + rr * 1.15, tz, 0.9);
+  bag.add('cloth_white', lathe([[0.001, 0], [0.9, 0.05], [0.85, 0.2], [0.001, 0.55]], 12, null, tx, yy + rr * 1.15 + 1.5, tz));
+  bag.add('timber', rod([tx, yy + rr * 1.15 + 1.2, tz], [tx, yy + rr * 1.15 + 1.6, tz], 0.04, 5));
+  // the two wooden horses springing from the front, the charioteer between them
+  for (const sb of [-1.3, 1.3]) {
+    const [hx, hz] = P(L / 2 + 1.2, sb), ax = d[0], az = d[1];
+    bag.add('stucco_cream', rod([hx - ax * 0.8, yb + 2.0, hz - az * 0.8], [hx + ax * 0.6, yb + 2.4, hz + az * 0.6], 0.38, 10));
+    bag.add('stucco_cream', rod([hx + ax * 0.5, yb + 2.5, hz + az * 0.5], [hx + ax * 0.9, yb + 3.4, hz + az * 0.9], 0.2, 8));
+    bag.add('stucco_cream', rod([hx + ax * 0.9, yb + 3.4, hz + az * 0.9], [hx + ax * 1.35, yb + 3.2, hz + az * 1.35], 0.15, 8));
+    for (const [fa, ya] of [[0.5, 1.6], [0.7, 1.7]]) for (const sl of [-0.15, 0.15]) bag.add('stucco_cream', rod([hx + ax * fa - az * sl, yb + 2.2, hz + az * fa + ax * sl], [hx + ax * (fa + 0.5) - az * sl, yb + ya + 0.6, hz + az * (fa + 0.5) + ax * sl], 0.07, 6));
+    for (const sl of [-0.15, 0.15]) bag.add('stucco_cream', rod([hx - ax * 0.6 - az * sl, yb + 2.0, hz - az * 0.6 + ax * sl], [hx - ax * 0.7 - az * sl, yb + 1.0, hz - az * 0.7 + ax * sl], 0.08, 6));
+    bag.add('cloth_red', rod([hx - ax * 0.3, yb + 2.42, hz - az * 0.3], [hx + ax * 0.3, yb + 2.48, hz + az * 0.3], 0.4, 10));
+  }
+  { const [qx, qz] = P(L / 2 + 0.8, 0); bag.add('stucco_saffron', lathe([[0.3, 0], [0.25, 0.7], [0.18, 1.0], [0.001, 1.05]], 8, null, qx, yb + 2.7, qz)); bag.add('paint_ochre', lathe([[0.001, 0], [0.13, 0.05], [0.14, 0.2], [0.001, 0.28]], 8, null, qx, yb + 3.75, qz)); bag.add('gilt_bronze', lathe([[0.12, 0], [0.06, 0.25], [0.001, 0.32]], 6, null, qx, yb + 4.0, qz)); }
+  // the ropes, from the front of the body out along the street, slack on the ground
+  for (const sb of [-2.2, 2.2]) { const [r0x, r0z] = P(L / 2, sb), [r1x, r1z] = P(L / 2 + 4, sb), [r2x, r2z] = P(L / 2 + (el.rope ?? 34), sb); bag.add('reed_mat', rod([r0x, yb + 0.6, r0z], [r1x, 0.12, r1z], 0.08, 6)); bag.add('reed_mat', rod([r1x, 0.12, r1z], [r2x, 0.1, r2z], 0.08, 6)); }
 }
 
 /** dhvaja: the gilded flagstaff before a shrine { c, h }. */
@@ -382,6 +629,6 @@ function house(el, { bag, col }) {
 
 registerStyle('dravidian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: house },
+  elements: { ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: house, ashta_shakti: ashtaShakti, elephant, ther },
   objects: {},
 });
