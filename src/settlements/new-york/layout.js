@@ -11,6 +11,10 @@ export const AVENUES = [[-200, 18, '6th'], [0, 18, '5th'], [90, 14, 'Madison'], 
 /** The cross streets: number → z of the centre line (34th at 200, 50 m apart, the Empire State's block 60). */
 export const streetZ = (n) => (n <= 33 ? 260 + (33 - n) * 50 : 200 - (n - 34) * 50);
 export const STREETS = Array.from({ length: 17 }, (_, i) => 30 + i).map((n) => [streetZ(n), 12, n]);
+/** The Sixth Avenue El's stations at 33rd, 38th and 42nd Streets: the middle of each platform (its stair comes down mid-block north of the street). */
+export const EL_STATIONS = [33, 38, 42].map((n) => streetZ(n) - 19.5);
+/** Where an El stair stands on the pavement (no one stands there). */
+export const onElStair = (x, z, m = 0) => Math.abs(Math.abs(x - AVENUES[0][0]) - 10) < 0.8 + m && EL_STATIONS.some((s) => z > s + 30 - 5.5 - 21 - m && z < s + 30 - 5.5 + m);
 export const ESB = [-119, 206, -9, 254];
 export const LIBRARY = [-78, -190, -9, -112];
 export const BRYANT = [-191, -194, -82, -106];

@@ -1,7 +1,7 @@
 // The blocks' buildings (docs/settlements/new-york.md §5) and the street's life (§5a): the traffic of
 // 1931 on the avenues and cross streets — Checker and Yellow cabs among black, cream and blue
 // motor cars — people on the pavements, lamp posts along the avenues.
-import { RADIUS, AVENUES, STREETS, lots, height, onBroadway, inLot } from './layout.js';
+import { RADIUS, AVENUES, STREETS, lots, height, onBroadway, inLot, onElStair } from './layout.js';
 const base = (id, elements) => ({ id, style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [4, 176], facing: 's' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 function streetLife() {
@@ -27,11 +27,11 @@ function streetLife() {
   for (const [ax, w] of AVENUES) for (const sg of [-1, 1]) {
     const x = ax + sg * (w / 2 + 1.5);
     for (let z = -RADIUS; z < RADIUS; z += 6 + rand() * 18) {
-      if (!inside(x, z) || inLot(x, z, 0.6) || crossing(x, z, 0)) continue;
+      if (!inside(x, z) || inLot(x, z, 0.6) || crossing(x, z, 0) || onElStair(x, z, 1)) continue;
       const woman = rand() < 0.4;
       L.push({ t: 'figure', at: [x + (rand() - 0.5) * 1.6, z], y: height(x, z), rot: rand() < 0.5 ? 0 : Math.PI, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'trousers', cloth: pick(DRESS), cloth2: pick(['cloth_white', 'cloth_grey', 'cloth_black']), skin: pick(['skin_light', 'skin_light', 'skin_medium', 'skin_dark']), hat: woman ? pick(['cap', 'none']) : 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']) });
     }
-    for (let z = -RADIUS + 10; z < RADIUS; z += 30) { const xx = ax + sg * (w / 2 + 0.5); if (inside(xx, z) && !inLot(xx, z, 0.4) && !crossing(xx, z, 1)) L.push({ t: 'street_lamp', at: [xx, z], y: height(xx, z), h: 5.5, seed: z }); }
+    for (let z = -RADIUS + 10; z < RADIUS; z += 30) { const xx = ax + sg * (w / 2 + 0.5); if (inside(xx, z) && !inLot(xx, z, 0.4) && !crossing(xx, z, 1) && !onElStair(xx, z, 0.5)) L.push({ t: 'street_lamp', at: [xx, z], y: height(xx, z), h: 5.5, seed: z }); }
   }
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 150)},${Math.floor(e.at[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }

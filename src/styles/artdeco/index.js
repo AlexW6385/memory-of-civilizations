@@ -8,6 +8,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, rod, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 import { empireState } from './esb.js';
+import { elTrack } from './el.js';
 
 const LS = 'facade_limestone', CH = 'steel_chrome';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -192,13 +193,6 @@ function beauxArts(el, { bag, col }) {
   for (let i = 0; i < nc; i++) { const u = L * 0.25 + i * L * 0.5 / Math.max(1, nc - 1), p = along ? [a0 + u, face + sg * 1.6] : [face + sg * 1.6, a0 + u]; bag.add(mat, lathe([[0.75, 0], [0.75, 0.5], [0.6, 0.8], [0.55, h * 0.62], [0.8, h * 0.66], [0.8, h * 0.7]], 12, null, p[0], y + h * 0.18, p[1])); }
   if (nc) put(L * 0.22, L * 0.78, h * 0.88, h * 0.95, mat, 2.2);
   put(L * 0.2, L * 0.8, -0.5, h * 0.18, mat, 3.5);                                            // the steps or the base
-}
-/** el_track: { x, z0, z1, y } — the elevated railway: a steel deck on bents every 15 m, the rails. */
-function elTrack(el, { bag, col }) {
-  const x = el.x, z0 = el.z0, z1 = el.z1, y = el.y ?? 0, w = 9, H = 9;
-  for (let z = z0; z <= z1; z += 15) for (const dx of [-w / 2 + 0.6, w / 2 - 0.6]) { bag.add('iron', box(x + dx - 0.25, y - 0.3, z - 0.25, x + dx + 0.25, y + H, z + 0.25)); col.rect([x + dx - 0.25, z - 0.25, x + dx + 0.25, z + 0.25], y, y + H); }
-  bag.add('iron', box(x - w / 2, y + H, z0, x + w / 2, y + H + 1.1, z1));
-  for (const dx of [-2.4, -1, 1, 2.4]) bag.add(CH, box(x + dx - 0.05, y + H + 1.1, z0, x + dx + 0.05, y + H + 1.25, z1));
 }
 /** park: { rect, y } — a level lawn with paths (the trees come from the ground's planting). */
 function park(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('granite_grey', box(x0, y - 0.3, z0, x1, y + 0.25, z0 + 1.5)); bag.add('granite_grey', box(x0, y - 0.3, z1 - 1.5, x1, y + 0.25, z1)); }

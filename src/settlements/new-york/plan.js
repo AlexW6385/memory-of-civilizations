@@ -1,5 +1,5 @@
 // Modern New York about 1931 (docs/settlements/new-york.md §2–§4).
-import { RADIUS, ESB, LIBRARY, BRYANT, GCT, CHRYSLER, CHANIN, LINCOLN, AVENUES, height } from './layout.js';
+import { RADIUS, EL_STATIONS, ESB, LIBRARY, BRYANT, GCT, CHRYSLER, CHANIN, LINCOLN, AVENUES, height } from './layout.js';
 
 const hy = (r) => height((r[0] + r[2]) / 2, (r[1] + r[3]) / 2);
 export const esb = {
@@ -26,7 +26,7 @@ export const midtown = {
     { t: 'beaux_arts', rect: GCT, y: hy(GCT), h: 30, front: 's', arches: 3, attic: true, mat: 'limestone' },
     { t: 'beaux_arts', rect: LIBRARY, y: hy(LIBRARY), h: 22, front: 'e', cols: 6, mat: 'marble' },
     { t: 'park', rect: BRYANT, y: hy(BRYANT) },
-    { t: 'el_track', x: AVENUES[0][0], z0: -400, z1: 400, y: 0 },
+    { t: 'el_track', x: AVENUES[0][0], z0: -400, z1: 400, y: 0, yAt: (z) => height(AVENUES[0][0], z), stations: EL_STATIONS },
   ],
 };
 export default esb;
