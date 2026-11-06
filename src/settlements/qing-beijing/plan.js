@@ -113,10 +113,12 @@ for (const s of [-1, 1]) {
 // ── the Three Great Halls ──
 const th = HALLS.taihe, zh = HALLS.zhonghe, bh = HALLS.baohe;
 E.push({ t: 'qing_hall', rect: th.rect, y: th.y, H: 9.2, double: 7.5, roof: 'hip', bays: [11, 5], front: 's', four: false, plat: 0.5, eave: 2.2, sweep: 0.55, orn: { figures: 10 } });
-E.push({ t: 'throne_hall', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5] });
+E.push({ t: 'throne_hall', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5], kind: 'taihe' });
 E.push({ t: 'qing_hall', rect: zh.rect, y: zh.y, H: 6.4, roof: 'none', bays: [5, 5], front: 's', four: true, plat: 0.4 });
+E.push({ t: 'throne_hall', rect: zh.rect, y: zh.y, H: 6.4, bays: [5, 5], kind: 'zhonghe', d: 0.7 });
 E.push({ t: 'pyramid', poly: [[zh.rect[0] - 2, zh.rect[1] - 2], [zh.rect[2] + 2, zh.rect[1] - 2], [zh.rect[2] + 2, zh.rect[3] + 2], [zh.rect[0] - 2, zh.rect[3] + 2]], y: zh.y + 6.2, rise: 9, sweep: 0.6 });
 E.push({ t: 'qing_hall', rect: bh.rect, y: bh.y, H: 7.6, double: 6, roof: 'xieshan', bays: [9, 5], front: 's', four: false, plat: 0.4, eave: 1.9, orn: { figures: 9 } });
+E.push({ t: 'throne_hall', rect: bh.rect, y: bh.y, H: 7.6, bays: [9, 5], kind: 'baohe', d: 0.8 });
 
 // ── the Gate of Heavenly Purity and the wall to the Inner Court ──
 E.push({ t: 'palace_wall', a: [wx0, -172], b: [-22, -172], y: 0, h: 7, th: 2.4, gates: gates([[60, 5, 5]]) });

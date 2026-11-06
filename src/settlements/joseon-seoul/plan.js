@@ -55,7 +55,7 @@ for (const s of [-1, 1]) {
 }
 E.push({ t: 'stairs', rect: [-4, 50, 4, 56], y0: 0, y1: 1.6, dir: 'n' });
 E.push({ t: 'stairs', rect: [-4, 42, 4, 50], y0: 1.6, y1: 3.2, dir: 'n' });
-E.push({ t: 'throne_hall', rect: [-15, 13, 15, 34], y: 3.2, H: 6.8, bays: [5, 5], gilt: false, d: 0.6, screen: 'irworo', elephants: false, daisW: 4.6, daisD: 2.8 });
+E.push({ t: 'throne_hall', rect: [-15, 13, 15, 34], y: 3.2, H: 6.8, bays: [5, 5], d: 0.6, kind: 'joseon' });
 E.push({ t: 'qing_hall', rect: [-15, 13, 15, 34], y: 3.2, H: 6.8, double: 5.5, roof: 'xieshan', bays: [5, 5], front: 's', four: true, plat: 0.3, orn: { joseon: true, figures: 7 }, dapo: { tiers: 3, inter: 2 } });
 // the inner halls, with their own walled courts
 E.push({ t: 'ming_hall', rect: [-14, -52, 14, -38], y: 0, H: 5, front: 's', four: true, roof: 'xieshan', plat: 1, eave: 1.6, sweep: 0.8, orn: { figures: 5 }, dapo: { tiers: 3, inter: 2 } });
