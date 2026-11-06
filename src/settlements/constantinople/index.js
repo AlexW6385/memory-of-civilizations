@@ -2,6 +2,7 @@
 import '../../styles/greek/index.js';
 import '../../styles/byzantine/index.js';
 import '../../styles/roman/town.js';
+import '../../styles/byzantine/city.js';
 import { sophia, city } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';

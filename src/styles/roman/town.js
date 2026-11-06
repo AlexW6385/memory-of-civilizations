@@ -69,7 +69,7 @@ function insula(el, { bag, col }) {
       else if (r < 0.65) fb(F, uc - w / 2, uc + w / 2 - 0.9, y + 0.12, y + 1.0, -0.05, 0.5, 'travertine');   // a counter in the door
     }
     // the upper storeys: windows with sills and shutters, a string course at each floor
-    const nw = Math.max(1, Math.floor((F.L - 1.0) / 3.1)), ww = (F.L - 1.0) / nw;
+    const nw = Math.max(1, Math.floor((F.L - 1.0) / (el.winStep ?? 3.1))), ww = (F.L - 1.0) / nw;
     for (let k = 1; k < n; k++) {
       const yk = y + g0 + (k - 1) * sh, top = k === n - 1, wh = top ? 1.0 : 1.4;
       if (!far && !(balcony && fi === long && k === 1)) fb(F, 0, F.L, yk - 0.12, yk, -0.05, 0.07, 'brick');
@@ -288,8 +288,20 @@ function stadium(el, ctx) {
     bag.add('marble', B(ax0 - 0.2, top, za - 1.0, ax1 + 0.2, top + 0.6, za - 0.5));
     for (let i = 0; i <= gates; i++) { const px = ax0 + gw * i; bag.add('brick', B(px - 0.35, y - 0.5, za + 0.5, px + 0.35, top, za + sd2)); col.rect(Rr([px - 0.35, za - 0.5, px + 0.35, za + sd2]), y, Hc); }
     bag.add('brick', B(ax0, top, za + 0.5, ax1, Hc, za + sd2));
-    bag.add('brick', B(ax0, y - 0.5, za + sd2, ax1, Hc, zb)); col.rect(Rr([ax0, za + sd2, ax1, zb]), y, Hc);
+    // the block behind the stalls rises to the gallery roof: the back wall of the upper ambulatory
+    bag.add('brick', B(ax0, y - 0.5, za + sd2, ax1, T2, zb)); col.rect(Rr([ax0, za + sd2, ax1, zb]), y, T2);
     bag.add('marble', B(ax0, Hc, za - 0.5, ax1, Hc + 1.0, za + 0.1));
+    // its face over the terrace: a window over each gate between brick pilasters, a marble cornice
+    const zf = za + sd2;
+    for (let i = 0; i < gates; i++) {
+      const cxg = ax0 + gw * (i + 0.5);
+      bag.add('opening', B(cxg - 0.8, Hc + 2.2, zf - 0.02, cxg + 0.8, T2 - 2.6, zf + 0.05));
+      bag.add('marble', B(cxg - 1.0, Hc + 2.05, zf - 0.2, cxg + 1.0, Hc + 2.2, zf + 0.05));
+      bag.add('marble', B(cxg - 1.05, T2 - 2.6, zf - 0.12, cxg + 1.05, T2 - 2.35, zf + 0.05));
+    }
+    for (let i = 0; i <= gates; i++) bag.add('brick', B(ax0 + gw * i - 0.45, Hc, zf - 0.22, ax0 + gw * i + 0.45, T2 - 1.0, zf + 0.05));
+    bag.add('marble', B(ax0, T2 - 1.0, zf - 0.45, ax1, T2 - 0.4, zf + 0.05));
+    bag.add('marble', B(ax0, T2 - 0.4, zf - 0.65, ax1, T2, zf));
     const mx = (ax0 + ax1) / 2, pz = za + 3;
     bag.add('marble', B(mx - 3.4, Hc, pz - 1.6, mx + 3.4, Hc + 1.6, pz + 1.6));
     bag.add('marble', B(mx - 3.6, Hc + 1.6, pz - 1.8, mx + 3.6, Hc + 1.85, pz + 1.8));

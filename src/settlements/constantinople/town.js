@@ -3,5 +3,5 @@
 import { lodTiles } from '../lod.js';
 import { RADIUS, lots } from './layout.js';
 export async function houses() {
-  return lodTiles('constantinople-houses', 'roman', lots().map((l) => ({ t: 'insula', balcony: 0.8, ...l })), { R: RADIUS, entrance: { at: [-150, 110], facing: 'e' } });
+  return lodTiles('constantinople-houses', 'roman', lots().map((l) => ({ t: 'insula', balcony: 0.8, winStep: 3.5, ...l })), { R: RADIUS, entrance: { at: [-150, 110], facing: 'e' } });
 }
