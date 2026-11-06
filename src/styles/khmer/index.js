@@ -1,89 +1,309 @@
 // Khmer architecture of the Angkor period (Angkor Wat, first half of the 12th c.;
 // docs/settlements/angkor.md §4–§5): towers (prasat) shaped like lotus buds, their plan a square
-// with its sides stepped out (redented), rising in receding tiers crowned by a bud; galleries with
-// a solid wall on one side and square pillars on the other under corbelled stone vaults, a
-// half-vault along their open side; cross-shaped entrance pavilions (gopura); terraces of laterite
-// faced with sandstone, mouldings stepped in and out, steep stairs; causeways bordered by the
-// bodies of serpents (naga) that rear up as seven-headed fans at their ends; libraries; basins.
+// with its corners stepped in (redented), rising in receding tiers, each a storey in miniature
+// with its cornice and a crown of antefixes, the whole crowned by a bud wrapped in lotus petals;
+// porticoes under tiered pediments framed by serpent bodies that rear up as heads at their ends;
+// galleries with a solid wall on one side and square pillars on the other under corbelled stone
+// vaults, a half-vault along their open side, windows filled with turned balusters, bas-reliefs
+// along the walls, female deities (devata) standing in groups on the walls; cross-shaped entrance
+// pavilions (gopura); terraces of laterite faced with sandstone, mouldings stepped in and out,
+// steep stairs, lions on pedestals; causeways bordered by the bodies of serpents (naga) that rear
+// up as fans of heads at their ends; libraries; basins.
 // The village: houses of timber on stilts with steep roofs of palm thatch.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod, orientOutward } from '../../core/geom.js';
+import { Matrix4, Vector3 } from '../../core/three.js';
 import '../qing/index.js';
 import { rectRoof, beamTris, flipTris } from '../ming/index.js';
 
-const S = 'sandstone_khmer';
+const S = 'sandstone_khmer', C = 'sandstone_carved';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-/** The redented square: the radius factor at angle th for a square (corners on the diagonals) with its sides stepped out `steps` times. */
-function redent(steps, depth = 0.12) {
-  return (th) => {
-    const c = Math.abs(Math.cos(th)), s = Math.abs(Math.sin(th)), sq = 1 / Math.max(c, s);
-    // distance along the side from its middle (0) to the corner (1)
-    const t = Math.min(c, s) / Math.max(c, s);
-    const step = Math.floor((1 - t) * (steps + 1) * 0.999) / (steps + 1);
-    return sq * (1 - depth + depth * step * 1.6);
-  };
+// ---- shapes -------------------------------------------------------------------------------------
+
+/** The redented square: half-width a, its four corners stepped in n times by d; counter-clockwise (x towards z) from the +x side. */
+export function redentPoly(a, n, d) {
+  const c = a - n * d, Q = [[a, c]];
+  for (let k = 1; k <= n; k++) Q.push([a - k * d, c + (k - 1) * d], [a - k * d, c + k * d]);
+  const P = [];
+  for (let r = 0; r < 4; r++) for (const [x, z] of Q) { let X = x, Z = z; for (let i = 0; i < r; i++) [X, Z] = [-Z, X]; P.push([X, Z]); }
+  return P;
+}
+/** The convex corners of redentPoly (n + 1 a quarter) and the middles of the sides: where antefixes stand. */
+function redentSpots(a, n, d) {
+  const c = a - n * d, out = [];
+  for (let r = 0; r < 4; r++) {
+    const rot = (x, z) => { let X = x, Z = z; for (let i = 0; i < r; i++) [X, Z] = [-Z, X]; return [X, Z]; };
+    out.push({ p: rot(a, 0), dir: rot(1, 0), mid: true });
+    for (let k = 0; k <= n; k++) { const x = a - k * d, z = c + k * d, l = Math.hypot(1, 1); out.push({ p: rot(x, z), dir: rot(1 / l, 1 / l), mid: false, k }); }
+  }
+  return out;
+}
+/** A stack of rings of polygon P (each [scale, y]) round (cx, cz) from y0, as triangles; capped if the last ring is not a point. */
+function stack(out, P, rings, cx, y0, cz) {
+  const n = P.length, V = rings.map(([s, y]) => P.map(([x, z]) => [cx + x * s, y0 + y, cz + z * s]));
+  for (let i = 0; i + 1 < V.length; i++) {
+    const L = V[i], U = V[i + 1];
+    for (let j = 0; j < n; j++) { const k = (j + 1) % n; out.push(...L[j], ...U[k], ...L[k], ...L[j], ...U[j], ...U[k]); }
+  }
+  const T = V[V.length - 1], top = [cx, T[0][1], cz];
+  if (rings[rings.length - 1][0] > 0.002) for (let j = 0; j < n; j++) { const k = (j + 1) % n; out.push(...top, ...T[k], ...T[j]); }
+  return out;
+}
+/** A convex outline [[u, v]] stood up at O (u along the horizontal unit U, v up) and given thickness t along the horizontal normal N. */
+function prism(out, outline, O, U, N, t) {
+  const P = (u, v, w) => [O[0] + U[0] * u + N[0] * w, O[1] + v, O[2] + U[1] * u + N[1] * w], T = [], m = outline.length;
+  for (let i = 1; i + 1 < m; i++) {
+    T.push(...P(...outline[0], 0), ...P(...outline[i], 0), ...P(...outline[i + 1], 0));
+    T.push(...P(...outline[0], t), ...P(...outline[i], t), ...P(...outline[i + 1], t));
+  }
+  for (let i = 0; i < m; i++) { const a = outline[i], b = outline[(i + 1) % m]; T.push(...P(...a, 0), ...P(...b, 0), ...P(...b, t), ...P(...a, 0), ...P(...b, t), ...P(...a, t)); }
+  for (const v of orientOutward(T)) out.push(v);
+  return out;
+}
+/** The Khmer pediment's outline (and the corbelled vault's section): sides rising steeply, curving in to a point. */
+const ARCH = (W, H, m = 12) => { const p = []; for (let i = 0; i <= m; i++) { const x = -1 + 2 * i / m; p.push([x * W / 2, H * Math.pow(1 - Math.abs(x), 0.6)]); } return p; };
+/** A leaf, a flame, a serpent's raised head: the outline of the antefixes and the pediments' ends (width 1, height 1). */
+const LEAF = [[-0.5, 0], [0.5, 0], [0.56, 0.22], [0.48, 0.5], [0.28, 0.76], [0, 1], [-0.28, 0.76], [-0.48, 0.5], [-0.56, 0.22]];
+const scaled = (o, w, h) => o.map(([u, v]) => [u * w, v * h]);
+const along = (O, N, d, U = [0, 0], u = 0) => [O[0] + N[0] * d + U[0] * u, O[1], O[2] + N[1] * d + U[1] * u];
+const perp = (N) => [-N[1], N[0]];
+/** A rod a→b of radius r with rounded, closed ends (rod() leaves its ends open). */
+function limb(a, b, r, seg = 10) {
+  const A = new Vector3(...a), B = new Vector3(...b), L = A.distanceTo(B), e = Math.min(r * 0.35, L * 0.3);
+  const g = lathe([[0.001, -e], [r * 0.75, -e * 0.6], [r, 0], [r, L], [r * 0.75, L + e * 0.6], [0.001, L + e]], seg);
+  const dir = B.clone().sub(A).normalize(), up = new Vector3(0, 1, 0), axis = up.clone().cross(dir), m = new Matrix4();
+  if (axis.lengthSq() < 1e-9) { if (dir.y < 0) m.makeRotationX(Math.PI); } else m.makeRotationAxis(axis.normalize(), Math.acos(Math.min(1, Math.max(-1, up.dot(dir)))));
+  m.setPosition(A);
+  return g.applyMatrix4(m);
 }
 
+/** A pediment at O facing N: the tympanum (carved) inside a frame of serpent bodies (width f) whose ends rear up as heads. */
+function pediment(bag, O, N, W, H, f) {
+  const U = perp(N), fr = [], ty = [], inner = ARCH(W, H), outer = ARCH(W + 2 * f, H + f * 1.5);
+  for (let i = 0; i + 1 < inner.length; i++) prism(fr, [inner[i], inner[i + 1], outer[i + 1], outer[i]], O, U, N, f * 0.9);
+  prism(ty, ARCH(W - 0.06, H - 0.05), along(O, N, -0.12), U, N, 0.12 + f * 0.3);
+  for (const s of [-1, 1]) prism(fr, scaled(LEAF, f * 2.2, f * 3), along(O, N, f * 0.1, U, s * (W / 2 + f * 1.9)), U, N, f * 0.7);
+  bag.add(S, fromTriangles(fr)); bag.add(C, fromTriangles(ty));
+}
+/** An axis-aligned rectangle from local (u, d) ranges about c with the side normal N. */
+function rUD(c, N, u0, u1, d0, d1) {
+  const U = perp(N), pts = [[u0, d0], [u1, d1]].map(([u, d]) => [c[0] + U[0] * u + N[0] * d, c[1] + U[1] * u + N[1] * d]);
+  return [Math.min(pts[0][0], pts[1][0]), Math.min(pts[0][1], pts[1][1]), Math.max(pts[0][0], pts[1][0]), Math.max(pts[0][1], pts[1][1])];
+}
+const boxR = (r, y0, y1) => box(r[0], y0, r[1], r[2], y1, r[3]);
+/** A doorway on a face at distance d along N from c: dark, in a frame of colonnettes under a lintel. */
+function doorway(bag, c, N, d, y, dw, dh) {
+  bag.add(C, boxR(rUD(c, N, -dw - 0.45, dw + 0.45, d - 0.05, d + 0.12), y, y + dh + 0.5));
+  bag.add('opening', boxR(rUD(c, N, -dw, dw, d - 0.05, d + 0.16), y, y + dh));
+  bag.add(S, boxR(rUD(c, N, -dw - 0.6, dw + 0.6, d - 0.05, d + 0.2), y + dh + 0.5, y + dh + 0.85));
+  for (const s of [-1, 1]) bag.add(C, lathe([[0.13, 0], [0.11, 0.2], [0.14, 0.3], [0.1, dh * 0.5], [0.14, dh * 0.55], [0.1, dh * 0.6], [0.11, dh + 0.3], [0.14, dh + 0.5]], 8, null, ...(() => { const p = along([c[0], 0, c[1]], N, d + 0.2, perp(N), s * (dw + 0.25)); return [p[0], y, p[2]]; })()));
+}
 /**
- * k_tower: a prasat { c, y, w (the sanctuary's width), h (the tower's full height above y), porches }:
- * the sanctuary (a cube with a portico on each side), then tiers that recede and shrink, each with a
- * row of antefixes at its corners, then the lotus-bud crown.
+ * A portico on a side N of a building centred at c whose wall face is d0 out: a vestibule
+ * (depth, width, height h) with a doorway, its cornice, a corbelled vault ending in a pediment, and
+ * (tiers 2) a taller vault set back behind it with its own pediment.
  */
-function kTower(el, { bag, col }) {
-  const [cx, cz] = el.c, y = el.y, w = el.w, H = el.h, hw = w / 2;
-  const body = Math.min(H * 0.28, w * 1.1);
-  // the base mouldings and the sanctuary
-  bag.add(S, box(cx - hw - 0.6, y, cz - hw - 0.6, cx + hw + 0.6, y + 0.8, cz + hw + 0.6));
-  bag.add(S, box(cx - hw, y + 0.8, cz - hw, cx + hw, y + body, cz + hw));
-  bag.add('sandstone_carved', box(cx - hw - 0.25, y + body - 0.6, cz - hw - 0.25, cx + hw + 0.25, y + body, cz + hw + 0.25));
-  col.rect([cx - hw - 0.6, cz - hw - 0.6, cx + hw + 0.6, cz + hw + 0.6], y, y + body);
-  // a doorway on each face (el.doors: the faces, default all): dark, in a frame of colonnettes under a lintel
-  for (const f of el.doors ?? 'nesw') {
-    const [dx, dz] = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] }[f], dw = Math.min(1.1, w * 0.12), dh = Math.min(3.2, body * 0.55);
-    const R = (u, d0, d1) => (dx ? [cx + dx * (hw + d0), cz - u, cx + dx * (hw + d1), cz + u] : [cx - u, cz + dz * (hw + d0), cx + u, cz + dz * (hw + d1)]);
-    const fix = (r) => [Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.max(r[0], r[2]), Math.max(r[1], r[3])];
-    let r = fix(R(dw + 0.45, 0, 0.12)); bag.add('sandstone_carved', box(r[0], y + 0.8, r[1], r[2], y + 0.8 + dh + 0.5, r[3]));
-    r = fix(R(dw, 0, 0.16)); bag.add('opening', box(r[0], y + 0.8, r[1], r[2], y + 0.8 + dh, r[3]));
-    r = fix(R(dw + 0.6, 0, 0.2)); bag.add(S, box(r[0], y + 0.8 + dh + 0.5, r[1], r[2], y + 0.8 + dh + 0.85, r[3]));
+function portico(ctx, { c, N, y, d0, depth, width, h, tiers = 2, door = true }) {
+  const { bag, col } = ctx, d1 = d0 + depth, Y = [c[0], y, c[1]];
+  bag.add(C, boxR(rUD(c, N, -width / 2 - 0.3, width / 2 + 0.3, d0 - 0.3, d1 + 0.3), y, y + 0.7));
+  bag.add(S, boxR(rUD(c, N, -width / 2, width / 2, d0 - 0.3, d1), y + 0.7, y + h - 0.45));
+  bag.add(C, boxR(rUD(c, N, -width / 2 - 0.25, width / 2 + 0.25, d0 - 0.3, d1 + 0.25), y + h - 0.45, y + h));
+  col.rect(rUD(c, N, -width / 2 - 0.3, width / 2 + 0.3, d0 - 0.3, d1 + 0.3), y, y + h);
+  if (door) doorway(bag, c, N, d1, y + 0.7, Math.min(1.1, width * 0.16), Math.min(3.2, (h - 1.2) * 0.75));
+  const U = perp(N), H1 = width * 0.42, f = Math.max(0.25, width * 0.05), v = [];
+  prism(v, ARCH(width + 0.3, H1), [Y[0] + N[0] * (d0 - 0.3), y + h, Y[2] + N[1] * (d0 - 0.3)], U, N, depth + 0.3);
+  pediment(bag, along([c[0], y + h, c[1]], N, d1 - 0.05), N, width + 0.3, H1, f);
+  if (tiers > 1) {
+    const d2 = d0 + depth * 0.45;
+    prism(v, ARCH(width * 0.78, H1 * 1.65), [Y[0] + N[0] * (d0 - 0.3), y + h, Y[2] + N[1] * (d0 - 0.3)], U, N, d2 - d0 + 0.3);
+    pediment(bag, along([c[0], y + h, c[1]], N, d2 - 0.05), N, width * 0.78, H1 * 1.65, f * 0.85);
   }
-  // porticoes: on each side a projecting porch with its own little gabled vault and pediment
-  if (el.porches !== false) for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-    const pw = w * 0.38, pd = w * 0.28, ph = body * 0.75;
-    const px = cx + dx * (hw + pd / 2), pz = cz + dz * (hw + pd / 2);
-    const r = dx ? [px - pd / 2, pz - pw / 2, px + pd / 2, pz + pw / 2] : [px - pw / 2, pz - pd / 2, px + pw / 2, pz + pd / 2];
-    bag.add(S, box(r[0], y + 0.8, r[1], r[2], y + ph * 0.25, r[3]));
-    for (const s of [-1, 1]) {                                       // the porch's two pillars
-      const qx = dx ? px + dx * pd * 0.35 : px + s * pw * 0.35, qz = dz ? pz + dz * pd * 0.35 : pz + s * pw * 0.35;
-      bag.add(S, box(qx - 0.25, y + 0.8, qz - 0.25, qx + 0.25, y + ph, qz + 0.25));
+  bag.add(S, fromTriangles(v));
+}
+
+/** A devata: a standing goddess in low relief (height s), in her tall three-pointed crown and sampot, on the face at p facing N. */
+const DEVATA = [
+  [[-0.17, 0], [-0.02, 0], [-0.03, 0.07], [-0.15, 0.07]], [[0.02, 0], [0.17, 0], [0.15, 0.07], [0.03, 0.07]],          // the feet, turned out
+  [[-0.1, 0.06], [0.1, 0.06], [0.15, 0.52], [-0.15, 0.52]],                                                           // the sampot
+  [[-0.08, 0.36], [0.08, 0.36], [0.06, 0.5], [-0.06, 0.5]],                                                           // its front panel
+  [[-0.11, 0.5], [0.11, 0.5], [0.14, 0.78], [-0.14, 0.78]],                                                           // the torso
+  [[0.13, 0.55], [0.18, 0.56], [0.2, 0.76], [0.14, 0.78]], [[-0.18, 0.56], [-0.13, 0.55], [-0.14, 0.78], [-0.2, 0.76]], // the arms
+  [[0.17, 0.64], [0.24, 0.72], [0.22, 0.82], [0.16, 0.74]],                                                           // a flower in her hand
+  [[-0.045, 0.78], [0.045, 0.78], [0.065, 0.84], [0.06, 0.9], [-0.06, 0.9], [-0.065, 0.84]],                           // the head
+  [[-0.08, 0.89], [0.08, 0.89], [0.02, 1.04], [-0.02, 1.04]], [[-0.1, 0.89], [-0.05, 0.89], [-0.12, 0.99]], [[0.05, 0.89], [0.1, 0.89], [0.12, 0.99]], // the crown's three points
+];
+function devata(bag, p, y, N, s) {
+  const U = perp(N), t = [], back = [];
+  for (const part of DEVATA) prism(t, scaled(part, s, s), [p[0] + N[0] * 0.02, y, p[1] + N[1] * 0.02], U, N, 0.07 * s / 1.1);
+  // the shallow niche she stands in: a panel with a pointed top
+  prism(back, [[-0.26 * s, -0.04], [0.26 * s, -0.04], [0.26 * s, 0.9 * s], [0, 1.16 * s], [-0.26 * s, 0.9 * s]], [p[0] - N[0] * 0.02, y, p[1] - N[1] * 0.02], U, N, 0.05);
+  bag.add(C, fromTriangles(t)); bag.add(S, fromTriangles(back));
+}
+
+/** A blind window on a wall face at p facing N: a carved frame, a dark ground, turned balusters standing half out of it. */
+function blindWindow(bag, p, N, y, ww, wh) {
+  const c = [p[0], p[1]];
+  bag.add(C, boxR(rUD(c, N, -ww / 2 - 0.25, -ww / 2 + 0.02, -0.05, 0.16), y - 0.1, y + wh + 0.1));
+  bag.add(C, boxR(rUD(c, N, ww / 2 - 0.02, ww / 2 + 0.25, -0.05, 0.16), y - 0.1, y + wh + 0.1));
+  bag.add(C, boxR(rUD(c, N, -ww / 2 - 0.3, ww / 2 + 0.3, -0.05, 0.2), y - 0.18, y + 0.02));
+  bag.add(C, boxR(rUD(c, N, -ww / 2 - 0.3, ww / 2 + 0.3, -0.05, 0.2), y + wh - 0.02, y + wh + 0.18));
+  bag.add('opening', boxR(rUD(c, N, -ww / 2 + 0.01, ww / 2 - 0.01, -0.05, 0.03), y + 0.01, y + wh - 0.01));
+  const nb = Math.max(3, Math.round(ww / 0.21)), U = perp(N);
+  for (let i = 0; i < nb; i++) { const u = -ww / 2 + (i + 0.5) * ww / nb; bag.add(C, lathe(baluster(wh - 0.04), 8, null, p[0] + U[0] * u + N[0] * 0.09, y + 0.02, p[1] + U[1] * u + N[1] * 0.09)); }
+}
+
+// ---- the towers ---------------------------------------------------------------------------------
+
+/**
+ * k_tower: a prasat { c, y, w (the sanctuary's width), h (the tower's full height above y), tiers,
+ * porches, doors }: the sanctuary on its base mouldings, redented in plan, with a portico on each
+ * side (or a doorway), devatas on its walls; then tiers that recede along the bud's curve, each a
+ * storey in miniature — its wall, its cornice, and on the ledge above antefixes at every corner
+ * and in the middle of each side (small towers at the corners, leaf-shaped serpent heads between);
+ * the crown: a bud wrapped in lotus petals, pointed.
+ */
+function kTower(el, ctx) {
+  const { bag, col } = ctx, [cx, cz] = el.c, y = el.y, w = el.w, H = el.h, hw = w / 2;
+  const body = Math.min(H * 0.28, w * 1.1), n = 3, d = hw * 0.09, P = redentPoly(hw, n, d);
+  const t = [], ca = [];
+  // the base mouldings and the walls of the sanctuary, its cornice
+  stack(t, P, [[1.12, 0], [1.12, 0.3], [1.08, 0.3], [1.06, 0.55], [1.03, 0.62], [1.03, 0.8], [1.0, 0.8], [1.0, body - 0.9], [1.05, body - 0.9]], cx, y, cz);
+  stack(ca, P, [[1.05, body - 0.9], [1.08, body - 0.6], [1.08, body - 0.35], [1.02, body - 0.15], [1.02, body]], cx, y, cz);
+  col.rect([cx - hw * 1.12, cz - hw * 1.12, cx + hw * 1.12, cz + hw * 1.12], y, y + body);
+  const sides = [['e', [1, 0]], ['w', [-1, 0]], ['s', [0, 1]], ['n', [0, -1]]];
+  for (const [f, N] of sides) {
+    if (el.porches !== false) portico(ctx, { c: [cx, cz], N, y, d0: hw, depth: w * 0.24, width: w * 0.36, h: body * 0.7, tiers: w > 8 ? 2 : 1 });
+    else if ((el.doors ?? 'nesw').includes(f)) doorway(bag, [cx, cz], N, hw, y + 0.8, Math.min(1.1, w * 0.12), Math.min(3.2, body * 0.55));
+    // devatas on the wall either side of the door
+    const s = Math.min(1.9, body * 0.16), U = perp(N);
+    if (hw - n * d > w * 0.18 + s * 0.4 + 0.3 && el.devatas !== false) for (const side of [-1, 1]) {
+      const u = side * Math.min(hw - n * d - s * 0.35, w * 0.18 + s * 0.45 + 0.35);
+      devata(bag, [cx + N[0] * hw + U[0] * u, cz + N[1] * hw + U[1] * u], y + 1.0, N, s);
     }
-    rectRoof({ c: [px, pz], A: (dx ? pd : pw) / 2 + 0.3, B: (dx ? pw : pd) / 2 + 0.2, y: y + ph, rise: pw * 0.45, kind: 'gable', sweep: 0, curl: false, p: 0.75, alongZ: !!dz, mat: S, soffit: S }, bag);
   }
-  // the tiers: a lathe on a redented square, each tier a band, a cornice and a set-back
-  const tiers = el.tiers ?? 5, prof = [];
-  let r = hw * 1.04, yy = body;
-  const th = (H - body) * 0.72 / tiers;
+  // the tiers along the bud's curve
+  const tiers = el.tiers ?? 5, zone = H - body, bud = zone * 0.2, curve = (q) => Math.pow(1 - Math.pow(q, 1.5), 0.8);
+  let hs = [], tot = 0;
+  for (let k = 0; k < tiers; k++) { hs.push(Math.pow(0.88, k)); tot += hs[k]; }
+  hs = hs.map((v) => v / tot * (zone - bud));
+  let yy = body, sk = 0.98 * curve(0);
+  const rings = [];
   for (let k = 0; k < tiers; k++) {
-    prof.push([r, yy], [r * 0.97, yy + th * 0.62], [r * 1.02, yy + th * 0.7], [r * 1.02, yy + th * 0.82], [r * 0.84, yy + th]);
-    // antefixes at the tier's corners and middles: small flame-shaped finials
-    for (let a = 0; a < 8; a++) {
-      const ang = a * Math.PI / 4 + Math.PI / 4, rr = r * 1.0 * (a % 2 ? 1 : 1 / Math.SQRT2 * 1.38);
-      const ax = cx + Math.cos(ang) * rr * (a % 2 ? 0.72 : 1), az = cz + Math.sin(ang) * rr * (a % 2 ? 0.72 : 1);
-      bag.add('sandstone_carved', lathe([[0.32 * w / 8, 0], [0.26 * w / 8, th * 0.35], [0.001, th * 0.7]], 4, null, ax, y + yy + th * 0.82, az));
+    const h = hs[k], sn = 0.98 * curve((yy + h - body) / zone);
+    rings.push([sk, yy], [sk * 0.965, yy + h * 0.6], [sk * 1.035, yy + h * 0.6], [sk * 1.06, yy + h * 0.7], [sk * 1.06, yy + h * 0.8], [sk, yy + h]);
+    // the antefixes on the ledge: at the corners small towers, between them leaf-shaped heads
+    const aw = Math.min(hw * sk * 0.16, d * sk * 1.3), ah = Math.min(h * 0.6, aw * 2.1), th = aw * 0.4;
+    for (const sp of redentSpots(hw, n, d)) {
+      const ax = cx + sp.p[0] * sk - sp.dir[0] * th * 0.7, az = cz + sp.p[1] * sk - sp.dir[1] * th * 0.7, ay = y + yy + h - 0.04;
+      if (sp.mid || sp.k === 0 || sp.k === n) {
+        const wd = sp.mid ? aw * 1.5 : aw;
+        prism(ca, scaled(LEAF, wd, sp.mid ? ah * 1.1 : ah), [ax - sp.dir[0] * th * 0.5, ay, az - sp.dir[1] * th * 0.5], perp(sp.dir), sp.dir, th);
+      } else {
+        const q = aw * 0.45, mp = redentPoly(q, 0, 0);
+        stack(ca, mp, [[1, 0], [0.92, ah * 0.32], [1.1, ah * 0.36], [0.7, ah * 0.42], [0.62, ah * 0.6], [0.76, ah * 0.63], [0.32, ah * 0.85], [0.001, ah]], ax, ay, az);
+      }
     }
-    r *= 0.8; yy += th;
+    yy += h; sk = sn;
   }
-  // the lotus bud
-  const bud = H - yy;
-  prof.push([r, yy], [r * 1.05, yy + bud * 0.18], [r * 0.95, yy + bud * 0.42], [r * 0.6, yy + bud * 0.72], [r * 0.2, yy + bud * 0.92], [0.001, H]);
-  bag.add(S, lathe(prof, 32, redent(3), cx, y, cz));
+  // the crown: the bud, wrapped at its foot by a ring of lotus petals
+  rings.push([sk, yy], [sk * 0.99, yy + bud * 0.2], [sk * 0.9, yy + bud * 0.38], [sk * 0.7, yy + bud * 0.58], [sk * 0.4, yy + bud * 0.78], [sk * 0.14, yy + bud * 0.93], [0.001, bud + yy]);
+  stack(t, P, rings, cx, y, cz);
+  // two registers of petals: the lower at the bud's foot, the upper, smaller, a third of the way up
+  for (const [f, sc, ph] of [[0, sk, 0.34], [0.36, sk * 0.9, 0.28]]) {
+    const pw = d * sc * 1.3, th = pw * 0.28;
+    for (const sp of redentSpots(hw, n, d)) prism(ca, scaled(LEAF, sp.mid ? pw * 2.2 : pw, bud * ph), [cx + sp.p[0] * sc - sp.dir[0] * th * 0.6, y + yy + bud * f - 0.05, cz + sp.p[1] * sc - sp.dir[1] * th * 0.6], perp(sp.dir), sp.dir, th);
+  }
+  bag.add(S, fromTriangles(t)); bag.add(C, fromTriangles(ca));
+}
+
+/** A turned baluster of height h, as if of wood: rings and swellings along it. */
+function baluster(h) {
+  const p = [[0.075, 0], [0.075, 0.06]], k = 5;
+  for (let i = 0; i < k; i++) { const y0 = 0.06 + (h - 0.12) * i / k, s = (h - 0.12) / k; p.push([0.055, y0 + s * 0.12], [0.085, y0 + s * 0.3], [0.085, y0 + s * 0.42], [0.06, y0 + s * 0.6], [0.05, y0 + s * 0.88], [0.07, y0 + s]); }
+  p.push([0.075, h - 0.06], [0.075, h]);
+  return p;
+}
+/** The tiles of the bas-relief (2.4 m long, three registers): an army on the march — foot soldiers with spear and shield, an officer on horseback. */
+const ROUND = (cu, cv, r, m = 8) => Array.from({ length: m }, (_, i) => [cu + Math.cos(i / m * Math.PI * 2) * r, cv + Math.sin(i / m * Math.PI * 2) * r]);
+function soldier(u, v, s, dir) {
+  const q = (pts) => pts.map(([a, b]) => [u + a * s * dir, v + b * s]), fix = (pts) => (dir < 0 ? pts.slice().reverse() : pts);
+  return [
+    fix(q([[-0.1, 0], [0.1, 0], [0.06, 0.22], [-0.06, 0.22]])), fix(q([[-0.07, 0.22], [0.07, 0.22], [0.09, 0.4], [-0.09, 0.4]])),
+    fix(q(ROUND(0, 0.45, 0.045, 6))), fix(q([[-0.03, 0.48], [0.03, 0.48], [0, 0.56]])), fix(q(ROUND(0.11, 0.3, 0.07))),
+    fix(q([[-0.13, 0.04], [-0.11, 0.03], [0.21, 0.61], [0.19, 0.62]])),
+  ];
+}
+function rider(u, v, s, dir) {
+  const q = (pts) => pts.map(([a, b]) => [u + a * s * dir, v + b * s]), fix = (pts) => (dir < 0 ? pts.slice().reverse() : pts), out = [];
+  out.push(fix(q([[-0.26, 0.24], [-0.1, 0.18], [0.12, 0.18], [0.26, 0.26], [0.24, 0.36], [0.05, 0.38], [-0.2, 0.36]])));          // the horse's body
+  out.push(fix(q([[0.18, 0.3], [0.28, 0.33], [0.38, 0.5], [0.33, 0.54], [0.22, 0.4]])), fix(q([[0.33, 0.46], [0.44, 0.42], [0.45, 0.47], [0.36, 0.55]])));
+  for (const [a, b] of [[-0.22, -0.16], [-0.12, -0.18], [0.12, 0.08], [0.2, 0.24]]) out.push(fix(q([[a - 0.025, 0], [a + 0.025, 0], [b + 0.025, 0.22], [b - 0.025, 0.22]])));
+  for (const p of soldier(0, 0.26, 0.7, 1)) out.push(fix(q(p.map(([a, b]) => [a, b]))));
+  return out;
+}
+const RELIEF_TILE = (() => {
+  const parts = [];
+  for (let i = 0; i < 6; i++) parts.push(...soldier(0.2 + i * 0.4, 0.06, 0.95, 1));
+  for (let i = 0; i < 6; i++) parts.push(...soldier(0.2 + i * 0.4, 0.7, 0.95, i % 3 === 2 ? -1 : 1));
+  parts.push(...rider(0.55, 1.3, 1.0, 1));
+  for (let i = 0; i < 3; i++) parts.push(...soldier(1.25 + i * 0.4, 1.34, 0.95, 1));
+  return parts;
+})();
+/**
+ * A gallery's wall along wa→wb: solid, or (el.windows) pierced between the pillars by windows filled
+ * with turned balusters in carved frames; on its face to the gallery (f) the bas-relief (el.relief),
+ * on its other face devatas in twos and threes (el.devatas).
+ */
+function wall(ctx, el, { wa, wb, len, ux, uz, y, h, np, f }) {
+  const { bag } = ctx, P = (s, o = 0) => [wa[0] + ux * s + f[0] * o, wa[1] + uz * s + f[1] * o];
+  const seg = (mat, s0, s1, y0, y1, o = 0, hw = 0.45) => { const t = [], a = P(s0, o), b = P(s1, o); beamTris(t, [a[0], y0, a[1]], [b[0], y0, b[1]], hw, y1 - y0); bag.add(mat, fromTriangles(t)); };
+  const top = y + h + 0.4;
+  if (!el.windows) seg(S, 0, len, y, top);
+  else {
+    const sill = 0.8, wh = Math.min(1.7, h - 1.4), ww = Math.min(1.5, len / np * 0.5), wins = Array.from({ length: np }, (_, k) => (k + 0.5) / np * len);
+    seg(S, 0, len, y, y + sill); seg(S, 0, len, y + sill + wh, top);
+    let prev = 0;
+    for (const s of wins) {
+      seg(S, prev, s - ww / 2, y + sill - 0.01, y + sill + wh + 0.01); prev = s + ww / 2;
+      // the frame: jambs, sill and lintel standing proud of both faces
+      seg(C, s - ww / 2 - 0.25, s - ww / 2 + 0.05, y + sill - 0.1, y + sill + wh + 0.1, 0, 0.5);
+      seg(C, s + ww / 2 - 0.05, s + ww / 2 + 0.25, y + sill - 0.1, y + sill + wh + 0.1, 0, 0.5);
+      seg(C, s - ww / 2 - 0.3, s + ww / 2 + 0.3, y + sill - 0.16, y + sill + 0.05, 0, 0.52);
+      seg(C, s - ww / 2 - 0.3, s + ww / 2 + 0.3, y + sill + wh - 0.05, y + sill + wh + 0.16, 0, 0.52);
+      const nb = 7, bh = wh - 0.1;
+      for (let i = 0; i < nb; i++) { const p = P(s - ww / 2 + 0.05 + (i + 0.5) * (ww - 0.1) / nb); bag.add(C, lathe(baluster(bh), 8, null, p[0], y + sill + 0.05, p[1])); }
+    }
+    seg(S, prev, len, y + sill - 0.01, y + sill + wh + 0.01);
+  }
+  // the bas-relief: a polished band 2 m high along the gallery, the figures standing out of it
+  if (el.relief) {
+    seg(C, 0.3, len - 0.3, y + 0.75, y + 2.8, 0.46, 0.03);
+    seg(C, 0.3, len - 0.3, y + 2.8, y + 3.0, 0.47, 0.04);
+    seg(C, 0.3, len - 0.3, y + 0.6, y + 0.75, 0.47, 0.04);
+    const n = Math.floor((len - 0.8) / 2.4), s0 = (len - n * 2.4) / 2, U = [ux, uz];
+    for (let i = 0; i < n; i++) {
+      const O = P(s0 + i * 2.4, 0.48), t = [];
+      for (const part of RELIEF_TILE) prism(t, part, [O[0], y + 0.8, O[1]], U, f, 0.05);
+      bag.add('sandstone_relief', fromTriangles(t));
+    }
+  }
+  // devatas on the other face, in twos and threes between the pillars
+  if (el.devatas) {
+    const g = Math.max(1, Math.floor(np / 2)), Nn = [-f[0], -f[1]];
+    for (let k = 0; k < g; k++) {
+      const s = (k + 0.5) / g * len, cnt = 2 + (k % 2);
+      for (let j = 0; j < cnt; j++) { const p = P(s + (j - (cnt - 1) / 2) * 0.62, -0.45); devata(bag, p, y + 0.5, Nn, 1.1); }
+    }
+  }
 }
 
 /**
  * k_gallery: a gallery round a rectangle { rect (its centre line), y, w (width), h (pillar height),
  * solid ('in' | 'out': the side with the wall), half (a half-gallery on the open side), gates
- * (gaps at the middles of the sides, with a gopura), corner (towers at the corners: height) }.
+ * (gaps at the middles of the sides, with a gopura), corner (towers at the corners: height),
+ * windows, relief, devatas (see wall) }.
  */
 function kGallery(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, w = el.w, h = el.h, hw = w / 2;
@@ -102,12 +322,10 @@ function kGallery(el, ctx) {
       bag.add(S, fromTriangles(fl));
       // the wall
       const wa = [A[0] + n[0] * hw * out, A[1] + n[1] * hw * out], wb = [B[0] + n[0] * hw * out, B[1] + n[1] * hw * out];
-      const wt = [];
-      beamTris(wt, [wa[0], y, wa[1]], [wb[0], y, wb[1]], 0.45, h + 0.4);
-      bag.add(S, fromTriangles(wt));
+      const np = Math.max(1, Math.round(len / 3.2));
+      wall(ctx, el, { wa, wb, len, ux, uz, y, h, np, f: [-n[0] * out, -n[1] * out] });
       col.segment(wa, wb, 0.9, y - 0.6, y + h + 0.4);
       // the pillars on the open side, and those of the half-gallery beyond them
-      const np = Math.max(1, Math.round(len / 3.2));
       for (let k = 0; k <= np; k++) {
         const s = k / np, p = [A[0] + (B[0] - A[0]) * s, A[1] + (B[1] - A[1]) * s];
         for (const off of el.half ? [-hw, -hw - 2.6] : [-hw]) {
@@ -185,15 +403,67 @@ function nagaRail(el, { bag, col }) {
   }
 }
 
-/** k_library: a small building on its own platform { rect, y, h }: walls of sandstone, a corbelled vault, porches at its ends. */
+/**
+ * k_library: a "library" on its own platform { rect, y, h }: a long hall of sandstone under a
+ * corbelled vault ending in pediments, with a portico on each of its four sides — deeper ones at the
+ * ends, each under its own pediment — and steps down from the platform on all four sides.
+ */
 function kLibrary(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, h = el.h ?? 5;
-  kTerrace({ rect: [x0 - 1.5, z0 - 1.5, x1 + 1.5, z1 + 1.5], y0: 0, y1: y }, ctx);
-  bag.add(S, box(x0, y, z0, x1, y + h, z1));
-  bag.add('sandstone_carved', box(x0 - 0.3, y + h - 0.5, z0 - 0.3, x1 + 0.3, y + h, z1 + 0.3));
+  const c = [(x0 + x1) / 2, (z0 + z1) / 2], alongX = x1 - x0 >= z1 - z0, A = (alongX ? x1 - x0 : z1 - z0) / 2, B = (alongX ? z1 - z0 : x1 - x0) / 2;
+  const NL = alongX ? [1, 0] : [0, 1], NS = alongX ? [0, 1] : [1, 0], dE = 1.5, dS = 1.2, m = 0.5;
+  // the platform, wide enough for the porticoes, and its steps
+  const pr = rUD(c, NL, -(B + dS + m), B + dS + m, -(A + dE + m), A + dE + m);
+  kTerrace({ rect: pr, y0: 0, y1: y }, ctx);
+  for (const N of [NL, [-NL[0], -NL[1]], NS, [-NS[0], -NS[1]]]) {
+    const far = N[0] === NL[0] && N[1] === NL[1] || N[0] === -NL[0] && N[1] === -NL[1] ? A + dE + m : B + dS + m, run = y / 0.6 * 0.35;
+    const r = rUD(c, N, -1.4, 1.4, far, far + run), dir = N[0] > 0 ? 'w' : N[0] < 0 ? 'e' : N[1] > 0 ? 'n' : 's';
+    STYLES.qing.elements.stairs({ rect: r, y0: 0, y1: y, dir, mat: S }, ctx);
+  }
+  // the hall: its base moulding, walls, cornice
+  bag.add(C, box(x0 - 0.3, y, z0 - 0.3, x1 + 0.3, y + 0.6, z1 + 0.3));
+  bag.add(S, box(x0, y + 0.6, z0, x1, y + h - 0.5, z1));
+  bag.add(C, box(x0 - 0.3, y + h - 0.5, z0 - 0.3, x1 + 0.3, y + h, z1 + 0.3));
   col.rect([x0, z0, x1, z1], y, y + h);
-  const along = x1 - x0 >= z1 - z0;
-  rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (along ? x1 - x0 : z1 - z0) / 2 + 0.5, B: (along ? z1 - z0 : x1 - x0) / 2 + 0.4, y: y + h, rise: (along ? z1 - z0 : x1 - x0) * 0.6, kind: 'gable', sweep: 0, curl: false, p: 0.7, alongZ: !along, mat: S, soffit: S }, bag);
+  // the nave raised over the aisles: half-vaults on the aisles, a clerestory, the nave's vault and its pediments at the ends
+  const bn = B * 0.62, hc = 1.3, W = 2 * bn + 0.4, Hv = bn * 1.1, v = [], U = perp(NL);
+  bag.add(S, boxR(rUD(c, NL, -bn, bn, -A, A), y + h, y + h + hc));
+  bag.add(C, boxR(rUD(c, NL, -bn - 0.2, bn + 0.2, -A - 0.2, A + 0.2), y + h + hc - 0.3, y + h + hc));
+  for (const s of [-1, 1]) {
+    const q = []; for (let i = 0; i <= 6; i++) { const t = i / 6; q.push([s * (bn + (B + 0.3 - bn) * t), (hc - 0.3) * Math.pow(1 - t, 0.7)]); }
+    q.push([s * bn, 0]);
+    prism(v, q, [c[0] - NL[0] * (A + 0.3), y + h, c[1] - NL[1] * (A + 0.3)], U, NL, 2 * A + 0.6);
+  }
+  prism(v, ARCH(W, Hv), [c[0] - NL[0] * (A + 0.3), y + h + hc, c[1] - NL[1] * (A + 0.3)], U, NL, 2 * A + 0.6);
+  bag.add(S, fromTriangles(v));
+  for (const N of [NL, [-NL[0], -NL[1]]]) pediment(bag, along([c[0], y + h + hc, c[1]], N, A + 0.25), N, W, Hv, 0.35);
+  // blind windows with balusters on the long walls either side of the side porticoes
+  for (const N of [NS, [-NS[0], -NS[1]]]) for (const s of [-1, 1]) { const Uu = perp(N), u = s * A * 0.62; blindWindow(bag, [c[0] + N[0] * B + Uu[0] * u, c[1] + N[1] * B + Uu[1] * u], N, y + 1.4, 1.2, 1.6); }
+  // the porticoes
+  for (const N of [NL, [-NL[0], -NL[1]]]) portico(ctx, { c, N, y, d0: A, depth: dE, width: B * 1.3, h: h * 0.82, tiers: 1 });
+  for (const N of [NS, [-NS[0], -NS[1]]]) portico(ctx, { c, N, y, d0: B, depth: dS, width: Math.min(3.2, A * 0.6), h: h * 0.75, tiers: 1 });
+}
+
+/** k_lion: a guardian lion { at, y, face (e|w|n|s), s } sitting up on its haunches on a moulded pedestal, its mane a ruff round the head. */
+function kLion(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, s = el.s ?? 1, f = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] }[el.face ?? 'e'], U = perp(f);
+  const P = (u, v, w) => [x + (f[0] * w + U[0] * u) * s, y + v * s, z + (f[1] * w + U[1] * u) * s];
+  const R = (u0, u1, w0, w1) => { const a = P(u0, 0, w0), b = P(u1, 0, w1); return [Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])]; };
+  bag.add(C, boxR(R(-0.42, 0.42, -0.62, 0.55), y, y + 0.15 * s));
+  bag.add(S, boxR(R(-0.36, 0.36, -0.56, 0.49), y + 0.15 * s, y + 0.58 * s));
+  bag.add(C, boxR(R(-0.4, 0.4, -0.6, 0.53), y + 0.58 * s, y + 0.7 * s));
+  col.rect(R(-0.42, 0.42, -0.62, 0.55), y, y + 1.9 * s);
+  const parts = [
+    [P(-0.2, 0.92, -0.26), P(0.2, 0.92, -0.26), 0.22], [P(0, 0.92, -0.26), P(0, 1.42, 0.08), 0.23],      // haunches, body
+    [P(-0.21, 0.76, -0.12), P(-0.21, 0.76, 0.14), 0.075], [P(0.21, 0.76, -0.12), P(0.21, 0.76, 0.14), 0.075], // hind feet
+    [P(-0.13, 0.74, 0.22), P(-0.12, 1.28, 0.1), 0.075], [P(0.13, 0.74, 0.22), P(0.12, 1.28, 0.1), 0.075],     // forelegs
+    [P(0, 1.62, 0.0), P(0, 1.62, 0.13), 0.28],                                                              // the mane
+    [P(0, 1.63, 0.1), P(0, 1.63, 0.3), 0.17], [P(0, 1.56, 0.28), P(0, 1.55, 0.42), 0.1],                     // head, muzzle
+    [P(-0.12, 1.8, 0.12), P(-0.14, 1.88, 0.12), 0.04], [P(0.12, 1.8, 0.12), P(0.14, 1.88, 0.12), 0.04],       // ears
+    [P(0, 0.76, -0.48), P(0, 1.0, -0.5), 0.04], [P(0, 1.0, -0.5), P(0, 1.3, -0.38), 0.04],                   // the tail curled up the back
+  ];
+  for (const [a, b, r] of parts) bag.add(C, limb(a, b, r * s, 10));
+  for (const u of [-0.13, 0.13]) bag.add(C, boxR(R(u - 0.08, u + 0.08, 0.16, 0.3), y + 0.7 * s, y + 0.78 * s));
 }
 
 /**
@@ -229,7 +499,7 @@ registerStyle('khmer', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, stilt_house: stiltHouse,
+    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse,
   },
   objects: {},
 });

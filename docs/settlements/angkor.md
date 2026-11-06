@@ -1,7 +1,7 @@
 # Angkor, c. 1150 — dossier
 
 Settlement id: `angkor` · Style: `khmer` · Region: Indochina (the Tonle Sap plain) · Code: `src/settlements/angkor/`
-Status of this dossier: L1–L2 (the temple's three levels, galleries, towers, stairs, causeways, libraries, basins, enclosure, moat; the village; ground, planting, weather, music). L3 recorded for later: the bas-reliefs (about 800 m of them in the third gallery), the apsaras, the cruciform cloister, the balustered windows, the lions on the stairs, the Vishnu statue in the western gate, people.
+Status of this dossier: L2 (the temple's three levels, galleries, towers, stairs, causeways, libraries, basins, enclosure, moat; the village; ground, planting, weather, music; and the detail of §10: the towers' tiers, antefixes and lotus crown, porticoes and pediments, the bas-relief band of the third gallery, the balustered windows of the Bakan gallery, devatas, the libraries, the lions of the Terrace of Honour). L3 recorded for later: the eight relief subjects told panel by panel, the cruciform cloister, the Vishnu statue in the western gate, the carved lintels and colonnettes in full.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -54,6 +54,18 @@ The end of the dry season: hot, hazy, towering clouds, an afternoon shower now a
 
 The temple ensemble (gong circles, xylophones, oboe) — a plucked string and a reed stand in — and chant in the galleries. [inferred]
 
+## 10. Detail (L2)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Towers | Plan a square with each corner stepped in three times (redented), true polygons; the sanctuary on stepped base mouldings, its cornice; tiers receding along the bud's curve (wide at first, then quickly narrowing), each a storey in miniature — a slightly battered wall, a heavy cornice — and on each tier's ledge antefixes at every salient corner and at the middle of each side; a pointed bud wrapped in two registers of lotus petals | "graduated tiers … rows of lotus flowers taper to a point", the lotus-bud profile [stated: Phnom Penh Post; factsanddetails]; the antefix forms (miniature towers at the main corners, leaf-shaped serpent heads between) [inferred from photographs of the Angkor Wat towers] |
+| Porticoes and pediments | On each side of the central and corner sanctuaries a vestibule with a doorway (colonnettes under a lintel), a corbelled vault ending in a pediment framed by serpent bodies whose ends rear up as heads, and a taller vault set back behind it with its own pediment (tiered pediments) | entry towers with porch and columns at the head of each stair [stated: Phnom Penh Post]; the tiered, serpent-framed pediment [inferred from the Khmer pediment type] |
+| Bas-relief | Along the inner wall of the third gallery a polished band 2 m high between carved frieze bands, an army on the march in three registers — foot soldiers with spear and shield, officers on horseback | "about 2 m high … eight sections … Hindu myths and epics … battles", 1,200 m² [stated: factsanddetails]; the marching army stands for the Kurukshetra and other battle panels [inferred] |
+| Balustered windows | The outer wall of the Bakan gallery pierced between its pillars by windows filled with seven turned balusters in carved frames; blind balustered windows on the libraries | "the outer side of the third-level gallery has windows and balusters", balusters "turned as if they were made of wood" [stated: factsanddetails]; balusters set into sill and head jamb [stated: Ngamsiriudom, IAFOR] |
+| Devatas | Standing goddesses about 1.1 m tall in low relief, frontal, in tall three-pointed crowns, each in a shallow pointed niche: in twos and threes along the outer wall of the second gallery, and either side of the doors of the towers | more than 1,796 devatas, 95–110 cm, at every level up to the tops of the towers, singly or in groups of up to four [stated: the-khmerempire]; 1,500 apsaras along the walls of the second level "in twos and threes", always frontal [stated: factsanddetails]; their placement on the gallery's outer face [inferred] |
+| Libraries | A hall on a raised platform with steps on all four sides; porticoes on all four sides under pediments; the nave raised over half-vaulted aisles with a clerestory and its own vault and pediments | two "jewel-box" libraries either side of the causeway, and two smaller ones of "similar form" by the cloister [stated: factsanddetails]; the porticoes on four sides, the raised nave and the rectangular platform [inferred from the Khmer library type] |
+| Lions | Seated guardian lions on moulded pedestals flanking the steps on the three sides of the Terrace of Honour, which now has steps on its north and south sides | "lions on pedestals flank the steps on three sides of the Terrace of Honor" [stated: factsanddetails; Phnom Penh Post] |
+
 ## Sources
 
 - [Angkor Wat — wondermondo](https://wondermondo.com/angkor-wat)
@@ -63,3 +75,7 @@ The temple ensemble (gong circles, xylophones, oboe) — a plucked string and a 
 - [Angkor Wat — Designing Buildings Wiki](https://www.designingbuildings.co.uk/wiki/Angkor_Wat)
 - [Astronomy at Angkor — Scribd](https://www.scribd.com/document/530601168/Astronomy-at-Angkor)
 - [Angkor Watt — eSamskriti](https://esamskriti.com/a/Cambodia-and-Vietnam/Angkor-Watt.aspx)
+- [The Architecture of Angkor Wat — Phnom Penh Post](https://phnompenhpost.com/national/architecture-angkor-wat)
+- [Angkor Wat: its layout, architecture and components — Facts and Details](https://factsanddetails.com/southeast-asia/Cambodia/sub5_2f/entry-6643.html)
+- [Prasat Angkor Wat 2 — the-khmerempire](https://the-khmerempire.blogspot.com/2019/09/prasat-angkor-wat-2.html)
+- [Window Balusters of the Khmer Architecture — IAFOR (ACAS)](https://acas.iafor.org/presentation/submission70777/)

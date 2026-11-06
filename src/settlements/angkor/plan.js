@@ -31,7 +31,14 @@ for (const s of [-1, 1]) {
 for (const [x, dir] of [[CAUSEWAY.outer[0] - 4, 'e'], [CAUSEWAY.inner[2] - 6, 'w']]) E.push({ t: 'stairs', rect: [x, -3.5, x + 4, 3.5], y0: 0, y1: 1.1, dir, mat: 'sandstone_khmer' });
 // the cross-shaped terrace before the temple's western entrance (the "terrace of honour")
 E.push({ t: 'k_terrace', rect: [CX - 99 - 14, -12, CX - 99, 12], y0: 0, y1: 1.4 });
-for (const s of [-1, 1]) E.push({ t: 'naga_rail', a: [CX - 112, s * 11.6], b: [CX - 100, s * 11.6], y: 1.4, h: 0.8 });
+// its serpent balustrades broken for the steps on its north and south sides; lions on pedestals flank the steps on its three sides
+for (const s of [-1, 1]) {
+  E.push({ t: 'naga_rail', a: [CX - 112, s * 11.6], b: [CX - 108.4, s * 11.6], y: 1.4, h: 0.8 });
+  E.push({ t: 'naga_rail', a: [CX - 103.6, s * 11.6], b: [CX - 100, s * 11.6], y: 1.4, h: 0.8 });
+  E.push({ t: 'stairs', rect: s < 0 ? [CX - 108, -14.4, CX - 104, -12] : [CX - 108, 12, CX - 104, 14.4], y0: 0, y1: 1.4, dir: s < 0 ? 's' : 'n', mat: 'sandstone_khmer' });
+  for (const x of [CX - 108.9, CX - 103.1]) E.push({ t: 'k_lion', at: [x, s * 13.3], y: 0, face: s < 0 ? 'n' : 's', s: 1.0 });
+  E.push({ t: 'k_lion', at: [CX - 112.3, s * 6.6], y: 1.4, face: 'w', s: 0.9 });
+}
 
 // ── libraries and basins ──
 for (const r of LIBRARIES) E.push({ t: 'k_library', rect: r, y: 1.4, h: 4.8 });
@@ -42,11 +49,11 @@ for (const b of BASINS) {
 
 // ── the temple ──
 E.push({ t: 'k_terrace', rect: T.base.rect, y0: 0, y1: T.base.y });
-E.push({ t: 'k_gallery', rect: T.third.line, y: T.base.y, w: T.third.w, h: T.third.h, solid: 'in', half: true, gates: true, gate: 22, gateH: 12 });
+E.push({ t: 'k_gallery', rect: T.third.line, y: T.base.y, w: T.third.w, h: T.third.h, solid: 'in', half: true, gates: true, gate: 22, gateH: 12, relief: true });
 E.push({ t: 'k_terrace', rect: T.second.terrace, y0: T.base.y, y1: T.second.y });
-E.push({ t: 'k_gallery', rect: T.second.line, y: T.second.y, w: T.second.w, h: T.second.h, solid: 'out', gates: true, gate: 12, gateH: 13, corner: 12 });
+E.push({ t: 'k_gallery', rect: T.second.line, y: T.second.y, w: T.second.w, h: T.second.h, solid: 'out', gates: true, gate: 12, gateH: 13, corner: 12, devatas: true });
 E.push({ t: 'k_terrace', rect: T.bakan.terrace, y0: T.second.y, y1: T.bakan.y });
-E.push({ t: 'k_gallery', rect: T.bakan.line, y: T.bakan.y, w: T.bakan.w, h: T.bakan.h, solid: 'out', gates: true, gate: 8, gateH: 10 });
+E.push({ t: 'k_gallery', rect: T.bakan.line, y: T.bakan.y, w: T.bakan.w, h: T.bakan.h, solid: 'out', gates: true, gate: 8, gateH: 10, windows: true });
 for (const [x, z] of [[CX - 28, -28], [CX + 28, -28], [CX - 28, 28], [CX + 28, 28]]) E.push({ t: 'k_tower', c: [x, z], y: T.bakan.y + T.bakan.h * 0.2, w: 9, h: 32, tiers: 5 });
 E.push({ t: 'k_tower', c: [CX, 0], y: T.bakan.y, w: 15, h: 65 - T.bakan.y, tiers: 6 });
 // the stairs: up the base terrace, up the second level, the steep stairs of the Bakan, on each axis
