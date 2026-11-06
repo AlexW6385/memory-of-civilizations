@@ -1,10 +1,11 @@
 // Paris — the ground: mud and paving of the streets, the stone quays, gardens with fruit trees
 // and lime trees, willows on the banks, the Seine; the soft, changeable sky of the Île-de-France.
 
-import { RADIUS, PALACE, PARVIS, CATHEDRAL, RIVER, height, inRiver, inRect, inLot } from './layout.js';
+import { RADIUS, PALACE, GARDEN, PARVIS, CATHEDRAL, RIVER, height, inRiver, inRect, inLot } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0, grass: 0.45, rock: 0, soil: 0.55, fields: 0, dry: 0.2, warmth: 0.4, red: 0.1, road: 0, snow: 0, forest: 0 };
+  if (inRect(GARDEN, x, z)) { c.grass = 0.85; c.soil = 0.25; c.road = 0; return c; }
   if (inRect(PALACE, x, z) || inRect(PARVIS, x, z) || inRect(CATHEDRAL, x, z, 4)) { c.road = 0.8; return c; }
   if (h < 0) { c.soil = 0.8; c.grass = 0.2; return c; }
   c.road = 0.4; return c;
@@ -13,6 +14,8 @@ function water(x, z, y) { return inRiver(x, z) && y < RIVER.level + 0.3; }
 function waterLevel(x, z) { return inRiver(x, z) ? RIVER.level : -Infinity; }
 function fromWater(x, z) { return inRiver(x, z) ? -3 : Math.max(-5, Math.min(40, height(x, z) - RIVER.level)); }
 function planting(x, z) {
+  // the king's orchard in the garden's west part: apples and pears in rows, grass under them
+  if (inRect(GARDEN, x, z, -1.5)) return x < -301 ? { apple: 0.035, grass: 30 } : { grass: 18 };
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inRect(PALACE, x, z, 3) || inRect(PARVIS, x, z, 2) || inRect(CATHEDRAL, x, z, 6) || inLot(x, z, 0.5)) return null;
   if (height(x, z) < 0.5) return { willow: 0.04, reeds: 8, grass: 25 };
   return { apple: 0.03, elm: 0.01, grass: 20 };

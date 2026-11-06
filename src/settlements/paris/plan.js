@@ -2,7 +2,7 @@
 // previous design, src/buildings/sainte-chapelle) in the palace court; the palace's great hall and
 // towers; Notre-Dame and its parvis; the bridges; the river.
 
-import { RADIUS, CHAPEL, CATHEDRAL, PALACE, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER } from './layout.js';
+import { RADIUS, CHAPEL, CATHEDRAL, PALACE, GARDEN, QUAY, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER } from './layout.js';
 import chapelPlan from '../../buildings/sainte-chapelle/plan.js';
 
 const g = RIVER.ground;
@@ -11,12 +11,34 @@ export const city = {
   entrance: { at: [0, -60], facing: 'w' }, bounds: [PALACE[0] - 2, PALACE[1] - 2, CATHEDRAL[2] + 22, PALACE[3] + 2], rooms: [],
   elements: [
     { t: 'notre_dame', rect: CATHEDRAL, y: g },
-    { t: 'great_hall', rect: [-290, -88, -230, -58], h: 16, y: g },
-    { t: 'great_hall', rect: [-150, -60, -118, 40], h: 12, y: g },
-    { t: 'tower', at: [-300, -85], r: 5, h: 22, roof: 10, y: g }, { t: 'tower', at: [-260, -92], r: 6, h: 24, roof: 11, y: g }, { t: 'tower', at: [-215, -92], r: 6, h: 24, roof: 11, y: g },
-    { t: 'tower', at: [-120, -88], r: 5, h: 26, roof: 12, y: g },
+    // the palace (docs/settlements/paris.md §1c): the Grand-Salle north-west of the chapel, the king's gallery reaching it from
+    // the chapel's upper porch (the chapel's plan); the towers on the Seine; the enclosure on the Barillerie with its gate
+    { t: 'palace_hall', rect: [-265, -72, -199, -44], h: 17, floor: 6, y: g, gap: -203 },
+    { t: 'palace_tower', at: [-262, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.0, h: 24.5, roof: 11, face: -Math.PI / 2 },     // Tour Bonbec
+    { t: 'palace_tower', at: [-236, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.3, h: 27.5, roof: 13, face: -Math.PI / 2 },     // Tour César
+    { t: 'palace_tower', at: [-222, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.3, h: 27.5, roof: 13, face: -Math.PI / 2 },     // Tour d'Argent
+    { t: 'palace_wall', a: [-112, -100], b: [-112, 58], y: g, h: 8, th: 1.6, gates: [{ at: 100, w: 4 }] },
+    { t: 'palace_tower', at: [-112, -6.5], y: g, r: 3.2, h: 14, roof: 7, face: 0 }, { t: 'palace_tower', at: [-112, 6.5], y: g, r: 3.2, h: 14, roof: 7, face: 0 },
+    { t: 'palace_tower', at: [-112, 58], y: g, r: 3.0, h: 12, roof: 6.5, face: Math.PI / 4 },
+    { t: 'quay', ...QUAY, bed: RIVER.bed - 0.5, water: RIVER.level, stairs: [-250, -180, -140], posts: [-300, -288, -276, -244, -210, -196, -166, -154, -126] },
+    // the king's garden: its wall with a door toward the palace, beds of herbs, roses and lilies, the vine arbour, the well
+    { t: 'garden_wall', rect: GARDEN, y: g, h: 3.2, gates: [{ side: 'e', at: 30, w: 2.4 }, { side: 'w', at: 30, w: 2.0 }] },
+    { t: 'garden_arbour', a: [-298, -10], b: [-273, -10], w: 2.6, h: 2.5, y: g },
+    { t: 'garden_well', at: [-288, 20], y: g },
+    ...gardenBeds(),
   ],
 };
+function gardenBeds() {
+  const els = [], kinds = ['herbs', 'herbs', 'roses', 'herbs', 'lilies', 'herbs'];
+  let i = 0;
+  for (const zb of [-34, -30.6, -27.2, -23.8, -20.4, -17, -6, -2.6, 0.8, 4.2, 7.6, 11, 30, 33.4, 36.8, 40.2])
+    for (const xb of [-298, -292.4, -286.8, -281.2]) {
+      els.push({ t: 'garden_bed', rect: [xb, zb, xb + 4.0, zb + 1.6], y: g, seed: 31 + i * 7, kind: kinds[i++ % kinds.length] });
+    }
+  return els;
+}
+// the boats moored at the palace's quay
+const quayBoats = [[-314, 0.02, 11, 'casks'], [-300, -0.03, 12, 'wood'], [-286, 0, 10, ''], [-197, 0.04, 12, 'sacks'], [-165, -0.02, 11, 'casks'], [-152, 0, 10, 'wood'], [-124, 0.03, 12, '']];
 // the bridges (docs/settlements/paris.md §2a): stone, on round arches with cutwaters, lined with houses;
 // mills hung on the Grand Pont's downstream face. The houses are timber houses (style vernacular) on the deck's strips.
 const PONTS = [
@@ -54,7 +76,8 @@ export const boats = {
   elements: [
     [40, -159.5, 0, 13, 'casks'], [56, -160, 0.05, 11, 'wood'], [72, -159.5, -0.04, 12, 'sacks'], [88, -160.2, 0, 13, 'casks'], [104, -159.6, 0.03, 10, ''],
     [150, -158.5, 0.1, 12, 'wood'], [60, -132, 0.12, 12, 'sacks'], [-70, -140, -0.08, 11, 'casks'], [40, 145.5, 0, 11, 'wood'], [-40, 145.8, 0.04, 10, ''],
-  ].map(([x, z, yaw, len, load]) => ({ t: 'boat_seine', at: [x, z], yaw, len, load, water: RIVER.level })),
+  ].map(([x, z, yaw, len, load]) => ({ t: 'boat_seine', at: [x, z], yaw, len, load, water: RIVER.level }))
+    .concat(quayBoats.map(([x, yaw, len, load]) => ({ t: 'boat_seine', at: [x, QUAY.z - 1.9], yaw, len, load, water: RIVER.level }))),
 };
 // the Seine's two arms
 export const river = {

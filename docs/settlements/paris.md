@@ -2,7 +2,7 @@
 
 Settlement id: `paris` · Style: `gothic` (with `vernacular` houses and bridges) · Region: France (the Seine) · Code: `src/settlements/paris/`
 Replaces the legacy district of the previous design. The Sainte-Chapelle itself is the full building from that design (`src/buildings/sainte-chapelle`, dossier `docs/buildings/sainte-chapelle.md`), in the palace court.
-Status of this dossier: L2–L3 (the island between the Seine's two arms; the royal palace with its great hall and towers on the north quay and the Sainte-Chapelle in its court; Notre-Dame's massing (nave, aisles, transept, apse, west towers and rose) and its parvis; the Grand Pont and the Petit Pont; rows of timber-framed houses on the island and both banks; ground, planting, weather, music). Notre-Dame in detail (§1a), inside (§1b); the bridges with their houses, mills and boats (§2a). L3 recorded for later: the palace's buildings in detail, the Châtelet and the Petit-Châtelet at the bridges' ends, the walls of Philip Augustus, people and boats.
+Status of this dossier: L2–L3 (the island between the Seine's two arms; the royal palace with its great hall and towers on the north quay and the Sainte-Chapelle in its court; Notre-Dame's massing (nave, aisles, transept, apse, west towers and rose) and its parvis; the Grand Pont and the Petit Pont; rows of timber-framed houses on the island and both banks; ground, planting, weather, music). Notre-Dame in detail (§1a), inside (§1b); the bridges with their houses, mills and boats (§2a). The palace (§1c): the Grand-Salle, the king's gallery, the towers on the Seine, the enclosure, the quay with its boats, the king's garden. L3 recorded for later: the palace's interiors, the logis du roi, the Châtelet and the Petit-Châtelet at the bridges' ends, the walls of Philip Augustus, people and boats.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -36,6 +36,16 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **Glass:** the 13th-century windows in the stained-glass material everywhere (clerestory, tribunes, chapels, ambulatory, transept roses and lancets, the west rose) [inferred].
 - **Floor:** flags throughout [inferred].
 
+## 1c. The palace about 1248 (built: `src/styles/gothic/palace.js`; the gallery in `src/buildings/sainte-chapelle/style.js`)
+
+- **Position.** The Sainte-Chapelle stands in the palace court; the Grand-Salle lies north-west of it and the towers on the north arm's quay north of that; the gardens stretched west toward the island's point, with an orchard behind them [stated: techno-science "Conciergerie"; Wikipedia "Sainte-Chapelle" — visitors entering the court saw "the north flank and eastern apse ... to their left"]. Built: the Grand-Salle at x −265…−199, z −72…−44; the towers on the quay at z −104.5; the garden at the west end, x −322…−270 [inferred: positions scaled to our island].
+- **Grand-Salle.** Where the king held his *lits de justice* and receptions; split into two naves by a row of pillars, each under a panelled timber barrel vault, statues of the kings on the walls and pillars [stated: techno-science "Conciergerie"] — that is the hall as Philip IV rebuilt it (finished 1313). The hall of Saint Louis's day is not described by our sources; built after the later one on the same site [inferred]: 66 × 28 m, two naves under twin slate roofs, an undercroft with small pointed windows, the hall over it lit by tall windows of two lights between buttresses, at each end two gables with a window of four lights and a rose, a cornice on a corbel table.
+- **The king's gallery.** The galerie des Merciers was built under Saint Louis with the chapel to give the king direct access from his apartments to the upper chapel [stated: techno-science "Conciergerie"]; the upper chapel was reached only by the palace's upper galleries [stated: techno-science "Sainte-Chapelle"]. Built: a gallery 34 m long on an open arcade of pointed arches, running north from the upper porch's landing at the upper chapel's floor to the Grand-Salle, lit by windows of two lights between buttresses, a slate roof and a gable at the far end; the walker can enter it from the landing [inferred: its form]. The straight stair from the court to the landing (standing for the Grand Degré, which led to the gallery [stated: ibid.]) now has sloping parapets with pinnacle posts and blind arcading on its sides [inferred], in place of a plain wall.
+- **Towers on the Seine.** Tour Bonbec stood on the north side of Saint Louis's palace, flanking the *salle sur l'eau*; Tour César (on Roman foundations) and Tour d'Argent (named for the royal treasure kept there) were existing towers that Philip IV reinforced [stated: techno-science "Conciergerie"]. The Tour de l'Horloge at the north-east corner is of Jean II's time (clock about 1371) [stated: ibid.] and is not shown — the round tower that stood there in our previous plan is removed. Built: round towers 10–10.6 m across, their battered feet in the river, string courses, stair slits, two-light windows with mullion and transom toward the river, a double corbel table under a crenellated parapet, conical slate roofs with a lead finial and an iron vane [inferred: details; the conical roofs as in the user's brief and the towers' surviving form].
+- **The enclosure.** The palace was walled [stated: techno-science "Conciergerie"]; Philip IV's wall along the Seine (finished 1313) is later [stated: ibid.]. Built: a crenellated wall on the Barillerie side (x = −112) with a pointed gate between two small round towers, a tower at its south end [inferred: its line and form]. The long hall our previous plan put east of the chapel (x −150…−118) had no source and is removed: that side was the open court (the Cour de Mai, where a tree was planted each spring [stated: ibid.]).
+- **The quay.** A revetment of ashlar from the river bed with a coping, the top paved, water stairs at three places down to landings awash, timber mooring posts with iron rings; seven boats moored along it [inferred: the river trade of §2a].
+- **The king's garden.** Gardens west toward the point with an orchard [stated: techno-science "Conciergerie", for Philip IV's time; inferred for 1248]. Medieval gardens were enclosed by walls (stone for the wealthy), hedges or wattle; raised beds with paths between; herbs included roses, lilies, sage and rosemary; orchards of apples and pears [stated: Wikipedia "Medieval gardening"]; wattle hurdles edging and supporting beds [stated: the Met, "Whence Willow Wattle?" — of the modern Cloisters garden, after medieval practice]. Built: a rubble wall with a stone coping and doors east and west; 64 raised beds edged with wattle on stakes, of herbs, roses with red flowers and white lilies; a tunnel arbour of poles grown over with vine along the path from the door; a well with its windlass under a little roof; the orchard of apple trees in rows in the west part [inferred: the arbour and the well].
+
 ## 2. Layout of the settlement (radius 420 m)
 
 | Part | Where (m, +x east, +z south) | Notes |
@@ -47,6 +57,8 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Grand Pont, Petit Pont | x = 0 north, x = 110 south | [stated: arms; positions inferred] |
 | Boats | along the Right Bank east of the Grand Pont (the Grève), a few on the river, two at the Left Bank | [inferred] |
 | Houses | in rows on the island and both banks | [inferred] |
+| Palace garden | x −322…−270, z −40…50 | [inferred] |
+| Palace quay | x −326…−112, its face at z −107 | [inferred] |
 
 ## 2a. The bridges, mills and boats (built: `src/styles/gothic/town.js`, `pont`, `mill_pendant`, `boat_seine`)
 
@@ -90,6 +102,11 @@ As for the Sainte-Chapelle (`docs/buildings/sainte-chapelle.md` §9).
 
 - The Sainte-Chapelle's own sources: `docs/buildings/sainte-chapelle.md`
 - [Palais de la Cité — Wikipedia](https://en.wikipedia.org/wiki/Palais_de_la_Cit%C3%A9)
+- [Conciergerie — techno-science.net](https://www.techno-science.net/fr/definitions/conciergerie)
+- [Sainte-Chapelle — techno-science.net](https://www.techno-science.net/glossaire-definition/Sainte-Chapelle.html)
+- [Sainte-Chapelle — Wikipedia (IPFS mirror)](https://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.4everland.io/wiki/Sainte-Chapelle.html)
+- [Medieval gardening — Wikipedia (IPFS mirror)](https://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.4everland.io/wiki/Medieval_gardening.html)
+- [Whence Willow Wattle? — The Met](https://www.metmuseum.org/articles/whence-willow-wattle)
 - [Notre-Dame de Paris — Wikipedia](https://en.wikipedia.org/wiki/Notre-Dame_de_Paris)
 - [Grand-Pont — Wikipedia (fr)](https://fr.wikipedia.org/wiki/Grand-Pont)
 - [Petit-Pont — Wikipedia](https://en.wikipedia.org/wiki/Petit-Pont)
