@@ -12,6 +12,7 @@ export const PIAZZA_DUOMO = [-160, -110, 100, -10];
 export const SIGNORIA = [0, 110, 110, 205];
 export const PALAZZO = [62, 120, 102, 160];
 export const LOGGIA = [12, 165, 50, 182];
+export const ORSAN = [16, 20, 48.4, 42.1];                      // Orsanmichele, between the cathedral and the Signoria (32.4 × 22.1 m)
 export const ARNO = { z: 275, w: 60, level: -4, bed: -7 };
 export const BRIDGE = { x: 40 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -33,6 +34,8 @@ export function lots() {
     if (Math.hypot(cx, cz) > RADIUS - 45 || inRect(PIAZZA_DUOMO, cx, cz, 6) || inRect(SIGNORIA, cx, cz, 6) || Math.abs(cz - arnoZ(cx)) < ARNO.w / 2 + 12 || (Math.abs(cx - BRIDGE.x) < 8 && cz > SIGNORIA[3]) || Math.abs((cz + 400) % 48 - 24) < 3 || rand() < 0.1) continue;
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.3, storeys: 3 + (rand() < 0.4 ? 1 : 0), front: rand() < 0.5 ? 'n' : 's', plaster: rand() < 0.6 });
   }
+  // the block of Orsanmichele and its four streets (after the draw, so that the other lots stay as they were)
+  LOTS = LOTS.filter((l) => !inRect(ORSAN, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 9));
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

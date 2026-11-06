@@ -1,5 +1,5 @@
 // Florence about 1480 (docs/settlements/florence.md §2–§4).
-import { RADIUS, DUOMO, CAMPANILE, BAPTISTERY, PALAZZO, LOGGIA, ARNO, BRIDGE } from './layout.js';
+import { RADIUS, DUOMO, CAMPANILE, BAPTISTERY, PALAZZO, LOGGIA, ORSAN, ARNO, BRIDGE } from './layout.js';
 
 const E = [
   { t: 'duomo', ...DUOMO, interior: true },
@@ -7,6 +7,7 @@ const E = [
   { t: 'baptistery', c: BAPTISTERY, a: 12.8, h: 26 },
   { t: 'palazzo', rect: PALAZZO, h: 30, front: 'w', tower: { u: 13, s: 7, h: 94 } },
   { t: 'loggia', rect: LOGGIA, h: 9.5, n: 3 },
+  { t: 'orsanmichele', rect: ORSAN, h: 39.5 },
 ];
 export const centre = {
   id: 'florence-centre',

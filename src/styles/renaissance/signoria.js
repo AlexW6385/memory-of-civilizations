@@ -12,6 +12,7 @@
 // timber brackets, the open middle.
 
 import { box, lathe, frustum, rod } from '../../core/geom.js';
+import { Float32BufferAttribute } from '../../core/three.js';
 import { faceFrame, Local, ext, archOutline, headPts, voussoirs, wrect, sheet } from './face.js';
 import { ball, limb, T } from '../qing/carving.js';
 
@@ -49,6 +50,18 @@ function rusticate(Lc, a, b, y0, y1, holes, proj, rand, course = 0.72) {
   }
 }
 
+/** A box without its face toward [nx, nz] (the back of a block against its wall), and without its top if asked. */
+function dropFace(g, [nx, nz], top = false) {
+  if (g.index) g = g.toNonIndexed();
+  const P = g.attributes.position.array, N = g.attributes.normal.array, keepP = [], keepN = [];
+  for (let i = 0; i < P.length; i += 9) {
+    if (N[i] * nx + N[i + 2] * nz > 0.99 || (top && N[i + 1] > 0.99)) continue;
+    for (let k = 0; k < 9; k++) { keepP.push(P[i + k]); keepN.push(N[i + k]); }
+  }
+  g.setAttribute('position', new Float32BufferAttribute(keepP, 3)); g.setAttribute('normal', new Float32BufferAttribute(keepN, 3));
+  return g;
+}
+
 /** A two-light window under a round arch, centred at uc with its sill at s (local face coordinates). */
 function bifora(Lc, uc, s, { w = 2.6, hl = 3.2, vou = 0.75, proj = 0.34 } = {}) {
   const r = w / 2, ys = s + hl;
@@ -58,7 +71,7 @@ function bifora(Lc, uc, s, { w = 2.6, hl = 3.2, vou = 0.75, proj = 0.34 } = {}) 
   const holes = [archOutline(uc - lc, ys - 0.1, lw, ys, 'trefoil', 7), archOutline(uc + lc, ys - 0.1, lw, ys, 'trefoil', 7)];
   const oc = []; for (let i = 0; i < 10; i++) { const a = -i / 10 * Math.PI * 2; oc.push([uc + Math.cos(a) * 0.15, ys + 0.98 + Math.sin(a) * 0.15]); }
   holes.push(oc);
-  Lc.add(M, ext(headPts(uc, ys - 0.15, w, 'round', 10), holes, 0.0, 0.1));
+  Lc.add(M, ext(headPts(uc, ys - 0.15, w, 'round', 7), holes, 0.0, 0.1));
   // the jambs, the colonnette with its base and leaf capital, the sill
   for (const sg of [-1, 1]) Lc.box(M, uc + sg * r, s, 0, uc + sg * (lc + lw / 2), ys - 0.15, 0.1);
   Lc.add(M, rod([uc, s + 0.25, 0.08], [uc, ys - 0.42, 0.08], 0.085, 8));
@@ -94,7 +107,10 @@ export function palazzo(el, { bag, col }) {
   const RU = new Local(), tw = el.tower ? el.tower.s ?? 7 : 0, tu = el.tower ? el.tower.u ?? 13 : -99;
   for (const f of 'nsew') {
     const { M: FM, L } = faceFrame(rect, f, y), Lc = new Local(), isFront = f === front;
-    Lc.put = (u0, y0, d0, u1, y1, d1) => { const r = wrect(FM, u0, d0, u1, d1); RU.add(PF, box(r[0], y + y0, r[1], r[2], y + y1, r[3])); };
+    Lc.noBack = true; Lc.L = L;
+    const nb = f === 'w' ? [1, 0] : f === 'e' ? [-1, 0] : f === 'n' ? [0, 1] : [0, -1];       // the inward normal: the blocks' backs, never seen
+    // above the eye the blocks' tops are never seen from the street either (a few centimetres of ledge seen from the air)
+    Lc.put = (u0, y0, d0, u1, y1, d1) => { const r = wrect(FM, u0, d0, u1, d1); RU.add(PF, dropFace(box(r[0], y + y0, r[1], r[2], y + y1, r[3]), nb, y0 > 2.5)); };
     const nWin = Math.max(2, Math.round(L / 8)), wu = (i) => (i + 0.5) * L / nWin;
     // the string courses under the windows and the cornice under the corbels
     for (const ys of sills) Lc.box(PF, -0.45, ys - 0.4, -0.04, L + 0.45, ys, 0.45);
@@ -167,7 +183,9 @@ function tower(el, { bag, col }, rect, front, tu, s, P, yc, y, RU) {
   const rand = rng(1310);
   for (const f of 'nsew') {
     const { M: TM, L } = faceFrame(tr, f, 0), Lc = new Local();
-    Lc.put = (u0, y0, d0, u1, y1, d1) => { const r = wrect(TM, u0, d0, u1, d1); RU.add(PF, box(r[0], y0, r[1], r[2], y1, r[3])); };
+    Lc.noBack = true; Lc.L = L;
+    const nb = f === 'w' ? [1, 0] : f === 'e' ? [-1, 0] : f === 'n' ? [0, 1] : [0, -1];
+    Lc.put = (u0, y0, d0, u1, y1, d1) => { const r = wrect(TM, u0, d0, u1, d1); RU.add(PF, dropFace(box(r[0], y0, r[1], r[2], y1, r[3]), nb, true)); };
     // the shaft: rough courses, small windows, two string bands
     const holes = [];
     for (const wy of [y + 40, y + 50]) { holes.push({ u0: L / 2 - 0.55, u1: L / 2 + 0.55, y0: wy - 0.1, y1: wy + 2.3 }); Lc.add(O, ext(archOutline(L / 2, wy, 0.9, wy + 1.6, 'round', 6), [], -0.03, 0.01)); Lc.box(PF, L / 2 - 0.6, wy - 0.2, -0.04, L / 2 + 0.6, wy, 0.25); voussoirs(Lc, PF, L / 2, wy + 1.6, 0.45, 0.85, -0.04, 0.16, 7, 0.05); }

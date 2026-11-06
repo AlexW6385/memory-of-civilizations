@@ -16,7 +16,7 @@
 // d outward) and merged per material: Florence has no mesh to spare for an instanced shape.
 
 import { Matrix4 } from '../../core/three.js';
-import { box, lathe, rod } from '../../core/geom.js';
+import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { Local, ext, archOutline, headPts } from './face.js';
 import { ball, limb, T } from '../qing/carving.js';
 
@@ -137,8 +137,18 @@ function cornerPilaster(bag, cx, cz, a, t, w, p, y0, y1, bh) {
   const kA = Math.round((t - Math.PI / 8) / (Math.PI / 4)), kB = kA + 1;
   const R = (off) => (a + off) / C8, cp = (off) => [cx + Math.cos(t) * R(off), cz + Math.sin(t) * R(off)];
   const poly = [onFace(kA, -0.05, w, true), onFace(kA, p, w, true), cp(p), onFace(kB, p, w, false), onFace(kB, -0.05, w, false), cp(-0.05)];
-  const n = Math.max(1, Math.round((y1 - y0) / bh));
-  for (let i = 0; i < n; i++) bag.add(i % 2 ? G : M, plan(M, poly, y0 + i * (y1 - y0) / n, y0 + (i + 1) * (y1 - y0) / n));
+  // only the four faces that show (the back two lie in the wall; the ends under the plinth and the cornice)
+  const n = Math.max(1, Math.round((y1 - y0) / bh)), cxp = poly.reduce((s, p) => s + p[0], 0) / 6, czp = poly.reduce((s, p) => s + p[1], 0) / 6;
+  for (let i = 0; i < n; i++) {
+    const ya = y0 + i * (y1 - y0) / n, yb = y0 + (i + 1) * (y1 - y0) / n, t = [];
+    for (let e = 0; e < 4; e++) {
+      let [pa, pb] = [poly[e], poly[e + 1]];
+      const dx = pb[0] - pa[0], dz = pb[1] - pa[1], mx = (pa[0] + pb[0]) / 2 - cxp, mz = (pa[1] + pb[1]) / 2 - czp;
+      if (-dz * mx + dx * mz < 0) [pa, pb] = [pb, pa];
+      t.push(pa[0], ya, pa[1], pb[0], ya, pb[1], pb[0], yb, pb[1], pa[0], ya, pa[1], pb[0], yb, pb[1], pa[0], yb, pa[1]);
+    }
+    bag.add(i % 2 ? G : M, fromTriangles(t));
+  }
 }
 
 /** baptistery: { c, a (apothem), h (to the top of the attic), y } — doors on the east, north and south, the scarsella on the west. */
@@ -173,6 +183,7 @@ export function baptistery(el, { bag, col }) {
   }
   for (let k = 0; k < 8; k++) {
     const { M: FM } = octFace(cx, cz, a, k, y), Lc = new Local();
+    Lc.noBack = true; Lc.L = L;
     const door = k === 0 ? 'paradise' : k === 2 ? 'pisano' : k === 6 ? 'ghiberti' : null, west = k === 4;
     const i0 = cw, i1 = L - cw, bw = (i1 - i0) / 3, pw = 0.55;
     // ── the lower register: two green pilasters on the face, three bays of framed panels (the door in the middle one)

@@ -39,12 +39,30 @@ export class Local {
   loose(mat, g) { this.free.push([mat, g]); return g; }
   add(mat, g) { if (!g) return g; if (!this.m.has(mat)) this.m.set(mat, []); this.m.get(mat).push(g); return g; }
   /** a box in local coordinates (u0..u1, y0..y1, d0..d1) */
-  box(mat, u0, y0, d0, u1, y1, d1) { return this.add(mat, box(Math.min(u0, u1), Math.min(y0, y1), Math.min(d0, d1), Math.max(u0, u1), Math.max(y0, y1), Math.max(d0, d1))); }
+  box(mat, u0, y0, d0, u1, y1, d1) {
+    const g = box(Math.min(u0, u1), Math.min(y0, y1), Math.min(d0, d1), Math.max(u0, u1), Math.max(y0, y1), Math.max(d0, d1));
+    // (only within the face's length: past the corners the back of a cornice may show)
+    const inside = this.L === undefined || (Math.min(u0, u1) >= -1e-6 && Math.max(u0, u1) <= this.L + 1e-6);
+    return this.add(mat, this.noBack && inside && Math.min(d0, d1) <= 1e-6 ? dropBack(g) : g);
+  }
   emit(bag, M = null) {
     for (const [mat, list] of this.m) { if (!list.length) continue; const g = merge(list); if (M) g.applyMatrix4(M); bag.add(mat, g); }
     for (const [mat, g] of this.free) { if (M) g.applyMatrix4(M); bag.add(mat, g); }
     this.m.clear(); this.free = [];
   }
+}
+
+/** A piece without its faces toward −d (its back against the wall it stands on): a Local with `noBack` set drops them from every box reaching back to the wall's plane. */
+export function dropBack(g) {
+  if (g.index) g = g.toNonIndexed();
+  const P = g.attributes.position.array, N = g.attributes.normal.array, kp = [], kn = [];
+  for (let i = 0; i < P.length; i += 9) {
+    if (N[i + 2] < -0.99 && N[i + 5] < -0.99 && N[i + 8] < -0.99) continue;
+    for (let k = 0; k < 9; k++) { kp.push(P[i + k]); kn.push(N[i + k]); }
+  }
+  const m = new BufferGeometry();
+  m.setAttribute('position', new Float32BufferAttribute(kp, 3)); m.setAttribute('normal', new Float32BufferAttribute(kn, 3));
+  return m;
 }
 
 /** An outline [[u, y], …] (with holes, each [[u, y], …]) extruded from d0 to d1. */
@@ -88,7 +106,7 @@ export function voussoirs(L, mat, uc, yc, r0, r1, d0, d1, n = 9, gap = 0.04) {
     const a0 = Math.PI * i / n, a1 = Math.PI * (i + 1) / n, am = (a0 + a1) / 2, len = 2 * rr * Math.sin((a1 - a0) / 2) - gap;
     const g = box(-len / 2, -t / 2, d0, len / 2, t / 2, d1);
     g.rotateZ(am + Math.PI / 2); g.translate(uc + Math.cos(am) * rr, yc + Math.sin(am) * rr, 0);
-    L.add(mat, g);
+    L.add(mat, L.noBack && d0 <= 1e-6 ? dropBack(g) : g);
   }
 }
 
