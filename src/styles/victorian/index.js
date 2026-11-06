@@ -7,23 +7,12 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import '../gothic/town.js';
 import '../vernacular/index.js';
+import { riverFront } from './palace.js';
+import { ironBridge, embankment } from './bridge.js';
 
 const S = 'limestone_yellow', SL = 'slate';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pinnacle = (bag, x, y, z, s = 0.6, h = 3) => { bag.add(S, box(x - s / 2, y, z - s / 2, x + s / 2, y + h * 0.4, z + s / 2)); bag.add(S, lathe([[s * 0.5, 0], [0.001, h * 0.6]], 4, null, x, y + h * 0.4, z)); };
-/** river_front: a long Gothic Revival range { rect, h, y, face ('e'…) } — bays of tall windows, pinnacles, a steep roof of iron tiles. */
-function riverFront(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 22, f = el.face ?? 'e';
-  bag.add(S, box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y, y + h); col.floor(el.rect, y + h);
-  const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, n = Math.floor(L / 4.5);
-  for (let i = 0; i <= n; i++) {
-    const u = (along ? x0 : z0) + i * L / n, px = along ? u : (f === 'e' ? x1 : x0), pz = along ? (f === 's' ? z1 : z0) : u;
-    bag.add(S, box(px - 0.35, y, pz - 0.35, px + 0.35, y + h + 1, pz + 0.35)); pinnacle(bag, px, y + h + 1, pz, 0.7, 3.5);
-    if (i < n) for (const yy of [y + 3, y + 9, y + 15]) { const m = u + L / n / 2, q = f === 'e' ? [x1 - 0.02, m - 1, x1 + 0.06, m + 1] : f === 'w' ? [x0 - 0.06, m - 1, x0 + 0.02, m + 1] : f === 's' ? [m - 1, z1 - 0.02, m + 1, z1 + 0.06] : [m - 1, z0 - 0.06, m + 1, z0 + 0.02]; bag.add('opening', box(q[0], yy, q[1], q[2], yy + 4.2, q[3])); }
-  }
-  const w = along ? z1 - z0 : x1 - x0;
-  bag.add('lead', frustum([x0 + 1, z0 + 1, x1 - 1, z1 - 1], y + h, y + h + w * 0.35, along ? 0 : w / 2 - 1.05, along ? 0 : w / 2 - 1.05, along ? w / 2 - 1.05 : 0, along ? w / 2 - 1.05 : 0));
-}
 /** gothic_tower: { c, s, h, y, clock, spire, crown } — a square tower with corner turrets, tracery panels, the clock stage, a spire or a crown of pinnacles. */
 function gothicTower(el, { bag, col }) {
   const [x, z] = el.c, s = el.s ?? 12, h = el.h ?? 96, y = el.y ?? 0, body = el.clock ? h * 0.58 : h * 0.86;
@@ -105,10 +94,20 @@ function terraceHouse(el, { bag, col }) {
     bag.add('iron', box(rl[0], y + 0.9, rl[1], rl[2], y + 0.95, rl[3]));
     if (!el.simple) for (let u = (along ? x0 : z0) + 0.15; u < (along ? x1 : z1); u += 0.3) bag.add('iron', along ? box(u - 0.012, y, rl[1], u + 0.012, y + 1.0, rl[3]) : box(rl[0], y, u - 0.012, rl[2], y + 1.0, u + 0.012)); }
   bag.add(SL, frustum([x0 - 0.2, z0 - 0.2, x1 + 0.2, z1 + 0.2], y + H, y + H + D * 0.32, along ? 0 : D / 2 + 0.15, along ? 0 : D / 2 + 0.15, along ? D / 2 + 0.15 : 0, along ? D / 2 + 0.15 : 0));
-  for (let i = 0; i <= k; i++) { const u = (along ? x0 : z0) + i * L / k, c = along ? [u - 0.5, (z0 + z1) / 2 - 0.4, u + 0.5, (z0 + z1) / 2 + 0.4] : [(x0 + x1) / 2 - 0.4, u - 0.5, (x0 + x1) / 2 + 0.4, u + 0.5]; bag.add(mat, box(c[0], y + H, c[1], c[2], y + H + D * 0.32 + 1.4, c[3])); }
+  // the chimney stacks on the party walls (one per wall: the neighbour's is the same stack), a stone
+  // coping and a row of terracotta pots, one for each flue
+  for (let i = 0; i < k; i++) {
+    const u = (along ? x0 : z0) + i * L / k, c = along ? [u - 0.5, (z0 + z1) / 2 - 0.4, u + 0.5, (z0 + z1) / 2 + 0.4] : [(x0 + x1) / 2 - 0.4, u - 0.5, (x0 + x1) / 2 + 0.4, u + 0.5], top = y + H + D * 0.32 + 1.4;
+    bag.add(mat, box(c[0], y + H, c[1], c[2], top, c[3]));
+    if (el.simple) continue;
+    bag.add('limestone', box(c[0] - 0.08, top - 0.25, c[1] - 0.08, c[2] + 0.08, top - 0.1, c[3] + 0.08));
+    bag.add(mat, box(c[0] - 0.04, top - 0.1, c[1] - 0.04, c[2] + 0.04, top + 0.05, c[3] + 0.04));
+    const np = 2 + Math.floor(rand() * 3);
+    for (let j = 0; j < np; j++) { const t = (j + 0.5) / np - 0.5, px = along ? u + t * 0.85 : (x0 + x1) / 2, pz = along ? (z0 + z1) / 2 : u + t * 0.85; bag.add('terracotta', lathe([[0.14, 0], [0.12, 0.25], [0.11, 0.55], [0.14, 0.63], [0.11, 0.68]], 6, null, px, top + 0.05, pz)); }
+  }
 }
 registerStyle('victorian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.gothic.elements, river_front: riverFront, gothic_tower: gothicTower, terrace_house: terraceHouse, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
+  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, gothic_tower: gothicTower, terrace_house: terraceHouse, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
   objects: {},
 });

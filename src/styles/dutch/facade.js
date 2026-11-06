@@ -54,3 +54,11 @@ export function arch(u, v0, wid, hh, pointed = false, grow = 0) {
   out.push(...outline(u, hw, vs, vs + rise + grow * 0.8, pointed ? 6 : 5));
   return out;
 }
+
+/** A convex polygon in plan ([[x, z]…]) extruded upward from y0 to y1 (piers, cutwaters, pedestals). */
+export function vprism(pts, y0, y1) {
+  const top = pts.map(([x, z]) => [x, y1, z]), bot = pts.map(([x, z]) => [x, y0, z]), n = pts.length, t = [];
+  for (let i = 1; i < n - 1; i++) { t.push(...top[0], ...top[i], ...top[i + 1]); t.push(...bot[0], ...bot[i + 1], ...bot[i]); }
+  for (let i = 0; i < n; i++) { const j = (i + 1) % n; t.push(...top[i], ...bot[i], ...bot[j], ...top[i], ...bot[j], ...top[j]); }
+  return fromTriangles(orientOutward(t));
+}
