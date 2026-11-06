@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.68 — Versailles: the Hall of Mirrors and the Grand Apartment (2026-11-06)
+- The garden block opened inside; the Hall of Mirrors with 17 windows facing 357 mirrors, Rance pilasters with French-order capitals, trophies, the painted barrel vault, chandeliers, parquet and the silver furniture of the 1680s; the Salons de la Guerre (Coysevox's relief) and de la Paix; the King's Grand Apartment in its enfilade (Apollo's silver throne, Mercury's bed, Mars, Diana, Venus with Warin's statue); the Ambassadors' Staircase with its fountain and painted Parts of the World; the Grand Canal ending in a stone landing with steps, quay and boats.
+
 ## v9.67 — Constantinople's Chalke and Senate; Jerusalem's walls and Umayyad palace (2026-11-06)
 - The Chalke gate with its gilded bronze roof, domed bay, gold mosaic vaults and the mosaics of Justinian, Theodora and Belisarius; the Senate house with its six-column porch and statues; the Augustaion's porticoes opened; the Mese's roofed porticoes with shops; the Forum of Constantine's two-storey ring and arches; 6th-century street life; Jerusalem's Herodian retaining walls with margined blocks and Umayyad courses, the Double, Triple and Golden Gates, al-Walid's palace with its court, reused columns, cistern and bridge to the Haram, the pillared building, people.
 
