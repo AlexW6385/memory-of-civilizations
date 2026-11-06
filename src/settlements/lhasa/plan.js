@@ -11,9 +11,11 @@ const E = [];
 /** The ground under a block's south face (the lowest of its edge), a little below it. */
 const foot = (x0, x1, z) => { let m = Infinity; for (let i = 0; i <= 8; i++) m = Math.min(m, hill(x0 + (x1 - x0) * i / 8, z)); return m - 3; };
 /** A battered mass of the palace: x from x0 to x1, z from front (south) to back, its roof at top. */
+const MASSES = [];
 const mass = (x0, x1, front, back, top, o = {}) => {
   const y0 = foot(x0, x1, front);
-  E.push({ t: 'dzong', rect: [x0, back, x1, front], y0, y1: top, mat: o.mat || 'limewash_white', windows: o.windows ?? 's', seed: o.seed ?? Math.round(x0 * 7 + top), wy: y0 + 4, pembe: o.pembe ?? (top - y0 > 40 ? 1.8 : 1.3), ...o });
+  MASSES.push({ t: 'dzong', rect: [x0, back, x1, front], y0, y1: top, mat: o.mat || 'limewash_white', windows: o.windows ?? 's', seed: o.seed ?? Math.round(x0 * 7 + top), wy: y0 + 4, pembe: o.pembe ?? (top - y0 > 40 ? 1.8 : 1.3), ...o });
+  E.push(MASSES[MASSES.length - 1]);
 };
 // the great white frontage (its middle the blank wall where the giant thangkas were hung)
 const STW = [-140, -100], STE = [46, 86];                     // the two zigzag stairs on its face
@@ -92,8 +94,8 @@ for (const x of [TW[0], TE[0]]) for (let za = -14; za > -80; za -= 14) {
   E.push({ t: 'dzong', rect: [x - 3, zb, x + 3, za], y0, y1: hill(x, zb) + 5, batter: 0.5, pembe: 0.6, windows: '', seed: 4 });
 }
 // the zigzag stairs on the frontage, four flights each, the lowest outermost; the top landings onto the frontage roof
-E.push({ t: 'zigzag', x0: STW[0], x1: STW[1], zf: 30, w: 4, n: 4, y1: 22.12, land: 6, start: 'e', bridge: 2.6 });
-E.push({ t: 'zigzag', x0: STE[0], x1: STE[1], zf: 30, w: 4, n: 4, y1: 22.12, land: 6, start: 'w', bridge: 2.6 });
+E.push({ t: 'zigzag', x0: STW[0], x1: STW[1], zf: 30, w: 4, n: 4, y1: 22.12, land: 6, start: 'e', bridge: 2.6, back: 2.4, base: -0.8 });
+E.push({ t: 'zigzag', x0: STE[0], x1: STE[1], zf: 30, w: 4, n: 4, y1: 22.12, land: 6, start: 'w', bridge: 2.6, back: 2.4, base: -0.8 });
 // Shöl: walled on three sides, the fourth the foot of the hill; its gates south, east and west; corner towers at the south
 const [sx0, , sx1, sz1] = SHOL, GZ = 142, GX = -1;
 const wall = (a, b) => E.push({ t: 'dzong', rect: [Math.min(a[0], b[0]) - 1.2, Math.min(a[1], b[1]) - 1.2, Math.max(a[0], b[0]) + 1.2, Math.max(a[1], b[1]) + 1.2], y0: -0.5, y1: 6, batter: 0.4, windows: '', pembe: 0.5 });
@@ -108,6 +110,69 @@ for (const [x, z] of [[sx0, sz1], [sx1, sz1]]) E.push({ t: 'dzong', rect: [x - 5
 E.push({ t: 'doring', at: [-4, 54], h: 6.5 });
 E.push({ t: 'doring', at: [GX, 238], h: 7.5 });
 E.push({ t: 'stone_heap', at: [GX - 6, 237], r: 1.2, seed: 5 }); E.push({ t: 'sangkhang', at: [GX - 9.5, 234], rot: 0 });
+
+// ---- the joints between the masses ---------------------------------------------------------------
+// Every mass is battered on all four faces, so where a lower mass meets a higher one behind it or
+// beside it their sloping faces would part into a V-shaped slot. The palace reads as one stepped
+// body: the lower mass's roof runs on, frieze and coping with it, until it meets the higher one's
+// wall. Each joint is a filler block with the lower mass's height, frieze and colours, its sides
+// following the faces of the two masses (0.15 m inside them), its ends buried in both.
+{
+  const geo = (m) => { const pe = m.pembe ?? 1.8, cap = m.cap ?? (pe > 1 ? 0.4 : 0.3), yw = m.y1 - pe - cap, b = m.batter ?? (yw - m.y0) * 0.08; return { yw, k: b / (yw - m.y0), b }; };
+  // a face's position at height y (W, E: x; N, S: z), its batter carried below the foot or above the wall's top as a straight line
+  const line = (m, side) => { const g = geo(m), [x0, z0, x1, z1] = m.rect; return (y) => { const i = g.k * (y - m.y0); return side === 'W' ? x0 + i : side === 'E' ? x1 - i : side === 'N' ? z0 + i : z1 - i; }; };
+  const at = (m, side, y) => line(m, side)(Math.min(y, geo(m).yw));
+  const FILL = [], ZN = new Map();
+  /** A filler for the lower mass L: sides { W, E, N, S } each a function of y (or a number: upright). */
+  const fill = (L, sides) => {
+    const g = geo(L), y0 = L.y0, yw = g.yw, P = (f, y) => (typeof f === 'number' ? f : f(y));
+    const [w0, w1, e0, e1, n0, n1, s0, s1] = [P(sides.W, y0), P(sides.W, yw), P(sides.E, y0), P(sides.E, yw), P(sides.N, y0), P(sides.N, yw), P(sides.S, y0), P(sides.S, yw)];
+    if (Math.min(e0, e1) - Math.max(w0, w1) < 0.5 || Math.min(s0, s1) - Math.max(n0, n1) < 0.5) return;
+    const el = { t: 'dzong', rect: [w0, n0, e0, s0], bs: [w1 - w0, e0 - e1, n1 - n0, s0 - s1], y0, y1: L.y1, mat: L.mat, pembe: L.pembe, cap: L.cap, capMat: L.capMat, split: L.split, low: L.low, windows: '', joint: true };
+    FILL.push(el); E.push(el);
+    return el;
+  };
+  const inward = (cands, side, y) => cands.reduce((a, c) => { const va = typeof a === 'number' ? a : a(y), vc = typeof c === 'number' ? c : c(y); return (side === 'W' || side === 'N') === (vc > va) ? c : a; });
+  const off = (f, d) => (y) => f(y) + d;
+  const higher = (L, H) => H !== L && H.y1 > L.y1 + 0.3 && L.y1 > H.y0 + 0.5;
+  // behind: the masses higher than L whose fronts stand behind its back
+  for (const L of MASSES) {
+    const [lx0, lb, lx1, lf] = L.rect, g = geo(L);
+    const Hs = MASSES.filter((H) => higher(L, H) && Math.min(lx1, H.rect[2]) - Math.max(lx0, H.rect[0]) > 1 && H.rect[3] > lb - 14 && H.rect[3] < lf - 3 && H.rect[1] < lb
+      && at(H, 'S', L.y1) < lb + g.b - 0.05);
+    if (!Hs.length) continue;
+    const zn = Math.min(...Hs.map((H) => at(H, 'S', L.y1))) - 0.6;
+    const hw = Hs.reduce((a, H) => (H.rect[0] < a.rect[0] ? H : a)), he = Hs.reduce((a, H) => (H.rect[2] > a.rect[2] ? H : a)), yw = g.yw;
+    const W = inward([off(line(L, 'W'), 0.15), off(line(hw, 'W'), 0.15)], 'W', yw), Ea = inward([off(line(L, 'E'), -0.15), off(line(he, 'E'), -0.15)], 'E', yw);
+    if (fill(L, { W, E: Ea, N: zn, S: lb + g.b + 0.5 })) ZN.set(L, zn);
+  }
+  // beside: a higher neighbour east or west, a few metres off or touching
+  for (const L of MASSES) {
+    const [lx0, lb, lx1, lf] = L.rect, g = geo(L), yw = g.yw;
+    for (const H of MASSES) {
+      if (!higher(L, H) || Math.min(lf, H.rect[3]) - Math.max(lb, H.rect[1]) < 1) continue;
+      const S = inward([off(line(L, 'S'), -0.15), off(line(H, 'S'), -0.15)], 'S', yw);
+      const back = (m) => (ZN.has(m) ? ZN.get(m) + 0.1 : off(line(m, 'N'), 0.15)), N = inward([back(L), back(H)], 'N', yw);
+      if (H.rect[0] >= lx1 - 3 && H.rect[0] - lx1 < 7 && H.rect[2] > lx1 + 3 && at(H, 'W', L.y1) > lx1 - g.b + 0.05)
+        fill(L, { W: lx1 - g.b - 0.5, E: at(H, 'W', L.y1) + 0.6, N, S });
+      if (H.rect[2] <= lx0 + 3 && lx0 - H.rect[2] < 7 && H.rect[0] < lx0 - 3 && at(H, 'E', L.y1) < lx0 + g.b - 0.05)
+        fill(L, { W: at(H, 'E', L.y1) - 0.6, E: lx0 + g.b + 0.5, N, S });
+    }
+  }
+  // no windows where a mass, a joint or a stair stands against the face
+  const bodies = [...MASSES, ...FILL].map((m) => { const [x0, z0, x1, z1] = m.rect, [w, e, n, s] = m.bs || [0, 0, 0, 0]; return { m, r: [Math.min(x0, x0 + w) - 0.4, Math.min(z0, z0 + n) - 0.4, Math.max(x1, x1 - e) + 0.4, Math.max(z1, z1 - s) + 0.4, -50, m.y1] }; });
+  const stairs = [];
+  for (const el of E) {
+    if (el.t === 'flight') {
+      const [ax, az] = el.a, [bx, bz] = el.b, hw = (el.w ?? 3.3) / 2 + 0.45 + 0.6;
+      for (let i = 0; i < 4; i++) { const t0 = i / 4, t1 = (i + 1) / 4, xa = ax + (bx - ax) * t0, xb = ax + (bx - ax) * t1, za = az + (bz - az) * t0, zb = az + (bz - az) * t1;
+        stairs.push([Math.min(xa, xb) - hw, Math.min(za, zb) - hw, Math.max(xa, xb) + hw, Math.max(za, zb) + hw, -50, el.y0 + (el.y1 - el.y0) * t1 + 1.6]); }
+    } else if (el.t === 'landing') stairs.push([el.rect[0] - 0.6, el.rect[1] - 0.6, el.rect[2] + 0.6, el.rect[3] + 0.6, -50, el.y + 1.6]);
+    else if (el.t === 'zigzag') stairs.push([el.x0 - 0.6, el.zf - 4, el.x1 + 0.6, el.zf + el.n * el.w + 0.6, -50, el.y1 + 1.6]);
+    else if (el.t === 'triple_stair') stairs.push([el.xt - (el.land ?? 4.5) - 0.6, el.zc - 6, el.xf + 0.6, el.zc + 6, -50, el.y1 + 6]);
+  }
+  for (const m of MASSES) if (m.windows) m.win = { ...(m.win || {}), avoid: [...(m.win?.avoid || []), ...bodies.filter((b) => b.m !== m).map((b) => b.r), ...stairs] };
+}
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('shol', SHOL, 0, 'open'), room('below the palace', [sx0 + 2, 47, sx1 - 2, 62], 0, 'open'),

@@ -14,6 +14,10 @@ export function hill(x, z) {
   return Math.max(60 * fx * fz, c < 1 ? CHOKPORI.h * smooth(1, 0, c) : 0);
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** The printing house (Shöl Parkhang, c. 1690), "a two-story building on the southeast corner of the Shol". */
+export const PRINTERY = [150, 164, 192, 198];
+/** The printers' benches in its upper room (pairs facing each other across each), along the room's middle. */
+export const BENCHES = [158.6, 162.2, 165.8, 169.4, 173, 176.6, 180.2].map((x) => [x, PRINTERY[1] + 7.5 - 2.5]);
 let LOTS = null;
 /** Houses in Shöl (close-packed) and scattered farmsteads on the valley floor. */
 export function lots() {
@@ -27,6 +31,7 @@ export function lots() {
     const w = 10 + rand() * 4, d = 9 + rand() * 4;
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
   }
+  LOTS = LOTS.filter((l) => !(l.rect[2] > PRINTERY[0] - 4 && l.rect[0] < PRINTERY[2] + 4 && l.rect[3] > PRINTERY[1] - 4 && l.rect[1] < SHOL[3]));
   for (let k = 0; k < 400 && LOTS.length < 260; k++) {
     const a = rand() * Math.PI * 2, d = 230 + rand() * 160, x = Math.cos(a) * d, z = Math.sin(a) * d;
     if (z < 40 || hill(x, z) > 1 || Math.hypot(x, z) > RADIUS - 30) continue;
