@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.38 — Mesopotamia, Rome, Byzantium, the North, Beijing and Seoul in detail (2026-11-06)
+- Babylon's paved Processional Way, glazed lion walls with rosettes, stepped battlements, Ishtar Gate rows of bulls and dragons, a walkable Southern Palace with the enamelled throne-room facade, Etemenanki's south stair; Ur's houses after Woolley, the cone-studded temenos terrace and gate towers; two-storey arcaded stadium facades, Ostia-type insulae with shops; the Hippodrome's carceres, obelisk, Serpent Column and kathisma, Hagia Eirene as a domed basilica, the columns of Justinian and Constantine and the Milion, the Mese rerouted; Borgund's open svalgang, turret, bell tower and log farm; the Kremlin's swallowtail merlons and tented towers, St Basil's arcade and kokoshniks, izby with horse-head ridges; the Forbidden City's carved balustrades, dragon spouts, lions, terrace bronzes, roof beasts and nailed gates; Gyeongbokgung's japsang, haetae and balustrades.
+
 ## v9.37 — Egypt, Angkor, Borobudur, the Pacific and the Potala in detail (2026-11-06)
 - Edfu's falcons, pylon smiting reliefs, flagpole clamps and a real birth house; Giza's royal ship, sealed boat pits and bakeries; Angkor's redented lotus-bud towers, porticoes, bas-relief, balustered windows, devatas and libraries; Borobudur's 72 pierced stupas, crowning stupa, kala-makara gates, spouts and pilgrims; sculpted moai, fitted ahu, Rano Raraku quarry and hare paenga; the Māori pā's carved figures, chief's house, pātaka, waka taua and kūmara gardens; the Potala in stepped battered masses with Tibetan windows, pembe friezes, zigzag stairs and banners, Shöl walled with gates and pillars.
 
