@@ -1,8 +1,8 @@
 // The Haram al-Sharif and Jerusalem about 700 (docs/settlements/jerusalem.md §2–§4): the Dome of
 // the Rock (the full building of the previous design, src/buildings/dome-of-the-rock) on its
-// platform; the esplanade's retaining walls; the al-Aqsa mosque; the Church of the Holy Sepulchre.
+// platform; the esplanade's retaining walls; the al-Aqsa mosque. (The city and the Holy Sepulchre: city.js.)
 
-import { HARAM, AQSA, SEPULCHRE, height } from './layout.js';
+import { HARAM, AQSA, height } from './layout.js';
 import domePlan from '../../buildings/dome-of-the-rock/plan.js';
 
 const [hx0, hz0, hx1, hz1] = HARAM.rect, T = HARAM.top;
@@ -26,15 +26,6 @@ export const haram = {
   bounds: [hx0 - 26, hz0 - 4, hx1 + 4, hz1 + 4],
   elements: E,
   rooms: [],
-};
-// the Church of the Holy Sepulchre: the Anastasis rotunda and the basilica with its atrium
-export const sepulchre = {
-  id: 'jerusalem-sepulchre', style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true,
-  entrance: { at: [-320, -20], facing: 'n' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, SEPULCHRE[2] + 2, SEPULCHRE[3] + 2], rooms: [],
-  elements: [
-    { t: 'thermae', rect: [SEPULCHRE[0], SEPULCHRE[1], SEPULCHRE[2], SEPULCHRE[1] + 50], h: 22, y: height(-320, -135) },
-    { t: 'porticus', rect: [SEPULCHRE[0], SEPULCHRE[1] + 54, SEPULCHRE[2], SEPULCHRE[3]], h: 9, depth: 6, y: height(-320, -70) },
-  ],
 };
 export const dome = { ...domePlan, origin: [0, -20], district: undefined, view: [-28, -48, 28, 8] };
 export default dome;
