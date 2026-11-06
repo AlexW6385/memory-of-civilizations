@@ -306,7 +306,7 @@ export function orangeTub(bag, col, x, y, z, s = 0.36) {
   }
   // a raised panel with a sun on each side
   for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) bag.add(GD, box(x + dx * (s + 0.004) - Math.abs(dz) * 0.12 - 0.004, y + 0.28, z + dz * (s + 0.004) - Math.abs(dx) * 0.12 - 0.004, x + dx * (s + 0.004) + Math.abs(dz) * 0.12 + 0.004, y + 0.46, z + dz * (s + 0.004) + Math.abs(dx) * 0.12 + 0.004));
-  bag.add('soil', box(x - s + 0.02, y + 0.7, z - s + 0.02, x + s - 0.02, y + 0.71, z + s - 0.02));
+  bag.add('silt', box(x - s + 0.02, y + 0.7, z - s + 0.02, x + s - 0.02, y + 0.71, z + s - 0.02));
   bag.add('bark_dark', lathe([[0.05, 0], [0.04, 0.9], [0.03, 1.05]], 6, null, x, y + 0.7, z));
   bag.add('lotus_leaf', lathe([[0.001, 0], [0.32, 0.06], [0.45, 0.3], [0.42, 0.55], [0.25, 0.75], [0.001, 0.82]], 10, (th, i) => (i > 0 && i < 5 ? 1 + 0.1 * Math.cos(th * 5 + i) : 1), x, y + 1.62, z));
   for (let k = 0; k < 7; k++) { const a = k * 2.4, r = 0.36 + (k % 3) * 0.03, yy = y + 1.75 + (k % 4) * 0.13; bag.add('stucco_saffron', lathe([[0.001, 0], [0.03, 0.01], [0.035, 0.035], [0.001, 0.07]], 6, null, x + Math.cos(a) * r, yy, z + Math.sin(a) * r)); }
