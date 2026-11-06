@@ -201,19 +201,71 @@ function ttFloor(el, { bag, col }) {
   col.floor(el.rect, y);
 }
 
-/** compound: an apartment compound { rect, seed }: a blank outer wall on a talud, rooms (flat-roofed blocks) round three or four patios, a small altar in the main patio, a door on one side. */
+/**
+ * compound: an apartment compound { rect, seed }: a blank outer wall on a talud, one doorway in it;
+ * rooms (flat-roofed blocks) round a sunken main patio and a second one; the rooms on the main patio
+ * raised on low talud platforms and opened to it by porticoes of square pillars, the principal room on
+ * its north side higher, with a crest of almenas; a small talud-tablero altar in the patio's middle.
+ */
 function compound(el, { bag, col }) {
-  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 3.2;
-  for (const r of [[x0, z0, x1, z0 + 1], [x0, z1 - 1, x1, z1], [x0, z0 + 1, x0 + 1, z1 - 1], [x1 - 1, z0 + 1, x1, z1 - 1]]) { bag.add(S, box(r[0], 0, r[1], r[2], h, r[3])); col.rect(r, 0, h); }
-  bag.add(RB, frustum([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], 0, 0.9, 0.5, 0.5, 0.5, 0.5));
-  // rooms: a grid of blocks with patios left open
-  const nx = 3, nz = 3, cw = (x1 - x0 - 2) / nx, cd = (z1 - z0 - 2) / nz, open = new Set([4, Math.floor(rand() * 9)]);
+  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 3.2, gate = Math.floor(rand() * 4), gw = 0.9;
+  // the outer wall, a doorway in the middle of one side
+  const xm = (x0 + x1) / 2, zm = (z0 + z1) / 2;
+  const sides = [[[x0, z0, x1, z0 + 1], 'x'], [[x0, z1 - 1, x1, z1], 'x'], [[x0, z0 + 1, x0 + 1, z1 - 1], 'z'], [[x1 - 1, z0 + 1, x1, z1 - 1], 'z']];
+  sides.forEach(([r, ax], i) => {
+    const parts = i !== gate ? [r] : ax === 'x' ? [[r[0], r[1], xm - gw, r[3]], [xm + gw, r[1], r[2], r[3]]] : [[r[0], r[1], r[2], zm - gw], [r[0], zm + gw, r[2], r[3]]];
+    for (const q of parts) { bag.add(S, box(q[0], 0, q[1], q[2], h, q[3])); col.rect(q, 0, h); }
+    if (i === gate) {                                                                   // the wall over the doorway on a painted lintel
+      bag.add(S, ax === 'x' ? box(xm - gw, 2.6, r[1], xm + gw, h, r[3]) : box(r[0], 2.6, zm - gw, r[2], h, zm + gw));
+      bag.add(RD, ax === 'x' ? box(xm - gw - 0.2, 2.3, r[1] - 0.05, xm + gw + 0.2, 2.6, r[3] + 0.05) : box(r[0] - 0.05, 2.3, zm - gw - 0.2, r[2] + 0.05, 2.6, zm + gw + 0.2));
+    }
+  });
+  bag.add(RB, frustum([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], 0, 0.9, 0.5, 0.5, 0.5, 0.5, { noBottom: true }));
+  // rooms: a grid of blocks, the middle cell the main patio, another the second patio
+  const nx = 3, nz = 3, cw = (x1 - x0 - 2) / nx, cd = (z1 - z0 - 2) / nz, second = [0, 2, 6, 8][Math.floor(rand() * 4)];
+  const P = [x0 + 1 + cw, z0 + 1 + cd, x0 + 1 + 2 * cw, z0 + 1 + 2 * cd];            // the main patio
   for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
     const k = i * nz + j, cx0 = x0 + 1 + i * cw, cz0 = z0 + 1 + j * cd;
-    if (open.has(k)) { bag.add('stucco', box(cx0 + 0.5, 0, cz0 + 0.5, cx0 + cw - 0.5, 0.06, cz0 + cd - 0.5)); if (k === 4) { bag.add(RD, box(cx0 + cw / 2 - 0.8, 0, cz0 + cd / 2 - 0.8, cx0 + cw / 2 + 0.8, 1, cz0 + cd / 2 + 0.8)); } continue; }
+    if (k === 4 || k === second) {
+      bag.add(k === 4 ? 'stucco_pale' : 'stucco', frustum([cx0 + 0.5, cz0 + 0.5, cx0 + cw - 0.5, cz0 + cd - 0.5], -0.2, 0.06, 0, 0, 0, 0, { noBottom: true }));
+      if (k === 4) {
+        // the altar: a talud and a framed tablero, a little shrine in miniature
+        const ax = cx0 + cw / 2, az = cz0 + cd / 2;
+        bag.add(RD, frustum([ax - 1, az - 1, ax + 1, az + 1], 0.06, 0.5, 0.2, 0.2, 0.2, 0.2, { noBottom: true, noTop: true }));
+        tablero(bag, [ax - 0.85, az - 0.85, ax + 0.85, az + 0.85], 0.5, 1.15, { out: 0.12, discs: false });
+        col.rect([ax - 1, az - 1, ax + 1, az + 1], 0, 1.15);
+      }
+      continue;
+    }
+    // which side of the room faces the main patio (rooms beside it), and how far
+    const face = k === 1 ? 'e' : k === 7 ? 'w' : k === 3 ? 's' : k === 5 ? 'n' : null;
     const r = [cx0 + 0.6, cz0 + 0.6, cx0 + cw - 0.6, cz0 + cd - 0.6];
-    bag.add(S, box(r[0], 0, r[1], r[2], h - 0.2, r[3])); col.rect(r, 0, h); col.floor(r, h - 0.2);
-    bag.add(RD, box(r[0] - 0.02, 0, r[1] - 0.02, r[2] + 0.02, 0.6, r[3] + 0.02));
+    if (!face) {
+      bag.add(S, box(r[0], 0, r[1], r[2], h - 0.2, r[3])); col.rect(r, 0, h); col.floor(r, h - 0.2);
+      bag.add(RD, box(r[0] - 0.02, 0, r[1] - 0.02, r[2] + 0.02, 0.6, r[3] + 0.02));
+      continue;
+    }
+    const principal = face === 's', ph = principal ? 1.1 : 0.5, rh = h + (principal ? 0.6 : 0) - 0.2, pd = 2.6;
+    // the platform with its stair down into the patio
+    bag.add(RD, frustum(r, 0, ph, 0, 0, 0, 0, { noBottom: true })); col.rect(r, 0, ph); col.floor(r, ph);
+    const [fx, fz] = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[face];
+    const mx = (r[0] + r[2]) / 2, mz = (r[1] + r[3]) / 2, edge = fx ? (fx > 0 ? r[2] : r[0]) : (fz > 0 ? r[3] : r[1]);
+    ttStair({ rect: fx ? [fx > 0 ? edge : edge - ph * 1.6, mz - 1.4, fx > 0 ? edge + ph * 1.6 : edge, mz + 1.4] : [mx - 1.4, fz > 0 ? edge : edge - ph * 1.6, mx + 1.4, fz > 0 ? edge + ph * 1.6 : edge], y0: 0.06, y1: ph, dir: { e: 'w', w: 'e', s: 'n', n: 's' }[face], mat: S }, { bag, col });
+    // the room set back behind its portico; the roof over both; two pillars at the front
+    const back = fx ? (fx > 0 ? [r[0], r[1], r[2] - pd, r[3]] : [r[0] + pd, r[1], r[2], r[3]]) : (fz > 0 ? [r[0], r[1], r[2], r[3] - pd] : [r[0], r[1] + pd, r[2], r[3]]);
+    bag.add(S, box(back[0], ph, back[1], back[2], rh, back[3])); col.rect(back, ph, rh);
+    bag.add(S, box(r[0], rh - 0.45, r[1], r[2], rh, r[3])); col.floor(r, rh);
+    const dw = 0.8, dz = fx ? (fx > 0 ? back[2] : back[0]) : (fz > 0 ? back[3] : back[1]);
+    bag.add('opening', fx ? box(dz - 0.05, ph, mz - dw, dz + 0.05, ph + 2.1, mz + dw) : box(mx - dw, ph, dz - 0.05, mx + dw, ph + 2.1, dz + 0.05));
+    const L = fx ? r[3] - r[1] : r[2] - r[0];
+    for (const t of [1 / 3, 2 / 3]) {
+      const u = (fx ? r[1] : r[0]) + L * t;
+      const [px, pz] = fx ? [edge - fx * 0.45, u] : [u, edge - fz * 0.45];
+      bag.add(S, box(px - 0.3, ph, pz - 0.3, px + 0.3, rh - 0.45, pz + 0.3)); bag.add(RD, box(px - 0.32, ph, pz - 0.32, px + 0.32, ph + 0.5, pz + 0.32));
+      col.rect([px - 0.3, pz - 0.3, px + 0.3, pz + 0.3], ph, rh);
+    }
+    bag.add(RD, box(r[0] - 0.03, rh - 0.45, r[1] - 0.03, r[2] + 0.03, rh - 0.2, r[3] + 0.03));    // the painted cornice band
+    if (principal) for (let x = r[0] + 0.6; x < r[2] - 0.4; x += 1.2) { bag.add(S, box(x - 0.3, rh, edge - 0.25, x + 0.3, rh + 0.7, edge - 0.08)); bag.add(RD, box(x - 0.12, rh + 0.25, edge - 0.27, x + 0.12, rh + 0.55, edge - 0.06)); }
   }
 }
 

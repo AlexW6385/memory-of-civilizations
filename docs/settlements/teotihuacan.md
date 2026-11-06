@@ -30,7 +30,7 @@ Talud-tablero: a sloping apron with a framed vertical panel above [stated: Studi
 
 ## 5. The town
 
-Single-storey walled compounds of plastered stone and adobe, rooms round several patios, flat roofs. [stated: Britannica Kids; ancientcivilizations]
+Single-storey walled compounds of plastered stone and adobe, rooms round several patios, flat roofs. [stated: Britannica Kids; ancientcivilizations] Walls plastered with lime and painted, most often red; columns standing before a room to shade a terrace; almenas on the roofs [stated: cookjmex]. Ours: a blank outer wall on a talud with one doorway under a painted lintel; a sunken main patio with a small talud-tablero altar in its middle; the four rooms on it raised on low red platforms with stairs down, each opened to the patio by a portico of two square pillars under the roof; the principal room on the north side higher, crested with almenas; a second, plain patio; the other rooms closed blocks with a red dado [inferred: the plan after the excavated compounds' type, simplified to a 3 × 3 grid].
 
 ## 6. Ground and water
 
