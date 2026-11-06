@@ -4,6 +4,7 @@ import { box } from '../../core/geom.js';
 import { doricColumn, ionicColumn } from './columns.js';
 import { doricEntablature, pedimentRoof, coffers, krepis } from './order.js';
 import { opening, doors, basin, athenaParthenos } from './objects.js';
+import { PROGRAMME } from './programme.js';
 
 /** Wall crown: a projecting moulded band (hawksbeak and fillet) along the top of a wall. */
 function trim(el, { bag }) {
@@ -23,7 +24,7 @@ export const greek = {
   column: (el, ctx) => (el.order === 'ionic' ? ionicColumn(el, ctx) : doricColumn(el, ctx)),
   trim,
   opening,
-  elements: { doric_entablature: doricEntablature, pediment_roof: pedimentRoof, coffers, krepis },
+  elements: { doric_entablature: doricEntablature, pediment_roof: pedimentRoof, coffers, krepis, ...PROGRAMME },
   objects: { doors, basin, athena_parthenos: athenaParthenos },
 };
 

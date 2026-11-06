@@ -9,6 +9,7 @@
 // tiles: pan tiles with cover-tile ridges, a ridge course, antefixes at the eaves.
 
 import { box, lathe, fromTriangles, quad, orientOutward } from '../../core/geom.js';
+import { Matrix4 } from '../../core/three.js';
 import { subtractRects } from '../../core/build.js';
 
 /**
@@ -52,18 +53,18 @@ export function doricEntablature(el, { bag }) {
   };
   const tx = sideTriglyphs(X, O[0], O[2]);
   const tz = sideTriglyphs(Z, O[1], O[3]);
-  const gut = [];
+  const gut = [], tri = [];
   const triglyph = (cx, cz, along) => {
     // three bars (femora) and two channels; the outer chamfers implied by narrower end bars
     const g = (tw - 0.1 * 2) / 3;
     const segs = [[-tw / 2, -tw / 2 + g], [-tw / 2 + g + 0.1, tw / 2 - g - 0.1], [tw / 2 - g, tw / 2]];
     for (const [a, b] of segs) {
-      if (along === 'x') parts.push(box(cx + a, yA, cz - 0.05, cx + b, yF - 0.08, cz + 0.05));
-      else parts.push(box(cx - 0.05, yA, cz + a, cx + 0.05, yF - 0.08, cz + b));
+      if (along === 'x') tri.push(box(cx + a, yA, cz - 0.05, cx + b, yF - 0.08, cz + 0.05));
+      else tri.push(box(cx - 0.05, yA, cz + a, cx + 0.05, yF - 0.08, cz + b));
     }
     // channel backs and the capital band of the triglyph
-    if (along === 'x') parts.push(box(cx - tw / 2, yF - 0.12, cz - 0.07, cx + tw / 2, yF, cz + 0.07));
-    else parts.push(box(cx - 0.07, yF - 0.12, cz - tw / 2, cx + 0.07, yF, cz + tw / 2));
+    if (along === 'x') tri.push(box(cx - tw / 2, yF - 0.12, cz - 0.07, cx + tw / 2, yF, cz + 0.07));
+    else tri.push(box(cx - 0.07, yF - 0.12, cz - tw / 2, cx + 0.07, yF, cz + tw / 2));
     // regula and six guttae under the taenia
     const ry = yA - tH;
     if (along === 'x') parts.push(box(cx - tw / 2, ry - 0.06, cz - 0.04, cx + tw / 2, ry, cz + 0.04));
@@ -95,6 +96,8 @@ export function doricEntablature(el, { bag }) {
   mut(both(tx), null, 'zn'); mut(both(tx), null, 'zp');
   mut(both(tz).slice(1, -1), null, 'xn'); mut(both(tz).slice(1, -1), null, 'xp');
   for (const g of parts) bag.add(mat, g);
+  // the triglyphs: painted dark blue where the temple's paint is shown (el.triglyphMat), else of the marble
+  for (const g of tri) bag.add(el.triglyphMat || mat, g);
 }
 
 /**
@@ -102,7 +105,15 @@ export function doricEntablature(el, { bag }) {
  * el = { rect (outer edge of the horizontal geison), y (top of the horizontal geison),
  *        rise (height of the pediment at the centre), tympanumInset, sima, mat, tileMat }
  */
-export function pedimentRoof(el, { bag }) {
+export function pedimentRoof(el, ctx) {
+  if (el.ridge === 'z') {
+    // the ridge north–south: built with the ridge along x about the rectangle's centre, then turned a quarter
+    const [x0, z0, x1, z1] = el.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hx = (x1 - x0) / 2, hz = (z1 - z0) / 2;
+    const m = new Matrix4().makeTranslation(-cx, 0, -cz).premultiply(new Matrix4().makeRotationY(Math.PI / 2)).premultiply(new Matrix4().makeTranslation(cx, 0, cz));
+    const bag = { add: (mat, g) => { g.applyMatrix4(m); ctx.bag.add(mat, g); } };
+    return pedimentRoof({ ...el, ridge: 'x', rect: [cx - hz, cz - hx, cx + hz, cz + hx] }, { ...ctx, bag });
+  }
+  const { bag } = ctx;
   const mat = el.mat || 'marble';
   const [x0, z0, x1, z1] = el.rect;
   const y = el.y, rise = el.rise, zc = (z0 + z1) / 2, half = (z1 - z0) / 2;
@@ -139,14 +150,23 @@ export function pedimentRoof(el, { bag }) {
     for (let k = 0; k <= n; k++) {
       const x = x0 + 1 + k * 0.72;
       cover.push(slopedBar(x - 0.09, x + 0.09, [ze + s * 0.0, y + rg * 0.6 + th], [zc, y + rise + rg * 0.6 + th], 0.12, 0));
-      // antefix: a small upright palmette plate at the eave
-      cover.push(box(x - 0.16, y + rg * 0.6 + th - 0.02, ze - (s < 0 ? 0.04 : -0.0) - (s > 0 ? 0.04 : 0), x + 0.16, y + rg * 0.6 + th + 0.38, ze + (s > 0 ? 0.04 : 0) + (s < 0 ? 0.0 : 0)));
+      // antefix: a small upright palmette plate at the eave (a fan of petals over a pair of volutes)
+      cover.push(antefix(x, y + rg * 0.6 + th - 0.02, ze, 0.38));
     }
     for (const c of cover) bag.add(tileMat, c);
   }
   // ridge course
   parts.push(box(x0 + 0.3, y + rise + rg * 0.6 + th - 0.05, zc - 0.28, x1 - 0.3, y + rise + rg * 0.6 + th + 0.16, zc + 0.28));
   for (const g of parts) bag.add(mat, g);
+}
+
+/** An antefix at (x, y, z) facing ±z, h high: a palmette's outline cut from a plate 4 cm thick. */
+function antefix(x, y, z, h) {
+  const pts = [[-0.1, 0], [0.1, 0], [0.16, 0.25], [0.12, 0.6], [0.0, 1.0], [-0.12, 0.6], [-0.16, 0.25]].map(([u, v]) => [x + u * h, y + v * h]);
+  const t = [], z0 = z - 0.02, z1 = z + 0.02;
+  for (let i = 1; i < pts.length - 1; i++) { t.push(pts[0][0], pts[0][1], z1, pts[i][0], pts[i][1], z1, pts[i + 1][0], pts[i + 1][1], z1); t.push(pts[0][0], pts[0][1], z0, pts[i + 1][0], pts[i + 1][1], z0, pts[i][0], pts[i][1], z0); }
+  for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; quad(t, [a[0], a[1], z0], [b[0], b[1], z0], [b[0], b[1], z1], [a[0], a[1], z1]); }
+  return fromTriangles(orientOutward(t));
 }
 
 /** A bar between two (z, y) points, spanning x from xa to xb, thickness h perpendicular-ish (vertical). */
@@ -171,7 +191,9 @@ export function coffers(el, { bag }) {
   const [x0, z0, x1, z1] = el.rect;
   const mat = el.mat || 'marble';
   const y = el.y, d = el.depth ?? 0.25, b = el.beam ?? 0.18, c = el.cell ?? 0.9;
-  const parts = [box(x0, y + d, z0, x1, y + d + 0.15, z1)];
+  // the slab over the beams (painted, el.ceilMat: blue with gold stars in the Propylaia), the grid of beams
+  bag.add(el.ceilMat || mat, box(x0, y + d, z0, x1, y + d + 0.15, z1));
+  const parts = [];
   for (let x = x0; x <= x1 + 1e-6; x += c) parts.push(box(Math.max(x0, x - b / 2), y, z0, Math.min(x1, x + b / 2), y + d, z1));
   for (let z = z0; z <= z1 + 1e-6; z += c) parts.push(box(x0, y, Math.max(z0, z - b / 2), x1, y + d, Math.min(z1, z + b / 2)));
   for (const g of parts) bag.add(mat, g);

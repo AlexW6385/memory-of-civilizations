@@ -74,7 +74,7 @@ export function doricColumn(el, { bag, col }) {
 /** Ionic volute: a spiral ribbon on a capital face (in the x–y plane, facing +z), centred at the eye. */
 function volute(r0, turns, width, thick) {
   const tris = [];
-  const N = Math.round(turns * 48);
+  const N = Math.round(turns * 28);
   const pts = [];
   for (let i = 0; i <= N; i++) {
     const t = i / N, a = -Math.PI / 2 + t * turns * TAU;          // starts at the bottom, winds inward
@@ -107,13 +107,13 @@ export function ionicColumn(el, { bag, col }) {
   const bH = R;
   const base = [[R * 1.42, 0], [R * 1.48, bH * 0.12], [R * 1.46, bH * 0.3], [R * 1.36, bH * 0.36], [R * 1.22, bH * 0.42],
     [R * 1.18, bH * 0.55], [R * 1.26, bH * 0.62], [R * 1.3, bH * 0.72], [R * 1.24, bH * 0.86], [R * 1.08, bH * 0.94], [R * 1.02, bH]];
-  bag.add(mat, lathe(base, 48, null, x, y, z));
-  bag.add(mat, disc(R * 1.42, y + 0.001, 48, x, z, false));
+  bag.add(mat, lathe(base, 36, null, x, y, z));
+  bag.add(mat, disc(R * 1.42, y + 0.001, 36, x, z, false));
   const capH = R * 1.1, abH = capH * 0.18;
   const shaftH = H - bH - capH;
   const rTop = R * 0.84;
   const prof = [];
-  for (let i = 0; i <= 10; i++) { const t = i / 10; prof.push([R + (rTop - R) * (t * 0.7 + t * t * 0.3), shaftH * t]); }
+  for (let i = 0; i <= 5; i++) { const t = i / 5; prof.push([R + (rTop - R) * (t * 0.7 + t * t * 0.3), shaftH * t]); }
   bag.add(mat, lathe(prof, 24 * 5, fluteMod(24, 0.06, 0.18), x, y + bH, z));
   // capital: echinus ring, the volute block with its two faces, the thin abacus
   const c0 = y + bH + shaftH;
