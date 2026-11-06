@@ -1,7 +1,7 @@
 # Safavid Isfahan, c. 1630 — dossier
 
 Settlement id: `isfahan` · Style: `safavid` · Region: Persia (the Isfahan plain) · Code: `src/settlements/isfahan/`
-Status of this dossier: L1–L2 (Naqsh-e Jahan Square with its two-storey arcades, the canal and plane trees round the polo field and the stone goalposts; the Shah Mosque with its portal, court, four iwans, minarets and dome; the Sheikh Lotfollah Mosque; Ali Qapu with its talar; the Qeysarieh portal and the first stretch of the vaulted bazaar; the royal garden behind Ali Qapu; the town of courtyard houses; ground, planting, weather, music). L3 recorded for later: the muqarnas of the portals, the tile patterns and inscriptions, the madrasas and side halls of the Shah Mosque, the tunnel under the square, the caravanserais and timchehs, the Chahar Bagh avenue, the river and its bridges, people, polo matches and the night lamps.
+Status of this dossier: L2, parts toward L3 (the net of arabesques on both domes, the inscriptions and grilles of their drums; Ali Qapu's talar in detail; the muqarnas of the iwans; and Naqsh-e Jahan Square with its two-storey arcades, the canal and plane trees round the polo field and the stone goalposts; the Shah Mosque with its portal, court, four iwans, minarets and dome; the Sheikh Lotfollah Mosque; Ali Qapu with its talar; the Qeysarieh portal and the first stretch of the vaulted bazaar; the royal garden behind Ali Qapu; the town of courtyard houses; ground, planting, weather, music). L3 recorded for later: the muqarnas of the portals, the tile patterns and inscriptions, the madrasas and side halls of the Shah Mosque, the tunnel under the square, the caravanserais and timchehs, the Chahar Bagh avenue, the river and its bridges, people, polo matches and the night lamps.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -58,6 +58,18 @@ A dry, clear sky; strong sun; a little dust. Latitude 32.7° N. [inferred]
 ## 10. Sound
 
 Persian classical music: the santur and the tar over a drone, the ney leading; the naqqareh-khaneh (drums and horns) over the Qeysarieh portal for later. Ours: a bright plucked string, a drone and the ney, mode close to Homayun. [inferred]
+
+## 11. Detail (2026-11-06)
+
+**The domes.** Lotfollah's dome is covered in "creamy tiles", a "floral dome" [stated: Tehran Times (restoration report)]; the exterior drum carries a running inscription in white tile on a blue ground (surahs 91, 76 and 108) [stated: Wikipedia (kiwix 2023)]; a ring of grilled windows pierces the drum at the dome's base, sixteen in the diagram [stated: Studio Matrx]. Ours: on the cream dome a net of lapis bands with a white line along each, sixteen spiralling up each way so that they cross in lozenges shrinking toward the crown, a turquoise medallion at each crossing; over the drum's sixteen windows a white frame and lattice; above them the band of white letters on lapis [inferred: the net stands for the dome's arabesques, which are scrolling vines round lozenge medallions; the letters are abstract strokes]. The Shah Mosque's turquoise dome is given the same treatment, its arabesques in cream and white with lapis medallions, the drum's inscription and grilles likewise [inferred from its well-known appearance; not yet sourced].
+
+**Ali Qapu's talar.** An open portico whose roof rests on eighteen wooden columns; a fountain on the talar itself, fed from a cistern along the building's north face; the talar dated 1643–44 [stated: Encyclopaedia Iranica]. The columns were covered with mirror work and the ceiling painted; a copper pool belongs to the columned balcony [stated: Wikipedia]. The talar is thus later than our moment (c. 1630); kept as built at L1 and noted here. Ours: the eighteen columns sixteen-sided, tapering, on stone bases, banded with mirror work (silver) at three heights, with four stepped tiers of painted niches as their capitals and a bolster under the main beams; the main beams over the column rows, joists every 1.5 m and the frames of the coffers under the painted ceiling; a balustrade of posts, rails and wooden lattice on the three open sides; the copper-lined pool between the two middle columns with its marble rim and the bronze spout of the fountain [inferred: the column form, the capitals, the balustrade, the pool's size].
+
+Sources added:
+- [Sheikh Lotfollah Mosque: restoration work ends on quarter of creamy dome — Tehran Times](https://www.tehrantimes.com/news/484946/Sheikh-Lotfollah-Mosque-restoration-work-ends-on-quarter-of)
+- [Sheikh Lotfollah Mosque — Studio Matrx](https://www.studiomatrx.org/architecture-canon/sheikh-lotfollah-mosque)
+- [Ali Qapu — Encyclopaedia Iranica](https://iranicaonline.org/articles/ali-qapu)
+- [Ali Qapu — Wikipedia](https://en.wikipedia.org/wiki/Ali_Qapu)
 
 ## Sources
 

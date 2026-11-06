@@ -179,11 +179,89 @@ function domeChamber(el, { bag, col }) {
     const a = k / 16 * Math.PI * 2, wx = cx + Math.cos(a) * (dr + 0.02), wz = cz + Math.sin(a) * (dr + 0.02), t = [];
     beamTris(t, [wx - Math.sin(a) * 0.6, y1 + dh * 0.3, wz + Math.cos(a) * 0.6], [wx + Math.sin(a) * 0.6, y1 + dh * 0.3, wz - Math.cos(a) * 0.6], 0.06, dh * 0.45);
     bag.add('lacquer_black', fromTriangles(t));
+    if (el.grilles) {
+      // the window's grille: a frame of tile and a lattice of bars, standing a little out of the drum
+      const gx = cx + Math.cos(a) * (dr + 0.07), gz = cz + Math.sin(a) * (dr + 0.07), tx = -Math.sin(a), tz = Math.cos(a), y0 = y1 + dh * 0.3, hh = dh * 0.45;
+      const bar = (u0, v0, u1, v1, w) => { const g = []; if (Math.abs(u1 - u0) < 1e-6) beamTris(g, [gx + tx * u0, y0 + v0, gz + tz * u0], [gx + tx * u0 + Math.cos(a) * 0.001, y0 + v0, gz + tz * u0 + Math.sin(a) * 0.001], w, v1 - v0); else beamTris(g, [gx + tx * u0, y0 + v0, gz + tz * u0], [gx + tx * u1, y0 + v0, gz + tz * u1], 0.06, w); return g; };
+      const T = [...bar(-0.66, -0.06, 0.66, 0, 0.08), ...bar(-0.66, hh - 0.02, 0.66, 0, 0.08)];
+      for (const u of [-0.62, -0.31, 0, 0.31, 0.62]) T.push(...vbar(gx + tx * u, gz + tz * u, a, y0, hh, 0.05));
+      for (let v = 0.35; v < hh - 0.1; v += 0.35) T.push(...bar(-0.62, v, 0.62, 0, 0.04));
+      bag.add('tile_white', fromTriangles(T));
+    }
+  }
+  if (el.inscription) {
+    // the band round the drum over the windows: white letters on lapis (§10)
+    const yb = y1 + dh * 0.8, hb = dh * 0.17, T = [];
+    const n = Math.round(2 * Math.PI * dr / 0.3);
+    for (let k = 0; k < n; k++) {
+      const a = k / n * Math.PI * 2, tall = k % 5 !== 2, x = cx + Math.cos(a) * (dr + 0.03), z = cz + Math.sin(a) * (dr + 0.03);
+      T.push(...vbar(x, z, a, yb + hb * 0.15, hb * (tall ? 0.7 : 0.28), 0.07));
+      if (k % 3 === 0) { const g = []; beamTris(g, [x, yb + hb * 0.12, z], [x - Math.sin(a) * 0.3, yb + hb * 0.12, z + Math.cos(a) * 0.3], 0.03, 0.05); T.push(...g); }
+    }
+    bag.add('tile_white', fromTriangles(T));
   }
   safDome(bag, el.domeMat ?? Q, cx, y1 + dh + 0.5, cz, r, el.dome.h, el.dome.bulge);
+  if (el.net) domeNet(bag, el.net, cx, y1 + dh + 0.5, cz, r, el.dome.h, el.dome.bulge);
   col.circle(cx, cz, A * 1.4, y + H, y1 + dh + el.dome.h);
 }
 
+/** A thin upright bar standing out of a round drum at angle a: w wide (along the drum), from y0 up by h. */
+function vbar(x, z, a, y0, h, w) {
+  const t = [], tx = -Math.sin(a) * w / 2, tz = Math.cos(a) * w / 2;
+  beamTris(t, [x - tx, y0, z - tz], [x + tx, y0, z + tz], 0.05, h);
+  return t;
+}
+/**
+ * The net of arabesques laid over a dome (docs/settlements/isfahan.md §10): bands spiralling up from
+ * the drum both ways, so that they cross in a net of lozenges growing smaller toward the crown, a
+ * pale line along the middle of each band and a medallion at each crossing. net: { n (bands each
+ * way), turn (sectors each band sweeps), band, line, knot (materials) }.
+ */
+function domeNet(bag, net, x, y, z, r, h, bulge) {
+  const prof = domeProfile(r, h, bulge), N = net.n ?? 16, K = net.turn ?? 3, t0 = 0.05, t1 = 0.86, steps = 44;
+  const at = (t, phi, off) => {
+    const f = t * 20, i = Math.min(19, Math.floor(f)), u = f - i, [r0, y0] = prof[i], [r1, y1] = prof[i + 1];
+    const rr = r0 + (r1 - r0) * u, yy = y0 + (y1 - y0) * u, dl = Math.hypot(r1 - r0, y1 - y0) || 1, nr = (y1 - y0) / dl, ny = -(r1 - r0) / dl;
+    return [x + Math.cos(phi) * (rr + nr * off), y + yy + ny * off, z + Math.sin(phi) * (rr + nr * off)];
+  };
+  const band = (sg, i, w, off, T) => {
+    const phi = (t) => i / N * Math.PI * 2 + sg * (t - t0) / (t1 - t0) * K / N * Math.PI * 2;
+    for (let k = 0; k < steps; k++) {
+      const ta = t0 + (t1 - t0) * k / steps, tb = t0 + (t1 - t0) * (k + 1) / steps;
+      // the band's half-width as an angle, narrowing with the dome's radius toward the crown
+      const ra = Math.max(0.6, at(ta, 0, 0)[0] - x), rb = Math.max(0.6, at(tb, 0, 0)[0] - x), da = w / 2 / ra, db = w / 2 / rb;
+      const A0 = at(ta, phi(ta) - da, off), A1 = at(ta, phi(ta) + da, off), B0 = at(tb, phi(tb) - db, off), B1 = at(tb, phi(tb) + db, off);
+      const a0 = at(ta, phi(ta) - da, -0.03), a1 = at(ta, phi(ta) + da, -0.03), b0 = at(tb, phi(tb) - db, -0.03), b1 = at(tb, phi(tb) + db, -0.03);
+      const inner = at((ta + tb) / 2, phi((ta + tb) / 2), off - 1), mid = at((ta + tb) / 2, phi((ta + tb) / 2), off * 0.5);
+      tri(T, inner, A0, B1, B0); tri(T, inner, A0, A1, B1);                     // the face, outward
+      tri(T, mid, a0, B0, b0); tri(T, mid, a0, A0, B0);                         // its two edges, away from its middle
+      tri(T, mid, a1, b1, B1); tri(T, mid, a1, B1, A1);
+    }
+  };
+  const TB = [], TL = [];
+  for (const sg of [-1, 1]) for (let i = 0; i < N; i++) { band(sg, i, net.width ?? 0.42, 0.05, TB); band(sg, i, (net.width ?? 0.42) * 0.3, 0.08, TL); }
+  bag.add(net.band ?? T, fromTriangles(TB));
+  bag.add(net.line ?? 'tile_white', fromTriangles(TL));
+  // the medallions where the bands cross
+  const TK = [];
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) for (let m = -K; m <= K; m++) {
+    const d = (j - i) / N * Math.PI * 2 + m * Math.PI * 2, tt = t0 + d / 2 / (K / N * Math.PI * 2) * (t1 - t0);
+    if (tt <= t0 + 0.01 || tt >= t1 - 0.02) continue;
+    const phi = i / N * Math.PI * 2 + (tt - t0) / (t1 - t0) * K / N * Math.PI * 2, rr = Math.max(0.6, at(tt, 0, 0)[0] - x), s = (net.knot ?? 0.5) * Math.min(1, rr / r + 0.25);
+    const c = at(tt, phi, 0.1), e = at(tt, phi + s / rr, 0.1), w = at(Math.min(t1, tt + s / h), phi, 0.1), q = at(tt, phi - s / rr, 0.1), sth = at(Math.max(0, tt - s / h), phi, 0.1);
+    const c0 = at(tt, phi, -0.02), inner = at(tt, phi, -1), axis = at(tt, phi, 0.04);
+    tri(TK, inner, c, e, w); tri(TK, inner, c, w, q); tri(TK, inner, c, q, sth); tri(TK, inner, c, sth, e);
+    for (const [p0, p1] of [[e, w], [w, q], [q, sth], [sth, e]]) tri(TK, axis, c0, p1, p0);
+  }
+  bag.add(net.knot_mat ?? Q, fromTriangles(TK));
+}
+/** Push the triangle a b c into T, wound to face away from the point `from`. */
+function tri(T, from, a, b, c) {
+  const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+  const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+  const mx = (a[0] + b[0] + c[0]) / 3 - from[0], my = (a[1] + b[1] + c[1]) / 3 - from[1], mz = (a[2] + b[2] + c[2]) / 3 - from[2];
+  if (nx * mx + ny * my + nz * mz >= 0) T.push(...a, ...b, ...c); else T.push(...a, ...c, ...b);
+}
 /** court_arcade: a two-storey arcade a→b facing a court { y, h, bay, depth, facing, mat }: tiled, arches recessed, the mass behind. */
 function courtArcade(el, { bag, col }) {
   const a = el.a, b = el.b, y = el.y ?? 0, h = el.h ?? 14, D = el.depth ?? 12, bay = el.bay ?? 6, mat = el.mat ?? T;
@@ -214,18 +292,63 @@ function arcade(el, { bag, col }) {
 /** mass: a solid block a→b (its centre line) { y, th, h, mat }: the bulk of a building, its top walkable by the roof field. */
 function mass(el, { bag, col }) { slab(bag, col, el.mat ?? B, el.a, el.b, el.y ?? 0, el.th, el.h); }
 
-/** talar: a columned terrace { rect, y, h, cols: [nx, nz] }: slender wooden columns on a platform, a flat wooden roof with a painted ceiling, a railing on the open sides. */
+/**
+ * talar: a columned terrace { rect, y, h, cols: [nx, nz], rail, pool } (docs/settlements/isfahan.md
+ * §10): slender wooden columns, many-sided, on stone bases, their shafts banded with mirror work,
+ * stepped muqarnas capitals under the bolsters; the main beams over the rows of columns, a grid of
+ * joists and coffers under the painted ceiling; a balustrade of posts and lattice on the open
+ * sides; the copper-lined pool with its fountain in the middle of the floor.
+ */
 function talar(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, h = el.h, [nx, nz] = el.cols;
   bag.add(B, box(x0, y - 0.4, z0, x1, y, z1)); col.floor([x0, z0, x1, z1], y);
-  for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
-    const x = x0 + 0.8 + (x1 - x0 - 1.6) * (nx > 1 ? i / (nx - 1) : 0.5), z = z0 + 0.8 + (z1 - z0 - 1.6) * (nz > 1 ? j / (nz - 1) : 0.5);
-    bag.add('timber', lathe([[0.34, 0], [0.34, 0.5], [0.24, 0.8], [0.2, h - 1.2], [0.4, h - 0.5], [0.5, h]], 12, null, x, y, z));
+  const xs = [], zs = [];
+  for (let i = 0; i < nx; i++) xs.push(x0 + 0.8 + (x1 - x0 - 1.6) * (nx > 1 ? i / (nx - 1) : 0.5));
+  for (let j = 0; j < nz; j++) zs.push(z0 + 0.8 + (z1 - z0 - 1.6) * (nz > 1 ? j / (nz - 1) : 0.5));
+  for (const x of xs) for (const z of zs) {
+    bag.add('marble', box(x - 0.42, y, z - 0.42, x + 0.42, y + 0.25, z + 0.42));
+    bag.add('marble', lathe([[0.4, 0], [0.38, 0.12], [0.3, 0.3], [0.27, 0.42]], 16, null, x, y + 0.25, z));
+    bag.add('timber', lathe([[0.25, 0], [0.19, h - 1.6]], 16, null, x, y + 0.67, z));
+    for (const f of [0.18, 0.42, 0.66]) bag.add('silver', lathe([[0.26 - 0.06 * f, 0], [0.26 - 0.06 * f, 0.7], [0.25 - 0.06 * f, 0.72]], 16, null, x, y + 0.67 + (h - 1.6) * f, z));
+    // the capital: four stepped tiers of little niches, then the bolster under the beam
+    let yc = y + h - 0.93;
+    for (let k = 0; k < 4; k++) {
+      const r = 0.22 + k * 0.1, hh = 0.16;
+      bag.add('timber', lathe([[r, 0], [r + 0.07, hh], [0.001, hh]], 8, null, x, yc, z));
+      bag.add('paint_blue', lathe([[r + 0.028, hh * 0.25], [r + 0.07, hh * 0.85]], 8, null, x, yc, z));
+      yc += hh;
+    }
+    bag.add('timber', box(x - 0.6, yc, z - 0.35, x + 0.6, y + h - 0.45, z + 0.35));
     col.circle(x, z, 0.3, y, y + h);
   }
+  // the main beams over the rows of columns (along z), the joists across them and the coffers' frames
+  for (const x of xs) bag.add('timber', box(x - 0.3, y + h - 0.45, z0, x + 0.3, y + h - 0.02, z1));
+  for (let z = z0 + 0.75; z < z1 - 0.3; z += 1.5) bag.add('timber', box(x0 - 0.3, y + h - 0.32, z - 0.09, x1 + 0.3, y + h - 0.02, z + 0.09));
+  for (let x = x0 + 0.75; x < x1 - 0.3; x += 1.5) if (!xs.some((c) => Math.abs(c - x) < 0.5)) bag.add('timber', box(x - 0.07, y + h - 0.2, z0, x + 0.07, y + h - 0.02, z1));
   bag.add('timber', box(x0 - 0.6, y + h, z0 - 0.6, x1 + 0.6, y + h + 0.9, z1 + 0.6));
   bag.add('ceiling_painted', box(x0, y + h - 0.02, z0, x1, y + h, z1));
-  for (const r of el.rail || []) { const [a, b] = r; slab(bag, col, 'timber', a, b, y, 0.15, 1.0); }
+  // the balustrade: posts, a rail, a lattice between
+  for (const r of el.rail || []) {
+    const [a, b] = r, L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / 1.5)), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+    slab(bag, col, 'timber', a, b, y, 0.16, 0.12);
+    slab(bag, null, 'timber', a, b, y + 0.92, 0.2, 0.1);
+    const ia = [a[0] + ux * 0.1, a[1] + uz * 0.1], ib = [b[0] - ux * 0.1, b[1] - uz * 0.1];
+    slab(bag, null, 'lattice', ia, ib, y + 0.12, 0.04, 0.8);
+    for (let i = 0; i <= n; i++) { const p = [a[0] + ux * L * i / n, a[1] + uz * L * i / n]; bag.add('timber', box(p[0] - 0.08, y, p[1] - 0.08, p[0] + 0.08, y + 1.08, p[1] + 0.08)); }
+    col.segment(a, b, 0.2, y, y + 1.0);
+  }
+  // the pool in the middle of the floor: a copper lining, a stone rim, the water and the jet's spout
+  if (el.pool !== false) {
+    // between the columns nearest the middle: half the gap less a column's base and the rim
+    const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, near = (vs, c) => Math.min(...vs.map((v) => Math.abs(v - c) < 0.01 ? Infinity : Math.abs(v - c)));
+    const pw = Math.max(0.5, Math.min(1.6, near(xs, cx) - 0.8)), pd = Math.max(0.5, Math.min(2.4, near(zs, cz) - 0.8));
+    bag.add('marble', box(cx - pw - 0.3, y, cz - pd - 0.3, cx + pw + 0.3, y + 0.1, cz + pd + 0.3)); col.rect([cx - pw - 0.3, cz - pd - 0.3, cx + pw + 0.3, cz + pd + 0.3], y, y + 0.4);
+    for (const [a0, b0, a1, b1] of [[-pw - 0.3, -pd - 0.3, pw + 0.3, -pd], [-pw - 0.3, pd, pw + 0.3, pd + 0.3], [-pw - 0.3, -pd, -pw, pd], [pw, -pd, pw + 0.3, pd]]) bag.add('marble', box(cx + a0, y + 0.1, cz + b0, cx + a1, y + 0.4, cz + b1));
+    bag.add('bronze', box(cx - pw, y + 0.1, cz - pd, cx + pw, y + 0.12, cz + pd));
+    for (const [a0, b0, a1, b1] of [[-pw, -pd, pw, -pd + 0.02], [-pw, pd - 0.02, pw, pd], [-pw, -pd + 0.02, -pw + 0.02, pd - 0.02], [pw - 0.02, -pd + 0.02, pw, pd - 0.02]]) bag.add('bronze', box(cx + a0, y + 0.12, cz + b0, cx + a1, y + 0.38, cz + b1));
+    bag.add('water', box(cx - pw + 0.02, y + 0.12, cz - pd + 0.02, cx + pw - 0.02, y + 0.33, cz + pd - 0.02));
+    bag.add('bronze', lathe([[0.18, 0], [0.12, 0.08], [0.05, 0.3], [0.09, 0.42], [0.03, 0.5], [0.001, 0.52]], 12, null, cx, y + 0.12, cz));
+  }
 }
 
 /** goalpost: a pair of stone polo posts { c, along ('x'|'z'), gap, h }. */

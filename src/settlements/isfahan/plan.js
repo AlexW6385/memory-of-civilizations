@@ -56,13 +56,15 @@ E.push({ t: 'mass', a: M(0, -13), b: M(0, 13), th: 18, h: 0.4, mat: 'marble' });
 E.push({ t: 'mass', a: M(0, -12), b: M(0, 12), y: 0.3, th: 16, h: 0.12, mat: 'water' });
 // the sanctuary (22.5 m inside) under the dome (52 m high, 26 m across), the winter halls either side
 const sv = ch + ring + 12.5;
-E.push({ t: 'dome_chamber', c: M(0, sv), half: 12.5, rot: Math.PI / 4, wallH: 24, drum: { r: 12, h: 7 }, dome: { r: 13, h: 17, bulge: 0.08 }, wallMat: 'brick_buff', drumMat: 'tile_lapis', domeMat: 'tile_turquoise' });
+E.push({ t: 'dome_chamber', c: M(0, sv), half: 12.5, rot: Math.PI / 4, wallH: 24, drum: { r: 12, h: 7 }, dome: { r: 13, h: 17, bulge: 0.08 }, wallMat: 'brick_buff', drumMat: 'tile_lapis', domeMat: 'tile_turquoise',
+  inscription: true, grilles: true, net: { n: 24, turn: 3, width: 0.45, band: 'tile_cream', line: 'tile_white', knot_mat: 'tile_lapis', knot: 0.55 } });
 for (const s of [-1, 1]) E.push({ t: 'mass', a: M(s * 30.25, ch + ring), b: M(s * 30.25, ch + ring + 25), th: 35.5, h: 15 });
 
 // ---- the Sheikh Lotfollah Mosque: portal on the east side, the dome chamber turned behind it
 E.push({ t: 'portal', a: LOTF.portal[0], b: LOTF.portal[1], facing: mid, h: 20, depth: 10, iwan: { w: 9, h: 14, depth: 4 } });
 E.push({ t: 'mass', a: [91, -40], b: [97, -35], th: 8, h: 12 });
-E.push({ t: 'dome_chamber', c: LOTF.c, half: LOTF.half, rot: Math.PI / 4, wallH: 14, drum: { r: 10, h: 4 }, dome: { r: 11, h: 10, bulge: 0 }, wallMat: 'brick_buff', drumMat: 'tile_lapis', domeMat: 'tile_cream' });
+E.push({ t: 'dome_chamber', c: LOTF.c, half: LOTF.half, rot: Math.PI / 4, wallH: 14, drum: { r: 10, h: 4 }, dome: { r: 11, h: 10, bulge: 0 }, wallMat: 'brick_buff', drumMat: 'tile_lapis', domeMat: 'tile_cream',
+  inscription: true, grilles: true, net: { n: 16, turn: 3, width: 0.42, band: 'tile_lapis', line: 'tile_white', knot_mat: 'tile_turquoise', knot: 0.5 } });
 
 // ---- Ali Qapu: the gate block (13 m), the talar on 18 wooden columns, the tower behind (38 m)
 const [ax0, az0, ax1, az1] = ALIQAPU.rect;
