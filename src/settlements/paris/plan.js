@@ -17,12 +17,45 @@ export const city = {
     { t: 'tower', at: [-120, -88], r: 5, h: 26, roof: 12, y: g },
   ],
 };
-// the bridges, their decks running across the arms (plans turned a quarter so the deck runs north–south)
-export const bridges = BRIDGES.map((b, i) => ({
-  id: `paris-bridge-${i}`, style: 'vernacular', origin: [b.x, (b.arm[1] + b.arm[3]) / 2], base: 0, yaw: 90, feature: true,
-  entrance: { at: [0, 0], facing: 'n' }, bounds: [-38, -6, 38, 6], rooms: [],
-  elements: [{ t: 'bridge_stone', rect: [-(b.arm[3] - b.arm[1]) / 2 - 4, -5, (b.arm[3] - b.arm[1]) / 2 + 4, 5], y: g + 0.4, bed: RIVER.bed, ramps: [] }],
-}));
+// the bridges (docs/settlements/paris.md §2a): stone, on round arches with cutwaters, lined with houses;
+// mills hung on the Grand Pont's downstream face. The houses are timber houses (style vernacular) on the deck's strips.
+const PONTS = [
+  { name: 'grand', b: BRIDGES[0], n: 7, mills: [-148, -130.7] },
+  { name: 'petit', b: BRIDGES[1], n: 5, mills: [] },
+];
+const DECK = g + 0.4, BW = 9, STREET = 6;
+export const bridges = PONTS.map(({ name, b, n, mills }) => {
+  const z0 = b.arm[1] - 4, z1 = b.arm[3] + 4;
+  const els = [{ t: 'pont', rect: [b.x - BW, z0, b.x + BW, z1], y: DECK, bed: RIVER.bed, water: RIVER.level, n, abut: 5, street: STREET }];
+  for (const zm of mills) els.push({ t: 'mill_pendant', at: [b.x - BW, zm], dir: -1, w: 5.5, y: DECK, water: RIVER.level, bed: RIVER.bed });
+  return { id: `paris-pont-${name}`, style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [b.x, (z0 + z1) / 2], facing: 'n' }, bounds: [b.x - BW - 8, z0, b.x + BW + 8, z1], rooms: [], elements: els };
+});
+/** The houses on the bridges: narrow lots along both sides of the street, their fronts to it, none where a mill stands. */
+export function bridgeHouses() {
+  let seed = 1250;
+  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const els = [];
+  for (const { b, mills } of PONTS) {
+    const za = b.arm[1] + 2, zb = b.arm[3] - 2;
+    for (const side of [-1, 1]) for (let z = za; z < zb - 4;) {
+      const w = 5 + rnd() * 2, zc = z + w / 2;
+      if (side < 0 && mills.some((m) => zc > m - 3.8 && zc < m + 6.8)) { z += 1; continue; }
+      const xo = side < 0 ? b.x - BW : b.x + STREET / 2, rect = [xo, z, xo + (BW - STREET / 2), Math.min(z + w, zb) - 0.2];
+      els.push({ t: 'house_timber', rect, y: DECK, foot: DECK, seed: Math.floor(rnd() * 1e6), front: side < 0 ? 'e' : 'w', storeys: 3 + (rnd() < 0.4 ? 1 : 0) });
+      z += w;
+    }
+  }
+  return { id: 'paris-bridge-houses', style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [], elements: els };
+}
+// boats on the Seine: moored along the Right Bank's strand upstream of the Grand Pont (the port of the Grève),
+// a few under way, two at the Left Bank
+export const boats = {
+  id: 'paris-boats', style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
+  elements: [
+    [40, -159.5, 0, 13, 'casks'], [56, -160, 0.05, 11, 'wood'], [72, -159.5, -0.04, 12, 'sacks'], [88, -160.2, 0, 13, 'casks'], [104, -159.6, 0.03, 10, ''],
+    [150, -158.5, 0.1, 12, 'wood'], [60, -132, 0.12, 12, 'sacks'], [-70, -140, -0.08, 11, 'casks'], [40, 145.5, 0, 11, 'wood'], [-40, 145.8, 0.04, 10, ''],
+  ].map(([x, z, yaw, len, load]) => ({ t: 'boat_seine', at: [x, z], yaw, len, load, water: RIVER.level })),
+};
 // the Seine's two arms
 export const river = {
   id: 'paris-seine', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
