@@ -8,7 +8,7 @@ import { MeshStandardNodeMaterial, DoubleSide, Color } from 'three/webgpu';
 import {
   Fn, float, vec2, vec3, vec4, positionWorld, positionLocal, normalWorld, normalLocal, normalView, positionView, abs, floor, fract, min, max,
   mix, smoothstep, hash, mx_noise_float, mx_fractal_noise_float, mx_worley_noise_float, dot, cross, normalize,
-  sign, select, time, sin, clamp, length, cameraPosition, uniform, attribute, reflect, pow, fwidth,
+  sign, select, time, sin, cos, clamp, length, cameraPosition, uniform, attribute, reflect, pow, fwidth,
 } from 'three/tsl';
 import { ENV, cloudShadow } from './env.js';
 import { MATERIALS } from '../core/palette.js';
@@ -109,7 +109,8 @@ const flags = (u, v, size) => {
 // streaks down the faces and moss on the north side near the ground, and on north-facing roofs —
 // streaks and moss by how damp the place's climate is (ENV.damp). In settlement coordinates (the
 // ground at y ≈ 0, north = −z).
-const WEATHERED = new Set(['ashlar', 'mudbrick', 'granite', 'smooth', 'facade', 'wood', 'timberframe', 'veined', 'drums', 'sectile', 'rock']);
+const WEATHERED = new Set(['ashlar', 'mudbrick', 'granite', 'smooth', 'facade', 'wood', 'timberframe', 'veined', 'drums', 'sectile', 'rock', 'mud', 'tukutuku', 'kowhaiwhai']);
+const ROOFS = new Set(['tiles', 'plates']);
 function weather(col, roof) {
   const P = positionLocal, y = P.y, vertical = float(1).sub(smoothstep(0.5, 0.8, abs(normalLocal.y)));
   const patch = mx_noise_float(P.mul(0.7)), fine = mx_noise_float(P.mul(3.1));
@@ -247,7 +248,10 @@ function make(spec) {
     case 'mosaic': {
       // gold (or coloured) glass tesserae about 3.5 cm, each set at its own small angle, so that
       // each catches the light differently; grey grout between them. Faded with distance.
-      const q = P.div(0.035), cell = floor(q), f = fract(q);
+      // (mirror work uses the same: smaller pieces, steeper tilts, all near-perfect mirrors, in white plaster)
+      const tess = uniform(spec.tess ?? 0.035), tilt = uniform(spec.tilt ?? 0.004), spread = uniform(spec.spread ?? 0.35);
+      const groutCol = uniform(new Color(spec.grout ?? '#524d45'));
+      const q = P.div(tess), cell = floor(q), f = fract(q);
       const id = hash(cell.x.mul(12.9898).add(cell.y.mul(78.233)).add(cell.z.mul(37.719)));
       const id2 = hash(cell.x.mul(4.898).add(cell.y.mul(7.23)).add(cell.z.mul(97.71)));
       const fw = fwidth(q.x).add(fwidth(q.y)).add(fwidth(q.z));
@@ -256,11 +260,12 @@ function make(spec) {
       const grout = float(1).sub(smoothstep(0.05, 0.14, e)).mul(aa);
       const big = mx_fractal_noise_float(P.mul(0.4), 3, 2.0, 0.5);
       const col = baseNode.mul(mix(float(1), id.mul(0.5).add(0.75), aa)).mul(big.mul(0.1).add(1));
-      m.colorNode = mix(col, vec3(0.32, 0.3, 0.27), grout.mul(0.7));
+      m.colorNode = mix(col, groutCol, grout.mul(0.7));
       m.metalnessNode = uniform(spec.metalness ?? 1).mul(float(1).sub(grout.mul(0.9)));
-      m.roughnessNode = mix(roughU, id2.mul(0.35).add(0.12), aa).add(grout.mul(0.5));
-      // the tilt of each tessera: a per-cell slope in the bump
-      m.normalNode = bump(f.x.mul(id.sub(0.5)).add(f.y.mul(id2.sub(0.5))).add(f.z.mul(id.sub(id2))).mul(0.004).mul(aa).sub(grout.mul(0.0015)), 1);
+      m.roughnessNode = mix(roughU, id2.mul(spread).add(roughU.min(0.12)), aa).add(grout.mul(0.5));
+      // the tilt of each tessera: a per-cell slope in the bump (in units of the tessera, so the
+      // slope does not change with its size)
+      m.normalNode = bump(f.x.mul(id.sub(0.5)).add(f.y.mul(id2.sub(0.5))).add(f.z.mul(id.sub(id2))).mul(tilt).mul(tess.div(0.035)).mul(aa).sub(grout.mul(0.0015)), 1);
       break;
     }
     case 'veined': {
@@ -594,6 +599,175 @@ function make(spec) {
       m.shadowSide = DoubleSide;
       break;
     }
+    case 'foam': {
+      // water broken into spray (a fountain's jets and their falls): white, scattering, partly
+      // translucent — denser where one looks through more of it (the middle of a jet), thin at its
+      // edges — streaked along the flow, the streaks running with time
+      const V = normalize(cameraPosition.sub(positionWorld));
+      const ndv = abs(dot(normalWorld, V));
+      const t = time.mul(2.2);
+      const streak = mx_noise_float(vec3(P.x.mul(14.0), P.y.mul(2.2).sub(t), P.z.mul(14.0)));
+      const bubbles = mx_worley_noise_float(P.mul(36.0).add(vec3(0, t.mul(0.5), 0)));
+      m.colorNode = baseNode.mul(streak.mul(0.06).add(0.96)).mul(smoothstep(0.0, 0.45, bubbles).mul(0.07).add(0.94));
+      // the light it scatters: a little of the sky's, so it stays white in shade
+      m.emissiveNode = ENV.zenith.mul(0.3).add(ENV.horizon.mul(0.2)).mul(baseNode);
+      m.opacityNode = uniform(spec.opacity ?? 0.75).mul(pow(ndv, 0.7).mul(0.7).add(0.3)).mul(streak.mul(0.25).add(0.95)).clamp(0.05, 1);
+      m.roughnessNode = roughU.add(streak.abs().mul(0.2));
+      m.transparent = true;
+      m.depthWrite = false;
+      break;
+    }
+    case 'iznik': {
+      // Iznik underglaze tiles: on each square a rosette — four turquoise petals on the axes, four
+      // cobalt ones on the diagonals, outlined in dark cobalt round a red heart; at each corner,
+      // shared by four tiles, a red disc in a cobalt ring; fine grout between the tiles, each tile
+      // set at its own slight angle. Seen from afar the pattern fades to the panel's average.
+      const C = spec.colors.map((c) => uniform(new Color(c)));
+      const { u, v } = wallUV();
+      const sz = uniform(spec.block ?? 0.25);
+      const g = vec2(u, v).div(sz), cell = floor(g), f = fract(g).sub(0.5);
+      const a = abs(f), b = vec2(max(a.x, a.y), min(a.x, a.y));                 // one eighth of the square
+      const id = hash(cell.x.mul(12.9898).add(cell.y.mul(78.233)));
+      const id2 = hash(cell.x.mul(4.898).add(cell.y.mul(7.23)));
+      const ell = (p, c, rx, ry) => length(p.sub(c).div(vec2(rx, ry)));
+      const pAx = ell(b, vec2(0.2, 0.0), 0.12, 0.055);                          // petal on the axis
+      const d45 = vec2(b.x.add(b.y), b.x.sub(b.y)).mul(0.7071);
+      const pDg = ell(d45, vec2(0.21, 0.0), 0.1, 0.05);                          // petal on the diagonal
+      const rc = length(a.sub(0.5));                                             // to the tile's corner
+      const r0 = length(f);
+      const fw = fwidth(g.x).add(fwidth(g.y)), lw = max(fw.mul(0.7), 0.012);
+      const inside = (e) => float(1).sub(smoothstep(float(1).sub(lw.mul(4)), float(1), e));
+      const line = (e) => float(1).sub(smoothstep(lw, lw.mul(2), abs(e.sub(1)).mul(0.12)));
+      let col = C[0];
+      col = mix(col, C[2], inside(pAx));
+      col = mix(col, C[1], inside(pDg));
+      col = mix(col, C[1].mul(0.55), max(line(pAx), line(pDg)));
+      const heart = float(1).sub(smoothstep(0.055, float(0.055).add(lw), r0));
+      const heartRing = float(1).sub(smoothstep(0.012, float(0.012).add(lw), abs(r0.sub(0.075))));
+      col = mix(col, C[1], heartRing);
+      col = mix(col, C[3], heart);
+      // at the corner, shared by four tiles: a red bud ringed in cobalt, and four cobalt leaves
+      // lying along the joints (half a leaf on each tile)
+      const cc = vec2(float(0.5).sub(a.x), float(0.5).sub(a.y));               // from the corner
+      const leaf = min(ell(cc, vec2(0.0, 0.16), 0.035, 0.1), ell(vec2(cc.y, cc.x), vec2(0.0, 0.16), 0.035, 0.1));
+      col = mix(col, C[1], inside(leaf));
+      col = mix(col, C[1].mul(0.55), line(leaf));
+      const dot2 = float(1).sub(smoothstep(0.05, float(0.05).add(lw), rc));
+      const budRing = float(1).sub(smoothstep(0.01, float(0.01).add(lw), abs(rc.sub(0.065))));
+      col = mix(col, C[1], budRing);
+      col = mix(col, C[3], dot2);
+      // grout (in metres) and the far fade
+      const dg = min(float(0.5).sub(a.x), float(0.5).sub(a.y)).mul(sz);
+      const aa = float(1).sub(smoothstep(0.08, 0.3, fw));
+      const grout = float(1).sub(smoothstep(0.0012, 0.003, dg)).mul(aa);
+      col = mix(baseNode, col.mul(id.sub(0.5).mul(0.05).add(1)), aa);
+      m.colorNode = mix(col, vec3(0.62, 0.6, 0.56), grout);
+      m.roughnessNode = roughU.add(grout.mul(0.6)).add(id2.mul(0.04));
+      // the bole red stands in low relief; each tile tilted a little
+      const relief = max(heart, dot2).mul(0.0004).mul(aa);
+      m.normalNode = bump(f.x.mul(id.sub(0.5)).add(f.y.mul(id2.sub(0.5))).mul(0.0012).mul(aa).add(relief).sub(grout.mul(0.001)), 1);
+      break;
+    }
+    case 'shell': {
+      // pāua (abalone) shell: nacre whose colour shifts with the angle of view through blues,
+      // greens and violets, in wavy growth bands with dark seams
+      const V = normalize(cameraPosition.sub(positionWorld));
+      const ndv = clamp(dot(normalWorld, V), 0, 1);
+      const bands = mx_fractal_noise_float(P.mul(18.0), 3, 2.0, 0.5);
+      const t = ndv.mul(1.3).add(bands.mul(0.9)).mul(Math.PI * 2);
+      const rainbow = vec3(cos(t).mul(0.5).add(0.5), cos(t.sub(2.1)).mul(0.5).add(0.5), cos(t.sub(4.2)).mul(0.5).add(0.5));
+      const seam = smoothstep(0.04, 0.0, abs(mx_noise_float(P.mul(40.0)))).mul(detailFade());
+      const col = mix(baseNode, rainbow.mul(vec3(0.4, 0.72, 0.9)), 0.6).mul(float(1).sub(seam.mul(0.5)));
+      m.colorNode = col;
+      m.metalnessNode = float(0.55);
+      m.roughnessNode = roughU.add(seam.mul(0.3));
+      m.normalNode = bump(bands.mul(0.0004), 1);
+      break;
+    }
+    case 'tukutuku': {
+      // a tukutuku panel: upright reeds (kākaho) behind, dark wooden laths (kaho) across them, and
+      // over the laths cross-stitches of pale kiekie and red-dyed flax in the kaokao pattern
+      // (chevrons, the ribs of a warrior); 3 cm stitches
+      const C = spec.colors.map((c) => uniform(new Color(c)));
+      const { u, v } = wallUV();
+      const s = 0.03, g = vec2(u, v).div(s), cell = floor(g), f = fract(g);
+      const fm = (x, n) => x.sub(floor(x.div(n)).mul(n));
+      const mcol = abs(fm(cell.x, 12).sub(5.5));                                 // 0.5 … 5.5 across a chevron
+      const k = fm(cell.y.add(floor(mcol)), 6);
+      const stitched = k.lessThan(2);
+      const red = fm(floor(cell.y.add(floor(mcol)).div(6)), 2).lessThan(1);
+      const reed = sin(u.div(0.0125).mul(Math.PI * 2)).mul(0.5).add(0.5);
+      const lath = float(1).sub(smoothstep(0.26, 0.3, abs(f.y.sub(0.5))));
+      const xs = float(1).sub(smoothstep(0.12, 0.2, min(abs(f.x.sub(f.y)), abs(f.x.add(f.y).sub(1)))));
+      const st = select(stitched, xs, float(0));
+      let col = C[0].mul(reed.mul(0.25).add(0.8));
+      col = mix(col, C[1], lath);
+      col = mix(col, select(red, C[3], C[2]), st);
+      const aa = float(1).sub(smoothstep(0.25, 0.8, fwidth(g.x).add(fwidth(g.y))));
+      m.colorNode = mix(baseNode, col, aa);
+      m.roughnessNode = roughU.sub(lath.mul(0.15));
+      m.normalNode = bump(lath.mul(0.003).add(st.mul(0.0015)).add(reed.mul(0.0008)).mul(aa), 1);
+      break;
+    }
+    case 'kowhaiwhai': {
+      // kōwhaiwhai, the painted scrolls of the rafters: a running wave of white line on red, each
+      // crest curling into a black bulb (the koru) ringed in white; the rows mirrored alternately
+      const C = spec.colors.map((c) => uniform(new Color(c)));
+      const { u, v } = wallUV();
+      const L = 0.24, H = 0.07;
+      const fu = fract(u.div(L)), cv = floor(v.div(H)), fv0 = fract(v.div(H));
+      const fv = select(fract(cv.mul(0.5)).greaterThan(0.25), float(1).sub(fv0), fv0);
+      const wave = sin(fu.mul(Math.PI * 2)).mul(0.26).add(0.5);
+      const fw = max(fwidth(u.div(L)), fwidth(v.div(H)));
+      const lw = max(fw.mul(1.2), 0.04);
+      const wline = float(1).sub(smoothstep(lw, lw.mul(1.6), abs(fv.sub(wave)).mul(H / 0.05)));
+      // the koru: below each crest and above each trough, a bulb hanging off the line
+      const pa = vec2(fu.sub(0.25).mul(L), fv.sub(0.52).mul(H)), pb = vec2(fu.sub(0.75).mul(L), fv.sub(0.48).mul(H));
+      const db = min(length(pa), length(pb));
+      const bulb = float(1).sub(smoothstep(0.013, 0.015, db));
+      const ringW = float(1).sub(smoothstep(0.003, 0.0045, abs(db.sub(0.019))));
+      let col = C[0];
+      col = mix(col, C[2], max(wline, ringW));
+      col = mix(col, C[1], bulb);
+      const aa = float(1).sub(smoothstep(0.2, 0.6, fw));
+      m.colorNode = mix(baseNode, col, aa);
+      m.roughnessNode = roughU;
+      break;
+    }
+    case 'plates': {
+      // a metal roof of cast-iron plates: courses lapped down the slope, a rib over each upright
+      // joint, each plate a slightly different grey under the paint
+      const n = normalLocal;
+      const alongX = abs(n.x).lessThan(abs(n.z));
+      const u = select(alongX, P.x, P.z);
+      const bw = uniform(spec.block ?? 0.6), ch = uniform(spec.course ?? 0.9);
+      const fu = fract(u.div(bw)), row = floor(P.y.div(ch.mul(0.6))), lv = fract(P.y.div(ch.mul(0.6)));
+      const id = hash(floor(u.div(bw)).mul(3.1).add(row.mul(17.7)));
+      const du = min(fu, float(1).sub(fu)).mul(bw);
+      const aa = float(1).sub(smoothstep(0.3, 0.9, fwidth(u.div(bw)).mul(8)));
+      const rib = float(1).sub(smoothstep(0.012, 0.022, du)).mul(aa);
+      const lap = float(1).sub(smoothstep(0.0, 0.06, lv)).mul(aa);
+      const stain = mx_fractal_noise_float(P.mul(0.4), 3, 2.0, 0.5);
+      m.colorNode = baseNode.mul(id.sub(0.5).mul(0.12).mul(aa).add(1)).mul(rib.mul(0.12).add(1)).mul(lap.mul(-0.3).add(1)).mul(stain.mul(0.15).add(1));
+      m.roughnessNode = roughU.add(stain.abs().mul(0.15));
+      m.normalNode = bump(rib.mul(0.012).add(lv.mul(0.006).mul(aa)), 1);
+      break;
+    }
+    case 'mud': {
+      // mud plaster as laid by hand: broad lumps, the smears of the palms, straw flecks, and the
+      // runnels the rains cut down the walls
+      const vertical = float(1).sub(smoothstep(0.5, 0.8, abs(normalLocal.y)));
+      const lump = mx_fractal_noise_float(P.mul(1.6), 3, 2.0, 0.5);
+      const smear = smoothstep(0.0, 0.5, mx_worley_noise_float(vec3(P.x.mul(4.5), P.y.mul(6.5), P.z.mul(4.5))));
+      const runnel = smoothstep(0.5, 0.8, mx_noise_float(vec3(P.x.add(P.z).mul(3.5), P.y.mul(0.22), 0.7))).mul(vertical);
+      const fade = detailFade();
+      const fine = mx_noise_float(P.mul(28.0)).mul(fade);
+      const straw = float(1).sub(smoothstep(0.0, 0.06, mx_worley_noise_float(P.mul(55.0)))).mul(fade);
+      m.colorNode = baseNode.mul(lump.mul(0.14).add(1)).mul(smear.mul(0.08).add(0.94)).mul(float(1).sub(runnel.mul(0.12))).mul(fine.mul(0.05).add(1)).mul(straw.mul(0.18).add(1));
+      m.roughnessNode = roughU;
+      m.normalNode = bump(lump.mul(0.03).add(smear.mul(0.004)).sub(runnel.mul(0.006)).add(fine.mul(0.0008)), 1);
+      break;
+    }
     default: {
       const n = mx_fractal_noise_float(P.mul(0.8), 3, 2.0, 0.5);
       const f = mx_noise_float(P.mul(20.0)).mul(detailFade());
@@ -601,7 +775,7 @@ function make(spec) {
       m.normalNode = bump(f.mul(0.0005), 1);
     }
   }
-  if (!spec.clean && m.colorNode && (WEATHERED.has(spec.kind ?? 'smooth') || spec.kind === 'tiles')) m.colorNode = weather(m.colorNode, spec.kind === 'tiles');
+  if (!spec.clean && m.colorNode && (WEATHERED.has(spec.kind ?? 'smooth') || ROOFS.has(spec.kind))) m.colorNode = weather(m.colorNode, ROOFS.has(spec.kind));
   return m;
 }
 

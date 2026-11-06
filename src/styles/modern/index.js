@@ -44,7 +44,7 @@ function shell(bag, cx, z0, z1, hw, H, y) {
     if (a[1] - y < 0.3 && b[1] - y < 0.3) continue;
     tri2(G, a, b, fb); tri2(G, a, fb, fa);
   }
-  bag.add('glass_outer', fromTriangles(G));
+  bag.add('glass_topaz', fromTriangles(G));        // Hall's topaz-tinted glass
   for (let i = 1; i < nu; i++) {
     const a = P(i, nv), f = foot(i); if (a[1] - y < 1) continue;
     bag.add('steel_grey', rod([a[0], a[1] - 0.1, a[2]], f, 0.09, 5));
@@ -174,7 +174,7 @@ function ferry(el, { bag, col }) {
   const HP = (i, j) => { const t = i / n, hw = half(t, K.B), a = j / m * Math.PI / 2; return W(hw * Math.cos(a) * (j === m ? 0 : 1), sheer(t) - (sheer(t) + 1.6) * Math.sin(a), -K.L / 2 + K.L * t); };
   const HPm = (i, j) => { const p = HP(i, j), t = i / n, hw = half(t, K.B), a = j / m * Math.PI / 2; return W(-hw * Math.cos(a) * (j === m ? 0 : 1), sheer(t) - (sheer(t) + 1.6) * Math.sin(a), -K.L / 2 + K.L * t); };
   for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) { tri2(H, HP(i, j), HP(i + 1, j), HP(i + 1, j + 1)); tri2(H, HP(i, j), HP(i + 1, j + 1), HP(i, j + 1)); tri2(H, HPm(i, j), HPm(i + 1, j), HPm(i + 1, j + 1)); tri2(H, HPm(i, j), HPm(i + 1, j + 1), HPm(i, j + 1)); }
-  bag.add(kind === 'hydrofoil' ? 'paint_white' : 'stucco_leaf', fromTriangles(H));
+  bag.add(kind === 'hydrofoil' ? 'paint_white' : 'paint_ferry_green', fromTriangles(H));
   const D = [];
   for (let i = 0; i < n; i++) { const a = HP(i, 0), b = HP(i + 1, 0), am = HPm(i, 0), bm = HPm(i + 1, 0); tri2(D, a, b, bm); tri2(D, a, bm, am); }
   bag.add('planks_grey', fromTriangles(D));

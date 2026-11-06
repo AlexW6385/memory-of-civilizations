@@ -63,9 +63,9 @@ function gothicTower(el, { bag, col }) {
       }
     }
     for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) pinnacle(bag, x + dx * bs / 2, by + bh, z + dz * bs / 2, s * 0.08, s * 0.45);
-    bag.add('lead', frustum([x - s * 0.45, z - s * 0.45, x + s * 0.45, z + s * 0.45], by + bh, y + h - 3, s * 0.44, s * 0.44, s * 0.44, s * 0.44));
+    bag.add('iron_galv', frustum([x - s * 0.45, z - s * 0.45, x + s * 0.45, z + s * 0.45], by + bh, y + h - 3, s * 0.44, s * 0.44, s * 0.44, s * 0.44));
     // small gabled lucarnes on the spire
-    for (const f of 'nsew') { const R = face(f); const yy = by + bh + (h - 3 - body - ch - bh) * 0.25; bag.add('lead', R(-0.8, 0.8, yy, yy + 2.4, -s * 0.17, -s * 0.05)); }
+    for (const f of 'nsew') { const R = face(f); const yy = by + bh + (h - 3 - body - ch - bh) * 0.25; bag.add('iron_galv', R(-0.8, 0.8, yy, yy + 2.4, -s * 0.17, -s * 0.05)); }
     bag.add('gilt_bronze', lathe([[0.3, 0], [0.15, 3], [0.001, 3.6]], 6, null, x, y + h - 3, z));
   } else if (el.spire) bag.add('lead', lathe([[s * 0.5, 0], [0.001, h - body]], 8, null, x, y + body, z));
   else { bag.add(S, box(x - s / 2 - 0.3, y + body, z - s / 2 - 0.3, x + s / 2 + 0.3, y + body + 1, z + s / 2 + 0.3)); bag.add('iron', lathe([[0.1, 0], [0.08, h - body]], 6, null, x, y + body, z)); }

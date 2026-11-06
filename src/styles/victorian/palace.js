@@ -60,18 +60,18 @@ export function riverFront(el, { bag, col }) {
     for (const [, v1] of rows) A(S, u - 0.42, u + 0.42, v1 + 0.5, v1 + 0.75, p, p + 0.8);
     pinnacle(bag, F, y, u, top + 1.2, p + 0.35, 0.6, 3.6);
   }
-  // pavilions: an octagonal turret at each corner, rising above the parapet under a lead cap
+  // pavilions: an octagonal turret at each corner, rising above the parapet under a cap of iron plates
   if (el.turrets !== false) for (const [a, b] of pav) for (const u of [a, b]) {
     const [tx, tz] = F.at(u, 2.4 - 0.4), r = 0.95;
     bag.add(S, lathe([[r, 0], [r, h + 5.5]], 8, null, tx, y, tz));
     for (const v of [h * 0.33, h * 0.62, h + 1.6]) bag.add(S, lathe([[r + 0.12, 0], [r + 0.12, 0.3]], 8, null, tx, y + v, tz));
     for (let j = 0; j < 8; j++) { const t = (j + 0.5) * Math.PI / 4; bag.add('opening', box(tx + Math.cos(t) * r * 0.93 - 0.12, y + h + 2.4, tz + Math.sin(t) * r * 0.93 - 0.12, tx + Math.cos(t) * r * 0.93 + 0.12, y + h + 4.6, tz + Math.sin(t) * r * 0.93 + 0.12)); }
-    bag.add('lead', lathe([[r + 0.15, 0], [r * 0.9, 1.0], [r * 0.45, 2.4], [0.12, 3.6], [0.001, 4.0]], 8, null, tx, y + h + 5.5, tz));
+    bag.add('iron_galv', lathe([[r + 0.15, 0], [r * 0.9, 1.0], [r * 0.45, 2.4], [0.12, 3.6], [0.001, 4.0]], 8, null, tx, y + h + 5.5, tz));
     bag.add('gilt_bronze', lathe([[0.001, 0], [0.12, 0.2], [0.001, 0.5]], 6, null, tx, y + h + 9.4, tz));
   }
   // the roof of cast-iron plates, its iron cresting along the ridge
   const along = f === 'n' || f === 's', w = along ? z1 - z0 : x1 - x0, rh = w * 0.38;
-  bag.add('lead', frustum([x0 + 0.5, z0 + 0.5, x1 - 0.5, z1 - 0.5], y + h, y + h + rh, along ? 0 : w / 2 - 0.55, along ? 0 : w / 2 - 0.55, along ? w / 2 - 0.55 : 0, along ? w / 2 - 0.55 : 0));
+  bag.add('iron_galv', frustum([x0 + 0.5, z0 + 0.5, x1 - 0.5, z1 - 0.5], y + h, y + h + rh, along ? 0 : w / 2 - 0.55, along ? 0 : w / 2 - 0.55, along ? w / 2 - 0.55 : 0, along ? w / 2 - 0.55 : 0));
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, len = along ? x1 - x0 - 1 : z1 - z0 - 1;
   for (let t = -len / 2 + 0.3; t < len / 2; t += 0.6) { const px = along ? cx + t : cx, pz = along ? cz : cz + t; bag.add('iron', box(px - 0.03, y + h + rh - 0.05, pz - 0.03, px + 0.03, y + h + rh + 0.55, pz + 0.03)); }
   bag.add('iron', along ? box(x0 + 0.5, y + h + rh + 0.4, cz - 0.03, x1 - 0.5, y + h + rh + 0.46, cz + 0.03) : box(cx - 0.03, y + h + rh + 0.4, z0 + 0.5, cx + 0.03, y + h + rh + 0.46, z1 - 0.5));

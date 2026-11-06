@@ -16,7 +16,7 @@ import { Matrix4 } from '../../core/three.js';
 import { sculpt, rows, smooth, bump, blob } from '../rapanui/sculpt.js';
 import '../qing/index.js';
 
-const K = 'kokowai', P = 'palisade', TH = 'raupo', PAUA = 'glaze_green';
+const K = 'kokowai', P = 'palisade', TH = 'raupo', PAUA = 'shell_inlay';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const post = (bag, x, y, z, r, h, mat = P) => bag.add(mat, lathe([[r, 0], [r * 0.9, h], [0.001, h + r]], 7, null, x, y, z));
@@ -221,11 +221,11 @@ function whare(el, ctx) {
     add(K, lathe([[0.16, 0], [0.14, under(0.16) - 0.3]], 10, null, 0, -0.1, (zf + l / 2) / 2 + 0.3));
     fig('post', 0, 0, (zf + l / 2) / 2 + 0.3 - 0.13, 1.25);
     for (const s of [-1, 1]) {
-      add('koshi', box(s > 0 ? w / 2 - t - 0.03 : -w / 2 + t, 0.05, zi0 - 0.3, s > 0 ? w / 2 - t : -w / 2 + t + 0.03, h - 0.08, zi1 + 0.3));
+      add('tukutuku', box(s > 0 ? w / 2 - t - 0.03 : -w / 2 + t, 0.05, zi0 - 0.3, s > 0 ? w / 2 - t : -w / 2 + t + 0.03, h - 0.08, zi1 + 0.3));
       for (let k = 0; k <= n; k++) {
         const zz = zi0 + (zi1 - zi0) * k / n;
         fig('slab', s * (w / 2 - t - 0.08), 0, zz, h - 0.02, s * Math.PI / 2);
-        add(K, board([s * (w / 2 - t - 0.1), h - 0.02], [s * 0.15, under(0.15) - 0.07], 0.12, zz - 0.05, zz + 0.05));
+        add('kowhaiwhai', board([s * (w / 2 - t - 0.1), h - 0.02], [s * 0.15, under(0.15) - 0.07], 0.12, zz - 0.05, zz + 0.05));   // heke painted with kōwhaiwhai
       }
     }
     add('reed_mat', box(-w / 2 + t + 0.15, -0.2, zf + 1.2, w / 2 - t - 0.15, 0.03, l / 2 - t - 0.15));

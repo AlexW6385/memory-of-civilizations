@@ -118,7 +118,7 @@ function fountain(el, ctx) {
         const dx = P1[0] - P0[0], dy = P1[1] - P0[1], dz = P1[2] - P0[2], len = Math.hypot(dx, dy, dz), g = lathe([[0.035, 0], [0.03, len]], 5, null, 0, 0, 0);
         g.rotateX(Math.acos(dy / len)); g.rotateY(Math.atan2(dx, dz)); g.translate(...P0); jet.push(g);
       }
-      for (const g of jet) bag.add('water', g);
+      for (const g of jet) bag.add('water_jet', g);
     };
     for (let t = 0; t < 4; t++) {
       const rt = r * (0.62 - t * 0.13), yt = y + 0.2 + t * 0.75;

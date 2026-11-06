@@ -12,7 +12,7 @@ import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/ge
 import { planarWall, archHalf, archRise } from '../byzantine/index.js';
 import './index.js';
 
-const L = 'limestone', CARVE = 'stucco', LEAD = 'lead';
+const L = 'limestone', CARVE = 'limestone_carved', LEAD = 'lead';
 const D2R = Math.PI / 180;
 
 // ── geometry helpers ───────────────────────────────────────────────────────────────────────────

@@ -309,7 +309,7 @@ function talar(el, { bag, col }) {
     bag.add('marble', box(x - 0.42, y, z - 0.42, x + 0.42, y + 0.25, z + 0.42));
     bag.add('marble', lathe([[0.4, 0], [0.38, 0.12], [0.3, 0.3], [0.27, 0.42]], 16, null, x, y + 0.25, z));
     bag.add('timber', lathe([[0.25, 0], [0.19, h - 1.6]], 16, null, x, y + 0.67, z));
-    for (const f of [0.18, 0.42, 0.66]) bag.add('silver', lathe([[0.26 - 0.06 * f, 0], [0.26 - 0.06 * f, 0.7], [0.25 - 0.06 * f, 0.72]], 16, null, x, y + 0.67 + (h - 1.6) * f, z));
+    for (const f of [0.18, 0.42, 0.66]) bag.add('mirror_work', lathe([[0.26 - 0.06 * f, 0], [0.26 - 0.06 * f, 0.7], [0.25 - 0.06 * f, 0.72]], 16, null, x, y + 0.67 + (h - 1.6) * f, z));
     // the capital: four stepped tiers of little niches, then the bolster under the beam
     let yc = y + h - 0.93;
     for (let k = 0; k < 4; k++) {

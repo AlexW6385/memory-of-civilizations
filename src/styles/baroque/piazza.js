@@ -9,7 +9,7 @@ import { box, lathe, rod, frustum } from '../../core/geom.js';
 import { Local, ext, sheet } from '../renaissance/face.js';
 import { human, blob, limb } from '../greek/sculpture.js';
 
-const T = 'travertine', GB = 'gilt_bronze', BR = 'bronze', W = 'water', MB = 'marble';
+const T = 'travertine', GB = 'gilt_bronze', BR = 'bronze', W = 'water', WJ = 'water_jet', MB = 'marble';
 
 /** A couchant lion facing +x, about 1.6 m long, its body at the origin's height. */
 function lion(L, mat, s = 1, headless = false) {
@@ -90,10 +90,10 @@ export function fountain(el, { bag, col }) {
   // the water falling from the rims in streams: from the upturned bowl into the granite one, from that into the basin
   for (let i = 0; i < 48; i++) {
     const a = i / 48 * Math.PI * 2, c = Math.cos(a), sn = Math.sin(a);
-    L.add(W, limb([x + c * 2.58, yu + 0.48, z + sn * 2.58], [x + c * 2.95, yb + 1.05, z + sn * 2.95], 0.025, 0.045, 4));
-    const b2 = a + Math.PI / 48; L.add(W, limb([x + Math.cos(b2) * 3.44, yb + 1.1, z + Math.sin(b2) * 3.44], [x + Math.cos(b2) * 4.1, y + 0.68, z + Math.sin(b2) * 4.1], 0.025, 0.05, 4));
+    L.add(WJ, limb([x + c * 2.58, yu + 0.48, z + sn * 2.58], [x + c * 2.95, yb + 1.05, z + sn * 2.95], 0.025, 0.045, 4));
+    const b2 = a + Math.PI / 48; L.add(WJ, limb([x + Math.cos(b2) * 3.44, yb + 1.1, z + Math.sin(b2) * 3.44], [x + Math.cos(b2) * 4.1, y + 0.68, z + Math.sin(b2) * 4.1], 0.025, 0.05, 4));
   }
-  L.add(W, lathe([[0.12, 0], [0.08, 1.2], [0.001, 1.6]], 8, null, x, yu + 1.45, z));
+  L.add(WJ, lathe([[0.12, 0], [0.08, 1.2], [0.001, 1.6]], 8, null, x, yu + 1.45, z));
   L.emit(bag);
 }
 
@@ -181,7 +181,7 @@ export function ponteAngeli(el, { bag, col }) {
   let k = 0;
   for (const sz of [-1, 1]) for (const uu of stands) {
     const parts = angel(k++), yaw = sz > 0 ? Math.PI : 0;
-    for (const g of parts) { g.rotateY(yaw); g.translate(uu, deck + 1.9, sz * (Wd / 2 - 0.45)); L.add(MB, g); }
+    for (const g of parts) { g.rotateY(yaw); g.translate(uu, deck + 1.9, sz * (Wd / 2 - 0.45)); L.add('marble_smooth', g); }
   }
   // Peter with the keys and Paul with the sword at the city end
   const ce = (el.city ?? 'e') === 'e' ? 1 : -1;
@@ -190,7 +190,7 @@ export function ponteAngeli(el, { bag, col }) {
     L.add(T, box(ux - 1.0, deck, sz * (Wd / 2 - 0.45) - 1.0, ux + 1.0, deck + 2.6, sz * (Wd / 2 - 0.45) + 1.0));
     const parts = fig.stone.slice();
     parts.push(sz < 0 ? box(0.35, 2.2, 0.3, 0.45, 2.6, 0.45) : box(-0.03, 1.0, 0.35, 0.03, 2.5, 0.42));
-    for (const g of parts) { g.rotateY(ce > 0 ? -Math.PI / 2 : Math.PI / 2); g.translate(ux, deck + 2.6, sz * (Wd / 2 - 0.45)); L.add(MB, g); }
+    for (const g of parts) { g.rotateY(ce > 0 ? -Math.PI / 2 : Math.PI / 2); g.translate(ux, deck + 2.6, sz * (Wd / 2 - 0.45)); L.add('marble_smooth', g); }
   }
   L.emit(bag);
 }

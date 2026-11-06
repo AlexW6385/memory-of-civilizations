@@ -142,7 +142,7 @@ function platform(el, { bag, col }) {
  * toes gripping the ring, the head on a long neck with lips rather than a beak.
  */
 function soapstoneBird(el, { bag, col }) {
-  const [x, z] = el.at, y = el.y ?? 0, s = el.s ?? 1, rot = el.rot ?? 0, M = 'serpentine', H = 0.95 * s;
+  const [x, z] = el.at, y = el.y ?? 0, s = el.s ?? 1, rot = el.rot ?? 0, M = 'soapstone', H = 0.95 * s;
   const fx = Math.sin(rot), fz = -Math.cos(rot), sx = -fz, sz = fx;      // forward (−z turned by rot), side
   const W = (u, v, w) => [x + fx * u + sx * v, y + w, z + fz * u + sz * v], W2 = (u, v) => [x + fx * u + sx * v, z + fz * u + sz * v];
   const put = (g) => bag.add(M, g);

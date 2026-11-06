@@ -56,8 +56,9 @@ export function buildingMesh(geometry, mat, matrices = IDENTITY, colors = null) 
  */
 /** Fine detail is drawn within this distance (m) of its part's bounds, and casts shadows within the second. */
 const DETAIL_REACH = 160, DETAIL_SHADOW = 50;
-const NO_SHADOW = new Set(['water', 'glass_outer', 'opening', 'daylight', 'daylight_plain']);
-const castsShadow = (mat) => !NO_SHADOW.has(mat) && MATERIALS[mat]?.kind !== 'glow' && MATERIALS[mat]?.kind !== 'water';
+const NO_SHADOW = new Set(['water', 'glass_outer', 'glass_topaz', 'opening', 'daylight', 'daylight_plain']);
+const NO_SHADOW_KINDS = new Set(['glow', 'water', 'foam']);
+const castsShadow = (mat) => !NO_SHADOW.has(mat) && !NO_SHADOW_KINDS.has(MATERIALS[mat]?.kind);
 
 /**
  * A module fetched on demand, tried again if its download fails (a dropped connection, or the site

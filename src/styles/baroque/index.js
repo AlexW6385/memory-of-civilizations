@@ -89,7 +89,7 @@ function colonnade(el, { bag, col }) {
         for (let j = 1; j < 8; j++) { const t = j / 8; bag.add(T, lathe([[0.09, 0], [0.15, 0.3], [0.08, 0.6], [0.11, 0.78], [0.1, 0.8]], 6, null, sx + (tx - sx) * t, yt + 0.2, sz + (tz - sz) * t)); }
         bag.add(T, box(sx - 0.45, yt, sz - 0.45, sx + 0.45, yt + 1.3, sz + 0.45));
         const yaw = Math.atan2(ox - sx, oz - sz), k = (i * 7 + (a0 < 0 ? 3 : 0)) % 20;
-        const fig = merge(saint(k)); fig.rotateY(yaw); fig.translate(sx, yt + 1.3, sz); bag.add(T, fig);
+        const fig = merge(saint(k)); fig.rotateY(yaw); fig.translate(sx, yt + 1.3, sz); bag.add('limestone_carved', fig);   // travertine, carved from one block
       }
     }
     // the end pavilions

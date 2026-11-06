@@ -11,7 +11,7 @@ import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const B = 'banco';
+const B = 'banco_rough';      // hand-smeared at each year's crépissage: lumpy, runnelled
 /** A square, tapering mass (flat faces): half-width r0 at y0 to r1 at y1, a cone of height cap on top. */
 function taper(bag, x, z, y0, y1, r0, r1, cap = 0) {
   bag.add(B, frustum([x - r0, z - r0, x + r0, z + r0], y0, y1, r0 - r1, r0 - r1, r0 - r1, r0 - r1));

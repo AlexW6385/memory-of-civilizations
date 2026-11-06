@@ -308,6 +308,50 @@ export const MATERIALS = {
   coral_plaster:    { color: '#d9d2c2', roughness: 0.92, kind: 'mudbrick', course: 0.32, block: 0.55 },
   sandstone_relief: { color: '#a98d6c', roughness: 0.9, kind: 'rock' },
   rubber:           { clean: true, color: '#1a1a1a', roughness: 0.9, kind: 'smooth' },
+  // Stone for sculpture: a figure is cut from one block, so these carry no joints. Pale fine-grained
+  // limestone (the Lutetian of Paris, the Caen and Tonnerre stones); the Great Zimbabwe soapstone
+  // (chlorite–talc schist, grey-green and matte, soft enough to carve with iron); Preseli spotted
+  // dolerite (the bluestones: blue-grey with pale feldspar spots); the Altar Stone's grey-green
+  // micaceous sandstone
+  limestone_carved: { color: '#d9cfb8', roughness: 0.8, kind: 'smooth' },
+  soapstone:        { color: '#7b8273', roughness: 0.82, kind: 'smooth' },
+  dolerite_spotted: { color: '#565d61', roughness: 0.86, kind: 'granite' },
+  sandstone_green:  { color: '#858670', roughness: 0.9, kind: 'rock' },
+  // Babylon: red breccia veined white, the bitumen the bricks were set in, red-brown glazed brick
+  breccia_red:      { color: '#8c4436', roughness: 0.3, kind: 'veined', block: 0.9, course: 0.9, colors: ['#8e4335', '#7a352b', '#a0553f', '#e6ddd0'] },
+  bitumen:          { color: '#1b1816', roughness: 0.32, kind: 'smooth' },
+  glaze_red:        { color: '#94402a', roughness: 0.24, kind: 'mudbrick', course: 0.09, block: 0.34 },
+  // fountains: water broken into spray and foam, white and part translucent (thicker where seen
+  // through more of it); no shadow (src/engine/world.js)
+  water_jet:        { clean: true, color: '#e9eef0', roughness: 0.25, kind: 'foam', opacity: 0.72 },
+  foam:             { clean: true, color: '#f0f2f1', roughness: 0.4, kind: 'foam', opacity: 0.9 },
+  // pietra dura: hard stones cut and set flush in white marble (Agra, Florence), polished
+  inlay_carnelian:  { color: '#a3442c', roughness: 0.18, kind: 'smooth' },
+  inlay_jade:       { color: '#4d7a5c', roughness: 0.18, kind: 'smooth' },
+  inlay_lapis:      { color: '#25447c', roughness: 0.18, kind: 'smooth' },
+  inlay_yellow:     { color: '#c39a3e', roughness: 0.2, kind: 'smooth' },                 // yellow jasper
+  // Iznik underglaze tiles (c. 1560): 25 cm squares, white slip ground, cobalt, turquoise and the
+  // raised bole red, under a clear glaze
+  tile_iznik:       { color: '#d4d6d6', roughness: 0.12, kind: 'iznik', block: 0.25, colors: ['#eef0ec', '#1f3f8c', '#2f9a9c', '#b2322a'] },
+  // Safavid mirror work (āyeneh-kāri): small pieces of mirror set at many angles in white plaster
+  mirror_work:      { clean: true, color: '#d6d9dc', roughness: 0.04, metalness: 1, kind: 'mosaic', tess: 0.022, tilt: 0.03, spread: 0.06, grout: '#d8d2c6' },
+  // modern paint and glass: the New York cab's yellow (1930s), the Sydney ferries' green, the Opera
+  // House's topaz-tinted glass (Peter Hall's walls, 1973); no shadow from the glass
+  paint_cab_yellow: { clean: true, color: '#d8a41f', roughness: 0.32, metalness: 0.3, kind: 'smooth' },
+  paint_ferry_green:{ color: '#2c5236', roughness: 0.5, kind: 'smooth' },
+  glass_topaz:      { clean: true, color: '#3a2c1b', roughness: 0.08, kind: 'smooth' },
+  // Māori: pāua shell (iridescent blue-green), tukutuku panels (laths over reeds, cross-stitched in
+  // flax, kiekie and pīngao in kaokao chevrons), kōwhaiwhai rafter paint (red, black and white scrolls)
+  shell_inlay:      { clean: true, color: '#2a5560', roughness: 0.14, kind: 'shell' },
+  tukutuku:         { color: '#b69c62', roughness: 0.9, kind: 'tukutuku', colors: ['#c9b27a', '#231c16', '#e2d4a8', '#8a2d1e'] },
+  kowhaiwhai:       { color: '#7a2d1e', roughness: 0.75, kind: 'kowhaiwhai', colors: ['#7f2c1d', '#1e1916', '#e6ddcc'] },
+  // Aegean wall painting: lime fresco green, Egyptian blue (calcium copper silicate), both matte
+  fresco_green:     { color: '#5f8a68', roughness: 0.93, kind: 'smooth' },
+  egyptian_blue:    { color: '#3a6a9e', roughness: 0.95, kind: 'smooth' },
+  // Barry's Westminster roofs: cast-iron plates, painted grey, in courses with ribs down the slope
+  iron_galv:        { color: '#5f6569', roughness: 0.6, metalness: 0.4, kind: 'plates', block: 0.6, course: 0.9 },
+  // Djenné: banco freshly hand-smeared at the crépissage: lumps, palm strokes, rain runnels
+  banco_rough:      { color: '#9a7250', roughness: 0.97, kind: 'mud' },
 };
 
 export function albedo(key) {

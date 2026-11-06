@@ -10,6 +10,7 @@ import { box, lathe, frustum, rod } from '../../core/geom.js';
 import { faceFrame, Local, ext, archOutline, headPts, wrect } from '../renaissance/face.js';
 import { human, blob, limb as slimb } from '../greek/sculpture.js';
 
+const CV = 'limestone_carved';   // Istrian stone, carved: the figures, one block each, unjointed
 const M = 'marble', PINK = 'marble_pink', O = 'opening', I = 'limestone', L = 'lead';
 
 /** A quatrefoil outline at (u, y) of radius r (four lobes on a square). */
@@ -102,7 +103,7 @@ export function dogesPalace(el, { bag, col }) {
         for (const sg of [-1, 1]) { Lc.box(M, uc + sg * 2.6 - 0.35, yw, 0, uc + sg * 2.6 + 0.35, top + 1.2, 0.6); Lc.add(M, lathe([[0.42, 0], [0.001, 2.2]], 4, null, uc + sg * 2.6, top + 1.2, 0.3)); }
         Lc.add(M, ext([[uc - w / 2 - 0.5, top], [uc + w / 2 + 0.5, top], [uc + 0.3, top + 2.4], [uc, top + 3.0], [uc - 0.3, top + 2.4]], [], 0, 0.3));
         const fig = human({ pose: 'stand', h: 2.0, drape: 'peplos', arms: { r: [[0.15, 0.62, 0.05], [0.16, 0.95, 0.05]], l: [[-0.15, 0.62, 0.05], [-0.17, 0.55, 0.15]] } });
-        for (const g of fig.stone) { g.translate(uc, top + 3.0, 0.3); Lc.add(M, g); }
+        for (const g of fig.stone) { g.translate(uc, top + 3.0, 0.3); Lc.add(CV, g); }
         Lc.add(M, rod([uc + 0.32, top + 4.9, 0.4], [uc + 0.32, top + 6.0, 0.4], 0.04, 4));    // her sword
         holesD.push([uc - 3.4, yw - 1.3, uc + 3.4, top + 3.2]);
       }
@@ -126,12 +127,12 @@ export function dogesPalace(el, { bag, col }) {
     const cg = (cx, cz, dx, dz, kind) => {
       // built facing +z (out along the corner's diagonal), the tree on the corner, a figure either side
       const Lc = new Local(), yb = y + 4.3 + 0.18;
-      Lc.add(M, rod([0, 0, 0], [0, 2.3, 0], 0.13, 6)); Lc.add(M, blob([0, 2.5, 0], 0.55, [1, 0.7, 1], 7));
-      Lc.add(M, slimb([0, 1.9, 0], [0.4, 2.3, 0.1], 0.06, 0.04, 5)); Lc.add(M, slimb([0, 2.0, 0], [-0.4, 2.3, -0.1], 0.06, 0.04, 5));
+      Lc.add(CV, rod([0, 0, 0], [0, 2.3, 0], 0.13, 6)); Lc.add(CV, blob([0, 2.5, 0], 0.55, [1, 0.7, 1], 7));
+      Lc.add(CV, slimb([0, 1.9, 0], [0.4, 2.3, 0.1], 0.06, 0.04, 5)); Lc.add(CV, slimb([0, 2.0, 0], [-0.4, 2.3, -0.1], 0.06, 0.04, 5));
       const figs = kind === 'adam'
         ? [human({ pose: 'ease', h: 1.75, drape: 'nude' }), human({ pose: 'ease', h: 1.65, drape: 'nude', mirror: true, arms: { r: [[0.15, 0.68, 0.05], [0.1, 0.83, 0.12]] } })]
         : [human({ pose: 'ease', h: 1.75, drape: 'mantle', lean: 8, arms: { r: [[0.16, 0.68, 0.05], [0.18, 0.82, 0.14]] } }), human({ pose: 'stand', h: 1.5, drape: 'chiton', mirror: true })];
-      figs.forEach((fg, i) => { const sg = i ? 1 : -1; for (const g of fg.stone) { g.rotateY(-sg * 0.35); g.translate(sg * 0.6, 0, 0); Lc.add(M, g); } });
+      figs.forEach((fg, i) => { const sg = i ? 1 : -1; for (const g of fg.stone) { g.rotateY(-sg * 0.35); g.translate(sg * 0.6, 0, 0); Lc.add(CV, g); } });
       for (const list of Lc.m.values()) for (const g of list) { g.rotateY(Math.atan2(dx, dz)); g.translate(cx, yb, cz); }
       Lc.emit(bag);
     };
