@@ -12,6 +12,7 @@ import { registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { byzantineElements } from '../byzantine/index.js';
 import { bracketSet, hexa, obox, buddha, alongZ, hipRoof, gableRoofC } from '../chinese/index.js';
+import { tube, plate } from './shape.js';
 
 /** Round column on a stone base, or a square post { at, y, h, d, square, mat }. */
 function column(el, { bag, col }) {
@@ -192,24 +193,119 @@ function bridge(el, { bag, col }) {
   bag.add(el.deckMat || 'timber', fromTriangles(deck));
 }
 
+/**
+ * The Uji Bridge: a long timber bridge crossing a river along x from x0 to x1 at z { x0, x1, z, w,
+ * y (ground at the ends), rise (the gentle arch), bed (the river bed), bay, sannoma: { at (x), out,
+ * len } }: rows of round piles driven into the bed every bay, each row tied by a cap beam and a
+ * brace, stringers along, a deck of planks across, railings of posts and two rails with
+ * bronze onion finials (giboshi) on the posts at the ends and at every third post, and the
+ * san-no-ma — a little railed platform projecting upstream from the third bay from the west end.
+ */
+function ujiBridge(el, { bag, col }) {
+  const { x0, x1, z, w, y, rise, bed } = el, L = x1 - x0, bay = el.bay ?? 5.4, hw = w / 2;
+  const Y = (x) => y + rise * Math.sin(Math.PI * Math.max(0, Math.min(1, (x - x0) / L)));
+  const wood = [], dark = [], bronze = [];
+  const nb = Math.max(2, Math.round(L / bay)), B = L / nb;
+  // the pile rows (not at the ends, which rest on the banks), their caps and braces
+  for (let i = 1; i < nb; i++) {
+    const x = x0 + i * B, yt = Y(x) - 0.65;
+    for (const zz of [z - hw + 0.4, z - hw * 0.33, z + hw * 0.33, z + hw - 0.4]) { dark.push(lathe([[0.2, 0], [0.2, yt - bed + 0.5], [0.001, yt - bed + 0.5]], 10, null, x, bed - 0.5, zz)); col.circle(x, zz, 0.22, bed, yt); }
+    dark.push(box(x - 0.2, yt, z - hw - 0.3, x + 0.2, yt + 0.42, z + hw + 0.3));
+    dark.push(box(x - 0.12, yt - 2.0, z - hw + 0.1, x + 0.12, yt - 1.75, z + hw - 0.1));
+  }
+  // the stringers and the deck, in sections following the arch; walkable
+  const N = Math.max(8, Math.round(L / 2));
+  for (let k = 0; k < N; k++) {
+    const xa = x0 + L * k / N, xb = x0 + L * (k + 1) / N, ya = Y(xa), yb = Y(xb);
+    const deck = [], st = [];
+    const q = (xx, yy, zz) => [xx, yy, zz];
+    hexaBox(deck, [q(xa, ya, z - hw), q(xb, yb, z - hw), q(xb, yb, z + hw), q(xa, ya, z + hw)], 0.14);
+    for (const zz of [z - hw + 0.4, z - hw * 0.33, z + hw * 0.33, z + hw - 0.4]) hexaBox(st, [q(xa, ya - 0.55, zz - 0.14), q(xb, yb - 0.55, zz - 0.14), q(xb, yb - 0.55, zz + 0.14), q(xa, ya - 0.55, zz + 0.14)], 0.41);
+    wood.push(fromTriangles(deck)); dark.push(fromTriangles(st));
+    col.ramp([xa, z - hw, xb, z + hw], Math.min(ya, yb), Math.max(ya, yb), yb > ya ? 'e' : 'w');
+  }
+  // the railings, each side; the san-no-ma's gap on the upstream (+z) side
+  const sn = el.sannoma, gap = sn ? [sn.at - sn.len / 2, sn.at + sn.len / 2] : null;
+  const rails = (side, from, to) => {
+    const zz = z + side * (hw - 0.1), n = Math.max(1, Math.round((to - from) / 1.8));
+    for (let k = 0; k <= n; k++) {
+      const x = from + (to - from) * k / n, yy = Y(x);
+      wood.push(box(x - 0.08, yy, zz - 0.08, x + 0.08, yy + 1.05, zz + 0.08));
+      if (k === 0 || k === n || k % 3 === 0) bronze.push(lathe([[0.1, 0], [0.1, 0.06], [0.12, 0.08], [0.13, 0.17], [0.09, 0.25], [0.03, 0.33], [0.012, 0.4], [0.001, 0.42]], 10, null, x, yy + 1.05, zz));
+    }
+    for (const [h0, th] of [[0.95, 0.1], [0.5, 0.07]]) for (let k = 0; k < 12; k++) {
+      const xa = from + (to - from) * k / 12, xb = from + (to - from) * (k + 1) / 12, t = [];
+      hexaBox(t, [[xa, Y(xa) + h0, zz - th / 2], [xb, Y(xb) + h0, zz - th / 2], [xb, Y(xb) + h0, zz + th / 2], [xa, Y(xa) + h0, zz + th / 2]], th);
+      wood.push(fromTriangles(t));
+    }
+    col.segment([from, zz], [to, zz], 0.2, y - 1, y + rise + 1.2);
+  };
+  rails(-1, x0, x1);
+  if (gap) { rails(1, x0, gap[0]); rails(1, gap[1], x1); } else rails(1, x0, x1);
+  // the san-no-ma: a deck projecting upstream on two piles, railed on three sides
+  if (sn) {
+    const ys = Y(sn.at), za = z + hw, zb = z + hw + sn.out, xa = gap[0], xb = gap[1];
+    wood.push(box(xa, ys - 0.14, za - 0.1, xb, ys, zb));
+    dark.push(box(xa, ys - 0.55, za, xb, ys - 0.14, zb));
+    col.floor([xa, za - 0.1, xb, zb], ys);
+    for (const xx of [xa + 0.3, xb - 0.3]) dark.push(lathe([[0.18, 0], [0.18, ys - 0.55 - bed + 0.5], [0.001, ys - 0.55 - bed + 0.5]], 10, null, xx, bed - 0.5, zb - 0.3));
+    for (const [a, b] of [[[xa, za], [xa, zb]], [[xa, zb], [xb, zb]], [[xb, zb], [xb, za]]]) {
+      const lx = Math.min(a[0], b[0]) - 0.04, hx = Math.max(a[0], b[0]) + 0.04, lz = Math.min(a[1], b[1]) - 0.04, hz = Math.max(a[1], b[1]) + 0.04;
+      wood.push(box(lx, ys + 0.9, lz, hx, ys + 1.0, hz)); wood.push(box(lx + 0.01, ys + 0.47, lz + 0.01, hx - 0.01, ys + 0.53, hz - 0.01));
+      col.segment(a, b, 0.2, ys - 0.5, ys + 1.1);
+    }
+    for (const [xx, zz2] of [[xa, za], [xa, zb], [xb, zb], [xb, za]]) { wood.push(box(xx - 0.08, ys, zz2 - 0.08, xx + 0.08, ys + 1.05, zz2 + 0.08)); bronze.push(lathe([[0.1, 0], [0.1, 0.06], [0.12, 0.08], [0.13, 0.17], [0.09, 0.25], [0.03, 0.33], [0.012, 0.4], [0.001, 0.42]], 10, null, xx, ys + 1.05, zz2)); }
+  }
+  for (const g of wood) bag.add(el.mat || 'timber', g);
+  for (const g of dark) bag.add('wood_dark', g);
+  for (const g of bronze) bag.add('bronze', g);
+}
+/** A slab hanging down `t` from the top quad `top` (4 corners), its faces turned outward. */
+function hexaBox(out, top, t) { const bot = top.map((p) => [p[0], p[1] - t, p[2]]); hexa(out, bot, top); }
+
 function boxTris(x0, y0, z0, x1, y1, z1) {
   const out = [];
   hexa(out, [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]], [[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]]);
   return out;
 }
 
-/** A gilt-bronze phoenix standing on the ridge, wings raised, the tail streaming back { at, y, dir }. */
+/**
+ * A gilt-bronze phoenix (hōō) standing on the ridge { at, y, dir, h }: on a small rounded base, the
+ * legs, the body with its chest thrust out, the neck curving up to the crested head and open beak,
+ * the wings raised and spread as if about to fly, each of five long feathers, and the tail of three
+ * long plumes streaming back and curling up (docs/settlements/heian-uji.md §4).
+ */
 function phoenix(el, { bag }) {
-  const [x, z] = el.at, y = el.y, d = el.dir || [1, 0], u = [-d[1], d[0]], out = [];
-  obox(out, [x, z], u, d, 0.06, 0.06, y, y + 0.35);                                           // the legs
-  obox(out, [x, z], u, d, 0.16, 0.42, y + 0.35, y + 0.75);                                    // the body
-  obox(out, [x + d[0] * 0.4, z + d[1] * 0.4], u, d, 0.08, 0.1, y + 0.75, y + 1.15);           // the neck
-  obox(out, [x + d[0] * 0.5, z + d[1] * 0.5], u, d, 0.09, 0.16, y + 1.12, y + 1.3);           // the head
-  for (const s of [-1, 1]) {                                                                   // the wings
-    const c = [x + u[0] * s * 0.45, z + u[1] * s * 0.45];
-    obox(out, c, u, d, 0.32, 0.3, y + 0.75 + 0.2, y + 0.95 + 0.6);
+  const [x, z] = el.at, y = el.y, d = el.dir || [1, 0], s = (el.h || 1.0) / 1.0, sd = [-d[1], d[0]], out = [];
+  const o = [x, y, z];
+  const P = (u, v, w = 0) => [x + (d[0] * u + sd[0] * w) * s, y + v * s, z + (d[1] * u + sd[1] * w) * s];
+  const sc = (pts) => pts.map(([u, v]) => [u * s, v * s]), sr = (r) => r.map(([a, b]) => [a * s, b * s]);
+  // the base and the legs
+  bag.add('gilt_bronze', lathe([[0.16 * s, 0], [0.17 * s, 0.04 * s], [0.12 * s, 0.09 * s], [0.05 * s, 0.11 * s], [0.001, 0.11 * s]], 10, null, x, y, z));
+  for (const w of [-0.06, 0.06]) tube(out, P(0, 0.1, w), d, sc([[0, 0], [-0.02, 0.14], [0.02, 0.26]]), sr([[0.022, 0.022], [0.02, 0.02], [0.03, 0.03]]), 6);
+  // the body: from the root of the tail to the puffed chest; the neck and head
+  tube(out, o, d, sc([[-0.3, 0.44], [-0.18, 0.4], [-0.02, 0.4], [0.12, 0.46], [0.19, 0.56], [0.2, 0.66]]), sr([[0.05, 0.04], [0.1, 0.09], [0.13, 0.13], [0.13, 0.14], [0.1, 0.11], [0.065, 0.065]]), 10);
+  tube(out, o, d, sc([[0.19, 0.64], [0.24, 0.76], [0.25, 0.88], [0.27, 0.96], [0.33, 1.0], [0.4, 0.99], [0.47, 0.965]]), sr([[0.06, 0.06], [0.05, 0.05], [0.045, 0.045], [0.05, 0.05], [0.055, 0.05], [0.035, 0.03], [0.008, 0.008]]), 8);
+  const up = [0, 1, 0], side = [sd[0], 0, sd[1]], fwd = [d[0], 0, d[1]];
+  plate(out, [P(0.3, 1.02), P(0.22, 1.1), P(0.15, 1.08), P(0.25, 1.0)], side, 0.02 * s);       // the crest
+  plate(out, [P(0.3, 0.94), P(0.26, 0.82), P(0.32, 0.86), P(0.36, 0.95)], side, 0.02 * s);       // the wattle
+  // the wings: five feathers each, fanned from the shoulder, raised and spread
+  for (const w of [-1, 1]) {
+    const sh = [0.08, 0.64, w * 0.1];
+    for (let k = 0; k < 5; k++) {
+      const a = 0.25 + k * 0.17, len = 0.78 - k * 0.07;
+      const tip = [sh[0] - Math.cos(a) * len * 0.55 - 0.05, sh[1] + Math.sin(a + 0.3) * len, sh[2] + w * (0.32 + k * 0.05)];
+      const r0 = [sh[0] - 0.02 * k, sh[1] - 0.02, sh[2]], r1 = [sh[0] - 0.1 - 0.03 * k, sh[1] + 0.02, sh[2] + w * 0.05];
+      plate(out, [P(...r0), P(...r1), P(tip[0] - 0.07, tip[1] - 0.06, tip[2]), P(...tip), P(tip[0] + 0.05, tip[1] - 0.12, tip[2] - w * 0.02)], side, 0.025 * s);
+    }
+    plate(out, [P(0.14, 0.62, w * 0.1), P(0.0, 0.7, w * 0.16), P(-0.1, 0.62, w * 0.14), P(0.02, 0.52, w * 0.12)], side, 0.03 * s);   // the coverts
   }
-  for (let k = 0; k < 4; k++) obox(out, [x - d[0] * (0.55 + k * 0.28), z - d[1] * (0.55 + k * 0.28)], u, d, 0.12 + k * 0.03, 0.15, y + 0.55 + k * 0.18, y + 0.7 + k * 0.22);   // the tail
+  // the tail: three plumes streaming back and curling up, a little fanned
+  for (const [ang, lift] of [[-0.22, 0], [0, 0.06], [0.22, 0]]) {
+    const dd = [d[0] * Math.cos(ang) - d[1] * Math.sin(ang), d[1] * Math.cos(ang) + d[0] * Math.sin(ang)];
+    tube(out, P(-0.28, 0.44), dd, sc([[0, 0], [-0.2, -0.02 + lift], [-0.42, 0.06 + lift], [-0.6, 0.24 + lift], [-0.68, 0.48 + lift], [-0.62, 0.66 + lift], [-0.5, 0.72 + lift]]), sr([[0.05, 0.025], [0.07, 0.018], [0.08, 0.016], [0.08, 0.016], [0.07, 0.016], [0.05, 0.016], [0.02, 0.012]]), 6);
+  }
+  void up; void fwd;
   bag.add('gilt_bronze', fromTriangles(out));
 }
 
@@ -279,6 +375,6 @@ registerStyle('japanese', {
   column,
   trim: () => {},
   opening: () => {},
-  elements: { ...byzantineElements, bracket_set: bracketSet, irimoya, pent_roof: pentRoof, hogyo, gable_roof_j: gableRoofC, railing, bridge, pond_water: pond },
+  elements: { ...byzantineElements, bracket_set: bracketSet, irimoya, pent_roof: pentRoof, hogyo, gable_roof_j: gableRoofC, railing, bridge, uji_bridge: ujiBridge, pond_water: pond },
   objects: { amida, canopy, cloud_bodhisattva: cloudBodhisattva, lantern, phoenix },
 });
