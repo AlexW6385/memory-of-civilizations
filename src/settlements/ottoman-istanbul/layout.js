@@ -10,6 +10,14 @@ export const MOSQUE = { c: [0, 20], d: 26.5, h: 53 };
 export const PRECINCT = [-75, -95, 75, 90];
 export const MADRASAS = [[-150, -60, -90, 10], [90, -60, 150, 10], [-150, 25, -90, 95], [90, 25, 150, 95]];
 export const TERRACE = [-160, -110, 160, 110];
+// behind the qibla wall: Hürrem Sultan's tomb (1558) in the burial garden; Süleyman's own (1566) is not yet built
+export const TOMB = { c: [22, 68], r: 4.4 };
+export const CEMETERY = [-62, 54, 64, 86];
+/** The graves of the burial garden in 1560 — still few [inferred] — and its rose bushes. */
+export const GRAVES = [[-40, 60, 'man'], [-36.5, 60, 'woman'], [-28, 63.5, 'man'], [-44, 70, 'man'], [-31, 72, 'woman'], [-18, 76, 'man'], [-48, 79, 'woman'], [-26, 81, 'man'], [40, 62, 'man'], [44, 74, 'woman'], [50, 80, 'man'], [6, 82, 'man']].map(([x, z, kind]) => ({ at: [x, z], len: kind === 'man' ? 2.1 : 1.9, yaw: 0, kind }));
+export const ROSES = [[-34, 66], [-22, 69], [-39, 75], [-12, 63], [-6, 72], [-30, 84], [-52, 66], [8, 62], [10, 74], [34, 70], [37, 81], [56, 68], [-14, 84], [28, 84]];
+export const inCemetery = (x, z) => inRect(CEMETERY, x, z);
+export const nearGrave = (x, z, m) => Math.hypot(x - TOMB.c[0], z - TOMB.c[1]) < TOMB.r + 2.6 + m || GRAVES.some((g) => Math.abs(x - g.at[0]) < 1.4 + m && Math.abs(z - g.at[1]) < 0.8 + m) || ROSES.some(([a, b]) => Math.hypot(x - a, z - b) < 0.8 + m);
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 /** The hill: level on its crown (the terrace), falling to the north toward the Golden Horn and on all sides to the rim. */
