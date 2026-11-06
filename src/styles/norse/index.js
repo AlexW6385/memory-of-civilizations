@@ -67,9 +67,9 @@ export function pitched(bag, mat, wall, [x0, z0, x1, z1], y, pitch, o = 0.3, alo
   return yr;
 }
 /** A square pyramid or frustum with its sides parallel to the axes: half-widths a0 at y0, a1 at y1. */
-function pyr(x, z, a0, y0, a1, y1) { return lathe([[a0 * Math.SQRT2, 0], [Math.max(a1, 0.001) * Math.SQRT2, y1 - y0], [0.001, y1 - y0]], 4).rotateY(Math.PI / 4).translate(x, y0, z); }
+export function pyr(x, z, a0, y0, a1, y1) { return lathe([[a0 * Math.SQRT2, 0], [Math.max(a1, 0.001) * Math.SQRT2, y1 - y0], [0.001, y1 - y0]], 4).rotateY(Math.PI / 4).translate(x, y0, z); }
 /** An arcade's outline: a band L long and H high over n round arches (radius bay/2 − post), springing at v = 0. */
-function arcadeShape(L, H, n, post = 0.06) {
+export function arcadeShape(L, H, n, post = 0.06) {
   const sh = new Shape(), bw = L / n, rr = bw / 2 - post;
   sh.moveTo(0, 0);
   for (let i = 0; i < n; i++) { const uc = (i + 0.5) * bw; sh.lineTo(uc - rr, 0); sh.absarc(uc, 0, rr, Math.PI, 0, true); }
