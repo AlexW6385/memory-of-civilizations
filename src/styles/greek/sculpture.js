@@ -306,25 +306,30 @@ const GROUPS = {
 };
 export const RELIEF_KINDS = Object.keys(GROUPS);
 
-/** One relief group as a geometry, in a plane: u along `u`, v up, out along `o` (unit 3-vectors), origin p, size s, depth d, facing −u when back. */
+/** One relief group as a geometry, in a plane: u along `u`, v up, out along `o` (unit 3-vectors), origin p, size s, depth d, facing −u when flipped. */
 export function relief(kind, v, { p, u, o, s = 1, d = 0.056, flip = false }) {
-  const parts = GROUPS[kind](v);
+  return profile(GROUPS[kind](v), { p, u, o, s, d, flip });
+}
+/** Pieces [outline, depth fraction] in profile (u, v), raised d from a plane and set into it (see relief). */
+export function profile(parts, { p, u, o, s = 1, d = 0.056, flip = false }) {
   const geoms = parts.map(([pts, f]) => {
     let q = pts.map(([a, b]) => [a * s, b * s]);
     if (flip) q = q.map(([a, b]) => [-a, b]).reverse();
     return prism(q, d * f);
   });
-  const g = merge(geoms);
-  // (u, v, depth) → world
+  return toPlane(merge(geoms), p, u, o);
+}
+/** A geometry built in (u, v, depth) into a wall's plane: u along `u`, v up, depth along `o`, origin p. */
+export function toPlane(g, p, u, o) {
   const m = new Matrix4().set(u[0], 0, o[0], p[0], u[1], 1, o[1], p[1], u[2], 0, o[2], p[2], 0, 0, 0, 1);
-  // the basis is right-handed only when u × up = o; otherwise flip the winding by mirroring u
-  const cr = [u[1] * 0 - u[2] * 1, u[2] * 0 - u[0] * 0, u[0] * 1 - u[1] * 0];
-  if (cr[0] * o[0] + cr[1] * o[1] + cr[2] * o[2] < 0) {
-    const pos = g.attributes.position.array;
-    for (let i = 0; i < pos.length; i += 9) for (let k = 0; k < 3; k++) { const t = pos[i + 3 + k]; pos[i + 3 + k] = pos[i + 6 + k]; pos[i + 6 + k] = t; }
-    const nor = g.attributes.normal.array;
-    for (let i = 0; i < nor.length; i += 9) for (let k = 0; k < 3; k++) { const t = nor[i + 3 + k]; nor[i + 3 + k] = nor[i + 6 + k]; nor[i + 6 + k] = t; }
+  // the basis is right-handed only when u × up = o; otherwise the winding is turned back
+  if (-u[2] * o[0] + u[0] * o[2] < 0) {
+    for (const name of ['position', 'normal']) {
+      const a = g.attributes[name].array;
+      for (let i = 0; i < a.length; i += 9) for (let k = 0; k < 3; k++) { const t = a[i + 3 + k]; a[i + 3 + k] = a[i + 6 + k]; a[i + 6 + k] = t; }
+    }
   }
   g.applyMatrix4(m);
   return g;
 }
+export { prism, ell, cap, poly };
