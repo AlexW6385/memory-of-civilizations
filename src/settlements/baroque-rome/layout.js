@@ -8,6 +8,7 @@
 export const RADIUS = 380;
 export const CROSSING = [-210, 0];
 export const FRONT_X = -82;                                  // the east front of the basilica
+export const FLOOR = 3;                                      // the church's floor above the piazza (Bernini's steps)
 export const OVAL = { c: [40, 0], ax: 70, bz: 95 };
 export const RETTA = [-78, -50, -28, 50];
 export const PALACE = [-150, -175, -70, -112];

@@ -12,6 +12,7 @@ import { obelisk, fountain, saint, ponteAngeli, palaceRoman } from './piazza.js'
 import { merge, ext } from '../renaissance/face.js';
 import { stPeterFacade, entrances } from './facade.js';
 import { stPeterInterior } from './interior.js';
+import { socle, sagrato } from './sagrato.js';
 
 const T = 'travertine', L = 'lead', ST = 'stucco_ochre';
 /** st_peter: { c (the crossing), s (side of the central block), nave (length east), w, h, d (dome diameter), y } — the church faces east. */
@@ -52,6 +53,12 @@ function stPeter(el, { bag, col }) {
   bag.add(T, lathe([[R0 * 0.2, 0], [R0 * 0.2, 9], [R0 * 0.24, 10], [0.001, 10]], 16, null, cx, ly, cz));
   bag.add(L, lathe([[R0 * 0.16, 0], [0.5, 6], [0.001, 7]], 16, null, cx, ly + 10, cz));
   bag.add('gilt_bronze', lathe([[0.9, 0], [0.9, 1.8], [0.2, 2], [0.2, 4.5], [0.001, 4.5]], 10, null, cx, ly + 17, cz));
+  // raised above the piazza: the socle under the walls, the sagrato and Bernini's steps (sagrato.js)
+  if (y > 0.3) {
+    const corners = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([dx, dz]) => { const r = [cx + dx * aw / 2, cz + dz * aw / 2, cx + dx * arm * 0.85, cz + dz * arm * 0.85]; return [Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.max(r[0], r[2]), Math.max(r[1], r[3])]; });
+    socle(bag, col, { y, rects: [[cx - arm, cz - aw / 2, cx + arm, cz + aw / 2], [cx - aw / 2, cz - arm, cx + aw / 2, cz + arm], ...corners, [n0 - 1, cz - W / 2, n1, cz + W / 2], [n1 - 9.2, cz - 41.2, n1, cz + 41.2], [n1, cz - fw, n1 + 4, cz + fw]], circles: [[cx - arm, cz, aw / 2], [cx, cz - arm, aw / 2], [cx, cz + arm, aw / 2]] });
+    sagrato(bag, col, { fx: n1 + 4, cz, fw, y });
+  }
   // inside (interior.js): the arms 27.5 m wide under barrel vaults springing at 30 m, the crossing's arches 21 m from its centre
   if (IN) stPeterInterior(bag, col, { cx, cz, y, A: R0, b: 13.75, ys: 30, R0, yDrum1: dy + 24 - y, yDome: domeY - y, domeH: R0 * 1.1, xFront: n1 - 8, xWest: cx - arm + aw / 2 + 1.6, zEnd: arm - aw / 2 - 1.2 });
 }

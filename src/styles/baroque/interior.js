@@ -17,6 +17,7 @@ import { box, lathe, rod, disc, fromTriangles } from '../../core/geom.js';
 import { Local, ext, archOutline, headPts } from '../renaissance/face.js';
 import { human, blob, limb as slimb } from '../greek/sculpture.js';
 import { ball, limb, T } from '../qing/carving.js';
+import { pilaster, revet, niche, virtue, pierFace, medallion, bronzePeter, tombUrban, tombPaul, frameFacing, naveFloor, crossingFloor, armFloor } from './marbles.js';
 
 const TR = 'travertine', ST = 'stucco', MF = 'marble_floor', GO = 'mosaic_gold', GB = 'gilt_bronze', BR = 'bronze', M = 'marble', DL = 'daylight', PT = 'ceiling_painted', BL = 'paint_blue', CV = 'limestone_carved';
 
@@ -58,6 +59,10 @@ export function stPeterInterior(bag, col, o) {
   for (const r of [[cx + A, cz - 20.5, xFront, cz + 20.5], [cx - A, cz - A, cx + A, cz + A], [cx - b, cz - zEnd, cx + b, cz - A], [cx - b, cz + A, cx + b, cz + zEnd], [xWest, cz - b, cx - A, cz + b], [xFront, cz - 40, xFront + 8, cz + 40]]) {
     Lc.add(MF, box(r[0], y - 0.3, r[1], r[2], y + 0.05, r[3])); col.floor(r, y + 0.05);
   }
+  // the pavement's figures in coloured marble (della Porta, Maderno, Bernini)
+  naveFloor(Lc, { x0: cx + A, x1: xFront - 1.2, cz, y, nb: 5, hw: b }); crossingFloor(Lc, { cx, cz, y });
+  for (const s of [-1, 1]) armFloor(Lc, { rect: [cx - b, Math.min(cz + s * A, cz + s * zEnd), cx + b, Math.max(cz + s * A, cz + s * zEnd)], y });
+  armFloor(Lc, { rect: [xWest, cz - b, cx - A, cz + b], y });
   // ── the walls of the arms with their entablature, and the barrel vaults over them
   const entab = (F, u0, u1) => { Lc.add(TR, box(u0, 26.6, 0, u1, 28.6, 0.45).applyMatrix4(F.M)); Lc.add(TR, box(u0, 28.6, 0, u1, 30, 1.3).applyMatrix4(F.M)); for (let u = u0 + 0.6; u < u1 - 0.3; u += 1.4) Lc.add(TR, box(u - 0.2, 28.2, 0.4, u + 0.2, 28.6, 1.1).applyMatrix4(F.M)); };
   const wall = (a2, b2, top, holes = []) => {
@@ -88,19 +93,25 @@ export function stPeterInterior(bag, col, o) {
     entab(F, 0, F.L);
     for (let i = 0; i <= nb; i++) {
       const u = i * bay;
-      for (const du of [-2.0, 2.0]) { if ((i === 0 && du < 0) || (i === nb && du > 0)) continue; Lc.add(TR, box(u + du - 1.0, 0, 0, u + du + 1.0, 26.6, 0.4).applyMatrix4(F.M)); Lc.add(TR, box(u + du - 1.25, 0, 0, u + du + 1.25, 1.4, 0.55).applyMatrix4(F.M)); Lc.add(GB, box(u + du - 1.2, 24.8, 0.4, u + du + 1.2, 26.6, 0.6).applyMatrix4(F.M)); }
+      for (const du of [-2.0, 2.0]) { if ((i === 0 && du < 0) || (i === nb && du > 0)) continue; pilaster(Lc, F, u + du, 0, 26.6); }
+      // between the paired pilasters: two niches lined with coloured marble, framed panels between and above
+      if (i > 0 && i < nb) { niche(Lc, F, u - 0.95, u + 0.95, 2.4, 10.6); niche(Lc, F, u - 0.95, u + 0.95, 13.4, 21.6); revet(Lc, F, u - 0.95, u + 0.95, 11.0, 13.0); revet(Lc, F, u - 0.95, u + 0.95, 22.0, 26.4); }
+      // the bronze St Peter against the pier of St Longinus, at the nave's end
+      if (s > 0 && i === nb) { bronzePeter(Lc, F, u - 1.9, 1.5); const p = atF(F, u - 1.9, 0, 1.5); col.rect([p[0] - 1.1, p[2] - 1.1, p[0] + 1.1, p[2] + 1.1], y, y + 1.75); }
     }
     for (let i = 0; i < nb; i++) {
       const uc = (i + 0.5) * bay, r = aw / 2;
       Lc.add(TR, ext(headPts(uc, asp, aw + 1.2, 'round', 12).concat(headPts(uc, asp, aw, 'round', 12).reverse()), [], 0, 0.3).applyMatrix4(F.M));
-      // the chapel behind: its sides, its back with the altar and the altarpiece, its ceiling; a gilt angel in each spandrel
+      // the chapel behind: its sides, its back with the altar and the altarpiece, its ceiling; a Virtue on each side of the arch
       const D = 5.5, cF = F;
       for (const sg of [-1, 1]) { const p0 = atF(cF, uc + sg * r, 0, -1.2), p1 = atF(cF, uc + sg * r, 0, -1.2 - D); Lc.add(ST, box(0, -0.5, -0.15, Math.hypot(p1[0] - p0[0], p1[2] - p0[2]), asp + r + 0.2, 0.15).applyMatrix4(lineFrame([p0[0], p0[2]], [p1[0], p1[2]], y).M)); }
       Lc.add(ST, box(uc - r, -0.5, -1.2 - D - 0.3, uc + r, asp + r + 0.2, -1.2 - D).applyMatrix4(F.M));
       Lc.add(ST, box(uc - r, asp + r, -1.2 - D, uc + r, asp + r + 0.3, -1.2).applyMatrix4(F.M));
       Lc.add(M, box(uc - 1.6, 0, -1.2 - D, uc + 1.6, 1.1, -1.2 - D + 1.1).applyMatrix4(F.M)); Lc.add(PT, box(uc - 1.8, 2.6, -1.2 - D, uc + 1.8, 8.0, -1.2 - D + 0.08).applyMatrix4(F.M));
       Lc.add(GB, box(uc - 2.1, 2.3, -1.2 - D, uc + 2.1, 8.3, -1.2 - D + 0.05).applyMatrix4(F.M));
-      for (const sg of [-1, 1]) Lc.add(GB, T(ball(0.5, 0.7, 0.18, 7, 4), 0, 0, 0).applyMatrix4(new Matrix4().makeTranslation(uc + sg * (r + 1.0), asp + r * 0.8, 0.25)).applyMatrix4(F.M));
+      for (const a of [Math.PI * 0.7, Math.PI * 0.3]) virtue(Lc, F, uc, asp, r + 0.6, a, 4.4, 0.55);   // the reclining Virtues on the arch
+      // the piers' faces within the arch (the chapel's sides): coloured marbles and the medallions of the popes
+      for (const sg of [-1, 1]) { const e = F.M.elements, p0 = atF(F, uc + sg * (r - 0.15), 0, -1.2), p1 = atF(F, uc + sg * (r - 0.15), 0, -1.2 - D); pierFace(Lc, frameFacing([p0[0], p0[2]], [p1[0], p1[2]], [-sg * e[0], -sg * e[2]], y), D, asp + r - 0.65); }
       const pa = atF(F, uc, 0, -1.2 - D + 0.55); col.rect([pa[0] - 1.7, pa[2] - 1.7, pa[0] + 1.7, pa[2] + 1.7], y, y + 1.1);
       for (const sg of [-1, 1]) { const p0 = atF(F, uc + sg * r, 0, -1.2), p1 = atF(F, uc + sg * r, 0, -1.2 - D); col.segment([p0[0], p0[2]], [p1[0], p1[2]], 0.3, y, y + asp + r); }
       { const p0 = atF(F, uc - r, 0, -1.35 - D), p1 = atF(F, uc + r, 0, -1.35 - D); col.segment([p0[0], p0[2]], [p1[0], p1[2]], 0.3, y, y + asp + r); }
@@ -125,7 +136,11 @@ export function stPeterInterior(bag, col, o) {
   // the transepts and the west arm: their walls, their ends, their vaults
   for (const s of [-1, 1]) {
     const z0 = cz + s * A, z1 = cz + s * zEnd;
-    for (const sx of [-1, 1]) { const xw = cx + sx * b, zl = Math.min(z0, z1), zh = Math.max(z0, z1), F = wall(sx > 0 ? [xw, zl] : [xw, zh], sx > 0 ? [xw, zh] : [xw, zl], 30); entab(F, 0, F.L); }
+    for (const sx of [-1, 1]) { const xw = cx + sx * b, zl = Math.min(z0, z1), zh = Math.max(z0, z1), F = wall(sx > 0 ? [xw, zl] : [xw, zh], sx > 0 ? [xw, zh] : [xw, zl], 30); entab(F, 0, F.L);
+      // the fluted pilasters at its ends, between them a field of coloured marble with a niche and a medallion
+      for (const u of [1.25, F.L - 1.25]) pilaster(Lc, F, u, 0, 26.6);
+      revet(Lc, F, 2.6, F.L - 2.6, 0.9, 25.8); niche(Lc, F, F.L / 2 - 1.3, F.L / 2 + 1.3, 3.2, 14.5, 0.08); medallion(Lc, F, F.L / 2, 19.5, 0.08, 0.9);
+    }
     const F = wall([cx + s * b, z1], [cx - s * b, z1], yc + 0.5); entab(F, 0, F.L);
     // its altar under a frame of columns and a pediment, the great altarpiece
     Lc.add(M, box(b - 2.5, 0, 0, b + 2.5, 1.2, 1.5).applyMatrix4(F.M)); Lc.add(PT, box(b - 4, 3.5, 0, b + 4, 16, 0.12).applyMatrix4(F.M)); Lc.add(GB, box(b - 4.4, 3.1, 0, b + 4.4, 16.4, 0.08).applyMatrix4(F.M));
@@ -134,7 +149,14 @@ export function stPeterInterior(bag, col, o) {
     const pc = atF(F, b, 0, 0.75); col.rect([pc[0] - 2.6, pc[2] - 1.0, pc[0] + 2.6, pc[2] + 1.0].map((v) => v), y, y + 1.2);
     vault(cx - b, Math.min(z0, z1), cx + b, Math.max(z0, z1), 'z');
   }
-  for (const s of [-1, 1]) { const zl = cz + s * b, F = wall(s < 0 ? [xWest, zl] : [cx - A, zl], s < 0 ? [cx - A, zl] : [xWest, zl], 30); entab(F, 0, F.L); }
+  for (const s of [-1, 1]) {
+    const zl = cz + s * b, F = wall(s < 0 ? [xWest, zl] : [cx - A, zl], s < 0 ? [cx - A, zl] : [xWest, zl], 30); entab(F, 0, F.L);
+    for (const u of [1.25, F.L - 1.25]) pilaster(Lc, F, u, 0, 26.6);
+    revet(Lc, F, 2.6, F.L - 2.6, 13.6, 25.8);
+    // the tombs flanking the Cathedra: Urban VIII's on the right (the north), Paul III's on the left
+    const fp = (s < 0 ? tombUrban : tombPaul)(Lc, F, F.L / 2), p0 = atF(F, fp[0], 0, fp[1]), p1 = atF(F, fp[2], 0, fp[3]);
+    col.rect([Math.min(p0[0], p1[0]), Math.min(p0[2], p1[2]), Math.max(p0[0], p1[0]), Math.max(p0[2], p1[2])], y, y + 4.5);
+  }
   vault(xWest, cz - b, cx - A, cz + b, 'x');
   // ── the west end: the Cathedra Petri
   {

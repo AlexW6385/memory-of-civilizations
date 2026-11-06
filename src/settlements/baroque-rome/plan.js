@@ -1,5 +1,5 @@
 // Baroque Rome about 1670 (docs/settlements/baroque-rome.md §2–§4).
-import { RADIUS, CROSSING, FRONT_X, OVAL, RETTA, PALACE, SISTINE, CASTEL, TIBER, tiberX } from './layout.js';
+import { RADIUS, CROSSING, FRONT_X, FLOOR, OVAL, RETTA, PALACE, SISTINE, CASTEL, TIBER, tiberX } from './layout.js';
 
 export const stpeter = {
   id: 'baroque-rome-stpeter',
@@ -12,7 +12,7 @@ export const stpeter = {
   view: [FRONT_X - 30, -62, FRONT_X + 12, 62],
   bakeTop: 132,
   elements: [
-    { t: 'st_peter', c: CROSSING, s: 110, nave: FRONT_X - 4 - (CROSSING[0] + 55), w: 56, h: 48, d: 42, interior: true },
+    { t: 'st_peter', c: CROSSING, s: 110, nave: FRONT_X - 4 - (CROSSING[0] + 55), w: 56, h: 48, d: 42, y: FLOOR, interior: true },
     { t: 'colonnade', c: OVAL.c, ax: OVAL.ax, bz: OVAL.bz, rows: 4, depth: 14, h: 13 },
     { t: 'paving', rect: RETTA },
     { t: 'obelisk', c: OVAL.c, h: 25.5 },
@@ -21,10 +21,10 @@ export const stpeter = {
   ],
   rooms: [
     { id: 'piazza', rect: [RETTA[0], -90, OVAL.c[0] + OVAL.ax, 90], y: 0, kind: 'open' },
-    { id: 'nave', rect: [CROSSING[0] + 21, -13.75, FRONT_X - 4 - 9.2, 13.75], y: 0, kind: 'hall' },
-    { id: 'crossing', rect: [CROSSING[0] - 21, -21, CROSSING[0] + 21, 21], y: 0, kind: 'hall' },
+    { id: 'nave', rect: [CROSSING[0] + 21, -13.75, FRONT_X - 4 - 9.2, 13.75], y: FLOOR, kind: 'hall' },
+    { id: 'crossing', rect: [CROSSING[0] - 21, -21, CROSSING[0] + 21, 21], y: FLOOR, kind: 'hall' },
   ],
-  walks: [Object.assign([[125, 0], [40, 0], [FRONT_X + 12, 0]], { y0: 0 })],
+  walks: [Object.assign([[125, 0], [40, 0], [FRONT_X + 26, 0]], { y0: 0 })],
 };
 export const vatican = {
   id: 'baroque-rome-vatican', style: 'baroque', origin: [0, 0], base: 0, yaw: 0, feature: true,
