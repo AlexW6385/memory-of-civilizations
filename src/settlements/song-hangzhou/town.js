@@ -52,11 +52,41 @@ function tideDay() {
       person([x + 0.2, zs + 0.7], yR, faceTo([0, -1]), { pose: 'squat', dress: 'robe', hat: 'none' });
     }
   }
+  teaInside(S, L, rand, person);
+  // the shops' name boards over their fronts, on the beam over the opening; the tea houses' on their front beam
+  const tea = new Set(teaHouses()), F = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
+  for (const l of lots()) {
+    if (!l.shop) continue;
+    const [x0, z0, x1, z1] = l.rect, o = F[l.front], len = o[0] ? z1 - z0 : x1 - x0, edge = [o[0] > 0 ? x1 : o[0] < 0 ? x0 : (x0 + x1) / 2, o[1] > 0 ? z1 : o[1] < 0 ? z0 : (z0 + z1) / 2];
+    const n = Math.min(Math.floor((len - 1.6) / 0.36), 2 + (l.seed % 4)), back = tea.has(l) ? 0.435 : 0.505;
+    if (n < 2) continue;
+    S.push({ t: 'shop_plaque', at: [edge[0] - o[0] * back, edge[1] - o[1] * back], y: LEVEL.street, yb: tea.has(l) ? 3.3 : 2.28, rot: Math.atan2(o[0], o[1]), n: tea.has(l) ? 2 : n, scheme: tea.has(l) ? 0 : [0, 0, 1, 2][(l.seed >> 2) % 4], seed: l.seed >> 5 });
+  }
   return [base('song-hangzhou-stands', S), base('song-hangzhou-tide-crowd', L, 'life')];
 }
 
+/** The tea houses on the road below the pagoda: three of the wide shop lots nearest its stair. */
+let TEA = null;
+export function teaHouses() {
+  if (TEA) return TEA;
+  TEA = lots().filter((l) => l.front === 's' && l.rect[3] > ROAD.z0 - 1 && l.rect[0] < -30 && l.rect[2] - l.rect[0] > 8).slice(0, 3);
+  return TEA;
+}
+/** Inside each tea house: tea tables with their benches, customers seated round them, the host at the counter. */
+function teaInside(S, L, rand, person) {
+  for (const l of teaHouses()) {
+    const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2 - 0.6, Y = LEVEL.street + 0.45;
+    S.push({ t: 'tea_house', rect: l.rect, y: LEVEL.street, seed: l.seed });
+    for (const zz of [z0 + 4.4, z0 + 8.2]) {
+      L.push({ t: 'tea_table', at: [cx, zz], y: Y, rot: 0, seed: Math.floor(rand() * 1e9) });
+      for (const [dx, dz] of [[0.85, 0], [-0.85, 0], [0, 0.85], [0, -0.85]]) if (rand() < 0.6) person([cx + dx, zz + dz], Y, faceTo([-dx, -dz]), { pose: 'sit', dress: 'robe', hat: rand() < 0.6 ? 'cap' : 'none' });
+    }
+    person([x1 - 1.15, z0 + 6], Y, faceTo([-1, 0]), { pose: 'stand', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_black', hat: 'cap' });
+  }
+}
+
 export async function town() {
-  const all = lots(), plans = [];
+  const tea = new Set(teaHouses()), all = lots().filter((l) => !tea.has(l)), plans = [];
   for (let i = 0; i < all.length; i += 150) plans.push(base(`song-hangzhou-houses-${i / 150}`, all.slice(i, i + 150).map((l) => ({ t: 'house_jiangnan', y: LEVEL.street, ...l }))));
   plans.push(...tideDay());
   return plans;

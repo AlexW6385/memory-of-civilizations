@@ -10,7 +10,8 @@ import { beamTris } from '../ming/index.js';
 import '../qing/index.js';
 import { KAIFENG_ELEMENTS, hexa } from './kaifeng.js';
 import { WUTAI_ELEMENTS } from './wutai.js';
-import { ironSkin } from './iron.js';
+import { ironSkin, relief, RELIEF_PITCH } from './iron.js';
+import '../chinese/index.js';
 import { HANGZHOU_ELEMENTS } from './hangzhou.js';
 import { SCROLL_ELEMENTS } from './scroll.js';
 
@@ -220,6 +221,24 @@ function interiorStorey(bag, col, el, cx, cz, i, y, coreMat) {
   ringWall(wall, col, cx, cz, aw, a, y, y + h, OPEN_FACES, 0.8, Math.min(2.9, h * 0.42));
   ringWall(inner, col, cx, cz, ac - 0.8, ac, y, y + h, [5], 0.6, 2.4);
   bag.add(coreMat, fromTriangles(wall)); bag.add('plaster_white', fromTriangles(inner));
+  // the sumeru base along the foot of the inner wall where the stair leaves the corridor free (west, the
+  // diagonals but the south-east, the north either side of the chamber's door): plinth, mouldings, the
+  // waist with its brick-carved panels — flowers, flying figures, beasts — mouldings and the cap
+  if (el.images) {
+    const sm = [], faces = [[2, -99, 99], [3, -99, 99], [4, -99, 99], [6, -99, 99], [5, -99, -0.72], [5, 0.72, 99]];
+    const bands = [[0, 0.12, 0.3], [0.12, 0.22, 0.22], [0.22, 0.66, 0.08], [0.66, 0.76, 0.22], [0.76, 0.9, 0.3]];
+    for (const [k, u0, u1] of faces) for (const [b0, b1, o] of bands) ringPiece(sm, cx, cz, k, ac - 0.01, ac + o, y + b0, y + b1, u0, u1);
+    bag.add('brick_grey', fromTriangles(sm));
+    for (const [k, u0, u1] of faces) {
+      const th = (k + 1) * Math.PI / 4, mx = Math.cos(th), mz = Math.sin(th), tx = -mz, tz2 = mx, a = ac + 0.08, half = a * T8;
+      const lo = Math.max(-half + 0.12, u0 + 0.06), hi = Math.min(half - 0.12, u1 - 0.06), P = RELIEF_PITCH, n = Math.floor((hi - lo) / P);
+      const seq = n >= 6 ? ['flower', 'fly', 'lion', 'fly', 'flower'] : n >= 4 ? ['lion', 'fly', 'lion'] : n >= 2 ? ['fly'] : n >= 1 ? ['flower'] : [];
+      const units = seq.reduce((t, q) => t + (q === 'fly' ? 2 : 1), 0);
+      let u = (lo + hi) / 2 - units * P / 2;
+      for (const q of seq) { const w = q === 'fly' ? 2 : 1, uc = u + w * P / 2; relief(bag, 'plaster_grey', q, cx + mx * a + tx * uc, y + 0.235, cz + mz * a + tz2 * uc, mx, mz); u += w * P; }
+      col.obstacles.push({ poly: ringPiece([], cx, cz, k, ac - 0.01, ac + 0.3, y, y + 0.9, u0, u1), y0: y, y1: y + 0.9 });
+    }
+  }
   // the doorways' frames on the outer face: red jambs, the lintel with its two door-pins (men zan), the threshold
   {
     const fr = [], dh = Math.min(2.9, h * 0.42);
@@ -275,12 +294,25 @@ function interiorStorey(bag, col, el, cx, cz, i, y, coreMat) {
     bag.add('paint_caihua', fromTriangles(ringT(r0 * 0.45, r0 * 0.74, yc - 0.3, yc - 0.06)));
     slab(cz2, ngon(cx, cz, r0 * 0.47), yc - 0.08, yc);
     bag.add('ceiling_coffer', fromTriangles(cz2));
-    // an offering table and its bronze censer against the south wall, facing the door (the chamber's images recorded for later)
-    const tb = [];
-    hexaBox(tb, cx - 0.6, y, cz + ac - 0.8 - 0.75, cx + 0.6, y + 0.82, cz + ac - 0.8 - 0.25);
+    // the image: a Buddha seated on a sumeru throne against the south wall, facing the door, his offering
+    // table and its bronze censer before him
+    const ai2 = ac - 0.8;
+    if (el.images) {
+      STYLES.chinese.objects.buddha({ at: [cx, cz + ai2 - 0.78], y, h: 1.9, dir: [0, -1], hexSeat: true, robe: 'clay_robe', gilt: 'clay_gilt' }, { bag, col });
+      col.circle(cx, cz + ai2 - 0.78, 0.65, y, y + 1.6);
+    }
+    const tz = el.images ? ai2 - 2.05 : ai2 - 0.75, tb = [], zc = cz + tz + 0.25;
+    // the table: a top with everted ends, an apron, four legs; the censer between two candlesticks
+    hexaBox(tb, cx - 0.62, y + 0.78, cz + tz, cx + 0.62, y + 0.84, cz + tz + 0.5);
+    for (const sx of [-1, 1]) hexaBox(tb, cx + sx * 0.62 - (sx > 0 ? 0.06 : 0), y + 0.84, cz + tz, cx + sx * 0.62 + (sx > 0 ? 0 : 0.06), y + 0.88, cz + tz + 0.5);
+    hexaBox(tb, cx - 0.56, y + 0.66, cz + tz + 0.02, cx + 0.56, y + 0.78, cz + tz + 0.06); hexaBox(tb, cx - 0.56, y + 0.66, cz + tz + 0.44, cx + 0.56, y + 0.78, cz + tz + 0.48);
+    for (const sx of [-1, 1]) for (const zz of [cz + tz + 0.07, cz + tz + 0.43]) hexaBox(tb, cx + sx * 0.52 - 0.035, y, zz - 0.035, cx + sx * 0.52 + 0.035, y + 0.78, zz + 0.035);
+    for (const sx of [-1, 1]) hexaBox(tb, cx + sx * 0.52 - 0.025, y + 0.12, cz + tz + 0.07, cx + sx * 0.52 + 0.025, y + 0.16, cz + tz + 0.43);
     bag.add('lacquer_red', fromTriangles(tb));
-    bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.16, 0.06], [0.18, 0.16], [0.14, 0.22], [0.15, 0.25], [0.001, 0.25]], 10, null, cx, y + 0.82, cz + ac - 0.8 - 0.5));
-    col.rect([cx - 0.6, cz + ac - 1.55, cx + 0.6, cz + ac - 1.05], y, y + 0.82);
+    bag.add('bronze', lathe([[0.001, 0], [0.07, 0], [0.1, 0.04], [0.11, 0.1], [0.085, 0.14], [0.09, 0.16], [0.001, 0.16]], 12, null, cx, y + 0.84, zc));
+    for (const sx of [-1, 1]) bag.add('bronze', lathe([[0.001, 0], [0.06, 0], [0.05, 0.03], [0.015, 0.06], [0.012, 0.26], [0.04, 0.28], [0.04, 0.3], [0.001, 0.3]], 10, null, cx + sx * 0.36, y + 0.84, zc));
+    for (const sx of [-1, 1]) bag.add('linen', lathe([[0.016, 0], [0.016, 0.12], [0.001, 0.13]], 8, null, cx + sx * 0.36, y + 1.14, zc));
+    col.rect([cx - 0.6, cz + tz, cx + 0.6, cz + tz + 0.5], y, y + 0.82);
   }
 }
 /** The plan of the sill through a diagonal doorway (the outer wall's thickness, the door's width). */

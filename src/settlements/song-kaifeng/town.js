@@ -75,6 +75,14 @@ function scroll() {
   for (let k = 0; k < 5; k++) L.push({ t: 'animal', kind: 'camel', at: [WALL_X + 11 + k * 3.6, GATE.z + (k % 2 ? 0.3 : -0.3)], y: 0, rot: -Math.PI / 2 - (k % 2 ? 0.04 : -0.04), seed: 77 + k });
   person([WALL_X + 11 + 5 * 3.6 + 0.4, GATE.z - 0.9], 0, faceTo([1, 0]), { dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_ochre', hat: 'brim', skin: 'skin_medium' });
   person([WALL_X + 10, GATE.z + 1.4], 0, faceTo([1, 0]), { dress: 'robe', cloth: 'cloth_grey', hat: 'brim', skin: 'skin_medium' });
+  // ---- the shops' name boards over their fronts (the wine shops have their colour gates and lantern boxes instead)
+  const wine = new Set(wineShops());
+  for (const l of lots()) {
+    if (!l.shop || wine.has(l)) continue;
+    const F = frontLine(l), m = [(F.a[0] + F.b[0]) / 2 - F.out[0] * 0.505, (F.a[1] + F.b[1]) / 2 - F.out[1] * 0.505], L = Math.hypot(F.b[0] - F.a[0], F.b[1] - F.a[1]);
+    const n = Math.min(Math.floor((L - 0.6) / 0.36), 2 + (l.seed % 4));
+    if (n >= 2) S.push({ t: 'shop_plaque', at: m, y: 0, rot: Math.atan2(F.out[0], F.out[1]), n, scheme: [0, 0, 1, 2][l.seed % 4 === 3 ? (l.seed >> 3) % 4 : (l.seed >> 2) % 3], seed: l.seed >> 5 });
+  }
   more(S, L, rand, person, pick);
   return [base('song-kaifeng-scroll', S), base('song-kaifeng-crowds', L, 'life')];
 }

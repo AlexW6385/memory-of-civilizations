@@ -9,6 +9,7 @@ import { beamTris, rectRoof, column, platform } from '../ming/index.js';
 import { gateDoors } from '../qing/carving.js';
 import { hexa } from './kaifeng.js';
 import { vajra } from './guardian.js';
+import { Matrix4 } from '../../core/three.js';
 
 const fromTri = (g) => { const p = g.index ? g.toNonIndexed() : g; return Array.from(p.attributes.position.array); };
 
@@ -135,6 +136,38 @@ function shanmen(el, { bag, col }) {
     for (const [a, b, c2, dd] of [[-pw / 2 - 0.1, -0.1, pw / 2 + 0.1, 0.05], [-pw / 2 - 0.1, ph - 0.05, pw / 2 + 0.1, ph + 0.12], [-pw / 2 - 0.1, -0.1, -pw / 2 + 0.02, ph + 0.12], [pw / 2 - 0.02, -0.1, pw / 2 + 0.1, ph + 0.12]]) hexa(ink, box4(cx + a, py + b, pz - 0.08, cx + c2, py + dd, pz + 0.1));
     for (let k = 0; k < 3; k++) { const yy = py + 1.08 - k * 0.45; strokes(ink, (u, v, kk) => [cx + u, yy + v, pz + 0.06 + kk], 0.38, 0.38, 7 + k); }
     bag.add('gilt_bronze', fromTriangles(ink));
+  }
+}
+/**
+ * shop_plaque: the horizontal name board over a shop's front { at (the board's middle, on the face
+ * of the beam over the opening), y (the house's ground), rot (the board faces +z turned by rot), n
+ * (characters, 2–5), scheme (0: black board, gilt characters; 1: white board, black characters;
+ * 2: red board, gilt), seed, yb (the board's foot above y) }: a board in a moulded frame, the name in
+ * abstract strokes, hung on two iron hooks. A few shapes repeated over the town, so built once each
+ * and placed as instances.
+ */
+const PLAQUES = new Map();
+function plaqueParts(n, scheme, v) {
+  const key = `${n}|${scheme}|${v}`;
+  if (PLAQUES.has(key)) return PLAQUES.get(key);
+  const cw = 0.36, w = n * cw + 0.22, h = 0.5, fr = [], bd = [], ink = [], hk = [];
+  const P = (x, y, z) => [x, y, z];
+  const B8 = (x0, y0, z0, x1, y1, z1) => box4(x0, y0, z0, x1, y1, z1);
+  hexa(bd, B8(-w / 2, 0, -0.035, w / 2, h, 0.01));
+  for (const [a, b, c, d] of [[-w / 2 - 0.07, -0.07, w / 2 + 0.07, 0.02], [-w / 2 - 0.07, h - 0.02, w / 2 + 0.07, h + 0.07], [-w / 2 - 0.07, 0.02, -w / 2 + 0.03, h - 0.02], [w / 2 - 0.03, 0.02, w / 2 + 0.07, h - 0.02]]) hexa(fr, B8(a, b, -0.04, c, d, 0.04));
+  for (let k = 0; k < n; k++) { const u = -w / 2 + 0.11 + (k + 0.5) * cw; strokes(ink, (uu, vv, kk) => P(u + uu, 0.08 + vv, 0.01 + kk), cw * 0.82, h - 0.16, v * 17 + k * 5 + n); }
+  for (const u of [-w / 2 + 0.25, w / 2 - 0.25]) { hexa(hk, B8(u - 0.012, h + 0.07, -0.055, u + 0.012, h + 0.3, -0.03)); }
+  const mats = [['lacquer_black', 'gilt_bronze', 'lacquer_red'], ['paint_white', 'lacquer_black', 'wood_dark'], ['lacquer_red', 'gilt_bronze', 'lacquer_black']][scheme];
+  const parts = [[mats[0], fromTriangles(bd)], [mats[2], fromTriangles(fr)], [mats[1], fromTriangles(ink)], ['iron', fromTriangles(hk)]];
+  PLAQUES.set(key, parts);
+  return parts;
+}
+function shopPlaque(el, { bag }) {
+  const [x, z] = el.at, n = Math.max(2, Math.min(5, el.n ?? 4)), parts = plaqueParts(n, el.scheme ?? 0, (el.seed ?? 0) % 3);
+  const M = new Matrix4().makeRotationY(el.rot ?? 0).premultiply(new Matrix4().makeTranslation(x, (el.y ?? 0) + (el.yb ?? 2.28), z));
+  for (const [mat, g] of parts) {
+    if (bag.addInstance) bag.addInstance(mat, g.clone(), M, { reach: 140 });
+    else bag.add(mat, g.clone().applyMatrix4(M));
   }
 }
 /** The eight corners of an axis box, for hexa. */
@@ -314,4 +347,4 @@ function towLine(el, { bag }) {
   bag.add(el.mat ?? 'sacking', fromTriangles(t));
 }
 
-export const SCROLL_ELEMENTS = { shanmen, song_oxcart: songOxcart, signboard, fortune, jar_heap: jarHeap, tow_line: towLine };
+export const SCROLL_ELEMENTS = { shop_plaque: shopPlaque, shanmen, song_oxcart: songOxcart, signboard, fortune, jar_heap: jarHeap, tow_line: towLine };

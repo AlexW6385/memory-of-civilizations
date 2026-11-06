@@ -32,7 +32,7 @@ E.push({ t: 'stairs', rect: [PAGODA.c[0] - 6, T1.rect[3], PAGODA.c[0] + 6, ROAD.
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 4, T2.rect[3], PAGODA.c[0] + 4, T1.rect[1]], y0: T1.y, y1: T2.y, dir: 'n', mat: 'granite_block' });
 const tiers = [{ r: 10.5, h: 9.5 }];
 for (let i = 1; i < 7; i++) tiers.push({ r: 10.5 - 0.6 * i, h: 6.7 });
-E.push({ t: 'pagoda_oct', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, spire: 4.4, bells: 'iron', interior: true });
+E.push({ t: 'pagoda_oct', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, spire: 4.4, bells: 'iron', interior: true, images: true });
 // the steps up the base on the south, to the way onto the lowest gallery and the doors into the pagoda
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 3, PAGODA.c[1] + 15.3, PAGODA.c[0] + 3, PAGODA.c[1] + 19.3], y0: T1.y, y1: PAGODA.y + 2, dir: 'n', mat: 'granite_block' });
 E.push({ t: 'ming_hall', rect: [-129, -4, -91, 24], y: T2.y, H: 6, front: 's', four: true, roof: 'xieshan', plat: 0.8, eave: 1.8, sweep: 0.9 });

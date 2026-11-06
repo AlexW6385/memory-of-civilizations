@@ -117,3 +117,7 @@ export function ironSkin(bag, mat, cx, cz, r, y, h, top, i) {
   }
   return { dark, frame };
 }
+
+/** One moulded relief ('buddha' | 'flower' | 'lion' | 'fly' (a double width)) centred at (px, pz), its foot at y, on a face whose outside is (nx, nz). */
+export function relief(bag, mat, kind, px, y, pz, nx, nz) { put(bag, mat, protos()[kind], px, y, pz, nz, -nx, nx, nz); }
+export const RELIEF_PITCH = S;
