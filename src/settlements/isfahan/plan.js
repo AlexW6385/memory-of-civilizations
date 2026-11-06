@@ -93,7 +93,9 @@ E.push({ t: 'ali_qapu', rect: ALIQAPU.rect, tower: -92, top: 38 });
 E.push({ t: 'talar', rect: [-92, az0 + 1, ax1, az1 - 1], y: 13, h: 12, cols: [3, 6], rail: [[[ax1, az0 + 1], [ax1, az1 - 1]], [[-92, az0 + 1], [ax1, az0 + 1]], [[-92, az1 - 1], [ax1, az1 - 1]]] });
 
 // ---- the Qeysarieh portal and the bazaar running north
-E.push({ t: 'portal', a: [15, sz0], b: [-15, sz0], facing: mid, h: 24, depth: 12, iwan: { w: 10, h: 17, depth: 6, pass: true, backMat: 'tile_cream' } });
+E.push({ t: 'portal', a: [15, sz0], b: [-15, sz0], facing: mid, h: 24, depth: 12, iwan: { w: 10, h: 17, depth: 6, pass: true, backMat: 'tile_cream', doorH: 5 } });
+// Sagittarius in mosaic tile over the door at the back of the iwan (the back wall's face 7.2 m behind the portal's)
+E.push({ t: 'sagittarius', c: [0, sz0 - 7.2], n: [0, 1], y0: 5.5, w: 5, h: 2.5 });
 E.push({ t: 'bazaar', a: [BAZAAR.x, BAZAAR.z0], b: [BAZAAR.x, BAZAAR.z1], w: BAZAAR.w, h: 7, bay: 5, shops: BAZAAR.shops });
 
 // ---- the royal garden behind Ali Qapu: walls, the long channel, the pool

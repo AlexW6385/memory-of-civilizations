@@ -219,7 +219,7 @@ function pishtaqFace(bag, col, a, b, y, h, iw, mat, niches = true, inside = null
     const off = 1.2 + (iw.depth ?? 4) + 0.2, c0 = [a[0] + ux0 * L0 / 2 + mx * off, a[1] + uz0 * L0 / 2 + mz * off];
     const p0 = [c0[0] - ux0 * iw.w / 2, c0[1] - uz0 * iw.w / 2], p1 = [c0[0] + ux0 * iw.w / 2, c0[1] + uz0 * iw.w / 2];
     const dw = Math.min(5, iw.w * 0.45);
-    arcadeWall(bag, col, p0, p1, y, iw.h, 0.4, iw.backMat || mat, [{ at: iw.w / 2, w: dw, h: Math.min(iw.h * 0.5, dw * 1.6), pass: true }]);
+    arcadeWall(bag, col, p0, p1, y, iw.h, 0.4, iw.backMat || mat, [{ at: iw.w / 2, w: dw, h: iw.doorH ?? Math.min(iw.h * 0.5, dw * 1.6), pass: true }]);
   }
   faceDecor(bag, a, b, y, h, iw, mat, niches, inside);
 }
@@ -711,9 +711,9 @@ function bazaarRow(el, { bag, col }) {
     for (const [a, b] of [[xp + 0.18, xc - dw / 2], [xc + dw / 2, xp + bw - 0.18]]) { bx(a, b, zc, zc + s * 0.45, py, H, 'lime_plaster'); const [p, q] = zr(zc, zc + s * 0.45); col.rect([a, p, b, q], py, H); }
     bx(xc - dw / 2, xc + dw / 2, zc, zc + s * 0.45, py + dh, H, 'lime_plaster');
     bx(xc - dw / 2 - 0.12, xc + dw / 2 + 0.12, zc + s * 0.45, zc + s * 0.5, py + dh, py + dh + 0.14, 'sandstone_red');
-    // the dark inside, the folded-back leaves of the door
+    // the dark inside, the door's two leaves folded back
     bx(xc - dw / 2, xc + dw / 2, zb + s * 0.52, zb + s * 0.56, py, py + dh, 'lacquer_black');
-    for (const sg of [-1, 1]) bx(xc + sg * dw / 2 - (sg > 0 ? 0.06 : -0.0), xc + sg * dw / 2 + (sg > 0 ? 0 : 0.06), zc + s * 0.45, zc + s * 0.45 + s * 0.62, py + 0.02, py + dh - 0.05, 'wood_dark');
+    for (const sg of [-1, 1]) bx(Math.min(xc + sg * (dw / 2 + 0.04), xc + sg * (dw / 2 + 0.62)), Math.max(xc + sg * (dw / 2 + 0.04), xc + sg * (dw / 2 + 0.62)), zc + s * 0.45, zc + s * 0.51, py + 0.02, py + dh - 0.05, 'wood_dark');   // folded back flat against the front
   }
   // the roof over cells and verandah, the chhajja on brackets, the parapet with merlons
   bx(x0, x1, zb, zf, H, H + 0.4, R);

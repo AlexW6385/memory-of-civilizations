@@ -490,6 +490,67 @@ function lotfInterior(el, { bag, col, lights }, pt, A, H, y) {
   }
 }
 
+/**
+ * sagittarius: the tile panel crowning the Qeysarieh portal's iwan (docs/settlements/isfahan.md §14) { c: [x, z] (the
+ * middle of its foot on the wall's face), n: [nx, nz] (out of the wall), y0, w, h }: in a turquoise frame and a white
+ * border, on a blue ground strewn with little flowers, Sagittarius as the sources describe him — a tiger's body, a
+ * man's head and a dragon's tail — the archer turned back on his tiger's body drawing his bow at the dragon's head at
+ * the end of his own tail. Mosaic tile: flat pieces laid a few millimetres proud of each other.
+ */
+function sagittarius(el, { bag }) {
+  const [cx, cz] = el.c, [nx, nz] = el.n, tx = nz, tz = -nx, y0 = el.y0, w = el.w ?? 5, h = el.h ?? 2.5, k = h / 2.5;
+  const lay = (pts, o, m, d = 0.008) => {
+    const sh = new Shape(); sh.moveTo(pts[0][0] * k, pts[0][1] * k); for (const q of pts.slice(1)) sh.lineTo(q[0] * k, q[1] * k);
+    const g = new ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 3 });
+    g.applyMatrix4(new Matrix4().makeBasis({ x: tx, y: 0, z: tz }, { x: 0, y: 1, z: 0 }, { x: nx, y: 0, z: nz }).setPosition(cx + nx * o, y0, cz + nz * o));
+    bag.add(m, g);
+  };
+  const rect = (u0, v0, u1, v1) => [[u0, v0], [u1, v0], [u1, v1], [u0, v1]];
+  const ell = (u, v, a, b, n = 20, rot = 0) => Array.from({ length: n }, (_, i) => { const t = i / n * Math.PI * 2, c = Math.cos(t) * a, s = Math.sin(t) * b; return [u + c * Math.cos(rot) - s * Math.sin(rot), v + c * Math.sin(rot) + s * Math.cos(rot)]; });
+  // a band along a polyline, its width going from w0 to w1
+  const strip = (pts, w0, w1) => {
+    const L = [], R2 = [];
+    pts.forEach((p, i) => { const q = pts[Math.min(pts.length - 1, i + 1)], o = pts[Math.max(0, i - 1)], dx = q[0] - o[0], dy = q[1] - o[1], l = Math.hypot(dx, dy) || 1, ww = (w0 + (w1 - w0) * i / (pts.length - 1)) / 2; L.push([p[0] - dy / l * ww, p[1] + dx / l * ww]); R2.push([p[0] + dy / l * ww, p[1] - dx / l * ww]); });
+    return [...L, ...R2.reverse()];
+  };
+  const W2 = w / 2 / k, H2 = h / k;                                          // the panel in units of a 2.5 m high one
+  lay(rect(-W2, 0, W2, H2), 0, Q, 0.03);
+  lay(rect(-W2 + 0.1, 0.1, W2 - 0.1, H2 - 0.1), 0.03, 'tile_white');
+  lay(rect(-W2 + 0.17, 0.17, W2 - 0.17, H2 - 0.17), 0.038, T);
+  // the ground's little flowers: four white petals round a yellow heart
+  for (let u = -W2 + 0.4; u < W2 - 0.3; u += 0.42) for (let v = 0.4; v < H2 - 0.3; v += 0.42) {
+    const du = ((Math.round(v / 0.42) % 2) * 0.21);
+    for (const [a, b] of [[0.06, 0], [-0.06, 0], [0, 0.06], [0, -0.06]]) lay(ell(u + du + a, v + b, 0.04, 0.04, 8), 0.046, 'tile_white');
+    lay(ell(u + du, v, 0.025, 0.025, 8), 0.054, 'glaze_yellow');
+  }
+  const F = 0.06;                                                           // the figure stands proud of the ground
+  // the dragon's tail: from the tiger's rump an S rising and curling back, scaled, its head facing the archer
+  const tail = [[0.95, 1.1], [1.25, 1.2], [1.5, 1.42], [1.62, 1.7], [1.56, 1.95], [1.36, 2.1], [1.1, 2.12], [0.88, 2.04]];
+  lay(strip(tail, 0.2, 0.13), F - 0.004, Q);
+  lay(strip(tail, 0.05, 0.03), F + 0.008, 'tile_white');
+  lay([[0.9, 1.97], [0.64, 2.0], [0.5, 2.1], [0.66, 2.05], [0.58, 2.2], [0.82, 2.18], [0.92, 2.2]], F, Q);   // the head with open jaws
+  lay(ell(0.78, 2.13, 0.025, 0.025, 6), F + 0.008, 'glaze_yellow');
+  lay([[0.84, 2.18], [0.9, 2.32], [0.94, 2.19]], F - 0.004, 'tile_white');                                          // a horn
+  // the tiger's body, legs, stripes
+  lay(ell(0.0, 1.05, 1.0, 0.33, 24), F, 'glaze_yellow');
+  for (const [u, dir] of [[-0.75, -1], [-0.5, -1], [0.55, 1], [0.8, 1]]) {
+    lay([[u - 0.08, 0.95], [u + 0.08, 0.95], [u + 0.05 + dir * 0.06, 0.32], [u - 0.05 + dir * 0.06, 0.32]], F, 'glaze_yellow');
+    lay(ell(u + dir * 0.08, 0.3, 0.09, 0.05, 8), F + 0.008, 'tile_white');
+  }
+  for (let i = 0; i < 8; i++) { const u = -0.65 + i * 0.19; lay(strip([[u - 0.04, 1.32], [u + 0.02, 1.12], [u - 0.02, 0.9]], 0.05, 0.02), F + 0.008, 'lacquer_black'); }
+  // the archer: robe, head with a crown, turned back drawing the bow toward the tail
+  lay([[-1.05, 1.2], [-0.7, 1.2], [-0.74, 1.88], [-1.0, 1.88]], F + 0.004, 'tile_white');
+  lay(rect(-1.04, 1.4, -0.71, 1.46), F + 0.012, 'tile_turquoise');
+  lay(ell(-0.87, 2.04, 0.13, 0.15, 14), F + 0.004, 'tile_cream');
+  lay([[-1.0, 2.15], [-0.74, 2.15], [-0.78, 2.3], [-0.87, 2.24], [-0.96, 2.3]], F + 0.008, 'glaze_yellow');
+  lay(strip([[-0.74, 1.8], [-0.5, 1.88], [-0.3, 1.92]], 0.07, 0.06), F + 0.008, 'tile_white');           // the bow arm, to the right
+  lay(strip([[-0.95, 1.82], [-0.8, 1.94], [-0.66, 1.93]], 0.07, 0.06), F + 0.012, 'tile_white');         // the drawing arm
+  lay(strip([[-0.32, 1.6], [-0.23, 1.76], [-0.2, 1.93], [-0.23, 2.1], [-0.32, 2.26]], 0.035, 0.035), F + 0.016, 'lacquer_black');   // the bow
+  lay(strip([[-0.32, 1.6], [-0.66, 1.93], [-0.32, 2.26]], 0.012, 0.012), F + 0.014, 'tile_white');     // the string drawn back
+  lay(strip([[-0.68, 1.93], [0.45, 2.02]], 0.022, 0.022), F + 0.018, 'lacquer_black');                     // the arrow at the dragon
+  lay([[0.45, 1.98], [0.56, 2.03], [0.45, 2.07]], F + 0.018, 'lacquer_black');
+}
+
 /** A thin upright bar standing out of a round drum at angle a: w wide (along the drum), from y0 up by h. */
 function vbar(x, z, a, y0, h, w) {
   const t = [], tx = -Math.sin(a) * w / 2, tz = Math.cos(a) * w / 2;
@@ -963,7 +1024,7 @@ registerStyle('safavid', {
   elements: {
     ...STYLES.mughal.elements,
     square_arcade: squareArcade, portal, dome_chamber: domeChamber, court_arcade: courtArcade,
-    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, ali_qapu: aliQapu,
+    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, ali_qapu: aliQapu, sagittarius,
   },
   objects: {},
 });
