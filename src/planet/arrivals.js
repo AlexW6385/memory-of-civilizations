@@ -34,7 +34,7 @@ export const ARRIVALS = {
   'edfu':             [0, 0.1, 150, 0, 0.2],             // the pylon with its flagpoles, through the palms
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square
   'djenne':           [95, 0.1, 30, 1.25, 0.13],         // the Great Mosque over the market
-  'lalibela':         [-218, 0.1, 112, -2.356, -0.24],   // from the pit's north-west corner, down its diagonal onto the cross
+  'lalibela':         [-217, 0.1, 113, -2.356, -0.42],   // at the pit's north-west corner, down its diagonal onto the cross
   'kilwa':            [5, null, 30, 0.785, 0.15],        // in the Great Mosque, among its pillars
   'great-zimbabwe':   [46, 0.1, 60, 3.1416, 0.1],        // the Great Enclosure's curved walls
   'knossos':          [0, 0.2, 22, 0, 0.05],             // the central court between its red columns
