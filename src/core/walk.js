@@ -1,7 +1,7 @@
 // The walker's body and movement, shared by the controls and the walk-through check.
 
 export const EYE = 1.62, RADIUS = 0.3, STEP = 0.5, HEAD = 1.75, LOW = 0.25;
-export const WALK = 2.6, RUN = 6.5, GRAVITY = 18;
+export const WALK = 2.0, RUN = 5.2, GRAVITY = 18;
 /** Flight. The height above the ground sets the top vertical speed, the same up and down
  *  (flightSpeeds().vertical: slow near the ground, so that take-off and landing are gentle, fast
  *  high up); held, one rises toward it, let go, one falls toward it, and the acceleration only
@@ -14,7 +14,7 @@ export const FLY = 12, FLY_FAST = 24, SINK = 0.8, VERTICAL_RISE = 0.6, CEILING =
  *  vertical speed, rising (falling is SINK of it) { vertical }. */
 export function flightSpeeds(alt) {
   const a = Math.max(0, alt);
-  return { fly: Math.min(160, FLY + a * 0.3), fast: Math.min(300, FLY_FAST + a * 0.6), vertical: Math.min(250, 6 + a * 0.4) };
+  return { fly: Math.min(120, FLY * 0.75 + a * 0.22), fast: Math.min(240, FLY_FAST * 0.75 + a * 0.45), vertical: Math.min(250, 6 + a * 0.4) };
 }
 
 /** The vertical speed aloft after dt (P: vy, lift, cruise; fs from flightSpeeds). */
