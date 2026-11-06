@@ -1,5 +1,5 @@
 // Westminster about 1870 (docs/settlements/london.md §2–§4).
-import { RADIUS, GROUND, PALACE, CLOCK, VICTORIA, ABBEY, BRIDGE, RIVER, bank } from './layout.js';
+import { RADIUS, GROUND, PALACE, CLOCK, VICTORIA, ABBEY, BRIDGE, RIVER, HALL, bank } from './layout.js';
 
 const g = GROUND;
 export const westminster = {
@@ -17,14 +17,15 @@ export const westminster = {
     { t: 'river_front', rect: [PALACE[2] - 24, PALACE[1], PALACE[2], PALACE[3]], h: 22, face: 'e', y: g, pavilions: [[0, 17.7], [128.4, 141.6], [252.3, 270]] },
     { t: 'river_front', rect: [PALACE[0], PALACE[1] + 20, PALACE[0] + 26, PALACE[3] - 10], h: 20, face: 'w', y: g },
     { t: 'river_front', rect: [PALACE[0] + 26, -20, PALACE[2] - 24, 10], h: 20, face: 'n', y: g },
-    { t: 'great_hall', rect: [PALACE[0] - 30, -125, PALACE[0] - 6, -52], h: 28, y: g },
+    // Westminster Hall: Richard II's hall and Herland's hammerbeam roof, entered by the north door from New Palace Yard
+    { t: 'westminster_hall', rect: HALL, y: g, h: 14, ridge: 28 },
     { t: 'gothic_tower', c: CLOCK, s: 12, h: 96, clock: true, y: g },
     { t: 'gothic_tower', c: VICTORIA, s: 22, h: 98, y: g },
     { t: 'gothic_tower', c: [76, -5], s: 10, h: 91, spire: true, y: g + 20 },
     // Westminster Abbey: the high nave and its flyers, the transepts, the lantern, Hawksmoor's towers, Henry VII's chapel
     { t: 'abbey', rect: ABBEY, y: g },
   ],
-  rooms: [{ id: 'parliament square', rect: [-60, -215, 40, -150], y: g, kind: 'open' }],
+  rooms: [{ id: 'parliament square', rect: [-60, -215, 40, -150], y: g, kind: 'open' }, { id: 'westminster hall', rect: [HALL[0] + 2, HALL[1] + 3, HALL[2] - 2, HALL[3] - 13], y: g + 0.05, kind: 'hall' }],
   walks: [Object.assign([[0, -180], [60, -170]], { y0: g })],
 };
 // Westminster Bridge (1862): seven iron arches on granite piers, Barry's Gothic detail

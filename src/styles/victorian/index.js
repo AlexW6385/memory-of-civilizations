@@ -10,6 +10,7 @@ import '../vernacular/index.js';
 import { riverFront } from './palace.js';
 import { ironBridge, embankment } from './bridge.js';
 import { abbey } from './abbey.js';
+import { westminsterHall } from './hall.js';
 
 const S = 'limestone_yellow', SL = 'slate';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -109,6 +110,6 @@ function terraceHouse(el, { bag, col }) {
 }
 registerStyle('victorian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, gothic_tower: gothicTower, terrace_house: terraceHouse, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
+  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, gothic_tower: gothicTower, terrace_house: terraceHouse, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
   objects: {},
 });
