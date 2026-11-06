@@ -30,9 +30,9 @@ export const kremlin = {
   elements: [
     { t: 'kremlin_wall', pts: KREMLIN, h: 12, th: 4.5, y: height, every: 55, round: [0, 1, 2], gates: [SPASSKY, NIKOLSKY, [2, 0.5]] },
     { t: 'moat', wallX, ...MOAT, y: height, bridges: [gateZ(SPASSKY[1]), gateZ(NIKOLSKY[1])], bw: 3.2 },
-    { t: 'russian_church', rect: C.archangel, h: 18, y: hy(C.archangel), domes: five(C.archangel, 0.8), dome: 'gilt_bronze' },
-    { t: 'russian_church', rect: C.annunciation, h: 14, y: hy(C.annunciation), domes: five(C.annunciation, 0.6), dome: 'gilt_bronze' },
-    { t: 'bell_tower', c: C.ivan, y: height(...C.ivan), tiers: [[8.5, 24], [7.2, 14], [6, 12], [4.8, 14], [3.8, 8]] },
+    { t: 'archangel', rect: C.archangel, h: 18, y: hy(C.archangel) },
+    { t: 'annunciation', rect: C.annunciation, y: hy(C.annunciation) },
+    { t: 'ivan_tower', c: C.ivan, y: height(...C.ivan) },
     { t: 'russian_church', rect: C.facets, h: 13, y: hy(C.facets), domes: [], apses: 0 },
   ],
 };

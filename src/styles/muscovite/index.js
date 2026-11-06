@@ -10,11 +10,12 @@ import { Shape, Path } from '../../core/three.js';
 import '../qing/index.js';
 import { slab, hexa, pitched, pyr, wallShape } from '../norse/index.js';
 import { cathedralInside } from './dormition.js';
+import { ivanTower, archangel, annunciation } from './kremlin.js';
 
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** An onion dome of radius r on its drum (drum height dh) at (x, y, z): the drum with its slit windows and white-stone cornice, the sheet dome with its standing seams (ribs), the cross on top. */
-function onion(bag, x, y, z, r, dh, mat, drum = BR, ribs = 16) {
+export function onion(bag, x, y, z, r, dh, mat, drum = BR, ribs = 16) {
   bag.add(drum, lathe([[r * 0.8, 0], [r * 0.8, dh], [r * 0.9, dh + 0.3], [0.001, dh + 0.3]], 16, null, x, y, z));
   bag.add(WS, lathe([[r * 0.8 + 0.01, 0], [r * 0.8 + 0.12, 0.08], [r * 0.8 + 0.12, 0.26], [r * 0.8 + 0.01, 0.34]], 16, null, x, y + dh - 0.42, z));
   bag.add(WS, lathe([[r * 0.8 + 0.01, 0], [r * 0.8 + 0.1, 0.06], [r * 0.8 + 0.1, 0.2], [r * 0.8 + 0.01, 0.26]], 16, null, x, y + 0.05, z));
@@ -32,7 +33,7 @@ function onion(bag, x, y, z, r, dh, mat, drum = BR, ribs = 16) {
   bag.add(G, box(x - r * 0.12 - 0.05, top + r * 0.2, z - 0.05, x + r * 0.12 + 0.05, top + r * 0.25 + 0.05, z + 0.05));
 }
 /** A kokoshnik's outline: w wide, straight sides h1 high, then the keel-shaped head rising to a point at h1 + h2. */
-function kokoshnikShape(w, h1, h2) {
+export function kokoshnikShape(w, h1, h2) {
   const sh = new Shape();
   sh.moveTo(0, 0); sh.lineTo(w, 0); sh.lineTo(w, h1);
   sh.bezierCurveTo(w + w * 0.04, h1 + h2 * 0.55, w * 0.52, h1 + h2 * 0.62, w / 2, h1 + h2);
@@ -47,7 +48,7 @@ function kokoshnik(bag, cx, cz, a, R, y, w, h1, h2, th = 0.5) {
   bag.add(BR, slab(kokoshnikShape(w, h1, h2), th * 0.5, at(R + th * 0.25, -w / 2), at(R + th * 0.25, w / 2), y + 0.1, 10));
 }
 /** A helmet dome (shlem) — the older, flatter Muscovite dome. */
-function helmet(bag, x, y, z, r, dh, mat, drum = WS) {
+export function helmet(bag, x, y, z, r, dh, mat, drum = WS) {
   bag.add(drum, lathe([[r, 0], [r, dh], [r * 1.05, dh + 0.3], [0.001, dh + 0.3]], 16, null, x, y, z));
   bag.add(mat, lathe([[r, 0], [r * 0.98, r * 0.55], [r * 0.7, r * 1.05], [r * 0.25, r * 1.4], [0.06, r * 1.65], [0.001, r * 1.65]], 16, null, x, y + dh + 0.3, z));
   const top = y + dh + 0.3 + r * 1.65;
@@ -522,6 +523,6 @@ function beamBox(a, b, w, h) {
 }
 registerStyle('muscovite', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon },
+  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
   objects: {},
 });
