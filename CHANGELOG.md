@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.75 — Angkor's open sanctuary; Borobudur's Buddhas and reliefs (2026-11-06)
+- Borobudur's Buddhas in framed niches with kala lintels and mudras by direction, the latticed stupas' Buddhas teaching, relief panels with composed scenes on the walls and the balustrades' inner faces, devotees, monks and pilgrims, the monastery's life; Angkor Wat's central sanctuary opened to the four quarters with the eight-armed Vishnu, naga balustrades on columns rising into nine-headed fans, lions at the causeway, wooden coffered ceilings under the gallery vaults, quarter-vaulted half-galleries, Brahmin priests, dancers and musicians on the Terrace of Honour, devotees with offerings.
+
 ## v9.74 — Throne halls of Beijing and Seoul; Gyeonghoeru of 1412 (2026-11-06)
 - A shared throne module with carved dragons: the Hall of Supreme Harmony's throne at its published size on its dais before the seven-leaf screen, luduan, enamel elephants, cranes, gilt dragon columns and the dragon caisson; the Halls of Central and Preserving Harmony furnished; Geunjeongjeon's red throne, canopy and three-leaf sun-moon-five-peaks screen; Gyeonghoeru as Taejong's pavilion with its 48 dragon-carved stone pillars; Beijing's courtyard houses with goldfish jars, pomegranates and chrysanthemums; Seoul's court in session at the rank stones, with guards at the gates.
 
