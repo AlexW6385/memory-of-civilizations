@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.67 — Constantinople's Chalke and Senate; Jerusalem's walls and Umayyad palace (2026-11-06)
+- The Chalke gate with its gilded bronze roof, domed bay, gold mosaic vaults and the mosaics of Justinian, Theodora and Belisarius; the Senate house with its six-column porch and statues; the Augustaion's porticoes opened; the Mese's roofed porticoes with shops; the Forum of Constantine's two-storey ring and arches; 6th-century street life; Jerusalem's Herodian retaining walls with margined blocks and Umayyad courses, the Double, Triple and Golden Gates, al-Walid's palace with its court, reused columns, cistern and bridge to the Haram, the pillared building, people.
+
 ## v9.66 — Wutai, Uji and Sanchi, second pass (2026-11-06)
 - Foguang's red-lacquered ping'an ceilings and oil lamps before the Buddhas, monks' quarters, pilgrims on the stairs; the Phoenix Hall's mother-of-pearl canopy with its openwork inner canopy and mirror, the 66 ceiling mirrors, raigō paintings on the walls and doors, the Byōdō-in bell tower, fishing weirs and boats on the Uji, travellers and an ox cart on the bridge; Sanchi's Stupa 2 with its carved medallion railing and L-shaped entrances, Temple 40's hall of fifty pillars, monks and pilgrims.
 
