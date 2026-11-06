@@ -162,3 +162,46 @@ function boxAlong(out, p0, p1, n, T, y0, y1) {
   quad4(out, v[0][0], v[1][0], v[2][0], v[3][0], [0, -1, 0]);
 }
 void tri;
+
+/**
+ * A bell-shaped window (katōmado) on a wall face: c the foot of its middle on the face [x, z], u the
+ * unit along the face, n the outward normal, y the sill, w × h: straight jambs, then the head swelling
+ * out at the shoulders and drawn in to a point (an ogee arch, from the windows of Zen halls); a frame
+ * of black lacquer standing out of the plaster, the opening dark behind a lattice of thin bars, gilt
+ * fittings at the shoulders, the foot and the crown.
+ */
+export function katomado(bag, c, u, n, y, w, h) {
+  const prof = [[0.5, 0], [0.5, 0.52], [0.6, 0.6], [0.56, 0.68], [0.42, 0.76], [0.25, 0.86], [0.1, 0.95], [0, 1]];
+  const ring = (k, grow) => {
+    const R = [...prof.map(([s, t]) => [s * w * k + grow, t * h * k + grow * (t > 0.5 ? 1 : 0)]), ...prof.slice().reverse().slice(1).map(([s, t]) => [-s * w * k - grow, t * h * k + grow * (t > 0.5 ? 1 : 0)])];
+    return R;
+  };
+  const P = ([s, t], o) => [c[0] + u[0] * s + n[0] * o, y + t, c[1] + u[1] * s + n[1] * o];
+  // a shape filled as a fan from its centre: front, back and rim
+  const slab = (mat, pts, ctr, o0, o1) => {
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length];
+      tri(out, P(ctr, o1), P(a, o1), P(b, o1), [n[0], 0, n[1]]);
+      tri(out, P(ctr, o0), P(b, o0), P(a, o0), [-n[0], 0, -n[1]]);
+      quad4(out, P(a, o0), P(b, o0), P(b, o1), P(a, o1), (p) => { const q = P(ctr, 0); return [p[0] - q[0], p[1] - q[1], p[2] - q[2]]; });
+    }
+    bag.add(mat, fromTriangles(out));
+  };
+  const ctr = [0, h * 0.45];
+  slab(DARK, ring(1, 0.16), ctr, -0.02, 0.1);
+  slab('opening', ring(1, 0), ctr, 0.1, 0.115);
+  // the frame's inner moulding and the lattice bars across the opening
+  const bars = [];
+  const nb = Math.max(4, Math.round(w / 0.12));
+  for (let k = 1; k < nb; k++) {
+    const s = -w / 2 + k * w / nb, top = (() => { let t = 0.52; for (let i = 1; i < prof.length; i++) if (Math.abs(s) / w <= prof[i - 1][0] && Math.abs(s) / w >= prof[i][0]) t = prof[i - 1][1] + (prof[i][1] - prof[i - 1][1]) * (prof[i - 1][0] - Math.abs(s) / w) / ((prof[i - 1][0] - prof[i][0]) || 1); return Math.max(0.52, t); })();
+    const a = P([s - 0.02, 0], 0.11), b = P([s + 0.02, top * h], 0.15);
+    bars.push(box(Math.min(a[0], b[0]), y, Math.min(a[2], b[2]), Math.max(a[0], b[0]), y + top * h - 0.03, Math.max(a[2], b[2])));
+  }
+  for (const g of bars) bag.add('wood_dark', g);
+  for (const [s, t] of [[0.6, 0.6], [-0.6, 0.6], [0, 1], [0.5, 0], [-0.5, 0]]) {
+    const p = P([s * w + Math.sign(s) * 0.12, t * h + (t > 0.5 ? 0.12 : -0.06)], 0.12), g = lathe([[0.001, -0.06], [0.07, -0.05], [0.08, 0], [0.06, 0.04], [0.001, 0.06]], 8);
+    g.rotateX(Math.PI / 2); g.rotateY(Math.atan2(n[0], n[1])); g.translate(p[0], p[1], p[2]); bag.add('gilt_bronze', g);
+  }
+}

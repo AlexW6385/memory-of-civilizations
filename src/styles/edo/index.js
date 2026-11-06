@@ -6,10 +6,11 @@
 // the ming style's rectRoof with a Japanese palette and a gentler curve.
 
 import { registerStyle, STYLES } from '../../core/build.js';
+import { Matrix4 } from '../../core/three.js';
 import { box, frustum, fromTriangles, orientOutward, rod } from '../../core/geom.js';
 import { rectRoof, withPal, beamTris } from '../ming/index.js';
 import '../qing/index.js';
-import { barredWindows, shachi as shachiFish, karaHafu, samaWall } from './detail.js';
+import { barredWindows, shachi as shachiFish, karaHafu, samaWall, katomado } from './detail.js';
 
 const PL = 'plaster_castle', ST = 'ishigaki', TL = 'tile_grey', WD = 'wood_dark';
 const JPAL = { roof: TL, soffit: PL, plaster: PL, wood: WD, column: WD };
@@ -271,20 +272,55 @@ function stair(bag, col, st, RISE, RUN) {
 }
 
 
-/** yagura: a turret { rect, y, storeys (1–3), top ('xieshan'|'hip') }: plastered storeys stepping in, each under a tiled roof. */
+/**
+ * yagura: a turret { rect, y, storeys (1–3), top ('xieshan'|'hip'), h, gables (faces of the lower
+ * roof carrying a gable, e.g. 'ns') }: plastered storeys stepping in, each under a tiled roof; on the
+ * ground storey stone-drop bays standing out at the corners; a triangular gable (chidori-hafu) on
+ * the lower roof's faces; shachi on the top ridge's ends.
+ */
 function yagura(el, { bag, col }) {
   let [x0, z0, x1, z1] = el.rect, y = el.y ?? 0;
-  const n = el.storeys ?? 2, h = el.h ?? 3.6;
+  const n = el.storeys ?? 2, h = el.h ?? 3.6, ov = 1.2;
   for (let i = 0; i < n; i++) {
-    const rect = [x0, z0, x1, z1], last = i === n - 1;
+    const rect = [x0, z0, x1, z1], last = i === n - 1, mn = Math.min(x1 - x0, z1 - z0), s = mn * 0.12;
     tierBox(bag, col, rect, y, h);
-    roof(bag, rect, y + h - 0.2, 1.2, last ? (el.top || 'xieshan') : 'hip', (Math.min(x1 - x0, z1 - z0) / 2 + 1.2) * (last ? 0.7 : 0.55));
+    if (i === 0) turretBays(bag, col, rect, y, h);
+    const B = mn / 2 + ov, rise = B * (last ? 0.7 : 0.55);
+    roof(bag, rect, y + h - 0.2, ov, last ? (el.top || 'xieshan') : 'hip', rise);
+    if (last) {
+      const alongZ = z1 - z0 > x1 - x0, L = (alongZ ? z1 - z0 : x1 - x0) / 2 - mn / 2, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, top = y + h - 0.2 + rise;
+      if (L > 0.6 && (el.top || 'xieshan') === 'xieshan') shachi(bag, alongZ ? [cx, cz - L] : [cx - L, cz], alongZ ? [cx, cz + L] : [cx + L, cz], top + 0.15, Math.min(1.3, mn * 0.13));
+    } else {
+      // the gables on the faces of this roof, standing against the storey above
+      const up = [x0 + s, z0 + s, x1 - s, z1 - s], E = s + ov, R = rise, ye = y + h - 0.2;
+      const roofAt = (dd) => ye + R * Math.pow(Math.max(0, Math.min(1, (E - dd) / B)), 1.25);
+      for (const dir of el.gables ?? 'ns') {
+        const nn = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[dir], ns = dir === 'n' || dir === 's';
+        const half = ns ? (up[3] - up[1]) / 2 : (up[2] - up[0]) / 2, W = Math.min(4.2, (ns ? up[2] - up[0] : up[3] - up[1]) * 0.6), D = E - 0.35;
+        karaHafu(bag, { c: [(x0 + x1) / 2 + nn[0] * half, (z0 + z1) / 2 + nn[1] * half], n: nn, W, D, yb: roofAt(D) + 0.4, H: W * 0.4, roofAt, kind: 'chidori' });
+      }
+    }
     y += h;
-    const s = Math.min(x1 - x0, z1 - z0) * 0.12;
     x0 += s; z0 += s; x1 -= s; z1 -= s;
   }
 }
-
+/** A turret's stone-drop bays: one on each face, between its first and second windows (alternating ends round the turret), clear of them. */
+function turretBays(bag, col, rect, y, h) {
+  const o = 0.6, yb = y + Math.min(1.0, h * 0.25), yt = y + h - Math.min(1.3, h * 0.33), list = [];
+  faces(rect, 0).forEach(([a, b], k) => {
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), nw = Math.max(1, Math.round(L / 3.2)), ww = Math.min(1.2, L / 8), gap = L / nw - ww - 0.3;
+    if (nw < 2 || gap < 0.8) return;
+    const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux, sc = k % 2 ? L - L / nw : L / nw, w = Math.min(1.7, gap);
+    const p = [a[0] + ux * (sc - w / 2), a[1] + uz * (sc - w / 2)], q = [a[0] + ux * (sc + w / 2) + nx * o, a[1] + uz * (sc + w / 2) + nz * o];
+    list.push([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]);
+  });
+  for (const [bx0, bz0, bx1, bz1] of list) {
+    bag.add(PL, box(bx0, yb, bz0, bx1, yt, bz1));
+    bag.add(TL, box(bx0 - 0.15, yt, bz0 - 0.15, bx1 + 0.15, yt + 0.18, bz1 + 0.15));
+    bag.add('lacquer_black', box(bx0 + 0.12, yb - 0.03, bz0 + 0.12, bx1 - 0.12, yb + 0.02, bz1 - 0.12));
+    col.rect([bx0, bz0, bx1, bz1], yb, yt);
+  }
+}
 /** watari: a roofed passage or long gallery { rect, y, storeys, h }: plastered, windowed, under a hip-and-gable roof. */
 function watari(el, { bag, col }) {
   const rect = el.rect, y = el.y ?? 0, n = el.storeys ?? 1, h = el.h ?? 3.6;
@@ -349,6 +385,93 @@ function yaguraMon(el, { bag, col }) {
   tierBox(bag, col, [x0, z0, x1, z1], y + h, 3.4);
   col.floor([x0, z0, x1, z1], y + h + 3.4);
   roof(bag, [x0, z0, x1, z1], y + h + 3.2, 1.2, 'xieshan', (Math.min(x1 - x0, z1 - z0) / 2 + 1.2) * 0.7);
+}
+
+/**
+ * hishi_mon: the Hishi gate, the turret gate at the entrance of the Ninomaru { rect, y, passage, h }
+ * (docs/settlements/edo-himeji.md §4): the passage through the middle along z, the guard room on the
+ * west and a plastered pier on the east on stone footings; the white plaster leaving the posts, the
+ * tie beams and the head beam (kabuki) bare, of dark zelkova; on the head beam over the two main posts
+ * the carved diamond crests (hishi) that name the gate; the two great leaves standing open, bound
+ * with iron strips and studded with bosses; over all the storey for the garrison, its front (south)
+ * with a row of warrior windows between two bell-shaped windows framed in black lacquer with gilt
+ * fittings, its back with a double row of warrior windows; a hip-and-gable roof with shachi.
+ */
+function hishiMon(el, ctx) {
+  if (el.front !== 's') return hishiMonN(el, ctx);
+  // facing south: built facing north, then mirrored across the gate's middle (the triangles turned back)
+  const [, z0, , z1] = el.rect, m = z0 + z1, fz = (r) => [r[0], m - r[3], r[2], m - r[1]];
+  const M = new Matrix4().makeTranslation(0, 0, m).multiply(new Matrix4().makeScale(1, 1, -1));
+  const bag = { add: (mat, g) => { if (!g) return; if (g.index) g = g.toNonIndexed(); g.applyMatrix4(M); for (const k of ['position', 'normal']) { const A = g.attributes[k]?.array; if (!A) continue; for (let i = 0; i < A.length; i += 9) for (let j = 0; j < 3; j++) { const t = A[i + 3 + j]; A[i + 3 + j] = A[i + 6 + j]; A[i + 6 + j] = t; } } ctx.bag.add(mat, g); } };
+  const col = { rect: (r, y0, y1) => ctx.col.rect(fz(r), y0, y1), floor: (r, y) => ctx.col.floor(fz(r), y) };
+  return hishiMonN(el, { ...ctx, bag, col });
+}
+function hishiMonN(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 4.4, w = el.passage ?? 5, H2 = el.h2 ?? 3.8, cx = (x0 + x1) / 2;
+  const a = cx - w / 2, b = cx + w / 2, P = 0.55, F = 0.6;
+  // the footings, the guard room and the pier, plastered
+  for (const [u0, u1] of [[x0, a - P], [b + P, x1]]) {
+    bag.add(ST, box(u0, y, z0, u1, y + F, z1)); bag.add(PL, box(u0 + 0.05, y + F, z0 + 0.05, u1 - 0.05, y + h, z1 - 0.05)); col.rect([u0, z0, u1, z1], y, y + h);
+  }
+  // the guard room's barred window onto the passage and its door at the back
+  barredWindows(bag, [a - P, z1 - 2.2], [a - P, z0 + 2.2], y + 1.4, 1.0, 2, 1.1);
+  bag.add(WD, box(x0 + 1.2, y + F, z1 - 0.07, x0 + 2.4, y + 2.6, z1 - 0.03));
+  // the exposed frame: the main posts and the back posts, the tie beams, the head beam, a post line on the faces
+  for (const u of [a - P, b]) for (const [za, zb] of [[z0 - 0.08, z0 + 0.6], [z1 - 0.6, z1 + 0.08]]) { bag.add(WD, box(u, y, za, u + P, y + h, zb)); col.rect([u, za, u + P, zb], y, y + h); }
+  const face = (zf, o) => {
+    bag.add(WD, box(x0 - 0.06, y + h - 0.85, Math.min(zf, zf + o), x1 + 0.06, y + h - 0.1, Math.max(zf, zf + o)));                // the head beam
+    bag.add(WD, box(x0, y + h * 0.5, Math.min(zf, zf + o * 0.6), a - P, y + h * 0.5 + 0.3, Math.max(zf, zf + o * 0.6)));          // the tie beams
+    bag.add(WD, box(b + P, y + h * 0.5, Math.min(zf, zf + o * 0.6), x1, y + h * 0.5 + 0.3, Math.max(zf, zf + o * 0.6)));
+    for (const u of [x0 + 0.02, (x0 + a - P) / 2, (b + P + x1) / 2, x1 - 0.32]) bag.add(WD, box(u, y + F, Math.min(zf, zf + o * 0.5), u + 0.3, y + h - 0.85, Math.max(zf, zf + o * 0.5)));
+  };
+  face(z0 + 0.05, -0.16); face(z1 - 0.05, 0.16);
+  // the diamond crests on the head beam over the main posts, and iron bands on its ends
+  for (const u of [a - P / 2, b + P / 2]) {
+    const yc = y + h - 0.48, t = [];
+    const D = (dx, dy, dz) => [u + dx, yc + dy, z0 - 0.11 - dz];
+    for (const [r, dz, m] of [[0.34, 0, WD], [0.22, 0.05, 'gilt_bronze']]) {
+      const q = [D(0, r, dz), D(r * 0.8, 0, dz), D(0, -r, dz), D(-r * 0.8, 0, dz)];
+      const qq = [];
+      plateRhomb(qq, q, 0.06);
+      bag.add(m, fromTriangles(orientOutward(qq)));
+    }
+    void t;
+  }
+  for (const u of [x0 + 0.25, x1 - 0.55]) bag.add('iron', box(u, y + h - 0.88, z0 - 0.13, u + 0.3, y + h - 0.07, z0 + 0.1));
+  // the leaves, open inward against the posts, iron strips and bosses
+  const lw = w / 2 - 0.05;
+  for (const [u, sg] of [[a + 0.02, 1], [b - 0.14, -1]]) {
+    const v0 = z0 + 0.65, v1 = v0 + lw;
+    bag.add(WD, box(u, y + 0.05, v0, u + 0.12, y + h - 0.9, v1)); col.rect([u, v0, u + 0.12, v1], y, y + h - 0.9);
+    const fu = sg > 0 ? u + 0.12 : u;
+    for (let k = 0; k < 7; k++) { const yy = y + 0.3 + k * (h - 1.5) / 6; bag.add('iron', box(Math.min(fu, fu + sg * 0.015), yy, v0, Math.max(fu, fu + sg * 0.015), yy + 0.1, v1));
+      for (let j = 0; j < 4; j++) { const vv = v0 + 0.25 + j * (lw - 0.5) / 3; bag.add('iron', box(Math.min(fu, fu + sg * 0.05), yy + 0.02, vv - 0.035, Math.max(fu, fu + sg * 0.05), yy + 0.08, vv + 0.035)); } }
+  }
+  // the ceiling of planks over the passage
+  bag.add(WD, box(a, y + h - 0.12, z0, b, y + h, z1));
+  // the upper storey, a tiled band under it
+  const yu = y + h;
+  bag.add(TL, box(x0 - 0.45, yu - 0.05, z0 - 0.45, x1 + 0.45, yu + 0.18, z1 + 0.45));
+  bag.add(PL, box(x0, yu + 0.18, z0, x1, yu + H2, z1)); col.rect(el.rect, yu, yu + H2);
+  // the front: the warrior windows between the bell-shaped windows; the back: a double row
+  const wy = yu + 1.0;
+  barredWindows(bag, [cx + 4.2, z0], [cx - 4.2, z0], wy, 1.0, 4, 1.7);
+  for (const sx of [-1, 1]) katomado(bag, [cx + sx * 6.3, z0 - 0.01], [1, 0], [0, -1], wy - 0.15, 1.1, 1.75);
+  barredWindows(bag, [x0 + 1.2, z1], [x1 - 1.2, z1], wy - 0.2, 0.75, 6, 1.6);
+  barredWindows(bag, [x0 + 1.2, z1], [x1 - 1.2, z1], wy + 0.85, 0.75, 6, 1.6);
+  for (const [p, q] of [[[x0, z0], [x0, z1]], [[x1, z1], [x1, z0]]]) barredWindows(bag, p, q, wy, 1.0, 1, 1.4);
+  const rise = (Math.min(x1 - x0, z1 - z0) / 2 + 1.4) * 0.72, top = yu + H2 - 0.2 + rise;
+  roof(bag, el.rect, yu + H2 - 0.2, 1.4, 'xieshan', rise);
+  const L = (x1 - x0) / 2 + 1.4 - (Math.min(x1 - x0, z1 - z0) / 2 + 1.4);
+  shachi(bag, [cx - L, (z0 + z1) / 2], [cx + L, (z0 + z1) / 2], top + 0.2, 1.2);
+}
+/** A rhomb plate (4 points, roughly in a vertical plane facing −z) of thickness t toward +z. */
+function plateRhomb(out, q, t) {
+  const back = q.map((p) => [p[0], p[1], p[2] + t]);
+  const tr = (A, B, C) => out.push(...A, ...B, ...C);
+  tr(q[0], q[1], q[2]); tr(q[0], q[2], q[3]);
+  tr(back[0], back[2], back[1]); tr(back[0], back[3], back[2]);
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; tr(q[i], back[i], back[j]); tr(q[i], back[j], q[j]); }
 }
 
 /** shoin: a single-storey hall { rect, y, h } on a raised floor, posts and paper screens, a veranda, a big tiled roof. */
@@ -438,7 +561,7 @@ registerStyle('edo', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), goten: J(goten), yashiki: J(yashiki), machiya: J(machiya),
+    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), goten: J(goten), yashiki: J(yashiki), machiya: J(machiya),
   },
   objects: {},
 });

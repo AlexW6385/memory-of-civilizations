@@ -50,7 +50,9 @@ const ring = (r, y, gaps = []) => {
   wall([x0 + e, z0 + e], [x1 - e, z0 + e], y); wall([x0 + e, z0 + e], [x0 + e, z1 - e], y); wall([x1 - e, z0 + e], [x1 - e, z1 - e], y);
   let u = x0 + e; for (const [g0, g1] of gaps) { wall([u, z1 - e], [g0, z1 - e], y); u = g1; } wall([u, z1 - e], [x1 - e, z1 - e], y);
 };
-ring(NINO.rect, NINO.top, [[-6, 18]]);
+ring(NINO.rect, NINO.top, [[-10, 10]]);
+// the Hishi gate, the turret gate of the Ninomaru's entrance, at the head of the way up (§4)
+E.push({ t: 'hishi_mon', rect: [-10, NINO.rect[3] - 8.5, 10, NINO.rect[3] - 0.5], y: NINO.top, passage: 5, h: 4.4, front: 's' });
 ring(HON.rect, HON.top, [[-36, -26]]);
 for (const [x, z] of [[NINO.rect[0], NINO.rect[1]], [NINO.rect[2] - 9, NINO.rect[1]], [NINO.rect[0], NINO.rect[3] - 9], [NINO.rect[2] - 9, NINO.rect[3] - 9], [HON.rect[2] - 8, HON.rect[3] - 8], [HON.rect[0], HON.rect[3] - 8]]) {
   const y = z > HON.rect[1] && z < HON.rect[3] && x > HON.rect[0] - 1 && x < HON.rect[2] ? HON.top : NINO.top;
