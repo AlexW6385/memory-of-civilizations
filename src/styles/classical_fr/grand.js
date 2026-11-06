@@ -11,6 +11,7 @@
 // grand_corps: { rect (the block), ext (its extension east of the north end), stair (the staircase hall), y, h, fy (the first floor) }
 
 import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { ext } from '../renaissance/face.js';
 import { subtractRects } from '../../core/build.js';
 import { planarWall } from '../byzantine/index.js';
 import { gardenFront } from './front.js';
@@ -316,14 +317,35 @@ function salon(ctx, which, r, Y, { zc, zb, AX }) {
     const F = EW.F, oy = Y + 4.6;
     F.add(GD, ringGeo(0, 0, 1, 1.12, 0, 0.12, 0, Math.PI * 2, 32).scale(1.55, 2.0, 1).translate(c, oy, 0.05));
     F.add(DM, ringGeo(0, 0, 0.001, 1, 0, 0.02, 0, Math.PI * 2, 32).scale(1.55, 2.0, 1).translate(c, oy, 0.05));
-    const st = 'stucco';
-    { const g = lathe([[0.001, -0.75], [0.3, -0.55], [0.36, 0], [0.3, 0.5], [0.001, 0.7]], 10); g.scale(1, 1, 0.5); g.rotateZ(Math.PI / 2 + 0.25); g.translate(c, oy - 0.3, 0.2); F.add(st, g); }        // the horse rearing
-    F.add(st, bar([c + 0.55, oy - 0.1, 0.2], [c + 0.85, oy + 0.45, 0.2], 0.16)); F.disc(st, [[0.001, 0], [0.13, 0.04], [0.12, 0.14], [0.001, 0.18]], c + 0.9, oy + 0.55, 0.12, 8);   // neck and head
-    for (const [a, b] of [[[c - 0.4, oy - 0.55], [c - 0.55, oy - 1.3]], [[c - 0.2, oy - 0.55], [c - 0.1, oy - 1.25]], [[c + 0.35, oy - 0.45], [c + 0.75, oy - 0.95]], [[c + 0.5, oy - 0.45], [c + 0.85, oy - 0.7]]]) F.add(st, bar([a[0], a[1], 0.2], [b[0], b[1], 0.2], 0.08));
-    F.lathe(st, [[0.001, 0], [0.15, 0.05], [0.17, 0.35], [0.12, 0.6], [0.001, 0.65]], c, 0.25, oy - 0.05, 10);   // the King
-    F.lathe(st, [[0.001, 0], [0.08, 0.03], [0.09, 0.12], [0.001, 0.2]], c, 0.25, oy + 0.6, 8);
-    F.add(st, bar([c, oy + 0.45, 0.3], [c + 0.45, oy + 0.75, 0.3], 0.05));                                                                  // the baton raised
-    for (const s of [-1, 1]) { const g = lathe([[0.001, -0.4], [0.16, -0.3], [0.2, 0], [0.14, 0.3], [0.001, 0.4]], 8); g.rotateZ(s * 1.2); g.scale(1, 1, 0.5); g.translate(c + s * 0.9, oy - 1.45, 0.2); F.add(st, g); }   // enemies under the hooves
+    const st = 'stucco', K = 1.15, Q = (mat, g) => F.add(mat, g.translate(-c, -oy, 0).scale(K, K, 1).translate(c, oy, 0));
+    const blob = (prof, sx, sz, rz, x, yy, d, mat = st) => { const g = lathe(prof, 10); g.scale(sx, 1, sz); g.rotateZ(rz); g.translate(x, yy, d); Q(mat, g); };
+    const limbQ = (a, b, w, d = 0.18) => Q(st, bar([a[0], a[1], d], [b[0], b[1], d], w));
+    // the horse rearing to the right: barrel, chest, haunches, the arched neck and head, the flowing mane and tail
+    blob([[0.001, -0.62], [0.26, -0.5], [0.33, -0.1], [0.32, 0.25], [0.24, 0.55], [0.001, 0.66]], 1, 0.55, Math.PI / 2 + 0.35, c, oy - 0.35, 0.2);
+    blob([[0.001, -0.3], [0.24, -0.2], [0.27, 0.05], [0.18, 0.28], [0.001, 0.32]], 1, 0.6, 0.4, c + 0.5, oy - 0.05, 0.22);
+    blob([[0.001, -0.3], [0.25, -0.2], [0.28, 0.05], [0.2, 0.26], [0.001, 0.3]], 1, 0.6, -0.3, c - 0.55, oy - 0.6, 0.22);
+    limbQ([c + 0.55, oy + 0.1], [c + 0.85, oy + 0.62], 0.2); blob([[0.001, -0.22], [0.1, -0.15], [0.12, 0.05], [0.07, 0.2], [0.001, 0.24]], 1, 0.7, -0.9, c + 0.98, oy + 0.66, 0.2);
+    for (const s of [-1, 1]) Q(st, ext([[c + 0.75, oy + 0.62], [c + 0.45 + s * 0.02, oy + 0.15], [c + 0.35, oy + 0.3]], [], 0.3, 0.34));
+    Q(st, ext([[c - 0.8, oy - 0.55], [c - 1.25, oy - 1.1], [c - 1.05, oy - 1.25], [c - 0.75, oy - 0.8]], [], 0.18, 0.26));
+    // the forelegs pawing high, the hind legs planted on the fallen
+    limbQ([c + 0.45, oy - 0.25], [c + 0.8, oy - 0.45], 0.1); limbQ([c + 0.8, oy - 0.45], [c + 0.95, oy - 0.15], 0.08);
+    limbQ([c + 0.35, oy - 0.3], [c + 0.6, oy - 0.7], 0.1); limbQ([c + 0.6, oy - 0.7], [c + 0.85, oy - 0.6], 0.08);
+    limbQ([c - 0.6, oy - 0.75], [c - 0.5, oy - 1.25], 0.12); limbQ([c - 0.5, oy - 1.25], [c - 0.62, oy - 1.6], 0.09);
+    limbQ([c - 0.4, oy - 0.7], [c - 0.15, oy - 1.2], 0.12); limbQ([c - 0.15, oy - 1.2], [c - 0.2, oy - 1.58], 0.09);
+    // the King in armour, the cloak streaming behind him, the baton raised toward the enemy
+    blob([[0.001, 0], [0.16, 0.04], [0.19, 0.3], [0.15, 0.55], [0.001, 0.6]], 1, 0.6, 0.15, c - 0.05, oy - 0.05, 0.36);
+    blob([[0.001, 0], [0.09, 0.03], [0.1, 0.13], [0.07, 0.2], [0.001, 0.22]], 1, 1, 0, c - 0.1, oy + 0.55, 0.36);
+    Q(st, ext([[c - 0.15, oy + 0.4], [c - 0.95, oy + 0.75], [c - 1.15, oy + 0.35], [c - 0.75, oy + 0.15], [c - 0.2, oy + 0.1]], [], 0.3, 0.36));
+    limbQ([c + 0.05, oy + 0.4], [c + 0.45, oy + 0.75], 0.06, 0.4); limbQ([c + 0.45, oy + 0.75], [c + 0.75, oy + 1.05], 0.035, 0.42);
+    limbQ([c - 0.05, oy - 0.05], [c + 0.1, oy - 0.45], 0.08, 0.42);
+    // Glory flying above, holding a crown over the King's head
+    blob([[0.001, -0.35], [0.12, -0.25], [0.14, 0.05], [0.09, 0.3], [0.001, 0.36]], 1, 0.5, 1.2, c - 0.4, oy + 1.15, 0.24);
+    Q(st, ext([[c - 0.4, oy + 1.2], [c - 0.95, oy + 1.5], [c - 0.75, oy + 1.15]], [], 0.22, 0.26));
+    Q(GD, ringGeo(c - 0.1, oy + 0.95, 0.08, 0.12, 0.4, 0.44, 0, Math.PI * 2, 10));
+    // the enemies thrown down under the hooves: a soldier fallen on his shield, another crawling away
+    blob([[0.001, -0.45], [0.15, -0.35], [0.18, 0], [0.13, 0.35], [0.001, 0.45]], 1, 0.5, 1.4, c - 0.35, oy - 1.65, 0.2);
+    blob([[0.001, -0.4], [0.14, -0.3], [0.17, 0], [0.12, 0.3], [0.001, 0.4]], 1, 0.5, -1.1, c + 0.55, oy - 1.45, 0.2);
+    Q(st, ringGeo(c + 0.15, oy - 1.68, 0.001, 0.22, 0.16, 0.24, 0, Math.PI * 2, 12));
     for (const s of [-1, 1]) {
       // the Fames above the oval with their trumpets, the captives below it
       { const g = lathe([[0.001, -0.5], [0.18, -0.35], [0.2, 0.1], [0.12, 0.45], [0.001, 0.55]], 8); g.rotateZ(s * 1.0); g.translate(c + s * 0.95, oy + 2.35, 0.18); F.add(GD, g); }

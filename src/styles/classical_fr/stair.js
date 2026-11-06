@@ -67,14 +67,16 @@ export function ambassadors(el, ctx) {
   const nC = 24, rC = (PY - Y0) / nC, tC = (xA - xC) / nC;
   for (let i = 0; i < nC; i++) { const xs = xA - (i + 1) * tC; bag.add('marble', box(xs, y, cz - 3.5 + 0.0, xs + tC, Y0 + (i + 1) * rC, cz + 3.5)); bag.add(MS, box(xs - 0.03, Y0 + (i + 1) * rC - 0.04, cz - 3.5, xs + tC, Y0 + (i + 1) * rC, cz + 3.5)); }
   col.ramp([xC, zN, xA, zS], Y0, PY, 'w');
-  const pf = (r) => { bag.add(S, box(r[0], y, r[1], r[2], PY - 0.06, r[3])); col.rect(r, y, PY - 0.06); marbleFloor(bag, col, r, PY, 1.1); };
+  const pf = (q) => { const r = [q[0], q[1] === z0 ? z0 + 0.05 : q[1], q[2], q[3] === z1 ? z1 - 0.05 : q[3]]; bag.add(S, box(r[0], y, r[1], r[2], PY - 0.06, r[3])); col.rect(r, y, PY - 0.06); marbleFloor(bag, col, r, PY, 1.1); };
   pf([xC, z0, xA, zN]); pf([xC, zS, xA, z1]); pf([xP, z0, xC, z1]); pf([xL, zN, xP, zS]);
+  // the cheeks' faces toward the flight: white marble panels in red frames
+  for (const [za, zb2] of [[zN, zN + 0.04], [zS - 0.04, zS]]) { bag.add(WM, box(xC, y, za, xA, PY - 0.06, zb2)); for (let x = xC + 0.3; x < xA - 1.5; x += 2.6) bag.add(RM, box(x, Y0 + 0.5, za === zN ? zN + 0.04 : zS - 0.06, x + 2.2, Y0 + 0.62, za === zN ? zN + 0.06 : zS - 0.04)); }
   const nS = 22, rS = (FY - PY) / nS, tS = (xP - xL) / nS;
   for (const [za, zb2] of [[z0, zN], [zS, z1]]) {
     for (let i = 0; i < nS; i++) { const xs = xP - (i + 1) * tS; bag.add('marble', box(xs, y, za, xs + tS, PY + (i + 1) * rS - 0.04, zb2)); bag.add(MS, box(xs - 0.03, PY + (i + 1) * rS - 0.04, za, xs + tS, PY + (i + 1) * rS, zb2)); }
     col.ramp([xL, za, xP, zb2], PY, FY, 'w');
   }
-  bag.add(S, box(x0, y, z0, xL, FY - 0.06, z1)); col.rect([x0, z0, xL, z1], y, FY - 0.06); marbleFloor(bag, col, [x0, z0, xL, z1], FY, 1.1);
+  bag.add(S, box(x0, y, z0, xL, FY - 0.06, z1)); col.rect([x0, z0, xL, z1], y, FY - 0.06); marbleFloor(bag, col, [x0, z0 + 0.05, xL, z1 - 0.05], FY, 1.1);
   // the balustrades: along the landing's edge, down the side flights' inner edges, along the cheeks of the central flight
   const balus = (a, b, ya, yb, n) => {
     for (let k = 0; k <= n; k++) { const t = (k + 0.5) / (n + 1), px = a[0] + (b[0] - a[0]) * t, pz = a[1] + (b[1] - a[1]) * t, py = ya + (yb - ya) * t; bag.add(MS, lathe([[0.07, 0], [0.05, 0.1], [0.1, 0.32], [0.045, 0.62], [0.065, 0.7], [0.065, 0.76]], 8, null, px, py + 0.1, pz)); }

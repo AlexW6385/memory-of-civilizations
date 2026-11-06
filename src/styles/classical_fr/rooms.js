@@ -129,23 +129,23 @@ export function painting(bag, map, { s, t, ws, wt, oval = false, kind = 'sky', s
   const rs = ws / 2, rt = wt / 2;
   const ground = kind === 'gold' ? 'paint_ochre' : 'stucco_sky';
   add(ground, patchTris(map, s, t, rs, rt, off, !oval));
-  if (kind === 'earth') add('paint_robe', patchTris(map, s, t - rt * 0.55, rs * (oval ? 0.75 : 0.98), rt * 0.42, off + 0.008, !oval));
+  if (kind === 'earth') add('paint_robe', patchTris(map, s, t - rt * 0.55, rs * (oval ? 0.75 : 0.98), rt * 0.42, off + 0.013, !oval));
   // clouds, then the figures on them: robes and flesh, a gilt glory behind the principal one
   const inside = (u, v) => (oval ? (u * u + v * v < 0.6) : (Math.abs(u) < 0.8 && Math.abs(v) < 0.8));
   if (kind !== 'gold') for (let k = 0; k < 4; k++) {
     let u = rand() * 1.6 - 0.8, v = rand() * 1.2 - 0.7; if (!inside(u, v)) { u *= 0.6; v *= 0.6; }
-    add('stucco_cream', patchTris(map, s + u * rs * 0.8, t + v * rt * 0.8, rs * (0.22 + rand() * 0.18), rt * (0.14 + rand() * 0.1), off + 0.016));
+    add('stucco_cream', patchTris(map, s + u * rs * 0.8, t + v * rt * 0.8, rs * (0.22 + rand() * 0.18), rt * (0.14 + rand() * 0.1), off + 0.026));
   }
-  add(GD, patchTris(map, s + (rand() - 0.5) * rs * 0.3, t + rt * 0.15, rs * 0.2, rt * 0.2, off + 0.022));
+  add(GD, patchTris(map, s + (rand() - 0.5) * rs * 0.3, t + rt * 0.15, rs * 0.2, rt * 0.2, off + 0.039));
   const ROBES = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_red', 'cloth_white', 'cloth_indigo'];
   const nf = 4 + Math.floor(rand() * 4);
   for (let k = 0; k < nf; k++) {
     let u = rand() * 1.4 - 0.7, v = rand() * 1.2 - 0.6; if (!inside(u, v)) { u *= 0.6; v *= 0.6; }
     const fs = s + u * rs * 0.85, ft = t + v * rt * 0.85, sz = 0.6 + rand() * 0.5;
-    add(kind === 'gold' ? 'cloth_brown' : ROBES[k % ROBES.length], patchTris(map, fs, ft, rs * 0.07 * sz + 0.06, rt * 0.16 * sz + 0.08, off + 0.028));
-    add(kind === 'gold' ? 'cloth_brown' : 'stucco_rose', patchTris(map, fs, ft + rt * 0.16 * sz + 0.1, 0.05 + rs * 0.025, 0.05 + rt * 0.03, off + 0.034));
+    add(kind === 'gold' ? 'cloth_brown' : ROBES[k % ROBES.length], patchTris(map, fs, ft, rs * 0.07 * sz + 0.06, rt * 0.16 * sz + 0.08, off + 0.052));
+    add(kind === 'gold' ? 'cloth_brown' : 'stucco_rose', patchTris(map, fs, ft + rt * 0.16 * sz + 0.1, 0.05 + rs * 0.025, 0.05 + rt * 0.03, off + 0.065));
   }
-  if (frame) add(GD, patchTris(map, s, t, rs, rt, off + 0.04, !oval, frame));
+  if (frame) add(GD, patchTris(map, s, t, rs, rt, off + 0.078, !oval, frame));
   for (const [mat, tris] of lay) bag.add(mat, fromTriangles(tris));
 }
 
@@ -156,7 +156,7 @@ export function wallPainting(bag, F, u, y, w, h, opts = {}) {
   painting(bag, map, { s: u, t: y, ws: w, wt: h, ...opts, off: 0 });
   // the moulded frame standing proud of the wall
   if (opts.moulding !== false) {
-    const k = 0.1, dd = d0 + 0.055;
+    const k = 0.1, dd = d0 + 0.09;
     if (opts.oval) F.add(GD, ringGeo(0, 0, 1, 1 + k * 2 / Math.max(w, h), 0, 0.055, 0, Math.PI * 2, 24).scale(w / 2, h / 2, 1).translate(u, y, d0));
     else { F.box(GD, u - w / 2 - k, u + w / 2 + k, y - h / 2 - k, y - h / 2, d0, dd); F.box(GD, u - w / 2 - k, u + w / 2 + k, y + h / 2, y + h / 2 + k, d0, dd); F.box(GD, u - w / 2 - k, u - w / 2, y - h / 2, y + h / 2, d0, dd); F.box(GD, u + w / 2, u + w / 2 + k, y - h / 2, y + h / 2, d0, dd); }
   }
