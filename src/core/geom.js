@@ -198,7 +198,7 @@ function norm2(a) { const l = Math.hypot(a[0], a[1]) || 1; return [a[0] / l, a[1
 /** The stand-off rank of a material (0…15 from its name; 16 and up only by override); DEPTH_STEP metres per rank. */
 export const DEPTH_STEP = 0.0003;
 // overrides where two materials laid in one plane would otherwise share a rank (tools/surface-check.mjs finds them)
-const RANK_OVERRIDE = { paint_minoan_red: 20, plaster_white: 16, brick_paving: 6, stucco_ochre: 14, stucco_warm: 11, pavonazzetto: 5, vault_stars: 1, paint_dancheong: 8, stucco_cream: 15, plaster_castle: 17, raupo: 18, brick: 19 };
+const RANK_OVERRIDE = { paint_minoan_red: 20, plaster_white: 16, brick_paving: 6, stucco_ochre: 14, stucco_warm: 11, pavonazzetto: 5, vault_stars: 1, paint_dancheong: 8, stucco_cream: 15, plaster_castle: 17, raupo: 18, brick: 19, paint_cab_yellow: 3, cloth_indigo: 13 };
 export function depthRank(mat) {
   if (mat in RANK_OVERRIDE) return RANK_OVERRIDE[mat];
   let h = 2166136261;

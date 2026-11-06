@@ -9,6 +9,8 @@ function streetLife() {
   const crossing = (x, z, m) => AVENUES.some(([ax, w]) => Math.abs(x - ax) < w / 2 + m) && STREETS.some(([sz, w]) => Math.abs(z - sz) < w / 2 + m);
   const car = (x, z, rot) => {
     if (!inside(x, z) || crossing(x, z, 2) || onBroadway(x, z, 2) || inLot(x, z, 1.5)) return;
+    // no two cars in one place (a car 4.4 m long: keep 5.2 m between centres)
+    if (L.some((c) => c.t === 'car' && Math.hypot(c.at[0] - x, c.at[1] - z) < 5.2)) return;
     const cab = rand() < 0.38;
     L.push({ t: 'car', at: [x, z], y: height(x, z), rot, era: 1930, seed: Math.floor(rand() * 1e9), ...(cab ? { mat: 'paint_cab_yellow' } : {}) });
   };
