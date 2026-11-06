@@ -6,12 +6,23 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import '../qing/index.js';
+import { gardenFront } from './front.js';
 
 const S = 'sandstone_dressed';
 /** range: a wing of the château { rect, h, y, front ('nsew' faces with windows), roof ('flat' balustraded | 'slate') }. */
 function range(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 20, brick = el.brick;
   bag.add(brick ? 'brick' : S, box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y, y + h); col.floor(el.rect, y + h);
+  if (!brick) {
+    // the stone fronts in full (front.js); the returns with their band courses and cornice
+    for (const f of el.front ?? 'nsew') gardenFront({ bag, col }, f, el.rect, y, h);
+    for (const f of 'nsew') if (!(el.front ?? 'nsew').includes(f)) {
+      const r = f === 'n' ? [x0, z0 - 0.3, x1, z0] : f === 's' ? [x0, z1, x1, z1 + 0.3] : f === 'w' ? [x0 - 0.3, z0, x0, z1] : [x1, z0, x1 + 0.3, z1];
+      for (const [a, b] of [[0.34, 0.36], [0.78, 0.86], [0.985, 1.0]]) bag.add(S, box(r[0], y + h * a, r[1], r[2], y + h * b, r[3]));
+    }
+    bag.add('lead', box(x0 + 1, y + h, z0 + 1, x1 - 1, y + h + 1.2, z1 - 1));
+    return;
+  }
   bag.add(S, box(x0 - 0.2, y + h * 0.3, z0 - 0.2, x1 + 0.2, y + h * 0.33, z1 + 0.2));
   for (const f of el.front ?? 'nsew') {
     const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, n = Math.floor(L / 5);
