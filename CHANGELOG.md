@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.53 — Borgund inside, Moscow's Red Square (2026-11-06)
+- Borgund's arrival set on the ground; the stave church hollow and walkable (staves, knee-brace arcades, St Andrew's crosses, round openings, open roof, chancel with crucifix beam, apse, altar, font), dry-stone churchyard wall and lychgate, farm life; the Dormition Cathedral's interior with painted piers, the iconostasis tiers and the Monomakh throne; the Spassky and Nikolsky gate passages opened; the moat with its trestle bridges and booksellers; the stone trading rows of 1595, the Lobnoye Mesto, the Tsar Cannon.
+
 ## v9.52 — Welded geometry: 28% less memory; Machu Picchu, Taos, Cahokia (2026-11-06)
 - Merged meshes welded (identical position and normal only) and indexed, normals packed to 16 bits, 16-bit indices kept 16-bit on the GPU: all sites 1297 → 935 MB with the same picture; Machu Picchu's stone canal and sixteen fountains, the Royal Tomb under the raised Torreón, the Sacred Rock with its wayronas, the Main Temple's niches and great stones; Taos' sunken kivas with pole palisades, the battered wall, log footbridges, mealing bins; Cahokia's charnel house on Fox Mound.
 
