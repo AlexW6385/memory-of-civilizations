@@ -26,8 +26,8 @@ export const vatican = {
   id: 'baroque-rome-vatican', style: 'baroque', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [125, 0], facing: 'w' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [
-    { t: 'palazzo', rect: PALACE, h: 26 },
-    { t: 'palazzo', rect: SISTINE, h: 21 },
+    { t: 'palace_roman', rect: PALACE, h: 26 },
+    { t: 'palace_roman', rect: SISTINE, h: 21, hall: true },
     { t: 'castel', c: CASTEL.c, r: CASTEL.r, h: 20 },
   ],
 };
@@ -38,9 +38,9 @@ export const passetto = {
 };
 const bz = CASTEL.c[1], bx = tiberX(bz);
 export const bridge = {
-  id: 'baroque-rome-ponte', style: 'vernacular', origin: [bx, bz], base: 0, yaw: 0, feature: true,
-  entrance: { at: [0, 0], facing: 'n' }, bounds: [-50, -8, 50, 8], rooms: [],
-  elements: [{ t: 'bridge_stone', rect: [-TIBER.w / 2 - 6, -5, TIBER.w / 2 + 6, 5], y: 0.5, bed: TIBER.bed, ramps: [] }],
+  id: 'baroque-rome-ponte', style: 'baroque', origin: [bx, bz], base: 0, yaw: 0, feature: true,
+  entrance: { at: [0, 0], facing: 'n' }, bounds: [-44, -10, 44, 10], rooms: [],
+  elements: [{ t: 'ponte_angeli', span: TIBER.w + 12, w: 11, y: 0.5, bed: TIBER.bed, water: TIBER.level, city: 'e' }],
 };
 export const river = {
   id: 'baroque-rome-tiber', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,

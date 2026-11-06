@@ -8,6 +8,8 @@ import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe } from '../../core/geom.js';
 import '../qing/index.js';
 import '../renaissance/index.js';
+import { obelisk, fountain, saint, ponteAngeli, palaceRoman } from './piazza.js';
+import { merge } from '../renaissance/face.js';
 
 const T = 'travertine', L = 'lead', ST = 'stucco_ochre';
 /** st_peter: { c (the crossing), s (side of the central block), nave (length east), w, h, d (dome diameter), y } — the church faces east. */
@@ -81,28 +83,19 @@ function colonnade(el, { bag, col }) {
         const b = a0 + (a1 - a0) * (i + 1) / n, [px, pz] = pt(a, depth / 2), [qx, qz] = pt(b, depth / 2);
         bag.add(T, orientedBox([px, pz], [qx, qz], depth + 2.5, y + h, y + h + 3.2, 0.05));
         bag.add(L, orientedBox([px, pz], [qx, qz], depth + 1.6, y + h + 3.2, y + h + 4.6, 0.05));
-        if (i % 2 === 0) { const [sx, sz] = pt(a, -1); bag.add('marble', lathe([[0.5, 0], [0.4, 2.4], [0.5, 3.2], [0.001, 3.9]], 8, null, sx, y + h + 3.2, sz)); }
+        // the balustrade along the inner edge, a saint on a pedestal over every bay, facing the piazza
+        const [sx, sz] = pt(a, -1.05), [tx, tz] = pt(b, -1.05), yt = y + h + 3.2;
+        bag.add(T, orientedBox([sx, sz], [tx, tz], 0.45, yt, yt + 0.2, 0.02)); bag.add(T, orientedBox([sx, sz], [tx, tz], 0.4, yt + 1.0, yt + 1.15, 0.02));
+        for (let j = 1; j < 8; j++) { const t = j / 8; bag.add(T, lathe([[0.09, 0], [0.15, 0.3], [0.08, 0.6], [0.11, 0.78], [0.1, 0.8]], 6, null, sx + (tx - sx) * t, yt + 0.2, sz + (tz - sz) * t)); }
+        bag.add(T, box(sx - 0.45, yt, sz - 0.45, sx + 0.45, yt + 1.3, sz + 0.45));
+        const yaw = Math.atan2(ox - sx, oz - sz), k = (i * 7 + (a0 < 0 ? 3 : 0)) % 20;
+        const fig = merge(saint(k)); fig.rotateY(yaw); fig.translate(sx, yt + 1.3, sz); bag.add(T, fig);
       }
     }
     // the end pavilions
     for (const a of [a0, a1]) { const [px, pz] = pt(a, depth / 2), [qx, qz] = pt(a + (a1 > a0 ? -1 : 1) * 0.04, depth / 2); bag.add(T, orientedBox([px, pz], [qx, qz], depth + 4, y - 0.3, y + h + 5.5, 1.5)); col.segment([px, pz], [qx, qz], depth + 4, y, y + h + 5.5); }
   }
   bag.add('flagstone', box(ox - ax * 1.05, y - 0.4, oz - bz * 1.05, ox + ax * 1.05, y + 0.02, oz + bz * 1.05));
-}
-/** obelisk: { c, h, y } — the Egyptian obelisk on its base, the cross on top. */
-function obelisk(el, { bag, col }) {
-  const [x, z] = el.c, h = el.h ?? 25.5, y = el.y ?? 0;
-  bag.add(T, box(x - 3, y - 0.3, z - 3, x + 3, y + 1.2, z + 3)); bag.add(T, box(x - 2.2, y + 1.2, z - 2.2, x + 2.2, y + 8, z + 2.2)); col.rect([x - 3, z - 3, x + 3, z + 3], y, y + 8);
-  bag.add('granite_red', lathe([[1.9, 0], [1.3, h * 0.94], [0.001, h]], 4, null, x, y + 8, z));
-  bag.add('gilt_bronze', box(x - 0.1, y + 8 + h, z - 0.1, x + 0.1, y + 10.5 + h, z + 0.1));
-}
-/** fountain: { c, r, y } — a basin with a raised bowl and a jet. */
-function fountain(el, { bag, col }) {
-  const [x, z] = el.c, r = el.r ?? 6, y = el.y ?? 0;
-  bag.add(T, lathe([[r, 0], [r, 0.9], [r - 0.5, 0.9], [r - 0.5, 0.3], [0.001, 0.3]], 24, null, x, y - 0.2, z)); col.circle(x, z, r, y, y + 0.7);
-  bag.add('water', lathe([[r - 0.5, 0], [0.001, 0]], 24, null, x, y + 0.6, z));
-  bag.add(T, lathe([[0.8, 0], [0.6, 3], [3.2, 3.6], [3.2, 4], [0.5, 4.2], [0.3, 6], [1, 6.5], [0.001, 6.6]], 16, null, x, y + 0.3, z));
-  bag.add('water', lathe([[0.25, 0], [0.12, 2.6], [0.001, 2.8]], 8, null, x, y + 6.6, z));
 }
 /** castel: { c, r, h, y } — Castel Sant'Angelo: the square base with corner bastions, the great drum, the papal apartments and the angel. */
 function castel(el, { bag, col }) {
@@ -117,6 +110,6 @@ function castel(el, { bag, col }) {
 function paving(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('flagstone', box(x0, y - 0.4, z0, x1, y + 0.02, z1)); }
 registerStyle('baroque', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel, paving },
+  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel, paving, ponte_angeli: ponteAngeli, palace_roman: palaceRoman },
   objects: {},
 });
