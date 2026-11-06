@@ -39,7 +39,7 @@ for (const s of [-1, 1]) {
   });
   for (const x of [12.0, 18.5]) obj('flagpole', s * x, -0.15, 0, { h: 40 });
   // granite falcons of Horus before the towers, facing the arriving visitor
-  obj('falcon', s * 8.6, 3.2, 0, { yaw: PI, h: 2.9, plinth: [1.7, 2.6, 1.1], mat: 'granite_black' });
+  obj('falcon', s * 8.6, 3.4, 0, { yaw: PI, h: 3.2, plinth: [1.8, 2.8, 1.2], mat: 'granite_black' });
 }
 // gate block: two jambs and the lintel over a 6 × 14 m passage, crowned by its own cornice
 block([-6.5, -11.6, -3, -0.4], 0, 24.5);
@@ -112,7 +112,7 @@ for (const s of [-1, 1]) {
   trim([Math.min(s * 12.6, xo), -62.6, Math.max(s * 12.6, xo), -59.2], Y.pronaos, Y.pronaos + 5.4, { torus: 0.1, cornice: 0.5, corners: false });
 }
 // granite falcon with the double crown at the pronaos door (one survives of the pair)
-for (const s of [-1, 1]) obj('falcon', s * 5.6, -54.6, 0, { yaw: PI, h: 2.4, plinth: [1.4, 2.2, 0.8], mat: 'granite_grey' });
+for (const s of [-1, 1]) obj('falcon', s * 5.6, -54.6, 0, { yaw: PI, h: 3.2, plinth: [1.7, 2.6, 0.9], mat: 'granite_black' });
 
 // ── the naos: outer walls ─────────────────────────────────────────────────────
 const NAOS_H = 12.6;
