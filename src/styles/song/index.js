@@ -10,6 +10,7 @@ import { beamTris } from '../ming/index.js';
 import '../qing/index.js';
 import { KAIFENG_ELEMENTS, hexa } from './kaifeng.js';
 import { WUTAI_ELEMENTS } from './wutai.js';
+import { ironSkin } from './iron.js';
 import { HANGZHOU_ELEMENTS } from './hangzhou.js';
 import { SCROLL_ELEMENTS } from './scroll.js';
 
@@ -62,10 +63,10 @@ function eaveBells(bag, cx, cz, r0, y0, r1, yc, mat) {
  * block, the cross arm with its small blocks, two tiers of arms stepping out, the eave purlin's ring
  * on their ends; the architrave below.
  */
-function bracketRow(bag, cx, cz, r, y, arms = 'timber_red', blocks = 'paint_ochre') {
+function bracketRow(bag, cx, cz, r, y, arms = 'timber_red', blocks = 'paint_ochre', K = 1) {
   const G = ngon(cx, cz, r), A = [], B = [];
   const set = (px, pz, ux, uz, nx, nz, s) => {
-    const Q = (u, n, yy) => [px + ux * u + nx * n, y + yy, pz + uz * u + nz * n];
+    const Q = (u, n, yy) => [px + (ux * u + nx * n) * K, y + yy * K, pz + (uz * u + nz * n) * K];
     const bx = (out, u0, u1, n0, n1, y0, y1) => hexa(out, [Q(u0, n0, y0), Q(u1, n0, y0), Q(u1, n1, y0), Q(u0, n1, y0), Q(u0, n0, y1), Q(u1, n0, y1), Q(u1, n1, y1), Q(u0, n1, y1)]);
     bx(B, -0.24 * s, 0.24 * s, -0.05, 0.42 * s, 0, 0.26);
     bx(A, -0.62 * s, 0.62 * s, 0.06, 0.3 * s, 0.26, 0.46);
@@ -86,8 +87,8 @@ function bracketRow(bag, cx, cz, r, y, arms = 'timber_red', blocks = 'paint_ochr
   }
   bag.add(arms, fromTriangles(A)); bag.add(blocks, fromTriangles(B));
   // the architrave round the core under the sets, the ring on the arms' ends
-  prism(bag, arms, ngon(cx, cz, r + 0.12), ngon(cx, cz, r + 0.12), y - 0.45, y + 0.02);
-  prism(bag, arms, ngon(cx, cz, r + 1.15), ngon(cx, cz, r + 1.55), y + 0.96, y + 1.22);
+  prism(bag, arms, ngon(cx, cz, r + 0.12 * K), ngon(cx, cz, r + 0.12 * K), y - 0.45 * K, y + 0.02 * K);
+  prism(bag, arms, ngon(cx, cz, r + 1.15 * K), ngon(cx, cz, r + 1.55 * K), y + 0.96 * K, y + 1.22 * K);
 }
 
 /**
@@ -113,29 +114,23 @@ function pagodaOct(el, { bag, col }) {
     for (let k = 0; k < 8; k++) {
       const a = F[k], b = F[(k + 1) % 8], m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], ux = (b[0] - a[0]), uz = (b[1] - a[1]), L = Math.hypot(ux, uz), w = (k % 2 === 0 ? 0.32 : 0.18) * L, hh = k % 2 === 0 ? Math.min(3, h * 0.45) : 1.2, y0 = k % 2 === 0 ? y + 0.4 : y + h * 0.35;
       if (inside && OPEN_FACES.includes(k)) { const fr = []; beamTris(fr, [a[0], y + h - 0.6, a[1]], [b[0], y + h - 0.6, b[1]], 0.08, 0.35); bag.add(el.frame || 'timber_red', fromTriangles(fr)); continue; }
+      if (!gal && el.relief) continue;   // the glazed skin makes its own openings and the brackets their architrave
       const tr = []; beamTris(tr, [m[0] - ux / L * w / 2, y0, m[1] - uz / L * w / 2], [m[0] + ux / L * w / 2, y0, m[1] + uz / L * w / 2], 0.05, hh); bag.add('lacquer_black', fromTriangles(tr));
       const fr = []; beamTris(fr, [a[0], y + h - 0.6, a[1]], [b[0], y + h - 0.6, b[1]], 0.08, 0.35); bag.add(el.frame || 'timber_red', fromTriangles(fr));
     }
     if (!gal && el.relief) {
-      // the glazed brick skin: each face in moulded tiles (seated Buddhas, flying figures, flowers) in
-      // rows, engaged columns at the corners, a row of bracket sets (in glazed brick) under the eave
-      const G = ngon(cx, cz, r), tiles = [], cols = [], br = [];
-      for (let k = 0; k < 8; k++) {
-        const a = G[k], b = G[(k + 1) % 8], ux = b[0] - a[0], uz = b[1] - a[1], L = Math.hypot(ux, uz), nx = uz / L, nz = -ux / L;
-        const sgn = ((a[0] + b[0]) / 2 - cx) * nx + ((a[1] + b[1]) / 2 - cz) * nz > 0 ? 1 : -1, o = 0.06 * sgn;
-        const rows = Math.max(2, Math.floor((h - 1.2) / 0.62)), per = Math.max(2, Math.floor(L / 0.62));
-        for (let i = 0; i < rows; i++) for (let j = 0; j < per; j++) {
-          const t = (j + 0.5) / per, yy = y + 0.3 + i * (h - 1.2) / rows, px = a[0] + ux * t, pz = a[1] + uz * t;
-          const w2 = 0.2, hh = (h - 1.2) / rows - 0.1;
-          if (Math.abs(t - 0.5) < (k % 2 === 0 ? 0.2 : 0.1) && yy > y + (k % 2 === 0 ? 0.2 : h * 0.3) && yy < y + (k % 2 === 0 ? 3.4 : h * 0.35 + 1.2)) continue;   // the door or window
-          beamTris(tiles, [px - ux / L * w2 + nx * o, yy, pz - uz / L * w2 + nz * o], [px + ux / L * w2 + nx * o, yy, pz + uz / L * w2 + nz * o], 0.06, hh);
-        }
-        cols.push(lathe([[0.16, 0], [0.14, h - 0.6], [0.24, h - 0.5]], 8, null, a[0], y, a[1]));
-        for (let j = 0; j < 3; j++) { const t = (j + 0.5) / 3, px = a[0] + ux * t, pz = a[1] + uz * t; beamTris(br, [px - ux / L * 0.25 + nx * sgn * 0.2, y + h - 0.55, pz - uz / L * 0.25 + nz * sgn * 0.2], [px + ux / L * 0.25 + nx * sgn * 0.2, y + h - 0.55, pz + uz / L * 0.25 + nz * sgn * 0.2], 0.25, 0.45); }
-      }
-      bag.add(coreMat, fromTriangles(tiles));
-      for (const g of cols) bag.add(coreMat, g);
-      bag.add(coreMat, fromTriangles(br));
+      // the glazed brick skin (iron.js): moulded bricks in rows, the arched openings in their surrounds;
+      // engaged columns at the corners; under the eave a row of bracket sets in glazed brick, smaller
+      // than a timber pagoda's
+      const top = h - 0.68 - 0.45 * 0.7 - 0.04, sk = ironSkin(bag, coreMat, cx, cz, r, y, h, top, i);
+      bag.add('lacquer_black', fromTriangles(sk.dark)); bag.add(coreMat, fromTriangles(sk.frame));
+      const G = ngon(cx, cz, r);
+      for (let k = 0; k < 8; k++) bag.add(coreMat, lathe([[0.17, 0], [0.17, 0.12], [0.14, 0.2], [0.14, top - 0.12], [0.18, top], [0.001, top]], 8, null, G[k][0], y, G[k][1]));
+      bracketRow(bag, cx, cz, r, y + h - 0.68, coreMat, coreMat, 0.7);
+      prism(bag, coreMat, ngon(cx, cz, r + 0.15), ngon(cx, cz, r + 0.4), y + h, y + h + 0.72);
+      octEave(bag, cx, cz, r + 0.3, y + h + 0.7, r + 1.6, y + h - 0.1, 0.35, el.eave || 'tile_dark', coreMat, el.bells || null);
+      y += h;
+      return;
     }
     if (!gal) {
       prism(bag, coreMat, ngon(cx, cz, r + 0.15), ngon(cx, cz, r + 0.55), y + h - 0.5, y + h + 0.2);

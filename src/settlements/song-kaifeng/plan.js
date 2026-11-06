@@ -16,7 +16,7 @@ E.push({ t: 'pagoda_oct', c: PAGODA, y: 0, base: { r: 7.2, h: 1.2 }, tiers, gall
 const [mx0, mz0, mx1, mz1] = MONASTERY, w = (a, b) => E.push({ t: 'ming_wall', a, b, y: 0, h: 3.6, th: 0.8 });
 const SHANMEN = { c: [PAGODA[0], mz1], bays: [4.4, 6.1, 4.4] }, smW = 14.9;
 w([mx0, mz0], [mx1, mz0]); w([mx0, mz1], [PAGODA[0] - smW / 2, mz1]); w([PAGODA[0] + smW / 2, mz1], [mx1, mz1]); w([mx0, mz0], [mx0, mz1]); w([mx1, mz0], [mx1, mz1]);
-E.push({ t: 'shanmen', c: SHANMEN.c, bays: SHANMEN.bays, depth: 8.8, y: 0, plat: 0.42, H: 4.4, door: 3.4, doorH: 3.6 });
+E.push({ t: 'shanmen', c: SHANMEN.c, bays: SHANMEN.bays, depth: 8.8, y: 0, plat: 0.42, H: 4.4, door: 3.4, doorH: 3.6, guardians: { h: 4.6 } });
 E.push({ t: 'qing_hall', rect: [PAGODA[0] - 18, mz0 + 10, PAGODA[0] + 18, mz0 + 32], y: 0, H: 6, double: 4.8, roof: 'xieshan', bays: [7, 4], front: 's', four: true, plat: 1, pal: { roof: 'tile_dark', soffit: 'lacquer_red', wood: 'lacquer_red', column: 'lacquer_red', plaster: 'plaster_white', plinth: 'granite_block', base: 'granite_block' } });
 for (const x of [mx0 + 14, mx1 - 14]) E.push({ t: 'ming_hall', rect: [x - 6, -200, x + 6, -170], y: 0, H: 4.2, front: x < PAGODA[0] ? 'e' : 'w', roof: 'xieshan', plat: 0.6, eave: 1.3, sweep: 0.8 });
 // ---- the river: water, stone landings near the bridge, the Rainbow Bridge, boats

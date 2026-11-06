@@ -8,6 +8,7 @@ import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { beamTris, rectRoof, column, platform } from '../ming/index.js';
 import { gateDoors } from '../qing/carving.js';
 import { hexa } from './kaifeng.js';
+import { vajra } from './guardian.js';
 
 const fromTri = (g) => { const p = g.index ? g.toNonIndexed() : g; return Array.from(p.attributes.position.array); };
 
@@ -114,6 +115,18 @@ function shanmen(el, { bag, col }) {
   bag.add('timber_red', fromTriangles(ring));
   const ov = 2.6;
   rectRoof({ c: [cx, cz], A: W / 2 + ov, B: d / 2 + ov, y: yb + 1.55, rise: (d / 2 + ov) * 0.5, kind: 'hip', sweep: 0.55, mat: 'tile_dark', soffit: 'timber_red', p: 1.5 }, bag);
+  // the two guardians (jingang lishi), over 5 m tall, one in each side bay's front half under the eaves,
+  // turned in toward the way through, on low stone plinths (guardian.js)
+  if (el.guardians) {
+    const gh = el.guardians.h ?? 4.6;
+    for (const [bx0, bx1, dx] of [[x0, xs[1], 1], [xs[2], x1, -1]]) {
+      const px = (bx0 + bx1) / 2 - dx * 0.35, pz = (cz + z1) / 2 + 0.2, r = [px - 1.1, pz - 1.15, px + 1.1, pz + 1.15];
+      bag.add('granite_block', box(r[0], Y - 0.02, r[1], r[2], Y + 0.55, r[3]));
+      bag.add('granite_block', box(r[0] - 0.08, Y - 0.02, r[1] - 0.08, r[2] + 0.08, Y + 0.12, r[3] + 0.08));
+      col.rect(r, Y, Y + gh + 0.55);
+      vajra(bag, { at: [px, pz], y: Y + 0.5, h: gh, dir: [dx, 0.35], side: dx, skirt: dx > 0 ? 'clay_green' : 'clay_robe', scarf: dx > 0 ? 'clay_robe' : 'clay_green' });
+    }
+  }
   // the plaque under the south eaves: a framed board, upright, its characters in gilt
   {
     const pz = z1 + 0.45, py = Y + H - 0.1, pw = 1.1, ph = 1.6, fr = [], ink = [];
