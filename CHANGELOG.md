@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.76 — The Iron Pagoda's glazed skin; tea houses (2026-11-06)
+- The Iron Pagoda clad in moulded glazed bricks (seated Buddhas in niches, rosettes, flying figures with lions, arched framed openings, glazed bracket sets); the Kaibao gate hall's two clay guardians; horizontal name boards over shop fronts in Kaifeng and Hangzhou; tea houses with landscape scrolls, plum vases, braziers, kettles and black bowls, potted pines and customers; Buddhas on hexagonal thrones with altar tables and carved bases in the Liuhe Pagoda's chambers and corridors.
+
 ## v9.75 — Angkor's open sanctuary; Borobudur's Buddhas and reliefs (2026-11-06)
 - Borobudur's Buddhas in framed niches with kala lintels and mudras by direction, the latticed stupas' Buddhas teaching, relief panels with composed scenes on the walls and the balustrades' inner faces, devotees, monks and pilgrims, the monastery's life; Angkor Wat's central sanctuary opened to the four quarters with the eight-armed Vishnu, naga balustrades on columns rising into nine-headed fans, lions at the causeway, wooden coffered ceilings under the gallery vaults, quarter-vaulted half-galleries, Brahmin priests, dancers and musicians on the Terrace of Honour, devotees with offerings.
 
