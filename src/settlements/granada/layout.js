@@ -7,7 +7,7 @@
 export const RADIUS = 400;
 export const HILL = { c: [20, 10], r: [200, 62], top: 30 };
 export const MYRTLES = [8, -32, 31, 4];
-export const COMARES = [6, -48, 33, -36];
+export const COMARES = [11.5, -57.6, 27.5, -41.6];   // the tower, 16 m square (§4.2)
 export const LIONS = [44, -22, 72, -6];
 export const ALCAZABA = [-170, -30, -120, 30];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;

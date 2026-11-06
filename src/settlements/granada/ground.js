@@ -2,7 +2,7 @@
 // cypresses, myrtle and orange trees; elms in the wood below the walls; the Darro's poplars; the
 // white Albaicín; the clear sky under the Sierra Nevada.
 
-import { RADIUS, height, hillE, inLot } from './layout.js';
+import { RADIUS, COMARES, height, hillE, inLot, inRect } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.15, grass: 0.35, rock: 0, soil: 0.5, fields: 0, dry: 0.6, warmth: 0.65, red: 0.6, road: 0, snow: 0, forest: 0 };
@@ -12,7 +12,7 @@ function cover(x, z, h, ny) {
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || inRect(COMARES, x, z, 3)) return null;
   const e = hillE(x, z);
   if (e < 0.95) return e > 0.6 && x > 90 ? { cypress: 0.04, grass: 15 } : null;          // the gardens of the Partal and toward the Generalife
   if (e < 1.4) return { elm: 0.12, cypress: 0.02, grass: 20 };                              // the wood on the slopes

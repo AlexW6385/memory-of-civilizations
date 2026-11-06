@@ -6,15 +6,10 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, disc, place } from '../../core/geom.js';
 import '../qing/index.js';
+import { crenels, nColumn, archRun } from './halls.js';
+import { comares, lionsHalls } from './palaces.js';
 
 const W = 'tuff_red', P = 'plaster_white';
-function crenels(bag, r, y, mat = W) {
-  const [x0, z0, x1, z1] = r;
-  for (const [a, b, alongX] of [[x0, x1, true], [z0, z1, false]]) {
-    const n = Math.floor((b - a) / 1.5);
-    for (let i = 0; i < n; i += 2) { const u0 = a + i * (b - a) / n, u1 = u0 + (b - a) / n; for (const s of [0, 1]) { const q = alongX ? [u0, s ? z1 - 0.6 : z0, u1, s ? z1 : z0 + 0.6] : [s ? x1 - 0.6 : x0, u0, s ? x1 : x0 + 0.6, u1]; bag.add(mat, box(q[0], y, q[1], q[2], y + 1.3, q[3])); } }
-  }
-}
 /** nasrid_tower: { rect, h, y } — a square tower of red rammed earth and brick, crenellated. */
 function tower(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 14;
@@ -102,6 +97,11 @@ function courtFaces(bag, r, y, h, doors) {
 /** court: a palace court { rect, y, kind ('myrtles' | 'lions'), h (the rooms' height) } — rooms round it under tiled roofs, arcades, the pool or the fountain. */
 function court(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 8, d = 7;
+  if (el.kind === 'lions') {
+    // the rooms round the court are built by lions_halls (src/styles/nasrid/palaces.js)
+    bag.add('marble', box(x0, y - 0.3, z0, x1, y + 0.05, z1)); col.floor([x0, z0, x1, z1], y + 0.05);
+    return lionsCourt(bag, col, el.rect, y, h);
+  }
   for (const r of [[x0 - d, z0 - d, x1 + d, z0], [x0 - d, z1, x1 + d, z1 + d], [x0 - d, z0, x0, z1], [x1, z0, x1 + d, z1]]) {
     bag.add(P, box(r[0], y - 0.5, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h);
     bag.add('roof_tile', box(r[0] - 0.3, y + h, r[1] - 0.3, r[2] + 0.3, y + h + 0.2, r[3] + 0.3));
@@ -142,62 +142,6 @@ function court(el, ctx) {
 // spouting water; the low garden in the four quarters between the channels.
 const MS = 'marble_smooth';
 const dbl2 = (t) => fromTriangles(t.concat(flip(t)));
-/** A Nasrid column, springing at y + hc: ringed base, slender shaft, rings under the neck, the cubic capital (round below, square above). */
-function nColumn(bag, col, x, z, y, hc) {
-  const s = hc - 0.62;
-  bag.add(MS, lathe([[0.15, 0], [0.15, 0.08], [0.125, 0.12], [0.125, 0.16], [0.1, 0.22], [0.094, s - 0.2], [0.114, s - 0.18], [0.114, s - 0.13], [0.094, s - 0.11], [0.094, s - 0.07], [0.114, s - 0.05], [0.114, s - 0.01], [0.1, s + 0.02]], 12, null, x, y, z));
-  bag.add(MS, lathe([[0.1, 0], [0.132, 0.1], [0.132, 0.2]], 12, null, x, y + s + 0.02, z));
-  bag.add(MS, box(x - 0.15, y + s + 0.2, z - 0.15, x + 0.15, y + hc - 0.14, z + 0.15));
-  col.circle(x, z, 0.13, y, y + hc);
-}
-/**
- * A run of arches from A to B (plan points) over stations st = [{ u, w }] (u along the run, w the
- * half width of the station's columns), springing at y + hc, the wall 0.5 thick up to y + top.
- * Spans under 0.8 m are solid. opts: lobed (scalloped intrados), sebka (lattice panels above the crowns), abaci.
- */
-function archRun(bag, A, B, st, y, hc, top, opts = {}) {
-  const L = Math.hypot(B[0] - A[0], B[1] - A[1]), ux = (B[0] - A[0]) / L, uz = (B[1] - A[1]) / L, th = 0.5, t2 = th / 2;
-  const P = (u, yy, o) => [A[0] + ux * u + uz * o, yy, A[1] + uz * u - ux * o];
-  const tri = [], grd = [], q = (out, a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
-  const ys = y + hc, yt = y + top;
-  const strip = (ua, ya, ub, yb) => { if (Math.abs(ub - ua) < 1e-5) return; for (const o of [-t2, t2]) q(tri, P(ua, ya, o), P(ub, yb, o), P(ub, yt, o), P(ua, yt, o)); };
-  const under = (ua, ya, ub, yb) => q(tri, P(ua, ya, t2), P(ub, yb, t2), P(ub, yb, -t2), P(ua, ya, -t2));
-  for (const s of st) {
-    strip(s.u - s.w, ys, s.u + s.w, ys);
-    if (opts.abaci !== false) bag.add(MS, (() => { const a = P(s.u - s.w - 0.03, 0, -t2 - 0.03), b = P(s.u + s.w + 0.03, 0, t2 + 0.03); return box(Math.min(a[0], b[0]), ys - 0.14, Math.min(a[2], b[2]), Math.max(a[0], b[0]), ys, Math.max(a[2], b[2])); })());
-  }
-  const u0 = st[0].u - st[0].w, u1 = st[st.length - 1].u + st[st.length - 1].w;
-  q(tri, P(u0, ys, -t2), P(u0, ys, t2), P(u0, yt, t2), P(u0, yt, -t2)); q(tri, P(u1, ys, -t2), P(u1, ys, t2), P(u1, yt, t2), P(u1, yt, -t2));
-  q(tri, P(u0, yt, -t2), P(u1, yt, -t2), P(u1, yt, t2), P(u0, yt, t2));
-  const rods = [];
-  for (let i = 0; i + 1 < st.length; i++) {
-    const ua = st[i].u + st[i].w, ub = st[i + 1].u - st[i + 1].w, span = ub - ua;
-    if (span < 0.8) { strip(ua, ys, ub, ys); under(ua, ys, ub, ys); continue; }
-    const r = span / 2, uc = (ua + ub) / 2, stilt = 0.22, yc = ys + stilt, K = 16, pts = [[ua, ys]];
-    for (let k = 0; k <= K; k++) { const t = Math.PI - Math.PI * k / K, rr = opts.lobed && k > 0 && k < K ? r * (1 - 0.07 * Math.abs(Math.sin(t * 4.5))) : r; pts.push([uc + Math.cos(t) * rr, yc + Math.sin(t) * rr]); }
-    pts.push([ub, ys]);
-    for (let k = 0; k + 1 < pts.length; k++) { strip(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1]); under(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1]); }
-    // the archivolt: a moulding round the extrados on both faces
-    for (let k = 0; k < K; k++) { const t0 = Math.PI - Math.PI * k / K, t1 = Math.PI - Math.PI * (k + 1) / K, R2 = r + 0.13; for (const o of [-t2, t2]) rods.push([P(uc + Math.cos(t0) * R2, yc + Math.sin(t0) * R2, o), P(uc + Math.cos(t1) * R2, yc + Math.sin(t1) * R2, o), 0.03]); }
-    // the sebka over the crown: a lattice of rhombs in relief on a darker ground, framed
-    const sy0 = yc + r + 0.24, sy1 = yt - 0.1, sa = ua + 0.04, sb = ub - 0.04;
-    if (opts.sebka && sy1 - sy0 > 0.25) {
-      for (const o of [-t2 - 0.008, t2 + 0.008]) q(grd, P(sa, sy0, o), P(sb, sy0, o), P(sb, sy1, o), P(sa, sy1, o));
-      const m = 1.9, sp = 0.22, hh = sy1 - sy0;
-      for (const sg of [1, -1]) for (let c = sa - hh / m; c < sb + hh / m; c += sp) {
-        // the line y = sy0 + sg·m·(u − c) (sg −1 measured from the top), clipped to the panel
-        let ga = sg > 0 ? c : c, gb = c + hh / m; ga = Math.max(ga, sa); gb = Math.min(gb, sb);
-        if (gb - ga < 0.03) continue;
-        const Y = (u) => sg > 0 ? sy0 + m * (u - c) : sy1 - m * (u - c);
-        for (const o of [-t2, t2]) rods.push([P(ga, Y(ga), o), P(gb, Y(gb), o), 0.022]);
-      }
-      for (const o of [-t2, t2]) for (const [a, b] of [[[sa, sy0], [sb, sy0]], [[sb, sy0], [sb, sy1]], [[sb, sy1], [sa, sy1]], [[sa, sy1], [sa, sy0]]]) rods.push([P(a[0], a[1], o), P(b[0], b[1], o), 0.03]);
-    }
-  }
-  bag.add('stucco_cream', dbl2(tri));
-  if (grd.length) bag.add('stucco_warm', dbl2(grd));
-  for (const [a, b, r] of rods) bag.add('stucco_cream', rod(a, b, r, 4));
-}
 /** One of the twelve lions, facing out at angle a from the fountain's centre (cx, cz), standing at y: stylised, the mane in ridges, the mouth a spout. */
 function lion(bag, cx, y, cz, a) {
   const add = (g) => bag.add(MS, place(g, cx, y, cz, -a));
@@ -316,16 +260,7 @@ function lionsCourt(bag, col, rect, y, h) {
   }
   // the fountain and the channels to the halls
   lionFountain(bag, col, cx, cz, y + 0.05);
-  channel(bag, col, [cx, cz - 2.45], [cx, z0 + 0.9], y + 0.05); channel(bag, col, [cx, cz + 2.45], [cx, z1 - 0.9], y + 0.05);
-  // the doors to the halls of the Two Sisters (north) and the Abencerrajes (south): a stucco frame, a band of script, the door
-  for (const [zw, s] of [[z0, 1], [z1, -1]]) {
-    const Z = (a, b) => [Math.min(zw + s * a, zw + s * b), Math.max(zw + s * a, zw + s * b)];
-    const f = Z(0, 0.075), o = Z(0, 0.095), b2 = Z(0, 0.09);
-    bag.add('stucco_cream', box(cx - 1.8, y + 0.05, f[0], cx + 1.8, y + 4.9, f[1]));
-    bag.add('opening', box(cx - 1.2, y + 0.05, o[0], cx + 1.2, y + 3.9, o[1]));
-    bag.add('stucco_warm', box(cx - 1.55, y + 4.15, b2[0], cx + 1.55, y + 4.65, b2[1]));
-    for (let i = 0; i < 22; i++) { const u = cx - 1.45 + i * 0.138, tall = (i * 7) % 3 !== 0; const r2 = Z(0.09, 0.12); bag.add('stucco_cream', box(u, y + 4.22, r2[0], u + 0.05, y + (tall ? 4.58 : 4.34), r2[1])); }
-  }
+  channel(bag, col, [cx, cz - 2.45], [cx, z0], y + 0.05, false); channel(bag, col, [cx, cz + 2.45], [cx, z1], y + 0.05, false);
   // the low garden in the four quarters: beds of earth edged with clipped myrtle, low shrubs in them
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
     const xa = sx < 0 ? x0 + g + 0.45 : cx + 0.4, xb = sx < 0 ? cx - 0.4 : x1 - g - 0.45, za = sz < 0 ? z0 + g + 0.45 : cz + 0.4, zb = sz < 0 ? cz - 0.4 : z1 - g - 0.45;
@@ -342,6 +277,6 @@ function lionsCourt(bag, col, rect, y, h) {
 
 registerStyle('nasrid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, nasrid_tower: tower, nasrid_wall: wall, court },
+  elements: { ...STYLES.qing.elements, nasrid_tower: tower, nasrid_wall: wall, court, comares, lions_halls: lionsHalls },
   objects: {},
 });
