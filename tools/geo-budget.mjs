@@ -57,11 +57,11 @@ export async function measureSite(id) {
     for (const k of ['verts', 'protoVerts', 'instances', 'tris', 'meshes', 'bytes']) S[k] += c[k];
   }
   // life: shapes of LIFE_MIN copies or more are one instanced mesh each; rarer ones are merged into
-  // their tiles' meshes (vertices as copies; their tiles' meshes are already counted)
+  // their tiles' meshes, indexed (vertices and indices as copies; their tiles' meshes are already counted)
   for (const e of life.values()) {
     S.tris += (e.idx / 3) * e.n;
     if (e.n >= LIFE_MIN) { S.meshes += 2; S.protoVerts += e.v; S.instances += e.n; S.bytes += e.bytes + e.n * (64 + (e.colors ? 12 : 0)); }
-    else { S.verts += e.idx * e.n; S.bytes += e.idx * e.n * 24; }
+    else { S.verts += e.v * e.n; S.bytes += e.n * (e.v * 24 + e.idx * 4); }
   }
   return S;
 }

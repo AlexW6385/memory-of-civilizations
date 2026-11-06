@@ -95,6 +95,18 @@ function beamTris(out, p0, p1, w, h) {
   for (const v of orientOutward(loc)) out.push(v);
 }
 
+/** Triangles (flat xyz list) turned so each faces along dir (a film laid on a face). */
+function facing(arr, dir) {
+  const o = [];
+  for (let i = 0; i < arr.length; i += 9) {
+    const ux = arr[i + 3] - arr[i], uy = arr[i + 4] - arr[i + 1], uz = arr[i + 5] - arr[i + 2], vx = arr[i + 6] - arr[i], vy = arr[i + 7] - arr[i + 1], vz = arr[i + 8] - arr[i + 2];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    if (nx * dir[0] + ny * dir[1] + nz * dir[2] >= 0) o.push(...arr.slice(i, i + 9));
+    else o.push(...arr.slice(i, i + 3), ...arr.slice(i + 6, i + 9), ...arr.slice(i + 3, i + 6));
+  }
+  return o;
+}
+
 /**
  * The curl at a ridge's end (the Jiangnan scroll ridge end): from the ridge's top at p it runs out
  * along dir and rises, turning up and back over itself in a scroll of `size` metres; a square
@@ -650,12 +662,15 @@ function mingWall(el, { bag, col }) {
   }
   // the weathering, on both faces: the damp rising above the plinth in a ragged band, rain streaks under the coping
   if (PAL.plaster === 'plaster_white' && !el.clean) {
-    const rand = rng(((ax * 73 + az * 31) | 0) + 11), damp = [], streak = [];
+    const rand = rng(((ax * 73 + az * 31) | 0) + 11);
+    let damp = [], streak = [];
+    const dampAll = [], streakAll = [];
     const clear = (s0, s1, ya, yb) => (el.gates || []).every((g2) => { const hw = (g2.r ?? g2.w / 2) + 0.15; return s1 < g2.at - hw - 0.1 || s0 > g2.at + hw + 0.1; }) && (el.windows || []).every((w) => s1 < w.at - w.w / 2 - 0.15 || s0 > w.at + w.w / 2 + 0.15 || yb < (w.sill ?? 1.2) - 0.12 || ya > (w.sill ?? 1.2) + w.h + 0.12);
     const ph = [rand() * 6.3, rand() * 6.3, rand() * 6.3];
     // the damp line: a smooth wandering height (two long waves), cut into 0.7 m strips
     const top = (s0) => 0.68 + 0.13 * Math.sin(s0 * 0.7 + ph[0]) + 0.07 * Math.sin(s0 * 1.9 + ph[1]);
     for (const sgn of [-1, 1]) {
+      damp = []; streak = [];
       const o = (th / 2 + 0.008) * sgn;
       const quad = (arr, s0, s1, ya0, yb0, ya1 = ya0, yb1 = yb0) => { arr.push(...Wp(s0, ya0, o), ...Wp(s1, ya1, o), ...Wp(s1, yb1, o), ...Wp(s0, ya0, o), ...Wp(s1, yb1, o), ...Wp(s0, yb0, o)); };
       const step = 0.7;
@@ -665,9 +680,12 @@ function mingWall(el, { bag, col }) {
         const w = 0.05 + rand() * 0.12, lo = Math.max(1.3, h - 0.05 - (0.3 + rand() * 1.4));
         if (h - 0.06 - lo > 0.2 && clear(s0, s0 + w, lo, h)) { const m = s0 + w / 2; streak.push(...Wp(m - w * 0.3, lo, o), ...Wp(s0 + w, h - 0.06, o), ...Wp(s0, h - 0.06, o), ...Wp(m - w * 0.3, lo, o), ...Wp(m + w * 0.3, lo, o), ...Wp(s0 + w, h - 0.06, o)); }
       }
+      // one-sided, each face's film turned to look out from its own face of the wall
+      const out = [Wp(0, 0, o)[0] - Wp(0, 0, 0)[0], Wp(0, 0, o)[1] - Wp(0, 0, 0)[1], Wp(0, 0, o)[2] - Wp(0, 0, 0)[2]];
+      for (const [arr, all] of [[damp, dampAll], [streak, streakAll]]) all.push(...facing(arr, out));
     }
-    if (damp.length) bag.add('plaster_damp', fromTriangles(damp.concat(flipTris(damp))));
-    if (streak.length) bag.add('plaster_streak', fromTriangles(streak.concat(flipTris(streak))));
+    if (dampAll.length) bag.add('plaster_damp', fromTriangles(dampAll));
+    if (streakAll.length) bag.add('plaster_streak', fromTriangles(streakAll));
   }
   const pl = [];
   beamTris(pl, [ax - ux * 0.02, y - 0.3, az - uz * 0.02], [bx + ux * 0.02, y - 0.3, bz + uz * 0.02], th / 2 + 0.03, 0.62);

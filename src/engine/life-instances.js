@@ -54,8 +54,9 @@ export class LifeInstances {
     for (const alts of shapes.values()) {
       for (const s of alts) {
         if (s.n < LIFE_MIN) {
-          // rare: merged into its tile, by real material
-          const local = s.geometry.toNonIndexed();
+          // rare: merged into its tile, by real material (indexed: a lathe's vertices are shared by
+          // about six triangle corners, so a copy kept indexed costs a fraction of an unrolled one)
+          const local = s.geometry.clone();
           for (const { rec, p } of s.chunks) {
             const byMat = perTile.get(rec) || perTile.set(rec, new Map()).get(rec);
             for (let i = 0; i < p.reals.length; i++) {
@@ -140,14 +141,21 @@ export class LifeInstances {
 }
 
 function mergeList(gs) {
-  let n = 0;
-  for (const g of gs) n += g.attributes.position.count;
-  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3);
-  let o = 0;
-  for (const g of gs) { pos.set(g.attributes.position.array, o); nor.set(g.attributes.normal.array, o); o += g.attributes.position.array.length; g.dispose(); }
+  let n = 0, ni = 0;
+  for (const g of gs) { n += g.attributes.position.count; ni += g.index ? g.index.count : g.attributes.position.count; }
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), idx = n > 65535 ? new Uint32Array(ni) : new Uint16Array(ni);
+  let o = 0, oi = 0;
+  for (const g of gs) {
+    const v = g.attributes.position.count;
+    pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3);
+    if (g.index) { const I = g.index.array; for (let k = 0; k < I.length; k++) idx[oi + k] = I[k] + o; oi += I.length; }
+    else { for (let k = 0; k < v; k++) idx[oi + k] = o + k; oi += v; }
+    o += v; g.dispose();
+  }
   const m = new THREE.BufferGeometry();
   m.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   m.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  m.setIndex(new THREE.BufferAttribute(idx, 1));
   m.computeBoundingBox(); m.computeBoundingSphere();
   return m;
 }
