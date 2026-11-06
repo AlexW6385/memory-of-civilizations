@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.52 — Welded geometry: 28% less memory; Machu Picchu, Taos, Cahokia (2026-11-06)
+- Merged meshes welded (identical position and normal only) and indexed, normals packed to 16 bits, 16-bit indices kept 16-bit on the GPU: all sites 1297 → 935 MB with the same picture; Machu Picchu's stone canal and sixteen fountains, the Royal Tomb under the raised Torreón, the Sacred Rock with its wayronas, the Main Temple's niches and great stones; Taos' sunken kivas with pole palisades, the battered wall, log footbridges, mealing bins; Cahokia's charnel house on Fox Mound.
+
 ## v9.51 — Fifth wave: every place reachable on foot (2026-11-06)
 - plan-check walks as the viewer's walker does; reachability fixed at Djenné (doors, roof stair), Kaifeng (monastery gate hall), Lhasa (ramps, Deyang Shar gate, Great East Hall, stairs to the Red Palace roof), Madurai (gopuram plinths, the Golden Lotus tank dug out), Persepolis (palace stairs, the Tachara and Hadish), Borobudur (stupas spaced off the axes), Isfahan (Ali Qapu's interior and music room), Himeji (a gate to the keep's court, every floor reached), Nara (gate steps), Paris (Sainte-Chapelle's porch eave), Cairo (a market street to Sultan Hasan); new: Djenné's Monday market, Kilwa's second suite and South Court vaults, Great Zimbabwe's Hill Complex and Valley Ruins, Kaifeng's shops, fortune tellers, ox carts and trackers, Liuhe's interior, Madurai's Ashta Shakti Mandapam, temple car and elephants, Khajuraho's platforms and Varaha pavilion, Petra's colonnaded street and Great Temple, Angkor's cruciform cloister, Isfahan's arcade shops, Nara's attendant bodhisattvas, Niō and deer, Himeji's Hishi gate, Uji's pebble shore and island, Notre-Dame hollow and walkable with its jubé, Paris's bridges with houses and mills, the Cairo Citadel's road, walls and mosque; Amsterdam's sledges, no stalls in ceremonial plazas, draw-wells by region.
 
