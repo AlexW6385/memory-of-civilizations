@@ -10,6 +10,7 @@ import '../qing/index.js';
 import '../artdeco/index.js';
 import { rocksTerrace } from './rocks.js';
 import { archBridge } from './bridge.js';
+import { wharf } from './wharf.js';
 
 /** Both faces of a triangle. */
 const tri2 = (t, a, b, c) => t.push(...a, ...b, ...c, ...a, ...c, ...b);
@@ -93,13 +94,6 @@ function roundTower(el, { bag, col }) {
   bag.add('facade_grey', lathe([[r, 0], [r, h], [0.001, h]], 32, null, x, y - 0.5, z)); col.circle(x, z, r, y, y + h);
   for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; bag.add('plaster_white', box(x + Math.cos(a) * (r + 0.3) - 0.4, y, z + Math.sin(a) * (r + 0.3) - 0.4, x + Math.cos(a) * (r + 0.3) + 0.4, y + h, z + Math.sin(a) * (r + 0.3) + 0.4)); }
   bag.add('plaster_white', lathe([[r + 1, 0], [r + 1, 2], [0.001, 2]], 32, null, x, y + h, z));
-}
-/** wharf: { rect, y } — a ferry wharf on piles with its shelter. */
-function wharf(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 1.2;
-  bag.add('timber', box(x0, y - 0.4, z0, x1, y, z1)); col.floor(el.rect, y);
-  for (let z = z0 + 2; z < z1; z += 5) for (const x of [x0 + 0.5, x1 - 0.5]) bag.add('timber', box(x - 0.25, -6, z - 0.25, x + 0.25, y - 0.4, z + 0.25));
-  bag.add('plaster_white', box(x0 + 1, y, z1 - 12, x1 - 1, y + 3.5, z1 - 2)); bag.add('steel_grey', box(x0 + 0.5, y + 3.5, z1 - 12.5, x1 - 0.5, y + 4, z1 - 1.5));
 }
 /** viaduct: { rect (along x), y (deck), w } — the Cahill Expressway over the quay's station. */
 function viaduct(el, { bag, col }) {
