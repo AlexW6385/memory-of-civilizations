@@ -1159,6 +1159,75 @@ function taihu(el, { bag, col }) {
  * One stone: a waisted, lumpy body leaning by lean [dx, dz] per metre of height, its skin furrowed
  * in vertical folds (the wrinkles) and pitted, its top rounded over (not a point).
  */
+/**
+ * ming_rockery: a path climbing among piled Taihu stone, as the rockery hills of the Suzhou
+ * gardens are walked (docs/settlements/ming-suzhou.md §5): { pts: [[x, z, y]…] (the path's line
+ * and its tread heights), w (the path's width), ground (x, z) → the hill's height (to bed the
+ * stones), cave (0…1: where along the path a stone lies across it overhead, a short grotto),
+ * seed }. Stepping slabs of stone, irregular, every half metre or so, each a step up; on both
+ * sides stones from knee to twice a man's height, crowding in, some leaning together, the gaps
+ * between them left (one sees out); where the cave is, two tall stones carry a lintel slab and a
+ * stone heaped on it, its underside high enough to walk under.
+ */
+function rockery(el, { bag, col }) {
+  const rand = rng(el.seed || 31), P = el.pts, hw = (el.w ?? 1.3) / 2, gr = el.ground || (() => -Infinity);
+  const bedAt = (x, z, y) => { const g = gr(x, z); return Number.isFinite(g) ? Math.min(y, g) : y; };
+  // the line, resampled
+  const S = [0];
+  for (let i = 1; i < P.length; i++) S.push(S[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+  const Ltot = S[S.length - 1];
+  const at = (s) => {
+    let i = 1; while (i < P.length - 1 && S[i] < s) i++;
+    const t = Math.max(0, Math.min(1, (s - S[i - 1]) / (S[i] - S[i - 1]))), a = P[i - 1], b = P[i], l = S[i] - S[i - 1];
+    const x = a[0] + (b[0] - a[0]) * t, z = a[1] + (b[1] - a[1]) * t;
+    // (never under the hill: between the given heights the treads ride on the ground)
+    return { x, z, y: Math.max(a[2] + (b[2] - a[2]) * t, gr(x, z) + 0.06), ux: (b[0] - a[0]) / l, uz: (b[1] - a[1]) / l };
+  };
+  // the treads: rough slabs, each a little turned, 0.2 thick, their tops the path's height
+  const tr = [], nT = Math.max(2, Math.round(Ltot / 0.55));
+  for (let k = 0; k <= nT; k++) {
+    const q = at(k * Ltot / nT), ang = Math.atan2(q.uz, q.ux) + (rand() - 0.5) * 0.3, ca = Math.cos(ang), sa = Math.sin(ang);
+    const poly = [];
+    for (let j = 0; j < 8; j++) {
+      const a = (j + (rand() - 0.5) * 0.6) / 8 * Math.PI * 2, rr = 1 + (rand() - 0.5) * 0.4, lu = Math.cos(a) * 0.36 * rr, lv = Math.sin(a) * hw * 0.92 * rr;
+      poly.push([q.x + lu * ca - lv * sa, q.z + lu * sa + lv * ca]);
+    }
+    const top = q.y + (rand() - 0.5) * 0.02;
+    tr.push(...prismTris(poly, Math.min(top - 0.2, bedAt(q.x, q.z, top) - 0.1), top));
+    col.floor([q.x - 0.36, q.z - 0.36, q.x + 0.36, q.z + 0.36], top);
+  }
+  bag.add('taihu', fromTriangles(tr));
+  // the stones along both sides, kept clear of the path's two ends
+  const cave = el.cave ?? -1, sC = cave * Ltot;
+  for (const sg of [-1, 1]) {
+    for (let s = 0.9 + rand() * 0.4; s < Ltot - 0.9; s += 0.95 + rand() * 0.7) {
+      if (cave >= 0 && Math.abs(s - sC) < 1.3) continue;
+      const q = at(s), nx = -q.uz * sg, nz = q.ux * sg, r = 0.35 + rand() * 0.4, off = hw + 0.45 + r * 1.5;
+      const x = q.x + nx * off, z = q.z + nz * off, b = bedAt(x, z, q.y) - 0.15;
+      const h = (q.y - b) + 0.6 + rand() * 2.0;
+      // leaning a little away from the path, so that none hangs over it
+      bag.add('taihu', rock(x, b, z, r, h, rand, [nx * 0.06, nz * 0.06]));
+      col.circle(x, z, r * 0.9, b, b + h);
+    }
+  }
+  // the cave: two tall stones either side, a lintel slab across on them, a stone heaped on that
+  if (cave >= 0) {
+    const q = at(sC), nx = -q.uz, nz = q.ux, clear = 2.3, lw = 0.9;
+    for (const sg of [-1, 1]) {
+      const x = q.x + nx * (hw + 0.75) * sg, z = q.z + nz * (hw + 0.75) * sg, b = bedAt(x, z, q.y) - 0.15;
+      bag.add('taihu', rock(x, b, z, 0.45, q.y + clear + 0.5 - b, rand, [0, 0], true));
+      col.circle(x, z, 0.45, b, q.y + clear + 0.3);
+    }
+    // the lintel: a long stone lying across, flattened (thin side down), its ends in the pillars
+    const span = hw + 1.2, lin = rock(0, 0.05, 0, 0.4, 2 * span, rand, [0, 0], true);
+    lin.applyMatrix4(new Matrix4().makeBasis({ x: q.ux, y: 0, z: q.uz }, { x: nx, y: 0, z: nz }, { x: 0, y: -1, z: 0 }).setPosition(q.x - nx * span, q.y + clear + 0.3, q.z - nz * span));
+    bag.add('taihu', lin);
+    // a stone heaped on it over one pillar (not over the way)
+    const hx = q.x + nx * (hw + 0.75), hz = q.z + nz * (hw + 0.75);
+    bag.add('taihu', rock(hx, q.y + clear + 0.45, hz, 0.4, 0.8 + rand() * 0.5, rand, [0, 0], true));
+    col.rect([Math.min(q.x - nx * span, q.x + nx * span) - 0.4, Math.min(q.z - nz * span, q.z + nz * span) - 0.4, Math.max(q.x - nx * span, q.x + nx * span) + 0.4, Math.max(q.z - nz * span, q.z + nz * span) + 0.4], q.y + clear + 0.02, q.y + clear + 1.6);
+  }
+}
 function rock(x, y, z, s, h, rand, lean = [0, 0], fine = false) {
   const nn = fine ? 11 : 7, NS = fine ? 14 : 10, ph = rand() * 6.28, ph2 = rand() * 6.28, sz = 0.9 + 0.2 * rand();
   const prof = [];
@@ -1585,6 +1654,7 @@ registerStyle('ming', {
     ming_wall: withPal(mingWall),
     ming_gallery: withPal(mingGallery),
     ming_slab_bridge: withPal(slabBridge),
+    ming_rockery: withPal(rockery),
     ming_arch_bridge: withPal(archBridge),
     canal_wall: withPal(canalWall),
     water_rect: withPal(waterRect),

@@ -189,6 +189,24 @@ export const GARDEN_BRIDGES = [
   { pts: [[27.5, -51], [32, -54], [36, -56], [40, -57.5]], w: 1.3 },            // from the east island to the north-east shore
   { pts: [[-28, -23], [-27, -26.7]], w: 1.4 },
 ];
+/**
+ * Paths up the islands' hills among piled stone (ming_rockery), from the bridges' landings to the
+ * hill pavilions' platforms: { pts [[x, z]…], end (the tread height at the last point, the
+ * platform's; elsewhere the ground's), cave (where a stone lies overhead, 0…1) }.
+ */
+export const ROCK_PATHS = [
+  { pts: [[-18, -42.5], [-19.5, -44.5], [-18.5, -46.6], [-16, -47.6], [-13, -48.3]], end: 3.65, cave: 0.42 },   // up to Snowy Fragrance
+  { pts: [[6.5, -50], [9, -49.2], [11.5, -49.8], [14.7, -51.4]], end: 2.9 },                                    // to Waiting for Frost from the west
+  { pts: [[27.5, -51], [25, -50], [22.2, -50.5], [19.7, -51.5]], end: 2.9 },                                    // and from the east
+];
+export function nearRockPath(x, z, m = 1.6) {
+  for (const { pts } of ROCK_PATHS) for (let i = 0; i + 1 < pts.length; i++) {
+    const [ax, az] = pts[i], [bx, bz] = pts[i + 1], vx = bx - ax, vz = bz - az, l2 = vx * vx + vz * vz;
+    const t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / l2));
+    if (Math.hypot(x - ax - vx * t, z - az - vz * t) < m) return true;
+  }
+  return false;
+}
 /** The loquat court's walls (with a moon gate on the west). */
 export const LOQUAT_COURT = [30, -13, 50, 8];
 

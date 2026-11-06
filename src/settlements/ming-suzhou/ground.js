@@ -7,7 +7,7 @@
 
 import {
   RADIUS, LEVEL, GARDEN, RESIDENCE, ISLANDS, MOUNDS, LOQUAT_COURT, FOOTPRINTS,
-  pondDistance, canalDistance, inRect, onStreet, onBridge, inLot, nearGallery, smooth as sm,
+  pondDistance, canalDistance, inRect, onStreet, onBridge, inLot, nearGallery, nearRockPath, smooth as sm,
 } from './layout.js';
 
 function bump(shapes, x, z) {
@@ -84,7 +84,7 @@ function planting(x, z, p) {
   if (cd < 1.2 && onStreet(x, z)) return { willow: 1.1 };
   if (onStreet(x, z) || inLot(x, z, 0.6) || inRect(RESIDENCE, x, z, 0.5)) return null;
   if (inRect(GARDEN, x, z)) {
-    if (FOOTPRINTS.some((r) => inRect(r, x, z, 1.2)) || nearGallery(x, z)) return null;
+    if (FOOTPRINTS.some((r) => inRect(r, x, z, 1.2)) || nearGallery(x, z) || nearRockPath(x, z, 2.4)) return null;
     const pd = pondDistance(x, z);
     if (pd < 0.8) return pd < -0.4 ? null : { willow: 2 };
     const wall = Math.min(x - GARDEN[0], GARDEN[2] - x, z - GARDEN[1], GARDEN[3] - z);

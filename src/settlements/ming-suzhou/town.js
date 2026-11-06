@@ -18,10 +18,12 @@ const base = (id, elements) => ({ id, style: 'ming', origin: [0, 0], base: 0, ya
 
 /** The boats tied up at the landings (filled by waterways(), kept clear by the moving boats of riverLife()). */
 const MOORED = [];
+/** The public landings with no boat at them: { c (the bottom slab's middle), dir (toward the water) } (filled by waterways()). */
+const LANDINGS = [];
 /** The streets, the canals with their walls and water, the bridges, steps and boats. */
 function waterways() {
   const E = [], rand = rng(1606);
-  MOORED.length = 0;
+  MOORED.length = 0; LANDINGS.length = 0;
   for (const s of STREETS) { const r = clip(s); if (r) E.push({ t: 'paving', rect: r, y: LEVEL.street + 0.04, th: 0.3 }); }
   for (const c of CANALS) {
     const r = clip(c, R - 2);
@@ -59,6 +61,10 @@ function waterways() {
         const ring = [face[0] + dir[0] * 0.13, LEVEL.canal + 0.6, face[1] + dir[1] * 0.13];
         E.push({ t: 'boat', at: c, dir: u, len: bl, y: LEVEL.canal, moor: [ring[0], ring[1], ring[2]] });
         MOORED.push(c);
+      } else {
+        // the bottom slab's middle (a single flight runs down along u and leaves the slab at its far end)
+        const m = double ? 0 : 0.6;
+        LANDINGS.push({ c: [face[0] + u[0] * m + dir[0] * 0.5, face[1] + u[1] * m + dir[1] * 0.5], dir, u });
       }
     }
   }
@@ -137,6 +143,19 @@ function riverLife() {
       M.push({ t: 'water_steps', a, b, dir: out, y, water: LEVEL.canal });
       if (rand() < 0.7) { const p = F.P(t + (rand() - 0.5) * w, 0.35 + 1.44); person(p, y - 0.6, faceTo(out), { pose: 'squat', dress: 'robe', cloth: pick(['cloth_indigo', 'cloth_white', 'cloth_grey']), hat: 'none' }); L.push({ t: 'basket', at: F.P(t + w * 0.8, 0.35 + 0.8), y: y - 0.3, rot: 0, s: 0.8, seed: Math.floor(rand() * 1e9) }); }
     }
+  }
+  // the public landings with no boat: women washing at the bottom slab — squatting at the water's
+  // edge to rinse, a basket of washing beside, now and then one beating the cloth with a paddle on
+  // the stone, a neighbour coming down the steps or waiting at the top with her basket
+  for (const g of LANDINGS) {
+    if (!inDisc(g.c) || rand() < 0.3) continue;
+    const yS = LEVEL.canal + 0.14, n = rand() < 0.45 ? 2 : 1;
+    for (let k = 0; k < n; k++) {
+      const off = (k - (n - 1) / 2) * 0.9, p = [g.c[0] + g.u[0] * off + g.dir[0] * 0.2, g.c[1] + g.u[1] * off + g.dir[1] * 0.2];
+      person(p, yS, faceTo(g.dir), { pose: 'squat', dress: 'robe', cloth: pick(['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_indigo']), hat: 'none' });
+    }
+    L.push({ t: 'basket', at: [g.c[0] - g.u[0] * (n * 0.45 + 0.35) - g.dir[0] * 0.15, g.c[1] - g.u[1] * (n * 0.45 + 0.35) - g.dir[1] * 0.15], y: yS, rot: rand() * 6.28, s: 0.8, seed: Math.floor(rand() * 1e9) });
+    if (rand() < 0.35) person([g.c[0] - g.dir[0] * 1.6 + g.u[0] * 1.2, g.c[1] - g.dir[1] * 1.6 + g.u[1] * 1.2], LEVEL.street, faceTo(g.dir), { pose: 'stand', dress: 'robe', carry: 'basket', hat: 'none' });
   }
   // the boats: along each canal, some moving with the boatman at the oar, some moored with cargo
   for (const c of CANALS) {

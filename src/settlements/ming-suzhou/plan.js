@@ -7,7 +7,7 @@
 
 import { PLACED } from '../../planet/layout.js';
 import {
-  LEVEL, GARDEN, RESIDENCE, POND, ISLANDS, MOUNDS, BUILDINGS, GALLERIES, GARDEN_BRIDGES, LOQUAT_COURT, pondDistance, inRect,
+  LEVEL, GARDEN, RESIDENCE, POND, ISLANDS, MOUNDS, BUILDINGS, GALLERIES, GARDEN_BRIDGES, LOQUAT_COURT, ROCK_PATHS, pondDistance, inRect, nearRockPath,
 } from './layout.js';
 import { ground } from './ground.js';
 
@@ -40,9 +40,18 @@ for (const [i, s] of [...ISLANDS.slice(0, 2), ...MOUNDS].entries()) {
     const a = rand() * Math.PI * 2, d = 0.35 + rand() * 0.45;
     const x = s.c[0] + Math.cos(a) * s.r[0] * d, z = s.c[1] + Math.sin(a) * s.r[1] * d;
     if (Object.values(BUILDINGS).some((b) => (b.rect ? inRect(b.rect, x, z, 2) : Math.hypot(x - b.c[0], z - b.c[1]) < (b.r || b.w / 2) + 2.2))) continue;
-    E.push({ t: 'taihu', c: [x, z], r: 0.6 + rand() * 0.8, h: 1.2 + rand() * 1.8, y: H(x, z) - 0.1, seed: 900 + i * 31 + k, solid: true });
+    const r = 0.6 + rand() * 0.8, h = 1.2 + rand() * 1.8;
+    if (nearRockPath(x, z, r + 1.4)) continue;
+    E.push({ t: 'taihu', c: [x, z], r, h, y: H(x, z) - 0.1, seed: 900 + i * 31 + k, solid: true });
   }
 }
+// the paths up the island hills among piled stone, from the bridges to the hill pavilions (a
+// short grotto on the way up to Snowy Fragrance; docs/settlements/ming-suzhou.md §5)
+ROCK_PATHS.forEach((p, i) => {
+  const n = p.pts.length;
+  const pts = p.pts.map(([x, z], k) => [x, z, k === n - 1 ? p.end : Math.max(G + 0.05, H(x, z) + 0.06)]);
+  E.push({ t: 'ming_rockery', pts, w: 1.3, ground: H, cave: p.cave, seed: 4100 + i * 17 });
+});
 // lotus north of the Hall of Distant Fragrance and in the west bay
 for (const [c, r, n] of [[[0, -32], 9, 80], [[-38, -40], 6, 40], [[34, -42], 6, 36], [[-48, -60], 4, 22]]) E.push({ t: 'lotus', c, r, n, y: LEVEL.pond, seed: c[0] * 7 + 3 });
 
