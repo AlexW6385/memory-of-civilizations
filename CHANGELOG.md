@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.54 — Ming wall gates open; Suzhou's garden (2026-11-06)
+- Ming wall copings closed over gates so their passages are walkable (Suzhou, Seoul, Angkor and every wall gate); doorways no longer drawn filled in; plinths stop at gates; leaky-window bars given sides; Suzhou's garden: hanging fretwork under gallery and pavilion beams, gallery frames with leaky windows, zigzag granite bridges with landing slabs and rails, rockery paths among Taihu stones with a grotto, women washing at the public landings; the garden door moved off the back of the women's building.
+
 ## v9.53 — Borgund inside, Moscow's Red Square (2026-11-06)
 - Borgund's arrival set on the ground; the stave church hollow and walkable (staves, knee-brace arcades, St Andrew's crosses, round openings, open roof, chancel with crucifix beam, apse, altar, font), dry-stone churchyard wall and lychgate, farm life; the Dormition Cathedral's interior with painted piers, the iconostasis tiers and the Monomakh throne; the Spassky and Nikolsky gate passages opened; the moat with its trestle bridges and booksellers; the stone trading rows of 1595, the Lobnoye Mesto, the Tsar Cannon.
 
