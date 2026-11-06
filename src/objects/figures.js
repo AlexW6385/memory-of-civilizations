@@ -169,11 +169,16 @@ const torsoMod = (k) => { const fx = ell(1, 0.66); return (th, i, r, y) => fx(th
  * under the breast to the ankle, held by two straps over the shoulders). Standing or in any pose.
  */
 /** A robe, wrap or dress kneeling or seated cross-legged: its skirt pooled round the legs on the ground (and kneeling the calves under it). */
-function pool(a, up, legs, seed) {
+function pool(a, up, legs, seed, long = true) {
   if (legs === 'kneel') {
     up('c1', folded([[0.001, 0.395], [0.23, 0.39], [0.24, 0.41], [0.215, 0.62], [0.17, 0.8], [0.155, 1.0], [0.001, 1.01]], 16, 9, 0.06, seed).scale(1, 1, 0.86));
-    legTubes(a, 'c1', 'kneel', { from: 2, thick: 1.45 });
-  } else up('c1', folded([[0.001, 0.765], [0.41, 0.76], [0.425, 0.78], [0.42, 0.89], [0.36, 0.935], [0.24, 0.965], [0.16, 1.0], [0.001, 1.01]], 18, 11, 0.06, seed).scale(1, 1, 0.78).translate(0, 0, -0.07));
+    if (long) legTubes(a, 'c1', 'kneel', { from: 2, thick: 1.45 });
+  } else {
+    // cross-legged: the cloth over the lap and along the thighs to the knees; a robe's down the shins too
+    up('c1', folded([[0.001, 0.752], [0.22, 0.755], [0.245, 0.8], [0.21, 0.9], [0.16, 1.0], [0.001, 1.01]], 16, 7, 0.05, seed).scale(1, 1, 0.8));
+    legTubes(a, 'c1', 'cross', { to: 3, thick: 1.3 });
+    if (long) legTubes(a, 'c1', 'cross', { from: 2, thick: 1.3 });
+  }
 }
 /** A point on the torso's surface at height y, x across (front: −z), lifted off it by `off`. */
 function onTorso(x, y, front, off = 0.006) {
@@ -366,7 +371,7 @@ export function figure(el, { bag, col }) {
     else if (dress === 'shendyt') kilt(a, up(a), legs, 4);
     else if (dress === 'sheath') sheath(a, up(a), legs, 6);
     // kneeling or cross-legged, a robe or a wrap lies pooled round the legs
-    else if ((legs === 'kneel' || legs === 'cross') && (dress === 'robe' || dress === 'wrap')) pool(a, up(a), legs, dress === 'robe' ? 5 : 7);
+    else if ((legs === 'kneel' || legs === 'cross') && (dress === 'robe' || dress === 'wrap')) pool(a, up(a), legs, dress === 'robe' ? 5 : 7, dress === 'robe');
     else if (dress === 'robe') skirt(a, 'c1', legs === 'brace' ? 'stand' : legs, { hem: 0.03, seed: 5 });
     else if (dress === 'wrap') skirt(a, 'c1', legs === 'brace' ? 'stand' : legs, { hem: legs === 'stand' || legs === 'brace' ? 0.22 : 0.2, seed: 7, flare: 0.6 });
     else if (dress === 'tunic') { if (legs === 'stand' || legs === 'brace') skirt(a, 'c1', 'stand', { hem: 0.5, flare: 1.4, seed: 9 }); else up(a)('c1', slathe([[0.2, 0.62], [0.16, 0.86], [0.001, 0.87]], 14).scale(1, 1, 0.8)); }
