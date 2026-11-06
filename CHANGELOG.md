@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.46 — Kilwa: Husuni Kubwa on its headland (2026-11-06)
+- Kilwa's ground in terraces with retaining walls and cliffs (the palace no longer runs off the plateau); Husuni Kubwa rebuilt: the audience court with niched walls and verandahs, the pavilion up nine steps, the sunken octagonal pool, private and domestic courts, the double suite, vaulted ranges, the South Court's 48 storerooms, the cliff stair to the beach mosque; coral-stone houses raised over the lanes with sunken courts, pole ceilings, niche walls with porcelain; the Great Mosque's doorways opened; walkable from the arrival (332,000 m², was 2,500).
+
 ## v9.45 — Teotihuacan and Tenochtitlan, second pass (2026-11-06)
 - Teotihuacan's avenue rising plaza by plaza toward the Moon, the Palace of Quetzalpapalotl with its carved bird pillars and the Jaguars' patio murals, altars, censers and worshippers on the arrival plaza, the Great Goddess in the Moon Plaza; Tenochtitlan's House of the Eagles with its warrior benches and eagle warriors, the calmecac, the blue and ochre coatepantli serpent walls round the Templo Mayor, the precinct's enclosing platform, Ehecatl's round temple with its serpent-mouth door, the Temple of Tezcatlipoca, a causeway bridge.
 
