@@ -3,8 +3,8 @@
 // altars, cedar door leaves, date palms.
 
 import { Matrix4, BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { box, frustum, lathe, disc, rod, place, fromTriangles, quad } from '../../core/geom.js';
-import { trim, wingedDisc } from './trim.js';
+import { box, frustum, lathe, disc, rod, place, fromTriangles, quad, sweep } from '../../core/geom.js';
+import { trim, wingedDisc, cavettoProfile, rectLoop } from './trim.js';
 
 const rnd = (seed) => { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); };
 
@@ -362,32 +362,59 @@ export function falcon(el, { bag, col }) {
 
 /** The granite naos (shrine) of Nectanebo II: a monolith with a pyramidal roof, cornice and door. */
 export function naos(el, { bag, col }) {
+  // the naos of Nectanebo II in the sanctuary (docs/settlements/edfu.md §4.3): a monolith of dark granite on a stepped
+  // plinth; the body bound at its corners and under the cornice by torus rolls; the cavetto cornice; a pyramidal top;
+  // the deep door in the front under a frame of jambs and lintel carrying a winged disc, the jambs carved with columns
+  // of text; on the sides registers of the king before the gods; bronze doors standing open; in the dark of the
+  // shrine the gilded falcon of Horus
   const [x, z] = el.at, y = el.y ?? 0, yaw = el.yaw ?? 0;
-  const W = el.w ?? 1.55, D = el.d ?? 1.4, H = el.h ?? 4.0;
-  const mat = el.mat || 'granite_grey';
-  const parts = [];
-  const plinthH = 0.3, bodyH = H * 0.66, corH = 0.32, roofH = H - plinthH - bodyH - corH;
-  parts.push(box(-W / 2 - 0.12, 0, -D / 2 - 0.12, W / 2 + 0.12, plinthH, D / 2 + 0.12));
-  // body hollowed by a deep door recess on the front (-z)
-  const dw = W * 0.56, dh = bodyH * 0.72;
-  parts.push(box(-W / 2, plinthH, -D / 2 + 0.55, W / 2, plinthH + bodyH, D / 2));
-  parts.push(box(-W / 2, plinthH, -D / 2, -dw / 2, plinthH + bodyH, -D / 2 + 0.55));
-  parts.push(box(dw / 2, plinthH, -D / 2, W / 2, plinthH + bodyH, -D / 2 + 0.55));
-  parts.push(box(-dw / 2, plinthH + dh, -D / 2, dw / 2, plinthH + bodyH, -D / 2 + 0.55));
-  // torus and cornice
-  const ct = plinthH + bodyH;
-  parts.push(box(-W / 2 - 0.06, ct - 0.1, -D / 2 - 0.06, W / 2 + 0.06, ct, D / 2 + 0.06));
-  parts.push(frustum([-W / 2, -D / 2, W / 2, D / 2], ct, ct + corH, -0.16, -0.16, -0.16, -0.16));
-  // pyramidal roof
-  parts.push(frustum([-W / 2 - 0.12, -D / 2 - 0.12, W / 2 + 0.12, D / 2 + 0.12], ct + corH, ct + corH + roofH, W / 2 + 0.07, W / 2 + 0.07, D / 2 + 0.07, D / 2 + 0.07));
-  const g = mergeLocal(parts);
+  const W = el.w ?? 1.55, D = el.d ?? 1.4, H = el.h ?? 4.0, mat = el.mat || 'granite_grey';
+  const parts = [], carved = [], put = { add: (m, g) => carved.push(g) };
+  const p0 = 0.16, p1 = 0.3, bodyH = H * 0.6, ct = p1 + bodyH, corH = 0.34, corP = 0.17, roofH = H - ct - corH;
+  parts.push(box(-W / 2 - 0.2, 0, -D / 2 - 0.2, W / 2 + 0.2, p0, D / 2 + 0.2), box(-W / 2 - 0.1, p0, -D / 2 - 0.1, W / 2 + 0.1, p1, D / 2 + 0.1));
+  // the body hollowed by the door recess on the front (−z)
+  const dw = W * 0.5, dh = bodyH * 0.74, rd = 0.62;
+  parts.push(box(-W / 2, p1, -D / 2 + rd, W / 2, ct, D / 2));
+  parts.push(box(-W / 2, p1, -D / 2, -dw / 2, ct, -D / 2 + rd), box(dw / 2, p1, -D / 2, W / 2, ct, -D / 2 + rd));
+  parts.push(box(-dw / 2, p1 + dh, -D / 2, dw / 2, ct, -D / 2 + rd));
+  // the torus rolls: up the four corners and round under the cornice
+  const tr = 0.045, C = [[-W / 2, -D / 2], [W / 2, -D / 2], [W / 2, D / 2], [-W / 2, D / 2]];
+  for (const [cx, cz] of C) parts.push(rod([cx, p1, cz], [cx, ct - tr, cz], tr, 8));
+  for (let i = 0; i < 4; i++) { const [a0, b0] = C[i], [a1, b1] = C[(i + 1) % 4]; parts.push(rod([a0, ct - tr, b0], [a1, ct - tr, b1], tr, 8)); }
+  // the cavetto cornice and the pyramid above it
+  parts.push(sweep(cavettoProfile(corH, corP, 0.3), rectLoop([-W / 2, -D / 2, W / 2, D / 2]), ct, true));
+  parts.push(box(-W / 2 + 0.3, ct, -D / 2 + 0.3, W / 2 - 0.3, ct + corH, D / 2 - 0.3));
+  parts.push(frustum([-W / 2 - corP + 0.02, -D / 2 - corP + 0.02, W / 2 + corP - 0.02, D / 2 + corP - 0.02], ct + corH, ct + corH + roofH, W / 2 + corP - 0.03, W / 2 + corP - 0.03, D / 2 + corP - 0.03, D / 2 + corP - 0.03));
+  // the door frame: jambs and lintel standing proud of the front, the lintel's winged disc, columns of text on the jambs
+  const fw = 0.14, fp = 0.035, zf = -D / 2;
+  parts.push(box(-dw / 2 - fw, p1, zf - fp, -dw / 2, p1 + dh + fw * 1.4, zf), box(dw / 2, p1, zf - fp, dw / 2 + fw, p1 + dh + fw * 1.4, zf));
+  parts.push(box(-dw / 2 - fw - 0.006, p1 + dh, zf - fp - 0.006, dw / 2 + fw + 0.006, p1 + dh + fw * 1.8, zf));
+  { const g = wingedDisc(dw + fw * 1.6, fw * 1.5, 0.012); g.rotateY(Math.PI); g.translate(0, p1 + dh + fw * 0.9, zf - fp - 0.006); parts.push(g); }
+  const front = (u, v, d) => [u, v, zf - fp - d];
+  for (const s of [-1, 1]) glyphColumn(put, mat, front, s * (dw / 2 + fw / 2), p1 + 0.1, p1 + dh - 0.05, fw * 0.62, 11 + s, 0.008, [-1, 1]);
+  // the sides (±x) and the back: two registers of the king offering to a god, a column of text between them
+  for (const s of [-1, 1]) {
+    const side = (u, v, d) => [s * (W / 2 + d), v, u];
+    for (let r = 0; r < 2; r++) {
+      const v0 = p1 + 0.25 + r * (bodyH - 0.35) / 2, hh = (bodyH - 0.35) / 2 * 0.82;
+      figure(put, mat, 'offer', side, -D * 0.22, v0, hh * 0.9, 1, 0.012);
+      figure(put, mat, 'god', side, D * 0.24, v0, hh * 0.95, -1, 0.012);
+      glyphColumn(put, mat, side, 0.01, v0 + hh * 0.55, v0 + hh, hh * 0.09, 20 + r + s * 3, 0.008, [-1, 1]);
+      parts.push(box(s > 0 ? W / 2 : -W / 2 - 0.012, v0 - 0.03, -D / 2 + 0.08, s > 0 ? W / 2 + 0.012 : -W / 2, v0 - 0.012, D / 2 - 0.08));
+    }
+  }
+  const g = mergeLocal([...parts, ...carved]);
   place(g, x, y, z, yaw);
   bag.add(mat, g);
-  // gilded cedar doors standing open inside the recess
-  const d = mergeLocal([box(-dw / 2 - 0.02, plinthH + 0.02, -D / 2 - 0.02, -dw / 2 + 0.04, plinthH + dh - 0.02, -D / 2 + 0.5)]);
-  place(d, x, y, z, yaw);
-  bag.add('cedar', d);
-  col.rect(rotRect([x, z], W + 0.3, D + 0.3, yaw), y, y + H);
+  // inside: the back of the shrine in shadow; the bronze doors folded back against the reveals
+  const inner = mergeLocal([box(-dw / 2 + 0.01, p1, -D / 2 + rd - 0.012, dw / 2 - 0.01, p1 + dh - 0.01, -D / 2 + rd)]);
+  place(inner, x, y, z, yaw); bag.add('lacquer_black', inner);
+  const d = mergeLocal([-1, 1].map((s) => box(s * dw / 2 - (s > 0 ? 0.04 : 0), p1 + 0.02, -D / 2 - 0.01, s * dw / 2 + (s < 0 ? 0.04 : 0), p1 + dh - 0.03, -D / 2 + rd * 0.8)));
+  place(d, x, y, z, yaw); bag.add('bronze', d);
+  // the falcon of Horus, gilded, in the shrine
+  const fx = 0, fz = -D / 2 + rd - 0.3, c = Math.cos(yaw), sn = Math.sin(yaw);
+  falcon({ at: [x + fx * c + fz * sn, z - fx * sn + fz * c], y: y + p1, yaw, h: Math.min(0.75, dh * 0.5), plinth: [0.24, 0.32, 0.12], mat: 'gold' }, { bag, col: { rect() {}, circle() {}, segment() {}, floor() {}, ramp() {} } });
+  col.rect(rotRect([x, z], W + 0.4, D + 0.4, yaw), y, y + H);
 }
 
 /** Granite pedestal for the sacred barque. */
@@ -605,4 +632,116 @@ export function wingedDiscObj(el, { bag }) {
   const g = wingedDisc(el.w, el.h, el.depth ?? 0.16);
   place(g, el.at[0], el.y, el.at[1], el.yaw ?? 0);
   bag.add(el.mat || 'sandstone_relief', g);
+}
+
+/**
+ * The reliefs of a temple gateway's face (docs/settlements/edfu.md §4.1) { z (the face), face ('zp' faces +z, 'zn'
+ * −z), x0, x1 (the face between its corner rolls), door: [xa, xb], doorTop, from (the lintel's carved field begins
+ * above the winged disc), top (under the torus), y }: on the lintel, registers of the king offering to the gods, the
+ * scenes mirrored about the axis so that the king walks in toward it; on each jamb a stack of scenes of the king
+ * before a standing god, the king facing the doorway; each scene with its columns of text, on ruled ground lines.
+ */
+export function gateReliefs(el, { bag }) {
+  const y = el.y ?? 0, sg = el.face === 'zn' ? -1 : 1, R = el.mat || 'sandstone_relief';
+  const place = (u, v, d) => [u, y + v, el.z + sg * (0.01 + d)];
+  const placeN = (u, v, d) => [u, y + v, el.z + sg * (0.01 + d)];
+  let seed = Math.round(el.z * 31 + 7);
+  const line = (a, c, v) => { const p = place(a, v, 0), q = place(c, v - 0.1, 0.06); bag.add(R, box(Math.min(p[0], q[0]), q[1], Math.min(p[2], q[2]), Math.max(p[0], q[0]), p[1], Math.max(p[2], q[2]))); };
+  // the lintel: registers from `from` to `top`, scenes in pairs either side of the axis
+  const [xa, xb] = el.door, mid = (xa + xb) / 2, nr = Math.max(1, Math.round((el.top - el.from) / 2.5)), rh = (el.top - el.from) / nr;
+  for (let j = 0; j < nr; j++) {
+    const vy = el.from + j * rh, hh = rh * 0.84, half = (el.x1 - el.x0) / 2, n = Math.max(1, Math.floor(half / (hh * 1.25))), sw = half / n;
+    line(el.x0 + 0.1, el.x1 - 0.1, vy);
+    for (const side of [-1, 1]) for (let i = 0; i < n; i++) {
+      // from the axis outward: the god sits nearer the axis, the king comes toward him from the outside
+      const s0 = mid + side * i * sw, s1 = mid + side * (i + 1) * sw, g = s0 + (s1 - s0) * 0.3, k = s0 + (s1 - s0) * 0.72;
+      figure(bag, R, 'seated', placeN, g, vy, hh * 0.85, side, 0.1);
+      figure(bag, R, 'offer', placeN, k, vy, hh * 0.9, -side, 0.1);
+      for (const dk of [-0.5, 0.5]) glyphColumn(bag, R, placeN, (g + k) / 2 + dk * hh * 0.1, vy + hh * 0.6, vy + hh * 0.98, hh * 0.09, seed++, 0.07, dk > 0 ? [-1, 1] : [-1]);
+    }
+  }
+  line(el.x0 + 0.1, el.x1 - 0.1, el.top - 0.05);
+  // the jambs: scenes stacked from the foot to the lintel
+  for (const [a, c] of [[el.x0 + 0.15, xa - 0.3], [xb + 0.3, el.x1 - 0.15]]) {
+    const w = c - a; if (w < 1.5) continue;
+    const toDoor = (a + c) / 2 < mid ? 1 : -1, v0 = 1.2, n = Math.max(1, Math.round((el.doorTop - v0) / (w * 0.75))), rh2 = (el.doorTop - v0) / n;
+    for (let j = 0; j < n; j++) {
+      const vy = v0 + j * rh2, hh = Math.min(rh2 * 0.86, w * 0.62);
+      line(a, c, vy);
+      const king = toDoor > 0 ? a + w * 0.3 : c - w * 0.3, god = toDoor > 0 ? c - w * 0.25 : a + w * 0.25;
+      figure(bag, R, 'offer', placeN, king, vy, hh * 0.9, toDoor, 0.08);
+      figure(bag, R, 'god', placeN, god, vy, hh * 0.92, -toDoor, 0.08);
+      glyphColumn(bag, R, placeN, (king + god) / 2, vy + hh * 0.6, vy + hh * 0.98, hh * 0.08, seed++, 0.06, [-1, 1]);
+    }
+    line(a, c, el.doorTop - 0.05);
+  }
+  void place;
+}
+
+/**
+ * The painted ceiling of a hypostyle hall (docs/settlements/edfu.md §4.4) { y (the soffit), bays: [[x0, z0, x1, z1,
+ * kind]], holes: [[x0, z0, x1, z1]] (light slits to keep clear) }: each bay between the architraves the night sky —
+ * blue sown with stars — and on it, in the central aisle ('vultures'), vultures with spread wings alternating with
+ * winged discs, flying in toward the sanctuary; in the side aisles ('sky') the sky goddess Nut stretched the length of
+ * the bay, the sun at her mouth and at her womb, and beside her the gods of the stars standing in their boats.
+ */
+export function astroCeiling(el, { bag }) {
+  const Y = el.y, holes = el.holes ?? [];
+  const parts = {}, put = (m, g) => (parts[m] ??= []).push(g);
+  // seen only from below: one face each way, counter-clockwise in (u, v) facing down, the sides outward
+  const prism = (m, poly, place, d) => {
+    let ar = 0; for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; ar += a[0] * b[1] - b[0] * a[1]; }
+    if (ar < 0) poly = poly.slice().reverse();
+    const T = [], tri = earClip(poly);
+    for (const [a, b, c] of tri) T.push(...place(...poly[a], d), ...place(...poly[b], d), ...place(...poly[c], d));
+    for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length], q = [place(...a, 0), place(...b, 0), place(...b, d), place(...a, d)]; T.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]); }
+    put(m, fromTriangles(T));
+  };
+  const star = (cx, cy, r) => Array.from({ length: 10 }, (_, i) => { const a = Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.42 : r; return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; });
+  for (const [x0, z0, x1, z1, kind] of el.bays) {
+    put('vault_stars', box(x0, Y - 0.02, z0, x1, Y, z1));
+    const W = x1 - x0, L = z1 - z0, cx = (x0 + x1) / 2;
+    // u runs along the bay toward the sanctuary (−z), v across it (+x); d down from the painted soffit
+    const place = (u, v, d) => [x0 + v, Y - 0.02 - d, z1 - u];
+    const clear = (u0, u1) => !holes.some((h) => z1 - u0 > h[1] - 0.3 && z1 - u1 < h[3] + 0.3 && x1 > h[0] && x0 < h[2]);
+    if (kind === 'vultures') {
+      const step = Math.min(3.2, W * 0.95);
+      for (let k = 0, u = step / 2; u < L - step / 2 + 0.01; u += step, k++) {
+        if (!clear(u - step * 0.42, u + step * 0.42)) continue;
+        const s = W * 0.92;
+        if (k % 2) {                                                   // the winged disc, its wings across the aisle
+          const g = wingedDisc(s, s * 0.3, 0.02);
+          g.applyMatrix4(new Matrix4().makeRotationY(Math.PI).multiply(new Matrix4().makeRotationX(Math.PI / 2))); g.translate(cx, Y - 0.02, z1 - u);   // the wings' leading edge toward the sanctuary put('paint_ochre', g);
+          continue;
+        }
+        // the vulture seen from below: the wings spread across the aisle in their tiers of feathers, the head toward the
+        // sanctuary, the tail fanned behind, a shen ring in each foot
+        const vc = W / 2, g = wingedDisc(s, s * 0.34, 0.02);
+        g.applyMatrix4(new Matrix4().makeRotationY(Math.PI).multiply(new Matrix4().makeRotationX(Math.PI / 2))); g.translate(cx, Y - 0.02, z1 - u);   // the wings' leading edge toward the sanctuary put('fresco_green', g);
+        prism('plaster_white', [[u + 0.1 * s, vc - 0.07 * s], [u + 0.13 * s, vc], [u + 0.1 * s, vc + 0.07 * s], [u - 0.12 * s, vc + 0.1 * s], [u - 0.2 * s, vc + 0.08 * s], [u - 0.2 * s, vc - 0.08 * s], [u - 0.12 * s, vc - 0.1 * s]], place, 0.05);   // the body
+        prism('egyptian_blue', [[u - 0.19 * s, vc - 0.07 * s], [u - 0.19 * s, vc + 0.07 * s], [u - 0.36 * s, vc + 0.13 * s], [u - 0.38 * s, vc], [u - 0.36 * s, vc - 0.13 * s]], place, 0.045);   // the tail
+        prism('paint_ochre', [[u + 0.12 * s, vc - 0.03 * s], [u + 0.12 * s, vc + 0.03 * s], [u + 0.22 * s, vc + 0.03 * s], [u + 0.27 * s, vc + 0.01 * s], [u + 0.25 * s, vc - 0.02 * s], [u + 0.22 * s, vc - 0.03 * s]], place, 0.055);   // the neck and head
+        for (const sg of [-1, 1]) prism('limewash_red', circ(u - 0.14 * s, vc + sg * 0.14 * s, 0.035 * s, 0.035 * s, 10), place, 0.06);   // the shen rings
+      }
+    } else {
+      // Nut stretched along the bay at its outer side: her feet at the entrance end, her arms toward the sanctuary
+      const v0 = W * 0.2, bw = Math.min(0.55, W * 0.14), u0 = 0.5, u1 = L - 0.5;
+      prism('paint_ochre', [[u0, v0 - bw * 0.5], [u0 + 0.35, v0 - bw * 0.5], [u0 + 0.35, v0 - bw * 0.15], [u0 + L * 0.32, v0 - bw * 0.45], [u1 - 1.1, v0 - bw * 0.5], [u1 - 0.7, v0 - bw * 0.35], [u1 - 0.7, v0 + bw * 0.35], [u1 - 1.1, v0 + bw * 0.5], [u0 + L * 0.32, v0 + bw * 0.45], [u0 + 0.35, v0 + bw * 0.15], [u0 + 0.35, v0 + bw * 0.5], [u0, v0 + bw * 0.5]], place, 0.02);
+      prism('paint_ochre', circ(u1 - 0.45, v0, 0.26, 0.2, 12), place, 0.02);                                        // her head
+      prism('lacquer_black', circ(u1 - 0.42, v0, 0.24, 0.24, 12).map(([a, b]) => [a + 0.06, b]), place, 0.024);    // her hair
+      for (const sg of [-1, 1]) prism('paint_ochre', [[u1 - 0.75, v0 + sg * bw * 0.3], [u1 - 0.7, v0 + sg * bw * 0.45], [u1 + 0.05, v0 + sg * bw * 0.65], [u1 + 0.05, v0 + sg * bw * 0.45]], place, 0.022);   // her arms
+      prism('limewash_red', circ(u1 + 0.25, v0, 0.2, 0.2, 14), place, 0.026);                                       // the evening sun at her mouth
+      prism('limewash_red', circ(u0 + L * 0.3, v0 + bw * 0.95, 0.24, 0.24, 14), place, 0.026);                     // the sun reborn at her womb
+      // the star gods in their boats, in a row along the bay
+      const vb = v0 + bw + (W - v0 - bw) * 0.35, n = Math.max(1, Math.floor((L - 1) / 1.6)), sp = (L - 1) / n;
+      for (let k = 0; k < n; k++) {
+        const u = 0.5 + sp * (k + 0.5), bl = Math.min(1.2, sp * 0.8);
+        if (!clear(u - bl / 2, u + bl / 2)) continue;
+        prism('paint_ochre', [[u - bl / 2, vb + 0.12], [u - bl * 0.35, vb], [u + bl * 0.35, vb], [u + bl / 2, vb + 0.12], [u + bl * 0.3, vb + 0.06], [u - bl * 0.3, vb + 0.06]], place, 0.02);   // the boat
+        { const gh = Math.min(0.9, (W - vb) * 0.7); FIG.god.forEach((poly, j) => prism('plaster_white', poly.map(([a, b]) => [u + a * gh * 1.15, vb + 0.06 + b * gh]), place, 0.02 + 0.002 * (j % 4))); }
+        prism('limewash_yellow', star(u + 0.28, vb + Math.min(0.9, (W - vb) * 0.7) * 0.8, 0.09), place, 0.024);
+      }
+    }
+  }
+  for (const [m, list] of Object.entries(parts)) bag.add(m, mergeLocal(list));
 }

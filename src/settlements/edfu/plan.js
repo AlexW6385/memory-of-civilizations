@@ -23,7 +23,15 @@ export const lake = {
       .map((rect) => ({ t: 'block', rect, y0: -3, y1: 0.1, mat: 'sandstone', walk: true })),
   ],
 };
-// the winged disc of Horus Behdety over the great gate drawn to the width of the lintel (§4.1)
-const elements = edfuPlan.elements.map((e) => (e.kind === 'winged_disc' && e.w > 8 ? { ...e, w: 11.6, h: 3.4, y: 17.2 } : e));
+// the winged disc of Horus Behdety over the great gate spanning the lintel between its corner rolls, just over the
+// doorway; above it the lintel's registers of offering scenes, and the scenes stacked up the jambs (§4.1)
+const elements = edfuPlan.elements.map((e) => (e.kind === 'winged_disc' && e.w > 8 ? { ...e, w: 12.1, h: 3.5, y: 16.0 } : e.kind === 'naos' ? { ...e, mat: 'granite_black' } : e));
+// the painted ceilings of the two hypostyle halls between their architraves (§4.4)
+{
+  const side = (xs, z0, z1) => xs.flatMap(([a, b]) => [[a, z0, b, z1, 'sky'], [-b, z0, -a, z1, 'sky']]);
+  elements.push({ t: 'obj', kind: 'astro_ceiling', at: [0, -66], y: 14.25, bays: [[-2.6, -73, 2.6, -58.8, 'vultures'], ...side([[4.2, 8.2], [9.8, 13.8], [15.4, 17.5]], -73, -58.8)] });
+  elements.push({ t: 'obj', kind: 'astro_ceiling', at: [0, -81], y: 11.5, bays: [[-2.25, -87.5, 2.25, -75.5, 'vultures'], ...side([[3.55, 6.65], [7.95, 10.3]], -87.5, -75.5)], holes: [[-1.6, -80.3, 1.6, -79.6], [-1.6, -83.4, 1.6, -82.7]] });
+}
+for (const [z, face] of [[-0.4, 'zp'], [-11.6, 'zn']]) elements.push({ t: 'obj', kind: 'gate_reliefs', at: [0, z], z, face, y: 0, x0: -6.1, x1: 6.1, door: [-3, 3], doorTop: 14, from: 18.0, top: 23.85 });
 export const temple = { ...edfuPlan, elements, origin: TEMPLE.origin, base: 0, district: undefined, view: [-30, -60, 30, 0] };
 export default temple;

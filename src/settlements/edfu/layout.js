@@ -9,6 +9,8 @@ export const ENCLOSURE = [-64, -92, 64, 108];
 export const MAMMISI = [-58, 112, -32, 152];      // the birth house's podium (axis north–south, door north)
 export const LAKE = [78, -40, 118, 0];
 export const NILE = { x: -300, w: 90, level: -4 };
+/** The stone quay on the Nile's east bank, west of the town (§6.1): a platform over the sloping bank, flights of steps down to the water. */
+export const QUAY = { rect: [-256, 40, -236, 80], top: 0.2, stairs: [50, 62] };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 const riverX = (z) => NILE.x + 20 * Math.sin(z / 150);
