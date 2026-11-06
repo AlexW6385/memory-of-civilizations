@@ -23,7 +23,7 @@ function tramLines() {
     { pts: arc([X1 + R, ZS - R], R, Math.PI, Math.PI / 2), every: 6, skipFirst: true },            // round the cut corner, east
     { pts: straight([X1 + R, ZS], [XM - R, ZS]), every: 30, skipFirst: true },                     // along the cross street
     { pts: arc([XM - R, ZS - R], R, Math.PI / 2, 0), every: 6, skipFirst: true },                  // round the corner, north
-    { pts: straight([XM, ZS - R], [XM, -220]), every: 30, skipFirst: true },                       // up the Marina past the façade
+    { pts: straight([XM, ZS - R], [XM, -220]), every: 36, skipFirst: true },                       // up the Marina past the façade (poles at z -76 and -112, clear of the arrival's view of the portals)
     { pts: straight([X1, ZS - R], [X1, 330]), every: 30, skipFirst: true },                        // the Passeig on toward the old city
   ];
   return runs.map((r) => ({ t: 'tram_line', ...r, avoid }));
