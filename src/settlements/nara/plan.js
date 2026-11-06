@@ -14,6 +14,10 @@ E.push({ t: 'ming_gallery', pts: [[-g, cz1], [cx0, cz1], [cx0, cz0], [cx1, cz0],
 E.push({ t: 'qing_hall', rect: [-g + 1, cz1 - 7, g - 1, cz1 + 7], y: 1.0, H: 7, double: 5, roof: 'xieshan', bays: [5, 2], front: 's', four: true, plat: 1.0, open: true });
 // the Great South Gate
 E.push({ t: 'qing_hall', rect: SOUTH_GATE, y: 0.8, H: 9, double: 7, roof: 'hip', bays: [5, 2], front: 's', four: true, plat: 0.8, open: true });
+// the guardian kings in the Great South Gate's outer bays, facing each other across the passage:
+// the open-mouthed "a" on the west (the visitor's left), the closed-mouthed "un" on the east (§4)
+E.push({ t: 'obj', kind: 'nio', form: 'a', at: [-12, (SOUTH_GATE[1] + SOUTH_GATE[3]) / 2], y: 0.8, h: 5.7, dir: [1, 0] });
+E.push({ t: 'obj', kind: 'nio', form: 'un', at: [12, (SOUTH_GATE[1] + SOUTH_GATE[3]) / 2], y: 0.8, h: 5.7, dir: [-1, 0] });
 // steps up to both gates' platforms (each 0.9 m out beyond the posts) on the axis, front and back
 for (const [r, y] of [[[-g + 1, cz1 - 7, g - 1, cz1 + 7], 1.0], [SOUTH_GATE, 0.8]]) {
   const run = y * 3.2;
