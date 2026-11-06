@@ -301,7 +301,7 @@ function altar12(el, { bag, col }) {
   bag.add('marble', box(cx - 1.3, yb, cz - 1.0, cx + 1.3, yb + 0.25, cz + 1.0));
   bag.add('marble', box(cx - 1.0, yb + 0.25, cz - 0.75, cx + 1.0, yb + 1.0, cz + 0.75));
   bag.add('marble', box(cx - 1.12, yb + 1.0, cz - 0.87, cx + 1.12, yb + 1.12, cz + 0.87));
-  for (const s of [-1, 1]) bag.add('marble', lathe([[0.2, 0], [0.2, 0.3], [0.001, 0.3]], 10, null, cx, yb + 1.12 - 0.15, cz + s * 0.72).rotateX(0));
+  for (const s of [-1, 1]) bag.add('marble_smooth', lathe([[0.2, 0], [0.2, 0.3], [0.001, 0.3]], 10, null, cx, yb + 1.12 - 0.15, cz + s * 0.72).rotateX(0));
   bag.add('rubble', box(cx - 0.7, yb + 1.12, cz - 0.45, cx + 0.7, yb + 1.17, cz + 0.45));
   col.rect([cx - 1.3, cz - 1.0, cx + 1.3, cz + 1.0], yb, yb + 1.17);
 }
@@ -320,7 +320,7 @@ function herm(el, { bag, col }) {
 function horos(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, m = new Matrix4().makeRotationY(el.rot ?? 0).setPosition(x, y, z), parts = [box(-0.2, -0.3, -0.12, 0.2, 1.2, 0.12)], cut = [];
   for (let i = 0; i < 14; i++) { const v = 1.08 - i * 0.075; cut.push(box(-0.04, v - 0.05, 0.119, 0.04, v, 0.126)); if (i % 3) cut.push(box(-0.09, v - 0.008, 0.119, 0.09, v, 0.126)); }
-  const g = merge(parts); g.applyMatrix4(m); bag.add('marble', g);
+  const g = merge(parts); g.applyMatrix4(m); bag.add('marble_smooth', g);                // one stone: no joints
   const c = merge(cut); c.applyMatrix4(m); bag.add('marble_dark', c);
   col.circle(x, z, 0.25, y, y + 1.2);
 }

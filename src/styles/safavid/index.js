@@ -268,13 +268,20 @@ function courtArcade(el, { bag, col }) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / bay)), w = L / n;
   const [nx, nz] = awayFrom(a, b, el.facing), behind = [(a[0] + b[0]) / 2 + nx * 100, (a[1] + b[1]) / 2 + nz * 100];
   const arches = [];
+  // each bay a recess under a pointed half-dome (docs/settlements/isfahan.md §4): the walls and the floor in cream
+  // tile, a band of muqarnas cells at the springing in cream, the hood in lapis with its net of ribs (karbandi)
+  // in turquoise; set 5 cm short of the mass behind so that the back walls do not share its face
+  const niche = { alcove: 'rect', depth: 2.45, plain: true, floor: true, ribSeg: 3, ribOut: 0.022, sideMat: 'tile_cream', domeMat: 'tile_lapis', ribMat: 'tile_turquoise', cellMat: 'tile_cream' };
   for (let i = 0; i < n; i++) {
-    arches.push({ at: (i + 0.5) * w, w: w * 0.62, h: h * 0.4, sill: 0.4, depth: 2.5, back: 'tile_cream' });
-    arches.push({ at: (i + 0.5) * w, w: w * 0.62, h: h * 0.36, sill: h * 0.5, depth: 2.5, back: 'tile_cream' });
+    arches.push({ ...niche, at: (i + 0.5) * w, w: w * 0.62, h: h * 0.4, sill: 0.4 });
+    arches.push({ ...niche, at: (i + 0.5) * w, w: w * 0.62, h: h * 0.36, sill: h * 0.5 });
   }
   arcadeWall(bag, col, a, b, y, h, 1.2, mat, arches, behind);
   const m0 = [a[0] + nx * (3.1 + D) / 2, a[1] + nz * (3.1 + D) / 2], m1 = [b[0] + nx * (3.1 + D) / 2, b[1] + nz * (3.1 + D) / 2];
   slab(bag, col, B, m0, m1, y, D - 3.1, h - 0.05);
+  // the roof over the recesses, between the face and the mass (it lay open to the sky)
+  const r0 = [a[0] + nx * 1.85, a[1] + nz * 1.85], r1 = [b[0] + nx * 1.85, b[1] + nz * 1.85];
+  slab(bag, null, B, r0, r1, y + h - 0.6, 2.5, 0.55);
 }
 
 /** wall: a plain wall a→b { y, h, th, mat } with a rounded coping. */

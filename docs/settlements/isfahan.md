@@ -35,6 +35,8 @@ The square's long axis north–south, the Shah Mosque at the south end; the mosq
 
 Fired brick, buff, for the arcades and the outer walls; tile mosaic and haft-rangi (seven-colour) tile for the portals, iwans and minarets — deep blue with turquoise [stated: iranontour]; the Shah Mosque's dome turquoise, double-shelled [stated]; Lotfollah's dome cream with blue arabesques [inferred from its well-known appearance]; pointed arches; wooden talar columns. Muqarnas left for L3.
 
+**The court's arcades (2026-11-06).** The court is "surrounded by a two-story arcade on four sides with four iwans, one at the center of each side"; the walls "fully covered with a polychrome, mostly dark blue, glazed tile revetment above a continuous marble dado"; the portal iwan "surmounted by tiers of muqarnas forming a semi-dome" [stated: Archnet, Masjid-i Imam]. Ours: each bay of both storeys a rectangular recess 2.45 m deep (it was a flat panel at the back of the opening, with the space behind the face open to the sky) under a pointed half-dome of lapis tile with a net of turquoise ribs (karbandi) following the shell, a band of two tiers of muqarnas cells in cream at the springing, the walls and floor in cream tile; a roof over the recesses between the face and the rooms behind [inferred: the recess form, the karbandi and the colours of each part, after photographs of Safavid court facades; built with the Taj's alcove (`src/styles/mughal`), its Mughal door, jali and dark-stone panels left out].
+
 ## 5. The square's life
 
 In the mornings pedlars, in the evenings polo; 12 gates; the square lit with oil lamps at night [stated: irannewsdaily (Isfahan.ir)]. People for later.
@@ -95,3 +97,4 @@ Sources added:
 - [Isfahan: Half the World — Columbia](https://archaeology.columbia.edu/magnifying-the-miniatures/isfahan)
 - [Isfahan sites — islamichistoryandtravel](https://islamichistoryandtravel.com/?p=1991)
 - [Shah Mosque — iranontour](https://iranontour.com/?p=10607)
+- [Masjid-i Imam (Isfahan) — Archnet](https://archnet.org/sites/1622)

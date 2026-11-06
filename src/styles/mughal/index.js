@@ -95,10 +95,13 @@ function arcadeWall(bag, col, a, b, y, h, th, mat, arches = [], inside = null) {
  * its walls rising to the arch's springing, a band of muqarnas cells along the springing, the pointed half-dome
  * above meeting the arch at the face, a net of ribs on it; on the back wall a door below and a jali window above (or
  * only the jali in a raised niche); a blind arched panel on each side wall. at: the arch's centre on the wall's centre
- * line; (nx, nz) into the recess.
+ * line; (nx, nz) into the recess. Options for other styles (the Safavid court arcades): sideMat, backMat, domeMat,
+ * ribMat, cellMat (the walls, the back, the half-dome, its ribs, the muqarnas cells; else mat); plain (no door, jali
+ * or side panels); floor (a floor at the sill, for a niche raised above the ground).
  */
 function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
   const w = ar.w, h = ar.h, sill = ar.sill ?? 0, d = ar.depth ?? 1.2, y0 = y + sill, oct = ar.alcove !== 'rect';
+  const SM = ar.sideMat ?? mat, DM = ar.domeMat ?? mat, RM = ar.ribMat ?? DM, CM = ar.cellMat ?? DM;
   const r = w * 0.8, rise = Math.sqrt(r * r - (r - w / 2) ** 2), spring = Math.max(0.3, h - rise), ys = y0 + spring;
   const n0 = th / 2 - 0.02, n1 = th / 2 + d, wb = oct ? Math.min(w * 0.46, w - 0.4) : w;
   const Q = (s, n) => [at[0] + ux * s + nx * n, at[1] + uz * s + nz * n];
@@ -111,11 +114,13 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
   const sideT = 0.3;
   for (const sg of [-1, 1]) {
     const A = per[sg < 0 ? 0 : 3], Bk = per[sg < 0 ? 1 : 2], off = oct ? 0 : sg * sideT / 2;
-    const pa = Q(A[0] + off, A[1]), pb = Q(Bk[0] + off, Bk[1] + (ar.pass ? 0.2 : 0));
-    bag.add(mat, orientedBox(pa, pb, sideT, y0, ys + 0.05, 0.12));
+    const pa = Q(A[0] + off, oct ? A[1] : th / 2), pb = Q(Bk[0] + off, Bk[1] + (ar.pass ? 0.2 : 0));
+    bag.add(SM, orientedBox(pa, pb, sideT, y0, ys + 0.05, oct ? 0.12 : 0));         // a rect recess's sides meet the wall's back face, flush with the opening
     if (col && sill < 0.5) col.segment(pa, pb, sideT, y0, ys);
   }
-  if (!ar.pass) bag.add(mat, orientedBox(Q(-wb / 2 - 0.1, n1 + 0.15), Q(wb / 2 + 0.1, n1 + 0.15), 0.3, y0, ys + 0.05));
+  if (!ar.pass) bag.add(ar.backMat ?? SM, orientedBox(Q(-wb / 2 - 0.1, n1 + 0.15), Q(wb / 2 + 0.1, n1 + 0.15), 0.3, y0, ys + 0.05));
+  // the floor of a raised niche, from the wall's back face to the back wall (the wall's own sill fills the opening)
+  if (ar.floor && !oct) bag.add(SM, orientedBox(Q(-w / 2, (th / 2 + n1) / 2), Q(w / 2, (th / 2 + n1) / 2), n1 - th / 2, y0 - Math.min(sill, 0.5), y0));
   // the half-dome: rows from the springing up to the arch at the face, faced toward the opening
   const NU = 24, NT = 10, tris = [], tgt = Q(0, n0 - 4), ty = y0 + spring * 0.4;
   const push = (A, Bv, C) => {
@@ -129,15 +134,17 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
     const a1 = V(i / NU, j / NT), b1 = V((i + 1) / NU, j / NT), c1 = V((i + 1) / NU, (j + 1) / NT), d1 = V(i / NU, (j + 1) / NT);
     push(a1, b1, c1); if (j < NT - 1) push(a1, c1, d1);
   }
-  bag.add(mat, fromTriangles(tris));
+  bag.add(DM, fromTriangles(tris));
   // the net of ribs over it, standing a few centimetres proud toward the opening
-  const inward = (p) => { const dx = tgt[0] - p[0], dy = ty - p[1], dz = tgt[1] - p[2], L = Math.hypot(dx, dy, dz) || 1; return [p[0] + dx / L * 0.035, p[1] + dy / L * 0.035, p[2] + dz / L * 0.035]; };
+  const ro = ar.ribOut ?? 0.035, inward = (p) => { const dx = tgt[0] - p[0], dy = ty - p[1], dz = tgt[1] - p[2], L = Math.hypot(dx, dy, dz) || 1; return [p[0] + dx / L * ro, p[1] + dy / L * ro, p[2] + dz / L * ro]; };
   const rb = Math.max(0.018, Math.min(0.035, w * 0.0025));
   for (let k = 0; k <= 8; k++) for (let j = 0; j < 4; j++) {
     const t0 = j / 4.4, t1 = (j + 1) / 4.4, u0 = k / 8;
-    if (k < 8) { bag.add(mat, rod(inward(V(u0, t0)), inward(V(u0 + 1 / 8, t1)), rb, 4)); bag.add(mat, rod(inward(V(u0 + 1 / 8, t0)), inward(V(u0, t1)), rb, 4)); }
+    // each rib in ar.ribSeg pieces following the shell (one straight piece cuts in under it on a small hood)
+    const ns = ar.ribSeg ?? 1, rib = (ua, ub) => { for (let q = 0; q < ns; q++) bag.add(RM, rod(inward(V(ua + (ub - ua) * q / ns, t0 + (t1 - t0) * q / ns)), inward(V(ua + (ub - ua) * (q + 1) / ns, t0 + (t1 - t0) * (q + 1) / ns)), rb, 4)); };
+    if (k < 8) { rib(u0, u0 + 1 / 8); rib(u0 + 1 / 8, u0); }
   }
-  for (const t of [0.0, 0.45, 0.68, 0.9]) for (let i = 0; i < 16; i++) bag.add(mat, rod(inward(V(i / 16, t)), inward(V((i + 1) / 16, t)), rb, 4));
+  for (const t of [0.0, 0.45, 0.68, 0.9]) for (let i = 0; i < 16; i++) bag.add(RM, rod(inward(V(i / 16, t)), inward(V((i + 1) / 16, t)), rb, 4));
   // muqarnas: two tiers of little corbelled cells along the springing, the upper set over the joints of the lower
   const cw = Math.max(0.35, Math.min(0.7, w * 0.07));
   for (let i = 0; i < 3; i++) {
@@ -149,10 +156,10 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
       for (let k = 0; k < n - tier; k++) {
         const c0 = (k + shift + 0.12) * L / n, c1 = (k + shift + 0.88) * L / n, o = prot / 2 + 0.1;
         const p0 = Q(A[0] + ds * c0 + ms * o, A[1] + dn * c0 + mn * o), p1 = Q(A[0] + ds * c1 + ms * o, A[1] + dn * c1 + mn * o);
-        bag.add(mat, orientedBox(p0, p1, prot, ya, yb));
+        bag.add(CM, orientedBox(p0, p1, prot, ya, yb));
         // the cell's hood: a smaller block stepping out under the next tier
         const q0 = Q(A[0] + ds * (c0 + 0.08) + ms * (o + prot * 0.35), A[1] + dn * (c0 + 0.08) + mn * (o + prot * 0.35)), q1 = Q(A[0] + ds * (c1 - 0.08) + ms * (o + prot * 0.35), A[1] + dn * (c1 - 0.08) + mn * (o + prot * 0.35));
-        bag.add(mat, orientedBox(q0, q1, prot * 0.3, yb - (yb - ya) * 0.3, yb));
+        bag.add(CM, orientedBox(q0, q1, prot * 0.3, yb - (yb - ya) * 0.3, yb));
       }
     }
   }
@@ -166,7 +173,7 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
     for (let g = 1; g < nv; g++) { const vg = v0 + (v1 - v0) * g / nv; face(s0, s1, vg - bw, vg + bw, 0.02, 0.08, W); }
     frame(s0, s1, v0, v1, 0.14, 'marble_dark');
   };
-  if (!ar.pass) {
+  if (!ar.pass && !ar.plain) {
     const jw = Math.min(wb * 0.62, 3.6);
     if (sill < 0.5 && spring > 4) {
       const dw = Math.min(wb * 0.5, 2.6), dh = Math.min(spring * 0.5, 4.2);
@@ -181,7 +188,7 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
     }
   }
   // a blind arched panel framed in dark stone on each slanting side
-  if (oct && spring > 3) for (const sg of [-1, 1]) {
+  if (oct && spring > 3 && !ar.plain) for (const sg of [-1, 1]) {
     const A = per[sg < 0 ? 0 : 3], Bk = per[sg < 0 ? 1 : 2], L = Math.hypot(Bk[0] - A[0], Bk[1] - A[1]), ds = (Bk[0] - A[0]) / L, dn = (Bk[1] - A[1]) / L;
     let ms = -dn, mn = ds; if (ms * (0 - A[0]) + mn * ((n0 + n1) / 2 - A[1]) < 0) { ms = -ms; mn = -mn; }
     const o = sideT / 2 + 0.03, P2 = (c) => Q(A[0] + ds * c + ms * o, A[1] + dn * c + mn * o);

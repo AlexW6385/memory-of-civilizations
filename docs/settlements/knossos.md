@@ -45,6 +45,7 @@ A gypsum ashlar base; upper storeys of rubble and timber framing, plastered ochr
 - **Light wells and the Grand Staircase:** a light well open to the sky in the East Wing with colonnades rising storey above storey on its north side, the columns standing on the balustrades of the landings [inferred: after Evans's restoration of the Grand Staircase]; a passage in from the court's east portico.
 - **Queen's Megaron and its dolphins:** a room opening off the light well with the dolphin fresco (dolphins and small fish on a pale ground) on its south wall [inferred: the fresco's subject is standard; its wall here chosen to face the light well].
 - **Bull-leaping fresco:** on the back wall of the east portico, toward its north end: a red-skinned youth vaulting over the back of a galloping bull, a pale-skinned girl at the horns and another behind, inside a border of painted stones [inferred: the fresco came from the East Wing (Court of the Stone Spout); its place here is ours].
+- **Pigments (2026-11-06):** "Colours employed were black (carbonaceous shale), red (haematite), white (hydrate of lime), yellow (ochre), blue (silicate of copper), and green (blue and yellow mixed)" [stated: Cartwright, World History Encyclopedia]. Ours: every painted blue — the bull-leaping fresco's ground and its border stones, the griffins' wavy band, the dolphins, the bands under the eaves — in the palette's Egyptian blue (the copper silicate); the olive tree's foliage behind the charging bull in the fresco green, as blue and yellow mixed (it was a cloth green) [inferred: which parts take which colour].
 
 ## 5. The town
 
@@ -81,3 +82,4 @@ The lyre, the double pipe and the sistrum are shown on the Hagia Triada sarcopha
 - [Throne Room — explorecrete](https://www.explorecrete.com/Knossos/07_knossos_throne_room_P.htm)
 - [Knossos, the North Entrance — HMdb marker](https://www.HMdb.org/m.asp?m=85549)
 - [Knossos: North Entrance — searchculture.gr](https://www.searchculture.gr/aggregator/edm/knossos/000158-75d8464e-4624-4c37-b0b8-3d7b02cf3af1)
+- [Minoan Frescoes — World History Encyclopedia](https://www.worldhistory.org/article/390/minoan-frescoes/)

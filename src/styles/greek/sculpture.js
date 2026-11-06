@@ -204,7 +204,7 @@ export function centaur(o) {
 /** Place the pieces of a figure: { x, y, z, yaw } — merged, one geometry per material. */
 export function placed(fig, x, y, z, yaw = 0) {
   const m = new Matrix4().makeRotationY(yaw).setPosition(x, y, z), out = {};
-  for (const key of ['stone', 'metal']) { if (!fig[key]?.length) continue; const g = merge(fig[key]); g.applyMatrix4(m); out[key] = g; }
+  for (const key of ['stone', 'metal', 'leaf']) { if (!fig[key]?.length) continue; const g = merge(fig[key]); g.applyMatrix4(m); out[key] = g; }
   return out;
 }
 

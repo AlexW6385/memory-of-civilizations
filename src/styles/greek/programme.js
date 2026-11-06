@@ -9,7 +9,7 @@ import { orientedBox } from '../../core/build.js';
 import { human, horse, centaur, limb, blob, placed, relief } from './sculpture.js';
 import { merge } from './columns.js';
 
-const add = (bag, mats, g) => { if (g.stone) bag.add(mats.stone, g.stone); if (g.metal) bag.add(mats.metal, g.metal); };
+const add = (bag, mats, g) => { if (g.stone) bag.add(mats.stone, g.stone); if (g.metal) bag.add(mats.metal, g.metal); if (g.leaf) bag.add(mats.leaf || 'fresco_green', g.leaf); };
 
 // ── figures by kind, with their height in units of H and their half-width ──────────────────────
 const TOP = { stand: 1.0, ease: 1.0, stride: 1.04, seat: 0.71, recline: 0.47, fallen: 0.52 };
@@ -20,9 +20,14 @@ function figureOf(e, H, n) {
   if (e.kind === 'centaur') return centaur({ pose: e.pose, h: H, mirror: e.mirror, n });
   if (e.kind === 'tree') {
     // the olive, Athena's gift, between the two gods
-    const g = [limb([0, 0, 0], [0.05 * H, 0.45 * H, 0], 0.05 * H, 0.035 * H, 6)];
-    for (const [x, y] of [[-0.2, 0.7], [0.22, 0.68], [0.02, 0.8]]) { g.push(limb([0.05 * H, 0.45 * H, 0], [x * H, y * H, 0], 0.025 * H, 0.015 * H, 5)); g.push(blob([x * H, y * H, 0], 0.13 * H, [1.4, 0.7, 0.8], 7)); }
-    return { stone: g, metal: [] };
+    // a gnarled trunk forking low, the boughs spreading, the foliage in clumps painted green on the marble
+    const g = [limb([0, 0, 0], [0.03 * H, 0.22 * H, 0.01 * H], 0.055 * H, 0.045 * H, 6), limb([0.03 * H, 0.22 * H, 0.01 * H], [0.06 * H, 0.42 * H, 0], 0.045 * H, 0.033 * H, 6)], leaf = [];
+    for (const [x, y, z, r] of [[-0.2, 0.66, 0.03, 0.11], [0.21, 0.64, -0.02, 0.11], [0.03, 0.82, 0, 0.13], [-0.1, 0.52, 0.06, 0.09], [0.18, 0.5, 0.05, 0.08]]) {
+      const from = y < 0.55 ? [0.04 * H, 0.3 * H, 0.01 * H] : [0.06 * H, 0.42 * H, 0];
+      g.push(limb(from, [x * 0.8 * H, y * 0.97 * H, z * H], 0.024 * H, 0.012 * H, 5));
+      leaf.push(blob([x * H, y * H, z * H], r * H, [1.4, 0.62, 0.8], 7), blob([(x + 0.07 * Math.sign(x || 1)) * H, (y + 0.05) * H, (z - 0.02) * H], r * 0.7 * H, [1.2, 0.6, 0.8], 6));
+    }
+    return { stone: g, metal: [], leaf };
   }
   const f = human({ ...e, h: H, n });
   if (e.upper) {

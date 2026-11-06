@@ -31,7 +31,7 @@ E.push({ t: 'wing', rect: [19, -28, 62, 58], storeys: 4, windows: 'es', seed: 4,
 E.push({ t: 'lightwell_tiers', rect: LW, y: 0, storeys: 4, sh: 3.6 });
 E.push({ t: 'fresco', kind: 'dolphins', at: [27, 13], face: 'n', y0: 1.4, w: 3.6, h: 1.3, bg: 'plaster_white' });
 // the bull-leaping fresco on the back wall of the east portico, toward its north end
-E.push({ t: 'fresco', kind: 'bull_leaping', at: [19, -12], face: 'w', y0: 1.1, w: 1.9, h: 1.0, bg: 'paint_blue' });
+E.push({ t: 'fresco', kind: 'bull_leaping', at: [19, -12], face: 'w', y0: 1.1, w: 1.9, h: 1.0, bg: 'egyptian_blue' });
 E.push({ t: 'wing', rect: [-19, 28, -3, 58], storeys: 2, windows: 's', seed: 5 }, { t: 'wing', rect: [3, 28, 19, 58], storeys: 2, windows: 's', seed: 6 });
 // porticoes on the court: the Throne Room's antechamber, the Tripartite Shrine, the east side, the south
 E.push({ t: 'portico', a: [-14.2, -20], b: [-14.2, -8], n: 4, depth: 4.6, side: -1, h: 3.4 });

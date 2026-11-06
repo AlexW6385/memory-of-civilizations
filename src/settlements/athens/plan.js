@@ -22,7 +22,7 @@ const T = ACRO.top, E = [];
   E.push({ t: 'floor', rect: [XW + 1.2, -10.05, XE - 1.2, 10.05], y: y + K, th: K + 0.3, mat: 'marble_floor' });
   for (const z of Z6) { E.push({ t: 'column', at: [XW, z], y: y + K, h: 8.81, d: 1.56, mat: 'marble_column' }); E.push({ t: 'column', at: [XE, z], y: y + K, h: 8.81, d: 1.56, mat: 'marble_column' }); }
   const ENT = y + K + 8.81, AR = 1.15, FR = 1.15, GE = 0.53;
-  E.push({ t: 'doric_entablature', axes: { x: XA, z: Z6 }, y: ENT, face: 0.7, arch: AR, frieze: FR, geison: GE, tw: 0.7, overhang: 0.55, mat: 'marble', triglyphMat: 'paint_blue' });
+  E.push({ t: 'doric_entablature', axes: { x: XA, z: Z6 }, y: ENT, face: 0.7, arch: AR, frieze: FR, geison: GE, tw: 0.7, overhang: 0.55, mat: 'marble', triglyphMat: 'egyptian_blue' });
   E.push({ t: 'pediment_roof', rect: [XW - 1.25, -10.33, XE + 1.25, 10.33], y: ENT + AR + FR + GE, rise: 2.5, tympanumInset: 0.6, rakingGeison: 0.45, mat: 'marble' });
   // the side walls, the cross wall with its five doorways (the widest in the middle, for the procession and the victims)
   for (const s of [-1, 1]) E.push({ t: 'wall', a: [XW + 0.9, s * 9.6], b: [XE - 0.9, s * 9.6], th: 0.9, y0: y + K, y1: ENT + AR + FR, mat: 'marble' });
@@ -42,13 +42,13 @@ const T = ACRO.top, E = [];
     for (const x of [x0, x1]) E.push({ t: 'wall', a: [x, zA], b: [x, zB], th: 0.85, y0: y, y1: ent, mat: 'marble' });
     E.push({ t: 'wall', a: [x0, zb], b: [x1, zb], th: 0.85, y0: y, y1: ent, mat: 'marble' });
     if (room) E.push({ t: 'wall', a: [x0, inner], b: [x1, inner], th: 0.75, y0: y, y1: ent, mat: 'marble', openings: [{ at: 5.1, w: 1.6, h: 3.4, y0: y }, { at: 2.2, w: 0.9, h: 1.4, y0: y + 1.6 }, { at: 8.0, w: 0.9, h: 1.4, y0: y + 1.6 }] });
-    E.push({ t: 'doric_entablature', axes: { x: [x0 + 0.3, -148.9, -146.4, -143.9, x1 - 0.3], z: [zA, zB] }, y: ent, face: 0.45, arch: 0.8, frieze: 0.8, geison: 0.38, tw: 0.5, overhang: 0.4, mat: 'marble', triglyphMat: 'paint_blue' });
+    E.push({ t: 'doric_entablature', axes: { x: [x0 + 0.3, -148.9, -146.4, -143.9, x1 - 0.3], z: [zA, zB] }, y: ent, face: 0.45, arch: 0.8, frieze: 0.8, geison: 0.38, tw: 0.5, overhang: 0.4, mat: 'marble', triglyphMat: 'egyptian_blue' });
     E.push({ t: 'pediment_roof', rect: [x0 - 0.15, zA - 0.85, x1 + 0.15, zB + 0.85], y: ent + 1.98, rise: 1.4, tympanumInset: 0.4, rakingGeison: 0.35, mat: 'marble' });
     if (room) E.push({ t: 'slab', rect: [x0 + 0.4, Math.min(inner, zb), x1 - 0.4, Math.max(inner, zb)], y0: ent - 0.25, y1: ent, mat: 'cedar' });
   };
   wing(-12.0, -26.0, true);
   // the paintings on panels round the walls of the room
-  ['wall_red', 'paint_blue', 'paint_ochre'].forEach((m, i) => {
+  ['wall_red', 'egyptian_blue', 'paint_ochre'].forEach((m, i) => {
     const x = -149.4 + i * 3.0, z = -26.0 + 0.43;
     E.push({ t: 'block', rect: [x - 0.98, z, x + 0.98, z + 0.06], y0: y + 1.5, y1: y + 2.9, mat: 'cedar', collide: false });
     E.push({ t: 'block', rect: [x - 0.9, z + 0.06, x + 0.9, z + 0.09], y0: y + 1.58, y1: y + 2.82, mat: m, collide: false });
@@ -129,7 +129,7 @@ E.push({ t: 'promachos', c: [-80, -6], h: 7.4, y: T, yaw: -Math.PI / 2 });
   for (const x of [NX[0], NX[3]]) E.push({ t: 'column', at: [x, -55.9], y: yl + 0.6, h: nh, d: 0.82, mat: 'marble_column', order: 'ionic' });
   E.push({ t: 'ionic_entablature', axes: { x: [NX[0], NX[3]], z: [-58.9, -52.55] }, y: NE, face: 0.38, arch: 0.7, frieze: 0.66, geison: 0.36, overhang: 0.4, mat: 'marble', friezeMat: 'marble_dark' });
   E.push({ t: 'pediment_roof', rect: [NX[0] - 0.78, -59.68, NX[3] + 0.78, -52.25], y: NE + 1.72, rise: 1.25, tympanumInset: 0.4, rakingGeison: 0.35, mat: 'marble', ridge: 'z' });
-  E.push({ t: 'coffers', rect: [NX[0] - 0.05, -58.52, NX[3] + 0.05, -52.25], y: NE + 1.36 - 0.3, depth: 0.3, cell: 0.9, beam: 0.18, mat: 'marble', ceilMat: 'paint_blue' });
+  E.push({ t: 'coffers', rect: [NX[0] - 0.05, -58.52, NX[3] + 0.05, -52.25], y: NE + 1.36 - 0.3, depth: 0.3, cell: 0.9, beam: 0.18, mat: 'marble', ceilMat: 'egyptian_blue' });
   // the court: paved, walled where the summit stands above it, the stair up to the east
   const [cx0, , cx1] = NCOURT.rect;
   E.push({ t: 'block', rect: [cx0 + 0.4, -67.0, cx1 - 0.4, -53.2], y0: yl - 0.6, y1: yl, mat: 'limestone', walk: true });
@@ -168,15 +168,15 @@ for (const r of [[-108, -55, NCOURT.rect[0], 55], [NCOURT.rect[2], -55, 128, 55]
   for (const x of X) for (const z of [Z[0], Z[5]]) E.push({ t: 'column', at: [x, z], y: ST, h: H, d: D, mat: 'marble_column' });
   for (const z of Z.slice(1, -1)) for (const x of [X[0], X[12]]) E.push({ t: 'column', at: [x, z], y: ST, h: H, d: D, mat: 'marble_column' });
   const ENT = ST + H, AR = 0.75, FR = 0.75, GE = 0.34, FACE = 0.48, OH = 0.35, WT = ENT + AR + FR;
-  const DE = { t: 'doric_entablature', axes: { x: X, z: Z }, y: ENT, face: FACE, arch: AR, frieze: FR, geison: GE, tw: 0.46, overhang: OH, mat: 'marble', triglyphMat: 'paint_blue' };
+  const DE = { t: 'doric_entablature', axes: { x: X, z: Z }, y: ENT, face: FACE, arch: AR, frieze: FR, geison: GE, tw: 0.46, overhang: OH, mat: 'marble', triglyphMat: 'egyptian_blue' };
   E.push(DE);
-  E.push({ ...DE, t: 'metopes', programme: { e: 'herakles', n: 'theseus', s: 'theseus' }, only: { n: [20, 21, 22, 23], s: [20, 21, 22, 23], w: [] }, bg: 'wall_red', band: 'paint_blue' });
+  E.push({ ...DE, t: 'metopes', programme: { e: 'herakles', n: 'theseus', s: 'theseus' }, only: { n: [20, 21, 22, 23], s: [20, 21, 22, 23], w: [] }, bg: 'wall_red', band: 'egyptian_blue' });
   const PR = { t: 'pediment_roof', rect: [X[0] - FACE - OH, Z[0] - FACE - OH, X[12] + FACE + OH, Z[5] + FACE + OH], y: WT + GE, rise: 1.75, tympanumInset: 0.45, rakingGeison: 0.3, mat: 'marble' };
   E.push(PR);
   for (const dir of [1, -1]) {
     const [x0, z0, x1, z1] = PR.rect;
     E.push({ t: 'pediment_sculpture', x: (dir > 0 ? x1 : x0) - dir * PR.tympanumInset, dir, zc: cz, half: (z1 - z0) / 2, y: PR.y, rise: PR.rise, depth: PR.tympanumInset,
-      apex: PR.y + PR.rise - PR.rakingGeison * 0.9, tz: (z1 - z0) / 2 - PR.tympanumInset * 0.6, programme: dir > 0 ? 'hephaisteion-east' : 'hephaisteion-west', paint: 'paint_blue' });
+      apex: PR.y + PR.rise - PR.rakingGeison * 0.9, tz: (z1 - z0) / 2 - PR.tympanumInset * 0.6, programme: dir > 0 ? 'hephaisteion-east' : 'hephaisteion-west', paint: 'egyptian_blue' });
     E.push({ t: 'acroterion', at: [dir > 0 ? x1 - 0.35 : x0 + 0.35, cz], y: PR.y + PR.rise + PR.rakingGeison + 0.15, h: 1.4, yaw: Math.PI / 2 });
   }
   // the cella on its step: the long walls, the pronaos (east) and the opisthodomos (west) with two columns in antis each
@@ -195,7 +195,7 @@ for (const r of [[-108, -55, NCOURT.rect[0], 55], [NCOURT.rect[2], -55, 128, 55]
   E.push({ t: 'beam', a: [XP, cz - zi], b: [XP, cz + zi], y: ENT + AR, w: 0.8, h: FR, mat: 'marble' });
   E.push({ t: 'beam', a: [XO, cz - ZW - 0.4], b: [XO, cz + ZW + 0.4], y: ENT, w: 0.9, h: AR, mat: 'marble' });
   E.push({ t: 'beam', a: [XO, cz - ZW - 0.4], b: [XO, cz + ZW + 0.4], y: ENT + AR, w: 0.8, h: FR, mat: 'marble' });
-  E.push({ t: 'frieze_relief', y0: ENT + AR + 0.04, h: FR - 0.1, bg: 'paint_blue', runs: [
+  E.push({ t: 'frieze_relief', y0: ENT + AR + 0.04, h: FR - 0.1, bg: 'egyptian_blue', runs: [
     { a: [XP + 0.4, cz + zi], b: [XP + 0.4, cz - zi], o: [1, 0], seq: 'battle', toward: 'b' },
     { a: [XO - 0.4, cz - ZW - 0.4], b: [XO - 0.4, cz + ZW + 0.4], o: [-1, 0], seq: 'centaurs', toward: 'b' }] });
   // the marble coffers over the pteron and the porches
@@ -220,8 +220,8 @@ for (const r of [[-108, -55, NCOURT.rect[0], 55], [NCOURT.rect[2], -55, 128, 55]
 // Spartan shields of 425), the Stoa of Zeus of Freedom on the west (about 425–410: Doric outside, Ionic inside, its two
 // wings with Victories on their roofs, Zeus before it), South Stoa I (the late fifth century: a double colonnade of
 // stuccoed poros before a row of dining rooms of mudbrick)
-E.push({ t: 'stoa', rect: [-252, -237.6, -204, -225], front: 's', y: 0.62, h: 4.9, d: 0.8, sp: 1.998, flutes: 20, frieze: 0.718, tw: 0.384, arch: 0.66, inner: { d: 0.55, every: 2 }, paintings: ['marathon', 'amazons', 'troy', 'oinoe'], shields: true, mat: 'limestone', wall: 'limestone', triglyphMat: 'paint_blue' });
-E.push({ t: 'stoa', rect: [-292, -195, -281.27, -151.44], front: 'e', y: 0.4, h: 5.0, d: 0.79, sp: 3.02, flutes: 20, inner: { d: 0.69, every: 2 }, wings: { depth: 5.86, width: 10.6, sp: 2.01 }, nikai: true, shields: true, mat: 'limestone', wall: 'limestone', triglyphMat: 'paint_blue' });
+E.push({ t: 'stoa', rect: [-252, -237.6, -204, -225], front: 's', y: 0.62, h: 4.9, d: 0.8, sp: 1.998, flutes: 20, frieze: 0.718, tw: 0.384, arch: 0.66, inner: { d: 0.55, every: 2 }, paintings: ['marathon', 'amazons', 'troy', 'oinoe'], shields: true, mat: 'limestone', wall: 'limestone', triglyphMat: 'egyptian_blue' });
+E.push({ t: 'stoa', rect: [-292, -195, -281.27, -151.44], front: 'e', y: 0.4, h: 5.0, d: 0.79, sp: 3.02, flutes: 20, inner: { d: 0.69, every: 2 }, wings: { depth: 5.86, width: 10.6, sp: 2.01 }, nikai: true, shields: true, mat: 'limestone', wall: 'limestone', triglyphMat: 'egyptian_blue' });
 E.push({ t: 'zeus_statue', at: [-268.5, -173.2], y: 0, rot: Math.PI / 2 });
 E.push({ t: 'stoa', rect: [-262, -124.89, -219, -110], front: 'n', y: 0.35, h: 3.6, d: 0.53, sp: 1.745, flutes: 0, inner: { d: 0.5, every: 2 }, rooms: { n: 8, depth: 5.9 }, mat: 'limestone', wall: 'mud_plaster', seed: 41 });
 E.push({ t: 'tholos', c: [-280, -133], r: 9.16, h: 5.2, y: 0.1 });
@@ -274,13 +274,13 @@ const PE = parthenonPlan.elements, DE = PE.find((e) => e.t === 'doric_entablatur
 const pediment = (dir) => {
   const [x0, z0, x1, z1] = PR.rect, inset = PR.tympanumInset, rg = PR.rakingGeison;
   return { t: 'pediment_sculpture', x: (dir > 0 ? x1 : x0) - dir * inset, dir, zc: (z0 + z1) / 2, half: (z1 - z0) / 2, y: PR.y, rise: PR.rise, depth: inset,
-    apex: PR.y + PR.rise - rg * 0.9, tz: (z1 - z0) / 2 - inset * 0.6, programme: dir > 0 ? 'parthenon-east' : 'parthenon-west', paint: 'paint_blue' };
+    apex: PR.y + PR.rise - rg * 0.9, tz: (z1 - z0) / 2 - inset * 0.6, programme: dir > 0 ? 'parthenon-east' : 'parthenon-west', paint: 'egyptian_blue' };
 };
 const FX = 26.725, FZ = 10.85, FY = DE.y + DE.arch;                      // the frieze: the outer faces of the cella walls and the porch beams
 const parthenonArt = [
   pediment(1), pediment(-1),
-  { ...DE, t: 'metopes', programme: { e: 'gigantomachy', w: 'amazonomachy', n: 'troy', s: 'centauromachy' }, bg: 'wall_red', band: 'paint_blue' },
-  { t: 'frieze_relief', y0: FY, h: 1.0, bg: 'paint_blue', runs: [
+  { ...DE, t: 'metopes', programme: { e: 'gigantomachy', w: 'amazonomachy', n: 'troy', s: 'centauromachy' }, bg: 'wall_red', band: 'egyptian_blue' },
+  { t: 'frieze_relief', y0: FY, h: 1.0, bg: 'egyptian_blue', runs: [
     { a: [-FX, -FZ], b: [FX, -FZ], o: [0, -1], seq: 'procession', toward: 'b' },
     { a: [-FX, FZ], b: [FX, FZ], o: [0, 1], seq: 'procession', toward: 'b' },
     { a: [-FX, FZ], b: [-FX, -FZ], o: [-1, 0], seq: 'cavalcade', toward: 'b' },
@@ -288,6 +288,6 @@ const parthenonArt = [
   ] },
   ...[1, -1].map((dir) => ({ t: 'acroterion', at: [dir * (PR.rect[2] - 0.6), 0], y: PR.y + PR.rise + PR.rakingGeison + 0.3, h: 2.6, yaw: Math.PI / 2 })),
 ];
-export const parthenon = { ...parthenonPlan, elements: [...PE.map((e) => (e === DE ? { ...e, triglyphMat: 'paint_blue' } : e)), ...parthenonArt],
+export const parthenon = { ...parthenonPlan, elements: [...PE.map((e) => (e === DE ? { ...e, triglyphMat: 'egyptian_blue' } : e)), ...parthenonArt],
   origin: [18, 18], base: T, district: undefined, view: [18 - 35, 18 - 16, 18 + 35, 18 + 16], viewY: T };
 export default acropolis;

@@ -115,7 +115,7 @@ function wing(el, { bag, col }) {
         if (ya < y + H - 0.6) bag.add('timber', at(u, u + 0.14, ya, y + H - 0.3, 0.05));
       }
       const m = Math.floor(L / 0.6);
-      for (let i = 0; i < m; i++) bag.add(i % 3 === 0 ? 'paint_blue' : i % 3 === 1 ? RED : 'paint_ochre', at(i * L / m, (i + 1) * L / m - 0.04, y + H - 0.85, y + H - 0.35, 0.09));
+      for (let i = 0; i < m; i++) bag.add(i % 3 === 0 ? 'egyptian_blue' : i % 3 === 1 ? RED : 'paint_ochre', at(i * L / m, (i + 1) * L / m - 0.04, y + H - 0.85, y + H - 0.35, 0.09));
     }
     if (el.horns !== false) {
       for (let x = x0 + 2; x < x1 - 1; x += 4) { horns(bag, x, y + H, z0 + 0.4); horns(bag, x, y + H, z1 - 0.4); }
@@ -171,14 +171,14 @@ const FRESCO = {
   bull_relief: (w, h) => [
     { mat: 'paint_ochre', parts: [[[[-w / 2, 0], [w / 2, 0], [w / 2, 0.22], [-w / 2, 0.22]], 0.12]] },
     { mat: 'bark_olive', parts: [[cap([-2.7, 0.2], [-2.6, 1.3], 0.16, 0.12), 0.5], [cap([-2.6, 1.3], [-3.1, 1.9], 0.08, 0.05), 0.4], [cap([-2.6, 1.3], [-2.1, 2.0], 0.08, 0.05), 0.4]] },
-    { mat: 'cloth_green', parts: [[ell(-3.15, 2.0, 0.42, 0.28, 10), 0.35], [ell(-2.05, 2.1, 0.45, 0.3, 10), 0.35], [ell(-2.6, 2.35, 0.5, 0.3, 10), 0.35], [ell(-1.2, 1.4, 0.3, 0.42, 9), 0.3]] },
+    { mat: 'fresco_green', parts: [[ell(-3.15, 2.0, 0.42, 0.28, 10), 0.35], [ell(-2.05, 2.1, 0.45, 0.3, 10), 0.35], [ell(-2.6, 2.35, 0.5, 0.3, 10), 0.35], [ell(-1.2, 1.4, 0.3, 0.42, 9), 0.3]] },
     { mat: 'paint_robe', parts: bullParts(1.15, true).map(([p, f]) => [tr(p, 0.6, 0.22), f]) },
     { mat: 'plaster_white', parts: [[ell(-1.1 * 1.15 + 0.6, 0.78 * 1.15 + 0.22, 0.04, 0.03, 6), 1.05]] },
   ],
   // the bull-leaping fresco: a youth vaulting over the bull's back, a girl at the horns, a girl behind with arms out;
   // the frame of painted stones round it
   bull_leaping: (w, h) => {
-    const out = [], bands = ['paint_blue', 'paint_ochre', 'paint_minoan_red', 'plaster_white'];
+    const out = [], bands = ['egyptian_blue', 'paint_ochre', 'paint_minoan_red', 'plaster_white'];
     const b = 0.09;
     for (let i = 0; i < 12; i++) { const u0 = -w / 2 + i * w / 12, u1 = u0 + w / 12; out.push({ mat: bands[i % 4], parts: [[[[u0, h - b], [u1, h - b], [u1, h], [u0, h]], 0.6], [[[u0, 0], [u1, 0], [u1, b], [u0, b]], 0.6]] }); }
     for (let i = 0; i < 6; i++) { const v0 = b + i * (h - 2 * b) / 6, v1 = v0 + (h - 2 * b) / 6; for (const u of [-w / 2, w / 2 - b]) out.push({ mat: bands[(i + 1) % 4], parts: [[[[u, v0], [u + b, v0], [u + b, v1], [u, v1]], 0.6]] }); }
@@ -192,7 +192,7 @@ const FRESCO = {
   },
   // couchant griffins among papyrus on a red ground, a wavy band below (the Throne Room, either side of the throne)
   griffin: (w, h) => {
-    const out = [{ mat: 'paint_white', parts: [] }, { mat: 'paint_ochre', parts: [] }, { mat: 'paint_blue', parts: [] }];
+    const out = [{ mat: 'paint_white', parts: [] }, { mat: 'paint_ochre', parts: [] }, { mat: 'egyptian_blue', parts: [] }];
     for (let i = 0; i < 10; i++) { const u0 = -w / 2 + i * w / 10; out[2].parts.push([[[u0, 0], [u0 + w / 10, 0], [u0 + w / 10, 0.1 + (i % 2) * 0.06], [u0, 0.16 - (i % 2) * 0.06]], 0.5]); }
     for (const x of [-0.85, -0.55, 0.8]) { out[0].parts.push([cap([x, 0.15], [x + 0.06, 0.95], 0.014, 0.01), 0.8], [poly([x + 0.06, 0.93], [x + 0.18, 1.05], [x + 0.06, 1.12], [x - 0.06, 1.05]), 0.8]); }
     const g = [[ell(0, 0.45, 0.5, 0.18, 12), 1], [ell(-0.35, 0.42, 0.22, 0.2, 10), 1], [cap([0.3, 0.32], [0.62, 0.28], 0.06, 0.05), 1], [cap([0.35, 0.55], [0.5, 0.86], 0.11, 0.08), 1], [ell(0.55, 0.93, 0.1, 0.08, 9), 1],
@@ -203,7 +203,7 @@ const FRESCO = {
   },
   // dolphins and little fish swimming (the Queen's Megaron)
   dolphins: (w, h) => {
-    const out = [{ mat: 'paint_blue', parts: [] }, { mat: 'paint_ochre', parts: [] }, { mat: 'paint_minoan_black', parts: [] }];
+    const out = [{ mat: 'egyptian_blue', parts: [] }, { mat: 'paint_ochre', parts: [] }, { mat: 'paint_minoan_black', parts: [] }];
     const dolphin = (dx, dy, a, s, fx) => {
       const body = [[cap([-0.45, 0], [0.42, 0.02], 0.09, 0.06), 1], [cap([0.42, 0.02], [0.58, -0.02], 0.035, 0.018), 1], [poly([-0.05, 0.08], [0.12, 0.08], [-0.12, 0.24]), 1], [poly([-0.45, 0], [-0.62, 0.12], [-0.56, 0.0], [-0.62, -0.12]), 1], [poly([0.1, -0.06], [0.22, -0.06], [0.05, -0.17]), 1]];
       out[0].parts.push(...body.map(([p, f]) => [tr(p, dx, dy, a, s, fx), f]));
