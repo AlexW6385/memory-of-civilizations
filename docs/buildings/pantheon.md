@@ -67,6 +67,12 @@ Granite shafts (grey, pink), Pentelic capitals and bases; interior marbles: pavo
 
 Coffer rosettes (conjectural gilded bronze) [stated: conjecture]; pediment relief (eagle in wreath, gilded bronze) [stated: probable]; the attic's original porphyry panels and pilasters [stated].
 
+**Built (2026-11-06, `src/buildings/pantheon/style.js`):**
+- *Aediculae:* eight between the niches, alternating triangular and segmental pediments, porphyry shafts [stated: archeoroma, §4 above]. Built: a moulded podium of giallo with a framed panel, two Corinthian columns with porphyry shafts before pilasters, a pavonazzetto back slab, an entablature with dentils and a gilt fillet, the pediments alternating. [proportions inferred]
+- *The attic:* originally faced with porphyry panels and pilasters; rebuilt by Paolo Posi in 1747, one bay of the earlier decoration restored in 1930 [stated: archeoroma (dossier §8); romapedia, "Pantheon — second part"]. Built: a plinth; porphyry pilasters with white bases and capitals between the sixteen bays; in each bay a framed blind window with sill and cornice over a porphyry panel, flanked by pavonazzetto panels framed in giallo (none over the apse). [rhythm and sizes inferred]
+- *The doorway:* two leaves of cast bronze; fluted bronze pilasters with Tuscan capitals carrying bronze egg-and-dart, joined by an entablature with a short frieze; above, a transom of six identical rectangular bronze lattice panels, "a simple and fairly common ancient pattern" [stated: Wikipedia, "Doors of the Roman Pantheon"]. Built so; the leaves stand open, each with stiles, three rails with rows of studs and two moulded panels. [panel division and studs inferred]
+- *The pediment:* an eagle in a wreath of gilded bronze, from the clamp holes [stated: probable — dossier §8]. Built: an oak wreath tied with ribbons, a frontal eagle with spread wings on a thunderbolt. [form inferred]
+
 ## 9. Light
 
 Only the oculus and the open door: a 9 m disc of sun moving across the dome and walls; the rest lit by its reflection. [stated]
@@ -90,3 +96,6 @@ Roman temple music: the tibia (double reed pipe) played at sacrifice, the cornu 
 - Pantheon guide, "Inside the Pantheon". https://pantheon-guide.com/what-to-see/inside-the-pantheon/
 - Designing Buildings, "Pantheon". https://www.designingbuildings.co.uk/wiki/Pantheon
 - W. L. MacDonald, *The Pantheon* (1976); K. de Fine Licht, *The Rotunda in Rome* (1968).
+- Wikipedia, "Doors of the Roman Pantheon". https://en.wikipedia.org/wiki/Doors_of_the_Roman_Pantheon
+- Romapedia, "Pantheon — second part" (2017). https://romapedia.blogspot.com/2017/12/pantheon-second-part.html
+- VoiceMap, "The Pantheon: wall and floor decorations". https://voicemap.me/tour/rome/the-pantheon-the-mysteries-and-secrets-of-the-world-s-largest-dome/sites/wall-and-floor-decorations

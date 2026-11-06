@@ -62,6 +62,8 @@ Buff and pinkish sandstone; the dome probably plastered white and painted [infer
 
 The gateways' reliefs: the Buddha's life in symbols (tree, wheel, footprints, empty throne), the Jatakas, Ashoka's visit, the war of the relics; yakshis as brackets; elephants, lions and dwarfs as capitals; the donors' inscriptions on the railing.
 
+**Built (2026-11-06, `src/buildings/sanchi-great-stupa/style.js`):** the dome "flattened on the top to support a square box-like structure (harmika) supporting an umbrella (chhatra)" [stated: puratattva]; the harmika as a vedika in small, like the ground railing [inferred: the type]: a moulded plinth, posts of lens section (seven a side), three lens-shaped crossbars in each bay, a coping rounded on top and mitred at the corners; within it a square pedestal, the octagonal shaft and the three parasols diminishing upward, each a disc with a rim and a curved top on a collar, a finial. [sizes inferred] The Great Stupa's railings are plain, their ornament being the donors' inscriptions (over 1,000 on railings and gateways [stated: puratattva]) — the carved medallions belong to Stupa 2, so none are put on Stupa 1.
+
 ## 9. Lighting
 
 Open sky; the region's winter afternoon sun in the south-west throws the gateways' shadows across the walk. [inferred]
@@ -84,3 +86,4 @@ No music of the period survives in notation; the early Buddhist recitation of th
 - Britannica, "Great Stupa". https://www.britannica.com/print/article/243778
 - Victoria and Albert Museum, photograph of the eastern gateway, O155245. https://api.vam.ac.uk/v2/object/O155245
 - inditales, "Sanchi Stupa – The Great Stupa With Buddha Relics". https://inditales.com/sanchi-stupa-great-stupa-madhya-pradesh/
+- Puratattva, "Sanchi – Buddham Dhammam Sangham". https://www.puratattva.in/sanchi-buddham-dammam-sangham-2/

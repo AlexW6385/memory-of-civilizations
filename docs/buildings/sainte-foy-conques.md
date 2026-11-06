@@ -76,6 +76,10 @@ Ashlar on rubble cores: walls, piers and vaults all of stone [stated: structurae
 - **Corbels** under the eaves; **arcading** on the chevet; the **Annunciation** relief in the north arm (L3). [stated: fr-academic; corbels inferred]
 - **Furnishings:** the high altar in the choir; the reliquary statue of Sainte Foy (gold over wood, 0.85 m) on a pillar behind it; altars in the chapels; the iron grilles. [stated]
 
+**Built (2026-11-06, `src/buildings/sainte-foy-conques/style.js`, `plan.js`):**
+- *The Majesty of Sainte Foy:* a reliquary statue of the 9th–10th century, 85 cm, of yew wood covered in gold (silver gilt in places), engraved with small flowers; the gold head cut from a late antique bust (4th–5th century), large blue eyes, the chin held high; a crown of the 10th century with gold cloisonné; the hands large; the throne of gilt silver with pre-Romanesque bands; gems and intaglios added over time. The arms were refashioned in the 16th century (their first position unknown) and the rock-crystal balls of the throne are Gothic [stated: tourisme-conques, "The treasure"; ergane (85 cm, silver gilt over wood, gems and cameos of various dates)]. Built: the saint seated frontally on a gilt silver throne with knobbed posts, a low back and gilt bands, her feet on a footstool, the robe gold and set with stones, the forearms held forward with large open hands, the large head with blue eyes and a jewelled crown; on a moulded limestone pedestal. The crystal balls are not shown (later). [the arms' position inferred]
+- *The tribunes' openings:* to the nave and the transept arms, under an enclosing arch, a pair of small arches on a central colonnette with its capital, the tympanum filled and set back in the reveal. [stated: twin openings; the colonnette and enclosing arch inferred from the type]
+
 ## 9. Light
 
 Orientation east–west. The nave without clerestory is dim; light falls from the aisles' and tribunes' windows across the piers; the crossing is lit from above by the lantern's eight windows; the choir by its clerestory and the ambulatory's and chapels' windows behind the columns of the hemicycle. Oil lamps hanging in the choir and before the chapels' altars; candles before the saint [inferred: Benedictine practice]. Baked lamps: two in the choir, three down the nave, three in the crossing and the arms, one in each chapel and apsidiole.
@@ -95,3 +99,5 @@ The **pilgrims' songs** and the monastic office of the late 11th and early 12th 
 - Ministère de la Culture, POP, Mérimée IA12000102: https://pop.culture.gouv.fr/notice/merimee/IA12000102
 - "Abbatiale de Conques" (fr-academic mirror of French Wikipedia): https://fr-academic.com/dic.nsf/frwiki/38984
 - Collège des Flandres, "Le tympan de Conques": https://collegedesflandres.etab.ac-lille.fr/HIDA/5HDA-Hist-Conques.pdf
+- Conques tourism office, "The treasure". https://www.tourisme-conques.fr/en/conques/the-treasure
+- Ergane, "Reliquary Statue of Sainte Foy (St. Faith)". https://ergane.artinterp.org/omeka/items/show/215
