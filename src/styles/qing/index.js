@@ -12,6 +12,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import '../ming/index.js';
 import { rectRoof, pyramidRoof, column, beamTris, flipTris, latticeBay, mingHall, mingPavilion, mingWall, withPal } from '../ming/index.js';
+import { Parts, sumeru, post, limb as limbG, seated, crouching, vat, tripod, tortoise, crane, sundial, jialiang, balustradeCarved, spout, roofOrnaments, gateDoors } from './carving.js';
 
 export const IMPERIAL = { wood: 'paint_caihua', column: 'lacquer_red', soffit: 'paint_caihua', base: 'marble', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'palace_wall', plinth: 'marble', roof: 'tile_yellow' };
 export const HOUSE = { wood: 'lacquer_red', column: 'lacquer_red', soffit: 'paint_caihua', base: 'brick_grey', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'brick_grey', plinth: 'brick_grey', roof: 'tile_grey' };
@@ -56,18 +57,41 @@ function balustrade(bag, col, a, b, y, open = [], step = 1.6) {
  */
 function terrace(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y0 = el.y0, y1 = el.y1;
-  bag.add('marble', box(x0, y0 - 0.3, z0, x1, y1 - 0.25, z1));
-  bag.add('marble_smooth', box(x0 - 0.12, y1 - 0.25, z0 - 0.12, x1 + 0.12, y1 - 0.05, z1 + 0.12));    // the coping
+  const gk = el.carve === 'joseon' ? (el.pal?.base || 'granite_korea') : null;
+  bag.add(gk || 'marble', box(x0, y0 - 0.3, z0, x1, y1 - 0.25, z1));
+  bag.add(gk || 'marble_smooth', box(x0 - 0.12, y1 - 0.25, z0 - 0.12, x1 + 0.12, y1 - 0.05, z1 + 0.12));    // the coping
   bag.add('brick_paving', box(x0 + 0.05, y1 - 0.05, z0 + 0.05, x1 - 0.05, y1, z1 - 0.05));
   // the base moulding: a band of carved lotus petals (a plain torus here)
-  bag.add('marble_smooth', box(x0 - 0.18, y0, z0 - 0.18, x1 + 0.18, y0 + 0.35, z1 + 0.18));
+  bag.add(gk || 'marble_smooth', box(x0 - 0.18, y0, z0 - 0.18, x1 + 0.18, y0 + 0.35, z1 + 0.18));
   col.floor([x0, z0, x1, z1], y1);
   col.rect([x0, z0, x1, z1], y0 - 0.3, y1 - 0.31);
   const o = el.open || {}, i = 0.25;
-  balustrade(bag, col, [x0 + i, z0 + i], [x1 - i, z0 + i], y1, o.n || []);
-  balustrade(bag, col, [x0 + i, z1 - i], [x1 - i, z1 - i], y1, o.s || []);
-  balustrade(bag, col, [x0 + i, z0 + i], [x0 + i, z1 - i], y1, o.w || []);
-  balustrade(bag, col, [x1 - i, z0 + i], [x1 - i, z1 - i], y1, o.e || []);
+  if (!el.carve) {
+    balustrade(bag, col, [x0 + i, z0 + i], [x1 - i, z0 + i], y1, o.n || []);
+    balustrade(bag, col, [x0 + i, z1 - i], [x1 - i, z1 - i], y1, o.s || []);
+    balustrade(bag, col, [x0 + i, z0 + i], [x0 + i, z1 - i], y1, o.w || []);
+    balustrade(bag, col, [x1 - i, z0 + i], [x1 - i, z1 - i], y1, o.e || []);
+    return;
+  }
+  // the carved balustrade (el.carve: 'qing' | 'joseon'); under each post of a Qing terrace a
+  // dragon-head spout juts from the face below the coping, and a great one from each corner
+  const stone = el.carve === 'joseon' ? (el.pal?.base || 'granite_korea') : 'marble_smooth', bo = { carve: el.carve, mat: stone, beasts: el.beasts };
+  const sides = [['n', [x0 + i, z0 + i], [x1 - i, z0 + i], [0, -1]], ['s', [x0 + i, z1 - i], [x1 - i, z1 - i], [0, 1]], ['w', [x0 + i, z0 + i], [x0 + i, z1 - i], [-1, 0]], ['e', [x1 - i, z0 + i], [x1 - i, z1 - i], [1, 0]]];
+  for (const [k, a, b, f] of sides) {
+    const posts = balustradeCarved(bag, col, a, b, y1, o[k] || [], { ...bo, skipEnds: k === 'w' || k === 'e' });
+    if (el.carve !== 'qing' || el.spouts === false) continue;
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), yaw = Math.atan2(f[0], f[1]);
+    for (const s of posts) {
+      if (s < 0.5 || s > L - 0.5) continue;
+      const u = s / L, px = a[0] + (b[0] - a[0]) * u, pz = a[1] + (b[1] - a[1]) * u;
+      const P = new Parts(); spout(P, stone);
+      P.emit(bag, f[0] ? (f[0] < 0 ? x0 : x1) : px, y1 - 0.42, f[1] ? (f[1] < 0 ? z0 : z1) : pz, yaw);
+    }
+  }
+  if (el.carve === 'qing' && el.spouts !== false) for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const P = new Parts(); spout(P, stone);
+    P.emit(bag, sx < 0 ? x0 + 0.05 : x1 - 0.05, y1 - 0.62, sz < 0 ? z0 + 0.05 : z1 - 0.05, Math.atan2(sx, sz), 1.7);
+  }
 }
 
 /** stairs: { rect, y0, y1, dir (the way up: n|s|e|w), slab (a carved middle slab, no steps) } — marble steps, side walls. */
@@ -105,13 +129,25 @@ function stairs(el, { bag, col }) {
 function qingHall(el, ctx) {
   const { bag, col } = ctx;
   const [x0, z0, x1, z1] = el.rect, along = x1 - x0 >= z1 - z0;
-  const lower = { ...el, t: 'ming_hall', roof: el.double ? 'none' : (el.roof || 'xieshan'), front: el.front || 's' };
+  const orn = el.orn, omat = el.pal?.roof || 'tile_yellow', osoff = el.pal?.soffit || 'paint_caihua';
+  const ornament = (r, figures, ends) => roofOrnaments(bag, r, { mat: omat, joseon: !!orn.joseon, white: !!orn.joseon && ends, figures, ends, lead: orn.lead });
+  const lower = { ...el, t: 'ming_hall', roof: el.double || orn ? 'none' : (el.roof || 'xieshan'), front: el.front || 's' };
   mingHall(lower, ctx);
-  if (!el.double) return;
+  if (!el.double) {
+    if (!orn) return;
+    // the roof drawn here (as ming_hall draws it, its ridge without curled ends) to carry its ornaments
+    const o1 = el.eave ?? 1.25, L1 = along ? x1 - x0 : z1 - z0, D1 = along ? z1 - z0 : x1 - x0;
+    const r = { c: [(x0 + x1) / 2, (z0 + z1) / 2], A: L1 / 2 + o1, B: D1 / 2 + o1, y: el.y + (el.H ?? 4.2) - 0.25, rise: el.rise ?? (D1 / 2 + o1) * 0.62, kind: el.roof || 'xieshan', sweep: el.sweep ?? 1.0, alongZ: !along, mat: omat, soffit: osoff, curl: false };
+    rectRoof(r, bag);
+    ornament(r, orn.figures ?? 0, true);
+    return;
+  }
   const H = el.H, y = el.y, inset = el.inset ?? Math.min((x1 - x0), (z1 - z0)) / ((el.bays?.[1] ?? 4) + 0.5);
   // the lower roof: a skirt of tiles from the eaves up to the upper body's wall
   const o = el.eave ?? 1.6, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, A = (along ? x1 - x0 : z1 - z0) / 2 + o, B = (along ? z1 - z0 : x1 - x0) / 2 + o;
-  rectRoof({ c: [cx, cz], A, B, y: y + H - 0.25, rise: (inset + o) * 0.55, p: 1.25, kind: 'hip', sweep: el.sweep ?? 0.5, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua' }, bag);
+  const skirt = { c: [cx, cz], A, B, y: y + H - 0.25, rise: (inset + o) * 0.55, p: 1.25, kind: 'hip', sweep: el.sweep ?? 0.5, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua' };
+  rectRoof(skirt, bag);
+  if (orn) roofOrnaments(bag, skirt, { mat: omat, joseon: !!orn.joseon, ends: false, figures: orn.lower ?? orn.figures ?? 0, lead: orn.lead, tLimit: (inset + o) / B, reach: 0.75 });
   // the upper body: red walls with a band of lattice windows, the painted frieze, the upper eaves
   const u = [x0 + inset, z0 + inset, x1 - inset, z1 - inset], yb = y + H, D = el.double;
   bag.add('palace_wall', box(u[0], yb - 0.2, u[1], u[2], yb + D - 1.2, u[3]));
@@ -123,7 +159,9 @@ function qingHall(el, ctx) {
   const cols = along ? [xs, zs] : [zs, xs];
   for (const x of (along ? cols[0] : cols[1])) for (const z of [u[1], u[3]]) column(bag, null, x, z, yb - 0.2, D - 0.2, 0.42, 'lacquer_red');
   const A2 = (along ? u[2] - u[0] : u[3] - u[1]) / 2 + o * 1.1, B2 = (along ? u[3] - u[1] : u[2] - u[0]) / 2 + o * 1.1;
-  rectRoof({ c: [cx, cz], A: A2, B: B2, y: yb + D - 0.25, rise: el.rise ?? B2 * 0.78, kind: el.roof || 'hip', sweep: el.sweep ?? 0.6, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua', gableAt: 0.45 }, bag);
+  const upper = { c: [cx, cz], A: A2, B: B2, y: yb + D - 0.25, rise: el.rise ?? B2 * 0.78, kind: el.roof || 'hip', sweep: el.sweep ?? 0.6, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua', gableAt: 0.45, curl: orn ? false : undefined };
+  rectRoof(upper, bag);
+  if (orn) { ornament(upper, orn.figures ?? 0, true); return; }
   // the guardian beasts on the hips (a row of little figures; here a row of knobs) and the ridge's dragon ends
   const R = el.rise ?? B2 * 0.78, top = yb + D - 0.25 + R, L = el.roof === 'hip' ? A2 - B2 : A2 * 0.6, beasts = [];
   for (const s of [-1, 1]) {
@@ -136,28 +174,33 @@ function qingHall(el, ctx) {
 /** palace_wall: a red wall { a, b, y, h, th, gates } with a marble footing and a coping of yellow tiles. */
 const palaceWall = (el, ctx) => mingWall({ ...el, pal: undefined }, ctx);
 
-/** A bronze vat (on its marble stand), an incense burner (a tripod on a pedestal), a lion on its plinth. */
+/**
+ * bronze: the bronzes and carved stones of the courts { kind, at, y, s, face, stone (the pedestal's
+ * stone), metal }: 'vat' (gilt, with ring handles; 'deumu' the wide Joseon basin), 'tripod' (the
+ * ding burner), 'lion' (paw: 'ball' | 'cub'), 'haetae' and 'cheonrok' (in stone), 'tortoise',
+ * 'crane', 'sundial', 'jialiang' (the grain measure in its shrine).
+ */
 function bronze(el, { bag, col }) {
-  const [x, z] = el.at, y = el.y ?? 0;
-  if (el.kind === 'vat') {
-    bag.add('marble', box(x - 1.0, y, z - 1.0, x + 1.0, y + 0.45, z + 1.0));
-    bag.add('gilt_bronze', lathe([[0.001, 0], [0.9, 0.05], [1.12, 0.5], [1.18, 1.0], [1.05, 1.35], [1.1, 1.42], [0.95, 1.42], [0.001, 1.3]], 18, null, x, y + 0.45, z));
-    col.circle(x, z, 1.15, y, y + 1.9);
-  } else if (el.kind === 'tripod') {
-    bag.add('marble', box(x - 0.9, y, z - 0.9, x + 0.9, y + 1.0, z + 0.9));
-    bag.add('bronze', lathe([[0.001, 0], [0.6, 0.15], [0.75, 0.6], [0.55, 0.95], [0.62, 1.05], [0.25, 1.3], [0.3, 1.9], [0.12, 2.3], [0.001, 2.5]], 12, null, x, y + 1.0, z));
-    col.circle(x, z, 0.95, y, y + 3.5);
-  } else {
-    // a lion: a body leaning back on its haunches, the head with its mane, on a plinth
-    const s = el.s ?? 1, f = el.face ?? [0, 1];
-    bag.add('marble', box(x - 1.1 * s, y, z - 1.5 * s, x + 1.1 * s, y + 1.4 * s, z + 1.5 * s));
-    const y1 = y + 1.4 * s;
-    bag.add('bronze', lathe([[0.001, 0], [0.55, 0.05], [0.6, 0.5], [0.5, 1.2], [0.42, 1.5], [0.001, 1.55]], 10, null, x - f[0] * 0.25 * s, y1, z - f[1] * 0.25 * s));
-    bag.add('bronze', lathe([[0.001, 0], [0.45, 0.1], [0.55, 0.45], [0.42, 0.8], [0.001, 0.9]], 10, null, x + f[0] * 0.2 * s, y1 + 1.45 * s, z + f[1] * 0.2 * s));
-    col.rect([x - 1.1 * s, z - 1.5 * s, x + 1.1 * s, z + 1.5 * s], y, y + 4 * s);
+  const [x, z] = el.at, y = el.y ?? 0, s = el.s ?? 1, f = el.face ?? [0, 1], yaw = Math.atan2(f[0], f[1]), stone = el.stone ?? 'marble', P = new Parts();
+  const k = el.kind;
+  if (k === 'vat' || k === 'deumu') { vat(P, el.metal ?? (k === 'vat' ? 'gilt_bronze' : 'bronze'), stone, k === 'deumu'); col.circle(x, z, 1.15 * s * (k === 'deumu' ? 1.25 : 1), y, y + 1.9 * s); }
+  else if (k === 'tripod') { tripod(P, el.metal ?? 'bronze', stone); col.circle(x, z, 0.95 * s, y, y + 3.2 * s); }
+  else if (k === 'tortoise') { tortoise(P, 'bronze', stone); col.rect([x - 0.9 * s, z - 1.1 * s, x + 0.9 * s, z + 1.1 * s], y, y + 1.8 * s); }
+  else if (k === 'crane') { crane(P, 'bronze', stone); col.circle(x, z, 0.55 * s, y, y + 2.6 * s); }
+  else if (k === 'sundial') { sundial(P, el.lat ?? 40); col.rect([x - 0.8 * s, z - 0.8 * s, x + 0.8 * s, z + 0.8 * s], y, y + 2.4 * s); }
+  else if (k === 'jialiang') { jialiang(P); col.rect([x - 0.85 * s, z - 0.85 * s, x + 0.85 * s, z + 0.85 * s], y, y + 3.2 * s); }
+  else if (k === 'cheonrok') { crouching(P, stone); col.rect([x - 0.6 * s, z - 0.6 * s, x + 0.6 * s, z + 0.6 * s], y, y + 1.3 * s); P.emit(bag, x, y, z, yaw, s); return; }
+  else {
+    // a guardian on its sumeru pedestal: the bronze lions of the gates, or the Joseon haetae in granite
+    const haetae = k === 'haetae', m = haetae ? stone : (el.metal ?? 'bronze'), ped = el.ped ?? 1.4;
+    const Q = new Parts(); sumeru(Q, stone, -1.1, -1.5, 1.1, 1.5, ped); Q.emit(bag, x, y, z, yaw, s);
+    seated(P, m, { paw: el.paw, horn: haetae, bell: !haetae });
+    P.emit(bag, x, y + ped * s - 0.02 * s, z, yaw, s);
+    col.rect([x - 1.1 * s, z - 1.5 * s, x + 1.1 * s, z + 1.5 * s], y, y + (ped + 2.4) * s);
+    return;
   }
+  P.emit(bag, x, y, z, yaw, s);
 }
-
 /**
  * corner_tower: the tower over a corner of the palace wall { c, y, s } — a square pavilion with a
  * wing to each side, each wing with its own gabled roof, eaves over eaves (here three tiers).
@@ -222,7 +265,38 @@ function lane(el, { bag, col }) {
 /** pyramid: a pyramidal roof of yellow tiles over a polygon { poly, y, rise, sweep }. */
 function pyramid(el, { bag }) { pyramidRoof(el.poly, el.y, el.rise, el.sweep ?? 0.6, bag, el.mat || 'tile_yellow', el.soffit || 'paint_caihua'); }
 /** rail: a marble balustrade { a, b, y, open: [[from, to], …] }. */
-function rail(el, { bag, col }) { balustrade(bag, col, el.a, el.b, el.y, el.open || []); }
+function rail(el, { bag, col }) { if (el.carve) balustradeCarved(bag, col, el.a, el.b, el.y, el.open || [], { carve: el.carve, mat: el.mat ?? 'marble_smooth' }); else balustrade(bag, col, el.a, el.b, el.y, el.open || []); }
+
+/**
+ * An arched bridge (ming_arch_bridge) with, when el.rail, a carved balustrade standing on its
+ * parapets and following their rise: posts every 1.6 m, sloping panels, balusters and handrail.
+ */
+function archBridgeRailed(el, ctx) {
+  STYLES.ming.elements.ming_arch_bridge(el, ctx);
+  if (!el.rail) return;
+  const { bag } = ctx, [cx, cz] = el.at, S = el.span, W = el.width / 2, R = el.rise ?? 2.2, land = el.landing ?? 4.5, y0 = el.y ?? 0;
+  const alongZ = el.across === 'z', half = S / 2 + land, N = 48, m = el.rail.mat ?? (el.pal?.base === 'marble' ? 'marble_smooth' : (el.pal?.base || 'granite_block'));
+  const top = (s) => y0 + R * Math.cos(Math.min(1, Math.abs(s) / half) * Math.PI / 2) ** 0.8, q = (v) => Math.round(v / 0.16) * 0.16;
+  const base = (s) => { const i = Math.max(0, Math.min(N - 1, Math.floor((s + half) / (2 * half / N)))), s0 = -half + 2 * half * i / N; return Math.max(q(top(s0)), q(top(s0 + 2 * half / N))) - 0.001 + 0.5; };
+  const Pw = (s, o, y) => (alongZ ? [cx + o, y, cz + s] : [cx + s, y, cz + o]);
+  const n = Math.max(2, Math.round((2 * half - 0.3) / 1.6)), ss = Array.from({ length: n + 1 }, (_, k) => -half + 0.15 + (2 * half - 0.3) * k / n);
+  for (const o of [-W, W]) {
+    for (const [k, s] of ss.entries()) {
+      const p = Pw(s, o, base(s) - 0.02), P = new Parts();
+      post(P, m, el.rail.head ?? (k % 2 ? 'phoenix' : 'dragon')); P.emit(bag, p[0], p[1], p[2]);
+      if (k === n) continue;
+      const s1 = ss[k + 1], b0 = base(s) - 0.02, b1 = base(s1) - 0.02, t = [];
+      const A = (u, dy) => Pw(s + (s1 - s) * u, o, b0 + (b1 - b0) * u + dy);
+      const u0 = 0.1 / (s1 - s), u1 = 1 - u0;
+      beamTris(t, A(u0, -0.18), A(u1, -0.18), 0.07, 0.68);       // the panel, its foot sunk in the parapet
+      beamTris(t, A(u0, 0.5), A(u1, 0.5), 0.055, 0.06);           // the cloud band
+      for (const u of [1 / 3, 2 / 3]) { const c = A(u, 0.56); bag.add(m, lathe([[0.03, 0], [0.055, 0.04], [0.07, 0.09], [0.045, 0.15], [0.03, 0.18], [0.05, 0.2], [0.001, 0.2]], 8, null, c[0], c[1], c[2])); beamTris(t, A(u - 0.07, 0.76), A(u + 0.07, 0.76), 0.05, 0.075); }
+      bag.add(m, fromTriangles(t));
+      const r0 = A(u0 - 0.04, 0.86), r1 = A(u1 + 0.04, 0.86);
+      bag.add(m, limbG(r0, r1, 0.045));
+    }
+  }
+}
 
 /**
  * throne_hall: the inside of the Hall of Supreme Harmony { rect, y (floor), H (to the ceiling), bays: [n, d],
@@ -320,6 +394,7 @@ registerStyle('qing', {
     terrace: withPal(terrace), stairs: withPal(stairs), bronze: withPal(bronze), lane: withPal(lane),
     qing_hall: (el, ctx) => withPal(qingHall)({ ...el, pal: el.pal || IMPERIAL }, ctx),
     palace_wall: (el, ctx) => withPal(palaceWall)({ ...el, pal: { plaster: 'palace_wall', roof: 'tile_yellow', plinth: 'marble' } }, ctx),
+    ming_arch_bridge: archBridgeRailed, gate_doors: gateDoors,
     corner_tower: withPal(cornerTower), throne_hall: (el, ctx) => withPal(throneHall)({ ...el, pal: el.pal || IMPERIAL }, ctx), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail),
   },
   objects: {},

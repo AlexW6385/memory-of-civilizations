@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.36 — Africa and the Americas in detail (2026-11-06)
+- Djenné's arcaded prayer hall, ribbed qibla towers and roof vents; Kilwa's domed and vaulted mosque and sewn mtepe boats; Great Zimbabwe's tower dentelle, Eastern Enclosure birds and hill boulders; Lalibela's Aksumite windows, triple-cross roof and pilgrims; Machu Picchu's battered trapezoid-opening walls, Torreón and Intihuatana; Taos' vigas, roof hatches and racks; Cahokia's daubed palisade with round bastions, summit house and chunkey yards.
+
 ## v9.35 — The Shah Mosque's iwan (2026-11-06)
 - Isfahan's great iwans (the Shah Mosque's portal and court iwans, Lotfollah's portal) have their muqarnas hoods: eight tiers of tile-faced cells stepping in from the springing to the crown, cream, lapis and turquoise by turns with white edges, a lapis crown panel; below, the iwan's walls lined with a lapis dado and a band of white letters on blue at the springing (tile_white).
 
