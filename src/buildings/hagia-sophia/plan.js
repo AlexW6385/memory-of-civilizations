@@ -3,6 +3,7 @@
 // apse), +z south; y = 0 at the nave floor. Metres, true scale.
 
 import { SITES } from '../../world/regions.js';
+import './style.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -71,6 +72,12 @@ for (const sz of [-1, 1]) {
     const x0 = -S + gb * k + 0.35, x1 = -S + gb * (k + 1) - 0.35;
     block([x0, z - 0.14, x1, z + 0.14], GF, GF + 1.0, 'revetment_green');
   }
+  // the projecting cornices at the gallery floor and at the top of the gallery arcade (Paul the Silentiary: the
+  // cornices and the mouldings between the revetment gilded — pallasweb), the inlaid discs in the spandrels
+  add({ t: 'n_cornice', path: [[-S, z], [S, z]], toward: [0, 0], y: GF, half: 0.4, fill: true });
+  add({ t: 'n_cornice', path: [[-S, z], [S, z]], toward: [0, 0], y: 21.9, half: 0.4 });
+  add({ t: 'spandrel_discs', o: [-S, z], u: [1, 0], half: 0.4, at: [1, 2, 3, 4].map((k) => 6.2 * k), y: 12.25, r: 0.42, side: -sz });
+  add({ t: 'spandrel_discs', o: [-S, z], u: [1, 0], half: 0.4, at: [1, 2, 3, 4, 5, 6].map((k) => gb * k), y: 20.45, r: 0.24, side: -sz });
   // the tympanum under the great arch: two rows of windows (7 + 5)
   const holes = [];
   for (let k = 1; k <= 7; k++) holes.push({ u0: 2 * S * k / 8 - 1.1, u1: 2 * S * k / 8 + 1.1, y0: 24.0, y1: 29.0 });
@@ -135,6 +142,9 @@ for (const sx of [-1, 1]) {
     };
     bays(3, 0, 14.0, 9.4, 9.4, 0.95, 'porphyry', 0.9);
     bays(7, GF, 21.6, GF + 4.4, 4.4, 0.55, 'verde_antico', 0.6);
+    const poly = (n) => Array.from({ length: n + 1 }, (_, k) => P(th - 90 + 180 * k / n));
+    add({ t: 'n_cornice', path: poly(3), toward: [px, pz], y: GF, half: 0.4 });
+    add({ t: 'n_cornice', path: poly(7), toward: [px, pz], y: 21.9, half: 0.4 });
   }
 }
 
@@ -144,6 +154,9 @@ add({ t: 'sphere', c: [0, YS, 0], R: RP, clips: [[1, 0, 0, S], [-1, 0, 0, S], [0
 add({ t: 'arc_wall', c: [0, 0], r0: S - 0.45, r1: S + 0.1, a0: 0, a1: 360, y0: YD - 0.45, y1: YD + 0.6, mat: 'marble_smooth', collide: false, step: 3 });
 add({ t: 'square_ring', c: [0, 0], half: 17.5, r: S + 0.9, y: YD + 0.6, y0: YD - 0.8, mat: 'stucco_warm' });
 add({ t: 'ribbed_dome', c: [0, 0], y0: YD + 0.6, r: S, thick: 0.9, win: { n: 40, w: 1.25, h: 1.9 }, crown: CROWN, mat: 'mosaic_gold', outMat: 'lead' });
+// the cross in a circle of mosaic at the crown; the single lamps on bronze stakes along the cornice (Paul, 489, 506, 862)
+add({ t: 'dome_cross', c: [0, 0], y0: YD + 0.6, r: S, win: { h: 1.9 }, crown: CROWN, R: 4.0 });
+add({ t: 'cornice_lamps', c: [0, 0], r: S - 0.25, y: YD + 0.6, n: 80, cyma: { r: S - 0.45, y0: YD - 0.45 } });
 
 // ── the apse and the bema ────────────────────────────────────────────────────
 const AX = S + DA;                                  // the apse arch's chord (x = 30.1)
@@ -284,10 +297,10 @@ obj('doors', -48.5, 0, 0, { yaw: Math.PI / 2, w: 2.6, h: 4.5, th: 0.16, depth: 0
 // ── the furnishings of the liturgy ───────────────────────────────────────────
 obj('ambo', 4, 0, 0, { rx: 3.0, rz: 2.1, h: 2.4 });
 obj('solea', 0, 0, 0, { rect: [12.4, -1.6, 21.6, 1.6] });
-obj('chancel_screen', 0, 0, 0, { a: [22, -8.5], b: [22, 8.5], n: 5, gaps: [2] });
+obj('chancel_screen', 0, 0, 0, { a: [22, -8.5], b: [22, 8.5], n: 5, gaps: [0, 2, 4] });   // "three doors" (Paul)
 for (const sz of [-1, 1]) obj('chancel_screen', 0, 0, 0, { a: [22, sz * 8.5], b: [28.0, sz * 8.5], n: 3 });
 // lamps: the great ring under the dome, rings under the semidomes and in the aisles
-obj('polykandelon', 0, 0, 7.0, { r: 9.0, n: 64, top: CROWN, light: 2.5, lights: 6, distance: 16 });
+obj('polykandelon', 0, 0, 7.0, { r: 9.0, n: 64, top: CROWN, hang: { r: S - 0.7, y: YD - 0.8 }, light: 2.5, lights: 6, distance: 16 });
 for (const sx of [-1, 1]) obj('polykandelon', sx * 22, 0, 6.0, { r: 2.6, n: 20, top: YS + 14, light: 1.5, lights: 2, distance: 10 });
 for (const sz of [-1, 1]) for (const x of [-25, -6, 6, 27]) obj('polykandelon', x, sz * 25.4, 5.5, { r: 1.1, n: 10, top: 13.8, light: 1.2, lights: 1, distance: 9 });
 for (const sz of [-1, 1]) for (const x of [-25, -6, 6, 27]) obj('polykandelon', x, sz * 25.4, GF + 4.5, { r: 0.9, n: 8, top: 21.4, light: 0.8, lights: 1, distance: 8 });
@@ -326,7 +339,7 @@ export const hagiaSophia = {
   id: 'hagia-sophia',
   name: { en: 'Hagia Sophia, Constantinople', zh: '君士坦丁堡圣索菲亚大教堂' },
   era: { en: 'Byzantine, AD 532–537, dome rebuilt 562', zh: '拜占庭，公元532—537年，穹顶562年重建' },
-  style: 'byzantine',
+  style: 'byzantine-hs',
   district: 'byzantium',
   ...SITES['hagia-sophia'],
   entrance: { at: [-104, 0], facing: 'e' },
