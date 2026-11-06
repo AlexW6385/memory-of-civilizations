@@ -11,6 +11,7 @@ import '../qing/index.js';
 import { KAIFENG_ELEMENTS, hexa } from './kaifeng.js';
 import { WUTAI_ELEMENTS } from './wutai.js';
 import { HANGZHOU_ELEMENTS } from './hangzhou.js';
+import { SCROLL_ELEMENTS } from './scroll.js';
 
 const ngon = (cx, cz, r, n = 8, rot = Math.PI / 8) => Array.from({ length: n }, (_, k) => [cx + Math.cos(rot + k / n * Math.PI * 2) * r, cz + Math.sin(rot + k / n * Math.PI * 2) * r]);
 /** A flat-faced frustum from the polygon `bot` at y0 to `top` at y1, capped. */
@@ -169,6 +170,6 @@ function pagodaOct(el, { bag, col }) {
 
 registerStyle('song', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, ...KAIFENG_ELEMENTS, ...WUTAI_ELEMENTS, ...HANGZHOU_ELEMENTS },
+  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, ...KAIFENG_ELEMENTS, ...WUTAI_ELEMENTS, ...HANGZHOU_ELEMENTS, ...SCROLL_ELEMENTS },
   objects: {},
 });

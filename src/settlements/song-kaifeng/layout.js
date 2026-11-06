@@ -16,6 +16,10 @@ export const GATE = { z: -80, rect: [-309, -96, -291, -64] };   // the city gate
 export const MONASTERY = [80, -260, 240, -110];
 export const PAGODA = [160, -190];
 export const WALL_X = -300;
+// the open country east of the suburb: wheat fields, the road and the towpath running on into them
+export const FIELDS_X = 262;
+// the stone-faced banks by the bridge (canal_wall); beyond them the banks are of earth and the towpath runs on the north one
+export const STONE_BANK = 90;
 export const STREETS = [[-7, -RADIUS, 7, RIVER.z0], [-7, RIVER.z1, 7, RADIUS], [-RADIUS, RIVER.z0 - 14, RADIUS, RIVER.z0], [-RADIUS, RIVER.z1, RADIUS, RIVER.z1 + 14], [-RADIUS, -84, RADIUS, -76], [-RADIUS, 196, RADIUS, 204], [-156, -RADIUS, -148, RIVER.z0 - 14], [146, RIVER.z1 + 14, 154, RADIUS]];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -28,7 +32,7 @@ export function lots() {
   LOTS = [];
   const rand = rng(1120);
   const fits = (r) => Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) <= RADIUS - 24;
-  const ok = (r) => fits(r) && r[0] > WALL_X + 8 && !inRect(MONASTERY, (r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 10) && !STREETS.some((s) => s[0] < r[2] && s[2] > r[0] && s[1] < r[3] && s[3] > r[1]) && !(r[1] < RIVER.z1 + 2 && r[3] > RIVER.z0 - 2);
+  const ok = (r) => fits(r) && r[0] > WALL_X + 8 && r[2] < FIELDS_X && !inRect(MONASTERY, (r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 10) && !STREETS.some((s) => s[0] < r[2] && s[2] > r[0] && s[1] < r[3] && s[3] > r[1]) && !(r[1] < RIVER.z1 + 2 && r[3] > RIVER.z0 - 2);
   for (const s of STREETS) {
     const horiz = s[2] - s[0] > s[3] - s[1];
     if (horiz) for (const side of [-1, 1]) for (let x = s[0]; x < s[2];) { const w = 6 + rand() * 4, d = 11 + rand() * 4, r = side < 0 ? [x, s[1] - d, x + w - 0.3, s[1] - 0.2] : [x, s[3] + 0.2, x + w - 0.3, s[3] + d]; if (ok(r)) LOTS.push({ rect: r, front: side < 0 ? 's' : 'n', storeys: rand() < 0.5 ? 2 : 1, shop: rand() < 0.7, seed: Math.floor(rand() * 1e6) }); x += w; }

@@ -304,10 +304,15 @@ function caimen(el, { bag, col }) {
     bag.add('cloth_indigo', fromTriangles(blue)); bag.add('cloth_white', fromTriangles(white));
     col.circle(fp[0], fp[2], 0.12, y, y + fh);
   }
+  // the red gardenia lamps (zhizi deng) hung from the door's lintel, either side of the way in
+  if (el.lamps) for (const u of [us[1] + 0.35, us[2] - 0.35]) {
+    const h0 = P(u, front, 2.7 + 0.65 * 0.35 / (L / 2 - us[1]));
+    zhizi(bag, h0[0], h0[1] - 0.05, h0[2]);
+  }
   // the lantern boxes before the door: a stand, paper sides, a little roof, characters in black
   const nb = el.boxes ?? 2;
   for (let i = 0; i < nb; i++) {
-    const u = nb === 1 ? L / 2 - 1.4 : (i ? us[2] - 0.6 : us[1] + 0.6), c = P(u, front + 0.9, 0), s = 0.33;
+    const u = nb === 1 ? L / 2 - 1.4 : nb === 3 ? [(us[0] + us[1]) / 2, us[1] + 0.6, us[2] - 0.6][i] : (i ? us[2] - 0.6 : us[1] + 0.6), c = P(u, front + 0.9, 0), s = 0.33;
     bag.add('wood_dark', box(c[0] - s - 0.04, y, c[2] - s - 0.04, c[0] + s + 0.04, y + 0.5, c[2] + s + 0.04));
     bag.add('lamp_paper', box(c[0] - s, y + 0.5, c[2] - s, c[0] + s, y + 1.75, c[2] + s));
     bag.add('wood_dark', box(c[0] - s - 0.06, y + 1.75, c[2] - s - 0.06, c[0] + s + 0.06, y + 1.83, c[2] + s + 0.06));
@@ -317,6 +322,16 @@ function caimen(el, { bag, col }) {
     bag.add('lacquer_black', fromTriangles(ink));
     col.circle(c[0], c[2], 0.45, y, y + 2);
   }
+}
+
+/** A gardenia lamp hanging from (x, y, z): the cord, a cap, the lamp of red silk on ribs swelling like the gardenia's fruit, a tassel. */
+export function zhizi(bag, x, y, z) {
+  bag.add('cloth_red', rod([x, y, z], [x, y - 0.3, z], 0.008, 3));
+  bag.add('lacquer_black', lathe([[0.001, 0], [0.07, 0], [0.06, 0.05], [0.001, 0.06]], 8, null, x, y - 0.36, z));
+  const prof = [[0.001, 0], [0.08, 0.02], [0.17, 0.12], [0.2, 0.26], [0.17, 0.4], [0.09, 0.48], [0.001, 0.5]];
+  bag.add('cloth_red', lathe(prof, 12, (th) => 1 + 0.07 * Math.cos(th * 6), x, y - 0.86, z));
+  bag.add('lacquer_black', lathe([[0.001, 0], [0.05, 0], [0.05, 0.04], [0.001, 0.04]], 8, null, x, y - 0.9, z));
+  bag.add('cloth_red', lathe([[0.001, -0.3], [0.04, -0.28], [0.02, 0], [0.001, 0]], 6, null, x, y - 0.9, z));
 }
 
 /**
