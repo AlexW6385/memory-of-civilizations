@@ -51,9 +51,9 @@ function quays() {
     let path = [];
     for (let a = 0; a <= Math.PI + 1e-9; a += Math.PI / 180) {
       const x = C[0] + Math.cos(a) * r, z = C[1] + Math.sin(a) * r;
-      if (inside(x, z)) path.push([x, z]); else { if (path.length > 1) out.push({ t: 'quay_wall', path, y: GROUND, bed: WATER - 2.2, water: WATER, side: s }); path = []; }
+      if (inside(x, z)) path.push([x, z]); else { if (path.length > 1) out.push({ t: 'quay_wall', path, y: GROUND, bed: WATER - 2.2, water: WATER, side: -s }); path = []; }
     }
-    if (path.length > 1) out.push({ t: 'quay_wall', path, y: GROUND, bed: WATER - 2.2, water: WATER, side: s });
+    if (path.length > 1) out.push({ t: 'quay_wall', path, y: GROUND, bed: WATER - 2.2, water: WATER, side: -s });
   }
   const zq = IJ_Z + QUAY + 0.2, xq = Math.sqrt((RADIUS - 62) ** 2 - zq * zq);
   out.push({ t: 'quay_wall', path: Array.from({ length: 41 }, (_, i) => [-xq + i * 2 * xq / 40, zq]), y: GROUND, bed: WATER - 2.2, water: WATER, side: 1 });

@@ -23,7 +23,8 @@ export function quayWall(el, { bag, col }) {
     if (acc > 9) { acc = 0; const nx = -(bz - az) / L, nz = (bx - ax) / L, side = el.side ?? 1;
       const px = bx + nx * 0.7 * side, pz = bz + nz * 0.7 * side;                        // a wooden mooring post on the quay
       bag.add('timber', lathe([[0.12, 0], [0.12, 0.8], [0.14, 0.85], [0.001, 0.95]], 8, null, px, y + 0.28 - 0.3, pz));
-      bag.add('iron', box(bx - 0.05, y - 0.5, bz - 0.05, bx + 0.05, y - 0.2, bz + 0.05)); }
+      const rx = bx - nx * 0.3 * side, rz = bz - nz * 0.3 * side;                         // an iron mooring ring on the water face
+      bag.add('iron', box(rx - 0.06, y - 0.55, rz - 0.06, rx + 0.06, y - 0.25, rz + 0.06)); }
   }
 }
 
