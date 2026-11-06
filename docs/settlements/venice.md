@@ -32,6 +32,12 @@ The basilica faces west down the piazza; the Piazzetta opens south to the water.
 
 Brick and Istrian stone; marble and gold mosaic on the basilica; lead domes; arcades; houses plastered under tiled roofs. [stated]
 
+**The Doge's Palace (L2–L3, built).** A portico of columns with carved fourteenth-century capitals supporting the arcades, and above it a light Gothic loggia with twice as many arches, with four-petalled circular openings in the tracery above them [stated: travelmate]; on the Molo front a lower gallery of 17 pointed arches, about 5.76 m high, the Piazzetta side following it; the quatrefoils [stated: jc-r]. The upper wall in a two-tone diamond pattern of white Istrian stone and pink Verona marble [stated: travelmate; jc-r], pierced besides small oculi only by seven major windows [stated: jc-r]; large balconies with sculpture on the two fronts [stated: travelmate] — ours on the Molo (the balcony of 1404) with Justice above [inferred: the figure's attributes]. The top is not battlemented but crowned with spires and pinnacles [stated: travelmate]; ours a cresting of marble leaves [inferred]. Corner groups: Adam and Eve, the Drunkenness of Noah [stated: travelmate]; ours simple figures round a tree on the two Molo corners [inferred]. The Piazzetta wing was rebuilt from 1424 [stated: jc-r], so in 1500 both fronts stand. The Porta della Carta (1438–42) and the canal front are not detailed [inferred: recorded for later].
+
+**The horses of San Marco (L2, built).** Four almost life-size gilt-bronze horses, brought after the Fourth Crusade and set on the basilica's front in 1254 [stated: tuscanynowandmore], on the loggia over the central portal [inferred: from views]; ours modelled whole, each pair turned toward the other, two lifting a foreleg [inferred from photographs], on a terrace in front of the central arch [inferred].
+
+**The Molo (L2, built).** Gondolas moored stern to the quay before the Piazzetta and the palace between mooring posts [inferred]. Gondolas of the 1490s as Carpaccio painted them (the "Miracle of the Relic of the Cross at the Rialto", 1494): long, rising at both ends, some with a cabin (felze) amidships, rowed standing with one oar [inferred: from the painting, Gallerie dell'Accademia (Wikipedia "Miracle of the Relic of the Cross at the Ponte di Rialto"), not fetched here]; the hull black [inferred: the colour was made compulsory only by the sumptuary law of 1562; many were already dark].
+
 ## 5. The town
 
 About 1,000 houses on the islands. [inferred]
@@ -60,3 +66,6 @@ Polychoral music in San Marco; the lute and the viol; the gondoliers' songs. [in
 - [St Mark's Campanile — Wikipedia](https://en.wikipedia.org/wiki/St_Mark%27s_Campanile)
 - [Doge's Palace — Wikipedia](https://en.wikipedia.org/wiki/Doge%27s_Palace)
 - [Piazza San Marco — Wikipedia](https://en.wikipedia.org/wiki/Piazza_San_Marco)
+- [Doge's Palace exterior — travelmate](https://travelmate.tech/en/italy/venice/doge-s-palace/exterior)
+- [The Doge's palace — venice.jc-r.net](https://venice.jc-r.net/doges-palace)
+- [5 things about the Basilica di San Marco — tuscanynowandmore](https://tuscanynowandmore.com/discover-italy/museums-unmissable-sights/5-things-you-didnt-know-about-basilica-di-san-marco)

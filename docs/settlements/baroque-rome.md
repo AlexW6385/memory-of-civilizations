@@ -33,6 +33,13 @@ The church's front faces east, toward the city. Its apse faces west, toward the 
 
 Travertine walls, lead roofs and a ribbed lead dome; Tuscan columns in the colonnade; statues on the attics. [stated]
 
+**The piazza's sculpture and water (L2–L3, built).**
+- *The obelisk:* 25.31 m high on a base 8.25 m wide, re-erected by Domenico Fontana for Sixtus V in 1586; it rests on four couchant bronze lions, each with two bodies whose tails intertwine, on a high pedestal; on top a bronze emblem of Sixtus with a relic of the Cross, the cross above [stated: stpetersbasilica.info]; 41 m with the pedestal [stated: aviewoncities]. Ours: steps, plinth, die with framed panels and cornice, the lions with one head at each corner and a body along each side, the emblem as the three mounts and the star of the Peretti arms [inferred], the cross.
+- *The fountain:* Maderno's of 1614 — an octagonal base with dragons and Borghese eagles, the old granite lower basin reused, all set in a much larger, slightly oval basin with a multilinear profile; height about 8 m, upper basin about 16 m round [stated: vatican.va]. Bernini rebuilt it a few metres forward in line with the obelisk (1667); its twin was inaugurated in 1677 [stated: vatican.va; aviewoncities] — so at our date only the north fountain stood; the twin is shown as in the existing plan [inferred: a known anachronism, left for the owner to decide]. Ours: the lobed basin, the octagonal pedestal, the granite bowl, the upturned bowl, the water falling from both rims in streams [inferred: the form from photographs].
+- *The colonnade:* four rows, 284 Doric columns and 88 pilasters, finished 1660; 140 statues by Bernini and his pupils on top [stated: aviewoncities]. Ours: a balustrade along the inner edge of the entablature and a saint on a pedestal over every bay, in five poses with a cross, a book, a palm or a staff [inferred: the attributes].
+- *Ponte Sant'Angelo:* five arches, the three middle ones Roman [stated: ancient-history-sites]; ours three great arches and a small one at each end, segmental because our banks are low [inferred]. In 1669 Clement IX had Bernini design a new parapet; ten angels with the instruments of the Passion, commissioned 1667, were installed in 1670 — the column, the scourges, the crown of thorns, the veil, the garment and dice, the nails, the cross, the title, the sponge, the lance; at the end opposite the castle, Peter with the keys and Paul with the sword (1535) [stated: ancient-history-sites]. Ours: travertine balustrades between pedestals [stated: the balustrades], the angels five a side facing across the road [inferred: placing], Peter and Paul at the city end.
+- *The Vatican ranges:* the palace as stuccoed storeys over a travertine base with framed windows under alternating pediments and a crowning cornice; the Sistine Chapel as a plain brick hall with its row of tall round-headed windows [inferred: from views; replaces the Florentine palace block used before].
+
 ## 5. The town
 
 The Borgo's stuccoed houses of three or four storeys with tiled roofs, between the two Borgo streets and in the lanes. [stated: the houses; their number ours — inferred]
@@ -64,3 +71,7 @@ The Cappella Sistina's polyphony (Palestrina, Allegri's Miserere), the organ, an
 - [Borgo (rione of Rome) — Wikipedia](https://en.wikipedia.org/wiki/Borgo_(rione_of_Rome))
 - [Via della Conciliazione — Wikipedia](https://en.wikipedia.org/wiki/Via_della_Conciliazione)
 - [Miserere (Allegri) — Wikipedia](https://en.wikipedia.org/wiki/Miserere_(Allegri))
+- [Fountain to the right — vatican.va](https://www.vatican.va/content/vatican/en/ra/fontana-destra.html)
+- [The obelisk — stpetersbasilica.info](https://mail.stpetersbasilica.info/Exterior/Obelisk/Obelisk.htm)
+- [St. Peter's Square — aviewoncities](https://aviewoncities.com/rome/st-peters-square)
+- [Ponte Sant'Angelo — ancient-history-sites.com](https://www.ancient-history-sites.com/?p=169995)
