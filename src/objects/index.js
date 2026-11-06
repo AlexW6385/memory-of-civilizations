@@ -458,7 +458,7 @@ function teaTable(el, { bag, col }) {
   put('pottery_dark', at(lz([[0.06, 0], [0.09, 0.04], [0.09, 0.09], [0.04, 0.13], [0.05, 0.15], [0.001, 0.15]], 10), 0.05, 0.8, 0.05));
   put('pottery_dark', seg([0.14, 0.86, 0.05], [0.21, 0.92, 0.05], 0.012, 0.008, 4));
   for (const [cx2, cz2] of [[-0.25, -0.2], [0.25, -0.22], [-0.22, 0.25], [0.2, 0.26]]) if (rand() < 0.8) put('glaze_white', at(lz([[0.025, 0], [0.04, 0.05], [0.001, 0.05]], 8), cx2, 0.8, cz2));
-  if (rand() < 0.5) put('basket', at(lz([[0.1, 0], [0.13, 0.08], [0.001, 0.08]], 8), -0.2, 0.8, 0.12));
+  if (rand() < 0.5) put('wicker', at(lz([[0.1, 0], [0.13, 0.08], [0.001, 0.08]], 8), -0.2, 0.8, 0.12));
   const [x, z] = el.at, y = el.y ?? 0; col.circle(x, z, 0.55, y, y + 0.8);
 }
 /** drying_tray: a round flat bamboo tray on a trestle, things laid out to dry (greens, red peppers, beans). */
