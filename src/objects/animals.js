@@ -189,7 +189,60 @@ function elephantParts(a, { african = false, tusks = 'long' } = {}) {
   a('hide', tube([[0, bk[0] + 0.08, 1.28, 0.06], [0, bk[0] - 0.3, 1.43, 0.045], [0, 1.0, 1.47, 0.03], [0, 0.85, 1.45, 0.025]], 6));
   a('dark', tube([[0, 0.9, 1.455, 0.03], [0, 0.78, 1.45, 0.045], [0, 0.66, 1.44, 0.012]], 6));
 }
-/** An elephant: { at, rot, seed, african, tusks ('long' | 'short' | 'none'), gear (a caparison over the back), cloth }. */
+/** The farthest crossing of a ray (origin o, direction d) with a non-indexed geometry's triangles (distance along d), or null. */
+function farHit(g, o, d) {
+  const P = g.attributes.position.array;
+  let best = null;
+  for (let i = 0; i < P.length; i += 9) {
+    const e1 = [P[i + 3] - P[i], P[i + 4] - P[i + 1], P[i + 5] - P[i + 2]], e2 = [P[i + 6] - P[i], P[i + 7] - P[i + 1], P[i + 8] - P[i + 2]];
+    const h = [d[1] * e2[2] - d[2] * e2[1], d[2] * e2[0] - d[0] * e2[2], d[0] * e2[1] - d[1] * e2[0]], det = e1[0] * h[0] + e1[1] * h[1] + e1[2] * h[2];
+    if (Math.abs(det) < 1e-9) continue;
+    const f = 1 / det, sv = [o[0] - P[i], o[1] - P[i + 1], o[2] - P[i + 2]], u = f * (sv[0] * h[0] + sv[1] * h[1] + sv[2] * h[2]);
+    if (u < 0 || u > 1) continue;
+    const q = [sv[1] * e1[2] - sv[2] * e1[1], sv[2] * e1[0] - sv[0] * e1[2], sv[0] * e1[1] - sv[1] * e1[0]], v = f * (d[0] * q[0] + d[1] * q[1] + d[2] * q[2]);
+    if (v < 0 || u + v > 1) continue;
+    const t = f * (e2[0] * q[0] + e2[1] * q[1] + e2[2] * q[2]);
+    if (t > 0 && (best === null || t > best)) best = t;
+  }
+  return best;
+}
+/**
+ * A temple elephant's dressing, laid on its hide (found by rays cast at the built shape): the sacred marks
+ * on the brow — 'tripundra', Shiva's three level stripes of holy ash with a red dot of kumkum below, or
+ * 'namam', Vishnu's white U with the red line up its middle; a brass bell hanging from a rope round the neck;
+ * brass rings at the ankles. Roles: white, red, rope, brass.
+ */
+function templeDress(a, hide, { marks, bell, anklets }) {
+  const front = (x, y) => { const t = farHit(hide, [x, y, -1.4], [0, 0, -1]); return t === null ? null : -1.4 - t; };
+  const strip = (pts, role, r) => { const q = pts.map(([x, y]) => { const z = front(x, y); return z === null ? null : [x, y, z + r * 0.35, r, r * 0.45]; }).filter(Boolean); if (q.length > 1) a(role, tube(q, 5)); };
+  if (marks === 'tripundra') {
+    for (const y of [2.29, 2.36, 2.43]) strip(Array.from({ length: 9 }, (_, k) => [-0.2 + k * 0.05, y]), 'white', 0.02);
+    const z = front(0, 2.21); if (z !== null) a('red', slathe([[0.001, 0], [0.036, 0.002], [0.034, 0.012], [0.001, 0.014]], 10).rotateX(Math.PI / 2).translate(0, 2.21, z - 0.006));
+  } else if (marks === 'namam') {
+    for (const sx of [-1, 1]) strip(Array.from({ length: 7 }, (_, k) => [sx * 0.07 + sx * 0.012 * Math.sin(k / 6 * Math.PI), 2.18 + k * 0.05]), 'white', 0.022);
+    strip(Array.from({ length: 5 }, (_, k) => [-0.06 + k * 0.03, 2.17 - 0.012 * Math.sin(k / 4 * Math.PI)]), 'white', 0.022);
+    strip(Array.from({ length: 6 }, (_, k) => [0, 2.2 + k * 0.05]), 'red', 0.016);
+  }
+  if (bell) {
+    // the rope round the neck where the head meets the shoulders, the bell from its lowest point (the rope
+    // drawn under the throat only, its ends running up under the ears, which hide the rest)
+    const zc = -1.12, yc = 1.88, ring = [];
+    for (let k = 0; k <= 16; k++) { const th = Math.PI + 0.12 + k / 16 * (Math.PI - 0.24), d = [Math.cos(th), Math.sin(th), 0], t = Math.min(0.72, farHit(hide, [0, yc, zc], d) ?? 0.6); ring.push([d[0] * (t + 0.02), yc + d[1] * (t + 0.02), zc, 0.022]); }
+    a('rope', tube(ring, 5));
+    const low = ring.reduce((m, p) => (p[1] < m[1] ? p : m));
+    a('rope', tube([[low[0], low[1], zc, 0.015], [low[0], low[1] - 0.1, zc - 0.01, 0.015]], 5));
+    a('brass', slathe([[0.001, 0], [0.11, 0.0], [0.115, 0.02], [0.095, 0.08], [0.075, 0.18], [0.05, 0.215], [0.02, 0.225], [0.001, 0.226]], 12).translate(low[0], low[1] - 0.33, zc - 0.01));
+    a('brass', EL_BALL(0.03, 6, 5).translate(low[0], low[1] - 0.31, zc - 0.01));                      // the clapper
+  }
+  if (anklets) for (const sx of [-1, 1]) for (const [fz, r] of [[-0.715, 0.222], [0.87, 0.214]]) {
+    const ring = Array.from({ length: 17 }, (_, k) => { const th = k / 16 * Math.PI * 2; return [sx * 0.45 + Math.cos(th) * r, 0.24, fz + Math.sin(th) * r, 0.024, 0.03]; });
+    a('brass', tube(ring, 5, { capA: false, capB: false }));
+  }
+}
+/**
+ * An elephant: { at, rot, seed, african, tusks ('long' | 'short' | 'none'), gear (a caparison over the back), cloth,
+ * and a temple elephant's dressing: marks ('tripundra' | 'namam' on the brow), bell (on a rope round the neck), anklets }.
+ */
 function elephant(el, { bag, col }) {
   const rand = rng(el.seed), african = !!el.african, tusks = el.tusks ?? (african ? 'long' : rand() < 0.4 ? 'long' : rand() < 0.5 ? 'short' : 'none');
   const put = placer(el, bag, 0.94 + rand() * 0.12, [0.96 + rand() * 0.08, 1, 1]), shade = 0.85 + rand() * 0.2;
@@ -217,6 +270,11 @@ function elephant(el, { bag, col }) {
       for (const th of [a0, a1]) a('trim', tube(Array.from({ length: 9 }, (_, k) => [...at(z0 + (z1 - z0) * k / 8, th, 0.05), 0.03, 0.012]), 5));
     });
     put(el.cloth ?? 'cloth_red', G.cloth.clone()); put('gilt_bronze', G.trim.clone());
+  }
+  if (el.marks || el.bell || el.anklets) {
+    const T = assembly(`beast-temple|elephant|${african ? 'a' : ''}|${el.marks ?? ''}|${el.bell ? 'b' : ''}|${el.anklets ? 'k' : ''}`, (a) => templeDress(a, P.hide, el));
+    if (T.white) put('paint_white', T.white.clone()); if (T.red) put('stucco_red', T.red.clone());
+    if (T.rope) put('cloth_white', T.rope.clone(), 0.85); if (T.brass) put('bronze', T.brass.clone());
   }
   const [x, z] = el.at, y = el.y ?? 0;
   col.circle(x, z, 1.4, y, y + 3);

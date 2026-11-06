@@ -505,42 +505,22 @@ function shakti(bag, x, y, z, f, robe, small = false) {
 }
 
 /**
- * elephant: a temple elephant { at: [x, z], y, rot (it faces −z turned by rot), seed }: an Asian
- * cow elephant some 2.6 m at the shoulder — the arched back, the domed twin bulges of the head,
- * small ears, the trunk hanging and curling, short tusks; on the forehead the god's sacred marks
- * painted in white and red, a brass bell on a rope round the neck, a red cloth over the back with a
- * gilt border, rings on the ankles. Tied by a chain at one foot.
+ * elephant: a temple elephant { at: [x, z], y, rot (it faces −z turned by rot), seed, chain }: the shared
+ * Asian elephant (src/objects/animals.js) with short tushes, dressed as a temple's — a red caparison with
+ * gilt borders over the back, Shiva's three stripes of holy ash and a red dot of kumkum on the brow (the
+ * Meenakshi–Sundareswarar temple is Shaiva) [inferred], a brass bell on a rope round the neck, brass rings at
+ * the ankles (docs/settlements/madurai.md §10). Tied by a chain at the left forefoot to a stone.
  */
-function elephant(el, { bag, col }) {
-  const [ex, ez] = el.at, y = el.y ?? 0, rot = el.rot ?? 0, parts = [], add = (m, g) => parts.push([m, g]), H = 'hide_grey';
-  // built facing +x with the feet at the origin; turned so +x faces −z rotated by rot
-  const body = lathe([[0.001, -1.2], [0.55, -1.05], [0.78, -0.6], [0.82, 0], [0.78, 0.55], [0.5, 1.05], [0.001, 1.2]], 16, (th, i) => 1 + 0.08 * Math.sin(th), 0, 0, 0);
-  body.rotateZ(-Math.PI / 2); body.scale(1, 0.95, 0.85); body.translate(-0.1, 1.85, 0); add(H, body);
-  for (const [x, z] of [[0.7, 0.42], [0.7, -0.42], [-0.85, 0.4], [-0.85, -0.4]]) { add(H, lathe([[0.24, 0], [0.22, 0.1], [0.2, 0.9], [0.27, 1.6], [0.001, 1.65]], 10, null, x, 0, z)); add('gilt_bronze', lathe([[0.235, 0], [0.235, 0.06]], 10, null, x, 0.18, z)); }
-  // the head with its twin domes, the ears, the trunk, the tusks
-  add(H, lathe([[0.001, -0.5], [0.42, -0.35], [0.5, 0], [0.42, 0.35], [0.001, 0.5]], 12, null, 1.32, 2.15, 0));
-  for (const sz of [-1, 1]) add(H, lathe([[0.001, 0], [0.24, 0.05], [0.26, 0.2], [0.14, 0.34], [0.001, 0.36]], 10, null, 1.25, 2.45, sz * 0.18));
-  for (const sz of [-1, 1]) { const ear = lathe([[0.001, 0], [0.36, 0.01], [0.38, 0.04], [0.001, 0.05]], 14, null, 0, 0, 0); ear.rotateX(Math.PI / 2); ear.scale(0.85, 1.15, 1); ear.translate(1.02, 2.0, sz * 0.47 - 0.025); add(H, ear); }
-  const tk = [[1.72, 2.05, 0], [1.88, 1.6, 0], [1.9, 1.1, 0], [1.84, 0.6, 0], [1.9, 0.32, 0.02], [2.04, 0.24, 0.04]];
-  for (let i = 0; i + 1 < tk.length; i++) add(H, rod(tk[i], tk[i + 1], 0.2 - i * 0.03, 8));
-  for (const sz of [-1, 1]) add('ivory', rod([1.68, 1.75, sz * 0.2], [1.95, 1.52, sz * 0.24], 0.05, 6));
-  add(H, rod([-1.3, 2.1, 0], [-1.42, 1.1, 0], 0.04, 5));
-  // the sacred marks on the forehead, the bell, the cloth
-  add('paint_white', box(1.78, 2.15, -0.2, 1.84, 2.55, -0.14)); add('paint_white', box(1.78, 2.15, 0.14, 1.84, 2.55, 0.2)); add('stucco_red', box(1.785, 2.1, -0.05, 1.845, 2.6, 0.05));
-  add('cloth_white', rod([1.0, 2.45, -0.45], [1.25, 1.55, 0], 0.04, 5)); add('cloth_white', rod([1.0, 2.45, 0.45], [1.25, 1.55, 0], 0.04, 5));
-  add('bronze', lathe([[0.001, 0], [0.14, 0.04], [0.11, 0.25], [0.05, 0.3], [0.001, 0.32]], 10, null, 1.27, 1.25, 0));
-  // the cloth draped over the back (a shell just outside the body), hanging to a gilt hem on either side
-  { const t = [], hem = [], ry = 0.82 * 0.95 * 1.05, rz = 0.82 * 0.85 * 1.06, N = 10, at = (x, a) => [x, 1.85 + Math.cos(a) * ry, Math.sin(a) * rz];
-    const xa = -0.85, xb = 0.55, A = 1.45, pts = (x) => { const r = []; for (let k = 0; k <= N; k++) { const a = -A + 2 * A * k / N; r.push(at(x, a)); } const lo = r[0], hi = r[N]; return [[lo[0], 1.5, lo[2]], ...r, [hi[0], 1.5, hi[2]]]; };
-    const P0 = pts(xa), P1 = pts(xb);
-    for (let k = 0; k + 1 < P0.length; k++) t.push(...P0[k], ...P1[k], ...P1[k + 1], ...P0[k], ...P1[k + 1], ...P0[k + 1], ...P0[k], ...P1[k + 1], ...P1[k], ...P0[k], ...P0[k + 1], ...P1[k + 1]);
-    add('cloth_red', fromTriangles(t));
-    for (const k of [0, P0.length - 1]) { const a = P0[k], b = P1[k]; hem.push(box(a[0], 1.42, a[2] - 0.03, b[0], 1.52, a[2] + 0.03)); }
-    for (const g of hem) add('gilt_bronze', g); }
-  const a = rot;
-  for (const [m, g] of parts) bag.add(m, place(g, ex, y, ez, Math.PI / 2 + a, 1));
-  col.circle(ex, ez, 1.6, y, y + 3.1);
-  if (el.chain !== false) { const c = Math.cos(Math.PI / 2 + a), s2 = Math.sin(Math.PI / 2 + a), fx = ex + (0.7 * c + 0.42 * s2), fz = ez + (-0.7 * s2 + 0.42 * c); bag.add('iron', rod([fx, y + 0.15, fz], [fx + 1.6 * s2, y + 0.04, fz + 1.6 * c], 0.03, 5)); bag.add('granite_tamil', box(fx + 1.6 * s2 - 0.15, y, fz + 1.6 * c - 0.15, fx + 1.6 * s2 + 0.15, y + 0.5, fz + 1.6 * c + 0.15)); }
+function elephant(el, ctx) {
+  const { bag } = ctx, [ex, ez] = el.at, y = el.y ?? 0, a = el.rot ?? 0;
+  STYLES.life.elements.animal({ ...el, t: 'animal', kind: 'elephant', gear: true, cloth: el.cloth ?? 'cloth_red', tusks: el.tusks ?? 'short', marks: el.marks ?? 'tripundra', bell: el.bell ?? true, anklets: el.anklets ?? true }, ctx);
+  if (el.chain !== false) {
+    // from the left forefoot's ankle (local −0.45, −0.7: the elephant's local frame turned by rot) out sideways to the stone
+    const c = Math.cos(a), s = Math.sin(a), L = (x, z) => [ex + c * x + s * z, ez - s * x + c * z];
+    const f = L(-0.45 - 0.2, -0.7), t = L(-2.2, -0.9);
+    bag.add('iron', rod([f[0], y + 0.2, f[1]], [t[0], y + 0.35, t[1]], 0.03, 5));
+    bag.add('granite_tamil', box(t[0] - 0.15, y, t[1] - 0.15, t[0] + 0.15, y + 0.5, t[1] + 0.15));
+  }
 }
 
 /**
