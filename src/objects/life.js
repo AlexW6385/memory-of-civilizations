@@ -226,7 +226,7 @@ export function lifePlans(id, R, landmarks, town, G) {
   }
   // the landmarks' paved floors (forecourts, plazas raised a little): figures and stalls stand on them
   const floors = [];
-  if (MARKETS[id]?.length || PEOPLE[id]?.length || strollAreas.length) for (const plan of landmarks) { try { for (const f of buildPlan(plan).colliders.floors) if (f.y1 === undefined) floors.push(f); } catch (e) { /* a plan that cannot build here keeps the ground */ } }
+  if (MARKETS[id]?.length || PEOPLE[id]?.length) for (const plan of landmarks) { try { for (const f of buildPlan(plan).colliders.floors) if (f.y1 === undefined) floors.push(f); } catch (e) { /* a plan that cannot build here keeps the ground */ } }
   const ground = (x, z) => G.height(x, z);
   const H = (x, z) => { const g = ground(x, z); let y = g; for (const f of floors) { const r = f.rect; if (x >= r[0] && x <= r[2] && z >= r[1] && z <= r[3] && f.y > y && f.y < g + 2.5) y = f.y; } return y; };
   const wet = (x, z) => { const l = G.waterLevel(x, z); return Number.isFinite(l) && ground(x, z) < l + 0.05; };
@@ -360,7 +360,7 @@ export function lifePlans(id, R, landmarks, town, G) {
   // people in the open places of the landmarks: knots talking, some walking with loads (the listed places, then the
   // landmarks' other open rooms, more thinly; a terrace well above the ground keeps its own height)
   const areas = (PEOPLE[id] ?? []).map((a) => ({ a, k: 300 }));
-  if (!PEOPLE[id]) for (const sa of strollAreas) { const [x0, z0, x1, z1] = sa.rect, g = ground((x0 + x1) / 2, (z0 + z1) / 2); areas.push({ a: [x0, z0, x1, z1, sa.y - g > 2.4 ? sa.y : undefined], k: sa.garden ? 900 : sa.court ? 260 : 550 }); }
+  if (!PEOPLE[id]) for (const sa of strollAreas) { const [x0, z0, x1, z1] = sa.rect, g = ground((x0 + x1) / 2, (z0 + z1) / 2); areas.push({ a: [x0, z0, x1, z1, sa.y - g > 0.25 ? sa.y : undefined], k: sa.garden ? 900 : sa.court ? 260 : 550 }); }
   for (const { a: [x0, z0, x1, z1, yOver], k: per } of areas) {
     const cap = Math.max(per > 300 ? 4 : 10, Math.min(per > 300 ? 40 : 70, Math.round((x1 - x0) * (z1 - z0) / per)));
     for (let k = 0, tries = 0; k < cap && tries < cap * 8; tries++) {

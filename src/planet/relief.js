@@ -13,7 +13,7 @@ import { PLANET_RADIUS as R, SITES, BLEND } from './sites.js';
 import { PLACED } from './layout.js';
 import { coastAt, climateAt } from './land.js';
 import { fbm3, ridged3, noise3 } from './noise.js';
-import { unit, enuFrame, add, sub, scale, dot } from './geo.js';
+import { unit, enuFrame, add, sub, scale, dot, cross, norm, angle } from './geo.js';
 import { withFocus, terrainHeight, groundCover, inWater as legacyWater, waterLevel as legacyWaterLevel, RIM_FADE } from '../world/regions.js';
 import { GROUNDS } from '../settlements/grounds.js';
 
@@ -54,6 +54,32 @@ export const BUILT = SITES.filter((s) => s.legacy || GROUNDS[s.id]).map((s) => {
 });
 export const BUILT_BY_ID = Object.fromEntries(BUILT.map((b) => [b.id, b]));
 
+/**
+ * The roads between the settlements of one region (DESIGN §4.1: "no houses or roads outside
+ * settlements, except the roads and fields that join settlements of one region"): a spanning tree
+ * of each region's settlements, shortest links first, none longer than 2.6 km; each a great-circle
+ * arc from centre to centre that wanders a little, a strip of fields either side.
+ */
+export const ROADS = [];
+function layRoads() {
+  ROADS.length = 0;
+  const by = {};
+  for (const S of BUILT) (by[S.site.region] ??= []).push(S);
+  for (const list of Object.values(by)) {
+    if (list.length < 2) continue;
+    const links = [];
+    for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) links.push([angle(list[i].u, list[j].u), i, j]);
+    links.sort((p, q) => p[0] - q[0]);
+    const root = list.map((_, i) => i), find = (i) => (root[i] === i ? i : (root[i] = find(root[i])));
+    for (const [ang, i, j] of links) {
+      if (ang * R > 2600 || find(i) === find(j)) continue;
+      root[find(i)] = find(j);
+      const a = list[i].u, b = list[j].u, n = norm(cross(a, b));
+      ROADS.push({ a, n, t: norm(cross(n, a)), ang, seed: ROADS.length * 1.7 + 0.3, ends: [list[i], list[j]] });
+    }
+  }
+}
+
 /** Set the settlements' levels and frames (after the land map is loaded). */
 export function initRelief() {
   for (const S of BUILT) {
@@ -64,6 +90,7 @@ export function initRelief() {
     const [cx, cz] = S.local.center;
     S.frame = { ...S.enu, o: sub(S.enu.o, add(scale(S.enu.x, cx), scale(S.enu.z, cz))) };
   }
+  layRoads();
 }
 
 /**
@@ -144,6 +171,20 @@ export function coverAt(g, ny, u) {
     warmth: Math.min(1, desert * 0.9 + 0.2), red: sm(0.65, 0.9, n.warm) * sm(0.35, 0.65, n.moist) * 0.6,
     road: 0, snow, forest,
   };
+  // the roads between a region's settlements, and fields along them (on land, not on steep, high, snowy or desert ground)
+  for (const rd of ROADS) {
+    const off = dot(u, rd.n) * R;
+    if (Math.abs(off) > 90) continue;
+    const along = Math.atan2(dot(u, rd.t), dot(u, rd.a));
+    if (along < 0 || along > rd.ang) continue;
+    const m = along * R, wob = 22 * Math.sin(m / 210 + rd.seed) + 9 * Math.sin(m / 67 + rd.seed * 3.1);
+    const d = Math.abs(off - wob * Math.min(1, m / 300, (rd.ang * R - m) / 300));
+    const tame = (1 - steep) * (1 - snow) * (1 - high) * (n.d > 6 ? 1 : 0);
+    const road = (1 - sm(2.6, 4.2, d + 0.6 * patch)) * tame;
+    const fields = (1 - sm(18, 60, d + 15 * patch)) * tame * (1 - sm(0.3, 0.6, desert)) * (1 - road);   // (no fields in the desert)
+    if (road > c.road) { const k = road - c.road; c.road = road; c.grass *= 1 - k; c.forest *= 1 - k; }
+    if (fields > c.fields) { c.fields = fields; c.forest *= 1 - fields; }
+  }
   // on a settlement's disc, its own ground cover (the old city's), blended out with its ground
   const s = g.s;
   if (s && s.w > 0) {

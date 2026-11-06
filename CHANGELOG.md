@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.27 — Roads between a region's settlements (2026-11-05)
+- The open country now carries the roads that join the settlements of one region (DESIGN §4.1): a spanning tree of each region's settlements, shortest links first and none longer than 2.6 km (23 roads: China, Japan, India, Mesopotamia, Persia, the Levant, the Bosphorus, Egypt, the Aegean, Latium, Britain, France, Iberia, Italy, Mexico); each a great-circle arc from centre to centre that wanders a little, 5–8 m of beaten earth, with a strip of fields either side except in the desert, not on steep, high or snowy ground nor on the beach. tests/roads.test.mjs checks they are laid and show on the ground. Life: the landmarks' raised open rooms take their own height directly (no longer by building every landmark's floors), so laying out the life is fast again.
+
 ## v9.26 — Conques' west front (2026-11-05)
 - Sainte-Foy's west gable is no longer a stack of stepped slabs: a smooth stone triangle with a coping along both slopes, a stone cross at the apex, and a corbel table under a moulding along its foot; two flat buttresses flank the portal up to the windows' sills under sloped caps. New romanesque element: west_gable.
 
