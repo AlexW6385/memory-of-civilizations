@@ -1,7 +1,7 @@
 # Ming–Qing Beijing — dossier
 
 Settlement id: `qing-beijing` · Style: `qing` · Region: China (North China plain) · Code: `src/settlements/qing-beijing/`
-Status of this dossier: L1–L2 (the Outer Court's plan, gates, terrace and halls at their true size; the wall, moat and corner towers; bronzes; the hutong quarter of courtyard houses; ground, planting, weather, music). L3 recorded for later: the Inner Court, the throne and interiors, the painted beams (hexi caihua) in their patterns, the guardian figures on the hips, carved balustrade panels and dragon heads, the U-shaped Meridian Gate with its towers, people and processions.
+Status of this dossier: L1–L2 (the Outer Court's plan, gates, terrace and halls at their true size; the wall, moat and corner towers; bronzes; the hutong quarter of courtyard houses; ground, planting, weather, music). L2–L3 detail in §10 (carved balustrades and spouts, lions, terrace bronzes, roof figures and ridge ornaments, gate leaves with nails, siheyuan gates). L3 recorded for later: the Inner Court, the painted beams (hexi caihua) in their patterns, the corner towers' full roofs, the U-shaped Meridian Gate with its towers, processions.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -64,6 +64,23 @@ A clear autumn: high blue sky, dry air, a north-west wind, now and then dust fro
 ## 9. Sound
 
 The court's ceremonial music (bell and stone chimes, slow, on the gong mode) in the open; mouth organs and flute in the halls; a plucked lute for the lanes. [inferred; timbres from our sound library]
+
+## 10. Carved, cast and glazed detail (L2–L3)
+
+- **Balustrade and spouts:** every tier of the terrace (and the platforms of the Gate of Supreme Harmony and the Gate of Heavenly Purity) carries a carved marble balustrade: posts with dragon and phoenix heads by turns, between them the sill, a framed lower panel with a carved medallion, the cloud band, vase-shaped balusters with cloud caps and a round handrail. Under each post a dragon-head spout (chishou) juts from the face below the coping, a great one from each corner. "There are over 1,000 of them" round the three-tiered sumeru terrace, draining it [stated: Google Arts & Culture]; "under the railings of each tier, a row of dragon heads" [stated: Sohu]. Our posts, one every 1.6 m, give about 1,100 spouts on the three tiers [inferred: count]. The dragon-and-phoenix posts, the vase balusters and the panel's form follow the Qing balustrade as seen in photographs [inferred].
+- **Golden Water bridges:** the five bridges carry the same balustrade, its posts and panels following the arch's rise [inferred: photographs]; the river's banks have it too.
+- **Lions:** the Gate of Supreme Harmony "is guarded by one male and one female bronze lion"; "the male's right paw rests on an embroidered ball", "the female has a cub under her left paw" [stated: Google Arts & Culture]; "45 snail curls on the lion — nine times five, the supreme number" [stated: Sohu]. Ours sit on sumeru pedestals, the male on the east [inferred: the usual arrangement], with collars and bells, and 45 curls each. The lions at the Gate of Heavenly Purity are gilt [inferred].
+- **Terrace bronzes:** "at the east corner of the platform is a sundial made of white marble"; "a marble square pavilion named Jialiang stands opposite" [stated: Travel China Guide]; "a pair of bronze cranes and a pair of bronze tortoises stand on the terrace" [stated: Google Arts & Culture]; the crane is 1.98 m high [stated: Sohu]. Ours: the sundial's dial tilted to the plane of the equator (latitude 40°) with its gnomon toward the pole [inferred: how an equatorial sundial works], the grain measure in a small stone shrine, tortoises with dragon heads, cranes, tripod burners, gilt vats with animal masks and rings beside the halls [inferred: positions].
+- **Roof ornaments:** "ten figurines sit at each roof corner" of the Hall of Supreme Harmony, unique among ancient buildings; the ridge-end ornament (dawen) "stands 3.4 meters tall, weighs 4.3 metric tons" [stated: Google Arts & Culture; Travel China Guide; Sohu]. Ours: the immortal riding a bird leading, ten beasts, the hip beast behind, on every hip of both eaves; the dawen at 3.4 m with its sword hilt, curled tail and the small beast on its back. Other halls carry fewer, in odd numbers (9 on the Meridian Gate, the Gate of Supreme Harmony and the Hall of Preserving Harmony, 7 on the pavilions and the Gate of Heavenly Purity) [inferred: the rank of the buildings]. The Meridian Gate's hall now has a double-eaved hip roof, the highest rank, as in photographs [inferred; the plan had hip-and-gable].
+- **Gate leaves:** the major gates are "adorned with 81 gilded door nails", "arranged in a strict nine-by-nine grid" [stated: Young Post]. The leaves of the Meridian Gate's three passages, the West and East Flowery Gates and the side gates of the courts stand open, red, with nine by nine gilt nails and a gilt mask with its ring [inferred: masks from photographs].
+- **Courtyard houses:** at each gate the two leaves stand open, a pair of drum stones (men dun) flanks the threshold, two round door pins (men zan) hold the lintel [inferred: photographs of Beijing siheyuan gates].
+- **Corner towers:** "nine beams, eighteen columns and seventy-two ridges" [stated: Sohu]; not rebuilt in this pass (recorded for later).
+
+Sources for §10:
+- [Spot the Sacred Animals in the Imperial Palace — Google Arts & Culture](https://artsandculture.google.com/story/zwXBu2RtdGQKUA)
+- [Hall of Supreme Harmony — Travel China Guide](https://www.travelchinaguide.com/attraction/beijing/forbidden/supreme.htm)
+- [太和殿 — Sohu](https://www.sohu.com/a/704985693_539773)
+- [The hidden symbolism of the Forbidden City's red doors — Young Post](https://www.youngpostclub.com/posties/kids/eye-news/article/3353998/discover-hidden-symbolism-forbidden-citys-iconic-red-doors)
 
 ## Sources
 

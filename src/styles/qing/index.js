@@ -236,7 +236,20 @@ function siheyuan(el, ctx) {
   wall([x0, z0], [x1, z0]); wall([x0, z0], [x0, z1]); wall([x1, z0], [x1, z1]);
   // the gatehouse: a small gabled roof over the gate, red doors standing open
   Hall({ rect: [gx - 1.6, z1 - 3.6, gx + 1.6, z1 - 0.2], y: 0.35, H: 3.1, front: 's', four: false, roof: 'gable', plat: 0.35, bays: [1, 1], pal, eave: 0.7 }, ctx);
-  bag.add('lacquer_red', box(gx - 0.8, 0.35, z1 - 0.5, gx - 0.74, 2.6, z1 + 0.1));
+  // the two leaves standing open; outside, the pair of drum stones (men dun) flanking the threshold,
+  // and over the doorway the two round door pins (men zan) that hold the lintel
+  for (const sx of [-1, 1]) {
+    bag.add('lacquer_red', box(gx + sx * 0.8 - 0.03, 0.35, z1 - 0.95, gx + sx * 0.8 + 0.03, 2.38, z1 - 0.2));
+    const D = new Parts(), xd = gx + sx * 1.02;
+    D.add('granite_grey', box(-0.17, 0, -0.22, 0.17, 0.42, 0.22));
+    const drum = lathe([[0.001, -0.09], [0.24, -0.09], [0.27, -0.05], [0.27, 0.05], [0.24, 0.09], [0.001, 0.09]], 14); drum.rotateZ(Math.PI / 2);
+    D.add('granite_grey', drum.translate(0, 0.66, 0));
+    D.add('granite_grey', box(-0.12, 0.42, -0.12, 0.12, 0.46, 0.12));
+    D.emit(bag, xd, 0.35, z1 + 0.44);
+    const pin = lathe([[0.001, 0], [0.07, 0], [0.075, 0.24], [0.001, 0.25]], 8); pin.rotateX(Math.PI / 2);
+    bag.add('lacquer_red', pin.translate(gx + sx * 0.38, 2.6, z1 + 0.05));
+  }
+  col.rect([gx - 1.2, z1 + 0.2, gx - 0.84, z1 + 0.67], 0.35, 1.3); col.rect([gx + 0.84, z1 + 0.2, gx + 1.2, z1 + 0.67], 0.35, 1.3);
   // the screen wall facing the gate
   Wall({ a: [gx - 1.8, z1 - 6.2], b: [gx + 1.8, z1 - 6.2], y: 0, h: 2.6, th: 0.36, pal }, ctx);
   // the houses round the courtyard

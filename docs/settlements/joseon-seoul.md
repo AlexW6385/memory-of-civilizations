@@ -1,7 +1,7 @@
 # Joseon Hanyang (Gyeongbokgung), c. 1430 — dossier
 
 Settlement id: `joseon-seoul` · Style: `joseon` · Region: Korea (Hanyang, under Bugaksan) · Code: `src/settlements/joseon-seoul/`
-Status of this dossier: L1–L2 (Gyeongbokgung on its north–south axis: Gwanghwamun on its stone base, Heungnyemun, the Yeongjegyo bridge over the palace stream, Geunjeongmun, Geunjeongjeon on its two-tier platform within its cloister, Sajeongjeon, Gangnyeongjeon, Gyotaejeon, Amisan's terraces; Gyeonghoeru on its 48 pillars in its pond with the island and three bridges; the palace wall and corner gates; the offices along the avenue south of the gate; hanok quarters round the palace; ground, planting, weather, music). L3 recorded for later: the rank stones in the court, the haetae, the dancheong patterns, the bronze dragons in the pond, interiors, the royal kitchens and the eastern palace, Hyangwonjeong (1873, after our moment), people.
+Status of this dossier: L1–L2 (Gyeongbokgung on its north–south axis: Gwanghwamun on its stone base, Heungnyemun, the Yeongjegyo bridge over the palace stream, Geunjeongmun, Geunjeongjeon on its two-tier platform within its cloister, Sajeongjeon, Gangnyeongjeon, Gyotaejeon, Amisan's terraces; Gyeonghoeru on its 48 pillars in its pond with the island and three bridges; the palace wall and corner gates; the offices along the avenue south of the gate; hanok quarters round the palace; ground, planting, weather, music). L2–L3 detail in §10 (japsang, white ridges, haetae, cheonrok, the woldae's balustrades and beasts, bronzes). L3 recorded for later: the dancheong patterns and bracket sets, the bronze dragons in the pond, interiors, the royal kitchens and the eastern palace, Hyangwonjeong (1873, after our moment), people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -50,6 +50,21 @@ Clear autumn, misty spring, snow in winter. Latitude 37.6° N. [inferred]
 ## 9. Sound
 
 Court music (aak): bells and stones, the haegeum's bowed voice, the daegeum flute (a plucked string, the ney and a reed organ stand in). [inferred]
+
+## 10. Carved and glazed detail (L2–L3)
+
+- **Japsang:** small figures along the hips, believed to guard the wooden buildings; "the number of Japsang is always an odd number, ranging from 3 to 11"; the first named after characters of *Journey to the West*, Tang Sanzang leading [stated: Asia Society]. "Generally five, but seven at Geunjeongjeon, nine at Sungnyemun, and eleven at Gyeonghoeru — the most of any building in Korea" [stated: Seoul Mediahub]. Ours: Geunjeongjeon 7 on each hip of both eaves, Gyeonghoeru 11, Heungnyemun and Geunjeongmun 5, Gwanghwamun 7 [inferred], the monk leading, in grey fired clay.
+- **Ridges:** the ridge sides plastered white (yangseong) with the dark tile cap above, and the chwidu at the ridge's ends [inferred: photographs of Gyeongbokgung's roofs].
+- **Haetae:** the haechi, one-horned beasts at Gwanghwamun, said to judge right from wrong [stated: Google Arts & Culture]. Ours sit in granite on pedestals before the gate, facing south.
+- **Cheonrok:** "four animal-shaped statues made of stone" overlook the water beside Yeongjegyo, watching for evil coming in by the stream [stated: Dragon Travel Mag]. Ours crouch on the banks at the bridge's corners, horned and scaled along the spine [inferred: form]. The bridge carries a granite balustrade with lotus-bud posts [inferred].
+- **The platform (woldae):** its two tiers carry "carved animal ornaments, including 12 Chinese zodiac signs" [stated: JoongAng Daily]; the animals of the Twelve Earthly Branches and the Four Guardians appear at Geunjeongjeon [stated: Google Arts & Culture]. Ours: granite balustrades with lotus-bud posts, small seated beasts on the posts at the corners and beside the stairs (generic, not each of the sixteen) [inferred: placement], the platform itself now in granite rather than marble. Bronze tripod burners (jeong) on the upper tier and fire-scaring basins (deumu) on the lower [inferred: photographs].
+
+Sources for §10:
+- [Japsang: a group of small animal-shaped statues — Asia Society](https://asiasociety.org/korea/japsang-group-small-animal-shaped-statues)
+- [Gyeongbokgung tour — Seoul Mediahub](https://mediahub.seoul.go.kr/archives/1280136)
+- [Animals in the Palaces — Google Arts & Culture](https://artsandculture.google.com/story/1AUx6nRWUZs6JA)
+- [Geunjeongjeon — JoongAng Daily](https://www.koreajoongangdaily.com/lifestyle/treasure-geunjeongjeon-diligent-politics-of-gyeongbokgung-palace/10035312)
+- [Gyeongbokgung Palace — Dragon Travel Mag](https://dragontravelmag.blogspot.com/2023/05/gyeongbokgung-palace.html)
 
 ## Sources
 
