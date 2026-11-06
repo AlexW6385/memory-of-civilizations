@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.56 — El Castillo's stairs; the Ball Court; the Empire State Building (2026-11-06)
+- El Castillo's stairs as solid masses outside the tiers at 45° (no ledges through the treads), platform stairs with real treads; the Great Ball Court's slanted benches with the decapitation reliefs, carved rings and the Temples of the Jaguars; El Caracol; a market of mats south of the Thousand Columns; Knossos' West Magazines with pithoi, the theatral area after Evans, the paved Royal Road, town houses after the Town Mosaic; Conques' bridge over the Dourdou; the Empire State Building with its setbacks, spandrels, entrance and mooring mast; the Sixth Avenue El with stations; Grand Central's 42nd Street front and the Park Avenue viaduct; shop fronts, newsstands and tenement yards; Sydney's Rocks terraces and bond stores, the Harbour Bridge's trusses in true proportion with the 1973 deck, Circular Quay's wharves with gangways, the Opera House's shell undersides and northern foyers.
+
 ## v9.55 — Westminster Hall; Versailles' Marble Court (2026-11-06)
 - Westminster Hall in its true section with Herland's thirteen hammerbeam trusses, carved angels, traceried windows, the north front and St Stephen's Porch, enterable; hansom cabs, knifeboard omnibuses, gas lamps, paddle steamers, lighters and a floating pier; terrace houses removed from inside the hall and New Palace Yard; Versailles' Marble Court in its U plan with the marble paving, brick-and-stone fronts with busts on consoles and gilded balconies, slate mansards with gilt cresting, the paired red marble columns and the clock pediment with Mars and Hercules, the gilded railings of the Royal Court and forecourt.
 
