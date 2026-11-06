@@ -23,12 +23,14 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
 /** A quad strip surface from a grid of points P[i][j] (each [x, y, z]); both sides when twoSided. */
-function sheet(P, flip = false, skip = null) {
+function sheet(P, flip = false, skip = null, cross = null) {
   const tris = [];
   for (let i = 0; i + 1 < P.length; i++) for (let j = 0; j + 1 < P[i].length; j++) {
     if (skip && skip(i, j)) continue;
     const a = P[i][j], b = P[i + 1][j], c = P[i + 1][j + 1], d = P[i][j + 1];
-    if (flip) tris.push(...a, ...c, ...b, ...a, ...d, ...c); else tris.push(...a, ...b, ...c, ...a, ...c, ...d);
+    // cross(i, j): split the cell along b–d instead of a–c (so that a crease, e.g. a hip, runs along the split)
+    if (cross && cross(i, j)) { if (flip) tris.push(...a, ...d, ...b, ...b, ...d, ...c); else tris.push(...a, ...b, ...d, ...b, ...c, ...d); }
+    else if (flip) tris.push(...a, ...c, ...b, ...a, ...d, ...c); else tris.push(...a, ...b, ...c, ...a, ...c, ...d);
   }
   return fromTriangles(tris);
 }
@@ -119,24 +121,42 @@ function rectRoof(el, bag) {
     const [rx, rz] = rot(x, z);
     return [rx, h, rz];
   };
-  // the roof surface as a grid over the rectangle, finer near the gable line of a xieshan
-  const xs = [], zs = [];
-  for (let i = 0; i <= NX; i++) xs.push(cx - A + 2 * A * i / NX);
-  if (kind === 'xieshan') { const xg = A - gAt * B; xs.push(cx - xg - 0.02, cx - xg + 0.02, cx + xg - 0.02, cx + xg + 0.02); }
-  xs.sort((a, b) => a - b);
-  for (let j = 0; j <= NZ; j++) zs.push(cz - B + 2 * B * j / NZ);
+  // the roof surface as a grid over the rectangle, finer near the gable line of a xieshan. The hips
+  // are creases: the grid is laid so that every hip runs exactly through its vertices and along the
+  // cells' diagonals (each end zone gets the same offsets in x as the sides get in z), else the
+  // triangles cut across the crease and sag below it, leaving the hip ridge floating over the tiles.
   let hole = null;
   if (el.hole) {
     const inv = (wx, wz) => (el.alongZ ? [cx + (wz - cz), cz - (wx - cx)] : [wx, wz]);
     const a = inv(el.hole[0], el.hole[1]), b = inv(el.hole[2], el.hole[3]);
     hole = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
-    xs.push(hole[0], hole[2]); zs.push(hole[1], hole[3]); xs.sort((a2, b2) => a2 - b2); zs.sort((a2, b2) => a2 - b2);
   }
+  const xs = [], zs = [], D = [];
+  const uniq = (v) => { v.sort((a2, b2) => a2 - b2); return v.filter((q, k) => k === 0 || q - v[k - 1] > 1e-4); };
+  const zone = kind === 'gable' ? -1 : A - B;                // |x - cx| beyond this: the hips' end zones
+  for (let j = 0; j <= NZ; j++) D.push(B * Math.min(j, NZ - j) * 2 / NZ);
+  const extraX = [];
+  if (kind === 'xieshan') { const xg = A - gAt * B; extraX.push(cx - xg - 0.02, cx - xg + 0.02, cx + xg - 0.02, cx + xg + 0.02); }
+  if (hole) { extraX.push(hole[0], hole[2]); D.push(B - Math.abs(hole[1] - cz), B - Math.abs(hole[3] - cz)); }
+  if (kind === 'gable') {
+    for (let i = 0; i <= NX; i++) xs.push(cx - A + 2 * A * i / NX);
+    xs.push(...extraX);
+    for (const d of D) zs.push(cz - B + d, cz + B - d);
+  } else {
+    for (const x of extraX) { if (Math.abs(x - cx) > zone + 1e-4) D.push(A - Math.abs(x - cx)); else xs.push(x); }
+    const n = Math.max(1, Math.round(NX * zone / A));
+    if (zone > 1e-4) for (let i = 0; i <= n; i++) xs.push(cx - zone + 2 * zone * i / n);
+    for (const d of D) if (d >= -1e-6 && d <= B + 1e-6) { zs.push(cz - B + d, cz + B - d); if (d <= A) xs.push(cx - A + d, cx + A - d); }
+  }
+  uniq(xs); uniq(zs);
   const inHole = (x, z) => hole && x > hole[0] + 0.01 && x < hole[2] - 0.01 && z > hole[1] + 0.01 && z < hole[3] - 0.01;
-  const skip = hole ? (i, j) => inHole((xs[i] + xs[i + 1]) / 2, (zs[j] + zs[j + 1]) / 2) : null;
+  // the step in the surface at a xieshan's gable lines stays open: the gable board closes it
+  const xgl = A - gAt * B, step = (mx, mz) => kind === 'xieshan' && Math.abs(Math.abs(mx - cx) - xgl) < 0.019 && Math.abs(mz - cz) < B - gAt * B - 0.001;
+  const skip = (i, j) => { const mx = (xs[i] + xs[i + 1]) / 2, mz = (zs[j] + zs[j + 1]) / 2; return inHole(mx, mz) || step(mx, mz); };
+  const cross = kind === 'gable' ? null : (i, j) => ((xs[i] + xs[i + 1]) / 2 - cx) * ((zs[j] + zs[j + 1]) / 2 - cz) < 0;
   const G = xs.map((x) => zs.map((z) => P(x, z))), GU = xs.map((x) => zs.map((z) => P(x, z, -0.14)));
-  bag.add(mat, sheet(G, true, skip));
-  bag.add(soffit, sheet(GU, false, skip));
+  bag.add(mat, sheet(G, true, skip, cross));
+  bag.add(soffit, sheet(GU, false, skip, cross));
   // the eave's edge
   const ring = [];
   for (const x of xs) ring.push([x, cz - B]);
@@ -160,27 +180,42 @@ function rectRoof(el, bag) {
       beamTris(r, [e0[0], top + 0.2 + k * k * 0.07, e0[1]], [e1[0], top + 0.2 + (k + 1) * (k + 1) * 0.07, e1[1]], 0.13, 0.22);
     }
     if (kind !== 'gable') for (const sz of [-1, 1]) {
+      // the hip ridge follows the crease through the grid's vertices, bedded a little into the tiles
       const pts = [];
-      const tEnd = kind === 'xieshan' ? gAt : 1;
-      for (let k = 0; k <= 12; k++) {
-        const t = tEnd * k / 12;
-        if (inHole(cx + s * (A - t * B), cz + sz * (B - t * B))) break;
-        pts.push(P(cx + s * (A - t * B), cz + sz * (B - t * B), 0.08));
+      const dEnd = (kind === 'xieshan' ? gAt * B - 0.02 : Math.min(A, B)) + 1e-6;
+      for (const d of uniq(D.slice())) {
+        if (d > dEnd || d < -1e-6) continue;
+        if (inHole(cx + s * (A - d), cz + sz * (B - d))) break;
+        pts.push(P(cx + s * (A - d), cz + sz * (B - d), -0.05));
       }
-      for (let k = 0; k + 1 < pts.length; k++) beamTris(r, pts[k], pts[k + 1], 0.08, 0.14);
+      for (let k = 0; k + 1 < pts.length; k++) beamTris(r, pts[k], pts[k + 1], 0.08, 0.22);
     }
   }
   bag.add(mat, fromTriangles(r));
-  // the xieshan's gable boards: a plastered triangle above the hips, set back over the hip
+  // the xieshan's gable: the tiles of the upper roof stop at the gable line (the step there is left
+  // open), a plastered gable board closes the triangle between the upper roof and the hips, its top
+  // following the concave roof just under the tiles; along its top the bargeboards (bo feng), and
+  // over them a roll of tiles along the verge
   if (kind === 'xieshan') {
-    const xg = A - gAt * B - 0.05, yb = y + R * Math.pow(gAt, p);
-    const g = [];
+    const xg = A - gAt * B, y0 = y + R * Math.pow(gAt, p), yb = y0 - 0.1, zz = B - gAt * B;
+    const g = [], bb = [], vg = [], NB = LOW ? 4 : 8;
+    const hz = (z) => y + R * Math.pow(Math.max(gAt, (B - Math.abs(z)) / B), p);
     for (const s of [-1, 1]) {
-      const zz = (B - gAt * B) * 0.98;
-      const q0 = rot(cx + s * xg, cz - zz), q1 = rot(cx + s * xg, cz + zz), q2 = rot(cx + s * xg, cz);
-      g.push(q0[0], yb, q0[1], q1[0], yb, q1[1], q2[0], top - 0.1, q2[1]);
+      const prof = [];
+      for (let k = 0; k <= 2 * NB; k++) { const z = -zz + zz * k / NB; prof.push([z, hz(z)]); }
+      for (let k = 0; k < 2 * NB; k++) {
+        const [za, ha] = prof[k], [zb, hb] = prof[k + 1];
+        const a0 = rot(cx + s * xg, cz + za), a1 = rot(cx + s * xg, cz + zb);
+        g.push(a0[0], yb, a0[1], a1[0], yb, a1[1], a1[0], hb - 0.03, a1[1], a0[0], yb, a0[1], a1[0], hb - 0.03, a1[1], a0[0], ha - 0.03, a0[1]);
+        const c0 = rot(cx + s * (xg + 0.06), cz + za), c1 = rot(cx + s * (xg + 0.06), cz + zb);
+        beamTris(bb, [c0[0], Math.max(y0 - 0.02, ha - 0.3), c0[1]], [c1[0], Math.max(y0 - 0.02, hb - 0.3), c1[1]], 0.04, 0.26);
+        const v0 = rot(cx + s * (xg + 0.02), cz + za), v1 = rot(cx + s * (xg + 0.02), cz + zb);
+        beamTris(vg, [v0[0], ha - 0.06, v0[1]], [v1[0], hb - 0.06, v1[1]], 0.13, 0.16);
+      }
     }
     bag.add(PAL.plaster, fromTriangles(g.concat(flipTris(g))));
+    bag.add(soffit, fromTriangles(bb));
+    bag.add(mat, fromTriangles(vg));
   }
 }
 
