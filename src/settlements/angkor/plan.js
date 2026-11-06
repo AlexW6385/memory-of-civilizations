@@ -48,7 +48,14 @@ for (const b of BASINS) {
 }
 
 // ── the temple ──
-E.push({ t: 'k_terrace', rect: T.base.rect, y0: 0, y1: T.base.y });
+// the base terrace, built in pieces round the four basins of the cruciform cloister
+const CL = { rect: [T.third.line[0] + T.third.w / 2 + 0.46, -19, T.second.terrace[0], 19], west: CX - 89, stair: T.second.terrace[0] - (T.second.y - T.base.y) / 0.16 * 0.26 };
+{
+  const xm = (CL.rect[0] + CL.rect[2]) / 2, a = CL.rect[0] + 1, b = xm - 3.6, c = xm + 3.6, d = CL.rect[2] - 1;
+  CL.basins = [[a, -12.8, b, -5], [c, -12.8, d, -5], [a, 5, b, 12.8], [c, 5, d, 12.8]];
+}
+for (const r of carve(T.base.rect, CL.basins)) E.push({ t: 'k_terrace', rect: r, y0: 0, y1: T.base.y });
+E.push({ t: 'k_cloister', rect: CL.rect, y: T.base.y, w: 4, h: 3.4, west: CL.west, stair: CL.stair, basins: CL.basins });
 E.push({ t: 'k_gallery', rect: T.third.line, y: T.base.y, w: T.third.w, h: T.third.h, solid: 'in', half: true, gates: true, gate: 22, gateH: 12, relief: true });
 E.push({ t: 'k_terrace', rect: T.second.terrace, y0: T.base.y, y1: T.second.y });
 E.push({ t: 'k_gallery', rect: T.second.line, y: T.second.y, w: T.second.w, h: T.second.h, solid: 'out', gates: true, gate: 12, gateH: 13, corner: 12, devatas: true });
@@ -60,16 +67,29 @@ E.push({ t: 'k_tower', c: [CX, 0], y: T.bakan.y, w: 15, h: 65 - T.bakan.y, tiers
 const st = (rect, y0, y1, dir) => E.push({ t: 'stairs', rect, y0, y1, dir, mat: 'sandstone_khmer' });
 st([CX - 99 - 0.01 - 2.5, -6, CX - 99, 6], T.base.y - 0.2, T.base.y, 'e');
 for (const [face, sgn] of [['x', -1], ['x', 1], ['z', -1], ['z', 1]]) {
-  const h2 = (T.second.y - T.base.y) / 0.16 * 0.26, h3 = (T.bakan.y - T.second.y) / 0.2 * 0.22;
+  // the Bakan's stairs: forty steps at about 65° (docs/settlements/angkor.md §11)
+  const h2 = (T.second.y - T.base.y) / 0.16 * 0.26, h3 = (T.bakan.y - T.second.y) / Math.tan(63.4 * Math.PI / 180);
   if (face === 'x') {
     const x2 = sgn < 0 ? T.second.terrace[0] : T.second.terrace[2], x3 = sgn < 0 ? T.bakan.terrace[0] : T.bakan.terrace[2];
     st(sgn < 0 ? [x2 - h2, -4, x2, 4] : [x2, -4, x2 + h2, 4], T.base.y, T.second.y, sgn < 0 ? 'e' : 'w');
-    st(sgn < 0 ? [x3 - h3, -3, x3, 3] : [x3, -3, x3 + h3, 3], T.second.y, T.bakan.y, sgn < 0 ? 'e' : 'w');
+    E.push({ t: 'k_stair', rect: sgn < 0 ? [x3 - h3, -1.6, x3, 1.6] : [x3, -1.6, x3 + h3, 1.6], y0: T.second.y, y1: T.bakan.y, dir: sgn < 0 ? 'e' : 'w', riser: 0.325, cheek: 0.7 });
   } else {
     const z2 = sgn < 0 ? T.second.terrace[1] : T.second.terrace[3], z3 = sgn < 0 ? T.bakan.terrace[1] : T.bakan.terrace[3];
     st(sgn < 0 ? [CX - 4, z2 - h2, CX + 4, z2] : [CX - 4, z2, CX + 4, z2 + h2], T.base.y, T.second.y, sgn < 0 ? 's' : 'n');
-    st(sgn < 0 ? [CX - 3, z3 - h3, CX + 3, z3] : [CX - 3, z3, CX + 3, z3 + h3], T.second.y, T.bakan.y, sgn < 0 ? 's' : 'n');
+    E.push({ t: 'k_stair', rect: sgn < 0 ? [CX - 1.6, z3 - h3, CX + 1.6, z3] : [CX - 1.6, z3, CX + 1.6, z3 + h3], y0: T.second.y, y1: T.bakan.y, dir: sgn < 0 ? 's' : 'n', riser: 0.325, cheek: 0.7 });
   }
+}
+
+/** A rectangle less the rectangles `holes` inside it (not overlapping), as rectangles: strips across x at the holes' edges, each cut along z. */
+function carve(r, holes) {
+  const xs = [...new Set([r[0], r[2], ...holes.flatMap((h) => [h[0], h[2]])])].sort((p, q) => p - q), out = [];
+  for (let i = 0; i + 1 < xs.length; i++) {
+    const a = xs[i], b = xs[i + 1], cut = holes.filter((h) => h[0] < b - 1e-6 && h[2] > a + 1e-6).sort((p, q) => p[1] - q[1]);
+    let z = r[1];
+    for (const h of cut) { if (h[1] > z) out.push([a, z, b, h[1]]); z = h[3]; }
+    if (r[3] > z) out.push([a, z, b, r[3]]);
+  }
+  return out;
 }
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -77,6 +97,7 @@ const rooms = [
   room('bakan', T.bakan.terrace, T.bakan.y, 'open'),
   room('second', T.second.terrace, T.second.y, 'open'),
   room('court', T.base.rect, T.base.y, 'open'),
+  room('hall-of-echoes', [CL.rect[0] + 1, -18, CL.rect[2] - 1, -15], T.base.y + 0.4, 'hall'),
   room('enclosure', ENCLOSURE, 0, 'open'),
 ];
 const walks = [[[-205, 0], [-196, 0], [-150, 0], [-80, 0], [-74, 0], [-60, 0], [-45, 0], [-33, 0], [-20, 0], [-8, 0]]];

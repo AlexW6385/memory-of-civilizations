@@ -495,11 +495,134 @@ function stiltHouse(el, { bag, col }) {
   rectRoof({ c: [cx, cz], A: (along ? x1 - x0 : z1 - z0) / 2 + 0.8, B: (along ? z1 - z0 : x1 - x0) / 2 + 0.9, y: up + wallH, rise: (along ? z1 - z0 : x1 - x0) * 0.62, kind: 'gable', sweep: 0, curl: false, p: 1.05, alongZ: !along, mat: 'thatch_palm', soffit: 'thatch_palm' }, bag);
 }
 
+// ---- the cruciform cloister (Preah Poan), the steep stairs of the Bakan ---------------------------
+
+/**
+ * A straight gallery of the cloister along x (axis 'x') or z, its centre line from u0 to u1 at v
+ * (the other coordinate): a plinth 0.4 high with its moulding, the floor at y + 0.4; on each side
+ * (sides: [the −v side, the +v side]) square pillars ('pillars', every ~3 m, skipped inside the
+ * `skip` spans where other galleries cross; walls open there only on the sides `skipOn`), a wall with turned balusters in its windows
+ * ('windows'), or a blind wall with devatas ('wall'); the architrave, the corbelled vault.
+ */
+function cloisterGallery(ctx, { axis, u0, u1, v, y, w, h, sides, skip = [], skipOn = [0, 1], doors = [] }) {
+  const { bag, col } = ctx, hw = w / 2, X = axis === 'x', fy = y + 0.4, L = u1 - u0;
+  const R = (a0, a1, b0, b1) => (X ? [a0, b0, a1, b1] : [b0, a0, b1, a1]);
+  const P = (u, o) => (X ? [u, v + o] : [v + o, u]);
+  // the plinth: its moulded foot and lip, the floor
+  bag.add(C, boxR(R(u0, u1, v - hw - 0.55, v + hw + 0.55), y, y + 0.12));
+  bag.add(S, boxR(R(u0, u1, v - hw - 0.45, v + hw + 0.45), y + 0.12, y + 0.3));
+  bag.add(C, boxR(R(u0, u1, v - hw - 0.6, v + hw + 0.6), y + 0.3, fy));
+  col.rect(R(u0, u1, v - hw - 0.6, v + hw + 0.6), y, fy - 0.01); col.floor(R(u0, u1, v - hw - 0.6, v + hw + 0.6), fy);
+  const inSkip = (u, m = 0) => skip.some(([a, b]) => u > a - m && u < b + m);
+  sides.forEach((kind, i) => {
+    const o = i ? hw : -hw, N = X ? [0, i ? 1 : -1] : [i ? 1 : -1, 0];
+    if (kind === 'pillars') {
+      const np = Math.max(1, Math.round(L / 3));
+      for (let k = 0; k <= np; k++) {
+        const u = u0 + L * k / np; if (inSkip(u, 0.5)) continue;
+        const q = P(u, o);
+        bag.add(S, box(q[0] - 0.3, fy, q[1] - 0.3, q[0] + 0.3, fy + h, q[1] + 0.3));
+        bag.add(C, box(q[0] - 0.36, fy, q[1] - 0.36, q[0] + 0.36, fy + 0.45, q[1] + 0.36));                 // the base, with its praying ascetics
+        bag.add(C, box(q[0] - 0.4, fy + h - 0.35, q[1] - 0.4, q[0] + 0.4, fy + h, q[1] + 0.4));             // the capital
+        col.rect([q[0] - 0.36, q[1] - 0.36, q[0] + 0.36, q[1] + 0.36], fy, fy + h);
+      }
+      const ar = [], a = P(u0, o), b = P(u1, o);
+      beamTris(ar, [a[0], fy + h, a[1]], [b[0], fy + h, b[1]], 0.38, 0.55);
+      bag.add(C, fromTriangles(ar));
+    } else {
+      // a wall, broken where the doors and the crossing galleries open into it
+      const gaps = [...(skipOn.includes(i) ? skip : []).filter(([a, b]) => b > u0 && a < u1), ...doors.map((d) => [d - 1.1, d + 1.1])].sort((p, q) => p[0] - q[0]);
+      let s = u0;
+      for (const [g0, g1] of [...gaps, [u1, u1]]) {
+        if (g0 - s > 0.3) {
+          const wa = P(s, o), wb = P(g0, o), len = g0 - s;
+          wall(ctx, { windows: kind === 'windows', devatas: kind === 'wall' }, { wa, wb, len, ux: X ? 1 : 0, uz: X ? 0 : 1, y: fy, h, np: Math.max(1, Math.round(len / 3.2)), f: [-N[0], -N[1]] });
+          col.segment(wa, wb, 0.9, fy, fy + h + 0.4);
+        }
+        if (doors.some((d) => Math.abs(d - (g0 + g1) / 2) < 0.01)) doorway(bag, P((g0 + g1) / 2, o), N, -0.45, fy, 0.9, 2.6);
+        s = Math.max(s, g1);
+      }
+    }
+  });
+  rectRoof({ c: P((u0 + u1) / 2, 0), A: L / 2, B: hw + 0.6, y: fy + h + 0.5, rise: w * 0.55, kind: 'gable', sweep: 0, curl: false, p: 0.7, alongZ: !X, mat: S, soffit: S }, bag);
+}
+
+/**
+ * k_cloister: the cruciform cloister between the third gallery's west entrance and the second
+ * level { rect: [x0, z0, x1, z1] (x0 the third gallery's inner wall, x1 the second level's face),
+ * y, w, h, west (where the axial gallery begins, behind the entrance tower), stair (the x of the
+ * foot of the stair up to the second level) }: two
+ * galleries crossing — the axial one from the entrance to the stair, the transverse one between the
+ * side galleries — with a raised vault at their crossing; the north gallery walled on both sides
+ * (the Hall of Echoes), the south one open on pillars to the court; in each of the four courts a
+ * sunken basin, paved, its sides stepped down in three tiers to the water (the terrace around it
+ * is built in pieces round the basins: `basins` gives them).
+ */
+function kCloister(el, ctx) {
+  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, w = el.w ?? 4, h = el.h ?? 3.4, hw = w / 2, xs = el.stair;
+  const xm = el.cross ?? (x0 + x1) / 2, gn = z0 + hw + 0.6, gs = z1 - hw - 0.6, fy = y + 0.4;
+  // the Hall of Echoes on the north, the south gallery, the axial and the transverse galleries
+  cloisterGallery(ctx, { axis: 'x', u0: x0, u1: x1, v: gn, y, w, h, sides: ['windows', 'windows'], skip: [[xm - hw, xm + hw]], skipOn: [1] });
+  cloisterGallery(ctx, { axis: 'x', u0: x0, u1: x1, v: gs, y, w, h, sides: ['pillars', 'windows'], skip: [[xm - hw, xm + hw]], skipOn: [0] });
+  cloisterGallery(ctx, { axis: 'x', u0: el.west ?? x0, u1: xs, v: 0, y, w, h, sides: ['pillars', 'pillars'], skip: [[xm - hw, xm + hw]] });
+  for (const [a, b] of [[gn + hw + 0.6, -hw - 0.6], [hw + 0.6, gs - hw - 0.6]]) cloisterGallery(ctx, { axis: 'z', u0: a, u1: b, v: xm, y, w, h, sides: ['pillars', 'pillars'] });
+  // the crossing: a square bay under a taller vault, pediments on its four faces
+  bag.add(C, boxR([xm - hw - 0.6, -hw - 0.6, xm + hw + 0.6, hw + 0.6], y, fy)); col.floor([xm - hw - 0.6, -hw - 0.6, xm + hw + 0.6, hw + 0.6], fy);
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const q = [xm + sx * hw, sz * hw];
+    bag.add(S, box(q[0] - 0.4, fy, q[1] - 0.4, q[0] + 0.4, fy + h + 0.6, q[1] + 0.4)); col.rect([q[0] - 0.4, q[1] - 0.4, q[0] + 0.4, q[1] + 0.4], fy, fy + h + 0.6);
+    bag.add(C, box(q[0] - 0.48, fy + h + 0.25, q[1] - 0.48, q[0] + 0.48, fy + h + 0.6, q[1] + 0.48));
+  }
+  for (const alongZ of [false, true]) rectRoof({ c: [xm, 0], A: hw + 0.9, B: hw + 0.9, y: fy + h + 1.1, rise: w * 0.9, kind: 'gable', sweep: 0, curl: false, p: 0.7, alongZ, mat: S, soffit: S }, bag);
+  for (const N of [[1, 0], [-1, 0], [0, 1], [0, -1]]) pediment(bag, along([xm, fy + h + 1.1, 0], N, hw + 0.85), N, w + 1.2, w * 0.9, 0.3);
+  // the basins: three tiers stepping down 0.5 m and in 0.7 m, a paved floor, the water over the lowest tier
+  for (const [bx0, bz0, bx1, bz1] of el.basins) {
+    const ring = (d0, d1, top, mat) => {
+      for (const r of [[bx0 + d0, bz0 + d0, bx1 - d0, bz0 + d1], [bx0 + d0, bz1 - d1, bx1 - d0, bz1 - d0], [bx0 + d0, bz0 + d1, bx0 + d1, bz1 - d1], [bx1 - d1, bz0 + d1, bx1 - d0, bz1 - d1]]) bag.add(mat, boxR(r, y - 1.7, top));
+      col.floor([bx0 + d0, bz0 + d0, bx1 - d0, bz0 + d1], top); col.floor([bx0 + d0, bz1 - d1, bx1 - d0, bz1 - d0], top);
+      col.floor([bx0 + d0, bz0 + d1, bx0 + d1, bz1 - d1], top); col.floor([bx1 - d1, bz0 + d1, bx1 - d0, bz1 - d1], top);
+    };
+    ring(0, 0.7, y - 0.5, 'laterite'); ring(0.7, 1.4, y - 1.0, S); ring(1.4, 2.1, y - 1.5, S);
+    // the lip of each tier, a moulding along its edge
+    for (const [d, top] of [[0.7, y - 0.5], [1.4, y - 1.0], [2.1, y - 1.5]]) for (const r of [[bx0 + d - 0.1, bz0 + d - 0.1, bx1 - d + 0.1, bz0 + d + 0.04], [bx0 + d - 0.1, bz1 - d - 0.04, bx1 - d + 0.1, bz1 - d + 0.1], [bx0 + d - 0.1, bz0 + d, bx0 + d + 0.04, bz1 - d], [bx1 - d - 0.04, bz0 + d, bx1 - d + 0.1, bz1 - d]]) bag.add(C, boxR(r, top - 0.14, top + 0.03));
+    bag.add(S, boxR([bx0 + 2.1, bz0 + 2.1, bx1 - 2.1, bz1 - 2.1], y - 1.7, y - 1.65)); col.floor([bx0 + 2.1, bz0 + 2.1, bx1 - 2.1, bz1 - 2.1], y - 1.65);
+    bag.add('water', boxR([bx0 + 1.4, bz0 + 1.4, bx1 - 1.4, bz1 - 1.4], y - 1.28, y - 1.26));
+  }
+}
+
+/**
+ * k_stair: a steep Khmer stair { rect, y0, y1, dir, cheek }: narrow treads and tall risers (the
+ * Bakan's climb at about 65°), between stepped cheek walls (`cheek` wide) that rise with it in
+ * flights of four steps, each cheek block capped with a moulding.
+ */
+function kStair(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, { y0, y1, dir } = el, ch = el.cheek ?? 0.7, n = Math.max(1, Math.round((y1 - y0) / (el.riser ?? 0.32)));
+  const alongZ = dir === 'n' || dir === 's', len = alongZ ? z1 - z0 : x1 - x0;
+  const span = (f0, f1) => (dir === 'n' ? [x0, z1 - len * f1, x1, z1 - len * f0] : dir === 's' ? [x0, z0 + len * f0, x1, z0 + len * f1] : dir === 'e' ? [x0 + len * f0, z0, x0 + len * f1, z1] : [x1 - len * f1, z0, x1 - len * f0, z1]);
+  const full = (r) => (dir === 'n' ? [r[0], z0, r[2], r[3]] : dir === 's' ? [r[0], r[1], r[2], z1] : dir === 'e' ? [r[0], r[1], x1, r[3]] : [x0, r[1], r[2], r[3]]);
+  for (let k = 0; k < n; k++) {
+    const r = full(span(k / n, (k + 1) / n)), yy = y0 + (y1 - y0) * (k + 1) / n;
+    bag.add(S, boxR(r, Math.max(y0 - 0.2, yy - 1.2), yy));
+  }
+  col.ramp([x0, z0, x1, z1], y0, y1, dir);
+  // the cheek walls, in flights of four steps
+  const g = 4, ng = Math.ceil(n / g);
+  for (const side of [0, 1]) {
+    for (let k = 0; k < ng; k++) {
+      const f0 = k * g / n, f1 = Math.min(1, (k + 1) * g / n), yy = y0 + (y1 - y0) * f1 + 0.45, sp = span(f0, f1);
+      const r = alongZ ? [side ? x1 : x0 - ch, sp[1], side ? x1 + ch : x0, sp[3]] : [sp[0], side ? z1 : z0 - ch, sp[2], side ? z1 + ch : z0];
+      bag.add(S, boxR(r, y0 - 0.2, yy - 0.18));
+      bag.add(C, boxR([r[0] - 0.05, r[1] - 0.05, r[2] + 0.05, r[3] + 0.05], yy - 0.18, yy));
+      col.rect(r, y0, yy);
+    }
+  }
+}
+
 registerStyle('khmer', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse,
+    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse, k_cloister: kCloister, k_stair: kStair,
   },
   objects: {},
 });
