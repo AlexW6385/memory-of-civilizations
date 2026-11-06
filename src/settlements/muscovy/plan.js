@@ -27,11 +27,24 @@ export const kremlin = {
   entrance: { at: [40, 20], facing: 'w' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [
     { t: 'kremlin_wall', pts: KREMLIN, h: 12, th: 4.5, y: height, every: 55, round: [0, 1, 2], gates: [SPASSKY, [2, 0.5]] },
-    { t: 'russian_church', rect: C.dormition, h: 21, y: hy(C.dormition), domes: five(C.dormition), apses: 5 },
     { t: 'russian_church', rect: C.archangel, h: 18, y: hy(C.archangel), domes: five(C.archangel, 0.8), dome: 'gilt_bronze' },
     { t: 'russian_church', rect: C.annunciation, h: 14, y: hy(C.annunciation), domes: five(C.annunciation, 0.6), dome: 'gilt_bronze' },
     { t: 'bell_tower', c: C.ivan, y: height(...C.ivan), tiers: [[8.5, 24], [7.2, 14], [6, 12], [4.8, 14], [3.8, 8]] },
     { t: 'russian_church', rect: C.facets, h: 13, y: hy(C.facets), domes: [], apses: 0 },
   ],
+};
+// the Dormition, with its inside: its own plan, so that its nave is a room (with its music) and its door is reached on foot
+const D = C.dormition, dy = hy(D), dsx = D[0] + 1.5 * (D[2] - D[0]) / 4;
+export const dormition = {
+  id: 'muscovy-dormition',
+  name: { en: 'Cathedral of the Dormition', zh: '圣母升天大教堂' },
+  era: { en: 'Moscow Kremlin, about 1600', zh: '莫斯科克里姆林宫，约1600年' },
+  style: 'muscovite', origin: [0, 0], base: 0, yaw: 0,
+  entrance: { at: [dsx, D[3] + 3], facing: 'n' },
+  bounds: [D[0] - 6, D[1] - 2, D[2] + 6, D[3] + 2],
+  bakeTop: 40,
+  elements: [{ t: 'russian_church', rect: D, h: 21, y: dy, domes: five(D), apses: 5, interior: true }],
+  rooms: [{ id: 'nave', rect: [D[0] + 1.3, D[1] + 1.3, D[2] - 1.3, D[3] - 1.3], y: dy + 0.15, kind: 'hall' }],
+  walks: [Object.assign([[dsx, D[3] + 4], [dsx, D[3] - 3], [dsx + 2, (D[1] + D[3]) / 2]], { y0: dy })],
 };
 export default square;

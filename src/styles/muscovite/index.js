@@ -9,6 +9,7 @@ import { box, frustum, lathe } from '../../core/geom.js';
 import { Shape, Path } from '../../core/three.js';
 import '../qing/index.js';
 import { slab, hexa, pitched, pyr } from '../norse/index.js';
+import { cathedralInside } from './dormition.js';
 
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -53,17 +54,21 @@ function helmet(bag, x, y, z, r, dh, mat, drum = WS) {
   bag.add(G, box(x - 0.08, top, z - 0.08, x + 0.08, top + r * 0.7 + 0.5, z + 0.08));
 }
 /** russian_church: { rect, h, y, domes: [[x, z, r, dh]], mat, dome (material), apses (count, on the east) } — a cross-domed church with zakomary arches along its tops. */
-function russianChurch(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, h = el.h ?? 20, y = el.y ?? 0, mat = el.mat ?? WS, dm = el.dome ?? G;
+function russianChurch(el, ctx) {
+  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, h = el.h ?? 20, y = el.y ?? 0, mat = el.mat ?? WS, dm = el.dome ?? G;
+  // the top: the zakomary (round-topped gables along each side), the roof, the apses on the east, the domes
+  const top = () => {
+    for (const [a, b, zz, along] of [[x0, x1, z0, true], [x0, x1, z1, true], [z0, z1, x0, false], [z0, z1, x1, false]]) {
+      const n = 4, L = (b - a) / n;
+      for (let i = 0; i < n; i++) { const m = a + (i + 0.5) * L, r = L / 2 - 0.2; const g = lathe([[r, 0], [r * 0.7, r * 0.7], [0.001, r]], 8, null, 0, 0, 0); g.rotateX(Math.PI / 2); g.scale(1, 1, 0.12); if (!along) g.rotateY(Math.PI / 2); g.translate(along ? m : zz, y + h, along ? zz : m); bag.add(mat, g); }
+    }
+    bag.add('lead', box(x0 + 0.5, y + h, z0 + 0.5, x1 - 0.5, y + h + 1.2, z1 - 0.5));
+    for (let k = 0; k < (el.apses ?? 3); k++) { const n = el.apses ?? 3, z = z0 + (k + 0.5) * (z1 - z0) / n, r = Math.min((z1 - z0) / n / 2 - 0.3, 4.5); bag.add(mat, lathe([[r, 0], [r, h * 0.75], [0.001, h * 0.75]], 16, null, x1, y - 0.5, z)); col.circle(x1, z, r, y, y + h * 0.75); }
+    for (const [dx, dz, r, dh] of el.domes ?? []) helmet(bag, dx, y + h + 1.2, dz, r, dh, dm, mat);
+  };
+  if (el.interior) { col.floor(el.rect, y + h); return cathedralInside(el, ctx, top); }
   bag.add(mat, box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y, y + h); col.floor(el.rect, y + h);
-  // the zakomary: round-topped gables along each side
-  for (const [a, b, zz, along] of [[x0, x1, z0, true], [x0, x1, z1, true], [z0, z1, x0, false], [z0, z1, x1, false]]) {
-    const n = 4, L = (b - a) / n;
-    for (let i = 0; i < n; i++) { const m = a + (i + 0.5) * L, r = L / 2 - 0.2; const g = lathe([[r, 0], [r * 0.7, r * 0.7], [0.001, r]], 8, null, 0, 0, 0); g.rotateX(Math.PI / 2); g.scale(1, 1, 0.12); if (!along) g.rotateY(Math.PI / 2); g.translate(along ? m : zz, y + h, along ? zz : m); bag.add(mat, g); }
-  }
-  bag.add('lead', box(x0 + 0.5, y + h, z0 + 0.5, x1 - 0.5, y + h + 1.2, z1 - 0.5));
-  for (let k = 0; k < (el.apses ?? 3); k++) { const n = el.apses ?? 3, z = z0 + (k + 0.5) * (z1 - z0) / n, r = Math.min((z1 - z0) / n / 2 - 0.3, 4.5); bag.add(mat, lathe([[r, 0], [r, h * 0.75], [0.001, h * 0.75]], 16, null, x1, y - 0.5, z)); col.circle(x1, z, r, y, y + h * 0.75); }
-  for (const [dx, dz, r, dh] of el.domes ?? []) helmet(bag, dx, y + h + 1.2, dz, r, dh, dm, mat);
+  top();
   for (const f of [z0, z1]) for (let i = 0; i < 4; i++) { const x = x0 + (i + 0.5) * (x1 - x0) / 4; bag.add('opening', box(x - 0.5, y + h * 0.5, f - 0.04, x + 0.5, y + h * 0.5 + 2.6, f + 0.04)); }
   bag.add('opening', box(x0 - 0.05, y, (z0 + z1) / 2 - 1.5, x0 + 0.05, y + 5, (z0 + z1) / 2 + 1.5));
 }
@@ -222,7 +227,20 @@ function kremlinWall(el, { bag, col }) {
         bag.add('iron', box(x, top + MH + 2.2 * r + 1.3, z - 0.03, x + 0.9, top + MH + 2.2 * r + 2, z + 0.03));
         return;
       }
-      bag.add(BR, box(x - r, yy - 3, z - r, x + r, yy - 3 + H, z + r)); col.rect([x - r, z - r, x + r, z + r], yy - 3, yy - 3 + H);
+      if (tall) {
+        // the gate tower: its body round the vaulted passage through it (along x where the wall runs north–south)
+        const g = 2.4, gh = yy + 4.2, ax = Math.abs(uz) > Math.abs(ux), Bx = (a0, a1, b0, b1, y0, y1) => ax ? box(x + a0, y0, z + b0, x + a1, y1, z + b1) : box(x + b0, y0, z + a0, x + b1, y1, z + a1);
+        const Rx = (a0, a1, b0, b1) => ax ? [x + a0, z + b0, x + a1, z + b1] : [x + b0, z + a0, x + b1, z + a1];
+        bag.add(BR, Bx(-r, r, -r, -g, yy - 3, yy - 3 + H)); bag.add(BR, Bx(-r, r, g, r, yy - 3, yy - 3 + H)); bag.add(BR, Bx(-r, r, -g, g, gh, yy - 3 + H));
+        col.rect(Rx(-r, r, -r, -g), yy - 3, yy - 3 + H); col.rect(Rx(-r, r, g, r), yy - 3, yy - 3 + H); col.rect(Rx(-r, r, -g, g), gh, yy - 3 + H);
+        // the white-stone frames of its two mouths, the oak leaves standing open against the passage's sides, iron-bound
+        for (const e of [-1, 1]) {
+          bag.add(WS, Bx(e * r - 0.12, e * r + 0.12, -g - 0.5, -g, yy - 3, gh + 0.5)); bag.add(WS, Bx(e * r - 0.12, e * r + 0.12, g, g + 0.5, yy - 3, gh + 0.5)); bag.add(WS, Bx(e * r - 0.12, e * r + 0.12, -g, g, gh, gh + 0.5));
+          const l0 = e > 0 ? r - 2.9 : -r + 0.8;
+          bag.add('timber', Bx(l0, l0 + 2.1, -g + 0.02, -g + 0.14, yy - 1, gh - 0.3)); bag.add('timber', Bx(l0, l0 + 2.1, g - 0.14, g - 0.02, yy - 1, gh - 0.3));
+          for (const yb of [yy + 0.4, yy + 2.6]) { bag.add('iron', Bx(l0 + 0.1, l0 + 2.0, -g + 0.14, -g + 0.16, yb, yb + 0.08)); bag.add('iron', Bx(l0 + 0.1, l0 + 2.0, g - 0.16, g - 0.14, yb, yb + 0.08)); }
+        }
+      } else { bag.add(BR, box(x - r, yy - 3, z - r, x + r, yy - 3 + H, z + r)); col.rect([x - r, z - r, x + r, z + r], yy - 3, yy - 3 + H); }
       bag.add(BR, box(x - r - 0.5, yy - 3 + H, z - r - 0.5, x + r + 0.5, yy - 1.5 + H, z + r + 0.5));        // the machicolated parapet's corbelled band
       for (let q = 0; q < 6; q++) { const zz = z - r + (q + 0.5) * 2 * r / 6; for (const sx of [-1, 1]) bag.add(BR, box(x + sx * (r + 0.25) - 0.25, yy - 4.2 + H, zz - 0.3, x + sx * (r + 0.25) + 0.25, yy - 3 + H, zz + 0.3)); }
       for (let q = 0; q < 6; q++) { const xx = x - r + (q + 0.5) * 2 * r / 6; for (const sz of [-1, 1]) bag.add(BR, box(xx - 0.3, yy - 4.2 + H, z + sz * (r + 0.25) - 0.25, xx + 0.3, yy - 3 + H, z + sz * (r + 0.25) + 0.25)); }
@@ -240,7 +258,6 @@ function kremlinWall(el, { bag, col }) {
         return;
       }
       // the gate tower: the gateway, the superstructure above the parapet, the open stage on columns with its bell, the stone tent
-      bag.add('opening', Math.abs(uz) > Math.abs(ux) ? box(x - r - 0.04, yy - 3, z - 2.4, x + r + 0.04, yy + 4, z + 2.4) : box(x - 2.4, yy - 3, z - r - 0.04, x + 2.4, yy + 4, z + r + 0.04));   // the gateway, through the wall
       const a = r * 0.65, y1 = top + 0.2, y2 = y1 + 7, y3 = y2 + 4.5;
       bag.add(BR, box(x - a, top - 0.5, z - a, x + a, y2, z + a));
       bag.add(WS, box(x - a - 0.15, y2 - 0.4, z - a - 0.15, x + a + 0.15, y2, z + a + 0.15));
