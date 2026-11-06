@@ -22,6 +22,7 @@ export function lots() {
   const rand = rng(1694);
   for (let x = SHOL[0] + 6; x < SHOL[2] - 14; x += 17) for (let z = SHOL[1] + 6; z < SHOL[3] - 14; z += 17) {
     if (Math.abs(x + 4) < 10) continue;                                    // the street up to the palace
+    if (Math.abs(z - 136) < 1) continue;                                   // the lane between the east and west gates
     if (rand() < 0.12) continue;
     const w = 10 + rand() * 4, d = 9 + rand() * 4;
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });

@@ -1,39 +1,70 @@
-// The Potala in 1694 (docs/settlements/lhasa.md §2–§4): battered blocks climbing Marpo Ri's south
-// face — the lower white frontage, the White Palace east and west, the Red Palace in the middle
-// rising to about 117 m with its gilded roofs, the yellow building of the Deyang Shar, the round
-// towers at the ends; stairs up the front; Shöl's wall and gate at the foot.
+// The Potala in 1694 (docs/settlements/lhasa.md §2–§4): battered blocks in many stepped masses
+// climbing Marpo Ri's south face — the great white frontage below with the zigzag stairs on its face,
+// the White Palace east and west stepping down to the ends, the Red Palace in the middle rising on its
+// white base to about 117 m under its gilded roofs, the yellow banner store beside it, round bastions
+// at the ends and walls stepping up the rock; Shöl walled below on three sides with its three gates,
+// its inner pillar under the stairs and the outer pillar across the road outside the south gate.
 
 import { SHOL, hill } from './layout.js';
 
 const E = [];
-const block = (rect, top, mat = 'limewash_white', windows = 's', seed = 1) => {
-  const y0 = Math.min(hill(rect[0], rect[3]), hill(rect[2], rect[3]), hill((rect[0] + rect[2]) / 2, rect[3])) - 3;
-  E.push({ t: 'dzong', rect, y0, y1: top, batter: (top - y0) * 0.05, mat, windows, seed, wy: y0 + 4 });
+/** The ground under a block's south face (the lowest of its edge), a little below it. */
+const foot = (x0, x1, z) => { let m = Infinity; for (let i = 0; i <= 8; i++) m = Math.min(m, hill(x0 + (x1 - x0) * i / 8, z)); return m - 3; };
+/** A battered mass of the palace: x from x0 to x1, z from front (south) to back, its roof at top. */
+const mass = (x0, x1, front, back, top, o = {}) => {
+  const y0 = foot(x0, x1, front);
+  E.push({ t: 'dzong', rect: [x0, back, x1, front], y0, y1: top, mat: o.mat || 'limewash_white', windows: o.windows ?? 's', seed: o.seed ?? Math.round(x0 * 7 + top), wy: y0 + 4, pembe: o.pembe ?? (top - y0 > 40 ? 1.8 : 1.3), ...o });
 };
-// the lower frontage and the terraces above it
-block([-185, 5, -60, 30], 22, 'limewash_white', 's', 1); block([-60, 5, 40, 30], 24, 'limewash_white', 's', 2); block([40, 5, 170, 30], 22, 'limewash_white', 's', 3);
-block([-190, -25, -60, 5], 44, 'limewash_white', 'se', 4); block([-60, -25, 40, 5], 50, 'limewash_white', 's', 5); block([40, -25, 175, 5], 46, 'limewash_white', 'sw', 6);
-block([-170, -62, -60, -25], 70, 'limewash_white', 's', 7); block([30, -62, 150, -25], 92, 'limewash_white', 'se', 8); block([-55, -62, 30, -25], 98, 'limewash_red', 'se', 9);
-block([-160, -100, -60, -62], 80, 'limewash_white', 'sw', 10); block([40, -98, 135, -62], 100, 'limewash_white', 'sew', 11); block([-48, -98, 24, -62], 117, 'limewash_red', 'sew', 12);
-block([24, -84, 40, -62], 99, 'limewash_yellow', 's', 13);
-// the round towers of the sun (east) and the moon (west)
-block([170, -18, 192, 4], 38, 'limewash_white', 'sew', 14); block([-206, -14, -184, 8], 36, 'limewash_white', 'sew', 15);
-// the gilded roofs on the Red Palace
-for (const [x, z, w] of [[-30, -88, 10], [-12, -86, 12], [8, -88, 9], [-38, -70, 7], [14, -70, 7]]) E.push({ t: 'golden_roof', rect: [x - w / 2, z - w / 2, x + w / 2, z + w / 2], y: 117 });
-for (const x of [-60, -10, 40, 90, 140]) E.push({ t: 'banner_pole', c: [x, -96], y: x > -48 && x < 24 ? 117 : 100, h: 5 });
-// the stairs up the front, flight by flight, landings between
-E.push({ t: 'stairs', rect: [-20, 30, 40, 36], y0: 0, y1: 11, dir: 'e', mat: 'limewash_white' });
-E.push({ t: 'block', walk: true, rect: [40, 30, 52, 36], y0: 0, y1: 11, mat: 'limewash_white' });
-E.push({ t: 'stairs', rect: [52, 30, 112, 36], y0: 11, y1: 22, dir: 'e', mat: 'limewash_white' });
-E.push({ t: 'block', walk: true, rect: [112, 30, 124, 36], y0: 0, y1: 22, mat: 'limewash_white' });
-// Shöl's wall with its corner towers and south gate
-const [sx0, sz0, sx1, sz1] = SHOL, w = (a, b) => E.push({ t: 'dzong', rect: [Math.min(a[0], b[0]) - 1.2, Math.min(a[1], b[1]) - 1.2, Math.max(a[0], b[0]) + 1.2, Math.max(a[1], b[1]) + 1.2], y0: -0.5, y1: 5, batter: 0.4, windows: '', pembe: 0.5 });
-w([sx0, sz1], [-12, sz1]); w([4, sz1], [sx1, sz1]); w([sx0, sz0 + 4], [sx0, sz1]); w([sx1, sz0 + 4], [sx1, sz1]);
-for (const [x, z] of [[sx0, sz1], [sx1, sz1], [sx0, sz0 + 4], [sx1, sz0 + 4]]) E.push({ t: 'dzong', rect: [x - 5, z - 5, x + 5, z + 5], y0: -0.5, y1: 9, batter: 0.6, windows: 'nesw', pembe: 0.8 });
+// the great white frontage (its middle the blank wall where the giant thangkas were hung)
+const STW = [-140, -100], STE = [46, 86];                     // the two zigzag stairs on its face
+mass(-186, -142, 28, 8, 19); mass(-142, -98, 30, 8, 22, { win: { skip: [[...STW, 23]] } }); mass(-98, -60, 29, 8, 21);
+mass(-60, 40, 30, 8, 24, { win: { from: 15, step: 4.2 } });
+mass(40, 86, 30, 8, 22, { win: { skip: [[...STE, 23]] } }); mass(86, 132, 29, 8, 21); mass(132, 170, 27, 8, 18);
+// the second tier
+mass(-196, -150, 4, -26, 34); mass(-150, -104, 7, -26, 41); mass(-104, -60, 5, -26, 46);
+mass(-60, 40, 8, -26, 52, { win: { bay: [0.4, 0.6] } });
+mass(40, 96, 7, -26, 49); mass(96, 140, 4, -26, 44); mass(140, 176, 1, -26, 37);
+// the third tier: the White Palace's west wing, the Red Palace's lower storeys red on the white base, the yellow banner store, the White Palace east
+mass(-172, -128, -30, -62, 58); mass(-128, -60, -24, -62, 70, { windows: 'se' });
+mass(-56, 26, -22, -62, 66, { mat: 'limewash_red', split: 50, pembe: 2.0, gilt: true, capMat: 'limewash_white' });
+mass(26, 44, -30, -84, 86, { mat: 'limewash_yellow', windows: 's', pembe: 1.6 });
+mass(44, 100, -24, -62, 86, { windows: 'se' }); mass(100, 138, -28, -62, 78, { windows: 'se' }); mass(138, 162, -34, -62, 64, { windows: 'se' });
+// the top tier: the Red Palace rising in two stages with its doubled, gilt-studded frieze; the White Palace east, its quarters' wide windows in the middle
+mass(-160, -118, -64, -96, 72, { windows: 'sw', banners: 'black' }); mass(-118, -58, -60, -98, 86, { windows: 'sw', banners: 'black' });
+mass(-52, 22, -56, -98, 104, { mat: 'limewash_red', split: 52, pembe: 2.6, gilt: true, windows: 'sew', banners: 'gilt' });
+mass(-42, 12, -64, -94, 117, { mat: 'limewash_red', pembe: 2.8, gilt: true, windows: 'sew', banners: 'gilt', bannerS: 1.2 });
+mass(44, 98, -60, -98, 100, { windows: 'se', pembe: 2.0, banners: 'black', win: { bay: [0.38, 0.66] } });
+mass(98, 134, -62, -96, 92, { windows: 'se', banners: 'black' }); mass(134, 152, -64, -92, 80, { windows: 'se' });
+// the gilded roofs over the Red Palace's chapels and tombs
+for (const [x, z, w] of [[-28, -82, 8], [-15, -82, 9], [-2, -82, 8], [-32, -72.3, 4.4], [2, -72.3, 4.4]]) E.push({ t: 'golden_roof', rect: [x - w / 2, z - w / 2, x + w / 2, z + w / 2], y: 117 });
+// the round bastions at the ends, and the walls stepping up the rock behind them
+const TW = [-200, -2], TE = [192, -4];
+for (const [[x, z], top] of [[TW, 38], [TE, 40]]) E.push({ t: 'round_tower', c: [x, z], r: 10, y0: Math.min(hill(x, z + 10), hill(x - 10, z), hill(x + 10, z)) - 2, y1: top, from: 0.1, to: Math.PI - 0.1, seed: x });
+for (const x of [TW[0], TE[0]]) for (let za = -14; za > -80; za -= 14) {
+  const zb = za - 14, y0 = Math.min(hill(x, za), hill(x - 3, za), hill(x + 3, za)) - 1.5;
+  E.push({ t: 'dzong', rect: [x - 3, zb, x + 3, za], y0, y1: hill(x, zb) + 5, batter: 0.5, pembe: 0.6, windows: '', seed: 4 });
+}
+// the zigzag stairs on the frontage, four flights each, the lowest outermost; the top landings onto the frontage roof
+E.push({ t: 'zigzag', x0: STW[0], x1: STW[1], zf: 30, w: 4, n: 4, y1: 22.12, land: 6, start: 'e', bridge: 2.6 });
+E.push({ t: 'zigzag', x0: STE[0], x1: STE[1], zf: 30, w: 4, n: 4, y1: 22.12, land: 6, start: 'w', bridge: 2.6 });
+// Shöl: walled on three sides, the fourth the foot of the hill; its gates south, east and west; corner towers at the south
+const [sx0, , sx1, sz1] = SHOL, GZ = 142, GX = -1;
+const wall = (a, b) => E.push({ t: 'dzong', rect: [Math.min(a[0], b[0]) - 1.2, Math.min(a[1], b[1]) - 1.2, Math.max(a[0], b[0]) + 1.2, Math.max(a[1], b[1]) + 1.2], y0: -0.5, y1: 6, batter: 0.4, windows: '', pembe: 0.5 });
+wall([sx0 + 5, sz1], [GX - 9, sz1]); wall([GX + 9, sz1], [sx1 - 5, sz1]);
+wall([sx0, TW[1]], [sx0, GZ - 8]); wall([sx0, GZ + 8], [sx0, sz1 - 5]); wall([sx1, TE[1]], [sx1, GZ - 8]); wall([sx1, GZ + 8], [sx1, sz1 - 5]);
+E.push({ t: 'shol_gate', c: [GX, sz1], along: 'x', w: 5, d: 9, len: 18, h: 10, seed: 21 });
+E.push({ t: 'shol_gate', c: [sx0, GZ], along: 'z', w: 4.5, d: 8, len: 16, h: 9, seed: 23 });
+E.push({ t: 'shol_gate', c: [sx1, GZ], along: 'z', w: 4.5, d: 8, len: 16, h: 9, seed: 25 });
+for (const [x, z] of [[sx0, sz1], [sx1, sz1]]) E.push({ t: 'dzong', rect: [x - 5, z - 5, x + 5, z + 5], y0: -0.5, y1: 10, batter: 0.6, windows: 'nesw', pembe: 0.8, win: { step: 3.0, from: 4.5, dense: 0.6 }, seed: x });
+// the inner pillar (doring nangma, uninscribed) under the stairs; the outer pillar (doring chima, inscribed, c. 764)
+// across the road outside the south gate, with its heap of stones and incense burner beside it
+E.push({ t: 'doring', at: [-4, 54], h: 6.5 });
+E.push({ t: 'doring', at: [GX, 238], h: 7.5 });
+E.push({ t: 'stone_heap', at: [GX - 6, 237], r: 1.2, seed: 5 }); E.push({ t: 'sangkhang', at: [GX - 9.5, 234], rot: 0 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('shol', SHOL, 0, 'open'), room('red palace roof', [-48, -98, 24, -62], 117, 'open')];
-const walks = [[[-4, 240], [-4, 140], [-4, 50], [-20, 33]]];
+const rooms = [room('shol', SHOL, 0, 'open'), room('below the palace', [sx0 + 2, 47, sx1 - 2, 62], 0, 'open'), room('red palace roof', [-36, -88, 6, -70], 117, 'open')];
+const walks = [[[-1, 228], [-1, 140], [-1, 58], [-103, 50], [-103, 44], [-137, 44], [-137, 40], [-103, 40], [-103, 36], [-137, 36], [-137, 32], [-103, 32], [-103, 18]]];
 walks[0].y0 = 0;
 
 export const potala = {
@@ -43,8 +74,8 @@ export const potala = {
   style: 'tibetan',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [-4, 60], facing: 'n' },
-  bounds: [-210, -105, 195, 212],
-  bakeBounds: [-210, -105, 195, 40],
+  bounds: [-212, -105, 202, 244],
+  bakeBounds: [-212, -105, 202, 48],
   view: [-60, 5, 40, 30],
   bakeTop: 125,
   elements: E,
