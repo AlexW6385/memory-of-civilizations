@@ -294,8 +294,28 @@ function house(el, { bag, col }) {
   }
 }
 
+/**
+ * timber_circle: the Southern Circle at Durrington Walls (docs/settlements/stonehenge.md §5b) { posts: [{ at, y, r, h,
+ * seed }] }: great posts of oak, each a trunk set upright in its pit, a little irregular in section and leaning a
+ * hair, its top cut flat; the foot packed round with a collar of rammed chalk.
+ */
+function timberCircle(el, { bag, col }) {
+  for (const p of el.posts) {
+    const rand = rng(p.seed ?? 1), [x, z] = p.at, y = p.y, r = p.r, h = p.h, n = 9, lean = [(rand() - 0.5) * 0.04, (rand() - 0.5) * 0.04];
+    const wob = Array.from({ length: n }, () => 0.9 + rand() * 0.18), rings = [];
+    for (let k = 0; k <= 4; k++) {
+      const f = k / 4, rr = r * (1 - 0.12 * f), yy = y - 0.4 + (h + 0.4) * f, cx = x + lean[0] * h * f, cz = z + lean[1] * h * f;
+      rings.push(Array.from({ length: n }, (_, j) => { const a = j / n * Math.PI * 2; return [cx + Math.cos(a) * rr * wob[j], yy, cz + Math.sin(a) * rr * wob[j]]; }));
+    }
+    bag.add('bark_dark', loft(rings, { capStart: false }));
+    bag.add('timber', lathe([[0.001, 0], [r * 0.86, 0], [r * 0.86, 0.02]], n, null, x + lean[0] * h, y + h - 0.01, z + lean[1] * h));      // the cut top, pale
+    bag.add('lime_plaster', lathe([[r * 1.9, -0.1], [r * 1.7, 0.08], [r * 1.05, 0.16], [r * 0.95, 0.16]], 10, null, x, y, z));   // the rammed chalk round the foot
+    col.circle(x, z, r * 1.05, y, y + h);
+  }
+}
+
 registerStyle('neolithic', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house },
+  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle },
   objects: {},
 });

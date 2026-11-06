@@ -1,7 +1,7 @@
 // The builders' houses (docs/settlements/stonehenge.md §5) and the people (§10): a gathering at the
 // stones and up the Avenue, as at the midwinter feasts; at the houses people, pigs fattened for the
 // feast, cattle and dogs.
-import { RADIUS, AXIS, VILLAGE, height, houses, avenue } from './layout.js';
+import { RADIUS, AXIS, VILLAGE, DURR, height, houses, avenue } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, style) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, -40], facing: 'w' } });
@@ -49,8 +49,24 @@ function people() {
   return L;
 }
 
+/** The Southern Circle (§5b): 166 posts in five rings 40 m across, two great posts at the entrance facing the avenue
+ *  and the midwinter sunrise; the rings broken on that axis. */
+function timberCircle() {
+  const rand = rng(2502), posts = [], [dx, dz] = DURR.dir, [cx, cz] = DURR.c, ax = Math.atan2(dz, dx);
+  const RINGS = [[19.5, 52, 0.45, 3.6], [16, 42, 0.6, 4.6], [12.5, 33, 0.85, 6.2], [9, 24, 0.7, 5.2], [5.5, 15, 0.5, 4.0]];
+  for (const [r, n, d, h] of RINGS) for (let i = 0; i < n; i++) {
+    const a = ax + (i + 0.5) / n * Math.PI * 2, rel = Math.atan2(Math.sin(a - ax), Math.cos(a - ax));
+    if (Math.abs(rel) * r < 1.8) continue;                                  // the way in
+    const at = [cx + Math.cos(a) * r + (rand() - 0.5) * 0.25, cz + Math.sin(a) * r + (rand() - 0.5) * 0.25];
+    posts.push({ at, y: height(at[0], at[1]), r: d / 2 * (0.9 + rand() * 0.2), h: h * (0.92 + rand() * 0.16), seed: Math.floor(rand() * 1e9) });
+  }
+  for (const s of [-1, 1]) { const at = [cx + dx * 21.5 - dz * s * 1.9, cz + dz * 21.5 + dx * s * 1.9]; posts.push({ at, y: height(at[0], at[1]), r: 0.52, h: 7, seed: 7 + s }); }
+  return [{ t: 'timber_circle', posts }];
+}
+
 export async function town() {
   return [
+    base('stonehenge-timber-circle', timberCircle(), 'neolithic'),
     base('stonehenge-houses', houses().map((h) => ({ t: 'neolithic_house', ...h })), 'neolithic'),
     base('stonehenge-people', people(), 'life'),
   ];

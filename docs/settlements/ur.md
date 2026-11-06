@@ -1,7 +1,7 @@
 # Ur of the Third Dynasty, c. 2050 BC — dossier
 
 Settlement id: `ur` · Style: `sumerian` · Region: Mesopotamia (the lower Euphrates) · Code: `src/settlements/ur/`
-Status of this dossier: L2 for the houses and the temenos's terrace and gates (§4.1, §5); before that L1–L2 (the Ziggurat of Ur-Nammu on its terrace — three stages, the three stairways meeting at the gatehouse, the shrine on top; the terrace's enclosure; the Court of Nanna; the Giparu and the palace E-hursag inside the temenos wall; a quarter of courtyard houses on winding lanes; the harbour on the west with reed boats; date palms; ground, weather, music). L3 recorded for later: the Royal Cemetery's mausolea, the city rampart and its oval wall, the canals, the brick stamps and bitumen, interiors, people.
+Status of this dossier: L2 for the houses, the temenos's terrace and gates, the shrine on the ziggurat's top and the harbour's boats (§4.1, §4.2, §5, §6.1); before that L1–L2 (the Ziggurat of Ur-Nammu on its terrace — three stages, the three stairways meeting at the gatehouse, the shrine on top; the terrace's enclosure; the Court of Nanna; the Giparu and the palace E-hursag inside the temenos wall; a quarter of courtyard houses on winding lanes; the harbour on the west with reed boats; date palms; ground, weather, music). L3 recorded for later: the Royal Cemetery's mausolea, the city rampart and its oval wall, the canals, the brick stamps and bitumen, interiors, people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -38,7 +38,12 @@ The ziggurat's skin (L3, built): a mud-brick core with a casing about 2.4 m thic
 - **The terrace:** Ur-Nammu's terrace wall "a massive wall, buttressed and sloping sharply inwards", of unbaked brick, with rows of nail-shaped clay cones set in its face whose round heads formed a pattern, their stems inscribed with the king's name and the dedication to the Moon God [stated: Penn Museum Journal, "The Expedition to Ur"]. Ours: the terrace 2.5 m high in mud brick, its faces leaning in 0.6 m, buttresses every 4 m, two rows of cone heads every 0.32 m near the top following the slope; the rooms' walls stand on the terrace 2.5 m back from its edge so the face shows [inferred: spacing, rows, setback].
 - **The Edublalmah:** the gate tower in front of the ziggurat steps, a gateway with very thick burnt-brick walls and wide doors [stated: Penn Museum Journal]. Ours: a tower 16 × 12 m, 9 m high, of baked brick at the Court of Nanna's entrance, a passage 3 m wide through it, two cedar leaves bound in bronze standing open inside, buttressed faces; a like tower of mud brick at the temenos's north gate [inferred].
 - **Gateways of the courtyard buildings** (the Giparu, E-hursag, the stores; Babylon's Esagila too): a deep doorway in the middle of the side between two projecting towers, cedar doors at the back of the reveal, a brick threshold — after Koldewey's account of Esagila's gateways "elaborated with massive projecting towers" [stated for Babylon; inferred for Ur].
-- **Stairs:** brick steps on a wedge of brickwork (the ziggurat's flights and the terrace stair) [inferred].
+- **Stairs:** brick steps on a wedge of brickwork (the ziggurat's flights, the terrace stair before the Edublalmah and the flights down to the harbour's water), all built by the Sumerian stair builder [inferred].
+
+### 4.2 The house of Nanna on the top (L2, built)
+
+- **What is known:** the Nanna temple on the top "has not survived"; blue glazed bricks found at the site may have belonged to its decoration [stated: Lumen "Ziggurat of Ur"] — but the shrine was later faced with blue glazed bricks by Nebuchadnezzar [stated: stevewatson], so for 2050 BC ours has none (the earlier blue band was removed). The reconstruction is "a modest sanctuary at the top" [stated: stevewatson]. Sumerian temples of the "house plan" had "a main entrance flanked by towers", the altar reached directly through antechambers [stated: stevewatson]; the faces of the stages and of temples were decorated with buttresses and recesses [stated: stevewatson].
+- **Ours:** 14 × 11 m, 5 m high, plastered mud brick with buttresses every 2.2 m; the doorway (1.6 × 2.9 m) in the middle of the north front between two towers 2 × 1.1 m standing 6.4 m high, a palm-trunk lintel, cedar doors bound with bronze standing open, a baked-brick threshold; an antecella 3 m deep across the front; the cella behind it on the same axis (a broad room 11.2 × 4.2 m) with the god's podium (3.8 × 1.5 m, 1 m high, three brick steps) against the back wall under a raised niche, Nanna's crescent in gold on a bronze standard on it, an offering table with three bowls before it, brick benches at the ends, an oil lamp on a stand; floors of baked brick; the roof of mud on reed mats on palm trunks 0.75 m apart, with a parapet [inferred: plan, sizes, the furnishings; the crescent as the moon god's emblem is [inferred] from his name and cult].
 
 ## 5. The town
 
@@ -49,6 +54,11 @@ Built (L2): after Woolley's houses (of the Isin–Larsa period, a little later t
 ## 6. Ground and water
 
 The flat alluvial plain; the harbour basin on the west with water about a metre below its quay. (`ground.js`) [inferred]
+
+### 6.1 The harbour's boats and quay (L2, built)
+
+- Boat models of bitumen and of silver were placed in the graves of the Royal Cemetery, "often loaded with small containers, as if carrying provisions for the dead" [stated: sumerianshakespeare, Royal Tombs]; a bitumen boat model from an early grave at Ur measures 940 × 300 mm [stated: Penn Museum, object 331509]. The silver model from PG 789 (the King's Grave) has the long narrow hull with both ends rising high [inferred: as generally photographed].
+- **Ours:** boats 7–9 m long and about a sixth as broad, of reed bundles coated with bitumen, open, the ends drawn up into horns about 1.6–1.9 m high curving in over the hull, the bundles bound with cord at intervals; four thwarts, a reed mat floor, a punting pole; some carry jars or bundles of reeds. Four lie along the quay, five out in the basin. Three flights of baked-brick steps go down from the quay into the water, and palm-trunk mooring posts stand along its edge every 9 m [inferred: sizes, numbers, the quay furniture].
 
 ## 7. Planting
 
@@ -80,3 +90,6 @@ The lyre and the harp, a reed pipe, frame drums (a plucked string, the ney and a
 - [The Expedition to Ur — Penn Museum Journal](https://www.penn.museum/sites/journal?p=1297)
 - [Ur of the Chaldees — Houses (odysseyadventures)](https://odysseyadventures.ca/articles/ur%20of%20the%20chaldees/ur_article04houses.html)
 - [R. Koldewey, *The Excavations at Babylon* (1914) — Project Gutenberg](https://gutenberg.org/files/71398/71398-h/71398-h.htm)
+- [Ziggurat of Ur — Lumen Learning, Art History I](https://courses.lumenlearning.com/suny-arthistory1/chapter/ziggurat-of-ur/)
+- [Bitumen boat model, Ur — Penn Museum 331509](https://collections.penn.museum/collections/object/331509)
+- [Miscellaneous items from the Royal Tombs of Ur — sumerianshakespeare](https://sumerianshakespeare.com/miscellaneous-items-royal-tombs-ur)

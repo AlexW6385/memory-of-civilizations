@@ -1,7 +1,7 @@
 # Stonehenge, about 2500 BC — dossier
 
 Settlement id: `stonehenge` · Style: `neolithic` · Region: Britain (Salisbury Plain) · Code: `src/settlements/stonehenge/`
-Status of this dossier: L2, toward L3 (the stones individually shaped and set in the ground — §1a; the Station Stones, the entrance stones and the Heel Stone's ditch; Durrington-type houses with interiors — §5a; people and animals — §10). Earlier: L1–L2 (the sarsen circle with its lintels, the five trilithons in a horseshoe open to the north-east, the bluestone circle and horseshoe, the altar, slaughter and heel stones; the circular ditch and bank; the Avenue toward the midsummer sunrise; round barrows on the down; the builders' houses brought near; ground, planting, weather, music). L3 recorded for later: each stone's surveyed shape, the Aubrey holes, Durrington Walls and Woodhenge at their true distance, the Cursus, the River Avon, gatherings at the solstices.
+Status of this dossier: L2, toward L3 (the Southern Circle and its avenue with the houses flanking it, long barrows and bowl barrows — §5b, §6a; the stones individually shaped and set in the ground — §1a; the Station Stones, the entrance stones and the Heel Stone's ditch; Durrington-type houses with interiors — §5a; people and animals — §10). Earlier: L1–L2 (the sarsen circle with its lintels, the five trilithons in a horseshoe open to the north-east, the bluestone circle and horseshoe, the altar, slaughter and heel stones; the circular ditch and bank; the Avenue toward the midsummer sunrise; round barrows on the down; the builders' houses brought near; ground, planting, weather, music). L3 recorded for later: each stone's surveyed shape, the Aubrey holes, Durrington Walls and Woodhenge at their true distance, the Cursus, the River Avon, gatherings at the solstices.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -35,7 +35,7 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Ditch and bank | radius 55 m | [stated] |
 | Avenue, Heel Stone | north-east | [stated] |
 | Barrows | on the down round about | [stated: round barrows near] |
-| Houses | north-east, ≈ 280 m (they are ≈ 3 km away) | [stated: Durrington; compressed — inferred] |
+| Houses, Southern Circle, Durrington avenue | north-east, ≈ 270 m (they are ≈ 3 km away) | [stated: Durrington; compressed — inferred] |
 
 ## 3. Orientation
 
@@ -55,6 +55,11 @@ About 70 houses. [inferred]
 - The English Heritage reconstructions at the visitor centre: one room 5 m a side, stakes woven with hazel and daubed with "chalk, hay and water", white chalk walls and floors, thatch of wheat straw tied to a woven hazel frame, smoke rising through the thatch; based on the Durrington houses dated about 2500 BC; the methods are hypotheses being tested [stated: EH "Neolithic Houses"].
 - As built: inner side 4.8–5.7 m, walls 0.16 m of chalk daub 1.75 m high with a doorway 0.85 × 1.5 m framed in timber, the foot darkened by mud; a timber wall-plate; a steep roof hipped to a point (thatch outside, woven hazel within, eaves 0.75 m out, a bound capping bundle) [inferred: wall height, door, roof form]; chalk floor on a levelled platform; a round hearth with a chalk kerb, ash and sticks, a fire in some; one or two box beds of planks with bedding and a hide; a dresser of posts and two shelves against the back wall with flat-based Grooved Ware pots; firewood outside [stated: hearth, beds, dressers; inferred: their making].
 
+### 5b. The Southern Circle and the Durrington avenue
+
+- The Southern Circle "was 40 metres across and aligned so that the midwinter sun would rise between the entrance posts"; it "consist[ed] of two huge entrance posts and 166 posts of various sizes arranged in five concentric circles" [stated: h2g2]. Oriented south-east toward the midwinter sunrise; a paved avenue led from it to the river, aligned on the midsummer sunset [stated: Wikipedia "Durrington Walls"]; the avenue was stone-surfaced, "some 30 metres wide and 170 metres long" [stated: UNESCO WHC news]; "with its rammed flint surface" [stated: Stone Pages]; with a gully and an external bank [stated: digitaldigging]; seven houses were found flanking it [stated: Internet Archaeology 26]. The village went out of use about 2500–2460 BC and the great henge bank was finished about 2480–2450 BC, after the houses [stated: Current Archaeology, "Rethinking Durrington Walls"] — so the henge's bank is not built.
+- **Ours:** brought near (like the houses), north-east of the stones beside the Stonehenge Avenue: the circle centred at (214, −165), 166 posts of oak laid out in five rings of 19.5, 16, 12.5, 9 and 5.5 m radius (52, 42, 33, 24, 15), the ten that would stand in the way in left out, 0.45–0.85 m thick and 3.6–6.2 m high, the middle ring the stoutest and tallest; the rings broken on the axis for the way in; two entrance posts 1.05 m thick and 7 m high just outside, either side of the axis; each post's foot in a collar of rammed chalk, its top cut flat. The avenue runs south-east from the circle, 30 m wide, its surface rammed flint, a gully and a low bank outside each side, 108 m to the settlement's edge (toward the river beyond); the 61 houses stand along both sides of it and round the circle [inferred: ring radii, post sizes and heights, the avenue's length as cut by the edge].
+
 ## 10. Life
 
 - The pigs at Durrington were mostly killed at about nine months, "in time for the midwinter solstice", with feasting on an unprecedented scale [stated: the-past.com]. Shown: about 60 people at the stones, round the entrance and coming up the Avenue, others at the houses; 30 pigs, cattle and dogs among the houses [inferred: numbers]. Dress of hide and woven cloth in browns and greys [inferred].
@@ -62,6 +67,10 @@ About 70 houses. [inferred]
 ## 6. Ground and water
 
 Chalk down with short grass; white chalk in the ditch, banks and barrows; woodland far off. [inferred]
+
+## 6a. Barrows
+
+Long barrows "acted as funerary monuments during the Early and Middle Neolithic periods (3400–2400 BC)"; the one north-east of Winterbourne Stoke crossroads is 95 m long, 22 m wide and 2.5 m high, with ditches along both sides, oriented south-west–north-east [stated: Historic England list entry 1011841]. Bowl barrows date "from the Late Neolithic period to the Late Bronze Age" and are usually surrounded by a ditch; round barrow cemeteries in general are of the Bronze Age [stated: Historic England list entry 1011047]. Ours (changed from six round barrows): two long barrows, old and grassed by 2500 BC (95 × 22 × 2.5 m and 70 × 18 × 2.2 m, higher at the north-east end, a quarry ditch along each side), and four bowl barrows each with its ring ditch [inferred: the higher end; how many round barrows stood by 2500 BC is uncertain].
 
 ## 7. Sky and climate
 
@@ -86,3 +95,11 @@ Nothing is known; pipes, drums and voices stand in, under the wind. [inferred]
 - [Station Stones — Wikipedia](https://en.wikipedia.org/wiki/Station_Stones)
 - [Stonehenge Avenue — Wikipedia](https://en.wikipedia.org/wiki/Stonehenge_Avenue)
 - [Stonehenge — MacTutor gazetteer](https://mathshistory.st-andrews.ac.uk/Gaz/Stonehenge)
+- [The Woodhenge, Durrington Walls Henge and Stonehenge Complex — h2g2](https://www.h2g2.com/edited_entry/A9568128)
+- [Durrington Walls avenue — UNESCO World Heritage Centre news](https://whc.unesco.org/en/news/310)
+- [Durrington avenue — Stone Pages news](https://www.stonepages.com/news/archives/001548.html)
+- [Timber circles, Durrington Walls Southern Circle — digitaldigging](https://www.digitaldigging.net/timber-circles-durrington-walls-south-circle-digital-model/)
+- [Durrington Walls East Entrance — Internet Archaeology 26](https://intarch.ac.uk/journal/issue26/2/2.html)
+- [Rethinking Durrington Walls — Current Archaeology](https://archaeology.co.uk/articles/features/rethinking-durrington-walls-a-long-lost-monument-revealed.htm)
+- [Long barrow NE of Winterbourne Stoke crossroads — Historic England 1011841](https://historicengland.org.uk/listing/the-list/list-entry/1011841)
+- [Round barrow cemetery on Winterbourne Stoke Down — Historic England 1011047](https://historicengland.org.uk/listing/the-list/list-entry/1011047)
