@@ -14,7 +14,7 @@ const PL = 'plaster_white', SC = 'stucco_cream', MS = 'marble_smooth', RED = 'tu
 const q4 = (out, a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
 
 /** A pair of arched windows divided by a marble colonnette in a wall face f (wall th thick) at u, from y0 to y1. */
-function pairedWindow(bag, f, u, y0, y1, th) {
+export function pairedWindow(bag, f, u, y0, y1, th) {
   for (const [a, b] of [[u - 0.78, u - 0.08], [u + 0.08, u + 0.78]]) {
     archHead(bag, f, a, b, y1 - 0.42, y1, th, 'lobed', { both: true, alfiz: false });
     const r = f.R(th * 0.5 - 0.01, th * 0.5 + 0.01, a, b); bag.add('daylight', box(r[0], y0, r[1], r[2], y1 - 0.42, r[3]));

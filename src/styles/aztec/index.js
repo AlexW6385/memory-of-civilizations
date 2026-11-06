@@ -12,6 +12,8 @@ import '../maya/index.js';
 import '../../objects/index.js';
 import { Kit, carved, serpentHeadKit, chacmoolKit } from '../maya/meso.js';
 import { calli, tecpan, tzompantli } from './houses.js';
+import { shrineInterior, huehuetl } from './shrines.js';
+import { mxPeople } from './life.js';
 import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causewayStakes } from './precinct.js';
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue';
@@ -48,14 +50,17 @@ export function treads(bag, col, [x0, z0, x1, z1], y0, y1, dir, mat, riser = nul
  */
 function shrine(bag, col, [x0, z0, x1, z1], y, h, roofH, god) {
   const tl = god === 'tlaloc', wall = tl ? W : R, zc = (z0 + z1) / 2, dw = 1.3, dh = h * 0.72;
-  bag.add(wall, box(x0, y, z0, x1, y + h, z1)); col.rect([x0, z0, x1, z1], y, y + h);
+  // the thick walls of rubble round the god's chamber, the door a deep passage through the west one (shrines.js)
+  const I = [x0 + 3, zc - 4.2, x1 - 3, zc + 4.2];
+  for (const r of [[x0, z0, x1, I[1]], [x0, I[3], x1, z1], [I[2], I[1], x1, I[3]], [x0, I[1], I[0], zc - dw], [x0, zc + dw, I[0], I[3]]]) { bag.add(wall, box(r[0], y, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h); }
+  bag.add(wall, box(x0, y + dh, zc - dw, I[0], y + h, zc + dw));
+  shrineInterior(bag, col, I, y, h, god);
   if (tl) {
     // the blue stripes, upright, round all four walls
     for (let x = x0 + 0.5; x < x1 - 0.3; x += 0.9) for (const z of [z0, z1]) bag.add(B, box(x, y + 0.3, z - 0.03, x + 0.4, y + h - 0.2, z + 0.03));
     for (let z = z0 + 0.5; z < z1 - 0.3; z += 0.9) { if (Math.abs(z + 0.2 - zc) < dw + 0.4) continue; bag.add(B, box(x0 - 0.03, y + 0.3, z, x0 + 0.03, y + h - 0.2, z + 0.4)); bag.add(B, box(x1 - 0.03, y + 0.3, z, x1 + 0.03, y + h - 0.2, z + 0.4)); }
   }
   // the doorway: its dark opening, the jambs and the lintel standing out
-  bag.add('opening', box(x0 - 0.05, y, zc - dw, x0 + 0.05, y + dh, zc + dw));
   for (const s of [-1, 1]) bag.add(tl ? W : 'plaster_white', box(x0 - 0.18, y, zc + s * dw - (s > 0 ? 0 : 0.35), x0 + 0.02, y + dh, zc + s * dw + (s > 0 ? 0.35 : 0)));
   bag.add(tl ? W : 'plaster_white', box(x0 - 0.2, y + dh, zc - dw - 0.35, x0 + 0.02, y + dh + 0.45, zc + dw + 0.35));
   // the roof stage: a cornice, the tall upper walls, the crest
@@ -137,6 +142,8 @@ function temploMayor(el, { bag, col }) {
   techcatl().emit(bag, sxw - 2.2, sy, cz + d1 * 0.85 - sd, 0, 1);
   col.rect([sxw - 2.7, cz - d1 * 0.85 + sd - 0.9, sxw - 1.7, cz - d1 * 0.85 + sd + 0.9], sy, sy + 1);
   for (const s of [-1, 1]) bag.add('basalt', lathe([[0.9, 0], [1.2, 0.9], [0.8, 1.1], [0.001, 1.1]], 12, null, cx - w1 + 2, sy, cz + s * d1 * 0.45 + s * (d1 * 0.32 + 2.6)));
+  // the huehuetl beside Huitzilopochtli's door, beaten from the summit
+  huehuetl(bag, sxw - 1.2, sy, cz + d1 * 0.85 - 2 * sd + 1.0); col.circle(sxw - 1.2, cz + d1 * 0.85 - 2 * sd + 1.0, 0.4, sy, sy + 1.2);
   // the Coyolxauhqui stone at the foot of Huitzilopochtli's stair
   coyolxauhqui().emit(bag, sx0 - 4.5, 0, cz + d1 * 0.45, 0, 1);
   col.circle(sx0 - 4.5, cz + d1 * 0.45, 1.75, 0, 0.37);
@@ -302,6 +309,6 @@ function tianguis(el, { bag, col }) {
 
 registerStyle('aztec', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes },
+  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes, mx_people: mxPeople },
   objects: {},
 });

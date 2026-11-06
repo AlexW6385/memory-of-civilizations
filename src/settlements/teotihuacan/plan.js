@@ -7,10 +7,19 @@ import { AVENUE, MOON, PLAZA, SUN, CIUD, KEEP_CLEAR, RADIUS, CROSS, STEP, BANK, 
 const E = [], LP = MOON.rise;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const rand = rng(4000);
-E.push({ t: 'tt_pyramid', c: SUN.c, w: SUN.w, d: SUN.d, tw: SUN.tw, td: SUN.td, h: SUN.h, levels: 5, tablero: 0, stair: 'w', stairW: 14, temple: { w: 16, d: 16, h: 5 } });
-E.push({ t: 'tt_pyramid', c: [SUN.c[0] - SUN.w / 2 - 22, SUN.c[1]], w: 44, d: 70, tw: 32, td: 58, h: 12, levels: 2, tablero: 0.4, stair: 'w', stairW: 12, stairFoot: LEVELS[1] + 0.03 });
+// the Sun "finished … with lime plaster" (Wikipedia), its temple's chamber within thick walls
+E.push({ t: 'tt_pyramid', c: SUN.c, w: SUN.w, d: SUN.d, tw: SUN.tw, td: SUN.td, h: SUN.h, levels: 5, tablero: 0, stair: 'w', stairW: 14, talud: 'lime_plaster_rough', temple: { w: 16, d: 16, h: 5, inner: true, wall: 3, seed: 65 } });
+// pilgrims and priests on the Sun's stair, going up and coming down; priests and a censer-bearer before the temple
+{
+  const run = SUN.h * 1.05 - 0.15 * (SUN.w - SUN.tw) / 10, x0 = SUN.c[0] - SUN.tw / 2 - SUN.h * 1.05, n = Math.round(SUN.h / 0.2), up = -Math.PI / 2, down = Math.PI / 2, zc = SUN.c[1];
+  const at = (k, dz, rot, who, seed) => [x0 + run * (k + 0.5) / n, zc + dz, SUN.h * (k + 1) / n, rot, who, seed];
+  E.push({ t: 'tt_people', people: [at(14, -2.5, up, 'pilgrim', 1), at(18, 1.5, up, 'bearer', 2), at(22, 3.6, down, 'pilgrim', 3), at(60, -1, up, 'priest', 4), at(64, 1.2, up, 'pilgrim', 5),
+    at(120, -3.5, up, 'bearer', 6), at(126, 2.8, down, 'pilgrim', 7), at(190, 0.5, up, 'pilgrim', 8), at(196, -1.8, up, 'pilgrim', 9), at(250, 3, down, 'priest', 10), at(300, -2, up, 'bearer', 11),
+    [SUN.c[0] - 12, zc - 3, SUN.h, down, 'priest', 12], [SUN.c[0] - 11.5, zc + 3.4, SUN.h, Math.PI * 0.75, 'pilgrim', 13], [SUN.c[0] - 13.5, zc + 1, SUN.h, up, 'kneel', 14]] });
+}
+E.push({ t: 'tt_pyramid', c: [SUN.c[0] - SUN.w / 2 - 22, SUN.c[1]], w: 44, d: 70, tw: 32, td: 58, h: 12, levels: 2, tablero: 0.4, stair: 'w', stairW: 12, stairFoot: LEVELS[1] + 0.03, talud: 'lime_plaster_rough' });
 // the Moon and its front platform on the plaza's terrace
-E.push({ t: 'tt_pyramid', c: MOON.c, y: LP, w: MOON.w, d: MOON.d, tw: MOON.tw, td: MOON.td, h: MOON.h, levels: 4, tablero: 0.3, stair: 's', stairW: 12, temple: { w: 14, d: 12, h: 4.5 } });
+E.push({ t: 'tt_pyramid', c: MOON.c, y: LP, w: MOON.w, d: MOON.d, tw: MOON.tw, td: MOON.td, h: MOON.h, levels: 4, tablero: 0.3, stair: 's', stairW: 12, talud: 'lime_plaster_rough', temple: { w: 14, d: 12, h: 4.5 } });
 E.push({ t: 'tt_pyramid', c: [0, MOON.c[1] + MOON.d / 2 + 14], y: LP, w: 46, d: 30, tw: 36, td: 22, h: 10, levels: 3, tablero: 0.45, stair: 's', stairW: 10 });
 // the Moon Plaza's platform temples round its sides, its central altar
 const [qx0, qz0, qx1, qz1] = PLAZA;
