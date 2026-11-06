@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.39 — Mesoamerica in detail (2026-11-06)
+- Teotihuacan's Avenue of the Dead as a run of sunken plazas crossed by red talud-tablero platforms with stairs and temples, the Moon Plaza lifted out of the ground, framed tableros, about 300 heads on the Feathered Serpent Pyramid, the Ciudadela's fifteen temples, apartment compounds with patios and porticoes; carved serpent heads and serpent columns, Chaac masks, the chacmool and warrior pillars at Chichen Itza; the Templo Mayor's painted twin shrines, Coyolxauhqui stone, beam bridges, dugout canoes and a market with sellers on mats at Tenochtitlan.
+
 ## v9.38 — Mesopotamia, Rome, Byzantium, the North, Beijing and Seoul in detail (2026-11-06)
 - Babylon's paved Processional Way, glazed lion walls with rosettes, stepped battlements, Ishtar Gate rows of bulls and dragons, a walkable Southern Palace with the enamelled throne-room facade, Etemenanki's south stair; Ur's houses after Woolley, the cone-studded temenos terrace and gate towers; two-storey arcaded stadium facades, Ostia-type insulae with shops; the Hippodrome's carceres, obelisk, Serpent Column and kathisma, Hagia Eirene as a domed basilica, the columns of Justinian and Constantine and the Milion, the Mese rerouted; Borgund's open svalgang, turret, bell tower and log farm; the Kremlin's swallowtail merlons and tented towers, St Basil's arcade and kokoshniks, izby with horse-head ridges; the Forbidden City's carved balustrades, dragon spouts, lions, terrace bronzes, roof beasts and nailed gates; Gyeongbokgung's japsang, haetae and balustrades.
 
