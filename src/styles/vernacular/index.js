@@ -252,7 +252,7 @@ function houseTimber(el, { bag, col }) {
  * tiles with a ridge, small latticed windows and a door on the courtyard side. { rect, y, foot, front, seed }
  */
 function houseChina(el, ctx) {
-  gabledHouse(el, ctx, { H: 3.2, foot: 'brick_grey', walls: ['brick_grey', 'earth_wall'], roof: 'tile_grey', o: 0.5, pitch: 0.62, door: 'timber_red', window: 'timber_red', horns: true });
+  gabledHouse(el, ctx, { H: 3.2, foot: 'brick_grey', walls: ['brick_grey', 'earth_wall'], roof: 'tile_grey', o: 0.5, pitch: 0.62, door: 'timber_red', window: 'timber_red', horns: true, inside: 'china' });
 }
 
 /**
@@ -261,7 +261,7 @@ function houseChina(el, ctx) {
  */
 function houseJapan(el, ctx) {
   const rand = rng((el.seed || 1) + 7);
-  gabledHouse(el, ctx, { H: 2.9, foot: 'limestone', walls: ['timber', 'plaster_white'], roof: rand() < 0.5 ? 'roof_bark' : 'thatch', o: 0.9, pitch: 0.85, door: 'timber', window: 'timber', horns: false });
+  gabledHouse(el, ctx, { H: 2.9, foot: 'limestone', walls: ['timber', 'plaster_white'], roof: rand() < 0.5 ? 'roof_bark' : 'thatch', o: 0.9, pitch: 0.85, door: 'timber', window: 'timber', horns: false, inside: 'japan' });
 }
 
 /**
@@ -269,7 +269,7 @@ function houseJapan(el, ctx) {
  * brick, a low-pitched roof of half-round clay tiles over a verandah front. { rect, y, foot, front, seed }
  */
 function houseIndia(el, ctx) {
-  gabledHouse(el, ctx, { H: 2.8, foot: 'mudbrick', walls: ['plaster', 'earth_wall'], roof: 'roof_tile', o: 0.7, pitch: 0.45, door: 'timber', window: 'timber', horns: false });
+  gabledHouse(el, ctx, { H: 2.8, foot: 'mudbrick', walls: ['plaster', 'earth_wall'], roof: 'roof_tile', o: 0.7, pitch: 0.45, door: 'timber', window: 'timber', horns: false, inside: 'india' });
 }
 
 /**
@@ -280,15 +280,79 @@ function houseRouergue(el, ctx) {
   gabledHouse(el, ctx, { H: 3.0, foot: 'schist_rubble', walls: ['schist_rubble', 'limestone_yellow'], roof: 'lauze', o: 0.4, pitch: 1.0, door: 'timber', window: 'timber', horns: false });
 }
 
+/**
+ * The inside of an open gabled village house (DESIGN §4.3): four walls with the door's way cut in
+ * the front's middle (the leaf open inside), a step, the floor, a ceiling of boards on beams under
+ * the roof; furnished by region (O.inside): 'china' — the kang (the heated brick bed) with its mat
+ * and low table, the stove and its pot, water jars, a chest; 'japan' — a raised board floor, the
+ * sunken hearth with its kettle, straw mats, a low table, a chest, a hanging shelf; 'india' — the
+ * clay stove (chulha), water pots, two string beds (charpai), a grain bin; 'europe' — the hearth,
+ * a table, a bench, a chest, a bed of boards with straw.
+ */
+function openGabled(bag, col, el, O, mat, { L, f, H, nb }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, T = 0.3, fy = y + 0.45, D = (f === 's' || f === 'n') ? z1 - z0 : x1 - x0;
+  const P = (u, v) => (f === 's' ? [x1 - u, z1 - v] : f === 'n' ? [x0 + u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]);
+  const rect = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+  const B = (m, u0, v0, u1, v1, ya, yb, c = false) => { const r = rect(u0, v0, u1, v1); bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya - 0.45, yb); };
+  const pot = (m, u, v, r, h, ya = 0) => { const p = P(u, v); bag.add(m, lathe([[r * 0.6, 0], [r, h * 0.45], [r * 0.75, h * 0.85], [r * 0.55, h], [0.001, h]], 10, null, p[0], fy + ya, p[1])); };
+  // the door: in the middle bay of the front, as the closed house has it
+  const k = Math.floor(nb / 2), du = (k + 0.5) * L / nb, dw = 1.1;
+  // the walls, the floor, the ceiling (as the closed house's solid, but hollow)
+  B(mat, 0, D - T, L, D, fy, y + H, true); B(mat, 0, T, T, D - T, fy, y + H, true); B(mat, L - T, T, L, D - T, fy, y + H, true);
+  B(mat, 0, 0, du - dw / 2, T, fy, y + H, true); B(mat, du + dw / 2, 0, L, T, fy, y + H, true); B(mat, du - dw / 2, 0, du + dw / 2, T, fy + 2.1, y + H);
+  B(O.door, du - dw / 2 - 0.02, T, du - dw / 2 + 0.05, T + dw, fy, fy + 2.05);
+  { const r = rect(0, 0, L, D); col.floor(r, fy); col.rect(r, y + H - 0.1, y + H + 0.3); }
+  B(O.foot, du - 0.7, -0.5, du + 0.7, 0, fy - 0.25, fy - 0.02); col.floor(rect(du - 0.7, -0.5, du + 0.7, 0), fy - 0.25);
+  const kind = O.inside ?? 'europe';
+  B(kind === 'japan' ? 'timber' : kind === 'china' ? 'brick_grey' : kind === 'india' ? 'earth_wall' : 'flagstone', T, T, L - T, D - T, fy - 0.12, fy + 0.012);
+  B('timber', T, T, L - T, D - T, y + H - 0.06, y + H - 0.02);
+  for (let u = T + 0.6; u < L - T; u += 1.0) B('wood_dark', u - 0.08, T, u + 0.08, D - T, y + H - 0.24, y + H - 0.06);
+  if (kind === 'china') {
+    // the kang along the back wall, its mat and the low table on it; the stove at one end feeding it; water jars; a chest
+    B('brick_grey', T, D - T - 1.8, L - T - 1.2, D - T, fy, fy + 0.6, true); B('reed_mat', T + 0.05, D - T - 1.75, L - T - 1.25, D - T - 0.05, fy + 0.6, fy + 0.62);
+    B('lacquer_chestnut', L / 2 - 0.6, D - T - 1.2, L / 2 + 0.2, D - T - 0.6, fy + 0.85, fy + 0.9); for (const [a, b] of [[-0.55, -1.15], [0.15, -1.15], [-0.55, -0.65], [0.15, -0.65]]) B('lacquer_chestnut', L / 2 + a, D - T + b, L / 2 + a + 0.04, D - T + b + 0.04, fy + 0.62, fy + 0.85);
+    B('cloth_indigo', T + 0.1, D - T - 0.6, T + 1.4, D - T - 0.1, fy + 0.62, fy + 0.8);
+    B('brick_grey', L - T - 1.15, D - T - 1.2, L - T, D - T, fy, fy + 0.8, true); pot('iron', L - T - 0.6, D - T - 0.6, 0.35, 0.25, 0.8);
+    B('brick_grey', L - T - 0.6, D - T - 0.4, L - T - 0.25, D - T - 0.05, fy + 0.8, y + H);
+    for (const u of [L - T - 0.5, L - T - 1.2]) pot('glaze_green', u, T + 0.5, 0.3, 0.8);
+    B('lacquer_chestnut', T + 0.1, T + 0.2, T + 1.0, T + 0.7, fy, fy + 0.7, true);
+  } else if (kind === 'japan') {
+    // the raised floor, the sunken hearth with its kettle on a hook, mats, a low table, a chest, a hanging shelf
+    B('timber', T, T + 1.2, L - T, D - T, fy, fy + 0.4, true); col.floor(rect(T, T + 1.2, L - T, D - T), fy + 0.4);
+    const hu = L / 2, hv = (T + 1.2 + D - T) / 2;
+    B('wood_dark', hu - 0.6, hv - 0.6, hu + 0.6, hv + 0.6, fy + 0.4, fy + 0.43); B('pottery_dark', hu - 0.45, hv - 0.45, hu + 0.45, hv + 0.45, fy + 0.43, fy + 0.44);
+    pot('iron', hu, hv, 0.2, 0.22, 0.6); B('bamboo_culm', hu - 0.02, hv - 0.02, hu + 0.02, hv + 0.02, fy + 0.85, y + H - 0.06);
+    for (const [u0, v0] of [[T + 0.1, D - T - 1.1], [L - T - 2.0, D - T - 1.1]]) if (u0 + 1.8 < L - T) B('reed_mat', u0, v0, u0 + 1.8, v0 + 0.9, fy + 0.4, fy + 0.43);
+    B('wood_dark', T + 0.2, T + 1.4, T + 0.9, T + 1.8, fy + 0.4, fy + 0.7, true);
+    B('lacquer_black', L - T - 0.8, T + 1.3, L - T - 0.1, T + 1.9, fy + 0.4, fy + 1.0, true);
+    B('wood_dark', T + 0.05, D - T - 0.35, L - T - 0.05, D - T - 0.05, fy + 1.8, fy + 1.84); for (let u = T + 0.4; u < L - T - 0.3; u += 0.6) pot('pottery_dark', u, D - T - 0.2, 0.08, 0.16, 1.84);
+  } else if (kind === 'india') {
+    // the clay stove by the back wall, water pots on a stand, two string beds, a grain bin of clay
+    B('earth_wall', L - T - 1.0, D - T - 0.6, L - T - 0.1, D - T - 0.05, fy, fy + 0.35, true); pot('pottery_dark', L - T - 0.55, D - T - 0.33, 0.18, 0.2, 0.35);
+    for (const u of [T + 0.4, T + 0.85]) pot('terracotta', u, D - T - 0.4, 0.22, 0.45);
+    for (const v of [T + 0.6, T + 1.8]) { if (v + 0.9 > D - T - 0.8) continue; const u0 = L - T - 2.0; B('timber', u0, v, u0 + 1.9, v + 0.05, fy + 0.4, fy + 0.46); B('timber', u0, v + 0.85, u0 + 1.9, v + 0.9, fy + 0.4, fy + 0.46); B('timber', u0, v, u0 + 0.05, v + 0.9, fy + 0.4, fy + 0.46); B('timber', u0 + 1.85, v, u0 + 1.9, v + 0.9, fy + 0.4, fy + 0.46); B('cloth_white', u0 + 0.05, v + 0.05, u0 + 1.85, v + 0.85, fy + 0.42, fy + 0.44); for (const [a, b] of [[0, 0], [1.85, 0], [0, 0.85], [1.85, 0.85]]) B('timber', u0 + a, v + b, u0 + a + 0.05, v + b + 0.05, fy, fy + 0.46); { const r = rect(u0, v, u0 + 1.9, v + 0.9); col.rect(r, fy, fy + 0.46); } }
+    pot('earth_wall', T + 0.5, T + 0.7, 0.35, 1.0);
+  } else {
+    // the hearth against the end wall, a table and bench, a chest, the bed of boards with straw
+    B(O.foot, L - T - 1.2, D / 2 - 0.7, L - T, D / 2 + 0.7, fy, fy + 0.3, true); pot('iron', L - T - 0.6, D / 2, 0.22, 0.28, 0.3);
+    B(O.foot, L - T - 0.7, D / 2 - 0.5, L - T, D / 2 + 0.5, fy + 1.4, y + H);
+    B('timber', L / 2 - 0.8, D / 2 - 0.4, L / 2 + 0.6, D / 2 + 0.4, fy + 0.74, fy + 0.8, true); for (const [a, b] of [[-0.75, -0.35], [0.5, -0.35], [-0.75, 0.3], [0.5, 0.3]]) B('timber', L / 2 + a, D / 2 + b, L / 2 + a + 0.06, D / 2 + b + 0.06, fy, fy + 0.74);
+    B('timber', L / 2 - 0.8, D / 2 - 0.85, L / 2 + 0.6, D / 2 - 0.6, fy + 0.4, fy + 0.45, true);
+    B('wood_dark', T + 0.1, T + 0.2, T + 1.0, T + 0.7, fy, fy + 0.6, true);
+    if (D > 4) { B('timber', T + 0.05, D - T - 2.0, T + 1.3, D - T - 0.05, fy, fy + 0.4, true); B('thatch', T + 0.1, D - T - 1.95, T + 1.25, D - T - 0.1, fy + 0.4, fy + 0.5); B('cloth_brown', T + 0.15, D - T - 1.3, T + 1.2, D - T - 0.1, fy + 0.5, fy + 0.53); }
+  }
+}
+
 function gabledHouse(el, { bag, col }, O) {
   const rand = rng(el.seed || 1);
   const [x0, z0, x1, z1] = el.rect, y = el.y, H = O.H;
   const mat = O.walls[rand() < 0.5 ? 0 : 1];
   bag.add(O.foot, box(x0 - 0.1, el.foot - 0.6, z0 - 0.1, x1 + 0.1, y + 0.45, z1 + 0.1));
-  bag.add(mat, box(x0, y + 0.45, z0, x1, y + H, z1));
-  col.rect([x0, z0, x1, z1], el.foot - 0.6, y + H);
   const f = el.front || 's', along = f === 's' || f === 'n';
   const L = along ? x1 - x0 : z1 - z0;
+  const OPEN = !!el.open && !el.simple;
+  if (!OPEN) { bag.add(mat, box(x0, y + 0.45, z0, x1, y + H, z1)); col.rect([x0, z0, x1, z1], el.foot - 0.6, y + H); }
+  else openGabled(bag, col, el, O, mat, { L, f, H, nb: Math.max(2, Math.floor(L / 3.2)) });
   const open = (u, v0, w, h, m = 'opening') => {
     if (u + w > L - 0.3) return;
     if (f === 's') bag.add(m, box(x0 + u, y + v0, z1, x0 + u + w, y + v0 + h, z1 + 0.04));
@@ -299,7 +363,7 @@ function gabledHouse(el, { bag, col }, O) {
   const n = Math.max(2, Math.floor(L / 3.2));
   for (let k = 0; k < n; k++) {
     const u = (k + 0.5) * L / n;
-    if (k === Math.floor(n / 2)) open(u - 0.55, 0.45, 1.1, 2.1, O.door);
+    if (k === Math.floor(n / 2)) { if (!OPEN) open(u - 0.55, 0.45, 1.1, 2.1, O.door); }
     else open(u - 0.6, 1.2, 1.2, 1.1, O.window);
   }
   // the roof: a gable over the long side, grey tiles, a ridge with raised ends

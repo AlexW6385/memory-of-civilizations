@@ -34,6 +34,8 @@ Romanesque in yellow limestone and grey schist (see the church's dossier); villa
 
 About 300 houses on the slope. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): the hearth against the end wall with its pot, a table and bench, a chest, a bed of boards with straw; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
+
 ## 6. Ground and water
 
 The steep slope of schist and thin soil; gardens and fruit trees near the village; oak and chestnut woods beyond (oak stands in); the rocky river. [inferred]

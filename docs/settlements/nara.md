@@ -39,6 +39,8 @@ Tang-style timber halls with vermilion columns, white plaster and grey tiles on 
 
 About 300 houses on the capital's grid. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): a raised board floor with the sunken hearth and its kettle on a hook, straw mats, a low table, a lacquered chest, a hanging shelf of pots; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
+
 ## 6. Ground and water
 
 White gravel courts; lawns; Wakakusa's open grass; cedar and maple woods. [inferred]

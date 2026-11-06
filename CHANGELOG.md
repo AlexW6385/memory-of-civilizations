@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.31 — Village houses to enter (2026-11-05)
+- The village houses of Tang Wutai, Nara, Heian Uji, Khajuraho, Sanchi and Conques can be entered: the three nearest each arrival are hollow (gabledHouse takes open; openGabled): walls with the door's way cut, the leaf open inside, a step, the floor and a ceiling of boards on beams, furnished by region — China: the kang with its mat and low table, the stove feeding it, glazed water jars, a chest; Japan: the raised board floor, the sunken hearth with its kettle on a hook, mats, a low table, a lacquered chest, a hanging shelf; India: the clay stove, water pots, two string beds, a clay grain bin; the Rouergue: the hearth and its pot, table and bench, chest, a bed of boards with straw. Dossiers noted.
+
 ## v9.30 — Houses to enter in six more towns (2026-11-05)
 - In Florence, Rome, Venice, Versailles, Granada and Istanbul the three houses nearest the arrival can be entered (openLots in src/settlements/lod.js; house_med takes open and use): a step up from the street, the door leaf standing open inside, a floor of terracotta, flags or brick, the ceiling's beams. The first is an inn in the Christian towns: tables with benches, the counter with jugs, wine barrels behind it, the hearth with its jambs, hood and pot, hams and cheeses hanging. Homes: table and stools, the hearth, a chest, a bed, a cupboard of crockery. In Granada and Istanbul: the divan round the walls with mattresses and cushions, a rug, the brass tray on its stand, a hanging lamp, a painted chest. Dossiers noted.
 

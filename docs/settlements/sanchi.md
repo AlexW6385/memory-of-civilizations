@@ -33,6 +33,8 @@ Sandstone stupa and gateways (see the stupa's dossier); village houses of mud, p
 
 About 120 houses. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): furnished as in Khajuraho: the clay stove, water pots, string beds, a grain bin; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
+
 ## 6. Ground and water
 
 Sandstone and dry grass on the hill; red-brown fields on the plain; neem, palms and a banyan by the village. [inferred]

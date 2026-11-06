@@ -35,6 +35,8 @@ Heian timber architecture (see the hall's dossier); village houses of timber on 
 
 About 200 houses. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): furnished as in Nara: the raised floor, the sunken hearth, mats, a low table, a chest, a shelf; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
+
 ## 6. Ground and water
 
 Gravel and moss in the garden; the pond; the pebbled banks of the swift river; cedar, maple and pine on the hills. [inferred]

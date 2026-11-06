@@ -33,6 +33,8 @@ Nagara: a high terrace; halls in a row under stepped pyramidal roofs rising to t
 
 About 200 village houses. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): the clay stove (chulha) by the back wall, water pots, two string beds (charpai), a clay grain bin; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
+
 ## 6. Ground and water
 
 Lawns and packed earth round the temples; the red-brown plain; neem, banyan, palms; the tank. [inferred]

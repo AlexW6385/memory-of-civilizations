@@ -34,6 +34,8 @@ Tang timber hall (see its dossier); a brick pagoda; village houses of earth and 
 
 About 120 houses in the valley. [inferred]
 
+**Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): the kang (the heated brick bed) along the back wall with its mat and low table, the stove feeding it with its pot, glazed water jars, a chest; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
+
 ## 6. Ground and water
 
 Loess and grass; millet fields; pines and junipers on the hills; poplars and jujubes in the village. [inferred]
