@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.66 — Wutai, Uji and Sanchi, second pass (2026-11-06)
+- Foguang's red-lacquered ping'an ceilings and oil lamps before the Buddhas, monks' quarters, pilgrims on the stairs; the Phoenix Hall's mother-of-pearl canopy with its openwork inner canopy and mirror, the 66 ceiling mirrors, raigō paintings on the walls and doors, the Byōdō-in bell tower, fishing weirs and boats on the Uji, travellers and an ox cart on the bridge; Sanchi's Stupa 2 with its carved medallion railing and L-shaped entrances, Temple 40's hall of fifty pillars, monks and pilgrims.
+
 ## v9.65 — The Potala as one body; Shöl's courtyard houses (2026-11-06)
 - Joint blocks close the V-notches between the Potala's battered masses (46, carrying roof, frieze and coping on to the higher walls); windows skip faces covered by stairs and neighbouring masses; the zigzag stairs bedded into the wall and the ground; Shöl's houses as two-storey courtyard houses with galleries, gates, roof-corner flag bundles and incense urns; the Shöl printing house with its woodblock racks and printers' benches; pilgrims with prayer wheels walking the circuit clockwise, monks in the Deyang Shar and on the roofs.
 
