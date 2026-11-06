@@ -130,12 +130,27 @@ function chhatri(bag, col, x, y, z, r, h, n = 8, mat = W, domeMat = W) {
   if (col) col.circle(x, z, r * 1.15, y, y + h + 1);
 }
 
-/** minaret: a tapering round tower { c, y, h, r } with three balconies and a kiosk on top. */
+/** minaret: a tapering round tower { c, y, h, r } on an octagonal base, in three stages divided by balconies
+ *  on brackets with railings; the marble blocks outlined by thin dark joints (rings and verticals); a kiosk on top. */
 function minaret(bag, col, x, y, z, h, r) {
-  bag.add(W, lathe([[r * 1.25, 0], [r * 1.25, 3], [r * 1.05, 3.2], [r * 0.82, h]], 24, null, x, y, z));
-  for (const f of [0.34, 0.64, 0.92]) bag.add(W, lathe([[r * 0.9, 0], [r * 1.55, 0.7], [r * 1.6, 1.1], [r * 1.5, 1.5], [0.001, 1.5]], 24, null, x, y + h * f - 1.2, z));
+  bag.add(W, lathe([[r * 1.45, 0], [r * 1.45, 2.2], [r * 1.3, 2.5], [0.001, 2.5]], 8, null, x, y, z));
+  bag.add('marble_dark', lathe([[r * 1.47, 2.0], [r * 1.47, 2.12], [r * 1.44, 2.12], [r * 1.44, 2.0]], 8, null, x, y, z));
+  const rad = (yy) => r * (1.08 - 0.26 * Math.max(0, yy - 2.5) / (h - 2.5));
+  bag.add(W, lathe([[rad(2.5), 2.5], [rad(h), h], [0.001, h]], 24, null, x, y, z));
+  // the joints: rings every 2 m, eight verticals
+  for (let yy = 4; yy < h - 0.5; yy += 2) bag.add('marble_dark', lathe([[rad(yy) + 0.012, yy], [rad(yy) + 0.012, yy + 0.06], [rad(yy) - 0.01, yy + 0.06], [rad(yy) - 0.01, yy]], 24, null, x, y, z));
+  for (let k = 0; k < 8; k++) { const a = (k + 0.5) / 8 * Math.PI * 2; bag.add('marble_dark', rod([x + Math.cos(a) * (rad(2.6) + 0.01), y + 2.6, z + Math.sin(a) * (rad(2.6) + 0.01)], [x + Math.cos(a) * (rad(h - 0.2) + 0.01), y + h - 0.2, z + Math.sin(a) * (rad(h - 0.2) + 0.01)], 0.03, 3)); }
+  for (const f of [0.34, 0.64, 0.92]) {
+    const yb = y + h * f - 1.2, rr = rad(h * f - 1.2), R = rr * 1.6;
+    bag.add(W, lathe([[rr, 0], [R * 0.98, 0.7], [R, 1.1], [R * 0.94, 1.15], [0.001, 1.15]], 24, null, x, yb, z));
+    for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; bag.add(W, rod([x + Math.cos(a) * rr, yb - 0.6, z + Math.sin(a) * rr], [x + Math.cos(a) * R * 0.9, yb + 0.8, z + Math.sin(a) * R * 0.9], 0.09, 4)); }
+    // the railing: posts and a rail round the balcony's edge
+    for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; bag.add(W, box(x + Math.cos(a) * R * 0.95 - 0.05, yb + 1.15, z + Math.sin(a) * R * 0.95 - 0.05, x + Math.cos(a) * R * 0.95 + 0.05, yb + 1.95, z + Math.sin(a) * R * 0.95 + 0.05)); }
+    bag.add(W, lathe([[R, 0], [R, 0.12], [R * 0.9, 0.12], [R * 0.9, 0]], 24, null, x, yb + 1.95, z));
+    bag.add('marble_dark', lathe([[rr + 0.02, -0.2], [rr + 0.02, -0.05], [rr - 0.01, -0.05], [rr - 0.01, -0.2]], 24, null, x, yb, z));
+  }
   chhatri(bag, null, x, y + h + 0.3, z, r * 0.95, 3.4, 8);
-  col.circle(x, z, r * 1.25, y, y + h);
+  col.circle(x, z, r * 1.45, y, y + h);
 }
 
 /**

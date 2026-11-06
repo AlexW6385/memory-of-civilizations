@@ -41,12 +41,31 @@ function ziggurat(el, { bag, col }) {
     col.rect([r[0] + b * 0.4, r[1] + b * 0.4, r[2] - b * 0.4, r[3] - b * 0.4], y, y + s.h);
     col.floor([r[0] + b, r[1] + b, r[2] - b, r[3] - b], y + s.h);
     tops.push({ r, b, y0: y, y1: y + s.h });
+    // the weeper holes: rows of small dark drains through the baked-brick skin, midway between the buttresses
+    for (const [ax, az, bx, bz, nx, nz] of [[r[0], r[1], r[2], r[1], 0, -1], [r[0], r[3], r[2], r[3], 0, 1], [r[0], r[1], r[0], r[3], -1, 0], [r[2], r[1], r[2], r[3], 1, 0]]) {
+      const L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / 3.2);
+      for (let k = 0; k < n; k++) {
+        const u = (k + 0.5) * L / n, px = ax + (bx - ax) * u / L, pz = az + (bz - az) * u / L;
+        if (nz < 0 && Math.abs(px - cx) < 7) continue;                       // not behind the stairs
+        if (nz < 0 && i === 0 && Math.abs(px - cx) > s.w / 2 - 4) continue;
+        for (let yy = y + 1.4; yy < y + s.h - 1; yy += 1.8) {
+          const f = (yy - y) / s.h, o = b * f, fx = px - nx * o, fz = pz - nz * o, hw = 0.13, hd = 0.09;
+          bag.add('opening', nx ? box(fx - hd, yy, fz - hw, fx + hd, yy + 0.22, fz + hw) : box(fx - hw, yy, fz - hd, fx + hw, yy + 0.22, fz + hd));
+        }
+      }
+    }
     y += s.h;
   });
   const S0 = tops[0], fz = S0.r[1];                          // the front face (north)
   // the central stair, out from the face to the first stage's top; the two leaning stairs
   const run = S0.y1 - S0.y0;
   stairs({ rect: [cx - 4, fz - run * 1.9, cx + 4, fz + S0.b + 0.5], y0: S0.y0, y1: S0.y1, dir: 's', mat: BB }, { bag, col });
+  // the central stair's parapets: low walls rising with it
+  for (const sx of [-1, 1]) {
+    const t = [], za = fz - run * 1.9, zb = fz + S0.b + 0.5;
+    beamTris(t, [cx + sx * 4.3, S0.y0, za], [cx + sx * 4.3, S0.y1, zb], 0.3, 1.0);
+    bag.add(BB, fromTriangles(t)); col.segment([cx + sx * 4.3, za], [cx + sx * 4.3, zb], 0.6, S0.y0, S0.y1 + 1);
+  }
   for (const s of [-1, 1]) {
     const x0 = cx + s * (S0.r[2] - cx - 3), x1 = cx + s * 5;
     stairs({ rect: [Math.min(x0, x1), fz - 1, Math.max(x0, x1), fz + 4], y0: S0.y0, y1: S0.y1, dir: s < 0 ? 'e' : 'w', mat: BB }, { bag, col });

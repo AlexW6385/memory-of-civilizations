@@ -31,6 +31,8 @@ Corners to the cardinal points, front to the north-east [stated: Smarthistory: "
 
 Mud brick with baked-brick facing, the walls broken by shallow buttresses and recesses; flat roofs; bitumen; reed and palm-trunk timber. [stated: brick and bitumen; inferred: the rest]
 
+The ziggurat's skin (L3, built): a mud-brick core with a casing about 2.4 m thick of baked brick set in bitumen, mats of reed every six to eight courses in the core, and many drains from the core [stated: stevewatson after Woolley]; "weeper holes" pierce the sloping walls so the core can dry out [stated: Britannica; Alberti's Window]. Ours: rows of small weeper holes every 1.8 m up each stage, midway between the buttresses (not behind the stairs); low parapets rising with the central stair [inferred].
+
 ## 5. The town
 
 Courtyard houses of one and two storeys, plastered mud brick, blank to the lanes, rooms round an open court. [inferred]
@@ -52,6 +54,10 @@ Hot and dry, dust haze, clear desert nights. Latitude 31° N. [inferred]
 The lyre and the harp, a reed pipe, frame drums (a plucked string, the ney and a reed organ stand in). [inferred]
 
 ## Sources
+
+- [Ziggurat at Ur — Britannica](https://www.britannica.com/topic/ziggurat-at-Ur)
+- [The Bricks of the Ziggurat of Ur — Alberti's Window](https://albertis-window.com/2015/05/the-bricks-of-the-ziggurat-of-ur/)
+- [Notes on architectural novelties of Ur III — stevewatson](https://stevewatson.info/blog/?p=105)
 
 - [Ur of the Chaldees — the Ziggurat (odysseyadventures)](https://odysseyadventures.ca/articles/ur%20of%20the%20chaldees/ur_article01zig.html)
 - [The Great Ziggurat of Ur — Smarthistory](https://smarthistory.org/?p=1038)

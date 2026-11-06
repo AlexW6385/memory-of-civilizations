@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.25 — Kilwa's ground, Ur's skin, the Taj's minarets (2026-11-05)
+- Kilwa's ground is no longer snow-white: inland the coral rag weathers to a grey-brown sandy soil under grass, only the beach stays white; round the mosque and palace less paving. Ur's ziggurat: rows of weeper holes through the baked-brick skin every 1.8 m up each stage, between the buttresses (dossier §4, sourced), and low parapets rising with the central stair. The Taj Mahal's minarets: an octagonal base, the shaft tapering, its marble blocks outlined by thin dark joints (rings and verticals), the three balconies on brackets with railings.
+
 ## v9.24 — Crafts at the doors (2026-11-05)
 - Crafts at about one door in fifteen, by region: a potter squatting among his pots and a big jar (most regions), a basket-maker sitting among her baskets (Asia, Africa, the Americas, the Pacific), a dyer's cloth on lines by a dark vat (the Near East, South Asia, Africa, the Andes, China), a carpenter with timber and a ladder, a cooper among his barrels (Europe, Venice). Goods unloaded on the quays follow the region: sacks, baskets and jars except in Europe (sacks, crates, barrels).
 

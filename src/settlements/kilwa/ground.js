@@ -1,12 +1,13 @@
-// Kilwa — the ground: white coral sand, grass and scrub, coconut palms (date palms stand in) and
+// Kilwa — the ground: grey-brown sandy soil on the coral rag, white coral sand on the beach, grass and scrub, coconut palms (date palms stand in) and
 // baobabs (banyan stands in) on the island, the beach and the reef flat, the Indian Ocean; the
 // warm, bright, humid sky of the monsoon coast.
 
 import { RADIUS, SEA, RIM, MOSQUE, PALACE, height, inSea, inRect, inLot } from './layout.js';
 
 function cover(x, z, h) {
-  const c = { sand: 0.6, grass: 0.3, rock: 0, soil: 0.1, fields: 0, dry: 0.3, warmth: 0.9, red: 0.05, road: 0, snow: 0, forest: 0 };
-  if (inRect(MOSQUE, x, z, 2) || inRect(PALACE, x, z, 2)) { c.road = 0.7; return c; }
+  // inland the coral rag weathers to a grey-brown sandy soil under grass; only the beach is white
+  const c = { sand: 0.35, grass: 0.35, rock: 0.05, soil: 0.3, fields: 0, dry: 0.3, warmth: 0.9, red: 0.15, road: 0, snow: 0, forest: 0 };
+  if (inRect(MOSQUE, x, z, 2) || inRect(PALACE, x, z, 2)) { c.road = 0.45; c.grass = 0.1; return c; }
   if (h < 1) { c.sand = 0.9; c.grass = 0; return c; }
   return c;
 }
