@@ -11,6 +11,7 @@ import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
 import { serpentHeadKit, chaacKit, chacmoolKit, warriorPanelKit, Kit } from './meso.js';
+import { emitFrame, ballPanelKit, ringKit, jaguarThroneKit } from './ballcourt.js';
 
 const L = 'limestone_maya';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -188,36 +189,95 @@ function mTemple(el, { bag, col }) {
 }
 
 /**
- * m_ballcourt: the Great Ball Court { rect (the playing alley: long along z), wallH, bench }: two
- * walls along its long sides with sloping benches at their feet, a stone ring high on each wall's
- * middle, small temples at both ends (north and south), and the Temple of the Jaguars on the east wall.
+ * A straight flight of steps up to a wall top or a terrace { foot [x, z] (the middle of the lowest step's
+ * front), dir [dx, dz] (the way up, along an axis), w (the flight's width), H, steps }: a solid mass under the
+ * stair's line, closed wedge steps on it, plain balustrades either side; walked as a ramp.
+ */
+function flight(bag, col, foot, [dx, dz], w, H, steps, run = 0.3, back = 1.0) {
+  const nx = -dz, nz = dx, hw = w / 2, bw = 0.6, Lr = steps * run;
+  const P = (d, o, y) => [foot[0] + dx * d + nx * o, y, foot[1] + dz * d + nz * o];
+  const prism = (poly, o0, o1) => {
+    const t = [], q = (a, b, c, e) => t.push(...a, ...b, ...c, ...a, ...c, ...e);
+    for (let i = 1; i + 1 < poly.length; i++) { t.push(...P(poly[0][0], o0, poly[0][1]), ...P(poly[i][0], o0, poly[i][1]), ...P(poly[i + 1][0], o0, poly[i + 1][1])); t.push(...P(poly[0][0], o1, poly[0][1]), ...P(poly[i][0], o1, poly[i][1]), ...P(poly[i + 1][0], o1, poly[i + 1][1])); }
+    for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; q(P(a[0], o0, a[1]), P(b[0], o0, b[1]), P(b[0], o1, b[1]), P(a[0], o1, a[1])); }
+    bag.add(L, fromTriangles(orientOutward(t)));
+  };
+  prism([[0, -0.2], [0, 0], [Lr, H - 0.02], [Lr + back, H - 0.02], [Lr + back, -0.2]], -(hw + bw), hw + bw);
+  const t = [];
+  for (let i = 0; i < steps; i++) {
+    const d0 = i * run, d1 = (i + 1) * run, y0 = H * i / steps, y1 = H * (i + 1) / steps, e = hw + 0.05;
+    const w6 = [];
+    const A = P(d0, -e, y0), B = P(d0, -e, y1), C = P(d1, -e, y1), A2 = P(d0, e, y0), B2 = P(d0, e, y1), C2 = P(d1, e, y1);
+    w6.push(...A, ...B, ...C, ...A2, ...C2, ...B2, ...B, ...B2, ...C2, ...B, ...C2, ...C, ...A, ...A2, ...B2, ...A, ...B2, ...B);
+    t.push(...orientOutward(w6));
+  }
+  bag.add(L, fromTriangles(t));
+  for (const s of [-1, 1]) prism([[0, 0], [-0.3, 0], [-0.3, 1.1], [Lr, H + 0.9], [Lr, H - 0.02]], s < 0 ? -(hw + bw) : hw, s < 0 ? -hw : hw + bw);
+  const r = [Math.min(foot[0], foot[0] + dx * Lr) - (dx ? 0 : hw), Math.min(foot[1], foot[1] + dz * Lr) - (dz ? 0 : hw), Math.max(foot[0], foot[0] + dx * Lr) + (dx ? 0 : hw), Math.max(foot[1], foot[1] + dz * Lr) + (dz ? 0 : hw)];
+  col.ramp(r, 0, H, dx > 0 ? 'e' : dx < 0 ? 'w' : dz > 0 ? 's' : 'n');
+}
+
+/** A square pillar with a warrior carved on each face, on a floor at y { x, z, y, h } (the colonnades, the Lower Temple of the Jaguars). */
+function warriorPillar(bag, col, x, z, y, h) {
+  bag.add(L, box(x - 0.4, y, z - 0.4, x + 0.4, y + h, z + 0.4));
+  bag.add('stucco_red', box(x - 0.5, y + h - 0.4, z - 0.5, x + 0.5, y + h, z + 0.5));
+  for (const [fx, fz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) warriorPanelKit().emit(bag, x + fx * 0.4, y + Math.max(0.2, (h - 0.4 - 2.8) / 2), z + fz * 0.4, fx, fz, Math.min(1, (h - 0.6) / 2.9));
+  col.rect([x - 0.4, z - 0.4, x + 0.4, z + 0.4], y, y + h);
+}
+
+/**
+ * m_ballcourt: the Great Ball Court { rect (the playing alley, long along z), wallH, bench, wallLen }: the two
+ * platforms, 95 m long, along the alley's middle with their high inner walls, the slanted benches at their feet
+ * carved with six panels each (the ball players and the sacrifice), a ring carved with twined serpents high on
+ * each wall's middle; the North and South Temples at the ends; on the east platform's south end the Upper
+ * Temple of the Jaguars, looking over the court between serpent columns, its stair up from the south; under it,
+ * facing out over the plaza, the Lower Temple of the Jaguars with its carved pillars and the jaguar throne.
  */
 function mBallcourt(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, H = el.wallH ?? 8.5, bw = el.bench ?? 4.5, T = 11;
+  const zc = (z0 + z1) / 2, WL = el.wallLen ?? 95, wz0 = zc - WL / 2, wz1 = zc + WL / 2;
+  const sl = 1.6, b0 = 0.4, b1 = 1.75, a = Math.atan2(b1 - b0, sl), ca = Math.cos(a), sa = Math.sin(a);
   for (const s of [-1, 1]) {
     const xi = s < 0 ? x0 : x1, xo = xi + s * T;                      // the inner face, the outer face
     const [xa, xb] = s < 0 ? [xo, xi] : [xi, xo];
-    bag.add(L, box(xa, 0, z0, xb, H, z1));
-    col.rect([xa, z0, xb, z1], 0, H);
-    col.floor([xa, z0, xb, z1], H);
-    // the bench: a sloping band at the wall's foot, carved with processions
-    const t = [], xin = xi - s * bw;
-    t.push(xin, 0, z0, xin, 0, z1, xi, 1.6, z1, xin, 0, z0, xi, 1.6, z1, xi, 1.6, z0);
-    bag.add('rubble', fromTriangles(t.concat(flipTris(t))));
-    // the ring: a stone ring standing out from the wall, high up, its hole facing across
-    const ry = H - 1.6, zc = (z0 + z1) / 2;
-    bag.add(L, lathe([[0.6, -0.15], [1.0, -0.15], [1.0, 0.15], [0.6, 0.15]], 20, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(xi - s * 0.2, ry, zc));
+    bag.add(L, box(xa, 0, wz0, xb, H, wz1));
+    col.rect([xa, wz0, xb, wz1], 0, H);
+    col.floor([xa, wz0, xb, wz1], H);
+    // the bench: a low upright face, the slanted face with the panels, a ledge back to the wall
+    const X = (u) => xi - s * u, poly = [[-0.05, 0], [bw, 0], [bw, b0], [bw - sl, b1], [-0.05, b1]], t = [];
+    for (let i = 1; i + 1 < poly.length; i++) for (const z of [wz0, wz1]) t.push(X(poly[0][0]), poly[0][1], z, X(poly[i][0]), poly[i][1], z, X(poly[i + 1][0]), poly[i + 1][1], z);
+    for (let i = 0; i < poly.length; i++) { const p = poly[i], q = poly[(i + 1) % poly.length]; t.push(X(p[0]), p[1], wz0, X(q[0]), q[1], wz0, X(q[0]), q[1], wz1, X(p[0]), p[1], wz0, X(q[0]), q[1], wz1, X(p[0]), p[1], wz1); }
+    bag.add(L, fromTriangles(orientOutward(t)));
+    col.rect([Math.min(X(0), X(bw)), wz0, Math.max(X(0), X(bw)), wz1], 0, b1);
+    // the six relief panels on the slanted face
+    const V = [s * ca, sa, 0], N = [-s * sa, ca, 0], U = [0, 0, s];
+    for (let i = 0; i < 6; i++) {
+      const zp = zc + (i - 2.5) * 15.5, O = [X(bw) + V[0] * 0.06 - N[0] * 0.01, b0 + V[1] * 0.06 - N[1] * 0.01, zp];
+      emitFrame(ballPanelKit(12, 1.95), bag, O, U, V, N);
+    }
+    // the ring, high on the wall's middle, its hole facing across the court
+    ringKit().emit(bag, xi + s * 0.03, el.ringY ?? 6.2, zc, -s, 0);
   }
   // the end temples (north and south), on low platforms
-  for (const [zc, k] of [[z0 - 8, 'n'], [z1 + 8, 's']]) {
+  for (const [zt, k] of [[z0 - 8, 'n'], [z1 + 8, 's']]) {
     const cx = (x0 + x1) / 2;
-    bag.add(L, box(cx - 12, 0, zc - 6, cx + 12, 3.2, zc + 6));
-    col.rect([cx - 12, zc - 6, cx + 12, zc + 6], 0, 2.9);
-    col.floor([cx - 12, zc - 6, cx + 12, zc + 6], 3.2);
-    mTemple({ c: [cx, zc], y: 3.2, w: 14, d: 7, h: 5.5, doors: k === 'n' ? 's' : 'n', serpentCols: false }, ctx);
+    bag.add(L, box(cx - 12, 0, zt - 6, cx + 12, 3.2, zt + 6));
+    col.rect([cx - 12, zt - 6, cx + 12, zt + 6], 0, 2.9);
+    col.floor([cx - 12, zt - 6, cx + 12, zt + 6], 3.2);
+    mTemple({ c: [cx, zt], y: 3.2, w: 14, d: 7, h: 5.5, doors: k === 'n' ? 's' : 'n', serpentCols: false }, ctx);
   }
-  // the Temple of the Jaguars on the east wall
-  mTemple({ c: [x1 + T / 2, (z0 + z1) / 2 - 18], y: H, w: 9, d: 8, h: 5.5, doors: 'w' }, ctx);
+  // the Upper Temple of the Jaguars on the east platform's south end, its serpent columns toward the court;
+  // the steep stair up to it from the south
+  const ut = wz1 - 6;
+  mTemple({ c: [x1 + T / 2, ut], y: H, w: 9, d: 8, h: 5.5, doors: 'w' }, ctx);
+  flight(bag, col, [x1 + T / 2, wz1 + Math.round(H / 0.25) * 0.3], [0, -1], 4.4, H, Math.round(H / 0.25));
+  // the Lower Temple of the Jaguars at the platform's outer foot, facing the plaza: two carved pillars in its
+  // doorway, the jaguar throne before it
+  const lw = 4, lx = x1 + T + lw - 0.5;
+  mTemple({ c: [lx, ut], y: 0, w: 2 * lw, d: 10, h: 5, doors: 'e', serpentCols: false }, ctx);
+  for (const dz of [-1, 1]) warriorPillar(bag, col, lx + lw, ut + dz * 1.0, 0.4, 5 * 0.62);
+  jaguarThroneKit().emit(bag, lx + lw + 2.2, 0, ut, 1, 0);
+  col.rect([lx + lw + 1.85, ut - 0.8, lx + lw + 2.55, ut + 0.8], 0, 0.8);
 }
 
 /** m_colonnade: rows of square pillars, each face carved with a warrior, under a flat roof of beams and plaster { rect, rows, cols, h, warriors }. */
