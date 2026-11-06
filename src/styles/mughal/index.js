@@ -8,7 +8,7 @@
 
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles, frustum, disc, rod } from '../../core/geom.js';
+import { box, lathe, fromTriangles, frustum, disc, rod, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
 
@@ -112,13 +112,113 @@ function pishtaqFace(bag, col, a, b, y, h, iw, mat, niches = true, inside = null
     const dw = Math.min(5, iw.w * 0.45);
     arcadeWall(bag, col, p0, p1, y, iw.h, 0.4, iw.backMat || mat, [{ at: iw.w / 2, w: dw, h: Math.min(iw.h * 0.5, dw * 1.6), pass: true }]);
   }
-  // the frame round the iwan (a band of inlaid stone), the parapet
-  const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+  faceDecor(bag, a, b, y, h, iw, mat, niches, inside);
+}
+
+/**
+ * The inlay and carving of a pishtaq face (docs/settlements/mughal-agra.md §4): the inscription band
+ * framing the great arch — black letters on white, larger the higher they stand; the spandrels'
+ * flowering vines of inlaid stones round a rosette; the dado of flowering plants carved in relief in
+ * panels framed in dark stone.
+ */
+function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
   let nx = -uz, nz = ux;
   if (inside && (inside[0] - (a[0] + b[0]) / 2) * nx + (inside[1] - (a[1] + b[1]) / 2) * nz > 0) { nx = -nx; nz = -nz; }
-  const c = [a[0] + ux * L / 2 + nx * 1.25, a[1] + uz * L / 2 + nz * 1.25];
-  for (const s of [-1, 1]) { const t = []; beamTris(t, [c[0] + ux * s * (iw.w / 2 + 0.6), y, c[1] + uz * s * (iw.w / 2 + 0.6)], [c[0] + ux * s * (iw.w / 2 + 1.1), y, c[1] + uz * s * (iw.w / 2 + 1.1)], 0.15, h); bag.add(trim, fromTriangles(t)); }
-  const t2 = []; beamTris(t2, [c[0] - ux * (iw.w / 2 + 1.1), y + iw.h + 1.2, c[1] - uz * (iw.w / 2 + 1.1)], [c[0] + ux * (iw.w / 2 + 1.1), y + iw.h + 1.2, c[1] + uz * (iw.w / 2 + 1.1)], 0.15, 0.5); bag.add(trim, fromTriangles(t2));
+  const F = opt.F ?? 1.2, buckets = new Map(), rnd = rng(Math.round(Math.abs(a[0] * 7 + a[1] * 13)) + 1);
+  const P = (s2, v, o) => [a[0] + ux * s2 + nx * (F + o), y + v, a[1] + uz * s2 + nz * (F + o)];
+  const slab = (m, s0, s1, v0, v1, o0, o1) => {
+    if (!buckets.has(m)) buckets.set(m, []);
+    const t = [], q = (p1, p2, p3, p4) => t.push(...p1, ...p2, ...p3, ...p1, ...p3, ...p4);
+    const c = [P(s0, v0, o0), P(s1, v0, o0), P(s1, v1, o0), P(s0, v1, o0), P(s0, v0, o1), P(s1, v0, o1), P(s1, v1, o1), P(s0, v1, o1)];
+    q(c[0], c[1], c[2], c[3]); q(c[4], c[7], c[6], c[5]); q(c[0], c[4], c[5], c[1]); q(c[1], c[5], c[6], c[2]); q(c[2], c[6], c[7], c[3]); q(c[3], c[7], c[4], c[0]);
+    buckets.get(m).push(...orientOutward(t));
+  };
+  const DK = 'marble_dark', field = mat === W ? null : W;
+  const sL = L / 2 - iw.w / 2, sR = L / 2 + iw.w / 2, gap = 0.35, bw = Math.min(1.5, iw.w * 0.09), vTop = Math.min(iw.h + 0.5, h - bw - 0.4);
+  // the inscription band: field, borders, letters running along it
+  const band = (s0, s1, v0, v1, along) => {
+    if (field) slab(field, s0, s1, v0, v1, 0, 0.03);
+    const o = 0.03;
+    if (along === 'v') { slab(DK, s0, s0 + 0.06, v0, v1, o, o + 0.02); slab(DK, s1 - 0.06, s1, v0, v1, o, o + 0.02); }
+    else { slab(DK, s0, s1, v0, v0 + 0.06, o, o + 0.02); slab(DK, s0, s1, v1 - 0.06, v1, o, o + 0.02); }
+    const len = along === 'v' ? v1 - v0 : s1 - s0, cw = (along === 'v' ? s1 - s0 : v1 - v0) - 0.2;
+    if (opt.flowers) {
+      // a running scroll of flowers in place of the inscription (the jawab)
+      for (let t = 0.3, j = 0; t < len - 0.3; t += 0.5, j++) {
+        const cs = along === 'v' ? (s0 + s1) / 2 : s0 + t, cv = along === 'v' ? v0 + t : (v0 + v1) / 2, fr = Math.min(0.12, cw * 0.18);
+        slab(['stucco_rose', 'stucco_saffron', 'stucco_sky'][j % 3], cs - fr, cs + fr, cv - fr, cv + fr, o, o + 0.015);
+        if (along === 'v') slab('stucco_leaf', cs - fr * 0.5, cs + fr * 0.5, cv + fr, cv + 0.25, o, o + 0.012); else slab('stucco_leaf', cs + fr, cs + 0.25, cv - fr * 0.5, cv + fr * 0.5, o, o + 0.012);
+      }
+      return;
+    }
+    for (let t = 0.15; t < len - 0.15;) {
+      const vv = along === 'v' ? v0 + t : (v0 + v1) / 2, k = (1 + 0.45 * (vv / h)) * Math.max(0.6, bw / 1.2), cell = 0.2 * k;
+      const S2 = (tt, c0, c1, w2) => (along === 'v' ? slab(DK, s0 + 0.1 + c0 * cw, s0 + 0.1 + c1 * cw, v0 + tt, v0 + tt + w2, o, o + 0.012) : slab(DK, s0 + tt, s0 + tt + w2, v0 + 0.1 + c0 * cw, v0 + 0.1 + c1 * cw, o, o + 0.012));
+      S2(t, 0.25, 0.32, cell);                                     // the baseline
+      const r = rnd();
+      if (r < 0.4) S2(t + cell * 0.2, 0.25, 0.25 + 0.55 * Math.min(1, k * 0.8), 0.035 * k);     // a tall upright (alif, lam)
+      else if (r < 0.7) { S2(t + cell * 0.1, 0.3, 0.5, 0.03 * k); S2(t + cell * 0.1, 0.48, 0.52, cell * 0.6); }
+      else S2(t + cell * 0.4, 0.6, 0.66, 0.05 * k);                // a dot
+      t += cell + 0.03;
+    }
+  };
+  const e0 = sL - gap - bw, e1 = sR + gap + bw;
+  band(e0, sL - gap, 0.2, vTop, 'v'); band(sR + gap, e1, 0.2, vTop, 'v'); band(e0, e1, vTop, vTop + bw, 's');
+  // the spandrels: a vine of inlaid stones along the arch, flowers on it, a rosette in the angle
+  const w = iw.w, r = w * 0.8, rise = Math.sqrt(r * r - (r - w / 2) ** 2), spring = Math.max(0.3, iw.h - rise), cLs = sL + r;
+  const arcV = (x) => spring + Math.sqrt(Math.max(0, r * r - (x - cLs) ** 2));
+  const FL = ['stucco_rose', 'stucco_saffron', 'stucco_rose', 'stucco_sky'];
+  for (const sd of [-1, 1]) {
+    const S = (x) => (sd < 0 ? x : L - x);
+    let prev = null, nfl = 0;
+    for (let j = 0; j <= 64; j++) {
+      const x = sL + (w / 2) * j / 64, vv = arcV(x) + 0.45 + 0.1 * Math.sin(j * 0.5);
+      if (vv > vTop - 0.15) break;
+      if (prev) { const s0 = Math.min(S(prev[0]), S(x)), s1 = Math.max(S(prev[0]), S(x)); slab(DK, s0, s1 + 0.035, Math.min(prev[1], vv), Math.max(prev[1], vv) + 0.035, 0, 0.015); }
+      if (j % 10 === 5) {
+        const fx = S(x), m2 = FL[nfl++ % FL.length];
+        for (let p2 = 0; p2 < 5; p2++) { const an = p2 / 5 * Math.PI * 2, px = fx + Math.cos(an) * 0.1, pv = vv + 0.16 + Math.sin(an) * 0.1; slab(m2, px - 0.045, px + 0.045, pv - 0.045, pv + 0.045, 0, 0.018); }
+        slab('stucco_saffron', fx - 0.03, fx + 0.03, vv + 0.13, vv + 0.19, 0, 0.022);
+        slab('stucco_leaf', fx + 0.06 * sd, fx + 0.2 * sd > fx ? fx + 0.2 : fx - 0.06, vv - 0.06, vv + 0.0, 0, 0.016);
+      }
+      prev = [x, vv];
+    }
+    // the rosette in the angle between the arch and the band
+    const rx = S(sL + w * 0.12), rv = (arcV(sL + w * 0.12) + vTop) / 2 + 0.2, rr = Math.min(0.8, (vTop - arcV(sL + w * 0.12)) * 0.3);
+    if (rr > 0.2) {
+      for (let p2 = 0; p2 < 12; p2++) { const an = p2 / 12 * Math.PI * 2, px = rx + Math.cos(an) * rr * 0.7, pv = rv + Math.sin(an) * rr * 0.7; slab(p2 % 2 ? 'stucco_leaf' : 'stucco_rose', px - rr * 0.14, px + rr * 0.14, pv - rr * 0.14, pv + rr * 0.14, 0, 0.018); }
+      slab('stucco_saffron', rx - rr * 0.22, rx + rr * 0.22, rv - rr * 0.22, rv + rr * 0.22, 0, 0.022);
+      // a spray of stems from the rosette, each ending in a flower between two leaves
+      for (let p2 = 0; p2 < 6; p2++) {
+        const an = p2 / 6 * Math.PI * 2 + 0.3, x0 = rx + Math.cos(an) * rr * 0.9, v0 = rv + Math.sin(an) * rr * 0.9;
+        for (let q2 = 1; q2 <= 6; q2++) { const rr2 = rr * (0.9 + q2 * 0.22), a2 = an + q2 * 0.08, px = rx + Math.cos(a2) * rr2, pv = rv + Math.sin(a2) * rr2; if (pv < arcV(Math.min(sR, Math.max(sL, sd < 0 ? px : L - px))) + 0.6 || pv > vTop - 0.1) break; slab(DK, px - 0.022, px + 0.022, pv - 0.022, pv + 0.022, 0, 0.014);
+          if (q2 === 6) { slab(FL[p2 % 4], px - 0.07, px + 0.07, pv - 0.07, pv + 0.07, 0, 0.02); slab('stucco_leaf', px - 0.16, px - 0.08, pv - 0.03, pv + 0.03, 0, 0.016); slab('stucco_leaf', px + 0.08, px + 0.16, pv - 0.03, pv + 0.03, 0, 0.016); } }
+        void x0; void v0;
+      }
+    }
+  }
+  // the dado: panels framed in dark stone, a flowering plant carved in each, between the openings
+  const holes = [[sL - gap - bw - 0.1, sR + gap + bw + 0.1], ...(opt.holes || [])];
+  if (niches) for (const sd of [-1, 1]) { const c = L / 2 + sd * (iw.w / 2 + (L - iw.w) / 4), nw = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45); holes.push([c - nw / 2 - 0.15, c + nw / 2 + 0.15]); }
+  const DH = 1.5;
+  let s0 = 0.4;
+  const runs = [];
+  for (const [h0, h1] of holes.sort((p, q) => p[0] - q[0])) { if (h0 > s0 + 0.8) runs.push([s0, h0]); s0 = Math.max(s0, h1); }
+  if (L - 0.4 > s0 + 0.8) runs.push([s0, L - 0.4]);
+  for (const [r0, r1] of runs) {
+    const np = Math.max(1, Math.round((r1 - r0) / 1.5)), pw = (r1 - r0) / np;
+    slab(DK, r0, r1, DH, DH + 0.08, 0, 0.04);
+    for (let k = 0; k < np; k++) {
+      const p0 = r0 + k * pw, p1 = p0 + pw, pc = (p0 + p1) / 2;
+      slab(DK, p0, p0 + 0.05, 0.25, DH, 0, 0.02); slab(DK, p1 - 0.05, p1, 0.25, DH, 0, 0.02); slab(DK, p0, p1, 0.25, 0.3, 0, 0.02);
+      const R2 = W;
+      slab(R2, pc - 0.025, pc + 0.025, 0.32, 1.25, 0, 0.05);
+      for (const [dv, ds] of [[0.5, -1], [0.62, 1], [0.8, -1], [0.92, 1]]) slab(R2, Math.min(pc, pc + ds * 0.22), Math.max(pc, pc + ds * 0.22), dv, dv + 0.06, 0, 0.04);
+      for (const [fs, fv] of [[0, 1.3], [-0.22, 1.06], [0.22, 1.14]]) { slab(R2, pc + fs - 0.08, pc + fs + 0.08, fv - 0.06, fv + 0.06, 0, 0.07); slab(R2, pc + fs - 0.05, pc + fs + 0.05, fv + 0.06, fv + 0.14, 0, 0.06); }
+    }
+  }
+  for (const [m, t] of buckets) bag.add(m, fromTriangles(t));
 }
 
 /** chhatri: a domed kiosk { c, y, r, h, n (columns), mat } on a little platform. */
@@ -280,12 +380,33 @@ function tombChamber(bag, col, cx, cz, y, A) {
 /** red_hall: the mosque or its twin (the jawab) { rect, y, h, front, domes: 3 }: a hall of red sandstone with arched openings, three white domes. */
 function redHall(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, h = el.h ?? 12, f = el.front || 'e';
-  bag.add(R, box(x0, y, z0, x1, y + h, z1));
+  // the hall's mass stands back behind the arcade so the arches open into their bays (dark doors at the back);
+  // the roof and the end walls close the gap
+  const bx0 = f === 'e' ? x0 : x0 + 3.15, bx1 = f === 'e' ? x1 - 3.15 : x1, gx0 = f === 'e' ? x1 - 3.2 : x0 + 0.5, gx1 = f === 'e' ? x1 - 0.5 : x0 + 3.2;
+  bag.add(R, box(bx0, y, z0, bx1, y + h, z1));
+  bag.add(R, box(gx0, y + h - 1.0, z0, gx1, y + h, z1));
+  for (const zz of [[z0, z0 + 0.8], [z1 - 0.8, z1]]) bag.add(R, box(gx0, y, zz[0], gx1, y + h - 1.0, zz[1]));
   col.rect([x0, z0, x1, z1], y, y + h);
   const [a, b] = f === 'e' ? [[x1 + 0.05, z0], [x1 + 0.05, z1]] : [[x0 - 0.05, z1], [x0 - 0.05, z0]];
   const L = z1 - z0, arches = [];
   for (let i = 0; i < 5; i++) { const c = L * (i + 0.5) / 5, big = i === 2; arches.push({ at: c, w: big ? 7 : 4.2, h: big ? h * 0.85 : h * 0.55, depth: 2.5, door: true }); }
   arcadeWall(bag, col, a, b, y, h, 1.2, R, arches, [(x0 + x1) / 2, (z0 + z1) / 2]);
+  if (el.decor) {
+    // the facade's inlay: the central arch framed by an inscription (the mosque) or a flower scroll (the
+    // jawab) in white marble, the spandrels' inlay, the dado; white marble outlines round the side arches
+    faceDecor(bag, a, b, y, h, { w: 7, h: h * 0.85 }, R, false, [(x0 + x1) / 2, (z0 + z1) / 2], { F: 0.6, flowers: el.decor === 'flowers', holes: arches.filter((q) => q.w < 7).map((q) => [q.at - q.w / 2 - 0.35, q.at + q.w / 2 + 0.35]) });
+    const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, ox = f === 'e' ? 1 : -1;
+    for (const q of arches.filter((q2) => q2.w < 7)) {
+      // a white frame round the arch: two jambs and the head
+      const P2 = (s2) => [a[0] + ux * s2, a[1] + uz * s2];
+      for (const [s0, s1, v0, v1] of [[q.at - q.w / 2 - 0.3, q.at - q.w / 2 - 0.1, 0, q.h + 0.3], [q.at + q.w / 2 + 0.1, q.at + q.w / 2 + 0.3, 0, q.h + 0.3], [q.at - q.w / 2 - 0.3, q.at + q.w / 2 + 0.3, q.h + 0.3, q.h + 0.5]]) {
+        const p0 = P2(s0), p1 = P2(s1), xx = a[0] + ox * 0.6;
+        bag.add(W, box(Math.min(xx, xx + ox * 0.03), y + v0, Math.min(p0[1], p1[1]), Math.max(xx, xx + ox * 0.03), y + v1, Math.max(p0[1], p1[1])));
+      }
+    }
+    // the parapet: a white band and a row of little merlons along the top
+    { const xx = a[0] + ox * 0.6; bag.add(W, box(Math.min(xx, xx + ox * 0.05), y + h - 0.9, z0, Math.max(xx, xx + ox * 0.05), y + h - 0.6, z1)); }
+  }
   for (let i = 0; i < 3; i++) {
     const z = z0 + L * (i + 0.5) / 3, r = i === 1 ? 6.2 : 4.6, x = (x0 + x1) / 2;
     bag.add(R, lathe([[r * 1.04, 0], [r * 1.04, 2]], 24, null, x, y + h, z));
@@ -343,6 +464,15 @@ function haveli(el, { bag, col }) {
   }
 }
 
+/** A fountain at (x, z): a lotus of marble rising from the water floor (y0) to just above the surface (y),
+ *  a copper nozzle, the jet of water h high. */
+function fountain(bag, x, z, y0, y, h = 1.6) {
+  const hb = y - y0 + 0.1;
+  bag.add('marble_smooth', lathe([[0.22, 0], [0.18, hb * 0.6], [0.3, hb * 0.85], [0.26, hb], [0.08, hb], [0.001, hb]], 16, (th, i) => (i === 2 || i === 3 ? 1 + 0.12 * Math.abs(Math.cos(th * 4)) : 1), x, y0, z));
+  bag.add('bronze', lathe([[0.05, 0], [0.04, 0.1], [0.018, 0.16], [0.001, 0.16]], 8, null, x, y0 + hb, z));
+  // the jet: a white column of broken water, spreading into a plume that falls back
+  bag.add('paint_white', lathe([[0.045, 0], [0.035, h * 0.5], [0.025, h * 0.85], [0.07, h * 0.93], [0.11, h * 0.9], [0.05, h * 0.97], [0.001, h]], 8, null, x, y0 + hb + 0.14, z));
+}
 registerStyle('mughal', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
@@ -350,6 +480,7 @@ registerStyle('mughal', {
     mausoleum,
     minaret: (el, { bag, col }) => minaret(bag, col, el.c[0], el.y, el.c[1], el.h, el.r),
     chhatri: (el, { bag, col }) => chhatri(bag, col, el.c[0], el.y, el.c[1], el.r, el.h, el.n ?? 8, el.mat ?? W, el.domeMat ?? W),
+    fountains: (el, { bag }) => { for (const [x, z] of el.pts) fountain(bag, x, z, el.y0 ?? 0, el.y, el.h ?? 1.6); },
     red_hall: redHall, great_gate: greatGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli,
   },
   objects: {},

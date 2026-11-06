@@ -16,8 +16,8 @@ E.push({ t: 'stairs', rect: [-10, tz1, 10, tz1 + 4], y0: 0, y1: ty, dir: 'n', ma
 E.push({ t: 'mausoleum', c: PLINTH.c, y: PLINTH.y, a: 28.3, chamfer: 8.5, h: 33, dome: { r: 17.7, h: 28, drum: 7 }, interior: true });
 for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) E.push({ t: 'minaret', c: [PLINTH.c[0] + sx * (PLINTH.a - 3), PLINTH.c[1] + sz * (PLINTH.a - 3)], y: PLINTH.y, h: 40, r: 2.6 });
 // the mosque (west, facing east) and its twin (east, facing west), on the terrace
-E.push({ t: 'red_hall', rect: [-138, -232, -115, -174], y: ty, h: 12, front: 'e' });
-E.push({ t: 'red_hall', rect: [115, -232, 138, -174], y: ty, h: 12, front: 'w' });
+E.push({ t: 'red_hall', rect: [-138, -232, -115, -174], y: ty, h: 12, front: 'e', decor: 'calligraphy' });
+E.push({ t: 'red_hall', rect: [115, -232, 138, -174], y: ty, h: 12, front: 'w', decor: 'flowers' });
 // the garden: walks of red sandstone along the axes and round the quarters, raised channels of
 // marble along the axes, the central pool on its platform
 const [gx0, gz0, gx1, gz1] = GARDEN;
@@ -26,8 +26,21 @@ E.push({ t: 'water_rect', rect: [-3, gz0 + 2, 3, gz1 - 2], y: 0.25 });
 E.push({ t: 'water_rect', rect: [gx0 + 2, -3, gx1 - 2, 3], y: 0.25 });
 for (const r of [[-3.6, gz0 + 2, -3, gz1 - 2], [3, gz0 + 2, 3.6, gz1 - 2], [gx0 + 2, -3.6, gx1 - 2, -3], [gx0 + 2, 3, gx1 - 2, 3.6]]) E.push({ t: 'block', walk: true, rect: r, y0: 0, y1: 0.55, mat: 'marble_smooth' });
 for (const r of [[-77, gz0, -73, gz1], [73, gz0, 77, gz1], [gx0, -77, gx1, -73], [gx0, 73, gx1, 77]]) E.push({ t: 'lane', rect: r, y: 0.2, mat: 'sandstone_red' });
-E.push({ t: 'block', walk: true, rect: [-POOL.a - 3, -POOL.a - 3, POOL.a + 3, POOL.a + 3], y0: 0, y1: 1.1, mat: 'marble' });
+// the raised marble tank: a rim 3 m wide round a basin (it was a solid block hiding the water before)
+{
+  const a = POOL.a, o = POOL.a + 3;
+  for (const r of [[-o, -o, o, -a], [-o, a, o, o], [-o, -a, -a, a], [a, -a, o, a]]) E.push({ t: 'block', walk: true, rect: r, y0: 0, y1: 1.1, mat: 'marble' });
+  E.push({ t: 'block', walk: true, rect: [-a, -a, a, a], y0: 0, y1: 0.4, mat: 'marble_smooth' });
+}
 E.push({ t: 'water_rect', rect: [-POOL.a, -POOL.a, POOL.a, POOL.a], y: 1.0 });
+// the fountains: a line of equidistant jets down the middle of the north–south channel, five in the
+// central tank, one at each corner and one in the middle (docs/settlements/mughal-agra.md §4)
+{
+  const row = [];
+  for (let z = gz0 + 8; z < gz1 - 6; z += 8) if (Math.abs(z) > POOL.a + 6) row.push([0, z]);
+  E.push({ t: 'fountains', pts: row, y0: 0, y: 0.25, h: 1.4 });
+  E.push({ t: 'fountains', pts: [[0, 0], [-POOL.a + 2.5, -POOL.a + 2.5], [POOL.a - 2.5, -POOL.a + 2.5], [-POOL.a + 2.5, POOL.a - 2.5], [POOL.a - 2.5, POOL.a - 2.5]], y0: 0.4, y: 1.0, h: 2.2 });
+}
 // the walls round the garden and the forecourt, their octagonal towers, the pavilions on the east and west walls
 const wall = (a, b) => E.push({ t: 'mughal_wall', a, b, h: 7 });
 wall([gx0, gz0], [gx0, gz1]); wall([gx1, gz0], [gx1, gz1]);
