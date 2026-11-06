@@ -1,7 +1,7 @@
 # Mamluk Cairo (Sultan Hasan and the Citadel), about 1363 — dossier
 
 Settlement id: `mamluk-cairo` · Style: `mamluk` (with `vernacular` houses) · Region: Egypt (Cairo, below the Muqattam) · Code: `src/settlements/mamluk-cairo/`
-Status of this dossier: L1–L2 (the Madrasa of Sultan Hasan — the sheer stone block with its tiers of window bays, muqarnas cornice and crenellated crown, the deep portal, the open court, the founder's domed tomb behind the qibla flanked by minarets; the Rumayla square; the Citadel on its spur, walled with round towers, the Mosque of al-Nasir Muhammad inside; the dense city; ground, planting, weather, music). L3 recorded for later: the four iwans and the madrasas of the four schools inside, the portal's muqarnas, the bronze doors, the present dome is later (the first dome's form), the Citadel's palaces, the Bab Zuwayla and the Qasaba, house interiors, people.
+Status of this dossier: L1–L2 (the Madrasa of Sultan Hasan — the sheer stone block with its tiers of window bays, muqarnas cornice and crenellated crown, the deep portal, the open court, the founder's domed tomb behind the qibla flanked by minarets; the Rumayla square; the Citadel on its spur, walled with round towers, the Mosque of al-Nasir Muhammad inside; the dense city; ground, planting, weather, music). Also built: the Citadel's mosque and minarets, curtain, road and gate (§4.2), a covered market street (§4.3). L3 recorded for later: the four iwans and the madrasas of the four schools inside, the portal's muqarnas, the bronze doors, the present dome is later (the first dome's form), the Citadel's palaces, the Bab Zuwayla and the Qasaba, house interiors, people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -19,6 +19,8 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Rumayla square | east of it | [stated] |
 | Citadel | on the spur to the east, 36 m up | [stated: the spur; height inferred] |
 | City | west and round about | [stated] |
+| Covered market street | x −45…−30, z −116…−14, north from the portal | [inferred] |
+| Road to the Citadel | round the spur's west face, angle 140°…220° about its centre | [inferred] |
 
 ## 3. Orientation
 
@@ -33,6 +35,16 @@ Cut limestone; tiers of tall window recesses; a muqarnas cornice and crenellated
 ### 4.1 The minarets (L3, built)
 
 - Two minarets flanked the domed mausoleum; only one survives [stated: Archnet], the tallest about 81.6 m [stated: mosqpedia]; one fell while the building was going up [stated: mosqpedia]. The Mamluk minaret rises in three tiers from a square base through an octagonal middle to a round top, the balconies carried on muqarnas corbels, the shafts carved, the top ending in a bulb-like head [stated: Vectree, "Mamluk architecture"]. Ours, both standing as built in 1363: a square stage to 0.4 of the height with two tiers of keel-arched niches and slit windows on each face; a balcony on four tiers of muqarnas cells with a parapet of carved panels between posts; the octagonal stage with a niche on each face and its balcony; the round, lightly fluted stage and its balcony; a pavilion of eight slender marble columns round the stair's core, a ring, the bulb on its neck, and a bronze finial with its crescent [inferred: proportions, the niches and the pavilion follow the type].
+
+### 4.2 The Citadel (L3, built)
+
+- **The mosque of al-Nasir Muhammad** (completed about 1318, heightened 1335): a free-standing hypostyle mosque 63 × 57 m round a court of 35.81 × 23.32 m, the sanctuary on the qibla side, galleries on the other three; the outer walls plain with a rectangular crenellation; the main entrance projecting from the west wall; two minarets, both of stone, their bases below the roof's line: the taller at the north-east corner, the other at the western portal above the main entrance, its top a garlic-shaped bulb unique in Cairo and its upper sections covered with green, white and blue faience mosaic, thought to be the work of a craftsman from Tabriz; both with finely carved bulbous sections [stated: Wikipedia "Al-Nasir Muhammad Mosque"]. Ours: the block at that size (its court 35.8 × 23.3 m, set north of the middle for the deeper sanctuary), the west portal; the north-west minaret (36 m): a square base, a round shaft carved in bands, a balcony on muqarnas, the upper stage in bands of green and white faience with a blue band at its head, the neck and the ribbed garlic bulb in green faience, the bronze finial; the north-east (42 m): a round shaft carved in chevrons, two balconies, a carved bulbous stage, an open pavilion of eight columns, a ribbed stone bulb [inferred: proportions and the distribution of the carving].
+- **The curtain** of the Citadel on its spur in ten straight runs with round towers at the angles, square merlons along the walk [inferred]; it was previously drawn as the axis-aligned boxes round each run, now built along each run.
+- **The road and the gate.** The road climbs from the Rumayla's south-east corner round the spur's western face, 8 m wide, cut into the slope and built up on it, at about 13°, with a revetment on its inner side where cut and a parapet on its outer side where raised, to a gate in the north-western curtain flanked by two round towers under an arch of red and white voussoirs [inferred: the north-west is the side of Bab al-Mudarraj, Saladin's gate of 1183 reached by a stepped ramp; the line and the gate's form are ours].
+
+### 4.3 The covered market street (L3, built: `suq_covered`)
+
+Cairo's markets lined its streets — al-Maqrizi wrote that the Qasaba had once held 12,000 shops; some markets were covered, one with a roof of wood, and an amir shaded the Qafaysat market with canvas drawn on ropes [stated: Belleten, "Al-Makrizi's Khitat and the markets in Cairo during the Mamluk era"]. A market of arms, the Suq al-Silah, stood on the Qasaba [stated: same]; the street now called Shari' Suq al-Silah runs north from Sultan Hasan [stated: Archnet "Suq al-Silah" for the street's name]. Ours: a covered market street 100 m long running north from the madrasa's portal, in the manner of the Qasaba's markets [inferred: its place here]: a row of shops each side, each a cell 3 m wide and 5 deep with a raised wooden floor and shelves of goods (pots, cloth, brass trays, blades, baskets) behind a stone bench (the mastaba) where the seller sat, the shutters folded up under a lintel of joggled stones; over them a plastered storey with small projecting lattice windows; across the street beams carrying mats, a bay left open every 24 m for light and air; a gate at each end with an arch of dark and white voussoirs [inferred: dimensions and goods].
 
 ## 5. The town
 
@@ -52,7 +64,7 @@ Hot and hazy; the khamsin's dust. [inferred]
 
 ## 8. Paths
 
-From the city to the portal, into the court. [inferred]
+From the city down the covered market street to the portal, through the bent passage into the court; from the Rumayla up the road round the spur to the Citadel's gate and the mosque of al-Nasir Muhammad. [inferred]
 
 ## 9. Sound
 
@@ -73,3 +85,5 @@ The call to prayer; the ney, the oud and the qanun in a maqam. [inferred]
 - [E. W. Lane, An Account of the Manners and Customs of the Modern Egyptians — Project Gutenberg](https://www.gutenberg.org/ebooks/70796)
 - [Residential architecture in Historic Cairo — Wikipedia](https://en.wikipedia.org/wiki/Residential_architecture_in_Historic_Cairo)
 - [Bayt al-Razzaz — Wikipedia](https://en.wikipedia.org/wiki/Bayt_al-Razzaz)
+- [Al-Makrizi's Khitat and the Markets in Cairo during the Mamluk Era — Belleten](https://belleten.gov.tr/eng/full-text/301/eng)
+- [Suq al-Silah — Archnet](https://www.archnet.org/sites/2592)

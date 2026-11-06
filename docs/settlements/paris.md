@@ -2,7 +2,7 @@
 
 Settlement id: `paris` · Style: `gothic` (with `vernacular` houses and bridges) · Region: France (the Seine) · Code: `src/settlements/paris/`
 Replaces the legacy district of the previous design. The Sainte-Chapelle itself is the full building from that design (`src/buildings/sainte-chapelle`, dossier `docs/buildings/sainte-chapelle.md`), in the palace court.
-Status of this dossier: L1–L2 (the island between the Seine's two arms; the royal palace with its great hall and towers on the north quay and the Sainte-Chapelle in its court; Notre-Dame's massing (nave, aisles, transept, apse, west towers and rose) and its parvis; the Grand Pont and the Petit Pont; rows of timber-framed houses on the island and both banks; ground, planting, weather, music). Notre-Dame in detail (§1a). L3 recorded for later: the palace's buildings in detail, the Châtelet and the Petit-Châtelet at the bridges' ends, houses on the bridges, mills on the river, the walls of Philip Augustus, people and boats.
+Status of this dossier: L2–L3 (the island between the Seine's two arms; the royal palace with its great hall and towers on the north quay and the Sainte-Chapelle in its court; Notre-Dame's massing (nave, aisles, transept, apse, west towers and rose) and its parvis; the Grand Pont and the Petit Pont; rows of timber-framed houses on the island and both banks; ground, planting, weather, music). Notre-Dame in detail (§1a), inside (§1b); the bridges with their houses, mills and boats (§2a). L3 recorded for later: the palace's buildings in detail, the Châtelet and the Petit-Châtelet at the bridges' ends, the walls of Philip Augustus, people and boats.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -25,6 +25,17 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **Transept:** arms projecting just beyond the chapels, each gable with a rose (the north rose about 1250, the south 1258–60: shown in their place though the new façades were only begun) [stated: Kiddle; inferred: their state in 1248].
 - **Spire:** of oak sheathed in lead over the crossing, about 1220–30, about 78 m above the floor, taken down 1786–92 [stated: Wikiwand "Spire of Notre-Dame de Paris"]; built as an octagonal lantern with pointed bays, gablets and corner pinnacles under a crocketed needle with its cross and cock [inferred].
 
+## 1b. Notre-Dame inside (built: `src/styles/gothic/nd-interior.js` and `notre-dame.js`)
+
+- **Entering.** The three west portals stand open, their leaves turned in against the passage: the central portal into the west bay of the nave between the towers, the side portals into the towers' vaulted ground floors (four cells on a central column), which open east into the aisles and, by an arch, into the west bay [inferred: the nave "entered through two arcades under the towers", stated: Bluffton, Notre-Dame interior]. The west bay is vaulted higher than the nave (round-headed lunette over the west rose), a transverse wall with the nave's arch between [inferred: so the rose, which our façade sets at 31 m, shows whole inside].
+- **The nave:** eight bays and two aisles each side [stated: Bluffton]; massive plain cylindrical piers with crocketed capitals [stated: Bluffton; Hanover]; sexpartite rib vaults, each over two bays of the elevation [stated: Hanover; Bluffton]; the clerestory windows enlarged about 1225, removing the old oculus storey [stated: Bluffton]. Built: piers 1.4 m across on square plinths, crocket capitals under square abaci at 6.4 m; the arcade's pointed arches; above, the tribune over the inner aisle opening to the nave through three arches on two colonnettes under a relieving arch; the clerestory of two lancets and an oculus (the glass of the exterior's windows, now set in the wall's thickness); three vaulting shafts from each abacus to the vault's springing at 23.5 m; the vault's crown at 33.5 m [stated: 33–35 m, §1a]; the columns between the aisles, every other one with eight attached shafts (the alternation of the double aisles) [inferred]; the inner aisle vaulted at 10 m under the tribune's floor, the tribune vaulted at 21 m under its lead terrace, the outer aisle and the chapels between the buttresses at 11 m [inferred: heights from the exterior].
+- **Transept and crossing:** the crossing on four great piers, its quadripartite vault; the arms quadripartite, their end walls pierced by the door's window, five lancets and the rose (glass inside and out); the west and east walls of the arms open to the aisles and the tribunes below, a window above [inferred].
+- **Choir:** four bays as the nave, sexpartite; the hemicycle of five sides on its piers, its radiating vault, the double ambulatory with the tribune over the inner ring, its vault cells over the trapezoids between the rings [inferred: the plan, the triangular cells of the real ambulatory simplified].
+- **The jubé** across the choir's entrance east of the crossing: of the 1230s, polychrome, separating the choir from the nave; the deacon read the Gospel from it; destroyed early in the 18th century; over a thousand fragments found under the crossing in 2022, some 650 with their colour [stated: culture.gouv.fr; Aleteia]. Its form is not described by these sources; built in the manner of the period's screens [inferred]: an arcade of five pointed bays on colonnettes (the middle one the door, the others altars' recesses on a blue ground sown with gold), a frieze of the Passion in painted figures over it, a cornice and a parapet of quatrefoils, the rood on the platform (the cross with Christ, the Virgin and Saint John). The carved choir enclosure with its scenes is of the 14th century (Pierre de Chelles, finished 1351) [stated: notredamedeparis.fr, "The Jube of Cathedrals"] and is not shown.
+- **Furnishings:** the canons' oak stalls in two rows along the choir with desks and a canopy [inferred]; the high altar in the hemicycle on its steps, a painted frontal, a gilt retable, the cross and two candlesticks [inferred].
+- **Glass:** the 13th-century windows in the stained-glass material everywhere (clerestory, tribunes, chapels, ambulatory, transept roses and lancets, the west rose) [inferred].
+- **Floor:** flags throughout [inferred].
+
 ## 2. Layout of the settlement (radius 420 m)
 
 | Part | Where (m, +x east, +z south) | Notes |
@@ -34,7 +45,14 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Palace and Sainte-Chapelle | the west end; the chapel at (−200, −10) | [stated: positions] |
 | Notre-Dame and parvis | the east end | [stated] |
 | Grand Pont, Petit Pont | x = 0 north, x = 110 south | [stated: arms; positions inferred] |
+| Boats | along the Right Bank east of the Grand Pont (the Grève), a few on the river, two at the Left Bank | [inferred] |
 | Houses | in rows on the island and both banks | [inferred] |
+
+## 2a. The bridges, mills and boats (built: `src/styles/gothic/town.js`, `pont`, `mill_pendant`, `boat_seine`)
+
+- **The bridges** were lined with houses and shops and served as streets and markets [stated: Paris Zigzag]; in the mid-12th century Louis VII had the money-changers and goldsmiths work on the Grand Pont (later the Pont au Change) [stated: Wikipedia "Pont au Change"; stickymangorice]; the Petit Pont was rebuilt in stone in 1175 with the support of Bishop Maurice de Sully [stated: Wikipedia "Petit Pont"]; stone bridges stood on the Grand Pont's site until the floods of 1296 [stated: stickymangorice]. Built: both in stone, 18 m wide, on round arches (seven on the Grand Pont, five on the Petit Pont) about 6 m in span between piers 2.6 m thick with pointed cutwaters up- and downstream, a string course, the deck paved; a street 6 m wide between kerbs, and on the strips either side timber houses of three or four storeys, their fronts to the street, jettied over it [inferred: widths, arch counts].
+- **Mills:** two water-mills hung on the Grand Pont's downstream face over the stream, each a boarded mill-house on cantilevered beams and struts, an undershot wheel beside it on its post [inferred: Paris's bridges carried mills hung under or beside them — the later Pont aux Meuniers was named for them; their exact place in 1248 not sourced].
+- **Boats:** flat-bottomed river boats of planks with square raised ends, thwarts, a steering oar and a pole, loaded with casks, sacks or wood, moored at the Right Bank's strand east of the Grand Pont (the port of the Grève) and on the river [inferred: the river trade of the *marchands de l'eau*].
 
 ## 3. Orientation
 
@@ -80,3 +98,12 @@ As for the Sainte-Chapelle (`docs/buildings/sainte-chapelle.md` §9).
 - [Galerie des Rois — aroundus](https://aroundus.com/p/175212302-galerie-des-rois)
 - [Notre Dame de Paris — Kiddle](https://kids.kiddle.co/Notre_Dame_de_Paris)
 - [Spire of Notre-Dame de Paris — Wikiwand](https://wikiwand.com/en/articles/Spire_of_Notre-Dame_de_Paris)
+- [Notre-Dame, interior — Bluffton University](https://homepages.bluffton.edu/~SULLIVANM/france/paris/notredame/notredame5.html)
+- [Notre Dame, Paris, nave — Hanover College](https://history.hanover.edu/courses/art/ndnave.html)
+- [The Jube of Cathedrals — notredamedeparis.fr](https://www.notredamedeparis.fr/en/?p=3445)
+- [Notre-Dame de Paris : des découvertes archéologiques majeures — DRAC Île-de-France](https://www.culture.gouv.fr/fr/regions/drac-ile-de-france/Actualites/actualite-a-la-une/notre-dame-de-paris-des-decouvertes-archeologiques-majeures)
+- [On a retrouvé le jubé de Notre-Dame — Aleteia](https://fr.aleteia.org/2024/11/15/j-22-on-a-retrouve-le-jube-de-notre-dame/)
+- [Pont au Change — Wikipedia](https://en.wikipedia.org/wiki/Pont_au_Change)
+- [History of Paris' medieval bridges — stickymangorice](https://stickymangorice.com/2023/06/05/history-of-paris-bridges/)
+- [Jusqu'à quand les ponts parisiens ont-ils été habités ? — Paris Zigzag](https://www.pariszigzag.fr/insolite/histoire-insolite-paris/ponts-habitation-sparis/)
+- [Histoire des ponts de Paris — cometoparis](https://www.cometoparis.com/fre/decouvrir-paris/petites-histoires/ponts-de-paris-s1066)
