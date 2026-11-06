@@ -23,8 +23,6 @@ import { buildPlan } from '../src/core/build.js';
 import { depthRank } from '../src/core/geom.js';
 
 const CELL = 0.25, EPS = 0.012, SKIP = new Set(['opening', 'water', 'glass_outer', 'flame', 'glass_lamp']);
-const only = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-for (const id of only) if (!MODULES[id] && !BUILDINGS.some((b) => b.id === id)) { console.log(`${id}: no such settlement or building`); process.exit(2); }
 let failed = 0;
 
 /** The faces of a plan lying along the axes, packed: 9 floats each, and their material, element, axis and facing. */
@@ -93,7 +91,8 @@ function depth(f, i, j) {
   return f.A2 + f.du * s + f.dv * q;
 }
 
-function check(plan) {
+/** The surface problems of one plan: { coplanar: Map(key → { area m², at }), errors: [message], faces }. */
+export function check(plan) {
   const mats = { id: new Map(), name: [], rank: [] }, errors = [];
   const F = collect(plan, mats, errors), coplanar = new Map();
   const n = F.n, M = F.M;
@@ -168,14 +167,18 @@ function report(id, plan) {
   for (const [k, r] of bad.sort((x, y) => y[1].area - x[1].area).slice(0, 12)) console.log(`  coplanar  ${k}  ${r.area.toFixed(1)} m²  near (${r.at.map((v) => v.toFixed(1)).join(', ')})`);
 }
 
-// one settlement at a time, one plan at a time
-for (const [id, load] of Object.entries(MODULES)) {
-  if (only.length && !only.includes(id)) continue;
-  const m = await load();
-  for (const l of m.landmarks || []) report(id, l.plan);
-  if (m.town) for (const p of await m.town()) report(id, p);
-}
-for (const b of BUILDINGS) if (!only.length || only.includes(b.id)) report(b.id, (await b.load()).plan);
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const only = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+  for (const id of only) if (!MODULES[id] && !BUILDINGS.some((b) => b.id === id)) { console.log(`${id}: no such settlement or building`); process.exit(2); }
+  // one settlement at a time, one plan at a time
+  for (const [id, load] of Object.entries(MODULES)) {
+    if (only.length && !only.includes(id)) continue;
+    const m = await load();
+    for (const l of m.landmarks || []) report(id, l.plan);
+    if (m.town) for (const p of await m.town()) report(id, p);
+  }
+  for (const b of BUILDINGS) if (!only.length || only.includes(b.id)) report(b.id, (await b.load()).plan);
 
-console.log(failed ? `${failed} plan(s) with surface problems` : 'surfaces ok');
-process.exit(failed ? 1 : 0);
+  console.log(failed ? `${failed} plan(s) with surface problems` : 'surfaces ok');
+  process.exit(failed ? 1 : 0);
+}
