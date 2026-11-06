@@ -7,7 +7,7 @@
 // raised channels and the central pool; the town of flat-roofed houses with balconies (jharokha).
 
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
-import { registerStyle, STYLES } from '../../core/build.js';
+import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles, frustum, disc, rod, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
@@ -71,6 +71,7 @@ function arcadeWall(bag, col, a, b, y, h, th, mat, arches = [], inside = null) {
   let nx = -uz, nz = ux;
   if (inside) { const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2; if ((inside[0] - mx) * nx + (inside[1] - mz) * nz < 0) { nx = -nx; nz = -nz; } }
   for (const ar of arches) {
+    if (ar.alcove) { alcove(bag, col, [a[0] + ux * ar.at, a[1] + uz * ar.at], ux, uz, nx, nz, ar, th, y, mat); continue; }
     const d = ar.depth ?? 1.2, c = [a[0] + ux * ar.at + nx * (th / 2 + d), a[1] + uz * ar.at + nz * (th / 2 + d)], sill = ar.sill ?? 0;
     const t = [];
     beamTris(t, [c[0] - ux * ar.w / 2, y + sill, c[1] - uz * ar.w / 2], [c[0] + ux * ar.w / 2, y + sill, c[1] + uz * ar.w / 2], 0.1, ar.h);
@@ -89,17 +90,118 @@ function arcadeWall(bag, col, a, b, y, h, th, mat, arches = [], inside = null) {
 }
 
 /**
+ * The recess behind an arch with `alcove` (the iwans and niches of the tomb and the gate; docs/settlements/mughal-agra.md
+ * §4): in plan half an octagon ('oct': the back narrower than the opening, the sides slanting) or a rectangle ('rect'),
+ * its walls rising to the arch's springing, a band of muqarnas cells along the springing, the pointed half-dome
+ * above meeting the arch at the face, a net of ribs on it; on the back wall a door below and a jali window above (or
+ * only the jali in a raised niche); a blind arched panel on each side wall. at: the arch's centre on the wall's centre
+ * line; (nx, nz) into the recess.
+ */
+function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
+  const w = ar.w, h = ar.h, sill = ar.sill ?? 0, d = ar.depth ?? 1.2, y0 = y + sill, oct = ar.alcove !== 'rect';
+  const r = w * 0.8, rise = Math.sqrt(r * r - (r - w / 2) ** 2), spring = Math.max(0.3, h - rise), ys = y0 + spring;
+  const n0 = th / 2 - 0.02, n1 = th / 2 + d, wb = oct ? Math.min(w * 0.46, w - 0.4) : w;
+  const Q = (s, n) => [at[0] + ux * s + nx * n, at[1] + uz * s + nz * n];
+  const per = [[-w / 2, n0], [-wb / 2, n1], [wb / 2, n1], [w / 2, n0]];
+  const segL = [0, 1, 2].map((i) => Math.hypot(per[i + 1][0] - per[i][0], per[i + 1][1] - per[i][1])), tot = segL[0] + segL[1] + segL[2];
+  const perim = (u) => { let l = u * tot; for (let i = 0; i < 3; i++) { if (l <= segL[i] || i === 2) { const f = Math.min(1, l / segL[i]); return [per[i][0] + (per[i + 1][0] - per[i][0]) * f, per[i][1] + (per[i + 1][1] - per[i][1]) * f]; } l -= segL[i]; } return per[3]; };
+  const H = (t) => ys + Math.sqrt(Math.max(0, r * r - (w / 2 * t - r) ** 2));
+  const V = (u, t) => { const p = perim(u), sn = [p[0] * (1 - t), p[1] + (n0 - p[1]) * t], q = Q(sn[0], sn[1]); return [q[0], H(t), q[1]]; };
+  // the side walls and the back wall (none behind an arch one walks through: its own wall stands there)
+  const sideT = 0.3;
+  for (const sg of [-1, 1]) {
+    const A = per[sg < 0 ? 0 : 3], Bk = per[sg < 0 ? 1 : 2], off = oct ? 0 : sg * sideT / 2;
+    const pa = Q(A[0] + off, A[1]), pb = Q(Bk[0] + off, Bk[1] + (ar.pass ? 0.2 : 0));
+    bag.add(mat, orientedBox(pa, pb, sideT, y0, ys + 0.05, 0.12));
+    if (col && sill < 0.5) col.segment(pa, pb, sideT, y0, ys);
+  }
+  if (!ar.pass) bag.add(mat, orientedBox(Q(-wb / 2 - 0.1, n1 + 0.15), Q(wb / 2 + 0.1, n1 + 0.15), 0.3, y0, ys + 0.05));
+  // the half-dome: rows from the springing up to the arch at the face, faced toward the opening
+  const NU = 24, NT = 10, tris = [], tgt = Q(0, n0 - 4), ty = y0 + spring * 0.4;
+  const push = (A, Bv, C) => {
+    const ab = [A[0] - Bv[0], A[1] - Bv[1], A[2] - Bv[2]], cb = [C[0] - Bv[0], C[1] - Bv[1], C[2] - Bv[2]];
+    const nrm = [cb[1] * ab[2] - cb[2] * ab[1], cb[2] * ab[0] - cb[0] * ab[2], cb[0] * ab[1] - cb[1] * ab[0]];
+    const m = [(A[0] + Bv[0] + C[0]) / 3, (A[1] + Bv[1] + C[1]) / 3, (A[2] + Bv[2] + C[2]) / 3];
+    const dot = nrm[0] * (tgt[0] - m[0]) + nrm[1] * (ty - m[1]) + nrm[2] * (tgt[1] - m[2]);
+    if (dot >= 0) tris.push(...A, ...Bv, ...C); else tris.push(...A, ...C, ...Bv);
+  };
+  for (let i = 0; i < NU; i++) for (let j = 0; j < NT; j++) {
+    const a1 = V(i / NU, j / NT), b1 = V((i + 1) / NU, j / NT), c1 = V((i + 1) / NU, (j + 1) / NT), d1 = V(i / NU, (j + 1) / NT);
+    push(a1, b1, c1); if (j < NT - 1) push(a1, c1, d1);
+  }
+  bag.add(mat, fromTriangles(tris));
+  // the net of ribs over it, standing a few centimetres proud toward the opening
+  const inward = (p) => { const dx = tgt[0] - p[0], dy = ty - p[1], dz = tgt[1] - p[2], L = Math.hypot(dx, dy, dz) || 1; return [p[0] + dx / L * 0.035, p[1] + dy / L * 0.035, p[2] + dz / L * 0.035]; };
+  const rb = Math.max(0.018, Math.min(0.035, w * 0.0025));
+  for (let k = 0; k <= 8; k++) for (let j = 0; j < 4; j++) {
+    const t0 = j / 4.4, t1 = (j + 1) / 4.4, u0 = k / 8;
+    if (k < 8) { bag.add(mat, rod(inward(V(u0, t0)), inward(V(u0 + 1 / 8, t1)), rb, 4)); bag.add(mat, rod(inward(V(u0 + 1 / 8, t0)), inward(V(u0, t1)), rb, 4)); }
+  }
+  for (const t of [0.0, 0.45, 0.68, 0.9]) for (let i = 0; i < 16; i++) bag.add(mat, rod(inward(V(i / 16, t)), inward(V((i + 1) / 16, t)), rb, 4));
+  // muqarnas: two tiers of little corbelled cells along the springing, the upper set over the joints of the lower
+  const cw = Math.max(0.35, Math.min(0.7, w * 0.07));
+  for (let i = 0; i < 3; i++) {
+    if (ar.pass && i === 1) continue;
+    const A = per[i], Bk = per[i + 1], L = segL[i], ds = (Bk[0] - A[0]) / L, dn = (Bk[1] - A[1]) / L;
+    let ms = -dn, mn = ds; if (ms * (0 - A[0]) + mn * ((n0 + n1) / 2 - A[1]) < 0) { ms = -ms; mn = -mn; }
+    const n = Math.max(1, Math.floor(L / cw));
+    for (const [tier, ya, yb, prot, shift] of [[0, ys - cw * 0.9, ys - cw * 0.1, cw * 0.28, 0], [1, ys - cw * 0.1, ys + cw * 0.7, cw * 0.5, 0.5]]) {
+      for (let k = 0; k < n - tier; k++) {
+        const c0 = (k + shift + 0.12) * L / n, c1 = (k + shift + 0.88) * L / n, o = prot / 2 + 0.1;
+        const p0 = Q(A[0] + ds * c0 + ms * o, A[1] + dn * c0 + mn * o), p1 = Q(A[0] + ds * c1 + ms * o, A[1] + dn * c1 + mn * o);
+        bag.add(mat, orientedBox(p0, p1, prot, ya, yb));
+        // the cell's hood: a smaller block stepping out under the next tier
+        const q0 = Q(A[0] + ds * (c0 + 0.08) + ms * (o + prot * 0.35), A[1] + dn * (c0 + 0.08) + mn * (o + prot * 0.35)), q1 = Q(A[0] + ds * (c1 - 0.08) + ms * (o + prot * 0.35), A[1] + dn * (c1 - 0.08) + mn * (o + prot * 0.35));
+        bag.add(mat, orientedBox(q0, q1, prot * 0.3, yb - (yb - ya) * 0.3, yb));
+      }
+    }
+  }
+  // on the back wall: a door below and a jali above, framed in dark stone; or a jali alone in a raised niche
+  const face = (s0, s1, v0, v1, o0, o1, m) => { const p0 = Q(s0, n1 - o1 + (o1 - o0) / 2), p1 = Q(s1, n1 - o1 + (o1 - o0) / 2); bag.add(m, orientedBox(p0, p1, o1 - o0, v0, v1)); };
+  const frame = (s0, s1, v0, v1, fw, m) => { face(s0 - fw, s0, v0, v1 + fw, 0.01, 0.05, m); face(s1, s1 + fw, v0, v1 + fw, 0.01, 0.05, m); face(s0, s1, v1, v1 + fw, 0.01, 0.05, m); };
+  const jali = (s0, s1, v0, v1) => {
+    face(s0, s1, v0, v1, 0.012, 0.02, 'lacquer_black');
+    const nb = Math.max(4, Math.round((s1 - s0) / 0.28)), nv = Math.max(4, Math.round((v1 - v0) / 0.28)), bw = 0.045;
+    for (let g = 1; g < nb; g++) { const sg = s0 + (s1 - s0) * g / nb; face(sg - bw, sg + bw, v0, v1, 0.02, 0.08, W); }
+    for (let g = 1; g < nv; g++) { const vg = v0 + (v1 - v0) * g / nv; face(s0, s1, vg - bw, vg + bw, 0.02, 0.08, W); }
+    frame(s0, s1, v0, v1, 0.14, 'marble_dark');
+  };
+  if (!ar.pass) {
+    const jw = Math.min(wb * 0.62, 3.6);
+    if (sill < 0.5 && spring > 4) {
+      const dw = Math.min(wb * 0.5, 2.6), dh = Math.min(spring * 0.5, 4.2);
+      face(-dw / 2, dw / 2, y0, y0 + dh, 0.012, 0.09, 'wood_dark');
+      for (let k = 0; k < 5; k++) for (const sg of [-1, 1]) face(sg * dw / 4 - 0.05, sg * dw / 4 + 0.05, y0 + 0.5 + k * (dh - 1) / 4, y0 + 0.6 + k * (dh - 1) / 4, 0.09, 0.12, 'gilt_bronze');
+      frame(-dw / 2, dw / 2, y0, y0 + dh, 0.18, 'marble_dark');
+      const j0 = y0 + dh + 0.8, j1 = Math.min(ys - 0.3, j0 + jw * 1.4);
+      if (j1 - j0 > 0.8) jali(-jw / 2, jw / 2, j0, j1);
+    } else {
+      const j0 = y0 + spring * 0.18, j1 = ys - Math.max(0.3, spring * 0.08);
+      if (j1 - j0 > 0.6) jali(-jw / 2, jw / 2, j0, j1);
+    }
+  }
+  // a blind arched panel framed in dark stone on each slanting side
+  if (oct && spring > 3) for (const sg of [-1, 1]) {
+    const A = per[sg < 0 ? 0 : 3], Bk = per[sg < 0 ? 1 : 2], L = Math.hypot(Bk[0] - A[0], Bk[1] - A[1]), ds = (Bk[0] - A[0]) / L, dn = (Bk[1] - A[1]) / L;
+    let ms = -dn, mn = ds; if (ms * (0 - A[0]) + mn * ((n0 + n1) / 2 - A[1]) < 0) { ms = -ms; mn = -mn; }
+    const o = sideT / 2 + 0.03, P2 = (c) => Q(A[0] + ds * c + ms * o, A[1] + dn * c + mn * o);
+    const c0 = L * 0.18, c1 = L * 0.82, v0 = y0 + spring * 0.12, v1 = ys - spring * 0.12;
+    for (const [p, q, va, vb] of [[c0, c0 + 0.1, v0, v1], [c1 - 0.1, c1, v0, v1], [c0, c1, v1 - 0.1, v1], [c0, c1, v0, v0 + 0.1]]) bag.add('marble_dark', orientedBox(P2(p), P2(q), 0.04, va, vb));
+  }
+}
+
+/**
  * pishtaq_face: one face of the mausoleum or a gate { a, b, y, h, iwan: { w, h }, niches (the two
  * storeys of niches either side), mat, trim }: the face with the great arch in its middle, the
  * niches beside it, a parapet with a frieze along the top.
  */
 function pishtaqFace(bag, col, a, b, y, h, iw, mat, niches = true, inside = null, trim = 'marble_dark') {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
-  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass }];
+  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass, alcove: iw.alcove && (iw.pass ? 'rect' : iw.alcove) }];
   if (niches) for (const s of [-1, 1]) {
     const c = L / 2 + s * (iw.w / 2 + (L - iw.w) / 4);
     const nw = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45);
-    arches.push({ at: c, w: nw, h: iw.h * 0.42, sill: 0.6, depth: 1.5 }, { at: c, w: nw, h: iw.h * 0.38, sill: iw.h * 0.52, depth: 1.5 });
+    arches.push({ at: c, w: nw, h: iw.h * 0.42, sill: 0.6, depth: 1.5, alcove: iw.alcove && 'oct' }, { at: c, w: nw, h: iw.h * 0.38, sill: iw.h * 0.52, depth: 1.5, alcove: iw.alcove && 'oct' });
   }
   arcadeWall(bag, col, a, b, y, h, 2.4, mat, arches, inside);
   if (iw.pass) {
@@ -263,7 +365,7 @@ function mausoleum(el, { bag, col }) {
   const P = [[-A + C, -A], [A - C, -A], [A, -A + C], [A, A - C], [A - C, A], [-A + C, A], [-A, A - C], [-A, -A + C]].map(([x, z]) => [cx + x, cz + z]);
   for (let k = 0; k < 8; k++) {
     const a = P[k], b = P[(k + 1) % 8], main = k % 2 === 0;
-    pishtaqFace(bag, col, a, b, y, H, main ? { w: (A - C) * 2 * 0.42, h: H * 0.82, depth: 5, pass: el.interior && k === 4 } : { w: C * 1.4 * 0.5, h: H * 0.42 }, W, main, [cx, cz]);
+    pishtaqFace(bag, col, a, b, y, H, main ? { w: (A - C) * 2 * 0.42, h: H * 0.82, depth: 5, pass: el.interior && k === 4, alcove: 'oct' } : { w: C * 1.4 * 0.5, h: H * 0.42, alcove: 'oct', depth: 2.2 }, W, main, [cx, cz]);
   }
   if (el.interior) tombChamber(bag, col, cx, cz, y, A);
   bag.add(W, box(cx - A + 2, y + H - 0.8, cz - A + 2, cx + A - 2, y + H, cz + A - 2));
@@ -418,7 +520,7 @@ function redHall(el, { bag, col }) {
 /** great_gate: the gate { c, y, w, d, h, front ('n'|'s') }: a block of red sandstone, its faces with great iwans, a row of small chhatris along the top, towers with kiosks at its corners. */
 function greatGate(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y ?? 0, w = el.w / 2, d = el.d / 2, h = el.h;
-  for (const s of [-1, 1]) pishtaqFace(bag, col, [cx + w * s, cz + d * s], [cx - w * s, cz + d * s], y, h, { w: w * 0.6, h: h * 0.75, depth: d - 1.5 }, R, true, [cx, cz]);
+  for (const s of [-1, 1]) pishtaqFace(bag, col, [cx + w * s, cz + d * s], [cx - w * s, cz + d * s], y, h, { w: w * 0.6, h: h * 0.75, depth: d - 1.5, alcove: 'oct' }, R, true, [cx, cz]);
   bag.add(R, box(cx - w, y, cz - d + 1.2, cx - w * 0.3, y + h, cz + d - 1.2));
   bag.add(R, box(cx + w * 0.3, y, cz - d + 1.2, cx + w, y + h, cz + d - 1.2));
   bag.add(R, box(cx - w * 0.3, y + h * 0.78, cz - d + 1.2, cx + w * 0.3, y + h, cz + d - 1.2));
