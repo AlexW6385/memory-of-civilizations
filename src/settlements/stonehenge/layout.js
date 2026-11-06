@@ -26,7 +26,7 @@ function ditchFactor(x, z) {
   if (Math.abs(south) < 0.05) return 0;
   return 0.65 + 0.35 * Math.abs(Math.sin(a * 23.5 + 0.7)) ** 0.5 * (0.8 + 0.2 * Math.sin(a * 7));   // segment by segment
 }
-export function height(x, z) {
+function baseHeight(x, z) {
   const r = Math.hypot(x, z);
   // the down: gentle swells, nearly level where the stones stand
   let h = (2.5 * Math.sin(x / 90) * Math.cos(z / 110) + 1.5 * Math.sin((x + z) / 60)) * (0.25 + 0.75 * smooth(18, 70, r));
@@ -50,9 +50,21 @@ export function height(x, z) {
   for (const [bx, bz, br] of BARROWS) { const d = Math.hypot(x - bx, z - bz) / br; if (d < 1) h += 2.2 * Math.cos(d * Math.PI / 2) ** 2; }
   return h * (1 - smooth(RADIUS - 50, RADIUS - 5, r));
 }
+/** The ground: the down, with a level platform cut and built up for each house. */
+export function height(x, z) {
+  let h = baseHeight(x, z);
+  if (Math.hypot(x - VILLAGE.c[0], z - VILLAGE.c[1]) > VILLAGE.r + 12) return h;
+  for (const o of houses()) {
+    const d = Math.max(Math.abs(x - o.c[0]), Math.abs(z - o.c[1]));
+    if (d > o.s + 3) continue;
+    const r = Math.hypot(x - o.c[0], z - o.c[1]), w = smooth(o.s * 0.75 + 2.5, o.s * 0.75 + 0.3, r);
+    h += (o.y - 0.05 - h) * w;
+  }
+  return h;
+}
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let H = null;
-/** The houses: { c, s (inner side), yaw, y (the chalk floor, at the highest corner), seed }. */
+/** The houses: { c, s (inner side), yaw, y (the chalk floor, on its levelled platform), seed }. */
 export function houses() {
   if (H) return H;
   H = [];
@@ -61,8 +73,9 @@ export function houses() {
     const a = rand() * Math.PI * 2, d = rand() * VILLAGE.r, x = VILLAGE.c[0] + Math.cos(a) * d, z = VILLAGE.c[1] + Math.sin(a) * d;
     if (Math.hypot(x, z) > RADIUS - 50 || H.some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < 10)) continue;
     const s = 4.8 + rand() * 0.9, yaw = rand() * Math.PI * 2, e = s / 2 + 0.3;
-    const ys = [[-e, -e], [e, -e], [e, e], [-e, e], [0, 0]].map(([u, v]) => height(x + u * Math.cos(yaw) - v * Math.sin(yaw), z + u * Math.sin(yaw) + v * Math.cos(yaw)));
-    H.push({ c: [x, z], s, yaw, y: Math.max(...ys) + 0.04, low: Math.min(...ys), seed: Math.floor(rand() * 1e6) });
+    const ys = [[-e, -e], [e, -e], [e, e], [-e, e], [0, 0]].map(([u, v]) => baseHeight(x + u * Math.cos(yaw) - v * Math.sin(yaw), z + u * Math.sin(yaw) + v * Math.cos(yaw)));
+    const y = ys.reduce((a, b) => a + b, 0) / ys.length + 0.05;
+    H.push({ c: [x, z], s, yaw, y, low: y - 0.1, seed: Math.floor(rand() * 1e6) });
   }
   return H;
 }

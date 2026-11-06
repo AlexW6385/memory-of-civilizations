@@ -199,7 +199,7 @@ const groovedWare = (r, h) => [[0.001, 0], [r * 0.82, 0], [r * 0.86, h * 0.1], [
 function house(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x, z] = el.c, s = el.s ?? 5, y = el.y ?? 0, a = el.yaw ?? 0, low = el.low ?? y - 0.4;
   const fr = { x, z, y, c: Math.cos(a), s: Math.sin(a) };
-  const hw = s / 2, th = 0.16, wh = 1.75, dw = 0.85, dh = 1.6, doorU = (rand() - 0.5) * 0.8;
+  const hw = s / 2, th = 0.16, wh = 1.75, dw = 0.85, dh = 1.5, doorU = (rand() - 0.5) * 0.8;
   const foot = low - y - 0.25;
   // the floor: chalk, beaten and plastered, its edge bedded into the ground
   bag.add('plaster_white', obox(fr, -hw - th + 0.04, hw + th - 0.04, foot, 0, -hw - th + 0.04, hw + th - 0.04));
@@ -210,8 +210,12 @@ function house(el, { bag, col }) {
   bag.add('lime_plaster', obox(fr, -hw - th, doorU - dw / 2, foot, wh, hw, hw + th));
   bag.add('lime_plaster', obox(fr, doorU + dw / 2, hw + th, foot, wh, hw, hw + th));
   bag.add('lime_plaster', obox(fr, doorU - dw / 2, doorU + dw / 2, dh + 0.12, wh, hw, hw + th));
-  bag.add('timber', obox(fr, doorU - dw / 2 - 0.1, doorU + dw / 2 + 0.1, dh, dh + 0.12, hw - 0.02, hw + th + 0.02));
-  for (const sg of [-1, 1]) bag.add('timber', obox(fr, doorU + sg * dw / 2 - (sg > 0 ? 0 : 0.09), doorU + sg * dw / 2 + (sg > 0 ? 0.09 : 0), 0, dh, hw - 0.02, hw + th + 0.02));
+  bag.add('timber', obox(fr, doorU - dw / 2 - 0.1, doorU + dw / 2 + 0.1, dh, dh + 0.12, hw - 0.02, hw + th + 0.035));
+  for (const sg of [-1, 1]) bag.add('timber', obox(fr, doorU + sg * dw / 2 - (sg > 0 ? 0 : 0.09), doorU + sg * dw / 2 + (sg > 0 ? 0.09 : 0), 0, dh, hw - 0.02, hw + th + 0.035));
+  // the foot of the walls darkened by splashed mud, a skin of daub a little proud of the face
+  for (const [u0, u1, v0, v1] of [[-hw - th - 0.02, hw + th + 0.02, -hw - th - 0.02, -hw - th], [-hw - th - 0.02, -hw - th, -hw - th, hw + th], [hw + th, hw + th + 0.02, -hw - th, hw + th]]) bag.add('plaster_damp', obox(fr, u0, u1, foot, 0.32, v0, v1));
+  bag.add('plaster_damp', obox(fr, -hw - th - 0.02, doorU - dw / 2, foot, 0.32, hw + th, hw + th + 0.02));
+  bag.add('plaster_damp', obox(fr, doorU + dw / 2, hw + th + 0.02, foot, 0.32, hw + th, hw + th + 0.02));
   // the wall-plate on the stakes, carrying the rafters
   const o = hw + th + 0.02, i0 = hw - 0.02;
   for (const [u0, u1, v0, v1] of [[-o, o, -o, -i0], [-o, o, i0, o], [-o, -i0, -i0, i0], [i0, o, -i0, i0]]) bag.add('timber', obox(fr, u0, u1, wh, wh + 0.1, v0, v1));
@@ -223,7 +227,7 @@ function house(el, { bag, col }) {
   col.segment(P2(-hw, hw + th / 2), P2(doorU - dw / 2, hw + th / 2), th, y + foot, y + wh);
   col.segment(P2(doorU + dw / 2, hw + th / 2), P2(hw, hw + th / 2), th, y + foot, y + wh);
   // the roof: thatch outside, the woven hazel frame seen from within, a thick eave
-  const e = hw + th + 0.75, ye = wh - 0.55, apex = wh + s * 0.95, ti = 0.32;
+  const e = hw + th + 0.75, ye = wh - 0.25, apex = wh + s * 0.95, ti = 0.32;
   const out = [], inn = [], rim = [];
   const C = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
   for (let k = 0; k < 4; k++) {
@@ -248,6 +252,8 @@ function house(el, { bag, col }) {
   bag.add('thatch', fromTriangles(orient(out, 'out')));
   bag.add('wicker', fromTriangles(orient(inn, 'in')));
   bag.add('thatch', fromTriangles(orient(rim, 'down')));
+  // the apex bound into a capping bundle
+  bag.add('wicker', lathe([[0.001, -0.5], [0.34, -0.42], [0.3, -0.05], [0.16, 0.12], [0.001, 0.16]], 10, null, ...W(fr, 0, apex - 0.1, 0)));
   // the hearth: a round kerb of chalk about a bed of ash, a few sticks; in some a fire
   bag.add('plaster_white', lathe([[0.62, 0], [0.62, 0.07], [0.5, 0.09], [0.45, 0.03], [0.001, 0.03]], 18, null, ...W(fr, 0, 0, -0.1)));
   bag.add('pottery_dark', lathe([[0.45, 0], [0.42, 0.035], [0.001, 0.045]], 14, null, ...W(fr, 0, 0.01, -0.1)));

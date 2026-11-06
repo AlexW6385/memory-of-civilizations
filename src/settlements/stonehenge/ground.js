@@ -2,12 +2,14 @@
 // chalk in the fresh ditch and banks and on the barrows, a few hawthorns and patches of woodland
 // far off; the wide, changeable sky.
 
-import { RADIUS, DITCH, VILLAGE, height, houses } from './layout.js';
+import { RADIUS, DITCH, VILLAGE, HEEL, height, houses, avenue } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0, grass: 0.85, rock: 0, soil: 0.15, fields: 0, dry: 0.25, warmth: 0.35, red: 0, road: 0, snow: 0, forest: 0 };
   const r = Math.hypot(x, z);
   if (Math.abs(r - DITCH.r) < 5 || ny < 0.85) { c.sand = 0.6; c.grass = 0.4; return c; }            // white chalk
+  const [s, t] = avenue(x, z);
+  if ((s > DITCH.r && s < RADIUS - 40 && Math.abs(Math.abs(t) - 9.6) < 1.1) || Math.abs(Math.hypot(s - HEEL.d, t) - HEEL.ditch) < 0.7) { c.sand = 0.5; c.grass = 0.5; return c; }   // chalk in the fresh ditches
   if (r < 20) { c.soil = 0.5; c.grass = 0.5; return c; }
   return c;
 }
