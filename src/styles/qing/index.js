@@ -14,7 +14,7 @@ import '../ming/index.js';
 import { rectRoof, pyramidRoof, column, beamTris, flipTris, latticeBay, mingHall, mingPavilion, mingWall, withPal } from '../ming/index.js';
 import { dapo, dapoHeight, meoricho, postLines } from '../joseon/dancheong.js';
 import { throneHall } from './throne.js';
-import { Parts, sumeru, post, limb as limbG, seated, crouching, vat, tripod, tortoise, crane, sundial, jialiang, balustradeCarved, spout, roofOrnaments, gateDoors } from './carving.js';
+import { Parts, ball, limb, T, sumeru, post, limb as limbG, seated, crouching, vat, tripod, tortoise, crane, sundial, jialiang, balustradeCarved, spout, roofOrnaments, gateDoors } from './carving.js';
 
 export const IMPERIAL = { wood: 'paint_caihua', column: 'lacquer_red', soffit: 'paint_caihua', base: 'marble', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'palace_wall', plinth: 'marble', roof: 'tile_yellow' };
 export const HOUSE = { wood: 'lacquer_red', column: 'lacquer_red', soffit: 'paint_caihua', base: 'brick_grey', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'brick_grey', plinth: 'brick_grey', roof: 'tile_grey' };
@@ -345,10 +345,51 @@ function siheyuan(el, ctx) {
     Hall({ rect: [x0 + 0.6, sz0, x0 + 0.6 + dE, sz1], y: 0.4, H: 3.1, front: 'e', four: false, roof: 'gable', plat: 0.4, bays: [3, 1], pal, eave: 0.8 }, ctx);
     Hall({ rect: [x1 - 0.6 - dE, sz0, x1 - 0.6, sz1], y: 0.4, H: 3.1, front: 'w', four: false, roof: 'gable', plat: 0.4, bays: [3, 1], pal, eave: 0.8 }, ctx);
   }
-  // the courtyard: brick paving with stone paths crossing it
+  // the courtyard: brick paving with stone paths crossing it, from the main house's steps to the
+  // opposite house and across between the side houses
   bag.add('brick_paving', box(x0 + 0.3, -0.2, z0 + 0.3, x1 - 0.3, 0.03, z1 - 0.3));
   col.floor([x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3], 0.03);
-  if (rand() < 0.5) bronze({ kind: 'vat', at: [(x0 + x1) / 2 + 3, (sz0 + sz1) / 2], y: 0, }, { bag, col });
+  const cx = (x0 + x1) / 2, pz0 = main[3] + 0.9, pz1 = z1 - dS - 0.9, pzm = (sz0 + sz1) / 2;
+  bag.add('bluestone', box(cx - 0.6, 0.0, pz0, cx + 0.6, 0.06, pz1));
+  if (sz1 - sz0 > 4) { bag.add('bluestone', box(x0 + 0.9 + dE, 0.0, pzm - 0.5, cx - 0.6, 0.06, pzm + 0.5)); bag.add('bluestone', box(cx + 0.6, 0.0, pzm - 0.5, x1 - 0.9 - dE, 0.06, pzm + 0.5)); }
+  // "awning, fish jar, pomegranate tree": the great jar of goldfish, two pomegranates in tubs before the
+  // main house, pots of flowers along its steps
+  const yard = new Parts();
+  if (rand() < 0.75) { fishJar(yard, rand() < 0.5 ? 'glaze_green' : 'pottery_dark'); const jz = Math.min(z0 + D * 0.67 + 0.9, z1 - dS - 1.4); yard.emit(bag, cx + 3.2, 0.03, jz); col.circle(cx + 3.2, jz, 0.62, 0, 0.9); }
+  const pom = new Parts(); pomegranate(pom, el.seed);
+  for (const k of [-1, 1]) if (rand() < 0.8) { pom.emit(bag, cx + k * 2.4, 0.03, pz0 + 0.8); col.circle(cx + k * 2.4, pz0 + 0.8, 0.4, 0, 0.7); }
+  const pots = new Parts(); flowerPots(pots);
+  pots.emit(bag, cx + (rand() < 0.5 ? -5.4 : 3.8), 0.03, pz0 + 0.3);
+}
+
+/** A goldfish jar (yugang): a wide glazed earthenware bowl on a low brick stand, its water and fish, a lotus leaf or two. */
+function fishJar(P, glaze) {
+  P.add('brick_grey', box(-0.5, 0, -0.5, 0.5, 0.18, 0.5));
+  P.add(glaze, lathe([[0.32, 0.18], [0.5, 0.3], [0.6, 0.55], [0.6, 0.72], [0.56, 0.84], [0.6, 0.86], [0.6, 0.9], [0.52, 0.9], [0.52, 0.84], [0.55, 0.72], [0.55, 0.56], [0.45, 0.32], [0.001, 0.26]], 18));
+  const w = lathe([[0.001, 0.78], [0.545, 0.78], [0.545, 0.8], [0.001, 0.8]], 18); P.add('water', w);
+  for (const [x, z, a] of [[0.15, 0.1, 0.4], [-0.2, -0.05, 2.1], [0.02, -0.22, 4]]) { const f = ball(0.06, 0.025, 0.025, 6, 4); f.rotateY(a); f.translate(x, 0.775, z); P.add('cloth_red', f); }
+  for (const [x, z, r] of [[-0.25, 0.2, 0.16], [0.28, -0.18, 0.12]]) P.add('lotus_leaf', lathe([[0.001, 0.805], [r, 0.81], [r, 0.82], [0.001, 0.818]], 10, null, x, 0, z));
+}
+/** A pomegranate tree in a wooden tub: the twisted trunk, the branches, a round crown of small leaves, red fruit (autumn). */
+function pomegranate(P, seed = 1) {
+  const r = rng(seed * 7 + 3);
+  P.add('timber', lathe([[0.3, 0], [0.36, 0.55], [0.38, 0.6], [0.001, 0.6]], 12));
+  for (const yy of [0.1, 0.45]) P.add('iron', lathe([[0.31 + yy * 0.1, yy], [0.31 + yy * 0.1 + 0.015, yy], [0.31 + yy * 0.1 + 0.015, yy + 0.04], [0.31 + yy * 0.1, yy + 0.04]], 12));
+  const trunk = [[0, 0.58, 0], [0.05, 1.0, 0.03], [-0.03, 1.4, -0.02]];
+  for (let i = 0; i < 2; i++) P.add('bark_dark', limb(trunk[i], trunk[i + 1], 0.07 - i * 0.015, 0.055 - i * 0.015, 6));
+  const crown = [];
+  for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 + r(), d = 0.35 + r() * 0.2, c = [Math.cos(a) * d, 1.75 + r() * 0.35, Math.sin(a) * d]; crown.push(c); P.add('bark_dark', limb(trunk[2], c, 0.04, 0.02, 5)); }
+  for (const c of [...crown, [0, 2.0, 0]]) P.add('lotus_leaf', T(ball(0.42, 0.34, 0.42, 9, 5), c[0], c[1], c[2]));
+  for (let k = 0; k < 9; k++) { const a = r() * Math.PI * 2, c = crown[k % 5]; P.add('glaze_red', T(ball(0.075, 0.075, 0.075, 6, 4), c[0] + Math.cos(a) * 0.43, c[1] - 0.12 + r() * 0.2, c[2] + Math.sin(a) * 0.43)); }
+}
+/** A row of flower pots: glazed and earthen pots of chrysanthemums (autumn) on the paving. */
+function flowerPots(P) {
+  for (let k = 0; k < 4; k++) {
+    const x = k * 0.55, m = ['glaze_blue', 'terracotta', 'glaze_white', 'terracotta'][k];
+    P.add(m, lathe([[0.1, 0], [0.15, 0.04], [0.19, 0.3], [0.2, 0.32], [0.001, 0.3]], 10, null, x, 0, 0));
+    P.add('lotus_leaf', T(ball(0.22, 0.16, 0.22, 8, 4), x, 0.42, 0));
+    for (let j = 0; j < 4; j++) P.add(k % 2 ? 'glaze_yellow' : 'paint_white', T(ball(0.06, 0.04, 0.06, 6, 4), x + Math.cos(j * 1.7) * 0.13, 0.54, Math.sin(j * 1.7) * 0.13));
+  }
 }
 
 /** hutong: a lane of beaten earth and brick { rect, y } (walkable). */
