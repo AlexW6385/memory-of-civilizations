@@ -30,22 +30,53 @@ mass(-172, -128, -30, -62, 58); mass(-128, -60, -24, -62, 70, { windows: 'se' })
 mass(-56, 26, -22, -62, 66, { mat: 'limewash_red', split: 50, pembe: 2.0, gilt: true, capMat: 'limewash_white' });
 mass(26, 44, -30, -84, 86, { mat: 'limewash_yellow', windows: 's', pembe: 1.6 });
 mass(44, 100, -24, -62, 86, { windows: 'se' });
+/** A battered mass's foot, the top of its wall and its batter, as mass() and the dzong make them; ins(y): its faces' set-in at height y. */
+const shape = (x0, x1, front, top, pe) => { const y0 = foot(x0, x1, front), yw = top - pe - (pe > 1 ? 0.4 : 0.3), b = (yw - y0) * 0.08; return { y0, yw, b, ins: (y) => b * (Math.min(y, yw) - y0) / (yw - y0) }; };
 // the Deyang Shar, the great eastern court before the White Palace (Richardson), raised on its
-// platform at 70 m: galleries along its south side, a long range on the north, the massive
-// three-storied building towering over its east end
-const DY = 70;
-mass(92, 150, -38, -90, DY, { windows: '', pembe: 0, batter: 0.4, mat: 'limewash_white', seed: 31 });
-mass(100, 160, -24, -42, DY + 8, { windows: 'sn', win: { from: 50 } });
+// platform at 70 m: galleries along its south side (from the White Palace's face to the east
+// building), a long range on the north, the massive three-storied building towering over its east
+// end. The way up: from the eastern zigzag stairs' head on the frontage roof, two steep ramps of
+// stone stairs (Lonely Planet: "two steep access ramps") — the first along the face of the second
+// tier, the second in two flights on its roof to a stair tower — and through the gate passage under
+// the south galleries into the court; from the court the triple stair up the White Palace's east
+// face, its doorway, the passage into the Great East Hall; from the hall the steep wooden stair up
+// to the roof, across the link to the Red Palace, up its stages to the roof of the chapels.
+const DY = 70, GAL = shape(92, 160, -24, DY + 8, 1.8), zGs = -24 - GAL.ins(DY), zGn = -42 + GAL.ins(DY), GATE = [106, 110], GH = 3.6;
+mass(92, 150, zGn + 0.4, -90, DY, { windows: '', pembe: 0, batter: 0.4, mat: 'limewash_white', seed: 31 });
+mass(92, 160, -24, -42, DY + 8, { windows: 'sn', win: { from: 50 }, voids: [{ r: [GATE[0], -44, GATE[1], -22], y0: DY, y1: DY + GH }] });
 mass(146, 166, -36, -96, DY + 16, { windows: 'ew', win: { from: DY + 2 }, banners: 'black' });
 mass(100, 148, -86, -104, DY + 8, { windows: 's', win: { from: DY + 1.5 } });
+for (const [z, n] of [[zGs, 's'], [zGn, 'n']]) E.push({ t: 'doorway', at: [(GATE[0] + GATE[1]) / 2, z], n, y: DY, w: GATE[1] - GATE[0], h: GH, k: GAL.b / (GAL.yw - GAL.y0) });
+// the first ramp: from a landing on the frontage roof east along the second tier's face to a landing on its roof
+E.push({ t: 'landing', rect: [78, 4.4, 92, 12.6], y: 22.3, base: 4, walls: [[92, 8.6, 92, 12.6], [78, 5.3, 78, 9.85], [84.2, 12.6, 92, 12.6]] });
+E.push({ t: 'flight', a: [92, 6.5], b: [134, 6.5], w: 3.3, y0: 22.3, y1: 44.3, base: 4 });
+E.push({ t: 'landing', rect: [134, -3.5, 142, 8.6], y: 44.3, base: 4, walls: [[134, 8.6, 142, 8.6], [142, -3.5, 142, 8.6], [134, 0.94, 134, 4.4], [136.9, -3.5, 142, -3.5]] });
+// the second ramp: two flights on the second tier's roof, turning at a landing, to the stair tower before the gate
+E.push({ t: 'flight', a: [104, -11.5], b: [130, -11.5], w: 3.3, y0: 44, y1: 57, base: 43.7 });
+E.push({ t: 'landing', rect: [130, -22.6, 136.6, -9.4], y: 57, base: 43.7, walls: [[136.6, -22.6, 136.6, -9.4], [130, -9.4, 136.6, -9.4], [130, -22.6, 136.6, -22.6], [130, -18.4, 130, -13.6]] });
+E.push({ t: 'flight', a: [130, -20.5], b: [112, -20.5], w: 3.3, y0: 57, y1: DY, base: 43.7 });
+E.push({ t: 'landing', rect: [104, zGs, 112, -18.4], y: DY, base: 18.7, walls: [[104, -18.4, 112, -18.4], [104, zGs, 104, -18.4], [112, zGs, 112, -22.6]] });
 // the top tier: the Red Palace rising in two stages with its doubled, gilt-studded frieze; the White Palace east, its quarters' wide windows in the middle
 mass(-160, -118, -64, -96, 72, { windows: 'sw', banners: 'black' }); mass(-118, -58, -60, -98, 86, { windows: 'sw', banners: 'black' });
 mass(-52, 22, -56, -98, 104, { mat: 'limewash_red', split: 52, pembe: 2.6, gilt: true, windows: 'sew', banners: 'gilt' });
 mass(-42, 12, -64, -94, 117, { mat: 'limewash_red', pembe: 2.8, gilt: true, windows: 'sew', banners: 'gilt', bannerS: 1.2 });
-mass(44, 98, -60, -98, 100, { windows: 'se', pembe: 2.0, banners: 'black', win: { bay: [0.38, 0.66] } });
+// the White Palace east, hollowed: the Great East Hall on its fourth floor (27.8 × 25.8 m), the
+// passage in to it from the triple stair's head, the stairwell up from it to the roof
+const WP = shape(44, 98, -60, 100, 2.0), YH = DY + 14, HALL = [62, -92.5, 90, -66.7], SW = [51.5, -91.2, 62, -88.6], DZ = [-75.2, -72.8];
+mass(44, 98, -60, -98, 100, { windows: 'se', pembe: 2.0, banners: 'black', win: { bay: [0.38, 0.66], avoid: [[92, -80, 100, -68, 60, 92]] },
+  voids: [{ r: HALL, y0: YH, y1: YH + 5.6 }, { r: [HALL[2], DZ[0], 101, DZ[1]], y0: YH, y1: YH + 3.2 }, { r: SW, y0: YH, y1: 101 }] });
+E.push({ t: 'potala_hall', rect: HALL, y: YH, h: 5.6, nx: 7, nz: 7, throne: 'w', keep: [SW, [HALL[2] - 1, DZ[0], HALL[2] + 1, DZ[1]]] });
+E.push({ t: 'skas', rect: SW, y0: YH, y1: 100, up: 'w', hatch: true });
+E.push({ t: 'doorway', at: [98 - WP.ins(YH), (DZ[0] + DZ[1]) / 2], n: 'e', y: YH, w: DZ[1] - DZ[0], h: 3.2, k: WP.b / (WP.yw - WP.y0) });
+E.push({ t: 'doorway', at: [HALL[2], (DZ[0] + DZ[1]) / 2], n: 'w', y: YH, w: DZ[1] - DZ[0], h: 3.2, k: 0 });
+// the link between the White and the Red Palace behind the yellow building, and the stairs on over the roofs
+mass(18, 51, -83, -97, 99.8, { batter: 2.0, windows: 'n', pembe: 1.3 });
+E.push({ t: 'flight', a: [30, -90.1], b: [16.4, -90.1], w: 3.3, y0: 99.8, y1: 104.25, base: 99.5 });
+E.push({ t: 'flight', a: [10.3, -63], b: [10.3, -87], w: 3.3, y0: 104, y1: 117.25, base: 103.7 });
+E.push({ t: 'landing', rect: [7.0, -91.4, 12.4, -87], y: 117.25, base: 103.7, walls: [[7, -91.4, 12.4, -91.4], [12.4, -91.4, 12.4, -87], [7, -91.4, 7, -89.1], [7, -87, 8.2, -87]] });
 
-// the triple stair from the Deyang Shar up the White Palace's east face, the middle flight the Dalai Lama's
-E.push({ t: 'triple_stair', xf: 114, xt: 98.5, zc: -74, y0: DY, y1: DY + 14, w: 2.2, land: 5.5 });
+// the triple stair from the Deyang Shar up the White Palace's east face, the middle flight the Dalai Lama's; its head at the doorway
+E.push({ t: 'triple_stair', xf: 114, xt: 98.5, zc: -74, y0: DY, y1: YH, w: 2.2, land: 98.5 - (98 - WP.ins(YH)), open: true });
 // the great appliqué banner (koku) of the Golden Procession hung down the frontage's blank middle
 {
   const y0 = foot(-60, 40, 30), yw = 24 - 1.3 - 0.4, b = (yw - y0) * 0.08;
@@ -79,7 +110,9 @@ E.push({ t: 'doring', at: [GX, 238], h: 7.5 });
 E.push({ t: 'stone_heap', at: [GX - 6, 237], r: 1.2, seed: 5 }); E.push({ t: 'sangkhang', at: [GX - 9.5, 234], rot: 0 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('shol', SHOL, 0, 'open'), room('below the palace', [sx0 + 2, 47, sx1 - 2, 62], 0, 'open'), room('red palace roof', [-36, -88, 6, -70], 117, 'open')];
+const rooms = [room('shol', SHOL, 0, 'open'), room('below the palace', [sx0 + 2, 47, sx1 - 2, 62], 0, 'open'),
+  room('deyang shar', [100, -80, 145, -45], DY, 'open'), room('great east hall', [HALL[0] + 2, HALL[1] + 2, HALL[2] - 2, HALL[3] - 2], YH, 'hall'),
+  room('white palace roof', [52, -86, 90, -68], 100, 'open'), room('red palace roof', [-36, -88, 6, -70], 117, 'open')];
 const walks = [[[-1, 228], [-1, 140], [-1, 58], [-103, 50], [-103, 44], [-137, 44], [-137, 40], [-103, 40], [-103, 36], [-137, 36], [-137, 32], [-103, 32], [-103, 18]]];
 walks[0].y0 = 0;
 

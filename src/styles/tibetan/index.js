@@ -7,7 +7,7 @@
 // flat-roofed whitewashed houses with prayer-flag poles.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
+import { box, frustum, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { rectRoof } from '../ming/index.js';
 import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
 import '../qing/index.js';
@@ -82,6 +82,7 @@ function windows(bag, rect, y0, y1, b, faces, rand, o = {}) {
       const put = (u, yy, sc, lights = 1) => {
         const wx = ax + ux * u, wz = az + uz * u;
         if (o.skip && f === 's' && o.skip.some(([xa, xb, yt]) => wx > xa - 2 && wx < xb + 2 && yy < yt)) return;
+        if (o.avoid && o.avoid.some(([xa, za, xb, zb, ya, yb]) => wx > xa && wx < xb && wz > za && wz < zb && yy + 1.6 * sc > ya && yy < yb)) return;
         const ins = b * (yy - y0) / H - 0.01;
         win(bag, [wx - nx * ins, wz - nz * ins], [ux, uz], [nx, nz], yy, sc, rand, { k, lights });
       };
@@ -133,6 +134,33 @@ function roundels(bag, [ax, az, bx, bz, nx, nz], y, d, r, step = 3.6) {
   }
 }
 /**
+ * One layer (ya to yb) of a hollowed block on the rect R, its outer faces set in by iA at the foot
+ * and iB at the top (the batter), cut into cells along the edges of the voids ({ r, y0, y1 }: the
+ * rooms, passages and stairwells in it); the cells in a void are left out. Only the faces that
+ * can be seen are made: outer faces, and faces onto a void beside, above or below. o.ci: the
+ * colliders' set-in on the outer sides (null col: none); o.top / o.bottom: always close the
+ * layer's top / foot. Returns the solid cells' rects at the top.
+ */
+function cells(bag, col, mat, R, ya, yb, iA, iB, voids, o = {}) {
+  const cut = (lo, hi, vals) => [...new Set([lo, ...vals.filter((v) => v > lo + iB + 0.05 && v < hi - iB - 0.05), hi])].sort((p, q) => p - q);
+  const xs = cut(R[0], R[2], voids.flatMap((v) => [v.r[0], v.r[2]])), zs = cut(R[1], R[3], voids.flatMap((v) => [v.r[1], v.r[3]]));
+  const inV = (x, z, y) => voids.some((v) => x > v.r[0] && x < v.r[2] && z > v.r[1] && z < v.r[3] && y > v.y0 && y < v.y1);
+  const nx = xs.length - 1, nz = zs.length - 1, ym = (ya + yb) / 2, d = iB - iA, out = [];
+  const solid = (i, j) => i >= 0 && j >= 0 && i < nx && j < nz && !inV((xs[i] + xs[i + 1]) / 2, (zs[j] + zs[j + 1]) / 2, ym);
+  for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+    if (!solid(i, j)) continue;
+    const cx = (xs[i] + xs[i + 1]) / 2, cz = (zs[j] + zs[j + 1]) / 2, w = i === 0, e = i === nx - 1, n = j === 0, s = j === nz - 1;
+    const rr = [xs[i] + (w ? iA : 0), zs[j] + (n ? iA : 0), xs[i + 1] - (e ? iA : 0), zs[j + 1] - (s ? iA : 0)];
+    bag.add(mat, frustum(rr, ya, yb, w ? d : 0, e ? d : 0, n ? d : 0, s ? d : 0, {
+      noXn: !w && solid(i - 1, j), noXp: !e && solid(i + 1, j), noZn: !n && solid(i, j - 1), noZp: !s && solid(i, j + 1),
+      noTop: !(o.top || inV(cx, cz, yb + 0.01)), noBottom: !(o.bottom || inV(cx, cz, ya - 0.01)),
+    }));
+    out.push([rr[0] + (w ? d : 0), rr[1] + (n ? d : 0), rr[2] - (e ? d : 0), rr[3] - (s ? d : 0)]);
+    if (col) { const c = o.ci ?? 0; col.rect([xs[i] + (w ? c : 0), zs[j] + (n ? c : 0), xs[i + 1] - (e ? c : 0), zs[j + 1] - (s ? c : 0)], ya, yb); }
+  }
+  return out;
+}
+/**
  * dzong: a battered block { rect, y0, y1, batter, mat, split + low (the wall below `split` in `low`:
  * the Red Palace on its white base), windows ('nesw' faces), win (options for windows()), pembe
  * (frieze depth; ≥ 2.2 doubles it), gilt (roundels on the frieze), banners ('gilt' | 'black' at the
@@ -143,28 +171,44 @@ function dzong(el, { bag, col }) {
   const rand = rng(el.seed || 1), rect = el.rect, [x0, z0, x1, z1] = rect, y0 = el.y0, y1 = el.y1, mat = el.mat || 'limewash_white';
   const pe = el.pembe ?? 1.8, cap = el.cap ?? (pe > 1 ? 0.4 : 0.3), yw = y1 - pe - cap, b = el.batter ?? (yw - y0) * 0.08;
   const r1 = [x0 + b, z0 + b, x1 - b, z1 - b];
-  if (el.split && el.split > y0 + 1 && el.split < yw - 1) {
+  const voids = el.voids || [], roofVoids = voids.filter((v) => v.y1 > yw);
+  if (voids.length) {
+    // hollowed: the block in layers split at the rooms' floors and ceilings, each layer in cells
+    // round the rooms (halls, passages, stairwells), the outer faces keeping the batter
+    const ins = (y) => b * (Math.min(y, yw) - y0) / (yw - y0);
+    const ys = [...new Set([y0, ...(el.split > y0 + 1 && el.split < yw - 1 ? [el.split] : []), ...voids.flatMap((v) => [v.y0, v.y1]).filter((y) => y > y0 + 0.05 && y < yw - 0.05), yw])].sort((p, q) => p - q);
+    for (let i = 0; i + 1 < ys.length; i++) cells(bag, col, el.split && ys[i + 1] <= el.split + 1e-6 ? (el.low || 'limewash_white') : mat, rect, ys[i], ys[i + 1], ins(ys[i]), ins(ys[i + 1]), voids, { bottom: i === 0, top: false, ci: b / 2 });
+    for (const v of voids) if (v.floor !== false && v.y0 > y0) { const q = ins(v.y0); col.floor([Math.max(v.r[0], x0 + q), Math.max(v.r[1], z0 + q), Math.min(v.r[2], x1 - q), Math.min(v.r[3], z1 - q)], v.y0); }
+  } else if (el.split && el.split > y0 + 1 && el.split < yw - 1) {
     const bs = b * (el.split - y0) / (yw - y0);
     bag.add(el.low || 'limewash_white', frustum(rect, y0, el.split, bs, bs, bs, bs));
     bag.add(mat, frustum([x0 + bs, z0 + bs, x1 - bs, z1 - bs], el.split, yw, b - bs, b - bs, b - bs, b - bs));
   } else bag.add(mat, frustum(rect, y0, yw, b, b, b, b));
   const grow = (r, m) => [r[0] - m, r[1] - m, r[2] + m, r[3] + m];
   const bx = (m, r, ya, yb) => bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3]));
+  // (with a stairwell through the roof: the ledge and the friezes as rings round the edge, the
+  // roof's fill and coping in cells round the opening)
+  const RB = roofVoids.length ? (m, r, ya, yb) => { const d = 0.8; for (const q of [[r[0], r[1], r[2], r[1] + d], [r[0], r[3] - d, r[2], r[3]], [r[0], r[1] + d, r[0] + d, r[3] - d], [r[2] - d, r[1] + d, r[2], r[3] - d]]) bx(m, q, ya, yb); } : bx;
+  if (roofVoids.length) cells(bag, col, 'limewash_white', r1, yw, y1 - cap, 0, 0, voids, { ci: 0 });
   if (pe > 0) {
     const po = pe > 1 ? 0.12 : 0.06, led = pe > 1 ? 0.2 : 0.1;
-    bx('limewash_white', grow(r1, led), yw - 0.14, yw + 0.06);
+    RB('limewash_white', grow(r1, led), yw - 0.14, yw + 0.06);
     if (pe >= 2.2) {
       const m = yw + 0.06 + (pe - 0.06) * 0.42;
-      bx('pembe', grow(r1, po), yw + 0.06, m - 0.12); bx('limewash_white', grow(r1, po + 0.07), m - 0.12, m + 0.12); bx('pembe', grow(r1, po), m + 0.12, y1 - cap);
+      RB('pembe', grow(r1, po), yw + 0.06, m - 0.12); RB('limewash_white', grow(r1, po + 0.07), m - 0.12, m + 0.12); RB('pembe', grow(r1, po), m + 0.12, y1 - cap);
       if (el.gilt) { const F = FACES(...r1), yc = (m + 0.12 + y1 - cap) / 2, rr = Math.min(0.42, (y1 - cap - m) * 0.3); for (const f of el.windows || 's') roundels(bag, F[f], yc, po + 0.025, rr); }
     } else {
-      bx('pembe', grow(r1, po), yw + 0.06, y1 - cap);
+      RB('pembe', grow(r1, po), yw + 0.06, y1 - cap);
       if (el.gilt) { const F = FACES(...r1), yc = (yw + y1 - cap) / 2 + 0.03, rr = Math.min(0.36, pe * 0.22); for (const f of el.windows || 's') roundels(bag, F[f], yc, po + 0.025, rr); }
     }
-    bx(el.capMat || 'limewash_white', grow(r1, led), y1 - cap, y1);
-  } else bx(el.capMat || mat, grow(r1, 0.12), yw, y1);
-  col.rect([x0 + b / 2, z0 + b / 2, x1 - b / 2, z1 - b / 2], y0, y1); col.floor(r1, y1);
-  if (el.windows) windows(bag, rect, y0, yw, b, el.windows, rand, { from: el.wy, ...(el.win || {}) });
+    if (roofVoids.length) for (const q of cells(bag, null, el.capMat || 'limewash_white', grow(r1, led), y1 - cap, y1, 0, 0, voids, { top: true })) col.floor(q, y1);
+    else bx(el.capMat || 'limewash_white', grow(r1, led), y1 - cap, y1);
+  } else if (roofVoids.length) { for (const q of cells(bag, null, el.capMat || mat, grow(r1, 0.12), yw, y1, 0, 0, voids, { top: true })) col.floor(q, y1); } else bx(el.capMat || mat, grow(r1, 0.12), yw, y1);
+  if (!voids.length) col.rect([x0 + b / 2, z0 + b / 2, x1 - b / 2, z1 - b / 2], y0, y1);
+  else if (!roofVoids.length) col.rect(r1, yw, y1);
+  if (!roofVoids.length) col.floor(r1, y1);
+  const avoid = [...(el.win?.avoid || []), ...voids.map((v) => [v.r[0] - 1.2, v.r[1] - 1.2, v.r[2] + 1.2, v.r[3] + 1.2, v.y0 - 1.5, v.y1 + 1.2])];
+  if (el.windows) windows(bag, rect, y0, yw, b, el.windows, rand, { from: el.wy, ...(el.win || {}), avoid });
   if (el.banners) for (const [x, z] of [[r1[0], r1[1]], [r1[2], r1[1]], [r1[0], r1[3]], [r1[2], r1[3]]]) gyaltsen(bag, x + Math.sign((r1[0] + r1[2]) / 2 - x) * 0.6, y1, z + Math.sign((r1[1] + r1[3]) / 2 - z) * 0.6, el.banners, el.bannerS ?? 1);
 }
 /**
@@ -398,10 +442,128 @@ function tripleStair(el, { bag, col }) {
   bag.add('pembe', box(xl, y1 + hp + 0.7, z0 + 0.1, xp + 0.62, y1 + hp + 1.5, z0 + W - 0.1));
   bag.add('limewash_white', box(xl, y1 + hp + 1.5, z0, xp + 0.75, y1 + hp + 1.75, z0 + W));
   for (const [za, zb] of [[z0 + 0.1, z0 + T + 0.1], [z0 + W - T - 0.1, z0 + W - 0.1]]) { bag.add('limewash_white', box(xl, y1, za, xp - 0.4, y1 + hp + 0.7, zb)); col.rect([xl, za, xp - 0.4, zb], y1, y1 + hp); }
+  if (el.open) return;                          // the doorway itself is the wall's (a passage into the palace: doorway)
   const xd = xl + 0.5;
   bag.add('opening', box(xl, y1, zc - 1.1, xd, y1 + 2.8, zc + 1.1));
   bag.add('cloth_black', box(xd, y1 + 0.2, zc - 1.3, xd + 0.06, y1 + 3.0, zc + 1.3));
   for (const [za, zb, ya, yb] of [[zc - 1.3, zc + 1.3, y1 + 2.82, y1 + 3.0], [zc - 1.3, zc - 1.18, y1 + 0.2, y1 + 2.82], [zc + 1.18, zc + 1.3, y1 + 0.2, y1 + 2.82], [zc - 0.4, zc + 0.4, y1 + 1.3, y1 + 1.7]]) bag.add('cloth_white', box(xd + 0.06, ya, za, xd + 0.1, yb, zb));
+}
+
+/** A prism over the band u0…u1 × v0…v1 of a straight run, its foot at yb, its top following y(u): five quads (no bottom), for fixOut. */
+function slopeBlock(t, P, u0, u1, v0, v1, yb, yt) {
+  const A = [P(u0, v0, yb), P(u1, v0, yb), P(u1, v1, yb), P(u0, v1, yb)], U = [P(u0, v0, yt(u0)), P(u1, v0, yt(u1)), P(u1, v1, yt(u1)), P(u0, v1, yt(u0))];
+  const q = (a, b, c, d) => t.push(...a, ...b, ...c, ...a, ...c, ...d);
+  q(U[0], U[1], U[2], U[3]); q(A[0], A[1], U[1], U[0]); q(A[3], U[3], U[2], A[2]); q(A[0], U[0], U[3], A[3]); q(A[1], A[2], U[2], U[1]);
+}
+/**
+ * flight: a straight stone stair climbing a face or a roof { a, b: [x, z] (the middle of its foot and
+ * of its head, on a line along x or z), w (the treads' width), y0, y1, base (the foot of its solid
+ * mass) }: steps of about 17 cm on a solid whitewashed mass between parapets a metre high with
+ * dark copings; both ends open. (The ramps up to the Deyang Shar — "two steep access ramps".)
+ */
+function flight(el, { bag, col }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, alongX = Math.abs(bx - ax) > Math.abs(bz - az), w = el.w ?? 3.3, T = 0.45, ph = 1.0, y0 = el.y0, y1 = el.y1;
+  const L = alongX ? Math.abs(bx - ax) : Math.abs(bz - az), sg = Math.sign(alongX ? bx - ax : bz - az);
+  const P = (u, v, y) => (alongX ? [ax + sg * u, y, az + v] : [ax + v, y, az + sg * u]);
+  const R = (u0, u1, v0, v1) => { const p = P(u0, v0, 0), q = P(u1, v1, 0); return [Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])]; };
+  const slope = (u) => y0 + (y1 - y0) * Math.max(0, Math.min(1, u / L)), hw = w / 2;
+  const t = []; slopeBlock(t, P, 0, L, -hw, hw, el.base, (u) => slope(u) - 0.3); bag.add('limewash_white', fromTriangles(fixOut(t)));
+  const ns = Math.max(2, Math.round((y1 - y0) / 0.17));
+  for (let i = 0; i < ns; i++) {
+    const u0 = L * i / ns, u1 = L * (i + 1) / ns, yy = y0 + (y1 - y0) * (i + 1) / ns, yp = y0 + (y1 - y0) * i / ns, r = R(u0, u1, -hw, hw);
+    bag.add('limewash_white', box(r[0], yp - 0.3, r[1], r[2], yy - 0.08, r[3])); bag.add('flagstone', box(r[0], yy - 0.08, r[1], r[2], yy, r[3]));
+  }
+  col.ramp(R(0, L, -hw, hw), y0, y1, alongX ? (sg > 0 ? 'e' : 'w') : (sg > 0 ? 's' : 'n'));
+  for (const s of [-1, 1]) {
+    const v0 = s < 0 ? -hw - T : hw, v1 = v0 + T, p = [], c = [];
+    slopeBlock(p, P, 0, L, v0, v1, el.base, (u) => slope(u) + ph - 0.02); bag.add('limewash_white', fromTriangles(fixOut(p)));
+    // the dark coping along the parapet's top
+    const e = 0.03, B = (u, y) => y, top = (u) => slope(u) + ph;
+    { const A = [P(0, v0 - e, top(0) - 0.1), P(L, v0 - e, top(L) - 0.1), P(L, v1 + e, top(L) - 0.1), P(0, v1 + e, top(0) - 0.1)], U = A.map(([x, y, z]) => [x, y + 0.1, z]);
+      const q = (a, b2, cc, d) => c.push(...a, ...b2, ...cc, ...a, ...cc, ...d); q(U[0], U[1], U[2], U[3]); q(A[0], A[1], U[1], U[0]); q(A[3], U[3], U[2], A[2]); q(A[0], U[0], U[3], A[3]); q(A[1], A[2], U[2], U[1]); B(0, 0);
+      bag.add('lacquer_black', fromTriangles(fixOut(c))); }
+    const pa = P(0, (v0 + v1) / 2, 0), pb = P(L, (v0 + v1) / 2, 0);
+    col.segment([pa[0], pa[2]], [pb[0], pb[2]], T, Math.min(y0, y1) - 0.3, Math.max(y0, y1) + ph);
+  }
+}
+/**
+ * landing: a whitewashed block with a flagstone top { rect, y, base, walls: [[ax, az, bx, bz]] (parapets
+ * along its edges, built inside them) }: the turns of the flights, the stair towers.
+ */
+function landing(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, T = 0.45, ph = 1.0, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  bag.add('limewash_white', box(x0, el.base, z0, x1, y - 0.1, z1)); bag.add('flagstone', box(x0, y - 0.1, z0, x1, y, z1));
+  col.rect(el.rect, el.base, y); col.floor(el.rect, y);
+  for (const [ax, az, bx, bz] of el.walls || []) {
+    const ax2 = Math.abs(bx - ax) > Math.abs(bz - az), [lo, hi] = ax2 ? [Math.min(ax, bx), Math.max(ax, bx)] : [Math.min(az, bz), Math.max(az, bz)];
+    const r = ax2 ? [lo, az < cz ? az : az - T, hi, az < cz ? az + T : az] : [ax < cx ? ax : ax - T, lo, ax < cx ? ax + T : ax, hi];
+    bag.add('limewash_white', box(r[0], y, r[1], r[2], y + ph - 0.02, r[3]));
+    bag.add('lacquer_black', box(r[0] - 0.03, y + ph - 0.1, r[1] - 0.03, r[2] + 0.03, y + ph, r[3] + 0.03));
+    col.rect(r, y - 0.3, y + ph);
+  }
+}
+/**
+ * doorway: the frame of a doorway through a battered wall { at: [x, z] (the middle of its sill on the
+ * face), n: 'n' | 'e' | 's' | 'w' (outward), y, w, h, k (the wall's set-back per metre of height) }:
+ * the black trapezoid surround about the opening, red jambs and lintel standing out of it, the
+ * cornice of a red board, painted beam ends and a dark cap, the pleated valance under it, and the
+ * black yak-hair curtain (Bell: "the doorway covered with yak hair curtains") rolled up under the lintel.
+ */
+function doorway(el, { bag }) {
+  const N = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[el.n], [nx, nz] = N, ux = -nz, uz = nx, [px, pz] = el.at, y = el.y, k = el.k ?? 0, w = el.w, h = el.h, hw = w / 2;
+  const P = (u, v, d) => [px + ux * u + nx * (d - k * v), y + v, pz + uz * u + nz * (d - k * v)];
+  const Q = (mat, u0, v0, u1, v1, d) => face(bag, mat, N, P(u0, v0, d), P(u1, v0, d), P(u1, v1, d), P(u0, v1, d));
+  // the surround, left, right and over the opening
+  face(bag, 'lacquer_black', N, P(-hw - 0.6, 0, 0.02), P(-hw, 0, 0.02), P(-hw, h, 0.02), P(-hw - 0.35, h, 0.02));
+  face(bag, 'lacquer_black', N, P(hw, 0, 0.02), P(hw + 0.6, 0, 0.02), P(hw + 0.35, h, 0.02), P(hw, h, 0.02));
+  face(bag, 'lacquer_black', N, P(-hw - 0.35, h, 0.02), P(hw + 0.35, h, 0.02), P(hw + 0.3, h + 0.35, 0.02), P(-hw - 0.3, h + 0.35, 0.02));
+  // the red frame: jambs and a lintel, boxes standing out of the face
+  const bxu = (mat, u0, u1, v0, v1, d0, d1) => { const a = P(u0, v0, d0), b2 = P(u1, v1, d1), lo = P(u0, v0, d0); const xs = [a[0], b2[0], P(u1, v0, d0)[0], P(u0, v1, d1)[0]], zs = [a[2], b2[2], P(u1, v0, d0)[2], P(u0, v1, d1)[2]]; bag.add(mat, box(Math.min(...xs), lo[1], Math.min(...zs), Math.max(...xs), b2[1], Math.max(...zs))); };
+  bxu('lacquer_red', -hw - 0.2, -hw, 0, h, -0.15, 0.1); bxu('lacquer_red', hw, hw + 0.2, 0, h, -0.15, 0.1); bxu('lacquer_red', -hw - 0.3, hw + 0.3, h, h + 0.24, -0.15, 0.12);
+  // the cornice and the valance
+  const vt = h + 0.32, W = hw + 0.55;
+  Q('limewash_red', -W - 0.04, vt, W + 0.04, vt + 0.12, 0.13);
+  Q('paint_dancheong', -W - 0.1, vt + 0.12, W + 0.1, vt + 0.27, 0.34);
+  face(bag, 'paint_dancheong', [0, 0, -1], P(-W - 0.1, vt + 0.12, 0.03), P(W + 0.1, vt + 0.12, 0.03), P(W + 0.1, vt + 0.12, 0.34), P(-W - 0.1, vt + 0.12, 0.34));
+  face(bag, 'lacquer_black', [nx, nz, 1], P(-W - 0.12, vt + 0.27, 0.36), P(W + 0.12, vt + 0.27, 0.36), P(W + 0.12, vt + 0.45, 0.03), P(-W - 0.12, vt + 0.45, 0.03));
+  Q('cloth_red', -W, vt - 0.08, W, vt, 0.26);
+  const NP = Math.max(4, Math.round(2 * W / 0.3)), v1 = vt - 0.08, v2 = v1 - 0.32;
+  for (let i = 0; i < NP; i++) { const u0 = -W + 2 * W * i / NP, u1 = -W + 2 * W * (i + 1) / NP, d0 = 0.2 + (i % 2) * 0.06, d1 = 0.2 + ((i + 1) % 2) * 0.06; face(bag, i % 3 ? 'cloth_white' : 'paint_blue', N, P(u0, v2, d0), P(u1, v2, d1), P(u1, v1, d1), P(u0, v1, d0)); }
+  // the curtain, rolled up under the lintel, a white border showing at its ends
+  const ca = P(-hw + 0.05, h - 0.22, -0.3), cb = P(hw - 0.05, h - 0.22, -0.3);
+  bag.add('cloth_black', rod(ca, cb, 0.17, 10));
+  for (const t of [0.04, 0.96]) { const c = [ca[0] + (cb[0] - ca[0]) * t, ca[1], ca[2] + (cb[2] - ca[2]) * t], c2 = [ca[0] + (cb[0] - ca[0]) * (t + 0.02), ca[1], ca[2] + (cb[2] - ca[2]) * (t + 0.02)]; bag.add('cloth_white', rod(c, c2, 0.175, 10)); }
+}
+/**
+ * skas: a steep wooden stair (Tibetan buildings are climbed inside by such stairs, near ladders)
+ * { rect (the flight's plan), y0, y1, up ('n' | 'e' | 's' | 'w': the way it rises), hatch: walls round
+ * the opening it comes up through on the roof (all but the side one steps off) }: two heavy
+ * stringers, plank treads, red handrails on posts.
+ */
+function skas(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y0 = el.y0, y1 = el.y1, up = el.up, alongX = up === 'e' || up === 'w', fwd = up === 'e' || up === 's' ? 1 : -1;
+  const L = alongX ? x1 - x0 : z1 - z0, W = alongX ? z1 - z0 : x1 - x0, ns = Math.max(3, Math.round((y1 - y0) / 0.24));
+  // u from the foot along the flight, v across from the rect's low edge
+  const P = (u, v, y) => alongX ? [fwd > 0 ? x0 + u : x1 - u, y, z0 + v] : [x0 + v, y, fwd > 0 ? z0 + u : z1 - u];
+  const at = (u) => y0 + (y1 - y0) * u / L;
+  for (const v of [0.05, W - 0.05]) bag.add('timber', rod(P(0, v, y0 - 0.15), P(L, v, y1 - 0.15), 0.1, 6));
+  for (let i = 0; i < ns; i++) {
+    const u = L * (i + 0.5) / ns, yy = y0 + (y1 - y0) * (i + 1) / ns, a = P(u - L / ns * 0.75, 0.12, yy - 0.05), b2 = P(u + L / ns * 0.25, W - 0.12, yy);
+    bag.add('wood_painted', box(Math.min(a[0], b2[0]), yy - 0.05, Math.min(a[2], b2[2]), Math.max(a[0], b2[0]), yy, Math.max(a[2], b2[2])));
+  }
+  for (const v of [0.08, W - 0.08]) {
+    bag.add('lacquer_red', rod(P(0, v, y0 + 0.95), P(L, v, y1 + 0.95), 0.035, 6));
+    for (const u of [0.15, L / 2, L - 0.15]) bag.add('lacquer_red', rod(P(u, v, at(u) - 0.1), P(u, v, at(u) + 0.95), 0.03, 5));
+  }
+  col.ramp(el.rect, y0, y1, up);
+  if (el.hatch) {
+    const T = 0.3, h = 0.95, sides = { n: [x0 - T, z0 - T, x1 + T, z0], s: [x0 - T, z1, x1 + T, z1 + T], w: [x0 - T, z0, x0, z1], e: [x1, z0, x1 + T, z1] }, off = up;
+    for (const [sd, r] of Object.entries(sides)) {
+      if (sd === off) continue;
+      bag.add('limewash_white', box(r[0], y1, r[1], r[2], y1 + h - 0.08, r[3])); bag.add('lacquer_black', box(r[0] - 0.02, y1 + h - 0.08, r[1] - 0.02, r[2] + 0.02, y1 + h, r[3] + 0.02));
+      col.rect(r, y1 - 0.3, y1 + h);
+    }
+  }
 }
 
 /**
@@ -457,8 +619,112 @@ function koku(el, { bag }) {
   });
 }
 
+/**
+ * A thangka hung on a wall: { at: [x, z] (the wall face), u: [ux, uz] (along the wall, to the right seen
+ * from the room), n: [nx, nz] (into the room), y (the foot of the painting), w, h, kind }: the
+ * brocade mount in indigo, the red and ochre "rainbow" borders round the painting, the brocade
+ * "door" below it, the painting — a deity seated on a lotus in a ring of light on a ground of
+ * green hills under a blue sky — the yellow silk veil rolled up at the top with its two red
+ * ribbons, the top stick and the bottom roller with its gilt knobs.
+ */
+function thangka(bag, el) {
+  const [px, pz] = el.at, [ux, uz] = el.u, [nx, nz] = el.n, y = el.y, w = el.w, h = el.h, hw = w / 2;
+  const P = (u, v, d) => [px + ux * u + nx * d, y + v, pz + uz * u + nz * d];
+  const Q = (mat, u0, v0, u1, v1, d) => face(bag, mat, [nx, nz], P(u0, v0, d), P(u1, v0, d), P(u1, v1, d), P(u0, v1, d));
+  const flat = (mat, shape, d) => {
+    const g = new ExtrudeGeometry(shape, { depth: 0.004, bevelEnabled: false, curveSegments: 8 }), A = g.attributes.position;
+    for (let i = 0; i < A.count; i++) { const q = P(A.getX(i), A.getY(i), d + A.getZ(i)); A.setXYZ(i, q[0], q[1], q[2]); }
+    g.computeVertexNormals(); bag.add(mat, g);
+  };
+  const ell = (cu, cv, ru, rv) => { const sh = new Shape(); sh.absellipse(cu, cv, ru, rv, 0, Math.PI * 2, false); return sh; };
+  const poly = (pts) => { const sh = new Shape(); sh.moveTo(...pts[0]); for (const q of pts.slice(1)) sh.lineTo(...q); sh.closePath(); return sh; };
+  Q('cloth_indigo', -hw - 0.24, -0.42, hw + 0.24, h + 0.62, 0.03);                         // the mount
+  Q('cloth_red', -hw * 0.62, -0.38, hw * 0.62, -0.02, 0.036);                              // the "door"
+  Q('cloth_ochre', -hw * 0.5, -0.3, hw * 0.5, -0.1, 0.04);
+  for (const [m, e] of [['cloth_red', 0.07], ['cloth_ochre', 0.035]]) {                   // the rainbow borders
+    Q(m, -hw - e, -e, hw + e, 0, 0.037 + e * 0.02); Q(m, -hw - e, h, hw + e, h + e, 0.037 + e * 0.02);
+    Q(m, -hw - e, 0, -hw, h, 0.037 + e * 0.02); Q(m, hw, 0, hw + e, h, 0.037 + e * 0.02);
+  }
+  Q('paint_blue', -hw, h * 0.32, hw, h, 0.04); Q('cloth_green', -hw, 0, hw, h * 0.32, 0.04);   // sky and hills
+  const kind = el.kind ?? 0, robe = ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_green'][kind % 4], fh = Math.min(w * 0.8, h * 0.62), cv = h * 0.2;
+  flat('cloth_ochre', ell(0, cv + fh * 0.6, fh * 0.48, fh * 0.6), 0.06);                // the aureole
+  flat(kind % 2 ? 'cloth_green' : 'cloth_red', ell(0, cv + fh * 0.88, fh * 0.2, fh * 0.2), 0.08);     // the halo
+  flat(robe, poly([[-fh * 0.42, cv + fh * 0.04], [fh * 0.42, cv + fh * 0.04], [fh * 0.36, cv + fh * 0.22], [fh * 0.2, cv + fh * 0.3], [fh * 0.2, cv + fh * 0.66], [fh * 0.1, cv + fh * 0.74], [-fh * 0.1, cv + fh * 0.74], [-fh * 0.2, cv + fh * 0.66], [-fh * 0.2, cv + fh * 0.3], [-fh * 0.36, cv + fh * 0.22]]), 0.1);
+  flat('paint_ochre', ell(0, cv + fh * 0.86, fh * 0.1, fh * 0.12), 0.12);                // the gilt face
+  for (let k = 0; k < 7; k++) { const u = -fh * 0.5 + fh * (k + 0.5) / 7; flat('cloth_white', poly([[u - fh * 0.08, cv + fh * 0.04], [u + fh * 0.08, cv + fh * 0.04], [u, cv - fh * 0.12]]), 0.1); }
+  for (const sg of [-1, 1]) flat(kind % 2 ? 'cloth_red' : 'cloth_white', ell(sg * hw * 0.68, h * 0.84, hw * 0.16, hw * 0.16), 0.06);   // two small figures in the sky
+  // the veil rolled at the top, its ribbons; the stick and the roller
+  const t0 = P(-hw - 0.2, h + 0.5, 0.17), t1 = P(hw + 0.2, h + 0.5, 0.17);
+  bag.add('cloth_ochre', rod(t0, t1, 0.07, 8));
+  for (const sg of [-0.3, 0.3]) Q('cloth_red', sg * w - 0.04, h * 0.25, sg * w + 0.04, h + 0.45, 0.17);
+  bag.add('timber', rod(P(-hw - 0.3, h + 0.62, 0.05), P(hw + 0.3, h + 0.62, 0.05), 0.03, 6));
+  const b0 = P(-hw - 0.32, -0.45, 0.06), b1 = P(hw + 0.32, -0.45, 0.06);
+  bag.add('lacquer_red', rod(b0, b1, 0.04, 8));
+  for (const q of [P(-hw - 0.38, -0.45, 0.06), P(hw + 0.38, -0.45, 0.06)]) bag.add('gilt_bronze', lathe([[0.001, -0.07], [0.06, -0.04], [0.065, 0.02], [0.03, 0.07], [0.001, 0.08]], 8, null, q[0], q[1], q[2]));
+}
+/**
+ * potala_hall: a great pillared hall inside the palace (the Great East Hall of the White Palace,
+ * 27.8 × 25.8 m, where the Dalai Lamas were enthroned) { rect, y, h, nx, nz (bays), door: the side
+ * of the passage it is entered by, throne: the side of the throne }: a polished floor; pillars of
+ * red lacquer on stone bases under painted capitals and long splayed brackets carrying the red
+ * beams, painted joists and boards over them; thangkas hung round the walls on their brocade
+ * mounts; the Dalai Lama's throne of stacked cushions on its lacquered dais with its gilt back and
+ * canopy; a table of butter lamps before it; the monks' long low seats in rows down the hall.
+ */
+function potalaHall(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, h = el.h, yc = y + h, nxb = el.nx ?? 7, nzb = el.nz ?? 7, W = x1 - x0, D = z1 - z0;
+  bag.add('lacquer_chestnut', box(x0, y, z0, x1, y + 0.03, z1));
+  const xs = [], zs = []; for (let i = 1; i < nxb; i++) xs.push(x0 + W * i / nxb); for (let j = 1; j < nzb; j++) zs.push(z0 + D * j / nzb);
+  const yb = yc - 0.95;                 // the beams' underside
+  for (const x of xs) for (const z of zs) {
+    bag.add('granite_grey', box(x - 0.36, y + 0.03, z - 0.36, x + 0.36, y + 0.16, z + 0.36));
+    bag.add('lacquer_red', lathe([[0.25, 0], [0.24, yb - 0.9 - y - 0.16], [0.26, yb - 0.9 - y - 0.12]], 12, null, x, y + 0.16, z));
+    for (const v of [0.35, 0.36 + (yb - y) * 0.45]) bag.add('cloth_ochre', lathe([[0.262, 0], [0.262, 0.22]], 12, null, x, y + v, z));   // brocade bands round the shaft
+    // the capital: a square block, the short bracket, the long splayed bracket along the beam
+    bag.add('paint_dancheong', box(x - 0.33, yb - 0.9, z - 0.33, x + 0.33, yb - 0.55, z + 0.33));
+    bag.add('lacquer_red', frustum([x - 0.45, z - 0.2, x + 0.45, z + 0.2], yb - 0.55, yb - 0.35, -0.2, -0.2, 0, 0));
+    bag.add('paint_dancheong', frustum([x - 0.65, z - 0.2, x + 0.65, z + 0.2], yb - 0.35, yb, -0.55, -0.55, 0, 0));
+    col.circle(x, z, 0.3, y, yb);
+  }
+  // the beams along x over the pillar rows, the joists across them, the boards; a painted band on the beams
+  for (const z of zs) { bag.add('lacquer_red', box(x0, yb, z - 0.22, x1, yb + 0.42, z + 0.22)); bag.add('paint_dancheong', box(x0, yb + 0.1, z - 0.235, x1, yb + 0.3, z + 0.235)); }
+  for (let x = x0 + 0.45; x < x1 - 0.2; x += 0.9) bag.add('paint_caihua', box(x - 0.07, yb + 0.42, z0, x + 0.07, yb + 0.58, z1));
+  bag.add('ceiling_coffer', box(x0, yb + 0.58, z0, x1, yc - 0.02, z1));
+  // thangkas along the walls, one in each bay (not at the passage or the stair)
+  const th = Math.min(2.4, yb - y - 1.9), tw = th * 0.66, skip = el.keep || [];
+  const walls = [
+    { a: [x0, z1], u: [1, 0], n: [0, -1], L: W, axis: 'x', c: z1, side: 's' }, { a: [x1, z0], u: [-1, 0], n: [0, 1], L: W, axis: 'x', c: z0, side: 'n' },
+    { a: [x0, z0], u: [0, 1], n: [1, 0], L: D, axis: 'z', c: x0, side: 'w' }, { a: [x1, z1], u: [0, -1], n: [-1, 0], L: D, axis: 'z', c: x1, side: 'e' },
+  ];
+  let k = 0;
+  for (const wl of walls) {
+    const nb = wl.axis === 'x' ? nxb : nzb;
+    for (let i = 0; i < nb; i++) {
+      const u = wl.L * (i + 0.5) / nb, px = wl.a[0] + wl.u[0] * u, pz = wl.a[1] + wl.u[1] * u;
+      if (wl.side === el.throne && Math.abs(i - (nb - 1) / 2) < 1) continue;
+      if (skip.some(([xa, za, xb, zb]) => px > xa - tw && px < xb + tw && pz > za - tw && pz < zb + tw)) continue;
+      thangka(bag, { at: [px, pz], u: wl.u, n: wl.n, y: y + 1.35, w: tw, h: th, kind: k++ });
+    }
+  }
+  // the throne against the middle of its wall, facing into the hall
+  const T = { w: [x0, (z0 + z1) / 2, 1, 0], e: [x1, (z0 + z1) / 2, -1, 0], n: [(x0 + x1) / 2, z0, 0, 1], s: [(x0 + x1) / 2, z1, 0, -1] }[el.throne || 'w'];
+  const [tx, tz, fx, fz] = T, L = (a, b2, c0, c1, ya, yb2, m) => { const p = [tx + fx * a + fz * c0, tz + fz * a + fx * c0], q = [tx + fx * b2 + fz * c1, tz + fz * b2 + fx * c1]; const r = [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; bag.add(m, box(r[0], ya, r[1], r[2], yb2, r[3])); return r; };
+  col.rect(L(0.05, 2.4, -1.5, 1.5, y, y + 0.9, 'lacquer_red'), y, y + 2.6);
+  L(0.02, 2.48, -1.58, 1.58, y + 0.9, y + 0.98, 'gilt_bronze');
+  L(0.2, 2.3, -1.3, 1.3, y + 0.98, y + 1.2, 'cloth_ochre'); L(0.3, 2.2, -1.2, 1.2, y + 1.2, y + 1.42, 'cloth_red'); L(0.4, 2.1, -1.1, 1.1, y + 1.42, y + 1.62, 'cloth_ochre');
+  L(0.05, 0.25, -1.4, 1.4, y + 0.98, y + 3.4, 'wood_painted'); L(0.25, 0.3, -1.2, 1.2, y + 1.62, y + 3.1, 'cloth_ochre'); L(0.04, 0.28, -1.5, 1.5, y + 3.4, y + 3.6, 'gilt_bronze');
+  L(0.05, 2.7, -1.75, 1.75, yb - 0.9, yb - 0.75, 'cloth_ochre');                                          // the canopy, its valance
+  for (let i = 0; i < 12; i++) { const c = -1.75 + 3.5 * i / 12; L(2.62, 2.7, c, c + 3.5 / 12, yb - 1.35, yb - 0.75, i % 2 ? 'cloth_red' : 'cloth_white'); }
+  // a table of butter lamps before it, and the long low seats of the monks in rows down the hall
+  const tr = L(3.0, 3.7, -1.2, 1.2, y, y + 0.75, 'wood_painted'); col.rect(tr, y, y + 0.75);
+  for (let i = 0; i < 9; i++) { const c = -1.0 + 2.0 * i / 8, a = 3.35, px = tx + fx * a + fz * c, pz = tz + fz * a + fx * c; bag.add('gilt_bronze', lathe([[0.04, 0], [0.025, 0.08], [0.07, 0.14], [0.06, 0.17], [0.001, 0.17]], 8, null, px, y + 0.75, pz)); bag.add('lamp_glass', lathe([[0.001, 0], [0.02, 0.03], [0.001, 0.09]], 5, null, px, y + 0.92, pz)); }
+  // (between the pillar rows, the middle aisle left clear)
+  const along = fx !== 0, span = along ? W : D, lines = (along ? zs : xs).map((v) => v - (along ? tz : tx)), mid = [];
+  for (let i = 0; i + 1 < lines.length; i++) if (lines[i] * lines[i + 1] > 0) mid.push((lines[i] + lines[i + 1]) / 2);
+  for (const c of mid) L(4.6, span - 2.5, c - 0.42, c + 0.42, y + 0.03, y + 0.2, 'cloth_red');
+}
 registerStyle('tibetan', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dzong, golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku },
+  elements: { ...STYLES.qing.elements, dzong, golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall },
   objects: {},
 });

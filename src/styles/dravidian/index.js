@@ -31,7 +31,8 @@ function gopuram(el, { bag, col }) {
   // the granite base: two piers either side of the passage, the lintel over it, a moulded plinth
   for (const [u0, u1] of [[-W / 2, -pw / 2], [pw / 2, W / 2]]) { const r = R(u0, -D / 2, u1, D / 2); bag.add(G, box(r[0], y, r[1], r[2], y + base, r[3])); col.rect(r, y, y + base); }
   { const r = R(-pw / 2, -D / 2, pw / 2, D / 2); bag.add(G, box(r[0], y + ph, r[1], r[2], y + base, r[3])); }
-  { const r = R(-W / 2 - 0.4, -D / 2 - 0.4, W / 2 + 0.4, D / 2 + 0.4); bag.add(G, box(r[0], y, r[1], r[2], y + 1.2, r[3])); }
+  // (the plinth stops at the passage's jambs: the way through is open at the pavement's level)
+  for (const [u0, u1] of [[-W / 2 - 0.4, -pw / 2], [pw / 2, W / 2 + 0.4]]) { const r = R(u0, -D / 2 - 0.4, u1, D / 2 + 0.4); bag.add(G, box(r[0], y, r[1], r[2], y + 1.2, r[3])); }
   { const r = R(-pw / 2, -D / 2, pw / 2, D / 2); bag.add('granite_tamil', box(r[0], y - 0.05, r[1], r[2], y + 0.02, r[3])); col.floor(r, y); }
   // the granite base's faces: pilasters, niches with their guardians, the moulded bands
   if (!el.simple) for (const s of [-1, 1]) {
