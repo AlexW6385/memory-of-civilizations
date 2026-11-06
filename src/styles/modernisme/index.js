@@ -3,8 +3,8 @@
 // balcony and four upper floors round an open court, the corners cut at 45° with glazed tribunes,
 // iron balconies and green louvred shutters, cornices and parapets over flat roof terraces; the
 // Sagrada Família as it stood about 1910 — the apse of 1891–1894 with its seven chapels, lancets,
-// gables and pinnacles, the Nativity façade's three portals with the bases of its four towers in
-// timber scaffolding, a derrick, the workshop and the stone yard, Gaudí's Schools of 1909 with
+// gables and pinnacles, the Nativity façade (nativity.js: its sculpted portals, the turtle columns,
+// the four towers rising in timber scaffolding), a derrick, the workshop and the stone yard, Gaudí's Schools of 1909 with
 // their waving brick walls and roof; Casa Milà's undulating stone front round its corner, with
 // twisted iron balconies and the chimneys on its roof; Casa Batlló's bone-like stone columns,
 // mosaic front set with ceramic discs, mask-like iron balconies and scaled dragon roof with the
@@ -14,6 +14,7 @@ import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, disc } from '../../core/geom.js';
 import { Matrix4, BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import '../qing/index.js';
+import { nativity } from './nativity.js';
 
 const S = 'limestone_yellow', P = 'stucco_cream', IRON = 'iron';
 const FACADES = [S, P, 'stucco_ochre', 'stucco_pale', P, 'stucco_rose'];
@@ -344,70 +345,6 @@ function apse(bag, col, A, y, R = 16, H = 19, run = 12) {
   bag.add(fl, lathe([[ri, 0], [ri, 2.4], [0.001, 2.4]], 28, null, A[0], y - 1.2, A[1]));
   bag.add(fl, box(A[0] - ri, y - 1.2, A[1], A[0] + ri, y + 1.2, A[1] + run - 0.02));
   col.floor([A[0] - ri, A[1] - ri, A[0] + ri, A[1] + run], y + 1.2);
-}
-/** The Nativity façade: its mass, the three portals, the bases of the four towers in their timber scaffolding. */
-function nativity(bag, col, fx, y, cz) {
-  bag.add(S, box(fx - 3, y - 1.2, cz - 26, fx + 8, y + 32, cz + 26)); col.rect([fx - 3, cz - 26, fx + 8, cz + 26], y - 1.2, y + 32);
-  bag.add(S, box(fx - 3.3, y + 31.4, cz - 26.3, fx + 8.3, y + 32.2, cz + 26.3));
-  // the three portals (Hope, Charity, Faith): tall parabolic arches, deep in stepped archivolts, a dark
-  // doorway at the back, a trumeau in the middle one; over each a steep gable fringed with crockets
-  const F = fx + 8, tri = [], dark = [], q = (A, B, C, D, arr = tri) => arr.push(...A, ...B, ...C, ...A, ...C, ...D);
-  const P3 = (xx, u, v, zc) => [xx, y + v, zc + u];
-  for (const [k, w, top] of [[-14, 7, 21], [0, 9, 24], [14, 7, 21]]) {
-    const zc = cz + k, spring = 6;
-    const arch = (hw, t) => { const u = -hw + 2 * hw * t; return [u, top - (top - spring) * (u / hw) ** 2]; };
-    const N = 20;
-    // the doorway's darkness, a parabola filled
-    for (let i = 0; i < N; i++) { const [u0, v0] = arch(w / 2, i / N), [u1, v1] = arch(w / 2, (i + 1) / N); q(P3(F + 0.03, u0, spring - 6, zc), P3(F + 0.03, u0, v0, zc), P3(F + 0.03, u1, v1, zc), P3(F + 0.03, u1, spring - 6, zc), dark); }
-    // the archivolts: three rings stepping out and forward
-    for (let r = 0; r < 3; r++) {
-      const hw = w / 2 + 0.55 + r * 0.7, d0 = F + 0.03 + (2 - r) * 0.45, d1 = d0 + 0.45, th = 0.55, tp = top + r * 0.9;
-      const ring = (t) => { const u = -hw + 2 * hw * t; return [u, Math.max(0, tp - (tp - spring) * (u / hw) ** 2)]; };
-      for (let i = 0; i < N; i++) {
-        const [u0, v0] = ring(i / N), [u1, v1] = ring((i + 1) / N);
-        const a0 = [u0, v0], a1 = [u1, v1];
-        const A0 = [u0 * (hw + th) / hw, v0 + th * 0.6], A1 = [u1 * (hw + th) / hw, v1 + th * 0.6];
-        q(P3(d1, a0[0], a0[1], zc), P3(d1, a1[0], a1[1], zc), P3(d1, A1[0], A1[1], zc), P3(d1, A0[0], A0[1], zc));
-        q(P3(d0, a0[0], a0[1], zc), P3(d1, a0[0], a0[1], zc), P3(d1, a1[0], a1[1], zc), P3(d0, a1[0], a1[1], zc));
-        q(P3(d0, A0[0], A0[1], zc), P3(d0, A1[0], A1[1], zc), P3(d1, A1[0], A1[1], zc), P3(d1, A0[0], A0[1], zc));
-      }
-    }
-    if (k === 0) bag.add(S, lathe([[0.55, 0], [0.45, 4.5], [0.7, 5], [0.7, 5.4]], 10, null, F + 0.6, y + 0.2, zc));
-    // the gable above, steep, its edges fringed with crockets
-    const g0 = top + 1.5, g1 = top + (k === 0 ? 14 : 10), gw = w / 2 + 2.6;
-    q(P3(F + 0.6, -gw, g0, zc), P3(F + 0.6, 0, g1, zc), P3(F + 0.6, 0, g1, zc), P3(F + 0.6, gw, g0, zc));
-    for (const xx of [F, F + 0.6]) tri.push(...P3(xx, -gw, g0, zc), ...P3(xx, gw, g0, zc), ...P3(xx, 0, g1, zc));
-    for (const sgn of [-1, 1]) {
-      q(P3(F, sgn * gw, g0, zc), P3(F + 0.6, sgn * gw, g0, zc), P3(F + 0.6, 0, g1, zc), P3(F, 0, g1, zc));
-      for (let i = 1; i < 8; i++) { const t = i / 8; bag.add(S, lathe([[0.32, 0], [0.18, 0.5], [0.001, 0.9]], 6, null, F + 0.3, y + g0 + (g1 - g0) * t + 0.1, zc + sgn * gw * (1 - t))); }
-    }
-    bag.add(S, lathe([[0.5, 0], [0.3, 1.2], [0.001, 2.2]], 8, null, F + 0.3, y + g1, zc));
-  }
-  const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
-  bag.add(S, fromTriangles(both(tri)));
-  bag.add('opening', fromTriangles(both(dark)));
-  // the towers' bases: hollow drums rising unevenly over the façade, each in a cage of scaffolding
-  for (const [dz, hs] of [[-20, 8], [-7, 13], [7, 11], [20, 6]]) {
-    const z = cz + dz, tx = fx + 2.5, y0 = y + 32.2;
-    bag.add(S, lathe([[4.2, 0], [4.05, hs], [3.3, hs], [3.45, 0.01]], 20, null, tx, y0, z)); col.circle(tx, z, 4.2, y0, y0 + hs);
-    bag.add(S, lathe([[3.45, 0.02], [3.45, 0.2], [0.001, 0.2]], 20, null, tx, y0, z));
-    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + 0.3, r = 4.12; bag.add('opening', box(tx + Math.cos(a) * r - 0.25, y0 + 1.5, z + Math.sin(a) * r - 0.25, tx + Math.cos(a) * r + 0.25, y0 + Math.min(hs - 1, 6), z + Math.sin(a) * r + 0.25)); }
-    scaffold(bag, [tx - 5.1, z - 5.4, tx + 4.9, z + 5.4], y0, y0 + hs + 3.5);
-  }
-}
-/** Timber scaffolding round a rect: standards at the corners and between, ledgers every 2 m, boards every 4 m, braces. */
-function scaffold(bag, [x0, z0, x1, z1], y0, y1) {
-  const W = 'timber', xs = [x0, (x0 + x1) / 2, x1], zs = [z0, (z0 + z1) / 2, z1];
-  for (const x of xs) for (const z of zs) if (x !== xs[1] || z !== zs[1]) bag.add(W, box(x - 0.09, y0, z - 0.09, x + 0.09, y1, z + 0.09));
-  for (let yy = y0 + 2; yy < y1 - 0.2; yy += 2) {
-    bag.add(W, box(x0 - 0.07, yy - 0.07, z0 - 0.2, x0 + 0.07, yy + 0.07, z1 + 0.2)); bag.add(W, box(x1 - 0.07, yy - 0.07, z0 - 0.2, x1 + 0.07, yy + 0.07, z1 + 0.2));
-    bag.add(W, box(x0 - 0.2, yy + 0.07, z0 - 0.07, x1 + 0.2, yy + 0.21, z0 + 0.07)); bag.add(W, box(x0 - 0.2, yy + 0.07, z1 - 0.07, x1 + 0.2, yy + 0.21, z1 + 0.07));
-    if (Math.round(yy - y0) % 4 === 0) {
-      bag.add('planks_grey', box(x0 - 0.9, yy + 0.21, z0 + 0.2, x0 - 0.1, yy + 0.26, z1 - 0.2)); bag.add('planks_grey', box(x1 + 0.1, yy + 0.21, z0 + 0.2, x1 + 0.9, yy + 0.26, z1 - 0.2));
-      for (const x of [x0 - 0.9, x1 + 0.1]) bag.add(W, box(x, yy - 0.07, z0 + 0.2, x + 0.8, yy + 0.07, z0 + 0.34));
-    }
-  }
-  for (let yy = y0; yy + 4 <= y1; yy += 4) { bag.add(W, rod([x0 - 0.1, yy, z0], [x0 - 0.1, yy + 4, zs[1]], 0.06, 4)); bag.add(W, rod([x1 + 0.1, yy, zs[1]], [x1 + 0.1, yy + 4, z1], 0.06, 4)); bag.add(W, rod([x0, yy, z1 + 0.1], [xs[1], yy + 4, z1 + 0.1], 0.06, 4)); bag.add(W, rod([xs[1], yy, z0 - 0.1], [x1, yy + 4, z0 - 0.1], 0.06, 4)); }
 }
 /** A guyed timber derrick: the mast, the boom raised toward the work, the guys, the winch. */
 function derrick(bag, x, y, z, H, tip) {
