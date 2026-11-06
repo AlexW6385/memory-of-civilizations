@@ -50,7 +50,7 @@ const GOD_SLEEVE = [[0.07, 0.585], [0.16, 0.615], [0.17, 0.645], [0.09, 0.625]];
 /**
  * Lay one of the scenes on a jamb's inner face: place(u, v, w) maps the face (u across the wall's
  * depth, v up from the floor, w out of the face) to the world; uOut / uIn: the face's outer and inner
- * ends; H: the height up to the lintel; kind: 'audience' | 'throne'.
+ * ends; H: the height up to the lintel; kind: 'audience' | 'throne' | 'king'.
  */
 export function jambScene(bag, kind, place, uOut, uIn, H) {
   const o = Math.sign(uOut - uIn), D = Math.abs(uOut - uIn), U = (s) => uOut - o * s;
@@ -102,7 +102,50 @@ export function jambScene(bag, kind, place, uOut, uIn, H) {
     // the crown prince behind the throne, his hand raised to it
     relief(bag, C, 'persian', place, U(s + 0.62 * k), v0, 1.68 * k, o, 0.05);
   };
-  if (kind === 'audience') {
+  if (kind === 'treasury') {
+    // the audience of the Treasury's porticoes, in one register: guards, the official bowing with his hand at his
+    // mouth, two incense burners, the king enthroned, the crown prince behind him, attendants and guards
+    const v = 0.12;
+    S(C, 0.06, v - 0.05, D - 0.06, v - 0.05, 0.05, 0.04);
+    for (const s of [0.3, 0.72]) { relief(bag, C, 'persian', place, U(s), v, 1.85, -o, 0.06); S(C, s + 0.14 * 1.85, v, s + 0.14 * 1.85, v + 2.05, 0.03, 0.075); }
+    const so = 1.45, ko = 1.9;
+    relief(bag, C, 'mede', place, U(so), v, ko, -o, 0.07);
+    S(C, so + 0.04 * ko, v + 0.75 * ko, so + 0.115 * ko, v + 0.88 * ko, 0.05, 0.085);
+    for (const s of [2.1, 2.45]) R(C, CENSER, 'censer', s, v, 0.07);
+    king(3.35, v, 1.32);
+    relief(bag, C, 'bearer', place, U(5.0), v, 1.75, o, 0.06);
+    for (const s of [5.45, 5.88]) { relief(bag, C, 'persian', place, U(s), v, 1.85, o, 0.06); S(C, s - 0.14 * 1.85, v, s - 0.14 * 1.85, v + 2.05, 0.03, 0.075); }
+    S(C, 0.06, Math.min(H - 0.1, v + 2.75), D - 0.06, Math.min(H - 0.1, v + 2.75), 0.06, 0.04);
+  } else if (kind === 'king') {
+    // the king walking out of his palace, his staff before him, the parasol held over him by the attendant
+    // behind, a second carrying the fly whisk and the towel (the Tachara's and the Hadish's main doorways)
+    const v = 0.15, kk = Math.min(2.2, H * 0.42), sk = 0.25 * kk + 0.12, sa = sk + 0.3 * kk + 0.2, ka = kk * 0.78;
+    S(C, 0.08, v - 0.04, D - 0.08, v - 0.04, 0.05, 0.05);
+    relief(bag, C, 'persian', place, U(sk), v, kk, o, 0.09);
+    S(GOLD, sk - 0.07 * kk, v + 0.935 * kk, sk + 0.1 * kk, v + 0.935 * kk, 0.03 * kk, 0.1);                       // the crown, gilded, crenellated
+    for (let i = 0; i < 4; i++) { const u = sk - 0.055 * kk + i * 0.045 * kk; S(GOLD, u, v + 0.95 * kk, u, v + 1.01 * kk, 0.022 * kk, 0.1); }
+    S(GOLD, sk + 0.09 * kk, v + 0.04 * kk, sk + 0.105 * kk, v + 0.34 * kk, 0.012 * kk, 0.1);                       // the robe's gilded edge
+    S(C, sk - 0.17 * kk, v, sk - 0.17 * kk, v + 0.98 * kk, 0.03 * kk, 0.11);                                         // the staff
+    S(C, sk - 0.15 * kk, v + 0.6 * kk, sk - 0.06 * kk, v + 0.56 * kk, 0.02 * kk, 0.11);
+    R(C, LOTUS.map(([x, y]) => [x * kk * 0.6, (y - 1.1) * kk * 0.6 + 0.62 * kk]), 'klotus' + kk, sk + 0.0, v, 0.11);
+    if (sa + 0.15 * ka < D - 0.05) {
+      relief(bag, C, 'bearer', place, U(sa), v, ka, o, 0.06);
+      // the parasol: its pole rising from his hands to the canopy over the king's head, the fringe hanging
+      const top = v + kk * 1.12, pr = Math.min(0.5, sk - 0.1);
+      S(C, sa - 0.08 * ka, v + 0.55 * ka, sk + 0.02, top + 0.02, 0.035, 0.08);
+      const DOME = [[-pr, 0], [pr, 0], [pr * 0.92, 0.08], [pr * 0.55, 0.2], [0, 0.26], [-pr * 0.55, 0.2], [-pr * 0.92, 0.08]];
+      R(C, DOME, 'parasol' + Math.round(pr * 100), sk, top, 0.08, 1, o);
+      for (let i = 0; i < 7; i++) { const u = sk - pr * 0.9 + i * (1.8 * pr) / 6; S(C, u, top - 0.12, u, top + 0.01, 0.03, 0.085); }
+    }
+    const sw = sa + 0.3 * ka + 0.15;
+    if (sw + 0.15 * ka < D - 0.05) {
+      relief(bag, C, 'mede', place, U(sw), v, ka * 0.98, o, 0.06);
+      // the fly whisk raised behind the king; the towel over his other arm
+      S(C, sw - 0.1 * ka, v + 0.62 * ka, sw - 0.32 * ka, v + 1.08 * ka, 0.025, 0.08);
+      R(C, [[0, 0], [0.06, 0.02], [0.12, 0.16], [0.02, 0.22], [-0.05, 0.12]].map(([x, y]) => [x * ka, y * ka]), 'whisk' + ka, sw - 0.32 * ka, v + 1.08 * ka, 0.085, 1, o);
+      R(C, [[-0.05, 0], [0.05, 0], [0.04, 0.22], [-0.04, 0.22]].map(([x, y]) => [x * ka, y * ka]), 'towel' + ka, sw + 0.1 * ka, v + 0.38 * ka, 0.075, 1, o);
+    }
+  } else if (kind === 'audience') {
     // the guards in five registers, Persians and Medes by turns, spears upright
     const reg = 0.66, n = Math.max(2, Math.floor((D - 0.3) / 0.62));
     for (let r = 0; r < 5; r++) {

@@ -120,8 +120,17 @@ function hall(el, { bag, col }) {
   const port = el.porticoes ?? '', pd = el.portDepth ?? (x1 - x0) / (nx + 1) * 2.2, th = el.walls ?? 5;
   const P = [x0 - (port.includes('w') ? pd : 0), z0 - (port.includes('n') ? pd : 0), x1 + (port.includes('e') ? pd : 0), z1 + (port.includes('s') ? pd : 0)];
   if (pl > 0) {
-    bag.add(S, box(P[0] - 3, el.y ?? 0, P[1] - 3, P[2] + 3, y, P[3] + 3)); col.rect([P[0] - 3, P[1] - 3, P[2] + 3, P[3] + 3], el.y ?? 0, y);
-    col.floor([P[0] - 3, P[1] - 3, P[2] + 3, P[3] + 3], y);
+    // the platform: 3 m (or `margin`) beyond the porticoes, and beyond the thick walls where there is none
+    const mg = (f) => Math.max(el.margin ?? 3, port.includes(f) || th <= 0 ? 0 : th + 0.5);
+    const ex = [P[0] - mg('w'), P[1] - mg('n'), P[2] + mg('e'), P[3] + mg('s')], y0 = el.y ?? 0;
+    bag.add(S, box(ex[0], y0, ex[1], ex[2], y, ex[3])); col.rect(ex, y0, y); col.floor(ex, y);
+    // the stairs up its faces: double flights with their reliefs (as the Apadana's), or a plain flight
+    for (const st of el.stairs || []) {
+      const f = st.face, line = { n: ex[1], s: ex[3], w: ex[0], e: ex[2] }[f], span = f === 'n' || f === 's' ? [ex[0], ex[2]] : [ex[1], ex[3]];
+      const c = st.c ?? (span[0] + span[1]) / 2;
+      if (st.kind === 'flight') flight(bag, col, f, line, c, st.W ?? 6, y0, pl);
+      else apadanaStair({ ...st, face: f, line, span, c, y: y0, h: pl }, { bag, col });
+    }
   }
   bag.add(S, box(P[0], y, P[1], P[2], y + 0.15, P[3])); col.floor(P, y + 0.15);
   // the columns of the hall
@@ -140,15 +149,44 @@ function hall(el, { bag, col }) {
   const doors = el.doors ?? 'nesw', dw0 = Math.min(5, (x1 - x0) * 0.12), dh = Math.min(h * 0.6, 12);
   let dw = dw0;
   const fd = 0.12, jw = 0.75;
+  // a wall broken by its door and its windows (`windows`: how many on each face); each window a frame of
+  // polished stone the depth of the wall (the Tachara's are single blocks, 2.65 m high), its sill raised
+  const wwin = el.windowW ?? 1.2, wh = el.windowH ?? 1.3, sill = el.sill ?? 0.65;
   const wallSeg = (r, door, face) => {
     dw = el.doorW?.[face] ?? dw0;
-    if (!door) { bag.add(W, box(r[0], y, r[1], r[2], y + h + 1.2, r[3])); col.rect(r, y, y + h + 1.2); return; }
-    const alongX = r[2] - r[0] > r[3] - r[1], m = alongX ? (r[0] + r[2]) / 2 : (r[1] + r[3]) / 2;
-    const A = alongX ? [r[0], r[1], m - dw / 2, r[3]] : [r[0], r[1], r[2], m - dw / 2], B = alongX ? [m + dw / 2, r[1], r[2], r[3]] : [r[0], m + dw / 2, r[2], r[3]];
-    for (const q of [A, B]) { bag.add(W, box(q[0], y, q[1], q[2], y + h + 1.2, q[3])); col.rect(q, y, y + h + 1.2); }
-    const L = alongX ? [m - dw / 2, r[1], m + dw / 2, r[3]] : [r[0], m - dw / 2, r[2], m + dw / 2];
-    bag.add(W, box(L[0], y + dh + 0.1, L[1], L[2], y + h + 1.2, L[3]));
-    doorFrame(bag, alongX, m, alongX ? r[1] : r[0], alongX ? r[3] : r[2], y, dw, dh, el.reliefs && !el.simple, face);
+    const alongX = r[2] - r[0] > r[3] - r[1], lo = alongX ? r[0] : r[1], hi = alongX ? r[2] : r[3], m = (lo + hi) / 2;
+    const Rr = (a0, a1) => (alongX ? [a0, r[1], a1, r[3]] : [r[0], a0, r[2], a1]);
+    const gaps = [];
+    if (door) gaps.push([m - dw / 2, m + dw / 2, 'door']);
+    const nw = el.windows?.[face] ?? 0;
+    if (nw) {
+      const e0 = lo + th + 1.6, e1 = hi - th - 1.6, d0 = m - dw / 2 - jw - 1.6, d1 = m + dw / 2 + jw + 1.6;
+      const parts = door ? [[e0, d0, Math.ceil(nw / 2)], [d1, e1, Math.floor(nw / 2)]] : [[e0, e1, nw]];
+      for (const [s0, s1, n] of parts) for (let i = 0; i < n && s1 - s0 > 2.8; i++) { const u = s0 + (i + 0.5) * (s1 - s0) / n; gaps.push([u - wwin / 2, u + wwin / 2, 'window']); }
+    }
+    gaps.sort((a, b) => a[0] - b[0]);
+    let a = lo;
+    const piece = (q) => { bag.add(W, box(q[0], y, q[1], q[2], y + h + 1.2, q[3])); col.rect(q, y, y + h + 1.2); };
+    for (const [g0, g1, kind] of gaps) {
+      if (g0 > a) piece(Rr(a, g0));
+      a = g1;
+      const L = Rr(g0, g1), gm = (g0 + g1) / 2;
+      if (kind === 'door') {
+        bag.add(W, box(L[0], y + dh + 0.1, L[1], L[2], y + h + 1.2, L[3]));
+        doorFrame(bag, alongX, gm, alongX ? r[1] : r[0], alongX ? r[3] : r[2], y, dw, dh, el.reliefs && !el.simple, face);
+      } else {
+        bag.add(W, box(L[0], y + sill + wh + 0.1, L[1], L[2], y + h + 1.2, L[3])); col.rect(L, y, y + h + 1.2);
+        const c0 = alongX ? r[1] : r[0], c1 = alongX ? r[3] : r[2];
+        doorFrame(bag, alongX, gm, c0, c1, y, wwin, sill + wh, false, face);
+        // the sill, set back a little from the frame's faces; on the Hadish the inner faces carry servants
+        bag.add(C, alongX ? box(g0, y, c0 - fd + 0.02, g1, y + sill, c1 + fd - 0.02) : box(c0 - fd + 0.02, y, g0, c1 + fd - 0.02, y + sill, g1));
+        if (el.windowReliefs) for (const [fx, sg] of [[g0 + 0.06, 1], [g1 - 0.06, -1]]) {
+          const place = (u, v, w) => (alongX ? [fx + sg * w, y + v, u] : [u, y + v, fx + sg * w]), out = face === 'n' || face === 'w' ? c0 - fd : c1 + fd, inn = out === c0 - fd ? c1 + fd : c0 - fd, o = Math.sign(out - inn);
+          relief(bag, C, 'bearer', place, (out + inn) / 2 + o * 0.12, sill + 0.05, Math.min(1.2, wh - 0.1), o, 0.04);
+        }
+      }
+    }
+    if (hi > a) piece(Rr(a, hi));
   };
   // the frame of polished stone round a door: two jambs the depth of the wall, the lintel, the
   // Egyptian cornice above it (a roll, the flaring gorge of upright leaves, a fillet); on the
@@ -179,7 +217,8 @@ function hall(el, { bag, col }) {
     for (const [fx, sg] of [[a0 + 0.06, 1], [a1 - 0.06, -1]]) {
       const place = (u, v, w) => (alongX ? [fx + sg * w, y + v, u] : [u, y + v, fx + sg * w]);
       // the north doorways: the audience; the south: the king on the throne the peoples carry
-      if (face === 'n' || face === 's') { const out = face === 'n' ? b0 : b1; jambScene(bag, face === 'n' ? 'audience' : 'throne', place, out, out === b0 ? b1 : b0, dh - 0.02); continue; }
+      const scene = el.scenes?.[face] ?? (el.scenes ? null : face === 'n' ? 'audience' : face === 's' ? 'throne' : null), out = face === 'n' || face === 'w' ? b0 : b1;
+      if (scene) { jambScene(bag, scene, place, out, out === b0 ? b1 : b0, dh - 0.02); continue; }
       const dir = sg, u0 = cu - dir * 0.235 * size;
       relief(bag, 'marble_dark', 'hero', place, u0, 0.35, size, dir, 0.08);
       relief(bag, 'marble_dark', 'rampant', place, u0, 0.35, size, dir, 0.07);
@@ -221,6 +260,89 @@ function hall(el, { bag, col }) {
 }
 
 /**
+ * treasury: the royal Treasury { rect, y, h (its columns' height), th (its walls) } (docs/settlements/persepolis.md §12): a
+ * great low block of thick plastered mudbrick walls, one door on the west; within, the north hall of a hundred
+ * columns, the hall of ninety-nine to the south-east, the court with its porticoes on the north and the east —
+ * at the middle of each the relief of the king's audience — and the long storerooms opening off its south side.
+ * The columns are of wood on stone bases, plastered and painted, their capitals plain blocks under the beams;
+ * cedar ceilings and flat earth roofs over all but the court.
+ */
+function treasury(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 7, th = el.th ?? 3, top = y + h + 1.2;
+  const wall = (r) => { bag.add(W, box(r[0], y, r[1], r[2], top, r[3])); col.rect(r, y, top); };
+  // a wall along x (or z) from a to b at c0…c1 across, broken by doorways [centre, width]
+  const run = (alongX, a, b, c0, c1, doors = []) => {
+    let p = a;
+    for (const [m, w] of [...doors].sort((q, r) => q[0] - r[0])) {
+      if (m - w / 2 > p) wall(alongX ? [p, c0, m - w / 2, c1] : [c0, p, c1, m - w / 2]);
+      const L = alongX ? [m - w / 2, c0, m + w / 2, c1] : [c0, m - w / 2, c1, m + w / 2], dh = Math.min(4.2, h - 1.2);
+      bag.add(W, box(L[0], y + dh + 0.1, L[1], L[2], top, L[3]));
+      // a plain stone frame: jambs and lintel
+      for (const s of [-1, 1]) { const u = m + s * (w / 2 + 0.2); bag.add(C, alongX ? box(u - 0.26, y, c0 - 0.06, u + 0.26, y + dh, c1 + 0.06) : box(c0 - 0.06, y, u - 0.26, c1 + 0.06, y + dh, u + 0.26)); }
+      bag.add(C, alongX ? box(m - w / 2 - 0.46, y + dh, c0 - 0.06, m + w / 2 + 0.46, y + dh + 0.45, c1 + 0.06) : box(c0 - 0.06, y + dh, m - w / 2 - 0.46, c1 + 0.06, y + dh + 0.45, m + w / 2 + 0.46));
+      p = m + w / 2;
+    }
+    if (b > p) wall(alongX ? [p, c0, b, c1] : [c0, p, c1, b]);
+  };
+  // a wooden column on its stone base: the square plinth and the torus, the plastered shaft painted, a block under the beams
+  const post = (x, z, r = 0.32) => {
+    bag.add(C, box(x - r * 2.1, y, z - r * 2.1, x + r * 2.1, y + 0.32, z + r * 2.1));
+    bag.add(C, lathe([[r * 1.7, 0], [r * 1.75, 0.1], [r * 1.55, 0.26], [r * 1.12, 0.32]], 16, null, x, y + 0.32, z));
+    bag.add('plaster_persian', lathe([[r * 1.08, 0], [r * 1.02, 0.25], [r, 0.3]], 12, null, x, y + 0.64, z));
+    bag.add('stucco_red', lathe([[r, 0], [r * 0.92, h - 1.5]], 12, null, x, y + 0.94, z));
+    bag.add('plaster_persian', lathe([[r * 0.92, 0], [r * 1.0, 0.1], [r * 1.0, 0.3]], 12, null, x, y + h - 0.56, z));
+    bag.add('cedar', box(x - r * 1.5, y + h - 0.26, z - r * 1.2, x + r * 1.5, y + h, z + r * 1.2));
+    col.circle(x, z, r * 1.2, y, y + h);
+  };
+  const roof = (r) => {
+    bag.add('cedar', box(r[0], y + h, r[1], r[2], y + h + 0.5, r[3]));
+    bag.add(W, box(r[0], y + h + 0.5, r[1], r[2], top, r[3])); col.floor(r, top);
+  };
+  const hallCols = (r, nx, nz) => {
+    const sx = (r[2] - r[0]) / nx, sz = (r[3] - r[1]) / nz;
+    for (let i = 0; i < nx; i++) {
+      const x = r[0] + (i + 0.5) * sx;
+      for (let k = 0; k < nz; k++) post(x, r[1] + (k + 0.5) * sz);
+      bag.add('cedar', box(x - 0.24, y + h - 0.6, r[1], x + 0.24, y + h, r[3]));                  // the beam along each row
+    }
+    roof(r);
+  };
+  bag.add('flagstone', box(x0, y, z0, x1, y + 0.06, z1)); col.floor([x0, z0, x1, z1], y + 0.06);
+  // the plan, from the north: the hall of a hundred columns; the court, its storerooms south of it; the hall of ninety-nine
+  const zN = z0 + th + (z1 - z0) * 0.34, xC = x0 + th + (x1 - x0 - 2 * th) * 0.54, zC = zN + th + (z1 - zN - th) * 0.42;
+  const N = [x0 + th, z0 + th, x1 - th, zN], H99 = [xC + th, zN + th, x1 - th, z1 - th], CT = [x0 + th, zN + th, xC, zC], ST = [x0 + th, zC + th, xC, z1 - th];
+  // the outer walls: the door on the west into the north hall
+  run(true, x0, x1, z0, z0 + th); run(true, x0, x1, z1 - th, z1);
+  run(false, z0, z1, x0, x0 + th, [[(N[1] + N[3]) / 2, 3.2]]); run(false, z0, z1, x1 - th, x1);
+  // the inner walls: the north hall to the court and to the hall of 99; the court to the hall of 99; the court to the storerooms
+  run(true, x0 + th, x1 - th, zN, zN + th, [[(CT[0] + CT[2]) / 2 - 11, 3], [(H99[0] + H99[2]) / 2, 3]]);
+  run(false, zN + th, z1 - th, xC, xC + th, [[(CT[1] + CT[3]) / 2 + 9, 3]]);
+  const nS = Math.max(2, Math.floor((ST[2] - ST[0]) / 6.8)), ws = (ST[2] - ST[0]) / nS;
+  run(true, ST[0], ST[2], zC, zC + th, Array.from({ length: nS }, (_, i) => [ST[0] + (i + 0.5) * ws, 1.6]));
+  for (let i = 1; i < nS; i++) { const x = ST[0] + i * ws; wall([x - 0.5, ST[1], x + 0.5, ST[3]]); }
+  roof(ST);
+  hallCols(N, 10, 10);
+  hallCols(H99, 9, 11);
+  // the court: porticoes on its north and east sides, one row of columns each
+  const pd = 5.5, PN = [CT[0], CT[1], CT[2], CT[1] + pd], PE = [CT[2] - pd, CT[1] + pd, CT[2], CT[3]];
+  for (let i = 0; i < 6; i++) post(CT[0] + (i + 0.5) * (CT[2] - CT[0] - pd) / 6, PN[3]);
+  post(CT[2] - pd, PN[3]);
+  for (let k = 1; k < 6; k++) post(PE[0], PN[3] + k * (CT[3] - PN[3]) / 6);
+  bag.add('cedar', box(CT[0], y + h - 0.6, PN[3] - 0.24, CT[2] - pd + 0.24, y + h, PN[3] + 0.24));
+  bag.add('cedar', box(PE[0] - 0.24, y + h - 0.6, PN[3] - 0.24, PE[0] + 0.24, y + h, CT[3]));
+  roof([CT[0], CT[1], CT[2], PN[3] + 0.6]); roof([PE[0] - 0.6, PN[3] + 0.6, CT[2], CT[3]]);
+  // the reliefs of the audience at the middle of the two porticoes' back walls, on panels of the dark stone
+  for (const [cx, cz, ax] of [[(CT[0] + CT[2] - pd) / 2, CT[1], true], [CT[2], (PN[3] + CT[3]) / 2, false]]) {
+    const L = 6.2, Hp = 3.1;
+    if (ax) { bag.add(C, box(cx - L / 2 - 0.15, y, cz, cx + L / 2 + 0.15, y + Hp + 0.1, cz + 0.12)); }
+    else bag.add(C, box(cx - 0.12, y, cz - L / 2 - 0.15, cx, y + Hp + 0.1, cz + L / 2 + 0.15));
+    const place = ax ? (u, v, w) => [u, y + v, cz + 0.12 + w] : (u, v, w) => [cx - 0.12 - w, y + v, u];
+    const c = ax ? cx : cz;
+    jambScene(bag, 'treasury', place, c + (ax ? -L / 2 : L / 2), c + (ax ? L / 2 : -L / 2), Hp);
+  }
+}
+
+/**
  * apadana_stair: a stairway up the face of the Apadana's plinth { face ('n' | 'e'), line (the face's
  * x or z), span [a0, a1] (the face between the towers), c (the stair's centre along it), W (its
  * width), D (its depth out from the face), y (the terrace), h (the plinth), wings ('nobles' |
@@ -234,7 +356,8 @@ function hall(el, { bag, col }) {
  */
 function apadanaStair(el, { bag, col }) {
   const { face, line, c, y, h } = el, [s0, s1] = el.span, W = el.W ?? 32, D = el.D ?? 7.5, Lf = el.flight ?? 10, pt = 0.8, ph = 1.0;
-  const M = face === 'n' ? (a, o) => [a, line - o] : (a, o) => [line + o, a];
+  const M = face === 'n' ? (a, o) => [a, line - o] : face === 's' ? (a, o) => [a, line + o] : face === 'w' ? (a, o) => [line - o, a] : (a, o) => [line + o, a];
+  const ax = face === 'n' || face === 's', climber = el.climbers ?? 'persian';
   const R = (a0, a1, o0, o1) => { const p = M(a0, o0), q = M(a1, o1); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
   const Box = (mat, a0, a1, o0, o1, y0, y1) => { const r = R(a0, a1, o0, o1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); return r; };
   // a prism with the convex outline [[a, y], …] across o0…o1
@@ -259,7 +382,7 @@ function apadanaStair(el, { bag, col }) {
       const a = aOut + up * k * tread;
       Box(S, Math.min(a, aIn), Math.max(a, aIn), 0, D - pt, y - 0.2, y + (k + 1) * h / steps);
     }
-    const fr = R(aOut, aIn, 0, D - pt); col.ramp(fr, y, y + h, face === 'n' ? (up > 0 ? 'e' : 'w') : (up > 0 ? 's' : 'n'));
+    const fr = R(aOut, aIn, 0, D - pt); col.ramp(fr, y, y + h, ax ? (up > 0 ? 'e' : 'w') : (up > 0 ? 's' : 'n'));
     prismAY(S, [[aOut, y - 0.2], [aIn, y - 0.2], [aIn, y + h + ph], [aOut, y + ph]], D - pt, D);
     for (let k = 0; k < 8; k++) { const a = aOut + up * (k + 0.5) * Lf / 8; col.segment(M(a - Lf / 16, D - pt / 2), M(a + Lf / 16, D - pt / 2), pt, y, y + ph + h * (k + 1) / 8); }
     // stepped merlons along the slope, each set on the parapet at its lower edge
@@ -272,8 +395,8 @@ function apadanaStair(el, { bag, col }) {
     strip(bag, S, front, aOut, top(aOut) - 0.95, aIn, top(aIn) - 0.95, 0.07, 0.05);
     for (let k = 0; k < 6; k++) {
       const a = aOut + up * (k + 0.8) * Lf / 7;
-      relief(bag, C, 'persian', front, a, top(a) - 0.88, 0.7, up, 0.05);
-      strip(bag, C, front, a + up * 0.115 * 0.7, top(a) - 0.88, a + up * 0.115 * 0.7, top(a) - 0.88 + 0.75, 0.018, 0.065);
+      relief(bag, C, climber, front, a, top(a) - 0.88, 0.7, up, 0.05);
+      if (climber === 'persian') strip(bag, C, front, a + up * 0.115 * 0.7, top(a) - 0.88, a + up * 0.115 * 0.7, top(a) - 0.88 + 0.75, 0.018, 0.065);
     }
     const size = 1.45, u0 = aIn - up * (0.5 * size + 0.35);
     relief(bag, C, 'bull', front, u0, 0.12, size, up, 0.07);
@@ -281,11 +404,20 @@ function apadanaStair(el, { bag, col }) {
   }
   // the central panel: rosette borders, the winged disc between sphinxes, the guards below
   for (let a = L0 + 0.25; a < L1 - 0.1; a += 0.32) { rosette(bag, S, front, a, h - 0.13, 0.1); rosette(bag, S, front, a, 0.1, 0.07); }
-  relief(bag, C, 'disc', front, c, 1.4, 1.35, 1, 0.07);
+  // (or, on the palaces' stairs, the trilingual inscription between guards: Old Persian, Elamite, Babylonian)
+  const insc = el.centre === 'inscription', iw = Math.min(4.4, (L1 - L0) * 0.5);
+  if (insc) {
+    Box(C, c - iw / 2, c + iw / 2, D, D + 0.03, y + 0.3, y + h - 0.3);
+    for (let k = 0; k < 3; k++) for (let r = 0; r * 0.16 < h - 0.85; r++) {
+      const u0 = c - iw / 2 + 0.12 + k * (iw - 0.24) / 3 + 0.06, u1 = u0 + (iw - 0.24) / 3 - 0.12 - ((r * 7 + k * 3) % 5) * 0.05;
+      Box(C, u0, u1, D + 0.03, D + 0.045, y + 0.45 + r * 0.16, y + 0.5 + r * 0.16);
+    }
+  } else relief(bag, C, 'disc', front, c, 1.4, 1.35, 1, 0.07);
   for (const sg of [-1, 1]) {
-    relief(bag, C, 'sphinx', front, c + sg * 2.7, 1.48, 0.85, -sg, 0.07);
-    for (let k = 0; k < 4; k++) {
-      const a = c + sg * (1.4 + k * 0.95);
+    if (!insc) relief(bag, C, 'sphinx', front, c + sg * 2.7, 1.48, 0.85, -sg, 0.07);
+    const ng = insc ? Math.max(0, Math.min(4, Math.floor(((L1 - L0) / 2 - iw / 2 - 0.35) / 0.8))) : 4;
+    for (let k = 0; k < ng; k++) {
+      const a = insc ? c + sg * (iw / 2 + 0.45 + k * 0.8) : c + sg * (1.4 + k * 0.95);
       relief(bag, C, 'persian', front, a, 0.2, 1.1, -sg, 0.07);
       strip(bag, C, front, a - sg * 0.13 * 1.1, 0.2, a - sg * 0.13 * 1.1, 0.2 + 1.2, 0.025, 0.085);
     }
@@ -294,13 +426,20 @@ function apadanaStair(el, { bag, col }) {
   const reg = [0.2, 0.93, 1.66], rh = 0.66;
   for (const [w0, w1, kind] of [[s0, c - W / 2, el.wings?.[0] ?? 'nobles'], [c + W / 2, s1, el.wings?.[1] ?? 'nobles']]) {
     const toward = w1 <= c ? 1 : -1;
+    if (w1 - w0 < 1.5) continue;
     for (let a = w0 + 0.2; a < w1 - 0.1; a += 0.32) { rosette(bag, S, wall, a, h - 0.12, 0.1); rosette(bag, S, wall, a, 0.09, 0.07); }
     for (const v of [0.88, 1.61]) strip(bag, S, wall, w0 + 0.1, v, w1 - 0.1, v, 0.06, 0.05);
     reg.forEach((v, ri) => {
       let a = toward > 0 ? w1 - 0.6 : w0 + 0.6, i = 0;
       const end = (q) => (toward > 0 ? q > w0 + 0.5 : q < w1 - 0.5);
       while (end(a)) {
-        if (kind === 'tribute') {
+        if (kind === 'servants') {
+          // the palaces' servants carrying up food in covered dishes, a kid or a wineskin; a cypress between groups
+          const k = i % 7;
+          if (k === 6) { relief(bag, C, 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.5; }
+          else if (k === 3) { relief(bag, C, 'ram', wall, a - toward * 0.1, v, rh * 0.8, toward, 0.05); a -= toward * 0.62; }
+          else { relief(bag, C, k % 2 ? 'mede' : 'bearer', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.5; }
+        } else if (kind === 'tribute') {
           // a delegation: an usher, three bearers and their animal, then a cypress
           const k = i % 6;
           if (k === 5) { relief(bag, C, 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.55; }
@@ -315,18 +454,26 @@ function apadanaStair(el, { bag, col }) {
       }
     });
     // the wing's parapet of stepped merlons along the plinth's edge
-    merlonsAlong(bag, M, w0 + 0.3, w1 - 0.3, 0.3, y + h);
+    merlonsAlong(bag, M, w0 + 0.3, w1 - 0.3, -0.35, y + h);
   }
 }
 /** One stepped merlon at (a, o) in a stair's frame, its base at yb. */
 function merlon(bag, M, a, o, yb, hgt, w, th, face) {
   for (let k = 0; k < 3; k++) {
-    const f = 1 - k / 3, [x, z] = M(a, o), ex = face === 'n' ? w / 2 * f : th / 2, ez = face === 'n' ? th / 2 : w / 2 * f;
+    const ax = face === 'n' || face === 's', f = 1 - k / 3, [x, z] = M(a, o), ex = ax ? w / 2 * f : th / 2, ez = ax ? th / 2 : w / 2 * f;
     bag.add(S, box(x - ex, yb + hgt * k / 3, z - ez, x + ex, yb + hgt * (k + 1) / 3, z + ez));
   }
 }
+/** A plain flight of 10 cm steps up a plinth's face (at `line`, facing `face`), `W` wide, centred at c along it; cheeks of stone either side. */
+function flight(bag, col, face, line, c, W, y, h) {
+  const n = Math.max(1, Math.round(h / 0.1)), t = 0.34, D = n * t, out = face === 'n' || face === 'w' ? -1 : 1, ax = face === 'n' || face === 's';
+  const R = (a0, a1, o0, o1) => { const p = [line + out * o0, line + out * o1]; return ax ? [a0, Math.min(...p), a1, Math.max(...p)] : [Math.min(...p), a0, Math.max(...p), a1]; };
+  for (let k = 0; k < n; k++) { const r = R(c - W / 2, c + W / 2, 0, D - k * t); bag.add(S, box(r[0], y - 0.2, r[1], r[2], y + (k + 1) * h / n, r[3])); }
+  const fr = R(c - W / 2, c + W / 2, 0, D); col.ramp(fr, y, y + h, { n: 's', s: 'n', w: 'e', e: 'w' }[face]);
+  for (const sg of [-1, 1]) { const r = R(sg < 0 ? c - W / 2 - 0.6 : c + W / 2, sg < 0 ? c - W / 2 : c + W / 2 + 0.6, 0, D + 0.1); bag.add(S, box(r[0], y - 0.2, r[1], r[2], y + h + 0.5, r[3])); col.rect(r, y, y + h + 0.5); }
+}
 function merlonsAlong(bag, M, a0, a1, o, yb) {
-  const n = Math.max(1, Math.floor((a1 - a0) / 1.25)), probe = M(1, 0), face = probe[0] === 1 ? 'n' : 'e';
+  const n = Math.max(1, Math.floor((a1 - a0) / 1.25)), p0 = M(0, 0), p1 = M(1, 0), face = Math.abs(p1[0] - p0[0]) > 0.5 ? 'n' : 'e';
   for (let i = 0; i < n; i++) merlon(bag, M, a0 + (i + 0.5) * (a1 - a0) / n, o, yb, 0.9, 0.7, 0.55, face);
 }
 
@@ -541,6 +688,6 @@ function house(el, { bag, col }) {
 
 registerStyle('achaemenid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, apadana_stair: apadanaStair },
+  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, apadana_stair: apadanaStair, treasury },
   objects: {},
 });
