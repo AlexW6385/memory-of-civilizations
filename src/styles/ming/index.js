@@ -573,6 +573,7 @@ function wallBar(out, W, p, q, hw, d) {
 /** A flat ring (a frame) between two outlines, extruded through the wall by depth, placed by the wall's matrix M. */
 function ringGeom(outer, inner, depth, M) {
   const sh = new Shape(); sh.moveTo(...outer[0]); for (const p of outer.slice(1)) sh.lineTo(...p); sh.lineTo(...outer[0]);
+  if (!inner) { const g = new ExtrudeGeometry(sh, { depth, bevelEnabled: false, curveSegments: 4 }); g.translate(0, 0, -depth / 2); return g.applyMatrix4(M); }
   const hp = new Path(); hp.moveTo(...inner[0]); for (const p of inner.slice(1)) hp.lineTo(...p); hp.lineTo(...inner[0]);
   sh.holes.push(hp);
   const g = new ExtrudeGeometry(sh, { depth, bevelEnabled: false, curveSegments: 4 });
@@ -606,7 +607,8 @@ function mingWall(el, { bag, col }) {
     } else {
       const gh = g.h ?? 2.4, x0 = g.at - g.w / 2, x1 = g.at + g.w / 2;
       shape.holes.push(pathOf([[x0, 0.02], [x1, 0.02], [x1, gh], [x0, gh]])); cuts.push([x0, x1, 0, gh]);
-      frames.push([[[x0 - 0.14, 0], [x1 + 0.14, 0], [x1 + 0.14, gh + 0.14], [x0 - 0.14, gh + 0.14]], [[x0 + 0.012, -0.01], [x1 - 0.012, -0.01], [x1 - 0.012, gh - 0.012], [x0 + 0.012, gh - 0.012]]]);
+      // (one outline, the frame's U, open at the threshold: a hole running out of the outline would not triangulate)
+      frames.push([[[x0 - 0.14, 0], [x0 + 0.012, 0], [x0 + 0.012, gh - 0.012], [x1 - 0.012, gh - 0.012], [x1 - 0.012, 0], [x1 + 0.14, 0], [x1 + 0.14, gh + 0.14], [x0 - 0.14, gh + 0.14]], null]);
       if (g.plaque) frames.push({ plaque: [g.at, gh + 0.55, Math.min(1.6, g.w * 0.8), 0.46] });
     }
   }
@@ -675,7 +677,35 @@ function mingWall(el, { bag, col }) {
       const o = (th / 2 + 0.008) * sgn;
       const quad = (arr, s0, s1, ya0, yb0, ya1 = ya0, yb1 = yb0) => { arr.push(...Wp(s0, ya0, o), ...Wp(s1, ya1, o), ...Wp(s1, yb1, o), ...Wp(s0, ya0, o), ...Wp(s1, yb1, o), ...Wp(s0, yb0, o)); };
       const step = 0.7;
-      for (let s0 = 0.1; s0 + step < L - 0.1; s0 += step) { const s1 = s0 + step; if (clear(s0, s1, 0.32, 1.3)) quad(damp, s0, s1, 0.33, top(s0 + sgn * 0.7), 0.33, top(s1 + sgn * 0.7)); }
+      // runs of clear strips (up to 6 m), each one polygon: its straight foot and its wandering
+      // top, triangulated as a monotone polygon (k + 1 triangles for k strips, not 2k): along the
+      // top with a stack, cutting off each corner that bulges down, then the far foot joined to the rest
+      const fan = (run) => {
+        if (run.length < 2) return;
+        const tp = run.map((sv) => [sv, top(sv + sgn * 0.7)]), tri = (p, q, r) => damp.push(...Wp(p[0], p[1], o), ...Wp(q[0], q[1], o), ...Wp(r[0], r[1], o));
+        const stack = [[run[0], 0.33], tp[0]];
+        for (let i = 1; i < tp.length; i++) {
+          const c = tp[i];
+          while (stack.length >= 2) {
+            const q = stack[stack.length - 1], p = stack[stack.length - 2];
+            // q above the line from p to c: the triangle p, q, c lies inside
+            if ((c[0] - p[0]) * (q[1] - p[1]) - (c[1] - p[1]) * (q[0] - p[0]) <= 1e-9) break;
+            tri(p, q, c); stack.pop();
+          }
+          stack.push(c);
+        }
+        const b1 = [run[run.length - 1], 0.33];
+        for (let i = 0; i + 1 < stack.length; i++) tri(stack[i], stack[i + 1], b1);
+      };
+      let run = [];
+      for (let s0 = 0.1; s0 + step < L - 0.1; s0 += step) {
+        const s1 = s0 + step;
+        if (!clear(s0, s1, 0.32, 1.3)) { fan(run); run = []; continue; }
+        if (!run.length) run.push(s0);
+        run.push(s1);
+        if (run.length > 8) { fan(run); run = [s1]; }
+      }
+      fan(run);
       // the streaks taper downward (a wedge from the coping)
       for (let s0 = 0.3 + rand() * 2; s0 < L - 0.4; s0 += 1.2 + rand() * 3.5) {
         const w = 0.05 + rand() * 0.12, lo = Math.max(1.3, h - 0.05 - (0.3 + rand() * 1.4));
@@ -688,18 +718,44 @@ function mingWall(el, { bag, col }) {
     if (dampAll.length) bag.add('plaster_damp', fromTriangles(dampAll));
     if (streakAll.length) bag.add('plaster_streak', fromTriangles(streakAll));
   }
+  // the plinth of grey brick, broken at the gates (a door's threshold and a moon gate's sill are
+  // the ground's own paving, not a step of plinth)
   const pl = [];
-  beamTris(pl, [ax - ux * 0.02, y - 0.3, az - uz * 0.02], [bx + ux * 0.02, y - 0.3, bz + uz * 0.02], th / 2 + 0.03, 0.62);
-  bag.add(PAL.plinth, fromTriangles(pl));
-  // the coping: a little roof of black tiles on both sides of the wall's top
-  const cp = [], o = th / 2 + 0.28;
-  for (const sgn of [-1, 1]) {
-    const ex = -uz * sgn, ez = ux * sgn;
-    const e0 = [ax + ex * o, y + h - 0.05, az + ez * o], e1 = [bx + ex * o, y + h - 0.05, bz + ez * o];
-    const r0 = [ax, y + h + 0.38, az], r1 = [bx, y + h + 0.38, bz];
-    cp.push(...e0, ...e1, ...r1, ...e0, ...r1, ...r0);
+  {
+    let s0 = -0.02;
+    const run = (u0, u1) => { if (u1 - u0 > 0.05) beamTris(pl, [ax + ux * u0, y - 0.3, az + uz * u0], [ax + ux * u1, y - 0.3, az + uz * u1], th / 2 + 0.03, 0.62); };
+    for (const g2 of [...(el.gates || [])].sort((p, q) => p.at - q.at)) {
+      const hw = g2.r ? Math.sqrt(Math.max(0.01, g2.r * g2.r - Math.max(0, g2.r + 0.05 - 0.32) ** 2)) : g2.w / 2;
+      run(s0, g2.at - hw); s0 = g2.at + hw;
+    }
+    run(s0, L + 0.02);
   }
-  bag.add(PAL.roof, fromTriangles(cp.concat(flipTris(cp))));
+  bag.add(PAL.plinth, fromTriangles(pl));
+  // the coping: a little roof of black tiles on both sides of the wall's top, on a course of grey
+  // brick corbelled out from each face. The tiles have their thickness: a row of eave ends (a
+  // fascia) and a flat soffit back to the wall, so that the overhang has an underside (over a gate
+  // one walks under it, not into it); the ends closed by a gable board. Each face one-sided,
+  // turned to where it is seen from (the shell is closed).
+  const cp = [], o = th / 2 + 0.28, eY = y + h - 0.05, sY = y + h - 0.11, rY = y + h + 0.38;
+  const cb = [];
+  beamTris(cb, [ax - ux * 0.02, y + h - 0.23, az - uz * 0.02], [bx + ux * 0.02, y + h - 0.23, bz + uz * 0.02], th / 2 + 0.12, 0.115);
+  bag.add(PAL.plinth, fromTriangles(cb));
+  const sec = (p, off, yy) => [p[0] - uz * off, yy, p[1] + ux * off];
+  for (const sgn of [-1, 1]) {
+    const out = [-uz * sgn, 0, ux * sgn];
+    const e0 = sec(el.a, sgn * o, eY), e1 = sec(el.b, sgn * o, eY), r0 = [ax, rY, az], r1 = [bx, rY, bz];
+    cp.push(...facing([...e0, ...e1, ...r1, ...e0, ...r1, ...r0], [out[0], 1, out[2]]));
+    // the fascia of eave tiles, and the soffit back to the wall's face
+    const f0 = sec(el.a, sgn * o, sY), f1 = sec(el.b, sgn * o, sY), s0 = sec(el.a, sgn * th / 2, sY), s1 = sec(el.b, sgn * th / 2, sY);
+    cp.push(...facing([...f0, ...f1, ...e1, ...f0, ...e1, ...e0], out));
+    cp.push(...facing([...s0, ...s1, ...f1, ...s0, ...f1, ...f0], [0, -1, 0]));
+  }
+  // the gable ends: the coping's section between the soffit and the tiles
+  for (const [p, sg] of [[el.a, -1], [el.b, 1]]) {
+    const P = (off, yy) => sec(p, off, yy), Rr = [p[0], rY, p[1]];
+    cp.push(...facing([...P(-o, sY), ...P(-o, eY), ...Rr, ...P(-o, sY), ...Rr, ...P(o, eY), ...P(-o, sY), ...P(o, eY), ...P(o, sY)], [ux * sg, 0, uz * sg]));
+  }
+  bag.add(PAL.roof, fromTriangles(cp));
   const rd = [];
   beamTris(rd, [ax, y + h + 0.3, az], [bx, y + h + 0.3, bz], 0.09, 0.16);
   bag.add(PAL.roof, fromTriangles(rd));

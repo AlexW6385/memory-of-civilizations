@@ -55,8 +55,10 @@ const leaky = (at, k, w = 1.1, h = 1.1, sill = 1.5) => ({ at, w: SHAPES[k % 7] =
 wall([gx0, gz0], [gx1, gz0], { windows: [-50, -20, 10, 40].map((at, k) => leaky(at + 74, k)) });
 wall([gx1, gz0], [gx1, gz1], { windows: [30, 60, 84].map((at, k) => leaky(at, k + 4)) });
 wall([gx0, gz1], [gx0, gz0], { gates: [{ at: 52, r: 1.3 }] });                       // a moon gate west toward the town
-// the south wall: the door from the residence (the garden's own gate), leaky windows along it
-wall([gx1, gz1], [gx0, gz1], { gates: [{ at: 74, w: 2.2, h: 2.8, plaque: true }], windows: [20, 34, 46, 102, 114, 128].map((at, k) => leaky(at, k + 1, 1.2, 1.2, 1.4)) });
+// the south wall: the door from the residence (the garden's own gate), leaky windows along it. The
+// women's building backs onto the wall on the axis, so the door is east of it, reached from the
+// court before that building along its east side
+wall([gx1, gz1], [gx0, gz1], { gates: [{ at: 60, w: 2.2, h: 2.8, plaque: true }], windows: [20, 34, 46, 102, 114, 128].map((at, k) => leaky(at, k + 1, 1.2, 1.2, 1.4)) });
 // the loquat court: low walls with a moon gate on the west and a gate north to the pond
 const [lx0, lz0, lx1, lz1] = LOQUAT_COURT;
 const low = { h: 3.2, th: 0.32 };
@@ -93,7 +95,7 @@ for (const id of ['hefeng', 'xuexiang', 'daishuang', 'wuzhu', 'lvyi']) {
 // ── the bridges over the pond and the paths ──────────────────────────────────
 for (const b of GARDEN_BRIDGES) E.push({ t: 'ming_slab_bridge', pts: b.pts, w: b.w, y: G + 0.05, bed: LEVEL.pondBed });
 const paths = [
-  [[0, 23], [0, 8], [-2, 0], [0, -8], [0, -9.8]],                      // from the garden gate to the hall
+  [[14, 23], [8, 14], [0, 8], [-2, 0], [0, -8], [0, -9.8]],            // from the garden gate to the hall
   [[-2, -6], [-12, -8], [-20, -11.8]],                                  // to the Leaning Jade
   [[3, -4], [16, -2], [26, -4], [30, -2.5]],                            // east to the loquat court's moon gate
   [[-22, -19], [-26, -21], [-28, -23]],                                  // to the bridge for the Lotus Breeze islet
@@ -141,7 +143,7 @@ const rooms = [
   room('garden', GARDEN, G, 'open'),
   room('residence', RESIDENCE, G, 'open'),
 ];
-const walks = [[[0, 64], [0, 57], [0, 46], [0, 40], [0, 30], [0, 23], [0, 8], [0, -9], [0, -21], [-12, -8], [-21, -12]]];
+const walks = [[[0, 64], [0, 57], [0, 46], [0, 40], [0, 30.6], [14, 30.6], [14, 25.5], [14, 22], [8, 14], [0, 8], [0, -9], [0, -21], [-12, -8], [-21, -12]]];
 walks[0].y0 = 0;
 
 export const garden = {
