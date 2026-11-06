@@ -48,16 +48,16 @@ for (let i = 0; i < 60; i++) {
   if (rand() < 0.08) continue;
   const a = AXIS + (i + 0.5) / 60 * Math.PI * 2 + (rand() - 0.5) * 0.02, r = 11.6 + (rand() - 0.5) * 0.4, at = [Math.cos(a) * r, Math.sin(a) * r];
   const w = 0.55 + rand() * 0.45, h = 1.6 + rand() * 0.6;
-  stone(at, a + (rand() - 0.5) * 0.3, { h, w0: w, w1: w * (0.7 + rand() * 0.2), d0: 0.45 + rand() * 0.2, d1: 0.38, rough: 0.05, bury: 0.8, cap: rand() < 0.5 ? 'round' : 'peak', mat: 'sandstone_carved' });
+  stone(at, a + (rand() - 0.5) * 0.3, { h, w0: w, w1: w * (0.7 + rand() * 0.2), d0: 0.45 + rand() * 0.2, d1: 0.38, rough: 0.05, bury: 0.8, cap: rand() < 0.5 ? 'round' : 'peak', mat: 'dolerite_spotted' });
 }
 // the bluestone horseshoe: 19 dressed pillars rising toward the south-west, within the trilithons
 for (let k = 0; k < 19; k++) {
   const th = (-1 + k / 9) * 108 * Math.PI / 180, u = -0.6 - 4.4 * Math.cos(th), v = 4.2 * Math.sin(th), at = P(u, v);
   const h = 1.9 + 0.5 * Math.cos(th * 0.9);
-  stone(at, Math.atan2(at[1] - P(-0.6, 0)[1], at[0] - P(-0.6, 0)[0]), { h, w0: 0.55, w1: 0.5, d0: 0.45, d1: 0.42, dress: 1, rough: 0.015, bury: 0.9, cap: 'round', mat: 'sandstone_carved' });
+  stone(at, Math.atan2(at[1] - P(-0.6, 0)[1], at[0] - P(-0.6, 0)[0]), { h, w0: 0.55, w1: 0.5, d0: 0.45, d1: 0.42, dress: 1, rough: 0.015, bury: 0.9, cap: 'round', mat: 'dolerite_spotted' });
 }
 // the Altar Stone, 4.9 m of greenish sandstone, lying before the Great Trilithon across the axis
-{ const at = P(-3.8, 0); E.push({ t: 'standing_stone', at, y: height(at[0], at[1]), yaw: AXIS, lying: true, h: 4.9, w0: 1.0, w1: 1.0, d0: 0.53, d1: 0.5, rough: 0.03, dress: 1, bury: 0.12, mat: 'sandstone_carved', seed: 41 }); }
+{ const at = P(-3.8, 0); E.push({ t: 'standing_stone', at, y: height(at[0], at[1]), yaw: AXIS, lying: true, h: 4.9, w0: 1.0, w1: 1.0, d0: 0.53, d1: 0.5, rough: 0.03, dress: 1, bury: 0.12, mat: 'sandstone_green', seed: 41 }); }
 
 // ── at the entrance: the Slaughter Stone and its partner, standing; the Heel Stone, unshaped and leaning in ──
 for (const v of [-3.2, 2.4]) { const at = P(47 + (v > 0 ? 0.4 : 0), v); stone(at, AXIS, { h: v > 0 ? 4.0 : 3.6, w0: 2.1, w1: 1.9, d0: 0.95, d1: 0.85, rough: 0.06, bury: 1.2, mat: 'granite_rough' }); }

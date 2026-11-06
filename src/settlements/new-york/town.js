@@ -10,7 +10,7 @@ function streetLife() {
   const car = (x, z, rot) => {
     if (!inside(x, z) || crossing(x, z, 2) || onBroadway(x, z, 2) || inLot(x, z, 1.5)) return;
     const cab = rand() < 0.38;
-    L.push({ t: 'car', at: [x, z], y: height(x, z), rot, era: 1930, seed: Math.floor(rand() * 1e9), ...(cab ? { mat: 'glaze_yellow' } : {}) });
+    L.push({ t: 'car', at: [x, z], y: height(x, z), rot, era: 1930, seed: Math.floor(rand() * 1e9), ...(cab ? { mat: 'paint_cab_yellow' } : {}) });
   };
   // the avenues: two-way, traffic keeping right; the Sixth Avenue's lanes clear of the El's columns
   for (const [ax, w, name] of AVENUES) {
