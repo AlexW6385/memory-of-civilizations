@@ -2,11 +2,12 @@
 // the red-brown plain with fields, neem, banyan and palms round the village; the hot, hazy sky
 // of central India before the rains.
 
-import { RADIUS, PATH, SUMMIT, height, out, inLot } from './layout.js';
+import { RADIUS, PATH, SUMMIT, STUPA2, height, out, inLot, inRect } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.2, grass: 0.3, rock: 0, soil: 0.5, fields: 0, dry: 0.75, warmth: 0.85, red: 0.5, road: 0, snow: 0, forest: 0 };
   if (out(x, z) === 0) { c.road = 0.5; c.grass = 0.3; return c; }
+  if (inRect(STUPA2.terrace, x, z, 3) || (Math.abs(x - STUPA2.c[0]) < 2.5 && z < STUPA2.terrace[1] && z > -60)) { c.road = 0.6; c.grass = 0.25; return c; }
   if (ny < 0.8) { c.rock = 0.6; c.soil = 0.4; return c; }
   if (Math.abs(x - PATH.x) < PATH.w && z < -SUMMIT.half[1]) { c.road = 0.8; return c; }
   if (Math.hypot(x, z) > 230) { c.fields = 0.7; c.grass = 0.2; return c; }
@@ -14,7 +15,7 @@ function cover(x, z, h, ny) {
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || (Math.abs(x - PATH.x) < PATH.w + 1 && z < -SUMMIT.half[1] + 5)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || inRect(STUPA2.terrace, x, z, 4) || (Math.abs(x - STUPA2.c[0]) < 3.5 && z < STUPA2.terrace[1] && z > -62) || (Math.abs(x - PATH.x) < PATH.w + 1 && z < -SUMMIT.half[1] + 5)) return null;
   const d = out(x, z);
   if (d === 0) return null;
   if (d < 30) return { grass_dry: 10, maquis: 0.08 };

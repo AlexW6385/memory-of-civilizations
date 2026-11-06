@@ -2,8 +2,9 @@
 import '../../styles/chinese/index.js';
 import '../../styles/indian/index.js';
 import '../../styles/vernacular/index.js';
-import { stupa } from './plan.js';
+import { stupa, stupa2, site, pilgrims } from './plan.js';
 import music from './music.js';
-export { town } from './town.js';
+import { town as houses } from './town.js';
+export async function town() { return [stupa2, site, pilgrims, ...(await houses())]; }
 export { music };
 export const landmarks = [{ plan: stupa, music }];

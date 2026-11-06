@@ -90,7 +90,35 @@ for (const [z0, z1] of [[-7.0, -2.45], [2.45, 7.0]]) {
 // ── the interior: altar, Amida, canopy, the bodhisattvas on clouds, ceilings ─
 block([-2.7, -2.0, 1.2, 2.0], F, F + 1.0, 'lacquer_black');
 obj('byodo_amida', -0.9, 0, F + 1.0, { h: 2.77, dir: [1, 0] });
-obj('canopy', -0.9, 0, F + 6.6, { r: 1.9 });
+obj('byodo_canopy', -0.9, 0, F + 8.4, { half: 1.85, depth: 0.62 });
+// the sixty-six bronze mirrors: on the high ceiling round the canopy and on the lower ceilings either side
+{
+  const spots = [];
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 6; j++) spots.push([1.45 + i * 0.68, -1.9 + j * 0.76, F + 8.4]);
+  for (let j = 0; j < 6; j++) spots.push([-3.35, -1.9 + j * 0.76, F + 8.4]);
+  for (const sz of [-1, 1]) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) spots.push([-3.1 + i * 1.24, sz * (3.05 + j * 0.95), F + 6.6]);
+  add({ t: 'byodo_mirrors', spots });
+}
+// the paintings of the nine forms of Amida's welcome in the landscapes of the four seasons, low on the walls under the
+// bodhisattvas on clouds: the side walls' four bays, the back wall's two side bays, and the open door leaves
+{
+  const y0 = F + 0.35, y1 = F + 3.55, P = [];
+  for (const [x0, x1] of [[-3.9 + 0.27, -0.27], [0.27, 3.9 - 0.27]]) {
+    P.push({ a: [x0, -5.25], b: [x1, -5.25], dir: [0, 1] });
+    P.push({ a: [x0, 5.25], b: [x1, 5.25], dir: [0, -1] });
+  }
+  for (const [z0, z1] of [[-5.4 + 0.27, -2.3 - 0.27], [2.3 + 0.27, 5.4 - 0.27]]) P.push({ a: [-3.75, z0], b: [-3.75, z1], dir: [1, 0] });
+  const seasons = ['spring', 'summer', 'autumn', 'winter'];
+  P.forEach((p, i) => add({ t: 'raigo', ...p, y0, y1, season: seasons[i % 4], from: i % 2 ? 'r' : 'l', seed: 1053 + i * 17 }));
+  // the door leaves (open, at right angles to the front wall): a painting on the face toward the hall's middle
+  for (let i = 0; i < 3; i++) {
+    const zc = (CZ[i] + CZ[i + 1]) / 2, half = (CZ[i + 1] - CZ[i]) / 2 - 0.5, hh = i === 1 ? 4.6 : 3.4;
+    for (const sd of [-1, 1]) {
+      const zz = sd < 0 ? zc - half : zc + half;                      // the leaf's face toward the bay's middle
+      add({ t: 'raigo', a: [3.06, zz], b: [3.66, zz], dir: [0, -sd], y0: F + 0.3, y1: F + hh - 0.3, season: seasons[(i * 2 + (sd > 0 ? 1 : 0)) % 4], from: sd > 0 ? 'l' : 'r', seed: 2053 + i * 31 + sd });
+    }
+  }
+}
 add({ t: 'slab', rect: [-3.9, -5.4, 3.9, 5.4], y0: F + 6.6, y1: F + 6.75, mat: 'ceiling_coffer', holes: [[-3.9, -2.3, 3.9, 2.3]] });
 add({ t: 'slab', rect: [-3.9, -2.3, 3.9, 2.3], y0: F + 8.4, y1: F + 8.55, mat: 'ceiling_coffer', holes: [] });
 for (const s of [-1, 1]) add({ t: 'slab', rect: [-3.9, Math.min(s * 2.3, s * 2.45), 3.9, Math.max(s * 2.3, s * 2.45)], y0: F + 6.6, y1: F + 8.45, mat: 'timber_ni', holes: [] });

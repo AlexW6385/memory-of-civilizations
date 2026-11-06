@@ -7,6 +7,10 @@ export const RADIUS = 300;
 export const TOP = 22;
 export const SUMMIT = { c: [0, 0], half: [95, 95], round: 40 };
 export const PATH = { x: 0, w: 5 };                         // up the north slope
+/** Stupa 2 on its built terrace at the foot of the west slope, against the hill (docs/settlements/sanchi.md §10). */
+export const STUPA2 = { c: [-140, 0], terrace: [-156, -16, -124, 16], y: 1.5 };
+/** Temple 40 on the summit, south-east of the Great Stupa (its platform 41.76 × 27.74 m). */
+export const TEMPLE40 = { c: [40, 62], rect: [40 - 21.2, 62 - 14.2, 40 + 21.2, 62 + 14.2] };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 /** Outside distance from the summit's rounded square (0 on it). */
@@ -22,6 +26,8 @@ export function height(x, z) {
     const ramp = TOP * smooth(SUMMIT.half[1] + 75, SUMMIT.half[1] - 5, -z), k = smooth(PATH.w + 3, PATH.w, Math.abs(x - PATH.x));
     h = h * (1 - k) + Math.max(ramp, h * 0) * k;
   }
+  // Stupa 2's terrace: the ground kept under its paving
+  if (inRect(STUPA2.terrace, x, z, 0.5)) h = Math.min(h, STUPA2.y - 0.3);
   return h * (1 - smooth(RADIUS - 40, RADIUS - 5, Math.hypot(x, z)));
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }

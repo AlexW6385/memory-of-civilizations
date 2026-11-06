@@ -25,7 +25,7 @@ function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inPond(x, z) || inLot(x, z, 1)) return null;
   if (inRect(GARDEN, x, z)) {
     const d = pondDistance(x, z);
-    if (d < 5 || Math.hypot(x + 40, z) < 28) return null;
+    if (d < 5 || Math.hypot(x + 40, z) < 28 || Math.hypot(x - 50, z - 46) < 7) return null;
     return d < 16 ? { red_pine: 0.06, grass: 3 } : { red_pine: 0.1, maple: 0.08, grass: 4 };
   }
   if (height(x, z) > 4) return { sugi: 0.2, maple: 0.06, red_pine: 0.05, grass: 15 };

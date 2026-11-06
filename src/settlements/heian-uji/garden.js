@@ -1,6 +1,7 @@
 // The pond garden's edges (docs/settlements/heian-uji.md §6): the pebble beach (suhama) along the
 // shores of the Aji pond and round the small island, set stones at the beach's points, and the two
 // bridges joining the small island to the hall's island (arched) and to the north shore (flat).
+import '../../buildings/byodo-in-phoenix-hall/style.js';
 import { GARDEN, POND_LEVEL, ISLAND, height, pondDistance, islandDistance } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -29,4 +30,11 @@ export const garden = {
     { t: 'bridge', a: [ix, iz + ISLAND.r[1] - 1.6], b: [ix, iz + 15.5], y: top - 0.15, rise: 1.3, w: 2.0 },
     { t: 'bridge', a: [ix, iz - ISLAND.r[1] + 1.6], b: [ix, iz - 16.5], y: top - 0.15, rise: 0.3, w: 2.0 },
   ],
+};
+/** The bell tower across the pond from the Phoenix Hall, with Byōdō-in's bronze bell (docs/settlements/heian-uji.md §4). */
+export const BELL = [50, 46];
+export const belfry = {
+  id: 'heian-uji-belfry', style: 'japanese-byodo', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [],
+  bounds: [BELL[0] - 6, BELL[1] - 6, BELL[0] + 6, BELL[1] + 6], entrance: { at: [BELL[0] - 5, BELL[1]], facing: 'e' },
+  elements: [{ t: 'shoro', c: BELL, y: 0, half: 1.8, h: 3.4 }],
 };
