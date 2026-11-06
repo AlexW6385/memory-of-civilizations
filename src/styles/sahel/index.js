@@ -18,6 +18,61 @@ function taper(bag, x, z, y0, y1, r0, r1, cap = 0) {
   if (cap > 0) bag.add(B, lathe([[r1 * 1.05, 0], [r1 * 0.6, cap * 0.6], [0.05, cap]], 8, null, x, y1, z));
 }
 
+/** Flip each triangle so that it faces along want(centroid). */
+function orientBy(tris, want) {
+  for (let i = 0; i < tris.length; i += 9) {
+    const a = [tris[i], tris[i + 1], tris[i + 2]], b = [tris[i + 3], tris[i + 4], tris[i + 5]], c = [tris[i + 6], tris[i + 7], tris[i + 8]];
+    const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const w = want([(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3]);
+    if (n[0] * w[0] + n[1] * w[1] + n[2] * w[2] < 0) for (let k = 0; k < 3; k++) { const t = tris[i + 3 + k]; tris[i + 3 + k] = tris[i + 6 + k]; tris[i + 6 + k] = t; }
+  }
+  return tris;
+}
+/**
+ * The solid over a pointed arch between zA and zB in a wall at x (half-thickness t): from the arch
+ * (springing at ys, two arcs of radius 0.75 × the span) up to yT; its faces and the soffit.
+ */
+export function pointedSpandrel(out, x, t, zA, zB, ys, yT, alongX = false) {
+  const span = zB - zA, R = span * 0.75, N = 10, P = [];
+  for (let k = 0; k <= N; k++) {
+    const z = zA + span * k / N, c = z <= zA + span / 2 ? zA + R : zB - R;
+    P.push([z, Math.min(yT - 0.05, ys + Math.sqrt(Math.max(0, R * R - (z - c) * (z - c))))]);
+  }
+  const V = (sx, z, y) => (alongX ? [z, y, x + sx * t] : [x + sx * t, y, z]), loc = [];
+  const q = (a, b, c, d) => loc.push(...a, ...b, ...c, ...a, ...c, ...d);
+  for (let k = 0; k < N; k++) {
+    const [za, ya] = P[k], [zb, yb] = P[k + 1];
+    for (const sx of [-1, 1]) q(V(sx, za, ya), V(sx, zb, yb), V(sx, zb, yT), V(sx, za, yT));
+    q(V(-1, za, ya), V(1, za, ya), V(1, zb, yb), V(-1, zb, yb));
+  }
+  const mid = zA + span / 2;
+  out.push(...orientBy(loc, (p) => {
+    const across = alongX ? p[2] - x : p[0] - x, along = alongX ? p[0] : p[2];
+    if (Math.abs(Math.abs(across) - t) < 1e-4) return alongX ? [0, 0, Math.sign(across)] : [Math.sign(across), 0, 0];
+    return alongX ? [-(along - mid) * 0.3, -1, 0] : [0, -1, -(along - mid) * 0.3];
+  }));
+}
+/** A half-pipe spout (the open trough upward) from p along the horizontal unit d, length L, radius r: inner and outer faces. */
+function halfPipe(p, d, L, r) {
+  const N = 6, ex = [-d[2], 0, d[0]], loc = [], th = 0.025;
+  const P = (s, a, rr) => [p[0] + d[0] * s + ex[0] * Math.cos(a) * rr, p[1] - Math.sin(a) * rr - s * 0.06, p[2] + d[2] * s + ex[2] * Math.cos(a) * rr];
+  const q = (a, b, c, e) => loc.push(...a, ...b, ...c, ...a, ...c, ...e);
+  for (let k = 0; k < N; k++) {
+    const a0 = Math.PI * k / N, a1 = Math.PI * (k + 1) / N;
+    for (const rr of [r, r + th]) q(P(0, a0, rr), P(L, a0, rr), P(L, a1, rr), P(0, a1, rr));
+    q(P(L, a0, r), P(L, a0, r + th), P(L, a1, r + th), P(L, a1, r));
+  }
+  for (const a of [0, Math.PI]) q(P(0, a, r), P(L, a, r), P(L, a, r + th), P(0, a, r + th));
+  return orientBy(loc, (c) => {
+    const s = (c[0] - p[0]) * d[0] + (c[2] - p[2]) * d[2];
+    if (s > L - 0.01) return d;
+    const ax = [p[0] + d[0] * s, p[1] - s * 0.06, p[2] + d[2] * s], v = [c[0] - ax[0], c[1] - ax[1], c[2] - ax[2]], rr = Math.hypot(...v);
+    if (rr < 1e-6 || Math.abs(c[1] - ax[1]) < 1e-3) return [0, 1, 0];
+    return rr > r + th / 2 ? v : v.map((x) => -x);
+  });
+}
+
 /** A wall of banco from a to b { h, th, batter }: a slab leaning in a little, pilasters every `step` m rising above it as pinnacles, rows of toron. */
 function bancoWall(bag, col, a, b, y, h, th, opts = {}) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.2) return;
@@ -64,19 +119,36 @@ function greatMosque(el, { bag, col }) {
   w([x0, z0], [x1, z0], { out: -1 }); w([x1, z1], [x0, z1], { out: -1 });
   w([x0, z1], [x0, (z0 + z1) / 2 + 3], { out: -1, h: 7 }); w([x0, (z0 + z1) / 2 - 3], [x0, z0], { out: -1, h: 7 });
   w([xm, z0 + 1], [xm, z1 - 1], { out: 1, h: 9, toron: false });          // the hall's west wall on the court
-  // the hall's roof on its pillars: rows of thick square pillars, the flat roof with its vents
-  for (let i = 0; i < 5; i++) for (let j = 0; j < 9; j++) {
-    const x = xm + (x1 - xm) * (i + 0.5) / 5, z = z0 + (z1 - z0) * (j + 0.5) / 9;
-    bag.add('banco_smooth', box(x - 0.9, py, z - 0.9, x + 0.9, py + 9.6, z + 0.9));
-    col.rect([x - 0.9, z - 0.9, x + 0.9, z + 0.9], py, py + 9.6);
+  // the hall's roof on nine arcaded walls running north–south (docs/settlements/djenne.md §2): each
+  // a row of massive piers joined by tall pointed arches, ninety piers in all; the flat roof of palm
+  // beams and banco over them, its vents capped with inverted fired bowls
+  const ys = py + 4.6, yT = py + 9.6;
+  for (let i = 0; i < 9; i++) {
+    const x = xm + (x1 - xm) * (i + 0.5) / 9, t = 0.55, piers = [];
+    for (let j = 0; j <= 10; j++) piers.push(z0 + (z1 - z0) * j / 10);
+    for (const [j, z] of piers.entries()) {
+      const hz = j === 0 || j === 10 ? 0.7 : 0.8;
+      bag.add('banco_smooth', box(x - t, py, z - hz, x + t, yT, z + hz));
+      col.rect([x - t, z - hz, x + t, z + hz], py, yT);
+    }
+    const tris = [];
+    for (let j = 0; j < 10; j++) pointedSpandrel(tris, x, t, piers[j] + (j === 0 ? 0.7 : 0.8), piers[j + 1] - (j === 9 ? 0.7 : 0.8), ys, yT);
+    bag.add('banco_smooth', fromTriangles(tris));
   }
   bag.add('timber', box(xm, py + 9.6, z0, x1, py + 9.9, z1));
   bag.add('banco_smooth', box(xm - 0.5, py + 9.9, z0 - 0.5, x1 + 0.5, py + 10.5, z1 + 0.5));
   col.floor([xm, z0, x1, z1], py + 10.5);
   for (let i = 0; i < 4; i++) for (let j = 0; j < 6; j++) {
     const x = xm + (x1 - xm) * (i + 1) / 5, z = z0 + (z1 - z0) * (j + 1) / 7;
-    bag.add('banco_smooth', lathe([[0.5, 0], [0.45, 0.8], [0.55, 0.85], [0.001, 1.0]], 8, null, x, py + 10.5, z));
+    bag.add('banco_smooth', lathe([[0.4, -0.05], [0.4, 0.22], [0.34, 0.26], [0.001, 0.26]], 10, null, x, py + 10.5, z));      // the vent's collar
+    bag.add('terracotta', lathe([[0.001, 0.25], [0.44, 0.25], [0.44, 0.31], [0.4, 0.42], [0.3, 0.52], [0.16, 0.57], [0.001, 0.58]], 12, null, x, py + 10.5, z));   // the inverted bowl
   }
+  // ceramic half-pipes along the roof's edge, throwing the rain clear of the north and south walls (between the pilasters)
+  { const L = x1 - x0, n = Math.max(1, Math.round(L / 3));
+    for (let k = 0; k < n; k += 2) {
+      const x = x0 + (k + 0.5) * L / n, hall = x > xm + 0.8;
+      for (const [zz, sg] of [[z0 - (hall ? 0.5 : 0.45), -1], [z1 + (hall ? 0.5 : 0.45), 1]]) bag.add('terracotta', fromTriangles(halfPipe([x, hall ? py + 10.02 : py + H - 0.45, zz], [0, 0, sg], 1.0, 0.11)));
+    } }
   // the three towers on the qibla wall, rising 16 m above the platform with their pinnacles
   for (const [zz, s] of [[cz, 1.2], [cz - 13, 1], [cz + 13, 1]]) {
     const tw = 3.2 * s, th = 16 * s;
@@ -87,10 +159,22 @@ function greatMosque(el, { bag, col }) {
       bag.add(B, lathe([[0.55, 0], [0.4, ph * 0.7], [0.08, ph]], 8, null, px, py + th, pz));
       bag.add('tura_limestone', lathe([[0.001, 0], [0.18, 0.12], [0.2, 0.28], [0.001, 0.48]], 8, null, px, py + th + ph, pz));     // the ostrich egg
     }
+    // engaged ribs on the three outer faces, battered with the face, rising through the cornice as pinnacles
+    const tx = x1 + 1.6, fA = tw * 1.2, yR = py + th + 0.05, fB = tw * (1.2 - 0.2 * (yR - py) / th), dF = fA - fB;
+    for (const k of [-0.33, 0.33]) {
+      const sh = k * (fB - fA);
+      bag.add(B, frustum([tx + fA - 0.05, zz + k * fA - 0.3, tx + fA + 0.32, zz + k * fA + 0.3], py, yR, -dF, dF + 0.08, sh + 0.06, -sh + 0.06));
+      bag.add(B, lathe([[0.26, 0], [0.18, 1.1], [0.04, 1.6]], 8, null, tx + fB + 0.1, yR, zz + k * fB));
+      for (const sz of [-1, 1]) {
+        const r0 = sz < 0 ? [tx + k * fA - 0.3, zz - fA - 0.32, tx + k * fA + 0.3, zz - fA + 0.05] : [tx + k * fA - 0.3, zz + fA - 0.05, tx + k * fA + 0.3, zz + fA + 0.32];
+        bag.add(B, frustum(r0, py, yR, sh + 0.06, -sh + 0.06, sz < 0 ? dF + 0.08 : -dF, sz < 0 ? -dF : dF + 0.08));
+        bag.add(B, lathe([[0.26, 0], [0.18, 1.1], [0.04, 1.6]], 8, null, tx + k * fB, yR, zz + sz * (fB + 0.1)));
+      }
+    }
     // toron on the tower's three outer faces, following the batter
     const tt = [];
     for (let r = 1; r < Math.floor(th / 1.6); r++) {
-      const yy = py + r * 1.6, f = tw * (1.2 - 0.2 * (yy - py) / th), tx = x1 + 1.6;
+      const yy = py + r * 1.6, f = tw * (1.2 - 0.2 * (yy - py) / th);
       for (const k of [-0.66, 0, 0.66]) {
         beamTris(tt, [tx + f - 0.05, yy, zz + k * f], [tx + f + 0.85, yy + 0.03, zz + k * f], 0.06, 0.1);
         for (const sz of [-1, 1]) beamTris(tt, [tx + k * f, yy, zz + sz * (f - 0.05)], [tx + k * f, yy + 0.03, zz + sz * (f + 0.85)], 0.06, 0.1);
