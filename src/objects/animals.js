@@ -70,21 +70,22 @@ function build(K, kind, graze, a) {
     const dir = [0, Math.sin(na * D2R), -Math.cos(na * D2R)], e = [0, nb[1] + dir[1] * nl, nb[2] + dir[2] * nl];
     N = [[0, nb[1] - B * 0.1, nb[2] + 0.05, B * 0.62, B * 0.82], [0, nb[1] + dir[1] * nl * 0.5, nb[2] + dir[2] * nl * 0.5, B * 0.42, B * 0.62], [...e, B * 0.36, B * 0.46]]; hd = e;
   }
-  if (nl > 0.15) hide(tube(N, 8)); else hd = [0, nb[1] - B * 0.15, nb[2] - B * 0.25];
+  const head = (g) => a('hhide', g);
+  if (nl > 0.15) head(tube(N, 8)); else hd = [0, nb[1] - B * 0.15, nb[2] - B * 0.25];
   const hl = K.head, hr = B * K.hr, hdir = [0, Math.sin(ha * D2R), -Math.cos(ha * D2R)], H = (k) => [hd[0], hd[1] + hdir[1] * hl * k, hd[2] + hdir[2] * hl * k];
   const lift = [0, Math.cos(ha * D2R) * hr * 0.2, Math.sin(ha * D2R) * hr * 0.2];
-  hide(tube([[...H(-0.08), hr * 0.85, hr * 0.95], [...H(0.15), hr * 0.95, hr * 1.1], [...H(0.5), hr * (pig ? 0.85 : 0.72), hr * (pig ? 0.85 : 0.88)], [...H(0.86), hr * (pig ? 0.6 : 0.6), hr * (pig ? 0.6 : 0.7)], [...H(1.0), hr * (pig ? 0.55 : 0.45), hr * (pig ? 0.55 : 0.5)]], 8));
+  head(tube([[...H(-0.08), hr * 0.85, hr * 0.95], [...H(0.15), hr * 0.95, hr * 1.1], [...H(0.5), hr * (pig ? 0.85 : 0.72), hr * (pig ? 0.85 : 0.88)], [...H(0.86), hr * (pig ? 0.6 : 0.6), hr * (pig ? 0.6 : 0.7)], [...H(1.0), hr * (pig ? 0.55 : 0.45), hr * (pig ? 0.55 : 0.5)]], 8));
   if (pig) a('pale', slathe([[0.001, 0], [hr * 0.5, 0.002], [hr * 0.52, 0.03], [0.001, 0.032]], 10).rotateX(-Math.PI / 2 + ha * D2R).translate(...H(0.99)));
   if (K.muzzle) a('pale', tube([[...H(0.72), hr * 0.66, hr * 0.76], [...H(0.9), hr * 0.62, hr * 0.72], [...H(1.02), hr * 0.42, hr * 0.48]], 8));
-  if (K.darkface) a('dark', tube([[...H(0.05), hr * 0.92, hr * 1.02], [...H(0.5), hr * 0.76, hr * 0.92], [...H(1.01), hr * 0.47, hr * 0.52]], 8));
+  if (K.darkface) a('hdark', tube([[...H(0.05), hr * 0.92, hr * 1.02], [...H(0.5), hr * 0.76, hr * 0.92], [...H(1.01), hr * 0.47, hr * 0.52]], 8));
   // the eyes, either side of the head
-  for (const s of [-1, 1]) { const e = H(0.22); a('dark', slathe([[0.001, -0.016], [0.018, 0], [0.001, 0.016]], 5).scale(0.5, 1, 1).translate(e[0] + s * hr * 0.88, e[1] + lift[1] * 1.5, e[2] + lift[2])); }
+  for (const s of [-1, 1]) { const e = H(0.22); a('hdark', slathe([[0.001, -0.016], [0.018, 0], [0.001, 0.016]], 5).scale(0.5, 1, 1).translate(e[0] + s * hr * 0.88, e[1] + lift[1] * 1.5, e[2] + lift[2])); }
   // the ears (pricked, or drooping), the horns, the forelock and mane
   const top = H(0.02);
   if (K.ears) for (const s of [-1, 1]) {
     const base = [s * hr * 0.55, top[1] + hr * 0.7, top[2] + 0.02];
     const tip = K.droop ? [s * (hr * 0.7 + K.ears * 0.8), base[1] - K.ears * 0.55, base[2] - K.ears * 0.25] : [s * (hr * 0.55 + K.ears * 0.3), base[1] + K.ears * 0.95, base[2] + K.ears * 0.2];
-    hide(tube([[...base, K.ears * 0.18, K.ears * 0.1], [(base[0] + tip[0]) / 2, (base[1] + tip[1]) / 2, (base[2] + tip[2]) / 2, K.ears * 0.22, K.ears * 0.09], [...tip, 0.004]], 6));
+    head(tube([[...base, K.ears * 0.18, K.ears * 0.1], [(base[0] + tip[0]) / 2, (base[1] + tip[1]) / 2, (base[2] + tip[2]) / 2, K.ears * 0.22, K.ears * 0.09], [...tip, 0.004]], 6));
   }
   if (K.horns) for (const s of [-1, 1]) {
     const base = [s * hr * 0.6, top[1] + hr * 0.6, top[2] + 0.03], L = K.horns;
@@ -98,10 +99,10 @@ function build(K, kind, graze, a) {
   if (K.mane) {
     const [p0, p1, p2] = N;
     const up = (p, k) => [p[0], p[1] + B * 0.48 * k, p[2] + B * 0.12 * k];
-    a('dark', tube([[...up(p0, 0.55), 0.03 * K.mane, 0.06 * K.mane], [...up(p1, 0.85), 0.03 * K.mane, 0.08 * K.mane], [...up(p2, 0.9), 0.025 * K.mane, 0.07 * K.mane], [...H(0.02).map((v, i) => v + (i === 1 ? hr * 0.75 : 0)), 0.02, 0.03]], 6));
+    a('hdark', tube([[...up(p0, 0.55), 0.03 * K.mane, 0.06 * K.mane], [...up(p1, 0.85), 0.03 * K.mane, 0.08 * K.mane], [...up(p2, 0.9), 0.025 * K.mane, 0.07 * K.mane], [...H(0.02).map((v, i) => v + (i === 1 ? hr * 0.75 : 0)), 0.02, 0.03]], 6));
   }
-  if (K.beard) a('hide', tube([[...H(0.82).map((v, i) => v - (i === 1 ? hr * 0.5 : 0)), 0.02], [...H(0.75).map((v, i) => v - (i === 1 ? hr * 1.4 : 0)), 0.004]], 5));
-  if (K.dewlap) hide(tube([[0, nb[1] - B * 0.65, nb[2] + 0.05, B * 0.12, B * 0.3], [0, (nb[1] + hd[1]) / 2 - B * 0.65 * K.dewlap, (nb[2] + hd[2]) / 2, B * 0.08, B * 0.35 * K.dewlap], [0, hd[1] - hr * 0.8, hd[2] + 0.02, B * 0.05, B * 0.12]], 6));
+  if (K.beard) a('hhide', tube([[...H(0.82).map((v, i) => v - (i === 1 ? hr * 0.5 : 0)), 0.02], [...H(0.75).map((v, i) => v - (i === 1 ? hr * 1.4 : 0)), 0.004]], 5));
+  if (K.dewlap) head(tube([[0, nb[1] - B * 0.65, nb[2] + 0.05, B * 0.12, B * 0.3], [0, (nb[1] + hd[1]) / 2 - B * 0.65 * K.dewlap, (nb[2] + hd[2]) / 2, B * 0.08, B * 0.35 * K.dewlap], [0, hd[1] - hr * 0.8, hd[2] + 0.02, B * 0.05, B * 0.12]], 6));
   // the hump (over the shoulders, or the camel's in the middle) and the yak's long skirt of hair
   if (K.hump) { const z = kind === 'camel' ? -A * 0.05 : -A * 0.55, h = K.hump; hide(slathe([[B * 0.78, 0], [B * 0.62, h * 0.55], [B * 0.32, h * 0.92], [0.001, h]], 10).scale(0.75, 1, kind === 'camel' ? 1.5 : 1.0).translate(0, by + B * 0.75, z)); }
   if (K.skirt) a('dark', tube([[0, by - B * 0.7, A * 0.7, B * 0.95, B * 0.4], [0, by - B * 0.85, 0, B * 1.08, B * 0.45], [0, by - B * 0.8, -A * 0.7, B * 1.0, B * 0.45]], 10));
@@ -137,9 +138,12 @@ export function animal(el, { bag, col }) {
   const rand = rng(el.seed), kind = BEASTS[el.kind] ? el.kind : 'goat', K = BEASTS[kind], m = el.mat ?? K.mats[Math.floor(rand() * K.mats.length)];
   const graze = el.graze ?? (K.graze && rand() < 0.35), size = 0.92 + rand() * 0.16, fat = 0.94 + rand() * 0.12;
   const put = placer(el, bag, size, [fat, 1, 1]), shade = 0.85 + rand() * 0.25;
-  const P = assembly(`beast|${kind}|${graze ? 'g' : ''}`, (a) => build(K, kind, graze, a));
-  put(m, P.hide.clone(), shade);
-  if (P.dark) put(m === 'hide_black' ? 'hide_black' : kind === 'yak' || K.tail === 'hair' && m !== 'hide_tan' ? 'hide_black' : 'hide_brown', P.dark.clone(), m === 'hide_black' ? 0.8 : 0.6);
+  // the body (legs, tail, hump) is the same whatever the stance; the neck and head are the stance's own
+  const P0 = assembly(`beast|${kind}|`, (a) => build(K, kind, false, a)), P = graze ? assembly(`beast|${kind}|g`, (a) => build(K, kind, true, a)) : P0;
+  const dk = m === 'hide_black' ? 'hide_black' : kind === 'yak' || K.tail === 'hair' && m !== 'hide_tan' ? 'hide_black' : 'hide_brown', ds = m === 'hide_black' ? 0.8 : 0.6;
+  put(m, P0.hide.clone(), shade); put(m, P.hhide.clone(), shade);
+  if (P0.dark) put(dk, P0.dark.clone(), ds);
+  if (P.hdark) put(dk, P.hdark.clone(), ds);
   if (P.horn) put('ivory', P.horn.clone());
   if (P.pale) put(K.snout ? 'skin_light' : 'hide_white', P.pale.clone());
   const wantGear = el.gear ?? ((kind === 'donkey' && rand() < 0.6) || (kind === 'camel' && rand() < 0.7) || (kind === 'horse' && rand() < 0.4));
