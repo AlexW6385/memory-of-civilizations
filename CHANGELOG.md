@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.58 — Florence's Baptistery and Orsanmichele; Venice's Clock Tower; St Peter's (2026-11-06)
+- The Baptistery in white and green marble with Ghiberti's gilt Gate of Paradise and the two quatrefoil doors; Orsanmichele with its fourteen guild tabernacles as about 1480; Venice's Clock Tower of 1499 with its dial, Magi doors, lion and giants; the old Procuratie after Bellini; the Piazzetta's lion and St Theodore on their columns; St Peter's front by Maderno with the Loggia of the Blessings and its inscription; St Peter's walkable inside: coffered nave, crossing piers with saints, the dome with its inscription, Bernini's baldacchino and the Cathedra Petri.
+
 ## v9.57 — Rapa Nui's walking moai; the pōwhiri (2026-11-06)
 - Coral and obsidian eyes on the Tongariki moai; a moai walked upright by three rope teams along its road from the quarry; plank canoes with fishermen; bananas in the manavai; people on the plaza; at the pā a pōwhiri before the chief's house (elders on the paepae, the caller, the visitors at the gate, the challenger with taiaha and dart), a hāngī with an open and a covered oven, weavers and flax, fish racks, a waka being hollowed, warriors on the fighting stages.
 
