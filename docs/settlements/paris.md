@@ -50,6 +50,8 @@ About 2,300 houses in rows. [inferred]
 
 **A tavern and a workshop to enter (L3, built).** The two timber houses nearest the arrival are open on the ground floor (DESIGN §4.3): a wide door in the stone front, a floor of flags, the beams of the floor above. The tavern: trestle tables with benches, jugs and cups, the hearth with its jambs, hood and pot, casks on a stand, a shelf of jugs. The joiner's workshop: the bench with its vice and shavings, a half-made chest, a trestle, planks stacked along the wall, tools hung on a rail, a chest of tools, shavings on the floor [inferred: the trades of the Cité's streets as the 13th-century crafts were practised].
 
+**House detail (vernacular `house_timber`).** Each storey's windows on its own jettied face, framed, with a mullion (some shuttered); the jetty 0.3–0.45 m by house; a plank door under a stone lintel in the stone storey; roof slabs with eave and verge boards; a stone chimney stack on some houses [inferred].
+
 ## 6. Ground and water
 
 Streets of mud and paving; gardens with fruit trees; willows and reeds on the banks; the Seine. [inferred]

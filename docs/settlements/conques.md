@@ -48,6 +48,8 @@ About 300 houses on the slope. [inferred]
 
 **Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): the hearth against the end wall with its pot, a table and bench, a chest, a bed of boards with straw; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
 
+**House detail (vernacular `house_rouergue`).** Small windows (0.6–0.75 m) in yellow-stone frames with plank shutters, open or closed; doors under stone lintels with a step; dressed yellow quoins at the corners of the schist houses; lauze roofs with real thickness and boards under the eaves [inferred].
+
 ## 6. Ground and water
 
 The steep slope of schist and thin soil; gardens and fruit trees near the village; oak and chestnut woods beyond (oak stands in); the rocky river. [inferred]

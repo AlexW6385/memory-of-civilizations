@@ -44,6 +44,8 @@ About 1,000 houses on the islands. [inferred]
 
 **Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): a bacaro-like inn and two homes, furnished as in Florence; a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
 
+**House detail (vernacular `house_med`).** Casement frames in the windows; ground-floor windows behind iron gratings over stone sills; balconies as a slab of Istrian stone on stepped brackets with an iron railing of bars; cornices as deep as the eaves [inferred].
+
 ## 6. Ground and water
 
 Paving of trachyte and brick; a few gardens; the canals and the lagoon. [inferred]

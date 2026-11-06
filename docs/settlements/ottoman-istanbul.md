@@ -52,6 +52,8 @@ About 700 timber houses. [inferred]
 
 **Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): three houses with the sedir (the raised divan) round the walls, rugs, the brass tray on its stand, a hanging lamp, a painted chest; a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
 
+**House detail (vernacular `house_med`).** The cumba as a closed bay on stepped brackets with a row of sash windows round it, their lower parts behind wooden lattice (kafes), a cornice board above; casement frames; iron-grated ground-floor windows; cornices as deep as the eaves [inferred].
+
 ## 6. Ground and water
 
 Paved courts; gardens with cypresses and plane trees. [inferred]

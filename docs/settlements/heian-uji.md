@@ -41,6 +41,8 @@ About 200 houses. [inferred]
 
 **Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): furnished as in Nara: the raised floor, the sunken hearth, mats, a low table, a chest, a shelf; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
 
+**House detail (vernacular `house_japan`).** The timber frame shown: corner posts, posts between the bays, the sill beam on the stones and the head beam; windows and a gable vent of wooden lattice (shitomi-like); deep eaves with their boards underneath; thatch ridges with crossed poles; some roofs of boards held down by poles and stones — early town roofs were of shingles weighted with stones or of thatch [stated: JAANUS, "machiya"; inferred: the details].
+
 ## 6. Ground and water
 
 Gravel and moss in the garden; the pond; the pebbled banks of the swift river; cedar, maple and pine on the hills. [inferred]
@@ -65,3 +67,4 @@ As for the hall (`docs/buildings/byodo-in-phoenix-hall.md` §9).
 - [Ujigami Shrine — Wikipedia](https://en.wikipedia.org/wiki/Ujigami_Shrine)
 - [Phoenix (Hō-ō) Statues — MLIT (JTA multilingual texts)](https://www.mlit.go.jp/tagengo-db/R1-00389.html)
 - [Ujibashi Bridge — GLTJP](https://www.gltjp.com/en/article/item/20524/)
+- [machiya — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/2637)

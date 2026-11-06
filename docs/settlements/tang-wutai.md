@@ -36,6 +36,8 @@ About 120 houses in the valley. [inferred]
 
 **Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): the kang (the heated brick bed) along the back wall with its mat and low table, the stove feeding it with its pot, glazed water jars, a chest; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
 
+**House detail (vernacular `house_china`).** Windows in red timber frames with paper lattice and brick sills; plank doors in frames under a lintel with a step; on earth-walled houses a grey-brick dado, corner piers and a band under the eaves; roofs with real thickness, boards under the eaves and verges, the ridge with raised ends; on most houses the kang's brick flue rising at one gable end [inferred].
+
 ## 6. Ground and water
 
 Loess and grass; millet fields; pines and junipers on the hills; poplars and jujubes in the village. [inferred]
@@ -57,7 +59,6 @@ As for the hall (`docs/buildings/foguang-east-hall.md` §9).
 - **The dhāraṇī pillar of 857.** 3.24 m, hexagonal, built in 857 recording the hall's construction [stated: Wikipedia (wikiwand) "Foguang Temple"]. Ours, before the hall on the upper terrace (where the hall plan had a simple stand-in): an octagonal base of three tiers with niches round its waist, an up-turned lotus seat of sixteen petals, the hexagonal shaft with two bands, the canopy with a swagged drapery and tassels at its corners, a short drum, a lotus and the pearl [inferred: the usual Tang form of dhāraṇī pillars, see the Wikipedia article "Dharani pillar"].
 - **The Zushi pagoda.** South of the Great East Hall; white, hexagonal, 6 m; the first storey holds a hexagonal chamber, the second is purely decorative; lotus petals; the steeple carries a flower-shaped vase [stated: Wikipedia (wikiwand)]. Ours: on the upper terrace south of the hall (the earlier octagonal stand-in on the slope to the north is removed): a brick plinth, the white first storey with its chamber door on the west under a flame-shaped arch of brick [inferred: the arch, and the door's face], an eave of corbelled courses stepping out and back, a band of lotus petals as the seat of the second storey, its blind doors, a small corbelled eave, a lotus bud and the vase.
 - **Monks.** Tang monks were called the "black-robed" (*ziyi*), the kasaya over the robe of a dark reddish brown [inferred from thepaper's account of kasaya colours and the term]. Ours: monks in black or grey robes with a brown kasaya sash and shaven heads at the pillar, at the pagoda, on the hall's platform, on the middle terrace and in the courtyard; a few lay pilgrims in blue, one with an offering basket.
-
 
 ## Sources
 

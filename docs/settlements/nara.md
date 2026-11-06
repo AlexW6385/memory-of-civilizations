@@ -47,6 +47,8 @@ About 300 houses on the capital's grid. [inferred]
 
 **Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): a raised board floor with the sunken hearth and its kettle on a hook, straw mats, a low table, a lacquered chest, a hanging shelf of pots; a step up to the door, the leaf open inside, a ceiling of boards on beams [inferred: the period's village interiors].
 
+**House detail (vernacular `house_japan`).** As at Uji: the visible frame of posts, sill and head beams, lattice windows and gable vent, deep eaves with boards beneath, thatch ridges with crossed poles, some board roofs held by poles and stones [stated: JAANUS, "machiya": shingles weighted with stones or thatch; inferred: the details].
+
 ## 6. Ground and water
 
 White gravel courts; lawns; Wakakusa's open grass; cedar and maple woods. [inferred]
@@ -72,3 +74,4 @@ Gagaku as at the eye-opening in 752 (the shō, the hichiriki, the biwa); chantin
 - [Bronze lantern, Tōdai-ji — World History Encyclopedia](https://www.worldhistory.org/image/6538/bronze-lantern-todaiji/)
 - [Ruins of the Tōdai-ji east pagoda — Ancient Pages](https://www.ancientpages.com/?p=3397)
 - [Todai-ji — University of Idaho, Architecture 499](https://www.webpages.uidaho.edu/arch499/nonwest/japan3/Todai-ji.htm)
+- [machiya — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/2637)
