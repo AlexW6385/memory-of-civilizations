@@ -10,7 +10,8 @@
 // boxTop (how high the dressed rock behind the façade rises; the cliff is built above it),
 // flank (the dressed rock either side), y (its foot) }
 
-import { fromTriangles } from '../../core/geom.js';
+import { fromTriangles, lathe } from '../../core/geom.js';
+import { floralCapital } from './khazneh.js';
 import { orientedBox } from '../../core/build.js';
 
 const R = 'sandstone_rose', O = 'opening';
@@ -86,7 +87,7 @@ export function crowTomb(el, { bag, col: C }) {
   bag.add(R, B(-W / 2 - fl, -back, W / 2 + fl, 0, -2, boxTop));
   C.segment(P(-W / 2 - fl, (fv - back) / 2), P(W / 2 + fl, (fv - back) / 2), back + fv, y0 - 2, y0 + H);
   // standing alone (not under a built cliff): the rock above, set back behind the crow-steps
-  if (el.top) bag.add(R, B(-W / 2 - fl, -back, W / 2 + fl, -1.4, boxTop, el.top));
+  if (el.top) bag.add(R, B(-W / 2 - fl, -back, W / 2 + fl, -1.4, boxTop, el.top - y0));
   // the plinth and the front, the door's recess left open in it
   const dw = Math.max(1.3, Math.min(2.3, W * 0.2)), dh = Math.min(4.4, Math.max(2.6, H * 0.3)), pl = 0.4;
   bag.add(R, B(-W / 2 - 0.25, 0, W / 2 + 0.25, fv + 0.25, -0.4, pl));
@@ -135,5 +136,134 @@ export function crowTomb(el, { bag, col: C }) {
     const hw = Math.min(W * 0.32, 3.6);
     merlon(bag, B, -W / 2, -W / 2 + hw, ya, 4, (H - ya) / 4, mv0 - 0.1, mv1, -1);
     merlon(bag, B, W / 2 - hw, W / 2, ya, 4, (H - ya) / 4, mv0 - 0.1, mv1, 1);
+  }
+}
+
+// ---- the Royal Tombs in the east cliff (docs/settlements/petra.md §10)
+
+/** An engaged column at u standing at v (its axis; half sunk in the façade), with base, shaft and capital (floral, or the plain Nabataean block). */
+function halfColumn(bag, P, y0, u, v, ya, yb, r, floral) {
+  const [x, z] = P(u, v), capH = Math.min(1.4, (yb - ya) * 0.1);
+  bag.add(R, lathe([[r * 1.35, 0], [r * 1.35, 0.15], [r * 1.12, 0.3], [r * 1.2, 0.42], [r, 0.55]], 12, null, x, y0 + ya, z));
+  bag.add(R, lathe([[r, 0], [r * 0.9, yb - ya - 0.55 - capH]], 12, null, x, y0 + ya + 0.55, z));
+  if (floral) floralCapital(bag, R, x, y0 + yb - capH, z, r * 0.9, capH);
+  else { bag.add(R, lathe([[r * 0.9, 0], [r * 1.0, capH * 0.5], [r * 1.25, capH * 0.6], [r * 1.25, capH]], 12, null, x, y0 + yb - capH, z)); }
+}
+/** An entablature across the façade from u0 to u1 at y: architrave (two fasciae), frieze, cornice on a cyma. */
+function entablature(bag, P, B, y0, u0, u1, y, fv, frieze = 0.9) {
+  bag.add(R, B(u0 - 0.05, 0, u1 + 0.05, fv + 0.32, y, y + 0.35));
+  bag.add(R, B(u0 - 0.08, 0, u1 + 0.08, fv + 0.4, y + 0.35, y + 0.7));
+  bag.add(R, B(u0, 0, u1, fv + 0.3, y + 0.7, y + 0.7 + frieze));
+  moulding(bag, P, y0 + y + 0.7 + frieze, [[fv + 0.3, 0], [fv + 0.45, 0.1], [fv + 0.62, 0.28], [fv + 0.95, 0.42], [fv + 0.95, 0.62]], u0 - 0.3, u1 + 0.3, 0);
+  return y + 0.7 + frieze + 0.62;
+}
+/** A triangular pediment from u0 to u1 on y, rising rise: the tympanum and its two raking cornices. */
+function pedimentU(bag, P, y0, u0, u1, y, rise, fv) {
+  const T = [], V = (u, yy, v) => { const [x, z] = P(u, v); return [x, y0 + yy, z]; }, m = (u0 + u1) / 2;
+  const tri = (v) => [V(u0, y, v), V(u1, y, v), V(m, y + rise, v)];
+  const f = tri(fv + 0.2), b = tri(0);
+  T.push(...f[0], ...f[1], ...f[2], ...b[0], ...b[2], ...b[1]);
+  for (const [i, j] of [[0, 1], [1, 2], [2, 0]]) T.push(...f[i], ...b[i], ...b[j], ...f[i], ...b[j], ...f[j]);
+  bag.add(R, fromTriangles(orientOut(T)));
+  // the raking cornices: bars along each slope, standing out further
+  const L = Math.hypot(m - u0, rise), th = 0.45;
+  for (const s of [-1, 1]) {
+    const ua = s < 0 ? u0 - 0.35 : m, ya = s < 0 ? y - 0.1 : y + rise + 0.05, ub = s < 0 ? m : u1 + 0.35, yb = s < 0 ? y + rise + 0.05 : y - 0.1;
+    const nu = -(yb - ya) / L * th * (s < 0 ? 1 : 1), ny = Math.abs((ub - ua) / L * th);
+    const q = [[ua, ya], [ub, yb], [ub + (s < 0 ? -nu : nu) * 0, yb + ny], [ua, ya + ny]], C = [];
+    for (const v of [0, fv + 0.55]) C.push(q.map(([u, yy]) => V(u, yy, v)));
+    const [a, c] = C, Tq = [];
+    Tq.push(...c[0], ...c[1], ...c[2], ...c[0], ...c[2], ...c[3], ...a[0], ...a[2], ...a[1], ...a[0], ...a[3], ...a[2]);
+    for (let k = 0; k < 4; k++) { const k2 = (k + 1) % 4; Tq.push(...c[k], ...a[k], ...a[k2], ...c[k], ...a[k2], ...c[k2]); }
+    bag.add(R, fromTriangles(orientOut(Tq)));
+  }
+}
+function orientOut(T) {
+  let cx = 0, cy = 0, cz = 0; const n = T.length / 3;
+  for (let i = 0; i < T.length; i += 3) { cx += T[i] / n; cy += T[i + 1] / n; cz += T[i + 2] / n; }
+  const out = [];
+  for (let i = 0; i < T.length; i += 9) {
+    const a = T.slice(i, i + 3), b = T.slice(i + 3, i + 6), c = T.slice(i + 6, i + 9);
+    const nx = (b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1]), ny = (b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2]), nz = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+    const mx = (a[0] + b[0] + c[0]) / 3 - cx, my = (a[1] + b[1] + c[1]) / 3 - cy, mz = (a[2] + b[2] + c[2]) / 3 - cz;
+    if (nx * mx + ny * my + nz * mz < 0) out.push(...a, ...c, ...b); else out.push(...a, ...b, ...c);
+  }
+  return out;
+}
+/** A framed door at u (width dw, height dh) from y: the recess with the dark door, jambs and lintel, and a crown (pediment, arch or flat cornice). */
+function door(bag, P, B, y0, u, dw, dh, y, fv, crown) {
+  bag.add(O, B(u - dw / 2, fv - 0.02, u + dw / 2, fv + 0.01, y, y + dh));
+  for (const s of [-1, 1]) bag.add(R, B(u + s * dw / 2, fv, u + s * (dw / 2 + 0.35), fv + 0.14, y, y + dh + 0.35));
+  bag.add(R, B(u - dw / 2 - 0.35, fv, u + dw / 2 + 0.35, fv + 0.14, y + dh, y + dh + 0.35));
+  if (crown === 'pediment') { bag.add(R, B(u - dw / 2 - 0.6, fv, u + dw / 2 + 0.6, fv + 0.28, y + dh + 0.35, y + dh + 0.6)); pedimentU(bag, P, y0, u - dw / 2 - 0.6, u + dw / 2 + 0.6, y + dh + 0.6, dw * 0.28, fv); }
+  else if (crown === 'arch') {
+    const cy = y + dh + 0.35, r = dw / 2 + 0.6;
+    for (let k = 0; k < 7; k++) { const a0 = Math.PI * k / 7, a1 = Math.PI * (k + 1) / 7, [ua, ya] = [u + Math.cos(a0) * r, cy + Math.sin(a0) * r], [ub, yb] = [u + Math.cos(a1) * r, cy + Math.sin(a1) * r], c = P((ua + ub) / 2, fv + 0.12); bag.add(R, orientedBox(P(ua, fv + 0.12), P(ub, fv + 0.12), 0.28, y0 + Math.min(ya, yb), y0 + Math.max(ya, yb) + 0.3)); void c; }
+  } else bag.add(R, B(u - dw / 2 - 0.55, fv, u + dw / 2 + 0.55, fv + 0.3, y + dh + 0.35, y + dh + 0.6));
+}
+
+export function royalTomb(el, { bag, col: C }) {
+  const [x, z] = el.at, y0 = el.y ?? 0, { P, B } = frame(x, z, el.dir, y0), W = el.w, H = el.h, back = el.back ?? 20, fl = el.flank ?? 6, top = (el.top ?? H + 15) - y0, fv = 0.4;
+  bag.add(R, B(-W / 2 - fl, -back, W / 2 + fl, 0, -2, top));
+  C.segment(P(-W / 2 - fl, (fv - back) / 2), P(W / 2 + fl, (fv - back) / 2), back + fv, y0 - 2, y0 + top);
+  bag.add(R, B(-W / 2 - 0.3, 0, W / 2 + 0.3, fv + 0.4, -0.5, 0.5));                    // the plinth
+  const kind = el.kind;
+  if (kind === 'urn') {
+    // the Urn Tomb: corner pilasters and two engaged columns, the frieze with four busts, the attic, the pediment and its urn
+    const y1 = H * 0.55, dw = Math.min(3, W * 0.17), dh = Math.min(6.5, y1 * 0.45);
+    bag.add(R, B(-W / 2, 0, W / 2, fv, 0.5, y1));
+    for (const s of [-1, 1]) { pilaster(bag, B, s * (W / 2 - 0.5), 1.0, 0.5, y1, fv, fv + 0.3); halfColumn(bag, P, y0, s * W * 0.17, fv, 0.5, y1, 0.6, false); }
+    door(bag, P, B, y0, 0, dw, dh, 0.5, fv, 'pediment');
+    const ye = entablature(bag, P, B, y0, -W / 2, W / 2, y1, fv, 1.4);
+    for (let i = 0; i < 4; i++) { const u = -W / 2 + W * (i + 0.5) / 4; bag.add(R, B(u - 0.6, fv + 0.3, u + 0.6, fv + 0.42, y1 + 0.85, y1 + 1.95)); const [bx, bz] = P(u, fv + 0.42); bag.add(R, lathe([[0.3, 0], [0.38, 0.25], [0.28, 0.55], [0.18, 0.6], [0.22, 0.8], [0.15, 0.95], [0.001, 1.0]], 8, null, bx, y0 + y1 + 0.9, bz)); }
+    // the attic with its short pilasters
+    const ya = ye + H * 0.12;
+    bag.add(R, B(-W / 2 + 0.2, 0, W / 2 - 0.2, fv, ye, ya));
+    for (let i = 0; i <= 6; i++) { const u = -W / 2 + 0.6 + i * (W - 1.2) / 6; bag.add(R, B(u - 0.3, fv, u + 0.3, fv + 0.18, ye, ya - 0.25)); }
+    bag.add(R, B(-W / 2, 0, W / 2, fv + 0.35, ya - 0.25, ya));
+    const rise = Math.min(H - ya - 2.2, W * 0.2);
+    pedimentU(bag, P, y0, -W / 2 + 0.3, W / 2 - 0.3, ya, rise, fv);
+    const [ux, uz] = P(0, fv * 0.5);
+    bag.add(R, lathe([[0.7, 0], [0.5, 0.3], [0.95, 0.9], [1.0, 1.5], [0.7, 1.9], [0.4, 2.0], [0.5, 2.15], [0.001, 2.35]], 14, null, ux, y0 + ya + rise - 0.2, uz));
+  } else if (kind === 'corinthian') {
+    // the Corinthian Tomb: eight engaged columns below with a pediment over the middle; above, after the Khazneh, a tholos between two half-pediments
+    const y1 = H * 0.42, dw = 2.4, dh = Math.min(5.5, y1 * 0.5);
+    bag.add(R, B(-W / 2, 0, W / 2, fv, 0.5, y1));
+    for (let i = 0; i < 8; i++) halfColumn(bag, P, y0, -W / 2 + 0.8 + i * (W - 1.6) / 7, fv, 0.5, y1, 0.48, true);
+    for (const u of [-W * 0.32, 0, W * 0.32]) door(bag, P, B, y0, u, u ? 1.5 : dw, u ? dh * 0.7 : dh, 0.5, fv, u ? 'flat' : 'pediment');
+    let ye = entablature(bag, P, B, y0, -W / 2, W / 2, y1, fv, 0.9);
+    pedimentU(bag, P, y0, -W * 0.22, W * 0.22, ye, 2.4, fv);
+    const yu = ye + 2.6, yt = H - 7;
+    bag.add(R, B(-W / 2 + 0.4, 0, W / 2 - 0.4, fv, ye, yu));
+    for (const s of [-1, 1]) {
+      const uo = s * (W / 2 - 0.6), ui = s * (W / 2 - 7);
+      for (const u of [uo, ui]) halfColumn(bag, P, y0, u, fv, yu, yt, 0.42, true);
+      bag.add(R, B(Math.min(uo, ui) - 0.5, 0, Math.max(uo, ui) + 0.5, fv, yu, yt));
+      entablature(bag, P, B, y0, Math.min(uo, ui) - 0.5, Math.max(uo, ui) + 0.5, yt, fv, 0.6);
+      bag.add(R, B(Math.min(uo, ui), -0.2, Math.max(uo, ui), fv * 0.6, yt + 1.9, yt + 3.4));
+    }
+    const [tx, tz] = P(0, -0.2);
+    bag.add(R, lathe([[2.6, 0], [2.6, yt - yu]], 20, null, tx, y0 + yu, tz));
+    for (const a of [-80, -40, 0, 40, 80]) { const t = a * Math.PI / 180; halfColumn(bag, P, y0, Math.sin(t) * 3.2, -0.2 + Math.cos(t) * 3.2, yu, yt, 0.38, true); }
+    bag.add(R, lathe([[3.7, 0], [3.7, 1.2], [0.001, 1.2]], 20, null, tx, y0 + yt, tz));
+    bag.add(R, lathe([[3.4, 0], [0.8, 3.2], [0.001, 3.3]], 20, null, tx, y0 + yt + 1.2, tz));
+    bag.add(R, lathe([[0.5, 0], [0.75, 0.8], [0.6, 1.5], [0.3, 1.7], [0.001, 1.9]], 12, null, tx, y0 + yt + 4.4, tz));
+  } else {
+    // the Palace Tomb: four doors in the lowest storey between engaged pilasters, the two in the middle twice as wide and under
+    // pediments, the outer two under arches; above, a storey of eighteen engaged columns, and a third of pilasters, its upper left
+    // corner built of masonry where the rock gave out
+    const s1 = H * 0.36, s2 = H * 0.68, ys = [0.5, s1, s2, H - 1.2];
+    bag.add(R, B(-W / 2, 0, W / 2, fv, 0.5, s1));
+    for (let i = 0; i <= 12; i++) pilaster(bag, B, -W / 2 + 0.6 + i * (W - 1.2) / 12, 0.9, 0.5, s1 - 0.1, fv, fv + 0.28);
+    const dh = Math.min(7, s1 * 0.5);
+    for (const [u, crown, dw] of [[-W * 0.34, 'arch', 1.8], [-W * 0.115, 'pediment', 3.4], [W * 0.115, 'pediment', 3.4], [W * 0.34, 'arch', 1.8]]) door(bag, P, B, y0, u, dw, crown === 'arch' ? dh * 0.8 : dh, 0.5, fv + 0.28, crown);
+    for (let s = 1; s < 3; s++) {
+      const ya = entablature(bag, P, B, y0, -W / 2, W / 2, ys[s] - 1.6, fv, 0.3), yb = ys[s + 1] - (s === 2 ? 0 : 1.6), n = s === 1 ? 18 : 18;
+      bag.add(R, B(-W / 2 + 0.3, 0, W / 2 - 0.3, fv, ya, yb));
+      for (let i = 0; i < n; i++) { const u = -W / 2 + 1.2 + i * (W - 2.4) / (n - 1); if (s === 1) halfColumn(bag, P, y0, u, fv, ya, yb, 0.42, false); else pilaster(bag, B, u, 0.7, ya, yb - 0.1, fv, fv + 0.24); }
+    }
+    // the masonry at the upper left (as seen): coursed ashlar instead of the living rock (+u is the viewer's left)
+    bag.add('sandstone_rose_ashlar', B(W / 2 - W * 0.28, -0.5, W / 2 + 0.02, fv + 0.27, s2 + 1, H - 1.25));
+    bag.add(R, B(-W / 2 - 0.2, 0, W / 2 + 0.2, fv + 0.5, H - 1.2, H));
   }
 }

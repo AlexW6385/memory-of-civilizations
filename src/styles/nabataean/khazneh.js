@@ -118,7 +118,13 @@ function roundel(c, n, t, r, seg = 16) {
 export function khazneh(el, { bag, col: C }) {
   const [x, z] = el.at, { P, B, Rc } = frame(x, z, el.dir), W = el.w ?? 24.9, H = el.h ?? 38.77, back = el.back ?? 26, top = el.top ?? H + 20;
   const hw = W / 2, pu = 6.6, pv = -3.5;                                                   // the portico's half-width and back wall
-  const rock = (u0, v0, u1, v1, y0, y1) => { bag.add(R, B(u0, v0, u1, v1, y0, y1)); C.rect(Rc(u0, v0, u1, v1), y0, y1); };
+  const rock0 = (u0, v0, u1, v1, y0, y1) => { bag.add(R, B(u0, v0, u1, v1, y0, y1)); C.rect(Rc(u0, v0, u1, v1), y0, y1); };
+  // above `cliff` (when the cliff over the façade is built round it) the dressed rock stands 3 m back, behind the built face
+  const rock = (u0, v0, u1, v1, y0, y1) => {
+    if (!el.cliff || y1 <= el.cliff) return rock0(u0, v0, u1, v1, y0, y1);
+    if (y0 < el.cliff) rock0(u0, v0, u1, v1, y0, el.cliff);
+    if (v0 < -3) rock0(u0, v0, u1, Math.min(v1, -3), Math.max(y0, el.cliff), y1);
+  };
   // the rock the façade is cut from, the portico hollowed in it
   const fl = el.flank ?? 25;                                                  // the rock either side (the cliff itself may be built round it)
   rock(-hw - fl, -back, -hw, 0, -2, top); rock(hw, -back, hw + fl, 0, -2, top);

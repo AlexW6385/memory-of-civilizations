@@ -24,6 +24,10 @@ export const siqHalf = (x) => SIQ.w / 2 + SIQ_WALL.wide * smooth(SIQ_WALL.x1 - 1
 export const PLAZA = { c: [128, -160], r: 20 };
 /** The walls of the square and the Outer Siq are built too (plan.js): the floor runs on under them, this much deeper. */
 export const GORGE_WIDE = 4.5;
+/** The theatre (plan.js): its centre, the radius of its cavea's back and how far behind that the cliff's face stands. */
+export const THEATRE = { c: [84, -44], r1: 34, cliff: 1.8, west: -4 };   // (only east of c.x + west: the cavea's half)
+/** How far (in the valley ellipse's measure) the floor runs on under the built east cliff. */
+export const EAST_WIDE = 0.035;
 /** The rock the Khazneh is cut from (its builder fills it): the ground stays at the floor inside, so that it never shows in the portico. */
 export const KHAZNEH_ROCK = [88, -174, 111, -146];
 export const OUTER = { path: [[128, -160], [126, -120], [108, -82], [80, -52], [40, -20]], w: 34 };
@@ -35,22 +39,28 @@ function segDist(x, z, a, b) { const dx = b[0] - a[0], dz = b[1] - a[1], t = Mat
 export const pathDist = (x, z, p) => { let d = Infinity; for (let i = 0; i + 1 < p.length; i++) d = Math.min(d, segDist(x, z, p[i], p[i + 1])); return d; };
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 /** How open the ground is (1 on a gorge or valley floor, 0 on the massif). */
-export function open(x, z) {
-  const hs = siqHalf(x);
+export function open(x, z, W = GORGE_WIDE) {
+  const hs = W ? siqHalf(x) : SIQ.w / 2;
   let m = smooth(hs + 3, hs, pathDist(x, z, SIQ_LINE));
-  m = Math.max(m, smooth(PLAZA.r + GORGE_WIDE + 4, PLAZA.r + GORGE_WIDE, Math.hypot(x - PLAZA.c[0], z - PLAZA.c[1])));
-  m = Math.max(m, smooth(OUTER.w / 2 + GORGE_WIDE + 6, OUTER.w / 2 + GORGE_WIDE, pathDist(x, z, OUTER.path)));
-  if (inRect(KHAZNEH_ROCK, x, z)) m = 1;
-  const e = Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]);
-  m = Math.max(m, smooth(1.08, 1.0, e));
+  m = Math.max(m, smooth(PLAZA.r + W + 4, PLAZA.r + W, Math.hypot(x - PLAZA.c[0], z - PLAZA.c[1])));
+  m = Math.max(m, smooth(OUTER.w / 2 + W + 6, OUTER.w / 2 + W, pathDist(x, z, OUTER.path)));
+  // the theatre's cavea, cut back into the rock, its cliff built behind it
+  m = Math.max(m, smooth(THEATRE.r1 + THEATRE.cliff + W + 3, THEATRE.r1 + THEATRE.cliff + W, Math.hypot(x - THEATRE.c[0], z - THEATRE.c[1])) * smooth(THEATRE.c[0] + THEATRE.west - W - 3, THEATRE.c[0] + THEATRE.west - W, x));
+  if (W && inRect(KHAZNEH_ROCK, x, z)) m = 1;
+  // the valley; its east cliff (the Royal Tombs) is built, the floor running on under it
+  const e = Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]), d = W ? EAST_WIDE * smooth(30, 50, x) * smooth(-30, -12, z) : 0;
+  m = Math.max(m, smooth(1.08 + d, 1.0 + d, e));
   return m;
 }
+/** Behind the built cliffs: open ground under them that is never seen (nothing is planted there). */
+export const behindWalls = (x, z) => open(x, z) > 0.5 && open(x, z, 0) < 0.97;
 /** The valley's slopes: the floor rises gently toward its edge (houses climb them); the east wadi rises to the rim. */
 export function floorY(x, z) {
   const e = Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]);
-  const valley = e < 1.1 ? 10 * smooth(0.55, 1.0, e) : 0;
+  // (but level along the colonnaded street and where the Outer Siq opens into the valley, so that neither is buried)
+  const valley = e < 1.1 ? 10 * smooth(0.55, 1.0, e) * smooth(OUTER.w / 2 + 4, OUTER.w / 2 + 36, pathDist(x, z, OUTER.path)) * smooth(9, 24, Math.abs(z - STREET.a[1])) : 0;
   const wadi = x > 268 ? RIM * smooth(268, 324, x) : 0;
-  return Math.max(valley * (x < 100 ? 1 : 0), wadi);
+  return Math.max(valley, wadi);
 }
 export function height(x, z) {
   if (Math.hypot(x, z) > RADIUS) return RIM;

@@ -2,7 +2,7 @@
 // mouth, the Street of Façades, the theatre, the Royal Tombs in the east cliff, the colonnaded
 // street, the Great Temple and Qasr al-Bint.
 
-import { PLAZA, OUTER, SIQ, STREET, RIM, VALLEY, SIQ_LINE, SIQ_WALL, KHAZNEH_ROCK, height, pathDist } from './layout.js';
+import { PLAZA, OUTER, SIQ, STREET, RIM, VALLEY, SIQ_LINE, SIQ_WALL, KHAZNEH_ROCK, THEATRE, height, pathDist } from './layout.js';
 
 const E = [];
 // the Siq's walls, sampled every 2 m along its line from the east down to the square (docs/settlements/petra.md §10)
@@ -30,10 +30,23 @@ const E = [];
   E.push({ t: 'siq_walls', face: SIQ_WALL.face, sides, niches: [[ni, 14], [si, 31], [ni, 52], [si, 64]], camel: [si, 44], clear: [[100, -200, 168, -120]] });
 }
 // the Khazneh in the west wall of the little square, facing the Siq's mouth
-E.push({ t: 'khazneh', at: [PLAZA.c[0] - PLAZA.r + 2, PLAZA.c[1]], dir: 'e', w: 24.9, h: 38.77, back: 26, top: RIM - 2, flank: 1.5 });
+E.push({ t: 'khazneh', at: [PLAZA.c[0] - PLAZA.r + 2, PLAZA.c[1]], dir: 'e', w: 24.9, h: 38.77, back: 26, top: RIM - 2, flank: 1.5, cliff: 39.6 });
 // the theatre cut into the Outer Siq's east side, facing west
-const THEATRE = { c: [84, -44], r1: 34 };
 E.push({ t: 'theatre', c: THEATRE.c, dir: 'w', r0: 10, r1: THEATRE.r1, rows: 30, span: Math.PI * 1.05 });
+// the Royal Tombs in the eastern cliff of the valley, facing west across it (docs/settlements/petra.md §10): from the north the
+// Palace Tomb (where the cliff runs straightest), the Corinthian Tomb, the Silk Tomb and the Urn Tomb, side by side, each set
+// square to the cliff and standing on the valley's floor where it meets it
+const ROYAL = [];
+{
+  const ell = (z) => VALLEY.c[0] + VALLEY.r[0] * Math.sqrt(Math.max(0, 1 - ((z - VALLEY.c[1]) / VALLEY.r[1]) ** 2));
+  for (const [z, w, h, kind] of [[10, 49, 46, 'palace'], [52, 27.5, 28, 'corinthian'], [76, 13, 20, 'hegr'], [95, 16.5, 26, 'urn']]) {
+    const x = ell(z), gx = (x - VALLEY.c[0]) / VALLEY.r[0] ** 2, gz = (z - VALLEY.c[1]) / VALLEY.r[1] ** 2, gl = Math.hypot(gx, gz), nx = gx / gl, nz = gz / gl;
+    const at = [+(x + nx).toFixed(3), +(z + nz).toFixed(3)], y = +height(x - nx * 4, z - nz * 4).toFixed(3);
+    const boxTop = kind === 'hegr' ? +(h * 0.66).toFixed(2) : h;
+    E.push({ t: 'rock_tomb', at, dir: [-nx, -nz].map((v) => +v.toFixed(5)), w, h, kind, back: 20, top: +(y + h + 0.6).toFixed(3), flank: 1.5, y, ...(kind === 'hegr' ? { boxTop, top: undefined } : {}) });
+    ROYAL.push({ x: at[0], z: at[1], nx, nz, w, base: y + boxTop + 0.15, set: kind === 'hegr' ? 1.6 : 0 });
+  }
+}
 // the walls of the square and of the Outer Siq, built as the Siq's are (the same beds run through them), sampled every
 // 2 m along the edge of the open ground, broken where the Khazneh and the theatre are cut in the rock; the tombs of the
 // Street of Façades stand at the foot of the Outer Siq's west wall, the wall set back and rising from their tops
@@ -42,9 +55,10 @@ E.push({ t: 'theatre', c: THEATRE.c, dir: 'w', r0: 10, r1: THEATRE.r1, rows: 30,
   const taken = (x, z, self) => (self !== 'plaza' && Math.hypot(x - PLAZA.c[0], z - PLAZA.c[1]) < PLAZA.r - 0.5)
     || (self !== 'outer' && pathDist(x, z, OUTER.path) < OUTER.w / 2 - 0.5)
     || (x > 138 && pathDist(x, z, SIQ_LINE) < SIQ.w / 2 - 0.5)
-    || Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]) < 1.02
+    || (self !== 'valley' && Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]) < 1.02)
     || (x > KHAZNEH_ROCK[0] - 4 && x < KHAZNEH_ROCK[2] + 2.6 && Math.abs(z - PLAZA.c[1]) < 13.6)
-    || Math.hypot(x - THEATRE.c[0], z - THEATRE.c[1]) < THEATRE.r1 + 2;
+    || (self !== 'theatre' && Math.hypot(x - THEATRE.c[0], z - THEATRE.c[1]) < THEATRE.r1 + THEATRE.cliff - 0.5 && x > THEATRE.c[0] + THEATRE.west + 0.5)
+    || (self === 'theatre' && x < THEATRE.c[0] + THEATRE.west - 0.5);
   const edges = [];
   // the square's round edge, counter-clockwise from the west
   { const r = PLAZA.r, n = Math.round(2 * Math.PI * r / 2), e = []; for (let k = 0; k < n; k++) { const a = Math.PI + k / n * Math.PI * 2, nx = Math.cos(a), nz = Math.sin(a); e.push([PLAZA.c[0] + nx * r, PLAZA.c[1] + nz * r, nx, nz, 'plaza']); } edges.push({ pts: e, ring: true }); }
@@ -54,6 +68,14 @@ E.push({ t: 'theatre', c: THEATRE.c, dir: 'w', r0: 10, r1: THEATRE.r1, rows: 30,
     for (let i = 0; i + 1 < P.length; i++) { const [ax, az] = P[i], [bx, bz] = P[i + 1], len = Math.hypot(bx - ax, bz - az), k = Math.max(1, Math.round(len / 2)); for (let j = 0; j < k; j++) L.push([ax + (bx - ax) * j / k, az + (bz - az) * j / k]); }
     for (const sg of [-1, 1]) { const e = []; for (let i = 0; i < L.length; i++) { const p = L[Math.max(0, i - 1)], q = L[Math.min(L.length - 1, i + 1)], tl = Math.hypot(q[0] - p[0], q[1] - p[1]), nx = -(q[1] - p[1]) / tl * sg, nz = (q[0] - p[0]) / tl * sg; e.push([L[i][0] + nx * OUTER.w / 2, L[i][1] + nz * OUTER.w / 2, nx, nz, 'outer']); } edges.push({ pts: e, west: e[Math.floor(e.length / 2)][2] < 0 }); }
   }
+  // the cliff behind the theatre's cavea (where it is not open to the Outer Siq or the valley), rising from the top of its parapet
+  { const r = THEATRE.r1 + THEATRE.cliff, n = Math.round(2 * Math.PI * r / 2), e = []; for (let k = 0; k < n; k++) { const a = Math.PI + k / n * Math.PI * 2, nx = Math.cos(a), nz = Math.sin(a); e.push([THEATRE.c[0] + nx * r, THEATRE.c[1] + nz * r, nx, nz, 'theatre']); } edges.push({ pts: e, ring: true, theatre: true }); }
+  // and the straight edge of its cut on the west, where that is not open
+  { const r = THEATRE.r1 + THEATRE.cliff, x = THEATRE.c[0] + THEATRE.west, h = Math.sqrt(r * r - THEATRE.west ** 2), e = []; for (let z = THEATRE.c[1] - h + 1; z < THEATRE.c[1] + h; z += 2) e.push([x, z, -1, 0, 'theatre-w']); edges.push({ pts: e }); }
+  // the valley's east cliff, from the theatre past the Royal Tombs
+  { const e = []; let z = -16; while (z < 112) { const q = Math.sqrt(Math.max(0, 1 - ((z - VALLEY.c[1]) / VALLEY.r[1]) ** 2)), x = VALLEY.c[0] + VALLEY.r[0] * q, gx = (x - VALLEY.c[0]) / VALLEY.r[0] ** 2, gz = (z - VALLEY.c[1]) / VALLEY.r[1] ** 2, gl = Math.hypot(gx, gz);
+      e.push([x, z, gx / gl, gz / gl, 'valley']); z += 2 * Math.abs(gx / gl) + 0.15; }
+    edges.push({ pts: e, royal: true }); }
   // the Street of Façades (docs/settlements/petra.md §10): tombs of the three crow-step kinds side by side along the west edge,
   // each on the edge and facing across the gorge; [kind, width, height]
   const FACADES = [['step', 9, 11], ['pylon', 7, 8.5], ['hegr', 10, 13], ['step', 8, 10.5], ['pylon', 6.5, 8], ['hegr', 11, 14], ['step', 9.5, 12], ['pylon', 7.5, 9]];
@@ -71,7 +93,7 @@ E.push({ t: 'theatre', c: THEATRE.c, dir: 'w', r0: 10, r1: THEATRE.r1, rows: 30,
     }
   }
   const sides = [];
-  for (const { pts, ring, west } of edges) {
+  for (const { pts, ring, west, royal, theatre } of edges) {
     const ok = pts.map(([x, z, , , self]) => !taken(x, z, self));
     let start = 0;
     if (ring) { start = ok.indexOf(false); if (start < 0) start = 0; }
@@ -82,6 +104,8 @@ E.push({ t: 'theatre', c: THEATRE.c, dir: 'w', r0: 10, r1: THEATRE.r1, rows: 30,
           // over a tomb: the face set back behind its crow-steps, rising from the top of the dressed rock
           let set = 0, base = null;
           if (west) for (const t of tombs) { const u = (x - t.x) * -t.nz + (z - t.z) * t.nx; if (Math.abs(u) < t.w / 2 + FL + 0.6) { set = 1.6; base = t.boxTop + 0.15; } }
+          if (royal) for (const t of ROYAL) { const u = (x - t.x) * -t.nz + (z - t.z) * t.nx; if (Math.abs(u) < t.w / 2 + FL + 0.6) { set = t.set; base = t.base - height(x - nx * (face - set), z - nz * (face - set)); } }
+          if (theatre) { const a = Math.atan2(z - THEATRE.c[1], x - THEATRE.c[0]); if (Math.cos(a) > Math.cos(Math.PI * 0.525) - 0.02) base = 30 * 0.42 + 0.3 - height(x - nx * face, z - nz * face); }
           const lx = x - nx * (face - set), lz = z - nz * (face - set), floor = height(lx, lz), top = Math.max(height(x + nx * 9.5, z + nz * 9.5), RIM) - 0.3;
           return [+lx.toFixed(3), +lz.toFixed(3), +nx.toFixed(5), +nz.toFixed(5), +floor.toFixed(3), +top.toFixed(3), +(base === null ? floor - 1 : floor + base).toFixed(3)];
         });
@@ -93,11 +117,12 @@ E.push({ t: 'theatre', c: THEATRE.c, dir: 'w', r0: 10, r1: THEATRE.r1, rows: 30,
     for (let k = 0; k < pts.length; k++) { const i = (start + k) % pts.length; if (ok[i]) run.push(pts[i]); else flush(); }
     flush();
   }
+  // the cliff over the Khazneh, rising from just above its urn, its face 1.5 m behind the façade's plane
+  { const fx = PLAZA.c[0] - PLAZA.r + 2, out = [];
+    for (let z = PLAZA.c[1] - 16; z <= PLAZA.c[1] + 16.01; z += 2) out.push([+(fx + face - 1.5).toFixed(3), +z.toFixed(3), -1, 0, 0, RIM - 0.3, 39.7]);
+    sides.push({ s: 1, pts: out }); }
   E.push({ t: 'siq_walls', face, sides, seed: 7, clear: [[100, -185, 160, -135]] });
 }
-// the Royal Tombs in the eastern cliff of the valley, facing west
-const edge = (z) => VALLEY.c[0] + VALLEY.r[0] * Math.sqrt(Math.max(0, 1 - ((z - VALLEY.c[1]) / VALLEY.r[1]) ** 2));
-for (const [z, w, h, k] of [[-40, 18, 26, 'pediment'], [-16, 22, 32, 'pediment'], [8, 14, 22, 'crowstep'], [48, 40, 40, 'palace']]) E.push({ t: 'rock_tomb', at: [Math.min(edge(z - w / 2), edge(z + w / 2)) + 1, z], dir: 'w', w, h, kind: k, back: 20, top: RIM - 4, flank: 6 });
 // the colonnaded street, the Great Temple on the south, Qasr al-Bint at the west end
 E.push({ t: 'colonnade_street', a: STREET.a, b: STREET.b, w: STREET.w });
 E.push({ t: 'podium_temple', rect: [-72, 40, -44, 74], h: 18, podium: 2.5 });
