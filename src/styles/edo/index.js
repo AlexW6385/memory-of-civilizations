@@ -9,6 +9,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, fromTriangles, orientOutward, rod } from '../../core/geom.js';
 import { rectRoof, withPal, beamTris } from '../ming/index.js';
 import '../qing/index.js';
+import { barredWindows, shachi as shachiFish, karaHafu, samaWall } from './detail.js';
 
 const PL = 'plaster_castle', ST = 'ishigaki', TL = 'tile_grey', WD = 'wood_dark';
 const JPAL = { roof: TL, soffit: PL, plaster: PL, wood: WD, column: WD };
@@ -80,7 +81,8 @@ function dobei(el, { bag, col }) {
   const a = el.a, b = el.b, y = el.y ?? 0, h = el.h ?? 2.2, t = [];
   if (Math.hypot(b[0] - a[0], b[1] - a[1]) < 0.5) return;
   beamTris(t, [a[0], y, a[1]], [b[0], y, b[1]], 0.3, 0.5); bag.add(ST, fromTriangles(t));
-  const t2 = []; beamTris(t2, [a[0], y + 0.5, a[1]], [b[0], y + 0.5, b[1]], 0.24, h - 0.5); bag.add(el.mat ?? PL, fromTriangles(t2));
+  if (el.sama) samaWall(bag, a, b, y + 0.5, y + h, 0.24);
+  else { const t2 = []; beamTris(t2, [a[0], y + 0.5, a[1]], [b[0], y + 0.5, b[1]], 0.24, h - 0.5); bag.add(el.mat ?? PL, fromTriangles(t2)); }
   sweepSection(bag, TL, a, b, [[-0.55, y + h - 0.05], [0, y + h + 0.45], [0.55, y + h - 0.05], [0.3, y + h - 0.15], [-0.3, y + h - 0.15]]);
   col.segment(a, b, 0.6, y, y + h + 0.4);
 }
@@ -90,7 +92,11 @@ function tierBox(bag, col, rect, y, h, nWin) {
   const [x0, z0, x1, z1] = rect;
   bag.add(PL, box(x0, y, z0, x1, y + h, z1));
   col.rect(rect, y, y + h);
-  for (const [a, b] of faces(rect)) { const L = Math.hypot(b[0] - a[0], b[1] - a[1]); windows(bag, a, b, y + h * 0.42, h * 0.3, nWin ?? Math.max(1, Math.round(L / 3.2)), Math.min(1.2, L / 8)); }
+  tierWindows(bag, rect, y, h, nWin);
+}
+/** The barred windows round a tier, at the height and spacing the keep's inside shares. */
+function tierWindows(bag, rect, y, h, nWin) {
+  for (const [a, b] of faces(rect, 0)) { const L = Math.hypot(b[0] - a[0], b[1] - a[1]); barredWindows(bag, a, b, y + h * 0.42, h * 0.3, nWin ?? Math.max(1, Math.round(L / 3.2)), Math.min(1.2, L / 8)); }
 }
 /** chidori-hafu: a triangular gable standing on a roof slope, its plastered face out toward `dir`. */
 function chidori(bag, c, y, w, dir) {
@@ -103,8 +109,9 @@ function chidori(bag, c, y, w, dir) {
   bag.add(PL, fromTriangles(g.concat([g[0], g[1], g[2], g[6], g[7], g[8], g[3], g[4], g[5]])));
 }
 /** shachi: a pair of tile fish at the ends of the top ridge (a tail rising). */
-function shachi(bag, a, b, y) {
-  for (const p of [a, b]) { const t = []; beamTris(t, [p[0], y, p[1]], [p[0], y + 0.01, p[1] + 0.01], 0.25, 1.4); bag.add('tile_dark', fromTriangles(t)); }
+function shachi(bag, a, b, y, h = 1.9) {
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, d = [(b[0] - a[0]) / L, (b[1] - a[1]) / L];
+  shachiFish(bag, a, y, d, h); shachiFish(bag, b, y, [-d[0], -d[1]], h);
 }
 
 /**
@@ -132,17 +139,26 @@ function tenshu(el, { bag, col }) {
   }
   el.tiers.forEach((t, i) => {
     const rect = rects[i], last = i === el.tiers.length - 1;
+    if (H) tierWindows(bag, rect, y, t.h);
     if (H) hollowTier(bag, col, rect, y, t.h, i, { T, below: i ? rects[i - 1] : el.basementRect ?? rect, hole: stairs.find((s) => s.into === i)?.hole, keep: stairs.filter((s) => s.into === i || s.y0 === y).map((s) => s.hole), racks: i < 3 });
     else { tierBox(bag, col, rect, y, t.h); col.floor(rect, y); }
     const ov = last ? 1.6 : 1.9;
     if (last) {
       roof(bag, rect, y + t.h - 0.2, ov, 'xieshan', (Math.min(t.hw, t.hd) + ov) * 0.75);
       const alongZ = t.hd > t.hw, L = (alongZ ? t.hd : t.hw) + ov - (Math.min(t.hw, t.hd) + ov), top = y + t.h - 0.2 + (Math.min(t.hw, t.hd) + ov) * 0.75;
-      shachi(bag, alongZ ? [cx, cz - L] : [cx - L, cz], alongZ ? [cx, cz + L] : [cx + L, cz], top + 0.2);
+      shachi(bag, alongZ ? [cx, cz - L] : [cx - L, cz], alongZ ? [cx, cz + L] : [cx + L, cz], top + 0.2, 1.9 * Math.min(1, Math.min(t.hw, t.hd) / 5.3));
       if (H) { bag.add(WD, box(rect[0] + T, y + t.h - 0.3, rect[1] + T, rect[2] - T, y + t.h, rect[3] - T)); }
     } else {
       roof(bag, rect, y + t.h - 0.2, ov, 'hip', (Math.min(t.hw, t.hd) + ov) * 0.62, H ? { hole: rects[i + 1] } : {});
-      if ((el.chidori || []).includes(i)) {
+      const gables = [...((el.kara || {})[i] || []).map((d) => [d, 'kara']), ...((el.chidori || []).includes(i) ? ['n', 's', 'e', 'w'].filter((d) => !((el.kara || {})[i] || []).includes(d)).map((d) => [d, 'chidori']) : [])];
+      for (const [dir, kind] of gables) {
+        const n = el.tiers[i + 1], E = (dir === 'n' || dir === 's' ? t.hd - n.hd : t.hw - n.hw) + ov, B = Math.min(t.hw, t.hd) + ov, R = B * 0.62, ye = y + t.h - 0.2;
+        const nn = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[dir], half = dir === 'n' || dir === 's' ? n.hd : n.hw;
+        const roofAt = (dd) => ye + R * Math.pow(Math.max(0, Math.min(1, (E - dd) / B)), 1.25);
+        const W = kind === 'kara' ? Math.min(7, (dir === 'n' || dir === 's' ? n.hw : n.hd) * 0.85) : Math.min(6, (dir === 'n' || dir === 's' ? n.hw : n.hd) * 0.9), D = E - 0.45;
+        karaHafu(bag, { c: [cx + nn[0] * half, cz + nn[1] * half], n: nn, W, D, yb: roofAt(D) + 0.45, H: W * (kind === 'kara' ? 0.24 : 0.4), roofAt, kind });
+      }
+      if (false) {
         const n = el.tiers[i + 1], ye = y + t.h - 0.2 + ov * 0.5;
         for (const dir of ['n', 's', 'e', 'w']) {
           const c = dir === 'n' ? [cx, cz - n.hd - 0.2] : dir === 's' ? [cx, cz + n.hd + 0.2] : dir === 'e' ? [cx + n.hw + 0.2, cz] : [cx - n.hw - 0.2, cz];
