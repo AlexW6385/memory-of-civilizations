@@ -356,7 +356,7 @@ function siheyuan(el, ctx) {
   // main house, pots of flowers along its steps
   const yard = new Parts();
   if (rand() < 0.75) { fishJar(yard, rand() < 0.5 ? 'glaze_green' : 'pottery_dark'); const jz = Math.min(z0 + D * 0.67 + 0.9, z1 - dS - 1.4); yard.emit(bag, cx + 3.2, 0.03, jz); col.circle(cx + 3.2, jz, 0.62, 0, 0.9); }
-  const pom = new Parts(); pomegranate(pom, el.seed);
+  const pom = new Parts(); pomegranate(pom, 1 + (el.seed % 3));          // three trees, repeated (so drawn as instances)
   for (const k of [-1, 1]) if (rand() < 0.8) { pom.emit(bag, cx + k * 2.4, 0.03, pz0 + 0.8); col.circle(cx + k * 2.4, pz0 + 0.8, 0.4, 0, 0.7); }
   const pots = new Parts(); flowerPots(pots);
   pots.emit(bag, cx + (rand() < 0.5 ? -5.4 : 3.8), 0.03, pz0 + 0.3);
