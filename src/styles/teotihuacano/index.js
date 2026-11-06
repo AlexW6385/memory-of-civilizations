@@ -7,6 +7,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import '../qing/index.js';
 import { carved, Kit } from '../maya/meso.js';
+import { ttPalace, ttJaguars, ttPlazaAltars, ttCrossAltar, ttGoddess } from './palace.js';
 
 const S = 'stucco_ochre', RD = 'stucco_red', RF = 'limewash_red', RB = 'rubble_teo', HS = 'andesite';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -16,7 +17,7 @@ const stairs = (el, ctx) => STYLES.qing.elements.stairs(el, ctx);
  * tt_stair: a stair { rect, y0, y1, dir (the way up), mat } between its alfardas — the plain sloping
  * balustrades either side, standing a little above the treads and painted red.
  */
-function ttStair(el, { bag, col }) {
+export function ttStair(el, { bag, col }) {
   // the treads, each a block a little deeper than its riser (the alfardas close the sides below them)
   {
     const [x0, z0, x1, z1] = el.rect, { y0, y1, dir } = el, alongZ = dir === 'n' || dir === 's', len = alongZ ? z1 - z0 : x1 - x0, n = Math.max(1, Math.round((y1 - y0) / 0.2));
@@ -46,7 +47,7 @@ function ttStair(el, { bag, col }) {
  * row of chalchihuites — green discs ringed in black — painted on the panel (the West Plaza's stair).
  * The frame stands `out` beyond the panel.
  */
-function tablero(bag, [x0, z0, x1, z1], y0, y1, { out = 0.25, discs = true, inner = null } = {}) {
+export function tablero(bag, [x0, z0, x1, z1], y0, y1, { out = 0.25, discs = true, inner = null } = {}) {
   const H = y1 - y0, fh = Math.min(0.32, H * 0.18), fw = Math.min(0.4, H * 0.2);
   // the panel (its top the floor above), the frame's bars as rings (their hidden middles left out), the corner posts
   // (where a stage stands on it, `inner`, the panel's top is left out and the top bar reaches in under that stage)
@@ -82,7 +83,7 @@ function tablero(bag, [x0, z0, x1, z1], y0, y1, { out = 0.25, discs = true, inne
  * lower jaw — rings for eyes, a row of teeth, plates on top. Each about 0.9 m tall, tenoned to
  * stand about 0.9 m out of the tablero. Faces +z, its middle at y 0.
  */
-const teoSerpent = () => carved('teo-serpent', (k) => {
+export const teoSerpent = () => carved('teo-serpent', (k) => {
   k.petals('stucco_pale', 0, 0, 0, 0.62, 0.14, 11);
   k.fz(HS, [-0.34, 0.34, -0.26, 0.32], [-0.26, 0.26, -0.16, 0.26], 0.1, 0.92);                // the skull and upper jaw
   k.fz(HS, [-0.27, 0.27, 0.12, 0.34], [-0.2, 0.2, 0.14, 0.3], 0.62, 1.0);                    // the snout
@@ -108,7 +109,7 @@ const teoCipactli = () => carved('teo-cipactli', (k) => {
  * vertical panel; 0 for plain sloping stages), stair ('w'|'s'|…), stairW, temple: { w, d, h }, heads (faces
  * whose tableros carry the Feathered Serpent's heads, e.g. 'nse'), talud (its material: stone, or red stucco) }.
  */
-function ttPyramid(el, { bag, col }) {
+export function ttPyramid(el, { bag, col }) {
   const [cx, cz] = el.c, n = el.levels, H = el.h, tb = el.tablero ?? 0.35, y0b = el.y ?? 0;
   for (let k = 0; k < n; k++) {
     const t0 = k / n, t1 = (k + 1) / n, ya = y0b + H * t0, yb = y0b + H * t1, ht = yb - ya;
@@ -156,9 +157,10 @@ function ttPyramid(el, { bag, col }) {
     col.rect([cx - a[0] + sx * 0.4, cz - a[1] + sz * 0.4, cx + a[0] - sx * 0.4, cz + a[1] - sz * 0.4], ya, ya + ht * 0.5);
   }
   // the stair up the chosen face, the whole height
-  const sw = (el.stairW ?? 12) / 2, run = H * 1.05, f = el.stair || 'w';
+  // (`stairFoot`: the stair starts higher than the pyramid's base, on a plaza laid above it)
+  const sw = (el.stairW ?? 12) / 2, sy0 = el.stairFoot ?? y0b, run = (y0b + H - sy0) * 1.05, f = el.stair || 'w';
   const r = f === 'w' ? [cx - el.tw / 2 - run, cz - sw, cx - el.tw / 2 + 0.5, cz + sw] : f === 'e' ? [cx + el.tw / 2 - 0.5, cz - sw, cx + el.tw / 2 + run, cz + sw] : f === 's' ? [cx - sw, cz + el.td / 2 - 0.5, cx + sw, cz + el.td / 2 + run] : [cx - sw, cz - el.td / 2 - run, cx + sw, cz - el.td / 2 + 0.5];
-  ttStair({ rect: r, y0: y0b, y1: y0b + H, dir: { w: 'e', e: 'w', s: 'n', n: 's' }[f], mat: S }, { bag, col });
+  ttStair({ rect: r, y0: sy0, y1: y0b + H, dir: { w: 'e', e: 'w', s: 'n', n: 's' }[f], mat: S }, { bag, col });
   if (el.temple) {
     // the temple: plastered walls, its doorway over the stair, a red cornice and a crest of almenas
     const T = el.temple, ty = y0b + H, [w, d] = [T.w / 2, T.d / 2], top = ty + T.h;
@@ -185,13 +187,15 @@ function ttPyramid(el, { bag, col }) {
  * platforms that enclose the avenue's sunken plazas and cross it): the sloping talud below, the
  * framed and painted tablero above standing out over it, the top a walk.
  */
-function ttWall(el, { bag, col }) {
+export function ttWall(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, h = el.h, y = el.y ?? 0, ins = Math.min(1.0, (x1 - x0) / 4, (z1 - z0) / 4), yt = y + h * 0.4;
-  bag.add(RD, frustum([x0, z0, x1, z1], y, yt, ins, ins, ins, ins, { noBottom: true, noTop: true }));
+  // `foot`: the talud carried on down at its slope below y (where the ground falls away beside a plaza laid higher)
+  const ft = el.foot ?? 0, e = ft * ins / (yt - y);
+  bag.add(RD, frustum([x0 - e, z0 - e, x1 + e, z1 + e], y - ft, yt, ins + e, ins + e, ins + e, ins + e, { noBottom: true, noTop: true }));
   const p = ins - 0.3;
   tablero(bag, [x0 + p, z0 + p, x1 - p, z1 - p], yt, y + h, { out: 0.22, discs: el.discs !== false });
   bag.add('stucco_pale', frustum([x0 + p + 0.1, z0 + p + 0.1, x1 - p - 0.1, z1 - p - 0.1], y + h - 0.1, y + h + 0.03, 0, 0, 0, 0, { noBottom: true }));   // the plastered top
-  col.rect([x0, z0, x1, z1], y, y + h); col.floor([x0 + p - 0.22, z0 + p - 0.22, x1 - p + 0.22, z1 - p + 0.22], y + h);
+  col.rect([x0, z0, x1, z1], y - ft, y + h); col.floor([x0 + p - 0.22, z0 + p - 0.22, x1 - p + 0.22, z1 - p + 0.22], y + h);
 }
 
 /** tt_floor: a plastered floor { rect, y, mat } laid on the ground (a thin slab, its underside left out). */
@@ -271,6 +275,6 @@ function compound(el, { bag, col }) {
 
 registerStyle('teotihuacano', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound },
+  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess },
   objects: {},
 });
