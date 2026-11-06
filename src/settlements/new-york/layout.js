@@ -50,7 +50,7 @@ export function lots() {
         if (murray && rand() < 0.6) h = 12 + rand() * 8;
         if (rand() < 0.04 + near42 * 0.3) h = 90 + rand() * (100 + near42 * 120);
         const mats = garment ? ['facade_buff', 'facade_brick', 'facade_buff'] : murray ? ['facade_brick', 'facade_brick', 'facade_limestone'] : ['facade_limestone', 'facade_buff', 'facade_grey', 'facade_brick'];
-        LOTS.push({ rect: r, y: height(cx, cz), h: Math.round(h), mat: mats[Math.floor(rand() * mats.length)], seed: Math.floor(rand() * 1e6) });
+        LOTS.push({ rect: r, y: height(cx, cz), h: Math.round(h), mat: mats[Math.floor(rand() * mats.length)], seed: Math.floor(rand() * 1e6), front: z0 === bz0 ? 'n' : 's' });
       }
     }
   }

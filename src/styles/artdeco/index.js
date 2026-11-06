@@ -5,18 +5,50 @@
 // with water tanks on their roofs; the steel viaduct of the elevated railway.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, frustum, lathe } from '../../core/geom.js';
+import { box, frustum, lathe, rod, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 
 const LS = 'facade_limestone', CH = 'steel_chrome';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const block = (bag, mat, [x0, z0, x1, z1], y0, y1) => bag.add(mat, box(x0, y0, z0, x1, y1, z1));
 const inset = ([x0, z0, x1, z1], ix, iz = ix) => [x0 + ix, z0 + iz, x1 - ix, z1 - iz];
-/** A water tank on its stilts, the New York roof's mark. */
+/** A water tank on its stilts, the New York roof's mark: a timber platform on a braced steel frame, the
+ * tub of upright staves bound by steel hoops, a conical roof with a vent, a ladder up the side. */
 function tank(bag, x, y, z, r = 2.2) {
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bag.add('iron', box(x + dx * r * 0.6 - 0.1, y, z + dz * r * 0.6 - 0.1, x + dx * r * 0.6 + 0.1, y + 3, z + dz * r * 0.6 + 0.1));
-  bag.add('timber', lathe([[r, 0], [r, 4], [0.001, 4]], 12, null, x, y + 3, z));
-  bag.add('timber', lathe([[r + 0.1, 0], [0.001, 1.3]], 12, null, x, y + 7, z));
+  const H = 3.2, k = r * 0.62;
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bag.add('iron', box(x + dx * k - 0.11, y, z + dz * k - 0.11, x + dx * k + 0.11, y + H, z + dz * k + 0.11));
+  for (const yy of [y + 1.1, y + 2.4]) { bag.add('iron', box(x - k, yy - 0.06, z - k - 0.05, x + k, yy + 0.06, z - k + 0.05)); bag.add('iron', box(x - k, yy - 0.06, z + k - 0.05, x + k, yy + 0.06, z + k + 0.05)); bag.add('iron', box(x - k - 0.05, yy - 0.06, z - k, x - k + 0.05, yy + 0.06, z + k)); bag.add('iron', box(x + k - 0.05, yy - 0.06, z - k, x + k + 0.05, yy + 0.06, z + k)); }
+  for (const sx of [-1, 1]) { bag.add('iron', rod([x + sx * k, y + 0.1, z - k], [x + sx * k, y + H - 0.1, z + k], 0.03, 4)); bag.add('iron', rod([x - k, y + 0.1, z + sx * k], [x + k, y + H - 0.1, z + sx * k], 0.03, 4)); }
+  bag.add('timber', box(x - r - 0.1, y + H, z - r - 0.1, x + r + 0.1, y + H + 0.2, z + r + 0.1));
+  bag.add('tar_wood', lathe([[r * 0.97, 0], [r, 2.0], [r * 0.98, 4.2], [r * 1.04, 4.25], [r * 1.04, 4.3], [0.001, 4.3]], 16, (th) => 1 + 0.012 * Math.cos(th * 16), x, y + H + 0.2, z));
+  for (const hy of [0.4, 1.1, 1.9, 2.8, 3.7]) bag.add('iron', lathe([[r + 0.04, 0], [r + 0.04, 0.06], [r * 0.9, 0.06]], 16, null, x, y + H + 0.2 + hy, z));
+  bag.add('tar_wood', lathe([[r * 1.08, 0], [r * 1.08, 0.08], [0.25, 1.25], [0.25, 1.3], [0.001, 1.3]], 16, null, x, y + H + 4.5, z));
+  bag.add('iron', lathe([[0.18, 0], [0.18, 0.45], [0.32, 0.5], [0.001, 0.75]], 8, null, x, y + H + 5.75, z));
+  for (const sx of [-0.25, 0.25]) bag.add('iron', box(x + sx - 0.025, y, z + r + 0.12, x + sx + 0.025, y + H + 4.4, z + r + 0.17));
+  for (let yy = y + 0.4; yy < y + H + 4.3; yy += 0.35) bag.add('iron', box(x - 0.25, yy - 0.015, z + r + 0.13, x + 0.25, yy + 0.015, z + r + 0.16));
+}
+/** A fire escape down a street front (the face at o, outward sg, along x if `along`): a balcony of iron grating at each floor
+ * with its railing, a stair between each, a drop ladder over the shop front. */
+function fireEscape(bag, along, o, sg, u0, u1, y0, top, step = 3.4) {
+  const B = (a0, a1, d0, d1, ya, yb) => { const p = o + sg * d0, q = o + sg * d1; return along ? box(a0, ya, Math.min(p, q), a1, yb, Math.max(p, q)) : box(Math.min(p, q), ya, a0, Math.max(p, q), yb, a1); };
+  const P = (a, d, yy) => along ? [a, yy, o + sg * d] : [o + sg * d, yy, a];
+  let flip = false;
+  for (let yy = y0; yy < top - 1.5; yy += step) {
+    bag.add('iron', B(u0, u1, 0.02, 1.25, yy - 0.08, yy));
+    bag.add('iron', B(u0, u1, 1.2, 1.25, yy + 0.92, yy + 0.98));
+    bag.add('iron', B(u0, u1, 1.21, 1.24, yy + 0.4, yy + 0.43));
+    for (const a of [u0, u1 - 0.05]) { bag.add('iron', B(a, a + 0.05, 0.02, 1.25, yy + 0.92, yy + 0.98)); bag.add('iron', B(a, a + 0.05, 1.2, 1.25, yy, yy + 0.92)); }
+    for (let a = u0 + 0.45; a < u1 - 0.2; a += 0.45) bag.add('iron', B(a - 0.015, a + 0.015, 1.21, 1.24, yy, yy + 0.92));
+    if (yy + step < top - 1.5) {
+      const a0 = flip ? u1 - 0.4 : u0 + 0.4, a1 = flip ? u0 + 1.2 : u1 - 1.2;
+      bag.add('iron', rod(P(a0, 0.35, yy + step), P(a1, 0.35, yy + 0.02), 0.04, 4)); bag.add('iron', rod(P(a0, 0.95, yy + step), P(a1, 0.95, yy + 0.02), 0.04, 4));
+      for (let k = 1; k < 10; k++) { const f = k / 10, a = a0 + (a1 - a0) * f, hh = yy + step - (step - 0.02) * f; bag.add('iron', rod(P(a, 0.35, hh), P(a, 0.95, hh), 0.025, 4)); }
+      flip = !flip;
+    }
+  }
+  const a = (u0 + u1) / 2 + 0.6;
+  for (const d of [0.5, 0.9]) bag.add('iron', box(...(along ? [a + (d - 0.7) - 0.02, y0 - 2.6, o + sg * 0.9 - 0.02, a + (d - 0.7) + 0.02, y0, o + sg * 0.9 + 0.02] : [o + sg * 0.9 - 0.02, y0 - 2.6, a + (d - 0.7) - 0.02, o + sg * 0.9 + 0.02, y0, a + (d - 0.7) + 0.02])));
+  for (let yy = y0 - 2.4; yy < y0; yy += 0.4) bag.add('iron', along ? box(a - 0.2, yy - 0.015, o + sg * 0.9 - 0.015, a + 0.2, yy + 0.015, o + sg * 0.9 + 0.015) : box(o + sg * 0.9 - 0.015, yy - 0.015, a - 0.2, o + sg * 0.9 + 0.015, yy + 0.015, a + 0.2));
 }
 const PLAIN = 'limestone';
 /** Ground-floor shops: a granite base course, plate-glass windows along each face between short piers, a
@@ -57,6 +89,7 @@ function skyscraper(el, { bag, col }) {
     block(bag, mat, inset(r, -0.5), y + h - 0.2, y + h + 0.8);
     block(bag, PLAIN, inset(r, -0.2), y + h - 1.6, y + h - 0.2);                // the frieze under the cornice
     if (h > 20) block(bag, PLAIN, inset(r, -0.25), y + 12.2, y + 12.8);              // a belt course over the base
+    if (el.front && h > 14 && rand() < 0.55) { const r = el.rect, f = el.front, along = f === 'n' || f === 's', L = along ? r[2] - r[0] : r[3] - r[1], a0 = along ? r[0] : r[1], w = Math.min(7, L - 2), u0 = a0 + (L - w) / 2 + (rand() - 0.5) * (L - w - 1); fireEscape(bag, along, f === 'n' ? r[1] : f === 's' ? r[3] : f === 'w' ? r[0] : r[2], f === 'n' || f === 'w' ? -1 : 1, u0, u0 + w, y + 7.6, y + h); }
     if (rand() < 0.4) tank(bag, (r[0] + r[2]) / 2 + (rand() - 0.5) * 4, y + h + 0.8, (r[1] + r[3]) / 2 + (rand() - 0.5) * 4);
     return;
   }
@@ -100,20 +133,67 @@ function chrysler(el, { bag, col }) {
   block(bag, 'facade_grey', r, y - 0.5, y + 60); block(bag, 'granite_black', inset(r, -0.15), y - 0.5, y + 6); col.rect(r, y - 0.5, y + 60); col.floor(r, y + 60);
   const t1 = [cx - 18, cz - 18, cx + 18, cz + 18];
   block(bag, 'facade_grey', t1, y + 60, y + 120);
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bag.add(CH, box(cx + dx * 18 - 1.2, y + 118, cz + dz * 18 - 1.2, cx + dx * 18 + 1.2, y + 121, cz + dz * 18 + 1.2));   // the radiator caps
+  // the radiator caps of 1929 at the corners of the 31st floor: a winged cap on a stepped base
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const px = cx + dx * 18, pz = cz + dz * 18, ang = Math.atan2(dx, dz);
+    bag.add(CH, box(px - 1.3, y + 117, pz - 1.3, px + 1.3, y + 120.4, pz + 1.3));
+    bag.add(CH, lathe([[0.9, 0], [0.9, 0.5], [0.7, 0.7], [0.75, 1.6], [0.5, 1.9], [0.001, 2.0]], 12, null, px, y + 120.4, pz));
+    for (const s of [-1, 1]) { const g = fromTriangles(both3([0, 0.6, 0, s * 2.4, 2.2, -0.6, s * 2.0, 1.2, 0.4, 0, 0.6, 0, s * 2.0, 1.2, 0.4, 0, 1.6, 0.3])); g.rotateY(ang); g.translate(px, y + 120.4, pz); bag.add(CH, g); }
+  }
   const t2 = [cx - 15, cz - 15, cx + 15, cz + 15];
   block(bag, 'facade_grey', t2, y + 120, y + 240);
-  for (const [dx, dz] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) { const g = box(-0.8, -0.8, 0, 0.8, 0.8, 4.5); g.rotateY(Math.atan2(dx, dz)); g.translate(cx + dx * 15, y + 238, cz + dz * 15); bag.add(CH, g); }   // the eagles
-  // the crown: seven diminishing tiers, each a ring of sunburst arches
-  let s = 13, yy = y + 240;
-  for (let k = 0; k < 7; k++) {
-    const hgt = 6.5 - k * 0.4;
-    const g = lathe([[s * Math.SQRT2, 0], [s * Math.SQRT2, hgt * 0.4], [s * 0.86 * Math.SQRT2, hgt], [0.001, hgt]], 4); g.rotateY(Math.PI / 4); g.translate(cx, yy, cz); bag.add(CH, g);
-    for (let q = 0; q < 4; q++) { const a = q * Math.PI / 2; for (let j = -2; j <= 2; j++) { const u = j * s * 0.28, px = cx + Math.cos(a) * s * 0.75 - Math.sin(a) * u, pz = cz + Math.sin(a) * s * 0.75 + Math.cos(a) * u; bag.add('glass_lamp', box(px - 0.35, yy + hgt * 0.35, pz - 0.35, px + 0.35, yy + hgt * 0.75, pz + 0.35)); } }
-    yy += hgt; s *= 0.8;
+  // the eagles at the corners of the 61st floor, leaning out diagonally over the street
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const ang = Math.atan2(dx, dz), g = [];
+    const neck = rod([0, 0, 0], [0, 0.9, 3.4], 0.75, 10); g.push(neck);
+    g.push(lathe([[0.001, -0.9], [0.8, -0.6], [0.95, 0], [0.8, 0.6], [0.001, 0.95]], 12).translate(0, 1.05, 3.6));
+    g.push(rod([0, 1.0, 4.3], [0, 0.2, 5.4], 0.32, 8)); g.push(lathe([[0.32, 0], [0.001, 0.5]], 8).rotateX(Math.PI * 0.75).translate(0, 0.2, 5.4));
+    g.push(box(-1.4, -0.9, -0.5, 1.4, 0.4, 1.0));
+    for (const part of g) { part.rotateY(ang); part.translate(cx + dx * 15, y + 238, cz + dz * 15); bag.add(CH, part); }
   }
-  bag.add(CH, lathe([[s, 0], [1.2, 6], [0.4, 22], [0.001, 319 - (yy - y)]], 8, null, cx, yy, cz));
+  // the crown: seven terraced arches on each face, a cruciform groin vault of riveted stainless steel in a
+  // sunburst, triangular windows in each arch
+  let yy = y + 240;
+  const S = [13, 10.8, 9.0, 7.5, 6.2, 5.1, 4.2], HB = 2.0, V = [], W = [];
+  for (let k = 0; k < 7; k++) {
+    const s = S[k], top = yy + HB, ar = (u) => top + Math.sqrt(Math.max(0, s * s - u * u));
+    // the four faces, each a wall with an arched head
+    const N = 16;
+    for (let q = 0; q < 4; q++) {
+      const R = (u, v, o = 0) => { const a = q * Math.PI / 2, ca = Math.cos(a), sa = Math.sin(a); const lx = s + o, lz = u; return [cx + lx * ca - lz * sa, v, cz + lx * sa + lz * ca]; };
+      for (let i = 0; i < N; i++) { const u0 = -s + 2 * s * i / N, u1 = -s + 2 * s * (i + 1) / N; V.push(...R(u0, yy - 0.3), ...R(u1, yy - 0.3), ...R(u1, ar(u1)), ...R(u0, yy - 0.3), ...R(u1, ar(u1)), ...R(u0, ar(u0))); }
+      // the sunburst's ribs and the arch's rim
+      for (let i = 0; i < 12; i++) {
+        const f0 = Math.PI * i / 12, f1 = Math.PI * (i + 1) / 12, rr = s * 0.98;
+        bag.add(CH, rod(R(-Math.cos(f0) * rr, top + Math.sin(f0) * rr, 0.08), R(-Math.cos(f1) * rr, top + Math.sin(f1) * rr, 0.08), 0.14, 5));
+        if (i % 2 === 0 && i > 0) bag.add(CH, rod(R(-Math.cos(f0) * s * 0.35, top + Math.sin(f0) * s * 0.35, 0.05), R(-Math.cos(f0) * rr, top + Math.sin(f0) * rr, 0.05), 0.07, 4));
+      }
+      // the triangular windows, pointing out along the arch like rays
+      const nw = Math.max(5, 9 - k);
+      for (let i = 0; i < nw; i++) {
+        const f = Math.PI * (i + 0.5) / nw, d = 0.16 * Math.PI / nw * 3, r0 = s * 0.5, r1 = s * 0.86;
+        const A = R(-Math.cos(f - d) * r0, top + Math.sin(f - d) * r0, 0.04), B = R(-Math.cos(f + d) * r0, top + Math.sin(f + d) * r0, 0.04), C = R(-Math.cos(f) * r1, top + Math.sin(f) * r1, 0.04);
+        W.push(...A, ...B, ...C, ...A, ...C, ...B);
+      }
+      // a band of windows in the wall under the arch
+      for (let i = -2; i <= 2; i++) { const A = R(i * s * 0.32 - 0.3, yy + 0.4, 0.04), B = R(i * s * 0.32 + 0.3, yy + 0.4, 0.04), C = R(i * s * 0.32, yy + 1.7, 0.04); W.push(...A, ...B, ...C, ...A, ...C, ...B); }
+    }
+    // the groin vault between the faces
+    const M = 14;
+    for (let i = 0; i < M; i++) for (let j = 0; j < M; j++) {
+      const P = (a, b) => { const x = -s + 2 * s * a / M, z = -s + 2 * s * b / M; return [cx + x, top + Math.sqrt(Math.max(0, s * s - Math.min(x * x, z * z))), cz + z]; };
+      V.push(...P(i, j), ...P(i, j + 1), ...P(i + 1, j + 1), ...P(i, j), ...P(i + 1, j + 1), ...P(i + 1, j));
+    }
+    if (k < 6) yy = top + Math.sqrt(S[k] * S[k] - S[k + 1] * S[k + 1]) - 0.02;
+    else yy = top + s;
+  }
+  bag.add(CH, fromTriangles(both3(V)));
+  bag.add('glass_lamp', fromTriangles(W));
+  // the spire, its foot hidden in the last vault
+  bag.add(CH, lathe([[2.2, 0], [1.6, 4], [1.0, 9], [0.45, 20], [0.001, 319 - (yy - y) + 2]], 8, null, cx, yy - 2, cz));
 }
+/** Both faces of a triangle list. */
+function both3(t) { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; }
 /** beaux_arts: { rect, y, h, front ('n'|'s'|'e'|'w'), arches (count), cols (count), mat, attic } — a terminal or library: the rusticated block, the front of columns or great arched windows, the attic. */
 function beauxArts(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 28, mat = el.mat ?? 'limestone', f = el.front ?? 's';
