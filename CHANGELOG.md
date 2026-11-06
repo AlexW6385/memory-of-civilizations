@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.64 — Florence: room to build; Palazzo Medici, the Mercato Vecchio, Santa Maria Novella (2026-11-06)
+- Florence's houses re-tiled in 150 m tiles (1489 → 875 meshes, half the draw calls); the Palazzo Medici with graded rustication, great cornice, the open corner loggia, shops and the court with tondi, sgraffito and Donatello's David; the Mercato Vecchio with the column of Abundance and the Dovizia, the market hall and its counters; Alberti's front of Santa Maria Novella with avelli, striped pilasters, the Rucellai sails, the rose, the inscription and the left volute only inlaid.
+
 ## v9.63 — St Peter's in marble (2026-11-06)
 - St Peter's nave in polychrome marble: fluted proconnesian pilasters with gilt capitals, pier faces with Innocent X's medallions held by putti, coloured-marble niches and panels, reclining Virtues on the arches, the inlaid floor with its roundels and porphyry disc, the bronze St Peter, the tombs of Urban VIII and Paul III; the church raised on a travertine socle with three flights of front steps and its sagrato; the transepts opened into coffered apses.
 
