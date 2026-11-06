@@ -7,6 +7,7 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, rod, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
+import { empireState } from './esb.js';
 
 const LS = 'facade_limestone', CH = 'steel_chrome';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -109,23 +110,6 @@ function skyscraper(el, { bag, col }) {
   }
   if (h > 150) { const c = [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], s0 = Math.min(r[2] - r[0], r[3] - r[1]) / 2; bag.add(rand() < 0.5 ? 'lead' : mat, frustum([c[0] - s0, c[1] - s0, c[0] + s0, c[1] + s0], yy, yy + s0 * 1.4, s0 * 0.9, s0 * 0.9, s0 * 0.9, s0 * 0.9, { noBottom: true })); }
   else block(bag, mat, inset(r, -0.4), yy - 0.2, yy + 0.8);
-}
-/** empire_state: { rect (the full lot), y } — the five-storey base, the setbacks, the shaft with its piers, the 86th-floor observatory and the mooring mast to 381 m. */
-function empireState(el, { bag, col }) {
-  const r = el.rect, y = el.y ?? 0, cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, W = r[2] - r[0], D = r[3] - r[1];
-  const stage = (hw, hd, y0, y1) => { const q = [cx - hw, cz - hd, cx + hw, cz + hd]; block(bag, LS, q, y + y0, y + y1); return q; };
-  block(bag, LS, r, y - 0.5, y + 22); block(bag, 'granite_grey', inset(r, -0.15), y - 0.5, y + 6); col.rect(r, y - 0.5, y + 22); col.floor(r, y + 22);
-  bag.add('opening', box(r[2] - 0.05, y, cz - 4, r[2] + 0.05, y + 9, cz + 4));          // the 5th Avenue entrance
-  stage(W / 2 - 12, D / 2 - 5, 22, 88);
-  stage(W / 2 - 20, D / 2 - 7, 88, 104);
-  const shaft = stage(30, 17, 104, 268);
-  // the piers of chrome-nickel steel running up the shaft between the window columns
-  for (let i = 0; i <= 12; i++) { const x = shaft[0] + i * 60 / 12; for (const z of [shaft[1] - 0.15, shaft[3] - 0.05]) bag.add(CH, box(x - 0.25, y + 104, z, x + 0.25, y + 268, z + 0.2)); }
-  for (let i = 0; i <= 7; i++) { const z = shaft[1] + i * 34 / 7; for (const x of [shaft[0] - 0.15, shaft[2] - 0.05]) bag.add(CH, box(x, y + 104, z - 0.25, x + 0.2, y + 268, z + 0.25)); }
-  stage(22, 13, 268, 296);
-  stage(15, 10, 296, 312);
-  stage(10, 8, 312, 320);                                                                 // the 86th-floor observatory
-  bag.add(CH, lathe([[7, 0], [6.5, 6], [5, 8], [5, 30], [3.5, 34], [2.8, 48], [1.6, 54], [0.6, 60], [0.001, 61]], 8, null, cx, y + 320, cz));
 }
 /** chrysler: { rect, y } — the base, the tower with its eagles, the stainless crown of seven tiers of sunbursts with triangular windows, the spire to 319 m. */
 function chrysler(el, { bag, col }) {
