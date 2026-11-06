@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.57 — Rapa Nui's walking moai; the pōwhiri (2026-11-06)
+- Coral and obsidian eyes on the Tongariki moai; a moai walked upright by three rope teams along its road from the quarry; plank canoes with fishermen; bananas in the manavai; people on the plaza; at the pā a pōwhiri before the chief's house (elders on the paepae, the caller, the visitors at the gate, the challenger with taiaha and dart), a hāngī with an open and a covered oven, weavers and flax, fish racks, a waka being hollowed, warriors on the fighting stages.
+
 ## v9.56 — El Castillo's stairs; the Ball Court; the Empire State Building (2026-11-06)
 - El Castillo's stairs as solid masses outside the tiers at 45° (no ledges through the treads), platform stairs with real treads; the Great Ball Court's slanted benches with the decapitation reliefs, carved rings and the Temples of the Jaguars; El Caracol; a market of mats south of the Thousand Columns; Knossos' West Magazines with pithoi, the theatral area after Evans, the paved Royal Road, town houses after the Town Mosaic; Conques' bridge over the Dourdou; the Empire State Building with its setbacks, spandrels, entrance and mooring mast; the Sixth Avenue El with stations; Grand Central's 42nd Street front and the Park Avenue viaduct; shop fronts, newsstands and tenement yards; Sydney's Rocks terraces and bond stores, the Harbour Bridge's trusses in true proportion with the 1973 deck, Circular Quay's wharves with gangways, the Opera House's shell undersides and northern foyers.
 
