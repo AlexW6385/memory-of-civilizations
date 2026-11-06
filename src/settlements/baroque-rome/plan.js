@@ -12,14 +12,18 @@ export const stpeter = {
   view: [FRONT_X - 30, -62, FRONT_X + 12, 62],
   bakeTop: 132,
   elements: [
-    { t: 'st_peter', c: CROSSING, s: 110, nave: FRONT_X - 4 - (CROSSING[0] + 55), w: 56, h: 48, d: 42 },
+    { t: 'st_peter', c: CROSSING, s: 110, nave: FRONT_X - 4 - (CROSSING[0] + 55), w: 56, h: 48, d: 42, interior: true },
     { t: 'colonnade', c: OVAL.c, ax: OVAL.ax, bz: OVAL.bz, rows: 4, depth: 14, h: 13 },
     { t: 'paving', rect: RETTA },
     { t: 'obelisk', c: OVAL.c, h: 25.5 },
     { t: 'fountain', c: [OVAL.c[0], OVAL.c[1] - 42], r: 6 },
     { t: 'fountain', c: [OVAL.c[0], OVAL.c[1] + 42], r: 6 },
   ],
-  rooms: [{ id: 'piazza', rect: [RETTA[0], -90, OVAL.c[0] + OVAL.ax, 90], y: 0, kind: 'open' }],
+  rooms: [
+    { id: 'piazza', rect: [RETTA[0], -90, OVAL.c[0] + OVAL.ax, 90], y: 0, kind: 'open' },
+    { id: 'nave', rect: [CROSSING[0] + 21, -13.75, FRONT_X - 4 - 9.2, 13.75], y: 0, kind: 'hall' },
+    { id: 'crossing', rect: [CROSSING[0] - 21, -21, CROSSING[0] + 21, 21], y: 0, kind: 'hall' },
+  ],
   walks: [Object.assign([[125, 0], [40, 0], [FRONT_X + 12, 0]], { y0: 0 })],
 };
 export const vatican = {

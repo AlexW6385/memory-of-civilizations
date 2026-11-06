@@ -65,8 +65,11 @@ function pilasterCapital(Lc, u0, u1, y, d0, d1, hc) {
   Lc.box(TR, u0 - 0.15, y + hc * 0.86, d0, u1 + 0.15, y + hc, d1 + 0.15);
 }
 
+/** The five entrances to the portico: [{ dz (offset from the axis, toward +z), w, h }] for a front whose balustrade stands at `top`. */
+export function entrances(top) { const s = top / 45.5; return [[0, 5.2], [15.5, 4.4], [-15.5, 4.4], [30.5, 4.4], [-30.5, 4.4]].map(([dz, w]) => ({ dz: dz * s, w: w * s, h: 10.5 * s })); }
+
 /** facade: draws the front on the wall at x = fx facing +x, centred at cz, half-width fw; y the floor, top the balustrade's foot. */
-export function stPeterFacade(bag, col, { fx, cz, fw, y, top }) {
+export function stPeterFacade(bag, col, { fx, cz, fw, y, top, open = false }) {
   const rect = [fx - 4, cz - fw, fx, cz + fw], { M: FM, L } = faceFrame(rect, 'e', y), Lc = new Local(), U = (dz) => fw - dz;   // u of an offset dz from the axis (dz toward +z: the south)
   Lc.noBack = true; Lc.L = L;
   const s = (top - 0) / 45.5, hcol = 27.5 * s, rc = 1.39 * s, hc = 3.1 * s, yE = hcol, yE1 = yE + 5.4 * s, yAt = yE1, P = 1.5;
@@ -75,8 +78,15 @@ export function stPeterFacade(bag, col, { fx, cz, fw, y, top }) {
   const pils = [35.8, 40.2, 54.4, 58.2].flatMap((a) => [a * s, -a * s]);
   const fore = (dz) => (Math.abs(dz) < 12.6 * s ? P : 0);                                      // the frontispiece of the middle stands forward
   // the frontispiece block and the plinth along the front
-  Lc.box(TR, U(12.6 * s), -0.5, 0, U(-12.6 * s), yE1, P);
-  Lc.box(TR, 0, -0.5, 0, L, 1.6, 0.6); Lc.box(TR, U(12.6 * s) - 0.1, -0.5, P, U(-12.6 * s) + 0.1, 1.6, P + 0.6);
+  // (open: the entrances go through, the frontispiece parted round the middle one)
+  const ent = entrances(top), cw = ent[0].w, ch = ent[0].h;
+  if (open) { Lc.box(TR, U(12.6 * s), -0.5, 0, U(cw / 2), yE1, P); Lc.box(TR, U(-cw / 2), -0.5, 0, U(-12.6 * s), yE1, P); Lc.box(TR, U(cw / 2), ch, 0, U(-cw / 2), yE1, P); }
+  else Lc.box(TR, U(12.6 * s), -0.5, 0, U(-12.6 * s), yE1, P);
+  // the plinth course, broken at the entrances and the end arches
+  const gaps = [...ent.map((e) => [U(e.dz) - e.w / 2 - 0.6, U(e.dz) + e.w / 2 + 0.6]), ...[-1, 1].map((sg) => [U(sg * 47.3 * s) - 4.0 * s - 0.7, U(sg * 47.3 * s) + 4.0 * s + 0.7])].sort((p, q) => p[0] - q[0]);
+  const runs = (a0, a1) => { const out = []; let u = a0; for (const [g0, g1] of gaps) { if (g1 <= a0 || g0 >= a1) continue; if (g0 > u) out.push([u, g0]); u = Math.max(u, g1); } if (u < a1) out.push([u, a1]); return out; };
+  for (const [a0, a1] of runs(0, L)) Lc.box(TR, a0, -0.5, 0, a1, 1.6, 0.6);
+  for (const [a0, a1] of runs(U(12.6 * s) - 0.1, U(-12.6 * s) + 0.1)) Lc.box(TR, a0, -0.5, P, a1, 1.6, P + 0.6);
   // the columns: base, shaft with its taper and entasis, the Corinthian capital
   for (const dz of cols) {
     const u = U(dz), d0 = fore(dz) + rc * 0.75;
@@ -98,7 +108,7 @@ export function stPeterFacade(bag, col, { fx, cz, fw, y, top }) {
   for (const [a, b, kind] of wide) {
     const u0 = U(b * s), u1 = U(a * s), uc = (u0 + u1) / 2, d0 = fore((a + b) / 2 * s), ew = kind ? 5.2 * s : 4.4 * s, eh = 10.5 * s;
     // the entrance into the portico: its dark, the moulded frame, the cornice on consoles
-    Lc.box(O, uc - ew / 2, 0, d0, uc + ew / 2, eh, d0 + 0.06);
+    if (!open) Lc.box(O, uc - ew / 2, 0, d0, uc + ew / 2, eh, d0 + 0.06);
     for (const sg of [-1, 1]) Lc.box('marble', uc + sg * ew / 2 - (sg > 0 ? 0 : 0.6), 0, d0, uc + sg * ew / 2 + (sg > 0 ? 0.6 : 0), eh + 0.6, d0 + 0.35);
     Lc.box('marble', uc - ew / 2 - 0.6, eh, d0, uc + ew / 2 + 0.6, eh + 0.6, d0 + 0.35);
     for (const sg of [-1, 1]) Lc.box(TR, uc + sg * (ew / 2 + 0.3) - 0.25, eh - 1.2, d0 + 0.35, uc + sg * (ew / 2 + 0.3) + 0.25, eh + 0.6, d0 + 0.75);
