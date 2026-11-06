@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.82 — Wave 9 merged (2026-11-06)
+- The Generalife on its hill; Djenné facades and the landing; Teotihuacan and Tenochtitlan shrines opened; Falqués bench-lamps, the Sixth Avenue El, Sydney's sea wall; Ivan the Great, the Archangel and Annunciation; Borgund's dragons and portal; dance poses, musicians, cats, ducks, geese, elephants with howdahs; light baked for ten landmarks in their settlements.
+
 ## v9.81 — Seam fix (2026-11-06)
 - Fixed the line across the middle of the screen with the lower half darker: half-resolution ambient occlusion picked the farthest of four depth texels under the reversed depth buffer.
 
