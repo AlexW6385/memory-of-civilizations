@@ -85,14 +85,16 @@ function pyramidRoof(poly, y, rise, sweep, bag, mat, soffit, p = 1.7) {
 }
 function flipTris(t) { const o = []; for (let i = 0; i < t.length; i += 9) o.push(t[i], t[i + 1], t[i + 2], t[i + 6], t[i + 7], t[i + 8], t[i + 3], t[i + 4], t[i + 5]); return o; }
 /** A square-section beam from p0 to p1 (half-width w, height h above the line). */
-function beamTris(out, p0, p1, w, h) {
+function beamTris(out, p0, p1, w, h, noBottom = false) {
   const dx = p1[0] - p0[0], dz = p1[2] - p0[2], l = Math.hypot(dx, dz) || 1, nx = -dz / l * w, nz = dx / l * w;
   const b = [[p0[0] - nx, p0[1], p0[2] - nz], [p0[0] + nx, p0[1], p0[2] + nz], [p1[0] + nx, p1[1], p1[2] + nz], [p1[0] - nx, p1[1], p1[2] - nz]];
   const t = b.map((q) => [q[0], q[1] + h, q[2]]);
   // the six faces, each turned to face out of the (convex) beam
   const loc = [], q = (a, bb, c, d) => loc.push(...a, ...bb, ...c, ...a, ...c, ...d);
   q(t[0], t[3], t[2], t[1]); q(b[0], t[0], t[1], b[1]); q(b[2], t[2], t[3], b[3]); q(b[1], t[1], t[2], b[2]); q(b[3], t[3], t[0], b[0]); q(b[0], b[1], b[2], b[3]);
-  for (const v of orientOutward(loc)) out.push(v);
+  orientOutward(loc);
+  // (noBottom: the underside left out, where it is buried or hidden)
+  for (let i = 0, n = noBottom ? loc.length - 18 : loc.length; i < n; i++) out.push(loc[i]);
 }
 
 /** Triangles (flat xyz list) turned so each faces along dir (a film laid on a face). */
@@ -767,28 +769,54 @@ function mingWall(el, { bag, col }) {
   }
   // the plinth of grey brick, broken at the gates (a door's threshold and a moon gate's sill are
   // the ground's own paving, not a step of plinth)
-  const pl = [];
+  // (each run a box of its own: boxes are drawn as one repeated shape, stretched)
   {
     let s0 = -0.02;
-    const run = (u0, u1) => { if (u1 - u0 > 0.05) beamTris(pl, [ax + ux * u0, y - 0.3, az + uz * u0], [ax + ux * u1, y - 0.3, az + uz * u1], th / 2 + 0.03, 0.62); };
-    for (const g2 of [...(el.gates || [])].sort((p, q) => p.at - q.at)) {
+    const run = (u0, u1) => { if (u1 - u0 > 0.05) { const pl = []; beamTris(pl, [ax + ux * u0, y - 0.3, az + uz * u0], [ax + ux * u1, y - 0.3, az + uz * u1], th / 2 + 0.03, 0.62); bag.add(PAL.plinth, fromTriangles(pl)); } };
+    // (not in the simple walls of the town's houses, whose gates stand on their gatehouse's platform)
+    for (const g2 of LOW ? [] : [...(el.gates || [])].sort((p, q) => p.at - q.at)) {
       const hw = g2.r ? Math.sqrt(Math.max(0.01, g2.r * g2.r - Math.max(0, g2.r + 0.05 - 0.32) ** 2)) : g2.w / 2;
       run(s0, g2.at - hw); s0 = g2.at + hw;
     }
     run(s0, L + 0.02);
   }
-  bag.add(PAL.plinth, fromTriangles(pl));
   // the coping: a little roof of black tiles on both sides of the wall's top, on a course of grey
   // brick corbelled out from each face. The tiles have their thickness: a row of eave ends (a
   // fascia) and a flat soffit back to the wall, so that the overhang has an underside (over a gate
   // one walks under it, not into it); the ends closed by a gable board. Each face one-sided,
   // turned to where it is seen from (the shell is closed).
+  // (In another palette — palace walls, courtyard walls of other towns — the plain coping, a
+  // sheet of tiles on both sides, with the underside only over the gates, closed at its ends.)
   const cp = [], o = th / 2 + 0.28, eY = y + h - 0.05, sY = y + h - 0.11, rY = y + h + 0.38;
-  const cb = [];
-  beamTris(cb, [ax - ux * 0.02, y + h - 0.23, az - uz * 0.02], [bx + ux * 0.02, y + h - 0.23, bz + uz * 0.02], th / 2 + 0.12, 0.115);
-  bag.add(PAL.plinth, fromTriangles(cb));
+  const under = jiangnan;
+  if (jiangnan) {
+    const cb = [];
+    beamTris(cb, [ax - ux * 0.02, y + h - 0.23, az - uz * 0.02], [bx + ux * 0.02, y + h - 0.23, bz + uz * 0.02], th / 2 + 0.12, 0.115);
+    bag.add(PAL.plinth, fromTriangles(cb));
+  }
   const sec = (p, off, yy) => [p[0] - uz * off, yy, p[1] + ux * off];
-  for (const sgn of [-1, 1]) {
+  if (!under) {
+    for (const sgn of [-1, 1]) {
+      const e0 = sec(el.a, sgn * o, eY), e1 = sec(el.b, sgn * o, eY);
+      cp.push(...e0, ...e1, bx, rY, bz, ...e0, bx, rY, bz, ax, rY, az);
+    }
+    bag.add(PAL.roof, fromTriangles(cp.concat(flipTris(cp))));
+    const gs = [];
+    for (const g2 of LOW ? [] : el.gates || []) {
+      const hw2 = (g2.r ?? g2.w / 2) + 0.45, u0 = Math.max(0, g2.at - hw2), u1 = Math.min(L, g2.at + hw2), A = [ax + ux * u0, az + uz * u0], B = [ax + ux * u1, az + uz * u1];
+      const shY = eY + (rY - eY) * (1 - th / 2 / o);
+      for (const sgn of [-1, 1]) {
+        const out = [-uz * sgn, 0, ux * sgn], f0 = sec(A, sgn * o, sY), f1 = sec(B, sgn * o, sY), e0 = sec(A, sgn * o, eY), e1 = sec(B, sgn * o, eY), w0 = sec(A, sgn * th / 2, sY), w1 = sec(B, sgn * th / 2, sY);
+        gs.push(...facing([...f0, ...f1, ...e1, ...f0, ...e1, ...e0], out));
+        gs.push(...facing([...w0, ...w1, ...f1, ...w0, ...f1, ...f0], [0, -1, 0]));
+        for (const [Q, sg] of [[A, -1], [B, 1]]) {
+          const q = [sec(Q, sgn * th / 2, sY), sec(Q, sgn * o, sY), sec(Q, sgn * o, eY), sec(Q, sgn * th / 2, shY)];
+          gs.push(...facing([...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]], [ux * sg, 0, uz * sg]));
+        }
+      }
+    }
+    if (gs.length) bag.add(PAL.roof, fromTriangles(gs));
+  } else for (const sgn of [-1, 1]) {
     const out = [-uz * sgn, 0, ux * sgn];
     const e0 = sec(el.a, sgn * o, eY), e1 = sec(el.b, sgn * o, eY), r0 = [ax, rY, az], r1 = [bx, rY, bz];
     cp.push(...facing([...e0, ...e1, ...r1, ...e0, ...r1, ...r0], [out[0], 1, out[2]]));
@@ -798,11 +826,13 @@ function mingWall(el, { bag, col }) {
     cp.push(...facing([...s0, ...s1, ...f1, ...s0, ...f1, ...f0], [0, -1, 0]));
   }
   // the gable ends: the coping's section between the soffit and the tiles
-  for (const [p, sg] of [[el.a, -1], [el.b, 1]]) {
-    const P = (off, yy) => sec(p, off, yy), Rr = [p[0], rY, p[1]];
-    cp.push(...facing([...P(-o, sY), ...P(-o, eY), ...Rr, ...P(-o, sY), ...Rr, ...P(o, eY), ...P(-o, sY), ...P(o, eY), ...P(o, sY)], [ux * sg, 0, uz * sg]));
+  if (under) {
+    for (const [p, sg] of [[el.a, -1], [el.b, 1]]) {
+      const P = (off, yy) => sec(p, off, yy), Rr = [p[0], rY, p[1]];
+      cp.push(...facing([...P(-o, sY), ...P(-o, eY), ...Rr, ...P(-o, sY), ...Rr, ...P(o, eY), ...P(-o, sY), ...P(o, eY), ...P(o, sY)], [ux * sg, 0, uz * sg]));
+    }
+    bag.add(PAL.roof, fromTriangles(cp));
   }
-  bag.add(PAL.roof, fromTriangles(cp));
   const rd = [];
   beamTris(rd, [ax, y + h + 0.3, az], [bx, y + h + 0.3, bz], 0.09, 0.16);
   bag.add(PAL.roof, fromTriangles(rd));
@@ -1156,10 +1186,6 @@ function taihu(el, { bag, col }) {
   if (el.solid) col.circle(cx, cz, el.r * 0.7, y, y + (el.h ?? 1.2));
 }
 /**
- * One stone: a waisted, lumpy body leaning by lean [dx, dz] per metre of height, its skin furrowed
- * in vertical folds (the wrinkles) and pitted, its top rounded over (not a point).
- */
-/**
  * ming_rockery: a path climbing among piled Taihu stone, as the rockery hills of the Suzhou
  * gardens are walked (docs/settlements/ming-suzhou.md §5): { pts: [[x, z, y]…] (the path's line
  * and its tread heights), w (the path's width), ground (x, z) → the hill's height (to bed the
@@ -1228,6 +1254,10 @@ function rockery(el, { bag, col }) {
     col.rect([Math.min(q.x - nx * span, q.x + nx * span) - 0.4, Math.min(q.z - nz * span, q.z + nz * span) - 0.4, Math.max(q.x - nx * span, q.x + nx * span) + 0.4, Math.max(q.z - nz * span, q.z + nz * span) + 0.4], q.y + clear + 0.02, q.y + clear + 1.6);
   }
 }
+/**
+ * One stone: a waisted, lumpy body leaning by lean [dx, dz] per metre of height, its skin furrowed
+ * in vertical folds (the wrinkles) and pitted, its top rounded over (not a point).
+ */
 function rock(x, y, z, s, h, rand, lean = [0, 0], fine = false) {
   const nn = fine ? 11 : 7, NS = fine ? 14 : 10, ph = rand() * 6.28, ph2 = rand() * 6.28, sz = 0.9 + 0.2 * rand();
   const prof = [];
