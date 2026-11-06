@@ -8,6 +8,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { Matrix4, Vector3 } from '../../core/three.js';
 import { box, frustum, lathe, fromTriangles, rod, orientOutward } from '../../core/geom.js';
 import { relief, strip, rosette } from './reliefs.js';
+import { jambScene } from './throne.js';
 import '../qing/index.js';
 
 const S = 'limestone_persian', W = 'plaster_persian', C = 'marble_dark';     // C: the polished stone of the columns, frames and sculpture
@@ -136,21 +137,23 @@ function hall(el, { bag, col }) {
     }
   }
   // the thick walls with a great door in the middle of each side (open toward porticoes and where `doors` say)
-  const doors = el.doors ?? 'nesw', dw = Math.min(5, (x1 - x0) * 0.12), dh = Math.min(h * 0.6, 12);
+  const doors = el.doors ?? 'nesw', dw0 = Math.min(5, (x1 - x0) * 0.12), dh = Math.min(h * 0.6, 12);
+  let dw = dw0;
   const fd = 0.12, jw = 0.75;
-  const wallSeg = (r, door) => {
+  const wallSeg = (r, door, face) => {
+    dw = el.doorW?.[face] ?? dw0;
     if (!door) { bag.add(W, box(r[0], y, r[1], r[2], y + h + 1.2, r[3])); col.rect(r, y, y + h + 1.2); return; }
     const alongX = r[2] - r[0] > r[3] - r[1], m = alongX ? (r[0] + r[2]) / 2 : (r[1] + r[3]) / 2;
     const A = alongX ? [r[0], r[1], m - dw / 2, r[3]] : [r[0], r[1], r[2], m - dw / 2], B = alongX ? [m + dw / 2, r[1], r[2], r[3]] : [r[0], m + dw / 2, r[2], r[3]];
     for (const q of [A, B]) { bag.add(W, box(q[0], y, q[1], q[2], y + h + 1.2, q[3])); col.rect(q, y, y + h + 1.2); }
     const L = alongX ? [m - dw / 2, r[1], m + dw / 2, r[3]] : [r[0], m - dw / 2, r[2], m + dw / 2];
     bag.add(W, box(L[0], y + dh + 0.1, L[1], L[2], y + h + 1.2, L[3]));
-    doorFrame(bag, alongX, m, alongX ? r[1] : r[0], alongX ? r[3] : r[2], y, dw, dh, el.reliefs && !el.simple);
+    doorFrame(bag, alongX, m, alongX ? r[1] : r[0], alongX ? r[3] : r[2], y, dw, dh, el.reliefs && !el.simple, face);
   };
   // the frame of polished stone round a door: two jambs the depth of the wall, the lintel, the
   // Egyptian cornice above it (a roll, the flaring gorge of upright leaves, a fillet); on the
   // jambs' inner faces, where `reliefs`, the royal hero stabbing a rearing lion
-  const doorFrame = (bag, alongX, m, c0, c1, y, dw, dh, rel) => {
+  const doorFrame = (bag, alongX, m, c0, c1, y, dw, dh, rel, face) => {
     const Bx = (a0, a1, b0, b1, y0, y1, mat = 'marble_dark') => bag.add(mat, alongX ? box(a0, y0, b0, a1, y1, b1) : box(b0, y0, a0, b1, y1, a1));
     const a0 = m - dw / 2, a1 = m + dw / 2, b0 = c0 - fd, b1 = c1 + fd;
     Bx(a0 - jw, a0 + 0.06, b0, b1, y, y + dh); Bx(a1 - 0.06, a1 + jw, b0, b1, y, y + dh);
@@ -175,6 +178,8 @@ function hall(el, { bag, col }) {
     const size = Math.min(2.6, dh * 0.62, (b1 - b0) * 0.95 / 0.93), cu = (b0 + b1) / 2;
     for (const [fx, sg] of [[a0 + 0.06, 1], [a1 - 0.06, -1]]) {
       const place = (u, v, w) => (alongX ? [fx + sg * w, y + v, u] : [u, y + v, fx + sg * w]);
+      // the north doorways: the audience; the south: the king on the throne the peoples carry
+      if (face === 'n' || face === 's') { const out = face === 'n' ? b0 : b1; jambScene(bag, face === 'n' ? 'audience' : 'throne', place, out, out === b0 ? b1 : b0, dh - 0.02); continue; }
       const dir = sg, u0 = cu - dir * 0.235 * size;
       relief(bag, 'marble_dark', 'hero', place, u0, 0.35, size, dir, 0.08);
       relief(bag, 'marble_dark', 'rampant', place, u0, 0.35, size, dir, 0.07);
@@ -182,10 +187,17 @@ function hall(el, { bag, col }) {
     }
   };
   if (th > 0) {
-    wallSeg([x0 - th, z0 - th, x1 + th, z0], doors.includes('n'));
-    wallSeg([x0 - th, z1, x1 + th, z1 + th], doors.includes('s'));
-    wallSeg([x0 - th, z0, x0, z1], doors.includes('w'));
-    wallSeg([x1, z0, x1 + th, z1], doors.includes('e'));
+    wallSeg([x0 - th, z0 - th, x1 + th, z0], doors.includes('n'), 'n');
+    wallSeg([x0 - th, z1, x1 + th, z1 + th], doors.includes('s'), 's');
+    wallSeg([x0 - th, z0, x0, z1], doors.includes('w'), 'w');
+    wallSeg([x1, z0, x1 + th, z1], doors.includes('e'), 'e');
+  }
+  // the colossal bulls flanking the north portico on its antae (the Hundred-Column Hall), painted blue
+  if (el.bulls && port.includes('n') && th > 0 && !el.simple) for (const xc of [x0 - th / 2, x1 + th / 2]) {
+    const zc = P[1] + 2.9;
+    lamassu(bag, xc, zc, y, [0, -1], { kind: 'bull', skin: 'paint_blue' }); col.rect([xc - 1, zc - 3.2, xc + 1, zc + 3.2], y, y + 6.5);
+    const a = [xc - th / 2, zc + 3.2, xc + th / 2, z0 - th];
+    bag.add(W, box(a[0], y, a[1], a[2], y + h + 1.2, a[3])); col.rect(a, y, y + h + 1.2);
   }
   // the corner towers
   if (el.towers && th > 0) for (const [cx, cz] of [[P[0], P[1]], [P[2], P[1]], [P[0], P[3]], [P[2], P[3]]]) {
@@ -318,17 +330,40 @@ function merlonsAlong(bag, M, a0, a1, o, yb) {
   for (let i = 0; i < n; i++) merlon(bag, M, a0 + (i + 0.5) * (a1 - a0) / n, o, yb, 0.9, 0.7, 0.55, face);
 }
 
-/** lamassu_gate: the Gate of All Nations { c, s (side), h }: a square hall of four columns, great doors west and east guarded by winged bulls. */
+/**
+ * lamassu_gate: the Gate of All Nations { c, s (side), h } (docs/settlements/persepolis.md §11): a square
+ * hall of four columns, great doors west and east and a third on the south; the west doorway guarded
+ * by a pair of bulls, the east by a pair of winged bulls with men's heads, their foreparts out past the
+ * facade, their bodies lining the passage; above each colossus on the jamb the trilingual inscription
+ * of Xerxes; a stone bench round the inner walls.
+ */
 function gate(el, ctx) {
-  const { bag } = ctx, [cx, cz] = el.c, s = el.s, h = el.h;
-  hall({ rect: [cx - s / 2, cz - s / 2, cx + s / 2, cz + s / 2], y: el.y, h, grid: [2, 2], walls: 4, doors: 'we', d: 1.3, simple: el.simple }, ctx);
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) lamassu(bag, cx + sx * (s / 2 + 3.2), cz + sz * 3.4, el.y ?? 0, sx, sz);
+  const { bag, col } = ctx, [cx, cz] = el.c, s = el.s, h = el.h, th = 4, y = el.y ?? 0, pw = 1.9, half = pw + 1.88;
+  hall({ rect: [cx - s / 2, cz - s / 2, cx + s / 2, cz + s / 2], y, h, grid: [2, 2], walls: th, doors: 'wes', d: 1.3, simple: el.simple, doorW: { w: 2 * half, e: 2 * half } }, ctx);
+  if (el.simple) return;
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const bx = cx + sx * (s / 2 + 3.2), bz = cz + sz * (pw + 0.98);
+    lamassu(bag, bx, bz, y, [sx, 0], { kind: sx < 0 ? 'bull' : 'man' });
+    col.rect([bx - 3.2, bz - 1, bx + 3.2, bz + 1], y, y + 6.5);
+    // the inscription panel on the jamb's face above it: three columns of lines (Old Persian, Elamite, Babylonian)
+    const fz = cz + sz * half, xa = cx + sx * (s / 2 + 0.25), xb = cx + sx * (s / 2 + th - 0.25), x0 = Math.min(xa, xb), x1 = Math.max(xa, xb), w = sz < 0 ? 1 : -1;
+    bag.add(C, box(x0, y + 7.2, Math.min(fz, fz + w * 0.03), x1, y + 9.6, Math.max(fz, fz + w * 0.03)));
+    for (let c = 0; c < 3; c++) for (let r = 0; r < 14; r++) {
+      const u0 = x0 + 0.15 + c * (x1 - x0 - 0.3) / 3 + 0.08, u1 = u0 + (x1 - x0 - 0.3) / 3 - 0.16, v = y + 7.38 + r * 0.15;
+      bag.add(C, box(u0, v, Math.min(fz + w * 0.03, fz + w * 0.045), u1 - ((r * 7 + c * 3) % 5) * 0.06, v + 0.05, Math.max(fz + w * 0.03, fz + w * 0.045)));
+    }
+  }
+  // the bench round the inner walls, broken at the doors
+  const r = [cx - s / 2, cz - s / 2, cx + s / 2, cz + s / 2], bd = 0.6, bh = 0.5, dS = Math.min(5, s * 0.12) / 2 + 0.75;
+  for (const q of [[r[0], r[1], r[2], r[1] + bd], [r[0], r[3] - bd, cx - dS, r[3]], [cx + dS, r[3] - bd, r[2], r[3]], [r[0], r[1] + bd, r[0] + bd, cz - half - 0.75], [r[0], cz + half + 0.75, r[0] + bd, r[3] - bd], [r[2] - bd, r[1] + bd, r[2], cz - half - 0.75], [r[2] - bd, cz + half + 0.75, r[2], r[3] - bd]]) {
+    bag.add(S, box(q[0], y + 0.15, q[1], q[2], y + bh, q[3])); col.rect(q, y, y + bh);
+  }
 }
 
 // an ellipsoid in a frame: centre c, radii along f (forward), y, l (lateral)
 // the ellipsoid's profile; with p < 1 it squares toward a block (the carved forms of the capitals)
 const ELLS = {};
-const ellProfile = (p) => (ELLS[p] ??= Array.from({ length: 9 }, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 8, c = Math.cos(a), sn = Math.sin(a); return [Math.max(0.001, Math.abs(c) ** p), Math.sign(sn) * Math.abs(sn) ** p]; }));
+const ellProfile = (p) => (ELLS[p] ??= Array.from({ length: 13 }, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 12, c = Math.cos(a), sn = Math.sin(a); return [Math.max(0.001, Math.abs(c) ** p), Math.sign(sn) * Math.abs(sn) ** p]; }));
 function ell(c, f, l, rf, ry, rl, seg = 12, p = 1) {
   if (f[0] * l[1] - f[1] * l[0] < 0) l = [-l[0], -l[1]];             // keep the frame right-handed (the faces wound outward)
   const n = 2 / p, g = lathe(ellProfile(p), seg, p < 1 ? (th) => (Math.abs(Math.cos(th)) ** n + Math.abs(Math.sin(th)) ** n) ** (-1 / n) : null);
@@ -347,46 +382,120 @@ function taper(bag, mat, a, b, r0, r1) {
   g.applyMatrix4(M4); bag.add(mat, g);
 }
 /**
- * A winged bull with a man's head (lamassu) standing at a portal, facing out along x (sx), its outer
- * side toward sz: the plinth, the body and its four legs, the chest, the great wing sweeping up and
- * back along the outer flank in rows of feathers, the bearded head under its tall horned crown.
+ * A colossus at a portal (docs/settlements/persepolis.md §11), standing on its plinth and facing out
+ * along the axis direction fd ([1, 0], [0, -1], …). kind 'man': the winged bull with a bearded man's
+ * head under the tall horned crown (the east doorway of the Gate of All Nations); 'bull': the bull
+ * (its west doorway; wingless, as at the north portico of the Hundred-Column Hall). Carved square in
+ * the Achaemenid manner: the four columnar legs with their hooves and dewclaws, the forequarters, the
+ * barrel and the haunches, the belly fringe of curls, the tail with its tuft; the wings on both
+ * flanks — a plate set with covert feathers in rows and long primaries sweeping up and curving
+ * forward at the tips; the head. `skin`: the material of the hide (the stone, or the blue paint whose
+ * traces survive on the portico bull).
  */
-function lamassu(bag, x, z, y, sx, sz) {
-  const f = [sx, 0], l = [0, sz], P = (a, b) => [x + f[0] * a + l[0] * b, z + f[1] * a + l[1] * b];
-  bag.add(S, box(x - 3.0, y, z - 1.0, x + 3.0, y + 0.6, z + 1.0));
-  const yb = y + 0.6;
-  // legs: the forelegs together under the chest, the hind legs striding
-  for (const [a, b] of [[1.9, -0.42], [1.9, 0.42], [-1.9, -0.42], [-1.3, 0.42]]) { const [lx, lz] = P(a, b); bag.add(S, lathe([[0.4, 0], [0.3, 0.3], [0.27, 1.6], [0.36, 2.2]], 10, null, lx, yb, lz)); }
-  const [bx, bz] = P(0, 0);
-  bag.add(S, ell([bx, yb + 3.0, bz], f, l, 2.6, 1.15, 0.85));
-  const [chx, chz] = P(1.85, 0);
-  bag.add(S, ell([chx, yb + 3.3, chz], f, l, 0.95, 1.35, 0.8));
-  // the wing: one great curved plate along the outer flank, sweeping up behind the head, with the
-  // ridges of its rows of feathers
-  const outline = [[1.7, 3.0], [0.2, 2.75], [-1.6, 2.85], [-2.55, 3.3], [-2.5, 4.3], [-1.9, 5.4], [-0.9, 6.0], [0.3, 6.05], [1.1, 5.5], [1.6, 4.3]];
-  const tri = [], cA = outline.reduce((q, p) => q + p[0], 0) / outline.length, cY = outline.reduce((q, p) => q + p[1], 0) / outline.length;
-  const W3 = (a, yy, o) => { const [px, pz] = P(a, o); return [px, yb + yy, pz]; };
-  for (let i = 0; i < outline.length; i++) {
-    const [a0, y0] = outline[i], [a1, y1] = outline[(i + 1) % outline.length];
-    for (const o of [0.78, 1.0]) tri.push(...W3(cA, cY, o), ...W3(a0, y0, o), ...W3(a1, y1, o));
-    tri.push(...W3(a0, y0, 0.78), ...W3(a0, y0, 1.0), ...W3(a1, y1, 1.0), ...W3(a0, y0, 0.78), ...W3(a1, y1, 1.0), ...W3(a1, y1, 0.78));
+function lamassu(bag, x, z, y, fd, { kind = 'man', wings = kind === 'man', skin = C } = {}) {
+  const S = C;
+  const f = fd, l = [-fd[1], fd[0]], P = (a, b) => [x + f[0] * a + l[0] * b, z + f[1] * a + l[1] * b];
+  const yb = y + 0.6, Q = (a, b, v) => { const [px, pz] = P(a, b); return [px, yb + v, pz]; };
+  const E = (mat, a, b, v, rf, ry, rl, seg = 14, p = 1) => bag.add(mat, ell(Q(a, b, v), f, l, rf, ry, rl, seg, p));
+  // an upright box in the frame: a0…a1 along, b0…b1 across
+  const RB = (mat, a0, a1, b0, b1, y0, y1) => { const p = P(a0, b0), q = P(a1, b1); bag.add(mat, box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1]))); };
+  RB('limestone_persian', -3.2, 3.2, -1, 1, y, yb - 0.08); RB(C, -3.25, 3.25, -1.04, 1.04, yb - 0.08, yb);
+  // the legs: the forelegs together, the hind legs a little apart; hoof, pastern, fetlock and dewclaw, cannon, knee, forearm
+  const LEG = [[0.33, 0], [0.32, 0.05], [0.28, 0.3], [0.23, 0.36], [0.21, 0.5], [0.27, 0.6], [0.235, 0.72], [0.225, 1.15], [0.29, 1.28], [0.27, 1.42], [0.33, 1.62], [0.42, 1.9], [0.47, 2.2]];
+  for (const [a, b, hind] of [[1.85, -0.44, 0], [1.85, 0.44, 0], [-1.95, -0.44, 1], [-1.45, 0.44, 1]]) {
+    const [lx, lz] = P(a, b);
+    bag.add(skin, lathe(hind ? LEG.map(([r, v], i) => [r * (i > 9 ? 1.18 : 1), v]) : LEG, 12, null, lx, yb, lz));
+    bag.add(C, lathe([[0.34, 0], [0.33, 0.04], [0.29, 0.29], [0.001, 0.3]], 12, null, lx, yb, lz));                    // the hoof
+    RB('opening', a + 0.2, a + 0.32, b - 0.015, b + 0.015, yb + 0.02, yb + 0.24);                                    // the cleft between the claws
+    E(C, a - 0.2, b, 0.5, 0.08, 0.1, 0.09, 8);                                                                       // the dewclaw
   }
-  const both = []; for (let i = 0; i < tri.length; i += 9) both.push(...tri.slice(i, i + 9), ...tri.slice(i, i + 3), ...tri.slice(i + 6, i + 9), ...tri.slice(i + 3, i + 6));
-  bag.add(S, fromTriangles(both));
-  for (let r = 0; r < 4; r++) {
-    const yy = 3.5 + r * 0.6, a0 = 1.4 - r * 0.1, a1 = -2.3 + r * 0.35, [p0x, p0z] = P(a0, 1.04), [p1x, p1z] = P(a1, 1.04);
-    const L = Math.hypot(p1x - p0x, p1z - p0z), g = box(-L / 2, 0, -0.04, L / 2, 0.1, 0.04);
-    g.translate((p0x + p1x) / 2, yb + yy, (p0z + p1z) / 2); bag.add(S, g);
+  // the forequarters, the barrel, the haunches, carved square
+  E(skin, 0, 0, 2.75, 2.45, 0.98, 0.8, 18, 0.72);
+  E(skin, 1.62, 0, 3.05, 0.86, 1.18, 0.84, 16, 0.68);
+  E(skin, -1.9, 0, 2.9, 0.92, 1.12, 0.8, 16, 0.75);
+  // the belly fringe: a row of locks along the underside
+  for (let i = 0; i < 15; i++) for (const b of [-0.56, 0.56]) E(skin, -1.2 + i * 0.17, b, 1.86 + 0.02 * Math.sin(i * 1.7), 0.06, 0.17, 0.06, 8);
+  // the tail down the back of the haunch to its tuft
+  taper(bag, skin, Q(-2.78, 0, 3.3), Q(-2.95, 0, 1.6), 0.09, 0.06);
+  E(skin, -2.95, 0, 1.35, 0.13, 0.3, 0.13, 10, 0.8);
+  for (let k = 0; k < 4; k++) E(skin, -2.95 + (k - 1.5) * 0.04, (k - 1.5) * 0.06, 1.05, 0.05, 0.12, 0.05, 6);
+  if (wings) for (const side of [-1, 1]) {
+    const lo = side * 0.5, la = side * 0.84, lf = side * 0.9;
+    // the plate of the wing on the flank
+    const outline = [[1.55, 3.3], [0.2, 3.25], [-1.5, 3.3], [-2.45, 3.55], [-2.55, 4.4], [-2.2, 5.3], [-1.4, 6.0], [-0.3, 6.35], [0.8, 6.15], [1.3, 5.5], [1.55, 4.4]];
+    const tri = [], W3 = (a, v, o) => Q(a, o, v), cA = 0, cY = 4.6;
+    for (let i = 0; i < outline.length; i++) {
+      const [a0, v0] = outline[i], [a1, v1] = outline[(i + 1) % outline.length];
+      tri.push(...W3(cA, cY, la), ...W3(a0, v0, la), ...W3(a1, v1, la), ...W3(cA, cY, lo), ...W3(a1, v1, lo), ...W3(a0, v0, lo));
+      tri.push(...W3(a0, v0, lo), ...W3(a1, v1, lo), ...W3(a1, v1, la), ...W3(a0, v0, lo), ...W3(a1, v1, la), ...W3(a0, v0, la));
+    }
+    bag.add(skin, fromTriangles(orientOutward(tri)));
+    // the long primaries: slats from the coverts up to the crest, curving forward at their tips
+    const N = 12;
+    for (let k = 0; k < N; k++) {
+      const t = k / (N - 1), ab = 1.15 - t * 3.45, vb = 3.95 + t * 0.15, at = ab + 0.35 + 0.75 * t, vt = 5.05 + 1.15 * Math.sin(Math.PI * (0.15 + 0.75 * t)) - 0.25 * t;
+      const w0 = 0.17, w1 = 0.12, o0 = la + side * (k % 2 ? 0.035 : 0.005), o1 = o0 + side * 0.05;
+      const dv = [at - ab, vt - vb], L = Math.hypot(...dv), n = [-dv[1] / L, dv[0] / L];
+      const tip = [at + dv[0] / L * 0.22, vt + dv[1] / L * 0.22];
+      const quad = [[ab - n[0] * w0, vb - n[1] * w0], [ab + n[0] * w0, vb + n[1] * w0], [at + n[0] * w1, vt + n[1] * w1], [tip[0], tip[1]], [at - n[0] * w1, vt - n[1] * w1]];
+      const T = [];
+      for (let i = 1; i < quad.length - 1; i++) { T.push(...W3(...quad[0], o1), ...W3(...quad[i], o1), ...W3(...quad[i + 1], o1)); T.push(...W3(...quad[0], o0), ...W3(...quad[i + 1], o0), ...W3(...quad[i], o0)); }
+      for (let i = 0; i < quad.length; i++) { const p = quad[i], q = quad[(i + 1) % quad.length]; T.push(...W3(...p, o0), ...W3(...q, o0), ...W3(...q, o1), ...W3(...p, o0), ...W3(...q, o1), ...W3(...p, o1)); }
+      bag.add(skin, fromTriangles(orientOutward(T)));
+      const mid = (s) => [ab + (at - ab) * s, vb + (vt - vb) * s];
+      taper(bag, skin, W3(...mid(0.05), o1), W3(...mid(0.98), o1), 0.025, 0.012);                                      // the shaft
+    }
+    // the coverts: three rows of rounded feathers over the slats' roots, and the small feathers along the front
+    for (let r = 0; r < 4; r++) for (let i = 0; i < 15 - r; i++) {
+      const a = 1.3 - r * 0.1 - i * 0.25, v = 3.5 + r * 0.17 + 0.03 * Math.sin(i);
+      E(skin, a, lf + side * (0.02 + r * 0.025), v, 0.15, 0.1, 0.04, 8);
+    }
+    for (let i = 0; i < 8; i++) E(skin, 1.36 - i * 0.03, lf + side * 0.02, 4.25 + i * 0.2, 0.1, 0.1, 0.04, 8);
   }
-  // the head: neck, the face, the long square beard tapering to the chest, the tall horned crown
-  const [hx, hz] = P(2.3, 0);
-  bag.add(S, lathe([[0.55, 0], [0.48, 0.6], [0.001, 0.62]], 10, null, hx, yb + 4.0, hz));
-  bag.add(S, ell([hx, yb + 4.95, hz], f, l, 0.42, 0.55, 0.4));
-  const [bdx, bdz] = P(2.55, 0);
-  bag.add(S, frustum([bdx - 0.18, bdz - 0.32, bdx + 0.18, bdz + 0.32], yb + 3.7, yb + 4.75, 0.02, 0.02, -0.04, -0.04));
-  for (let k = 0; k < 5; k++) bag.add(S, box(bdx - 0.2, yb + 3.8 + k * 0.19, bdz - 0.33, bdx + 0.2, yb + 3.85 + k * 0.19, bdz + 0.33));     // the beard's curled rows
-  bag.add(S, lathe([[0.36, 0], [0.4, 0.75], [0.45, 0.8], [0.45, 0.88], [0.001, 0.88]], 12, null, hx, yb + 5.35, hz));
-  for (const k of [0.2, 0.45, 0.68]) bag.add(S, lathe([[0.4, 0], [0.4, 0.06], [0.001, 0.06]], 12, null, hx, yb + 5.35 + k, hz));
+  if (kind === 'man') {
+    // the neck; the face, the nose, the eyes under the brows; the bull's ears with their rings
+    E(skin, 2.0, 0, 3.95, 0.58, 0.72, 0.52, 14, 0.8);
+    E(S, 2.32, 0, 4.82, 0.4, 0.5, 0.39, 16, 0.85);
+    E(S, 2.72, 0, 4.86, 0.09, 0.17, 0.07, 10, 0.8);                                                                    // the nose
+    for (const b of [-0.15, 0.15]) {
+      E(C, 2.66, b, 4.99, 0.04, 0.045, 0.085, 8);                                                                     // the eyes, almond-shaped
+      E(S, 2.64, b, 5.07, 0.08, 0.035, 0.14, 8);                                                                      // the brows
+      E(S, 2.6, b * 1.35, 4.72, 0.1, 0.12, 0.1, 10);                                                                  // the cheeks
+    }
+    E(S, 2.66, 0, 4.6, 0.06, 0.035, 0.11, 8); E(C, 2.7, 0, 4.6, 0.02, 0.012, 0.07, 6);                                  // the lips
+    for (const b of [-0.4, 0.4]) { E(S, 2.15, b, 4.95, 0.11, 0.24, 0.07, 10); taper(bag, 'gilt_bronze', Q(2.2, b * 1.02, 4.74), Q(2.2, b * 1.02, 4.52), 0.035, 0.035); }
+    // the long square beard in rows of curls, the moustache, the hair falling in curls at the nape
+    const bA = 2.6, bw = 0.34;
+    RB(S, bA - 0.45, bA, -bw, bw, yb + 3.55, yb + 4.48);
+    for (let r = 0; r < 6; r++) for (let i = 0; i < 7; i++) E(S, bA + 0.01, -0.28 + i * 0.093 + (r % 2) * 0.03, 3.66 + r * 0.155, 0.04, 0.06, 0.04, 6);
+    for (let r = 0; r < 5; r++) for (const b of [-bw - 0.01, bw + 0.01]) for (let i = 0; i < 3; i++) E(S, bA - 0.08 - i * 0.13, b, 3.68 + r * 0.19, 0.06, 0.07, 0.04, 6);
+    for (const b of [-1, 1]) taper(bag, S, Q(2.66, b * 0.03, 4.67), Q(2.58, b * 0.3, 4.58), 0.04, 0.015);
+    for (let r = 0; r < 3; r++) for (let i = 0; i < 6; i++) E(S, 1.98 - r * 0.05, -0.32 + i * 0.13, 4.3 + r * 0.17, 0.07, 0.08, 0.06, 6);
+    // the crown: the tall drum on its band of horns, a band of rosettes, a crest of feathers round its top
+    const [hx, hz] = P(2.28, 0);
+    bag.add(S, lathe([[0.42, 0], [0.44, 0.78], [0.47, 0.82], [0.47, 0.9], [0.001, 0.9]], 20, null, hx, yb + 5.18, hz));
+    for (let k = 0; k < 3; k++) for (const b of [-1, 1]) {
+      const yh = 5.26 + k * 0.17, pts = [];
+      for (let i = 0; i <= 6; i++) { const a = Math.PI * (0.92 - i * 0.14); pts.push(Q(2.28 + Math.cos(a) * 0.45, b * Math.sin(a) * 0.45, yh + i * 0.01)); }
+      for (let i = 0; i < 6; i++) taper(bag, S, pts[i], pts[i + 1], 0.05 - i * 0.006, 0.044 - i * 0.006);
+    }
+    for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5; bag.add(S, ell([hx + Math.cos(a) * 0.45, yb + 5.82, hz + Math.sin(a) * 0.45], [Math.cos(a), Math.sin(a)], [-Math.sin(a), Math.cos(a)], 0.03, 0.09, 0.09, 8)); }
+    for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; bag.add(S, frustum([hx + Math.cos(a) * 0.43 - 0.05, hz + Math.sin(a) * 0.43 - 0.05, hx + Math.cos(a) * 0.43 + 0.05, hz + Math.sin(a) * 0.43 + 0.05], yb + 6.08, yb + 6.3, 0.03, 0.03, 0.03, 0.03)); }
+  } else {
+    // the bull's head: the neck and dewlap, the skull, the muzzle with its nostrils, the eyes, the ears set level, the horns
+    E(skin, 2.0, 0, 3.95, 0.66, 0.8, 0.58, 14, 0.8);
+    E(skin, 2.25, 0, 3.25, 0.36, 0.55, 0.22, 10);
+    E(skin, 2.5, 0, 4.5, 0.72, 0.5, 0.45, 16, 0.8);
+    E(skin, 3.1, 0, 4.15, 0.32, 0.34, 0.36, 14, 0.8);
+    for (const b of [-0.16, 0.16]) E(C, 3.38, b, 4.18, 0.05, 0.06, 0.06, 8);
+    for (const b of [-0.38, 0.38]) { E(C, 2.68, b, 4.66, 0.09, 0.06, 0.05, 8); E(skin, 2.68, b * 0.95, 4.74, 0.13, 0.04, 0.08, 8); }
+    for (const b of [-1, 1]) {
+      E(skin, 2.2, b * 0.58, 4.72, 0.15, 0.09, 0.26, 10);
+      taper(bag, C, Q(2.25, b * 0.34, 4.85), Q(2.38, b * 0.72, 4.98), 0.1, 0.08);
+      taper(bag, C, Q(2.38, b * 0.72, 4.98), Q(2.7, b * 0.8, 5.3), 0.08, 0.012);
+    }
+    for (let i = 0; i < 6; i++) E(skin, 2.3 + (i % 2) * 0.05, -0.3 + i * 0.12, 4.95, 0.09, 0.07, 0.07, 6);                          // the curls of the brow
+  }
 }
 
 /**
