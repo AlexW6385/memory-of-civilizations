@@ -14,7 +14,7 @@ for (const r of [[hx0 - 3, hz0 - 3, hx0, hz1 + 3], [hx1, hz0 - 3, hx1 + 3, hz1 +
 }
 // a gate and stair up from the city on the west
 E.push({ t: 'stair', rect: [hx0 - 24, -6, hx0 - 3, 6], dir: 'e', y0: height(hx0 - 24, 0), y1: T, riser: 0.18, base: height(hx0 - 24, 0) - 0.5, mat: 'limestone' });
-E.push({ t: 'hypostyle', rect: AQSA, h: 9, y: T, aisles: 7 });
+E.push({ t: 'hypostyle', rect: AQSA, y: T, aisles: 11, bay: 4.9 });
 
 export const haram = {
   id: 'jerusalem-haram',
