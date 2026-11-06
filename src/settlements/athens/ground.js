@@ -2,7 +2,7 @@
 // dry grass and thyme; olives and cypresses in the gardens, a plane tree or two in the Agora; the
 // paved Panathenaic Way; the clear Attic light.
 
-import { RADIUS, ACRO, AGORA, height, acroE, onWay, pathAt, RAMP, inRect, inLot } from './layout.js';
+import { RADIUS, ACRO, AGORA, height, acroE, onWay, pathAt, RAMP, inRect, inLot, SLOPE, THEATRE, ODEION } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.2, grass: 0.25, rock: 0, soil: 0.55, fields: 0, dry: 0.8, warmth: 0.75, red: 0.45, road: 0, snow: 0, forest: 0 };
@@ -16,6 +16,8 @@ const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || acroE(x, z) < 1.05 || onWay(x, z, 1) || pathAt(x, z, RAMP)[0] < 8 || inLot(x, z, 1)) return null;
   if (inRect(AGORA, x, z)) return { plane_tree: 0.008 };
+  // the south slope: nothing in the theatre, the Odeion or the sanctuary's buildings; dry grass between
+  if (inRect(SLOPE, x, z, 4)) return Math.hypot(x - THEATRE.c[0], z - THEATRE.c[1]) < 48 || inRect(ODEION.rect, x, z, 3) || inRect([40, 145, 105, 185], x, z) ? null : { grass_dry: 4 };
   if (acroE(x, z) < 1.7) return { grass_dry: 6, maquis: 0.1 };
   return { olive: 0.06, cypress: 0.02, grass_dry: 10 };
 }

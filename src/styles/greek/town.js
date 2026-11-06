@@ -6,6 +6,7 @@ import { STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import './index.js';
 import './agora.js';
+import './slope.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** greek_house: { rect, seed, y } — rooms round a court, plastered mudbrick on a stone socle, pent roofs of tile. */
