@@ -1,6 +1,6 @@
 # Conques (Sainte-Foy and its village), about 1120 — dossier
 
-Settlement id: `conques` · Style: `romanesque` (with `vernacular` houses and bridge) · Region: France (the Rouergue, the gorge of the Dourdou) · Code: `src/settlements/conques/`
+Settlement id: `conques` · Style: `romanesque` (with `vernacular` houses) · Region: France (the Rouergue, the gorge of the Dourdou) · Code: `src/settlements/conques/`
 Replaces the legacy district of the previous design. The abbey church itself is the full building from that design (`src/buildings/sainte-foy-conques`, dossier `docs/buildings/sainte-foy-conques.md`), with its cloister.
 Status of this dossier: L1–L2 (the steep south-facing hillside; the abbey church on its terrace with its retaining wall; the village of schist houses with lauze roofs on the slope; the Dourdou in its rocky bed with a stone bridge; woods and gardens; ground, planting, weather, music). L3 recorded for later: the monastic buildings round the cloister, the village gates and walls, the pilgrims' road (the Via Podiensis to Santiago), the chapel of Saint-Roch above, lanes and stairs, people and pilgrims.
 
@@ -12,6 +12,12 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **The village:** Conques stands on a steep hillside above the confluence of the Dourdou and the Ouche. Its houses are of schist and limestone with roofs of schist slabs (lauzes) [stated: Wikipedia "Conques"].
 - **The bridge:** the "Roman bridge" over the Dourdou, a medieval bridge used by pilgrims [stated: Wikipedia "Conques"].
 - **Moment shown:** about 1120, the church completed.
+
+## 1b. The bridge over the Dourdou (built: `pont` in `src/styles/romanesque/index.js`)
+
+- A semicircular-arch masonry bridge of the 14th century, five spans of 2.00, 3.80, 6.50, 10.30 and 6.60 m, its deck 2.30 m wide [stated: Structurae "Conques Bridge"]. The pilgrims to Santiago arrived in Conques by this bridge [stated: Callahan, Illinois Wesleyan].
+- **Date:** the standing bridge is later than our moment (c. 1120); we build it as the type of the crossing the pilgrims used, an earlier bridge on the same site being assumed [inferred].
+- **Built:** the five round arches in that order across the river, the great one over the stream; piers of 2.0–2.4 m [inferred]; the body of schist rubble with the arch rings in dressed stone standing a little proud; pointed cutwaters on both sides of each pier, capped with lauze; a paved deck humped over the great arch, 2.3 m between low parapets with a coping [inferred: the parapets and the cutwaters, after medieval bridges of the Rouergue]. Replaces the generic flat stone bridge.
 
 ## 1a. The tympanum of the Last Judgement (built: `tympanum` in `src/styles/romanesque/index.js`)
 
@@ -70,6 +76,8 @@ As for the church (`docs/buildings/sainte-foy-conques.md` §9).
 
 - The church's own sources: `docs/buildings/sainte-foy-conques.md`
 - [Conques — Wikipedia](https://en.wikipedia.org/wiki/Conques)
+- [Conques Bridge — Structurae](https://structurae.net/en/structures/conques-bridge)
+- [Conques, the medieval bridge — Callahan, Illinois Wesleyan University](https://sun.iwu.edu/~callahan/conques-pont-e.html)
 - [The tympanum of the Last Judgment — Conques tourist office](https://tourisme-conques.fr/en/en-conques/the-tympanum)
 - [The West Tympanum at Conques — christianiconography.info](https://www.christianiconography.info/conques/tympanum.htm)
 - [The structure of the tympanum — art-roman-conques.fr](https://www.art-roman-conques.fr/english/structure.html)

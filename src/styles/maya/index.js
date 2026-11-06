@@ -420,6 +420,12 @@ function mayaHouse(el, { bag, col }) {
   col.rect([cx - (alongX ? a : b), cz - (alongX ? b : a), cx + (alongX ? a : b), cz + (alongX ? b : a)], 0, 4);
 }
 
+/** petate: a woven palm mat laid on the ground { at [x, z], y, w, d, rot } (the market's sellers sit behind theirs). */
+function petate(el, { bag }) {
+  const g = box(-el.w / 2, 0, -el.d / 2, el.w / 2, 0.015, el.d / 2); if (el.rot) g.rotateY(el.rot);
+  bag.add('reed_mat', g.translate(el.at[0], el.y ?? 0, el.at[1]));
+}
+
 /** albarrada: a dry-stone wall of rubble along a polyline { pts, h }. */
 function albarrada(el, { bag, col }) {
   const h = el.h ?? 1.1;
@@ -435,7 +441,7 @@ registerStyle('maya', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    m_pyramid: mPyramid, m_temple: mTemple, m_ballcourt: mBallcourt, m_colonnade: mColonnade, m_platform: mPlatform, m_caracol: mCaracol, sacbe, maya_house: mayaHouse, albarrada,
+    m_pyramid: mPyramid, m_temple: mTemple, m_ballcourt: mBallcourt, m_colonnade: mColonnade, m_platform: mPlatform, m_caracol: mCaracol, sacbe, maya_house: mayaHouse, albarrada, petate,
   },
   objects: {},
 });
