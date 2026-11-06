@@ -7,7 +7,7 @@ export const RADIUS = 380;
 export const EDGE = 3;                                 // the band where a cut's wall stands
 // pits: { rect, depth }; churches stand on their floors
 export const PITS = {
-  giyorgis: { rect: [-216, 114, -184, 146], depth: 12 },
+  giyorgis: { rect: [-216, 114, -174, 156], depth: 12 },     // the cross 25.6 m over its plinth, a court of about 5 m round it
   medhane: { rect: [-15, -112, 35, -68], depth: 11.5 },
   maryam: { rect: [55, -104, 85, -76], depth: 9 },
   golgotha: { rect: [-72, -104, -32, -78], depth: 9 },

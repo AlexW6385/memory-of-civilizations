@@ -41,7 +41,19 @@ void inRect;
 for (const p of Object.values(PITS)) { const [x0, z0, x1, z1] = p.rect; E.push({ t: 'block', walk: true, rect: [x0 + EDGE - 0.2, z0 + EDGE - 0.2, x1 - EDGE + 0.2, z1 - EDGE + 0.2], y0: -p.depth - 1.5, y1: -p.depth + 0.15, mat: 'tuff_red' }); }
 // ---- the churches
 const G = PITS.giyorgis, gc = [(G.rect[0] + G.rect[2]) / 2, (G.rect[1] + G.rect[3]) / 2];
-E.push({ t: 'giyorgis', c: gc, y0: -G.depth + 0.15, h: G.depth - 0.15, a: 12, w: 4.6 });
+// its roof level with the ground round the pit: the body stops 0.42 m below it, the three stepped crosses carved up to it
+E.push({ t: 'giyorgis', c: gc, y0: -G.depth + 0.15, h: G.depth - 0.15 - 0.42, a: 12, w: 4.6 });
+// the way in: the trench from the west narrows into a tunnel through the last eight metres of rock and
+// opens into the court beside the church's west arm (Wikipedia: "a very narrow man-made canyon ...
+// which becomes a tunnel close to the church"; Senses Atlas: "a descending trench and a tunnel")
+{
+  const T = TRENCHES[0], [, tz0, , tz1] = T.rect, x1 = G.rect[0] + EDGE;
+  const zc = (tz0 + tz1) / 2, wT = tz1 - tz0 - 2 * EDGE;
+  E.push({ t: 'rock_cut', a: [x1 - 8, zc], b: [x1, zc], y0: -7.4, th: wT, top: 0 });
+  E.push({ t: 'block', walk: true, rect: [x1 - 8, tz0 + EDGE, x1, tz1 - EDGE], y0: -0.3, y1: 0, mat: 'tuff_red', collide: false });
+  // the tunnel's mouths, each under a hewn band standing a little proud of the rock face
+  for (const x of [x1 - 8 - 0.06, x1 + 0.06]) E.push({ t: 'rock_cut', a: [x, tz0 + EDGE - 0.2], b: [x, tz1 - EDGE + 0.2], y0: -7.75, th: 0.12, top: -7.1 });
+}
 const M = PITS.medhane, mc = [(M.rect[0] + M.rect[2]) / 2, (M.rect[1] + M.rect[3]) / 2];
 E.push({ t: 'basilica', rect: [mc[0] - 16.75, mc[1] - 11.75, mc[0] + 16.75, mc[1] + 11.75], y0: -M.depth + 0.15, h: 11, cols: [11, 7] });
 const ch = (p, w, d, h) => { const c = [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2]; E.push({ t: 'aksumite', rect: [c[0] - w / 2, c[1] - d / 2, c[0] + w / 2, c[1] + d / 2], y0: -p.depth + 0.15, h }); };
@@ -51,7 +63,9 @@ ch(PITS.maryam, 15, 11, 8.5); ch(PITS.golgotha, 22, 12, 8); ch(PITS.amanuel, 18,
 // number of caves", lodgings of priests and burial places), some at the floor, some on a ledge
 {
   const [x0, z0, x1, z1] = G.rect, yf = -G.depth + 0.15;
-  const caves = [[[x1 - EDGE, 120], [-1, 0], 0], [[-208, z1 - EDGE], [0, -1], 1.8], [[x1 - EDGE, 139], [-1, 0], 0], [[-206, z0 + EDGE], [0, 1], 0], [[-193, z0 + EDGE], [0, 1], 2.6], [[-193.5, z1 - EDGE], [0, -1], 0], [[-189, z1 - EDGE], [0, -1], 3.4], [[x0 + EDGE, 118.5], [1, 0], 0], [[x0 + EDGE, 140], [1, 0], 2.2]];
+  // their places on the faces as first laid out for a pit of 26 m inside, stretched to this one's 36 m
+  const k = (x1 - x0 - 2 * EDGE) / 26, mx = (v) => gc[0] + (v + 200) * k, mz = (v) => gc[1] + (v - 130) * k;
+  const caves = [[[x1 - EDGE, mz(120)], [-1, 0], 0], [[mx(-208), z1 - EDGE], [0, -1], 1.8], [[x1 - EDGE, mz(139)], [-1, 0], 0], [[mx(-206), z0 + EDGE], [0, 1], 0], [[mx(-193), z0 + EDGE], [0, 1], 2.6], [[mx(-193.5), z1 - EDGE], [0, -1], 0], [[mx(-189), z1 - EDGE], [0, -1], 3.4], [[x0 + EDGE, mz(118.5)], [1, 0], 0], [[x0 + EDGE, mz(140)], [1, 0], 2.2]];
   for (const [c, n, up] of caves) E.push({ t: 'cave', c, n, y: yf + 0.25 + up, floor: yf, w: up ? 0.9 : 1.05, h: up ? 1.4 : 1.75 });
 }
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -68,7 +82,7 @@ export const churches = {
   entrance: { at: [-240, 100], facing: 's' },
   bounds: [-262, -146, 212, 146],
   bakeBounds: [-262, -146, 212, 146],
-  view: [-212, 118, -188, 142],
+  view: [-208, 122, -182, 148],
   bakeTop: 4,
   elements: E,
   rooms,

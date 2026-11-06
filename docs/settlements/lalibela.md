@@ -22,7 +22,7 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Pits | each church in a pit 7–12 m deep | [stated: ancient-history-sites] |
 | Village | round houses on the slopes round the churches | [inferred] |
 
-Ours: Bete Giyorgis' cross 24 m across in a pit 32 m square; the smaller churches' sizes chosen. [inferred]
+Ours: Bete Giyorgis' cross 24 m across (25.6 m over its plinth) in a pit 42 m square, 36 m between its rock faces, leaving a court of about 5 m round the church; the smaller churches' sizes chosen. [inferred]
 
 ## 3. Orientation
 
@@ -58,6 +58,8 @@ Chant in the ge'ez mode with the kebero drum and sistrum, the begena's buzzing s
 - **Bete Giyorgis:** "the lower windows of the building are in the Axumite style", "the upper windows are in the form of floral ogive windows" [stated: Senses Atlas]; the Greek cross appears "three times on the roof" [stated: Senses Atlas; Pilgrimaps: triple cross]. Ours: Aksumite lower windows, pointed (ogee) upper windows with raised frames, the roof's three crosses nested and stepped up one within another.
 - **Caves in the pit:** "Its vertical walls have a number of caves", used as lodgings for priests and as tombs [stated: Senses Atlas]. Ours: nine cells cut into the pit's faces, some at the floor and some higher with a rock step below.
 - **People:** pilgrims "dressed in white"; priests "are the only people to wear color" [stated: myjoyonline (pilgrimage to Lalibela)]. Ours: about forty still figures — pilgrims wrapped in white (most with the shawl over the head) in the pits' corners, sitting on the rim above Bete Giyorgis, filing down the trenches; four priests in white or ochre with white turbans, each holding a brass hand cross in the raised hand [hand crosses inferred from photographs].
+
+- **Bete Giyorgis re-proportioned (third pass).** The church stands in a shaft about 25 m by 25 m cut into the tuff, some 3,400 m³ of rock removed round it; it is reached "by a descending trench and a tunnel, which leads to a sunken courtyard surrounding the building" [stated: Senses Atlas]; "a very narrow man-made canyon, spiralling downwards", becomes a tunnel close to the church [stated: Church of Saint George — Wikipedia]; its roof at ground level [stated: Amusing Planet]. Ours: the plinth had stood within 0.2 m of the pit's faces and the roof's crosses 0.4 m above the ground; now the pit is 42 m square (36 m inside, a court of about 5 m round the plinth — wider than the sources' shaft, which we read as the church's own extent [inferred]), the body stops 0.42 m below the ground so that the top of the triple cross lies flush with it, and the trench from the west runs into a tunnel through the last 8 m of rock (4 m wide, its ceiling 7.4 m below the ground, a hewn band over each mouth) opening into the court beside the west arm [inferred: the tunnel's size and place]. The nine cells in the pit's faces keep their places, stretched to the larger pit.
 
 ## Sources
 
