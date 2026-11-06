@@ -12,6 +12,8 @@ import { ironBridge, embankment } from './bridge.js';
 import { abbey } from './abbey.js';
 import { westminsterHall } from './hall.js';
 import { stStephens, centralLobby, commons, lords } from './interior.js';
+import { clockDial } from './dial.js';
+import { faceFrame } from '../dutch/facade.js';
 import { hansomCab, omnibus, gasLamp, paddleSteamer, lighter, steamboatPier } from './street.js';
 
 const S = 'limestone_yellow', SL = 'slate';
@@ -40,19 +42,8 @@ function gothicTower(el, { bag, col }) {
   if (el.clock) {
     const cy = y + body, cs = s * 1.08, ch = h * 0.12;
     bag.add(S, box(x - cs / 2, cy, z - cs / 2, x + cs / 2, cy + ch, z + cs / 2));
-    // the dials: round, white, in a square gilded frame with its tracery corners; the hands
-    for (const f of 'nsew') {
-      const sg = f === 'n' || f === 'w' ? -1 : 1, along = f === 'n' || f === 's', R = cs * 0.34, yc = cy + ch * 0.5;
-      const fx = along ? x : x + sg * (cs / 2), fz = along ? z + sg * (cs / 2) : z;
-      const disc = (r, d, t, m) => { const g = lathe([[0.001, 0], [r, 0], [r, t], [0.001, t]], 32); g.rotateX(Math.PI / 2); if (!along) g.rotateY(Math.PI / 2); g.translate(fx + (along ? 0 : sg * d), yc, fz + (along ? sg * d : 0)); if (sg < 0) g.translate(along ? 0 : -t, 0, along ? -t : 0); bag.add(m, g); };
-      const F = (u0, u1, y0, y1, d0, d1) => (along ? box(x + u0, y0, Math.min(fz + sg * d0, fz + sg * d1), x + u1, y1, Math.max(fz + sg * d0, fz + sg * d1)) : box(Math.min(fx + sg * d0, fx + sg * d1), y0, z + u0, Math.max(fx + sg * d0, fx + sg * d1), y1, z + u1));
-      bag.add('gilt_bronze', F(-R * 1.18, R * 1.18, yc - R * 1.18, yc + R * 1.18, 0, 0.12));
-      disc(R * 1.06, 0.12, 0.06, 'gilt_bronze');
-      disc(R, 0.18, 0.04, 'plaster_white');
-      for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6, r1 = R * 0.82, r2 = R * 0.95, u = Math.cos(a), v = Math.sin(a); bag.add('lacquer_black', F(u * r1 - 0.08, u * r1 + 0.08, yc + v * r1 - 0.08, yc + v * r1 + 0.08, 0.22, 0.26)); void r2; }
-      bag.add('lacquer_black', F(-0.09, 0.09, yc, yc + R * 0.55, 0.26, 0.3));
-      bag.add('lacquer_black', F(-0.07, R * 0.75, yc - 0.07, yc + 0.07, 0.3, 0.33));
-    }
+    // the dials: 7 m of opal glass in their iron frames, the gilt surrounds with blue corners, the hands, the prayer below
+    for (const f of 'nsew') clockDial(bag, faceFrame([x - cs / 2, z - cs / 2, x + cs / 2, z + cs / 2], f), cs / 2, cy + ch * 0.5 + 0.3, 3.5);
     // the belfry: an open arcade of pointed openings on each face, louvres within; pinnacles at its corners
     const by = cy + ch, bh = h * 0.08, bs = s * 0.88;
     bag.add(S, box(x - bs / 2, by, z - bs / 2, x + bs / 2, by + bh, z + bs / 2));

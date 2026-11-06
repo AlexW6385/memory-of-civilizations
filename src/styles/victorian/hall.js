@@ -12,6 +12,7 @@
 
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { faceFrame, prism, fbox } from '../dutch/facade.js';
+import { figure } from '../../objects/figures.js';
 
 const ST = 'limestone', OAK = 'timber', LD = 'lead';
 
@@ -61,14 +62,20 @@ export function windowOn(bag, F, y, { uc, hw, v0, vs, rise, lights, transoms = [
   if (label) for (let i = 0; i < n; i++) { const a = -hw - 0.3 + 2 * (hw + 0.3) * i / n, b = -hw - 0.3 + 2 * (hw + 0.3) * (i + 1) / n, R = hw + 0.3; P(ST, [[uc + a, vs + pointed(a, R, rise + 0.3)], [uc + b, vs + pointed(b, R, rise + 0.3)], [uc + b, vs + pointed(b, R, rise + 0.3) + 0.16], [uc + a, vs + pointed(a, R, rise + 0.3) + 0.16]], d - 0.02, d + 0.38); }
 }
 
-/** a king in his niche: the canopied recess, the figure crowned, holding an orb and sceptre */
-export function kingNiche(bag, F, y, u, v, d) {
+/** a king (or queen) in his niche: the canopied recess, the figure crowned; with ctx a robed figure, else a simple one holding orb and sceptre */
+export function kingNiche(bag, F, y, u, v, d, ctx = null, seed = 1) {
   const P = (m, pts, d0, d1) => bag.add(m, prism(F, y, pts, d0, d1)), A = (m, ...r) => bag.add(m, fbox(F, y, ...r));
   A('opening', u - 0.55, u + 0.55, v, v + 2.4, d - 0.02, d + 0.01);
   for (const s of [-1, 1]) A(ST, u + s * 0.55 - 0.1, u + s * 0.55 + 0.1, v - 0.15, v + 2.6, d, d + 0.35);
   A(ST, u - 0.75, u + 0.75, v - 0.3, v, d, d + 0.45);
   P(ST, [[u - 0.7, v + 2.4], [u + 0.7, v + 2.4], [u, v + 3.3]], d, d + 0.4);
   const [x, z] = F.at(u, d + 0.25);
+  if (ctx) {
+    const [x1, z1] = F.at(u, d + 1.25), rot = Math.atan2(-(x1 - x), -(z1 - z)), h = 1.72, queen = seed % 4 === 3;
+    figure({ t: 'figure', at: [x, z], y: y + v, rot, seed, h, dress: 'robe', cloth: 'limestone_carved', cloth2: 'limestone_carved', skin: 'limestone_carved', hairMat: 'limestone_carved', hair: queen ? 'long' : 'short', beard: !queen, over: 'cape', feet: 'bare', pose: 'stand' }, ctx);
+    bag.add('limestone_carved', lathe([[0.1, 0], [0.105, 0.09], [0.13, 0.14], [0.001, 0.12]], 8, null, x, y + v + h * 1.075 - 0.07, z));
+    return;
+  }
   bag.add('limestone_carved', lathe([[0.3, 0], [0.3, 0.12], [0.24, 0.9], [0.22, 1.35], [0.25, 1.5], [0.15, 1.62], [0.001, 1.63]], 10, null, x, y + v, z));
   bag.add('limestone_carved', lathe([[0.001, 0], [0.1, 0.03], [0.11, 0.15], [0.07, 0.23], [0.001, 0.25]], 8, null, x, y + v + 1.63, z));
   bag.add('limestone_carved', lathe([[0.1, 0], [0.11, 0.1], [0.13, 0.14], [0.001, 0.15]], 6, null, x, y + v + 1.82, z));
@@ -195,11 +202,11 @@ export function westminsterHall(el, ctx) {
     Ai(ST, 0, Fi.w, 0.05, 0.4, 0, 0.12);
   }
   // the corbel table of the outside cornice is the parapet's; the north front
-  northFront(bag, col, el, { y, h, T, cx, x0, x1, z0, zi0, door, dSpring, dRise, ridge, k, Y0 });
-  southEnd(bag, col, el, { y, h, cx, xi0, xi1, zi0, zi1, z1, ridge, k, Y0 });
+  northFront(bag, col, el, { y, h, T, cx, x0, x1, z0, zi0, door, dSpring, dRise, ridge, k, Y0 }, ctx);
+  southEnd(bag, col, el, { y, h, cx, xi0, xi1, zi0, zi1, z1, ridge, k, Y0 }, ctx);
 }
 
-function northFront(bag, col, el, { y, h, cx, x0, x1, z0, zi0, door, dSpring, dRise, ridge, k, Y0 }) {
+function northFront(bag, col, el, { y, h, cx, x0, x1, z0, zi0, door, dSpring, dRise, ridge, k, Y0 }, ctx) {
   const Fo = faceFrame(el.rect, 'n'), Fi = faceFrame([x0, zi0 - 1, x1, zi0], 's'), uo = (x) => x1 - x, ui = (x) => x - x0;
   const P = (F, m, pts, d0, d1) => bag.add(m, prism(F, y, pts, d0, d1));
   // the great doorway: its orders of mouldings and shafts, the label; the oak leaves standing open against the inner wall
@@ -231,7 +238,7 @@ function northFront(bag, col, el, { y, h, cx, x0, x1, z0, zi0, door, dSpring, dR
       for (const v of [0.8, 7.6, 14.6, 21.0, 25.4]) A(ST, -0.1, L + 0.1, v - 0.25, v, 0, 0.22);
       A(ST, -0.15, L + 0.15, -0.5, 0.8, 0, 0.35);
       if (f !== 'n' && f === (s < 0 ? 'e' : 'w')) continue;
-      kingNiche(bag, F, y, L / 2, 9.0, 0);
+      kingNiche(bag, F, y, L / 2, 9.0, 0, ctx, 3 + s);
       windowOn(bag, F, y, { uc: L / 2, hw: 0.55, v0: 15.4, vs: 18.8, rise: 0.9, lights: 2, glass: 'opening', depth: 0.15 });
       windowOn(bag, F, y, { uc: L / 2, hw: 0.75, v0: 21.6, vs: 23.8, rise: 0.9, lights: 2, glass: 'opening', depth: 0.15 });
       for (const u of [0.5, L - 0.5]) A(ST, u - 0.12, u + 0.12, 0.8, 25.2, 0, 0.18);
@@ -247,7 +254,7 @@ function northFront(bag, col, el, { y, h, cx, x0, x1, z0, zi0, door, dSpring, dR
   void ridge; void h;
 }
 
-function southEnd(bag, col, el, { y, cx, xi0, xi1, zi0, zi1, z1, ridge }) {
+function southEnd(bag, col, el, { y, cx, xi0, xi1, zi0, zi1, z1, ridge }, ctx) {
   // Barry's flight of steps across the south end, up to the landing of St Stephen's Porch; the porch's arch beyond
   const up = 2.4, s0 = zi1 - 10.5, s1 = zi1 - 5.5, n = 14;
   for (let i = 0; i < n; i++) bag.add('limestone', box(xi0 + 2.2, y - 0.2, s0 + (s1 - s0) * i / n, xi1 - 2.2, y + up * (i + 1) / n, s1));
@@ -268,7 +275,7 @@ function southEnd(bag, col, el, { y, cx, xi0, xi1, zi0, zi1, z1, ridge }) {
       P(ST, [[ui(cx) + a, vs + pointed(a, R, H + o * 0.2)], [ui(cx) + b, vs + pointed(b, R, H + o * 0.2)], [ui(cx) + B2, vs + pointed(B2, R2, H + o * 0.2 - 0.15) - 0.01], [ui(cx) + A2, vs + pointed(A2, R2, H + o * 0.2 - 0.15) - 0.01]], 0, 0.45 - o * 0.12); }
       for (const s of [-1, 1]) A(ST, ui(cx) + s * R - 0.1, ui(cx) + s * R + 0.1, up, vs, 0, 0.45 - o * 0.12); } }
   // the statues of kings in their niches, three either side of the arch
-  for (const s of [-1, 1]) for (let j = 0; j < 3; j++) kingNiche(bag, Fi, y, ui(cx) + s * (4.8 + j * 1.75), up + 1.2, 0);
+  for (const s of [-1, 1]) for (let j = 0; j < 3; j++) kingNiche(bag, Fi, y, ui(cx) + s * (4.8 + j * 1.75), up + 1.2, 0, ctx, 11 + j * 2 + s);
   // the great south window over it
   windowOn(bag, Fi, y, { uc: ui(cx), hw: 5.2, v0: 13.0, vs: 18.6, rise: 5.4, lights: 8, transoms: [15.8], glass: 'daylight_plain', depth: 0.25, label: false });
   const Fo = faceFrame([xi0 - 1.6, zi1, xi1 + 1.6, z1], 's');

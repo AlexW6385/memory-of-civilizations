@@ -69,14 +69,26 @@ export function panels(bag, F, m, u0, u1, v0, v1, { n = 0, pw = 0.6, d = 0.1, ra
     for (const s of [0, 1]) poly(bag, F, m, s ? [[c, v1], [b, v1], [b, v1 - hh]] : [[a, v1], [c, v1], [a, v1 - hh]], 0, d * 0.6); }
 }
 
-/** A gilt frame with a painting in it (the history paintings of the corridors). */
-export function painting(bag, F, u0, u1, v0, v1, { arch = 0 } = {}) {
-  fb(bag, F, 'ceiling_painted', u0, u1, v0, v1, 0, 0.03);
-  if (arch) { const r = (u1 - u0) / 2, uc = u0 + r; for (let i = 0; i < 10; i++) { const a = -r + 2 * r * i / 10, b = a + 2 * r / 10; poly(bag, F, 'ceiling_painted', [[uc + a, v1], [uc + b, v1], [uc + b, v1 + pointed(b, r, arch)], [uc + a, v1 + pointed(a, r, arch)]], 0, 0.03); } }
+/**
+ * A gilt frame with a history painting in it: a sky over a ground, and a group of figures in coloured dress composed
+ * across it (the paintings themselves are not copied; this stands for their subject and tonality).
+ */
+export function painting(bag, F, u0, u1, v0, v1, { arch = 0, seed = 0 } = {}) {
+  const vh = v0 + (v1 - v0) * 0.38, r = (u1 - u0) / 2, uc = u0 + r;
+  fb(bag, F, 'paint_ochre', u0, u1, v0, vh, 0, 0.03); fb(bag, F, 'paint_blue', u0, u1, vh, v1, 0, 0.03);
+  if (arch) for (let i = 0; i < 10; i++) { const a = -r + 2 * r * i / 10, b = a + 2 * r / 10; poly(bag, F, 'paint_blue', [[uc + a, v1], [uc + b, v1], [uc + b, v1 + pointed(b, r, arch)], [uc + a, v1 + pointed(a, r, arch)]], 0, 0.03); }
+  let k = (Math.round(u0 * 13.7 + v0 * 3.1 + seed * 7) >>> 0) || 1; const rnd = () => ((k = (k * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const cloths = ['cloth_red', 'cloth_white', 'cloth_indigo', 'cloth_brown', 'cloth_black', 'cloth_green', 'cloth_ochre'];
+  const n = 3 + Math.floor(rnd() * 3), fh = (v1 - v0) * 0.5;
+  for (let j = 0; j < n; j++) {
+    const fu = u0 + (u1 - u0) * (j + 0.5 + (rnd() - 0.5) * 0.4) / n, s = fh * (0.8 + rnd() * 0.3), base = v0 + (v1 - v0) * (0.08 + rnd() * 0.12), wd = s * 0.16;
+    poly(bag, F, cloths[Math.floor(rnd() * cloths.length)], [[fu - wd * 1.3, base], [fu + wd * 1.3, base], [fu + wd, base + s * 0.8], [fu - wd, base + s * 0.8]], 0.03, 0.045);
+    poly(bag, F, 'skin_light', [[fu - wd * 0.45, base + s * 0.8], [fu + wd * 0.45, base + s * 0.8], [fu + wd * 0.4, base + s], [fu - wd * 0.4, base + s]], 0.03, 0.045);
+  }
   const t = 0.14;
   fb(bag, F, G, u0 - t, u1 + t, v0 - t, v0, 0, 0.08); fb(bag, F, G, u0 - t, u0, v0, v1, 0, 0.08); fb(bag, F, G, u1, u1 + t, v0, v1, 0, 0.08);
   if (!arch) fb(bag, F, G, u0 - t, u1 + t, v1, v1 + t, 0, 0.08);
-  else { const r = (u1 - u0) / 2, uc = u0 + r; for (let i = 0; i < 10; i++) { const a = -1 + 2 * i / 10, b = a + 0.2; poly(bag, F, G, [[uc + a * r, v1 + pointed(a * r, r, arch)], [uc + b * r, v1 + pointed(b * r, r, arch)], [uc + b * (r + t), v1 + pointed(b * (r + t), r + t, arch + t)], [uc + a * (r + t), v1 + pointed(a * (r + t), r + t, arch + t)]], 0, 0.08); } }
+  else for (let i = 0; i < 10; i++) { const a = -1 + 2 * i / 10, b = a + 0.2; poly(bag, F, G, [[uc + a * r, v1 + pointed(a * r, r, arch)], [uc + b * r, v1 + pointed(b * r, r, arch)], [uc + b * (r + t), v1 + pointed(b * (r + t), r + t, arch + t)], [uc + a * (r + t), v1 + pointed(a * (r + t), r + t, arch + t)]], 0, 0.08); }
 }
 
 /** A heraldic shield on F: the field, a bordure, a charge (a cross, a chevron or a lion's block), a crown or helm over it. */
@@ -91,7 +103,7 @@ export function shield(bag, F, u, v, s, d, k = 0, field = 'cloth_red') {
 }
 
 /** A rib vault over a rectangular bay: the cells (two barrels crossing, their groins on the diagonals), ribs, bosses. */
-export function bayVault(bag, rect, ys, H, { along = 'x', cell = ST, rib = ST, boss = G, ribW = 0.26, ribD = 0.22, tierceron = true, transverse = [true, true], N = 10 } = {}) {
+export function bayVault(bag, rect, ys, H, { along = 'x', cell = ST, rib = ST, boss = G, ribW = 0.26, ribD = 0.22, tierceron = true, transverse = [true, true], N = 8 } = {}) {
   const [x0, z0, x1, z1] = rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hx = (x1 - x0) / 2, hz = (z1 - z0) / 2;
   // normalised two-centred profile: g(0) = 1, g(±1) = 0
   const kk = 1.25, g = (t) => pointed(Math.min(1, Math.abs(t)), 1, kk) / kk;

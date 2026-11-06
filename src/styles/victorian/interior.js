@@ -13,7 +13,7 @@ import { faceFrame, prism, ngon, vprism } from '../dutch/facade.js';
 import { windowOn, kingNiche, pointed, hexa } from './hall.js';
 import { inner, frame, poly, fb, wall, archTrim, panels, painting, shield, bayVault, ribSeg, shaft, statue, benches, ST, SY, CV, OAK, LD, G } from './rooms.js';
 
-const AU = 'gold';
+const AU = 'clay_gilt';
 const pinn = (bag, m, x, y, z, s, h) => { bag.add(m, box(x - s / 2, y, z - s / 2, x + s / 2, y + h * 0.4, z + s / 2)); bag.add(m, lathe([[s * 0.62, 0], [0.001, h * 0.6]], 4, null, x, y + h * 0.4, z)); bag.add(m, lathe([[0.001, 0], [s * 0.18, s * 0.15], [0.001, s * 0.4]], 6, null, x, y + h, z)); };
 /** A floor slab with its walkable top; `m` its surface. */
 const slab = (bag, col, m, r, y0, y1, walk = true) => { bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); if (walk) col.floor(r, y1); };
@@ -67,7 +67,7 @@ export function stStephens(el, ctx) {
   archTrim(bag, Fe, CV, (dz0 + dz1) / 2, 2.5, L, L + 5.0, 2.5, { orders: 2 });
   for (const [F, u0, u1] of [[Fw, 0.5, Fw.w - 0.5], [Fn, 0.5, 22 - px0 - 4.2], [Fn, 22 - px0 + 4.2, Fn.w - 0.5], [Fe, 0.5, dz0 - 0.9], [Fe, dz1 + 0.9, Fe.w - 0.5]]) {
     panels(bag, F, CV, u0, u1, L + 0.3, L + 3.0, { pw: 0.55 });
-    if (F === Fw) { panels(bag, F, CV, u0, u1, L + 3.3, L + 5.8, { pw: 0.55 }); for (const u of [Fw.w * 0.3, Fw.w * 0.7]) kingNiche(bag, F, 0, u, L + 5.95 + 0.3, 0); }
+    if (F === Fw) { panels(bag, F, CV, u0, u1, L + 3.3, L + 5.8, { pw: 0.55 }); for (const u of [Fw.w * 0.3, Fw.w * 0.7]) kingNiche(bag, F, 0, u, L + 5.95 + 0.3, 0, ctx, Math.round(u * 7)); }
   }
   for (const [x, z] of [[px0 + 0.25, pz0 + 0.25], [px1 - 0.25, pz0 + 0.25], [px0 + 0.25, pz1 - 0.25], [px1 - 0.25, pz1 - 0.25]]) shaft(bag, CV, x, z, L, L + 6.2, 0.13, [x < 22 ? 1 : -1, 0]);
   bayVault(bag, pr, L + 6.2, 3.3, { along: 'x', cell: SY, rib: CV, boss: G, N: 12 });
@@ -93,7 +93,7 @@ export function stStephens(el, ctx) {
   wall(bag, col, SY, E, P, Ws, 0.6, [{ u0: 2.4, u1: 6.6, v0: P, v1: P + 5.0, rise: 2.1 }]);
   archTrim(bag, E, CV, 4.5, 2.1, P, P + 5.0, 2.1, { orders: 2 });
   archTrim(bag, W, CV, -41.5 - (-46), 2.5, L, L + 5.0, 2.5, { orders: 2, d: 0.2 });
-  for (const u of [1.15, 7.85]) kingNiche(bag, E, 0, u, P + 2.2, 0);
+  for (const u of [1.15, 7.85]) kingNiche(bag, E, 0, u, P + 2.2, 0, ctx, Math.round(u * 5));
   windowOn(bag, W, 0, { uc: 4.5, hw: 2.6, v0: Wp + 0.9, vs: P + 13.0, rise: 2.0, lights: 4, glass: 'stained_glass', depth: 0.2, label: false });
   const uN = (x) => x - hx0, uS = (x) => 61.0 - x;
   for (const [F, uf, rot, zs] of [[N, uN, Math.PI, hz0 + 0.8], [S, uS, 0, hz1 - 0.8]]) {
@@ -173,7 +173,7 @@ export function centralLobby(el, ctx) {
       else panels(bag, F, CV, uc - r + 0.6, uc + r - 0.6, vb + 0.3, vb + 2.6, { n: 6, d: 0.08 });
     } else {
       panels(bag, F, CV, 0.5, w - 0.5, P + 0.3, P + 2.3, { pw: 0.55 }); panels(bag, F, CV, 0.5, w - 0.5, P + 2.5, P + 4.5, { pw: 0.55 });
-      for (const du of [-2.55, -0.85, 0.85, 2.55]) kingNiche(bag, F, 0, uc + du, P + 4.8, 0);
+      for (const du of [-2.55, -0.85, 0.85, 2.55]) kingNiche(bag, F, 0, uc + du, P + 4.8, 0, ctx, k * 4 + Math.round(du * 2 + 6));
       windowOn(bag, F, 0, { uc, hw: 1.9, v0: P + 9.2, vs: P + 11.6, rise: 2.0, lights: 3, transoms: [P + 10.4], glass: 'stained_glass', depth: 0.2, label: false });
       windowOn(bag, faceF(k, a + T, true), 0, { uc: (2 * (a + T) * t8) / 2, hw: 1.9, v0: P + 9.2, vs: P + 11.6, rise: 2.0, lights: 3, transoms: [P + 10.4], glass: 'glass_outer', depth: 0.25 });
     }
@@ -349,7 +349,7 @@ export function commons(el, ctx) {
     panels(bag, F, OAK, 0.3, F.w - 0.3, P + 0.2, P + 4.3, { pw: 0.5, d: 0.06 }); panels(bag, F, OAK, 0.3, F.w - 0.3, P + 4.7, P + 6.3, { pw: 0.5, d: 0.06 });
     for (const z of zs) windowOn(bag, F, 0, { uc: uf(z), hw: 1.4, v0: P + 6.7, vs: P + 10.0, rise: 1.4, lights: 3, transoms: [P + 8.4], glass: 'stained_glass', depth: 0.18, label: false });
   }
-  panels(bag, Fn, OAK, 1.3, Fn.w - 1.3, P + 4.9, P + 7.3, { pw: 0.5, d: 0.06 }); panels(bag, Fs, OAK, 0.3, Fs.w - 0.3, P + 4.8, P + 6.6, { pw: 0.5, d: 0.06 });
+  panels(bag, Fn, OAK, 1.3, Fn.w - 1.3, P + 4.9, P + 7.3, { pw: 0.5, d: 0.06 }); panels(bag, Fn, OAK, 1.3, Fn.w - 1.3, P + 0.2, P + 4.3, { pw: 0.5, d: 0.06 }); panels(bag, Fs, OAK, 0.3, Fs.w - 0.3, P + 4.8, P + 6.6, { pw: 0.5, d: 0.06 });
   panels(bag, Fs, OAK, 0.3, Fs.w / 2 - 1.9, P + 0.2, P + 4.2, { pw: 0.5, d: 0.06 }); panels(bag, Fs, OAK, Fs.w / 2 + 1.9, Fs.w - 0.3, P + 0.2, P + 4.2, { pw: 0.5, d: 0.06 });
   ceiling(bag, ch, P + 11.6, P + 12.6, ax);
   // outside: buttresses, windows, the roof
