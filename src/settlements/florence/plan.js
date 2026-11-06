@@ -1,5 +1,5 @@
 // Florence about 1480 (docs/settlements/florence.md §2–§4).
-import { RADIUS, DUOMO, CAMPANILE, BAPTISTERY, PALAZZO, LOGGIA, ORSAN, ARNO, BRIDGE } from './layout.js';
+import { RADIUS, DUOMO, CAMPANILE, BAPTISTERY, PALAZZO, LOGGIA, ORSAN, ARNO, BRIDGE, MEDICI } from './layout.js';
 
 const E = [
   { t: 'duomo', ...DUOMO, interior: true },
@@ -33,5 +33,12 @@ export const river = {
   id: 'florence-arno', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [{ t: 'water_cells', rect: [-(RADIUS - 55), ARNO.z - 45, RADIUS - 55, ARNO.z + 45], y: ARNO.level, cell: 1.5, inside: (x, z) => Math.abs(z - (ARNO.z + 12 * Math.sin(x / 130))) < ARNO.w / 2 - 2 && Math.hypot(x, z) < RADIUS - 55 }],
+};
+// the Palazzo Medici (docs/settlements/florence.md §4): its front on the Via Larga (east), the loggia on the corner of the Via de' Gori (south-east)
+export const medici = {
+  id: 'florence-palazzo-medici', style: 'renaissance', origin: [0, 0], base: 0, yaw: 0, feature: true,
+  entrance: { at: [MEDICI[2] + 4, (MEDICI[1] + MEDICI[3]) / 2], facing: 'w' }, bounds: [MEDICI[0] - 1, MEDICI[1] - 1, MEDICI[2] + 3, MEDICI[3] + 3],
+  elements: [{ t: 'palazzo_medici', rect: MEDICI, y: 0 }],
+  rooms: [{ id: 'medici-court', rect: [MEDICI[0] + 9.1, MEDICI[1] + 9.1, MEDICI[2] - 9.1, MEDICI[3] - 9.1], y: 0, kind: 'open' }],
 };
 export default centre;

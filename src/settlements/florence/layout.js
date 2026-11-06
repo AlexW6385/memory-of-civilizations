@@ -13,6 +13,7 @@ export const SIGNORIA = [0, 110, 110, 205];
 export const PALAZZO = [62, 120, 102, 160];
 export const LOGGIA = [12, 165, 50, 182];
 export const ORSAN = [16, 20, 48.4, 42.1];                      // Orsanmichele, between the cathedral and the Signoria (32.4 × 22.1 m)
+export const MEDICI = [-12, -196, 28, -156];                   // the Palazzo Medici on the Via Larga, north of the cathedral (40 × 40 m)
 export const ARNO = { z: 275, w: 60, level: -4, bed: -7 };
 export const BRIDGE = { x: 40 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -36,6 +37,9 @@ export function lots() {
   }
   // the block of Orsanmichele and its four streets (after the draw, so that the other lots stay as they were)
   LOTS = LOTS.filter((l) => !inRect(ORSAN, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 9));
+  // the Palazzo Medici's block, the Via Larga before it and the Via de' Gori beside it
+  LOTS = LOTS.filter((l) => !overlaps(l.rect, [MEDICI[0] - 2, MEDICI[1] - 2, MEDICI[2] + 9, MEDICI[3] + 8]));
   return LOTS;
 }
+const overlaps = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

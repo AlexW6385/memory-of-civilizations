@@ -24,7 +24,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
  * Lc.put(u0, y0, d0, u1, y1, d1) places each block (into one merged collector: Florence has no mesh to spare
  * for an instanced shape).
  */
-function rusticate(Lc, a, b, y0, y1, holes, proj, rand, course = 0.72) {
+export function rusticate(Lc, a, b, y0, y1, holes, proj, rand, course = 0.72) {
   const n = Math.max(1, Math.round((y1 - y0) / course)), ch = (y1 - y0) / n, J = 0.06;
   for (let i = 0; i < n; i++) {
     const ya = y0 + i * ch, yb = ya + ch - J;
@@ -51,7 +51,7 @@ function rusticate(Lc, a, b, y0, y1, holes, proj, rand, course = 0.72) {
 }
 
 /** A box without its face toward [nx, nz] (the back of a block against its wall), and without its top if asked. */
-function dropFace(g, [nx, nz], top = false) {
+export function dropFace(g, [nx, nz], top = false) {
   if (g.index) g = g.toNonIndexed();
   const P = g.attributes.position.array, N = g.attributes.normal.array, keepP = [], keepN = [];
   for (let i = 0; i < P.length; i += 9) {
@@ -63,28 +63,29 @@ function dropFace(g, [nx, nz], top = false) {
 }
 
 /** A two-light window under a round arch, centred at uc with its sill at s (local face coordinates). */
-function bifora(Lc, uc, s, { w = 2.6, hl = 3.2, vou = 0.75, proj = 0.34 } = {}) {
+export function bifora(Lc, uc, s, { w = 2.6, hl = 3.2, vou = 0.75, proj = 0.34, mat = M, stone = PF, light = 'trefoil', lite = false } = {}) {
+  const n7 = lite ? 5 : 7, n8 = lite ? 6 : 8, nv = lite ? 9 : 11;
   const r = w / 2, ys = s + hl;
-  Lc.add(O, ext(archOutline(uc, s, w, ys - 0.15, 'round', 8), [], -0.03, 0.01));              // the dark of the window
+  Lc.add(O, ext(archOutline(uc, s, w, ys - 0.15, 'round', n8), [], -0.03, 0.01));              // the dark of the window
   // the tympanum of white marble with the two trefoil heads of the lights and an oculus cut through it
   const lw = 0.9, lc = 0.62;
-  const holes = [archOutline(uc - lc, ys - 0.1, lw, ys, 'trefoil', 7), archOutline(uc + lc, ys - 0.1, lw, ys, 'trefoil', 7)];
-  const oc = []; for (let i = 0; i < 10; i++) { const a = -i / 10 * Math.PI * 2; oc.push([uc + Math.cos(a) * 0.15, ys + 0.98 + Math.sin(a) * 0.15]); }
+  const holes = [archOutline(uc - lc, ys - 0.1, lw, ys, light, n7), archOutline(uc + lc, ys - 0.1, lw, ys, light, n7)];
+  const oc = []; const no = lite ? 7 : 10; for (let i = 0; i < no; i++) { const a = -i / no * Math.PI * 2; oc.push([uc + Math.cos(a) * 0.15, ys + 0.98 + Math.sin(a) * 0.15]); }
   holes.push(oc);
-  Lc.add(M, ext(headPts(uc, ys - 0.15, w, 'round', 7), holes, 0.0, 0.1));
+  Lc.add(mat, ext(headPts(uc, ys - 0.15, w, 'round', n7), holes, 0.0, 0.1));
   // the jambs, the colonnette with its base and leaf capital, the sill
-  for (const sg of [-1, 1]) Lc.box(M, uc + sg * r, s, 0, uc + sg * (lc + lw / 2), ys - 0.15, 0.1);
-  Lc.add(M, rod([uc, s + 0.25, 0.08], [uc, ys - 0.42, 0.08], 0.085, 8));
-  Lc.add(M, lathe([[0.15, 0], [0.15, 0.1], [0.1, 0.25]], 8, null, uc, s, 0.08));
-  Lc.add(M, lathe([[0.09, 0], [0.12, 0.1], [0.19, 0.24], [0.2, 0.27]], 8, null, uc, ys - 0.42, 0.08));
-  Lc.box(M, uc - 0.21, ys - 0.15, 0, uc + 0.21, ys - 0.12, 0.2);
-  Lc.box(M, uc - r - 0.1, s - 0.12, -0.02, uc + r + 0.1, s, 0.22);
+  for (const sg of [-1, 1]) Lc.box(mat, uc + sg * r, s, 0, uc + sg * (lc + lw / 2), ys - 0.15, 0.1);
+  Lc.add(mat, rod([uc, s + 0.25, 0.08], [uc, ys - 0.42, 0.08], 0.085, n8));
+  Lc.add(mat, lathe([[0.15, 0], [0.15, 0.1], [0.1, 0.25]], n8, null, uc, s, 0.08));
+  Lc.add(mat, lathe([[0.09, 0], [0.12, 0.1], [0.19, 0.24], [0.2, 0.27]], n8, null, uc, ys - 0.42, 0.08));
+  Lc.box(mat, uc - 0.21, ys - 0.15, 0, uc + 0.21, ys - 0.12, 0.2);
+  Lc.box(mat, uc - r - 0.1, s - 0.12, -0.02, uc + r + 0.1, s, 0.22);
   // the rusticated voussoirs round the arch
-  voussoirs(Lc, PF, uc, ys - 0.15, r, r + vou, -0.04, proj, 11, 0.06);
+  voussoirs(Lc, stone, uc, ys - 0.15, r, r + vou, -0.04, proj, nv, 0.06);
 }
 
 /** A seated lion (the Marzocco) facing +z, its right forepaw on a shield, about 1.6 m high. */
-function marzocco(Lc, mat) {
+export function marzocco(Lc, mat) {
   const B = (rx, ry, rz, x, y, z, n = 8) => Lc.add(mat, T(ball(rx, ry, rz, n), x, y, z));
   Lc.box(mat, -0.42, 0, -0.62, 0.42, 0.22, 0.62);                                           // the plinth
   B(0.34, 0.3, 0.42, 0, 0.5, -0.18, 10);                                                    // the haunches
