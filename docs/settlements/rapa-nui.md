@@ -1,7 +1,7 @@
 # Rapa Nui (Ahu Tongariki and Rano Raraku), about 1500 — dossier
 
 Settlement id: `rapa-nui` · Style: `rapanui` · Region: Polynesia (Rapa Nui, the south-east coast) · Code: `src/settlements/rapa-nui/`
-Status of this dossier: L2, parts toward L3 (Ahu Tongariki with fifteen moai facing inland, some with pukao, its ramp and plaza; Rano Raraku's cone, crater lake and quarry with moai standing buried to the shoulders and moai half-cut in the rock; a village of hare paenga with paved forecourts, hare moa and manavai; the rocky shore and the sea; ground, planting, weather, music). Since raised: the moai sculpted in full (face, ears, hands, hami, ring-and-girdle), the ahu's fitted slabs, ramp and wings, quarry bays with half-cut statues, hare paenga with curb, porch, poro pavement and umu (§4a). L3 recorded for later: the coral-and-obsidian eyes, the transport roads, Orongo and the birdman cult, rongorongo, tattoo, the canoes, people.
+Status of this dossier: L2, parts toward L3 (Ahu Tongariki with fifteen moai facing inland, some with pukao, its ramp and plaza; Rano Raraku's cone, crater lake and quarry with moai standing buried to the shoulders and moai half-cut in the rock; a village of hare paenga with paved forecourts, hare moa and manavai; the rocky shore and the sea; ground, planting, weather, music). Since raised: the moai sculpted in full (face, ears, hands, hami, ring-and-girdle), the ahu's fitted slabs, ramp and wings, quarry bays with half-cut statues, hare paenga with curb, porch, poro pavement and umu (§4a). Second pass (§4b): the coral-and-obsidian eyes on the ahu statues, a statue road with a statue being walked down it by three rope teams, small plank canoes on the shore, bananas in the manavai, people on the plaza, at the road and on the shore. L3 recorded for later: Orongo and the birdman cult, rongorongo, tattoo and body paint, the tupa towers.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -38,7 +38,7 @@ Moai of yellow-brown tuff; ahu of fitted basalt with a paved ramp of rounded sto
 - Heavy brows, long nose with a fish-hook-shaped curl of the nostrils; lips protruding in a thin pout; long oblong ears; big chin; jaw lines standing out against the truncated neck; deep eye slits [stated: Wikipedia "Moai"].
 - Heavy torso, collarbones faintly outlined; arms in low relief; hands with long slender fingers resting along the hips, thumbs sometimes toward the navel, meeting at the hami (loincloth) [stated: Wikipedia "Moai"]. Nipples and the navel are carved [inferred from photographs of standing moai].
 - Backs generally plain, some with the ring-and-girdle motif on the lower back [stated: Wikipedia "Moai"]; we give it to the ahu statues [inferred].
-- Eye sockets were made to hold coral eyes with obsidian or red scoria pupils [stated: Wikipedia "Moai"]. Statues in the quarry are shown without sockets, as they stand on Rano Raraku today [inferred]; inserted eyes are left out (not shown as a standing state around 1500) [inferred].
+- Eye sockets were made to hold coral eyes with obsidian or red scoria pupils [stated: Wikipedia "Moai"]. Statues in the quarry are shown without sockets, as they stand on Rano Raraku today [inferred]. The second pass sets the eyes in the ahu statues (§4b).
 - Pukao: cylindrical, with a dent on the underside to fit the head and a boss or knot on top, ring-like grooves along the bottom edge; set so that the pukao protrudes forward; 1.8–3 m across [stated: Wikipedia "Pukao"]. Ours: 0.26 of the statue's height across (≈ 1.9 m on a 7.4 m statue), pushed 0.02 h forward [inferred].
 - Average moai about 4 m tall and 1.6 m wide at the base [stated: Wikipedia "Moai"]; Tongariki's are taller and squatter (86 t) [stated]. Ours are 0.37 of their height wide [inferred].
 
@@ -50,13 +50,21 @@ Moai of yellow-brown tuff; ahu of fitted basalt with a paved ramp of rounded sto
 
 **Hare moa and manavai:** rubble cairns with small openings at their foot and slab caps; round walls of dry-laid boulders round sunken gardens [inferred from the Britannica description and photographs].
 
+## 4b. Second pass: the eyes, the walking statue, the road, canoes, bananas, people
+
+- **The eyes** (`moaiEyes`): in 1979 Sergio Rapu Haoa's team found that the eye sockets were made to hold coral eyes with black obsidian or red scoria pupils; statues with carved sockets were probably allocated to the ahu and ceremonial sites [stated: Wikipedia "Moai"]. Ours: every Tongariki statue has them, an almond of white coral (`limewash_white`) 0.068 × 0.029 of the statue's height sunk in each socket, standing short of the rim, with a round obsidian pupil (`lacquer_black`, glossy) [inferred: shown as on a ceremonial day; sizes from the sockets]. The eye sits on the carved socket floor, read off the mesh. Quarry and walking statues have no sockets and so no eyes [stated: sockets on ahu statues; inferred: none in transport].
+- **The road and the walking statue** (`ROAD` in layout.js, `moai_walk`): the statues were "walked" upright with ropes from two sides, tilted from side to side while pulled forward [stated: Wikipedia "Moai"]; in the 2012 experiment 18 people with three ropes tied to the head of a 4.35 t, 3 m replica — two teams pulling forward from either side, one at the rear steadying it — moved it 100 m in under an hour [stated: HeritageDaily 2012]; the moai roads were about 4.5 m wide with a gently concave bed, the road statues had a slight forward tilt and broad D-shaped bases [stated: ScienceDaily 2025, Lipo & Hunt]; statues fallen during transport lie along the roads [stated: HeritageDaily]. Ours: a 4.5 m track (bare earth in the ground cover) from the foot of Rano Raraku to the plaza, houses kept off it; a 5.4 m statue on it, rocked 0.07 rad onto one edge of its base and leaning 0.05 rad forward, a rope round its neck under the jaw and three ropes from its left, right and back; seven haulers on each forward rope and five on the rear one, holding the rope at hand height, the rope's tail lying on the ground [inferred: the counts scaled to a larger statue, the rope of hau-bark fibre drawn in `sacking`]. The fallen statue now lies beside the road, face up, its head toward the coast [inferred].
+- **Canoes** (`vaka`): Roggeveen's men (1722) saw a canoe of narrow pieces of wood joined together, light enough for one man to carry, the largest about 3 m; Cook (1774) saw three or four, 3–4 m long, "built of sewn planks of wood only up to 1 m long", "small, patched and unseaworthy" [stated: Hōkūleʻa archive, "Decline in fishing…"]; canoes carried two men [stated: same, Kotzebue 1816]. Ours: three canoes 3.3–4 m long drawn up above the shore east of the ahu, the hull dark, battens along three seams and across it every 0.8–1.05 m where plank meets plank, two thwarts, a paddle; a light outrigger float on two booms [inferred: the Polynesian norm; the outrigger is not in the sources read]. One or two fishermen by each.
+- **Bananas** (`banana`): Roggeveen recorded that the islanders cultivated bananas, sugar cane and above all sweet potatoes [stated: Wikipedia "Easter Island"]; the manavai, circular stone walls, protected the plants within from the wind and held moisture [stated: Vernian Era "Features and sites"]. Ours: one to three banana stems (1.9–2.7 m) with broad, drooping, wind-torn leaves and a dead leaf hanging, in each manavai over 2.6 m across; the bamboo that stood in for them is gone [inferred: bananas in the manavai].
+- **People** (`rapa-nui-people`, style `life`): men in the loincloth (hami) with a girdle of bark cloth, drawn as a skin-coloured short garment with a belt; women in wraps of bark cloth, white, turmeric-yellow, tan or brown [inferred: from the bark cloth (mahute) the dossier's sources mention; tattoo left out]. About forty on the plaza facing the statues, some seated, the walk up the middle left clear; nineteen haulers at the walking statue; fishermen at the canoes [inferred].
+
 ## 5. The town
 
-About forty hare paenga, chicken houses and garden walls scattered on the plain. [inferred]
+About forty hare paenga, chicken houses and garden walls scattered on the plain, kept off the statue road. [inferred]
 
 ## 6. Ground and water
 
-Grass over red-brown soil; bare tuff on the cone; reeds in the crater lake; a dark rocky shore. The island was nearly treeless by then [stated: Wikipedia "Easter Island"]. Bananas and sugar cane grew in the manavai; bamboo stands in for them. [inferred]
+Grass over red-brown soil; bare tuff on the cone; reeds in the crater lake; a dark rocky shore. The island was nearly treeless by then [stated: Wikipedia "Easter Island"]. Bananas grow in the manavai (§4b). [inferred]
 
 ## 7. Sky and climate
 
@@ -82,3 +90,7 @@ Chant (riu) with hand-clapping and a stamping stone; voices and a drone stand in
 - [Hare paenga: the canoe-shaped houses and monumental archaeology of Rapa Nui — The Past](https://the-past.com/feature/hare-paenga-the-canoe-shaped-houses-and-monumental-archaeology-of-rapa-nui-easter-island)
 - [Hare Paenga in Rapa Nui — easterisland.travel](https://www.easterisland.travel/blog/?p=521)
 - [Rano Raraku, the quarry — easterisland.travel](https://www.easterisland.travel/places-to-visit/rano-raraku)
+- [Easter Island statues walked into position, say experts — HeritageDaily (2012)](https://www.heritagedaily.com/2012/10/easter-island-statues-walked-into-position-say-experts/61152)
+- [How Easter Island's giant statues "walked" — ScienceDaily (2025)](https://sciencedaily.com/releases/2025/10/251008030938.htm)
+- [Decline in fishing due to deforestation and the lack of trees to build canoes? — Hōkūleʻa archive](https://archive.hokulea.com/rapanui/rapaforest.html)
+- [Features and sites (manavai, hare moa, umu pae) — Vernian Era](https://vernianera.com/Archaeology/RapaNui/features.html)

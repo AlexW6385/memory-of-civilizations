@@ -15,6 +15,7 @@ import { box, lathe, fromTriangles, orientOutward, rod } from '../../core/geom.j
 import { Matrix4 } from '../../core/three.js';
 import { sculpt, rows, smooth, bump, blob } from '../rapanui/sculpt.js';
 import '../qing/index.js';
+import { SCENES } from './scenes.js';
 
 const K = 'kokowai', P = 'palisade', TH = 'raupo', PAUA = 'shell_inlay';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -388,6 +389,6 @@ function mara(el, { bag }) {
 
 registerStyle('maori', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara },
+  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, ...SCENES },
   objects: {},
 });
