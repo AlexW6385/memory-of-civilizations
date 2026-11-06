@@ -4,7 +4,7 @@ import { RADIUS, C, RINGS, CANAL_W, HALL, DAM, IJ_Z, WATER, GROUND, QUAY, BRIDGE
 
 const wk = westerkerk(), wn = westerNave();
 /** The sledges on the Dam (docs §5.6): [x, z, rot (their front along −z turned by rot), load]; each has its horse (town.js). */
-export const SLEDGES = [[-8, -236.2, Math.PI / 2, 'casks'], [11, -214.5, -Math.PI / 2, 'bales'], [31.6, -268, 0, 'casks']];
+export const SLEDGES = [[-8, -236.2, Math.PI / 2, 'casks'], [33, -219, 0, 'bales'], [31.6, -268, 0, 'casks']];
 export const dam = {
   id: 'amsterdam-dam',
   name: { en: 'The Dam and the Town Hall', zh: '水坝广场与市政厅' },
