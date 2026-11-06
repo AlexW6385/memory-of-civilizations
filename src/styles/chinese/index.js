@@ -751,12 +751,92 @@ function pagoda(el, { bag, col }) {
   col.circle(x, z, 1.7, y, y + 6);
 }
 
+/**
+ * A Tang lattice ceiling (ping'an) { rect, y (the boards' underside), holes: [rects], pitch, board, strip, border }:
+ * backing boards with a close grid of square strips under them, all lacquered red, no pattern; with `border`
+ * { w, rise } the ceiling is a flat lattice inset by w and lifted by rise above the rect's edge, joined to it by
+ * slanting boards on rafters (the slanting edge of an inner-zone ceiling). Used only by the plans that ask for it.
+ */
+function tangPingan(el, { bag }) {
+  const [X0, Z0, X1, Z1] = el.rect, p = el.pitch ?? 0.3, sw = 0.045, B = [], S = [];
+  const w = el.border?.w ?? 0, rise = el.border?.rise ?? 0, y = el.y;
+  const [x0, z0, x1, z1] = [X0 + w, Z0 + w, X1 - w, Z1 - w], holes = el.holes || [];
+  // the boards: the rect minus the holes, as strips between the holes' edges
+  const xs = [...new Set([x0, x1, ...holes.flatMap((h) => [h[0], h[2]])])].sort((a, b) => a - b);
+  for (let i = 0; i < xs.length - 1; i++) {
+    const a = xs[i], b = xs[i + 1], m = (a + b) / 2;
+    const cuts = holes.filter((h) => m > h[0] && m < h[2]).map((h) => [h[1], h[3]]).sort((q, r) => q[0] - r[0]);
+    let s = z0;
+    for (const [c0, c1] of cuts) { if (c0 > s) B.push(box(a, y, s, b, y + 0.05, c0)); s = Math.max(s, c1); }
+    if (z1 > s) B.push(box(a, y, s, b, y + 0.05, z1));
+  }
+  // the grid: lines both ways, broken by the holes; the strips one way 5 mm deeper than the other
+  const free = (fixed, alongX, lo, hi) => {
+    let segs = [[lo, hi]];
+    for (const h of holes) {
+      const [f0, f1, a0, a1] = alongX ? [h[1], h[3], h[0], h[2]] : [h[0], h[2], h[1], h[3]];
+      if (fixed <= f0 - sw || fixed >= f1 + sw) continue;
+      segs = segs.flatMap(([s0, s1]) => [[s0, Math.min(s1, a0)], [Math.max(s0, a1), s1]].filter(([u, v]) => v - u > 0.02));
+    }
+    return segs;
+  };
+  const nz = Math.round((z1 - z0) / p), nx = Math.round((x1 - x0) / p);
+  for (let k = 1; k < nz; k++) { const z = z0 + (z1 - z0) * k / nz; for (const [a, b] of free(z, true, x0, x1)) S.push(box(a, y - 0.07, z - sw / 2, b, y + 0.01, z + sw / 2)); }
+  for (let k = 1; k < nx; k++) { const x = x0 + (x1 - x0) * k / nx; for (const [a, b] of free(x, false, z0, z1)) S.push(box(x - sw / 2, y - 0.065, a, x + sw / 2, y + 0.01, b)); }
+  // the frame round the flat lattice
+  for (const r of [[x0 - 0.06, z0 - 0.06, x1 + 0.06, z0 + 0.04], [x0 - 0.06, z1 - 0.04, x1 + 0.06, z1 + 0.06], [x0 - 0.06, z0 + 0.04, x0 + 0.04, z1 - 0.04], [x1 - 0.04, z0 + 0.04, x1 + 0.06, z1 - 0.04]]) S.push(box(r[0], y - 0.1, r[1], r[2], y + 0.01, r[3]));
+  if (w > 0) {
+    // the slanting edge: boards from the rect's edge up to the frame, rafters under them running up the slope
+    const yb = y - rise, T = [], R = [];
+    const sides = [
+      [[X0, Z0], [X1, Z0], [x1, z0], [x0, z0]], [[X1, Z0], [X1, Z1], [x1, z1], [x1, z0]],
+      [[X1, Z1], [X0, Z1], [x0, z1], [x1, z1]], [[X0, Z1], [X0, Z0], [x0, z0], [x0, z1]],
+    ];
+    for (const [a, b, c, d] of sides) {
+      const P = (q, yy) => [q[0], yy, q[1]];
+      hexa(T, [P(a, yb), P(b, yb), P(c, y), P(d, y)], [P(a, yb + 0.05), P(b, yb + 0.05), P(c, y + 0.05), P(d, y + 0.05)]);
+      // rafters at the pitch along the side, from the outer edge to the inner one (short toward the corners)
+      const L = Math.hypot(b[0] - a[0], b[1] - a[1]), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L];
+      let inw = [-u[1], u[0]];
+      if (inw[0] * ((X0 + X1) / 2 - a[0]) + inw[1] * ((Z0 + Z1) / 2 - a[1]) < 0) inw = [-inw[0], -inw[1]];
+      const nr = Math.round(L / p);
+      for (let k = 1; k < nr; k++) {
+        const t = L * k / nr, o = [a[0] + u[0] * t, a[1] + u[1] * t];
+        // the inner end on the frame's line, clipped where the corner's diagonal comes first
+        const reach = Math.min(w, t, L - t);
+        if (reach < 0.08) continue;
+        const e = [o[0] + inw[0] * reach, o[1] + inw[1] * reach], ye = yb + rise * reach / w;
+        const hw = 0.035, px = u[0] * hw, pz = u[1] * hw;
+        hexa(R, [[o[0] - px, yb - 0.06, o[1] - pz], [o[0] + px, yb - 0.06, o[1] + pz], [e[0] + px, ye - 0.06, e[1] + pz], [e[0] - px, ye - 0.06, e[1] - pz]],
+          [[o[0] - px, yb + 0.01, o[1] - pz], [o[0] + px, yb + 0.01, o[1] + pz], [e[0] + px, ye + 0.01, e[1] + pz], [e[0] - px, ye + 0.01, e[1] - pz]]);
+      }
+    }
+    bag.add(el.board || 'lacquer_red', fromTriangles(T));
+    bag.add(el.strip || 'timber_red', fromTriangles(R));
+  }
+  for (const g of B) bag.add(el.board || 'lacquer_red', g);
+  for (const g of S) bag.add(el.strip || 'timber_red', g);
+}
+
+/**
+ * A lamp stand of the Tang hall { at, y, h }: a lotus foot, a slender shaft, a dish of oil with its flame; lit.
+ * Opt-in: only plans that place it.
+ */
+function tangLamp(el, { bag, col, lights }) {
+  const [x, z] = el.at, y = el.y, h = el.h ?? 1.3;
+  bag.add('bronze', lathe([[0.2, 0], [0.2, 0.03], [0.14, 0.07], [0.07, 0.12], [0.035, 0.16], [0.03, h - 0.12], [0.05, h - 0.1], [0.05, h - 0.07], [0.03, h - 0.05], [0.14, h - 0.02], [0.15, h], [0.13, h + 0.02], [0.001, h + 0.02]], 12, null, x, y, z));
+  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; bag.add('bronze', lathe([[0.001, 0], [0.04, 0.03], [0.001, 0.09]], 5, null, x + Math.cos(a) * 0.15, y + 0.03, z + Math.sin(a) * 0.15)); }
+  bag.add('flame', lathe([[0.012, 0], [0.018, 0.03], [0.001, 0.08]], 6, null, x + 0.07, y + h + 0.02, z));
+  if (lights) lights.push({ at: [x + 0.07, y + h + 0.08, z], color: '#ffb46b', intensity: el.intensity ?? 2.2, distance: el.distance ?? 7 });
+  if (col) col.circle(x, z, 0.2, y, y + h);
+}
+
 export { hipRoof, gableRoofC, column as chineseColumn };
 
 registerStyle('chinese', {
   column,
   trim: () => {},
   opening: () => {},
-  elements: { ...byzantineElements, bracket_set: bracketSet, tang_bracket_set: tangBracket, tang_fang: tangFang, hip_roof: hipRoof, gable_roof_c: gableRoofC },
+  elements: { ...byzantineElements, bracket_set: bracketSet, tang_bracket_set: tangBracket, tang_fang: tangFang, hip_roof: hipRoof, gable_roof_c: gableRoofC, tang_pingan: tangPingan, tang_lamp: tangLamp },
   objects: { buddha, figure, statue, mount, dharani_pillar: dharaniPillar, pagoda },
 });

@@ -146,12 +146,10 @@ for (const i of [0, 6]) {
 }
 
 // ── the interior: ceilings, the altar and its statues ───────────────────────
-add({ t: 'slab', rect: [-8.83, -17.0, 8.83, 17.0], y0: F + 7.8, y1: F + 8.0, mat: 'ceiling_grid', holes: [[-4.415, -12.6, 4.415, 12.6]] });
-add({ t: 'slab', rect: [-4.6, -12.8, 4.6, 12.8], y0: F + 8.9, y1: F + 9.1, mat: 'ceiling_grid', holes: [] });
-for (const s of [-1, 1]) {
-  add({ t: 'slab', rect: [Math.min(s * 4.415, s * 4.6), -12.8, Math.max(s * 4.415, s * 4.6), 12.8], y0: F + 7.8, y1: F + 9.0, mat: 'timber_red', holes: [] });
-  add({ t: 'slab', rect: [-4.6, Math.min(s * 12.6, s * 12.8), 4.6, Math.max(s * 12.6, s * 12.8)], y0: F + 7.8, y1: F + 9.0, mat: 'timber_red', holes: [] });
-}
+// the ceilings (ping'an): backing boards over a close grid of square strips, lacquered red without pattern; the
+// outer aisle's flat over the crescent beams, the inner zone's higher, its edges slanting up on rafters to the flat
+add({ t: 'tang_pingan', rect: [-8.83, -17.0, 8.83, 17.0], y: F + 7.8, holes: [[-4.6, -12.8, 4.6, 12.8]], pitch: 0.3 });
+add({ t: 'tang_pingan', rect: [-4.6, -12.8, 4.6, 12.8], y: F + 9.0, pitch: 0.3, border: { w: 1.2, rise: 1.25 } });
 // crescent beams linking the rings across the outer aisle
 for (const z of ZS.slice(1, -1)) for (const sx of [-1, 1]) block([Math.min(sx * 4.415, sx * 8.83), z - 0.15, Math.max(sx * 4.415, sx * 8.83), z + 0.15], F + 7.2, F + 7.75, 'timber_red', { collide: false });
 for (const x of XS.slice(1, -1)) for (const sz of [-1, 1]) block([x - 0.15, Math.min(sz * 12.6, sz * 17.0), x + 0.15, Math.max(sz * 12.6, sz * 17.0)], F + 7.2, F + 7.75, 'timber_red', { collide: false });
@@ -181,6 +179,8 @@ for (const z0 of [-10.08, 10.08]) {
   st('groom', -2.1, z0 - Math.sign(z0) * 0.9, 2.1, { robe: 'clay_robe', robe2: 'clay_green', dir: [-0.6, Math.sign(z0) * 0.8] });
 }
 for (const sz of [-1, 1]) st('king', -2.35, sz * 11.6, 3.2, { robe: 'clay_green', robe2: 'clay_robe' });
+// oil lamps on bronze stands before the three Buddhas, the hall's only light besides the open doors
+for (const z0 of [0, -5.04, 5.04]) for (const k of [-1, 1]) add({ t: 'tang_lamp', at: [-3.55, z0 + k * 1.1], y: F, h: 1.25 });
 
 // ── the roof ─────────────────────────────────────────────────────────────────
 // eaves 4.0 m past the column line on rafters and flying rafters; the lowest slope about 0.3, steeper toward the ridge
