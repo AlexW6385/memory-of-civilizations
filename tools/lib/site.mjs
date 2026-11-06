@@ -51,8 +51,8 @@ export class SiteWorld extends CollisionWorld {
 /**
  * The settlement as the viewer walks it: its ground inside its disc (nothing beyond: the checks
  * stay on the disc), its water, and every plan built (one at a time, the geometry let go once its
- * top field is made). onError(plan, error) for a plan that does not build (default: thrown).
- * Returns { cw, landmarks, town, radius, arrival, failed: [[planId, message]] }.
+ * top field is made). Plans that do not build are listed in `failed`, not thrown.
+ * Returns { cw, mod, landmarks, town, radius, arrival, failed: [[planId, message]] }.
  */
 export async function siteWorld(id, { tops = true, onPlan = null } = {}) {
   const G = GROUNDS[id], radius = radiusOf(id);
