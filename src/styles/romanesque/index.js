@@ -7,6 +7,7 @@
 // windows), arc walls and sphere patches come from the shared Byzantine vocabulary.
 
 import { registerStyle } from '../../core/build.js';
+import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
 import { box, lathe, frustum, fromTriangles, orientOutward } from '../../core/geom.js';
 import { byzantineElements } from '../byzantine/index.js';
 import { doors } from '../greek/objects.js';
@@ -402,10 +403,81 @@ function bourdon(el, { bag }) {
   bag.add('wood_ochre', lathe([[0.001, 0], [0.06, 0.04], [0.065, 0.1], [0.035, 0.15], [0.045, 0.2], [0.025, 0.25], [0.001, 0.26]], 8, null, x + 0.05, y + h - 0.52, z));
 }
 
+/**
+ * pont: a stone bridge of round arches on piers with cutwaters, across local x { x0 (the first abutment's face),
+ * spans [{ w, pier (the pier after it) }…], y0, y1 (the deck at the two ends), peak [x, y] (the deck's crown),
+ * bed (the piers' footing), w (overall width), rise (deck over each arch's crown) }: the body of rubble with its
+ * arch openings, the arch rings in dressed stone standing a little proud on both faces, pointed cutwaters on both
+ * sides of each pier rising to a sloped cap, a paved deck humped over the great arch, low parapets with a coping.
+ * After the bridge over the Dourdou at Conques (docs/settlements/conques.md §1b).
+ */
+function pont(el, { bag, col }) {
+  const W = el.w ?? 3.1, hw = W / 2, rise = el.rise ?? 0.65, bed = el.bed, pt = 0.4;
+  const xs = [el.x0];
+  for (const s of el.spans) { xs.push(xs[xs.length - 1] + s.w); if (s.pier) xs.push(xs[xs.length - 1] + s.pier); }
+  const xEnd = xs[xs.length - 1], [px, py] = el.peak;
+  const deckAt = (x) => x <= px ? el.y0 + (py - el.y0) * (x - el.x0) / (px - el.x0) : py + (el.y1 - py) * (x - px) / (xEnd - px);
+  // the arches: their sides, radius and springing (the crown `rise` under the deck)
+  const arches = []; let x = el.x0;
+  for (const s of el.spans) { const r = s.w / 2, c = x + r; arches.push({ a: x, b: x + s.w, c, r, y: Math.min(deckAt(c), deckAt(c - r * 0.5), deckAt(c + r * 0.5)) - rise - r }); x += s.w + (s.pier ?? 0); }
+  // the body as one outline with the openings cut from below, extruded across
+  const ext = 1.5, sh = new Shape();
+  sh.moveTo(el.x0 - ext, bed); sh.lineTo(el.x0 - ext, el.y0 - 0.05); sh.lineTo(px, py - 0.05); sh.lineTo(xEnd + ext, el.y1 - 0.05); sh.lineTo(xEnd + ext, bed);
+  for (let i = arches.length - 1; i >= 0; i--) {
+    const A = arches[i], n = Math.max(8, Math.round(A.r * 8));
+    sh.lineTo(A.b, bed); sh.lineTo(A.b, A.y);
+    for (let k = 1; k < n; k++) { const t = Math.PI * k / n; sh.lineTo(A.c + A.r * Math.cos(t), A.y + A.r * Math.sin(t)); }
+    sh.lineTo(A.a, A.y); sh.lineTo(A.a, bed);
+  }
+  sh.lineTo(el.x0 - ext, bed);
+  const body = new ExtrudeGeometry(sh, { depth: W, bevelEnabled: false, curveSegments: 1 });
+  body.translate(0, 0, -hw); body.deleteAttribute('uv');
+  bag.add(el.mat ?? 'schist_rubble', body);
+  // the arch rings, a voussoir's depth deep, standing 6 cm proud of both faces
+  for (const A of arches) for (const z of [-hw - 0.06, hw]) {
+    const ring = new Shape(), R = A.r + 0.5, n = Math.max(10, Math.round(A.r * 10));
+    ring.moveTo(A.c + R, A.y); ring.lineTo(A.c + A.r, A.y);
+    for (let k = 1; k < n; k++) { const t = Math.PI * k / n; ring.lineTo(A.c + A.r * Math.cos(t), A.y + A.r * Math.sin(t)); }
+    ring.lineTo(A.c - A.r, A.y); ring.lineTo(A.c - R, A.y);
+    for (let k = n - 1; k > 0; k--) { const t = Math.PI * k / n; ring.lineTo(A.c + R * Math.cos(t), A.y + R * Math.sin(t)); }
+    const g = new ExtrudeGeometry(ring, { depth: 0.06, bevelEnabled: false, curveSegments: 1 }); g.translate(0, 0, z); g.deleteAttribute('uv');
+    bag.add(el.ringMat ?? 'limestone_yellow', g);
+  }
+  // the cutwaters: a pointed prism on each side of each pier, a sloped cap
+  for (let i = 0; i + 1 < arches.length; i++) {
+    const xa = arches[i].b, xb = arches[i + 1].a, m = (xa + xb) / 2, len = (xb - xa) / 2 * 1.3, top = Math.min(arches[i].y, arches[i + 1].y) + Math.min(arches[i].r, arches[i + 1].r) * 0.6;
+    for (const sg of [-1, 1]) {
+      const z0 = sg * (hw - 0.02), z1 = sg * (hw + len), t = [];
+      hexa(t, [[xa, bed, z0], [xb, bed, z0], [m + 0.05, bed, z1], [m - 0.05, bed, z1]], [[xa, top, z0], [xb, top, z0], [m + 0.05, top, z1], [m - 0.05, top, z1]]);
+      bag.add(el.mat ?? 'schist_rubble', fromTriangles(t));
+      const cap = []; hexa(cap, [[xa - 0.05, top - 0.02, z0], [xb + 0.05, top - 0.02, z0], [m + 0.1, top - 0.02, sg * (hw + len + 0.08)], [m - 0.1, top - 0.02, sg * (hw + len + 0.08)]], [[xa - 0.05, top + 0.12, z0], [xb + 0.05, top + 0.12, z0], [m + 0.1, top + 0.12, sg * (hw + len + 0.08)], [m - 0.1, top + 0.12, sg * (hw + len + 0.08)]]);
+      bag.add(el.ringMat ?? 'limestone_yellow', fromTriangles(cap));
+      const roof = [], ap = top + 0.12 + len * 0.9, yc = top + 0.11;
+      const A = [xa - 0.03, yc, z0], B = [xb + 0.03, yc, z0], C = [m, yc, sg * (hw + len + 0.04)], D = [m, ap, z0];
+      roof.push(...orientOutward([...A, ...B, ...C, ...A, ...D, ...B, ...B, ...D, ...C, ...C, ...D, ...A]));
+      bag.add('lauze', fromTriangles(roof));
+    }
+  }
+  // the deck and the parapets along the profile: from beyond the first abutment, up to the crown, down past the last
+  const prof = [[el.x0 - ext, el.y0], [px, py], [xEnd + ext, el.y1]];
+  for (let i = 0; i + 1 < prof.length; i++) {
+    const [ax, ay] = prof[i], [bx, by] = prof[i + 1];
+    const seg = (mat, z0, z1, d0, d1) => { const t = []; hexa(t, [[ax, ay + d0, z0], [bx, by + d0, z0], [bx, by + d0, z1], [ax, ay + d0, z1]], [[ax, ay + d1, z0], [bx, by + d1, z0], [bx, by + d1, z1], [ax, ay + d1, z1]]); bag.add(mat, fromTriangles(t)); };
+    seg('pebbles', -hw + pt - 0.01, hw - pt + 0.01, -0.25, 0);
+    for (const sg of [-1, 1]) {
+      const [z0, z1] = sg < 0 ? [-hw, -hw + pt] : [hw - pt, hw];
+      seg(el.mat ?? 'schist_rubble', z0, z1, -0.3, 0.8);
+      seg(el.ringMat ?? 'limestone_yellow', z0 - 0.04, z1 + 0.04, 0.8, 0.92);
+      col.segment([ax, (z0 + z1) / 2], [bx, (z0 + z1) / 2], pt, Math.min(ay, by) - 0.3, Math.max(ay, by) + 0.92);
+    }
+    col.ramp([Math.min(ax, bx), -hw + pt, Math.max(ax, bx), hw - pt], Math.min(ay, by), Math.max(ay, by), (by > ay) === (bx > ax) ? 'e' : 'w');
+  }
+}
+
 registerStyle('romanesque', {
   column,
   trim: () => {},
   opening: () => {},
-  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille, west_gable: westGable, bourdon },
+  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille, west_gable: westGable, bourdon, pont },
   objects: { doors, reliquary, basin },
 });
