@@ -179,8 +179,105 @@ function chunkeyYard(el, { bag, col }) {
     bag.add('timber', rod([cx - Math.cos(a) * 0.9, y + 0.074, cz - Math.sin(a) * 0.9], [cx + Math.cos(a) * 0.9, y + 0.074, cz + Math.sin(a) * 0.9], 0.025, 6));
   }
 }
+/**
+ * charnel_house: the house of the dead on the platform mound of the twin mounds { c, y, s (its
+ * side), yaw (0: the door on the north) } — "probably a charnel house", the conical mound beside it
+ * for burial [stated: Cahokia Mounds State Historic Site, "Twin Mounds"]; built after the temple of
+ * the Natchez, the Mississippians' heirs, as Le Page du Pratz saw it: about thirty feet a side, the
+ * four corner posts a foot and a half thick and rising ten feet, the walls of mud not nine inches
+ * thick, the roof a vault on a ridge of six feet, three carved birds on flat boards along the ridge,
+ * white with red feathers, facing east; inside a small wall dividing it into a front part of twenty
+ * feet, where the eternal fire burns, and a dark back part of ten; an altar four feet high, six long
+ * and two broad bearing a coffer of split cane; the door on the north; logs stacked near for the
+ * fire [stated: Le Page du Pratz, Histoire de la Louisiane III.2; the transfer to Cahokia inferred].
+ */
+function charnelHouse(el, { bag, col, lights }) {
+  const [cx, cz] = el.c, y = el.y ?? 0, s = el.s ?? 9, h = 3.0, t = 0.23, hs = s / 2;
+  const x0 = cx - hs, x1 = cx + hs, z0 = cz - hs, z1 = cz + hs, dw = 1.0, dh = 1.95;
+  // the walls, the doorway in the north wall
+  const walls = [[x0, z1 - t, x1, z1], [x0, z0 + t, x0 + t, z1 - t], [x1 - t, z0 + t, x1, z1 - t], [x0, z0, cx - dw / 2, z0 + t], [cx + dw / 2, z0, x1, z0 + t]];
+  for (const r of walls) { bag.add(WALL, box(r[0], y - 0.4, r[1], r[2], y + h, r[3])); col.rect(r, y - 0.4, y + h); }
+  bag.add(WALL, box(cx - dw / 2, y + dh, z0, cx + dw / 2, y + h, z0 + t));
+  col.rect([cx - dw / 2, z0, cx + dw / 2, z0 + t], y + dh, y + h);
+  // the doorway left open: its two posts, the lintel pole over them, a sill of worn clay
+  for (const sd of [-1, 1]) bag.add('timber', rod([cx + sd * (dw / 2 + 0.1), y - 0.3, z0 - 0.1], [cx + sd * (dw / 2 + 0.1), y + dh + 0.3, z0 - 0.1], 0.11, 7));
+  bag.add('timber', rod([cx - dw / 2 - 0.35, y + dh + 0.12, z0 - 0.12], [cx + dw / 2 + 0.35, y + dh + 0.12, z0 - 0.12], 0.09, 7));
+  bag.add(WALL, box(cx - dw / 2 - 0.25, y - 0.2, z0 - 0.5, cx + dw / 2 + 0.25, y + 0.06, z0 + t));
+  // the floor of beaten clay, and the corner posts of cypress standing at the corners
+  bag.add(WALL, box(x0 + t, y - 0.3, z0 + t, x1 - t, y + 0.05, z1 - t));
+  col.floor([x0 + t, z0 + t, x1 - t, z1 - t], y + 0.05);
+  for (const [px, pz] of [[x0, z0], [x1, z0], [x1, z1], [x0, z1]]) bag.add('timber', rod([px, y - 0.4, pz], [px, y + h + 0.15, pz], 0.23, 10));
+  // the wall plate, the roof: a steep vault of thatch on a short ridge
+  bag.add('timber', box(x0 - 0.12, y + h - 0.3, z0 - 0.12, x1 + 0.12, y + h, z1 + 0.12));
+  const rise = 6.2, ridge = 1.8, o = 0.7, T = [];
+  const prof = (f) => Math.sin(f * Math.PI / 2) ** 0.8;                 // the vault's swell: steep at the eaves, rounding to the ridge
+  const loop = (f, p) => { const ix = (hs + o) * f, iz = (hs + o) * f, yy = y + h - 0.15 + rise * prof(f) - p * 0.4; const rx = Math.max(ridge / 2, hs + o - ix) + p, rz = hs + o - iz + p; return [[cx - rx, yy, cz - rz], [cx + rx, yy, cz - rz], [cx + rx, yy, cz + rz], [cx - rx, yy, cz + rz]]; };
+  const N = 7;
+  for (let k = 0; k < N; k++) {
+    const f0 = k / N, f1 = k === N - 1 ? 0.995 : (k + 1) / N + 0.05, butt = 0.28 * (1 - 0.6 * k / N);
+    const lo = loop(f0, butt), hi = loop(Math.min(1, f1), 0), inn = loop(f0, 0);
+    for (let e = 0; e < 4; e++) {
+      const f = (e + 1) % 4, m = [(lo[e][0] + lo[f][0]) / 2 - cx, 0, (lo[e][2] + lo[f][2]) / 2 - cz], l = Math.hypot(m[0], m[2]);
+      tri(T, lo[e], lo[f], hi[f], [m[0], l * 0.7, m[2]]); tri(T, lo[e], hi[f], hi[e], [m[0], l * 0.7, m[2]]);
+      tri(T, lo[e], lo[f], inn[f], [m[0], -l * 2, m[2]]); tri(T, lo[e], inn[f], inn[e], [m[0], -l * 2, m[2]]);
+    }
+  }
+  bag.add(TH, fromTriangles(T));
+  // under the eaves, closed back to the wall plate; inside, a ceiling of cane mats at the wall-head
+  { const E = [], e = hs + o, w = hs + 0.12, yy = y + h - 0.15;
+    for (const [a, b, c, d] of [[[-e, -e], [e, -e], [w, -w], [-w, -w]], [[e, -e], [e, e], [w, w], [w, -w]], [[e, e], [-e, e], [-w, w], [w, w]], [[-e, e], [-e, -e], [-w, -w], [-w, w]]]) {
+      const P = (q) => [cx + q[0], yy, cz + q[1]];
+      tri(E, P(a), P(b), P(c), [0, -1, 0]); tri(E, P(a), P(c), P(d), [0, -1, 0]);
+    }
+    bag.add(TH, fromTriangles(E)); }
+  bag.add('reed_mat', box(x0 + t, y + h - 0.32, z0 + t, x1 - t, y + h - 0.28, z1 - t));
+  // the top: the ridge pole closing it, the flat boards along it and the three birds on them, facing east
+  const top = loop(0.995, 0), ry = top[0][1];
+  bag.add(TH, frustum([top[0][0] - 0.05, top[0][2] - 0.05, top[2][0] + 0.05, top[2][2] + 0.05], ry - 0.1, ry + 0.25, 0.1, 0.1, 0.25, 0.25));
+  bag.add('timber', rod([cx - ridge / 2 - 0.4, ry + 0.3, cz], [cx + ridge / 2 + 0.4, ry + 0.3, cz], 0.12, 8));
+  for (const bx of [cx - ridge / 2 - 0.25, cx, cx + ridge / 2 + 0.25]) {
+    bag.add('timber', box(bx - 0.35, ry + 0.38, cz - 0.16, bx + 0.35, ry + 0.45, cz + 0.16));
+    bird(bag, bx, ry + 0.45, cz);
+  }
+  // inside: the dividing wall and its doorway, the back part the darker
+  const zp = z0 + t + (s - 2 * t) * 2 / 3;
+  for (const r of [[x0 + t, zp, cx - 0.5, zp + 0.18], [cx + 0.5, zp, x1 - t, zp + 0.18]]) { bag.add(WALL, box(r[0], y, r[1], r[2], y + 2.3, r[3])); col.rect(r, y, y + 2.3); }
+  bag.add('timber', rod([cx - 0.7, y + 1.75, zp + 0.09], [cx + 0.7, y + 1.75, zp + 0.09], 0.07, 6));
+  bag.add(WALL, box(cx - 0.5, y + 1.8, zp, cx + 0.5, y + 2.3, zp + 0.18));
+  // the eternal fire in the front part: a ring of clay, logs laid star-wise, the flame
+  const fz = z0 + t + 2.4;
+  bag.add(WALL, lathe([[0.62, 0], [0.62, 0.12], [0.5, 0.14], [0.48, 0.06], [0.001, 0.06]], 16, null, cx, y + 0.04, fz));
+  for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 + 0.3; bag.add('timber', rod([cx + Math.cos(a) * 0.6, y + 0.13, fz + Math.sin(a) * 0.6], [cx + Math.cos(a) * 0.08, y + 0.2, fz + Math.sin(a) * 0.08], 0.05, 6)); }
+  bag.add('flame', lathe([[0.16, 0], [0.13, 0.12], [0.06, 0.32], [0.001, 0.45]], 8, (th) => 1 + 0.25 * Math.sin(th * 3), cx, y + 0.12, fz));
+  col.circle(cx, fz, 0.62, y, y + 0.3);
+  if (lights) lights.push({ at: [cx, y + 0.6, fz], color: '#ff9a4a', intensity: 5, distance: 7 });
+  // the altar in the back part, the coffer of split cane on it
+  const az = (zp + 0.18 + z1 - t) / 2;
+  bag.add(WALL, box(cx - 0.92, y, az - 0.31, cx + 0.92, y + 1.22, az + 0.31));
+  col.rect([cx - 0.92, az - 0.31, cx + 0.92, az + 0.31], y, y + 1.22);
+  bag.add('wicker', frustum([cx - 0.55, az - 0.22, cx + 0.55, az + 0.22], y + 1.22, y + 1.6, 0.02, 0.02, 0.02, 0.02));
+  bag.add('reed_mat', box(cx - 0.58, y + 1.6, az - 0.25, cx + 0.58, y + 1.65, az + 0.25));
+  // the logs stacked by the door for the fire
+  const lx = x1 + 1.2, lz = z0 + 0.6;
+  for (let r = 0; r < 3; r++) for (let k = 0; k < 4 - r; k++) bag.add('timber', rod([lx - 0.9, y + 0.12 + r * 0.2, lz + (k - (3 - r) / 2) * 0.22], [lx + 0.9, y + 0.12 + r * 0.2, lz + (k - (3 - r) / 2) * 0.22], 0.1, 7));
+  col.rect([lx - 0.9, lz - 0.5, lx + 0.9, lz + 0.5], y, y + 0.6);
+}
+/** A carved bird the size of two geese, without feet, white with red feathers, its head to +x (east), on its board at (x, y, z). */
+function bird(bag, x, y, z) {
+  const body = lathe([[0.001, 0], [0.13, 0.06], [0.2, 0.25], [0.19, 0.45], [0.13, 0.6], [0.05, 0.72], [0.001, 0.74]], 10, null, 0, 0, 0);
+  body.scale(1, 1, 0.8).rotateZ(-Math.PI / 2).translate(x - 0.42, y + 0.22, z);
+  bag.add('paint_white', body);
+  bag.add('paint_white', rod([x + 0.22, y + 0.3, z], [x + 0.36, y + 0.62, z], 0.065, 7));
+  bag.add('paint_white', lathe([[0.001, 0], [0.09, 0.05], [0.1, 0.12], [0.06, 0.2], [0.001, 0.22]], 8, null, x + 0.38, y + 0.56, z));
+  bag.add('timber_red', rod([x + 0.46, y + 0.66, z], [x + 0.62, y + 0.63, z], 0.03, 5));
+  // the red feathers: the wings laid along the sides, the tail fanned behind
+  for (const sd of [-1, 1]) { const t = []; t.push(x - 0.3, y + 0.38, z + sd * 0.17, x + 0.15, y + 0.4, z + sd * 0.17, x - 0.4, y + 0.26, z + sd * 0.15); bag.add('timber_red', fromTriangles(t.concat(flip(t)))); }
+  { const t = []; t.push(x - 0.4, y + 0.26, z, x - 0.72, y + 0.42, z - 0.14, x - 0.72, y + 0.42, z + 0.14); bag.add('timber_red', fromTriangles(t.concat(flip(t)))); }
+}
+const flip = (t) => { const o = []; for (let i = 0; i < t.length; i += 9) o.push(t[i], t[i + 1], t[i + 2], t[i + 6], t[i + 7], t[i + 8], t[i + 3], t[i + 4], t[i + 5]); return o; };
+
 registerStyle('mississippian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_house: greatHouse, miss_house: house, palisade, woodhenge, plaza_pole: pole, chunkey_yard: chunkeyYard },
+  elements: { ...STYLES.qing.elements, great_house: greatHouse, miss_house: house, palisade, woodhenge, plaza_pole: pole, chunkey_yard: chunkeyYard, charnel_house: charnelHouse },
   objects: {},
 });

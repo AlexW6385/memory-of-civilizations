@@ -30,7 +30,8 @@ export const precinct = {
   elements: [
     { t: 'palisade', rect: PALISADE, y: height, every: 26, gates: [[2, 0.5], [3, 0.45], [1, 0.55]] },
     { t: 'woodhenge', c: WOODHENGE.c, r: WOODHENGE.r, n: 48, y: height(...WOODHENGE.c) },
-    { t: 'great_house', rect: [FOX[0] + 14, FOX[1] + 14, FOX[2] - 14, FOX[3] - 14], y: height(...mid(FOX)), h: 3, rise: 6 },
+    // the twin mounds: on the platform mound the charnel house, its door to the plaza; the conical mound beside it for burial
+    { t: 'charnel_house', c: mid(FOX), y: height(...mid(FOX)), s: 9 },
     ...MOUNDS.map(([x, z, s, h]) => ({ t: 'great_house', rect: [x - s * 0.4, z - s * 0.3, x + s * 0.4, z + s * 0.3], y: height(x, z), h: 3, rise: 5 })),
   ],
 };
