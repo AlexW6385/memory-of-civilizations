@@ -13,9 +13,15 @@ E.push({ t: 'floor', rect: COURT, y: 0.05, th: 0.3, mat: 'flagstone' });
 // the West Wing, with the Throne Room cut into it behind its antechamber: the room, the lustral basin sunk in its
 // south-west corner under a light well open to the sky, the two double doors from the antechamber
 const TR = [-25.8, -19.6, -19.8, -12.6], PIT = [-25.8, -15.4, -22.8, -12.6];
+// the West Magazines: the Long Corridor running north–south through the wing's ground floor, eighteen long
+// store-rooms opening off its west side, the way in from the north
+const CORR = [-41, -48, -37.5, 22], MAG = { x0: -57, z0: -46, z1: 20, n: 18 }, MP = (MAG.z1 - MAG.z0) / MAG.n;
+const magHoles = Array.from({ length: MAG.n }, (_, i) => ({ rect: [MAG.x0, MAG.z0 + i * MP + 0.8, CORR[0], MAG.z0 + (i + 1) * MP - 0.8], h: 3.2 }));
 E.push({ t: 'wing', rect: [-62, -60, -19, 58], storeys: 3, windows: 'w', seed: 1,
-  holes: [{ rect: TR, h: 3.6 }, { rect: PIT, h: 99 }, { rect: [-19.8, -18.2, -19.0, -16.6], h: 2.6, lintel: true }, { rect: [-19.8, -15.6, -19.0, -14.0], h: 2.6, lintel: true }],
+  holes: [{ rect: TR, h: 3.6 }, { rect: PIT, h: 99 }, { rect: [-19.8, -18.2, -19.0, -16.6], h: 2.6, lintel: true }, { rect: [-19.8, -15.6, -19.0, -14.0], h: 2.6, lintel: true },
+    { rect: CORR, h: 3.4 }, { rect: [CORR[0], -60, CORR[2], CORR[1]], h: 3.0, lintel: true }, ...magHoles],
   pits: [{ rect: PIT, depth: 1.0 }] });
+E.push({ t: 'magazines', corridor: CORR, ...MAG, y: 0 });
 E.push({ t: 'throne_room', rect: TR, y: 0, throne: [-23.2, -19.6], pit: PIT, pitDepth: 1.0 });
 E.push({ t: 'stair', rect: [-24.0, -14.1, -22.8, -12.6], dir: 'e', y0: -1.0, y1: 0, riser: 0.25, base: -1.0, mat: 'gypsum_minoan' });
 // the west façade in setbacks: blocks standing forward of the line by a metre or three, at different heights,
@@ -45,13 +51,21 @@ E.push({ t: 'bastion', rect: [-12, -72, -6, -62], y: 0, podium: 2.4, front: 'e' 
 E.push({ t: 'portico', a: [-3, 60], b: [3, 60], n: 2, depth: 3, side: 1, h: 3.4 });
 // the West Court's raised walks and the theatral area
 E.push({ t: 'floor', rect: [-120, -50, -64, 50], y: 0.05, th: 0.3, mat: 'flagstone' });
-E.push({ t: 'steps', rect: [THEATRAL[0], THEATRAL[1], THEATRAL[2], THEATRAL[1] + 8], n: 8, rise: 0.3, dir: 'n' });
-E.push({ t: 'steps', rect: [THEATRAL[2] - 8, THEATRAL[1], THEATRAL[2], THEATRAL[3]], n: 6, rise: 0.3, dir: 'e' });
+// the theatral area where the Royal Road ends: a paved court about 13 × 10 m; on its east the flight of eighteen low
+// steps, a little over 10 m broad; on its south the six steps, 15.5 m long; at the corner between them the bastion,
+// where a pavilion may have stood for the ruler to watch from (§4b)
+const [T0, T1] = [THEATRAL[0] + 4, THEATRAL[1] + 6];                // the court's south-west corner: x −100, z −92
+E.push({ t: 'floor', rect: [T0, T1, T0 + 14, T1 + 10], y: 0.05, th: 0.3, mat: 'flagstone' });
+E.push({ t: 'steps', rect: [T0, T1 + 10, T0 + 15.5, T1 + 16], n: 6, rise: 0.25, dir: 's' });
+E.push({ t: 'steps', rect: [T0 + 14, T1 - 0.4, T0 + 22, T1 + 10], n: 18, rise: 0.12, dir: 'e' });
+E.push({ t: 'block', rect: [T0 + 15.5, T1 + 10, T0 + 22, T1 + 16], y0: -0.5, y1: 2.16, mat: 'gypsum_minoan', walk: true });
+E.push({ t: 'portico', a: [T0 + 16.2, T1 + 15.4], b: [T0 + 16.2, T1 + 10.6], n: 2, depth: 5, side: 1, y: 2.16, h: 2.8 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('central court', COURT, 0.05, 'open'), room('west court', [-120, -50, -64, 50], 0.05, 'open'), room('throne room antechamber', [-19, -20, -14, -8], 0, 'hall'),
-  room('throne room', TR, 0, 'inner'), room('grand staircase light well', LW, 0, 'open'), room("queen's megaron", QM, 0, 'inner')];
-const walks = [[[-100, 0], [-90, -70], [-60, -89], [0, -89], [0, -60], [0, 0]]];
+  room('throne room', TR, 0, 'inner'), room('long corridor', CORR, 0, 'inner'), room('grand staircase light well', LW, 0, 'open'), room("queen's megaron", QM, 0, 'inner')];
+const walks = [[[-100, 0], [-90, -60], [-92, -87], [-92, -95], [-70, -95], [-60, -89], [0, -89], [0, -60], [0, 0]], [[-39, -66], [-39, -54], [-39, 0], [-46, 0.5]]];
+walks[1].y0 = 0;
 walks[0].y0 = 0;
 
 export const palace = {

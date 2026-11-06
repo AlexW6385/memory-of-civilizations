@@ -5,7 +5,7 @@
 // red-framed windows.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles, quad } from '../../core/geom.js';
+import { box, lathe, fromTriangles, quad, orientOutward } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 import { profile, prism, toPlane, ell, cap, poly } from '../greek/sculpture.js';
 import { merge } from '../greek/columns.js';
@@ -283,8 +283,146 @@ function lightwellTiers(el, { bag, col }) {
   bag.add('timber', box(x0, y + n * sh - 0.3, z0 + ld - 0.4, x1, y + n * sh, z0 + ld + 0.05));
 }
 
+// ── the town, the stores, the approach (docs/settlements/knossos.md §4b) ───────────────────
+
+/**
+ * town_house: a house after the Town Mosaic plaques { rect, seed, y, front ('n' | 's' | 'e' | 'w': the street side),
+ * storeys }: a base course of stone, plastered walls with timber beams at each floor whose round ends show in a row
+ * on the front, a door under a timber lintel and narrow slits on the ground floor, the windows of the upper floors in
+ * red frames divided into four panes, a flat roof with a low edge and, on many, a small room on the roof.
+ */
+function townHouse(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed || 1), n = el.storeys ?? (rand() < 0.7 ? 2 : 3), sh = 2.9, H = n * sh;
+  const f = el.front ?? 's', base = rand() < 0.4 ? G : 'rubble', e = 0;
+  bag.add(base, box(x0, y - 1.5, z0, x1, y + 0.5, z1));
+  bag.add(P, box(x0 + e, y + 0.5, z0 + e, x1 - e, y + H, z1 - e));
+  col.rect(el.rect, y - 1.5, y + H); col.floor(el.rect, y + H);
+  // a face: its run along u (from a0, length L), its plane at fp, its outward sign sg
+  const face = (k) => {
+    const alongX = k === 'n' || k === 's', L = alongX ? x1 - x0 : z1 - z0, a0 = alongX ? x0 : z0, fp = k === 'n' ? z0 : k === 's' ? z1 : k === 'w' ? x0 : x1, sg = k === 'n' || k === 'w' ? -1 : 1;
+    const at = (mat, u0, u1, v0, v1, d0, d1) => { const p0 = fp + sg * d0, p1 = fp + sg * d1; const q = alongX ? [a0 + u0, Math.min(p0, p1), a0 + u1, Math.max(p0, p1)] : [Math.min(p0, p1), a0 + u0, Math.max(p0, p1), a0 + u1]; bag.add(mat, box(q[0], v0, q[1], q[2], v1, q[3])); };
+    return { alongX, L, a0, fp, sg, at };
+  };
+  // the timber beams at each floor and under the roof's edge, round the four faces
+  for (let k = 1; k <= n; k++) {
+    const m = k === n ? 'plaster' : 'timber', ya = y + k * sh - (k === n ? 0.3 : 0.24), yb = y + k * sh;
+    bag.add(m, box(x0 - 0.01, ya, z0 - 0.01, x1 + 0.01, yb, z0 + 0.3)); bag.add(m, box(x0 - 0.01, ya, z1 - 0.3, x1 + 0.01, yb, z1 + 0.01));
+    bag.add(m, box(x0 - 0.01, ya, z0 + 0.3, x0 + 0.3, yb, z1 - 0.3)); bag.add(m, box(x1 - 0.3, ya, z0 + 0.3, x1 + 0.01, yb, z1 - 0.3));
+  }
+  const F = face(f), du = F.L * (0.3 + rand() * 0.4);
+  // the round ends of the floor beams in a row on the front, just under each floor's band
+  for (let k = 1; k < n; k++) for (let u = 0.45; u < F.L - 0.3; u += 0.62) {
+    if (k === 1 && Math.abs(u - du) < 0.95) continue;
+    const g = lathe([[0.001, 0], [0.085, 0], [0.085, 0.05], [0.001, 0.05]], 8);
+    if (F.alongX) g.rotateX(F.sg * Math.PI / 2); else g.rotateZ(-F.sg * Math.PI / 2);
+    const yy = y + k * sh - 0.36;
+    bag.add('timber', F.alongX ? g.translate(F.a0 + u, yy, F.fp - F.sg * 0.01) : g.translate(F.fp - F.sg * 0.01, yy, F.a0 + u));
+  }
+  // the door, a little off the middle, under its lintel; a step of stone before it
+  F.at('timber', du - 0.62, du + 0.62, y + 0.5, y + 2.45, -0.06, 0.06);
+  F.at('opening', du - 0.48, du + 0.48, y + 0.5, y + 2.25, 0.06, 0.08);
+  F.at('timber', du - 0.75, du + 0.75, y + 2.25, y + 2.5, 0.06, 0.1);
+  F.at(G, du - 0.7, du + 0.7, y, y + 0.5, -0.05, 0.45);
+  // narrow slits on the ground floor
+  for (const u of [du - 1.8, du + 1.8]) if (u > 0.6 && u < F.L - 0.6 && rand() < 0.7) { F.at(G, u - 0.2, u + 0.2, y + 1.2, y + 2.0, -0.06, 0.04); F.at('opening', u - 0.08, u + 0.08, y + 1.3, y + 1.9, 0.04, 0.06); }
+  // the upper windows: red frames, four panes; on the front and on one side
+  const side = f === 'n' || f === 's' ? (rand() < 0.5 ? 'e' : 'w') : (rand() < 0.5 ? 'n' : 's');
+  for (const k of [f, side]) {
+    const W = face(k), m = Math.max(1, Math.floor(W.L / 2.6));
+    for (let fl = 1; fl < n; fl++) for (let i = 0; i < m; i++) {
+      if (k !== f && rand() < 0.5) continue;
+      const u = (i + 0.5) * W.L / m, yy = y + fl * sh + 0.75;
+      W.at(RED, u - 0.55, u + 0.55, yy, yy + 1.25, -0.06, 0.07);
+      W.at('opening', u - 0.42, u + 0.42, yy + 0.12, yy + 1.13, 0.07, 0.09);
+      W.at(RED, u - 0.045, u + 0.045, yy + 0.12, yy + 1.13, 0.09, 0.11);
+      W.at(RED, u - 0.42, u + 0.42, yy + 0.6, yy + 0.68, 0.09, 0.11);
+    }
+  }
+  // the roof: a low edge all round, and on many houses a small room toward the back
+  if (rand() < 0.5) {
+    const back = { n: 's', s: 'n', e: 'w', w: 'e' }[f], w = Math.min(3.4, (x1 - x0) * 0.45), d = Math.min(3.0, (z1 - z0) * 0.45);
+    const rx0 = back === 'w' ? x0 + 0.3 : back === 'e' ? x1 - 0.3 - w : x0 + (x1 - x0 - w) / 2, rz0 = back === 'n' ? z0 + 0.3 : back === 's' ? z1 - 0.3 - d : z0 + (z1 - z0 - d) / 2;
+    bag.add(P, box(rx0, y + H - 0.05, rz0, rx0 + w, y + H + 2.2, rz0 + d));
+    bag.add('timber', box(rx0 - 0.08, y + H + 2.2, rz0 - 0.08, rx0 + w + 0.08, y + H + 2.45, rz0 + d + 0.08));
+    // its doorway toward the street side, dark
+    const [ox, oz] = f === 'n' ? [rx0 + w / 2, rz0] : f === 's' ? [rx0 + w / 2, rz0 + d] : f === 'w' ? [rx0, rz0 + d / 2] : [rx0 + w, rz0 + d / 2];
+    const alongX = f === 'n' || f === 's', sg = f === 'n' || f === 'w' ? -1 : 1;
+    bag.add('opening', alongX ? box(ox - 0.4, y + H, Math.min(oz, oz + sg * 0.03), ox + 0.4, y + H + 1.8, Math.max(oz, oz + sg * 0.03)) : box(Math.min(ox, ox + sg * 0.03), y + H, oz - 0.4, Math.max(ox, ox + sg * 0.03), y + H + 1.8, oz + 0.4));
+    col.rect([rx0, rz0, rx0 + w, rz0 + d], y + H, y + H + 2.45);
+  }
+}
+
+/**
+ * pithos: a great storage jar { at [x, z], y, s (scale: 1 ≈ 1.6 m high), rot }: the narrow foot, the swelling body,
+ * the short neck and the thick rim; raised bands with the rope pattern round the body, rows of small handles.
+ */
+const PITHOS = new Map();
+function pithosGeometry(s) {
+  const P0 = [[0.001, 0], [0.24, 0], [0.27, 0.06], [0.4, 0.4], [0.47, 0.8], [0.47, 1.05], [0.42, 1.3], [0.32, 1.47], [0.3, 1.5], [0.36, 1.53], [0.37, 1.6], [0.3, 1.62], [0.27, 1.56], [0.001, 1.5]];
+  const parts = [lathe(P0.map(([r, h]) => [r * s, h * s]), 18)];
+  for (const [h, r] of [[0.42, 0.405], [0.62, 0.445], [0.86, 0.475], [1.08, 0.465], [1.3, 0.425]]) {
+    // a band, and the rope's twists round it as a ring of little bosses
+    parts.push(lathe([[r * s, (h - 0.03) * s], [(r + 0.025) * s, (h - 0.02) * s], [(r + 0.025) * s, (h + 0.02) * s], [r * s, (h + 0.03) * s]], 18));
+  }
+  for (const h of [0.95, 1.36]) for (let i = 0; i < 4; i++) {
+    const a = (i + 0.5) * Math.PI / 2 + (h > 1 ? Math.PI / 4 : 0), r = (h > 1 ? 0.41 : 0.47) * s;
+    const g = box(-0.05 * s, (h - 0.06) * s, -0.02 * s, 0.05 * s, (h + 0.06) * s, 0.09 * s); g.rotateY(-a + Math.PI / 2); g.translate(Math.cos(a) * r, 0, Math.sin(a) * r); parts.push(g);
+  }
+  return merge(parts);
+}
+function pithos(el, { bag, col }) {
+  const s = el.s ?? 1, k = String(s);
+  if (!PITHOS.has(k)) PITHOS.set(k, pithosGeometry(s));
+  const g = PITHOS.get(k).clone(); if (el.rot) g.rotateY(el.rot);
+  bag.add('terracotta', g.translate(el.at[0], el.y ?? 0, el.at[1]));
+  bag.add('pottery_dark', lathe([[0.001, 0], [0.27 * s, 0], [0.27 * s, 0.02], [0.001, 0.02]], 12, null, el.at[0], (el.y ?? 0) + 1.52 * s, el.at[1]));
+  col.circle(el.at[0], el.at[1], 0.47 * s, el.y ?? 0, (el.y ?? 0) + 1.6 * s);
+}
+
+/**
+ * magazines: the stores along the Long Corridor { corridor [x0, z0, x1, z1] (runs along z), x0 (the magazines' far
+ * end, west of the corridor), z0, z1, n, y }: the pithoi in a row down each magazine, the stone-lined cists sunk in
+ * the floor under their gypsum lids, a lamp in the corridor. The rooms themselves are holes cut in the wing (plan.js).
+ */
+function magazines(el, ctx) {
+  const { bag } = ctx, y = el.y ?? 0, [cx0] = el.corridor, pitch = (el.z1 - el.z0) / el.n, mw = pitch - 1.6, rand = rng(1700);
+  for (let i = 0; i < el.n; i++) {
+    const za = el.z0 + i * pitch + 0.8, zm = za + mw / 2;
+    // the cists down the middle of the floor, the pithoi along the north wall
+    for (let x = cx0 - 1.2; x > el.x0 + 0.8; x -= 1.15) {
+      if (rand() < 0.12) continue;
+      pithos({ at: [x - 0.1, za + 0.55], y, s: 0.92 + rand() * 0.14, rot: rand() * 6.28 }, ctx);
+    }
+    for (let x = cx0 - 1.6; x > el.x0 + 1.2; x -= 2.1) bag.add(G, box(x - 0.85, y - 0.02, zm + 0.05, x + 0.85, y + 0.03, zm + 0.75));
+  }
+  const [a, b, c, d] = el.corridor;
+  for (let z = b + 6; z < d - 3; z += 14) GENERIC_LAMP(ctx, [(a + c) / 2, y + 2.6, z]);
+}
+const GENERIC_LAMP = ({ lights }, at) => lights.push({ at, color: '#ffb46b', intensity: 4, distance: 10 });
+
+/** royal_road: the paved road { pts: [[x, y, z]…] (its centre line), w }: a bed of packed lime over stone, its kerbs, and down the middle the raised strip of oblong slabs. */
+function royalRoad(el, { bag, col }) {
+  const w = (el.w ?? 3.8) / 2, cw = 0.7, pts = el.pts;
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const [ax, ay, az] = pts[i], [bx, by, bz] = pts[i + 1], L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
+    const hexa = (mat, o0, o1, t0, t1, top, bot) => {
+      const Q = (t, o, dy) => [ax + ux * L * t + nx * o, ay + (by - ay) * t + dy, az + uz * L * t + nz * o];
+      const v = [Q(t0, o0, bot), Q(t1, o0, bot), Q(t1, o1, bot), Q(t0, o1, bot), Q(t0, o0, top), Q(t1, o0, top), Q(t1, o1, top), Q(t0, o1, top)];
+      const t = [], q = (p, r, s2, u) => t.push(...v[p], ...v[r], ...v[s2], ...v[p], ...v[s2], ...v[u]);
+      q(0, 1, 2, 3); q(4, 5, 6, 7); q(0, 1, 5, 4); q(1, 2, 6, 5); q(2, 3, 7, 6); q(3, 0, 4, 7);
+      bag.add(mat, fromTriangles(orientOutward(t)));
+    };
+    hexa('lime_plaster', -w + 0.25, w - 0.25, 0, 1, 0.1, -0.4);                                       // the packed bed
+    hexa(G, -w, -w + 0.25, 0, 1, 0.16, -0.4); hexa(G, w - 0.25, w, 0, 1, 0.16, -0.4);                 // the kerbs
+    // the slabs of the middle strip, each a little different in length
+    let t = 0;
+    while (t < 1) { const l = (0.9 + ((i * 7 + t * 97) % 1) * 0.5) / L, t1 = Math.min(1, t + l); if (t1 - t > 0.2 / L) hexa('flagstone', -cw, cw, t + 0.02 / L, t1 - 0.02 / L, 0.15, 0.05); t = t1; }
+    const r = [Math.min(ax, bx) - Math.abs(nx) * w, Math.min(az, bz) - Math.abs(nz) * w, Math.max(ax, bx) + Math.abs(nx) * w, Math.max(az, bz) + Math.abs(nz) * w];
+    if (Math.abs(by - ay) < 0.02) col.floor(r, ay + 0.12); else col.ramp(r, Math.min(ay, by) + 0.12, Math.max(ay, by) + 0.12, Math.abs(ux) > 0.5 ? ((by > ay) === (ux > 0) ? 'e' : 'w') : ((by > ay) === (uz > 0) ? 's' : 'n'));
+  }
+}
 registerStyle('minoan', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, wing, portico, steps, minoan_house: house, fresco, bastion, throne_room: throneRoom, lightwell_tiers: lightwellTiers },
+  elements: { ...STYLES.qing.elements, wing, portico, steps, minoan_house: house, fresco, bastion, throne_room: throneRoom, lightwell_tiers: lightwellTiers, town_house: townHouse, pithos, magazines, royal_road: royalRoad },
   objects: {},
 });

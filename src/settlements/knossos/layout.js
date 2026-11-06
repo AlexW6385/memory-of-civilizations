@@ -8,7 +8,7 @@ export const RADIUS = 350;
 export const COURT = [-13.5, -25, 13.5, 25];
 export const PALACE = [-64, -72, 64, 60];
 export const THEATRAL = [-104, -98, -72, -80];
-export const ROAD = { z: -89, x0: -RADIUS, x1: -72, w: 4 };
+export const ROAD = { z: -89, x0: -RADIUS, x1: -100, w: 3.8 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 /** The hill and the valley: flat round the palace, down east to the stream, up again beyond; level at the edge. */
