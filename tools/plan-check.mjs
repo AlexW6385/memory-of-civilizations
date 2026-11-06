@@ -3,9 +3,10 @@
 // no floating obstacles, no columns or objects driven into walls.
 //
 // Settlements of their own (src/settlements/<id>/): the whole settlement as the viewer walks it
-// (tools/lib/site.mjs), flood-filled from its arrival point (src/planet/arrivals.js) with the
-// walker's own rules (src/core/walk.js: steps, roofs and wall tops, no wading, no climbing open
-// ground steeper than ~40°, falls allowed); the arrival must be walkable, and every landmark's
+// (tools/lib/site.mjs), flood-filled (tools/lib/reach.mjs) from its arrival point (src/planet/arrivals.js) with the
+// walker's own rules (src/core/walk.js: its footing — steps, floors, terraces and low blocks, roofs
+// and wall tops within a step, not slopes steeper than ~50°; no wading, no climbing open ground
+// steeper than ~40°, falls allowed); the arrival must be walkable, and every landmark's
 // entrance, rooms and walk-through routes reachable from it.
 //
 // usage: node tools/plan-check.mjs [id ...] [--sites] [--cell 0.25]
@@ -17,8 +18,10 @@ import { buildPlan, toWorld } from '../src/core/build.js';
 import { CollisionWorld } from '../src/core/collide.js';
 import { terrainHeight, inWater } from '../src/world/regions.js';
 import { SETTLEMENTS, isSettlement, siteWorld } from './lib/site.mjs';
+import { footing, RADIUS as R, STEP, LOW, HEAD } from '../src/core/walk.js';
+import { flood } from './lib/reach.mjs';
 
-const R = 0.3, STEP = 0.5, HEAD = 1.7, LOW = 0.25, CELL = 0.25;
+const CELL = 0.25;
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv[i + 1] : d; };
 const ids = argv.filter((a, i) => !a.startsWith('--') && !(i > 0 && argv[i - 1] === '--cell'));
 for (const id of ids) if (!isSettlement(id) && !BUILDINGS.some((b) => b.id === id)) { console.log(`${id}: no such building or settlement`); process.exit(2); }
@@ -50,7 +53,7 @@ for (const b of BUILDINGS) {
     if (i < 0 || j < 0 || i >= nx || j >= nz) return;
     const k = idx(i, j);
     const x = cx(i), z = cz(j);
-    const g = cw.groundAt(x, z, fromY + STEP);
+    const g = footing(cw, x, z, fromY + STEP);                     // a floor, or a low built top (src/core/walk.js)
     if (!Number.isFinite(g) || g < fromY - 2.0) return;           // no falling off cliffs
     const L = levels.get(k);
     if (L && L.some((h) => Math.abs(h - g) < 0.3)) return;
@@ -138,40 +141,9 @@ async function checkSettlement(id) {
   const { cw, radius, arrival } = S;
   const problems = S.failed.map(([p, m]) => `plan ${p} does not build: ${m}`);
   const C = +opt('cell', 0.25), n = Math.ceil((2 * radius) / C), X0 = -radius, Z0 = -radius;
-  // the first floor height reached in each cell; more storeys in `extra`
-  const first = new Float32Array(n * n).fill(NaN), extra = new Map();
-  const cx = (i) => X0 + (i + 0.5) * C, cz = (j) => Z0 + (j + 0.5) * C;
-  const stack = [];
-  const has = (k, h) => (first[k] === first[k] && Math.abs(first[k] - h) < 0.3) || (extra.get(k)?.some((y) => Math.abs(y - h) < 0.3) ?? false);
-  // one step of the walker (src/core/walk.js, move) from height fromY into cell (i, j)
-  const visit = (i, j, fromY, fromWet) => {
-    if (i < 0 || j < 0 || i >= n || j >= n) return;
-    const x = cx(i), z = cz(j), k = j * n + i;
-    const g = cw.groundAt(x, z, fromY + STEP);
-    // above the floor here: standing on a top (a roof, a wall, a terrace), or falling
-    const s = fromY > g + 1e-3 ? Math.max(g, cw.topAt(x, z, R * 0.6, fromY + STEP)) : g;
-    if (!Number.isFinite(s)) return;
-    if (s === g && s - fromY > Math.max(0.02, C * 0.85) && Math.abs(g - cw.terrain(x, z)) < 1e-6) return;   // too steep
-    if (s <= g + 0.3 && cw.water(x, z, s) && !fromWet) return;                                            // no wading
-    if (has(k, s)) return;
-    if (cw.blockedAt(x, z, R, s + LOW, s + HEAD)) return;
-    if (cw.inShell(x, z, R * 0.7, s + LOW, s + HEAD, fromY + STEP)) return;
-    if (first[k] !== first[k]) first[k] = s; else (extra.get(k) || extra.set(k, []).get(k)).push(s);
-    stack.push(i, j, s);
-  };
+  const { first, extra, reach, started } = flood(cw, { X0, Z0, n, C, start: arrival });
   const [ax, ay, az] = arrival;
-  const ai = Math.floor((ax - X0) / C), aj = Math.floor((az - Z0) / C);
-  const startY = ay ?? cw.terrain(ax, az);
-  visit(ai, aj, startY + 0.05, cw.water(ax, az, startY));
-  if (!stack.length) problems.push(`arrival at (${ax}, ${ay ?? 'ground'}, ${az}) is not walkable`);
-  while (stack.length) {
-    const s = stack.pop(), j = stack.pop(), i = stack.pop();
-    const wet = cw.water(cx(i), cz(j), s);
-    visit(i + 1, j, s, wet); visit(i - 1, j, s, wet); visit(i, j + 1, s, wet); visit(i, j - 1, s, wet);
-  }
-  let reach = 0;
-  for (let k = 0; k < first.length; k++) if (first[k] === first[k]) reach++;
-  for (const L of extra.values()) reach += L.length;
+  if (!started) problems.push(`arrival at (${ax}, ${ay ?? 'ground'}, ${az}) is not walkable`);
 
   /** Is a cell in the world rectangle reached (at height y ± 0.35, if given)? */
   const reached = (x0, z0, x1, z1, y) => {

@@ -19,8 +19,9 @@ export const opera = {
       { x: ce, hw: 17, shells: [[oz1 - 10, oz1 - 36, 20], [oz1 - 28, oz1 - 60, 32], [oz1 - 50, oz1 - 84, 43], [oz1 - 74, oz1 - 104, 49]] },
     ],
   }],
-  rooms: [{ id: 'forecourt', rect: [ox0, oz1, ox1, oz1 + OPERA.stair + 12], y: 0, kind: 'open' }],
-  walks: [Object.assign([[100, -96], [100, oz1 + OPERA.stair + 2]], { y0: 0 })],
+  // (the forecourt and the walk at the ground's height there, not at the plan's base)
+  rooms: [{ id: 'forecourt', rect: [ox0, oz1, ox1, oz1 + OPERA.stair + 12], y: height(100, oz1 + OPERA.stair + 6), kind: 'open' }],
+  walks: [Object.assign([[100, -96], [100, oz1 + OPERA.stair + 2]], { y0: height(100, -96) })],
 };
 export const harbour = {
   id: 'sydney-harbour', style: 'modern', origin: [0, 0], base: 0, yaw: 0, feature: true,

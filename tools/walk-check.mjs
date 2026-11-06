@@ -13,7 +13,7 @@ import { BUILDINGS } from '../src/buildings/index.js';
 import { buildPlan, toWorld } from '../src/core/build.js';
 import { CollisionWorld } from '../src/core/collide.js';
 import { terrainHeight, inWater } from '../src/world/regions.js';
-import { move, WALK } from '../src/core/walk.js';
+import { move, footing, WALK } from '../src/core/walk.js';
 import { SETTLEMENTS, isSettlement, siteWorld } from './lib/site.mjs';
 
 const argv = process.argv.slice(2), ids = argv.filter((a) => !a.startsWith('--'));
@@ -54,8 +54,8 @@ function walkRoutes(plan, cw) {
   for (const [ri, route] of (plan.walks || []).entries()) {
     const W = route.map(([x, z]) => toWorld(plan, x, z));
     const P = { x: W[0][0], y: 0, z: W[0][2], vy: 0 };
-    // start on the floor at the first waypoint: the highest walkable surface below head height
-    P.y = cw.groundAt(P.x, P.z, (plan.base || 0) + (route.y0 ?? 0) + 0.5);
+    // start on the floor at the first waypoint: where the walker's feet come to rest (src/core/walk.js, footing)
+    P.y = footing(cw, P.x, P.z, (plan.base || 0) + (route.y0 ?? 0) + 0.5);
     for (let k = 1; k < W.length; k++) {
       const [tx, , tz] = W[k];
       const dist = Math.hypot(tx - P.x, tz - P.z);
