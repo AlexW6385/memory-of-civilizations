@@ -20,7 +20,9 @@ function streets() {
   for (const r of [[a0, b0, a1, d0], [a0, d1, a1, b1], [a0, d0, c0, d1], [c1, d0, a1, d1]]) E.push({ t: 'water_rect', rect: r, y: LEVEL.moat });
   for (const [p, q] of [[[a0, b0], [a1, b0]], [[a0, b1], [a1, b1]], [[a0, b0], [a0, b1]], [[a1, b0], [a1, b1]], [[c0, d0], [c1, d0]], [[c0, d1], [c1, d1]], [[c0, d0], [c0, d1]], [[c1, d0], [c1, d1]]]) {
     E.push({ t: 'canal_wall', a: p, b: q, y: 0.05, bed: LEVEL.moatBed, th: 0.8 });
-    E.push({ t: 'rail', a: p, b: q, y: 0.05, open: [] });
+    // a low wall of grey brick under a stone coping along each bank, open at the bridges' landings
+    const open = p[1] === q[1] ? (p[1] > 0 ? [[-6 - p[0], 6 - p[0]]] : []) : [[65 - 4.6 - p[1], 65 + 4.6 - p[1]]];
+    E.push({ t: 'low_wall', a: p, b: q, y: 0.05, h: 1.05, th: 0.5, open });
   }
   // the bridge over the moat on the axis, before the Meridian Gate, and at the side gates
   E.push({ t: 'ming_arch_bridge', at: [0, (b1 + d1) / 2], across: 'z', span: b1 - d1 + 0.6, width: 10, rise: 1.4, landing: 4, y: 0.04, water: LEVEL.moat, bed: LEVEL.moatBed, pal: { base: 'marble' } });

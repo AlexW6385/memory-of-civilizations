@@ -12,6 +12,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import '../ming/index.js';
 import { rectRoof, pyramidRoof, column, beamTris, flipTris, latticeBay, mingHall, mingPavilion, mingWall, withPal } from '../ming/index.js';
+import { dapo, dapoHeight, meoricho, postLines } from '../joseon/dancheong.js';
 import { Parts, sumeru, post, limb as limbG, seated, crouching, vat, tripod, tortoise, crane, sundial, jialiang, balustradeCarved, spout, roofOrnaments, gateDoors } from './carving.js';
 
 export const IMPERIAL = { wood: 'paint_caihua', column: 'lacquer_red', soffit: 'paint_caihua', base: 'marble', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'palace_wall', plinth: 'marble', roof: 'tile_yellow' };
@@ -133,11 +134,17 @@ function qingHall(el, ctx) {
   const ornament = (r, figures, ends) => roofOrnaments(bag, r, { mat: omat, joseon: !!orn.joseon, white: !!orn.joseon && ends, figures, ends, lead: orn.lead });
   const lower = { ...el, t: 'ming_hall', roof: el.double || orn ? 'none' : (el.roof || 'xieshan'), front: el.front || 's' };
   mingHall(lower, ctx);
+  // Joseon: moru dancheong at the beams' ends, dapo bracket sets under the eaves (raising them by bk)
+  const jo = !!orn?.joseon, bk = el.dapo ? dapoHeight(el.dapo) : 0, fy = el.y + (el.H ?? 4.2);
+  if (jo) meoricho(bag, el.rect, postLines(el), fy - 0.55, fy - 0.17, 0.14);
+  /** The underside of roof r at d metres out from a wall line set back by `set` from its eave. */
+  const under = (r, set) => (d) => r.y + r.rise * Math.pow(Math.max(0, (set - d) / r.B), r.p ?? 1.7) - 0.14;
   if (!el.double) {
     if (!orn) return;
     // the roof drawn here (as ming_hall draws it, its ridge without curled ends) to carry its ornaments
     const o1 = el.eave ?? 1.25, L1 = along ? x1 - x0 : z1 - z0, D1 = along ? z1 - z0 : x1 - x0;
-    const r = { c: [(x0 + x1) / 2, (z0 + z1) / 2], A: L1 / 2 + o1, B: D1 / 2 + o1, y: el.y + (el.H ?? 4.2) - 0.25, rise: el.rise ?? (D1 / 2 + o1) * 0.62, kind: el.roof || 'xieshan', sweep: el.sweep ?? 1.0, alongZ: !along, mat: omat, soffit: osoff, curl: false };
+    const r = { c: [(x0 + x1) / 2, (z0 + z1) / 2], A: L1 / 2 + o1, B: D1 / 2 + o1, y: fy - 0.25 + bk, rise: el.rise ?? (D1 / 2 + o1) * 0.62, kind: el.roof || 'xieshan', sweep: el.sweep ?? 1.0, alongZ: !along, mat: omat, soffit: osoff, curl: false };
+    if (bk) dapo(bag, el.rect, postLines(el), fy - 0.17, el.dapo, under(r, o1));
     rectRoof(r, bag);
     ornament(r, orn.figures ?? 0, true);
     return;
@@ -145,21 +152,27 @@ function qingHall(el, ctx) {
   const H = el.H, y = el.y, inset = el.inset ?? Math.min((x1 - x0), (z1 - z0)) / ((el.bays?.[1] ?? 4) + 0.5);
   // the lower roof: a skirt of tiles from the eaves up to the upper body's wall
   const o = el.eave ?? 1.6, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, A = (along ? x1 - x0 : z1 - z0) / 2 + o, B = (along ? z1 - z0 : x1 - x0) / 2 + o;
-  const skirt = { c: [cx, cz], A, B, y: y + H - 0.25, rise: (inset + o) * 0.55, p: 1.25, kind: 'hip', sweep: el.sweep ?? 0.5, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua' };
+  const skirt = { c: [cx, cz], A, B, y: y + H - 0.25 + bk, rise: (inset + o) * 0.55, p: 1.25, kind: 'hip', sweep: el.sweep ?? 0.5, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua' };
+  if (bk) dapo(bag, el.rect, postLines(el), y + H - 0.17, el.dapo, under(skirt, o));
   rectRoof(skirt, bag);
   if (orn) roofOrnaments(bag, skirt, { mat: omat, joseon: !!orn.joseon, ends: false, figures: orn.lower ?? orn.figures ?? 0, lead: orn.lead, tLimit: (inset + o) / B, reach: 0.75 });
-  // the upper body: red walls with a band of lattice windows, the painted frieze, the upper eaves
-  const u = [x0 + inset, z0 + inset, x1 - inset, z1 - inset], yb = y + H, D = el.double;
-  bag.add('palace_wall', box(u[0], yb - 0.2, u[1], u[2], yb + D - 1.2, u[3]));
+  // the upper body: red walls with a band of lattice windows, the painted frieze, the upper eaves;
+  // a Joseon hall's white plaster between dancheong rails (sill, the rails round the window band)
+  const u = [x0 + inset, z0 + inset, x1 - inset, z1 - inset], yb = y + H + bk, D = el.double;
+  bag.add(jo ? (el.pal?.plaster || 'plaster_white') : 'palace_wall', box(u[0], yb - 0.2, u[1], u[2], yb + D - 1.2, u[3]));
   for (const [a, b] of [[[u[0], u[3] + 0.02], [u[2], u[3] + 0.02]], [[u[2], u[1] - 0.02], [u[0], u[1] - 0.02]]]) latticeBay(bag, null, a, b, yb + D * 0.35, D * 0.4, 'window', 0.03);
-  bag.add('paint_caihua', box(u[0] - 0.05, yb + D - 1.2, u[1] - 0.05, u[2] + 0.05, yb + D - 0.2, u[3] + 0.05));
+  const wood = jo ? (el.pal?.wood || 'paint_dancheong') : 'paint_caihua';
+  bag.add(wood, box(u[0] - 0.05, yb + D - 1.2, u[1] - 0.05, u[2] + 0.05, yb + D - 0.2, u[3] + 0.05));
+  if (jo) for (const [ya, yc] of [[yb - 0.15, yb + 0.28], [yb + D * 0.35 - 0.16, yb + D * 0.35], [yb + D * 0.75, yb + D * 0.75 + 0.14]]) bag.add(wood, box(u[0] - 0.07, ya, u[1] - 0.07, u[2] + 0.07, yc, u[3] + 0.07));
   const xs = [], zs = [], nb = el.bays?.[0] ?? 7, nd = el.bays?.[1] ?? 4;
   for (let i = 0; i <= nb - 2; i++) xs.push(u[0] + (u[2] - u[0]) * i / Math.max(1, nb - 2));
   for (let j = 0; j <= nd - 2; j++) zs.push(u[1] + (u[3] - u[1]) * j / Math.max(1, nd - 2));
   const cols = along ? [xs, zs] : [zs, xs];
   for (const x of (along ? cols[0] : cols[1])) for (const z of [u[1], u[3]]) column(bag, null, x, z, yb - 0.2, D - 0.2, 0.42, 'lacquer_red');
+  if (jo) meoricho(bag, u, [xs, zs], yb + D - 1.2, yb + D - 0.2, 0.05);
   const A2 = (along ? u[2] - u[0] : u[3] - u[1]) / 2 + o * 1.1, B2 = (along ? u[3] - u[1] : u[2] - u[0]) / 2 + o * 1.1;
-  const upper = { c: [cx, cz], A: A2, B: B2, y: yb + D - 0.25, rise: el.rise ?? B2 * 0.78, kind: el.roof || 'hip', sweep: el.sweep ?? 0.6, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua', gableAt: 0.45, curl: orn ? false : undefined };
+  const upper = { c: [cx, cz], A: A2, B: B2, y: yb + D - 0.25 + bk, rise: el.rise ?? B2 * 0.78, kind: el.roof || 'hip', sweep: el.sweep ?? 0.6, alongZ: !along, mat: el.pal?.roof || 'tile_yellow', soffit: el.pal?.soffit || 'paint_caihua', gableAt: 0.45, curl: orn ? false : undefined };
+  if (bk) dapo(bag, u, [xs, zs], yb + D - 0.2, el.dapo, under(upper, o * 1.1));
   rectRoof(upper, bag);
   if (orn) { ornament(upper, orn.figures ?? 0, true); return; }
   // the guardian beasts on the hips (a row of little figures; here a row of knobs) and the ridge's dragon ends
@@ -202,21 +215,90 @@ function bronze(el, { bag, col }) {
   P.emit(bag, x, y, z, yaw, s);
 }
 /**
- * corner_tower: the tower over a corner of the palace wall { c, y, s } — a square pavilion with a
- * wing to each side, each wing with its own gabled roof, eaves over eaves (here three tiers).
+ * corner_tower: the tower over a corner of the palace wall { c, y, s, out: [sx, sz] (the corner's
+ * outward signs) } — on its platform with a marble balustrade, a cross-shaped plan: a square core of
+ * three bays with a wing (baosha) on each side; three tiers of roofs: the lowest a skirt of eaves
+ * round the ground storey of the whole cross (the "half-slope" eave), the middle four hip-and-gable
+ * roofs over the wings' upper storey, their gables turned outward, the top the core's cross-ridged
+ * roof (two gabled roofs crossing) with the gilt finial at the crossing (Travel China Guide: the
+ * upper tier a cross-shaped ridge with a gilded copper finial, the middle four hip-and-gable roofs,
+ * the lowest a half-sloped eave; 28 eave corners, "nine beams, eighteen columns, seventy-two ridges").
  */
 function cornerTower(el, ctx) {
-  const [cx, cz] = el.c, y = el.y, s = el.s ?? 1, pal = IMPERIAL;
-  const w = 7 * s, d = 4.5 * s, H = 4.2 * s;
-  // the core and its four wings (lower), then the upper square roof
-  Hall({ rect: [cx - w / 2, cz - w / 2, cx + w / 2, cz + w / 2], y, H: H + 3 * s, front: 's', four: true, roof: 'none', plat: 0.2, bays: [3, 3], pal }, ctx);
-  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-    const r = dx ? [cx + (dx > 0 ? w / 2 : -w / 2 - d), cz - w / 2 + 1, cx + (dx > 0 ? w / 2 + d : -w / 2), cz + w / 2 - 1] : [cx - w / 2 + 1, cz + (dz > 0 ? w / 2 : -w / 2 - d), cx + w / 2 - 1, cz + (dz > 0 ? w / 2 + d : -w / 2)];
-    Hall({ rect: r, y, H, front: dx > 0 ? 'e' : dx < 0 ? 'w' : dz > 0 ? 's' : 'n', four: true, roof: 'none', plat: 0.2, bays: [2, 1], pal }, ctx);
-    const along = dx !== 0;
-    rectRoof({ c: [(r[0] + r[2]) / 2 + dx * 0.6, (r[1] + r[3]) / 2 + dz * 0.6], A: (along ? r[2] - r[0] : r[3] - r[1]) / 2 + 1.2, B: (along ? r[3] - r[1] : r[2] - r[0]) / 2 + 1.0, y: y + H - 0.2, rise: 2.4 * s, kind: 'xieshan', sweep: 0.6, alongZ: !along, mat: 'tile_yellow', soffit: 'paint_caihua' }, ctx.bag);
+  const { bag, col } = ctx, [cx, cz] = el.c, y = el.y, s = el.s ?? 1, pal = IMPERIAL;
+  const w = 8 * s, aw = 6 * s, d = 3.2 * s, H1 = 4.6 * s, H2a = 3.6 * s, H2c = 7.2 * s, o1 = 1.5 * s;
+  const hw = w / 2, ha = aw / 2, ext = hw + d;
+  const ARMS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  /** The rect of an arm from the core's centre out to `out`, half-width h. */
+  const arm = ([dx, dz], out, h) => (dx ? [cx + Math.min(0, dx * out), cz - h, cx + Math.max(0, dx * out), cz + h] : [cx - h, cz + Math.min(0, dz * out), cx + h, cz + Math.max(0, dz * out)]);
+  // the ground storey: the core and its four wings, lattice all round, no roofs of their own
+  Hall({ rect: [cx - hw, cz - hw, cx + hw, cz + hw], y, H: H1, front: 's', four: true, roof: 'none', plat: 0.25, bays: [3, 3], pal }, ctx);
+  for (const a of ARMS) {
+    const r = a[0] ? (a[0] > 0 ? [cx + hw, cz - ha, cx + ext, cz + ha] : [cx - ext, cz - ha, cx - hw, cz + ha]) : (a[1] > 0 ? [cx - ha, cz + hw, cx + ha, cz + ext] : [cx - ha, cz - ext, cx + ha, cz - hw]);
+    Hall({ rect: r, y, H: H1, front: a[0] > 0 ? 'e' : a[0] < 0 ? 'w' : a[1] > 0 ? 's' : 'n', four: true, roof: 'none', plat: 0.25, bays: [2, 1], pal }, ctx);
   }
-  pyramidRoof([[cx - w / 2 - 1.4, cz - w / 2 - 1.4], [cx + w / 2 + 1.4, cz - w / 2 - 1.4], [cx + w / 2 + 1.4, cz + w / 2 + 1.4], [cx - w / 2 - 1.4, cz + w / 2 + 1.4]], y + H + 3 * s - 0.2, w * 0.62, 0.6, ctx.bag, 'tile_yellow', 'paint_caihua');
+  // the lowest tier: a skirt of eaves round each wing and the core's corners between them; each
+  // skirt's inner end runs into the core (hidden by its upper storey), a hole left for the upper body
+  const ins = 0.9 * s, yk = y + H1 - 0.25;
+  for (const a of ARMS) {
+    const along = a[0] !== 0, r = arm(a, ext, ha), A = (along ? r[2] - r[0] : r[3] - r[1]) / 2 + o1, B = ha + o1;
+    const c = [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], hole = arm(a, ext - ins, ha - ins * 0.6);
+    rectRoof({ c, A, B, y: yk, rise: (ins + o1) * 0.5, p: 1.2, kind: 'hip', sweep: 0.55 * s, alongZ: !along, mat: 'tile_yellow', soffit: 'paint_caihua', hole }, bag);
+  }
+  // the upper storey: the core rises higher than the wings; red walls, a band of lattice windows, the painted frieze
+  const body = (r, h, faces) => {
+    const yb = y + H1 + 0.05;
+    bag.add('palace_wall', box(r[0], yb - 0.4, r[1], r[2], yb + h - 1.0, r[3]));
+    bag.add('paint_caihua', box(r[0] - 0.06, yb + h - 1.0, r[1] - 0.06, r[2] + 0.06, yb + h - 0.2, r[3] + 0.06));
+    for (const [a, b] of faces) latticeBay(bag, null, a, b, yb + h * 0.3, Math.min(1.8, h * 0.4), 'window', 0.03);
+    for (const [x, z] of [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]]) column(bag, null, x, z, yb - 0.4, h - 0.6, 0.36 * s, 'lacquer_red');
+    col.rect(r, yb - 0.4, yb + h);
+  };
+  const cu = [cx - hw + ins * 0.5, cz - hw + ins * 0.5, cx + hw - ins * 0.5, cz + hw - ins * 0.5];
+  body(cu, H2c, [[[cu[0], cu[3] + 0.02], [cu[2], cu[3] + 0.02]], [[cu[2], cu[1] - 0.02], [cu[0], cu[1] - 0.02]], [[cu[0] - 0.02, cu[1]], [cu[0] - 0.02, cu[3]]], [[cu[2] + 0.02, cu[3]], [cu[2] + 0.02, cu[1]]]]);
+  for (const a of ARMS) {
+    const r = arm(a, ext - ins, ha - ins * 0.6), [x0, z0, x1, z1] = r;
+    const outer = a[0] > 0 ? [[x1 + 0.02, z1], [x1 + 0.02, z0]] : a[0] < 0 ? [[x0 - 0.02, z0], [x0 - 0.02, z1]] : a[1] > 0 ? [[x0, z1 + 0.02], [x1, z1 + 0.02]] : [[x1, z0 - 0.02], [x0, z0 - 0.02]];
+    const rr = a[0] ? (a[0] > 0 ? [cu[2], z0, x1, z1] : [x0, z0, cu[0], z1]) : (a[1] > 0 ? [x0, cu[3], x1, z1] : [x0, z0, x1, cu[1]]);
+    body(rr, H2a, [outer]);
+    // the middle tier: a hip-and-gable roof over the wing, its ridge running out, its gable facing out
+    const along = a[0] !== 0, o2 = 1.2 * s, A = (along ? r[2] - r[0] : r[3] - r[1]) / 2 + o2, B = (ha - ins * 0.6) + o2;
+    rectRoof({ c: [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], A, B, y: y + H1 + H2a - 0.2, rise: B * 0.72, kind: 'xieshan', gableAt: 0.5, sweep: 0.7 * s, alongZ: !along, mat: 'tile_yellow', soffit: 'paint_caihua', curl: false }, bag);
+  }
+  // the top tier: two gabled roofs crossing over the core (the cross-shaped ridge), their four gables
+  // closed by boards; the gilt finial at the crossing
+  const o3 = 1.3 * s, B3 = (cu[2] - cu[0]) / 2 + o3, R3 = B3 * 0.78, y3 = y + H1 + H2c - 0.2, p3 = 1.7;
+  for (const az of [false, true]) rectRoof({ c: [cx, cz], A: B3 + 0.4 * s, B: B3, y: y3, rise: R3, kind: 'gable', sweep: 0, alongZ: az, mat: 'tile_yellow', soffit: 'paint_caihua', curl: false }, bag);
+  const gb = [], N = 10;
+  for (const [ux, uz] of ARMS) {
+    const g = B3 + 0.25 * s;                       // the board stands just inside the gable's edge
+    for (let k = 0; k < N; k++) {
+      const t0 = -1 + 2 * k / N, t1 = -1 + 2 * (k + 1) / N, h = (t) => y3 + R3 * Math.pow(1 - Math.abs(t), p3) - 0.16;
+      const P = (t, yy) => (ux ? [cx + ux * g, yy, cz + t * (B3 - 0.2)] : [cx + t * (B3 - 0.2), yy, cz + uz * g]);
+      const a0 = P(t0, y3 - 0.1), a1 = P(t1, y3 - 0.1), b1 = P(t1, h(t1 * (B3 - 0.2) / B3)), b0 = P(t0, h(t0 * (B3 - 0.2) / B3));
+      gb.push(...a0, ...a1, ...b1, ...a0, ...b1, ...b0);
+    }
+  }
+  bag.add('palace_wall', fromTriangles(gb.concat(flipTris(gb))));
+  bag.add('gilt_bronze', lathe([[0.42, 0], [0.5, 0.18], [0.3, 0.4], [0.42, 0.75], [0.2, 1.1], [0.26, 1.3], [0.08, 1.7], [0.001, 2.0]].map(([r, h]) => [r * s, h * s]), 12, null, cx, y3 + R3 - 0.15, cz));
+}
+
+/** low_wall: a low parapet { a, b, y, h, th, open: [[from, to], …] } of grey brick under a stone coping. */
+function lowWall(el, { bag, col }) {
+  const L = Math.hypot(el.b[0] - el.a[0], el.b[1] - el.a[1]), ux = (el.b[0] - el.a[0]) / L, uz = (el.b[1] - el.a[1]) / L;
+  const y = el.y ?? 0.05, h = el.h ?? 1.0, th = el.th ?? 0.5, P = (s) => [el.a[0] + ux * s, el.a[1] + uz * s];
+  let runs = [[0, L]];
+  for (const [f, t] of el.open || []) runs = runs.flatMap(([p, q]) => (t <= p || f >= q ? [[p, q]] : [[p, f], [t, q]].filter(([u, v]) => v - u > 0.3)));
+  const body = [], cap = [];
+  for (const [p, q] of runs) {
+    const a = P(p), b = P(q);
+    beamTris(body, [a[0], y, a[1]], [b[0], y, b[1]], th / 2, h - 0.12);
+    beamTris(body, [a[0] - ux * 0.04, y, a[1] - uz * 0.04], [b[0] + ux * 0.04, y, b[1] + uz * 0.04], th / 2 + 0.05, 0.25);       // the plinth course
+    beamTris(cap, [a[0] - ux * 0.06, y + h - 0.12, a[1] - uz * 0.06], [b[0] + ux * 0.06, y + h - 0.12, b[1] + uz * 0.06], th / 2 + 0.07, 0.12);
+    col.segment(a, b, th, y, y + h);
+  }
+  bag.add(el.mat ?? 'brick_grey', fromTriangles(body));
+  bag.add(el.cap ?? 'granite_grey', fromTriangles(cap));
 }
 
 /**
@@ -408,7 +490,7 @@ registerStyle('qing', {
     qing_hall: (el, ctx) => withPal(qingHall)({ ...el, pal: el.pal || IMPERIAL }, ctx),
     palace_wall: (el, ctx) => withPal(palaceWall)({ ...el, pal: { plaster: 'palace_wall', roof: 'tile_yellow', plinth: 'marble' } }, ctx),
     ming_arch_bridge: archBridgeRailed, gate_doors: gateDoors,
-    corner_tower: withPal(cornerTower), throne_hall: (el, ctx) => withPal(throneHall)({ ...el, pal: el.pal || IMPERIAL }, ctx), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail),
+    corner_tower: withPal(cornerTower), low_wall: withPal(lowWall), throne_hall: (el, ctx) => withPal(throneHall)({ ...el, pal: el.pal || IMPERIAL }, ctx), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail),
   },
   objects: {},
 });

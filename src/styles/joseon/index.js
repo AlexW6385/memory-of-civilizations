@@ -8,6 +8,7 @@ import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, beamTris, withPal } from '../ming/index.js';
 import '../qing/index.js';
 import { roofOrnaments } from '../qing/carving.js';
+import { dapo, dapoHeight, meoricho, muryangRoof, postLines } from './dancheong.js';
 
 export const JPAL = { wood: 'paint_dancheong', column: 'lacquer_red', soffit: 'paint_dancheong', base: 'granite_korea', floor: 'granite_korea', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_korea', roof: 'tile_grey' };
 const withJ = (fn) => (el, ctx) => fn({ ...el, pal: { ...JPAL, ...(el.pal || {}) } }, ctx);
@@ -42,12 +43,17 @@ function nu(el, { bag, col }) {
 /** ming_hall with el.orn (Joseon): the roof drawn here without curled ridge ends, to carry its white ridges, chwidu and japsang. */
 function hallOrn(el, ctx) {
   const base = STYLES.qing.elements.ming_hall;
-  if (!el.orn) return base(el, ctx);
+  if (!el.orn && !el.muryang && !el.dapo) return base(el, ctx);
   base({ ...el, roof: 'none' }, ctx);
   const [x0, z0, x1, z1] = el.rect, along = x1 - x0 >= z1 - z0, o = el.eave ?? 1.25, L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
-  const r = { c: [(x0 + x1) / 2, (z0 + z1) / 2], A: L / 2 + o, B: D / 2 + o, y: el.y + (el.H ?? 4.2) - 0.25, rise: el.rise ?? (D / 2 + o) * 0.62, kind: el.roof || 'xieshan', sweep: el.sweep ?? 1.0, alongZ: !along, mat: el.pal.roof, soffit: el.pal.soffit, curl: false };
-  rectRoof(r, ctx.bag);
-  roofOrnaments(ctx.bag, r, { mat: el.pal.roof, joseon: true, white: true, figures: el.orn.figures ?? 5 });
+  const fy = el.y + (el.H ?? 4.2), bk = el.dapo ? dapoHeight(el.dapo) : 0, posts = postLines(el);
+  const r = { c: [(x0 + x1) / 2, (z0 + z1) / 2], A: L / 2 + o, B: D / 2 + o, y: fy - 0.25 + bk, rise: el.rise ?? (D / 2 + o) * 0.62, kind: el.muryang ? 'xieshan' : (el.roof || 'xieshan'), sweep: el.sweep ?? 1.0, alongZ: !along, mat: el.pal.roof, soffit: el.pal.soffit, curl: false };
+  // moru dancheong on the beam under the eaves; the dapo bracket sets over it
+  if (!el.simple) meoricho(ctx.bag, el.rect, posts, fy - 0.55, fy - 0.17, 0.14);
+  if (bk) dapo(ctx.bag, el.rect, posts, fy - 0.17, el.dapo, (d) => r.y + r.rise * Math.pow(Math.max(0, (o - d) / r.B), 1.7) - 0.14);
+  // the king's and queen's halls have no main ridge (the king being the dragon himself)
+  if (el.muryang) muryangRoof({ ...r, plaster: el.pal.plaster }, ctx.bag); else rectRoof(r, ctx.bag);
+  roofOrnaments(ctx.bag, r, { mat: el.pal.roof, joseon: true, white: !el.muryang, ends: !el.muryang, figures: el.orn?.figures ?? 5 });
 }
 
 /** hanok: a house in its walled lot { rect, seed, thatch }: an L- or U-shaped range of rooms on a stone base, white walls between timber posts, tiled (or thatched) roofs, the lot's wall with a gate. */

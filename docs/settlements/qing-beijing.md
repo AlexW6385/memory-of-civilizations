@@ -1,7 +1,7 @@
 # Ming–Qing Beijing — dossier
 
 Settlement id: `qing-beijing` · Style: `qing` · Region: China (North China plain) · Code: `src/settlements/qing-beijing/`
-Status of this dossier: L1–L2 (the Outer Court's plan, gates, terrace and halls at their true size; the wall, moat and corner towers; bronzes; the hutong quarter of courtyard houses; ground, planting, weather, music). L2–L3 detail in §10 (carved balustrades and spouts, lions, terrace bronzes, roof figures and ridge ornaments, gate leaves with nails, siheyuan gates). L3 recorded for later: the Inner Court, the painted beams (hexi caihua) in their patterns, the corner towers' full roofs, the U-shaped Meridian Gate with its towers, processions.
+Status of this dossier: L1–L2 (the Outer Court's plan, gates, terrace and halls at their true size; the wall, moat and corner towers; bronzes; the hutong quarter of courtyard houses; ground, planting, weather, music). L2–L3 detail in §10 (carved balustrades and spouts, lions, terrace bronzes, roof figures and ridge ornaments, gate leaves with nails, siheyuan gates). L3 recorded for later: the Inner Court, the painted beams (hexi caihua) in their patterns, the U-shaped Meridian Gate with its towers, processions.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -74,7 +74,8 @@ The court's ceremonial music (bell and stone chimes, slow, on the gong mode) in 
 - **Roof ornaments:** "ten figurines sit at each roof corner" of the Hall of Supreme Harmony, unique among ancient buildings; the ridge-end ornament (dawen) "stands 3.4 meters tall, weighs 4.3 metric tons" [stated: Google Arts & Culture; Travel China Guide; Sohu]. Ours: the immortal riding a bird leading, ten beasts, the hip beast behind, on every hip of both eaves; the dawen at 3.4 m with its sword hilt, curled tail and the small beast on its back. Other halls carry fewer, in odd numbers (9 on the Meridian Gate, the Gate of Supreme Harmony and the Hall of Preserving Harmony, 7 on the pavilions and the Gate of Heavenly Purity) [inferred: the rank of the buildings]. The Meridian Gate's hall now has a double-eaved hip roof, the highest rank, as in photographs [inferred; the plan had hip-and-gable].
 - **Gate leaves:** the major gates are "adorned with 81 gilded door nails", "arranged in a strict nine-by-nine grid" [stated: Young Post]. The leaves of the Meridian Gate's three passages, the West and East Flowery Gates and the side gates of the courts stand open, red, with nine by nine gilt nails and a gilt mask with its ring [inferred: masks from photographs].
 - **Courtyard houses:** at each gate the two leaves stand open, a pair of drum stones (men dun) flanks the threshold, two round door pins (men zan) hold the lintel [inferred: photographs of Beijing siheyuan gates].
-- **Corner towers:** "nine beams, eighteen columns and seventy-two ridges" [stated: Sohu]; not rebuilt in this pass (recorded for later).
+- **Corner towers:** "nine beams, eighteen columns and seventy-two ridges" [stated: Sohu] (a saying; Travel China Guide counts 28 eave corners and 76 ridges). On the platform at the corner of the wall, ringed by white marble balustrades; a main pavilion in the middle with rooms reaching out toward each side; three tiers of yellow-tiled roofs: the upper "a four-angled pinnacle combined with a hip-and-gable roof, forming a cross-shaped ridge pattern, with a gilded copper finial at the center", the middle "four hip-and-gable roofs, one per side", the lowest "a half-sloped eave"; beams and brackets painted blue and green [stated: Travel China Guide]. Ours: a core of three bays (8 m) with a wing 6 m wide and 3.2 m deep on each side, lattice all round the ground storey; the lowest tier a skirt of eaves round each wing, meeting at the re-entrant corners; an upper storey of red walls with lattice bands, the wings' upper storeys under four hip-and-gable roofs with their gables turned out, the core rising higher under two gabled roofs crossing, their gables closed by boards, the gilt finial at the crossing, about 17 m over the platform; a marble balustrade on the platform's outer sides and on its inner sides either side of the walls [inferred: dimensions and the skirt's form].
+- **The moat's banks:** the moat is 52 m wide and 4.1 m deep, its bed paved with brick [stated: Travel China Guide]; ours carries along both banks, on the stone walls, a low parapet of grey brick (1.05 m) on a plinth course under a stone coping, open at the bridges' landings, in place of the marble balustrade it had before [inferred: the owner's survey note; the bank walls' form as seen in photographs of the moat].
 
 Sources for §10:
 - [Spot the Sacred Animals in the Imperial Palace — Google Arts & Culture](https://artsandculture.google.com/story/zwXBu2RtdGQKUA)
@@ -83,6 +84,9 @@ Sources for §10:
 - [The hidden symbolism of the Forbidden City's red doors — Young Post](https://www.youngpostclub.com/posties/kids/eye-news/article/3353998/discover-hidden-symbolism-forbidden-citys-iconic-red-doors)
 
 ## Sources
+
+- [Corner Towers of the Forbidden City — Travel China Guide](https://www.travelchinaguide.com/attraction/beijing/forbidden-city/corner-towers.htm)
+- [Moat of the Forbidden City (Tongzihe) — Travel China Guide](https://www.travelchinaguide.com/attraction/beijing/forbidden/stone_carve.htm)
 
 - [Hall of Supreme Harmony — Wikipedia](https://en.wikipedia.org/wiki/Hall_of_Supreme_Harmony)
 - [Hall of Supreme Harmony — Britannica](https://www.britannica.com/place/Hall-of-Supreme-Harmony)

@@ -16,11 +16,11 @@ E.push({ t: 'block', walk: true, rect: [8, pz1 - 8, 22, pz1 + 8], y0: 0, y1: 7, 
 E.push({ t: 'block', walk: true, rect: [-3.2, pz1 - 8, 3.2, pz1 + 8], y0: 0, y1: 7, mat: 'granite_korea' });
 E.push({ t: 'block', walk: true, rect: [-8, pz1 - 8, -3.2, pz1 + 8], y0: 4.8, y1: 7, mat: 'granite_korea' });
 E.push({ t: 'block', walk: true, rect: [3.2, pz1 - 8, 8, pz1 + 8], y0: 4.8, y1: 7, mat: 'granite_korea' });
-E.push({ t: 'qing_hall', rect: [-15, pz1 - 6, 15, pz1 + 6], y: 7, H: 5, double: 4.2, roof: 'xieshan', bays: [3, 2], front: 's', four: true, plat: 0.3, open: true, orn: { joseon: true, figures: 7 } });
+E.push({ t: 'qing_hall', rect: [-15, pz1 - 6, 15, pz1 + 6], y: 7, H: 5, double: 4.2, roof: 'xieshan', bays: [3, 2], front: 's', four: true, plat: 0.3, open: true, orn: { joseon: true, figures: 7 }, dapo: { tiers: 2, inter: 3 } });
 // the haetae (haechi) before the gate, the beasts that know right from wrong
 for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'haetae', at: [s * 13, pz1 + 16], y: 0.03, s: 0.85, face: [0, 1], stone: 'granite_korea', ped: 1.0 });
 // the courts' cross walls with their gate halls; the stream and its bridge
-const gateHall = (z, w = 16) => E.push({ t: 'ming_hall', rect: [-w / 2, z - 4.5, w / 2, z + 4.5], y: 0, H: 5.2, front: 's', roof: 'xieshan', plat: 0.8, eave: 1.6, sweep: 0.8, open: true, orn: { figures: 5 } });
+const gateHall = (z, w = 16) => E.push({ t: 'ming_hall', rect: [-w / 2, z - 4.5, w / 2, z + 4.5], y: 0, H: 5.2, front: 's', roof: 'xieshan', plat: 0.8, eave: 1.6, sweep: 0.8, open: true, orn: { figures: 5 }, dapo: { tiers: 2, inter: 2 } });
 for (const z of [160, 92]) { wall([px0, z], [-9, z], [], 4.6); wall([9, z], [px1, z], [], 4.6); gateHall(z); }
 E.push({ t: 'water_rect', rect: [-150, STREAM.z0, 150, STREAM.z1], y: -1.2 });
 E.push({ t: 'canal_wall', a: [-150, STREAM.z0], b: [150, STREAM.z0], y: 0.05, bed: -2.6, th: 0.6 });
@@ -56,11 +56,12 @@ for (const s of [-1, 1]) {
 E.push({ t: 'stairs', rect: [-4, 50, 4, 56], y0: 0, y1: 1.6, dir: 'n' });
 E.push({ t: 'stairs', rect: [-4, 42, 4, 50], y0: 1.6, y1: 3.2, dir: 'n' });
 E.push({ t: 'throne_hall', rect: [-15, 13, 15, 34], y: 3.2, H: 6.8, bays: [5, 5], gilt: false, d: 0.6, screen: 'irworo', elephants: false, daisW: 4.6, daisD: 2.8 });
-E.push({ t: 'qing_hall', rect: [-15, 13, 15, 34], y: 3.2, H: 6.8, double: 5.5, roof: 'xieshan', bays: [5, 5], front: 's', four: true, plat: 0.3, orn: { joseon: true, figures: 7 } });
+E.push({ t: 'qing_hall', rect: [-15, 13, 15, 34], y: 3.2, H: 6.8, double: 5.5, roof: 'xieshan', bays: [5, 5], front: 's', four: true, plat: 0.3, orn: { joseon: true, figures: 7 }, dapo: { tiers: 3, inter: 2 } });
 // the inner halls, with their own walled courts
-E.push({ t: 'ming_hall', rect: [-14, -52, 14, -38], y: 0, H: 5, front: 's', four: true, roof: 'xieshan', plat: 1, eave: 1.6, sweep: 0.8 });
+E.push({ t: 'ming_hall', rect: [-14, -52, 14, -38], y: 0, H: 5, front: 's', four: true, roof: 'xieshan', plat: 1, eave: 1.6, sweep: 0.8, orn: { figures: 5 }, dapo: { tiers: 3, inter: 2 } });
 for (const [z, w] of [[-108, 34], [-165, 32]]) {
-  E.push({ t: 'ming_hall', rect: [-w / 2, z - 7, w / 2, z + 7], y: 0, H: 4.6, front: 's', four: true, roof: 'hip', plat: 1, eave: 1.5, sweep: 0.8 });
+  // Gangnyeongjeon and Gyotaejeon: hip-and-gable roofs with no main ridge (muryang), brackets on the posts only
+  E.push({ t: 'ming_hall', rect: [-w / 2, z - 7, w / 2, z + 7], y: 0, H: 4.6, front: 's', four: true, roof: 'xieshan', muryang: true, plat: 1, eave: 1.5, sweep: 0.8, orn: { figures: 5 }, dapo: { tiers: 2, inter: 0 } });
   wall([-w / 2 - 14, z - 20], [w / 2 + 14, z - 20], [], 3.6); wall([-w / 2 - 14, z + 22], [-5, z + 22], [], 3.6); wall([5, z + 22], [w / 2 + 14, z + 22], [], 3.6);
   wall([-w / 2 - 14, z - 20], [-w / 2 - 14, z + 22], [], 3.6); wall([w / 2 + 14, z - 20], [w / 2 + 14, z + 22], [], 3.6);
 }

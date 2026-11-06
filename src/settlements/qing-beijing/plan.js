@@ -34,6 +34,12 @@ for (const [x, w, h] of [[-12, 5, 7.5], [0, 6, 8.5], [12, 5, 7.5]]) E.push({ t: 
 for (const [x, z] of [[wx0, wz0], [wx1, wz0], [wx0, wz1], [wx1, wz1]]) {
   E.push({ t: 'block', walk: true, rect: [x - 9, z - 9, x + 9, z + 9], y0: 0, y1: WH, mat: 'palace_wall', solid: true });
   E.push({ t: 'corner_tower', c: [x, z], y: WH, s: 1.0 });
+  // the platform's marble balustrade: whole on the two outer sides, open on the inner sides where the walls run in
+  const sx = Math.sign(x), sz = Math.sign(z), e = 8.75, gap = [[e - WT / 2 - 0.5, e + WT / 2 + 0.5]];
+  E.push({ t: 'rail', a: [x - e, z + sz * e], b: [x + e, z + sz * e], y: WH });
+  E.push({ t: 'rail', a: [x + sx * e, z - e], b: [x + sx * e, z + e], y: WH });
+  E.push({ t: 'rail', a: [x - e, z - sz * e], b: [x + e, z - sz * e], y: WH, open: gap });
+  E.push({ t: 'rail', a: [x - sx * e, z - e], b: [x - sx * e, z + e], y: WH, open: gap });
 }
 
 // ── the Meridian Gate's court: the Golden Water River and its bridges ──
