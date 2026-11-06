@@ -31,7 +31,7 @@ function market() {
     if (rand() < 0.15) continue;
     const x = 96 + c * 10 + (rand() - 0.5) * 2, z = 56 + r * 7 + (rand() - 0.5) * 1.2, woman = rand() < 0.55;
     M.push({ t: 'petate', at: [x, z + 0.4], y: Y, w: 1.8, d: 1.2, rot: (rand() - 0.5) * 0.2 });
-    L.push({ t: 'figure', at: [x, z - 0.55], y: Y, rot: Math.PI, h: woman ? 1.5 : 1.6, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'wrap', cloth: woman ? 'cloth_white' : pick(['cloth_white', 'cloth_ochre']), cloth2: pick(['cloth_red', 'cloth_white', 'cloth_ochre']), skin: skin(), hat: 'none', hair: woman ? pick(['long', 'bun']) : 'long', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: woman ? 'none' : 'cape', pose: rand() < 0.6 ? 'squat' : 'sit' });
+    L.push({ t: 'figure', at: [x, z - 0.55], y: Y, rot: Math.PI, h: woman ? 1.5 : 1.6, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'wrap', cloth: woman ? 'cloth_white' : pick(['cloth_white', 'cloth_ochre']), cloth2: pick(['cloth_red', 'cloth_white', 'cloth_ochre']), skin: skin(), hat: 'none', hair: woman ? pick(['long', 'bun']) : 'long', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: woman ? 'none' : 'cape', pose: rand() < 0.6 ? 'squat' : 'sit_ground' });
     for (let k = 0; k < 3; k++) {
       const at = [x - 0.55 + k * 0.55 + (rand() - 0.5) * 0.1, z + 0.45 + (rand() - 0.5) * 0.3];
       const g = rand();

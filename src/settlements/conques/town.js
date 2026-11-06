@@ -26,7 +26,7 @@ function people() {
     const p = [ABBEY.origin[0] - 7 - rand() * 6, (rand() - 0.5) * 9];
     pilgrim(p, face(p, portal) + (rand() - 0.5) * 0.4);
   }
-  for (const z of [-7.5, 6.8]) pilgrim([ABBEY.origin[0] - 12.5 + rand(), z], face([0, z], [0, 0]) + 0.6, 'sit');
+  for (const z of [-7.5, 6.8]) pilgrim([ABBEY.origin[0] - 12.5 + rand(), z], face([0, z], [0, 0]) + 0.6, 'sit_low');
   // coming down the lane north-west of the church onto the terrace
   for (let k = 0; k < 4; k++) { const p = [ABBEY.origin[0] - 22 + k * 1.6 + rand() * 0.6, -26 + k * 4.5]; pilgrim(p, face(p, [p[0] + 1.6, p[1] + 4.5])); }
   // monks at the cloister's west door and on the terrace south of the nave

@@ -44,7 +44,7 @@ function market() {
     if (inView(at[0], at[1], 2)) continue;
     const rot = face(at, [x - side, at[1]]), goods = pick(GOODS);
     E.push({ t: 'market_mat', at, rot, goods, seed: Math.floor(rand() * 1e6) });
-    (goods === 'meat' || goods === 'cloth' || goods === 'salt' ? man : woman)(at, rot, { pose: 'sit' });
+    (goods === 'meat' || goods === 'cloth' || goods === 'salt' ? man : woman)(at, rot, { pose: 'sit_ground' });
   }
   // the kola sellers in two lines facing each other at the north end of the market
   for (let k = 0; k < 9; k++) for (const [x, side] of [[44.5, 1], [48.5, -1]]) {
@@ -52,7 +52,7 @@ function market() {
     if (rand() < 0.2) continue;
     const rot = face(at, [x + side, at[1]]);
     E.push({ t: 'market_mat', at, rot, goods: 'kola', seed: Math.floor(rand() * 1e6) });
-    woman(at, rot, { pose: 'sit' });
+    woman(at, rot, { pose: 'sit_ground' });
   }
   // buyers in the aisles, in twos and threes; women with loads on the head
   for (let k = 0; k < 44; k++) {

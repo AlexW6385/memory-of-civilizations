@@ -58,7 +58,7 @@ function people() {
   const yf = 3.86;
   for (const [bx, bz] of BENCHES) for (const sg of [-1, 1]) {
     const p = [bx + sg * 0.92, bz];
-    L.push({ t: 'figure', at: p, y: yf, rot: face(p, [bx, bz]), h: 1.6 + rand() * 0.1, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.5 ? 'cloth_maroon' : pick(['cloth_brown', 'cloth_grey']), cloth2: 'cloth_maroon', over: 'sash', skin: 'skin_medium', hat: 'none', hair: rand() < 0.5 ? 'shaven' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'sit' });
+    L.push({ t: 'figure', at: p, y: yf, rot: face(p, [bx, bz]), h: 1.6 + rand() * 0.1, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.5 ? 'cloth_maroon' : pick(['cloth_brown', 'cloth_grey']), cloth2: 'cloth_maroon', over: 'sash', skin: 'skin_medium', hat: 'none', hair: rand() < 0.5 ? 'shaven' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'cross' });
   }
   monk([PRINTERY[0] + 22.5, PRINTERY[1] + 3.6], yf, face([0, 0], [1, 0]));
   return [base('lhasa-people', L, 'life'), base('lhasa-wheels', W)];

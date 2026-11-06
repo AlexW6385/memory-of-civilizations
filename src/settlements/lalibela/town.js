@@ -21,16 +21,16 @@ function people() {
   const G = PITS.giyorgis, gc = [(G.rect[0] + G.rect[2]) / 2, (G.rect[1] + G.rect[3]) / 2];
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const c = [gc[0] + sx * 9, gc[1] + sz * 9];
-    for (let k = 0; k < 3; k++) { const p = [c[0] + (rand() - 0.5) * 3, c[1] + (rand() - 0.5) * 3]; pilgrim(p, face(p, gc) + (rand() - 0.5) * 0.6, k === 2 ? 'sit' : 'stand'); }
+    for (let k = 0; k < 3; k++) { const p = [c[0] + (rand() - 0.5) * 3, c[1] + (rand() - 0.5) * 3]; pilgrim(p, face(p, gc) + (rand() - 0.5) * 0.6, k === 2 ? 'sit_ground' : 'stand'); }
   }
   priest([gc[0] - 9.2, gc[1] - 6.5], face([gc[0] - 9.2, gc[1] - 6.5], [gc[0] - 11, gc[1] + 2]));
   // on the rim to the north, pilgrims sitting and looking down into the pit
-  for (let k = 0; k < 6; k++) { const p = [G.rect[0] + 4 + k * 4.5 + rand(), G.rect[1] - 1.2]; pilgrim(p, face(p, [p[0], p[1] + 5]), rand() < 0.6 ? 'sit' : 'stand'); }
+  for (let k = 0; k < 6; k++) { const p = [G.rect[0] + 4 + k * 4.5 + rand(), G.rect[1] - 1.2]; pilgrim(p, face(p, [p[0], p[1] + 5]), rand() < 0.6 ? 'sit_ground' : 'stand'); }
   // in the trench leading down, a file of pilgrims going in
   for (let k = 0; k < 5; k++) { const p = [-255 + k * 7 + rand() * 2, 128 + (rand() - 0.5) * 1.5]; pilgrim(p, face(p, [p[0] + 5, p[1]])); }
   // Bete Medhane Alem: pilgrims in the court along its south side and at the trench from the north, two priests
   const M = PITS.medhane, mc = [(M.rect[0] + M.rect[2]) / 2, (M.rect[1] + M.rect[3]) / 2];
-  for (let k = 0; k < 9; k++) { const p = [M.rect[0] + 5 + k * 4.6 + rand(), M.rect[3] - 5.2 + rand() * 1.5]; pilgrim(p, face(p, mc) + (rand() - 0.5) * 0.5, k % 4 === 1 ? 'sit' : 'stand'); }
+  for (let k = 0; k < 9; k++) { const p = [M.rect[0] + 5 + k * 4.6 + rand(), M.rect[3] - 5.2 + rand() * 1.5]; pilgrim(p, face(p, mc) + (rand() - 0.5) * 0.5, k % 4 === 1 ? 'sit_ground' : 'stand'); }
   for (let k = 0; k < 4; k++) { const p = [8 + rand() * 4, -140 + k * 6]; pilgrim(p, face(p, [p[0], p[1] + 5])); }
   priest([mc[0] - 4, M.rect[3] - 6.2], face([mc[0] - 4, M.rect[3] - 6.2], [mc[0] - 4, M.rect[3] - 2]));
   priest([M.rect[0] + 4.2, mc[1] + 2], face([M.rect[0] + 4.2, mc[1] + 2], mc));
