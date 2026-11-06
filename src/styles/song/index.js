@@ -1,12 +1,14 @@
 // Southern Song architecture (12th–13th c.; docs/settlements/song-hangzhou.md §4): the Liuhe
 // Pagoda — an octagonal brick core plastered white, a timber gallery and eave at every storey, the
 // corners of the eaves turned up, an octagonal crowning roof and a gilt spire — with the halls,
-// houses, bridges, canals and boats of the ming style (the Jiangnan building tradition it grew from).
+// houses, bridges, canals and boats of the ming style (the Jiangnan building tradition it grew from);
+// Bianjing's bridge, boats, shops and gate (kaifeng.js).
 
 import { registerStyle, STYLES } from '../../core/build.js';
 import { lathe, box, fromTriangles, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import '../qing/index.js';
+import { KAIFENG_ELEMENTS } from './kaifeng.js';
 
 const ngon = (cx, cz, r, n = 8, rot = Math.PI / 8) => Array.from({ length: n }, (_, k) => [cx + Math.cos(rot + k / n * Math.PI * 2) * r, cz + Math.sin(rot + k / n * Math.PI * 2) * r]);
 /** A flat-faced frustum from the polygon `bot` at y0 to `top` at y1, capped. */
@@ -109,25 +111,8 @@ function pagodaOct(el, { bag, col }) {
   bag.add('gilt_bronze', lathe([[0.5, 0], [0.5, 0.6], [1.0, 0.8], [0.35, 1.2], [0.8, 1.6], [0.3, 2.0], [0.6, 2.4], [0.2, 2.8], [0.45, 3.1], [0.12, 3.6], [0.001, el.spire ?? 4.8]], 12, null, cx, y + 3.8, cz));
 }
 
-/** rainbow_bridge: the timber arch bridge of the Qingming scroll { at, across ('x'|'z': the direction it runs), span, width, rise }: arched ribs of logs, the deck on them following the arch, railings, abutments. */
-function rainbowBridge(el, { bag, col }) {
-  const [cx, cz] = el.at, S = el.span / 2, W = el.width / 2, R = el.rise, alongX = el.across === 'x', N = 14;
-  const P = (s, o, y) => (alongX ? [cx + s, y, cz + o] : [cx + o, y, cz + s]);
-  const yAt = (s) => R * (1 - (s / S) ** 2);
-  for (let k = 0; k < N; k++) {
-    const s0 = -S + 2 * S * k / N, s1 = -S + 2 * S * (k + 1) / N, t = [];
-    const a = P(s0, 0, yAt(s0)), b = P(s1, 0, yAt(s1));
-    beamTris(t, a, b, W, 0.35); bag.add('timber', fromTriangles(t));
-    for (const o of [-W + 0.2, W - 0.2]) { const r = [], q0 = P(s0, o, yAt(s0) + 0.35), q1 = P(s1, o, yAt(s1) + 0.35); beamTris(r, q0, q1, 0.06, 1.0); bag.add('timber_red', fromTriangles(r)); }
-    for (const o of [-W + 0.5, -W / 3, W / 3, W - 0.5]) { const r = [], q0 = P(s0, o, yAt(s0) - 0.7), q1 = P(s1, o, yAt(s1) - 0.7); beamTris(r, q0, q1, 0.18, 0.4); bag.add('timber', fromTriangles(r)); }
-  }
-  for (const s of [-1, 1]) { const q = P(s * (S + 2), 0, 0), r = alongX ? [q[0] - 2, q[2] - W - 0.5, q[0] + 2, q[2] + W + 0.5] : [q[0] - W - 0.5, q[2] - 2, q[0] + W + 0.5, q[2] + 2]; bag.add('granite_block', box(r[0], -3, r[1], r[2], 0.3, r[3])); }
-  const dr = alongX ? 'e' : 's';
-  void dr; void col;
-}
-
 registerStyle('song', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, rainbow_bridge: rainbowBridge },
+  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, ...KAIFENG_ELEMENTS },
   objects: {},
 });

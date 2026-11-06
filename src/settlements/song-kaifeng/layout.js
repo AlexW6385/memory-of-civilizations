@@ -5,7 +5,14 @@
 
 export const RADIUS = 400;
 export const RIVER = { z0: 60, z1: 92, bed: -4, water: -1.6 };
-export const BRIDGE = { at: [0, 76], span: 30, width: 9, rise: 5.2 };
+// the Rainbow Bridge: 20 m between its stone abutments, 8.6 m wide, the arch rising 4 m from springings 1 m above the water
+export const BRIDGE = { at: [0, 76], span: 20, width: 8.6, spring: -0.6, crown: 4.0, y0: 0.06 };
+/** The bridge deck's height at z (the line rainbow_bridge lays its planks on). */
+export function bridgeDeck(z) {
+  const S = BRIDGE.span / 2, E = S + 0.6, yc = BRIDGE.spring + BRIDGE.crown + 0.79;
+  return BRIDGE.y0 + 0.06 + (yc - BRIDGE.y0 - 0.06) * (1 - Math.min(1, Math.abs(z - BRIDGE.at[1]) / E) ** 1.3);
+}
+export const GATE = { z: -80, rect: [-309, -96, -291, -64] };   // the city gate's platform over the road
 export const MONASTERY = [80, -260, 240, -110];
 export const PAGODA = [160, -190];
 export const WALL_X = -300;

@@ -1,9 +1,9 @@
 // Bianjing about 1120 (docs/settlements/song-kaifeng.md §2–§4): the Iron Pagoda (13 storeys of brown
 // glazed brick, eaves at every storey, 56 m) in the Kaibao monastery with its halls; the Bian River
-// with its stone landings, the Rainbow Bridge and grain boats; the east wall, its water gate and its
-// gate tower; the streets' paving.
+// with its stone landings, the Rainbow Bridge and grain boats; the east wall, its water gate and the
+// city gate with its tower; the streets' paving.
 
-import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS } from './layout.js';
+import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE } from './layout.js';
 
 const E = [];
 const RW = RADIUS - 26, half = (z) => Math.sqrt(Math.max(0, RW * RW - z * z));
@@ -20,14 +20,16 @@ for (const x of [mx0 + 14, mx1 - 14]) E.push({ t: 'ming_hall', rect: [x - 6, -20
 // ---- the river: water, stone landings near the bridge, the Rainbow Bridge, boats
 E.push({ t: 'water_rect', rect: [WALL_X + 2, RIVER.z0, half(RIVER.z1) - 2, RIVER.z1], y: RIVER.water });
 for (const z of [RIVER.z0, RIVER.z1]) E.push({ t: 'canal_wall', a: [-90, z], b: [90, z], y: 0.05, bed: RIVER.bed, th: 0.8 });
-E.push({ t: 'rainbow_bridge', at: BRIDGE.at, across: 'z', span: BRIDGE.span, width: BRIDGE.width, rise: BRIDGE.rise });
-for (const [x, z, d, L] of [[-200, 70, 1, 18], [-120, 82, -1, 16], [-60, 68, 1, 20], [60, 80, -1, 18], [130, 70, 1, 14], [220, 84, -1, 18], [300, 72, 1, 12]]) E.push({ t: 'boat', at: [x, z], dir: [d, 0], len: L, y: RIVER.water });
-// ---- the east wall of the city with its water gate and the gate tower over the road
-const wz = (z0, z1) => E.push({ t: 'block', walk: true, rect: [WALL_X - 8, z0, WALL_X + 8, z1], y0: RIVER.bed, y1: 9, mat: 'brick_grey' });
-wz(-half(WALL_X) + 4, -110); wz(-94, RIVER.z0 - 2); wz(RIVER.z1 + 2, half(WALL_X) - 4);
+E.push({ t: 'rainbow_bridge', at: BRIDGE.at, across: 'z', span: BRIDGE.span, width: BRIDGE.width, spring: BRIDGE.spring, crown: BRIDGE.crown, y0: BRIDGE.y0, abut: (RIVER.z1 - RIVER.z0) / 2 - BRIDGE.span / 2 - 0.35, bed: RIVER.bed });
+// the grain boats: moored along the banks with their masts laid back on the crutch, two with masts up
+// downstream, and the one before the bridge, its crew lowering the mast as it comes up to it
+for (const [x, z, d, L, mast] of [[-200, 67.5, 1, 18, 90], [-120, 84.5, -1, 16, 90], [-17.5, 75, 1, 19, 42], [62, 84.5, -1, 18, 90], [130, 67.5, 1, 14, 0], [220, 84.5, -1, 20, 90], [300, 70, 1, 12, 0]]) E.push({ t: 'song_boat', at: [x, z], dir: [d, 0], len: L, beam: L * 0.25, mast, y: RIVER.water, seed: x + 1000 });
+// ---- the city wall east of the city (rammed earth, battered, no battlements) with its water gate and the gate over the road
+const wz = (z0, z1) => E.push({ t: 'block', walk: true, rect: [WALL_X - 8, z0, WALL_X + 8, z1], y0: RIVER.bed, y1: 9, mat: 'earth_wall', batter: [2.2, 2.2, 0, 0] });
+wz(-half(WALL_X) + 4, GATE.rect[1] + 0.5); wz(GATE.rect[3] - 0.5, RIVER.z0 - 1.5); wz(RIVER.z1 + 1.5, half(WALL_X) - 4);
 E.push({ t: 'block', walk: true, rect: [WALL_X - 8, RIVER.z0 - 2, WALL_X + 8, RIVER.z1 + 2], y0: 4.5, y1: 9, mat: 'brick_grey' });
-E.push({ t: 'block', walk: true, rect: [WALL_X - 8, -110, WALL_X + 8, -94], y0: 5, y1: 9, mat: 'brick_grey' });
-E.push({ t: 'qing_hall', rect: [WALL_X - 7, -116, WALL_X + 7, -88], y: 9, H: 5, double: 4, roof: 'xieshan', bays: [5, 3], front: 'e', four: true, plat: 0.3, pal: { roof: 'tile_dark', soffit: 'lacquer_red', wood: 'lacquer_red', column: 'lacquer_red', plaster: 'plaster_white', plinth: 'brick_grey', base: 'brick_grey' } });
+E.push({ t: 'song_gate', rect: GATE.rect, along: 'x', w: 5.2, h: 4.2, top: 5.8, tw: 3.2, H: 9.5, mat: 'brick_grey' });
+E.push({ t: 'qing_hall', rect: [WALL_X - 6.5, GATE.z - 13, WALL_X + 6.5, GATE.z + 13], y: 9.5, H: 5, roof: 'hip', bays: [5, 3], front: 'e', four: true, plat: 0.3, pal: { roof: 'tile_dark', soffit: 'lacquer_red', wood: 'lacquer_red', column: 'lacquer_red', plaster: 'plaster_white', plinth: 'brick_grey', base: 'brick_grey' } });
 // ---- the streets' paving
 for (const s of STREETS) { const c = [Math.max(s[0], WALL_X + 8), s[1], s[2], s[3]]; const horiz = c[2] - c[0] > c[3] - c[1]; const h = horiz ? half(Math.max(Math.abs(c[1]), Math.abs(c[3]))) : half(Math.max(Math.abs(c[0]), Math.abs(c[2]))); const r = horiz ? [Math.max(c[0], -h), c[1], Math.min(c[2], h), c[3]] : [c[0], Math.max(c[1], -h), c[2], Math.min(c[3], h)]; if (r[2] > r[0] && r[3] > r[1]) E.push({ t: 'paving', rect: r, y: 0.04, th: 0.3 }); }
 
