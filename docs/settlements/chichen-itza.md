@@ -1,7 +1,7 @@
 # Chichén Itzá, c. 1000 — dossier
 
 Settlement id: `chichen-itza` · Style: `maya` · Region: Yucatán · Code: `src/settlements/chichen-itza/`
-Status of this dossier: L1–L2 (the Great Plaza's buildings at true size, the sacbe and the Sacred Cenote, the town of house lots; ground, planting, weather, music). L2 detail added: the sculpted feathered-serpent heads, the serpent columns, the Temple of the Warriors' masks and chacmool (§10). L3 recorded for later: El Caracol and the southern Old Chichén, the carved panels (the ball players, the skulls, eagles and jaguars), the warrior pillars' reliefs, the Atlantean altar, the painted colour of the temples in full, the market in the colonnades, people.
+Status of this dossier: L1–L2 (the Great Plaza's buildings at true size, the sacbe and the Sacred Cenote, the town of house lots; ground, planting, weather, music). L2 detail added: the sculpted feathered-serpent heads, the serpent columns, the Temple of the Warriors' masks and chacmool, the warrior pillars (§10). L3 recorded for later: El Caracol and the southern Old Chichén, the carved panels (the ball players, the skulls, eagles and jaguars), the Atlantean altar, the vision serpents of the frieze, the painted colour of the temples in full, the market in the colonnades, people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -60,7 +60,7 @@ Clay flutes, the slit drum and turtle-shell drums (a flute and a struck wooden s
 - **The chacmool** in front of the central entrance, holding an offering plate on its stomach [stated: mayaruins]: reclining on a low base, knees up, propped on its elbows, head turned to look down the stair.
 - **The masks**: the frieze carries long-nosed rain-god masks on the corners and in the middle, alternating with vision serpents [stated: mayaruins]. Ours: masks on every corner (both faces) and in the middle of each side but the front; the mask after the Puuc mosaic type — framed eyes, heavy brows, the hooked nose curling up, the mouth with fangs, ear spools [inferred]; the vision serpents left for later.
 - **Heights**: the Warriors' temple floor 45 ft (13.7 m) above the ground [stated: mayaruins] — ours 13 m (was 11). The colonnade before it moved 4 m west so the stair's serpents stand clear of it.
-- The 64 warrior pillars (four rows of sixteen), carved with Toltec warriors with spears, shields and quetzal-feather headdresses, once brightly painted [stated: mayaruins] — recorded for L3.
+- **The warrior pillars**: some 64 square columns in four rows of sixteen, carved with Toltec warriors in battle dress with spears, shields and green quetzal-feather headdresses, once brightly painted, traces remaining [stated: mayaruins]. Ours: every pillar of the colonnades carved on its four faces with a framed warrior in low relief — legs and head, a quilted tunic with a red belt, a round shield, the spear, the green headdress — painted [inferred: the colours beyond the green]. The finer carving (faces, jewellery, the jaguar pelts) is left for L3.
 
 ## Sources
 

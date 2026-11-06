@@ -142,3 +142,25 @@ export function chacmoolKit(stone = 'limestone_maya') {
     k.geo(stone, lathe([[0.001, 0], [0.16, 0], [0.19, 0.06], [0.001, 0.06]], 14).translate(-0.1, 0.5, 0)); // the dish
   });
 }
+
+/**
+ * A warrior carved in low relief on a square pillar's face (the Temple of the Warriors' colonnades):
+ * a framed panel, the warrior standing in profile with his spear and round shield, a tall headdress
+ * of quetzal feathers (green); the panel about 0.7 × 2.8 m on a face 0.8 m wide, facing +z.
+ */
+export function warriorPanelKit(stone = 'limestone_maya') {
+  return carved(`warrior:${stone}`, (k) => {
+    const d = 0.05;
+    k.bx(stone, -0.36, 0.36, 0, 0.1, 0, d); k.bx(stone, -0.36, 0.36, 2.7, 2.8, 0, d);              // the frame, top and bottom
+    k.bx(stone, -0.36, -0.3, 0.1, 2.7, 0, d); k.bx(stone, 0.3, 0.36, 0.1, 2.7, 0, d);                // and sides
+    k.seg('stucco_ochre', [-0.06, 0.2, d * 0.5], [-0.04, 0.95, d * 0.5], 0.05, d * 0.5); k.seg('stucco_ochre', [0.06, 0.2, d * 0.5], [0.05, 0.95, d * 0.5], 0.05, d * 0.5);   // the legs (the reliefs were painted)
+    k.bx('lime_plaster', -0.13, 0.13, 0.95, 1.75, 0, d);                                              // the body, in a quilted cotton tunic
+    k.bx('stucco_red', -0.14, 0.14, 1.2, 1.32, d * 0.5, d * 1.2);                                     // the belt
+    k.bx('stucco_ochre', -0.09, 0.09, 1.78, 2.02, 0, d);                                              // the head
+    k.fy('stucco_leaf', [-0.12, 0.12, 0, d], [-0.24, 0.22, 0, d], 2.02, 2.55);                       // the headdress of quetzal feathers
+    k.disc(stone, -0.17, 1.38, d * 0.4, 0.15, d, 12);                                                 // the round shield
+    k.disc('stucco_red', -0.17, 1.38, d * 1.3, 0.07, d * 0.4, 10);
+    k.seg('timber', [0.18, 0.25, d * 0.6], [0.24, 2.4, d * 0.6], 0.018, d * 0.5);                    // the spear
+    k.fy(stone, [0.21, 0.27, d * 0.3, d * 0.9], [0.235, 0.245, d * 0.55, d * 0.65], 2.4, 2.58);
+  });
+}

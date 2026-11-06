@@ -10,7 +10,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
-import { serpentHeadKit, chaacKit, chacmoolKit, Kit } from './meso.js';
+import { serpentHeadKit, chaacKit, chacmoolKit, warriorPanelKit, Kit } from './meso.js';
 
 const L = 'limestone_maya';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -201,7 +201,7 @@ function mBallcourt(el, ctx) {
   mTemple({ c: [x1 + T / 2, (z0 + z1) / 2 - 18], y: H, w: 9, d: 8, h: 5.5, doors: 'w' }, ctx);
 }
 
-/** m_colonnade: rows of square pillars (carved with warriors) under a flat roof of beams and plaster { rect, rows, cols, h }. */
+/** m_colonnade: rows of square pillars, each face carved with a warrior, under a flat roof of beams and plaster { rect, rows, cols, h, warriors }. */
 function mColonnade(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, h = el.h ?? 4.2, y = el.y ?? 0;
   bag.add(L, box(x0 - 0.5, y - 0.3, z0 - 0.5, x1 + 0.5, y + 0.6, z1 + 0.5));
@@ -210,6 +210,8 @@ function mColonnade(el, { bag, col }) {
     const x = x0 + (x1 - x0) * (i + 0.5) / el.cols, z = z0 + (z1 - z0) * (j + 0.5) / el.rows;
     bag.add(L, box(x - 0.4, y + 0.6, z - 0.4, x + 0.4, y + 0.6 + h, z + 0.4));
     bag.add('stucco_red', box(x - 0.5, y + 0.6 + h - 0.4, z - 0.5, x + 0.5, y + 0.6 + h, z + 0.5));
+    // a warrior carved on each face, between a plain base and the capital
+    if (el.warriors !== false) for (const [fx, fz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) warriorPanelKit().emit(bag, x + fx * 0.4, y + 0.6 + Math.max(0.2, (h - 0.4 - 2.8) / 2), z + fz * 0.4, fx, fz, Math.min(1, (h - 0.6) / 2.9));
     col.rect([x - 0.4, z - 0.4, x + 0.4, z + 0.4], y, y + h);
   }
   if (el.roof !== false) {
