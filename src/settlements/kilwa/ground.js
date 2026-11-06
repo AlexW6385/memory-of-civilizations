@@ -2,7 +2,7 @@
 // baobabs (banyan stands in) on the island, the beach and the reef flat, the Indian Ocean; the
 // warm, bright, humid sky of the monsoon coast.
 
-import { RADIUS, SEA, RIM, MOSQUE, PALACE, height, inSea, inRect, inLot, onHeadland, STAIR, BEACH_MOSQUE } from './layout.js';
+import { RADIUS, SEA, RIM, MOSQUE, PALACE, height, inSea, inRect, inLot, onHeadland, STAIR, BEACH_MOSQUE, GATE_STAIRS } from './layout.js';
 
 function cover(x, z, h) {
   // inland the coral rag weathers to a grey-brown sandy soil under grass; only the beach is white
@@ -19,7 +19,7 @@ function water(x, z, y) { return inSea(x, z) && y < SEA + 0.3; }
 function waterLevel(x, z) { return inSea(x, z) ? SEA : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, height(x, z) - SEA)); }
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inSea(x, z) || height(x, z) < 0.8 || inRect(MOSQUE, x, z, 4) || inRect(PALACE, x, z, 4) || onHeadland(x, z, 3) || inRect(STAIR.b.rect, x, z, 3) || inRect(BEACH_MOSQUE, x, z, 4) || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inSea(x, z) || height(x, z) < 0.8 || inRect(MOSQUE, x, z, 4) || inRect(PALACE, x, z, 4) || onHeadland(x, z, 3) || inRect(STAIR.b.rect, x, z, 3) || inRect(BEACH_MOSQUE, x, z, 4) || GATE_STAIRS.some((g) => inRect(g.rect, x, z, 3)) || inLot(x, z, 1)) return null;
   return { date_palm: 0.12, banyan: 0.008, maquis: 0.06, grass: 18 };
 }
 export const ground = {

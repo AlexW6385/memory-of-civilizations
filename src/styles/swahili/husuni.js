@@ -43,7 +43,11 @@ export function flight(ctx, rect, y0, y1, dir, { base = null, mat = DRESSED, nos
       else ctx.bag.add('timber', box(x0 + 0.01, yk - 0.07, Math.min(f0, f1), x1 - 0.01, yk + 0.012, Math.max(f0, f1)));
     }
   }
-  ctx.col.ramp(rect, y0, y1, dir);
+  // the walker's ramp runs along the steps' nosings: from the first tread to the last, which is flat
+  const lastT = along === 'x' ? (sg > 0 ? [x1 - d, z0, x1, z1] : [x0, z0, x0 + d, z1]) : (sg > 0 ? [x0, z1 - d, x1, z1] : [x0, z0, x1, z0 + d]);
+  const rr = along === 'x' ? (sg > 0 ? [x0, z0, x1 - d, z1] : [x0 + d, z0, x1, z1]) : (sg > 0 ? [x0, z0, x1, z1 - d] : [x0, z0 + d, x1, z1]);
+  if (n > 1) ctx.col.ramp(rr, y0 + h, y1, dir);
+  ctx.col.floor(lastT, y1);
 }
 /** A parapet or cheek wall along a flight: from base up to 0.9 m over the steps' line (from ya at a0 to yb at a1). */
 function cheek(ctx, along, c, t, a0, a1, base, ya, yb, mat = C) {
@@ -213,12 +217,12 @@ function core(el, ctx) {
   carvedPanel(ctx, wallFace('z', P[2], -1, 0), P[1] + 0.2, fl + 3.62, P[3] - 0.4, fl + 3.9, 'darts');
   carvedPanel(ctx, wallFace('x', P[3], -1, 0), P[0] + 0.4, fl + 3.62, P[2] - 0.4, fl + 3.9, 'darts');
   // ---- the row between the bathing court and the audience court (its doors to the arcade)
-  rooms(ctx, { mat: SMOOTH, rect: [145.4, -130.4, 165, -126.6], along: 'x', n: 5, fl, door: 'n', skip: ['w'] });
+  rooms(ctx, { mat: SMOOTH, rect: [145.4, -130.4, 165, -126.6], along: 'x', n: 5, fl, door: 'n', skip: ['w'], holes: { s: [{ u0: 154.7, u1: 155.7, v0: fl, v1: fl + 2.15, frame: 'door' }] } });   // the passage from the audience court to the bathing court
   // ---- the double suite: the 17 m ante-room off the arcade, the main room, two bedrooms of 2.2 m
   const zid = (z0, z1, v0) => { const R = []; const n = Math.floor((z1 - z0) / 0.62); for (let i = 0; i < n; i++) for (let j = 0; j < 3; j++) { const u = z0 + (i + 0.5) * (z1 - z0) / n; R.push({ u0: u - 0.22, u1: u + 0.22, v0: v0 + j * 0.78, v1: v0 + j * 0.78 + 0.5, d: 0.16, side: -1, holes: nicheHoles(u, v0 + j * 0.78, 0.4, 0.42) }); } return R; };
   rooms(ctx, { mat: SMOOTH, rect: [165, -146.6, 168.4, -128.4], along: 'z', n: 1, fl, door: null, skip: ['n'], holes: { w: [{ u0: -140, u1: -139, v0: fl, v1: fl + 2.2, frame: 'grand' }, { u0: -134, u1: -133.1, v0: fl, v1: fl + 2.1, frame: 'door' }], e: [{ u0: -138.2, u1: -137.2, v0: fl, v1: fl + 2.2, frame: 'grand' }] } });
   carvedPanel(ctx, wallFace('z', 165, -1, 0), -140.2, fl + 2.45, -138.8, fl + 2.85, 'stars');
-  rooms(ctx, { mat: SMOOTH, rect: [167.8, -146.6, 171.8, -128.4], along: 'z', at: [-134.3, -131.5], fl, door: null, cross: true, skip: ['n', 'w'], rec: { e: zid(-145, -135, fl + 0.6) } });
+  rooms(ctx, { mat: SMOOTH, rect: [167.8, -146.6, 171.8, -128.4], along: 'z', at: [-134.3, -131.5], fl, door: null, cross: true, skip: ['n', 'w'], rec: { e: zid(-144.2, -135.2, fl + 0.6) }, holes: { e: [{ u0: -145.7, u1: -144.8, v0: fl, v1: fl + 2.1, frame: 'door' }] } });
   for (const [za, zb] of [[-134.0, -131.8], [-131.2, -129.0]]) solid(ctx, SMOOTH, 170.0, fl - 0.02, za + 0.1, 171.2, fl + 0.5, zb - 0.1);   // the built platform beds
   // ---- the private court: sunk a metre by four steps all round, walkways either side, wide-doored rooms
   rooms(ctx, { mat: SMOOTH, rect: [171.2, -146.6, 175.2, -128.4], along: 'z', n: 5, fl, door: 'e', doorW: 1.7, doorH: 2.4, skip: ['n', 'w'] });
@@ -244,7 +248,7 @@ function core(el, ctx) {
   // ---- the east range
   rooms(ctx, { mat: SMOOTH, rect: [190, -146.6, 194, -100], along: 'z', n: 12, fl, door: 'w', skip: ['n'] });
   // ---- the domestic court's north rooms (single storey), its west row, its servants' rooms (rough plaster) on the south
-  rooms(ctx, { mat: SMOOTH, rect: [173, -128.4, 190, -124.6], along: 'x', n: 4, fl, door: 's', roof: 'poles', hs: 2.9 });
+  rooms(ctx, { mat: SMOOTH, rect: [173, -128.4, 190, -124.6], along: 'x', n: 4, fl, door: 's', roof: 'poles', hs: 2.9, holes: { n: [{ u0: 187.9, u1: 188.8, v0: fl, v1: fl + 2.1, frame: 'door' }] } });
   rooms(ctx, { mat: SMOOTH, rect: [165, -128.4, 173.6, -124.6], along: 'x', n: 2, fl, door: null, cross: true, roof: 'poles', hs: 2.9, skip: ['e'] });
   rooms(ctx, { mat: SMOOTH, rect: [169.4, -125.2, 173, -104], along: 'z', n: 5, fl, door: 'e', skip: ['n'], roof: 'poles', hs: 2.9 });
   rooms(ctx, { rect: [169.4, -104, 190, -100], along: 'x', n: 6, fl, door: 'n', roof: 'poles', hs: 2.7, mat: ROUGH, skip: ['w'] });
@@ -295,12 +299,14 @@ function core(el, ctx) {
 }
 /** The pavilion { rect (the platform, the steps cut into its west face), fl, deep }. */
 function pavilion(ctx, { rect, fl, deep }) {
-  const [x0, z0, x1, z1] = rect, top = fl + 3, mz = (z0 + z1) / 2, st = [x0, mz - 3, x0 + 3.2, mz + 3];
-  // the platform of coral rag, plastered, the nine steps cut into its front
-  for (const r of [[x0, z0, x1, st[1]], [x0, st[3], x1, z1], [st[2], st[1], x1, st[3]]]) { solid(ctx, SMOOTH, r[0], deep, r[1], r[2], top - 0.04, r[3], false); ctx.col.rect(r, deep, top - 0.5); }
-  slab(ctx, SMOOTH, [x0, z0, x1, z1].map((v, i) => (i === 0 ? x0 + 3.2 : v)), top - 0.04, top);
-  for (const r of [[x0, z0, x0 + 3.2, st[1]], [x0, st[3], x0 + 3.2, z1]]) slab(ctx, SMOOTH, r, top - 0.04, top);
-  flight(ctx, st, fl, top, 'e', { base: deep, rise: 1 / 3 });
+  const [x0, z0, x1, z1] = rect, top = fl + 3, mz = (z0 + z1) / 2, st = [x0 - 4.0, mz - 3, x0, mz + 3];
+  // the platform of coral rag, plastered; the nine steps (3 m) running out into the court before it, a balustrade either side
+  solid(ctx, SMOOTH, x0, deep, z0, x1, top - 0.04, z1, false); ctx.col.rect([x0, z0, x1, z1], deep, top - 0.5);
+  slab(ctx, SMOOTH, [x0, z0, x1, z1], top - 0.04, top);
+  flight(ctx, st, fl, top, 'e', { base: fl - 0.1, rise: 1 / 3 });
+  for (const zz of [st[1] - 0.25, st[3] + 0.25]) cheek(ctx, 'x', zz, 0.5, st[0], st[2], fl - 0.1, fl, top);
+  // a parapet along the platform's front either side of the steps
+  for (const r of [[x0, z0 + 0.6, x0 + 0.45, st[1] - 0.5], [x0, st[3] + 0.5, x0 + 0.45, z1 - 0.6]]) solid(ctx, SMOOTH, r[0], top, r[1], r[2], top + 0.85, r[3]);
   // the open arcade on the platform's edge, the vaulted front aisle, the arcade wall, the back hall, the east wall with wide openings
   const ax = x0 + 3.2 + 0.3;
   arcade(ctx, { c: ax, a0: z0 + 0.6, a1: z1 - 0.6, n: 5, fl: top, yT: 4.0, along: 'z', pier: 0.7 });

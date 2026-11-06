@@ -10,6 +10,7 @@ import '../qing/index.js';
 import { pointedSpandrel, orientBy } from '../sahel/index.js';
 import { HUSUNI } from './husuni.js';
 import { house } from './house.js';
+import { wall } from './kit.js';
 
 const C = 'coral_plaster', R = 'rubble';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -70,13 +71,17 @@ function vaultBay(out, r, yT, pd, yTop, openN, openS) {
 /** swahili_mosque: { rect, y, bay, big (index of the bay carrying the great dome) } — a walled hall of bays on pillars, each bay roofed by a small dome. */
 function mosque(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, b = el.bay ?? 4.5, yS = y + 3.4, yT = y + 6.1, PD = 0.5, yTop = yT + PD + 0.35, h = yTop - y - 0.6;
-  for (const r of [[x0, z0, x1, z0 + 0.8], [x0, z1 - 0.8, x1, z1], [x0, z0, x0 + 0.8, z1], [x1 - 0.8, z0, x1, z1]]) { bag.add(C, box(r[0], y - 0.5, r[1], r[2], y + h + 0.6, r[3])); col.rect(r, y, y + h + 0.6); }
+  // the enclosing walls, open at every other bay by a doorway (1.4 × 2.6 m)
+  const doorsAt = (a, b2) => { const L = b2 - a, n = Math.floor(L / (b * 2)), H = []; for (let i = 0; i < n; i += 2) { const u = a + (i + 0.5) * L / n; H.push({ u0: u - 0.7, u1: u + 0.7, v0: y + 0.05, v1: y + 2.6 }); } return H; };
+  for (const [ax, c, a, b2, u0, u1] of [['x', z0 + 0.4, x0, x1, x0, x1], ['x', z1 - 0.4, x0, x1, x0, x1], ['z', x0 + 0.4, z0, z1, z0 + 0.8, z1 - 0.8], ['z', x1 - 0.4, z0, z1, z0 + 0.8, z1 - 0.8]]) {
+    wall({ bag, col }, { axis: ax, c, u0, u1, t: 0.8, y0: y - 0.5, y1: y + h + 0.6, holes: doorsAt(a, b2), mat: C });
+  }
   // the walls' faces: doorways with their stepped stone frames along the sides, small windows above, buttresses at the corners and between
   for (const [a, b2, zz, alongX, sg] of [[x0, x1, z0, true, -1], [x0, x1, z1, true, 1], [z0, z1, x0, false, -1], [z0, z1, x1, false, 1]]) {
     const L = b2 - a, n = Math.floor(L / (b * 2));
     for (let i = 0; i < n; i++) {
       const u = a + (i + 0.5) * L / n, f = (m, u0, u1, v0, v1, d0, d1) => { const p0 = zz + sg * d0, p1 = zz + sg * d1; bag.add(m, alongX ? box(u + u0, y + v0, Math.min(p0, p1), u + u1, y + v1, Math.max(p0, p1)) : box(Math.min(p0, p1), y + v0, u + u0, Math.max(p0, p1), y + v1, u + u1)); };
-      if (i % 2 === 0) { f('limestone', -1.0, 1.0, 0, 3.0, -0.01, 0.12); f('opening', -0.7, 0.7, 0, 2.6, 0.11, 0.14); } else { f('limestone', -0.5, 0.5, 2.8, 4.0, -0.01, 0.1); f('opening', -0.35, 0.35, 3.0, 3.8, 0.09, 0.12); }
+      if (i % 2 === 0) { f('limestone', -1.0, -0.7, 0, 3.0, -0.01, 0.12); f('limestone', 0.7, 1.0, 0, 3.0, -0.01, 0.12); f('limestone', -0.7, 0.7, 2.6, 3.0, -0.01, 0.12); } else { f('limestone', -0.5, 0.5, 2.8, 4.0, -0.01, 0.1); f('opening', -0.35, 0.35, 3.0, 3.8, 0.09, 0.12); }
       f(C, L / n / 2 - 0.45, L / n / 2 + 0.45, -0.5, h + 0.6, -0.01, 0.55);
     }
   }

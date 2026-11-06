@@ -49,13 +49,13 @@ export const kilwa = {
   era: { en: 'The Swahili coast, about 1330', zh: '斯瓦希里海岸，约1330年' },
   style: 'swahili',
   origin: [0, 0], base: 0, yaw: 0,
-  entrance: { at: [-10, -30], facing: 's' },
+  entrance: { at: [-15, -30], facing: 's' },
   bounds: [-160, -178, PALACE[2] + 10, 45],
   view: [MOSQUE[0] - 2, MOSQUE[1] - 2, MOSQUE[2] + 2, MOSQUE[3] + 2],
   bakeTop: 12,
   elements: E,
-  rooms: [room('prayer hall', MOSQUE, 0, 'hall')],
-  walks: Object.assign([[[-10, -30], [-10, -15]]], {}),
+  rooms: [room('prayer hall', MOSQUE, E[0].y, 'hall'), room('pavilion', [162.2, -124, 169.4, -106.6], PY + 3, 'hall')],
+  walks: Object.assign([[[-15, -30], [-15, -15]]], {}),
 };
-kilwa.walks[0].y0 = height(-10, -30);
+kilwa.walks[0].y0 = height(-15, -30);
 export default kilwa;
