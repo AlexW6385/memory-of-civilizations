@@ -1,5 +1,5 @@
 // Modern Sydney, 1973 (docs/settlements/sydney.md §2–§4).
-import { RADIUS, LEVEL, OPERA, BRIDGE, QUAY, AUSTRALIA_SQ, height, inWater } from './layout.js';
+import { RADIUS, LEVEL, OPERA, BRIDGE, QUAY, AUSTRALIA_SQ, height, inWater, seawalls } from './layout.js';
 
 const [ox0, oz0, ox1, oz1] = OPERA.rect, cw = ox0 + 21, ce = ox1 - 21;
 export const opera = {
@@ -28,6 +28,8 @@ export const harbour = {
   entrance: { at: [100, -96], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [
     { t: 'arch_bridge', ...BRIDGE },
+    // the sandstone sea wall along every shore (§6)
+    ...seawalls().map((w) => ({ t: 'sea_wall', ...w, level: LEVEL })),
     { t: 'viaduct', rect: QUAY, y: 13 },
     // the wharves, a gangway at each berth: lowered onto the Lady-class ferry's foredeck at the east wharf, raised elsewhere
     ...[-36, -18, 0, 18].map((x) => ({ t: 'wharf', rect: [x - 5, -60, x + 5, -8], y: 1.2, gangways: [{ side: -1, z: -50 }, x === 18 ? { side: 1, z: -52.5, down: -0.3 } : { side: 1, z: -50 }] })),

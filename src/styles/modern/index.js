@@ -11,6 +11,7 @@ import '../artdeco/index.js';
 import { rocksTerrace } from './rocks.js';
 import { archBridge } from './bridge.js';
 import { wharf } from './wharf.js';
+import { seaWall } from './seawall.js';
 
 /** Both faces of a triangle. */
 const tri2 = (t, a, b, c) => t.push(...a, ...b, ...c, ...a, ...c, ...b);
@@ -204,6 +205,6 @@ function ferry(el, { bag, col }) {
 }
 registerStyle('modern', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace },
+  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace, sea_wall: seaWall },
   objects: {},
 });
