@@ -38,6 +38,16 @@ const TRIB_SPR = 14.5, VSPR = 18.7, VCROWN = 22.1, EAVE = 23.2, RIDGE = 27.5;
 const OUT = 15.5;                    // top of the outer walls (under the tribunes' lean-to roofs)
 const RED = 7.6;                     // red sandstone below, yellow limestone above
 
+/**
+ * The tribune's opening to the nave: under an enclosing arch, a pair of small arches on a central colonnette, the
+ * tympanum between them and the arch filled (a thinner wall set within the reveal, toward the nave). [stated: twin
+ * openings to the tribunes; the central colonnette and enclosing arch inferred from the type — Conques, Saint-Sernin]
+ */
+const bifora = (o, u, uc) => {
+  pwall({ o, u, th: 0.4, u0: uc - 1.27, u1: uc + 1.27, y0: 11.8, y1: 13.4 + 1.27, outline: { uc, r: 1.27, spring: 13.4 },
+    arches: [{ uc: uc - 0.64, r: 0.52, spring: 13.05, sill: 11.8 }, { uc: uc + 0.64, r: 0.52, spring: 13.05, sill: 11.8 }], arcade: true, mat: 'limestone_yellow', collide: false });
+  add({ t: 'column', at: [o[0] + u[0] * uc, o[1] + u[1] * uc], y: 11.8, h: 1.25, d: 0.26, mat: 'limestone_yellow', collide: false });
+};
 const bays = (P, from) => { const out = []; let a = from; for (const p of P) { out.push([a, p - PS]); a = p + PS; } return out; };
 
 // ── the terrace, the floors ──────────────────────────────────────────────────
@@ -58,8 +68,9 @@ for (const sz of [-1, 1]) {
   const arc = bays(NAVE_P, XW).map(([a, b]) => ({ uc: (a + b) / 2, r: (b - a) / 2, spring: ARC_SPR, sill: 0 }));
   pwall({ o: [0, z], u: [1, 0], th: 2 * PS, u0: XW, u1: NAVE_P[4] + PS, y0: 0, y1: TRIB, arches: arc, arcade: true, mat: 'limestone_yellow', collide: false });
   // the tribunes' twin openings to the nave, and the wall above to the eaves
-  const twin = bays(NAVE_P, XW).flatMap(([a, b]) => { const c = (a + b) / 2; return [{ uc: c - 0.68, r: 0.58, spring: 13.4, sill: 11.8 }, { uc: c + 0.68, r: 0.58, spring: 13.4, sill: 11.8 }]; });
+  const twin = bays(NAVE_P, XW).map(([a, b]) => ({ uc: (a + b) / 2, r: 1.26, spring: 13.4, sill: 11.8 }));
   pwall({ o: [0, z], u: [1, 0], th: 2 * PS, u0: XW, u1: XC0 - PS, y0: TRIB, y1: EAVE, arches: twin, mat: 'limestone_yellow', collide: false });
+  for (const a of twin) bifora([0, sz * (PZ - 0.1)], [1, 0], a.uc);
   // the aisle's barrel vault, the tribune floor over it, the tribune's half-barrel
   add({ t: 'barrel', axis: 'x', s0: XW, s1: TW1 + 2.85, c: sz * (AI + AO) / 2, y: AISLE_SPR, r: (AO - AI) / 2, th: 0.4, mat: 'limestone_yellow' });
   add({ t: 'slab', rect: [XW, sz * AI, TW1, sz * AO], y0: AISLE_CROWN + 0.4, y1: TRIB, mat: 'limestone_yellow' });
@@ -142,7 +153,8 @@ for (const sz of [-1, 1]) {
     const arm = [[P[0] + PS, P[1] - PS], [P[1] + PS, P[2] - PS], [P[2] + PS, TZ]];
     const o = [x, sz > 0 ? 0 : 0], u = [0, sz];
     pwall({ o, u, th: 2 * PS, u0: PZ, u1: TZ, y0: 0, y1: TRIB, arches: arm.map(([a, b]) => ({ uc: (a + b) / 2, r: Math.min(1.45, (b - a) / 2), spring: ARC_SPR, sill: 0 })), arcade: true, mat: 'limestone_yellow', collide: false });
-    pwall({ o, u, th: 2 * PS, u0: PZ + PS, u1: TZ, y0: TRIB, y1: EAVE, arches: arm.flatMap(([a, b]) => { const c = (a + b) / 2; return [{ uc: c - 0.68, r: 0.58, spring: 13.4, sill: 11.8 }, { uc: c + 0.68, r: 0.58, spring: 13.4, sill: 11.8 }]; }), mat: 'limestone_yellow', collide: false });
+    pwall({ o, u, th: 2 * PS, u0: PZ + PS, u1: TZ, y0: TRIB, y1: EAVE, arches: arm.map(([a, b]) => ({ uc: (a + b) / 2, r: 1.26, spring: 13.4, sill: 11.8 })), mat: 'limestone_yellow', collide: false });
+    for (const [a, b] of arm) bifora([x + (x < XM ? 0.1 : -0.1), 0], u, (a + b) / 2);
   }
   // the arm's barrel vault, at the nave's height
   add({ t: 'barrel', axis: 'z', s0: sz * (PZ + PS), s1: sz * (TZ + 0.3), c: XM, y: VSPR, r: HN, th: 0.6, mat: 'limestone_yellow' });
