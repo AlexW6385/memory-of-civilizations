@@ -83,8 +83,8 @@ function vaka(el, { bag, col }) {
 function leafGeometry(seed) {
   const rand = rng(seed), t = [], N = 14, cut = new Set();
   for (let k = 0; k < 4; k++) cut.add(2 + Math.floor(rand() * (N - 3)));
-  const mid = (u) => [0.22 + u * 0.78, 0.3 * Math.sin(Math.min(1, u * 1.4) * Math.PI * 0.55) - 0.55 * Math.max(0, u - 0.35) ** 2, 0];
-  const half = (u) => 0.13 * Math.sin(Math.PI * Math.min(1, 0.06 + u * 0.97)) ** 0.6;
+  const mid = (u) => [0.22 + u * 0.78, 0.22 * Math.sin(Math.min(1, u * 1.6) * Math.PI * 0.5) - 0.7 * Math.max(0, u - 0.3) ** 2, 0];
+  const half = (u) => 0.17 * Math.sin(Math.PI * Math.min(1, 0.06 + u * 0.97)) ** 0.6;
   for (let i = 0; i < N; i++) {
     const u0 = i / N, u1 = (i + 1) / N, m0 = mid(u0), m1 = mid(u1);
     for (const s of [-1, 1]) {
@@ -109,7 +109,7 @@ function banana(el, { bag, col }) {
     const L = 1.3 + h * 0.4, nl = 6 + Math.floor(rand() * 3);
     for (let k = 0; k < nl; k++) {
       const yaw = k / nl * 6.28 + rand() * 0.6, up = (k % 3) * 0.12;
-      const m = new Matrix4().makeTranslation(x, y0 + h - 0.05, z).multiply(new Matrix4().makeRotationY(yaw)).multiply(new Matrix4().makeRotationZ(0.35 - up - (k === 0 ? -0.5 : 0))).multiply(new Matrix4().makeScale(L, L, L * (0.9 + rand() * 0.25)));
+      const m = new Matrix4().makeTranslation(x, y0 + h - 0.05, z).multiply(new Matrix4().makeRotationY(yaw)).multiply(new Matrix4().makeRotationZ(0.2 - up + (k === 0 ? 0.6 : 0))).multiply(new Matrix4().makeScale(L, L, L * (0.9 + rand() * 0.25)));
       if (bag.addInstance) bag.addInstance('palm_leaf', LEAVES[k % 3], m, { reach: 200 }); else bag.add('palm_leaf', LEAVES[k % 3].clone().applyMatrix4(m));
     }
     // a dead leaf hanging against the stem
