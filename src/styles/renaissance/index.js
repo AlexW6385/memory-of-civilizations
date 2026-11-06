@@ -176,8 +176,8 @@ function naveHollow(bag, col, nave, cx, cz, y, H, W) {
     // the walkway on its corbels along the clerestory at the springing, its iron rail
     bag.add(PS, box(xa, y + 29.2, Math.min(zl - s * 0.75, zl - s * 1.75), xb, y + 29.5, Math.max(zl - s * 0.75, zl - s * 1.75)));
     for (let x = xa + 0.6; x < xb; x += 1.2) bag.add(PS, box(x - 0.15, y + 28.6, Math.min(zl - s * 0.75, zl - s * 1.6), x + 0.15, y + 29.2, Math.max(zl - s * 0.75, zl - s * 1.6)));
-    bag.add('iron', box(xa, y + 30.4, zl - s * 1.72 - 0.03, xb, y + 30.46, zl - s * 1.72 + 0.03));
-    for (let x = xa + 0.6; x < xb; x += 1.2) bag.add('iron', box(x - 0.025, y + 29.5, zl - s * 1.72 - 0.025, x + 0.025, y + 30.46, zl - s * 1.72 + 0.025));
+    bag.add('wood_dark', box(xa, y + 30.4, zl - s * 1.72 - 0.03, xb, y + 30.46, zl - s * 1.72 + 0.03));
+    for (let x = xa + 0.6; x < xb; x += 1.2) bag.add('wood_dark', box(x - 0.025, y + 29.5, zl - s * 1.72 - 0.025, x + 0.025, y + 30.46, zl - s * 1.72 + 0.025));
     // the aisle's inner face: lancets where the outer skin has its windows
     const zw = s < 0 ? z0 + T + 0.02 : z1 - T - 0.02, p = (x1 - x0) / Math.round((x1 - x0) / 4.4), hb = hA / 3;
     for (let i = 1; i < Math.round((x1 - x0) / 4.4); i += 2) {
@@ -208,10 +208,10 @@ function naveHollow(bag, col, nave, cx, cz, y, H, W) {
   bag.add('stucco', box(xa, y, cz - zp + 0.75, xa + 0.04, y + 29, cz + zp - 0.75));
   const ky = y + 21, kx = xa + 0.08;
   const dial = (r, m, dx) => { const g = disc(r, 0, 32); g.rotateZ(-Math.PI / 2); bag.add(m, g.translate(kx + dx, ky, cz)); };
-  dial(3.0, 'stucco_ochre', 0); dial(2.55, 'stucco_sky', 0.02); dial(1.0, 'stucco_saffron', 0.03);
+  dial(3.0, 'marble_pink', 0); dial(2.55, 'verde_antico', 0.02); dial(1.0, 'gilt_bronze', 0.03);
   for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; bag.add('gilt_bronze', rod([kx + 0.04, ky + Math.cos(a) * 2.6, cz + Math.sin(a) * 2.6], [kx + 0.04, ky + Math.cos(a) * 2.9, cz + Math.sin(a) * 2.9], 0.06, 4)); }
   bag.add('gilt_bronze', rod([kx + 0.06, ky, cz], [kx + 0.06, ky - 2.2, cz + 0.9], 0.07, 4));
-  for (const [dy, dz] of [[3.6, 3.6], [3.6, -3.6], [-3.6, 3.6], [-3.6, -3.6]]) bag.add('stucco_saffron', disc(0.5, 0, 12).rotateZ(-Math.PI / 2).translate(kx + 0.02, ky + dy * 0.85, cz + dz * 0.85));
+  for (const [dy, dz] of [[3.6, 3.6], [3.6, -3.6], [-3.6, 3.6], [-3.6, -3.6]]) bag.add('gilt_bronze', disc(0.5, 0, 12).rotateZ(-Math.PI / 2).translate(kx + 0.02, ky + dy * 0.85, cz + dz * 0.85));
 }
 
 /**
@@ -244,7 +244,7 @@ function crossingHollow(bag, col, cx, cz, y, H, R0, apses) {
   const inner = [[rv * 0.12, 25.6], [rv * 0.38, 24.2], [rv * 0.66, 20], [rv * 0.86, 14], [rv * 0.97, 7], [rv, 0]];
   bag.add('stucco', lathe(inner, 8, null, 0, 0, 0).rotateY(Math.PI / 8).translate(cx, yd, cz));
   for (let k = 0; k < 8; k++) { const a = Math.PI / 8 + k * Math.PI / 4; for (let i = 0; i + 1 < inner.length; i++) { const [r0, h0] = inner[i], [r1, h1] = inner[i + 1]; bag.add(PS, rod([cx + Math.cos(a) * (r0 - 0.25), yd + h0 - 0.2, cz + Math.sin(a) * (r0 - 0.25)], [cx + Math.cos(a) * (r1 - 0.25), yd + h1 - 0.2, cz + Math.sin(a) * (r1 - 0.25)], 0.35, 6)); } }
-  bag.add('daylight_plain', disc(rv * 0.12, yd + 25.55, 16, cx, cz, false));
+  bag.add('stained_glass', disc(rv * 0.12, yd + 25.55, 16, cx, cz, false));
   bag.add(PS, lathe([[rv * 0.12, 0], [rv * 0.12 + 0.5, 0], [rv * 0.12 + 0.5, 0.5], [rv * 0.12, 0.5]], 16, null, cx, yd + 25.1, cz));
   // the floor under the dome and the tribunes
   bag.add('cotto_floor', box(cx - ai, y - 0.3, cz - ai, cx + ai, y + 0.05, cz + ai)); col.floor([cx - ai, cz - ai, cx + ai, cz + ai], y + 0.05);
@@ -255,8 +255,8 @@ function crossingHollow(bag, col, cx, cz, y, H, R0, apses) {
     bag.add('wood_dark', box(p1[0] - 0.2, y, p1[1] - 0.2, p1[0] + 0.2, y + 3.4, p1[1] + 0.2)); bag.add('gilt_bronze', lathe([[0.15, 0], [0.001, 0.5]], 6, null, p1[0], y + 3.4, p1[1]));
     if (west) { bag.add('wood_dark', orientedBox(p0, p1, 0.18, y + 2.8, y + 3.3)); continue; }
     bag.add('wood_dark', orientedBox(p0, p1, 0.14, y, y + 2.6)); col.segment(p0, p1, 0.2, y, y + 2.6);
-    bag.add('timber', orientedBox(p0, p1, 0.2, y + 2.6, y + 2.8)); bag.add('timber', orientedBox(p0, p1, 0.2, y + 0.9, y + 1.0));
-    const L = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]); for (let j = 1; j < 4; j++) { const q = [p0[0] + (p1[0] - p0[0]) * j / 4, p0[1] + (p1[1] - p0[1]) * j / 4]; bag.add('timber', box(q[0] - 0.1, y, q[1] - 0.1, q[0] + 0.1, y + 2.6, q[1] + 0.1)); } void L;
+    bag.add('wood_dark', orientedBox(p0, p1, 0.2, y + 2.6, y + 2.8)); bag.add('wood_dark', orientedBox(p0, p1, 0.2, y + 0.9, y + 1.0));
+    const L = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]); for (let j = 1; j < 4; j++) { const q = [p0[0] + (p1[0] - p0[0]) * j / 4, p0[1] + (p1[1] - p0[1]) * j / 4]; bag.add('wood_dark', box(q[0] - 0.1, y, q[1] - 0.1, q[0] + 0.1, y + 2.6, q[1] + 0.1)); } void L;
   }
   bag.add(M, box(cx + 2.2, y, cz - 1.8, cx + 4.0, y + 1.1, cz + 1.8)); bag.add('marble_pink', box(cx + 2.1, y + 1.1, cz - 1.9, cx + 4.1, y + 1.25, cz + 1.9)); col.rect([cx + 2.2, cz - 1.8, cx + 4.0, cz + 1.8], y, y + 1.25);
   bag.add('gilt_bronze', box(cx + 3.6, y + 1.25, cz - 0.05, cx + 3.7, y + 3.4, cz + 0.05)); bag.add('gilt_bronze', box(cx + 3.6, y + 2.6, cz - 0.6, cx + 3.7, y + 2.7, cz + 0.6));
@@ -269,7 +269,7 @@ function crossingHollow(bag, col, cx, cz, y, H, R0, apses) {
     for (let k = 0; k < 8; k++) {
       const fa = k * Math.PI / 4, dd = Math.abs(Math.atan2(Math.sin(fa - toC), Math.cos(fa - toC)));
       if (dd < Math.PI * 0.3) continue;                                     // the side toward the crossing stays open
-      archWall(bag, col, 'stucco', AV(k - 1, tm), AV(k, tm), tt, y, y + H * 0.75, dd > Math.PI * 0.55 ? { w: 3.6, spring: 3.8, rise: 2.2, back: 'stucco_ochre' } : null);
+      archWall(bag, col, 'stucco', AV(k - 1, tm), AV(k, tm), tt, y, y + H * 0.75, dd > Math.PI * 0.55 ? { w: 3.6, spring: 3.8, rise: 2.2, back: 'marble_pink' } : null);
       const n = [Math.cos(fa), Math.sin(fa)], wc = [ox + n[0] * (ia - 0.03), oz + n[1] * (ia - 0.03)], ux = -n[1], uz = n[0];
       if (dd > Math.PI * 0.55) {
         const g = []; const Pq = (u, yy) => [wc[0] + ux * u, yy, wc[1] + uz * u]; g.push(...Pq(-0.7, y + 9), ...Pq(0.7, y + 9), ...Pq(0.7, y + 17), ...Pq(-0.7, y + 9), ...Pq(0.7, y + 17), ...Pq(-0.7, y + 17), ...Pq(-0.7, y + 17), ...Pq(0.7, y + 17), ...Pq(0, y + 18.2));

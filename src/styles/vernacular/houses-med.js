@@ -73,7 +73,7 @@ function openGround(bag, col, el, { O, wall, y, st, f, rand }) {
   B('wood_dark', du - dw / 2 - 0.02, T, du - dw / 2 + 0.06, T + dw, fy, fy + 2.45);
   const h = (mat, u, v, r, ht, ya = 0) => { const p = P(u, v); bag.add(mat, lathe([[r * 0.6, 0], [r, ht * 0.4], [r * 0.7, ht * 0.85], [r * 0.4, ht], [0.001, ht]], 10, null, p[0], fy + ya, p[1])); };
   const table = (u, v, w, d, ht, mat = 'wood_dark') => { B(mat, u - w / 2, v - d / 2, u + w / 2, v + d / 2, fy + ht - 0.06, fy + ht, true); for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) B(mat, u + a * (w / 2 - 0.08) - 0.04, v + b * (d / 2 - 0.08) - 0.04, u + a * (w / 2 - 0.08) + 0.04, v + b * (d / 2 - 0.08) + 0.04, fy, fy + ht - 0.06); };
-  const hearth = (u) => { B('brick', u - 0.8, D - T - 0.7, u + 0.8, D - T, fy, fy + 0.45, true); B('brick', u - 0.9, D - T - 0.75, u + 0.9, D - T, fy + 1.6, fy + 1.9); for (const sg of [-1, 1]) B('brick', u + sg * 0.8 - 0.1, D - T - 0.7, u + sg * 0.8 + 0.1, D - T, fy + 0.45, fy + 1.6); B('brick', u - 0.6, D - T - 0.5, u + 0.6, D - T, fy + 1.9, y + st); B('pottery_dark', u - 0.5, D - T - 0.55, u + 0.5, D - T - 0.05, fy + 0.45, fy + 0.47); h('iron', u, D - T - 0.35, 0.22, 0.3, 0.47); B('timber', u - 0.3, D - T - 0.45, u + 0.3, D - T - 0.25, fy + 0.45, fy + 0.55); };
+  const hearth = (u) => { B('brick', u - 0.8, D - T - 0.7, u + 0.8, D - T, fy, fy + 0.45, true); B('brick', u - 0.9, D - T - 0.75, u + 0.9, D - T, fy + 1.6, fy + 1.9); for (const sg of [-1, 1]) B('brick', u + sg * 0.8 - 0.1, D - T - 0.7, u + sg * 0.8 + 0.1, D - T, fy + 0.45, fy + 1.6); B('brick', u - 0.6, D - T - 0.5, u + 0.6, D - T, fy + 1.9, y + st); B('wood_dark', u - 0.5, D - T - 0.55, u + 0.5, D - T - 0.05, fy + 0.45, fy + 0.47); h('terracotta', u, D - T - 0.35, 0.22, 0.3, 0.47); B('timber', u - 0.3, D - T - 0.45, u + 0.3, D - T - 0.25, fy + 0.45, fy + 0.55); };
   const islamic = el.variant === 'moorish' || el.variant === 'ottoman';
   if (el.use === 'inn' && !islamic) {
     // tables with benches, the counter along one side with jugs, barrels behind it, the hearth at the back, hams hanging
@@ -81,14 +81,14 @@ function openGround(bag, col, el, { O, wall, y, st, f, rand }) {
     for (let k = 0; k < nt; k++) for (const v of [D * 0.38, D * 0.62]) {
       const u = 1.2 + k * 2.2 + 0.4; if (u > L - 1.8 || v > D - 1.4) continue;
       table(u, v, 1.4, 0.7, 0.78); for (const s2 of [-1, 1]) { B('timber', u - 0.7, v + s2 * 0.55 - 0.13, u + 0.7, v + s2 * 0.55 + 0.13, fy + 0.42, fy + 0.46, true); for (const a of [-0.6, 0.55]) B('timber', u + a, v + s2 * 0.55 - 0.1, u + a + 0.05, v + s2 * 0.55 + 0.1, fy, fy + 0.42); }
-      h('terracotta', u - 0.3, v, 0.07, 0.24, 0.78); h('pottery_dark', u + 0.2, v + 0.1, 0.05, 0.12, 0.78);
+      h('terracotta', u - 0.3, v, 0.07, 0.24, 0.78); h('plaster_white', u + 0.2, v + 0.1, 0.05, 0.12, 0.78);
     }
     const cu = L - T - 0.6;
     B('wood_dark', cu - 0.3, T + 1.2, cu + 0.3, D - T - 1.2, fy, fy + 1.05, true); B('timber', cu - 0.35, T + 1.15, cu + 0.35, D - T - 1.15, fy + 1.05, fy + 1.1);
-    for (let v = T + 1.5; v < D - T - 1.4; v += 0.55) h(rand() < 0.5 ? 'terracotta' : 'glaze_green', cu, v, 0.08, 0.28, 1.1);
+    for (let v = T + 1.5; v < D - T - 1.4; v += 0.55) h('terracotta', cu, v, 0.08, 0.28, 1.1);
     for (let v = T + 1.4; v < D - T - 1.2; v += 0.8) { const p = P(L - T - 0.25, v); const g = lathe([[0.28, 0], [0.33, 0.35], [0.28, 0.7], [0.001, 0.7]], 12, null, 0, 0, 0); g.rotateX(Math.PI / 2); g.translate(p[0], fy + 0.32, p[1]); bag.add('timber', g); }
     hearth(Math.min(L / 2, L - 2.5));
-    for (let k = 0; k < 4; k++) { const u = 1 + k * 0.6; h(k % 2 ? 'hide_tan' : 'stucco_cream', u, D - T - 1.5, 0.1, 0.35, st - 1.0); B('cloth_brown', u - 0.005, D - T - 1.505, u + 0.005, D - T - 1.495, fy + st - 0.65, y + st - 0.24); }
+    for (let k = 0; k < 4; k++) { const u = 1 + k * 0.6; h(k % 2 ? 'terracotta' : 'plaster_white', u, D - T - 1.5, 0.1, 0.35, st - 1.0); B('wood_dark', u - 0.005, D - T - 1.505, u + 0.005, D - T - 1.495, fy + st - 0.65, y + st - 0.24); }
   } else if (islamic) {
     // the divan: a low platform along the walls with mattresses and cushions, a rug, the brass tray on its stand, a lamp, a chest
     const dv = 0.75;
@@ -102,11 +102,11 @@ function openGround(bag, col, el, { O, wall, y, st, f, rand }) {
   } else {
     // a home: the table and stools, the hearth, a chest, the bed in the corner, a cupboard with crockery
     table(L / 2, D * 0.45, 1.3, 0.8, 0.78); for (const [a, b] of [[-0.9, 0], [0.9, 0], [0, -0.65]]) { const p = [L / 2 + a, D * 0.45 + b]; B('timber', p[0] - 0.18, p[1] - 0.18, p[0] + 0.18, p[1] + 0.18, fy, fy + 0.45, true); }
-    h('terracotta', L / 2 - 0.2, D * 0.45, 0.09, 0.3, 0.78); h('glaze_white', L / 2 + 0.25, D * 0.45 - 0.1, 0.1, 0.06, 0.78);
+    h('terracotta', L / 2 - 0.2, D * 0.45, 0.09, 0.3, 0.78); h('plaster_white', L / 2 + 0.25, D * 0.45 - 0.1, 0.1, 0.06, 0.78);
     hearth(L - 1.6 > 2 ? L - 1.6 : L / 2);
-    B('wood_dark', T + 0.1, T + 0.2, T + 1.1, T + 0.75, fy, fy + 0.65, true); B('iron', T + 0.1, T + 0.2, T + 1.1, T + 0.25, fy + 0.5, fy + 0.56);
+    B('wood_dark', T + 0.1, T + 0.2, T + 1.1, T + 0.75, fy, fy + 0.65, true); B('timber', T + 0.1, T + 0.2, T + 1.1, T + 0.25, fy + 0.5, fy + 0.56);
     if (D > 4.5) { B('wood_dark', T + 0.05, D - T - 2.1, T + 1.45, D - T - 0.05, fy, fy + 0.5, true); B('cloth_white', T + 0.1, D - T - 2.05, T + 1.4, D - T - 0.1, fy + 0.5, fy + 0.62); B('cloth_red', T + 0.1, D - T - 1.4, T + 1.4, D - T - 0.1, fy + 0.62, fy + 0.66); B('cloth_white', T + 0.25, D - T - 0.55, T + 1.25, D - T - 0.15, fy + 0.62, fy + 0.78); }
-    const cu = L - T - 0.25; B('wood_dark', cu - 0.2, T + 0.3, cu + 0.2, T + 1.5, fy, fy + 1.9, true); for (const hh of [1.0, 1.45]) { B('wood_dark', cu - 0.22, T + 0.3, cu + 0.2, T + 1.5, fy + hh, fy + hh + 0.03); for (let v = T + 0.45; v < T + 1.4; v += 0.3) h(rand() < 0.5 ? 'glaze_white' : 'terracotta', cu - 0.05, v, 0.08, 0.16, hh + 0.03); }
+    const cu = L - T - 0.25; B('wood_dark', cu - 0.2, T + 0.3, cu + 0.2, T + 1.5, fy, fy + 1.9, true); for (const hh of [1.0, 1.45]) { B('wood_dark', cu - 0.22, T + 0.3, cu + 0.2, T + 1.5, fy + hh, fy + hh + 0.03); for (let v = T + 0.45; v < T + 1.4; v += 0.3) h(rand() < 0.5 ? 'plaster_white' : 'terracotta', cu - 0.05, v, 0.08, 0.16, hh + 0.03); }
   }
 }
 
