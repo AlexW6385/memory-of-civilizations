@@ -10,7 +10,7 @@ import { material } from './materials.js';
 import { SMALL } from './layers.js';
 
 /** A shape is instanced settlement-wide from this many copies; rarer ones are merged per tile. */
-export const LIFE_MIN = 16;
+export const LIFE_MIN = 13;
 /** Copies nearer than this cast shadows (as the life tiles did before). */
 const SHADOW_NEAR = 120;
 

@@ -153,7 +153,8 @@ function rectRoof(el, bag) {
   const [cx, cz] = el.c, A = el.A, B = el.B, y = el.y, R = el.rise, sw = el.sweep ?? 0.9, kind = el.kind || 'xieshan';
   const mat = el.mat || PAL.roof, soffit = el.soffit || PAL.soffit, p = el.p ?? 1.7, gAt = el.gableAt ?? 0.42;
   const L = kind === 'gable' ? A : A - B;                 // half-length of the ridge
-  const NX = LOW ? Math.max(4, Math.round(A * 0.8)) : Math.max(8, Math.round(A * 2)), NZ = LOW ? 6 : 12;
+  // small roofs (houses) need fewer rings: the curve still reads, at half the vertices
+  const small = B < 5.5, NX = LOW ? Math.max(4, Math.round(A * 0.8)) : small ? Math.max(6, Math.round(A * 1.3)) : Math.max(8, Math.round(A * 2)), NZ = LOW ? 6 : small ? 8 : 12;
   const out = [], under = [];
   const rot = (x, z) => (el.alongZ ? [cx - (z - cz), cz + (x - cx)] : [x, z]);
   const P = (x, z, off = 0) => {
