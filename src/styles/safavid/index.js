@@ -15,6 +15,7 @@ import { beamTris } from '../ming/index.js';
 import { arcadeWall, pishtaqFace } from '../mughal/index.js';
 
 const B = 'brick_buff', T = 'tile_lapis', Q = 'tile_turquoise';
+const boxR = (r, y0, y1) => box(r[0], y0, r[1], r[2], y1, r[3]);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** A straight wall a→b, `th` thick, from y to y + h. */
@@ -86,6 +87,40 @@ function squareArcade(el, { bag, col }) {
     arches.push({ at: (i + 0.5) * w, w: w * 0.55, h: h * 0.33, sill: h * 0.53, depth: 2.4, back: 'kahgel' });
   }
   arcadeWall(bag, col, a, b, y, h, 1.2, B, arches, behind);
+  // the shops: behind each lower arch, across the arcade's passage, a shop front on the mass of rooms —
+  // two timber door leaves, folded open, under a lattice transom — and before it the stone platform
+  // (sakku) the shopkeeper sits on with his wares: bales of cloth, rolled carpets, copper vessels,
+  // jars; in each upper arch a wooden lattice balustrade
+  const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, rand = rng(Math.round(a[0] * 31 + a[1] * 17) + 7);
+  const Q = (s, d) => [a[0] + ux * s + nx * d, a[1] + uz * s + nz * d];
+  const R = (s0, s1, d0, d1) => { const p = Q(s0, d0), q = Q(s1, d1); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
+  const wares = ['cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_green'];
+  for (let i = 0; i < n; i++) {
+    const c = (i + 0.5) * w, dw = Math.min(1.25, w * 0.18), dh = 2.7, df = 3.7;
+    for (const s of [-1, 1]) {                                                                       // the door leaves, folded back against the jambs
+      bag.add('wood_dark', boxR(R(c + s * dw, c + s * (dw + 0.08), df - 0.95, df), y, y + dh));
+      bag.add('wood_dark', boxR(R(c + s * (dw - 0.12), c + s * (dw + 0.1), df - 0.06, df), y, y + dh + 0.12));
+    }
+    bag.add('wood_dark', boxR(R(c - dw - 0.12, c + dw + 0.12, df - 0.06, df), y + dh, y + dh + 0.14));
+    bag.add('lattice', boxR(R(c - dw, c + dw, df - 0.04, df), y + dh + 0.14, y + dh + 1.3));
+    bag.add('wood_dark', boxR(R(c - dw - 0.12, c + dw + 0.12, df - 0.06, df), y + dh + 1.3, y + dh + 1.42));
+    bag.add('opening', boxR(R(c - dw, c + dw, df - 0.02, df), y, y + dh));
+    // the platform and the wares on it
+    const pw = Math.min(w * 0.28, 1.9), ph = 0.45, pr = R(c - pw, c + pw, df - 1.3, df - 0.95);
+    bag.add('limestone', boxR(pr, y, y + ph)); col.rect(pr, y, y + ph);
+    const kind = Math.floor(rand() * 4);
+    for (let k = 0; k < 3; k++) {
+      const s = c - pw + 0.45 + k * (2 * pw - 0.9) / 2, d = df - 1.12, yp = y + ph, [px, pz] = Q(s, d);
+      if (kind === 0) bag.add(wares[(i + k) & 3], boxR(R(s - 0.28, s + 0.28, d - 0.15, d + 0.15), yp, yp + 0.3 + 0.1 * k));              // bales of cloth
+      else if (kind === 1) bag.add(wares[(i + k + 1) & 3], lathe([[0.001, 0], [0.16, 0.01], [0.17, 0.5], [0.16, 1.1], [0.001, 1.12]], 8, null, px, yp, pz)); // carpets rolled, stood up
+      else if (kind === 2) bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.2, 0.12], [0.18, 0.24], [0.08, 0.32], [0.07, 0.42], [0.11, 0.46], [0.001, 0.46]], 10, null, px, yp, pz)); // copper vessels
+      else bag.add(k === 1 ? 'pottery_dark' : 'terracotta', lathe([[0.001, 0], [0.1, 0.01], [0.2, 0.18], [0.19, 0.36], [0.08, 0.5], [0.09, 0.56], [0.001, 0.56]], 10, null, px, yp, pz)); // jars
+    }
+    // the upper arch's balustrade, in the middle of the wall's thickness
+    const bw = w * 0.55 / 2, ys = y + h * 0.53;
+    bag.add('lattice', boxR(R(c - bw, c + bw, -0.03, 0.03), ys, ys + 0.85));
+    bag.add('wood_dark', boxR(R(c - bw, c + bw, -0.07, 0.07), ys + 0.85, ys + 0.95));
+  }
   const off = (d) => [[a[0] + nx * d, a[1] + nz * d], [b[0] + nx * d, b[1] + nz * d]];
   const [m0, m1] = off((3.8 + D) / 2);
   slab(bag, col, B, m0, m1, y, D - 3.8, h - 0.05);
