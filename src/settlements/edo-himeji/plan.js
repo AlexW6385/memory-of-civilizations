@@ -7,6 +7,7 @@
 import { INNER, OUTER, BANK, LEVEL, NINO, HON, DAI, NISHI, KEEP, SMALL, GOTEN, OTEMON, MIDDLE, RADIUS } from './layout.js';
 
 const E = [];
+const KEEP_TIERS = [{ hw: 11.5, hd: 10.5, h: 6.5 }, { hw: 10.3, hd: 9.3, h: 5 }, { hw: 9, hd: 8, h: 5 }, { hw: 7.6, hd: 6.6, h: 4.8 }, { hw: 6.2, hd: 5.3, h: 4.7 }];
 const [ix0, iz0, ix1, iz1] = INNER, [ox0, oz0, ox1, oz1] = OUTER, RW = 4, RT = BANK + 1.4;
 const ST = 'ishigaki';
 // ---- the inner rampart (four strips, the south one broken by the gate) and the moat's outer bank
@@ -66,9 +67,13 @@ wall([nx0 + 7, nz0 + 1], [nx1 - 1, nz0 + 1], NISHI.top); wall([nx0 + 7, nz1 - 1]
 // the main keep is hollow: its stone base a ring round the basement, entered by a door on the west from the
 // courtyard between the keeps; inside, the floors, the great pillars and the stairs to the top
 E.push({ t: 'ishigaki', rect: [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], y0: DAI.top, y1: KEEP.base, batter: 1.4, ring: 2.5, door: { at: KEEP.c[1] - 7.4, w: 1.8, h: 2.8 } });
-E.push({ t: 'tenshu', c: KEEP.c, base: KEEP.base, hollow: true, below: DAI.top, basementRect: [KEEP.c[0] - 9.5, KEEP.c[1] - 8.5, KEEP.c[0] + 9.5, KEEP.c[1] + 8.5], basementHd: 8.5, chidori: [0, 2], kara: { 1: ['s', 'n'] }, ishiOtoshi: true, tiers: [{ hw: 11.5, hd: 10.5, h: 6.5 }, { hw: 10.3, hd: 9.3, h: 5 }, { hw: 9, hd: 8, h: 5 }, { hw: 7.6, hd: 6.6, h: 4.8 }, { hw: 6.2, hd: 5.3, h: 4.7 }] });
+E.push({ t: 'tenshu', c: KEEP.c, base: KEEP.base, hollow: true, below: DAI.top, basementRect: [KEEP.c[0] - 9.5, KEEP.c[1] - 8.5, KEEP.c[0] + 9.5, KEEP.c[1] + 8.5], basementHd: 8.5, chidori: [0, 2], kara: { 1: ['s', 'n'] }, ishiOtoshi: true, tiers: KEEP_TIERS });
 for (const k of SMALL) E.push({ t: 'tenshu', c: k.c, base: DAI.top, chidori: [0], tiers: [{ hw: 6, hd: 5.5, h: 5 }, { hw: 5, hd: 4.5, h: 4.5 }, { hw: 4, hd: 3.6, h: 4.2 }] });
-for (const rect of [[-17, -76.5, -9, -62.6], [-39, -86, -19, -78], [-49, -76.5, -41, -55.5], [-39, -54, -26.6, -46]]) E.push({ t: 'watari', rect, y: DAI.top, storeys: 2, h: 3.5 });
+// the four passages (i, ro, ha, ni) close the courtyard between the keeps; the way in is a gate through
+// the ground storey of the south-west one, between the west small keep and the main keep, where the
+// path from the Honmaru comes up (the last of the water gates, mizu-no-mon, led so into the keeps)
+for (const rect of [[-17, -76.5, -9, -62.6], [-39, -86, -19, -78], [-49, -76.5, -41, -55.5]]) E.push({ t: 'watari', rect, y: DAI.top, storeys: 2, h: 3.5 });
+E.push({ t: 'watari', rect: [-39, -54, -26.6, -46], y: DAI.top, storeys: 2, h: 3.5, gate: { at: -32.4, w: 2.6, h: 3.0, side: 'hi' } });
 
 // ---- the Sannomaru: the lord's residence, its walls and gate
 E.push({ t: 'goten', y: BANK, halls: [[-55, 106, -12, 134], [-4, 100, 42, 128, 4], [12, 138, 56, 166], [-52, 142, -8, 168], [-8, 134, 6, 146, 3]] });
@@ -86,7 +91,10 @@ for (const [x0, x1] of [[-RADIUS, -MIDDLE.gap / 2], [MIDDLE.gap / 2, RADIUS]]) {
 E.push({ t: 'yagura_mon', rect: [-12, MIDDLE.z0 - 9, 12, MIDDLE.z0 - 1], y: 0, passage: 6, h: 4.2 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('main keep', [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], DAI.top, 'hall'), room('inner', INNER, BANK, 'open'), room('honmaru', HON.rect, HON.top, 'open'), room('keep', DAI.rect, DAI.top, 'hall')];
+const rooms = [room('main keep', [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], DAI.top, 'hall'), room('inner', INNER, BANK, 'open'), room('honmaru', HON.rect, HON.top, 'open'), room('keep', DAI.rect, DAI.top, 'hall'),
+  room('keep courtyard', [-40, -77, -26, -55], DAI.top, 'open')];
+// every floor of the main keep, climbed by its own stairs from the basement
+{ let y = KEEP.base; for (const [i, t] of KEEP_TIERS.entries()) { rooms.push(room(`main keep floor ${i + 1}`, [KEEP.c[0] - t.hw + 1, KEEP.c[1] - t.hd + 1, KEEP.c[0] + t.hw - 1, KEEP.c[1] + t.hd - 1], y, 'hall')); y += t.h; } }
 const walks = [[[0, 300], [0, 215], [0, 180], [0, 80], [0, 40], [0, 10], [12, 0], [-31, -30]]];
 walks[0].y0 = 0;
 

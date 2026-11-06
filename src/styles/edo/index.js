@@ -288,11 +288,53 @@ function yagura(el, { bag, col }) {
 /** watari: a roofed passage or long gallery { rect, y, storeys, h }: plastered, windowed, under a hip-and-gable roof. */
 function watari(el, { bag, col }) {
   const rect = el.rect, y = el.y ?? 0, n = el.storeys ?? 1, h = el.h ?? 3.6;
-  tierBox(bag, col, rect, y, h * n);
+  if (el.gate) watariGate(bag, col, rect, y, h * n, el.gate);
+  else tierBox(bag, col, rect, y, h * n);
   if (n > 1) { const [x0, z0, x1, z1] = rect; bag.add(TL, box(x0 - 0.5, y + h - 0.1, z0 - 0.5, x1 + 0.5, y + h + 0.15, z1 + 0.5)); }
   col.floor(rect, y);
   roof(bag, rect, y + h * n - 0.2, 1.1, el.top || 'xieshan', (Math.min(rect[2] - rect[0], rect[3] - rect[1]) / 2 + 1.1) * 0.7);
 }
+
+/**
+ * A gate through the ground storey of a roofed passage { at (along the long side), w, h }: the
+ * passage crosses the short side; plastered piers either side, the storeys over it on a lintel beam;
+ * at the outer mouth two posts and a head beam (kabuki) of dark timber, the two leaves of planks
+ * sheathed in iron strips with rows of bosses, standing open against the passage's walls; a plank
+ * ceiling under the storey above.
+ */
+function watariGate(bag, col, rect, y, H, g) {
+  const [x0, z0, x1, z1] = rect, alongX = x1 - x0 >= z1 - z0, w = g.w ?? 2.6, gh = g.h ?? 3.0, a = g.at - w / 2, b = g.at + w / 2;
+  // in local terms: u along the long side (the gate at u = at), v across (the passage runs along v)
+  const R = (u0, v0, u1, v1) => (alongX ? [u0, v0, u1, v1] : [v0, u0, v1, u1]);
+  const [U0, V0, U1, V1] = alongX ? [x0, z0, x1, z1] : [z0, x0, z1, x1];
+  for (const r of [R(U0, V0, a, V1), R(b, V0, U1, V1)]) { bag.add(PL, box(r[0], y, r[1], r[2], y + gh, r[3])); col.rect(r, y, y + gh); }
+  // the storeys over the passage, the windows of the upper one only
+  bag.add(PL, box(x0, y + gh, z0, x1, y + H, z1)); col.rect(rect, y + gh, y + H);
+  tierWindows(bag, rect, y + H / 2, H / 2);
+  const cr = R(a, V0, b, V1);
+  bag.add(WD, box(cr[0], y + gh - 0.08, cr[1], cr[2], y + gh - 0.02, cr[3]));
+  for (let k = 1; k < 5; k++) { const v = V0 + (V1 - V0) * k / 5, r = R(a, v - 0.09, b, v + 0.09); bag.add(WD, box(r[0], y + gh - 0.26, r[1], r[2], y + gh - 0.08, r[3])); }
+  // the gate's frame at the outer mouth (v = V0 when g.side is 'lo', else V1): posts, head beam, a sill at the ground
+  const vo = g.side === 'hi' ? V1 : V0, s = g.side === 'hi' ? -1 : 1, d = 0.32;
+  const fr = (u0, u1, yy0, yy1, vv0, vv1) => { const r = R(u0, Math.min(vv0, vv1), u1, Math.max(vv0, vv1)); bag.add(WD, box(r[0], yy0, r[1], r[2], yy1, r[3])); return r; };
+  for (const u of [a, b]) { const r = fr(u - (u === a ? 0.02 : 0.34), u + (u === a ? 0.34 : 0.02), y, y + gh, vo - s * 0.04, vo + s * d); col.rect(r, y, y + gh); }
+  fr(a - 0.25, b + 0.25, y + gh - 0.45, y + gh - 0.02, vo - s * 0.06, vo + s * (d + 0.04));
+  // iron bands round the head beam's ends, a little boss at each
+  for (const u of [a + 0.1, b - 0.1]) { const r = R(u - 0.16, Math.min(vo - s * 0.08, vo + s * (d + 0.06)), u + 0.16, Math.max(vo - s * 0.08, vo + s * (d + 0.06))); bag.add('iron', box(r[0], y + gh - 0.47, r[1], r[2], y + gh, r[3])); }
+  // the leaves, opened back against the side walls inside the mouth
+  const lw = w / 2 - 0.36, lt = 0.1;
+  for (const [u, sg] of [[a + 0.34, 1], [b - 0.34, -1]]) {
+    const v0 = vo + s * (d + 0.06), v1 = v0 + s * lw, uu0 = sg > 0 ? u : u - lt, uu1 = sg > 0 ? u + lt : u;
+    fr(uu0, uu1, y + 0.04, y + gh - 0.5, v0, v1);
+    // the iron strips across the leaf, and the bosses in rows
+    const fu = sg > 0 ? uu1 : uu0, o = sg > 0 ? 0.015 : -0.015;
+    for (let k = 0; k < 6; k++) { const yy = y + 0.25 + k * (gh - 0.95) / 5; fr(Math.min(fu, fu + o), Math.max(fu, fu + o), yy, yy + 0.09, v0, v1); }
+    for (let k = 0; k < 6; k++) for (let j = 0; j < 3; j++) { const yy = y + 0.25 + k * (gh - 0.95) / 5 + 0.045, vv = v0 + s * (0.2 + j * (lw - 0.4) / 2); bag.add('iron', boxAt(R, fu + o * 2, vv, yy, 0.03, 0.05)); }
+    col.rect(R(uu0, Math.min(v0, v1), uu1, Math.max(v0, v1)), y, y + gh - 0.5);
+  }
+}
+/** A small cube (a boss) at local (u, v), height y, half-sizes hu across the leaf's face and h. */
+function boxAt(R, u, v, y, hu, h) { const r = R(u - hu, v - h, u + hu, v + h); return box(r[0], y - h, r[1], r[2], y + h, r[3]); }
 
 /** yagura_mon: a gate-house { rect, y, alongX (the passage runs along z when false) }: two stone-footed piers, the upper storey across, its roof; the passage open. */
 function yaguraMon(el, { bag, col }) {
