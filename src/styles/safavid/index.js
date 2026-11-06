@@ -458,7 +458,14 @@ const VESSELS = [
 ];
 /** A closed outline of vessel k, standing at (u, v), h high, as points. */
 function vesselOutline(k, u, v, h) {
-  const prof = VESSELS[k % VESSELS.length], R = prof.map(([w, t]) => [u + w * h, v + t * h]), L = prof.map(([w, t]) => [u - w * h, v + t * h]).reverse();
+  // the profile smoothed (Catmull–Rom, four points a span) so the cut reads as a turned vessel
+  const p = VESSELS[k % VESSELS.length], sm = [];
+  for (let i = 0; i + 1 < p.length; i++) {
+    const a = p[Math.max(0, i - 1)], b = p[i], c = p[i + 1], d = p[Math.min(p.length - 1, i + 2)];
+    for (let j = 0; j < 4; j++) { const t = j / 4, t2 = t * t, t3 = t2 * t; sm.push([0, 1].map((m) => 0.5 * (2 * b[m] + (-a[m] + c[m]) * t + (2 * a[m] - 5 * b[m] + 4 * c[m] - d[m]) * t2 + (-a[m] + 3 * b[m] - 3 * c[m] + d[m]) * t3))); }
+  }
+  sm.push(p[p.length - 1]);
+  const R = sm.map(([w, t]) => [u + Math.max(0.02, w) * h, v + t * h]), L = sm.map(([w, t]) => [u - Math.max(0.02, w) * h, v + t * h]).reverse();
   return [...R, ...L];
 }
 /** A pointed-arch outline (a niche's frame) of width w, height h, its foot at (u, v), as points. */
@@ -475,7 +482,7 @@ function archOutline(u, v, w, h) {
  * a point of the wall's face, n the unit normal from it into the room, the lining from s0 to s1
  * along u = (n.z, −n.x), from y0 up H.
  */
-function lining(bag, col, o, n, s0, s1, y0, H, th, holes, mat = 'stucco_cream', back = 'plaster_ochre') {
+function lining(bag, col, o, n, s0, s1, y0, H, th, holes, cuts = [], mat = 'stucco_cream', back = 'plaster_ochre') {
   const L = s1 - s0, U = [n[1], -n[0]], sh = new Shape(), bt = 0.03;
   sh.moveTo(0, 0); sh.lineTo(L, 0); sh.lineTo(L, H); sh.lineTo(0, H); sh.lineTo(0, 0);
   for (const pts of holes) { const p = new Path(); p.moveTo(pts[0][0], pts[0][1]); for (const q of pts.slice(1)) p.lineTo(q[0], q[1]); p.lineTo(pts[0][0], pts[0][1]); sh.holes.push(p); }
@@ -484,8 +491,15 @@ function lining(bag, col, o, n, s0, s1, y0, H, th, holes, mat = 'stucco_cream', 
   g.applyMatrix4(new Matrix4().makeBasis({ x: U[0], y: 0, z: U[1] }, { x: 0, y: 1, z: 0 }, { x: n[0], y: 0, z: n[1] }).setPosition(p0[0], y0, p0[1]));
   bag.add(mat, g);
   const a = [o[0] + U[0] * s0, o[1] + U[1] * s0], b = [o[0] + U[0] * s1, o[1] + U[1] * s1];
-  const bx = [a[0], a[1], b[0] + n[0] * bt, b[1] + n[1] * bt], r = [Math.min(bx[0], bx[2]), Math.min(bx[1], bx[3]), Math.max(bx[0], bx[2]), Math.max(bx[1], bx[3])];
-  bag.add(back, box(r[0], y0, r[1], r[2], y0 + H, r[3]));
+  // the backing, broken where `cuts` ([s0, s1] along the wall: the windows) go through
+  let u = s0;
+  for (const [c0, c1] of [...cuts.sort((p, q) => p[0] - q[0]), [s1, s1]]) {
+    if (c0 > u + 0.01) {
+      const pa = [o[0] + U[0] * u, o[1] + U[1] * u], pb = [o[0] + U[0] * c0 + n[0] * bt, o[1] + U[1] * c0 + n[1] * bt];
+      bag.add(back, box(Math.min(pa[0], pb[0]), y0, Math.min(pa[1], pb[1]), Math.max(pa[0], pb[0]), y0 + H, Math.max(pa[1], pb[1])));
+    }
+    u = Math.max(u, c1);
+  }
   const e = [b[0] + n[0] * (bt + th), b[1] + n[1] * (bt + th)];
   col.rect([Math.min(a[0], e[0]), Math.min(a[1], e[1]), Math.max(a[0], e[0]), Math.max(a[1], e[1])], y0, y0 + H);
 }
@@ -634,32 +648,26 @@ function aliQapu(el, { bag, col, lights }) {
     balustrade(bag, col, [wx1 + 0.07, F4[1]], [wx1 + 0.07, C3[3] - 0.25], y);
     // the stucco: a plain dado, then three rows of arched niches, each cut through in a vessel's shape
     const y0 = y, Hh = TOP - 0.6 - y, th = 0.22, cols = 0.9;
-    const cutWall = (o, n, spans) => {
-      for (const [s0, s1] of spans) {
-        if (s1 - s0 < 0.6) continue;
-        const L = s1 - s0, m = Math.floor(L / cols), pad = (L - m * cols) / 2, holes = [];
-        for (let i = 0; i < m; i++) {
-          const u = pad + (i + 0.5) * cols;
-          for (let r = 0; r < 3; r++) {
-            const v = 1.05 + r * 1.32, k = (i + r * 2 + Math.round(s0)) % 4;
-            holes.push(r === 2 ? archOutline(u, v, cols - 0.2, 1.08) : vesselOutline(k, u, v + 0.06, r === 0 ? 1.04 : 0.98));
-          }
+    // each wall one lining from e to L − e (s along u = (n.z, −n.x) from the face point o), the windows
+    // (centres s, widths w) cut out of it a little larger than their arches, the niches in columns between
+    const cutWall = (o, n, L, wins, e = 0) => {
+      const m = Math.floor((L - 2 * e) / cols), pad = e + (L - 2 * e - m * cols) / 2, holes = [];
+      for (const [c, w] of wins) holes.push(archOutline(c - e, 0.9, w + 0.3, 3.1));
+      for (let i = 0; i < m; i++) {
+        const u = pad + (i + 0.5) * cols;
+        if (wins.some(([c, w]) => Math.abs(u - c) < w / 2 + 0.15 + cols / 2)) continue;
+        for (let r = 0; r < 3; r++) {
+          const v = 1.05 + r * 1.32, k = (i + r * 2 + Math.round(o[0] + o[1])) & 3;
+          holes.push(r === 2 ? archOutline(u - e, v, cols - 0.2, 1.08) : vesselOutline(k, u - e, v + 0.06, r === 0 ? 1.04 : 0.98));
         }
-        lining(bag, col, o, n, s0, s1, y0, Hh, th, holes);
       }
+      lining(bag, col, o, n, e, L - e, y0, Hh, th, holes, wins.map(([c, w]) => [c - w / 2 - 0.15, c + w / 2 + 0.15]));
     };
-    // spans along each wall (s along u = (n.z, −n.x) from the face point o), leaving the windows; the
-    // north and south linings run the room's full width, the west and east ones between them
-    const ix0 = X0 + 1, ix1 = XT - 1, iz0 = Z0 + 2, iz1 = Z1 - 2, Lx = ix1 - ix0, Lz = iz1 - iz0, gaps = (L, holes, e = 0) => {
-      const out = []; let u = e;
-      for (const [a, b] of holes.sort((p, q) => p[0] - q[0])) { out.push([u, a - 0.1]); u = b + 0.1; }
-      out.push([u, L - e]); return out;
-    };
-    const ww = (c, w) => [c - w / 2, c + w / 2];
-    cutWall([ix0, iz0], [0, 1], gaps(Lx, [ww(X0 + 3 - ix0, 2), ww(X0 + 8 - ix0, 2)]));
-    cutWall([ix1, iz1], [0, -1], gaps(Lx, [ww(ix1 - (XT - 4), 2)]));
-    cutWall([ix0, iz1], [1, 0], gaps(Lz, [ww(iz1 - (Z1 - 2 - 9), 2), ww(iz1 - (Z1 - 2 - 13), 2)], th + 0.03));
-    cutWall([ix1, iz0], [-1, 0], gaps(Lz, [3, 8, 13].map((u) => ww((Z1 - 2 - u) - iz0, 2.4)), th + 0.03));
+    const ix0 = X0 + 1, ix1 = XT - 1, iz0 = Z0 + 2, iz1 = Z1 - 2, Lx = ix1 - ix0, Lz = iz1 - iz0, e = th + 0.03;
+    cutWall([ix0, iz0], [0, 1], Lx, [[X0 + 3 - ix0, 2], [X0 + 8 - ix0, 2]]);
+    cutWall([ix1, iz1], [0, -1], Lx, [[ix1 - (XT - 4), 2]]);
+    cutWall([ix0, iz1], [1, 0], Lz, [[iz1 - (Z1 - 2 - 9), 2], [iz1 - (Z1 - 2 - 13), 2]], e);
+    cutWall([ix1, iz0], [-1, 0], Lz, [3, 8, 13].map((u) => [(Z1 - 2 - u) - iz0, 2.4]), e);
     hangingLamp(bag, lights, (ix0 + ix1) / 2 + 1.5, y + 3.2, iz0 + Lz * 0.3, TOP - 0.6, 5, 12);
     hangingLamp(bag, lights, (ix0 + ix1) / 2 + 1.5, y + 3.2, iz0 + Lz * 0.7, TOP - 0.6, 5, 12);
   }
