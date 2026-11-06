@@ -12,6 +12,13 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **The town:** three avenues converge on the Place d'Armes before the palace [stated: Wikipedia "Versailles, Yvelines"].
 - **Moment shown:** about 1690.
 
+## 1a. Detail (built: `src/styles/classical_fr/front.js`, `fountain` in `index.js`, `town.js`)
+
+- **The garden front:** three storeys — a slightly rusticated ground floor with arched windows whose keystones are carved with figures; the main floor with tall arched windows between unfluted Ionic pilasters; an attic of small rectangular windows between pilasters; a flat roof behind a balustrade; the central front 25 bays wide [stated: Sullivan, Bluffton "Garden facade"]. Several slightly projecting avant-corps with detached columns; the balustrade set with trophies and vases hiding the roof; the 17 windows of the Hall of Mirrors on the gardens [stated: Larousse "château de Versailles"]. Built on every stone front of the central block and the wings: rustication in 0.55 m courses, glazing of small panes in white frames set back in the reveals, iron rails to the long windows, the band courses and entablature breaking forward over the avant-corps (the central five bays and three at each end), detached columns on pedestals with a statue above each before the attic, trophies of arms on the avant-corps' dies and fire-vases (pots-à-feu) elsewhere [inferred: bay grouping, sizes].
+- **The Latona fountain:** the marble group of Latona and her children by the Marsy brothers; the peasants of Lycia turned into frogs and lizards; remodelled 1687–89 by Hardouin-Mansart, who replaced the rock with a marble pyramid and turned Latona to face the Grand Canal [stated: chateauversailles.fr "Fountains"]; the tiers carry frogs, the lowest turtles [stated: KidzSearch "Latona Fountain"]. Built: the four tiers with gilded frogs and turtles on their rims and frogs in the basin, each spouting an arc of water toward the goddess; Latona with a hand raised to Jupiter and the two children at her knees, facing west. The basin now stands on a level landing at the foot of the slope (it had been set below the ground there).
+- **The Grand Canal:** 1.67 km by 62 m, finished 1679; its flotilla of Louis XIV's time — a three-masted ship, a galley, rowing boats, galiots, brigantines, gondolas given by Venice, two English yachts (1675); six gondoliers in 1684 [stated: Wikiwand "Grand Canal of Versailles"]; two gondolas sent by Venice in 1674 with gondoliers who settled at "Little Venice" [stated: parisdigest "Grand Canal"]. Built: two gondolas with their gondoliers and two rowing boats (the canal is compressed and only its eastern end lies inside the settlement).
+- **The court:** courtiers in coats and plumed hats and ladies in gowns walking and talking on the terrace, down the walk between the water basins and at the Latona basin [inferred: the gardens as the court's promenade].
+
 ## 2. Layout of the settlement (radius 420 m)
 
 | Part | Where (m, +x east, +z south) | Notes |
@@ -58,3 +65,9 @@ Lully's strings, the grands motets, the harpsichord. [inferred]
 - [Hall of Mirrors — Wikipedia](https://en.wikipedia.org/wiki/Hall_of_Mirrors)
 - [Gardens of Versailles — Wikipedia](https://en.wikipedia.org/wiki/Gardens_of_Versailles)
 - [Versailles, Yvelines — Wikipedia](https://en.wikipedia.org/wiki/Versailles,_Yvelines)
+- [Garden facade — Bluffton University (M. Sullivan)](https://homepages.bluffton.edu/~SULLIVANM/france/versailles/exterior/gardenfront.html)
+- [Château de Versailles — Larousse](https://www.larousse.fr/encyclopedie/divers/Versailles/148666)
+- [Fountains — Château de Versailles](https://en.chateauversailles.fr/discover/estate/fountains)
+- [Latona Fountain — KidzSearch](https://wiki.kidzsearch.com/wiki/Latona_Fountain)
+- [Grand Canal of Versailles — Wikiwand](https://www.wikiwand.com/en/Grand_Canal_of_Versailles)
+- [Grand Canal — Paris Digest](https://www.parisdigest.com/versailles/grand-canal.htm)
