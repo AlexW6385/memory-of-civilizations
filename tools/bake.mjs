@@ -1,86 +1,39 @@
 #!/usr/bin/env node
-// Offline light bake: an irradiance volume (L1 spherical harmonics on a regular grid) per
-// building, from the same geometry the viewer shows. Sun (with shadows), sky and oil lamps,
-// plus bounced light (two passes). Output: data/gi/<id>.gi (format in src/engine/gi.js).
+// Offline light bake: irradiance volumes (L1 spherical harmonics on regular grids) for each
+// settlement's landmark, from the same geometry the viewer shows (tools/lib/gi-scene.mjs): sun
+// (with shadows, at the settlement's chosen hour), sky, oil lamps and bounced light (two passes),
+// in boxes round its indoor rooms. Output: data/gi/<plan id>.gi (format in src/engine/gi.js) and
+// its entry in data/gi/index.json (the geometry hash it was baked from, size, probes, time).
 //
-// usage: node tools/bake.mjs [building-id ...] [--spacing 1.0] [--rays 64] [--threads N]
+// usage: node tools/bake.mjs <settlement or plan id ...> [--spacing 1.0] [--rays 160] [--threads N]
+//        node tools/bake.mjs --status [ids...]   every landmark: current, stale, unbaked or none
+//        node tools/bake.mjs --stale             re-bake every stale bake
+//        node tools/bake.mjs --dry <ids...>      the boxes and probe counts only, nothing traced
 
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { availableParallelism } from 'node:os';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readdir } from 'node:fs/promises';
+import { writeFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BufferGeometry, Float32BufferAttribute, Ray, Vector3, DoubleSide, DataUtils } from 'three';
 import { MeshBVH } from 'three-mesh-bvh';
-import { BUILDINGS } from '../src/buildings/index.js';
-import { buildPlan, toWorld } from '../src/core/build.js';
-import { albedo } from '../src/core/palette.js';
-import { buildChunk } from '../src/world/terrain-grid.js';
-import { REGION, SITES, sunDirection, skyRadiance as skyRadianceOf } from '../src/world/regions.js';
+import { sunDirection, skyRadiance as skyRadianceOf } from '../src/world/regions.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const MAGIC = 0x4947504D;
 
-/** Scene for ray tracing: merged triangles with an albedo per triangle, and the lamps. */
-async function scene(id) {
-  const entry = BUILDINGS.find((b) => b.id === id);
-  const { plan } = await entry.load();
-  const built = buildPlan(plan);
-  const pos = [], alb = [], tr = [];
-  // stained glass lets coloured light through; the clear outer skin of a window lets it all through
-  const TRANSMIT = { stained_glass: [0.45, 0.24, 0.5], glass_outer: [1, 1, 1] };
-  for (const { mat, geometry } of built.parts) {
-    if (mat === 'water' || mat === 'flame') continue;
-    const a = albedo(mat), p = geometry.attributes.position.array, t3 = TRANSMIT[mat];
-    for (let i = 0; i < p.length; i++) pos.push(p[i]);
-    for (let t = 0; t < p.length / 9; t++) { alb.push(a[0], a[1], a[2]); tr.push(...(t3 || [-1, -1, -1])); }
-  }
-  // open ground around the building
-  const [bx0, bz0, bx1, bz1] = plan.bounds;
-  const c0 = toWorld(plan, bx0, bz0), c1 = toWorld(plan, bx1, bz1);
-  const gx0 = Math.min(c0[0], c1[0]) - 300, gx1 = Math.max(c0[0], c1[0]) + 300, gz0 = Math.min(c0[2], c1[2]) - 300, gz1 = Math.max(c0[2], c1[2]) + 300;
-  // the ground, as the viewer draws it, with the albedo of its cover (sand, fields, grass, rock, soil)
-  const C = buildChunk([gx0, gz0, gx1, gz1], 3);
-  const cov = { sand: [0.54, 0.4, 0.22], grass: [0.16, 0.18, 0.08], rock: [0.4, 0.37, 0.32], soil: [0.15, 0.1, 0.06], fields: [0.15, 0.2, 0.07] };
-  const vAlb = (v) => {
-    const g = C.ground, g2 = C.ground2, w = [g[v * 4], g[v * 4 + 1], g[v * 4 + 2], g[v * 4 + 3], g2[v * 4]];
-    const keys = ['sand', 'grass', 'rock', 'soil', 'fields'], tot = w.reduce((a, b) => a + b, 0) || 1;
-    return [0, 1, 2].map((k) => keys.reduce((a, key, i) => a + cov[key][k] * w[i], 0) / tot);
-  };
-  const vertsTop = (C.position.length / 3);
-  for (let i = 0; i < C.index.length; i += 3) {
-    const [a, b, c] = [C.index[i], C.index[i + 1], C.index[i + 2]];
-    for (const v of [a, b, c]) pos.push(C.position[v * 3], C.position[v * 3 + 1] - 0.02, C.position[v * 3 + 2]);
-    const A = vAlb(a);
-    alb.push(...A);
-    tr.push(-1, -1, -1);
-  }
-  const climate = REGION[SITES[id]?.region || 'nile'].climate;
-  return { plan, built, pos: new Float32Array(pos), alb: new Float32Array(alb), tr: new Float32Array(tr), lights: built.lights, climate };
-}
-
-function grid(plan, spacing) {
-  const [bx0, bz0, bx1, bz1] = plan.bakeBounds || plan.bounds;
-  const a = toWorld(plan, bx0, bz0), b = toWorld(plan, bx1, bz1);
-  const min = [Math.min(a[0], b[0]), (plan.base || 0) + 0.5, Math.min(a[2], b[2])];
-  const max = [Math.max(a[0], b[0]), (plan.base || 0) + (plan.bakeTop ?? 20), Math.max(a[2], b[2])];
-  const n = [0, 1, 2].map((k) => Math.max(2, Math.round((max[k] - min[k]) / spacing) + 1));
-  return { min, n, spacing };
-}
-
-// ── worker: trace probes for a range of z slices ─────────────────────────────
+// ── worker: trace probes for a range of z slices of one grid ─────────────────
 
 function workerMain() {
-  const { pos, alb, tr, lights, G, rays, zs, prev, pass, climate } = workerData;
+  const { pos, alb, tr, lights, rays, climate } = workerData;
   const SUN_DIR = sunDirection(climate), SUN_COLOR = climate.sun.color, SUN_INTENSITY = climate.sun.intensity;
   const skyRadiance = (d) => skyRadianceOf(climate, d);
   const geo = new BufferGeometry();
   geo.setAttribute('position', new Float32BufferAttribute(new Float32Array(pos), 3));
   const bvh = new MeshBVH(geo, { targetLeafSize: 8 });
   const A = new Float32Array(alb), TR = new Float32Array(tr);
-  const prevV = prev ? new Float32Array(prev) : null;
-  const [nx, ny, nz] = G.n, s = G.spacing;
   const ray = new Ray(new Vector3(), new Vector3());
   const sray = new Ray(new Vector3(), new Vector3());
   const sun = new Vector3(...SUN_DIR);
@@ -128,6 +81,10 @@ function workerMain() {
     }
     return null;
   };
+  // one job: a range of z slices of one grid, in one pass (the BVH is built once per worker)
+  parentPort.on('message', ({ G, zs, prev }) => {
+  const prevV = prev ? new Float32Array(prev) : null;
+  const [nx, ny, nz] = G.n, s = G.spacing;
   // trilinear SH sample of the previous pass at p with normal n → irradiance rgb
   const sampleE = (p, nrm, out) => {
     const fx = (p[0] - G.min[0]) / s, fy = (p[1] - G.min[1]) / s, fz = (p[2] - G.min[2]) / s;
@@ -220,7 +177,9 @@ function workerMain() {
     parentPort.postMessage({ progress: 1 });
   }
   parentPort.postMessage({ done: true, out: out.buffer, valid: valid.buffer }, [out.buffer, valid.buffer]);
+  });
 }
+
 
 const hexCache = new Map();
 function hex(c) {
@@ -234,38 +193,49 @@ function hex(c) {
 
 // ── main ─────────────────────────────────────────────────────────────────────
 
-async function runPass(S, G, rays, threads, prev, pass) {
+const share = (a) => { const s = new Float32Array(new SharedArrayBuffer(a.byteLength)); s.set(a); return s.buffer; };
+
+/** Workers that each hold the scene's BVH and trace jobs (z ranges of a grid) sent to them. */
+function pool(S, rays, threads) {
+  const workers = Array.from({ length: threads }, () => new Worker(fileURLToPath(import.meta.url), {
+    workerData: { pos: S.shared.pos, alb: S.shared.alb, tr: S.shared.tr, lights: S.lights, rays, climate: S.climate },
+  }));
+  return { workers, close: () => Promise.all(workers.map((w) => w.terminate())) };
+}
+
+async function runPass(P, G, prev, pass, label) {
   const [nx, ny, nz] = G.n;
   const vol = new Float32Array(nx * ny * nz * 12);
   const valid = new Uint8Array(nx * ny * nz);
   const chunks = [];
-  const per = Math.ceil(nz / (threads * 4));
+  const per = Math.max(1, Math.ceil(nz / (P.workers.length * 4)));
   for (let z = 0; z < nz; z += per) chunks.push([z, Math.min(nz, z + per)]);
   let doneSlices = 0;
   const t0 = Date.now();
-  const runChunk = (zs) => new Promise((ok, fail) => {
-    const w = new Worker(fileURLToPath(import.meta.url), {
-      workerData: { pos: S.pos.buffer.slice(0), alb: S.alb.buffer.slice(0), tr: S.tr.buffer.slice(0), lights: S.lights, G, rays, zs, prev, pass, climate: S.climate },
-    });
-    w.on('message', (m) => {
+  const prevS = prev ? share(new Float32Array(prev)) : null;
+  const runChunk = (w, zs) => new Promise((ok, fail) => {
+    const onMsg = (m) => {
       if (m.progress) {
         doneSlices++;
-        if (doneSlices % 8 === 0 || doneSlices === nz) {
+        if (process.stdout.isTTY && (doneSlices % 4 === 0 || doneSlices === nz)) {
           const el = (Date.now() - t0) / 1000;
-          process.stdout.write(`\r  pass ${pass}: ${doneSlices}/${nz} slices, ${el.toFixed(0)}s, eta ${(el / doneSlices * (nz - doneSlices)).toFixed(0)}s   `);
+          process.stdout.write(`\r  ${label} pass ${pass}: ${doneSlices}/${nz} slices, ${el.toFixed(0)}s, eta ${(el / doneSlices * (nz - doneSlices)).toFixed(0)}s   `);
         }
       }
       if (m.done) {
         vol.set(new Float32Array(m.out), zs[0] * ny * nx * 12);
         valid.set(new Uint8Array(m.valid), zs[0] * ny * nx);
+        w.off('message', onMsg); w.off('error', fail);
         ok();
       }
-    });
-    w.on('error', fail);
+    };
+    w.on('message', onMsg); w.on('error', fail);
+    w.postMessage({ G, zs, prev: prevS, pass });
   });
   const queue = chunks.slice();
-  await Promise.all(Array.from({ length: threads }, async () => { while (queue.length) await runChunk(queue.shift()); }));
-  process.stdout.write('\n');
+  await Promise.all(P.workers.map(async (w) => { while (queue.length) await runChunk(w, queue.shift()); }));
+  if (process.stdout.isTTY) process.stdout.write('\n');
+  console.log(`  ${label} pass ${pass}: ${((Date.now() - t0) / 1000).toFixed(0)}s`);
   fill(vol, valid, G.n);
   smooth(vol, G.n);
   return vol;
@@ -312,12 +282,9 @@ function smooth(vol, [nx, ny, nz]) {
   }
 }
 
-/**
- * Write data/gi/<id>.gi: a 36-byte header, then the 12 SH coefficient planes as half floats,
- * delta-coded along the grid, byte-shuffled and gzipped (half floats compress poorly as is;
- * GitHub Pages does not compress binary files).
- */
-export async function write(id, G, vol) {
+/** One grid as a version-3 volume: a 36-byte header, then the 12 SH planes as half floats,
+ * delta-coded along the grid, byte-shuffled and gzipped (GitHub Pages does not compress binary files). */
+function encode(G, vol) {
   const [nx, ny, nz] = G.n, N = nx * ny * nz;
   const header = new ArrayBuffer(36);
   new Uint32Array(header, 0, 5).set([MAGIC, 3, nx, ny, nz]);
@@ -334,29 +301,89 @@ export async function write(id, G, vol) {
   const bytes = new Uint8Array(planes.buffer), M = planes.length;
   const shuffled = Buffer.alloc(bytes.length);
   for (let i = 0; i < M; i++) { shuffled[i] = bytes[2 * i]; shuffled[M + i] = bytes[2 * i + 1]; }
-  const payload = gzipSync(shuffled, { level: 9 });
+  return Buffer.concat([Buffer.from(header), gzipSync(shuffled, { level: 9 })]);
+}
+
+/**
+ * Write data/gi/<id>.gi: one volume as version 3; several (one per box of rooms) as version 4 —
+ * u32 magic, u32 4, u32 count, then per volume a u32 byte length and its version-3 bytes.
+ */
+export async function write(id, grids, vols) {
+  const parts = grids.map((G, i) => encode(G, vols[i]));
+  let buf;
+  if (parts.length === 1) buf = parts[0];
+  else {
+    const head = Buffer.alloc(12);
+    head.writeUInt32LE(MAGIC, 0); head.writeUInt32LE(4, 4); head.writeUInt32LE(parts.length, 8);
+    buf = Buffer.concat([head, ...parts.flatMap((p) => { const l = Buffer.alloc(4); l.writeUInt32LE(p.length); return [l, p]; })]);
+  }
   await mkdir(join(ROOT, 'data/gi'), { recursive: true });
   const file = join(ROOT, 'data/gi', `${id}.gi`);
-  await writeFile(file, Buffer.concat([Buffer.from(header), payload]));
-  return { file, bytes: 36 + payload.length };
+  await writeFile(file, buf);
+  return { file, bytes: buf.length };
+}
+
+async function bakeOne(site, plan, { rays, threads, spacing }) {
+  const { bakeScene, readIndex, INDEX } = await import('./lib/gi-scene.mjs');
+  const t0 = Date.now();
+  if (spacing) plan = { ...plan, bakeSpacing: spacing };
+  const S = bakeScene(site, plan, { rays });
+  if (!S.grids) { console.log(`${plan.id} (${site}): no indoor room to bake`); return null; }
+  const probes = S.grids.reduce((a, g) => a + g.n[0] * g.n[1] * g.n[2], 0);
+  console.log(`${plan.id} (${site}): ${S.landmarkTris} triangles + ground, ${S.lights.length} lamps, ${S.grids.length} box(es) at ${S.grids[0].spacing} m, ${probes} probes, ${rays} rays, ${threads} threads`);
+  S.shared = { pos: share(S.pos), alb: share(S.alb), tr: share(S.tr) };
+  S.pos = S.alb = S.tr = null;
+  const vols = [], P = pool(S, rays, threads);
+  try {
+    for (const [i, G] of S.grids.entries()) {
+      const label = `[${i + 1}/${S.grids.length} ${G.n.join('x')}]`;
+      const v1 = await runPass(P, G, null, 1, label);
+      vols.push(await runPass(P, G, v1.buffer, 2, label));
+    }
+  } finally { await P.close(); }
+  const { file, bytes } = await write(plan.id, S.grids, vols);
+  const seconds = Math.round((Date.now() - t0) / 1000);
+  const index = readIndex();
+  index[plan.id] = { site, hash: S.hash, rays, probes, boxes: S.grids.map((g) => ({ min: g.min.map((v) => +v.toFixed(2)), n: g.n, spacing: g.spacing, rooms: g.rooms })), bytes, seconds, baked: new Date().toISOString().slice(0, 10) };
+  const sorted = Object.fromEntries(Object.keys(index).sort().map((k) => [k, index[k]]));
+  writeFileSync(INDEX, JSON.stringify(sorted, null, 1) + '\n');
+  console.log(`  wrote ${file} (${(bytes / 1e6).toFixed(2)} MB) in ${seconds}s`);
+  return { bytes, seconds, probes };
 }
 
 if (isMainThread) {
   const args = process.argv.slice(2);
   const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
-  const ids = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && args[i - 1].startsWith('--')));
-  const spacing = +opt('spacing', 1.0), rays = +opt('rays', 160);
+  const valued = new Set(['--spacing', '--rays', '--threads']);
+  const ids = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && valued.has(args[i - 1])));
+  const rays = +opt('rays', 160), spacing = args.includes('--spacing') ? +opt('spacing', 1) : null;
   const threads = +opt('threads', Math.max(1, availableParallelism()));
-  for (const b of BUILDINGS) {
-    if (ids.length && !ids.includes(b.id)) continue;
-    const t0 = Date.now();
-    const S = await scene(b.id);
-    const G = grid(S.plan, args.includes('--spacing') ? spacing : (S.plan.bakeSpacing ?? spacing));
-    console.log(`${b.id}: ${S.pos.length / 9} triangles, ${S.lights.length} lamps, ${G.n.join('×')} probes (${G.n[0] * G.n[1] * G.n[2]}), ${rays} rays, ${threads} threads`);
-    const v1 = await runPass(S, G, rays, threads, null, 1);
-    const v2 = await runPass(S, G, rays, threads, v1.buffer, 2);
-    const { file, bytes } = await write(b.id, G, v2);
-    console.log(`  wrote ${file} (${(bytes / 1e6).toFixed(1)} MB) in ${((Date.now() - t0) / 1000).toFixed(0)}s`);
+  const gi = await import('./lib/gi-scene.mjs');
+  if (args.includes('--status') || args.includes('--stale')) {
+    const st = await gi.status({ ids: ids.length ? ids : null, onlyBaked: args.includes('--stale') });
+    const files = (await readdir(join(ROOT, 'data/gi'))).filter((f) => f.endsWith('.gi')).map((f) => f.slice(0, -3));
+    for (const f of files) if (!st.some((s) => s.id === f) && !ids.length) st.push({ id: f, site: '?', state: 'orphan' });
+    if (args.includes('--status')) {
+      for (const s of st) if (s.state !== 'none') console.log(`${s.state.padEnd(8)} ${s.site.padEnd(18)} ${s.id.padEnd(34)} ${s.probes ? `${s.boxes} box(es), ${s.probes} probes at ${s.spacing} m` : ''}`);
+      const c = {}; for (const s of st) c[s.state] = (c[s.state] || 0) + 1;
+      console.log(Object.entries(c).map(([k, v]) => `${v} ${k}`).join(', '));
+    } else {
+      const stale = st.filter((s) => s.state === 'stale');
+      console.log(stale.length ? `stale: ${stale.map((s) => s.id).join(', ')}` : 'no stale bakes');
+      for (const s of stale) { const [{ plan }] = await gi.resolve([s.id]); await bakeOne(s.site, plan, { rays, threads, spacing }); }
+    }
+  } else if (args.includes('--dry')) {
+    for (const { site, plan } of await gi.resolve(ids)) {
+      const S = gi.bakeScene(site, plan, { rays });
+      if (!S.grids) { console.log(`${plan.id}: no indoor room`); continue; }
+      const probes = S.grids.reduce((a, g) => a + g.n[0] * g.n[1] * g.n[2], 0);
+      console.log(`${plan.id} (${site}): ${S.landmarkTris} tris, ${S.grids.length} box(es) at ${S.grids[0].spacing} m, ${probes} probes, hash ${S.hash}`);
+      for (const g of S.grids) console.log(`   ${g.n.join('x')} at ${g.min.map((v) => v.toFixed(1)).join(',')}: ${g.rooms.join('; ')}`);
+    }
+  } else {
+    if (!ids.length) { console.log('name the settlements or plans to bake (or --status, --stale)'); process.exit(1); }
+    const found = await gi.resolve(ids);
+    for (const { site, plan } of found) if (!plan.feature) await bakeOne(site, plan, { rays, threads, spacing });
   }
 } else {
   workerMain();
