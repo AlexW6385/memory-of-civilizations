@@ -246,12 +246,24 @@ function gable(el, { bag }) {
 /** A steep gable roof along x { x0, x1, z0, z1, y (eaves), ridge, mat } with its end triangles. */
 function gableRoof(el, { bag }) {
   const { x0, x1, z0, z1, y, ridge } = el, zm = (z0 + z1) / 2;
+  // the roof has its thickness at the eave (boards, rafters and the lead on them, ~0.25 m): an
+  // edge one can see, and an underside the walker finds above a porch open under the eave
+  const e = y + (el.eave ?? 0.25);
   const tris = [];
   const q = (a, b, c, d) => tris.push(...a, ...b, ...c, ...a, ...c, ...d);
-  q([x0, y, z0], [x1, y, z0], [x1, ridge, zm], [x0, ridge, zm]);
-  q([x0, y, z1], [x0, ridge, zm], [x1, ridge, zm], [x1, y, z1]);
-  if (el.ends !== false) { tris.push(x0, y, z0, x0, ridge, zm, x0, y, z1); tris.push(x1, y, z0, x1, y, z1, x1, ridge, zm); }
-  q([x0, y, z0], [x0, y, z1], [x1, y, z1], [x1, y, z0]);
+  // the slopes and the underside in strips, a narrow one along each edge (the walker's top field
+  // reads a big face a little past its edges; a narrow strip there keeps the eave where it is)
+  const W = Math.min(0.5, (zm - z0) / 3), XW = Math.min(0.5, (x1 - x0) / 3), f = W / (zm - z0);
+  const xs = [x0, x0 + XW, x1 - XW, x1];
+  for (const [za, ya] of [[z0, e], [z1, e]]) {
+    const zb = za + (zm - za) * f, yb = ya + (ridge - ya) * f;
+    for (let k = 0; k < 3; k++) { q([xs[k], ya, za], [xs[k + 1], ya, za], [xs[k + 1], yb, zb], [xs[k], yb, zb]); q([xs[k], yb, zb], [xs[k + 1], yb, zb], [xs[k + 1], ridge, zm], [xs[k], ridge, zm]); }
+  }
+  q([x0, y, z0], [x1, y, z0], [x1, e, z0], [x0, e, z0]);
+  q([x0, y, z1], [x0, e, z1], [x1, e, z1], [x1, y, z1]);
+  if (el.ends !== false) for (const x of [x0, x1]) tris.push(x, y, z0, x, e, z0, x, ridge, zm, x, y, z0, x, ridge, zm, x, y, z1, x, y, z1, x, ridge, zm, x, e, z1);
+  const zs = [z0, z0 + W, z1 - W, z1];
+  for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) q([xs[a], y, zs[b]], [xs[a], y, zs[b + 1]], [xs[a + 1], y, zs[b + 1]], [xs[a + 1], y, zs[b]]);
   bag.add(el.mat || 'lead', fromTriangles(orientOutward(tris)));
   // the gilt cresting along the ridge
   bag.add('gold', box(x0, ridge - 0.05, zm - 0.06, x1, ridge + 0.5, zm + 0.06));
