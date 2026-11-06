@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.50 — Stairs that can be climbed; material swaps (2026-11-06)
+- The walker climbs stairs built over solid masses (the mass under a stair is cut back to its sides; roof-top cells lowered to the stair) and steps onto terraces and plinths within a step; Giza's mortuary temple door, causeway on the plateau into the valley temple, the valley temple on the valley floor with its quay; Machu Picchu's plaza banks and temple steps; footbridges into Isfahan's square; a side door and steps at Suzhou; stairs up Borobudur's round terraces; arrivals re-aimed at Lalibela, Granada and Barcelona. Materials applied: breccia, bitumen and red-glazed manes at Babylon, pietra dura stones and water jets at Agra, water jets and a 31.3 m Myrtles pool at Granada, Egyptian blue and fresco green at Athens and Knossos, muqarnas recesses in the Shah Mosque's court arcades.
+
 ## v9.49 — Petra's Siq in rock (2026-11-06)
 - The Siq's walls as real sandstone: some seventy colour bands matched across both walls, worn grooves and ledges, cracks, inward lean closing overhead, flood-worn foot, fallen blocks; the cliffs joined round the square, the Outer Siq, the theatre and the valley, the Khazneh set in its recess; no stalls in the gorge; the Street of Façades with three crow-step tomb types; the theatre rebuilt with three tiers and a two-storey stage, moved off the walkway; the Palace, Corinthian, Silk and Urn Tombs standing on the valley floor.
 
