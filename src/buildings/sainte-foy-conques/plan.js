@@ -4,6 +4,7 @@
 // nave and the terrace. Metres.
 
 import { SITES } from '../../world/regions.js';
+import './style.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -296,7 +297,7 @@ export const sainteFoy = {
   id: 'sainte-foy-conques',
   name: { en: 'Sainte-Foy de Conques', zh: '孔克圣福瓦修道院教堂' },
   era: { en: 'Romanesque, c. 1050–1120', zh: '罗马式，约1050—1120年' },
-  style: 'romanesque',
+  style: 'romanesque-foy',
   district: 'rouergue',
   ...SITES['sainte-foy-conques'],
   entrance: { at: [-12, 0], facing: 'e' },
