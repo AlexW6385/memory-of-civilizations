@@ -9,9 +9,12 @@ export const TEMPLES = [
   { c: [-70, -60], len: 24, w: 13, h: 27, jagati: 4 },       // Kandariya Mahadeva
   { c: [-70, -14], len: 16, w: 9, h: 22, jagati: 3.5 },      // Jagadambi
   { c: [-70, 26], len: 16, w: 9, h: 22, jagati: 3.5 },       // Chitragupta
-  { c: [20, -90], len: 22, w: 12, h: 28, jagati: 4, corners: true },   // Lakshmana
-  { c: [40, -10], len: 20, w: 11, h: 27, jagati: 4, corners: true },   // Vishvanatha
+  // Lakshmana on its great platform (10 ft high, its sides carved with the life of the kingdom), a shrine at each corner
+  { c: [20, -90], len: 22, w: 12, h: 28, jagati: 3.1, corners: true, frieze: true, terrace: [7, -103, 50, -77] },
+  { c: [40, -10], len: 20, w: 11, h: 27, jagati: 4, corners: true, terrace: [28, -22, 67, 2] },   // Vishvanatha
 ];
+/** The Varaha pavilion facing Lakshmana across the way east of its stair. */
+export const VARAHA = [62, -95, 74, -85];
 export const TANK = { c: [40, 150], r: [75, 38], level: -1.5 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };

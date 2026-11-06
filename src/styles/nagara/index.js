@@ -187,9 +187,10 @@ function bell(bag, x, y, z, r, h) {
  */
 function temple(el, { bag, col }) {
   const [cx, cz] = el.c, L = el.len, W = el.w, H = el.h, J = el.jagati ?? 4, y0 = el.y ?? 0, y = y0 + J, plinth = H * 0.12;
-  // the terrace with a stair on the east
-  const T = [cx - W * 0.85, cz - W * 0.95, cx + L + 4, cz + W * 0.95];
+  // the terrace with a stair on the east (el.terrace: a larger platform, as Lakshmana's with its corner shrines)
+  const T = el.terrace || [cx - W * 0.85, cz - W * 0.95, cx + L + 4, cz + W * 0.95];
   bag.add(S, box(T[0], y0 - 0.5, T[1], T[2], y, T[3])); col.rect(T, y0, y); col.floor(T, y);
+  if (el.frieze && !el.simple) platformFrieze(bag, T, y0, y, cz, W * 0.14 + 0.2);
   const sw = W * 0.28, sr = [T[2], cz - sw / 2, T[2] + J * 2.2, cz + sw / 2], n = Math.round(J / 0.22);
   for (let i = 0; i < n; i++) { const z = sr[0] + (sr[2] - sr[0]) * (1 - (i + 1) / n), yy = y0 + J * (i + 1) / n; bag.add(S, box(z, y0 - 0.5, sr[1], z + (sr[2] - sr[0]) / n + 0.02, yy, sr[3])); col.floor([z, sr[1], z + (sr[2] - sr[0]) / n, sr[3]], yy); }
   // the high moulded plinth under all the halls
@@ -262,8 +263,111 @@ function temple(el, { bag, col }) {
     for (const [ky, kz] of [[0.55, 0], [0.75, -0.35], [0.75, 0.35]]) bag.add(RELIEF, lathe([[0.001, 0], [0.16, 0.04], [0.13, 0.28], [0.09, 0.42], [0.001, 0.5]], 6, null, px + 0.3, yb + (yt - yb) * ky, cz + kz * hw));
   }
 }
-/** sub_shrine: a small temple or shrine { c, w, h, y } (no halls). */
-function shrine(el, { bag, col }) {
+/** A small figure of the platform's frieze facing out along n, feet at (x, y, z), h tall: kind 0 an elephant
+ *  with its rider, 1 a horse and rider, 2 and 3 foot soldiers with shields, 4 a dancer, 5 a drummer, 6 a
+ *  couple, 7 a porter with his load. Parts in the round, low and simple; ux, uz along the band. */
+function friezeFig(bag, kind, x, y, z, ux, uz, h) {
+  const k = h / 0.75, M = RELIEF, P = (u, v, d = 0) => [x + ux * u, y + v * k, z + uz * u];
+  const man = (u, sc = 1, arms = 0) => {
+    bag.add(M, lathe([[0.07 * k * sc, 0], [0.05 * k * sc, 0.3 * k * sc], [0.06 * k * sc, 0.42 * k * sc], [0.04 * k * sc, 0.5 * k * sc], [0.001, 0.52 * k * sc]], 5, null, ...P(u, 0)));
+    bag.add(M, lathe([[0.001, 0], [0.04 * k * sc, 0.02 * k * sc], [0.04 * k * sc, 0.08 * k * sc], [0.001, 0.1 * k * sc]], 5, null, ...P(u, 0.52 * sc)));
+    if (arms) bag.add(M, rod(P(u, 0.42 * sc), P(u + arms * 0.12 * k, 0.6 * sc), 0.018 * k, 4));
+  };
+  if (kind === 0) {
+    bag.add(M, box(...[P(-0.22 * k, 0.18), P(0.22 * k, 0.42)].reduce((a, b) => [Math.min(a[0], b[0]) - 0.08 * k * Math.abs(uz), a[1], Math.min(a[2], b[2]) - 0.08 * k * Math.abs(ux), Math.max(a[0], b[0]) + 0.08 * k * Math.abs(uz), b[1], Math.max(a[2], b[2]) + 0.08 * k * Math.abs(ux)])));
+    for (const u of [-0.16, 0.16]) bag.add(M, lathe([[0.035 * k, 0], [0.035 * k, 0.2 * k], [0.001, 0.2 * k]], 5, null, ...P(u * k, 0)));
+    bag.add(M, rod(P(0.24 * k, 0.4), P(0.3 * k, 0.05), 0.025 * k, 4));
+    man(0.02 * k, 0.55, 1); return;
+  }
+  if (kind === 1) {
+    bag.add(M, rod(P(-0.18 * k, 0.3), P(0.16 * k, 0.32), 0.07 * k, 5)); bag.add(M, rod(P(0.16 * k, 0.32), P(0.26 * k, 0.48), 0.04 * k, 5));
+    for (const u of [-0.15, 0.13]) bag.add(M, rod(P(u * k, 0.3), P(u * k + 0.02 * k, 0), 0.02 * k, 4));
+    man(0, 0.6, 1); return;
+  }
+  if (kind === 2 || kind === 3) { man(0, 1, kind === 2 ? 1 : -1); bag.add(M, lathe([[0.001, 0], [0.09 * k, 0.005], [0.09 * k, 0.02 * k]], 6, null, ...P(-0.06 * k, 0.28))); return; }
+  if (kind === 4) { man(0, 1, 1); bag.add(M, rod(P(0, 0.42), P(-0.12 * k, 0.55), 0.018 * k, 4)); bag.add(M, rod(P(0, 0.12), P(0.1 * k, 0.24), 0.02 * k, 4)); return; }
+  if (kind === 5) { man(0, 1); bag.add(M, lathe([[0.05 * k, 0], [0.07 * k, 0.07 * k], [0.05 * k, 0.14 * k]], 6, null, ...P(0.08 * k, 0.22))); return; }
+  if (kind === 6) { man(-0.06 * k, 1, 1); man(0.06 * k, 0.94, -1); return; }
+  man(0, 1); bag.add(M, rod(P(-0.2 * k, 0.5), P(0.2 * k, 0.5), 0.012 * k, 4)); for (const u of [-0.18, 0.18]) bag.add(M, lathe([[0.04 * k, 0], [0.05 * k, 0.05 * k], [0.001, 0.1 * k]], 5, null, ...P(u * k, 0.36)));
+}
+/** The jagati's sides: a moulded base and coping, and between them a sunk band carved with the life of the
+ *  kingdom in long processions — elephants and horsemen, soldiers, dancers and drummers, couples, porters.
+ *  (The stair's opening on the east, half-width sw about cz, is left.) */
+function platformFrieze(bag, T, y0, y, cz, sw) {
+  const [x0, z0, x1, z1] = T, H = y - y0, bh = Math.min(0.85, H * 0.28), yb = y0 + H * 0.38;
+  for (const [ya, yb2, o] of [[y0, y0 + 0.35, 0.3], [y0 + 0.35, y0 + 0.55, 0.15], [y - 0.35, y, 0.25], [yb - 0.18, yb, 0.12], [yb + bh, yb + bh + 0.18, 0.12]]) {
+    for (const r of [[x0 - o, z0 - o, x1 + o, z0], [x0 - o, z1, x1 + o, z1 + o], [x0 - o, z0, x0, z1], [x1, z0, x1 + o, cz - sw], [x1, cz + sw, x1 + o, z1]]) bag.add(o > 0.2 ? S : 'sandstone', box(r[0], ya, r[1], r[2], yb2, r[3]));
+  }
+  let n = 0;
+  const run = (ax, az, bx, bz, nx, nz) => {
+    const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, step = 0.62, m = Math.floor(L / step);
+    for (let i = 0; i < m; i++) { const u = (i + 0.5) * L / m, px = ax + ux * u + nx * 0.04, pz = az + uz * u + nz * 0.04; friezeFig(bag, [0, 2, 3, 1, 2, 4, 5, 4, 6, 7, 2, 3][n++ % 12], px, yb, pz, ux, uz, bh * 0.92); }
+  };
+  run(x1, z0, x0, z0, 0, -1); run(x0, z1, x1, z1, 0, 1); run(x0, z0, x0, z1, -1, 0); run(x1, z1, x1, cz + sw + 0.3, 1, 0); run(x1, cz - sw - 0.3, x1, z0, 1, 0);
+}
+/**
+ * sub_shrine: a small temple { c, w, h, y, face ('e' | 'n' | 's' | 'w') } — on a moulded base, the
+ * sanctum under its curvilinear tower, and before its door an entrance porch: two pillars, the
+ * seat-backs at the sides, a little stepped roof (Lakshmana's corner shrines: "each … like a
+ * separate temple with a sanctum and entrance porch"). Without face: no porch.
+ */
+function shrine(el, ctx) {
+  const { bag, col } = ctx, [cx, cz] = el.c, w = el.w, y = el.y ?? 0, h = el.h, f = el.face;
+  shrineCore(el, ctx);
+  if (!f) return;
+  const d = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] }[f], ux = -d[1], uz = d[0], pd = w * 0.62, pw = w * 0.4;
+  const P = (a, b) => [cx + d[0] * a + ux * b, cz + d[1] * a + uz * b], R = (a0, a1, b0, b1) => { const p = P(a0, b0), q = P(a1, b1); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
+  const base = R(w * 0.75, w * 0.75 + pd, -pw, pw);
+  bag.add(S, box(base[0], y - 0.5, base[1], base[2], y + 1.4, base[3])); col.rect(base, y, y + 1.4); col.floor(base, y + 1.4);
+  for (const sb of [-1, 1]) { const [px, pz] = P(w * 0.75 + pd - 0.35, sb * (pw - 0.35)); pillar(bag, px, pz, y + 1.4, y + 1.4 + h * 0.3, 0.2); col.rect([px - 0.2, pz - 0.2, px + 0.2, pz + 0.2], y, y + 1.4 + h * 0.3); }
+  const roofR = R(w / 2 - 0.1, w * 0.75 + pd + 0.2, -pw - 0.2, pw + 0.2);
+  bag.add(S, box(roofR[0], y + 1.4 + h * 0.3, roofR[1], roofR[2], y + 1.4 + h * 0.3 + 0.3, roofR[3]));
+  stepped(bag, roofR, y + 1.4 + h * 0.3 + 0.3, h * 0.22, S, 3);
+  // the steps down from the porch to the terrace
+  const st = R(w * 0.75 + pd, w * 0.75 + pd + 1.2, -0.7, 0.7);
+  for (let i = 0; i < 4; i++) { const a0 = w * 0.75 + pd + 1.2 * i / 4, r = R(a0, a0 + 1.2 / 4, -0.7, 0.7), yy = y + 1.4 * (1 - (i + 1) / 5); bag.add(S, box(r[0], y - 0.3, r[1], r[2], yy, r[3])); col.floor(r, yy); }
+  void st;
+}
+/**
+ * varaha_mandapa: the boar's pavilion before Lakshmana (c. 900–925; "an oblong pavilion with a pyramidal
+ * roof of receding tiers, resting on fourteen plain pillars", on a lofty plinth) { rect, y, plinth, h }:
+ * the moulded plinth with its stair on the side facing the temple, the fourteen square pillars round
+ * the oblong, the architraves and ceiling, the stepped roof; inside the colossal monolithic Varaha, 2.6
+ * m long and 1.7 m high, its whole body carved with rows of little figures.
+ */
+function varaha(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, ph = el.plinth ?? 2.6, h = el.h ?? 3.6, yf = y + ph, cz = (z0 + z1) / 2, cx = (x0 + x1) / 2;
+  bag.add(S, box(x0, y - 0.5, z0, x1, yf, z1)); col.rect([x0, z0, x1, z1], y, yf); col.floor([x0, z0, x1, z1], yf);
+  for (const [f, o] of [[0.1, 0.25], [0.45, 0.12], [0.75, 0.18], [0.95, 0.1]]) bag.add('sandstone', box(x0 - o, y + ph * f - 0.12, z0 - o, x1 + o, y + ph * f + 0.12, z1 + o));
+  // the stair up the west side, toward the temple
+  const n = Math.round(ph / 0.22), run = ph * 1.1;
+  for (let i = 0; i < n; i++) { const xa = x0 - run * (i + 1) / n, yy = yf - ph * (i + 1) / n + ph / n; bag.add(S, box(xa, y - 0.3, cz - 1.2, xa + run / n, yy, cz + 1.2)); col.floor([xa, cz - 1.2, xa + run / n, cz + 1.2], yy); }
+  // fourteen pillars: five along each long side, two more on each short side
+  const pts = [];
+  for (let i = 0; i < 5; i++) { const x = x0 + 0.5 + (x1 - x0 - 1) * i / 4; pts.push([x, z0 + 0.5], [x, z1 - 0.5]); }
+  for (const x of [x0 + 0.5, x1 - 0.5]) for (const t of [1 / 3, 2 / 3]) pts.push([x, z0 + 0.5 + (z1 - z0 - 1) * t]);
+  for (const [px, pz] of pts) {
+    if (px === x0 + 0.5 && Math.abs(pz - cz) < 1.5) { /* the way in from the stair stays clear between the west pair */ }
+    bag.add(S, box(px - 0.32, yf, pz - 0.32, px + 0.32, yf + 0.25, pz + 0.32)); bag.add(S, box(px - 0.22, yf + 0.25, pz - 0.22, px + 0.22, yf + h - 0.35, pz + 0.22)); bag.add(S, box(px - 0.36, yf + h - 0.35, pz - 0.36, px + 0.36, yf + h, pz + 0.36));
+    col.rect([px - 0.22, pz - 0.22, px + 0.22, pz + 0.22], yf, yf + h);
+  }
+  bag.add(S, box(x0, yf + h, z0, x1, yf + h + 0.45, z1));
+  stepped(bag, [x0 - 0.3, z0 - 0.3, x1 + 0.3, z1 + 0.3], yf + h + 0.45, (z1 - z0) * 0.55, S, 5);
+  // the boar on its pedestal, facing north, its body covered in rows of small carved figures
+  const by = yf + 0.45, L = 2.6, H2 = 1.7;
+  bag.add(S, box(cx - 1.6, yf, cz - 0.8, cx + 1.6, by, cz + 0.8)); col.rect([cx - 1.6, cz - 0.8, cx + 1.6, cz + 0.8], yf, by + H2);
+  const body = lathe([[0.001, -1], [0.55, -0.85], [0.75, -0.4], [0.78, 0.1], [0.7, 0.55], [0.45, 0.88], [0.001, 1]], 14, null, 0, 0, 0);
+  body.rotateZ(Math.PI / 2); body.scale(L * 0.42, 0.62, 0.55); body.translate(cx, by + 0.95, cz); bag.add(RELIEF, body);
+  for (const [dx, dz] of [[0.75, 0.3], [0.75, -0.3], [-0.75, 0.3], [-0.75, -0.3]]) bag.add(RELIEF, lathe([[0.15, 0], [0.13, 0.55], [0.001, 0.6]], 8, null, cx + dx, by, cz + dz));
+  bag.add(RELIEF, lathe([[0.001, 0], [0.3, 0.1], [0.32, 0.35], [0.18, 0.6], [0.08, 0.72], [0.001, 0.74]], 10, null, 0, 0, 0).rotateZ(-Math.PI / 2).translate(cx + 1.0, by + 1.15, cz));
+  for (const sz of [-1, 1]) bag.add('ivory', rod([cx + 1.45, by + 1.0, cz + sz * 0.1], [cx + 1.6, by + 1.25, cz + sz * 0.18], 0.035, 5));
+  for (let r = 0; r < 4; r++) for (let i = 0; i < 9; i++) for (const sz of [-1, 1]) {
+    const t = -0.8 + 1.6 * i / 8, yy = by + 0.65 + r * 0.17, rz = 0.55 * Math.sqrt(Math.max(0, 1 - (t / 1.15) ** 2)) * Math.cos((r - 1.2) * 0.5);
+    bag.add('sandstone', lathe([[0.03, 0], [0.025, 0.07], [0.001, 0.1]], 4, null, cx + t, yy, cz + sz * rz));
+  }
+}
+/** The sanctum and tower of a small shrine on its base. */
+function shrineCore(el, { bag, col }) {
   const [cx, cz] = el.c, w = el.w, y = el.y ?? 0, h = el.h;
   bag.add(S, box(cx - w * 0.75, y - 0.5, cz - w * 0.75, cx + w * 0.75, y + 1.4, cz + w * 0.75)); col.rect([cx - w * 0.75, cz - w * 0.75, cx + w * 0.75, cz + w * 0.75], y, y + 1.4); col.floor([cx - w * 0.75, cz - w * 0.75, cx + w * 0.75, cz + w * 0.75], y + 1.4);
   bag.add(S, box(cx - w / 2, y + 1.4, cz - w / 2, cx + w / 2, y + 1.4 + h * 0.35, cz + w / 2)); col.rect([cx - w / 2, cz - w / 2, cx + w / 2, cz + w / 2], y, y + h * 0.4);
@@ -271,6 +375,6 @@ function shrine(el, { bag, col }) {
 }
 registerStyle('nagara', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, nagara_temple: temple, sub_shrine: shrine },
+  elements: { ...STYLES.qing.elements, nagara_temple: temple, sub_shrine: shrine, varaha_mandapa: varaha },
   objects: {},
 });

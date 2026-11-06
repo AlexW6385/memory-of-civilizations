@@ -1,13 +1,19 @@
 // The Western Group about 1050 (docs/settlements/khajuraho.md §2–§4): the temples on their
 // terraces, Lakshmana's and Vishvanatha's corner shrines, the tank's water.
 
-import { RADIUS, TEMPLES, TANK } from './layout.js';
+import { RADIUS, TEMPLES, TANK, VARAHA } from './layout.js';
 
 const E = [];
 for (const t of TEMPLES) {
   E.push({ t: 'nagara_temple', ...t });
-  if (t.corners) for (const [dx, dz] of [[-t.w * 0.75, -t.w * 0.8], [-t.w * 0.75, t.w * 0.8], [t.len + 1, -t.w * 0.8], [t.len + 1, t.w * 0.8]]) E.push({ t: 'sub_shrine', c: [t.c[0] + dx, t.c[1] + dz], w: 3.2, h: 9, y: t.jagati });
+  // the corner shrines, each a little temple with its porch: the two at the back face east, the two
+  // at the front face each other across the way to the stair (hindutemples-india)
+  if (t.corners) {
+    const [x0, z0, x1, z1] = t.terrace, m = 3.4;
+    for (const [x, z, face] of [[x0 + m, z0 + m, 'e'], [x0 + m, z1 - m, 'e'], [x1 - m - 1.5, z0 + m, 's'], [x1 - m - 1.5, z1 - m, 'n']]) E.push({ t: 'sub_shrine', c: [x, z], w: 3.2, h: 9, y: t.jagati, face });
+  }
 }
+E.push({ t: 'varaha_mandapa', rect: VARAHA, plinth: 2.6, h: 3.6 });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const K = TEMPLES[0];
 export const temples = {

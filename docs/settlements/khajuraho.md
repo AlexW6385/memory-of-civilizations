@@ -1,7 +1,7 @@
 # Khajuraho (the Western Group), about 1050 — dossier
 
 Settlement id: `khajuraho` · Style: `nagara` · Region: India (Bundelkhand) · Code: `src/settlements/khajuraho/`
-Status of this dossier: L1–L2 (the Western Group's five temples on their terraces — Kandariya Mahadeva, Jagadambi, Chitragupta, Lakshmana with its four corner shrines, Vishvanatha with its shrines — each a row of halls under stepped roofs rising to the sanctum's clustered tower; the Shivsagar tank; the village; ground, planting, weather, music). L3 recorded for later: the full 84 spires of the Kandariya tower (ours: 28, see §4), the sculpture bands figure by figure, the sardula figures at the terrace corners, the Varaha pavilion, the Matangeshvara temple, the Eastern and Southern groups, festivals and dance.
+Status of this dossier: L2 (Lakshmana's carved platform with its porched corner shrines, the Varaha pavilion — §10; the Western Group's five temples on their terraces — Kandariya Mahadeva, Jagadambi, Chitragupta, Lakshmana with its four corner shrines, Vishvanatha with its shrines — each a row of halls under stepped roofs rising to the sanctum's clustered tower; the Shivsagar tank; the village; ground, planting, weather, music). L3 recorded for later: the full 84 spires of the Kandariya tower (ours: 28, see §4), the sculpture bands figure by figure, the sardula figures at the terrace corners, the Varaha pavilion, the Matangeshvara temple, the Eastern and Southern groups, festivals and dance.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -55,6 +55,18 @@ From the village across to the temples and up the steep stairs of the terraces. 
 ## 9. Sound
 
 A raga on the veena over a drone, temple drums and bells. [inferred; a plucked string, a drone and a reed stand in]
+
+## 10. Detail added (2026-11 pass: Lakshmana's platform, its corner shrines, the Varaha pavilion)
+
+- **Lakshmana's platform.** The temple faces east, about 30 × 14 m, "constructed on high raised jagati (platform) of 10 feet height which is approached by a fleet of steps"; "the only temple which preserves the sculpture panel on the platform", depicting "everyday life: a royal hunt, battle, dance, musicians, erotic scenes, traders" [stated: hindutemples-india]; friezes along the plinth "depict images of daily life, love, and war" [stated: Smarthistory]. Ours: the platform enlarged to 43 × 26 m and lowered to 3.1 m (it was the size of the temple's own terrace, too small for its shrines, which hung over its edges), its sides moulded — a projecting base, a coping, and between two fillets a sunk band carved all round with processions of small figures in the round: elephants with riders, horsemen, foot soldiers with shields, dancers, drummers, couples, porters with their loads [inferred: the band's height and the figures' forms and order].
+- **The corner shrines.** Four subsidiary shrines at the corners of the jagati (the panchayatana plan) [stated: arch-heritage; Smarthistory], "like miniature temples with their own vimanas" [stated: Smarthistory]; "each subsidiary shrine is like a separate temple with a sanctum and entrance porch. The subsidiary shrine at the back faces east and the subsidiary shrines at the front faces each other" [stated: hindutemples-india]. Ours: each on its moulded base, the sanctum under its curvilinear tower, an entrance porch of two pillars under a small stepped roof with its bells and spires, four steps down to the platform; the two at the back facing east, the two at the front facing each other across the way to the temple's stair, all now standing wholly on the platform. Vishvanatha's platform is enlarged likewise for its shrines [inferred].
+- **The Varaha pavilion.** Of c. 900–925, opposite the Lakshmana temple; "an oblong pavilion with a pyramidal roof of receding tiers, resting on fourteen plain pillars", on "a lofty plinth", built of sandstone; the boar "2.6 m long and 1.7 high", colossal and monolithic, "carved with numerous figures on its entire body" [stated: Varaha Temple, Khajuraho — Wikipedia (IPFS mirror)]. Ours: 12 × 10 m on a 2.6 m moulded plinth east of Lakshmana's stair, its own stair on the side facing the temple; fourteen square pillars (five along each long side, two more on each short side), a ceiling slab and a five-tiered stepped roof; the boar on its pedestal facing north, rows of small carved figures over its flanks, short tusks [inferred: plinth height, plan size, the boar's facing].
+
+Sources added:
+- [Lakshmana temple — hindutemples-india](https://hindutemples-india.blogspot.com/2021/03/lakshmana-temple-khajuraho-temple.html)
+- [Lakshmana Temple — arch-heritage](https://arch-heritage.blogspot.com/2025/11/lakshmana-temple-khajuraho.html)
+- [Lakshmana Temple — Smarthistory](https://smarthistory.org/lakshmana-temple)
+- [Varaha Temple, Khajuraho — Wikipedia (IPFS mirror)](https://ipfs.aleph.im/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/wiki/Varaha_Temple%2C_Khajuraho.html)
 
 ## Sources
 
