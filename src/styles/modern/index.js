@@ -9,6 +9,7 @@ import { box, lathe, fromTriangles, rod, frustum } from '../../core/geom.js';
 import '../qing/index.js';
 import '../artdeco/index.js';
 import { rocksTerrace } from './rocks.js';
+import { archBridge } from './bridge.js';
 
 /** Both faces of a triangle. */
 const tri2 = (t, a, b, c) => t.push(...a, ...b, ...c, ...a, ...c, ...b);
@@ -85,58 +86,6 @@ function operaHouse(el, { bag, col }) {
   // the small restaurant shells at the south-west corner
   shell(bag, x0 + 14, z1 - 4, z1 - 20, 9, 12, y + h);
   shell(bag, x0 + 14, z1 - 18, z1 - 30, 8, 9, y + h);
-}
-/** A straight beam from a to b (3-D points), w wide (x) and d deep, for a bridge running along z. */
-function beam(bag, mat, a, b, w, d) {
-  const dy = b[1] - a[1], dz = b[2] - a[2], L = Math.hypot(dy, dz);
-  const g = box(-w / 2, -d / 2, 0, w / 2, d / 2, L); g.rotateX(-Math.atan2(dy, dz)); g.translate(a[0], a[1], a[2]); bag.add(mat, g);
-}
-/** arch_bridge: { x, z0, z1 (the springings), rise (crown of the lower chord), depth0, depth1 (truss depth at the ends, crown), deck, w (deck width), approach, pylon } */
-function archBridge(el, { bag, col }) {
-  const { x, z0, z1 } = el, rise = el.rise ?? 62, dE = el.depth0 ?? 15, dC = el.depth1 ?? 8, deck = el.deck ?? 26, w = el.w ?? 25, ap = el.approach ?? 60, py = el.pylon ?? 46, L = z1 - z0, S = 'steel_grey';
-  const yb = (t) => rise * (1 - (2 * t - 1) ** 2), dep = (t) => dE + (dC - dE) * (1 - (2 * t - 1) ** 2), N = 28;
-  for (const sx of [-w / 2 + 1, w / 2 - 1]) {
-    for (let i = 0; i < N; i++) {
-      const t0 = i / N, t1 = (i + 1) / N, za = z0 + L * t0, zb = z0 + L * t1;
-      beam(bag, S, [x + sx, yb(t0), za], [x + sx, yb(t1), zb], 1.6, 1.8);
-      beam(bag, S, [x + sx, yb(t0) + dep(t0), za], [x + sx, yb(t1) + dep(t1), zb], 1.6, 1.8);
-      beam(bag, S, [x + sx, yb(t0), za], [x + sx, yb(t1) + dep(t1), zb], 0.8, 0.8);                 // the diagonals
-      bag.add(S, box(x + sx - 0.4, yb(t0), za - 0.4, x + sx + 0.4, yb(t0) + dep(t0), za + 0.4));      // the posts
-      // the hangers down to the deck where the arch is above it, the posts up to it where below
-      const top = yb(t0);
-      if (top > deck + 1) bag.add(S, box(x + sx - 0.25, deck, za - 0.25, x + sx + 0.25, top, za + 0.25));
-      else bag.add(S, box(x + sx - 0.5, top, za - 0.5, x + sx + 0.5, deck, za + 0.5));
-    }
-    // the bracing between the two ribs
-  }
-  for (let i = 1; i < N; i += 2) { const t = i / N, z = z0 + L * t, yy = yb(t) + dep(t); bag.add(S, box(x - w / 2 + 1, yy - 0.6, z - 0.4, x + w / 2 - 1, yy + 0.3, z + 0.4)); }
-  // the deck through the arch and on to the shores
-  const za = z0 - ap, zb = z1 + ap;
-  bag.add(S, box(x - w / 2, deck - 2.5, Math.min(za, zb), x + w / 2, deck, Math.max(za, zb)));
-  bag.add('asphalt', box(x - w / 2 + 1.5, deck, Math.min(za, zb), x + w / 2 - 1.5, deck + 0.05, Math.max(za, zb)));
-  col.floor([x - w / 2, Math.min(za, zb), x + w / 2, Math.max(za, zb)], deck + 0.05);
-  for (const [zz, sg] of [[z0, -1], [z1, 1]]) {
-    // the granite pylons, a pair at each end
-    for (const sx of [-w / 2 - 2, w / 2 + 2]) {
-      // the granite pylon: a battered shaft in rusticated courses, a cornice, two stepped stages over it, tall windows near the top
-      const px = x + sx, pz = zz + sg * 2;
-      bag.add('granite_grey', frustum([px - 5, pz - 6, px + 5, pz + 6], -8, py, 0.5, 0.5, 0.5, 0.5)); col.rect([px - 5, pz - 6, px + 5, pz + 6], -8, py);
-      for (let yy = 2; yy < py - 4; yy += 2.6) { const f = (yy + 8) / (py + 8) * 0.5; bag.add('granite_rough', box(px - 5 + f - 0.08, yy, pz - 6 + f - 0.08, px + 5 - f + 0.08, yy + 0.35, pz + 6 - f + 0.08)); }
-      bag.add('granite_grey', box(px - 5.0, py - 0.2, pz - 6.0, px + 5.0, py + 1.0, pz + 6.0));
-      bag.add('granite_grey', box(px - 4.2, py + 1.0, pz - 5.2, px + 4.2, py + 4.5, pz + 5.2));
-      bag.add('granite_grey', box(px - 3.4, py + 4.5, pz - 4.4, px + 3.4, py + 6.5, pz + 4.4));
-      bag.add('granite_grey', box(px - 3.7, py + 6.5, pz - 4.7, px + 3.7, py + 7.0, pz + 4.7));
-      // the windows, on the battered faces
-      const ins = (yy) => (yy + 8) / (py + 8) * 0.5 - 0.012, WN = [], y0 = py - 9, y1 = py - 2.5;
-      for (const sz of [-1, 1]) for (const dx of [-2, 2]) { const z0 = pz + sz * (6 - ins(y0)), z1 = pz + sz * (6 - ins(y1)); const A = [px + dx - 0.6, y0, z0], B = [px + dx + 0.6, y0, z0], C = [px + dx + 0.6, y1, z1], D = [px + dx - 0.6, y1, z1]; if (sz > 0) WN.push(...A, ...B, ...C, ...A, ...C, ...D); else WN.push(...A, ...C, ...B, ...A, ...D, ...C); }
-      for (const sxx of [-1, 1]) for (const dz of [-2.4, 0, 2.4]) { const x0 = px + sxx * (5 - ins(y0)), x1 = px + sxx * (5 - ins(y1)); const A = [x0, y0, pz + dz - 0.5], B = [x0, y0, pz + dz + 0.5], C = [x1, y1, pz + dz + 0.5], D = [x1, y1, pz + dz - 0.5]; if (sxx < 0) WN.push(...A, ...B, ...C, ...A, ...C, ...D); else WN.push(...A, ...C, ...B, ...A, ...D, ...C); }
-      bag.add('opening', fromTriangles(WN));
-    }
-    // the approach piers
-    for (let k = 1; k * 15 < ap; k++) { const z = zz + sg * k * 15; for (const sx of [-w / 2 + 2, w / 2 - 2]) bag.add('granite_grey', box(x + sx - 1, -8, z - 1, x + sx + 1, deck - 2.5, z + 1)); }
-    // the railings
-  }
-  for (const sx of [-w / 2 + 0.1, w / 2 - 0.1]) bag.add(S, box(x + sx - 0.1, deck, Math.min(za, zb), x + sx + 0.1, deck + 1.2, Math.max(za, zb)));
 }
 /** round_tower: { c, r, h, y } — a round office tower of concrete fins and glass (Australia Square). */
 function roundTower(el, { bag, col }) {

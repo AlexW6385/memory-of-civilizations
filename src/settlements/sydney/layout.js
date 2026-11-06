@@ -13,7 +13,7 @@ export const COVE = [-45, -100, 40, -8];
 export const FARM = [175, -100, 330, -38];
 export const DAWES = [-265, -140, -105, -90];
 export const NORTH = [-320, -560, -20, -385];
-export const BRIDGE = { x: -150, z0: -372, z1: -112, rise: 62, deck: 26, w: 25, approach: 70, pylon: 46 };
+export const BRIDGE = { x: -150, z0: -372, z1: -112, rise: 56, depth0: 28.5, depth1: 9, deck: 26, w: 25, truss: 7.5, approach: 70, pylon: 46 };
 export const QUAY = [-60, 2, 52, 30];                         // the Cahill Expressway over the station
 export const AUSTRALIA_SQ = [-70, 230];
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -51,7 +51,7 @@ export function lots() {
   for (let x = -RADIUS + 20; x < RADIUS - 20; x += 16) for (let z = -120; z < RADIUS - 20; z += 16) {
     const w = 11 + rand() * 4, d = 11 + rand() * 4, cx = x + 8, cz = z + 8;
     if (Math.hypot(cx, cz) > RADIUS - 45 || shore(cx, cz) < 10 || inRect(GARDEN, cx, cz, 4) || inRect(QUAY, cx, cz, 10) || inRect(BENNELONG, cx, cz, 4) || onStreet(cx, cz)
-      || Math.abs(cx - BRIDGE.x) < 22 && cz < 0 || Math.hypot(cx - AUSTRALIA_SQ[0], cz - AUSTRALIA_SQ[1]) < 34 || rand() < 0.12) continue;
+      || Math.abs(cx - BRIDGE.x) < 31 && cz < -30 || Math.hypot(cx - AUSTRALIA_SQ[0], cz - AUSTRALIA_SQ[1]) < 34 || rand() < 0.12) continue;
     const rocks = cx < -100 && cz < 70, ys = [height(cx - w / 2, cz - d / 2), height(cx + w / 2, cz - d / 2), height(cx - w / 2, cz + d / 2), height(cx + w / 2, cz + d / 2)];
     let h, mat;
     if (rocks) {
