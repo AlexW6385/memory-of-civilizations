@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.74 — Throne halls of Beijing and Seoul; Gyeonghoeru of 1412 (2026-11-06)
+- A shared throne module with carved dragons: the Hall of Supreme Harmony's throne at its published size on its dais before the seven-leaf screen, luduan, enamel elephants, cranes, gilt dragon columns and the dragon caisson; the Halls of Central and Preserving Harmony furnished; Geunjeongjeon's red throne, canopy and three-leaf sun-moon-five-peaks screen; Gyeonghoeru as Taejong's pavilion with its 48 dragon-carved stone pillars; Beijing's courtyard houses with goldfish jars, pomegranates and chrysanthemums; Seoul's court in session at the rank stones, with guards at the gates.
+
 ## v9.73 — Esagila and the Euphrates; Persepolis' wall and delegations (2026-11-06)
 - Esagila at Koldewey's size with its towered gates, court of altars and Marduk's gold-sheeted cella with the golden throne, table and image; Etemenanki's summit temple in blue glaze with Herodotus's couch and table; the Euphrates bridge on boat-shaped piers; the east-bank quay wall with towers; round hide boats; Babylonians, boatmen, porters and priests; Persepolis' mudbrick fortification with towers along the east edge and up the slope; guards with pomegranate spears at the gates; five delegations with ushers, gifts and animals walking to the Apadana.
 
