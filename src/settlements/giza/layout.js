@@ -16,6 +16,19 @@ export const WEST_FIELD = [-330, -230, -150, 110];
 export const EAST_FIELD = [200, -250, 300, -80];
 export const CROW_WALL = { a: [-140, 150], b: [80, 150], h: 10, th: 10, gate: { at: 150, w: 4, h: 7 } };
 export const TOWN = [-160, 165, 230, 360];
+// the five boat pits (docs/settlements/giza.md §4.2): two rectangular ones south of the pyramid,
+// sealed with beams of limestone; three boat-shaped ones east of it — north and south of the
+// mortuary temple and beside the causeway — sealed the same way. { c, len, w, ang, shape }
+const CW = Math.atan2(CAUSEWAY.b[1] - CAUSEWAY.a[1], CAUSEWAY.b[0] - CAUSEWAY.a[0]);
+export const BOAT_PITS = [
+  { c: [22, 97], len: 31.2, w: 4.2, ang: 0, shape: 'rect', n: 41 },
+  { c: [-16, 97], len: 32.5, w: 4.2, ang: 0, shape: 'rect', n: 40 },
+  { c: [148, -112], len: 50, w: 7, ang: Math.PI / 2, shape: 'boat' },
+  { c: [147, -9.6], len: 34, w: 4.4, ang: 0, shape: 'boat' },
+  { c: [CAUSEWAY.a[0] + Math.cos(CW) * 45 + Math.sin(CW) * 11, CAUSEWAY.a[1] + Math.sin(CW) * 45 - Math.cos(CW) * 11], len: 45, w: 6.5, ang: CW, shape: 'boat' },
+];
+// Khufu's ship moored in the harbour beside the landing, her bow to the north
+export const SHIP = { at: [366, 57], len: 43.6, ang: -Math.PI / 2 };
 
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 /** The plateau's height: level round the pyramid, falling east toward the valley and south toward the town. */
@@ -51,6 +64,8 @@ export function town() {
   for (let b = 0; b < 4; b++) {
     const x0 = -140 + b * 52;
     for (let k = 0; k < 7; k++) { const z0 = 172 + k * 7.5; TOWNS.push({ kind: 'gallery', rect: [x0, z0, x0 + 40, z0 + 5.6], seed: k }); }
+    // the bakeries at the gallery block's south end (§5)
+    for (let k = 0; k < 4; k++) TOWNS.push({ kind: 'bakery', rect: [x0 + 2 + k * 9.5, 227, x0 + 9.5 + k * 9.5, 232.5], seed: b * 4 + k + 1 });
   }
   // houses and bakeries round them
   for (let x = -150; x < 220; x += 11) for (let z = 236; z < 350; z += 11) {
