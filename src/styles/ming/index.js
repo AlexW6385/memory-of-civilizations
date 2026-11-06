@@ -267,8 +267,12 @@ function rectRoof(el, bag) {
 }
 
 /** A round column on a drum base. */
-function column(bag, col, x, z, y, h, d, mat = PAL.column) {
-  if (LOW) {
+function column(bag, col, x, z, y, h, d, mat = PAL.column, slim = false) {
+  if (slim && !LOW) {
+    // a slender post (a gallery's): the same drum base and shaft on eight sides
+    bag.add(PAL.base, lathe([[d * 0.85, 0], [d * 0.85, 0.08], [d * 0.72, 0.2], [d * 0.6, 0.22], [0.001, 0.22]], 8, null, x, y, z));
+    bag.add(mat, lathe([[d / 2, 0], [d / 2 * 0.94, h], [0.001, h]], 8, null, x, y + 0.2, z));
+  } else if (LOW) {
     bag.add(PAL.base, box(x - d * 0.75, y, z - d * 0.75, x + d * 0.75, y + 0.2, z + d * 0.75));
     bag.add(mat, lathe([[d / 2, 0], [d / 2 * 0.94, h]], 6, null, x, y + 0.2, z));
   } else {
@@ -333,6 +337,39 @@ function latticeBay(bag, col, a, b, y, h, kind = 'door', th = 0.06) {
   }
   slab(0, L, y + topH, y + h, PAL.wood);
   if (col) col.segment(a, b, th * 2, y, y + h);
+}
+
+/**
+ * A hanging fretwork (gua luo) between two posts a and b ([x, z], centres; r the posts' radius),
+ * hung from yb (the underside of the beam): an openwork band of slender bars — the top rail
+ * under the beam, a bottom rail, and between them the "step by step brocade" (bu bu jin) fret of
+ * short uprights and rails stepping up and down; at each end a leg running down past the band,
+ * a small bracket set in the angle (docs/settlements/ming-suzhou.md §5). Bars of section 2.4 ×
+ * 4 cm. Triangles pushed onto out.
+ */
+function guaLuo(out, a, b, yb, r = 0.1) {
+  const L0 = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L0, uz = (b[1] - a[1]) / L0;
+  const L = L0 - 2 * r, ox = a[0] + ux * r, oz = a[1] + uz * r;
+  if (L < 0.8) return;
+  const W = (u, v, o) => [ox + ux * u - uz * o, yb + v, oz + uz * u + ux * o];
+  const bar = (u0, v0, u1, v1, caps = false) => wallBar(out, W, [u0, v0], [u1, v1], 0.012, 0.04, caps);
+  const band = 0.27, leg = 0.46, e = 0.018;
+  bar(0, -e, L, -e);                          // the top rail, under the beam
+  bar(e, -e, e, -leg, true); bar(L - e, -e, L - e, -leg, true);   // the legs
+  bar(e, -band, L - e, -band);                // the bottom rail
+  // the fret: a square wave running the length of the band from leg to leg, high in one cell and
+  // low in the next, cells about 0.38 m wide; every other high run tied up to the top rail at its middle,
+  // every other low run tied down to the bottom rail
+  const n = Math.max(3, Math.round(L / 0.38)), cw = (L - 2 * e) / n, hi = -0.095, lo = -0.18;
+  const lev = (k) => (k % 2 ? lo : hi);
+  for (let k = 0; k < n; k++) {
+    const u0 = e + k * cw, u1 = u0 + cw, v = lev(k), um = (u0 + u1) / 2;
+    bar(u0, v, u1, v);
+    if (k > 0) bar(u0, lev(k - 1), u0, v);
+    if (k % 4 < 2) bar(um, v, um, k % 2 ? -band : -e);
+  }
+  // the brackets in the angles between the legs and the bottom rail
+  bar(e, -leg + 0.06, e + 0.16, -band); bar(L - e, -leg + 0.06, L - e - 0.16, -band);
 }
 
 /** A bench rail (mei ren kao): the seat on low panels, the curved back leaning out. */
@@ -433,7 +470,15 @@ function mingPavilion(el, { bag, col }) {
     for (let k = 0; k < n; k++) if (!open.includes(k)) benchRail(bag, col, poly[k], poly[(k + 1) % n], y);
   }
   const fr = [];
-  for (let k = 0; k < n; k++) { const a = poly[k], b = poly[(k + 1) % n]; beamTris(fr, [a[0], y + H - 0.55, a[1]], [b[0], y + H - 0.55, b[1]], 0.12, 0.34); }
+  // fine: a lighter beam, and under it a hanging fretwork (gua luo) between the posts on every
+  // side not walled (otherwise the beam is a deep frieze board)
+  for (let k = 0; k < n; k++) {
+    const a = poly[k], b = poly[(k + 1) % n];
+    if (el.fine) {
+      beamTris(fr, [a[0], y + H - 0.42, a[1]], [b[0], y + H - 0.42, b[1]], 0.1, 0.22);
+      if (!(el.moons && n === 4)) guaLuo(fr, a, b, y + H - 0.42, 0.11);
+    } else beamTris(fr, [a[0], y + H - 0.55, a[1]], [b[0], y + H - 0.55, b[1]], 0.12, 0.34);
+  }
   bag.add(PAL.wood, fromTriangles(fr));
   if (el.shape === 'rect') rectRoof({ c: [cx, cz], A: el.w / 2 + 1.0, B: (el.d ?? el.w) / 2 + 1.0, y: y + H - 0.2, rise: ((el.d ?? el.w) / 2 + 1) * 0.7, kind: 'xieshan', sweep: 0.9 }, bag);
   else pyramidRoof(poly.map((p) => ext(p, 1.0)), y + H - 0.2, (el.r ?? el.w / 2) * 1.05 + 0.9, el.sweep ?? 1.0, bag, PAL.roof, PAL.wood);
@@ -560,14 +605,16 @@ function clipTo(S, P) {
   return out;
 }
 /** A bar in a wall's plane from p to q ([u, v]), hw half its face, d its depth through the wall; W(u, v, o) maps to the world. */
-function wallBar(out, W, p, q, hw, d) {
+function wallBar(out, W, p, q, hw, d, caps = false) {
   const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1, pu = -(q[1] - p[1]) / L * hw, pv = (q[0] - p[0]) / L * hw;
   const c = [];
   for (const o of [-d / 2, d / 2]) for (const [bu, bv] of [p, q]) for (const sg of [-1, 1]) c.push(W(bu + pu * sg, bv + pv * sg, o));
   // c: o-, p-, p+, q-, q+ ; o+ likewise (indices 0..3, 4..7)
   const loc = [], f = (a, b, cc, dd) => loc.push(...c[a], ...c[b], ...c[cc], ...c[a], ...c[cc], ...c[dd]);
-  // the faces and the two sides; no end caps (each end runs into another bar or the frame)
-  f(0, 1, 3, 2); f(4, 6, 7, 5); f(0, 4, 5, 1); f(2, 3, 7, 6);
+  // the two faces and the two long sides (seen in the depth of the wall); end caps only where
+  // asked (elsewhere each end runs into another bar or the frame)
+  f(0, 1, 3, 2); f(4, 6, 7, 5); f(0, 2, 6, 4); f(1, 5, 7, 3);
+  if (caps) { f(0, 4, 5, 1); f(2, 3, 7, 6); }
   for (const v of orientOutward(loc)) out.push(v);
 }
 /** A flat ring (a frame) between two outlines, extruded through the wall by depth, placed by the wall's matrix M. */
@@ -774,13 +821,13 @@ function mingGallery(el, { bag, col }) {
   for (let i = 0; i + 1 < pts.length; i++) {
     const a = pts[i], b = pts[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux;
     const n = Math.max(1, Math.round(L / 3));
-    // the floor
-    const fl = [];
-    beamTris(fl, [a[0], y - 0.35, a[1]], [b[0], y - 0.35, b[1]], w + 0.15, 0.35);
+    // the floor (every other run 3 mm higher, so that where two runs overlap at a turn one lies on the other)
+    const fl = [], fy = y - 0.35 + (i % 2) * 0.003;
+    beamTris(fl, [a[0], fy, a[1]], [b[0], fy, b[1]], w + 0.15, 0.35);
     bag.add(PAL.floor, fromTriangles(fl));
     for (let k = 0; k <= n; k++) {
       const s = k * L / n;
-      for (const sg of [-1, 1]) column(bag, col, a[0] + ux * s + nx * w * sg, a[1] + uz * s + nz * w * sg, y, H - 0.1, 0.18);
+      for (const sg of [-1, 1]) column(bag, col, a[0] + ux * s + nx * w * sg, a[1] + uz * s + nz * w * sg, y, H - 0.1, 0.18, PAL.column, !!el.fine);
     }
     // the roof: two slopes over a ridge
     const rf = [], uf = [];
@@ -799,7 +846,37 @@ function mingGallery(el, { bag, col }) {
     // a bench rail on the open side, a white wall with windows on the other
     if (el.side) {
       const sg = el.side, A = [a[0] + nx * (w + 0.1) * sg, a[1] + nz * (w + 0.1) * sg], B = [b[0] + nx * (w + 0.1) * sg, b[1] + nz * (w + 0.1) * sg];
-      mingWall({ a: A, b: B, y, h: H - 0.2, th: 0.24, windows: L > 4 ? [{ at: L / 2, w: 1.0, h: 1.0, sill: 1.1, shape: ['rect', 'oct', 'round', 'hex', 'begonia', 'rect', 'fan'][i % 7] }] : [] }, { bag, col });
+      const SH = ['rect', 'oct', 'round', 'hex', 'begonia', 'rect', 'fan'];
+      // fine: a leaky window in every third bay, each of its own outline, the run of them
+      // changing the view as one walks (otherwise one window in the middle of a long run)
+      const wins = el.fine && n > 1
+        ? Array.from({ length: n }, (_, k) => k).filter((k) => k % 3 === 1).map((k, j) => ({ at: (k + 0.5) * L / n, w: 0.95, h: 0.95, sill: 1.05, shape: SH[(i * 3 + j) % 7], pattern: ['lattice', 'ice', 'lattice', 'turtle'][(i + j) % 4] }))
+        : L > 4 ? [{ at: L / 2, w: 1.0, h: 1.0, sill: 1.1, shape: SH[i % 7] }] : [];
+      for (const wd of wins) if (wd.shape === 'fan') { wd.w *= 1.25; wd.h *= 0.8; }
+      mingWall({ a: A, b: B, y, h: H - 0.2, th: 0.24, windows: wins }, { bag, col });
+    }
+    // fine: the frame under the roof — a tie beam across at each pair of posts with a short post
+    // on it carrying the ridge purlin, purlins along the slopes — and a hanging fretwork (gua luo)
+    // between the posts on each open side
+    if (el.fine) {
+      const fr = [], U = (off) => y + H - 0.2 + 1.1 * (1 - Math.abs(off) / (w + 0.7)), bt = y + H - 0.18;
+      for (let k = 0; k <= n; k++) {
+        const s = k * L / n, c = [a[0] + ux * s, a[1] + uz * s], at = (off) => [c[0] + nx * off, c[1] + nz * off];
+        const P = (off, yy) => [at(off)[0], yy, at(off)[1]];
+        beamTris(fr, P(-(w + 0.12), y + H - 0.38), P(w + 0.12, y + H - 0.38), 0.07, 0.2);
+        // the struts on the tie beam: under the two middle purlins and (taller) under the ridge
+        for (const off of [-w / 2, w / 2, 0]) { const top = U(off) - (off === 0 ? 0.14 : 0.1); beamTris(fr, [at(off)[0] - ux * 0.05, bt, at(off)[1] - uz * 0.05], [at(off)[0] + ux * 0.05, bt, at(off)[1] + uz * 0.05], 0.05, top - bt); }
+      }
+      // the purlins: on the posts (filling up to the roof boards), on the struts, the ridge
+      const pur = (off, y0, hh) => beamTris(fr, [a[0] + nx * off, y0, a[1] + nz * off], [b[0] + nx * off, y0, b[1] + nz * off], 0.065, hh);
+      for (const sg of [-1, 1]) { pur(w * sg, bt, U(w) - bt); pur(w / 2 * sg, U(w / 2) - 0.1, 0.1); }
+      pur(0, U(0) - 0.14, 0.14);
+      const gl = [];
+      for (const sg of el.side ? [-el.side] : [-1, 1]) for (let k = 0; k < n; k++) {
+        const s0 = k * L / n, s1 = (k + 1) * L / n;
+        guaLuo(gl, [a[0] + ux * s0 + nx * w * sg, a[1] + uz * s0 + nz * w * sg], [a[0] + ux * s1 + nx * w * sg, a[1] + uz * s1 + nz * w * sg], y + H - 0.38, 0.09);
+      }
+      bag.add(PAL.wood, fromTriangles(fr.concat(gl)));
     }
     // the bench rail on the open side, broken every few bays where a path leaves the gallery
     const sg2 = el.side ? -el.side : 1;
@@ -814,25 +891,89 @@ function mingGallery(el, { bag, col }) {
 
 /** ming_slab_bridge: stone slabs on piers along a polyline over the water { pts, w, y, bed }, a low rail on each side. */
 function slabBridge(el, { bag, col }) {
-  const y = el.y ?? 0.2, w = el.w / 2, bed = el.bed ?? -1.6;
-  for (let i = 0; i + 1 < el.pts.length; i++) {
-    const a = el.pts[i], b = el.pts[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux;
-    const t = [];
-    beamTris(t, [a[0] - ux * 0.15, y - 0.25, a[1] - uz * 0.15], [b[0] + ux * 0.15, y - 0.25, b[1] + uz * 0.15], w, 0.25);
-    bag.add(PAL.base, fromTriangles(t));
-    const p = [];
-    for (const q of [a, b]) beamTris(p, [q[0] - ux * 0.25, bed, q[1] - uz * 0.25], [q[0] + ux * 0.25, bed, q[1] + uz * 0.25], w * 0.9, y - 0.25 - bed);
-    bag.add(PAL.base, fromTriangles(p));
-    const r = [];
-    for (const sg of [-1, 1]) beamTris(r, [a[0] + nx * (w - 0.08) * sg, y, a[1] + nz * (w - 0.08) * sg], [b[0] + nx * (w - 0.08) * sg, y, b[1] + nz * (w - 0.08) * sg], 0.07, 0.32);
-    bag.add(PAL.base, fromTriangles(r));
-    // walk: a narrow floor along the segment (a few rectangles)
-    const n = Math.max(1, Math.ceil(L / 0.8));
+  // Granite slabs from pier to pier; at each turn the slabs stop short and a landing slab (the
+  // pier's cap) fills the corner, its outer corner cut off; the piers of stacked blocks standing
+  // in the water, one under a long span's middle as well. On a narrow bridge a low rail of square
+  // stone posts with a rail along their heads, open below, broken at the ends (wide ones, under a
+  // pavilion or gallery, have none).
+  const y = el.y ?? 0.2, w = el.w / 2, bed = el.bed ?? -1.6, P = el.pts, T = 0.22, railed = el.rail ?? (el.w < 2.5);
+  const segs = [];
+  for (let i = 0; i + 1 < P.length; i++) {
+    const a = P[i], b = P[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    segs.push({ a, b, L, u: [(b[0] - a[0]) / L, (b[1] - a[1]) / L], n: [-(b[1] - a[1]) / L, (b[0] - a[0]) / L] });
+  }
+  const deck = [], piers = [], rail = [];
+  const at = (p, u, s, n, o) => [p[0] + u[0] * s + n[0] * o, p[1] + u[1] * s + n[1] * o];
+  // a slab between two points along a segment, its top at y
+  const slab = (S, s0, s1) => {
+    beamTris(deck, [S.a[0] + S.u[0] * s0, y - T, S.a[1] + S.u[1] * s0], [S.a[0] + S.u[0] * s1, y - T, S.a[1] + S.u[1] * s1], w, T);
+    const n = Math.max(1, Math.ceil((s1 - s0) / 0.8));
     for (let k = 0; k < n; k++) {
-      const s = (k + 0.5) * L / n, cx = a[0] + ux * s, cz = a[1] + uz * s, hw = Math.abs(ux) * (L / n / 2 + 0.25) + Math.abs(nx) * w, hd = Math.abs(uz) * (L / n / 2 + 0.25) + Math.abs(nz) * w;
+      const s = s0 + (k + 0.5) * (s1 - s0) / n, cx = S.a[0] + S.u[0] * s, cz = S.a[1] + S.u[1] * s, hw = Math.abs(S.u[0]) * ((s1 - s0) / n / 2 + 0.25) + Math.abs(S.n[0]) * w, hd = Math.abs(S.u[1]) * ((s1 - s0) / n / 2 + 0.25) + Math.abs(S.n[1]) * w;
       col.floor([cx - hw, cz - hd, cx + hw, cz + hd], y);
     }
+  };
+  // a pier under a point: two courses of blocks, the lower a little wider
+  const pier = (c, u) => {
+    const hb = y - T - bed, mid = bed + hb * 0.55;
+    beamTris(piers, [c[0] - u[0] * 0.3, bed, c[1] - u[1] * 0.3], [c[0] + u[0] * 0.3, bed, c[1] + u[1] * 0.3], w * 0.9, mid - bed);
+    beamTris(piers, [c[0] - u[0] * 0.26, mid, c[1] - u[1] * 0.26], [c[0] + u[0] * 0.26, mid, c[1] + u[1] * 0.26], w * 0.84, y - T - mid - 0.005);
+  };
+  // the rail between two points [x, z]: posts at both, the rail on their heads
+  const posts = new Set();
+  const post = (p) => { const k = p[0].toFixed(2) + ',' + p[1].toFixed(2); if (posts.has(k)) return; posts.add(k); rail.push(...frustumTris(p, 0.075, y, y + 0.5)); };
+  const railRun = (p, q) => {
+    post(p); post(q);
+    const L = Math.hypot(q[0] - p[0], q[1] - p[1]);
+    if (L < 0.2) return;
+    beamTris(rail, [p[0], y + 0.4, p[1]], [q[0], y + 0.4, q[1]], 0.05, 0.08);
+    col.segment(p, q, 0.12, y, y + 0.65);
+  };
+  segs.forEach((S, k) => {
+    // each slab pulled back from a turn by the landing's half; at the ends run a little onto the shore
+    const s0 = k > 0 ? w : -0.15, s1 = k < segs.length - 1 ? S.L - w : S.L + 0.15;
+    // a long span: two slabs meeting over a pier in the middle
+    if (s1 - s0 > 3.6) { const m = (s0 + s1) / 2; slab(S, s0, m); slab(S, m, s1); pier(at(S.a, S.u, m, S.n, 0), S.u, S.n); }
+    else slab(S, s0, s1);
+    if (k === 0) pier(at(S.a, S.u, 0.3, S.n, 0), S.u, S.n);
+    if (k === segs.length - 1) pier(at(S.a, S.u, S.L - 0.3, S.n, 0), S.u, S.n);
+    if (railed) for (const sg of [-1, 1]) railRun(at(S.a, S.u, s0 + (k === 0 ? 0.3 : 0), S.n, (w - 0.08) * sg), at(S.a, S.u, s1 - (k === segs.length - 1 ? 0.3 : 0), S.n, (w - 0.08) * sg));
+  });
+  // the landings at the turns
+  for (let k = 1; k < segs.length; k++) {
+    const A = segs[k - 1], B = segs[k], j = P[k];
+    const pts = [at(j, A.u, -w, A.n, -w), at(j, A.u, -w, A.n, w), at(j, B.u, w, B.n, w), at(j, B.u, w, B.n, -w)];
+    deck.push(...prismTris(pts, y - T, y));
+    const cu = [(A.u[0] + B.u[0]) / 2, (A.u[1] + B.u[1]) / 2], cl = Math.hypot(...cu) || 1;
+    pier(j, [cu[0] / cl, cu[1] / cl], [-cu[1] / cl, cu[0] / cl]);
+    const fl = [Math.min(...pts.map((p) => p[0])), Math.min(...pts.map((p) => p[1])), Math.max(...pts.map((p) => p[0])), Math.max(...pts.map((p) => p[1]))];
+    col.floor([fl[0] + 0.05, fl[1] + 0.05, fl[2] - 0.05, fl[3] - 0.05], y);
+    if (railed) {
+      // the rail round the landing's two open sides, from the incoming slab's rail to the outgoing one's
+      for (const sg of [-1, 1]) railRun(at(j, A.u, -w, A.n, (w - 0.08) * sg), at(j, B.u, w, B.n, (w - 0.08) * sg));
+    }
   }
+  bag.add(PAL.base, fromTriangles(deck));
+  bag.add(PAL.base, fromTriangles(piers));
+  if (rail.length) bag.add(PAL.base, fromTriangles(rail));
+}
+/** A square post [x, z] of half-width h from y0 to y1, its head cut to a low pyramid (closed). */
+function frustumTris(p, h, y0, y1) {
+  const [x, z] = p, t = [], c = (sx, sz, yy, k = 1) => [x + sx * h * k, yy, z + sz * h * k];
+  const ring = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+  for (let i = 0; i < 4; i++) {
+    const [ax, az] = ring[i], [bx, bz] = ring[(i + 1) % 4];
+    t.push(...c(ax, az, y0), ...c(bx, bz, y0), ...c(bx, bz, y1 - 0.06), ...c(ax, az, y0), ...c(bx, bz, y1 - 0.06), ...c(ax, az, y1 - 0.06));
+    t.push(...c(ax, az, y1 - 0.06), ...c(bx, bz, y1 - 0.06), ...[x, y1, z]);
+  }
+  return orientOutward(t);
+}
+/** A prism over a convex polygon [[x, z]…] from y0 to y1 (closed, faces outward). */
+function prismTris(poly, y0, y1) {
+  const t = [], n = poly.length, v = (p, yy) => [p[0], yy, p[1]];
+  for (let i = 1; i + 1 < n; i++) { t.push(...v(poly[0], y1), ...v(poly[i], y1), ...v(poly[i + 1], y1)); t.push(...v(poly[0], y0), ...v(poly[i + 1], y0), ...v(poly[i], y0)); }
+  for (let i = 0; i < n; i++) { const a = poly[i], b = poly[(i + 1) % n]; t.push(...v(a, y0), ...v(b, y0), ...v(b, y1), ...v(a, y0), ...v(b, y1), ...v(a, y1)); }
+  return orientOutward(t);
 }
 
 /**

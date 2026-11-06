@@ -66,7 +66,7 @@ wall([lx0, lz1], [lx0, lz0], { ...low, gates: [{ at: 10.5, r: 1.15 }], windows: 
 wall([lx0, lz0], [lx1, lz0], { ...low, gates: [{ at: 9, w: 1.6, h: 2.3 }], windows: [leaky(3.5, 1, 0.9, 0.9, 1.3), leaky(15, 4, 0.9, 0.9, 1.3)] });
 
 // ── the galleries, along the walls and between the halls ─────────────────────
-GALLERIES.forEach((pts, i) => E.push({ t: 'ming_gallery', pts, y: G + 0.3, w: 2.0, H: 2.8, side: i === 0 ? -1 : i === 1 ? 1 : i === 2 ? 1 : 0 }));
+GALLERIES.forEach((pts, i) => E.push({ t: 'ming_gallery', fine: true, pts, y: G + 0.3, w: 2.0, H: 2.8, side: i === 0 ? -1 : i === 1 ? 1 : i === 2 ? 1 : 0 }));
 
 // ── the halls and pavilions ──────────────────────────────────────────────────
 const B = BUILDINGS;
@@ -84,12 +84,12 @@ E.push({ t: 'ming_hall', rect: B.xiaocanglang.rect, y: G + B.xiaocanglang.y, H: 
 {
   const [x0, z0, x1, z1] = B.xiaofeihong.rect, zc = (z0 + z1) / 2;
   E.push({ t: 'ming_slab_bridge', pts: [[x0 - 1, zc], [(x0 + x1) / 2, zc], [x1 + 1, zc]], w: z1 - z0 + 0.2, y: G + B.xiaofeihong.y, bed: LEVEL.pondBed });
-  E.push({ t: 'ming_gallery', pts: [[x0, zc], [x1, zc]], y: G + B.xiaofeihong.y + 0.01, w: z1 - z0 - 0.4, H: 2.7, side: 0 });
+  E.push({ t: 'ming_gallery', fine: true, pts: [[x0, zc], [x1, zc]], y: G + B.xiaofeihong.y + 0.01, w: z1 - z0 - 0.4, H: 2.7, side: 0 });
 }
 for (const id of ['hefeng', 'xuexiang', 'daishuang', 'wuzhu', 'lvyi']) {
   const b = B[id], hill = b.y > 1.5;
   const shape = b.kind === 'hex' ? 'hex' : b.kind === 'pav_rect' ? 'rect' : 'square';
-  E.push({ t: 'ming_pavilion', c: b.c, shape, r: b.r, w: b.w, d: b.d, y: G + b.y, H: b.moons ? 4.4 : 3.3, moons: b.moons, plat: hill ? 1.4 : 0.45, open: shape === 'hex' ? [1, 4] : [0, 2] });
+  E.push({ t: 'ming_pavilion', fine: true, c: b.c, shape, r: b.r, w: b.w, d: b.d, y: G + b.y, H: b.moons ? 4.4 : 3.3, moons: b.moons, plat: hill ? 1.4 : 0.45, open: shape === 'hex' ? [1, 4] : [0, 2] });
 }
 
 // ── the bridges over the pond and the paths ──────────────────────────────────
