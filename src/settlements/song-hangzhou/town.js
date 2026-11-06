@@ -1,6 +1,8 @@
 // The riverside quarter (docs/settlements/song-hangzhou.md §5, §10): shophouses and tea houses of the
 // Jiangnan type; and the day of the tide — the coloured stands of the great houses along the flood
-// wall below the pagoda, the crowd on the wall looking out for the bore, tea tables on the road.
+// wall below the pagoda, the crowd on the wall looking out for the bore, tea tables on the road; the
+// peddlers come to the riverbank for the crowd: stalls along the foot of the flood wall, hawkers with
+// their shoulder poles, a fruit seller under a parasol.
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, lots } from './layout.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 136], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -28,7 +30,28 @@ function tideDay() {
     for (const [dx, dz] of [[0.85, 0], [-0.85, 0], [0, 0.85]]) if (rand() < 0.7) person([c[0] + dx, c[1] + dz], LEVEL.street + 0.04, faceTo([-dx, -dz]), { pose: 'sit', dress: 'robe' });
   }
   // people on the road walking to the river
-  for (let k = 0; k < 40; k++) { const x = -190 + rand() * 300; if (Math.abs(x - (CANAL.x0 + CANAL.x1) / 2) < 10) continue; person([x, ROAD.z0 + 4.5 + rand() * 6], LEVEL.street + 0.04, faceTo([rand() < 0.5 ? 1 : -1, 0.3]), { carry: pick(['none', 'none', 'basket', 'pole']) }); }
+  for (let k = 0; k < 40; k++) { const x = -190 + rand() * 300; if (Math.abs(x - (CANAL.x0 + CANAL.x1) / 2) < 10) continue; person([x, ROAD.z0 + 4.5 + rand() * 4], LEVEL.street + 0.04, faceTo([rand() < 0.5 ? 1 : -1, 0.3]), { carry: pick(['none', 'none', 'basket', 'pole']) }); }
+  // the riverbank market of the tide day: stalls at the foot of the flood wall facing the road, the
+  // sellers behind them, buyers before; hawkers with their poles set down; a parasol over a fruit seller
+  const zs = WALL.z0 - 1.6, yR = LEVEL.street + 0.04;
+  for (let x = -196; x < CANAL.x0 - 14; x += 6.5 + rand() * 4) {
+    if (Math.abs(x - PAGODA.c[0]) < 10) continue;
+    const r = rand();
+    if (r < 0.6) {
+      const W = 2.2 + rand() * 0.8;
+      L.push({ t: 'stall', at: [x, zs], y: yR, rot: Math.PI, w: W, d: 1.3, awning: pick(['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_white']), stripe: rand() < 0.4 ? pick(['cloth_red', 'cloth_indigo']) : undefined, goods: pick([['produce', 'basket'], ['dark_pot', 'water_pot', 'basket'], ['cloth', 'basket'], ['produce', 'produce', 'basket']]), seed: Math.floor(rand() * 1e9) });
+      person([x + (rand() - 0.5) * W * 0.5, zs + 0.95], yR, faceTo([0, -1]), { dress: pick(['robe', 'trousers']), hat: pick(['none', 'cap']), pose: rand() < 0.5 ? 'talk' : 'stand' });
+      if (rand() < 0.7) person([x + (rand() - 0.5) * W * 0.7, zs - 1.9 - rand() * 0.5], yR, faceTo([(rand() - 0.5) * 0.4, 1]), { pose: rand() < 0.5 ? 'talk' : 'stand' });
+    } else if (r < 0.85) {
+      // a hawker squatting by the two baskets of his shoulder pole
+      for (const dx of [-0.55, 0.55]) L.push({ t: 'basket', at: [x + dx, zs + 0.2], y: yR, rot: rand() * 6.28, n: 1, seed: Math.floor(rand() * 1e9) });
+      person([x, zs + 0.85], yR, faceTo([0, -1]), { pose: 'squat', dress: 'trousers', cloth: pick(['cloth_brown', 'cloth_grey', 'cloth_indigo']), hat: pick(['straw', 'none']) });
+    } else {
+      S.push({ t: 'parasol', at: [x, zs + 0.3], y: yR, h: 2.3, r: 1.3, cloth: pick(['cloth_white', 'cloth_ochre']) });
+      for (const dx of [-0.5, 0.3]) L.push({ t: 'basket', at: [x + dx, zs - 0.2], y: yR, rot: rand() * 6.28, n: 2, seed: Math.floor(rand() * 1e9) });
+      person([x + 0.2, zs + 0.7], yR, faceTo([0, -1]), { pose: 'squat', dress: 'robe', hat: 'none' });
+    }
+  }
   return [base('song-hangzhou-stands', S), base('song-hangzhou-tide-crowd', L, 'life')];
 }
 
