@@ -23,6 +23,8 @@ E.push({ t: 'm_colonnade', rect: [146, -36, 164, 28], rows: 10, cols: 3, h: 4.2 
 E.push({ t: 'm_platform', c: [0, -64], a: 12.5, h: 4.2, serpents: 'nesw' });
 E.push({ t: 'm_platform', c: [-58, -46], a: 9, h: 1.9, stairs: 'e', skulls: true });
 E.push({ t: 'm_platform', c: [-48, -12], a: 7, h: 3.2 });
+// El Caracol, the round observatory, south-west of the Castillo (its stair facing west)
+E.push({ t: 'm_caracol', c: [-50, 75] });
 // the sacbe to the cenote, the cenote's rim temple
 E.push({ t: 'sacbe', a: SACBE.a, b: SACBE.b, w: SACBE.w, h: 0.8 });
 E.push({ t: 'm_platform', c: [0, CENOTE.c[1] + CENOTE.r + 5], a: 4, h: 1.6, stairs: 'n', stairOut: 0 });

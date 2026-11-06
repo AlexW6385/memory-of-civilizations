@@ -193,9 +193,9 @@ function mTemple(el, { bag, col }) {
  * front), dir [dx, dz] (the way up, along an axis), w (the flight's width), H, steps }: a solid mass under the
  * stair's line, closed wedge steps on it, plain balustrades either side; walked as a ramp.
  */
-function flight(bag, col, foot, [dx, dz], w, H, steps, run = 0.3, back = 1.0) {
+function flight(bag, col, foot, [dx, dz], w, H, steps, run = 0.3, back = 1.0, y0 = 0) {
   const nx = -dz, nz = dx, hw = w / 2, bw = 0.6, Lr = steps * run;
-  const P = (d, o, y) => [foot[0] + dx * d + nx * o, y, foot[1] + dz * d + nz * o];
+  const P = (d, o, y) => [foot[0] + dx * d + nx * o, y0 + y, foot[1] + dz * d + nz * o];
   const prism = (poly, o0, o1) => {
     const t = [], q = (a, b, c, e) => t.push(...a, ...b, ...c, ...a, ...c, ...e);
     for (let i = 1; i + 1 < poly.length; i++) { t.push(...P(poly[0][0], o0, poly[0][1]), ...P(poly[i][0], o0, poly[i][1]), ...P(poly[i + 1][0], o0, poly[i + 1][1])); t.push(...P(poly[0][0], o1, poly[0][1]), ...P(poly[i][0], o1, poly[i][1]), ...P(poly[i + 1][0], o1, poly[i + 1][1])); }
@@ -214,7 +214,7 @@ function flight(bag, col, foot, [dx, dz], w, H, steps, run = 0.3, back = 1.0) {
   bag.add(L, fromTriangles(t));
   for (const s of [-1, 1]) prism([[0, 0], [-0.3, 0], [-0.3, 1.1], [Lr, H + 0.9], [Lr, H - 0.02]], s < 0 ? -(hw + bw) : hw, s < 0 ? -hw : hw + bw);
   const r = [Math.min(foot[0], foot[0] + dx * Lr) - (dx ? 0 : hw), Math.min(foot[1], foot[1] + dz * Lr) - (dz ? 0 : hw), Math.max(foot[0], foot[0] + dx * Lr) + (dx ? 0 : hw), Math.max(foot[1], foot[1] + dz * Lr) + (dz ? 0 : hw)];
-  col.ramp(r, 0, H, dx > 0 ? 'e' : dx < 0 ? 'w' : dz > 0 ? 's' : 'n');
+  col.ramp(r, y0, y0 + H, dx > 0 ? 'e' : dx < 0 ? 'w' : dz > 0 ? 's' : 'n');
 }
 
 /** A square pillar with a warrior carved on each face, on a floor at y { x, z, y, h } (the colonnades, the Lower Temple of the Jaguars). */
@@ -278,6 +278,82 @@ function mBallcourt(el, ctx) {
   for (const dz of [-1, 1]) warriorPillar(bag, col, lx + lw, ut + dz * 1.0, 0.4, 5 * 0.62);
   jaguarThroneKit().emit(bag, lx + lw + 2.2, 0, ut, 1, 0);
   col.rect([lx + lw + 1.85, ut - 0.8, lx + lw + 2.55, ut + 0.8], 0, 0.8);
+}
+
+/** A sector of a round wall, r0…r1 from (cx, cz), angles a0…a1 (radians, from +x toward +z), y0…y1, as a closed solid. */
+function arcWall(bag, mat, cx, cz, r0, r1, a0, a1, y0, y1, seg = 0) {
+  const n = seg || Math.max(2, Math.ceil((a1 - a0) / 0.13)), t = [], q = (a, b, c, e) => t.push(...a, ...b, ...c, ...a, ...c, ...e);
+  const P = (r, a, y) => [cx + r * Math.cos(a), y, cz + r * Math.sin(a)];
+  for (let i = 0; i < n; i++) {
+    const u0 = a0 + (a1 - a0) * i / n, u1 = a0 + (a1 - a0) * (i + 1) / n;
+    q(P(r1, u0, y0), P(r1, u1, y0), P(r1, u1, y1), P(r1, u0, y1));                                      // outer
+    q(P(r0, u1, y0), P(r0, u0, y0), P(r0, u0, y1), P(r0, u1, y1));                                      // inner
+    q(P(r0, u0, y1), P(r1, u0, y1), P(r1, u1, y1), P(r0, u1, y1));                                      // top
+    q(P(r0, u1, y0), P(r1, u1, y0), P(r1, u0, y0), P(r0, u0, y0));                                      // bottom
+  }
+  q(P(r0, a0, y0), P(r1, a0, y0), P(r1, a0, y1), P(r0, a0, y1)); q(P(r1, a1, y0), P(r0, a1, y0), P(r0, a1, y1), P(r1, a1, y1));   // the ends
+  // each quad was wound for an outward normal seen from outside; fix any the other way round (r0 may be 0)
+  bag.add(mat, fromTriangles(t.concat(flipTris(t))));
+}
+/** A round wall r0…r1 between y0 and y1 with openings of width w (metres at r1) centred at the angles `at`. */
+function ringWithGaps(bag, mat, cx, cz, r0, r1, y0, y1, at, w) {
+  const half = w / 2 / r1, gaps = at.map((a) => [a - half, a + half]).sort((p, q) => p[0] - q[0]);
+  for (let i = 0; i < gaps.length; i++) { const a = gaps[i][1], b = i + 1 < gaps.length ? gaps[i + 1][0] : gaps[0][0] + 2 * Math.PI; arcWall(bag, mat, cx, cz, r0, r1, a, b, y0, y1); }
+}
+
+/**
+ * m_caracol: El Caracol, the round observatory { c, rot (unused: the stair faces west) }: the lower platform
+ * (52 × 67 m, 6 m high) with its broad west stair; the upper platform with its own stair; on it the round base
+ * and the tower — an outer wall with four doorways to the cardinal points round a gallery, an inner wall with
+ * four doorways turned 45° round a second gallery, the solid core with the spiral stair; a frieze with the
+ * rain god's mask over each outer doorway; on the roof the upper chamber with its narrow sighting shafts.
+ */
+function mCaracol(el, { bag, col }) {
+  const [cx, cz] = el.c, H1 = 6, ax = 26, az = 33.5;
+  // the lower platform: a battered face, a projecting cornice
+  frust(bag, L, cx, cz, ax, az, ax - 0.5, az - 0.5, 0, H1 - 0.5);
+  frust(bag, L, cx, cz, ax - 0.3, az - 0.3, ax - 0.3, az - 0.3, H1 - 0.5, H1);
+  col.rect([cx - ax, cz - az, cx + ax, cz + az], 0, H1 - 0.31);
+  col.floor([cx - ax + 0.3, cz - az + 0.3, cx + ax - 0.3, cz + az - 0.3], H1);
+  flight(bag, col, [cx - ax - 24 * 0.3, cz], [1, 0], 14, H1, 24, 0.3, 1.0);
+  // the upper platform, set back toward the east, its stair from the west
+  const ux = cx + 6, H2 = 4, bx = 12, bz = 13;
+  frust(bag, L, ux, cz, bx, bz, bx - 0.3, bz - 0.3, H1, H1 + H2 - 0.45);
+  frust(bag, L, ux, cz, bx - 0.15, bz - 0.15, bx - 0.15, bz - 0.15, H1 + H2 - 0.45, H1 + H2);
+  col.rect([ux - bx, cz - bz, ux + bx, cz + bz], H1, H1 + H2 - 0.31);
+  col.floor([ux - bx + 0.2, cz - bz + 0.2, ux + bx - 0.2, cz + bz - 0.2], H1 + H2);
+  flight(bag, col, [ux - bx - 16 * 0.3, cz], [1, 0], 8, H2, 16, 0.3, 1.0, H1);
+  // the round base (16 m across) and the tower (11 m)
+  const y0 = H1 + H2, R0 = 8, yb = y0 + 1.2;
+  arcWall(bag, L, ux, cz, 0, R0, 0, 2 * Math.PI, y0 - 0.2, yb - 0.25, 64);
+  arcWall(bag, L, ux, cz, 0, R0 + 0.2, 0, 2 * Math.PI, yb - 0.3, yb, 64);
+  col.circle(ux, cz, R0, y0, yb - 0.3);
+  col.floor([ux - R0 * 0.7, cz - R0 * 0.7, ux + R0 * 0.7, cz + R0 * 0.7], yb);
+  const Ro = 5.5, wt = 0.8, Ri = 3.7, Rc = 1.9, yl = yb + 2.6, yr = yb + 3.7, yf = yb + 5.3;
+  const card = [0, Math.PI / 2, Math.PI, 1.5 * Math.PI], diag = card.map((a) => a + Math.PI / 4);
+  ringWithGaps(bag, L, ux, cz, Ro - wt, Ro, yb, yl, card, 1.5);                        // the outer wall, its four doorways
+  arcWall(bag, L, ux, cz, Ro - wt, Ro, 0, 2 * Math.PI, yl - 0.02, yr, 64);              // over the lintels
+  for (const a of card) bag.add('timber', box(...(() => { const x = ux + Math.cos(a) * (Ro - wt / 2), z = cz + Math.sin(a) * (Ro - wt / 2), ex = Math.abs(Math.cos(a)) > 0.5 ? wt / 2 + 0.02 : 1.0, ez = Math.abs(Math.cos(a)) > 0.5 ? 1.0 : wt / 2 + 0.02; return [x - ex, yl - 0.2, z - ez, x + ex, yl, z + ez]; })()));
+  ringWithGaps(bag, L, ux, cz, Ri - wt, Ri, yb, yl, diag, 1.1);                        // the inner wall, its doorways turned
+  arcWall(bag, L, ux, cz, Ri - wt, Ri, 0, 2 * Math.PI, yl - 0.02, yr, 48);
+  arcWall(bag, L, ux, cz, 0, Rc, 0, 2 * Math.PI, yb, yr, 32);                          // the core, the spiral stair inside it
+  arcWall(bag, 'stucco', ux, cz, 0, Ro - wt + 0.01, 0, 2 * Math.PI, yr - 0.3, yr, 48); // the galleries' ceiling
+  col.circle(ux, cz, Ro, yb, yr);
+  // the frieze: a moulding, a plain band with the rain god's mask over each outer doorway, a cornice
+  arcWall(bag, L, ux, cz, Ro - 0.4, Ro + 0.15, 0, 2 * Math.PI, yr - 0.05, yr + 0.25, 64);
+  arcWall(bag, 'stucco_red', ux, cz, Ro - 0.4, Ro, 0, 2 * Math.PI, yr + 0.2, yf - 0.25, 64);
+  arcWall(bag, L, ux, cz, Ro - 0.4, Ro + 0.2, 0, 2 * Math.PI, yf - 0.3, yf, 64);
+  for (const a of card) chaacKit().emit(bag, ux + Math.cos(a) * (Ro - 0.04), yr + 0.28, cz + Math.sin(a) * (Ro - 0.04), Math.cos(a), Math.sin(a), 0.62);
+  arcWall(bag, L, ux, cz, 0, Ro - 0.39, 0, 2 * Math.PI, yr - 0.15, yf - 0.05, 48);     // the roof's fill
+  col.floor([ux - 3.8, cz - 3.8, ux + 3.8, cz + 3.8], yf - 0.05);
+  // the upper chamber: a small round room, its wall pierced by narrow sighting shafts
+  const Rt = 2.6, yt0 = yf, ys = yf + 1.2, ys1 = yf + 1.8, yt1 = yf + 2.6;
+  arcWall(bag, L, ux, cz, Rt - 0.6, Rt, 0, 2 * Math.PI, yt0 - 0.1, ys, 40);
+  ringWithGaps(bag, L, ux, cz, Rt - 0.6, Rt, ys - 0.01, ys1 + 0.01, [Math.PI * 1.06, Math.PI * 0.8, Math.PI * 1.3, Math.PI * 1.85, Math.PI * 0.2], 0.3);
+  arcWall(bag, L, ux, cz, Rt - 0.6, Rt, 0, 2 * Math.PI, ys1, yt1, 40);
+  arcWall(bag, L, ux, cz, 0, Rt + 0.15, 0, 2 * Math.PI, yt1 - 0.02, yt1 + 0.3, 40);
+  arcWall(bag, 'lacquer_black', ux, cz, 0, Rt - 0.59, 0, 2 * Math.PI, yt0 - 0.08, yt0, 24);   // the dark floor inside
+  col.circle(ux, cz, Rt, yt0, yt1);
 }
 
 /** m_colonnade: rows of square pillars, each face carved with a warrior, under a flat roof of beams and plaster { rect, rows, cols, h, warriors }. */
@@ -359,7 +435,7 @@ registerStyle('maya', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    m_pyramid: mPyramid, m_temple: mTemple, m_ballcourt: mBallcourt, m_colonnade: mColonnade, m_platform: mPlatform, sacbe, maya_house: mayaHouse, albarrada,
+    m_pyramid: mPyramid, m_temple: mTemple, m_ballcourt: mBallcourt, m_colonnade: mColonnade, m_platform: mPlatform, m_caracol: mCaracol, sacbe, maya_house: mayaHouse, albarrada,
   },
   objects: {},
 });
