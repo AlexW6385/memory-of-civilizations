@@ -574,6 +574,111 @@ function haveli(el, { bag, col }) {
   }
 }
 
+/** The intrados of a multi-cusped (engrailed) pointed arch from (s0, ys) to (s1, ys): n lobes bulging out between cusps, as points [s, y] (the ends excluded). */
+function cuspedArc(s0, s1, ys, n = 7, depth = 0.09) {
+  const w = s1 - s0, r = w * 0.62, rise = Math.sqrt(r * r - (r - w / 2) ** 2), cL = s0 + r, cR = s1 - r, cs = (s0 + s1) / 2, cy = ys + rise * 0.35;
+  const base = (t) => { const s = s0 + w * t; return [s, ys + Math.sqrt(Math.max(0, r * r - (s - (t <= 0.5 ? cL : cR)) ** 2))]; };
+  // arc-length samples of the base arch, the cusps at equal steps
+  const S = Array.from({ length: 121 }, (_, i) => base(i / 120)), D = [0];
+  for (let i = 1; i < S.length; i++) D.push(D[i - 1] + Math.hypot(S[i][0] - S[i - 1][0], S[i][1] - S[i - 1][1]));
+  const at = (d) => { let i = 1; while (i < D.length - 1 && D[i] < d) i++; const g = (d - D[i - 1]) / (D[i] - D[i - 1] || 1); return [S[i - 1][0] + (S[i][0] - S[i - 1][0]) * g, S[i - 1][1] + (S[i][1] - S[i - 1][1]) * g]; };
+  const P = [], tot = D[D.length - 1];
+  for (let k = 0; k < n; k++) for (let j = k ? 0 : 1; j <= 6; j++) {
+    if (k === n - 1 && j === 6) break;
+    const q = at(tot * (k + j / 6) / n), out = [q[0] - cs, q[1] - cy], ol = Math.hypot(...out) || 1, b = Math.sin(Math.PI * j / 6) * depth;
+    P.push([q[0] + out[0] / ol * b, q[1] + out[1] / ol * b]);
+  }
+  return P;
+}
+
+/** A Shah Jahani column at (x, z) from y up to yc: a cusped square base, a faceted tapering shaft, a bell capital under an impost block. */
+function shahColumn(bag, col, x, y, z, yc, r = 0.15, mat = R) {
+  bag.add(mat, box(x - r * 1.7, y, z - r * 1.7, x + r * 1.7, y + 0.12, z + r * 1.7));
+  bag.add(mat, lathe([[r * 1.55, 0], [r * 1.5, 0.08], [r * 1.15, 0.22], [r * 1.25, 0.3], [r * 1.0, 0.36]], 8, (th) => 1 + 0.12 * Math.abs(Math.cos(th * 2)), x, y + 0.12, z));
+  const hs = yc - y - 0.86;
+  bag.add(mat, lathe([[r, 0], [r * 0.82, hs]], 12, null, x, y + 0.48, z));
+  for (const f of [0.33, 0.66]) bag.add(mat, lathe([[r * (1 - 0.18 * f) + 0.02, 0], [r * (1 - 0.18 * f) + 0.02, 0.06], [0.001, 0.06]], 12, null, x, y + 0.48 + hs * f, z));
+  bag.add(mat, lathe([[r * 0.82, 0], [r * 0.95, 0.06], [r * 0.8, 0.12], [r * 1.25, 0.28], [r * 1.5, 0.32], [0.001, 0.32]], 12, (th) => 1 + 0.1 * Math.abs(Math.cos(th * 4)), x, y + 0.48 + hs, z));
+  bag.add(mat, box(x - r * 1.6, yc - 0.06, z - r * 1.6, x + r * 1.6, yc, z + r * 1.6));
+  if (col) col.circle(x, z, r * 1.3, y, yc);
+}
+
+/**
+ * bazaar_row: a row of shops along a bazaar street of the forecourt (docs/settlements/mughal-agra.md §5) { x0, x1, z
+ * (the verandah's front edge), facing ('n' | 's', toward the street), cell (width), deep (the cells), ver (the
+ * verandah), h }: small windowless cells side by side, each with its door, fronted by an arcaded verandah of multi-
+ * cusped arches on Shah Jahani columns, on a plinth; a flat roof with a chhajja and a crenellated parapet.
+ */
+function bazaarRow(el, { bag, col }) {
+  const { x0, x1, z } = el, s = el.facing === 's' ? 1 : -1, cw = el.cell ?? 3.2, D = el.deep ?? 4, V = el.ver ?? 3, H = el.h ?? 5.0, py = 0.35;
+  const n = Math.max(1, Math.round((x1 - x0) / cw)), bw = (x1 - x0) / n, zf = z, zc = z - s * V, zb = z - s * (V + D);
+  const zr = (a, b) => [Math.min(a, b), Math.max(a, b)];
+  const bx = (xa, xb, za, zb2, ya, yb, m) => { const [p, q] = zr(za, zb2); bag.add(m, box(xa, ya, p, xb, yb, q)); };
+  // the plinth, the back wall, the cells' front wall with their doors, the partitions
+  bx(x0, x1, zf + s * 0.05, zb, 0, py, R); { const [p, q] = zr(zf + s * 0.05, zb); col.floor([x0, p, x1, q], py); }
+  for (let i = 0; i < 2; i++) bx(x0 + 0.02, x1 - 0.02, zf + s * (0.05 + 0.3 * (i + 1)), zf + s * (0.05 + 0.3 * i), 0, py * (2 - i) / 3, R);   // two steps down to the street
+  bx(x0, x1, zb, zb + s * 0.5, py, H, R); { const [p, q] = zr(zb, zb + s * 0.5); col.rect([x0, p, x1, q], py, H); }
+  const dw = 1.4, dh = 2.5;
+  for (let k = 0; k <= n; k++) {
+    const xp = x0 + k * bw;
+    bx(Math.max(x0, xp - 0.18), Math.min(x1, xp + 0.18), zb + s * 0.5, zc, py, H, R); { const [p, q] = zr(zb, zc); col.rect([Math.max(x0, xp - 0.18), p, Math.min(x1, xp + 0.18), q], py, H); }
+    if (k === n) break;
+    const xc = xp + bw / 2;
+    for (const [a, b] of [[xp + 0.18, xc - dw / 2], [xc + dw / 2, xp + bw - 0.18]]) { bx(a, b, zc, zc + s * 0.45, py, H, 'lime_plaster'); const [p, q] = zr(zc, zc + s * 0.45); col.rect([a, p, b, q], py, H); }
+    bx(xc - dw / 2, xc + dw / 2, zc, zc + s * 0.45, py + dh, H, 'lime_plaster');
+    bx(xc - dw / 2 - 0.12, xc + dw / 2 + 0.12, zc + s * 0.45, zc + s * 0.5, py + dh, py + dh + 0.14, 'sandstone_red');
+    // the dark inside, the folded-back leaves of the door
+    bx(xc - dw / 2, xc + dw / 2, zb + s * 0.52, zb + s * 0.56, py, py + dh, 'lacquer_black');
+    for (const sg of [-1, 1]) bx(xc + sg * dw / 2 - (sg > 0 ? 0.06 : -0.0), xc + sg * dw / 2 + (sg > 0 ? 0 : 0.06), zc + s * 0.45, zc + s * 0.45 + s * 0.62, py + 0.02, py + dh - 0.05, 'wood_dark');
+  }
+  // the roof over cells and verandah, the chhajja on brackets, the parapet with merlons
+  bx(x0, x1, zb, zf, H, H + 0.4, R);
+  bx(x0 - 0.3, x1 + 0.3, zf - s * 0.2, zf + s * 0.7, H - 0.1, H + 0.04, R);
+  for (let k = 0; k <= n; k++) { const xp = x0 + k * bw; bx(xp - 0.08, xp + 0.08, zf, zf + s * 0.6, H - 0.45, H - 0.1, R); }
+  bx(x0, x1, zf - s * 0.1, zf + s * 0.15, H + 0.4, H + 0.85, R);
+  for (let xx = x0 + 0.4; xx < x1 - 0.2; xx += 0.8) bx(xx - 0.22, xx + 0.22, zf - s * 0.08, zf + s * 0.13, H + 0.85, H + 1.2, R);
+  // the arcade: a column at every partition, a cusped arch over each bay in a panel up to the roof
+  const yc = py + 2.4, ys = yc;
+  for (let k = 0; k <= n; k++) shahColumn(bag, col, x0 + k * bw, py, zf - s * 0.2, yc);
+  for (let k = 0; k < n; k++) {
+    const xa = x0 + k * bw, xb = xa + bw, ci = 0.25, sh = new Shape();
+    sh.moveTo(xa, ys); sh.lineTo(xa + ci, ys);
+    for (const [u, v] of cuspedArc(xa + ci, xb - ci, ys, 7, 0.08)) sh.lineTo(u, v);
+    sh.lineTo(xb - ci, ys); sh.lineTo(xb, ys); sh.lineTo(xb, H); sh.lineTo(xa, H); sh.lineTo(xa, ys);
+    const g = new ExtrudeGeometry(sh, { depth: 0.34, bevelEnabled: false, curveSegments: 4 });
+    g.translate(0, 0, zf - s * 0.2 - 0.17);
+    bag.add(R, g);
+    // a white marble line framing the arch's crown, a rosette in each spandrel
+    const zz = zf - s * 0.2 + s * 0.17;
+    for (const [xr, yr] of [[xa + bw * 0.16, H - 0.42], [xb - bw * 0.16, H - 0.42]]) bx(xr - 0.11, xr + 0.11, zz, zz + s * 0.02, yr - 0.11, yr + 0.11, W);
+    bx(xa + 0.1, xb - 0.1, zz, zz + s * 0.02, H - 0.14, H - 0.08, W);
+  }
+}
+
+/**
+ * bazaar_gate: a gate of red sandstone at the end of a bazaar street or in the forecourt's south wall { c, axis ('x'
+ * | 'z': the way through), w (across), d (through), h }: on each face a pointed arch one walks through, framed by a
+ * scroll of inlaid flowers in white marble, the passage vaulted between solid piers, a crenellated parapet with a
+ * domed kiosk at each corner.
+ */
+function bazaarGate(el, { bag, col }) {
+  const [cx, cz] = el.c, w = el.w ?? 20, d = el.d ?? 8, h = el.h ?? 11, aw = el.aw ?? 6, ahh = el.ah ?? 8.5, X = el.axis === 'x';
+  const P = (t, c) => (X ? [cx + t, cz + c] : [cx + c, cz + t]);              // t along the way through, c across
+  for (const sg of [-1, 1]) {
+    const a = P(sg * (d / 2 - 0.6), -sg * w / 2), b = P(sg * (d / 2 - 0.6), sg * w / 2);
+    arcadeWall(bag, col, a, b, 0, h, 1.2, R, [{ at: w / 2, w: aw, h: ahh, pass: true }], [cx, cz]);
+    faceDecor(bag, a, b, 0, h, { w: aw, h: ahh }, R, false, [cx, cz], { F: 0.6, flowers: true });
+  }
+  const r2 = (t0, c0, t1, c1) => { const p = P(t0, c0), q = P(t1, c1); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
+  for (const sg of [-1, 1]) { const r = r2(-d / 2 + 1.2, sg * aw / 2, d / 2 - 1.2, sg * w / 2); bag.add(R, box(r[0], 0, r[1], r[2], h, r[3])); col.rect(r, 0, h); }
+  { const r = r2(-d / 2 + 1.2, -aw / 2, d / 2 - 1.2, aw / 2); bag.add(R, box(r[0], ahh, r[1], r[2], h, r[3])); bag.add('lime_plaster', box(r[0], ahh - 0.25, r[1], r[2], ahh, r[3])); }
+  { const r = r2(-d / 2 + 1.2, -aw / 2, d / 2 - 1.2, aw / 2); bag.add('sandstone_red', box(r[0], 0.0, r[1], r[2], 0.04, r[3])); }
+  const rt = r2(-d / 2, -w / 2, d / 2, w / 2);
+  bag.add(R, box(rt[0], h, rt[1], rt[2], h + 0.4, rt[3]));
+  for (let c = -w / 2 + 0.5; c < w / 2 - 0.3; c += 1.0) for (const sg of [-1, 1]) { const p = P(sg * (d / 2 - 0.2), c); bag.add(R, box(p[0] - 0.25, h + 0.4, p[1] - 0.25, p[0] + 0.25, h + 1.1, p[1] + 0.25)); }
+  for (const [st, sc] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const p = P(st * (d / 2 - 1), sc * (w / 2 - 1)); chhatri(bag, null, p[0], h + 0.4, p[1], 0.9, 1.8, 6, R, W); }
+}
+
 /** A fountain at (x, z): a lotus of marble rising from the water floor (y0) to just above the surface (y),
  *  a copper nozzle, the jet of water h high. */
 function fountain(bag, x, z, y0, y, h = 1.6) {
@@ -591,7 +696,7 @@ registerStyle('mughal', {
     minaret: (el, { bag, col }) => minaret(bag, col, el.c[0], el.y, el.c[1], el.h, el.r),
     chhatri: (el, { bag, col }) => chhatri(bag, col, el.c[0], el.y, el.c[1], el.r, el.h, el.n ?? 8, el.mat ?? W, el.domeMat ?? W),
     fountains: (el, { bag }) => { for (const [x, z] of el.pts) fountain(bag, x, z, el.y0 ?? 0, el.y, el.h ?? 1.6); },
-    red_hall: redHall, great_gate: greatGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli,
+    red_hall: redHall, great_gate: greatGate, bazaar_row: bazaarRow, bazaar_gate: bazaarGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli,
   },
   objects: {},
 });

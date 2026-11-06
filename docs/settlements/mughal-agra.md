@@ -44,6 +44,8 @@ Ours: on every pishtaq face of the tomb and the great gate, an inscription band 
 
 Flat-roofed houses of two or three storeys, plastered brick or red sandstone, with a jharokha balcony over the door. [inferred]
 
+**The forecourt's bazaar streets and gates (third pass, built).** "The Taj complex is now entered through one of three gates leading into the Jilaukhana, or forecourt"; "Two identical bazaar streets lead from the east and west gates to the Jilaukhana"; "The streets are lined with rows of small unconnected rectangular cells without windows", "fronted by an arcaded verandah with multi-cusped arches supported by columns of distinctive Shah Jahan type"; the Khawasspuras (attendants' quarters) on the north against the garden wall and the two tomb complexes (Saheli Burj) on the south; outside, a short flight up to the Taj Ganj [stated: tajmahal.gov.in, Outlying buildings]. Visitors "would dismount from their horses or elephants" there; the cells "were used to sell goods from when the Taj was built until 1996"; a caravanserai on the north-west was "Katra Omar Khan" [stated: Wikipedia, Origins and architecture]. Ours: in our shortened forecourt (250 × 56 m) a bazaar street 9 m wide runs along its middle from a gate in each end wall to 48 m from the axis, lined on both sides by 22 cells 3.2 m wide and 4 m deep, each with a door 1.4 × 2.5 m in a plastered front, its wooden leaves folded back, dark inside; before them a verandah 3 m deep on a plinth of 0.35 m with two steps, its front an arcade of seven-lobed cusped pointed arches on Shah Jahani columns (a cusped square base, a faceted tapering shaft with two rings, a bell capital, an impost block), a white marble line and two rosettes over each arch, a chhajja on brackets and a crenellated parapet; the east, west and south gates of red sandstone 20 m wide and 11 m high, a pointed arch one walks through on each face framed by a scroll of inlaid flowers in white marble, the passage between solid piers under a plastered ceiling, merlons and four domed kiosks on the roof; a paved street outward from each side gate [inferred: the cell, verandah and gate dimensions, the lobes, the column's profile, the gates' form]. The Khawasspuras, the Saheli Burj and the caravanserais are left for later.
+
 ## 6. Ground and water
 
 The level plain; the riverbank falling to the Yamuna on the north. (`ground.js`)
@@ -77,6 +79,8 @@ The settlement's latitude in `src/planet/sites.js` is set a little south and eas
 - [Taj Mahal — middleheight](https://middleheight.com/?p=3849)
 - [The Taj Mahal — thetilesofindia](https://www.thetilesofindia.com/global-architects/the-taj-mahal/)
 
+- [Outlying buildings — tajmahal.gov.in](https://tajmahal.gov.in/outlying-building.aspx)
+- [Origins and architecture of the Taj Mahal — Wikipedia](https://en.wikipedia.org/wiki/Origins_and_architecture_of_the_Taj_Mahal)
 - [Taj garden — tajmahal.org.uk](https://www.tajmahal.org.uk/taj-garden.html)
 - [Taj Mahal — Wikipedia](https://en.wikipedia.org/wiki/Taj_Mahal)
 - [Taj Mahal — Wikipedia (wikipedia.com mirror)](https://wikipedia.com/wiki/Tajmahal)

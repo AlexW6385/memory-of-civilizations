@@ -53,8 +53,17 @@ for (const s of [-1, 1]) E.push({ t: 'red_hall', rect: s < 0 ? [gx0 - 10, -14, g
 E.push({ t: 'great_gate', c: GATE.c, y: 0, w: GATE.w, d: GATE.d, h: GATE.h });
 const [fx0, fz0, fx1, fz1] = FORECOURT;
 E.push({ t: 'lane', rect: FORECOURT, y: 0.05, mat: 'sandstone_red' });
-wall([fx0, fz0], [fx0, fz1]); wall([fx1, fz0], [fx1, fz1]);
-wall([fx0, fz1], [-8, fz1]); wall([8, fz1], [fx1, fz1]);
+// the forecourt's three gates and the two bazaar streets from the east and west gates toward its middle, each lined on
+// both sides with cells behind arcaded verandahs (docs/settlements/mughal-agra.md §5)
+const BZ = 200, BW = 4.5, GTW = 20;
+wall([fx0, fz0], [fx0, BZ - GTW / 2]); wall([fx0, BZ + GTW / 2], [fx0, fz1]); wall([fx1, fz0], [fx1, BZ - GTW / 2]); wall([fx1, BZ + GTW / 2], [fx1, fz1]);
+wall([fx0, fz1], [-GTW / 2, fz1]); wall([GTW / 2, fz1], [fx1, fz1]);
+for (const sx of [-1, 1]) {
+  E.push({ t: 'bazaar_gate', c: [sx * fx1, BZ], axis: 'x', w: GTW, d: 8, h: 11 });
+  for (const sz of [-1, 1]) E.push({ t: 'bazaar_row', x0: sx < 0 ? fx0 + 4.2 : 48, x1: sx < 0 ? -48 : fx1 - 4.2, z: BZ + sz * BW, facing: sz < 0 ? 's' : 'n', cell: 3.2, deep: 4, ver: 3 });
+  E.push({ t: 'lane', rect: sx < 0 ? [-170, BZ - BW, fx0 - 4, BZ + BW] : [fx1 + 4, BZ - BW, 170, BZ + BW], y: 0.04, mat: 'sandstone_red' });
+}
+E.push({ t: 'bazaar_gate', c: [0, fz1], axis: 'z', w: GTW, d: 8, h: 11 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('tomb chamber', [-11, -214, 11, -192], PLINTH.y, 'hall'), room('plinth', [-47.5, -250.5, 47.5, -155.5], PLINTH.y, 'open'), room('garden', GARDEN, 0, 'open')];
