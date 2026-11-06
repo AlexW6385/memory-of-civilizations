@@ -70,6 +70,10 @@ Down the Processional Way from the north, through the Ishtar Gate, to the precin
 
 As for Ur (lyres, harps, drums, voices — `docs/settlements/ur.md` §9).
 
+## 11. Layout fix: the Southern Palace against the inner wall
+
+The Southern Palace's north range had the inner city wall (Imgur-Enlil, ours at z ≈ −282) running through it. The palace was built in the angle between the inner wall and the Processional Way, its north side against the wall west of the Ishtar Gate [inferred: after Koldewey's plan of the Kasr]. Ours: the palace moved 9 m south (z −281…−161), its north side set into the wall's south face with no stepped face or battlements of its own there (`abut: 'n'`); the wall's towers rise over its north range.
+
 ## Sources
 
 - [Etemenanki — Wikipedia](https://en.wikipedia.org/wiki/Etemenanki)

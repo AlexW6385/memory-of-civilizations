@@ -9,7 +9,8 @@ export const RADIUS = 420;
 export const WAY = { x: -40, z0: -380, z1: -60, w: 20 };
 export const GATE = { c: [-40, -300] };
 export const WALL_Z = -300;
-export const PALACE = [-200, -290, -70, -170];
+/** The Southern Palace, its north side built against the inner city wall (Imgur-Enlil, z −284…−280) west of the Ishtar Gate. */
+export const PALACE = [-200, -281, -70, -161];
 export const PRECINCT = [-110, -60, 110, 150];
 export const ZIGGURAT = { c: [0, 40] };
 export const ESAGILA = [-50, 175, 50, 260];

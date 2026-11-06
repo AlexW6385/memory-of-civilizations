@@ -29,7 +29,7 @@ for (const s of [-1, 1]) {
 // enamelled facade of the throne room on its south side, a court of lodgings to the south-east
 const [pa0, pb0, pa1, pb1] = PALACE;
 E.push({
-  t: 'palace', rect: PALACE, h: 11,
+  t: 'palace', rect: PALACE, h: 11, abut: 'n',
   courts: [[pa1 - 44, pb0 + 24, pa1 - 12, pb0 + 76], [pa0 + 28, pb0 + 18, pa0 + 74, pb0 + 72], [pa1 - 44, pb1 - 32, pa1 - 12, pb1 - 10]],
   gates: [{ rect: [pa1 - 12, pb0 + 46, pa1, pb0 + 52], h: 5, towers: 'e' }, { rect: [pa0 + 74, pb0 + 46, pa1 - 44, pb0 + 52], h: 4.5 }, { rect: [pa1 - 31, pb0 + 76, pa1 - 25, pb1 - 32], h: 4.5 }],
   throne: { court: 1, doors: [-15, 0, 15] },

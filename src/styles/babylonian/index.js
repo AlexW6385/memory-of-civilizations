@@ -290,7 +290,7 @@ function cityWall(el, { bag, col }) {
   }
 }
 /**
- * palace: { rect, h, courts: [rect], gates: [{ rect, h, towers ('n'|'s'|'e'|'w': the outer face it opens on) }],
+ * palace: { rect, h, abut ('n'…: the side built against the city wall), courts: [rect], gates: [{ rect, h, towers ('n'|'s'|'e'|'w': the outer face it opens on) }],
  * throne: { court (index into courts), doors: [u, …] (centres along the court's south face) } — a palace of baked
  * brick round its courts (the Southern Palace): solid ranges of rooms between the courts, gateways through them,
  * the outer faces in shallow vertical steps (Koldewey: 80 steps on an 80 m front), stepped battlements, the courts
@@ -323,6 +323,7 @@ function palace(el, { bag, col }) {
   // the outer faces in shallow vertical steps, broken by the gates; the battlements
   const near = (x, z, m) => gates.some((g) => g.towers && x > g.rect[0] - m && x < g.rect[2] + m && z > g.rect[1] - m && z < g.rect[3] + m);
   for (const [f, a, b] of [['n', x0, x1], ['s', x0, x1], ['w', z0, z1], ['e', z0, z1]]) {
+    if (el.abut === f) continue;                                    // built against a wall there: no face of its own
     for (let u = a + 1; u < b - 1.5; u += 2) {
       const q = f === 'n' ? [u, z0 - 0.3, u + 1, z0] : f === 's' ? [u, z1, u + 1, z1 + 0.3] : f === 'w' ? [x0 - 0.3, u, x0, u + 1] : [x1, u, x1 + 0.3, u + 1];
       if (near((q[0] + q[2]) / 2, (q[1] + q[3]) / 2, 5)) continue;
