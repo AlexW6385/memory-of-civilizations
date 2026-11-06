@@ -54,9 +54,20 @@ export function lots() {
       || Math.abs(cx - BRIDGE.x) < 22 && cz < 0 || Math.hypot(cx - AUSTRALIA_SQ[0], cz - AUSTRALIA_SQ[1]) < 34 || rand() < 0.12) continue;
     const rocks = cx < -100 && cz < 70, ys = [height(cx - w / 2, cz - d / 2), height(cx + w / 2, cz - d / 2), height(cx - w / 2, cz + d / 2), height(cx + w / 2, cz + d / 2)];
     let h, mat;
-    if (rocks) { h = 7 + rand() * 7; mat = 'sandstone_dressed'; }
-    else { h = 15 + rand() * 30; mat = ['facade_buff', 'facade_grey', 'facade_limestone'][Math.floor(rand() * 3)]; if (rand() < 0.22) { h = 60 + rand() * 90; mat = rand() < 0.6 ? 'facade_glass' : 'facade_grey'; } }
-    LOTS.push({ rect: [x, z, x + w, z + d], y: Math.max(...ys), h: Math.round(h), mat, seed: Math.floor(rand() * 1e6) });
+    if (rocks) {
+      // the Rocks: a short terrace of two-storey houses facing the lane, or by the harbour a sandstone bond store (§5a)
+      const seed = Math.floor(rand() * 1e6), store = cz < -60 && rand() < 0.5;
+      LOTS.push({ t: 'rocks_terrace', rect: [x, z, x + w, z + d], y: Math.max(...ys), y0: Math.min(...ys), front: Math.floor((z + 1000) / 16) % 2 ? 's' : 'n', kind: store ? 'store' : 'terrace', seed });
+      continue;
+    }
+    h = 15 + rand() * 30; mat = ['facade_buff', 'facade_grey', 'facade_limestone'][Math.floor(rand() * 3)]; if (rand() < 0.22) { h = 60 + rand() * 90; mat = rand() < 0.6 ? 'facade_glass' : 'facade_grey'; }
+    LOTS.push({ rect: [x, z, x + w, z + d], y: Math.max(...ys), h: Math.round(h), mat, seed: Math.floor(rand() * 1e6), tanks: false });
+  }
+  // shop fronts only on the faces with a street or a lane of at least 3 m before them
+  for (const l of LOTS) {
+    if (l.t) continue;
+    const [x0, z0, x1, z1] = l.rect, clear = (r) => !LOTS.some((o) => o !== l && o.rect[0] < r[2] && o.rect[2] > r[0] && o.rect[1] < r[3] && o.rect[3] > r[1]);
+    l.shops = [['n', [x0, z0 - 3, x1, z0]], ['s', [x0, z1, x1, z1 + 3]], ['w', [x0 - 3, z0, x0, z1]], ['e', [x1, z0, x1 + 3, z1]]].filter(([, r]) => clear(r)).map(([f]) => f).join('');
   }
   return LOTS;
 }

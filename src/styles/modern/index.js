@@ -8,6 +8,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, frustum } from '../../core/geom.js';
 import '../qing/index.js';
 import '../artdeco/index.js';
+import { rocksTerrace } from './rocks.js';
 
 /** Both faces of a triangle. */
 const tri2 = (t, a, b, c) => t.push(...a, ...b, ...c, ...a, ...c, ...b);
@@ -214,6 +215,6 @@ function ferry(el, { bag, col }) {
 }
 registerStyle('modern', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry },
+  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace },
   objects: {},
 });
