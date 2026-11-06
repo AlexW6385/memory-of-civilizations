@@ -23,6 +23,21 @@ const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const flag = (k) => args.includes('--' + k);
 
+/**
+ * A geometry's bytes on the GPU as three's WebGPU backend (r186) lays them out: each attribute
+ * padded to four bytes a vertex (16-bit normals: 8), and a 16-bit index widened to 32 bits unless
+ * flagged normalized (src/core/geom.js, indexAttribute).
+ */
+export function gpuBytes(g) {
+  let b = 0;
+  for (const a of Object.values(g.attributes)) {
+    const e = a.array.BYTES_PER_ELEMENT, wide = !a.normalized && e < 4 ? 4 : e;
+    b += a.count * Math.ceil((a.itemSize * wide) / 4) * 4;
+  }
+  if (g.index) b += g.index.count * (g.index.array instanceof Uint16Array && g.index.normalized ? 2 : 4);
+  return b;
+}
+
 /** Count one built plan (the output of buildPlan). */
 export function countBuilt(b, life = null) {
   const c = { verts: 0, tris: 0, meshes: 0, instances: 0, protoVerts: 0, bytes: 0 };
@@ -30,14 +45,14 @@ export function countBuilt(b, life = null) {
     const g = p.geometry, n = g.attributes.position.count;
     const idx = g.index ? g.index.count : n;
     c.meshes++; c.verts += n; c.tris += idx / 3;
-    c.bytes += n * 24 + (g.index ? g.index.array.byteLength : 0);
+    c.bytes += gpuBytes(g);
   }
   for (const p of b.instanced || []) {
     const g = p.geometry, n = g.attributes.position.count, idx = g.index ? g.index.count : n, k = p.matrices.length / 16;
     // the life of the streets is gathered settlement-wide (src/engine/life-instances.js): counted
     // per shape at the end (measureSite)
-    if (life) { const e = life.get(p.key) || life.set(p.key, { n: 0, v: n, idx, colors: !!p.colors, bytes: n * 24 + (g.index ? g.index.array.byteLength : 0) }).get(p.key); e.n += k; continue; }
-    c.meshes++; c.protoVerts += n; c.bytes += n * 24 + (g.index ? g.index.array.byteLength : 0);
+    if (life) { const e = life.get(p.key) || life.set(p.key, { n: 0, v: n, idx, colors: !!p.colors, bytes: gpuBytes(g) }).get(p.key); e.n += k; continue; }
+    c.meshes++; c.protoVerts += n; c.bytes += gpuBytes(g);
     c.instances += k; c.tris += (idx / 3) * k; c.bytes += k * (64 + (p.colors ? 12 : 0));
   }
   return c;

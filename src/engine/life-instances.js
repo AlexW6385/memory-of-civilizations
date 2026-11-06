@@ -155,7 +155,8 @@ function mergeList(gs) {
   const m = new THREE.BufferGeometry();
   m.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   m.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-  m.setIndex(new THREE.BufferAttribute(idx, 1));
+  // a Uint16 index flagged normalized stays 16-bit on the GPU (src/core/geom.js, indexAttribute)
+  m.setIndex(new THREE.BufferAttribute(idx, 1, idx instanceof Uint16Array));
   m.computeBoundingBox(); m.computeBoundingSphere();
   return m;
 }

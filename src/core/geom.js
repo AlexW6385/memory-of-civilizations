@@ -1,7 +1,8 @@
 // Geometry primitives for architecture. Pure three.js core: runs in the browser and in Node
 // (the baker and the plan checker build the same geometry the viewer shows).
 //
-// Every primitive returns a non-indexed BufferGeometry with `position` and `normal` only.
+// Every primitive returns a non-indexed BufferGeometry with `position` and `normal` only. The
+// viewer's merged meshes are indexed (GeoBag weld); the tools' stay triangle soups.
 // Materials are procedural and work from world position, so no UVs are needed.
 
 import { BufferGeometry, BufferAttribute, Float32BufferAttribute, Vector3, Matrix4 } from './three.js';
@@ -281,7 +282,7 @@ function prototypeOf(g, sh, d) {
   const m = new BufferGeometry();
   m.setAttribute('position', new Float32BufferAttribute(pos, 3));
   m.setAttribute('normal', new Float32BufferAttribute(nor, 3));
-  m.setIndex(new BufferAttribute(index, 1));
+  m.setIndex(indexAttribute(index));
   m.computeBoundingBox(); m.computeBoundingSphere();
   // the stand-off of a stretched piece: its box grown by d where it has depth, moved by d toward
   // its faces where it is flat
@@ -306,23 +307,102 @@ function isSmall(geometry, M) {
   const b = geometry.boundingBox, s = Math.max(Math.hypot(M[0], M[1], M[2]), Math.hypot(M[4], M[5], M[6]), Math.hypot(M[8], M[9], M[10]));
   return Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z) * s < DETAIL_SIZE;
 }
-function mergeInto(mat, list, d, detail) {
+function mergeInto(mat, list, d, detail, join = false) {
   let count = 0;
   for (const g of list) count += g.attributes.position.count;
   const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3);
   let o = 0;
+  // copy and let go of each piece as it is copied, so the peak is one merged copy, not two
   for (let i = 0; i < list.length; i++) { const g = list[i]; pos.set(g.attributes.position.array, o); nor.set(g.attributes.normal.array, o); o += g.attributes.position.array.length; list[i] = null; }
+  // each material stands off its faces by its own fraction of a millimetre or so, so that two
+  // materials laid in the same plane (a lattice in its frame, paving on a terrace) never fight
+  // in the depth buffer
   if (d) for (let k = 0; k < pos.length; k++) pos[k] += nor[k] * d;
   const m = new BufferGeometry();
-  m.setAttribute('position', new Float32BufferAttribute(pos, 3));
-  m.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  if (join) {
+    const w = weld(pos, nor);
+    m.setAttribute('position', new Float32BufferAttribute(w.pos, 3));
+    m.setAttribute('normal', new Float32BufferAttribute(w.nor, 3));
+    m.setIndex(indexAttribute(w.index));
+  } else {
+    m.setAttribute('position', new Float32BufferAttribute(pos, 3));
+    m.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  }
   m.computeBoundingBox(); m.computeBoundingSphere();
-  return [{ mat, geometry: m, detail }];
+  return detail ? [{ mat, geometry: m, detail }] : [{ mat, geometry: m }];
+}
+
+/**
+ * An index attribute. A Uint16 index is flagged `normalized`: three's WebGPU backend (r186) widens
+ * every non-normalized 16-bit array to 32 bits on upload, the index too, doubling it on the GPU;
+ * the flag means nothing else for an index (WebGL reads its type from the array).
+ */
+export function indexAttribute(index) {
+  return new BufferAttribute(index, 1, index instanceof Uint16Array);
+}
+
+/**
+ * Normals packed as normalized 16-bit integers (6 bytes a vertex, 8 on the GPU after three pads
+ * each to four, instead of 12): an error under 2e-5 a component, far below what a pixel shows.
+ * Axis-aligned normals stay exact. For the viewer's merged meshes (build.js, after placement).
+ */
+export function packNormals(g) {
+  const a = g.attributes.normal;
+  if (!a || a.array instanceof Int16Array) return g;
+  const N = a.array, out = new Int16Array(N.length);
+  for (let i = 0; i < N.length; i++) out[i] = Math.round(Math.max(-1, Math.min(1, N[i])) * 32767);
+  g.setAttribute('normal', new BufferAttribute(out, 3, true));
+  return g;
+}
+
+/**
+ * Corners that are the same vertex — position and normal equal to the bit — kept once, with an
+ * index (Uint16 under 65536 vertices, else Uint32). Only bit-identical corners are joined, so the
+ * picture is exactly the soup's: a flat face keeps its own normals, a crease stays a crease.
+ */
+export function weld(pos, nor) {
+  const n = pos.length / 3;
+  const P = new Uint32Array(pos.buffer, pos.byteOffset, pos.length), N = new Uint32Array(nor.buffer, nor.byteOffset, nor.length);
+  let size = 1;
+  while (size < n * 2) size <<= 1;
+  const mask = size - 1, table = new Int32Array(size).fill(-1);
+  const first = new Uint32Array(n);          // for each kept vertex, the corner it came from
+  const index = new (n > 65535 ? Uint32Array : Uint16Array)(n);
+  let kept = 0;
+  for (let i = 0; i < n; i++) {
+    const o = 3 * i, a = P[o], b = P[o + 1], c = P[o + 2], e = N[o], f = N[o + 1], g = N[o + 2];
+    let h = Math.imul(a ^ 0x9e3779b9, 0x85ebca6b);
+    h = Math.imul(h ^ (h >>> 13) ^ b, 0xc2b2ae35);
+    h = Math.imul(h ^ (h >>> 16) ^ c, 0x27d4eb2f);
+    h = Math.imul(h ^ (h >>> 15) ^ e, 0x165667b1);
+    h = Math.imul(h ^ (h >>> 13) ^ f, 0x85ebca6b);
+    h = Math.imul(h ^ (h >>> 16) ^ g, 0xc2b2ae35);
+    h ^= h >>> 15;
+    let s = h & mask, j;
+    for (;;) {
+      j = table[s];
+      if (j < 0) { j = kept++; table[s] = j; first[j] = i; break; }
+      const q = 3 * first[j];
+      if (P[q] === a && P[q + 1] === b && P[q + 2] === c && N[q] === e && N[q + 1] === f && N[q + 2] === g) break;
+      s = (s + 1) & mask;
+    }
+    index[i] = j;
+  }
+  const outP = new Float32Array(kept * 3), outN = new Float32Array(kept * 3);
+  for (let j = 0; j < kept; j++) {
+    const q = 3 * first[j], o = 3 * j;
+    outP[o] = pos[q]; outP[o + 1] = pos[q + 1]; outP[o + 2] = pos[q + 2];
+    outN[o] = nor[q]; outN[o + 1] = nor[q + 1]; outN[o + 2] = nor[q + 2];
+  }
+  // the index type follows the vertices kept, not the corners
+  const idx = kept <= 65535 && index instanceof Uint32Array ? Uint16Array.from(index) : index;
+  return { pos: outP, nor: outN, index: idx };
 }
 
 export class GeoBag {
   /** instancing: find repeated pieces (the viewer); without it every piece is merged (the tools). */
-  constructor({ instancing = false, always = false, detail = false } = {}) { this.parts = new Map(); this.instancing = instancing; this.always = always; this.detail = detail; this.explicit = new Map(); }
+  /** weld (default: with instancing, i.e. the viewer): merged meshes indexed, identical corners kept once (weld). */
+  constructor({ instancing = false, always = false, detail = false, weld = instancing } = {}) { this.parts = new Map(); this.instancing = instancing; this.always = always; this.detail = detail; this.weld = weld; this.explicit = new Map(); }
   /**
    * A piece built at its object's origin and placed by a matrix (rotation, uniform scale,
    * translation): the objects of use and the figures (src/objects/index.js). Pieces of the same
@@ -425,30 +505,10 @@ export class GeoBag {
       if (this.detail) {
         const small = [], big = [];
         for (const g of list) (pieceSize(g) < DETAIL_SIZE ? small : big).push(g);
-        if (small.length && big.length) { res.push(...mergeInto(mat, small, d, true)); list = big; }
-        else if (small.length) { res.push(...mergeInto(mat, small, d, true)); continue; }
+        if (small.length && big.length) { res.push(...mergeInto(mat, small, d, true, this.weld)); list = big; }
+        else if (small.length) { res.push(...mergeInto(mat, small, d, true, this.weld)); continue; }
       }
-      let count = 0;
-      for (const g of list) count += g.attributes.position.count;
-      const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3);
-      let o = 0;
-      // copy and let go of each piece as it is copied, so the peak is one merged copy, not two
-      for (let i = 0; i < list.length; i++) {
-        const g = list[i];
-        pos.set(g.attributes.position.array, o);
-        nor.set(g.attributes.normal.array, o);
-        o += g.attributes.position.array.length;
-        list[i] = null;
-      }
-      // each material stands off its faces by its own fraction of a millimetre or so, so that two
-      // materials laid in the same plane (a lattice in its frame, paving on a terrace) never fight
-      // in the depth buffer
-      if (d) for (let k = 0; k < pos.length; k++) pos[k] += nor[k] * d;
-      const m = new BufferGeometry();
-      m.setAttribute('position', new Float32BufferAttribute(pos, 3));
-      m.setAttribute('normal', new Float32BufferAttribute(nor, 3));
-      m.computeBoundingBox(); m.computeBoundingSphere();
-      res.push({ mat, geometry: m });
+      res.push(...mergeInto(mat, list, d, false, this.weld));
     }
     this.parts.clear();
     return res;

@@ -5,7 +5,7 @@
 // `origin` [x, z] places it in the world; `yaw` (multiple of 90°) turns it.
 
 import { Matrix4, BufferGeometry, Float32BufferAttribute } from './three.js';
-import { GeoBag, box, frustum, fromTriangles, quad, lathe } from './geom.js';
+import { GeoBag, box, frustum, fromTriangles, quad, lathe, packNormals } from './geom.js';
 
 export const STYLES = {};
 export function registerStyle(name, style) { STYLES[name] = style; }
@@ -59,12 +59,12 @@ export async function buildPlanAsync(plan, budget = 4, opts = {}) {
   return finishBuild(ctx);
 }
 
-function startBuild(plan, { instancing = false, detail = false } = {}) {
+function startBuild(plan, { instancing = false, detail = false, weld = instancing } = {}) {
   const style = STYLES[plan.style];
   if (!style) throw new Error(`style ${plan.style} not registered`);
   // the life of the streets is gathered settlement-wide by the viewer (src/engine/life-instances.js),
   // so every placed piece of it is instanced however few there are in one tile
-  return { bag: new GeoBag({ instancing, detail, always: instancing && plan.style === 'life' }), col: new Colliders(), lights: [], style, plan };
+  return { bag: new GeoBag({ instancing, detail, weld, always: instancing && plan.style === 'life' }), col: new Colliders(), lights: [], style, plan };
 }
 function buildElement(el, ctx) {
   const fn = GENERIC[el.t] || ctx.style.elements?.[el.t];
@@ -75,6 +75,8 @@ function finishBuild({ bag, col, lights, plan }) {
   const m = placement(plan);
   const parts = bag.merged();
   for (const p of parts) { p.geometry.applyMatrix4(m); p.geometry.computeBoundingBox(); p.geometry.computeBoundingSphere(); }
+  // the viewer's (welded) meshes: normals as 16-bit integers (geom.js)
+  if (bag.weld) for (const p of parts) packNormals(p.geometry);
   // repeated pieces (instancing): their matrices placed with the plan
   const instanced = bag.instanced || [];
   const A = new Matrix4(), B = new Matrix4();
@@ -87,9 +89,9 @@ function finishBuild({ bag, col, lights, plan }) {
   return { parts, instanced, lights, colliders, matrix: m };
 }
 
-/** Every triangle of a built plan as merged parts (instanced copies expanded). */
+/** Every triangle of a built plan as triangle soups (indexed parts unrolled, instanced copies expanded). */
 export function flatParts(built) {
-  const out = [...built.parts];
+  const out = built.parts.map((p) => (p.geometry.index ? { ...p, geometry: unrolled(p.geometry) } : p));
   const M = new Matrix4();
   for (const p of built.instanced || []) {
     const P0 = p.geometry.attributes.position.array, N0 = p.geometry.attributes.normal.array, I = p.geometry.index.array;
@@ -115,6 +117,23 @@ export function flatParts(built) {
     out.push({ mat: p.mat, geometry: g });
   }
   return out;
+}
+
+/** An indexed geometry as a triangle soup (position and normal; its bounds kept). */
+function unrolled(geo) {
+  const P0 = geo.attributes.position.array, N0 = geo.attributes.normal.array, I = geo.index.array, n = I.length;
+  const k = geo.attributes.normal.normalized && N0 instanceof Int16Array ? 1 / 32767 : 1;
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3);
+  for (let t = 0; t < n; t++) {
+    const v = I[t] * 3, o = t * 3;
+    pos[o] = P0[v]; pos[o + 1] = P0[v + 1]; pos[o + 2] = P0[v + 2];
+    nor[o] = Math.max(-1, N0[v] * k); nor[o + 1] = Math.max(-1, N0[v + 1] * k); nor[o + 2] = Math.max(-1, N0[v + 2] * k);
+  }
+  const g = new BufferGeometry();
+  g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  if (geo.boundingBox) g.boundingBox = geo.boundingBox.clone();
+  return g;
 }
 
 export function placement(plan) {

@@ -241,7 +241,7 @@ class Settlement {
     this.group.add(group);
     // the upper surfaces, to land and walk on (roofs, wall tops)
     if (!plan.nocollide) {
-      if (!prebuilt) built.colliders.tops = await topField(built.instanced.length ? flatParts(built) : built.parts);
+      if (!prebuilt) built.colliders.tops = await topField(flatParts(built));
       this.collide.add(built.colliders);
     }
     const rec = { id, plan, music, group, built, settlement: this, detail: group.children.filter((o) => o.userData.detail) };
