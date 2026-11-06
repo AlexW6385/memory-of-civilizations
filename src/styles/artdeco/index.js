@@ -9,6 +9,7 @@ import { box, frustum, lathe, rod, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 import { empireState } from './esb.js';
 import { elTrack } from './el.js';
+import { grandCentral } from './gct.js';
 
 const LS = 'facade_limestone', CH = 'steel_chrome';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -198,6 +199,6 @@ function beauxArts(el, { bag, col }) {
 function park(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('granite_grey', box(x0, y - 0.3, z0, x1, y + 0.25, z0 + 1.5)); bag.add('granite_grey', box(x0, y - 0.3, z1 - 1.5, x1, y + 0.25, z1)); }
 registerStyle('artdeco', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, skyscraper, empire_state: empireState, chrysler, beaux_arts: beauxArts, el_track: elTrack, park },
+  elements: { ...STYLES.qing.elements, skyscraper, empire_state: empireState, grand_central: grandCentral, chrysler, beaux_arts: beauxArts, el_track: elTrack, park },
   objects: {},
 });

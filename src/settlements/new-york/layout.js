@@ -18,7 +18,9 @@ export const onElStair = (x, z, m = 0) => Math.abs(Math.abs(x - AVENUES[0][0]) -
 export const ESB = [-119, 206, -9, 254];
 export const LIBRARY = [-78, -190, -9, -112];
 export const BRYANT = [-191, -194, -82, -106];
-export const GCT = [152, -244, 208, -206];
+export const GCT = [136, -244, 224, -206];
+/** Park Avenue's viaduct of 1919, from the terminal's roadway over 42nd and 41st Streets down to 40th. */
+export const VIADUCT = { x: 180, w: 8, z1: streetZ(40), spans: [[streetZ(42) - 6, streetZ(42) + 6], [streetZ(41) - 6, streetZ(41) + 6]], flat: streetZ(42) + 8 };
 export const CHRYSLER = [279, -244, 329, -206];
 export const CHANIN = [222, -194, 262, -160];
 export const LINCOLN = [110, -194, 150, -164];
@@ -30,6 +32,8 @@ export const onBroadway = (x, z, m = 0) => z < 230 && Math.abs(x - broadwayX(z))
 export const onStreet = (x, z, m = 0) => AVENUES.some(([ax, w]) => Math.abs(x - ax) < w / 2 + m) || STREETS.some(([sz, w]) => Math.abs(z - sz) < w / 2 + m) || onBroadway(x, z, m);
 export const height = (x, z) => 0.8 * smooth(-300, 300, -z) * (1 - smooth(RADIUS - 60, RADIUS - 30, Math.hypot(x, z)));   // Murray Hill's gentle rise
 const SPECIAL = [ESB, LIBRARY, BRYANT, GCT, CHRYSLER, CHANIN, LINCOLN];
+/** Inside one of the landmarks' lots, or on Park Avenue's viaduct. */
+export const inSpecial = (x, z, m = 0) => SPECIAL.some((s) => s !== BRYANT && inRect(s, x, z, m)) || (Math.abs(x - VIADUCT.x) < VIADUCT.w / 2 + 0.6 + m && z > GCT[3] - m && z < VIADUCT.z1 + m);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let LOTS = null;
 /** The buildings: each block cut into lots along its two street fronts; heights by district (lofts west of Fifth, towers near 42nd, brownstones in Murray Hill). */
