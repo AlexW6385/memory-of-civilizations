@@ -14,15 +14,18 @@ function cover(x, z) {
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || onSite(x, z, -1)) return null;
-  if (inBlock(x, z, -20)) return { plane_tree: 0.01, grass: 15 };                       // the courts' gardens
+  if (inBlock(x, z, -20)) return { date_palm: 0.0025, oleander: 0.01, fig: 0.003, cypress: 0.0015, grass: 12 };   // the courts' gardens
   if (inBlock(x, z, 1)) return null;
-  const sx = Math.abs(((x % PITCH) + PITCH) % PITCH - PITCH / 2), sz = Math.abs(((z % PITCH) + PITCH) % PITCH - PITCH / 2);
-  if ((sx > PITCH / 2 - 3 || sz > PITCH / 2 - 3) && !onDiagonal(x, z)) return { plane_tree: 0.12 };   // the rows of planes along the streets
+  // the rows of planes along both kerbs of every street, 7–8.3 m from its middle (clear of the tram poles at 9.6),
+  // not in the crossings
+  const sx = Math.abs(((x % PITCH) + PITCH) % PITCH - PITCH / 2), sz = Math.abs(((z % PITCH) + PITCH) % PITCH - PITCH / 2), half = (PITCH - BLOCK) / 2;
+  if (onDiagonal(x, z)) return null;
+  if ((sx > 7 && sx < 8.3 && sz > half + 2) || (sz > 7 && sz < 8.3 && sx > half + 2)) return { plane_tree: 0.1 };
   return null;
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { plane_tree: 0.12 },
+  maxDensity: { plane_tree: 0.1, date_palm: 0.0025, oleander: 0.01, fig: 0.003, cypress: 0.0015 },
   climate: {
     sun: { az: 160, el: 55, color: [1.0, 0.96, 0.88], intensity: 3.5, lat: 41, dec: 12, hour: 11 },
     sky: { turbidity: 2.8, rayleigh: 1.05, mie: 0.005, mieG: 0.78, zenith: [0.07, 0.15, 0.4], horizon: [0.62, 0.66, 0.72] },

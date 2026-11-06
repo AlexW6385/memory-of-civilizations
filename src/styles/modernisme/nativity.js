@@ -82,7 +82,7 @@ function drips(bag, x, y, z, L, rand) {
   const n = 1 + Math.floor(rand() * 3);
   for (let i = 0; i < n; i++) {
     const l = L * (0.5 + rand() * 0.6), r = 0.07 + l * 0.09, dx = (rand() - 0.5) * 0.25, dz = (rand() - 0.5) * 0.35;
-    bag.add(SC, lathe([[r, 0], [r * 0.85, 0.12], [r * 0.55, l * 0.45], [r * 0.3, l * 0.8], [0.001, l]], 6).rotateX(Math.PI).translate(x + dx, y + 0.1, z + dz));
+    bag.add(SC, lathe([[r, 0], [r * 0.85, 0.12], [r * 0.55, l * 0.45], [0.001, l]], 5).rotateX(Math.PI).translate(x + dx, y + 0.1, z + dz));
   }
 }
 
@@ -248,12 +248,12 @@ function foliage(bag, pr, cz, y, n, rand, avoid) {
     const [x, v, u] = pr.face(a, b), r = 0.22 + rand() * 0.3;
     if (rand() < 0.6) {
       // a knot of leaves and buds swelling out of the stone
-      const m = 3 + Math.floor(rand() * 3);
-      for (let i = 0; i < m; i++) { const rr = r * (0.55 + rand() * 0.6), ang = rand() * Math.PI * 2, d = r * 0.7 * rand(); bag.add(SC, ball(rr, 8, 6).scale(0.65, 1, 1).translate(x - rr * 0.4, y + v + Math.sin(ang) * d - rr, cz + u + Math.cos(ang) * d)); }
+      const m = 2 + Math.floor(rand() * 3);
+      for (let i = 0; i < m; i++) { const rr = r * (0.55 + rand() * 0.6), ang = rand() * Math.PI * 2, d = r * 0.7 * rand(); bag.add(SC, ball(rr, 7, 5).scale(0.65, 1, 1).translate(x - rr * 0.4, y + v + Math.sin(ang) * d - rr, cz + u + Math.cos(ang) * d)); }
     } else {
       // a flower: a cup of petals turned to the street
       const rf = r * 1.1;
-      bag.add(SC, lathe([[0.001, 0], [rf * 0.6, rf * 0.25], [rf, rf * 0.5], [rf * 0.9, rf * 0.62], [rf * 0.55, rf * 0.45], [rf * 0.25, rf * 0.3], [0.001, rf * 0.38]], 12, (th, i) => 1 + (i >= 2 ? 0.09 : 0.04) * Math.cos(th * 6)).rotateZ(-Math.PI / 2).translate(x - 0.1, y + v, cz + u));
+      bag.add(SC, lathe([[0.001, 0], [rf * 0.6, rf * 0.25], [rf, rf * 0.5], [rf * 0.9, rf * 0.62], [rf * 0.55, rf * 0.45], [rf * 0.25, rf * 0.3], [0.001, rf * 0.38]], 10, (th, i) => 1 + (i >= 2 ? 0.09 : 0.04) * Math.cos(th * 6)).rotateZ(-Math.PI / 2).translate(x - 0.1, y + v, cz + u));
     }
   }
 }

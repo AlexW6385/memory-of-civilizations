@@ -15,6 +15,7 @@ import { box, lathe, fromTriangles, rod, disc } from '../../core/geom.js';
 import { Matrix4, BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import '../qing/index.js';
 import { nativity } from './nativity.js';
+import { STREET } from './street.js';
 
 const S = 'limestone_yellow', P = 'stucco_cream', IRON = 'iron';
 const FACADES = [S, P, 'stucco_ochre', 'stucco_pale', P, 'stucco_rose'];
@@ -209,7 +210,7 @@ function block(el, { bag, col }) {
   const [cx, cz] = el.c, s = el.s ?? 70, D = el.d ?? 18, ch = el.ch ?? 12, y = el.y ?? 0, rand = rng(el.seed || 1), o = s / 2;
   const W = (x, z) => [cx + x, cz + z];
   const P8 = [[-o + ch, -o], [o - ch, -o], [o, -o + ch], [o, o - ch], [o - ch, o], [-o + ch, o], [-o, o - ch], [-o, -o + ch]].map(([x, z]) => W(x, z));
-  const L = 2 * (o - ch), trim = D - ch, cut = el.cut;
+  const L = 2 * (o - ch), trim = D - ch, cut = el.cut, bounds = [[], [], [], []];
   for (let k = 0; k < 4; k++) {
     const fr = frame(P8[2 * k], P8[2 * k + 1]);
     let r0 = k % 2 ? trim : 0, r1 = k % 2 ? L - trim : L;
@@ -217,6 +218,7 @@ function block(el, { bag, col }) {
     if (cut && (cut.corner + 1) % 4 === k) r0 = Math.max(r0, cut.b);
     const gaps = (el.gaps ?? []).filter((g) => g.side === k).map((g) => [g.s0, g.s1]);
     for (const [a, b] of plotRuns(r0, r1, gaps, rand)) {
+      bounds[k].push(a, b);
       const h = pickH(rand), mat = FACADES[Math.floor(rand() * FACADES.length)];
       bag.add(mat, fr.F(a, b, -D, 0, y - 1.2, y + h));
       const p = fr.at(a, -D), q = fr.at(b, 0); col.rect([p[0], p[1], q[0], q[1]], y - 1.2, y + h);
@@ -251,6 +253,64 @@ function block(el, { bag, col }) {
     roofTop(bag, fc, 2, fc.L - 2, y, h, 9, rand);
     col.segment(fc.at(0, -3), fc.at(fc.L, -3), 6, yb, yt);
     const a = fr2.at(0, -ch), b = fr2.at(fr2.L, 0); col.rect([a[0], a[1], b[0], b[1]], yb, yt);
+  }
+  court(el, bag, P8, bounds, o - D, rand);
+}
+/**
+ * The court's gardens: the plots' party walls carried on from the houses' backs into the court until
+ * they meet the walls along its diagonals (the four sides' gardens are triangles meeting in the
+ * middle); in each garden a gravel path from the back door, a pergola by the house on some, a round
+ * basin or a well at the far end, pots of plants along the walls.
+ */
+function court(el, bag, P8, bounds, q, rand) {
+  const [cx, cz] = el.c, y = el.y ?? 0, dz = el.dz ?? 0, yAt = (z) => y + dz * (z - cz), o = (el.s ?? 70) / 2, ch = el.ch ?? 12, D = el.d ?? 18;
+  const wall = (p0, p1, h = 2.1) => { const ya = Math.min(yAt(p0[1]), yAt(p1[1])); bag.add(P, orientedBox(p0, p1, 0.3, ya - 0.5, ya + h)); bag.add(S, orientedBox(p0, p1, 0.42, ya + h, ya + h + 0.1)); };
+  // the diagonals, corner to centre (stopping short of the middle where the four meet in a small pier)
+  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) wall([cx + sx * q, cz + sz * q], [cx + sx * 0.3, cz + sz * 0.3]);
+  bag.add(S, box(cx - 0.45, y - 0.5, cz - 0.45, cx + 0.45, yAt(cz) + 2.4, cz + 0.45));
+  for (let k = 0; k < 4; k++) {
+    const fr = frame(P8[2 * k], P8[2 * k + 1]), xs = (s) => s - (o - ch);          // s along the side → the offset from the side's middle
+    const cuts = [...new Set(bounds[k].map((v) => +v.toFixed(2)))].sort((a, b) => a - b);
+    // a party wall at each boundary inside the court (not at the corners' ends)
+    for (const s of cuts) {
+      const x = xs(s), len = q - Math.abs(x) - 0.2; if (len < 0.8 || Math.abs(x) > q - 0.5) continue;
+      wall(fr.at(s, -D), fr.at(s, -D - len), 1.95);
+    }
+    // the gardens between
+    for (let i = 0; i + 1 < cuts.length; i++) {
+      const s0 = cuts[i], s1 = cuts[i + 1], sc = (s0 + s1) / 2, x = xs(sc), deep = q - Math.abs(x) - 0.6;
+      if (deep < 3 || Math.abs(x) > q - 2) continue;
+      const pl = Math.max(2, deep - 2.4), A = fr.at(sc, -D), B = fr.at(sc, -D - pl), yy = yAt(A[1]);
+      bag.add('pebbles', orientedBox(A, B, 1.1, yy - 0.3, yy + 0.04));
+      const end = fr.at(sc, -D - pl - 1.2), ye = yAt(end[1]);
+      if (rand() < 0.55) {
+        // a round basin with its water, a little jet's spout in the middle
+        bag.add(S, lathe([[1.0, -0.3], [1.0, 0.45], [1.1, 0.5], [1.1, 0.58], [0.85, 0.58], [0.85, 0.15], [0.001, 0.15]], 16, null, end[0], ye, end[1]));
+        bag.add('water', lathe([[0.86, 0.38], [0.001, 0.38]], 16, null, end[0], ye, end[1]));
+        bag.add(S, lathe([[0.12, 0.15], [0.08, 0.6], [0.14, 0.7], [0.001, 0.8]], 8, null, end[0], ye, end[1]));
+      } else {
+        // a well head with its iron hoop and pulley
+        bag.add(S, lathe([[0.7, -0.3], [0.7, 0.8], [0.78, 0.85], [0.78, 0.95], [0.55, 0.95], [0.55, 0.3], [0.001, 0.3]], 14, null, end[0], ye, end[1]));
+        const n = [fr.n[0], fr.n[1]], t = [fr.u[0], fr.u[1]];
+        for (const sg of [-1, 1]) bag.add(IRON, rod([end[0] + t[0] * sg * 0.62, ye + 0.9, end[1] + t[1] * sg * 0.62], [end[0] + t[0] * sg * 0.3, ye + 2.0, end[1] + t[1] * sg * 0.3], 0.03, 5));
+        bag.add(IRON, rod([end[0] - t[0] * 0.32, ye + 2.0, end[1] - t[1] * 0.32], [end[0] + t[0] * 0.32, ye + 2.0, end[1] + t[1] * 0.32], 0.03, 5));
+        bag.add(IRON, lathe([[0.13, -0.03], [0.13, 0.03], [0.001, 0.03]], 10).rotateX(Math.PI / 2).rotateY(fr.yaw).translate(end[0], ye + 1.85, end[1])); void n;
+      }
+      // a pergola by the house: four posts, two beams, the slats
+      if (rand() < 0.45 && s1 - s0 > 6 && Math.abs(x) + Math.min(2.4, (s1 - s0) / 2 - 1.2) < q - 4.2) {
+        const w = Math.min(2.4, (s1 - s0) / 2 - 1.2), t0 = -D - 0.4, t1 = -D - 3.4, y0 = yAt(fr.at(sc, t0)[1]);
+        for (const ss of [sc - w, sc + w]) for (const tt of [t0, t1]) { const p = fr.at(ss, tt); bag.add('timber', box(p[0] - 0.07, y0 - 0.3, p[1] - 0.07, p[0] + 0.07, y0 + 2.5, p[1] + 0.07)); }
+        for (const ss of [sc - w, sc + w]) bag.add('timber', orientedBox(fr.at(ss, t0 + 0.2), fr.at(ss, t1 - 0.2), 0.12, y0 + 2.5, y0 + 2.68));
+        for (let m = 0; m <= 6; m++) { const tt = t0 - (t0 - t1) * m / 6; bag.add('timber', orientedBox(fr.at(sc - w - 0.25, tt), fr.at(sc + w + 0.25, tt), 0.06, y0 + 2.68, y0 + 2.76)); }
+      }
+      // pots along the party walls
+      for (const ss of [s0 + 0.55, s1 - 0.55]) for (let m = 0; m < 3; m++) {
+        if (rand() < 0.4) continue;
+        const tt = -D - 1.5 - m * (pl / 3), p = fr.at(ss, tt), yp = yAt(p[1]);
+        if (Math.abs(xs(ss)) > q - Math.abs(tt + D) - 0.8) continue;
+        bag.add('terracotta', lathe([[0.18, 0], [0.24, 0.1], [0.3, 0.5], [0.33, 0.55], [0.27, 0.55], [0.27, 0.45], [0.001, 0.45]], 10, null, p[0], yp - 0.02, p[1]));
+      }
+    }
   }
 }
 
@@ -642,6 +702,6 @@ function batllo(el, { bag, col }) {
 }
 registerStyle('modernisme', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, eixample_block: block, sagrada, pedrera, batllo },
+  elements: { ...STYLES.qing.elements, eixample_block: block, sagrada, pedrera, batllo, ...STREET },
   objects: {},
 });
