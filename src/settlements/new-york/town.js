@@ -37,6 +37,6 @@ function streetLife() {
 }
 export async function buildings() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 200) plans.push(base(`new-york-blocks-${i / 200}`, all.slice(i, i + 200).map((l) => ({ t: 'skyscraper', ...l }))));
+  for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).map((l) => ({ t: 'skyscraper', ...l }))));
   return [...plans, ...streetLife()];
 }

@@ -29,6 +29,11 @@ export const harbour = {
     { t: 'arch_bridge', ...BRIDGE },
     { t: 'viaduct', rect: QUAY, y: 13 },
     ...[-36, -18, 0, 18].map((x) => ({ t: 'wharf', rect: [x - 5, -60, x + 5, -8], y: 1.2 })),
+    // the ferries of 1973: a Lady-class ferry at the quay, another crossing, a Manly ferry and a hydrofoil out on the harbour
+    { t: 'ferry', kind: 'lady', at: [28.6, -36], y: LEVEL, rot: 0 },
+    { t: 'ferry', kind: 'lady', at: [-20, -185], y: LEVEL, rot: 0.35 },
+    { t: 'ferry', kind: 'manly', at: [-60, -265], y: LEVEL, rot: -0.9 },
+    { t: 'ferry', kind: 'hydrofoil', at: [225, -205], y: LEVEL, rot: 2.6 },
     { t: 'round_tower', c: AUSTRALIA_SQ, r: 21, h: 170, y: height(...AUSTRALIA_SQ) },
     { t: 'skyscraper', rect: [-30, 40, 10, 66], y: height(-10, 53), h: 117, mat: 'facade_glass', seed: 1962 },     // the AMP Building at the quay
   ],

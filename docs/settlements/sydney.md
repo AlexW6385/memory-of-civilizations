@@ -1,7 +1,7 @@
 # Modern Sydney (Bennelong Point and the Harbour), 1973 — dossier
 
 Settlement id: `sydney` · Style: `modern` · Region: Australia (Port Jackson) · Code: `src/settlements/sydney/`
-Status of this dossier: L1–L2. Built: the Opera House at true size (the granite-clad podium, the monumental stair, the concert hall's and the opera theatre's rows of white-tiled shells rising north toward the harbour with glazed mouths, the restaurant shells); the harbour, Sydney Cove and Farm Cove; Circular Quay with four ferry wharves and the Cahill Expressway over the station; the Harbour Bridge at about half scale (two trussed ribs, the deck hung beneath and carried over the approaches, granite pylons); Australia Square's round tower; the AMP Building; ~650 city buildings and the Rocks' sandstone terraces; the Botanic Garden; ground, planting, weather, music. Recorded for L3, later: the shells as true spherical sections with their ribbed tiles; the louvred back-facing shells; the bridge at true size (503 m span, 134 m); the Rocks' lanes; Macquarie Street's sandstone; ferries on the water; Moreton Bay figs as a species (stand-ins now: `fig`, `banyan`).
+Status of this dossier: L1–L2. Built: the Opera House at true size (the granite-clad podium, the monumental stair, the concert hall's and the opera theatre's rows of white-tiled shells rising north toward the harbour with glazed mouths, the restaurant shells); the harbour, Sydney Cove and Farm Cove; Circular Quay with four ferry wharves and the Cahill Expressway over the station; the Harbour Bridge at about half scale (two trussed ribs, the deck hung beneath and carried over the approaches, granite pylons); Australia Square's round tower; the AMP Building; ~650 city buildings and the Rocks' sandstone terraces; the Botanic Garden; ground, planting, weather, music. Recorded for L3, later: the shells as true spherical sections with their ribbed tiles; the louvred back-facing shells; the bridge at true size (503 m span, 134 m); the Rocks' lanes; Macquarie Street's sandstone; ferries on the water (built since, with the pleated glass walls, the tile chevrons and the bridge pylons' detail); Moreton Bay figs as a species (stand-ins now: `fig`, `banyan`).
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -13,6 +13,13 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **Australia Square:** a round tower of 1967, 170 m tall [stated: Wikipedia "Australia Square"]. The **AMP Building** at the quay is from 1962, 117 m [stated: Wikipedia "AMP Building, Sydney"].
 - **Royal Botanic Garden:** east of the Opera House round Farm Cove [stated: Wikipedia "Royal Botanic Garden, Sydney"].
 - **Moment shown:** October 1973, at the opening.
+
+### Detail added (shells, glass, bridge pylons, ferries)
+
+- **Tiles:** the shells carry 1,056,006 tiles in two colours, glossy white and matte cream, made by Höganäs AB. The roof is made of 2,194 precast concrete sections on precast ribs, and each shell is a section of a sphere of 75.2 m radius. The highest point is 67 m above sea level [stated: Wikipedia "Sydney Opera House"]. Built: on each shell the cream joints of the tile lids drawn as chevrons between the ribs, pointing up the shell [inferred: the pattern of the lids; their number is ours].
+- **Glass walls:** Utzon planned prefabricated plywood mullions, but "a different system was designed to deal with the glass" [stated: Wikipedia "Sydney Opera House"]. Built: the crude fan of glass that ran to one point on the podium is replaced by a pleated wall hung in each shell's mouth. Its folds run from the shell's edge down to a foot line on the podium that steps in and out every panel; there is a steel mullion on every fold and transoms every 3.2 m [inferred: the folded form from photographs of the walls; sizes ours].
+- **Harbour Bridge pylons:** granite-faced pylons at each end [stated: Wikipedia "Sydney Harbour Bridge"]. Built: each pylon a battered shaft in rusticated courses, a cornice, two stepped stages above it, and tall windows high on the faces [inferred: composed from the pylons' Art Deco form; the bridge is at half scale].
+- **Ferries:** the Lady class — Lady Cutler (arrived in Sydney 1968), Lady Woodward and Lady McKell (launched 1970; reverse-sloped wheelhouses); Lady Wakehurst and Lady Northcott followed only in 1974–75 [stated: Wikipedia "Lady-class ferry"]. The Manly service kept double-ended ferries and had hydrofoils from the mid-1960s; Baragoola and North Head were retired in 1983 and 1985 [stated: Wikipedia "Manly ferry service"]. Built: a Lady-class ferry (about 38 × 9.6 m) berthed beyond the quay's last wharf and another crossing the harbour, a Manly ferry (about 60 × 11 m, two decks of saloons, a funnel) and a hydrofoil out on the water. The ferries are double-ended hulls with a green hull, a cream strake, white saloons with bands of windows, a wheelhouse at each end and railed upper decks [inferred: dimensions and livery; the green-and-cream is the traditional Sydney ferry colouring].
 
 ## 2. Layout of the settlement (radius 460 m)
 
@@ -54,6 +61,9 @@ Arrival is at the forecourt below the stair, looking north at the shells. [infer
 The opening season, and the didgeridoo and clapsticks of the Gadigal people, the land's traditional owners. [stated: Wikipedia "Sydney Opera House"; "Gadigal"]
 
 ## Sources
+
+- [Lady-class ferry — Wikipedia](https://en.wikipedia.org/wiki/Lady-class_ferry)
+- [Manly ferry service — Wikipedia](https://en.wikipedia.org/wiki/Manly_ferry_service)
 
 - [Sydney Opera House — Wikipedia](https://en.wikipedia.org/wiki/Sydney_Opera_House)
 - [Sydney Harbour Bridge — Wikipedia](https://en.wikipedia.org/wiki/Sydney_Harbour_Bridge)
