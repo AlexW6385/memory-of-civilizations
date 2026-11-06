@@ -2,15 +2,22 @@
 // Walk-through check: a walker with the viewer's own body and movement follows each building's
 // routes (plan.walks, local [x, z] waypoints) and must reach every waypoint.
 //
-// usage: node tools/walk-check.mjs [building-id ...]
+// Settlements of their own: every landmark's routes, walked in the whole settlement as the viewer
+// builds it (tools/lib/site.mjs: every plan's colliders and roofs, the settlement's ground).
+//
+// usage: node tools/walk-check.mjs [id ...] [--sites]
+//   ids: legacy buildings (src/buildings) or settlements; no ids: all legacy buildings;
+//   --sites: every settlement too
 
 import { BUILDINGS } from '../src/buildings/index.js';
 import { buildPlan, toWorld } from '../src/core/build.js';
 import { CollisionWorld } from '../src/core/collide.js';
 import { terrainHeight, inWater } from '../src/world/regions.js';
 import { move, WALK } from '../src/core/walk.js';
+import { SETTLEMENTS, isSettlement, siteWorld } from './lib/site.mjs';
 
-const ids = process.argv.slice(2);
+const argv = process.argv.slice(2), ids = argv.filter((a) => !a.startsWith('--'));
+for (const id of ids) if (!isSettlement(id) && !BUILDINGS.some((b) => b.id === id)) { console.log(`${id}: no such building or settlement`); process.exit(2); }
 let failed = 0;
 for (const b of BUILDINGS) {
   if (ids.length && !ids.includes(b.id)) continue;
@@ -19,6 +26,29 @@ for (const b of BUILDINGS) {
   cw.terrain = terrainHeight;
   cw.water = inWater;
   cw.add(buildPlan(plan).colliders);
+  const { problems, legs } = walkRoutes(plan, cw);
+  console.log(`${b.id}: ${problems.length ? 'FAIL' : 'ok'} — ${(plan.walks || []).length} routes, ${legs} legs walked`);
+  for (const p of problems) console.log('  - ' + p);
+  if (problems.length) failed++;
+}
+for (const id of SETTLEMENTS) {
+  if (ids.length ? !ids.includes(id) : !argv.includes('--sites')) continue;
+  const S = await siteWorld(id);
+  const problems = S.failed.map(([p, m]) => `plan ${p} does not build: ${m}`);
+  let routes = 0, legs = 0;
+  for (const { plan } of S.landmarks) {
+    const r = walkRoutes(plan, S.cw);
+    routes += (plan.walks || []).length; legs += r.legs;
+    problems.push(...r.problems.map((p) => `${plan.id}: ${p}`));
+  }
+  console.log(`${id}: ${problems.length ? 'FAIL' : 'ok'} — ${routes} routes, ${legs} legs walked`);
+  for (const p of problems) console.log('  - ' + p);
+  if (problems.length) failed++;
+}
+process.exit(failed ? 1 : 0);
+
+/** Walk a plan's routes in the collision world cw: { problems, legs }. */
+function walkRoutes(plan, cw) {
   const problems = [];
   let legs = 0;
   for (const [ri, route] of (plan.walks || []).entries()) {
@@ -42,8 +72,5 @@ for (const b of BUILDINGS) {
       if (!ok) { problems.push(`route ${ri + 1}: stuck before waypoint ${k} (${route[k]}) at (${P.x.toFixed(1)}, ${P.y.toFixed(2)}, ${P.z.toFixed(1)})`); break; }
     }
   }
-  console.log(`${b.id}: ${problems.length ? 'FAIL' : 'ok'} — ${(plan.walks || []).length} routes, ${legs} legs walked`);
-  for (const p of problems) console.log('  - ' + p);
-  if (problems.length) failed++;
+  return { problems, legs };
 }
-process.exit(failed ? 1 : 0);

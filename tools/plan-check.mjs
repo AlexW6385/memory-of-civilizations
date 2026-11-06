@@ -2,15 +2,26 @@
 // Plan check: walkability, every room reachable from the entrance, every doorway connects,
 // no floating obstacles, no columns or objects driven into walls.
 //
-// usage: node tools/plan-check.mjs [building-id ...]     (default: all buildings)
+// Settlements of their own (src/settlements/<id>/): the whole settlement as the viewer walks it
+// (tools/lib/site.mjs), flood-filled from its arrival point (src/planet/arrivals.js) with the
+// walker's own rules (src/core/walk.js: steps, roofs and wall tops, no wading, no climbing open
+// ground steeper than ~40°, falls allowed); the arrival must be walkable, and every landmark's
+// entrance, rooms and walk-through routes reachable from it.
+//
+// usage: node tools/plan-check.mjs [id ...] [--sites] [--cell 0.25]
+//   ids: legacy buildings (src/buildings) or settlements; no ids: all legacy buildings;
+//   --sites: every settlement too (slow: minutes per settlement)
 
 import { BUILDINGS } from '../src/buildings/index.js';
 import { buildPlan, toWorld } from '../src/core/build.js';
 import { CollisionWorld } from '../src/core/collide.js';
 import { terrainHeight, inWater } from '../src/world/regions.js';
+import { SETTLEMENTS, isSettlement, siteWorld } from './lib/site.mjs';
 
 const R = 0.3, STEP = 0.5, HEAD = 1.7, LOW = 0.25, CELL = 0.25;
-const ids = process.argv.slice(2);
+const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv[i + 1] : d; };
+const ids = argv.filter((a, i) => !a.startsWith('--') && !(i > 0 && argv[i - 1] === '--cell'));
+for (const id of ids) if (!isSettlement(id) && !BUILDINGS.some((b) => b.id === id)) { console.log(`${id}: no such building or settlement`); process.exit(2); }
 let failed = 0;
 
 for (const b of BUILDINGS) {
@@ -113,7 +124,97 @@ for (const b of BUILDINGS) {
   if (problems.length > 40) console.log(`  … ${problems.length - 40} more`);
   if (problems.length) failed++;
 }
+
+for (const id of SETTLEMENTS) {
+  if (ids.length ? !ids.includes(id) : !argv.includes('--sites')) continue;
+  if (await checkSettlement(id)) failed++;
+}
 process.exit(failed ? 1 : 0);
+
+/** Flood fill of a settlement from its arrival point; prints the result, returns the problems' count. */
+async function checkSettlement(id) {
+  const t0 = performance.now();
+  const S = await siteWorld(id);
+  const { cw, radius, arrival } = S;
+  const problems = S.failed.map(([p, m]) => `plan ${p} does not build: ${m}`);
+  const C = +opt('cell', 0.25), n = Math.ceil((2 * radius) / C), X0 = -radius, Z0 = -radius;
+  // the first floor height reached in each cell; more storeys in `extra`
+  const first = new Float32Array(n * n).fill(NaN), extra = new Map();
+  const cx = (i) => X0 + (i + 0.5) * C, cz = (j) => Z0 + (j + 0.5) * C;
+  const stack = [];
+  const has = (k, h) => (first[k] === first[k] && Math.abs(first[k] - h) < 0.3) || (extra.get(k)?.some((y) => Math.abs(y - h) < 0.3) ?? false);
+  // one step of the walker (src/core/walk.js, move) from height fromY into cell (i, j)
+  const visit = (i, j, fromY, fromWet) => {
+    if (i < 0 || j < 0 || i >= n || j >= n) return;
+    const x = cx(i), z = cz(j), k = j * n + i;
+    const g = cw.groundAt(x, z, fromY + STEP);
+    // above the floor here: standing on a top (a roof, a wall, a terrace), or falling
+    const s = fromY > g + 1e-3 ? Math.max(g, cw.topAt(x, z, R * 0.6, fromY + STEP)) : g;
+    if (!Number.isFinite(s)) return;
+    if (s === g && s - fromY > Math.max(0.02, C * 0.85) && Math.abs(g - cw.terrain(x, z)) < 1e-6) return;   // too steep
+    if (s <= g + 0.3 && cw.water(x, z, s) && !fromWet) return;                                            // no wading
+    if (has(k, s)) return;
+    if (cw.blockedAt(x, z, R, s + LOW, s + HEAD)) return;
+    if (cw.inShell(x, z, R * 0.7, s + LOW, s + HEAD, fromY + STEP)) return;
+    if (first[k] !== first[k]) first[k] = s; else (extra.get(k) || extra.set(k, []).get(k)).push(s);
+    stack.push(i, j, s);
+  };
+  const [ax, ay, az] = arrival;
+  const ai = Math.floor((ax - X0) / C), aj = Math.floor((az - Z0) / C);
+  const startY = ay ?? cw.terrain(ax, az);
+  visit(ai, aj, startY + 0.05, cw.water(ax, az, startY));
+  if (!stack.length) problems.push(`arrival at (${ax}, ${ay ?? 'ground'}, ${az}) is not walkable`);
+  while (stack.length) {
+    const s = stack.pop(), j = stack.pop(), i = stack.pop();
+    const wet = cw.water(cx(i), cz(j), s);
+    visit(i + 1, j, s, wet); visit(i - 1, j, s, wet); visit(i, j + 1, s, wet); visit(i, j - 1, s, wet);
+  }
+  let reach = 0;
+  for (let k = 0; k < first.length; k++) if (first[k] === first[k]) reach++;
+  for (const L of extra.values()) reach += L.length;
+
+  /** Is a cell in the world rectangle reached (at height y ± 0.35, if given)? */
+  const reached = (x0, z0, x1, z1, y) => {
+    for (let i = Math.max(0, Math.floor((x0 - X0) / C)); i <= Math.min(n - 1, Math.floor((x1 - X0) / C)); i++) {
+      for (let j = Math.max(0, Math.floor((z0 - Z0) / C)); j <= Math.min(n - 1, Math.floor((z1 - Z0) / C)); j++) {
+        const k = j * n + i, f = first[k];
+        if (f !== f) continue;
+        if (y === undefined || Math.abs(f - y) < 0.35 || extra.get(k)?.some((h) => Math.abs(h - y) < 0.35)) return true;
+      }
+    }
+    return false;
+  };
+  /** The heights reached in a world rectangle, as "lo…hi" (or "nowhere"). */
+  const heights = (x0, z0, x1, z1) => {
+    let lo = Infinity, hi = -Infinity;
+    for (let i = Math.max(0, Math.floor((x0 - X0) / C)); i <= Math.min(n - 1, Math.floor((x1 - X0) / C)); i++) {
+      for (let j = Math.max(0, Math.floor((z0 - Z0) / C)); j <= Math.min(n - 1, Math.floor((z1 - Z0) / C)); j++) {
+        const k = j * n + i;
+        for (const h of [first[k], ...(extra.get(k) || [])]) if (h === h) { lo = Math.min(lo, h); hi = Math.max(hi, h); }
+      }
+    }
+    return lo <= hi ? `reached only at y ${lo.toFixed(2)}…${hi.toFixed(2)}` : 'nowhere reached';
+  };
+  const rectOf = (plan, r) => { const p = toWorld(plan, r[0], r[1]), q = toWorld(plan, r[2], r[3]); return [Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])]; };
+  for (const { plan } of S.landmarks) {
+    if (plan.entrance?.at) {
+      const [x, , z] = toWorld(plan, ...plan.entrance.at);
+      if (!reached(x - 1.5, z - 1.5, x + 1.5, z + 1.5)) problems.push(`${plan.id}: entrance at (${x.toFixed(1)}, ${z.toFixed(1)}) is not reachable from the arrival`);
+    }
+    for (const r of plan.rooms || []) {
+      const W = rectOf(plan, r.rect), y = r.y === undefined ? undefined : r.y + (plan.base || 0);
+      if (!reached(...W, y)) problems.push(`${plan.id}: room ${r.id} (y ${y ?? 'any'}) is not reachable from the arrival: ${heights(...W)}`);
+    }
+    for (const [ri, route] of (plan.walks || []).entries()) {
+      const [x, , z] = toWorld(plan, ...route[0]);
+      if (!reached(x - 1, z - 1, x + 1, z + 1)) problems.push(`${plan.id}: walk ${ri + 1} starts at (${x.toFixed(1)}, ${z.toFixed(1)}), not reachable from the arrival`);
+    }
+  }
+  console.log(`${id}: ${problems.length ? 'FAIL' : 'ok'} — ${S.landmarks.length} landmarks, ${S.town.length} town plans, ${(reach * C * C).toFixed(0)} m² walkable from the arrival (${((performance.now() - t0) / 1000).toFixed(0)} s)`);
+  for (const p of problems.slice(0, 40)) console.log('  - ' + p);
+  if (problems.length > 40) console.log(`  … ${problems.length - 40} more`);
+  return problems.length;
+}
 
 function circleIntrudes(x, z, r, q) {
   if (r <= 0) return false;
