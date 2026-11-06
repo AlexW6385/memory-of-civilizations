@@ -2,9 +2,9 @@
 // serpent wall and its three gates, the Templo Mayor at true size, Ehecatl's round temple on its
 // axis, the temples of Tezcatlipoca and the Sun, the ballcourt, the tzompantli, the House of the
 // Eagles, the calmecac; the palace of Moctezuma; the causeway west over the lake; the canals,
-// their walls, bridges and canoes.
+// their walls, timber bridges and dugout canoes; the market by the west canal.
 
-import { RADIUS, PRECINCT, TM, PALACE, LEVEL, ISLAND, CAUSEWAY, CANALS } from './layout.js';
+import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS } from './layout.js';
 
 const E = [];
 const [px0, pz0, px1, pz1] = PRECINCT;
@@ -29,21 +29,26 @@ E.push({ t: 'court_house', rect: PALACE, h: 6, ring: 16, band: true, seed: 9 });
 // ---- the causeway west over the lake
 const cw = Math.sqrt((RADIUS - 26) ** 2 - CAUSEWAY.z1 ** 2);
 E.push({ t: 'block', walk: true, rect: [-cw, CAUSEWAY.z0, -ISLAND + 6, CAUSEWAY.z1], y0: LEVEL.lakeBed, y1: 0.4, mat: 'basalt' });
-// ---- the canals: water, walls, bridges at the avenues, canoes
+// ---- the canals: water, stone walls, timber bridges at the avenues, canoes poled along or moored
 const clip = ([x0, z0, x1, z1]) => { const h = (v) => Math.sqrt(Math.max(0, (ISLAND - 6) ** 2 - v * v)); return x1 - x0 > z1 - z0 ? [Math.max(x0, -h(z1)), z0, Math.min(x1, h(z1)), z1] : [x0, Math.max(z0, -h(x1)), x1, Math.min(z1, h(x1))]; };
+let seed = 11;
 for (const c of CANALS) {
   const r = clip(c), horiz = r[2] - r[0] > r[3] - r[1];
   E.push({ t: 'water_rect', rect: r, y: LEVEL.water });
-  for (const [a, b] of horiz ? [[[r[0], r[1]], [r[2], r[1]]], [[r[0], r[3]], [r[2], r[3]]]] : [[[r[0], r[1]], [r[0], r[3]]], [[r[2], r[1]], [r[2], r[3]]]]) E.push({ t: 'canal_wall', a, b, y: 0.05, bed: LEVEL.canalBed, th: 0.7 });
-  for (const s of [0]) E.push({ t: 'ming_arch_bridge', at: horiz ? [s, (r[1] + r[3]) / 2] : [(r[0] + r[2]) / 2, s], across: horiz ? 'z' : 'x', span: 8.4, width: 4, rise: 1.6, landing: 3.5, y: 0.04, water: LEVEL.water, bed: LEVEL.canalBed });
-  for (let k = 0; k < 4; k++) { const t = (k + 0.5) / 4; const at = horiz ? [r[0] + (r[2] - r[0]) * t, (r[1] + r[3]) / 2] : [(r[0] + r[2]) / 2, r[1] + (r[3] - r[1]) * t]; if (Math.abs(at[0]) > 12 && Math.abs(at[1]) > 12) E.push({ t: 'boat', at, dir: horiz ? [1, 0] : [0, 1], len: 6, y: LEVEL.water }); }
+  for (const [a, b] of horiz ? [[[r[0], r[1]], [r[2], r[1]]], [[r[0], r[3]], [r[2], r[3]]]] : [[[r[0], r[1]], [r[0], r[3]]], [[r[2], r[1]], [r[2], r[3]]]]) E.push({ t: 'mx_canal_wall', a, b, y: 0.05, bed: LEVEL.canalBed, th: 0.7 });
+  E.push({ t: 'beam_bridge', at: horiz ? [0, (r[1] + r[3]) / 2] : [(r[0] + r[2]) / 2, 0], across: horiz ? 'z' : 'x', span: 8, width: 4.4, y: 0.05 });
+  for (let k = 0; k < 6; k++) {
+    const t = (k + 0.5) / 6, side = k % 2 ? 1.6 : -1.6, mid = horiz ? (r[1] + r[3]) / 2 + side : (r[0] + r[2]) / 2 + side;
+    const at = horiz ? [r[0] + (r[2] - r[0]) * t, mid] : [mid, r[1] + (r[3] - r[1]) * t];
+    if (Math.abs(at[0]) > 12 && Math.abs(at[1]) > 12) E.push({ t: 'acalli', at, dir: horiz ? [k % 3 ? 1 : -1, 0] : [0, k % 3 ? 1 : -1], len: 5 + (k % 3), y: LEVEL.water, seed: seed++ });
+  }
 }
-// the lake: water round the island, canoes
-E.push({ t: 'water_cells', rect: [-RADIUS + 24, -RADIUS + 24, RADIUS - 24, RADIUS - 24], y: LEVEL.water, cell: 3, inside: (x, z) => { const r = Math.hypot(x, z); return r > ISLAND + 2 && r < RADIUS - 27 && !(x < 0 && z > CAUSEWAY.z0 - 1 && z < CAUSEWAY.z1 + 1); } });
-for (const [x, z, d] of [[-300, -60, 1], [250, -230, -1], [-120, 330, 1], [320, 120, -1], [80, -345, 1]]) E.push({ t: 'boat', at: [x, z], dir: [d, 0], len: 6, y: LEVEL.water });
-
+// ---- the market by the west canal: the sellers' rows, a landing stair down to the water, canoes unloading
+E.push({ t: 'tianguis', rect: MARKET, seed: 1519 });
+for (const z of [34, 62]) E.push({ t: 'stairs', rect: [-219.6, z, -215.6, z + 6], y0: LEVEL.water - 0.3, y1: 0.05, dir: 'e', mat: 'andesite' });
+for (const [z, cargo] of [[30, 'maize'], [44, 'pots'], [56, 'chile'], [74, 'reeds'], [84, 'cloth']]) E.push({ t: 'acalli', at: [-218.6, z], dir: [0, 1], len: 6, y: LEVEL.water, seed: seed++, cargo });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('precinct', PRECINCT, 0, 'open')];
+const rooms = [room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open')];
 const walks = [[[-260, 0], [-150, 0], [-60, 0], [10, 0], [50, 0]]];
 walks[0].y0 = 0;
 

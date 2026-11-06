@@ -6,7 +6,9 @@
 export const RADIUS = 400;
 export const PRECINCT = [-150, -150, 150, 150];
 export const TM = { c: [95, 0], w: 80, d: 100, h: 45, top: { w: 34, d: 46 } };
-export const PALACE = [165, 165, 265, 255];
+export const PALACE = [160, 100, 211, 191];   // between the two canals (it straddled them)
+/** The market (tianguis) on the west canal, south of the causeway's avenue, where canoes unload. */
+export const MARKET = [-212, 22, -168, 92];
 export const LEVEL = { water: -0.7, canalBed: -2.4, lakeBed: -2.6 };
 export const ISLAND = 335;                              // the island's edge (chinampas from 300)
 export const CAUSEWAY = { z0: -9, z1: 9 };
@@ -26,7 +28,7 @@ export function houses() {
   for (let x = -RADIUS; x < RADIUS; x += S) for (let z = -RADIUS; z < RADIUS; z += S) {
     const w = 10 + rand() * 5, d = 10 + rand() * 5, r = [x + 2, z + 2, x + 2 + w, z + 2 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
     if (Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) > 300) continue;
-    if (inRect(PRECINCT, cx, cz, w / 2 + 10) || inRect(PALACE, cx, cz, w / 2 + 6) || CANALS.some((c) => inRect(c, cx, cz, w / 2 + 4))) continue;
+    if (inRect(PRECINCT, cx, cz, w / 2 + 10) || inRect(PALACE, cx, cz, w / 2 + 6) || inRect(MARKET, cx, cz, w / 2 + 3) || CANALS.some((c) => inRect(c, cx, cz, w / 2 + 4))) continue;
     if (Math.abs(cz) < 12 + d / 2 && cx < -150) continue;
     if (Math.abs(cx) < 8 + w / 2 || Math.abs(cz) < 8 + d / 2) continue;           // the avenues to the gates
     if (rand() < 0.06) continue;

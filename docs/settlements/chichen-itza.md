@@ -1,7 +1,7 @@
 # Chichén Itzá, c. 1000 — dossier
 
 Settlement id: `chichen-itza` · Style: `maya` · Region: Yucatán · Code: `src/settlements/chichen-itza/`
-Status of this dossier: L1–L2 (the Great Plaza's buildings at true size, the sacbe and the Sacred Cenote, the town of house lots; ground, planting, weather, music). L3 recorded for later: El Caracol and the southern Old Chichén, the carved panels (the ball players, the skulls, eagles and jaguars), chacmools, the painted colour of the temples in full, the market in the colonnades, people.
+Status of this dossier: L1–L2 (the Great Plaza's buildings at true size, the sacbe and the Sacred Cenote, the town of house lots; ground, planting, weather, music). L2 detail added: the sculpted feathered-serpent heads, the serpent columns, the Temple of the Warriors' masks and chacmool (§10). L3 recorded for later: El Caracol and the southern Old Chichén, the carved panels (the ball players, the skulls, eagles and jaguars), the warrior pillars' reliefs, the Atlantean altar, the painted colour of the temples in full, the market in the colonnades, people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -53,6 +53,15 @@ The dry season: hot, bright, fair clouds. Latitude 20.7° N. [inferred]
 
 Clay flutes, the slit drum and turtle-shell drums (a flute and a struck wooden sound stand in). [inferred]
 
+## 10. Detail (L2): serpents, masks, the chacmool
+
+- **The serpent heads** at the foot of the balustrades (the Castillo's north stair, the Temple of the Warriors, the Platform of Venus): open-mouthed serpent heads top the balustrades flanking the Warriors' stair [stated: mayaruins]; plumed serpents on the Castillo's north balustrade [stated: Designing Buildings]. Ours carved after the type: the block ending the balustrade, the upper jaw with an upturned snout and heavy brows, the lower jaw open on the ground, fangs and a row of teeth, the tongue over the lip, ear spools, a crest of feathers; the mouth painted red [inferred: paint traces]. About 2.4 m long.
+- **The serpent columns**: two giant serpent columns behind the chacmool, their rattlesnake tails rising to hold what was probably a wooden lintel [stated: mayaruins]; the Castillo's temple has the same pair in its north doorway [stated: general]. Ours: the head on the floor, jaws out; the body a square shaft banded with feathers (the bands painted red [inferred]); the tail bent out under the lintel with its rattles.
+- **The chacmool** in front of the central entrance, holding an offering plate on its stomach [stated: mayaruins]: reclining on a low base, knees up, propped on its elbows, head turned to look down the stair.
+- **The masks**: the frieze carries long-nosed rain-god masks on the corners and in the middle, alternating with vision serpents [stated: mayaruins]. Ours: masks on every corner (both faces) and in the middle of each side but the front; the mask after the Puuc mosaic type — framed eyes, heavy brows, the hooked nose curling up, the mouth with fangs, ear spools [inferred]; the vision serpents left for later.
+- **Heights**: the Warriors' temple floor 45 ft (13.7 m) above the ground [stated: mayaruins] — ours 13 m (was 11). The colonnade before it moved 4 m west so the stair's serpents stand clear of it.
+- The 64 warrior pillars (four rows of sixteen), carved with Toltec warriors with spears, shields and quetzal-feather headdresses, once brightly painted [stated: mayaruins] — recorded for L3.
+
 ## Sources
 
 - [El Castillo, Chichen Itza — Wikipedia](https://en.wikipedia.org/wiki/Temple_of_Kukulc%C3%A1n)
@@ -62,3 +71,4 @@ Clay flutes, the slit drum and turtle-shell drums (a flute and a struck wooden s
 - [Chichén Itzá — amazingtemples](https://amazingtemples.com/en/mexico-en/yucatan-en/chichen-itza)
 - [Chichen Itza — famous-historic-buildings](https://famous-historic-buildings.org.uk/chichen_itza_88.html)
 - [Chichen Itza — geographyworlds](https://geographyworlds.com/blog/chichen-itza-site/)
+- [The East Group: the Temple of the Warriors and the Thousand Columns — mayaruins.com](https://mayaruins.com/chichen/1000Columns.html)
