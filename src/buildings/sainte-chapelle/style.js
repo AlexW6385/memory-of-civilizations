@@ -496,7 +496,7 @@ function stairRail(el, { bag, col }) {
   hexa(S, [P(-0.05, Y(0) + h, -t - 0.07), P(Ln + 0.05, Y(Ln) + h, -t - 0.07), P(Ln + 0.05, Y(Ln) + h, t + 0.07), P(-0.05, Y(0) + h, t + 0.07)], [P(-0.05, Y(0) + h + 0.14, -t - 0.07), P(Ln + 0.05, Y(Ln) + h + 0.14, -t - 0.07), P(Ln + 0.05, Y(Ln) + h + 0.14, t + 0.07), P(-0.05, Y(0) + h + 0.14, t + 0.07)]);
   bag.add('limestone', fromTriangles(S));
   for (const [s, yy] of [[0, ay], [Ln, by]]) { const p = P(s, 0, 0); ndPinnacle(bag, p[0], Math.max(yy, ay) - 0.6, p[2], 0.5, h + 2.2, 'limestone'); }
-  col.segment([ax, az], [bx, bz], t * 2, ay - 0.6, by + h);
+  col.segment([ax, az], [bx, bz], t * 2, ay, by + h);
 }
 
 /**

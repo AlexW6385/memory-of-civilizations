@@ -132,6 +132,8 @@ for (const uc of [1.9, 5.7, 9.5]) add({ t: 'sc_gablet', o: [-4.85, -5.7], u: [0,
 // the stair from the courtyard to the upper porch, with its parapets and blind arcading; and from the porch's landing the
 // king's gallery (the galerie des Merciers) runs north on its arcade to the palace's Grand-Salle
 add({ t: 'stair', rect: [-17.9, -9.6, -4.5, -7.6], dir: 'e', y0: 0, y1: UP, riser: 0.169, base: 0, mat: 'limestone' });
+// the courtyard's paving under the stair and its parapets (the parapets' footings stand on it)
+floor([-18.3, -10.2, -4.5, -7.0], 0.04, 'limestone', { th: 0.08 });
 add({ t: 'sc_stair_rail', a: [-17.9, 0, -7.4], b: [-4.5, UP, -7.4], h: 1.0, th: 0.3 });
 add({ t: 'sc_stair_rail', a: [-17.9, 0, -9.8], b: [-5.2, UP - 0.53, -9.8], h: 1.0, th: 0.3 });
 add({ t: 'sc_stair_arcade', o: [-17.9, -7.6], u: [1, 0], n: [0, 1], u0: 0.3, u1: 13.4, y0: 0, ya: 0, yb: UP, d0: 0.02 });
