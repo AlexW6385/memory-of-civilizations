@@ -96,6 +96,40 @@ function beamTris(out, p0, p1, w, h) {
 }
 
 /**
+ * The curl at a ridge's end (the Jiangnan scroll ridge end): from the ridge's top at p it runs out
+ * along dir and rises, turning up and back over itself in a scroll of `size` metres; a square
+ * section of half-width w swept along the curve, its faces kept square to it (so a steep stretch
+ * is not a sliver), and a block under its foot sitting on the ridge.
+ */
+function ridgeCurl(out, p, dir, size, w) {
+  const l = Math.hypot(dir[0], dir[1]) || 1, ex = dir[0] / l, ez = dir[1] / l, bx = -ez, bz = ex;
+  // the curve in its own plane (d out, v up): a quarter circle out and up, then a tightening turn back
+  const C = [];
+  const N = 12;
+  for (let k = 0; k <= N; k++) {
+    const t = k / N, a = -Math.PI / 2 + t * Math.PI * 1.35, R = size * (0.55 - 0.3 * t);
+    C.push([size * 0.15 + Math.cos(a) * R, size * 0.55 + Math.sin(a) * R]);
+  }
+  C[0] = [0, 0]; C.unshift([-size * 0.25, 0]);
+  const W3 = (d, v) => [p[0] + ex * d, p[1] + v, p[2] + ez * d];
+  const sec = C.map((q, i) => {
+    const a = C[Math.max(0, i - 1)], b = C[Math.min(C.length - 1, i + 1)], td = b[0] - a[0], tv = b[1] - a[1], tl = Math.hypot(td, tv) || 1;
+    const nd = -tv / tl, nv = td / tl, hh = w * (1 - 0.35 * i / C.length);
+    return [[nd * hh, nv * hh, -w], [nd * hh, nv * hh, w], [-nd * hh, -nv * hh, w], [-nd * hh, -nv * hh, -w]].map(([dd, vv, bb]) => { const P = W3(q[0] + dd, q[1] + vv); return [P[0] + bx * bb, P[1], P[2] + bz * bb]; });
+  });
+  // each stretch a little closed box, turned outward about its own middle
+  for (let i = 0; i + 1 < sec.length; i++) {
+    const loc = [];
+    for (let k = 0; k < 4; k++) {
+      const A = sec[i][k], B = sec[i][(k + 1) % 4], C2 = sec[i + 1][(k + 1) % 4], D = sec[i + 1][k];
+      loc.push(...A, ...D, ...C2, ...A, ...C2, ...B);
+    }
+    for (const S of [sec[i], sec[i + 1]]) loc.push(...S[0], ...S[1], ...S[2], ...S[0], ...S[2], ...S[3]);
+    out.push(...orientOutward(loc));
+  }
+}
+
+/**
  * A roof over a rectangle { c [x, z], A (half-length along x), B (half-depth), y (eave), rise,
  * kind ('hip', 'xieshan' hip-and-gable, 'gable'), sweep, alongZ }. Rings from the eave to the
  * ridge; the xieshan's hips rise only to `gableAt` of the height, the triangle above them closed
@@ -175,9 +209,9 @@ function rectRoof(el, bag) {
   if (!hole) beamTris(r, [a0[0], top - 0.08, a0[1]], [a1[0], top - 0.08, a1[1]], 0.16, 0.42);
   for (const s of [-1, 1]) {
     // the curl at each end of the ridge, rising and turning out
-    for (let k = 0; k < (el.curl === false || hole ? 0 : 5); k++) {
-      const e0 = rot(cx + s * (L + 0.3 + k * 0.12), cz), e1 = rot(cx + s * (L + 0.42 + k * 0.12), cz);
-      beamTris(r, [e0[0], top + 0.2 + k * k * 0.07, e0[1]], [e1[0], top + 0.2 + (k + 1) * (k + 1) * 0.07, e1[1]], 0.13, 0.22);
+    if (el.curl !== false && !hole) {
+      const e = rot(cx + s * (L + 0.3), cz), o = rot(cx + s * (L + 1.3), cz);
+      ridgeCurl(r, [e[0], top + 0.34, e[1]], [(o[0] - e[0]), (o[1] - e[1])], Math.min(1.1, 0.45 + R * 0.08), 0.13);
     }
     if (kind !== 'gable') for (const sz of [-1, 1]) {
       // the hip ridge follows the crease through the grid's vertices, bedded a little into the tiles
@@ -1049,10 +1083,7 @@ function houseJiangnan(el, { bag, col }) {
   bag.add('timber', fromTriangles(uf.concat(flipTris(uf))));
   const rd = [];
   beamTris(rd, [rg[0][0], rg[0][1] - 0.05, rg[0][2]], [rg[1][0], rg[1][1] - 0.05, rg[1][2]], 0.12, 0.3);
-  for (const [p, sgn] of [[rg[0], -1], [rg[1], 1]]) {
-    const ua = [u[0] * sgn, u[1] * sgn];
-    for (let k = 0; k < 3; k++) beamTris(rd, [p[0] + ua[0] * k * 0.1, p[1] + 0.2 + k * k * 0.08, p[2] + ua[1] * k * 0.1], [p[0] + ua[0] * (k + 1) * 0.1, p[1] + 0.2 + (k + 1) * (k + 1) * 0.08, p[2] + ua[1] * (k + 1) * 0.1], 0.1, 0.18);
-  }
+  for (const [p, sgn] of [[rg[0], -1], [rg[1], 1]]) ridgeCurl(rd, [p[0], p[1] + 0.25, p[2]], [u[0] * sgn, u[1] * sgn], 0.42, 0.1);
   bag.add('tile_dark', fromTriangles(rd));
   // the gable ends: plastered triangles; on some houses stepped horse-head walls above the roof
   const g = [];
