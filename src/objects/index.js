@@ -74,14 +74,131 @@ function trough(el, { bag, col }) {
   put(m, box(-0.9, 0, -0.3, 0.9, 0.55, -0.24)); put(m, box(-0.9, 0, 0.24, 0.9, 0.55, 0.3)); put(m, box(-0.9, 0, -0.3, -0.84, 0.55, 0.3)); put(m, box(0.84, 0, -0.3, 0.9, 0.55, 0.3)); put(m, box(-0.9, 0, -0.3, 0.9, 0.1, 0.3));
   put('water', box(-0.84, 0.4, -0.24, 0.84, 0.42, 0.24));
 }
+/** A wooden bucket of staves, two iron hoops and an iron bail, standing at (x, y, z): roles 'timber', 'iron' (or `mat` for a leather or clay one). */
+function bucket(a, x, y, z, { r = 0.14, h = 0.26, mat = 'timber', bail = true } = {}) {
+  if (mat === 'timber') {
+    a('timber', at(slathe([[0.001, 0], [r * 0.82, 0], [r * 0.86, 0.02], [r, h], [r * 0.93, h], [r * 0.8, 0.04], [0.001, 0.04]], 12), x, y, z));
+    for (const t of [0.22, 0.8]) { const rr = r * (0.84 + 0.16 * t) + 0.006; a('iron', at(slathe([[rr, 0], [rr, 0.025], [rr - 0.012, 0.025], [rr - 0.012, 0]], 12), x, y + h * t - 0.012, z)); }
+  } else a(mat, at(slathe([[0.001, 0], [r * 0.6, 0], [r, h * 0.45], [r * 0.85, h], [r * 0.78, h], [r * 0.9, h * 0.45], [r * 0.5, 0.03], [0.001, 0.03]], 10), x, y, z));
+  if (bail) a(mat === 'timber' ? 'iron' : 'rope', tube(Array.from({ length: 9 }, (_, k) => { const t = Math.PI * k / 8; return [x + Math.cos(t) * r * 0.97, y + h + Math.sin(t) * r * 0.9, z, 0.007]; }), 4));
+}
+/** A rope through points [x, y, z] (role 'rope'). */
+const rope = (a, pts, w = 0.012) => a('rope', tube(pts.map((p) => [...p, w]), 4));
+/** A rope hanging between two points with a sag (a catenary's look): n points. */
+function sagged(p, q, sag, n = 9) { return Array.from({ length: n }, (_, k) => { const t = k / (n - 1); return [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t - sag * 4 * t * (1 - t), p[2] + (q[2] - p[2]) * t]; }); }
+/** The rim of a well, its mouth at r0, its outside at r1, h high; `square`: a curb of four stones (or logs) set square. */
+function curb(a, m, r0, r1, h, { square = false, mould = false } = {}) {
+  if (square) {
+    // the curb as a square of beams (or slabs) in courses, the pairs crossing at the corners and running
+    // past them in turn, as a log crib or the Japanese igeta is laid
+    const t = r1 - r0, n = Math.max(1, Math.round(h / 0.2)), hh = h / n, ext = 0.05 + t * 0.35;
+    for (let k = 0; k < n; k++) {
+      const y0 = k * hh, ex = k % 2 ? ext : 0, ez = k % 2 ? 0 : ext;
+      for (const s of [-1, 1]) {
+        a(m, box(-r1 - ex, y0, s > 0 ? r0 : -r1, r1 + ex, y0 + hh, s > 0 ? r1 : -r0));
+        a(m, box(s > 0 ? r0 : -r1, y0, -r1 - ez, s > 0 ? r1 : -r0, y0 + hh, r1 + ez));
+      }
+    }
+    a(m, box(-r0, 0, -r0, r0, h * 0.45, r0));
+    a('water', box(-r0 + 0.002, h * 0.45, -r0 + 0.002, r0 - 0.002, h * 0.45 + 0.03, r0 - 0.002));
+    return;
+  }
+  const P = mould
+    ? [[r1 + 0.08, 0], [r1 + 0.08, 0.12], [r1, 0.16], [r1, h - 0.14], [r1 + 0.05, h - 0.1], [r1 + 0.06, h], [r0 - 0.02, h], [r0 - 0.02, h - 0.06], [r0, h - 0.08], [r0, h * 0.45], [0.001, h * 0.45]]
+    : [[r1 + 0.02, 0], [r1, 0.08], [r1, h - 0.06], [r1 - 0.02, h], [r0 + 0.02, h], [r0, h - 0.04], [r0, h * 0.45], [0.001, h * 0.45]];
+  a(m, slathe(P, 20));
+  a('water', at(lz([[r0 - 0.005, 0], [0.001, 0]], 16), 0, h * 0.45 + 0.03, 0));
+}
+/**
+ * well: { kind, mat (the curb's stone), roof } — a draw-well of the region (WELL in src/objects/life.js):
+ * 'windlass' — a round stone curb, two posts carrying a drum with an iron crank, its rope wound on the
+ *   drum and down to the bucket stood on the curb; `roof`: a little gabled roof of boards over it
+ *   (the European draw-well; without the roof, the Chinese lulu);
+ * 'pulley' — a gallows of two posts and a beam, a pulley block under the beam, the rope over it to a
+ *   bucket in the mouth and one on the curb; `roof` (the Japanese tsurube, the curb square: `square`);
+ * 'shaduf' — a low curb under the sweep: a pole pivoted on a crossbar between two posts a fifth of its
+ *   length from its butt, a lump of clay or stone weighting the butt, the rope from the tip to a bucket
+ *   (Egypt, India's dhenkli, China's jiegao, the Russian zhuravl);
+ * 'open' — a curb (a Venetian vera da pozzo: tall and moulded, `mould`) with a bucket and a coil of rope on it.
+ */
 function well(el, { bag, col }) {
-  const put = placer(el, bag), m = el.mat ?? 'limestone', [x, z] = el.at, y = el.y ?? 0;
-  put(m, lz([[0.75, 0], [0.75, 0.75], [0.55, 0.75], [0.55, 0.1], [0.001, 0.1]], 16));
-  put('water', at(lz([[0.55, 0], [0.001, 0]], 12), 0, 0.25, 0));
-  for (const s of [-1, 1]) put('timber', box(s * 0.7 - 0.06, 0, -0.06, s * 0.7 + 0.06, 2, 0.06));
-  put('timber', at(lying(0.05, 1.5, 6), 0, 1.85, 0));
-  put('timber', at(lz([[0.14, 0], [0.16, 0.25], [0.001, 0.25]], 8), 0.3, 0.75, 0));
-  col.circle(x, z, 0.8, y, y + 0.75);
+  const put = placer(el, bag), kind = el.kind ?? 'windlass', m = el.mat ?? 'limestone', sq = !!el.square, roof = !!el.roof, [x, z] = el.at, y = el.y ?? 0;
+  const bm = el.bucket ?? (kind === 'shaduf' ? 'hide_brown' : 'timber');
+  const A = assembly(`well|${kind}|${m}|${sq ? 's' : ''}|${roof ? 'r' : ''}|${el.mould ? 'm' : ''}|${bm}`, (a) => {
+    const r0 = kind === 'shaduf' ? 0.6 : 0.52, r1 = r0 + (sq ? 0.14 : 0.2), h = kind === 'shaduf' ? 0.55 : el.mould ? 0.95 : 0.78;
+    curb(a, m, r0, r1, h, { square: sq, mould: !!el.mould });
+    const top = h + (el.mould ? 0 : 0);
+    if (kind === 'windlass') {
+      const px = r1 + 0.12, ya = 1.25;
+      for (const s of [-1, 1]) {
+        a('timber', box(s * px - 0.06, 0, -0.07, s * px + 0.06, roof ? 2.05 : 1.45, 0.07));
+        a('timber', tube([[s * px, 0.55, -0.07, 0.035], [s * px, 0.02, -0.55, 0.04]], 5));           // a brace
+        a('timber', tube([[s * px, 0.55, 0.07, 0.035], [s * px, 0.02, 0.55, 0.04]], 5));
+      }
+      // the drum between the posts, its axle through them, the crank on the +x side
+      a('timber', at(lying(0.11, 2 * px - 0.14, 10), 0, ya, 0));
+      a('iron', at(lying(0.025, 2 * px + 0.3, 6), 0.03, ya, 0));
+      a('iron', tube([[px + 0.15, ya, 0, 0.022], [px + 0.15, ya - 0.34, 0, 0.022]], 4));
+      a('iron', tube([[px + 0.15, ya - 0.34, 0, 0.02], [px + 0.4, ya - 0.34, 0, 0.02]], 4));
+      a('timber', at(lying(0.03, 0.18, 6), px + 0.3, ya - 0.34, 0));
+      // the rope wound on the drum, and down to the bucket's bail on the curb
+      for (let k = 0; k < 6; k++) a('rope', at(slathe([[0.001, 0], [0.122, 0], [0.122, 0.03], [0.001, 0.03]], 10).rotateZ(Math.PI / 2), -0.12 + k * 0.035, ya, 0));
+      const bz = r0 + (r1 - r0) / 2;
+      bucket(a, 0, top, bz, { mat: bm });
+      rope(a, [[0, ya - 0.1, 0.06], [0, top + 0.5, bz - 0.02], [0, top + 0.26 + 0.13, bz]]);
+      if (roof) {
+        // the gabled roof: boards on a ridge pole over the posts' heads, open at the gables
+        const ry = 2.42, ey = 1.98, ez = 0.85, len = 2 * px + 0.5, sl = Math.hypot(ez, ry - ey), ang = Math.atan2(ry - ey, ez);
+        a('timber', box(-len / 2, 1.97, -0.06, len / 2, 2.07, 0.06));
+        a('timber', at(lying(0.05, len + 0.1, 6), 0, ry - 0.02, 0));
+        for (const xx of [-px, px]) a('timber', tube([[xx, 2.05, 0, 0.04], [xx, ry - 0.06, 0, 0.04]], 4));
+        for (const s of [-1, 1]) { const g = s > 0 ? box(-len / 2, 0, 0, len / 2, 0.035, sl) : box(-len / 2, 0, -sl, len / 2, 0.035, 0); g.rotateX(s * ang); g.translate(0, ry, 0); a('roof', g); }
+      }
+    } else if (kind === 'pulley') {
+      const px = r1 + 0.1, yb = roof ? 2.15 : 2.25;
+      for (const s of [-1, 1]) a('timber', box(s * px - 0.07, 0, -0.07, s * px + 0.07, yb + 0.12, 0.07));
+      a('timber', box(-px - 0.22, yb, -0.08, px + 0.22, yb + 0.16, 0.08));
+      // the block hung from the beam, the sheave in it (turning about x)
+      a('iron', tube([[0, yb, 0, 0.012], [0, yb - 0.12, 0, 0.012]], 4));
+      for (const s of [-1, 1]) a('timber', box(s * 0.04 - 0.012, yb - 0.38, -0.12, s * 0.04 + 0.012, yb - 0.1, 0.12));
+      a('timber', at(lying(0.1, 0.05, 12), 0, yb - 0.24, 0));
+      // the rope over the sheave: one end down to the bucket hanging in the mouth, the other to the bucket on the curb
+      const bz = -(r0 + (r1 - r0) / 2);
+      rope(a, [[0, yb - 0.24, 0.1], [0, top + 0.55, 0.1]]);
+      bucket(a, 0, top + 0.18, 0.1, { mat: bm });
+      rope(a, [[0, yb - 0.24, -0.1], [0, top + 0.6, bz + 0.03], [0, top + 0.26 + 0.13, bz]]);
+      bucket(a, 0, top, bz, { mat: bm });
+      if (roof) {
+        const ry = yb + 0.62, len = 2 * px + 0.7, ez = 0.62, sl = Math.hypot(ez, 0.34), ang = Math.atan2(0.34, ez);
+        a('timber', tube([[0, yb + 0.16, 0, 0.045], [0, ry - 0.05, 0, 0.045]], 4));
+        a('timber', at(lying(0.05, len, 6), 0, ry - 0.03, 0));
+        for (const s of [-1, 1]) { const g = s > 0 ? box(-len / 2, 0, 0, len / 2, 0.03, sl) : box(-len / 2, 0, -sl, len / 2, 0.03, 0); g.rotateX(s * ang); g.translate(0, ry, 0); a('roof', g); }
+      }
+    } else if (kind === 'shaduf') {
+      // the upright: two posts and the pivot bar a fifth of the pole from its butt; the pole at rest, its weighted butt down, its tip over the mouth
+      const pz = -2.2, py = 2.0, T = [0, 4.2, 0], len = Math.hypot(T[1] - py, T[2] - pz), C = [0, py - (T[1] - py) / 4, pz - (T[2] - pz) / 4];
+      for (const s of [-1, 1]) a('timber', tube([[s * 0.16, 0, pz, 0.075], [s * 0.15, py + 0.18, pz, 0.065]], 6));
+      a('timber', at(lying(0.035, 0.46, 6), 0, py, pz));
+      a('timber', tube([[0, C[1], C[2], 0.085], [0, py, pz, 0.075], [0, T[1], T[2], 0.04]], 6));
+      a('mud', at(ball(0.3, 9).scale(1, 0.85, 1.15), 0, C[1] - 0.5, C[2] - 0.05));
+      rope(a, [[0, C[1] - 0.24, C[2]], [0, C[1] + 0.02, C[2]]], 0.02);
+      // the rope (or a thin pole) from the tip down to the bucket hanging over the mouth
+      rope(a, [[0, T[1], T[2]], [0, top + 0.74, 0]], 0.014);
+      bucket(a, 0, top + 0.33, 0, { mat: bm, r: 0.15, h: 0.28 });
+      void len;
+    } else {
+      // open: the bucket on the rim, its rope coiled beside it
+      const rr = r0 + (r1 - r0) / 2;
+      bucket(a, 0, top, rr, { mat: bm });
+      for (let k = 0; k < 3; k++) a('rope', tube(Array.from({ length: 13 }, (_, q) => { const t = q / 12 * Math.PI * 2; return [rr * Math.cos(-0.6) + Math.cos(t) * (0.12 - k * 0.012), top + 0.015 + k * 0.022, rr * Math.sin(-0.6) + Math.sin(t) * (0.12 - k * 0.012), 0.011]; }), 4, { capA: false, capB: false }));
+      rope(a, [[0, top + 0.26 + 0.12, rr], [rr * Math.cos(-0.6) + 0.12, top + 0.06, rr * Math.sin(-0.6)]]);
+    }
+  });
+  const mats = { mud: el.weight ?? 'mud_plaster', rope: 'sacking', roof: el.roofMat ?? 'timber' };
+  for (const [role, g] of Object.entries(A)) put(mats[role] ?? role, g.clone());
+  const r1 = (kind === 'shaduf' ? 0.6 : 0.52) + (sq ? 0.14 : 0.2);
+  col.circle(x, z, r1 + 0.05, y, y + (kind === 'shaduf' ? 0.55 : el.mould ? 0.95 : 0.78));
+  if (kind === 'shaduf') { const c = Math.cos(el.rot ?? 0), s = Math.sin(el.rot ?? 0); col.circle(x - 2.2 * s, z - 2.2 * c, 0.3, y, y + 2.2); }
 }
 
 // ---- stalls, carts, tools ---------------------------------------------------------------------
@@ -248,30 +365,163 @@ function ladder(el, { bag }) {
   for (let k = 1; k < L / 0.32; k++) parts.push(box(-0.22, k * 0.32 - 0.02, -0.02, 0.22, k * 0.32 + 0.02, 0.02));
   for (const g of parts) { g.rotateX(-lean); put('timber', g); }
 }
-/** laundry: two posts and a line, cloths hanging. */
-function laundry(el, { bag }) {
-  const put = placer(el, bag), rand = rng(el.seed), L = el.len ?? 3.2;
-  for (const s of [-1, 1]) put('timber', box(s * L / 2 - 0.04, 0, -0.04, s * L / 2 + 0.04, 2, 0.04));
-  put('timber', box(-L / 2, 1.9, -0.008, L / 2, 1.915, 0.008));
-  const n = 3 + Math.floor(rand() * 3), cl = ['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_grey'];
-  for (let i = 0; i < n; i++) { const w = 0.35 + rand() * 0.45, x = -L / 2 + 0.3 + i * (L - 0.6) / n, h = 0.4 + rand() * 0.5; put(cl[Math.floor(rand() * cl.length)], box(x, 1.9 - h, -0.01, x + w, 1.9, 0.01)); }
-}
-function haystack(el, { bag, col }) {
-  const put = placer(el, bag), [x, z] = el.at, y = el.y ?? 0;
-  put('thatch', lz([[1.3, 0], [1.4, 1], [1.1, 2], [0.4, 2.8], [0.001, 3]], 12)); col.circle(x, z, 1.3, y, y + 3);
-}
-
-// ---- animals -------------------------------------------------------------------------------------
-/** chickens: { n } — a few hens pecking. */
-function chickens(el, { bag }) {
-  const put = placer(el, bag), rand = rng(el.seed), n = el.n ?? 4;
-  for (let i = 0; i < n; i++) {
-    const x = (rand() - 0.5) * 1.6, z = (rand() - 0.5) * 1.6, m = ['hide_white', 'hide_brown', 'hide_tan', 'hide_black'][Math.floor(rand() * 4)], a = Math.floor(rand() * 8) * Math.PI / 4;
-    const g = body(0.15, 0.1, 8); g.rotateY(a); put(m, at(g, x, 0.18, z));
-    const h = lz([[0.05, 0], [0.04, 0.08], [0.001, 0.1]], 6); put(m, at(h, x - Math.sin(a) * 0.14, 0.22, z - Math.cos(a) * 0.14));
-    put('cloth_red', at(box(-0.01, 0, -0.02, 0.01, 0.035, 0.02), x - Math.sin(a) * 0.14, 0.31, z - Math.cos(a) * 0.14));
-    for (const s of [-1, 1]) put('hide_tan', box(x + s * 0.03 - 0.008, 0, z - 0.008, x + s * 0.03 + 0.008, 0.1, z + 0.008));
+/** A hanging cloth, both faces: f(u, v) → [x, y, z] (u across, v down), nu × nv cells; the back face th behind (−z). */
+function hanging(f, nu, nv, th = 0.006) {
+  const T = [];
+  for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) {
+    const a = f(i / nu, j / nv), b = f((i + 1) / nu, j / nv), c = f((i + 1) / nu, (j + 1) / nv), d = f(i / nu, (j + 1) / nv), k = (p) => [p[0], p[1], p[2] - th];
+    T.push(...a, ...c, ...b, ...a, ...d, ...c);                     // the face toward +z
+    T.push(...k(a), ...k(b), ...k(c), ...k(a), ...k(c), ...k(d));   // the face toward −z
   }
+  return fromTriangles(T);
+}
+/**
+ * laundry: { len } — a washing line between two forked props driven into the ground, the line sagging
+ * between them, the wash hung over it: sheets and cloths folded over the line (their backs a little
+ * shorter), shirts with their sleeves out, each rippled and swelling a little in the air. Four
+ * layouts, the cloths' colours from the seed.
+ */
+function laundry(el, { bag }) {
+  const put = placer(el, bag), rand = rng(el.seed), L = Math.round((el.len ?? 3.2) * 2) / 2, v = (el.seed ?? 1) % 4, H = 1.95, sag = 0.13 + L * 0.02;
+  const lineY = (x) => H - sag * (1 - (2 * x / L) ** 2);
+  const A = assembly(`laundry|${L}|${v}`, (a) => {
+    const r = rng(41 + v * 13);
+    // the props: a pole, a little leaning out against the line's pull, forked at its head
+    for (const s of [-1, 1]) {
+      const top = [s * L / 2, H - 0.02, 0];
+      a('timber', tube([[s * (L / 2 + 0.12), 0, 0, 0.045], [s * (L / 2 + 0.04), H * 0.6, 0, 0.04], [...top, 0.035]], 6));
+      for (const q of [-1, 1]) a('timber', tube([[top[0], top[1] - 0.02, 0, 0.03], [top[0] + s * 0.03, top[1] + 0.16, q * 0.07, 0.022]], 5));
+    }
+    a('rope', tube(sagged([-L / 2, H, 0], [L / 2, H, 0], sag, 13).map((p) => [...p, 0.007]), 4));
+    // the wash, from one end to the other, with gaps
+    let x = -L / 2 + 0.25, k = 0;
+    while (x < L / 2 - 0.45 && k < 6) {
+      const room = L / 2 - 0.2 - x;
+      let type = r() < 0.3 ? 'shirt' : r() < 0.5 ? 'sheet' : 'cloth', w = type === 'sheet' ? 0.9 + r() * 0.4 : type === 'shirt' ? 0.42 : 0.35 + r() * 0.3;
+      if (w > room) { if (room < 0.3) break; type = 'cloth'; w = room; }       // the last a cloth that fits
+      const h = type === 'sheet' ? 0.75 + r() * 0.3 : type === 'shirt' ? 0.62 : 0.4 + r() * 0.35, ph = r() * 6.28, x0 = x;
+      const f = (side) => (u, vv) => {
+        const xx = x0 + w * u, y = lineY(xx), d = vv * (side ? h * 0.35 : h);
+        return [xx, y - 0.012 - d + Math.sin(u * Math.PI) * 0.015 * vv, (side ? -0.016 : 0.012) + (side ? -1 : 1) * (0.025 * Math.sin(u * Math.PI * 3 + ph) * vv + 0.05 * vv * Math.sin(u * Math.PI))];
+      };
+      a(`c${k}`, hanging(f(false), 6, 3)); a(`c${k}`, hanging(f(true), 6, 1));
+      if (type === 'shirt') for (const s of [0, 1]) { const sx = s ? x0 + w : x0, sw = 0.2; a(`c${k}`, hanging((u, vv) => { const xx = s ? sx + sw * u : sx - sw * (1 - u), y = lineY(sx) - 0.06 - vv * 0.16 - (s ? u : 1 - u) * 0.12; return [xx, y, 0.012 + 0.02 * vv]; }, 2, 1)); }
+      x += w + 0.08 + r() * 0.15; k++;
+    }
+  });
+  const cl = ['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_grey', 'linen', 'cloth_white', 'cloth_brown'];
+  for (const [role, g] of Object.entries(A)) put(role === 'rope' ? 'sacking' : role === 'timber' ? 'timber' : cl[Math.floor(rand() * cl.length)], g.clone(), role[0] === 'c' ? 0.9 + rand() * 0.2 : 1);
+}
+/**
+ * haystack: { kind ('rick' | 'pole') } — a stack of hay round a pole whose head shows at the top
+ * (the stozhar of a Russian stog, the pole of a Dutch or English rick), its sides bellied and ragged,
+ * drawn in at the foot where it has been pulled at, hay pulled loose round the foot; a weighted rope
+ * or two over the top against the wind. Two sizes, from the seed.
+ */
+function haystack(el, { bag, col }) {
+  const put = placer(el, bag), v = (el.seed ?? 1) % 2, k = v ? 1.15 : 0.9, [x, z] = el.at, y = el.y ?? 0;
+  const A = assembly(`haystack|${v}`, (a) => {
+    const P = [[1.2, 0], [1.38, 0.35], [1.48, 0.95], [1.4, 1.6], [1.1, 2.25], [0.66, 2.8], [0.25, 3.12], [0.001, 3.2]].map(([r, yy]) => [r * k, yy * k]);
+    a('thatch', folded(P, 18, 7, -0.05, 5 + v));
+    // hay pulled loose round the foot
+    a('thatch', slathe([[1.22 * k, 0.02], [1.5 * k, 0.04], [1.72 * k, 0.015], [1.22 * k, 0.11]], 16, (th) => 1 + 0.06 * Math.sin(th * 5 + v)));
+    a('timber', tube([[0, 2.6 * k, 0, 0.06], [0.03, 3.9 * k, 0.02, 0.045]], 6));
+    // ropes over the top, weighted with stones at their ends
+    const top = P[P.length - 1][1], R = (yy) => { const i = Math.max(1, P.findIndex(([, py]) => py >= yy)), [r0, y0] = P[i - 1], [r1, y1] = P[i]; return r0 + (r1 - r0) * (yy - y0) / ((y1 - y0) || 1); };
+    const off = (yy) => 0.03 + 0.09 * (1 - yy / top) ** 2, ye = 0.95 * k;
+    for (const t of [0.4, 0.4 + Math.PI / 2]) {
+      const pts = [];
+      for (let q = -8; q <= 8; q++) { const s = q < 0 ? -1 : 1, yy = ye + (top - ye) * (1 - (Math.abs(q) / 8) ** 1.6), rr = q === 0 ? 0 : R(yy) + off(yy); pts.push([Math.cos(t) * rr * s, yy + (q === 0 ? 0.03 : 0.01), Math.sin(t) * rr * s, 0.016]); }
+      a('rope', tube(pts, 4));
+      for (const s of [-1, 1]) { const rr = R(ye) + off(ye) + 0.06; a('rope', tube([[Math.cos(t) * (rr - 0.06) * s, ye + 0.01, Math.sin(t) * (rr - 0.06) * s, 0.016], [Math.cos(t) * rr * s, ye - 0.2, Math.sin(t) * rr * s, 0.014]], 4)); a('stone', at(ball(0.11, 7).scale(1.2, 0.85, 1), Math.cos(t) * rr * s, ye - 0.38, Math.sin(t) * rr * s)); }
+    }
+  });
+  for (const [role, g] of Object.entries(A)) put({ rope: 'sacking', stone: 'rock_boulder' }[role] ?? role, g.clone());
+  col.circle(x, z, 1.45 * k, y, y + 3.2 * k);
+}
+/**
+ * A hen or a cock (front along −z) as an assembly: 'p' its plumage, 't' its tail (a darker or a glossy
+ * feather), 'r' its comb and wattles, 'y' its beak, legs and toes. pose: 'up' (standing, looking about)
+ * or 'peck' (its head down at the ground); cock: taller, a big comb, the sickle feathers of its tail.
+ */
+function fowl(pose, cock) {
+  return assembly(`fowl|${pose}|${cock ? 1 : 0}`, (a) => {
+    const k = cock ? 1.12 : 1, peck = pose === 'peck', by = (cock ? 0.21 : 0.17);
+    // the body: a loft from the breast to the saddle, the wings folded on its sides
+    a('p', tube([[0, by + 0.03, 0.15 * k, 0.03, 0.04], [0, by + 0.02, 0.09 * k, 0.085, 0.09], [0, by, 0.0, 0.1, 0.1], [0, by + 0.01, -0.07 * k, 0.085, 0.09], [0, by + 0.05, -0.11 * k, 0.05, 0.055]], 9));
+    for (const s of [-1, 1]) a('t', tube([[s * 0.085, by + 0.03, -0.05, 0.012, 0.045], [s * 0.095, by + 0.03, 0.04, 0.014, 0.055], [s * 0.07, by + 0.05, 0.12, 0.01, 0.03]], 6));
+    // the neck and the head: up, or down at the ground
+    const head = peck ? [0, 0.07, -0.21 * k] : [0, by + 0.17 * k, -0.15 * k];
+    a('p', tube([[0, by + 0.05, -0.1 * k, 0.05], [0, (by + 0.05 + head[1]) / 2 + (peck ? 0.03 : 0), (head[2] - 0.1 * k) / 2 - (peck ? 0.02 : 0.015), 0.035], [...head, 0.033]], 7));
+    a('p', at(ball(0.036, 8).scale(0.9, 1, 1.15), head[0], head[1] - 0.034, head[2]));
+    const fwd = peck ? [0, -0.6, -0.8] : [0, -0.1, -1], tip = (d) => [head[0], head[1] + fwd[1] * d, head[2] + fwd[2] * d];
+    a('y', tube([[...tip(0.025), 0.013, 0.01], [...tip(0.052), 0.004, 0.003]], 4));
+    // the comb along the crown, the wattles under the beak
+    const up = peck ? [0, 0.8, -0.6] : [0, 1, -0.1], cw = cock ? 0.035 : 0.018;
+    a('r', tube([[head[0], head[1] + up[1] * 0.025 + fwd[1] * 0.012, head[2] + up[2] * 0.025 + fwd[2] * 0.012, 0.006, cw * 0.6], [head[0], head[1] + up[1] * (0.03 + cw * 0.5), head[2] + up[2] * 0.03 - fwd[2] * 0.012, 0.006, cw], [head[0], head[1] + up[1] * 0.03 - fwd[1] * 0.02, head[2] + up[2] * 0.03 - fwd[2] * 0.03, 0.005, cw * 0.4]], 4));
+    a('r', at(ball(cock ? 0.018 : 0.011, 6).scale(0.6, 1.3, 1), ...tip(0.02).map((v, i) => v - [0, 0.04, -0.005][i])));
+    // the tail: raised feathers, the cock's long sickles arching over and down
+    if (cock) for (const [s, q] of [[-1, 0.9], [0, 1.1], [1, 0.8], [-0.5, 0.65], [0.5, 0.7]]) a('t', tube(Array.from({ length: 7 }, (_, i) => { const t = i / 6, th = Math.PI * (0.1 + 0.85 * t); return [s * (0.015 + 0.03 * t), by + 0.05 + Math.sin(th) * 0.2 * q, 0.12 + (1 - Math.cos(th)) * 0.13 * q, 0.006 * (1 - t * 0.5), 0.028 * (1 - t * 0.6)]; }), 5));
+    else a('t', tube([[0, by + 0.04, 0.12, 0.025, 0.04], [0, by + 0.12, 0.17, 0.02, 0.05], [0, by + 0.17, 0.19, 0.006, 0.02]], 6));
+    // the legs, the three toes forward and one back
+    for (const s of [-1, 1]) {
+      const hx = s * 0.035, hz = 0.01, ly = by - 0.07;
+      a('y', tube([[hx, ly + 0.02, hz, 0.012], [hx, 0.012, hz - 0.005, 0.008]], 5));
+      for (const t of [-0.5, 0, 0.5]) a('y', tube([[hx, 0.008, hz - 0.005, 0.006], [hx + Math.sin(t) * 0.055, 0.006, hz - 0.005 - Math.cos(t) * 0.055, 0.004]], 3));
+      a('y', tube([[hx, 0.008, hz, 0.005], [hx, 0.006, hz + 0.035, 0.004]], 3));
+    }
+  });
+}
+/** chickens: { n } — a few fowls about a yard: hens pecking or looking up, now and then a cock among them. */
+function chickens(el, { bag }) {
+  const rand = rng(el.seed), n = el.n ?? 4, [x, z] = el.at, rot = el.rot ?? 0, c = Math.cos(rot), sn = Math.sin(rot);
+  const PL = [['hide_white', 'hide_white'], ['hide_brown', 'hide_black'], ['hide_tan', 'hide_brown'], ['hide_black', 'hide_black'], ['hide_brown', 'hide_brown']];
+  let cock = rand() < 0.4;
+  for (let i = 0; i < n; i++) {
+    const dx = (rand() - 0.5) * 1.7, dz = (rand() - 0.5) * 1.7, isCock = cock && i === 0, A = fowl(isCock || rand() < 0.4 ? 'up' : 'peck', isCock), [pm, tm] = isCock ? ['hide_brown', 'hide_black'] : PL[Math.floor(rand() * PL.length)];
+    const put = placer({ ...el, at: [x + dx * c + dz * sn, z - dx * sn + dz * c], rot: rot + Math.floor(rand() * 12) * Math.PI / 6, s: (el.s ?? 1) * (isCock ? 1 : 0.92 + Math.floor(rand() * 3) * 0.05) }, bag);
+    const sh = 0.85 + rand() * 0.3;
+    put(pm, A.p.clone(), sh); put(tm, A.t.clone(), tm === pm ? sh * 0.85 : 1); put('cloth_red', A.r.clone()); put('hide_tan', A.y.clone(), [1.15, 1.0, 0.55]);
+  }
+}
+/**
+ * sledge: { load ('casks' | 'bales' | 'empty'), beast ('horse' | none) } — the goods sledge (slede) of
+ * the Amsterdam carters, on which the city drew its goods instead of carts (no wheels on the piled
+ * streets): two runners turned up at the front and shod with iron, a bed of planks on cross-bars,
+ * stakes at the corners joined by rails, the water keg at the front that wet the runners; the shafts
+ * forward (−z), to the horse's shoulders when it is in them, else resting on the ground. As
+ * src/styles/dutch/dam.js's, but placed as instances.
+ */
+function sledge(el, { bag, col }) {
+  const rand = rng(el.seed), Bk = el.beast ? BEASTS[el.beast] : null, load = el.load ?? ['casks', 'bales', 'casks', 'empty'][Math.floor(rand() * 4)];
+  const A = assembly(`sledge|${Bk ? el.beast : ''}|${load}`, (a) => {
+    for (const x of [-0.48, 0.48]) {
+      a('timber', box(x - 0.06, 0.02, -0.95, x + 0.06, 0.16, 1.4));
+      a('iron', box(x - 0.05, 0, -0.95, x + 0.05, 0.02, 1.4));
+      a('timber', tube([[x, 0.09, -0.9, 0.06, 0.07], [x, 0.16, -1.15, 0.06, 0.065], [x, 0.4, -1.32, 0.055, 0.055]], 6));
+      a('iron', tube([[x, 0.012, -0.94, 0.05, 0.012], [x, 0.06, -1.13, 0.05, 0.012], [x, 0.3, -1.33, 0.045, 0.012]], 4, { capA: false }));
+      const end = Bk ? [x * 0.85, Bk.H * 0.6, -3.05] : [x * 0.85, 0.05, -2.85];
+      a('timber', tube([[x, 0.2, -0.7, 0.045], [x * 0.92, (0.2 + end[1]) / 2 + 0.05, (-0.7 + end[2]) / 2, 0.042], [...end, 0.035]], 6));
+    }
+    for (const z of [-0.8, 0.2, 1.2]) a('timber', box(-0.6, 0.16, z - 0.06, 0.6, 0.27, z + 0.06));
+    for (let i = 0; i < 6; i++) { const x0 = -0.62 + i * 1.24 / 6; a('planks', box(x0 + 0.005, 0.27, -0.95, x0 + 1.24 / 6 - 0.005, 0.31, 1.38)); }
+    for (const x of [-0.56, 0.56]) { for (const z of [-0.88, 1.31]) a('timber', box(x - 0.04, 0.31, z - 0.04, x + 0.04, 0.85, z + 0.04)); a('timber', box(x - 0.03, 0.62, -0.92, x + 0.03, 0.68, 1.35)); }
+    // the keg at the front, lying across, its tap toward the runners
+    a('timber', slathe([[0.001, -0.17], [0.1, -0.17], [0.13, -0.08], [0.135, 0], [0.13, 0.08], [0.1, 0.17], [0.001, 0.17]], 10).rotateZ(Math.PI / 2).translate(0, 0.31 + 0.135, -0.7));
+    for (const xx of [-0.11, 0.11]) a('iron', slathe([[0.121, -0.015], [0.121, 0.015], [0.001, 0.015], [0.001, -0.015]], 10).rotateZ(Math.PI / 2).translate(xx, 0.445, -0.7));
+    if (load === 'casks') for (const x of [-0.27, 0.27]) {
+      a('timber', slathe([[0.001, -0.55], [0.25, -0.55], [0.3, -0.3], [0.31, 0], [0.3, 0.3], [0.25, 0.55], [0.001, 0.55]], 12).rotateX(Math.PI / 2).translate(x, 0.31 + 0.31, 0.25));
+      for (const zz of [-0.42, 0.42]) a('iron', slathe([[0.283, -0.03], [0.283, 0.03], [0.001, 0.03], [0.001, -0.03]], 12).rotateX(Math.PI / 2).translate(x, 0.62, 0.25 + zz));
+    } else if (load === 'bales') {
+      a('sacking', box(-0.5, 0.31, -0.55, 0.5, 0.86, 0.45)); a('sacking', box(-0.45, 0.31, 0.5, 0.45, 0.8, 1.25)); a('sacking', box(-0.4, 0.86, -0.4, 0.42, 1.25, 0.3));
+      for (const z of [-0.2, 0.9]) a('rope', box(-0.515, 0.312, z - 0.03, 0.515, z < 0 ? 0.875 : 0.815, z + 0.03));
+    }
+  });
+  const put = placer(el, bag);
+  for (const [role, g] of Object.entries(A)) put({ planks: 'planks_grey', rope: 'cloth_brown' }[role] ?? role, g.clone());
+  if (Bk) { const oz = -1.35 - 0.3 - Bk.L / 2, ro = el.rot ?? 0; animal({ t: 'animal', kind: el.beast, gear: false, graze: false, seed: el.seed + 1, y: el.y, rot: ro, at: [el.at[0] + oz * Math.sin(ro), el.at[1] + oz * Math.cos(ro)] }, { bag, col }); }
+  const [x, z] = el.at, y = el.y ?? 0, c = Math.sin(el.rot ?? 0), d = Math.cos(el.rot ?? 0);
+  col.circle(x + 0.2 * c, z + 0.2 * d, 0.85, y, y + 1.1);
 }
 
 // ---- figures -----------------------------------------------------------------------------------
@@ -345,6 +595,12 @@ function boatParts(kind, L, a) {
   }
   if (K.cabin) a('cabin', box(-B * 0.35, 0.3, -L * 0.3, B * 0.35, 2.6, L * 0.3));
 }
+/**
+ * Where a boat's y goes above the water for it to float right (m): its sheer stands 0.3 above y
+ * amidships, its keel D below that; afloat, a laden small boat shows some 0.2–0.3 m of side above the
+ * water, a dhow or a ferry 0.7 — about 45 % of its depth, drawing the rest.
+ */
+export function boatFloat(kind) { const K = BOATS[kind] ?? BOATS.rowboat; return Math.min(0.75, Math.max(0.18, K.D * 0.45)) - 0.3; }
 function boat(el, { bag }) {
   const put = placer(el, bag), kind = BOATS[el.kind] ? el.kind : 'rowboat', K = BOATS[kind], L = el.len ?? K.L;
   const A = assembly(`boat|${kind}|${L}`, (a) => boatParts(kind, L, a));
@@ -481,7 +737,7 @@ function oar(el, { bag }) {
 
 registerStyle('life', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { pot, basket, sacks, barrel, crates, firewood, bench, trough, well, stall, cart, barrow, ladder, laundry, haystack, animal, chickens, figure, boat, car, street_lamp: streetLamp, lantern, shop_sign: shopSign, hang_lantern: hangLantern, laundry_pole: laundryPole, tea_table: teaTable, drying_tray: dryingTray, oar },
+  elements: { pot, basket, sacks, barrel, crates, firewood, bench, trough, well, stall, cart, sledge, barrow, ladder, laundry, haystack, animal, chickens, figure, boat, car, street_lamp: streetLamp, lantern, shop_sign: shopSign, hang_lantern: hangLantern, laundry_pole: laundryPole, tea_table: teaTable, drying_tray: dryingTray, oar },
   objects: {},
 });
-export const LIFE_KINDS = ['pot', 'basket', 'sacks', 'barrel', 'crates', 'firewood', 'bench', 'trough', 'well', 'stall', 'cart', 'barrow', 'ladder', 'laundry', 'haystack', 'animal', 'chickens', 'figure', 'boat', 'car', 'street_lamp', 'lantern', 'shop_sign', 'hang_lantern', 'laundry_pole', 'tea_table', 'drying_tray', 'oar'];
+export const LIFE_KINDS = ['pot', 'basket', 'sacks', 'barrel', 'crates', 'firewood', 'bench', 'trough', 'well', 'stall', 'cart', 'sledge', 'barrow', 'ladder', 'laundry', 'haystack', 'animal', 'chickens', 'figure', 'boat', 'car', 'street_lamp', 'lantern', 'shop_sign', 'hang_lantern', 'laundry_pole', 'tea_table', 'drying_tray', 'oar'];
