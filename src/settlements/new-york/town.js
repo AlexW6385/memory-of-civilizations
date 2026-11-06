@@ -1,7 +1,20 @@
 // The blocks' buildings (docs/settlements/new-york.md §5) and the street's life (§5a): the traffic of
 // 1931 on the avenues and cross streets — Checker and Yellow cabs among black, cream and blue
 // motor cars — people on the pavements, lamp posts along the avenues.
-import { RADIUS, AVENUES, STREETS, lots, height, onBroadway, inLot, onElStair, inSpecial } from './layout.js';
+import { RADIUS, AVENUES, STREETS, lots, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect } from './layout.js';
+function rng0(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** The newsstands at the corners of the avenues with 34th, 38th and 42nd Streets (§1d). */
+const NEWSSTANDS = (() => {
+  const out = [], rand = rng0(1931);
+  for (const [ax, w] of AVENUES) for (const n of [34, 38, 42]) for (const sg of [-1, 1]) {
+    if (rand() < 0.45) continue;
+    const sgz = rand() < 0.5 ? -1 : 1, x = ax + sg * (w / 2 + 2.3), z = streetZ(n) + sgz * 8.2;
+    if (Math.hypot(x, z) > RADIUS - 50 || inLot(x, z, 1.4) || inSpecial(x, z, 1.4) || onElStair(x, z, 1.5) || onBroadway(x, z, 2)) continue;
+    out.push({ t: 'newsstand', at: [x, z], y: height(x, z), rot: -sg * Math.PI / 2, seed: Math.floor(rand() * 1e6) });
+  }
+  return out;
+})();
+const nearStand = (x, z, m) => NEWSSTANDS.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < m);
 const base = (id, elements) => ({ id, style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [4, 176], facing: 's' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 function streetLife() {
@@ -27,18 +40,35 @@ function streetLife() {
   for (const [ax, w] of AVENUES) for (const sg of [-1, 1]) {
     const x = ax + sg * (w / 2 + 1.5);
     for (let z = -RADIUS; z < RADIUS; z += 6 + rand() * 18) {
-      if (!inside(x, z) || inLot(x, z, 0.6) || crossing(x, z, 0) || onElStair(x, z, 1) || inSpecial(x, z, 0.8)) continue;
+      if (!inside(x, z) || inLot(x, z, 0.6) || crossing(x, z, 0) || onElStair(x, z, 1) || inSpecial(x, z, 0.8) || nearStand(x, z, 2.6)) continue;
       const woman = rand() < 0.4;
       L.push({ t: 'figure', at: [x + (rand() - 0.5) * 1.6, z], y: height(x, z), rot: rand() < 0.5 ? 0 : Math.PI, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'trousers', cloth: pick(DRESS), cloth2: pick(['cloth_white', 'cloth_grey', 'cloth_black']), skin: pick(['skin_light', 'skin_light', 'skin_medium', 'skin_dark']), hat: woman ? pick(['cap', 'none']) : 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']) });
     }
-    for (let z = -RADIUS + 10; z < RADIUS; z += 30) { const xx = ax + sg * (w / 2 + 0.5); if (inside(xx, z) && !inLot(xx, z, 0.4) && !crossing(xx, z, 1) && !onElStair(xx, z, 0.5) && !inSpecial(xx, z, 0.4)) L.push({ t: 'street_lamp', at: [xx, z], y: height(xx, z), h: 5.5, seed: z }); }
+    for (let z = -RADIUS + 10; z < RADIUS; z += 30) { const xx = ax + sg * (w / 2 + 0.5); if (inside(xx, z) && !inLot(xx, z, 0.4) && !crossing(xx, z, 1) && !onElStair(xx, z, 0.5) && !inSpecial(xx, z, 0.4) && !nearStand(xx, z, 1.8)) L.push({ t: 'street_lamp', at: [xx, z], y: height(xx, z), h: 5.5, seed: z }); }
   }
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 150)},${Math.floor(e.at[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-life-${k}`, list), style: 'life', center: [i * 150 + 75, j * 150 + 75], near: 260 }; });
 }
+/** The tenements' rear yards east of Lexington Avenue, washing on the lines from their back windows to a pole (§1d). */
+function yards() {
+  const rand = rng0(1932), out = [...NEWSSTANDS], all = lots();
+  for (const l of all) {
+    const [x0, , x1, zb] = l.rect, cx = (x0 + x1) / 2;
+    if (l.front !== 'n' || l.h > 35 || cx < 275 || x1 - x0 < 8 || rand() < 0.3) continue;
+    const zm = zb + 3.5, opp = all.find((o) => o.front === 's' && o.h <= 40 && inRect(o.rect, cx, zm + 3.6, 0.1)), lines = [];
+    const floors = (h, y) => { const f = []; for (let yy = y + 4.6; yy < y + h - 1.5 && f.length < 4; yy += 3.2) f.push(yy); return f; };
+    for (const yy of floors(l.h, l.y)) if (rand() < 0.8) lines.push([cx + (rand() - 0.5) * (x1 - x0 - 3), yy, zb + 0.15]);
+    if (opp) for (const yy of floors(opp.h, opp.y)) if (rand() < 0.7) lines.push([cx + (rand() - 0.5) * (x1 - x0 - 3), yy, opp.rect[1] - 0.15]);
+    if (!lines.length) continue;
+    out.push({ t: 'laundry', pole: [cx, zm], y: height(cx, zm), h: Math.min(16, Math.max(...lines.map((p) => p[1])) - l.y + 2), lines, seed: Math.floor(rand() * 1e6) });
+  }
+  const tiles = new Map();
+  for (const e of out) { const p = e.at ?? e.pole, k = `${Math.floor(p[0] / 150)},${Math.floor(p[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-yards-${k}`, list), center: [i * 150 + 75, j * 150 + 75], near: 300 }; });
+}
 export async function buildings() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).map((l) => ({ t: 'skyscraper', ...l }))));
-  return [...plans, ...streetLife()];
+  return [...plans, ...streetLife(), ...yards()];
 }

@@ -58,7 +58,11 @@ export function lots() {
         if (murray && rand() < 0.6) h = 12 + rand() * 8;
         if (rand() < 0.04 + near42 * 0.3) h = 90 + rand() * (100 + near42 * 120);
         const mats = garment ? ['facade_buff', 'facade_brick', 'facade_buff'] : murray ? ['facade_brick', 'facade_brick', 'facade_limestone'] : ['facade_limestone', 'facade_buff', 'facade_grey', 'facade_brick'];
-        LOTS.push({ rect: r, y: height(cx, cz), h: Math.round(h), mat: mats[Math.floor(rand() * mats.length)], seed: Math.floor(rand() * 1e6), front: z0 === bz0 ? 'n' : 's' });
+        // the rear yard: the houses, tenements and lofts stop 3.5 m short of the block's middle line (the towers fill their lots)
+        const front = z0 === bz0 ? 'n' : 's';
+        if (h < 70) { if (front === 'n') r[3] -= 3.5; else r[1] += 3.5; }
+        const shops = front + (r[0] <= bx0 + 0.01 ? 'w' : '') + (x >= bx1 - 6 || x + 0.01 >= bx1 ? 'e' : '');   // the street front, and the side at a corner
+        LOTS.push({ rect: r, y: height(cx, cz), h: Math.round(h), mat: mats[Math.floor(rand() * mats.length)], seed: Math.floor(rand() * 1e6), front, shops });
       }
     }
   }
