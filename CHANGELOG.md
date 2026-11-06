@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.47 — Amsterdam's Dam (2026-11-06)
+- The Dam paved in setts with bluestone kerbs and stone-edged gutters; the Waag with its great balances, porch roofs and city arms; the Damrak harbour with moored boats and quay houses; fish benches, goods sledges with horses and carters (sledges, not carts, as sources record), greengrocers, porters and burghers; the houses round the square turned to face it; house backs everywhere with framed windows, back gables, annexes, yard walls and privies.
+
 ## v9.46 — Kilwa: Husuni Kubwa on its headland (2026-11-06)
 - Kilwa's ground in terraces with retaining walls and cliffs (the palace no longer runs off the plateau); Husuni Kubwa rebuilt: the audience court with niched walls and verandahs, the pavilion up nine steps, the sunken octagonal pool, private and domestic courts, the double suite, vaulted ranges, the South Court's 48 storerooms, the cliff stair to the beach mosque; coral-stone houses raised over the lanes with sunken courts, pole ceilings, niche walls with porcelain; the Great Mosque's doorways opened; walkable from the arrival (332,000 m², was 2,500).
 
