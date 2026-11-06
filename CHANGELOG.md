@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.28 — The great rivers (2026-11-05)
+- The open country has its great rivers (DESIGN §4.1): the Nile, Tigris, Euphrates, Indus, Ganges, Yangtze, Yellow River, Danube, Rhine, Amazon and Mississippi, each a coarse line of Earth's coordinates from the mouth upstream carried onto the planet through the layout's map (src/planet/rivers.js); densified every 45 m and given meanders; bent round the settlements' discs and blends (the layout moved the sites for room, so a true course may cross a disc not its own: a run inside is laid on the disc's ring, the short way round). The relief cuts the bed below the sea's level, so the sea's surface is the river's water and it cannot be waded; the banks fall to it over 26 m in mud and sand, without trees. 22–60 m wide. tests/rivers.test.mjs: every river laid with water along it, none through a disc.
+
 ## v9.27 — Roads between a region's settlements (2026-11-05)
 - The open country now carries the roads that join the settlements of one region (DESIGN §4.1): a spanning tree of each region's settlements, shortest links first and none longer than 2.6 km (23 roads: China, Japan, India, Mesopotamia, Persia, the Levant, the Bosphorus, Egypt, the Aegean, Latium, Britain, France, Iberia, Italy, Mexico); each a great-circle arc from centre to centre that wanders a little, 5–8 m of beaten earth, with a strip of fields either side except in the desert, not on steep, high or snowy ground nor on the beach. tests/roads.test.mjs checks they are laid and show on the ground. Life: the landmarks' raised open rooms take their own height directly (no longer by building every landmark's floors), so laying out the life is fast again.
 

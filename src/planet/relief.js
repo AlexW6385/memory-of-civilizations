@@ -12,6 +12,7 @@
 import { PLANET_RADIUS as R, SITES, BLEND } from './sites.js';
 import { PLACED } from './layout.js';
 import { coastAt, climateAt } from './land.js';
+import { riverAt } from './rivers.js';
 import { fbm3, ridged3, noise3 } from './noise.js';
 import { unit, enuFrame, add, sub, scale, dot, cross, norm, angle } from './geo.js';
 import { withFocus, terrainHeight, groundCover, inWater as legacyWater, waterLevel as legacyWaterLevel, RIM_FADE } from '../world/regions.js';
@@ -110,7 +111,11 @@ export function natural(u) {
   if (mount > 0.5) land += mount * (0.3 + 0.7 * ridged3(px / 240, py / 240, pz / 240, 5)) * sm(10, 160, d);
   const sea = -(1.2 + 0.09 * Math.min(-d, 300));
   const t = sm(-4, 4, d);
-  return { h: sea + (land - sea) * t, d, mount, moist, warm };
+  let h = sea + (land - sea) * t;
+  // a great river: its bed below the sea's level (the sea's surface is its water), the banks falling to it
+  const rv = d > 0 ? riverAt(u) : null;
+  if (rv) { const bed = -1.4, f = sm(rv.half, rv.half + rv.bank, rv.d); h = bed + (Math.max(h, 0.6) - bed) * f; }
+  return { h, d, mount, moist, warm, river: rv ? 1 - sm(rv.half, rv.half + rv.bank, rv.d) : 0 };
 }
 
 /**
@@ -164,6 +169,7 @@ export function coverAt(g, ny, u) {
   const sand = Math.max(beach, desert * (1 - rock)) * (1 - snow);
   const forest = sm(0.5, 0.72, n.moist + 0.15 * patch) * sm(0.2, 0.38, n.warm) * (1 - high) * (1 - steep) * (1 - beach) * sm(-0.15, 0.2, patch + 0.1);
   const soil = Math.max(0, 0.12 + 0.15 * patch) * (1 - rock - sand);
+  const bank = n.river ?? 0;
   const grass = Math.max(0, 1 - rock - sand - soil);
   const c = {
     sand, grass, rock, soil, fields: 0,
@@ -171,6 +177,8 @@ export function coverAt(g, ny, u) {
     warmth: Math.min(1, desert * 0.9 + 0.2), red: sm(0.65, 0.9, n.warm) * sm(0.35, 0.65, n.moist) * 0.6,
     road: 0, snow, forest,
   };
+  // a river's banks: mud and sand at the water, no trees
+  if (bank > 0) { c.soil = c.soil * (1 - bank) + bank * 0.6; c.sand = c.sand * (1 - bank) + bank * 0.35; c.grass *= 1 - bank; c.forest *= 1 - bank; c.rock *= 1 - bank; c.snow *= 1 - bank; }
   // the roads between a region's settlements, and fields along them (on land, not on steep, high, snowy or desert ground)
   for (const rd of ROADS) {
     const off = dot(u, rd.n) * R;
