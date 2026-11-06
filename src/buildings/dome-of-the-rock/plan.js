@@ -3,6 +3,7 @@
 // +x east, +z south; y = 0 at the top of the platform (4 m above the esplanade). Metres.
 
 import { SITES } from '../../world/regions.js';
+import './style.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -56,6 +57,8 @@ for (let k = 0; k < 8; k++) {
   pwall({ o: out(TH / 2 + 0.03), u: s.u, th: 0.06, u0: -extO, u1: s.L + extO, y0: 0, y1: 5.6, arches, mat: 'revetment_byz', collide: false });
   pwall({ o: out(TH / 2 + 0.03), u: s.u, th: 0.06, u0: -extO, u1: s.L + extO, y0: 5.6, y1: PARAPET, arches, mat: 'mosaic_green', collide: false });
   pwall({ o: out(-TH / 2 - 0.03), u: s.u, th: 0.06, u0: extO, u1: s.L - extO, y0: 0, y1: CEIL, arches, mat: 'revetment_byz', collide: false });
+  // the articulation: panels and fillets, string course, blind arcade on pilasters, window frames and grilles, cornice
+  add({ t: 'dotr_face', o: s.o, u: s.u, n: s.n, L: s.L, th: TH, arches, marbleTop: 5.6, top: PARAPET });
   if (door) {
     // a porch of four columns before the door
     const [cx, cz] = s.c, [nx, nz] = s.n, [ux, uz] = s.u;
@@ -75,6 +78,7 @@ for (let k = 0; k < 8; k++) {
   const s = side(k, AA), bay = (s.L - 1.6) / 3;
   const arches = [0, 1, 2].map((i) => ({ uc: 0.8 + bay * (i + 0.5), r: (bay - 0.7) / 2, spring: 6.2 }));
   pwall({ o: s.o, u: s.u, th: 1.1, u0: 0, u1: s.L, y0: 0, y1: CEIL, arches, arcade: true, noEnds: true, mat: 'mosaic_gold' });
+  add({ t: 'ablaq', o: s.o, u: s.u, th: 1.1, arches, ring: 0.42 });
   for (const i of [1, 2]) { const u = 0.8 + bay * i; column(s.o[0] + s.u[0] * u, s.o[1] + s.u[1] * u, 0, 5.9, 0.62, 'marble_dark'); }
   // the pier at the corner where this side begins
   const ang = (k * 45 - 22.5) * D2R, rv = AA / Math.cos(22.5 * D2R);
@@ -90,6 +94,7 @@ for (let k = 0; k < 16; k++) {
   const pa = [Math.cos(a) * RC, Math.sin(a) * RC], pb = [Math.cos(b) * RC, Math.sin(b) * RC];
   const L = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]), u = [(pb[0] - pa[0]) / L, (pb[1] - pa[1]) / L];
   pwall({ o: pa, u, th: 1.2, u0: 0, u1: L, y0: 6.0, y1: 9.2, arches: [{ uc: L / 2, r: (L - 0.8) / 2, spring: 6.0 }], arcade: true, noEnds: true, mat: 'mosaic_gold', collide: false });
+  add({ t: 'ablaq', o: pa, u, th: 1.2, arches: [{ uc: L / 2, r: (L - 0.8) / 2, spring: 6.0 }], ring: 0.36, n: 9 });
   if (k % 4 === 0) {
     const ra = [Math.cos(a) * (RC - 1.1), Math.sin(a) * (RC - 1.1)], rb = [Math.cos(a) * (RC + 1.1), Math.sin(a) * (RC + 1.1)];
     add({ t: 'wall', a: ra, b: rb, th: 1.6, y0: 0, y1: 6.0, openings: [], mat: 'revetment_byz' });
@@ -97,11 +102,12 @@ for (let k = 0; k < 16; k++) {
   // a low wooden screen between the supports, round the Rock
   const q0 = [pa[0] + u[0] * (k % 4 === 0 ? 0.85 : 0.4), pa[1] + u[1] * (k % 4 === 0 ? 0.85 : 0.4)];
   const q1 = [pb[0] - u[0] * ((k + 1) % 4 === 0 ? 0.85 : 0.4), pb[1] - u[1] * ((k + 1) % 4 === 0 ? 0.85 : 0.4)];
-  obj('screen', 0, 0, 0, { a: q0, b: q1, h: 1.4 });
+  obj('rock_screen', 0, 0, 0, { a: q0, b: q1, h: 1.4 });
 }
 add({ t: 'arc_wall', c: [0, 0], r0: RC - 0.25, r1: RC + 0.25, a0: 0, a1: 360, y0: 5.6, y1: 5.9, mat: 'gilt_bronze', collide: false, step: 3 });
 add({ t: 'arc_wall', c: [0, 0], r0: RD, r1: RDO, a0: 0, a1: 360, y0: 9.2, y1: SPR, mat: 'mosaic_gold', collide: false, step: 3,
   gaps: Array.from({ length: 16 }, (_, k) => ({ a: 11.25 + 22.5 * k, w: 1.3, y0: 15.6, y1: 19.0 })) });
+add({ t: 'drum_frames', c: [0, 0], r: RDO, wins: Array.from({ length: 16 }, (_, k) => 11.25 + 22.5 * k), w: 1.3, y0: 15.6, y1: 19.0, base: 14.0 });
 add({ t: 'arc_wall', c: [0, 0], r0: RDO - 0.05, r1: RDO + 0.45, a0: 0, a1: 360, y0: SPR - 0.5, y1: SPR + 0.2, mat: 'limestone', collide: false, step: 3 });
 // the dome: inner shell (gilded), outer shell (gilded metal over timber), finial
 const shell = (R, H, n = 14) => { const p = []; for (let i = 0; i <= n; i++) { const t = (i / n) * Math.PI / 2; p.push([R * Math.cos(t) + 0.0001, H * Math.pow(Math.sin(t), 0.9)]); } p.push([0.0001, H + 0.5]); return p; };
@@ -164,7 +170,7 @@ export const domeOfTheRock = {
   id: 'dome-of-the-rock',
   name: { en: 'The Dome of the Rock, Jerusalem', zh: '耶路撒冷圆顶清真寺（岩石圆顶）' },
   era: { en: 'Umayyad, AD 691/92', zh: '倭马亚王朝，公元691/692年' },
-  style: 'islamic',
+  style: 'islamic-dotr',
   district: 'levant',
   ...SITES['dome-of-the-rock'],
   base: SITES['dome-of-the-rock'].base + P,

@@ -45,6 +45,10 @@ A centralised shrine: an octagon of outer walls, inside it an octagonal arcade o
 - *Dome:* inner shell from 20.5 m to 31.0 m (a raised, slightly pointed curve), outer shell from 20.5 m to 35.6 m, a finial above.
 - *Ceilings:* both ambulatories under flat, painted and gilded timber ceilings at 9.6 m.
 - *Porches:* before each door, a porch of four columns carrying a flat roof at 6.4 m, 3.2 m deep.
+- *Outer walls in detail (2026-11):* the marble zone (to 5.6 m) on a dark plinth, its slabs framed by dark fillets, two panels to a bay and two tiers; a moulded string course at its top, broken round the doors; above it "seven round arches on each side" [stated: lifeintheholyland.com, quoting *Picturesque Palestine* and Porter, of the 19th-century state — the arcade is the structure's, the tiles over it Ottoman]: a blind arcade on pilasters with bases and capitals, its arches springing at 7.9 m and framing the windows (5 on the diagonal sides, 4 and the door on the cardinal sides) and the blind end bays; each window with a marble frame, a sill and a grille of crossing bars in the thickness of the wall; a gilt roundel in each spandrel, a gilt frieze and a two-stepped cornice at the top of the parapet; the doors framed by jambs and an arch of alternating light and dark voussoirs. [inferred: pilasters, frames, roundels and grilles — the Umayyad mosaic survives only in fragments; window grilles recorded in §8 as L3]
+- *Ablaq:* the arches of both arcades with alternating light and dark voussoirs on both faces (11 to an arch in the octagonal arcade, 9 in the circular). [stated: §5]
+- *Drum outside:* each of the 16 windows between two colonnettes with capitals, under an arch of alternating voussoirs, a grille in the opening; a moulding where the lead roof meets the drum. [inferred]
+- *Screen round the Rock:* between the supports of the circular arcade, a wooden screen 1.4 m high — posts, a plinth rail, a middle rail, a capped top rail, and close rows of turned balusters. [inferred: a low barrier of the period's woodwork; the Crusader iron grille is later]
 - *Platform:* 140 × 120 m, 4 m above the esplanade, retaining walls, a flight of steps on each side.
 - *Dome of the Chain:* 30 m east of the octagon's east face; outer columns on a circle of 6.6 m, inner hexagon of 6 columns on 3.2 m, a hexagonal drum to 8.8 m, dome of 3.4 m radius; a mihrab on its south (qibla) side.
 
@@ -91,5 +95,6 @@ In the shrine no instruments: the human voice — the call to prayer and the rec
 - Madain Project, "Dome of the Rock". https://madainproject.com/dome_of_the_rock
 - vitrosearch, "Dome of the Rock" (windows). https://vitrosearch.ch/en/buildings/2713115
 - AboutIslam, "The Rock inside the Aqsa Mosque" (quoting K. A. C. Creswell). https://aboutislam.net/reading-islam/research-studies/the-rock-inside-the-aqsa-mosque-whats-it-all-about/
+- Life in the Holy Land, "Dome of the Rock, Exterior" (quoting *Picturesque Palestine* and Porter, 1880s). https://www.lifeintheholyland.com/?p=853
 - Structurae, "Dome of the Rock". https://structurae.net/en/structures/dome-of-the-rock
 - K. A. C. Creswell, *Early Muslim Architecture* I (1932/1969); O. Grabar, *The Shape of the Holy* (1996).
