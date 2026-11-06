@@ -8,6 +8,7 @@ import '../qing/index.js';
 import '../song/index.js';
 import { pagodaJp } from './pagoda.js';
 import { hakkakuToro } from './lantern.js';
+import { daibutsu } from './daibutsu.js';
 
 export const NPAL = { wood: 'timber_red', column: 'timber_red', soffit: 'plaster_white', base: 'granite_block', floor: 'granite_block', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_block', roof: 'tile_grey', doors: 'plank' };
 const withN = (fn) => (el, ctx) => fn({ ...el, pal: { ...NPAL, ...(el.pal || {}) } }, ctx);
@@ -20,5 +21,5 @@ registerStyle('nara', {
     pagoda_oct: STYLES.song.elements.pagoda_oct,
     pagoda_jp: withPal(pagodaJp),
   },
-  objects: { hakkaku_toro: hakkakuToro },
+  objects: { hakkaku_toro: hakkakuToro, daibutsu },
 });

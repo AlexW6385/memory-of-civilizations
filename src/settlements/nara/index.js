@@ -11,9 +11,11 @@ export const landmarks = [{ plan: todaiji, music }];
 // the Great Buddha (Vairocana) in bronze, 15 m seated on his lotus, in the hall; the two attendant
 // bodhisattvas; the hall's inner rings of columns, its coffered ceiling, the stone dais, the altar and
 // the banners hung from the beams
-const [hx0, hz0, hx1, hz1] = HALL, FLOOR = 2.2, CEIL = FLOOR + 15 - 0.2;
+const [hx0, hz0, hx1, hz1] = HALL, FLOOR = 2.2, CEIL = FLOOR + 21 - 0.2;
 const cx = (hx0 + hx1) / 2, cz = (hz0 + hz1) / 2 - 4, DAIS = 0.7, Y = FLOOR + DAIS;
-const statues = [[cx, cz, 15.5, 'bronze'], [cx - 15, cz + 2, 7, 'clay_gilt'], [cx + 15, cz + 2, 7, 'clay_gilt']];
+// the Great Buddha itself is drawn by the nara style (daibutsu, src/styles/nara/daibutsu.js) on its
+// lotus throne, r 9.2 m; the two attendants stand either side of it
+const statues = [[cx, cz - 1, 0, 'bronze'], [cx - 15, cz + 2, 7, 'clay_gilt'], [cx + 15, cz + 2, 7, 'clay_gilt']];
 const inner = [];
 const bx = (hx1 - hx0) / 11, bz = (hz1 - hz0) / 7;
 // the two inner rings of posts (bays 1 and 2 in from the walls), clear of the statues and the way to them
@@ -21,7 +23,7 @@ for (let i = 1; i <= 10; i++) for (let j = 1; j <= 6; j++) {
   const ring = Math.min(i, 11 - i, j, 7 - j);
   if (ring > 2) continue;
   const x = hx0 + i * bx, z = hz0 + j * bz;
-  if (statues.some(([sx, sz]) => Math.hypot(x - sx, z - sz) < 8) || (Math.abs(x) < 24 && z > cz - 8 && z < hz1 - bz * 0.5 && ring > 1)) continue;
+  if (statues.some(([sx, sz, h]) => Math.hypot(x - sx, z - sz) < (h ? 8 : 10.5)) || (Math.abs(x) < 24 && z > cz - 8 && z < hz1 - bz * 0.5 && ring > 1)) continue;
   inner.push({ t: 'column', at: [x, z], y: FLOOR, h: CEIL - FLOOR, d: 0.95 });
 }
 // the coffered ceiling: the great beams over every bay line, a lattice of smaller ribs between them
@@ -44,12 +46,17 @@ const daibutsu = {
   id: 'nara-daibutsu', style: 'chinese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [hx0, hz0, hx1, hz1], entrance: { at: [0, 180], facing: 'n' },
   elements: [
     // the dais of dressed stone, its edge moulded; the altar before the Buddha
-    { t: 'block', rect: [cx - 22, cz - 9, cx + 22, cz + 7.5], y0: FLOOR - 0.05, y1: Y - 0.12, mat: 'granite_block' },
-    { t: 'block', rect: [cx - 22.2, cz - 9.2, cx + 22.2, cz + 7.7], y0: Y - 0.12, y1: Y, mat: 'granite_block', collide: false },
-    { t: 'block', rect: [cx - 3.2, cz + 5.6, cx + 3.2, cz + 7.0], y0: Y, y1: Y + 0.95, mat: 'lacquer_red' },
-    { t: 'block', rect: [cx - 3.35, cz + 5.45, cx + 3.35, cz + 7.15], y0: Y + 0.95, y1: Y + 1.02, mat: 'gilt_bronze', collide: false },
-    ...statues.map(([x, z, h, m]) => ({ t: 'obj', kind: 'buddha', at: [x, z], y: Y, h, dir: [0, 1], robe: m, gilt: m })),
+    { t: 'block', rect: [cx - 22, cz - 11, cx + 22, cz + 11], y0: FLOOR - 0.05, y1: Y - 0.12, mat: 'granite_block' },
+    { t: 'block', rect: [cx - 22.2, cz - 11.2, cx + 22.2, cz + 11.2], y0: Y - 0.12, y1: Y, mat: 'granite_block', collide: false },
+    { t: 'block', rect: [cx - 3.2, cz + 8.6, cx + 3.2, cz + 10.0], y0: Y, y1: Y + 0.95, mat: 'lacquer_red' },
+    { t: 'block', rect: [cx - 3.35, cz + 8.45, cx + 3.35, cz + 10.15], y0: Y + 0.95, y1: Y + 1.02, mat: 'gilt_bronze', collide: false },
+    ...statues.filter(([, , h]) => h).map(([x, z, h, m]) => ({ t: 'obj', kind: 'buddha', at: [x, z], y: Y, h, dir: [0, 1], robe: m, gilt: m })),
     ...inner, ...ceil, ...banners,
   ],
 };
-export async function town() { return [daibutsu, ...(await houses())]; }
+// the Great Buddha, Rushana, in bronze as at the eye-opening of 752, on its lotus throne
+const rushana = {
+  id: 'nara-rushana', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [hx0, hz0, hx1, hz1], entrance: { at: [0, 180], facing: 'n' },
+  elements: [{ t: 'obj', kind: 'daibutsu', at: [cx, cz - 1], y: Y, h: 15.8, dir: [0, 1], mat: 'bronze' }],
+};
+export async function town() { return [daibutsu, rushana, ...(await houses())]; }
