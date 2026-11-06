@@ -8,6 +8,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, rod } from '../../core/geom.js';
 import '../qing/index.js';
 import { dogesPalace } from './palace.js';
+import { gondola, palo } from './boats.js';
 import { horse, limb } from '../greek/sculpture.js';
 
 const M = 'marble', B = 'brick', L = 'lead', I = 'limestone';
@@ -110,6 +111,6 @@ function procuratie(el, { bag, col }) {
 function columnStatue(el, { bag, col }) { const [x, z] = el.c, h = el.h ?? 14, y = el.y ?? 0; bag.add(I, box(x - 1.6, y - 0.3, z - 1.6, x + 1.6, y + 1.5, z + 1.6)); bag.add('granite_grey', lathe([[0.75, 0], [0.65, h]], 14, null, x, y + 1.5, z)); bag.add('bronze', lathe([[0.6, 0], [0.4, 1.8], [0.001, 2.6]], 8, null, x, y + 1.5 + h, z)); col.circle(x, z, 1.6, y, y + h); }
 registerStyle('venetian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie, column_statue: columnStatue },
+  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie, column_statue: columnStatue, gondola, palo },
   objects: {},
 });

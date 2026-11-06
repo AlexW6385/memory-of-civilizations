@@ -1,5 +1,5 @@
 // The Piazza San Marco about 1500 (docs/settlements/venice.md §2–§4).
-import { PIAZZA, PIAZZETTA, BASILICA, CAMPANILE, PALACE, GROUND } from './layout.js';
+import { PIAZZA, PIAZZETTA, BASILICA, CAMPANILE, PALACE, GROUND, SEA, BASIN_Z } from './layout.js';
 
 const g = GROUND, E = [
   { t: 'basilica', c: BASILICA.c, s: BASILICA.s, w: BASILICA.w, h: 22, y: g },
@@ -24,5 +24,13 @@ export const sanMarco = {
   elements: E,
   rooms: [{ id: 'piazza', rect: PIAZZA, y: g, kind: 'open' }],
   walks: [Object.assign([[-120, -5], [-40, -5], [10, -5]], { y0: g })],
+};
+// the gondolas moored stern to the Molo before the Piazzetta and the palace, between their posts
+const boats = [];
+for (const [x0, x1] of [[30, 72], [84, 146]]) for (let x = x0, i = 0; x <= x1; x += 2.3, i++) boats.push({ t: 'gondola', at: [x, BASIN_Z + 6.4], yaw: Math.PI / 2 + (i % 3 - 1) * 0.04, y: SEA, felze: i % 3 !== 1 });
+for (const x of [27.5, 75, 81, 149]) for (const dz of [1.2, 9.5]) boats.push({ t: 'palo', at: [x, BASIN_Z + dz], y: SEA - 3, h: 6.2 });
+export const molo = {
+  id: 'venice-molo', style: 'venetian', origin: [0, 0], base: 0, yaw: 0, feature: true,
+  entrance: { at: [0, 0], facing: 'n' }, bounds: [24, BASIN_Z, 152, BASIN_Z + 13], rooms: [], elements: boats,
 };
 export default sanMarco;
