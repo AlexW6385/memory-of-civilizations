@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.29 — Houses to enter in Suzhou (2026-11-05)
+- The first enterable houses (DESIGN §4.3): in Suzhou the two shops and two homes nearest the way in are open and furnished. Shops: the counter with a way in at one end, abacus and steelyard, a stool, shelves of glazed jars and bolts of cloth, a paper lantern. Homes: the door leaf folded open; the hall's long table against the back wall with incense burner, vase and a hanging scroll; the square table between two armchairs; a tall cabinet, a washstand with its basin, stools; a canopied bed with curtains half drawn behind a screen; a brick floor and the upper floor's boards and joists overhead. house_jiangnan takes open: true.
+
 ## v9.28 — The great rivers (2026-11-05)
 - The open country has its great rivers (DESIGN §4.1): the Nile, Tigris, Euphrates, Indus, Ganges, Yangtze, Yellow River, Danube, Rhine, Amazon and Mississippi, each a coarse line of Earth's coordinates from the mouth upstream carried onto the planet through the layout's map (src/planet/rivers.js); densified every 45 m and given meanders; bent round the settlements' discs and blends (the layout moved the sites for room, so a true course may cross a disc not its own: a run inside is laid on the disc's ring, the short way round). The relief cuts the bed below the sea's level, so the sea's surface is the river's water and it cannot be waded; the banks fall to it over 26 m in mud and sand, without trees. 22–60 m wide. tests/rivers.test.mjs: every river laid with water along it, none through a disc.
 

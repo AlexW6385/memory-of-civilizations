@@ -645,8 +645,10 @@ function houseJiangnan(el, { bag, col }) {
   B(L - 0.25, front, L, back, y + 0.45, y + H, 'plaster_white');
   B(0, back - 0.25, L, back, y + 0.45, y + H, 'plaster_white');
   if (el.shop) {
-    // a shop front: a counter of boards, the upper part open (the shutters taken down for the day)
-    B(0.25, front, L - 0.25, front + 0.12, y + 0.45, y + 1.4, 'timber');
+    // a shop front: a counter of boards, the upper part open (the shutters taken down for the day); an
+    // open shop leaves a way in at one end of the counter
+    if (el.open) { B(0.25, front, L - 1.35, front + 0.12, y + 0.45, y + 1.4, 'timber'); col.rect(boxRect(W(0.25, front, 0), W(L - 1.35, front + 0.12, 0)), y, y + 1.4); }
+    else B(0.25, front, L - 0.25, front + 0.12, y + 0.45, y + 1.4, 'timber');
     B(0.25, front - 0.05, L - 0.25, front + 0.12, y + storey - 0.35, y + storey, 'lacquer_chestnut');
     B(0.3, front + 1.4, L - 0.3, front + 1.5, y + 0.45, y + 0.95, 'timber');            // a table inside
   } else {
@@ -654,11 +656,20 @@ function houseJiangnan(el, { bag, col }) {
     for (let k = 0; k < nb; k++) {
       const a0 = 0.25 + (L - 0.5) * k / nb, a1 = 0.25 + (L - 0.5) * (k + 1) / nb - 0.04;
       const door = k === Math.floor(nb / 2);
+      if (el.open && door) { B(a0 - 0.02, front - 0.02, a0 + 0.06, front + 0.7, y + 0.45, y + storey - 0.3, 'lacquer_chestnut'); continue; }   // the door leaf stands open, folded in
       B(a0, front, a1, front + 0.08, y + 0.45, y + storey - 0.3, door ? 'lacquer_chestnut' : (rand() < 0.5 ? 'timber' : 'lattice'));
+      if (el.open) col.rect(boxRect(W(a0, front, 0), W(a1, front + 0.08, 0)), y, y + storey);
     }
   }
   B(0, front - 0.05, L, front + 0.15, y + storey - 0.3, y + storey + 0.05, 'lacquer_chestnut');
-  col.rect([x0, z0, x1, z1], plinthBottom, y + H);
+  if (!el.open) col.rect([x0, z0, x1, z1], plinthBottom, y + H);
+  else {
+    // an open house: the plinth a floor, the walls solid, a step up at the front; the interior furnished
+    col.rect([x0, z0, x1, z1], plinthBottom, y + 0.2);
+    col.floor([x0, z0, x1, z1], y + 0.45);
+    for (const [a0, b0, a1, b1] of [[0, front, 0.25, back], [L - 0.25, front, L, back], [0, back - 0.25, L, back]]) col.rect(boxRect(W(a0, b0, 0), W(a1, b1, 0)), y, y + H);
+    houseInterior(bag, col, { W, B, L, D, front, back, y: y + 0.45, storey, storeys: el.storeys, shop: el.shop, rand });
+  }
   if (el.storeys > 1) {
     // a little pent eave over the ground floor, then the upper floor's lattice windows
     const pe = [];
@@ -712,6 +723,85 @@ function houseJiangnan(el, { bag, col }) {
     }
   }
   bag.add('plaster_white', fromTriangles(g.concat(flipTris(g))));
+}
+
+const boxRect = (p, q) => [Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])];
+/**
+ * The inside of an open canal-town house (docs/settlements/ming-suzhou.md §6): a floor of square
+ * bricks, the upper floor's boards and joists overhead; a shop has shelves of jars and bolts of cloth
+ * along the back, a scale and an abacus on the counter, a stool; a home has the hall's long table
+ * against the back wall (incense burner, vase, a hanging scroll above), the square table with two
+ * armchairs before it, and a canopied bed screened off at one side.
+ */
+function houseInterior(bag, col, { W, B, L, D, front, back, y, storey, storeys, shop, rand }) {
+  const ib = back - 0.25, il = 0.25, ir = L - 0.25, fin = front + 0.15;
+  B(il, fin, ir, ib, y - 0.02, y + 0.01, 'brick_grey');
+  if (storeys > 1) {
+    B(il, fin, ir, ib, y + storey - 0.5, y + storey - 0.42, 'timber');
+    for (let a = il + 0.5; a < ir; a += 0.7) B(a - 0.06, fin, a + 0.06, ib, y + storey - 0.62, y + storey - 0.5, 'wood_dark');
+  }
+  const put = (mat, a0, b0, a1, b1, ya, yb) => B(a0, b0, a1, b1, y + ya, y + yb, mat);
+  const block = (a0, b0, a1, b1, h) => { const p = W(a0, b0, 0), q = W(a1, b1, 0); col.rect(boxRect(p, q), y - 0.45, y + h); };
+  const pot = (a, b, ya, s2, mat) => { const p = W(a, b, 0); bag.add(mat, lathe([[0.1 * s2, 0], [0.16 * s2, 0.08 * s2], [0.17 * s2, 0.2 * s2], [0.1 * s2, 0.3 * s2], [0.06 * s2, 0.34 * s2], [0.001, 0.34 * s2]], 10, null, p[0], y + ya, p[2])); };
+  if (shop) {
+    // shelves along the back wall, three boards on uprights, jars and bolts of cloth on them
+    const sb0 = ib - 0.45;
+    for (const a of [il + 0.1, (il + ir) / 2, ir - 0.14]) put('wood_dark', a, sb0, a + 0.05, ib, 0, 2.2);
+    for (const hh of [0.5, 1.15, 1.8]) {
+      put('wood_dark', il + 0.1, sb0, ir - 0.1, ib, hh - 0.04, hh);
+      for (let a = il + 0.35; a < ir - 0.3; a += 0.42) { if (rand() < 0.35) continue; if (rand() < 0.6) pot(a, sb0 + 0.22, hh, 0.9, ['glaze_blue', 'glaze_green', 'pottery_dark', 'glaze_white'][Math.floor(rand() * 4)]); else put(['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre'][Math.floor(rand() * 4)], a - 0.15, sb0 + 0.05, a + 0.15, ib - 0.05, hh, hh + 0.22); }
+    }
+    block(il, sb0, ir, ib, 2.2);
+    // on the counter: an abacus and a steelyard; behind it a stool; a lantern overhead
+    const cb = fin;
+    put('wood_dark', 0.6, cb - 0.12, 0.95, cb + 0.05, 0.95, 1.0);
+    for (let k = 0; k < 6; k++) put('wood_dark', 0.63 + k * 0.05, cb - 0.1, 0.645 + k * 0.05, cb + 0.03, 1.0, 1.04);
+    put('iron', 1.3, cb - 0.04, 1.85, cb - 0.02, 1.25, 1.27); put('timber', 1.4, cb - 0.06, 1.44, cb, 0.97, 1.25);
+    put('timber', 1.0, fin + 0.7, 1.35, fin + 1.05, 0, 0.45);
+    const lp = W(L / 2, (fin + ib) / 2, 0); bag.add('lamp_paper', lathe([[0.07, 0], [0.17, 0.07], [0.19, 0.2], [0.16, 0.34], [0.07, 0.4], [0.001, 0.4]], 12, null, lp[0], y + 2.0, lp[2]));
+  } else {
+    // the hall: the long table against the back wall with its incense burner and a vase, the scroll over it
+    const t0 = ib - 0.45, mid = L / 2;
+    put('lacquer_chestnut', mid - 1.0, t0, mid + 1.0, ib - 0.02, 0.88, 0.94);
+    for (const a of [mid - 0.95, mid + 0.9]) put('lacquer_chestnut', a, t0 + 0.03, a + 0.05, ib - 0.05, 0, 0.88);
+    put('lacquer_chestnut', mid - 1.05, t0, mid - 0.98, ib - 0.02, 0.94, 1.02); put('lacquer_chestnut', mid + 0.98, t0, mid + 1.05, ib - 0.02, 0.94, 1.02);
+    pot(mid - 0.5, t0 + 0.22, 0.94, 1.1, 'glaze_white'); pot(mid + 0.15, t0 + 0.22, 0.94, 0.55, 'bronze');
+    put('stucco_cream', mid - 0.35, ib - 0.03, mid + 0.35, ib - 0.01, 1.3, 2.4); put('wood_dark', mid - 0.4, ib - 0.04, mid + 0.4, ib - 0.01, 2.38, 2.44); put('wood_dark', mid - 0.38, ib - 0.04, mid + 0.38, ib - 0.01, 1.25, 1.3);
+    put('stucco_rose', mid - 0.25, ib - 0.035, mid + 0.25, ib - 0.025, 1.5, 2.2);
+    block(mid - 1.05, t0, mid + 1.05, ib, 1.0);
+    // the square table and two armchairs in front of it
+    const tb = t0 - 1.2;
+    put('lacquer_chestnut', mid - 0.45, tb - 0.45, mid + 0.45, tb + 0.45, 0.76, 0.82);
+    for (const [da, db] of [[-0.4, -0.4], [0.36, -0.4], [-0.4, 0.36], [0.36, 0.36]]) put('lacquer_chestnut', mid + da, tb + db, mid + da + 0.05, tb + db + 0.05, 0, 0.76);
+    for (const sx of [-1, 1]) {
+      const ca = mid + sx * 0.85;
+      put('lacquer_chestnut', ca - 0.28, tb - 0.25, ca + 0.28, tb + 0.25, 0.45, 0.5);
+      for (const [da, db] of [[-0.26, -0.23], [0.22, -0.23], [-0.26, 0.19], [0.22, 0.19]]) put('lacquer_chestnut', ca + da, tb + db, ca + da + 0.04, tb + db + 0.04, 0, 0.45);
+      put('lacquer_chestnut', ca - 0.28, tb + 0.2, ca + 0.28, tb + 0.25, 0.5, 1.05);
+      for (const da of [-0.28, 0.24]) put('lacquer_chestnut', ca + da, tb - 0.25, ca + da + 0.04, tb + 0.25, 0.68, 0.72);
+      block(ca - 0.28, tb - 0.25, ca + 0.28, tb + 0.25, 1.05);
+    }
+    block(mid - 0.45, tb - 0.45, mid + 0.45, tb + 0.45, 0.82);
+    // along the other side: a tall cabinet, a washstand with its basin, two stools; a lantern hung from the boards overhead
+    { const a1 = ir - 0.05, a0 = a1 - 0.5, b0 = fin + 1.0;
+      put('lacquer_chestnut', a0, b0, a1, b0 + 1.0, 0, 1.9); put('gilt_bronze', a0 - 0.01, b0 + 0.45, a0, b0 + 0.55, 1.0, 1.1);
+      block(a0, b0, a1, b0 + 1.0, 1.9);
+      const wb = b0 + 1.6; for (const [da, db] of [[0, 0], [0.4, 0], [0, 0.4], [0.4, 0.4]]) put('wood_dark', a0 + 0.05 + da, wb + db, a0 + 0.09 + da, wb + db + 0.04, 0, 0.8);
+      pot(a0 + 0.27, wb + 0.22, 0.8, 0.9, 'bronze');
+      for (const db of [0, 0.7]) put('timber', a0 - 1.2, wb + 1.4 + db, a0 - 0.85, wb + 1.75 + db, 0, 0.45);
+      const lp = W(L / 2, (fin + ib) / 2, 0); bag.add('lamp_paper', lathe([[0.07, 0], [0.17, 0.07], [0.19, 0.2], [0.16, 0.34], [0.07, 0.4], [0.001, 0.4]], 12, null, lp[0], y + Math.min(2.2, storey - 1.1), lp[2])); }
+    // the bed at one side: a platform, posts and a canopy frame, curtains half drawn, a screen before it
+    if (L > 3.8) {
+      const a0 = il + 0.05, a1 = il + 1.4, b0 = fin + 0.6, b1 = fin + 2.6;
+      put('lacquer_chestnut', a0, b0, a1, b1, 0.35, 0.5);
+      put('cloth_white', a0 + 0.05, b0 + 0.05, a1 - 0.05, b1 - 0.05, 0.5, 0.56);
+      for (const [a, b] of [[a0, b0], [a1 - 0.05, b0], [a0, b1 - 0.05], [a1 - 0.05, b1 - 0.05]]) put('lacquer_chestnut', a, b, a + 0.05, b + 0.05, 0, 2.1);
+      put('lacquer_chestnut', a0, b0, a1, b1, 2.05, 2.12);
+      put('cloth_red', a1 - 0.03, b0 + 0.06, a1 - 0.01, b0 + 0.55, 0.56, 2.04); put('cloth_red', a1 - 0.03, b1 - 0.55, a1 - 0.01, b1 - 0.06, 0.56, 2.04);
+      put('lacquer_chestnut', a1 + 0.3, b0 - 0.1, a1 + 0.34, b0 + 1.1, 0, 1.7);
+      block(a0, b0, a1, b1, 2.1);
+    }
+  }
 }
 
 /** water_steps: steps down from the street into a canal (a landing for boats and for washing) { a, b (along the wall), dir (toward the water), y, water }. */

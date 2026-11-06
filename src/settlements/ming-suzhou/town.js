@@ -59,13 +59,17 @@ function waterways() {
 /** The houses, in plans of a few hundred each (by quadrant). */
 function houses() {
   const all = lots(), plans = [];
+  // a few houses by the south street can be entered (DESIGN §4.3): the two shops and two homes nearest the way in
+  const near = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 - 60);
+  const dry = all.filter((l) => !l.water && (l.front === 's' || l.front === 'n') && l.rect[2] - l.rect[0] > 3.6).sort((a, b) => near(a) - near(b));
+  const open = new Set([...dry.filter((l) => l.shop).slice(0, 2), ...dry.filter((l) => !l.shop).slice(0, 2)]);
   const quads = [[], [], [], []];
   for (const l of all) {
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
     quads[(cx > 0 ? 1 : 0) + (cz > 0 ? 2 : 0)].push(l);
   }
   quads.forEach((q, i) => {
-    const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, water: l.water, seed: l.seed }));
+    const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, water: l.water, seed: l.seed, open: open.has(l) }));
     if (E.length) plans.push(base(`ming-suzhou-houses-${i}`, E));
   });
   return plans;
