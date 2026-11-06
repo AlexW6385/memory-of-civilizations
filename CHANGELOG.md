@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.49 — Petra's Siq in rock (2026-11-06)
+- The Siq's walls as real sandstone: some seventy colour bands matched across both walls, worn grooves and ledges, cracks, inward lean closing overhead, flood-worn foot, fallen blocks; the cliffs joined round the square, the Outer Siq, the theatre and the valley, the Khazneh set in its recess; no stalls in the gorge; the Street of Façades with three crow-step tomb types; the theatre rebuilt with three tiers and a two-storey stage, moved off the walkway; the Palace, Corinthian, Silk and Urn Tombs standing on the valley floor.
+
 ## v9.48 — Hagia Sophia, the Pantheon, Sainte-Foy and Sanchi (2026-11-06)
 - Hagia Sophia after Paul the Silentiary: the cross at the dome's crown, 80 lamps on the cornice, gilt-moulded marble cornices, porphyry spandrel discs, the silver chancel barrier with three doors, the silver ciborium over a gold altar, the lamp ring of silver discs; the Pantheon's eight aediculae with porphyry columns, the attic band, the bronze doorway with open leaves and lattice transom, the pediment eagle; Sainte-Foy's golden Majesty on its throne and the tribunes' twin arches; Sanchi's harmika railing and three-tiered parasol.
 
