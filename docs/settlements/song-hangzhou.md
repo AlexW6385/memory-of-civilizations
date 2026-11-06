@@ -1,7 +1,7 @@
 # Southern Song Lin'an (Hangzhou), c. 1200 — dossier
 
 Settlement id: `song-hangzhou` · Style: `song` · Region: Jiangnan (the Qiantang River) · Code: `src/settlements/song-hangzhou/`
-Status of this dossier: L1–L2 (the Liuhe Pagoda on the slope of Yuelun Hill with Kaihua Temple's halls; the hill's woods; the riverside: the stone flood wall on the Qiantang, the road along it, tea houses for watching the bore; the Longshan quarter by the river — a canal down to the river with its lock, arched bridges, a street of shops and two-storey houses, warehouses, boats; ground, planting, weather, music). L3 recorded for later: the tidal bore itself, the pagoda's interior stair and Buddhist images, the city wall and the palace on Phoenix Hill, West Lake, markets in full, people.
+Status of this dossier: L1–L2 (the Liuhe Pagoda on the slope of Yuelun Hill with Kaihua Temple's halls; the hill's woods; the riverside: the stone flood wall on the Qiantang, the road along it, tea houses for watching the bore; the Longshan quarter by the river — a canal down to the river with its lock, arched bridges, a street of shops and two-storey houses, warehouses, boats; ground, planting, weather, music). L3 built (§10): the pagoda's bracket sets and wind bells, the river boats under sail, the day of the tide (the coloured stands along the flood wall, the crowd, tea tables on the road). L3 recorded for later: the tidal bore itself, the pagoda's interior stair and Buddhist images, the city wall and the palace on Phoenix Hill, markets in full. West Lake, the Su causeway and the Leifeng Pagoda lie some 3 km north of the Liuhe Pagoda, outside this disc; they would need a settlement (or a second landmark) of their own.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -51,6 +51,13 @@ Jiangnan: humid haze, drizzle, the clear days of autumn (the bore's season). Lat
 
 The guqin and the pipa, a dizi flute, temple bells (a plucked string, the ney and a reed organ stand in). [inferred]
 
+## 10. Detail (L3)
+
+- **The pagoda's eaves.** Bells at the corners of the eaves, 104 iron bells today [stated: trip.com; aroundus]. Ours: an iron wind bell (hook, bell, clapper and wind plate) at each of the eight corners of every eave and the crowning roof. Under each gallery eave a row of bracket sets — at each corner one pointing out along the diagonal, two on each face — of bearing block, cross arm with small blocks and two tiers of arms stepping out to the eave purlin, on an architrave round the core; the gallery posts carried up into the eaves' corners [inferred: the Song bracket set in its usual form; red timbers, ochre blocks].
+- **The tide.** On the 18th of the eighth month the people of Lin'an emptied the city to watch the bore on the Qiantang; below the Liuhe Pagoda the great houses put up coloured curtained stands for more than twenty li, carriages and crowds shoulder to shoulder [stated: hznews (Hangzhou Daily) citing *Wulin jiushi*]. Ours: the stands along the top of the flood wall west of the canal, curtained at the back and sides, roofs of red, green, ochre and blue cloth, people seated in them; the crowd along the wall's edge facing the river; tea tables before the tea houses on the road, people walking down to the river.
+- **River boats.** Ours: the Bian type of boat (`song_boat`) with its bipod mast up; moored by the wall with sails down, out on the river under a batten lug sail of matting [inferred].
+
+
 ## Sources
 
 - [Liuhe Pagoda — Wikipedia](https://en.wikipedia.org/wiki/Liuhe_Pagoda)
@@ -63,3 +70,4 @@ The guqin and the pipa, a dizi flute, temple bells (a plucked string, the ney an
 - [Flood wall and pagoda built to calm water — Shanghai Daily](https://archive.shine.cn/city-specials/hangzhou/Flood-wall-and-pagoda-built-in-ancient-times-to-calm-water/shdaily.shtml)
 - [Zhijiang Road — Shanghai Daily](https://shine.cn/feature/travel/1805315584)
 - [Qiantang River — Wikipedia](https://ipfs.aleph.im/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/wiki/Fuchun.html)
+- [The tide and the Liuhe Pagoda — Hangzhou Daily (hznews)](https://hznews.hangzhou.com.cn/chengshi/content/2020-10/03/content_7825329_2.htm)

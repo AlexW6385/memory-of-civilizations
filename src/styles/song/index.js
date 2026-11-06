@@ -103,7 +103,7 @@ function pagodaOct(el, { bag, col }) {
   col.circle(cx, cz, B.r, y, y + B.h);
   y += B.h;
   el.tiers.forEach((t, i) => {
-    const r = t.r, h = t.h, gal = el.galleries !== false, g = gal ? r + 2.4 : r + 0.6, coreMat = el.core || 'plaster_white';
+    const last = i === el.tiers.length - 1, r = t.r, h = t.h, gal = el.galleries !== false, g = gal ? r + 2.4 : r + 0.6, coreMat = el.core || 'plaster_white';
     // the core, its doors and windows (doors on the four sides facing the compass, windows on the diagonals)
     prism(bag, coreMat, ngon(cx, cz, r), ngon(cx, cz, r), y, y + h);
     col.circle(cx, cz, r * 0.95, y, y + h);
@@ -144,15 +144,21 @@ function pagodaOct(el, { bag, col }) {
     prism(bag, 'timber', ngon(cx, cz, g), ngon(cx, cz, g), y - 0.35, y);
     const P = ngon(cx, cz, g - 0.35), Rl = ngon(cx, cz, g - 0.15);
     for (let k = 0; k < 8; k++) {
-      bag.add('timber_red', lathe([[0.2, 0], [0.18, h + 0.7]], 8, null, P[k][0], y, P[k][1]));   // up into the eave's corner
+      bag.add('timber_red', lathe([[0.2, 0], [0.18, last ? h + 0.7 : h - 0.55]], 8, null, P[k][0], y, P[k][1]));   // up into the eave's corner, or the gallery floor above
       col.circle(P[k][0], P[k][1], 0.2, y, y + h);
       const a = Rl[k], b = Rl[(k + 1) % 8], rt = []; beamTris(rt, [a[0], y + 0.85, a[1]], [b[0], y + 0.85, b[1]], 0.06, 0.12); beamTris(rt, [a[0], y + 0.2, a[1]], [b[0], y + 0.2, b[1]], 0.04, 0.08);
       bag.add('timber_red', fromTriangles(rt));
       col.segment(a, b, 0.15, y, y + 1);
     }
-    // the bracket sets under the eave, the eave with its bells
-    bracketRow(bag, cx, cz, r, y + h - 0.35);
-    octEave(bag, cx, cz, r + 0.6, y + h + 1.1, g + 1.5, y + h - 0.2, 0.75, 'tile_dark', 'lacquer_red', el.bells || null);
+    // below the gallery above: the bracket sets carrying its floor, the eave skirting it with its bells;
+    // the top storey's eave runs in to the core under the crowning roof
+    if (last) {
+      bracketRow(bag, cx, cz, r, y + h - 0.35);
+      octEave(bag, cx, cz, r + 0.6, y + h + 1.1, g + 1.5, y + h - 0.2, 0.75, 'tile_dark', 'lacquer_red', el.bells || null);
+    } else {
+      bracketRow(bag, cx, cz, r, y + h - 1.45);
+      octEave(bag, cx, cz, g - 0.85, y + h - 0.38, g + 1.6, y + h - 1.3, 0.6, 'tile_dark', 'lacquer_red', el.bells || null);
+    }
     y += h;
   });
   // the crowning roof and the spire
