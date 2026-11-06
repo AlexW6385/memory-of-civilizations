@@ -8,6 +8,7 @@ import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, frustum, lathe, rod, disc, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 import { palazzo, loggia, ponteVecchio } from './signoria.js';
+import { baptistery } from './baptistery.js';
 
 const M = 'marble', G = 'verde_antico', R = 'roof_tile', ST = 'limestone_yellow';
 const oct = (bag, mat, cx, y, cz, r, h) => bag.add(mat, lathe([[r, 0], [r, h], [0.001, h]], 8, null, cx, y, cz));
@@ -329,14 +330,6 @@ function campanile(el, { bag, col }) {
     win(0, s * 0.42, y + h * 0.81, 12, 3);
   }
   bag.add(M, box(r[0] - 1, y + h, r[1] - 1, r[2] + 1, y + h + 1.2, r[3] + 1));
-}
-/** baptistery: { c, r, h, y } — the octagon in white and green marble, its pyramidal roof and lantern. */
-function baptistery(el, { bag, col }) {
-  const [x, z] = el.c, r = el.r ?? 13.5, h = el.h ?? 26, y = el.y ?? 0;
-  oct(bag, M, x, y - 0.5, z, r, h + 0.5); col.circle(x, z, r, y, y + h);
-  for (let k = 0; k < 8; k++) { const a0 = k / 8 * Math.PI * 2, a1 = (k + 1) / 8 * Math.PI * 2; inlay(bag, [x + Math.cos(a0) * r, z + Math.sin(a0) * r], [x + Math.cos(a1) * r, z + Math.sin(a1) * r], y, y + h * 0.78, { pitch: r * 0.765 / 3, bands: 2, windows: 3 }); inlay(bag, [x + Math.cos(a0) * r, z + Math.sin(a0) * r], [x + Math.cos(a1) * r, z + Math.sin(a1) * r], y + h * 0.78, y + h, { pitch: r * 0.765, bands: 1, pink: false }); }
-  bag.add(M, lathe([[r, 0], [r * 0.25, r * 0.55], [0.001, r * 0.55]], 8, null, x, y + h, z));
-  oct(bag, M, x, y + h + r * 0.55, z, r * 0.2, 4);
 }
 registerStyle('renaissance', {
   trim: () => {}, opening: () => {}, column: () => {},

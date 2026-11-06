@@ -4,7 +4,7 @@ import { RADIUS, DUOMO, CAMPANILE, BAPTISTERY, PALAZZO, LOGGIA, ARNO, BRIDGE } f
 const E = [
   { t: 'duomo', ...DUOMO, interior: true },
   { t: 'campanile', c: CAMPANILE, s: 14.5, h: 84 },
-  { t: 'baptistery', c: BAPTISTERY, r: 13.5, h: 26 },
+  { t: 'baptistery', c: BAPTISTERY, a: 12.8, h: 26 },
   { t: 'palazzo', rect: PALAZZO, h: 30, front: 'w', tower: { u: 13, s: 7, h: 94 } },
   { t: 'loggia', rect: LOGGIA, h: 9.5, n: 3 },
 ];

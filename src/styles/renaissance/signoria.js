@@ -238,7 +238,7 @@ export function loggia(el, { bag, col }) {
   const rect = el.rect, [x0, z0, x1, z1] = rect, y = el.y ?? 0, n = el.n ?? 3, pier = 2.2, Hs = el.h ?? 11;
   // the floor raised on its steps toward the piazza (north)
   const yF = y + 1.2;
-  bag.add('flagstone', box(x0, y - 0.3, z0, x1, yF, z1)); col.floor([x0, z0, x1, z1], yF);
+  bag.add(SER, box(x0, y - 0.3, z0, x1, yF, z1));                                       // the floor of pietra serena flags col.floor([x0, z0, x1, z1], yF);
   for (let i = 0; i < 4; i++) bag.add(PF, box(x0, y - 0.3, z0 - 0.42 * (i + 1), x1, yF - (i + 1) * 0.3, z0 - 0.42 * i));
   col.ramp([x0, z0 - 1.7, x1, z0], y, yF, 's');
   const Lf = x1 - x0, Ls = z1 - z0, rF = (Lf - (n + 1) * pier) / n / 2, rS = (Ls - 2 * pier) / 2, ys = yF + Hs, yC = ys + Math.max(rF, rS) + 1.4;
