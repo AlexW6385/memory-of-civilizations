@@ -11,6 +11,7 @@ import { beamTris } from '../ming/index.js';
 import '../maya/index.js';
 import '../../objects/index.js';
 import { Kit, carved, serpentHeadKit, chacmoolKit } from '../maya/meso.js';
+import { calli, tecpan, tzompantli } from './houses.js';
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -172,13 +173,33 @@ function courtHouse(el, { bag, col }) {
   bag.add('lacquer_black', fromTriangles(t));
 }
 
-/** ballcourt: an I-shaped court { c, len, w, h } along x: two sloping banks with vertical walls, the end zones. */
+/**
+ * ballcourt: the tlachtli { c, len, w, h } along x — an I-shaped court: the long alley between two
+ * structures with vertical inner faces (their outer sides sloping), the wider end zones closed by
+ * walls, the plaster floor with its line across the middle, and the two stone rings set upright in
+ * the middle of the side walls, the ball passing through them across the court.
+ */
 function ballcourt(el, { bag, col }) {
-  const [cx, cz] = el.c, L = el.len / 2, w = el.w / 2, h = el.h ?? 4;
-  for (const s of [-1, 1]) { const r = [cx - L, cz + s * w + (s > 0 ? 0 : -6), cx + L, cz + s * w + (s > 0 ? 6 : 0)]; bag.add(W, frustum(r, 0, h, 0, 0, s > 0 ? 0 : 2.5, s > 0 ? 2.5 : 0)); col.rect(r, 0, h); col.floor(r, h); }
-  for (const s of [-1, 1]) { const r = [cx + s * L + (s > 0 ? 0 : -8), cz - w - 10, cx + s * L + (s > 0 ? 8 : 0), cz + w + 10]; bag.add(W, box(r[0], 0, r[1], r[2], 1.2, r[3])); col.rect(r, 0, 1.2); col.floor(r, 1.2); }
+  const [cx, cz] = el.c, L = el.len / 2, w = el.w / 2, h = el.h ?? 4, sw = 6, ez = 8, ew = w + sw + 3, t = 1.4;
+  for (const s of [-1, 1]) { const r = [cx - L, cz + s * w + (s > 0 ? 0 : -sw), cx + L, cz + s * w + (s > 0 ? sw : 0)]; bag.add(W, frustum(r, 0, h, 0, 0, s > 0 ? 0 : 2.5, s > 0 ? 2.5 : 0)); col.rect(r, 0, h); col.floor([r[0], s > 0 ? r[1] : r[1] + 2.5, r[2], s > 0 ? r[3] - 2.5 : r[3]], h); bag.add(R, box(r[0], h - 0.45, s > 0 ? r[1] - 0.03 : r[3] - 0.02, r[2], h - 0.15, s > 0 ? r[1] + 0.02 : r[3] + 0.03)); }
+  for (const s of [-1, 1]) {
+    const xa = cx + s * L, xb = cx + s * (L + ez), xo = cx + s * (L + ez + t);
+    const end = [Math.min(xb, xo), cz - ew - t, Math.max(xb, xo), cz + ew + t];
+    bag.add(W, box(end[0], 0, end[1], end[2], h, end[3])); col.rect(end, 0, h); col.floor(end, h);
+    for (const q of [-1, 1]) { const r = [Math.min(xa, xb), q < 0 ? cz - ew - t : cz + ew, Math.max(xa, xb), q < 0 ? cz - ew : cz + ew + t]; bag.add(W, box(r[0], 0, r[1], r[2], h, r[3])); col.rect(r, 0, h); col.floor(r, h); }
+    // the stretch of wall closing each end zone back to the alley's structures
+    for (const q of [-1, 1]) { const r = [Math.min(xa, xa + s * t), q < 0 ? cz - ew : cz + w + sw, Math.max(xa, xa + s * t), q < 0 ? cz - w - sw : cz + ew]; bag.add(W, box(r[0], 0, r[1], r[2], h, r[3])); col.rect(r, 0, h); }
+    bag.add('stucco', box(Math.min(xa, xb), 0, cz - ew, Math.max(xa, xb), 0.05, cz + ew));
+  }
   bag.add('stucco', box(cx - L, 0, cz - w, cx + L, 0.05, cz + w));
-  for (const s of [-1, 1]) bag.add('basalt', lathe([[1.1, 0], [1.1, 0.4], [0.6, 0.4], [0.6, 0], [1.1, 0]], 16, null, cx, h * 0.75, cz + s * (w + 0.2)));
+  bag.add(R, box(cx - 0.12, 0.05, cz - w, cx + 0.12, 0.065, cz + w));
+  // the rings, set upright out of the middle of the side walls, their holes along the court
+  const ring = carved('mx-tlachtli-ring', (k) => {
+    k.bx('basalt', -0.5, 0.16, -0.13, 0.13, -0.11, 0.11);                        // the tenon into the wall
+    k.disc('basalt', 0.7, 0, -0.15, 0.6, 0.3, 24, 0.21);
+    for (const z0 of [-0.18, 0.15]) for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; k.disc('basalt', 0.7 + Math.cos(a) * 0.41, Math.sin(a) * 0.41, z0, 0.065, 0.03, 8); }
+  });
+  for (const s of [-1, 1]) ring.emit(bag, cx, h * 0.72, cz + s * w, s, 0);
 }
 
 /**
@@ -280,6 +301,6 @@ function tianguis(el, { bag, col }) {
 
 registerStyle('aztec', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis },
+  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli },
   objects: {},
 });

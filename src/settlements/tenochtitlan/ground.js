@@ -2,7 +2,7 @@
 // walls, chinampa plots round its edge, the lake beyond with the causeway crossing it; willows by
 // the water, maize on the chinampas; the clear high sky of the Valley of Mexico.
 
-import { RADIUS, PRECINCT, LEVEL, ISLAND, inRect, inCanal, inLake, inHouse, smooth as sm } from './layout.js';
+import { RADIUS, PRECINCT, PALACE, LEVEL, ISLAND, inRect, inCanal, inLake, inHouse, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function height(x, z) {
@@ -26,12 +26,12 @@ function cover(x, z) {
 function water(x, z, y) { return wet(x, z) && y < LEVEL.water + 0.3; }
 function waterLevel(x, z) { return wet(x, z) ? LEVEL.water : -Infinity; }
 function fromWater(x, z) { return wet(x, z) ? 0 : Math.max(0, ISLAND - Math.hypot(x, z)); }
-/** Plants per 100 m²: ahuejote willows along the chinampas' edges and the canals, maize stand-in grass on the plots; none in the precinct or the lanes. */
+/** Plants per 100 m²: ahuejote willows along the chinampas' edges and the canals, maize with grass among it on the plots; none in the precinct, the palace or the lanes. */
 function planting(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6 || wet(x, z)) return null;
-  if (r > 300) { const lane = Math.abs(((x % 14) + 14) % 14 - 7); return lane > 5.4 && lane < 6.2 ? { poplar: 2.5 } : { grass: 40 }; }
-  if (inRect(PRECINCT, x, z, 2) || inHouse(x, z, 0.5)) return null;
+  if (r > 300) { const lane = Math.abs(((x % 14) + 14) % 14 - 7); return lane > 5.4 && lane < 6.2 ? { poplar: 2.5 } : lane < 4.6 ? { maize: 30, grass: 12 } : { grass: 30 }; }
+  if (inRect(PRECINCT, x, z, 2) || inRect(PALACE, x, z, 4) || inHouse(x, z, 0.5)) return null;
   return hash2(x * 0.2, z * 0.2) < 0.05 ? { willow: 0.4 } : null;
 }
 export const ground = {

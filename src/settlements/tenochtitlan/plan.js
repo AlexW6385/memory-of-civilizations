@@ -4,7 +4,7 @@
 // Eagles, the calmecac; the palace of Moctezuma; the causeway west over the lake; the canals,
 // their walls, timber bridges and dugout canoes; the market by the west canal.
 
-import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS } from './layout.js';
+import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI } from './layout.js';
 
 const E = [];
 const [px0, pz0, px1, pz1] = PRECINCT;
@@ -20,12 +20,14 @@ E.push({ t: 'm_pyramid', c: [-55, 75], base: 17, top: 8, h: 15, tiers: 4, stairs
 E.push({ t: 'm_pyramid', c: [25, -95], base: 15, top: 7, h: 13, tiers: 3, stairs: 's', steps: 50, stairW: 6, serpents: 's', temple: { w: 9, d: 9, h: 5, doors: 's' } });
 E.push({ t: 'm_pyramid', c: [25, 95], base: 12, top: 6, h: 10, tiers: 3, stairs: 'n', steps: 40, stairW: 5, temple: { w: 8, d: 8, h: 4.5, doors: 'n' } });
 E.push({ t: 'ballcourt', c: [-50, -65], len: 60, w: 9, h: 4 });
+// the Huey Tzompantli before Huitzilopochtli's side of the temple: its platform north–south, the tower of skulls at its north end
+E.push({ t: 'tzompantli', rect: TZOMPANTLI, h: 4.6 });
 E.push({ t: 'm_platform', c: [-30, 40], a: 9, h: 2.4, serpents: 'w' });
 E.push({ t: 'court_house', rect: [100, -135, 140, -72], h: 4.2, ring: 7, band: true, seed: 3 });
 E.push({ t: 'court_house', rect: [-138, -138, -82, -100], h: 3.8, ring: 8, seed: 5 });
 E.push({ t: 'court_house', rect: [-138, 100, -90, 138], h: 3.8, ring: 8, seed: 6 });
 // ---- the palace of Moctezuma
-E.push({ t: 'court_house', rect: PALACE, h: 6, ring: 16, band: true, seed: 9 });
+E.push({ t: 'tecpan', rect: PALACE });
 // ---- the causeway west over the lake
 const cw = Math.sqrt((RADIUS - 26) ** 2 - CAUSEWAY.z1 ** 2);
 E.push({ t: 'block', walk: true, rect: [-cw, CAUSEWAY.z0, -ISLAND + 6, CAUSEWAY.z1], y0: LEVEL.lakeBed, y1: 0.4, mat: 'basalt' });
@@ -48,7 +50,7 @@ E.push({ t: 'tianguis', rect: MARKET, seed: 1519 });
 for (const z of [34, 62]) E.push({ t: 'stairs', rect: [-219.6, z, -215.6, z + 6], y0: LEVEL.water - 0.3, y1: 0.05, dir: 'e', mat: 'andesite' });
 for (const [z, cargo] of [[30, 'maize'], [44, 'pots'], [56, 'chile'], [74, 'reeds'], [84, 'cloth']]) E.push({ t: 'acalli', at: [-218.6, z], dir: [0, 1], len: 6, y: LEVEL.water, seed: seed++, cargo });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open')];
+const rooms = [room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open'), room('palace', PALACE, 1.0, 'open')];
 const walks = [[[-260, 0], [-150, 0], [-60, 0], [10, 0], [50, 0]]];
 walks[0].y0 = 0;
 

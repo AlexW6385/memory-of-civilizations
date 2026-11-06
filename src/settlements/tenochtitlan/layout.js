@@ -7,6 +7,8 @@ export const RADIUS = 400;
 export const PRECINCT = [-150, -150, 150, 150];
 export const TM = { c: [95, 0], w: 80, d: 100, h: 45, top: { w: 34, d: 46 } };
 export const PALACE = [160, 100, 211, 191];   // between the two canals (it straddled them)
+/** The Huey Tzompantli: about 38 × 13 m, north–south, west of the Templo Mayor's south stair. */
+export const TZOMPANTLI = [40, 22, 53, 60];
 /** The market (tianguis) on the west canal, south of the causeway's avenue, where canoes unload. */
 export const MARKET = [-212, 22, -168, 92];
 export const LEVEL = { water: -0.7, canalBed: -2.4, lakeBed: -2.6 };
