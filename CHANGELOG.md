@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.62 — New York at 29°; arrivals re-checked (2026-11-06)
+- New York's grid turned 29° as Manhattan's is (a turned element rotates geometry, instances, lights and obstacles exactly; floors become strips), its arrival with it; every arrival surveyed with a new view-check script (rays over the view cone, nearest hits, the landmark's offset): Borgund, Machu Picchu (now from the saddle to Huayna Picchu), Kilwa, Barcelona, Isfahan and Tenochtitlan re-aimed.
+
 ## v9.61 — The Palais de la Cité and the Sainte-Chapelle (2026-11-06)
 - The Sainte-Chapelle's flanks with framed upper windows, crocketed gables and pinnacled buttresses, the cornice and openwork balustrade, the lead roof with its fleur-de-lis crest, the archangel and the flèche, spherical-triangle windows below, the stair with arcaded parapets; the king's gallery to the Grand-Salle with its twin naves and roses; Tour Bonbec, Tour César and Tour d'Argent on the quay; the walled Barillerie side with its gate; the stone quay with water stairs and boats; the king's garden with raised beds, arbour, well and orchard; the unsourced east hall removed.
 
