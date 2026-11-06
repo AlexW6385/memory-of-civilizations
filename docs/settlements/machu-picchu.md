@@ -33,9 +33,22 @@ The ridge runs north–south; the town looks along it to Huayna Picchu. [stated:
 
 Dry-stone walls of granite — "smooth, seamless walls for elite buildings; rougher stone for common areas" [stated: digital art archive]; outward faces worked smooth like a mosaic; roofs of wood and thatch; trapezoidal doorways and windows [stated: Pressbooks]; thatch of ichu grass [stated: digital art archive].
 
+### 4.1 Walls, openings, gables (detail, as built in `src/styles/inca/index.js`)
+
+- **Batter.** "Inca exterior walls commonly slope inwards as they rise (typically around 5 degrees)", giving the buildings their trapezoid form [stated: World History Encyclopedia, "Inca Architecture"]. Built: both faces of every wall lean in by tan 5° of the height, capped so the wall-head keeps at least half the foot's thickness; corners mitred, so the leaning faces meet cleanly. [inferred: the cap, the mitres]
+- **Trapezoids.** "The trapezoid motif was repeated in doorways, windows and interior wall niches" [stated: same]. Built: every opening narrows to 0.78 of its foot's width at the head [inferred ratio], with real reveals (jambs, head, sill); niches sunk 0.26–0.34 m into the inner face; doorways 1.0 × 1.95 m in houses, windows 0.42 × 0.55 m [inferred sizes].
+- **Double jambs.** "Doorways and windows often also have double jambs and the former are usually topped with a large single stone lintel" [stated: same]. Built: a recess 0.13 m wider all round and 0.14 m deep on the outer face of the royal residence's doorways, the Main Temple's niches and the Torreón's north window.
+- **Pegs and gables.** Roof poles were "fixed to the stone walls using stone pegs which protruded from them", the pegs "circular or square", some interior pegs perhaps for textile hangings; roofs of grass thatch on poles, steep in rainy regions, "often 60 degrees" [stated: same]. Built: solid stone gables carrying the wall up at about 55° [inferred: a little less than 60° so the thatch covers the rakes], five round pegs standing out of each gable's outer face under the eaves, a row of pegs inside under the wall-head.
+
+### 4.2 The Temple of the Sun, the Intihuatana, the terraces (detail)
+
+- **Torreón.** A curved wall on a natural rock, one of few curved Inca buildings; three windows, the largest to the north with a distinctive form cut at its base and small holes in its base stones; two smaller ones to the east aligned on the June and December solstices; the rock inside carved into long flat sections used as an altar; built over the cave of the Royal Tomb [stated: The Only Peru Guide, "Temple of the Sun"]. Built: the arc of battered ashlar with the two east windows set on the solstice sunrise azimuths (65° and 113° from north, for latitude 13° S — [inferred]), the north window double-jambed; the rock carved flat into a long altar with a step cut in its side. Not built: the drilled holes, the tomb's cave.
+- **Intihuatana.** Carved directly into the bedrock, with complex planes and angles, a slightly inclined plane on top and "an upright stone column that tilts 13 degrees northward"; its base "squat and stubby" [stated: Wikipedia "Intihuatana, Urubamba"]. Built: an outcrop of rough granite, a carved platform and two lower cut planes on it, the post (0.48 × 0.34 × ~0.65 m [inferred size]) leaning 13° north, its top cut on a slant.
+- **Terrace walls** of "loose rocks fixed with mud mortar or finely cut large blocks" [stated: World History Encyclopedia]; at Moray "each terrace is about 2 m high and has cantilevered steps to connect the levels" [stated: Rollinson, "Moray"]. Built: the retaining walls as continuous battered faces; now and then a flight of long stones set into the wall and standing out of its face, climbing across it on a slant [inferred for Machu Picchu from the Inca practice].
+
 ## 5. The houses
 
-Rectangular rooms of rough granite set in clay, a trapezoid door on the court, niches inside, stone gables carrying steep thatched roofs; grouped in kanchas. [stated: thatch, trapezoids; inferred groupings]
+Rectangular rooms of rough granite set in clay, a trapezoid door on the court, niches in a row inside, now and then a small window, stone gables with their pegs carrying steep thatched roofs; grouped in kanchas, "three (or more)" buildings round a walled patio [stated: World History Encyclopedia]. The royal residence's doorways double-jambed. [stated: thatch, trapezoids, pegs; inferred: the counts and sizes]
 
 ## 6. Ground
 
@@ -59,5 +72,9 @@ Panpipes and the quena flute, drums, the conch (a flute, a reed and a struck sou
 - [Machu Picchu — Wikipedia (mirror)](https://wiki.riteme.site/wiki/Machu_Pichu)
 - [Machu Picchu — World History Encyclopedia](https://www.worldhistory.org/audioplayer/en/1-11930/)
 - [Machu Picchu — Pressbooks (ARTH 2720)](https://uen.pressbooks.pub/arth2720/chapter/machu-picchu/)
+- [Inca Architecture — World History Encyclopedia](https://www.worldhistory.org/Inca_Architecture/.md)
+- [Intihuatana, Urubamba — Wikipedia](https://en.wikipedia.org/wiki/Intihuatana,_Urubamba)
+- [Temple of the Sun (Intiwasi) — The Only Peru Guide](https://www.theonlyperuguide.com/peru-guide/machu-picchu/highlights/temple-sun-intiwasi%20/)
+- [Moray — S. Rollinson (cantilevered terrace steps)](https://srollinson.blogspot.com/2018/09/moray.html)
 - [City of Machu Picchu — digital art archive](https://digital-art-archive.vercel.app/art/161)
 - [Machu Picchu — doc.surf](https://www.doc.surf/wiki/machu-picchu)

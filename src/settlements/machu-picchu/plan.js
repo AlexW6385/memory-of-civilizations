@@ -19,6 +19,8 @@ for (let k = 0; k < TERRACE.n; k++) {
     const p = [Math.cos(t) * a, Math.sin(t) * b], buried = ground.height(p[0], p[1]) > y1 + 1;     // under a peak's slope
     if (inGap || buried) { if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1 }); pts = []; continue; }
     pts.push(p);
+    // now and then a flight of stones standing out of the wall, climbing across its face
+    if (pts.length > 1 && (i + k * 7) % 19 === 3) E.push({ t: 'flying_stair', a: pts[pts.length - 2], b: p, from: 0.9, y0, y1, dir: 1 });
   }
   if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1 });
   // the stairs down through the gaps
@@ -39,10 +41,10 @@ E.push({ t: 'intihuatana', c: HILL.c, y: Math.floor(HILL.h / 2.2) * 2.2 });
 E.push({ t: 'stairs', rect: [HILL.c[0] + 4, HILL.c[1] - 1.2, HILL.c[0] + HILL.r + 6, HILL.c[1] + 1.2], y0: 0, y1: Math.floor(HILL.h / 2.2) * 2.2, dir: 'w', mat: 'granite_rough' });
 // the Temple of the Sun on its rock, the royal residence beside it
 E.push({ t: 'torreon', c: [-36, -22], r: 5.5, y: 1.2, h: 4.6 });
-E.push({ t: 'inca_house', rect: [-52, -10, -42, 2], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', seed: 9 });
-E.push({ t: 'inca_house', rect: [-56, -32, -46, -20], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', seed: 10 });
+E.push({ t: 'inca_house', rect: [-52, -10, -42, 2], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', jamb: true, seed: 9 });
+E.push({ t: 'inca_house', rect: [-56, -32, -46, -20], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', jamb: true, seed: 10 });
 // the Sacred Plaza: the Main Temple (three walls, open to the south), the Temple of the Three Windows (open to the west)
-E.push({ t: 'inca_temple', rect: [-50, 34, -34, 46], y: 0.6, h: 3.8, open: 's' });
+E.push({ t: 'inca_temple', rect: [-50, 34, -34, 46], y: 0.6, h: 3.8, open: 's', jamb: true });
 E.push({ t: 'inca_temple', rect: [-30, 34, -20, 48], y: 0.6, h: 3.6, open: 'w', windowSide: 'e', windows: 3 });
 E.push({ t: 'inca_house', rect: [-46, 52, -36, 60], y: 0.2, h: 2.8, front: 's', mat: 'granite_inca', roof: 'thatch', seed: 11 });
 // the Main Plaza's edge: a low wall with stairs down into it

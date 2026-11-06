@@ -1,7 +1,7 @@
 # Mississippian Cahokia, about 1175 — dossier
 
 Settlement id: `cahokia` · Style: `mississippian` · Region: the Mississippi valley (the American Bottom) · Code: `src/settlements/cahokia/`
-Status of this dossier: L1–L2. Built: Monks Mound in the ground itself (the main summit at 30 m, the first terrace at 12 m, a west terrace, the ramp from the plaza), with the great house on the summit and a smaller one on the first terrace; the levelled Grand Plaza with its pole; the twin mounds at the plaza's south end (Fox Mound, a platform with its building, and the conical Roundtop); six smaller platform mounds with buildings; the palisade round the central precinct with its bastions and screened gates; Woodhenge (48 red cedar posts and a centre post); ~1,300 wall-trench houses; fields, woods, Cahokia Creek; ground, planting, weather, music. Recorded for L3, later: the full count of ~120 mounds and their true places; Mound 72; the borrow pits and ponds; the mound's fourth terrace; people playing chunkey in the plaza; the true scale (Monks Mound 291 × 236 m).
+Status of this dossier: L1–L2. Built: Monks Mound in the ground itself (the main summit at 30 m, the first terrace at 12 m, a west terrace, the ramp from the plaza), with the great house on the summit and a smaller one on the first terrace; the levelled Grand Plaza with its pole; the twin mounds at the plaza's south end (Fox Mound, a platform with its building, and the conical Roundtop); six smaller platform mounds with buildings; the palisade round the central precinct with its bastions and screened gates; Woodhenge (48 red cedar posts and a centre post); ~1,300 wall-trench houses; fields, woods, Cahokia Creek; ground, planting, weather, music. Recorded for L3, later: the full count of ~120 mounds and their true places; Mound 72; the borrow pits and ponds; the mound's fourth terrace; people playing chunkey in the plaza (the yards and stones are built); the true scale (Monks Mound 291 × 236 m).
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -34,9 +34,15 @@ The precinct is laid out roughly on the cardinal directions, with Monks Mound fa
 
 Earthen mounds; buildings of poles and clay under steep grass thatch; log palisade plastered with clay. [stated]
 
+### 4.1 Detail (as built in `src/styles/mississippian/index.js`)
+
+- **The summit building.** On a slightly raised area at the north end of the summit plateau stood a building "over 100 ft (30 m) long, the largest in the entire Cahokia Mounds urban zone"; Reed's excavation found a socket "for a post about three feet (one metre) in diameter" [stated: Wikipedia "Monks Mound"]. Built: the great house (42 × 20 m, compressed plan kept) with a timber wall plate, a hipped roof of grass thatch laid in courses whose butts stand proud, a ridge roll, carved red posts at the ridge's ends [inferred: the ornaments], a framed doorway with posts, lintel pole and clay sill on the south; the great red cedar post, 1 m thick and ~9 m high, on the summit before it [inferred: its place and height].
+- **Palisade.** "Two miles in length, built using some 15,000 logs, and studded with bastions" [stated: HistoryRise]; postholes with plaster alongside, a rectangular compound with rounded bastions [stated: Archaeology, 2013]; logs set upright in a dug trench, lashed and buried at the foot, bastions regularly spaced [stated: Illinois State Museum, RiverWeb]. Built: the wall as logs daubed with clay, the logs' rounded tops standing above the daub at ~0.36 m centres; round bastions 5.2 m across standing out of the wall every ~26 m [inferred spacing], with a parapet of post tops round a fighting platform; each gate a 3 m gap screened by a stretch of wall 4 m outside it [inferred].
+- **Chunkey.** The game "originated around 600 CE in the Cahokia region"; chunkey stones and a copper sheath in Mound 72; stones disc-shaped, the thrown stick about six feet long; Choctaw yards 12 × 100 feet, Muscogee yards cleared and levelled "with embankments on both sides and a pole in the center", a Mandan "clay pavement worn smooth and hard" [stated: Wikipedia "Chunkey"]; discoidals "from about three to five or more inches" across, of granitic rock [stated: Illinois State Museum]. Built: three yards on the Grand Plaza (36 × 4 m) of beaten clay with low earth banks down their sides, discoidal stones of 11–15 cm with dished faces and a pair of 1.8 m poles at one end [inferred: the yards' places on the plaza].
+
 ## 5. The town
 
-About 1,300 houses round small courtyards, inside and outside the palisade. [stated: tens of thousands of people at the peak; count ours — inferred]
+About 1,300 houses round small courtyards, inside and outside the palisade. [stated: tens of thousands of people at the peak; count ours — inferred] They are "single-family wattle and daub structures plastered by clay with thatch roofing" [stated: HistoryRise]; built with daubed walls, the thatch closed under the eaves, a doorway framed by two posts and a lintel [inferred: the frame].
 
 ## 6. Ground and water
 
@@ -60,3 +66,9 @@ Drums and rattles, cane flutes, voices at ceremonies. [inferred]
 - [Cahokia — Wikipedia](https://en.wikipedia.org/wiki/Cahokia)
 - [Woodhenge (Cahokia) — Wikipedia](https://en.wikipedia.org/wiki/Woodhenge_(Cahokia))
 - [Mississippian culture — Wikipedia](https://en.wikipedia.org/wiki/Mississippian_culture)
+- [Mound 38, Monks Mound — Cahokia Mounds](https://cahokiamounds.org/mound/mound-38-monks-mound/)
+- [Cahokia, North America's largest pre-Columbian settlement — HistoryRise](https://historyrise.com/cahokia-north-americas-largest-pre-columbian-settlement/)
+- [Cahokia palisade wall — Archaeology (2013)](https://archaeology.org/news/2013/05/30/130530-illinois-cahokia-palisade-wall/)
+- [Palisade — Illinois State Museum, RiverWeb](https://www.museum.state.il.us/RiverWeb/landings/Ambot/prehistory/mississippian/technology/fac-palisade2.html)
+- [Chunkey — Wikipedia](https://en.wikipedia.org/wiki/Chunkey)
+- [Discoidal or chunkey stone — Illinois State Museum](https://story.illinoisstatemuseum.org/node/175)

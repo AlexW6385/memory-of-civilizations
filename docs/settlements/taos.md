@@ -30,6 +30,14 @@ The plaza east–west with Taos Mountain behind (north-east) [stated: SAH Archip
 
 Sun-dried adobe bricks, walls several feet thick, roofs of packed earth on vigas hauled from the mountains [stated: ictnews; taos.org]; rooms entered by ladders through the roofs before doors [stated: travelpast50]; parapets, small windows. [inferred: details]
 
+### 4.1 Detail (as built in `src/styles/pueblo/index.js`)
+
+- **Vigas.** Roofs carried on Engelmann spruce vigas, layered with branches, grass, mud and plaster; the aspen latillas laid across the vigas came after Coronado [stated: Wikipedia "Taos Pueblo"]. Vigas "typically about 6 to 10 inches (15.24 to 25.4 cm) in diameter", about 3 feet apart, their ends extended outside the wall [stated: Wikipedia "Viga"]. Built: round peeled logs 16–24 cm thick, five to a 5 m room, spanning north–south so that their ends, left long and uneven (0.25–0.9 m), stand out of the north and south faces only [inferred: the span direction, the lengths]; no latillas shown (c. 1500).
+- **Entry.** "Access to rooms was through square holes in the roof that the people reached by climbing long, wooden ladders", ladders that "could easily be pulled up"; "the buildings at Taos originally had few windows and no standard doorways" [stated: Wikipedia "Taos Pueblo"]. Built: roof hatches with a raised adobe rim and the ladder standing up out of the hole, poles running 1.3–2 m past the roof; ladders leaning from terrace to terrace; few small windows (0.5 × 0.45 m) under a lintel pole, and only rarely a low doorway on the ground storey [inferred: sizes, frequency].
+- **Kivas.** Their roofs entered by a hatch with a ladder, as the house rooms [inferred from the roof entries; the kivas' interiors are sacred and not shown].
+- **Racks.** Wooden racks along the plaza's north side [stated: SAH Archipedia]; built with what the valley dried before contact — strings of maize ears, hides over the rails, strips of meat [inferred]. Chile, introduced by the Spanish, is not shown.
+- **Not built, on purpose:** the beehive *hornos* now seen at the pueblo — "the Spanish introduced hornos" after 1540, with wheat [stated: National Park Service, "Hornos"]; our moment is c. 1500.
+
 ## 5. The town
 
 The pueblo is the town: rooms stacked in winding ranges crossed by alleys, from one to five storeys [stated: SAH Archipedia].
@@ -58,4 +66,7 @@ Drums and voices, rattles, a cedar flute (a drone, a voice and the ney stand in)
 - [Taos Pueblo — ICT News](https://ictnews.org/?p=99156)
 - [Taos Pueblo — New World Encyclopedia](https://www.newworldencyclopedia.org/entry/Taos_Pueblo)
 - [Taos Pueblo — travelpast50](https://travelpast50.com/?p=14611)
+- [Viga (architecture) — Wikipedia](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Viga_(architecture))
+- [Taos Pueblo — Wikipedia (IPFS snapshot)](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Taos_Pueblo)
+- [Hornos — National Park Service, Petrified Forest](https://www.nps.gov/petr/planyourvisit/hornos.htm)
 - [Taos Pueblo — technotink](https://technotink.net/science/?p=1765)

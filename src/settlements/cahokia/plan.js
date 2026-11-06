@@ -13,9 +13,13 @@ export const monks = {
   view: [-82, -240, 82, -50],
   bakeTop: 60,
   elements: [
-    { t: 'great_house', rect: [SUMMIT[0], SUMMIT[1] + 20, SUMMIT[2], SUMMIT[1] + 40], y: height(...mid(SUMMIT)), h: 4.5, rise: 11 },
+    { t: 'great_house', rect: [SUMMIT[0], SUMMIT[1] + 20, SUMMIT[2], SUMMIT[1] + 40], y: height(...mid(SUMMIT)), h: 4.5, rise: 11, post: [-6, SUMMIT[1] + 50] },
     { t: 'great_house', rect: [-14, -100, 6, -86], y: height(-4, -93), h: 3.5, rise: 7 },
     { t: 'plaza_pole', c: [0, 55], y: 0, h: 14 },
+    // chunkey yards on the Grand Plaza
+    { t: 'chunkey_yard', rect: [12, 20, 48, 24], y: 0, seed: 3 },
+    { t: 'chunkey_yard', rect: [-80, 92, -44, 96], y: 0, seed: 5 },
+    { t: 'chunkey_yard', rect: [58, 104, 62, 140], y: 0, seed: 7 },
   ],
   rooms: [{ id: 'plaza', rect: PLAZA, y: 0, kind: 'open' }],
   walks: [Object.assign([[-25, -5], [-25, -36]], { y0: 0 })],
