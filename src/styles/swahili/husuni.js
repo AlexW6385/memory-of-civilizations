@@ -196,6 +196,8 @@ function core(el, ctx) {
   // ---- the north range over the cliff: long vaulted rooms, small windows to the harbour
   const nwin = Array.from({ length: 13 }, (_, i) => { const m = 142 + 4 * (i + 0.5); return { u0: m - 0.25, u1: m + 0.25, v0: fl + 1.5, v1: fl + 2.1 }; });
   rooms(ctx, { mat: SMOOTH, rect: [142, -150, 194, -146], along: 'x', n: 13, fl, door: 's', holes: { n: nwin } });
+  // three panels with inscriptions in the rooms at the palace's northern tip (Archnet), under the windows
+  for (const i of [5, 6, 7]) { const m = 142 + 4 * (i + 0.5); carvedPanel(ctx, wallFace('x', -149.4, 1, 0), m - 0.85, fl + 0.95, m + 0.85, fl + 1.32, 'inscription'); }
   // ---- the west range, its gate to the audience court from the west
   const wr = rooms(ctx, { mat: SMOOTH, rect: [142, -146.6, 146, -100], along: 'z', n: 12, fl, door: 'e', skip: ['n'], holes: { w: [{ u0: -117.25 - 0.75, u1: -117.25 + 0.75, v0: fl, v1: fl + 2.7, frame: 'grand' }] } });
   carvedPanel(ctx, wallFace('z', 142, -1, 0), -118.3, fl + 3.0, -116.2, fl + 3.5, 'stars');
@@ -225,7 +227,22 @@ function core(el, ctx) {
   rooms(ctx, { mat: SMOOTH, rect: [167.8, -146.6, 171.8, -128.4], along: 'z', at: [-134.3, -131.5], fl, door: null, cross: true, skip: ['n', 'w'], rec: { e: zid(-144.2, -135.2, fl + 0.6) }, holes: { e: [{ u0: -145.7, u1: -144.8, v0: fl, v1: fl + 2.1, frame: 'door' }] } });
   for (const [za, zb] of [[-134.0, -131.8], [-131.2, -129.0]]) solid(ctx, SMOOTH, 170.0, fl - 0.02, za + 0.1, 171.2, fl + 0.5, zb - 0.1);   // the built platform beds
   // ---- the private court: sunk a metre by four steps all round, walkways either side, wide-doored rooms
-  rooms(ctx, { mat: SMOOTH, rect: [171.2, -146.6, 175.2, -128.4], along: 'z', n: 5, fl, door: 'e', doorW: 1.7, doorH: 2.4, skip: ['n', 'w'] });
+  // ---- the second suite, interlocking with the first (Archnet: "The two sets of interlocking suites
+  // form the core of royal domicile … a short but very wide ante-room (about 17 meters long), into a
+  // main access room … to two bedrooms each about 2.2 meters square. These two bedrooms interlock
+  // with the bedrooms of the other unit"): its ante-room the arcaded walkway along the private
+  // court's west side, its main room behind with a zidaka between two wide doors and a carved
+  // inscription over them, its bedrooms back to back with the first suite's, the beds against the
+  // same wall [arrangement inferred]
+  rooms(ctx, { mat: SMOOTH, rect: [171.2, -146.6, 175.2, -128.4], along: 'z', at: [-134.3, -131.5], fl, door: null, cross: true, skip: ['n', 'w'],
+    rec: { e: zid(-141.9, -138.6, fl + 0.6) },
+    holes: { e: [{ u0: -143.85, u1: -142.15, v0: fl, v1: fl + 2.4, frame: 'grand' }, { u0: -138.35, u1: -136.65, v0: fl, v1: fl + 2.4, frame: 'grand' }] } });
+  for (const [za, zb] of [[-134.0, -131.8], [-131.2, -129.0]]) solid(ctx, SMOOTH, 171.8, fl - 0.02, za + 0.1, 173.0, fl + 0.5, zb - 0.1);
+  ctx.bag.add('reed_mat', box(171.85, fl + 0.5, -133.8, 172.95, fl + 0.52, -132.0));
+  arcade(ctx, { c: Q[0] - 0.3, a0: Q[1], a1: Q[3], n: 5, fl, yT: 3.4, along: 'z' });
+  poleCeiling(ctx, [175.2, Q[1], Q[0], Q[3]], fl + 3.4, 'x', { th: 0.4 });
+  carvedPanel(ctx, wallFace('z', 175.2, 1, 0), -144.2, fl + 2.6, -136.3, fl + 2.98, 'inscription');
+  carvedPanel(ctx, wallFace('z', Q[0], 1, 0), Q[1] + 0.3, fl + 3.42, Q[3] - 0.3, fl + 3.68, 'fleur');
   for (const w of [[175.2, Q[1], Q[0], Q[3]], [Q[2], Q[1], 190, Q[3]]]) slab(ctx, SMOOTH, w, fl - 0.06, fl);
   {
     const cf = fl - K.palace.sunk, n = 4, h = K.palace.sunk / n, d = 0.32;
@@ -341,12 +358,13 @@ function southCourt(el, ctx) {
   const port = (a0, a1, n) => Array.from({ length: n }, (_, i) => { const m = a0 + (i + 0.5) * (a1 - a0) / n; return [{ u0: m - 1.0, u1: m - 0.6, v0: fl + 1.9, v1: fl + 2.3 }, { u0: m + 0.6, u1: m + 1.0, v0: fl + 1.9, v1: fl + 2.3 }]; }).flat();
   const gate = (m) => ({ u0: m - 1.1, u1: m + 1.1, v0: fl, v1: fl + 2.8, frame: 'grand' });
   const ring = d * 2 - t;
+  const sH = [x0 + ring + 4.4, x0 + ring + 8.4];    // the stair to the upper terrace (below)
   // north and south: back rows (portholes in the outer wall) and front rows (doors to the court), seven rooms each, the middle a passage
   const NS = [[z0, z0 + d, z0 + d - t, z0 + ring, 'n', 's'], [z1 - d, z1, z1 - ring, z1 - d + t, 's', 'n']];
   for (const [b0, b1, f0, f1, outS, inS] of NS) {
     const outH = port(x0, x1, 7).filter((h) => Math.abs((h.u0 + h.u1) / 2 - mx) > 2.5);
     rooms(ctx, { rect: [x0, b0, x1, b1], along: 'x', n: 7, fl, door: inS, roof: 'poles', hs: 2.75, t, parapetOn: [outS, 'w', 'e'], holes: { [outS]: [...outH, gate(mx)], [inS]: [gate(mx)] } });
-    rooms(ctx, { rect: [x0, f0, x1, f1], along: 'x', n: 7, fl, door: inS, roof: 'poles', hs: 2.75, t, skip: [outS], parapetOn: [inS, 'w', 'e'], holes: { [inS]: [gate(mx)] } });
+    rooms(ctx, { rect: [x0, f0, x1, f1], along: 'x', n: 7, fl, door: inS, roof: 'poles', hs: 2.75, t, skip: [outS], parapetOn: [inS, 'w', 'e'], holes: { [inS]: [gate(mx), ...(outS === 'n' ? [{ u0: sH[0] - 1.2, u1: sH[0], v0: fl + 3.05, v1: fl + 4.2 }] : [])] } });
   }
   const WE = [[x0, x0 + d, x0 + d - t, x0 + ring, 'w', 'e'], [x1 - d, x1, x1 - ring, x1 - d + t, 'e', 'w']];
   const za = z0 + ring - t, zb = z1 - ring + t;
@@ -360,14 +378,42 @@ function southCourt(el, ctx) {
   // the upper storey on the north and west: vaulted apartments over the storerooms, doors onto the roof
   // of the front rows, the corner dome over the north-west corner room, raised high (about 60°)
   const yU = fl + 2.75 + 0.3, xc = x0 + (x1 - x0) / 7 + t / 2, cr = [x0, z0, xc, z0 + d];
-  rooms(ctx, { rect: [xc - t, z0, x1 - (x1 - x0) / 7 - t / 2, z0 + d], along: 'x', n: 5, fl: yU, yB: yU, door: 's', hs: 2.2, t, floor: null, holes: { n: port(xc, x1 - (x1 - x0) / 7, 5).map((h) => ({ ...h, v0: yU + 1.3, v1: yU + 1.7 })) } });
-  rooms(ctx, { rect: [x0, z0 + d - t, x0 + d, zb], along: 'z', n: 6, fl: yU, yB: yU, door: 'e', hs: 2.2, t, floor: null, holes: { w: port(z0 + d, zb, 6).map((h) => ({ ...h, v0: yU + 1.3, v1: yU + 1.7 })) } });
+  // (Archnet: "Each of these rooms employ a unique combination of vaulting" — octagonal, conical,
+  // trifoliate; the order ours)
+  rooms(ctx, { rect: [xc - t, z0, x1 - (x1 - x0) / 7 - t / 2, z0 + d], along: 'x', n: 5, fl: yU, yB: yU, door: 's', hs: 2.2, t, floor: null, vaults: ['trefoil', 'oct', 'cone', 'barrel', 'trefoil'], holes: { n: port(xc, x1 - (x1 - x0) / 7, 5).map((h) => ({ ...h, v0: yU + 1.3, v1: yU + 1.7 })) } });
+  rooms(ctx, { rect: [x0, z0 + d - t, x0 + d, zb], along: 'z', n: 6, fl: yU, yB: yU, door: 'e', hs: 2.2, t, floor: null, vaults: ['oct', 'trefoil', 'cone', 'oct', 'barrel', 'trefoil'], holes: { w: port(z0 + d, zb, 6).map((h) => ({ ...h, v0: yU + 1.3, v1: yU + 1.7 })) } });
+  // over the upper rooms' doors toward the court, carved panels: fleurs-de-lys and the blind arcade
+  for (let i = 0; i < 5; i++) { const m = xc - t + (x1 - (x1 - x0) / 7 - t / 2 - xc + t) * (i + 0.5) / 5; carvedPanel(ctx, wallFace('x', z0 + d, 1, 0), m - 0.7, yU + 2.3, m + 0.7, yU + 2.62, i % 2 ? 'arcade' : 'fleur'); }
   {
     const yT = yU + 2.4, out = [], rI = [cr[0] + t, cr[1] + t, cr[2] - t, cr[3] - t];
     for (const [ax, c, a0, a1] of [['x', cr[1] + t / 2, cr[0], cr[2]], ['x', cr[3] - t / 2, cr[0], cr[2]], ['z', cr[0] + t / 2, cr[1] + t, cr[3] - t], ['z', cr[2] - t / 2, cr[1] + t, cr[3] - t]]) wall(ctx, { axis: ax, c, u0: a0, u1: a1, t, y0: yU, y1: yT + 0.9 });
     domeBay(out, [rI[0] - 0.02, rI[1] - 0.02, rI[2] + 0.02, rI[3] + 0.02], yT, 0.5, yT + 0.9, 0.6, 1.7);
     ctx.bag.add(C, fromTriangles(out));
   }
+  // the stair up to the terrace before the upper rooms: a flight of dressed steps against the north
+  // front row between two of its doors, rising west to a landing; the parapet broken over it
+  // [inferred: Archnet gives no stair; the upper rooms open onto the front rows' roofs]
+  const sz0 = z0 + ring, sz1 = sz0 + 1.3;
+  flight(ctx, [sH[0], sz0, sH[1], sz1], fl, yU, 'w', { base: fl - 0.25 });
+  solid(ctx, C, sH[0] - 1.2, fl - 0.25, sz0 - 0.03, sH[0], yU - 0.02, sz1); slab(ctx, DRESSED, [sH[0] - 1.2, sz0, sH[0], sz1], yU - 0.04, yU);
+  {
+    // the parapet along the flight's open side, its top following the steps, a dressed coping
+    const za = sz1, zb = sz1 + 0.3, xa = sH[0] - 1.2, xb = sH[1], T = [], T2 = [], yb = fl - 0.25, ta = yU + 0.85, tb = fl + 0.85;
+    const V = (x, y, z) => [x, y, z];
+    face(T, [0, 0, 1], V(xa, yb, zb), V(xb, yb, zb), V(xb, tb, zb), V(xa, ta, zb));
+    face(T, [0, 0, -1], V(xa, yb, za), V(xb, yb, za), V(xb, tb, za), V(xa, ta, za));
+    face(T, [1, 0, 0], V(xb, yb, za), V(xb, yb, zb), V(xb, tb, zb), V(xb, tb, za));
+    face(T, [-1, 0, 0], V(xa, yb, za), V(xa, yb, zb), V(xa, ta, zb), V(xa, ta, za));
+    face(T2, [-1, 0, 0], V(xa, ta, za - 0.03), V(xa, ta, zb + 0.03), V(xa, ta + 0.1, zb + 0.03), V(xa, ta + 0.1, za - 0.03));
+    face(T2, [ta - tb, xb - xa, 0], V(xa, ta, za - 0.03), V(xa, ta, zb + 0.03), V(xb, tb, zb + 0.03), V(xb, tb, za - 0.03));
+    face(T2, [0, 0, 1], V(xa, ta, zb + 0.03), V(xb, tb, zb + 0.03), V(xb, tb + 0.1, zb + 0.03), V(xa, ta + 0.1, zb + 0.03));
+    face(T2, [0, 0, -1], V(xa, ta, za - 0.03), V(xb, tb, za - 0.03), V(xb, tb + 0.1, za - 0.03), V(xa, ta + 0.1, za - 0.03));
+    face(T2, [ta - tb, xb - xa, 0], V(xa, ta + 0.1, za - 0.03), V(xa, ta + 0.1, zb + 0.03), V(xb, tb + 0.1, zb + 0.03), V(xb, tb + 0.1, za - 0.03));
+    face(T2, [1, 0, 0], V(xb, tb, za - 0.03), V(xb, tb, zb + 0.03), V(xb, tb + 0.1, zb + 0.03), V(xb, tb + 0.1, za - 0.03));
+    ctx.bag.add(C, fromTriangles(T)); ctx.bag.add(DRESSED, fromTriangles(T2));
+    ctx.col.segment([xa, (za + zb) / 2], [xb, (za + zb) / 2], 0.3, yb, fl + 0.85);
+  }
+  ctx.col.floor([sH[0] - 1.2, sz0 - t - 0.05, sH[0], sz0], yU);
   // the front rows' roofs as a terrace before the upper rooms, a parapet to the court
   for (const r of [[x0 + d - t, z0 + d - t, x1 - d + t, z0 + ring], [x0 + d - t, z0 + ring, x0 + ring, zb]]) ctx.col.floor(r, yU);
   // the manager's house of two storeys in the south-west corner, and the square well beside it (4.6 m a side)

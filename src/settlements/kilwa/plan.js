@@ -54,7 +54,10 @@ export const kilwa = {
   view: [MOSQUE[0] - 2, MOSQUE[1] - 2, MOSQUE[2] + 2, MOSQUE[3] + 2],
   bakeTop: 12,
   elements: E,
-  rooms: [room('prayer hall', MOSQUE, E[0].y, 'hall'), room('pavilion', [162.2, -124, 169.4, -106.6], PY + 3, 'hall')],
+  rooms: [room('prayer hall', MOSQUE, E[0].y, 'hall'), room('pavilion', [162.2, -124, 169.4, -106.6], PY + 3, 'hall'),
+    // the second suite's ante-room (the arcaded walkway) and main room; the South Court's upper terrace and its vaulted rooms
+    room('ante-room', [175.4, -145, 176.4, -129.5], PY + 0.03, 'hall'), room('second suite', [172, -145.5, 174.4, -135], PY + 0.03, 'hall'),
+    room('south court terrace', [150, -94, 186, -91], PY + 3.08, 'open'), room('upper rooms', [152.5, -97.2, 180, -94.8], PY + 3.08, 'hall')],
   walks: Object.assign([[[-15, -30], [-15, -15]]], {}),
 };
 kilwa.walks[0].y0 = height(-15, -30);
