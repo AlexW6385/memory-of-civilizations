@@ -18,7 +18,11 @@ export const HIPPODROME = [-290, 62, -195, 360];
 export const PALACE = [60, 140, 260, 330];
 export const MESE = { w: 12, path: [[-60, 110], [-180, 110], [-180, 40], [-RADIUS, 40]] };
 export const MILION = [-90, 110];
-export const FORUM = { c: [-345, 30], r: 38 };
+export const FORUM = { c: [-345, 30], r: 36 };
+/** On the Augustaion's east side the Senate house (its portico west of the rect), on its south-east corner the Chalke (§4.4). */
+export const SENATE = [16, 112, 40, 138];
+export const CHALKE = { c: [28, 159] };
+const KEEP = [[3, 110, 42, 140], [19, 143, 37, 175], [37, 150, 60, 168]];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 /** The hill: level round Hagia Sophia, falling toward the sea to the east and south-east, back up to the rim's level at the edge. */
@@ -36,7 +40,7 @@ export function lots() {
   const rand = rng(562);
   for (let x = -RADIUS + 20; x < RADIUS - 20; x += 22) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 20) {
     const w = 15 + rand() * 5, d = 13 + rand() * 5, cx = x + w / 2, cz = z + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 45 || [SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE].some((r) => inRect(r, cx, cz, 16)) || onMese(cx, cz, 12) || Math.hypot(cx - FORUM.c[0], cz - FORUM.c[1]) < FORUM.r + 14) continue;
+    if (Math.hypot(cx, cz) > RADIUS - 45 || [SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, ...KEEP].some((r) => inRect(r, cx, cz, 16)) || onMese(cx, cz, 21) || Math.hypot(cx - FORUM.c[0], cz - FORUM.c[1]) < FORUM.r + 23) continue;
     if (rand() < 0.15) continue;
     const ys = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]].map(([a, b]) => height(a, b));
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.min(...ys) });
