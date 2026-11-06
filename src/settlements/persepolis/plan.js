@@ -26,9 +26,11 @@ E.push({ t: 'lamassu_gate', c: [-112, STAIR.z], s: 25, h: 17, y: T });
 // the Apadana on its 2.6 m plinth: 6 × 6 columns in the hall, porticoes north, west and east
 E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe' });
 E.push({ t: 'audience', c: [-30, -40], y: T + 2.75, dir: [0, -1], aisle: 44 });
-E.push({ t: 'stair', rect: [-50, -126, -10, -116], dir: 's', y0: T, y1: T + 2.6, riser: 0.12, base: T, mat: 'limestone_persian' });
+// its two stairways, north and east, with their reliefs: the nobles on the north, the delegations on the east stair's south wing
+E.push({ t: 'apadana_stair', face: 'n', line: -110, span: [-67, 7], c: -30, W: 32, D: 7.5, y: T, h: 2.6, wings: ['nobles', 'nobles'] });
+E.push({ t: 'apadana_stair', face: 'e', line: 20, span: [-97, -40], c: -68.5, W: 32, D: 7.5, y: T, h: 2.6, wings: ['nobles', 'tribute'] });
 // the Hall of a Hundred Columns, 70 × 70 m, 10 × 10 columns, a portico north
-E.push({ t: 'hall', rect: [40, -130, 110, -60], y: T, plinth: 0.8, h: 13, grid: [10, 10], porticoes: 'n', portDepth: 14, walls: 3.5, doors: 'nesw' });
+E.push({ t: 'hall', rect: [40, -130, 110, -60], y: T, plinth: 0.8, h: 13, grid: [10, 10], porticoes: 'n', portDepth: 14, walls: 3.5, doors: 'nesw', reliefs: true });
 // the Tripylon, the Tachara (palace of Darius), the Hadish (palace of Xerxes)
 E.push({ t: 'hall', rect: [5, -12, 25, 12], y: T, plinth: 1.2, h: 9, grid: [2, 2], walls: 2.5, doors: 'nesw' });
 E.push({ t: 'hall', rect: [-68, 5, -40, 35], y: T, plinth: 3, h: 9, grid: [4, 3], porticoes: 's', portDepth: 9, walls: 3, doors: 's' });
