@@ -11,6 +11,7 @@ import { STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { planarWall, archHalf, archRise } from '../byzantine/index.js';
 import './index.js';
+import { archWall, pier, vault, rise, jube, stalls, altar } from './nd-interior.js';
 
 const L = 'limestone', CARVE = 'limestone_carved', LEAD = 'lead';
 const D2R = Math.PI / 180;
@@ -212,17 +213,19 @@ function portal(bag, col, p) {
   bag.add(L, lathe([[0.001, -0.3], [0.24, -0.06], [0.3, 0]], 8, null, xEnd - 0.55, y + 1.6, zc));
   figure(bag, xEnd - 0.55, y + 1.6, zc, p.statue * 1.05, { book: true, crown: p.trumeauCrown });
   bag.add(L, box(xEnd - 0.84, y + 1.72 + p.statue * 1.05, zc - 0.3, xEnd - 0.28, y + 2.0 + p.statue * 1.05, zc + 0.3));
+  // the two leaves stand open, turned in against the jambs of the passage (their iron scrolls on the
+  // face that shuts outward, now turned to the passage)
   for (const s of [-1, 1]) {
-    const za = zc + s * 0.36, zb = zc + s * wN, zl = Math.min(za, zb), zh = Math.max(za, zb);
-    bag.add('wood_dark', box(xd - 0.08, y, zl + 0.01, xd + 0.08, doorTop - 0.01, zh - 0.01));
-    const iron = [];
+    const lw = wN - 0.36, zh = zc + s * (wN - 0.06), zf = zc + s * (wN - 0.22), zl = Math.min(zh, zf), zm = Math.max(zh, zf), xh = xBack + 0.02;
+    bag.add('wood_dark', box(xh, y + 0.01, zl, xh + lw, doorTop - 0.01, zm));
+    const iron = [], zi = zc + s * (wN - 0.26);
     for (const hy of [0.18, 0.42, 0.66, 0.88]) {
       const yy = y + p.door * hy;
-      iron.push(...box(xd - 0.12, yy - 0.05, zl + 0.1, xd - 0.08, yy + 0.05, zh - 0.1).attributes.position.array);
-      // the scrolls branching off each strap
-      for (let q = 1; q < 4; q++) { const zq = zl + (zh - zl) * q / 4; bars(iron, [xd - 0.1, 0], [0, 1], ringPts(zq, yy + 0.32, 0.28, 8, -Math.PI * 0.95, -Math.PI * 0.05), 0.04, 0.035); bars(iron, [xd - 0.1, 0], [0, 1], ringPts(zq, yy - 0.32, 0.28, 8, Math.PI * 0.05, Math.PI * 0.95), 0.04, 0.035); }
+      iron.push(...box(xh + 0.1, yy - 0.05, Math.min(zi, zf), xh + lw - 0.1, yy + 0.05, Math.max(zi, zf)).attributes.position.array);
+      for (let q = 1; q < 4; q++) { const xq = xh + lw * q / 4; bars(iron, [0, zf - s * 0.02], [1, 0], ringPts(xq, yy + 0.32, 0.28, 8, -Math.PI * 0.95, -Math.PI * 0.05), 0.04, 0.035); bars(iron, [0, zf - s * 0.02], [1, 0], ringPts(xq, yy - 0.32, 0.28, 8, Math.PI * 0.05, Math.PI * 0.95), 0.04, 0.035); }
     }
     bag.add('iron', fromTriangles(iron));
+    col.rect([xh, zl, xh + lw, zm], y, doorTop);
   }
   // lintels and tympanum: two bands of figures and the field above with its own
   const tA = { r: wN, pointed: f }, TH = archRise(tA), ty = y + S;
@@ -256,8 +259,14 @@ function portal(bag, col, p) {
     bag.add(L, box(xEnd - 0.4, ty + TH * 0.68, zc - 0.55, xEnd - 0.04, ty + TH * 0.76, zc + 0.55));
     for (const s of [-1, 1]) { figure(bag, xEnd - 0.16, ty + 0.15, zc + s * wN * 0.38, TH * 0.42, { wings: true }); figure(bag, xEnd - 0.16, ty + 0.1, zc + s * wN * 0.7, TH * 0.32, { crown: s > 0 }); }
   }
-  col.rect([x, z0, xBack, z1], y, y + top);
+  // the jambs and the splays are solid, the trumeau stands in the middle; the door opens through
+  col.rect([x, z0, xBack, zc - wN], y, y + top); col.rect([x, zc + wN, xBack, z1], y, y + top);
+  col.rect([xEnd - 0.84, zc - 0.36, xBack, zc + 0.36], y, doorTop);
+  col.rect([xEnd - 0.4, zc - wN, xBack, zc + wN], doorTop, y + top);
 }
+
+/** A floor of flags over the rect r, its top 2 cm over the ground at y. */
+function floorPiece(bag, col, r, y) { bag.add('flagstone', box(r[0], y - 0.1, r[1], r[2], y + 0.02, r[3])); col.floor(r, y + 0.02); }
 
 // ── the cathedral ─────────────────────────────────────────────────────────────────────────────
 
@@ -267,7 +276,7 @@ function notreDame(el, ctx) {
   // plan (x from the west front, z from the axis)
   const XF = X0 + 1, XA = X0 + 4, XT = X0 + 13, ZF = 20.5;
   const BAY = 6.2, NB = 8, XTR0 = XT + NB * BAY, XTR1 = XTR0 + 14, CB = 6.4, NCB = 4, XAP = XTR1 + NCB * CB;
-  const ZN = 7, ZT = 13, ZC = 21, ZU0 = 18.6, ZU1 = 23.6, ZCC = 17, ZUC0 = 16, ZUC1 = 21;   // walls; nave uprights; the choir's outer wall and uprights
+  const ZN = 7, ZT = 13, ZC = 21, ZU0 = 18.6, ZU1 = 23.6, ZCC = 17, ZUC0 = 16.6, ZUC1 = 21;   // walls; nave uprights; the choir's outer wall and uprights
   const EAVE = 34, RIDGE = 44.5, TRIB = 21.8, TRIBR = 23, CHAP = 11.5, CHAPR = 13.8;
   const Z = (v) => cz + v;
 
@@ -293,8 +302,14 @@ function notreDame(el, ctx) {
   portal(bag, col, { ...side, x: XF, z0: Z(-17.6), z1: Z(-7.4), y, xBack: XA, scheme: 'virgin', crowns: true });
   portal(bag, col, { x: XF, z0: Z(-4.6), z1: Z(4.6), y, W0: 4.45, N: 6, dw: 0.24, dd: 0.42, spring: 9.5, door: 6.4, lintel: 1.15, base: 2.6, statue: 2.35, top: 19.45, xBack: XA, scheme: 'judgement' });
   portal(bag, col, { ...side, x: XF, z0: Z(7.4), z1: Z(17.6), y, xBack: XA, scheme: 'anne', trumeauCrown: false });
-  // the core of the front behind the portals and up to the great gallery
-  bag.add(L, box(XA, Y(-0.5), Z(-ZF), XT, Y(36.8), Z(ZF))); col.rect([XA, Z(-ZF), XT, Z(ZF)], y, Y(36.8));
+  // behind the central portal, the west bay of the nave between the towers, open to its high vault
+  // (the rose in its west wall); the transverse wall to the nave with the nave's arch in it
+  const SP = 6.4, VS = 23.5, VC = 33.5, out0 = [];
+  for (const s of [-1, 1]) bag.add(L, box(X0 + 2.3, Y(24.6), Z(Math.min(s * 5.4, s * 6)), XA, Y(36.8), Z(Math.max(s * 5.4, s * 6))));
+  vault(bag, (u, v) => [XA + u * (XT - 0.6 - XA), Z(-6 + 12 * v)], { spring: Y(26), crown: Y(36.3), f: 0.5, nu: 10, nv: 12 });
+  archWall(out0, (u, yy, d) => [XT - 0.6 + d, yy, Z(u)], { u0: -6, u1: 6, d0: 0, d1: 0.6, y0: Y(0), y1: Y(36.4), openings: [{ uc: 0, r: 5.6, sill: Y(0), spring: Y(VS), f: 0.97 }] });
+  bag.add(L, fromTriangles(out0));
+  floorPiece(bag, col, [XA, Z(-6), XT, Z(6)], y);
 
   // the Gallery of Kings: twenty-eight kings of Judah under an arcade, on a ledge some 20 m up
   const XK = XF + 0.6;
@@ -356,7 +371,21 @@ function notreDame(el, ctx) {
   const TX0 = X0 + 3.4, TX1 = XT + 3.5;
   for (const s of [-1, 1]) {
     const za = s < 0 ? -ZF : 6.0, zb = s < 0 ? -6.0 : ZF;
-    bag.add(L, box(X0 + 3.4, Y(-0.5), Z(za), TX1, Y(43.4), Z(zb))); col.rect([X0 + 3.4, Z(za), TX1, Z(zb)], y, Y(43.4));
+    // the tower's mass over its vaulted ground floor, the floor open to the aisles and to the nave's west bay
+    const A = (a, b) => Z(Math.min(s * a, s * b)), Bz = (a, b) => Z(Math.max(s * a, s * b));
+    bag.add(L, box(X0 + 3.4, Y(36.8), Z(za), TX1, Y(43.4), Z(zb))); col.rect([X0 + 3.4, Z(za), TX1, Z(zb)], Y(36.8), Y(43.4));
+    bag.add(L, box(XA, Y(11), A(6, 20.5), XT, Y(36.8), Bz(6, 20.5))); bag.add(L, box(XT, Y(11), A(7, 20.5), TX1, Y(36.8), Bz(7, 20.5))); bag.add(L, box(XT, Y(EAVE), A(6, 7), TX1, Y(36.8), Bz(6, 7)));
+    col.rect([XA, A(6, 20.5), TX1, Bz(6, 20.5)], Y(11), Y(36.8));
+    const XC0 = XA + (XT - 1.2 - XA) / 2, tw = [];
+    archWall(tw, (u, yy, d) => [u, yy, Z(s * d)], { u0: XA, u1: XT - 1.2, d0: 6, d1: 7, y0: Y(0), y1: Y(11), openings: [{ uc: XC0, r: 2.4, sill: Y(0), spring: Y(5.5), f: 0.75 }] });
+    bag.add(L, fromTriangles(tw));
+    col.rect([XA, A(6, 7), XC0 - 2.4, Bz(6, 7)], y, Y(11)); col.rect([XC0 + 2.4, A(6, 7), XT - 1.2, Bz(6, 7)], y, Y(11));
+    bag.add(L, box(XA, Y(-0.5), A(19.5, 20.5), XT - 1.2, Y(11), Bz(19.5, 20.5))); col.rect([XA, A(19.5, 20.5), XT - 1.2, Bz(19.5, 20.5)], y, Y(11));
+    // the east piers carrying the tower's east wall, between the nave, the two aisles and the outer wall
+    for (const [a, b] of [[6, 7.6], [12.3, 13.7], [19.5, 21.1]]) { bag.add(L, box(XT - 1.2, Y(-0.5), A(a, b), XT + 1.2, Y(11), Bz(a, b))); col.rect([XT - 1.2, A(a, b), XT + 1.2, Bz(a, b)], y, Y(11)); }
+    pier(bag, XC0, Z(s * 13), Y(0), 4.6, 0.6); col.circle(XC0, Z(s * 13), 0.75, y, Y(5.8));
+    for (const [x0, x1] of [[XA, XC0], [XC0, XT - 1.2]]) for (const [d0, d1] of [[7, 13], [13, 19.5]]) vault(bag, (u, v) => [x0 + u * (x1 - x0), Z(s * (d0 + v * (d1 - d0)))], { spring: Y(5.8), crown: Y(10.4), nu: 6, nv: 6, wallRibs: false, ribN: 8 });
+    floorPiece(bag, col, [XA, A(7, 19.5), XT + 1.2, Bz(7, 19.5)], y);
     const faces = [[[TX0 + 0.7, Z(za)], [0, 1], zb - za], [[TX1 - 0.7, Z(za)], [0, 1], zb - za], [[TX0, Z(za) + 0.7], [1, 0], TX1 - TX0], [[TX0, Z(zb) - 0.7], [1, 0], TX1 - TX0]];
     for (const [o, u, Ln] of faces) {
       const bays = [Ln / 2 - 2.6, Ln / 2 + 2.6];
@@ -386,12 +415,15 @@ function notreDame(el, ctx) {
   // the nave's west gable behind the gallery
   { const g = []; prism(g, [[XT, Y(EAVE), Z(-ZN - 0.4)], [XT, Y(EAVE), Z(ZN + 0.4)], [XT, Y(RIDGE + 0.6), cz]], [0.9, 0, 0]); bag.add(L, fromTriangles(g)); }
 
-  // ── nave, choir: the three volumes in section, the clerestory, the tribunes, the chapels ──
+  // ── nave, choir: in section the main vessel, the inner aisle under its tribune, the outer aisle (the
+  // nave's with chapels between the buttresses), the clerestory; inside, the arcade on cylindrical piers ──
+  // (walls: the clerestory's ZN−1…ZN, the tribune's outer wall ZT−0.9…ZT+0.1 on the aisles' columns, the outer wall zc−0.9…zc+0.1)
+  const TF = 10.6, TS = 15.2, TCR = 20.8;                                     // the tribunes' floor, their vaults' springing and crown
   const range = (xa, xb, zc, zu0, zu1, chapels) => {
+    const n = Math.round((xb - xa) / BAY), bw = (xb - xa) / n, nave = xa === XT;
     for (const s of [-1, 1]) {
       const zlo = (a, b) => Z(Math.min(s * a, s * b)), zhi = (a, b) => Z(Math.max(s * a, s * b));
-      bag.add(L, box(xa, Y(-0.5), zlo(ZN, ZT), xb, Y(TRIB), zhi(ZN, ZT)));
-      bag.add(L, box(xa, Y(-0.5), zlo(ZT, zc), xb, Y(CHAP), zhi(ZT, zc))); col.rect([xa, zlo(ZN, zc), xb, zhi(ZN, zc)], y, Y(TRIB));
+      const M = (u, yy, d) => [u, yy, Z(s * d)], wA = [], wB = [], wC = [], wT = [], wO = [];
       // the lead roofs: the tribune's terrace-roof, the outer aisle's lean-to
       const lean = (z0, y0, z1, y1) => { const r = []; hexa(r, [[xa, Y(y0 - 0.25), Z(s * z0)], [xb, Y(y0 - 0.25), Z(s * z0)], [xb, Y(y1 - 0.25), Z(s * z1)], [xa, Y(y1 - 0.25), Z(s * z1)]], [[xa, Y(y0), Z(s * z0)], [xb, Y(y0), Z(s * z0)], [xb, Y(y1), Z(s * z1)], [xa, Y(y1), Z(s * z1)]]); bag.add(LEAD, fromTriangles(r)); };
       lean(ZN - 0.1, TRIBR, ZT + 0.35, TRIB + 0.05);
@@ -400,25 +432,66 @@ function notreDame(el, ctx) {
       bag.add(L, box(xa, Y(CHAP - 0.45), zlo(zc, zc + 0.3), xb, Y(CHAP - 0.2), zhi(zc, zc + 0.3)));
       bag.add(L, box(xa, Y(TRIB - 0.45), zlo(ZT, ZT + 0.3), xb, Y(TRIB - 0.2), zhi(ZT, ZT + 0.3)));
       bag.add(L, box(xa, Y(EAVE - 0.5), zlo(ZN, ZN + 0.35), xb, Y(EAVE - 0.15), zhi(ZN, ZN + 0.35)));
-    }
-    bag.add(L, box(xa, Y(-0.5), Z(-ZN), xb, Y(EAVE), Z(ZN))); col.rect([xa, Z(-ZN), xb, Z(ZN)], y, Y(EAVE));
-    bag.add(LEAD, frustum([xa, Z(-ZN - 0.45), xb, Z(ZN + 0.45)], Y(EAVE), Y(RIDGE), 0, 0, ZN + 0.45, ZN + 0.45));
-    bag.add(LEAD, box(xa, Y(RIDGE - 0.05), cz - 0.12, xb, Y(RIDGE + 0.25), cz + 0.12));
-    const n = Math.round((xb - xa) / BAY), bw = (xb - xa) / n;
-    for (let i = 0; i < n; i++) {
-      const uc = (i + 0.5) * bw;
-      for (const s of [-1, 1]) {
-        if (i > 0 || xa !== XT) {                                  // the first bay of the nave is engaged in the towers
-          win(ctx, [xa, Z(s * (ZN + 0.06))], [1, 0], uc, 4.0, Y(24.0), Y(30.0), 2, -s);
-          win(ctx, [xa, Z(s * (ZT + 0.06))], [1, 0], uc, 2.8, Y(CHAPR + 0.8), Y(18.4), 2, -s);
+      const outerOps = [];
+      for (let i = 0; i < n; i++) {
+        const u0 = xa + i * bw, u1 = u0 + bw, uc = (u0 + u1) / 2, engaged = i === 0 && nave, ua = engaged ? u0 + 1.2 : u0;
+        // the clerestory wall: the arcade's arch, the tribune's opening (three arches on two colonnettes under a
+        // relieving arch), the window
+        const ra = (u1 - ua) / 2 - (engaged ? 0.45 : 0.9), ca = engaged ? ua + 0.45 + ra : uc;
+        archWall(wA, M, { u0, u1, d0: ZN - 1, d1: ZN, y0: Y(SP), y1: Y(TF), openings: [{ uc: ca, r: ra, sill: Y(SP), spring: Y(SP), f: 0.75 }] });
+        if (!engaged) {
+          const rt = bw / 2 - 0.75;
+          archWall(wB, M, { u0, u1, d0: ZN - 1, d1: ZN, y0: Y(TF), y1: Y(22.5), openings: [{ uc, r: rt, sill: Y(TF + 0.9), spring: Y(16.0), f: 0.75 }] });
+          const ty = [], k3 = (2 * rt) / 3;
+          archWall(ty, M, { u0: uc - rt, u1: uc + rt, d0: ZN - 0.7, d1: ZN - 0.35, y0: Y(15.0), y1: Y(16.0) + rise(rt, 0.75), openings: [0, 1, 2].map((k) => ({ uc: uc - rt + (k + 0.5) * k3, r: k3 / 2 - 0.1, sill: Y(15.0), spring: Y(15.0), f: 0.8 })) });
+          bag.add(L, fromTriangles(ty));
+          for (const k of [1, 2]) bag.add(L, lathe([[0.16, 0], [0.12, 0.18], [0.12, 15.0 - TF - 1.2], [0.2, 15.0 - TF - 0.95], [0.22, 15.0 - TF - 0.9]], 8, null, uc - rt + k * k3, Y(TF + 0.9), Z(s * (ZN - 0.52))));
+          archWall(wC, M, { u0, u1, d0: ZN - 1, d1: ZN, y0: Y(22.5), y1: Y(EAVE), openings: [{ uc, r: 2.0, sill: Y(VS), spring: Y(28.6), f: 0.75 }] });
+        } else { archWall(wB, M, { u0, u1, d0: ZN - 1, d1: ZN, y0: Y(TF), y1: Y(EAVE), openings: [] }); }
+        // the tribune's outer wall on the aisles' columns: the arcade's arch, the tribune's window
+        const rz = (u1 - ua) / 2 - (engaged ? 0.4 : 0.75), cz2 = engaged ? ua + 0.4 + rz : uc;
+        archWall(wT, M, { u0, u1, d0: ZT - 0.9, d1: ZT + 0.1, y0: Y(SP), y1: Y(TF), openings: [{ uc: cz2, r: rz, sill: Y(SP), spring: Y(SP), f: 0.7 }] });
+        archWall(wT, M, { u0, u1, d0: ZT - 0.9, d1: ZT + 0.1, y0: Y(TF), y1: Y(TRIB), openings: engaged ? [] : [{ uc, r: 1.4, sill: Y(CHAPR + 0.8), spring: Y(18.4), f: 0.75 }] });
+        outerOps.push(chapels ? { uc, r: 1.7, sill: Y(2.8), spring: Y(8.0), f: 0.75 } : { uc, r: 1.3, sill: Y(3.2), spring: Y(7.6), f: 0.75 });
+        if (!engaged) {
+          win(ctx, [xa, Z(s * (ZN - 0.5))], [1, 0], uc - xa, 4.0, Y(VS), Y(28.6), 2, -s);
+          win(ctx, [xa, Z(s * (ZT - 0.4))], [1, 0], uc - xa, 2.8, Y(CHAPR + 0.8), Y(18.4), 2, -s);
         }
-        if (chapels) win(ctx, [xa, Z(s * (zc + 0.06))], [1, 0], uc, 3.4, Y(2.8), Y(8.0), 4, -s);
-        else win(ctx, [xa, Z(s * (zc + 0.06))], [1, 0], uc, 2.6, Y(3.2), Y(7.6), 2, -s);
+        if (chapels) win(ctx, [xa, Z(s * (zc - 0.4))], [1, 0], uc - xa, 3.4, Y(2.8), Y(8.0), 4, -s);
+        else win(ctx, [xa, Z(s * (zc - 0.4))], [1, 0], uc - xa, 2.6, Y(3.2), Y(7.6), 2, -s);
+        // the vaults of the inner aisle, the tribune, the outer aisle (and the chapel between the buttresses); the tribune's floor
+        const SM = { nu: 6, nv: 6, wallRibs: false, ribN: 8, last: i === n - 1 };
+        const Q = (d0, d1, x0 = u0, x1 = u1) => (u, v) => [x0 + u * (x1 - x0), Z(s * (d0 + v * (d1 - d0)))];
+        vault(bag, Q(ZN - 0.5, ZT - 0.4), { spring: Y(SP), crown: Y(10.1), ...SM });
+        if (!engaged) vault(bag, Q(ZN - 0.5, ZT - 0.4), { spring: Y(TS), crown: Y(TCR), ...SM });
+        bag.add('flagstone', box(u0, Y(TF - 0.3), zlo(ZN, ZT - 0.9), u1, Y(TF), zhi(ZN, ZT - 0.9)));
+        if (chapels) { vault(bag, Q(ZT - 0.4, zu0), { spring: Y(SP), crown: Y(10.8), ...SM }); vault(bag, Q(zu0, zc - 0.5, u0 + (i ? 1.0 : 1.2), u1 - (i < n - 1 ? 1.0 : 0)), { spring: Y(SP), crown: Y(10.8), nu: 5, nv: 4, wallRibs: false, ribN: 8 }); }
+        else vault(bag, Q(ZT - 0.4, zc - 0.5), { spring: Y(SP), crown: Y(10.8), ...SM });
+      }
+      archWall(wO, M, { u0: xa, u1: xb, d0: zc - 0.9, d1: zc + 0.1, y0: Y(-0.5), y1: Y(CHAP), openings: outerOps });
+      for (const w of [wA, wB, wC, wT, wO]) bag.add(L, fromTriangles(w));
+      col.rect([xa, zlo(zc - 0.9, zc + 0.1), xb, zhi(zc - 0.9, zc + 0.1)], y, Y(CHAP));
+      // the piers of the arcade, the columns between the aisles (every other one with attached shafts), the
+      // vaulting shafts up the clerestory wall from each pier to the vault
+      for (let i = 1; i < n; i++) {
+        const x = xa + i * bw;
+        pier(bag, x, Z(s * (ZN - 0.5)), Y(0), SP - 1.2, 0.7); col.circle(x, Z(s * (ZN - 0.5)), 0.85, y, Y(SP));
+        pier(bag, x, Z(s * (ZT - 0.4)), Y(0), SP - 1.2, 0.5); col.circle(x, Z(s * (ZT - 0.4)), 0.65, y, Y(SP));
+        if (i % 2 === 0) for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; bag.add(L, lathe([[0.09, 0], [0.09, SP - 1.6]], 6, null, x + Math.cos(a) * 0.55, Y(0.95), Z(s * (ZT - 0.4)) + Math.sin(a) * 0.55)); }
+        shafts(x, s, ZN - 1);
       }
     }
+    // the main vessel's vaults: sexpartite, over two bays each
+    for (let i = 0; i + 1 < n; i += 2) vault(bag, (u, v) => [xa + (i + 2 * u) * bw, Z(-(ZN - 1) + 2 * (ZN - 1) * v)], { spring: Y(VS), crown: Y(VC), sex: true, nu: 16, nv: 12, last: i + 2 >= n && xb !== XAP });
+    floorPiece(bag, col, [xa, Z(-(zc - 0.9)), xb, Z(zc - 0.9)], y);
+    const n2 = Math.round((xb - xa) / BAY);
     // at each bay's division: the pilaster on the clerestory, the upright, the flyer, its pinnacle and gargoyle
     // (none against the towers or the transept; the choir's last stands at the apse's springing)
-    for (let i = 1; i <= (xb === XAP ? n : n - 1); i++) for (const s of [-1, 1]) flyer(xa + i * bw, s, zu0, zu1);
+    for (let i = 1; i <= (xb === XAP ? n2 : n2 - 1); i++) for (const s of [-1, 1]) flyer(xa + i * bw, s, zu0, zu1);
+  };
+  /** Three shafts up the clerestory wall's face at d (from the axis) from the arcade's abacus to the vault's springing. */
+  const shafts = (x, s, d) => {
+    for (const o of [-0.26, 0, 0.26]) bag.add(L, lathe([[0.12, 0], [0.12, VS - SP - 0.5], [0.2, VS - SP - 0.25], [0.22, VS - SP]], 8, null, x + o, Y(SP), Z(s * (d - 0.12))));
   };
   const flyer = (x, s, zu0, zu1) => {
     const zl = (a, b) => Z(Math.min(s * a, s * b)), zh = (a, b) => Z(Math.max(s * a, s * b));
@@ -444,58 +517,120 @@ function notreDame(el, ctx) {
   range(XT, XTR0, ZC, ZU0, ZU1, true);
   range(XTR1, XAP, ZCC, ZUC0, ZUC1, false);
 
-  // ── the transept: the arms to just beyond the chapels, the gables with their roses ──
-  const ZTR = 23.2, XC = (XTR0 + XTR1) / 2;
-  bag.add(L, box(XTR0, Y(-0.5), Z(-ZTR), XTR1, Y(EAVE), Z(ZTR))); col.rect([XTR0, Z(-ZTR), XTR1, Z(ZTR)], y, Y(EAVE));
+  // ── the transept: the arms to just beyond the chapels, the gables with their roses; inside, the crossing
+  // on its four great piers, the arms open to the aisles and the tribunes ──
+  const ZTR = 23.2, XC = (XTR0 + XTR1) / 2, ZE = ZTR - 1.2;
   bag.add(LEAD, frustum([XTR0 - 0.45, Z(-ZTR), XTR1 + 0.45, Z(ZTR)], Y(EAVE), Y(RIDGE), 7.45, 7.45, 0, 0));
   bag.add(LEAD, box(XC - 0.12, Y(RIDGE - 0.05), Z(-ZTR), XC + 0.12, Y(RIDGE + 0.25), Z(ZTR)));
   for (const s of [-1, 1]) {
+    const A = (a2, b2) => Z(Math.min(s * a2, s * b2)), Bz = (a2, b2) => Z(Math.max(s * a2, s * b2));
     const g = []; prism(g, [[XTR0 - 0.45, Y(EAVE), Z(s * ZTR)], [XTR1 + 0.45, Y(EAVE), Z(s * ZTR)], [XC, Y(RIDGE + 0.7), Z(s * ZTR)]], [0, 0, s * 0.7]); bag.add(L, fromTriangles(g));
-    roseND(bag, [XTR0, Z(s * (ZTR + 0.08))], [1, 0], XC - XTR0, Y(25.6), 4.4, -s, 0.36);
+    // the end wall: the door's window below, five lancets, the rose
+    const we = [], ME = (u, yy, d) => [XTR0 + u, yy, Z(s * d)], E0 = { u0: 0, u1: XTR1 - XTR0, d0: ZE, d1: ZTR };
+    archWall(we, ME, { ...E0, y0: Y(-0.5), y1: Y(13.2), openings: [{ uc: 7, r: 1.7, sill: Y(5.6), spring: Y(10.5), f: 0.75 }] });
+    archWall(we, ME, { ...E0, y0: Y(13.2), y1: Y(20.6), openings: Array.from({ length: 5 }, (_, k) => ({ uc: 2.6 + k * 2.2, r: 0.75, sill: Y(14.5), spring: Y(19.2), f: 0.8 })) });
+    archWall(we, ME, { ...E0, y0: Y(20.6), y1: Y(EAVE), openings: [{ uc: 7, yc: Y(25.6), r: 4.4 }] });
+    bag.add(L, fromTriangles(we));
+    col.rect([XTR0, A(ZE, ZTR), XTR1, Bz(ZE, ZTR)], y, Y(EAVE));
+    roseND(bag, [XTR0, Z(s * (ZTR - 0.6))], [1, 0], XC - XTR0, Y(25.6), 4.4, -s, 0.36);
     const rr = []; bars(rr, [XTR0, Z(s * (ZTR + 0.08))], [1, 0], ringPts(XC - XTR0, Y(25.6), 4.65, 40), 0.4, 0.3); bag.add(L, fromTriangles(rr));
-    for (let k = 0; k < 5; k++) win(ctx, [XTR0, Z(s * (ZTR + 0.06))], [1, 0], 2.6 + k * 2.2, 1.5, Y(14.5), Y(19.2), 2, -s, 0.8);
-    win(ctx, [XTR0, Z(s * (ZTR + 0.06))], [1, 0], 7, 3.4, Y(5.6), Y(10.5), 2, -s);
+    for (let k = 0; k < 5; k++) win(ctx, [XTR0, Z(s * (ZTR - 0.6))], [1, 0], 2.6 + k * 2.2, 1.5, Y(14.5), Y(19.2), 2, -s, 0.8);
+    win(ctx, [XTR0, Z(s * (ZTR - 0.6))], [1, 0], 7, 3.4, Y(5.6), Y(10.5), 2, -s);
     roseND(bag, [XTR0, Z(s * (ZTR + 0.72))], [1, 0], 7, Y(38.4), 1.5, -s, 0.3);
     for (const x of [XTR0 - 1.0, XTR1 + 1.0]) {
       bag.add(L, box(x - 1.0, Y(-0.5), Z(Math.min(s * (ZTR - 1), s * (ZTR + 1.8))), x + 1.0, Y(EAVE + 1), Z(Math.max(s * (ZTR - 1), s * (ZTR + 1.8)))));
       pinnacle(bag, x, Y(EAVE + 1), Z(s * (ZTR + 0.4)), 1.7, 6.5);
       gargoyle(bag, x, Y(EAVE + 0.4), Z(s * (ZTR + 1.8)), [0, s], 1.6);
     }
+    // the arm's side walls: on the west the nave's aisles and tribune open into it, on the east the choir's
+    for (const [x0, sg, zo] of [[XTR0, 1, ZC], [XTR1, -1, ZCC]]) {
+      const ws = [], MW = (u, yy, d) => [x0 + sg * d, yy, Z(s * u)], W0 = { u0: ZN, u1: ZE, d0: 0, d1: 0.9 };
+      const o1 = (ZT + 0.1 + zo - 0.9) / 2, r1 = (zo - 0.9 - ZT - 0.1) / 2 - 0.2;
+      archWall(ws, MW, { ...W0, y0: Y(-0.5), y1: Y(TF), openings: [{ uc: (ZN + ZT - 0.9) / 2, r: 2.3, sill: Y(0), spring: Y(SP), f: 0.75 }, { uc: o1, r: r1, sill: Y(0), spring: Y(SP), f: r1 > 2 ? 0.6 : 0.75 }] });
+      archWall(ws, MW, { ...W0, y0: Y(TF), y1: Y(22.5), openings: [{ uc: (ZN + ZT - 0.9) / 2, r: 2.2, sill: Y(TF + 0.9), spring: Y(16), f: 0.75 }] });
+      archWall(ws, MW, { ...W0, y0: Y(22.5), y1: Y(EAVE), openings: [{ uc: 14, r: 2.0, sill: Y(VS), spring: Y(28.6), f: 0.75 }] });
+      bag.add(L, fromTriangles(ws));
+      win(ctx, [x0 + sg * 0.45, cz], [0, 1], s * 14, 4.0, Y(VS), Y(28.6), 2, -sg);
+      const xl = Math.min(x0, x0 + sg * 0.9), xh = Math.max(x0, x0 + sg * 0.9);
+      col.rect([xl, A(ZT - 0.9, ZT + 0.1), xh, Bz(ZT - 0.9, ZT + 0.1)], y, Y(TF)); col.rect([xl, A(zo - 0.9, ZE), xh, Bz(zo - 0.9, ZE)], y, Y(EAVE));
+      // the corner of the crossing over its pier, up to the vault
+      bag.add(L, box(xl, Y(SP), A(ZN - 1, ZN), xh, Y(EAVE), Bz(ZN - 1, ZN)));
+      // the great pier of the crossing, its shafts
+      pier(bag, x0, Z(s * (ZN - 0.5)), Y(0), SP - 1.2, 1.0); col.circle(x0, Z(s * (ZN - 0.5)), 1.2, y, Y(SP));
+      shafts(x0, s, ZN - 1);
+    }
+    vault(bag, (u, v) => [XTR0 + v * (XTR1 - XTR0), Z(s * (ZN - 1 + u * (ZE - ZN + 1)))], { spring: Y(VS), crown: Y(VC), nu: 12, nv: 10 });
   }
+  vault(bag, (u, v) => [XTR0 + u * (XTR1 - XTR0), Z(-(ZN - 1) + 2 * (ZN - 1) * v)], { spring: Y(VS), crown: Y(VC), nu: 10, nv: 10, transverse: false, wallRibs: false });
+  floorPiece(bag, col, [XTR0, Z(-ZE), XTR1, Z(ZE)], y);
 
-  // ── the apse: the half-polygon of the choir, the ambulatories round it, the uprights and flyers ──
-  const SIDES = 5, a0 = -90, step = 180 / SIDES;
+  // ── the apse: the half-polygon of the choir, the ambulatories round it, the uprights and flyers (radii to
+  // the corners: the straight walls run on into the polygon) ──
+  const SIDES = 5, a0 = -90, step = 180 / SIDES, C18 = Math.cos(step / 2 * D2R);
   const P = (r, a, yy) => [XAP + r * Math.cos(a * D2R), yy, cz + r * Math.sin(a * D2R)];
-  const half = (r, y0, y1, mat) => { const pts = Array.from({ length: SIDES + 1 }, (_, k) => P(r, a0 + k * step, Y(y0))); const g = []; prism(g, pts, [0, y1 - y0, 0]); bag.add(mat, fromTriangles(g)); };
-  half(ZN / Math.cos(step / 2 * D2R), -0.5, EAVE, L);
-  half(ZT / Math.cos(step / 2 * D2R), -0.5, TRIB, L);
-  half(ZCC / Math.cos(step / 2 * D2R), -0.5, CHAP, L);
-  col.circle(XAP, cz, ZCC, y, Y(TRIB));
-  STYLES.gothic.elements.apse_roof({ c: [XAP, cz], sides: SIDES, a0: -90, a1: 90, R: ZN / Math.cos(step / 2 * D2R) + 0.5, y: Y(EAVE), ridge: Y(RIDGE) }, ctx);
+  STYLES.gothic.elements.apse_roof({ c: [XAP, cz], sides: SIDES, a0: -90, a1: 90, R: ZN + 0.5, y: Y(EAVE), ridge: Y(RIDGE) }, ctx);
   const ringRoof = (r0, y0, r1, y1) => {
     const g = [];
     for (let k = 0; k < SIDES; k++) {
-      const aa = a0 + k * step, bb = aa + step, R0 = r0 / Math.cos(step / 2 * D2R), R1 = r1 / Math.cos(step / 2 * D2R);
-      hexa(g, [P(R0, aa, Y(y0 - 0.25)), P(R0, bb, Y(y0 - 0.25)), P(R1, bb, Y(y1 - 0.25)), P(R1, aa, Y(y1 - 0.25))], [P(R0, aa, Y(y0)), P(R0, bb, Y(y0)), P(R1, bb, Y(y1)), P(R1, aa, Y(y1))]);
+      const aa = a0 + k * step, bb = aa + step;
+      hexa(g, [P(r0, aa, Y(y0 - 0.25)), P(r0, bb, Y(y0 - 0.25)), P(r1, bb, Y(y1 - 0.25)), P(r1, aa, Y(y1 - 0.25))], [P(r0, aa, Y(y0)), P(r0, bb, Y(y0)), P(r1, bb, Y(y1)), P(r1, aa, Y(y1))]);
     }
     bag.add(LEAD, fromTriangles(g));
   };
   ringRoof(ZN - 0.1, TRIBR, ZT + 0.35, TRIB + 0.05);
   ringRoof(ZT - 0.1, CHAPR, ZCC + 0.35, CHAP + 0.05);
+  const wa = [], fl = [];
   for (let k = 0; k < SIDES; k++) {
-    const am = a0 + (k + 0.5) * step;
-    for (const [r, w, sill, spring, Lc] of [[ZN, 3.2, 24.0, 30.0, 2], [ZT, 3.0, CHAPR + 0.8, 18.4, 2], [ZCC, 3.6, 3.2, 7.6, 2]]) {
-      const c = P(r + 0.06, am, 0), uu = [-Math.sin(am * D2R), Math.cos(am * D2R)], half2 = r * Math.tan(step / 2 * D2R);
-      win(ctx, [c[0] - uu[0] * half2, c[2] - uu[1] * half2], uu, half2, w, Y(sill), Y(spring), Lc, 1);
-    }
+    const aa = a0 + k * step, bb = aa + step, am = aa + step / 2, nk = [Math.cos(am * D2R), Math.sin(am * D2R)], tk = [-nk[1], nk[0]];
+    const MK = (rr) => (u, yy, d) => { const f = d / rr; return [XAP + (nk[0] * rr * C18 + tk[0] * u) * f, yy, cz + (nk[1] * rr * C18 + tk[1] * u) * f]; };
+    const hw = (rr) => rr * Math.sin(step / 2 * D2R);
+    // the hemicycle's wall: its arcade, the tribune's opening, the window
+    const m1 = MK(ZN - 0.5), h1 = hw(ZN - 0.5);
+    archWall(wa, m1, { u0: -h1, u1: h1, d0: ZN - 1, d1: ZN, y0: Y(SP), y1: Y(TF), openings: [{ uc: 0, r: h1 - 0.95, sill: Y(SP), spring: Y(SP), f: 0.9 }] });
+    archWall(wa, m1, { u0: -h1, u1: h1, d0: ZN - 1, d1: ZN, y0: Y(TF), y1: Y(22.5), openings: [{ uc: 0, r: 1.2, sill: Y(TF + 0.9), spring: Y(16), f: 0.75 }] });
+    archWall(wa, m1, { u0: -h1, u1: h1, d0: ZN - 1, d1: ZN, y0: Y(22.5), y1: Y(EAVE), openings: [{ uc: 0, r: 1.5, sill: Y(VS), spring: Y(28.6), f: 0.75 }] });
+    const c1 = m1(0, 0, ZN - 0.5); win(ctx, [c1[0], c1[2]], tk, 0, 3.0, Y(VS), Y(28.6), 2, 1);
+    // the tribune's outer wall on the ambulatory's columns, its window
+    const m2 = MK(ZT - 0.4), h2 = hw(ZT - 0.4);
+    archWall(wa, m2, { u0: -h2, u1: h2, d0: ZT - 0.9, d1: ZT + 0.1, y0: Y(SP), y1: Y(TF), openings: [{ uc: 0, r: h2 - 0.75, sill: Y(SP), spring: Y(SP), f: 0.6 }] });
+    archWall(wa, m2, { u0: -h2, u1: h2, d0: ZT - 0.9, d1: ZT + 0.1, y0: Y(TF), y1: Y(TRIB), openings: [{ uc: 0, r: 1.5, sill: Y(CHAPR + 0.8), spring: Y(18.4), f: 0.75 }] });
+    const c2 = m2(0, 0, ZT - 0.4); win(ctx, [c2[0], c2[2]], tk, 0, 3.0, Y(CHAPR + 0.8), Y(18.4), 2, 1);
+    // the outer wall of the ambulatory, its window
+    const m3 = MK(ZCC - 0.4), h3 = hw(ZCC - 0.4);
+    archWall(wa, m3, { u0: -h3, u1: h3, d0: ZCC - 0.9, d1: ZCC + 0.1, y0: Y(-0.5), y1: Y(CHAP), openings: [{ uc: 0, r: 1.8, sill: Y(3.2), spring: Y(7.6), f: 0.75 }] });
+    const c3 = m3(0, 0, ZCC - 0.4); win(ctx, [c3[0], c3[2]], tk, 0, 3.6, Y(3.2), Y(7.6), 2, 1);
+    const pa = P(ZCC - 0.4, aa, 0), pb = P(ZCC - 0.4, bb, 0); col.segment([pa[0], pa[2]], [pb[0], pb[2]], 1.0, y, Y(CHAP));
+    // the vaults of the ambulatories and of the tribune over the inner one; the tribune's floor
+    const Qa = (r0, r1) => (u, v) => { const A0 = P(r0, aa, 0), A1 = P(r0, bb, 0), B0 = P(r1, aa, 0), B1 = P(r1, bb, 0); const lx = (p, q, t) => [p[0] + (q[0] - p[0]) * t, p[2] + (q[2] - p[2]) * t]; const i0 = lx(A0, A1, u), o0 = lx(B0, B1, u); return [i0[0] + (o0[0] - i0[0]) * v, i0[1] + (o0[1] - i0[1]) * v]; };
+    const SA = { nu: 6, nv: 6, wallRibs: false, ribN: 8, last: k === SIDES - 1 };
+    vault(bag, Qa(ZN - 0.5, ZT - 0.4), { spring: Y(SP), crown: Y(10.1), ...SA });
+    vault(bag, Qa(ZN - 0.5, ZT - 0.4), { spring: Y(TS), crown: Y(TCR), ...SA });
+    vault(bag, Qa(ZT - 0.4, ZCC - 0.5), { spring: Y(SP), crown: Y(10.8), ...SA });
+    hexa(fl, [P(ZN, aa, Y(TF - 0.3)), P(ZN, bb, Y(TF - 0.3)), P(ZT - 0.9, bb, Y(TF - 0.3)), P(ZT - 0.9, aa, Y(TF - 0.3))], [P(ZN, aa, Y(TF)), P(ZN, bb, Y(TF)), P(ZT - 0.9, bb, Y(TF)), P(ZT - 0.9, aa, Y(TF))]);
+    const fp = []; prism(fp, [P(0, aa, Y(-0.1)), P(ZCC - 0.9, aa, Y(-0.1)), P(ZCC - 0.9, bb, Y(-0.1))], [0, 0.12, 0]); bag.add('flagstone', fromTriangles(fp));
   }
+  bag.add(L, fromTriangles(wa)); bag.add('flagstone', fromTriangles(fl));
+  col.floor([XAP, Z(-(ZCC - 0.9)), XAP + ZCC - 0.9, Z(ZCC - 0.9)], Y(0.02));
+  // the piers of the hemicycle and the columns of the ambulatory at the corners, the shafts to the vault
+  for (let k = 0; k <= SIDES; k++) {
+    const a = a0 + k * step, p1 = P(ZN - 0.5, a, 0), p2 = P(ZT - 0.4, a, 0);
+    pier(bag, p1[0], p1[2], Y(0), SP - 1.2, 0.7); col.circle(p1[0], p1[2], 0.85, y, Y(SP));
+    pier(bag, p2[0], p2[2], Y(0), SP - 1.2, 0.5); col.circle(p2[0], p2[2], 0.65, y, Y(SP));
+    const t = [-Math.sin(a * D2R), Math.cos(a * D2R)];
+    for (const o of [-0.26, 0, 0.26]) { const q = P(ZN - 1.12, a, 0); bag.add(L, lathe([[0.12, 0], [0.12, VS - SP - 0.5], [0.2, VS - SP - 0.25], [0.22, VS - SP]], 8, null, q[0] + t[0] * o, Y(SP), q[2] + t[1] * o)); }
+  }
+  STYLES.gothic.elements.apse_vault({ c: [XAP, cz], R: ZN - 1, a0: -90, a1: 90, sides: SIDES, spring: Y(VS), crown: Y(VC), mat: L, ribMat: L }, ctx);
+  // the choir: the jubé across its entrance, the canons' stalls, the high altar in the hemicycle
+  jube(ctx, { xa: XTR1 + 1.3, xb: XTR1 + 4.6, z0: Z(-5.6), z1: Z(5.6), y: Y(0.02), figure });
+  for (const s of [-1, 1]) stalls(ctx, { xa: XTR1 + 4.8, xb: XAP - 0.9, zb: Z(s * 5.6), zf: Z(0), y: Y(0.02) });
+  altar(ctx, { x: XAP + 2.2, z: cz, y: Y(0.02) });
   // the uprights round the apse, at its corners, each with its flyer to the choir's wall
   for (let k = 1; k < SIDES; k++) {
     const a = a0 + k * step, d = [Math.cos(a * D2R), Math.sin(a * D2R)], t = [-d[1], d[0]];
     const Q = (r, s, yy) => [XAP + d[0] * r + t[0] * s, Y(yy), cz + d[1] * r + t[1] * s];
     const up = [];
     for (const [y0, y1, ro] of [[-0.5, 12, ZUC1], [12, 22, ZUC1 - 0.7], [22, 29.5, ZUC1 - 1.4]]) hexa(up, [Q(ZUC0, -1, y0), Q(ZUC0, 1, y0), Q(ro, 1, y0), Q(ro, -1, y0)], [Q(ZUC0, -1, y1), Q(ZUC0, 1, y1), Q(ro, 1, y1), Q(ro, -1, y1)]);
-    const R7 = ZN / Math.cos(step / 2 * D2R);
+    const R7 = ZN;
     hexa(up, [Q(R7 - 0.2, -0.55, TRIBR - 0.3), Q(R7 - 0.2, 0.55, TRIBR - 0.3), Q(R7 + 0.6, 0.55, TRIBR - 0.3), Q(R7 + 0.6, -0.55, TRIBR - 0.3)], [Q(R7 - 0.2, -0.55, EAVE - 0.5), Q(R7 - 0.2, 0.55, EAVE - 0.5), Q(R7 + 0.6, 0.55, EAVE - 0.5), Q(R7 + 0.6, -0.55, EAVE - 0.5)]);
     const N = 14;
     for (let i = 0; i < N; i++) {
