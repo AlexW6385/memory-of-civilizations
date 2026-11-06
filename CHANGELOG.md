@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.44 — Barcelona's Nativity façade in 1910 (2026-11-06)
+- The Nativity façade's three parabolic portals with their sculpture (the Charity trumeau, star, Annunciation and Coronation; Hope and Faith scenes), palm columns on turtle and tortoise, four broken-off towers in timber scaffolding; trams on the Passeig de Gràcia and round the cut corners with overhead wires, closed cars and open jardineres; hackney carriages; the Eixample's court gardens; plane trees in rows.
+
 ## v9.43 — The Süleymaniye külliye (2026-11-06)
 - The four medreses with domed porticoes, chimneyed cells and dershanes, the arasta shops, the darüşşifa with its octagonal pool, the imaret's kitchens and bakery, the hamam with its 3×3 hot room and glass bulbs, the dar'ül-hadis; Iznik tiles in Hürrem Sultan's türbe.
 
