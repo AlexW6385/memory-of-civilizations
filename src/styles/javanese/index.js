@@ -6,6 +6,7 @@
 
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { Matrix4, Vector3 } from '../../core/three.js';
 import { rectRoof, beamTris } from '../ming/index.js';
 import '../qing/index.js';
 
@@ -22,8 +23,8 @@ function redent(cx, cz, a, p) {
 }
 function slab(bag, mat, a, b, y, th, h) { const t = []; beamTris(t, [a[0], y, a[1]], [b[0], y, b[1]], th / 2, h); bag.add(mat, fromTriangles(t)); }
 /** A small stupa (bell, harmika, spire) of radius r at (x, y, z); `lattice` for the pierced ones. */
-function stupa(bag, x, y, z, r, lattice = false) {
-  if (lattice) return latticeStupa(bag, x, y, z, r, lattice);
+function stupa(bag, x, y, z, r, lattice = false, face = null) {
+  if (lattice) return latticeStupa(bag, x, y, z, r, lattice, face);
   const S = r < 1 ? 8 : r < 3 ? 14 : 32, NR = r < 1 ? 4 : 10;
   bag.add(A, lathe([[r * 1.18, 0], [r * 1.18, r * 0.18], [r * 1.05, r * 0.3], [r * 1.0, r * 0.32]], S, null, x, y, z));
   const bell = []; for (let i = 0; i <= NR; i++) { const t = i / NR; bell.push([Math.max(0.001, r * (1 - 0.18 * t) * Math.cos(t * Math.PI / 2) ** 0.7), r * 0.32 + r * 1.25 * Math.sin(t * Math.PI / 2)]); }
@@ -51,7 +52,7 @@ function padma(r, h, n) {
  * the top terrace) and the octagonal spire. Built at the origin and moved, so that all the stupas of
  * a terrace are one shape (drawn as instances).
  */
-function latticeStupa(bag, x, y, z, r, kind) {
+function latticeStupa(bag, x, y, z, r, kind, face) {
   const sq = kind === 'square', M = sq ? 12 : 14, K = sq ? 3 : 2, t0 = 0.08, t1 = sq ? 0.58 : 0.62, th = r * 0.08, bar = sq ? 0.26 : 0.3;
   const out = [], inn = [];
   const P = (a, b, o = 0) => { const t = t0 + (t1 - t0) * b / K, ang = a / M * Math.PI * 2, R = bellR(r, t) - o; return [x + Math.cos(ang) * R, y + bellY(r, t), z + Math.sin(ang) * R]; };
@@ -98,9 +99,9 @@ function latticeStupa(bag, x, y, z, r, kind) {
   bag.add(A, fromTriangles(out.concat(inn)));
   // the floor inside, the lotus cushion, the Buddha
   bag.add(A, padma(r * 1.15, r * 0.32, 16).translate(x, y, z));
-  bag.add(A, lathe([[r * 0.4, 0], [r * 0.42, r * 0.08], [r * 0.38, r * 0.14]], 12, null, x, y + r * 0.3, z));
-  const b = r * 0.62, by = y + r * 0.44;
-  bag.add(A, lathe([[b * 0.62, 0], [b * 0.6, b * 0.22], [b * 0.36, b * 0.34], [b * 0.33, b * 0.62], [b * 0.27, b * 0.78], [b * 0.2, b * 0.82], [b * 0.2, b * 0.86], [b * 0.17, b * 1.02], [b * 0.1, b * 1.1], [0.001, b * 1.13]], 10, null, x, by, z));
+  bag.add(A, lathe([[r * 0.4, 0], [r * 0.42, r * 0.08], [r * 0.38, r * 0.14], [0.001, r * 0.14]], 12, null, x, y + r * 0.3, z));
+  // the Buddha within, turning the wheel of the law (dharmacakra), facing out by the quarter he sits in
+  buddha(bag, 'teaching', x, y + r * 0.43, z, face ?? [1, 0], r * 0.6);
   // the harmika and the spire
   const hy = y + bellY(r, tc);
   if (sq) bag.add(A, lathe([[r * 0.3, 0], [r * 0.3, r * 0.22], [r * 0.34, r * 0.26], [r * 0.34, r * 0.32], [0.001, r * 0.32]], 8, null, x, hy - 0.02, z));
@@ -198,6 +199,150 @@ function spout(bag, p, y, dir) {
   bag.add(A, fromTriangles(t));
 }
 
+// ---- the Buddhas of the niches, the relief panels ------------------------------------------------
+
+/** A rod a→b of radius r with rounded, closed ends. */
+function limb(a, b, r, seg = 8) {
+  const P = new Vector3(...a), Q = new Vector3(...b), L = P.distanceTo(Q), e = Math.min(r * 0.6, L * 0.3);
+  const g = lathe([[0.001, -e], [r * 0.8, -e * 0.55], [r, 0], [r, L], [r * 0.8, L + e * 0.55], [0.001, L + e]], seg);
+  const dir = Q.clone().sub(P).normalize(), up = new Vector3(0, 1, 0), axis = up.clone().cross(dir), m = new Matrix4();
+  if (axis.lengthSq() < 1e-9) { if (dir.y < 0) m.makeRotationX(Math.PI); } else m.makeRotationAxis(axis.normalize(), Math.acos(Math.min(1, Math.max(-1, up.dot(dir)))));
+  m.setPosition(P);
+  return g.applyMatrix4(m);
+}
+/** An ellipsoid of radii (rx, ry, rz) centred at c. */
+function ellipsoid(c, rx, ry, rz, n = 10) {
+  const p = []; for (let i = 0; i <= 6; i++) { const t = i / 6 * Math.PI; p.push([Math.max(0.001, Math.sin(t)), -Math.cos(t)]); }
+  return lathe(p, n).scale(rx, ry, rz).translate(...c);
+}
+/**
+ * The seated Buddha of the niches (seated height about 1.05 at scale 1, facing +z), in padmasana on a
+ * double lotus, differing only by the gesture of the hands (mudra): 'earth' (bhumisparsa, the right
+ * hand over the right knee touching the ground — the east), 'giving' (vara, the right hand on the knee
+ * palm out — the south), 'meditation' (dhyana, both hands in the lap — the west), 'fearless' (abhaya,
+ * the right hand raised palm out — the north), 'discussion' (vitarka, the right hand raised, thumb and
+ * finger joined — the fifth balustrade), 'teaching' (dharmacakra, both hands before the chest — the
+ * round terraces). The left hand rests in the lap but in the last. Pieces cached by mudra.
+ */
+const BUDDHAS = new Map();
+function buddhaPieces(mudra) {
+  if (BUDDHAS.has(mudra)) return BUDDHAS.get(mudra);
+  const G = [];
+  G.push(padma(0.5, 0.16, 12));
+  G.push(ellipsoid([0, 0.27, 0.05], 0.46, 0.11, 0.29, 12));                                             // the crossed legs
+  for (const s of [-1, 1]) G.push(ellipsoid([s * 0.14, 0.34, 0.2], 0.08, 0.03, 0.05, 6));              // the soles turned up on the thighs
+  G.push(lathe([[0.19, 0], [0.21, 0.12], [0.24, 0.3], [0.25, 0.36], [0.19, 0.42], [0.001, 0.43]], 12).scale(1, 1, 0.62).translate(0, 0.3, 0));   // the body
+  G.push(ellipsoid([0, 0.67, 0], 0.27, 0.06, 0.14, 10));                                                 // the shoulders
+  G.push(lathe([[0.065, 0], [0.06, 0.1], [0.001, 0.1]], 8, null, 0, 0.71, 0));                           // the neck
+  G.push(ellipsoid([0, 0.86, 0.01], 0.1, 0.125, 0.11, 10));                                              // the head
+  G.push(ellipsoid([0, 0.985, -0.005], 0.07, 0.055, 0.07, 8));                                           // the ushnisha
+  for (const s of [-1, 1]) G.push(limb([s * 0.1, 0.89, 0], [s * 0.105, 0.78, 0], 0.017, 5));           // the long earlobes
+  // the arms: upper arms to the elbows; then each forearm and hand by the mudra (the right arm at −x)
+  for (const s of [-1, 1]) G.push(limb([s * 0.24, 0.66, 0], [s * 0.27, 0.45, 0.05], 0.048));
+  const fore = (s, w, r = 0.04) => G.push(limb([s * 0.27, 0.45, 0.05], w, r));
+  const lap = () => { fore(1, [0.06, 0.35, 0.17]); G.push(ellipsoid([0.02, 0.345, 0.18], 0.075, 0.022, 0.05, 8)); };
+  if (mudra === 'meditation') { fore(1, [0.05, 0.35, 0.17]); fore(-1, [-0.05, 0.36, 0.17]); G.push(ellipsoid([0, 0.355, 0.18], 0.1, 0.028, 0.06, 8)); }
+  else if (mudra === 'teaching') { fore(1, [0.06, 0.56, 0.17]); fore(-1, [-0.06, 0.57, 0.17]); G.push(ellipsoid([0.04, 0.58, 0.19], 0.03, 0.05, 0.03, 6), ellipsoid([-0.04, 0.6, 0.19], 0.03, 0.05, 0.03, 6)); }
+  else {
+    lap();
+    if (mudra === 'earth') { fore(-1, [-0.3, 0.31, 0.25]); G.push(limb([-0.3, 0.31, 0.25], [-0.31, 0.2, 0.3], 0.032, 6)); }
+    else if (mudra === 'giving') { fore(-1, [-0.29, 0.33, 0.26]); G.push(ellipsoid([-0.29, 0.28, 0.29], 0.045, 0.07, 0.02, 8)); }
+    else if (mudra === 'fearless') { fore(-1, [-0.24, 0.6, 0.15]); G.push(ellipsoid([-0.24, 0.68, 0.16], 0.045, 0.075, 0.02, 8)); }
+    else { fore(-1, [-0.22, 0.58, 0.16]); G.push(ellipsoid([-0.215, 0.645, 0.175], 0.04, 0.055, 0.025, 8)); }   // vitarka
+  }
+  BUDDHAS.set(mudra, G);
+  return G;
+}
+/** A seated Buddha of the given mudra at (x, y, z) facing N (a unit vector in plan), scale s. */
+function buddha(bag, mudra, x, y, z, N, s) {
+  const m = new Matrix4().makeRotationY(Math.atan2(N[0], N[1])).premultiply(new Matrix4().makeScale(s, s, s)).premultiply(new Matrix4().makeTranslation(x, y, z));
+  for (const g of buddhaPieces(mudra)) bag.add(A, g.clone().applyMatrix4(m));
+}
+/** The mudra of a niche whose face looks along N: east earth-touching, south giving, west meditation, north fearlessness. */
+const mudraOf = (N) => (N[0] > 0.5 ? 'earth' : N[0] < -0.5 ? 'meditation' : N[1] > 0.5 ? 'giving' : 'fearless');
+/**
+ * A niche on a wall face at p (the face's plan point) looking along N, its opening w wide and h high
+ * from y0: a dark recess between pilasters on a sill, a lintel stepped in over the opening as a
+ * corbelled arch, the kala's head over it, and the Buddha seated within on his lotus.
+ */
+function niche(bag, p, N, y0, w, h, mudra) {
+  const U = [-N[1], N[0]], hw = w / 2;
+  const R = (u0, u1, d0, d1, ya, yb) => { const a = [p[0] + U[0] * u0 + N[0] * d0, p[1] + U[1] * u0 + N[1] * d0], b = [p[0] + U[0] * u1 + N[0] * d1, p[1] + U[1] * u1 + N[1] * d1]; return box(Math.min(a[0], b[0]), ya, Math.min(a[1], b[1]), Math.max(a[0], b[0]), yb, Math.max(a[1], b[1])); };
+  bag.add('opening', R(-hw, hw, -0.01, 0.03, y0 + 0.1, y0 + h));                                  // the dark of the recess
+  bag.add(A, R(-hw - 0.22, hw + 0.22, -0.01, 0.5, y0 - 0.02, y0 + 0.1));                          // the sill
+  for (const s of [-1, 1]) {
+    bag.add(A, R(s < 0 ? -hw - 0.2 : hw, s < 0 ? -hw : hw + 0.2, -0.01, 0.42, y0 + 0.1, y0 + h));                  // the pilasters
+    bag.add(A, R(s < 0 ? -hw - 0.24 : hw - 0.02, s < 0 ? -hw + 0.02 : hw + 0.24, -0.01, 0.46, y0 + 0.1, y0 + 0.2)); // their feet
+    for (let k = 0; k < 2; k++) bag.add(A, R(s < 0 ? -hw - 0.01 : hw - 0.07 * (k + 1), s < 0 ? -hw + 0.07 * (k + 1) : hw + 0.01, -0.01, 0.36, y0 + h - 0.09 * (k + 1), y0 + h - 0.09 * k));  // the arch stepping in
+  }
+  bag.add(A, R(-hw - 0.26, hw + 0.26, -0.01, 0.44, y0 + h, y0 + h + 0.18));                       // the lintel
+  // the kala's mask on the lintel's face, over the arch: the face plate, the brows, the bulging eyes, the fangs at the arch's crown
+  const t = [], O = [p[0] + N[0] * 0.43, y0 + h - 0.06, p[1] + N[1] * 0.43], kw = w * 0.5;
+  prism(t, [[-kw / 2, 0.02], [kw / 2, 0.02], [kw / 2 + 0.05, 0.12], [kw / 2, 0.24], [-kw / 2, 0.24], [-kw / 2 - 0.05, 0.12]], O, U, N, 0.06);
+  for (const sg of [-1, 1]) {
+    prism(t, RND(sg * kw * 0.22, 0.14, 0.035, 6), [O[0] + N[0] * 0.04, O[1], O[2] + N[1] * 0.04], U, N, 0.05);
+    prism(t, [[sg * 0.03, 0.02], [sg * 0.07, 0.02], [sg * 0.05, -0.06]], [O[0] + N[0] * 0.01, O[1], O[2] + N[1] * 0.01], U, N, 0.04);
+  }
+  prism(t, [[-0.035, 0.06], [0.035, 0.06], [0.03, 0.16], [-0.03, 0.16]], [O[0] + N[0] * 0.04, O[1], O[2] + N[1] * 0.04], U, N, 0.06);
+  bag.add(A, fromTriangles(t));
+  const s = Math.min((h - 0.2) / 1.05, w / 1.1);
+  buddha(bag, mudra, p[0] + N[0] * 0.2, y0 + 0.1, p[1] + N[1] * 0.2, N, s);
+}
+
+// the narrative panels: compositions of figures in low relief (u across the panel from −0.5 to 0.5, v up from 0 to 1)
+const RND = (cu, cv, r, m = 8, sx = 1) => Array.from({ length: m }, (_, i) => [cu + Math.cos(i / m * Math.PI * 2) * r * sx, cv + Math.sin(i / m * Math.PI * 2) * r]);
+const MOVE = (o, du, k = 1) => o.map(([u, v]) => [du + u * k, v * k]);
+function standing(u, k = 1) {
+  return [
+    [[-0.05, 0.04], [0.05, 0.04], [0.065, 0.42], [-0.065, 0.42]],                       // the kain, to the ankles
+    [[-0.06, 0], [0.06, 0], [0.05, 0.04], [-0.05, 0.04]],                              // the feet
+    [[-0.06, 0.42], [0.06, 0.42], [0.08, 0.62], [-0.08, 0.62]],                        // the body
+    [[0.075, 0.61], [0.105, 0.58], [0.095, 0.43], [0.07, 0.45]], [[-0.075, 0.61], [-0.07, 0.45], [-0.095, 0.43], [-0.105, 0.58]],   // the arms
+    RND(0, 0.675, 0.048),                                                                // the head
+    [[-0.042, 0.71], [0.042, 0.71], [0.024, 0.81], [-0.024, 0.81]],                     // the tall headdress
+  ].map((o) => MOVE(o, u, k));
+}
+function seated(u, k = 1) {
+  return [
+    [[-0.13, 0], [0.13, 0], [0.11, 0.1], [-0.11, 0.1]],                                 // the crossed legs
+    [[-0.06, 0.1], [0.06, 0.1], [0.075, 0.32], [-0.075, 0.32]],
+    [[0.07, 0.31], [0.1, 0.29], [0.09, 0.14], [0.065, 0.16]], [[-0.07, 0.31], [-0.065, 0.16], [-0.09, 0.14], [-0.1, 0.29]],
+    RND(0, 0.375, 0.046), [[-0.04, 0.41], [0.04, 0.41], [0.022, 0.5], [-0.022, 0.5]],
+  ].map((o) => MOVE(o, u, k));
+}
+function tree(u, k = 1) {
+  return [[[-0.022, 0], [0.022, 0], [0.016, 0.55], [-0.016, 0.55]], RND(0, 0.66, 0.15, 10, 1.1), RND(-0.13, 0.55, 0.08, 8), RND(0.13, 0.57, 0.08, 8)].map((o) => MOVE(o, u, k));
+}
+function pavilion(u, k = 1) {
+  return [
+    [[-0.2, 0], [0.2, 0], [0.19, 0.06], [-0.19, 0.06]],                                 // its platform
+    [[-0.18, 0.06], [-0.155, 0.06], [-0.155, 0.6], [-0.18, 0.6]], [[0.155, 0.06], [0.18, 0.06], [0.18, 0.6], [0.155, 0.6]],
+    [[-0.24, 0.6], [0.24, 0.6], [0.2, 0.66], [-0.2, 0.66]], [[-0.2, 0.66], [0.2, 0.66], [0.07, 0.86], [-0.07, 0.86]],   // the eave, the steep roof
+  ].map((o) => MOVE(o, u, k));
+}
+/** The compositions: an audience (a lord seated in a pavilion, attendants), a procession under a tree, a hermitage in the forest. */
+const SCENES = [
+  [...pavilion(-0.25), ...seated(-0.25, 1).map((o) => o.map(([u, v]) => [u, v + 0.06])), ...standing(0.05, 0.85), ...standing(0.2, 0.85), ...seated(0.38, 0.9)],
+  [...standing(-0.38), ...standing(-0.22), ...standing(-0.06, 0.95), ...standing(0.1), ...tree(0.33, 1.05)],
+  [...tree(-0.32), ...seated(-0.05, 1.1), ...standing(0.17, 0.9), ...tree(0.36, 0.9)],
+];
+/**
+ * A relief panel on a face at c looking along N (its plane at c), w wide and h high from y0: the
+ * panel stands a little proud, in a frame of flat bands, with the scene's figures standing out of it.
+ */
+function panel(bag, c, N, y0, w, h, scene) {
+  const U = [-N[1], N[0]], t = [];
+  prism(t, [[-w / 2, 0], [w / 2, 0], [w / 2, h], [-w / 2, h]], [c[0], y0, c[1]], U, N, 0.05);
+  for (const o of [[[-w / 2, 0], [w / 2, 0], [w / 2, 0.07], [-w / 2, 0.07]], [[-w / 2, h - 0.07], [w / 2, h - 0.07], [w / 2, h], [-w / 2, h]], [[-w / 2, 0.07], [-w / 2 + 0.07, 0.07], [-w / 2 + 0.07, h - 0.07], [-w / 2, h - 0.07]], [[w / 2 - 0.07, 0.07], [w / 2, 0.07], [w / 2, h - 0.07], [w / 2 - 0.07, h - 0.07]]]) prism(t, o, [c[0] + N[0] * 0.04, y0, c[1] + N[1] * 0.04], U, N, 0.09);
+  // the scene as tall as the panel; a wide panel holds two or three scenes side by side
+  const sv = (h - 0.16) / 0.86, iw = w - 0.16, nC = Math.max(1, Math.round(iw / (sv * 1.15))), su = iw / nC;
+  for (let i = 0; i < nC; i++) {
+    const du = -iw / 2 + (i + 0.5) * su;
+    for (const o of SCENES[(scene + i) % SCENES.length]) prism(t, o.map(([u, v]) => [du + u * su, 0.08 + v * sv]), [c[0] + N[0] * 0.04, y0, c[1] + N[1] * 0.04], U, N, 0.085);
+  }
+  bag.add(A, fromTriangles(t));
+}
+
 /**
  * borobudur: the monument { c, base: { a, p, h, foot }, squares: [{ a, y }] (the five terraces'
  * half-widths and top heights), circles: [{ r, y, n }], crown: { r, y, h } }.
@@ -231,6 +376,12 @@ function borobudur(el, { bag, col }) {
         if (s1 - s0 < 0.5) continue;
         const a0 = [q0[0] + ux * s0, q0[1] + uz * s0], a1 = [q0[0] + ux * s1, q0[1] + uz * s1];
         slab(bag, A, a0, a1, y, 0.9, h); col.segment(a0, a1, 0.9, y, y + h);
+        // on its inner face, toward the gallery it encloses, the balustrade's own register of reliefs
+        const nin = [-uz, ux], L2 = s1 - s0 - 1.4, np2 = Math.floor((L2 + 0.3) / 2.3);
+        for (let i = 0; i < np2 && withSpouts !== 'plain'; i++) {
+          const sm = s0 + 0.7 + (L2 - np2 * 2.3 + 0.3) / 2 + i * 2.3 + 1.0;
+          panel(bag, [q0[0] + ux * sm + nin[0] * 0.45, q0[1] + uz * sm + nin[1] * 0.45], nin, y + 0.2, 2.0, h - 0.5, i & 1);
+        }
         const n = Math.floor((s1 - s0) / 3.6);
         for (let i = 0; i < n; i++) { const s = s0 + (i + 0.5) * (s1 - s0) / n, c = [q0[0] + ux * s, q0[1] + uz * s]; stupa(bag, c[0], y + h, c[1], 0.42); }
       }
@@ -240,30 +391,31 @@ function borobudur(el, { bag, col }) {
   let prevY = B.h;
   for (const s of el.squares) {
     level(s.a, prevY, s.y);
-    // the main wall's niches (dark) along each straight side of this terrace's face
+    // the main wall's face along each straight side of this terrace: above, the niches of the
+    // balustrade over it, each with its Buddha — the mudra by the side the face looks to, and on the
+    // last (the fifth balustrade) the gesture of discussion on all four; below, the narrative reliefs
+    const last = s === el.squares[el.squares.length - 1];
     for (const [sx, sz, nx, nz] of [[1, 0, 0, -1], [1, 0, 0, 1], [0, 1, -1, 0], [0, 1, 1, 0]]) {
-      const H = s.y - prevY;
-      if (H < 2.6) continue;
-      // the niches with their seated Buddhas in the upper part of the wall
-      for (let u = -s.a + 3; u < s.a - 2; u += 4.5) {
-        if (Math.abs(u) < s.a / 3 + 1) continue;
-        const px = cx + sx * u + nx * (s.a + 0.02), pz = cz + sz * u + nz * (s.a + 0.02), t = [], nh = Math.min(1.5, H * 0.32), ny0 = s.y - nh - 0.35;
-        beamTris(t, [px - sx * 0.7, ny0, pz - sz * 0.7], [px + sx * 0.7, ny0, pz + sz * 0.7], 0.05, nh);
-        bag.add('lacquer_black', fromTriangles(t));
-        bag.add(A, lathe([[0.42, 0], [0.4, 0.25], [0.24, 0.45], [0.26, 0.75], [0.14, 0.95], [0.001, 1.0]], 8, null, px + nx * 0.25, ny0 + 0.05, pz + nz * 0.25));
+      const H = s.y - prevY, N = [nx, nz], mudra = last ? 'discussion' : mudraOf(N);
+      const nh = H >= 2.3 ? Math.min(1.5, H * 0.38) : 0;
+      // the face steps out by p over the middle third of the side (the projection)
+      const face = (u, m) => (Math.abs(Math.abs(u) - s.a / 3) < m ? null : Math.abs(u) < s.a / 3 ? s.a + p : s.a);
+      if (nh) for (let u = -s.a + 3; u < s.a - 2; u += 4.5) {
+        const d = face(u, 1.1);
+        if (d == null || Math.abs(u) < 3) continue;
+        niche(bag, [cx + sx * u + nx * d, cz + sz * u + nz * d], N, s.y - nh - 0.4, 1.15, nh, mudra);
       }
-      // the narrative reliefs below them: two registers of framed panels, figures standing out in each
-      const regs = H > 3.6 ? 2 : 1, rh = (H - Math.min(1.5, H * 0.32) - 0.9) / regs;
+      // the narrative reliefs below them: one or two registers of framed panels, a scene in each
+      const regs = H - nh > 2.4 ? 2 : 1, rh = (H - nh - 0.4 - 0.45) / regs - 0.12;
+      if (rh < 0.5) continue;
       for (let r2 = 0; r2 < regs; r2++) {
-        const y0 = prevY + 0.35 + r2 * rh, t = [], fig = [];
+        const y0 = prevY + 0.35 + r2 * (rh + 0.12);
+        let k = 0;
         for (let u = -s.a + 1.6; u < s.a - 1.6; u += 2.7) {
-          if (Math.abs(u) < s.a / 3 + 1.2 && Math.abs(u) > 2.4) { /* the projections are plain where the stair passes */ }
-          if (Math.abs(u) < 2.4) continue;
-          const px = cx + sx * u + nx * (s.a + 0.04), pz = cz + sz * u + nz * (s.a + 0.04);
-          beamTris(t, [px - sx * 1.25, y0, pz - sz * 1.25], [px + sx * 1.25, y0, pz + sz * 1.25], 0.06, rh - 0.25);
-          for (const d of [-0.75, -0.2, 0.4, 0.85]) { const fx = px + sx * d + nx * 0.07, fz = pz + sz * d + nz * 0.07, fh = (rh - 0.6) * (d === 0.4 ? 0.7 : 1); beamTris(fig, [fx - sx * 0.14, y0 + 0.12, fz - sz * 0.14], [fx + sx * 0.14, y0 + 0.12, fz + sz * 0.14], 0.05, fh); }
+          const d = face(u, 1.35);
+          if (d == null || Math.abs(u) < 2.4) continue;                      // the stair passes in the middle
+          panel(bag, [cx + sx * u + nx * d, cz + sz * u + nz * d], N, y0, 2.5, rh, (k++ & 1) + r2);
         }
-        bag.add(A, fromTriangles(t)); bag.add(A, fromTriangles(fig));
       }
     }
     balustrade(s.a, s.y, 1.5);
@@ -291,7 +443,8 @@ function borobudur(el, { bag, col }) {
     const R = c.r + 1.6 - foot - 0.25, per = c.n / 4, th = Math.asin((foot + 2.2 / 2) / R), step = (Math.PI / 2 - 2 * th) / (per - 1);
     for (let q = 0; q < 4; q++) for (let i = 0; i < per; i++) {
       const a = q * Math.PI / 2 + th + i * step, px = cx + Math.cos(a) * R, pz = cz + Math.sin(a) * R;
-      stupa(bag, px, c.y, pz, sr, kind); col.circle(px, pz, foot + 0.02, c.y, c.y + sr * 2.6);
+      const ca = Math.cos(a), sa = Math.sin(a), face = Math.abs(ca) > Math.abs(sa) ? [Math.sign(ca), 0] : [0, Math.sign(sa)];
+      stupa(bag, px, c.y, pz, sr, kind, face); col.circle(px, pz, foot + 0.02, c.y, c.y + sr * 2.6);
     }
     y = c.y;
   }
