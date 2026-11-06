@@ -133,7 +133,10 @@ function skene(el, { bag, col }) {
   W([s, z0, x1, z0 + th], y, y + h);
   W([x0, z1 - th, x1, z1], y, y + h); W([x0, z0, x0 + th, z1], y, y + h); W([x1 - th, z0, x1, z1], y, y + h);
   // the posts standing proud of the front, the beam across the storey
-  for (let x = x0 + 0.15; x <= x1 - 0.1; x += L / 10) bag.add('wood_dark', box(x - 0.12, y, z0 - 0.14, x + 0.12, y + h, z0));
+  for (let x = x0 + 0.15; x <= x1 - 0.1; x += L / 10) {
+    const inDoor = doors.find(([dx, w]) => Math.abs(x - dx) < w / 2 + 0.32);
+    bag.add('wood_dark', box(x - 0.12, inDoor ? y + inDoor[2] + 0.18 : y, z0 - 0.14, x + 0.12, y + h, z0));
+  }
   bag.add('wood_dark', box(x0 - 0.05, y + f - 0.15, z0 - 0.2, x1 + 0.05, y + f + 0.15, z0));
   // the painted panels between the doors and the posts: columns and a pediment drawn in colour on light boards
   const rand = rng(el.seed ?? 9);
@@ -141,12 +144,27 @@ function skene(el, { bag, col }) {
     const a = x + 0.2, b = x + L / 10 - 0.2;
     if (doors.some(([dx, w]) => a < dx + w / 2 + 0.2 && b > dx - w / 2 - 0.2)) continue;
     bag.add('plaster_white', box(a, y + 0.5, z0 - 0.04, b, y + f - 0.5, z0));
+    // a painted portico: a red dado, columns with their bases and capitals, the architrave in blue with its red regulae,
+    // a door painted dark between the middle columns — the perspective scenery of the tragic stage
+    bag.add('wall_red', box(a, y + 0.5, z0 - 0.055, b, y + 0.85, z0 - 0.04));
     const n = 2 + Math.floor(rand() * 2);
-    for (let i = 0; i < n; i++) { const u = a + (b - a) * (i + 0.5) / n; bag.add(i % 2 ? 'paint_ochre' : 'wall_red', box(u - 0.09, y + 0.6, z0 - 0.055, u + 0.09, y + f - 0.9, z0 - 0.04)); }
-    bag.add('egyptian_blue', box(a + 0.05, y + f - 0.85, z0 - 0.055, b - 0.05, y + f - 0.62, z0 - 0.04));
+    for (let i = 0; i < n; i++) {
+      const u = a + (b - a) * (i + 0.5) / n;
+      bag.add('paint_ochre', box(u - 0.08, y + 0.92, z0 - 0.055, u + 0.08, y + f - 0.98, z0 - 0.04));
+      bag.add('paint_white', box(u - 0.13, y + 0.85, z0 - 0.06, u + 0.13, y + 0.92, z0 - 0.04));
+      bag.add('paint_white', box(u - 0.15, y + f - 0.98, z0 - 0.06, u + 0.15, y + f - 0.9, z0 - 0.04));
+    }
+    if (n === 3) bag.add('wood_dark', box(a + (b - a) * 0.42, y + 0.85, z0 - 0.05, a + (b - a) * 0.58, y + 2.2, z0 - 0.04));
+    bag.add('egyptian_blue', box(a + 0.05, y + f - 0.9, z0 - 0.055, b - 0.05, y + f - 0.62, z0 - 0.04));
+    for (let u = a + 0.15; u < b - 0.1; u += 0.32) bag.add('wall_red', box(u, y + f - 0.86, z0 - 0.06, u + 0.12, y + f - 0.7, z0 - 0.055));
   }
   // the upper storey's three openings over the doors
   for (const [dx] of doors) bag.add('wood_dark', box(dx - 0.9, y + f + 0.9, z0 - 0.06, dx + 0.9, y + f + 2.4, z0 - 0.01));
+  // over the middle door, a pediment of boards, where a palace or a temple is meant
+  { const t = [], A = [xm - 2.4, y + f + 2.6, z0 - 0.02], Bp = [xm + 2.4, y + f + 2.6, z0 - 0.02], C = [xm, y + f + 3.5, z0 - 0.02];
+    const A2 = [A[0], A[1], z0 - 0.16], B2 = [Bp[0], Bp[1], z0 - 0.16], C2 = [C[0], C[1], z0 - 0.16];
+    t.push(...A, ...Bp, ...C, ...A2, ...C2, ...B2, ...A, ...A2, ...B2, ...A, ...B2, ...Bp, ...Bp, ...B2, ...C2, ...Bp, ...C2, ...C, ...C, ...C2, ...A2, ...C, ...A2, ...A);
+    bag.add('wood_dark', fromTriangles(orientOutward(t))); }
   // the roof: boards on joists, the low railing round the edge
   bag.add('planks_grey', box(x0 - 0.1, y + h, z0 - 0.15, x1 + 0.1, y + h + 0.18, z1 + 0.05)); col.floor([x0, z0, x1, z1], y + h + 0.18);
   for (const r of [[x0, z0 - 0.15, x1, z0 - 0.05], [x0, z1 - 0.05, x1, z1 + 0.05], [x0 - 0.1, z0, x0, z1], [x1, z0, x1 + 0.1, z1]]) bag.add('timber', box(r[0], y + h + 0.18, r[1], r[2], y + h + 1.0, r[3]));
@@ -174,6 +192,19 @@ function odeionRoof(el, { bag }) {
     bag.add('terracotta', rod([ax, y - ov * pitch + 0.02, az], [tx, y + rise + 0.02, tz], 0.16, 5));
   }
   bag.add('terracotta', rod([cx, y + rise + 0.02, cz - ridge], [cx, y + rise + 0.02, cz + ridge], 0.18, 6));
+  // the cover-tiles: a rib every 0.72 m down each slope from the hip (or the ridge) to the eaves, an antefix at its foot
+  const ribs = [], fixes = [], ye0 = y - ov * pitch + 0.07, X0 = x0 - ov, X1 = x1 + ov, Z0 = z0 - ov, Z1 = z1 + ov, run = hx + ov;
+  for (let x = X0 + 0.5; x < X1 - 0.4; x += 0.72) {
+    const L = Math.min(x - X0, X1 - x, run) - 0.1;
+    if (L < 0.4) continue;
+    for (const [ze, s] of [[Z0, 1], [Z1, -1]]) { ribs.push(rod([x, ye0, ze], [x, ye0 + L * pitch, ze + s * L], 0.075, 4)); fixes.push(box(x - 0.12, ye0 - 0.08, ze - s * 0.02 - 0.02, x + 0.12, ye0 + 0.22, ze - s * 0.02 + 0.02)); }
+  }
+  for (let z = Z0 + 0.5; z < Z1 - 0.4; z += 0.72) {
+    const L = Math.min(z - Z0, Z1 - z, run) - 0.1;
+    if (L < 0.4) continue;
+    for (const [xe, s] of [[X0, 1], [X1, -1]]) { ribs.push(rod([xe, ye0, z], [xe + s * L, ye0 + L * pitch, z], 0.075, 4)); fixes.push(box(xe - s * 0.02 - 0.02, ye0 - 0.08, z - 0.12, xe - s * 0.02 + 0.02, ye0 + 0.22, z + 0.12)); }
+  }
+  bag.add('roof_tile', merge(ribs)); bag.add('terracotta', merge(fixes));
   // the timbers under the roof: purlins from column-head to column-head along both ways, rafters out to the walls
   const X = el.cols.x, Z = el.cols.z, top = (x, z) => H(x, z) - 0.55;
   for (const x of X) for (let j = 0; j + 1 < Z.length; j++) bag.add('timber', rod([x, top(x, Z[j]), Z[j]], [x, top(x, Z[j + 1]), Z[j + 1]], 0.2, 5));
@@ -227,19 +258,24 @@ function xoanon(el, { bag, col }) {
 function trojanHorse(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 2.6, yaw = el.yaw ?? 0, k = h / 1.5, m = new Matrix4().makeRotationY(yaw).setPosition(x, y, z);
   const P = (g, mat) => { g.applyMatrix4(m); bag.add(mat, g); };
-  const L = 1.95 * k, W = 0.85 * k;
+  const L = 1.55 * k, W = 0.62 * k;
   // the base: a footing, the die and its crowning course with the inscription cut along the front
   P(merge([box(-L / 2 - 0.25, 0, -W / 2 - 0.25, L / 2 + 0.25, 0.3, W / 2 + 0.25), box(-L / 2, 0.3, -W / 2, L / 2, 1.0, W / 2), box(-L / 2 - 0.1, 1.0, -W / 2 - 0.1, L / 2 + 0.1, 1.18, W / 2 + 0.1)]), 'marble');
   const cut = [];
   for (let i = 0; i < 30; i++) { const u = -L / 2 + 0.3 + i * (L - 0.6) / 29; cut.push(box(u - 0.03, 0.8, W / 2 - 0.004, u + 0.03, 0.9, W / 2 + 0.003)); if (i % 4 === 1) cut.push(box(u - 0.03, 0.65, W / 2 - 0.004, u + 0.03, 0.73, W / 2 + 0.003)); }
   P(merge(cut), 'marble_dark');
-  // the horse in bronze, its plates and rivets suggested by bands round the barrel; the hatch with the heroes' heads
-  const hs = horse({ pose: 'stand', h, n: 8 });
+  // the horse in bronze; the hatch in its flank with the heroes' heads
+  const hs = horse({ pose: 'stand', h, n: 12 });
+  // filled out as a bronze of the late fifth century: the deep chest, the round haunches, the heavy thighs
+  hs.stone.push(blob([0.36 * k, 1.1 * k, 0], 0.3 * k, [1, 1.05, 0.95], 9), blob([-0.36 * k, 1.13 * k, 0], 0.3 * k, [1.05, 1.0, 1.0], 9));
+  for (const z of [-0.13, 0.13]) hs.stone.push(limb([0.35 * k, 1.02 * k, z * k], [0.37 * k, 0.55 * k, z * k], 0.12 * k, 0.065 * k, 7), limb([-0.36 * k, 1.08 * k, z * k], [-0.43 * k, 0.55 * k, z * k], 0.15 * k, 0.07 * k, 7));
+  for (const [x1, x2, z] of [[0.37, 0.36, 0.13], [0.39, 0.4, -0.13], [-0.44, -0.38, 0.13], [-0.4, -0.36, -0.13]]) {
+    hs.stone.push(limb([x1 * k, 0.52 * k, z * k], [x2 * k, 0.1 * k, z * k], 0.065 * k, 0.045 * k, 7));
+    hs.stone.push(blob([x2 * k, 0.11 * k, z * k], 0.055 * k, [1, 0.8, 1], 6));                            // the fetlock
+    hs.stone.push(lathe([[0.06 * k, 0], [0.055 * k, 0.07 * k], [0.04 * k, 0.09 * k], [0.001, 0.09 * k]], 8, null, x2 * k + 0.01 * k, 0, z * k));   // the hoof
+  }
   const g = placed(hs, 0, 1.18, 0, 0);
   P(g.stone, 'bronze');
-  const bands = [];
-  for (const u of [-0.3, 0, 0.3]) { const rr = 0.26 * k * Math.sqrt(1 - (u / 0.525) ** 2) + 0.01; bands.push(lathe([[rr, -0.03], [rr, 0.03]], 16).applyMatrix4(new Matrix4().makeRotationZ(Math.PI / 2).premultiply(new Matrix4().makeScale(1, 1, 0.24 / 0.26)).setPosition(u * k, 1.18 + 1.12 * k, 0))); }
-  P(merge(bands), 'gilt_bronze');
   const hx = 0.05 * k, hy = 1.18 + 1.16 * k, hz = 0.23 * k;
   P(box(hx - 0.26 * k, hy - 0.1 * k, 0.15 * k, hx + 0.26 * k, hy + 0.1 * k, hz + 0.012), 'wood_dark');
   for (const [u, s] of [[-0.14, 1], [0.12, 0.95]]) P(merge([blob([hx + u * k, hy + 0.02 * k, hz + 0.04 * k], 0.07 * k, [0.85, 1.05, 0.95], 7), blob([hx + u * k, hy + 0.07 * k, hz + 0.02 * k], 0.072 * k * s, [0.95, 0.8, 1], 7)]), 'bronze');
@@ -305,8 +341,8 @@ function armoury(el, { bag, col }) {
   }
   // the shields on the wall above the rack, and the spears in their rack at the end
   for (let u = 0.8; u < L - 0.6; u += 1.15) {
-    const [px, pz] = P(u, D + 0.02), g = lathe([[0.001, 0.07], [0.12, 0.068], [0.42, 0.04], [0.46, 0.012], [0.46, 0], [0.001, 0]], 16);
-    g.applyMatrix4(new Matrix4().makeRotationX(alongX ? -Math.PI / 2 : 0).premultiply(new Matrix4().makeRotationZ(alongX ? 0 : Math.PI / 2)).setPosition(px, y + 2.85, pz));
+    const [px, pz] = P(u, D - 0.08), g = lathe([[0.001, 0], [0.46, 0], [0.46, 0.012], [0.42, 0.04], [0.12, 0.068], [0.001, 0.07]], 16);
+    g.applyMatrix4(new Matrix4().makeRotationX(Math.PI / 2).premultiply(new Matrix4().makeRotationY(alongX ? Math.PI : -Math.PI / 2)).setPosition(px, y + 2.85, pz));
     parts.bronze.push(g);
   }
   for (let i = 0; i < 9; i++) { const [px, pz] = P(L + 0.35 + (i % 3) * 0.12, 0.2 + Math.floor(i / 3) * 0.2); parts.wood_dark.push(rod([px, y, pz], [px + 0.02, y + 2.6, pz], 0.018, 4)); parts.iron.push(lathe([[0.025, 0], [0.03, 0.08], [0.001, 0.3]], 4, null, px + 0.02, y + 2.6, pz)); }
@@ -345,4 +381,14 @@ function cyclopean(el, { bag, col }) {
   if (small.length) bag.add('rubble', merge(small));
 }
 
-Object.assign(STYLES.greek.elements, { theatron, orchestra, skene, odeion_roof: odeionRoof, xoanon, trojan_horse: trojanHorse, votive, armoury, cyclopean });
+/** benches: { runs: [[x0, x1, z], ...], y, mat } — benches of a plank on three posts, each 0.36 m deep, facing +z. */
+function benches(el, { bag }) {
+  const y = el.y ?? 0, top = [], legs = [];
+  for (const [xa, xb, z] of el.runs) {
+    top.push(box(xa, y + 0.4, z, xb, y + 0.46, z + 0.36));
+    for (const xx of [xa + 0.3, (xa + xb) / 2, xb - 0.3]) legs.push(box(xx - 0.06, y, z + 0.12, xx + 0.06, y + 0.4, z + 0.24));
+  }
+  bag.add(el.mat ?? 'timber', merge([...top, ...legs]));
+}
+
+Object.assign(STYLES.greek.elements, { benches, theatron, orchestra, skene, odeion_roof: odeionRoof, xoanon, trojan_horse: trojanHorse, votive, armoury, cyclopean });

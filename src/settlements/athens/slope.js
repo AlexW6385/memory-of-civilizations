@@ -58,12 +58,12 @@ export function southSlope() {
     for (const x of X) for (const z of Z) E.push({ t: 'column', at: [x, z], y, h: roofAt(x, z) - 0.55 - 0.5 - y, d: 0.95, mat: 'limestone', flutes: 0 });
     E.push({ t: 'odeion_roof', rect: ODEION.rect, y: yW, rise, cols: { x: X, z: Z } });
     // the benches: rows of planks on posts facing south, between the columns, over the northern two-thirds of the hall
+    const runs = [];
     for (let z = z0 + wt + 1.2; z < czo + 10; z += 1.05) for (let i = 0; i < 10; i++) {
       const xa = (i === 0 ? x0 + wt : X[i - 1]) + 0.75, xb = (i === 9 ? x1 - wt : X[i]) - 0.75;
-      if (Z.some((zz) => Math.abs(zz - z) < 0.75)) continue;
-      E.push({ t: 'block', rect: [xa, z, xb, z + 0.36], y0: y + 0.4, y1: y + 0.46, mat: 'timber', collide: false });
-      for (const xx of [xa + 0.3, (xa + xb) / 2, xb - 0.3]) E.push({ t: 'block', rect: [xx - 0.06, z + 0.12, xx + 0.06, z + 0.24], y0: y, y1: y + 0.4, mat: 'timber', collide: false });
+      if (!Z.some((zz) => Math.abs(zz - z) < 0.75 || Math.abs(zz - z - 0.36) < 0.75)) runs.push([xa, xb, z]);
     }
+    E.push({ t: 'benches', runs, y, rect: [x0 + wt, z0 + wt, x1 - wt, czo + 10] });
     // the platform for the musicians and the poets in the southern part, a few steps up
     E.push({ t: 'block', rect: [cxo - 7, czo + 15, cxo + 7, czo + 21], y0: y, y1: y + 0.9, mat: 'planks_grey', walk: true });
     E.push({ t: 'stair', rect: [cxo - 2, czo + 13.6, cxo + 2, czo + 15], dir: 's', y0: y, y1: y + 0.9, riser: 0.18, base: y, mat: 'planks_grey' });
@@ -82,7 +82,7 @@ export function summitSanctuaries(y) {
   E.push({ t: 'xoanon', at: [-103.0, 29.0], y: sy, yaw: Math.PI / 2, h: 1.75, god: 'artemis', gifts: 6 });
   E.push({ t: 'wall', a: [-107.5, 19.5], b: [-72.5, 19.5], th: 0.6, y0: y, y1: y + 1.6, mat: 'limestone' });
   E.push({ t: 'wall', a: [-64.8, 19.5], b: [-64.8, 44], th: 0.6, y0: y, y1: y + 1.6, mat: 'limestone' });
-  E.push({ t: 'trojan_horse', at: [-87, 27.5], y, yaw: 0, h: 2.7 });
+  E.push({ t: 'trojan_horse', at: [-87, 27.5], y, yaw: 0, h: 3.2 });
   // the stretch of the Mycenaean wall under the Brauronion's west end, south of the Propylaia
   E.push({ t: 'cyclopean', a: [-110.5, 18.5], b: [-110.5, 41.5], th: 4.2, y0: y - 0.5, y1: y + 2.6, seed: 5 });
   // the bronze store: a long hall of poros before the south wall (its north portico is of the 4th century, not yet
@@ -94,7 +94,7 @@ export function summitSanctuaries(y) {
     E.push({ t: 'wall', a: [x0, z0 + w / 2], b: [x1, z0 + w / 2], th: w, y0: yf, y1: yf + h, mat: 'limestone', openings: [D(21.5, 2.6, 4.0), D(8, 1.6, 3.2), D(35, 1.6, 3.2)] });
     E.push({ t: 'wall', a: [x0, z1 - w / 2], b: [x1, z1 - w / 2], th: w, y0: yf, y1: yf + h, mat: 'limestone' });
     for (const x of [x0 + w / 2, x1 - w / 2]) E.push({ t: 'wall', a: [x, z0 + w], b: [x, z1 - w], th: w, y0: yf, y1: yf + h, mat: 'limestone' });
-    for (const x of [x0 + 14.3, x0 + 28.6]) E.push({ t: 'column', at: [x, (z0 + z1) / 2], y: yf, h: h + 0.7, d: 0.62, mat: 'limestone', flutes: 0 });
+    for (const x of [x0 + 14.3, x0 + 28.6]) E.push({ t: 'column', at: [x, (z0 + z1) / 2], y: yf, h, d: 0.62, mat: 'limestone', flutes: 0 });
     E.push({ t: 'beam', a: [x0 + w, (z0 + z1) / 2], b: [x1 - w, (z0 + z1) / 2], y: yf + h, w: 0.55, h: 0.7, mat: 'cedar' });
     E.push({ t: 'coffers', rect: [x0 + w, z0 + w, x1 - w, z1 - w], y: yf + h, depth: 0.22, cell: 1.5, beam: 0.18, mat: 'cedar' });
     E.push({ t: 'pediment_roof', rect: [x0 - 0.45, z0 - 0.45, x1 + 0.45, z1 + 0.45], y: yf + h + 0.7, rise: 1.75, tympanumInset: 0.3, rakingGeison: 0.3, mat: 'limestone', tileMat: 'roof_tile' });
