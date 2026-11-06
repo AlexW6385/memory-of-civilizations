@@ -8,7 +8,7 @@ import pantheonPlan from '../../buildings/pantheon/plan.js';
 const E = [];
 E.push({ t: 'thermae', rect: BATHS, h: 24 });
 E.push({ t: 'porticus', rect: SAEPTA, h: 9, depth: 7 });
-E.push({ t: 'stadium', rect: STADIUM, h: 16, depth: 28, rows: 12 });
+E.push({ t: 'stadium', rect: STADIUM, h: 20, depth: 28, rows: 14 });
 
 export const campus = {
   id: 'rome-campus',
