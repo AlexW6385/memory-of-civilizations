@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.40 — Athens and Knossos in detail (2026-11-06)
+- The Parthenon's two pediments of posed figures, all 92 metopes in high relief, the 160 m frieze procession, painted triglyphs and palmette eaves; the Propylaia rebuilt with Ionic hall, starred ceiling, five doors and Pinakotheke; Ionic temples given a true Ionic entablature; the Nike temple and its Victory parapet; the Erechtheion with its north porch and caryatids; bronze Promachos and a gold-and-ivory Athena Parthenos; Knossos' Throne Room with griffins and lustral basin, the West Bastion's charging bull, the Grand Staircase light well, the Queen's Megaron dolphins and the bull-leaping fresco.
+
 ## v9.39 — Mesoamerica in detail (2026-11-06)
 - Teotihuacan's Avenue of the Dead as a run of sunken plazas crossed by red talud-tablero platforms with stairs and temples, the Moon Plaza lifted out of the ground, framed tableros, about 300 heads on the Feathered Serpent Pyramid, the Ciudadela's fifteen temples, apartment compounds with patios and porticoes; carved serpent heads and serpent columns, Chaac masks, the chacmool and warrior pillars at Chichen Itza; the Templo Mayor's painted twin shrines, Coyolxauhqui stone, beam bridges, dugout canoes and a market with sellers on mats at Tenochtitlan.
 
