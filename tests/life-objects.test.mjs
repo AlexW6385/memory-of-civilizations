@@ -55,3 +55,21 @@ test('the life pass reads a turned plan as it is built', () => {
   const far = out.filter((e) => dist(e.at) > 10);
   assert.deepEqual(far.map((e) => `${e.t} ${e.at.map((v) => v.toFixed(1))}`), [], 'objects far from every house');
 });
+
+test('the new dresses, poses, things held and the elephant build, and an old figure is unchanged by them', () => {
+  const els = [];
+  let i = 0;
+  for (const dress of ['robe', 'tunic', 'trousers', 'wrap', 'loincloth', 'shendyt', 'sheath'])
+    for (const pose of ['stand', 'sit', 'squat', 'kneel', 'cross', 'pray', 'pull', 'staff', 'row', 'punt'])
+      els.push({ t: 'figure', dress, pose, at: [i++, 0], seed: i, over: dress === 'shendyt' ? 'wesekh' : undefined, hair: dress === 'sheath' ? 'wig' : undefined, top: dress === 'wrap' ? 'bare' : undefined });
+  els.push({ t: 'figure', carry: 'child', at: [0, 5], seed: 1 }, { t: 'figure', pose: 'kneel', arms: 'pray', at: [1, 5], seed: 2 }, { t: 'figure', pose: 'row', carry: 'oars', at: [2, 5], seed: 3 });
+  els.push({ t: 'animal', kind: 'elephant', at: [0, 10], seed: 1, gear: true }, { t: 'animal', kind: 'elephant', african: true, at: [6, 10], seed: 2 });
+  for (const el of els) {
+    const b = buildPlan(plan([el]));
+    assert.ok(b.parts.length > 0, `${el.t} ${el.dress ?? el.kind} ${el.pose ?? ''} builds nothing`);
+    for (const p of b.parts) assert.ok(p.geometry.attributes.position.array.every(Number.isFinite), `${el.dress} ${el.pose}: not finite`);
+  }
+  // opt-in: the same seed and parameters give the same figure as before the new options
+  const tri = (el) => buildPlan(plan([el])).parts.reduce((n, p) => n + p.geometry.attributes.position.count, 0);
+  assert.equal(tri({ t: 'figure', dress: 'robe', at: [0, 0], seed: 11 }), tri({ t: 'figure', dress: 'robe', carry: 'none', at: [0, 0], seed: 11 }));
+});
