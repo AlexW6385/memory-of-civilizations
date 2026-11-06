@@ -18,24 +18,29 @@ function chaikin(P, n) {
   return P;
 }
 export const SIQ_LINE = chaikin(SIQ.path, 2);
-/** Where the Siq's walls are built (docs/settlements/petra.md §10): from the east down to x = 150, by the square; the floor runs on under them, 4.5 m wider on each side, so the ground's slope never shows in front of them. */
-export const SIQ_WALL = { x1: 150, face: 6.2, wide: 4.5 };
+/** Where the Siq's walls are built (docs/settlements/petra.md §10): from the east down to x = 145, at the square; the floor runs on under them, 4.5 m wider on each side, so the ground's slope never shows in front of them. */
+export const SIQ_WALL = { x1: 145, face: 6.2, wide: 4.5 };
 export const siqHalf = (x) => SIQ.w / 2 + SIQ_WALL.wide * smooth(SIQ_WALL.x1 - 14, SIQ_WALL.x1, x);
 export const PLAZA = { c: [128, -160], r: 20 };
+/** The walls of the square and the Outer Siq are built too (plan.js): the floor runs on under them, this much deeper. */
+export const GORGE_WIDE = 4.5;
+/** The rock the Khazneh is cut from (its builder fills it): the ground stays at the floor inside, so that it never shows in the portico. */
+export const KHAZNEH_ROCK = [88, -174, 111, -146];
 export const OUTER = { path: [[128, -160], [126, -120], [108, -82], [80, -52], [40, -20]], w: 34 };
 export const VALLEY = { c: [-70, 10], r: [175, 120] };
 export const STREET = { a: [60, 12], b: [-128, 12], w: 7 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 function segDist(x, z, a, b) { const dx = b[0] - a[0], dz = b[1] - a[1], t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t); }
-const pathDist = (x, z, p) => { let d = Infinity; for (let i = 0; i + 1 < p.length; i++) d = Math.min(d, segDist(x, z, p[i], p[i + 1])); return d; };
+export const pathDist = (x, z, p) => { let d = Infinity; for (let i = 0; i + 1 < p.length; i++) d = Math.min(d, segDist(x, z, p[i], p[i + 1])); return d; };
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 /** How open the ground is (1 on a gorge or valley floor, 0 on the massif). */
 export function open(x, z) {
   const hs = siqHalf(x);
   let m = smooth(hs + 3, hs, pathDist(x, z, SIQ_LINE));
-  m = Math.max(m, smooth(PLAZA.r + 4, PLAZA.r, Math.hypot(x - PLAZA.c[0], z - PLAZA.c[1])));
-  m = Math.max(m, smooth(OUTER.w / 2 + 6, OUTER.w / 2, pathDist(x, z, OUTER.path)));
+  m = Math.max(m, smooth(PLAZA.r + GORGE_WIDE + 4, PLAZA.r + GORGE_WIDE, Math.hypot(x - PLAZA.c[0], z - PLAZA.c[1])));
+  m = Math.max(m, smooth(OUTER.w / 2 + GORGE_WIDE + 6, OUTER.w / 2 + GORGE_WIDE, pathDist(x, z, OUTER.path)));
+  if (inRect(KHAZNEH_ROCK, x, z)) m = 1;
   const e = Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]);
   m = Math.max(m, smooth(1.08, 1.0, e));
   return m;

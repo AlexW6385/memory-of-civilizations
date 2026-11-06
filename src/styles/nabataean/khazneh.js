@@ -120,7 +120,8 @@ export function khazneh(el, { bag, col: C }) {
   const hw = W / 2, pu = 6.6, pv = -3.5;                                                   // the portico's half-width and back wall
   const rock = (u0, v0, u1, v1, y0, y1) => { bag.add(R, B(u0, v0, u1, v1, y0, y1)); C.rect(Rc(u0, v0, u1, v1), y0, y1); };
   // the rock the façade is cut from, the portico hollowed in it
-  rock(-hw - 25, -back, -hw, 0, -2, top); rock(hw, -back, hw + 25, 0, -2, top);
+  const fl = el.flank ?? 25;                                                  // the rock either side (the cliff itself may be built round it)
+  rock(-hw - fl, -back, -hw, 0, -2, top); rock(hw, -back, hw + fl, 0, -2, top);
   rock(-hw, -back, hw, pv, -2, top);
   rock(-hw, pv, -pu, 0, -2, top); rock(pu, pv, hw, 0, -2, top);
   rock(-pu, pv, pu, 0, 13.5, top);

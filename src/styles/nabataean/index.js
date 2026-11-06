@@ -9,6 +9,7 @@ import { box, lathe, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 import { khazneh } from './khazneh.js';
 import { siqWalls } from './siq.js';
+import { crowTomb } from './tombs.js';
 
 const R = 'sandstone_rose', A = 'sandstone_rose_ashlar';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -108,6 +109,6 @@ function house(el, { bag, col: C }) {
 
 registerStyle('nabataean', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, khazneh, siq_walls: siqWalls, rock_tomb: rockTomb, theatre, podium_temple: podiumTemple, colonnade_street: colonnadeStreet, nabataean_house: house },
+  elements: { ...STYLES.qing.elements, khazneh, siq_walls: siqWalls, rock_tomb: (el, ctx) => (['pylon', 'step', 'hegr', 'crowstep'].includes(el.kind ?? 'crowstep') ? crowTomb : rockTomb)(el, ctx), theatre, podium_temple: podiumTemple, colonnade_street: colonnadeStreet, nabataean_house: house },
   objects: {},
 });
