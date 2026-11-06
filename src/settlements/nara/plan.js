@@ -16,8 +16,8 @@ E.push({ t: 'qing_hall', rect: [-g + 1, cz1 - 7, g - 1, cz1 + 7], y: 1.0, H: 7, 
 E.push({ t: 'qing_hall', rect: SOUTH_GATE, y: 0.8, H: 9, double: 7, roof: 'hip', bays: [5, 2], front: 's', four: true, plat: 0.8, open: true });
 // the pagodas: seven storeys each, in square courts of corridors
 for (const [px, pz] of PAGODAS) {
-  const tiers = []; for (let i = 0; i < 7; i++) tiers.push({ r: 8.5 - i * 0.55, h: i === 0 ? 11 : 8.4 - i * 0.2 });
-  E.push({ t: 'pagoda_oct', c: [px, pz], y: 0, base: { r: 11, h: 1.6 }, tiers, galleries: false, core: 'plaster_white', eave: 'tile_grey', frame: 'timber_red', spire: 14 });
+  // square, three bays a side, seven storeys narrowing upward, the spire of nine rings (§4)
+  E.push({ t: 'pagoda_jp', c: [px, pz], y: 0, base: { half: 12, h: 1.6 }, side: 16.8, shrink: 1.15, tiers: 7, h0: 5.6, dh: 0.3, over: 5.2, spire: 16 });
   E.push({ t: 'ming_gallery', pts: [[px - 8, pz + 32], [px - 32, pz + 32], [px - 32, pz - 32], [px + 32, pz - 32], [px + 32, pz + 32], [px + 8, pz + 32]], y: 0.4, w: 4.5, H: 3.8, side: 1 });
 }
 // the lecture hall and the monks' quarters to the north
@@ -26,7 +26,9 @@ for (const s of [-1, 1]) for (let k = 0; k < 3; k++) E.push({ t: 'ming_hall', re
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('court', COURT, 0, 'open'), room('great buddha hall', HALL, 2.2, 'hall')];
-const walks = [[[0, 180], [0, 146], [0, 60], [0, 40], [0, -20]]];
+// the octagonal gilt-bronze lantern on the axis before the hall's stairs (§4)
+E.push({ t: 'obj', kind: 'hakkaku_toro', at: [0, -16], y: 0 });
+const walks = [[[0, 180], [0, 146], [0, 60], [0, 40], [0, -8], [2.8, -12], [2.8, -20]]];
 walks[0].y0 = 0;
 
 export const todaiji = {
