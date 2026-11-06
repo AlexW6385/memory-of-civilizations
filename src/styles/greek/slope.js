@@ -356,28 +356,33 @@ function armoury(el, { bag, col }) {
 function cyclopean(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, Lw = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / Lw, uz = (bz - az) / Lw, nx = -uz, nz = ux, th = el.th ?? 4, rand = rng(el.seed ?? 3);
   const y0 = el.y0 ?? 0, y1 = el.y1 ?? y0 + 3;
-  const big = [], small = [];
-  // the core and the blocks of both faces
-  bag.add('rubble', orientedBox([ax, az], [bx, bz], th - 0.5, y0 - 0.5, y1 - 0.4));
+  const big = [], small = [], yaw = Math.atan2(ux, uz);
+  // the core of earth and small stones, and the boulders bedded in both faces: rough lumps, each its own size and
+  // tilt, the bigger low down; small stones chinked between them
+  bag.add('rubble', orientedBox([ax, az], [bx, bz], th - 1.0, y0 - 0.5, y1 - 0.5));
   col.segment([ax, az], [bx, bz], th, y0 - 0.5, y1);
-  let yy = y0 - 0.3;
-  for (let row = 0; yy < y1 - 0.4; row++) {
-    const ch = Math.min(0.9 + rand() * 0.7, y1 - yy);
-    let s = -rand() * 0.8;
-    while (s < Lw) {
-      const w = 1.1 + rand() * 1.4, s0 = Math.max(0, s), s1 = Math.min(Lw, s + w);
-      if (s1 - s0 > 0.3) for (const side of [-1, 1]) {
-        const o = side * (th / 2 - 0.3 - rand() * 0.12), jag = (rand() - 0.5) * 0.25;
-        const p = (q, oo) => [ax + ux * q + nx * oo, az + uz * q + nz * oo];
-        const pts = [p(s0 + 0.06, o - 0.35), p(s1 - 0.06, o - 0.35), p(s1 - 0.06 - jag, o + side * 0.42), p(s0 + 0.06 + jag, o + side * 0.42)];
-        big.push(prism(pts, yy + 0.04, yy + ch - 0.04 - rand() * 0.1));
-        if (rand() < 0.5) { const q = p(s1, o + side * 0.32); small.push(blob([q[0], yy + ch * 0.5, q[1]], 0.16 + rand() * 0.08, [1, 0.8, 0.7], 5)); }
+  const lump = (s, o, yy, w, h, d) => {
+    const g = blob([0, 0, 0], 1, [d, h, w], 6);           // local: x across the wall, z along it
+    g.applyMatrix4(new Matrix4().makeRotationX((rand() - 0.5) * 0.25).premultiply(new Matrix4().makeRotationY(yaw + Math.PI / 2 + (rand() - 0.5) * 0.3)).setPosition(ax + ux * s + nx * o, yy, az + uz * s + nz * o));
+    return g;
+  };
+  let yy = y0 - 0.2;
+  for (let row = 0; yy < y1 - 0.3; row++) {
+    const ch = Math.max(0.5, (1.25 - row * 0.15) * (0.8 + rand() * 0.4));
+    for (const side of [-1, 1]) {
+      let s = -rand() * 0.6;
+      while (s < Lw + 0.3) {
+        const w = 0.8 + rand() * 0.9 - row * 0.08, sc = Math.min(Lw + 0.2, Math.max(-0.2, s + w / 2));
+        big.push(lump(sc, side * (th / 2 - 0.45), yy + ch / 2, w * 0.66, ch * 0.64, 0.7 + rand() * 0.2));
+        if (rand() < 0.6) { const q = [ax + ux * (s + w) + nx * side * (th / 2 - 0.12), az + uz * (s + w) + nz * side * (th / 2 - 0.12)]; small.push(blob([q[0], yy + ch * (0.25 + rand() * 0.5), q[1]], 0.13 + rand() * 0.08, [1, 0.8, 0.8], 5)); }
+        s += w;
       }
-      s += w;
     }
+    // the ends: two boulders across the thickness each course
+    for (const e of [-0.1, Lw + 0.1]) for (const o of [-th / 4, th / 4]) big.push(lump(e, o, yy + ch / 2, 0.75, ch * 0.56, th / 4 + 0.25));
     yy += ch;
   }
-  bag.add('limestone_yellow', merge(big));
+  bag.add('rock_boulder', merge(big));
   if (small.length) bag.add('rubble', merge(small));
 }
 
