@@ -7,6 +7,7 @@
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, frustum, lathe, rod, disc, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
+import { palazzo, loggia, ponteVecchio } from './signoria.js';
 
 const M = 'marble', G = 'verde_antico', R = 'roof_tile', ST = 'limestone_yellow';
 const oct = (bag, mat, cx, y, cz, r, h) => bag.add(mat, lathe([[r, 0], [r, h], [0.001, h]], 8, null, cx, y, cz));
@@ -337,24 +338,8 @@ function baptistery(el, { bag, col }) {
   bag.add(M, lathe([[r, 0], [r * 0.25, r * 0.55], [0.001, r * 0.55]], 8, null, x, y + h, z));
   oct(bag, M, x, y + h + r * 0.55, z, r * 0.2, 4);
 }
-/** palazzo: { rect, h, tower: { c, s, h }, y } — the rusticated block with its crenellated gallery and tower. */
-function palazzo(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, h = el.h ?? 30, y = el.y ?? 0;
-  bag.add('rubble', box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y, y + h); col.floor(el.rect, y + h);
-  bag.add('rubble', box(x0 - 1.2, y + h, z0 - 1.2, x1 + 1.2, y + h + 2.5, z1 + 1.2));
-  for (let x = x0 - 1; x < x1 + 1; x += 2.4) for (const zz of [z0 - 1.2, z1 + 0.6]) bag.add('rubble', box(x, y + h + 2.5, zz, x + 1.2, y + h + 3.8, zz + 0.6));
-  for (const f of 'nsew') { const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, n = Math.floor(L / 5); for (let i = 0; i < n; i++) for (const yy of [y + 10, y + 19]) { const u = (along ? x0 : z0) + (i + 0.5) * L / n; const q = f === 'n' ? [u - 0.9, z0 - 0.06, u + 0.9, z0 + 0.02] : f === 's' ? [u - 0.9, z1 - 0.02, u + 0.9, z1 + 0.06] : f === 'w' ? [x0 - 0.06, u - 0.9, x0 + 0.02, u + 0.9] : [x1 - 0.02, u - 0.9, x1 + 0.06, u + 0.9]; bag.add('opening', box(q[0], yy, q[1], q[2], yy + 3, q[3])); } }
-  if (el.tower) { const [tx, tz] = el.tower.c, s = el.tower.s ?? 7, th = el.tower.h ?? 94; bag.add('rubble', box(tx - s / 2, y + h, tz - s / 2, tx + s / 2, y + th - 12, tz + s / 2)); bag.add('rubble', box(tx - s / 2 - 1, y + th - 14, tz - s / 2 - 1, tx + s / 2 + 1, y + th - 10, tz + s / 2 + 1)); for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bag.add('rubble', box(tx + dx * s * 0.4 - 0.4, y + th - 10, tz + dz * s * 0.4 - 0.4, tx + dx * s * 0.4 + 0.4, y + th - 4, tz + dz * s * 0.4 + 0.4)); bag.add(R, frustum([tx - s / 2 - 0.5, tz - s / 2 - 0.5, tx + s / 2 + 0.5, tz + s / 2 + 0.5], y + th - 4, y + th, s / 2, s / 2, s / 2, s / 2)); }
-}
-/** loggia: an open arcade { rect, h, y, n }. */
-function loggia(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, h = el.h ?? 12, y = el.y ?? 0, n = el.n ?? 3;
-  for (let i = 0; i <= n; i++) for (const z of [z0, z1]) { const x = x0 + (x1 - x0) * i / n; bag.add(ST, box(x - 0.8, y, z - 0.8, x + 0.8, y + h, z + 0.8)); col.rect([x - 0.8, z - 0.8, x + 0.8, z + 0.8], y, y + h); }
-  bag.add(ST, box(x0 - 1, y + h, z0 - 1, x1 + 1, y + h + 2.5, z1 + 1)); bag.add(R, box(x0 - 1.2, y + h + 2.5, z0 - 1.2, x1 + 1.2, y + h + 3, z1 + 1.2));
-  bag.add('flagstone', box(x0, y - 0.3, z0, x1, y + 0.6, z1)); col.floor([x0, z0, x1, z1], y + 0.6);
-}
 registerStyle('renaissance', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, duomo, campanile, baptistery, palazzo, loggia },
+  elements: { ...STYLES.qing.elements, duomo, campanile, baptistery, palazzo, loggia, ponte_vecchio: ponteVecchio },
   objects: {},
 });

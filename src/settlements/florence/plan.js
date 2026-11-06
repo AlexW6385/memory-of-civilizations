@@ -5,8 +5,8 @@ const E = [
   { t: 'duomo', ...DUOMO, interior: true },
   { t: 'campanile', c: CAMPANILE, s: 14.5, h: 84 },
   { t: 'baptistery', c: BAPTISTERY, r: 13.5, h: 26 },
-  { t: 'palazzo', rect: PALAZZO, h: 30, tower: { c: [82, 124], s: 7, h: 94 } },
-  { t: 'loggia', rect: LOGGIA, h: 12, n: 3 },
+  { t: 'palazzo', rect: PALAZZO, h: 30, front: 'w', tower: { u: 13, s: 7, h: 94 } },
+  { t: 'loggia', rect: LOGGIA, h: 9.5, n: 3 },
 ];
 export const centre = {
   id: 'florence-centre',
@@ -24,9 +24,9 @@ export const centre = {
 };
 const az = ARNO.z + 12 * Math.sin(BRIDGE.x / 130);
 export const bridge = {
-  id: 'florence-ponte-vecchio', style: 'vernacular', origin: [BRIDGE.x, az], base: 0, yaw: 90, feature: true,
-  entrance: { at: [0, 0], facing: 'n' }, bounds: [-40, -8, 40, 8], rooms: [],
-  elements: [{ t: 'bridge_stone', rect: [-ARNO.w / 2 - 6, -5, ARNO.w / 2 + 6, 5], y: 0.5, bed: ARNO.bed, ramps: [] }, ...Array.from({ length: 10 }, (_, k) => ({ t: 'wall_low', rect: [-ARNO.w / 2 + k * 6.2, 3.2, -ARNO.w / 2 + k * 6.2 + 5.6, 7.5], y: 0.5, h: 4.5 })), ...Array.from({ length: 10 }, (_, k) => ({ t: 'wall_low', rect: [-ARNO.w / 2 + k * 6.2, -7.5, -ARNO.w / 2 + k * 6.2 + 5.6, -3.2], y: 0.5, h: 4.5 }))],
+  id: 'florence-ponte-vecchio', style: 'renaissance', origin: [BRIDGE.x, az], base: 0, yaw: 90, feature: true,
+  entrance: { at: [0, 0], facing: 'n' }, bounds: [-44, -13, 44, 13], rooms: [],
+  elements: [{ t: 'ponte_vecchio', span: ARNO.w + 12, w: 10, y: 0.5, bed: ARNO.bed, water: ARNO.level }],
 };
 export const river = {
   id: 'florence-arno', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
