@@ -9,7 +9,7 @@ const E = [];
 const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
 E.push({ t: 'terrace', rect: TERRACE.rect, h: ty, batter: 0.6, gap: [-7, 7] });
 E.push({ t: 'stairs', rect: [-7, COURT[3], 7, tz0 + 0.6], y0: 0, y1: ty, dir: 's', mat: 'brick_baked' });
-E.push({ t: 'ziggurat', c: [0, 0], y: ty, stages: [{ w: 64, d: 46, h: 15, batter: 3 }, { w: 38, d: 28, h: 7, batter: 1.5 }, { w: 24, d: 18, h: 5, batter: 1 }], shrine: { w: 14, d: 11, h: 5 } });
+E.push({ t: 'ziggurat', c: [0, 0], y: ty, stages: [{ w: 64, d: 46, h: 15, batter: 3 }, { w: 38, d: 28, h: 7, batter: 1.5, dz: 5 }, { w: 24, d: 18, h: 5, batter: 1, dz: 8 }], shrine: { w: 14, d: 11, h: 5 } });
 // the terrace's enclosure (walls of rooms standing on it, back from its sloping face), the Court of Nanna with the
 // Edublalmah, the gate tower, at its entrance, the precinct wall and its north gate
 const w = (a, b, h, th, y) => E.push({ t: 'precinct_wall', a, b, h, th, y });
@@ -37,7 +37,7 @@ for (const z of [-80, -30, 12]) E.push({ t: 'stairs', rect: [hx1 - 4.6, z, hx1 -
 for (let z = hz0 + 10; z < hz1 - 8; z += 9) if (![-80, -30, 12].some((s) => z > s - 1.5 && z < s + 4)) E.push({ t: 'block', rect: [hx1 - 1.35, z - 0.14, hx1 - 1.07, z + 0.14], y0: 0.6, y1: 1.45, mat: 'palm_trunk' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('terrace', TERRACE.rect, ty, 'open'), room('court', COURT, 0, 'open'), room('shrine', [-5.7, -3.2, 5.7, 5.2], ty + 27, 'hall')];
+const rooms = [room('terrace', TERRACE.rect, ty, 'open'), room('court', COURT, 0, 'open'), room('shrine', [-5.7, 4.8, 5.7, 13.2], ty + 27, 'hall')];
 const walks = [[[0, -240], [0, -170], [0, -110], [0, -78], [0, -60], [0, -40]]];
 walks[0].y0 = 0;
 

@@ -58,7 +58,7 @@ function ziggurat(el, ctx) {
   let y = el.y ?? 0;
   const tops = [];
   el.stages.forEach((s, i) => {
-    const r = [cx - s.w / 2, cz - s.d / 2, cx + s.w / 2, cz + s.d / 2], b = s.batter ?? s.h * 0.12;
+    const r = [cx - s.w / 2, cz + (s.dz ?? 0) - s.d / 2, cx + s.w / 2, cz + (s.dz ?? 0) + s.d / 2], b = s.batter ?? s.h * 0.12;   // dz: the upper stages set back
     bag.add(BB, frustum(r, y, y + s.h, b, b, b, b, { noBottom: true }));
     buttresses(bag, r, y, s.h, b, 3.2, (px) => Math.abs(px - cx) < 5);
     col.rect([r[0] + b * 0.4, r[1] + b * 0.4, r[2] - b * 0.4, r[3] - b * 0.4], y, y + s.h);
@@ -94,18 +94,19 @@ function ziggurat(el, ctx) {
     stairs({ rect: [Math.min(x0, x1), fz - 1, Math.max(x0, x1), fz + 4], y0: S0.y0, y1: S0.y1, dir: s < 0 ? 'e' : 'w', mat: BB }, { bag, col });
     bag.add(BB, frustum([Math.min(x0, x1), fz - 1.4, Math.max(x0, x1), fz - 1], S0.y0, S0.y1 + 0.8, 0, 0, 0, 0));
   }
-  // the gatehouse at the head of the stairs, with its arched way
-  const gz = fz + S0.b + 1;
-  bag.add(MP, box(cx - 6, S0.y1, gz, cx - 2, S0.y1 + 5, gz + 6)); bag.add(MP, box(cx + 2, S0.y1, gz, cx + 6, S0.y1 + 5, gz + 6));
-  bag.add(MP, box(cx - 6, S0.y1 + 3.8, gz, cx + 6, S0.y1 + 5, gz + 6));
-  col.rect([cx - 6, gz, cx - 2, gz + 6], S0.y1, S0.y1 + 5); col.rect([cx + 2, gz, cx + 6, gz + 6], S0.y1, S0.y1 + 5);
-  // the stairs on up the second and third stages
+  // the gatehouse at the head of the stairs, its way 5 m wide and 4.8 m high, the single stair going on up through it
+  const gz = fz + S0.b + 1, GH = 6.2, gw = 2.6;
+  for (const sx of [-1, 1]) { const q = [Math.min(cx + sx * gw, cx + sx * 6.5), gz, Math.max(cx + sx * gw, cx + sx * 6.5), gz + 4]; bag.add(MP, box(q[0], S0.y1, q[1], q[2], S0.y1 + GH, q[3])); col.rect(q, S0.y1, S0.y1 + GH); col.floor(q, S0.y1 + GH); }
+  bag.add(MP, box(cx - gw, S0.y1 + 4.8, gz, cx + gw, S0.y1 + GH, gz + 4)); col.floor([cx - gw, gz, cx + gw, gz + 4], S0.y1 + GH);
+  bag.add('palm_trunk', box(cx - gw - 0.2, S0.y1 + 4.62, gz - 0.12, cx + gw + 0.2, S0.y1 + 4.8, gz + 0.3));
+  // the stairs on up the second and third stages, each from the front edge of the stage below
   for (let i = 1; i < tops.length; i++) {
-    const T = tops[i], f = T.r[1], h = T.y1 - T.y0;
-    stairs({ rect: [cx - 2.5, f - h * 1.6, cx + 2.5, f + T.b + 0.3], y0: T.y0, y1: T.y1, dir: 's', mat: BB }, { bag, col });
+    const T = tops[i], P = tops[i - 1], foot = Math.max(P.r[1] + P.b + 0.6, i === 1 ? gz - 0.4 : -Infinity);
+    stairs({ rect: [cx - 2.5, foot, cx + 2.5, T.r[1] + T.b + 0.3], y0: T.y0, y1: T.y1, dir: 's', mat: BB }, { bag, col });
   }
   // the shrine of Nanna on the top stage (§4.2)
-  shrine({ ...el.shrine, c: [cx, cz + 1], y: tops[tops.length - 1].y1 }, ctx);
+  const tz = (tops[tops.length - 1].r[1] + tops[tops.length - 1].r[3]) / 2;
+  shrine({ ...el.shrine, c: [cx, tz + 1], y: tops[tops.length - 1].y1 }, ctx);
 }
 
 /**
