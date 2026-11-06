@@ -42,7 +42,7 @@ Earthen mounds; buildings of poles and clay under steep grass thatch; log palisa
 
 ## 5. The town
 
-About 1,300 houses round small courtyards, inside and outside the palisade. [stated: tens of thousands of people at the peak; count ours — inferred]
+About 1,300 houses round small courtyards, inside and outside the palisade. [stated: tens of thousands of people at the peak; count ours — inferred] They are "single-family wattle and daub structures plastered by clay with thatch roofing" [stated: HistoryRise]; built with daubed walls, the thatch closed under the eaves, a doorway framed by two posts and a lintel [inferred: the frame].
 
 ## 6. Ground and water
 

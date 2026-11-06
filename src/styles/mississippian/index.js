@@ -14,7 +14,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 /** A steep hipped thatch roof over rect from y, rising rise. */
 function hip(bag, [x0, z0, x1, z1], y, rise, o = 0.5) {
   const w = x1 - x0 + 2 * o, d = z1 - z0 + 2 * o, m = Math.min(w, d) / 2 - 0.05;
-  bag.add(TH, frustum([x0 - o, z0 - o, x1 + o, z1 + o], y, y + rise, m, m, m, m, { noBottom: true }));
+  bag.add(TH, frustum([x0 - o, z0 - o, x1 + o, z1 + o], y, y + rise, m, m, m, m));          // closed below: the eaves' underside
 }
 /** Push triangle a b c turned to face `want`. */
 function tri(out, a, b, c, want) {
@@ -86,9 +86,13 @@ function house(el, { bag, col }) {
   bag.add(WALL, box(x0, foot, z0, x1, y + 2, z1)); col.rect(el.rect, foot, y + 2);
   const along = (x1 - x0) >= (z1 - z0), rise = 2.6 + rand() * 1.2, o = 0.4;
   if (rand() < 0.5) hip(bag, el.rect, y + 2, rise, o);
-  else { const r = [x0 - o, z0 - o, x1 + o, z1 + o]; if (along) { const hz = (z1 - z0) / 2 + o; bag.add(TH, frustum(r, y + 2, y + 2 + rise, 0, 0, hz, hz, { noBottom: true, noTop: true })); } else { const hx = (x1 - x0) / 2 + o; bag.add(TH, frustum(r, y + 2, y + 2 + rise, hx, hx, 0, 0, { noBottom: true, noTop: true })); } }
+  else { const r = [x0 - o, z0 - o, x1 + o, z1 + o]; if (along) { const hz = (z1 - z0) / 2 + o; bag.add(TH, frustum(r, y + 2, y + 2 + rise, 0, 0, hz, hz, { noTop: true })); } else { const hx = (x1 - x0) / 2 + o; bag.add(TH, frustum(r, y + 2, y + 2 + rise, hx, hx, 0, 0, { noTop: true })); } }
   const f = rand() < 0.5 ? z0 : z1, sg = f === z0 ? -1 : 1, mx = (x0 + x1) / 2;
   bag.add('opening', box(mx - 0.4, y, f + sg * 0.01, mx + 0.4, y + 1.5, f + sg * 0.05));
+  // the door posts and the lintel pole across them
+  const z0d = Math.min(f, f + sg * 0.16), z1d = Math.max(f, f + sg * 0.16);
+  for (const sd of [-1, 1]) bag.add('timber', box(mx + sd * 0.48 - 0.07, foot, z0d, mx + sd * 0.48 + 0.07, y + 1.72, z1d));
+  bag.add('timber', box(mx - 0.68, y + 1.58, z0d - 0.005, mx + 0.68, y + 1.74, z1d + 0.005));
 }
 /**
  * palisade: { rect, y (fn), every (bastion spacing), gates: [[side, t]] } — a wall of logs set in a
