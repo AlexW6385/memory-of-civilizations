@@ -9,6 +9,7 @@
 import { box } from '../core/geom.js';
 import { rng, placer, assembly, tube, slathe } from './kit.js';
 import { BufferGeometry, Float32BufferAttribute } from '../core/three.js';
+import { figure } from './figures.js';
 
 const D2R = Math.PI / 180;
 // L body length (chest to rump), H height at the withers, B body radius, neck length and angle
@@ -245,7 +246,7 @@ function templeDress(a, hide, { marks, bell, anklets }) {
  */
 function elephant(el, { bag, col }) {
   const rand = rng(el.seed), african = !!el.african, tusks = el.tusks ?? (african ? 'long' : rand() < 0.4 ? 'long' : rand() < 0.5 ? 'short' : 'none');
-  const put = placer(el, bag, 0.94 + rand() * 0.12, [0.96 + rand() * 0.08, 1, 1]), shade = 0.85 + rand() * 0.2;
+  const ek = 0.94 + rand() * 0.12, put = placer(el, bag, ek, [0.96 + rand() * 0.08, 1, 1]), shade = 0.85 + rand() * 0.2;
   const P = assembly(`beast|elephant|${african ? 'a' : ''}|${tusks}`, (a) => elephantParts(a, { african, tusks }));
   put(el.mat ?? 'hide_grey', P.hide.clone(), shade); put('hide_black', P.dark.clone(), 0.6);
   put('ivory', P.pale.clone(), 0.8); if (P.ivory) put('ivory', P.ivory.clone());
@@ -271,6 +272,18 @@ function elephant(el, { bag, col }) {
     });
     put(el.cloth ?? 'cloth_red', G.cloth.clone()); put('gilt_bronze', G.trim.clone());
   }
+  // the howdah on the back, girthed on with ropes round the body; the mahout astride the neck, his goad in hand
+  const topAt = (z) => { const t = farHit(P.hide, [0, 1.6, z], [0, 1, 0]); return t === null ? 2.5 : 1.6 + t; };
+  if (el.howdah) {
+    const H = assembly(`beast-howdah|elephant|${african ? 'a' : ''}|${el.canopy ? 'c' : ''}`, (a) => howdah(a, P.hide, topAt, !!el.canopy));
+    put(el.cloth ?? 'cloth_red', H.cloth.clone(), 0.9); put('gilt_bronze', H.gilt.clone()); put('timber', H.wood.clone(), 0.8); put('cloth_white', H.rope.clone(), 0.75);
+    if (H.cushion) put(el.cushion ?? 'cloth_ochre', H.cushion.clone());
+  }
+  if (el.mahout) {
+    const m = typeof el.mahout === 'object' ? el.mahout : {}, z0 = -1.06, top = topAt(z0), rot = el.rot ?? 0, ks = (el.s ?? 1) * ek;
+    const lz = z0 * ks, wx = el.at[0] + Math.sin(rot) * lz, wz = el.at[1] + Math.cos(rot) * lz, Hm = 1.62;
+    figure({ t: 'figure', at: [wx, wz], y: (el.y ?? 0) + top * ks - 0.79 * Hm / 1.65, rot, seed: el.seed ^ 0x2f6b, h: Hm, pose: 'ride', dress: 'tunic', legs: 'hose', cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'turban', feet: 'bare', ...m }, { bag, col: { circle() {}, rect() {} } });
+  }
   if (el.marks || el.bell || el.anklets) {
     const T = assembly(`beast-temple|elephant|${african ? 'a' : ''}|${el.marks ?? ''}|${el.bell ? 'b' : ''}|${el.anklets ? 'k' : ''}`, (a) => templeDress(a, P.hide, el));
     if (T.white) put('paint_white', T.white.clone()); if (T.red) put('stucco_red', T.red.clone());
@@ -278,6 +291,56 @@ function elephant(el, { bag, col }) {
   }
   const [x, z] = el.at, y = el.y ?? 0;
   col.circle(x, z, 1.4, y, y + 3);
+}
+
+/**
+ * The howdah (hauda) of a Mughal riding elephant: a padded mattress (gaddi) laid over the caparison on the back, on it a
+ * platform with a low railing of turned gilt posts and rails all round, cushions inside; with `canopy` four posts
+ * carrying a domed cloth canopy with a finial; girthed on by two ropes round the body and a breast rope. Roles:
+ * cloth, gilt, wood, rope, cushion.
+ */
+function howdah(a, hide, topAt, canopy) {
+  const z0 = -0.45, z1 = 0.65, hw = 0.55, top = Math.max(topAt(z0), topAt((z0 + z1) / 2), topAt(z1)) + 0.12;
+  // the mattress: from the back up to the platform, its sides falling a little
+  const pad = [];
+  for (let i = 0; i <= 6; i++) { const z = z0 - 0.05 + (z1 - z0 + 0.1) * i / 6; pad.push([0, (topAt(z) + top) / 2 + 0.01, z, hw + 0.08, Math.max(0.05, (top - topAt(z)) / 2 + 0.04)]); }
+  a('cloth', tube(pad, 12));
+  // the platform and its railing: corner posts with finials, posts between, a top rail and a mid rail, balusters
+  a('wood', box(-hw, top, z0, hw, top + 0.07, z1));
+  const y0 = top + 0.07, rh = 0.42, posts = [];
+  for (const x of [-hw + 0.03, hw - 0.03]) for (let k = 0; k <= 4; k++) posts.push([x, z0 + 0.03 + (z1 - z0 - 0.06) * k / 4, k === 0 || k === 4]);
+  for (const z of [z0 + 0.03, z1 - 0.03]) for (let k = 1; k < 3; k++) posts.push([-hw + 0.03 + (2 * hw - 0.06) * k / 3, z, false]);
+  for (const [x, z, corner] of posts) {
+    a('gilt', slathe([[0.03, 0], [0.032, 0.03], [0.02, 0.06], [0.026, 0.12], [0.017, 0.2], [0.024, 0.3], [0.02, rh], [0.001, rh + 0.002]], 8).translate(x, y0, z));
+    if (corner) a('gilt', slathe([[0.001, 0], [0.035, 0.0], [0.04, 0.04], [0.025, 0.08], [0.008, 0.13], [0.001, 0.15]], 8).translate(x, y0 + rh, z));
+  }
+  const rail = (y, r) => { const c = [[-hw + 0.03, z0 + 0.03], [hw - 0.03, z0 + 0.03], [hw - 0.03, z1 - 0.03], [-hw + 0.03, z1 - 0.03], [-hw + 0.03, z0 + 0.03]]; a('gilt', tube(c.map(([x, z]) => [x, y, z, r]), 6, { capA: false, capB: false })); };
+  rail(y0 + rh, 0.022); rail(y0 + 0.2, 0.014);
+  for (const [x0, za, x1, zb] of [[-hw + 0.03, z0 + 0.03, hw - 0.03, z0 + 0.03], [-hw + 0.03, z1 - 0.03, hw - 0.03, z1 - 0.03], [-hw + 0.03, z0 + 0.03, -hw + 0.03, z1 - 0.03], [hw - 0.03, z0 + 0.03, hw - 0.03, z1 - 0.03]]) {
+    const L = Math.hypot(x1 - x0, zb - za), n = Math.floor(L / 0.09);
+    for (let k = 1; k < n; k++) { const t = k / n; a('gilt', tube([[x0 + (x1 - x0) * t, y0 + 0.2, za + (zb - za) * t, 0.008], [x0 + (x1 - x0) * t, y0 + rh, za + (zb - za) * t, 0.008]], 4, { capA: false, capB: false })); }
+  }
+  // the cushions: a seat and a bolster against the back rail
+  a('cushion', tube([[-hw + 0.1, y0 + 0.07, (z0 + z1) / 2, 0.07, 0.07], [hw - 0.1, y0 + 0.07, (z0 + z1) / 2, 0.07, 0.07]], 10));
+  a('cushion', tube([[0, y0 + 0.06, z0 + 0.15, hw - 0.08, 0.06], [0, y0 + 0.06, z1 - 0.15, hw - 0.08, 0.06]], 10));
+  if (canopy) {
+    const ch = 1.25;
+    for (const x of [-hw + 0.03, hw - 0.03]) for (const z of [z0 + 0.03, z1 - 0.03]) a('gilt', tube([[x, y0 + rh, z, 0.018], [x, y0 + ch, z, 0.016]], 6));
+    a('cloth', slathe([[hw * 1.25, 0], [hw * 1.22, 0.04], [hw * 1.1, 0.12], [hw * 0.85, 0.24], [hw * 0.5, 0.33], [0.05, 0.37], [0.001, 0.372]], 16).scale(1, 1, (z1 - z0) / (2 * hw)).translate(0, y0 + ch, (z0 + z1) / 2));
+    a('cloth', slathe([[hw * 1.25, 0.002], [hw * 1.25, -0.12], [hw * 1.24, -0.125], [hw * 1.24, 0.0]], 16).scale(1, 1, (z1 - z0) / (2 * hw)).translate(0, y0 + ch, (z0 + z1) / 2));        // the valance
+    a('cloth', slathe([[0.001, 0.004], [hw * 1.235, 0.0]], 16).scale(1, 1, (z1 - z0) / (2 * hw)).translate(0, y0 + ch - 0.01, (z0 + z1) / 2));                            // the lining under the dome
+    a('gilt', slathe([[0.001, 0], [0.04, 0.0], [0.05, 0.05], [0.025, 0.1], [0.035, 0.14], [0.01, 0.2], [0.001, 0.22]], 8).translate(0, y0 + ch + 0.36, (z0 + z1) / 2));
+  }
+  // the girths: ropes round the body, and a breast rope round the chest
+  for (const zg of [z0 + 0.15, z1 - 0.15]) {
+    const ring = [];
+    for (let k = 0; k <= 24; k++) {
+      const th = k / 24 * Math.PI * 2, d = [Math.cos(th), Math.sin(th), 0], t = farHit(hide, [0, 1.75, zg], d) ?? 0.8, p = [d[0] * (t + 0.06), 1.75 + d[1] * (t + 0.06), zg];
+      if (p[1] > top) { p[1] = top; p[0] = Math.sign(p[0] || 1) * Math.min(Math.abs(p[0]), hw + 0.09); }
+      ring.push([...p, 0.022]);
+    }
+    a('rope', tube(ring, 5, { capA: false, capB: false }));
+  }
 }
 
 /** animal: { kind, mat, graze, gear } — a still beast, head toward −z. */
