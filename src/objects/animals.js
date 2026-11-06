@@ -8,6 +8,7 @@
 
 import { box } from '../core/geom.js';
 import { rng, placer, assembly, tube, slathe } from './kit.js';
+import { BufferGeometry, Float32BufferAttribute } from '../core/three.js';
 
 const D2R = Math.PI / 180;
 // L body length (chest to rump), H height at the withers, B body radius, neck length and angle
@@ -133,8 +134,97 @@ function gear(K, kind, a) {
   }
 }
 
+/**
+ * The elephant, Asian unless `african`: built by its own proportions (a cow some 2.5 m at the shoulder, the
+ * back highest in the middle; the African's at the shoulder, its ears far larger): the barrel of the body;
+ * the pillar legs, the forelegs' wrists and the hind legs' knees and hocks a little bent, the round feet with
+ * their toenails; the head with the twin domes of the brow (Asian) and the cheek; the trunk in rings,
+ * tapering and curled at its tip, the lower lip under it; the ears as broad thin flaps; the tusks (long for a
+ * tusker, short tushes, or none); the eyes; the tail with its tuft. Roles: hide, dark, pale (nails), ivory.
+ */
+const EL_BALL = (r, n = 10, m = 7) => slathe(Array.from({ length: m }, (_, i) => { const t = i / (m - 1) * Math.PI; return [Math.max(0.001, Math.sin(t) * r), r - Math.cos(t) * r]; }), n).translate(0, -r, 0);
+function elephantParts(a, { african = false, tusks = 'long' } = {}) {
+  const hide = (g) => a('hide', g), bk = african ? [1.8, 1.72, 1.66] : [1.74, 1.82, 1.74];      // the back over the hips, the middle, the shoulders
+  // the body: rump, flank, belly slung, chest, shoulders
+  hide(tube([[0, bk[0] - 0.12, 1.47, 0.16, 0.18], [0, bk[0] - 0.06, 1.38, 0.38, 0.4], [0, bk[0], 1.1, 0.68, 0.66], [0, bk[1] - 0.02, 0.5, 0.8, 0.74], [0, bk[1] - 0.06, -0.1, 0.82, 0.76], [0, bk[2] - 0.04, -0.62, 0.78, 0.74], [0, bk[2] - 0.02, -0.98, 0.64, 0.68], [0, bk[2] + 0.02, -1.16, 0.42, 0.5]], 12));
+  // the legs: pillars from inside the body down through the joints to the round feet
+  for (const sx of [-1, 1]) for (const front of [true, false]) {
+    const x = sx * 0.45, z = front ? -0.68 : 0.86;
+    const P = front
+      ? [[x * 0.9, 1.55, z, 0.3, 0.33], [x, 1.05, z - 0.02, 0.24, 0.26], [x, 0.62, z - 0.05, 0.2, 0.21], [x, 0.52, z - 0.055, 0.205, 0.205], [x, 0.3, z - 0.04, 0.2], [x, 0.12, z - 0.03, 0.22], [x, 0.03, z - 0.03, 0.235]]
+      : [[x * 0.9, 1.5, z - 0.05, 0.3, 0.36], [x, 1.0, z - 0.12, 0.25, 0.28], [x, 0.82, z - 0.1, 0.22, 0.24], [x, 0.5, z + 0.03, 0.19, 0.2], [x, 0.4, z + 0.04, 0.19], [x, 0.12, z + 0.0, 0.21], [x, 0.03, z, 0.225]];
+    hide(tube(P, 10, { capB: false }));
+    const [fx, , fz] = P[P.length - 1];
+    hide(slathe([[0.001, 0.0], [0.2, 0.0], [0.24, 0.012], [0.235, 0.03]], 12).translate(fx, 0, fz));        // the sole
+    const n = front ? 5 : 4;
+    for (let k = 0; k < n; k++) { const t = (k / (n - 1) - 0.5) * (front ? 1.7 : 1.4), nx = fx + Math.sin(t) * 0.225, nz = fz - Math.cos(t) * 0.225; a('pale', EL_BALL(0.045, 7, 5).scale(1, 0.75, 0.6).translate(nx, 0.065, nz)); }
+  }
+  // the head: the cheeks and brow on a short neck, the twin domes (Asian) or the single (African)
+  const hz = -1.45, hy = african ? 2.05 : 2.15;
+  hide(tube([[0, bk[2] - 0.1, -0.95, 0.56, 0.66], [0, hy, hz + 0.05, 0.5, 0.58], [0, hy - 0.02, hz - 0.25, 0.42, 0.52], [0, hy - 0.1, hz - 0.45, 0.28, 0.36]], 12, { capA: false }));
+  if (african) hide(EL_BALL(0.36, 12, 7).scale(1, 0.8, 1).translate(0, hy + 0.3, hz - 0.12));
+  else for (const sx of [-1, 1]) hide(EL_BALL(0.23, 10, 7).scale(1, 1, 1.1).translate(sx * 0.14, hy + 0.4, hz - 0.12));
+  // the trunk: from the face down in rings, tapering, curling forward at its tip
+  const tk = [[0, hy - 0.05, hz - 0.5, 0.2], [0, hy - 0.4, hz - 0.62, 0.17], [0, hy - 0.8, hz - 0.68, 0.14], [0, hy - 1.2, hz - 0.68, 0.115], [0, hy - 1.55, hz - 0.64, 0.095], [0, hy - 1.8, hz - 0.58, 0.08], [0, hy - 1.92, hz - 0.68, 0.068], [0, hy - 1.88, hz - 0.8, 0.058], [0, hy - 1.78, hz - 0.84, 0.05]];
+  const T = [];
+  for (let i = 0; i + 1 < tk.length; i++) for (let k = 0; k < 3; k++) { const t = k / 3, p = tk[i].map((v, j) => v + (tk[i + 1][j] - v) * t); T.push([p[0], p[1], p[2], p[3] * (k === 1 ? 0.93 : 1)]); }
+  T.push(tk[tk.length - 1]);
+  hide(tube(T, 10));
+  hide(tube([[0, hy - 0.42, hz - 0.36, 0.1, 0.06], [0, hy - 0.5, hz - 0.46, 0.08, 0.05], [0, hy - 0.5, hz - 0.52, 0.04]], 7));     // the lower lip
+  // the ears: broad thin flaps laid back along the neck
+  for (const sx of [-1, 1]) {
+    const e = african ? EL_BALL(1, 14, 9).scale(0.05, 0.62, 0.52) : EL_BALL(1, 12, 8).scale(0.045, 0.4, 0.33);
+    e.rotateY(sx * 0.42).rotateZ(sx * 0.1);
+    e.translate(sx * (african ? 0.6 : 0.57), hy + (african ? -0.02 : 0.02), hz + (african ? 0.42 : 0.32));
+    hide(e);
+  }
+  // the tusks, out of the sockets either side of the trunk, curving forward and up
+  if (tusks !== 'none') for (const sx of [-1, 1]) {
+    const L = tusks === 'long' ? (african ? 1.25 : 1.0) : 0.22, b = [sx * 0.2, hy - 0.32, hz - 0.42];
+    const pts = tusks === 'long' ? [[...b, 0.075], [sx * 0.24, b[1] - L * 0.35, b[2] - L * 0.3, 0.07], [sx * 0.27, b[1] - L * 0.45, b[2] - L * 0.62, 0.055], [sx * 0.27, b[1] - L * 0.32, b[2] - L * 0.9, 0.03], [sx * 0.26, b[1] - L * 0.2, b[2] - L, 0.012]] : [[...b, 0.05], [sx * 0.22, b[1] - L * 0.6, b[2] - L * 0.5, 0.04], [sx * 0.23, b[1] - L, b[2] - L * 0.8, 0.015]];
+    a('ivory', tube(pts, 7));
+  }
+  for (const sx of [-1, 1]) a('dark', EL_BALL(0.03, 7, 5).scale(0.6, 0.8, 1).translate(sx * 0.375, hy + 0.02, hz - 0.3));    // the eyes
+  // the tail, the tuft at its end
+  a('hide', tube([[0, bk[0] + 0.08, 1.28, 0.06], [0, bk[0] - 0.3, 1.43, 0.045], [0, 1.0, 1.47, 0.03], [0, 0.85, 1.45, 0.025]], 6));
+  a('dark', tube([[0, 0.9, 1.455, 0.03], [0, 0.78, 1.45, 0.045], [0, 0.66, 1.44, 0.012]], 6));
+}
+/** An elephant: { at, rot, seed, african, tusks ('long' | 'short' | 'none'), gear (a caparison over the back), cloth }. */
+function elephant(el, { bag, col }) {
+  const rand = rng(el.seed), african = !!el.african, tusks = el.tusks ?? (african ? 'long' : rand() < 0.4 ? 'long' : rand() < 0.5 ? 'short' : 'none');
+  const put = placer(el, bag, 0.94 + rand() * 0.12, [0.96 + rand() * 0.08, 1, 1]), shade = 0.85 + rand() * 0.2;
+  const P = assembly(`beast|elephant|${african ? 'a' : ''}|${tusks}`, (a) => elephantParts(a, { african, tusks }));
+  put(el.mat ?? 'hide_grey', P.hide.clone(), shade); put('hide_black', P.dark.clone(), 0.6);
+  put('ivory', P.pale.clone(), 0.8); if (P.ivory) put('ivory', P.ivory.clone());
+  if (el.gear) {
+    const G = assembly(`beast-gear|elephant|${african ? 'a' : ''}`, (a) => {
+      // the caparison: a cloth laid over the back and hanging down the flanks, following the body, its gilt borders
+      const B = [[1.1, 0.68, 0.66], [0.5, 0.8, 0.74], [-0.1, 0.82, 0.76], [-0.62, 0.78, 0.74], [-0.98, 0.64, 0.68]], bk = african ? [1.8, 1.72, 1.66] : [1.74, 1.82, 1.74];
+      const cyz = [bk[0], bk[1] - 0.02, bk[1] - 0.06, bk[2] - 0.04, bk[2] - 0.02];
+      const sec = (z) => { for (let i = 0; i + 1 < B.length; i++) if (z <= B[i][0] && z >= B[i + 1][0]) { const t = (B[i][0] - z) / (B[i][0] - B[i + 1][0]); return [cyz[i] + (cyz[i + 1] - cyz[i]) * t, B[i][1] + (B[i + 1][1] - B[i][1]) * t, B[i][2] + (B[i + 1][2] - B[i][2]) * t]; } return [cyz[2], B[2][1], B[2][2]]; };
+      const at = (z, th, off) => { const [cy, rw, rh] = sec(z); return [Math.cos(th) * (rw + off), cy + Math.sin(th) * (rh + off), z]; };
+      const NZ = 8, NA = 16, z0 = 0.5, z1 = -0.7, a0 = -0.2 * Math.PI, a1 = 1.2 * Math.PI;
+      const pos = [];
+      for (let i = 0; i < NZ; i++) for (let j = 0; j < NA; j++) {
+        const zA = z0 + (z1 - z0) * i / NZ, zB = z0 + (z1 - z0) * (i + 1) / NZ, tA = a0 + (a1 - a0) * j / NA, tB = a0 + (a1 - a0) * (j + 1) / NA;
+        const p = at(zA, tA, 0.04), q = at(zB, tA, 0.04), r = at(zB, tB, 0.04), u = at(zA, tB, 0.04);
+        pos.push(...p, ...r, ...q, ...p, ...u, ...r, ...p, ...q, ...r, ...p, ...r, ...u);           // both faces
+      }
+      const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(pos, 3)); g.computeVertexNormals();
+      a('cloth', g);
+      const ring = (z) => Array.from({ length: 15 }, (_, k) => [...at(z, a0 + (a1 - a0) * k / 14, 0.05), 0.03, 0.012]);
+      a('trim', tube(ring(z0), 5)); a('trim', tube(ring(z1), 5));
+      for (const th of [a0, a1]) a('trim', tube(Array.from({ length: 9 }, (_, k) => [...at(z0 + (z1 - z0) * k / 8, th, 0.05), 0.03, 0.012]), 5));
+    });
+    put(el.cloth ?? 'cloth_red', G.cloth.clone()); put('gilt_bronze', G.trim.clone());
+  }
+  const [x, z] = el.at, y = el.y ?? 0;
+  col.circle(x, z, 1.4, y, y + 3);
+}
+
 /** animal: { kind, mat, graze, gear } — a still beast, head toward −z. */
 export function animal(el, { bag, col }) {
+  if (el.kind === 'elephant') return elephant(el, { bag, col });
   const rand = rng(el.seed), kind = BEASTS[el.kind] ? el.kind : 'goat', K = BEASTS[kind], m = el.mat ?? K.mats[Math.floor(rand() * K.mats.length)];
   const graze = el.graze ?? (K.graze && rand() < 0.35), size = 0.92 + rand() * 0.16, fat = 0.94 + rand() * 0.12;
   const put = placer(el, bag, size, [fat, 1, 1]), shade = 0.85 + rand() * 0.25;

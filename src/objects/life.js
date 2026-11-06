@@ -33,7 +33,10 @@ const KITS = {
     door: [['lantern:oil', 0.7], ['pot:water_pot', 3], ['pot:dark_pot', 1.5], ['basket', 2], ['sacks', 1], ['firewood', 0.4]],
     street: [['animal:donkey', 2], ['animal:ox', 1], ['animal:goat', 1.2], ['chickens', 0.5], ['sacks', 1.2], ['well', 0.25], ['figure', 2.5]],
     stall: ['pot:water_pot', 'basket', 'produce'], boats: ['reed', 'barge'], awnings: ['cloth_white', 'reed_mat'],
-    figures: F(['wrap', 'tunic'], ['cloth_white', 'cloth_white', 'linen'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { hair: ['short', 'long', 'short'], beard: 0, feet: 'bare', over: ['sash', 'none'] }),
+    // the wrapped linen kilt (shendyt) and the loincloth of the labourers, bare above the waist; the women's
+    // sheath dress on two straps; the broad collar; wigs and shaven heads; barefoot
+    // (https://en.wikipedia.org/wiki/Clothing_in_ancient_Egypt)
+    figures: F(['shendyt', 'shendyt', 'sheath', 'loincloth', 'shendyt', 'sheath'], ['linen', 'cloth_white', 'linen'], ['skin_medium', 'skin_dark'], ['none'], { carry: ['none', 'none', 'none', 'basket', 'pot'], hair: ['short', 'wig', 'shaven', 'wig', 'short'], beard: 0, feet: 'bare', cloths2: ['cloth_indigo', 'cloth_green', 'cloth_red', 'cloth_white'], overs: { shendyt: ['belt', 'belt', 'wesekh'], sheath: ['none', 'wesekh'], loincloth: ['none'] } }),
   },
   east_asia: {
     fronts: [['hang_lantern:paper', 1.4, 1], ['shop_sign', 1, 1], ['laundry_pole', 1, 2]],
@@ -60,13 +63,13 @@ const KITS = {
     door: [['lantern:oil', 0.7], ['pot:water_pot', 3.5], ['basket', 2], ['firewood', 0.8], ['bench', 0.8], ['laundry', 1]],
     street: [['cart', 1.2], ['animal:zebu', 2.2], ['animal:buffalo', 0.8], ['animal:goat', 1], ['animal:dog', 0.6], ['well', 0.25], ['figure', 3]],
     stall: ['pot:water_pot', 'basket', 'produce', 'cloth'], boats: ['rowboat'], awnings: ['cloth_red', 'cloth_ochre', 'cloth_white'],
-    figures: F(['wrap', 'robe'], ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_indigo'], ['skin_medium', 'skin_dark'], ['turban', 'veil', 'none'], { carry: ['pot', 'none', 'none'] , hair: ['bun', 'long', 'short'], beard: 0.4, feet: 'bare', over: ['shawl', 'sash', 'none'] }),
+    figures: F(['wrap', 'robe'], ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_indigo'], ['skin_medium', 'skin_dark'], ['turban', 'veil', 'none'], { carry: ['pot', 'none', 'none'] , hair: ['bun', 'long', 'short'], beard: 0.4, feet: 'bare', over: ['shawl', 'sash', 'none'], tops: { wrap: ['bare', '', ''] }, overs: { wrap: ['shawl', 'shawl', 'none'] } }),
   },
   southeast_asia: {
     door: [['lantern:oil', 0.7], ['pot:dark_pot', 2.5], ['basket', 3], ['firewood', 1], ['ladder', 1]],
     street: [['cart', 1], ['animal:buffalo', 1.5], ['animal:zebu', 1], ['chickens', 1.2], ['animal:pig', 0.6], ['figure', 2.5]],
     stall: ['basket', 'produce', 'pot:dark_pot'], boats: ['canoe', 'sampan'], awnings: ['reed_mat', 'cloth_ochre'],
-    figures: F(['wrap'], ['cloth_ochre', 'cloth_red', 'cloth_brown', 'cloth_white'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { carry: ['pole', 'basket', 'none'] , hair: ['bun', 'long', 'short'], beard: 0.05, feet: 'bare' }),
+    figures: F(['wrap'], ['cloth_ochre', 'cloth_red', 'cloth_brown', 'cloth_white'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { carry: ['pole', 'basket', 'none'] , hair: ['bun', 'long', 'short'], beard: 0.05, feet: 'bare', tops: { wrap: ['bare', 'bare', ''] }, overs: { wrap: ['none', 'none', 'sash'] } }),
   },
   europe_medieval: {
     fronts: [['shop_sign:board', 1, 1], ['laundry_pole', 0.4, 2]],
@@ -86,7 +89,9 @@ const KITS = {
     door: [['pot:dark_pot', 2.5], ['pot:water_pot', 1.5], ['basket', 2.5], ['firewood', 1], ['ladder', 0.6]],
     street: [['animal:dog', 1.2], ['chickens', 0.6], ['basket', 1], ['pot:dark_pot', 1], ['figure', 3]],
     stall: ['basket', 'produce', 'pot:dark_pot', 'cloth'], boats: ['canoe'], awnings: ['cloth_white', 'reed_mat'],
-    figures: F(['wrap', 'tunic'], ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_brown'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { carry: ['basket', 'pot', 'none', 'none'] , hair: ['long', 'bun', 'short'], beard: 0, feet: 'bare', over: ['sash', 'none'] }),
+    // the men's loincloth (maxtlatl, ex) with a cloak knotted at the shoulder (tilmatli), the women's huipil
+    // (a tunic) and wrapped skirt
+    figures: F(['loincloth', 'loincloth', 'tunic', 'wrap'], ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_brown'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { carry: ['basket', 'pot', 'none', 'none'] , hair: ['long', 'bun', 'short'], beard: 0, feet: 'bare', over: ['sash', 'none'], overs: { loincloth: ['cape', 'none', 'cape'], wrap: ['none', 'shawl'] } }),
   },
   andes: {
     door: [['pot:dark_pot', 2], ['basket', 2], ['firewood', 1]],
@@ -104,7 +109,9 @@ const KITS = {
     door: [['basket', 3], ['firewood', 1.5], ['pot:dark_pot', 0.2]],
     street: [['chickens', 1.2], ['animal:dog', 0.6], ['basket', 1], ['figure', 2.5]],
     stall: [], boats: ['canoe'], awnings: [],
-    figures: F(['wrap'], ['cloth_brown', 'cloth_ochre', 'hide_tan'], ['skin_medium', 'skin_dark'], ['none'], { hair: ['bun', 'long', 'short'], beard: 0.3, feet: 'bare', over: ['none'] }),
+    // the loincloth (Rapa Nui's hami) or a skirt of bark cloth or flax, bare above the waist; a cloak of
+    // bark cloth or flax over the shoulders (the Māori kākahu)
+    figures: F(['loincloth', 'wrap', 'loincloth'], ['cloth_brown', 'cloth_ochre', 'hide_tan', 'cloth_white'], ['skin_medium', 'skin_dark'], ['none'], { hair: ['bun', 'long', 'short'], beard: 0.3, feet: 'bare', over: ['none'], tops: { wrap: ['bare', 'bare', ''] }, overs: { loincloth: ['none', 'none', 'cape'], wrap: ['none', 'cape'] } }),
   },
   north: {
     door: [['lantern:iron', 0.7], ['firewood', 3], ['barrel', 1.5], ['basket', 1], ['bench', 1], ['ladder', 0.5]],
@@ -137,6 +144,14 @@ const KITS = {
 const KIT_OVER = {
   // Amsterdam on its piles drew its goods on sledges, not carts (coaches taxed and few; docs/settlements/amsterdam.md §5.6),
   // and drew its water from rain cisterns and the water boats, not from draw-wells in the street
+  // Sumerian Ur: the men bare above a wrapped skirt to the shin (the fleeced kaunakes), heads shaven; the
+  // women in a robe over one shoulder, the hair in a bun (the Standard of Ur, the Ur statues)
+  ur: { figures: F(['wrap', 'wrap', 'robe'], ['cloth_white', 'linen', 'cloth_ochre', 'cloth_brown'], ['skin_medium'], ['none'], { hair: ['shaven', 'shaven', 'bun', 'long'], beard: 0.4, feet: 'bare', over: ['shawl', 'sash'], tops: { wrap: ['bare'] }, overs: { wrap: ['none', 'belt'] } }) },
+  // Minoan Knossos: the men's loincloth and kilt, bare above the waist, long-haired, beardless; the women's
+  // long robes (the frescoes: the Cupbearer, the Prince of the Lilies)
+  knossos: { figures: F(['loincloth', 'shendyt', 'robe', 'robe'], ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_indigo'], ['skin_medium'], ['none'], { hair: ['long', 'long', 'bun'], beard: 0, feet: 'bare', over: ['sash', 'none', 'cape'], overs: { shendyt: ['belt'], loincloth: ['none'] }, hairs: [['hide_black', 0.7], ['hide_brown', 0.6]] }) },
+  // Great Zimbabwe: aprons and loincloths of hide, bare above the waist, a hide cloak on some
+  'great-zimbabwe': { figures: F(['loincloth', 'loincloth', 'wrap'], ['hide_tan', 'hide_brown', 'cloth_ochre'], ['skin_dark'], ['none'], { hair: ['short', 'short', 'bun'], beard: 0.3, feet: 'bare', over: ['none'], tops: { wrap: ['bare', ''] }, overs: { loincloth: ['none', 'none', 'cape'], wrap: ['none'] } }) },
   amsterdam: { street: [['sledge', 2], ['animal:horse', 0.8], ['animal:dog', 0.6], ['barrel', 1.2], ['sacks', 0.8], ['figure', 3]] },
 };
 // the draw-well of each kit (src/objects/index.js well): its kind, its curb, a roof over it
@@ -491,7 +506,8 @@ export function lifePlans(id, R, landmarks, town, G) {
       // the crew: someone standing at the stern (the gondolier, the boatman at his oar), or sitting amidships
       if (kind !== 'ferry' && kind !== 'dhow' && rand() < 0.6) {
         const dx = Math.sin(brot), dz = Math.cos(brot), stand = kind === 'gondola' || kind === 'sampan' || rand() < 0.4, f = stand ? 0.4 : 0.05;
-        put('figure', x + dx * len * f, z + dz * len * f, brot + Math.PI + (rand() - 0.5) * 0.5, { y: wy + (stand ? 0.28 : 0.15), ...(stand ? {} : { pose: 'sit' }) });
+        const pole = stand && (kind === 'reed' || kind === 'canoe');                 // the reed boat and the canoe poled from the stern
+        put('figure', x + dx * len * f, z + dz * len * f, brot + Math.PI + (rand() - 0.5) * 0.5, { y: wy + (stand ? 0.28 : 0.15), ...(stand ? (pole ? { pose: 'punt', poleMat: 'timber' } : {}) : { pose: 'sit' }) });
         if (kind === 'sampan') els.push({ t: 'oar', at: [x + dx * (len * 0.43 + 0.2), z + dz * (len * 0.43 + 0.2)], y: wy + 0.3, rot: brot + Math.PI, seed: 3 });
       }
       grid.fill(box, 2); nb++;
@@ -512,6 +528,10 @@ function dressed(kit, rand) {
   if (f.hair) o.hair = c(f.hair);
   if (f.beard !== undefined) o.beard = o.hat !== 'veil' && o.hair !== 'long' && o.hair !== 'bun' && rand() < f.beard;
   if (f.over && o.dress === 'robe') o.over = c(f.over);
+  // the kits that say so: the second garment by dress, a bare chest, the colours of the second cloth
+  if (f.overs?.[o.dress]) o.over = c(f.overs[o.dress]);
+  if (f.tops?.[o.dress]) { const t = c(f.tops[o.dress]); if (t) o.top = t; }
+  if (f.cloths2) o.cloth2 = c(f.cloths2);
   if (f.legs && o.dress === 'tunic') o.legs = f.legs;
   if (f.feet) o.feet = f.feet;
   const [hm, hs] = f.hairs ? c(f.hairs) : ['hide_black', 0.7];
