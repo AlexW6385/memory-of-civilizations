@@ -6,36 +6,11 @@
 
 import { registerStyle } from '../core/build.js';
 import { box, lathe, fromTriangles } from '../core/geom.js';
-import { Matrix4, Quaternion, Vector3, Color } from '../core/three.js';
-import { MATERIALS } from '../core/palette.js';
 
-function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-/**
- * A placer: builds at the origin, then scales, turns and moves each piece to the object's place —
- * as an instance of the piece's shape (GeoBag.addInstance), so the same pot, limb or head in a
- * hundred places is held once. Cloth, skin and hide are each one material tinted per piece
- * (`k` scales the object further: a figure's height).
- */
-const FAMILY = { cloth_: 'cloth_white', hide_: 'hide_white', skin_: 'skin_light' };
-const _lin = new Color();
-function tint(mat) {
-  for (const [pre, base] of Object.entries(FAMILY)) {
-    if (!mat.startsWith(pre) || !MATERIALS[mat] || !MATERIALS[base]) continue;
-    const a = _lin.set(MATERIALS[mat].color).toArray(), b = new Color(MATERIALS[base].color).toArray();
-    return { base, color: [a[0] / b[0], a[1] / b[1], a[2] / b[2]] };
-  }
-  return null;
-}
-/** How far off an object is still drawn (m): the small things nearer. */
-const REACH = { shop_sign: 160, hang_lantern: 120, laundry_pole: 150, tea_table: 120, drying_tray: 90, oar: 150, figure: 170, animal: 190, chickens: 90, pot: 120, basket: 110, sacks: 120, firewood: 110, crates: 140, barrel: 140, ladder: 140, laundry: 150, lantern: 120 };
-const _m = new Matrix4(), _q = new Quaternion(), _up = new Vector3(0, 1, 0), _p = new Vector3(), _s = new Vector3();
-function placer(el, bag, k = 1) {
-  const [x, z] = el.at, y = el.y ?? 0, rot = el.rot ?? 0, s = (el.s ?? 1) * k;
-  if (!bag.addInstance) return (mat, g) => { if (s !== 1) g.scale(s, s, s); g.rotateY(rot); g.translate(x, y, z); bag.add(mat, g); };
-  const M = _m.compose(_p.set(x, y, z), _q.setFromAxisAngle(_up, rot), _s.set(s, s, s)).clone();
-  const reach = REACH[el.t] ?? 230;
-  return (mat, g) => { const t = tint(mat); bag.addInstance(t ? t.base : mat, g, M, { color: t?.color ?? null, real: mat, reach }); };
-}
+import { rng, placer, assembly, tube, slathe, folded } from './kit.js';
+import { Matrix4 } from '../core/three.js';
+import { figure } from './figures.js';
+import { animal, BEASTS } from './animals.js';
 const at = (g, x, y, z) => { g.translate(x, y, z); return g; };
 const lz = (profile, seg = 12) => lathe(profile, seg);
 /** A cylinder lying along x (wheels, logs, rolls). */
@@ -61,7 +36,7 @@ function pot(el, { bag }) {
 function basket(el, { bag }) {
   const put = placer(el, bag), rand = rng(el.seed), n = el.n ?? 1;
   for (let i = 0; i < n; i++) {
-    const r = 0.22 + Math.floor(rand() * 4) * 0.06, h = 0.2 + Math.floor(rand() * 4) * 0.083, a = rand() * 6.28, d = i ? 0.45 + rand() * 0.2 : 0, x = Math.cos(a) * d, z = Math.sin(a) * d;
+    const q = Math.floor(rand() * 4), r = 0.22 + q * 0.06, h = 0.2 + ((q * 3 + 1) % 4) * 0.083, a = rand() * 6.28, d = i ? 0.45 + rand() * 0.2 : 0, x = Math.cos(a) * d, z = Math.sin(a) * d;
     put('wicker', at(lz([[r * 0.75, 0], [r, h], [r * 0.92, h], [r * 0.7, 0.03], [0.001, 0.03]], 12), x, 0, z));
     if (rand() < 0.6) put(el.goods ?? ['cloth_ochre', 'cloth_red', 'cloth_green', 'hide_tan'][Math.floor(rand() * 4)], at(lz([[r * 0.9, 0], [r * 0.5, 0.1], [0.001, 0.13]], 10), x, h - 0.06, z));
   }
@@ -83,8 +58,10 @@ function crates(el, { bag }) {
   for (let i = 0; i < n; i++) { const w = 0.5 + rand() * 0.3, x = (i % 2) * 0.75, y = i >= 2 ? 0.6 : 0; put('timber', turn(at(box(-w / 2, 0, -w / 2, w / 2, 0.55, w / 2), 0, 0, 0), (rand() - 0.5) * 0.3).translate(x, y, 0)); }
 }
 function firewood(el, { bag }) {
-  const put = placer(el, bag), rand = rng(el.seed), L = el.len ?? 1.6;
-  for (let row = 0; row < 4; row++) for (let k = 0; k < 6 - row; k++) { const g = lying(0.07 + rand() * 0.03, L * (0.85 + rand() * 0.2), 6); g.rotateY(Math.PI / 2); put('bark_pine', at(g, 0, 0.07 + row * 0.13, (k - (5 - row) / 2) * 0.15 + (rand() - 0.5) * 0.03)); }
+  // the stack is one of two of each length (its logs uneven within it), so that stacks share their shape
+  const put = placer(el, bag), L = Math.round((el.len ?? 1.6) * 4) / 4, v = (el.seed ?? 1) % 2;
+  const A = assembly(`firewood|${L}|${v}`, (a) => { const rand = rng(17 + v * 31); for (let row = 0; row < 4; row++) for (let k = 0; k < 6 - row; k++) { const g = lying(0.07 + rand() * 0.03, L * (0.85 + rand() * 0.2), 6); g.rotateY(Math.PI / 2); a('w', at(g, (rand() - 0.5) * 0.08, 0.07 + row * 0.13, (k - (5 - row) / 2) * 0.15 + (rand() - 0.5) * 0.03)); } });
+  put('bark_pine', A.w.clone());
 }
 function bench(el, { bag, col }) {
   const put = placer(el, bag), L = el.len ?? 1.8, m = el.mat ?? 'timber';
@@ -109,27 +86,67 @@ function well(el, { bag, col }) {
 
 // ---- stalls, carts, tools ---------------------------------------------------------------------
 /** stall: { awning (cloth material), goods: [pot kinds or 'basket' | 'cloth' | 'produce'] } — a table on posts under a cloth awning, goods laid out. */
+/** A thin cloth sheet over a grid (both faces): f(u, v) → [x, y, z], u, v in 0..1; `keep(i, j)` picks the cells (stripes). */
+function sheet(f, nu, nv, keep = null, th = 0.008) {
+  const T = [];
+  for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) {
+    if (keep && !keep(i, j)) continue;
+    const a = f(i / nu, j / nv), b = f((i + 1) / nu, j / nv), c = f((i + 1) / nu, (j + 1) / nv), d = f(i / nu, (j + 1) / nv);
+    const up = (p) => [p[0], p[1] + th, p[2]];
+    T.push(...up(a), ...up(c), ...up(b), ...up(a), ...up(d), ...up(c));      // the upper face
+    T.push(...a, ...b, ...c, ...a, ...c, ...d);                               // the lower face
+  }
+  return T.length ? fromTriangles(T) : null;
+}
+/**
+ * stall: { awning (cloth material), stripe (a second cloth, or none), goods: [pot kinds or 'basket' | 'cloth' |
+ * 'produce'], w, d } — a trestle table under a cloth awning on four poles, the awning sloping down
+ * toward the buyers in front (+z) and ending in a scalloped valance, the seller's side behind (−z).
+ */
 function stall(el, { bag, col }) {
   const put = placer(el, bag), rand = rng(el.seed), W = el.w ?? 2.6, D = el.d ?? 1.4, aw = el.awning ?? 'cloth_white';
-  for (const [px, pz] of [[-W / 2, -D / 2], [W / 2, -D / 2], [-W / 2, D / 2 + 0.6], [W / 2, D / 2 + 0.6]]) put('timber', box(px - 0.05, 0, pz - 0.05, px + 0.05, pz > 0 ? 2.1 : 2.4, pz + 0.05));
-  put('timber', box(-W / 2, 0.75, -D / 2, W / 2, 0.8, D / 2)); for (const xx of [-W / 2 + 0.1, W / 2 - 0.1]) for (const zz of [-D / 2 + 0.1, D / 2 - 0.1]) put('timber', box(xx - 0.04, 0, zz - 0.04, xx + 0.04, 0.78, zz + 0.04));
-  const g = box(-W / 2 - 0.2, -0.02, -D / 2 - 0.2, W / 2 + 0.2, 0.02, D / 2 + 0.8); g.rotateX(-0.2); g.translate(0, 2.3, 0); put(aw, g);
+  const zb = -D / 2 - 0.25, zf = D / 2 + 0.75, yb = 2.45, yf = 2.08, ov = 0.18;
+  const frame = assembly(`stall-frame|${W}|${D}`, (a) => {
+    // the poles, with the cross bars that carry the awning, and the table on its trestles
+    for (const [px, pz, h] of [[-W / 2, zb, yb], [W / 2, zb, yb], [-W / 2, zf, yf], [W / 2, zf, yf]]) a('timber', box(px - 0.045, 0, pz - 0.045, px + 0.045, h + 0.06, pz + 0.045));
+    a('timber', box(-W / 2 - 0.1, yb - 0.06, zb - 0.03, W / 2 + 0.1, yb, zb + 0.03));
+    a('timber', box(-W / 2 - 0.1, yf - 0.06, zf - 0.03, W / 2 + 0.1, yf, zf + 0.03));
+    for (const sx of [-1, 1]) { const g = box(-0.025, -0.025, 0, 0.025, 0.025, Math.hypot(zf - zb, yb - yf)); g.rotateX(Math.atan2(yb - yf, zf - zb)); g.translate(sx * W / 2, yb - 0.03, zb); a('timber', g); }
+    a('timber', box(-W / 2 + 0.05, 0.74, -D / 2 + 0.02, W / 2 - 0.05, 0.79, D / 2 - 0.02));
+    for (const xx of [-W / 2 + 0.25, W / 2 - 0.25]) for (const s of [-1, 1]) { const g = box(-0.03, 0, -0.03, 0.03, 0.78, 0.03); g.rotateX(s * 0.32); g.translate(xx, 0, s * D * 0.32); a('timber', g); }
+    for (const xx of [-W / 2 + 0.25, W / 2 - 0.25]) a('timber', box(xx - 0.035, 0.68, -D / 2 + 0.06, xx + 0.035, 0.74, D / 2 - 0.06));
+  });
+  put('timber', frame.timber.clone());
+  // the awning: sagging between the bars, a scalloped valance along the front; plain or striped
+  const stripe = el.stripe ?? (rand() < 0.4 ? ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_indigo'].find((c) => c !== aw) : null);
+  const f = (u, v) => { const x = -W / 2 - ov + (W + 2 * ov) * u, z = zb - 0.06 + (zf - zb + 0.12) * v; return [x, yb + 0.005 + (yf - yb) * v - 0.1 * Math.sin(Math.PI * v) * (0.4 + 0.6 * Math.sin(Math.PI * u)), z]; };
+  const val = (u, v) => { const x = -W / 2 - ov + (W + 2 * ov) * u, sc = Math.abs(Math.sin(u * Math.PI * 7)); return [x, yf + 0.005 - v * (0.2 + 0.08 * sc), zf + 0.065]; };
+  const A = assembly(`stall-awning|${W}|${D}|${stripe ? 's' : ''}`, (a) => {
+    const keepA = stripe ? (i) => i % 2 === 0 : null, keepB = (i) => i % 2 === 1;
+    a('a', sheet(f, 14, 6, keepA)); a('a', sheet((u, v) => { const p = val(u, v); return [p[0], p[1], p[2]]; }, 14, 1, keepA, 0));
+    if (stripe) { a('b', sheet(f, 14, 6, keepB)); a('b', sheet(val, 14, 1, keepB, 0)); }
+  });
+  put(aw, A.a.clone());
+  if (A.b) put(stripe, A.b.clone());
+  // the cloth on the table, hanging down in front
+  const tc = ['cloth_white', 'cloth_indigo', 'cloth_red', 'sacking', 'cloth_green'][Math.floor(rand() * 5)];
+  const C = assembly(`stall-cloth|${W}|${D}`, (a) => { a('c', box(-W / 2, 0.79, -D / 2, W / 2, 0.805, D / 2 + 0.02)); a('c', box(-W / 2, 0.52, D / 2 + 0.02, W / 2, 0.805, D / 2 + 0.035)); });
+  put(tc, C.c.clone());
   const goods = el.goods ?? ['basket', 'produce', 'cloth'];
-  put(['cloth_white', 'cloth_indigo', 'cloth_red', 'sacking'][Math.floor(rand() * 4)], box(-W / 2 - 0.02, 0.8, -D / 2 - 0.02, W / 2 + 0.02, 0.82, D / 2 + 0.02));      // the cloth on the table
-  // goods under the table and beside it
-  for (let i = 0; i < 3; i++) { const x = -W / 2 + 0.4 + rand() * (W - 0.8); put(rand() < 0.5 ? 'wicker' : 'sacking', at(lz([[0.2, 0], [0.24, 0.25], [0.18, 0.4], [0.001, 0.42]], 8), x, 0, D / 2 + 0.35 + rand() * 0.4)); }
+  // stores behind the table, on the seller's side, and a basket or two beside it
+  for (let i = 0; i < 3; i++) { const x = -W / 2 + 0.35 + rand() * (W - 0.7); put(rand() < 0.5 ? 'wicker' : 'sacking', at(lz([[0.2, 0], [0.24, 0.25], [0.18, 0.4], [0.001, 0.42]], 8), x, 0, -D / 2 - 0.25 - rand() * 0.25)); }
   for (let i = 0; i < 7; i++) {
-    const kind = goods[Math.floor(rand() * goods.length)], x = -W / 2 + 0.3 + (i % 4) * (W - 0.6) / 3 + (i >= 4 ? (W - 0.6) / 6 : 0), z = (i >= 4 ? 0.3 : -0.25) + (rand() - 0.5) * 0.15;
+    const kind = goods[Math.floor(rand() * goods.length)], x = -W / 2 + 0.3 + (i % 4) * (W - 0.6) / 3 + (i >= 4 ? (W - 0.6) / 6 : 0), z = (i >= 4 ? -0.25 : 0.3) + (rand() - 0.5) * 0.1;
     if (x > W / 2 - 0.2) continue;
-    if (kind === 'cloth') for (let k = 0; k < 3; k++) put(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_green'][Math.floor(rand() * 5)], at(lying(0.08, 0.6, 8), x, 0.88 + k * 0.15, z));
-    else if (kind === 'produce') { put('wicker', at(lz([[0.22, 0], [0.26, 0.12], [0.001, 0.12]], 10), x, 0.82, z)); const pm = ['cloth_green', 'cloth_red', 'cloth_ochre', 'glaze_yellow'][Math.floor(rand() * 4)]; for (let q = 0; q < 5; q++) { const a = q * 1.26, r2 = q ? 0.11 : 0; put(pm, at(ball(0.06, 6), x + Math.cos(a) * r2, 0.88 + (q ? 0 : 0.07), z + Math.sin(a) * r2)); } }
-    else if (kind === 'basket') { put('wicker', at(lz([[0.16, 0], [0.22, 0.2], [0.2, 0.2], [0.14, 0.03], [0.001, 0.03]], 10), x, 0.82, z)); put(['cloth_ochre', 'hide_tan', 'cloth_brown', 'cloth_white'][Math.floor(rand() * 4)], at(lz([[0.2, 0], [0.13, 0.07], [0.001, 0.1]], 8), x, 1.0, z)); }
-    else { const P = POTS[kind] ?? POTS.water_pot; put(P.m, at(lz(P.p.map(([r, h]) => [r * 0.6, h * 0.6])), x, 0.8, z)); }
+    if (kind === 'cloth') for (let k = 0; k < 3; k++) put(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_green'][Math.floor(rand() * 5)], at(lying(0.08, 0.6, 8), x, 0.885 + k * 0.155, z));
+    else if (kind === 'produce') { put('wicker', at(lz([[0.22, 0], [0.26, 0.12], [0.001, 0.12]], 10), x, 0.805, z)); const pm = ['cloth_green', 'cloth_red', 'cloth_ochre', 'glaze_yellow'][Math.floor(rand() * 4)]; for (let q = 0; q < 5; q++) { const a = q * 1.26, r2 = q ? 0.11 : 0; put(pm, at(ball(0.06, 6), x + Math.cos(a) * r2, 0.87 + (q ? 0 : 0.07), z + Math.sin(a) * r2)); } }
+    else if (kind === 'basket') { put('wicker', at(lz([[0.16, 0], [0.22, 0.2], [0.2, 0.2], [0.14, 0.03], [0.001, 0.03]], 10), x, 0.805, z)); put(['cloth_ochre', 'hide_tan', 'cloth_brown', 'cloth_white'][Math.floor(rand() * 4)], at(lz([[0.2, 0], [0.13, 0.07], [0.001, 0.1]], 8), x, 0.985, z)); }
+    else { const P = POTS[kind] ?? POTS.water_pot; put(P.m, at(lz(P.p.map(([r, h]) => [r * 0.6, h * 0.6])), x, 0.805, z)); }
   }
-  const [x, z] = el.at, y = el.y ?? 0, c = Math.cos(el.rot ?? 0), s = Math.sin(el.rot ?? 0), R = Math.hypot(W, D) / 2;
+  const [x, z] = el.at, y = el.y ?? 0;
   col.circle(x, z, Math.min(W, D) / 2 + 0.2, y, y + 0.8);
 }
-/** A spoked wheel in the x = 0 plane, radius r. */
+/** A spoked wheel in the x = 0 plane, radius r: felloes, a turned nave, round spokes (the old flat one for the barrow). */
 function wheel(r, w = 0.08, spokes = 8) {
   const parts = [];
   const rim = lathe([[r, 0], [r, w], [r - 0.06, w], [r - 0.06, 0], [r, 0]], 20); rim.translate(0, -w / 2, 0); rim.rotateZ(Math.PI / 2); parts.push(rim);
@@ -137,28 +154,93 @@ function wheel(r, w = 0.08, spokes = 8) {
   for (let k = 0; k < spokes; k++) { const g = box(-0.02, 0, -0.025, 0.02, r - 0.05, 0.025); g.rotateX(k / spokes * Math.PI * 2); parts.push(g); }
   return parts;
 }
-/** cart: { kind ('two' | 'four' | 'ox'), load ('sacks' | 'barrels' | 'hay' | 'empty') } */
-function cart(el, { bag, col }) {
-  const put = placer(el, bag), rand = rng(el.seed), four = el.kind === 'four', L = four ? 3 : 2.2, W = 1.3, r = four ? 0.45 : 0.62, yb = r + 0.15;
-  put('timber', box(-W / 2, yb, -L / 2, W / 2, yb + 0.08, L / 2));
-  for (const s of [-1, 1]) put('timber', box(s * W / 2 - 0.05, yb, -L / 2, s * W / 2 + 0.05, yb + 0.45, L / 2));
-  put('timber', box(-W / 2, yb, L / 2 - 0.05, W / 2, yb + 0.45, L / 2 + 0.05));
-  for (const s of [-1, 1]) { const g = box(s * 0.45 - 0.04, 0, -0.04, s * 0.45 + 0.04, 0.08, 1.8); g.rotateX(0.18); g.translate(0, yb, -L / 2 - 1.6); put('timber', g); }
-  const axles = four ? [-L / 2 + 0.5, L / 2 - 0.5] : [0.1];
-  for (const az of axles) { put('timber', at(lying(0.05, W + 0.4, 6), 0, r, az)); for (const s of [-1, 1]) for (const g of wheel(r)) put('timber', at(g, s * (W / 2 + 0.12), r, az)); }
-  const load = el.load ?? ['sacks', 'barrels', 'hay', 'empty'][Math.floor(rand() * 4)];
-  if (load === 'sacks') for (let i = 0; i < 4; i++) { const g = lz([[0.22, 0], [0.26, 0.12], [0.22, 0.35], [0.001, 0.42]], 8); g.rotateX(Math.PI / 2); put('sacking', at(g, (i % 2 - 0.5) * 0.55, yb + 0.3, (Math.floor(i / 2) - 0.5) * 0.7 - 0.2)); }
-  else if (load === 'barrels') for (let i = 0; i < 2; i++) put('timber', at(lz([[0.24, 0], [0.28, 0.3], [0.24, 0.65], [0.001, 0.65]], 12), 0, yb + 0.08, (i - 0.5) * 0.7));
-  else if (load === 'hay') put('thatch', at(lz([[W / 2, 0], [W / 2 - 0.05, 0.5], [0.3, 0.8], [0.001, 0.85]], 8).scale(1, 1, L / W), 0, yb + 0.08, 0));
-  const [x, z] = el.at, y = el.y ?? 0, c = Math.cos(el.rot ?? 0), s = Math.sin(el.rot ?? 0);
-  col.circle(x, z, 1.1, y, y + yb + 0.45);
+function cartWheel(a, r, spokes) {
+  const w = 0.075, fr = r - 0.075, n = 24;
+  // the rim of felloes: a ring of square section, slightly faceted where the felloes meet
+  a('timber', tube(Array.from({ length: n + 1 }, (_, k) => { const t = k / n * Math.PI * 2, rr = r - 0.035 - (k % (n / spokes * 2) === 0 ? 0.004 : 0); return [0, Math.cos(t) * rr, Math.sin(t) * rr, w / 2, 0.038]; }), 4, { capA: false, capB: false }));
+  // the nave, turned and bulging, through which the axle runs
+  a('timber', slathe([[0.001, -0.17], [0.06, -0.17], [0.085, -0.12], [0.11, -0.04], [0.11, 0.04], [0.085, 0.12], [0.06, 0.17], [0.001, 0.17]], 12).rotateZ(Math.PI / 2));
+  for (let k = 0; k < spokes; k++) { const t = (k + 0.5) / spokes * Math.PI * 2; a('timber', tube([[k % 2 ? 0.02 : -0.02, Math.cos(t) * 0.09, Math.sin(t) * 0.09, 0.024, 0.02], [0, Math.cos(t) * fr * 0.55, Math.sin(t) * fr * 0.55, 0.021, 0.018], [0, Math.cos(t) * (fr + 0.01), Math.sin(t) * (fr + 0.01), 0.018, 0.016]], 5, { capA: false })); }
+  a('iron', tube(Array.from({ length: n + 1 }, (_, k) => { const t = k / n * Math.PI * 2; return [0, Math.cos(t) * (r + 0.004), Math.sin(t) * (r + 0.004), w / 2 + 0.004, 0.008]; }), 4, { capA: false, capB: false }));
 }
-/** barrow: the Chinese wheelbarrow — one large central wheel, a frame either side, handles. */
+/**
+ * cart: { kind ('two' | 'four'), load ('sacks' | 'barrels' | 'hay' | 'empty'), beast (a kind of animal for a
+ * two-wheeled cart: harnessed in its shafts) } — a cart of plank floor and staked sides on its frame,
+ * the shafts running on from the frame to the front (−z). Unharnessed, a two-wheeled cart tips forward
+ * on its shaft ends; a four-wheeled wagon rests level, its pole on the ground.
+ */
+function cart(el, { bag, col }) {
+  const rand = rng(el.seed), four = el.kind === 'four', L = four ? 3 : 2.2, W = 1.25, r = four ? 0.5 : 0.65, yb = r + 0.12, beast = !four ? el.beast : null;
+  const load = el.load ?? ['sacks', 'barrels', 'hay', 'empty'][Math.floor(rand() * 4)];
+  const axles = four ? [-L / 2 + 0.55, L / 2 - 0.55] : [0.1];
+  // the tilt: a two-wheeled cart unharnessed rests on its shaft ends (turned about its axle); harnessed, its shafts rise to the beast's sides
+  const tipZ = -L / 2 - 1.75, Bk = beast ? BEASTS[beast] : null, sideY = Bk ? Bk.H * 0.6 : 0.06;
+  const tiltM = new Matrix4().makeTranslation(0, r, axles[0]).multiply(new Matrix4().makeRotationX(Bk ? Math.atan2(sideY - yb, axles[0] - tipZ) : -Math.atan2(yb - sideY, axles[0] - tipZ))).multiply(new Matrix4().makeTranslation(0, -r, -axles[0]));
+  const put = placer(el, bag);
+  const tf = (a) => (four ? (role, g) => a(role, g) : (role, g) => a(role, g.applyMatrix4(tiltM)));
+  const frame = assembly(`cart|${four ? 4 : 2}|${Bk ? beast : ''}`, (a) => {
+    const t = tf(a);
+    // the frame's two side beams, running on as the shafts (or a pole for the wagon)
+    for (const s of [-1, 1]) {
+      t('timber', box(s * (W / 2 - 0.06) - 0.05, yb - 0.1, -L / 2, s * (W / 2 - 0.06) + 0.05, yb, L / 2 + 0.1));
+      if (!four) t('timber', tube([[s * (W / 2 - 0.06), yb - 0.05, -L / 2 + 0.05, 0.045, 0.05], [s * 0.42, yb - 0.05, -L / 2 - 0.9, 0.04, 0.045], [s * 0.36, yb - 0.04, tipZ, 0.03, 0.035]], 6));
+    }
+    if (four) { t('timber', tube([[0, r * 0.9, -L / 2 + 0.55, 0.05], [0, 0.28, -L / 2 - 0.9, 0.045], [0, 0.06, -L / 2 - 2.2, 0.035]], 6)); t('timber', box(-0.35, r - 0.04, -L / 2 + 0.5, 0.35, r + 0.04, -L / 2 + 0.6)); }
+    // the floor of planks with gaps, the cross bearers under it
+    for (let k = 0; k < 6; k++) { const x0 = -W / 2 + k * W / 6; t('timber', box(x0 + 0.008, yb, -L / 2, x0 + W / 6 - 0.008, yb + 0.035, L / 2)); }
+    for (let k = 0; k < 3; k++) t('timber', box(-W / 2, yb - 0.17, -L / 2 + 0.2 + k * (L - 0.4) / 2 - 0.04, W / 2, yb - 0.1, -L / 2 + 0.2 + k * (L - 0.4) / 2 + 0.04));
+    // the staked sides: stakes in the side beams, a rail along their tops, a lower board; a board across the back
+    const n = four ? 6 : 5;
+    for (const s of [-1, 1]) {
+      for (let k = 0; k < n; k++) { const z = -L / 2 + 0.06 + k * (L - 0.12) / (n - 1); t('timber', box(s * W / 2 - 0.035, yb, z - 0.03, s * W / 2 + 0.035, yb + 0.52, z + 0.03)); }
+      t('timber', box(s * W / 2 - 0.04, yb + 0.47, -L / 2 - 0.02, s * W / 2 + 0.04, yb + 0.54, L / 2 + 0.02));
+      t('timber', box(s * W / 2 - 0.025, yb + 0.035, -L / 2, s * W / 2 + 0.025, yb + 0.22, L / 2));
+    }
+    t('timber', box(-W / 2, yb + 0.035, L / 2 - 0.03, W / 2, yb + 0.4, L / 2 + 0.01));
+    // the axles under the frame
+    for (const az of axles) t('timber', box(-W / 2 - 0.2, r - 0.05, az - 0.05, W / 2 + 0.2, r + 0.05, az + 0.05));
+  });
+  const cargo = assembly(`cart-load|${four ? 4 : 2}|${Bk ? beast : ''}|${load}`, (a) => {
+    const t = tf(a);
+    if (load === 'sacks') for (let i = 0; i < (four ? 6 : 4); i++) { const x = (i % 2 - 0.5) * 0.52, z = (Math.floor(i / 2) - (four ? 1 : 0.5)) * 0.62, rr = 0.2; t('sacking', tube([[x, yb + 0.035 + rr * 0.8, z - 0.3, 0.06, 0.05], [x, yb + 0.035 + rr * 0.85, z - 0.24, rr, rr * 0.8], [x, yb + 0.035 + rr * 0.85, z + 0.1, rr * 1.05, rr * 0.85], [x, yb + 0.035 + rr * 0.8, z + 0.24, rr * 0.8, rr * 0.7], [x, yb + 0.035 + rr * 0.8, z + 0.3, 0.05, 0.05]], 8)); }
+    else if (load === 'barrels') for (let i = 0; i < (four ? 4 : 2); i++) { const z = (i - ((four ? 4 : 2) - 1) / 2) * 0.68; t('timber', slathe([[0.001, 0], [0.24, 0], [0.28, 0.16], [0.29, 0.31], [0.28, 0.46], [0.24, 0.62], [0.001, 0.62]], 12).translate(0, yb + 0.035, z)); for (const yy of [0.08, 0.54]) t('iron', slathe([[0.272, 0], [0.272, 0.04], [0.001, 0.04]], 12).translate(0, yb + 0.035 + yy, z)); }
+    else if (load === 'hay') t('thatch', folded([[W / 2 + 0.05, 0], [W / 2 + 0.1, 0.25], [W / 2, 0.55], [0.35, 0.85], [0.001, 0.92]], 12, 5, 0.06, 3).scale(1, 1, (L + 0.1) / (W + 0.2)).translate(0, yb + 0.035, 0));
+  });
+  put('timber', frame.timber.clone());
+  for (const [role, g] of Object.entries(cargo)) put(role, g.clone());
+  const Wh = assembly(`cart-wheel|${r}|${four ? 10 : 12}`, (a) => cartWheel(a, r, four ? 10 : 12));
+  for (const az of axles) for (const s of [-1, 1]) {
+    const M = new Matrix4().makeTranslation(s * (W / 2 + 0.16), r, az);
+    put('timber', Wh.timber.clone().applyMatrix4(M)); put('iron', Wh.iron.clone().applyMatrix4(M));
+  }
+  // the beast in the shafts, its head forward
+  if (Bk) { const oz = -L / 2 - 0.35 - Bk.L / 2, ro = el.rot ?? 0; animal({ t: 'animal', kind: beast, gear: false, graze: false, seed: el.seed + 1, y: el.y, rot: ro, at: [el.at[0] + oz * Math.sin(ro), el.at[1] + oz * Math.cos(ro)] }, { bag, col }); }
+  const [x, z] = el.at, y = el.y ?? 0;
+  col.circle(x, z, 1.1, y, y + yb + 0.5);
+}
+/**
+ * barrow: the Chinese wheelbarrow — one large wheel in the middle under a slatted arch, a platform on
+ * either side of it for the load, two long rails running back into the handles, two legs it rests on.
+ */
 function barrow(el, { bag }) {
-  const put = placer(el, bag), r = 0.45;
-  for (const g of wheel(r, 0.06, 10)) { g.rotateY(Math.PI / 2); put('timber', at(g, 0, r, 0)); }
-  for (const s of [-1, 1]) { put('timber', box(s * 0.3 - 0.04, r + 0.05, -0.8, s * 0.3 + 0.04, r + 0.12, 0.9)); const g = box(s * 0.35 - 0.03, 0, -0.03, s * 0.35 + 0.03, 0.03, 0.8); g.rotateX(-0.35); g.translate(0, r + 0.1, 0.9); put('timber', g); put('timber', box(s * 0.32 - 0.03, 0, -0.65, s * 0.32 + 0.03, r + 0.1, -0.6)); put('sacking', at(lz([[0.18, 0], [0.2, 0.2], [0.001, 0.3]], 8), s * 0.45, r + 0.12, 0.1)); }
-  put('timber', box(-0.36, r + 0.12, -0.6, 0.36, r + 0.16, 0.6));
+  const put = placer(el, bag), rand = rng(el.seed), r = 0.42;
+  const A = assembly('barrow', (a) => {
+    const y = r + 0.08;
+    for (const s of [-1, 1]) {
+      // the rails, from the front over the wheel back to the handles, which the barrowman lifts
+      a('timber', tube([[s * 0.27, y + 0.02, -0.62, 0.03], [s * 0.3, y, 0.3, 0.032], [s * 0.3, y + 0.03, 0.75, 0.03], [s * 0.27, y + 0.08, 1.25, 0.022]], 6));
+      a('timber', tube([[s * 0.3, y, 0.48, 0.028], [s * 0.3, 0.02, 0.56, 0.026]], 5));                        // a leg
+      a('timber', box(s * 0.62 - 0.03, y - 0.02, -0.45, s * 0.62 + 0.03, y + 0.02, 0.45));                       // the platform's outer rail
+      for (const z of [-0.4, -0.13, 0.13, 0.4]) a('timber', box(Math.min(s * 0.3, s * 0.62) - 0.01, y + 0.02, z - 0.06, Math.max(s * 0.3, s * 0.62) + 0.01, y + 0.045, z + 0.06));
+    }
+    for (const z of [-0.6, 0.62]) a('timber', box(-0.3, y - 0.02, z - 0.025, 0.3, y + 0.03, z + 0.025));
+    // the arch over the wheel: slats bent over it
+    for (let k = 0; k < 6; k++) { const t = Math.PI * (k + 0.5) / 6, g = box(-0.11, -0.012, -0.14, 0.11, 0.012, 0.14); g.rotateX(t - Math.PI / 2); g.translate(0, r + Math.sin(t) * (r + 0.07), -Math.cos(t) * (r + 0.07)); a('timber', g); }
+    for (const g of wheel(r, 0.06, 10)) a("timber", at(g, 0, r, 0));
+  });
+  put('timber', A.timber.clone());
+  // the load: a sack or a basket on each platform
+  for (const s of [-1, 1]) if (rand() < 0.75) put(rand() < 0.6 ? 'sacking' : 'wicker', at(lz([[0.17, 0], [0.2, 0.18], [0.16, 0.34], [0.001, 0.36]], 8), s * 0.46, r + 0.125, (rand() - 0.5) * 0.3));
 }
 function ladder(el, { bag }) {
   const put = placer(el, bag), L = el.len ?? 3, lean = 0.28, parts = [];
@@ -180,65 +262,6 @@ function haystack(el, { bag, col }) {
 }
 
 // ---- animals -------------------------------------------------------------------------------------
-// L body length, H height of the back, B body radius, neck length and angle (degrees above level),
-// head length and angle, leg thickness
-const BEASTS = {
-  horse: { L: 1.6, H: 1.55, B: 0.31, neck: 0.8, na: 52, head: 0.58, ha: -55, leg: 0.06, mats: ['hide_brown', 'hide_black', 'hide_tan', 'hide_grey'], ears: 0.12, tail: 'hair', mane: 1 },
-  donkey: { L: 1.1, H: 1.12, B: 0.24, neck: 0.5, na: 40, head: 0.48, ha: -50, leg: 0.045, mats: ['hide_grey', 'hide_brown'], ears: 0.24, tail: 'thin', mane: 1 },
-  ox: { L: 1.9, H: 1.45, B: 0.42, neck: 0.42, na: 12, head: 0.5, ha: -62, leg: 0.08, mats: ['hide_tan', 'hide_brown', 'hide_white', 'hide_black'], horns: 0.32, tail: 'thin', dewlap: 1 },
-  buffalo: { L: 1.9, H: 1.4, B: 0.45, neck: 0.38, na: 8, head: 0.52, ha: -45, leg: 0.085, mats: ['hide_black', 'hide_grey'], horns: 0.6, sweep: 1, tail: 'thin' },
-  yak: { L: 1.7, H: 1.4, B: 0.46, neck: 0.3, na: 5, head: 0.45, ha: -60, leg: 0.075, mats: ['hide_black', 'hide_brown', 'hide_black'], horns: 0.38, hump: 0.18, tail: 'hair', dewlap: 1 },
-  zebu: { L: 1.6, H: 1.35, B: 0.35, neck: 0.38, na: 15, head: 0.45, ha: -60, leg: 0.065, mats: ['hide_white', 'hide_grey'], horns: 0.28, hump: 0.28, tail: 'thin', dewlap: 1 },
-  camel: { L: 1.6, H: 1.95, B: 0.36, neck: 1.05, na: 30, head: 0.5, ha: -15, leg: 0.065, mats: ['hide_tan'], hump: 0.45, ears: 0.06, tail: 'thin', bend: 1 },
-  llama: { L: 1.0, H: 1.1, B: 0.25, neck: 0.75, na: 78, head: 0.3, ha: -25, leg: 0.045, mats: ['hide_white', 'hide_tan', 'hide_brown'], ears: 0.14, tail: 'stub' },
-  goat: { L: 0.85, H: 0.72, B: 0.17, neck: 0.3, na: 50, head: 0.28, ha: -50, leg: 0.03, mats: ['hide_white', 'hide_black', 'hide_brown'], horns: 0.18, ears: 0.08, tail: 'stub' },
-  sheep: { L: 0.95, H: 0.72, B: 0.26, neck: 0.22, na: 30, head: 0.27, ha: -55, leg: 0.032, mats: ['hide_white', 'cloth_white'], ears: 0.06, tail: 'stub' },
-  pig: { L: 1.05, H: 0.68, B: 0.27, neck: 0.12, na: 0, head: 0.34, ha: -15, leg: 0.045, mats: ['hide_black', 'hide_tan'], ears: 0.08, tail: 'stub' },
-  dog: { L: 0.72, H: 0.55, B: 0.13, neck: 0.24, na: 50, head: 0.24, ha: -15, leg: 0.03, mats: ['hide_tan', 'hide_brown', 'hide_black'], ears: 0.08, tail: 'up' },
-};
-/** A tapered limb along +y turned to point along a direction (angle `deg` above level, toward −z), its base at (x, y, z). */
-function limb(profile, deg, x, y, z) { const g = lathe(profile, 10); g.rotateX(-(Math.PI / 2 - deg * Math.PI / 180)); g.translate(x, y, z); return g; }
-/** animal: { kind, mat } — a still figure of a beast, head toward −z: body, legs, neck, head, ears, horns, hump, tail. */
-function animal(el, { bag, col }) {
-  const put = placer(el, bag), rand = rng(el.seed), K = BEASTS[el.kind] ?? BEASTS.goat, m = el.mat ?? K.mats[Math.floor(rand() * K.mats.length)];
-  const a = K.L / 2, B = K.B, by = K.H - B * 1.1;                       // body centre
-  const bod = lathe([[0.001, -a], [B * 0.55, -a * 0.94], [B * 0.92, -a * 0.7], [B, -a * 0.3], [B, a * 0.35], [B * 0.88, a * 0.72], [B * 0.5, a * 0.95], [0.001, a]], 14);
-  bod.rotateX(Math.PI / 2); bod.scale(0.86, 1.1, 1); put(m, at(bod, 0, by, 0));
-  // the legs: a thick upper leg out of the body, a thin lower leg, a hoof or paw
-  const knee = by * 0.48;
-  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const x = sx * B * 0.5, z = sz * a * 0.7, front = sz < 0;
-    put(m, at(lz([[K.leg * 1.25, 0], [K.leg * (front ? 1.7 : 2.3), (by - knee) * 0.6], [K.leg * (front ? 2.2 : 3), by - knee + B * 0.3], [0.001, by - knee + B * 0.3]], 8), x, knee, z));
-    put(m, at(lz([[K.leg * 1.15, 0], [K.leg * 0.95, knee * 0.5], [K.leg * 1.2, knee + 0.02], [0.001, knee + 0.02]], 8), x, 0, z));
-    put(K.L > 1.4 ? 'hide_black' : m, at(lz([[K.leg * 1.35, 0], [K.leg * 1.2, 0.07], [0.001, 0.07]], 8), x, 0, z));
-  }
-  // the neck from the shoulders, the head at its end
-  const nx = 0, ny = by + B * 0.35, nz = -a * 0.78, na = K.na, nl = K.neck;
-  if (K.bend) {                                                        // the camel's neck: down, then up to the head
-    put(m, limb([[B * 0.55, 0], [B * 0.38, nl * 0.55], [0.001, nl * 0.55]], -20, nx, ny, nz));
-    const mx = nz - Math.cos(20 * Math.PI / 180) * nl * 0.55, my = ny - Math.sin(20 * Math.PI / 180) * nl * 0.55;
-    put(m, limb([[B * 0.38, 0], [B * 0.3, nl * 0.6], [0.001, nl * 0.6]], 70, nx, my, mx));
-    var hx = nx, hy = my + Math.sin(70 * Math.PI / 180) * nl * 0.6, hz = mx - Math.cos(70 * Math.PI / 180) * nl * 0.6;
-  } else {
-    if (nl > 0.15) put(m, limb([[B * 0.62, 0], [B * 0.42, nl * 0.7], [B * 0.34, nl], [0.001, nl]], na, nx, ny, nz));
-    var hx = nx, hy = ny + Math.sin(na * Math.PI / 180) * nl, hz = nz - Math.cos(na * Math.PI / 180) * nl;
-  }
-  const hl = K.head, hr = B * (K.L > 1.4 ? 0.38 : 0.45);
-  put(m, limb([[hr * 0.95, 0], [hr, hl * 0.25], [hr * 0.75, hl * 0.7], [hr * 0.6, hl * 0.95], [0.001, hl]], K.ha, hx, hy, hz));
-  if (K.mane) put('hide_black', limb([[0.03, 0], [0.03, nl * 0.95], [0.001, nl * 0.95]], na, nx, ny + B * 0.42, nz + 0.02));
-  if (K.dewlap) put(m, limb([[B * 0.3, 0], [B * 0.15, nl * 0.8], [0.001, nl * 0.8]], na - 25, nx, ny - B * 0.5, nz));
-  if (K.ears) for (const s of [-1, 1]) put(m, at(lz([[0.025 + K.ears * 0.12, 0], [0.001, K.ears]], 5).rotateZ(-s * 0.35).rotateX(0.35), hx + s * hr * 0.55, hy + hr * 0.5, hz + 0.02));
-  if (K.horns) for (const s of [-1, 1]) { const g = lz([[0.03 + K.horns * 0.05, 0], [0.001, K.horns]], 6); if (K.sweep) { g.rotateZ(-s * 1.45); g.rotateX(0.35); } else { g.rotateZ(-s * 0.9); g.rotateX(-0.2); } put('glaze_white', at(g, hx + s * hr * 0.5, hy + hr * 0.45, hz + 0.03)); }
-  if (K.hump) put(m, at(lz([[B * 0.75, 0], [B * 0.55, K.hump * 0.6], [B * 0.25, K.hump * 0.95], [0.001, K.hump]], 10).scale(0.8, 1, 1.15), 0, by + B * 0.8, el.kind === 'zebu' ? -a * 0.55 : 0));
-  // the tail
-  const tz = a * 0.95, ty = by + B * 0.55;
-  if (K.tail === 'hair') { const g = lz([[0.07, 0], [0.09, 0.4], [0.03, 0.85], [0.001, 0.9]], 6); g.rotateX(Math.PI - 0.25); put('hide_black', at(g, 0, ty, tz)); }
-  else if (K.tail === 'thin') { const g = lz([[0.03, 0], [0.02, K.H * 0.5], [0.06, K.H * 0.55], [0.001, K.H * 0.62]], 5); g.rotateX(Math.PI - 0.12); put(m, at(g, 0, ty, tz)); }
-  else if (K.tail === 'up') { const g = lz([[0.025, 0], [0.001, 0.3]], 5); g.rotateX(0.7); put(m, at(g, 0, ty, tz)); }
-  else put(m, at(lz([[0.04, 0], [0.001, 0.1]], 5).rotateX(2), 0, ty, tz));
-  const [x, z] = el.at, y = el.y ?? 0;
-  if (K.L > 0.9) col.circle(x, z, a * 0.75, y, y + K.H);
-}
 /** chickens: { n } — a few hens pecking. */
 function chickens(el, { bag }) {
   const put = placer(el, bag), rand = rng(el.seed), n = el.n ?? 4;
@@ -262,100 +285,71 @@ function seg(a, b, r0, r1, n = 6) {
   return g;
 }
 const ball = (r, n = 10) => lathe(Array.from({ length: 7 }, (_, i) => { const t = i / 6 * Math.PI; return [Math.max(0.001, Math.sin(t) * r), r - Math.cos(t) * r]; }), n);
-/**
- * figure: { dress ('robe' | 'tunic' | 'trousers' | 'wrap'), cloth, cloth2, skin, hat ('none' | 'cap' | 'turban' |
- * 'straw' | 'veil' | 'brim'), h (height), carry ('none' | 'pot' | 'basket' | 'pole' | 'hoe'), pose ('stand' | 'talk' |
- * 'sit' | 'squat') } — a still figure in its place, facing −z: shoulders, arms, hands and head; skirts that
- * hang and flare; feet below.
- */
-function figure(el, { bag, col }) {
-  // the figure is built at one height and scaled to its own, and its small irregularities (flare,
-  // hands, sash) come in four variants, so that figures share their pieces as instances
-  const r0 = rng(el.seed), H = el.h ?? 1.58 + r0() * 0.18, rand = rng(1 + Math.floor(r0() * 4) * 7919), k = 1;
-  const put = placer(el, bag, H / 1.65), c1 = el.cloth ?? 'cloth_white', c2 = el.cloth2 ?? c1, sk = el.skin ?? 'skin_medium', dress = el.dress ?? 'robe';
-  const pose = el.pose ?? 'stand', sit = pose === 'sit' || pose === 'squat', drop = pose === 'sit' ? 0.92 * k - 0.47 : pose === 'squat' ? 0.62 * k : 0;
-  const Y = (v) => v * k - drop, sw = 0.19 * k * (dress === 'wrap' ? 0.95 : 1);    // shoulder half-width
-  const flare = 1 + rand() * 0.15;
-  // the lower body: a skirt or robe, or legs
-  if (!sit && (dress === 'robe' || dress === 'wrap')) {
-    put(c1, lz([[0.25 * k * flare, 0], [0.235 * k * flare, 0.08 * k], [0.2 * k, 0.55 * k], [0.165 * k, 0.95 * k], [0.15 * k, 1.0 * k], [0.001, 1.0 * k]], 10));
-    for (const s of [-1, 1]) put('cloth_brown', box(s * 0.08 * k - 0.045, 0, -0.17 * k, s * 0.08 * k + 0.045, 0.06, -0.05 * k));
-  } else if (!sit) {
-    const legC = dress === 'trousers' ? c2 : sk;
-    for (const s of [-1, 1]) { put(legC, seg([s * 0.085 * k, 0.06, 0.01], [s * 0.095 * k, 0.88 * k, 0], 0.055 * k, 0.075 * k, 6)); put('cloth_brown', box(s * 0.085 * k - 0.045, 0, -0.16 * k, s * 0.085 * k + 0.045, 0.07, 0.05 * k)); }
-    if (dress === 'tunic') put(c1, lz([[0.21 * k, 0], [0.19 * k, 0.15 * k], [0.165 * k, 0.4 * k], [0.001, 0.4 * k]], 10).translate(0, 0.6 * k, 0));
-  } else {
-    // seated or squatting: thighs forward, shins down, the skirt over them
-    for (const s of [-1, 1]) {
-      const hip = [s * 0.09 * k, Y(0.92), 0], knee = [s * 0.11 * k, pose === 'sit' ? Y(0.92) : Y(0.98) - 0.25 * k, -0.4 * k], foot = [s * 0.11 * k, 0.04, -0.42 * k];
-      const legC = dress === 'robe' || dress === 'wrap' ? c1 : dress === 'trousers' ? c2 : sk;
-      put(legC, seg(hip, knee, 0.085 * k, 0.07 * k)); put(legC, seg(knee, foot, 0.065 * k, 0.05 * k));
-    }
-    if (dress === 'robe' || dress === 'wrap') put(c1, lz([[0.24 * k, 0], [0.2 * k, 0.12 * k], [0.001, 0.14 * k]], 10).translate(0, Y(0.86), -0.05 * k));
-  }
-  // the torso: hips, waist, chest, shoulders
-  put(c1, lz([[0.16 * k, 0], [0.145 * k, 0.12 * k], [0.165 * k, 0.32 * k], [sw * 0.98, 0.47 * k], [sw * 0.75, 0.52 * k], [0.06 * k, 0.56 * k], [0.001, 0.56 * k]], 10).scale(1, 1, 0.72).translate(0, Y(0.88), 0));
-  if (dress === 'robe' && rand() < 0.5) put(c2, box(-0.16 * k, Y(1.0), -0.13 * k, 0.16 * k, Y(1.05), 0.13 * k));   // a sash
-  // the arms: hanging, or one raised in talk, or holding the load
-  const sh = Y(1.38), carry = el.carry ?? 'none';
-  for (const s of [-1, 1]) {
-    const S = [s * sw, sh, 0];
-    let E, Hn;
-    if (carry === 'pot' || carry === 'basket') { E = [s * (sw + 0.06 * k), sh + 0.18 * k, -0.03]; Hn = [s * 0.1 * k, Y(1.75), 0]; if (s > 0) { E = [s * (sw + 0.02), sh - 0.28 * k, 0.02]; Hn = [s * (sw + 0.01), sh - 0.55 * k, -0.02]; } }
-    else if (carry === 'pole') { E = [s * (sw + 0.04), sh - 0.12 * k, -0.18 * k]; Hn = [s * (sw * 0.7), sh + 0.02 * k, -0.28 * k]; }
-    else if (carry === 'hoe') { E = [s * (sw + 0.02), sh - 0.24 * k, -0.12 * k]; Hn = [s * 0.06 * k + 0.02, sh - (s > 0 ? 0.3 : 0.5) * k, -(s > 0 ? 0.36 : 0.46) * k]; }
-    else if (pose === 'talk' && s > 0) { E = [s * (sw + 0.05), sh - 0.26 * k, -0.06 * k]; Hn = [s * (sw * 0.8), sh - 0.22 * k, -0.33 * k]; }
-    else if (sit) { E = [s * (sw + 0.03), sh - 0.27 * k, -0.08 * k]; Hn = [s * 0.12 * k, sh - 0.42 * k, -0.32 * k]; }
-    else { E = [s * (sw + 0.035), sh - 0.29 * k, 0.02]; Hn = [s * (sw + 0.025), sh - 0.56 * k, -0.02 - rand() * 0.04]; }
-    put(c1, seg(S, E, 0.06 * k, 0.05 * k)); put(dress === 'wrap' ? sk : c1, seg(E, Hn, 0.05 * k, 0.042 * k));
-    put(sk, at(ball(0.045 * k, 8).scale(0.8, 1.3, 0.9), Hn[0], Hn[1] - 0.07 * k, Hn[2]));
-  }
-  // neck and head: a skull, the face a little forward, nose, ears; hair or a covering
-  put(sk, seg([0, Y(1.42), 0], [0, Y(1.5), -0.005], 0.048 * k, 0.045 * k));
-  const hy = Y(1.48), hc = [0, hy + 0.11 * k, -0.01];
-  put(sk, at(ball(0.105 * k, 10).scale(0.86, 1.12, 0.98), hc[0], hy, hc[2]));
-  put(sk, at(lz([[0.018 * k, 0], [0.001, 0.035 * k]], 5).rotateX(-Math.PI / 2), 0, hy + 0.1 * k, hc[2] - 0.1 * k));
-  for (const s of [-1, 1]) put(sk, at(ball(0.022 * k, 6).scale(0.5, 1, 1), s * 0.09 * k, hy + 0.11 * k, hc[2] + 0.01));
-  const hat = el.hat ?? 'none', top = hy + 0.235 * k;
-  if (hat === 'cap') put(el.hatMat ?? c2, at(ball(0.1 * k, 8).scale(1, 0.6, 1.02), 0, top - 0.07 * k, hc[2]));
-  else if (hat === 'turban') put(el.hatMat ?? 'cloth_white', at(lz([[0.105 * k, 0], [0.125 * k, 0.05 * k], [0.12 * k, 0.1 * k], [0.08 * k, 0.15 * k], [0.001, 0.16 * k]], 8), 0, top - 0.09 * k, hc[2]));
-  else if (hat === 'straw') put('thatch', at(lz([[0.3 * k, 0], [0.29 * k, 0.012], [0.07 * k, 0.15 * k], [0.001, 0.19 * k]], 10), 0, top - 0.05 * k, hc[2]));
-  else if (hat === 'brim') put(el.hatMat ?? 'cloth_black', at(lz([[0.17 * k, 0], [0.17 * k, 0.012], [0.1 * k, 0.02], [0.095 * k, 0.13 * k], [0.001, 0.135 * k]], 10), 0, top - 0.05 * k, hc[2]));
-  else if (hat === 'veil') { const vm = el.hatMat ?? c1; put(vm, at(ball(0.118 * k, 10).scale(1, 1.06, 1.04), 0, hy - 0.005, hc[2] + 0.03)); put(vm, at(lz([[0.2 * k, 0], [0.14 * k, 0.2 * k], [0.09 * k, 0.3 * k], [0.001, 0.31 * k]], 10).scale(1, 1, 0.8), 0, hy - 0.2 * k, hc[2] + 0.045)); }
-  else put('hair_dark', at(ball(0.108 * k, 10).scale(0.9, 0.75, 1.0), 0, hy + 0.08 * k, hc[2] + 0.012));
-  if (carry === 'pot') put('terracotta', at(lz(POTS.water_pot.p.map(([r, y]) => [r * 0.7, y * 0.7]), 12), 0, top + 0.01, hc[2]));
-  else if (carry === 'basket') put('wicker', at(lz([[0.17, 0], [0.24, 0.18], [0.22, 0.18], [0.15, 0.03], [0.001, 0.03]], 8), 0, top + 0.01, hc[2]));
-  else if (carry === 'hoe') {
-    // the hoe held in both hands, its blade on the ground before the feet
-    put('timber', seg([0.04 * k, sh - 0.12 * k, -0.28 * k], [0.08, 0.12, -0.95], 0.018, 0.018, 5));
-    put('iron', box(-0.04, 0.0, -0.995, 0.2, 0.17, -0.975));
-  }
-  else if (carry === 'pole') {
-    const py = sh + 0.06 * k;
-    put('bamboo_culm', at(lying(0.022, 1.8, 6), 0, py, -0.03));
-    for (const s of [-1, 1]) { for (const d of [-0.06, 0.06]) put('timber', seg([s * 0.86, py, -0.03], [s * 0.86 + d, 0.6 * k, -0.03 + d], 0.004, 0.004, 4)); put('wicker', at(lz([[0.16, 0], [0.22, 0.24], [0.2, 0.24], [0.14, 0.03], [0.001, 0.03]], 8), s * 0.86, 0.36 * k, -0.03)); put(['cloth_green', 'cloth_ochre', 'cloth_red'][Math.floor(rand() * 3)], at(lz([[0.19, 0], [0.1, 0.08], [0.001, 0.1]], 10), s * 0.86, 0.58 * k, -0.03)); }
-  }
-  const [x, z] = el.at, y = el.y ?? 0;
-  col.circle(x, z, 0.25, y, y + H);
-}
-
 // ---- boats -----------------------------------------------------------------------------------
-/** boat: { kind ('rowboat' | 'canoe' | 'sampan' | 'gondola' | 'dhow' | 'barge' | 'reed'), len } — a hull (both faces), thwarts, an awning, a mast and sail. Sits with its sheer just above y. */
+/** boat: { kind ('rowboat' | 'canoe' | 'sampan' | 'gondola' | 'dhow' | 'barge' | 'reed' | 'ferry'), len } — a hull (both
+ * faces) with its gunwales, wale, stem and stern posts, thwarts and floor; by kind an awning, oars or paddles,
+ * the gondola's ferro and forcola, the dhow's raked mast, yard and lateen sail. Sits with its sheer 0.3 above y. */
+const BOATS = {
+  rowboat: { L: 4.5, B: 1.5, D: 0.6, m: 'timber', sheer: 0.25, flat: 0.3, thwarts: 3 }, canoe: { L: 6, B: 0.8, D: 0.45, m: 'wood_dark', sheer: 0.35, flat: 0, thwarts: 0 },
+  sampan: { L: 7, B: 1.8, D: 0.6, m: 'timber', sheer: 0.4, flat: 0.5, awning: 'reed_mat', thwarts: 2 }, gondola: { L: 10.8, B: 1.4, D: 0.55, m: 'lacquer_black', sheer: 0.9, flat: 0.3, thwarts: 2 },
+  dhow: { L: 13, B: 3.6, D: 1.6, m: 'timber', sheer: 0.8, flat: 0.2, mast: 9, sail: 'cloth_white', thwarts: 4 }, barge: { L: 12, B: 3, D: 1, m: 'timber', sheer: 0.2, flat: 0.8, awning: 'thatch', thwarts: 3 },
+  reed: { L: 4, B: 0.9, D: 0.4, m: 'reed_mat', sheer: 0.6, flat: 0, thwarts: 0 }, ferry: { L: 22, B: 6, D: 1.6, m: 'plaster_white', sheer: 0.4, flat: 0.8, cabin: 'cloth_ochre', thwarts: 0 },
+};
+function boatParts(kind, L, a) {
+  const K = BOATS[kind], B = K.B * L / K.L, D = K.D, n = 16, m = 6, T = [];
+  const P = (i, j) => { const t = i / n, u = j / m, half = Math.pow(Math.sin(Math.PI * t), 0.6) * B / 2, sh = K.sheer * (2 * t - 1) ** 4, s = u * 2 - 1; return [half * s, sh + 0.3 - D * (1 - Math.abs(s) ** (1 + K.flat * 3)) * Math.pow(Math.sin(Math.PI * t), 0.3), -L / 2 + L * t]; };
+  for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) { const p = P(i, j), b = P(i + 1, j), c = P(i + 1, j + 1), d = P(i, j + 1); T.push(...p, ...b, ...c, ...p, ...c, ...b, ...p, ...c, ...d, ...p, ...d, ...c); }
+  a('hull', fromTriangles(T));
+  const wood = kind === 'gondola' ? 'trim' : 'timber', big = L > 9 ? 1.6 : 1;
+  // the gunwales along the sheer, a wale below them; the stem and stern posts
+  if (kind !== 'reed') for (const j of [0, m]) {
+    a(wood, tube(Array.from({ length: n - 1 }, (_, i) => [...P(i + 1, j), 0.03 * big, 0.028 * big]), 5));
+    a(wood, tube(Array.from({ length: n - 3 }, (_, i) => { const p = P(i + 2, j), q = P(i + 2, j === 0 ? 1 : m - 1); return [p[0] * 0.75 + q[0] * 0.25 + (j ? 0.012 : -0.012), p[1] * 0.75 + q[1] * 0.25, p[2], 0.022 * big, 0.02 * big]; }), 4));
+  }
+  for (const [e, f] of [[0, 1], [n, n - 1]]) { const top = P(e, m / 2), k = P(f, m / 2); a(wood, tube([[k[0], k[1] + 0.02, k[2], 0.03 * big], [0, top[1], top[2], 0.035 * big], [0, top[1] + 0.07, top[2] * 1.004, 0.03 * big]], 5)); }
+  // a reed boat: its bundles bound round at intervals
+  if (kind === 'reed') for (let i = 2; i < n - 1; i += 2) a('cloth', tube(Array.from({ length: m + 1 }, (_, j) => { const p = P(i, j); return [p[0] * 1.02, p[1] - 0.01, p[2], 0.012, 0.025]; }), 4, { capA: false, capB: false }));
+  // the thwarts, the floor boards
+  for (let k = 1; k <= K.thwarts; k++) { const t = k / (K.thwarts + 1), half = Math.pow(Math.sin(Math.PI * t), 0.6) * B / 2 * 0.94; a('timber', box(-half, 0.2, -L / 2 + L * t - 0.11, half, 0.25, -L / 2 + L * t + 0.11)); }
+  if (K.flat > 0.25 && kind !== 'ferry') { const fy = 0.3 - D + D * 0.18, fw = B * 0.3; a('timber', box(-fw, fy, -L * 0.33, fw, fy + 0.03, L * 0.33)); }
+  if (K.awning) { const g = slathe([[0.001, 0], [B * 0.42, 0], [B * 0.42, L * 0.3], [0.001, L * 0.3]], 12, (th) => (Math.sin(th) > 0.05 ? 0.001 : 1)); g.rotateX(Math.PI / 2); g.translate(0, 0.3, -L * 0.1); a('awning', g);
+    for (const z of [-L * 0.1, L * 0.05, L * 0.2]) a('timber', tube(Array.from({ length: 9 }, (_, k) => { const th = Math.PI * k / 8; return [Math.cos(th) * B * 0.43, 0.3 + Math.sin(th) * B * 0.43, z, 0.025]; }), 4)); }
+  // oars, paddles
+  if (kind === 'rowboat') for (const s of [-1, 1]) { a('timber', tube([[s * 0.32, 0.29, -L * 0.36, 0.022], [s * 0.3, 0.3, L * 0.18, 0.026]], 5)); a('timber', box(s * 0.3 - 0.07, 0.28, L * 0.18, s * 0.3 + 0.07, 0.3, L * 0.32)); for (const z of [-0.05, 0.08]) a('timber', box(s * B * 0.47 - 0.015, 0.3, z - 0.015, s * B * 0.47 + 0.015, 0.42, z + 0.015)); }
+  if (kind === 'canoe') { a('timber', tube([[0.12, 0.05, -1.2, 0.02], [0.08, 0.06, 0.2, 0.02]], 5)); a('timber', slathe([[0.001, 0], [0.08, 0.06], [0.08, 0.35], [0.001, 0.45]], 6).scale(1, 1, 0.2).rotateX(Math.PI / 2).translate(0.08, 0.06, 0.2)); }
+  // the gondola: the ferro at the bow (its six teeth forward, the comb above), the forcola and the oar at the stern
+  if (kind === 'gondola') {
+    const bow = P(0, m / 2), zb = bow[2], yb = bow[1];
+    a('ferro', box(-0.015, yb - 0.25, zb - 0.12, 0.015, yb + 0.55, zb + 0.08));
+    a('ferro', box(-0.015, yb + 0.45, zb - 0.32, 0.015, yb + 0.62, zb + 0.08));
+    for (let k = 0; k < 6; k++) a('ferro', box(-0.015, yb - 0.15 + k * 0.1, zb - 0.32, 0.015, yb - 0.1 + k * 0.1, zb - 0.1));
+    a('ferro', box(-0.015, yb - 0.32, zb - 0.22, 0.015, yb - 0.22, zb + 0.02));
+    a('timber', tube([[B * 0.32, 0.3, L * 0.3, 0.05], [B * 0.34, 0.65, L * 0.3, 0.045], [B * 0.36, 0.72, L * 0.3 - 0.08, 0.04]], 5));
+    a('timber', tube([[B * 0.2, 1.0, L * 0.3 + 1.1, 0.03], [B * 0.36, 0.73, L * 0.3, 0.035], [B * 0.5 + 1.5, -0.2, L * 0.3 - 1.2, 0.03]], 5));
+    a('timber', slathe([[0.001, 0], [0.08, 0.05], [0.08, 0.5], [0.001, 0.55]], 6).scale(1, 1, 0.25).rotateX(Math.PI / 2).rotateY(Math.atan2(1.5 + B * 0.14, -1.2)).translate(B * 0.5 + 1.5, -0.2, L * 0.3 - 1.2));
+    a('trim', box(-B * 0.3, 0.28, -L * 0.06, B * 0.3, 0.42, L * 0.06)); a('trim', box(-B * 0.3, 0.42, L * 0.05, B * 0.3, 0.75, L * 0.065));
+  }
+  // the dhow: the mast raked forward, the long yard slung from its head, the lateen sail between the yard and the bow
+  if (K.mast) {
+    const mz = -L * 0.12, top = [0, 0.2 + K.mast, mz - K.mast * 0.12];
+    a('timber', tube([[0, 0.2 - D * 0.6, mz, 0.14], [0, 0.6, mz - 0.05, 0.13], [...top, 0.08]], 6));
+    // the yard crosses the masthead: its fore end down near the stem, its after end high over the stern
+    const y0 = [0, 1.5, -L * 0.46], y1 = top.map((v, i) => v + (v - y0[i]) * 0.6), cl = [0, 1.7, L * 0.33], sx = 0.25;
+    a('timber', tube([[...y0, 0.05], [...top.map((v, i) => (i === 1 ? v + 0.12 : i === 0 ? sx * 0.4 : v)), 0.09], [...y1, 0.04]], 5));
+    // the sail hangs from the yard to the clew, bellied out a little to one side
+    const S = [], N = 6, Q = (u, v) => { const p = y0.map((c, i) => c + (y1[i] - c) * u), q = y0.map((c, i) => c + (cl[i] - c) * u); return [sx * 0.5 + Math.sin(Math.PI * u) * Math.sin(Math.PI * v) * 0.6, p[1] + (q[1] - p[1]) * v, p[2] + (q[2] - p[2]) * v]; };
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) { const p = Q(i / N, j / N), b = Q((i + 1) / N, j / N), c = Q((i + 1) / N, (j + 1) / N), d = Q(i / N, (j + 1) / N); S.push(...p, ...b, ...c, ...p, ...c, ...d, ...p, ...c, ...b, ...p, ...d, ...c); }
+    a('sail', fromTriangles(S));
+    a('rope', tube([[sx * 0.5, cl[1], cl[2], 0.012], [0, 0.4, L * 0.42, 0.012]], 3)); a('rope', tube([[...y0, 0.014], [0, 0.45, -L * 0.47, 0.014]], 3));
+    a('rope', tube([[0, top[1] - 0.2, top[2], 0.015], [0, 0.4, L * 0.1, 0.015]], 3));
+  }
+  if (K.cabin) a('cabin', box(-B * 0.35, 0.3, -L * 0.3, B * 0.35, 2.6, L * 0.3));
+}
 function boat(el, { bag }) {
-  const put = placer(el, bag), kind = el.kind ?? 'rowboat', K = {
-    rowboat: { L: 4.5, B: 1.5, D: 0.6, m: 'timber', sheer: 0.25, flat: 0.3 }, canoe: { L: 6, B: 0.8, D: 0.45, m: 'wood_dark', sheer: 0.35, flat: 0 },
-    sampan: { L: 7, B: 1.8, D: 0.6, m: 'timber', sheer: 0.4, flat: 0.5, awning: 'reed_mat' }, gondola: { L: 10.8, B: 1.4, D: 0.55, m: 'lacquer_black', sheer: 0.9, flat: 0.3 },
-    dhow: { L: 13, B: 3.6, D: 1.6, m: 'timber', sheer: 0.8, flat: 0.2, mast: 9, sail: 'cloth_white' }, barge: { L: 12, B: 3, D: 1, m: 'timber', sheer: 0.2, flat: 0.8, awning: 'thatch' },
-    reed: { L: 4, B: 0.9, D: 0.4, m: 'reed_mat', sheer: 0.6, flat: 0 }, ferry: { L: 22, B: 6, D: 1.6, m: 'plaster_white', sheer: 0.4, flat: 0.8, cabin: 'cloth_ochre' },
-  }[kind] ?? {}; const L = el.len ?? K.L, B = K.B * L / K.L, D = K.D, n = 14, m = 6, T = [];
-  const P = (i, j) => { const t = i / n, u = j / m, half = Math.pow(Math.sin(Math.PI * t), 0.6) * B / 2, sh = K.sheer * (2 * t - 1) ** 4, s = u * 2 - 1; const flat = K.flat; return [half * s, sh + 0.3 - D * (1 - Math.abs(s) ** (1 + flat * 3)) * Math.pow(Math.sin(Math.PI * t), 0.3), -L / 2 + L * t]; };
-  for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) { const a = P(i, j), b = P(i + 1, j), c = P(i + 1, j + 1), d = P(i, j + 1); T.push(...a, ...b, ...c, ...a, ...c, ...b, ...a, ...c, ...d, ...a, ...d, ...c); }
-  put(K.m, fromTriangles(T));
-  for (let k = 1; k < 4; k++) { const t = k / 4, half = Math.pow(Math.sin(Math.PI * t), 0.6) * B / 2 * 0.92; put('timber', box(-half, 0.2, -L / 2 + L * t - 0.1, half, 0.25, -L / 2 + L * t + 0.1)); }
-  if (K.awning) { const g = lathe([[B * 0.42, 0], [B * 0.42, L * 0.3], [0.001, L * 0.3]], 10, (th) => (Math.sin(th) > 0.05 ? 0.001 : 1)); g.rotateX(Math.PI / 2); g.translate(0, 0.3, -L * 0.1); put(K.awning, g); }
-  if (K.mast) { put('timber', at(lz([[0.12, 0], [0.08, K.mast], [0.001, K.mast]], 6), 0, 0.2, -L * 0.15)); const S = []; S.push(0, 1.5, -L * 0.45, 0, K.mast + 1, L * 0.05, 0, 1.8, L * 0.25); S.push(0, 1.5, -L * 0.45, 0, 1.8, L * 0.25, 0, K.mast + 1, L * 0.05); put(K.sail, fromTriangles(S)); }
-  if (K.cabin) put(K.cabin, box(-B * 0.35, 0.3, -L * 0.3, B * 0.35, 2.6, L * 0.3));
-  if (kind === 'gondola') put('steel_chrome', box(-0.02, 0.5, -L / 2 - 0.1, 0.02, 1.4, -L / 2 + 0.3));
+  const put = placer(el, bag), kind = BOATS[el.kind] ? el.kind : 'rowboat', K = BOATS[kind], L = el.len ?? K.L;
+  const A = assembly(`boat|${kind}|${L}`, (a) => boatParts(kind, L, a));
+  const mats = { hull: K.m, timber: 'timber', trim: 'wood_dark', awning: K.awning, sail: K.sail, cabin: K.cabin, ferro: 'steel_chrome', rope: 'sacking', cloth: 'thatch' };
+  for (const [role, g] of Object.entries(A)) put(mats[role] ?? 'timber', g.clone());
 }
 
 // ---- the modern street -----------------------------------------------------------------------
@@ -437,12 +431,13 @@ function hangLantern(el, { bag }) {
 }
 /** laundry_pole: a bamboo pole pushed out of a window over the street or the water (along +z), clothes hanging from it; y is the window sill. */
 function laundryPole(el, { bag }) {
-  const put = placer(el, bag), rand = rng(el.seed), L = el.len ?? 2.4, CL = ['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_red', 'cloth_brown', 'cloth_indigo', 'cloth_green'];
+  // (lengths and the cloths' sizes in steps, so that poles and cloths share their shapes)
+  const put = placer(el, bag), rand = rng(el.seed), L = Math.max(1, Math.round((el.len ?? 2.4) * 4) / 4), CL = ['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_red', 'cloth_brown', 'cloth_indigo', 'cloth_green'];
   const yb = 0.1, ye = 0.45;
   put('bamboo_culm', seg([0, yb, -0.3], [0, ye, L], 0.025, 0.02, 6));
   const n = 2 + Math.floor(rand() * 3);
   for (let k = 0; k < n; k++) {
-    const t = 0.25 + k * 0.7 / n + rand() * 0.05, zz = -0.3 + (L + 0.3) * t, yy = yb + (ye - yb) * t, w = 0.25 + rand() * 0.35, h = 0.4 + rand() * 0.6, c = CL[Math.floor(rand() * CL.length)];
+    const t = 0.25 + k * 0.7 / n + rand() * 0.05, zz = -0.3 + (L + 0.3) * t, yy = yb + (ye - yb) * t, w = 0.25 + Math.floor(rand() * 4) * 0.11, h = 0.4 + Math.floor(rand() * 4) * 0.19, c = CL[Math.floor(rand() * CL.length)];
     const xo = (k % 2 ? 1 : -1) * 0.045;                                      // alternate sides of the pole, so neighbours never share a plane
     put(c, box(xo - 0.015, yy - h, zz - w / 2, xo + 0.015, yy, zz + w / 2));
     if (rand() < 0.4) for (const s of [-1, 1]) put(c, box(xo - 0.014, yy - h * 0.55, zz + s * (w / 2 + 0.1) - 0.08, xo + 0.014, yy - 0.05, zz + s * (w / 2 + 0.1) + 0.08));   // a jacket's sleeves
