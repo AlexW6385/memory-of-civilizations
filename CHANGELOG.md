@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.70 — Nineteen new materials (2026-11-06)
+- Tin-mercury mirror glass in the Hall of Mirrors, maroon cloth for Lhasa's monks, africano marble in St Peter's, Prussian blue on Big Ben's dials, green leather on the Commons benches, rough lime plaster and coral rag at Kilwa (and coral_plaster without coursing), carved pietra serena and Elba granite in the Mercato Vecchio, white and yellow sandstone in Petra's bands, chalk at Stonehenge, coral and obsidian eyes on the moai, fibre rope, flax leaves at the pā, dull aluminium on the Empire State Building, light concrete and brush box at the Opera House.
+
 ## v9.69 — The Palace of Westminster inside (2026-11-06)
 - Westminster Hall's south arch opened to St Stephen's Porch; St Stephen's Hall with its statesmen and stained glass; the Central Lobby under its mosaic vault with the chandelier, sixteen sovereigns and Poynter's St George, the Central Tower over it; the Commons and Lords corridors and lobbies with Ward's paintings and the Brass Gates; the House of Commons (green benches, Speaker's chair, Table and mace, galleries, the Ladies' grille); the House of Lords (red benches, Woolsack, the gilded throne and canopy, barons in niches, frescoes, heraldic ceiling); the Great Clock's opal dials with gilt surrounds and the Latin prayer.
 
