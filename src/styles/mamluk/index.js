@@ -130,7 +130,8 @@ function block(el, { bag, col }) {
     for (let i = 0; i < n; i++) {
       const u = a0 + (i + 0.5) * L / n, bw = L / n / 2 - 0.9;
       if (inPortal(face, u, bw)) continue;
-      for (const [yy, hh, pointed] of [[y + 4, 4.2, false], [y + 13, 5.5, true], [y + 23, 4.8, true]]) for (const s2 of [-0.9, 0.9]) {
+      // (a low block, the Citadel's mosque, has only the tiers that fit under its cornice)
+      for (const [yy, hh, pointed] of [[y + 4, 4.2, false], [y + 13, 5.5, true], [y + 23, 4.8, true]].filter(([yy, hh]) => yy + hh < y + h - 5.5)) for (const s2 of [-0.9, 0.9]) {
         bag.add('opening', R(u + s2 - 0.55, u + s2 + 0.55, yy, yy + hh, -0.02, 0.05));
         bag.add(S, R(u + s2 - 0.75, u + s2 + 0.75, yy - 0.25, yy, 0, 0.12));
         if (pointed) bag.add(S, R(u + s2 - 0.28, u + s2 + 0.28, yy + hh, yy + hh + 0.5, -0.02, 0.06));
