@@ -231,6 +231,7 @@ function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
   const P = (s2, v, o) => [a[0] + ux * s2 + nx * (F + o), y + v, a[1] + uz * s2 + nz * (F + o)];
   const slab = (m, s0, s1, v0, v1, o0, o1) => {
     if (!buckets.has(m)) buckets.set(m, []);
+    if (o0 === 0 && m.startsWith('inlay_')) o0 = -0.02;                  // the stones set into the marble, not laid on it
     const t = [], q = (p1, p2, p3, p4) => t.push(...p1, ...p2, ...p3, ...p1, ...p3, ...p4);
     const c = [P(s0, v0, o0), P(s1, v0, o0), P(s1, v1, o0), P(s0, v1, o0), P(s0, v0, o1), P(s1, v0, o1), P(s1, v1, o1), P(s0, v1, o1)];
     q(c[0], c[1], c[2], c[3]); q(c[4], c[7], c[6], c[5]); q(c[0], c[4], c[5], c[1]); q(c[1], c[5], c[6], c[2]); q(c[2], c[6], c[7], c[3]); q(c[3], c[7], c[4], c[0]);
@@ -278,10 +279,10 @@ function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
       const x = sL + (w / 2) * j / 64, vv = arcV(x) + 0.45 + 0.1 * Math.sin(j * 0.5);
       if (vv > vTop - 0.15) break;
       if (prev) { const s0 = Math.min(S(prev[0]), S(x)), s1 = Math.max(S(prev[0]), S(x)); slab(DK, s0, s1 + 0.035, Math.min(prev[1], vv), Math.max(prev[1], vv) + 0.035, 0, 0.015); }
-      if (j % 10 === 5) {
+      if (j % 10 === 5 && vv + 0.3 < vTop) {
         const fx = S(x), m2 = FL[nfl++ % FL.length];
-        for (let p2 = 0; p2 < 5; p2++) { const an = p2 / 5 * Math.PI * 2, px = fx + Math.cos(an) * 0.1, pv = vv + 0.16 + Math.sin(an) * 0.1; slab(m2, px - 0.045, px + 0.045, pv - 0.045, pv + 0.045, 0, 0.018); }
-        slab('inlay_yellow', fx - 0.03, fx + 0.03, vv + 0.13, vv + 0.19, 0, 0.022);
+        for (let p2 = 0; p2 < 5; p2++) { const an = p2 / 5 * Math.PI * 2, px = fx + Math.cos(an) * 0.1, pv = vv + 0.16 + Math.sin(an) * 0.1; slab(m2, px - 0.045, px + 0.045, pv - 0.045, pv + 0.045, 0, 0.03); }   // standing clear of the vine where it crosses
+        slab('inlay_yellow', fx - 0.03, fx + 0.03, vv + 0.13, vv + 0.19, 0, 0.036);
         slab('inlay_jade', fx + 0.06 * sd, fx + 0.2 * sd > fx ? fx + 0.2 : fx - 0.06, vv - 0.06, vv + 0.0, 0, 0.016);
       }
       prev = [x, vv];
@@ -294,7 +295,7 @@ function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
       // a spray of stems from the rosette, each ending in a flower between two leaves
       for (let p2 = 0; p2 < 6; p2++) {
         const an = p2 / 6 * Math.PI * 2 + 0.3, x0 = rx + Math.cos(an) * rr * 0.9, v0 = rv + Math.sin(an) * rr * 0.9;
-        for (let q2 = 1; q2 <= 6; q2++) { const rr2 = rr * (0.9 + q2 * 0.22), a2 = an + q2 * 0.08, px = rx + Math.cos(a2) * rr2, pv = rv + Math.sin(a2) * rr2; if (pv < arcV(Math.min(sR, Math.max(sL, sd < 0 ? px : L - px))) + 0.6 || pv > vTop - 0.1) break; slab(DK, px - 0.022, px + 0.022, pv - 0.022, pv + 0.022, 0, 0.014);
+        for (let q2 = 1; q2 <= 6; q2++) { const rr2 = rr * (0.9 + q2 * 0.22), a2 = an + q2 * 0.08, px = rx + Math.cos(a2) * rr2, pv = rv + Math.sin(a2) * rr2; if (pv < arcV(Math.min(sR, Math.max(sL, sd < 0 ? px : L - px))) + 0.6 || pv > vTop - 0.1) break; if (q2 < 6) slab(DK, px - 0.022, px + 0.022, pv - 0.022, pv + 0.022, 0, 0.014);
           if (q2 === 6) { slab(FL[p2 % 4], px - 0.07, px + 0.07, pv - 0.07, pv + 0.07, 0, 0.02); slab('inlay_jade', px - 0.16, px - 0.08, pv - 0.03, pv + 0.03, 0, 0.016); slab('inlay_jade', px + 0.08, px + 0.16, pv - 0.03, pv + 0.03, 0, 0.016); } }
         void x0; void v0;
       }
