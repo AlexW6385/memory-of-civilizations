@@ -8,7 +8,29 @@ export const RADIUS = 400;
 export const TOP = 22;
 export const MOSQUE = { c: [0, 20], d: 26.5, h: 53 };
 export const PRECINCT = [-75, -95, 75, 90];
-export const MADRASAS = [[-150, -60, -90, 10], [90, -60, 150, 10], [-150, 25, -90, 95], [90, 25, 150, 95]];
+// the külliye round the precinct (docs/settlements/ottoman-istanbul.md §4.4–§4.9), on the real plan turned so
+// that the qibla is +z: the medreses Sani and Evvel west of the mosque, Salis and Rabi east (on the side
+// toward the Horn), each 11 modules of 4.2 m square; the vaulted shops before them along the avenues; the
+// hospital at the north-west corner, the soup kitchen at the north-east; the bath and the dar'ül-hadis at
+// the south-east end
+const MW = 11 * 4.2;
+export const MEDRESES = [
+  { id: 'sani', rect: [-95.8 - MW, -56, -95.8, -56 + MW], out: 'w' },
+  { id: 'evvel', rect: [-95.8 - MW, -6.8, -95.8, -6.8 + MW], out: 'w' },
+  { id: 'salis', rect: [95.8, -56, 95.8 + MW, -56 + MW], out: 'e' },
+  { id: 'rabi', rect: [95.8, -6.8, 95.8 + MW, -6.8 + MW], out: 'e' },
+];
+export const ARASTA = { w: -95.8, e: 95.8, z0: -56, z1: -6.8 + MW, d: 4.4 };
+export const DARUSSIFA = [-96 - 12 * 4.4, -107, -96, -107 + 10 * 4.4];
+export const IMARET = [100, -107, 100 + 10 * 4.4, -107 + 10 * 4.4];
+export const HAMAM = [98, 58, 141.6, 74];
+export const DARULHADIS = { at: [72, 92], m: 4.0 };
+/** The footprints of the külliye's buildings (no trees or houses there). */
+export const KULLIYE_RECTS = [
+  ...MEDRESES.map((q) => q.out === 'w' ? [q.rect[0] - 4.4, q.rect[1], q.rect[2] + ARASTA.d + 1.5, q.rect[3]] : [q.rect[0] - ARASTA.d - 1.5, q.rect[1], q.rect[2] + 4.4, q.rect[3]]),
+  DARUSSIFA, IMARET, [HAMAM[0] - 1, HAMAM[1], HAMAM[2] + 3.5, HAMAM[3]], [DARULHADIS.at[0] - 1, DARULHADIS.at[1] - 1, DARULHADIS.at[0] + 21 * 4 + 0.5, DARULHADIS.at[1] + 16.5],
+];
+export const inKulliye = (x, z, m = 0) => KULLIYE_RECTS.some((r) => inRect(r, x, z, m));
 export const TERRACE = [-160, -110, 160, 110];
 // behind the qibla wall: Hürrem Sultan's tomb (1558) in the burial garden; Süleyman's own (1566) is not yet built
 export const TOMB = { c: [22, 68], r: 4.4 };

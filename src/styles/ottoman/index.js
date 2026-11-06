@@ -7,9 +7,10 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, disc, place } from '../../core/geom.js';
 import '../qing/index.js';
+import { KULLIYE } from './kulliye.js';
 
 const S = 'limestone', L = 'lead';
-const dome = (bag, x, y, z, r, mat = L) => {
+export const dome = (bag, x, y, z, r, mat = L) => {
   bag.add(S, lathe([[r * 1.04, 0], [r * 1.04, r * 0.22], [r * 0.98, r * 0.28]], 24, null, x, y, z));
   bag.add(mat, lathe([[r, 0], [r * 0.94, r * 0.3], [r * 0.78, r * 0.6], [r * 0.5, r * 0.85], [0.001, r * 0.95]], 24, null, x, y + r * 0.26, z));
   bag.add('gilt_bronze', lathe([[0.06 * r, 0], [0.03 * r, 0.25 * r], [0.001, 0.3 * r]], 6, null, x, y + r * 1.2, z));
@@ -78,9 +79,9 @@ function mosque(el, ctx) {
   courtyard(bag, col, court, y, 9, 7);
   for (const [mx, mz, h, n] of [[court[0], court[1], 56, 2], [court[2], court[1], 56, 2], [court[0], court[3], 76, 3], [court[2], court[3], 76, 3]]) minaret({ c: [mx, mz], y, h, r: 1.9, balconies: n }, ctx);
 }
-const dblT = (t) => { const o = t.slice(); for (let i = 0; i < t.length; i += 9) o.push(t[i], t[i + 1], t[i + 2], t[i + 6], t[i + 7], t[i + 8], t[i + 3], t[i + 4], t[i + 5]); return fromTriangles(o); };
+export const dblT = (t) => { const o = t.slice(); for (let i = 0; i < t.length; i += 9) o.push(t[i], t[i + 1], t[i + 2], t[i + 6], t[i + 7], t[i + 8], t[i + 3], t[i + 4], t[i + 5]); return fromTriangles(o); };
 /** A wall from A to B (plan), th thick, from ya to yb, pierced by pointed arches over the spans [[u0, u1]…] springing at ys; ablaq voussoirs on its faces when ablaq. */
-function arcadeWall(bag, A, B, spans, ya, ys, yb, th, mat = S, ablaq = false) {
+export function arcadeWall(bag, A, B, spans, ya, ys, yb, th, mat = S, ablaq = false) {
   const L = Math.hypot(B[0] - A[0], B[1] - A[1]), ux = (B[0] - A[0]) / L, uz = (B[1] - A[1]) / L, t2 = th / 2;
   const P = (u, yy, o) => [A[0] + ux * u + uz * o, yy, A[1] + uz * u - ux * o], tri = [], vou = [[], []];
   const q = (out, a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
@@ -112,7 +113,7 @@ function arcadeWall(bag, A, B, spans, ya, ys, yb, th, mat = S, ablaq = false) {
 }
 const norm = (v) => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
 /** The intrados of a pointed arch over [s0, s1] springing at ys (centres at 0.38 of the span in from each side). */
-function pointedArc(s0, s1, ys, K = 8) {
+export function pointedArc(s0, s1, ys, K = 8) {
   const w = s1 - s0, r = w * 0.62, cL = s0 + r, cR = s1 - r, ta = Math.acos(((s0 + s1) / 2 - cL) / r), out = [];
   // left half: centred on the right centre's mirror — the arc from s0 rises about cL
   for (let i = 0; i <= K; i++) { const t = Math.PI - (Math.PI - ta) * i / K; out.push([cL + r * Math.cos(t), ys + r * Math.sin(t)]); }
@@ -135,7 +136,7 @@ function courtColumn(bag, col, x, z, y, hs, mat) {
   col.circle(x, z, 0.42, y, y + hs);
 }
 /** A dome over a bay from below and above: the plastered shell and the corner fans inside, the lead outside. */
-function bayDome(bag, x, y, z, hx, hz) {
+export function bayDome(bag, x, y, z, hx, hz) {
   const r = Math.min(hx, hz) * 0.92, shell = [];
   for (let k = 0; k <= 8; k++) { const t = Math.PI / 2 * k / 8; shell.push([Math.max(0.001, r * Math.cos(t)), r * 0.82 * Math.sin(t)]); }
   bag.add('stucco', lathe(shell.reverse(), 20, null, x, y, z));
@@ -348,8 +349,8 @@ function turbe(el, { bag, col }) {
       F(a, ro - 0.02, ro + 0.03, -0.45, 0.45, y0 + 5.0, y0 + 6.2, 'opening'); F(a, ri - 0.03, ri + 0.02, -0.45, 0.45, y0 + 5.0, y0 + 6.2, 'daylight');
       for (let s = 0; s < 3; s++) F(a, ro - 0.02, ro + 0.03, -0.45 + s * 0.15, 0.45 - s * 0.15, y0 + 6.2 + s * 0.13, y0 + 6.33 + s * 0.13, 'opening');
       // inside: the Iznik tiles to the window heads, the inscription band, the lunette's panel
-      F(a, ri - 0.04, ri, -ri * tn, -0.75, y0 + 0.02, y0 + 3.3, 'tile_turquoise'); F(a, ri - 0.04, ri, 0.75, ri * tn, y0 + 0.02, y0 + 3.3, 'tile_turquoise');
-      F(a, ri - 0.04, ri, -0.75, 0.75, y0 + 0.02, y0 + 0.9, 'tile_turquoise');
+      F(a, ri - 0.04, ri, -ri * tn, -0.75, y0 + 0.02, y0 + 3.3, 'tile_iznik'); F(a, ri - 0.04, ri, 0.75, ri * tn, y0 + 0.02, y0 + 3.3, 'tile_iznik');
+      F(a, ri - 0.04, ri, -0.75, 0.75, y0 + 0.02, y0 + 0.9, 'tile_iznik');
       F(a, ri - 0.06, ri, -ri * tn, ri * tn, y0 + 3.3, y0 + 4.1, 'tile_lapis');
       for (let i = 0; i < 16; i++) { const u = -ri * tn + 0.15 + i * (2 * ri * tn - 0.3) / 15, tall = (i * 5 + k) % 3 !== 0; F(a, ri - 0.09, ri - 0.06, u - 0.03, u + 0.03, y0 + 3.45, y0 + (tall ? 3.95 : 3.62), 'glaze_white'); }
     }
@@ -421,6 +422,6 @@ function graves(el, { bag, col }) {
 
 registerStyle('ottoman', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves },
+  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, ...KULLIYE },
   objects: {},
 });

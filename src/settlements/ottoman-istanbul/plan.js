@@ -1,13 +1,22 @@
 // The Süleymaniye about 1560 (docs/settlements/ottoman-istanbul.md §2–§4): the mosque, its outer
-// court's wall, the four madrasas, Süleyman's tomb, the terrace's retaining wall to the north.
+// court's wall, the külliye (medreses, shops, hospital, soup kitchen, bath, dar'ül-hadis), Süleyman's tomb, the terrace's retaining wall to the north.
 
-import { MOSQUE, PRECINCT, MADRASAS, TERRACE, TOP, TOMB, GRAVES, ROSES } from './layout.js';
+import { MOSQUE, PRECINCT, MEDRESES, ARASTA, DARUSSIFA, IMARET, HAMAM, DARULHADIS, TERRACE, TOP, TOMB, GRAVES, ROSES } from './layout.js';
 
 const E = [];
 E.push({ t: 'sinan_mosque', c: MOSQUE.c, d: MOSQUE.d, h: MOSQUE.h, y: TOP, court: 38.1 });
 const [p0, q0, p1, q1] = PRECINCT;
 for (const r of [[p0, q0, -6, q0 + 1.2], [6, q0, p1, q0 + 1.2], [p0, q1 - 1.2, p1, q1], [p0, q0, p0 + 1.2, q1], [p1 - 1.2, q0, p1, q1]]) E.push({ t: 'block', rect: r, y0: TOP - 0.5, y1: TOP + 4, mat: 'limestone' });
-for (const r of MADRASAS) E.push({ t: 'madrasa', rect: r, y: TOP });
+for (const q of MEDRESES) E.push({ t: 'kulliye_medrese', rect: q.rect, out: q.out, y: TOP, shopFace: true });
+// the shops before the medreses, the gaps at the medreses' gates and the alley between them
+for (const f of ['w', 'e']) {
+  const gates = MEDRESES.filter((q) => (q.out === 'w') === (f === 'w')).map((q) => [q.rect[1] + 5 * 4.2 - 1.6, q.rect[1] + 6 * 4.2 + 1.6]);
+  E.push({ t: 'arasta', x: ARASTA[f], z0: ARASTA.z0, z1: ARASTA.z1, face: f === 'w' ? 'e' : 'w', d: ARASTA.d, y: TOP, gaps: [...gates, [-9.8, -6.8]], goods: f === 'w' ? 'cloth' : 'copper' });
+}
+E.push({ t: 'darussifa', rect: DARUSSIFA, y: TOP });
+E.push({ t: 'imaret', rect: IMARET, y: TOP });
+E.push({ t: 'hamam', rect: HAMAM, y: TOP });
+E.push({ t: 'darulhadis', at: DARULHADIS.at, m: DARULHADIS.m, y: TOP });
 E.push({ t: 'turbe', c: TOMB.c, r: TOMB.r, h: 7.6, y: TOP, door: 'n' });
 E.push({ t: 'graves', list: GRAVES, roses: ROSES, y: TOP });
 const [t0, u0, t1, u1] = TERRACE;
