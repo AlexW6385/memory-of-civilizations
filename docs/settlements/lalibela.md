@@ -52,6 +52,13 @@ Highland: clear dry season, cool mornings, cloud on the escarpments. Latitude 12
 
 Chant in the ge'ez mode with the kebero drum and sistrum, the begena's buzzing strings (a plucked string, a drone and the ney stand in). [inferred]
 
+## 10. Detail added (L2–L3)
+
+- **Aksumite windows:** Aksumite openings were "framed with rounded cross beams, nicknamed 'monkey heads'", and the Lalibela churches carry these forms on [stated: The Met, Aksumite architecture]. Ours: on Medhane Alem and the Aksumite churches, each window framed by squared beams standing proud of the wall — jambs, sill and lintel running past them — with the cross-beam ends jutting at the corners, a transom with its own heads in the taller windows.
+- **Bete Giyorgis:** "the lower windows of the building are in the Axumite style", "the upper windows are in the form of floral ogive windows" [stated: Senses Atlas]; the Greek cross appears "three times on the roof" [stated: Senses Atlas; Pilgrimaps: triple cross]. Ours: Aksumite lower windows, pointed (ogee) upper windows with raised frames, the roof's three crosses nested and stepped up one within another.
+- **Caves in the pit:** "Its vertical walls have a number of caves", used as lodgings for priests and as tombs [stated: Senses Atlas]. Ours: nine cells cut into the pit's faces, some at the floor and some higher with a rock step below.
+- **People:** pilgrims "dressed in white"; priests "are the only people to wear color" [stated: myjoyonline (pilgrimage to Lalibela)]. Ours: about forty still figures — pilgrims wrapped in white (most with the shawl over the head) in the pits' corners, sitting on the rim above Bete Giyorgis, filing down the trenches; four priests in white or ochre with white turbans, each holding a brass hand cross in the raised hand [hand crosses inferred from photographs].
+
 ## Sources
 
 - [Church of Saint George, Lalibela — Wikipedia](https://en.wikipedia.org/wiki/Church_of_Saint_George,_Lalibela)
@@ -64,3 +71,7 @@ Chant in the ge'ez mode with the kebero drum and sistrum, the begena's buzzing s
 - [The rock churches of Lalibela — Google Sightseeing](https://www.googlesightseeing.com/2009/06/the-rock-churches-of-lalibela/)
 - [Ethiopia 2012 — Stanford (Latombe)](https://ai.stanford.edu/~latombe/mountain/photo/ethiopia-2012/lalibela/index.htm)
 - [Rock-Hewn Churches, Lalibela — cavac (Wikipedia text)](https://cavac.at/cavacopedia/Rock-Hewn_Churches%2C_Lalibela)
+- [Monumental architecture of the Aksumite Empire — The Met](https://www.metmuseum.org/essays/monumental-architecture-and-stelae-of-the-aksumite-empire)
+- [The rock-hewn churches of Lalibela: Bete Giyorgis — Senses Atlas](https://www.sensesatlas.com/?p=642)
+- [Biete Giyorgis — Pilgrimaps](https://www.pilgrimaps.com/biete-giyorgis/)
+- [Walk with pilgrims to Lalibela — myjoyonline](https://www.myjoyonline.com/walk-with-pilgrims-on-a-journey-to-lalibela-ethiopias-new-jerusalem/)

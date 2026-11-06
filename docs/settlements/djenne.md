@@ -50,6 +50,13 @@ The dry season under the harmattan: dusty, hazy, a pale sun. Latitude 14° N. [i
 
 The griot's kora and ngoni, the balafon, a voice (a plucked harp, a struck wooden sound and a voice stand in). [inferred]
 
+## 10. Detail added (L2–L3)
+
+- **Prayer hall:** the roof stands on nine interior walls running north–south, pierced by pointed arches, making "a forest of ninety massive rectangular pillars" [stated: Wikipedia via Wikiwand]. Ours: nine arcaded walls of eleven piers each (half-piers against the north and south walls), pointed arches of two arcs (radius 0.75 × span) springing at 4.6 m, the roof of palm beams over them. Arch shape and spring height [inferred].
+- **Roof vents:** "Small vents in the roof are topped with removable inverted kiln-fired bowls" [stated: Wikiwand]. Ours: banco collars capped with terracotta bowls, 24 over the hall.
+- **Spouts:** "Ceramic half-pipes also extend from the roofline and direct rain water from the roof away from the walls" [stated: Wikiwand]. Ours: terracotta half-pipes about a metre long, between the pilasters of the north and south walls.
+- **Qibla towers:** three box-like towers, the central about 16 m, cone-shaped pinnacles topped with ostrich eggs [stated: Wikiwand]. Ours adds engaged ribs on each tower's three outer faces, battered with the face and rising through the cornice as small pinnacles, as in photographs of the qibla front [inferred from photographs; number of ribs ours].
+
 ## Sources
 
 - [Great Mosque of Djenne — Designing Buildings Wiki](https://designingbuildings.co.uk/wiki/Great_Mosque_of_Djenne)
@@ -60,3 +67,4 @@ The griot's kora and ngoni, the balafon, a voice (a plucked harp, a struck woode
 - [Mud Architecture: The Great Mosque of Djenné — ArchEyes](https://archeyes.com/great-mud-architecture-mali-dogon-culture/)
 - [Great Mosque of Djenné — Studio Matrx](https://www.studiomatrx.org/architecture-canon/great-mosque-of-djenne)
 - [Great Mosque of Djenne — gohistoric](https://gohistoric.com/places/249205-great-mosque-djenne)
+- [Great Mosque of Djenné — Wikiwand (Wikipedia)](https://www.wikiwand.com/en/articles/Great_Mosque_of_Djenne)

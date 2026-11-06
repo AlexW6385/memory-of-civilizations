@@ -50,6 +50,17 @@ From the valley into the Great Enclosure by the north entrance, along the passag
 
 The mbira, drums, hand-clapping and voices. [inferred]
 
+## 10. Detail added (L2–L3)
+
+- **Conical tower:** "nearly 10 metres high", "plain and has sloping sides swelling slightly"; "the top of the Conical Tower once had a dentelle pattern which is now gone" [stated: Zimbabwe Field Guide]. 5.5 m in diameter, 9 m high [stated: Wikipedia]. Ours: 5.6 m across, 10 m, a slight swell in the batter, the dentelle course (blocks set with gaps) between two plain courses 0.9 m below the flat top [position of the band inferred].
+- **Platform:** beside the tower "a platform 7.6 metres (25 ft) across, the largest built at Great Zimbabwe" [stated: Zimbabwe Field Guide]. Ours: a round, battered stone platform with a daga top and a step.
+- **Eastern Enclosure and the birds:** eight soapstone birds, carved "from a micaceous schist (soapstone) on the tops of monoliths the height of a person"; slots in a platform in the Eastern Enclosure appear designed to hold monoliths; their original positions cannot be determined [stated: Wikipedia, Great Zimbabwe]. Birds about 40 cm tall on columns over 90 cm; Bent recorded six large and two small [stated: Wikipedia, Zimbabwe Bird]. Ours: an enclosure wall at the hill's east end, a stone platform, eight birds (two smaller) on columns with a raised zigzag, folded wings, legs with toes on a perch ring, lips rather than a beak; six plain granite monoliths behind. Row order, zigzag and the birds' features from museum photographs [inferred].
+- **Boulders:** granite boulders among the Hill Complex walls (18, 3–8 m), set into the slope clear of the walls [stated: walls among boulders; placement inferred].
+- **Daga houses:** "Dhaka once formed interior platforms and floors of huts"; courtyards paved with dhaka "often with raised kerbs" [stated: Zimbabwe Field Guide]. Ours: each house on a kerbed daga floor, the wall a little battered, a doorway with a raised sill and lintel, the thatch in two lifts; the larger houses with a veranda of eight posts under the eave [veranda inferred from Shona houses].
+
 ## Sources
 
 - [Great Zimbabwe — Wikipedia](https://en.wikipedia.org/wiki/Great_Zimbabwe)
+- [The Great Enclosure in photographs — Zimbabwe Field Guide](https://mail.zimfieldguide.com/node/710)
+- [Zimbabwe Bird — Wikipedia](https://en.wikipedia.org/wiki/Zimbabwe_Bird)
+- [Great Zimbabwe — Wikipedia (mirror)](https://wiki.krisyotam.com/content/wikipedia_en_all_nopic_2026-03/Great_Zimbabwe)
