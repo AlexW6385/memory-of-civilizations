@@ -22,8 +22,8 @@ for (let k = 0; k < 22; k++) {
 }
 // statues half-cut in their bays higher up the face (layout.js cuts the niches)
 for (const b of BAYS) E.push({ t: 'quarry_bay', at: b.at, y: b.y, h: b.h, facing: b.facing, tilt: b.tilt });
-// one fallen on its way to the coast
-E.push({ t: 'moai', at: [-40, -10], y: height(-40, -10) - 0.3, h: 6.5, facing: 'n', lie: true, kind: 'quarry' });
+// one fallen by the road on its way to the coast, face up, its head toward the sea
+E.push({ t: 'moai', at: [-36, -15], y: height(-36, -15) - 0.3, h: 6.5, facing: 0.64, lie: true, kind: 'quarry' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('plaza', PLAZA, 0.12, 'open')];

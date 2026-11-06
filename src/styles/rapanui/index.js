@@ -4,10 +4,12 @@
 // quarry and standing buried to the shoulders on its slopes; boat-shaped thatched houses (hare
 // paenga) on curbs of dressed basalt; stone chicken houses (hare moa); round garden walls (manavai).
 
-import { Matrix4 } from '../../core/three.js';
+import { Matrix4, Vector3 } from '../../core/three.js';
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles, orientOutward, rod } from '../../core/geom.js';
 import { sculpt, rows, smooth, bump, blob } from './sculpt.js';
+import { merge, tube } from '../../objects/kit.js';
+import { SCENES, rope } from './scenes.js';
 import '../qing/index.js';
 
 const T = 'tuff_moai', B = 'basalt_ahu';
@@ -114,6 +116,29 @@ function moaiGeometry(kind) {
   const ys = rows(0, 1, 94, (y) => (y > HEAD0 - 0.03 ? 3 : y > 0.08 && y < 0.5 ? 1.7 : 0.7));
   return (MOAI[kind] = sculpt({ ys, cols: 66, section: moaiSection, relief: moaiRelief(kind), warp: 0.45 }));
 }
+/**
+ * The inlaid eyes of an ahu statue, at unit height: in each socket an almond of white coral, its
+ * back sunk into the floor of the socket and its face standing a little short of the rim, with a
+ * round pupil of black obsidian set in it (docs/settlements/rapa-nui.md §4a). The socket's floor
+ * is read off the carved surface itself, so the eye sits in the stone wherever the relief puts it.
+ */
+let EYES = null;
+function moaiEyes() {
+  if (EYES) return EYES;
+  const pos = moaiGeometry('ahu').getAttribute('position'), ex = 0.072, ey = HEAD0 + (1 - HEAD0) * 0.745;
+  let floor = 0;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    if (Math.abs(y - ey) < 0.01 && Math.abs(Math.abs(x) - ex) < 0.012) floor = Math.min(floor, z);
+  }
+  const ball = (n) => lathe(Array.from({ length: 7 }, (_, k) => { const t = k / 6 * Math.PI; return [Math.max(0.001, Math.sin(t)), -Math.cos(t)]; }), n).rotateX(Math.PI / 2);
+  const coral = [], pupil = [], d = 0.02, c = floor + 0.006;
+  for (const s of [-1, 1]) {
+    coral.push(ball(14).scale(0.034, 0.0145, d).translate(s * ex, ey, c));
+    pupil.push(ball(10).scale(0.0105, 0.0095, 0.004).translate(s * (ex - 0.004), ey - 0.001, c - d + 0.0028));
+  }
+  return (EYES = [{ mat: 'limewash_white', g: merge(coral) }, { mat: 'lacquer_black', g: merge(pupil) }]);
+}
 /** The pukao at unit statue height: a cylinder of red scoria, a dent below to sit on the head, a boss on top, grooves round its foot. */
 let PUKAO = null;
 function pukaoGeometry() {
@@ -132,10 +157,34 @@ function moai(el, { bag, col }) {
   m.multiply(new Matrix4().makeScale(h, h, h));
   m.setPosition(x, y - (el.buried ?? 0), z);
   putStone(bag, T, moaiGeometry(kind), m);
+  if (kind === 'ahu' && el.eyes !== false) for (const e of moaiEyes()) putStone(bag, e.mat, e.g, m);
   if (el.pukao) putStone(bag, 'scoria_red', pukaoGeometry().clone().translate(0, 1 - 0.006, -0.02), m);
   const r = h * 0.17;
   if (el.lie) col.circle(x, z, r * 1.4, y - 1, y + r * 1.5);
   else col.circle(x, z, r, y - 1, y + h);
+}
+/**
+ * moai_walk: a statue on its way down the road, walked upright { at, y, h, facing (the way it goes;
+ * it walks face first), rock (its sideways tilt onto one edge of its base), lean (forward), ropes:
+ * [{ side ('l' | 'r' | 'b'), path: [[x, y, z], …] }] } — a rope tied round its neck below the jaw,
+ * the three ropes leaving it from the left, the right and the back, through the haulers' hands
+ * (docs/settlements/rapa-nui.md §4b). A statue in transport has no eye sockets yet.
+ */
+function moaiWalk(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 5, rock = el.rock ?? 0.06, lean = el.lean ?? 0.05, sec0 = moaiSection(0), px = -Math.sign(rock || 1) * sec0.w * h;
+  const M = new Matrix4().makeTranslation(x, y, z).multiply(new Matrix4().makeRotationY(yawOf(el.facing ?? 'n')))
+    .multiply(new Matrix4().makeTranslation(px, 0, 0)).multiply(new Matrix4().makeRotationZ(rock)).multiply(new Matrix4().makeTranslation(-px, 0, 0))
+    .multiply(new Matrix4().makeRotationX(-lean)).multiply(new Matrix4().makeScale(h, h, h));
+  putStone(bag, T, moaiGeometry('quarry'), M);
+  // the rope round the neck, hugging the section just under the jaw
+  const yr = 0.585, sc = moaiSection(yr), n = sc.n, ring = [];
+  const at = (ph, o) => { const sp = Math.sin(ph), cp = Math.cos(ph); return [(sc.w + o) * Math.sign(sp) * Math.abs(sp) ** (2 / n), yr, sc.zc - (sc.d + o) * Math.sign(cp) * Math.abs(cp) ** (2 / n)]; };
+  for (let k = 0; k <= 28; k++) ring.push([...at(k / 28 * Math.PI * 2, 0.007), 0.0055]);
+  const g = tube(ring, 5); g.applyMatrix4(M); bag.add('sacking', g);
+  const world = (p) => { const v = new Vector3(...p).applyMatrix4(M); return [v.x, v.y, v.z]; };
+  const anchor = { l: at(-Math.PI / 2, 0.012), r: at(Math.PI / 2, 0.012), b: at(Math.PI, 0.012) };
+  for (const r of el.ropes ?? []) rope(bag, [world(anchor[r.side]), ...r.path], 0.028);
+  col.circle(x, z, h * 0.2, y, y + h);
 }
 /** A sculpted piece placed by a matrix: one shape held once however many stand (GeoBag.addInstance). */
 function putStone(bag, mat, g, m) {
@@ -389,7 +438,7 @@ function manavai(el, { bag, col }) {
 
 registerStyle('rapanui', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, moai, quarry_bay: quarryBay, ahu, hare_paenga: harePaenga, hare_moa: hareMoa, manavai },
+  elements: { ...STYLES.qing.elements, moai, quarry_bay: quarryBay, ahu, hare_paenga: harePaenga, hare_moa: hareMoa, manavai, moai_walk: moaiWalk, ...SCENES },
   objects: {},
 });
 export { sculpt, moaiGeometry };

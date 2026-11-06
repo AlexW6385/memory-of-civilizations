@@ -57,12 +57,28 @@ function baseHeight(x, z) {
 }
 export const inLake = (x, z) => Math.hypot(x - RARAKU.c[0], z - RARAKU.c[1]) < RARAKU.crater - 8;
 export const inSea = (x, z) => height(x, z) < SEA - 0.2 && !inLake(x, z);
+/**
+ * The statue road from the foot of the quarry to the plaza (docs/settlements/rapa-nui.md §4b): a
+ * track about 4.5 m wide, its bed a little dished; a statue walking down it, another fallen by it.
+ */
+export const ROAD = [[-98, -62], [-66, -36], [-40, -10], [-14, 30], [-4, 58]];
+export const ROAD_W = 4.5;
+/** The distance from (x, z) to the road's centre line. */
+export function roadDist(x, z) {
+  let d = Infinity;
+  for (let i = 0; i < ROAD.length - 1; i++) {
+    const [ax, az] = ROAD[i], [bx, bz] = ROAD[i + 1], dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / L2));
+    d = Math.min(d, Math.hypot(x - ax - dx * t, z - az - dz * t));
+  }
+  return d;
+}
 let HOUSES = null;
 /** The village: boat-shaped houses (long axis roughly east–west), chicken houses and garden walls among them. */
 export function village() {
   if (HOUSES) return HOUSES;
   const rand = rng(1500), out = { houses: [], moa: [], gardens: [] };
-  const free = (x, z, m) => !inRect(PLAZA, x, z, m + 6) && !inRect(AHU.rect, x, z, m + 16) && Math.hypot(x - RARAKU.c[0], z - RARAKU.c[1]) > RARAKU.r + m && z < coastZ(x) - 20 && Math.hypot(x, z) < RADIUS - 30
+  const free = (x, z, m) => !inRect(PLAZA, x, z, m + 6) && !inRect(AHU.rect, x, z, m + 16) && Math.hypot(x - RARAKU.c[0], z - RARAKU.c[1]) > RARAKU.r + m && z < coastZ(x) - 20 && Math.hypot(x, z) < RADIUS - 30 && roadDist(x, z) > m + ROAD_W / 2 + 4
     && ![...out.houses, ...out.moa, ...out.gardens].some((o) => Math.hypot(o.c[0] - x, o.c[1] - z) < m + 7);
   for (let k = 0; k < 2500 && out.houses.length < 40; k++) {
     const x = -260 + rand() * 520, z = -60 + rand() * 180;
