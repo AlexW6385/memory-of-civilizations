@@ -8,7 +8,7 @@
 // Pieces may be turned (the Shah Mosque faces Mecca, 45° off the square), so most take points a, b
 // rather than axis-aligned rectangles.
 
-import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
+import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
@@ -447,12 +447,230 @@ function khaneh(el, { bag, col }) {
   if (rand() < 0.3) { const r = Math.min(d, 3) * 0.55; bag.add(M, lathe(domeProfile(r, r * 0.8, 0), 12, null, xc, H, z1 - d / 2)); }
 }
 
+// ---- Ali Qapu ------------------------------------------------------------------------------------
+
+/** Vessels as the music room's stucco cut them out: half-profiles [half-width, height], both of a unit of height. */
+const VESSELS = [
+  [[0.1, 0], [0.24, 0.07], [0.34, 0.24], [0.3, 0.42], [0.13, 0.55], [0.07, 0.62], [0.065, 0.88], [0.11, 0.94], [0.08, 1]],    // the long-necked bottle (surahi)
+  [[0.14, 0], [0.18, 0.05], [0.32, 0.3], [0.35, 0.48], [0.26, 0.68], [0.16, 0.78], [0.18, 0.92], [0.24, 1]],                  // the vase
+  [[0.2, 0], [0.2, 0.04], [0.05, 0.1], [0.05, 0.42], [0.29, 0.55], [0.34, 0.75], [0.34, 1]],                                  // the goblet
+  [[0.18, 0], [0.29, 0.12], [0.37, 0.38], [0.34, 0.6], [0.19, 0.78], [0.16, 0.88], [0.21, 1]],                               // the jar
+];
+/** A closed outline of vessel k, standing at (u, v), h high, as points. */
+function vesselOutline(k, u, v, h) {
+  const prof = VESSELS[k % VESSELS.length], R = prof.map(([w, t]) => [u + w * h, v + t * h]), L = prof.map(([w, t]) => [u - w * h, v + t * h]).reverse();
+  return [...R, ...L];
+}
+/** A pointed-arch outline (a niche's frame) of width w, height h, its foot at (u, v), as points. */
+function archOutline(u, v, w, h) {
+  const r = w * 0.75, rise = Math.sqrt(r * r - (r - w / 2) ** 2), sp = h - rise, pts = [[u - w / 2, v]];
+  for (let i = 0; i <= 8; i++) { const x = -w / 2 + (w / 2) * i / 8; pts.push([u + x, v + sp + Math.sqrt(Math.max(0, r * r - (x + w / 2 - r) ** 2))]); }
+  for (let i = 1; i <= 8; i++) { const x = (w / 2) * i / 8; pts.push([u + x, v + sp + Math.sqrt(Math.max(0, r * r - (w / 2 - x - r) ** 2))]); }
+  pts.push([u + w / 2, v]);
+  return pts;
+}
+/**
+ * A wall's lining of stucco, th thick, cut through with the outlines `holes` (in the lining's u–v
+ * plane: u along the wall from s0, v up from y0), over a thin backing that shows in the holes: o is
+ * a point of the wall's face, n the unit normal from it into the room, the lining from s0 to s1
+ * along u = (n.z, −n.x), from y0 up H.
+ */
+function lining(bag, col, o, n, s0, s1, y0, H, th, holes, mat = 'stucco_cream', back = 'plaster_ochre') {
+  const L = s1 - s0, U = [n[1], -n[0]], sh = new Shape(), bt = 0.03;
+  sh.moveTo(0, 0); sh.lineTo(L, 0); sh.lineTo(L, H); sh.lineTo(0, H); sh.lineTo(0, 0);
+  for (const pts of holes) { const p = new Path(); p.moveTo(pts[0][0], pts[0][1]); for (const q of pts.slice(1)) p.lineTo(q[0], q[1]); p.lineTo(pts[0][0], pts[0][1]); sh.holes.push(p); }
+  const g = new ExtrudeGeometry(sh, { depth: th, bevelEnabled: false, curveSegments: 4 });
+  const p0 = [o[0] + U[0] * s0 + n[0] * bt, o[1] + U[1] * s0 + n[1] * bt];
+  g.applyMatrix4(new Matrix4().makeBasis({ x: U[0], y: 0, z: U[1] }, { x: 0, y: 1, z: 0 }, { x: n[0], y: 0, z: n[1] }).setPosition(p0[0], y0, p0[1]));
+  bag.add(mat, g);
+  const a = [o[0] + U[0] * s0, o[1] + U[1] * s0], b = [o[0] + U[0] * s1, o[1] + U[1] * s1];
+  const bx = [a[0], a[1], b[0] + n[0] * bt, b[1] + n[1] * bt], r = [Math.min(bx[0], bx[2]), Math.min(bx[1], bx[3]), Math.max(bx[0], bx[2]), Math.max(bx[1], bx[3])];
+  bag.add(back, box(r[0], y0, r[1], r[2], y0 + H, r[3]));
+  const e = [b[0] + n[0] * (bt + th), b[1] + n[1] * (bt + th)];
+  col.rect([Math.min(a[0], e[0]), Math.min(a[1], e[1]), Math.max(a[0], e[0]), Math.max(a[1], e[1])], y0, y0 + H);
+}
+/** A straight flight of steps over rect rising y0 → y1 toward dir, each step solid down to y0 − under. */
+function flight(bag, col, rect, y0, y1, dir, mat, under = 0.28) {
+  const [x0, z0, x1, z1] = rect, n = Math.max(1, Math.round((y1 - y0) / 0.2));
+  for (let i = 0; i < n; i++) {
+    const f = i / n, yt = y0 + (y1 - y0) * (i + 1) / n;
+    const r = dir === 'e' ? [x0 + (x1 - x0) * f, z0, x1, z1] : dir === 'w' ? [x0, z0, x1 - (x1 - x0) * f, z1] : dir === 's' ? [x0, z0 + (z1 - z0) * f, x1, z1] : [x0, z0, x1, z1 - (z1 - z0) * f];
+    bag.add(mat, box(r[0], i === 0 ? y0 - under : yt - 0.2 - under, r[1], r[2], yt, r[3]));
+  }
+  col.ramp(rect, y0, y1, dir);
+}
+/** A balustrade a→b at floor height y: posts, a rail, wooden lattice between. */
+function balustrade(bag, col, a, b, y, h = 0.95) {
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, n = Math.max(1, Math.round(L / 1.1));
+  slab(bag, null, 'wood_dark', a, b, y, 0.12, 0.1);
+  slab(bag, null, 'wood_dark', a, b, y + h - 0.08, 0.14, 0.08);
+  slab(bag, null, 'lattice', [a[0] + ux * 0.06, a[1] + uz * 0.06], [b[0] - ux * 0.06, b[1] - uz * 0.06], y + 0.1, 0.03, h - 0.18);
+  for (let i = 0; i <= n; i++) { const p = [a[0] + ux * L * i / n, a[1] + uz * L * i / n]; bag.add('wood_dark', box(p[0] - 0.06, y, p[1] - 0.06, p[0] + 0.06, y + h + 0.04, p[1] + 0.06)); }
+  col.segment(a, b, 0.14, y, y + h);
+}
+/** A hanging lamp at (x, y, z) under a ceiling at yc: chain, a pierced brass body, its light. */
+function hangingLamp(bag, lights, x, y, z, yc, intensity = 5, distance = 10) {
+  bag.add('bronze', box(x - 0.015, y + 0.3, z - 0.015, x + 0.015, yc, z + 0.015));
+  bag.add('bronze', lathe([[0.001, 0], [0.12, 0.05], [0.2, 0.16], [0.17, 0.26], [0.05, 0.3], [0.001, 0.31]], 12, null, x, y, z));
+  lights.push({ at: [x, y + 0.1, z], color: '#ffb46b', intensity, distance });
+}
+
+/**
+ * ali_qapu: the palace gateway on the west side of the square { rect, tower, top } (docs/settlements/
+ * isfahan.md §11), its face to the square on +x. The gate block (13 m): the vaulted passage from the
+ * door on the square, two storeys with the hall of the chancellery over it; behind, the square tower
+ * rising to `top` with the reception chamber on the talar's level, two storeys of rooms over it and
+ * the music room at the top, its walls lined with stucco cut through in the shapes of bottles, vases,
+ * goblets and jars in rows of arched niches. An enclosed stair on the south side, steep, winding up
+ * round a square newel in four flights a storey, joins them all; windows of wooden lattice; painted
+ * ceilings on beams, carpets and bolsters, hanging lamps. (The talar on its columns is the `talar` element.)
+ */
+function aliQapu(el, { bag, col, lights }) {
+  const [X0, Z0, X1, Z1] = el.rect, XT = el.tower ?? X0 + 12, TOP = el.top ?? 38;
+  const Y = [0, 6.5, 13, 19.5, 26, 32.5], q = 6.5 / 4, P = 'plaster_persian';
+  const at = (dx, dz) => [X0 + dx, Z0 + dz];
+  const solid = (mat, x0, z0, x1, z1, y0, y1, c = true) => { bag.add(mat, box(x0, y0, z0, x1, y1, z1)); if (c) col.rect([x0, z0, x1, z1], y0, y1); };
+  const floorAt = (r, y, fin = 'brick_paving', ceil = 'ceiling_painted') => { bag.add(ceil, box(r[0], y - 0.5, r[1], r[2], y - 0.03, r[3])); bag.add(fin, box(r[0], y - 0.03, r[1], r[2], y, r[3])); col.floor(r, y); };
+  // the stair's well: clear [wx0, wz0, wx1, wz1] against the west and south walls, the newel in the middle, corner landings 1.25 m
+  const wx0 = X0 + 1, wx1 = X0 + 5.5, wz1 = Z1 - 2, wz0 = wz1 - 4.5, f = 1.25, ew = 0.5;
+  const C0 = [wx1 - f, wz0, wx1, wz0 + f], C1 = [wx0, wz0, wx0 + f, wz0 + f], C2 = [wx0, wz1 - f, wx0 + f, wz1], C3 = [wx1 - f, wz1 - f, wx1, wz1];
+  const F1 = [wx0 + f, wz0, wx1 - f, wz0 + f], F2 = [wx0, wz0 + f, wx0 + f, wz1 - f], F3 = [wx0 + f, wz1 - f, wx1 - f, wz1], F4 = [wx1 - f, wz0 + f, wx1, wz1 - f];
+  const yTop = Y[5] - 0.5;                                     // the well's walls and newel stop under the top floor
+  // ---- the gate block's shell (0–13): north, south and west walls; the face to the square with its door and lattice windows
+  solid(B, X0, Z0, X1 - 1, Z0 + 1, 0, 13); solid(B, X0, Z1 - 1, X1 - 1, Z1, 0, 13); solid(B, X0, Z0 + 1, X0 + 1, Z1 - 1, 0, 13);
+  for (const z of [Z0, Z1 - 1]) solid(B, X1 - 1, z, X1, z + 1, 12.6, 13, false);
+  const W = Z1 - Z0, zc = (Z0 + Z1) / 2;
+  arcadeWall(bag, col, [X1 - 0.5, Z1], [X1 - 0.5, Z0], 0, 12.6, 1, B, [
+    { at: W / 2, w: 4, h: 5.2, pass: true },
+    ...[W / 2 - 4, W / 2 + 4].map((u) => ({ at: u, w: 1.8, h: 2.6, sill: 1.2, depth: -0.5, back: 'lattice' })),
+    ...[3, 7, W - 7, W - 3].map((u) => ({ at: u, w: 2, h: 3, sill: 7.6, depth: -0.5, back: 'lattice' })),
+  ], [X0, zc]);
+  // the passage: a vaulted hall from the door, solid piers either side, the west mass carrying the tower
+  const vz0 = zc - 6, vz1 = zc + 6, vx0 = X0 + 6;
+  solid(P, vx0, Z0 + 1, X1 - 1, vz0, 0, 6); solid(P, vx0, vz1, X1 - 1, Z1 - 1, 0, 6);
+  solid(P, X0 + 1, Z0 + 1, vx0, wz0 - ew, 0, 12.5);
+  bag.add('brick_paving', box(vx0, 0, vz0, X1 - 1, 0.03, vz1));
+  {
+    const sh = new Shape(), half = 6, rise = 1.5, sp = 4.4, R = (half * half + rise * rise) / (2 * rise);
+    sh.moveTo(-half, sp); for (let i = 1; i < 24; i++) { const u = -half + 2 * half * i / 24; sh.lineTo(u, sp + rise - (R - Math.sqrt(R * R - u * u))); }
+    sh.lineTo(half, sp); sh.lineTo(half, 6); sh.lineTo(-half, 6); sh.lineTo(-half, sp);
+    const g = new ExtrudeGeometry(sh, { depth: X1 - 1 - vx0, bevelEnabled: false, curveSegments: 4 });
+    g.applyMatrix4(new Matrix4().makeBasis({ x: 0, y: 0, z: -1 }, { x: 0, y: 1, z: 0 }, { x: 1, y: 0, z: 0 }).setPosition(vx0, 0, zc));
+    bag.add(P, g);
+    // ribs across the vault at each third, a cornice at the springing
+    for (const fx of [1 / 3, 2 / 3]) {
+      const x = vx0 + (X1 - 1 - vx0) * fx, rib = new Shape();
+      rib.moveTo(-half, sp - 0.3); for (let i = 0; i <= 24; i++) { const u = -half + 2 * half * i / 24; rib.lineTo(u, sp + rise - (R - Math.sqrt(R * R - u * u)) - 0.22); }
+      rib.lineTo(half, sp - 0.3); rib.lineTo(half, sp); for (let i = 23; i >= 1; i--) { const u = -half + 2 * half * i / 24; rib.lineTo(u, sp + rise - (R - Math.sqrt(R * R - u * u))); } rib.lineTo(-half, sp);
+      const gr = new ExtrudeGeometry(rib, { depth: 0.4, bevelEnabled: false, curveSegments: 4 });
+      gr.applyMatrix4(new Matrix4().makeBasis({ x: 0, y: 0, z: -1 }, { x: 0, y: 1, z: 0 }, { x: 1, y: 0, z: 0 }).setPosition(x - 0.2, 0, zc));
+      bag.add('brick_buff', gr);
+    }
+    for (const z of [vz0, vz1 - 0.15]) bag.add('stucco_cream', box(vx0, sp - 0.3, z, X1 - 1, sp, z + 0.15));
+    hangingLamp(bag, lights, (vx0 + X1) / 2, 3.4, zc, sp + rise, 6, 12);
+  }
+  // ---- the hall over the passage (6.5): the chancellery, on beams under a painted ceiling
+  floorAt([vx0, Z0 + 1, X1 - 1, Z1 - 1], Y[1]);
+  bag.add('ceiling_painted', box(XT, 12.5, Z0 + 1, X1 - 1, 12.6, Z1 - 1));
+  for (let x = vx0 + 1.4; x < X1 - 1.5; x += 2.4) bag.add('wood_dark', box(x - 0.13, 12.15, Z0 + 1, x + 0.13, 12.5, Z1 - 1));
+  for (const [x0, z0, x1, z1] of [[vx0 + 2, Z0 + 2, X1 - 3, Z0 + 5.5], [vx0 + 2, Z1 - 5.5, X1 - 3, Z1 - 2]]) bag.add('cloth_red', box(x0, Y[1], z0, x1, Y[1] + 0.02, z1));
+  for (const [x0, z0, x1, z1] of [[vx0 + 2, Z0 + 1.05, X1 - 3, Z0 + 1.55], [vx0 + 2, Z1 - 1.55, X1 - 3, Z1 - 1.05]]) solid('cloth_indigo', x0, z0, x1, z1, Y[1] + 0.02, Y[1] + 0.42);
+  for (const x of [vx0 + 3, X1 - 5]) solid('wood_dark', x - 0.6, zc - 0.35, x + 0.6, zc + 0.35, Y[1], Y[1] + 0.75);
+  hangingLamp(bag, lights, (vx0 + X1) / 2, 10.2, zc, 12.5, 5, 12);
+  // ---- the tower (13 → top): walls with lattice windows on every storey, the reception chamber's three doors to the talar
+  const yT = 13, H = TOP - yT, win = (u, w = 1.6, h = 2.6, extra = {}) => Y.slice(2).map((y, k) => ({ at: u, w: k === 3 ? w + 0.4 : w, h: k === 3 ? 3 : h, sill: y - yT + (k === 0 && extra.door ? 0 : 0.95), depth: -0.5, back: 'lattice', ...(k === 0 && extra.door ? { pass: true, h: 4, w: 2.2 } : {}) }));
+  const inside = [(X0 + XT) / 2, zc];
+  arcadeWall(bag, col, [X0, Z0 + 1.5], [XT, Z0 + 1.5], yT, H, 1, B, [...win(3), ...win(8)], inside);
+  arcadeWall(bag, col, [XT, Z1 - 1.5], [X0, Z1 - 1.5], yT, H, 1, B, [...win(XT - X0 - 8), ...[0, 1, 2].map((k) => ({ at: XT - X0 - (wx0 + f + 1 - X0), w: 0.5, h: 1.2, sill: Y[2 + k] + 2 * q + 0.9 - yT, depth: -0.5, back: 'lattice' }))], inside);
+  arcadeWall(bag, col, [X0 + 0.5, Z1 - 2], [X0 + 0.5, Z0 + 2], yT, H, 1, B, [...win(9), ...win(13)], inside);
+  arcadeWall(bag, col, [XT - 0.5, Z1 - 2], [XT - 0.5, Z0 + 2], yT, H, 1, B, [3, 8, 13].flatMap((u) => win(u, 2, 2.6, { door: true })), inside);
+  solid(B, X0, Z0 + 1, XT, Z1 - 1, TOP - 0.5, TOP, false); col.floor([X0, Z0 + 1, XT, Z1 - 1], TOP);
+  bag.add('ceiling_painted', box(X0 + 1, TOP - 0.6, Z0 + 2, XT - 1, TOP - 0.5, Z1 - 2));
+  for (const [a, b] of [[[X0, Z0 + 1.5], [XT, Z0 + 1.5]], [[X0, Z1 - 1.5], [XT, Z1 - 1.5]], [[X0 + 0.5, Z0 + 2], [X0 + 0.5, Z1 - 2]], [[XT - 0.5, Z0 + 2], [XT - 0.5, Z1 - 2]]]) slab(bag, col, B, a, b, TOP, 1, 0.8);
+  // the floors of the tower's storeys (the stair's well left open), the reception chamber's reaching to the talar
+  floorAt([X0 + 1, Z0 + 1, wx1 + ew, wz0 - ew], Y[2]); floorAt([wx1 + ew, Z0 + 1, XT, Z1 - 1], Y[2]);
+  for (const y of [Y[3], Y[4]]) { floorAt([X0 + 1, Z0 + 2, wx1 + ew, wz0 - ew], y); floorAt([wx1 + ew, Z0 + 2, XT - 1, Z1 - 2], y); }
+  // ---- the stair: its walls (a door at the newel's north-east corner on every storey), the newel, landings and flights
+  for (let k = 0; k < 5; k++) {
+    const y0 = Y[k], y1 = k === 4 ? yTop : Y[k + 1], zs = y0 < 13 ? Z1 - 1 : Z1 - 2;
+    solid(P, wx0, wz0 - ew, wx1, wz0, y0, y1);                                            // the north wall
+    solid(P, wx1, wz0 - ew, wx1 + ew, C0[1], y0, y1);
+    solid(P, wx1, C0[3], wx1 + ew, zs, y0, y1);
+    solid(P, wx1, C0[1], wx1 + ew, C0[3], y0 + 2.2, y1);                                  // the door's head
+    bag.add('wood_dark', box(wx1 + ew - 0.02, y0, C0[1] - 0.08, wx1 + ew + 0.04, y0 + 2.28, C0[1]));
+    bag.add('wood_dark', box(wx1 + ew - 0.02, y0, C0[3], wx1 + ew + 0.04, y0 + 2.28, C0[3] + 0.08));
+    bag.add('wood_dark', box(wx1 + ew - 0.02, y0 + 2.2, C0[1], wx1 + ew + 0.04, y0 + 2.28, C0[3]));
+    col.floor([wx1, C0[1], wx1 + ew, C0[3]], y0);
+    const [A0, A1, A2, A3] = [y0, y0 + q, y0 + 2 * q, y0 + 3 * q];
+    flight(bag, col, F1, A0, A1, 'w', 'limestone'); flight(bag, col, F2, A1, A2, 's', 'limestone');
+    flight(bag, col, F3, A2, A3, 'e', 'limestone'); flight(bag, col, F4, A3, y0 + 6.5, 'n', 'limestone');
+    for (const [r, y] of [[C1, A1], [C2, A2], [C3, A3]]) { bag.add('limestone', box(r[0], y - 0.3, r[1], r[2], y, r[3])); col.floor(r, y); }
+    if (k > 0) { bag.add('limestone', box(C0[0], y0 - 0.3, C0[1], C0[2], y0, C0[3])); col.floor(C0, y0); }
+    if (y0 < 13) solid(P, wx0, wz1, wx1, Z1 - 1, y0, Math.min(y1, 13));                  // below the tower, the strip to the gate's south wall
+  }
+  solid(P, wx0 + f, wz0 + f, wx1 - f, wz1 - f, 0, yTop);                                  // the newel
+  hangingLamp(bag, lights, (C1[0] + C1[2]) / 2, 10, (C1[1] + C1[3]) / 2, Y[2] + q - 0.3, 3, 7);
+  hangingLamp(bag, lights, (C1[0] + C1[2]) / 2, 23, (C1[1] + C1[3]) / 2, Y[4] + q - 0.3, 3, 7);
+  // ---- the reception chamber (13): carpets, a low throne platform with its bolsters, painted beams
+  {
+    const y = Y[2], cx = (wx1 + ew + XT - 1) / 2;
+    bag.add('cloth_red', box(wx1 + ew + 0.8, y, Z0 + 3, XT - 1.8, y + 0.02, Z1 - 3));
+    bag.add('cloth_indigo', box(X0 + 2, y, Z0 + 3, wx1 - 0.5, y + 0.02, wz0 - 1.5));
+    solid('wood_dark', wx1 + ew + 0.3, zc - 2, wx1 + ew + 2.3, zc + 2, y, y + 0.45);
+    bag.add('cloth_red', box(wx1 + ew + 0.35, y + 0.45, zc - 1.95, wx1 + ew + 2.25, y + 0.5, zc + 1.95));
+    solid('cloth_indigo', wx1 + ew + 0.35, zc - 1.9, wx1 + ew + 0.75, zc + 1.9, y + 0.5, y + 0.95);
+    for (const s of [-1, 1]) solid('cloth_indigo', wx1 + ew + 0.75, zc + s * 1.9 - (s > 0 ? 0.4 : 0), wx1 + ew + 2.2, zc + s * 1.9 + (s < 0 ? 0.4 : 0), y + 0.5, y + 0.85);
+    for (let x = wx1 + ew + 1; x < XT - 1.2; x += 2) bag.add('wood_dark', box(x - 0.12, Y[3] - 0.82, Z0 + 2, x + 0.12, Y[3] - 0.5, Z1 - 2));
+    hangingLamp(bag, lights, cx, y + 3.4, zc, Y[3] - 0.5, 5, 11);
+    for (const y2 of [Y[3], Y[4]]) { bag.add('cloth_red', box(wx1 + ew + 0.8, y2, Z0 + 3, XT - 1.8, y2 + 0.02, Z1 - 3)); hangingLamp(bag, lights, cx, y2 + 3.6, zc, y2 + 6, 3, 9); }
+  }
+  // ---- the music room (top storey): the stair's well covered but for its last flights, a balustrade round them
+  {
+    const y = Y[5];   // open: the last flights F3, F4 and the corner C3 between them
+    for (const r of [[X0 + 1, Z0 + 2, XT - 1, wz0], [X0 + 1, wz0, C0[0], F2[3]], [X0 + 1, C2[1], wx0 + f, Z1 - 2], C0, [wx1, wz0, XT - 1, Z1 - 2]]) floorAt(r, y);
+    balustrade(bag, col, [F3[0] - 0.07, F3[1]], [F3[0] - 0.07, F3[3] - 0.25], y);
+    balustrade(bag, col, [F3[0], F3[1] - 0.07], [F3[2], F3[1] - 0.07], y);
+    balustrade(bag, col, [F4[0] - 0.07, F4[1]], [F4[0] - 0.07, F4[3]], y);
+    balustrade(bag, col, [wx1 + 0.07, F4[1]], [wx1 + 0.07, C3[3] - 0.25], y);
+    // the stucco: a plain dado, then three rows of arched niches, each cut through in a vessel's shape
+    const y0 = y, Hh = TOP - 0.6 - y, th = 0.22, cols = 0.9;
+    const cutWall = (o, n, spans) => {
+      for (const [s0, s1] of spans) {
+        if (s1 - s0 < 0.6) continue;
+        const L = s1 - s0, m = Math.floor(L / cols), pad = (L - m * cols) / 2, holes = [];
+        for (let i = 0; i < m; i++) {
+          const u = pad + (i + 0.5) * cols;
+          for (let r = 0; r < 3; r++) {
+            const v = 1.05 + r * 1.32, k = (i + r * 2 + Math.round(s0)) % 4;
+            holes.push(r === 2 ? archOutline(u, v, cols - 0.2, 1.08) : vesselOutline(k, u, v + 0.06, r === 0 ? 1.04 : 0.98));
+          }
+        }
+        lining(bag, col, o, n, s0, s1, y0, Hh, th, holes);
+      }
+    };
+    // spans along each wall (s along u = (n.z, −n.x) from the face point o), leaving the windows; the
+    // north and south linings run the room's full width, the west and east ones between them
+    const ix0 = X0 + 1, ix1 = XT - 1, iz0 = Z0 + 2, iz1 = Z1 - 2, Lx = ix1 - ix0, Lz = iz1 - iz0, gaps = (L, holes, e = 0) => {
+      const out = []; let u = e;
+      for (const [a, b] of holes.sort((p, q) => p[0] - q[0])) { out.push([u, a - 0.1]); u = b + 0.1; }
+      out.push([u, L - e]); return out;
+    };
+    const ww = (c, w) => [c - w / 2, c + w / 2];
+    cutWall([ix0, iz0], [0, 1], gaps(Lx, [ww(X0 + 3 - ix0, 2), ww(X0 + 8 - ix0, 2)]));
+    cutWall([ix1, iz1], [0, -1], gaps(Lx, [ww(ix1 - (XT - 4), 2)]));
+    cutWall([ix0, iz1], [1, 0], gaps(Lz, [ww(iz1 - (Z1 - 2 - 9), 2), ww(iz1 - (Z1 - 2 - 13), 2)], th + 0.03));
+    cutWall([ix1, iz0], [-1, 0], gaps(Lz, [3, 8, 13].map((u) => ww((Z1 - 2 - u) - iz0, 2.4)), th + 0.03));
+    hangingLamp(bag, lights, (ix0 + ix1) / 2 + 1.5, y + 3.2, iz0 + Lz * 0.3, TOP - 0.6, 5, 12);
+    hangingLamp(bag, lights, (ix0 + ix1) / 2 + 1.5, y + 3.2, iz0 + Lz * 0.7, TOP - 0.6, 5, 12);
+  }
+}
+
 registerStyle('safavid', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.mughal.elements,
     square_arcade: squareArcade, portal, dome_chamber: domeChamber, court_arcade: courtArcade,
-    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh,
+    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, ali_qapu: aliQapu,
   },
   objects: {},
 });

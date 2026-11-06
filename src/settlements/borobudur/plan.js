@@ -9,7 +9,7 @@ const E = [];
 E.push({ t: 'borobudur', c: MONUMENT.c, base: MONUMENT.base, squares: SQUARES, circles: CIRCLES, crown: { r: 5 } });
 // the stairs go on up through the round terraces on all four sides, to the top
 {
-  const [cx, cz] = MONUMENT.c, w = 1.4;
+  const [cx, cz] = MONUMENT.c, w = 1.0;   // 2 m wide, through the 2.2 m left between the stupas on the axes
   let y0 = SQUARES[SQUARES.length - 1].y;
   for (const c of CIRCLES) {
     const e0 = c.r + 1.6 - 0.06, e1 = c.r + 1.6 + 1.9;

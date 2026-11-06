@@ -77,14 +77,12 @@ E.push({ t: 'mass', a: [91, -40], b: [97, -35], th: 8, h: 12 });
 E.push({ t: 'dome_chamber', c: LOTF.c, half: LOTF.half, rot: Math.PI / 4, wallH: 14, drum: { r: 10, h: 4 }, dome: { r: 11, h: 10, bulge: 0 }, wallMat: 'brick_buff', drumMat: 'tile_lapis', domeMat: 'tile_cream',
   inscription: true, grilles: true, net: { n: 16, turn: 3, width: 0.42, band: 'tile_lapis', line: 'tile_white', knot_mat: 'tile_turquoise', knot: 0.5 } });
 
-// ---- Ali Qapu: the gate block (13 m), the talar on 18 wooden columns, the tower behind (38 m)
-const [ax0, az0, ax1, az1] = ALIQAPU.rect;
-E.push({ t: 'block', walk: true, rect: [ax0, az0, ax1, az1], y0: 0, y1: 13, mat: 'brick_buff' });
-E.push({ t: 'arcade', a: [ax1 + 0.3, az1], b: [ax1 + 0.3, az0], facing: mid, h: 13, th: 0.6, arches: [{ at: 10, w: 5, h: 8, depth: 1, door: true }, { at: 3.5, w: 3, h: 4.5, sill: 1, depth: 0.6 }, { at: 16.5, w: 3, h: 4.5, sill: 1, depth: 0.6 }, { at: 3.5, w: 3, h: 3.5, sill: 7.5, depth: 0.6 }, { at: 16.5, w: 3, h: 3.5, sill: 7.5, depth: 0.6 }] });
+// ---- Ali Qapu: the gate block (13 m) with its vaulted passage and the hall over it, the talar on 18
+// wooden columns on top, the tower behind (38 m) with the reception chamber, two storeys of rooms and
+// the music room, the enclosed stair on its south side joining them all
+const [, az0, ax1, az1] = ALIQAPU.rect;
+E.push({ t: 'ali_qapu', rect: ALIQAPU.rect, tower: -92, top: 38 });
 E.push({ t: 'talar', rect: [-92, az0 + 1, ax1, az1 - 1], y: 13, h: 12, cols: [3, 6], rail: [[[ax1, az0 + 1], [ax1, az1 - 1]], [[-92, az0 + 1], [ax1, az0 + 1]], [[-92, az1 - 1], [ax1, az1 - 1]]] });
-E.push({ t: 'block', walk: true, rect: [ax0, az0 + 2, -92, az1 - 2], y0: 13, y1: 38, mat: 'brick_buff' });
-E.push({ t: 'arcade', a: [-91.7, az1 - 2], b: [-91.7, az0 + 2], facing: mid, h: 25, y: 13, th: 0.6, arches: [4, 8, 12].flatMap((u) => [{ at: u, w: 2.6, h: 6, sill: 1, depth: 0.8, door: u === 8 }, { at: u, w: 2.4, h: 3.6, sill: 13.5, depth: 0.8 }, { at: u, w: 2.4, h: 3.6, sill: 19.5, depth: 0.8 }]) });
-for (const z of [az0 + 1.7, az1 - 1.7]) E.push({ t: 'arcade', a: [ax0, z], b: [-92, z], facing: [-98, -40], h: 25, y: 13, th: 0.6, arches: [3, 9].flatMap((u) => [{ at: u, w: 2.4, h: 3.6, sill: 13.5, depth: 0.8 }, { at: u, w: 2.4, h: 3.6, sill: 19.5, depth: 0.8 }]) });
 
 // ---- the Qeysarieh portal and the bazaar running north
 E.push({ t: 'portal', a: [15, sz0], b: [-15, sz0], facing: mid, h: 24, depth: 12, iwan: { w: 10, h: 17, depth: 6, pass: true, backMat: 'tile_cream' } });
@@ -102,7 +100,7 @@ E.push({ t: 'water_rect', rect: [-236, -52, -206, -38], y: 0.5 });
 E.push({ t: 'lane', rect: [gx0 + 6, -50, gx1 - 1, -40], y: 0.04, mat: 'brick_paving' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('square', SQUARE, 0, 'open'), room('garden', GARDEN, 0, 'open'), room('talar', [-92, az0 + 1, ax1, az1 - 1], 13, 'hall'), room('bazaar', [-2.5, BAZAAR.z1, 2.5, BAZAAR.z0], 0, 'hall')];
+const rooms = [room('square', SQUARE, 0, 'open'), room('garden', GARDEN, 0, 'open'), room('talar', [-92, az0 + 1, ax1, az1 - 1], 13, 'hall'), room('music_room', [-102, -47, -94, -38], 32.5, 'hall'), room('bazaar', [-2.5, BAZAAR.z1, 2.5, BAZAAR.z0], 0, 'hall')];
 const walks = [[[0, -280], [0, -150], [0, 0], [0, 150], [0, 245]]];
 walks[0].y0 = 0;
 

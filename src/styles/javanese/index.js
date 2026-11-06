@@ -284,8 +284,15 @@ function borobudur(el, { bag, col }) {
   for (const c of el.circles) {
     bag.add(A, lathe([[c.r + 1.6, 0], [c.r + 1.6, c.y - y], [0.001, c.y - y]], 48, null, cx, y, cz));
     col.circle(cx, cz, c.r + 1.6, y, c.y);
-    const kind = c === el.circles[el.circles.length - 1] ? 'square' : 'diamond';
-    for (let k = 0; k < c.n; k++) { const a = (k + 0.5) / c.n * Math.PI * 2; stupa(bag, cx + Math.cos(a) * c.r, c.y, cz + Math.sin(a) * c.r, 1.7, kind); col.circle(cx + Math.cos(a) * c.r, cz + Math.sin(a) * c.r, 2, c.y, c.y + 4.5); }
+    // the stupas stand back from the terrace's edge, their lotus cushion (whose petals reach 1.28 r)
+    // 0.25 m clear of it; the top terrace's a little smaller; in each quarter they are spaced evenly
+    // between the stair axes, where 2.2 m is left between the cushions for the stairs coming up
+    const top = c === el.circles[el.circles.length - 1], kind = top ? 'square' : 'diamond', sr = top ? 1.35 : 1.45, foot = sr * 1.28;
+    const R = c.r + 1.6 - foot - 0.25, per = c.n / 4, th = Math.asin((foot + 2.2 / 2) / R), step = (Math.PI / 2 - 2 * th) / (per - 1);
+    for (let q = 0; q < 4; q++) for (let i = 0; i < per; i++) {
+      const a = q * Math.PI / 2 + th + i * step, px = cx + Math.cos(a) * R, pz = cz + Math.sin(a) * R;
+      stupa(bag, px, c.y, pz, sr, kind); col.circle(px, pz, foot + 0.02, c.y, c.y + sr * 2.6);
+    }
     y = c.y;
   }
   col.floor([cx - 30, cz - 30, cx + 30, cz + 30], y);
