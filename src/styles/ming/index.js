@@ -132,7 +132,7 @@ function rectRoof(el, bag) {
     hole = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
   }
   const xs = [], zs = [], D = [];
-  const uniq = (v) => { v.sort((a2, b2) => a2 - b2); return v.filter((q, k) => k === 0 || q - v[k - 1] > 1e-4); };
+  const uniq = (v) => { v.sort((a2, b2) => a2 - b2); const u = v.filter((q, k) => k === 0 || q - v[k - 1] > 1e-4); v.length = 0; v.push(...u); return v; };
   const zone = kind === 'gable' ? -1 : A - B;                // |x - cx| beyond this: the hips' end zones
   for (let j = 0; j <= NZ; j++) D.push(B * Math.min(j, NZ - j) * 2 / NZ);
   const extraX = [];
@@ -198,7 +198,7 @@ function rectRoof(el, bag) {
   // over them a roll of tiles along the verge
   if (kind === 'xieshan') {
     const xg = A - gAt * B, y0 = y + R * Math.pow(gAt, p), yb = y0 - 0.1, zz = B - gAt * B;
-    const g = [], bb = [], vg = [], NB = LOW ? 4 : 8;
+    const g = [], bb = [], vg = [], NB = LOW ? 3 : 5;
     const hz = (z) => y + R * Math.pow(Math.max(gAt, (B - Math.abs(z)) / B), p);
     for (const s of [-1, 1]) {
       const prof = [];
@@ -619,12 +619,12 @@ function mingWall(el, { bag, col }) {
     const rand = rng(((ax * 73 + az * 31) | 0) + 11), damp = [], streak = [];
     const clear = (s0, s1, ya, yb) => (el.gates || []).every((g2) => { const hw = (g2.r ?? g2.w / 2) + 0.15; return s1 < g2.at - hw - 0.1 || s0 > g2.at + hw + 0.1; }) && (el.windows || []).every((w) => s1 < w.at - w.w / 2 - 0.15 || s0 > w.at + w.w / 2 + 0.15 || yb < (w.sill ?? 1.2) - 0.12 || ya > (w.sill ?? 1.2) + w.h + 0.12);
     const ph = [rand() * 6.3, rand() * 6.3, rand() * 6.3];
-    // the damp line: a smooth wandering height (three waves), cut into 0.25 m strips
-    const top = (s0) => 0.68 + 0.12 * Math.sin(s0 * 0.7 + ph[0]) + 0.07 * Math.sin(s0 * 2.9 + ph[1]) + 0.04 * Math.sin(s0 * 7.3 + ph[2]);
+    // the damp line: a smooth wandering height (two long waves), cut into 0.7 m strips
+    const top = (s0) => 0.68 + 0.13 * Math.sin(s0 * 0.7 + ph[0]) + 0.07 * Math.sin(s0 * 1.9 + ph[1]);
     for (const sgn of [-1, 1]) {
       const o = (th / 2 + 0.008) * sgn;
       const quad = (arr, s0, s1, ya0, yb0, ya1 = ya0, yb1 = yb0) => { arr.push(...Wp(s0, ya0, o), ...Wp(s1, ya1, o), ...Wp(s1, yb1, o), ...Wp(s0, ya0, o), ...Wp(s1, yb1, o), ...Wp(s0, yb0, o)); };
-      const step = 0.25;
+      const step = 0.7;
       for (let s0 = 0.1; s0 + step < L - 0.1; s0 += step) { const s1 = s0 + step; if (clear(s0, s1, 0.32, 1.3)) quad(damp, s0, s1, 0.33, top(s0 + sgn * 0.7), 0.33, top(s1 + sgn * 0.7)); }
       // the streaks taper downward (a wedge from the coping)
       for (let s0 = 0.3 + rand() * 2; s0 < L - 0.4; s0 += 1.2 + rand() * 3.5) {
@@ -760,13 +760,19 @@ function archBridge(el, { bag, col }) {
     const tn = i + 1 < N ? Math.round(top(-half + 2 * half * (i + 2) / N) / 0.16) * 0.16 : 0;
     const r = [P(s1, -W, t), P(s1, W, t), P(s1, W, Math.max(tn, t)), P(s1, -W, Math.max(tn, t))];
     body.push(...r[0], ...r[1], ...r[2], ...r[0], ...r[2], ...r[3]);
+    // a railing to come (src/styles/qing/): the plain stepped parapet it stands on
+    if (el.rail) for (const o of [-W - 0.12, W - 0.12]) {
+      const pp = [];
+      beamTris(pp, P(s0, o + 0.12, t), P(s1, o + 0.12, t), 0.12, 0.5);
+      bag.add(PAL.base, fromTriangles(pp));
+    }
   }
   bag.add(PAL.base, fromTriangles(body.concat(flipTris(body))));
   // the parapets: slabs whose tops run in one smooth curve over the hump (not stepped with the
   // treads), a rounded coping along them, square posts with round caps at the ends and over the
   // springing of the arch
-  const pp = [], NP = 32, ptop = (s) => top(s) + 0.55;
-  for (const sg of [-1, 1]) {
+  const pp = [], NP = 24, ptop = (s) => top(s) + 0.55;
+  for (const sg of (el.rail ? [] : [-1, 1])) {
     for (let i = 0; i < NP; i++) {
       const s0 = -half + 2 * half * i / NP, s1 = -half + 2 * half * (i + 1) / NP;
       const c = [], q = (a, b, cc, d) => c.push(...a, ...b, ...cc, ...a, ...cc, ...d);
@@ -822,9 +828,10 @@ function canalWall(el, { bag, col }) {
   const Pw = (s, o, yy) => [ax + ux * s + nx * o, yy, az + uz * s + nz * o];
   const t = [];
   beamTris(t, [ax, bed, az], [bx, bed, bz], th / 2, (y - 0.19) - bed);
-  // the coping slabs, 1.1–1.9 m long, a hair apart
+  // the coping slabs, 1.1–1.9 m long, a hair apart (where the canal's water is given: elsewhere one long coping)
   const rand = rng(Math.round(ax * 31 + az * 17 + bx * 7) + 3);
-  for (let s0 = 0; s0 < L - 0.05;) {
+  if (el.water === undefined) beamTris(t, Pw(0, 0, y - 0.2), Pw(L, 0, y - 0.2), th / 2 + 0.07, 0.22);
+  else for (let s0 = 0; s0 < L - 0.05;) {
     const s1 = Math.min(L, s0 + 1.1 + rand() * 0.8 > L - 0.6 ? L : s0 + 1.1 + rand() * 0.8);
     beamTris(t, Pw(s0 + (s0 > 0 ? 0.006 : 0), 0, y - 0.2), Pw(s1 - (s1 < L ? 0.006 : 0), 0, y - 0.2), th / 2 + 0.07, 0.22);
     s0 = s1;
