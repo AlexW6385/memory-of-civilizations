@@ -85,7 +85,7 @@ export function dragon(P, m, pts, r, o = {}) {
   }
 }
 /** A dragon coiled up a column of radius cr from y0 to y1, its head at the top; turns about the shaft. */
-function columnDragon(P, m, cr, y0, y1, r, turns = 2.2, a0 = 0) {
+export function columnDragon(P, m, cr, y0, y1, r, turns = 2.2, a0 = 0) {
   const N = 44, pts = [];
   for (let k = 0; k <= N; k++) { const t = k / N, a = a0 + t * turns * Math.PI * 2, R = cr + r * 0.75, y = y1 - t * (y1 - y0); pts.push([Math.cos(a) * R, y, Math.sin(a) * R]); }
   // the neck reaches out from the shaft so the head stands clear, facing outward and down
@@ -397,7 +397,7 @@ function dangga(bag, cx, cy, cz, w = 4.4, d = 2.6) {
     for (let i = 0; i <= n; i++) { const x = -hw + o + i * (w - 2 * o) / n; P.add('lacquer_red', box(x - 0.05, y - 0.06, hd - o - 0.04, x + 0.05, y + 0.02, hd - o + 0.12)); }
   }
   // the inner ceiling, with its dragon
-  P.add('paint_blue', box(-hw + 0.5, -0.16, -hd + 0.5, hw - 0.5, -0.12, hd - 0.5));
+  P.add('paint_blue', box(-hw + 0.5, -0.16, -hd + 0.5, hw - 0.5, -0.1, hd - 0.5));
   const D = new Parts(), pts = [];
   for (let k = 0; k <= 26; k++) { const t = k / 26; pts.push([(t - 0.5) * (w - 1.4) * -1, 0, Math.sin(t * Math.PI * 2) * (d - 1.4) * 0.3]); }
   dragon(D, 'gold', pts, 0.07, { up: [0, -1, 0], flat: 0.6 });
@@ -485,7 +485,7 @@ export function throneHall(el, { bag, col }) {
   const well = K.caisson ? [cx - K.caisson / 2, tz - K.caisson / 2, cx + K.caisson / 2, tz + K.caisson / 2] : K.ceilingDragons ? [cx - 4.5, (z0 + z1) / 2 - 3, cx + 4.5, (z0 + z1) / 2 + 3] : null;
   ceiling(bag, [x0 + 0.2, z0 + 0.2, x1 - 0.2, z1 - 0.2], cy, well, rib, rib, J ? 'paint_ochre' : 'gilt_bronze');
   if (K.caisson) caisson(bag, cx, cy, tz, K.caisson);
-  if (K.dangga) dangga(bag, cx, cy, tz - 0.3);
+  if (K.dangga) dangga(bag, cx, cy - 0.16, tz - 0.3);
   if (K.ceilingDragons) {
     // the raised panel in the middle of the ceiling: its stepped sides, the blue field, two yellow dragons flying round a pearl
     const [a, b, c, d] = well, P = new Parts();
