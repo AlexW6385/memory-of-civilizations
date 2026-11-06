@@ -481,6 +481,9 @@ function notreDame(el, ctx) {
         shafts(x, s, ZN - 1);
       }
     }
+    // the steep lead roof over the main vessel, its ridge
+    bag.add(LEAD, frustum([xa, Z(-ZN - 0.45), xb, Z(ZN + 0.45)], Y(EAVE), Y(RIDGE), 0, 0, ZN + 0.45, ZN + 0.45));
+    bag.add(LEAD, box(xa, Y(RIDGE - 0.05), cz - 0.12, xb, Y(RIDGE + 0.25), cz + 0.12));
     // the main vessel's vaults: sexpartite, over two bays each
     for (let i = 0; i + 1 < n; i += 2) vault(bag, (u, v) => [xa + (i + 2 * u) * bw, Z(-(ZN - 1) + 2 * (ZN - 1) * v)], { spring: Y(VS), crown: Y(VC), sex: true, nu: 16, nv: 12, last: i + 2 >= n && xb !== XAP });
     floorPiece(bag, col, [xa, Z(-(zc - 0.9)), xb, Z(zc - 0.9)], y);
