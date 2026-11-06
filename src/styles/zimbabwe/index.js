@@ -50,12 +50,22 @@ function dryWall(el, { bag, col }) {
     return [P(w0, -1), P(w0, 0), P(w1, H), P(-w1, H), P(-w0, 0), P(-w0, -1)];
   };
   const tri = [], S = path.map((_, i) => sect(i)), segs = closed ? n : n - 1;
+  // each face turned by its own side of the wall (outer, top, inner): a curved wall's faces cannot be
+  // oriented from the centre of the whole wall
+  const put = (a, b, c, w) => {
+    const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    const nn = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    if (nn[0] * w[0] + nn[1] * w[1] + nn[2] * w[2] < 0) tri.push(...a, ...c, ...b); else tri.push(...a, ...b, ...c);
+  };
   for (let i = 0; i < segs; i++) {
-    const A = S[i], B = S[(i + 1) % n];
-    for (let k = 0; k < 5; k++) tri.push(...A[k], ...B[k], ...B[k + 1], ...A[k], ...B[k + 1], ...A[k + 1]);
+    const A = S[i], B = S[(i + 1) % n], j = (i + 1) % n, nx = (fr[i][0] + fr[j][0]) / 2, nz = (fr[i][1] + fr[j][1]) / 2;
+    for (let k = 0; k < 5; k++) {
+      const w = k < 2 ? [nx, 0.2, nz] : k === 2 ? [0, 1, 0] : [-nx, 0.2, -nz];
+      put(A[k], B[k], B[k + 1], w); put(A[k], B[k + 1], A[k + 1], w);
+    }
     col.segment(path[i], path[(i + 1) % n], th, yOf(path[i]) - 1, yOf(path[i]) + h);
   }
-  bag.add(G, fromTriangles(orientOutward(tri)));
+  bag.add(G, fromTriangles(tri));
   // the rounded ends of an open wall
   if (!closed) for (const i of [0, n - 1]) {
     const [x, z] = path[i], y = yOf(path[i]);
@@ -84,11 +94,30 @@ function dryWall(el, { bag, col }) {
         const P = (p, yy, d) => [p[0] + nx * d, yy, p[1] + nz * d];
         const a0 = P(p0, q0, 0), a1 = P(p1, q1, 0), a2 = P(p1, q1 + 0.14, 0), a3 = P(p0, q0 + 0.14, 0);
         const b0 = P(p0, q0, 0.09), b1 = P(p1, q1, 0.09), b2 = P(p1, q1 + 0.14, 0.09), b3 = P(p0, q0 + 0.14, 0.09);
-        const qd = (A, B, C, D) => tris.push(...A, ...B, ...C, ...A, ...C, ...D);
+        const blk = [], qd = (A, B, C, D) => blk.push(...A, ...B, ...C, ...A, ...C, ...D);
         qd(b0, b1, b2, b3); qd(a3, a2, b2, b3); qd(a0, b0, b3, a3); qd(a1, a2, b2, b1); qd(a0, a1, b1, b0);
+        tris.push(...orientOutward(blk));     // each block by its own centre
       }
     }
-    if (tris.length) bag.add('granite_grey', fromTriangles(orientOutward(tris)));
+    if (tris.length) bag.add('granite_grey', fromTriangles(tris));
+  }
+  // the dentelle frieze: a plain course, blocks set with gaps between them like teeth, a plain course
+  // over them, near the top of the outer face (zimfieldguide: on the Eastern Enclosure's south wall)
+  if (el.dentelle) {
+    const [f0, f1] = el.dentelle;
+    for (let i = 0; i < segs; i++) {
+      const f = len[i] / total;
+      if (f < f0 || f > f1) continue;
+      const a = path[i], b = path[(i + 1) % n], y = yOf(a), H = Math.min(top(i), top((i + 1) % n)), L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (L < 0.05) continue;
+      const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = uz, nz = -ux, off = (v) => th / 2 - bat * (v / h) - 0.04;
+      for (const v0 of [H - 0.95, H - 0.45]) { const o = off(v0); bag.add(G, orientedBox([a[0] + nx * o, a[1] + nz * o], [b[0] + nx * o, b[1] + nz * o], 0.2, y + v0, y + v0 + 0.14, 0.02)); }
+      const o = off(H - 0.8);
+      for (let t = 0.06; t < L - 0.2; t += 0.46) {
+        const p0 = [a[0] + ux * t + nx * o, a[1] + uz * t + nz * o], p1 = [a[0] + ux * (t + 0.24) + nx * o, a[1] + uz * (t + 0.24) + nz * o];
+        bag.add(G, orientedBox(p0, p1, 0.26, y + H - 0.81, y + H - 0.45));
+      }
+    }
   }
   // monoliths: tall stones standing on the wall top, a few metres apart
   if (el.monoliths) {
@@ -214,8 +243,49 @@ function hut(el, { bag, col }) {
   if (ver) for (let k = 0; k < 8; k++) { const b = a + Math.PI / 8 + k * Math.PI / 4; bag.add('timber', lathe([[0.06, 0], [0.055, ye - y - 0.2 + 0.1], [0.001, ye - y - 0.15]], 6, null, x + Math.cos(b) * (fr - 0.2), y + 0.2, z + Math.sin(b) * (fr - 0.2))); }
   col.circle(x, z, r, y, y + h);
 }
+/**
+ * stone_steps: a stair of granite slabs up a slope along z { x, z0, z1, w, yAt }: each step a slab
+ * set into the ground at the slope's height, its tread level, a riser of dressed blocks (the
+ * Ancient Ascent; zimfieldguide: it rises through a narrow cleft).
+ */
+function stoneSteps(el, { bag, col }) {
+  const { x, z0, z1, w } = el, sg = Math.sign(z1 - z0), go = 0.42, n = Math.floor(Math.abs(z1 - z0) / go);
+  for (let k = 0; k < n; k++) {
+    const za = z0 + sg * k * go, zb = za + sg * go, zm = (za + zb) / 2;
+    const yt = Math.max(el.yAt(x - w / 2, zm), el.yAt(x + w / 2, zm), el.yAt(x, za), el.yAt(x, zb)) + 0.08;
+    const r = [x - w / 2 - 0.02 * (k % 3), Math.min(za, zb), x + w / 2 + 0.02 * ((k + 1) % 3), Math.max(za, zb)];
+    bag.add(G, frustum(r, yt - 0.6, yt, 0, 0, 0, 0));
+    col.floor(r, yt);
+  }
+}
+/** daga_yard: the court of a homestead, paved with daga, a raised kerb round it { c, r: [a, b], y } (zimfieldguide: courtyards paved with dhaka, often with raised kerbs). */
+function dagaYard(el, { bag, col }) {
+  const [x, z] = el.c, [a, b] = el.r, y = el.y ?? 0, k = b / a;
+  bag.add('mud_plaster', lathe([[a, -0.3], [a, 0.06], [0.001, 0.06]], 32).scale(1, 1, k).translate(x, y, z));
+  bag.add('mud_plaster', lathe([[a + 0.12, 0], [a + 0.12, 0.16], [a + 0.02, 0.2], [a - 0.08, 0.16], [a - 0.08, 0.06], [a, 0.06]], 40).scale(1, 1, k).translate(x, y, z));
+  col.floor([x - a * 0.7, z - b * 0.7, x + a * 0.7, z + b * 0.7], y + 0.06);
+}
+/**
+ * thatch_roof: the roof over the Recess Enclosure (zimfieldguide: "four slots built within the walls
+ * that may have held wooden posts" carrying a thatched roof) { c, r: [a, b], y, h, posts }: four
+ * posts standing in the wall, a ring beam on them, a low cone of thatch over the enclosure.
+ */
+function thatchRoof(el, { bag, col }) {
+  const [x, z] = el.c, [a, b] = el.r, y = el.y ?? 0, h = el.h ?? 3.2, k = b / a;
+  for (const p of el.posts) {
+    bag.add('timber', lathe([[0.11, -0.4], [0.1, h], [0.001, h + 0.02]], 7, null, p[0], el.yAt ? el.yAt(p[0], p[1]) : y, p[1]));
+    col.circle(p[0], p[1], 0.12, y, y + h);
+  }
+  const beam = []; const N = 24;
+  for (let i = 0; i < N; i++) { const t0 = Math.PI * 2 * i / N, t1 = Math.PI * 2 * (i + 1) / N; beamTris(beam, [x + Math.cos(t0) * a * 0.92, y + h - 0.12, z + Math.sin(t0) * b * 0.92], [x + Math.cos(t1) * a * 0.92, y + h - 0.12, z + Math.sin(t1) * b * 0.92], 0.07, 0.14); }
+  bag.add('timber', fromTriangles(beam));
+  const prof = [[a + 0.7, -0.1], [a + 0.65, 0.05], [a * 0.55, a * 0.38], [0.15, a * 0.62], [0.001, a * 0.66]];
+  bag.add('thatch', lathe(prof, 24, (th, i) => (i < 2 ? 1 + 0.02 * Math.sin(th * 13) : 1)).scale(1, 1, k).translate(x, y + h, z));
+  // the underside of the thatch, seen from within: the same cone a hand's breadth lower, facing down
+  bag.add('thatch', lathe(prof.slice(1).map(([r, v]) => [r, v - 0.14]).reverse(), 24).scale(1, 1, k).translate(x, y + h, z));
+}
 registerStyle('zimbabwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder },
+  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof },
   objects: {},
 });
