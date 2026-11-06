@@ -14,10 +14,10 @@ function ring(r, y, h, gate = true) {
     if (Math.abs(((a0 + a1) / 2 - south + Math.PI * 3) % (Math.PI * 2) - Math.PI) < gap + Math.PI / n) {
       if (a0 < south - gap && a1 > south - gap) a1 = south - gap; else if (a0 < south + gap && a1 > south + gap) a0 = south + gap; else continue;
     }
-    E.push({ t: 'palisade', a: [hx + Math.cos(a0) * r, hz + Math.sin(a0) * r], b: [hx + Math.cos(a1) * r, hz + Math.sin(a1) * r], y, h });
+    E.push({ t: 'palisade', a: [hx + Math.cos(a0) * r, hz + Math.sin(a0) * r], b: [hx + Math.cos(a1) * r, hz + Math.sin(a1) * r], y, h, center: [hx, hz] });
     if (i % 7 === 3) E.push({ t: 'stage', c: [hx + Math.cos((a0 + a1) / 2) * (r - 2.5), hz + Math.sin((a0 + a1) / 2) * (r - 2.5)], y, h: h + 1.5 });
   }
-  if (gate) E.push({ t: 'waharoa', c: [hx, hz + r], yaw: 0, y, h: 4.4 });
+  if (gate) E.push({ t: 'waharoa', c: [hx, hz + r], yaw: Math.PI, y, h: 4.4 });
 }
 ring(HILL.tihi - 1.5, HILL.top, 3.6);
 for (const [, r1, y] of HILL.rings) ring(r1 - 2, y, 3.8);

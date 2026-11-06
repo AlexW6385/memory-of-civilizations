@@ -44,7 +44,7 @@ export function village() {
   const put = (list, o, m) => { list.push(o); taken.push([o.c[0], o.c[1], m]); };
   const [hx, hz] = HILL.c;
   // the chief's house on the summit, a pātaka by it
-  put(out.houses, { c: [hx - 6, hz - 4], yaw: Math.PI, w: 5, l: 9, rank: 2, y: HILL.top }, 7);
+  put(out.houses, { c: [hx - 6, hz - 4], yaw: Math.PI, w: 5, l: 9, h: 1.6, rank: 2, y: HILL.top }, 7);
   put(out.pataka, { c: [hx + 8, hz - 2], yaw: Math.PI, y: HILL.top }, 3);
   // houses and pits on the terraces, facing outward
   for (const [r0, r1, y] of HILL.rings) for (let k = 0; k < 60; k++) {
