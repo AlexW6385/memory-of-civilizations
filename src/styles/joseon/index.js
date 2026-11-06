@@ -7,7 +7,6 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, beamTris, withPal } from '../ming/index.js';
 import '../qing/index.js';
-import { roofOrnaments } from '../qing/carving.js';
 
 export const JPAL = { wood: 'paint_dancheong', column: 'lacquer_red', soffit: 'paint_dancheong', base: 'granite_korea', floor: 'granite_korea', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_korea', roof: 'tile_grey' };
 const withJ = (fn) => (el, ctx) => fn({ ...el, pal: { ...JPAL, ...(el.pal || {}) } }, ctx);
@@ -34,20 +33,6 @@ function nu(el, { bag, col }) {
   for (const [a, b] of [[[x0 - 0.4, z0 - 0.4], [x1 + 0.4, z0 - 0.4]], [[x0 - 0.4, z1 + 0.4], [x1 + 0.4, z1 + 0.4]], [[x0 - 0.4, z0 - 0.4], [x0 - 0.4, z1 + 0.4]], [[x1 + 0.4, z0 - 0.4], [x1 + 0.4, z1 + 0.4]]]) { const t = []; beamTris(t, [a[0], y2 + 1.5, a[1]], [b[0], y2 + 1.5, b[1]], 0.06, 0.1); bag.add('lacquer_red', fromTriangles(t)); col.segment(a, b, 0.2, y2 + 0.7, y2 + 1.6); }
   bag.add('paint_dancheong', box(x0 - 0.3, y2 + 0.7 + h2 - 0.6, z0 - 0.3, x1 + 0.3, y2 + 0.7 + h2, z1 + 0.3));
   roof(bag, [x0, z0, x1, z1], y2 + 0.7 + h2 - 0.1, 2.6, 'xieshan', (z1 - z0) * 0.42, 'tile_grey', false);
-  // the ridges plastered white, the chwidu at the ridge's ends, eleven japsang on each hip (the most of any building)
-  const o = 2.6;
-  roofOrnaments(bag, { c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (x1 - x0) / 2 + o, B: (z1 - z0) / 2 + o, y: y2 + 0.7 + h2 - 0.1, rise: (z1 - z0) * 0.42, kind: 'xieshan', sweep: 0.6, p: 1.5, alongZ: false }, { mat: 'tile_grey', joseon: true, white: true, figures: el.figures ?? 11 });
-}
-
-/** ming_hall with el.orn (Joseon): the roof drawn here without curled ridge ends, to carry its white ridges, chwidu and japsang. */
-function hallOrn(el, ctx) {
-  const base = STYLES.qing.elements.ming_hall;
-  if (!el.orn) return base(el, ctx);
-  base({ ...el, roof: 'none' }, ctx);
-  const [x0, z0, x1, z1] = el.rect, along = x1 - x0 >= z1 - z0, o = el.eave ?? 1.25, L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
-  const r = { c: [(x0 + x1) / 2, (z0 + z1) / 2], A: L / 2 + o, B: D / 2 + o, y: el.y + (el.H ?? 4.2) - 0.25, rise: el.rise ?? (D / 2 + o) * 0.62, kind: el.roof || 'xieshan', sweep: el.sweep ?? 1.0, alongZ: !along, mat: el.pal.roof, soffit: el.pal.soffit, curl: false };
-  rectRoof(r, ctx.bag);
-  roofOrnaments(ctx.bag, r, { mat: el.pal.roof, joseon: true, white: true, figures: el.orn.figures ?? 5 });
 }
 
 /** hanok: a house in its walled lot { rect, seed, thatch }: an L- or U-shaped range of rooms on a stone base, white walls between timber posts, tiled (or thatched) roofs, the lot's wall with a gate. */
@@ -83,7 +68,6 @@ registerStyle('joseon', {
   elements: {
     ...STYLES.qing.elements,
     ...Object.fromEntries(['ming_hall', 'qing_hall', 'ming_gallery', 'palace_wall', 'terrace', 'stairs', 'ming_pavilion', 'corner_tower', 'throne_hall'].filter((k) => STYLES.qing.elements[k]).map((k) => [k, withJ(STYLES.qing.elements[k])])),
-    ming_hall: withJ(withPal(hallOrn)),
     nu: withJ(nu), hanok: withPal(hanok),
   },
   objects: {},
