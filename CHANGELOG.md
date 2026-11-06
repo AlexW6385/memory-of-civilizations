@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.65 — The Potala as one body; Shöl's courtyard houses (2026-11-06)
+- Joint blocks close the V-notches between the Potala's battered masses (46, carrying roof, frieze and coping on to the higher walls); windows skip faces covered by stairs and neighbouring masses; the zigzag stairs bedded into the wall and the ground; Shöl's houses as two-storey courtyard houses with galleries, gates, roof-corner flag bundles and incense urns; the Shöl printing house with its woodblock racks and printers' benches; pilgrims with prayer wheels walking the circuit clockwise, monks in the Deyang Shar and on the roofs.
+
 ## v9.64 — Florence: room to build; Palazzo Medici, the Mercato Vecchio, Santa Maria Novella (2026-11-06)
 - Florence's houses re-tiled in 150 m tiles (1489 → 875 meshes, half the draw calls); the Palazzo Medici with graded rustication, great cornice, the open corner loggia, shops and the court with tondi, sgraffito and Donatello's David; the Mercato Vecchio with the column of Abundance and the Dovizia, the market hall and its counters; Alberti's front of Santa Maria Novella with avelli, striped pilasters, the Rucellai sails, the rose, the inscription and the left volute only inlaid.
 
