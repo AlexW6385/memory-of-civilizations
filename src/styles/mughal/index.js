@@ -457,34 +457,118 @@ function tombChamber(bag, col, cx, cz, y, A) {
   bag.add(W, box(cx - 2.5, y + 9, z0, cx + 2.5, y + 9.4, z1));
   for (let zz = z0 + 1; zz < z1 - 0.5; zz += 1.8) bag.add('marble_dark', box(cx - 2.5, y + 8.85, zz - 0.1, cx + 2.5, y + 9, zz + 0.1));
   for (const sg of [-1, 1]) for (let zz = z0 + 0.6; zz < z1 - 1; zz += 2.6) { bag.add('marble_dark', box(cx + sg * 2.5 - (sg > 0 ? 0.06 : 0), y, zz, cx + sg * 2.5 + (sg < 0 ? 0.06 : 0), y + 1.6, zz + 2.2)); bag.add(W, box(cx + sg * 2.5 - (sg > 0 ? 0.1 : 0), y + 0.08, zz + 0.08, cx + sg * 2.5 + (sg < 0 ? 0.1 : 0), y + 1.52, zz + 2.12)); }
-  // the screen: an octagon of three pierced panels a side between posts, one panel open on the south
-  const sa = 3.6, sr = sa / Math.cos(Math.PI / 8), sh = 1.9;
+  // the screen (tajmahal.gov.in): octagonal, each side divided in three by marble frames filled with jalis pierced in
+  // plant arabesques, flowers inlaid in the frames, posts at the corners ending in kalasha finials, a cresting of
+  // kanguras; the entrance arch in the middle of the south side rising above it, a closed twin on the north
+  const sa = 3.6, sr = sa / Math.cos(Math.PI / 8), sh = 1.9, ST = 0.08, FL = ['inlay_carnelian', 'inlay_jade', 'inlay_lapis', 'inlay_yellow'];
   const sv = (k) => { const a = Math.PI / 8 + k * Math.PI / 4 - Math.PI / 2; return [cx + Math.cos(a) * sr, cz + Math.sin(a) * sr]; };
+  // a flat shape (outline [u, v], holes) set on the plane through p0 along (ux, uz), d thick, centred on it
+  const onPlane = (outline, holes, p0, ux, uz, y0, d, m) => {
+    const sh2 = new Shape(); sh2.moveTo(outline[0][0], outline[0][1]); for (const q of outline.slice(1)) sh2.lineTo(q[0], q[1]);
+    for (const h of holes) { const hp = new Path(); hp.moveTo(h[0][0], h[0][1]); for (const q of h.slice(1)) hp.lineTo(q[0], q[1]); sh2.holes.push(hp); }
+    const g = new ExtrudeGeometry(sh2, { depth: d, bevelEnabled: false, curveSegments: 3 }), nx = -uz, nz = ux;
+    g.applyMatrix4(new Matrix4().makeBasis({ x: ux, y: 0, z: uz }, { x: 0, y: 1, z: 0 }, { x: nx, y: 0, z: nz }).setPosition(p0[0] - nx * d / 2, y0, p0[1] - nz * d / 2));
+    bag.add(m, g);
+  };
+  // the jali of a panel pw × ph: a net of stems left between almond-shaped piercings in staggered rows, a leaf between
+  const jaliHoles = (pw, ph) => {
+    const H2 = [], m = 0.06, cols = Math.max(2, Math.round((pw - 2 * m) / 0.27)), px = (pw - 2 * m) / cols, rows = Math.max(3, Math.round((ph - 2 * m) / 0.27)), py = (ph - 2 * m) / rows;
+    const almond = (u, v, w, h) => { const P = []; for (let i = 0; i < 12; i++) { const t = i / 12 * Math.PI * 2, c = Math.cos(t), s = Math.sin(t); P.push([u + Math.sign(c) * Math.abs(c) ** 1.4 * w / 2, v + s * h / 2]); } return P; };
+    for (let r = 0; r < rows; r++) for (let c = 0; c <= cols; c++) {
+      const odd = r % 2, u = m + (c + (odd ? 0 : 0.5)) * px, v = m + (r + 0.5) * py;
+      if (u - px * 0.36 < m * 0.9 || u + px * 0.36 > pw - m * 0.9) continue;
+      H2.push(almond(u, v, px * 0.6, py * 0.78));
+    }
+    for (let r = 0; r < rows - 1; r++) for (let c = 0; c <= cols; c++) {
+      const odd = r % 2, u = m + (c + (odd ? 0.5 : 0)) * px, v = m + (r + 1) * py;
+      if (u - 0.05 < m || u + 0.05 > pw - m) continue;
+      H2.push([[u, v - py * 0.16], [u + px * 0.1, v], [u, v + py * 0.16], [u - px * 0.1, v]]);
+    }
+    return H2;
+  };
   for (let k = 0; k < 8; k++) {
-    const a = sv(k), b = sv(k + 1), L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, isS = (a[1] + b[1]) / 2 - cz > sa * 0.9;
-    for (let j = 0; j <= 3; j++) { const p = [a[0] + ux * L * j / 3, a[1] + uz * L * j / 3]; bag.add(W, lathe([[0.12, 0], [0.12, 0.2], [0.08, 0.3], [0.08, sh - 0.15], [0.12, sh], [0.06, sh + 0.25], [0.001, sh + 0.4]], 8, null, p[0], y, p[1])); }
+    const a = sv(k), b = sv(k + 1), L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, isS = (a[1] + b[1]) / 2 - cz > sa * 0.9, isN = (a[1] + b[1]) / 2 - cz < -sa * 0.9;
+    const P2 = (s2) => [a[0] + ux * s2, a[1] + uz * s2], nx = -uz, nz = ux;
+    const bx = (s0, s1, ya, yb, th, m, off = 0) => { const p0 = P2(s0), p1 = P2(s1), t = []; beamTris(t, [p0[0] + nx * off, ya, p0[1] + nz * off], [p1[0] + nx * off, ya, p1[1] + nz * off], th / 2, yb - ya); bag.add(m, fromTriangles(t)); };
+    // the corner post with its kalasha, the two stiles between the panels
+    bag.add(W, lathe([[0.13, 0], [0.13, 0.22], [0.1, 0.3], [0.1, sh - 0.1], [0.13, sh], [0.13, sh + 0.06], [0.11, sh + 0.1], [0.16, sh + 0.22], [0.14, sh + 0.32], [0.06, sh + 0.38], [0.08, sh + 0.42], [0.04, sh + 0.5], [0.001, sh + 0.58]], 8, null, a[0], y, a[1]));
+    bag.add('inlay_carnelian', lathe([[0.102, 0.9], [0.102, 0.98], [0.001, 0.98]], 8, null, a[0], y, a[1]));
+    for (const j of [1, 2]) bx(L * j / 3 - ST / 2, L * j / 3 + ST / 2, y, y + sh, 0.1, W);
+    // the rails: a plinth below, a top rail with a band of inlaid flowers on both faces
     for (let j = 0; j < 3; j++) {
-      const s0 = L * j / 3 + 0.1, s1 = L * (j + 1) / 3 - 0.1, P2 = (s2) => [a[0] + ux * s2, a[1] + uz * s2];
-      const rail = (ya, yb, m) => { const t = []; const p0 = P2(s0), p1 = P2(s1); beamTris(t, [p0[0], ya, p0[1]], [p1[0], ya, p1[1]], 0.06, yb - ya); bag.add(m, fromTriangles(t)); };
-      rail(y, y + 0.22, W); rail(sh + y - 0.22, sh + y, W); rail(sh + y - 0.17, sh + y - 0.12, 'inlay_carnelian');
-      if (isS && j === 1) { const p0 = P2(s0), p1 = P2(s1); col.segment(P2(0.05), p0, 0.12, y, y + sh); void p1; continue; }
-      const p0 = P2(s0), p1 = P2(s1); col.segment(p0, p1, 0.12, y, y + sh);
-      // the piercing: a lattice of small hexagons, here a fine grid of slender bars
-      const nb = 9;
-      for (let g = 1; g < nb; g++) { const q = P2(s0 + (s1 - s0) * g / nb), t = []; beamTris(t, [q[0] - ux * 0.02, y + 0.22, q[1] - uz * 0.02], [q[0] + ux * 0.02, y + 0.22, q[1] + uz * 0.02], 0.03, sh - 0.44); bag.add(W, fromTriangles(t)); }
-      for (let g = 1; g < 8; g++) rail(y + 0.22 + g * (sh - 0.44) / 8 - 0.02, y + 0.22 + g * (sh - 0.44) / 8 + 0.02, W);
-      for (const [dx, dy, m] of [[0.25, 0.5, 'inlay_jade'], [0.5, 0.75, 'inlay_carnelian'], [0.75, 0.5, 'inlay_yellow']]) { const q = P2(s0 + (s1 - s0) * dx), t = []; beamTris(t, [q[0] - ux * 0.045, y + 0.22 + (sh - 0.44) * dy - 0.045, q[1] - uz * 0.045], [q[0] + ux * 0.045, y + 0.22 + (sh - 0.44) * dy - 0.045, q[1] + uz * 0.045], 0.04, 0.09); bag.add(m, fromTriangles(t)); }
+      const s0 = L * j / 3 + (j ? ST / 2 : 0.1), s1 = L * (j + 1) / 3 - (j < 2 ? ST / 2 : 0.1), open = isS && j === 1;
+      if (open) bx(s0, s1, y, y + 0.02, 0.12, W);
+      else { bx(s0, s1, y, y + 0.22, 0.12, W); bx(s0, s1, y + sh - 0.2, y + sh, 0.1, W); }
+      if (!open) for (const side of [-1, 1]) for (let s2 = s0 + 0.08, q = 0; s2 < s1 - 0.05; s2 += 0.13, q++) { bx(s2 - 0.025, s2 + 0.025, y + sh - 0.125, y + sh - 0.075, 0.012, FL[q % 4], side * 0.052); if (q % 2) bx(s2 + 0.03, s2 + 0.09, y + sh - 0.11, y + sh - 0.09, 0.01, 'inlay_jade', side * 0.051); }
+      if (!open) for (const side of [-1, 1]) for (let s2 = s0 + 0.1, q = 0; s2 < s1 - 0.05; s2 += 0.2, q++) bx(s2 - 0.03, s2 + 0.03, y + 0.09, y + 0.15, 0.012, FL[(q + 2) % 4], side * 0.062);
+      if (open) { col.segment(P2(0.05), P2(s0), 0.12, y, y + sh); col.segment(P2(s1), P2(L - 0.05), 0.12, y, y + sh); }
+      else {
+        col.segment(P2(s0), P2(s1), 0.12, y, y + sh);
+        const pw = s1 - s0, ph = sh - 0.42;
+        onPlane([[0, 0], [pw, 0], [pw, ph], [0, ph]], jaliHoles(pw, ph), P2(s0), ux, uz, y + 0.22, 0.05, W);
+      }
+      // the entrance arch (south) and its closed twin (north): tall stiles, a cusped arch panel rising over the screen
+      if ((isS || isN) && j === 1) {
+        const spring = y + sh - 0.1, top = y + sh + 0.75, ci = 0.06;
+        for (const sg of [-1, 1]) bx(sg < 0 ? s0 - ST - 0.01 : s1 - 0.01, sg < 0 ? s0 + 0.01 : s1 + ST + 0.01, y, top, 0.14, W);
+        const pw = s1 - s0, out = [[0, 0], [ci, 0], ...cuspedArc(ci, pw - ci, 0, 7, 0.035).map(([u, v]) => [u, v]), [pw - ci, 0], [pw, 0], [pw, top - spring], [0, top - spring]];
+        onPlane(out, [], P2(s0), ux, uz, spring, 0.12, W);
+        for (const side of [-1, 1]) for (const [dx, m] of [[0.12, 'inlay_carnelian'], [pw - 0.12, 'inlay_lapis']]) bx(s0 + dx - 0.035, s0 + dx + 0.035, top - 0.17, top - 0.1, 0.01, m, side * 0.065);
+        { const c = P2(s0 + pw / 2); bag.add(W, lathe([[0.07, 0], [0.09, 0.08], [0.03, 0.16], [0.05, 0.2], [0.001, 0.28]], 8, null, c[0], top, c[1])); }
+      }
+    }
+    // the cresting: a row of kanguras (vase-shaped merlons) along the top rail
+    for (let s2 = 0.3; s2 < L - 0.2; s2 += 0.21) {
+      if ((isS || isN) && Math.abs(s2 - L / 2) < L / 6 + 0.1) continue;
+      onPlane([[-0.07, 0], [-0.085, 0.05], [-0.05, 0.1], [-0.02, 0.13], [-0.035, 0.17], [0, 0.23], [0.035, 0.17], [0.02, 0.13], [0.05, 0.1], [0.085, 0.05], [0.07, 0]].map(([u, v]) => [u + s2, v]), [], P2(0), ux, uz, y + sh, 0.04, W);
     }
   }
-  // the cenotaph of Mumtaz Mahal at the very centre, on its platform, inlaid with inscriptions and flowers
-  bag.add(W, box(cx - 1.25, y, cz - 2.1, cx + 1.25, y + 0.35, cz + 2.1));
-  bag.add('marble_dark', box(cx - 1.27, y + 0.2, cz - 2.12, cx + 1.27, y + 0.25, cz + 2.12));
-  bag.add(W, box(cx - 0.85, y + 0.35, cz - 1.55, cx + 0.85, y + 0.75, cz + 1.55));
-  bag.add(W, frustum([cx - 0.6, cz - 1.25, cx + 0.6, cz + 1.25], y + 0.75, y + 1.45, 0.1, 0.1, 0.1, 0.1));
-  bag.add(W, frustum([cx - 0.5, cz - 1.15, cx + 0.5, cz + 1.15], y + 1.45, y + 1.65, 0.3, 0.3, 0.05, 0.05));
-  for (const yy of [y + 0.5, y + 1.0]) for (const sg of [-1, 1]) { bag.add('marble_dark', box(cx + sg * (yy < y + 0.6 ? 0.86 : 0.57) - 0.01, yy, cz - (yy < y + 0.6 ? 1.4 : 1.1), cx + sg * (yy < y + 0.6 ? 0.86 : 0.57) + 0.01, yy + 0.06, cz + (yy < y + 0.6 ? 1.4 : 1.1))); }
-  for (let j = 0; j < 7; j++) for (const sg of [-1, 1]) bag.add(['inlay_carnelian', 'inlay_jade', 'inlay_yellow'][j % 3], box(cx + sg * 0.86 - 0.012, y + 0.6, cz - 1.2 + j * 0.4, cx + sg * 0.86 + 0.012, y + 0.68, cz - 1.12 + j * 0.4));
-  col.rect([cx - 1.25, cz - 2.1, cx + 1.25, cz + 2.1], y, y + 1.65);
+  // the cenotaph of Mumtaz Mahal at the very centre (tajmahal.gov.in): a single block shaped like a sarcophagus on a
+  // stepped plinth, the plinth on a wider platform whose top has a framed flowery scroll; Quranic verses in thuluth on
+  // the top and sides of the block; hardstone inlay of flowers
+  bag.add(W, box(cx - 1.35, y, cz - 2.25, cx + 1.35, y + 0.2, cz + 2.25));
+  for (const [x0, z0, x1, z1] of [[-1.25, -2.15, 1.25, -2.1], [-1.25, 2.1, 1.25, 2.15], [-1.25, -2.1, -1.2, 2.1], [1.2, -2.1, 1.25, 2.1]]) bag.add('marble_dark', box(cx + x0, y + 0.2, cz + z0, cx + x1, y + 0.212, cz + z1));
+  for (let i = 0; i < 26; i++) {
+    // the scroll: flowers round the platform's frame, between the plinth and the frame
+    const t = i / 26, per = 2 * (2.3 + 4.1), d = t * per, [px, pz] = d < 2.3 ? [-1.15 + d, -2.05] : d < 6.4 ? [1.15, -2.05 + (d - 2.3)] : d < 8.7 ? [1.15 - (d - 6.4), 2.05] : [-1.15, 2.05 - (d - 8.7)];
+    bag.add(FL[i % 4], box(cx + px - 0.035, y + 0.2, cz + pz - 0.035, cx + px + 0.035, y + 0.214, cz + pz + 0.035));
+    bag.add('inlay_jade', box(cx + px - 0.08, y + 0.2, cz + pz - 0.012, cx + px - 0.04, y + 0.21, cz + pz + 0.012));
+  }
+  const steps = [[1.0, 1.8, 0.2, 0.38], [0.86, 1.62, 0.38, 0.54], [0.74, 1.46, 0.54, 0.68]];
+  // a little flower spray inlaid in a face normal to x (ax 'x') or z at (fx, fy, fz): four petals round a yellow heart, two leaves
+  const spray = (ax, fx, fy, fz, m) => {
+    const B2 = (du, dv, hu, hv, mm) => { const t = 0.006; bag.add(mm, ax === 'x' ? box(fx - t, fy + dv - hv, fz + du - hu, fx + t, fy + dv + hv, fz + du + hu) : box(fx + du - hu, fy + dv - hv, fz - t, fx + du + hu, fy + dv + hv, fz + t)); };
+    for (const [du, dv] of [[0.022, 0.01], [-0.022, 0.01], [0, 0.032], [0, -0.012]]) B2(du, dv, 0.013, 0.013, m);
+    B2(0, 0.01, 0.009, 0.009, 'inlay_yellow'); B2(0.04, -0.03, 0.02, 0.006, 'inlay_jade'); B2(-0.04, -0.03, 0.02, 0.006, 'inlay_jade'); B2(0, -0.035, 0.004, 0.022, 'inlay_jade');
+  };
+  for (const [hx, hz, ya, yb] of steps) {
+    bag.add(W, box(cx - hx, y + ya, cz - hz, cx + hx, y + yb, cz + hz));
+    const ym = y + (ya + yb) / 2;
+    for (const sx of [-1, 1]) for (let zz = -hz + 0.2, q = 0; zz < hz - 0.1; zz += 0.3, q++) spray('x', cx + sx * hx, ym, cz + zz, FL[q % 3 === 2 ? 0 : q % 3]);
+    for (const sz of [-1, 1]) for (let xx = -hx + 0.2, q = 0; xx < hx - 0.1; xx += 0.3, q++) spray('z', cx + xx, ym, cz + sz * hz, FL[q % 3 === 2 ? 0 : q % 3]);
+  }
+  // the block: a foot, sides swelling a little then drawing in, a flat top with a raised tablet
+  const y3 = y + 0.68;
+  bag.add(W, frustum([cx - 0.62, cz - 1.36, cx + 0.62, cz + 1.36], y3, y3 + 0.08, -0.03, -0.03, -0.03, -0.03));
+  bag.add(W, frustum([cx - 0.65, cz - 1.39, cx + 0.65, cz + 1.39], y3 + 0.08, y3 + 0.5, 0.1, 0.1, 0.1, 0.1));
+  bag.add(W, frustum([cx - 0.55, cz - 1.29, cx + 0.55, cz + 1.29], y3 + 0.5, y3 + 0.6, 0.06, 0.06, 0.06, 0.06));
+  bag.add(W, box(cx - 0.3, y3 + 0.6, cz - 1.0, cx + 0.3, y3 + 0.66, cz + 1.0));
+  // the inscriptions: rows of black letters on the sides and the top, in frames
+  {
+    // on each sloping side: a framed band of letters, laid on the slope a hair proud of it
+    const LT = [], quad = (p0, p1, p2, p3) => LT.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3);
+    for (const sx of [-1, 1]) {
+      const X = (v) => cx + sx * (0.65 - 0.1 * v / 0.42 + 0.004), Y = (v) => y3 + 0.08 + v;
+      const strip = (z0, z1, v0, v1) => quad([X(v0), Y(v0), cz + z0], [X(v0), Y(v0), cz + z1], [X(v1), Y(v1), cz + z1], [X(v1), Y(v1), cz + z0]);
+      let i = 0;
+      for (let zz = -1.15; zz < 1.15; zz += 0.07, i++) { const tall = i % 4 !== 1; strip(zz - 0.011, zz + 0.011, 0.13, tall ? 0.33 : 0.2); if (i % 3 === 0) strip(zz - 0.03, zz + 0.03, 0.13, 0.15); if (i % 5 === 2) strip(zz + 0.02, zz + 0.04, 0.24, 0.26); }
+      strip(-1.25, 1.25, 0.08, 0.1); strip(-1.25, 1.25, 0.36, 0.38); strip(-1.25, -1.23, 0.08, 0.38); strip(1.23, 1.25, 0.08, 0.38);
+    }
+    bag.add('marble_dark', fromTriangles(orientOutward(LT.length ? LT : [])));
+  }
+  for (let zz = -0.9, i = 0; zz < 0.9; zz += 0.08, i++) bag.add('marble_dark', box(cx - (i % 3 === 1 ? 0.08 : 0.2), y3 + 0.66, cz + zz - 0.012, cx + (i % 3 === 1 ? 0.08 : 0.2), y3 + 0.667, cz + zz + 0.012));
+  for (const [x0, z0, x1, z1] of [[-0.3, -1.0, 0.3, -0.97], [-0.3, 0.97, 0.3, 1.0], [-0.3, -1.0, -0.27, 1.0], [0.27, -1.0, 0.3, 1.0]]) bag.add('marble_dark', box(cx + x0, y3 + 0.66, cz + z0, cx + x1, y3 + 0.668, cz + z1));
+  col.rect([cx - 1.35, cz - 2.25, cx + 1.35, cz + 2.25], y, y + 1.4);
 }
 
 /** red_hall: the mosque or its twin (the jawab) { rect, y, h, front, domes: 3 }: a hall of red sandstone with arched openings, three white domes. */
