@@ -14,7 +14,8 @@ export const PARTERRE = [-70, -55, -4, 55];
 export const LATONA = [-120, 0];
 export const TAPIS = [-300, -22, -140, 22];
 export const APOLLO = [-320, 0];
-export const CANAL = { x0: -340, w: 40, cross: -390, crossW: 24 };
+// the canal's eastern reach; it is cut by the settlement's edge at a landing (end), its cross-arm lying beyond
+export const CANAL = { x0: -340, w: 40, cross: -390, crossW: 24, end: -362 };
 export const PLACE = [100, -70, 210, 70];
 export const RISE = 6;
 // the first floor (§1c): the Hall of Mirrors along the garden front (bays 4–20 of its 25), the Salons of War and Peace,
@@ -30,7 +31,7 @@ export const STATE_ROOMS = [
 export const LATONA_Y = RISE * 0.352;                 // the ground at the Latona basin (the slope's height there)
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
-export const inCanal = (x, z) => Math.hypot(x, z) < RADIUS - 50 && ((x < CANAL.x0 && Math.abs(z - AXIS_Z) < CANAL.w / 2) || (Math.abs(x - CANAL.cross) < CANAL.crossW / 2 && Math.abs(z) < 260));
+export const inCanal = (x, z) => Math.hypot(x, z) < RADIUS - 50 && x > CANAL.end && ((x < CANAL.x0 && Math.abs(z - AXIS_Z) < CANAL.w / 2) || (Math.abs(x - CANAL.cross) < CANAL.crossW / 2 && Math.abs(z) < 260));
 /** The rise of the château falling west down the gardens; the canal dug in. */
 export function height(x, z) {
   let h = RISE * smooth(-160, -60, x);

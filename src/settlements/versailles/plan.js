@@ -44,8 +44,11 @@ export const chateau = {
   walks: [Object.assign([[180, 0], [80, 0]], { y0: y })],
 };
 export const canal = {
-  id: 'versailles-canal', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
+  id: 'versailles-canal', style: 'classical_fr', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [0, 0], facing: 'w' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
-  elements: [{ t: 'water_cells', rect: [-RADIUS + 50, -270, CANAL.x0, 270], y: -1, cell: 2, inside: (x, z) => Math.hypot(x, z) < RADIUS - 52 && ((x < CANAL.x0 - 1 && Math.abs(z) < CANAL.w / 2 - 1) || (Math.abs(x - CANAL.cross) < CANAL.crossW / 2 - 1 && Math.abs(z) < 259)) }],
+  elements: [
+    { t: 'water_cells', rect: [CANAL.end, -CANAL.w / 2, CANAL.x0, CANAL.w / 2], y: -1, cell: 2, inside: (x, z) => x > CANAL.end + 0.3 && x < CANAL.x0 - 1.6 && Math.abs(z) < CANAL.w / 2 - 1.6 },
+    { t: 'canal_quay', x0: CANAL.x0, x1: CANAL.end, w: CANAL.w, y: 0, water: -1, floor: -2.2 },
+  ],
 };
 export default chateau;

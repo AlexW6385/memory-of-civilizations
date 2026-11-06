@@ -30,16 +30,20 @@ function court() {
 }
 
 function canal() {
-  const L = [], y = -1.05, X = CANAL.x0 - 14;
+  const L = [], y = -1.05, X = CANAL.x0 - 10;
   // two gondolas along the canal, a gondolier standing at each stern; two of the King's rowing boats
-  for (const [x, z, rot] of [[X, -7, Math.PI / 2], [X - 6, 9, -Math.PI / 2 + 0.2]]) {
+  for (const [x, z, rot] of [[X, -7, Math.PI / 2], [X - 1, 9.5, -Math.PI / 2 + 0.2]]) {
     L.push({ t: 'boat', kind: 'gondola', at: [x, z], y, rot });
     const s = 4.2, c = Math.cos(rot), sn = Math.sin(rot);
     L.push({ t: 'figure', at: [x + s * sn, z + s * c], y: y + 0.32, rot: rot + Math.PI, h: 1.7, seed: 77 + Math.round(x), dress: 'tunic', cloth: 'cloth_black', cloth2: 'cloth_white', skin: 'skin_medium', hat: 'cap', hatMat: 'cloth_red', pose: 'stand' });
     L.push({ t: 'oar', at: [x + (s + 0.6) * sn, z + (s + 0.6) * c], y: y + 0.6, rot: rot + Math.PI / 2 });
   }
-  L.push({ t: 'boat', kind: 'rowboat', len: 6, at: [X + 6, 13], y, rot: Math.PI / 2 - 0.15 });
+  L.push({ t: 'boat', kind: 'rowboat', len: 6, at: [X + 3, 14], y, rot: Math.PI / 2 - 0.15 });
   L.push({ t: 'boat', kind: 'rowboat', len: 6, at: [X - 4, -14], y, rot: Math.PI / 2 + 0.3 });
+  // at the landing: a rowing boat and a gondola moored by the steps, their painters to the posts, a boatman waiting on the quay
+  L.push({ t: 'boat', kind: 'rowboat', len: 5, at: [CANAL.end + 7.0, -1.5], y, rot: Math.PI / 2 + 0.05 });
+  L.push({ t: 'boat', kind: 'gondola', at: [CANAL.end + 9.0, 5.5], y, rot: -Math.PI / 2 - 0.04 });
+  L.push({ t: 'figure', at: [CANAL.end - 1.6, -4.5], y: 0.12, rot: -Math.PI / 2, h: 1.72, seed: 1684, dress: 'tunic', cloth: 'cloth_indigo', cloth2: 'cloth_white', skin: 'skin_light', hat: 'brim', hatMat: 'cloth_black', pose: 'stand' });
   return base('versailles-canal-boats', L, 'life');
 }
 

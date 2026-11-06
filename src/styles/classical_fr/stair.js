@@ -68,7 +68,7 @@ export function ambassadors(el, ctx) {
   for (let i = 0; i < nC; i++) { const xs = xA - (i + 1) * tC; bag.add('marble', box(xs, y, cz - 3.5 + 0.0, xs + tC, Y0 + (i + 1) * rC, cz + 3.5)); bag.add(MS, box(xs - 0.03, Y0 + (i + 1) * rC - 0.04, cz - 3.5, xs + tC, Y0 + (i + 1) * rC, cz + 3.5)); }
   col.ramp([xC, zN, xA, zS], Y0, PY, 'w');
   const pf = (q) => { const r = [q[0], q[1] === z0 ? z0 + 0.05 : q[1], q[2], q[3] === z1 ? z1 - 0.05 : q[3]]; bag.add(S, box(r[0], y, r[1], r[2], PY - 0.06, r[3])); col.rect(r, y, PY - 0.06); marbleFloor(bag, col, r, PY, 1.1); };
-  pf([xC, z0, xA, zN]); pf([xC, zS, xA, z1]); pf([xP, z0, xC, z1]); pf([xL, zN, xP, zS]);
+  pf([xC, z0, xA - 0.05, zN]); pf([xC, zS, xA - 0.05, z1]); pf([xP, z0, xC, z1]); pf([xL, zN, xP, zS]);
   // the cheeks' faces toward the flight: white marble panels in red frames
   for (const [za, zb2] of [[zN, zN + 0.04], [zS - 0.04, zS]]) { bag.add(WM, box(xC, y, za, xA, PY - 0.06, zb2)); for (let x = xC + 0.3; x < xA - 1.5; x += 2.6) bag.add(RM, box(x, Y0 + 0.5, za === zN ? zN + 0.04 : zS - 0.06, x + 2.2, Y0 + 0.62, za === zN ? zN + 0.06 : zS - 0.04)); }
   const nS = 22, rS = (FY - PY) / nS, tS = (xP - xL) / nS;
