@@ -22,8 +22,8 @@ function court() {
   };
   // the terrace before the garden front
   for (const z of [-38, -21, -6, 12, 29, 44]) group([-7.5 - rand() * 2.5, z + rand() * 3], RISE + 0.04, 2 + Math.floor(rand() * 2));
-  // strolling down the walk between the two basins, toward Latona
-  for (let k = 0; k < 6; k++) { const p = [-52 + k * 6 + rand() * 2, (k % 2 ? 1 : -1) * (0.6 + rand() * 0.9)]; (k % 3 === 1 ? lady : man)(p, RISE + 0.04, face(p, [p[0] - 5, p[1]])); }
+  // strolling down the walk between the two basins, toward Latona (kept off the axis, clear of the arrival's view)
+  for (let k = 0; k < 6; k++) { const p = [-46 + k * 5 + rand() * 2, (k % 2 ? 1 : -1) * (2.5 + rand() * 0.7)]; (k % 3 === 1 ? lady : man)(p, RISE + 0.04, face(p, [p[0] - 5, p[1]])); }
   // round the Latona basin
   for (const a of [0.4, 2.2, 3.6, 5.1]) { const c = [LATONA[0] + Math.cos(a) * 17.5, LATONA[1] + Math.sin(a) * 17.5]; group(c, LATONA_Y, 2); }
   return base('versailles-court', L, 'life');
