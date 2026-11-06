@@ -62,3 +62,34 @@ export function vprism(pts, y0, y1) {
   for (let i = 0; i < n; i++) { const j = (i + 1) % n; t.push(...top[i], ...bot[i], ...bot[j], ...top[i], ...bot[j], ...top[j]); }
   return fromTriangles(orientOutward(t));
 }
+
+/** A bar of square section t from point a to point b ([x, y, z]); `up` keeps one face level where it can. */
+export function bar(a, b, t, t2 = t) {
+  const d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], L = Math.hypot(...d) || 1, e = d.map((v) => v / L);
+  let s = [e[2], 0, -e[0]]; if (Math.hypot(...s) < 1e-3) s = [1, 0, 0];
+  const sl = Math.hypot(...s); s = s.map((v) => v / sl);
+  const u = [e[1] * s[2] - e[2] * s[1], e[2] * s[0] - e[0] * s[2], e[0] * s[1] - e[1] * s[0]];
+  const C = (p, i, j) => [p[0] + s[0] * i * t / 2 + u[0] * j * t2 / 2, p[1] + s[1] * i * t / 2 + u[1] * j * t2 / 2, p[2] + s[2] * i * t / 2 + u[2] * j * t2 / 2];
+  const A = [C(a, -1, -1), C(a, 1, -1), C(a, 1, 1), C(a, -1, 1)], B = [C(b, -1, -1), C(b, 1, -1), C(b, 1, 1), C(b, -1, 1)], T = [];
+  const q = (p0, p1, p2, p3) => T.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3);
+  q(A[0], A[1], A[2], A[3]); q(B[0], B[3], B[2], B[1]);
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; q(A[i], B[i], B[j], A[j]); }
+  return fromTriangles(orientOutward(T));
+}
+/** A slab under four top corners ([x, y, z], in order round it), th thick (straight down). */
+export function slab4(P, th) {
+  const D = P.map(([x, y, z]) => [x, y - th, z]), T = [];
+  const q = (p0, p1, p2, p3) => T.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3);
+  q(P[0], P[1], P[2], P[3]); q(D[0], D[3], D[2], D[1]);
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; q(P[i], D[i], D[j], P[j]); }
+  return fromTriangles(orientOutward(T));
+}
+
+/** A polygon `pts` ([[d, v], …]) in the plane across a front, extruded along it from u0 to u1 (the end walls of a lean-to). */
+export function sideprism(F, y, pts, u0, u1) {
+  const P = (u, d, v) => { const [x, z] = F.at(u, d); return [x, y + v, z]; };
+  const a = pts.map(([d, v]) => P(u0, d, v)), b = pts.map(([d, v]) => P(u1, d, v)), n = pts.length, t = [];
+  for (let i = 1; i < n - 1; i++) { t.push(...a[0], ...a[i], ...a[i + 1]); t.push(...b[0], ...b[i + 1], ...b[i]); }
+  for (let i = 0; i < n; i++) { const j = (i + 1) % n; t.push(...a[i], ...b[i], ...b[j], ...a[i], ...b[j], ...a[j]); }
+  return fromTriangles(orientOutward(t));
+}

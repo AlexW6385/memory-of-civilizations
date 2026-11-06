@@ -6,14 +6,14 @@
 // warehouse, a spout gable with loading doors — with the attic hatch and the hoisting beam at its top.
 
 import { box, frustum } from '../../core/geom.js';
-import { faceFrame, prism, fbox, outline, ngon } from './facade.js';
+import { faceFrame, prism, fbox, outline, ngon, slab4, sideprism } from './facade.js';
 
 const ST = 'sandstone_dressed';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const sstep = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
 /** A cross-window: frame bars over the glass, the transom at 62%, the lower lights shuttered (closed or folded open). */
-function crossWindow(bag, F, y, u, v0, ww, hh, o) {
+export function crossWindow(bag, F, y, u, v0, ww, hh, o) {
   const A = (m, ...r) => bag.add(m, fbox(F, y, ...r)), u0 = u - ww / 2, u1 = u + ww / 2, vt = v0 + hh * 0.62, b = 0.07;
   A(ST, u0 - 0.1, u1 + 0.1, v0 - 0.14, v0, -0.02, 0.12);                       // the sill
   A(ST, u0 - 0.16, u1 + 0.16, v0 + hh, v0 + hh + 0.24, 0, 0.05);              // the lintel
@@ -38,7 +38,11 @@ export function canalHouse(el, { bag, col }) {
   const kindR = rand(), kind = el.gable ?? (kindR > 0.9 ? 'spout' : kindR < 0.3 ? 'step' : kindR < 0.65 ? 'neck' : 'bell'), warehouse = kind === 'spout';
   // the storeys: a half-sunk basement under a tall ground floor, then floors a little lower each
   const base = 1.0, g = 3.6, st = 2.95 + rand() * 0.3, H = base + g + (n - 1) * st, floors = [base, ...Array.from({ length: n - 1 }, (_, i) => base + g + i * st)];
-  bag.add(mat, box(...(() => { const [x0, z0, x1, z1] = el.rect; return [x0, y - 0.6, z0, x1, y + H, z1]; })())); col.rect(el.rect, y - 0.6, y + H);
+  // the back (its own stream of chances, so that the fronts stay as they were): about half the houses have a low
+  // annex (aanbouw) in a yard behind the main block, with the privy in the yard's other corner (docs §5.1)
+  const rb = rng((el.seed || 1) * 7 + 13), annex = !warehouse && D >= 11 && rb() < 0.55, Dm = annex ? D - 3.4 : D;
+  const main = ((r, k) => ({ s: [r[0], r[1] + k, r[2], r[3]], n: [r[0], r[1], r[2], r[3] - k], e: [r[0] + k, r[1], r[2], r[3]], w: [r[0], r[1], r[2] - k, r[3]] })[f])(el.rect, D - Dm);
+  bag.add(mat, box(main[0], y - 0.6, main[1], main[2], y + H, main[3])); col.rect(main, y - 0.6, y + H);
   A(ST, -0.02, w + 0.02, base - 0.16, base, 0, 0.06);                            // the water table over the basement
   A(mat, 0, w, H - 0.5, H, 0, 0.08); A(ST, -0.03, w + 0.03, H - 0.12, H + 0.02, 0, 0.14);  // a brick band and its stone cap at the eaves line
   const bays = w >= 6.4 ? 3 : 2, bw = w / bays, ww = Math.min(1.2, bw - 0.95), door = rand() < 0.5 ? 0 : bays - 1;
@@ -153,13 +157,63 @@ export function canalHouse(el, { bag, col }) {
   { const bv = G + Math.min(gh - 0.35, crownV - 0.6); A('timber', uc - 0.09, uc + 0.09, bv - 0.18, bv, -0.4, 1.15); A('timber', uc - 0.12, uc + 0.12, bv - 0.24, bv + 0.06, 1.05, 1.2);
     A('iron', uc - 0.015, uc + 0.015, bv - 0.62, bv - 0.24, 1.1, 1.13); bag.add('iron', prism(F, y, ngon(uc, bv - 0.7, 0.08, 6), 1.09, 1.14)); }
   // the roof, running back from the gable, and a plain brick gable at the back
-  { const [x0, z0, x1, z1] = el.rect, along = f === 'n' || f === 's';
+  { const [x0, z0, x1, z1] = main, along = f === 'n' || f === 's', wood = rb() < 0.3;
     bag.add('roof_tile', frustum([x0 + 0.2, z0 + 0.2, x1 - 0.2, z1 - 0.2], y + H, y + H + rh, along ? w / 2 - 0.25 : 0, along ? w / 2 - 0.25 : 0, along ? 0 : w / 2 - 0.25, along ? 0 : w / 2 - 0.25));
-    for (const q of outline(uc, (v) => Math.max(0.3, cover(v - G)), G, G + rh + 0.15, 4)) Pz(mat, q, -D, -D + 0.45);
-    for (const q of outline(uc, (v) => Math.max(0.3, cover(v - G)), G, G + rh + 0.15, 4, 0.06)) Pz(ST, q, -D - 0.04, -D + 0.5);
+    // the back gable: brick, or (in some) boarded in timber above a brick course, with its attic window and loading hatch
+    for (const [i, q] of outline(uc, (v) => Math.max(0.3, cover(v - G)), G, G + rh + 0.15, 4).entries()) Pz(wood && i > 0 ? 'tar_wood' : mat, q, -Dm, -Dm + 0.45);
+    if (wood) for (const du of [-0.6, 0.6]) Pz('planks_grey', [[uc + du - 0.05, G + rh * 0.27], [uc + du + 0.05, G + rh * 0.27], [uc + du + 0.05, G + rh * 0.75], [uc + du - 0.05, G + rh * 0.75]], -Dm - 0.04, -Dm + 0.1);
+    for (const q of outline(uc, (v) => Math.max(0.3, cover(v - G)), G, G + rh + 0.15, 4, 0.06)) Pz(wood ? 'wood_dark' : ST, q, -Dm - 0.04, -Dm + 0.5);
+    { const ga = G + 0.35, gb = G + Math.min(1.5, rh * 0.32); A(frame, uc - 0.42, uc + 0.42, ga, gb, -Dm - 0.05, -Dm + 0.02); A('opening', uc - 0.34, uc + 0.34, ga + 0.08, gb - 0.08, -Dm - 0.08, -Dm - 0.05);
+      const hv = G + rh * 0.5, hh = Math.min(1.1, rh * 0.22); if (rh > 4.2) A(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, uc - 0.4, uc + 0.4, hv, hv + hh, -Dm - 0.06, -Dm + 0.02); }
     // a chimney on the party wall, behind the gable
-    { const cu = rand() < 0.5 ? 0.35 : w - 0.35, cd = -D * 0.45; A(mat, cu - 0.3, cu + 0.3, H - 0.2, H + rh * 0.55 + 1.3, cd - 0.45, cd + 0.45); A(ST, cu - 0.38, cu + 0.38, H + rh * 0.55 + 1.3, H + rh * 0.55 + 1.45, cd - 0.53, cd + 0.53); }
+    { const cu = rand() < 0.5 ? 0.35 : w - 0.35, cd = -Dm * 0.45; A(mat, cu - 0.3, cu + 0.3, H - 0.2, H + rh * 0.55 + 1.3, cd - 0.45, cd + 0.45); A(ST, cu - 0.38, cu + 0.38, H + rh * 0.55 + 1.3, H + rh * 0.55 + 1.45, cd - 0.53, cd + 0.53); }
   }
-  // the back: two windows a floor, plain
-  for (let s = 0; s < n; s++) for (let k = 0; k < 2; k++) { const u = (k + 0.5) * w / 2, v0 = floors[s] + 0.6, hh = s ? st - 1.1 : 2.2; A('wood_painted', u - 0.55, u + 0.55, v0 - 0.06, v0 + hh + 0.06, -D - 0.06, -D + 0.02); A('opening', u - 0.47, u + 0.47, v0, v0 + hh, -D - 0.09, -D - 0.04); }
+  // ---- the back: a window a bay on each floor in its frame, under a brick relieving arch; some houses with cross-windows
+  // in the back rooms of the first floor; the door to the yard; the annex with its lean-to roof, the privy, the yard wall
+  const opp = { n: 's', s: 'n', e: 'w', w: 'e' }[f], Fb = faceFrame(main, opp), B = (m, ...r) => bag.add(m, fbox(Fb, y, ...r)), Bp = (m, pts, d0, d1) => bag.add(m, prism(Fb, y, pts, d0, d1));
+  const crossBack = rb() < 0.3, aw = Math.round(w * 0.55 * 10) / 10, side = rb() < 0.5, au = (u) => (side ? u : w - u);       // the annex on the left or the right as one faces the back
+  const arch = (u, hw, v) => { const r = (hw + 0.1) / Math.SQRT1_2; for (let i = 0; i < 3; i++) { const t0 = Math.PI * (0.25 + i / 6), t1 = Math.PI * (0.25 + (i + 1) / 6), c = (t, k) => [u - Math.cos(t) * r * k, v - r * 0.7 + Math.sin(t) * r * k]; Bp('brick_baked', [c(t0, 1), c(t1, 1), c(t1, 1.22), c(t0, 1.22)], 0, 0.03); } };
+  const casement = (u, v0, hw, hh, shut) => {
+    B(frame, u - hw, u + hw, v0, v0 + hh, -0.04, 0.04); B('opening', u - hw + 0.08, u + hw - 0.08, v0 + 0.08, v0 + hh - 0.08, 0.04, 0.06);
+    B(frame, u - hw + 0.06, u + hw - 0.06, v0 + hh * 0.64 - 0.04, v0 + hh * 0.64 + 0.04, 0.06, 0.09);                  // the transom
+    if (shut) B(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, u - hw + 0.09, u + hw - 0.09, v0 + 0.09, v0 + hh * 0.64 - 0.05, 0.06, 0.1);
+    B('brick_baked', u - hw - 0.06, u + hw + 0.06, v0 - 0.1, v0, -0.02, 0.1);                                               // the sill, a brick on edge
+    arch(u, hw, v0 + hh + 0.04);
+  };
+  const bayU = [0.25 * w, 0.75 * w];
+  for (let s = 0; s < n; s++) for (const u of bayU) {
+    const inAnnex = annex && s === 0 && (side ? u < aw + 0.3 : u > w - aw - 0.3);
+    if (inAnnex) continue;
+    if (s === 0) {                                                                                                         // the yard door, a kitchen window
+      if (u === (side ? bayU[1] : bayU[0]) || !annex && u === bayU[1]) { B(frame, u - 0.55, u + 0.55, -0.02, 2.3, -0.04, 0.04); B('wood_dark', u - 0.45, u + 0.45, 0.0, 2.2, 0.04, 0.08); arch(u, 0.55, 2.34); }
+      else casement(u, 0.9, 0.5, 1.6, rb() < 0.5);
+      continue;
+    }
+    const top = s === n - 1, v0 = floors[s] + 0.55, hh = top ? st - 1.25 : st - 1.0;
+    if (crossBack && s === 1) { crossWindow(bag, Fb, y, u, v0, Math.min(1.15, w / 2 - 1.1), hh, { frame, shutter, shut: rb() < 0.5 ? 'open' : 'none' }); continue; }
+    casement(u, v0, Math.min(0.55, w / 4 - 0.55), hh, rb() < 0.35);
+  }
+  for (let s = 1; s < n; s++) for (const u of [0.32, w - 0.32]) { const v = floors[s] - 0.15; B('iron', u - 0.16, u + 0.16, v - 0.03, v + 0.03, 0, 0.05); }   // the anchors
+  if (annex) {
+    const ua = side ? 0 : w - aw, ub = side ? aw : w, dd = D - Dm, wh = 3.0, rt = 3.75;
+    const P3 = (u, d, v) => { const [x, z] = Fb.at(u, d); return [x, y + v, z]; };
+    B(mat, ua, ub, -0.6, wh, -0.05, dd);
+    for (const u of [ua, ub - 0.25]) bag.add(mat, sideprism(Fb, y, [[-0.05, wh - 0.02], [dd, wh - 0.02], [-0.05, rt - 0.05]], u, u + 0.25));
+    const ra = ua > 0.01 ? ua - 0.12 : ua, rb2 = ub < w - 0.01 ? ub + 0.12 : ub;                                         // no overhang over the neighbour's plot
+    bag.add('roof_tile', slab4([P3(ra, -0.05, rt), P3(rb2, -0.05, rt), P3(rb2, dd + 0.25, wh - 0.05), P3(ra, dd + 0.25, wh - 0.05)], 0.12));
+    B(ST, ua, ub, wh - 0.18, wh - 0.02, dd - 0.02, dd + 0.06);
+    // its back face: a window and the door out to the lane
+    const Fa = { at: (u, d) => Fb.at(u, dd + d), w, D }, Aa = (m, ...r) => bag.add(m, fbox(Fa, y, ...r)), mu = (ua + ub) / 2;
+    Aa(frame, mu - 0.5, mu + 0.5, 0.9, 2.3, -0.04, 0.04); Aa('opening', mu - 0.42, mu + 0.42, 0.98, 2.22, 0.04, 0.06); Aa(frame, mu - 0.44, mu + 0.44, 1.75, 1.82, 0.06, 0.09); Aa('brick_baked', mu - 0.56, mu + 0.56, 0.8, 0.9, -0.02, 0.1);
+    { const p = Fb.at(ua, -0.05), q = Fb.at(ub, dd); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y - 0.6, y + rt); }
+    // the yard wall closing the rest of the plot, the privy (secreet) against it in the far corner
+    const ya = side ? aw : 0, yb = side ? w : w - aw;
+    B(mat, ya, yb, -0.6, 2.1, dd - 0.23, dd); B(ST, ya > 0.01 ? ya - 0.02 : ya, yb < w - 0.01 ? yb + 0.02 : yb, 2.1, 2.2, dd - 0.27, dd + 0.04);
+    { const p = Fb.at(ya, dd - 0.23), q = Fb.at(yb, dd); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y - 0.6, y + 2.2); }
+    const pw = Math.min(1.15, yb - ya - 0.5), pa = side ? yb - 0.15 - pw : ya + 0.15, pb = pa + pw, d0 = dd - 1.45;
+    B('planks_grey', pa, pb, -0.05, 2.0, d0, dd - 0.18);
+    bag.add('tar_wood', slab4([P3(pa - 0.08, d0 - 0.18, 2.12), P3(pb + 0.08, d0 - 0.18, 2.12), P3(pb + 0.08, dd - 0.15, 2.32), P3(pa - 0.08, dd - 0.15, 2.32)], 0.06));
+    B('wood_dark', pa + 0.14, pb - 0.14, 0.02, 1.85, d0 - 0.04, d0); B('iron', pb - 0.3, pb - 0.24, 0.95, 1.05, d0 - 0.07, d0 - 0.04);
+    { const p = Fb.at(pa, d0), q = Fb.at(pb, dd - 0.18); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y - 0.05, y + 2.3); }
+  }
 }

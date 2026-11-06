@@ -9,6 +9,7 @@ import '../qing/index.js';
 import { canalHouse } from './house.js';
 import { townHall, dutchChurch, westerTower } from './landmarks.js';
 import { quayWall, canalBridge } from './canal.js';
+import { waag, damPaving, fishBench, sledge } from './dam.js';
 
 const B = 'brick', W = 'plaster_white';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -28,6 +29,6 @@ function ship(el, ctx) {
 }
 registerStyle('dutch', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, canal_house: canalHouse, town_hall: townHall, dutch_church: dutchChurch, wester_tower: westerTower, quay_wall: quayWall, canal_bridge: canalBridge, stacked_tower: stackedTower, ship },
+  elements: { ...STYLES.qing.elements, canal_house: canalHouse, town_hall: townHall, dutch_church: dutchChurch, wester_tower: westerTower, quay_wall: quayWall, canal_bridge: canalBridge, stacked_tower: stackedTower, ship, waag, dam_paving: damPaving, fish_bench: fishBench, sledge },
   objects: {},
 });
