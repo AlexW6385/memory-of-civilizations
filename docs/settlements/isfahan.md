@@ -93,6 +93,14 @@ Sources added:
 - [Masjid-i Shaykh Lutfallah — Archnet](https://archnet.org/sites/1623)
 - [Sheikh Lotfollah Mosque — Wikipedia (kiwix 2023)](https://kaweah.freedombox.rocks/kiwix/wikipedia_en_all_maxi_2023-10/Lotfollah_mosque)
 
+## 14. The Qeysarieh portal's Sagittarius (third pass)
+
+The portal's iwan, the Naqqara-khana, is "crowned with the representation of Sagittarius in mosaic tile" [stated: Archnet, Maydan-i Naqsh-i Jahan]; the sign is "the tiger's body, human's head and dragon's tail"; the bazaar was finished about 1605 and the portal in 1617; paintings attributed to Reza Abbasi of Shah Abbas's hunt and his war with the Uzbeks are on its upper walls, and the naqqareh-khaneh, where drums, horns and karna sounded at sunset and sunrise, stood above until 1889 [stated: iranroute]. Ours: the door at the back of the iwan lowered to 5 m (the portal element's `doorH`), and over it a tile panel 5 × 2.5 m: a turquoise frame, a white border, a blue ground strewn with little white flowers with yellow hearts; on it the tiger's body in yellow with black stripes and white paws, the archer rising from its shoulders in a white robe with a turquoise girdle and a yellow crown, turned back and drawing his black bow, the arrow aimed at the dragon's head at the end of the turquoise tail curling up from the tiger's rump, its spine picked out in white, its jaws open [inferred: the composition, the colours, the size and place in the iwan]. The paintings and the drum gallery are left for later.
+
+Sources added:
+- [Maydan-i Naqsh-i Jahan — Archnet](https://archnet.org/sites/2717)
+- [Qeysarie Gate (Portal) — iranroute](https://iranroute.com/sights/14/qeysarie-gate-portal)
+
 ## Sources
 
 - [Naqsh-e Jahan Square — Wikipedia](https://en.wikipedia.org/wiki/Naqsh-e_Jahan_Square)
