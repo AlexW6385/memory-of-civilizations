@@ -5,7 +5,7 @@
 // painted boards under a gabled roof (Jasper Cropsey's design of 1878), a canopy over the platform and a stair
 // down to the pavement.
 
-import { box, fromTriangles } from '../../core/geom.js';
+import { box, fromTriangles, lathe } from '../../core/geom.js';
 
 const IRON = 'iron';
 /** A flat bar (a ribbon, both faces) from a to b, w wide, its width across in the direction `side` (unit, 3-D). */
@@ -122,4 +122,76 @@ export function elTrack(el, { bag, col }) {
   }
   void inStation;
   bag.add(IRON, fromTriangles(T));
+}
+
+/**
+ * el_train: { x (the track's middle line), z (the train's middle), y (the rails' top), cars, seed } — a train of the
+ * Manhattan elevated as it ran on the Sixth Avenue locals in 1931 (docs/settlements/new-york.md §1b): wooden cars
+ * built 1902–1911 and rebuilt from 1923 as MUDCs with enclosed vestibules and sliding doors in place of the open
+ * platforms' gates — a green-painted body on a steel underframe, a band of paired windows, a monitor roof with
+ * its clerestory lights, two four-wheeled trucks with the third-rail shoe, couplers and the end's three windows.
+ */
+export function elTrain(el, { bag, col }) {
+  const x = el.x, zc = el.z, ry = el.y, n = el.cars ?? 5, L = 14.3, gap = 0.55, W = 2.6, hw = W / 2;
+  const fl = ry + 0.85, eave = fl + 2.25, BODY = 'shutter_green', TRIM = 'wood_painted', ROOF = 'lead';
+  for (let c = 0; c < n; c++) {
+    const z0 = zc - (n * L + (n - 1) * gap) / 2 + c * (L + gap), z1 = z0 + L, ve = 1.25;     // a vestibule at each end
+    // the underframe, the sills and the equipment boxes between the trucks
+    bag.add(IRON, box(x - hw + 0.05, fl - 0.32, z0 + 0.3, x + hw - 0.05, fl, z1 - 0.3));
+    for (const [a, b] of [[z0 + 4.2, z0 + 6.6], [z1 - 6.4, z1 - 4.6], [z0 + 7.0, z0 + 7.9]]) bag.add(IRON, box(x - 0.8, fl - 0.85, a, x + 0.8, fl - 0.32, b));
+    // the body: the panelled wall below the windows, the posts between them, the letter board, the eaves
+    bag.add(BODY, box(x - hw, fl, z0, x + hw, fl + 0.9, z1));
+    bag.add(BODY, box(x - hw, fl + 1.85, z0, x + hw, eave, z1));
+    bag.add('glass_outer', box(x - hw + 0.06, fl + 0.9, z0 + ve, x + hw - 0.06, fl + 1.85, z1 - ve));
+    for (const s of [-1, 1]) {
+      const sx = x + s * hw;
+      bag.add(TRIM, box(Math.min(sx, sx + s * 0.03), fl + 0.86, z0, Math.max(sx, sx + s * 0.03), fl + 0.92, z1));                 // the belt rail
+      bag.add(TRIM, box(Math.min(sx, sx + s * 0.03), fl + 1.84, z0, Math.max(sx, sx + s * 0.03), fl + 1.9, z1));
+      // the window posts: twelve windows in pairs down the saloon
+      const s0 = z0 + ve, s1 = z1 - ve, nw = 12, pw = (s1 - s0) / nw;
+      for (let k = 0; k <= nw; k++) { const zz = s0 + k * pw, wide = k % 2 === 0 ? 0.16 : 0.06; bag.add(BODY, box(Math.min(sx, sx - s * 0.08), fl + 0.9, zz - wide / 2, Math.max(sx, sx - s * 0.08), fl + 1.85, zz + wide / 2)); }
+      // the panels' mouldings below the windows
+      for (let k = 0; k < 6; k++) { const a = s0 + k * 2 * pw + 0.12, b = a + 2 * pw - 0.24; bag.add(TRIM, box(Math.min(sx, sx + s * 0.02), fl + 0.12, a, Math.max(sx, sx + s * 0.02), fl + 0.16, b)); bag.add(TRIM, box(Math.min(sx, sx + s * 0.02), fl + 0.7, a, Math.max(sx, sx + s * 0.02), fl + 0.74, b)); }
+      // the vestibules: the sliding door at each end (a glazed leaf and a closed one), the step under it
+      for (const [a, b] of [[z0 + 0.15, z0 + ve - 0.1], [z1 - ve + 0.1, z1 - 0.15]]) {
+        bag.add('wood_dark', box(Math.min(sx, sx + s * 0.025), fl + 0.05, a, Math.max(sx, sx + s * 0.025), fl + 2.05, b));
+        bag.add('glass_outer', box(Math.min(sx, sx + s * 0.035), fl + 1.0, a + 0.1, Math.max(sx, sx + s * 0.035), fl + 1.8, (a + b) / 2 - 0.05));
+        bag.add(IRON, box(Math.min(sx, sx + s * 0.2), fl - 0.42, a, Math.max(sx, sx + s * 0.2), fl - 0.36, b));
+      }
+    }
+    // the ends: three windows, the destination sign's frame, the marker lamps, the coupler and buffer beam
+    for (const [ez, es] of [[z0, -1], [z1, 1]]) {
+      bag.add(BODY, box(x - hw, fl, Math.min(ez, ez + es * 0.02), x + hw, eave, Math.max(ez, ez + es * 0.02)));
+      for (const wx of [-0.8, 0, 0.8]) bag.add('glass_outer', box(x + wx - 0.3, fl + 1.0, Math.min(ez + es * 0.02, ez + es * 0.04), x + wx + 0.3, fl + 1.85, Math.max(ez + es * 0.02, ez + es * 0.04)));
+      for (const wx of [-1.05, 1.05]) bag.add('glass_lamp', lathe([[0.07, 0], [0.07, 0.04], [0.001, 0.04]], 8, null, 0, 0, 0).rotateX(es * Math.PI / 2).translate(x + wx, eave - 0.2, ez));
+      bag.add(IRON, box(x - hw, fl - 0.38, Math.min(ez, ez + es * 0.12), x + hw, fl - 0.1, Math.max(ez, ez + es * 0.12)));
+      bag.add(IRON, box(x - 0.12, fl - 0.42, Math.min(ez, ez + es * (gap / 2 + 0.02)), x + 0.12, fl - 0.2, Math.max(ez, ez + es * (gap / 2 + 0.02))));
+    }
+    // the monitor roof: the lower deck roof eaves to eaves, the clerestory with its little lights, the upper roof
+    const R = [], q = (a, b, c, d) => R.push(...a, ...b, ...c, ...a, ...c, ...d);
+    const mw = 0.75, ry1 = eave + 0.32, ry2 = eave + 0.7, e = 0.08;
+    q([x - hw - e, eave - 0.04, z1], [x - mw, ry1, z1], [x - mw, ry1, z0], [x - hw - e, eave - 0.04, z0]);
+    q([x + hw + e, eave - 0.04, z0], [x + mw, ry1, z0], [x + mw, ry1, z1], [x + hw + e, eave - 0.04, z1]);
+    q([x - mw - e, ry2 - 0.08, z1 + 0.1], [x, ry2 + 0.08, z1 + 0.1], [x, ry2 + 0.08, z0 - 0.1], [x - mw - e, ry2 - 0.08, z0 - 0.1]);
+    q([x + mw + e, ry2 - 0.08, z0 - 0.1], [x, ry2 + 0.08, z0 - 0.1], [x, ry2 + 0.08, z1 + 0.1], [x + mw + e, ry2 - 0.08, z1 + 0.1]);
+    // the hoods over the ends (the roof carried down over the vestibules)
+    for (const [ez, es] of [[z0, -1], [z1, 1]]) q([x - hw - e, eave - 0.04, ez], [x + hw + e, eave - 0.04, ez], [x + mw, ry1, ez + es * 0.001], [x - mw, ry1, ez + es * 0.001]);
+    bag.add(ROOF, fromTriangles([...R, ...R.reduce((o, _, i, arr) => { if (i % 9 === 0) o.push(...arr.slice(i, i + 3), ...arr.slice(i + 6, i + 9), ...arr.slice(i + 3, i + 6)); return o; }, [])]));
+    bag.add(BODY, box(x - mw, ry1 - 0.02, z0 + 0.4, x + mw, ry2 - 0.08, z1 - 0.4));
+    for (const s of [-1, 1]) for (let zz = z0 + 1.0; zz < z1 - 1.0; zz += 1.1) bag.add('glass_outer', box(Math.min(x + s * mw, x + s * (mw + 0.02)), ry1 + 0.05, zz - 0.3, Math.max(x + s * mw, x + s * (mw + 0.02)), ry2 - 0.14, zz + 0.3));
+    for (let zz = z0 + 2.5; zz < z1 - 2; zz += 3.2) bag.add(IRON, lathe([[0.12, 0], [0.12, 0.18], [0.16, 0.2], [0.001, 0.26]], 8, null, x, ry2 + 0.06, zz));      // the ventilators
+    // the trucks: side frames, springs, four wheels on the rails, the third-rail shoe on the outer side
+    for (const tz of [z0 + 2.4, z1 - 2.4]) {
+      for (const s of [-1, 1]) {
+        bag.add(IRON, box(x + s * 0.95 - 0.07, ry + 0.25, tz - 1.25, x + s * 0.95 + 0.07, ry + 0.6, tz + 1.25));
+        bag.add(IRON, box(x + s * 0.95 - 0.1, ry + 0.6, tz - 0.35, x + s * 0.95 + 0.1, fl - 0.32, tz + 0.35));
+        for (const wz of [tz - 0.95, tz + 0.95]) bag.add(IRON, lathe([[0.43, -0.05], [0.43, 0.05], [0.47, 0.07], [0.12, 0.07], [0.12, -0.05]], 14, null, 0, 0, 0).rotateZ(s * Math.PI / 2).translate(x + s * 0.72, ry + 0.43, wz));
+      }
+      bag.add(IRON, box(x - 0.95, ry + 0.35, tz - 0.12, x + 0.95, ry + 0.55, tz + 0.12));
+      const sh = Math.sign(el.x - (el.avenue ?? el.x - 1)) || 1;
+      bag.add(IRON, box(Math.min(x + sh * 0.85, x + sh * 1.05), ry + 0.06, tz - 0.6, Math.max(x + sh * 0.85, x + sh * 1.05), ry + 0.11, tz - 0.2));
+      bag.add(IRON, box(Math.min(x + sh * 0.8, x + sh * 0.9), ry + 0.06, tz - 0.5, Math.max(x + sh * 0.8, x + sh * 0.9), ry + 0.4, tz - 0.3));
+    }
+    col.rect([x - hw, z0, x + hw, z1], fl - 0.4, eave + 0.7);
+  }
 }
