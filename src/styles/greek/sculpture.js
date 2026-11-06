@@ -81,7 +81,8 @@ function joints(o) {
 export function human(o) {
   const H = o.h ?? 1.8, n = o.n ?? 6, J = joints(o), S = (p) => [p[0] * H, p[1] * H, p[2] * H], j = {};
   for (const k in J) j[k] = S(J[k]);
-  const g = [], metal = [], r = (v) => v * H, pose = o.pose ?? 'stand';
+  const g = [], metal = [], skin = o.skin ? [] : null, r = (v) => v * H, pose = o.pose ?? 'stand';
+  const flesh = skin ?? g;                                          // head, neck, forearms, hands, feet: ivory on a chryselephantine statue
   const drape = o.drape ?? 'nude', upper = !!o.upper;
   const mid = (a, b, t = 0.5) => a.map((v, i) => v + (b[i] - v) * t);
   // torso: the belly and the chest, the shoulders and the hips as bars (they turn with the pose)
@@ -91,8 +92,8 @@ export function human(o) {
   g.push(blob(mid(chest, j.neck, 0.15), r(0.075), [1.35, 0.9, 0.8], n));
   if (!upper) g.push(limb(j.hipL, j.hipR, r(0.07), r(0.07), n));
   // head and neck
-  g.push(limb(j.neck, mid(j.neck, j.head, 0.6), r(0.034), r(0.031), n));
-  g.push(blob(j.head, r(0.058), [0.86, 1.08, 0.98], n + 2));
+  flesh.push(limb(j.neck, mid(j.neck, j.head, 0.6), r(0.034), r(0.031), n));
+  flesh.push(blob(j.head, r(0.058), [0.86, 1.08, 0.98], n + 2));
   if (o.hair === 'rope') g.push(limb([j.head[0], j.head[1] - r(0.02), j.head[2] - r(0.05)], [j.neck[0], j.neck[1] - r(0.12), j.neck[2] - r(0.07)], r(0.03), r(0.022), 5));
   else g.push(blob([j.head[0], j.head[1] + r(0.018), j.head[2] - r(0.012)], r(0.057), [0.92, 0.82, 1.0], n + 2));
   if (o.helmet) {
@@ -103,8 +104,8 @@ export function human(o) {
   const dressed = drape !== 'nude';
   for (const s of ['L', 'R']) {
     const sh = j['sh' + s], el = j['el' + s], ha = j['ha' + s];
-    g.push(limb(sh, el, r(dressed ? 0.046 : 0.04), r(dressed ? 0.036 : 0.031), n, dressed ? fold(5, 0.08) : null), limb(el, ha, r(0.03), r(0.022), n));
-    g.push(blob(ha, r(0.024), [1, 1.25, 0.8], 5));
+    g.push(limb(sh, el, r(dressed ? 0.046 : 0.04), r(dressed ? 0.036 : 0.031), n, dressed ? fold(5, 0.08) : null)); flesh.push(limb(el, ha, r(0.03), r(0.022), n));
+    flesh.push(blob(ha, r(0.024), [1, 1.25, 0.8], 5));
   }
   // the legs: bare, or in the cloth that falls over them; the long peplos hides them but for the feet
   const longDress = (drape === 'peplos' || drape === 'mantle') && (pose === 'stand' || pose === 'ease');
@@ -113,7 +114,7 @@ export function human(o) {
     const hip = j['hip' + s], kn = j['kn' + s], ft = j['ft' + s];
     if (clothLegs) g.push(limb(hip, kn, r(0.07), r(0.052), n + 1, fold(7, 0.1)), limb(kn, [ft[0], ft[1] + r(0.01), ft[2]], r(0.048), r(0.06), n + 1, fold(9, 0.12)));
     else if (!longDress) g.push(limb(hip, kn, r(0.058), r(0.04), n), limb(kn, ft, r(0.039), r(0.026), n));
-    g.push(limb(ft, [ft[0], ft[1] - r(0.015), ft[2] + r(0.075)], r(0.024), r(0.018), 5));
+    flesh.push(limb(ft, [ft[0], ft[1] - r(0.015), ft[2] + r(0.075)], r(0.024), r(0.018), 5));
   }
   // drapery
   const waist = mid(j.pelvis, chest, 0.35);
@@ -148,7 +149,7 @@ export function human(o) {
   const side = (k) => ((k === 'r') !== !!o.mirror ? 'R' : 'L');
   if (o.shield) { const ha = j['ha' + side(o.shield)], el = j['el' + side(o.shield)]; const c = mid(el, ha, 0.5); const sh = lathe([[0.001, -r(0.03)], [r(0.21), -r(0.012)], [r(0.22), r(0.01)], [0.001, r(0.035)]], 14); sh.applyMatrix4(new Matrix4().makeRotationX(Math.PI / 2).setPosition(c[0], c[1], c[2] + r(0.05))); (o.metalShield ? metal : g).push(sh); }
   if (o.spear) { const ha = j['ha' + side(o.spear)], d = (o.spearDir ?? [0.12, 1, 0]).slice(); if (o.mirror) d[0] = -d[0]; const L = Math.hypot(...d); metal.push(limb([ha[0] - d[0] / L * r(0.55), ha[1] - d[1] / L * r(0.55), ha[2]], [ha[0] + d[0] / L * r(0.6), ha[1] + d[1] / L * r(0.6), ha[2]], r(0.009), r(0.006), 4)); }
-  return { stone: g, metal };
+  return { stone: g, metal, skin: skin ?? [] };
 }
 
 /** Rearing: the body turned up about the hind hooves. */

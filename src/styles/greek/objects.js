@@ -5,6 +5,7 @@ import { Matrix4 } from '../../core/three.js';
 import { box, lathe, rod, disc, place } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
 import { merge } from './columns.js';
+import { human, limb, blob, relief } from './sculpture.js';
 
 /** Door frame for an opening in a Greek wall: jambs and lintel in three fasciae, a crowning cornice. */
 export function opening(el, o, f, { bag }) {
@@ -67,72 +68,64 @@ export function basin(el, { bag, col }) {
 }
 
 /**
- * Athena Parthenos (Pheidias, 438 BC), gold and ivory, about 11.5 m high, on its pedestal
- * (8.043 × 4.096 m). She stands frontally in her peplos with the aegis on her breast and the
- * triple-crested helmet; on her right hand a Nike about 1.8 m tall (the hand supported by a
- * column, as in the reduced copies), her left hand on the rim of the shield that rests on the
- * ground beside her, the serpent coiled within it, the spear against her left shoulder.
- * A sculptural massing at L2: the forms and proportions are right, the carving is not yet.
- * Local: facing +z, pedestal centred at the origin.
+ * Athena Parthenos (Pheidias, 438 BC), gold and ivory, about 11.5 m high, on its pedestal (8.043 × 4.096 m;
+ * docs/buildings/parthenon.md §8, docs/settlements/athens.md §4c). She stands frontally, her weight on the right leg,
+ * in the peplos falling in deep folds, with the overfold and belt; the aegis with the gorgoneion on her breast; the
+ * Attic helmet with its three crests; on her right hand a Nike about 1.8 m tall, winged, holding out a wreath (the
+ * hand supported by a column, as in the reduced copies); her left hand on the rim of the shield that rests on the
+ * ground at her side, the serpent coiled within it; the spear against her left shoulder. Drapery, helmet, aegis,
+ * shield and Nike in gold; face, arms and feet in ivory. The pedestal's front carries the birth of Pandora, figures
+ * in a row in gilt relief. Local: facing +z, pedestal centred at the origin.
  */
 export function athenaParthenos(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, yaw = el.yaw ?? 0;
   const PW = 8.043, PD = 4.096, PH = el.pedestal ?? 1.2;
   const gold = [], ivory = [], stone = [];
-  // pedestal: plinth, die (with the birth of Pandora in relief: L3), crown moulding
+  // pedestal: plinth, die, crown moulding; the birth of Pandora in relief across the front
   stone.push(box(-PW / 2, 0, -PD / 2, PW / 2, 0.22, PD / 2));
   stone.push(box(-PW / 2 + 0.12, 0.22, -PD / 2 + 0.12, PW / 2 - 0.12, PH - 0.2, PD / 2 - 0.12));
   stone.push(box(-PW / 2 + 0.02, PH - 0.2, -PD / 2 + 0.02, PW / 2 - 0.02, PH, PD / 2 - 0.02));
-  const F = PH;                                   // foot level
-  const S = 11.5 / 11.5;
-  // peplos: from the feet to the waist, the folds as deep vertical flutes
-  const skirt = lathe([[1.15, 0], [1.2, 0.3], [1.12, 1.8], [1.02, 3.4], [0.92, 4.6], [0.82, 5.2]], 72,
-    (th, i) => 1 + (i > 0 ? 0.05 : 0.03) * Math.cos(th * 18) * (th > Math.PI ? 1 : 0.6), 0, F, 0);
-  gold.push(skirt);
-  // the overfold (apoptygma) and belt
-  gold.push(lathe([[0.95, 0], [1.0, 0.25], [0.93, 1.0], [0.84, 1.4]], 64, (th) => 1 + 0.035 * Math.cos(th * 14), 0, F + 4.4, 0));
-  gold.push(lathe([[0.86, 0], [0.88, 0.12], [0.86, 0.24]], 32, null, 0, F + 5.75, 0));
-  // torso and shoulders under the aegis
-  const torso = lathe([[0.84, 0], [0.88, 0.6], [0.9, 1.3], [0.82, 1.8], [0.55, 2.05], [0.3, 2.15]], 40, null, 0, F + 5.9, 0);
-  torso.applyMatrix4(new Matrix4().makeScale(1.12, 1, 0.78).setPosition(0, 0, 0));
-  gold.push(torso);
-  // aegis: a scaly cape across the breast with the gorgoneion at its centre
-  const aegis = lathe([[0.95, 0], [0.98, 0.5], [0.86, 0.95], [0.45, 1.15]], 40, (th) => 1 + 0.04 * Math.cos(th * 30), 0, F + 6.9, 0);
-  aegis.applyMatrix4(new Matrix4().makeScale(1.12, 1, 0.82));
+  for (let i = 0; i < 20; i++) {
+    const kind = i === 10 ? 'maiden' : ['walker', 'maiden', 'god', 'maiden'][i % 4];
+    gold.push(relief(kind, i, { p: [-PW / 2 + 0.45 + i * (PW - 0.9) / 19, 0.26, PD / 2 - 0.12 + 0.002], u: [1, 0, 0], o: [0, 0, 1], s: 0.68, d: 0.03, flip: i > 10 }));
+  }
+  const F = PH, H = 10.6;
+  // the goddess (the shield arm and the Nike arm set by hand)
+  const fig = human({ pose: 'ease', drape: 'peplos', h: H, n: 14, skin: true,
+    arms: { l: [[-0.15, 0.645, 0.05], [-0.16, 0.62, 0.21]], r: [[0.165, 0.62, 0.0], [0.215, 0.462, 0.02]] } });
+  const at = (list, dx = 0, dy = F, dz = 0) => list.map((g) => g.translate(dx, dy, dz));
+  gold.push(...at(fig.stone)); ivory.push(...at(fig.skin));
+  // the aegis: a scaly cape over the breast and shoulders, the gorgoneion at its centre
+  const aegis = lathe([[1.0, 0], [1.04, 0.45], [0.92, 0.9], [0.5, 1.12], [0.001, 1.15]], 40, (th) => 1 + 0.04 * Math.cos(th * 30));
+  aegis.applyMatrix4(new Matrix4().makeScale(1.05, 1, 0.78).setPosition(0, F + 0.66 * H, 0.02));
   gold.push(aegis);
-  ivory.push(place(disc(0.22, 0, 20), 0, F + 7.35, 0.82));
-  ivory[ivory.length - 1].applyMatrix4(new Matrix4().makeTranslation(0, 0, 0));
-  // neck and head (ivory), the Attic helmet with three crests (gold)
-  ivory.push(lathe([[0.22, 0], [0.21, 0.35], [0.25, 0.4]], 20, null, 0, F + 8.0, 0.05));
-  const head = lathe([[0.0, 0], [0.28, 0.08], [0.36, 0.35], [0.35, 0.7], [0.26, 0.92], [0.0, 1.0]], 24, null, 0, F + 8.35, 0.08);
-  head.applyMatrix4(new Matrix4().makeScale(0.92, 1, 1.05));
-  ivory.push(head);
-  gold.push(lathe([[0.0, 0.0], [0.4, 0.0], [0.44, 0.35], [0.4, 0.65], [0.0, 0.8]], 24, null, 0, F + 8.95, -0.02));   // helmet bowl
-  gold.push(box(-0.42, F + 8.85, 0.18, 0.42, F + 9.0, 0.5));                                                        // visor
-  for (const [cx, h] of [[0, 1.2], [-0.32, 0.85], [0.32, 0.85]]) gold.push(box(cx - 0.07, F + 9.5, -0.55, cx + 0.07, F + 9.5 + h, 0.25));
-  // right arm forward, holding the Nike, the hand on a column
-  gold.push(rod([0.92, F + 7.4, 0.0], [1.35, F + 6.5, 0.6], 0.24, 12));
-  ivory.push(rod([1.35, F + 6.5, 0.6], [1.55, F + 6.2, 1.9], 0.19, 12));
-  stone.push(lathe([[0.26, 0], [0.24, F + 5.95 - 0.1], [0.36, F + 5.95]], 24, null, 1.6, 0, 1.95));
-  const nike = [lathe([[0.32, 0], [0.28, 0.9], [0.2, 1.3], [0.14, 1.55], [0.0, 1.8]], 20, null, 1.6, F + 6.2, 2.0)];
-  for (const s of [-1, 1]) nike.push(box(1.6 + s * 0.04, F + 7.1, 1.65, 1.6 + s * 0.65, F + 7.9, 1.95));   // wings
-  gold.push(...nike);
-  // left arm down to the shield rim
-  gold.push(rod([-0.92, F + 7.4, 0.0], [-1.3, F + 6.2, 0.15], 0.24, 12));
-  ivory.push(rod([-1.3, F + 6.2, 0.15], [-1.75, F + 5.2, 0.3], 0.19, 12));
-  // the shield (about 4.8 m), resting on its rim on the pedestal at her left, turned outward
-  const sh = lathe([[0.0, -0.06], [2.38, -0.16], [2.4, -0.1], [2.3, -0.02], [1.6, 0.06], [0.0, 0.12]], 48);   // bottom to top, so normals face out
-  sh.applyMatrix4(new Matrix4().makeRotationZ(Math.PI / 2).premultiply(new Matrix4().makeRotationY(-0.35)).setPosition(-2.25, F + 2.42, 0.15));
+  ivory.push(place(disc(0.24, 0, 20), 0, 0, 0).applyMatrix4(new Matrix4().makeRotationX(Math.PI / 2).setPosition(0, F + 0.745 * H, 0.82)));
+  // the Attic helmet: the bowl, the raised cheek-pieces, the three crests (a sphinx between two winged horses)
+  const hc = [0, F + 0.915 * H, 0.05 * H * 0.1];
+  gold.push(lathe([[0.001, 0], [0.5, 0.0], [0.55, 0.32], [0.5, 0.62], [0.001, 0.78]], 24, null, hc[0], hc[1] - 0.1, hc[2] - 0.04));
+  gold.push(box(-0.52, hc[1] - 0.08, 0.3, 0.52, hc[1] + 0.06, 0.55));
+  for (const s of [-1, 1]) gold.push(box(s * 0.5 - 0.04, hc[1] - 0.45, -0.25, s * 0.5 + 0.04, hc[1] - 0.05, 0.3));
+  for (const [cx, h] of [[0, 1.25], [-0.36, 0.9], [0.36, 0.9]]) { gold.push(box(cx - 0.07, hc[1] + 0.55, -0.6, cx + 0.07, hc[1] + 0.55 + h, 0.3)); gold.push(blob([cx, hc[1] + 0.55 + h * 0.75, 0.3], 0.16, [0.6, 1, 1.2], 8)); }
+  // the Nike on her right palm (the hand forward), winged, the wreath held out; the column under the hand
+  const hand = [-0.16 * H, F + 0.62 * H, 0.21 * H];
+  const nk = human({ pose: 'ease', drape: 'peplos', h: 1.8, n: 8, arms: { r: [[0.15, 0.68, 0.06], [0.16, 0.78, 0.2]] } });
+  gold.push(...at(nk.stone, hand[0], hand[1] + 0.05, hand[2] + 0.1), ...at(nk.metal, hand[0], hand[1] + 0.05, hand[2] + 0.1));
+  for (const s of [-1, 1]) gold.push(limb([hand[0] + s * 0.12, hand[1] + 1.45, hand[2] + 0.02], [hand[0] + s * 0.75, hand[1] + 2.0, hand[2] - 0.35], 0.18, 0.06, 6), limb([hand[0] + s * 0.1, hand[1] + 1.3, hand[2] - 0.02], [hand[0] + s * 0.6, hand[1] + 1.4, hand[2] - 0.45], 0.14, 0.04, 6));
+  gold.push(lathe([[0.16, 0], [0.13, 0.05], [0.16, 0.1], [0.13, 0.05]], 16, null, hand[0] + 0.3, hand[1] + 1.4, hand[2] + 0.45));
+  stone.push(lathe([[0.32, 0], [0.32, 0.25], [0.26, 0.3], [0.24, hand[1] - F - 0.35], [0.34, hand[1] - F - 0.15], [0.36, hand[1] - F - 0.05], [0.001, hand[1] - F - 0.05]], 24, null, hand[0], F, hand[2]));
+  // the shield (about 4.8 m), resting on its rim at her left, its outer face turned out; the serpent within (her left is at +x: she faces +z)
+  const sh = lathe([[0.0, -0.06], [2.38, -0.16], [2.4, -0.1], [2.3, -0.02], [1.6, 0.06], [0.0, 0.12]], 48);
+  sh.applyMatrix4(new Matrix4().makeRotationZ(-Math.PI / 2).premultiply(new Matrix4().makeRotationY(0.35)).setPosition(2.35, F + 2.42, 0.15));
   gold.push(sh);
-  // the serpent coiled inside the shield
+  gold.push(blob([2.52, F + 2.42, 0.15 + 0.04], 0.28, [0.35, 1, 1], 10));                            // the boss, a gorgon's head
   const coil = [];
   for (let k = 0; k < 30; k++) {
     const a = k * 0.42, r = 0.5 + k * 0.025;
-    coil.push(rod([-2.05, F + 0.6 + r * Math.sin(a) * 0.8 + k * 0.03, 0.15 + r * Math.cos(a) * 0.9], [-2.05, F + 0.6 + (r + 0.025) * Math.sin(a + 0.42) * 0.8 + (k + 1) * 0.03, 0.15 + (r + 0.025) * Math.cos(a + 0.42) * 0.9], 0.11, 8));
+    coil.push(rod([1.95, F + 0.6 + r * Math.sin(a) * 0.8 + k * 0.03, 0.15 + r * Math.cos(a) * 0.9], [1.95, F + 0.6 + (r + 0.025) * Math.sin(a + 0.42) * 0.8 + (k + 1) * 0.03, 0.15 + (r + 0.025) * Math.cos(a + 0.42) * 0.9], 0.11, 8));
   }
   gold.push(...coil);
   // the spear, leaning against her left shoulder
-  gold.push(rod([-1.55, F, -0.4], [-1.05, F + 11.0, -0.25], 0.06, 8));
+  gold.push(rod([1.55, F, -0.4], [1.05, F + 11.0, -0.25], 0.06, 8));
   const m = new Matrix4().makeRotationY(yaw).setPosition(x, y, z);
   for (const [list, mat] of [[gold, 'gold'], [ivory, 'ivory'], [stone, el.pedestalMat || 'marble_dark']]) {
     const g = merge(list);
