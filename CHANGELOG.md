@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.37 — Egypt, Angkor, Borobudur, the Pacific and the Potala in detail (2026-11-06)
+- Edfu's falcons, pylon smiting reliefs, flagpole clamps and a real birth house; Giza's royal ship, sealed boat pits and bakeries; Angkor's redented lotus-bud towers, porticoes, bas-relief, balustered windows, devatas and libraries; Borobudur's 72 pierced stupas, crowning stupa, kala-makara gates, spouts and pilgrims; sculpted moai, fitted ahu, Rano Raraku quarry and hare paenga; the Māori pā's carved figures, chief's house, pātaka, waka taua and kūmara gardens; the Potala in stepped battered masses with Tibetan windows, pembe friezes, zigzag stairs and banners, Shöl walled with gates and pillars.
+
 ## v9.36 — Africa and the Americas in detail (2026-11-06)
 - Djenné's arcaded prayer hall, ribbed qibla towers and roof vents; Kilwa's domed and vaulted mosque and sewn mtepe boats; Great Zimbabwe's tower dentelle, Eastern Enclosure birds and hill boulders; Lalibela's Aksumite windows, triple-cross roof and pilgrims; Machu Picchu's battered trapezoid-opening walls, Torreón and Intihuatana; Taos' vigas, roof hatches and racks; Cahokia's daubed palisade with round bastions, summit house and chunkey yards.
 
