@@ -14,6 +14,12 @@ E.push({ t: 'ming_gallery', pts: [[-g, cz1], [cx0, cz1], [cx0, cz0], [cx1, cz0],
 E.push({ t: 'qing_hall', rect: [-g + 1, cz1 - 7, g - 1, cz1 + 7], y: 1.0, H: 7, double: 5, roof: 'xieshan', bays: [5, 2], front: 's', four: true, plat: 1.0, open: true });
 // the Great South Gate
 E.push({ t: 'qing_hall', rect: SOUTH_GATE, y: 0.8, H: 9, double: 7, roof: 'hip', bays: [5, 2], front: 's', four: true, plat: 0.8, open: true });
+// steps up to both gates' platforms (each 0.9 m out beyond the posts) on the axis, front and back
+for (const [r, y] of [[[-g + 1, cz1 - 7, g - 1, cz1 + 7], 1.0], [SOUTH_GATE, 0.8]]) {
+  const run = y * 3.2;
+  E.push({ t: 'stairs', rect: [-6, r[3] + 0.9, 6, r[3] + 0.9 + run], y0: 0, y1: y, dir: 'n' });
+  E.push({ t: 'stairs', rect: [-6, r[1] - 0.9 - run, 6, r[1] - 0.9], y0: 0, y1: y, dir: 's' });
+}
 // the pagodas: seven storeys each, in square courts of corridors
 for (const [px, pz] of PAGODAS) {
   // square, three bays a side, seven storeys narrowing upward, the spire of nine rings (§4)
