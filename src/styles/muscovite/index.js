@@ -240,7 +240,7 @@ function kremlinWall(el, { bag, col }) {
         return;
       }
       // the gate tower: the gateway, the superstructure above the parapet, the open stage on columns with its bell, the stone tent
-      bag.add('opening', box(x - r - 0.04, yy - 3, z - 2.4, x + r + 0.04, yy + 4, z + 2.4));
+      bag.add('opening', Math.abs(uz) > Math.abs(ux) ? box(x - r - 0.04, yy - 3, z - 2.4, x + r + 0.04, yy + 4, z + 2.4) : box(x - 2.4, yy - 3, z - r - 0.04, x + 2.4, yy + 4, z + r + 0.04));   // the gateway, through the wall
       const a = r * 0.65, y1 = top + 0.2, y2 = y1 + 7, y3 = y2 + 4.5;
       bag.add(BR, box(x - a, top - 0.5, z - a, x + a, y2, z + a));
       bag.add(WS, box(x - a - 0.15, y2 - 0.4, z - a - 0.15, x + a + 0.15, y2, z + a + 0.15));
