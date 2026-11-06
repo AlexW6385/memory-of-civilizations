@@ -10,7 +10,7 @@ import { PLAZA, CENOTE, SACBE } from './layout.js';
 const E = [];
 E.push({ t: 'lane', rect: PLAZA, y: 0.04, mat: 'lime_plaster' });
 // the Castillo: 55.3 m at the base, 24 m to the top platform, the temple 6 m more
-E.push({ t: 'm_pyramid', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stairs: 'nesw', steps: 91, stairW: 8.8, serpents: 'n', temple: { w: 13.5, d: 13.5, h: 6, doors: 'n' } });
+E.push({ t: 'm_pyramid', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stairs: 'nesw', steps: 91, stairW: 8.8, stairOut: 6.2, serpents: 'n', temple: { w: 13.5, d: 13.5, h: 6, doors: 'n' } });
 // the Great Ball Court: the alley 146 × 36 m, walls 8.5 m high
 E.push({ t: 'm_ballcourt', rect: [-133, -110, -97, 36], wallH: 8.5, bench: 4.5 });
 // the Temple of the Warriors, its colonnade, the Thousand Columns
@@ -25,7 +25,7 @@ E.push({ t: 'm_platform', c: [-58, -46], a: 9, h: 1.9, stairs: 'e', skulls: true
 E.push({ t: 'm_platform', c: [-48, -12], a: 7, h: 3.2 });
 // the sacbe to the cenote, the cenote's rim temple
 E.push({ t: 'sacbe', a: SACBE.a, b: SACBE.b, w: SACBE.w, h: 0.8 });
-E.push({ t: 'm_platform', c: [0, CENOTE.c[1] + CENOTE.r + 5], a: 4, h: 1.6, stairs: 'n' });
+E.push({ t: 'm_platform', c: [0, CENOTE.c[1] + CENOTE.r + 5], a: 4, h: 1.6, stairs: 'n', stairOut: 0 });
 E.push({ t: 'm_temple', c: [0, CENOTE.c[1] + CENOTE.r + 5], y: 1.6, w: 5, d: 4, h: 4, doors: 's', serpentCols: false });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -33,7 +33,7 @@ const rooms = [
   room('castillo-top', [-9.8, -9.8, 9.8, 9.8], 24, 'open'),
   room('plaza', PLAZA, 0, 'open'),
 ];
-const walks = [[[0, 60], [0, 34], [0, 28.8], [0, 12], [0, 9.6]]];
+const walks = [[[0, 60], [0, 37], [0, 34], [0, 12], [0, 9.6]]];
 walks[0].y0 = 0;
 
 export const plaza = {

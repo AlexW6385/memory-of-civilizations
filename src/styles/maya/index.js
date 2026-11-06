@@ -6,8 +6,8 @@
 // four sides; raised white roads (sacbe); in the town, oval houses of rubble and wattle under
 // steep palm thatch, their lots enclosed by dry-stone walls.
 
-import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { registerStyle, STYLES, subtractRects } from '../../core/build.js';
+import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
 import { serpentHeadKit, chaacKit, chacmoolKit, warriorPanelKit, Kit } from './meso.js';
@@ -38,7 +38,16 @@ function serpentHead(bag, x, z, dir, y, s = 1, opts) {
  */
 function mPyramid(el, { bag, col }) {
   const [cx, cz] = el.c, n = el.tiers, H = el.h, A0 = el.base, A1 = el.top, sw = (el.stairW ?? 8.8) / 2;
-  const th = H / n;
+  const th = H / n, STEP = (A0 - A1) / n, bw = 1.2;
+  const sides = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+  // the stairways stand out from the faces: their line runs parallel to the tiers' feet, far enough out that every
+  // tread clears the tier's moulding below it (the moulding stands 0.64 of a tier's step in from its foot)
+  const m = 0.64 * STEP + 0.2, foot = A0 + m + (el.stairOut ?? 0), head = A1 + m, mould = A1 + 0.64 * STEP;
+  const stairRect = (k) => {
+    const [dx, dz] = sides[k], o = sw + bw, a = Math.min(cx + dx * foot, cx + dx * (A1 - 1)), b = Math.max(cx + dx * foot, cx + dx * (A1 - 1));
+    return dx ? [a - 0.5, cz - o, b + 0.5, cz + o] : [cx - o, Math.min(cz + dz * foot, cz + dz * (A1 - 1)) - 0.5, cx + o, Math.max(cz + dz * foot, cz + dz * (A1 - 1)) + 0.5];
+  };
+  const holes = [...(el.stairs || 'nesw')].map((k) => { const r = stairRect(k), o = sw; return sides[k][0] ? [r[0], cz - o, r[2], cz + o] : [cx - o, r[1], cx + o, r[3]]; });
   for (let k = 0; k < n; k++) {
     // each tier: a sloping base, a vertical panel with a moulding, and a ledge before the next
     const a0 = A0 - (A0 - A1) * k / n, a1 = A0 - (A0 - A1) * (k + 1) / n, y0 = k * th, step = a0 - a1;
@@ -50,43 +59,53 @@ function mPyramid(el, { bag, col }) {
     if (!el.simple) {
       const pw = 2.2, py0 = y0 + th * 0.6, py1 = y0 + th * 0.86, d = ap - step * 0.04 + 0.05;
       for (const [fx, fz] of [[0, -1], [0, 1], [1, 0], [-1, 0]]) {
-        const m = Math.floor((2 * d) / (pw + 0.9));
-        for (let i = 0; i < m; i++) {
-          const u = -d + (i + 0.5) * (2 * d) / m;
-          if (Math.abs(u) < sw + 1.6) continue;
+        const mm = Math.floor((2 * d) / (pw + 0.9));
+        for (let i = 0; i < mm; i++) {
+          const u = -d + (i + 0.5) * (2 * d) / mm;
+          if (Math.abs(u) < sw + bw + pw / 2 + 0.3) continue;
           const [qx, qz] = fz ? [cx + u, cz + fz * d] : [cx + fx * d, cz + u];
           const t = 0.2, d0 = 0.15, bar = (u0, u1, v0, v1) => bag.add(L, fz ? box(qx + u0, v0, qz - d0, qx + u1, v1, qz + d0) : box(qx - d0, v0, qz + u0, qx + d0, v1, qz + u1));
           bar(-pw / 2, pw / 2, py0, py0 + t); bar(-pw / 2, pw / 2, py1 - t, py1); bar(-pw / 2, -pw / 2 + t, py0 + t, py1 - t); bar(pw / 2 - t, pw / 2, py0 + t, py1 - t);
         }
       }
     }
-    col.rect([cx - a0, cz - a0, cx + a0, cz + a0], y0 - 0.3, y0 + th - 0.31);
+    // the tier as an obstacle, except over the stairs (which are walked)
+    for (const r of subtractRects([cx - a0, cz - a0, cx + a0, cz + a0], holes)) col.rect(r, y0 - 0.3, y0 + th - 0.31);
     col.floor([cx - a1, cz - a1, cx + a1, cz + a1], y0 + th);
   }
-  // the stairways and their balustrades; a temple on top
-  const sides = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+  // the stairways: a solid mass standing out of the face, its treads and risers on top, a balustrade on either
+  // side whose foot carries the serpent's head where asked; a temple on top
   for (const k of el.stairs || 'nesw') {
-    const [dx, dz] = sides[k], nx = -dz, nz = dx;
-    const foot = A0 + 1.2, head = A1 - 0.2, steps = el.steps ?? 91;
-    // the stair as a sloping mass with treads
+    const [dx, dz] = sides[k], nx = -dz, nz = dx, steps = el.steps ?? 91, dIn = A1 - 1;
+    const P = (d, o, y) => [cx + dx * d + nx * o, y, cz + dz * d + nz * o];
+    // a prism over the (d, y) polygon `poly` (convex) between offsets o0 and o1
+    const prism = (mat, poly, o0, o1) => {
+      const t = [], q = (a, b, c, e) => t.push(...a, ...b, ...c, ...a, ...c, ...e);
+      for (let i = 1; i + 1 < poly.length; i++) { t.push(...P(poly[0][0], o0, poly[0][1]), ...P(poly[i][0], o0, poly[i][1]), ...P(poly[i + 1][0], o0, poly[i + 1][1])); t.push(...P(poly[0][0], o1, poly[0][1]), ...P(poly[i][0], o1, poly[i][1]), ...P(poly[i + 1][0], o1, poly[i + 1][1])); }
+      for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; q(P(a[0], o0, a[1]), P(b[0], o0, b[1]), P(b[0], o1, b[1]), P(a[0], o1, a[1])); }
+      bag.add(mat, fromTriangles(orientOutward(t)));
+    };
+    // the mass under the stair's line, back into the pyramid's core (hidden there), the full width with the balustrades
+    prism(L, [[foot, -0.2], [foot, 0], [head, H], [mould, H], [dIn, H - 1.2], [dIn, -0.2]], -(sw + bw), sw + bw);
+    // the treads and risers: each step a closed wedge sitting on the line
     const t = [];
     for (let i = 0; i < steps; i++) {
-      const f0 = i / steps, f1 = (i + 1) / steps, d0 = foot - (foot - head) * f0, d1 = foot - (foot - head) * f1, y1 = H * f1;
-      const P = (d, o, y) => [cx + dx * d + nx * o, y, cz + dz * d + nz * o];
-      const q = [P(d0, -sw, y1), P(d1, -sw, y1), P(d1, sw, y1), P(d0, sw, y1)];
-      t.push(...q[0], ...q[3], ...q[2], ...q[0], ...q[2], ...q[1]);                                          // the tread
-      const r = [P(d0, -sw, H * f0), P(d0, sw, H * f0), P(d0, sw, y1), P(d0, -sw, y1)];
-      t.push(...r[0], ...r[1], ...r[2], ...r[0], ...r[2], ...r[3]);                                          // the riser
+      const f0 = i / steps, f1 = (i + 1) / steps, d0 = foot - (foot - head) * f0, d1 = foot - (foot - head) * f1, y0 = H * f0, y1 = H * f1;
+      const e = sw + 0.05, A = P(d0, -e, y0), B = P(d0, -e, y1), C = P(d1, -e, y1), A2 = P(d0, e, y0), B2 = P(d0, e, y1), C2 = P(d1, e, y1);
+      t.push(...A, ...B, ...C, ...A2, ...C2, ...B2);                                                         // the wedge's ends
+      t.push(...B, ...B2, ...C2, ...B, ...C2, ...C);                                                         // the tread
+      t.push(...A, ...A2, ...B2, ...A, ...B2, ...B);                                                         // the riser
     }
-    bag.add(L, fromTriangles(t.concat(flipTris(t))));
-    // the balustrades: sloping slabs on either side, a serpent head at their foot where asked
+    // turn every face of the wedges outward (each wedge's own centre: the riser faces out, the tread up)
+    for (let i = 0; i < t.length; i += 9 * 6) { const w = t.slice(i, i + 9 * 6); orientOutward(w); for (let j = 0; j < w.length; j++) t[i + j] = w[j]; }
+    bag.add(L, fromTriangles(t));
+    // the balustrades: on the stair's line, a metre high, ending in a block at the foot
     for (const s of [-1, 1]) {
-      const b = [], o = s * (sw + 0.6);
-      beamTris(b, [cx + dx * (foot + 0.4) + nx * o, 0, cz + dz * (foot + 0.4) + nz * o], [cx + dx * head + nx * o, H, cz + dz * head + nz * o], 0.6, 1.0);
-      bag.add(L, fromTriangles(b));
-      if ((el.serpents || '').includes(k)) serpentHead(bag, cx + dx * (foot + 1.0) + nx * o, cz + dz * (foot + 1.0) + nz * o, [dx, dz], 0, 1);
+      const [o0, o1] = s < 0 ? [-(sw + bw), -sw] : [sw, sw + bw];
+      prism(L, [[foot, 0], [foot + 0.4, 0], [foot + 0.4, 1.2], [head, H + 1.0], [head, H]], o0, o1);
+      if ((el.serpents || '').includes(k)) serpentHead(bag, cx + dx * (foot + 1.0) + nx * s * (sw + bw / 2), cz + dz * (foot + 1.0) + nz * s * (sw + bw / 2), [dx, dz], 0, 1);
     }
-    // walking up: a ramp over the stair's footprint
+    // walking up: a ramp over the stair's footprint, then the step onto the top
     const r = dx ? [Math.min(cx + dx * foot, cx + dx * head), cz - sw, Math.max(cx + dx * foot, cx + dx * head), cz + sw] : [cx - sw, Math.min(cz + dz * foot, cz + dz * head), cx + sw, Math.max(cz + dz * foot, cz + dz * head)];
     col.ramp(r, 0, H, k === 'n' ? 's' : k === 's' ? 'n' : k === 'e' ? 'w' : 'e');
   }
@@ -222,7 +241,8 @@ function mColonnade(el, { bag, col }) {
 
 /** m_platform: a low square platform with stairs on its sides { c, a (half-size), h, stairs } (the Platform of Venus, the Tzompantli). */
 function mPlatform(el, ctx) {
-  mPyramid({ c: el.c, base: el.a, top: el.a - 0.6, h: el.h, tiers: 1, stairs: el.stairs || 'nesw', stairW: el.stairW ?? 4, steps: Math.round(el.h / 0.25), serpents: el.serpents }, ctx);
+  const steps = Math.round(el.h / 0.25);
+  mPyramid({ c: el.c, base: el.a, top: el.a - 0.6, h: el.h, tiers: 1, stairs: el.stairs || 'nesw', stairW: el.stairW ?? 4, steps, serpents: el.serpents, stairOut: el.stairOut ?? Math.max(0, steps * 0.27 - 0.6) }, ctx);
   if (el.skulls) {
     // the skull rack's walls: rows of carved skulls (a pattern of knobs)
     const [cx, cz] = el.c, a = el.a, { bag } = ctx;
