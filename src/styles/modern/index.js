@@ -27,6 +27,13 @@ function shell(bag, cx, z0, z1, hw, H, y) {
   const T = [];
   for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { tri2(T, P(i, j), P(i + 1, j), P(i + 1, j + 1)); tri2(T, P(i, j), P(i + 1, j + 1), P(i, j + 1)); }
   bag.add('tile_opera', fromTriangles(T));
+  // the underside: the precast concrete of the shell, 0.4 m under the tiles, its edge at the mouth, and the ribs
+  // running up it from the pedestal to the mouth (§1a)
+  const Q = (i, j) => { const p = P(i, j); return [p[0], p[1] - 0.4, p[2]]; }, U = [], E = [];
+  for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { tri2(U, Q(i, j), Q(i + 1, j), Q(i + 1, j + 1)); tri2(U, Q(i, j), Q(i + 1, j + 1), Q(i, j + 1)); }
+  for (let i = 0; i < nu; i++) { tri2(E, P(i, nv), P(i + 1, nv), Q(i + 1, nv)); tri2(E, P(i, nv), Q(i + 1, nv), Q(i, nv)); }
+  bag.add('plaster_grey', fromTriangles(U)); bag.add('plaster_grey', fromTriangles(E));
+  for (let i = 1; i < nu; i++) for (let j = 1; j < nv; j++) { const a = Q(i, j), b = Q(i, j + 1); if (a[1] - y < 1.2) continue; bag.add('plaster_grey', rod([a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], 0.2, 4)); }
   // the ridge: a rib of the cream tiles along the top, and the ribs fanning down the shell's face
   const rib = [];
   for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.28, 6)); }
@@ -84,6 +91,45 @@ function operaHouse(el, { bag, col }) {
   // the broadwalk round the podium's foot
   bag.add('granite_grey', box(x0 - 6, y - 4, z0 - 6, x1 + 6, y + 0.2, z1 + st + 2));
   for (const hall of el.halls ?? []) for (const [a, b, H, hw] of hall.shells) shell(bag, hall.x, a, b, hw ?? hall.hw, H, y + h);
+  // under each hall's shells: the auditorium's enclosure, clad in brush box, stepping up northward under the
+  // shells' envelope to its north wall, and between that wall and the glass the northern foyer over the harbour:
+  // its floor, the benches facing the glass, a bar against the enclosure, the lamps (§1a)
+  const yf = y + h;
+  for (const hall of el.halls ?? []) {
+    const env = (xx, zz) => {               // the lowest inner surface of the shells over (xx, zz), from their section and profile
+      let best = 0;
+      for (const [a, b, H, hw0] of hall.shells) {
+        const hw = hw0 ?? hall.hw, t = (zz - a) / (b - a); if (t < 0 || t > 1) continue;
+        const w = hw * (1 - 0.3 * t), sx = (xx - hall.x) / w; if (Math.abs(sx) >= 1) continue;
+        const c = 0.55, R = 1 + c, arc = (q) => Math.sqrt(Math.max(0, R * R - (q + c) * (q + c))), sect = (arc(Math.abs(sx)) - arc(1)) / (arc(0) - arc(1));
+        best = Math.max(best, H * (1 - (1 - t) ** 2.2) * sect - 0.6);
+      }
+      return best;
+    };
+    const last = hall.shells[hall.shells.length - 1], zMouth = last[1], zN = zMouth + (last[0] - last[1]) * 0.62, zS = hall.shells[0][0] - 10, aw = hall.hw * 0.55;
+    for (let zz = zS; zz > zN; zz -= 4) {
+      const zb = Math.max(zN, zz - 4), hh = Math.min(env(hall.x - aw, zz), env(hall.x - aw, zb), env(hall.x + aw, zz), env(hall.x + aw, zb)) * 0.82;
+      if (hh < 3) continue;
+      bag.add('wood_ochre', box(hall.x - aw, yf, zb, hall.x + aw, yf + hh, zz));
+    }
+    // the north wall of the enclosure, in three tiers stepping back as they rise
+    const hN = Math.min(env(hall.x - aw, zN), env(hall.x + aw, zN)) * 0.82;
+    for (let k = 0; k < 3; k++) bag.add('wood_ochre', box(hall.x - aw + k * 0.8, yf + hN * k / 3, zN - 3 + k * 1.0, hall.x + aw - k * 0.8, yf + hN * (k + 1) / 3 - 0.05, zN));
+    for (let k = 0; k < 3; k++) for (let u = hall.x - aw + k * 0.8 + 0.4; u < hall.x + aw - k * 0.8 - 0.3; u += 0.6) bag.add('wood_ochre', box(u - 0.08, yf + hN * k / 3 + (k ? 0.05 : 0.3), zN - 3 + k * 1.0 - 0.1, u + 0.08, yf + hN * (k + 1) / 3 - 0.4, zN - 3 + k * 1.0));   // the brush-box battens
+    for (let k = 1; k < 3; k++) bag.add('glass_outer', box(hall.x - aw + 2, yf + hN * k / 3 - 0.05 - 1.4, zN - 3 + (k - 1) * 1.0 - 0.02, hall.x + aw - 2, yf + hN * k / 3 - 0.35, zN - 3 + (k - 1) * 1.0));
+    col.rect([hall.x - aw, zN - 3, hall.x + aw, zS], yf, yf + 20);
+    // the foyer's floor, the bar, benches facing the harbour, lamps on stands
+    const f0 = zMouth + 2.5, f1 = zN - 3;
+    bag.add('timber', box(hall.x - aw - 4, yf, f0, hall.x + aw + 4, yf + 0.04, f1));
+    bag.add('marble_dark', box(hall.x - 6, yf, f1 - 1.2, hall.x + 6, yf + 1.1, f1 - 0.4)); bag.add('timber', box(hall.x - 6.1, yf + 1.1, f1 - 1.3, hall.x + 6.1, yf + 1.16, f1 - 0.3));
+    col.rect([hall.x - 6, f1 - 1.2, hall.x + 6, f1 - 0.4], yf, yf + 1.2);
+    for (let r = 0; r < 2; r++) for (let k = -2; k <= 2; k++) {
+      const bx = hall.x + k * 5.2, bz = f0 + 3 + r * 4;
+      bag.add('cloth_red', box(bx - 1.8, yf + 0.04, bz - 0.4, bx + 1.8, yf + 0.45, bz + 0.4));
+      bag.add('steel_grey', box(bx - 1.8, yf + 0.04, bz - 0.45, bx + 1.8, yf + 0.12, bz + 0.45));
+    }
+    for (const k of [-1, 1]) { const lx = hall.x + k * (aw + 2); bag.add('steel_grey', lathe([[0.25, 0], [0.25, 0.05], [0.03, 0.08], [0.03, 2.2], [0.001, 2.2]], 8, null, lx, yf + 0.04, f1 - 2)); bag.add('lamp_white', lathe([[0.001, 0], [0.3, 0.05], [0.32, 0.4], [0.001, 0.5]], 10, null, lx, yf + 2.2, f1 - 2)); }
+  }
   // the small restaurant shells at the south-west corner
   shell(bag, x0 + 14, z1 - 4, z1 - 20, 9, 12, y + h);
   shell(bag, x0 + 14, z1 - 18, z1 - 30, 8, 9, y + h);
