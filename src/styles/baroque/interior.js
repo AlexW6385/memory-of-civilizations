@@ -136,16 +136,20 @@ export function stPeterInterior(bag, col, o) {
   // the transepts and the west arm: their walls, their ends, their vaults
   for (const s of [-1, 1]) {
     const z0 = cz + s * A, z1 = cz + s * zEnd;
-    for (const sx of [-1, 1]) { const xw = cx + sx * b, zl = Math.min(z0, z1), zh = Math.max(z0, z1), F = wall(sx > 0 ? [xw, zl] : [xw, zh], sx > 0 ? [xw, zh] : [xw, zl], 30); entab(F, 0, F.L);
-      // the fluted pilasters at its ends, between them a field of coloured marble with a niche and a medallion
-      for (const u of [1.25, F.L - 1.25]) pilaster(Lc, F, u, 0, 26.6);
-      revet(Lc, F, 2.6, F.L - 2.6, 0.9, 25.8); niche(Lc, F, F.L / 2 - 1.3, F.L / 2 + 1.3, 3.2, 14.5, 0.08); medallion(Lc, F, F.L / 2, 19.5, 0.08, 0.9);
+    for (const sx of [-1, 1]) {
+      const xw = cx + sx * b, zl = Math.min(z0, z1), zh = Math.max(z0, z1), F = wall(sx > 0 ? [xw, zl] : [xw, zh], sx > 0 ? [xw, zh] : [xw, zl], 30); entab(F, 0, F.L);
+      // fluted pilasters, between each two a field of coloured marble with a niche and a medallion
+      const ps = F.L > 15 ? [1.25, F.L / 3, F.L * 2 / 3, F.L - 1.25] : [1.25, F.L - 1.25];
+      for (const u of ps) pilaster(Lc, F, u, 0, 26.6);
+      for (let k = 0; k + 1 < ps.length; k++) { const u0 = ps[k] + 1.35, u1 = ps[k + 1] - 1.35, um = (u0 + u1) / 2; revet(Lc, F, u0, u1, 0.9, 25.8); niche(Lc, F, um - 1.3, um + 1.3, 3.2, 14.5, 0.08); medallion(Lc, F, um, 19.5, 0.08, 0.9); }
     }
-    const F = wall([cx + s * b, z1], [cx - s * b, z1], yc + 0.5); entab(F, 0, F.L);
-    // its altar under a frame of columns and a pediment, the great altarpiece
+    // its end: the apse opened into the outer apse (o.apse), or a flat wall; the altar under a frame of columns and a pediment, the great altarpiece
+    let F;
+    if (o.apse) { apse(Lc, col, { cx, zc: z1, s, y, b, ys }); F = frameFacing([cx - b, z1 + s * (b - 0.65)], [cx + b, z1 + s * (b - 0.65)], [0, -s], y); Lc.add(M, box(b - 4.6, 2.8, -1.6, b + 4.6, 16.8, 0).applyMatrix4(F.M)); }
+    else { F = wall([cx + s * b, z1], [cx - s * b, z1], yc + 0.5); entab(F, 0, F.L); }
     Lc.add(M, box(b - 2.5, 0, 0, b + 2.5, 1.2, 1.5).applyMatrix4(F.M)); Lc.add(PT, box(b - 4, 3.5, 0, b + 4, 16, 0.12).applyMatrix4(F.M)); Lc.add(GB, box(b - 4.4, 3.1, 0, b + 4.4, 16.4, 0.08).applyMatrix4(F.M));
     for (const sg of [-1, 1]) Lc.add(M, lathe([[0.75, 0], [0.62, 0.6], [0.55, 17], [0.85, 18]], 12, null, 0, 0, 0).translate(b + sg * 5.6, 0, 1.0).applyMatrix4(F.M));
-    Lc.add(M, ext([[b - 7, 18], [b + 7, 18], [b, 21.5]], [], 0, 1.6).applyMatrix4(F.M));
+    Lc.add(M, ext([[b - 7, 18], [b + 7, 18], [b, 21.5]], [], o.apse ? -1.4 : 0, 1.6).applyMatrix4(F.M));
     const pc = atF(F, b, 0, 0.75); col.rect([pc[0] - 2.6, pc[2] - 1.0, pc[0] + 2.6, pc[2] + 1.0].map((v) => v), y, y + 1.2);
     vault(cx - b, Math.min(z0, z1), cx + b, Math.max(z0, z1), 'z');
   }
@@ -327,6 +331,35 @@ export function stPeterInterior(bag, col, o) {
     Lc.add(GB, box(bx - 0.1, yTop + 1.4, bz - 0.1, bx + 0.1, yTop + 3.6, bz + 0.1)); Lc.add(GB, box(bx - 0.6, yTop + 2.8, bz - 0.1, bx + 0.6, yTop + 3.0, bz + 0.1));
   }
   Lc.emit(bag);
+}
+/**
+ * A transept's apse: the half-cylinder of radius b about (cx, zc) bulging toward +s·z, up to the springing ys, its floor,
+ * the entablature running round, fluted pilasters and niches, the half-dome coffered in gilt ribs with rosettes.
+ */
+function apse(Lc, col, { cx, zc, s, y, b, ys }) {
+  const N = 32, P = (th, yy, r = b) => [cx + Math.cos(th) * r, yy, zc + s * Math.sin(th) * r], t = [], t2 = [];
+  for (let i = 0; i < N; i++) { const a0 = Math.PI * i / N, a1 = Math.PI * (i + 1) / N; t.push(...P(a0, y - 0.5), ...P(a1, y - 0.5), ...P(a1, y + ys), ...P(a0, y - 0.5), ...P(a1, y + ys), ...P(a0, y + ys)); }
+  Lc.add(ST, dbl(t));
+  const Q = (th, ph, r = b) => [cx + Math.cos(th) * r * Math.cos(ph), y + ys + r * Math.sin(ph), zc + s * Math.sin(th) * r * Math.cos(ph)], NP = 10;
+  for (let i = 0; i < N; i++) for (let j = 0; j < NP; j++) { const a0 = Math.PI * i / N, a1 = Math.PI * (i + 1) / N, p0 = Math.PI / 2 * j / NP, p1 = Math.PI / 2 * (j + 1) / NP; t2.push(...Q(a0, p0), ...Q(a1, p0), ...Q(a1, p1), ...Q(a0, p0), ...Q(a1, p1), ...Q(a0, p1)); }
+  Lc.add(ST, dbl(t2));
+  // the coffers: ribs along the meridians and the parallels, a rosette in each coffer
+  const rc = b - 0.08;
+  for (let k = 1; k < 8; k++) for (let j = 0; j < NP; j++) Lc.add(GB, rod(Q(Math.PI * k / 8, Math.PI / 2 * j / NP, rc), Q(Math.PI * k / 8, Math.PI / 2 * (j + 1) / NP, rc), 0.13, 3));
+  for (const ph of [0.0, 0.32, 0.64, 0.96, 1.25]) for (let i = 0; i < N; i++) Lc.add(GB, rod(Q(Math.PI * i / N, ph, rc), Q(Math.PI * (i + 1) / N, ph, rc), 0.13, 3));
+  for (let k = 0; k < 8; k++) for (const ph of [0.16, 0.48, 0.8]) { const c = Q(Math.PI * (k + 0.5) / 8, ph, b - 0.25); Lc.add(GB, T(ball(0.32, 0.32, 0.32, 6, 3), c[0], c[1], c[2])); }
+  // the floor
+  const half = (r0, r1, y0, y1) => { const pts = []; for (let i = 0; i <= N; i++) pts.push([Math.cos(Math.PI * i / N) * r1, Math.sin(Math.PI * i / N) * r1]); for (let i = N; i >= 0; i--) pts.push([Math.cos(Math.PI * i / N) * r0, Math.sin(Math.PI * i / N) * r0]); const g = ext(pts.map(([u, v]) => [cx + u, -(zc + s * v)]), [], y0, y1, 1); g.rotateX(-Math.PI / 2); return g; };
+  Lc.add(MF, half(0.001, b + 0.6, y - 0.3, y + 0.05)); col.floor([cx - b, Math.min(zc, zc + s * b), cx + b, Math.max(zc, zc + s * b)], y + 0.05);
+  // the entablature round the apse
+  Lc.add(TR, half(b - 0.45, b, y + 26.6, y + 28.6)); Lc.add(TR, half(b - 1.3, b, y + 28.6, y + 30));
+  for (let i = 0; i < 40; i++) { const th = Math.PI * (i + 0.5) / 40, a = P(th, y + 28.2, b - 0.4), c = P(th, y + 28.6, b - 1.1); Lc.add(TR, rod(a, c, 0.2, 4)); }
+  // fluted pilasters and niches on the curve (on its tangent planes), the altar at the back (the caller's)
+  const tangent = (th, w) => { const c = P(th, 0, b + 0.08), tg = [-Math.sin(th), s * Math.cos(th)]; return frameFacing([c[0] - tg[0] * w, c[2] - tg[1] * w], [c[0] + tg[0] * w, c[2] + tg[1] * w], [cx - c[0], zc - c[2]], y); };
+  for (const ph of [40, 75]) for (const sg of [-1, 1]) { const F = tangent(Math.PI / 2 + sg * ph * Math.PI / 180, 1.5); pilaster(Lc, F, 1.5, 0, 26.6); }
+  for (const sg of [-1, 1]) { const F = tangent(Math.PI / 2 + sg * 57.5 * Math.PI / 180, 1.6); niche(Lc, F, 0.2, 3.0, 3.2, 14.5, 0.1); niche(Lc, F, 0.2, 3.0, 16.5, 25.0, 0.1); }
+  // the wall's obstacle
+  for (let i = 0; i < 16; i++) { const a = P(Math.PI * i / 16, 0, b + 0.6), c = P(Math.PI * (i + 1) / 16, 0, b + 0.6); col.segment([a[0], a[2]], [c[0], c[2]], 1.2, y, y + ys); }
 }
 /** A lathe seen from inside as well. */
 function twoSided(g) { if (g.index) g = g.toNonIndexed(); const p = Array.from(g.attributes.position.array); return dbl(p); }

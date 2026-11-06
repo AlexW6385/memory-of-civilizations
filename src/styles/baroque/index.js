@@ -23,7 +23,14 @@ function stPeter(el, { bag, col }) {
   const IN = !!el.interior, n0 = cx + arm, n1 = n0 + N, fw = W * 1.05;
   if (!IN) for (const r of [[cx - arm, cz - aw / 2, cx + arm, cz + aw / 2], [cx - aw / 2, cz - arm, cx + aw / 2, cz + arm]]) { bag.add(T, box(r[0], y - 0.5, r[1], r[2], y + H, r[3])); col.rect(r, y, y + H); }
   else shell(bag, col, { cx, cz, y, H, arm, aw, n0, n1, W, fw, R0 });
-  for (const [ax, az] of [[cx - arm, cz], [cx, cz - arm], [cx, cz + arm]]) { bag.add(T, lathe([[aw / 2, 0], [aw / 2, H], [0.001, H]], 16, null, ax, y - 0.5, az)); col.circle(ax, az, aw / 2, y, y + H); }
+  for (const [ax, az] of [[cx - arm, cz], [cx, cz - arm], [cx, cz + arm]]) {
+    if (IN && az !== cz) {
+      // hollow where a transept's apse opens inside: only the outer half beyond the arm's end, a metre thick, and its roof
+      const sz = Math.sign(az - cz), r = aw / 2, half = (r0, r1, y0, y1) => { const pts = []; for (let i = 0; i <= 24; i++) pts.push([Math.cos(Math.PI * i / 24) * r1, Math.sin(Math.PI * i / 24) * r1]); for (let i = 24; i >= 0; i--) pts.push([Math.cos(Math.PI * i / 24) * r0, Math.sin(Math.PI * i / 24) * r0]); const g = ext(pts.map(([u, v]) => [ax + u, -(az + sz * v)]), [], y0, y1, 1); g.rotateX(-Math.PI / 2); return g; };
+      bag.add(T, half(r - 1, r, y - 0.5, y + H)); bag.add(T, half(0.001, r, y + H - 1, y + H));
+      for (let k = 0; k < 12; k++) { const a0 = Math.PI * k / 12, a1 = Math.PI * (k + 1) / 12; col.segment([ax + Math.cos(a0) * (r - 0.5), az + sz * Math.sin(a0) * (r - 0.5)], [ax + Math.cos(a1) * (r - 0.5), az + sz * Math.sin(a1) * (r - 0.5)], 1.0, y, y + H); }
+    } else { bag.add(T, lathe([[aw / 2, 0], [aw / 2, H], [0.001, H]], 16, null, ax, y - 0.5, az)); col.circle(ax, az, aw / 2, y, y + H); }
+  }
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const r = [cx + dx * aw / 2, cz + dz * aw / 2, cx + dx * arm * 0.85, cz + dz * arm * 0.85]; const q = [Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.max(r[0], r[2]), Math.max(r[1], r[3])]; bag.add(T, box(q[0], y - 0.5, q[1], q[2], y + H * 0.8, q[3])); col.rect(q, y, y + H * 0.8); bag.add(L, lathe([[8, 0], [5, 6], [0.001, 9]], 12, null, (q[0] + q[2]) / 2, y + H * 0.8, (q[1] + q[3]) / 2)); }
   // the attic and giant pilasters
   if (!IN) bag.add(T, box(cx - arm - 1, y + H, cz - aw / 2 - 1, cx + arm + 1, y + H + 2.5, cz + aw / 2 + 1));
@@ -60,7 +67,7 @@ function stPeter(el, { bag, col }) {
     sagrato(bag, col, { fx: n1 + 4, cz, fw, y });
   }
   // inside (interior.js): the arms 27.5 m wide under barrel vaults springing at 30 m, the crossing's arches 21 m from its centre
-  if (IN) stPeterInterior(bag, col, { cx, cz, y, A: R0, b: 13.75, ys: 30, R0, yDrum1: dy + 24 - y, yDome: domeY - y, domeH: R0 * 1.1, xFront: n1 - 8, xWest: cx - arm + aw / 2 + 1.6, zEnd: arm - aw / 2 - 1.2 });
+  if (IN) stPeterInterior(bag, col, { cx, cz, y, A: R0, b: 13.75, ys: 30, R0, yDrum1: dy + 24 - y, yDome: domeY - y, domeH: R0 * 1.1, xFront: n1 - 8, xWest: cx - arm + aw / 2 + 1.6, zEnd: arm - 5, apse: true });
 }
 /** A horizontal slab of the outline pts ([[x, z], …]) from y0 to y1, with a round hole of radius r at (hx, hz) if r. */
 function slab(pts, y0, y1, hx, hz, r) {
@@ -80,7 +87,7 @@ function shell(bag, col, { cx, cz, y, H, arm, aw, n0, n1, W, fw, R0 }) {
     // the east–west arm's long sides (the crossing's part belongs to the north–south arm), the north–south arm's sides
     wallZ(cz + s * a2, cx - arm, cx - a2, -s); wallZ(cz + s * a2, cx + a2, n0 - 1, -s);
     wallX(cx - a2, s < 0 ? cz - arm : cz + a2, s < 0 ? cz - a2 : cz + arm, 1); wallX(cx + a2, s < 0 ? cz - arm : cz + a2, s < 0 ? cz - a2 : cz + arm, -1);
-    wallZ(cz + s * arm, cx - a2, cx + a2, -s);
+    wallZ(cz + s * arm, cx - a2, cx - 15, -s); wallZ(cz + s * arm, cx + 15, cx + a2, -s);   // (the inner apse passes between)
     // the nave's sides, the step where it meets the arm, and above the portico
     wallZ(cz + s * w2, n0 - 1, xp - 1.2, -s); wallZ(cz + s * w2, xp - 1.2, n1, -s, y + 19.6);
     wallX(n0 - 1, s < 0 ? cz - w2 : cz + a2, s < 0 ? cz - a2 : cz + w2, 1);
