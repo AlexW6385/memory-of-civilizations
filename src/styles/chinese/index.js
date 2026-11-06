@@ -383,7 +383,7 @@ function column(el, { bag, col }) {
 }
 
 // an ellipsoid of radii rx, ry, rz at c (low-poly by default)
-function ellipsoid(c, rx, ry, rz, seg = 10, rows = 6) {
+export function ellipsoid(c, rx, ry, rz, seg = 10, rows = 6) {
   const prof = [];
   for (let i = 0; i <= rows; i++) { const a = -Math.PI / 2 + (i / rows) * Math.PI; prof.push([Math.max(0.001, Math.cos(a)), Math.sin(a)]); }
   const g = lathe(prof, seg); g.scale(rx, ry, rz); g.translate(c[0], c[1], c[2]); return g;
@@ -398,7 +398,7 @@ function limb(out, a, b, r0, r1) {
   g.translate(...a); out.push(g, ellipsoid(b, r1, r1, r1, 8, 4));
 }
 // a lotus petal: a curved, pointed shell rising from radius r0 at height y0, outward and up, at angle th
-function petal(th, r0, y0, len, w, lift) {
+export function petal(th, r0, y0, len, w, lift) {
   const tri = [], N = 7, pts = [];
   for (let i = 0; i <= N; i++) {
     const t = i / N, half = w * Math.sqrt(Math.sin(Math.PI * Math.min(1, 0.08 + t * 0.92))), out = r0 + len * Math.cos(lift * t), up = y0 + len * Math.sin(lift * t) * 0.9;
@@ -474,20 +474,26 @@ export function buddha(el, { bag }) {
   }
   // arms: the right raised, palm out; the left on the knee, palm up
   // (or, mudra 'earth': the right hand down over the right knee, touching the earth; the left holding the alms bowl in the lap)
-  const earth = el.mudra === 'earth';
+  // (or mudra 'dhyana': both hands in the lap, the right over the left, the thumbs and forefingers forming circles)
+  const earth = el.mudra === 'earth', dhyana = el.mudra === 'dhyana';
   limb(R, [-0.66, b + 1.6, 0], [-0.92, b + 1.0, 0.2], 0.2, 0.17);
   if (earth) limb(R, [-0.92, b + 1.0, 0.2], [-1.0, b + 0.5, 0.62], 0.17, 0.12);
+  else if (dhyana) limb(R, [-0.92, b + 1.0, 0.2], [-0.3, b + 0.66, 0.5], 0.17, 0.12);
   else limb(R, [-0.92, b + 1.0, 0.2], [-0.8, b + 1.42, 0.5], 0.17, 0.12);
   limb(R, [0.66, b + 1.6, 0], [0.92, b + 0.98, 0.12], 0.2, 0.17);
   if (earth) limb(R, [0.92, b + 0.98, 0.12], [0.3, b + 0.62, 0.5], 0.17, 0.12);
+  else if (dhyana) limb(R, [0.92, b + 0.98, 0.12], [0.3, b + 0.66, 0.5], 0.17, 0.12);
   else limb(R, [0.92, b + 0.98, 0.12], [0.86, b + 0.56, 0.5], 0.17, 0.12);
   // the sleeves hang from the forearms
   for (const k of [-1, 1]) R.push(ellipsoid([k * 1.0, b + 0.82, 0.2], 0.16, 0.34, 0.24, 10, 5));
   if (earth) {
     G.push(ellipsoid([-1.02, b + 0.42, 0.72], 0.12, 0.2, 0.05, 10, 4));
     G.push(lathe([[0.001, 0], [0.12, 0.01], [0.2, 0.08], [0.22, 0.16], [0.19, 0.18], [0.001, 0.12]], 16, null, 0.2, b + 0.6, 0.55));
+  } else if (dhyana) {
+    G.push(ellipsoid([0, b + 0.62, 0.55], 0.3, 0.05, 0.16, 12, 4), ellipsoid([0, b + 0.67, 0.57], 0.28, 0.045, 0.15, 12, 4));
+    for (const k of [-1, 1]) G.push(lathe([[0.05, -0.015], [0.075, -0.015], [0.075, 0.015], [0.05, 0.015]], 12).rotateX(Math.PI / 2).translate(k * 0.1, b + 0.78, 0.66));
   } else G.push(ellipsoid([-0.8, b + 1.6, 0.52], 0.13, 0.2, 0.05, 10, 4), ellipsoid([0.84, b + 0.56, 0.68], 0.13, 0.045, 0.2, 10, 4));
-  if (!simple && !earth) for (let f = 0; f < 4; f++) {
+  if (!simple && !earth && !dhyana) for (let f = 0; f < 4; f++) {
     G.push(ellipsoid([-0.89 + f * 0.06, b + 1.83, 0.53], 0.026, 0.07, 0.026, 6, 3));
     G.push(ellipsoid([0.78 + f * 0.06, b + 0.57, 0.88], 0.026, 0.024, 0.07, 6, 3));
   }

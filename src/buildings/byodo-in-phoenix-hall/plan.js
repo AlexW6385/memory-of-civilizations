@@ -4,6 +4,7 @@
 // ground of the island. Metres.
 
 import { SITES, PONDS } from '../../world/regions.js';
+import './style.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -88,7 +89,7 @@ for (const [z0, z1] of [[-7.0, -2.45], [2.45, 7.0]]) {
 
 // ── the interior: altar, Amida, canopy, the bodhisattvas on clouds, ceilings ─
 block([-2.7, -2.0, 1.2, 2.0], F, F + 1.0, 'lacquer_black');
-obj('amida', -0.9, 0, F + 1.0, { h: 2.8, dir: [1, 0] });
+obj('byodo_amida', -0.9, 0, F + 1.0, { h: 2.77, dir: [1, 0] });
 obj('canopy', -0.9, 0, F + 6.6, { r: 1.9 });
 add({ t: 'slab', rect: [-3.9, -5.4, 3.9, 5.4], y0: F + 6.6, y1: F + 6.75, mat: 'ceiling_coffer', holes: [[-3.9, -2.3, 3.9, 2.3]] });
 add({ t: 'slab', rect: [-3.9, -2.3, 3.9, 2.3], y0: F + 8.4, y1: F + 8.55, mat: 'ceiling_coffer', holes: [] });
@@ -101,7 +102,7 @@ for (const s of [-1, 1]) add({ t: 'slab', rect: [-3.9, Math.min(s * 2.3, s * 2.4
   for (let k = 0; k < 7; k++) spots.push([-3.7, -3.9 + k * 1.3, [1, 0], 5.0 - 0.0 * k]);
   for (let k = 0; k < 9; k++) spots.push([3.7, -4.8 + k * 1.2, [-1, 0], 4.9 + 0.25 * (k % 2)]);
   for (let k = 0; k < 9; k++) spots.push([-3.0 + k * 0.75, (k % 2 ? 1 : -1) * 5.2, [0, k % 2 ? -1 : 1], 5.0]);
-  for (const [x, z, d, y] of spots.slice(0, 52)) obj('cloud_bodhisattva', x, z, F + y, { dir: d });
+  for (const [x, z, d, y] of spots.slice(0, 52)) obj('byodo_cloud', x, z, F + y, { dir: d });
 }
 
 // ── the roofs of the central hall ────────────────────────────────────────────
@@ -183,7 +184,7 @@ export const byodoInPhoenixHall = {
   id: 'byodo-in-phoenix-hall',
   name: { en: 'The Phoenix Hall of Byōdō-in', zh: '平等院凤凰堂' },
   era: { en: 'Heian period, AD 1053', zh: '平安时代，天喜元年（公元1053年）' },
-  style: 'japanese',
+  style: 'japanese-byodo',
   district: 'heian',
   ...SITES['byodo-in-phoenix-hall'],
   entrance: { at: [-20, 72], facing: 'n' },
