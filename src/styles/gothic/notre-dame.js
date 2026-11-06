@@ -534,7 +534,10 @@ function notreDame(el, ctx) {
   }
   bag.add(LEAD, lathe([[R8 * 0.96, 0], [R8 * 0.6, 6], [0.5, 22], [0.08, 26.5]], 8, null, sx, Y(RIDGE + 6.8), cz));
   for (let k = 1; k <= 7; k++) {
-    const t = k / 8, yy = Y(RIDGE + 6.8 + 26 * t), rr = R8 * 0.96 * (1 - t) ** 0.8 + 0.08;
+    // crockets up the needle's eight arrises, set on the lathe's own profile
+    const hh = 26 * k / 8, prof = [[R8 * 0.96, 0], [R8 * 0.6, 6], [0.5, 22], [0.08, 26.5]];
+    let rr = 0.08; for (let q = 0; q < prof.length - 1; q++) if (hh >= prof[q][1] && hh <= prof[q + 1][1]) rr = prof[q][0] + (prof[q + 1][0] - prof[q][0]) * (hh - prof[q][1]) / (prof[q + 1][1] - prof[q][1]);
+    const yy = Y(RIDGE + 6.8 + hh); rr -= 0.04;
     for (let q = 0; q < 8; q++) { const a = q * Math.PI / 4; bag.add(LEAD, box(sx + Math.cos(a) * rr - 0.12, yy, cz + Math.sin(a) * rr - 0.12, sx + Math.cos(a) * rr + 0.12, yy + 0.3, cz + Math.sin(a) * rr + 0.12)); }
   }
   const top = Y(RIDGE + 6.8 + 26.5);
