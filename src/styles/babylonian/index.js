@@ -6,6 +6,7 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import '../sumerian/index.js';
+import { esagila, etemenanki, bridge, quay, quffa } from './temple.js';
 
 // K: black glaze (the outlines and enamelled lines; no black glaze in the palette, the black lacquer stands in);
 // R: the opaque red enamel of the manes (Koldewey: since decomposed to green)
@@ -15,7 +16,7 @@ const G = 'glaze_lapis', B = 'brick_baked', W = 'glaze_white', Y = 'glaze_yellow
  * narrowing upward (the Mesopotamian battlement), a row on each face of a thick wall or one across a
  * thin one. w: the merlon's width at the foot, gap: between merlons, tier: the height of a step.
  */
-function crenels(bag, r, y, mat, w = 1.2, { gap = w * 0.5, tier = w * 0.38, depth = 0.6 } = {}) {
+export function crenels(bag, r, y, mat, w = 1.2, { gap = w * 0.5, tier = w * 0.38, depth = 0.6 } = {}) {
   const [x0, z0, x1, z1] = r, along = x1 - x0 >= z1 - z0, L = along ? x1 - x0 : z1 - z0, T = along ? z1 - z0 : x1 - x0;
   const n = Math.max(1, Math.floor((L + gap) / (w + gap))), o = (L - n * w - (n - 1) * gap) / 2;
   const rows = T > 2 * depth + 0.6 ? [[0, depth], [T - depth, T]] : [[0, T]];
@@ -390,6 +391,6 @@ function throneFacade(bag, r, doors, h) {
 }
 registerStyle('babylonian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.sumerian.elements, ishtar_gate: ishtarGate, glazed_wall: glazedWall, city_wall: cityWall, way_paving: wayPaving, palace },
+  elements: { ...STYLES.sumerian.elements, ishtar_gate: ishtarGate, glazed_wall: glazedWall, city_wall: cityWall, way_paving: wayPaving, palace, esagila, etemenanki, bridge, quay, quffa },
   objects: {},
 });

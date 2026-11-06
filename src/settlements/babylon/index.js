@@ -3,7 +3,7 @@ import '../../styles/babylonian/index.js';
 import '../../styles/ming/index.js';
 import { babylon, river } from './plan.js';
 import music from './music.js';
-import { houses } from './town.js';
+import { houses, people } from './town.js';
 export { music };
 export const landmarks = [{ plan: babylon, music }];
-export async function town() { return [river, ...(await houses())]; }
+export async function town() { return [river, ...(await houses()), people()]; }

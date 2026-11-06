@@ -2,16 +2,24 @@
 // the Ishtar Gate in the double wall, the Processional Way between glazed walls, the Southern
 // Palace, the river.
 
-import { RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER } from './layout.js';
+import { RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX } from './layout.js';
 
 const E = [];
-// Etemenanki: seven stages from a base 91 m square, the shrine on top, the great stairway rising from the
-// south (Koldewey), toward Esagila
-E.push({ t: 'ziggurat', c: ZIGGURAT.c, y: 0, front: 's', stages: [{ w: 91, d: 91, h: 33, batter: 3 }, { w: 78, d: 78, h: 18, batter: 1.5 }, { w: 60, d: 60, h: 6, batter: 0.6 }, { w: 51, d: 51, h: 6, batter: 0.6 }, { w: 42, d: 42, h: 6, batter: 0.6 }, { w: 33, d: 33, h: 6, batter: 0.6 }], shrine: { w: 24, d: 21, h: 15 } });
+/** The round boats on the river: z, d (from the river's middle), r, cargo; the boatmen and an ass are placed in town.js. */
+export const QUFFAS = [
+  { z: -60, d: 22, r: 2.0, cargo: 'casks', moored: true }, { z: -40, d: 23, r: 1.6, cargo: 'reeds', moored: true },
+  { z: 95, d: 22.5, r: 2.4, cargo: 'casks', moored: true }, { z: 112, d: 23, r: 1.7, cargo: 'none', moored: true },
+  { z: -10, d: -4, r: 2.2, cargo: 'casks' }, { z: 140, d: 6, r: 2.6, cargo: 'ass' }, { z: 200, d: -10, r: 1.8, cargo: 'casks' },
+];
+// Etemenanki: seven stages from a base 91 m square, the temple of blue glazed brick on top with the god's couch
+// and golden table, the great stairway rising from the south (Koldewey), toward Esagila
+E.push({ t: 'etemenanki', c: ZIGGURAT.c, y: 0, front: 's', stages: [{ w: 91, d: 91, h: 33, batter: 3 }, { w: 78, d: 78, h: 18, batter: 1.5 }, { w: 60, d: 60, h: 6, batter: 0.6 }, { w: 51, d: 51, h: 6, batter: 0.6 }, { w: 42, d: 42, h: 6, batter: 0.6 }, { w: 33, d: 33, h: 6, batter: 0.6 }], shrine: { w: 24, d: 21, h: 15 } });
 // the precinct's wall
 const [p0, q0, p1, q1] = PRECINCT, gw = 12;
-for (const [a, b] of [[[p0, q0], [WAY.x - gw, q0]], [[WAY.x + gw, q0], [p1, q0]], [[p0, q1], [p1, q1]], [[p0, q0], [p0, q1]], [[p1, q0], [p1, q1]]]) E.push({ t: 'precinct_wall', a, b, h: 9, th: 4 });
-E.push({ t: 'courtyard_block', rect: ESAGILA, h: 12, ring: 14, door: 'n' });
+// (a gate on the north toward the Way, and one on the south toward Esagila, on the axis of the tower's stair)
+for (const [a, b] of [[[p0, q0], [WAY.x - gw, q0]], [[WAY.x + gw, q0], [p1, q0]], [[p0, q1], [ZIGGURAT.c[0] - gw, q1]], [[ZIGGURAT.c[0] + gw, q1], [p1, q1]], [[p0, q0], [p0, q1]], [[p1, q0], [p1, q1]]]) E.push({ t: 'precinct_wall', a, b, h: 9, th: 4 });
+// Esagila, the house of Marduk: towered walls, gates in the middle of each side, the court, the god's golden cella
+E.push({ t: 'esagila', rect: ESAGILA, h: 12 });
 // the double wall across the north with the Ishtar Gate in it
 E.push({ t: 'city_wall', a: [-(RADIUS - 50), WALL_Z], b: [GATE.c[0] - 22, WALL_Z], h: 15, th: 6, gap: 12 });
 E.push({ t: 'city_wall', a: [GATE.c[0] + 22, WALL_Z], b: [RADIUS - 50, WALL_Z], h: 15, th: 6, gap: 12 });
@@ -35,8 +43,19 @@ E.push({
   throne: { court: 1, doors: [-15, 0, 15] },
 });
 
+// the Euphrates: the bridge on its boat-shaped piers west of the tower, the towered quay wall of the east bank,
+// round hide boats (quffas) coming down with casks of palm wood or moored at the quay
+{
+  const xr = riverX(BRIDGE.z), half = 32;
+  E.push({ t: 'bridge', z: BRIDGE.z, y: BRIDGE.y, bed: RIVER.bed - 0.5, waterY: RIVER.level, piers: [xr - 18.25, xr, xr + 18.25], abut: [[xr - 46, xr - half], [xr + half, xr + 46]] });
+  E.push({ t: 'quay', river: riverX, z0: QUAY.z0, z1: QUAY.z1, d0: QUAY.d0, d1: QUAY.d1, y: QUAY.y, bed: RIVER.bed - 0.5, waterY: RIVER.level, skip: [[BRIDGE.z - 7, BRIDGE.z + 7]] });
+  for (const b of QUFFAS) E.push({ t: 'quffa', at: [riverX(b.z) + b.d, b.z], y: RIVER.level, r: b.r, cargo: b.cargo });
+}
+
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('processional way', [WAY.x - WAY.w / 2, WAY.z0, WAY.x + WAY.w / 2, WAY.z1], 0, 'open'), room('precinct', PRECINCT, 0, 'open'), room('throne court', [pa0 + 28, pb0 + 18, pa0 + 74, pb0 + 72], 0.08, 'open')];
+const rooms = [room('processional way', [WAY.x - WAY.w / 2, WAY.z0, WAY.x + WAY.w / 2, WAY.z1], 0, 'open'), room('precinct', PRECINCT, 0, 'open'), room('throne court', [pa0 + 28, pb0 + 18, pa0 + 74, pb0 + 72], 0.08, 'open'),
+  room('esagila court', [ESAGILA[0] + 32, (ESAGILA[1] + ESAGILA[3]) / 2 - 18.8, ESAGILA[0] + 63.3, (ESAGILA[1] + ESAGILA[3]) / 2 + 18.8], 0.06, 'open'),
+  room('cella of marduk', [ESAGILA[0] + 6, (ESAGILA[1] + ESAGILA[3]) / 2 - 12, ESAGILA[0] + 20.5, (ESAGILA[1] + ESAGILA[3]) / 2 + 12], 0.06, 'hall')];
 const walks = [[[WAY.x, -370], [WAY.x, WALL_Z - 20], [WAY.x, WALL_Z + 40], [WAY.x, -80]]];
 walks[0].y0 = 0;
 

@@ -13,11 +13,12 @@ export const WALL_Z = -300;
 export const PALACE = [-200, -281, -70, -161];
 export const PRECINCT = [-110, -60, 110, 150];
 export const ZIGGURAT = { c: [0, 40] };
-export const ESAGILA = [-50, 175, 50, 260];
+/** Esagila (Koldewey: 79.3 m on the north front, 85.8 m on the west). */
+export const ESAGILA = [-40, 174, 40, 260];
 export const RIVER = { x: -290, w: 70, level: -3, bed: -6 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
-const riverX = (z) => RIVER.x + 18 * Math.sin(z / 140);
+export const riverX = (z) => RIVER.x + 18 * Math.sin(z / 140);
 export const inRiver = (x, z) => Math.abs(x - riverX(z)) < RIVER.w / 2 - 3 && Math.hypot(x, z) < RADIUS - 60;
 export function height(x, z) {
   const d = Math.abs(x - riverX(z)), edge = smooth(RADIUS - 70, RADIUS - 40, Math.hypot(x, z));
@@ -38,3 +39,7 @@ export function lots() {
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** The bridge over the Euphrates west of Etemenanki (its axis), and the quay wall of the east bank (from the river's middle). */
+export const BRIDGE = { z: 40, y: 0.45 };
+export const QUAY = { z0: -150, z1: 250, d0: 31, d1: 44, y: 0.3 };
+export const inQuay = (x, z, m = 0) => z > QUAY.z0 - m && z < QUAY.z1 + m && x - riverX(z) > QUAY.d0 - 4 - m && x - riverX(z) < QUAY.d1 + m;
