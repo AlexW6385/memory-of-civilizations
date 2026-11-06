@@ -13,11 +13,12 @@ import { doors } from '../greek/objects.js';
 
 const D2R = Math.PI / 180;
 
-function hexa(out, b, t) {
+function hexa(out, b, t, caps = [true, true]) {
   const tris = [];
   const q = (a, b2, c, d) => tris.push(...a, ...b2, ...c, ...a, ...c, ...d);
   q(b[0], b[1], b[2], b[3]); q(t[0], t[3], t[2], t[1]);
-  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; q(b[i], t[i], t[j], b[j]); }
+  // (sides 0 and 2 are the ends of a bar: left out between the segments of one polyline)
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; if (i % 2 === 1 || caps[i / 2]) q(b[i], t[i], t[j], b[j]); }
   out.push(...orientOutward(tris));
 }
 
@@ -125,7 +126,7 @@ function barsInPlane(out, o, u, pts, w, d, off = 0) {
     const W = (uu, yy, s) => [o[0] + u[0] * uu + n[0] * (off + s), yy, o[1] + u[1] * uu + n[1] * (off + s)];
     const s0 = -d / 2, s1 = d / 2;
     hexa(out, [W(ua - px, ya - py, s0), W(ua + px, ya + py, s0), W(ub + px, yb + py, s0), W(ub - px, yb - py, s0)],
-      [W(ua - px, ya - py, s1), W(ua + px, ya + py, s1), W(ub + px, yb + py, s1), W(ub - px, yb - py, s1)]);
+      [W(ua - px, ya - py, s1), W(ua + px, ya + py, s1), W(ub + px, yb + py, s1), W(ub - px, yb - py, s1)], [k === 0, k === pts.length - 2]);
   }
 }
 const arcPts = (a, uc, side, n = 14) => Array.from({ length: n + 1 }, (_, k) => {

@@ -25,10 +25,10 @@ function prism(out, poly, d) {
   out.push(...orientOutward(t));
 }
 /** Convex hexahedron from 8 corners (bottom 4, top 4, same order). */
-function hexa(out, b, t) {
+function hexa(out, b, t, caps = [true, true]) {
   const tris = [], q = (a, b2, c, d) => tris.push(...a, ...b2, ...c, ...a, ...c, ...d);
   q(b[0], b[1], b[2], b[3]); q(t[0], t[3], t[2], t[1]);
-  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; q(b[i], t[i], t[j], b[j]); }
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; if (i % 2 === 1 || caps[i / 2]) q(b[i], t[i], t[j], b[j]); }
   out.push(...orientOutward(tris));
 }
 /** Bars along a polyline in a vertical plane { o [x, z], u [ux, uz] } — pts [[u, y] …], width w, depth d, offset off along the normal. */
@@ -39,7 +39,7 @@ function bars(out, o, u, pts, w, d, off = 0) {
     const tx = ub - ua, ty = yb - ya, Ln = Math.hypot(tx, ty) || 1, px = -ty / Ln * w / 2, py = tx / Ln * w / 2;
     const W = (uu, yy, s) => [o[0] + u[0] * uu + n[0] * (off + s), yy, o[1] + u[1] * uu + n[1] * (off + s)];
     hexa(out, [W(ua - px, ya - py, -d / 2), W(ua + px, ya + py, -d / 2), W(ub + px, yb + py, -d / 2), W(ub - px, yb - py, -d / 2)],
-      [W(ua - px, ya - py, d / 2), W(ua + px, ya + py, d / 2), W(ub + px, yb + py, d / 2), W(ub - px, yb - py, d / 2)]);
+      [W(ua - px, ya - py, d / 2), W(ua + px, ya + py, d / 2), W(ub + px, yb + py, d / 2), W(ub - px, yb - py, d / 2)], [k === 0, k === pts.length - 2]);
   }
 }
 const ringPts = (uc, yc, r, n = 24, a0 = 0, a1 = 2 * Math.PI) => Array.from({ length: n + 1 }, (_, k) => { const a = a0 + (a1 - a0) * k / n; return [uc + r * Math.cos(a), yc + r * Math.sin(a)]; });
