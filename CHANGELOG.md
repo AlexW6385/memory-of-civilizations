@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.69 — The Palace of Westminster inside (2026-11-06)
+- Westminster Hall's south arch opened to St Stephen's Porch; St Stephen's Hall with its statesmen and stained glass; the Central Lobby under its mosaic vault with the chandelier, sixteen sovereigns and Poynter's St George, the Central Tower over it; the Commons and Lords corridors and lobbies with Ward's paintings and the Brass Gates; the House of Commons (green benches, Speaker's chair, Table and mace, galleries, the Ladies' grille); the House of Lords (red benches, Woolsack, the gilded throne and canopy, barons in niches, frescoes, heraldic ceiling); the Great Clock's opal dials with gilt surrounds and the Latin prayer.
+
 ## v9.68 — Versailles: the Hall of Mirrors and the Grand Apartment (2026-11-06)
 - The garden block opened inside; the Hall of Mirrors with 17 windows facing 357 mirrors, Rance pilasters with French-order capitals, trophies, the painted barrel vault, chandeliers, parquet and the silver furniture of the 1680s; the Salons de la Guerre (Coysevox's relief) and de la Paix; the King's Grand Apartment in its enfilade (Apollo's silver throne, Mercury's bed, Mars, Diana, Venus with Warin's statue); the Ambassadors' Staircase with its fountain and painted Parts of the World; the Grand Canal ending in a stone landing with steps, quay and boats.
 
