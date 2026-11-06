@@ -17,8 +17,6 @@ const XS = [-8.83, -4.415, 0, 4.415, 8.83];                           // column 
 const ZS = [-17.0, -12.6, -7.56, -2.52, 2.52, 7.56, 12.6, 17.0];       // column lines along (width)
 const H0 = 4.99, RISE = 0.05;          // column height at the centre; rise per bay toward the ends
 const colH = (z) => H0 + RISE * Math.round(Math.abs(z) / 5.04 + 0.4);
-const BR = 2.45;                       // bracket set height
-const TOP = F + H0 + BR;               // seat of the eave purlin
 
 // ── terraces, stairs, platform ───────────────────────────────────────────────
 floor([-118, -46, -62, 46], 0, 'travertine', { th: 0.3 });
@@ -59,24 +57,52 @@ for (const x of XS) for (const z of ZS) {
 }
 for (const [x, z] of [...outer, ...inner]) add({ t: 'column', at: [x, z], y: F, h: colH(z), d: 0.54 });
 
-// ── bracket sets on every column and between ─────────────────────────────────
+// ── bracket sets on every column and between (seven-puzuo: two flower arms, two cantilevers) ──
 const outward = (x, z) => {
   const ex = Math.abs(Math.abs(x) - 8.83) < 0.01, ez = Math.abs(Math.abs(z) - 17.0) < 0.01;
   if (ex && ez) { const l = Math.SQRT2; return [Math.sign(x) / l, Math.sign(z) / l]; }
   return ex ? [Math.sign(x), 0] : [0, Math.sign(z)];
 };
-for (const [x, z] of outer) add({ t: 'bracket_set', at: [x, z], y: F + colH(z), dir: outward(x, z), tiers: 4, step: 0.48, ang: true });
+const isCorner = (x, z) => Math.abs(Math.abs(x) - 8.83) < 0.01 && Math.abs(Math.abs(z) - 17.0) < 0.01;
+const LV = 0.41, lvl = (z, k) => F + colH(z) + 0.24 + k * LV;           // the bottom of tier k of a set
+for (const [x, z] of outer) add({ t: 'tang_bracket_set', at: [x, z], y: F + colH(z), dir: outward(x, z), kind: isCorner(x, z) ? 'corner' : 'column' });
 for (const [x, z] of inner) {
   const d = Math.abs(Math.abs(x) - 4.415) < 0.01 ? [Math.sign(x), 0] : [0, Math.sign(z)];
-  add({ t: 'bracket_set', at: [x, z], y: F + colH(z), dir: d, tiers: 3, step: 0.42, both: true });
+  add({ t: 'tang_bracket_set', at: [x, z], y: F + colH(z), dir: d, kind: 'inner' });
 }
-// intercolumnar sets (simpler) in the middle of each outer bay
-const between = [];
-for (let i = 0; i < ZS.length - 1; i++) for (const sx of [-1, 1]) between.push([sx * 8.83, (ZS[i] + ZS[i + 1]) / 2, [sx, 0]]);
-for (let i = 0; i < XS.length - 1; i++) for (const sz of [-1, 1]) between.push([(XS[i] + XS[i + 1]) / 2, sz * 17.0, [0, sz]]);
-for (const [x, z, d] of between) add({ t: 'bracket_set', at: [x, z], y: F + H0 + 0.6, dir: d, tiers: 2, step: 0.45 });
+// the column lines of the two rings, side by side: [[x, z]…] in order
+const outerSides = [ZS.map((z) => [-8.83, z]), ZS.map((z) => [8.83, z]), XS.map((x) => [x, -17.0]), XS.map((x) => [x, 17.0])];
+const innerZ = ZS.filter((z) => Math.abs(z) <= 12.61), innerX = [-4.415, 0, 4.415];
+const innerSides = [innerZ.map((z) => [-4.415, z]), innerZ.map((z) => [4.415, z]), innerX.map((x) => [x, -12.6]), innerX.map((x) => [x, 12.6])];
+const fang = (p, q, y0, y1, w, h, mat = 'timber_red', ext = 0) => add({ t: 'tang_fang', a: [p[0], p[1], y0], b: [q[0], q[1], y1], w, h, mat, ext });
+// the intercolumnar sets: a short post on the architrave, two flower arms carrying the luohan fang
+for (const side of outerSides) for (let i = 0; i < side.length - 1; i++) {
+  const [p, q] = [side[i], side[i + 1]], m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+  const yc = (F + colH(p[1]) + F + colH(q[1])) / 2, yb = yc + 0.82, d = outward(m[0], m[1]);
+  add({ t: 'tang_bracket_set', at: m, y: yb, dir: d, kind: 'between', post: yb - (F + H0) });
+}
+// the timbers that tie the sets together, bay by bay, following the columns' rise toward the corners:
+// in the wall plane a stack of column-head fang; outside, the luohan fang on the second tier's tips
+// and the eave purlin on the bearing blocks of the ling gong
+for (const side of outerSides) for (let i = 0; i < side.length - 1; i++) {
+  const [p, q] = [side[i], side[i + 1]], n = outward((p[0] + q[0]) / 2, (p[1] + q[1]) / 2);
+  const off = (pt, r) => [pt[0] + n[0] * r, pt[1] + n[1] * r];
+  const endP = i === 0, endQ = i === side.length - 2;
+  for (const k of [2, 3, 4, 5, 6]) fang(p, q, lvl(p[1], k), lvl(q[1], k), 0.22, 0.30, 'timber_red', 0.11);
+  // outside the line: extended at the corners to meet the other side's
+  const ex = (r) => [endP ? r : 0, endQ ? r : 0];
+  const lo = (r) => { const [e0, e1] = ex(r), u = [(q[0] - p[0]), (q[1] - p[1])], l = Math.hypot(...u); return [[off(p, r)[0] - u[0] / l * e0, off(p, r)[1] - u[1] / l * e0], [off(q, r)[0] + u[0] / l * e1, off(q, r)[1] + u[1] / l * e1]]; };
+  const [l0, l1] = lo(0.96 + 0.11);
+  fang(l0, l1, lvl(p[1], 4), lvl(q[1], 4), 0.22, 0.30);
+  const [e0, e1] = lo(1.92 + 0.17);
+  fang(e0, e1, lvl(p[1], 4) + 0.56, lvl(q[1], 4) + 0.56, 0.34, 0.34);
+}
+for (const side of innerSides) for (let i = 0; i < side.length - 1; i++) {
+  const [p, q] = [side[i], side[i + 1]];
+  for (const k of [2, 3]) fang(p, q, lvl(p[1], k), lvl(q[1], k), 0.22, 0.30, 'timber_red', 0.11);
+}
 
-// ── architraves ("seven red, eight white"), the eave purlin, the plaster between the sets ──
+// ── architraves ("seven red, eight white"), the plaster between the sets ──
 // overhead beams in a rectangle (no colliders: they are above head height and sit on the columns)
 const ring = (hx, hz, y, w, h, mat, ext = 0) => {
   block([-hx - ext, -hz - w / 2, hx + ext, -hz + w / 2], y, y + h, mat, { collide: false });
@@ -91,8 +117,8 @@ for (let i = 0; i < ZS.length - 1; i++) for (let k = 0; k < 8; k++) {
   const z0 = ZS[i] + (ZS[i + 1] - ZS[i]) * (k + 0.2) / 8, z1 = ZS[i] + (ZS[i + 1] - ZS[i]) * (k + 0.8) / 8;
   for (const sx of [-1, 1]) block([Math.min(sx * 9.0, sx * 9.02), z0, Math.max(sx * 9.0, sx * 9.02), z1], F + H0 - 0.34, F + H0 - 0.1, 'paint_white', { collide: false });
 }
-ring(8.83 + 1.92, 17.0 + 1.92, TOP - 0.05, 0.32, 0.36, 'timber_red', 1.92);      // the eave purlin (liaoyan fang)
-ring(8.83, 17.0, F + H0, 0.24, BR - 0.2, 'paint_white', 0);                         // the plastered panels between the sets
+// the plastered panels (gongyan bi) between the sets and the fang, up to the rafters
+ring(8.83, 17.0, F + H0, 0.14, 3.45, 'paint_white', 0);
 
 // ── the walls: red earth walls at the sides and back; doors and windows on the front ─
 // walls fill the bays between the columns (the posts stand in the wall)
@@ -129,16 +155,36 @@ for (const s of [-1, 1]) {
 // crescent beams linking the rings across the outer aisle
 for (const z of ZS.slice(1, -1)) for (const sx of [-1, 1]) block([Math.min(sx * 4.415, sx * 8.83), z - 0.15, Math.max(sx * 4.415, sx * 8.83), z + 0.15], F + 7.2, F + 7.75, 'timber_red', { collide: false });
 for (const x of XS.slice(1, -1)) for (const sz of [-1, 1]) block([x - 0.15, Math.min(sz * 12.6, sz * 17.0), x + 0.15, Math.max(sz * 12.6, sz * 17.0)], F + 7.2, F + 7.75, 'timber_red', { collide: false });
-// the altar platform in the inner zone, the statues facing west
-block([-3.0, -12.2, 3.8, 12.2], F, F + 0.9, 'limestone', { walk: false });
-for (const z of [0, -10.08, 10.08]) obj('buddha', 0.8, z, F + 0.9, { h: 5.2, dir: [-1, 0] });
-for (const z of [-1.9, 1.9, -8.2, -11.9, 8.2, 11.9]) obj('figure', -1.6, z, F + 0.9, { h: 2.5 });
-obj('mount', 0.2, -5.04, F + 0.9, { animal: 'lion', dir: [-1, 0] });
-obj('mount', 0.2, 5.04, F + 0.9, { animal: 'elephant', dir: [-1, 0] });
-for (const z of [-12.0, 12.0]) obj('figure', -2.6, z, F + 0.9, { h: 3.2, robe: 'clay_robe' });
+// the altar platform in the inner zone, the statues facing west, as Liang Sicheng and Lin Huiyin recorded them
+// (1944): Śākyamuni in the central bay touching the earth, an alms bowl in his lap; Maitreya seated with the feet
+// down in the bay to his left (north), Amitābha on a hexagonal sumeru seat to the right (south); in the end bays
+// Samantabhadra on the elephant (north) and the lion-rider read as Guanyin (south), each with two attendant
+// bodhisattvas and the groom leading the animal; Kāśyapa and Ānanda beside Śākyamuni, attendant bodhisattvas at the
+// sides of each Buddha and two kneeling offering bodhisattvas on lotuses before them; armoured heavenly kings with
+// swords at the front corners of the end bays
+const A = F + 0.9, W = [-1, 0];
+block([-3.0, -12.2, 3.8, 12.2], F, A, 'limestone', { walk: false });
+obj('buddha', 0.8, 0, A, { h: 5.2, dir: W, mudra: 'earth' });
+obj('buddha', 0.8, -5.04, A, { h: 5.2, dir: W, pendant: true });
+obj('buddha', 0.8, 5.04, A, { h: 5.2, dir: W, hexSeat: true });
+const st = (type, x, z, h, extra = {}) => obj('statue', x, z, A, { type, h, dir: W, ...extra });
+st('disciple', 0.4, -1.9, 2.6, { robe: 'clay_robe', robe2: 'clay_green' });
+st('disciple', 0.4, 1.9, 2.6, { robe: 'clay_robe', robe2: 'clay_robe' });
+for (const z0 of [0, -5.04, 5.04]) {
+  for (const k of [-1, 1]) st('bodhisattva', -0.9, z0 + k * 2.05, 2.8, { robe: 'clay_robe', robe2: 'clay_green' });
+  for (const k of [-1, 1]) st('kneel', -2.2, z0 + k * 0.85, 2.0, { robe: 'clay_green', robe2: 'clay_robe' });
+}
+obj('mount', 0.7, -10.08, A, { animal: 'elephant', dir: W, rider: 2.9 });
+obj('mount', 0.7, 10.08, A, { animal: 'lion', dir: W, rider: 2.9 });
+for (const z0 of [-10.08, 10.08]) {
+  for (const k of [-1, 1]) st('bodhisattva', 0.6, z0 + k * 1.75, 2.6, { robe: 'clay_green', robe2: 'clay_robe' });
+  st('groom', -2.1, z0 - Math.sign(z0) * 0.9, 2.1, { robe: 'clay_robe', robe2: 'clay_green', dir: [-0.6, Math.sign(z0) * 0.8] });
+}
+for (const sz of [-1, 1]) st('king', -2.35, sz * 11.6, 3.2, { robe: 'clay_green', robe2: 'clay_robe' });
 
 // ── the roof ─────────────────────────────────────────────────────────────────
-add({ t: 'hip_roof', c: [0, 0], A: 17.0 + 4.0, B: 8.83 + 4.0, alongZ: true, y: F + 6.6, rise: 6.1, lift: 0.6, mat: 'tile_grey', soffit: 'timber_red' });
+// eaves 4.0 m past the column line on rafters and flying rafters; the lowest slope about 0.3, steeper toward the ridge
+add({ t: 'hip_roof', c: [0, 0], A: 17.0 + 4.0, B: 8.83 + 4.0, alongZ: true, y: F + 7.5, rise: 5.0, eaveSlope: 0.3, pow: 1.6, lift: 0.6, mat: 'tile_grey', soffit: 'timber_red', rafters: { out: 4.0, sp: 0.32 }, tangChiwei: 2.3 });
 
 // ── the monastery: gate, walls, the Tang pillar, the old pagoda ──────────────
 {
