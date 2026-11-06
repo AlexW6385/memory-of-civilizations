@@ -25,7 +25,7 @@ export const ARRIVALS = {
   'ur':               [0, 0.1, -118, 3.1416, 0.22],      // the ziggurat across its court
   'babylon':          [-40, 0.1, -360, 3.1416, 0.2],     // the Processional Way's lions to the Ishtar Gate
   'persepolis':       [-135, 14.05, -75, -1.571, 0.16],  // on the terrace, the Apadana's porch
-  'isfahan':          [0, 0.1, 205, 3.1416, 0.2],        // the mosque's portal and minarets over the square
+  'isfahan':          [0, 0.1, 216, 3.1416, 0.25],       // the mosque's portal and minarets over the square (past the market's last stall)
   'petra':            [160, 0.1, -158, 1.5708, 0.25],    // the Treasury at the end of the Siq
   'jerusalem':        [-67.6, 18, -40, -1.78, 0.16],     // on the esplanade, the Dome of the Rock
   'constantinople':   [-70, null, 110, -0.517, 0.16],    // Hagia Sophia's dome over its buttresses, from the south-west
@@ -35,7 +35,7 @@ export const ARRIVALS = {
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square
   'djenne':           [95, 0.1, 30, 1.25, 0.13],         // the Great Mosque over the market
   'lalibela':         [-217, 0.1, 113, -2.356, -0.42],   // at the pit's north-west corner, down its diagonal onto the cross
-  'kilwa':            [5, null, 30, 0.785, 0.15],        // in the Great Mosque, among its pillars
+  'kilwa':            [-9.95, null, 32.5, 0, 0.12],      // in the Great Mosque, down an aisle between its pillars to the great dome
   'great-zimbabwe':   [46, 0.1, 60, 3.1416, 0.1],        // the Great Enclosure's curved walls
   'knossos':          [0, 0.2, 22, 0, 0.05],             // the central court between its red columns
   'athens':           [86.8, 70, 36, 1.4, 0.15],         // on the Acropolis, the Parthenon's east front
@@ -50,13 +50,13 @@ export const ARRIVALS = {
   'amsterdam':        [20, 1.1, -210, 1.5708, 0.2],      // the Town Hall on the Dam
   'versailles':       [-60, 6.1, 0, -1.5708, 0.15],      // the garden front over the water parterre
   'london':           [200, 2.5, -170, 1.9, 0.2],        // the Clock Tower and Westminster from the bridge
-  'barcelona':        [240.3, null, -92, 1.5708, 0.5],   // the Nativity façade's portals, from the far pavement of the Carrer de la Marina
-  'norse-borgund':    [-24, null, -28, -1.5708, 0.3],     // the stave church in its valley
+  'barcelona':        [239.5, null, -101, 1.712, 0.45],  // the Nativity façade's portals, from the far pavement of the Carrer de la Marina (south of the tram standing at the façade)
+  'norse-borgund':    [-30, null, -28, -1.509, 0.27],     // the stave church in its valley, across the churchyard wall (8 m off)
   'muscovy':          [40, 0.1, 40, 3.1416, 0.3],        // St Basil's and the Kremlin wall across Red Square
   'teotihuacan':      [0, 0.1, 60, 0, 0.1],              // up the Avenue of the Dead
   'chichen-itza':     [30, 0.1, 75, 0.38, 0.17],         // El Castillo
-  'tenochtitlan':     [-10, 0.1, 30, -1.9, 0.25],        // the Templo Mayor's twin shrines
-  'machu-picchu':     [-14, null, 0, 3.05, 0.1],         // over the town to Huayna Picchu
+  'tenochtitlan':     [-10, 0.1, 30, -1.293, 0.25],      // the Templo Mayor's twin shrines
+  'machu-picchu':     [0, null, 150, 0.06, 0.12],        // from the saddle's south end, over the town to Huayna Picchu
   'cahokia':          [-25, 0.1, 20, 0, 0.25],           // Monks Mound across the Grand Plaza
   'taos':             [0, 0.1, 25, 0.3, 0.12],           // the north house across the plaza
   'new-york':         [4, 0.1, 176, 3.1416, 0.6],        // up Fifth Avenue between the towers
