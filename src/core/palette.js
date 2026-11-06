@@ -182,6 +182,7 @@ export const MATERIALS = {
   tile_lapis:       { color: '#23497f', roughness: 0.28, metalness: 0.05, kind: 'mosaic' },
   tile_turquoise:   { color: '#3b9aa0', roughness: 0.25, metalness: 0.05, kind: 'mosaic' },
   tile_cream:       { color: '#c8b089', roughness: 0.3, metalness: 0.03, kind: 'mosaic' },
+  tile_white:       { color: '#eeeae0', roughness: 0.35, kind: 'smooth' },
   kahgel:           { color: '#b59d7c', roughness: 0.97, kind: 'smooth' },
   // Edo Japan: fitted granite of the ramparts, the castle's lime plaster, dark-stained wood, the
   // townhouse lattice (koshi) and paper screens (shoji)

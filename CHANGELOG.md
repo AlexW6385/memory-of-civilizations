@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.35 — The Shah Mosque's iwan (2026-11-06)
+- Isfahan's great iwans (the Shah Mosque's portal and court iwans, Lotfollah's portal) have their muqarnas hoods: eight tiers of tile-faced cells stepping in from the springing to the crown, cream, lapis and turquoise by turns with white edges, a lapis crown panel; below, the iwan's walls lined with a lapis dado and a band of white letters on blue at the springing (tile_white).
+
 ## v9.34 — Babylon's lions; slower movement (2026-11-06)
 - The lions of Babylon's Processional Way are redrawn: striding, one fore and one hind leg forward, the tail raised with its tuft, the jaws open, the ear; the yellow mane with its edge in tufts; a blue eye. Movement is slower at the owner's word: walking 2.6 → 2.0 m/s, running 6.5 → 5.2; aloft the horizontal speeds 12 + 0.3/m up to 160 → 9 + 0.22/m up to 120, and with Shift 24 + 0.6/m up to 300 → 18 + 0.45/m up to 240.
 

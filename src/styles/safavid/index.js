@@ -112,7 +112,50 @@ function portal(el, { bag, col }) {
   }
   const top = y + (el.iwan.sill ?? 0) + el.iwan.h, c = [a[0] + ux * L / 2 + nx * (1.2 + D / 2), a[1] + uz * L / 2 + nz * (1.2 + D / 2)];
   slab(bag, col, B, [c[0] - ux * iw / 2, c[1] - uz * iw / 2], [c[0] + ux * iw / 2, c[1] + uz * iw / 2], top, D, y + h - top);
+  if (el.iwan.depth && el.iwan.h > 8) iwanHood(bag, [a[0] + ux * L / 2 + nx * 1.2, a[1] + uz * L / 2 + nz * 1.2], [ux, uz], [nx, nz], iw, el.iwan.depth, y + (el.iwan.sill ?? 0), el.iwan.h);
   if (el.minarets) for (const s of [0.04, 0.96]) minaret({ c: [a[0] + ux * L * s + nx * 1.5, a[1] + uz * L * s + nz * 1.5], y: el.minarets.y ?? y + h, h: el.minarets.h, r: el.minarets.r }, { bag, col });
+}
+
+/**
+ * The iwan's hood (docs/settlements/isfahan.md §4): under the great arch, the muqarnas — tiers of
+ * small niche cells, each tier stepping in over the one below, from the springing to the crown,
+ * faced in tile (cream, lapis, turquoise by turns, their edges picked out in white); the iwan's
+ * walls below lined with a lapis dado under a band of white inscription on blue. c: the middle of
+ * the face's inner side; u along the face; n into the iwan.
+ */
+function iwanHood(bag, c, u, n, w, depth, y, h) {
+  const rise = Math.sqrt((0.8 * w) ** 2 - (0.3 * w) ** 2), ys = y + Math.max(0.3, h - rise), K = 8, top = y + h - 0.4;
+  const P = (su, sd) => [c[0] + u[0] * su + n[0] * sd, c[1] + u[1] * su + n[1] * sd];
+  const mats = ['tile_cream', 'tile_lapis', 'tile_turquoise', 'tile_lapis'];
+  for (let k = 0; k < K; k++) {
+    const o = (k + 0.5) * Math.min(w * 0.42, depth * 0.85) / K, ya = ys + k * (top - ys) / K, yb = ya + (top - ys) / K + 0.02;
+    // the tier's path: up the left wall, across the back, down the right wall, each o in from them
+    const L1 = depth - o, L2 = w - 2 * o, path = [[-w / 2 + o, 0.15], [-w / 2 + o, depth - o], [w / 2 - o, depth - o], [w / 2 - o, 0.15]];
+    if (L2 < 0.6) break;
+    void L1;
+    for (let i = 0; i + 1 < path.length; i++) {
+      const [u0, d0] = path[i], [u1, d1] = path[i + 1], len = Math.hypot(u1 - u0, d1 - d0), nc = Math.max(1, Math.round(len / 1.15));
+      for (let j = 0; j < nc; j++) {
+        const t0 = (j + 0.06) / nc, t1 = (j + 0.94) / nc;
+        const qa = P(u0 + (u1 - u0) * t0, d0 + (d1 - d0) * t0), qb = P(u0 + (u1 - u0) * t1, d0 + (d1 - d0) * t1);
+        // the cell: a shell of tile standing out over the tier below, a white edge along its foot
+        const m = mats[(i * 7 + j + k) % mats.length];
+        const t = []; beamTris(t, [qa[0], ya, qa[1]], [qb[0], ya, qb[1]], 0.22, yb - ya); bag.add(m, fromTriangles(t));
+        const e = []; beamTris(e, [qa[0], ya - 0.05, qa[1]], [qb[0], ya - 0.05, qb[1]], 0.25, 0.07); bag.add('tile_white', fromTriangles(e));
+      }
+    }
+  }
+  // the crown: a flat lapis panel with a golden star over the last tier
+  const cc = P(0, depth * 0.6), cw = Math.max(0.6, w * 0.12);
+  const t = []; beamTris(t, [cc[0] - u[0] * cw, top + 0.02, cc[1] - u[1] * cw], [cc[0] + u[0] * cw, top + 0.02, cc[1] + u[1] * cw], depth * 0.35, 0.3); bag.add('tile_lapis', fromTriangles(t));
+  // the walls below the springing: a lapis dado, a band of white letters on blue at the springing
+  for (const [u0, d0, u1, d1] of [[-w / 2 + 0.06, 0.1, -w / 2 + 0.06, depth - 0.1], [-w / 2 + 0.1, depth - 0.06, w / 2 - 0.1, depth - 0.06], [w / 2 - 0.06, depth - 0.1, w / 2 - 0.06, 0.1]]) {
+    const a = P(u0, d0), b = P(u1, d1);
+    const d = []; beamTris(d, [a[0], y, a[1]], [b[0], y, b[1]], 0.06, 2.2); bag.add('tile_lapis', fromTriangles(d));
+    const bd = []; beamTris(bd, [a[0], ys - 1.3, a[1]], [b[0], ys - 1.3, b[1]], 0.06, 1.1); bag.add('tile_lapis', fromTriangles(bd));
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]), ex = (b[0] - a[0]) / len, ez = (b[1] - a[1]) / len;
+    for (let s = 0.3; s < len - 0.3; s += 0.32) { const q = [a[0] + ex * s, a[1] + ez * s], tall = Math.floor(s / 0.32) % 4 !== 0; const l = []; beamTris(l, [q[0] - ex * 0.05, ys - 1.15, q[1] - ez * 0.05], [q[0] + ex * 0.05, ys - 1.15, q[1] + ez * 0.05], 0.09, tall ? 0.8 : 0.25); bag.add('tile_white', fromTriangles(l)); }
+  }
 }
 
 /**
