@@ -108,10 +108,10 @@ function block(el, { bag, col }) {
   // the voids cut into the solid: the iwans round the court (each to the apex of its vault), the mihrab's niche, the way in from the portal
   const voids = [];
   for (const iw of el.iwans || []) { const [a, b, c2, d] = iw.rect; voids.push([a, b, c2, d, y, y + iw.ys + iw.W * 0.59]); if (iw.qibla) { const m2 = iwanFrame(iw); voids.push([...m2.rect(-1.1, 1.1, iw.D, iw.D + 1.1), y, y + 5]); } }
-  for (const r of el.entry || []) voids.push([...r, y, y + 5.2]);
+  for (const r of el.entry || []) voids.push([r[0], r[1], r[2], r[3], y, y + (r[4] ?? 5.2)]);
   for (const r of parts) { if (r[2] - r[0] < 0.5 || r[3] - r[1] < 0.5) continue; carve(bag, col, S, r, y - 0.5, y + h, voids); }
   if (court) { bag.add('marble', box(court[0], y - 0.3, court[1], court[2], y + 0.06, court[3])); col.floor(court, y + 0.06); }
-  for (const r of el.entry || []) { bag.add('marble_floor', box(r[0], y - 0.3, r[1], r[2], y + 0.06, r[3])); col.floor(r, y + 0.06); }
+  for (const r of el.entry || []) { bag.add('marble_floor', box(r[0], y - 0.3, r[1], r[2], y + 0.06, r[3])); col.floor(r.slice(0, 4), y + 0.06); if (r[4] > 6) vestibule(bag, col, r, y); }
   for (const iw of el.iwans || []) iwan(bag, col, iw, y);
   if (court && el.iwans) courtFittings(bag, col, court, y, h);
   crest(bag, [x0, z0, x1, z1], y + h);
@@ -156,6 +156,27 @@ function block(el, { bag, col }) {
   bag.add('opening', R(m - 1.0, m + 1.0, y + 7.5, y + 10.5, -0.02, 0.06));
   for (let g = 1; g < 5; g++) bag.add('iron', R(m - 1.0, m + 1.0, y + 7.5 + g * 0.6 - 0.03, y + 7.5 + g * 0.6 + 0.03, 0.06, 0.1));
   for (const s2 of [-1, 1]) bag.add(S, R(s2 < 0 ? m - W + 1.6 : m + W - 1.9, s2 < 0 ? m - W + 1.9 : m + W - 1.6, y, y + ph * 0.58, 0, 0.3));
+}
+/**
+ * The domed vestibule behind the portal (Sultan Hasan's: the first room of the bent way in), in the void
+ * r [x0, z0, x1, z1, height]: stone benches along its sides, a dado of dark and white marble courses, the
+ * zone of transition as tiers of muqarnas niches stepping out across the corners, the dome of plastered
+ * brick on its ring, the lamp from its crown.
+ */
+function vestibule(bag, col, r, y) {
+  const [x0, z0, x1, z1, H] = r, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, w = Math.min(x1 - x0, z1 - z0) / 2, ys = y + H - w - 0.6;
+  for (const [a, b] of [[x0, x0 + 0.7], [x1 - 0.7, x1]]) { bag.add(S, box(a, y, z0 + 1.2, b, y + 0.55, z1 - 1.2)); col.rect([a, z0 + 1.2, b, z1 - 1.2], y, y + 0.55); }
+  for (let k = 0; k < 6; k++) { const yy = y + 0.6 + k * 0.4; for (const [a, c] of [[x0, x0 + 0.03], [x1 - 0.03, x1]]) bag.add(k % 2 ? 'marble_smooth' : 'marble_dark', box(a, yy, z0 + 0.4, c, yy + 0.4, z1 - 0.4)); }
+  // the corners: tiers of cells stepping out until the square is an octagon, then the dome's ring
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) for (let k = 0; k < 4; k++) {
+    const e = (k + 1) * 0.42, yy = ys - 2.0 + k * 0.5, px = sx < 0 ? x0 : x1, pz = sz < 0 ? z0 : z1;
+    for (let i = 0; i <= k; i++) { const ox = sx * -(e - i * 0.42), oz = sz * -(i * 0.42 + 0.42); bag.add('stucco', box(Math.min(px, px + ox), yy, Math.min(pz, pz + oz), Math.max(px, px + ox), yy + 0.5, Math.max(pz, pz + oz))); }
+  }
+  bag.add('stucco', box(x0, ys - 0.1, z0, x1, ys + 0.3, z0 + 0.6)); bag.add('stucco', box(x0, ys - 0.1, z1 - 0.6, x1, ys + 0.3, z1));
+  bag.add('stucco', box(x0, ys - 0.1, z0 + 0.6, x0 + 0.6, ys + 0.3, z1 - 0.6)); bag.add('stucco', box(x1 - 0.6, ys - 0.1, z0 + 0.6, x1, ys + 0.3, z1 - 0.6));
+  bag.add('stucco', dbl(Array.from(lathe([[w - 0.05, 0], [w * 0.97, w * 0.3], [w * 0.8, w * 0.65], [w * 0.5, w * 0.9], [0.001, w + 0.3]], 20, null, cx, ys + 0.3, cz).attributes.position.array)));
+  bag.add('lamp_glass', lathe([[0.001, 0], [0.09, 0.02], [0.2, 0.2], [0.2, 0.3], [0.11, 0.45], [0.2, 0.62], [0.001, 0.62]], 10, null, cx, y + 4.2, cz));
+  bag.add('iron', rod([cx, y + 4.8, cz], [cx, ys + w + 0.5, cz], 0.012, 4));
 }
 /** Solid boxes filling rect r from ya to yb less the void boxes [x0, z0, x1, z1, y0, y1], on a grid cut at the voids' edges, runs merged along x. */
 function carve(bag, col, mat, r, ya, yb, voids) {
