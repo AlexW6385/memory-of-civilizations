@@ -330,7 +330,7 @@ export function bridge(el, { bag, col }) {
  * stepped merlons on its water edge, the towers standing out into the river.
  */
 export function quay(el, { bag, col }) {
-  const X = el.river, { z0, z1, d0, d1, y, bed } = el, skip = el.skip ?? [], step = 2;
+  const X = typeof el.river === 'function' ? el.river : () => el.river, { z0, z1, d0, d1, y, bed } = el, skip = el.skip ?? [], step = 2;
   const free = (a, b) => skip.every(([s0, s1]) => b <= s0 || a >= s1);
   for (let za = z0; za < z1 - 1e-6; za += step) {
     const zb = Math.min(z1, za + step);

@@ -3,11 +3,13 @@
 // on its plinth (36 columns of 20 m and three porticoes, corner towers), the Hall of a Hundred
 // Columns, the Tachara and the Hadish, the Treasury, the mudbrick wall along the mountain.
 
-import { TERRACE, STAIR } from './layout.js';
+import { TERRACE, STAIR, mountain } from './layout.js';
+import { people } from './people.js';
 
 const E = [], T = TERRACE.h, [tx0, tz0, tx1, tz1] = TERRACE.rect;
 // the terrace and its parapet (open where the stair arrives)
-E.push({ t: 'terrace', rect: TERRACE.rect, y0: -1, y1: T, gaps: [[tx0 - 2, STAIR.z - 12, tx0 + 2, STAIR.z + 12]] });
+// (and along the east edge, where the fortification wall stands on it)
+E.push({ t: 'terrace', rect: TERRACE.rect, y0: -1, y1: T, gaps: [[tx0 - 2, STAIR.z - 12, tx0 + 2, STAIR.z + 12], [tx1 - 2, tz0 - 1, tx1 + 2, tz1 + 1]] });
 // the double-return stair: two flights up the face either way from a landing, then turning back to the top
 {
   const x0 = tx0 - 2 * STAIR.w - 2, z = STAIR.z, w = STAIR.w, half = T / 2, run = 46;
@@ -50,8 +52,13 @@ E.push({ t: 'hall', rect: [-30, 75, 10, 115], y: T, plinth: 3.5, h: 8, grid: [6,
   stairs: [{ face: 'w', W: 28, flight: 10, wings: ['servants', 'servants'], climbers: 'bearer' }, { face: 'e', W: 28, flight: 10, wings: ['servants', 'servants'], climbers: 'bearer' }] });
 // the Treasury: its two great halls of wooden columns, the court with the audience reliefs, the storerooms
 E.push({ t: 'treasury', rect: [50, 60, 130, 200], y: T, h: 7, th: 3 });
-// the mudbrick fortification along the mountain side
-E.push({ t: 'block', rect: [tx1 - 6, tz0 + 4, tx1 - 2, tz1 - 4], y0: T, y1: T + 9, mat: 'plaster_persian' });
+// the fortification along the mountain side: square mudbrick towers linked by a wall 10 m thick on the terrace's
+// east edge, and towered walls climbing the slope east from its corners (ISAC)
+E.push({ t: 'fortification', x0: tx1 - 10, x1: tx1, z0: tz0 + 0.5, z1: tz1 - 0.5, y: T, h: 10, foot: 0, towers: { every: 38, size: 13, out: 2.5 },
+  climbs: [{ z: tz0 + 3, x1: 232, from: 2.5 }, { z: tz1 - 3, x1: 232, from: 2.5 }], ground: mountain });
+
+// the gear of the guards, ushers and bearers placed in town.js (headdresses, spears, quivers, vessels)
+E.push(...people().gear);
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [

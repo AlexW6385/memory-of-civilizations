@@ -9,6 +9,7 @@ import { Matrix4, Vector3 } from '../../core/three.js';
 import { box, frustum, lathe, fromTriangles, rod, orientOutward } from '../../core/geom.js';
 import { relief, strip, rosette } from './reliefs.js';
 import { jambScene } from './throne.js';
+import { fortification, guardGear, gift } from './fort.js';
 import '../qing/index.js';
 
 const S = 'limestone_persian', W = 'plaster_persian', C = 'marble_dark';     // C: the polished stone of the columns, frames and sculpture
@@ -688,6 +689,6 @@ function house(el, { bag, col }) {
 
 registerStyle('achaemenid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, apadana_stair: apadanaStair, treasury },
+  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift },
   objects: {},
 });
