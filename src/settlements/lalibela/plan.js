@@ -47,6 +47,13 @@ E.push({ t: 'basilica', rect: [mc[0] - 16.75, mc[1] - 11.75, mc[0] + 16.75, mc[1
 const ch = (p, w, d, h) => { const c = [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2]; E.push({ t: 'aksumite', rect: [c[0] - w / 2, c[1] - d / 2, c[0] + w / 2, c[1] + d / 2], y0: -p.depth + 0.15, h }); };
 ch(PITS.maryam, 15, 11, 8.5); ch(PITS.golgotha, 22, 12, 8); ch(PITS.amanuel, 18, 12, 11.5); ch(PITS.gabriel, 16, 10, 9);
 
+// cells and tombs cut into the rock faces of Bete Giyorgis' pit (sensesatlas: its walls have "a
+// number of caves", lodgings of priests and burial places), some at the floor, some on a ledge
+{
+  const [x0, z0, x1, z1] = G.rect, yf = -G.depth + 0.15;
+  const caves = [[[x1 - EDGE, 120], [-1, 0], 0], [[-208, z1 - EDGE], [0, -1], 1.8], [[x1 - EDGE, 139], [-1, 0], 0], [[-206, z0 + EDGE], [0, 1], 0], [[-193, z0 + EDGE], [0, 1], 2.6], [[-193.5, z1 - EDGE], [0, -1], 0], [[-189, z1 - EDGE], [0, -1], 3.4], [[x0 + EDGE, 118.5], [1, 0], 0], [[x0 + EDGE, 140], [1, 0], 2.2]];
+  for (const [c, n, up] of caves) E.push({ t: 'cave', c, n, y: yf + 0.25 + up, floor: yf, w: up ? 0.9 : 1.05, h: up ? 1.4 : 1.75 });
+}
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open')];
 const walks = [[[-280, 128], [-262, 128], [-216, 128], [-210, 130]]];

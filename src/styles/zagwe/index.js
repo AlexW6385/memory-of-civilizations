@@ -5,7 +5,7 @@
 // projecting courses with beam ends; the pits' and trenches' rock walls; round stone houses with
 // conical thatch.
 
-import { registerStyle, STYLES } from '../../core/build.js';
+import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import '../qing/index.js';
@@ -13,15 +13,51 @@ import '../qing/index.js';
 const TU = 'tuff_red', TH = 'tuff_hewn';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 function solid(bag, col, mat, r, y0, y1) { bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); col.floor(r, y1); }
-/** Dark openings on the face of a box [x0, z0, x1, z1] at height y (n per side, w × h). */
-function openings(bag, r, y, h, w, step, skipMid = false) {
+/**
+ * An Aksumite window on a face (centre c [x, z], sill at y; u the face's direction, n its outward
+ * normal; w × h): the dark opening framed by squared beams standing proud of the wall — jambs,
+ * sill and lintel running past them — with the ends of the cross beams, the "monkey heads",
+ * jutting at the corners; a transom with its own heads in a tall window (Met: Aksumite windows
+ * "framed with rounded cross beams, nicknamed 'monkey heads'"; carried on at Lalibela).
+ */
+function aksWindow(bag, c, y, u, n, w, h) {
+  const P = (a, d) => [c[0] + u[0] * a + n[0] * d, c[1] + u[1] * a + n[1] * d];
+  const bar = (a0, a1, y0, y1, d0, d1) => bag.add(TH, orientedBox(P(a0, (d0 + d1) / 2), P(a1, (d0 + d1) / 2), d1 - d0, y0, y1));
+  bag.add('opening', orientedBox(P(-w / 2, -0.1), P(w / 2, -0.1), 0.26, y, y + h));
+  const fw = 0.14, ext = 0.28;
+  for (const sg of [-1, 1]) bar(sg * (w / 2) - (sg < 0 ? fw : 0), sg * (w / 2) + (sg > 0 ? fw : 0), y, y + h, -0.24, 0.09);          // jambs
+  for (const yy of h > 1.2 ? [y - fw, y + h, y + h * 0.55 - fw / 2] : [y - fw, y + h]) {
+    const mid = yy !== y - fw && yy !== y + h;
+    bar(-w / 2 - (mid ? 0 : ext), w / 2 + (mid ? 0 : ext), yy, yy + fw, -0.24, mid ? 0.07 : 0.11);
+    for (const sg of [-1, 1]) bar(sg * (w / 2 + fw / 2) - 0.09, sg * (w / 2 + fw / 2) + 0.09, yy - 0.02, yy + fw + 0.02, 0.0, 0.26);   // the monkey heads
+  }
+}
+/** A window with a pointed (ogee) head, as Bete Giyorgis' upper row: the dark opening, a raised frame following it. */
+function ogeeWindow(bag, c, y, u, n, w, h) {
+  const hr = w * 0.75, N = 8, open = [], frame = [];
+  const V = (a, yy, d) => [c[0] + u[0] * a + n[0] * d, yy, c[1] + u[1] * a + n[1] * d];
+  const prof = [];
+  for (let k = 0; k <= N; k++) { const t = k / N, a = -w / 2 + w * t, f = Math.abs(a) / (w / 2); prof.push([a, y + h + hr * (1 - f) * (1 - f) * (1 + 0.6 * f)]); }
+  for (let k = 0; k < N; k++) {
+    const [a0, y0] = prof[k], [a1, y1] = prof[k + 1];
+    open.push(...V(a0, y, 0.03), ...V(a1, y, 0.03), ...V(a1, y1, 0.03), ...V(a0, y, 0.03), ...V(a1, y1, 0.03), ...V(a0, y0, 0.03));
+    beamTris(frame, V(a0, y0, 0.04), V(a1, y1, 0.04), 0.05, 0.13);
+  }
+  bag.add('opening', fromTriangles(orientOut(open, n)));
+  for (const sg of [-1, 1]) { const t = []; beamTris(t, V(sg * (w / 2 + 0.07) - 0.07, y - 0.12, 0.04), V(sg * (w / 2 + 0.07) + 0.07, y - 0.12, 0.04), 0.05, h + 0.12); frame.push(...t); }
+  { const t = []; beamTris(t, V(-w / 2 - 0.25, y - 0.14, 0.05), V(w / 2 + 0.25, y - 0.14, 0.05), 0.06, 0.14); frame.push(...t); }
+  bag.add(TH, fromTriangles(frame));
+}
+const orientOut = (tris, n) => { for (let i = 0; i < tris.length; i += 9) { const ux = tris[i + 3] - tris[i], uy = tris[i + 4] - tris[i + 1], uz = tris[i + 5] - tris[i + 2], vx = tris[i + 6] - tris[i], vy = tris[i + 7] - tris[i + 1], vz = tris[i + 8] - tris[i + 2]; const nx = uy * vz - uz * vy, nz = ux * vy - uy * vx; if (nx * n[0] + nz * n[1] < 0) for (let k = 0; k < 3; k++) { const t = tris[i + 3 + k]; tris[i + 3 + k] = tris[i + 6 + k]; tris[i + 6 + k] = t; } } return tris; };
+/** Windows along the four faces of a box [x0, z0, x1, z1] at height y (n per side, w × h, every `step` m), Aksumite or ogee. */
+function openings(bag, r, y, h, w, step, skipMid = false, kind = 'aks') {
   const [x0, z0, x1, z1] = r;
   for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
-    const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.floor(L / step));
+    const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.floor(L / step)), ux = (bx - ax) / L, uz = (bz - az) / L;
     for (let i = 0; i < n; i++) {
       if (skipMid && n % 2 === 1 && i === (n - 1) / 2) continue;
-      const s = (i + 0.5) * L / n, px = ax + (bx - ax) * s / L + nx * 0.03, pz = az + (bz - az) * s / L + nz * 0.03, ux = (bx - ax) / L, uz = (bz - az) / L, t = [];
-      beamTris(t, [px - ux * w / 2, y, pz - uz * w / 2], [px + ux * w / 2, y, pz + uz * w / 2], 0.04, h); bag.add('lacquer_black', fromTriangles(t));
+      const s = (i + 0.5) * L / n, c = [ax + ux * s, az + uz * s];
+      (kind === 'ogee' ? ogeeWindow : aksWindow)(bag, c, y, [ux, uz], [nx, nz], w, h);
     }
   }
 }
@@ -47,13 +83,17 @@ function giyorgis(el, { bag, col }) {
     const r = dx ? [cx + dx * a - (dx > 0 ? 0 : 0), cz - w, cx + dx * a, cz + w] : [cx - w, cz + dz * a, cx + w, cz + dz * a];
     const n = [dx, dz], face = dx ? [[cx + dx * (a + 0.03), cz - w * 0.55], [cx + dx * (a + 0.03), cz + w * 0.55]] : [[cx - w * 0.55, cz + dz * (a + 0.03)], [cx + w * 0.55, cz + dz * (a + 0.03)]];
     void r; void n;
-    for (const [yy, hh] of [[y0 + 4.5, 1.8], [y0 + 8.2, 1.6]]) for (const p of face) { const t = []; if (dx) beamTris(t, [p[0], yy, p[1] - 0.45], [p[0], yy, p[1] + 0.45], 0.04, hh); else beamTris(t, [p[0] - 0.45, yy, p[1]], [p[0] + 0.45, yy, p[1]], 0.04, hh); bag.add('lacquer_black', fromTriangles(t)); }
+    const u = dx ? [0, 1] : [1, 0], nn = [dx, dz];
+    for (const p of face) { const c = dx ? [cx + dx * a, p[1]] : [p[0], cz + dz * a]; aksWindow(bag, c, y0 + 4.5, u, nn, 0.9, 1.7); ogeeWindow(bag, c, y0 + 8.0, u, nn, 0.8, 1.1); }
     if (dx !== 1) { const t = []; if (dx) beamTris(t, [cx + dx * (a + 0.03), y0 + 1.8, cz - 1], [cx + dx * (a + 0.03), y0 + 1.8, cz + 1], 0.04, 2.8); else beamTris(t, [cx - 1, y0 + 1.8, cz + dz * (a + 0.03)], [cx + 1, y0 + 1.8, cz + dz * (a + 0.03)], 0.04, 2.8); bag.add('timber', fromTriangles(t)); }
   }
-  // the roof: three nested crosses in low relief
-  for (const [s, hgt] of [[0.85, 0.12], [0.6, 0.24], [0.35, 0.36]]) {
-    const A = a * s, W = Math.max(0.6, w * s * 0.7);
-    for (const r of [[cx - A, cz - W, cx + A, cz + W], [cx - W, cz - A, cx - W + 0.001 + 2 * W, cz - W], [cx - W, cz + W, cx + W, cz + A]]) bag.add(TH, box(r[0], top, r[1], r[2], top + hgt, r[3]));
+  // the roof, level with the ground round the pit: three Greek crosses nested one within another,
+  // each stepped up from the last (the triple cross carved on the roof)
+  let yr = top;
+  for (const [sA, sW, hgt] of [[0.86, 0.8, 0.14], [0.6, 0.55, 0.14], [0.34, 0.3, 0.14]]) {
+    const A = a * sA, Wd = w * sW;
+    for (const r of [[cx - Wd, cz - Wd, cx + Wd, cz + Wd], [cx - A, cz - Wd, cx - Wd, cz + Wd], [cx + Wd, cz - Wd, cx + A, cz + Wd], [cx - Wd, cz - A, cx + Wd, cz - Wd], [cx - Wd, cz + Wd, cx + Wd, cz + A]]) bag.add(TH, box(r[0], yr, r[1], r[2], yr + hgt, r[3]));
+    yr += hgt;
   }
 }
 
@@ -109,8 +149,31 @@ function tukul(el, { bag, col }) {
   col.circle(x, z, r + 0.5, y + H - 0.3, y + H + r);
 }
 
+/** cave: a cell or tomb cut into a pit's rock face { c [x, z] on the face, n (outward normal of the face, [nx, nz]), y, w, h }: the dark mouth with a rounded head, a hewn lip round it, a worn step below. */
+function cave(el, { bag }) {
+  const [cx, cz] = el.c, n = el.n, u = [-n[1], n[0]], w = el.w ?? 1, h = el.h ?? 1.6, y = el.y, N = 8, open = [], lip = [];
+  const V = (a, yy, d) => [cx + u[0] * a + n[0] * d, yy, cz + u[1] * a + n[1] * d];
+  const head = (k) => { const f = Math.PI * k / N; return [-Math.cos(f) * w / 2, y + h - w / 2 + Math.sin(f) * w / 2]; };
+  for (let k = 0; k < N; k++) { const [a0, y0] = head(k), [a1, y1] = head(k + 1); open.push(...V(0, y + h - w / 2, 0.02), ...V(a0, y0, 0.02), ...V(a1, y1, 0.02)); beamTris(lip, V(a0 * 1.12, y0 + 0.04, 0.03), V(a1 * 1.12, y1 + 0.04, 0.03), 0.04, 0.1); }
+  open.push(...V(-w / 2, y, 0.02), ...V(w / 2, y, 0.02), ...V(w / 2, y + h - w / 2, 0.02), ...V(-w / 2, y, 0.02), ...V(w / 2, y + h - w / 2, 0.02), ...V(-w / 2, y + h - w / 2, 0.02));
+  bag.add('opening', fromTriangles(orientOut(open, n)));
+  for (const sg of [-1, 1]) beamTris(lip, V(sg * w * 0.56 - 0.05, y, 0.03), V(sg * w * 0.56 + 0.05, y, 0.03), 0.04, h - w / 2 + 0.04);
+  bag.add(TH, fromTriangles(lip));
+  if (y > el.floor + 0.3) bag.add(TU, orientedBox([cx - u[0] * w * 0.6 + n[0] * 0.25, cz - u[1] * w * 0.6 + n[1] * 0.25], [cx + u[0] * w * 0.6 + n[0] * 0.25, cz + u[1] * w * 0.6 + n[1] * 0.25], 0.5, el.floor, y));
+}
+/** hand_cross: a priest's hand cross of brass held upright { at [x, z], y (the hand), rot }: a short grip, a knop, the cross with flared arms in an open ring. */
+function handCross(el, { bag }) {
+  const [x, z] = el.at, y = el.y, r = el.rot ?? 0, ux = Math.cos(r), uz = -Math.sin(r), M = 'bronze', t = [];
+  bag.add(M, lathe([[0.012, -0.06], [0.012, 0.1], [0.022, 0.12], [0.012, 0.14], [0.001, 0.14]], 6, null, x, y, z));
+  const yc = y + 0.26, P = (a, yy) => [x + ux * a, yy, z + uz * a];
+  beamTris(t, P(-0.009, y + 0.14), P(0.009, y + 0.14), 0.006, 0.24);
+  beamTris(t, P(-0.1, yc - 0.008), P(0.1, yc - 0.008), 0.006, 0.016);
+  for (let k = 0; k < 12; k++) { const a0 = k / 12 * Math.PI * 2, a1 = (k + 1) / 12 * Math.PI * 2; beamTris(t, P(Math.cos(a0) * 0.075, yc + Math.sin(a0) * 0.075), P(Math.cos(a1) * 0.075, yc + Math.sin(a1) * 0.075), 0.006, 0.012); }
+  for (const [a, b] of [[[0, 0.12], [0, 0.07]], [[-0.03, 0.12], [0.03, 0.12]]]) beamTris(t, P(a[0], yc + a[1]), P(b[0], yc + b[1]), 0.006, 0.012);
+  bag.add(M, fromTriangles(t));
+}
 registerStyle('zagwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, tukul },
+  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, tukul, cave, hand_cross: handCross },
   objects: {},
 });
