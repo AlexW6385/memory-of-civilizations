@@ -1,7 +1,7 @@
 # Angkor, c. 1150 — dossier
 
 Settlement id: `angkor` · Style: `khmer` · Region: Indochina (the Tonle Sap plain) · Code: `src/settlements/angkor/`
-Status of this dossier: L2 (the temple's three levels, galleries, towers, stairs, causeways, libraries, basins, enclosure, moat; the village; ground, planting, weather, music; and the detail of §10: the towers' tiers, antefixes and lotus crown, porticoes and pediments, the bas-relief band of the third gallery, the balustered windows of the Bakan gallery, devatas, the libraries, the lions of the Terrace of Honour). L3 recorded for later: the eight relief subjects told panel by panel, the cruciform cloister, the Vishnu statue in the western gate, the carved lintels and colonnettes in full.
+Status of this dossier: L2 (the temple's three levels, galleries, towers, stairs, causeways, libraries, basins, enclosure, moat; the village; ground, planting, weather, music; and the detail of §10: the towers' tiers, antefixes and lotus crown, porticoes and pediments, the bas-relief band of the third gallery, the balustered windows of the Bakan gallery, devatas, the libraries, the lions of the Terrace of Honour); §11 the cruciform cloister and the Bakan's stairs; §12 the open central sanctuary with its Vishnu, the naga balustrades and lions, the wooden ceilings and quarter-vaults, the people of the temple. L3 recorded for later: the eight relief subjects told panel by panel, the carved lintels and colonnettes in full.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -77,6 +77,27 @@ Sources added:
 - [Angkor Wat – Preah Poan (Hall of a Thousand Buddhas) — helloangkor](https://helloangkor.com/attractions/angkor-wat-preah-poan-hall-of-a-thousand-buddhas)
 - [Angkor Wat inner sanctuary — penang-traveltips](https://penang-traveltips.com/cambodia/angkor/angkor-wat/inner-sanctuary.htm)
 
+## 12. Third pass: the sanctuary, the naga, the ceilings, the people (2026-11-06)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| The central sanctuary open to the four quarters | The central tower's sanctuary hollow: a cella 5.2 m square inside walls about 5 m thick, a passage 2 m wide and 3.6 m high on each axis through the wall and its porch, a moulded sill at each door, the floor 0.7 m up with two steps to each porch, the ceiling corbelled in course by course (four courses of 0.45 m) to a capstone | the central sanctuary "originally had four porches opening to the cardinal directions"; "it once held a statue of Vishnu"; "the central core was walled up some time after the sacking of Angkor" [stated: factsanddetails]; the cella's size, the corbelled ceiling [inferred from the Khmer sanctuary type] |
+| The image of Vishnu | In the middle of the cella, facing west down the temple's axis, a standing Vishnu 3.3 m tall with eight arms on a moulded pedestal whose ablution spout runs out to the north: the feet together, the sampot from waist to knee with its hanging fold and belt, a necklace on the bare chest, the long earlobes, the cylindrical mitre; four arms fanning from each shoulder, the upper right holding the discus, the upper left the conch, the lower right resting on the mace, the lower left on the earth (a ball); the other hands empty | Ta Reach, the eight-armed Vishnu now in the western gopura, "speculated to be the original statue of Vishnu from the central shrine" [stated: helloangkor]; eight arms, about five metres high [stated: cambodianess — the height with its base]; the attributes and the pedestal type [inferred from Khmer Vishnu images]. We show it where it is believed to have stood c. 1150, not in the gopura |
+| Naga balustrades | The serpent's body, round and ringed with scale bands, carried on short round columns with moulded feet and cupped capitals; at the ends the body bends up off a moulded pedestal into an upright neck that opens into a fan of nine hooded heads (the middle one largest), each with snout, brow and eyes, against the hood spread as a halo with flame points | "a low balustrade resembling the body of a serpent"; "short columns support the balustrade"; the body ends "spreading its nine heads to form the shape of a fan" [stated: factsanddetails]; the heads' and halo's forms [inferred from photographs] |
+| Lions at the causeway | Two seated stone lions on pedestals at the foot of the causeway's western steps, facing out | "giant stone lions on each side of the terrace guard the monument" [stated: factsanddetails] |
+| Carved wooden ceilings | Under the corbelled vault of every gallery (the third, second and Bakan galleries, the cloister) a false ceiling of wood: boards painted red in a grid of dark beams, 0.9 m coffers, a gilded eight-petalled lotus rosette in each; broken where a crossing rises higher | the galleries' wooden ceilings (now replicated over the Churning gallery "as close as possible") [stated: World Monuments Fund]; "rosettes on the vaults" of the cross-shaped galleries; "traces of original color" on the ceiling of an entry tower [stated: factsanddetails]; the coffer size, the red and the gilding [inferred] |
+| Quarter-vaults | Over the half-galleries outside the third gallery's pillars, a quarter of a corbelled vault curving down from over the main pillars to the outer, shorter pillars (replacing a flat slope) | the half-galleries on columns along the outer side of the third gallery [stated: Notre Dame; factsanddetails]; the quarter-vault [inferred from the Khmer half-gallery type] |
+| People of the temple | Brahmin priests in white, bare-chested, hair in a chignon — one standing in worship before the image, one kneeling, an attendant's basket of flowers and water pot at the pedestal, one coming down from the western porch; four temple dancers in sampot standing in the salutation on the Terrace of Honour, four musicians seated by them; devotees crossing the causeway with offerings on their heads and slung from poles | a Vishnu temple served by Brahmins; temple dancers (apsaras carved by the hundred on the walls) [inferred]; at c. 1150 the temple was Hindu, so no Buddhist monks are shown [inferred] |
+| The town | Commoners' houses thatched; the village as before (§5) | "the homes of the common people have roofs made only of thatch" (Zhou Daguan, 1296) [stated: National Library of Australia] |
+
+Sources added:
+- [Angkor Wat – Gopura — helloangkor](https://helloangkor.com/attractions/angkor-wat-gopura)
+- [Ta Reach: most famous sacred sculpture at Angkor Wat — Cambodianess](https://www.cambodianess.com/article/ta-reach-most-famous-sacred-sculpture-at-angkor-wat)
+- [Churning of the Ocean of Milk Gallery Conservation Project — World Monuments Fund](https://wmf.org/node/13852)
+- [The way of life in the Khmer Empire — National Library of Australia](https://www.library.gov.au/learn/digital-classroom/angkorkhmer-empire-802-1431/way-life-khmer-empire)
+
+Not done here: the outer enclosure's five-entrance gopura with its elephant gates (the gopura is 240 m long, beyond our compressed enclosure) [stated: helloangkor]; the baray (the Western Baray lies kilometres away, outside the settlement) [inferred].
+
 ## Sources
 
 - [Angkor Wat — wondermondo](https://wondermondo.com/angkor-wat)
@@ -90,3 +111,7 @@ Sources added:
 - [Angkor Wat: its layout, architecture and components — Facts and Details](https://factsanddetails.com/southeast-asia/Cambodia/sub5_2f/entry-6643.html)
 - [Prasat Angkor Wat 2 — the-khmerempire](https://the-khmerempire.blogspot.com/2019/09/prasat-angkor-wat-2.html)
 - [Window Balusters of the Khmer Architecture — IAFOR (ACAS)](https://acas.iafor.org/presentation/submission70777/)
+- [Angkor Wat – Gopura — helloangkor](https://helloangkor.com/attractions/angkor-wat-gopura)
+- [Ta Reach — Cambodianess](https://www.cambodianess.com/article/ta-reach-most-famous-sacred-sculpture-at-angkor-wat)
+- [Churning of the Ocean of Milk Gallery Conservation Project — World Monuments Fund](https://wmf.org/node/13852)
+- [The way of life in the Khmer Empire — National Library of Australia](https://www.library.gov.au/learn/digital-classroom/angkorkhmer-empire-802-1431/way-life-khmer-empire)
