@@ -218,6 +218,25 @@ function kilt(a, up, legs, seed) {
   // the pleated front panel: the tucked end of the wrap, flaring to the hem (standing and kneeling)
   if (legs === 'stand' || legs === 'kneel') { const g = tube([[0.02, 0.97, -0.124, 0.03, 0.006], [0.03, 0.8, -0.15, 0.06, 0.006], [0.035, 0.575, -0.168, 0.085, 0.005]], 5); if (legs === 'stand') a('c1', g); else up('c1', g); }
 }
+/**
+ * The Māori kilt of free-hanging strands (the rāpaki; the piupiu of rolled flax is its later form): a
+ * plaited waistband and from it rolled flax strands to the knee, swinging a little apart. Standing, the
+ * strands hang free; seated, they lie over the thighs.
+ */
+function strands(a, up, legs, seed) {
+  up('c1', slathe([[0.16, 0.93], [0.168, 0.95], [0.168, 0.995], [0.16, 1.01]], 14, (th) => ell(1, 0.7)(th)));
+  const n = 34, r = rng(seed);
+  if (legs === 'stand' || legs === 'brace') {
+    for (let k = 0; k < n; k++) {
+      const t = (k + 0.5) / n * Math.PI * 2, c = Math.cos(t), sn = Math.sin(t), j = r(), hem = 0.47 + j * 0.05, fl = 0.2 + j * 0.02;
+      const P = (rr, y) => [c * rr, y, sn * rr * 0.74];
+      a('c1', tube([[...P(0.163, 0.95), 0.0075], [...P(0.18, 0.8), 0.007], [...P(fl, 0.62), 0.0065], [...P(fl + 0.012, hem), 0.006]], 4, { capA: false }));
+    }
+  } else {
+    legTubes(a, 'c1', legs, { to: 3, thick: 1.3 });
+    up('c1', folded([[0.2, Math.max(0.66, LEGS[legs].drop + 0.04)], [0.17, 0.86], [0.16, 0.95], [0.001, 0.96]], 18, 9, 0.03, seed).scale(1, 1, 0.82));
+  }
+}
 function sheath(a, up, legs, seed) {
   const k = 1.065, top = 1.255;
   // the bodice over the torso, from under the breast to the hips
@@ -289,7 +308,7 @@ function faceOf(add, beard) {
 }
 /** hair: { style: 'short' | 'long' | 'bun' | 'shaven' | 'under' (beneath a hat) } */
 function hairOf(add, style) {
-  if (style === 'short' || style === 'long' || style === 'bun' || style === 'under') {
+  if (style === 'short' || style === 'long' || style === 'bun' || style === 'under' || style === 'topknot') {
     const fx = ell(0.88, 1.0), low = style === 'under' ? 1.54 : 1.5;
     add('hair', slathe([[0.075, low], [0.086, 1.54], [0.093, 1.585], [0.091, 1.618], [0.08, 1.645], [0.056, 1.665], [0.028, 1.674], [0.001, 1.676]], 12,
       (th, i, r, y) => fx(th) * 1.08 * (FRONT(th) && y < 1.612 ? (Math.abs(Math.cos(th)) < 0.55 ? 0.62 : 0.86) : 1)).translate(0, 0, -0.004));
@@ -300,6 +319,8 @@ function hairOf(add, style) {
       (th, i, r, y) => fx(th) * 1.06 * (FRONT(th) && Math.abs(Math.cos(th)) < 0.6 ? (y < 1.535 ? 0.32 : y < 1.615 ? 0.66 : 0.9) : 1)).translate(0, 0, 0.004));
   }
   if (style === 'long') add('hair', tube([[0, 1.6, 0.075, 0.075, 0.03], [0, 1.47, 0.1, 0.085, 0.028], [0, 1.3, 0.1, 0.075, 0.022], [0, 1.24, 0.095, 0.05, 0.015]], 8));
+  // the topknot (tikitiki, rāhiri): the hair drawn up from all round and twisted into a knot on the crown
+  if (style === 'topknot') { const b = ball(0.052, 10, 7); b.scale(1, 0.9, 1); b.translate(0, 1.655, 0.012); add('hair', b); add('hair', tube([[0, 1.64, 0.01, 0.035], [0, 1.67, 0.012, 0.032], [0, 1.69, 0.012, 0.022]], 8)); }
   if (style === 'bun') { const b = ball(0.05, 9, 6); b.scale(1, 0.85, 0.9); b.translate(0, 1.565, 0.098); add('hair', b); }
 }
 function hatOf(add, hat) {
@@ -330,17 +351,24 @@ function veil(add) {
   }).scale(1, 1, 0.9));
 }
 
+/** The comb (heru) of wood or bone set upright in a topknot: a rounded head and a row of teeth into the knot. */
+function heru(add) {
+  const z = 0.0, w = 0.05;
+  add('comb', slathe([[0.001, 0], [w, 0], [w, 0.02], [w * 0.92, 0.04], [w * 0.62, 0.062], [0.001, 0.07]], 12, (th) => (Math.abs(Math.sin(th)) < 0.25 ? 1 : 0.08)).translate(0, 1.7, z));
+  for (let k = 0; k < 7; k++) { const x = -w * 0.8 + k * (w * 1.6 / 6); add('comb', tube([[x, 1.702, z, 0.0035], [x, 1.66, z, 0.0025]], 3)); }
+}
+
 // ---- the figure ----------------------------------------------------------------------------------------
 /**
- * figure: { dress ('robe' | 'tunic' | 'trousers' | 'wrap' | 'loincloth' | 'shendyt' | 'sheath'), top ('bare': no
+ * figure: { dress ('robe' | 'tunic' | 'trousers' | 'wrap' | 'loincloth' | 'shendyt' | 'sheath' | 'strands' (the Māori kilt of flax strands)), top ('bare': no
  * garment above the waist — the default of the loincloth and the shendyt; with a wrap or trousers too), cloth, cloth2,
  * skin, hat ('none' | 'cap' | 'turban' | 'straw' | 'veil' | 'brim'), hatMat, h (height), carry ('none' | 'pot' | 'basket' |
  * 'pole' | 'hoe' | 'staff' | 'rope' | 'child' | 'oars' | 'punt'), len (of the staff, rope, oars or pole), pose ('stand' |
  * 'talk' | 'sit' (on a chair or bench, seat 0.46 m) | 'sit_low' (on a step or low stool, seat ~0.22 m, y at the feet) | 'sit_ground' (on the
  * ground or a floor, legs out) | 'seiza' (sat back on the heels) | 'squat' | 'kneel' | 'cross' (seated cross-legged) | 'pray' | 'pull' (hauling a rope) | 'staff' |
  * 'row' (seated at the oars) | 'punt' (standing, poling)), staffMat, poleMat (of the staff or oars, of the punting pole), arms (an arm pose of its own, e.g. 'pray' with pose 'kneel'),
- * hair ('short' | 'long' | 'bun' | 'shaven' | 'wig'), hairMat, beard, over ('sash' | 'collar' | 'cape' | 'apron' | 'belt' |
- * 'shawl' | 'wesekh' (the broad collar) | 'none'), legs ('hose' | 'bare'), feet ('bare' | 'shod') } — a still figure, facing −z.
+ * hair ('short' | 'long' | 'bun' | 'shaven' | 'wig' | 'topknot'), comb (a heru in the topknot), combMat, hairMat, beard, over ('sash' | 'collar' | 'cape' |
+ * 'cloak' (to below the knee) | 'apron' | 'belt' | 'shawl' | 'wesekh' (the broad collar) | 'none'), legs ('hose' | 'bare'), feet ('bare' | 'shod') } — a still figure, facing −z.
  * The poses, dresses and things held beyond the first ones are opt-in: a figure without them is as it was.
  */
 const LEGS_OF = { sit: 'sit', squat: 'squat', row: 'sit', kneel: 'kneel', cross: 'cross', pull: 'brace', sit_low: 'low', sit_ground: 'ground', seiza: 'seiza' };
@@ -359,10 +387,10 @@ export function figure(el, { bag, col }) {
   const veiled = hat === 'veil';
   const style = veiled ? 'none' : hat === 'turban' ? 'under' : hat !== 'none' ? 'under' : el.hair ?? ['short', 'short', 'long', 'bun', 'short'][Math.floor(r0() * 5)];
   const beard = el.beard ?? (!veiled && style !== 'long' && style !== 'bun' && r0() < 0.35);
-  const lower = dress === 'loincloth' || dress === 'shendyt' || dress === 'sheath';             // the dresses of the lower body alone
+  const lower = dress === 'loincloth' || dress === 'shendyt' || dress === 'sheath' || dress === 'strands';             // the dresses of the lower body alone
   const bare = lower || ((el.top ?? (dress === 'loincloth' || dress === 'shendyt' ? 'bare' : '')) === 'bare' && (dress === 'wrap' || dress === 'trousers'));
   const over = el.over ?? (dress === 'robe' ? ['sash', 'none', 'collar'][Math.floor(r0() * 3)] : dress === 'wrap' ? (bare ? 'none' : 'shawl') : dress === 'tunic' || dress === 'shendyt' ? 'belt' : 'none');
-  const bareLegs = dress === 'tunic' ? (el.legs ?? 'bare') === 'bare' : dress === 'wrap' || dress === 'loincloth' || dress === 'shendyt';
+  const bareLegs = dress === 'tunic' ? (el.legs ?? 'bare') === 'bare' : dress === 'wrap' || dress === 'loincloth' || dress === 'shendyt' || dress === 'strands';
   const shod = (el.feet ?? (dress === 'wrap' || lower ? 'bare' : 'shod')) !== 'bare';
   const shade = () => 0.86 + r0() * 0.22, cs = shade(), cs2 = shade(), ss = 0.9 + r0() * 0.16;
   const hairMat = el.hairMat ?? 'hide_black', hairShade = el.hairShade ?? (hairMat === 'hide_black' ? 0.7 : 1);
@@ -390,6 +418,7 @@ export function figure(el, { bag, col }) {
     if (dress === 'loincloth') loinCloth(a, up(a), legs, 3);
     else if (dress === 'shendyt') kilt(a, up(a), legs, 4);
     else if (dress === 'sheath') sheath(a, up(a), legs, 6);
+    else if (dress === 'strands') strands(a, up(a), legs, 8);
     // kneeling or cross-legged, a robe or a wrap lies pooled round the legs
     else if ((legs === 'kneel' || legs === 'cross' || legs === 'seiza') && (dress === 'robe' || dress === 'wrap')) pool(a, up(a), legs, dress === 'robe' ? 5 : 7, dress === 'robe');
     else if (dress === 'robe') skirt(a, 'c1', legs === 'brace' ? 'stand' : legs, { hem: 0.03, seed: 5 });
@@ -405,6 +434,8 @@ export function figure(el, { bag, col }) {
     if (over === 'sash' && legs === 'stand') a('c2', tube([[0.06, 0.99, -0.108, 0.035, 0.008], [0.07, 0.8, -0.13, 0.04, 0.007], [0.075, 0.64, -0.14, 0.035, 0.006]], 5));
     if (over === 'collar') for (const s of [-1, 1]) up('c2', tube([[s * 0.06, 1.43, 0.02, 0.022, 0.01], [s * 0.075, 1.4, -0.07, 0.024, 0.01], [-s * 0.02, 1.25, -0.125, 0.026, 0.012], [-s * 0.07, 1.05, -0.105, 0.024, 0.01]], 5));
     if (over === 'cape') up('c2', folded([[0.26, 1.02], [0.24, 1.15], [0.215, 1.3], [0.185, 1.36], [0.1, 1.42], [0.06, 1.445], [0.001, 1.446]], 16, 7, 0.06, 13).scale(1, 1, 0.78));
+    // a cloak (kahu) of flax or dog skin from the shoulders to below the knees, wrapped round: standing; seated it lies as a cape
+    if (over === 'cloak') { if (legs === 'stand' || legs === 'brace') a('c2', folded([[0.29, 0.42], [0.285, 0.45], [0.27, 0.7], [0.262, 0.95], [0.262, 1.15], [0.255, 1.3], [0.215, 1.37], [0.11, 1.425], [0.06, 1.448], [0.001, 1.449]], 18, 9, 0.05, 15).scale(1, 1, 0.8)); else up('c2', folded([[0.27, 0.9], [0.24, 1.15], [0.215, 1.3], [0.185, 1.36], [0.1, 1.42], [0.06, 1.445], [0.001, 1.446]], 16, 7, 0.06, 13).scale(1, 1, 0.78)); }
     if (over === 'shawl') up('c2', tube([[-0.16, 1.4, 0.0, 0.07, 0.02], [-0.05, 1.3, -0.12, 0.08, 0.02], [0.1, 1.08, -0.115, 0.075, 0.018], [0.16, 0.96, -0.02, 0.06, 0.018], [0.08, 1.12, 0.115, 0.075, 0.018], [-0.08, 1.32, 0.1, 0.075, 0.02], [-0.16, 1.4, 0.0, 0.07, 0.02]], 6, { capA: false, capB: false }));
     if (over === 'wesekh') wesekh(up);
   });
@@ -412,6 +443,7 @@ export function figure(el, { bag, col }) {
   // the hair (eyes, brows, beard) and the hat
   put(hairMat, assembly(`fig-face|${legs}|${beard ? 'b' : ''}`, (a) => faceOf(up(a), beard)).hair.clone(), hairShade);
   if (style !== 'shaven' && style !== 'none') put(hairMat, assembly(`fig-hair|${style}|${legs}`, (a) => hairOf(up(a), style)).hair.clone(), hairShade);
+  if (el.comb && style === 'topknot') put(el.combMat ?? 'ivory', assembly(`fig-heru|${legs}`, (a) => heru(up(a))).comb.clone());
   if (hat !== 'none') {
     const T = assembly(`fig-hat|${hat}|${legs}`, (a) => { const up = (role, g) => a(role, g.applyMatrix4(M)); if (hat === 'veil') veil(up); else hatOf(up, hat); });
     const hm = el.hatMat ?? (hat === 'straw' ? 'thatch' : hat === 'turban' ? 'cloth_white' : hat === 'brim' ? 'cloth_black' : hat === 'veil' ? c1 : c2);

@@ -152,6 +152,14 @@ const KIT_OVER = {
   knossos: { figures: F(['loincloth', 'shendyt', 'robe', 'robe'], ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_indigo'], ['skin_medium'], ['none'], { hair: ['long', 'long', 'bun'], beard: 0, feet: 'bare', over: ['sash', 'none', 'cape'], overs: { shendyt: ['belt'], loincloth: ['none'] }, hairs: [['hide_black', 0.7], ['hide_brown', 0.6]] }) },
   // Great Zimbabwe: aprons and loincloths of hide, bare above the waist, a hide cloak on some
   'great-zimbabwe': { figures: F(['loincloth', 'loincloth', 'wrap'], ['hide_tan', 'hide_brown', 'cloth_ochre'], ['skin_dark'], ['none'], { hair: ['short', 'short', 'bun'], beard: 0.3, feet: 'bare', over: ['none'], tops: { wrap: ['bare', ''] }, overs: { loincloth: ['none', 'none', 'cape'], wrap: ['none'] } }) },
+  // the Māori of the later 18th century (docs/settlements/maori.md): men's and women's garments much alike —
+  // a cloak (kahu) of flax fibre, pale with dark borders, or for chiefs of dog skin, over the shoulders, and
+  // about the waist a kilt of free-hanging flax strands (the rāpaki; the piupiu proper is post-contact) or a
+  // wrapped garment; the high-born men's hair twisted into a topknot, a comb (heru) of wood or bone in it;
+  // barefoot (Te Ara, "Māori clothing and adornment – kākahu Māori": https://teara.govt.nz/en/maori-clothing-and-adornment-kakahu-maori;
+  // Wikipedia, "Māori traditional textiles": https://en.wikipedia.org/wiki/M%C4%81ori_traditional_textiles). Unlike Rapa
+  // Nui's hami and bark cloth (the pacific kit): no loincloths in sight, a cloak on most, the topknot.
+  maori: { figures: F(['strands', 'strands', 'wrap'], ['cloth_ochre', 'cloth_brown', 'linen', 'cloth_ochre'], ['skin_medium'], ['none'], { hair: ['topknot', 'topknot', 'long', 'long'], comb: 0.4, beard: 0.15, feet: 'bare', tops: { wrap: ['bare', ''] }, cloths2: ['linen', 'cloth_ochre', 'cloth_brown', 'cloth_black', 'hide_white', 'linen'], overs: { strands: ['cloak', 'cloak', 'cloak', 'none'], wrap: ['cloak', 'cloak', 'none'] }, hairs: [['hide_black', 0.7], ['hide_black', 0.6]] }) },
   amsterdam: { street: [['sledge', 2], ['animal:horse', 0.8], ['animal:dog', 0.6], ['barrel', 1.2], ['sacks', 0.8], ['figure', 3]] },
 };
 // the draw-well of each kit (src/objects/index.js well): its kind, its curb, a roof over it
@@ -570,6 +578,7 @@ function dressed(kit, rand) {
   if (f.cloths2) o.cloth2 = c(f.cloths2);
   if (f.legs && o.dress === 'tunic') o.legs = f.legs;
   if (f.feet) o.feet = f.feet;
+  if (f.comb && o.hair === 'topknot' && rand() < f.comb) o.comb = true;
   const [hm, hs] = f.hairs ? c(f.hairs) : ['hide_black', 0.7];
   o.hairMat = hm; o.hairShade = hs;
   return o;
