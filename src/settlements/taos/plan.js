@@ -8,8 +8,10 @@ const E = [];
 E.push({ t: 'pueblo_block', x0: NORTH.x0, z0: NORTH.z0, cell: CELL, heights: NORTH.heights, front: NORTH.front, seed: 7 });
 E.push({ t: 'pueblo_block', x0: SOUTH.x0, z0: SOUTH.z0, cell: CELL, heights: SOUTH.heights, front: SOUTH.front, seed: 11 });
 E.push({ t: 'water_cells', rect: [-RADIUS + 24, -30, RADIUS - 24, 30], y: CREEK.water, cell: 1, inside: (x, z) => inCreek(x, z, -0.3) });
-for (const [x, z, r] of KIVAS) E.push({ t: 'kiva', c: [x, z], r });
+for (const [x, z, r] of KIVAS) E.push({ t: 'kiva', c: [x, z], r, gate: Math.atan2(-z, -x) });
 for (const x0 of [-60, -25, 10]) E.push({ t: 'rack', a: [x0, -44], b: [x0 + 24, -44], h: 3 });
+// the grinding under the racks' shade: rows of three mealing bins, the grinder kneeling on the plaza side
+for (const x of [-52, -17, 18, 30]) E.push({ t: 'mealing_bin', c: [x, -44], yaw: 0 });
 for (const x of [-35, 30]) { const z = creekZ(x); E.push({ t: 'log_bridge', a: [x, z - 4.5], b: [x, z + 4.5] }); }
 const [wx0, wz0, wx1, wz1] = WALL, w = (a, b) => E.push({ t: 'adobe_wall', a, b, h: 2.2 });
 const gap = (x) => [creekZ(x) - 5, creekZ(x) + 5];

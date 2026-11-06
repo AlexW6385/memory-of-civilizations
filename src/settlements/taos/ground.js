@@ -26,7 +26,7 @@ function fromWater(x, z) { return Math.abs(z - creekZ(x)); }
 /** Plants per 100 m²: cottonwoods and willows along the creek, sagebrush stand-ins and grass on the dry ground, nothing in the plaza or on the houses. */
 function planting(x, z) {
   const r = Math.hypot(x, z), dz = Math.abs(z - creekZ(x));
-  if (r > RADIUS - 6 || inCreek(x, z) || inHouses(x, z, 1) || KIVAS.some(([kx, kz, kr]) => Math.hypot(x - kx, z - kz) < kr + 2)) return null;
+  if (r > RADIUS - 6 || inCreek(x, z) || inHouses(x, z, 1) || KIVAS.some(([kx, kz, kr]) => Math.hypot(x - kx, z - kz) < kr + 2.6) || (Math.abs(z + 44) < 1.6 && [-52, -17, 18, 30].some((bx) => Math.abs(x - bx) < 2.6))) return null;
   if (dz < 9 && !inRect([-60, -45, 60, 40], x, z)) return { poplar: 0.9, willow: 0.7, grass: 30 };
   if (inRect(WALL, x, z)) return null;
   if (r > 175) return { grass: 30 };

@@ -26,12 +26,12 @@ function ladder(bag, x, y, z, h, dx, dz, lean = 0.6, over = 1.3) {
   for (let k = 1; k * 0.36 < h - 0.1; k++) { const c = top(k * 0.36 / h); bag.add(V, rod([c[0] - px * 0.3, c[1], c[2] - pz * 0.3], [c[0] + px * 0.3, c[1], c[2] + pz * 0.3], 0.025, 5)); }
 }
 /** A roof hatch at (x, top, z): a low coaming of adobe round the square hole, the dark room below, a ladder standing up out of it. */
-function hatch(bag, col, x, top, z, rand) {
+function hatch(bag, col, x, top, z, rand, over = 2.0) {
   const r = 0.5, t = 0.16, hc = 0.22;
   for (const [x0, z0, x1, z1] of [[x - r - t, z - r - t, x + r + t, z - r], [x - r - t, z + r, x + r + t, z + r + t], [x - r - t, z - r, x - r, z + r], [x + r, z - r, x + r + t, z + r]]) bag.add(A, box(x0, top - 0.05, z0, x1, top + hc, z1));
   bag.add('lacquer_black', box(x - r, top - 0.4, z - r, x + r, top + 0.025, z + r));
   col.rect([x - r - t, z - r - t, x + r + t, z + r + t], top, top + hc);
-  ladder(bag, x - 0.15, top - 2.2, z, 2.2, 0, rand() < 0.5 ? 1 : -1, 0.5, 2.0);
+  ladder(bag, x - 0.15, top - 2.2, z, 2.2, 0, rand() < 0.5 ? 1 : -1, 0.5, over);
 }
 
 /**
@@ -78,14 +78,43 @@ function pueblo(el, { bag, col }) {
 }
 
 /**
- * kiva: a round kiva { c, r }: a low round wall a little above the ground, its earthen roof, the
- * hatch in the middle with its raised rim, and the ladder standing up out of it, its poles tall.
+ * kiva: a round kiva { c, r, gate (the angle of the palisade's way in) }: sunk in the ground, only
+ * its low earthen rim and roof showing, the hatch in the middle with its raised rim and the tall
+ * ladder standing up out of it; round it a palisade of poles set close in the ground and tied to two
+ * rails, a way left through it [stated: "circular, subterranean structures … protected by palisades
+ * of poles and entered through the roof by tall ladders" — SAH Archipedia].
  */
 function kiva(el, { bag, col }) {
-  const [x, z] = el.c, r = el.r, rand = rng(Math.round(x * 7 + z * 13));
-  bag.add(A, lathe([[r, -0.5], [r, 1.0], [r - 0.12, 1.18], [r - 0.35, 1.28], [0.001, 1.3]], 28, (t, i) => (i > 1 ? 1 : 1 + 0.012 * Math.sin(t * 5)), x, 0, z));
-  col.circle(x, z, r, 0, 1.3); col.floor([x - r * 0.7, z - r * 0.7, x + r * 0.7, z + r * 0.7], 1.3);
-  hatch(bag, col, x, 1.3, z, rand);
+  const [x, z] = el.c, r = el.r, rand = rng(Math.round(x * 7 + z * 13) >>> 0);
+  bag.add(A, lathe([[r + 0.25, -0.5], [r + 0.2, 0.35], [r - 0.05, 0.62], [r - 0.4, 0.74], [0.001, 0.78]], 32, (t, i) => (i > 1 ? 1 : 1 + 0.015 * Math.sin(t * 5 + i)), x, 0, z));
+  col.circle(x, z, r + 0.2, 0, 0.78); col.floor([x - r * 0.7, z - r * 0.7, x + r * 0.7, z + r * 0.7], 0.78);
+  hatch(bag, col, x, 0.78, z, rand, 3.6);
+  // the palisade: poles of unpeeled pine, a little uneven, a gap for the way in
+  const R = r + 1.6, gate = el.gate ?? Math.PI / 2, gw = 1.1 / R, H = 2.1;
+  const n = Math.round(2 * Math.PI * R / 0.17);
+  const inGate = (a) => Math.abs(((a - gate + Math.PI * 3) % (Math.PI * 2)) - Math.PI) < gw;
+  for (let k = 0; k < n; k++) {
+    const a = k / n * Math.PI * 2; if (inGate(a)) continue;
+    const pr = R + (rand() - 0.5) * 0.06, px = x + Math.cos(a) * pr, pz = z + Math.sin(a) * pr, h = H + (rand() - 0.5) * 0.35;
+    bag.add('log_pine', rod([px, -0.3, pz], [px + (rand() - 0.5) * 0.05, h, pz + (rand() - 0.5) * 0.05], 0.065 + rand() * 0.02, 6));
+    bag.add('log_pine', lathe([[0.07, 0], [0.05, 0.08], [0.001, 0.12]], 6, null, px, h - 0.01, pz));
+  }
+  // the two rails, in short straight lengths lashed to the poles on the outside
+  for (const yy of [0.55, 1.65]) {
+    const m = 24;
+    for (let k = 0; k < m; k++) {
+      const a0 = k / m * Math.PI * 2, a1 = (k + 1) / m * Math.PI * 2;
+      if (inGate(a0) || inGate(a1) || inGate((a0 + a1) / 2)) continue;
+      const q = R + 0.13;
+      bag.add(V, rod([x + Math.cos(a0) * q, yy, z + Math.sin(a0) * q], [x + Math.cos(a1) * q, yy + 0.02, z + Math.sin(a1) * q], 0.045, 5));
+    }
+  }
+  const m2 = 36;
+  for (let k = 0; k < m2; k++) {
+    const a0 = k / m2 * Math.PI * 2, a1 = (k + 1) / m2 * Math.PI * 2;
+    if (inGate(a0) || inGate(a1)) continue;
+    col.segment([x + Math.cos(a0) * R, z + Math.sin(a0) * R], [x + Math.cos(a1) * R, z + Math.sin(a1) * R], 0.2, 0, H);
+  }
 }
 
 /**
@@ -123,18 +152,123 @@ function rack(el, { bag, col }) {
   }
 }
 
-/** adobe_wall: the perimeter wall a→b { h }. */
-function adobeWall(el, { bag, col }) { const t = []; beamTris(t, [el.a[0], 0, el.a[1]], [el.b[0], 0, el.b[1]], 0.45, el.h ?? 2); bag.add(A, fromTriangles(t)); col.segment(el.a, el.b, 0.9, 0, el.h ?? 2); }
+/**
+ * adobe_wall: the perimeter wall a→b { h }: adobe laid thick at the foot and battered, its head
+ * rounded by the rain, its height and line a little uneven, worn lower here and there [inferred: the adobe as
+ * the houses'; the wall once "taller and punctuated by fortified towers" — SAH Archipedia — later].
+ */
+function adobeWall(el, { bag, col }) {
+  const [a, b] = [el.a, el.b], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux;
+  const H = el.h ?? 2.2, rand = rng(Math.round(a[0] * 13 + a[1] * 7 + b[0] * 3) >>> 0), n = Math.max(2, Math.ceil(L / 0.8));
+  // stations along the wall: height, lateral wobble, thickness
+  const st = [];
+  let hw = 0;
+  for (let i = 0; i <= n; i++) {
+    hw += (rand() - 0.5) * 0.12; hw *= 0.85;
+    const f = i / n, worn = Math.sin(f * L / 7.3 + a[0]) > 0.93 ? 0.35 : 0;
+    st.push({ u: f * L, h: H + 0.12 * Math.sin(f * L / 3.1 + a[1]) + hw - worn, o: 0.06 * Math.sin(f * L / 5.7 + b[0]), t: 0.42 + 0.03 * Math.sin(f * L / 2.3) });
+  }
+  // the section: foot, batter, the shoulders of the rounded head, the crown
+  const prof = (s) => [[-s.t - 0.06, -0.4], [-s.t, 0.5], [-s.t * 0.72, s.h - 0.2], [-s.t * 0.4, s.h - 0.04], [0, s.h], [s.t * 0.4, s.h - 0.04], [s.t * 0.72, s.h - 0.2], [s.t, 0.5], [s.t + 0.06, -0.4]];
+  const P = (s, [k, y]) => [a[0] + ux * s.u + nx * (k + s.o), y, a[1] + uz * s.u + nz * (k + s.o)];
+  const up = [], lo = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = prof(st[i]), p1 = prof(st[i + 1]);
+    for (let j = 0; j + 1 < p0.length; j++) {
+      const T = j === 0 || j === p0.length - 2 ? lo : up, mk = (p0[j][0] + p0[j + 1][0]) / 2, want = [nx * mk, (p0[j][1] + p0[j + 1][1]) > 2 * st[i].h - 0.5 ? 1 : 0.1, nz * mk];
+      const q = [P(st[i], p0[j]), P(st[i + 1], p1[j]), P(st[i + 1], p1[j + 1]), P(st[i], p0[j + 1])];
+      tri(T, q[0], q[1], q[2], want); tri(T, q[0], q[2], q[3], want);
+    }
+  }
+  for (const [i, sg] of [[0, -1], [n, 1]]) {
+    const p = prof(st[i]).map((v) => P(st[i], v)), c = P(st[i], [0, st[i].h * 0.4]);
+    for (let j = 0; j + 1 < p.length; j++) tri(up, c, p[j], p[j + 1], [ux * sg, 0, uz * sg]);
+    tri(up, c, p[p.length - 1], p[0], [ux * sg, 0, uz * sg]);
+  }
+  bag.add(A, fromTriangles(up.concat(lo)));
+  col.segment(a, b, 1.0, 0, H);
+}
 
-/** log_bridge: logs laid across the creek { a, b }. */
+/** Push triangle a b c, turned to face `want`. */
+function tri(out, a, b, c, want) {
+  const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+  const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+  if (nx * want[0] + ny * want[1] + nz * want[2] < 0) out.push(...a, ...c, ...b); else out.push(...a, ...b, ...c);
+}
+
+/**
+ * log_bridge: a footbridge across the creek { a, b }: three peeled logs side by side, their ends
+ * bedded on sill logs laid along each bank and pegged; the middle log flattened on top for the foot
+ * [inferred: the valley's timber, as the vigas].
+ */
 function logBridge(el, { bag, col }) {
-  const L = Math.hypot(el.b[0] - el.a[0], el.b[1] - el.a[1]), nx = -(el.b[1] - el.a[1]) / L, nz = (el.b[0] - el.a[0]) / L;
-  for (const o of [-0.6, -0.2, 0.2, 0.6]) { const t = []; beamTris(t, [el.a[0] + nx * o, 0, el.a[1] + nz * o], [el.b[0] + nx * o, 0, el.b[1] + nz * o], 0.18, 0.3); bag.add(V, fromTriangles(t)); }
-  col.segment(el.a, el.b, 1.6, -1, 0.3);
+  const L = Math.hypot(el.b[0] - el.a[0], el.b[1] - el.a[1]), ux = (el.b[0] - el.a[0]) / L, uz = (el.b[1] - el.a[1]) / L, nx = -uz, nz = ux;
+  const rand = rng(Math.round(el.a[0] * 17 + el.a[1] * 5) >>> 0), ext = 1.0;
+  const at = (u, k, y) => [el.a[0] + ux * u + nx * k, y, el.a[1] + uz * u + nz * k];
+  // the sills on the banks
+  for (const u of [0.3, L - 0.3]) bag.add(V, rod(at(u, -1.1, 0.02), at(u, 1.1, 0.04), 0.14, 8));
+  // the logs, resting on the sills, sagging a little over the water
+  for (const k of [-0.34, 0, 0.34]) {
+    const r = 0.15 + rand() * 0.03, y0 = 0.16 + r - 0.15, pts = [];
+    for (let i = 0; i <= 4; i++) { const f = i / 4, u = -ext + (L + 2 * ext) * f; pts.push(at(u, k + (rand() - 0.5) * 0.04, y0 + r - 0.04 * Math.sin(f * Math.PI) - (u < 0 || u > L ? 0.12 : 0))); }
+    for (let i = 0; i < 4; i++) bag.add(V, rod(pts[i], pts[i + 1], r, 9));
+  }
+  // pegs driven beside the logs at the sills, keeping them from rolling
+  for (const u of [0.3, L - 0.3]) for (const k of [-0.62, 0.62]) bag.add(V, rod(at(u, k, -0.1), at(u, k, 0.55), 0.045, 6));
+  col.segment(el.a, el.b, 1.0, -1, 0.42);
+  col.floor([Math.min(at(0, -0.5, 0)[0], at(L, 0.5, 0)[0]), Math.min(at(0, -0.5, 0)[2], at(L, 0.5, 0)[2]), Math.max(at(0, -0.5, 0)[0], at(L, 0.5, 0)[0]), Math.max(at(0, -0.5, 0)[2], at(L, 0.5, 0)[2])], 0.42);
+}
+
+/**
+ * mealing_bin: a row of three bins { c, yaw }, each lined with slabs of stone set on edge, a slab
+ * metate in each leaning at the grinding angle — coarse to fine — and its two-hand mano on it; the
+ * meal gathered at the foot; a jar of water and a basket of shelled ears beside the row [stated:
+ * slab metates in stone bins "built specifically to hold the metate at the proper angle", two-hand
+ * manos, rows of three — Crow Canyon; micaceous jars — Wikipedia "Taos Pueblo"].
+ */
+function mealingBin(el, { bag, col }) {
+  const [cx, cz] = el.c, yaw = el.yaw ?? 0, cs = Math.cos(yaw), sn = Math.sin(yaw), rand = rng(Math.round(cx * 11 + cz * 3) >>> 0);
+  // local x across the row, z toward where the grinder kneels (+z)
+  const W = (x, y, z) => [cx + x * cs + z * sn, y, cz - x * sn + z * cs];
+  const slabT = (t, x0, x1, z0, z1, y0, y1) => { const c = [W(x0, 0, z0), W(x1, 0, z0), W(x1, 0, z1), W(x0, 0, z1)]; const T = []; const p = (q, y) => [q[0], y, q[2]];
+    const want = (i) => { const m = [(c[i][0] + c[(i + 1) % 4][0]) / 2 - (c[0][0] + c[2][0]) / 2, 0, (c[i][2] + c[(i + 1) % 4][2]) / 2 - (c[0][2] + c[2][2]) / 2]; return m; };
+    tri(T, p(c[0], y1), p(c[1], y1), p(c[2], y1), [0, 1, 0]); tri(T, p(c[0], y1), p(c[2], y1), p(c[3], y1), [0, 1, 0]);
+    for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; tri(T, p(c[i], y0), p(c[j], y0), p(c[j], y1), want(i)); tri(T, p(c[i], y0), p(c[j], y1), p(c[i], y1), want(i)); }
+    t.push(...T); };
+  const S = [], M = [];
+  const bw = 0.62, bd = 0.85, t = 0.06;
+  for (let i = 0; i <= 3; i++) slabT(S, -1.5 * bw + i * bw - t / 2, -1.5 * bw + i * bw + t / 2, -bd / 2, bd / 2, -0.1, 0.3 + rand() * 0.04);
+  slabT(S, -1.5 * bw - t / 2, 1.5 * bw + t / 2, -bd / 2 - t, -bd / 2, -0.1, 0.36);
+  slabT(S, -1.5 * bw - t / 2, 1.5 * bw + t / 2, bd / 2, bd / 2 + t, -0.1, 0.14);
+  bag.add('flagstone', fromTriangles(S));
+  for (let i = 0; i < 3; i++) {
+    const x = -bw + i * bw, mw = bw - t - 0.06, ml = bd - 0.12, ang = 0.32;
+    // the metate: a slab raised at the back, its face worn hollow
+    const c = (dx, dz, k) => { const zz = -ml / 2 + dz * ml, yy = 0.05 + (ml - dz * ml) * Math.sin(ang) * 0.5 + k; return W(x + dx * mw / 2, yy, zz * Math.cos(ang)); };
+    const top = [c(-1, 0, 0.07), c(1, 0, 0.07), c(1, 1, 0.07), c(-1, 1, 0.07)], bot = [c(-1, 0, 0), c(1, 0, 0), c(1, 1, 0), c(-1, 1, 0)];
+    const nUp = [0, 1, 0];
+    tri(M, top[0], top[1], top[2], nUp); tri(M, top[0], top[2], top[3], nUp);
+    for (let e = 0; e < 4; e++) { const f = (e + 1) % 4, m = [(top[e][0] + top[f][0]) / 2 - (top[0][0] + top[2][0]) / 2, 0, (top[e][2] + top[f][2]) / 2 - (top[0][2] + top[2][2]) / 2]; tri(M, bot[e], bot[f], top[f], m); tri(M, bot[e], top[f], top[e], m); }
+    // the mano lying across it, partway down
+    const mz = -ml / 2 + (0.35 + rand() * 0.3) * ml, my = 0.05 + (ml / 2 - mz) * Math.sin(ang) * 0.5 + 0.07 + 0.045;
+    const g = rod(W(x - mw / 2 + 0.03, my, mz * Math.cos(ang)), W(x + mw / 2 - 0.03, my, mz * Math.cos(ang)), 0.045, 7);
+    bag.add('basalt', g);
+    // the meal at the foot
+    bag.add('linen', lathe([[0.16, 0], [0.1, 0.035], [0.001, 0.05]], 9, null, ...W(x, 0.04, bd / 2 - 0.1)));
+  }
+  bag.add('basalt', fromTriangles(M));
+  // a micaceous jar of water, a basket of shelled ears
+  const jp = W(1.5 * bw + 0.45, 0, 0.1);
+  bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.03], [0.22, 0.16], [0.24, 0.3], [0.17, 0.44], [0.11, 0.5], [0.12, 0.55], [0.001, 0.52]], 14, null, jp[0], 0, jp[2]));
+  const bp = W(-1.5 * bw - 0.45, 0, 0.2);
+  bag.add('wicker', lathe([[0.001, 0], [0.16, 0.01], [0.24, 0.1], [0.27, 0.2], [0.24, 0.2], [0.21, 0.11], [0.001, 0.08]], 14, null, bp[0], 0, bp[2]));
+  for (let k = 0; k < 7; k++) { const a = k * 0.9, rr = 0.06 + (k % 3) * 0.05; bag.add(k % 4 === 1 ? 'paint_ochre' : 'cloth_ochre', rod([bp[0] + Math.cos(a) * rr - 0.06, 0.15, bp[2] + Math.sin(a) * rr], [bp[0] + Math.cos(a) * rr + 0.07, 0.17, bp[2] + Math.sin(a) * rr + 0.03], 0.03, 6)); }
+  const e0 = W(-1.5 * bw, 0, -bd / 2), e1 = W(1.5 * bw, 0, -bd / 2);
+  col.segment([e0[0], e0[2]], [e1[0], e1[2]], bd, 0, 0.36);
 }
 
 registerStyle('pueblo', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, pueblo_block: pueblo, kiva, rack, adobe_wall: adobeWall, log_bridge: logBridge },
+  elements: { ...STYLES.qing.elements, pueblo_block: pueblo, kiva, rack, adobe_wall: adobeWall, log_bridge: logBridge, mealing_bin: mealingBin },
   objects: {},
 });
