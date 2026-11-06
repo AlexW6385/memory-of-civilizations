@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.24 — Crafts at the doors (2026-11-05)
+- Crafts at about one door in fifteen, by region: a potter squatting among his pots and a big jar (most regions), a basket-maker sitting among her baskets (Asia, Africa, the Americas, the Pacific), a dyer's cloth on lines by a dark vat (the Near East, South Asia, Africa, the Andes, China), a carpenter with timber and a ladder, a cooper among his barrels (Europe, Venice). Goods unloaded on the quays follow the region: sacks, baskets and jars except in Europe (sacks, crates, barrels).
+
 ## v9.23 — Work in the fields, goods on the quays (2026-11-05)
 - Field work in every settlement with fields: people hoeing or bent over the crop in twos and threes, an ox, buffalo or zebu by region, a basket at the edge (Giza, Angkor and others). By boats moored at the shore, their goods set down on land (sacks, crates, barrels; sacks, baskets and jars in East Asia) with porters. A new figure load: the hoe, held in both hands. Fixed: a figure's own load and height given by the life pass were overwritten by its dress (the porters' poles, the people on raised terraces).
 

@@ -287,6 +287,22 @@ export function lifePlans(id, R, landmarks, town, G) {
     else if (t === 'shop_sign') els.push({ t, at: P(sf, -0.05), y: yb, rot, h: sub === 'board' ? 3.1 : 2.75, board: sub === 'board', len: 1 + rand() * 0.6, cloth: sub === 'board' ? undefined : ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_black'][Math.floor(rand() * 4)], seed });
     else if (t === 'laundry_pole') els.push({ t, at: P(lf, -0.05), y: yb + 4.1, rot, len: 1.3 + rand() * 0.5, prop: false, seed });
   }
+  // crafts at the doors: a potter among his pots, a basket-maker, a dyer's cloth on lines, a carpenter's timber
+  const CRAFT = { east_asia: ['potter', 'basket', 'dyer', 'carpenter'], japan: ['potter', 'basket', 'carpenter'], south_asia: ['potter', 'dyer', 'basket'], southeast_asia: ['potter', 'basket'], near_east: ['potter', 'dyer', 'carpenter'], egypt: ['potter', 'basket'], africa: ['potter', 'basket', 'dyer'], americas: ['potter', 'basket'], andes: ['potter', 'dyer'], mediterranean: ['potter', 'carpenter'], europe_medieval: ['carpenter', 'potter', 'cooper'], europe_early_modern: ['cooper', 'carpenter'], venice: ['cooper', 'carpenter'], north: ['carpenter'], pacific: ['basket'] }[KIT_OF[id] ?? 'mediterranean'] ?? [];
+  if (CRAFT.length) for (const h of houses) {
+    if (!sides[h.front] || rand() > 0.07) continue;
+    const [x0, z0, x1, z1] = h.r, [nx, nz] = sides[h.front], t = 0.3 + rand() * 0.4, off = 1.6;
+    const x = nx ? (nx > 0 ? x1 + off : x0 - off) : x0 + (x1 - x0) * t, z = nz ? (nz > 0 ? z1 + off : z0 - off) : z0 + (z1 - z0) * t, b = [x - 1.4, z - 1.4, x + 1.4, z + 1.4];
+    if (!inside(x, z) || !grid.free(b) || wet(x, z) || !flat(x, z, 1.2)) continue;
+    const face = Math.atan2(nx, nz) + Math.PI, ux = nz, uz = -nx, craft = CRAFT[Math.floor(rand() * CRAFT.length)];
+    const P = (u, v) => [x + ux * u + nx * v, z + uz * u + nz * v];
+    if (craft === 'potter') { put('figure', ...P(0, 0), face, { pose: 'squat' }); for (let q = 0; q < 5; q++) put('pot:' + ['water_pot', 'dark_pot', 'water_pot', 'amphora'][q % 4], ...P(-1.1 + q * 0.5, (q % 2) * 0.5 - 0.3), rand() * 6.28); put('pot:pithos', ...P(1.2, 0.4), 0); }
+    else if (craft === 'basket') { put('figure', ...P(0, 0), face, { pose: 'sit' }); for (let q = 0; q < 4; q++) put('basket', ...P(-1 + q * 0.6, -0.5 + (q % 2) * 0.4), rand() * 6.28); }
+    else if (craft === 'dyer') { put('laundry', ...P(0, 0.3), face + Math.PI / 2); put('pot:dark_pot', ...P(-1.1, -0.6), 0); put('figure', ...P(0.9, -0.6), face + 0.8, { pose: 'stand' }); }
+    else if (craft === 'carpenter') { put('firewood', ...P(-0.9, 0), face); put('ladder', ...P(1.1, 0.4), face); put('figure', ...P(0.2, -0.4), face, { pose: 'squat' }); }
+    else if (craft === 'cooper') { for (let q = 0; q < 4; q++) put('barrel', ...P(-1 + q * 0.65, (q % 2) * 0.4), rand() * 6.28); put('figure', ...P(0.3, -0.7), face, { pose: 'stand' }); }
+    grid.fill(b, 2);
+  }
   // in the streets: free ground near houses
   const area = houses.reduce((a, h) => a + Math.min(1200, (h.r[2] - h.r[0]) * (h.r[3] - h.r[1])), 0), nStreet = Math.min(900, Math.round(area / 200));
   for (let k = 0, tries = 0; k < nStreet && tries < nStreet * 12; tries++) {
@@ -398,7 +414,7 @@ export function lifePlans(id, R, landmarks, town, G) {
       if (land !== null && rand() < 0.45) {
         const lx = x + Math.cos(land) * 5.5, lz = z + Math.sin(land) * 5.5, gb = [lx - 1.5, lz - 1.5, lx + 1.5, lz + 1.5];
         if (!wet(lx, lz) && grid.free(gb) && flat(lx, lz, 1)) {
-          const goods = KIT_OF[id] === 'east_asia' || KIT_OF[id] === 'japan' ? ['sacks', 'basket', 'pot'] : ['sacks', 'crates', 'barrel'];
+          const goods = /^(europe|venice|north|industrial|modern)/.test(KIT_OF[id] ?? '') ? ['sacks', 'crates', 'barrel'] : ['sacks', 'basket', 'pot'];
           for (let q = 0; q < 3; q++) { const gx = lx + (rand() - 0.5) * 2, gz = lz + (rand() - 0.5) * 2; put(goods[q % goods.length], gx, gz, rand() * 6.28); }
           for (let q = 0; q < 2; q++) if (rand() < 0.75) { const gx = lx + Math.cos(land + 1.6 * (q ? 1 : -1)) * 1.8, gz = lz + Math.sin(land + 1.6 * (q ? 1 : -1)) * 1.8; if (!wet(gx, gz)) put('figure', gx, gz, rand() * 6.28, { carry: KIT_OF[id] === 'east_asia' ? 'pole' : rand() < 0.5 ? 'basket' : 'none' }); }
           grid.fill(gb, 2);
