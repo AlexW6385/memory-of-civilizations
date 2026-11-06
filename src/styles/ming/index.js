@@ -418,6 +418,19 @@ function mingWall(el, { bag, col }) {
     beamTris(t, [c[0] - ux * w.w / 2, y + s, c[1] - uz * w.w / 2], [c[0] + ux * w.w / 2, y + s, c[1] + uz * w.w / 2], 0.03, w.h);
     bag.add(PAL.leaky, fromTriangles(t));
   }
+  // the weathering, on both faces: the damp rising above the plinth in a ragged band, rain streaks under the coping
+  if (PAL.plaster === 'plaster_white' && !el.clean) {
+    const rand = rng(((ax * 73 + az * 31) | 0) + 11), damp = [], streak = [];
+    const clear = (s0, s1, ya, yb) => (el.gates || []).every((g) => { const hw = g.r ?? g.w / 2; return s1 < g.at - hw - 0.1 || s0 > g.at + hw + 0.1; }) && (el.windows || []).every((w) => s1 < w.at - w.w / 2 - 0.05 || s0 > w.at + w.w / 2 + 0.05 || yb < (w.sill ?? 1.2) || ya > (w.sill ?? 1.2) + w.h);
+    for (const sgn of [-1, 1]) {
+      const o = th / 2 + 0.008, nx = -uz * sgn, nz = ux * sgn;
+      const quad = (arr, s0, s1, ya, yb) => { const p0 = [ax + ux * s0 + nx * o, az + uz * s0 + nz * o], p1 = [ax + ux * s1 + nx * o, az + uz * s1 + nz * o]; arr.push(p0[0], y + ya, p0[1], p1[0], y + ya, p1[1], p1[0], y + yb, p1[1], p0[0], y + ya, p0[1], p1[0], y + yb, p1[1], p0[0], y + yb, p0[1]); };
+      for (let s0 = 0.1; s0 < L - 0.2;) { const w = 0.6 + rand() * 1.8, s1 = Math.min(L - 0.1, s0 + w), top = 0.45 + rand() * 0.7; if (clear(s0, s1, 0.32, top)) quad(damp, s0, s1, 0.33, top); s0 = s1 + rand() * 0.6; }
+      for (let s0 = 0.3 + rand() * 2; s0 < L - 0.4; s0 += 1.2 + rand() * 3.5) { const w = 0.08 + rand() * 0.25, lo = Math.max(1.3, h - 0.05 - (0.3 + rand() * 1.4)); if (h - 0.06 - lo > 0.2 && clear(s0, s0 + w, lo, h)) quad(streak, s0, s0 + w, lo, h - 0.06); }
+    }
+    if (damp.length) bag.add('plaster_damp', fromTriangles(damp.concat(flipTris(damp))));
+    if (streak.length) bag.add('plaster_streak', fromTriangles(streak.concat(flipTris(streak))));
+  }
   const pl = [];
   beamTris(pl, [ax - ux * 0.02, y - 0.3, az - uz * 0.02], [bx + ux * 0.02, y - 0.3, bz + uz * 0.02], th / 2 + 0.03, 0.62);
   bag.add(PAL.plinth, fromTriangles(pl));

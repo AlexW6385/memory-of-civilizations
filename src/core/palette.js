@@ -100,6 +100,8 @@ export const MATERIALS = {
   timber_ni:        { color: '#9a3b22', roughness: 0.75, kind: 'wood' },
   paint_ochre:      { color: '#c9a04a', roughness: 0.8, kind: 'smooth' },
   plaster_white:    { color: '#e2ddd0', roughness: 0.9, kind: 'smooth' },
+  plaster_damp:     { color: '#a9aa9c', roughness: 0.95, kind: 'smooth' },     // whitewash greyed by damp and lichen
+  plaster_streak:   { color: '#c4c0b2', roughness: 0.95, kind: 'smooth' },     // rain streaks under a coping
   tile_dark:        { color: '#45484c', roughness: 0.7, kind: 'tiles' },
   roof_bark:        { color: '#5a4334', roughness: 0.95, kind: 'bark' },
   thatch:           { color: '#7d6a4c', roughness: 1.0, kind: 'bark' },

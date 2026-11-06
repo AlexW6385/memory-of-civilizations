@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.33 — Weathered garden walls (2026-11-06)
+- Suzhou's long white walls (ming_wall with the white plaster) are weathered on both faces: a ragged band of damp and lichen rising above the plinth, rain streaks under the tiled coping, kept clear of the gates and leaky windows (plaster_damp, plaster_streak).
+
 ## v9.32 — A tavern and a joiner's workshop in Paris (2026-11-05)
 - The two timber houses nearest Paris' arrival are open on the ground floor (house_timber takes open and use; openTimber): a wide door in the stone front with its leaves open, a step, flags, the beams overhead. The tavern: trestle tables with benches, jugs and cups, the hearth with jambs, hood and pot, casks on a stand, a shelf of jugs. The joiner's workshop: the bench with its vice and shavings, a half-made chest, a trestle, planks stacked, tools on a rail, a tool chest, shavings on the floor. Dossier noted.
 
