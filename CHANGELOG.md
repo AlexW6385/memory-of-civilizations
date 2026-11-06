@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.80 — No seam across the middle of the screen (2026-11-06)
+- The scene pass writes its view normals for the ambient occlusion (one more target in the same draw); GTAO rebuilding them from the reversed depth buffer had left a seam across the middle row of every view, the lower half darker.
+
 ## v9.79 — The Lotfollah dome inside; the Taj's screen and bazaars (2026-11-06)
 - Sheikh Lotfollah's chamber inside: the bent passage, lapis and marble walls, eight cable-outlined arches with script bands, squinch hoods, the windowed drum and the buff dome with twelve rings of lemon medallions round a sunburst, the muqarnas mihrab; the Qeysarieh portal's Sagittarius tile panel; horses and people on the square; the Taj's octagonal pierced-marble screen with inlaid frames and kanguras round Mumtaz Mahal's cenotaph; the forecourt's bazaar streets of cusped verandahs with gates; goods, keepers, buyers, horses and boats on the Yamuna.
 
