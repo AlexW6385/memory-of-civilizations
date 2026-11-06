@@ -4,7 +4,7 @@
 // slender paired columns, pavilions and the fountain; tiled roofs; whitewashed houses below.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod, disc, place } from '../../core/geom.js';
 import '../qing/index.js';
 
 const W = 'tuff_red', P = 'plaster_white';
@@ -129,17 +129,217 @@ function court(el, ctx) {
       bag.add('lotus_leaf', box(Math.min(xa, xb), y, za, Math.max(xa, xb), y + 0.85, zb));
       bag.add('lotus_leaf', box(Math.min(xa, xb) + 0.12, y + 0.85, za + 0.12, Math.max(xa, xb) - 0.12, y + 1.0, zb - 0.12));
     }
-  } else {
-    // arcades of slender columns all round, the two pavilions, the fountain of the lions
-    arcade(bag, col, [x0 + 2.5, z0 + 2.5], [x1 - 2.5, z0 + 2.5], y, 4, 2.2, true); arcade(bag, col, [x0 + 2.5, z1 - 2.5], [x1 - 2.5, z1 - 2.5], y, 4, 2.2, true);
-    arcade(bag, col, [x0 + 2.5, z0 + 2.5], [x0 + 2.5, z1 - 2.5], y, 4, 2.2, true); arcade(bag, col, [x1 - 2.5, z0 + 2.5], [x1 - 2.5, z1 - 2.5], y, 4, 2.2, true);
-    for (const px of [x0 + 6, x1 - 6]) { bag.add('roof_tile', lathe([[3.4, 0], [0.001, 2.6]], 4, null, px, y + 5.6, (z0 + z1) / 2)); arcade(bag, col, [px - 2.5, (z0 + z1) / 2 - 2.5], [px + 2.5, (z0 + z1) / 2 - 2.5], y, 4, 1.6, true); arcade(bag, col, [px - 2.5, (z0 + z1) / 2 + 2.5], [px + 2.5, (z0 + z1) / 2 + 2.5], y, 4, 1.6, true); }
-    const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-    bag.add('marble', lathe([[2.2, 0], [2.2, 0.9], [1.0, 1.0], [0.6, 2.0], [1.4, 2.2], [0.3, 2.6], [0.001, 3.0]], 12, null, cx, y, cz));
-    for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; bag.add('marble', box(cx + Math.cos(a) * 1.6 - 0.25, y, cz + Math.sin(a) * 1.6 - 0.25, cx + Math.cos(a) * 1.6 + 0.25, y + 0.9, cz + Math.sin(a) * 1.6 + 0.25)); }
-    col.circle(cx, cz, 2.2, y, y + 2);
+  } else lionsCourt(bag, col, el.rect, y, h);
+}
+// ——— The Court of the Lions (docs/settlements/granada.md §4.1) ———
+// Muhammad V's court about 1390: galleries of slender white marble columns standing singly, in pairs
+// and in threes, cubic capitals under abaci, stilted arches with panels of sebka (the rhomb lattice)
+// in the stucco above them, a carved wooden frieze, the galleries roofed in tile; a square pavilion
+// on each short side, built out into the court, its arches lobed, a wooden dome inside and a tiled
+// pyramid outside; the wider arches in the middle of the long sides before the halls of the Two
+// Sisters and the Abencerrajes; four marble channels from the pavilions and the halls meeting at the
+// fountain — the twelve-sided basin, carved with Ibn Zamrak's poem, on the backs of twelve lions
+// spouting water; the low garden in the four quarters between the channels.
+const MS = 'marble_smooth';
+const dbl2 = (t) => fromTriangles(t.concat(flip(t)));
+/** A Nasrid column, springing at y + hc: ringed base, slender shaft, rings under the neck, the cubic capital (round below, square above). */
+function nColumn(bag, col, x, z, y, hc) {
+  const s = hc - 0.62;
+  bag.add(MS, lathe([[0.15, 0], [0.15, 0.08], [0.125, 0.12], [0.125, 0.16], [0.1, 0.22], [0.094, s - 0.2], [0.114, s - 0.18], [0.114, s - 0.13], [0.094, s - 0.11], [0.094, s - 0.07], [0.114, s - 0.05], [0.114, s - 0.01], [0.1, s + 0.02]], 12, null, x, y, z));
+  bag.add(MS, lathe([[0.1, 0], [0.132, 0.1], [0.132, 0.2]], 12, null, x, y + s + 0.02, z));
+  bag.add(MS, box(x - 0.15, y + s + 0.2, z - 0.15, x + 0.15, y + hc - 0.14, z + 0.15));
+  col.circle(x, z, 0.13, y, y + hc);
+}
+/**
+ * A run of arches from A to B (plan points) over stations st = [{ u, w }] (u along the run, w the
+ * half width of the station's columns), springing at y + hc, the wall 0.5 thick up to y + top.
+ * Spans under 0.8 m are solid. opts: lobed (scalloped intrados), sebka (lattice panels above the crowns), abaci.
+ */
+function archRun(bag, A, B, st, y, hc, top, opts = {}) {
+  const L = Math.hypot(B[0] - A[0], B[1] - A[1]), ux = (B[0] - A[0]) / L, uz = (B[1] - A[1]) / L, th = 0.5, t2 = th / 2;
+  const P = (u, yy, o) => [A[0] + ux * u + uz * o, yy, A[1] + uz * u - ux * o];
+  const tri = [], grd = [], q = (out, a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
+  const ys = y + hc, yt = y + top;
+  const strip = (ua, ya, ub, yb) => { if (Math.abs(ub - ua) < 1e-5) return; for (const o of [-t2, t2]) q(tri, P(ua, ya, o), P(ub, yb, o), P(ub, yt, o), P(ua, yt, o)); };
+  const under = (ua, ya, ub, yb) => q(tri, P(ua, ya, t2), P(ub, yb, t2), P(ub, yb, -t2), P(ua, ya, -t2));
+  for (const s of st) {
+    strip(s.u - s.w, ys, s.u + s.w, ys);
+    if (opts.abaci !== false) bag.add(MS, (() => { const a = P(s.u - s.w - 0.03, 0, -t2 - 0.03), b = P(s.u + s.w + 0.03, 0, t2 + 0.03); return box(Math.min(a[0], b[0]), ys - 0.14, Math.min(a[2], b[2]), Math.max(a[0], b[0]), ys, Math.max(a[2], b[2])); })());
+  }
+  const u0 = st[0].u - st[0].w, u1 = st[st.length - 1].u + st[st.length - 1].w;
+  q(tri, P(u0, ys, -t2), P(u0, ys, t2), P(u0, yt, t2), P(u0, yt, -t2)); q(tri, P(u1, ys, -t2), P(u1, ys, t2), P(u1, yt, t2), P(u1, yt, -t2));
+  q(tri, P(u0, yt, -t2), P(u1, yt, -t2), P(u1, yt, t2), P(u0, yt, t2));
+  const rods = [];
+  for (let i = 0; i + 1 < st.length; i++) {
+    const ua = st[i].u + st[i].w, ub = st[i + 1].u - st[i + 1].w, span = ub - ua;
+    if (span < 0.8) { strip(ua, ys, ub, ys); under(ua, ys, ub, ys); continue; }
+    const r = span / 2, uc = (ua + ub) / 2, stilt = 0.22, yc = ys + stilt, K = 16, pts = [[ua, ys]];
+    for (let k = 0; k <= K; k++) { const t = Math.PI - Math.PI * k / K, rr = opts.lobed && k > 0 && k < K ? r * (1 - 0.07 * Math.abs(Math.sin(t * 4.5))) : r; pts.push([uc + Math.cos(t) * rr, yc + Math.sin(t) * rr]); }
+    pts.push([ub, ys]);
+    for (let k = 0; k + 1 < pts.length; k++) { strip(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1]); under(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1]); }
+    // the archivolt: a moulding round the extrados on both faces
+    for (let k = 0; k < K; k++) { const t0 = Math.PI - Math.PI * k / K, t1 = Math.PI - Math.PI * (k + 1) / K, R2 = r + 0.13; for (const o of [-t2, t2]) rods.push([P(uc + Math.cos(t0) * R2, yc + Math.sin(t0) * R2, o), P(uc + Math.cos(t1) * R2, yc + Math.sin(t1) * R2, o), 0.03]); }
+    // the sebka over the crown: a lattice of rhombs in relief on a darker ground, framed
+    const sy0 = yc + r + 0.24, sy1 = yt - 0.1, sa = ua + 0.04, sb = ub - 0.04;
+    if (opts.sebka && sy1 - sy0 > 0.25) {
+      for (const o of [-t2 - 0.008, t2 + 0.008]) q(grd, P(sa, sy0, o), P(sb, sy0, o), P(sb, sy1, o), P(sa, sy1, o));
+      const m = 1.9, sp = 0.22, hh = sy1 - sy0;
+      for (const sg of [1, -1]) for (let c = sa - hh / m; c < sb + hh / m; c += sp) {
+        // the line y = sy0 + sg·m·(u − c) (sg −1 measured from the top), clipped to the panel
+        let ga = sg > 0 ? c : c, gb = c + hh / m; ga = Math.max(ga, sa); gb = Math.min(gb, sb);
+        if (gb - ga < 0.03) continue;
+        const Y = (u) => sg > 0 ? sy0 + m * (u - c) : sy1 - m * (u - c);
+        for (const o of [-t2, t2]) rods.push([P(ga, Y(ga), o), P(gb, Y(gb), o), 0.022]);
+      }
+      for (const o of [-t2, t2]) for (const [a, b] of [[[sa, sy0], [sb, sy0]], [[sb, sy0], [sb, sy1]], [[sb, sy1], [sa, sy1]], [[sa, sy1], [sa, sy0]]]) rods.push([P(a[0], a[1], o), P(b[0], b[1], o), 0.03]);
+    }
+  }
+  bag.add('stucco_cream', dbl2(tri));
+  if (grd.length) bag.add('stucco_warm', dbl2(grd));
+  for (const [a, b, r] of rods) bag.add('stucco_cream', rod(a, b, r, 4));
+}
+/** One of the twelve lions, facing out at angle a from the fountain's centre (cx, cz), standing at y: stylised, the mane in ridges, the mouth a spout. */
+function lion(bag, cx, y, cz, a) {
+  const add = (g) => bag.add(MS, place(g, cx, y, cz, -a));
+  const lie = (prof, x, yy, seg, w) => { const g = lathe(prof, seg); g.rotateZ(-Math.PI / 2); g.scale(1, 1, w); g.translate(x, yy, 0); return g; };
+  // a stocky body, square-ish in section, the haunch rounded
+  add(lie([[0.001, 0], [0.11, 0.02], [0.15, 0.08], [0.16, 0.2], [0.155, 0.34], [0.17, 0.46], [0.001, 0.5]], 0.82, 0.4, 8, 0.8));
+  // the mane: a bib of parallel locks over the shoulders and chest, carved in grooves
+  add(box(1.2, 0.26, -0.15, 1.44, 0.68, 0.15));
+  for (let k = 0; k < 7; k++) { const zz = -0.12 + k * 0.04; add(rod([1.445, 0.3, zz], [1.445, 0.66, zz], 0.014, 4)); }
+  for (const s of [-1, 1]) for (let k = 0; k < 5; k++) { const xx = 1.23 + k * 0.045; add(rod([xx, 0.3, s * 0.152], [xx, 0.66, s * 0.152], 0.014, 4)); }
+  // the head: square brow, broad muzzle, the open mouth, the ears
+  add(box(1.42, 0.46, -0.13, 1.6, 0.72, 0.13));
+  add(box(1.58, 0.47, -0.1, 1.71, 0.62, 0.1));
+  bag.add('marble_dark', place(box(1.705, 0.52, -0.05, 1.72, 0.565, 0.05), cx, y, cz, -a));
+  for (const s of [-1, 1]) { add(box(1.45, 0.72, s * 0.09 - 0.03, 1.49, 0.765, s * 0.09 + 0.03)); add(box(1.6, 0.64, s * 0.065 - 0.025, 1.62, 0.67, s * 0.065 + 0.025)); }
+  // short thick legs, the paws on the step, the tail curled on the haunch
+  for (const lx of [0.9, 1.3]) for (const s of [-1, 1]) { add(rod([lx, 0, s * 0.1], [lx, 0.34, s * 0.1], 0.075, 8)); add(box(lx - 0.06, 0, s * 0.1 - 0.08, lx + 0.13, 0.07, s * 0.1 + 0.08)); }
+  const tail = [[0.81, 0.42, 0], [0.76, 0.26, 0.07], [0.8, 0.1, 0.13], [0.95, 0.18, 0.16], [1.05, 0.3, 0.15]];
+  for (let k = 0; k + 1 < tail.length; k++) add(rod(tail[k], tail[k + 1], 0.03, 5));
+}
+/** The fountain of the lions at (cx, cz): the low twelve-sided step in its ring of water, the lions on it, the basin on their backs and the central drum, the poem round its rim; jets from the lions' mouths. */
+function lionFountain(bag, col, cx, cz, y) {
+  bag.add('water', disc(2.26, y + 0.1, 12, cx, cz));
+  bag.add(MS, lathe([[2.45, 0], [2.45, 0.2], [2.26, 0.2], [2.26, 0.02]], 12, null, cx, y + 0.05, cz));
+  bag.add(MS, lathe([[1.95, 0], [1.95, 0.14], [0.001, 0.14]], 12, null, cx, y + 0.05, cz));
+  const yl = y + 0.19;
+  for (let k = 0; k < 12; k++) {
+    const a = (k + 0.5) / 12 * Math.PI * 2; lion(bag, cx, yl, cz, a);
+    const ca = Math.cos(a), sa = Math.sin(a), j = [[1.72, 0.54], [1.88, 0.48], [2.0, 0.3], [2.08, -0.09]];
+    for (let i = 0; i + 1 < j.length; i++) bag.add('water', rod([cx + ca * j[i][0], yl + j[i][1], cz + sa * j[i][0]], [cx + ca * j[i + 1][0], yl + j[i + 1][1], cz + sa * j[i + 1][0]], 0.01, 4));
+  }
+  const yb = yl + 0.55, RB = 1.36;
+  bag.add(MS, lathe([[0.5, 0], [0.5, 0.55]], 12, null, cx, yl, cz));
+  bag.add(MS, lathe([[0.5, 0], [0.9, 0.06], [1.22, 0.28], [RB, 0.46], [RB, 0.64], [RB - 0.1, 0.64], [RB - 0.13, 0.44], [0.001, 0.36]], 12, null, cx, yb, cz));
+  bag.add('water', disc(RB - 0.115, yb + 0.58, 12, cx, cz));
+  bag.add(MS, lathe([[0.12, 0], [0.09, 0.3], [0.13, 0.36], [0.04, 0.42], [0.001, 0.44]], 8, null, cx, yb + 0.36, cz));
+  bag.add('water', rod([cx, yb + 0.8, cz], [cx, yb + 1.25, cz], 0.02, 5));
+  // the poem: a band of script in low relief on the twelve faces of the rim
+  for (let f = 0; f < 12; f++) {
+    const a0 = f / 12 * Math.PI * 2, a1 = (f + 1) / 12 * Math.PI * 2, n = 9;
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) / n, ax = Math.cos(a0) * (1 - t) + Math.cos(a1) * t, az = Math.sin(a0) * (1 - t) + Math.sin(a1) * t, rr = RB;
+      const tall = (f * 5 + i * 3) % 4 !== 0, g = box(-0.012, 0, -0.014, 0.012, tall ? 0.13 : 0.05, 0.014);
+      bag.add('marble_dark', place(g, cx + ax * rr, yb + 0.5, cz + az * rr, -Math.atan2(az, ax)));
+    }
+  }
+  col.circle(cx, cz, 2.45, y, y + 2.2);
+}
+/** A marble channel from (a) to (b) along an axis, its kerbs and water; a small round basin with its jet at b. */
+function channel(bag, col, a, b, y, basin = true) {
+  const alongX = Math.abs(b[0] - a[0]) > Math.abs(b[1] - a[1]), lo = (i) => Math.min(a[i], b[i]), hi = (i) => Math.max(a[i], b[i]);
+  const R = (o0, o1) => alongX ? [lo(0), a[1] + o0, hi(0), a[1] + o1] : [a[0] + o0, lo(1), a[0] + o1, hi(1)];
+  for (const [o0, o1] of [[-0.25, -0.13], [0.13, 0.25]]) { const r = R(o0, o1); bag.add(MS, box(r[0], y, r[1], r[2], y + 0.14, r[3])); }
+  const w = R(-0.13, 0.13); bag.add('water', box(w[0], y, w[1], w[2], y + 0.1, w[3]));
+  if (!basin) return;
+  bag.add(MS, lathe([[0.6, 0], [0.6, 0.26], [0.5, 0.26], [0.5, 0.06]], 16, null, b[0], y, b[1]));
+  bag.add('water', disc(0.5, y + 0.19, 16, b[0], b[1]));
+  bag.add(MS, lathe([[0.07, 0], [0.05, 0.3], [0.001, 0.34]], 8, null, b[0], y + 0.06, b[1]));
+  bag.add('water', rod([b[0], y + 0.34, b[1]], [b[0], y + 0.62, b[1]], 0.015, 4));
+  col.circle(b[0], b[1], 0.6, y, y + 0.3);
+}
+/** A sloping roof slab of tiles over a gallery (ceiling of timber below): quad pts [[x, z]…] with heights from H(x, z). */
+function slab(bag, pts, H, t = 0.14) {
+  const T = pts.map(([x, z]) => [x, H(x, z), z]), Bt = pts.map(([x, z]) => [x, H(x, z) - t, z]), top = [], bot = [], edge = [];
+  top.push(...T[0], ...T[1], ...T[2], ...T[0], ...T[2], ...T[3]); bot.push(...Bt[0], ...Bt[2], ...Bt[1], ...Bt[0], ...Bt[3], ...Bt[2]);
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; edge.push(...T[i], ...Bt[i], ...Bt[j], ...T[i], ...Bt[j], ...T[j]); }
+  bag.add('roof_tile', dbl2(top)); bag.add('timber', dbl2(bot.concat(edge)));
+}
+function lionsCourt(bag, col, rect, y, h) {
+  const [x0, z0, x1, z1] = rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, g = 2.6, hc = 3.2, top = 5.3, e = g + 0.5;
+  const cols = new Map(), C = (x, z) => cols.set(`${x.toFixed(2)},${z.toFixed(2)}`, [x, z]);
+  const cornerW = 0.37, pairW = 0.37, oneW = 0.2;
+  // a station's columns: 1 single, 2 a pair along the run, 'c' a corner (its column and one along each run — the other run adds its own)
+  const stations = (A, B, list) => { const L = Math.hypot(B[0] - A[0], B[1] - A[1]), ux = (B[0] - A[0]) / L, uz = (B[1] - A[1]) / L; for (const [u, k] of list) { const x = A[0] + ux * u, z = A[1] + uz * u; if (k === 1) C(x, z); else if (k === 2) { C(x - ux * 0.17, z - uz * 0.17); C(x + ux * 0.17, z + uz * 0.17); } else { C(x, z); C(x + ux * (u < L / 2 ? 0.32 : -0.32), z + uz * (u < L / 2 ? 0.32 : -0.32)); } } return list.map(([u, k]) => ({ u, w: k === 1 ? oneW : k === 2 ? pairW : cornerW })); };
+  // the long sides: four bays each side of the wider middle arch before the hall
+  const longSt = (Lr) => { const m = Lr / 2, hb = m - 1.9, out = [[0, 'c']]; for (let i = 1; i < 4; i++) out.push([hb * i / 4, i === 2 ? 2 : 1]); out.push([m - 1.9, 2], [m + 1.9, 2]); for (let i = 1; i < 4; i++) out.push([m + 1.9 + hb * i / 4, i === 2 ? 2 : 1]); out.push([Lr, 'c']); return out; };
+  for (const zz of [z0 + g, z1 - g]) { const A = [x0 + g, zz], B = [x1 - g, zz], st = stations(A, B, longSt(B[0] - A[0])); archRun(bag, A, B, st, y, hc, top, { sebka: true }); const fx = [x0 + g - 0.3, zz - 0.3, x1 - g + 0.3, zz + 0.3]; bag.add('timber', box(fx[0], y + top, fx[1], fx[2], y + top + 0.25, fx[3])); }
+  // the short sides: a bay each side of the pavilion
+  const ph = 2.4, pz0 = cz - ph, pz1 = cz + ph;
+  for (const xx of [x0 + g, x1 - g]) for (const [za, zb] of [[z0 + g, pz0], [pz1, z1 - g]]) {
+    const A = [xx, za], B = [xx, zb], L = zb - za, st = stations(A, B, za < cz ? [[0, 'c'], [L, 1]] : [[0, 1], [L, 'c']]);
+    archRun(bag, A, B, st, y, hc, top, { sebka: true }); bag.add('timber', box(xx - 0.3, y + top, za - (za < cz ? 0.3 : 0), xx + 0.3, y + top + 0.25, zb + (za < cz ? 0 : 0.3)));
+  }
+  // the pavilions, square, their back part in the gallery
+  const ptop = hc + 2.4, band = hc + 3.9;
+  for (const sx of [-1, 1]) {
+    const pc = sx < 0 ? x0 + g + 1.2 : x1 - g - 1.2, bx = pc + sx * ph, fx = pc - sx * ph;   // back and front faces
+    const fr = stations([fx, pz0], [fx, pz1], [[0, 'c'], [1.4, 1], [3.4, 1], [4.8, 'c']]);
+    archRun(bag, [fx, pz0], [fx, pz1], fr, y, hc, ptop, { lobed: true, sebka: true });
+    archRun(bag, [bx, pz0], [bx, pz1], stations([bx, pz0], [bx, pz1], [[0, 'c'], [4.8, 'c']]), y, hc, ptop, { lobed: true });
+    for (const zz of [pz0, pz1]) { const A = [bx, zz], B = [fx, zz]; archRun(bag, A, B, stations(A, B, [[0, 'c'], [1.2, 1], [4.8, 'c']]), y, hc, ptop, { lobed: true, sebka: true }); }
+    const lo = Math.min(bx, fx), hi = Math.max(bx, fx);
+    for (const r of [[lo - 0.25, pz0 - 0.25, hi + 0.25, pz0 + 0.25], [lo - 0.25, pz1 - 0.25, hi + 0.25, pz1 + 0.25], [lo - 0.25, pz0 + 0.25, lo + 0.25, pz1 - 0.25], [hi - 0.25, pz0 + 0.25, hi + 0.25, pz1 - 0.25]]) bag.add('stucco_cream', box(r[0], y + ptop, r[1], r[2], y + band, r[3]));
+    // a carved band round the top, the wooden dome inside (seen from below), the corners under it, the eaves, the tiled pyramid
+    bag.add('timber', box(lo - 0.32, y + band - 0.45, pz0 - 0.32, hi + 0.32, y + band - 0.15, pz1 + 0.32));
+    const rd = ph - 0.25, dome = [];
+    for (let k = 0; k <= 8; k++) { const t = Math.PI / 2 * k / 8; dome.push([Math.max(0.001, rd * Math.cos(t)), (band - ptop) * Math.sin(t)]); }
+    bag.add('cedar', lathe(dome.reverse(), 24, null, pc, y + ptop, cz));
+    const fan = [];
+    for (const [qx, qz] of [[1, 1], [-1, 1], [-1, -1], [1, -1]]) { const a0 = Math.atan2(qz, qx) - Math.PI / 4; for (let k = 0; k < 6; k++) { const t0 = a0 + Math.PI / 2 * k / 6, t1 = a0 + Math.PI / 2 * (k + 1) / 6; fan.push(pc + qx * rd, y + ptop + 0.01, cz + qz * rd, pc + Math.cos(t0) * rd, y + ptop + 0.01, cz + Math.sin(t0) * rd, pc + Math.cos(t1) * rd, y + ptop + 0.01, cz + Math.sin(t1) * rd); } }
+    bag.add('cedar', dbl2(fan));
+    bag.add('timber', box(lo - 0.8, y + band, pz0 - 0.8, hi + 0.8, y + band + 0.12, pz1 + 0.8));
+    bag.add('roof_tile', place(lathe([[(ph + 0.8) * Math.SQRT2, 0], [0.001, 2.0]], 4), pc, y + band + 0.12, cz, Math.PI / 4));
+    channel(bag, col, [sx < 0 ? cx - 2.45 : cx + 2.45, cz], [pc, cz], y + 0.05);
+  }
+  for (const [x, z] of cols.values()) nColumn(bag, col, x, z, y, hc);
+  // the galleries' roofs, mitred at the corners, leaving the pavilions their own roofs
+  const yW = y + top + 1.35, yE = y + top + 0.3;
+  const Hz = (zw) => (x, z) => yW - (yW - yE) * Math.abs(z - zw) / e, Hx = (xw) => (x, z) => yW - (yW - yE) * Math.abs(x - xw) / e;
+  slab(bag, [[x0, z0], [x1, z0], [x1 - e, z0 + e], [x0 + e, z0 + e]], Hz(z0));
+  slab(bag, [[x1, z1], [x0, z1], [x0 + e, z1 - e], [x1 - e, z1 - e]], Hz(z1));
+  for (const [xw, s] of [[x0, 1], [x1, -1]]) {
+    slab(bag, [[xw, z0], [xw + s * e, z0 + e], [xw + s * e, pz0], [xw, pz0]], Hx(xw));
+    slab(bag, [[xw, pz1], [xw + s * e, pz1], [xw + s * e, z1 - e], [xw, z1]], Hx(xw));
+    slab(bag, [[xw, pz0], [xw + s * 1.4, pz0], [xw + s * 1.4, pz1], [xw, pz1]], Hx(xw));
+  }
+  // the fountain and the channels to the halls
+  lionFountain(bag, col, cx, cz, y + 0.05);
+  channel(bag, col, [cx, cz - 2.45], [cx, z0 + 0.9], y + 0.05); channel(bag, col, [cx, cz + 2.45], [cx, z1 - 0.9], y + 0.05);
+  // the doors to the halls of the Two Sisters (north) and the Abencerrajes (south): a stucco frame, a band of script, the door
+  for (const [zw, s] of [[z0, 1], [z1, -1]]) {
+    const Z = (a, b) => [Math.min(zw + s * a, zw + s * b), Math.max(zw + s * a, zw + s * b)];
+    const f = Z(0, 0.075), o = Z(0, 0.095), b2 = Z(0, 0.09);
+    bag.add('stucco_cream', box(cx - 1.8, y + 0.05, f[0], cx + 1.8, y + 4.9, f[1]));
+    bag.add('opening', box(cx - 1.2, y + 0.05, o[0], cx + 1.2, y + 3.9, o[1]));
+    bag.add('stucco_warm', box(cx - 1.55, y + 4.15, b2[0], cx + 1.55, y + 4.65, b2[1]));
+    for (let i = 0; i < 22; i++) { const u = cx - 1.45 + i * 0.138, tall = (i * 7) % 3 !== 0; const r2 = Z(0.09, 0.12); bag.add('stucco_cream', box(u, y + 4.22, r2[0], u + 0.05, y + (tall ? 4.58 : 4.34), r2[1])); }
+  }
+  // the low garden in the four quarters: beds of earth edged with clipped myrtle, low shrubs in them
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const xa = sx < 0 ? x0 + g + 0.45 : cx + 0.4, xb = sx < 0 ? cx - 0.4 : x1 - g - 0.45, za = sz < 0 ? z0 + g + 0.45 : cz + 0.4, zb = sz < 0 ? cz - 0.4 : z1 - g - 0.45;
+    const zf = sz < 0 ? cz - 2.8 : cz + 2.8, xf = sx < 0 ? cx - 2.8 : cx + 2.8, xp = sx < 0 ? x0 + g + 4.0 : x1 - g - 4.0;
+    const beds = [[xa, sz < 0 ? za : zf, xb, sz < 0 ? zf : zb], [sx < 0 ? xp : xf, sz < 0 ? zf : za, sx < 0 ? xf : xp, sz < 0 ? zb : zf]];
+    for (const r of beds) {
+      if (r[2] - r[0] < 0.8 || r[3] - r[1] < 0.8) continue;
+      bag.add('ground', box(r[0], y, r[1], r[2], y + 0.16, r[3]));
+      for (const e2 of [[r[0], r[1], r[2], r[1] + 0.3], [r[0], r[3] - 0.3, r[2], r[3]], [r[0], r[1] + 0.3, r[0] + 0.3, r[3] - 0.3], [r[2] - 0.3, r[1] + 0.3, r[2], r[3] - 0.3]]) bag.add('lotus_leaf', box(e2[0], y + 0.16, e2[1], e2[2], y + 0.5, e2[3]));
+      for (let x = r[0] + 0.9; x < r[2] - 0.6; x += 1.1) for (let z = r[1] + 0.9; z < r[3] - 0.6; z += 1.1) { const hh = 0.35 + ((x * 7 + z * 13) % 1 + 1) % 1 * 0.3; bag.add('lotus_leaf', lathe([[0.001, 0], [0.22, 0.06], [0.3, hh * 0.45], [0.24, hh * 0.85], [0.001, hh]], 8, null, x, y + 0.16, z)); }
+    }
   }
 }
+
 registerStyle('nasrid', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: { ...STYLES.qing.elements, nasrid_tower: tower, nasrid_wall: wall, court },

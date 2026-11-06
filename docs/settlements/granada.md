@@ -29,6 +29,14 @@ The Court of the Myrtles runs north–south toward the Comares Tower; the hill r
 
 Red rammed earth and brick walls and towers, crenellated; plain-walled palaces round courts; slender marble columns; tiled roofs; whitewashed houses. [stated: materials; inferred: details]
 
+### 4.1 The Court of the Lions (L3, built)
+
+- **Galleries.** A rectangular court with galleries all round, on 124 white marble columns with slender, ringed shafts, cubic capitals and large abaci [stated: alhambradegranada.org]; the columns stand singly, in pairs and in threes, in a subtle rhythm [stated: Bluffton]. Ours: corners in threes (an L of a corner column and one along each side), pairs and singles alternating along the sides; stilted round arches; over the arches, panels of sebka (the lattice of rhombs) in relief on the stucco [stated: the plaster arches and rhomb-shaped carving, alhambradegranada.org; the panel layout inferred]; the wood-carved frieze over the arcade [stated]; the galleries roofed in tile, mitred at the corners, with a timber ceiling below [inferred]. Columns 3.2 m to the springing, the galleries 2.6 m deep [inferred].
+- **The halls.** A larger arch at the middle of each long side, before the Hall of the Abencerrajes and the Hall of the Two Sisters [stated: alhambradegranada.org; Bluffton]; ours: a wider arch in the arcade and a framed door with a band of script in the hall's wall [inferred].
+- **Pavilions.** One at the centre of each short side, built partly out over the court, square in plan, with a semispherical dome of wood inside [stated: alhambradegranada.org]; the arches over the pavilions are of muqarnas [stated] — ours lobed (scalloped) arches, a carved timber band, the wooden dome on corner fans, wide eaves and a tiled pyramid [inferred: roof form]. Columns in threes at the corners [inferred].
+- **Water.** White marble channels start inside the pavilions and the halls and meet at the fountain in a cross, with jets at their ends [stated]. The fountain: a twelve-sided white marble basin on the backs of twelve lions spouting water, Ibn Zamrak's poem carved round its border [stated: alhambradegranada.org; Bluffton]. The second, upper basin is of the early 17th century [stated] and is left out. Ours: the basin 2.7 m across on a central drum, the lions standing outward on a low step in a ring of water, stylised (blocky bodies, a grooved mane, square muzzles) [inferred: sizes and carving], the poem as a band of strokes in relief; small round basins with jets at the channels' ends.
+- **Garden.** A low garden once occupied the centre, removed later for the damp it caused [stated: alhambradegranada.org]; ours: four beds between the channels, edged with clipped myrtle, low shrubs in them [inferred: planting].
+
 ## 5. The town
 
 About 1,000 houses in the Albaicín and below the hill. [inferred]
@@ -56,3 +64,5 @@ The oud and the Andalusian nawba over a drone; the fountains. [inferred]
 - [Alhambra — Wikipedia](https://en.wikipedia.org/wiki/Alhambra)
 - [Court of the Lions — Wikipedia](https://en.wikipedia.org/wiki/Court_of_the_Lions)
 - [Albaicín — Wikipedia](https://en.wikipedia.org/wiki/Albaic%C3%ADn)
+- [Patio of the Lions — alhambradegranada.org](https://alhambradegranada.org/en/amp-info/nasridpalaces/patioofthelions.html)
+- [The Patio of the Lions — Bluffton University](https://homepages.bluffton.edu/~Sullivanm/spain/granada/alhambra/alhambralioncourt.html)
