@@ -404,6 +404,31 @@ function wall(ctx, el, { wa, wb, len, ux, uz, y, h, np, f }) {
 }
 
 /**
+ * The false ceiling of carved wood under a gallery's corbelled vault, between A and B on its centre
+ * line (axis-aligned), `half` to each side of it, its underside at yc: boards painted red in a grid
+ * of dark beams, a gilded lotus rosette in each coffer.
+ */
+const ROSETTE = (() => { const n = 8, f = (th) => 1 + 0.18 * Math.abs(Math.cos(th * n / 2)); return lathe([[0.001, 0.0], [0.2, 0.0], [0.17, -0.035], [0.1, -0.05], [0.05, -0.08], [0.001, -0.09]], 16, f); })();
+function ceiling(bag, A, B, half, yc, cell = 0.9) {
+  const X = Math.abs(B[0] - A[0]) > Math.abs(B[1] - A[1]), s0 = X ? Math.min(A[0], B[0]) : Math.min(A[1], B[1]), s1 = X ? Math.max(A[0], B[0]) : Math.max(A[1], B[1]), v = X ? A[1] : A[0];
+  const R = (a0, a1, b0, b1, y0, y1) => (X ? box(a0, y0, b0, a1, y1, b1) : box(b0, y0, a0, b1, y1, a1));
+  const L = s1 - s0, na = Math.max(1, Math.round(L / cell)), nb = Math.max(1, Math.round(2 * half / cell)), ca = L / na, cb = 2 * half / nb;
+  bag.add('timber_red', R(s0, s1, v - half, v + half, yc, yc + 0.06));
+  for (let j = 0; j <= nb; j++) { const b = v - half + j * cb; bag.add('wood_dark', R(s0, s1, b - 0.05, b + 0.05, yc - 0.1, yc + 0.001)); }
+  for (let i = 0; i <= na; i++) { const a = s0 + i * ca; bag.add('wood_dark', R(a - 0.05, a + 0.05, v - half + 0.05, v + half - 0.05, yc - 0.095, yc + 0.001)); }
+  for (let i = 0; i < na; i++) for (let j = 0; j < nb; j++) {
+    const a = s0 + (i + 0.5) * ca, b = v - half + (j + 0.5) * cb, k = Math.min(ca, cb) / 0.9;
+    bag.add('paint_ochre', ROSETTE.clone().scale(k, k, k).translate(X ? a : b, yc - 0.001, X ? b : a));
+  }
+}
+/** A half-vault over a half-gallery: a quarter of a corbelled vault from the pillars' line (at P, its top yTop) down to the outer pillars `run` out along O, at yLow; `len` along U. */
+function halfVault(bag, P, U, O, len, yTop, yLow, run) {
+  const t = [], m = 8, prof = (i, th) => { const q = i / m, u = run * q; return [u, (yTop - yLow) * Math.sqrt(Math.max(0, 1 - q * q)) + th]; };
+  for (let i = 0; i < m; i++) prism(t, [prof(i, 0), prof(i + 1, 0), prof(i + 1, 0.3), prof(i, 0.3)], [P[0], yLow, P[1]], O, U, len);
+  bag.add(S, fromTriangles(t));
+}
+
+/**
  * k_gallery: a gallery round a rectangle { rect (its centre line), y, w (width), h (pillar height),
  * solid ('in' | 'out': the side with the wall), half (a half-gallery on the open side), gates
  * (gaps at the middles of the sides, with a gopura), corner (towers at the corners: height),
@@ -445,13 +470,15 @@ function kGallery(el, ctx) {
       bag.add('sandstone_carved', fromTriangles(ar));
       const mid = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2], along = Math.abs(ux) > 0.5;
       rectRoof({ c: mid, A: len / 2 + (s0 === 0 && !gate ? hw : 0.2), B: hw + 0.6, y: y + h + 0.5, rise: w * 0.55, kind: 'gable', sweep: 0, curl: false, p: 0.7, alongZ: !along, mat: S, soffit: S }, bag);
+      // the carved wooden ceiling under the vault
+      // (the sides along z stop short of the corners, which the sides along x cover)
+      const ch = hw - 0.37, t0 = Math.abs(uz) > 0.5 && s0 === 0 ? ch : 0, t1 = Math.abs(uz) > 0.5 && s1 >= L - 1e-6 ? ch : 0;
+      ceiling(bag, [A[0] + ux * t0, A[1] + uz * t0], [B[0] - ux * t1, B[1] - uz * t1], ch, y + h + 0.32);
       if (el.half) {
-        const hm = [mid[0] - n[0] * (hw + 1.4) * out, mid[1] - n[1] * (hw + 1.4) * out], hy = y + h * 0.62;
-        const t = [], e0 = [A[0] - n[0] * (hw + 3.2) * out, hy + 0.3, A[1] - n[1] * (hw + 3.2) * out], e1 = [B[0] - n[0] * (hw + 3.2) * out, hy + 0.3, B[1] - n[1] * (hw + 3.2) * out];
-        const r0 = [pa[0], y + h + 0.3, pa[1]], r1 = [pb[0], y + h + 0.3, pb[1]];
-        t.push(...e0, ...e1, ...r1, ...e0, ...r1, ...r0);
-        bag.add(S, fromTriangles(t.concat(flipTris(t))));
-        void hm;
+        // the half-gallery's quarter-vault, from over the pillars down to the outer pillars, along its whole length
+        const O = [-n[0] * out, -n[1] * out], start = s0 === 0 && !gate ? 0 : 0;
+        void start;
+        halfVault(bag, [pa[0] + O[0] * 0.38, pa[1] + O[1] * 0.38], [ux, uz], O, len, y + h + 0.3, y + h * 0.62 + 0.05, 2.6 + 0.42 - 0.38);
       }
       col.floor([Math.min(A[0], B[0]) - Math.abs(n[0]) * hw, Math.min(A[1], B[1]) - Math.abs(n[1]) * hw, Math.max(A[0], B[0]) + Math.abs(n[0]) * hw, Math.max(A[1], B[1]) + Math.abs(n[1]) * hw], y);
     }
@@ -704,6 +731,9 @@ function cloisterGallery(ctx, { axis, u0, u1, v, y, w, h, sides, skip = [], skip
       }
     }
   });
+  // the carved wooden ceiling, broken where a crossing rises higher
+  let cu = u0;
+  for (const [a, b] of [...skip.filter(([a, b]) => b > u0 && a < u1).sort((p, q) => p[0] - q[0]), [u1, u1]]) { if (a - cu > 0.5) ceiling(bag, P(cu, 0), P(a, 0), hw - 0.37, fy + h + 0.32); cu = Math.max(cu, b); }
   rectRoof({ c: P((u0 + u1) / 2, 0), A: L / 2, B: hw + 0.6, y: fy + h + 0.5, rise: w * 0.55, kind: 'gable', sweep: 0, curl: false, p: 0.7, alongZ: !X, mat: S, soffit: S }, bag);
 }
 
