@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.72 — Street dressing turned with New York; seated poses; Māori dress; the kneeling Doge (2026-11-06)
+- Generic street dressing reads lots inside turned elements (New York's benches, crates, stalls and figures back, aligned with the 29° grid); distinct ids for generic life plans; new seated poses on steps, on the ground and seiza, used where people sat on chairs that weren't there; a Māori dress kit (flax rāpaki, cloaks, topknots with bone combs); Madurai's temple elephant on the shared model with ash stripes, bell and anklets; Doge Barbarigo kneeling before the lion on the Clock Tower.
+
 ## v9.71 — Showroom: game lighting, 68°, any size, site views (2026-11-06)
 - The showroom serves its items as JSON (any list size), lights with the game's renderer and climate (metals and gilding read as in game; --light simple for speed), uses the game's 68° field of view, renders real settlement views from a pose or the arrival in 2–4 minutes (--site, --at, --arrival, nearby elements only), and can build the viewer's welded geometry (--weld).
 
