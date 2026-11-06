@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.61 — The Palais de la Cité and the Sainte-Chapelle (2026-11-06)
+- The Sainte-Chapelle's flanks with framed upper windows, crocketed gables and pinnacled buttresses, the cornice and openwork balustrade, the lead roof with its fleur-de-lis crest, the archangel and the flèche, spherical-triangle windows below, the stair with arcaded parapets; the king's gallery to the Grand-Salle with its twin naves and roses; Tour Bonbec, Tour César and Tour d'Argent on the quay; the walled Barillerie side with its gate; the stone quay with water stairs and boats; the king's garden with raised beds, arbour, well and orchard; the unsourced east hall removed.
+
 ## v9.60 — Figures: dress and poses; elephants (2026-11-06)
 - The figure library gains loincloth, shendyt and sheath dresses, bare chests, broad collars and wigs; kneeling, cross-legged, praying, pulling, staff, rowing and punting poses (combinable with arms); a child on the hip; a detailed Asian or African elephant with tusks and caparison; regional dress defaults for Egypt, South and Southeast Asia, the Americas and the Pacific, with Ur, Knossos and Great Zimbabwe overrides; boat crews pole their boats.
 
