@@ -15,7 +15,7 @@ import { faceFrame, prism, fbox } from '../dutch/facade.js';
 
 const ST = 'limestone', OAK = 'timber', LD = 'lead';
 
-function hexa(b, t) {
+export function hexa(b, t) {
   const tris = [], q = (a, b2, c, d) => tris.push(...a, ...b2, ...c, ...a, ...c, ...d);
   q(b[0], b[1], b[2], b[3]); q(t[0], t[3], t[2], t[1]);
   for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; q(b[i], t[i], t[j], b[j]); }
@@ -31,13 +31,13 @@ function tb(a, b, z, w, t) {
 const curved = (bag, m, pts, z, w, t) => { for (let i = 0; i + 1 < pts.length; i++) { const a = pts[i], b = pts[i + 1], e = 0.04 / Math.hypot(b[0] - a[0], b[1] - a[1]); bag.add(m, tb([a[0] - (b[0] - a[0]) * e, a[1] - (b[1] - a[1]) * e], [b[0] + (b[0] - a[0]) * e, b[1] + (b[1] - a[1]) * e], z, w, t)); } };
 
 /** a pointed (two-centred) head: the height over the springing at offset u from the centre, half width r, rise H */
-const pointed = (u, r, H) => { const R = (r * r + H * H) / (2 * r); return Math.sqrt(Math.max(0, R * R - (Math.abs(u) + R - r) ** 2)); };
+export const pointed = (u, r, H) => { const R = (r * r + H * H) / (2 * r); return Math.sqrt(Math.max(0, R * R - (Math.abs(u) + R - r) ** 2)); };
 
 /**
  * A traceried window on face frame F (u along, v up from y, d out): lights between mullions, transoms, a pointed head,
  * the glass (`glass`) flush on the face and the stone tracery standing on it, a moulded surround and label.
  */
-function windowOn(bag, F, y, { uc, hw, v0, vs, rise, lights, transoms = [], glass, d = 0, label = true, depth = 0.22 }) {
+export function windowOn(bag, F, y, { uc, hw, v0, vs, rise, lights, transoms = [], glass, d = 0, label = true, depth = 0.22 }) {
   const n = 14, P = (m, pts, d0, d1) => bag.add(m, prism(F, y, pts, d0, d1)), head = (u) => vs + pointed(u, hw, rise);
   // the glass: a rectangle to the springing, strips up the head
   P(glass, [[uc - hw, v0], [uc + hw, v0], [uc + hw, vs], [uc - hw, vs]], d - 0.04, d + 0.02);
@@ -62,7 +62,7 @@ function windowOn(bag, F, y, { uc, hw, v0, vs, rise, lights, transoms = [], glas
 }
 
 /** a king in his niche: the canopied recess, the figure crowned, holding an orb and sceptre */
-function kingNiche(bag, F, y, u, v, d) {
+export function kingNiche(bag, F, y, u, v, d) {
   const P = (m, pts, d0, d1) => bag.add(m, prism(F, y, pts, d0, d1)), A = (m, ...r) => bag.add(m, fbox(F, y, ...r));
   A('opening', u - 0.55, u + 0.55, v, v + 2.4, d - 0.02, d + 0.01);
   for (const s of [-1, 1]) A(ST, u + s * 0.55 - 0.1, u + s * 0.55 + 0.1, v - 0.15, v + 2.6, d, d + 0.35);
@@ -84,7 +84,12 @@ export function westminsterHall(el, ctx) {
   bag.add(ST, box(xi0, y - 0.5, z0, cx - door, y + h, zi0)); bag.add(ST, box(cx + door, y - 0.5, z0, xi1, y + h, zi0)); bag.add(ST, box(cx - door, y + dSpring + dRise, z0, cx + door, y + h, zi0));
   col.rect([xi0, z0, cx - door, zi0], y - 0.5, y + h); col.rect([cx + door, z0, xi1, zi0], y - 0.5, y + h); col.rect([cx - door, z0, cx + door, zi0], y + dSpring + dRise, y + h);
   { const n = 10; for (let i = 0; i < n; i++) { const a = -door + 2 * door * i / n, b = -door + 2 * door * (i + 1) / n; bag.add(ST, hexa([[cx + a, y + dSpring + pointed(a, door, dRise), z0], [cx + b, y + dSpring + pointed(b, door, dRise), z0], [cx + b, y + dSpring + pointed(b, door, dRise), zi0], [cx + a, y + dSpring + pointed(a, door, dRise), zi0]], [[cx + a, y + dSpring + dRise + 0.01, z0], [cx + b, y + dSpring + dRise + 0.01, z0], [cx + b, y + dSpring + dRise + 0.01, zi0], [cx + a, y + dSpring + dRise + 0.01, zi0]])); } }
-  bag.add(ST, box(xi0, y - 0.5, zi1, xi1, y + h, z1)); col.rect([xi0, zi1, xi1, z1], y - 0.5, y + h);
+  // the south wall, pierced by the porch's great arch (up to the landing, then the arch: half width 3.2, springing 6.6, rise 3)
+  { const up = 2.4, r = 3.2, vs = y + up + 4.2, H = 3.0, top = vs + H;
+    bag.add(ST, box(xi0, y - 0.5, zi1, cx - r, y + h, z1)); bag.add(ST, box(cx + r, y - 0.5, zi1, xi1, y + h, z1)); bag.add(ST, box(cx - r, top, zi1, cx + r, y + h, z1)); bag.add(ST, box(cx - r, y - 0.5, zi1, cx + r, y + up - 0.3, z1));
+    col.rect([xi0, zi1, cx - r, z1], y - 0.5, y + h); col.rect([cx + r, zi1, xi1, z1], y - 0.5, y + h); col.rect([cx - r, zi1, cx + r, z1], top, y + h);
+    for (let i = 0; i < 12; i++) { const a = -r + 2 * r * i / 12, b = -r + 2 * r * (i + 1) / 12, ha = vs + pointed(a, r, H), hb = vs + pointed(b, r, H); bag.add(ST, hexa([[cx + a, ha, zi1], [cx + b, hb, zi1], [cx + b, hb, z1], [cx + a, ha, z1]], [[cx + a, top + 0.01, zi1], [cx + b, top + 0.01, zi1], [cx + b, top + 0.01, z1], [cx + a, top + 0.01, z1]])); }
+    bag.add('flagstone', box(cx - r, y + up - 0.3, zi1 - 0.01, cx + r, y + up, z1 + 0.01)); col.floor([cx - r, zi1, cx + r, z1], y + up); }
   // the gables, carried up to the roof's slopes
   const Y0 = y + h, eave = xi0 - 0.25, k = (ridge - Y0) / (cx - eave);
   for (const [za, zb] of [[z0, zi0], [zi1, z1]]) bag.add(ST, hexa([[x0, Y0, za], [x1, Y0, za], [x1, Y0, zb], [x0, Y0, zb]], [[cx - 0.01, ridge + 0.6, za], [cx + 0.01, ridge + 0.6, za], [cx + 0.01, ridge + 0.6, zb], [cx - 0.01, ridge + 0.6, zb]]));
@@ -257,10 +262,8 @@ function southEnd(bag, col, el, { y, cx, xi0, xi1, zi0, zi1, z1, ridge }) {
     for (let x = xa + 0.25; x < xb - 0.1; x += 0.36) bag.add('limestone_carved', box(x - 0.05, y + up + 0.15, s1 - 0.33, x + 0.05, y + up + 0.85, s1 - 0.27));
   }
   const Fi = faceFrame([xi0, zi1, xi1, zi1 + 1], 'n'), ui = (x) => xi1 - x, A = (m, ...r) => bag.add(m, fbox(Fi, y, ...r));
-  // the porch's great arch (the way on to St Stephen's Hall), its depth dark
+  // the porch's great arch (the way on to St Stephen's Porch and Hall), open through the wall
   { const r = 3.2, vs = up + 4.2, H = 3.0, P = (m, pts, d0, d1) => bag.add(m, prism(Fi, y, pts, d0, d1));
-    P('opening', [[ui(cx) - r, up], [ui(cx) + r, up], [ui(cx) + r, vs], [ui(cx) - r, vs]], -0.02, 0.01);
-    for (let i = 0; i < 12; i++) { const a = -r + 2 * r * i / 12, b = -r + 2 * r * (i + 1) / 12; P('opening', [[ui(cx) + a, vs], [ui(cx) + b, vs], [ui(cx) + b, vs + pointed(b, r, H)], [ui(cx) + a, vs + pointed(a, r, H)]], -0.02, 0.01); }
     for (let o = 0; o < 3; o++) { const R = r + 0.05 + o * 0.25; for (let i = 0; i < 12; i++) { const a = -R + 2 * R * i / 12, b = -R + 2 * R * (i + 1) / 12, R2 = R - 0.2, A2 = Math.max(-R2, Math.min(R2, a)), B2 = Math.max(-R2, Math.min(R2, b));
       P(ST, [[ui(cx) + a, vs + pointed(a, R, H + o * 0.2)], [ui(cx) + b, vs + pointed(b, R, H + o * 0.2)], [ui(cx) + B2, vs + pointed(B2, R2, H + o * 0.2 - 0.15) - 0.01], [ui(cx) + A2, vs + pointed(A2, R2, H + o * 0.2 - 0.15) - 0.01]], 0, 0.45 - o * 0.12); }
       for (const s of [-1, 1]) A(ST, ui(cx) + s * R - 0.1, ui(cx) + s * R + 0.1, up, vs, 0, 0.45 - o * 0.12); } }

@@ -1,7 +1,7 @@
 // Westminster about 1870 (docs/settlements/london.md §2–§4).
-import { RADIUS, GROUND, PALACE, CLOCK, VICTORIA, ABBEY, BRIDGE, RIVER, HALL, bank } from './layout.js';
+import { RADIUS, GROUND, PALACE, CLOCK, VICTORIA, ABBEY, BRIDGE, RIVER, HALL, PORCH, STEPHEN, LOBBY, bank } from './layout.js';
 
-const g = GROUND;
+const g = GROUND, L = g + 2.4, P = g + 4.4;     // the porch at the landing of the hall's steps; the principal floor
 export const westminster = {
   id: 'london-westminster',
   name: { en: 'The Palace of Westminster', zh: '威斯敏斯特宫' },
@@ -15,17 +15,29 @@ export const westminster = {
   elements: [
     // the river front: 270 m, pavilions at its ends and in its centre (Barry's symmetry on the terrace)
     { t: 'river_front', rect: [PALACE[2] - 24, PALACE[1], PALACE[2], PALACE[3]], h: 22, face: 'e', y: g, pavilions: [[0, 17.7], [128.4, 141.6], [252.3, 270]] },
-    { t: 'river_front', rect: [PALACE[0], PALACE[1] + 20, PALACE[0] + 26, PALACE[3] - 10], h: 20, face: 'w', y: g },
-    { t: 'river_front', rect: [PALACE[0] + 26, -20, PALACE[2] - 24, 10], h: 20, face: 'n', y: g },
+    // the western ranges, broken by St Stephen's Hall with a court either side of it
+    { t: 'river_front', rect: [PALACE[0], PALACE[1] + 20, PALACE[0] + 16, -58], h: 20, face: 'w', y: g },
+    { t: 'river_front', rect: [PALACE[0], -34, PALACE[0] + 16, PALACE[3] - 10], h: 20, face: 'w', y: g },
     // Westminster Hall: Richard II's hall and Herland's hammerbeam roof, entered by the north door from New Palace Yard
     { t: 'westminster_hall', rect: HALL, y: g, h: 14, ridge: 28 },
     { t: 'gothic_tower', c: CLOCK, s: 12, h: 96, clock: true, y: g },
     { t: 'gothic_tower', c: VICTORIA, s: 22, h: 98, y: g },
-    { t: 'gothic_tower', c: [76, -5], s: 10, h: 91, spire: true, y: g + 20 },
+    // the principal floor (§1.5): St Stephen's Porch and Hall, the Central Lobby under the Central Tower, the Commons to
+    // the north and the Lords to the south along the axis
+    { t: 'st_stephens', porch: PORCH, hall: STEPHEN, y: g, L, P },
+    { t: 'central_lobby', c: LOBBY, a: 9, T: 1.5, y: g, P, top: g + 91 },
+    { t: 'commons', x: LOBBY[0], z0: LOBBY[1] - 10.5, y: g, P },
+    { t: 'lords', x: LOBBY[0], z0: LOBBY[1] + 10.5, y: g, P },
     // Westminster Abbey: the high nave and its flyers, the transepts, the lantern, Hawksmoor's towers, Henry VII's chapel
     { t: 'abbey', rect: ABBEY, y: g },
   ],
-  rooms: [{ id: 'parliament square', rect: [-60, -215, 40, -150], y: g, kind: 'open' }, { id: 'westminster hall', rect: [HALL[0] + 2, HALL[1] + 3, HALL[2] - 2, HALL[3] - 13], y: g + 0.05, kind: 'hall' }],
+  rooms: [{ id: 'parliament square', rect: [-60, -215, 40, -150], y: g, kind: 'open' }, { id: 'westminster hall', rect: [HALL[0] + 2, HALL[1] + 3, HALL[2] - 2, HALL[3] - 13], y: g + 0.05, kind: 'hall' },
+    { id: "st stephen's porch", rect: PORCH, y: L, kind: 'hall' }, { id: "st stephen's hall", rect: STEPHEN, y: P, kind: 'hall' },
+    { id: 'central lobby', rect: [LOBBY[0] - 9, LOBBY[1] - 9, LOBBY[0] + 9, LOBBY[1] + 9], y: P, kind: 'hall' },
+    { id: 'commons corridor', rect: [LOBBY[0] - 6.1, LOBBY[1] - 35.2, LOBBY[0] + 6.1, LOBBY[1] - 10.5], y: P, kind: 'hall' },
+    { id: 'house of commons', rect: [LOBBY[0] - 6.85, LOBBY[1] - 59, LOBBY[0] + 6.85, LOBBY[1] - 36.2], y: P, kind: 'chamber' },
+    { id: "lords corridor and peers' lobby", rect: [LOBBY[0] - 6, LOBBY[1] + 10.5, LOBBY[0] + 6, LOBBY[1] + 36], y: P, kind: 'hall' },
+    { id: 'house of lords', rect: [LOBBY[0] - 6.85, LOBBY[1] + 37, LOBBY[0] + 6.85, LOBBY[1] + 61.4], y: P, kind: 'chamber' }],
   walks: [Object.assign([[0, -180], [60, -170]], { y0: g })],
 };
 // Westminster Bridge (1862): seven iron arches on granite piers, Barry's Gothic detail

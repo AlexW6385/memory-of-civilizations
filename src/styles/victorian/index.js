@@ -11,6 +11,7 @@ import { riverFront } from './palace.js';
 import { ironBridge, embankment } from './bridge.js';
 import { abbey } from './abbey.js';
 import { westminsterHall } from './hall.js';
+import { stStephens, centralLobby, commons, lords } from './interior.js';
 import { hansomCab, omnibus, gasLamp, paddleSteamer, lighter, steamboatPier } from './street.js';
 
 const S = 'limestone_yellow', SL = 'slate';
@@ -111,6 +112,6 @@ function terraceHouse(el, { bag, col }) {
 }
 registerStyle('victorian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, gothic_tower: gothicTower, terrace_house: terraceHouse, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
+  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, st_stephens: stStephens, central_lobby: centralLobby, commons, lords, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, gothic_tower: gothicTower, terrace_house: terraceHouse, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
   objects: {},
 });

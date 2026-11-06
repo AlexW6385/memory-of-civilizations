@@ -9,6 +9,9 @@ export const GROUND = 2, RIVER = { x0: 115, x1: 255, level: -2.5, bed: -6 };
 export const PALACE = [40, -140, 112, 130];
 export const CLOCK = [96, -152];
 export const HALL = [PALACE[0] - 30, -125, PALACE[0] - 6, -52];     // Westminster Hall, 73 m by 24 m over its walls
+export const PORCH = [15, -52, 29, -41.5];                          // St Stephen's Porch, south of the hall
+export const STEPHEN = [30.2, -50.5, 59.2, -41.5];                  // St Stephen's Hall, 29 m by 9 m, east from the porch
+export const LOBBY = [69.7, -46];                                   // the Central Lobby's centre, under the Central Tower
 export const VICTORIA = [80, 140];
 export const ABBEY = [-200, 20, -70, 62];
 export const SQUARE = [-60, -215, 40, -150];
@@ -33,7 +36,7 @@ export function lots() {
     const w = 5.5 + rand() * 1.5, cx = x + w / 2, cz = za + 5.5;
     x += w;
     const [a, b] = bank(cz);
-    if (Math.hypot(cx, cz) > RADIUS - 45 || (cx > a - 14 && cx < b + 14) || inRect(PALACE, cx, cz, 14) || inRect(ABBEY, cx, cz, 16) || inRect(SQUARE, cx, cz, 6) || Math.abs(cz - BRIDGE.z) < 14 || inRect([HALL[0] - 12, -150, PALACE[0], HALL[3] + 8], cx, cz) || inRect([VICTORIA[0] - 60, VICTORIA[1] - 10, VICTORIA[0] + 20, VICTORIA[1] + 40], cx, cz)) continue;
+    if (Math.hypot(cx, cz) > RADIUS - 45 || (cx > a - 14 && cx < b + 14) || inRect(PALACE, cx, cz, 14) || inRect(ABBEY, cx, cz, 16) || inRect(SQUARE, cx, cz, 6) || Math.abs(cz - BRIDGE.z) < 14 || inRect([HALL[0] - 12, -150, PALACE[0], HALL[3] + 22], cx, cz) || inRect([VICTORIA[0] - 60, VICTORIA[1] - 10, VICTORIA[0] + 20, VICTORIA[1] + 40], cx, cz)) continue;
     LOTS.push({ rect: [x - w, za, x - 0.2, za + 11], seed: Math.floor(rand() * 1e6), front, storeys: 3 + (rand() < 0.3 ? 1 : 0), y: GROUND });
   }
   return LOTS;
