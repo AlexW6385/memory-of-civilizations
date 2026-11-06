@@ -1,7 +1,7 @@
 # Kilwa Kisiwani, about 1330 — dossier
 
 Settlement id: `kilwa` · Style: `swahili` · Region: the Swahili coast (an island off Tanzania) · Code: `src/settlements/kilwa/`
-Status of this dossier: L1–L2 (the island town on its north shore; the Great Mosque's hall of bays on pillars under small domes, with its great dome; Husuni Kubwa on its cliff with two courts and the octagonal pool; stone houses round courts; dhows on the beach; the sea round the island; ground, planting, weather, music). L3 recorded for later: the mosque's older northern prayer hall and its vaults, the Small Domed Mosque, Husuni Ndogo, the carved doors and niches, the coin mint, the reef and the trade (gold from Great Zimbabwe), people.
+Status of this dossier: L2 (Husuni Kubwa and the stone houses rebuilt 2026-11-06, §11–§12; the island town on its north shore; the Great Mosque's hall of bays on pillars under small domes, with its great dome; Husuni Kubwa on its cliff with two courts and the octagonal pool; stone houses round courts; dhows on the beach; the sea round the island; ground, planting, weather, music). L3 recorded for later: the mosque's older northern prayer hall and its vaults, the Small Domed Mosque, Husuni Ndogo, the carved doors and niches, the coin mint, the reef and the trade (gold from Great Zimbabwe), people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -17,7 +17,7 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Part | Where (m, +x east, +z south) | Notes |
 |---|---|---|
 | Great Mosque | 60 × 50 m in the town | [stated: features; size inferred] |
-| Husuni Kubwa | on the cliff to the east | [stated: east of the town, on a cliff] |
+| Husuni Kubwa | on its headland to the east: core x 142…194, z −150…−100; South Court x 145…191, z −98…−52; top terrace at +10 m | [stated: on a high headland, the ocean east, the harbour entrance north, the town west (Archnet); placement inferred] |
 | Town | round the mosque | [stated] |
 | Beach and harbour | north | [stated] |
 | Sea | round the disc (the island too small for the land map: marked `island`) | [inferred] |
@@ -55,7 +55,7 @@ The call to prayer, drums, the zumari's reed, under the surf. [inferred]
 - **Roof of domes and vaults:** the mosque is "entirely roofed by domes and vaults", of lime-coral concrete; domes about 20–30 cm thick, hemispherical, on groined squinches with pointed arches; barrel vaults on the bays of the central axis [stated: Archnet, after Chittick and Garlake — for the southern enclosure roofed c. 1421–42]. Ours: every bay a dome on pendentives (seen from inside as from outside, the shell 22 cm), the central aisle barrel-vaulted with tympana where it meets a domed bay, the great dome raised on a drum. Using the 15th-century enclosure's roof for a hall shown about 1330 is an anachronism we accept: the 14th-century extension's "barrel-vaulted corridor of 30 bays on coral columns" and the great dome are of the same vocabulary [inferred].
 - **Columns:** "two-tiered columns, octagonal at the base and squared halfway up", capitals of single coral blocks "with concave brackets" [stated: Archnet]; the old hall's octagonal monolithic coral pillars [stated: Archnet]. Ours: octagonal lower half, square upper half, a two-stage flared capital of dressed coral and an abacus, impost blocks carrying pointed arches both ways.
 - **Boats:** the earlier stand-in (a Chinese canal boat) replaced by **mtepe**, the sewn plank boats of the Swahili coast: sharp ends, strong sheer, long raking stem-head, coir stitching along the seams, a single mast with a square mat sail (furled on the lowered yard), drawn up on props at the top of the beach with a stone anchor and rope. [inferred from the general record of the mtepe; no single source fetched — to be sourced]
-- **Not done:** Husuni Kubwa's pool and courts are as before (the Husuni Kubwa page could not be fetched this session).
+- **Husuni Kubwa:** rebuilt in §11 (2026-11-06).
 
 ## Sources
 
@@ -63,3 +63,54 @@ The call to prayer, drums, the zumari's reed, under the surf. [inferred]
 - [Kilwa Kisiwani — Wikipedia](https://en.wikipedia.org/wiki/Kilwa_Kisiwani)
 - [Husuni Kubwa Palace — Wikipedia](https://en.wikipedia.org/wiki/Husuni_Kubwa_Palace)
 - [Great Mosque of Kilwa — Archnet](https://archnet.org/sites/3779)
+
+## 11. Husuni Kubwa (rebuilt 2026-11-06)
+
+**Sources.** Archnet site 3780 "Husuni Kubwa" (after Chittick's excavation report) — the main source for the plan; Wikiwand "Palace of Husuni Kubwa"; Islamic Architectural Heritage inventory form; Wikipedia "Husuni Kubwa Palace" (not fetched this session: permission timed out).
+
+**Site and parts** [stated, Archnet]: a high sandstone headland, the Indian Ocean east, the harbour entrance north, the town west. Three parts: the South Court, the residential complex round four inner courts, and a stair down to the beach. "More than 100 rooms and terraces arranged around sunken courtyards" [stated, inventory form]. Main entrance "from the shore"; rooms about 3 m high; roofs of cut limestone blocks laid across cut timbers; white plaster floors [stated, Wikiwand].
+
+**Terrain** [inferred]: the headland is modelled as terraces of the height function (`layout.js` TERRACES): the top at +10 m (local) under the whole palace and a 4–6 m apron; a lower terrace at +5 m on the north between it and the beach; the beach at +0.55 under the cliff; a terrace at +6.6 m before the South Court's south gate, with two flights up from the town. Built edges are held by retaining walls of coral rag with dressed copings, parapets and weep holes; the east and west sides are natural sandstone cliffs (rock cover where steep). The sunken courts and the pool cut down into the rock (their floors built solid over it). The previous layout's palace ran off the plateau (floating walls), the pool lay outside its rectangle and the height function had a vertical step at z = −60; all three are gone.
+
+**The core of four courts** (52 × 50 m here; arrangement in the square [inferred] from Archnet's order "audience court, domestic court, bathing court, private palace court"):
+- *Audience court* — 13 × 15 m, entered from the west [stated]; ours through a grand doorway in the west range with a carved star panel over it. High walls with an upper walkway and three rows of small square niches; two open verandahs break the walls [stated] — ours north and south, pointed arcades under pole ceilings, the walkway on their roofs behind a parapet with a dart frieze, the back walls rising to 7.4 m with three rows of 26 cm square niches.
+- *Pavilion* — nine steps climb 3 m to it on the court's east side; a large slab with a double niche, likely the sultan's seat; wide openings for the harbour view and cross-ventilation [stated]. Ours: the steps (timber-nosed) run out into the court between balustrades; on the platform an open arcade of five pointed arches, a barrel-vaulted front aisle, an arcade wall of three grand doorways with herringbone-cable panels, a vaulted back hall whose east wall has two wide openings and between them the double niche over the dressed slab with a mat, a carved star panel above, bosses on the vault ends [arrangement inferred].
+- *Domestic court* — a well; servants' rooms south, single-storey residential rooms north and east; "only about 40 cm deep"; a bedroom with a built platform bed [stated]. Ours: sunk 0.4 m with a step all round, the well with its kerb, posts, beam, rope and pot; the servants' row in rough grey plaster [stated: walls rough in servants' rooms]; water jars.
+- *Bathing court* — about 13 m square with a covered arcade; the pool octagonal, 8 m across, 2 m deep at the east, 1.6 m at the west, its edge about 60 cm above the court, a drain at the west over the cliff [stated]. Ours: the court sunk 0.8 m [inferred from "sunken courtyards"], arcades on three sides (five pointed bays each, dart-frieze cornice, pole ceilings), steps down at the middle of each; the octagon 8 m across the flats, its rim 0.6 m with a dressed coping, the floor sloping 1.6 → 2.0 m below the water, the spout at the west.
+- *Private (palace) court* — a north–south rectangle sunk about 1 m by four descending steps, raised walkways either side with wide-doored rooms, square corner chambers with soakaway pits, perhaps for plants [stated]. Ours: 10 × 17.6 m, four dressed steps all round, walkways, rooms with 1.7 m doors, four planted pits in the corners of the floor [the corner chambers themselves not built].
+- *Residential suites* — ante-room about 17 m long, main room, two bedrooms about 2.2 m square [stated]. Ours: one double suite between the bathing court and the private court; the main room's east wall a zidaka of three rows of niches; built platform beds in the bedrooms [the second, interlocking suite not built].
+- *Ranges* — long rooms no wider than 2.7–2.8 m because of the material [stated]; barrel vaults the commonest roof [stated]. Ours: ranges of vaulted rooms (2.8 m clear) on the north (small windows to the harbour), west and east; rows of pole-ceilinged rooms round the domestic court; a lane between the core and the South Court.
+
+**South Court** — 46 × 46 m, about 38 storerooms two deep, an entrance in each side with the storeroom doors aligned on them, back rooms lit by portholes about 40 × 40 cm, upper-storey apartments with varied vaulting on the north and west, a corner dome about 60° (the tallest roof), a two-storey manager's residence to the south-west next to a well 4.6 m square [stated]. Ours: 48 rooms (7 + 7 a side north and south, 5 + 5 east and west) with pole ceilings, the middle room of each side a passage with 2.2 m gates; two portholes per back room; vaulted upper rooms on the north and west opening onto the front rows' roofs; the north-west corner room carrying a steep domical vault (rise 1.7 × radius) on pendentives; the manager's house (two storeys) and the square well inside the court's south-west corner [position inferred]; bales, jars and cloth by the doors [inferred].
+
+**Stair and beach mosque** — a wide stair cut into the sandstone at the north-west corner descends in two flights set nearly at right angles; timber nosings; at the bottom a small building about 2 m wide with a south door and a water tank on each side, facing north, thought to be a mosque [stated]. Ours: flight a (25 steps) west along the foot of the top terrace's wall to the north terrace, a turn, flight b (22 steps) north down the terrace's west wall to the sand; the mosque 2.2 m wide inside with its mihrab swelling out of the north wall, a carved panel over the niche, the cisterns either side of the door.
+
+**Construction and decoration** — coral stone; walls built in horizontal segments; timbers embedded near the cornice; barrel, trifoliate-ribbed, octagonal and conical vaults [stated]. Carved offshore-coral panels on dados, door jambs, cornices and vault ends: eight-pointed stars of interlaced crosses, star-and-pinwheel bosses, dart friezes, herringbone cable, fleur-de-lys; many unfinished [stated]. Lime plaster with coral pebbles, smooth in royal rooms, rough in servants' rooms; floors plaster over crushed coral [stated]. Ours: the royal parts in smooth lime plaster (`lime_plaster`), servants' rooms `plaster_grey`, storerooms `coral_plaster`, retaining walls and exposed rag `rubble`, doorways and copings dressed coral (`limestone`), carved panels `limestone_carved` with their motifs in relief (star, boss, darts, cable; `src/styles/swahili/kit.js`). Not built: trifoliate and conical vaults, fleur-de-lys, inscriptions.
+
+## 12. The stone houses (rebuilt 2026-11-06)
+
+**Sources.** Wynne-Jones & Fleisher et al., Songo Mnara (Journal of Anthropological Archaeology 2013; White Rose eprint 81561); African History Extra, "Origins and development of Swahili architecture"; Archnet site 6076 "Vernacular Housing of Lamu"; Wikipedia "Swahili architecture".
+
+- Walls of coral rag in lime mortar, plastered [stated]; 0.38–0.45 m thick (Shanga) [stated] — ours 0.42 m.
+- Rooms long and narrow, about 1.8–2.8 m wide, set by the span of the roof timbers (mangrove poles, about 3 m) [stated]; roofs and floors of coral on joists about 30 cm apart [stated, Lamu] — ours poles 32 cm apart under a lime-concrete roof.
+- Standard plan of parallel rooms; entered through a porch with stone benches (baraza), a carved door, then from public to private, the innermost room (ndani) [stated]; "all but the smallest houses based around a stepped courtyard"; houses raised above the ground outside; doorways and niches faced with porites coral, carved into stepped jambs [stated, Songo Mnara]. Ours: the court in front, sunk below the rooms; on plots 9.2 m deep or more a front room and a back row (back room and inner room); on smaller plots one row.
+- Niches in most houses, compared with the zidaka display walls, "spaced more variously" than later; imported ceramics, glass and lamps displayed in them [stated]; heads multi-foil or ogee [stated, Lamu]. Ours: in furnished houses two rows of pointed niches on the back room's back wall with celadon, blue and white bowls; single niches in the front room's end walls.
+- Lines of holes across the walls, perhaps pegs for hangings [stated] — ours a line of holes along the front room. Palm matting on the front-room floor [stated, phytoliths] — ours a mat.
+- The back room of one house probably thatched with makuti [stated] — ours about 30% of deep houses have a thatched back room with plastered gables.
+- Two storeys in some houses [stated]; ours 28%, the upper rooms closed with small barred windows.
+- [inferred]: water jars and a grinding stone in the court; the damp band at the foot of the street wall, the rag showing where plaster has fallen, roof spouts into the court.
+- Houses are furnished inside within ~85 m of the Great Mosque and one in four elsewhere.
+
+## 13. The Great Mosque's doorways (2026-11-06)
+
+The enclosing walls were solid boxes with painted doorways, so the hall could not be left. They now have real doorways (1.4 × 2.6 m) at every other bay, framed in dressed coral; the entrance and walk moved to the north door at x = −15.
+
+## Sources (2026-11-06)
+
+- [Husuni Kubwa — Archnet](https://archnet.org/sites/3780)
+- [Palace of Husuni Kubwa — Wikiwand](https://wikiwand.com/en/Palace_of_Husuni_Kubwa)
+- [Husuni Kubwa — Islamic Architectural Heritage](https://www.islamicarchitecturalheritage.com/?p=1364)
+- [Wynne-Jones, Fleisher et al., Songo Mnara (White Rose eprint)](https://eprints.whiterose.ac.uk/81561/1/1_s2.0_S0278416513000329_main.pdf)
+- [Origins and Development of Swahili Architecture — African History Extra](https://www.africanhistoryextra.com/p/origins-and-development-of-swahili)
+- [Vernacular Housing of Lamu — Archnet](https://www.archnet.org/sites/6076)
+- [Swahili architecture — Wikipedia](https://en.wikipedia.org/wiki/Swahili_architecture)
