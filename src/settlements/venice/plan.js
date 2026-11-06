@@ -34,4 +34,17 @@ export const molo = {
   id: 'venice-molo', style: 'venetian', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [0, 0], facing: 'n' }, bounds: [24, BASIN_Z, 152, BASIN_Z + 13], rooms: [], elements: boats,
 };
+// Doge Agostino Barbarigo (doge 1486–1501) kneeling before the lion of St Mark over the Clock Tower's
+// gallery, as he was until the French took the figure down in 1797 (docs/settlements/venice.md §2, Clock
+// Tower) [stated: Wikipedia "St Mark's Clocktower"]: on the cornice before the gilt lion (which strides east,
+// +x, in the tower's front: venetian/piazza.js, clockTower), facing it, his hands joined; in the ducal robe
+// and mantle with the corno, gilt like the lion [inferred: material and dress]. The cornice's top is 20.75 m
+// up (the gallery's yG 20.3 + 0.45), its depth 0.55 m from the front.
+const DOGE = [CLOCK[0] + 6.25, CLOCK[3] + 0.28];
+export const doge = {
+  id: 'venice-doge', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, center: DOGE, near: 320,
+  entrance: { at: [0, 0], facing: 'n' }, bounds: [CLOCK[0], CLOCK[1], CLOCK[2], CLOCK[3] + 1], rooms: [],
+  elements: [{ t: 'figure', at: DOGE, y: g + 20.75, rot: Math.PI / 2, seed: 1486, h: 1.9, pose: 'kneel', arms: 'pray', dress: 'robe', over: 'cape', hat: 'corno', hair: 'short', beard: true, feet: 'bare',
+    cloth: 'gilt_bronze', cloth2: 'gilt_bronze', skin: 'gilt_bronze', hatMat: 'gilt_bronze', hairMat: 'gilt_bronze', hairShade: 1 }],
+};
 export default sanMarco;

@@ -327,6 +327,10 @@ function hatOf(add, hat) {
   if (hat === 'cap') {                                // a soft cap, a little full at the back
     add('hat', slathe([[0.097, 1.56], [0.1, 1.6], [0.094, 1.64], [0.075, 1.67], [0.04, 1.688], [0.001, 1.692]], 14, ell(0.9, 1.05)).translate(0, 0, 0.004));
     add('hat', slathe([[0.1, 1.555], [0.103, 1.56], [0.103, 1.585], [0.098, 1.59], [0.001, 1.59]], 14, ell(0.9, 1.05)).translate(0, 0, 0.004));
+  } else if (hat === 'corno') {                      // the doge's corno: a stiff cap rising behind to a rounded horn, over the white linen cuffia
+    add('hat', slathe([[0.1, 1.555], [0.104, 1.565], [0.104, 1.6], [0.098, 1.605], [0.001, 1.605]], 14, ell(0.9, 1.05)).translate(0, 0, 0.004));
+    add('hat', tube([[0, 1.58, 0.0, 0.098, 0.1], [0, 1.65, 0.02, 0.088, 0.09], [0, 1.72, 0.05, 0.068, 0.072], [0, 1.775, 0.075, 0.045, 0.05], [0, 1.8, 0.088, 0.022, 0.026]], 12));
+    for (const s of [-1, 1]) add('hat', tube([[s * 0.085, 1.565, 0.01, 0.022, 0.012], [s * 0.088, 1.5, 0.02, 0.02, 0.01]], 6));      // the cuffia's lappets over the ears
   } else if (hat === 'turban') {                      // the cloth wound round: a coil of turns rising
     const pts = [];
     for (let k = 0; k <= 30; k++) { const t = k / 30, a = t * Math.PI * 2 * 2.6, r = 0.098 + 0.012 * Math.sin(t * Math.PI) - t * 0.03; pts.push([Math.cos(a) * r * 0.92, 1.57 + t * 0.085, Math.sin(a) * r * 1.02, 0.026, 0.024]); }
@@ -362,7 +366,7 @@ function heru(add) {
 /**
  * figure: { dress ('robe' | 'tunic' | 'trousers' | 'wrap' | 'loincloth' | 'shendyt' | 'sheath' | 'strands' (the Māori kilt of flax strands)), top ('bare': no
  * garment above the waist — the default of the loincloth and the shendyt; with a wrap or trousers too), cloth, cloth2,
- * skin, hat ('none' | 'cap' | 'turban' | 'straw' | 'veil' | 'brim'), hatMat, h (height), carry ('none' | 'pot' | 'basket' |
+ * skin, hat ('none' | 'cap' | 'turban' | 'straw' | 'veil' | 'brim' | 'corno' (the doge's)), hatMat, h (height), carry ('none' | 'pot' | 'basket' |
  * 'pole' | 'hoe' | 'staff' | 'rope' | 'child' | 'oars' | 'punt'), len (of the staff, rope, oars or pole), pose ('stand' |
  * 'talk' | 'sit' (on a chair or bench, seat 0.46 m) | 'sit_low' (on a step or low stool, seat ~0.22 m, y at the feet) | 'sit_ground' (on the
  * ground or a floor, legs out) | 'seiza' (sat back on the heels) | 'squat' | 'kneel' | 'cross' (seated cross-legged) | 'pray' | 'pull' (hauling a rope) | 'staff' |
