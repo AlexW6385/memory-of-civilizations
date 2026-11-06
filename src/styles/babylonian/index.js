@@ -7,7 +7,9 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import '../sumerian/index.js';
 
-const G = 'glaze_lapis', B = 'brick_baked', W = 'glaze_white', Y = 'glaze_yellow', K = 'lacquer_black';
+// K: black glaze (the outlines and enamelled lines; no black glaze in the palette, the black lacquer stands in);
+// R: the opaque red enamel of the manes (Koldewey: since decomposed to green)
+const G = 'glaze_lapis', B = 'brick_baked', W = 'glaze_white', Y = 'glaze_yellow', K = 'lacquer_black', R = 'glaze_red';
 /**
  * Stepped merlons along the top of a wall or tower r = [x0, z0, x1, z1] at y: each merlon three steps
  * narrowing upward (the Mesopotamian battlement), a row on each face of a thick wall or one across a
@@ -138,7 +140,7 @@ function beasts(bag, r, face, y, { kind = 'lion', step = 3, size = 1, dir = 1 } 
     if (kind === 'lion') {
       const alt = i % 2 === 1;
       relief(bag, 'lion', alt ? Y : W, place, size, d);
-      relief(bag, 'mane', alt ? 'lacquer_red' : Y, place, size, d, 0.13);
+      relief(bag, 'mane', alt ? R : Y, place, size, d, 0.13);
       relief(bag, 'eye', 'glaze_blue', place, size, d, 0.115);
     } else if (kind === 'dragon') {
       relief(bag, 'dragon', W, place, size, d);
@@ -187,7 +189,7 @@ function archInfill(bag, col, x0, x1, ys, yt, z0, z1, mat) {
 function wayPaving(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0.12, C = el.centre ?? 7.4, xc = (x0 + x1) / 2, j = 0.035;
   const rand = rng(el.seed ?? 575);
-  bag.add('asphalt', frustum([x0, z0, x1, z1], y - 0.3, y - 0.012, 0, 0, 0, 0, { noBottom: true }));                     // the bitumen in the joints, on the brick bed
+  bag.add('bitumen', frustum([x0, z0, x1, z1], y - 0.3, y - 0.012, 0, 0, 0, 0, { noBottom: true }));                     // the bitumen in the joints, on the brick bed
   const lane = (a, b, s, mat) => {
     const nx = Math.max(1, Math.round((b - a) / s)), sx = (b - a) / nx, nz = Math.max(1, Math.floor((z1 - z0) / s)), sz = (z1 - z0) / nz;
     for (let i = 0; i < nx; i++) for (let k = 0; k < nz; k++) {
@@ -197,8 +199,8 @@ function wayPaving(el, { bag, col }) {
   };
   const c0 = Math.max(x0, xc - C / 2), c1 = Math.min(x1, xc + C / 2);
   lane(c0, c1, 1.05, el.slab ?? 'limestone');
-  if (c0 > x0 + 0.3) lane(x0, c0, 0.66, el.side ?? 'marble_pink');
-  if (x1 > c1 + 0.3) lane(c1, x1, 0.66, el.side ?? 'marble_pink');
+  if (c0 > x0 + 0.3) lane(x0, c0, 0.66, el.side ?? 'breccia_red');
+  if (x1 > c1 + 0.3) lane(c1, x1, 0.66, el.side ?? 'breccia_red');
   col.floor(el.rect, y);
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }

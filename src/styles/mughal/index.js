@@ -249,8 +249,8 @@ function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
       // a running scroll of flowers in place of the inscription (the jawab)
       for (let t = 0.3, j = 0; t < len - 0.3; t += 0.5, j++) {
         const cs = along === 'v' ? (s0 + s1) / 2 : s0 + t, cv = along === 'v' ? v0 + t : (v0 + v1) / 2, fr = Math.min(0.12, cw * 0.18);
-        slab(['stucco_rose', 'stucco_saffron', 'stucco_sky'][j % 3], cs - fr, cs + fr, cv - fr, cv + fr, o, o + 0.015);
-        if (along === 'v') slab('stucco_leaf', cs - fr * 0.5, cs + fr * 0.5, cv + fr, cv + 0.25, o, o + 0.012); else slab('stucco_leaf', cs + fr, cs + 0.25, cv - fr * 0.5, cv + fr * 0.5, o, o + 0.012);
+        slab(['inlay_carnelian', 'inlay_yellow', 'inlay_lapis'][j % 3], cs - fr, cs + fr, cv - fr, cv + fr, o, o + 0.015);
+        if (along === 'v') slab('inlay_jade', cs - fr * 0.5, cs + fr * 0.5, cv + fr, cv + 0.25, o, o + 0.012); else slab('inlay_jade', cs + fr, cs + 0.25, cv - fr * 0.5, cv + fr * 0.5, o, o + 0.012);
       }
       return;
     }
@@ -270,7 +270,7 @@ function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
   // the spandrels: a vine of inlaid stones along the arch, flowers on it, a rosette in the angle
   const w = iw.w, r = w * 0.8, rise = Math.sqrt(r * r - (r - w / 2) ** 2), spring = Math.max(0.3, iw.h - rise), cLs = sL + r;
   const arcV = (x) => spring + Math.sqrt(Math.max(0, r * r - (x - cLs) ** 2));
-  const FL = ['stucco_rose', 'stucco_saffron', 'stucco_rose', 'stucco_sky'];
+  const FL = ['inlay_carnelian', 'inlay_yellow', 'inlay_carnelian', 'inlay_lapis'];
   for (const sd of [-1, 1]) {
     const S = (x) => (sd < 0 ? x : L - x);
     let prev = null, nfl = 0;
@@ -281,21 +281,21 @@ function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
       if (j % 10 === 5) {
         const fx = S(x), m2 = FL[nfl++ % FL.length];
         for (let p2 = 0; p2 < 5; p2++) { const an = p2 / 5 * Math.PI * 2, px = fx + Math.cos(an) * 0.1, pv = vv + 0.16 + Math.sin(an) * 0.1; slab(m2, px - 0.045, px + 0.045, pv - 0.045, pv + 0.045, 0, 0.018); }
-        slab('stucco_saffron', fx - 0.03, fx + 0.03, vv + 0.13, vv + 0.19, 0, 0.022);
-        slab('stucco_leaf', fx + 0.06 * sd, fx + 0.2 * sd > fx ? fx + 0.2 : fx - 0.06, vv - 0.06, vv + 0.0, 0, 0.016);
+        slab('inlay_yellow', fx - 0.03, fx + 0.03, vv + 0.13, vv + 0.19, 0, 0.022);
+        slab('inlay_jade', fx + 0.06 * sd, fx + 0.2 * sd > fx ? fx + 0.2 : fx - 0.06, vv - 0.06, vv + 0.0, 0, 0.016);
       }
       prev = [x, vv];
     }
     // the rosette in the angle between the arch and the band
     const rx = S(sL + w * 0.12), rv = (arcV(sL + w * 0.12) + vTop) / 2 + 0.2, rr = Math.min(0.8, (vTop - arcV(sL + w * 0.12)) * 0.3);
     if (rr > 0.2) {
-      for (let p2 = 0; p2 < 12; p2++) { const an = p2 / 12 * Math.PI * 2, px = rx + Math.cos(an) * rr * 0.7, pv = rv + Math.sin(an) * rr * 0.7; slab(p2 % 2 ? 'stucco_leaf' : 'stucco_rose', px - rr * 0.14, px + rr * 0.14, pv - rr * 0.14, pv + rr * 0.14, 0, 0.018); }
-      slab('stucco_saffron', rx - rr * 0.22, rx + rr * 0.22, rv - rr * 0.22, rv + rr * 0.22, 0, 0.022);
+      for (let p2 = 0; p2 < 12; p2++) { const an = p2 / 12 * Math.PI * 2, px = rx + Math.cos(an) * rr * 0.7, pv = rv + Math.sin(an) * rr * 0.7; slab(p2 % 2 ? 'inlay_jade' : 'inlay_carnelian', px - rr * 0.14, px + rr * 0.14, pv - rr * 0.14, pv + rr * 0.14, 0, 0.018); }
+      slab('inlay_yellow', rx - rr * 0.22, rx + rr * 0.22, rv - rr * 0.22, rv + rr * 0.22, 0, 0.022);
       // a spray of stems from the rosette, each ending in a flower between two leaves
       for (let p2 = 0; p2 < 6; p2++) {
         const an = p2 / 6 * Math.PI * 2 + 0.3, x0 = rx + Math.cos(an) * rr * 0.9, v0 = rv + Math.sin(an) * rr * 0.9;
         for (let q2 = 1; q2 <= 6; q2++) { const rr2 = rr * (0.9 + q2 * 0.22), a2 = an + q2 * 0.08, px = rx + Math.cos(a2) * rr2, pv = rv + Math.sin(a2) * rr2; if (pv < arcV(Math.min(sR, Math.max(sL, sd < 0 ? px : L - px))) + 0.6 || pv > vTop - 0.1) break; slab(DK, px - 0.022, px + 0.022, pv - 0.022, pv + 0.022, 0, 0.014);
-          if (q2 === 6) { slab(FL[p2 % 4], px - 0.07, px + 0.07, pv - 0.07, pv + 0.07, 0, 0.02); slab('stucco_leaf', px - 0.16, px - 0.08, pv - 0.03, pv + 0.03, 0, 0.016); slab('stucco_leaf', px + 0.08, px + 0.16, pv - 0.03, pv + 0.03, 0, 0.016); } }
+          if (q2 === 6) { slab(FL[p2 % 4], px - 0.07, px + 0.07, pv - 0.07, pv + 0.07, 0, 0.02); slab('inlay_jade', px - 0.16, px - 0.08, pv - 0.03, pv + 0.03, 0, 0.016); slab('inlay_jade', px + 0.08, px + 0.16, pv - 0.03, pv + 0.03, 0, 0.016); } }
         void x0; void v0;
       }
     }
@@ -416,9 +416,9 @@ function tombChamber(bag, col, cx, cz, y, A) {
       slab(L / 2 - nw / 2 - 0.35, L / 2 + nw / 2 + 0.35, ya + hh + 0.75, ya + hh + 0.85, 0, 0.05, 'marble_dark');
       for (const sg of [-1, 1]) for (let j = 0; j < 5; j++) {
         const p = Q(L / 2 + sg * (nw / 2 - 0.2 - j * 0.12), 0.06), yy = ya + hh - 0.6 + (j % 2) * 0.25 - j * 0.05;
-        const m = ['stucco_rose', 'stucco_leaf', 'stucco_saffron', 'stucco_sky', 'stucco_rose'][j];
+        const m = ['inlay_carnelian', 'inlay_jade', 'inlay_yellow', 'inlay_lapis', 'inlay_carnelian'][j];
         const t = []; beamTris(t, [p[0] - ux * 0.05, yy, p[1] - uz * 0.05], [p[0] + ux * 0.05, yy, p[1] + uz * 0.05], 0.015, 0.14); bag.add(m, fromTriangles(t));
-        const t2 = []; beamTris(t2, [p[0] - ux * 0.11, yy + 0.05, p[1] - uz * 0.11], [p[0] + ux * 0.11, yy + 0.05, p[1] + uz * 0.11], 0.015, 0.04); bag.add('stucco_leaf', fromTriangles(t2));
+        const t2 = []; beamTris(t2, [p[0] - ux * 0.11, yy + 0.05, p[1] - uz * 0.11], [p[0] + ux * 0.11, yy + 0.05, p[1] + uz * 0.11], 0.015, 0.04); bag.add('inlay_jade', fromTriangles(t2));
       }
     }
     // the jali in the axial niches: a lattice of marble over the light
@@ -458,14 +458,14 @@ function tombChamber(bag, col, cx, cz, y, A) {
     for (let j = 0; j < 3; j++) {
       const s0 = L * j / 3 + 0.1, s1 = L * (j + 1) / 3 - 0.1, P2 = (s2) => [a[0] + ux * s2, a[1] + uz * s2];
       const rail = (ya, yb, m) => { const t = []; const p0 = P2(s0), p1 = P2(s1); beamTris(t, [p0[0], ya, p0[1]], [p1[0], ya, p1[1]], 0.06, yb - ya); bag.add(m, fromTriangles(t)); };
-      rail(y, y + 0.22, W); rail(sh + y - 0.22, sh + y, W); rail(sh + y - 0.17, sh + y - 0.12, 'stucco_rose');
+      rail(y, y + 0.22, W); rail(sh + y - 0.22, sh + y, W); rail(sh + y - 0.17, sh + y - 0.12, 'inlay_carnelian');
       if (isS && j === 1) { const p0 = P2(s0), p1 = P2(s1); col.segment(P2(0.05), p0, 0.12, y, y + sh); void p1; continue; }
       const p0 = P2(s0), p1 = P2(s1); col.segment(p0, p1, 0.12, y, y + sh);
       // the piercing: a lattice of small hexagons, here a fine grid of slender bars
       const nb = 9;
       for (let g = 1; g < nb; g++) { const q = P2(s0 + (s1 - s0) * g / nb), t = []; beamTris(t, [q[0] - ux * 0.02, y + 0.22, q[1] - uz * 0.02], [q[0] + ux * 0.02, y + 0.22, q[1] + uz * 0.02], 0.03, sh - 0.44); bag.add(W, fromTriangles(t)); }
       for (let g = 1; g < 8; g++) rail(y + 0.22 + g * (sh - 0.44) / 8 - 0.02, y + 0.22 + g * (sh - 0.44) / 8 + 0.02, W);
-      for (const [dx, dy, m] of [[0.25, 0.5, 'stucco_leaf'], [0.5, 0.75, 'stucco_rose'], [0.75, 0.5, 'stucco_saffron']]) { const q = P2(s0 + (s1 - s0) * dx), t = []; beamTris(t, [q[0] - ux * 0.045, y + 0.22 + (sh - 0.44) * dy - 0.045, q[1] - uz * 0.045], [q[0] + ux * 0.045, y + 0.22 + (sh - 0.44) * dy - 0.045, q[1] + uz * 0.045], 0.04, 0.09); bag.add(m, fromTriangles(t)); }
+      for (const [dx, dy, m] of [[0.25, 0.5, 'inlay_jade'], [0.5, 0.75, 'inlay_carnelian'], [0.75, 0.5, 'inlay_yellow']]) { const q = P2(s0 + (s1 - s0) * dx), t = []; beamTris(t, [q[0] - ux * 0.045, y + 0.22 + (sh - 0.44) * dy - 0.045, q[1] - uz * 0.045], [q[0] + ux * 0.045, y + 0.22 + (sh - 0.44) * dy - 0.045, q[1] + uz * 0.045], 0.04, 0.09); bag.add(m, fromTriangles(t)); }
     }
   }
   // the cenotaph of Mumtaz Mahal at the very centre, on its platform, inlaid with inscriptions and flowers
@@ -475,7 +475,7 @@ function tombChamber(bag, col, cx, cz, y, A) {
   bag.add(W, frustum([cx - 0.6, cz - 1.25, cx + 0.6, cz + 1.25], y + 0.75, y + 1.45, 0.1, 0.1, 0.1, 0.1));
   bag.add(W, frustum([cx - 0.5, cz - 1.15, cx + 0.5, cz + 1.15], y + 1.45, y + 1.65, 0.3, 0.3, 0.05, 0.05));
   for (const yy of [y + 0.5, y + 1.0]) for (const sg of [-1, 1]) { bag.add('marble_dark', box(cx + sg * (yy < y + 0.6 ? 0.86 : 0.57) - 0.01, yy, cz - (yy < y + 0.6 ? 1.4 : 1.1), cx + sg * (yy < y + 0.6 ? 0.86 : 0.57) + 0.01, yy + 0.06, cz + (yy < y + 0.6 ? 1.4 : 1.1))); }
-  for (let j = 0; j < 7; j++) for (const sg of [-1, 1]) bag.add(['stucco_rose', 'stucco_leaf', 'stucco_saffron'][j % 3], box(cx + sg * 0.86 - 0.012, y + 0.6, cz - 1.2 + j * 0.4, cx + sg * 0.86 + 0.012, y + 0.68, cz - 1.12 + j * 0.4));
+  for (let j = 0; j < 7; j++) for (const sg of [-1, 1]) bag.add(['inlay_carnelian', 'inlay_jade', 'inlay_yellow'][j % 3], box(cx + sg * 0.86 - 0.012, y + 0.6, cz - 1.2 + j * 0.4, cx + sg * 0.86 + 0.012, y + 0.68, cz - 1.12 + j * 0.4));
   col.rect([cx - 1.25, cz - 2.1, cx + 1.25, cz + 2.1], y, y + 1.65);
 }
 
@@ -573,7 +573,7 @@ function fountain(bag, x, z, y0, y, h = 1.6) {
   bag.add('marble_smooth', lathe([[0.22, 0], [0.18, hb * 0.6], [0.3, hb * 0.85], [0.26, hb], [0.08, hb], [0.001, hb]], 16, (th, i) => (i === 2 || i === 3 ? 1 + 0.12 * Math.abs(Math.cos(th * 4)) : 1), x, y0, z));
   bag.add('bronze', lathe([[0.05, 0], [0.04, 0.1], [0.018, 0.16], [0.001, 0.16]], 8, null, x, y0 + hb, z));
   // the jet: a white column of broken water, spreading into a plume that falls back
-  bag.add('paint_white', lathe([[0.045, 0], [0.035, h * 0.5], [0.025, h * 0.85], [0.07, h * 0.93], [0.11, h * 0.9], [0.05, h * 0.97], [0.001, h]], 8, null, x, y0 + hb + 0.14, z));
+  bag.add('water_jet', lathe([[0.045, 0], [0.035, h * 0.5], [0.025, h * 0.85], [0.07, h * 0.93], [0.11, h * 0.9], [0.05, h * 0.97], [0.001, h]], 8, null, x, y0 + hb + 0.14, z));
 }
 registerStyle('mughal', {
   trim: () => {}, opening: () => {}, column: () => {},

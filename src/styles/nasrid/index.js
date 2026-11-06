@@ -171,14 +171,14 @@ function lionFountain(bag, col, cx, cz, y) {
   for (let k = 0; k < 12; k++) {
     const a = (k + 0.5) / 12 * Math.PI * 2; lion(bag, cx, yl, cz, a);
     const ca = Math.cos(a), sa = Math.sin(a), j = [[1.72, 0.54], [1.88, 0.48], [2.0, 0.3], [2.08, -0.09]];
-    for (let i = 0; i + 1 < j.length; i++) bag.add('water', rod([cx + ca * j[i][0], yl + j[i][1], cz + sa * j[i][0]], [cx + ca * j[i + 1][0], yl + j[i + 1][1], cz + sa * j[i + 1][0]], 0.01, 4));
+    for (let i = 0; i + 1 < j.length; i++) bag.add('water_jet', rod([cx + ca * j[i][0], yl + j[i][1], cz + sa * j[i][0]], [cx + ca * j[i + 1][0], yl + j[i + 1][1], cz + sa * j[i + 1][0]], 0.01, 4));
   }
   const yb = yl + 0.55, RB = 1.36;
   bag.add(MS, lathe([[0.5, 0], [0.5, 0.55]], 12, null, cx, yl, cz));
   bag.add(MS, lathe([[0.5, 0], [0.9, 0.06], [1.22, 0.28], [RB, 0.46], [RB, 0.64], [RB - 0.1, 0.64], [RB - 0.13, 0.44], [0.001, 0.36]], 12, null, cx, yb, cz));
   bag.add('water', disc(RB - 0.115, yb + 0.58, 12, cx, cz));
   bag.add(MS, lathe([[0.12, 0], [0.09, 0.3], [0.13, 0.36], [0.04, 0.42], [0.001, 0.44]], 8, null, cx, yb + 0.36, cz));
-  bag.add('water', rod([cx, yb + 0.8, cz], [cx, yb + 1.25, cz], 0.02, 5));
+  bag.add('water_jet', rod([cx, yb + 0.8, cz], [cx, yb + 1.25, cz], 0.02, 5));
   // the poem: a band of script in low relief on the twelve faces of the rim
   for (let f = 0; f < 12; f++) {
     const a0 = f / 12 * Math.PI * 2, a1 = (f + 1) / 12 * Math.PI * 2, n = 9;
@@ -200,7 +200,7 @@ function channel(bag, col, a, b, y, basin = true) {
   bag.add(MS, lathe([[0.6, 0], [0.6, 0.26], [0.5, 0.26], [0.5, 0.06]], 16, null, b[0], y, b[1]));
   bag.add('water', disc(0.5, y + 0.19, 16, b[0], b[1]));
   bag.add(MS, lathe([[0.07, 0], [0.05, 0.3], [0.001, 0.34]], 8, null, b[0], y + 0.06, b[1]));
-  bag.add('water', rod([b[0], y + 0.34, b[1]], [b[0], y + 0.62, b[1]], 0.015, 4));
+  bag.add('water_jet', rod([b[0], y + 0.34, b[1]], [b[0], y + 0.62, b[1]], 0.015, 4));
   col.circle(b[0], b[1], 0.6, y, y + 0.3);
 }
 /** A sloping roof slab of tiles over a gallery (ceiling of timber below): quad pts [[x, z]…] with heights from H(x, z). */

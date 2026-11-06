@@ -57,15 +57,17 @@ export function comares(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, cx = (x0 + x1) / 2;
   const Wl = (r, y0, y1, holes = [], mat = PL) => holedWall(bag, col, mat, r, y0, y1, holes);
   // ——— the court: the long pool between marble kerbs, brimming; the myrtle hedges; a round fountain at each end
-  const pw = 3.55, k = 0.3, pz0 = z0 + 1.6, pz1 = z1 - 5.8, K = [cx - pw - k, pz0 - k, cx + pw + k, pz1 + k];
+  // the pool 34 × 7.1 m in a court 36.6 m long (docs/settlements/granada.md §4.2): ours runs from just inside the
+  // north fountain to 2 m short of the court's south edge, where the arrival stands (z ≈ 3), about 31.3 m
+  const pw = 3.55, k = 0.3, fo = 0.55, fr = 0.28, pz0 = z0 + k + fo + fr + 0.22, pz1 = z1 - 2 - k - fo - fr - 0.18, K = [cx - pw - k, pz0 - k, cx + pw + k, pz1 + k];
   for (const r of [[x0, z0, x1, K[1]], [x0, K[3], x1, z1], [x0, K[1], K[0], K[3]], [K[2], K[1], x1, K[3]]]) bag.add('marble', box(r[0], y - 0.3, r[1], r[2], y + 0.05, r[3]));
   col.floor([x0, z0, x1, z1], y + 0.05);
   for (const r of [[K[0], K[1], K[2], pz0], [K[0], pz1, K[2], K[3]], [K[0], pz0, cx - pw, pz1], [cx + pw, pz0, K[2], pz1]]) bag.add(MS, box(r[0], y - 0.9, r[1], r[2], y + 0.12, r[3]));
   bag.add('marble_dark', box(cx - pw, y - 1.0, pz0, cx + pw, y - 0.9, pz1));
   STYLES.qing.elements.water_rect({ rect: [cx - pw, pz0, cx + pw, pz1], y: y + 0.09 }, ctx);
   col.rect(K, y - 1, y + 0.4);
-  floorFountain(bag, col, cx, K[1] - 0.6, y + 0.05, 0.3, [0, 1, 0.6]);
-  floorFountain(bag, col, cx, K[3] + 0.6, y + 0.05, 0.3, [0, -1, 0.6]);
+  floorFountain(bag, col, cx, K[1] - fo, y + 0.05, fr, [0, 1, fo]);
+  floorFountain(bag, col, cx, K[3] + fo, y + 0.05, fr, [0, -1, fo]);
   for (const s of [-1, 1]) {
     const xa = cx + s * (pw + k + 0.3), xb = cx + s * (pw + k + 1.35), lo = Math.min(xa, xb), hi = Math.max(xa, xb);
     for (let z = pz0 + 0.2; z < pz1 - 0.5; z += 6.9) {

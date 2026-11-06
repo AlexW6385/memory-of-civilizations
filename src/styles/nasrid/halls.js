@@ -291,7 +291,7 @@ export function floorFountain(bag, col, x, z, y, r = 0.55, ch = null) {
   bag.add(MS, lathe([[r + 0.18, 0], [r + 0.18, 0.11], [r, 0.11], [r, 0.07], [0.001, 0.07]], 16, null, x, y, z));
   bag.add('water', disc(r, y + 0.095, 16, x, z));
   bag.add(MS, lathe([[0.06, 0], [0.04, 0.16], [0.001, 0.2]], 8, null, x, y + 0.07, z));
-  bag.add('water', rod([x, y + 0.27, z], [x, y + 0.5, z], 0.012, 4));
+  bag.add('water_jet', rod([x, y + 0.27, z], [x, y + 0.5, z], 0.012, 4));
   col.circle(x, z, r + 0.18, y, y + 0.12);
   if (!ch) return;
   const [dx, dz, L] = ch, a = [x + dx * (r + 0.17), z + dz * (r + 0.17)], b = [x + dx * L, z + dz * L];
