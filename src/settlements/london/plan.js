@@ -21,7 +21,8 @@ export const westminster = {
     { t: 'gothic_tower', c: CLOCK, s: 12, h: 96, clock: true, y: g },
     { t: 'gothic_tower', c: VICTORIA, s: 22, h: 98, y: g },
     { t: 'gothic_tower', c: [76, -5], s: 10, h: 91, spire: true, y: g + 20 },
-    { t: 'cathedral', rect: ABBEY, nave: 31, towers: 69, y: g },
+    // Westminster Abbey: the high nave and its flyers, the transepts, the lantern, Hawksmoor's towers, Henry VII's chapel
+    { t: 'abbey', rect: ABBEY, y: g },
   ],
   rooms: [{ id: 'parliament square', rect: [-60, -215, 40, -150], y: g, kind: 'open' }],
   walks: [Object.assign([[0, -180], [60, -170]], { y0: g })],

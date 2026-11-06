@@ -8,7 +8,7 @@ const ST = 'sandstone_dressed', RL = 'sandstone_relief';
 const sq = (x, z, s) => [x - s / 2, z - s / 2, x + s / 2, z + s / 2];
 
 /** An arched window on frame F: the stone surround, the glass, mullions and a transom of stone; a round light in the head. */
-function archWindow(bag, F, y, u, v0, wid, hh, pointed, lights = 2) {
+export function archWindow(bag, F, y, u, v0, wid, hh, pointed, lights = 2, ST = 'sandstone_dressed') {
   for (const q of arch(u, v0, wid, hh, pointed, 0.18)) bag.add(ST, prism(F, y, q, -0.02, 0.06));
   for (const q of arch(u, v0, wid, hh, pointed)) bag.add('opening', prism(F, y, q, 0.06, 0.1));
   const vs = v0 + hh - (pointed ? wid * 0.866 : wid / 2);
