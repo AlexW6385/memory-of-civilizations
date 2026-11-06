@@ -50,7 +50,8 @@ The level plain; the riverbank falling to the Yamuna on the north. (`ground.js`)
 
 ## 7. Planting
 
-Cypresses along the garden's walks, fruit trees in the beds, grass; neem and banyan in the town. [inferred from Mughal garden practice]
+The flowerbeds are "divided by stone-paved raised pathways", sixteen to each quarter; the trees are "either that of Cyprus (signifying death) or of the fruit bearing type (signifying life)", arranged symmetrically [stated: tajmahal.org.uk "Taj Garden"]. **Built (second wave):** raised walks of red sandstone 3 m wide with marble kerbs, 0.55 m above the beds, three each way in every quarter (at 46, 80 and 114 m from the axes) so that each quarter holds sixteen sunken beds, and a walk 4 m wide round the inside of the walls; a line of cypresses along the edge of every walk, fruit trees in the beds behind them (apple trees stand in for the orchard), grass [inferred: the walks' height and the spacing of the planting]; neem and banyan in the town.
+**The riverfront (second wave):** the terrace's face to the Yamuna built as an arcade of blind arches of red sandstone, crenellated, between the corner towers, from the river's bed to a parapet over the terrace [inferred: articulation after photographs of the riverfront].
 
 ## 8. Sky and weather
 
@@ -76,6 +77,7 @@ The settlement's latitude in `src/planet/sites.js` is set a little south and eas
 - [Taj Mahal — middleheight](https://middleheight.com/?p=3849)
 - [The Taj Mahal — thetilesofindia](https://www.thetilesofindia.com/global-architects/the-taj-mahal/)
 
+- [Taj garden — tajmahal.org.uk](https://www.tajmahal.org.uk/taj-garden.html)
 - [Taj Mahal — Wikipedia](https://en.wikipedia.org/wiki/Taj_Mahal)
 - [Taj Mahal — Wikipedia (wikipedia.com mirror)](https://wikipedia.com/wiki/Tajmahal)
 - [Origins and architecture of the Taj Mahal — Wikipedia](https://www.Wikipedia.com/wiki/Origins_and_architecture_of_the_Taj_Mahal)

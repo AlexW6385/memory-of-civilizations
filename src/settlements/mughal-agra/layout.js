@@ -12,6 +12,16 @@ export const GARDEN = [-150, -148, 150, 150];
 export const GATE = { c: [0, 157], w: 40, d: 30, h: 30 };
 export const FORECOURT = [-125, 172, 125, 228];
 export const POOL = { c: [0, 0], a: 14 };
+// the raised walks of the garden's quarters: each quarter (from the axial walks at 12 m to the walls) cut by three walks
+// each way into sixteen sunken beds; a walk round the inside of the walls. Centres (m from the axis), half-width 1.5.
+export const GWALKS = [46, 80, 114], GW = 1.5, GRIM = 145;
+/** Distance from (x, z) to the nearest edge of a garden walk (negative on one). */
+export function walkDist(x, z) {
+  const ax = Math.abs(x), az = Math.abs(z);
+  let d = Math.min(ax - 12, az - 12, GRIM - 2 - ax, GRIM - 2 - az);
+  for (const c of GWALKS) d = Math.min(d, Math.abs(ax - c) - GW, Math.abs(az - c) - GW);
+  return d;
+}
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 

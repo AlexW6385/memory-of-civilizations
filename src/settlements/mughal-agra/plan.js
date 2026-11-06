@@ -3,7 +3,7 @@
 // mosque (west) and its twin (east); the charbagh with its raised channels, walks and central
 // pool; the walls and their octagonal towers; the great gate; the forecourt.
 
-import { TERRACE, PLINTH, GARDEN, GATE, FORECOURT, POOL } from './layout.js';
+import { TERRACE, PLINTH, GARDEN, GATE, FORECOURT, POOL, GWALKS, GW, GRIM } from './layout.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
@@ -25,22 +25,25 @@ for (const r of [[-12, gz0, -3.6, gz1], [3.6, gz0, 12, gz1], [gx0, -12, -3.6, -3
 E.push({ t: 'water_rect', rect: [-3, gz0 + 2, 3, gz1 - 2], y: 0.25 });
 E.push({ t: 'water_rect', rect: [gx0 + 2, -3, gx1 - 2, 3], y: 0.25 });
 for (const r of [[-3.6, gz0 + 2, -3, gz1 - 2], [3, gz0 + 2, 3.6, gz1 - 2], [gx0 + 2, -3.6, gx1 - 2, -3], [gx0 + 2, 3, gx1 - 2, 3.6]]) E.push({ t: 'block', walk: true, rect: r, y0: 0, y1: 0.55, mat: 'marble_smooth' });
-for (const r of [[-77, gz0, -73, gz1], [73, gz0, 77, gz1], [gx0, -77, gx1, -73], [gx0, 73, gx1, 77]]) E.push({ t: 'lane', rect: r, y: 0.2, mat: 'sandstone_red' });
-// the raised marble tank: a rim 3 m wide round a basin (it was a solid block hiding the water before)
+// the raised walks of stone that cut each quarter into sixteen sunken beds, and the walk round the inside of the walls
+// (docs/settlements/mughal-agra.md §4): red sandstone with a kerb of white marble on each side
 {
-  const a = POOL.a, o = POOL.a + 3;
-  for (const r of [[-o, -o, o, -a], [-o, a, o, o], [-o, -a, -a, a], [a, -a, o, a]]) E.push({ t: 'block', walk: true, rect: r, y0: 0, y1: 1.1, mat: 'marble' });
-  E.push({ t: 'block', walk: true, rect: [-a, -a, a, a], y0: 0, y1: 0.4, mat: 'marble_smooth' });
+  const WY = 0.55, raised = (r) => {
+    E.push({ t: 'block', walk: true, rect: r, y0: -0.3, y1: WY, mat: 'sandstone_red' });
+    const along = r[2] - r[0] > r[3] - r[1];
+    for (const k of along ? [[r[0], r[1] - 0.12, r[2], r[1]], [r[0], r[3], r[2], r[3] + 0.12]] : [[r[0] - 0.12, r[1], r[0], r[3]], [r[2], r[1], r[2] + 0.12, r[3]]]) E.push({ t: 'block', rect: k, y0: -0.3, y1: WY + 0.06, mat: 'marble', collide: false });
+  };
+  const R0 = 12.15, R1 = GRIM - 2;
+  for (const s of [-1, 1]) for (const q of [-1, 1]) for (const c of GWALKS) {
+    const lo = q > 0 ? R0 : -R1, hi = q > 0 ? R1 : -R0;
+    raised([s * c - GW, lo, s * c + GW, hi]);                       // north–south, in the quarter on side s
+    raised([lo, s * c - GW, hi, s * c + GW]);                       // east–west
+  }
+  raised([-GRIM - 2, R1, GRIM + 2, GRIM + 2]); raised([-GRIM - 2, -GRIM - 2, GRIM + 2, -R1]);
+  raised([R1, -R1, GRIM + 2, R1]); raised([-GRIM - 2, -R1, -R1, R1]);
 }
-E.push({ t: 'water_rect', rect: [-POOL.a, -POOL.a, POOL.a, POOL.a], y: 1.0 });
-// the fountains: a line of equidistant jets down the middle of the north–south channel, five in the
-// central tank, one at each corner and one in the middle (docs/settlements/mughal-agra.md §4)
-{
-  const row = [];
-  for (let z = gz0 + 8; z < gz1 - 6; z += 8) if (Math.abs(z) > POOL.a + 6) row.push([0, z]);
-  E.push({ t: 'fountains', pts: row, y0: 0, y: 0.25, h: 1.4 });
-  E.push({ t: 'fountains', pts: [[0, 0], [-POOL.a + 2.5, -POOL.a + 2.5], [POOL.a - 2.5, -POOL.a + 2.5], [-POOL.a + 2.5, POOL.a - 2.5], [POOL.a - 2.5, POOL.a - 2.5]], y0: 0.4, y: 1.0, h: 2.2 });
-}
+// the riverfront: the terrace's face to the Yamuna, an arcade of blind arches with a parapet over it, between the towers
+for (const [xa, xb] of [[tx0 + 4.2, tx1 - 4.2]]) E.push({ t: 'mughal_wall', a: [xa, tz0], b: [xb, tz0], y: -4.6, h: 7.1, inside: [0, 0] });
 // the walls round the garden and the forecourt, their octagonal towers, the pavilions on the east and west walls
 const wall = (a, b) => E.push({ t: 'mughal_wall', a, b, h: 7 });
 wall([gx0, gz0], [gx0, gz1]); wall([gx1, gz0], [gx1, gz1]);
