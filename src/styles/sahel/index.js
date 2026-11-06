@@ -422,8 +422,78 @@ function marketStall(el, { bag }) {
   bag.add('terracotta', lathe([[0.001, 0], [0.2, 0.05], [0.3, 0.3], [0.2, 0.55], [0.12, 0.6], [0.14, 0.66], [0.001, 0.62]], 10, null, x - tw - 0.35, 0, z + td * 0.4));
 }
 
+/**
+ * market_mat: a seller's place on market day (docs/settlements/djenne.md §11, after Caillié's
+ * description of the market) { at, rot (the seller faces −z turned by rot, as the figures do), goods,
+ * seed }: a low stool for the seller, a mat before it and the goods laid out on it — 'kola' (a small
+ * basket of kola nuts, no mat), 'fish' (dried fish in heaps), 'salt' (bars of rock salt and broken
+ * pieces), 'pots', 'calabash', 'grain' (millet and rice in calabashes, sacks), 'butter' (shea butter
+ * in bowls), 'cloth' (folded narrow-strip cotton), 'mats' (rolled mats), 'meat' (smoked meat on skewers).
+ */
+function marketMat(el, { bag }) {
+  const [X, Z] = el.at, r = el.rot ?? 0, c = Math.cos(r), sn = Math.sin(r), rand = rng(el.seed || 1), g = el.goods || 'pots';
+  // local (x, z) → world: the rotation about y the figures use
+  const W = (x, z) => [X + x * c + z * sn, Z - x * sn + z * c];
+  const put = (mat, geo, x, y, z, yaw = 0) => { const [wx, wz] = W(x, z); bag.add(mat, geo.rotateY(r + yaw).translate(wx, y, wz)); };
+  const L = (prof, n = 10) => lathe(prof, n, null, 0, 0, 0);
+  // the stool (a single block of wood, a dished seat)
+  put('timber', L([[0.15, 0], [0.1, 0.12], [0.08, 0.3], [0.16, 0.42], [0.17, 0.45], [0.001, 0.44]], 8), 0, 0, 0.02);
+  if (g === 'kola') {
+    // Caillié: the kola sellers sit in two lines, each with a small basket
+    put('wicker', L([[0.001, 0], [0.16, 0.02], [0.2, 0.15], [0.19, 0.16], [0.001, 0.05]]), 0, 0, -0.75);
+    for (let i = 0; i < 9; i++) { const a = rand() * 6.28, d = rand() * 0.11; put(rand() < 0.6 ? 'terracotta' : 'hide_white', L([[0.001, 0], [0.035, 0.02], [0.03, 0.05], [0.001, 0.06]], 6), Math.cos(a) * d, 0.1 + rand() * 0.03, -0.75 + Math.sin(a) * d); }
+    return;
+  }
+  const mw = 0.7, z0 = -0.65, z1 = -1.8, mz = (z0 + z1) / 2;
+  put(g === 'cloth' ? 'cloth_white' : 'reed_mat', box(-mw, 0, z1, mw, 0.015, z0), 0, 0.005, 0);
+  const top = 0.02, spots = [[-0.4, -0.95], [0.05, -0.95], [0.45, -0.95], [-0.4, -1.5], [0.05, -1.5], [0.45, -1.5]];
+  if (g === 'fish') {
+    // dried fish of the Niger, laid head to tail in round heaps
+    for (const [sx, sz] of spots.slice(0, 4)) for (let k = 0; k < 7; k++) {
+      const a = k * 0.9 + rand(), f = L([[0.001, 0], [0.03, 0.04], [0.035, 0.12], [0.02, 0.2], [0.035, 0.24], [0.001, 0.25]], 5);
+      f.rotateZ(Math.PI / 2).scale(1, 0.55, 1).rotateY(a);
+      put(rand() < 0.5 ? 'hide_brown' : 'hide_tan', f, sx + Math.cos(a) * 0.06, top + 0.02 + Math.floor(k / 3) * 0.035, sz + Math.sin(a) * 0.06);
+    }
+  } else if (g === 'salt') {
+    // bars of rock salt from the desert mines, about a metre long, lashed in pairs; pieces broken off for retail
+    for (let k = 0; k < 3; k++) {
+      put('lime_plaster', box(-0.5, 0, -0.2, 0.5, 0.07, 0.2), 0.02 * k, top + k * 0.072, -1.15, (rand() - 0.5) * 0.12);
+      put('plaster_grey', box(-0.505, 0.03, -0.205, 0.505, 0.04, 0.205), 0.02 * k, top + k * 0.072, -1.15, 0);
+    }
+    for (const dx of [-0.35, 0.35]) put('hide_brown', box(-0.015, 0, -0.21, 0.015, 0.24, 0.21), dx, top - 0.005, -1.15);
+    for (let i = 0; i < 5; i++) put('lime_plaster', box(-0.07, 0, -0.05, 0.07, 0.05 + rand() * 0.04, 0.05), -0.5 + i * 0.25, top, -1.62, rand());
+  } else if (g === 'pots') {
+    for (const [sx, sz] of spots) {
+      const k = rand(), m = rand() < 0.5 ? 'terracotta' : 'pottery_dark';
+      if (k < 0.4) put(m, L([[0.001, 0], [0.12, 0.03], [0.2, 0.18], [0.14, 0.34], [0.1, 0.38], [0.12, 0.42], [0.001, 0.4]], 12), sx, top, sz);
+      else if (k < 0.75) put(m, L([[0.001, 0], [0.14, 0.02], [0.22, 0.1], [0.24, 0.14], [0.2, 0.14], [0.001, 0.05]], 12), sx, top, sz);
+      else put(m, L([[0.001, 0], [0.09, 0.02], [0.14, 0.12], [0.08, 0.24], [0.06, 0.3], [0.001, 0.29]], 10), sx, top, sz);
+    }
+  } else if (g === 'calabash') {
+    for (const [sx, sz] of spots) for (let k = 0; k < (rand() < 0.5 ? 3 : 2); k++) put('hide_tan', L([[0.001, 0.16], [0.18, 0.13], [0.24, 0.04], [0.22, 0.0], [0.2, 0.04], [0.001, 0.12]], 12), sx, top + k * 0.05, sz);
+  } else if (g === 'grain' || g === 'butter') {
+    for (const [sx, sz] of spots.slice(0, 5)) {
+      put('hide_tan', L([[0.001, 0], [0.16, 0.03], [0.22, 0.12], [0.2, 0.13], [0.001, 0.05]]), sx, top, sz);
+      put(g === 'butter' ? 'hide_white' : rand() < 0.5 ? 'cloth_ochre' : 'sacking', L([[0.2, 0], [0.13, 0.06], [0.001, 0.09]], 10), sx, top + 0.11, sz);
+    }
+    if (g === 'grain') for (const dx of [-0.95, 0.95]) put('sacking', L([[0.2, 0], [0.24, 0.25], [0.2, 0.45], [0.06, 0.52], [0.001, 0.52]], 8), dx, 0, mz);
+  } else if (g === 'cloth') {
+    for (let k = 0; k < 6; k++) put(['cloth_indigo', 'cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_black', 'cloth_white'][k], box(-0.3, 0, -0.2, 0.3, 0.05, 0.2), (k % 2) * 0.68 - 0.34, top + Math.floor(k / 2) * 0.052, -1.2, (rand() - 0.5) * 0.1);
+  } else if (g === 'mats') {
+    for (let k = 0; k < 4; k++) { const m = L([[0.09, 0], [0.09, 1.2], [0.001, 1.2]], 10); m.rotateZ(Math.PI / 2); put('reed_mat', m, 0.6, top + 0.09 + (k > 2 ? 0.17 : 0), -0.95 - (k % 3) * 0.19); }
+  } else if (g === 'meat') {
+    // smoked meat in small pieces on skewers, stuck in a block of wood (Caillié)
+    put('timber', box(-0.5, 0, -0.12, 0.5, 0.14, 0.12), 0, top, -1.2);
+    for (let k = 0; k < 9; k++) {
+      const x = -0.44 + k * 0.11, sk = L([[0.006, 0], [0.006, 0.42], [0.001, 0.43]], 4);
+      put('timber', sk, x, top + 0.1, -1.2);
+      for (let j = 0; j < 3; j++) put('hide_brown', box(-0.03, 0, -0.025, 0.03, 0.05, 0.025), x, top + 0.24 + j * 0.06, -1.2, rand());
+    }
+  }
+}
+
 registerStyle('sahel', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_wall: sahelWall, market_stall: marketStall },
+  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat },
   objects: {},
 });
