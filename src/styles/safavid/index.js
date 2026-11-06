@@ -9,8 +9,9 @@
 // rather than axis-aligned rectangles.
 
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
-import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
+import { box, lathe, fromTriangles, orientOutward, rod } from '../../core/geom.js';
+import { tube } from '../../objects/kit.js';
 import { beamTris } from '../ming/index.js';
 import { arcadeWall, pishtaqFace } from '../mughal/index.js';
 
@@ -26,13 +27,13 @@ function slab(bag, col, mat, a, b, y, th, h) {
   if (col) col.segment(a, b, th, y, y + h);
 }
 /** A flat-faced frustum from the polygon `bot` at y0 to `top` at y1 (convex, same vertex count), capped. */
-function prism(bag, mat, bot, top, y0, y1) {
+function prism(bag, mat, bot, top, y0, y1, bottom = true) {
   const n = bot.length, t = [], P = (q, y) => [q[0], y, q[1]];
   for (let k = 0; k < n; k++) {
     const a = P(bot[k], y0), b = P(bot[(k + 1) % n], y0), c = P(top[(k + 1) % n], y1), d = P(top[k], y1);
     t.push(...a, ...b, ...c, ...a, ...c, ...d);
   }
-  for (let k = 1; k < n - 1; k++) { t.push(...P(top[0], y1), ...P(top[k], y1), ...P(top[k + 1], y1)); t.push(...P(bot[0], y0), ...P(bot[k + 1], y0), ...P(bot[k], y0)); }
+  for (let k = 1; k < n - 1; k++) { t.push(...P(top[0], y1), ...P(top[k], y1), ...P(top[k + 1], y1)); if (bottom) t.push(...P(bot[0], y0), ...P(bot[k + 1], y0), ...P(bot[k], y0)); }
   bag.add(mat, fromTriangles(orientOutward(t)));
 }
 const ngon = (cx, cz, r, n, rot = 0) => Array.from({ length: n }, (_, k) => [cx + Math.cos(rot + k / n * Math.PI * 2) * r, cz + Math.sin(rot + k / n * Math.PI * 2) * r]);
@@ -198,16 +199,30 @@ function iwanHood(bag, c, u, n, w, depth, y, h) {
  * bulge }, wallMat, drumMat, domeMat }: four walls, an octagonal zone of transition, the drum
  * with its windows, the dome.
  */
-function domeChamber(el, { bag, col }) {
+function domeChamber(el, ctx) {
+  const { bag, col } = ctx;
   const [cx, cz] = el.c, y = el.y ?? 0, A = el.half, rot = el.rot ?? 0, H = el.wallH;
   const pt = (u, v) => [cx + u * Math.cos(rot) - v * Math.sin(rot), cz + u * Math.sin(rot) + v * Math.cos(rot)];
   const C = [pt(-A, -A), pt(A, -A), pt(A, A), pt(-A, A)];
-  for (let k = 0; k < 4; k++) slab(bag, col, el.wallMat ?? B, C[k], C[(k + 1) % 4], y, 2, H);
+  // with an interior the entrance wall (k 0) and the qibla wall (k 2) are built by it, with the door and the mihrab
+  for (let k = 0; k < 4; k++) if (!el.interior || k % 2) slab(bag, col, el.wallMat ?? B, C[k], C[(k + 1) % 4], y, 2, H);
   // the roof of the square, the octagon of transition, the drum, the dome
-  const sq = ngon(cx, cz, A * Math.SQRT2 + 0.7, 4, rot + Math.PI / 4);
-  prism(bag, el.wallMat ?? B, sq, sq, y + H - 0.6, y + H);
-  const dr = el.drum.r, dh = el.drum.h, r = el.dome.r;
-  prism(bag, el.wallMat ?? B, ngon(cx, cz, A * 1.05 / Math.cos(Math.PI / 8), 8, rot + Math.PI / 8), ngon(cx, cz, dr * 1.06 / Math.cos(Math.PI / 8), 8, rot + Math.PI / 8), y + H, y + H + A * 0.35);
+  const dr = el.drum.r, dh = el.drum.h, r = el.dome.r, oct8 = ngon(cx, cz, A * 1.05 / Math.cos(Math.PI / 8), 8, rot + Math.PI / 8);
+  if (el.interior) {
+    // the roof only round the octagon (the chamber's inner dome rises inside it); the octagon open below
+    const sh = new Shape(), sq = [[-A - 1, -A - 1], [A + 1, -A - 1], [A + 1, A + 1], [-A - 1, A + 1]].map(([u, v]) => pt(u, v));
+    sh.moveTo(sq[0][0], -sq[0][1]); for (const q of sq.slice(1)) sh.lineTo(q[0], -q[1]);
+    const hole = new Path(); hole.moveTo(oct8[0][0], -oct8[0][1]); for (const q of oct8.slice(1)) hole.lineTo(q[0], -q[1]); sh.holes.push(hole);
+    const g = new ExtrudeGeometry(sh, { depth: 0.3, bevelEnabled: false });
+    g.rotateX(-Math.PI / 2); g.translate(0, y + H - 0.3, 0);
+    bag.add(el.wallMat ?? B, g);
+    prism(bag, el.wallMat ?? B, oct8, ngon(cx, cz, dr * 1.06 / Math.cos(Math.PI / 8), 8, rot + Math.PI / 8), y + H, y + H + A * 0.35, false);
+    lotfInterior(el, ctx, pt, A, H, y);
+  } else {
+    const sq = ngon(cx, cz, A * Math.SQRT2 + 0.7, 4, rot + Math.PI / 4);
+    prism(bag, el.wallMat ?? B, sq, sq, y + H - 0.6, y + H);
+    prism(bag, el.wallMat ?? B, oct8, ngon(cx, cz, dr * 1.06 / Math.cos(Math.PI / 8), 8, rot + Math.PI / 8), y + H, y + H + A * 0.35);
+  }
   const y1 = y + H + A * 0.35;
   bag.add(el.drumMat ?? T, lathe([[dr, 0], [dr, dh], [dr * 1.04, dh + 0.3], [r, dh + 0.5]], 32, null, cx, y1, cz));
   for (let k = 0; k < 16; k++) {
@@ -238,6 +253,241 @@ function domeChamber(el, { bag, col }) {
   safDome(bag, el.domeMat ?? Q, cx, y1 + dh + 0.5, cz, r, el.dome.h, el.dome.bulge);
   if (el.net) domeNet(bag, el.net, cx, y1 + dh + 0.5, cz, r, el.dome.h, el.dome.bulge);
   col.circle(cx, cz, A * 1.4, y + H, y1 + dh + el.dome.h);
+}
+
+/** A pointed arch's outline in (s, y): w wide about s = 0, its feet at y0, its crown at y0 + h; up the left jamb, over, down the right (feet false: the arcs alone). */
+function archLine(w, h, y0, n = 12, feet = true) {
+  const r = w * 0.8, rise = Math.sqrt(r * r - (r - w / 2) ** 2), ys = y0 + Math.max(0.3, h - rise), cL = -w / 2 + r, cR = w / 2 - r, P = [];
+  if (feet) P.push([-w / 2, y0]);
+  for (let i = 0; i <= n; i++) { const s = -w / 2 + (w / 2) * i / n; P.push([s, ys + Math.sqrt(Math.max(0, r * r - (s - cL) ** 2))]); }
+  for (let i = 1; i <= n; i++) { const s = (w / 2) * i / n; P.push([s, ys + Math.sqrt(Math.max(0, r * r - (s - cR) ** 2))]); }
+  if (feet) P.push([w / 2, y0]);
+  return P;
+}
+/** Push the triangle a b c into T, wound to face the point p. */
+function facing(T, p, a, b, c) {
+  const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+  const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+  const mx = p[0] - (a[0] + b[0] + c[0]) / 3, my = p[1] - (a[1] + b[1] + c[1]) / 3, mz = p[2] - (a[2] + b[2] + c[2]) / 3;
+  if (nx * mx + ny * my + nz * mz >= 0) T.push(...a, ...b, ...c); else T.push(...a, ...c, ...b);
+}
+/**
+ * A turquoise cable moulding along the points `pts` ([x, y, z]): a core and a strand wound round it, the twist of the
+ * rope; `nrm(p)` the side it is seen from (the strand's frame), r the rope's radius.
+ */
+function cable(bag, pts, r, nrm, mat = Q) {
+  const S = [];
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const a = pts[i], b = pts[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), n = Math.max(1, Math.ceil(L / (r * 1.3)));
+    for (let j = i ? 1 : 0; j <= n; j++) S.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n, a[2] + (b[2] - a[2]) * j / n]);
+  }
+  bag.add(mat, tube(S.map((p) => [...p, r * 0.72]), 6));
+  let d = 0;
+  const H = S.map((p, i) => {
+    const q = S[Math.min(S.length - 1, i + 1)], o = S[Math.max(0, i - 1)], t = [q[0] - o[0], q[1] - o[1], q[2] - o[2]], tl = Math.hypot(...t) || 1;
+    if (i) d += Math.hypot(p[0] - S[i - 1][0], p[1] - S[i - 1][1], p[2] - S[i - 1][2]);
+    const N = nrm(p), dn = (N[0] * t[0] + N[1] * t[1] + N[2] * t[2]) / tl / tl, n0 = [N[0] - t[0] * dn, N[1] - t[1] * dn, N[2] - t[2] * dn], nl = Math.hypot(...n0) || 1;
+    const nn = n0.map((v) => v / nl), b = [t[1] * nn[2] - t[2] * nn[1], t[2] * nn[0] - t[0] * nn[2], t[0] * nn[1] - t[1] * nn[0]].map((v) => v / tl);
+    const ph = d / (r * 2.6) * Math.PI * 2, c = Math.cos(ph) * r * 0.5, s = Math.sin(ph) * r * 0.5;
+    return [p[0] + nn[0] * c + b[0] * s, p[1] + nn[1] * c + b[1] * s, p[2] + nn[2] * c + b[2] * s, r * 0.42];
+  });
+  bag.add(mat, tube(H, 5));
+}
+
+/**
+ * The Sheikh Lotfollah Mosque inside (docs/settlements/isfahan.md §13), for a dome_chamber with `interior` { passage:
+ * { x (the vestibule's east face) } }: the winding passage from the portal's vestibule — north-east along the
+ * chamber's north-west wall, south-east along its north-east wall — and the door into the chamber facing the mihrab;
+ * the chamber lined with tile above a marble dado, eight pointed arches of turquoise cable moulding rising from the
+ * dado, four on the walls and four across the corners, each framed by a band of white letters on blue, the wall arches'
+ * fields cream with a lozenge medallion, the corner ones closed over by squinches; the ring at the arches' crowns, the
+ * drum with its band of letters and sixteen grilled windows, a cable at the dome's foot; the inner dome of buff brick
+ * set with rings of thirty-two lemon-shaped medallions shrinking toward the sunburst at the crown; the mihrab in the
+ * qibla wall, its niche under a half-dome of muqarnas, enamelled with little flowers on blue. Local (u, v): +u south-
+ * east, +v south-west (toward Mecca) for rot = π/4.
+ */
+function lotfInterior(el, { bag, col, lights }, pt, A, H, y) {
+  const [cx, cz] = el.c, rot = el.rot ?? 0, WM = el.wallMat ?? B, a = A - 1, w8 = 2 * a * Math.tan(Math.PI / 8), y0 = y + 1.45, ah = 12;
+  const vec = (u, v) => [u * Math.cos(rot) - v * Math.sin(rot), u * Math.sin(rot) + v * Math.cos(rot)];
+  const mid = [cx, y + 7, cz];
+  // ---- the structure: the entrance wall with its door, the qibla wall in two leaves round the mihrab's niche, the corners filled
+  slab(bag, col, WM, pt(-A, -A), pt(-1, -A), y, 2, H); slab(bag, col, WM, pt(1, -A), pt(A, -A), y, 2, H);
+  slab(bag, col, WM, pt(-1, -A), pt(1, -A), y + 3.2, 2, H - 3.2);
+  const MW = 2.2, MH = 4.2, MO = 1.4;
+  arcadeWall(bag, col, pt(-A, A - 0.6), pt(A, A - 0.6), y, H, 0.8, T, [{ at: A, w: MW, h: MH, depth: 0.6, alcove: 'oct', plain: true, sideMat: T, backMat: T, domeMat: T, ribMat: Q, cellMat: 'tile_cream', ribSeg: 3 }], pt(0, A + 100));
+  slab(bag, col, WM, pt(-A, A + 0.4), pt(-MO, A + 0.4), y, 1.2, H); slab(bag, col, WM, pt(MO, A + 0.4), pt(A, A + 0.4), y, 1.2, H);
+  slab(bag, null, WM, pt(-MO, A + 0.4), pt(MO, A + 0.4), y + MH + 0.15, 1.2, H - MH - 0.15); slab(bag, null, WM, pt(-MO, A + 0.85), pt(MO, A + 0.85), y, 0.3, MH + 0.15);
+  for (const [su, sv] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) bag.add(WM, orientedBox(pt(su * A - 1, sv * A), pt(su * A + 1, sv * A), 2, y, y + H));
+  // ---- the eight faces of the octagon: the walls (inward normals) and the corners' diagonals, all `a` from the centre
+  const faces = [[0, 1, 'door'], [-1, 0], [0, -1, 'mihrab'], [1, 0]].map(([u, v, kind]) => ({ nL: [u, v], wall: true, kind }));
+  for (const [su, sv] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) faces.push({ nL: [-su * Math.SQRT1_2, -sv * Math.SQRT1_2], wall: false });
+  for (const f of faces) {
+    const n = vec(...f.nL), t = [n[1], -n[0]], c0 = [cx - n[0] * a, cz - n[1] * a];
+    f.F = (s, yy, o) => [c0[0] + t[0] * s + n[0] * o, yy, c0[1] + t[1] * s + n[1] * o];
+    f.box = (s0, s1, ya, yb, o0, o1, m) => { const p = f.F(s0, 0, (o0 + o1) / 2), q = f.F(s1, 0, (o0 + o1) / 2); bag.add(m, orientedBox([p[0], p[2]], [q[0], q[2]], o1 - o0, ya, yb)); };
+    // a flat shape (outline in s, y) laid on the face, `o` out from it, d thick
+    f.shape = (pts, o, d, m) => {
+      const sh = new Shape(); sh.moveTo(pts[0][0], pts[0][1]); for (const q of pts.slice(1)) sh.lineTo(q[0], q[1]);
+      const g = new ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 4 }), p0 = f.F(0, 0, o);
+      g.applyMatrix4(new Matrix4().makeBasis({ x: t[0], y: 0, z: t[1] }, { x: 0, y: 1, z: 0 }, { x: n[0], y: 0, z: n[1] }).setPosition(p0[0], 0, p0[2]));
+      bag.add(m, g);
+    };
+  }
+  const tris = new Map(), put = (m, p, A1, B1, C1) => { if (!tris.has(m)) tris.set(m, []); facing(tris.get(m), p, A1, B1, C1); };
+  const quad = (m, p, q0, q1, q2, q3) => { put(m, p, q0, q1, q2); put(m, p, q0, q2, q3); };
+  // white letters across a band: strokes between its two edges (lists of [s, y]) on face f, o out
+  const letters = (f, e0, e1, o, p) => {
+    let k = 0;
+    for (let i = 0; i + 1 < e0.length; i++) {
+      const L = Math.hypot(e0[i + 1][0] - e0[i][0], e0[i + 1][1] - e0[i][1]), ns = Math.max(1, Math.round(L / 0.24));
+      for (let j = 0; j < ns; j++, k++) {
+        const g = (j + 0.5) / ns, A0 = [e0[i][0] + (e0[i + 1][0] - e0[i][0]) * g, e0[i][1] + (e0[i + 1][1] - e0[i][1]) * g], A1 = [e1[i][0] + (e1[i + 1][0] - e1[i][0]) * g, e1[i][1] + (e1[i + 1][1] - e1[i][1]) * g];
+        const along = [(e0[i + 1][0] - e0[i][0]) / L * 0.03, (e0[i + 1][1] - e0[i][1]) / L * 0.03], tall = k % 5 !== 2 && k % 7 !== 4, f0 = 0.2, f1 = tall ? 0.78 : 0.4;
+        const P0 = [A0[0] + (A1[0] - A0[0]) * f0, A0[1] + (A1[1] - A0[1]) * f0], P1 = [A0[0] + (A1[0] - A0[0]) * f1, A0[1] + (A1[1] - A0[1]) * f1];
+        quad('tile_white', p, f.F(P0[0] - along[0], P0[1] - along[1], o), f.F(P0[0] + along[0], P0[1] + along[1], o), f.F(P1[0] + along[0], P1[1] + along[1], o), f.F(P1[0] - along[0], P1[1] - along[1], o));
+        if (k % 3 === 0) { const B0 = [A0[0] + (A1[0] - A0[0]) * 0.12, A0[1] + (A1[1] - A0[1]) * 0.12], d2 = [along[0] * 4, along[1] * 4]; quad('tile_white', p, f.F(B0[0] - d2[0], B0[1] - d2[1] - 0.025, o), f.F(B0[0] + d2[0], B0[1] + d2[1] - 0.025, o), f.F(B0[0] + d2[0], B0[1] + d2[1] + 0.025, o), f.F(B0[0] - d2[0], B0[1] - d2[1] + 0.025, o)); }
+      }
+    }
+  };
+  const lozenge = (f, s, yc, hw, hh, o, m) => { const p = f.F(0, yc, 3); quad(m, p, f.F(s, yc - hh, o), f.F(s + hw, yc, o), f.F(s, yc + hh, o), f.F(s - hw, yc, o)); };
+  const flower = (f, s, yc, r, o) => { const p = f.F(s, yc, o + 3); for (const [ds, dy] of [[r, 0], [-r, 0], [0, r], [0, -r]]) lozenge(f, s + ds * 0.6, yc + dy * 0.6, r * 0.45, r * 0.45, o, 'tile_white'); lozenge(f, s, yc, r * 0.3, r * 0.3, o + 0.008, 'glaze_yellow'); void p; };
+  const DOOR = 1.0, DH = 3.2, MF = 1.85, MFH = 6.3;
+  for (const f of faces) {
+    const p = f.F(0, y + 7, 4);
+    if (f.wall) {
+      // the lining: a marble dado with a moulded top, tile above (the qibla wall's inner leaf is itself of tile)
+      const gap = f.kind === 'door' ? DOOR : f.kind === 'mihrab' ? MF : 0, runs = gap ? [[-a, -gap], [gap, a]] : [[-a, a]];
+      for (const [s0, s1] of runs) { f.box(s0, s1, y, y + 1.35, -0.02, 0.1, 'marble_smooth'); f.box(s0, s1, y + 1.35, y + 1.45, -0.02, 0.13, 'marble'); }
+      if (f.kind !== 'mihrab') {
+        for (const [s0, s1] of runs) f.box(s0, s1, y + 1.35, y + H, -0.02, 0.05, T);
+        if (f.kind === 'door') {
+          f.box(-DOOR, DOOR, y + DH, y + H, -0.02, 0.05, T);
+          for (const sg of [-1, 1]) f.box(sg * DOOR - (sg > 0 ? 0 : 0.25), sg * DOOR + (sg > 0 ? 0.25 : 0), y, y + DH + 0.25, -0.02, 0.15, 'marble_smooth');
+          f.box(-DOOR - 0.25, DOOR + 0.25, y + DH, y + DH + 0.24, -0.02, 0.14, 'marble_smooth');
+        }
+      }
+      // the spandrels over the arch (cream), the band of letters inside it, the field, the medallion
+      const arc = archLine(w8, ah, y0, 12, false);
+      for (let i = 0; i + 1 < arc.length; i++) quad('tile_cream', p, f.F(arc[i][0], arc[i][1], 0.07), f.F(arc[i + 1][0], arc[i + 1][1], 0.07), f.F(arc[i + 1][0], y + H, 0.07), f.F(arc[i][0], y + H, 0.07));
+      const e0 = archLine(w8 - 0.24, ah - 0.15, y0 + 0.02), e1 = archLine(w8 - 1.5, ah - 0.95, y0 + 0.02);
+      for (let i = 0; i + 1 < e0.length; i++) quad(T, p, f.F(e0[i][0], e0[i][1], 0.08), f.F(e0[i + 1][0], e0[i + 1][1], 0.08), f.F(e1[i + 1][0], e1[i + 1][1], 0.08), f.F(e1[i][0], e1[i][1], 0.08));
+      letters(f, e0.slice(1, -1), e1.slice(1, -1), 0.095, p);
+      for (const e of [e0, e1]) for (let i = 1; i + 2 < e.length; i++) { const q0 = e[i], q1 = e[i + 1], L = Math.hypot(q1[0] - q0[0], q1[1] - q0[1]), nx = -(q1[1] - q0[1]) / L * 0.03, ny = (q1[0] - q0[0]) / L * 0.03; quad('tile_white', p, f.F(q0[0] - nx, q0[1] - ny, 0.09), f.F(q1[0] - nx, q1[1] - ny, 0.09), f.F(q1[0] + nx, q1[1] + ny, 0.09), f.F(q0[0] + nx, q0[1] + ny, 0.09)); }
+      // the field: notched round the door or the mihrab's frame
+      const fl = e1.slice(1, -1), fs = fl[0][0], fy = y0 + 0.02;
+      let outline = [[fs, fy], ...fl, [-fs, fy]];
+      if (gap) { const top = f.kind === 'door' ? y + DH + 0.3 : y + MFH; outline = [[fs, fy], ...fl, [-fs, fy], [gap + 0.02, fy], [gap + 0.02, top], [-gap - 0.02, top], [-gap - 0.02, fy]]; }
+      f.shape(outline.reverse(), 0.06, 0.012, 'tile_cream');
+      if (f.kind !== 'mihrab') {
+        const yc = y0 + ah * 0.47;
+        lozenge(f, 0, yc, 1.5, 2.4, 0.08, Q); lozenge(f, 0, yc, 1.32, 2.15, 0.09, T); lozenge(f, 0, yc, 0.55, 0.9, 0.1, 'tile_white'); lozenge(f, 0, yc, 0.22, 0.36, 0.11, 'glaze_yellow');
+        for (const [ds, dy] of [[0, 1.6], [0, -1.6], [0.8, 0], [-0.8, 0]]) flower(f, ds, yc + dy, 0.18, 0.1);
+        for (const sg of [-1, 1]) for (const dy of [-2.6, 2.6]) flower(f, sg * 1.7, yc + dy * 0.75, 0.16, 0.08);
+      }
+      // the cable round the arch, standing on the dado
+      cable(bag, archLine(w8 + 0.02, ah + 0.02, y0, 16).map(([s, yy]) => f.F(s, yy, 0.13)), 0.1, () => [mid[0] - f.F(0, 0, 0)[0], 0, mid[2] - f.F(0, 0, 0)[2]]);
+    } else {
+      // a corner: the arch across it on the diagonal, the squinch closing over the corner to its top, a band of letters along the arch
+      const arc = archLine(w8, ah, y0, 12, false), c0 = f.F(0, 0, 0), K = [cx + (c0[0] - cx) * Math.SQRT2, y + H, cz + (c0[2] - cz) * Math.SQRT2];
+      const P3 = arc.map(([s, yy]) => f.F(s, yy, 0)), lerp = (q, g) => [q[0] + (K[0] - q[0]) * g, q[1] + (K[1] - q[1]) * g, q[2] + (K[2] - q[2]) * g], BG = 0.11;
+      for (let i = 0; i + 1 < P3.length; i++) {
+        quad(T, p, P3[i], P3[i + 1], lerp(P3[i + 1], BG), lerp(P3[i], BG));
+        put('tile_cream', p, lerp(P3[i], BG), lerp(P3[i + 1], BG), K);
+        // the letters: strokes from the arch toward the corner, standing a little proud
+        const q = lerp(P3[i], 0.02), qe = lerp(P3[i], i % 4 === 2 ? 0.05 : 0.09), dx = (P3[i + 1][0] - P3[i][0]) * 0.12, dy = (P3[i + 1][1] - P3[i][1]) * 0.12, dz = (P3[i + 1][2] - P3[i][2]) * 0.12;
+        const pr = (v) => [v[0] + (mid[0] - v[0]) * 0.004, v[1] + (mid[1] - v[1]) * 0.004, v[2] + (mid[2] - v[2]) * 0.004];
+        quad('tile_white', p, pr([q[0] - dx, q[1] - dy, q[2] - dz]), pr([q[0] + dx, q[1] + dy, q[2] + dz]), pr([qe[0] + dx, qe[1] + dy, qe[2] + dz]), pr([qe[0] - dx, qe[1] - dy, qe[2] - dz]));
+      }
+      // ribs of turquoise over the squinch, from the band to the corner's top
+      for (const g of [0.1, 0.3, 0.5, 0.7, 0.9]) { const i = Math.round(g * (P3.length - 1)); bag.add(Q, rod(lerp(P3[i], BG), lerp(P3[i], 0.96), 0.045, 5)); }
+      cable(bag, archLine(w8 + 0.02, ah + 0.02, y0, 16, false).map(([s, yy]) => f.F(s, yy, 0.02)), 0.1, () => [mid[0] - c0[0], 0, mid[2] - c0[2]]);
+    }
+  }
+  // the mihrab: its frame of white-edged letters on blue, little flowers in the spandrels and over the niche's back
+  const fm = faces[2], pm = fm.F(0, y + 3, 4);
+  for (const [s0, s1, ya, yb] of [[-MF, -MF + 0.5, y, y + MFH], [MF - 0.5, MF, y, y + MFH], [-MF, MF, y + MFH - 0.5, y + MFH]]) {
+    for (const [p0, p1, q0, q1] of [[s0, s0 + 0.05, ya, yb], [s1 - 0.05, s1, ya, yb], [s0, s1, ya, ya + 0.05], [s0, s1, yb - 0.05, yb]]) fm.box(p0, p1, q0, q1, -0.02, 0.04, 'tile_white');
+    if (yb - ya > 2) letters(fm, [[s0 + 0.06, ya + 0.1], [s0 + 0.06, yb - 0.55]], [[s1 - 0.06, ya + 0.1], [s1 - 0.06, yb - 0.55]], 0.03, pm);
+    else letters(fm, [[s0 + 0.55, ya + 0.06], [s1 - 0.55, ya + 0.06]], [[s0 + 0.55, yb - 0.06], [s1 - 0.55, yb - 0.06]], 0.03, pm);
+  }
+  for (let s = -1.2; s <= 1.21; s += 0.3) for (let yy = y + MH + 0.42; yy < y + MFH - 0.6; yy += 0.3) flower(fm, s, yy, 0.09, 0.02);
+  { const spring = MH - Math.sqrt((MW * 0.8) ** 2 - (MW * 0.3) ** 2), wb = Math.min(MW * 0.46, MW - 0.4); for (let s = -wb / 2 + 0.15; s < wb / 2 - 0.1; s += 0.25) for (let yy = y + 0.35; yy < y + spring - 0.45; yy += 0.3) flower(fm, s, yy, 0.07, -(MO - 0.02)); }
+  cable(bag, archLine(MW + 0.3, MH + 0.25, y, 12).map(([s, yy]) => fm.F(s, yy, 0.08)), 0.07, () => [mid[0] - fm.F(0, 0, 0)[0], 0, mid[2] - fm.F(0, 0, 0)[2]]);
+  // ---- the ring at the crowns of the arches, the drum, the inner dome
+  const RD = a - 0.5, yD = y + H + 4, RI = RD;
+  bag.add('tile_cream', lathe([[RD, 0], [a * Math.SQRT2 + 0.1, 0]], 32, null, cx, y + H - 0.01, cz));
+  bag.add('tile_cream', lathe([[RD, 4.02], [RD, 0]], 48, null, cx, y + H - 0.01, cz));
+  bag.add(T, lathe([[RD - 0.03, 1.35], [RD - 0.03, 0.35]], 48, null, cx, y + H, cz));
+  {
+    const TL = [], n = Math.round(2 * Math.PI * RD / 0.26);
+    for (let k = 0; k < n; k++) {
+      const an = k / n * Math.PI * 2, tall = k % 5 !== 2 && k % 7 !== 3, x = cx + Math.cos(an) * (RD - 0.05), z = cz + Math.sin(an) * (RD - 0.05);
+      TL.push(...vbar(x, z, an, y + H + 0.5, tall ? 0.72 : 0.28, 0.06));
+      if (k % 3 === 0) { const g = []; beamTris(g, [x, y + H + 0.45, z], [x - Math.sin(an) * 0.22, y + H + 0.45, z + Math.cos(an) * 0.22], 0.05, 0.05); TL.push(...g); }
+    }
+    bag.add('tile_white', fromTriangles(TL));
+  }
+  cable(bag, Array.from({ length: 65 }, (_, k) => { const an = k / 64 * Math.PI * 2; return [cx + Math.cos(an) * (RD - 0.05), y + H + 0.12, cz + Math.sin(an) * (RD - 0.05)]; }), 0.1, (q) => [cx - q[0], 0, cz - q[2]]);
+  // sixteen windows: daylight behind grilles of white tile, framed in turquoise
+  for (let k = 0; k < 16; k++) {
+    const an = (k + 0.5) / 16 * Math.PI * 2, ca = Math.cos(an), sa = Math.sin(an), W2 = 0.5, wy0 = y + H + 1.6, wy1 = y + H + 3.6;
+    const at = (rr) => [cx + ca * rr, cz + sa * rr], tg = [-sa, ca];
+    const bx = (s0, s1, ya, yb, r0, r1, m) => { const c = at((r0 + r1) / 2), t = []; beamTris(t, [c[0] + tg[0] * s0, ya, c[1] + tg[1] * s0], [c[0] + tg[0] * s1, ya, c[1] + tg[1] * s1], (r1 - r0) / 2, yb - ya); bag.add(m, fromTriangles(t)); };
+    bx(-W2, W2, wy0, wy1, RD - 0.04, RD + 0.02, 'daylight');
+    for (const [s0, s1, ya, yb] of [[-W2 - 0.1, -W2, wy0, wy1 + 0.1], [W2, W2 + 0.1, wy0, wy1 + 0.1], [-W2 - 0.1, W2 + 0.1, wy0 - 0.1, wy0], [-W2 - 0.1, W2 + 0.1, wy1, wy1 + 0.1]]) bx(s0, s1, ya, yb, RD - 0.12, RD - 0.01, Q);
+    for (const s of [-0.25, 0, 0.25]) bx(s - 0.025, s + 0.025, wy0, wy1, RD - 0.1, RD - 0.05, 'tile_white');
+    for (let yy = wy0 + 0.33; yy < wy1 - 0.1; yy += 0.33) bx(-W2, W2, yy - 0.025, yy + 0.025, RD - 0.1, RD - 0.05, 'tile_white');
+  }
+  cable(bag, Array.from({ length: 65 }, (_, k) => { const an = k / 64 * Math.PI * 2; return [cx + Math.cos(an) * (RD - 0.06), yD, cz + Math.sin(an) * (RD - 0.06)]; }), 0.11, (q) => [cx - q[0], 0, cz - q[2]]);
+  // the inner dome: buff brick, the rings of lemon-shaped medallions, the sunburst
+  const prof = []; for (let i = 14; i >= 0; i--) { const ph = i / 14 * Math.PI / 2; prof.push([Math.max(0.001, RI * Math.cos(ph)), RI * Math.sin(ph)]); }
+  bag.add(B, lathe(prof, 48, null, cx, yD, cz));
+  const S3 = (th, ph, off) => [cx + Math.cos(th) * (RI - off) * Math.cos(ph), yD + (RI - off) * Math.sin(ph), cz + Math.sin(th) * (RI - off) * Math.cos(ph)], ctr = [cx, yD, cz];
+  const lemon = (th, ph, hw, hl, off, m) => {
+    const O = []; for (let k = 0; k < 16; k++) { const g = Math.cos(Math.PI * k / 8), side = k <= 8 ? 1 : -1, fw = Math.pow(Math.max(0, 1 - g * g), 1.2); O.push(S3(th + side * hw * fw, ph + hl * g, off)); }
+    const c = S3(th, ph, off); for (let k = 0; k < 16; k++) put(m, ctr, c, O[k], O[(k + 1) % 16]);
+  };
+  const N = 32, dT = Math.PI * 2 / N;
+  for (let j = 0, ph = 0.0; ; j++) {
+    const hw = 0.36 * dT, hl0 = 1.8 * hw * Math.cos(ph || 0.1);
+    if (j === 0) ph = 0.04 + hl0;
+    const hl = 1.8 * hw * Math.cos(ph);
+    if (RI * Math.cos(ph) < 2.7) break;
+    for (let i = 0; i < N; i++) {
+      const th = (i + (j % 2) * 0.5) * dT;
+      lemon(th, ph, hw, hl, 0.03, 'tile_white'); lemon(th, ph, hw * 0.86, hl * 0.86, 0.05, 'glaze_yellow');
+      lemon(th, ph, hw * 0.5, hl * 0.55, 0.07, T); lemon(th, ph, hw * 0.16, hl * 0.18, 0.09, Q);
+    }
+    ph += 1.1 * hl;
+  }
+  {
+    const ring = (r0, r1, off, m, n = 48, from = 0, step = 1, frac = 1) => { for (let k = from; k < n; k += step) { const t0 = k / n * Math.PI * 2, t1 = (k + frac) / n * Math.PI * 2, p0 = Math.acos(Math.min(1, r0 / RI)), p1 = Math.acos(Math.min(1, r1 / RI)); quad(m, ctr, S3(t0, p0, off), S3(t1, p0, off), S3(t1, p1, off), S3(t0, p1, off)); } };
+    ring(2.25, 2.6, 0.04, T); ring(2.2, 2.25, 0.05, 'tile_white'); ring(2.6, 2.65, 0.05, 'tile_white');
+    for (let k = 0; k < 24; k++) { const t0 = k / 24 * Math.PI * 2, tw = Math.PI * 2 / 24 * 0.42, p0 = Math.acos(1.0 / RI), p1 = Math.acos(2.2 / RI); put(k % 2 ? 'tile_white' : Q, ctr, S3(t0 - tw, p0, 0.05), S3(t0 + tw, p0, 0.05), S3(t0, p1, 0.05)); }
+    const cap = []; for (let i = 6; i >= 0; i--) { const ph = Math.acos(1.05 / RI) + (Math.PI / 2 - Math.acos(1.05 / RI)) * i / 6; cap.push([Math.max(0.001, (RI - 0.06) * Math.cos(ph)), (RI - 0.06) * Math.sin(ph)]); }
+    bag.add('glaze_yellow', lathe(cap, 24, null, cx, yD, cz));
+    ring(0.35, 0.9, 0.08, T, 8, 0, 1, 0.5);
+  }
+  for (const [m, t] of tris) bag.add(m, fromTriangles(t));
+  // ---- the floor, the passage from the portal's vestibule
+  const poly = (pts, y0p, y1p, m) => prism(bag, m, pts.map(([u, v]) => pt(u, v)), pts.map(([u, v]) => pt(u, v)), y0p, y1p);
+  poly([[-a, -a], [a, -a], [a, a], [-a, a]], y - 0.05, y + 0.04, 'marble_floor');
+  poly([[-1, -A - 1], [1, -A - 1], [1, -a], [-1, -a]], y - 0.05, y + 0.04, 'marble_floor');
+  const P = el.interior.passage;
+  if (P) {
+    const W = 2.6, o0 = A + 1, o1 = o0 + W, ow = o1 + 0.3, ch = 4.5, top = 5.5;
+    // the vestibule's east face in local terms: v where world x = P.x at a given u
+    const vx = (u) => (cx + u * Math.cos(rot) - P.x) / Math.sin(rot);
+    slab(bag, col, WM, pt(-ow, vx(-ow)), pt(-ow, -ow - 0.3), y, 0.6, top);             // the outer wall of the north-eastward leg
+    slab(bag, col, WM, pt(-ow - 0.3, -ow), pt(1.9, -ow), y, 0.6, top);                 // the outer wall of the south-eastward leg
+    slab(bag, col, WM, pt(1.9, -o0 + 0.1), pt(1.9, -ow - 0.3), y, 0.6, top);          // the end
+    poly([[-ow - 0.3, -ow - 0.3], [2.2, -ow - 0.3], [2.2, -o0 + 0.1], [-ow - 0.3, -o0 + 0.1]], y + ch, y + ch + 0.5, WM);
+    poly([[-ow - 0.3, -o0 + 0.1], [-o0 + 0.1, -o0 + 0.1], [-o0 + 0.1, vx(-o0 + 0.1)], [-ow - 0.3, vx(-ow - 0.3)]], y + ch, y + ch + 0.5, WM);
+    poly([[-o1, -o1], [1.6, -o1], [1.6, -o0], [-o1, -o0]], y - 0.05, y + 0.03, 'brick_paving');
+    poly([[-o1, -o0], [-o0, -o0], [-o0, vx(-o0)], [-o1, vx(-o1)]], y - 0.05, y + 0.03, 'brick_paving');
+    // the passage's lamps
+    for (const [u, v] of [[-(o0 + o1) / 2, -3], [-6, -(o0 + o1) / 2]]) { const q = pt(u, v); hangingLamp(bag, lights, q[0], y + 3.1, q[1], y + ch, 4, 9); }
+  }
 }
 
 /** A thin upright bar standing out of a round drum at angle a: w wide (along the drum), from y0 up by h. */

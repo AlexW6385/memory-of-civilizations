@@ -20,7 +20,7 @@ export const C = [0 + V[0] * (COURT.half + COURT.ring), 273 + V[1] * (COURT.half
 export const M = (u, v) => [C[0] + U[0] * u + V[0] * v, C[1] + U[1] * u + V[1] * v];
 export const toMosque = (x, z) => { const dx = x - C[0], dz = z - C[1]; return [dx * U[0] + dz * U[1], dx * V[0] + dz * V[1]]; };
 export const MOSQUE = { u: 48, v0: -48, v1: 72 };     // its footprint in (u, v)
-export const LOTF = { portal: [[80, -29], [80, -51]], c: [102, -32], half: 9.5 };
+export const LOTF = { portal: [[80, -29], [80, -51]], c: [103, -32], half: 10.5 };   // the chamber 19 m inside (Archnet)
 export const ALIQAPU = { rect: [-104, -50, -80, -30] };
 
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;

@@ -72,10 +72,18 @@ E.push({ t: 'dome_chamber', c: M(0, sv), half: 12.5, rot: Math.PI / 4, wallH: 24
 for (const s of [-1, 1]) E.push({ t: 'mass', a: M(s * 30.25, ch + ring), b: M(s * 30.25, ch + ring + 25), th: 35.5, h: 15 });
 
 // ---- the Sheikh Lotfollah Mosque: portal on the east side, the dome chamber turned behind it
-E.push({ t: 'portal', a: LOTF.portal[0], b: LOTF.portal[1], facing: mid, h: 20, depth: 10, iwan: { w: 9, h: 14, depth: 4 } });
-E.push({ t: 'mass', a: [91, -40], b: [97, -35], th: 8, h: 12 });
+// the portal's iwan opens by a door into a tall vestibule; from it the passage winds north-east and south-east round
+// the chamber to its door (the passage and the chamber are the dome_chamber's interior, docs/settlements/isfahan.md §13)
+E.push({ t: 'portal', a: LOTF.portal[0], b: LOTF.portal[1], facing: mid, h: 20, depth: 10, iwan: { w: 9, h: 14, depth: 4, pass: true, backMat: 'tile_lapis' } });
+const VX = 91.2;                                                       // the vestibule's east face (the portal's mass ends here)
+E.push({ t: 'mass', a: [VX + 0.3, -44.7], b: [VX + 0.3, -40.4], th: 0.6, h: 7.4 });
+E.push({ t: 'mass', a: [VX + 0.3, -40.6], b: [VX + 0.3, -35.3], y: 4.5, th: 0.6, h: 2.9 });
+E.push({ t: 'mass', a: [VX + 0.3, -44.7], b: [VX + 0.3, -35.3], y: 7.4, th: 0.6, h: 6.6 });
+E.push({ t: 'block', rect: [85.6, -44.7, VX, -35.3], y0: 7.0, y1: 7.4, mat: 'plaster_persian', collide: false });
+E.push({ t: 'lane', rect: [85.6, -44.7, VX, -35.3], y: 0.04, mat: 'brick_paving' });
 E.push({ t: 'dome_chamber', c: LOTF.c, half: LOTF.half, rot: Math.PI / 4, wallH: 14, drum: { r: 10, h: 4 }, dome: { r: 11, h: 10, bulge: 0 }, wallMat: 'brick_buff', drumMat: 'tile_lapis', domeMat: 'tile_cream',
-  inscription: true, grilles: true, net: { n: 16, turn: 3, width: 0.42, band: 'tile_lapis', line: 'tile_white', knot_mat: 'tile_turquoise', knot: 0.5 } });
+  inscription: true, grilles: true, net: { n: 16, turn: 3, width: 0.42, band: 'tile_lapis', line: 'tile_white', knot_mat: 'tile_turquoise', knot: 0.5 },
+  interior: { passage: { x: VX } } });
 
 // ---- Ali Qapu: the gate block (13 m) with its vaulted passage and the hall over it, the talar on 18
 // wooden columns on top, the tower behind (38 m) with the reception chamber, two storeys of rooms and
@@ -100,7 +108,7 @@ E.push({ t: 'water_rect', rect: [-236, -52, -206, -38], y: 0.5 });
 E.push({ t: 'lane', rect: [gx0 + 6, -50, gx1 - 1, -40], y: 0.04, mat: 'brick_paving' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('square', SQUARE, 0, 'open'), room('garden', GARDEN, 0, 'open'), room('talar', [-92, az0 + 1, ax1, az1 - 1], 13, 'hall'), room('music_room', [-102, -47, -94, -38], 32.5, 'hall'), room('bazaar', [-2.5, BAZAAR.z1, 2.5, BAZAAR.z0], 0, 'hall')];
+const rooms = [room('square', SQUARE, 0, 'open'), room('garden', GARDEN, 0, 'open'), room('talar', [-92, az0 + 1, ax1, az1 - 1], 13, 'hall'), room('music_room', [-102, -47, -94, -38], 32.5, 'hall'), room('bazaar', [-2.5, BAZAAR.z1, 2.5, BAZAAR.z0], 0, 'hall'), room('lotfollah', [LOTF.c[0] - 6.7, LOTF.c[1] - 6.7, LOTF.c[0] + 6.7, LOTF.c[1] + 6.7], 0, 'hall')];
 const walks = [[[0, -280], [0, -150], [0, 0], [0, 150], [0, 245]]];
 walks[0].y0 = 0;
 
