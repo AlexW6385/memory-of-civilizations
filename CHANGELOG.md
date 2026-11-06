@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.45 — Teotihuacan and Tenochtitlan, second pass (2026-11-06)
+- Teotihuacan's avenue rising plaza by plaza toward the Moon, the Palace of Quetzalpapalotl with its carved bird pillars and the Jaguars' patio murals, altars, censers and worshippers on the arrival plaza, the Great Goddess in the Moon Plaza; Tenochtitlan's House of the Eagles with its warrior benches and eagle warriors, the calmecac, the blue and ochre coatepantli serpent walls round the Templo Mayor, the precinct's enclosing platform, Ehecatl's round temple with its serpent-mouth door, the Temple of Tezcatlipoca, a causeway bridge.
+
 ## v9.44 — Barcelona's Nativity façade in 1910 (2026-11-06)
 - The Nativity façade's three parabolic portals with their sculpture (the Charity trumeau, star, Annunciation and Coronation; Hope and Faith scenes), palm columns on turtle and tortoise, four broken-off towers in timber scaffolding; trams on the Passeig de Gràcia and round the cut corners with overhead wires, closed cars and open jardineres; hackney carriages; the Eixample's court gardens; plane trees in rows.
 
