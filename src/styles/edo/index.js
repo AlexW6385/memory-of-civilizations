@@ -140,6 +140,20 @@ function tenshu(el, { bag, col }) {
   el.tiers.forEach((t, i) => {
     const rect = rects[i], last = i === el.tiers.length - 1;
     if (H) tierWindows(bag, rect, y, t.h);
+    // the stone-drop bays (ishi-otoshi) at the corners of the lowest storey: plastered boxes standing
+    // out of the wall, open below so that stones could be dropped on the foot of the base
+    if (i === 0 && el.ishiOtoshi) {
+      const [x0, z0, x1, z1] = rect, o = 0.7, w = 2.2, yb = y + 1.0, yt = y + t.h - 1.3;
+      for (const [bx0, bz0, bx1, bz1] of [[x0 + 0.5, z1, x0 + 0.5 + w, z1 + o], [x1 - 0.5 - w, z1, x1 - 0.5, z1 + o], [x0 + 0.5, z0 - o, x0 + 0.5 + w, z0], [x1 - 0.5 - w, z0 - o, x1 - 0.5, z0],
+        [x1, z0 + 0.5, x1 + o, z0 + 0.5 + w], [x1, z1 - 0.5 - w, x1 + o, z1 - 0.5], [x0 - o, z0 + 0.5, x0, z0 + 0.5 + w], [x0 - o, z1 - 0.5 - w, x0, z1 - 0.5]]) {
+        const ins = (a, b) => [Math.min(a, b), Math.max(a, b)];
+        bag.add(PL, box(bx0, yb, bz0, bx1, yt, bz1));
+        bag.add(TL, box(bx0 - 0.15, yt, bz0 - 0.15, bx1 + 0.15, yt + 0.18, bz1 + 0.15));
+        const sx = ins(bx0 + 0.15, bx1 - 0.15), sz = ins(bz0 + 0.15, bz1 - 0.15);
+        bag.add('lacquer_black', box(sx[0], yb - 0.03, sz[0], sx[1], yb + 0.02, sz[1]));
+        col.rect([bx0, bz0, bx1, bz1], yb, yt);
+      }
+    }
     if (H) hollowTier(bag, col, rect, y, t.h, i, { T, below: i ? rects[i - 1] : el.basementRect ?? rect, hole: stairs.find((s) => s.into === i)?.hole, keep: stairs.filter((s) => s.into === i || s.y0 === y).map((s) => s.hole), racks: i < 3 });
     else { tierBox(bag, col, rect, y, t.h); col.floor(rect, y); }
     const ov = last ? 1.6 : 1.9;
