@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.32 — A tavern and a joiner's workshop in Paris (2026-11-05)
+- The two timber houses nearest Paris' arrival are open on the ground floor (house_timber takes open and use; openTimber): a wide door in the stone front with its leaves open, a step, flags, the beams overhead. The tavern: trestle tables with benches, jugs and cups, the hearth with jambs, hood and pot, casks on a stand, a shelf of jugs. The joiner's workshop: the bench with its vice and shavings, a half-made chest, a trestle, planks stacked, tools on a rail, a tool chest, shavings on the floor. Dossier noted.
+
 ## v9.31 — Village houses to enter (2026-11-05)
 - The village houses of Tang Wutai, Nara, Heian Uji, Khajuraho, Sanchi and Conques can be entered: the three nearest each arrival are hollow (gabledHouse takes open; openGabled): walls with the door's way cut, the leaf open inside, a step, the floor and a ceiling of boards on beams, furnished by region — China: the kang with its mat and low table, the stove feeding it, glazed water jars, a chest; Japan: the raised board floor, the sunken hearth with its kettle on a hook, mats, a low table, a lacquered chest, a hanging shelf; India: the clay stove, water pots, two string beds, a clay grain bin; the Rouergue: the hearth and its pot, table and bench, chest, a bed of boards with straw. Dossiers noted.
 

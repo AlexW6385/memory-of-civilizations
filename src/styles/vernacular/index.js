@@ -191,6 +191,48 @@ function houseDomed(el, { bag, col }) {
 }
 
 /**
+ * The ground floor of an open Paris house (DESIGN §4.3): stone walls with a wide door in the middle
+ * of the front, a step, a floor of beaten earth and flags, the beams of the floor above; furnished by
+ * el.use — 'workshop' (a joiner's: the bench with a vice and shavings, planks stacked, tools on the
+ * wall, a trestle, a chest of tools, a half-made chest) or 'inn' (the tavern: trestle tables and
+ * benches, the hearth with its pot, casks on a stand, jugs on a shelf).
+ */
+function openTimber(bag, col, el, st, rand) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, f = el.front || 's', T = 0.45, fy = y + 0.25;
+  const along = f === 's' || f === 'n', L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
+  const P = (u, v) => (f === 's' ? [x1 - u, z1 - v] : f === 'n' ? [x0 + u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]);
+  const rect = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+  const B = (m, u0, v0, u1, v1, ya, yb, c = false) => { const r = rect(u0, v0, u1, v1); bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya - 0.3, yb); };
+  const pot = (m, u, v, r, h, ya = 0) => { const p = P(u, v); bag.add(m, lathe([[r * 0.6, 0], [r, h * 0.45], [r * 0.75, h * 0.85], [r * 0.55, h], [0.001, h]], 10, null, p[0], fy + ya, p[1])); };
+  const du = L / 2, dw = 1.6;
+  bag.add('limestone', box(x0 - 0.1, el.foot - 0.6, z0 - 0.1, x1 + 0.1, fy, z1 + 0.1)); col.rect([x0, z0, x1, z1], el.foot - 0.6, fy - 0.3);
+  B('limestone', 0, D - T, L, D, fy, y + st, true); B('limestone', 0, T, T, D - T, fy, y + st, true); B('limestone', L - T, T, L, D - T, fy, y + st, true);
+  B('limestone', 0, 0, du - dw / 2, T, fy, y + st, true); B('limestone', du + dw / 2, 0, L, T, fy, y + st, true); B('limestone', du - dw / 2, 0, du + dw / 2, T, fy + 2.4, y + st);
+  B('timber', du - dw / 2 - 0.1, -0.02, du + dw / 2 + 0.1, T + 0.02, fy + 2.4, fy + 2.6);
+  B('wood_dark', du - dw / 2 - 0.02, T, du - dw / 2 + 0.06, T + dw / 2, fy, fy + 2.35); B('wood_dark', du + dw / 2 - 0.06, T, du + dw / 2 + 0.02, T + dw / 2, fy, fy + 2.35);
+  { const r = rect(0, 0, L, D); col.floor(r, fy); col.rect(r, y + st - 0.1, y + st + 0.3); }
+  B('flagstone', T, T, L - T, D - T, fy - 0.12, fy + 0.012);
+  B('timber', T, T, L - T, D - T, y + st - 0.06, y + st - 0.02); for (let u = T + 0.5; u < L - T; u += 0.75) B('wood_dark', u - 0.09, T, u + 0.09, D - T, y + st - 0.28, y + st - 0.06);
+  if (el.use === 'inn') {
+    for (const v of [D * 0.35, D * 0.62]) { if (v > D - 1.6) continue; const u = L / 2 - 0.2; B('timber', u - 1.0, v - 0.35, u + 1.0, v + 0.35, fy + 0.74, fy + 0.8, true); for (const a of [-0.85, 0.8]) { B('wood_dark', u + a, v - 0.3, u + a + 0.06, v + 0.3, fy, fy + 0.74); } for (const sg of [-1, 1]) { B('timber', u - 1.0, v + sg * 0.6 - 0.12, u + 1.0, v + sg * 0.6 + 0.12, fy + 0.42, fy + 0.46, true); for (const a of [-0.9, 0.85]) B('wood_dark', u + a, v + sg * 0.6 - 0.1, u + a + 0.05, v + sg * 0.6 + 0.1, fy, fy + 0.42); } pot('terracotta', u - 0.4, v, 0.08, 0.26, 0.8); pot('pottery_dark', u + 0.3, v - 0.1, 0.06, 0.14, 0.8); }
+    B('limestone', L - T - 1.3, D - T - 0.7, L - T - 0.1, D - T, fy, fy + 0.35, true); pot('iron', L - T - 0.7, D - T - 0.35, 0.22, 0.28, 0.35); B('limestone', L - T - 1.4, D - T - 0.8, L - T, D - T, fy + 1.6, fy + 1.9); for (const sg of [-1, 1]) B('limestone', L - T - 0.7 + sg * 0.6 - 0.1, D - T - 0.7, L - T - 0.7 + sg * 0.6 + 0.1, D - T, fy + 0.35, fy + 1.6);
+    B('wood_dark', T + 0.1, D - T - 1.0, T + 0.9, D - T - 0.1, fy, fy + 0.5, true); for (let k = 0; k < 2; k++) { const p = P(T + 0.5, D - T - 0.75 + k * 0.0 + (k ? -0.0 : 0)); const g = lathe([[0.3, 0], [0.36, 0.4], [0.3, 0.8], [0.001, 0.8]], 12, null, 0, 0, 0); g.rotateZ(Math.PI / 2); g.translate(p[0] + (k ? 0 : 0), fy + 0.85 + k * 0.62, p[1]); bag.add('timber', g); }
+    B('wood_dark', T + 0.05, T + 0.8, T + 0.35, D - T - 1.4, fy + 1.5, fy + 1.54); for (let v = T + 1.0; v < D - T - 1.5; v += 0.35) pot(rand() < 0.5 ? 'terracotta' : 'pottery_dark', T + 0.2, v, 0.07, 0.24, 1.54);
+  } else {
+    // the joiner's bench along the side wall with its vice and shavings, a half-made chest, planks, tools on the wall
+    const bu = T + 0.4;
+    B('timber', bu - 0.35, T + 1.0, bu + 0.35, T + 3.0, fy + 0.8, fy + 0.9, true); for (const v of [T + 1.1, T + 2.85]) for (const a of [-0.3, 0.25]) B('wood_dark', bu + a, v, bu + a + 0.06, v + 0.06, fy, fy + 0.8);
+    B('wood_dark', bu - 0.4, T + 1.0, bu - 0.3, T + 1.2, fy + 0.6, fy + 1.0); for (let k = 0; k < 12; k++) { const a = bu - 0.2 + rand() * 0.37, b = T + 1.2 + rand() * 1.55; B('timber', a, b, a + 0.03 + rand() * 0.04, b + 0.03 + rand() * 0.05, fy + 0.9, fy + 0.915); }
+    for (let k = 0; k < 24; k++) { const a = T + 0.5 + rand() * 1.2, b = T + 1.0 + rand() * 2.2; B('timber', a, b, a + 0.03 + rand() * 0.05, b + 0.03 + rand() * 0.06, fy + 0.012, fy + 0.02); }
+    for (let k = 0; k < 6; k++) B('timber', L - T - 0.5, T + 0.6, L - T - 0.05, D - T - 0.8, fy + k * 0.05, fy + k * 0.05 + 0.04);
+    B('wood_dark', L / 2 - 0.45, D / 2 - 0.3, L / 2 + 0.45, D / 2 + 0.3, fy, fy + 0.5, true); B('timber', L / 2 - 0.45, D / 2 - 0.3, L / 2 - 0.3, D / 2 + 0.3, fy + 0.5, fy + 0.55);
+    for (const a of [-0.4, 0.4]) { B('timber', L / 2 + a - 0.05, D / 2 + 0.9, L / 2 + a + 0.05, D / 2 + 1.0, fy, fy + 0.6); } B('timber', L / 2 - 0.5, D / 2 + 0.88, L / 2 + 0.5, D / 2 + 1.02, fy + 0.6, fy + 0.68, true);
+    const wv = D - T - 0.03; B('wood_dark', T + 0.6, wv - 0.04, L - T - 0.6, wv, fy + 1.4, fy + 1.48); for (let u = T + 0.9; u < L - T - 0.8; u += 0.35) { B('timber', u - 0.02, wv - 0.06, u + 0.02, wv - 0.02, fy + 0.95, fy + 1.4); B('iron', u - 0.06, wv - 0.07, u + 0.06, wv - 0.03, fy + 0.95, fy + 1.05); }
+    B('wood_dark', T + 0.1, D - T - 0.8, T + 1.0, D - T - 0.15, fy, fy + 0.55, true);
+  }
+}
+
+/**
  * house_timber: a town house of medieval Paris — a stone ground floor, timber-framed upper
  * storeys jettied over the street, plastered between the timbers, a steep gabled roof whose gable
  * faces the street. { rect, y, foot, storeys, front, seed }
@@ -199,8 +241,9 @@ function houseTimber(el, { bag, col }) {
   const rand = rng(el.seed || 1);
   const [x0, z0, x1, z1] = el.rect, y = el.y, st = 3.0, H = el.storeys * st;
   const f = el.front || 's', along = f === 's' || f === 'n';
-  bag.add('limestone', box(x0 - 0.1, el.foot - 0.6, z0 - 0.1, x1 + 0.1, y + st, z1 + 0.1));
-  col.rect([x0, z0, x1, z1], el.foot - 0.6, y + H);
+  const OPEN = !!el.open && !el.simple;
+  if (!OPEN) { bag.add('limestone', box(x0 - 0.1, el.foot - 0.6, z0 - 0.1, x1 + 0.1, y + st, z1 + 0.1)); col.rect([x0, z0, x1, z1], el.foot - 0.6, y + H); }
+  else openTimber(bag, col, el, st, rng((el.seed || 1) + 3));
   // each upper storey steps out 0.4 m over the street
   let R = [x0, z0, x1, z1];
   for (let s = 1; s < el.storeys; s++) {
@@ -219,6 +262,7 @@ function houseTimber(el, { bag, col }) {
     if (f === 'w') bag.add('opening', box(R[0] - 0.03, y + v0, z0 + u, R[0], y + v0 + h, z0 + u + w));
   };
   const du = 0.6 + rand() * Math.max(0.2, L - 2.4);
+  if (OPEN) { /* the way in is cut in openTimber */ } else
   if (f === 's') bag.add('opening', box(x0 + du, y + 0.2, z1, x0 + du + 1.2, y + 2.5, z1 + 0.03));
   if (f === 'n') bag.add('opening', box(x0 + du, y + 0.2, z0 - 0.03, x0 + du + 1.2, y + 2.5, z0));
   if (f === 'e') bag.add('opening', box(x1, y + 0.2, z0 + du, x1 + 0.03, y + 2.5, z0 + du + 1.2));
