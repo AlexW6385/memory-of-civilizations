@@ -409,8 +409,8 @@ function roundWall(bag, col, a, b, y, h, th, rr, sill = null) {
   m.setPosition(a[0], y, a[1]);
   g.applyMatrix4(m);
   bag.add(PAL.plaster, g);
-  // the opening's rim of grey brick
-  bag.add(PAL.plinth, lathe([[rr + 0.08, -th / 2 - 0.01], [rr + 0.08, th / 2 + 0.01], [rr, th / 2 + 0.01], [rr, -th / 2 - 0.01]], 32, null, 0, 0, 0).applyMatrix4(new Matrix4().makeRotationX(Math.PI / 2)).applyMatrix4(new Matrix4().makeBasis({ x: ux, y: 0, z: uz }, { x: 0, y: 1, z: 0 }, { x: -uz, y: 0, z: ux }).setPosition(a[0] + ux * L / 2, y + cy, a[1] + uz * L / 2)));
+  // the opening's rim of dressed grey brick, lining the cut (a hair inside it) and standing proud of the plaster
+  bag.add(PAL.plinth, lathe([[rr + 0.12, -th / 2 - 0.025], [rr + 0.12, th / 2 + 0.025], [rr - 0.012, th / 2 + 0.025], [rr - 0.012, -th / 2 - 0.025]], 48, null, 0, 0, 0).applyMatrix4(new Matrix4().makeRotationX(Math.PI / 2)).applyMatrix4(new Matrix4().makeBasis({ x: ux, y: 0, z: uz }, { x: 0, y: 1, z: 0 }, { x: -uz, y: 0, z: ux }).setPosition(a[0] + ux * L / 2, y + cy, a[1] + uz * L / 2)));
   // collision: the wall either side of the opening (and above and below it)
   const gap = sill === null ? rr * 0.85 : 0;
   const s0 = L / 2 - gap, s1 = L / 2 + gap;
@@ -420,48 +420,216 @@ function roundWall(bag, col, a, b, y, h, th, rr, sill = null) {
 }
 
 /**
- * ming_wall: a garden wall { a, b, y, h (to the coping), th, gates: [{ at (along), r (moon gate) | w (door) }],
- * windows: [{ at, w, h, sill }] (latticed leaky windows) } with a tiled coping.
+ * The outline of a leaky window or a doorway in a wall's own plane, centred on (cu, cv), w wide and
+ * h high: 'rect', 'round', 'hex', 'oct', 'fan' (a folding fan's sector) or 'begonia' (the four-lobed
+ * crab-apple flower) — the frames of the Suzhou walls (docs/settlements/ming-suzhou.md §5).
+ */
+function outline(shape, cu, cv, w, h) {
+  const pts = [], hw = w / 2, hh = h / 2;
+  if (shape === 'round' || shape === 'begonia') {
+    const N = shape === 'round' ? 40 : 64;
+    for (let k = 0; k < N; k++) { const a = k / N * Math.PI * 2, r = shape === 'round' ? 1 : (0.86 + 0.14 * Math.abs(Math.cos(2 * a))) / 1.0; pts.push([cu + Math.cos(a) * hw * r, cv + Math.sin(a) * hh * r]); }
+  } else if (shape === 'hex' || shape === 'oct') {
+    const N = shape === 'hex' ? 6 : 8, a0 = shape === 'hex' ? 0 : Math.PI / 8, sc = shape === 'oct' ? 1 / Math.cos(Math.PI / 8) : 1;
+    for (let k = 0; k < N; k++) { const a = a0 + k / N * Math.PI * 2; pts.push([cu + Math.cos(a) * hw * sc, cv + Math.sin(a) * hh * (shape === 'hex' ? 1 / Math.sin(Math.PI / 3) : sc)]); }
+    for (const p of pts) { p[0] = cu + Math.max(-hw, Math.min(hw, p[0] - cu)); p[1] = cv + Math.max(-hh, Math.min(hh, p[1] - cv)); }
+  } else if (shape === 'fan') {
+    // a sector of 100 degrees, its point below: the outer arc at the top, the inner arc at 40 per cent
+    const span = 50 * Math.PI / 180, R = Math.min(hw / Math.sin(span), h / (1 - 0.4 * Math.cos(span))), oy = cv - hh + h - R;
+    for (let k = 0; k <= 16; k++) { const a = Math.PI / 2 - span + 2 * span * k / 16; pts.push([cu + Math.cos(a) * R, oy + Math.sin(a) * R]); }
+    for (let k = 16; k >= 0; k--) { const a = Math.PI / 2 - span + 2 * span * k / 16; pts.push([cu + Math.cos(a) * R * 0.4, oy + Math.sin(a) * R * 0.4]); }
+  } else pts.push([cu - hw, cv - hh], [cu + hw, cv - hh], [cu + hw, cv + hh], [cu - hw, cv + hh]);
+  return pts;
+}
+function inPoly(P, u, v) {
+  let c = false;
+  for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+    const [ui, vi] = P[i], [uj, vj] = P[j];
+    if ((vi > v) !== (vj > v) && u < (uj - ui) * (v - vi) / (vj - vi) + ui) c = !c;
+  }
+  return c;
+}
+/**
+ * The tracery of a leaky window: segments [[u0, v0], [u1, v1]] of one of the patterns the Yuan Ye
+ * and the gardens show (§5): 'lattice' (lozenges), 'coin' (interlocking circles of the copper
+ * coin), 'ice' (cracked ice: each crack ends on another), 'turtle' (hexagons of the tortoise shell),
+ * over the box [u0, v0, u1, v1].
+ */
+function tracery(pattern, [u0, v0, u1, v1], rand) {
+  const S = [], s = 0.2;
+  if (pattern === 'coin') {
+    const r = s / Math.SQRT2, N = 10;
+    for (let cu = u0 - s; cu < u1 + s; cu += s) for (let cv = v0 - s; cv < v1 + s; cv += s) for (let k = 0; k < N; k++) {
+      const a = k / N * Math.PI * 2, b = (k + 1) / N * Math.PI * 2;
+      S.push([[cu + Math.cos(a) * r, cv + Math.sin(a) * r], [cu + Math.cos(b) * r, cv + Math.sin(b) * r]]);
+    }
+  } else if (pattern === 'turtle') {
+    const r = s * 0.62, dx = r * 1.5, dy = r * Math.sqrt(3);
+    for (let i = Math.floor(u0 / dx) - 1; i * dx < u1 + dx; i++) for (let j = Math.floor(v0 / dy) - 1; j * dy < v1 + dy; j++) {
+      const cu = i * dx, cv = j * dy + (i & 1 ? dy / 2 : 0);
+      for (let k = 0; k < 3; k++) { const a = k * Math.PI / 3, b = (k + 1) * Math.PI / 3; S.push([[cu + Math.cos(a) * r, cv + Math.sin(a) * r], [cu + Math.cos(b) * r, cv + Math.sin(b) * r]]); }
+    }
+  } else if (pattern === 'ice') {
+    // split the box again and again along random lines through each piece
+    const split = (poly, depth) => {
+      let cu = 0, cv = 0; for (const p of poly) { cu += p[0]; cv += p[1]; } cu /= poly.length; cv /= poly.length;
+      const ext = Math.max(...poly.map((p) => Math.hypot(p[0] - cu, p[1] - cv)));
+      if (depth > 6 || ext < 0.17) return;
+      const a = rand() * Math.PI, du = Math.cos(a), dv = Math.sin(a), ou = cu + (rand() - 0.5) * ext * 0.5, ov = cv + (rand() - 0.5) * ext * 0.5;
+      const side = (p) => (p[0] - ou) * dv - (p[1] - ov) * du, A = [], B = [], cut = [];
+      for (let i = 0; i < poly.length; i++) {
+        const p = poly[i], q = poly[(i + 1) % poly.length], sp = side(p), sq = side(q);
+        (sp >= 0 ? A : B).push(p);
+        if ((sp >= 0) !== (sq >= 0)) { const t = sp / (sp - sq), x = [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]; A.push(x); B.push(x); cut.push(x); }
+      }
+      if (cut.length === 2) S.push(cut);
+      if (A.length > 2) split(A, depth + 1);
+      if (B.length > 2) split(B, depth + 1);
+    };
+    split([[u0, v0], [u1, v0], [u1, v1], [u0, v1]], 0);
+  } else {
+    // the lines u + v = 2c and u - v = 2e, at right angles, making lozenges
+    const d = s * 0.75, n = Math.ceil((u1 - u0 + v1 - v0) / d) + 2;
+    for (let k = -n; k <= n; k++) {
+      const c = (u0 + v0) / 2 + k * d, e = (u0 - v0) / 2 + k * d;
+      S.push([[2 * c - (v0 - 1), v0 - 1], [2 * c - (v1 + 1), v1 + 1]]);
+      S.push([[2 * e + (v0 - 1), v0 - 1], [2 * e + (v1 + 1), v1 + 1]]);
+    }
+  }
+  return S;
+}
+/** Clip segments to the inside of polygon P: the runs of each segment whose pieces lie inside. */
+function clipTo(S, P) {
+  const out = [];
+  for (const [p, q] of S) {
+    const L = Math.hypot(q[0] - p[0], q[1] - p[1]), n = Math.max(1, Math.ceil(L / 0.03));
+    let start = -1;
+    for (let k = 0; k <= n; k++) {
+      const inside = k < n && inPoly(P, p[0] + (q[0] - p[0]) * (k + 0.5) / n, p[1] + (q[1] - p[1]) * (k + 0.5) / n);
+      if (inside && start < 0) start = k;
+      if (!inside && start >= 0) { out.push([[p[0] + (q[0] - p[0]) * start / n, p[1] + (q[1] - p[1]) * start / n], [p[0] + (q[0] - p[0]) * k / n, p[1] + (q[1] - p[1]) * k / n]]); start = -1; }
+    }
+  }
+  return out;
+}
+/** A bar in a wall's plane from p to q ([u, v]), hw half its face, d its depth through the wall; W(u, v, o) maps to the world. */
+function wallBar(out, W, p, q, hw, d) {
+  const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1, pu = -(q[1] - p[1]) / L * hw, pv = (q[0] - p[0]) / L * hw;
+  const c = [];
+  for (const o of [-d / 2, d / 2]) for (const [bu, bv] of [p, q]) for (const sg of [-1, 1]) c.push(W(bu + pu * sg, bv + pv * sg, o));
+  // c: o-, p-, p+, q-, q+ ; o+ likewise (indices 0..3, 4..7)
+  const loc = [], f = (a, b, cc, dd) => loc.push(...c[a], ...c[b], ...c[cc], ...c[a], ...c[cc], ...c[dd]);
+  f(0, 1, 3, 2); f(4, 6, 7, 5); f(0, 2, 6, 4); f(1, 5, 7, 3); f(0, 4, 5, 1); f(2, 3, 7, 6);
+  for (const v of orientOutward(loc)) out.push(v);
+}
+/** A flat ring (a frame) between two outlines, extruded through the wall by depth, placed by the wall's matrix M. */
+function ringGeom(outer, inner, depth, M) {
+  const sh = new Shape(); sh.moveTo(...outer[0]); for (const p of outer.slice(1)) sh.lineTo(...p); sh.lineTo(...outer[0]);
+  const hp = new Path(); hp.moveTo(...inner[0]); for (const p of inner.slice(1)) hp.lineTo(...p); hp.lineTo(...inner[0]);
+  sh.holes.push(hp);
+  const g = new ExtrudeGeometry(sh, { depth, bevelEnabled: false, curveSegments: 4 });
+  g.translate(0, 0, -depth / 2);
+  return g.applyMatrix4(M);
+}
+
+/**
+ * ming_wall: a garden wall { a, b, y, h (to the coping), th, gates: [{ at (along), r (moon gate) | w, h (door), plaque }],
+ * windows: [{ at, w, h, sill, shape, pattern }] (leaky windows) } with a tiled coping. The openings
+ * are framed in dressed grey brick standing a little proud of the plaster; over a gate a framed brick
+ * plaque (men e) for its name; the leaky windows filled with tracery of tiles and brick, plastered
+ * grey (where the palette is the Jiangnan one; other palettes keep their wooden lattice).
  */
 function mingWall(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, y = el.y, h = el.h ?? 4.2, th = el.th ?? 0.4;
+  const nx = -uz, nz = ux, Wp = (u, v, o) => [ax + ux * u + nx * o, y + v, az + uz * u + nz * o];
+  const M = new Matrix4().makeBasis({ x: ux, y: 0, z: uz }, { x: 0, y: 1, z: 0 }, { x: -uz, y: 0, z: ux }).setPosition(ax, y, az);
   const shape = new Shape();
   shape.moveTo(0, 0); shape.lineTo(L, 0); shape.lineTo(L, h); shape.lineTo(0, h); shape.lineTo(0, 0);
-  const cuts = [];
+  const cuts = [], frames = [];
+  const pathOf = (pts) => { const p = new Path(); p.moveTo(...pts[pts.length - 1]); for (const q of pts) p.lineTo(...q); return p; };
+  const jiangnan = PAL.leaky === DEFAULT_PAL.leaky;
   for (const g of el.gates || []) {
-    const p = new Path();
-    if (g.r) { p.absarc(g.at, g.r + 0.05, g.r, 0, Math.PI * 2, true); cuts.push([g.at - g.r * 0.85, g.at + g.r * 0.85, 0, 2 * g.r * 0.95]); }
-    else { p.moveTo(g.at - g.w / 2, 0.02); p.lineTo(g.at - g.w / 2, g.h ?? 2.4); p.lineTo(g.at + g.w / 2, g.h ?? 2.4); p.lineTo(g.at + g.w / 2, 0.02); p.lineTo(g.at - g.w / 2, 0.02); cuts.push([g.at - g.w / 2, g.at + g.w / 2, 0, g.h ?? 2.4]); }
-    shape.holes.push(p);
+    if (g.r) {
+      const c = [g.at, g.r + 0.05], circ = (r, n = 48) => Array.from({ length: n }, (_, k) => [c[0] + Math.cos(k / n * Math.PI * 2) * r, c[1] + Math.sin(k / n * Math.PI * 2) * r]);
+      shape.holes.push(pathOf(circ(g.r))); cuts.push([g.at - g.r * 0.85, g.at + g.r * 0.85, 0, 2 * g.r * 0.95]);
+      // the frame: a ring of dressed brick, its inside lining the opening (a hair inside the plaster's cut)
+      frames.push([circ(g.r + 0.14), circ(g.r - 0.012)]);
+      if (g.plaque !== false) frames.push({ plaque: [g.at, 2 * g.r + 0.05 + 0.5, Math.min(1.6, g.r * 1.2), 0.46] });
+    } else {
+      const gh = g.h ?? 2.4, x0 = g.at - g.w / 2, x1 = g.at + g.w / 2;
+      shape.holes.push(pathOf([[x0, 0.02], [x1, 0.02], [x1, gh], [x0, gh]])); cuts.push([x0, x1, 0, gh]);
+      frames.push([[[x0 - 0.14, 0], [x1 + 0.14, 0], [x1 + 0.14, gh + 0.14], [x0 - 0.14, gh + 0.14]], [[x0 + 0.012, -0.01], [x1 - 0.012, -0.01], [x1 - 0.012, gh - 0.012], [x0 + 0.012, gh - 0.012]]]);
+      if (g.plaque) frames.push({ plaque: [g.at, gh + 0.55, Math.min(1.6, g.w * 0.8), 0.46] });
+    }
   }
   const lat = [];
   for (const w of el.windows || []) {
-    const p = new Path(), s = w.sill ?? 1.2;
-    p.moveTo(w.at - w.w / 2, s); p.lineTo(w.at - w.w / 2, s + w.h); p.lineTo(w.at + w.w / 2, s + w.h); p.lineTo(w.at + w.w / 2, s); p.lineTo(w.at - w.w / 2, s);
-    shape.holes.push(p);
-    lat.push(w);
+    const s = w.sill ?? 1.2, sh = jiangnan ? (w.shape || 'rect') : 'rect', cv = s + w.h / 2;
+    shape.holes.push(pathOf(outline(sh, w.at, cv, w.w, w.h)));
+    lat.push({ ...w, sh, cv });
+    if (jiangnan) frames.push([outline(sh, w.at, cv, w.w + 0.2, w.h + 0.2), outline(sh, w.at, cv, w.w - 0.024, w.h - 0.024)]);
   }
   const g = new ExtrudeGeometry(shape, { depth: th, bevelEnabled: false, curveSegments: 28 });
   g.translate(0, 0, -th / 2);
-  const M = new Matrix4().makeBasis({ x: ux, y: 0, z: uz }, { x: 0, y: 1, z: 0 }, { x: -uz, y: 0, z: ux }).setPosition(ax, y, az);
   g.applyMatrix4(M);
   bag.add(PAL.plaster, g);
-  // the leaky windows' lattice (ice-crack and coin patterns), a dark grey plinth along the foot
+  // the frames and plaques of dressed brick
+  if (jiangnan) {
+    const fr = [], pl = [];
+    for (const f of frames) {
+      if (!f.plaque) { fr.push(ringGeom(f[0], f[1], th + 0.05, M)); continue; }
+      // a plaque: a moulded border and the sunk field within it, proud of the plaster on both faces
+      const [cu, cv, pw, ph] = f.plaque, b = 0.08;
+      if (cv + ph / 2 + 0.1 > h) continue;
+      for (const sg of [-1, 1]) {
+        const o0 = sg * (th / 2 - 0.01), o1 = sg * (th / 2 + 0.05), o2 = sg * (th / 2 + 0.025);
+        const slab = (u0, v0, u1, v1, oa, ob) => { const t = []; const P = [Wp(u0, v0, oa), Wp(u1, v0, oa), Wp(u1, v1, oa), Wp(u0, v1, oa), Wp(u0, v0, ob), Wp(u1, v0, ob), Wp(u1, v1, ob), Wp(u0, v1, ob)]; const q = (a2, b2, c2, d2) => t.push(...P[a2], ...P[b2], ...P[c2], ...P[a2], ...P[c2], ...P[d2]); q(0, 1, 2, 3); q(4, 7, 6, 5); q(0, 4, 5, 1); q(1, 5, 6, 2); q(2, 6, 7, 3); q(3, 7, 4, 0); pl.push(...orientOutward(t)); };
+        slab(cu - pw / 2, cv - ph / 2, cu + pw / 2, cv - ph / 2 + b, o0, o1); slab(cu - pw / 2, cv + ph / 2 - b, cu + pw / 2, cv + ph / 2, o0, o1);
+        slab(cu - pw / 2, cv - ph / 2 + b, cu - pw / 2 + b, cv + ph / 2 - b, o0, o1); slab(cu + pw / 2 - b, cv - ph / 2 + b, cu + pw / 2, cv + ph / 2 - b, o0, o1);
+        slab(cu - pw / 2 + b, cv - ph / 2 + b, cu + pw / 2 - b, cv + ph / 2 - b, o0, o2);
+      }
+    }
+    for (const f of fr) bag.add(PAL.plinth, f);
+    if (pl.length) bag.add(PAL.plinth, fromTriangles(pl));
+  }
+  // the leaky windows' tracery (grey tiles and brick: lozenge, coin, cracked ice, tortoise shell),
+  // or another palette's lattice panel
   for (const w of lat) {
     const s = w.sill ?? 1.2, c = [ax + ux * w.at, az + uz * w.at];
+    if (!jiangnan) {
+      const t = [];
+      beamTris(t, [c[0] - ux * w.w / 2, y + s, c[1] - uz * w.w / 2], [c[0] + ux * w.w / 2, y + s, c[1] + uz * w.w / 2], 0.03, w.h);
+      bag.add(PAL.leaky, fromTriangles(t));
+      continue;
+    }
+    const rand = rng(Math.round(w.at * 97 + ax * 13 + az * 7) + 5);
+    const pats = ['lattice', 'coin', 'ice', 'turtle'];
+    const pat = w.pattern || pats[Math.abs(Math.round(w.at * 3.7 + ax + az)) % 4];
+    const inner = outline(w.sh, w.at, w.cv, w.w - 0.03, w.h - 0.03);
+    const segs = clipTo(tracery(pat, [w.at - w.w / 2, s, w.at + w.w / 2, s + w.h], rand), inner);
+    // a rim bar following the outline inside the frame, then the tracery
     const t = [];
-    beamTris(t, [c[0] - ux * w.w / 2, y + s, c[1] - uz * w.w / 2], [c[0] + ux * w.w / 2, y + s, c[1] + uz * w.w / 2], 0.03, w.h);
-    bag.add(PAL.leaky, fromTriangles(t));
+    for (let k = 0; k < inner.length; k++) wallBar(t, Wp, inner[k], inner[(k + 1) % inner.length], 0.022, 0.07);
+    for (const [p, q] of segs) wallBar(t, Wp, p, q, 0.018, 0.07);
+    bag.add(PAL.plinth, fromTriangles(t));
   }
   // the weathering, on both faces: the damp rising above the plinth in a ragged band, rain streaks under the coping
   if (PAL.plaster === 'plaster_white' && !el.clean) {
     const rand = rng(((ax * 73 + az * 31) | 0) + 11), damp = [], streak = [];
-    const clear = (s0, s1, ya, yb) => (el.gates || []).every((g) => { const hw = g.r ?? g.w / 2; return s1 < g.at - hw - 0.1 || s0 > g.at + hw + 0.1; }) && (el.windows || []).every((w) => s1 < w.at - w.w / 2 - 0.05 || s0 > w.at + w.w / 2 + 0.05 || yb < (w.sill ?? 1.2) || ya > (w.sill ?? 1.2) + w.h);
+    const clear = (s0, s1, ya, yb) => (el.gates || []).every((g2) => { const hw = (g2.r ?? g2.w / 2) + 0.15; return s1 < g2.at - hw - 0.1 || s0 > g2.at + hw + 0.1; }) && (el.windows || []).every((w) => s1 < w.at - w.w / 2 - 0.15 || s0 > w.at + w.w / 2 + 0.15 || yb < (w.sill ?? 1.2) - 0.12 || ya > (w.sill ?? 1.2) + w.h + 0.12);
+    const ph = [rand() * 6.3, rand() * 6.3, rand() * 6.3];
+    // the damp line: a smooth wandering height (three waves), cut into 0.25 m strips
+    const top = (s0) => 0.68 + 0.12 * Math.sin(s0 * 0.7 + ph[0]) + 0.07 * Math.sin(s0 * 2.9 + ph[1]) + 0.04 * Math.sin(s0 * 7.3 + ph[2]);
     for (const sgn of [-1, 1]) {
-      const o = th / 2 + 0.008, nx = -uz * sgn, nz = ux * sgn;
-      const quad = (arr, s0, s1, ya, yb) => { const p0 = [ax + ux * s0 + nx * o, az + uz * s0 + nz * o], p1 = [ax + ux * s1 + nx * o, az + uz * s1 + nz * o]; arr.push(p0[0], y + ya, p0[1], p1[0], y + ya, p1[1], p1[0], y + yb, p1[1], p0[0], y + ya, p0[1], p1[0], y + yb, p1[1], p0[0], y + yb, p0[1]); };
-      for (let s0 = 0.1; s0 < L - 0.2;) { const w = 0.6 + rand() * 1.8, s1 = Math.min(L - 0.1, s0 + w), top = 0.45 + rand() * 0.7; if (clear(s0, s1, 0.32, top)) quad(damp, s0, s1, 0.33, top); s0 = s1 + rand() * 0.6; }
-      for (let s0 = 0.3 + rand() * 2; s0 < L - 0.4; s0 += 1.2 + rand() * 3.5) { const w = 0.08 + rand() * 0.25, lo = Math.max(1.3, h - 0.05 - (0.3 + rand() * 1.4)); if (h - 0.06 - lo > 0.2 && clear(s0, s0 + w, lo, h)) quad(streak, s0, s0 + w, lo, h - 0.06); }
+      const o = (th / 2 + 0.008) * sgn;
+      const quad = (arr, s0, s1, ya0, yb0, ya1 = ya0, yb1 = yb0) => { arr.push(...Wp(s0, ya0, o), ...Wp(s1, ya1, o), ...Wp(s1, yb1, o), ...Wp(s0, ya0, o), ...Wp(s1, yb1, o), ...Wp(s0, yb0, o)); };
+      const step = 0.25;
+      for (let s0 = 0.1; s0 + step < L - 0.1; s0 += step) { const s1 = s0 + step; if (clear(s0, s1, 0.32, 1.3)) quad(damp, s0, s1, 0.33, top(s0 + sgn * 0.7), 0.33, top(s1 + sgn * 0.7)); }
+      // the streaks taper downward (a wedge from the coping)
+      for (let s0 = 0.3 + rand() * 2; s0 < L - 0.4; s0 += 1.2 + rand() * 3.5) {
+        const w = 0.05 + rand() * 0.12, lo = Math.max(1.3, h - 0.05 - (0.3 + rand() * 1.4));
+        if (h - 0.06 - lo > 0.2 && clear(s0, s0 + w, lo, h)) { const m = s0 + w / 2; streak.push(...Wp(m - w * 0.3, lo, o), ...Wp(s0 + w, h - 0.06, o), ...Wp(s0, h - 0.06, o), ...Wp(m - w * 0.3, lo, o), ...Wp(m + w * 0.3, lo, o), ...Wp(s0 + w, h - 0.06, o)); }
+      }
     }
     if (damp.length) bag.add('plaster_damp', fromTriangles(damp.concat(flipTris(damp))));
     if (streak.length) bag.add('plaster_streak', fromTriangles(streak.concat(flipTris(streak))));
@@ -472,8 +640,8 @@ function mingWall(el, { bag, col }) {
   // the coping: a little roof of black tiles on both sides of the wall's top
   const cp = [], o = th / 2 + 0.28;
   for (const sgn of [-1, 1]) {
-    const nx = -uz * sgn, nz = ux * sgn;
-    const e0 = [ax + nx * o, y + h - 0.05, az + nz * o], e1 = [bx + nx * o, y + h - 0.05, bz + nz * o];
+    const ex = -uz * sgn, ez = ux * sgn;
+    const e0 = [ax + ex * o, y + h - 0.05, az + ez * o], e1 = [bx + ex * o, y + h - 0.05, bz + ez * o];
     const r0 = [ax, y + h + 0.38, az], r1 = [bx, y + h + 0.38, bz];
     cp.push(...e0, ...e1, ...r1, ...e0, ...r1, ...r0);
   }
@@ -521,7 +689,7 @@ function mingGallery(el, { bag, col }) {
     // a bench rail on the open side, a white wall with windows on the other
     if (el.side) {
       const sg = el.side, A = [a[0] + nx * (w + 0.1) * sg, a[1] + nz * (w + 0.1) * sg], B = [b[0] + nx * (w + 0.1) * sg, b[1] + nz * (w + 0.1) * sg];
-      mingWall({ a: A, b: B, y, h: H - 0.2, th: 0.24, windows: L > 4 ? [{ at: L / 2, w: 1.0, h: 1.0, sill: 1.1 }] : [] }, { bag, col });
+      mingWall({ a: A, b: B, y, h: H - 0.2, th: 0.24, windows: L > 4 ? [{ at: L / 2, w: 1.0, h: 1.0, sill: 1.1, shape: ['rect', 'oct', 'round', 'hex', 'begonia', 'rect', 'fan'][i % 7] }] : [] }, { bag, col });
     }
     // the bench rail on the open side, broken every few bays where a path leaves the gallery
     const sg2 = el.side ? -el.side : 1;
