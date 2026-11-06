@@ -7,6 +7,8 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, rod } from '../../core/geom.js';
 import '../qing/index.js';
+import { dogesPalace } from './palace.js';
+import { horse, limb } from '../greek/sculpture.js';
 
 const M = 'marble', B = 'brick', L = 'lead', I = 'limestone';
 /** basilica: { c, s (arm length), w (arm width), h, y } — the Greek cross with its five domes, the west front. */
@@ -59,13 +61,21 @@ function basilica(el, { bag, col }) {
   }
   // the loggia over the narthex: a balustrade along the top of the lower storey, the four horses in the middle
   bag.add(M, B2(f[1], f[3], y + H * 0.7 - 0.3, y + H * 0.7, 0, 1.2));
-  for (let zz = f[1] + 0.3; zz < f[3]; zz += 0.5) bag.add(M, lathe([[0.1, 0], [0.16, 0.4], [0.08, 0.9]], 6, null, fx - 1.0, y + H * 0.7, zz));
+  const zm = (f[1] + f[3]) / 2, ht = 5.6;                                                 // the terrace of the horses: deeper in the middle
+  for (let zz = f[1] + 0.3; zz < f[3]; zz += 0.5) if (Math.abs(zz - zm) > ht) bag.add(M, lathe([[0.1, 0], [0.16, 0.4], [0.08, 0.9]], 6, null, fx - 1.0, y + H * 0.7, zz));
+  bag.add(M, B2(zm - ht, zm + ht, y + H * 0.7 - 0.45, y + H * 0.7, 1.2, 2.5));
+  for (let zz = zm - ht + 0.25; zz < zm + ht; zz += 0.5) bag.add(M, lathe([[0.1, 0], [0.16, 0.4], [0.08, 0.9]], 6, null, fx - 2.3, y + H * 0.7, zz));
+  bag.add(M, B2(zm - ht, zm + ht, y + H * 0.7 + 0.95, y + H * 0.7 + 1.1, 2.1, 2.5));
+  for (const sz of [-1, 1]) bag.add(M, B2(zm + sz * ht - 0.2, zm + sz * ht + 0.2, y + H * 0.7, y + H * 0.7 + 1.1, 0.8, 2.5));
   bag.add(M, B2(f[1], f[3], y + H * 0.7 + 0.95, y + H * 0.7 + 1.1, 0.8, 1.2));
-  for (const dz of [-3.6, -1.2, 1.2, 3.6]) {
+  // the four horses of gilt bronze on their pedestals, facing the Piazza, the outer pair turned toward the inner
+  for (const [dz, turn, lift] of [[-3.9, 0.22, 1], [-1.3, 0.08, 0], [1.3, -0.08, 1], [3.9, -0.22, 0]]) {
     const hz = (f[1] + f[3]) / 2 + dz, hy = y + H * 0.7 + 0.1;
-    bag.add('gilt_bronze', box(fx - 0.9, hy + 1.0, hz - 0.35, fx + 0.9, hy + 1.8, hz + 0.35));
-    for (const [lx, lz] of [[-0.7, -0.2], [-0.7, 0.2], [0.7, -0.2], [0.7, 0.2]]) bag.add('gilt_bronze', box(fx + lx - 0.08, hy, hz + lz - 0.08, fx + lx + 0.08, hy + 1.05, hz + lz + 0.08));
-    bag.add('gilt_bronze', box(fx - 1.4, hy + 1.6, hz - 0.18, fx - 0.7, hy + 2.6, hz + 0.18));
+    bag.add(M, box(fx - 2.05, hy - 0.1, hz - 0.6, fx - 0.15, hy + 0.55, hz + 0.6));
+    const hs = horse({ pose: 'stand', h: 1.65, mirror: true }).stone;
+    // one foreleg raised (each horse lifts one): the last two pieces of a front leg bent forward
+    if (lift) { hs.splice(hs.length - 8, 2, limb([-0.35 * 1.1, 1.0 * 1.1, 0.14], [-0.55 * 1.1, 0.72 * 1.1, 0.14], 0.085 * 1.1, 0.05 * 1.1, 6), limb([-0.55 * 1.1, 0.72 * 1.1, 0.14], [-0.5 * 1.1, 0.42 * 1.1, 0.14], 0.05 * 1.1, 0.035 * 1.1, 6)); }
+    for (const g of hs) { g.rotateY(turn); g.translate(fx - 1.1, hy + 0.55, hz); bag.add('gilt_bronze', g); }
   }
   // the five domes: drum with windows, the tall lead outer shell, the lantern and cross
   for (const [dx, dz, r] of [[0, 0, 7.5], [-S * 0.62, 0, 6.5], [S * 0.62, 0, 6.5], [0, -S * 0.55, 6.5], [0, S * 0.55, 6.5]]) {
@@ -87,24 +97,6 @@ function bellTower(el, { bag, col }) {
   bag.add(B, box(x - s / 2 + 0.5, y + sh + 11.5, z - s / 2 + 0.5, x + s / 2 - 0.5, y + sh + 19, z + s / 2 - 0.5));
   bag.add('tile_green', frustum([x - s / 2 + 0.5, z - s / 2 + 0.5, x + s / 2 - 0.5, z + s / 2 - 0.5], y + sh + 19, y + h - 2, s / 2 - 0.6, s / 2 - 0.6, s / 2 - 0.6, s / 2 - 0.6));
   bag.add('gilt_bronze', lathe([[0.4, 0], [0.3, 1.5], [0.001, 2.5]], 8, null, x, y + h - 2, z));
-}
-/** doges_palace: { rect, h, y } — the arcade on the ground, the loggia above, the diamond-patterned wall, the crenellation. */
-function dogesPalace(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 25, a1 = h * 0.29, a2 = h * 0.22;
-  const ring = [[x0, z0, x1, z0 + 9], [x0, z1 - 9, x1, z1], [x0, z0 + 9, x0 + 9, z1 - 9], [x1 - 9, z0 + 9, x1, z1 - 9]];
-  for (const r of ring) { bag.add('brick_buff', box(r[0] + 1.5, y - 0.5, r[1] + 1.5, r[2] - 1.5, y + a1 + a2, r[3] - 1.5)); col.rect([r[0] + 1.5, r[1] + 1.5, r[2] - 1.5, r[3] - 1.5], y, y + h); }
-  // the outer arcades on the two façades (south and west): columns at ground and loggia levels
-  for (const [a, b] of [[[x0, z1], [x1, z1]], [[x0, z0], [x0, z1]]]) {
-    const len = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / len, uz = (b[1] - a[1]) / len;
-    for (const [yy, hh, step, r] of [[y, a1, 5, 0.55], [y + a1 + 0.8, a2 - 0.8, 2.5, 0.3]]) { const n = Math.floor(len / step); for (let i = 0; i <= n; i++) { const px = a[0] + ux * len * i / n, pz = a[1] + uz * len * i / n; bag.add(M, lathe([[r, 0], [r * 0.9, hh - 0.5], [r * 1.4, hh]], 10, null, px, yy, pz)); if (yy === y) col.circle(px, pz, r, y, y + hh); } }
-    const t = 0.6, rr = [Math.min(a[0], b[0]) - t, Math.min(a[1], b[1]) - t, Math.max(a[0], b[0]) + t, Math.max(a[1], b[1]) + t];
-    bag.add(M, box(rr[0], y + a1, rr[1], rr[2], y + a1 + 0.8, rr[3]));
-  }
-  // the upper wall in pink and white over everything, its large pointed windows, the crenellation
-  bag.add('stucco_rose', box(x0 - 0.6, y + a1 + a2, z0 - 0.6, x1 + 0.6, y + h, z1 + 0.6)); col.floor([x0, z0, x1, z1], y + h);
-  for (const [a, b, f] of [[x0, x1, 's'], [z0, z1, 'w']]) { const n = Math.floor((b - a) / 9); for (let i = 0; i < n; i++) { const u = a + (i + 0.5) * (b - a) / n; const q = f === 's' ? [u - 1.4, z1 + 0.56, u + 1.4, z1 + 0.64] : [x0 - 0.64, u - 1.4, x0 - 0.56, u + 1.4]; bag.add('opening', box(q[0], y + a1 + a2 + 2.5, q[1], q[2], y + a1 + a2 + 7.5, q[3])); } }
-  bag.add(L, frustum([x0 - 0.8, z0 - 0.8, x1 + 0.8, z1 + 0.8], y + h, y + h + 4, 4, 4, 4, 4));
-  for (let x = x0; x < x1; x += 2.6) bag.add(M, box(x, y + h, z1 + 0.2, x + 1, y + h + 1.6, z1 + 0.6));
 }
 /** procuratie: { rect, h, y, front ('n'|'s'|'e'|'w') } — a long range over a ground-floor arcade. */
 function procuratie(el, { bag, col }) {
