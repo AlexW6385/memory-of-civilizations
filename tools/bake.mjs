@@ -5,7 +5,7 @@
 // in boxes round its indoor rooms. Output: data/gi/<plan id>.gi (format in src/engine/gi.js) and
 // its entry in data/gi/index.json (the geometry hash it was baked from, size, probes, time).
 //
-// usage: node tools/bake.mjs <settlement or plan id ...> [--spacing 1.0] [--rays 160] [--threads N]
+// usage: node tools/bake.mjs <settlement or plan id ...> [--spacing 1.0] [--rays 128] [--threads N]
 //        node tools/bake.mjs --status [ids...]   every landmark: current, stale, unbaked or none
 //        node tools/bake.mjs --stale             re-bake every stale bake
 //        node tools/bake.mjs --dry <ids...>      the boxes and probe counts only, nothing traced
@@ -356,7 +356,7 @@ if (isMainThread) {
   const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
   const valued = new Set(['--spacing', '--rays', '--threads']);
   const ids = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && valued.has(args[i - 1])));
-  const rays = +opt('rays', 160), spacing = args.includes('--spacing') ? +opt('spacing', 1) : null;
+  const rays = +opt('rays', 128), spacing = args.includes('--spacing') ? +opt('spacing', 1) : null;
   const threads = +opt('threads', Math.max(1, availableParallelism()));
   const gi = await import('./lib/gi-scene.mjs');
   if (args.includes('--status') || args.includes('--stale')) {

@@ -19,7 +19,7 @@ export const INDEX = `${ROOT}data/gi/index.json`;
 /** Bumped when the tracer or the box rules change in a way that should mark every bake stale. */
 export const BAKE_VERSION = 4;
 /** Probes per landmark (all its boxes): ~15 bytes each in the shipped file. */
-export const PROBE_BUDGET = 140000;
+export const PROBE_BUDGET = 80000;
 
 // light let through: coloured by stained glass; whole through the clear skins the viewer casts no
 // shadow from (glass, window openings, daylight planes, lamps); partly through paper lattices
@@ -161,7 +161,7 @@ const cat = (a, b) => { const o = new Float32Array(a.length + b.length); o.set(a
  * The whole scene of one landmark's bake: { site, plan, pos, alb, tr, lights, climate, grids, hash, tris }.
  * `null` grids (no indoor room) means there is nothing to bake.
  */
-export function bakeScene(site, plan, { rays = 160 } = {}) {
+export function bakeScene(site, plan, { rays = 128 } = {}) {
   const L = landmarkTriangles(plan);
   const bvh = bvhOf(L.pos);
   const boxes = roomBoxes(plan, bvh);
@@ -207,7 +207,7 @@ export function readIndex() {
  *   'orphan'   a bake file whose plan is gone
  * `onlyBaked` limits it to the landmarks that have a bake (fast: no room tracing for the rest).
  */
-export async function status({ ids = null, onlyBaked = false, rays = 160 } = {}) {
+export async function status({ ids = null, onlyBaked = false, rays = 128 } = {}) {
   const index = readIndex();
   const plans = ids ? await resolve(ids) : await landmarkPlans();
   const out = [];

@@ -1,0 +1,411 @@
+{
+ "angkor-wat": {
+  "site": "angkor",
+  "hash": "d00350b30b1aacad",
+  "rays": 160,
+  "probes": 7064,
+  "boxes": [
+   {
+    "min": [
+     20.5,
+     20.8,
+     -4.5
+    ],
+    "n": [
+     10,
+     44,
+     10
+    ],
+    "spacing": 1,
+    "rooms": [
+     "sanctuary"
+    ]
+   },
+   {
+    "min": [
+     -66.34,
+     1.5,
+     -20
+    ],
+    "n": [
+     37,
+     9,
+     8
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hall-of-echoes"
+    ]
+   }
+  ],
+  "bytes": 114085,
+  "seconds": 73,
+  "baked": "2026-11-06"
+ },
+ "byodo-in-phoenix-hall": {
+  "site": "heian-uji",
+  "hash": "644a951c00323958",
+  "rays": 160,
+  "probes": 5700,
+  "boxes": [
+   {
+    "min": [
+     -45.6,
+     0.6,
+     -7.1
+    ],
+    "n": [
+     15,
+     20,
+     19
+    ],
+    "spacing": 0.8,
+    "rooms": [
+     "hall"
+    ]
+   }
+  ],
+  "bytes": 101485,
+  "seconds": 76,
+  "baked": "2026-11-06"
+ },
+ "dome-of-the-rock": {
+  "site": "jerusalem",
+  "hash": "870953a86d796f50",
+  "rays": 160,
+  "probes": 2640,
+  "boxes": [
+   {
+    "min": [
+     -24.5,
+     17.5,
+     -25
+    ],
+    "n": [
+     15,
+     16,
+     11
+    ],
+    "spacing": 1,
+    "rooms": [
+     "outer-ambulatory",
+     "inner-ambulatory"
+    ]
+   }
+  ],
+  "bytes": 45225,
+  "seconds": 29,
+  "baked": "2026-11-06"
+ },
+ "edfu": {
+  "site": "edfu",
+  "hash": "ec481dab7d114aef",
+  "rays": 128,
+  "probes": 53352,
+  "boxes": [
+   {
+    "min": [
+     -19.2,
+     -0.05,
+     -68.2
+    ],
+    "n": [
+     39,
+     19,
+     72
+    ],
+    "spacing": 1,
+    "rooms": [
+     "pronaos",
+     "robing-room",
+     "library",
+     "hall-of-appearances",
+     "offering-hall",
+     "hall-of-the-ennead",
+     "stair-west",
+     "chapel-of-min",
+     "treasury",
+     "stair-east",
+     "linen-room",
+     "nile-room",
+     "sanctuary",
+     "corridor-w",
+     "chapel-of-khonsu",
+     "chapel-of-hathor",
+     "chapel-of-the-throne-of-re",
+     "corridor-e",
+     "chapel-of-the-spread-wings",
+     "chapel-of-the-throne-of-the-gods",
+     "chapel-of-horus-the-victor",
+     "corridor-n",
+     "chapel-of-osiris",
+     "tomb-of-osiris",
+     "chapel-of-the-west",
+     "laboratory",
+     "liquid-offerings"
+    ]
+   }
+  ],
+  "bytes": 872782,
+  "seconds": 637,
+  "baked": "2026-11-06"
+ },
+ "foguang-east-hall": {
+  "site": "tang-wutai",
+  "hash": "59a025083010967f",
+  "rays": 160,
+  "probes": 6336,
+  "boxes": [
+   {
+    "min": [
+     50,
+     13.5,
+     -16
+    ],
+    "n": [
+     8,
+     12,
+     33
+    ],
+    "spacing": 1,
+    "rooms": [
+     "front-aisle"
+    ]
+   },
+   {
+    "min": [
+     63.5,
+     13.5,
+     -16
+    ],
+    "n": [
+     8,
+     12,
+     33
+    ],
+    "spacing": 1,
+    "rooms": [
+     "rear-aisle"
+    ]
+   }
+  ],
+  "bytes": 115640,
+  "seconds": 46,
+  "baked": "2026-11-06"
+ },
+ "isfahan-maidan": {
+  "site": "isfahan",
+  "hash": "099f6197fac49923",
+  "rays": 160,
+  "probes": 37094,
+  "boxes": [
+   {
+    "min": [
+     -104,
+     12.5,
+     -51
+    ],
+    "n": [
+     27,
+     28,
+     23
+    ],
+    "spacing": 1,
+    "rooms": [
+     "talar",
+     "music_room"
+    ]
+   },
+   {
+    "min": [
+     -4.5,
+     -0.5,
+     -388
+    ],
+    "n": [
+     10,
+     11,
+     79
+    ],
+    "spacing": 1,
+    "rooms": [
+     "bazaar"
+    ]
+   },
+   {
+    "min": [
+     94.3,
+     -0.5,
+     -40.7
+    ],
+    "n": [
+     18,
+     34,
+     18
+    ],
+    "spacing": 1,
+    "rooms": [
+     "lotfollah"
+    ]
+   }
+  ],
+  "bytes": 620295,
+  "seconds": 564,
+  "baked": "2026-11-06"
+ },
+ "lhasa-potala": {
+  "site": "lhasa",
+  "hash": "29aab7996e9859a3",
+  "rays": 160,
+  "probes": 14877,
+  "boxes": [
+   {
+    "min": [
+     62,
+     83.5,
+     -92.5
+    ],
+    "n": [
+     29,
+     19,
+     27
+    ],
+    "spacing": 1,
+    "rooms": [
+     "great east hall"
+    ]
+   }
+  ],
+  "bytes": 166445,
+  "seconds": 83,
+  "baked": "2026-11-06"
+ },
+ "muscovy-dormition": {
+  "site": "muscovy",
+  "hash": "e351796c6108981c",
+  "rays": 160,
+  "probes": 36720,
+  "boxes": [
+   {
+    "min": [
+     -190.7,
+     5.65,
+     -10.7
+    ],
+    "n": [
+     34,
+     36,
+     30
+    ],
+    "spacing": 1,
+    "rooms": [
+     "nave"
+    ]
+   }
+  ],
+  "bytes": 612870,
+  "seconds": 623,
+  "baked": "2026-11-06"
+ },
+ "norse-borgund-church": {
+  "site": "norse-borgund",
+  "hash": "7acd7be3ac8f6354",
+  "rays": 160,
+  "probes": 6175,
+  "boxes": [
+   {
+    "min": [
+     -6.6,
+     1.3,
+     -36.1
+    ],
+    "n": [
+     19,
+     25,
+     13
+    ],
+    "spacing": 1,
+    "rooms": [
+     "nave",
+     "chancel"
+    ]
+   }
+  ],
+  "bytes": 98231,
+  "seconds": 27,
+  "baked": "2026-11-06"
+ },
+ "parthenon": {
+  "site": "athens",
+  "hash": "abd5caaf47819a90",
+  "rays": 160,
+  "probes": 23040,
+  "boxes": [
+   {
+    "min": [
+     -5.8,
+     71.76,
+     6.6
+    ],
+    "n": [
+     48,
+     20,
+     24
+    ],
+    "spacing": 1,
+    "rooms": [
+     "naos",
+     "naos-aisles",
+     "west-room"
+    ]
+   }
+  ],
+  "bytes": 375996,
+  "seconds": 198,
+  "baked": "2026-11-06"
+ },
+ "sainte-chapelle": {
+  "site": "paris",
+  "hash": "5404af11cff5a464",
+  "rays": 160,
+  "probes": 16158,
+  "boxes": [
+   {
+    "min": [
+     -198,
+     0.65,
+     -15
+    ],
+    "n": [
+     27,
+     46,
+     11
+    ],
+    "spacing": 1,
+    "rooms": [
+     "lower-chapel",
+     "upper-chapel"
+    ]
+   },
+   {
+    "min": [
+     -206.4,
+     8.1,
+     -44
+    ],
+    "n": [
+     8,
+     12,
+     26
+    ],
+    "spacing": 1,
+    "rooms": [
+     "kings-gallery"
+    ]
+   }
+  ],
+  "bytes": 265845,
+  "seconds": 204,
+  "baked": "2026-11-06"
+ }
+}
