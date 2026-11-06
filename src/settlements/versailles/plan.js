@@ -1,5 +1,5 @@
 // Versailles about 1690 (docs/settlements/versailles.md §2–§4).
-import { RADIUS, CHATEAU, LOGIS, WINGS, PARTERRE, LATONA, APOLLO, CANAL, RISE } from './layout.js';
+import { RADIUS, CHATEAU, LOGIS, WINGS, PARTERRE, LATONA, LATONA_Y, APOLLO, CANAL, RISE } from './layout.js';
 
 const y = RISE;
 export const chateau = {
@@ -19,7 +19,7 @@ export const chateau = {
     { t: 'range', rect: [92, -64, 150, -42], h: 15, y, brick: true, roof: 'slate', front: 's' },
     { t: 'range', rect: [92, 42, 150, 64], h: 15, y, brick: true, roof: 'slate', front: 'n' },
     { t: 'parterre', rect: PARTERRE, y, water: true },
-    { t: 'fountain', c: LATONA, r: 14, y: 0.6, kind: 'latona' },
+    { t: 'fountain', c: LATONA, r: 14, y: LATONA_Y, kind: 'latona' },
     { t: 'fountain', c: APOLLO, r: 18, y: 0, kind: 'apollo', dir: [1, 0] },
   ],
   rooms: [{ id: 'parterre', rect: PARTERRE, y, kind: 'open' }],

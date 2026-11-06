@@ -4,7 +4,7 @@
 // under steep slate roofs; parterres of clipped box; basins and fountains; the town's houses.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, frustum, lathe } from '../../core/geom.js';
+import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { gardenFront } from './front.js';
 
@@ -100,18 +100,52 @@ function fountain(el, ctx) {
   bag.add(S, lathe([[r + 0.8, -0.4], [r + 0.8, 0.5], [r, 0.5], [r, -0.5], [0.001, -0.5]], 28, null, x, y, z));
   STYLES.qing.elements.water_cells({ rect: [x - r, z - r, x + r, z + r], y: y + 0.2, cell: 0.8, inside: (a, b) => Math.hypot(a - x, b - z) < r - 0.2 }, ctx);
   if (el.kind === 'latona') {
-    // four tiers of marble, each ring a step higher and smaller, frogs and turtles (bronze) on their rims
+    // four tiers of red-veined marble stepping up (Hardouin-Mansart's pyramid, 1687–89); on their rims the Lycian
+    // peasants turned into frogs, and turtles on the lowest, all of gilded lead, spouting at the goddess; at the top
+    // Latona with her children Apollo and Diana, by the Marsy brothers, turned to face the Grand Canal (west)
+    const crit = (cx, cz, yy, a, kind) => {
+      // a frog (or turtle) on the rim, facing the centre: the body crouched, the head raised, the legs folded
+      const fx = -Math.cos(a), fz = -Math.sin(a), turtle = kind === 'turtle';
+      const body = lathe(turtle ? [[0.001, 0], [0.34, 0.03], [0.32, 0.12], [0.2, 0.2], [0.001, 0.22]] : [[0.001, 0], [0.18, 0.04], [0.22, 0.16], [0.16, 0.3], [0.001, 0.34]], 10, null, 0, 0, 0);
+      if (!turtle) { body.scale(1, 0.9, 1.25); body.rotateX(-0.5); }
+      body.rotateY(Math.atan2(fx, fz)); body.translate(cx, yy, cz); bag.add('gilt_bronze', body);
+      bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0.03], [0.11, 0.1], [0.06, 0.16], [0.001, 0.17]], 8, null, cx + fx * (turtle ? 0.36 : 0.22), yy + (turtle ? 0.03 : 0.25), cz + fz * (turtle ? 0.36 : 0.22)));
+      if (!turtle) for (const sd of [-1, 1]) bag.add('gilt_bronze', lathe([[0.07, 0], [0.06, 0.12], [0.001, 0.14]], 6, null, cx - fz * sd * 0.19 - fx * 0.05, yy, cz + fx * sd * 0.19 - fz * 0.05));
+      // the jet: an arc of water from the mouth, rising and falling toward the goddess
+      const m0 = [cx + fx * 0.32, yy + (turtle ? 0.12 : 0.36), cz + fz * 0.32], reach = turtle ? 2.2 : 1.6, peak = turtle ? 1.4 : 1.1, jet = [];
+      for (let k = 0; k < 7; k++) {
+        const t0 = k / 7, t1 = (k + 1) / 7, P0 = [m0[0] + fx * reach * t0, m0[1] + 4 * peak * t0 * (1 - t0) - 0.6 * t0, m0[2] + fz * reach * t0], P1 = [m0[0] + fx * reach * t1, m0[1] + 4 * peak * t1 * (1 - t1) - 0.6 * t1, m0[2] + fz * reach * t1];
+        const dx = P1[0] - P0[0], dy = P1[1] - P0[1], dz = P1[2] - P0[2], len = Math.hypot(dx, dy, dz), g = lathe([[0.035, 0], [0.03, len]], 5, null, 0, 0, 0);
+        g.rotateX(Math.acos(dy / len)); g.rotateY(Math.atan2(dx, dz)); g.translate(...P0); jet.push(g);
+      }
+      for (const g of jet) bag.add('water', g);
+    };
     for (let t = 0; t < 4; t++) {
       const rt = r * (0.62 - t * 0.13), yt = y + 0.2 + t * 0.75;
-      bag.add('marble', lathe([[rt + 0.3, 0], [rt + 0.3, 0.75], [rt, 0.85], [0.001, 0.85]], 32, null, x, yt, z));
+      bag.add('marble', lathe([[rt + 0.3, 0], [rt + 0.3, 0.68], [rt + 0.38, 0.75], [rt + 0.38, 0.8], [rt, 0.85], [0.001, 0.85]], 40, null, x, yt, z));
       const n = Math.round(rt * 2.2);
-      for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; bag.add('bronze', lathe([[0.001, 0], [0.22, 0.05], [0.2, 0.22], [0.001, 0.3]], 6, null, x + Math.cos(a) * (rt + 0.1), yt + 0.85, z + Math.sin(a) * (rt + 0.1))); }
+      for (let i = 0; i < n; i++) { const a = (i + (t % 2) * 0.5) / n * Math.PI * 2; crit(x + Math.cos(a) * (rt + 0.05), z + Math.sin(a) * (rt + 0.05), yt + 0.85, a, t === 0 ? 'turtle' : 'frog'); }
     }
+    // frogs in the water of the basin round the pyramid, spouting inward
+    for (let i = 0; i < 24; i++) { const a = (i + 0.5) / 24 * Math.PI * 2, rr = r - 1.4; crit(x + Math.cos(a) * rr, z + Math.sin(a) * rr, y + 0.12, a, 'frog'); }
     const yt = y + 0.2 + 4 * 0.75 + 0.1;
-    bag.add('marble', lathe([[0.9, 0], [0.8, 0.9], [1.0, 1.05], [0.001, 1.05]], 12, null, x, yt, z));
-    bag.add('marble', lathe([[0.001, 0], [0.42, 0.1], [0.36, 0.9], [0.22, 1.25], [0.001, 1.65]], 10, null, x, yt + 1.05, z));
-    bag.add('marble', lathe([[0.001, 0], [0.13, 0.05], [0.13, 0.22], [0.001, 0.27]], 8, null, x, yt + 2.7, z));
-    for (const s of [-1, 1]) bag.add('marble', lathe([[0.001, 0], [0.18, 0.1], [0.14, 0.6], [0.001, 0.8]], 8, null, x + s * 0.45, yt + 1.05, z + 0.3));
+    bag.add('marble', lathe([[1.1, 0], [1.1, 0.2], [0.85, 0.35], [0.8, 0.85], [1.05, 1.0], [1.05, 1.1], [0.001, 1.1]], 16, null, x, yt, z));
+    // the rock under the group, Latona standing and looking up, a hand raised to Jupiter, the two children at her knees
+    const yg = yt + 1.1, M = 'marble_smooth';
+    bag.add(M, lathe([[0.85, 0], [0.7, 0.25], [0.4, 0.35], [0.001, 0.36]], 9, (th) => 1 + 0.12 * Math.cos(5 * th), x, yg, z));
+    bag.add(M, lathe([[0.42, 0], [0.38, 0.2], [0.28, 0.95], [0.26, 1.25], [0.31, 1.52], [0.18, 1.66], [0.001, 1.68]], 12, (th, i) => (i > 0 && i < 4 ? 1 + 0.08 * Math.cos(8 * th) : 1), x, yg + 0.3, z));
+    bag.add(M, lathe([[0.001, 0], [0.12, 0.04], [0.13, 0.18], [0.08, 0.27], [0.001, 0.29]], 8, null, x - 0.03, yg + 1.98, z));
+    { const arm = [], s0 = [x - 0.05, yg + 1.78, z - 0.24], s1 = [x - 0.35, yg + 2.55, z - 0.4];
+      const sq = (p, w) => [[p[0] - w, p[1], p[2] - w], [p[0] + w, p[1], p[2] - w], [p[0] + w, p[1], p[2] + w], [p[0] - w, p[1], p[2] + w]];
+      const tr = [], q = (A, B2, C, D) => tr.push(...A, ...B2, ...C, ...A, ...C, ...D), b0 = sq(s0, 0.065), b1 = sq(s1, 0.05);
+      q(b0[0], b0[1], b0[2], b0[3]); q(b1[0], b1[3], b1[2], b1[1]); for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; q(b0[i], b1[i], b1[j], b0[j]); }
+      arm.push(...tr); bag.add(M, fromTriangles(orientOutward(arm))); }
+    // a fold of drapery blowing back; Apollo and Diana as children clinging at either side
+    bag.add(M, lathe([[0.2, 0], [0.32, 0.5], [0.001, 0.9]], 6, null, x + 0.32, yg + 0.5, z + 0.1));
+    for (const sd of [-1, 1]) {
+      bag.add(M, lathe([[0.18, 0], [0.16, 0.35], [0.11, 0.62], [0.001, 0.64]], 8, null, x - 0.2, yg + 0.3, z + sd * 0.48));
+      bag.add(M, lathe([[0.001, 0], [0.09, 0.03], [0.1, 0.13], [0.06, 0.2], [0.001, 0.21]], 8, null, x - 0.2, yg + 0.92, z + sd * 0.48));
+    }
   } else if (el.kind === 'apollo') {
     const d = el.dir ?? [1, 0], u = [-d[1], d[0]], P = (a, b) => [x + d[0] * a + u[0] * b, z + d[1] * a + u[1] * b];
     // the chariot, the god standing in it, four horses plunging forward, tritons blowing at the sides
