@@ -1,7 +1,7 @@
 # Sailendra Java (Borobudur), c. 825 — dossier
 
 Settlement id: `borobudur` · Style: `javanese` · Region: Java (the Kedu plain) · Code: `src/settlements/borobudur/`
-Status of this dossier: L1–L2 (Borobudur at true size — the base, five square terraces with their galleries, balustrades, niches and small stupas, the stairs on the four sides, the three circular terraces with 72 latticed stupas, the crowning stupa; the hill it encloses; a monastery compound of timber halls; villages of houses on posts among palms, bamboo and fields; ground, planting, weather, music). L3 recorded for later: the 2,672 relief panels and the 504 Buddhas, the kala gateways, the drainage spouts, Mendut and Pawon, the volcanoes and rivers, people and processions.
+Status of this dossier: L2 (Borobudur at true size — the base, five square terraces with their galleries, balustrades, niches and small stupas, the stairs on the four sides, the three circular terraces with 72 latticed stupas, the crowning stupa; the hill it encloses; a monastery compound of timber halls; villages of houses on posts among palms, bamboo and fields; ground, planting, weather, music). Detail of §10: the pierced stupas with their Buddhas, the crowning stupa's finial, the kala–makara gateways, the makara spouts, pilgrims on the galleries. L3 recorded for later: the 2,672 relief panels told one by one, the 32 lions at the gates, Mendut and Pawon, the volcanoes and rivers, processions.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -52,6 +52,16 @@ Tropical: morning mist, bright midday, afternoon cloud and showers. Latitude 7.6
 
 Bronze gongs and metallophones in an interlocking pattern, a bamboo flute (a plucked string, the ney and a reed organ stand in), slendro-like pentatonic. [inferred]
 
+## 10. Detail (L2)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Pierced stupas | 72 stupas, 32, 24 and 16 on the three round terraces, each on a double lotus cushion; the bell's middle an open stone lattice — diamond holes in staggered rows on the two lower terraces, square holes on the top one — with a solid band below and a solid crown above, the inside surface and the holes' sides built so that the lattice has its thickness; inside, seen through the holes, the Buddha seated on his lotus; a harmika and an octagonal spire on top | 32/24/16; the bottom two tiers with rhombus openings, the top tier "slightly smaller" with square openings; a Buddha in each behind the openwork [stated: arisguide]; the double lotus cushion, square harmika below and octagonal on the top terrace, the number of rows and holes [inferred from photographs] |
+| Crowning stupa | Solid, on a double lotus cushion with a moulded band round its foot; a square harmika in three steps; an octagonal shaft (yasti) carrying three parasols (chattra), the top 42 m above the ground | the main stupa "plain without any holes", about 35 m high, 42 m originally with the three-tiered chattra [stated: arisguide]; Van Erp's reconstruction of a tiered pinnacle with parasols from octagonal fragments, later dismantled as too uncertain [stated: Buddhistdoor] — we show it, the monument being new c. 825 [inferred] |
+| Kala–makara gateways | Where each stair passes a balustrade, a gateway: jambs on moulded feet, a corbelled arch stepping in three times over the passage, the mass above it with the kala's face (brow, bulging eyes, broad nose, upper jaw and fangs, no lower jaw) on both faces, on the outer face makaras turned outward from the jambs with their trunks curled up, three small stupas on top | stairs in the middle of each side climbing through arched gates, each with a kala head at the top and makaras projecting from both sides [stated: arisguide; skylineaparthistory]; the gateways' place at the balustrades and the forms [inferred] |
+| Spouts | A makara spout at each outer corner of the base and of each square terrace, below the balustrade: a channel block, brow, hanging jaw, eyes and rising snout, pointing out along the corner's bisector | 100 spouts in the form of makaras at the corners of the tiers, draining the galleries [stated: arisguide; skylineaparthistory]; ours one per outer corner (72) [inferred] |
+| Pilgrims | Monks in ochre and red robes and lay pilgrims in wraps, some carrying offerings, walking each gallery clockwise (the monument on their right), now and then in pairs | pilgrims walk the path round the monument and climb terrace by terrace past the reliefs [stated: skylineaparthistory]; the clockwise circumambulation and the dress [inferred] |
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)
@@ -61,3 +71,5 @@ Bronze gongs and metallophones in an interlocking pattern, a bamboo flute (a plu
 - [Borobudur — molon.de](https://molon.de/galleries/Indonesia/Java/Borobudur/)
 - [Temples of the Borobudur region — architectureofbuddhism](https://architectureofbuddhism.com/books/temples-borobudur-region-travel-diary-day-two)
 - [Borobudur — Bananas for Scale](https://sean-reid.github.io/bananas-for-scale/thing/borobudur-temple/)
+- [Architecture of Borobudur — arisguide](https://arisguide.blogspot.com/2023/01/architecture.html)
+- [Borobudur's chattra — Buddhistdoor Global](https://www.buddhistdoor.net/?p=51012)
