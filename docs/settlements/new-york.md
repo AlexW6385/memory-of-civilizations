@@ -1,7 +1,7 @@
 # Modern New York (Midtown Manhattan), 1931 — dossier
 
 Settlement id: `new-york` · Style: `artdeco` · Region: the US Northeast · Code: `src/settlements/new-york/`
-Status of this dossier: L1–L2. Built: the Empire State Building at true height, with its plan close to true (the five-storey base, the setbacks, the shaft with chrome-nickel piers, the 86th-floor observatory, the mooring mast to 381 m); the Chrysler Building (base, tower, radiator caps, eagles, seven-tier stainless crown with windows, spire to 319 m); the Chanin and Lincoln Buildings; Grand Central's 42nd Street front with its three arched windows; the Public Library's columned front on Fifth and Bryant Park; Broadway's diagonal through Herald Square; the Sixth Avenue El; ~800 buildings on the grid (lofts in the garment district, brownstones in Murray Hill, towers near 42nd, water tanks on the roofs); a window-grid façade material; ground, planting, weather, music. Recorded for L3, later: the grid's true 29° bearing and the real block sizes; Macy's and Herald Square; the Park Avenue viaduct and the New York Central Building; the Third Avenue El; traffic, streetcars and people; Grand Central's concourse; the ESB lobby. Built since: the Chrysler crown's terraced arches, eagles and radiator caps, braced water tanks, fire escapes, traffic with cabs, people and lamp posts.
+Status of this dossier: L1–L2. Built: the Empire State Building at true height, with its plan close to true (the five-storey base, the setbacks, the shaft with chrome-nickel piers, the 86th-floor observatory, the mooring mast to 381 m); the Chrysler Building (base, tower, radiator caps, eagles, seven-tier stainless crown with windows, spire to 319 m); the Chanin and Lincoln Buildings; Grand Central's 42nd Street front with its three arched windows; the Public Library's columned front on Fifth and Bryant Park; Broadway's diagonal through Herald Square; the Sixth Avenue El; ~800 buildings on the grid (lofts in the garment district, brownstones in Murray Hill, towers near 42nd, water tanks on the roofs); a window-grid façade material; ground, planting, weather, music. Recorded for L3, later: the real block sizes; Macy's and Herald Square; the Park Avenue viaduct and the New York Central Building; the Third Avenue El; traffic, streetcars and people; Grand Central's concourse; the ESB lobby. Built since: the grid turned to its true 29° bearing (§3); the Chrysler crown's terraced arches, eagles and radiator caps, braced water tanks, fire escapes, traffic with cabs, people and lamp posts.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -54,7 +54,7 @@ Sources added: [NRHP nomination, Empire State Building (NPS)](https://npgallery.
 
 ## 2. Layout of the settlement (radius 460 m)
 
-| Part | Where (m, +x east, +z south) | Notes |
+| Part | Where (m, in the grid's frame: +x along the streets, +z down the avenues; turned 29°, §3) | Notes |
 |---|---|---|
 | Fifth Avenue | x 0 | [stated] |
 | Sixth, Madison, Park, Lexington, Third | x −200, 90, 180, 270, 360 | [stated: their order; spacing compressed — inferred] |
@@ -66,7 +66,9 @@ Sources added: [NRHP nomination, Empire State Building (NPS)](https://npgallery.
 
 ## 3. Orientation
 
-The grid is drawn north–south here; the real one is turned 29°. [stated/inferred] Not fixed (2026-11-06): turning it would need the settlement's arrival view in `src/planet/arrivals.js` turned with it, and the ground's cover and planting rotated; left for a change that may touch the planet files.
+Manhattan's avenues run about 29° east of true north [stated: Wikipedia "Commissioners' Plan of 1811"; Charles Petzold, "How Far from True North are the Avenues of Manhattan?" — "The avenues of Manhattan deviate from true north by 29°"]. Built so since 2026-11-06: the whole layout is drawn in the grid's own frame (+x along the cross streets toward the East River, −z up the avenues) and turned 29° into the settlement's frame (`GRID`, `toCity` / `toGrid` in `layout.js`), so that uptown is N 29° E. Everything turns together: the avenues and streets, the lots and their buildings, Broadway, the El and its stations, the viaduct, the landmarks, Bryant Park's lawn and planting, the ground's gentle rise, the newsstands and yards, the traffic, the people and the lamps. A plan's own `yaw` turns only by quarter turns (its colliders stay on the axes), so the plans stand unturned at the origin and their elements are built inside the style's `turned` element (`src/styles/artdeco/turn.js`), which turns their geometry, lights and obstacles exactly and lays their floors and ramps as strips of axis-aligned rectangles inside the turned ones; the life of the streets (single placed things) is moved and turned in `town.js`. The arrival (`src/planet/arrivals.js`) turned with it: Fifth Avenue at 35th Street, looking down the avenue at the Empire State. [inferred: the method]
+
+One consequence: the generic street life added to every settlement (`src/objects/life.js`) finds no house fronts in New York now (the buildings are inside `turned`), so it no longer sets benches, crates and stalls by the doors; New York's own traffic, people, lamps, newsstands and washing are unchanged. [inferred]
 
 ## 4. The style
 
@@ -86,7 +88,7 @@ Clear autumn light at 41° N. [inferred]
 
 ## 8. Paths
 
-Arrival is on Fifth Avenue at 35th Street, looking south up at the Empire State. [inferred]
+Arrival is on Fifth Avenue at 35th Street, looking down the avenue (S 29° W since the grid was turned) up at the Empire State. [inferred]
 
 ## 9. Sound
 
@@ -105,3 +107,4 @@ Jazz, Gershwin, the big bands on the radio; horns and the El. [stated: Wikipedia
 - [New York Public Library Main Branch — Wikipedia](https://en.wikipedia.org/wiki/New_York_Public_Library_Main_Branch)
 - [IRT Sixth Avenue Line — Wikipedia](https://en.wikipedia.org/wiki/IRT_Sixth_Avenue_Line)
 - [Commissioners' Plan of 1811 — Wikipedia](https://en.wikipedia.org/wiki/Commissioners%27_Plan_of_1811)
+- [How Far from True North are the Avenues of Manhattan? — Charles Petzold](https://ftp.charlespetzold.com/etc/AvenuesOfManhattan)

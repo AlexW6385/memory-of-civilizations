@@ -1,14 +1,18 @@
 // Modern New York — the ground: asphalt avenues and streets, granite curbs and pavements, Bryant
 // Park's lawns and plane trees; the clear light of a New York autumn.
-import { RADIUS, BRYANT, height, inRect, inLot } from './layout.js';
+import { RADIUS, BRYANT, height as gridHeight, inRect, inLot, toGrid } from './layout.js';
 
-function cover(x, z) {
-  const c = { sand: 0, grass: 0.1, rock: 0, soil: 0.1, fields: 0, dry: 0.2, warmth: 0.3, red: 0, road: 0.95, snow: 0, forest: 0 };
+// (asked in the settlement's frame; the layout is in the grid's, turned 29°: layout.js)
+const height = (x, z) => gridHeight(...toGrid(x, z));
+
+function cover(X, Z) {
+  const [x, z] = toGrid(X, Z), c = { sand: 0, grass: 0.1, rock: 0, soil: 0.1, fields: 0, dry: 0.2, warmth: 0.3, red: 0, road: 0.95, snow: 0, forest: 0 };
   if (inRect(BRYANT, x, z)) { c.grass = 0.85; c.road = 0.15; return c; }
   return c;
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
-function planting(x, z) {
+function planting(X, Z) {
+  const [x, z] = toGrid(X, Z);
   if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1)) return null;
   if (inRect(BRYANT, x, z, -3)) return { plane_tree: 0.03, grass: 20 };
   return null;

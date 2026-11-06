@@ -1,7 +1,11 @@
 // The blocks' buildings (docs/settlements/new-york.md §5) and the street's life (§5a): the traffic of
 // 1931 on the avenues and cross streets — Checker and Yellow cabs among black, cream and blue
 // motor cars — people on the pavements, lamp posts along the avenues.
-import { RADIUS, AVENUES, STREETS, lots, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect } from './layout.js';
+import { RADIUS, AVENUES, STREETS, lots, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity } from './layout.js';
+import { entranceOf } from './plan.js';
+// (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
+// settlement's by the style's `turned`, the life of the streets — single placed things — moved and
+// turned here, and each tile's centre with it)
 function rng0(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** The newsstands at the corners of the avenues with 34th, 38th and 42nd Streets (§1d). */
 const NEWSSTANDS = (() => {
@@ -15,7 +19,9 @@ const NEWSSTANDS = (() => {
   return out;
 })();
 const nearStand = (x, z, m) => NEWSSTANDS.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < m);
-const base = (id, elements) => ({ id, style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [4, 176], facing: 's' } });
+const base = (id, elements) => ({ id, style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t: 'turned', angle: GRID, elements }], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: entranceOf() });
+/** A placed thing of the grid's frame in the settlement's: its place and its turn. */
+const placed = (e) => ({ ...e, at: toCity(...e.at), rot: (e.rot ?? 0) + GRID });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 function streetLife() {
   const rand = rng(1931), L = [], inside = (x, z) => Math.hypot(x, z) < RADIUS - 45;
@@ -48,7 +54,7 @@ function streetLife() {
   }
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 150)},${Math.floor(e.at[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
-  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-life-${k}`, list), style: 'life', center: [i * 150 + 75, j * 150 + 75], near: 260 }; });
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-life-${k}`, []), elements: list.map(placed), style: 'life', center: toCity(i * 150 + 75, j * 150 + 75), near: 260 }; });
 }
 /** The tenements' rear yards east of Lexington Avenue, washing on the lines from their back windows to a pole (§1d). */
 function yards() {
@@ -65,7 +71,7 @@ function yards() {
   }
   const tiles = new Map();
   for (const e of out) { const p = e.at ?? e.pole, k = `${Math.floor(p[0] / 150)},${Math.floor(p[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
-  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-yards-${k}`, list), center: [i * 150 + 75, j * 150 + 75], near: 300 }; });
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-yards-${k}`, list), center: toCity(i * 150 + 75, j * 150 + 75), near: 300 }; });
 }
 export async function buildings() {
   const all = lots(), plans = [];

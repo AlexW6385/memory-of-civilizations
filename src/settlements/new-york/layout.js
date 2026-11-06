@@ -2,11 +2,21 @@
 // grid between 32nd and 44th Streets, Sixth Avenue to Lexington; the Empire State Building on Fifth
 // Avenue between 33rd and 34th; the Public Library and Bryant Park on Fifth between 40th and 42nd;
 // Grand Central on Park Avenue at 42nd; the Chrysler and Chanin Buildings at 42nd and Lexington;
-// Broadway's diagonal through Herald Square; the Sixth Avenue El. The grid is drawn north–south
-// (Manhattan's runs 29° east of north), the avenues and blocks compressed (the landmarks' heights
-// and the Empire State's plan true). Pure data. +x east, +z south.
+// Broadway's diagonal through Herald Square; the Sixth Avenue El. The avenues and blocks are
+// compressed (the landmarks' heights and the Empire State's plan true). Pure data.
+//
+// Everything here is in the grid's own frame: +x along the cross streets (toward the East River),
+// −z up the avenues (uptown). The grid is turned into the settlement's frame (+x east, +z south)
+// by GRID: Manhattan's avenues run 29° east of true north (§3), the element `turned` of the style
+// doing it for the plans (src/styles/artdeco/turn.js), toCity / toGrid for points.
 
 export const RADIUS = 460;
+/** The grid's turn into the settlement's frame (as Matrix4.makeRotationY): uptown (−z) to N 29° E. */
+export const GRID = -29 * Math.PI / 180;
+const GC = Math.cos(GRID), GS = Math.sin(GRID);
+/** A point of the grid's frame in the settlement's, and back. */
+export const toCity = (x, z) => [GC * x + GS * z, -GS * x + GC * z];
+export const toGrid = (x, z) => [GC * x - GS * z, GS * x + GC * z];
 export const AVENUES = [[-200, 18, '6th'], [0, 18, '5th'], [90, 14, 'Madison'], [180, 24, 'Park'], [270, 16, 'Lexington'], [360, 16, '3rd']];
 /** The cross streets: number → z of the centre line (34th at 200, 50 m apart, the Empire State's block 60). */
 export const streetZ = (n) => (n <= 33 ? 260 + (33 - n) * 50 : 200 - (n - 34) * 50);

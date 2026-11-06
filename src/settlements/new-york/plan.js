@@ -1,5 +1,15 @@
 // Modern New York about 1931 (docs/settlements/new-york.md §2–§4).
-import { RADIUS, EL_STATIONS, VIADUCT, ESB, LIBRARY, BRYANT, GCT, CHRYSLER, CHANIN, LINCOLN, AVENUES, height } from './layout.js';
+import { RADIUS, EL_STATIONS, VIADUCT, ESB, LIBRARY, BRYANT, GCT, CHRYSLER, CHANIN, LINCOLN, AVENUES, height, GRID, toCity } from './layout.js';
+
+// (the plans stand at the origin unturned; their elements are laid out in the grid's frame and
+// turned with it by the style's `turned`; what the plans say of places — entrance, rooms, walks,
+// bounds — is in the settlement's frame)
+const P = (x, z) => toCity(x, z);
+/** The settlement-frame box round a grid-frame rectangle. */
+export const boxOf = ([x0, z0, x1, z1]) => { const c = [P(x0, z0), P(x1, z0), P(x1, z1), P(x0, z1)]; return [Math.min(...c.map((p) => p[0])), Math.min(...c.map((p) => p[1])), Math.max(...c.map((p) => p[0])), Math.max(...c.map((p) => p[1]))]; };
+const ENTRANCE = P(4, 176);
+/** Where the plans say the settlement is entered: on Fifth Avenue at 35th Street. */
+export const entranceOf = () => ({ at: ENTRANCE.map((v) => Math.round(v * 100) / 100), facing: 's' });
 
 const hy = (r) => height((r[0] + r[2]) / 2, (r[1] + r[3]) / 2);
 export const esb = {
@@ -8,18 +18,19 @@ export const esb = {
   era: { en: 'New York, 1931', zh: '纽约，1931年' },
   style: 'artdeco',
   origin: [0, 0], base: 0, yaw: 0,
-  entrance: { at: [4, 176], facing: 's' },
-  bounds: [ESB[0] - 1, ESB[1] - 1, ESB[2] + 1, ESB[3] + 1],
-  view: ESB,
+  entrance: entranceOf(),
+  bounds: boxOf([ESB[0] - 1, ESB[1] - 1, ESB[2] + 1, ESB[3] + 1]),
+  view: boxOf(ESB),
   bakeTop: 390,
-  elements: [{ t: 'empire_state', rect: ESB, y: hy(ESB) }],
-  rooms: [{ id: 'fifth', rect: [-9, 150, 9, 260], y: 0, kind: 'open' }],
-  walks: [Object.assign([[4, 176], [4, 230]], { y0: 0 })],
+  elements: [{ t: 'turned', angle: GRID, elements: [{ t: 'empire_state', rect: ESB, y: hy(ESB) }] }],
+  // (Fifth Avenue's roadway in front of the tower: a box inside the turned avenue)
+  rooms: [{ id: 'fifth', rect: [...P(0, 200).map((v) => v - 4), ...P(0, 200).map((v) => v + 4)], y: 0, kind: 'open' }],
+  walks: [Object.assign([P(4, 176), P(4, 230)], { y0: 0 })],
 };
 export const midtown = {
   id: 'new-york-midtown', style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true,
-  entrance: { at: [4, 176], facing: 's' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
-  elements: [
+  entrance: entranceOf(), bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
+  elements: [{ t: 'turned', angle: GRID, elements: [
     { t: 'chrysler', rect: CHRYSLER, y: hy(CHRYSLER) },
     { t: 'skyscraper', rect: CHANIN, y: hy(CHANIN), h: 197, mat: 'facade_buff', seed: 1929 },
     { t: 'skyscraper', rect: LINCOLN, y: hy(LINCOLN), h: 205, mat: 'facade_limestone', seed: 1930 },
@@ -27,6 +38,6 @@ export const midtown = {
     { t: 'beaux_arts', rect: LIBRARY, y: hy(LIBRARY), h: 22, front: 'e', cols: 6, mat: 'marble' },
     { t: 'park', rect: BRYANT, y: hy(BRYANT) },
     { t: 'el_track', x: AVENUES[0][0], z0: -400, z1: 400, y: 0, yAt: (z) => height(AVENUES[0][0], z), stations: EL_STATIONS },
-  ],
+  ] }],
 };
 export default esb;
