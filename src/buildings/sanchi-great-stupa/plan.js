@@ -3,6 +3,7 @@
 // stupa, +x east, +z south; y = 0 at the hilltop. Metres.
 
 import { SITES } from '../../world/regions.js';
+import './style.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -33,7 +34,7 @@ export const sanchiGreatStupa = {
   id: 'sanchi-great-stupa',
   name: { en: 'The Great Stupa at Sanchi', zh: '桑吉大塔' },
   era: { en: 'Maurya to Satavahana, 3rd century BCE – 1st century CE', zh: '孔雀王朝至百乘王朝，公元前3世纪—公元1世纪' },
-  style: 'indian',
+  style: 'indian-sanchi',
   district: 'india',
   ...SITES['sanchi-great-stupa'],
   entrance: { at: [0, 44], facing: 'n' },
