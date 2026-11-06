@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.71 — Showroom: game lighting, 68°, any size, site views (2026-11-06)
+- The showroom serves its items as JSON (any list size), lights with the game's renderer and climate (metals and gilding read as in game; --light simple for speed), uses the game's 68° field of view, renders real settlement views from a pose or the arrival in 2–4 minutes (--site, --at, --arrival, nearby elements only), and can build the viewer's welded geometry (--weld).
+
 ## v9.70 — Nineteen new materials (2026-11-06)
 - Tin-mercury mirror glass in the Hall of Mirrors, maroon cloth for Lhasa's monks, africano marble in St Peter's, Prussian blue on Big Ben's dials, green leather on the Commons benches, rough lime plaster and coral rag at Kilwa (and coral_plaster without coursing), carved pietra serena and Elba granite in the Mercato Vecchio, white and yellow sandstone in Petra's bands, chalk at Stonehenge, coral and obsidian eyes on the moai, fibre rope, flax leaves at the pā, dull aluminium on the Empire State Building, light concrete and brush box at the Opera House.
 
