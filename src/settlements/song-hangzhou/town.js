@@ -4,6 +4,7 @@
 // peddlers come to the riverbank for the crowd: stalls along the foot of the flood wall, hawkers with
 // their shoulder poles, a fruit seller under a parasol.
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, lots } from './layout.js';
+import { RIVER_BOATS, CANAL_BOATS } from './plan.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 136], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const CLOTH = ['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_black', 'cloth_red', 'cloth_green'];
@@ -85,9 +86,35 @@ function teaInside(S, L, rand, person) {
   }
 }
 
+/**
+ * The boats' people (§11): on the river boats the steersman at the stern and a hand at the bow — on
+ * those under sail a third at the mast, on those moored by the wall one sitting on the deck; on the
+ * canal boats the boatman at the stern's sculling oar, a passenger under the awning on some.
+ */
+function boatPeople() {
+  const L = [], rand = rng(1200), pick = (a) => a[Math.floor(rand() * a.length)];
+  const hand = (at, y, rot, extra = {}) => L.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: pick(['cloth_brown', 'cloth_grey', 'cloth_indigo', 'cloth_white']), cloth2: pick(['cloth_brown', 'cloth_grey']), skin: 'skin_medium', hat: pick(['straw', 'none', 'cap']), hair: 'bun', ...extra });
+  for (const [x, z, d, L0] of RIVER_BOATS) {
+    const len = L0 + 4, H = len / 2, yw = LEVEL.river, sheer = (t) => yw + 0.95 + 0.35 * t * t + (t > 0 ? 0.7 : 0.45) * t ** 6, deck = (t) => sheer(t) - 0.3;
+    const at = (t) => [x + d * t * H, z];
+    hand(at(-0.8), deck(-0.8), faceTo([d, 0]), { pose: 'pull' });                                       // at the tiller
+    hand(at(0.72), deck(0.72), faceTo([d, (rand() - 0.5) * 0.6]), { pose: rand() < 0.5 ? 'stand' : 'talk' });
+    if (z > 165) hand([x - d * 0.6, z + 0.5], deck(0) , faceTo([0, -1]), { pose: 'brace', carry: 'rope' });
+    else hand([x + d * 0.3 * H, z - 0.4], deck(0.3), faceTo([0, 1]), { pose: 'cross', dress: 'robe' });
+  }
+  for (const [z, d] of CANAL_BOATS) {
+    const len = 7, x = (CANAL.x0 + CANAL.x1) / 2 + (d > 0 ? -2 : 2), yw = LEVEL.canal, s = -0.38 * len;
+    const stern = [x, z + d * s], ys = yw + 0.5 + 0.32 * Math.pow(0.76, 2.2) - 0.06;
+    hand(stern, ys, faceTo([0, d]) + (rand() - 0.5) * 0.5, { pose: 'row' });
+    L.push({ t: 'oar', at: [x, z + d * (s - 0.45)], y: ys - 0.1, rot: d > 0 ? Math.PI : 0, seed: 5 });
+    if (rand() < 0.6) hand([x, z + d * 0.6], yw + 0.07, faceTo([0, d]), { pose: 'low', dress: 'robe', hat: 'cap', cloth: pick(['cloth_indigo', 'cloth_white']) });
+  }
+  return { ...base('song-hangzhou-boat-people', L, 'life'), center: [0, 120] };
+}
+
 export async function town() {
   const tea = new Set(teaHouses()), all = lots().filter((l) => !tea.has(l)), plans = [];
   for (let i = 0; i < all.length; i += 150) plans.push(base(`song-hangzhou-houses-${i / 150}`, all.slice(i, i + 150).map((l) => ({ t: 'house_jiangnan', y: LEVEL.street, ...l }))));
-  plans.push(...tideDay());
+  plans.push(...tideDay(), boatPeople());
   return plans;
 }
