@@ -20,7 +20,7 @@ export const ARRIVALS = {
   'khajuraho':        [0, 0.1, -60, 1.5708, 0.3],        // Kandariya Mahadeva rising among the temples
   'madurai':          [-20, 0.1, 170, 0, 0.3],           // the painted gopuram over the street
   'mughal-agra':      [0, 0.4, 60, 0, 0.1],              // the Taj Mahal down the garden's water channel
-  'angkor':           [-178, 1.05, 1.5, -1.5708, 0.08],  // Angkor Wat's towers at the end of the causeway
+  'angkor':           [-135, 1.25, 0, -1.5708, 0.1],     // inside the western gate, the five towers at the end of the inner causeway (the gate hid them from the outer)
   'borobudur':        [110, 0.1, 0, 1.5708, 0.18],       // the monument up the east way
   'ur':               [0, 0.1, -118, 3.1416, 0.22],      // the ziggurat across its court
   'babylon':          [-40, 0.1, -360, 3.1416, 0.2],     // the Processional Way's lions to the Ishtar Gate
