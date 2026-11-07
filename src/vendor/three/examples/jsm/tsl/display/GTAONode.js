@@ -396,6 +396,7 @@ class GTAONode extends TempNode {
 	setup( builder ) {
 
 		const uvNode = uv();
+		const reversed = builder.renderer.reversedDepthBuffer === true;
 
 		const linearizeDepth = ( depth ) => {
 
@@ -417,8 +418,10 @@ class GTAONode extends TempNode {
 
 			// Sidestep the nearest-rounding during depth access for the unjittered center pixel to avoid banding
 
+			// with a reversed depth buffer the nearest of the four is the largest; taking the
+			// smallest picks the farthest texel and shifts the result across the screen middle
 			const g = this.depthNode.gather().sample( uv );
-			const depth = min( min( g.x, g.y ), min( g.z, g.w ) );
+			const depth = reversed ? max( max( g.x, g.y ), max( g.z, g.w ) ) : min( min( g.x, g.y ), min( g.z, g.w ) );
 
 			return linearizeDepth( depth );
 
@@ -431,7 +434,8 @@ class GTAONode extends TempNode {
 
 			const depth = this._resolutionScale.lessThan( 1 ).select( sampleCenterDepth( uvNode ), sampleDepth( uvNode ) ).toConst();
 
-			depth.greaterThanEqual( 1.0 ).discard();
+			if ( reversed ) depth.lessThanEqual( 0.0 ).discard();
+			else depth.greaterThanEqual( 1.0 ).discard();
 
 			const viewPosition = getViewPosition( uvNode, depth, this._cameraProjectionMatrixInverse ).toConst();
 			const viewNormal = sampleNormal( uvNode ).toConst();

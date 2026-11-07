@@ -472,3 +472,49 @@ export function ttJaguars(el, ctx) {
   person(ctx, cx - 2, cz + 1, y + 0.02, 1.2, 'priest', el.seed + 1);
   person(ctx, cx - P - 1.5, cz - 2.4, yp, Math.PI / 2, 'pilgrim', el.seed + 2);
 }
+
+// ---- the temple on the Pyramid of the Sun, inside; people on the stairs --------------------------------
+
+/**
+ * The chamber of a temple on a pyramid (ttPyramid's temple.inner), its inner rect I, floor y, ceiling ceil,
+ * the door on the side fx (±1, x): a stucco floor; the walls with a red dado and, above, a band painted with
+ * chalchihuites; the roof's beams; in the middle the altar — a little talud-tablero platform with a theatre
+ * censer on it, two more on the floor before it, reed mats and offerings; a priest kneeling at the altar and
+ * one standing by it.
+ */
+export function ttTempleInside(I, y, ceil, fx, seed, ctx) {
+  const { bag, col } = ctx, [x0, z0, x1, z1] = I, zc = (z0 + z1) / 2, xc = (x0 + x1) / 2, e = 0.03, dw = 1.2, f = y + 0.05;
+  bag.add(WH, box(x0, y, z0, x1, f, z1));
+  // the walls' paint: the dado, the band of chalchihuites (green discs ringed in black on red)
+  const front = fx < 0 ? x0 : x1, back = fx < 0 ? x1 : x0;
+  const faces = [['x', z0, 1, x0, x1], ['x', z1, -1, x0, x1], ['z', back, fx, z0, z1], ['z', front, -fx, z0, zc - dw], ['z', front, -fx, zc + dw, z1]];
+  for (const [ax, c, s, a0, a1] of faces) {
+    const B = (ya, yb, m) => bag.add(m, ax === 'x' ? box(a0, ya, s > 0 ? c : c - e, a1, yb, s > 0 ? c + e : c) : box(s > 0 ? c : c - e, ya, a0, s > 0 ? c + e : c, yb, a1));
+    B(f, y + 1.0, RD); B(y + 2.1, y + 2.75, RF);
+    for (let u = a0 + 0.6; u < a1 - 0.4; u += 0.9) {
+      for (const [r, m, o] of [[0.24, OB, 0.03], [0.16, 'clay_green', 0.05]]) {
+        const g = lathe([[0.001, 0], [r, 0], [r, o], [0.001, o]], 10);
+        if (ax === 'x') g.rotateX(s > 0 ? Math.PI / 2 : -Math.PI / 2); else g.rotateZ(s > 0 ? -Math.PI / 2 : Math.PI / 2);
+        bag.add(m, ax === 'x' ? g.translate(u, y + 2.42, c + s * e) : g.translate(c + s * e, y + 2.42, u));
+      }
+    }
+  }
+  for (let z = z0 + 0.6; z < z1 - 0.3; z += 0.9) bag.add('viga', box(x0 - 0.1, ceil - 0.26, z - 0.12, x1 + 0.1, ceil + 0.05, z + 0.12));
+  // the altar a little behind the middle, its censer; two censers on the floor before it; mats and offerings
+  const ax = xc - fx * 1.4, a = 0.9;
+  bag.add(RD, frustum([ax - a, zc - a, ax + a, zc + a], f, f + 0.4, 0.12, 0.12, 0.12, 0.12, { noBottom: true, noTop: true }));
+  tablero(bag, [ax - a + 0.1, zc - a + 0.1, ax + a - 0.1, zc + a - 0.1], f + 0.4, f + 0.9, { out: 0.08, discs: false });
+  bag.add(WH, frustum([ax - a + 0.18, zc - a + 0.18, ax + a - 0.18, zc + a - 0.18], f + 0.8, f + 0.92, 0, 0, 0, 0, { noBottom: true }));
+  col.rect([ax - a, zc - a, ax + a, zc + a], f, f + 0.92);
+  theatreCenser().emit(bag, ax, f + 0.92, zc, fx, 0);
+  for (const s of [-1, 1]) { theatreCenser().emit(bag, ax + fx * 2.4, f, zc + s * 1.8, fx, 0); col.circle(ax + fx * 2.4, zc + s * 1.8, 0.4, f, f + 1); }
+  bag.add('reed_mat', box(Math.min(ax + fx * 1.2, ax + fx * 3.4), f, zc - 0.9, Math.max(ax + fx * 1.2, ax + fx * 3.4), f + 0.02, zc + 0.9));
+  for (let i = 0; i < 6; i++) bag.add(i % 2 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.13, 0.01], [0.19, 0.1], [0.18, 0.11], [0.001, 0.04]], 10, null, ax - fx * (a + 0.5), f, zc - 1.25 + i * 0.5));
+  person(ctx, ax + fx * 2.0, zc, f + 0.02, fx < 0 ? -Math.PI / 2 : Math.PI / 2, 'kneel', seed + 1);
+  person(ctx, ax - fx * 0.3, zc + a + 0.8, f, Math.PI, 'priest', seed + 2);
+}
+
+/** tt_people { people: [[x, z, y, rot, who, seed]] }: still figures (person): who 'priest' | 'pilgrim' | 'bearer' | 'kneel'. */
+export function ttPeople(el, ctx) {
+  for (const [x, z, y, rot, who, seed] of el.people) person(ctx, x, z, y, rot, who, seed);
+}

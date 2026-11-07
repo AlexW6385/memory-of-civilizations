@@ -1,7 +1,8 @@
 // Barcelona — the ground: the Eixample's paved streets and the planes along them, the courts'
 // gardens; the bright Mediterranean light.
 
-import { RADIUS, PITCH, BLOCK, SAGRADA, height, onDiagonal } from './layout.js';
+import { RADIUS, PITCH, BLOCK, SAGRADA, height, onDiagonal, bancsFanals } from './layout.js';
+const BANCS = bancsFanals();
 
 const inBlock = (x, z, m = 0) => { const bx = Math.round(x / PITCH) * PITCH, bz = Math.round(z / PITCH) * PITCH; return Math.abs(x - bx) < BLOCK / 2 + m && Math.abs(z - bz) < BLOCK / 2 + m; };
 const onSite = (x, z, m = 0) => Math.abs(x - SAGRADA[0]) < BLOCK / 2 + m && Math.abs(z - SAGRADA[1]) < BLOCK / 2 + m;      // the temple's works
@@ -19,7 +20,7 @@ function planting(x, z) {
   // the rows of planes along both kerbs of every street, 7–8.3 m from its middle (clear of the tram poles at 9.6),
   // not in the crossings
   const sx = Math.abs(((x % PITCH) + PITCH) % PITCH - PITCH / 2), sz = Math.abs(((z % PITCH) + PITCH) % PITCH - PITCH / 2), half = (PITCH - BLOCK) / 2;
-  if (onDiagonal(x, z)) return null;
+  if (onDiagonal(x, z) || BANCS.some(([bx, bz]) => Math.abs(x - bx) < 3 && Math.abs(z - bz) < 4.5)) return null;     // (clear of the bench-lamps)
   if ((sx > 7 && sx < 8.3 && sz > half + 2) || (sz > 7 && sz < 8.3 && sx > half + 2)) return { plane_tree: 0.1 };
   return null;
 }

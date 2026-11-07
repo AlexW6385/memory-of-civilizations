@@ -7,7 +7,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import '../qing/index.js';
 import { carved, Kit } from '../maya/meso.js';
-import { ttPalace, ttJaguars, ttPlazaAltars, ttCrossAltar, ttGoddess } from './palace.js';
+import { ttPalace, ttJaguars, ttPlazaAltars, ttCrossAltar, ttGoddess, ttTempleInside, ttPeople } from './palace.js';
 
 const S = 'stucco_ochre', RD = 'stucco_red', RF = 'limewash_red', RB = 'rubble_teo', HS = 'andesite';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -109,7 +109,8 @@ const teoCipactli = () => carved('teo-cipactli', (k) => {
  * vertical panel; 0 for plain sloping stages), stair ('w'|'s'|…), stairW, temple: { w, d, h }, heads (faces
  * whose tableros carry the Feathered Serpent's heads, e.g. 'nse'), talud (its material: stone, or red stucco) }.
  */
-export function ttPyramid(el, { bag, col }) {
+export function ttPyramid(el, ctx) {
+  const { bag, col } = ctx;
   const [cx, cz] = el.c, n = el.levels, H = el.h, tb = el.tablero ?? 0.35, y0b = el.y ?? 0;
   for (let k = 0; k < n; k++) {
     const t0 = k / n, t1 = (k + 1) / n, ya = y0b + H * t0, yb = y0b + H * t1, ht = yb - ya;
@@ -154,20 +155,32 @@ export function ttPyramid(el, { bag, col }) {
     }
     if (tb > 0 && k === n - 1) { const p = [a[0] - sx * 0.85 + 0.25, a[1] - sz * 0.85 + 0.25]; bag.add('stucco_pale', frustum([cx - p[0] + 0.1, cz - p[1] + 0.1, cx + p[0] - 0.1, cz + p[1] - 0.1], yb - 0.1, yb + 0.03, 0, 0, 0, 0, { noBottom: true })); }   // the plastered top
     col.rect([cx - b[0], cz - b[1], cx + b[0], cz + b[1]], ya, yb); col.floor([cx - b[0], cz - b[1], cx + b[0], cz + b[1]], yb);
+    if (tb === 0 && last) col.floor([cx - a[0] + sx * 0.85, cz - a[1] + sz * 0.85, cx + a[0] - sx * 0.85, cz + a[1] - sz * 0.85], yb);   // the whole of the top, out to its edge
     col.rect([cx - a[0] + sx * 0.4, cz - a[1] + sz * 0.4, cx + a[0] - sx * 0.4, cz + a[1] - sz * 0.4], ya, ya + ht * 0.5);
   }
   // the stair up the chosen face, the whole height
   // (`stairFoot`: the stair starts higher than the pyramid's base, on a plaza laid above it)
-  const sw = (el.stairW ?? 12) / 2, sy0 = el.stairFoot ?? y0b, run = (y0b + H - sy0) * 1.05, f = el.stair || 'w';
-  const r = f === 'w' ? [cx - el.tw / 2 - run, cz - sw, cx - el.tw / 2 + 0.5, cz + sw] : f === 'e' ? [cx + el.tw / 2 - 0.5, cz - sw, cx + el.tw / 2 + run, cz + sw] : f === 's' ? [cx - sw, cz + el.td / 2 - 0.5, cx + sw, cz + el.td / 2 + run] : [cx - sw, cz - el.td / 2 - run, cx + sw, cz - el.td / 2 + 0.5];
+  const sw = (el.stairW ?? 12) / 2, sy0 = el.stairFoot ?? y0b, run = (y0b + H - sy0) * 1.05, f = el.stair || 'w', ov = tb === 0 && el.talud ? -0.15 * (el.w - el.tw) / 2 / n : 0.5;   // the stair's head laid over the top's edge (on a plastered top, ending at its edge)
+  const r = f === 'w' ? [cx - el.tw / 2 - run, cz - sw, cx - el.tw / 2 + ov, cz + sw] : f === 'e' ? [cx + el.tw / 2 - ov, cz - sw, cx + el.tw / 2 + run, cz + sw] : f === 's' ? [cx - sw, cz + el.td / 2 - ov, cx + sw, cz + el.td / 2 + run] : [cx - sw, cz - el.td / 2 - run, cx + sw, cz - el.td / 2 + ov];
   ttStair({ rect: r, y0: sy0, y1: y0b + H, dir: { w: 'e', e: 'w', s: 'n', n: 's' }[f], mat: S }, { bag, col });
   if (el.temple) {
     // the temple: plastered walls, its doorway over the stair, a red cornice and a crest of almenas
     const T = el.temple, ty = y0b + H, [w, d] = [T.w / 2, T.d / 2], top = ty + T.h;
-    bag.add(S, box(cx - w, ty, cz - d, cx + w, top, cz + d));
-    bag.add(RD, box(cx - w - 0.3, top - 0.8, cz - d - 0.3, cx + w + 0.3, top, cz + d + 0.3));
     const [fx, fz] = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[f], dw = Math.min(1.2, (fx ? d : w) * 0.3), dh = Math.min(2.4, (T.h - 0.8) * 0.85);
-    bag.add('opening', fx ? box(cx + fx * w - 0.06, ty, cz - dw, cx + fx * w + 0.06, ty + dh, cz + dw) : box(cx - dw, ty, cz + fz * d - 0.06, cx + dw, ty + dh, cz + fz * d + 0.06));
+    if (T.inner && fx) {
+      // a chamber inside (palace.js): thick walls of rubble, the door a passage through the front one, a flat roof of beams and earth
+      const tw = T.wall ?? 3, I = [cx - w + tw, cz - d + tw, cx + w - tw, cz + d - tw], fr = fx < 0 ? [cx - w, I[0]] : [I[2], cx + w];
+      for (const r of [[cx - w, cz - d, cx + w, I[1]], [cx - w, I[3], cx + w, cz + d], fx < 0 ? [I[2], I[1], cx + w, I[3]] : [cx - w, I[1], I[0], I[3]], [fr[0], I[1], fr[1], cz - dw], [fr[0], cz + dw, fr[1], I[3]]]) { bag.add(S, box(r[0], ty, r[1], r[2], top - 0.6, r[3])); col.rect(r, ty, top); }
+      bag.add(S, box(fr[0], ty + dh, cz - dw, fr[1], top - 0.6, cz + dw));
+      bag.add(S, box(cx - w, top - 0.6, cz - d, cx + w, top + 0.02, cz + d));
+      ttTempleInside(I, ty, top - 0.6, fx, T.seed ?? 7, ctx);
+    } else {
+      bag.add(S, box(cx - w, ty, cz - d, cx + w, top, cz + d));
+      bag.add('opening', fx ? box(cx + fx * w - 0.06, ty, cz - dw, cx + fx * w + 0.06, ty + dh, cz + dw) : box(cx - dw, ty, cz + fz * d - 0.06, cx + dw, ty + dh, cz + fz * d + 0.06));
+      col.rect([cx - w, cz - d, cx + w, cz + d], ty, top);
+    }
+    if (T.inner && fx) for (const r of [[cx - w - 0.3, cz - d - 0.3, cx + w + 0.3, cz - d + 0.4], [cx - w - 0.3, cz + d - 0.4, cx + w + 0.3, cz + d + 0.3], [cx - w - 0.3, cz - d + 0.4, cx - w + 0.4, cz + d - 0.4], [cx + w - 0.4, cz - d + 0.4, cx + w + 0.3, cz + d - 0.4]]) bag.add(RD, box(r[0], top - 0.8, r[1], r[2], top, r[3]));   // the cornice, a ring round the walls' heads
+    else bag.add(RD, box(cx - w - 0.3, top - 0.8, cz - d - 0.3, cx + w + 0.3, top, cz + d + 0.3));
     const am = Math.min(0.9, T.h * 0.22);
     for (const [ax, az, bx, bz] of [[-w, -d, w, -d], [-w, d, w, d], [-w, -d, -w, d], [w, -d, w, d]]) {
       const L = Math.hypot(bx - ax, bz - az), n = Math.max(2, Math.floor(L / 1.3));
@@ -178,7 +191,6 @@ export function ttPyramid(el, { bag, col }) {
         bag.add(RD, along ? box(x - 0.12, top + am * 0.35, z - 0.13, x + 0.12, top + am * 0.75, z + 0.13) : box(x - 0.13, top + am * 0.35, z - 0.12, x + 0.13, top + am * 0.75, z + 0.12));
       }
     }
-    col.rect([cx - w, cz - d, cx + w, cz + d], ty, top);
   }
 }
 
@@ -275,6 +287,6 @@ function compound(el, { bag, col }) {
 
 registerStyle('teotihuacano', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess },
+  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople },
   objects: {},
 });

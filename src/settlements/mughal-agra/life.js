@@ -43,6 +43,14 @@ export function life() {
     L.push({ t: 'animal', kind: 'horse', at: [x, z], y: 0.05, rot, seed: Math.floor(rand() * 1e9) });
     person([x + Math.cos(rot) * 0.9, z - Math.sin(rot) * 0.9 + 0.6], 0.05, rot, { man: true, pose: 'stand', cloth: 'cloth_white' });
   }
+  // elephants with their mahouts astride the neck, goad in hand: one under a canopied howdah, one in its caparison
+  // alone, an attendant at each ("would dismount from their horses or elephants" there: Wikipedia, Origins and
+  // architecture of the Taj Mahal [stated]; the caparison, the howdah with its railing and canopy after Mughal
+  // paintings, e.g. "Elephant with Mahout", c. 1660, https://www.metmuseum.org/art/collection/search/825608 [inferred])
+  for (const [x, z, rot, o] of [[-38, 190, 0.35, { howdah: true, canopy: true, cloth: 'cloth_red', tusks: 'long' }], [41, 193, -0.5, { cloth: 'cloth_green', tusks: 'short' }]]) {
+    L.push({ t: 'animal', kind: 'elephant', at: [x, z], y: 0.05, rot, seed: Math.floor(rand() * 1e9), gear: true, mahout: { cloth: pick(MEN), hatMat: pick(['cloth_white', 'cloth_red', 'cloth_ochre']) }, ...o });
+    person([x + Math.cos(rot) * 1.9, z - Math.sin(rot) * 1.9 - 0.8], 0.05, rot, { man: true, pose: 'stand', cloth: 'cloth_white' });
+  }
   for (let k = 0; k < 8; k++) person([(rand() - 0.5) * 70, 184 + rand() * 8], 0.05, rand() * 6.28);
   // boats on the Yamuna: thatch-roofed barges and rowing boats along the river, below the terrace
   for (const [x, z, kind, len] of [[-95, -276, 'barge', 12], [-40, -292, 'rowboat', 5], [10, -281, 'barge', 11], [70, -296, 'rowboat', 4.5], [118, -277, 'barge', 12.5], [160, -300, 'rowboat', 5], [-150, -290, 'rowboat', 4.8]]) {

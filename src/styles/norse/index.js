@@ -9,20 +9,10 @@ import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, frustum, lathe, quad, fromTriangles, orientOutward } from '../../core/geom.js';
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import '../qing/index.js';
+import { dragonHead, ridgeCrest, westPortal } from './carving.js';
 
 const W = 'tar_wood', SH = 'tar_shingle', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-/** A carved dragon head leaning out from a gable end at (x, y, z), pointing along dir (+1/-1 on x). */
-function dragon(bag, x, y, z, dir, s = 1) {
-  // the neck rising out from the gable's ridge in three curving pieces, the head with its open jaws and crest
-  const seg = (a, b, w) => { const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy); const g = box(0, -w, -w * 0.8, L, w, w * 0.8); g.rotateZ(Math.atan2(dy, dx * dir)); g.translate(x + a[0] * dir, y + a[1], z); bag.add(W, g); };
-  const P = [[0, 0], [0.45 * s, 0.35 * s], [0.75 * s, 0.85 * s], [0.95 * s, 1.35 * s]];
-  for (let i = 0; i < 3; i++) seg(P[i], P[i + 1], (0.14 - i * 0.02) * s);
-  const h0 = P[3];
-  seg(h0, [h0[0] + 0.55 * s, h0[1] + 0.12 * s], 0.11 * s);           // the upper jaw
-  seg([h0[0] + 0.05 * s, h0[1] - 0.06 * s], [h0[0] + 0.5 * s, h0[1] - 0.22 * s], 0.06 * s);     // the lower jaw, open
-  seg([h0[0] - 0.08 * s, h0[1] + 0.08 * s], [h0[0] - 0.25 * s, h0[1] + 0.4 * s], 0.05 * s);     // the crest curling back
-}
 /** A small cross on a gable's apex. */
 function cross(bag, x, y, z, s = 1) { bag.add(W, box(x - 0.05 * s, y, z - 0.05 * s, x + 0.05 * s, y + 1.0 * s, z + 0.05 * s)); bag.add(W, box(x - 0.05 * s, y + 0.55 * s, z - 0.3 * s, x + 0.05 * s, y + 0.65 * s, z + 0.3 * s)); }
 /** An extruded flat piece: `shape` drawn in (u, v) — u along a→b from a, v up from y — th thick, centred on the line a–b. */
@@ -362,9 +352,11 @@ function staveChurch(el, { bag, col, lights }) {
     }
   }
   // the dragon heads, the openwork crest along the ridge
-  for (const [x, d] of [[co[0] - 0.3, -1], [co[2] + 0.3, 1]]) { bag.add(W, box(x - 0.1, ridge - 0.3, cz - 0.1, x + 0.1, ridge + 0.6, cz + 0.1)); dragon(bag, x, ridge - 0.4, cz, d, s * 1.1); }
-  for (let x = co[0] + 0.1; x <= co[2] - 0.1; x += 0.28) { bag.add(W, box(x - 0.035, ridge - 0.05, cz - 0.03, x + 0.035, ridge + 0.32 + 0.06 * Math.cos(x * 9), cz + 0.03)); }
-  bag.add(W, box(co[0], ridge + 0.12, cz - 0.035, co[2], ridge + 0.18, cz + 0.035));
+  // (both the nave and the turret carry openwork crests with dragon heads over the gables — SNL; the turret's below)
+  { const xe = 0.35 * s, bt = 1.25 * s;
+    ridgeCrest(bag, W, [co[0] - xe, cz], [cx - bt, cz], ridge - 0.03, 0.4 * s);
+    ridgeCrest(bag, W, [cx + bt, cz], [co[2] + xe, cz], ridge - 0.03, 0.4 * s);
+    for (const [x, d] of [[co[0] - xe + 0.12, -1], [co[2] + xe - 0.12, 1]]) dragonHead(bag, W, [x, ridge - 0.06, cz], [d, 0], 1.3 * s); }
   // the aisles' lean-to roof, from the eaves up to the central room's walls
   leanTo(bag, [ai[0] - 0.3, ai[1] - 0.3, ai[2] + 0.3, ai[3] + 0.3], [co[0] + 0.04, co[1] + 0.04, co[2] - 0.04, co[3] - 0.04], U(5.6), U(7.4));
 
@@ -380,13 +372,9 @@ function staveChurch(el, { bag, col, lights }) {
   for (const zz of [-0.45, 0.45]) { bag.add('opening', box(pu[0] - 0.03, pr + 0.1 * s, cz + zz * s - 0.17 * s, pu[0], pr + 0.75 * s, cz + zz * s + 0.17 * s)); bag.add('opening', lathe([[0.17 * s, 0], [0.17 * s, 0.03], [0.001, 0.03]], 10).rotateZ(Math.PI / 2).translate(pu[0] - 0.003, pr + 0.75 * s, cz + zz * s)); }
   const pur = pitched(bag, SH, W, pu, pr + 1.1 * s + 0.2 * 1.4, 1.4, 0.2, true);
   cross(bag, pu[0] - 0.12, pur - 0.15, cz, s * 0.8);
-  // the portal: broad carved jambs each side of the round-headed door (the vine and dragon work), a capital each side; the door leaf stands open inward
-  for (const sz2 of [-1, 1]) {
-    const zj = cz + sz2 * (wDoor.w / 2), zo = zj + sz2 * 0.42 * s;
-    bag.add(W, box(po[0] - 0.14, F, Math.min(zj, zo), po[0] - 0.02, F + wDoor.h + 0.1, Math.max(zj, zo)));
-    for (let k = 0; k < 6; k++) bag.add(W, box(po[0] - 0.2, F + 0.15 + k * 0.24, zj + sz2 * 0.21 * s - 0.08 * s, po[0] - 0.12, F + 0.28 + k * 0.24, zj + sz2 * 0.21 * s + 0.08 * s));
-    bag.add(W, box(po[0] - 0.22, F + wDoor.h + 0.1, zj + sz2 * 0.21 * s - 0.25 * s, po[0] - 0.02, F + wDoor.h + 0.25, zj + sz2 * 0.21 * s + 0.25 * s));
-  }
+  // the portal: the broad carved side panels and the field over the arch (the vine and dragon work), the half-columns; the door leaf stands open inward
+  { const hh = (po[3] - po[1]) / 2, yr = pH + hh * 1.2;
+    westPortal(bag, W, [po[0], F, cz], [-1, 0], { w: wDoor.w, hs: wDoor.h, pw: 0.62 * s, top: (u) => yr - 0.16 - 0.08 - Math.abs(u) * 1.2 - F }); }
   bag.add(W, box(po[0] + T + 0.02, F, cz + wDoor.w / 2 + 0.02, po[0] + T + wDoor.w - 0.04, F + wDoor.h + 0.2, cz + wDoor.w / 2 + 0.07));
   bag.add('iron', box(po[0] + T + 0.3, F + 0.3, cz + wDoor.w / 2 + 0.07, po[0] + T + wDoor.w - 0.1, F + 0.34, cz + wDoor.w / 2 + 0.085));
   bag.add('iron', box(po[0] + T + 0.3, F + 1.25, cz + wDoor.w / 2 + 0.07, po[0] + T + wDoor.w - 0.1, F + 1.29, cz + wDoor.w / 2 + 0.085));
@@ -445,6 +433,13 @@ function staveChurch(el, { bag, col, lights }) {
     bag.add(W, slab(sh, 2 * b0, [cx, cz - b0], [cx, cz + b0], yb0, 2)); }
   const g1 = pitched(bag, SH, W, [cx - b0, cz - b0, cx + b0, cz + b0], ty + 2.1 * s, 1.1, 0.25, true);
   pitched(bag, SH, W, [cx - b0, cz - b0, cx + b0, cz + b0], ty + 2.1 * s, 1.1, 0.25, false);
+  // the turret's crests on the four short ridges outside its first storey, the dragon heads over its east and west gables
+  { const e = b0 + 0.25, a = 0.85 * s;
+    for (const sg of [-1, 1]) {
+      ridgeCrest(bag, W, [cx + sg * e, cz], [cx + sg * a, cz], g1 - 0.03, 0.3 * s);
+      ridgeCrest(bag, W, [cx, cz + sg * e], [cx, cz + sg * a], g1 - 0.03, 0.3 * s);
+      dragonHead(bag, W, [cx + sg * (e - 0.1), g1 - 0.05, cz], [sg, 0], 0.9 * s);
+    } }
   const storey = (a, y0, h) => {
     bag.add(W, box(cx - a, y0, cz - a, cx + a, y0 + h, cz + a));
     for (const [nx, nz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) for (let k = -1; k <= 1; k++) {

@@ -5,6 +5,7 @@
 // their walls, timber bridges and dugout canoes; the market by the west canal.
 
 import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI, GAP } from './layout.js';
+import { ground } from './ground.js';
 
 const E = [];
 const [px0, pz0, px1, pz1] = PRECINCT;
@@ -57,6 +58,37 @@ for (const c of CANALS) {
 E.push({ t: 'tianguis', rect: MARKET, seed: 1519 });
 for (const z of [34, 62]) E.push({ t: 'stairs', rect: [-219.6, z, -215.6, z + 6], y0: LEVEL.water - 0.3, y1: 0.05, dir: 'e', mat: 'andesite' });
 for (const [z, cargo] of [[30, 'maize'], [44, 'pots'], [56, 'chile'], [74, 'reeds'], [84, 'cloth']]) E.push({ t: 'acalli', at: [-218.6, z], dir: [0, 1], len: 6, y: LEVEL.water, seed: seed++, cargo });
+// ---- people: priests climbing Huitzilopochtli's and Tlaloc's stairs with censers, the drummer and priests at the summit,
+// worshippers kneeling about the Coyolxauhqui stone, people crossing the precinct; farmers with the coa on the chinampas
+{
+  const sx0 = TM.c[0] - TM.top.w / 2 - TM.h * 0.9, len = TM.h * 0.9 + 0.5, n = Math.round(TM.h / 0.22), rs = TM.h / n;
+  const step = (k, z, rot, who, seed) => [sx0 + len * (k + 0.5) / n, z, rs * (k + 1), rot, who, seed];
+  const UP = -Math.PI / 2, DOWN = Math.PI / 2, P = [];
+  P.push(step(28, 9.2, UP, 'priest_censer', 1), step(32, 11.6, UP, 'priest', 2), step(88, 10.2, UP, 'priest_censer', 3), step(92, 8.4, UP, 'priest', 4),
+    step(150, 11.4, UP, 'priest_censer', 5), step(118, 13.2, DOWN, 'priest', 6), step(60, -9.0, UP, 'priest', 7), step(64, -11.4, UP, 'bearer', 8), step(170, -12.0, DOWN, 'priest', 9));
+  P.push([84.7, 12.4, TM.h, DOWN, 'priest', 10], [85.2, 3.1, TM.h, DOWN, 'drummer', 11], [83.0, -13.6, TM.h, DOWN, 'priest_censer', 12], [80.6, 15.0, TM.h, Math.PI * 0.8, 'priest', 13]);
+  // at the foot: worshippers about the Coyolxauhqui stone, others crossing toward the stairs
+  P.push([30.2, 7.4, 0.03, UP, 'worshipper', 20], [30.0, 10.6, 0.03, UP, 'worshipper', 21], [30.4, 13.6, 0.03, UP, 'worshipper', 22], [29.0, -9.5, 0.03, UP, 'worshipper', 23], [28.8, -11.6, 0.03, UP, 'worshipper', 24]);
+  const rp = ((s) => () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296))(77);
+  for (let i = 0; i < 16; i++) {
+    const x = 6 + rp() * 26, z = -26 + rp() * 52;
+    if (Math.hypot(x + 4, z + 10) < 16 || (x > 26 && Math.abs(Math.abs(z) - 10.4) < 4.5)) continue;
+    P.push([x, z, 0.03, rp() * 6.28, ['man', 'woman', 'bearer', 'man', 'priest'][i % 5], 30 + i]);
+  }
+  E.push({ t: 'mx_people', people: P });
+  // the chinampas: farmers turning the mud with the coa, others planting, on the plots between the ditches
+  const F = [];
+  for (let i = 0; i < 26; i++) {
+    const a = rp() * Math.PI * 2, r = 304 + rp() * 24;
+    let x = Math.cos(a) * r; const z = Math.sin(a) * r;
+    if (x < 0 && Math.abs(z) < 16) continue;
+    x = Math.floor(x / 14) * 14 + 4.5 + rp() * 5;
+    if (Math.hypot(x, z) < 303 || Math.hypot(x + 1.6, z + 1.2) > 331) continue;
+    F.push([x, z, ground.height(x, z), rp() * 6.28, i % 3 ? 'farmer' : 'planter', 60 + i]);
+    if (i % 2) F.push([x + 1.6, z + 1.2, ground.height(x + 1.6, z + 1.2), rp() * 6.28, 'farmer', 90 + i]);
+  }
+  E.push({ t: 'mx_people', people: F });
+}
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open'), room('palace', PALACE, 1.0, 'open')];
 const walks = [[[-260, 0], [-150, 0], [-60, 0], [-20, 8], [20, 8], [34, 0]]];
