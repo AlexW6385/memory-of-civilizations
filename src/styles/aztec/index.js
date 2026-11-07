@@ -11,7 +11,7 @@ import { beamTris } from '../ming/index.js';
 import '../maya/index.js';
 import '../../objects/index.js';
 import { Kit, carved, serpentHeadKit, chacmoolKit } from '../maya/meso.js';
-import { calli, tecpan, tzompantli } from './houses.js';
+import { calli, tecpan, tzompantli, chinampaHouse, mesoPlants } from './houses.js';
 import { shrineInterior, huehuetl } from './shrines.js';
 import { mxPeople } from './life.js';
 import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causewayStakes } from './precinct.js';
@@ -304,11 +304,21 @@ function tianguis(el, { bag, col }) {
         }
       }
     }
+    // in the aisle beyond the pair: buyers looking over the goods, porters (tlameme) under loads on the tumpline
+    const za = z0 + 1.5 + r * rowD + 3.6 + 1.7;
+    if (za > z1 - 1) continue;
+    for (let k = 0; k < 4; k++) {
+      if (rand() < 0.3) continue;
+      const x = x0 + 3 + rand() * (x1 - x0 - 6), w = rand() < 0.5, porter = !w && rand() < 0.35, seed = Math.floor(rand() * 1e6);
+      L.figure({ at: [x, za + (rand() - 0.5) * 1.6], y: 0.04, rot: porter ? (rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2) : (rand() < 0.5 ? 0 : Math.PI) + (rand() - 0.5) * 0.6, seed, h: w ? 1.5 : 1.6,
+        dress: 'wrap', cloth: rand() < 0.7 ? 'cloth_white' : 'cloth_ochre', cloth2: 'cloth_white', skin: 'skin_medium', hair: w ? 'bun' : 'short', hairMat: 'hair_dark', feet: 'bare', legs: 'bare',
+        over: w ? 'none' : rand() < 0.5 ? 'cape' : 'none', carry: porter ? 'bundle' : w ? (rand() < 0.5 ? 'basket' : 'none') : 'none', pose: !porter && rand() < 0.4 ? 'talk' : 'stand' }, ctx);
+    }
   }
 }
 
 registerStyle('aztec', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes, mx_people: mxPeople },
+  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes, mx_people: mxPeople, chinampa_house: chinampaHouse, meso_plants: mesoPlants },
   objects: {},
 });
