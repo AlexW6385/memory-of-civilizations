@@ -294,6 +294,69 @@
   "seconds": 44,
   "baked": "2026-11-07"
  },
+ "granada-alhambra": {
+  "site": "granada",
+  "hash": "b8f7c397b56408e8",
+  "rays": 128,
+  "probes": 64680,
+  "boxes": [
+   {
+    "min": [
+     6,
+     29.5,
+     -57.25
+    ],
+    "n": [
+     28,
+     48,
+     23
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hall of the ambassadors",
+     "sala de la barca"
+    ]
+   },
+   {
+    "min": [
+     52,
+     29.5,
+     -33.4
+    ],
+    "n": [
+     29,
+     20,
+     54
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hall of the two sisters",
+     "hall of the abencerrajes",
+     "rauda",
+     "hall of the kings"
+    ]
+   },
+   {
+    "min": [
+     104.4,
+     29.5,
+     -48.6
+    ],
+    "n": [
+     12,
+     17,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "tower of the ladies"
+    ]
+   }
+  ],
+  "bytes": 1033189,
+  "seconds": 174,
+  "baked": "2026-11-07"
+ },
  "hagia-sophia": {
   "site": "constantinople",
   "hash": "6c17db8549e4c88c",
