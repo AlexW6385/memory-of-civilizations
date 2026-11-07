@@ -154,7 +154,7 @@
  },
  "djenne-great-mosque": {
   "site": "djenne",
-  "hash": "a44210321fe5aa2d",
+  "hash": "541529bce915df7b",
   "rays": 128,
   "probes": 30784,
   "boxes": [
@@ -175,8 +175,8 @@
     ]
    }
   ],
-  "bytes": 535398,
-  "seconds": 171,
+  "bytes": 540011,
+  "seconds": 83,
   "baked": "2026-11-07"
  },
  "dome-of-the-rock": {
