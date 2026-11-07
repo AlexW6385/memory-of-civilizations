@@ -6,6 +6,8 @@ import { ENV } from './engine/env.js';
 import { World } from './engine/world.js';
 import { Perf } from './engine/perf.js';
 import { runBench } from './engine/bench.js';
+import { HITCH } from './engine/hitch.js';
+import { DynamicResolution } from './engine/dynres.js';
 import { Controls } from './engine/controls.js';
 import { Music } from './engine/audio.js';
 import { roomAcoustics } from './engine/acoustics.js';
@@ -27,9 +29,13 @@ import { ARRIVALS } from './planet/arrivals.js';
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 
-// the picture is always made at the highest quality (?quality=medium|low for testing); the music's
-// level and the look sensitivity are fixed; only the time of day is remembered between visits
-const settings = { quality: params.get('quality') || 'high', music: 0.6, sensitivity: 1, timeRuns: true, utc: 14, ...load('mp.time', {}) };
+// the picture's quality: measured on the first visit (autoQuality below) and remembered, or as the
+// address says (?quality=high|medium|low); the music's level and the look sensitivity are fixed;
+// the time of day is remembered between visits
+const QUALITIES = ['high', 'medium', 'low'];
+const storedQuality = (() => { try { const q = JSON.parse(localStorage.getItem('mp.quality') || 'null')?.q; return QUALITIES.includes(q) ? q : null; } catch { return null; } })();
+const askedQuality = QUALITIES.includes(params.get('quality')) ? params.get('quality') : null;
+const settings = { quality: askedQuality || storedQuality || 'high', music: 0.6, sensitivity: 1, timeRuns: true, utc: 14, ...load('mp.time', {}) };
 
 function sm(e0, e1, x) { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); }
 function load(k, d) { try { return { ...d, ...JSON.parse(localStorage.getItem(k) || '{}') }; } catch { return d; } }
@@ -130,7 +136,10 @@ async function main() {
   const onErr = (e) => { if (!window.READY) progress.fail(String(e?.reason?.message || e?.message || e?.reason || e)); };
   addEventListener('error', onErr); addEventListener('unhandledrejection', onErr);
   progress.set('renderer', 0);
+  // the hitch logger (`?perf`): on before the renderer and the world make their workers
+  if (params.has('perf')) HITCH.enable();
   const R = await new Renderer(canvas).init(settings.quality);
+  HITCH.watchRenderer(R.renderer);
   mark('renderer');
   progress.set('renderer', 1);
   const world = new World(R);
@@ -138,6 +147,8 @@ async function main() {
   // frame costs (`?perf` shows the panel; tools/perf.mjs uses window.palace.perf)
   const perf = new Perf(world, R);
   if (params.has('perf')) perf.show();
+  // the pixel ratio lowered and raised by the frame time on the high preset; ?dpr=x pins it
+  const dynres = perf.dynres = new DynamicResolution(R, params.has('dpr') ? parseFloat(params.get('dpr')) : null);
   mark('plans');
   progress.set('plans', 1);
   const climate = new Climate(R);
@@ -458,7 +469,9 @@ async function main() {
   function frameOnce(dt) {
     if (!controls.free) { world.reanchor(controls); controls.apply(); }
     world.place(R.camera, !controls.free);
+    const tW = HITCH.mark();
     const here = world.update(R.camera, controls);
+    HITCH.since('world', tW);
     const c = R.camera.position;
     const u = world.here(controls), f = world.anchor.frame;
     R.setRange(world.camAlt ?? 2, c.y - world.collide.terrain(c.x, c.z));
@@ -474,13 +487,18 @@ async function main() {
       zones.push({ zone: { id: near.s.id, climate: near.s.S.ground?.climate || REGION[near.s.S.focus.region].climate }, w });
       for (const z of open) zones.push({ zone: z.zone, w: z.w * (1 - w) });
     } else zones.push(...open);
+    const tC = HITCH.mark();
     const cl = climate.update({ sun: dirToLocal(f, sunPlanet(climate.utc)), moon: dirToLocal(f, moonPlanet(climate.utc)), up: dirToLocal(f, u), zones }, Math.min(dt, 0.25));
+    HITCH.since('climate', tC);
     rain.update(dt, cl.rain, outdoors);
+    const tA = HITCH.mark();
     music.ambience(cl.rain, cl.windy, !outdoors);
+    HITCH.since('audio', tA);
     // the sounds of the place, sampled twice a second: water near, a town round, birds by day
     placeT -= dt;
     if (placeT <= 0) {
       placeT = 0.5;
+      const tP = HITCH.mark();
       let wetN = 0;
       for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; for (const d of [5, 14]) if (Number.isFinite(world.collide.waterLevel(c.x + Math.cos(a) * d, c.z + Math.sin(a) * d)) && world.collide.waterLevel(c.x + Math.cos(a) * d, c.z + Math.sin(a) * d) > world.collide.terrain(c.x + Math.cos(a) * d, c.z + Math.sin(a) * d)) wetN++; }
       const inTown = near ? 1 - sm(near.s.S.radius * 0.6, near.s.S.radius + 40, near.r) : 0, modern = near && MODERN.has(near.s.id);
@@ -518,6 +536,7 @@ async function main() {
         }
         music.surround(dists);
       }
+      HITCH.since('audio', tP);
     }
     // eye adaptation: open up in dark rooms (at most ~3 stops), close down outdoors
     // the light round the eye: the brightest of a few samples a step apart, so that one probe buried
@@ -538,14 +557,16 @@ async function main() {
     snap = false;
     R.renderer.toneMappingExposure = exposure;
     // the reverberation of the room one is in, worked out from its volume and materials
+    const tR = HITCH.mark();
     if (here.building !== preparedFor) { preparedFor = here.building; if (preparedFor) music.prepare(preparedFor.plan.rooms.map((r) => roomAcoustics(preparedFor.plan, r))); }
     music.room(here.building && here.room ? roomAcoustics(here.building.plan, here.room) : null);
     if (here.building) music.set(here.building.music, here.room?.kind || 'open');
     else music.set(world.anchor.site?.music || null, 'open');
+    HITCH.since('audio', tR);
     return here;
   }
   // the view moves when one looks round, walks, flies or falls; tools (controls.free) hold it still
-  let lookYaw = 0, lookPitch = 0;
+  let lookYaw = 0, lookPitch = 0, fullWas = false, measuring = null;
   const frame = () => {
     const now = performance.now();
     const looked = controls.yaw !== lookYaw || controls.pitch !== lookPitch;
@@ -554,15 +575,24 @@ async function main() {
     R.setMotion(moving, now);
     // held still for a second: the scene only sways, flickers and drifts, so it is drawn at
     // ~24 fps instead of 60, leaving the machine (and the rest of the picture) its breath
-    if (!perf.panel && !perf.record && !controls.free && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
+    if (!perf.panel && !perf.record && !measuring && !controls.free && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
     const dt = (now - last) / 1000;
     last = now;
-    controls.update(dt);
+    HITCH.time('controls', () => controls.update(dt));
     frameOnce(dt);
-    minimap?.update(world.here(controls), heading());
+    HITCH.time('minimap', () => minimap?.update(world.here(controls), heading()));
+    const tR = HITCH.mark();
     R.render();
-    stats.frames++; stats.ms = stats.ms * 0.9 + (performance.now() - now) * 0.1;
-    perf.tick(now, performance.now() - now);
+    HITCH.since('render', tR);
+    const js = performance.now() - now;
+    stats.frames++; stats.ms = stats.ms * 0.9 + js * 0.1;
+    perf.tick(now, js);
+    HITCH.frame(now, dt * 1000, js, R.renderer.info);
+    // (the frames of a view held still are drawn at 24 fps on purpose: not counted)
+    const full = !!(perf.panel || perf.record) || now - (R.movedAt ?? -1e9) < 900;
+    if (measuring) measuring(now, dt * 1000);
+    else dynres.update(now, dt * 1000, full && fullWas);
+    fullWas = full;
   };
   R.renderer.setAnimationLoop(frame);
 
@@ -594,9 +624,36 @@ async function main() {
     walk: async (keys, ms) => { controls.enabled = true; for (const k of keys) controls.keys.add(k); await new Promise((r) => setTimeout(r, ms)); controls.keys.clear(); },
     feet: () => ({ ...controls.feet }),
     world, renderer: R, controls, stats, music, climate, mapView, perf,
+    get hitches() { return HITCH.ring; },
+    dynres,
     ground: (x, z) => world.collide.terrain(x, z),
   };
   window.READY = true;
+  // the first visit (no quality asked for or remembered): the frame times measured for a few
+  // seconds, every frame drawn, and the quality chosen from them and remembered. What can change
+  // without compiling every material again (the pixel ratio, the air's pass, the edge smoothing,
+  // the plants' reach) changes now; the rest (the lamps, the shadow maps, the occlusion) with the
+  // next visit, which starts at the remembered quality
+  if (!askedQuality && !storedQuality && settings.quality === 'high') {
+    // (four seconds and 30 frames at least; on a machine too slow for 30 frames in 15 s, low)
+    const t0 = performance.now() + 1500, t1 = t0 + 4000, t2 = t0 + 15000, dts = [];
+    measuring = (now, dt) => {
+      if (document.hidden) { measuring = null; return; }      // measured again next visit
+      if (now < t0 || controls.free) return;
+      if (dt < 3000) dts.push(dt);
+      if (now < t1 || (dts.length < 30 && now < t2)) return;
+      measuring = null;
+      dts.sort((a, b) => a - b);
+      const p50 = dts.length < 30 ? Infinity : dts[dts.length >> 1], q = p50 <= 30 ? 'high' : p50 <= 50 ? 'medium' : 'low';
+      try { localStorage.setItem('mp.quality', JSON.stringify({ q, p50: Number.isFinite(p50) ? +p50.toFixed(1) : null, frames: dts.length, ratio: R.renderer.getPixelRatio(), at: Date.now() })); } catch { /* storage unavailable */ }
+      console.info('[memory of civilizations] quality:', q, `(median frame ${p50.toFixed(1)} ms over ${dts.length} frames)`);
+      if (q !== 'high') {
+        R.setQualityLive(q);
+        world.flora.scale = world.openFlora.scale = floraScale[q];
+        world.flora.dirty = true;
+      }
+    };
+  }
   // the other settlements' landmark plans (for the map), now that the world is open
   setTimeout(() => world.prefetch(world.here(controls)), 2000);
   if (params.has('bench')) setTimeout(() => runBench(window.palace), 1000);

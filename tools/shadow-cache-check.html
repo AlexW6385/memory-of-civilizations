@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"/src/vendor/three/build/three.webgpu.js","three/webgpu":"/src/vendor/three/build/three.webgpu.js","three/tsl":"/src/vendor/three/build/three.tsl.js","three/addons/":"/src/vendor/three/examples/jsm/"}}</script>
+<style>html,body{margin:0;background:#000}canvas{display:block;width:100vw;height:100vh}</style>
+</head><body><canvas id="view"></canvas>
+<script type="module">
+// tools/shadow-cache-check.mjs: a small scene drawn through the game's renderer, its shadow
+// cascades cached (src/engine/shadow-cache.js); the tool compares frames.
+import * as THREE from 'three/webgpu';
+import { uniform, positionLocal, vec3 } from 'three/tsl';
+import { Renderer } from '/src/engine/renderer.js';
+const R = await new Renderer(document.getElementById('view')).init('high');
+R.sky.visible = false; R.stars.visible = false; R.moon.visible = false;
+R.scene.background = new THREE.Color(0x8899aa);
+R.sunDir = [0.45, 0.7, 0.35];
+const S = R.scene;
+const mat = new THREE.MeshStandardNodeMaterial({ color: 0xd8c8a8, roughness: 0.8 });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), mat);
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; ground.castShadow = true; S.add(ground);
+for (let i = 0; i < 12; i++) {
+  const b = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2 + (i % 4) * 2, 1.5), mat);
+  b.position.set(-10 + (i % 4) * 6, 1 + (i % 4), -6 - Math.floor(i / 4) * 8); b.castShadow = b.receiveShadow = true; S.add(b);
+}
+// a caster that moves its vertices (as the plants sway): drawn into the cascades every frame
+const shift = uniform(0);
+const dm = new THREE.MeshStandardNodeMaterial({ color: 0x55aa55 });
+dm.positionNode = positionLocal.add(vec3(shift, 0, 0));
+const dyn = new THREE.Mesh(new THREE.SphereGeometry(1.2, 24, 16), dm);
+dyn.position.set(2, 2.5, -4); dyn.castShadow = dyn.receiveShadow = true; S.add(dyn);
+R.camera.position.set(0, 1.7, 6); R.camera.rotation.set(-0.12, 0, 0); R.camera.updateMatrixWorld();
+R.renderer.toneMappingExposure = 1;
+const csm = () => R.sun.shadow.shadowNode;
+window.T = {
+  async frames(n) { for (let i = 0; i < n; i++) { R.render(); await R.renderer.backend.device?.queue.onSubmittedWorkDone(); } },
+  shift(v) { shift.value = v; },
+  moveBox(dx) { S.children.find((o) => o.castShadow && o.geometry?.type === 'BoxGeometry').position.x += dx; },
+  hideDyn(h) { dyn.visible = !h; },
+  dirty() { for (const node of csm()._shadowNodes) if (node._cascade) node._cascade.dirty = true; },
+  stats() { return { ...csm().stats, cache: csm().cache }; },
+};
+window.READY = true;
+</script></body></html>
