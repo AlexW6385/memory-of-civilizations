@@ -24,7 +24,8 @@ const samePrototype = (a, b) => {
 };
 
 export class LifeInstances {
-  constructor(parent, castsShadow) {
+  constructor(parent, castsShadow, precompile = null) {
+    this.precompile = precompile;          // compiles a mesh's shaders off the frame (renderer.js precompile)
     this.group = new THREE.Group();
     this.group.name = 'life';
     parent.add(this.group);
@@ -113,8 +114,11 @@ export class LifeInstances {
           lg.setAttribute('normal', new THREE.BufferAttribute(low.nor, 3, g.attributes.normal.normalized));
           lg.setIndex(new THREE.BufferAttribute(low.index, 1, low.index instanceof Uint16Array));
           lg.computeBoundingBox(); lg.computeBoundingSphere();
-          shape.far = make(true, lg);
-          shape.far.castShadow = near.castShadow;
+          const far = make(true, lg);
+          far.castShadow = near.castShadow;
+          // (a coarse version has other attributes than its shape: its shaders compiled before it is used)
+          if (!this.precompile) { shape.far = far; this.last = null; return; }
+          this.precompile(far).then(() => { if (!this.disposed) { shape.far = far; this.last = null; } });
         };
         shape.pre = !!pre;
         this.meshes.push(shape);
@@ -163,14 +167,15 @@ export class LifeInstances {
   update(x, y, z, force = false) {
     // the shapes' coarse versions made a few at each call (~3 ms), until all are (src/engine/cells.js)
     if (!this.lowDone) {
+      // those made in the build worker, ~3 ms of them a call; those to be made here (coarse(), a
+      // few ms each, more for a large shape) when the page is idle, one at a time
       const t0 = performance.now();
       for (const L of this.meshes) {
-        if (!L.makeFar) continue;
-        // (one shape at a time when they are made here: a large one alone takes a few ms)
-        if (performance.now() - t0 > (L.pre ? 3 : 0.5)) break;
+        if (!L.makeFar || !L.pre) continue;
+        if (performance.now() - t0 > 3) break;
         const f = L.makeFar; L.makeFar = null; f();
-        if (L.far) force = true;
       }
+      if (!this.idling && this.meshes.some((L) => L.makeFar && !L.pre)) this.idleLow();
       this.lowDone = !this.meshes.some((L) => L.makeFar);
     }
     if (!force && this.last && Math.hypot(x - this.last[0], y - this.last[1], z - this.last[2]) < 4) return;
@@ -227,7 +232,23 @@ export class LifeInstances {
     }
   }
 
+  /** The coarse versions to be made here, in the page's idle time (a shape per idle period). */
+  idleLow() {
+    this.idling = true;
+    const step = (deadline) => {
+      if (this.disposed) return;
+      const L = this.meshes.find((x) => x.makeFar && !x.pre);
+      if (!L) { this.idling = false; return; }
+      // a shape when the idle period has room (or after a second's wait at most)
+      if (!deadline || deadline.didTimeout || deadline.timeRemaining() > 6) { const f = L.makeFar; L.makeFar = null; f(); }
+      schedule();
+    };
+    const schedule = () => (globalThis.requestIdleCallback ? requestIdleCallback(step, { timeout: 1000 }) : setTimeout(step, 50));
+    schedule();
+  }
+
   dispose() {
+    this.disposed = true;
     for (const { near, far } of [...this.meshes, ...this.rare]) { near.geometry.dispose(); near.dispose(); if (far) { far.geometry.dispose(); far.dispose(); } }
     this.meshes = []; this.rare = [];
     this.group.removeFromParent();

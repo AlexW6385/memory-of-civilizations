@@ -67,6 +67,21 @@ const SEALED_OUT = 9;
 const NEAR_REACH = 200;
 /** How far (m) past a closed room of a plan one may stand, under a roof, and still be in it (world.locate). */
 const GAP = 5;
+/** New geometry let into the scene per frame (bytes): its upload to the GPU happens in the frame
+ *  that first draws it, so a settlement's parts and merged meshes come in spread over frames. */
+const UPLOAD_BUDGET = 8 << 20;
+/** The bytes a group's meshes will send to the GPU. */
+export function bytesOf(root) {
+  let n = 0;
+  const seen = new Set();
+  const add = (a) => { if (a?.array && !seen.has(a)) { seen.add(a); n += a.array.byteLength; } };
+  root.traverse((o) => {
+    if (!o.geometry) return;
+    for (const a of Object.values(o.geometry.attributes)) add(a);
+    add(o.geometry.index); add(o.instanceMatrix); add(o.instanceColor);
+  });
+  return n;
+}
 /** Static meshes merged across a settlement's plans (src/engine/merge.js); `?merge=0` keeps them per plan, to compare. */
 const MERGE = new URLSearchParams(globalThis.location?.search ?? '').get('merge') !== '0';
 const NO_SHADOW = new Set(['water', 'glass_outer', 'glass_topaz', 'opening', 'daylight', 'daylight_plain']);
@@ -263,6 +278,8 @@ class Settlement {
     HITCH.since('stream meshes', tS);
     // its shaders compiled before it shows, not in the frame that first draws it (a hitch)
     await this.world.r.precompile?.(group);
+    // and its buffers sent to the GPU in a frame with room for them
+    await this.world.uploadSlot(bytesOf(group));
     tS = HITCH.mark();
     if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
     this.group.add(group);
@@ -297,7 +314,8 @@ class Settlement {
     this.group.add(into);
     // the shapes drawn by distance (merge.js LodSet), their copies chosen with the street life's
     const lods = this.lods = [];
-    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods }); } catch (e) { console.warn('merging', this.id, e); }
+    const precompile = async (list) => { await this.world.r.precompile?.(list); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b); };
+    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile }); } catch (e) { console.warn('merging', this.id, e); }
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
 
@@ -305,9 +323,13 @@ class Settlement {
   buildLife() {
     if (!this.lifeParts?.length) return;
     const t0 = HITCH.mark();
-    this.life = new LifeInstances(this.group, castsShadow);
+    this.life = new LifeInstances(this.group, castsShadow, (o) => this.world.r.precompile?.(o) ?? Promise.resolve());
     // (the rarer shapes are merged settlement-wide by material, their copies chosen by distance)
     this.life.build(this.lifeParts);
+    // shown once its shaders are compiled (off the frame)
+    const life = this.life;
+    life.ready = false; life.group.visible = false;
+    Promise.resolve(this.world.r.precompile?.(life.group)).then(() => { life.ready = true; });
     // the lanterns among the street's things: one lamp per copy of a glow shape, and per piece of the rarer ones
     this.lifeLamps = lampsOf({}, this.life.meshes.map((L) => ({ mat: L.near.name.split(":")[1], geometry: L.near.geometry, matrices: L.all })));
     this.lifeLamps.push(...lampsOf({}, this.life.rare.map((B) => ({ mat: B.near.name.split(":")[1], geometry: B.near.geometry }))));
@@ -378,6 +400,27 @@ export class World {
     this._m2 = new THREE.Matrix4();
   }
 
+  /**
+   * Resolves in a frame with room for `bytes` more of new geometry (UPLOAD_BUDGET a frame; one
+   * larger than that alone in its frame). Without frames running (the start, behind the loading
+   * screen) at once.
+   */
+  uploadSlot(bytes) {
+    if (!(performance.now() - (this._updatedAt ?? -1e9) < 150)) return Promise.resolve();
+    return new Promise((r) => (this._uploads ??= []).push([bytes, r]));
+  }
+
+  /** The uploads let in this frame (called at the start of update). */
+  letUploadsIn() {
+    const Q = this._uploads;
+    this._updatedAt = performance.now();
+    if (!Q?.length) return;
+    let room = UPLOAD_BUDGET, k = 0;
+    while (k < Q.length && (room === UPLOAD_BUDGET || Q[k][0] <= room)) { room -= Q[k][0]; Q[k][1](); k++; }
+    Q.splice(0, k);
+    HITCH.count('uploads', k);
+  }
+
   /** onStep(label, fraction): the loading bar's detail (src/main.js Progress). */
   async init(onStep = () => {}) {
     this.builder = new Builder(2);
@@ -400,6 +443,7 @@ export class World {
     this.legacy.matrixAutoUpdate = false;
     this.scene.add(this.legacy);
     this.flora = new Flora(this.legacy);
+    this.flora.precompile = (o) => this.r.precompile(o);
     // the open country's collision: the planet's ground and the sea in the current frame
     this.open = new CollisionWorld();
     this.open.terrain = (x, z) => groundInFrame(this.anchor.frame, x, z);
@@ -690,6 +734,7 @@ export class World {
   /** Called every frame: load and unload by distance, the ground's detail, the plants, the baked light. */
   update(camera, controls) {
     const now = performance.now();
+    this.letUploadsIn();
     const u = this.here(controls);
     const camP = toPlanet(this.anchor.frame, camera.position.toArray());
     let t0 = HITCH.mark();
@@ -778,7 +823,7 @@ export class World {
         // the shapes drawn by distance (merge.js LodSet)
         if (s.lods) for (const D of s.lods) D.update(L[0], L[1], L[2]);
         if (!s.life) continue;
-        s.life.group.visible = !this.lifeHidden;
+        s.life.group.visible = !this.lifeHidden && s.life.ready !== false;
         s.life.update(L[0], L[1], L[2]);
       }
     }

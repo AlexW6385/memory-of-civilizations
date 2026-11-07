@@ -113,31 +113,35 @@ export class Flora {
 
   /** Cells wanted around (x, z): far cells for trees, near cells for grass. */
   update(x, z) {
-    const want = new Set();
     if (!this.focus) { if (this.dirty) { this.rebuild(x, z); this.dirty = false; } return 0; }
-    const [fx, fz] = this.focus.center, fr = this.focus.radius;
-    const [X0, Z0, X1, Z1] = [fx - fr + 400, fz - fr + 400, fx + fr - 400, fz + fr - 400];
-    const R = this.maxLod;
-    for (let cx = Math.floor((x - R) / BIG) * BIG; cx < x + R; cx += BIG) for (let cz = Math.floor((z - R) / BIG) * BIG; cz < z + R; cz += BIG) {
-      if (cx + BIG < X0 - 400 || cx > X1 + 400 || cz + BIG < Z0 - 400 || cz > Z1 + 400) continue;
-      const d = Math.hypot(Math.max(cx - x, 0, x - cx - BIG), Math.max(cz - z, 0, z - cz - BIG));
-      if (d < R) want.add(`B:${cx},${cz}`);
+    // the cells wanted, again only when the viewer has moved a few metres (or the site changed)
+    if (!this.wantAt || this.wantGen !== this.gen || Math.hypot(x - this.wantAt[0], z - this.wantAt[1]) > 4) {
+      this.wantAt = [x, z]; this.wantGen = this.gen;
+      const want = new Set();
+      const [fx, fz] = this.focus.center, fr = this.focus.radius;
+      const [X0, Z0, X1, Z1] = [fx - fr + 400, fz - fr + 400, fx + fr - 400, fz + fr - 400];
+      const R = this.maxLod;
+      for (let cx = Math.floor((x - R) / BIG) * BIG; cx < x + R; cx += BIG) for (let cz = Math.floor((z - R) / BIG) * BIG; cz < z + R; cz += BIG) {
+        if (cx + BIG < X0 - 400 || cx > X1 + 400 || cz + BIG < Z0 - 400 || cz > Z1 + 400) continue;
+        const d = Math.hypot(Math.max(cx - x, 0, x - cx - BIG), Math.max(cz - z, 0, z - cz - BIG));
+        if (d < R) want.add(`B:${cx},${cz}`);
+      }
+      for (let cx = Math.floor((x - NEAR_R) / SMALL) * SMALL; cx < x + NEAR_R; cx += SMALL) for (let cz = Math.floor((z - NEAR_R) / SMALL) * SMALL; cz < z + NEAR_R; cz += SMALL) {
+        const d = Math.hypot(Math.max(cx - x, 0, x - cx - SMALL), Math.max(cz - z, 0, z - cz - SMALL));
+        if (d < NEAR_R) want.add(`S:${cx},${cz}`);
+      }
+      for (const k of want) if (!this.cells.has(k)) {
+        const [kind, rest] = k.split(':'), [cx, cz] = rest.split(',').map(Number), size = kind === 'B' ? BIG : SMALL;
+        this.cells.set(k, { state: 'queued', rect: [cx, cz, cx + size, cz + size], near: kind === 'S', d: 0 });
+      }
+      for (const [k, c] of this.cells) if (!want.has(k) && c.state !== 'pending') { this.cells.delete(k); this.dirty = true; }
+      for (const c of this.cells.values()) c.d = Math.hypot((c.rect[0] + c.rect[2]) / 2 - x, (c.rect[1] + c.rect[3]) / 2 - z);
+      this.queue = [...this.cells.entries()].filter(([, c]) => c.state === 'queued').sort((a, b) => a[1].d - b[1].d).map(([k]) => k);
     }
-    for (let cx = Math.floor((x - NEAR_R) / SMALL) * SMALL; cx < x + NEAR_R; cx += SMALL) for (let cz = Math.floor((z - NEAR_R) / SMALL) * SMALL; cz < z + NEAR_R; cz += SMALL) {
-      const d = Math.hypot(Math.max(cx - x, 0, x - cx - SMALL), Math.max(cz - z, 0, z - cz - SMALL));
-      if (d < NEAR_R) want.add(`S:${cx},${cz}`);
-    }
-    for (const k of want) if (!this.cells.has(k)) {
-      const [kind, rest] = k.split(':'), [cx, cz] = rest.split(',').map(Number), size = kind === 'B' ? BIG : SMALL;
-      this.cells.set(k, { state: 'queued', rect: [cx, cz, cx + size, cz + size], near: kind === 'S', d: Math.hypot(cx + size / 2 - x, cz + size / 2 - z) });
-    }
-    for (const [k, c] of this.cells) if (!want.has(k) && c.state !== 'pending') { this.cells.delete(k); this.dirty = true; }
-    for (const c of this.cells.values()) c.d = Math.hypot((c.rect[0] + c.rect[2]) / 2 - x, (c.rect[1] + c.rect[3]) / 2 - z);
-    this.queue = [...this.cells.entries()].filter(([, c]) => c.state === 'queued').sort((a, b) => a[1].d - b[1].d).map(([k]) => k);
     this.pump();
     const moved = !this.last || Math.hypot(x - this.last[0], z - this.last[1]) > 12;
-    if (this.dirty || moved) { this.rebuild(x, z); this.last = [x, z]; this.dirty = false; }
-    return this.queue.length + [...this.cells.values()].filter((c) => c.state === 'pending').length;
+    if (this.dirty || moved) { this.last = [x, z]; this.dirty = !this.rebuild(x, z, 4); }
+    return this.queue.length;
   }
 
   /** Resolve when the plants within `near` metres are placed; farther ones follow. onProgress(0…1). */
@@ -165,48 +169,88 @@ export class Flora {
     }
   }
 
-  /** Sort every plant into its species, variant and level of detail, and fill the instanced meshes. */
-  rebuild(x, z) {
-    if (!this.species) return;
-    const buckets = new Map();
+  /**
+   * A cell's plants made ready to be drawn, once (when it arrives): each plant's matrix, colour
+   * and species-and-variant number, so that a rebuild only sorts and copies.
+   */
+  prepare(c) {
+    const d = c.data, n = d.length / 8;
+    const M = new Float32Array(n * 16), col = new Float32Array(n * 3), kv = new Int32Array(n), reach0 = new Float32Array(n), reach1 = new Float32Array(n), px = new Float32Array(n), pz = new Float32Array(n);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
-    const col = new THREE.Color();
+    const kvs = this.kvs ??= new Map(), kvList = this.kvList ??= [];
+    for (let j = 0, i = 0; j < n; j++, i += 8) {
+      const sp = this.species[d[i]], S = SPECIES[sp], v = d[i + 1] % VARIANTS, key = `${sp}/${v}`;
+      let k = kvs.get(key);
+      if (k === undefined) { k = kvList.length; kvs.set(key, k); kvList.push([sp, v]); }
+      kv[j] = k;
+      reach0[j] = S.lod[0]; reach1[j] = S.lod[1];
+      px[j] = d[i + 2]; pz[j] = d[i + 4];
+      const sc = S.scale[0] + (S.scale[1] - S.scale[0]) * d[i + 6];
+      p.set(d[i + 2], d[i + 3], d[i + 4]); q.setFromAxisAngle(up, d[i + 5]); s.setScalar(sc);
+      m.compose(p, q, s).toArray(M, j * 16);
+      col[j * 3] = 0.88 + 0.24 * d[i + 7]; col[j * 3 + 1] = 0.9 + 0.2 * d[i + 7]; col[j * 3 + 2] = 0.86 + 0.2 * ((d[i + 7] * 7) % 1);
+    }
+    c.prep = { n, M, col, kv, reach0, reach1, px, pz, cid: (this.cellIds = (this.cellIds || 0) + 1) };
+  }
+
+  /**
+   * Sort every plant into its species, variant and level of detail, and fill the instanced meshes:
+   * only the meshes whose plants changed are written, and only their used part is sent to the GPU.
+   * New cells are made ready within `budget` ms (the rest at the next call); returns whether all were.
+   */
+  rebuild(x, z, budget = Infinity) {
+    if (!this.species) return true;
+    const t0 = performance.now(), tH = HITCH.mark();
+    let all = true;
+    const buckets = new Map();             // kv * 2 + lod → [prep, j, prep, j, …]
+    const sc = this.scale;
     for (const c of this.cells.values()) {
       if (c.state !== 'done') continue;
-      const d = c.data;
-      for (let i = 0; i < d.length; i += 8) {
-        const sp = this.species[d[i]], S = SPECIES[sp];
-        const dist = Math.hypot(d[i + 2] - x, d[i + 4] - z);
-        const lod = dist < S.lod[0] * this.scale ? 0 : dist < S.lod[1] * this.scale ? 1 : -1;
+      if (!c.prep || c.prep.src !== c.data) {
+        if (performance.now() - t0 > budget) { all = false; continue; }
+        this.prepare(c); c.prep.src = c.data;
+      }
+      const P = c.prep, { n, kv, reach0, reach1, px, pz } = P;
+      // (a whole cell beyond every plant's reach skipped)
+      const r = c.rect, cdx = Math.max(r[0] - x, 0, x - r[2]), cdz = Math.max(r[1] - z, 0, z - r[3]);
+      if (cdx * cdx + cdz * cdz > (this.maxLod * sc) ** 2) continue;
+      const sc2 = sc * sc;
+      for (let j = 0; j < n; j++) {
+        const dx = px[j] - x, dz = pz[j] - z, d2 = dx * dx + dz * dz;
+        const lod = d2 < reach0[j] * reach0[j] * sc2 ? 0 : d2 < reach1[j] * reach1[j] * sc2 ? 1 : -1;
         if (lod < 0) continue;
-        const key = `${sp}/${d[i + 1] % VARIANTS}/${lod}`;
-        if (!buckets.has(key)) buckets.set(key, []);
-        buckets.get(key).push(i, c);
+        const b = kv[j] * 2 + lod;
+        let list = buckets.get(b);
+        if (!list) buckets.set(b, (list = []));
+        list.push(P, j);
       }
     }
     // hide what is no longer used
-    for (const [key, b] of this.batches) if (!buckets.has(key)) { for (const mesh of b.meshes) mesh.count = 0; }
-    for (const [key, list] of buckets) {
-      const [sp, v, lod] = key.split('/');
+    for (const [key, b] of this.batches) if (!buckets.has(b.id)) { for (const mesh of b.meshes) mesh.count = 0; b.sig = 0; }
+    for (const [id, list] of buckets) {
+      const [sp, v] = this.kvList[id >> 1], lod = id & 1;
       const n = list.length / 2;
-      const b = this.batch(sp, +v, +lod, n);
-      let k = 0;
-      for (let j = 0; j < list.length; j += 2) {
-        const i = list[j], d = list[j + 1].data, S = SPECIES[sp];
-        const sc = S.scale[0] + (S.scale[1] - S.scale[0]) * d[i + 6];
-        p.set(d[i + 2], d[i + 3], d[i + 4]); q.setFromAxisAngle(up, d[i + 5]); s.setScalar(sc);
-        m.compose(p, q, s);
-        col.setRGB(0.88 + 0.24 * d[i + 7], 0.9 + 0.2 * d[i + 7], 0.86 + 0.2 * ((d[i + 7] * 7) % 1));
-        for (const mesh of b.meshes) { mesh.setMatrixAt(k, m); if (mesh.instanceColor || mesh.userData.tinted) mesh.setColorAt(k, col); }
-        k++;
-      }
+      const b = this.batch(sp, v, lod, n);
+      b.id = id;
+      // (written only if its plants changed)
+      let sig = n;
+      for (let j = 0; j < list.length; j += 2) sig = (Math.imul(sig, 31) + list[j].cid * 65537 + list[j + 1]) | 0;
+      if (sig === b.sig && b.meshes[0]?.count === n) continue;
+      b.sig = sig;
       for (const mesh of b.meshes) {
+        const M = mesh.instanceMatrix.array, C = mesh.instanceColor?.array;
+        for (let j = 0, k = 0; j < list.length; j += 2, k++) {
+          const P = list[j], i = list[j + 1];
+          M.set(P.M.subarray(i * 16, i * 16 + 16), k * 16);
+          if (C) { C[k * 3] = P.col[i * 3]; C[k * 3 + 1] = P.col[i * 3 + 1]; C[k * 3 + 2] = P.col[i * 3 + 2]; }
+        }
         mesh.count = n;
-        mesh.instanceMatrix.needsUpdate = true;
-        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-        mesh.computeBoundingSphere?.();
+        mesh.instanceMatrix.clearUpdateRanges(); mesh.instanceMatrix.addUpdateRange(0, n * 16); mesh.instanceMatrix.needsUpdate = true;
+        if (mesh.instanceColor) { mesh.instanceColor.clearUpdateRanges(); mesh.instanceColor.addUpdateRange(0, n * 3); mesh.instanceColor.needsUpdate = true; }
       }
     }
+    HITCH.since('flora rebuild', tH);
+    return all;
   }
 
   batch(sp, v, lod, n) {
@@ -236,6 +280,11 @@ export class Flora {
       mesh.receiveShadow = true;
       mesh.name = `flora:${key}`;
       this.group.add(mesh);
+    }
+    // its shaders compiled off the frame before it shows (src/engine/renderer.js precompile)
+    if (this.precompile) {
+      for (const mesh of meshes) mesh.visible = false;
+      this.precompile(meshes).then(() => { for (const mesh of meshes) mesh.visible = true; });
     }
     b = { meshes, cap };
     this.batches.set(key, b);

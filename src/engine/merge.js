@@ -68,7 +68,7 @@ function hashGeometry(g) {
  * the settlement was let go of meanwhile. Returns the merged meshes, each with userData.recs (the
  * parts it holds).
  */
-export async function mergeParts(recs, into, make, { castsShadow, stale = () => false, lods = [] } = {}) {
+export async function mergeParts(recs, into, make, { castsShadow, stale = () => false, lods = [], precompile = null } = {}) {
   const groups = new Map();
   for (const rec of recs) {
     for (const o of rec.group.children) {
@@ -83,6 +83,16 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
   let t = performance.now();
   const breathe = async () => { if (performance.now() - t > SLICE) { HITCH.add('merge', performance.now() - t); await new Promise((r) => setTimeout(r, 0)); t = performance.now(); } };
   // a member left as it is (a shape or material of one plan only, not worth cutting or choosing)
+  // the merged meshes' shaders compiled off the frame before they are swapped in (a coarse version
+  // has other attributes than its prototype: a new pipeline, compiled in the frame that first drew it)
+  const ready = async (meshes) => {
+    if (!precompile) return;
+    const t0 = performance.now();
+    await precompile(meshes);
+    t += performance.now() - t0;             // (the wait is not this slice's work)
+  };
+  // without workers the coarse versions are made here: when the page is idle, a shape at a time
+  const idle = () => new Promise((r) => (globalThis.requestIdleCallback ? requestIdleCallback(() => r(), { timeout: 1000 }) : setTimeout(r, 0)));
   const keep = (G) => { for (const { o } of G.list) { delete o.userData.merge; releaseAfterUpload(o); } };
   for (const G of groups.values()) {
     if (stale()) return out;
@@ -92,6 +102,7 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
       const geometry = await mergeGeometries(G.list.map(({ o }) => o.geometry), breathe, stale);
       if (!geometry) return out;
       const B = new TileBatch(geometry, G.list, G.mat, make);
+      await ready([B.mesh]);
       if (stale()) { B.mesh.geometry.dispose(); B.mesh.dispose(); return out; }
       B.mesh.castShadow = castsShadow(G.mat);
       B.mesh.userData.cast = B.mesh.castShadow;
@@ -139,9 +150,12 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
         // plans were built in the page
         set = G.list.map(({ o }) => o.geometry.userData.coarse).find((c) => c !== undefined) ?? null;
         if (!set) {
-          await breathe();
+          HITCH.add('merge', performance.now() - t);
+          await idle();
           const P = proto.attributes.position.array, N = proto.attributes.normal.array, I = proto.index.array;
+          const tC = performance.now();
           set = coarseSet(P, N, I, MATERIALS[G.mat]?.kind === 'metal');
+          HITCH.add('coarse', performance.now() - tC);
           t = performance.now();
         }
         if (set.open) lod = 'open';
@@ -186,6 +200,7 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
         m.name = `merged:${G.mat}:inst${m.userData.farOf ? ':far' : ''}`;
       }
     }
+    await ready(meshes);
     if (stale()) { for (const m of meshes) { m.geometry.dispose(); m.dispose(); } return out; }
     // the swap, in one step: the merged meshes in, their members out
     for (const m of meshes) {

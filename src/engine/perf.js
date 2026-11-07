@@ -71,7 +71,7 @@ export class Perf {
     if (w.terrain) for (const t of w.terrain.tiles.values()) { if (t.mesh) t.mesh.visible = !off.has('terrain'); if (t.sea) t.sea.visible = !off.has('terrain'); }
     w.lifeHidden = off.has('life');
     for (const s of w.settlements || []) {
-      if (s.life) s.life.group.visible = !off.has('life');
+      if (s.life) s.life.group.visible = !off.has('life') && s.life.ready !== false;
       if (s !== w.anchor?.site && s.state !== 'idle') s.group.visible = !off.has('others');
       else s.group.visible = true;
       if (s.impostor && off.has('impostors')) s.impostor.visible = false;
