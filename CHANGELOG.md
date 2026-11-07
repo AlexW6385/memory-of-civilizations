@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.0 — Water where it belongs (2026-11-07)
+- Water across the planet is right now: the sea meets a settlement's flat ground exactly at its rim, so coasts, rivers and harbours sit at their level and boats float on them. Kilwa's and Rapa Nui's seas no longer sink away from the shore; the Nile at Edfu, the Yamuna at Agra, Tenochtitlan's lake, the cenote at Chichen Itza, Rano Raraku's crater lake, the Maori lake and Borgund's river are drawn at last; the Conques gorge, Jerusalem's valleys and Stonehenge are no longer flooded by the sea; Amsterdam's ships float on the IJ.
+
 ## v9.99 — Indoor light, corrected (2026-11-07)
 - Every baked interior has been re-baked after a fix in the light baker, which had been taking the wrong surface's colour (and the wrong glass's transmission) at almost every bounce; interiors now take their light from their own walls. New bakes: the Great Pyramid's passages and King's Chamber, San Marco, St Basil's, the Empire State lobby, the Sydney Concert Hall. 44 landmarks are baked, all current.
 
