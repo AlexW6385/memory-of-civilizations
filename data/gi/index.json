@@ -1061,6 +1061,55 @@
   "seconds": 878,
   "baked": "2026-11-07"
  },
+ "song-hangzhou-liuhe": {
+  "site": "song-hangzhou",
+  "hash": "6cc302370a205444",
+  "rays": 128,
+  "probes": 28237,
+  "boxes": [
+   {
+    "min": [
+     -131,
+     15.5,
+     -6
+    ],
+    "n": [
+     43,
+     18,
+     33
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hall"
+    ]
+   },
+   {
+    "min": [
+     -116.37,
+     9.5,
+     69.63
+    ],
+    "n": [
+     7,
+     55,
+     7
+    ],
+    "spacing": 1,
+    "rooms": [
+     "storey-1",
+     "storey-2",
+     "storey-3",
+     "storey-4",
+     "storey-5",
+     "storey-6",
+     "storey-7"
+    ]
+   }
+  ],
+  "bytes": 450570,
+  "seconds": 128,
+  "baked": "2026-11-07"
+ },
  "versailles-chateau": {
   "site": "versailles",
   "hash": "baba2f2b63e11267",
