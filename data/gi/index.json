@@ -552,6 +552,35 @@
   "seconds": 198,
   "baked": "2026-11-06"
  },
+ "qing-beijing-palace": {
+  "site": "qing-beijing",
+  "hash": "193227250d3aafde",
+  "rays": 128,
+  "probes": 78200,
+  "boxes": [
+   {
+    "min": [
+     -34,
+     8,
+     -112
+    ],
+    "n": [
+     46,
+     20,
+     85
+    ],
+    "spacing": 1.5,
+    "rooms": [
+     "taihe",
+     "zhonghe",
+     "baohe"
+    ]
+   }
+  ],
+  "bytes": 1198555,
+  "seconds": 614,
+  "baked": "2026-11-07"
+ },
  "sainte-chapelle": {
   "site": "paris",
   "hash": "5404af11cff5a464",
