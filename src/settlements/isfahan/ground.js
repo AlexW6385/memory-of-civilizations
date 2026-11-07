@@ -3,7 +3,7 @@
 // trees by the canal and in the garden, elms and fruit trees here and there in the town; the dry,
 // clear sky of the Iranian plateau.
 
-import { RADIUS, SQUARE, ARCADE, CANAL, GARDEN, inRect, inHouse, inMosque } from './layout.js';
+import { RADIUS, SQUARE, ARCADE, CANAL, GARDEN, inRect, inHouse, inMosque, OPEN_HOUSE } from './layout.js';
 
 const [sx0, sz0, sx1, sz1] = SQUARE;
 const FIELD = [sx0 + CANAL + 2, sz0 + CANAL + 2, sx1 - CANAL - 2, sz1 - CANAL - 2];
@@ -32,6 +32,9 @@ function planting(x, z) {
     if (inRect(GARDEN, x, z, -6) && !(Math.abs(z + 45) < 10) && !(Math.abs(x + 221) < 4)) return { plane_tree: 1.6, grass: 40 };
     return { grass: 30 };
   }
+  // the two beds either side of the open house's pool (docs/settlements/isfahan.md §16)
+  { const [x0, z0, x1, z1] = OPEN_HOUSE().rect, c = [x0 + 3.6, z0 + 4.8, x1 - 3.8, z1 - 3.4], cx = (c[0] + c[2]) / 2, cz = (c[1] + c[3]) / 2, pw = Math.min(2.4, (c[2] - c[0]) * 0.2);
+    for (const s of [-1, 1]) if (Math.abs(x - (cx + s * (pw + 2.1))) < 0.8 && Math.abs(z - cz) < 0.8) return { grass: 60 }; }
   if (inHouse(x, z, 0.6) || inMosque(x, z, 1) || inRect(SQUARE, x, z, ARCADE + 1) || (Math.abs(x) < 12 && z < -300) || inRect([88, -58, 122, -8], x, z)) return null;
   return { elm: 0.05, apple: 0.05, grass_dry: 10 };
 }

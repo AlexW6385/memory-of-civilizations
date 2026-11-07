@@ -7,6 +7,8 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, rod, disc, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import '../qing/index.js';
+import { cairoQaa } from './qaa.js';
+import * as FN from '../mughal/furnish.js';
 
 const S = 'limestone_yellow';
 function crest(bag, r, y, mat = S) {
@@ -249,11 +251,17 @@ function iwan(bag, col, iw, y) {
   for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
     const u = -W / 2 + (i + 0.5) * W / cols, d = (j + 0.6) * D / (rows + 0.2), p = P(u, d);
     const yv = ys + Math.sqrt(Math.max(0, r * r - (-Math.abs(u) - cL) ** 2)) - 0.2;
-    bag.add('lamp_glass', lathe([[0.001, 0], [0.09, 0.02], [0.08, 0.08], [0.2, 0.2], [0.2, 0.3], [0.12, 0.38], [0.11, 0.45], [0.2, 0.62], [0.001, 0.62]], 10, null, p[0], ly, p[1]));
-    for (const a of [0, 2.1, 4.2]) bag.add('bronze', rod([p[0] + Math.cos(a) * 0.18, ly + 0.55, p[1] + Math.sin(a) * 0.18], [p[0], ly + 1.1, p[1]], 0.008, 3));
-    bag.add('iron', rod([p[0], ly + 1.1, p[1]], [p[0], Math.max(ly + 1.2, yv), p[1]], 0.012, 4));
+    // the enamelled glass lamp of Sultan Hasan (docs/settlements/mamluk-cairo.md §10): the globular body, the flaring neck
+    // with the Light verse in blue enamel, the gilding, six loops for the chains
+    FN.mosqueLamp(bag, null, p[0], ly, p[1], Math.max(ly + 1.2, yv), { enamel: true, k: 1.15 });
   }
+  // the floor: reed mats laid across the iwan, carpets over them in the qibla iwan (§10)
+  { const v0 = P(0, 0), v1 = P(0, 1), yawd = Math.atan2(v1[0] - v0[0], v1[1] - v0[1]), n = Math.max(1, Math.floor((D - 1.2) / 2.1));
+    for (let j = 0; j < n; j++) { const p = P(0, 0.9 + (j + 0.5) * (D - 1.4) / n); FN.reedMat(bag, p[0], y + 0.06, p[1], W - 1.2, (D - 1.4) / n - 0.12, yawd); }
+    if (iw.qibla) for (let j = 0; j < 3; j++) { const p = P(0, 2.2 + j * 3.6); FN.carpet(bag, p[0], y + 0.072, p[1], Math.min(9, W - 3), 2.8, yawd, j % 2 ? 'mamluk' : 'maroon'); } }
   if (!iw.qibla) return;
+  // the Qur'an on its stand (kursi) by the minbar, a cushion for the reader
+  { const v0 = P(0, 0), v1 = P(0, 1), yawd = Math.atan2(v1[0] - v0[0], v1[1] - v0[1]), p = P(3.4, D - 4.2), r = P(3.4, D - 4.8); FN.rahle(bag, p[0], y + 0.09, p[1], yawd + Math.PI, { h: 0.42, w: 0.4 }); FN.cushion(bag, r[0], y + 0.09, r[1], 0.55, 0.55, 0.09, yawd, 'cloth_green'); }
   // the dado: panels of white, dark and rose marble with dark frames, round the three walls
   const panel = (u0, u1, d0, d1, ya, yb, k) => bag.add(['marble_smooth', 'marble_pink', 'marble_smooth', 'marble_dark'][k % 4], B(u0, u1, d0, d1, ya, yb));
   for (const s of [-1, 1]) { const n = Math.round(D / 1.5); for (let k = 0; k < n; k++) { const d0 = k * D / n + 0.06, d1 = (k + 1) * D / n - 0.06, uu = s * W / 2; panel(uu - (s > 0 ? 0.06 : 0), uu + (s < 0 ? 0.06 : 0), d0, d1, y + 0.3, y + 3.9, k); bag.add('marble_dark', B(uu - (s > 0 ? 0.04 : 0), uu + (s < 0 ? 0.04 : 0), k * D / n, (k + 1) * D / n, y + 0.06, y + 4.4)); } }
@@ -577,6 +585,6 @@ function sabilKuttab(el, { bag, col }) {
 
 registerStyle('mamluk', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, road_wall: roadWall, nasir_minaret: nasirMinaret, suq_covered: suqCovered, cairo_front: cairoFront, sabil_kuttab: sabilKuttab },
+  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, road_wall: roadWall, nasir_minaret: nasirMinaret, suq_covered: suqCovered, cairo_front: cairoFront, sabil_kuttab: sabilKuttab, cairo_qaa: cairoQaa },
   objects: {},
 });

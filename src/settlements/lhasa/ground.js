@@ -1,7 +1,7 @@
 // Lhasa — the ground: the flat valley at 3,650 m, the rocky ridge of Marpo Ri and Chokpori, barley
 // fields, willows and poplars on the valley floor; the intensely clear plateau sky.
 
-import { RADIUS, SHOL, POND, hill, inRect, inLot, pondDist, smooth as sm } from './layout.js';
+import { RADIUS, SHOL, POND, CHAPEL, hill, inRect, inLot, pondDist, smooth as sm } from './layout.js';
 
 /** The valley is ringed by mountains: the ground rises toward its rim to meet them (RIM above the valley floor). */
 export const RIM = 50;
@@ -25,7 +25,7 @@ const fromWater = (x, z) => Math.max(-5, Math.min(99, pondDist(x, z)));
 /** Plants per 100 m²: willows and poplars in rows on the valley floor, grass on the hills, none in Shöl. */
 function planting(x, z) {
   const r = Math.hypot(x, z);
-  if (r > RADIUS - 6 || inRect(SHOL, x, z, 3) || inLot(x, z, 2)) return null;
+  if (r > RADIUS - 6 || inRect(SHOL, x, z, 3) || inLot(x, z, 2) || inRect(CHAPEL, x, z, 1.5)) return null;
   const pd = pondDist(x, z);
   if (pd < 0.5) return null;
   if (pd < 12) return { willow: 0.9, grass: 30 };                                         // willows round the pond and on its island

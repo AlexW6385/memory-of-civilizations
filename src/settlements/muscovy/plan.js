@@ -21,7 +21,8 @@ export const square = {
     { t: 'tsar_cannon', c: [LOBNOYE[0], LOBNOYE[1] + 16], y: height(LOBNOYE[0], LOBNOYE[1] + 16) },
     { t: 'rows', rect: ROWS, y: hy(ROWS), seed: 1595 },
   ],
-  rooms: [{ id: 'square', rect: SQUARE, y: 0, kind: 'open' }],
+  // the central church of St Basil's, entered from the platform (its octagon's inside; first, so that a point in it is not on the square)
+  rooms: [{ id: 'intercession', rect: [BASIL[0] - 4.4, BASIL[1] - 4.4, BASIL[0] + 4.4, BASIL[1] + 4.4], y: by + 4, kind: 'hall' }, { id: 'square', rect: SQUARE, y: 0, kind: 'open' }],
   walks: [Object.assign([[40, 20], [40, 90], [BASIL[0], BASIL[1] - 26]], { y0: 0 })],
 };
 export const kremlin = {

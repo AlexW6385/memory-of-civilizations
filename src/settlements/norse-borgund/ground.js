@@ -29,6 +29,7 @@ export const ground = {
     sky: { turbidity: 2.4, rayleigh: 1.1, mie: 0.004, mieG: 0.78, zenith: [0.08, 0.16, 0.42], horizon: [0.62, 0.68, 0.75] },
     fog: { color: [0.75, 0.78, 0.82], density: 0.0005, height: 0.012 },
     exposure: 0.5,
+    damp: 0.85,     // western Norway: moss on the north faces and on the shingled roofs, rain streaks down the tarred wood (DESIGN §5)
     wind: [0.4, 0.1],
     weather: [
       { id: 'clear', weight: 2, clouds: 0.3, cloudDensity: 0.4, sun: 1.0, fog: 1 },

@@ -7,10 +7,11 @@
 
 import { registerStyle, STYLES } from '../../core/build.js';
 import { Matrix4 } from '../../core/three.js';
-import { box, frustum, fromTriangles, orientOutward, rod } from '../../core/geom.js';
+import { box, frustum, fromTriangles, orientOutward, rod, lathe } from '../../core/geom.js';
 import { rectRoof, withPal, beamTris } from '../ming/index.js';
 import '../qing/index.js';
 import { barredWindows, shachi as shachiFish, karaHafu, samaWall, katomado } from './detail.js';
+import { machiyaShop, zashiki, kago, daisho } from './rooms.js';
 
 const PL = 'plaster_castle', ST = 'ishigaki', TL = 'tile_grey', WD = 'wood_dark';
 const JPAL = { roof: TL, soffit: PL, plaster: PL, wood: WD, column: WD };
@@ -475,17 +476,44 @@ function plateRhomb(out, q, t) {
 }
 
 /** shoin: a single-storey hall { rect, y, h } on a raised floor, posts and paper screens, a veranda, a big tiled roof. */
-function shoinHall(bag, col, rect, y, h = 3.4, kind = 'xieshan', rmat = TL, bay = 1.8) {
+function shoinHall(bag, col, rect, y, h = 3.4, kind = 'xieshan', rmat = TL, bay = 1.8, open = null) {
   const [x0, z0, x1, z1] = rect;
   bag.add('timber', box(x0 - 1, y, z0 - 1, x1 + 1, y + 0.6, z1 + 1));
-  col.rect(rect, y, y + h + 0.6); col.floor([x0 - 1, z0 - 1, x1 + 1, z1 + 1], y + 0.6);
-  bag.add(PL, box(x0, y + 0.6, z0, x1, y + 0.6 + h, z1));
-  for (const [a, b] of faces(rect, 0.05)) {
+  col.floor([x0 - 1, z0 - 1, x1 + 1, z1 + 1], y + 0.6);
+  // a house open inside (docs §5.1): its reception room behind the paper doors of one face, slid open to the veranda
+  let skip = () => false;
+  if (!open) { col.rect(rect, y, y + h + 0.6); bag.add(PL, box(x0, y + 0.6, z0, x1, y + 0.6 + h, z1)); }
+  else skip = zashikiIn(bag, col, rect, y, h, open);
+  for (const [fi, [a, b]] of faces(rect, 0.05).entries()) {
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / bay)), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
-    for (let i = 0; i < n; i++) { const s0 = i * L / n + 0.12, s1 = (i + 1) * L / n - 0.12, t = []; beamTris(t, [a[0] + ux * s0, y + 0.6, a[1] + uz * s0], [a[0] + ux * s1, y + 0.6, a[1] + uz * s1], 0.04, h - 0.5); bag.add('shoji', fromTriangles(t)); }
+    for (let i = 0; i < n; i++) { const s0 = i * L / n + 0.12, s1 = (i + 1) * L / n - 0.12, t = []; if (skip(fi, [a[0] + ux * (s0 + s1) / 2, a[1] + uz * (s0 + s1) / 2])) continue; beamTris(t, [a[0] + ux * s0, y + 0.6, a[1] + uz * s0], [a[0] + ux * s1, y + 0.6, a[1] + uz * s1], 0.04, h - 0.5); bag.add('shoji', fromTriangles(t)); }
     for (let i = 0; i <= n; i++) { const s = i * L / n, c = [a[0] + ux * s, a[1] + uz * s]; bag.add(WD, box(c[0] - 0.12, y + 0.6, c[1] - 0.12, c[0] + 0.12, y + 0.6 + h, c[1] + 0.12)); }
   }
   roof(bag, [x0 - 1, z0 - 1, x1 + 1, z1 + 1], y + 0.6 + h - 0.1, 0.9, kind, undefined, { mat: rmat });
+}
+/**
+ * The reception room of an open samurai house: the frame of its front face `open.face`; the room (zashiki, rooms.js)
+ * across the middle of that face, the rest of the house filled; a stepping stone before the veranda. Returns which
+ * paper doors of the faces to leave out (those of the room's front, slid away).
+ */
+function zashikiIn(bag, col, [x0, z0, x1, z1], y, h, open) {
+  const f = open.face, fl = y + 0.6, top = fl + h;
+  const L = f === 'n' || f === 's' ? x1 - x0 : z1 - z0, D = f === 'n' || f === 's' ? z1 - z0 : x1 - x0, ua = f === 'n' || f === 's' ? x0 : z0;
+  const at = (u, v, q) => (f === 's' ? [u, v, z1 - q] : f === 'n' ? [u, v, z0 + q] : f === 'e' ? [x1 - q, v, u] : [x0 + q, v, u]);
+  const B = (m, u0, u1, v0, v1, q0, q1) => { const p = at(u0, v0, q0), q = at(u1, v1, q1); bag.add(m, box(Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[1], q[1]), Math.max(p[2], q[2]))); };
+  const C = (u0, u1, q0, q1, v0, v1) => { const p = at(u0, 0, q0), q = at(u1, 0, q1); col.rect([Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])], v0, v1); };
+  const lat = (m, prof, seg, u, v, q) => { const p = at(u, v, q); bag.add(m, lathe(prof, seg, null, p[0], p[1], p[2])); };
+  const W = Math.min(9, L - 2), u0 = ua + (L - W) / 2, u1 = u0 + W, td = 0.75, dq = Math.min(5.4, D - td - 0.6), q1 = dq;
+  zashiki(bag, B, C, lat, at, { u0, u1, q0: 0, q1, fl, h, seed: open.seed });
+  // the rest of the house, closed behind its paper doors: filled
+  const tw = Math.min(1.8, W * 0.32), tu0 = u0 + W * 0.5 - tw - 0.05, tb = Math.min(tu0 + tw + 0.12 + 1.6, u1 - 0.1) + 0.06;
+  const fill = (a0, a1, b0, b1) => { if (a1 - a0 > 0.01 && b1 - b0 > 0.01) { B(PL, a0, a1, fl, top, b0, b1); C(a0, a1, b0, b1, y, top); } };
+  fill(ua, u0, 0, D); fill(u1, ua + L, 0, D); fill(u0, u1, q1 + td, D); fill(u0, tu0 - 0.06, q1, q1 + td); fill(tb, u1, q1, q1 + td);
+  C(u0, u1, -1.0, D, y, fl - 0.02);
+  // the stepping stone (kutsunugi-ishi) before the veranda, where the shoes are left
+  { const p = at((u0 + u1) / 2, y, -1.45); bag.add('granite_grey', lathe([[0.001, 0], [0.42, 0.0], [0.45, 0.22], [0.38, 0.3], [0.001, 0.31]], 10, null, p[0], y - 0.02, p[2]).scale(1, 1, 1)); col.circle(p[0], p[2], 0.42, y, y + 0.29); }
+  const fi = { n: 0, e: 1, s: 2, w: 3 }[f];
+  return (k, c) => { if (k !== fi) return false; const u = f === 'n' || f === 's' ? c[0] : c[1]; return u > u0 + 0.2 && u < u1 - 0.2; };
 }
 function goten(el, { bag, col }) {
   for (const r of el.halls) shoinHall(bag, col, r, el.y ?? 0, r[4] ?? 3.6);
@@ -529,7 +557,7 @@ function yashiki(el, { bag, col }) {
   else if (g === 'n') house = [x0 + m + (W > 30 ? 8 : 0), z1 - m - D * 0.42, x1 - m, z1 - m];
   else if (g === 'e') house = [x0 + m, z0 + m, x0 + m + W * 0.45, z1 - m - 6];
   else house = [x1 - m - W * 0.45, z0 + m + 6, x1 - m, z1 - m];
-  shoinHall(bag, col, house, 0, 3.2, rand() < 0.75 ? 'xieshan' : 'hip', TL, el.simple ? 3.6 : 1.8);
+  shoinHall(bag, col, house, 0, 3.2, rand() < 0.75 ? 'xieshan' : 'hip', TL, el.simple && !el.open ? 3.6 : 1.8, el.open ? { face: g, seed: el.seed } : null);
   const kr = g === 's' ? [x1 - 9, z0 + 4, x1 - 3, z0 + 11] : g === 'n' ? [x0 + 3, z1 - 11, x0 + 9, z1 - 4] : g === 'e' ? [x1 - 11, z0 + 3, x1 - 4, z0 + 9] : [x0 + 4, z1 - 9, x0 + 11, z1 - 3];
   if (rand() < 0.8) kura(bag, col, kr);
 }
@@ -539,10 +567,13 @@ function machiya(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, f = el.front || 's', dep = Math.min(11, z1 - z0);
   const r = f === 's' ? [x0, z1 - dep, x1, z1] : [x0, z0, x1, z0 + dep];
   const fz = f === 's' ? r[3] : r[1], s = f === 's' ? 1 : -1, H1 = 3.2, H2 = 2.5 + rand() * 0.6;
-  bag.add(PL, box(r[0], 0, r[1], r[2], H1 + H2, r[3]));
-  col.rect(r, 0, H1 + H2);
-  // the front: lattice and an entrance below, the upper windows
-  { const t = []; beamTris(t, [x0 + 0.2, 0.3, fz + s * 0.04], [x1 - 0.2, 0.3, fz + s * 0.04], 0.04, H1 - 0.5); bag.add('koshi', fromTriangles(t)); }
+  if (el.open) machiyaShop(el, { bag, col }, { r, H1, H2 });
+  else {
+    bag.add(PL, box(r[0], 0, r[1], r[2], H1 + H2, r[3]));
+    col.rect(r, 0, H1 + H2);
+    // the front: lattice and an entrance below, the upper windows
+    { const t = []; beamTris(t, [x0 + 0.2, 0.3, fz + s * 0.04], [x1 - 0.2, 0.3, fz + s * 0.04], 0.04, H1 - 0.5); bag.add('koshi', fromTriangles(t)); }
+  }
   bag.add(WD, box(x0, H1 - 0.25, Math.min(fz, fz + s * 0.1), x1, H1, Math.max(fz, fz + s * 0.1)));
   for (const [u0, u1] of [[0.12, 0.4], [0.6, 0.88]]) { const t = [], xa = x0 + (x1 - x0) * u0, xb = x0 + (x1 - x0) * u1; beamTris(t, [xa, H1 + 0.8, fz + s * 0.05], [xb, H1 + 0.8, fz + s * 0.05], 0.04, Math.max(0.5, H2 - 1.6)); bag.add('koshi', fromTriangles(t)); }
   // the pent roof over the street, the main roof (ridge along the street)
@@ -561,7 +592,7 @@ registerStyle('edo', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), goten: J(goten), yashiki: J(yashiki), machiya: J(machiya),
+    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), goten: J(goten), yashiki: J(yashiki), machiya: J(machiya), kago, daisho,
   },
   objects: {},
 });

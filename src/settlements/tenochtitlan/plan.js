@@ -4,7 +4,7 @@
 // Eagles, the calmecac; the palace of Moctezuma; the causeway west over the lake; the canals,
 // their walls, timber bridges and dugout canoes; the market by the west canal.
 
-import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI, GAP } from './layout.js';
+import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI, GAP, inChinampaHouse } from './layout.js';
 import { ground } from './ground.js';
 
 const E = [];
@@ -83,7 +83,7 @@ for (const [z, cargo] of [[30, 'maize'], [44, 'pots'], [56, 'chile'], [74, 'reed
     let x = Math.cos(a) * r; const z = Math.sin(a) * r;
     if (x < 0 && Math.abs(z) < 16) continue;
     x = Math.floor(x / 14) * 14 + 4.5 + rp() * 5;
-    if (Math.hypot(x, z) < 303 || Math.hypot(x + 1.6, z + 1.2) > 331) continue;
+    if (Math.hypot(x, z) < 303 || Math.hypot(x + 1.6, z + 1.2) > 331 || inChinampaHouse(x, z, 1.5) || inChinampaHouse(x + 1.6, z + 1.2, 1.5)) continue;
     F.push([x, z, ground.height(x, z), rp() * 6.28, i % 3 ? 'farmer' : 'planter', 60 + i]);
     if (i % 2) F.push([x + 1.6, z + 1.2, ground.height(x + 1.6, z + 1.2), rp() * 6.28, 'farmer', 90 + i]);
   }

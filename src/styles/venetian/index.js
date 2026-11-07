@@ -11,15 +11,18 @@ import { dogesPalace } from './palace.js';
 import { gondola, palo } from './boats.js';
 import { clockTower, procuratieOld, columnStatue } from './piazza.js';
 import { horse, limb } from '../greek/sculpture.js';
+import { basilicaInterior, vestibule } from './interior.js';
+import { rive, rialto } from './rive.js';
 
 const M = 'marble', B = 'brick', L = 'lead', I = 'limestone';
 /** basilica: { c, s (arm length), w (arm width), h, y } — the Greek cross with its five domes, the west front. */
-function basilica(el, { bag, col }) {
-  const [cx, cz] = el.c, S = el.s ?? 38, Wd = el.w ?? 22, H = el.h ?? 22, y = el.y ?? 0;
-  for (const r of [[cx - S, cz - Wd / 2, cx + S, cz + Wd / 2], [cx - Wd / 2, cz - S * 0.8, cx + Wd / 2, cz + S * 0.8]]) { bag.add(B, box(r[0], y - 0.5, r[1], r[2], y + H, r[3])); col.rect(r, y, y + H); col.floor(r, y + H); }
+function basilica(el, { bag, col, lights }) {
+  const [cx, cz] = el.c, S = el.s ?? 38, Wd = el.w ?? 22, H = el.h ?? 22, y = el.y ?? 0, IN = !!el.interior;
+  if (!IN) for (const r of [[cx - S, cz - Wd / 2, cx + S, cz + Wd / 2], [cx - Wd / 2, cz - S * 0.8, cx + Wd / 2, cz + S * 0.8]]) { bag.add(B, box(r[0], y - 0.5, r[1], r[2], y + H, r[3])); col.rect(r, y, y + H); col.floor(r, y + H); }
+  else basilicaInterior(bag, col, lights, { cx, cz, y, S, Wd, H, DX: S * 0.62, DZ: S * 0.55 });
   // the narthex and the west front of five great arches with their gables
   const f = [cx - S - 10, cz - S * 0.85, cx - S, cz + S * 0.85];
-  bag.add(M, box(f[0], y - 0.5, f[1], f[2], y + H * 0.7, f[3])); col.rect(f, y, y + H * 0.7);
+  if (!IN) { bag.add(M, box(f[0], y - 0.5, f[1], f[2], y + H * 0.7, f[3])); col.rect(f, y, y + H * 0.7); }
   // B2(z0, z1, y0, y1, d0, d1): a box on the west front, d measured outward (toward -x) from its face
   const fx = f[0], B2 = (z0, z1, y0, y1, d0, d1) => box(fx - d1, y0, z0, fx - d0, y1, z1);
   const P = (zz, yy, d) => [fx - d, yy, zz];
@@ -41,7 +44,11 @@ function basilica(el, { bag, col }) {
       for (const sz of [-1, 1]) bag.add(M, B2(sz < 0 ? zc - rr : zc + rr - 0.55, sz < 0 ? zc - rr + 0.55 : zc + rr, y, y + spring, dd - 0.8, dd));
       ring(zc, y + spring, rr - 0.55, rr, dd - 0.8, dd, st === 1 ? 'marble_pink' : M);
     }
-    bag.add('opening', B2(zc - r * 0.62, zc + r * 0.62, y, y + spring * 0.62, 2.35, 2.42));
+    if (IN && big) {                                                        // open: the vestibule behind, the porch's soffit over the way in
+      vestibule(bag, col, f, zc, y, y + H * 0.7, r * 0.62, spring * 0.62);
+      bag.add(M, B2(zc - (r - 0.15), zc + (r - 0.15), y + spring * 0.62, y + spring * 0.64, 0, 2.38));
+      for (const sz of [-1, 1]) bag.add(M, B2(sz < 0 ? zc - r + 0.15 : zc + r * 0.62, sz < 0 ? zc - r * 0.62 : zc + r - 0.15, y - 0.3, y + spring * 0.62, 0, 0.3));
+    } else bag.add('opening', B2(zc - r * 0.62, zc + r * 0.62, y, y + spring * 0.62, 2.35, 2.42));
     for (let i = 0; i < 8; i++) { const t0 = i / 8, t1 = (i + 1) / 8, hw = r * Math.sqrt(1 - t0 * t0); bag.add('mosaic_gold', B2(zc - hw, zc + hw, y + spring + r * t0, y + spring + r * t1, 2.36, 2.44)); }
     bag.add('mosaic_gold', B2(zc - r + 0.2, zc + r - 0.2, y + spring * 0.64, y + spring - 0.02, 2.36, 2.44));
     // two tiers of colonnettes on the piers between the portals
@@ -83,6 +90,7 @@ function basilica(el, { bag, col }) {
   for (const [dx, dz, r] of [[0, 0, 7.5], [-S * 0.62, 0, 6.5], [S * 0.62, 0, 6.5], [0, -S * 0.55, 6.5], [0, S * 0.55, 6.5]]) {
     const x = cx + dx, z = cz + dz;
     bag.add(B, lathe([[r, 0], [r, 3]], 16, null, x, y + H, z));
+    if (IN) for (let k = 0; k < 16; k++) { const a = (k + 0.5) / 16 * Math.PI * 2, g = box(-0.03, 0, -0.32, 0.03, 1.2, 0.32); g.rotateY(-a); g.translate(x + Math.cos(a) * (r + 0.01), y + H + 0.6, z + Math.sin(a) * (r + 0.01)); bag.add('opening', g); }
     bag.add(L, lathe([[r * 1.05, 0], [r * 1.05, r * 0.4], [r * 0.95, r * 0.95], [r * 0.6, r * 1.45], [r * 0.2, r * 1.7], [0.001, r * 1.75]], 16, null, x, y + H + 3, z));
     bag.add(L, lathe([[1, 0], [1, 2], [0.4, 3.2], [0.001, 3.6]], 8, null, x, y + H + 3 + r * 1.72, z));
     bag.add('gilt_bronze', box(x - 0.08, y + H + 6.5 + r * 1.72, z - 0.08, x + 0.08, y + H + 8.5 + r * 1.72, z + 0.08));
@@ -102,6 +110,6 @@ function bellTower(el, { bag, col }) {
 }
 registerStyle('venetian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo },
+  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, rive, rialto },
   objects: {},
 });

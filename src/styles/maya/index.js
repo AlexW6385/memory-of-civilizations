@@ -7,6 +7,9 @@
 // steep palm thatch, their lots enclosed by dry-stone walls.
 
 import { registerStyle, STYLES, subtractRects } from '../../core/build.js';
+import { venusPanelKit, jawsPanelKit, cornice } from './venus.js';
+import { hearthKit, ollaKit, metateKit, waterJarKit, bedKit, storeJarKit, put } from './household.js';
+import { mesoPlants } from './plants.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
@@ -58,7 +61,16 @@ function mPyramid(el, { bag, col }) {
     frust(bag, L, cx, cz, ap, ap, ap - step * 0.04, ap - step * 0.04, y0 + th * 0.55, y0 + th * 0.9);             // the panel
     frust(bag, L, cx, cz, ap + step * 0.06, ap + step * 0.06, ap + step * 0.06, ap + step * 0.06, y0 + th * 0.9, y0 + th);   // the moulding
     // the panels on each tier's face: recessed rectangles in a row, the stair's run left clear
-    if (!el.simple) {
+    if (el.venus) {
+      // the Platform of Venus (venus.js): panels of Venus as a Year Bundle alternating with the god in the serpent's jaws, the serpent with fish along the cornice
+      const pd = ap - step * 0.04 - 0.002, py0 = y0 + th * 0.6, cd = ap + step * 0.06, ch = th * 0.1, edge = sw + bw + 0.25;
+      for (const [fx, fz] of [[0, -1], [0, 1], [1, 0], [-1, 0]]) for (const sd of [-1, 1]) {
+        const at = (u, dd) => (fz ? [cx + sd * u, cz + fz * dd] : [cx + fx * dd, cz + sd * u]);
+        for (let i = 0; i < 3; i++) { const u = edge + 1.4 + i * 2.75, [x, z] = at(u, pd); if (u + 1.1 < ap - 0.2) ((i + (sd > 0 ? 1 : 0)) % 2 ? jawsPanelKit : venusPanelKit)().emit(bag, x, py0, z, fx, fz); }
+        const len = ap - 0.15 - edge, [x, z] = at(edge + len / 2, cd);
+        cornice(len, ch).emit(bag, x, y0 + th * 0.9, z, fx, fz);
+      }
+    } else if (!el.simple) {
       const pw = 2.2, py0 = y0 + th * 0.6, py1 = y0 + th * 0.86, d = ap - step * 0.04 + 0.05;
       for (const [fx, fz] of [[0, -1], [0, 1], [1, 0], [-1, 0]]) {
         const mm = Math.floor((2 * d) / (pw + 0.9));
@@ -380,7 +392,7 @@ function mColonnade(el, { bag, col }) {
 /** m_platform: a low square platform with stairs on its sides { c, a (half-size), h, stairs } (the Platform of Venus, the Tzompantli). */
 function mPlatform(el, ctx) {
   const steps = Math.round(el.h / 0.25);
-  mPyramid({ c: el.c, base: el.a, top: el.a - 0.6, h: el.h, tiers: 1, stairs: el.stairs || 'nesw', stairW: el.stairW ?? 4, steps, serpents: el.serpents, stairOut: el.stairOut ?? Math.max(0, steps * 0.27 - 0.6) }, ctx);
+  mPyramid({ c: el.c, venus: el.venus, base: el.a, top: el.a - 0.6, h: el.h, tiers: 1, stairs: el.stairs || 'nesw', stairW: el.stairW ?? 4, steps, serpents: el.serpents, stairOut: el.stairOut ?? Math.max(0, steps * 0.27 - 0.6) }, ctx);
   if (el.skulls) {
     // the skull rack's walls: rows of carved skulls (a pattern of knobs)
     const [cx, cz] = el.c, a = el.a, { bag } = ctx;
@@ -409,17 +421,70 @@ function sacbe(el, { bag, col }) {
  * footing of rubble, walls of wattle plastered with mud (here plaster), doors in the middle of the
  * long sides, a tall roof of palm thatch on the oval, hipped at the rounded ends.
  */
-function mayaHouse(el, { bag, col }) {
-  const [cx, cz] = el.c, a = el.a, b = el.b, alongX = el.dir !== 'z', rand = rng(el.seed || 1);
+function mayaHouse(el, ctx) {
+  const { bag, col } = ctx, [cx, cz] = el.c, a = el.a, b = el.b, alongX = el.dir !== 'z', rand = rng(el.seed || 1);
   const sx = alongX ? 1 : b / a, sz = alongX ? b / a : 1;
   const oval = (th) => { const c = Math.cos(th), s = Math.sin(th); return 1 / Math.hypot(c / sx, s / sz); };
-  bag.add('rubble', lathe([[a * 1.04, -0.1], [a * 1.04, 0.45], [0.001, 0.45]], 24, oval, cx, 0, cz));
-  bag.add(rand() < 0.5 ? 'stucco_warm' : 'lime_plaster', lathe([[a, 0.45], [a * 0.98, 2.2]], 24, oval, cx, 0, cz));
-  bag.add('thatch_palm', lathe([[a * 1.25, 1.9], [a * 0.95, 2.6], [a * 0.55, 3.8], [a * 0.12, 5.0], [0.001, 5.2]], 24, oval, cx, 0, cz));
-  // the doorway's dark opening on the long side
-  const [dx, dz] = alongX ? [0, b] : [b, 0];
-  bag.add('lacquer_black', box(cx + dx * 0.99 - (alongX ? 0.5 : 0.05), 0.45, cz + dz * 0.99 - (alongX ? 0.05 : 0.5), cx + dx * 0.99 + (alongX ? 0.5 : 0.05), 2.0, cz + dz * 0.99 + (alongX ? 0.05 : 0.5)));
-  col.rect([cx - (alongX ? a : b), cz - (alongX ? b : a), cx + (alongX ? a : b), cz + (alongX ? b : a)], 0, 4);
+  const P = (th, r, y) => [cx + Math.cos(th) * r * oval(th), y, cz + Math.sin(th) * r * oval(th)];
+  const F = 0.45, wall = rand() < 0.5 ? 'stucco_warm' : 'lime_plaster', T = 0.16, top = 2.44;
+  bag.add('rubble', lathe([[a * 1.04, -0.1], [a * 1.04, F - 0.03], [0.001, F - 0.03]], 24, oval, cx, 0, cz));
+  bag.add('mud_plaster', lathe([[a - T / a * a, F - 0.03], [a - T, F], [0.001, F]], 24, oval, cx, 0, cz));     // the beaten earth floor
+  // the wall of wattle and daub with its two doorways in the middle of the long sides, each 1.0 m wide, 1.85 high
+  const doors = alongX ? [Math.PI / 2, -Math.PI / 2] : [0, Math.PI], dw = 0.5 / Math.min(a, b), dh = F + 1.85, N = 40;
+  const t = [], q = (p1, p2, p3, p4) => t.push(...p1, ...p2, ...p3, ...p1, ...p3, ...p4);
+  const inDoor = (th) => doors.some((d) => Math.abs(Math.atan2(Math.sin(th - d), Math.cos(th - d))) < dw);
+  for (let i = 0; i < N; i++) {
+    const t0 = (i / N) * 2 * Math.PI, t1 = ((i + 1) / N) * 2 * Math.PI, mid = (t0 + t1) / 2, y0 = inDoor(mid) ? dh : F;
+    const ro = a, ri = a - T;
+    q(P(t0, ro, y0), P(t1, ro, y0), P(t1, ro, top), P(t0, ro, top));            // outer face
+    q(P(t1, ri, y0), P(t0, ri, y0), P(t0, ri, top), P(t1, ri, top));            // inner face
+    q(P(t0, ri, top), P(t0, ro, top), P(t1, ro, top), P(t1, ri, top));          // the wall head
+    if (y0 > F) q(P(t0, ro, y0), P(t0, ri, y0), P(t1, ri, y0), P(t1, ro, y0));   // the lintel's underside
+    const nxt = inDoor(((i + 1.5) / N) * 2 * Math.PI), prv = inDoor(((i - 0.5) / N) * 2 * Math.PI);
+    if (!inDoor(mid) && nxt) q(P(t1, ro, F), P(t1, ri, F), P(t1, ri, dh), P(t1, ro, dh));    // the jambs
+    if (!inDoor(mid) && prv) q(P(t0, ri, F), P(t0, ro, F), P(t0, ro, dh), P(t0, ri, dh));
+    if (!inDoor(mid)) col.segment([P(t0, a - T / 2, 0)[0], P(t0, a - T / 2, 0)[2]], [P(t1, a - T / 2, 0)[0], P(t1, a - T / 2, 0)[2]], T, 0, top);
+  }
+  bag.add(wall, flipGeo(fromTriangles(t)));
+  // the roof of palm thatch, hipped at the rounded ends, its underside seen from within; the ridge pole
+  const prof = [[a * 1.25, 1.9], [a * 0.95, 2.6], [a * 0.55, 3.8], [a * 0.12, 5.0], [0.001, 5.2]];
+  bag.add('thatch_palm', lathe(prof, 24, oval, cx, 0, cz));
+  bag.add('thatch_palm', flipGeo(lathe(prof.map(([r, y]) => [Math.max(0.001, r - 0.12), y - 0.1]), 24, oval, cx, 0, cz)));
+  { const e = lathe([[a * 1.25, 1.9], [a * 1.25 - 0.12, 1.8]], 24, oval, cx, 0, cz); bag.add('thatch_palm', e); bag.add('thatch_palm', flipGeo(e.clone())); }   // the eaves' edge, closing the two skins
+  col.floor([cx - (alongX ? a : b) * 0.7, cz - (alongX ? b : a) * 0.7, cx + (alongX ? a : b) * 0.7, cz + (alongX ? b : a) * 0.7], F);
+  // a step stone before each doorway
+  for (const d of doors) { const p = P(d, a + 0.3, 0); bag.add('rubble', box(p[0] - 0.45, -0.05, p[2] - 0.3, p[0] + 0.45, 0.22, p[2] + 0.3)); col.floor([p[0] - 0.45, p[2] - 0.3, p[0] + 0.45, p[2] + 0.3], 0.22); }
+  mayaHouseThings(ctx, el, P, alongX, F, a, b, rand);
+}
+/** A geometry's faces turned the other way (the inner skin of a roof seen from below). */
+function flipGeo(g) {
+  const p = g.attributes.position.array, t = [];
+  for (let i = 0; i < p.length; i += 9) t.push(p[i], p[i + 1], p[i + 2], p[i + 6], p[i + 7], p[i + 8], p[i + 3], p[i + 4], p[i + 5]);
+  return fromTriangles(t);
+}
+/**
+ * The things of a Maya house (Joya de Cerén: sleeping mats on the floor, some seventy cooking vessels to a household,
+ * manos and metates, hearths; the Yucatec house of poles and thatch): at one rounded end the hearth of three stones
+ * with the comal and the ollas round it, the metate, the water jar; at the other the sleeping mats with blankets;
+ * stored jars and a basket by the wall.
+ */
+function mayaHouseThings(ctx, el, P, alongX, F, a, b, rand) {
+  const { bag, col } = ctx, L = STYLES.life.elements, endA = alongX ? 0 : Math.PI / 2, endB = endA + Math.PI, f = F;
+  const [hx, , hz] = P(endA, a - 1.0, f); put(bag, hearthKit('rubble'), hx, f, hz, 0); col.circle(hx, hz, 0.45, f, f + 0.3);
+  for (const [da, r] of [[0.5, a - 1.0], [-0.5, a - 1.0]]) { const p = P(endA + da, r, f); put(bag, ollaKit(), ...p, 0); }
+  const m = P(endA + (alongX ? 1.15 : 1.15), a - 0.75, f); put(bag, metateKit(), m[0], f, m[2], alongX ? Math.PI : -Math.PI / 2);
+  const w = P(endA - 1.2, a - 0.55, f); put(bag, waterJarKit(), ...w, 0); col.circle(w[0], w[2], 0.33, f, f + 0.8);
+  const bd = P(endB, a - 1.3, f); put(bag, bedKit(rand() < 0.7 ? 'cloth_white' : 'cloth_ochre', 'cloth_red'), bd[0], f, bd[2], alongX ? Math.PI / 2 : 0);
+  const sj = P(endB + 0.9, a - 0.5, f); put(bag, storeJarKit(), ...sj, 0);
+  L.basket({ at: [P(endB - 0.9, a - 0.55, f)[0], P(endB - 0.9, a - 0.55, f)[2]], y: f, seed: el.seed, n: 1 }, ctx);
+  if (rand() < 0.4) { const k = P(endA + 1.15, a - 1.35, f); L.figure({ at: [k[0], k[2]], y: f, rot: alongX ? 0 : Math.PI / 2, seed: el.seed, pose: 'kneel', dress: 'robe', cloth: 'cloth_white', skin: 'skin_dark', hair: 'long', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: 'none' }, ctx); }
+}
+
+/** m_ball: the solid rubber ball of the game { at, y, r } (about 0.3 m across). */
+function mBall(el, { bag }) {
+  const r = el.r ?? 0.15, n = 8, p = [];
+  for (let i = 0; i <= n; i++) { const a = -Math.PI / 2 + Math.PI * i / n; p.push([Math.max(0.001, Math.cos(a) * r), r + Math.sin(a) * r]); }
+  bag.add('rubber', lathe(p, 12, null, el.at[0], el.y ?? 0, el.at[1]));
 }
 
 /** petate: a woven palm mat laid on the ground { at [x, z], y, w, d, rot } (the market's sellers sit behind theirs). */
@@ -443,7 +508,7 @@ registerStyle('maya', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    m_pyramid: mPyramid, m_temple: mTemple, m_ballcourt: mBallcourt, m_colonnade: mColonnade, m_platform: mPlatform, m_caracol: mCaracol, sacbe, maya_house: mayaHouse, albarrada, petate, m_offering: mOffering,
+    m_pyramid: mPyramid, m_temple: mTemple, m_ballcourt: mBallcourt, m_colonnade: mColonnade, m_platform: mPlatform, m_caracol: mCaracol, sacbe, maya_house: mayaHouse, albarrada, petate, m_offering: mOffering, meso_plants: mesoPlants, m_ball: mBall,
   },
   objects: {},
 });

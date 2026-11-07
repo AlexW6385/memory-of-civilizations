@@ -1,5 +1,5 @@
 // The log houses (izby) of the boyars' courts and the posad (docs/settlements/muscovy.md §5).
-import { RADIUS, ROWS, LOBNOYE, CATHEDRALS, SPASSKY, MOAT, lots, height, wallX, gateZ } from './layout.js';
+import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, MOAT, BASIL, lots, height, wallX, gateZ } from './layout.js';
 const base = (id, elements) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
 // the gable end of each house turned to the nearer street (the streets of layout.js: x = 42 − 420 + 84k, z = 35 − 420 + 70k)
 function front([x0, z0, x1, z1]) {
@@ -7,9 +7,11 @@ function front([x0, z0, x1, z1]) {
   if (x1 - x0 >= z1 - z0) { const sx = Math.round((cx + 378) / 84) * 84 - 378; return sx < cx ? 'x0' : 'x1'; }
   const sz = Math.round((cz + 385) / 70) * 70 - 385; return sz < cz ? 'z0' : 'z1';
 }
+/** The izby furnished inside and open (docs §5.1): one in five within reach of Red Square, one in thirty-one beyond. */
+export const openIzba = (l) => (Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20) < 200 ? l.seed % 5 === 0 : l.seed % 31 === 0);
 export async function houses() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 200) plans.push(base(`muscovy-houses-${i / 200}`, all.slice(i, i + 200).map((l) => ({ t: 'izba', ...l, front: front(l.rect) }))));
+  for (let i = 0; i < all.length; i += 200) plans.push(base(`muscovy-houses-${i / 200}`, all.slice(i, i + 200).map((l) => ({ t: 'izba', ...l, front: front(l.rect), open: openIzba(l) }))));
   plans.push({ ...base('muscovy-people', people()), style: 'life' });
   return plans;
 }
@@ -43,5 +45,21 @@ export function people() {
   const D = CATHEDRALS.dormition, F = height((D[0] + D[2]) / 2, (D[1] + D[3]) / 2) + 0.15, xI = D[0] + 1.3 + 3 * (D[2] - D[0] - 2.6) / 4, cz = (D[1] + D[3]) / 2;
   fig([xI - 1.6, cz], -Math.PI / 2, { y: F, cloth: 'cloth_white', cloth2: 'cloth_red', over: 'cape', hat: 'none', beard: 1, hair: 'long' });
   for (let q = 0; q < 14; q++) { const at = [xI - 5 - rand() * 9, cz + (rand() - 0.5) * 5.2]; fig(at, -Math.PI / 2 + (rand() - 0.5) * 0.3, { y: F, pose: 'stand', hat: 'none', over: rand() < 0.5 ? 'cape' : 'none' }); }
+  // the traffic of the lane before the rows (docs §10): goods sledges — the sledge served in summer too — with their
+  // horses and drivers, two-wheeled carts in their shafts, pedlars with their packs, a kvass seller at his cask
+  const lx = (ROWS[0] + SQUARE[2]) / 2 - 1.3;
+  for (const [k, z] of [-100, -22, 52].entries()) {
+    const y = height(lx, z);
+    L.push({ t: 'sledge', at: [lx, z], y, rot: 0, seed: 300 + k, load: k === 1 ? 'sacks' : 'bales' });
+    L.push({ t: 'animal', kind: 'horse', at: [lx, z - 2.75], y: height(lx, z - 2.75), rot: 0, seed: 310 + k });
+    fig([lx - 1.05, z - 1.6], 0, { pose: k === 2 ? 'talk' : 'stand', over: 'sash' });
+  }
+  for (const [k, z] of [-62, 16, 84].entries()) { const y = height(lx, z); L.push({ t: 'cart', kind: 'two', beast: 'horse', load: ['sacks', 'barrels', 'hay'][k], at: [lx, z], y, rot: Math.PI, seed: 320 + k }); fig([lx + 1.1, z + 1.8], Math.PI, { carry: 'staff', len: 1.6 }); }
+  for (let k = 0; k < 7; k++) { const at = [SQUARE[2] - 1 - rand() * 3, -120 + k * 30 + rand() * 10]; fig(at, rand() * 6.28, { carry: k % 3 === 0 ? 'basket' : 'bundle', pose: 'stand' }); }
+  { const at = [SQUARE[2] - 2, 30]; L.push({ t: 'barrel', at, y: height(...at), rot: 0, seed: 330, n: 1 }); fig([at[0] + 0.7, at[1] + 0.2], -Math.PI / 2, { over: 'apron', cloth2: 'linen' }); fig([at[0] - 0.9, at[1] - 0.3], Math.PI / 2, { pose: 'talk' }); }
+  // in St Basil's central church: a priest before the royal doors, a few of the faithful standing (docs §10)
+  { const [bx, bz] = BASIL, by = height(bx, bz) + 4.02;
+    fig([bx + 1.6, bz], -Math.PI / 2, { y: by, cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cape', hat: 'none', beard: 1, hair: 'long' });
+    for (let q = 0; q < 7; q++) { const at = [bx - 0.5 - rand() * 3, bz + (rand() - 0.5) * 4.5]; fig(at, -Math.PI / 2 + (rand() - 0.5) * 0.4, { y: by, pose: 'stand', hat: 'none' }); } }
   return L;
 }

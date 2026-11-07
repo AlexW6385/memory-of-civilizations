@@ -5,7 +5,7 @@
 // dragon curled in the field over it. All of it flat relief cut from a plank, as the carvers worked.
 
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
-import { lathe } from '../../core/geom.js';
+import { lathe, box } from '../../core/geom.js';
 
 /**
  * A piece of relief: `shape` drawn in (u, v) on a vertical plane through O = [x, y, z] whose outward normal is
@@ -169,4 +169,34 @@ export function westPortal(bag, mat, O, n, { w, hs, pw, top, d = 0.1 }) {
   // the small dragon curled in on itself in the field over the archivolt
   { const c = [0, hs + W2 + 0.38]; F(ribbon(spiral(c, -Math.PI / 2, 0.16, 1.3, 1, 0.3), (f) => 0.05 * (1 - 0.5 * f)), 0.055);
     F(mapShape(HEAD, (p) => [c[0] - 0.02 + p[0] * 0.12, c[1] - 0.24 + p[1] * 0.12]), 0.06, 6); }
+}
+
+/**
+ * A carved mask or beast's head at the top of a stave (Borgund: "all the intermediate staves end in carved animal
+ * heads and masks", the masks on the central room's staves paralleled in the stone churches of Værnes and Mære —
+ * SNL): `kind` 'man' — an oval face with a heavy brow, bulging eyes, a long nose, a mouth and a beard falling to a
+ * point; 'beast' — a broad head with pricked ears, round eyes and a muzzle thrust out, a row of teeth. At O
+ * ([x, y, z], the face's centre on the stave's surface), facing dir ([dx, dz]), k its size (1 ≈ 0.34 m tall).
+ */
+export function staveMask(bag, mat, O, dir, kind = 'man', k = 1) {
+  const parts = [], ball = (r) => lathe(Array.from({ length: 7 }, (_, i) => { const t = i / 6 * Math.PI; return [Math.max(0.001, Math.sin(t) * r), r - Math.cos(t) * r]; }), 8);
+  const at = (g, x, y, z) => { g.translate(x, y, z); parts.push(g); return g; };
+  const fwd = (prof, seg = 8) => { const g = lathe(prof, seg); g.rotateX(Math.PI / 2); return g; };       // a lathe along +z
+  const ell = (rx, ry, rz) => { const g = lathe([[0.001, -1], [0.6, -0.8], [0.92, -0.35], [1, 0.1], [0.85, 0.6], [0.5, 0.9], [0.001, 1]], 10); g.scale(rx, ry, rz); return g; };
+  if (kind === 'man') {
+    at(ell(0.11, 0.15, 0.06), 0, 0, 0.0);
+    at(box(-0.1, 0.035, 0.02, 0.1, 0.065, 0.075), 0, 0, 0);                                     // the brow
+    for (const s of [-1, 1]) at(ball(0.024), s * 0.045, 0.0, 0.045);                            // the eyes
+    at(fwd([[0.03, 0], [0.022, 0.03], [0.001, 0.06]]).scale(0.8, 1.6, 1), 0, -0.03, 0.045);     // the nose
+    at(box(-0.045, -0.085, 0.03, 0.045, -0.07, 0.065), 0, 0, 0);                                 // the mouth
+    at(fwd([[0.07, 0], [0.05, 0.03], [0.001, 0.05]]).scale(1, 1.6, 1).rotateX(-0.5), 0, -0.13, 0.0);   // the beard
+    at(lathe([[0.12, 0], [0.13, 0.03], [0.1, 0.07], [0.001, 0.08]], 10).scale(1, 1, 0.55), 0, 0.12, 0.0);   // the hair over the brow
+  } else {
+    at(ell(0.13, 0.12, 0.07), 0, 0.01, 0.0);
+    for (const s of [-1, 1]) { at(lathe([[0.035, 0], [0.001, 0.09]], 6), s * 0.09, 0.09, 0.0); at(ball(0.026), s * 0.055, 0.03, 0.045); }
+    at(fwd([[0.06, 0], [0.055, 0.08], [0.04, 0.12], [0.001, 0.125]]).scale(1.2, 0.8, 1), 0, -0.05, 0.03);   // the muzzle
+    for (let i = -2; i <= 2; i++) at(box(i * 0.022 - 0.008, -0.11, 0.1, i * 0.022 + 0.008, -0.085, 0.125), 0, 0, 0);   // the teeth
+  }
+  const a = Math.atan2(dir[0], dir[1]);
+  for (const g of parts) { g.scale(k, k, k); g.rotateY(a); g.translate(O[0], O[1], O[2]); bag.add(mat, g); }
 }

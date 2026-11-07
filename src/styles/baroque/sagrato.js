@@ -42,7 +42,17 @@ export function sagrato(bag, col, { fx, cz, fw, y }) {
   let x = X0, top = y + 0.05;
   for (let j = 0; j < nf; j++) {
     const xa = x;
-    for (let k = 0; k < ns; k++) { const h = top - rise * (k + 1) / ns; bag.add(T, box(x, -0.5, cz - wst, x + tread, h, cz + wst)); x += tread; }
+    // each step worn by the feet of centuries: dished 2 cm in the middle 24 m of the flight where most climb, the
+    // nosing there rounded back (a sloped lip), the ends left sharp
+    for (let k = 0; k < ns; k++) {
+      const h = top - rise * (k + 1) / ns, wz = 12, dip = 0.02 + 0.006 * (nf - j);
+      for (const [a, b] of [[cz - wst, cz - wz], [cz + wz, cz + wst]]) bag.add(T, box(x, -0.5, a, x + tread, h, b));
+      bag.add(T, box(x, -0.5, cz - wz, x + tread - 0.06, h - dip, cz + wz));
+      const lip = box(0, -0.5, cz - wz, 0.06, 0, cz + wz), pa = lip.attributes.position.array;
+      for (let i = 0; i < pa.length; i += 3) { const top0 = pa[i + 1] === 0; pa[i + 1] = top0 ? h - dip - (pa[i] > 0.03 ? 0.03 : 0) : pa[i + 1]; pa[i] += x + tread - 0.06; }
+      lip.computeVertexNormals(); bag.add(T, lip);
+      x += tread;
+    }
     col.ramp([xa, cz - wst, x, cz + wst], top - rise, top, 'w');
     top -= rise;
     if (j < nf - 1) { bag.add(T, box(x, -0.5, cz - wst, x + land, top, cz + wst)); col.floor([x, cz - wst, x + land, cz + wst], top); x += land; }

@@ -9,7 +9,8 @@ import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, frustum, lathe, quad, fromTriangles, orientOutward } from '../../core/geom.js';
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import '../qing/index.js';
-import { dragonHead, ridgeCrest, westPortal } from './carving.js';
+import { dragonHead, ridgeCrest, westPortal, staveMask } from './carving.js';
+import { stueInside } from './stue.js';
 
 const W = 'tar_wood', SH = 'tar_shingle', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -272,6 +273,14 @@ function staveChurch(el, { bag, col, lights }) {
     if (y0 - F < 1.8) col.circle(x, z, sr, F, F + 2.2);
     else bag.add(W, lathe([[sr * 0.4, 0], [sr * 1.05, 0.25], [0.001, 0.3]], 12, null, x, y0 - 0.25, z));       // the suspended stave's carved foot
   }
+  // the intermediate staves end in carved masks and beasts' heads, turned into the room, under the wall plate (SNL)
+  { let k = 0;
+    for (const [x, z] of staves) {
+      const corner = (x === sx[0] || x === sx[4]) && (z === sz[0] || z === sz[3]);
+      if (corner) continue;
+      const d = Math.abs(z - sz[0]) < 1e-6 ? [0, 1] : Math.abs(z - sz[3]) < 1e-6 ? [0, -1] : x === sx[0] ? [1, 0] : [-1, 0];
+      staveMask(bag, W, [x + d[0] * (sr - 0.015), yPlate - 0.32, z + d[1] * (sr - 0.015)], d, k++ % 2 ? 'beast' : 'man', 1.5);
+    } }
   // the four sides of the central room: a (corner) → b (corner) on the staves' line, the staves' positions along it
   const sides = [
     [[sx[0], sz[0]], [sx[4], sz[0]], sx.map((x) => x - sx[0]), true],
@@ -503,13 +512,25 @@ function bellHouse(el, { bag, col }) {
   cross(bag, x, y + 11.85, z, 0.7);
 }
 /** Round-log walls on rect from y to y + H: the courses of the long and the short walls half a log apart, crossing and standing out at the notched corners. */
-function logWalls(bag, [x0, z0, x1, z1], y, H, d = 0.26, over = 0.3) {
-  bag.add(LOG, box(x0 + 0.03, y, z0 + 0.03, x1 - 0.03, y + H, z1 - 0.03));     // the logs' backs
+function logWalls(bag, [x0, z0, x1, z1], y, H, d = 0.26, over = 0.3, hole = null) {
   const r = d * 0.54;
+  // the logs' backs: solid, or (a house open inside) four walls a log thick, the door's gap cut through one
+  if (!hole) bag.add(LOG, box(x0 + 0.03, y, z0 + 0.03, x1 - 0.03, y + H, z1 - 0.03));
+  else {
+    const t = r + 0.02, ex = hole.face[0] === 'x', lo = hole.c - hole.w / 2, hi = hole.c + hole.w / 2;
+    const wallX = (xx, sg) => { const a = Math.min(xx, xx + sg * t), b = Math.max(xx, xx + sg * t);
+      if (ex && hole.face === (sg > 0 ? 'x0' : 'x1')) { bag.add(LOG, box(a, y, z0 + 0.03, b, y + H, lo)); bag.add(LOG, box(a, y, hi, b, y + H, z1 - 0.03)); bag.add(LOG, box(a, y + hole.h, lo, b, y + H, hi)); }
+      else bag.add(LOG, box(a, y, z0 + 0.03, b, y + H, z1 - 0.03)); };
+    const wallZ = (zz, sg) => { const a = Math.min(zz, zz + sg * t), b = Math.max(zz, zz + sg * t);
+      if (!ex && hole.face === (sg > 0 ? 'z0' : 'z1')) { bag.add(LOG, box(x0 + t + 0.03, y, a, lo, y + H, b)); bag.add(LOG, box(hi, y, a, x1 - t - 0.03, y + H, b)); bag.add(LOG, box(lo, y + hole.h, a, hi, y + H, b)); }
+      else bag.add(LOG, box(x0 + t + 0.03, y, a, x1 - t - 0.03, y + H, b)); };
+    wallX(x0 + 0.03, 1); wallX(x1 - 0.03, -1); wallZ(z0 + 0.03, 1); wallZ(z1 - 0.03, -1);
+  }
+  const split = (face, yy, a, b) => (hole && hole.face === face && yy - r < y + hole.h ? [[a, hole.c - hole.w / 2 - 0.12], [hole.c + hole.w / 2 + 0.12, b]] : [[a, b]]);
   for (let k = 0; y + k * d <= y + H - d * 0.4; k++) {
-    for (const xx of [x0, x1]) bag.add(LOG, logRod([xx, y + k * d, z0 - over], [xx, y + k * d, z1 + over], r));
+    for (const [xx, fc] of [[x0, 'x0'], [x1, 'x1']]) for (const [a, b] of split(fc, y + k * d, z0 - over, z1 + over)) bag.add(LOG, logRod([xx, y + k * d, a], [xx, y + k * d, b], r));
     const y2 = y + d / 2 + k * d;
-    if (y2 <= y + H - d * 0.4) for (const zz of [z0, z1]) bag.add(LOG, logRod([x0 - over, y2, zz], [x1 + over, y2, zz], r));
+    if (y2 <= y + H - d * 0.4) for (const [zz, fc] of [[z0, 'z0'], [z1, 'z1']]) for (const [a, b] of split(fc, y2, x0 - over, x1 + over)) bag.add(LOG, logRod([a, y2, zz], [b, y2, zz], r));
   }
 }
 /** The gable ends in logs above y over rect (ridge along x if alongX), each course shorter, under a roof of the given rise. */
@@ -537,9 +558,9 @@ function roofTrim(bag, [x0, z0, x1, z1], y, pitch, o, alongX, sod) {
   }
 }
 /** A plank door with its jambs and lintel on the face z = f (sg: the face's outward sign), centred at mx; w wide, h high, standing out by `out`. */
-function door(bag, mx, f, sg, y, w, h, out) {
+function door(bag, mx, f, sg, y, w, h, out, open = false) {
   const z = f + sg * out;
-  bag.add(W, box(mx - w / 2, y, Math.min(z, z + sg * 0.06), mx + w / 2, y + h, Math.max(z, z + sg * 0.06)));
+  if (!open) bag.add(W, box(mx - w / 2, y, Math.min(z, z + sg * 0.06), mx + w / 2, y + h, Math.max(z, z + sg * 0.06)));
   for (const sx of [-1, 1]) bag.add(W, box(mx + sx * (w / 2 + 0.06) - 0.06, y, Math.min(z, z + sg * 0.1), mx + sx * (w / 2 + 0.06) + 0.06, y + h + 0.14, Math.max(z, z + sg * 0.1)));
   bag.add(W, box(mx - w / 2 - 0.14, y + h, Math.min(z, z + sg * 0.1), mx + w / 2 + 0.14, y + h + 0.14, Math.max(z, z + sg * 0.1)));
 }
@@ -585,17 +606,30 @@ function logHouse(el, { bag, col }) {
   }
   const H = kind === 'barn' ? 3.9 : 3.1;
   bag.add('rubble', box(x0 - 0.15, foot, z0 - 0.15, x1 + 0.15, y + 0.15, z1 + 0.15));
-  logWalls(bag, el.rect, y + 0.15 + r, H - r, d); col.rect(el.rect, foot, y + H);
-  const alongX = x1 - x0 >= z1 - z0, front = rand() < 0.5;
+  const alongX = x1 - x0 >= z1 - z0, front = rand() < 0.5, open = kind === 'stue' && !!el.open;
+  const hole = open ? (alongX ? { face: front ? 'z0' : 'z1', c: (x0 + x1) / 2 - 0.8, w: 0.85, h: 1.7 + 0.12 - r } : { face: front ? 'x0' : 'x1', c: (z0 + z1) / 2, w: 0.85, h: 1.7 + 0.12 - r }) : null;
+  logWalls(bag, el.rect, y + 0.15 + r, H - r, d, 0.3, hole);
+  if (!open) col.rect(el.rect, foot, y + H);
+  else {
+    col.rect(el.rect, foot, y + 0.15);
+    const t = r + 0.05, lo = hole.c - hole.w / 2, hi = hole.c + hole.w / 2;
+    for (const [fc, seg] of [['z0', [[x0, z0 + t / 2], [x1, z0 + t / 2]]], ['z1', [[x0, z1 - t / 2], [x1, z1 - t / 2]]], ['x0', [[x0 + t / 2, z0], [x0 + t / 2, z1]]], ['x1', [[x1 - t / 2, z0], [x1 - t / 2, z1]]]]) {
+      if (fc !== hole.face) { col.segment(seg[0], seg[1], t, y + 0.15, y + H); continue; }
+      const ex = fc[0] === 'x', [p, q] = seg, at = (u) => (ex ? [p[0], u] : [u, p[1]]), u0 = ex ? z0 : x0, u1 = ex ? z1 : x1;
+      col.segment(at(u0), at(lo), t, y + 0.15, y + H); col.segment(at(hi), at(u1), t, y + 0.15, y + H); col.segment(at(lo), at(hi), t, y + 0.15 + r + hole.h, y + H);
+    }
+  }
   // the door (and the stue's small window) in a long wall; a barn's wide double doors
   if (alongX) {
     const f = front ? z0 : z1, sg = front ? -1 : 1, mx = (x0 + x1) / 2 + (kind === 'stue' ? -0.8 : 0);
-    door(bag, mx, f, sg, y + 0.15, kind === 'barn' ? 2.2 : 0.85, kind === 'barn' ? 2.3 : 1.7, r + 0.01);
+    door(bag, mx, f, sg, y + 0.15, kind === 'barn' ? 2.2 : 0.85, kind === 'barn' ? 2.3 : 1.7, r + 0.01, open);
+    if (open) { const zi = f - sg * (r + 0.03); bag.add(W, box(mx + 0.425 - 0.05, y + 0.19, Math.min(zi, zi - sg * 0.8), mx + 0.425, y + 1.82, Math.max(zi, zi - sg * 0.8))); }
     if (kind === 'stue') { const wx = mx + 1.7, z = f + sg * (r + 0.01); bag.add('opening', box(wx - 0.3, y + 1.4, Math.min(z, z + sg * 0.03), wx + 0.3, y + 1.85, Math.max(z, z + sg * 0.03))); for (const [a, b, c, e] of [[-0.38, -0.3, 1.32, 1.93], [0.3, 0.38, 1.32, 1.93], [-0.38, 0.38, 1.32, 1.4], [-0.38, 0.38, 1.85, 1.93]]) bag.add(W, box(wx + a, y + c, Math.min(z, z + sg * 0.06), wx + b, y + e, Math.max(z, z + sg * 0.06))); }
   } else {
     const f = front ? x0 : x1, sg = front ? -1 : 1, mz = (z0 + z1) / 2, X0 = f + sg * (r + 0.01), X1 = X0 + sg * 0.06;
     const w = kind === 'barn' ? 2.2 : 0.85, h = kind === 'barn' ? 2.3 : 1.7;
-    bag.add(W, box(Math.min(X0, X1), y + 0.15, mz - w / 2, Math.max(X0, X1), y + 0.15 + h, mz + w / 2));
+    if (!open) bag.add(W, box(Math.min(X0, X1), y + 0.15, mz - w / 2, Math.max(X0, X1), y + 0.15 + h, mz + w / 2));
+    else { const xi = f - sg * (r + 0.03); bag.add(W, box(Math.min(xi, xi - sg * 0.8), y + 0.19, mz + w / 2 - 0.05, Math.max(xi, xi - sg * 0.8), y + 1.82, mz + w / 2)); for (const e of [-1, 1]) bag.add(W, box(Math.min(X0, X1 + sg * 0.04), y + 0.15, mz + e * (w / 2 + 0.06) - 0.06, Math.max(X0, X1 + sg * 0.04), y + 0.15 + h + 0.14, mz + e * (w / 2 + 0.06) + 0.06)); }
     bag.add(W, box(Math.min(X0, X1 + sg * 0.04), y + 0.15 + h, mz - w / 2 - 0.14, Math.max(X0, X1 + sg * 0.04), y + 0.29 + h, mz + w / 2 + 0.14));
   }
   const roof = el.roof ?? (kind === 'stue' ? 'sod' : rand() < 0.5 ? 'sod' : SH), pitch = kind === 'stue' ? 0.5 : 0.7, o = 0.45, yt = y + H + o * pitch;
@@ -610,6 +644,7 @@ function logHouse(el, { bag, col }) {
     bag.add('opening', box(mx - 0.25, top + 0.05, mz - 0.36, mx + 0.25, top + 0.3, mz + 0.36));
     pitched(bag, W, W, [mx - 0.35, mz - 0.35, mx + 0.35, mz + 0.35], top + 0.35, 0.8, 0.12, alongX, 0.05);
   }
+  if (open) stueInside(bag, col, { rect: el.rect, fl: y + 0.17, top: y + H, ridge: top - (roof === 'sod' ? 0.28 : 0.16), alongX, wt: r + 0.05, door: hole });
 }
 /** fence: { pts, y, h } — a fence of split staves along a polyline. */
 function fence(el, { bag, col }) {

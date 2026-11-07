@@ -76,6 +76,8 @@ E.push({ t: 'inca_house', rect: [-56, 34, -46, 46], y: 0, h: 3.0, front: 'e', ma
   E.push({ t: 'stairs', rect: [g - 1.1, zb + DITCH.bottom - 0.4, g + 1.1, zb + DITCH.top + 0.3], y0: -DITCH.depth, y1: 0, dir: 's', mat: 'granite_rough' });
   E.push({ t: 'stairs', rect: [g - 1.1, zb - DITCH.top - 0.3, g + 1.1, zb - DITCH.bottom + 0.4], y0: -DITCH.depth, y1: 0, dir: 'n', mat: 'granite_rough' });
   E.push({ t: 'lane', rect: [g - 1.1, zb - DITCH.bottom + 0.4, g + 1.1, zb + DITCH.bottom - 0.4], y: -DITCH.depth + 0.02, mat: 'granite_rough' }); }
+// the chaski's hut (chaskiwasi) by the road south of the fields, its door to the road (§5.3)
+E.push({ t: 'inca_house', rect: [6.5, 118.6, 10.9, 123.2], y: ground.height(8.7, 120.9), h: 2.3, th: 0.55, front: 'w', roof: 'thatch', seed: 401 });
 // the five storehouses (qollqa) in the fields: small stone rooms in a row, thatched, their doors to the path
 for (const [i, r] of STORES.entries()) E.push({ t: 'inca_house', rect: r, y: 0, h: 2.4, th: 0.6, front: 'n', empty: true, seed: 300 + i });
 // the quarry between the Sacred Plaza and the Temple of the Sun, west of the Main Plaza

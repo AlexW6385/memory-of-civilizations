@@ -49,7 +49,7 @@ function sector(cx, cz, r0, r1, y0, y1, a0, a1, seg = 3) {
  * outward normal n — the robe narrowing to the shoulders over the feet, the cloak's edge, the head before
  * its halo. h tall, centred on u = 0, from v = 0, at depth d.
  */
-function saint(bag, P, n, h, d, rand, halo = 'paint_ochre') {
+export function saint(bag, P, n, h, d, rand, halo = 'paint_ochre') {
   const w = h * 0.24, robe = ROBES[Math.floor(rand() * ROBES.length)], cloak = ROBES[Math.floor(rand() * ROBES.length)];
   const Q = (u, v, dd) => P(u, v, d + dd);
   bag.add(robe, hexa([Q(-w / 2, 0, 0), Q(w / 2, 0, 0), Q(w * 0.36, h * 0.74, 0), Q(-w * 0.36, h * 0.74, 0), Q(-w / 2, 0, 0.012), Q(w / 2, 0, 0.012), Q(w * 0.36, h * 0.74, 0.012), Q(-w * 0.36, h * 0.74, 0.012)]));

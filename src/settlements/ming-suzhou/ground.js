@@ -113,6 +113,7 @@ export const ground = {
     fog: { color: [0.64, 0.67, 0.68], density: 0.0007, height: 0.012 },
     exposure: 0.6,
     wind: [0.3, 0.2],
+    damp: 0.85,        // the plum rains: streaked white walls, moss at the foot of the shaded walls and on the north roofs (§11)
     weather: [
       { id: 'hazy', weight: 3, clouds: 0.4, cloudDensity: 0.45, sun: 0.9, fog: 1.4 },
       { id: 'cloudy', weight: 2.5, clouds: 0.7, cloudDensity: 0.6, sun: 0.65, fog: 1.6 },

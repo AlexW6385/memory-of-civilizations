@@ -46,3 +46,20 @@ export function inHouse(x, z, m = 0) {
   const l = GRID.get(Math.floor(x / 19) + ',' + Math.floor(z / 19));
   return !!l && l.some((h) => inRect(h.rect, x, z, m));
 }
+let CH = null;
+/** The farmers' houses on the chinampas: { c, door, seed }, each on the middle of its plot (plots 14 m across in x, cells of 30 m in z), clear of the causeway and the canals. */
+export function chinampaHouses() {
+  if (CH) return CH;
+  CH = [];
+  const rand = rng(2519);
+  for (let i = -24; i < 24; i++) for (let j = -12; j < 12; j++) {
+    const x = i * 14 + 7, z = j * 30 + 15 + (rand() - 0.5) * 12, r = Math.hypot(x, z);
+    if (r < 308 || r > 324 || rand() < 0.45) continue;
+    if (x < 0 && Math.abs(z) < 24) continue;
+    if (CANALS.some((c) => inRect(c, x, z, 10))) continue;
+    CH.push({ c: [x, z], door: rand() < 0.5 ? 'e' : 'w', seed: Math.floor(rand() * 1e6) });
+  }
+  return CH;
+}
+/** Is (x, z) on a chinampa house's site (the house, its granary and plants), with margin m? */
+export const inChinampaHouse = (x, z, m = 0) => Math.hypot(x, z) > 300 && chinampaHouses().some((h) => Math.abs(x - h.c[0]) < 5.2 + m && Math.abs(z - h.c[1]) < 4.2 + m);

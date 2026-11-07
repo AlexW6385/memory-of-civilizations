@@ -20,7 +20,7 @@ E.push({ t: 'm_colonnade', rect: [62, -36, 86, 8], rows: 8, cols: 4, h: 4.2 });
 E.push({ t: 'm_colonnade', rect: [84, 28, 164, 46], rows: 4, cols: 20, h: 4.2 });
 E.push({ t: 'm_colonnade', rect: [146, -36, 164, 28], rows: 10, cols: 3, h: 4.2 });
 // the Platform of Venus, the Tzompantli, the Platform of the Eagles and Jaguars
-E.push({ t: 'm_platform', c: [0, -64], a: 12.5, h: 4.2, serpents: 'nesw' });
+E.push({ t: 'm_platform', c: [0, -64], a: 12.5, h: 4.2, serpents: 'nesw', venus: true });
 E.push({ t: 'm_platform', c: [-58, -46], a: 9, h: 1.9, stairs: 'e', skulls: true });
 E.push({ t: 'm_platform', c: [-48, -12], a: 7, h: 3.2 });
 // El Caracol, the round observatory, south-west of the Castillo (its stair facing west)
