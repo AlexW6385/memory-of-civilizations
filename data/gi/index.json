@@ -894,5 +894,56 @@
   "bytes": 1075205,
   "seconds": 878,
   "baked": "2026-11-07"
+ },
+ "versailles-chateau": {
+  "site": "versailles",
+  "hash": "baba2f2b63e11267",
+  "rays": 128,
+  "probes": 72641,
+  "boxes": [
+   {
+    "min": [
+     -1.5,
+     13.8,
+     -56.2
+    ],
+    "n": [
+     49,
+     15,
+     95
+    ],
+    "spacing": 1.15,
+    "rooms": [
+     "hall of mirrors",
+     "salon of peace",
+     "salon of war",
+     "salon of apollo",
+     "salon of mercury",
+     "salon of mars",
+     "salon of diana",
+     "salon of venus",
+     "ambassadors staircase landing"
+    ]
+   },
+   {
+    "min": [
+     69.6,
+     5.56,
+     -56.2
+    ],
+    "n": [
+     8,
+     22,
+     16
+    ],
+    "spacing": 1.15,
+    "rooms": [
+     "ambassadors staircase vestibule"
+    ]
+   }
+  ],
+  "bytes": 1193416,
+  "seconds": 351,
+  "baked": "2026-11-07"
  }
 }
