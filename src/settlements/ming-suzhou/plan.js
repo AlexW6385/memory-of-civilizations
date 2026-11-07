@@ -143,6 +143,25 @@ E.push({ t: 'ming_hall', rect: [22, 44, 34, 50], y: G + 0.35, H: 3.8, front: 'w'
 E.push({ t: 'taihu', c: [-30, 44], r: 1.6, h: 2.6, y: G, seed: 77, solid: true });
 E.push({ t: 'taihu', c: [28, 32], r: 1.2, h: 2.0, y: G, seed: 78, solid: true });
 
+// ── the halls furnished, their boards and couplets, potted landscapes in the courts (§11) ──
+E.push({ t: 'hall_furniture', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, front: 'n' });
+E.push({ t: 'scholar_study', rect: [-34, 30, -22, 36], y: G + 0.35, door: 'e' });
+E.push({ t: 'hall_furniture', rect: [-10, 32, 10, 39.5], y: G + 0.45, front: 's' });
+E.push({ t: 'hall_furniture', rect: B.linglong.rect, y: G + B.linglong.y, front: 'w' });
+// the inscribed boards under the eaves over the doorways (the doorway is the front's middle bay, as ming_hall lays it out)
+const board = (at, y, facing, w, n, seed, extra = {}) => E.push({ t: 'plaque', at, y, facing, w, h: 0.72, n, seed, ...extra });
+board([1.8, B.yuanxiang.rect[1] - 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, -1], 2.4, 4, 11);
+board([0, B.yuanxiang.rect[3] + 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, 1], 2.4, 3, 12);
+board([-20, B.yiyu.rect[1] - 0.2], G + B.yiyu.y + 3.8 - 0.98, [0, -1], 1.8, 3, 13, { h: 0.6 });
+board([B.linglong.rect[0] - 0.2, -3.375], G + B.linglong.y + 3.9 - 0.98, [-1, 0], 1.8, 4, 14, { h: 0.6 });
+board([1.67, 39.7], G + 0.45 + 5.0 - 1.02, [0, 1], 2.4, 4, 15);
+board([-21.8, 34.5], G + 0.35 + 3.8 - 0.98, [1, 0], 1.6, 3, 16, { h: 0.55 });
+// the couplet on the two columns of the Hall of Distant Fragrance's doorway, facing the pond
+for (const x of [0, 3.6]) E.push({ t: 'plaque', at: [x, B.yuanxiang.rect[1] - 0.17], y: G + B.yuanxiang.y + 1.2, facing: [0, -1], w: 0.3, h: 2.5, n: 7, vertical: true, seed: 20 + x, field: 'lacquer_black', ink: 'gilt_bronze' });
+// potted landscapes on stone stands: in the loquat court, before the Hall of Distant Fragrance, in the study's court
+for (const [at, kind, seed] of [[[33, 4.5], 'pine', 1], [[36.5, 4.5], 'rock', 2], [[40, 4.5], 'pine', 3], [[43.5, 4.5], 'pine', 4], [[47, 4.5], 'rock', 5],
+  [[-4.5, -7.6], 'pine', 6], [[4.5, -7.6], 'rock', 7], [[-25, 39], 'pine', 8], [[-31, 39], 'rock', 9]]) E.push({ t: 'penjing', at, y: Math.max(G, H(at[0], at[1])), kind, seed });
+
 // ── rooms and the walk ───────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
@@ -159,7 +178,7 @@ export const garden = {
   id: 'ming-suzhou-garden',
   name: { en: 'The Humble Administrator\'s Garden', zh: '拙政园' },
   era: { en: 'Ming dynasty, 1509–1533', zh: '明，正德四年至嘉靖十二年（1509–1533年）' },
-  style: 'ming',
+  style: 'suzhou-site',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [0, 65], facing: 'n' },
   bounds: [GARDEN[0] - 2, GARDEN[1] - 2, GARDEN[2] + 2, RESIDENCE[3] + 2],

@@ -1,7 +1,7 @@
 # Ming Suzhou, c. 1530 — dossier
 
 Settlement id: `ming-suzhou` · Style: `ming` · Region: China (Jiangnan) · Code: `src/settlements/ming-suzhou/`
-Status of this dossier: L1–L2 (layout of the garden and its buildings, the residence on its axis, the canal quarter's streets, houses, bridges and boats; materials; planting; weather; music). L3 items (furniture, inscribed boards, penjing, people and the life of the streets, the interiors of the houses) recorded for later.
+Status of this dossier: L2–L3 (layout of the garden and its buildings, the residence on its axis, the canal quarter's streets, houses, bridges and boats; materials; planting; weather; music). L3 items (furniture, inscribed boards, penjing, people and the life of the streets, the interiors of the houses) recorded for later.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -88,7 +88,23 @@ In the garden, slow pentatonic phrases on a plucked zither (the qin, played here
 
 ## 10. Not yet (L3)
 
-Furniture and the scholar's objects in the halls; inscribed boards and couplets; the penjing; the paving's patterns (crane, lotus, coins); people, the market's life, boats moving; lamps at night in the streets; interiors of the houses; the western and eastern parts of the garden as they were in the Ming.
+(Furniture, the study, boards and couplets and penjing are now built: §11; the street life and the open houses: §6.) Still to do: the paving's patterns (crane, lotus, coins); boats moving; lamps at night in the streets; the western and eastern parts of the garden as they were in the Ming.
+
+## 11. The halls furnished, boards and couplets, penjing, damp (L3)
+
+Built in `src/settlements/ming-suzhou/style.js` (the style `suzhou-site`, the Jiangnan vocabulary plus these pieces).
+
+- **A scholar's study.** Wen Zhenheng (1585–1645, Wen Zhengming's great-grandson), *Treatise on Superfluous Things* (*Zhangwu zhi*): a study that is also a sitting room "should contain no more than four chairs and a couch-bed"; in a small room the writing desk stands free, with "brushes, incense powder boxes, and incense burners"; shelves and cabinets keep books and paintings in order, "there should not be too many [shelves]; otherwise, the room looks like a bookstore"; in small rooms no painting is hung, elsewhere one to a room; flowers and incense burners are kept apart, as smoke harms plants; on the sitting table books, albums, paperweights, inkstones, brushes and water holders [stated: Pagoda Red, *Wen Zhenheng: Ming Dynasty Minimalist*]; the scholar's objects — inkstone, ink rest, water dropper, brush washer, paperweight, incense burner, vase — "formulated the scenario of literati's life" [stated: National Palace Museum, *Literati's Ordinaries*]; scholar's rocks valued for thinness, openness, perforation and wrinkling (§5). Ours, in the small hall of the residence's west court (x −34…−22, z 30…36, the door east): the couch-bed against the back wall with its three railed sides, a reed mat, the low table on it and a qin laid there (black lacquer, seven strings); the painting table across the room with the armchair behind it, on it the inkstone and ink stick, a brush rest with three brushes, a bamboo brush pot with brushes, a white water dropper, two jade paperweights on a sheet of paper, a stack of thread-bound books in their blue case; an open bookshelf of three shelves with books lying in cases and two lacquer boxes; on a high table the scholar's rock on its wooden stand and a white vase with a branch of plum in flower; the incense burner on its own small stand by the door, away from the flowers; two armchairs and a tea stand for a guest — four chairs in all [inferred: the arrangement within Wen's rules; no painting hung, as he asks of small rooms].
+- **Halls set for guests.** The Hall of Distant Fragrance, the residence's main hall and the Exquisite Jade hall: against the back wall a long table with turned-up ends (qiaotou'an), on it a great rock in its stand and a pair of blue vases; down each side a row of southern official's hat armchairs facing across, a tea stand between each pair [inferred: the symmetrical hall arrangement of surviving Suzhou halls].
+- **Furniture.** Ours in dark chestnut lacquer (standing in for the huanghuali and other hardwoods of Ming Suzhou), round legs and stretchers, waisted aprons; the armchairs with their round posts running up into the back, curved arms and the yoke rail [inferred].
+- **Inscribed boards and couplets.** The garden's buildings are named after verses; an inscription by Wang Ji hangs at the Pavilion of Snowy Fragrance and Azure Cloud [stated: Wikipedia, Humble Administrator's Garden]. Ours: a horizontal board under the eaves over the doorway of the Hall of Distant Fragrance (north and south), the Leaning Jade Pavilion, the Exquisite Jade hall, the residence's main hall and the study — a black lacquer frame round a wooden field, the characters raised in malachite green; on the two columns of the Hall of Distant Fragrance's doorway a couplet on black boards in gilt. The characters are generic strokes in the proportions of characters, not real inscriptions [inferred: the green-on-wood boards of the Suzhou gardens; the inscriptions themselves not modelled].
+- **Penjing.** The garden holds over 700 Suzhou-style penjing [stated: Wikipedia — of the present garden]. Ours: nine on granite stands — miniature pines with twisted trunks and cloud-like pads in blue glazed basins (with a small stone), and stones standing in white water basins — along the loquat court, either side of the path before the Hall of Distant Fragrance and in the study's court [inferred: their number in 1533 is not known; placing ours].
+- **Damp.** Late spring and the plum rains: the climate's dampness set high (0.85), so the white walls carry rain streaks and the shaded feet of walls and the north-facing roofs moss [inferred].
+
+Sources for §11:
+- [Wen Zhenheng: Ming Dynasty Minimalist — Pagoda Red](https://www.pagodared.com/blog/2016/08/10/wen-zhenheng-ming-dynasty-minimalist/)
+- [Literati's Ordinaries: Applicable Things — National Palace Museum](https://theme.npm.edu.tw/exh108/LiteratisOrdinaries/en/page-4.html)
+- [Humble Administrator's Garden — Wikipedia](https://en.wikipedia.org/wiki/Humble_Administrator%27s_Garden)
 
 ## Sources
 
