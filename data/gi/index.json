@@ -181,8 +181,8 @@
  },
  "dome-of-the-rock": {
   "site": "jerusalem",
-  "hash": "870953a86d796f50",
-  "rays": 160,
+  "hash": "36418e646c912b2b",
+  "rays": 128,
   "probes": 2640,
   "boxes": [
    {
@@ -203,9 +203,9 @@
     ]
    }
   ],
-  "bytes": 45225,
-  "seconds": 29,
-  "baked": "2026-11-06"
+  "bytes": 45068,
+  "seconds": 24,
+  "baked": "2026-11-07"
  },
  "edfu": {
   "site": "edfu",
