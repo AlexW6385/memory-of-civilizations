@@ -1,4 +1,33 @@
 {
+ "amsterdam-dam": {
+  "site": "amsterdam",
+  "hash": "ff2d521995f1fc67",
+  "rays": 128,
+  "probes": 77056,
+  "boxes": [
+   {
+    "min": [
+     -73,
+     0.65,
+     -252.8
+    ],
+    "n": [
+     43,
+     56,
+     32
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "vestibule",
+     "burgerzaal",
+     "stair"
+    ]
+   }
+  ],
+  "bytes": 1222505,
+  "seconds": 1010,
+  "baked": "2026-11-07"
+ },
  "angkor-wat": {
   "site": "angkor",
   "hash": "58ed19dd15dceff3",
