@@ -67,6 +67,24 @@ function openings(bag, r, y, h, w, step, skipMid = false, kind = 'aks') {
 function rockCut(el, { bag, col }) {
   const t = []; beamTris(t, [el.a[0], el.y0, el.a[1]], [el.b[0], el.y0, el.b[1]], (el.th ?? 1.6) / 2, -el.y0 + (el.top ?? 0));
   bag.add(TU, fromTriangles(t)); col.segment(el.a, el.b, el.th ?? 1.6, el.y0, el.top ?? 0);
+  if (el.n) hewnFace(bag, el);
+}
+// The tuff's beds, level across the whole site (docs/settlements/lalibela.md §12): [y0, y1] below the
+// precinct's ground, each a layer a little paler and finer than the rock round it.
+const BEDS = [[-1.55, -1.05], [-2.6, -2.42], [-4.3, -3.55], [-5.9, -5.7], [-7.35, -6.85], [-9.0, -8.8], [-10.4, -9.6], [-11.8, -11.5]];
+/**
+ * The face of a cut as the masons left it (§12): the beds of the tuff showing as bands, and every 1.1 m
+ * down the thin ledge of a working level, where the cutting of one lift stopped and the next began —
+ * on the face toward the cut (el.n, the unit into the cut), clipped to the face's height.
+ */
+function hewnFace(bag, el) {
+  const th = (el.th ?? 1.6) / 2, [nx, nz] = el.n, A = [el.a[0] + nx * th, el.a[1] + nz * th], B = [el.b[0] + nx * th, el.b[1] + nz * th];
+  const lo = el.y0 + 0.25, hi = (el.top ?? 0) - 0.2, beds = [], ledges = [];
+  const strip = (out, y0, y1, e) => { const a = Math.max(lo, y0), b = Math.min(hi, y1); if (b - a < 0.03) return; beamTris(out, [A[0], a, A[1]], [B[0], a, B[1]], e, b - a); };
+  for (const [y0, y1] of BEDS) strip(beds, y0, y1, 0.014);
+  for (let y = -1.1; y > el.y0; y -= 1.1) strip(ledges, y - 0.05, y, 0.035);
+  if (beds.length) bag.add('tuff_hewn', fromTriangles(beds));
+  if (ledges.length) bag.add(TU, fromTriangles(ledges));
 }
 
 /** A Greek cross [arms of half-length a, half-width w] at c from y0 to y1, as five boxes (no faces overlapping). */

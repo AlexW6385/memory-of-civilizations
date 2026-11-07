@@ -34,14 +34,42 @@ for (const c of cuts) {
       for (let i = 0; i < n; i++) {
         const s0 = p + (q - p) * i / n, s1 = p + (q - p) * (i + 1) / n, m = (s0 + s1) / 2, [mx, mz] = k === 'z' ? [m, v] : [v, m];
         const vo = v + (v < (k === 'z' ? (z0 + z1) / 2 : (x0 + x1) / 2) ? -OUTER / 2 : OUTER / 2);   // widened outward, under the ground
-        E.push({ t: 'rock_cut', a: k === 'z' ? [s0, vo] : [vo, s0], b: k === 'z' ? [s1, vo] : [vo, s1], y0: -c.depth - 0.2, th: EDGE + OUTER, top: slope(mx, mz) + 0.12 });   // a hewn kerb a hand proud of the ground (its top flush with the ground had flickered with it)
+        const inn = v < (k === 'z' ? (z0 + z1) / 2 : (x0 + x1) / 2) ? 1 : -1;                     // the unit into the cut
+        E.push({ t: 'rock_cut', a: k === 'z' ? [s0, vo] : [vo, s0], b: k === 'z' ? [s1, vo] : [vo, s1], y0: -c.depth - 0.2, th: EDGE + OUTER, top: slope(mx, mz) + 0.12, n: k === 'z' ? [0, inn] : [inn, 0] });   // a hewn kerb a hand proud of the ground (its top flush with the ground had flickered with it)
       }
     }
   }
 }
 void inRect;
-// the pits' floors, levelled
-for (const p of Object.values(PITS)) { const [x0, z0, x1, z1] = p.rect; E.push({ t: 'block', walk: true, rect: [x0 + EDGE - 0.2, z0 + EDGE - 0.2, x1 - EDGE + 0.2, z1 - EDGE + 0.2], y0: -p.depth - 1.5, y1: -p.depth + 0.15, mat: 'tuff_red' }); }
+// the pits' floors, levelled; round the churches of Giyorgis and Medhane Alem a drainage channel cut in the
+// floor, in Bete Maryam's court three pools (docs/settlements/lalibela.md §12; the Met: "drainage canals and
+// trenches" against flooding, three pools in the courtyard of Biete Mariam)
+const loop = (c, hx, hz, w) => [[c[0] - hx - w, c[1] - hz - w, c[0] + hx + w, c[1] - hz], [c[0] - hx - w, c[1] + hz, c[0] + hx + w, c[1] + hz + w], [c[0] - hx - w, c[1] - hz, c[0] - hx, c[1] + hz], [c[0] + hx, c[1] - hz, c[0] + hx + w, c[1] + hz]];
+const ctr = (p) => [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2];
+const SUNK = {
+  giyorgis: loop(ctr(PITS.giyorgis), 14.0, 14.0, 0.35).map((r) => [r, 0.3]),
+  medhane: loop(ctr(PITS.medhane), 18.95, 13.95, 0.35).map((r) => [r, 0.3]),
+  maryam: [[[79.2, -100.6, 81.6, -98.0], 1.1], [[79.2, -82.0, 81.6, -79.4], 1.1], [[58.4, -82.0, 60.8, -79.4], 1.1]],
+};
+for (const [id, p] of Object.entries(PITS)) {
+  const [x0, z0, x1, z1] = p.rect, F = [x0 + EDGE - 0.2, z0 + EDGE - 0.2, x1 - EDGE + 0.2, z1 - EDGE + 0.2], holes = SUNK[id] ?? [];
+  for (const r of carve(F, holes.map(([h]) => h))) E.push({ t: 'block', walk: true, rect: r, y0: -p.depth - 1.5, y1: -p.depth + 0.15, mat: 'tuff_red' });
+  for (const [h, d] of holes) {
+    E.push({ t: 'block', walk: true, rect: h, y0: -p.depth - 1.5, y1: -p.depth + 0.15 - d, mat: d > 0.5 ? 'tuff_hewn' : 'tuff_red' });
+    if (d > 0.5) E.push({ t: 'water_rect', rect: h, y: -p.depth + 0.15 - 0.35 });
+  }
+}
+/** A rectangle less the rectangles `holes` inside it (not overlapping), as rectangles: strips across x at the holes' edges, each cut along z. */
+function carve(r, holes) {
+  const xs = [...new Set([r[0], r[2], ...holes.flatMap((h) => [h[0], h[2]])])].sort((p, q) => p - q), out = [];
+  for (let i = 0; i + 1 < xs.length; i++) {
+    const a = xs[i], b = xs[i + 1], cut = holes.filter((h) => h[0] < b - 1e-6 && h[2] > a + 1e-6).sort((p, q) => p[1] - q[1]);
+    let z = r[1];
+    for (const h of cut) { if (h[1] > z) out.push([a, z, b, h[1]]); z = h[3]; }
+    if (r[3] > z) out.push([a, z, b, r[3]]);
+  }
+  return out;
+}
 // ---- the churches
 const G = PITS.giyorgis, gc = [(G.rect[0] + G.rect[2]) / 2, (G.rect[1] + G.rect[3]) / 2];
 // its roof level with the ground round the pit: the body stops 0.42 m below it, the three stepped crosses carved up to it

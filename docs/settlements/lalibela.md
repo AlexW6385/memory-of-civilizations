@@ -69,6 +69,12 @@ Chant in the ge'ez mode with the kebero drum and sistrum, the begena's buzzing s
 - **The liturgy's instruments and people.** "A large version of the kebero is also used in Ethiopian and Eritrean Orthodox Christian liturgical music", a drum of a hollowed trunk with hide over each end [stated: Wikipedia, Kebero]; the tsenatsel, a sistrum [stated: Wikipedia, Orthodox Tewahedo music], of brass, about 25 cm high [stated: The Met, Ṣanāṣel]. Ours: in Bete Maryam's north court six deacons in white turbans before the church, five shaking sistra (a wooden grip, a brass frame, three rods of loose discs), one with the kebero slung before him, a priest leading them; inside Medhane Alem rush mats down the nave, ten pilgrims seated on them facing the sanctuary curtain, a priest with his cross before it, two drums laid by a pillar [inferred: placement]. The kebero's heads of unequal size [inferred, from photographs].
 - **Trench walls.** The rock walls now reach 2 m outside each cut's edge under the ground and stand a hand proud of it as a hewn kerb, and the ground drops inside the walls, so that no seam or dip shows where the ground meets the cut [inferred: technical].
 
+## 12. Detail added (fifth pass: the hewn faces, the water)
+
+- **How the cuts were made.** "The churches have been carved top-down ... using chisels, axes, and other blades"; "workers first traced the perimeter of the structure on the rock face, then isolated the main structure of the church" [stated: The Met, The Rock-hewn Churches of Lalibela]. Ours: on every face of every pit and trench toward the cut, the tuff's beds as level bands a little paler than the rock round them, at the same depths across the whole site, and every 1.1 m down a thin ledge where one lift of the cutting stopped and the next began [inferred: the bands from the layered volcanic rock, the working levels from the top-down method].
+- **Drainage.** "To avoid flooding from underground rivers and water tables, the church builders excavated drainage canals and trenches" [stated: The Met]. Ours: round Bete Giyorgis and Bete Medhane Alem a channel 0.35 m wide and 0.3 m deep cut in the pit's floor, a little out from the plinth and its steps [inferred: size and place].
+- **Bete Maryam's pools.** "Additional hydraulic systems filled cisterns and baptismal pools, including the three pools in the courtyard of Biete Mariam" [stated: The Met]. Ours: three rectangular basins 2.4 × 2.6 m sunk 1.1 m into the court's floor, lined with fresh-hewn rock, water standing in them [inferred: sizes and places].
+
 ## Sources
 
 - [Church of Saint George, Lalibela — Wikipedia](https://en.wikipedia.org/wiki/Church_of_Saint_George,_Lalibela)
@@ -92,3 +98,4 @@ Chant in the ge'ez mode with the kebero drum and sistrum, the begena's buzzing s
 - [Kebero — Wikipedia](https://en.wikipedia.org/wiki/Kebero)
 - [Orthodox Tewahedo music — Wikipedia](https://en.wikipedia.org/wiki/Orthodox_Tewahedo_music)
 - [Ṣanāṣel (sistrum) — The Met](https://www.metmuseum.org/art/collection/search/503879)
+- [The Rock-hewn Churches of Lalibela — The Met](https://www.metmuseum.org/essays/the-rock-hewn-churches-of-lalibela)
