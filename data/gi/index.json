@@ -995,7 +995,7 @@
  },
  "mughal-agra-taj": {
   "site": "mughal-agra",
-  "hash": "e5649986d256c60a",
+  "hash": "d40693bfc7184ed2",
   "rays": 128,
   "probes": 45198,
   "boxes": [
@@ -1016,8 +1016,8 @@
     ]
    }
   ],
-  "bytes": 659505,
-  "seconds": 218,
+  "bytes": 666511,
+  "seconds": 163,
   "baked": "2026-11-07"
  },
  "muscovy-dormition": {
