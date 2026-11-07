@@ -22,6 +22,7 @@ import { LifeInstances } from './life-instances.js';
 import { SMALL } from './layers.js';
 import { Builder } from './builder.js';
 import { ENV } from './env.js';
+import { lampsOf, hazeOf } from './air.js';
 import { loadLand } from '../planet/land.js';
 import { BUILT, BUILT_BY_ID, initRelief, surface, groundInFrame, seaInFrame, PLANET_RADIUS as R, BLEND } from '../planet/relief.js';
 import { PlanetTerrain } from '../planet/terrain.js';
@@ -211,6 +212,7 @@ class Settlement {
 
   async addPart(id, plan, music, gen = this.gen, prebuilt = null) {
     const built = prebuilt ?? await buildPlanAsync(plan, undefined, { instancing: true, detail: true });
+    const rec0 = {};
     if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
     const group = new THREE.Group();
     group.name = plan.id;
@@ -233,6 +235,8 @@ class Settlement {
       if (detail) { m.userData.detail = true; m.layers.set(SMALL); }
       group.add(m);
     }
+    // the lamps of the part (its plan's lamps, the shades of its glow materials), for the lamps' pool
+    rec0.lamps = lampsOf(built, [...built.parts, ...(plan.style === 'life' ? [] : built.instanced)]);
     if (built.lights.length) {
       const flame = new THREE.ConeGeometry(0.035, 0.13, 8);
       const inst = new THREE.InstancedMesh(flame, flameMaterial(), built.lights.length);
@@ -249,7 +253,7 @@ class Settlement {
       if (!prebuilt) built.colliders.tops = await topField(flatParts(built));
       this.collide.add(built.colliders);
     }
-    const rec = { id, plan, music, group, built, settlement: this, detail: group.children.filter((o) => o.userData.detail) };
+    const rec = { id, plan, music, group, built, settlement: this, lamps: rec0.lamps, detail: group.children.filter((o) => o.userData.detail) };
     for (const o of rec.detail) { o.visible = false; o.castShadow = false; }
     if (!plan.feature) try { rec.gi = await this.world.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
     // unloaded while the collision or the light was being made: unload() already cleared the group
@@ -280,6 +284,9 @@ class Settlement {
     this.life = new LifeInstances(this.group, castsShadow);
     // (the rarer shapes are merged settlement-wide by material, their copies chosen by distance)
     this.life.build(this.lifeParts);
+    // the lanterns among the street's things: one lamp per copy of a glow shape, and per piece of the rarer ones
+    this.lifeLamps = lampsOf({}, this.life.meshes.map((L) => ({ mat: L.near.name.split(":")[1], geometry: L.near.geometry, matrices: L.all })));
+    this.lifeLamps.push(...lampsOf({}, this.life.rare.map((B) => ({ mat: B.near.name.split(":")[1], geometry: B.near.geometry }))));
     this.lifeParts = [];
   }
 
@@ -326,7 +333,7 @@ class Settlement {
     this.group.traverse((o) => { o.geometry?.dispose(); if (o.isInstancedMesh) o.dispose(); });
     this.merged = null; this.merging = null; this.quietFor = undefined;
     this.group.clear();
-    this.life?.dispose(); this.life = null; this.lifeParts = [];
+    this.life?.dispose(); this.life = null; this.lifeParts = []; this.lifeLamps = null;
     for (const rec of this.parts) this.world.r.gi.release?.(rec.plan.id);
     this.parts = [];
     this.collide = Object.assign(new CollisionWorld(), { terrain: this.collide.terrain, water: this.collide.water, waterLevel: this.collide.waterLevel });
@@ -683,6 +690,19 @@ export class World {
     }
     const here = this.locate(camera.position.x, camera.position.y, camera.position.z);
     this.indoorsIn = here.room && here.room.kind !== 'open' && here.distance === 0 ? here.building : null;
+    // the air of the room one is in (its building's haze) and the lamps nearest the eye (src/engine/air.js)
+    if (this.indoorsIn) this.r.haze = hazeOf(this.indoorsIn.plan.style);
+    if (this.r.lamps && (!this._nextLamp || now > this._nextLamp)) {
+      this._nextLamp = now + 250;
+      const src = [];
+      for (const s of this.settlements) {
+        if (s.state === 'idle' || !s.parts.length) continue;
+        s.group.updateMatrixWorld();
+        for (const rec of s.parts) if (rec.lamps?.length && rec.group.visible !== false) src.push({ list: rec.lamps, matrix: s.group.matrixWorld });
+        if (s.lifeLamps?.length) src.push({ list: s.lifeLamps, matrix: s.group.matrixWorld });
+      }
+      this.r.lamps.choose(camera.position, src, ENV.night.value);
+    }
     // the baked light of the landmark's rooms the viewer stands in (src/engine/gi.js)
     if (here.building?.gi) this.r.gi.use(here.building.gi, camera.position); else this.r.gi.clear?.();
     return here;

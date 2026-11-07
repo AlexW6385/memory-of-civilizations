@@ -52,6 +52,16 @@ const bump = (h, strength = 1) => {
   return normalize(abs(det).mul(N).sub(grad));
 };
 
+/**
+ * The moon's glitter on water for a reflected direction r (world): a sharp path of glints and a
+ * soft sheen round it, at night, with the moon up and the sky clear (DESIGN §11 Visual L3).
+ */
+const moonGlint = (r) => {
+  const c = max(dot(r, ENV.moonDir), 0);
+  const k = ENV.moonUp.mul(smoothstep(0.3, 0.8, ENV.night)).mul(float(1).sub(ENV.clouds.mul(0.85)));
+  return vec3(0.78, 0.84, 1.0).mul(pow(c, 400).mul(3.0).add(pow(c, 50).mul(0.04))).mul(k);
+};
+
 /** Fade fine detail with distance to avoid shimmering. */
 const detailFade = () => clamp(float(1).sub(length(positionWorld.sub(cameraPosition)).div(60)), 0, 1);
 
@@ -581,7 +591,7 @@ function make(spec) {
       m.colorNode = baseNode.mul(float(1).sub(fres));
       m.roughness = 1.0;
       m.metalness = 0.0;
-      m.emissiveNode = skyCol.mul(fres).add(glint);
+      m.emissiveNode = skyCol.mul(fres).add(glint).add(moonGlint(r));
       break;
     }
     case 'water': {
@@ -591,6 +601,11 @@ function make(spec) {
       m.roughness = 0.04;
       m.metalness = 0.0;
       m.normalNode = bump(w.mul(0.02), 1);
+      // at night the moon's broken path across the water, toward the eye (its own glints, wider
+      // than the one highlight the moon's light gives a still surface)
+      const wn = normalize(vec3(w.mul(0.06), 1, mx_noise_float(vec3(P.z.mul(0.9).sub(t), P.x.mul(0.9), t.mul(0.7))).mul(0.06)));
+      const rv = reflect(normalize(positionWorld.sub(cameraPosition)), wn);
+      m.emissiveNode = moonGlint(rv).mul(smoothstep(0.6, 0.9, normalLocal.y));
       break;
     }
     case 'leaf': {

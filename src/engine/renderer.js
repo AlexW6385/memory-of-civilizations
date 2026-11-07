@@ -3,7 +3,7 @@
 // same scene pass (one pass draws colour and normals), bloom, AgX tone mapping.
 
 import * as THREE from 'three/webgpu';
-import { pass, mrt, output, normalView, directionToColor, colorToDirection, sample, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
+import { rtt, pass, mrt, output, normalView, directionToColor, colorToDirection, sample, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { smaa } from 'three/addons/tsl/display/SMAANode.js';
@@ -14,14 +14,17 @@ import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
 import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
 import { SMALL } from './layers.js';
+import { AIR, airNode, airComposite, LampPool } from './air.js';
 
 /** The depth buffer unless the address asks for another (see init). */
 const DEPTH_DEFAULT = 'reversed';
 
+// air: dust, incense and coloured light in the beams indoors (src/engine/air.js); lamps: how many of
+// the nearest lamps light the room as point lights
 export const QUALITY = {
-  high: { pixelRatio: 1.5, shadowMap: 2048, cascades: 3, ao: true, aa: true },
-  medium: { pixelRatio: 1.0, shadowMap: 2048, cascades: 3, ao: true, aa: true },
-  low: { pixelRatio: 0.75, shadowMap: 1024, cascades: 2, ao: false, aa: false },
+  high: { pixelRatio: 1.5, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: true, lamps: 4 },
+  medium: { pixelRatio: 1.0, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: false, lamps: 2 },
+  low: { pixelRatio: 0.75, shadowMap: 1024, cascades: 2, ao: false, aa: false, air: false, lamps: 0 },
 };
 
 export class Renderer {
@@ -85,6 +88,9 @@ export class Renderer {
     this.giNode = this.gi.irradianceNode();
     useGI(this.gi);
 
+    // the room's air (set each frame by the climate and the world): how much under a roof, and the
+    // building's haze ([dust, incense], air.js hazeOf)
+    this.indoors = 0; this.haze = [1, 0.15];
     this.pipeline = new THREE.RenderPipeline(r);
     this.setQuality(quality);
     this.resize();
@@ -102,6 +108,9 @@ export class Renderer {
     const csm = new CSMShadowNode(sun, { cascades: Q.cascades, maxFar: 320, mode: 'practical', lightMargin: 200 });
     csm.fade = true;
     sun.shadow.shadowNode = csm;
+    // the lamps' pool: a fixed number of lights per preset (a change recompiles every material)
+    if (this.lamps?.slots.length !== Q.lamps) { this.lamps?.dispose(); this.lamps = new LampPool(this.scene, Q.lamps); }
+    this.airShadow = null;
     this.buildPipeline();
     this.resize();
   }
@@ -140,6 +149,14 @@ export class Renderer {
       const lit = smoothstep(0.6, 3.0, luminance(color.rgb));
       color = vec4(color.rgb.mul(mix(a, mix(1, a, 0.35), lit)), color.a);
     }
+    // the air of the room (air.js): needs the nearest cascade's map, made by the first frame (render)
+    const sh0 = this.airShadow;
+    if (Q.air && sh0) {
+      const airTex = this.airTex = rtt(airNode({ depth: scenePass.getTextureNode('depth'), camera, shadow: sh0, reversed: this.renderer.reversedDepthBuffer, lamps: this.lamps }), null, null, { resolutionScale: 0.5 });
+      color = airComposite(color, airTex, scenePass.getTextureNode('depth'), camera, this.airTexel = uniform(new THREE.Vector2(1e-3, 1e-3)));
+      this.onAirResize = () => { const s = new THREE.Vector2(); this.renderer.getDrawingBufferSize(s); this.airTexel.value.set(2 / Math.max(1, s.x), 2 / Math.max(1, s.y)); };
+      this.onAirResize();
+    } else this.onAirResize = null;
     // the sun's disc is thousands of times brighter than the sky: clamp it before the bloom, or its
     // glow floods half the picture when one looks toward a low sun
     const glowSrc = vec4(min(color.rgb, vec3(2.5)), 1);
@@ -224,6 +241,7 @@ export class Renderer {
     const w = innerWidth, h = innerHeight;
     this.renderer.setSize(w, h, false);
     this.onResize?.();
+    this.onAirResize?.();
     this.camera.aspect = w / h;
     this.camera.fov = w < h ? 78 : 68;
     this.camera.updateProjectionMatrix();
@@ -245,6 +263,11 @@ export class Renderer {
 
   /** Keep the sun's shadow cascades and the sky centred on the viewer. */
   update() {
+    // the air's pass reads the nearest cascade's map, which the first frame with shadows makes
+    if (this.Q.air && !this.airShadow) {
+      const L0 = this.sun.shadow.shadowNode?.lights?.[0]?.shadow;
+      if (L0?.map?.depthTexture) { this.airShadow = L0; this.buildPipeline(); }
+    }
     const c = this.camera.position;
     this.sky.position.copy(c);
     this.stars.position.copy(c);
@@ -255,6 +278,18 @@ export class Renderer {
     const d = this.sunDir;
     this.sun.position.set(c.x + d[0] * 400, c.y + d[1] * 400, c.z + d[2] * 400);
     this.sun.target.position.copy(c);
+    // the air indoors: the beams' dust and the smoke by the building's haze, fading in as one
+    // goes under the roof; the light that casts the shadows (the sun, or the moon at night)
+    const k = Math.max(0, Math.min(1, this.indoors || 0)), [dust, inc] = this.haze || [1, 0.15];
+    AIR.sigma.value = 0.026 * dust * k;
+    AIR.incense.value = 0.01 * inc * k;
+    AIR.sun.value.copy(this.sun.color).multiplyScalar(this.sun.intensity * (1 - 0.7 * ENV.clouds.value));
+    AIR.dir.value.set(d[0], d[1], d[2]).normalize();
+    const amb = (this.gi.ambientAt(c.x, c.y, c.z) || 0) * this.gi.uIntensity.value;
+    AIR.ambient.value.setRGB(0.95 * amb, 0.88 * amb, 0.78 * amb);
+    const now = performance.now() / 1000;
+    this.lamps?.update(now, Math.min(0.1, now - (this._lampT ?? now)));
+    this._lampT = now;
   }
 
   render() {
