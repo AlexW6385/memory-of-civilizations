@@ -81,18 +81,107 @@ function greatHouse(el, { bag, col }) {
   if (el.post) { const [px, pz] = el.post; bag.add('timber_red', lathe([[0.5, 0], [0.46, 9], [0.36, 9.6], [0.001, 9.8]], 12, null, px, y - 0.8, pz)); col.circle(px, pz, 0.5, y, y + 9); }
 }
 /** house: { rect, y, foot, seed } — a wall-trench house: low clay walls, a steep thatched hip or gable, a doorway. */
-function house(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1);
+function house(el, ctx) {
+  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1);
+  if (el.open) return openHouse(el, ctx);
   bag.add(WALL, box(x0, foot, z0, x1, y + 2, z1)); col.rect(el.rect, foot, y + 2);
+  // earth banked against the foot of the walls [stated: "dirt banked along woven mat walls" — Illinois State Museum]
+  bag.add('silt', frustum([x0 - 0.45, z0 - 0.45, x1 + 0.45, z1 + 0.45], foot, y + 0.32, 0.45, 0.45, 0.45, 0.45));
   const along = (x1 - x0) >= (z1 - z0), rise = 2.6 + rand() * 1.2, o = 0.4;
-  if (rand() < 0.5) hip(bag, el.rect, y + 2, rise, o);
-  else { const r = [x0 - o, z0 - o, x1 + o, z1 + o]; if (along) { const hz = (z1 - z0) / 2 + o; bag.add(TH, frustum(r, y + 2, y + 2 + rise, 0, 0, hz, hz, { noTop: true })); } else { const hx = (x1 - x0) / 2 + o; bag.add(TH, frustum(r, y + 2, y + 2 + rise, hx, hx, 0, 0, { noTop: true })); } }
+  if (rand() < 0.5) thatchHip(bag, el.rect, y + 2, rise, o + 0.1, 3);
+  else {
+    const r = [x0 - o, z0 - o, x1 + o, z1 + o];
+    if (along) { const hz = (z1 - z0) / 2 + o; bag.add(TH, frustum(r, y + 2, y + 2 + rise, 0, 0, hz, hz, { noTop: true })); bag.add(TH, rod([x0 - o - 0.1, y + 2 + rise + 0.04, (z0 + z1) / 2], [x1 + o + 0.1, y + 2 + rise + 0.04, (z0 + z1) / 2], 0.2, 7)); }
+    else { const hx = (x1 - x0) / 2 + o; bag.add(TH, frustum(r, y + 2, y + 2 + rise, hx, hx, 0, 0, { noTop: true })); bag.add(TH, rod([(x0 + x1) / 2, y + 2 + rise + 0.04, z0 - o - 0.1], [(x0 + x1) / 2, y + 2 + rise + 0.04, z1 + o + 0.1], 0.2, 7)); }
+  }
   const f = rand() < 0.5 ? z0 : z1, sg = f === z0 ? -1 : 1, mx = (x0 + x1) / 2;
   bag.add('opening', box(mx - 0.4, y, f + sg * 0.01, mx + 0.4, y + 1.5, f + sg * 0.05));
   // the door posts and the lintel pole across them
   const z0d = Math.min(f, f + sg * 0.16), z1d = Math.max(f, f + sg * 0.16);
   for (const sd of [-1, 1]) bag.add('timber', box(mx + sd * 0.48 - 0.07, foot, z0d, mx + sd * 0.48 + 0.07, y + 1.72, z1d));
   bag.add('timber', box(mx - 0.68, y + 1.58, z0d - 0.005, mx + 0.68, y + 1.74, z1d + 0.005));
+}
+/**
+ * A house opened and furnished (house with open: true; docs/settlements/cahokia.md §5.1): "a
+ * four-sided, partially subterranean structure with dirt banked along woven mat walls and a steeply
+ * pitched thatch roof"; inside "a number of storage pits"; "When it was present, the central hearth
+ * was the focus of much activity, particularly in the winter" [stated: Illinois State Museum,
+ * RiverWeb]; jars to store and cook in, bowls and plates of Powell Plain to eat from [stated:
+ * Illinois State Museum, "Ceramic function"]. Built: the floor of beaten earth (not dug in: the ground here cannot be cut), the walls'
+ * inside faced with mats, rafters under the thatch; a clay hearth in the middle with its fire; a
+ * storage pit in a corner, a mat over half of it; a bench of poles and cane along the back wall with
+ * hides and a robe on it; jars, bowls and a plate; baskets; a hoe of chert; a log mortar and its
+ * pestle; maize hung from the rafters; the doorway toward the plaza, made a man's height [inferred:
+ * the bench, the mortar and the arrangement after Southeastern practice].
+ */
+function openHouse(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1), t = 0.16, F = y + 0.04, top = y + 2.2;
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, dw = 0.85, dh = 1.95;
+  // the walls, the doorway in the south wall (toward the plaza)
+  const W = [[x0, z0, x1, z0 + t], [x0, z0 + t, x0 + t, z1 - t], [x1 - t, z0 + t, x1, z1 - t], [x0, z1 - t, cx - dw / 2, z1], [cx + dw / 2, z1 - t, x1, z1]];
+  for (const r of W) { bag.add(WALL, box(r[0], foot, r[1], r[2], top, r[3])); col.rect(r, foot, top); }
+  bag.add(WALL, box(cx - dw / 2, F + dh, z1 - t, cx + dw / 2, top, z1)); col.rect([cx - dw / 2, z1 - t, cx + dw / 2, z1], F + dh, top);
+  // the earth banked outside, broken at the door
+  for (const [r, ins] of [[[x0 - 0.45, z0 - 0.45, x1 + 0.45, z0], [0.45, 0.45, 0.45, 0]], [[x0 - 0.45, z0, x0, z1], [0.45, 0, 0, 0]], [[x1, z0, x1 + 0.45, z1], [0, 0.45, 0, 0]],
+    [[x0 - 0.45, z1, cx - dw / 2 - 0.3, z1 + 0.45], [0.45, 0.3, 0, 0.45]], [[cx + dw / 2 + 0.3, z1, x1 + 0.45, z1 + 0.45], [0.3, 0.45, 0, 0.45]]]) bag.add('silt', frustum(r, foot, y + 0.32, ...ins));
+  // the door frame: two posts, the lintel pole, the clay step down to the floor
+  for (const sd of [-1, 1]) bag.add('timber', box(cx + sd * (dw / 2 + 0.07) - 0.07, foot, z1 - 0.02, cx + sd * (dw / 2 + 0.07) + 0.07, F + dh + 0.12, z1 + 0.14));
+  bag.add('timber', box(cx - dw / 2 - 0.2, F + dh, z1 - 0.025, cx + dw / 2 + 0.2, F + dh + 0.14, z1 + 0.145));
+  bag.add(WALL, box(cx - dw / 2, foot, z1 - t, cx + dw / 2, F, z1 + 0.5)); col.floor([cx - dw / 2, z1 - t, cx + dw / 2, z1 + 0.5], F);
+  // the floor of beaten earth, dug in; the mats lining the walls inside
+  bag.add('earth_wall', box(x0 + t, foot - 0.1, z0 + t, x1 - t, F, z1 - t)); col.floor([x0 + t, z0 + t, x1 - t, z1 - t], F);
+  const M = 0.02;
+  for (const r of [[x0 + t, z0 + t, x1 - t, z0 + t + M], [x0 + t, z0 + t + M, x0 + t + M, z1 - t - M], [x1 - t - M, z0 + t + M, x1 - t, z1 - t - M], [x0 + t, z1 - t - M, cx - dw / 2, z1 - t], [cx + dw / 2, z1 - t - M, x1 - t, z1 - t]]) bag.add('reed_mat', box(r[0], F, r[1], r[2], top - 0.02, r[3]));
+  // the roof: thatch in courses, its underside the ceiling; rafters of poles under it
+  thatchHip(bag, el.rect, top, 2.8 + rand() * 0.8, 0.5, 3);
+  const along = x1 - x0 >= z1 - z0;
+  for (let k = 0; k < 7; k++) {
+    const f = (k + 0.5) / 7;
+    if (along) { const x = x0 + t + (x1 - x0 - 2 * t) * f; bag.add('timber', rod([x, top - 0.07, z0 + t + 0.05], [x, top - 0.07, z1 - t - 0.05], 0.05, 6)); }
+    else { const z = z0 + t + (z1 - z0 - 2 * t) * f; bag.add('timber', rod([x0 + t + 0.05, top - 0.07, z], [x1 - t - 0.05, top - 0.07, z], 0.05, 6)); }
+  }
+  // the hearth: a basin of clay, the ash, embers and fire
+  const hx = cx, hz = cz + 0.15;
+  bag.add(WALL, lathe([[0.5, 0], [0.5, 0.07], [0.42, 0.09], [0.4, 0.03], [0.001, 0.03]], 16, null, hx, F, hz));
+  bag.add('opening', lathe([[0.39, 0], [0.001, 0.005]], 12, null, hx, F + 0.035, hz));
+  for (let k = 0; k < 4; k++) { const a = k * 1.6 + 0.2; bag.add('bark_dark', rod([hx + Math.cos(a) * 0.36, F + 0.06, hz + Math.sin(a) * 0.36], [hx + Math.cos(a) * 0.04, F + 0.1, hz + Math.sin(a) * 0.04], 0.03, 5)); }
+  bag.add('flame', lathe([[0.1, 0], [0.08, 0.08], [0.04, 0.2], [0.001, 0.3]], 8, (th) => 1 + 0.25 * Math.sin(th * 3), hx, F + 0.06, hz));
+  col.circle(hx, hz, 0.5, F, F + 0.1);
+  if (lights) lights.push({ at: [hx, F + 0.5, hz], color: '#ff9a4a', intensity: 3, distance: 6 });
+  // the bench along the back (north) wall: posts, rails, a deck of split cane, hides and a robe on it
+  const bz0 = z0 + t + M, bz1 = bz0 + 0.85, bx0 = x0 + t + 0.25, bx1 = x1 - t - 0.25, bh = 0.45;
+  for (const x of [bx0 + 0.1, (bx0 + bx1) / 2, bx1 - 0.1]) for (const z of [bz0 + 0.08, bz1 - 0.08]) bag.add('timber', rod([x, F - 0.05, z], [x, F + bh, z], 0.04, 6));
+  for (const z of [bz0 + 0.08, bz1 - 0.08]) bag.add('timber', rod([bx0, F + bh - 0.03, z], [bx1, F + bh - 0.03, z], 0.045, 6));
+  bag.add('reed_mat', box(bx0, F + bh, bz0, bx1, F + bh + 0.04, bz1));
+  col.rect([bx0, bz0, bx1, bz1], F, F + bh + 0.04);
+  bag.add('hide_tan', box(bx0 + 0.15, F + bh + 0.04, bz0 + 0.08, bx0 + 1.6, F + bh + 0.065, bz1 - 0.05));
+  bag.add('hide_brown', rod([bx1 - 1.3, F + bh + 0.16, bz0 + 0.35], [bx1 - 0.2, F + bh + 0.16, bz0 + 0.35], 0.12, 9));
+  // the storage pit in the south-west corner, a mat over half of it
+  const px = x0 + t + 0.65, pz = z1 - t - 0.75;
+  bag.add(WALL, lathe([[0.48, 0], [0.48, 0.04], [0.4, 0.05], [0.001, 0.05]], 14, null, px, F - 0.04, pz));
+  bag.add('opening', lathe([[0.4, 0], [0.001, 0.003]], 14, null, px, F + 0.012, pz));
+  bag.add('reed_mat', box(px - 0.45, F + 0.05, pz - 0.45, px + 0.05, F + 0.07, pz + 0.45));
+  // jars, bowls and a plate by the hearth and along the walls; baskets
+  const jar = (x, z, k, mat = 'pottery_dark') => bag.add(mat, lathe([[0.001, 0], [0.12, 0.02], [0.2, 0.13], [0.21, 0.24], [0.16, 0.33], [0.15, 0.37], [0.165, 0.39], [0.14, 0.39], [0.13, 0.35], [0.001, 0.34]].map(([r, h]) => [r * k, h * k]), 14, null, x, F, z));
+  const bowl = (x, z, k = 1) => bag.add('pottery_dark', lathe([[0.001, 0], [0.05, 0.004], [0.13, 0.05], [0.15, 0.09], [0.14, 0.09], [0.12, 0.055], [0.001, 0.03]].map(([r, h]) => [r * k, h * k]), 12, null, x, F, z));
+  jar(x1 - t - 0.35, z1 - t - 0.4, 1.4); jar(x1 - t - 0.8, z1 - t - 0.35, 1.1); jar(x0 + t + 0.4, cz - 0.1, 1.2);
+  jar(hx + 0.62, hz + 0.1, 0.8);
+  bowl(hx - 0.6, hz + 0.3); bowl(hx - 0.75, hz - 0.1, 0.8); bowl(hx + 0.2, hz + 0.65, 1.3);
+  bag.add('pottery_dark', lathe([[0.001, 0], [0.12, 0.005], [0.2, 0.03], [0.22, 0.04], [0.21, 0.045], [0.12, 0.02], [0.001, 0.02]], 14, null, hx - 0.3, F, hz - 0.62));
+  for (const [bx, bz, r] of [[x1 - t - 0.4, cz - 0.2, 0.22], [x1 - t - 0.45, cz + 0.35, 0.17]]) bag.add('wicker', lathe([[0.001, 0], [r * 0.8, 0.01], [r, r * 0.9], [r * 0.9, r * 0.9], [r * 0.72, 0.05], [0.001, 0.04]], 12, null, bx, F, bz));
+  // the hoe of chert leaning on the west wall; the log mortar with its pestle by the door
+  bag.add('timber', rod([x0 + t + M + 0.05, F, cz + 0.6], [x0 + t + M + 0.06, F + 1.15, cz + 0.9], 0.022, 6));
+  bag.add('flagstone', box(x0 + t + M + 0.02, F + 0.02, cz + 0.52, x0 + t + M + 0.06, F + 0.26, cz + 0.68));
+  const mx = cx + dw / 2 + 0.55, mz = z1 - t - 0.45;
+  bag.add('timber', lathe([[0.001, 0], [0.19, 0], [0.18, 0.5], [0.15, 0.52], [0.12, 0.3], [0.001, 0.3]], 12, null, mx, F, mz));
+  bag.add('timber', rod([mx, F + 0.32, mz], [mx + 0.05, F + 1.15, mz - 0.03], 0.035, 6));
+  col.circle(mx, mz, 0.19, F, F + 0.52);
+  // maize hung in bundles from the rafters
+  for (let k = 0; k < 3; k++) {
+    const hxk = x0 + t + 0.6 + k * 0.5, hzk = z0 + t + 1.1;
+    bag.add('linen', rod([hxk, top - 0.1, hzk], [hxk, top - 0.45, hzk], 0.01, 4));
+    for (let e = 0; e < 4; e++) { const a = e * 1.57 + k; bag.add(e % 3 ? 'cloth_ochre' : 'paint_ochre', lathe([[0.001, 0], [0.03, 0.04], [0.035, 0.12], [0.02, 0.17], [0.001, 0.18]], 6, null, hxk + Math.cos(a) * 0.05, top - 0.65, hzk + Math.sin(a) * 0.05)); }
+  }
 }
 /**
  * palisade: { rect, y (fn), every (bastion spacing), gates: [[side, t]] } — a wall of logs set in a
