@@ -17,6 +17,7 @@ import { Flora } from './flora/index.js';
 import { material, flameMaterial } from './materials.js';
 import { MATERIALS } from '../core/palette.js';
 import { releaseAfterUpload } from './release.js';
+import { markMergeable, mergeParts } from './merge.js';
 import { LifeInstances } from './life-instances.js';
 import { SMALL } from './layers.js';
 import { Builder } from './builder.js';
@@ -56,6 +57,8 @@ export function buildingMesh(geometry, mat, matrices = IDENTITY, colors = null) 
  */
 /** Fine detail is drawn within this distance (m) of its part's bounds, and casts shadows within the second. */
 const DETAIL_REACH = 160, DETAIL_SHADOW = 50;
+/** Static meshes merged across a settlement's plans (src/engine/merge.js); `?merge=0` keeps them per plan, to compare. */
+const MERGE = new URLSearchParams(globalThis.location?.search ?? '').get('merge') !== '0';
 const NO_SHADOW = new Set(['water', 'glass_outer', 'glass_topaz', 'opening', 'daylight', 'daylight_plain']);
 const NO_SHADOW_KINDS = new Set(['glow', 'water', 'foam']);
 const castsShadow = (mat) => !NO_SHADOW.has(mat) && !NO_SHADOW_KINDS.has(MATERIALS[mat]?.kind);
@@ -199,6 +202,8 @@ class Settlement {
       this.buildLife();
       this.done = this.expected;
       this.state = 'ready';
+      // the plans' static meshes merged per material and shape, in the background (src/engine/merge.js)
+      this.merging = this.mergeStatic(gen);
       return this;
     })();
     return this.loading;
@@ -250,27 +255,31 @@ class Settlement {
     // unloaded while the collision or the light was being made: unload() already cleared the group
     if (gen !== this.gen) { this.world.r.gi.release?.(plan.id); return null; }
     // the collision and the bounds are made: the vertex arrays are not needed once on the GPU
-    group.traverse(releaseAfterUpload);
+    // (the meshes to be merged once the settlement is built keep their arrays until then)
+    if (MERGE) markMergeable(plan, group);
+    group.traverse((o) => { if (!o.userData.merge) releaseAfterUpload(o); });
     if (lifeList.length) this.lifeParts.push({ rec, list: lifeList });
     this.parts.push(rec);
     this.done = (this.done || 0) + 1;
     return rec;
   }
 
+  /** The static meshes of all its plans, merged per material and per repeated shape (src/engine/merge.js). */
+  async mergeStatic(gen) {
+    if (!MERGE || gen !== this.gen) return;
+    const into = this.merged = new THREE.Group();
+    into.name = 'merged';
+    this.group.add(into);
+    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen }); } catch (e) { console.warn('merging', this.id, e); }
+    this.quietFor = undefined;             // the indoor shadows (World.update) set again
+  }
+
   /** The life of the streets, settlement-wide (src/engine/life-instances.js). */
   buildLife() {
     if (!this.lifeParts?.length) return;
     this.life = new LifeInstances(this.group, castsShadow);
-    const rare = this.life.build(this.lifeParts);
-    for (const [rec, list] of rare) {
-      for (const { mat, geometry } of list) {
-        const m = buildingMesh(geometry, mat);
-        m.castShadow = castsShadow(mat); m.receiveShadow = true; m.name = `${rec.plan.id}:${mat}:rare`;
-        m.layers.set(SMALL);
-        releaseAfterUpload(m);
-        rec.group.add(m);
-      }
-    }
+    // (the rarer shapes are merged settlement-wide by material, their copies chosen by distance)
+    this.life.build(this.lifeParts);
     this.lifeParts = [];
   }
 
@@ -313,7 +322,9 @@ class Settlement {
     this.gen++;                            // a load still running stops adding parts
     this.job?.cancel(); this.job = null;
     this.world.scene.remove(this.group);
-    this.group.traverse((o) => { if (o.isInstancedMesh) o.dispose(); else if (o.geometry) o.geometry.dispose(); });
+    // (an instanced mesh's dispose() leaves its geometry: both are let go of)
+    this.group.traverse((o) => { o.geometry?.dispose(); if (o.isInstancedMesh) o.dispose(); });
+    this.merged = null; this.merging = null; this.quietFor = undefined;
     this.group.clear();
     this.life?.dispose(); this.life = null; this.lifeParts = [];
     for (const rec of this.parts) this.world.r.gi.release?.(rec.plan.id);
@@ -523,15 +534,19 @@ export class World {
     let best = null, bd = Infinity;
     for (const rec of site.parts) {
       if (rec.plan.feature) continue;
-      const [x0, z0, x1, z1] = World.worldBounds(rec.plan);
+      // (called every frame: the bounds and rooms in the settlement's frame are kept on the part)
+      const [x0, z0, x1, z1] = rec.wb ??= World.worldBounds(rec.plan);
       const d = Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(z0 - z, 0, z - z1));
       if (d < bd) { bd = d; best = rec; }
     }
     if (!best) return { building: null, room: null, distance: Infinity };
     let room = null;
-    for (const r of best.plan.rooms) {
+    best.roomBoxes ??= best.plan.rooms.map((r) => {
       const a = toWorld(best.plan, r.rect[0], r.rect[1]), b = toWorld(best.plan, r.rect[2], r.rect[3]);
-      if (x >= Math.min(a[0], b[0]) - 0.6 && x <= Math.max(a[0], b[0]) + 0.6 && z >= Math.min(a[2], b[2]) - 0.6 && z <= Math.max(a[2], b[2]) + 0.6 && Math.abs(y - (r.y + (best.plan.base || 0))) < 3) { room = r; break; }
+      return [r, Math.min(a[0], b[0]) - 0.6, Math.max(a[0], b[0]) + 0.6, Math.min(a[2], b[2]) - 0.6, Math.max(a[2], b[2]) + 0.6, r.y + (best.plan.base || 0)];
+    });
+    for (const [r, x0, x1, z0, z1, ry] of best.roomBoxes) {
+      if (x >= x0 && x <= x1 && z >= z0 && z <= z1 && Math.abs(y - ry) < 3) { room = r; break; }
     }
     return { building: best, room, distance: bd };
   }
@@ -619,6 +634,8 @@ export class World {
             if (rec.cast !== cast) { rec.cast = cast; rec.group.traverse((o) => { if (o.isMesh) o.castShadow = cast; }); }
           }
         }
+        // the tiles merged per material (src/engine/merge.js): the tiles shown, as their groups
+        if (st.merged) for (const m of st.merged.children) m.userData.batch?.choose();
       }
     }
     // fine detail (pieces under 0.4 m, src/core/geom.js): drawn within DETAIL_REACH of the part's
@@ -643,8 +660,14 @@ export class World {
           if (rec.quiet !== quiet) {
             rec.quiet = quiet;
             rec.group.traverse((o) => { if (o.isMesh && !o.userData.detail) o.castShadow = quiet ? false : (rec.plan.style === 'life' ? rec.cast !== false : castsShadow(o.material.name)); });
-            if (s.life) for (const L2 of s.life.meshes) L2.near.castShadow = !quiet && castsShadow(L2.near.material.name);
+            if (s.life) for (const L2 of [...s.life.meshes, ...s.life.rare]) L2.near.castShadow = !quiet && castsShadow(L2.near.material.name);
           }
+        }
+        // the merged meshes: indoors, those that hold no part of the building one is in cast no shadow
+        const q = inside && inside.settlement === s ? inside : null;
+        if (s.merged && s.quietFor !== q) {
+          s.quietFor = q;
+          for (const m of s.merged.children) m.castShadow = m.userData.cast && (!q || m.userData.recs.has(q));
         }
       }
     }

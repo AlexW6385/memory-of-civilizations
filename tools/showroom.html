@@ -97,9 +97,11 @@ function setFrame(frame) {
 }
 const exposureOf = (cl) => cl.exposure * (1 + 2.6 * (1 - cl.day));
 
+let LAST_DRAWS = null;
 async function draw(frames, before = () => {}) {
   for (let k = 0; k < frames; k++) {
     before(k);
+    renderer.info.reset();
     if (!R) renderer.render(scene, cam);
     else if (k === 0) R.render();
     else {
@@ -109,6 +111,8 @@ async function draw(frames, before = () => {}) {
       for (const l of R.sun.shadow.shadowNode?.lights || []) l.shadow.needsUpdate = true;
       R.pipeline.render();
     }
+    // (read now: the renderer's own frame loop resets the counts at the next animation frame)
+    LAST_DRAWS = { drawCalls: renderer.info.render.drawCalls, triangles: renderer.info.render.triangles };
     const d = renderer.backend?.device; if (d) await d.queue.onSubmittedWorkDone();
     mark('frame' + (k + 1));
   }
@@ -219,6 +223,7 @@ async function siteView() {
   const tb = performance.now();
   for (const [plan, music] of chosen) await site.addPart(plan.id, plan, music, site.gen);
   site.buildLife(); site.state = 'ready';
+  await site.mergeStatic?.(site.gen);
   const buildSeconds = +((performance.now() - tb) / 1000).toFixed(1);
   mark('build');
   // the feet: on what is there (a floor, a roof, the ground) below the height asked, or on the ground
@@ -269,7 +274,7 @@ async function siteView() {
   await draw(num(cfg.frames, 2), frameOnce);
   mark('draw');
   window.INFO = { site: id, pose: [x, feetY, z, yaw, pitch], cam: eye, fov, radius, plans: chosen.length, of: all.length, elements: elsKept, elementsOf: elsAll, hour,
-    buildSeconds, exposure: renderer.toneMappingExposure };
+    buildSeconds, exposure: renderer.toneMappingExposure, draws: LAST_DRAWS };
 }
 function sm(e0, e1, x) { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); }
 </script></body></html>

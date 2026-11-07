@@ -37,6 +37,8 @@
 //                              a landmark within reach kept whole; all: landmarks cut down too;
 //                              none: every plan within reach (by its bounds) whole
 //   --noflora  --verbose (the page's stages as they pass)
+//   --nomerge                  the plans' static meshes kept per plan (src/engine/merge.js), to compare
+//                              the last frame's draw calls (printed for --site)
 import { readFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve, dirname } from 'node:path';
 import { mkdirSync, existsSync } from 'node:fs';
@@ -98,13 +100,14 @@ const out = opt('out', 'shots/showroom.png');
 mkdirSync(dirname(resolve(out)), { recursive: true });
 try {
   // (no build workers: the page builds only what it was asked for)
-  await page.goto(`http://127.0.0.1:${srv.address().port}/tools/showroom.html?worker=0`, { timeout: TIMEOUT });
+  await page.goto(`http://127.0.0.1:${srv.address().port}/tools/showroom.html?worker=0${flag('nomerge') ? '&merge=0' : ''}`, { timeout: TIMEOUT });
   await Promise.race([page.waitForFunction('window.DONE === true', null, { timeout: TIMEOUT, polling: 1000 }), failed]);
   await page.screenshot({ path: out, timeout: TIMEOUT });
   const info = await page.evaluate(() => window.INFO), times = await page.evaluate(() => window.TIMES);
   const f = (a) => a.map((v) => (+v).toFixed(1));
   if (info?.site) console.log(`${info.site}: ${info.plans}/${info.of} plans, ${info.elements}/${info.elementsOf} elements within ${info.radius} m (built in ${info.buildSeconds}s), feet (${f(info.pose.slice(0, 3))}) yaw ${(+info.pose[3]).toFixed(2)} pitch ${(+info.pose[4]).toFixed(2)}, fov ${info.fov}, hour ${info.hour}`);
   else if (info) console.log(`bounds (${f(info.min)}) … (${f(info.max)}), camera (${f(info.cam)}) → (${f(info.look)}), fov ${info.fov}${info.sky ? `, sky of ${info.sky.site} at ${info.sky.hour}h` : ''}`);
+  if (info?.draws) console.log(`last frame (all three cascades drawn): ${info.draws.drawCalls} draw calls, ${(info.draws.triangles / 1e6).toFixed(2)} M triangles${flag('nomerge') ? ' (plans not merged)' : ''}`);
   if (info?.stats) console.log(`meshes ${info.stats.meshes} (indexed ${info.stats.indexed}, 16-bit normals ${info.stats.int16}, instanced ${info.stats.instanced})`);
   if (times) console.log('times (s from page start):', Object.entries(times).map(([k, v]) => `${k} ${v}`).join(', '), `| total ${((Date.now() - t0) / 1000).toFixed(1)}s`);
   console.log('→', out);
