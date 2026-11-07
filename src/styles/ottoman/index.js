@@ -9,6 +9,8 @@ import { box, lathe, fromTriangles, rod, disc, place } from '../../core/geom.js'
 import '../qing/index.js';
 import { KULLIYE } from './kulliye.js';
 import { prayerHall } from './prayerhall.js';
+import { kahvehane } from './kahve.js';
+import * as FN from '../mughal/furnish.js';
 
 const S = 'limestone', L = 'lead';
 export const dome = (bag, x, y, z, r, mat = L) => {
@@ -344,6 +346,9 @@ function turbe(el, { bag, col }) {
   bag.add('cloth_green', box(cx - cl[0] - 0.06, y0 + 0.02, cz - cl[1] - 0.06, cx + cl[0] + 0.06, y0 + 0.95, cz + cl[1] + 0.06));
   bag.add('cloth_green', lathe([[0.56, 0], [0.4, 0.16], [0.001, 0.22]], 12).scale(along ? 2.06 : 1, 1, along ? 1 : 2.06).translate(cx, y0 + 0.95, cz));
   const rr = [cx - cl[0] - 0.7, cz - cl[1] - 0.7, cx + cl[0] + 0.7, cz + cl[1] + 0.7];
+  // the Qur'an readers' places (docs/settlements/ottoman-istanbul.md §10): two folding stands with their books open, a
+  // cushion before each, outside the rail on the side away from the door
+  for (const s of [-1, 1]) { const qx = along ? cx + s * 0.8 : cx + (doorA === Math.PI / 2 ? -1 : 1) * -(cl[0] + 1.25), qz = along ? cz + (doorA === Math.PI ? 1 : -1) * -(cl[1] + 1.25) : cz + s * 0.8; const yw = along ? (doorA === Math.PI ? 0 : Math.PI) : (doorA === Math.PI / 2 ? -Math.PI / 2 : Math.PI / 2); FN.rahle(bag, qx, y0 + 0.02, qz, yw); const ox = Math.sin(yw) * 0.45, oz = Math.cos(yw) * 0.45; FN.cushion(bag, qx - ox, y0 + 0.02, qz - oz, 0.5, 0.5, 0.09, yw, 'cloth_green'); }
   for (const [ax, az, bx, bz] of [[rr[0], rr[1], rr[2], rr[1]], [rr[0], rr[3], rr[2], rr[3]], [rr[0], rr[1], rr[0], rr[3]], [rr[2], rr[1], rr[2], rr[3]]]) {
     const L = Math.hypot(bx - ax, bz - az), n = Math.ceil(L / 0.2);
     bag.add('wood_dark', box(Math.min(ax, bx) - 0.04, y0 + 0.82, Math.min(az, bz) - 0.04, Math.max(ax, bx) + 0.04, y0 + 0.9, Math.max(az, bz) + 0.04));
@@ -385,6 +390,6 @@ function graves(el, { bag, col }) {
 
 registerStyle('ottoman', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, ...KULLIYE },
+  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, ...KULLIYE },
   objects: {},
 });

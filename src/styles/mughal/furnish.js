@@ -181,7 +181,7 @@ export function oilLamp(bag, lights, x, y, z, mat = 'terracotta', glow = 0) {
  * A rahle (rahla, the Qur'an stand): two boards crossing in an X, slotted through each other, opened to hold the
  * book on the cradle they make; the book open on it, its leather covers out. yaw turns the reader's side.
  */
-export function rahle(bag, x, y, z, yaw = 0, { wood = 'wood_dark', h = 0.36, w = 0.34 } = {}) {
+export function rahle(bag, x, y, z, yaw = 0, { wood = 'wood_dark', h = 0.36, w = 0.34, cover = 'hide_brown', pages = 'linen' } = {}) {
   const a = 0.62, L = h / Math.sin(a) * 1.25, th = 0.018;
   for (const s of [-1, 1]) {
     const g = box(-w / 2, -th / 2, -L / 2, w / 2, th / 2, L / 2);
@@ -192,7 +192,7 @@ export function rahle(bag, x, y, z, yaw = 0, { wood = 'wood_dark', h = 0.36, w =
   const ty = h * 0.5 + Math.sin(a) * L * 0.3;
   for (const s of [-1, 1]) {
     const cov = box(-0.13, -0.006, -0.17, 0.13, 0.006, 0.0), pg = box(-0.12, 0.006, -0.16, 0.12, 0.026, -0.004);
-    for (const [g, m] of [[cov, 'hide_brown'], [pg, 'linen']]) { g.rotateX(-s * (PI / 2 - a) * 0.75); g.translate(0, ty + 0.04, s * 0.004); g.rotateY(s > 0 ? 0 : PI); put(bag, m, g, x, y, z, yaw); }
+    for (const [g, m] of [[cov, cover], [pg, pages]]) { g.rotateX(-s * (PI / 2 - a) * 0.75); g.translate(0, ty + 0.04, s * 0.004); g.rotateY(s > 0 ? 0 : PI); put(bag, m, g, x, y, z, yaw); }
   }
 }
 /** A low stand (kürsü, kursi) with a round brass tray (sini) on it, and on the tray cups, a bowl and an ewer. */

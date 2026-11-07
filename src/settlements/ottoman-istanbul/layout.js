@@ -65,3 +65,5 @@ export function lots() {
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** The coffee house (docs/settlements/ottoman-istanbul.md §10): the lot nearest the lane west of the terrace by the shops of the west avenue. */
+export const COFFEE = () => lots().reduce((b, l) => (Math.hypot((l.rect[0] + l.rect[2]) / 2 + 178, (l.rect[1] + l.rect[3]) / 2 + 20) < Math.hypot((b.rect[0] + b.rect[2]) / 2 + 178, (b.rect[1] + b.rect[3]) / 2 + 20) ? l : b));
