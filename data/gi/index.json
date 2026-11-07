@@ -125,6 +125,33 @@
   "seconds": 76,
   "baked": "2026-11-06"
  },
+ "djenne-great-mosque": {
+  "site": "djenne",
+  "hash": "a44210321fe5aa2d",
+  "rays": 128,
+  "probes": 30784,
+  "boxes": [
+   {
+    "min": [
+     0,
+     2.5,
+     -31.5
+    ],
+    "n": [
+     37,
+     13,
+     64
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hall"
+    ]
+   }
+  ],
+  "bytes": 535398,
+  "seconds": 171,
+  "baked": "2026-11-07"
+ },
  "dome-of-the-rock": {
   "site": "jerusalem",
   "hash": "870953a86d796f50",
