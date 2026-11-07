@@ -8,6 +8,8 @@ import { Perf } from './engine/perf.js';
 import { runBench } from './engine/bench.js';
 import { Controls } from './engine/controls.js';
 import { Music } from './engine/audio.js';
+import { roomAcoustics } from './engine/acoustics.js';
+import { profileOf, due } from './engine/soundscape.js';
 import { Climate, sunPlanet, moonPlanet } from './engine/climate.js';
 import { Rain } from './engine/rain.js';
 import { GlobeView } from './ui/globe.js';
@@ -152,7 +154,8 @@ async function main() {
   const music = new Music();
   music.setVolume(settings.music);
   let exposure = 0.55, snap = true, last = performance.now();
-  let placeT = 0;
+  let placeT = 0, clockWas = null, preparedFor = null;
+  const MANY_MOSQUES = new Set(['ottoman-istanbul', 'mamluk-cairo', 'isfahan']);
   const MODERN = new Set(['new-york', 'sydney', 'london', 'barcelona']);
   const AMB_TAPS = [[0, 0, 0], [1.2, 0, 0], [-1.2, 0, 0], [0, 0, 1.2], [0, 0, -1.2], [0, 0.9, 0]];
   const _view = new Vector3();
@@ -483,13 +486,38 @@ async function main() {
       const inTown = near ? 1 - sm(near.s.S.radius * 0.6, near.s.S.radius + 40, near.r) : 0, modern = near && MODERN.has(near.s.id);
       const low = Math.max(0, 1 - Math.max(0, c.y - world.collide.terrain(c.x, c.z)) / 60);
       const rainy = 1 - Math.min(1, cl.rain * 2);
+      // the place's own voices (src/engine/soundscape.js): its birds, animals, cicadas and frogs,
+      // its roofs under the rain; out in the open country the defaults
+      const P = profileOf(inTown > 0.05 ? near.s.id : null), am = climate.hour < 12;
+      const hot = Math.max(0, Math.min(1, (cl.sunEl - 15) / 30));
       music.place({
         water: Math.min(1, wetN / 6) * low,
         town: inTown * low * (modern ? 0.4 : 1) * (0.35 + 0.65 * cl.day),
         traffic: modern ? inTown * low : 0,
         birds: cl.day * low * rainy * (modern ? 0.25 : 1) * (0.25 + 0.75 * (ENV.damp.value ?? 0.4)),
         crickets: (1 - cl.day) * low * rainy * (cl.sunEl > -30 ? 1 : 0.6) * (modern ? 0.2 : 1),
+        voices: P.birds, animals: P.animals, roof: P.roof,
+        cicadas: P.cicadas * hot * rainy * low,
+        frogs: P.frogs * (1 - cl.day) * Math.min(1, 0.3 + wetN / 4 + cl.rain) * low,
+        dawn: am && cl.sunEl > -8 && cl.sunEl < 14 ? 1 : 0,
+        rain: cl.rain, indoors: !outdoors,
       });
+      // the hours of the place: bells, drums, horns, the call to prayer — within the settlement only
+      const now = { hour: climate.hour, el: cl.sunEl, lat: latLon(u)[0] };
+      if (inTown > 0.1) for (const ev of due(P, clockWas, now)) music.ring(ev, { many: MANY_MOSQUES.has(near.s.id) });
+      clockWas = now;
+      // outdoors, the walls round for the early reflections: the distance to the nearest obstacle
+      // in eight directions, ahead first and then clockwise
+      if (outdoors) {
+        const fy = controls.feet.y, dists = [];
+        for (let k = 0; k < 8; k++) {
+          const a = controls.yaw - k * Math.PI / 4, dx = -Math.sin(a), dz = -Math.cos(a);
+          let hit = Infinity;
+          for (let d = 1; d <= 60; d += d < 12 ? 1 : 2) if (world.collide.blockedAt(c.x + dx * d, c.z + dz * d, 0.1, fy + 0.8, fy + 2.5)) { hit = d; break; }
+          dists.push(hit);
+        }
+        music.surround(dists);
+      }
     }
     // eye adaptation: open up in dark rooms (at most ~3 stops), close down outdoors
     // the light round the eye: the brightest of a few samples a step apart, so that one probe buried
@@ -509,6 +537,9 @@ async function main() {
     exposure = snap ? target2 : exposure + (target2 - exposure) * (1 - Math.exp(-dt / (target2 > exposure ? 2.0 : 0.5)));
     snap = false;
     R.renderer.toneMappingExposure = exposure;
+    // the reverberation of the room one is in, worked out from its volume and materials
+    if (here.building !== preparedFor) { preparedFor = here.building; if (preparedFor) music.prepare(preparedFor.plan.rooms.map((r) => roomAcoustics(preparedFor.plan, r))); }
+    music.room(here.building && here.room ? roomAcoustics(here.building.plan, here.room) : null);
     if (here.building) music.set(here.building.music, here.room?.kind || 'open');
     else music.set(world.anchor.site?.music || null, 'open');
     return here;

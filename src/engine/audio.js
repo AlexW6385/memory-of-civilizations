@@ -2,6 +2,8 @@
 // drones, plucked strings (Karplus–Strong), sistra, frame drums. Zones of a building
 // (open air, halls, inner rooms, sanctum) crossfade as the visitor walks through them.
 
+import { impulseResponse } from './acoustics.js';
+
 const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 
 export class Music {
@@ -35,22 +37,36 @@ export class Music {
     this.makeup.gain.value = 2.2;
     this.master.connect(this.comp); this.comp.connect(this.makeup); this.makeup.connect(ctx.destination);
     this.dry = ctx.createGain();
-    this.wet = ctx.createGain();
-    this.reverb = ctx.createConvolver();
-    this.reverb.buffer = this.impulse(3.2, 2.6);
     this.dry.connect(this.master);
-    this.reverb.connect(this.wet);
-    this.wet.connect(this.master);
     this.bus = ctx.createGain();
     this.bus.connect(this.dry);
-    this.bus.connect(this.reverb);
-    // a second, very long reverberation for great domed spaces (Hagia Sophia rings ~12 s)
-    this.longReverb = ctx.createConvolver();
-    this.longReverb.buffer = this.impulse(12, 3.2);
-    this.wetLong = ctx.createGain(); this.wetLong.gain.value = 0;
-    // fed only in the zones that ask for it: a 12 s convolution costs the audio thread all the time
-    this.longReverb.connect(this.wetLong); this.wetLong.connect(this.master);
-    this.longOn = false;
+    // the room (src/engine/acoustics.js): two convolvers, one ringing with the room one is in, the
+    // other fading out the room one has left (a crossfade on every change of room); each is fed only
+    // while it is heard, and cut off once its tail has died away — a convolver costs the audio
+    // thread all the time it is fed, the more the longer its impulse response
+    this.wetIn = ctx.createGain();
+    this.bus.connect(this.wetIn);
+    this.slots = [0, 1].map(() => {
+      const conv = ctx.createConvolver(); conv.normalize = false;
+      const gain = ctx.createGain(); gain.gain.value = 0;
+      conv.connect(gain); gain.connect(this.master);
+      return { conv, gain, key: null, fed: false, off: 0, rt: 0 };
+    });
+    this.irCache = new Map();
+    this.roomKey = undefined;
+    // outdoors: dry, but for the early reflections off the walls round (streets, courts): a delay
+    // per direction, set from the distances to the nearest wall (surround())
+    this.erIn = ctx.createGain();
+    this.bus.connect(this.erIn);
+    const erLP = ctx.createBiquadFilter(); erLP.type = 'lowpass'; erLP.frequency.value = 3800;
+    this.erIn.connect(erLP);
+    this.taps = Array.from({ length: 8 }, () => {
+      const d = ctx.createDelay(0.5), g = ctx.createGain(), p = ctx.createStereoPanner();
+      d.delayTime.value = 0.05; g.gain.value = 0;
+      erLP.connect(d); d.connect(g); g.connect(p); p.connect(this.master);
+      return { d, g, p };
+    });
+    this.erGain = 1;
     // a meter for the tests: RMS of what reaches the speakers
     this.analyser = ctx.createAnalyser();
     this.analyser.fftSize = 2048;
@@ -89,18 +105,24 @@ export class Music {
   }
 
   /**
-   * The sounds of the place (DESIGN §5 "Sound"): water lapping at a shore or a quay, birds by day,
-   * crickets at night, the murmur of a town (voices, now and then a knock or a cart) or, in a
-   * modern city, the hum of traffic. Each 0…1; indoors muffles them with the weather.
+   * The sounds of the place (DESIGN §5 "Sound"; src/engine/soundscape.js says which, where): water
+   * lapping at a shore or a quay, birds by day (the voices of the place's climate), cicadas in the
+   * heat, frogs and crickets at night, the animals of the place, the murmur of a town (voices, a
+   * knock, a cart, hooves) or, in a modern city, the hum of traffic, and rain on the roofs. Levels
+   * 0…1; indoors muffles them with the weather. voices, animals: { name: weight }.
    */
-  place({ water = 0, birds = 0, crickets = 0, town = 0, traffic = 0 } = {}) {
+  place({ water = 0, birds = 0, crickets = 0, town = 0, traffic = 0, voices = null, cicadas = 0, frogs = 0, animals = null, dawn = 0, roof = 'tile', rain = 0, indoors = false } = {}) {
     const ctx = this.ctx;
     if (!ctx || !this.amb) return;
     if (!this.plc) {
       const sr = ctx.sampleRate, n = sr * 4, b = ctx.createBuffer(1, n, sr), d = b.getChannelData(0);
       for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      this.noiseBuf = b;
       const noise = () => { const s = ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = Math.random() * 3; s.start(); return s; };
       const out = ctx.createGain(); out.connect(this.amb.muffle);
+      // what is heard outside also reflects off the walls round, and rings in the hall one is in
+      const send = ctx.createGain(); send.gain.value = 0.45;
+      this.amb.muffle.connect(send); send.connect(this.wetIn); send.connect(this.erIn);
       // water: low noise swelling and ebbing like small waves
       const wG = ctx.createGain(); wG.gain.value = 0;
       const wLP = ctx.createBiquadFilter(); wLP.type = 'lowpass'; wLP.frequency.value = 520;
@@ -117,28 +139,201 @@ export class Music {
       const rG = ctx.createGain(); rG.gain.value = 0;
       const rLP = ctx.createBiquadFilter(); rLP.type = 'lowpass'; rLP.frequency.value = 260;
       noise().connect(rLP); rLP.connect(rG); rG.connect(out);
-      this.plc = { out, wG, tG, rG, birds: 0, crickets: 0, town: 0, traffic: 0, nextBird: 0, nextCricket: 0, nextKnock: 0 };
+      // cicadas: a high band of noise chopped at the tymbals' rate (~80 Hz), swelling and falling
+      // in choruses of several seconds
+      const cG = ctx.createGain(); cG.gain.value = 0;
+      const cBP = ctx.createBiquadFilter(); cBP.type = 'bandpass'; cBP.frequency.value = 5200; cBP.Q.value = 3;
+      const cAM = ctx.createGain(); cAM.gain.value = 0.5;
+      const pulse = ctx.createOscillator(), pG = ctx.createGain(); pulse.type = 'square'; pulse.frequency.value = 82; pG.gain.value = 0.5; pulse.connect(pG); pG.connect(cAM.gain); pulse.start();
+      const swell = ctx.createGain(); swell.gain.value = 0.6;
+      const sw = ctx.createOscillator(), swG = ctx.createGain(); sw.frequency.value = 0.11; swG.gain.value = 0.4; sw.connect(swG); swG.connect(swell.gain); sw.start();
+      noise().connect(cBP); cBP.connect(cAM); cAM.connect(swell); swell.connect(cG); cG.connect(out);
+      // rain on the roofs: a loop of drops whose sound is the roof's (made when the roof changes)
+      const patG = ctx.createGain(); patG.gain.value = 0;
+      patG.connect(this.amb.muffle);
+      this.plc = { out, wG, tG, rG, cG, pat: null, patG, patRoof: null, birds: 0, crickets: 0, town: 0, traffic: 0, voices: null, animals: null, frogs: 0, dawn: 0,
+        nextBird: 0, nextCricket: 0, nextKnock: 0, nextFrog: 0, nextAnimal: 0, nextHooves: 0 };
     }
     const t = ctx.currentTime, P = this.plc;
     P.wG.gain.setTargetAtTime(water * 0.05, t, 1.2);
     P.tG.gain.setTargetAtTime(town * 0.02, t, 2);
     P.rG.gain.setTargetAtTime(traffic * 0.06, t, 2);
-    P.birds = birds; P.crickets = crickets; P.town = town; P.traffic = traffic;
+    P.cG.gain.setTargetAtTime(cicadas * 0.018, t, 3);
+    if (roof !== P.patRoof) {
+      P.patRoof = roof;
+      // a source's buffer is set once: a new roof is a new loop
+      if (P.pat) try { P.pat.stop(); } catch { /* not started */ }
+      P.pat = ctx.createBufferSource(); P.pat.loop = true; P.pat.buffer = this.patter(roof);
+      P.pat.connect(P.patG); P.pat.start();
+    }
+    // under a roof one hears the rain on it above all; outside, on the roofs and the paving round
+    P.patG.gain.setTargetAtTime(rain * (indoors ? 0.16 : 0.07), t, 1.5);
+    Object.assign(P, { birds, crickets, town, traffic, voices, animals, frogs, dawn });
   }
-  /** Scheduled each tick: chirps, crickets, knocks. */
+
+  /**
+   * Two seconds of rain on a roof, looped: drops at random, each a click shaped by what it falls on —
+   * fired tiles a bright tick, slate a sharper one, shingles and boards a soft knock, thatch a hiss,
+   * a flat earth or plaster roof a dull pat.
+   */
+  patter(roof) {
+    const ctx = this.ctx, sr = ctx.sampleRate, n = sr * 2, b = ctx.createBuffer(1, n, sr), d = b.getChannelData(0);
+    const R = { tile: [2600, 0.0016, 900], slate: [3800, 0.001, 900], shingle: [1100, 0.004, 700], thatch: [5000, 0.0004, 2600], flat: [600, 0.006, 500] }[roof] || [2600, 0.0016, 900];
+    const [f, tau, count] = R;
+    for (let k = 0; k < count; k++) {
+      const at = Math.floor(Math.random() * n), a = 0.2 + Math.random() * 0.8, ff = f * (0.7 + Math.random() * 0.6), len = Math.floor(sr * tau * 8);
+      for (let i = 0; i < len; i++) {
+        const j = (at + i) % n, e = Math.exp(-i / (sr * tau));
+        d[j] += a * e * (roof === 'thatch' ? Math.random() * 2 - 1 : Math.sin(2 * Math.PI * ff * i / sr) * 0.7 + (Math.random() - 0.5) * 0.6);
+      }
+    }
+    let m = 0;
+    for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(d[i]));
+    for (let i = 0; i < n; i++) d[i] /= m || 1;
+    return b;
+  }
+
+  /** A short tone with a pitch contour and an envelope: f = [[t, Hz], …] from `when`; into dest. */
+  tone(when, f, dur, level, dest, type = 'sine', filter = null) {
+    const ctx = this.ctx, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f[0][1], when);
+    for (const [dt, hz] of f.slice(1)) o.frequency.exponentialRampToValueAtTime(hz, when + dt);
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime(level, when + Math.min(0.03, dur * 0.2));
+    g.gain.setValueAtTime(level, when + dur * 0.6);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    let node = o;
+    if (filter) { const bq = ctx.createBiquadFilter(); bq.type = filter[0]; bq.frequency.value = filter[1]; bq.Q.value = filter[2] ?? 1; o.connect(bq); node = bq; }
+    node.connect(g); g.connect(dest); o.start(when); o.stop(when + dur + 0.05);
+  }
+
+  /** A burst of noise through a band (a bark's breath, a hoof, a knock). */
+  burst(when, dur, f, q, level, dest) {
+    const ctx = this.ctx, s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = this.noiseBuf; bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
+    g.gain.setValueAtTime(level, when); g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    s.connect(bp); bp.connect(g); g.connect(dest); s.start(when, Math.random() * 3); s.stop(when + dur + 0.02);
+  }
+
+  /** One bird's call, by voice. */
+  bird(voice, t, lv) {
+    const out = this.plc.out, r = Math.random;
+    switch (voice) {
+      case 'sparrow': {                       // a run of short, rough chirps
+        const n = 3 + Math.floor(r() * 6), f = 3600 + r() * 1400;
+        for (let k = 0; k < n; k++) this.tone(t + k * (0.13 + r() * 0.05), [[0, f], [0.05, f * 0.8]], 0.06, 0.01 * lv, out, 'triangle');
+        break;
+      }
+      case 'dove': {                          // the soft coo of a dove: three to five low notes
+        const f = 430 + r() * 140, pat = r() < 0.5 ? [0.35, 0.6, 0.3] : [0.3, 0.3, 0.55, 0.3, 0.3];
+        let w = t;
+        for (const d of pat) { this.tone(w, [[0, f * 0.95], [d * 0.4, f], [d, f * 0.9]], d, 0.014 * lv, out, 'sine', ['lowpass', 900]); w += d + 0.12; }
+        break;
+      }
+      case 'crow': {                          // a harsh caw, two to four times
+        const n = 2 + Math.floor(r() * 3), f = 520 + r() * 260;
+        for (let k = 0; k < n; k++) this.tone(t + k * 0.55, [[0, f], [0.1, f * 1.15], [0.3, f * 0.85]], 0.32, 0.01 * lv, out, 'sawtooth', ['bandpass', 1400, 2]);
+        break;
+      }
+      case 'gull': {                          // the gull's falling cry, repeated
+        const n = 2 + Math.floor(r() * 4), f = 1500 + r() * 400;
+        for (let k = 0; k < n; k++) this.tone(t + k * 0.42, [[0, f * 0.8], [0.06, f], [0.35, f * 0.6]], 0.36, 0.009 * lv, out, 'sawtooth', ['bandpass', 1800, 3]);
+        break;
+      }
+      case 'kite': {                          // a kite's whistled, quavering fall
+        const f = 2600 + r() * 500;
+        this.tone(t, [[0, f], [0.2, f * 1.05], [1.1, f * 0.7]], 1.1, 0.008 * lv, out, 'sine');
+        this.tone(t + 1.3, [[0, f * 0.95], [0.6, f * 0.75]], 0.6, 0.006 * lv, out, 'sine');
+        break;
+      }
+      case 'koel': {                          // the koel's rising "ko-el", climbing with each repeat
+        const n = 3 + Math.floor(r() * 4), f = 760 + r() * 80;
+        for (let k = 0; k < n; k++) { const w = t + k * 0.95, ff = f * (1 + k * 0.06); this.tone(w, [[0, ff], [0.12, ff * 1.02]], 0.16, 0.012 * lv, out); this.tone(w + 0.2, [[0, ff * 1.1], [0.35, ff * 1.45]], 0.4, 0.014 * lv, out); }
+        break;
+      }
+      case 'tropic': {                        // clear whistles gliding (bulbuls, orioles, the forest)
+        const n = 2 + Math.floor(r() * 4), f = 1400 + r() * 1600;
+        for (let k = 0; k < n; k++) { const a = f * (0.8 + r() * 0.5), d = 0.15 + r() * 0.3; this.tone(t + k * (d + 0.08), [[0, a], [d, a * (0.75 + r() * 0.6)]], d, 0.009 * lv, out); }
+        break;
+      }
+      default: {                              // a songbird: a few quick falling or rising chirps
+        const base = 2200 + r() * 2600, n = 2 + Math.floor(r() * 5), up = r() < 0.5;
+        for (let k = 0; k < n; k++) { const w = t + 0.05 + k * (0.09 + r() * 0.05); this.tone(w, [[0, base * (up ? 0.85 : 1.15)], [0.07, base * (up ? 1.15 : 0.8)]], 0.08, 0.012 * lv, out); }
+      }
+    }
+  }
+
+  /** One animal's sound, by kind. */
+  animal(kind, t, lv) {
+    const out = this.plc.out, r = Math.random;
+    switch (kind) {
+      case 'rooster': {                       // cock-a-doodle-doo: four syllables, the last long and falling
+        const f = 520 + r() * 120;
+        [[0, 0.16, 1], [0.2, 0.14, 1.25], [0.38, 0.18, 1.35], [0.62, 0.7, 1.3]].forEach(([dt, d, k], i) =>
+          this.tone(t + dt, [[0, f * k * 0.9], [d * 0.3, f * k], [d, f * k * (i === 3 ? 0.7 : 0.95)]], d, 0.012 * lv, out, 'sawtooth', ['bandpass', 1500, 1.5]));
+        break;
+      }
+      case 'dog': {                           // a few barks
+        const n = 1 + Math.floor(r() * 4), f = 380 + r() * 260;
+        for (let k = 0; k < n; k++) { const w = t + k * (0.3 + r() * 0.15); this.tone(w, [[0, f], [0.04, f * 1.2], [0.14, f * 0.8]], 0.15, 0.014 * lv, out, 'sawtooth', ['bandpass', 900, 1.2]); this.burst(w, 0.1, 1200, 1, 0.02 * lv, out); }
+        break;
+      }
+      case 'donkey': {                        // the bray: hee-haw, hee-haw
+        for (let k = 0; k < 3; k++) { const w = t + k * 1.1; this.tone(w, [[0, 700], [0.35, 880]], 0.45, 0.012 * lv, out, 'sawtooth', ['bandpass', 1200, 2]); this.tone(w + 0.5, [[0, 260], [0.5, 200]], 0.55, 0.014 * lv, out, 'sawtooth', ['lowpass', 900]); }
+        break;
+      }
+      case 'cattle': {                        // a low moo
+        const f = 110 + r() * 50;
+        this.tone(t, [[0, f], [0.4, f * 1.25], [1.4, f * 1.1]], 1.5, 0.02 * lv, out, 'sawtooth', ['lowpass', 520, 2]);
+        break;
+      }
+      case 'goat': {                          // a bleat, trembling
+        const f = 380 + r() * 200, o = this.ctx.createOscillator(), g = this.ctx.createGain(), v = this.ctx.createOscillator(), vg = this.ctx.createGain(), bp = this.ctx.createBiquadFilter();
+        o.type = 'sawtooth'; o.frequency.value = f; v.frequency.value = 7; vg.gain.value = f * 0.05; v.connect(vg); vg.connect(o.frequency);
+        bp.type = 'bandpass'; bp.frequency.value = 1100; bp.Q.value = 1.5;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.012 * lv, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+        o.connect(bp); bp.connect(g); g.connect(out); o.start(t); v.start(t); o.stop(t + 0.75); v.stop(t + 0.75);
+        break;
+      }
+      case 'sheepbell': {                     // the bells of a flock grazing: a few small clanks
+        const n = 2 + Math.floor(r() * 5);
+        for (let k = 0; k < n; k++) { const w = t + k * (0.25 + r() * 0.5), f = 1300 + r() * 900; for (const [m, a] of [[1, 1], [2.32, 0.5], [3.9, 0.25]]) this.tone(w, [[0, f * m]], 0.5, 0.004 * a * lv, out); }
+        break;
+      }
+      case 'horse': {                         // now and then a whinny; else hooves (in hoofbeats())
+        this.tone(t, [[0, 900], [0.25, 1300], [1.2, 520]], 1.2, 0.008 * lv, out, 'sawtooth', ['bandpass', 1500, 2]);
+        break;
+      }
+      default:
+    }
+  }
+
+  /** Hooves on paving, a horse or a mule passing at a walk. */
+  hoofbeats(t, lv) {
+    const out = this.plc.out;
+    for (let k = 0; k < 10; k++) {
+      const w = t + k * 0.32 + (k % 2) * 0.06;
+      this.burst(w, 0.05, 900 + Math.random() * 500, 3, 0.05 * lv * (0.6 + 0.4 * Math.sin(Math.PI * k / 10)), out);
+    }
+  }
+
+  /** Pick a key of { name: weight } at random by weight. */
+  static pick(w) {
+    let s = 0;
+    for (const v of Object.values(w)) s += v;
+    let x = Math.random() * s;
+    for (const [k, v] of Object.entries(w)) if ((x -= v) <= 0) return k;
+    return null;
+  }
+
+  /** Scheduled each tick: birds, crickets, frogs, animals, knocks and hooves. */
   placeEvents() {
     const P = this.plc, ctx = this.ctx;
     if (!P) return;
     const t = ctx.currentTime;
     if (P.birds > 0.02 && t > P.nextBird) {
-      // a bird: a few quick falling or rising chirps
-      const base = 2200 + Math.random() * 2600, n = 2 + Math.floor(Math.random() * 5), up = Math.random() < 0.5;
-      for (let k = 0; k < n; k++) {
-        const o = ctx.createOscillator(), g = ctx.createGain(), w = t + 0.05 + k * (0.09 + Math.random() * 0.05);
-        o.frequency.setValueAtTime(base * (up ? 0.85 : 1.15), w); o.frequency.exponentialRampToValueAtTime(base * (up ? 1.15 : 0.8), w + 0.07);
-        g.gain.setValueAtTime(0, w); g.gain.linearRampToValueAtTime(0.012 * P.birds, w + 0.01); g.gain.exponentialRampToValueAtTime(1e-4, w + 0.08);
-        o.connect(g); g.connect(P.out); o.start(w); o.stop(w + 0.1);
-      }
+      this.bird(P.voices ? Music.pick(P.voices) : 'warbler', t + 0.05, P.birds);
       P.nextBird = t + (1.5 + Math.random() * 6) / (0.3 + P.birds);
     }
     if (P.crickets > 0.02 && t > P.nextCricket) {
@@ -150,6 +345,25 @@ export class Music {
       }
       P.nextCricket = t + 0.35 + Math.random() * 0.9;
     }
+    if (P.frogs > 0.02 && t > P.nextFrog) {
+      // a frog's croak: a quick train of pulses round a few hundred hertz
+      const f = 220 + Math.random() * 380, n = 2 + Math.floor(Math.random() * 5);
+      for (let k = 0; k < n; k++) this.tone(t + k * 0.11, [[0, f], [0.06, f * 0.85]], 0.07, 0.012 * P.frogs, P.out, 'sawtooth', ['bandpass', f * 2.5, 4]);
+      P.nextFrog = t + 0.6 + Math.random() * 2.5 / (0.3 + P.frogs);
+    }
+    if (P.animals && t > P.nextAnimal) {
+      const A = { ...P.animals };
+      // the cock crows at first light above all; dogs bark more at night
+      if (A.rooster) A.rooster *= 0.15 + 6 * P.dawn;
+      if (A.dog) A.dog *= P.birds < 0.1 ? 1.6 : 0.8;
+      const k = Music.pick(A), lv = Math.min(1, 0.35 + P.town + P.dawn);
+      if (k && Object.values(A).some((v) => v > 0)) this.animal(k, t + 0.05, lv * (0.5 + Math.random() * 0.5));
+      P.nextAnimal = t + 7 + Math.random() * 22 - 4 * P.dawn;
+    }
+    if (P.town > 0.05 && P.animals?.horse && t > P.nextHooves) {
+      this.hoofbeats(t + 0.1, P.town * P.animals.horse);
+      P.nextHooves = t + 15 + Math.random() * 40;
+    }
     if (P.town > 0.05 && t > P.nextKnock) {
       // a knock: a hammer, a door, a pot set down — a short filtered click
       const sr = ctx.sampleRate, len = Math.floor(sr * 0.06), b = ctx.createBuffer(1, len, sr), d = b.getChannelData(0);
@@ -160,6 +374,186 @@ export class Music {
       const n = Math.random() < 0.3 ? 3 : 1;
       P.nextKnock = t + (n === 3 ? 0.4 : 2 + Math.random() * 7);
     }
+  }
+
+  /**
+   * The bells, drums, horns and calls that mark the hours of the place (src/engine/soundscape.js
+   * `due` says which, when). Heard from a tower or a minaret some way off: softened, and reflected
+   * off the walls round like the rest of the place's sound. many: several mosques call at once.
+   */
+  ring(ev, { many = false } = {}) {
+    const ctx = this.ctx;
+    if (!ctx || ctx.state !== 'running' || !this.plc) return;
+    const t0 = ctx.currentTime + 0.2;
+    if (t0 < (this.ringBusy || 0) && !ev.startsWith('quarter')) return;   // one thing at a time
+    if (!this.far) {
+      this.far = ctx.createGain(); this.far.gain.value = 1;
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
+      this.far.connect(lp); lp.connect(this.amb.muffle);
+    }
+    const out = this.far, [kind, arg] = ev.split(':'), N = +arg || 0;
+    let end = t0;
+    const strokes = (n, every, fn) => { for (let k = 0; k < n; k++) fn(t0 + k * every, k); end = Math.max(end, t0 + n * every); };
+    switch (kind) {
+      case 'angelus': {                       // three strokes thrice, then the peal
+        for (let g = 0; g < 3; g++) for (let k = 0; k < 3; k++) this.strike(t0 + g * 6 + k * 1.6, 233, 0.05, out);
+        for (let k = 0; k < 14; k++) this.strike(t0 + 19 + k * 1.25, 233, 0.04 * (k < 12 ? 1 : 0.6), out);
+        end = t0 + 38;
+        break;
+      }
+      case 'office': strokes(22, 1.35, (w, k) => this.strike(w, k % 2 ? 196 : 197, 0.045, out)); break;
+      case 'strike': strokes(N, 2.6, (w) => this.strike(w, 147, 0.05, out, 1.3)); break;
+      case 'marangona': strokes(30, 1.6, (w) => this.strike(w, 110, 0.055, out, 1.6)); break;
+      case 'carillon': {                      // a tune on the carillon's small bells, then the hour
+        const sc = [0, 2, 4, 5, 7, 9, 11, 12, 14], base = 587;
+        let deg = 4;
+        for (let k = 0; k < 16; k++) { deg = Math.max(0, Math.min(8, deg + [-2, -1, -1, 1, 1, 2, 0][Math.floor(Math.random() * 7)])); this.strike(t0 + k * 0.32 * (k % 4 === 3 ? 1.5 : 1), base * Math.pow(2, sc[deg] / 12), 0.025, out, 0.35); }
+        for (let k = 0; k < N; k++) this.strike(t0 + 7 + k * 2.4, 147, 0.05, out, 1.3);
+        end = t0 + 8 + N * 2.4;
+        break;
+      }
+      case 'quarter':
+      case 'hour': {                          // the Westminster quarters, and Big Ben on the hour
+        const Q = [null, [68, 66, 64, 59], [64, 68, 66, 59], [64, 66, 68, 64], [68, 64, 66, 59], [59, 66, 68, 64]];
+        const seq = kind === 'hour' ? [2, 3, 4, 5] : [[1], [2, 3], [4, 5, 1]][N - 1];
+        let w = t0;
+        for (const c of seq) { Q[c].forEach((m, i) => this.strike(w + i * 0.75 * (i === 3 ? 1.4 : 1), mtof(m), 0.035, out, 0.9)); w += 4.4; }
+        if (kind === 'hour') for (let k = 0; k < N; k++) this.strike(w + 2 + k * 4.6, mtof(52), 0.07, out, 2);
+        end = w + (kind === 'hour' ? 2 + N * 4.6 : 0);
+        break;
+      }
+      case 'toki': strokes(N, 7, (w) => this.bonsho(w, 98, 0.06, out)); break;
+      case 'bonsho': strokes(9, 9, (w) => this.bonsho(w, 88, 0.07, out)); break;
+      case 'hanshan': strokes(12, 8, (w) => this.bonsho(w, 104, 0.04, out)); break;   // across the water, far
+      case 'bosingak': strokes(33, 5, (w) => this.bonsho(w, 82, 0.065, out, 0.33)); break;   // the great bell's slow beat
+      case 'zhong': strokes(18, 4.5, (w) => this.bonsho(w, 110, 0.05, out)); break;
+      case 'gu': end = this.drumRolls(t0, out, 3); break;
+      case 'drum-tower': { const e = this.drumRolls(t0, out, 2); for (let k = 0; k < 18; k++) this.bonsho(e + 2 + k * 4.5, 92, 0.05, out); end = e + 2 + 18 * 4.5; break; }
+      case 'zvon': {                          // the blagovest tolls, then all the bells together
+        for (let k = 0; k < 12; k++) this.strike(t0 + k * 2.6, 98, 0.06, out, 1.8);
+        const w = t0 + 33;
+        for (let k = 0; k < 48; k++) {
+          const beat = k * 0.36;
+          if (k % 4 === 0) this.strike(w + beat, 98, 0.05, out, 1.5);
+          if (k % 2 === 1) this.strike(w + beat, 294, 0.03, out, 0.6);
+          this.strike(w + beat + 0.05, [587, 659, 784, 880][k % 4], 0.018, out, 0.35);
+        }
+        end = w + 18;
+        break;
+      }
+      case 'semantron': for (let k = 0; k < 3; k++) this.semantron(t0 + k * 5, 0.12, out); end = t0 + 15; break;
+      case 'dungchen': {                      // the long horns from the roofs, in pairs, and a conch
+        for (let k = 0; k < 4; k++) this.horn(t0 + k * 7.5, k % 2 ? 62 : 58, 6.5, 0.03, out);
+        this.conch(t0 + 31, 0.02, out); end = t0 + 36;
+        break;
+      }
+      case 'puja': {                          // the hand bell rung through the worship, and the conch
+        this.conch(t0, 0.02, out);
+        for (let k = 0; k < 90; k++) this.strike(t0 + 3.5 + k * 0.13, 1480 + (k % 2) * 30, 0.008, out, 0.3);
+        end = t0 + 16;
+        break;
+      }
+      case 'adhan': {
+        end = this.adhan(t0, arg === 'fajr', out, 0.05, 0);
+        if (many) { this.adhan(t0 + 2.5 + Math.random() * 3, arg === 'fajr', out, 0.022, -2); this.adhan(t0 + 6 + Math.random() * 4, arg === 'fajr', out, 0.014, 1.5); }
+        break;
+      }
+      default: return;
+    }
+    this.ringBusy = end;
+  }
+
+  /** One stroke of a western bell (hum, prime, tierce, quint, nominal…) at strike pitch f. */
+  strike(when, f, level, dest, decay = 1) {
+    const ctx = this.ctx;
+    for (const [r, a, d] of [[0.5, 0.5, 5], [1, 0.8, 3.5], [1.19, 0.45, 2.5], [1.5, 0.3, 2], [2, 0.55, 1.6], [2.66, 0.2, 1.1], [3.0, 0.15, 0.8]]) {
+      const o = ctx.createOscillator(), g = ctx.createGain(), D = d * decay;
+      o.frequency.value = f * r;
+      g.gain.setValueAtTime(0.0001, when);
+      g.gain.exponentialRampToValueAtTime(level * a, when + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, when + D);
+      o.connect(g); g.connect(dest); o.start(when); o.stop(when + D + 0.05);
+    }
+  }
+
+  /**
+   * A great East Asian bell struck with a swung log: the thud, then a deep hum with two close
+   * partials beating slowly (the Korean bells' maeari), a few higher partials dying sooner.
+   */
+  bonsho(when, f, level, dest, beat = 0.9) {
+    const ctx = this.ctx;
+    this.burst(when, 0.12, 180, 1, level * 0.8, dest);
+    for (const [r, a, d] of [[1, 1, 22], [1 + beat / f, 0.8, 22], [2.04, 0.5, 12], [2.76, 0.35, 8], [4.1, 0.2, 4], [5.4, 0.12, 2.5]]) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.value = f * r;
+      g.gain.setValueAtTime(0.0001, when);
+      g.gain.exponentialRampToValueAtTime(level * a, when + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, when + d);
+      o.connect(g); g.connect(dest); o.start(when); o.stop(when + d + 0.05);
+    }
+  }
+
+  /** Rolls on a great drum, each quickening and dying away; returns when the last has ended. */
+  drumRolls(t0, dest, n) {
+    let w = t0;
+    for (let r = 0; r < n; r++) {
+      let gap = 0.9;
+      for (let k = 0; k < 24; k++) {
+        this.tone(w, [[0, 72], [0.25, 48]], 0.6, 0.06 * (0.5 + 0.5 * Math.sin(Math.PI * k / 24)), dest);
+        this.burst(w, 0.08, 700, 1, 0.02, dest);
+        w += gap; gap = Math.max(0.12, gap * 0.88);
+      }
+      w += 3;
+    }
+    return w;
+  }
+
+  /** A long horn (the Tibetan dungchen): a low, buzzing note swelling and fading. */
+  horn(when, midi, dur, level, dest) {
+    const ctx = this.ctx, f = mtof(midi - 24), o = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter(), bp = ctx.createBiquadFilter(), bg = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.value = f;
+    lp.type = 'lowpass'; lp.frequency.value = 700; bp.type = 'bandpass'; bp.frequency.value = 480; bp.Q.value = 3; bg.gain.value = 0.8;
+    g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(level, when + dur * 0.35); g.gain.setValueAtTime(level, when + dur * 0.75); g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    o.connect(lp); lp.connect(g); o.connect(bp); bp.connect(bg); bg.connect(g); g.connect(dest); o.start(when); o.stop(when + dur + 0.05);
+  }
+
+  /** A conch blown: a hollow tone rising into its note, with breath. */
+  conch(when, level, dest) {
+    this.tone(when, [[0, 300], [0.5, 340], [3, 336]], 3.2, level, dest, 'triangle', ['lowpass', 1400]);
+    this.burst(when, 3, 680, 4, level * 0.5, dest);
+  }
+
+  /**
+   * The call to prayer, sung from a minaret: the phrases of the adhan (with the morning's extra
+   * pair at Fajr), each a melismatic line in maqam bayati rising from the tonic and falling back,
+   * with a pause between. A voice through the formants of its vowels; returns its end.
+   */
+  adhan(t0, fajr, dest, level, transpose) {
+    const ctx = this.ctx;
+    const B = [0, 1.5, 3, 5, 7, 8, 10, 12].map((s) => 62 + s + transpose);   // D bayati (E half-flat)
+    const n = fajr ? 16 : 14;
+    let w = t0;
+    for (let p = 0; p < n; p++) {
+      // a phrase: up to a peak degree, an ornament there, down to rest a degree above the tonic or on it
+      const peak = Math.min(7, 2 + (p % 4) + (p > 9 ? 1 : 0)), notes = [];
+      for (let d = 0; d <= peak; d += 1 + (Math.random() < 0.4 ? 1 : 0)) notes.push([B[d], 0.28 + Math.random() * 0.2]);
+      notes.push([B[peak], 1.2 + Math.random() * 0.8], [B[Math.max(0, peak - 1)], 0.25], [B[peak], 0.3]);
+      for (let d = peak - 1; d >= (p % 2); d--) notes.push([B[d], 0.3 + Math.random() * 0.25]);
+      notes.push([B[p % 2], 1.4]);
+      const dur = notes.reduce((s, [, d]) => s + d, 0);
+      const o = ctx.createOscillator(), g = ctx.createGain(), v = ctx.createOscillator(), vg = ctx.createGain();
+      o.type = 'sawtooth';
+      let tt = w;
+      o.frequency.setValueAtTime(mtof(notes[0][0] - 12), tt);
+      for (const [m, d] of notes) { o.frequency.linearRampToValueAtTime(mtof(m - 12), tt + 0.09); tt += d; o.frequency.setValueAtTime(mtof(m - 12), tt); }
+      v.frequency.value = 5.4; vg.gain.value = 1.6; v.connect(vg); vg.connect(o.frequency);
+      g.gain.setValueAtTime(0.0001, w); g.gain.exponentialRampToValueAtTime(level, w + 0.25); g.gain.setValueAtTime(level, w + dur - 0.6); g.gain.exponentialRampToValueAtTime(0.0001, w + dur);
+      const V = [[730, 1090, 2440], [570, 840, 2410], [300, 2200, 2900]][p % 3];
+      V.forEach((fq, i) => { const bp = ctx.createBiquadFilter(), ag = ctx.createGain(); bp.type = 'bandpass'; bp.frequency.value = fq; bp.Q.value = 6 + i * 3; ag.gain.value = [1.8, 0.9, 0.4][i]; o.connect(bp); bp.connect(ag); ag.connect(g); });
+      g.connect(dest); o.start(w); o.stop(w + dur + 0.05); v.start(w); v.stop(w + dur + 0.05);
+      w += dur + 2.2 + Math.random() * 1.2;
+    }
+    return w;
   }
 
   /** Current output level (RMS, 0…1). */
@@ -177,16 +571,6 @@ export class Music {
     if (this.master) this.master.gain.setTargetAtTime(v, this.ctx.currentTime, 0.2);
   }
 
-  impulse(seconds, decay) {
-    const ctx = this.ctx, n = Math.floor(ctx.sampleRate * seconds);
-    const b = ctx.createBuffer(2, n, ctx.sampleRate);
-    for (let c = 0; c < 2; c++) {
-      const d = b.getChannelData(c);
-      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay) * (i < ctx.sampleRate * 0.01 ? i / (ctx.sampleRate * 0.01) : 1);
-    }
-    return b;
-  }
-
   /** Switch to a building's score and one of its zones. */
   set(score, zone) {
     if (!this.ctx) { this.score = score; this.zone = zone; return; }
@@ -201,18 +585,83 @@ export class Music {
     const t = this.ctx.currentTime;
     for (const [z, l] of this.layers) l.gain.gain.setTargetAtTime(z === zone ? 1 : 0, t, 1.2);
     if (!this.layers.has(zone)) this.layers.set(zone, this.makeLayer(score, zone));
-    const Z = score.zones[zone] || {};
-    this.wet.gain.setTargetAtTime((Z.reverb ?? 0.4) * 0.9, t, 1.5);
-    this.dry.gain.setTargetAtTime(1 - (Z.reverb ?? 0.4) * 0.5 - (Z.reverbLong ?? 0) * 0.25, t, 1.5);
-    this.wetLong.gain.setTargetAtTime((Z.reverbLong ?? 0) * 0.8, t, 2.0);
-    this.longReverbFor(!!Z.reverbLong);
   }
 
-  /** Feed the long reverberation only where it is heard (cut off after its tail has died away). */
-  longReverbFor(on) {
-    clearTimeout(this.longOff);
-    if (on && !this.longOn) { this.bus.connect(this.longReverb); this.longOn = true; }
-    else if (!on && this.longOn) this.longOff = setTimeout(() => { try { this.bus.disconnect(this.longReverb); } catch { /* not connected */ } this.longOn = false; }, 14000);
+  /**
+   * The room one is in: its acoustics (src/engine/acoustics.js roomAcoustics) or null outdoors.
+   * The reverberation crossfades to the new room's impulse response; outdoors it is dry, with the
+   * early reflections of surround().
+   */
+  room(A) {
+    const key = A ? A.key : null;
+    if (key === this.roomKey || !this.ctx) return;
+    this.roomKey = key;
+    const ctx = this.ctx, t = ctx.currentTime;
+    let target = null;
+    if (A) {
+      target = this.slots.find((s) => s.key === key) || this.slots.find((s) => s !== this.active) || this.slots[0];
+      if (target.key !== key) { target.conv.buffer = this.irFor(A); target.key = key; target.rt = Math.max(A.rt[0], A.mid); }
+      this.feed(target, true);
+      target.gain.gain.setTargetAtTime(A.wet * 0.85, t, 0.5);
+    }
+    for (const s of this.slots) {
+      if (s === target) continue;
+      s.gain.gain.setTargetAtTime(0, t, 0.6);
+      // unfed once the fade and the tail are over
+      s.off = t + 3 + s.rt;
+    }
+    this.active = target;
+    // a little less of the direct sound in a ringing hall (the music is heard partly through it)
+    this.dry.gain.setTargetAtTime(A ? 1 - Math.min(0.35, A.wet * 0.3) : 1, t, 0.8);
+    this.erGain = A ? 0 : 1;
+    for (const p of this.taps) if (A) p.g.gain.setTargetAtTime(0, t, 0.3);
+  }
+
+  feed(s, on) {
+    if (on && !s.fed) { this.wetIn.connect(s.conv); s.fed = true; s.off = 0; }
+    else if (!on && s.fed) { try { this.wetIn.disconnect(s.conv); } catch { /* not connected */ } s.fed = false; }
+  }
+
+  /**
+   * Make ready, a little at a time, the impulse responses of the rooms of the building one is
+   * near, so that stepping into a hall does not wait for its reverberation to be generated.
+   */
+  prepare(list) {
+    if (!this.ctx) return;
+    const todo = list.filter((A, i) => A && !this.irCache.has(A.key) && list.findIndex((B) => B?.key === A.key) === i).slice(0, 4);
+    clearTimeout(this.prepT);
+    const next = () => { const A = todo.shift(); if (!A) return; this.irFor(A); this.prepT = setTimeout(next, 400); };
+    this.prepT = setTimeout(next, 400);
+  }
+
+  /** The impulse response of a room, generated once per room (a few kept). */
+  irFor(A) {
+    if (this.irCache.has(A.key)) return this.irCache.get(A.key);
+    const ctx = this.ctx, ch = impulseResponse(A, ctx.sampleRate);
+    const b = ctx.createBuffer(2, ch[0].length, ctx.sampleRate);
+    b.getChannelData(0).set(ch[0]); b.getChannelData(1).set(ch[1]);
+    if (this.irCache.size >= 5) this.irCache.delete(this.irCache.keys().next().value);
+    this.irCache.set(A.key, b);
+    return b;
+  }
+
+  /**
+   * Outdoors, the walls round: dists (m) in 8 directions, the first ahead and then clockwise
+   * (Infinity where nothing stands within reach). Each near wall sends back one reflection, its
+   * delay the path there and back, its level falling with the distance; none when indoors.
+   */
+  surround(dists) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    dists.forEach((d, i) => {
+      const tap = this.taps[i];
+      if (!tap) return;
+      const near = Number.isFinite(d) && d < 70;
+      const g = near ? this.erGain * 0.55 * Math.min(1, 3 / Math.max(1, d)) ** 0.8 : 0;
+      if (near) tap.d.delayTime.setTargetAtTime(Math.min(0.45, 2 * d / 343), t, 0.4);
+      tap.g.gain.setTargetAtTime(g, t, 0.4);
+      tap.p.pan.value = Math.sin(i * Math.PI / 4) * 0.8;
+    });
   }
 
   fadeOut(l) {
@@ -426,7 +875,7 @@ export class Music {
   }
 
   /** The semantron: a wooden board struck with a mallet, in a run that quickens. */
-  semantron(when, level) {
+  semantron(when, level, dest = this.layers.get(this.zone).gain) {
     const ctx = this.ctx, sr = ctx.sampleRate;
     let t = when;
     for (let i = 0; i < 9; i++) {
@@ -441,7 +890,7 @@ export class Music {
       const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = pitch * 2.2; bp.Q.value = 3;
       const ng = ctx.createGain(); ng.gain.value = level * 0.6;
       o.connect(g); n.connect(bp); bp.connect(ng);
-      g.connect(this.layers.get(this.zone).gain); ng.connect(this.layers.get(this.zone).gain);
+      g.connect(dest); ng.connect(dest);
       o.start(t); o.stop(t + 0.1); n.start(t);
       t += 0.42 - i * 0.03;
     }
@@ -490,6 +939,7 @@ export class Music {
 
   tick() {
     if (this.ctx?.state !== 'running') return;          // muted (suspended): nothing to schedule
+    for (const s of this.slots) if (s !== this.active && s.fed && s.off && this.ctx.currentTime > s.off) this.feed(s, false);
     if (this.plc) this.placeEvents();
     const ctx = this.ctx, S = this.score;
     if (!ctx || !S || !this.zone || !this.layers.has(this.zone) || this.volume <= 0) return;
