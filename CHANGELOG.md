@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.6 — Tour (2026-11-07)
+- Every settlement's name now stands fixed beside its dot on the map, in a crisper small type with an outline, the current one in blue. A Tour button (or T) sets off on its own: from the nearest settlement it shows the arrival view, then walks slowly between the place's viewpoints, and after about a minute travels on to the next in a shuffled order, without end; any key, click or touch hands control back.
+
 ## v10.5 — Controls, map, random city (2026-11-07)
 - The loading screen lists the controls (walk, look, run, fly, cruise, map, random city; touch gestures on phones). The map's labels no longer pile on each other: where settlements crowd, the nearest keep their names and the rest show as dots that name themselves on hover; the list is grouped by region and sorted by date. A Random city button (R with the map open) takes you to a settlement chosen at random.
 
