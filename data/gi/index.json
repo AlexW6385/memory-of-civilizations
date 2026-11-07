@@ -734,7 +734,7 @@
  },
  "knossos-palace": {
   "site": "knossos",
-  "hash": "d6a29517684634ad",
+  "hash": "12e405e6e45ba177",
   "rays": 128,
   "probes": 28002,
   "boxes": [
@@ -772,8 +772,8 @@
     ]
    }
   ],
-  "bytes": 468115,
-  "seconds": 102,
+  "bytes": 466697,
+  "seconds": 93,
   "baked": "2026-11-07"
  },
  "lalibela-churches": {
