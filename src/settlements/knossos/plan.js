@@ -36,11 +36,19 @@ E.push({ t: 'wing', rect: [19, -28, 62, 58], storeys: 4, windows: 'es', seed: 4,
   holes: [{ rect: LW, h: 99 }, { rect: QM, h: 3.6 }, { rect: [19, 0, 23, 2], h: 2.6, lintel: true }] });
 E.push({ t: 'lightwell_tiers', rect: LW, y: 0, storeys: 4, sh: 3.6 });
 E.push({ t: 'fresco', kind: 'dolphins', at: [27, 13], face: 'n', y0: 1.4, w: 3.6, h: 1.3, bg: 'plaster_white' });
+// the Queen's Megaron furnished (§4c): the bathroom at its east end behind the low partition and its column, the
+// clay bath; the gypsum bench on the west wall under the dancing lady
+E.push({ t: 'queens_bath', rect: [28.4, 9.4, 31, 13], y: 0, h: 3.6 });
+E.push({ t: 'megaron_bench', rect: [23, 7.0, 23.45, 12.2], y: 0 });
+E.push({ t: 'fresco', kind: 'dancer', at: [23, 9.6], face: 'e', y0: 1.3, w: 1.7, h: 1.6, bg: 'plaster_white' });
 // the bull-leaping fresco on the back wall of the east portico, toward its north end
 E.push({ t: 'fresco', kind: 'bull_leaping', at: [19, -12], face: 'w', y0: 1.1, w: 1.9, h: 1.0, bg: 'egyptian_blue' });
 E.push({ t: 'wing', rect: [-19, 28, -3, 58], storeys: 2, windows: 's', seed: 5 }, { t: 'wing', rect: [3, 28, 19, 58], storeys: 2, windows: 's', seed: 6 });
 // porticoes on the court: the Throne Room's antechamber, the Tripartite Shrine, the east side, the south
 E.push({ t: 'portico', a: [-14.2, -20], b: [-14.2, -8], n: 4, depth: 4.6, side: -1, h: 3.4 });
+// the antechamber shut on the north and south by its walls; the wooden throne and the gypsum benches (§4c)
+for (const z of [[-20.3, -20], [-8, -7.7]]) E.push({ t: 'block', rect: [-19, z[0], -14.55, z[1]], y0: 0, y1: 3.65, mat: 'plaster_ochre' });
+E.push({ t: 'antechamber', rect: [-19, -20, -14.6, -8], y: 0, throne: [-16.8, -20] });
 E.push({ t: 'portico', a: [-14.2, 0], b: [-14.2, 12], n: 3, depth: 4.6, side: -1, h: 3.4 });
 E.push({ t: 'portico', a: [14.2, -22], b: [14.2, 22], n: 10, depth: 4.6, side: 1, h: 3.6 });
 // the North Entrance: the passage between the wings, the bastion's portico above its ramp
@@ -49,6 +57,10 @@ E.push({ t: 'portico', a: [-6, -66], b: [6, -66], n: 4, depth: 4, side: -1, h: 3
 E.push({ t: 'bastion', rect: [-12, -72, -6, -62], y: 0, podium: 2.4, front: 'e' }, { t: 'wing', rect: [6, -72, 12, -62], storeys: 1, sh: 4.4, windows: '' });
 // the south propylon
 E.push({ t: 'portico', a: [-3, 60], b: [3, 60], n: 2, depth: 3, side: 1, h: 3.4 });
+// the Procession Fresco along both walls of the south passage, over the gypsum dado: the bearers walking in toward
+// the court (Evans set copies of it in the South Propylaeum, §4c)
+E.push({ t: 'procession_wall', at: [-3, 43], face: 'e', y0: 1.2, w: 28, h: 2.1 });
+E.push({ t: 'procession_wall', at: [3, 43], face: 'w', y0: 1.2, w: 28, h: 2.1, flip: true });
 // the West Court's raised walks and the theatral area
 E.push({ t: 'floor', rect: [-120, -50, -64, 50], y: 0.05, th: 0.3, mat: 'flagstone' });
 // the theatral area where the Royal Road ends: a paved court about 13 × 10 m; on its east the flight of eighteen low
@@ -63,7 +75,7 @@ E.push({ t: 'portico', a: [T0 + 16.2, T1 + 15.4], b: [T0 + 16.2, T1 + 10.6], n: 
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('central court', COURT, 0.05, 'open'), room('west court', [-120, -50, -64, 50], 0.05, 'open'), room('throne room antechamber', [-19, -20, -14, -8], 0, 'hall'),
-  room('throne room', TR, 0, 'inner'), room('long corridor', CORR, 0, 'inner'), room('grand staircase light well', LW, 0, 'open'), room("queen's megaron", QM, 0, 'inner')];
+  room('throne room', TR, 0, 'inner'), room('long corridor', CORR, 0, 'inner'), room('grand staircase light well', LW, 0, 'open'), room("queen's megaron", QM, 0, 'inner'), room('south propylaeum', [-3, 28, 3, 63], 0, 'hall')];
 const walks = [[[-100, 0], [-90, -60], [-92, -87], [-92, -95], [-70, -95], [-60, -89], [0, -89], [0, -60], [0, 0]], [[-39, -66], [-39, -54], [-39, 0], [-46, 0.5]]];
 walks[1].y0 = 0;
 walks[0].y0 = 0;
