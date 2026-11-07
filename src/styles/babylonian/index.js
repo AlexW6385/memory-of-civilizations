@@ -281,6 +281,53 @@ function glazedWall(el, { bag, col }) {
     }
   }
 }
+/**
+ * The courses of reed matting laid through a brick wall every thirtieth course, each over its bed of bitumen
+ * (Herodotus 1.179), showing as a band of reed ends standing a little out of the faces of r (those named in
+ * `faces`, of 'nswe') every 30 × 8.5 cm from y up to y + h.
+ */
+function layers(bag, r, y, h, faces) {
+  const [x0, z0, x1, z1] = r, step = 30 * 0.085, o = 0.018;
+  for (let k = 1; y + k * step < y + h - 0.6; k++) {
+    const yy = y + k * step;
+    for (const f of faces) {
+      const q = f === 'n' ? [x0, z0 - o, x1, z0] : f === 's' ? [x0, z1, x1, z1 + o] : f === 'w' ? [x0 - o, z0, x0, z1] : [x1, z0, x1 + o, z1];
+      bag.add('reed_mat', box(q[0], yy, q[1], q[2], yy + 0.045, q[3]));
+      bag.add('bitumen', box(q[0] + (f === 'w' ? -0.006 : 0), yy - 0.022, q[1] + (f === 'n' ? -0.006 : 0), q[2] + (f === 'e' ? 0.006 : 0), yy, q[3] + (f === 's' ? 0.006 : 0)));
+    }
+  }
+}
+/**
+ * gate_inscription: { x0, x1, z (the face's plane), face ('n'|'s'), y0, y1, lines, seed } — Nebuchadnezzar's dedication
+ * on the wall by the Ishtar Gate: a panel of blue glazed brick with lines of cuneiform in white glaze (Akkadian, 60
+ * lines, Wikipedia after the Pergamon panel), framed by enamelled bands and rosettes. Each sign a cluster of wedges —
+ * horizontal, vertical, oblique heads and the corner wedge — standing a little proud of the blue.
+ */
+function gateInscription(el, { bag }) {
+  const { x0, x1, z, y0, y1 } = el, s = el.face === 's' ? 1 : -1, n = el.lines ?? 60, rand = rng(el.seed ?? 605);
+  const r = [x0, s < 0 ? z - 0.12 : z, x1, s < 0 ? z : z + 0.12], f = el.face ?? 'n', zf = s < 0 ? r[1] : r[3];
+  bag.add(G, box(r[0], y0, r[1], r[2], y1, r[3]));
+  band(bag, r, f, y1 - 0.3); rosettes(bag, r, f, y1 - 0.62, 0.6, 0.17); band(bag, r, f, y0 + 0.05);
+  // the frame's sides
+  for (const xa of [x0, x1 - 0.27]) [W, K, W].forEach((m, k) => bag.add(m, box(xa + k * 0.09, y0 + 0.32, Math.min(zf, zf + s * 0.025), xa + (k + 1) * 0.09, y1 - 0.3, Math.max(zf, zf + s * 0.025))));
+  const ta = y1 - 0.95, tb = y0 + 0.5, pitch = (ta - tb) / n, sh = pitch * 0.7, d = 0.012;
+  const wedge = (x, y, w, h) => bag.add(W, box(x, y, Math.min(zf, zf + s * d), x + w, y + h, Math.max(zf, zf + s * d)));
+  for (let l = 0; l < n; l++) {
+    const yb = ta - (l + 1) * pitch + (pitch - sh) / 2;
+    let x = x0 + 0.45;
+    // a ruling line under each line of text
+    bag.add(K, box(x0 + 0.4, yb - (pitch - sh) / 2 - 0.004, Math.min(zf, zf + s * 0.004), x1 - 0.4, yb - (pitch - sh) / 2 + 0.004, Math.max(zf, zf + s * 0.004)));
+    while (x < x1 - 0.6) {
+      const k = Math.floor(rand() * 6), w = sh * (0.8 + rand() * 0.9);
+      if (k === 0 || k === 1) { wedge(x, yb + sh * 0.45, w, sh * 0.16); if (k) wedge(x + w * 0.2, yb + sh * 0.1, w * 0.7, sh * 0.14); }    // one or two horizontals
+      else if (k === 2) { for (let j = 0; j < 3; j++) wedge(x + j * w / 3, yb, sh * 0.13, sh); }                                       // verticals
+      else if (k === 3) { wedge(x, yb + sh * 0.42, w, sh * 0.15); wedge(x + w * 0.65, yb, sh * 0.13, sh); }                             // a horizontal crossed by a vertical
+      else if (k === 4) { wedge(x, yb + sh * 0.55, sh * 0.35, sh * 0.35); wedge(x + sh * 0.45, yb + sh * 0.1, sh * 0.35, sh * 0.35); }  // corner wedges
+      else { wedge(x, yb + sh * 0.7, w, sh * 0.14); wedge(x, yb + sh * 0.2, w, sh * 0.14); wedge(x + w * 0.5, yb, sh * 0.13, sh); }     // two horizontals and a vertical
+      x += w + sh * (0.3 + rand() * 0.25);
+    }
+  }
+}
 /** city_wall: a double wall with towers a→b { h, th, gap (between the two walls), y }. */
 function cityWall(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, th = el.th ?? 6, h = el.h ?? 15, gap = el.gap ?? 12, y = el.y ?? 0, alongX = az === bz;
@@ -288,8 +335,9 @@ function cityWall(el, { bag, col }) {
     const r = alongX ? [Math.min(ax, bx), az - t / 2 + o, Math.max(ax, bx), az + t / 2 + o] : [ax - t / 2 + o, Math.min(az, bz), ax + t / 2 + o, Math.max(az, bz)];
     if (r[2] - r[0] < 0.5 || r[3] - r[1] < 0.5) continue;
     bag.add(B, frustum(r, y - 0.5, y + hh, 0, 0, 0, 0, { noBottom: true })); col.rect(r, y, y + hh); col.floor(r, y + hh); crenels(bag, r, y + hh, B, 1.5);
+    layers(bag, r, y, hh, alongX ? 'ns' : 'we');
     const L = alongX ? r[2] - r[0] : r[3] - r[1], n = Math.floor(L / 20);
-    for (let i = 0; i <= n; i++) { const u = (alongX ? r[0] : r[1]) + i * L / Math.max(1, n); const q = alongX ? [u - 4, r[1] - 2, u + 4, r[3] + 2] : [r[0] - 2, u - 4, r[2] + 2, u + 4]; bag.add(B, frustum(q, y - 0.5, y + hh + 3, 0, 0, 0, 0, { noBottom: true })); col.rect(q, y, y + hh + 3); crenels(bag, q, y + hh + 3, B, 1.5); }
+    for (let i = 0; i <= n; i++) { const u = (alongX ? r[0] : r[1]) + i * L / Math.max(1, n); const q = alongX ? [u - 4, r[1] - 2, u + 4, r[3] + 2] : [r[0] - 2, u - 4, r[2] + 2, u + 4]; bag.add(B, frustum(q, y - 0.5, y + hh + 3, 0, 0, 0, 0, { noBottom: true })); col.rect(q, y, y + hh + 3); crenels(bag, q, y + hh + 3, B, 1.5); layers(bag, q, y, hh + 3, 'nswe'); }
   }
 }
 /**
@@ -391,6 +439,6 @@ function throneFacade(bag, r, doors, h) {
 }
 registerStyle('babylonian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.sumerian.elements, ishtar_gate: ishtarGate, glazed_wall: glazedWall, city_wall: cityWall, way_paving: wayPaving, palace, esagila, etemenanki, bridge, quay, quffa },
+  elements: { ...STYLES.sumerian.elements, gate_inscription: gateInscription, ishtar_gate: ishtarGate, glazed_wall: glazedWall, city_wall: cityWall, way_paving: wayPaving, palace, esagila, etemenanki, bridge, quay, quffa },
   objects: {},
 });

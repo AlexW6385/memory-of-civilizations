@@ -37,6 +37,23 @@ export const STREET = { a: [60, 12], b: [-104, 12], w: 6 };
 export const GREAT_TEMPLE = [-86, 20.9, -30, 100];
 export const TEMENOS = [-172, -26, -104, 42];
 export const QASR = { rect: [-166, 8, -138, 36], altar: [-152, -14] };
+/**
+ * The garden and pool of Aretas IV (docs/settlements/petra.md §13) east of the Great Temple, behind the street's shops: the
+ * garden terrace 6 m above the street, the pool's promenade 2.5 m above the garden, the pool sunk in it, its floor 2.5 m down.
+ */
+export const GARDEN = { rect: [-27, 28, 27, 104], gy: 6, py: 8.5, split: 74, pool: [-19, 79, 19, 100], floor: 6, entry: [14, 17.5], zs: 21 };
+/** The ground's level inside the garden complex (or null outside it): the steps lie inside the walls. */
+export function gardenLevel(x, z) {
+  const G = GARDEN, [x0, z0, x1, z1] = G.rect;
+  if (x < x0 + 0.8 || x > x1 - 0.8 || z < z0 + 1.6 || z > z1 - 0.3) return null;
+  if (x > G.entry[0] - 0.25 && x < G.entry[1] + 0.25 && z < z0 + 6.5) return null;              // the stair up from the street
+  if (z < G.split + 1.6) return G.gy;
+  const [px0, pz0, px1, pz1] = G.pool;
+  return x > px0 - 0.4 && x < px1 + 0.4 && z > pz0 - 0.4 && z < pz1 + 0.4 ? G.floor : G.py;
+}
+export const inGarden = (x, z, m = 0) => inRect(GARDEN.rect, x, z, m);
+/** The banqueting hall cut in an outcrop on the valley's north slope, facing the street (§14): its front's middle, the hall's size; the ground levelled under it. */
+export const TRICLINIUM = { at: [-150, -33], w: 11, d: 9, h: 5.6, rect: [-160, -46, -140, -32.6] };
 /** Inside the precincts (nothing planted, no houses). */
 export const sacred = (x, z, m = 0) => inRect([GREAT_TEMPLE[0] - 1, GREAT_TEMPLE[1], GREAT_TEMPLE[2] + 1, GREAT_TEMPLE[3] + 1], x, z, m) || inRect([TEMENOS[0] - 1, TEMENOS[1], TEMENOS[2], TEMENOS[3]], x, z, m);
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -70,6 +87,9 @@ export function floorY(x, z) {
 }
 export function height(x, z) {
   if (Math.hypot(x, z) > RADIUS) return RIM;
+  const g = gardenLevel(x, z);
+  if (g !== null) return g;
+  if (inRect(TRICLINIUM.rect, x, z)) return Math.min(floorY(x, z), floorY(TRICLINIUM.at[0], TRICLINIUM.at[1]));
   const o = open(x, z), rock = RIM + 3 * Math.sin(x / 17) * Math.sin(z / 13) * smooth(RADIUS, RADIUS - 40, Math.hypot(x, z));
   return floorY(x, z) * o + rock * (1 - o);
 }
@@ -84,8 +104,9 @@ export function lots() {
     const e = Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]);
     if (e > 0.9 || Math.abs(z - 12) < 22 || rand() < 0.35) continue;
     if (sacred(x, z, 6) || sacred(x + 11, z + 10, 6) || sacred(x + 11, z, 6) || sacred(x, z + 10, 6) || x > 20 && z > -40) continue;
-    const w = 7 + rand() * 4, d = 7 + rand() * 3;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
+    const w = 7 + rand() * 4, d = 7 + rand() * 3, seed = Math.floor(rand() * 1e6);
+    if ([[x, z], [x + w, z + d], [x + w, z], [x, z + d]].some(([a, b]) => inGarden(a, b, 2) || inRect(TRICLINIUM.rect, a, b, 3))) continue;
+    LOTS.push({ rect: [x, z, x + w, z + d], seed });
   }
   return LOTS;
 }

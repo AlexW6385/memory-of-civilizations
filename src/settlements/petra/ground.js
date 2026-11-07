@@ -2,7 +2,7 @@
 // valley's dry slopes with oleander and tamarisk in the wadi bed, junipers and grass on the
 // heights; the desert sky.
 
-import { RADIUS, RIM, STREET, open, height, inLot, behindWalls, sacred } from './layout.js';
+import { RADIUS, RIM, STREET, GARDEN, open, height, inLot, behindWalls, sacred, inGarden, gardenLevel } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.5, grass: 0, rock: 0, soil: 0.3, fields: 0, dry: 0.9, warmth: 0.85, red: 0.8, road: 0, snow: 0, forest: 0 };
@@ -11,10 +11,23 @@ function cover(x, z, h) {
   // the foot of the cliffs: rock with the sand drifted against it, so that the walls stay rose to the floor
   if (o < 0.97) { c.rock = 0.75; c.sand = 0.15; c.soil = 0.1; return c; }
   if (Math.abs(z - STREET.a[1]) < 6 && x < STREET.a[0] && x > STREET.b[0]) { c.road = 0.7; return c; }
+  // the garden's watered earth and grass (its promenade and pool are paved over)
+  if (inGarden(x, z) && gardenLevel(x, z) === GARDEN.gy) { c.sand = 0.05; c.dry = 0.35; c.soil = 0.45; c.grass = 0.55; c.red = 0.4; return c; }
   return c;
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
+/**
+ * The garden (docs/settlements/petra.md §13): a grove of date palms in its southern quarters, figs and olives in the northern,
+ * irrigated grass under them; nothing on the walk, the axis's platforms and pergola, the stair, near the walls.
+ */
+function gardenPlants(x, z) {
+  const G = GARDEN, [x0, z0, x1] = G.rect, zw = (z0 + 2.6 + G.split) / 2;
+  if (gardenLevel(x, z) !== G.gy || x < x0 + 3 || x > x1 - 3 || z < z0 + 4 || z > G.split - 2.5) return null;
+  if (Math.abs(z - zw) < 3.2 || Math.abs(x) < 6.5 || (x > G.entry[0] - 2 && x < G.entry[1] + 2 && z < z0 + 8)) return { grass: 14 };
+  return z > zw ? { date_palm: 1.1, grass: 26 } : { fig: 0.5, olive: 0.35, grass: 26 };
+}
 function planting(x, z) {
+  if (inGarden(x, z)) return gardenPlants(x, z);
   if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || behindWalls(x, z)) return null;
   const o = open(x, z);
   if (o < 0.2) return { grass_dry: 2, maquis: 0.05 };
@@ -24,7 +37,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater, rim: RIM,
-  maxDensity: { oleander: 0.06, tamarisk: 0.04, maquis: 0.05 },
+  maxDensity: { oleander: 0.06, tamarisk: 0.04, maquis: 0.05, date_palm: 1.1, fig: 0.5, olive: 0.35 },
   climate: {
     sun: { az: 130, el: 50, color: [1.0, 0.95, 0.86], intensity: 3.6, lat: 30, dec: 5, hour: 10 },
     sky: { turbidity: 3.2, rayleigh: 1.1, mie: 0.005, mieG: 0.78, zenith: [0.08, 0.15, 0.4], horizon: [0.66, 0.64, 0.62] },

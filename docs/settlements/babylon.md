@@ -1,7 +1,7 @@
 # Babylon (Nebuchadnezzar's inner city), about 570 BC — dossier
 
 Settlement id: `babylon` · Style: `babylonian` (the sumerian mud-brick vocabulary with baked and glazed brick) · Region: Mesopotamia (the Euphrates) · Code: `src/settlements/babylon/`
-Status of this dossier: L2–L3 (Esagila with its court, altars and Marduk's golden cella; Etemenanki's blue-glazed summit temple; the bridge, the quay wall and the round boats; people — §4.5–4.8); before that L2 (the Processional Way paved and its walls towered and ornamented, the Ishtar Gate's beasts in rows, the Southern Palace with the throne-room facade — §4.1–4.4); before that L1–L2 (Etemenanki in seven stages in its walled precinct; Esagila south of it; the double northern wall with towers and the Ishtar Gate in blue glazed brick; the Processional Way between glazed walls with lions; the Southern Palace; the Euphrates; courtyard houses; ground, planting, weather, music). L3 recorded for later: the gate's inscription panel, the beasts' brick courses in relief, the Hanging Gardens question, the other gates and temples, the outer wall, the New Year procession.
+Status of this dossier: L3 for the gate's dedication, the reed layers of the walls, two furnished houses, the market, a caravan and scribes (§4.9, §4.10, §5.1, §5.2); before that L2–L3 (Esagila with its court, altars and Marduk's golden cella; Etemenanki's blue-glazed summit temple; the bridge, the quay wall and the round boats; people — §4.5–4.8); before that L2 (the Processional Way paved and its walls towered and ornamented, the Ishtar Gate's beasts in rows, the Southern Palace with the throne-room facade — §4.1–4.4); before that L1–L2 (Etemenanki in seven stages in its walled precinct; Esagila south of it; the double northern wall with towers and the Ishtar Gate in blue glazed brick; the Processional Way between glazed walls with lions; the Southern Palace; the Euphrates; courtyard houses; ground, planting, weather, music). L3 recorded for later: the gate's inscription panel, the beasts' brick courses in relief, the Hanging Gardens question, the other gates and temples, the outer wall, the New Year procession.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -80,9 +80,27 @@ Sources added:
 - [Herodotus 1.195 — Lexundria](https://lexundria.com/hdt/1.195/mcly)
 - [Esagil — Wikipedia](https://en.wikipedia.org/wiki/Esagil)
 
+### 4.9 The dedication by the gate (L3, built 2026-11-07)
+
+"The inscription is written in Akkadian cuneiform using white and blue glazed bricks", Nebuchadnezzar's dedication explaining the gate's purpose, "15 meters tall by 10 meters wide", 60 lines; "The roof and doors of the gate were made of cedar, according to the dedication plaque" [stated: Wikipedia "Ishtar Gate"; Madain Project "Ishtar Gate Inscription", which opens "Nebuchadnezzar, King of Babylon, the pious prince, appointed by the will of Marduk"]. Ours (`gate_inscription`): a panel 10 m wide of blue glazed brick on the city face of the inner wall just east of the gate, between its first two towers, where it is seen on coming out of the gate into the city (the outer face beside the gate lies hidden behind the Way's walls in our layout); 9.6 m high (the wall is lower than the stated 15 m); 60 ruled lines of signs in white glaze standing a little proud — horizontal, vertical and corner wedges in clusters — framed by white–black–white enamelled bands with a row of rosettes at the top [inferred: the place, the signs (generated, not the text), the frame].
+
+### 4.10 Reed and bitumen in the walls (L3, built 2026-11-07)
+
+Herodotus 1.179: they "made bricks of the earth which was carried out of the place they dug" and "baked them in ovens", "then using hot bitumen for cement and interposing layers of wattled reeds at every thirtieth course of bricks" [stated: Herodotus 1.179, Perseids]. Ours (`city_wall`): on every face of the double wall and its towers a band of reed ends standing 1.8 cm out of the face every thirty courses (30 × 8.5 cm, about 2.55 m), over a dark line of bitumen [inferred: the reed ends left showing on the face].
+
 ## 5. The town
 
 About 800 courtyard houses. [inferred] Mud-brick houses "scarcely strong enough to support even one upper storey"; the ordinary house of one floor [stated: Koldewey]. The houses share Ur's house type (`docs/settlements/ur.md` §5): brick footings, plastered walls, a door with a lintel, gutters, a court with a stair to the roof [inferred].
+
+### 5.1 Two houses to enter, furnished (L3, built 2026-11-07)
+
+The two houses on the east side of the Processional Way south of the palace (the lots of seeds 757329 and 866290) are built hollow and furnished as Ur's (`docs/settlements/ur.md` §5.1: lobby, court with stair and drain, reception room with couch, table and lamp, domestic chapel with niche and altar, kitchen with hearth, bread oven and quern, storeroom, lavatory), their street doors on the Way [inferred: the Neo-Babylonian house kept the courtyard plan of the older city].
+
+### 5.2 The market, the caravan, the scribes (L3, built 2026-11-07)
+
+- **The market** at the east end of the bridge (`MARKET`, 64 × 58 m, no houses on it; a market room for the generic pass): two rows of sellers behind reed mats and under cloth awnings — dates and melons, fish, greens, bread, pots, baskets, bolts of cloth — buyers before them, two donkeys standing loaded [inferred].
+- **The caravan:** four camels with their packs and two Arab drivers, bareheaded in long robes, and a man with a loaded donkey, coming down the road to the Ishtar Gate on its east side, clear of the arrival's view [inferred: the Arabs' dress after the Apadana's delegation (`docs/settlements/persepolis.md` §13); camels as Arabia's beasts of burden in the 6th century BC].
+- **The scribes:** on the quay by the moored boats two scribes cross-legged on their mats record a cargo for a man with a staff — one on a clay tablet, the other on a leather scroll with ink and pen. "Scribes are shown in pairs, one writing in cuneiform on a board or a tablet", "the other writing in Aramaic on a leather scroll" [stated: ORACC, "Writing cuneiform on other media" (Ancient Kalhu), of the Assyrian palace reliefs] (`scribe_kit` with `scroll`).
 
 ## 6. Ground and water
 
@@ -116,3 +134,6 @@ The Southern Palace's north range had the inner city wall (Imgur-Enlil, ours at 
 - [Reconstructed Ishtar Gate at the Pergamon Museum — Madain Project](https://madainproject.com/reconstructed_ishtar_gate_at_the_pergamon_museum)
 - [Etemenanki — globalsecurity.org](https://www.globalsecurity.org/military/world/iraq/etemenanki.htm)
 - [Koldewey, The Excavations at Babylon (Project Gutenberg)](https://gutenberg.org/cache/epub/71398/pg71398.txt) (the colours of the enamels, the red turned green, the asphalt in the courses)
+- [Ishtar Gate Inscription — Madain Project](https://madainproject.com/ishtar_gate_inscription)
+- [Herodotus 1.179 — Perseids](https://cts.perseids.org/read/greekLit/tlg0016/tlg001/perseus-eng2/1.179.1-1.179.3)
+- [Writing cuneiform on other media — ORACC, Ancient Kalhu](https://oracc.museum.upenn.edu/nimrud/ancientkalhu/thewritings/cuneiformonothermedia/index.html)

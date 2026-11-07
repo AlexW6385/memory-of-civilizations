@@ -2,7 +2,7 @@
 // their pleated headdresses, spears with golden pomegranates and quivers — at the Gate of All Nations and at the foot
 // of the Apadana's north stairway; delegations of the peoples, each led by an usher, carrying their vessels and
 // leading their animals from the gate toward the Apadana, as the stairways' reliefs show them (Livius).
-import { TERRACE } from './layout.js';
+import { TERRACE, ROAD, MARKET } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const T = TERRACE.h, E = -Math.PI / 2, N = 0, S = Math.PI, W = Math.PI / 2;     // the figure's rot to face east, north, south, west
@@ -45,6 +45,27 @@ export function people() {
     if (d.two) figures.push({ t: 'animal', kind: d.beast, at: [ax - 1.9, z + 1.6], y: T, rot: E, seed: seed() });
     figures.push({ t: 'figure', at: [ax + 0.2, z - 0.1], y: T, rot: E, h: 1.68, seed: seed(), dress: d.dress, top: d.top, cloth: d.cloth[1], cloth2: d.cloth[0], hat: d.hat, hatMat: d.cloth[0], beard: true, skin: d.skin ?? 'skin_medium', feet: d.dress === 'wrap' ? 'bare' : 'shod', pose: 'staff', len: 1.3, staffMat: 'wood_dark' });
     x -= 10.5;
+  }
+  // the archivist in the Treasury's hall, cross-legged at his mat by the benches of tablets (his mat in plan.js: the treasury)
+  figures.push({ t: 'figure', at: [123.6, 115.8], y: T + 0.09, rot: S, h: 1.7, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'sash', hair: 'short', beard: true, hat: 'cap', hatMat: 'cloth_white', skin: 'skin_medium', feet: 'shod', pose: 'cross' });
+  // on the road across the plain: a caravan of camels bound for the terrace with their drivers, donkeys loaded with
+  // sacks, a horseman of the guard
+  const rz = (ROAD[1] + ROAD[3]) / 2;
+  for (let k = 0; k < 5; k++) figures.push({ t: 'animal', kind: 'camel', at: [-330 + k * 3.6, rz + 2.8 + (k % 2) * 0.4], y: 0, rot: E + (rand() - 0.5) * 0.1, seed: seed(), gear: true });
+  for (const [x, dz] of [[-314.5, 1.6], [-333.6, 2.2]]) figures.push({ t: 'figure', at: [x, rz + dz], y: 0, rot: E, h: 1.72, seed: seed(), dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_ochre', over: 'belt', hat: 'cap', hatMat: 'cloth_ochre', beard: true, skin: 'skin_medium', feet: 'shod', pose: 'staff', carry: 'staff', len: 1.7, staffMat: 'wood_dark' });
+  for (let k = 0; k < 3; k++) figures.push({ t: 'animal', kind: 'donkey', at: [-262 + k * 2.4, rz - 3.0], y: 0, rot: W, seed: seed(), gear: true });
+  figures.push({ t: 'figure', at: [-264.6, rz - 2.6], y: 0, rot: W, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_brown', over: 'sash', hat: 'none', hair: 'short', beard: true, skin: 'skin_medium', feet: 'shod', carry: 'staff', len: 1.4, staffMat: 'wood_dark' });
+  figures.push({ t: 'animal', kind: 'horse', at: [-200, rz + 1.5], y: 0, rot: W, seed: seed(), gear: true });
+  // the market of Parsa: sellers behind their mats and stalls, buyers before them
+  const WARES = [['heap', 'baskets'], ['bread', 'heap'], ['greens', 'melons'], ['pottery', 'pottery'], ['bolts', 'baskets'], ['heap', 'greens']];
+  let w = 0;
+  for (const z of [MARKET[1] + 9, MARKET[3] - 9]) for (let x = MARKET[0] + 6; x < MARKET[2] - 4; x += 6.5) {
+    if (rand() < 0.15) continue;
+    const g = WARES[w++ % WARES.length], north = z < (MARKET[1] + MARKET[3]) / 2, back = north ? -1 : 1, rot = north ? S : N;
+    const seller = { t: 'figure', y: 0, seed: seed(), dress: rand() < 0.5 ? 'robe' : 'trousers', cloth: ['cloth_white', 'cloth_brown', 'cloth_ochre', 'cloth_indigo'][Math.floor(rand() * 4)], cloth2: 'cloth_white', over: 'sash', hat: rand() < 0.5 ? 'cap' : 'none', hatMat: 'cloth_white', beard: true, skin: 'skin_medium', feet: 'shod' };
+    if (w % 3 === 0) { figures.push({ t: 'stall', at: [x, z], y: 0, rot: north ? N : S, seed: seed(), awning: ['cloth_white', 'cloth_ochre', 'cloth_red'][w % 3 === 0 ? (w / 3) % 3 : 0], stripe: null, goods: g, w: 2.6, d: 1.3 }); figures.push({ ...seller, at: [x + 0.3, z + back * 1.4], rot, pose: 'talk' }); }
+    else { figures.push({ t: 'goods_mat', at: [x, z], y: 0, rot, seed: seed(), goods: g, mat: 'reed_mat' }); figures.push({ ...seller, at: [x - 0.2, z + back * 1.0], rot, pose: 'sit_ground' }); }
+    if (rand() < 0.5) figures.push({ ...seller, seed: seed(), cloth: 'cloth_red', at: [x + (rand() - 0.5), z - back * 1.7], rot: rot + S + (rand() - 0.5) * 0.5, pose: 'stand' });
   }
   return { figures, gear };
 }

@@ -1,7 +1,7 @@
 // Babylon — the ground: the flat alluvium, the baked-brick paving of the Processional Way, dusty
 // lanes, date palms in gardens and along the Euphrates, reeds on its banks; the hard, hazy light.
 
-import { RADIUS, PALACE, PRECINCT, ESAGILA, RIVER, BRIDGE, riverX, height, inRiver, onWay, inRect, inLot, inQuay } from './layout.js';
+import { RADIUS, PALACE, PRECINCT, ESAGILA, RIVER, BRIDGE, MARKET, riverX, height, inRiver, onWay, inRect, inLot, inQuay } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.5, grass: 0.05, rock: 0, soil: 0.45, fields: 0, dry: 0.9, warmth: 0.85, red: 0.2, road: 0, snow: 0, forest: 0 };
@@ -15,6 +15,7 @@ function fromWater(x, z) { return inRiver(x, z) ? -3 : Math.max(-5, Math.min(40,
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || onWay(x, z, 2) || [PALACE, PRECINCT, ESAGILA].some((r) => inRect(r, x, z, 4)) || inLot(x, z, 1) || inQuay(x, z, 1.5)) return null;
   if (Math.abs(z - BRIDGE.z) < 8 && Math.abs(x - riverX(z)) < 60) return null;   // the bridgeheads and the road onto the bridge
+  if (inRect(MARKET, x, z, 2)) return null;                                          // the market
   if (height(x, z) < -1) return { reeds: 15, date_palm: 0.05 };
   if (x < -200) return { date_palm: 0.25, grass: 8 };
   return { date_palm: 0.03 };

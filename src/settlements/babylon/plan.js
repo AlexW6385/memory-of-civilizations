@@ -24,6 +24,9 @@ E.push({ t: 'esagila', rect: ESAGILA, h: 12 });
 E.push({ t: 'city_wall', a: [-(RADIUS - 50), WALL_Z], b: [GATE.c[0] - 22, WALL_Z], h: 15, th: 6, gap: 12 });
 E.push({ t: 'city_wall', a: [GATE.c[0] + 22, WALL_Z], b: [RADIUS - 50, WALL_Z], h: 15, th: 6, gap: 12 });
 E.push({ t: 'ishtar_gate', c: [GATE.c[0], WALL_Z + 8], w: 5, d: 40, h: 14, h2: 23 });
+// Nebuchadnezzar's dedication on the city face of the inner wall east of the gate, between its first two towers,
+// seen on coming out of the gate into the city
+E.push({ t: 'gate_inscription', x0: GATE.c[0] + 27.2, x1: GATE.c[0] + 37.2, z: WALL_Z + 18 + 1.95, face: 's', y0: 1.0, y1: 10.6, lines: 60 });
 // the Processional Way: paved with limestone flags down the middle and red breccia either side, between
 // glazed walls with lions
 E.push({ t: 'way_paving', rect: [WAY.x - WAY.w / 2, WAY.z0, WAY.x + WAY.w / 2, WALL_Z - 13.5], y: 0.12, seed: 1 });

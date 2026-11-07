@@ -11,6 +11,8 @@ import { relief, strip, rosette } from './reliefs.js';
 import { jambScene } from './throne.js';
 import { fortification, guardGear, gift } from './fort.js';
 import '../qing/index.js';
+import { scribeKit } from '../sumerian/house.js';
+import { loft } from '../egyptian/objects.js';
 
 const S = 'limestone_persian', W = 'plaster_persian', C = 'marble_dark';     // C: the polished stone of the columns, frames and sculpture
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -60,29 +62,61 @@ function column(bag, col, x, z, y, h, d, beam = 'x', simple = false) {
   bullProtomes(bag, x, z, yS, s, beam === 'x');
 }
 
-/** The two kneeling bulls back to back on a capital, their saddle's top at yS, their axis along x (or z). */
+/**
+ * The two kneeling bulls back to back on a capital, their saddle's top at yS, their axis along x (or z) (docs/settlements/
+ * persepolis.md §14): each forepart one smooth carved body — the barrel at the saddle, the deep chest and the dewlap
+ * hanging under the neck, the neck rising to the long level head and the muzzle — lofted through rounded sections; the
+ * forelegs folded under the chest, hooves forward; ears held out level, horns curving out and forward; rows of small
+ * curls on the chest and dewlap and along the crest of the neck; red paint in the mouth and the nostrils.
+ */
+const BULL = [   // [a (out from the axis), v (the section's centre, up from the saddle's top), w (half-width), hu, hd (half-heights above, below)] in units of s
+  [0.42, -0.72, 0.5, 0.66, 0.64], [0.75, -0.72, 0.58, 0.7, 0.66], [1.05, -0.68, 0.56, 0.66, 0.68], [1.3, -0.55, 0.48, 0.58, 0.72],
+  [1.55, -0.38, 0.4, 0.5, 0.62], [1.78, -0.22, 0.32, 0.4, 0.46], [1.95, -0.16, 0.27, 0.3, 0.32], [2.2, -0.18, 0.23, 0.25, 0.26],
+  [2.4, -0.21, 0.19, 0.2, 0.2], [2.52, -0.23, 0.14, 0.15, 0.15], [2.58, -0.24, 0.09, 0.1, 0.1]];
+function bullAt(a) {
+  let i = 0; while (i < BULL.length - 2 && BULL[i + 1][0] < a) i++;
+  const p = BULL[i], q = BULL[i + 1], t0 = Math.max(0, Math.min(1, (a - p[0]) / (q[0] - p[0]))), t = t0 * t0 * (3 - 2 * t0);
+  return p.map((v, k) => v + (q[k] - v) * t);
+}
 function bullProtomes(bag, x, z, yS, s, axisX) {
-  const l = axisX ? [0, 1] : [1, 0], Y = (v) => yS + v * s;
+  const l0 = axisX ? [0, 1] : [1, 0], Y = (v) => yS + v * s;
   bag.add(C, axisX ? box(x - 1.5 * s, Y(-1.55), z - 0.6 * s, x + 1.5 * s, Y(-1.45), z + 0.6 * s) : box(x - 0.6 * s, Y(-1.55), z - 1.5 * s, x + 0.6 * s, Y(-1.45), z + 1.5 * s));
-  // the saddle between the two necks, where the beam lies
-  bag.add(C, axisX ? box(x - 0.5 * s, Y(-1.45), z - 0.5 * s, x + 0.5 * s, Y(0), z + 0.5 * s) : box(x - 0.5 * s, Y(-1.45), z - 0.5 * s, x + 0.5 * s, Y(0), z + 0.5 * s));
+  // the saddle between the two bodies, where the beam lies
+  bag.add(C, axisX ? box(x - 0.46 * s, Y(-1.45), z - 0.44 * s, x + 0.46 * s, Y(0), z + 0.44 * s) : box(x - 0.44 * s, Y(-1.45), z - 0.46 * s, x + 0.44 * s, Y(0), z + 0.46 * s));
   for (const side of [-1, 1]) {
-    const f = axisX ? [side, 0] : [0, side], P = (a, b, v) => [x + (f[0] * a + l[0] * b) * s, Y(v), z + (f[1] * a + l[1] * b) * s];
-    const E = (a, b, v, rf, ry, rl, seg = 12, p = 1) => bag.add(C, ell(P(a, b, v), f, l, rf * s, ry * s, rl * s, seg, p));
-    E(0.85, 0, -0.72, 1.0, 0.6, 0.55, 16, 0.6);         // the forepart of the body, carved square
-    E(1.5, 0, -0.62, 0.36, 0.5, 0.48);                  // the dewlap and chest
-    E(1.45, 0, -0.2, 0.42, 0.46, 0.38, 16, 0.8);        // the neck, short and thick
-    E(1.98, 0, 0.16, 0.52, 0.28, 0.27, 16, 0.7);        // the head held level, long-faced,
-    E(2.4, 0, 0.03, 0.17, 0.2, 0.22, 12, 0.8);          // the muzzle
-    for (const b of [-1, 1]) {
-      E(1.8, b * 0.32, 0.38, 0.12, 0.07, 0.17, 8);        // the ears
-      taper(bag, S, P(1.82, b * 0.2, 0.48), P(1.9, b * 0.4, 0.56), 0.065 * s, 0.05 * s);        // the horns, curving out and forward
-      taper(bag, S, P(1.9, b * 0.4, 0.56), P(2.12, b * 0.42, 0.62), 0.05 * s, 0.006 * s);
-      E(1.25, b * 0.28, -1.0, 0.22, 0.38, 0.16, 10);       // the forelegs folded under the chest, hooves forward
-      E(1.68, b * 0.28, -1.31, 0.42, 0.13, 0.14, 10);
-      E(2.08, b * 0.28, -1.32, 0.11, 0.12, 0.14, 8);
-      for (const k of [0, 1, 2]) E(1.72 + k * 0.05, b * (0.12 + k * 0.1), -0.5 - k * 0.14, 0.12, 0.1, 0.1, 8);   // the curls of the chest
+    const f = axisX ? [side, 0] : [0, side], l = l0, P = (a, b, v) => [x + (f[0] * a + l[0] * b) * s, Y(v), z + (f[1] * a + l[1] * b) * s];
+    const E = (mat, a, b, v, rf, ry, rl, seg = 10) => bag.add(mat, ell(P(a, b, v), f, l, rf * s, ry * s, rl * s, seg));
+    // a point on the body's surface at station a, angle t round the section (0: the side +l, π/2: the top), lifted by o
+    const surf = (a, t, o = 0) => { const [, v, w, hu, hd] = bullAt(a), k = (Math.abs(Math.cos(t)) ** 2.5 + Math.abs(Math.sin(t)) ** 2.5) ** (-1 / 2.5); return [Math.cos(t) * (w * k + o), v + Math.sin(t) * ((Math.sin(t) > 0 ? hu : hd) * k + o)]; };
+    // the body
+    const rings = [];
+    for (let i = 0; i <= 18; i++) {
+      const a = 0.42 + (2.58 - 0.42) * i / 18, R = [];
+      for (let j = 0; j < 16; j++) { const [b, v] = surf(a, j / 16 * Math.PI * 2); R.push(P(a, b, v)); }
+      rings.push(R);
     }
+    bag.add(C, loft(rings));
+    // the forelegs folded under the chest: the forearm down to the knee, the cannon lying forward, the hoof
+    for (const b of [-0.27, 0.27]) {
+      bag.add(C, rod(P(1.05, b, -1.0), P(1.22, b, -1.3), 0.16 * s, 10));
+      bag.add(C, rod(P(1.22, b, -1.33), P(1.7, b * 0.95, -1.35), 0.105 * s, 10));
+      E(C, 1.22, b, -1.32, 0.15, 0.13, 0.15); E(C, 1.78, b * 0.95, -1.345, 0.1, 0.085, 0.11);
+    }
+    // the ears, held out level; the horns curving out and forward (separate pieces, as the real ones were set in)
+    for (const b of [-1, 1]) {
+      E(C, 1.9, b * 0.33, 0.0, 0.08, 0.04, 0.17);
+      taper(bag, C, P(1.95, b * 0.16, 0.08), P(2.0, b * 0.34, 0.24), 0.065 * s, 0.05 * s);
+      taper(bag, C, P(2.0, b * 0.34, 0.24), P(2.18, b * 0.4, 0.34), 0.05 * s, 0.008 * s);
+      // the eye: an almond under a ridge of brow
+      const [eb, ev] = surf(2.1, b > 0 ? 0.42 : Math.PI - 0.42, 0.005);
+      E(C, 2.1, eb, ev, 0.05, 0.028, 0.025, 8); E(C, 2.08, eb * 0.98, ev + 0.04, 0.07, 0.015, 0.025, 8);
+    }
+    // red paint in the mouth and the nostrils (Roaf, as cited by the Stanford "Archaeolog" note on the griffin capital)
+    E('stucco_red', 2.5, 0, -0.375, 0.06, 0.012, 0.08, 8);
+    for (const b of [-1, 1]) E('stucco_red', 2.585, b * 0.045, -0.26, 0.012, 0.02, 0.02, 6);
+    // the curls: rows of small knobs on the chest and dewlap, two rows along the crest of the neck
+    for (const a of [1.25, 1.36, 1.47, 1.58]) for (const t of [-0.3, -0.4, -0.5, -0.6, -0.7]) { const [b, v] = surf(a, t * Math.PI, 0.01); E(C, a, b, v, 0.045, 0.045, 0.045, 6); }
+    for (let a = 1.35; a < 1.85; a += 0.09) for (const t of [0.43, 0.57]) { const [b, v] = surf(a, t * Math.PI, 0.01); E(C, a, b, v, 0.045, 0.04, 0.045, 6); }
   }
 }
 
@@ -260,6 +294,74 @@ function hall(el, { bag, col }) {
   if (!el.simple) for (const [a, b] of [[[P[0], P[1]], [P[2], P[1]]], [[P[0], P[3]], [P[2], P[3]]], [[P[0], P[1]], [P[0], P[3]]], [[P[2], P[1]], [P[2], P[3]]]]) merlons(bag, a, b, y + h + 1.6, 1.4, 1.1, W);
 }
 
+const RAND = (seed) => { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); };
+/**
+ * A storeroom of the Treasury r (its door in the middle of its north side) furnished by kind (docs/settlements/persepolis.md
+ * §14): 0 — great jars in rows; 1 — vessels of stone and bronze on benches; 2 — arms, trophies of war: spears racked along
+ * the walls, wicker shields leaning on them; 3 — tribute: bales of cloth and a chest of unminted silver bars.
+ */
+function storeroom(bag, col, r, y, i, lights) {
+  const [x0, z0, x1, z1] = r, xc = (x0 + x1) / 2, rand = RAND(4800 + i), kind = i % 4;
+  const L = (mat, prof, x, z, yy = y, seg = 12) => bag.add(mat, lathe(prof, seg, null, x, yy, z));
+  const jar = [[0.001, 0], [0.13, 0], [0.22, 0.12], [0.3, 0.45], [0.27, 0.8], [0.14, 0.98], [0.16, 1.05], [0.001, 1.03]];
+  if (kind === 0) {
+    for (let z = z0 + 1.6; z < z1 - 0.5; z += 0.75) for (const x of [x0 + 0.45, x1 - 0.45]) { L('terracotta', jar, x, z, y, 14); col.circle(x, z, 0.3, y, y + 1.05); }
+  } else if (kind === 1) {
+    for (const xb of [x0, x1 - 0.7]) {
+      bag.add('plaster_persian', box(xb, y, z0 + 1.2, xb + 0.7, y + 0.6, z1 - 0.3)); col.rect([xb, z0 + 1.2, xb + 0.7, z1 - 0.3], y, y + 0.6);
+      for (let z = z0 + 1.5; z < z1 - 0.5; z += 0.42) {
+        const x = xb + 0.35, k = Math.floor(rand() * 3);
+        if (k === 0) L('marble_dark', [[0.001, 0], [0.08, 0], [0.16, 0.04], [0.17, 0.1], [0.15, 0.11], [0.13, 0.05], [0.001, 0.05]], x, z, y + 0.6, 16);                    // a stone plate
+        else if (k === 1) L('marble_dark', [[0.001, 0], [0.06, 0], [0.1, 0.1], [0.11, 0.22], [0.06, 0.3], [0.07, 0.34], [0.001, 0.33]], x, z, y + 0.6, 14);                 // a stone jar
+        else L('bronze', [[0.001, 0], [0.04, 0], [0.13, 0.06], [0.14, 0.09], [0.12, 0.09], [0.04, 0.02], [0.001, 0.02]], x, z, y + 0.6, 16);                                 // a bronze bowl
+      }
+    }
+  } else if (kind === 2) {
+    for (const xw of [x0 + 0.12, x1 - 0.12]) {
+      const s = xw < xc ? 1 : -1;
+      bag.add('timber', box(Math.min(xw, xw + s * 0.1), y + 1.6, z0 + 1.2, Math.max(xw, xw + s * 0.1), y + 1.7, z1 - 0.3));             // the rack's rail
+      for (let z = z0 + 1.4; z < z1 - 0.4; z += 0.22) {
+        const lean = 0.18, a = [xw + s * lean, y, z], b = [xw + s * 0.03, y + 2.3, z];
+        bag.add('timber', rod(a, b, 0.018, 6));
+        bag.add('bronze', rod(b, [b[0] - s * 0.006, b[1] + 0.22, z], 0.022, 6));                                                      // the head
+        bag.add('silver', lathe([[0.001, 0], [0.035, 0.02], [0.035, 0.05], [0.001, 0.07]], 8, null, a[0], y, z));                    // the butt, a pomegranate
+      }
+      for (let z = z0 + 1.7; z < z1 - 0.8; z += 1.1) {                                                                                 // wicker shields leaning on the spears
+        const g = box(-0.03, 0, -0.38, 0.03, 1.25, 0.38); g.rotateZ(-s * 0.12); g.translate(xw + s * 0.45, y, z);
+        bag.add('wicker', g);
+      }
+    }
+  } else {
+    for (let z = z0 + 1.5; z < z1 - 0.6; z += 0.9) for (const x of [x0 + 0.5, x1 - 0.5]) {
+      const c = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'linen', 'cloth_maroon'][Math.floor(rand() * 5)];
+      for (let k = 0; k < 2 + Math.floor(rand() * 2); k++) bag.add(c, box(x - 0.35, y + k * 0.28, z - 0.3, x + 0.35, y + (k + 1) * 0.28 - 0.01, z + 0.3));
+      col.rect([x - 0.35, z - 0.3, x + 0.35, z + 0.3], y, y + 0.8);
+    }
+    const cz = z1 - 1.0;
+    bag.add('cedar', box(xc - 0.55, y, cz - 0.35, xc + 0.55, y + 0.55, cz + 0.35)); col.rect([xc - 0.55, cz - 0.35, xc + 0.55, cz + 0.35], y, y + 0.55);
+    for (let k = 0; k < 9; k++) bag.add('silver', box(xc - 0.45 + (k % 3) * 0.3, y + 0.55, cz - 0.25 + Math.floor(k / 3) * 0.17, xc - 0.2 + (k % 3) * 0.3, y + 0.6, cz - 0.15 + Math.floor(k / 3) * 0.17));
+  }
+}
+/**
+ * The archive in the north-east corner of the hall of ninety-nine r (docs/settlements/persepolis.md §14): the Treasury tablets
+ * — receipts in Elamite on clay for silver and food paid to workers — on low benches along the two walls, baskets of
+ * them, and a scribe's mat with his tablets.
+ */
+function archive(bag, col, r, y, el, ctx) {
+  const [, z0, x1] = r, rand = RAND(458);
+  for (const [q, ax] of [[[x1 - 7.5, z0, x1 - 0.6, z0 + 0.6], true], [[x1 - 0.6, z0 + 0.6, x1, z0 + 6.5], false]]) {
+    bag.add('plaster_persian', box(q[0], y, q[1], q[2], y + 0.45, q[3])); col.rect(q, y, y + 0.45);
+    const n = Math.floor(((ax ? q[2] - q[0] : q[3] - q[1]) - 0.2) / 0.13);
+    for (let k = 0; k < n; k++) for (let j = 0; j < 2; j++) {
+      if (rand() < 0.15) continue;
+      const u = (ax ? q[0] : q[1]) + 0.15 + k * 0.13, v = (ax ? q[1] : q[0]) + 0.15 + j * 0.28;
+      bag.add('mud_plaster', ax ? box(u - 0.045, y + 0.45, v - 0.08, u + 0.045, y + 0.5, v + 0.08) : box(v - 0.08, y + 0.45, u - 0.045, v + 0.08, y + 0.5, u + 0.045));
+    }
+  }
+  for (const [x, z] of [[x1 - 1.2, z0 + 1.3], [x1 - 1.9, z0 + 1.1]]) bag.add('wicker', lathe([[0.001, 0], [0.18, 0], [0.22, 0.3], [0.2, 0.31], [0.16, 0.03], [0.001, 0.03]], 12, null, x, y, z));
+  scribeKit({ at: [x1 - 3.4, z0 + 2.2], y, rot: Math.PI }, ctx);
+}
+
 /**
  * treasury: the royal Treasury { rect, y, h (its columns' height), th (its walls) } (docs/settlements/persepolis.md §12): a
  * great low block of thick plastered mudbrick walls, one door on the west; within, the north hall of a hundred
@@ -268,7 +370,8 @@ function hall(el, { bag, col }) {
  * The columns are of wood on stone bases, plastered and painted, their capitals plain blocks under the beams;
  * cedar ceilings and flat earth roofs over all but the court.
  */
-function treasury(el, { bag, col }) {
+function treasury(el, ctx) {
+  const { bag, col, lights } = ctx;
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 7, th = el.th ?? 3, top = y + h + 1.2;
   const wall = (r) => { bag.add(W, box(r[0], y, r[1], r[2], top, r[3])); col.rect(r, y, top); };
   // a wall along x (or z) from a to b at c0…c1 across, broken by doorways [centre, width]
@@ -322,6 +425,8 @@ function treasury(el, { bag, col }) {
   run(true, ST[0], ST[2], zC, zC + th, Array.from({ length: nS }, (_, i) => [ST[0] + (i + 0.5) * ws, 1.6]));
   for (let i = 1; i < nS; i++) { const x = ST[0] + i * ws; wall([x - 0.5, ST[1], x + 0.5, ST[3]]); }
   roof(ST);
+  for (let i = 0; i < nS; i++) storeroom(bag, col, [ST[0] + i * ws + (i ? 0.5 : 0), ST[1], ST[0] + (i + 1) * ws - (i < nS - 1 ? 0.5 : 0), ST[3]], y + 0.06, i, lights);
+  archive(bag, col, H99, y + 0.06, el, ctx);
   hallCols(N, 10, 10);
   hallCols(H99, 9, 11);
   // the court: porticoes on its north and east sides, one row of columns each
