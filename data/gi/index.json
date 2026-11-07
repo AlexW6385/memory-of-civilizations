@@ -383,6 +383,33 @@
   "seconds": 103,
   "baked": "2026-11-07"
  },
+ "mughal-agra-taj": {
+  "site": "mughal-agra",
+  "hash": "e5649986d256c60a",
+  "rays": 128,
+  "probes": 45198,
+  "boxes": [
+   {
+    "min": [
+     -13,
+     6.7,
+     -216
+    ],
+    "n": [
+     27,
+     62,
+     27
+    ],
+    "spacing": 1,
+    "rooms": [
+     "tomb chamber"
+    ]
+   }
+  ],
+  "bytes": 659505,
+  "seconds": 218,
+  "baked": "2026-11-07"
+ },
  "muscovy-dormition": {
   "site": "muscovy",
   "hash": "e351796c6108981c",
