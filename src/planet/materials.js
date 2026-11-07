@@ -133,7 +133,7 @@ export function groundMaterial() {
   const slopeUp = dot(normalLocal, S.up);
   const line = mix(float(165), mix(float(78), float(22), smoothstep(0.66, 0.9, sl)), winterK);
   const winterSnow = max(smoothstep(line, line.add(18), Pb.y), smoothstep(0.82, 0.92, sl).mul(smoothstep(0.35, 0.85, ENV.seasonWinter.mul(hemi))).mul(float(1).sub(g3.w)))
-    .mul(winterK.greaterThan(0.001).select(float(1), float(0))).mul(smoothstep(-0.35, 0.05, big.add(huge.mul(0.5))));
+    .mul(winterK.greaterThan(0.001).select(float(1), float(0))).mul(smoothstep(-0.75, -0.3, big.add(huge.mul(0.5))));
   const freshSnow = ENV.snowCover.mul(smoothstep(0.55, 0.85, slopeUp)).mul(smoothstep(-0.55, -0.1, big.add(mid.mul(0.5)).add(ENV.snowCover.mul(0.6))));
   const snowA = max(max(g3.y, winterSnow.mul(0.95)).mul(smoothstep(0.45, 0.75, slopeUp).mul(0.7).add(0.3)), freshSnow);
   col3 = mix(col3, C('#eef1f5').mul(big.mul(0.05).add(0.97)), snowA);
