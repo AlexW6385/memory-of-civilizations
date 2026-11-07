@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.5 — Controls, map, random city (2026-11-07)
+- The loading screen lists the controls (walk, look, run, fly, cruise, map, random city; touch gestures on phones). The map's labels no longer pile on each other: where settlements crowd, the nearest keep their names and the rest show as dots that name themselves on hover; the list is grouped by region and sorted by date. A Random city button (R with the map open) takes you to a settlement chosen at random.
+
 ## v10.4 — Smoother (2026-11-07)
 - Fewer stutters and a lighter frame: the buildings' shadows are kept and redrawn only when the sun or the view has moved enough, with only moving things drawn each frame; the picture's resolution steps down a little when the graphics card is behind and back up when it has room; the first visit picks its quality from the frame rate; shaders are prepared before things appear, plants and new buildings are put in over several frames, and a hall's reverberation is worked out off the main thread. Beijing's marble balustrades, posts and dragon spouts are rebuilt lighter. With ?perf, any frame over 50 ms is logged with what took the time (palace.hitches).
 
