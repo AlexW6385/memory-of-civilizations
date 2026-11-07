@@ -924,7 +924,7 @@
  },
  "mamluk-cairo-hasan": {
   "site": "mamluk-cairo",
-  "hash": "924983d813bdf625",
+  "hash": "23b2d6316e63298e",
   "rays": 128,
   "probes": 20475,
   "boxes": [
@@ -945,8 +945,8 @@
     ]
    }
   ],
-  "bytes": 317150,
-  "seconds": 103,
+  "bytes": 319018,
+  "seconds": 67,
   "baked": "2026-11-07"
  },
  "ming-suzhou-garden": {
