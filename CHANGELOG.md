@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.94 — Amsterdam, Muscovy, Borgund, Edo (2026-11-07)
+- Amsterdam: canal houses to walk into - marble halls, box beds, Delft tiles, paintings and maps; painted gable stones, door cases, lighters on the canals. Muscovy: St Basil's central church hollow up into its tent, with its iconostasis and candles; furnished izby with their stoves and icon corners; sledges and pedlars; the izby's roofs turned the right way. Borgund: carved masks and beasts on the staves; each farm's stue open, with its hearth, benches, loom and high-seat posts. Edo: machiya shops open with noren and goods, a samurai reception room with armour and scroll, a palanquin, pedlars.
+
 ## v9.93 — Venice, Florence, Baroque Rome, Versailles (2026-11-07)
 - Venice: San Marco opened inside - five domes on pendentives in gold mosaic, marble walls, the iconostasis of 1394, the Pala d'Oro; stone quay walls with their weed and tide bands along every canal; the timber Rialto bridge of 1458 with its shops and lifting span; the Rialto market; a traghetto. Florence: a painter's and sculptor's bottega to walk into, the dyers' yard on the Arno. Baroque Rome: coaches, sedan chairs, pilgrims and beggars; Bernini's steps worn. Versailles: orange trees in their boxes, gardeners, gilt and hired sedan chairs, coaches.
 
