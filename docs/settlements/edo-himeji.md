@@ -1,7 +1,7 @@
 # Edo Himeji, c. 1620 — dossier
 
 Settlement id: `edo-himeji` · Style: `edo` · Region: Japan (the Harima plain) · Code: `src/settlements/edo-himeji/`
-Status of this dossier: L1–L2 (Himeyama hill with its stone ramparts; the keep cluster — the main keep and three small keeps joined by roofed passages; the Honmaru, Ninomaru and Nishinomaru baileys with turrets, plastered walls and the long gallery; the lord's residence in the Sannomaru; the inner moat with its gate; the samurai quarter; the middle moat and the merchants' street beyond; ground, planting, weather, music). L3 built: the keep's interior; its barred windows, shachi, kara-hafu and chidori-hafu, stone-drop bays; loopholes in the castle walls (§4). L3 built (this pass): the Hishi gate; the way into the keeps' courtyard through a gate in the south-west passage; turrets with stone-drop bays, gables and shachi (§4). L3 recorded for later: the rest of the maze of lettered gates (i, ro, ha, ni…) and the water gates, interiors of the turrets, the temples and shrines of the town, the outer moat and the river, people and processions.
+Status of this dossier: L1–L2 (Himeyama hill with its stone ramparts; the keep cluster — the main keep and three small keeps joined by roofed passages; the Honmaru, Ninomaru and Nishinomaru baileys with turrets, plastered walls and the long gallery; the lord's residence in the Sannomaru; the inner moat with its gate; the samurai quarter; the middle moat and the merchants' street beyond; ground, planting, weather, music). L3 built: the keep's interior; its barred windows, shachi, kara-hafu and chidori-hafu, stone-drop bays; loopholes in the castle walls (§4). L3 built (this pass): the Hishi gate; the way into the keeps' courtyard through a gate in the south-west passage; turrets with stone-drop bays, gables and shachi (§4). L3 built (north3): machiya open as shops and samurai reception rooms, the kago, samurai with their swords, pedlars, damp weathering (§5.1–5.2). L3 recorded for later: the rest of the maze of lettered gates (i, ro, ha, ni…) and the water gates, interiors of the turrets, the temples and shrines of the town, the outer moat and the river, people and processions.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -52,6 +52,25 @@ White plaster walls (hence "White Heron Castle") [stated: Wikipedia]; grey tiled
 ## 5. The town
 
 Samurai residences: walled compounds with a gate-house (nagaya-mon), a main house under an irimoya roof, a storehouse. Merchants' machiya: two storeys, narrow fronts of wooden lattice, a pent roof between the storeys, tiled gable roofs with the ridge along the street. [inferred from Edo practice; All About Japan for proportions]
+
+
+### 5.1 Houses open inside (L3, 2026-11-07; `src/styles/edo/rooms.js`)
+
+- **The machiya as a shop:** the shop (mise) usually occupied the front part of the house; the earth-floored area (doma), commonly called the tōri-niwa, was the through-passage to the area behind the house; behind it one or more rooms with raised timber floors; the earliest surviving machiya (Kuriyama house, Gojō) dates from 1607 [stated: JAANUS "machiya"]. The tōri-niwa ran from the street front to the rear of the plot, could be divided by intermediate doors, its front part the retail zone (miseniwa), its rear the domestic service zone (okuniwa) usually open to the rafters, the smoke of the cooking range escaping by a louvre [stated: JAANUS "tooriniwa"]. Ours (one machiya in three, `open`): the front open between its posts, a long indigo noren of three panels over the passage's mouth and a short one along the shop front, each panel with a white crest; the sign board (kanban) on its post at the corner; the earth-floored passage from the street to the back; the shop on its raised floor of mats with their dark borders, the sliding doors to the room behind (two pushed aside); the trade — bolts of cloth on tall shelves and unrolled before a customer, ceramics on stepped stands, or rice in straw bales (tawara) with a measure; the counter's corner closed by a low lattice screen (chōba-gōshi), the desk with a ledger and an abacus, a brazier; at the rear of the passage the clay cooking range (kamado) with its iron kettle and lidded rice pot, the great water jar, shelves of bowls; the ceiling of joists and the boards of the floor above; the shopkeeper kneeling at the counter, a customer sat on the shop's edge in some. [inferred: sizes, the trades and their goods, the furniture]
+- **The samurai house's reception room** (one compound in six): ours, in the main house facing the gate, behind its paper doors slid away from the veranda, with a stepping stone before it: a room of mats under a board ceiling, the alcove (tokonoma) with its raised floor, lacquered edge and post of natural wood, a hanging scroll and a bronze vase with a branch; the staggered shelves beside it; plastered walls; the armour on its lacquered chest (the cuirass laced in red, the skirt of plates, the helmet with its gilt crest); the sword rack with the long and the short sword; a standing paper lamp (andon), a cushion, an armrest and a tray. [inferred: the room after the shoin style as generally known; the rest of the house kept closed]
+
+### 5.2 The street and the avenue (L3, 2026-11-07)
+
+- **The kago:** about 0.9 m long, hung from bamboo uprights under one large overhead pole, roofed, with screens for shade or rain; carried by men at each end of the pole, four taking turns; not to be confused with the more elaborate norimono of the samurai and the wealthy [stated: Wikipedia "Kago"]. Ours: on the avenue from the main gate, the basket seat, its bamboo uprights, the black pole, a light roof of reed mat and the blind rolled up; a bearer under each end, the passenger sat in it, a samurai walking after.
+- **Samurai:** a 1629 edict required the daishō to be worn on official duty; it was limited to the samurai class in 1683 [stated: Wikipedia "Daishō"]. Ours: samurai in dark robes with their topknots on the avenue and in the merchants' street, the long and the short sword thrust through the sash at the left hip, black scabbards, the hilts bound in white, gilt guards. [inferred: the way of wearing]
+- **Pedlars:** men with carrying poles in the merchants' street — pails of water or soy, baskets of greens and fish — some under straw hats. [inferred]
+- **Weathering:** the climate set damp (0.6). [inferred]
+
+Sources (2026-11-07):
+- [machiya — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/2637)
+- [tooriniwa — JAANUS](https://aisf.or.jp/~jaanus/deta/t/tooriniwa.htm)
+- [Kago — Wikipedia](https://en.wikipedia.org/wiki/Kago)
+- [Daishō — Wikipedia](https://en.wikipedia.org/wiki/Daish%C5%8D)
 
 ## 6. Ground and water
 
