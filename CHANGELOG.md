@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.87 — Seoul, c. 1888 (2026-11-07)
+- Joseon Seoul is now c. 1888, after Gyeongbokgung's rebuilding: Gyeonghoeru as rebuilt in 1867 on its 48 granite pillars, with its island, balustrade and bridges; the Hyangwonjeong pavilion on its lotus pond with the Chwihyanggyo bridge; Geoncheonggung; Amisan's terraces with their patterned chimneys; the licensed shops of Jongno and the bell pavilion; about 150 people in white coats, black hats and green head-cloaks, porters with A-frames, oxen with brushwood; hanok with papered doors, verandas and jar terraces.
+
 ## v9.86 — Weather of each place, seasons (2026-11-07)
 - Each place now has its typical weather: monsoon downpours over Angkor, snow at Borgund and in Muscovy that whitens ground and roofs, harmattan dust over Djenne, morning mist on West Lake, fog on the Thames, haze and khamsin at Giza, morning mists at Borobudur, Machu Picchu and Venice. Mist lies low on ground and water; dust and fog veil the sky. The open country follows the season of your visit: straw grass in autumn, russet and bare broadleaf forests, a lower snow line and white northern lowlands in winter. ?weather= and ?season= hold a weather or season.
 
