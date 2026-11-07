@@ -73,7 +73,7 @@
  },
  "babylon-centre": {
   "site": "babylon",
-  "hash": "f31938d22125ab7b",
+  "hash": "9eedcdf9e1cce1ea",
   "rays": 128,
   "probes": 8120,
   "boxes": [
@@ -94,8 +94,8 @@
     ]
    }
   ],
-  "bytes": 128385,
-  "seconds": 46,
+  "bytes": 128286,
+  "seconds": 15,
   "baked": "2026-11-07"
  },
  "baroque-rome-stpeter": {
