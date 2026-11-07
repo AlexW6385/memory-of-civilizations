@@ -58,6 +58,8 @@ export function buildingMesh(geometry, mat, matrices = IDENTITY, colors = null) 
  */
 /** Fine detail is drawn within this distance (m) of its part's bounds, and casts shadows within the second. */
 const DETAIL_REACH = 160, DETAIL_SHADOW = 50;
+/** How far (m) past a closed room of a plan one may stand, under a roof, and still be in it (world.locate). */
+const GAP = 5;
 /** Static meshes merged across a settlement's plans (src/engine/merge.js); `?merge=0` keeps them per plan, to compare. */
 const MERGE = new URLSearchParams(globalThis.location?.search ?? '').get('merge') !== '0';
 const NO_SHADOW = new Set(['water', 'glass_outer', 'glass_topaz', 'opening', 'daylight', 'daylight_plain']);
@@ -274,7 +276,9 @@ class Settlement {
     const into = this.merged = new THREE.Group();
     into.name = 'merged';
     this.group.add(into);
-    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen }); } catch (e) { console.warn('merging', this.id, e); }
+    // the shapes drawn by distance (merge.js LodSet), their copies chosen with the street life's
+    const lods = this.lods = [];
+    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods }); } catch (e) { console.warn('merging', this.id, e); }
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
 
@@ -331,7 +335,7 @@ class Settlement {
     this.world.scene.remove(this.group);
     // (an instanced mesh's dispose() leaves its geometry: both are let go of)
     this.group.traverse((o) => { o.geometry?.dispose(); if (o.isInstancedMesh) o.dispose(); });
-    this.merged = null; this.merging = null; this.quietFor = undefined;
+    this.merged = null; this.merging = null; this.quietFor = undefined; this.lods = null;
     this.group.clear();
     this.life?.dispose(); this.life = null; this.lifeParts = []; this.lifeLamps = null;
     for (const rec of this.parts) this.world.r.gi.release?.(rec.plan.id);
@@ -555,7 +559,28 @@ export class World {
     for (const [r, x0, x1, z0, z1, ry] of best.roomBoxes) {
       if (x >= x0 && x <= x1 && z >= z0 && z <= z1 && Math.abs(y - ry) < 3) { room = r; break; }
     }
+    // the plans' room lists have gaps (a crossing between two rooms, the end of a chapel): within
+    // GAP metres of a closed room on this level and under a roof all round, one is still in it
+    if (!room && bd === 0) {
+      let near = Infinity;
+      for (const [r, x0, x1, z0, z1, ry] of best.roomBoxes) {
+        if (r.kind === 'open' || Math.abs(y - ry) >= 3) continue;
+        const d = Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(z0 - z, 0, z - z1));
+        if (d < GAP && d < near) { near = d; room = r; }
+      }
+      if (room && !this.roofed(site, x, y, z)) room = null;
+    }
     return { building: best, room, distance: bd };
+  }
+
+  /** Is there a roof (a building's upper surface) over (x, z) above y, and 1.5 m round it on every side? */
+  roofed(site, x, y, z) {
+    const tops = site.collide?.tops || [];
+    const over = (px, pz) => tops.some((T) => {
+      const i = Math.floor((px - T.x0) / T.res), j = Math.floor((pz - T.z0) / T.res);
+      return i >= 0 && j >= 0 && i < T.w && j < T.h && T.data[j * T.w + i] > y + 0.5;
+    });
+    return [[0, 0], [1.5, 0], [-1.5, 0], [0, 1.5], [0, -1.5]].every(([dx, dz]) => over(x + dx, z + dz));
   }
 
   static worldBounds(plan) {
@@ -667,7 +692,7 @@ export class World {
           if (rec.quiet !== quiet) {
             rec.quiet = quiet;
             rec.group.traverse((o) => { if (o.isMesh && !o.userData.detail) o.castShadow = quiet ? false : (rec.plan.style === 'life' ? rec.cast !== false : castsShadow(o.material.name)); });
-            if (s.life) for (const L2 of [...s.life.meshes, ...s.life.rare]) L2.near.castShadow = !quiet && castsShadow(L2.near.material.name);
+            if (s.life) for (const L2 of [...s.life.meshes, ...s.life.rare]) for (const m of [L2.near, L2.far]) if (m) m.castShadow = !quiet && castsShadow(m.material.name);
           }
         }
         // the merged meshes: indoors, those that hold no part of the building one is in cast no shadow
@@ -682,8 +707,11 @@ export class World {
     if (!this._nextL || now > this._nextL) {
       this._nextL = now + 250;
       for (const s of this.settlements) {
-        if (!s.life) continue;
+        if (!s.life && !s.lods?.length) continue;
         const L = toLocal(s.S.frame, camP);
+        // the shapes drawn by distance (merge.js LodSet)
+        if (s.lods) for (const D of s.lods) D.update(L[0], L[1], L[2]);
+        if (!s.life) continue;
         s.life.group.visible = !this.lifeHidden;
         s.life.update(L[0], L[1], L[2]);
       }

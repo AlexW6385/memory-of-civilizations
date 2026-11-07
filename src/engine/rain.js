@@ -6,14 +6,8 @@
 // along the wind near the ground. One draw each, drawn only while it falls.
 
 import * as THREE from 'three/webgpu';
-import { attribute, uniform, vec2, vec3, vec4, mrt, output, float, fract, time, cameraPosition, normalize, cross, mix, sin, length, smoothstep, max, cameraViewMatrix } from 'three/tsl';
+import { attribute, uniform, vec2, vec3, float, fract, time, cameraPosition, normalize, cross, mix, sin, length, smoothstep, max } from 'three/tsl';
 import { ENV } from './env.js';
-
-// the drops and flakes write the up direction into the scene pass's normals (which are not
-// blended): the ground behind most of them faces up, while a camera-facing quad's own normal made
-// the ambient occlusion darken a square round every near flake; nearly clear pixels are discarded
-// (alphaTest) and write nothing
-const KEEP_NORMALS = mrt({ output, normal: vec4(cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize().mul(0.5).add(0.5), 1) });
 
 const N = 7000, BOX = [44, 22, 44], SPEED = 9, LEN = 0.55, WIDTH = 0.012;
 
@@ -51,7 +45,6 @@ export class Rain {
     m.colorNode = vec3(0.75, 0.78, 0.82);
     m.opacityNode = this.amount.mul(0.32).mul(mix(float(0.15), float(1), cr.y));
     m.fog = false;
-    m.mrtNode = KEEP_NORMALS;
     this.mesh = new THREE.Mesh(g, m);
     this.mesh.frustumCulled = false;
     this.mesh.renderOrder = 10;
@@ -123,7 +116,6 @@ class Flakes {
     const round = float(1).sub(smoothstep(0.55, 1.0, length(vec2(cr.x, cr.y))));
     m.opacityNode = mix(this.snow.mul(0.85), this.dust.mul(0.6), k).mul(round).mul(near).mul(far);
     m.fog = false;
-    m.mrtNode = KEEP_NORMALS;
     m.alphaTest = 0.04;
     this.mesh = new THREE.Mesh(g, m);
     this.mesh.frustumCulled = false;

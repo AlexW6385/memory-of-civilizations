@@ -11,6 +11,7 @@ import * as THREE from 'three/webgpu';
 import { material } from './materials.js';
 import { SMALL } from './layers.js';
 import { releaseAfterUpload } from './release.js';
+import { coarse, LIFE_FULL } from './cells.js';
 
 /** A shape is instanced settlement-wide from this many copies; rarer ones are merged per tile. */
 export const LIFE_MIN = 13;
@@ -85,8 +86,8 @@ export class LifeInstances {
         // and those beyond not; but the small things cast into the first cascade only, which ends
         // well within 120 m (src/engine/renderer.js), so the far ones' shadows fell nowhere and the
         // second mesh was only a second draw.)
-        const make = (cast) => {
-          const mesh = new THREE.InstancedMesh(s.geometry, material(s.mat), s.n);
+        const make = (cast, geometry = s.geometry) => {
+          const mesh = new THREE.InstancedMesh(geometry, material(s.mat), s.n);
           mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
           // always with instance colours (white where untinted): one form of each material (world.js buildingMesh)
           mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(s.n * 3).fill(1), 3); mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
@@ -98,7 +99,22 @@ export class LifeInstances {
           this.group.add(mesh);
           return mesh;
         };
-        this.meshes.push({ near: make(true), all, colors, pos, reach, n: s.n });
+        // beyond LIFE_FULL the copies are drawn coarse (src/engine/cells.js), where the shape has a
+        // faithful coarse version: made later, a shape at a time (a few ms each, update())
+        const near = make(true), shape = { near, far: null, all, colors, pos, reach, n: s.n };
+        const g = s.geometry, P = g.attributes.position.array, N = g.attributes.normal.array, I = g.index.array;
+        shape.makeFar = () => {
+          const low = coarse(P, N, I);
+          if (!low) return;
+          const lg = new THREE.BufferGeometry();
+          lg.setAttribute('position', new THREE.BufferAttribute(low.pos, 3));
+          lg.setAttribute('normal', new THREE.BufferAttribute(low.nor, 3, g.attributes.normal.normalized));
+          lg.setIndex(new THREE.BufferAttribute(low.index, 1, low.index instanceof Uint16Array));
+          lg.computeBoundingBox(); lg.computeBoundingSphere();
+          shape.far = make(true, lg);
+          shape.far.castShadow = near.castShadow;
+        };
+        this.meshes.push(shape);
       }
     }
     // the rare shapes, per real material: one geometry, drawn by an index of the copies chosen
@@ -142,25 +158,42 @@ export class LifeInstances {
 
   /** Choose the copies within reach of the viewer (x, y, z in the settlement's frame). */
   update(x, y, z, force = false) {
+    // the shapes' coarse versions made a few at each call (~3 ms), until all are (src/engine/cells.js)
+    if (!this.lowDone) {
+      const t0 = performance.now();
+      for (const L of this.meshes) {
+        if (!L.makeFar) continue;
+        if (performance.now() - t0 > 3) break;
+        const f = L.makeFar; L.makeFar = null; f();
+        if (L.far) force = true;
+      }
+      this.lowDone = !this.meshes.some((L) => L.makeFar);
+    }
     if (!force && this.last && Math.hypot(x - this.last[0], y - this.last[1], z - this.last[2]) < 4) return;
     this.last = [x, y, z];
+    const full2 = LIFE_FULL * LIFE_FULL;
     for (const L of this.meshes) {
-      const { near: mesh, all, colors, pos, reach, n } = L;
-      const M = mesh.instanceMatrix.array, C = mesh.instanceColor.array;
-      let c = 0;
+      const { near, far, all, colors, pos, reach, n } = L;
+      const Mn = near.instanceMatrix.array, Cn = near.instanceColor.array, Mf = far?.instanceMatrix.array, Cf = far?.instanceColor.array;
+      let c = 0, f = 0;
       for (let i = 0; i < n; i++) {
-        const dx = pos[i * 3] - x, dy = (pos[i * 3 + 1] - y) * 0.7, dz = pos[i * 3 + 2] - z, r = reach[i];
-        if (dx * dx + dy * dy + dz * dz > r * r) continue;
-        M.set(all.subarray(i * 16, i * 16 + 16), c * 16);
-        if (colors) { C[c * 3] = colors[i * 3]; C[c * 3 + 1] = colors[i * 3 + 1]; C[c * 3 + 2] = colors[i * 3 + 2]; }
-        c++;
+        const dx = pos[i * 3] - x, dy = (pos[i * 3 + 1] - y) * 0.7, dz = pos[i * 3 + 2] - z, r = reach[i], d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 > r * r) continue;
+        // (the coarse copies beyond LIFE_FULL, where the shape has a coarse version)
+        const toFar = far && d2 > full2, M = toFar ? Mf : Mn, C = toFar ? Cf : Cn, k = toFar ? f++ : c++;
+        M.set(all.subarray(i * 16, i * 16 + 16), k * 16);
+        if (colors) { C[k * 3] = colors[i * 3]; C[k * 3 + 1] = colors[i * 3 + 1]; C[k * 3 + 2] = colors[i * 3 + 2]; }
       }
-      if (c === 0 && mesh.count === 0) continue;
-      mesh.count = c;
-      mesh.instanceMatrix.clearUpdateRanges(); mesh.instanceMatrix.addUpdateRange(0, c * 16); mesh.instanceMatrix.needsUpdate = true;
-      if (colors) { mesh.instanceColor.clearUpdateRanges(); mesh.instanceColor.addUpdateRange(0, c * 3); mesh.instanceColor.needsUpdate = true; }
-      mesh.visible = c > 0;
-      if (c) mesh.computeBoundingSphere();
+      const put = (mesh, k) => {
+        if (k === 0 && mesh.count === 0) return;
+        mesh.count = k;
+        mesh.instanceMatrix.clearUpdateRanges(); mesh.instanceMatrix.addUpdateRange(0, k * 16); mesh.instanceMatrix.needsUpdate = true;
+        if (colors) { mesh.instanceColor.clearUpdateRanges(); mesh.instanceColor.addUpdateRange(0, k * 3); mesh.instanceColor.needsUpdate = true; }
+        mesh.visible = k > 0;
+        if (k) mesh.computeBoundingSphere();
+      };
+      put(near, c);
+      if (far) put(far, f);
     }
     // the rare shapes: the index ranges of the copies within reach, gathered at the front of the
     // mesh's index; the bounds those of the copies chosen
@@ -191,7 +224,7 @@ export class LifeInstances {
   }
 
   dispose() {
-    for (const { near } of [...this.meshes, ...this.rare]) { near.geometry.dispose(); near.dispose(); }
+    for (const { near, far } of [...this.meshes, ...this.rare]) { near.geometry.dispose(); near.dispose(); if (far) { far.geometry.dispose(); far.dispose(); } }
     this.meshes = []; this.rare = [];
     this.group.removeFromParent();
   }
