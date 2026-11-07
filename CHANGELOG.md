@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.89 — Light in the air (2026-11-07)
+- Inside, sunbeams now show as shafts of light in dust; stained glass throws coloured shafts down to its pools on the floor; temples hold incense haze by tradition (thick in Buddhist, Hindu, Egyptian and Orthodox halls, light in mosques); the nearest lamps and lanterns light the walls round you and flicker; water shows the moon's glitter path at night.
+
 ## v9.88 — Fewer draw calls (2026-11-07)
 - Smoother: once a settlement has loaded, its unchanging parts are merged into one mesh per material and per repeated shape, town tiles are batched, and street life uses one mesh per shape; draw calls per frame fall by about a third on average (Barcelona 1530 to 560, New York 1330 to 604). Leaving a settlement now frees its buildings' memory.
 
