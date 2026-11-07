@@ -33,19 +33,19 @@ function cover(x, z, h, ny) {
 function water(x, z, y) { const w = wet(x, z); return w < -0.3 && y < (inBasin(x, z) ? LEVEL.basin : LEVEL.moat) + 0.3; }
 function waterLevel(x, z) { const w = wet(x, z); return w < -0.3 ? (inBasin(x, z) ? LEVEL.basin : LEVEL.moat) : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, wet(x, z) < 0 ? wet(x, z) : 20)); }
-/** Plants per 100 m²: sugar palms everywhere outside, thicker by the houses; a few great trees; none on the temple. */
+/** Plants per 100 m²: grass, a few great trees; none on the temple (the sugar palms are placed by town.js, §14). */
 function planting(x, z, p) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6 || wet(x, z) < 0.6) return null;
   if (inRect(T.base.rect, x, z, 4) || inRect(CAUSEWAY.inner, x, z, 2) || inRect(CAUSEWAY.outer, x, z, 2) || onRoad(x, z) || inHouse(x, z, 0.8)) return null;
-  if (inRect(ENCLOSURE, x, z)) return { grass: 35, doum_palm: 0.08, banyan: 0.015, teak: 0.03 };
+  if (inRect(ENCLOSURE, x, z)) return { grass: 35, banyan: 0.015, teak: 0.03 };
   const near = inHouse(x, z, 18) ? 1 : 0;
-  if (r > 340) return { grass: 20, doum_palm: 0.06 };
-  return { grass: 30, doum_palm: 0.25 + 0.6 * near, banyan: 0.01, teak: 0.03, neem: 0.03 * near };
+  if (r > 340) return { grass: 20 };
+  return { grass: 30, banyan: 0.01, teak: 0.03, neem: 0.03 * near };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { doum_palm: 0.85, banyan: 0.015, teak: 0.03, neem: 0.03 },
+  maxDensity: { banyan: 0.015, teak: 0.03, neem: 0.03 },
   // the end of the dry season: hot, hazy with smoke and dust, towering clouds in the afternoon
   climate: {
     sun: { az: 120, el: 55, color: [1.0, 0.94, 0.84], intensity: 3.4, lat: 13, dec: 10, hour: 10 },

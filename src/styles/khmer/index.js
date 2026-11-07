@@ -18,6 +18,7 @@ import '../qing/index.js';
 import { rectRoof, beamTris, flipTris } from '../ming/index.js';
 import { assembly, placer, tube, slathe } from '../../objects/kit.js';
 import { panel } from './reliefs.js';
+import { sugarPalm, palanquin, parasol } from './life.js';
 
 const S = 'sandstone_khmer', C = 'sandstone_carved';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -904,7 +905,7 @@ registerStyle('khmer', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu,
+    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol,
   },
   objects: {},
 });
