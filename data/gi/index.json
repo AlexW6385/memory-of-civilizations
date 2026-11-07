@@ -1074,6 +1074,33 @@
   "seconds": 407,
   "baked": "2026-11-07"
  },
+ "new-york-esb": {
+  "site": "new-york",
+  "hash": "7afa70be079e1007",
+  "rays": 128,
+  "probes": 41616,
+  "boxes": [
+   {
+    "min": [
+     -156.99,
+     -0.57,
+     164.13
+    ],
+    "n": [
+     48,
+     17,
+     51
+    ],
+    "spacing": 1,
+    "rooms": [
+     "box 0"
+    ]
+   }
+  ],
+  "bytes": 689533,
+  "seconds": 390,
+  "baked": "2026-11-07"
+ },
  "norse-borgund-church": {
   "site": "norse-borgund",
   "hash": "86d05a6f2cb13c5f",
