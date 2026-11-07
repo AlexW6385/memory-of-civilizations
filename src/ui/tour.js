@@ -1,9 +1,8 @@
-// The tour: one click and the visitor is carried from settlement to settlement, each shown from its
-// arrival view and then walked through slowly, with the walker's own movement (src/core/walk.js:
-// ground-following, stopped by walls), between known good places. Any key, click, drag or touch ends
-// it where the camera is.
-import { move, WALK } from '../core/walk.js';
-import { ARRIVALS } from '../planet/arrivals.js';
+// The tour: one click and the visitor is carried from settlement to settlement; in each the walker
+// makes one brisk loop through the whole place (every known viewpoint plus points sampled round the
+// landmark and over the open ground), using the walker's own movement (src/core/walk.js), and where
+// it cannot get on the camera glides over the obstacle. Only Esc ends it; other input is ignored.
+import { move, footing } from '../core/walk.js';
 import { BUILT } from '../planet/relief.js';
 import { dot } from '../planet/geo.js';
 
@@ -69,11 +68,11 @@ const VIEWS = {
   'versailles': [[-60,0,-1.57,0.15]],
 };
 
-const SPEED = 1.5 * WALK / 2;               // m/s: an easy stroll
-const HOLD = 6;                             // s looking at the arrival view first
-const PAUSE = 4;                            // s looking at each place reached
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const yawTo = (dx, dz) => Math.atan2(-dx, -dz);       // the camera looks along (-sin yaw, -cos yaw)
+const GLIDE_UP = 4, GLIDE_SPEED = 9;                  // m above the ground, m/s of the free camera
 
 export class Tour {
   /**
@@ -86,11 +85,8 @@ export class Tour {
     this.queue = [];
     this.leg = null;
     this.runId = 0;
-    this._stop = (e) => {
-      if (!this.active || performance.now() - this.t0 < 700) return;
-      if (e.type === 'keydown' && e.repeat && e.code === 'KeyT') return;
-      this.stop();
-    };
+    // only Esc ends the tour
+    this._stop = (e) => { if (this.active && e.code === 'Escape') this.stop(); };
   }
 
   /** Whether the camera is being moved by the tour (the frame loop keeps drawing at full rate). */
@@ -99,7 +95,8 @@ export class Tour {
   start() {
     if (this.active) return;
     this.active = true; this.t0 = performance.now(); this.leg = null; this.queue = [];
-    for (const ev of ['keydown', 'pointerdown', 'mousedown', 'touchstart', 'wheel']) addEventListener(ev, this._stop, true);
+    this.controls.keys.clear(); this.controls.flyHeld = false;
+    addEventListener('keydown', this._stop, true);
     if (this.note) this.note.hidden = false;
     this.onChange?.(true);
     this.run();
@@ -108,10 +105,12 @@ export class Tour {
   stop() {
     if (!this.active) return;
     this.active = false; this.leg?.done?.(); this.leg = null; this.runId++;
-    for (const ev of ['keydown', 'pointerdown', 'mousedown', 'touchstart', 'wheel']) removeEventListener(ev, this._stop, true);
+    removeEventListener('keydown', this._stop, true);
     if (this.note) this.note.hidden = true;
-    this.controls.stick.x = this.controls.stick.y = 0;
-    this.controls.enabled = true;
+    const C = this.controls;
+    if (C.free) { const F = C.feet; C.setPose(F.x, F.y, F.z, C.yaw, C.pitch); }   // (a glide cut short: come down here)
+    C.keys.clear(); C.stick.x = C.stick.y = 0;
+    C.enabled = true;
     this.onChange?.(false);
   }
 
@@ -143,7 +142,7 @@ export class Tour {
       if (!this.active || id !== this.runId) break;
       this.last = S;
       this.begin(S);
-      // the leg ends by itself (its time spent), or the tour is stopped
+      // the leg ends by itself (the loop is closed or its time spent), or the tour is stopped
       await new Promise((resolve) => { this.leg.done = resolve; });
       if (id !== this.runId) return;
       this.leg = null;
@@ -151,82 +150,144 @@ export class Tour {
     if (id === this.runId) this.stop();
   }
 
-  /** Start walking the settlement: its arrival view first, then its other places, then on ahead. */
-  begin(S) {
-    const id = S.site.id, C = this.controls, F = C.feet;
-    const A = ARRIVALS[id];
-    const here = [F.x, F.z];
-    let pts = (VIEWS[id] || []).map((v) => ({ x: v[0], z: v[1], yaw: v[2], pitch: v[3] }));
-    // nearest first, from where we stand
-    const order = [];
-    let cx = here[0], cz = here[1];
-    while (pts.length) {
-      let bi = 0, bd = Infinity;
-      pts.forEach((p, i) => { const d = Math.hypot(p.x - cx, p.z - cz); if (d < bd) { bd = d; bi = i; } });
-      const [p] = pts.splice(bi, 1);
-      if (bd > 6) order.push(p);
-      cx = p.x; cz = p.z;
-    }
-    // too few places: stroll on ahead, in the direction of the arrival view
-    if (order.length < 2) {
-      const yaw = A ? A[3] : C.yaw, d = 45;
-      order.push({ x: here[0] - Math.sin(yaw) * d, z: here[1] - Math.cos(yaw) * d, yaw, pitch: Math.max(0.05, C.pitch * 0.6) });
-    }
-    this.leg = { site: world_site(this.world), S, order, i: 0, t: 0, hold: HOLD, budget: 40 + Math.random() * 20, v: 0, tries: 0, probe: 0, probeAt: [F.x, F.z], pause: 0 };
+  /** A standable point at (x, z) in the settlement's frame, or null (water, inside something, no ground). */
+  spot(x, z) {
+    const C = this.controls.collide;
+    try {
+      const g = footing(C, x, z, C.terrain(x, z) + 2);
+      if (!Number.isFinite(g)) return null;
+      if (C.water?.(x, z, g)) return null;
+      if (C.blockedAt(x, z, 0.4, g + 0.3, g + 1.8)) return null;
+      return g;
+    } catch { return null; }
   }
 
-  /** Every frame, before the controls: move the camera along the leg. */
-  update(dt) {
-    const L = this.leg;
-    if (!L || !this.active) return;
-    dt = Math.min(dt, 0.1);
-    const C = this.controls, F = C.feet;
-    L.t += dt;
-    // the frame changed under us (walked out of the settlement's zone): this leg is over
-    if (world_site(this.world) !== L.site || L.t > L.budget) { L.done?.(); return; }
-    C.enabled = true;
-    let tx = null;
-    if (L.hold > 0) { L.hold -= dt; }
-    else if (L.pause > 0) L.pause -= dt;
-    else if (L.i < L.order.length) tx = L.order[L.i];
-    let yawT = C.yaw, pitchT = C.pitch;
-    if (tx) {
-      const dx = tx.x - F.x, dz = tx.z - F.z, dist = Math.hypot(dx, dz);
-      if (dist < 1.2) { L.i++; L.pause = PAUSE; L.v = 0; L.tries = 0; }
-      else {
-        // the speed eases in over about two seconds and out over the last few metres
-        const want = SPEED * Math.min(1, dist / 6);
-        L.v += (want - L.v) * Math.min(1, dt * 1.2);
-        let a = Math.atan2(dz, dx);
-        // round an obstacle: alternately to either side, wider each time
-        if (L.tries) a += (L.tries % 2 ? 1 : -1) * Math.ceil(L.tries / 2) * 0.6;
-        F.vy = 0;
-        move(F, Math.cos(a) * L.v * dt, Math.sin(a) * L.v * dt, dt, C.collide);
-        yawT = tx.yaw; pitchT = tx.pitch;
-        // blocked? (a second's walk gone for less than a quarter of it)
-        L.probe += dt;
-        if (L.probe >= 1.2) {
-          const got = Math.hypot(F.x - L.probeAt[0], F.z - L.probeAt[1]);
-          L.probe = 0; L.probeAt = [F.x, F.z];
-          if (got < 0.25 * L.v * 1.2 && L.v > 0.4) {
-            if (++L.tries > 4) { L.i++; L.tries = 0; L.v = 0; L.pause = 1; }
-          } else if (got > 0.6 * L.v * 1.2) L.tries = 0;
-        }
+  /** One loop through the whole settlement: every viewpoint, the landmark's surroundings and the open
+   *  ground, nearest neighbour first from where we stand, closing back at the start. */
+  begin(S) {
+    const id = S.site.id, C = this.controls, F = C.feet;
+    const R = clamp(S.radius || 150, 60, 380);
+    const pts = [];
+    for (const v of VIEWS[id] || []) pts.push({ x: v[0], z: v[1], yaw: v[2], pitch: v[3], view: true });
+    // sampled walkable points in rings round the centre (the landmark) and out over the open ground
+    const want = clamp(Math.round(R / 16), 8, 20);
+    const cand = [];
+    for (const f of [0.18, 0.4, 0.62, 0.84]) {
+      const n = Math.round(6 + f * 10), off = Math.random() * 6.283;
+      for (let k = 0; k < n; k++) {
+        const a = off + (k / n) * 6.283, r = f * R;
+        const x = Math.cos(a) * r, z = Math.sin(a) * r;
+        if (this.spot(x, z) != null) cand.push({ x, z });
       }
-    } else if (L.i >= L.order.length && L.pause <= 0 && L.hold <= 0) {
-      // nothing more to walk to: a slow look round until the time is up
-      yawT = C.yaw + 0.12;
-    } else {
-      yawT = L.i > 0 ? L.order[L.i - 1].yaw : C.yaw;
     }
-    // the view turns slowly and smoothly
-    const k = 1 - Math.exp(-dt * 0.7);
-    if (tx || L.pause > 0 || L.i >= L.order.length) {
-      C.yaw += Math.max(-0.35 * dt, Math.min(0.35 * dt, wrap(yawT - C.yaw) * k * 1.6));
-      C.pitch += (pitchT - C.pitch) * k;
+    // keep the extra points well spread: farthest-point selection against what is already chosen
+    const chosen = pts.slice();
+    if (!chosen.length) chosen.push({ x: F.x, z: F.z });
+    while (chosen.length < want && cand.length) {
+      let bi = 0, bd = -1;
+      cand.forEach((c, i) => { let d = Infinity; for (const p of chosen) d = Math.min(d, Math.hypot(c.x - p.x, c.z - p.z)); if (d > bd) { bd = d; bi = i; } });
+      const [c] = cand.splice(bi, 1);
+      if (bd < 14) break;
+      chosen.push(c); pts.push(c);
     }
+    // nearest-neighbour order from here, then back to the start
+    const order = [], start = { x: F.x, z: F.z };
+    let cx = F.x, cz = F.z;
+    const rest = pts.filter((p) => Math.hypot(p.x - cx, p.z - cz) > 6);
+    while (rest.length) {
+      let bi = 0, bd = Infinity;
+      rest.forEach((p, i) => { const d = Math.hypot(p.x - cx, p.z - cz); if (d < bd) { bd = d; bi = i; } });
+      const [p] = rest.splice(bi, 1);
+      order.push(p); cx = p.x; cz = p.z;
+    }
+    order.push(start);
+    for (const p of order) p.gy = this.spot(p.x, p.z) ?? C.collide.terrain(p.x, p.z);
+    let len = 0; cx = F.x; cz = F.z;
+    for (const p of order) { len += Math.hypot(p.x - cx, p.z - cz); cx = p.x; cz = p.z; }
+    const speed = clamp(len / 65, 4, 6);
+    const budget = clamp(len / speed * 1.5 + 12, 30, 140);
+    this.leg = { site: world_site(this.world), S, order, i: 0, t: 0, budget, speed, v: 0, tries: 0, probe: 0, probeAt: [F.x, F.z], glide: null, R };
+  }
+
+  /** Every frame, before the controls: move the camera along the loop. */
+  update(dt) {
+    if (!this.active) return;
+    const C = this.controls, F = C.feet;
+    // the walker is the tour's alone: keys, the stick, the mouse and the fly button do nothing meanwhile
+    C.enabled = false; C.stick.x = C.stick.y = 0; C.flyHeld = false;
+    const L = this.leg;
+    if (!L) return;
+    dt = Math.min(dt, 0.1);
+    L.t += dt;
+    // the frame changed under us (left the settlement's zone) or the time is spent: this leg is over
+    if (world_site(this.world) !== L.site || L.t > L.budget) { this.land(); L.done?.(); return; }
+    if (L.glide) { this.glideStep(L, dt); return; }
+    const tx = L.order[L.i];
+    if (!tx) { this.land(); L.done?.(); return; }
+    const dx = tx.x - F.x, dz = tx.z - F.z, dist = Math.hypot(dx, dz);
+    if (dist < 2.2) { L.i++; L.tries = 0; L.probe = 0; L.probeAt = [F.x, F.z]; return this.finish(L, dt); }
+    // the pace eases in over a second or so and does not drop for the points on the way (only the last)
+    const want = L.speed * (L.i === L.order.length - 1 ? Math.min(1, dist / 8) : 1);
+    L.v += (want - L.v) * Math.min(1, dt * 2.5);
+    let a = Math.atan2(dz, dx);
+    // round an obstacle: alternately to either side, wider each time
+    if (L.tries) a += (L.tries % 2 ? 1 : -1) * Math.ceil(L.tries / 2) * 0.6;
+    F.vy = 0;
+    move(F, Math.cos(a) * L.v * dt, Math.sin(a) * L.v * dt, dt, C.collide);
+    // blocked? (a second's walk gone for less than a quarter of it): round it, then over it
+    L.probe += dt;
+    if (L.probe >= 0.8) {
+      const got = Math.hypot(F.x - L.probeAt[0], F.z - L.probeAt[1]);
+      L.probe = 0; L.probeAt = [F.x, F.z];
+      if (got < 0.25 * L.v * 0.8 && L.v > 0.6) { if (++L.tries > 2) { L.glide = { gy: F.y }; L.tries = 0; } }
+      else if (got > 0.6 * L.v * 0.8) L.tries = 0;
+    }
+    // heading: toward the point, a little toward the one after (look-ahead)
+    const nx = L.order[L.i + 1];
+    let yawT = yawTo(dx, dz);
+    if (nx && dist < 20) { const w = 0.35 * (1 - dist / 20); yawT += wrap(yawTo(nx.x - F.x, nx.z - F.z) - yawT) * w; }
+    // looking slightly down while passing the landmark (the settlement's centre), level elsewhere
+    const near = Math.hypot(F.x, F.z) < 0.3 * L.R + 25;
+    const pitchT = near ? -0.07 : 0.04;
+    this.turn(dt, yawT, pitchT);
     C.vy = F.vy || 0;
     C.apply();
+  }
+
+  /** The leg's closing step: when the loop is complete, it is over. */
+  finish(L, dt) {
+    if (L.i >= L.order.length) { this.land(); L.done?.(); }
+  }
+
+  turn(dt, yawT, pitchT) {
+    const C = this.controls, k = 1 - Math.exp(-dt * 2.2);
+    C.yaw += clamp(wrap(yawT - C.yaw) * k, -1.3 * dt, 1.3 * dt);
+    C.pitch += (pitchT - C.pitch) * k;
+  }
+
+  /** Stuck: the camera glides, a few metres up, to the next point (the walker is put down there). */
+  glideStep(L, dt) {
+    const C = this.controls, F = C.feet, tx = L.order[L.i];
+    if (!C.free) C.free = true;
+    const dx = tx.x - F.x, dz = tx.z - F.z, dist = Math.hypot(dx, dz);
+    const up = tx.gy + GLIDE_UP;
+    if (dist < 1.5) {
+      C.setPose(tx.x, tx.gy, tx.z, C.yaw, C.pitch);     // down again (and free = false)
+      L.glide = null; L.v = 0; L.i++; L.probe = 0; L.probeAt = [C.feet.x, C.feet.z];
+      if (L.i >= L.order.length) { L.done?.(); }
+      return;
+    }
+    const step = Math.min(dist, GLIDE_SPEED * dt);
+    F.x += dx / dist * step; F.z += dz / dist * step;
+    F.y += clamp(up - F.y, -4 * dt, 4 * dt);
+    this.turn(dt, yawTo(dx, dz), -0.05);
+    C.apply();
+  }
+
+  /** Put the walker down where it is (after a glide cut short by the leg's end). */
+  land() {
+    const C = this.controls;
+    if (C.free) { const F = C.feet; C.setPose(F.x, F.y, F.z, C.yaw, C.pitch); }
   }
 }
 

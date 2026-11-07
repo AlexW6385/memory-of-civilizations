@@ -403,7 +403,7 @@ async function main() {
     if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
   $('map-random').onclick = () => mapView.random();
-  // the tour: settlement after settlement, each walked through slowly; any input ends it
+  // the tour: settlement after settlement, one brisk loop through each; only Esc ends it
   const tour = new Tour({ controls, world, go: (S) => mapView.go(S), note: $('tour-note'), onChange: () => { snap = true; } });
   $('map-tour').onclick = () => { closePanels(); tour.start(); };
   const minimap = new MiniMap(world, mapView, () => openPanel(mapPanel), () => sunPlanet(climate.utc));
@@ -412,7 +412,7 @@ async function main() {
   addEventListener('keydown', (e) => {
     if (e.code === 'KeyR' && !e.repeat && panelsOpen() && !e.target.closest?.('input, select')) mapView.random();
     if (e.code === 'KeyT' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { closePanels(); tour.start(); }
-    if (e.code === 'KeyM') mapPanel.hidden ? openPanel(mapPanel) : closePanels();
+    if (e.code === 'KeyM' && !tour.active) mapPanel.hidden ? openPanel(mapPanel) : closePanels();
     if (e.code === 'Escape' && panelsOpen()) closePanels();
   });
 
@@ -578,11 +578,11 @@ async function main() {
     const now = performance.now();
     const looked = controls.yaw !== lookYaw || controls.pitch !== lookPitch;
     lookYaw = controls.yaw; lookPitch = controls.pitch;
-    const moving = !controls.free && (looked || controls.keys.size > 0 || controls.flyHeld || controls.stick.x !== 0 || controls.stick.y !== 0 || controls.speedNow > 0.05 || controls.vy !== 0 || controls.glide || tour.moving);
+    const moving = (!controls.free || tour.moving) && (looked || controls.keys.size > 0 || controls.flyHeld || controls.stick.x !== 0 || controls.stick.y !== 0 || controls.speedNow > 0.05 || controls.vy !== 0 || controls.glide || tour.moving);
     R.setMotion(moving, now);
     // held still for a second: the scene only sways, flickers and drifts, so it is drawn at
     // ~24 fps instead of 60, leaving the machine (and the rest of the picture) its breath
-    if (!perf.panel && !perf.record && !measuring && !controls.free && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
+    if (!perf.panel && !perf.record && !measuring && !(controls.free && !tour.moving) && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
     const dt = (now - last) / 1000;
     last = now;
     tour.update(dt);
