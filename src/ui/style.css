@@ -49,6 +49,16 @@ button.primary:disabled { opacity: 0.4; cursor: default; }
 .intro .status { margin: 12px 0 0; font-size: 13px; color: var(--ink-dim); font-variant-numeric: tabular-nums; min-height: 1.4em; }
 .intro.fading { opacity: 0; transition: opacity 0.8s ease; pointer-events: none; }
 
+/* the controls summary on the loading screen */
+.keys { margin-top: 30px; max-width: min(520px, 92vw); text-align: left; }
+.keys dl { display: grid; grid-template-columns: auto 1fr; column-gap: 18px; row-gap: 5px; margin: 0; font-size: 12.5px; }
+.keys dt { color: var(--ink); white-space: nowrap; text-align: right; }
+.keys dd { margin: 0; color: var(--ink-dim); }
+.keys kbd { font: inherit; font-size: 11px; display: inline-block; min-width: 20px; padding: 1px 5px; margin: 0 1px; text-align: center; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; background: rgba(243, 234, 217, 0.07); }
+.keys-touch { display: none !important; }
+@media (pointer: coarse) { .keys-desk { display: none !important; } .keys-touch { display: grid !important; } }
+@media (max-height: 520px) { .keys { margin-top: 14px; } .keys dl { row-gap: 2px; } }
+
 /* the language button, top right */
 #btn-lang { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); z-index: 12; font-size: 14px; font-weight: 600; color: var(--ink); }
 #btn-mute { position: fixed; top: max(14px, env(safe-area-inset-top)); right: calc(max(14px, env(safe-area-inset-right)) + 48px); z-index: 12; }
@@ -96,6 +106,10 @@ body.panel-open #btn-mute, body.panel-open #btn-lang, body.panel-open #corner, b
 .map header { grid-column: 1 / -1; margin-bottom: 8px; }
 #map-canvas { grid-column: 1; grid-row: 2; width: 100%; height: 100%; min-height: 0; cursor: crosshair; border-radius: 10px; background: #1e1a15; touch-action: none; }
 .map .map-hint { grid-column: 1; grid-row: 3; font-size: 12.5px; color: var(--ink-dim); margin: 8px 2px 0; }
+#map-list li.head { position: sticky; top: 0; z-index: 1; margin: 0; padding: 12px 6px 4px; font: 600 11px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: #1c1813; border-bottom: 1px solid var(--line); }
+.map header { gap: 12px; }
+.map-random { margin-right: auto; margin-left: 6px; background: rgba(243, 234, 217, 0.06); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 13px; color: var(--ink); }
+.map-random:hover { background: rgba(243, 234, 217, 0.16); }
 #map-list { grid-column: 2; grid-row: 2 / 4; list-style: none; margin: 0; padding: 0; overflow: auto; min-height: 0; }
 #map-list li button { width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 10px 6px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 #map-list li button:hover { background: rgba(255, 255, 255, 0.05); }

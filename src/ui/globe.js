@@ -38,6 +38,20 @@ export function landColour(d, [mount, moist, warm]) {
   return [r, g, b].map((v) => Math.max(0, Math.min(255, v)));
 }
 
+// The list's groups, in order, and the regions (sites.js) each holds.
+const GROUPS = [
+  ['east', ['china', 'tibet', 'japan', 'korea']],
+  ['south', ['india', 'indochina', 'java']],
+  ['mena', ['mesopotamia', 'persia', 'levant', 'bosphorus', 'egypt']],
+  ['africa', ['sahel', 'ethiopia', 'swahili', 'zimbabwe']],
+  ['europe', ['aegean', 'latium', 'britain', 'france', 'iberia', 'italy', 'lowlands', 'scandinavia', 'russia']],
+  ['americas', ['mexico', 'yucatan', 'andes', 'mississippi', 'southwest', 'northeast']],
+  ['oceania', ['polynesia', 'aotearoa', 'australia']],
+];
+const groupOf = (region) => (GROUPS.find(([, rs]) => rs.includes(region)) || ['other'])[0];
+/** "9th c." → 9, "21st c. BC" → -21: a sortable date. */
+const eraKey = (era) => { const m = /(\d+)/.exec(era || ''); const n = m ? +m[1] : 0; return /BC/i.test(era) ? -n : n; };
+
 export class GlobeView {
   constructor(world, onBuilding, onPlace, sun = null) {
     this.sun = sun;
@@ -63,7 +77,15 @@ export class GlobeView {
 
   fillList() {
     this.list.innerHTML = '';
-    for (const S of BUILT) {
+    const order = [...GROUPS.map(([g]) => g), 'other'];
+    const sorted = [...BUILT].sort((a, b) => order.indexOf(groupOf(a.site.region)) - order.indexOf(groupOf(b.site.region)) || eraKey(a.site.era) - eraKey(b.site.era));
+    let last = null;
+    for (const S of sorted) {
+      const g = groupOf(S.site.region);
+      if (g !== last) {
+        last = g;
+        const h = document.createElement('li'); h.className = 'head'; h.textContent = t('regions')[g]; this.list.appendChild(h);
+      }
       const li = document.createElement('li'), b = document.createElement('button');
       b.innerHTML = `<span class="name"></span><span class="era"></span>`;
       b.querySelector('.name').textContent = tr(S.site.name);
@@ -71,6 +93,20 @@ export class GlobeView {
       b.onclick = () => this.go(S);
       li.appendChild(b); this.list.appendChild(li);
     }
+  }
+
+  /** The settlement the visitor is at (the nearest), or null. */
+  here() {
+    if (!this.you) return null;
+    let best = null, bd = -2;
+    for (const S of BUILT) { const d = dot(this.you.u, S.u); if (d > bd) { bd = d; best = S; } }
+    return best;
+  }
+
+  /** Travel to a random settlement other than the current one. */
+  random() {
+    const cur = this.here(), pool = BUILT.filter((S) => S !== cur);
+    if (pool.length) this.go(pool[Math.floor(Math.random() * pool.length)]);
   }
 
   /** Open centred on the visitor (direction u), facing north up. */
@@ -134,9 +170,12 @@ export class GlobeView {
     g.clearRect(0, 0, W, H);
     g.imageSmoothingEnabled = true;
     g.drawImage(this.off, 0, 0, W, H);
-    // the planned settlements, faint; the built ones, named
-    g.font = `${Math.round(12 * dpr)}px system-ui, sans-serif`;
-    g.textAlign = 'left';
+    this.drawFaint(g);
+    this.paintMarks();
+  }
+
+  drawFaint(g) {
+    const dpr = devicePixelRatio || 1;
     for (const s of SITES) {
       if (s.legacy) continue;
       const p = this.project(unit(...PLACED[s.id]));
@@ -144,26 +183,47 @@ export class GlobeView {
       g.fillStyle = 'rgba(255, 245, 220, 0.35)';
       g.beginPath(); g.arc(p[0], p[1], 2.2 * dpr, 0, Math.PI * 2); g.fill();
     }
+  }
+
+  /** The settlements' marks and names over the cached map picture: names are kept apart (the hovered one, then those
+   *  nearest the centre, first); those that would overlap show as dots, and the hovered one in full. */
+  paintMarks() {
+    const cv = this.canvas, W = cv.width, H = cv.height, dpr = devicePixelRatio || 1, sun = this.sun?.();
+    const g = cv.getContext('2d');
+    g.font = `${Math.round(12 * dpr)}px system-ui, sans-serif`;
+    g.textAlign = 'left';
+    const c = this.basis().c, cur = this.here();
     this.marks = [];
     for (const S of BUILT) {
       const p = this.project(S.u);
-      if (!p) continue;
-      this.marks.push({ S, p });
+      if (p) this.marks.push({ S, p, rank: (S === this.hover ? -2 : S === cur ? -1 : 0) - dot(S.u, c) });
+    }
+    this.marks.sort((a, b) => a.rank - b.rank);
+    const taken = [], pad = 2 * dpr, hit = (r) => taken.some((q) => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1]);
+    for (const m of this.marks) {
+      const { S, p } = m;
       // at night the settlements glow with their lamps
       if (sun && dot(S.u, sun) < 0.02) {
         const gl = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], 14 * dpr);
         gl.addColorStop(0, 'rgba(255, 200, 110, 0.75)'); gl.addColorStop(1, 'rgba(255, 170, 80, 0)');
         g.fillStyle = gl; g.beginPath(); g.arc(p[0], p[1], 14 * dpr, 0, Math.PI * 2); g.fill();
       }
-      g.fillStyle = '#ffd36b'; g.strokeStyle = '#2a2116'; g.lineWidth = 1.5 * dpr;
-      g.beginPath(); g.arc(p[0], p[1], 4.5 * dpr, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.shadowBlur = 0;
+      g.fillStyle = S === this.hover ? '#fff2c4' : '#ffd36b'; g.strokeStyle = '#2a2116'; g.lineWidth = 1.5 * dpr;
+      g.beginPath(); g.arc(p[0], p[1], (S === this.hover ? 5.5 : 4.5) * dpr, 0, Math.PI * 2); g.fill(); g.stroke();
+      // the name: to the right of the mark, else to its left, else a shifted place; none if all would overlap
+      const name = tr(S.site.name), tw = g.measureText(name).width, th = 14 * dpr, d = 8 * dpr;
+      const spots = [[p[0] + d, p[1]], [p[0] - d - tw, p[1]], [p[0] + d, p[1] - th], [p[0] + d, p[1] + th], [p[0] - d - tw, p[1] - th], [p[0] - d - tw, p[1] + th]];
+      let put = null;
+      for (const [x0, yc] of spots) {
+        const x = Math.max(4 * dpr, Math.min(W - 4 * dpr - tw, x0)), r = [x - pad, yc - th / 2 - pad, x + tw + pad, yc + th / 2 + pad];
+        if (S === this.hover || !hit(r)) { put = { x, yc, r }; break; }
+      }
+      if (!put) continue;
+      taken.push(put.r);
+      if (S === this.hover) { g.fillStyle = 'rgba(24, 20, 15, 0.85)'; g.fillRect(put.r[0], put.r[1], put.r[2] - put.r[0], put.r[3] - put.r[1]); }
       g.fillStyle = '#fff8e8'; g.shadowColor = 'rgba(0,0,0,0.8)'; g.shadowBlur = 4 * dpr;
-      // the name to the right of the mark, or to its left where it would run off the edge
-      const name = tr(S.site.name), tw = g.measureText(name).width, left = p[0] + 8 * dpr + tw > W - 4 * dpr;
-      let tx = left ? p[0] - 8 * dpr - tw : p[0] + 8 * dpr;
-      tx = Math.max(4 * dpr, Math.min(W - 4 * dpr - tw, tx));
-      g.fillText(name, tx, p[1] + 4 * dpr);
-      g.textAlign = 'left';
+      g.fillText(name, put.x, put.yc + 4 * dpr);
       g.shadowBlur = 0;
     }
     if (this.you) {
@@ -173,6 +233,15 @@ export class GlobeView {
         g.beginPath(); g.arc(p[0], p[1], 5 * dpr, 0, Math.PI * 2); g.fill(); g.stroke();
       }
     }
+  }
+
+  /** Repaint only the marks (the hover), over the map picture already made. */
+  repaintMarks() {
+    const cv = this.canvas, g = cv.getContext('2d');
+    g.clearRect(0, 0, cv.width, cv.height);
+    g.drawImage(this.off, 0, 0, cv.width, cv.height);
+    this.drawFaint(g);
+    this.paintMarks();
   }
 
   bind() {
@@ -185,7 +254,14 @@ export class GlobeView {
       drag = { x: e.clientX, y: e.clientY }; moved = 0;
     });
     cv.addEventListener('pointermove', (e) => {
-      if (!pinch.has(e.pointerId)) return;
+      if (!pinch.has(e.pointerId)) {
+        const rect = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+        const px = (e.clientX - rect.left) * dpr, py = (e.clientY - rect.top) * dpr;
+        let h = null, hd = 14 * dpr;
+        for (const m of this.marks || []) { const d = Math.hypot(m.p[0] - px, m.p[1] - py); if (d < hd) { hd = d; h = m.S; } }
+        if (h !== this.hover) { this.hover = h; cv.style.cursor = h ? 'pointer' : ''; this.repaintMarks(); }
+        return;
+      }
       if (pinch.size === 2) {
         const [a, b] = [...pinch.values()], d0 = Math.hypot(a[0] - b[0], a[1] - b[1]);
         pinch.set(e.pointerId, [e.clientX, e.clientY]);
@@ -214,6 +290,7 @@ export class GlobeView {
       if (moved < 6) this.click(e);
       else this.draw();
     };
+    cv.addEventListener('pointerleave', () => { if (this.hover) { this.hover = null; this.repaintMarks(); } });
     cv.addEventListener('pointerup', end);
     cv.addEventListener('pointercancel', (e) => { pinch.delete(e.pointerId); drag = null; this.draw(); });
     cv.addEventListener('wheel', (e) => {

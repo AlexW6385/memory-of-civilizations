@@ -61,10 +61,14 @@
     <h1 data-i18n="title">Memory of Civilizations</h1>
     <div class="progress"><div id="progress-bar"></div></div>
     <p id="intro-status" class="status" data-i18n="loading">Preparing the world…</p>
+    <div class="keys" aria-label="Controls" data-i18n-label="ctl-title">
+      <dl class="keys-desk"><dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> <kbd>←↑↓→</kbd></dt><dd data-i18n="ctl-walk">Walk</dd><dt>Mouse</dt><dd data-i18n="ctl-look">Look (double-click to capture the mouse)</dd><dt><kbd>Q</kbd><kbd>E</kbd></dt><dd data-i18n="ctl-turn">Turn left / right</dd><dt><kbd>Shift</kbd></dt><dd data-i18n="ctl-run">Run</dd><dt>Hold <kbd>Space</kbd></dt><dd data-i18n="ctl-fly">Fly, faster the longer you hold</dd><dt><kbd>Space</kbd> ×2</dt><dd data-i18n="ctl-cruise">Cruise</dd><dt><kbd>M</kbd></dt><dd data-i18n="ctl-map">Map</dd><dt><kbd>R</kbd></dt><dd data-i18n="ctl-random">Travel to a random city (on the map)</dd><dt><kbd>Esc</kbd></dt><dd data-i18n="ctl-esc">Close panels, release the mouse</dd><dt>Clock</dt><dd data-i18n="ctl-clock">Drag the slider in the corner card to change the hour</dd></dl>
+      <dl class="keys-touch"><dt>Left thumb</dt><dd data-i18n="ctl-t-walk">Walk</dd><dt>Drag</dt><dd data-i18n="ctl-t-look">Look around</dd><dt>Hold ↑</dt><dd data-i18n="ctl-t-fly">Fly</dd><dt>Slide to →</dt><dd data-i18n="ctl-t-cruise">Cruise</dd><dt>Corner map</dt><dd data-i18n="ctl-t-map">Tap to open the map</dd></dl>
+    </div>
   </section>
 
   <section id="map" class="panel map" hidden>
-    <header><h2 data-i18n="map">Map</h2><button class="close" aria-label="Close">×</button></header>
+    <header><h2 data-i18n="map">Map</h2><button id="map-random" class="map-random" data-i18n="random" title="R" type="button">Random city</button><button class="close" aria-label="Close">×</button></header>
     <canvas id="map-canvas"></canvas>
     <p class="map-hint" data-i18n="map-hint">Click anywhere on the map to go there; near a building, or on its name, you arrive at its entrance.</p>
     <ul id="map-list"></ul>

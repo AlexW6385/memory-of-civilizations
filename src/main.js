@@ -401,10 +401,12 @@ async function main() {
     document.body.classList.add('panel-open');
     if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
+  $('map-random').onclick = () => mapView.random();
   const minimap = new MiniMap(world, mapView, () => openPanel(mapPanel), () => sunPlanet(climate.utc));
 
   for (const c of document.querySelectorAll('.panel .close')) c.onclick = closePanels;
   addEventListener('keydown', (e) => {
+    if (e.code === 'KeyR' && !e.repeat && panelsOpen() && !e.target.closest?.('input, select')) mapView.random();
     if (e.code === 'KeyM') mapPanel.hidden ? openPanel(mapPanel) : closePanels();
     if (e.code === 'Escape' && panelsOpen()) closePanels();
   });
