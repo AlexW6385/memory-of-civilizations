@@ -488,7 +488,7 @@
  },
  "granada-generalife": {
   "site": "granada",
-  "hash": "f1f1e2a2b9ee7481",
+  "hash": "766c8c4fe73ba4dd",
   "rays": 128,
   "probes": 7012,
   "boxes": [
@@ -558,8 +558,8 @@
     ]
    }
   ],
-  "bytes": 127453,
-  "seconds": 32,
+  "bytes": 125298,
+  "seconds": 18,
   "baked": "2026-11-07"
  },
  "hagia-sophia": {
