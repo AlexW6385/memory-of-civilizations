@@ -1468,7 +1468,7 @@
  },
  "sainte-foy-conques": {
   "site": "conques",
-  "hash": "5709bfb2b8dfecbf",
+  "hash": "477ee121a4ad0c6a",
   "rays": 128,
   "probes": 65170,
   "boxes": [
@@ -1494,8 +1494,8 @@
     ]
    }
   ],
-  "bytes": 1075205,
-  "seconds": 878,
+  "bytes": 1065109,
+  "seconds": 213,
   "baked": "2026-11-07"
  },
  "song-hangzhou-liuhe": {
