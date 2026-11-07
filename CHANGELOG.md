@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.96 — Angkor, Djenne, Lalibela, Granada (2026-11-07)
+- Angkor: the eight bas-relief galleries told by subject, the towers' gilded lotus crowns, Zhou Daguan's market of women on mats, an elephant and a palanquin on the moat road, sugar palms with tappers' ladders. Djenne: a year's rain worn into every mud-brick face, clay soaking for the replastering, ladders and baskets at the mosque. Lalibela: the tuff's layers and the masons' ledges in every cut face, drainage channels, the pools in Bete Maryam's court. Granada: star-tile dados and the Nasrid shield in the palaces, the muqarnas niches of the Myrtles, courtiers and envoys; Albaicin patio houses with porticoes and viewing towers, cisterns with women filling jars. Street life keeps clear of each arrival point; guards carry spears, not porters' loads.
+
 ## v9.95 — Jerusalem and the modern cities (2026-11-07)
 - Jerusalem: the Dome of the Rock's mosaic trees in every spandrel and the gold-on-turquoise inscription band, the Rock remade with its cave beneath, every courtyard house rebuilt with cisterns, ovens and stairs, four houses to enter, pilgrims. New York: the Empire State lobby to walk into, a diner and a walk-up flat, soot on the fronts, people waiting at the corners. Sydney: the Concert Hall opened inside with its stage, rings and stalls, a salt band on the sea wall, passengers on the ferry. Barcelona: the Mercat de la Concepcio of 1888 with its stalls, grime and rain streaks on the Eixample fronts.
 
