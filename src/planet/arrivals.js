@@ -25,7 +25,7 @@ export const ARRIVALS = {
   'ur':               [0, 0.1, -118, 3.1416, 0.22],      // the ziggurat across its court
   'babylon':          [-40, 0.1, -360, 3.1416, 0.2],     // the Processional Way's lions to the Ishtar Gate
   'persepolis':       [-135, 14.05, -75, -1.571, 0.16],  // on the terrace, the Apadana's porch
-  'isfahan':          [0, 0.1, 216, 3.1416, 0.25],       // the mosque's portal and minarets over the square (past the market's last stall)
+  'isfahan':          [0, 0.1, 170, 3.1416, 0.17],       // the mosque's portal and minarets over the square, its dome rising beside them (from 44 m the court's wall hid the dome)
   'petra':            [160, 0.1, -158, 1.5708, 0.25],    // the Treasury at the end of the Siq
   'jerusalem':        [-67.6, 18, -40, -1.78, 0.16],     // on the esplanade, the Dome of the Rock
   'constantinople':   [-70, null, 110, -0.517, 0.16],    // Hagia Sophia's dome over its buttresses, from the south-west
