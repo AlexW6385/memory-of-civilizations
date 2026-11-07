@@ -1,7 +1,7 @@
 // The tour: one click and the visitor is carried from settlement to settlement, about a minute in each:
 // the arrival view held for a few seconds, then the free camera rises smoothly up and outward to an
 // overview sized to the place and circles it once, always looking at the landmark, so the whole city is
-// seen from the air. Only Esc ends it; other input is ignored.
+// seen from the air. Any input ends it.
 import { footing, EYE } from '../core/walk.js';
 import { ARRIVALS } from '../planet/arrivals.js';
 import { BUILT } from '../planet/relief.js';
@@ -13,12 +13,13 @@ const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math
 const yawTo = (dx, dz) => Math.atan2(-dx, -dz);       // the camera looks along (-sin yaw, -cos yaw)
 const ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const HOLD = 3, RISE = 8, ORBIT = 48;                 // seconds: the arrival view, the climb, one full turn
+const INPUTS = ['keydown', 'pointerdown', 'mousedown', 'mousemove', 'wheel', 'touchstart', 'touchmove'];
 const CLEAR = 22;                                     // m the camera keeps above the ground and buildings
 
 export class Tour {
   /**
    * @param {object} o  controls, world, go(S) → Promise (travels and waits until the place is ready),
-   *                    note (element), onChange(active)
+   *                    onChange(active)
    */
   constructor(o) {
     Object.assign(this, o);
@@ -26,19 +27,25 @@ export class Tour {
     this.queue = [];
     this.leg = null;
     this.runId = 0;
-    // only Esc ends the tour
-    this._stop = (e) => { if (this.active && e.code === 'Escape') this.stop(); };
+    // any input ends the tour (the first half second is ignored, and the repeat of the start key)
+    this._stop = (e) => {
+      if (!this.active || performance.now() - this.t0 < 500) return;
+      if (e.type === 'keydown' && e.repeat && e.code === this.startKey) return;
+      if (e.type === 'mousemove' && !e.buttons) return;
+      e.stopImmediatePropagation(); e.preventDefault?.();
+      this.stop();
+    };
   }
 
   /** Whether the camera is being moved by the tour (the frame loop keeps drawing at full rate). */
   get moving() { return this.active && !!this.leg; }
 
-  start() {
+  start(startKey = null) {
     if (this.active) return;
+    this.startKey = startKey;
     this.active = true; this.t0 = performance.now(); this.leg = null; this.queue = [];
     this.controls.keys.clear(); this.controls.flyHeld = false;
-    addEventListener('keydown', this._stop, true);
-    if (this.note) this.note.hidden = false;
+    for (const t of INPUTS) addEventListener(t, this._stop, { capture: true, passive: false });
     this.onChange?.(true);
     this.run();
   }
@@ -46,8 +53,7 @@ export class Tour {
   stop() {
     if (!this.active) return;
     this.active = false; this.leg?.done?.(); this.leg = null; this.runId++;
-    removeEventListener('keydown', this._stop, true);
-    if (this.note) this.note.hidden = true;
+    for (const t of INPUTS) removeEventListener(t, this._stop, true);
     const C = this.controls;
     this.land();
     C.keys.clear(); C.stick.x = C.stick.y = 0;

@@ -403,15 +403,15 @@ async function main() {
     if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
   $('map-random').onclick = () => mapView.random();
-  // the tour: settlement after settlement, an aerial circuit over each; only Esc ends it
-  const tour = new Tour({ controls, world, go: (S) => mapView.go(S), note: $('tour-note'), onChange: () => { snap = true; } });
+  // the tour: settlement after settlement, an aerial circuit over each; any input ends it
+  const tour = new Tour({ controls, world, go: (S) => mapView.go(S), onChange: () => { snap = true; } });
   $('map-tour').onclick = () => { closePanels(); tour.start(); };
   const minimap = new MiniMap(world, mapView, () => openPanel(mapPanel), () => sunPlanet(climate.utc));
 
   for (const c of document.querySelectorAll('.panel .close')) c.onclick = closePanels;
   addEventListener('keydown', (e) => {
     if (e.code === 'KeyR' && !e.repeat && panelsOpen() && !e.target.closest?.('input, select')) mapView.random();
-    if (e.code === 'KeyT' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { closePanels(); tour.start(); }
+    if (e.code === 'KeyT' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { closePanels(); tour.start('KeyT'); }
     if (e.code === 'KeyM' && !tour.active) mapPanel.hidden ? openPanel(mapPanel) : closePanels();
     if (e.code === 'Escape' && panelsOpen()) closePanels();
   });
