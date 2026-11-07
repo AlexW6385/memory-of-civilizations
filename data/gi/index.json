@@ -497,6 +497,33 @@
   "seconds": 623,
   "baked": "2026-11-06"
  },
+ "nara-todaiji": {
+  "site": "nara",
+  "hash": "edd7393285a48023",
+  "rays": 128,
+  "probes": 76738,
+  "boxes": [
+   {
+    "min": [
+     -45,
+     1.7,
+     -87
+    ],
+    "n": [
+     61,
+     34,
+     37
+    ],
+    "spacing": 1.5,
+    "rooms": [
+     "great buddha hall"
+    ]
+   }
+  ],
+  "bytes": 1216743,
+  "seconds": 407,
+  "baked": "2026-11-07"
+ },
  "norse-borgund-church": {
   "site": "norse-borgund",
   "hash": "86d05a6f2cb13c5f",
