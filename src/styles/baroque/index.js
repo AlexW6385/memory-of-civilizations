@@ -9,6 +9,7 @@ import { box, lathe } from '../../core/geom.js';
 import '../qing/index.js';
 import '../renaissance/index.js';
 import { obelisk, fountain, saint, ponteAngeli, palaceRoman } from './piazza.js';
+import { coach, sedanChair } from './street.js';
 import { merge, ext } from '../renaissance/face.js';
 import { stPeterFacade, entrances } from './facade.js';
 import { stPeterInterior } from './interior.js';
@@ -139,6 +140,6 @@ function castel(el, { bag, col }) {
 function paving(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('flagstone', box(x0, y - 0.4, z0, x1, y + 0.02, z1)); }
 registerStyle('baroque', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel, paving, ponte_angeli: ponteAngeli, palace_roman: palaceRoman },
+  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel, paving, ponte_angeli: ponteAngeli, palace_roman: palaceRoman, coach, sedan_chair: sedanChair },
   objects: {},
 });

@@ -2,7 +2,7 @@
 import { PIAZZA, PIAZZETTA, BASILICA, CAMPANILE, PALACE, CLOCK, GROUND, SEA, BASIN_Z } from './layout.js';
 
 const g = GROUND, E = [
-  { t: 'basilica', c: BASILICA.c, s: BASILICA.s, w: BASILICA.w, h: 22, y: g },
+  { t: 'basilica', c: BASILICA.c, s: BASILICA.s, w: BASILICA.w, h: 22, y: g, interior: true },
   { t: 'bell_tower', c: CAMPANILE, s: 12, h: 98, y: g },
   { t: 'doges_palace', rect: PALACE, h: 25, y: g },
   { t: 'procuratie', rect: [PIAZZA[0], PIAZZA[1] - 18, CLOCK[0], PIAZZA[1]], h: 11, front: 's', y: g },
@@ -23,8 +23,10 @@ export const sanMarco = {
   view: [BASILICA.c[0] - BASILICA.s - 12, BASILICA.c[1] - 30, BASILICA.c[0] + BASILICA.s + 2, BASILICA.c[1] + 30],
   bakeTop: 100,
   elements: E,
-  rooms: [{ id: 'piazza', rect: PIAZZA, y: g, kind: 'open' }],
-  walks: [Object.assign([[-120, -5], [-40, -5], [10, -5]], { y0: g })],
+  rooms: [{ id: 'piazza', rect: PIAZZA, y: g, kind: 'open' },
+    { id: 'basilica', rect: [BASILICA.c[0] - BASILICA.s + 1.5, BASILICA.c[1] - 9.5, BASILICA.c[0] + 8, BASILICA.c[1] + 9.5], y: g, kind: 'hall' },
+    { id: 'transepts', rect: [BASILICA.c[0] - 9.5, BASILICA.c[1] - BASILICA.s * 0.8 + 2, BASILICA.c[0] + 9.5, BASILICA.c[1] + BASILICA.s * 0.8 - 2], y: g, kind: 'hall' }],
+  walks: [Object.assign([[-120, -5], [-40, -5], [10, -5], [22, -5], [40, -5], [BASILICA.c[0], BASILICA.c[1]]], { y0: g })],
 };
 // the gondolas moored stern to the Molo before the Piazzetta and the palace, between their posts
 const boats = [];
@@ -46,5 +48,19 @@ export const doge = {
   entrance: { at: [0, 0], facing: 'n' }, bounds: [CLOCK[0], CLOCK[1], CLOCK[2], CLOCK[3] + 1], rooms: [],
   elements: [{ t: 'figure', at: DOGE, y: g + 20.75, rot: Math.PI / 2, seed: 1486, h: 1.9, pose: 'kneel', arms: 'pray', dress: 'robe', over: 'cape', hat: 'corno', hair: 'short', beard: true, feet: 'bare',
     cloth: 'gilt_bronze', cloth2: 'gilt_bronze', skin: 'gilt_bronze', hatMat: 'gilt_bronze', hairMat: 'gilt_bronze', hairShade: 1 }],
+};
+// the fourteen marble statues of the iconostasis of 1394 (docs/settlements/venice.md §4, San Marco inside): the
+// Virgin and St Mark nearest the crucifix, the twelve apostles beyond, on the architrave (its top 5.42 m over the
+// pavement, 9.75 m east of the crossing's centre), facing the nave [stated: basilicasanmarco.it; inferred: the order]
+const IX = BASILICA.c[0] + 9.75, IY = g + 5.42;
+export const iconostasis = {
+  id: 'venice-iconostasis', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, center: [IX, BASILICA.c[1]], near: 120,
+  entrance: { at: [0, 0], facing: 'n' }, bounds: [IX - 1, BASILICA.c[1] - 7, IX + 1, BASILICA.c[1] + 7], rooms: [],
+  elements: Array.from({ length: 14 }, (_, i) => {
+    const s = i < 7 ? -1 : 1, k = i % 7, w = s * (1.0 + k * 0.85);
+    return { t: 'figure', at: [IX, BASILICA.c[1] + w], y: IY, rot: Math.PI / 2, seed: 1394 + i, h: 1.35, pose: 'stand', arms: k === 0 && s < 0 ? 'pray' : undefined,
+      dress: 'robe', over: 'cape', hat: k === 0 && s < 0 ? 'veil' : 'none', hair: 'short', beard: !(k === 0 && s < 0), feet: 'bare',
+      cloth: 'marble_smooth', cloth2: 'marble_smooth', skin: 'marble_smooth', hairMat: 'marble_smooth', hatMat: 'marble_smooth', hairShade: 1 };
+  }),
 };
 export default sanMarco;

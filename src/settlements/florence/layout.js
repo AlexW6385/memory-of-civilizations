@@ -17,6 +17,8 @@ export const MEDICI = [-12, -196, 28, -156];                   // the Palazzo Me
 export const MERCATO = [-82, 8, -18, 72];                      // the Mercato Vecchio, on the Roman forum west of Orsanmichele
 export const NOVELLA = [-266, -222, -233, -150];               // Santa Maria Novella, its front on the south (33 m: the side of its square)
 export const NOVELLA_PIAZZA = [-292, -150, -205, -110];        // the piazza before it
+export const BOTTEGA = [-104, 2, -92, 12];                     // a painter's and sculptor's bottega on the street south of the cathedral's square
+export const TINTORI = [100, 222, 240, 247];                   // the dyers' yard and the drying sheds on the Arno's north bank, east of the bridge
 export const ARNO = { z: 275, w: 60, level: -4, bed: -7 };
 export const BRIDGE = { x: 40 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -44,6 +46,7 @@ export function lots() {
   LOTS = LOTS.filter((l) => !overlaps(l.rect, MERCATO));
   LOTS = LOTS.filter((l) => !overlaps(l.rect, [NOVELLA[0] - 4, NOVELLA[1] - 4, NOVELLA[2] + 4, NOVELLA[3]]) && !overlaps(l.rect, NOVELLA_PIAZZA));
   LOTS = LOTS.filter((l) => !overlaps(l.rect, [MEDICI[0] - 2, MEDICI[1] - 2, MEDICI[2] + 9, MEDICI[3] + 8]));
+  LOTS = LOTS.filter((l) => !overlaps(l.rect, [BOTTEGA[0] - 1, BOTTEGA[1] - 1, BOTTEGA[2] + 1, BOTTEGA[3] + 1]) && !overlaps(l.rect, TINTORI));
   return LOTS;
 }
 const overlaps = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
