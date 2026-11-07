@@ -21,6 +21,24 @@ let FORCE = params.get('weather');              // e.g. ?weather=shower (screens
 /** Hold every region in one weather state by id (the tools' --weather), or null to let it run. */
 export function forceWeather(id) { FORCE = id || null; }
 const SEASON = seasonNow();
+// A held weather (FORCE) holds every region, also one without a state of that id: there the state
+// most like it stands in (for 'clear' the clearest; for a wet, snowy, dusty or misty id the one most so),
+// so that ?weather=clear never lets a region wander into its fog or rain set piece.
+const clearness = (w) => (w.clouds ?? 0) + Math.max(0, (w.fog ?? 1) - 1) / 3 + (w.rain ?? 0) + (w.snow ?? 0) + (w.dust ?? 0);
+const LIKE = [[/rain|shower|monsoon|storm|drizzle/, (w) => w.rain ?? 0], [/snow|blizzard/, (w) => w.snow ?? 0],
+  [/dust|harmattan|khamsin|sand/, (w) => w.dust ?? 0], [/fog|mist|haze|smoke/, (w) => w.fog ?? 1]];
+/** The index of the held state in a region's states (S), or -1 when nothing is held. */
+export function forcedIndex(S, id = FORCE) {
+  if (!id || !S?.length) return -1;
+  const i = S.findIndex((w) => w.id === id);
+  if (i >= 0) return i;
+  const like = LIKE.find(([re]) => re.test(id));
+  let best = 0;
+  for (let k = 1; k < S.length; k++) {
+    if (like ? like[1](S[k]) > like[1](S[best]) : clearness(S[k]) < clearness(S[best])) best = k;
+  }
+  return best;
+}
 /** Length of a day in real seconds. */
 export const DAY_SECONDS = 1800;
 const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -35,7 +53,7 @@ class RegionWeather {
     this.r = region; this.rand = rng(seed); this.hour = hour;
     const S = region.climate.weather;
     this.cur = this.pick(); this.next = this.cur; this.t = 1;
-    if (FORCE) { const i = S.findIndex((w) => w.id === FORCE); if (i >= 0) { this.cur = this.next = i; } }
+    if (FORCE) { const i = forcedIndex(S); if (i >= 0) { this.cur = this.next = i; } }
     this.hold = 120 + this.rand() * 240;
   }
   pick() {
@@ -47,7 +65,7 @@ class RegionWeather {
   }
   update(dt, hour) {
     if (hour !== undefined) this.hour = hour;
-    if (FORCE) { const i = this.r.climate.weather.findIndex((w) => w.id === FORCE); if (i >= 0) this.cur = this.next = i, this.t = 1; return; }
+    if (FORCE) { const i = forcedIndex(this.r.climate.weather); if (i >= 0) this.cur = this.next = i, this.t = 1; return; }
     if (this.t < 1) { this.t = Math.min(1, this.t + dt / 75); if (this.t >= 1) this.cur = this.next; return; }
     this.hold -= dt;
     if (this.hold <= 0) { this.next = this.pick(); this.t = this.next === this.cur ? 1 : 0; this.hold = 150 + this.rand() * 330; }
