@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.93 — Venice, Florence, Baroque Rome, Versailles (2026-11-07)
+- Venice: San Marco opened inside - five domes on pendentives in gold mosaic, marble walls, the iconostasis of 1394, the Pala d'Oro; stone quay walls with their weed and tide bands along every canal; the timber Rialto bridge of 1458 with its shops and lifting span; the Rialto market; a traghetto. Florence: a painter's and sculptor's bottega to walk into, the dyers' yard on the Arno. Baroque Rome: coaches, sedan chairs, pilgrims and beggars; Bernini's steps worn. Versailles: orange trees in their boxes, gardeners, gilt and hired sedan chairs, coaches.
+
 ## v9.92 — Baked light everywhere, later China, the Americas, Islamic cities (2026-11-07)
 - Baked indoor light for every landmark with an interior (39 bakes; some to be refreshed after this wave's changes). Beijing: the palace beams painted in hexi caihua with Qing bracket sets, the Temple of Heaven with its three-coloured roofs as c. 1700, a furnished courtyard house, camel strings and Peking carts. Suzhou: a scholar's study after Wen Zhenheng, penjing, inscribed boards. Hangzhou: the Kaihua temple hall furnished, boatmen on every boat. Lhasa: murals and a chapel with a great prayer wheel and butter lamps. Teotihuacan, Tenochtitlan, Chichen Itza: rooms opened and furnished, farmers' houses on the chinampas, the Platform of Venus, a ball game; Machu Picchu: lichen, a chaski post, tree ferns. Isfahan, Istanbul, Cairo, Agra: courtyard houses to walk into, a coffee house, a Mamluk qa'a, caravanserais, enamelled mosque lamps, carpets, bazaar shops by trade.
 
