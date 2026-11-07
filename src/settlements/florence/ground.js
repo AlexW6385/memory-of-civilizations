@@ -1,7 +1,7 @@
 // Florence — the ground: the stone paving of the piazzas and streets, the Arno's green water and
 // its banks, cypresses and umbrella pines in the gardens; the clear Tuscan light.
 
-import { RADIUS, PIAZZA_DUOMO, SIGNORIA, ORSAN, ARNO, MERCATO, MEDICI, NOVELLA_PIAZZA, height, inArno, inRect, inLot } from './layout.js';
+import { RADIUS, PIAZZA_DUOMO, SIGNORIA, ORSAN, ARNO, MERCATO, MEDICI, NOVELLA_PIAZZA, BOTTEGA, TINTORI, height, inArno, inRect, inLot } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.1, grass: 0.3, rock: 0, soil: 0.4, fields: 0, dry: 0.45, warmth: 0.6, red: 0.25, road: 0.3, snow: 0, forest: 0 };
@@ -16,7 +16,7 @@ function water(x, z, y) { return inArno(x, z) && y < ARNO.level + 0.3; }
 function waterLevel(x, z) { return inArno(x, z) ? ARNO.level : -Infinity; }
 function fromWater(x, z) { return inArno(x, z) ? -3 : Math.max(-5, Math.min(40, height(x, z) - ARNO.level)); }
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inArno(x, z) || inRect(PIAZZA_DUOMO, x, z, 2) || inRect(SIGNORIA, x, z, 2) || inRect(ORSAN, x, z, 7) || inRect(MERCATO, x, z, 2) || inRect(MEDICI, x, z, 9) || inRect(NOVELLA_PIAZZA, x, z, 3) || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inArno(x, z) || inRect(PIAZZA_DUOMO, x, z, 2) || inRect(SIGNORIA, x, z, 2) || inRect(ORSAN, x, z, 7) || inRect(MERCATO, x, z, 2) || inRect(MEDICI, x, z, 9) || inRect(NOVELLA_PIAZZA, x, z, 3) || inLot(x, z, 1) || inRect(BOTTEGA, x, z, 2) || inRect(TINTORI, x, z, 1)) return null;
   if (height(x, z) < -1) return { reeds: 6, willow: 0.03, grass: 20 };
   return { cypress: 0.02, stone_pine: 0.008, grass: 10 };
 }
