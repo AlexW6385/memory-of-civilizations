@@ -13,8 +13,15 @@ function cover(x, z, h) {
 function water(x, z, y) { return inTankWater(x, z) && y < TANK.level + 0.3; }
 function waterLevel(x, z) { return inTankWater(x, z) ? TANK.level : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, tankD(x, z))); }
+// the arrival's view of Kandariya Mahadeva (src/planet/arrivals.js) kept free of the oleander clumps:
+// the wedge from the arrival point to the temple's two ends, as far as its terrace
+const EYE = [-28, -98], ENDS = [[-34, -62], [-84, -60]];
+const ang = (x, z) => Math.atan2(z - EYE[1], x - EYE[0]);
+const A0 = Math.min(...ENDS.map(([x, z]) => ang(x, z))) - 0.08, A1 = Math.max(...ENDS.map(([x, z]) => ang(x, z))) + 0.08;
+function inView(x, z) { const a = ang(x, z); return a > A0 && a < A1 && Math.hypot(x - EYE[0], z - EYE[1]) < 50; }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inTank(x, z) || nearTemple(x, z, 6) || inLot(x, z, 1)) return null;
+  if (inView(x, z)) return { grass: 25 };
   if (tankD(x, z) < 8) return { reeds: 10, grass: 20 };
   // oleander (karavira, its flowers offered at the shrines) in clumps round the terraces; a pipal (a fig) or two by the tank
   if (nearTemple(x, z, 16)) return { oleander: 0.5, grass: 22 };
