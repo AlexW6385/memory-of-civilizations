@@ -15,13 +15,15 @@ export const opera = {
   elements: [{
     t: 'opera_house', rect: OPERA.rect, y: height(100, -190), h: OPERA.h, stair: OPERA.stair,
     halls: [
-      { x: cw, hw: 19, shells: [[oz1 - 6, oz1 - 34, 24], [oz1 - 26, oz1 - 60, 38], [oz1 - 50, oz1 - 88, 50], [oz1 - 78, oz1 - 112, 57]] },
+      { x: cw, hw: 19, concert: true, shells: [[oz1 - 6, oz1 - 34, 24], [oz1 - 26, oz1 - 60, 38], [oz1 - 50, oz1 - 88, 50], [oz1 - 78, oz1 - 112, 57]] },
       { x: ce, hw: 17, shells: [[oz1 - 10, oz1 - 36, 20], [oz1 - 28, oz1 - 60, 32], [oz1 - 50, oz1 - 84, 43], [oz1 - 74, oz1 - 104, 49]] },
     ],
   }],
   // (the forecourt and the walk at the ground's height there, not at the plan's base)
   rooms: [{ id: 'forecourt', rect: [ox0, oz1, ox1, oz1 + OPERA.stair + 12], y: height(100, oz1 + OPERA.stair + 6), kind: 'open' }],
-  walks: [Object.assign([[100, -96], [100, oz1 + OPERA.stair + 2]], { y0: height(100, -96) })],
+  walks: [Object.assign([[100, -96], [100, oz1 + OPERA.stair + 2]], { y0: height(100, -96) }),
+    // up the stair, in at the Concert Hall's east door and down its aisle to the stage
+    Object.assign([[100, oz1 - 4], [cw + 15, oz1 - 34], [cw + 8, oz1 - 34], [cw, oz1 - 34], [cw, oz1 - 45], [cw, oz1 - 55]], { y0: height(100, -190) + OPERA.h })],
 };
 export const harbour = {
   id: 'sydney-harbour', style: 'modern', origin: [0, 0], base: 0, yaw: 0, feature: true,

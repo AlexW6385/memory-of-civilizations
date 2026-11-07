@@ -10,7 +10,7 @@ const quad = (T, a, b, c, d) => T.push(...a, ...b, ...c, ...a, ...c, ...d);
 /** sea_wall: { pts: [[x, z]] (the face line), n: [[nx, nz]] (landward, mitred), top: [y] (the land behind), base, level (the water) } */
 export function seaWall(el, { bag }) {
   const P = el.pts, N = el.n, Y = el.top, base = el.base ?? -7.4, lv = el.level ?? -2.4, back = 2.1, nose = 0.07, ct = 0.3;
-  const face = [], wet = [], cope = [], joint = [];
+  const face = [], wet = [], salt = [], cope = [], joint = [];
   // the face's side toward the water: its normal is -n
   const at = (i, off, y) => [P[i][0] - N[i][0] * off, y, P[i][1] - N[i][1] * off];
   const cum = [0];
@@ -22,6 +22,9 @@ export function seaWall(el, { bag }) {
     // the tidal band: weed and wet stone a hand's breadth proud of the face, uneven along the wall
     const w0 = lv + 0.55 + 0.18 * Math.sin(cum[i] * 0.37), w1 = lv + 0.55 + 0.18 * Math.sin(cum[j] * 0.37);
     quad(wet, at(i, 0.015, lv - 0.5), at(i, 0.015, w0), at(j, 0.015, w1), at(j, 0.015, lv - 0.5));
+    // over it the splash zone: the stone bleached and crusted by the salt the spray leaves as it dries (§6a)
+    const s0 = Math.min(w0 + 0.45 + 0.25 * Math.sin(cum[i] * 0.23 + 1), Y[i] - ct - 0.1), s1 = Math.min(w1 + 0.45 + 0.25 * Math.sin(cum[j] * 0.23 + 1), Y[j] - ct - 0.1);
+    if (s0 > w0 + 0.05 && s1 > w1 + 0.05) quad(salt, at(i, 0.012, w0), at(i, 0.012, s0), at(j, 0.012, s1), at(j, 0.012, w1));
     // the coping: the slab's top from the nose back to the land, its front, and the nose's underside
     const fi = (k, y) => at(k, nose, y), bi = (k, y) => [P[k][0] + N[k][0] * back, y, P[k][1] + N[k][1] * back];
     const ti = (k) => at(k, nose - 0.03, Y[k] + 0.04);
@@ -42,6 +45,7 @@ export function seaWall(el, { bag }) {
   }
   bag.add('sandstone', fromTriangles(face));
   bag.add('sandstone_green', fromTriangles(wet));
+  bag.add('sandstone_white', fromTriangles(salt));
   bag.add('sandstone_dressed', fromTriangles(cope));
   bag.add('pottery_dark', fromTriangles(joint));
   // iron mooring rings let into the face every ~24 m where the wall stands well clear of the water
