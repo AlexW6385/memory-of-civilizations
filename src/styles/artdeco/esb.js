@@ -7,6 +7,8 @@
 // cone of the mooring gear, to 381 m.
 
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
+import { subtractRects } from '../../core/build.js';
+import { esbLobby } from './lobby.js';
 
 const LS = 'limestone', CH = 'steel_chrome', AL = 'aluminium_dull', GL = 'glass_outer';
 const FLOOR = 3.6, BASE = 22;
@@ -105,14 +107,17 @@ function eagle(bag, F, uc, y, d0) {
   }
 }
 /** empire_state: { rect (the full lot), y } */
-export function empireState(el, { bag, col }) {
+export function empireState(el, { bag, col, lights }) {
   const r = el.rect, y = el.y ?? 0, cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
   const [x0, z0, x1, z1] = r;
   // the base: five storeys over the whole lot
   const RD = 2.2, ez0 = cz - 5.2, ez1 = cz + 5.2, ey = y + 14.5;                          // the entrance's recess in the Fifth Avenue front
-  bag.add(LS, box(x0, y - 0.5, z0, x1 - RD, y + BASE, z1));
-  for (const [a, b, ya] of [[z0, ez0, y - 0.5], [ez1, z1, y - 0.5], [ez0, ez1, ey]]) bag.add(LS, box(x1 - RD, ya, a, x1, y + BASE, b));
-  col.rect(r, y - 0.5, y + BASE + 1.2); col.floor(r, y + BASE + 1.2);
+  // (hollowed by the lobby: the hall from the doors west to the silhouette, the corridor across it — new-york.md §1e)
+  const xr = x1 - RD, H1 = [xr - 28.8, ez0 + 0.2, xr, ez1 - 0.2], H2 = [xr - 20.8, z0 + 6, xr - 14.8, z1 - 6], hTop = y + 14.5, cTop = y + 7.6;
+  for (const [ya, yb2, holes] of [[y - 0.5, cTop, [H1, H2]], [cTop, hTop, [H1]], [hTop, y + BASE, []]]) for (const q of subtractRects([x0, z0, xr, z1], holes)) { bag.add(LS, box(q[0], ya, q[1], q[2], yb2, q[3])); col.rect(q, ya, yb2); }
+  for (const [a, b, ya] of [[z0, ez0, y - 0.5], [ez1, z1, y - 0.5], [ez0, ez1, ey]]) { bag.add(LS, box(x1 - RD, ya, a, x1, y + BASE, b)); col.rect([x1 - RD, a, x1, b], ya, y + BASE); }
+  col.rect(r, y + BASE, y + BASE + 1.2); col.floor(r, y + BASE + 1.2);
+  esbLobby(bag, col, lights, { H1, H2, y, yF: y + 0.15, hTop, cTop });
   bag.add(LS, box(x0 - 0.3, y + BASE, z0 - 0.3, x1 + 0.3, y + BASE + 1.2, z1 + 0.3));     // the parapet over the base
   const faces = [[true, z0, -1, x0, x1], [true, z1, 1, x0, x1], [false, x0, -1, z0, z1], [false, x1, 1, z0, z1]];
   for (const [along, o, sg, a, b] of faces) {
@@ -143,14 +148,17 @@ export function empireState(el, { bag, col }) {
     }
     bag.add(LS, F(mid - 5.2, mid + 5.2, 0.004, 0.5, y + 14.5, y + 16));                 // the lintel
     bag.add('granite_black', F(mid - 5.2, mid + 5.2, -RD, 0.004, y - 0.5, y + 0.15));    // the threshold
-    bag.add(GL, F(mid - 5.2, mid + 5.2, -RD, -RD + 0.02, y + 0.15, y + 14.5));            // the glass at the back of the recess
-    for (let i = 0; i <= 8; i++) { const u = mid - 5.2 + i * 10.4 / 8; bag.add(CH, F(Math.max(mid - 5.2, u - 0.07), Math.min(mid + 5.2, u + 0.07), -RD + 0.02, -RD + 0.2, y + 0.15, y + 14.5)); }
+    // the glass at the back of the recess, the central doors standing open into the lobby
+    for (const [a, b, ya] of [[mid - 5.2, mid - 1.4, y + 0.15], [mid + 1.4, mid + 5.2, y + 0.15], [mid - 1.4, mid + 1.4, y + 3.6]]) bag.add(GL, F(a, b, -RD, -RD + 0.02, ya, y + 14.5));
+    for (const [a, b] of [[mid - 5.2, mid - 1.4], [mid + 1.4, mid + 5.2]]) col.rect(along ? [a, o - RD, b, o - RD + 0.02] : [o - RD, a, o - RD + 0.02, b], y, y + 14.5);
+    for (let i = 0; i <= 8; i++) { const u = mid - 5.2 + i * 10.4 / 8; bag.add(CH, F(Math.max(mid - 5.2, u - 0.07), Math.min(mid + 5.2, u + 0.07), -RD + 0.02, -RD + 0.2, i === 4 ? y + 3.6 : y + 0.15, y + 14.5)); }
+    for (const s of [-1, 1]) bag.add(CH, F(mid + s * 1.4 - 0.08, mid + s * 1.4 + 0.08, -RD + 0.02, -RD + 0.24, y + 0.15, y + 3.6));
+    for (const s of [-1, 1]) bag.add('gilt_bronze', F(mid + s * 1.4, mid + s * 1.45, -RD - 1.3, -RD, y + 0.15, y + 3.45));     // the leaves folded back inside
     for (let k = 0; k < 7; k++) {                                                          // the stepped transom
       const yy = y + 5 + k * 1.35, hwk = 5.2 - Math.abs(k - 3) * 0.6;
       bag.add(CH, F(mid - 5.2, mid + 5.2, -RD + 0.02, -RD + 0.16, yy, yy + 0.12));
       bag.add(CH, F(mid - hwk, mid + hwk, -RD + 0.16, -RD + 0.28, yy + 0.5, yy + 0.6));
     }
-    bag.add('opening', F(mid - 1.4, mid + 1.4, -RD + 0.2, -RD + 0.3, y + 0.15, y + 3.6));          // the central doors
     for (const s of [-1, 1]) bag.add('opening', F(mid + s * 3.6 - 1.0, mid + s * 3.6 + 1.0, -RD + 0.2, -RD + 0.3, y + 0.15, y + 3.0));
     for (const s of [-1, 1]) bag.add(CH, lathe([[0.95, 0], [0.95, 0.12], [0.9, 0.12], [0.9, 2.9], [0.95, 2.9], [0.95, 3.05], [0.001, 3.05]], 16, null, ...(along ? [mid + s * 3.6, y + 0.15, o - sg * 1.05] : [o - sg * 1.05, y + 0.15, mid + s * 3.6])));   // the revolving doors' drums
     bag.add(CH, F(mid - 5.2, mid + 5.2, -RD + 0.02, -RD + 0.3, y + 4.4, y + 4.6));

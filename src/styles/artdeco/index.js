@@ -4,6 +4,7 @@
 // sunbursts and its spire; the Beaux-Arts of Grand Central and the Public Library; loft buildings
 // with water tanks on their roofs; the steel viaduct of the elevated railway.
 
+import { diner, walkup } from './rooms.js';
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, rod, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
@@ -109,6 +110,19 @@ function piers(bag, [x0, z0, x1, z1], y0, y1) {
     }
   }
 }
+/**
+ * The soot of a city burning coal (docs/settlements/new-york.md §1g) on a low building's street front: the sheltered band
+ * under the cornice's frieze blackened, its lower edge ragged where the rain has washed it; the dark streaks run down
+ * from it at the party walls; brick goes near black, the buff and limestone fronts a grey grime.
+ */
+function soot(bag, [x0, z0, x1, z1], f, y, h, mat, rand) {
+  const m = mat === 'facade_brick' ? 'pottery_dark' : 'plaster_damp', along = f === 'n' || f === 's', o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
+  const a0 = along ? x0 : z0, L = along ? x1 - x0 : z1 - z0, top = y + h - 1.6, low = y + 4.6;
+  const put = (u0, u1, ya, yb) => { if (yb - ya < 0.05) return; const p = o + sg * 0.004, q = o + sg * 0.014; bag.add(m, along ? box(a0 + u0, ya, Math.min(p, q), a0 + u1, yb, Math.max(p, q)) : box(Math.min(p, q), ya, a0 + u0, Math.max(p, q), yb, a0 + u1)); };
+  const n = Math.max(2, Math.round(L / 3));
+  for (let i = 0; i < n; i++) put(i * L / n, (i + 1) * L / n, Math.max(low, top - 0.6 - rand() * 0.9), top);
+  for (const u of [0.05, L - 0.55]) put(u, u + 0.5, Math.max(low, top - 4 - rand() * 6), Math.max(low, top - 0.6));
+}
 /** skyscraper: { rect, y, h, mat, seed } — a block that steps back as it rises when tall; a cornice or a crown; a tank on lower roofs. */
 function skyscraper(el, { bag, col }) {
   const rand = rng(el.seed || 1), y = el.y ?? 0, h = el.h ?? 40, mat = el.mat ?? LS;
@@ -121,6 +135,7 @@ function skyscraper(el, { bag, col }) {
     block(bag, mat, inset(r, -0.5), y + h - 0.2, y + h + 0.8);
     block(bag, PLAIN, inset(r, -0.2), y + h - 1.6, y + h - 0.2);                // the frieze under the cornice
     if (h > 20) block(bag, PLAIN, inset(r, -0.25), y + 12.2, y + 12.8);              // a belt course over the base
+    if (el.front) soot(bag, r, el.front, y, h, mat, rand);
     if (el.front && h > 14 && rand() < 0.55) { const r = el.rect, f = el.front, along = f === 'n' || f === 's', L = along ? r[2] - r[0] : r[3] - r[1], a0 = along ? r[0] : r[1], w = Math.min(7, L - 2), u0 = a0 + (L - w) / 2 + (rand() - 0.5) * (L - w - 1); fireEscape(bag, along, f === 'n' ? r[1] : f === 's' ? r[3] : f === 'w' ? r[0] : r[2], f === 'n' || f === 'w' ? -1 : 1, u0, u0 + w, y + 7.6, y + h); }
     if (el.tanks !== false && rand() < 0.4) tank(bag, (r[0] + r[2]) / 2 + (rand() - 0.5) * 4, y + h + 0.8, (r[1] + r[3]) / 2 + (rand() - 0.5) * 4);
     return;
@@ -228,6 +243,6 @@ function beauxArts(el, { bag, col }) {
 function park(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('granite_grey', box(x0, y - 0.3, z0, x1, y + 0.25, z0 + 1.5)); bag.add('granite_grey', box(x0, y - 0.3, z1 - 1.5, x1, y + 0.25, z1)); }
 registerStyle('artdeco', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, skyscraper, empire_state: empireState, grand_central: grandCentral, laundry, newsstand, chrysler, beaux_arts: beauxArts, el_track: elTrack, el_train: elTrain, park, turned },
+  elements: { ...STYLES.qing.elements, diner, walkup, skyscraper, empire_state: empireState, grand_central: grandCentral, laundry, newsstand, chrysler, beaux_arts: beauxArts, el_track: elTrack, el_train: elTrain, park, turned },
   objects: {},
 });

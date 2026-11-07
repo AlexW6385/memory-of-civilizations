@@ -52,6 +52,20 @@ function streetLife() {
     }
     for (let z = -RADIUS + 10; z < RADIUS; z += 30) { const xx = ax + sg * (w / 2 + 0.5); if (inside(xx, z) && !inLot(xx, z, 0.4) && !crossing(xx, z, 1) && !onElStair(xx, z, 0.5) && !inSpecial(xx, z, 0.4) && !nearStand(xx, z, 1.8)) L.push({ t: 'street_lamp', at: [xx, z], y: height(xx, z), h: 5.5, seed: z }); }
   }
+  // people waiting at the crossings: at about half the corners a knot of two to five on the kerb, facing across the
+  // avenue or the street, a policeman in blue on some corners of Fifth Avenue
+  for (const [ax, w, name] of AVENUES) for (const [sz, sw] of STREETS) for (const sx of [-1, 1]) for (const szs of [-1, 1]) {
+    if (rand() < 0.5) continue;
+    const cx = ax + sx * (w / 2 + 1.2), cz = sz + szs * (sw / 2 + 1.2);
+    if (!inside(cx, cz) || inLot(cx, cz, 0.3) || onElStair(cx, cz, 1) || inSpecial(cx, cz, 0.5) || nearStand(cx, cz, 2.2) || onBroadway(cx, cz, 1)) continue;
+    const across = rand() < 0.5, n = 2 + Math.floor(rand() * 4);
+    for (let k = 0; k < n; k++) {
+      const x = cx + (across ? (rand() - 0.5) * 1.6 : sx * k * 0.5), z = cz + (across ? szs * k * 0.5 : (rand() - 0.5) * 1.6), woman = rand() < 0.4;
+      if (inLot(x, z, 0.3)) continue;
+      L.push({ t: 'figure', at: [x, z], y: height(x, z), rot: across ? (szs > 0 ? 0 : Math.PI) + (rand() - 0.5) * 0.4 : (sx > 0 ? -Math.PI / 2 : Math.PI / 2) + (rand() - 0.5) * 0.4, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'trousers', cloth: pick(DRESS), cloth2: pick(['cloth_white', 'cloth_grey', 'cloth_black']), skin: pick(['skin_light', 'skin_light', 'skin_medium', 'skin_dark']), hat: woman ? pick(['cap', 'none']) : 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']) });
+    }
+    if (name === '5th' && rand() < 0.35) L.push({ t: 'figure', at: [cx - sx * 0.6, cz - szs * 0.6], y: height(cx, cz), rot: rand() * 6, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: 'cloth_indigo', cloth2: 'cloth_indigo', skin: 'skin_light', hat: 'cap', hatMat: 'cloth_indigo', over: 'belt' });
+  }
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 150)},${Math.floor(e.at[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-life-${k}`, []), elements: list.map(placed), style: 'life', center: toCity(i * 150 + 75, j * 150 + 75), near: 260 }; });
@@ -73,8 +87,35 @@ function yards() {
   for (const e of out) { const p = e.at ?? e.pole, k = `${Math.floor(p[0] / 150)},${Math.floor(p[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-yards-${k}`, list), center: toCity(i * 150 + 75, j * 150 + 75), near: 300 }; });
 }
+/** The lot of the diner (on 34th Street east of Fifth) and the walk-up (beside it), §1f. */
+const DINER_AT = [43, 185], WALKUP_AT = [75, 185];
+const lotAt = ([x, z]) => lots().find((l) => inRect(l.rect, x, z));
+function special(l) {
+  if (l === lotAt(DINER_AT)) return [{ t: 'diner', rect: l.rect, y: l.y }];
+  if (l === lotAt(WALKUP_AT)) {
+    // the walk-up takes the east 7.6 m of its lot (a 25-foot tenement), the rest a building as before
+    const [x0, z0, x1, z1] = l.rect, xs = x1 - 7.6;
+    return [{ t: 'skyscraper', ...l, rect: [x0, z0, xs - 0.3, z1], shops: l.shops.replace('e', '') }, { t: 'walkup', rect: [xs, z0, x1, z1], y: l.y, h: 15.5, seed: l.seed }];
+  }
+  return null;
+}
+/** The diner's people: the counterman behind the counter, the cook at the grill, customers at the counter and in a booth (life style). */
+function dinerLife() {
+  const l = lotAt(DINER_AT); if (!l) return [];
+  const [lx0, , lx1, lz1] = l.rect, F = l.y + 0.75, Lc = Math.min(13.5, lx1 - lx0 - 2), x0 = (lx0 + lx1) / 2 - Lc / 2, x1 = x0 + Lc, z0 = lz1 - 0.8 - 4.6;
+  const zb = z0 + 0.12, zk1 = zb + 2.2, rand = rng(1933);
+  const P = (o) => ({ t: 'figure', y: F, seed: Math.floor(rand() * 1e9), skin: rand() < 0.8 ? 'skin_light' : 'skin_medium', ...o });
+  return [
+    P({ at: [x0 + 6.5, zb + 1.1], rot: Math.PI, dress: 'trousers', cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white', over: 'apron' }),
+    P({ at: [x1 - 1.5, zb + 1.0], rot: 0, dress: 'trousers', cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white', over: 'apron' }),
+    P({ at: [x0 + 4.3, zk1 + 0.95], rot: 0, dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_white', hat: 'brim', hatMat: 'cloth_black', pose: 'talk' }),
+    P({ at: [x0 + 8.4, zk1 + 0.95], rot: 0.1, dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'brim', hatMat: 'cloth_brown' }),
+    P({ at: [x0 + 9.8, zk1 + 0.95], rot: -0.2, dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_red' }),
+  ].map(placed);
+}
 export async function buildings() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).map((l) => ({ t: 'skyscraper', ...l }))));
-  return [...plans, ...streetLife(), ...yards()];
+  for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l }])));
+  const dl = dinerLife(), c = toCity(...DINER_AT);
+  return [...plans, ...streetLife(), ...yards(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }
