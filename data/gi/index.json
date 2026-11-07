@@ -1631,7 +1631,7 @@
  },
  "versailles-chateau": {
   "site": "versailles",
-  "hash": "baba2f2b63e11267",
+  "hash": "8dfa4b361a2f82fa",
   "rays": 128,
   "probes": 72641,
   "boxes": [
@@ -1676,8 +1676,8 @@
     ]
    }
   ],
-  "bytes": 1193416,
-  "seconds": 351,
+  "bytes": 1192054,
+  "seconds": 230,
   "baked": "2026-11-07"
  }
 }
