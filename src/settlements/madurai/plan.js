@@ -3,7 +3,7 @@
 // Meenakshi with their own gopurams and gilded vimanas, the Golden Lotus tank in its colonnade,
 // the Thousand-Pillar Hall, the pillared entrance hall from the east gate, the flagstaffs.
 
-import { WALL, SUNDARA, MEENAKSHI, TANK, HALL, GATES } from './layout.js';
+import { WALL, SUNDARA, MEENAKSHI, TANK, HALL, GATES, PUDHU } from './layout.js';
 
 const E = [];
 const wallLoop = (r, gates, h, th) => {
@@ -60,6 +60,26 @@ E.push({ t: 'mandapa', rect: HALL, h: 6, step: 2.6, carved: true });
 E.push({ t: 'mandapa', rect: [GATES.s[0] - 8, 82, GATES.s[0] + 8, GATES.s[1] - 12], h: 6, step: 3.4 });
 E.push({ t: 'mandapa', rect: [WALL[0] + 12, GATES.w[1] - 7, MEENAKSHI[0] - 6, GATES.w[1] + 7], h: 6, step: 3.4 });
 
+// the things of worship (§11): at the passages of the shrines' gopurams two lamp stands and a bell, an offering;
+// garlands at the flagstaffs; lamps along the tank's top steps; an offering before the Nataraja
+{
+  const JM = [['cloth_white'], ['cloth_white', 'cloth_red']];
+  const shrineGate = (gx, gz, d, ph) => {
+    const xi = gx - d / 2 - 0.9;
+    for (const sz of [-1, 1]) E.push({ t: 'rite', kind: 'stand', at: [xi, gz + sz * 1.7], y: 0, h: 1.3 });
+    E.push({ t: 'rite', kind: 'bell', at: [gx - d / 2 + 0.6, gz], top: ph, drop: ph - 3.3, r: 0.17 });
+    E.push({ t: 'rite', kind: 'offering', at: [xi - 0.8, gz], y: 0, n: [-1, 0], seed: 1, mats: JM[1] });
+  };
+  shrineGate(SUNDARA[2], (SUNDARA[1] + SUNDARA[3]) / 2, 12, 6);
+  shrineGate(MEENAKSHI[2], (MEENAKSHI[1] + MEENAKSHI[3]) / 2, 9, 6);
+  for (const [x, z] of [[SUNDARA[2] + 10, (SUNDARA[1] + SUNDARA[3]) / 2], [MEENAKSHI[2] + 8, (MEENAKSHI[1] + MEENAKSHI[3]) / 2]]) {
+    E.push({ t: 'rite', kind: 'loop', at: [x + 0.33, 1.9, z], ux: 0, uz: 1, w: 0.62, drop: 0.4, mats: JM[0] });
+    E.push({ t: 'rite', kind: 'lamps', at: [x + 1.3, z - 0.8], to: [x + 1.3, z + 0.8], y: 0, count: 5 });
+  }
+  for (const zz of [TANK[1] + 0.17, TANK[3] - 0.17]) E.push({ t: 'rite', kind: 'lamps', at: [TANK[0] + 2, zz], to: [TANK[2] - 2, zz], y: 0, count: 24 });
+  E.push({ t: 'rite', kind: 'offering', at: [(HALL[0] + HALL[2]) / 2, HALL[1] + 4.7], y: 0.5, n: [0, 1], seed: 2, mats: JM[1] });
+  for (const sx of [-1, 1]) E.push({ t: 'rite', kind: 'stand', at: [(HALL[0] + HALL[2]) / 2 + sx * 2.3, HALL[1] + 4.4], y: 0.5, h: 1.3 });
+}
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('outer court', WALL, 0, 'open'),
@@ -83,5 +103,12 @@ export const temple = {
   elements: E,
   rooms,
   walks,
+};
+/** Tirumala Nayaka's new hall across the street from the east gopuram (docs/settlements/madurai.md §11). */
+export const pudhuMandapam = {
+  id: 'madurai-pudhu-mandapam', style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true,
+  entrance: { at: [PUDHU[0] - 3, (PUDHU[1] + PUDHU[3]) / 2], facing: 'e' }, bounds: [PUDHU[0] - 4, PUDHU[1] - 1, PUDHU[2] + 4, PUDHU[3] + 1],
+  elements: [{ t: 'pudhu_mandapa', rect: PUDHU, h: 7.6, plinth: 1.2 }],
+  rooms: [{ id: 'pudhu mandapam', rect: [PUDHU[0] + 1, PUDHU[1] + 1, PUDHU[2] - 1, PUDHU[3] - 1], y: 1.2, kind: 'hall' }],
 };
 export default temple;
