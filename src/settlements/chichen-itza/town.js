@@ -16,6 +16,16 @@ function lotElements(l) {
     E.push({ t: 'albarrada', pts: [[m[0] + ux * gw, m[1] + uz * gw], b] });
   });
   for (const h of l.houses) E.push({ t: 'maya_house', ...h });
+  // agave grown in the lot along its wall, for its fibre (§13)
+  const r = rng(Math.floor(x0 * 31 + z1 * 17) >>> 0), P = [];
+  for (let i = 0; i < 2 + Math.floor(r() * 4); i++) {
+    const side = Math.floor(r() * 4), u = 3 + r() * (x1 - x0 - 6), off = 1.4;
+    const x = side < 2 ? x0 + u : side === 2 ? x0 + off : x1 - off, z = side < 2 ? (side ? z1 - off : z0 + off) : z0 + u;
+    if (l.houses.some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.a + 2.5)) continue;
+    if ([0, 2, 3, 1][side] === l.gate && Math.abs(u - (side < 2 ? x1 - x0 : z1 - z0) / 2) < 3.6) continue;     // clear of the gateway
+    P.push(['maguey', x, z, ground.height(x, z), 0.5 + r() * 0.3, Math.floor(r() * 4) * Math.PI / 2, Math.floor(r() * 3)]);
+  }
+  if (P.length) E.push({ t: 'meso_plants', plants: P });
   return E;
 }
 
@@ -76,10 +86,35 @@ function rites() {
   priest(118.0, -13.2, 13.43, -Math.PI / 2, { pose: 'talk' }); priest(106.4, -16.6, 13.43, Math.PI / 2);
   return { ...base('chichen-itza-rites', L), style: 'life' };
 }
+/**
+ * A game in the Great Ball Court (§13): two teams of four in the alley about the middle line, in loincloths with
+ * hip guards of hide, the ball between them; people watching from the tops of the two platforms and of the end
+ * temples' platforms, sitting along the edges or standing.
+ */
+function ballgame() {
+  const rand = rng(1200), L = [], pick = (a) => a[Math.floor(rand() * a.length)], X0 = -128.5, X1 = -101.5, ZC = -37;
+  const person = (x, z, y, rot, o = {}) => {
+    const woman = o.woman ?? rand() < 0.35;
+    L.push({ t: 'figure', at: [x, z], y, rot, h: woman ? 1.5 : 1.6, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'wrap', cloth: 'cloth_white', cloth2: pick(['cloth_red', 'cloth_ochre', 'cloth_white']), skin: pick(['skin_dark', 'skin_dark', 'skin_medium']), hat: 'none', hair: woman ? pick(['long', 'bun']) : 'long', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: woman ? 'none' : pick(['cape', 'sash', 'none']), pose: 'stand', ...o });
+  };
+  // the players: each team on its half, facing the middle; the hip guards (the belt in hide) and the knee pad
+  for (const [side, cloth2] of [[-1, 'cloth_red'], [1, 'cloth_indigo']]) for (let i = 0; i < 4; i++) {
+    const x = X0 + 4 + rand() * (X1 - X0 - 8), z = ZC + side * (3 + i * 5 + rand() * 3);
+    person(x, z, 0.04, side < 0 ? Math.PI : 0, { woman: false, dress: 'loincloth', top: 'bare', cloth: 'cloth_white', cloth2, over: 'belt', hat: i === 0 ? 'cap' : 'none', hatMat: 'stucco_leaf', pose: i === 1 ? 'kneel' : 'stand' });
+  }
+  const ball = { t: 'm_ball', at: [X0 + 13 + rand() * 2, ZC + 1.2], y: 0.04 };
+  // the watchers on the platforms' tops (8.5 m), along their inner edges; and on the end temples' platforms (3.2 m)
+  for (const s of [-1, 1]) for (let i = 0; i < 16; i++) {
+    const z = -82 + rand() * (s > 0 ? 72 : 90), x = (s < 0 ? -133 - 0.7 : -97 + 0.7) - s * 0 + s * rand() * 2.5 * (rand() < 0.5 ? 1 : 0);
+    person(x, z, 8.5, s < 0 ? -Math.PI / 2 : Math.PI / 2, { pose: rand() < 0.55 ? 'sit_ground' : rand() < 0.3 ? 'talk' : 'stand' });
+  }
+  for (const zt of [-118, 44]) for (let i = 0; i < 6; i++) person(-127 + rand() * 24, zt + (zt < 0 ? 4.5 : -4.5) + (rand() - 0.5), 3.2, zt < 0 ? Math.PI : 0, { pose: rand() < 0.5 ? 'sit_ground' : 'stand' });
+  return [{ ...base('chichen-itza-ballgame', L), style: 'life' }, base('chichen-itza-ball', [ball])];
+}
 function riteObjects() { return base('chichen-itza-offering', [{ t: 'm_offering', at: [-5.6, -240.2], y: ground.height(-5.6, -240.2) + 0.02, dir: [0, -1] }]); }
 
 export async function town() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 30) plans.push(base(`chichen-itza-town-${i / 30}`, all.slice(i, i + 30).flatMap(lotElements)));
-  return [...plans, ...market(), rites(), riteObjects()];
+  return [...plans, ...market(), rites(), riteObjects(), ...ballgame()];
 }
