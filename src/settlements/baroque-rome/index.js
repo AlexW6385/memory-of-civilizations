@@ -6,6 +6,7 @@ import '../../styles/ming/index.js';
 import { stpeter, vatican, passetto, bridge, river } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';
+import { streetPlans } from './street.js';
 export { music };
 export const landmarks = [{ plan: stpeter, music }];
-export async function town() { return [vatican, passetto, bridge, river, ...(await houses())]; }
+export async function town() { return [vatican, passetto, bridge, river, ...streetPlans(), ...(await houses())]; }
