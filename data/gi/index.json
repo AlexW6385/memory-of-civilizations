@@ -1,8 +1,8 @@
 {
  "angkor-wat": {
   "site": "angkor",
-  "hash": "d00350b30b1aacad",
-  "rays": 160,
+  "hash": "58ed19dd15dceff3",
+  "rays": 128,
   "probes": 7064,
   "boxes": [
    {
@@ -38,9 +38,9 @@
     ]
    }
   ],
-  "bytes": 114085,
-  "seconds": 73,
-  "baked": "2026-11-06"
+  "bytes": 112916,
+  "seconds": 24,
+  "baked": "2026-11-07"
  },
  "byodo-in-phoenix-hall": {
   "site": "heian-uji",
@@ -152,9 +152,9 @@
  },
  "foguang-east-hall": {
   "site": "tang-wutai",
-  "hash": "59a025083010967f",
-  "rays": 160,
-  "probes": 6336,
+  "hash": "6dcc22aceb5b346a",
+  "rays": 128,
+  "probes": 8316,
   "boxes": [
    {
     "min": [
@@ -163,35 +163,20 @@
      -16
     ],
     "n": [
-     8,
+     21,
      12,
      33
     ],
     "spacing": 1,
     "rooms": [
-     "front-aisle"
-    ]
-   },
-   {
-    "min": [
-     63.5,
-     13.5,
-     -16
-    ],
-    "n": [
-     8,
-     12,
-     33
-    ],
-    "spacing": 1,
-    "rooms": [
+     "front-aisle",
      "rear-aisle"
     ]
    }
   ],
-  "bytes": 115640,
-  "seconds": 46,
-  "baked": "2026-11-06"
+  "bytes": 147825,
+  "seconds": 44,
+  "baked": "2026-11-07"
  },
  "isfahan-maidan": {
   "site": "isfahan",
@@ -309,8 +294,8 @@
  },
  "norse-borgund-church": {
   "site": "norse-borgund",
-  "hash": "7acd7be3ac8f6354",
-  "rays": 160,
+  "hash": "86d05a6f2cb13c5f",
+  "rays": 128,
   "probes": 6175,
   "boxes": [
    {
@@ -331,9 +316,9 @@
     ]
    }
   ],
-  "bytes": 98231,
-  "seconds": 27,
-  "baked": "2026-11-06"
+  "bytes": 99005,
+  "seconds": 7,
+  "baked": "2026-11-07"
  },
  "parthenon": {
   "site": "athens",
