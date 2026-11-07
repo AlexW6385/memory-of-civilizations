@@ -114,6 +114,8 @@ for (const s of [-1, 1]) {
 add({ t: 'pediment_roof_z', rect: [-17.1, FZ - 1.6, 17.1, BZ0], y: ET + EH, rise: 7.6, tympanumInset: 0.85, rakingGeison: 0.7, mat: 'marble', tileMat: 'gilt_bronze' });
 // the eagle in its wreath on the tympanum, in gilded bronze (the clamp holes; dossier §8)
 add({ t: 'eagle_wreath', at: [0, FZ - 1.6 + 0.88], y: ET + EH + 2.9, r: 2.0, face: -1 });
+// the bronze roof truss under the portico's roof, at five stations between the front and the block (docs/settlements/rome.md §4.3)
+add({ t: 'portico_truss', zs: [-46.1, -43.6, -41.1, -38.6, -36.1], y: ET + EH, yb: ET + 1.6, xs: [-11.05, -6.63, 6.63, 11.05], span: 15.5, rise: 6.7 });
 
 // ── rooms and walks ───────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });

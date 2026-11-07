@@ -88,4 +88,5 @@ function statue(el, { bag, col }) {
   bag.add('bronze', lathe([[0.06, 0], [0.06, h]], 6, null, x + 0.9, y + b, z));
   bag.add('bronze', lathe([[0.75, 0], [0.75, 0.08]], 14, null, x - 0.7, y + b + h * 0.5, z));
 }
+export { gables };
 Object.assign(STYLES.greek.elements, { greek_house: house, statue });

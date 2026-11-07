@@ -166,7 +166,7 @@ function bullParts(s, charge) {
   L.push([cap([0.95, 1.22], [1.32, 1.45], 0.04, 0.03), 0.8], [ell(1.36, 1.47, 0.07, 0.05, 6), 0.8]);
   return L.map(([p, f]) => [p.map(([u, v]) => [u * s, v * s]), f]);
 }
-const FRESCO = {
+export const FRESCO = {
   // the charging bull in an olive grove, in painted relief (the West Bastion of the North Entrance)
   bull_relief: (w, h) => [
     { mat: 'paint_ochre', parts: [[[[-w / 2, 0], [w / 2, 0], [w / 2, 0.22], [-w / 2, 0.22]], 0.12]] },
@@ -310,6 +310,10 @@ function townHouse(el, { bag, col }) {
     bag.add(m, box(x0 - 0.01, ya, z0 + 0.3, x0 + 0.3, yb, z1 - 0.3)); bag.add(m, box(x1 - 0.3, ya, z0 + 0.3, x1 + 0.01, yb, z1 - 0.3));
   }
   const F = face(f), du = F.L * (0.3 + rand() * 0.4);
+  // weathering: the damp and the splash of the lane darken the plaster's foot, highest on the street front; the
+  // rain streaks down from the roof's edge at the corners (docs/settlements/knossos.md §4c)
+  for (const k of 'nesw') { const W = face(k), dh = (k === f ? 0.5 : 0.3) + rand() * 0.25; W.at('plaster_damp', 0.02, W.L - 0.02, y + 0.5, y + 0.5 + dh, 0.0, 0.012); }
+  for (const k of [f]) { const W = face(k); for (const u of [0.12, W.L - 0.42]) W.at('plaster_streak', u, u + 0.3, y + H - 1.6 - rand() * 0.8, y + H - 0.3, 0.0, 0.006); }
   // the round ends of the floor beams in a row on the front, just under each floor's band
   for (let k = 1; k < n; k++) for (let u = 0.45; u < F.L - 0.3; u += 0.62) {
     if (k === 1 && Math.abs(u - du) < 0.95) continue;
@@ -421,6 +425,7 @@ function royalRoad(el, { bag, col }) {
     if (Math.abs(by - ay) < 0.02) col.floor(r, ay + 0.12); else col.ramp(r, Math.min(ay, by) + 0.12, Math.max(ay, by) + 0.12, Math.abs(ux) > 0.5 ? ((by > ay) === (ux > 0) ? 'e' : 'w') : ((by > ay) === (uz > 0) ? 's' : 'n'));
   }
 }
+export { column as minoanColumn, fresco as minoanFresco, pithos as minoanPithos };
 registerStyle('minoan', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: { ...STYLES.qing.elements, wing, portico, steps, minoan_house: house, fresco, bastion, throne_room: throneRoom, lightwell_tiers: lightwellTiers, town_house: townHouse, pithos, magazines, royal_road: royalRoad },

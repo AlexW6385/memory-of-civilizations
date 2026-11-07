@@ -3,6 +3,7 @@
 // the bright Cretan summer.
 
 import { RADIUS, PALACE, THEATRAL, STREAM, height, onRoad, inRect, inLot } from './layout.js';
+import { YARD } from './life.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.1, grass: 0.3, rock: 0.1, soil: 0.5, fields: 0, dry: 0.7, warmth: 0.75, red: 0.55, road: 0, snow: 0, forest: 0 };
@@ -13,7 +14,7 @@ function cover(x, z, h) {
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = (x) => Math.abs(x - STREAM.x) < 30 ? Math.abs(x - STREAM.x) : 1e4;
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inRect(PALACE, x, z, 6) || inRect([-130, -60, -64, 60], x, z, 2) || inRect(THEATRAL, x, z, 4) || onRoad(x, z, 1) || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inRect(PALACE, x, z, 6) || inRect([-130, -60, -64, 60], x, z, 2) || inRect(THEATRAL, x, z, 4) || onRoad(x, z, 1) || inLot(x, z, 1) || inRect(YARD, x, z, 2)) return null;
   if (Math.abs(x - STREAM.x) < 25) return { plane_tree: 0.05, oleander: 0.1, grass: 25 };
   if (x > 160 || Math.hypot(x, z) > 260) return { olive: 0.25, cypress: 0.03, grass_dry: 14 };
   return { olive: 0.05, cypress: 0.02, grass_dry: 10 };

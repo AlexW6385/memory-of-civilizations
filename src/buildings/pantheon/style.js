@@ -260,8 +260,33 @@ function eagleWreath(el, { bag }) {
 }
 
 const base = STYLES.roman;
+/**
+ * The bronze roof truss of the portico (docs/settlements/rome.md §4.3): the roof "made entirely from bronze", standing
+ * until 1625/26 when Urban VIII took its bronze for cannon. At each station z: a tie beam of bronze plates on the side
+ * entablatures, carried over the inner beams by short posts; two rafters under the roof's slopes meeting at the
+ * ridge; the king post and two struts; all box girders of riveted plate. { zs, y (the top of the side entablatures),
+ * yb (the top of the inner beams), xs (the inner beams' lines), span (half), rise (the rafters' rise), w, d }.
+ */
+function porticoTruss(el, { bag }) {
+  const br = [], gl = [], { y, yb, span, rise } = el, w = el.w ?? 0.45, d = el.d ?? 0.55;
+  for (const z of el.zs) {
+    const W = frame([0, z], [1, 0], [0, 1]);
+    fbox(br, W, -span, span, y, y + d, -w / 2, w / 2);                                   // the tie
+    for (const x of el.xs) fbox(br, W, x - 0.2, x + 0.2, yb, y, -0.2, 0.2);             // the posts on the inner beams
+    for (const s of [-1, 1]) {
+      slope(br, W, s * (span - 0.5), y + d, 0, y + d + rise, d, -w / 2, w / 2);             // the rafters
+      slope(br, W, s * span * 0.5, y + d, s * 0.25, y + d + rise * 0.55, 0.32, -w * 0.35, w * 0.35);   // the struts
+    }
+    fbox(br, W, -0.22, 0.22, y + d, y + d + rise + 0.2, -w / 2, w / 2);                      // the king post
+    // the rows of rivet heads along the tie's lower edge, gilt
+    for (let x = -span + 0.4; x < span - 0.3; x += 0.6) fbox(gl, W, x - 0.03, x + 0.03, y + 0.06, y + 0.12, w / 2, w / 2 + 0.02);
+  }
+  bag.add('bronze', fromTriangles(br));
+  bag.add('gilt_bronze', fromTriangles(gl));
+}
+
 registerStyle('roman-pantheon', {
   ...base,
-  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath },
+  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath, portico_truss: porticoTruss },
   objects: { ...base.objects, pantheon_door: pantheonDoor },
 });

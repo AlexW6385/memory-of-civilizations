@@ -5,6 +5,7 @@
 
 import { RADIUS, AUGUSTAION, MESE, FORUM, SENATE, CHALKE, height } from './layout.js';
 import { MESE_STOAS } from './plan.js';
+import { nearProcession } from './procession.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const fp = (o, u, s, t) => [o[0] + s * u[0] - t * u[1], o[1] + s * u[1] + t * u[0]];
@@ -58,10 +59,10 @@ export function life() {
   for (let k = 0; k < 7; k++) person([SENATE[0] - 15 - rand() * 6, SENATE[1] + 4 + rand() * 18], Math.PI / 2 + (rand() - 0.5), { dress: 'robe', cloth: 'cloth_white', cloth2: rand() < 0.5 ? 'cloth_red' : 'cloth_white', over: 'collar', hat: 'none', pose: rand() < 0.5 ? 'talk' : 'stand' });
   for (let k = 0; k < 3; k++) person([-20 + rand() * 20, z0 + 4 + rand() * 6], Math.PI + (rand() - 0.5), { dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_black', hat: 'none' });
   // guards at the Chalke's door
-  for (const s of [-1, 1]) person([CHALKE.c[0] - 8.6, CHALKE.c[1] + s * 3.2], -Math.PI / 2 + Math.PI, { dress: 'tunic', legs: 'hose', cloth: 'cloth_red', cloth2: 'cloth_white', hat: 'none', pose: 'stand', carry: 'pole' });
+  for (const s of [-1, 1]) person([CHALKE.c[0] - 8.6, CHALKE.c[1] + s * 3.2], -Math.PI / 2 + Math.PI, { dress: 'tunic', legs: 'hose', cloth: 'cloth_red', cloth2: 'cloth_white', hat: 'none', pose: 'stand', carry: 'staff', len: 2.4 });
   for (let k = 0; k < 22; k++) {
     const x = x0 + 10 + rand() * (x1 - x0 - 40), z = z0 + 6 + rand() * (z1 - z0 - 20);
-    if (Math.hypot(x - (x0 + 24), z - (z0 + 32)) < 9) continue;                         // the column's steps
+    if (Math.hypot(x - (x0 + 24), z - (z0 + 32)) < 9 || nearProcession(x, z, 6)) continue;   // the column's steps, the procession
     person([x, z], rand() * 6.28);
   }
   // the Forum of Constantine: people under its porticoes and about the column

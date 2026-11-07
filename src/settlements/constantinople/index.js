@@ -8,6 +8,7 @@ import { sophia, city } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';
 import { lifePlan } from './life.js';
+import { processionPlan } from './procession.js';
 export { music };
 export const landmarks = [{ plan: sophia, music }];
-export async function town() { return [city, lifePlan(), ...(await houses())]; }
+export async function town() { return [city, lifePlan(), processionPlan(), ...(await houses())]; }
