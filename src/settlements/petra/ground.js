@@ -2,7 +2,7 @@
 // valley's dry slopes with oleander and tamarisk in the wadi bed, junipers and grass on the
 // heights; the desert sky.
 
-import { RADIUS, RIM, STREET, GARDEN, open, height, inLot, behindWalls, sacred, inGarden, gardenLevel } from './layout.js';
+import { RADIUS, RIM, STREET, GARDEN, SIQ_LINE, PLAZA, open, height, inLot, behindWalls, sacred, inGarden, gardenLevel, pathDist, siqHalf } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.5, grass: 0, rock: 0, soil: 0.3, fields: 0, dry: 0.9, warmth: 0.85, red: 0.8, road: 0, snow: 0, forest: 0 };
@@ -33,6 +33,9 @@ function planting(x, z) {
   if (o < 0.2) return { grass_dry: 2, maquis: 0.05 };
   if (o < 0.95) return null;
   if (Math.abs(z - STREET.a[1]) < 17 || sacred(x, z, 2)) return null;
+  // (in the Siq the oleanders and tamarisks keep to the foot of its walls: its floor, scoured by the floods and walked, and the
+  // Treasury's plaza are clear, so that nothing stands between the Siq's last bend and the Treasury)
+  if (pathDist(x, z, SIQ_LINE) < siqHalf(x) - 2 || Math.hypot(x - PLAZA.c[0], z - PLAZA.c[1]) < PLAZA.r) return { grass_dry: 3 };
   return { oleander: 0.06, tamarisk: 0.04, grass_dry: 6 };
 }
 export const ground = {

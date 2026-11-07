@@ -6,7 +6,7 @@
 // Each was chosen by looking: from the screenshot tool's viewpoints (tools/viewpoints.json) where one
 // was good, otherwise composed on the spot. Change one only after looking at it again.
 export const ARRIVALS = {
-  'tang-wutai':       [38, 13.1, 0, -1.5708, 0.22],      // on the upper terrace, the Great East Hall's front and its Buddhas
+  'tang-wutai':       [35, 13.1, 6, -1.40, 0.36],        // on the upper terrace, the Great East Hall's front, eaves and Buddhas
   'song-kaifeng':     [160, 0.1, -140, 0, 0.38],         // the Iron Pagoda, whole, in its enclosure
   'song-hangzhou':    [-110, 0.1, 138, 0, 0.32],         // the stair up to the pagoda
   'ming-suzhou':      [0, 0.95, -23.5, 0, -0.04],        // across the lotus pond to the pavilion
@@ -29,7 +29,7 @@ export const ARRIVALS = {
   'petra':            [160, 0.1, -158, 1.5708, 0.25],    // the Treasury at the end of the Siq
   'jerusalem':        [-67.6, 18, -40, -1.78, 0.16],     // on the esplanade, the Dome of the Rock
   'constantinople':   [-70, null, 110, -0.517, 0.16],    // Hagia Sophia's dome over its buttresses, from the south-west
-  'ottoman-istanbul': [0, 22.1, -90, 3.1416, 0.25],      // the Süleymaniye's cascading domes and four minarets
+  'ottoman-istanbul': [0, 22.1, -91, 3.1416, 0.42],      // the Süleymaniye's cascading domes and four minarets, whole
   'giza':             [160, 0.1, -285, 2.563, 0.2],      // the Great Pyramid whole from the north-east across the plateau, two faces (the enclosure's corner had stood in front)
   'edfu':             [0, 0.1, 150, 0, 0.2],             // the pylon with its flagpoles, through the palms
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square
@@ -52,15 +52,15 @@ export const ARRIVALS = {
   'london':           [200, 2.5, -170, 1.9, 0.2],        // the Clock Tower and Westminster from the bridge
   'barcelona':        [239.5, null, -101, 1.712, 0.45],  // the Nativity façade's portals, from the far pavement of the Carrer de la Marina (south of the tram standing at the façade)
   'norse-borgund':    [-30, null, -28, -1.509, 0.27],     // the stave church in its valley, across the churchyard wall (8 m off)
-  'muscovy':          [40, 0.1, 40, 3.1416, 0.3],        // St Basil's and the Kremlin wall across Red Square
+  'muscovy':          [40, 0.1, 40, 3.0, 0.22],          // St Basil's and the Kremlin wall across Red Square
   'teotihuacan':      [0, 0.1, 60, 0, 0.1],              // up the Avenue of the Dead
   'chichen-itza':     [30, 0.1, 75, 0.38, 0.17],         // El Castillo
   'tenochtitlan':     [-10, 0.1, 30, -1.293, 0.25],      // the Templo Mayor's twin shrines
   'machu-picchu':     [-17.6, null, 128.6, -0.07, -0.02],    // from the Guardhouse's knoll at the saddle's south end, over the town to Huayna Picchu
   'cahokia':          [-25, 0.1, 20, 0, 0.25],           // Monks Mound across the Grand Plaza
   'taos':             [0, 0.1, 25, 0.3, 0.12],           // the north house across the plaza
-  'new-york':         [-81.83, 0.1, 155.87, 2.6354, 0.6], // up Fifth Avenue between the towers (the grid turned 29°: Fifth at 35th, looking down the avenue)
-  'rapa-nui':         [0, 0.3, 62, 3.1416, 0.12],        // the row of moai on their platform
+  'new-york':         [-14.15, 0.1, 37.89, 2.282, 0.55], // the Empire State whole over Fifth Avenue's towers (the grid turned 29°: Fifth at 38th, looking down the avenue)
+  'rapa-nui':         [0, 0.3, 46, 3.1416, 0.12],        // the row of moai on their platform, whole
   'maori':            [0, 0.2, 150, 0, 0.2],             // the pā's palisade and carved gateway
-  'sydney':           [220, null, -100, 0.901, 0.05],    // the Opera House across the cove, the Harbour Bridge behind
+  'sydney':           [214.5, null, -112, 1.0, 0.05],    // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
 };
