@@ -26,8 +26,37 @@ export const site = {
     { t: 'floor', rect: [t0, z0, t1, z1], y: STUPA2.y, mat: 'sandstone_floor', th: 0.06 },
     { t: 'stair', rect: [cx - 2, z0 - 2.6, cx + 2, z0], dir: 's', y0: 0, y1: STUPA2.y, riser: 0.17, base: -0.3, mat: 'sandstone_dressed' },
     { t: 'temple40', c: TEMPLE40.c, y: TOP },
+    ...offerings(),
   ],
 };
+
+/**
+ * The offerings at the Great Stupa (docs/settlements/sanchi.md §11): garlands swagged between each gateway's
+ * posts and looped round them, as the reliefs show heavenly figures and dwarfs bearing garlands to the stūpa;
+ * flowers heaped on leaves and little lamps at the posts' feet and at the foot of the double stairway.
+ */
+function offerings() {
+  const E = [], W = 2.1, P = 0.35, R = 27, mats = [['cloth_white'], ['cloth_white', 'cloth_red'], ['cloth_red', 'cloth_white']];
+  for (const [i, [dx, dz]] of [[1, 0], [0, 1], [-1, 0], [0, -1]].entries()) {
+    const ux = -dz, uz = dx, c = [dx * R, dz * R], m = mats[i % 3];
+    for (const f of [-1, 1]) {
+      const fy = TOP + 3.6 + (f > 0 ? 0 : 0.25), o = f * (P + 0.06);
+      E.push({ t: 'rite', kind: 'garland', a: [c[0] - ux * (W - P) + dx * o, fy, c[1] - uz * (W - P) + dz * o], b: [c[0] + ux * (W - P) + dx * o, fy, c[1] + uz * (W - P) + dz * o], sag: 0.7, mats: m });
+    }
+    for (const k of [-1, 1]) {
+      const px = c[0] + ux * k * W, pz = c[1] + uz * k * W;
+      // a garland looped over the post's outer face, its two ends falling
+      E.push({ t: 'rite', kind: 'loop', at: [px + dx * (P + 0.04), TOP + 2.3, pz + dz * (P + 0.04)], ux, uz, w: 0.55, drop: 0.35, mats: m });
+      // at the post's inner foot (toward the stūpa) flowers on a leaf and a lamp
+      const fx = px - dx * (P + 0.35) - ux * k * 0.2, fz = pz - dz * (P + 0.35) - uz * k * 0.2;
+      E.push({ t: 'rite', kind: 'plate', at: [fx, fz], y: TOP + 0.02, mats: m }, { t: 'rite', kind: 'lamp', at: [fx - ux * k * 0.35, fz - uz * k * 0.35], y: TOP + 0.02 });
+    }
+  }
+  // at the foot of the double stairway (its flights rise from x = ±7 m along z ≈ 18.3–19.9)
+  for (const sx of [-1, 1]) E.push({ t: 'rite', kind: 'offering', at: [sx * 7.6, 20.6], y: TOP + 0.02, n: [0, 1], seed: sx > 0 ? 1 : 2 });
+  E.push({ t: 'rite', kind: 'lamps', at: [-5, 20.4], to: [5, 20.4], y: TOP + 0.02, count: 9 });
+  return E;
+}
 
 /** Monks in ochre robes, shaven and barefoot, walking round the stupas; lay pilgrims in white with turbans, women with offerings. */
 function people() {
@@ -48,6 +77,9 @@ function people() {
   monk([tx - 1.2, tz - 1.2], ty, [0, 1], { pose: 'talk' }); man([tx + 5.4, tz - 0.5], ty, [-1, 0]);
   // Stupa 2: a monk at its east entrance, pilgrims coming from the path
   monk([cx + 14.8, -2.9], STUPA2.y, [0, 1]); man([cx - 3, z0 + 2.0], STUPA2.y, [0, 1]); woman([cx - 1.6, z0 + 1.2], STUPA2.y, [0.2, 1], { carry: 'pot' });
+  // where the north path comes onto the summit: a woman selling flowers from her mat, a buyer
+  L.push({ t: 'goods_mat', at: [6.5, -86], y: height(6.5, -86), rot: face([-1, 0]), seed: 5, goods: ['heap', 'heap', 'baskets'], produce: ['cloth_white', 'cloth_white', 'cloth_red'] });
+  woman([7.5, -86], height(7.5, -86), [-1, 0], { pose: 'sit_ground', carry: 'none' }); man([5.2, -84.8], height(5.2, -84.8), [1, -0.3], { pose: 'talk' });
   // pilgrims climbing the north path to the summit
   for (const [x, z, k] of [[-1.5, -120, 0], [1.2, -116, 1], [0.6, -138, 2], [-0.8, -141, 3]]) {
     const y = height(x, z);

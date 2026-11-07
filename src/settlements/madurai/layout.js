@@ -13,6 +13,8 @@ export const TANK = [-96, 32, -46, 69];
 export const HALL = [86, -112, 121, -52];
 export const STREETS = [{ off: 12, w: 14 }, { off: 70, w: 10 }, { off: 150, w: 14 }];   // outward from the wall
 export const GATES = { e: [127, -8], s: [-20, 118], w: [-127, -24], n: [14, -118] };
+/** Tirumala Nayaka's Pudhu Mandapam (1628–1635), 330 × 105 ft, across the street east of the east gopuram, the axial street through its middle. */
+export const PUDHU = [156, -24, 256.6, 8];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 /** How far outside the temple wall's rectangle (0 inside). */
@@ -39,7 +41,7 @@ export function lots() {
     const o = outside(x + w / 2, z + d / 2);
     if (o < 30 || Math.hypot(x + w / 2, z + d / 2) > RADIUS - 28) continue;
     if ([[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].some(([a, b]) => onStreet(a, b, 1.5))) continue;
-    if (rand() < 0.3) continue;
+    if (rand() < 0.3 || inRect(PUDHU, x + w / 2, z + d / 2, 9)) continue;
     LOTS.push({ rect: r, seed: Math.floor(rand() * 1e6), facing: rand() < 0.5 ? 'n' : 's' });
   }
   return LOTS;

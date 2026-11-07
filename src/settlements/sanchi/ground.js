@@ -2,7 +2,7 @@
 // the red-brown plain with fields, neem, banyan and palms round the village; the hot, hazy sky
 // of central India before the rains.
 
-import { RADIUS, PATH, SUMMIT, STUPA2, height, out, inLot, inRect } from './layout.js';
+import { RADIUS, PATH, SUMMIT, STUPA2, TEMPLE40, height, out, inLot, inRect } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.2, grass: 0.3, rock: 0, soil: 0.5, fields: 0, dry: 0.75, warmth: 0.85, red: 0.5, road: 0, snow: 0, forest: 0 };
@@ -17,19 +17,24 @@ const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || inRect(STUPA2.terrace, x, z, 4) || (Math.abs(x - STUPA2.c[0]) < 3.5 && z < STUPA2.terrace[1] && z > -62) || (Math.abs(x - PATH.x) < PATH.w + 1 && z < -SUMMIT.half[1] + 5)) return null;
   const d = out(x, z);
-  if (d === 0) return null;
+  if (d === 0) {
+    // on the summit, clear of the monuments and the ways between them: dry grass, a few neem and a pipal (a fig)
+    if (Math.hypot(x, z) < 34 || Math.hypot(x - 62, z + 40) < 16 || inRect([30, -2, 68, 36], x, z) || inRect(TEMPLE40.rect, x, z, 5) || Math.abs(x) < 7 || (Math.abs(z + 28) < 5 && x > 0 && x < 66) || Math.abs(x - 30) < 5) return null;
+    return { grass_dry: 9, neem: 0.015, fig: 0.01, oleander: 0.05 };
+  }
   if (d < 30) return { grass_dry: 10, maquis: 0.08 };
   if (inLot(x, z, 14)) return { neem: 0.08, date_palm: 0.05, banyan: 0.01, grass_dry: 8 };
   return { neem: 0.01, grass: 12 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { neem: 0.08, date_palm: 0.05, banyan: 0.01, maquis: 0.08 },
+  maxDensity: { neem: 0.08, date_palm: 0.05, banyan: 0.01, maquis: 0.08, fig: 0.01, oleander: 0.05 },
   climate: {
     sun: { az: 130, el: 60, color: [1.0, 0.95, 0.85], intensity: 3.5, lat: 23, dec: 10, hour: 10 },
     sky: { turbidity: 4.5, rayleigh: 1.3, mie: 0.006, mieG: 0.8, zenith: [0.1, 0.17, 0.36], horizon: [0.64, 0.62, 0.58] },
     fog: { color: [0.78, 0.76, 0.72], density: 0.0005, height: 0.012 },
     exposure: 0.5,
+    damp: 0.5,      // the monsoon darkens the sandstone's foot and the north side
     wind: [0.3, 0.2],
     weather: [
       { id: 'hazy', weight: 4, clouds: 0.2, cloudDensity: 0.4, sun: 0.95, fog: 1.3 },

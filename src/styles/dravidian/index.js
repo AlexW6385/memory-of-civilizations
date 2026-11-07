@@ -10,6 +10,7 @@ import { box, frustum, lathe, fromTriangles, rod, disc, place } from '../../core
 import { Shape, ExtrudeGeometry, Matrix4, Vector3 } from '../../core/three.js';
 import '../qing/index.js';
 import '../../objects/index.js';
+import { rite } from '../indian/rites.js';
 
 const G = 'granite_tamil';
 const PAINT = ['stucco_sky', 'stucco_rose', 'stucco_saffron', 'stucco_leaf', 'stucco_cream'];
@@ -74,6 +75,16 @@ function gopuram(el, { bag, col }) {
             bag.add(pm, lathe(prof, 6, null, px, y0 + 0.25, pz));
             const arm = long === !alongX ? box(px - 0.27 * k, y0 + 0.25 + 0.62 * k, pz - 0.05 * k, px + 0.27 * k, y0 + 0.25 + 0.72 * k, pz + 0.05 * k) : box(px - 0.05 * k, y0 + 0.25 + 0.62 * k, pz - 0.27 * k, px + 0.05 * k, y0 + 0.25 + 0.72 * k, pz + 0.27 * k);
             bag.add(pm, arm);
+            // every third a god with four arms, the upper pair raised holding his emblems, a pedestal under the feet
+            if ((i + j) % 3 === 0) {
+              const hk = 0.86 * k, wa = 0.34 * k, ax = long === !alongX;
+              for (const sd of [-1, 1]) {
+                const ex = ax ? px + sd * wa : px, ez = ax ? pz : pz + sd * wa;
+                bag.add(pm, rod([px + (ax ? sd * 0.1 * k : 0), y0 + 0.25 + 0.76 * k, pz + (ax ? 0 : sd * 0.1 * k)], [ex, y0 + 0.25 + hk, ez], 0.035 * k, 4));
+                bag.add('gilt_bronze', lathe([[0.001, 0], [0.04 * k, 0.03 * k], [0.001, 0.09 * k]], 5, null, ex, y0 + 0.25 + hk, ez));
+              }
+            }
+            bag.add('stucco_cream', box(px - 0.24 * k, y0 + 0.005, pz - 0.24 * k, px + 0.24 * k, y0 + 0.25, pz + 0.24 * k));
             bag.add('gilt_bronze', lathe([[0.075 * k, 0], [0.06 * k, 0.1 * k], [0.001, 0.2 * k]], 6, null, px, y0 + 0.25 + 1.08 * k, pz));
             if (j % 2 === 0) { const q = long ? R(u - len / m / 2 - 0.08, v - 0.06, u - len / m / 2 + 0.08, v + 0.12) : (alongX ? [cx + u - len / m / 2 - 0.08, cz + v - 0.06, cx + u - len / m / 2 + 0.08, cz + v + 0.12] : [cx + v - 0.06, cz + u - len / m / 2 - 0.08, cx + v + 0.12, cz + u - len / m / 2 + 0.08]); bag.add('stucco_cream', box(Math.min(q[0], q[2]), y0, Math.min(q[1], q[3]), Math.max(q[0], q[2]), y0 + fh + 0.3, Math.max(q[1], q[3]))); }
           }
@@ -590,6 +601,58 @@ function ther(el, { bag, col }) {
   for (const sb of [-2.2, 2.2]) { const [r0x, r0z] = P(L / 2, sb), [r1x, r1z] = P(L / 2 + 4, sb), [r2x, r2z] = P(L / 2 + (el.rope ?? 34), sb); bag.add('reed_mat', rod([r0x, yb + 0.6, r0z], [r1x, 0.12, r1z], 0.08, 6)); bag.add('reed_mat', rod([r1x, 0.12, r1z], [r2x, 0.1, r2z], 0.08, 6)); }
 }
 
+
+/**
+ * pudhu_mandapa: Tirumala Nayaka's new hall (1628–1635; "a height of 25 feet, length of 330 feet and breadth
+ * of 105 feet … built on a pedestal", "124 pillars", "the pillars on the sides of central passage …
+ * decorated with carvings of 14 rulers and their consorts of Nayaka dynasty" — maduraitourism) { rect (long
+ * along x), h, plinth }: the moulded pedestal with a flight at either end, four rows of 31 carved pillars,
+ * the passage on the long axis wider than the side aisles, the beams and the flat roof with its parapet;
+ * against seven pillars on each side of the passage a Nayaka king with joined hands in his tall cap, his
+ * queen beside him, carved in the round.
+ */
+function pudhu(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, ph = el.plinth ?? 1.2, h = el.h ?? 7.6, y = ph, cz = (z0 + z1) / 2, p = 0.75;
+  bag.add(G, box(x0, -0.4, z0, x1, ph, z1)); col.rect([x0, z0, x1, z1], 0, ph); col.floor([x0, z0, x1, z1], ph);
+  for (const [f, o] of [[0.15, 0.25], [0.5, 0.12], [0.85, 0.2]]) for (const zz of [[z0 - o, z0], [z1, z1 + o]]) bag.add(G, box(x0 - o, ph * f - 0.1, zz[0], x1 + o, ph * f + 0.1, zz[1]));
+  for (const [f, o] of [[0.15, 0.25], [0.5, 0.12], [0.85, 0.2]]) for (const xx of [[x0 - o, x0], [x1, x1 + o]]) for (const zz of [[z0, cz - 4], [cz + 4, z1]]) bag.add(G, box(xx[0], ph * f - 0.1, zz[0], xx[1], ph * f + 0.1, zz[1]));
+  // a flight up the pedestal at either end of the passage
+  const n = Math.round(ph / 0.2);
+  for (const sx of [-1, 1]) for (let i = 0; i < n; i++) {
+    const xe = sx < 0 ? x0 : x1, run = ph * 1.4, a = xe + sx * run * (1 - i / n), b = xe + sx * run * (1 - (i + 1) / n), yy = ph * (i + 1) / n;
+    const q = [Math.min(a, b), cz - 3.6, Math.max(a, b), cz + 3.6];
+    bag.add(G, box(q[0], -0.3, q[1], q[2], yy, q[3])); col.floor(q, yy);
+  }
+  // four rows of 31 pillars: the passage 9 m wide on the axis, an aisle either side
+  const rows = [z0 + 1.2, cz - 4.5, cz + 4.5, z1 - 1.2], xs = Array.from({ length: 31 }, (_, i) => x0 + 1.2 + i * (x1 - x0 - 2.4) / 30);
+  for (const z of rows) for (const x of xs) { carvedPillar(bag, x, z, y, y + h, p); col.rect([x - p / 2, z - p / 2, x + p / 2, z + p / 2], y, y + h); }
+  // the beams on the rows and across, the ceiling slabs, the roof and its parapet
+  for (const z of rows) bag.add(G, box(x0 + 0.6, y + h - 0.02, z - 0.35, x1 - 0.6, y + h + 0.5, z + 0.35));
+  for (const x of xs) bag.add(G, box(x - 0.3, y + h + 0.02, z0 + 0.8, x + 0.3, y + h + 0.48, z1 - 0.8));
+  bag.add(G, box(x0, y + h + 0.5, z0, x1, y + h + 0.9, z1)); col.floor([x0, z0, x1, z1], y + h + 0.9);
+  for (const zz of [[z0 - 0.1, z0 + 0.4], [z1 - 0.4, z1 + 0.1]]) bag.add('stucco_cream', box(x0 - 0.1, y + h + 0.9, zz[0], x1 + 0.1, y + h + 1.5, zz[1]));
+  for (const xx of [[x0 - 0.1, x0 + 0.4], [x1 - 0.4, x1 + 0.1]]) bag.add('stucco_cream', box(xx[0], y + h + 0.9, z0 + 0.4, xx[1], y + h + 1.5, z1 - 0.4));
+  // the fourteen Nayakas and their queens, against the passage's pillars, facing across it
+  const mid = Math.floor(xs.length / 2);
+  for (let k = 0; k < 7; k++) for (const [z, f] of [[rows[1], 1], [rows[2], -1]]) {
+    const x = xs[mid - 9 + k * 3], fz = z + f * (p / 2 + 0.28);
+    nayaka(bag, x - 0.15, y, fz, f, 1.85, true); nayaka(bag, x + 0.42, y, fz - f * 0.04, f, 1.55, false);
+  }
+}
+/** A royal figure carved in the round at (x, y, z) facing +z (f = 1) or −z, h tall: the king in his tall
+ *  cap with joined hands and the dagger at his waist, the queen with her hair in a side knot. */
+function nayaka(bag, x, y, z, f, h, king) {
+  const k = h / 1.85, M = G;
+  bag.add(M, box(x - 0.3 * k, y, z - 0.25 * k, x + 0.3 * k, y + 0.12, z + 0.25 * k));
+  bag.add(M, lathe([[0.2 * k, 0], [0.24 * k, 0.4 * k], [0.18 * k, 0.9 * k], [0.15 * k, 1.05 * k], [0.19 * k, 1.3 * k], [0.16 * k, 1.42 * k], [0.06 * k, 1.5 * k], [0.06 * k, 1.53 * k]], 10, null, x, y + 0.12, z));
+  bag.add(M, lathe([[0.001, 0], [0.09 * k, 0.03 * k], [0.1 * k, 0.12 * k], [0.08 * k, 0.2 * k], [0.001, 0.22 * k]], 8, null, x, y + 0.12 + 1.53 * k, z));
+  if (king) { bag.add(M, lathe([[0.1 * k, 0], [0.11 * k, 0.1 * k], [0.08 * k, 0.32 * k], [0.04 * k, 0.4 * k], [0.001, 0.42 * k]], 8, null, x, y + 0.12 + 1.7 * k, z)); bag.add(M, rod([x + 0.12 * k, y + 0.12 + 0.95 * k, z + f * 0.17 * k], [x + 0.05 * k, y + 0.12 + 0.62 * k, z + f * 0.2 * k], 0.025 * k, 5)); }
+  else bag.add(M, lathe([[0.001, -0.07 * k], [0.08 * k, 0], [0.001, 0.07 * k]], 8, null, x + 0.09 * k, y + 0.12 + 1.66 * k, z - f * 0.03 * k));
+  // the arms brought forward, the hands joined before the chest
+  for (const sx of [-1, 1]) bag.add(M, rod([x + sx * 0.18 * k, y + 0.12 + 1.36 * k, z], [x + sx * 0.04 * k, y + 0.12 + 1.18 * k, z + f * 0.2 * k], 0.045 * k, 6));
+  bag.add(M, lathe([[0.001, 0], [0.04 * k, 0.03 * k], [0.03 * k, 0.16 * k], [0.001, 0.2 * k]], 6, null, x, y + 0.12 + 1.15 * k, z + f * 0.21 * k));
+}
+
 /** dhvaja: the gilded flagstaff before a shrine { c, h }. */
 function dhvaja(el, { bag, col }) { const [x, z] = el.c, h = el.h ?? 12; bag.add(G, box(x - 1, 0, z - 1, x + 1, 1.2, z + 1)); bag.add('gilt_bronze', lathe([[0.3, 0], [0.18, h]], 8, null, x, 1.2, z)); col.circle(x, z, 1, 0, h); }
 
@@ -609,6 +672,6 @@ function house(el, { bag, col }) {
 
 registerStyle('dravidian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: house, ashta_shakti: ashtaShakti, elephant, ther },
+  elements: { ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: house, ashta_shakti: ashtaShakti, elephant, ther, pudhu_mandapa: pudhu, rite },
   objects: {},
 });

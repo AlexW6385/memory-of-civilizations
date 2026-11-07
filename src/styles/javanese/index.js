@@ -5,6 +5,7 @@
 // with walls of woven bamboo under steep thatched saddle roofs, open pavilions on platforms.
 
 import { registerStyle, STYLES } from '../../core/build.js';
+import { rite } from '../indian/rites.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { Matrix4, Vector3 } from '../../core/three.js';
 import { rectRoof, beamTris } from '../ming/index.js';
@@ -258,6 +259,37 @@ function buddha(bag, mudra, x, y, z, N, s) {
   const m = new Matrix4().makeRotationY(Math.atan2(N[0], N[1])).premultiply(new Matrix4().makeScale(s, s, s)).premultiply(new Matrix4().makeTranslation(x, y, z));
   for (const g of buddhaPieces(mudra)) bag.add(A, g.clone().applyMatrix4(m));
 }
+
+/**
+ * A guardian lion (singa) seated upright on its haunches on a low plinth, facing +z, about 1.25 m to the
+ * top of the head at scale 1: the haunches and the hind paws, the straight forelegs, the chest, the head
+ * with its mane in rows of curls, the open jaws, the tail curled up the back. Pieces cached.
+ */
+let LION = null;
+function lionPieces() {
+  if (LION) return LION;
+  const G = [];
+  G.push(lathe([[0.36, 0], [0.36, 0.14], [0.32, 0.16], [0.32, 0.2], [0.001, 0.2]], 4).rotateY(Math.PI / 4).scale(1, 1, 1.25));   // the plinth, square
+  G.push(ellipsoid([0, 0.4, -0.12], 0.25, 0.2, 0.26, 10));                                                    // the haunches
+  for (const s of [-1, 1]) { G.push(ellipsoid([s * 0.17, 0.28, -0.02], 0.08, 0.1, 0.18, 8)); G.push(ellipsoid([s * 0.15, 0.24, 0.17], 0.06, 0.04, 0.08, 6)); }   // the thighs, the hind paws
+  G.push(lathe([[0.18, 0], [0.2, 0.2], [0.17, 0.42], [0.001, 0.46]], 10).scale(1, 1, 0.8).rotateX(-0.25).translate(0, 0.45, 0.02));   // the body rising to the chest
+  for (const s of [-1, 1]) { G.push(limb([s * 0.12, 0.82, 0.12], [s * 0.11, 0.24, 0.2], 0.05, 7)); G.push(ellipsoid([s * 0.11, 0.23, 0.24], 0.055, 0.035, 0.07, 6)); }   // the forelegs and forepaws
+  G.push(ellipsoid([0, 0.97, 0.06], 0.24, 0.22, 0.2, 12));                                                    // the mane
+  for (let r = 0; r < 3; r++) for (let k = 0; k < 7; k++) { const a = -1.2 + k * 0.4; G.push(ellipsoid([Math.sin(a) * (0.2 + r * 0.02), 0.82 + r * 0.12 + Math.cos(a) * 0.04, 0.12 + Math.cos(a) * 0.1], 0.045, 0.045, 0.04, 6)); }   // its curls
+  G.push(ellipsoid([0, 1.02, 0.2], 0.14, 0.12, 0.12, 10));                                                    // the face
+  for (const s of [-1, 1]) G.push(ellipsoid([s * 0.06, 1.07, 0.3], 0.035, 0.03, 0.025, 6));                  // the bulging eyes
+  G.push(ellipsoid([0, 0.99, 0.31], 0.06, 0.035, 0.05, 6));                                                   // the snout
+  G.push(ellipsoid([0, 0.93, 0.27], 0.08, 0.025, 0.06, 6));                                                   // the lower jaw, open
+  G.push(limb([0, 0.25, -0.36], [0, 0.6, -0.4], 0.03, 5)); G.push(ellipsoid([0, 0.66, -0.38], 0.06, 0.07, 0.05, 6));   // the tail and its tuft
+  LION = G;
+  return G;
+}
+/** A guardian lion at (x, y, z) facing N, scale s. */
+function lion(bag, x, y, z, N, s = 1) {
+  const m = new Matrix4().makeRotationY(Math.atan2(N[0], N[1])).premultiply(new Matrix4().makeScale(s, s, s)).premultiply(new Matrix4().makeTranslation(x, y, z));
+  for (const g of lionPieces()) bag.add(A, g.clone().applyMatrix4(m));
+}
+
 /** The mudra of a niche whose face looks along N: east earth-touching, south giving, west meditation, north fearlessness. */
 const mudraOf = (N) => (N[0] > 0.5 ? 'earth' : N[0] < -0.5 ? 'meditation' : N[1] > 0.5 ? 'giving' : 'fearless');
 /**
@@ -429,6 +461,11 @@ function borobudur(el, { bag, col }) {
     for (const [dir, rect] of [['s', [cx - 1.6, cz - e1, cx + 1.6, cz - e0]], ['n', [cx - 1.6, cz + e0, cx + 1.6, cz + e1]], ['e', [cx - e1, cz - 1.6, cx - e0, cz + 1.6]], ['w', [cx + e0, cz - 1.6, cx + e1, cz + 1.6]]]) {
       STYLES.qing.elements.stairs({ rect, y0, y1, dir, mat: A }, { bag, col });
     }
+    // the 32 guardian lions: a pair beyond the foot of the ground flight and a pair beside the head of each of the next three, on every side, facing out
+    if (i < 4) for (const [nx, nz] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) for (const k of [-1, 1]) {
+      const d = i === 0 ? e1 + 0.75 : e0 + 0.75, ux = -nz, uz = nx, lx = cx + nx * d + ux * k * 2.4, lz = cz + nz * d + uz * k * 2.4;
+      lion(bag, lx, y0, lz, [nx, nz], 0.95); col.rect([lx - 0.36, lz - 0.36, lx + 0.36, lz + 0.36], y0, y0 + 1.2);
+    }
     void aOut;
   }
   // the circular terraces with their latticed stupas, the crowning stupa
@@ -478,6 +515,6 @@ function pagar(el, { bag, col }) { slab(bag, 'brick', el.a, el.b, 0, 0.6, el.h ?
 
 registerStyle('javanese', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, borobudur, rumah, pendopo, pagar },
+  elements: { ...STYLES.qing.elements, borobudur, rumah, pendopo, pagar, rite },
   objects: {},
 });
