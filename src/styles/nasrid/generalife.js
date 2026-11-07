@@ -12,7 +12,7 @@
 
 import { box, lathe, rod, disc, place, fromTriangles } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
-import { holedWall, face, dress, archHead, plankVault, hipRoof, tileFloor, floorFountain, archRun, nColumn, crenels, starCeiling, dbl } from './halls.js';
+import { holedWall, face, dress, archHead, plankVault, hipRoof, tileFloor, floorFountain, archRun, nColumn, crenels, starCeiling, dbl, script } from './halls.js';
 import { pairedWindow } from './partal.js';
 
 const PL = 'plaster_white', SC = 'stucco_cream', SW = 'stucco_warm', MS = 'marble_smooth', RED = 'tuff_red', BP = 'brick_paving', LEAF = 'lotus_leaf';
@@ -32,15 +32,44 @@ function pave(bag, col, mat, r, y, holes = [], d = 0.75) {
   for (const p of subtractRects(r, holes)) { bag.add(mat, box(p[0], y - d, p[1], p[2], y, p[3])); col.floor(p, y); }
 }
 /** A shrub: a clipped round mass of leaves on the ground at (x, y, z), r across, h tall. */
-function shrub(bag, x, y, z, r, h, seg = 7) { bag.add(LEAF, lathe([[0.001, 0], [r * 0.8, h * 0.08], [r, h * 0.45], [r * 0.75, h * 0.85], [0.001, h]], seg, null, x, y, z)); }
+function shrub(bag, x, y, z, r, h, seg = 9) { const k = (x * 7.1 + z * 3.3) % 6.28; bag.add(LEAF, lathe([[0.001, 0], [r * 0.7, h * 0.06], [r * 0.97, h * 0.3], [r, h * 0.55], [r * 0.85, h * 0.8], [r * 0.5, h * 0.96], [0.001, h]], seg, (th) => 1 + 0.08 * Math.sin(th * 3 + k), x, y, z)); }
+/** A clipped hedge of myrtle over r = [x0, z0, x1, z1] on the ground at y, h tall: a body and a rounded top. */
+function hedge(bag, r, y, h) {
+  const [x0, z0, x1, z1] = r, i = Math.min(0.08, (x1 - x0) / 4, (z1 - z0) / 4);
+  bag.add(LEAF, box(x0, y, z0, x1, y + h - 0.1, z1));
+  hexa(bag, LEAF, [[x0, y + h - 0.1, z0], [x1, y + h - 0.1, z0], [x1, y + h - 0.1, z1], [x0, y + h - 0.1, z1]], [[x0 + i, y + h, z0 + i], [x1 - i, y + h, z0 + i], [x1 - i, y + h, z1 - i], [x0 + i, y + h, z1 - i]]);
+}
+/**
+ * A low Nasrid jet from the spout at (x, y, z): a column of water h tall breaking at its head into a
+ * crown of falling threads that drop back into the basin, their ends at yw (the water's surface).
+ */
+function jet(bag, x, y, z, h, yw, R = 0.13) {
+  bag.add('water_jet', rod([x, y, z], [x, y + h, z], 0.016, 5));
+  bag.add('water_jet', lathe([[0.001, -0.03], [0.03, 0], [0.012, 0.04], [0.001, 0.05]], 6, null, x, y + h - 0.02, z));
+  for (let k = 0; k < 7; k++) {
+    const a = (k + 0.3) * Math.PI * 2 / 7, c = Math.cos(a), s = Math.sin(a), top = y + h;
+    const P = (f, dy) => [x + c * R * f, top + dy, z + s * R * f];
+    const fall = top - yw;
+    const pts = [P(0, 0.01), P(0.35, 0.025), P(0.65, -fall * 0.2), P(0.88, -fall * 0.55), P(1, -fall + 0.005)];
+    for (let i = 0; i + 1 < pts.length; i++) bag.add('water_jet', rod(pts[i], pts[i + 1], 0.007, 3));
+  }
+}
 /** A small fruit tree (orange, pomegranate): a trunk, a few limbs, a round crown. */
 function fruitTree(bag, x, y, z, s, rand) {
   const h = 1.3 * s, cr = 1.05 * s;
   bag.add('bark_olive', rod([x, y - 0.05, z], [x, y + h, z], 0.07 * s, 6));
   for (let k = 0; k < 3; k++) { const a = k * 2.1 + rand(), L = 0.55 * s; bag.add('bark_olive', rod([x, y + h - 0.1, z], [x + Math.cos(a) * L, y + h + 0.5 * s, z + Math.sin(a) * L], 0.035 * s, 5)); }
-  bag.add(LEAF, lathe([[0.001, 0], [cr * 0.7, 0.12 * s], [cr, 0.6 * s], [cr * 0.92, 1.05 * s], [cr * 0.55, 1.45 * s], [0.001, 1.6 * s]], 10, (th) => 1 + 0.1 * Math.sin(th * 3 + rand() * 6), x, y + h - 0.25 * s, z));
+  bag.add(LEAF, lathe([[0.001, 0], [cr * 0.6, 0.08 * s], [cr * 0.9, 0.3 * s], [cr, 0.6 * s], [cr * 0.95, 0.9 * s], [cr * 0.8, 1.2 * s], [cr * 0.55, 1.45 * s], [0.001, 1.6 * s]], 14, ((p) => (th) => 1 + 0.09 * Math.sin(th * 3 + p) + 0.05 * Math.sin(th * 7 + p * 2))(rand() * 6), x, y + h - 0.25 * s, z));
   // the fruit among the leaves
   for (let k = 0; k < 7; k++) { const a = rand() * Math.PI * 2, v = 0.25 + rand() * 0.9, rr = cr * (0.95 - Math.abs(v - 0.6) * 0.4); bag.add('glaze_yellow', box(x + Math.cos(a) * rr - 0.04, y + h - 0.25 * s + v * s - 0.04, z + Math.sin(a) * rr - 0.04, x + Math.cos(a) * rr + 0.04, y + h - 0.25 * s + v * s + 0.04, z + Math.sin(a) * rr + 0.04)); }
+}
+/** A frieze of cursive script over a portico's arcade, on its faces ([face, top]), from u0 to u1. */
+function arcadeFrieze(bag, faces, u0, u1, seed) {
+  for (const [f, yt] of faces) {
+    const b = f.R(0, 0.05, u0, u1); bag.add(SW, box(b[0], yt - 0.5, b[1], b[2], yt - 0.06, b[3]));
+    for (const [ya, yb] of [[yt - 0.5, yt - 0.46], [yt - 0.1, yt - 0.06]]) { const m = f.R(0.05, 0.075, u0, u1); bag.add(SC, box(m[0], ya, m[1], m[2], yb, m[3])); }
+    script(bag, SC, f, u0 + 0.08, u1 - 0.08, yt - 0.45, 0.33, 0.05, 0.068, seed);
+  }
 }
 /** A cornice of mocárabe under a ceiling: two tiers of small stepped corbels along a face. */
 function cornice(bag, f, u0, u1, y) {
@@ -129,13 +158,14 @@ function acequia(el, ctx) {
   bag.add(MS, lathe([[0.95, 0], [0.95, 0.16], [0.8, 0.16], [0.8, 0.04], [0.001, 0.04]], 20, null, cx, y + 0.02, zm));
   bag.add('water', disc(0.8, y + 0.13, 20, cx, zm));
   bag.add(MS, lathe([[0.08, 0], [0.05, 0.16], [0.001, 0.2]], 8, null, cx, y + 0.06, zm));
-  bag.add('water_jet', rod([cx, y + 0.24, zm], [cx, y + 0.55, zm], 0.014, 4));
+  jet(bag, cx, y + 0.24, zm, 0.3, y + 0.13, 0.22);
   col.circle(cx, zm, 0.95, y, y + 0.2);
   // the basins at the channel's ends, under the porticoes
   for (const bz of [ch[1] - 0.45, ch[3] + 0.45]) {
     bag.add(MS, lathe([[0.62, 0], [0.62, 0.3], [0.5, 0.3], [0.5, 0.08], [0.001, 0.08]], 18, null, cx, y, bz));
     bag.add('water', disc(0.5, y + 0.25, 18, cx, bz));
-    bag.add('water_jet', rod([cx, y + 0.26, bz], [cx, y + 0.5, bz], 0.012, 4));
+    bag.add(MS, lathe([[0.06, 0], [0.04, 0.1], [0.001, 0.12]], 8, null, cx, y + 0.08, bz));
+    jet(bag, cx, y + 0.2, bz, 0.22, y + 0.25, 0.16);
     col.circle(cx, bz, 0.62, y, y + 0.3);
   }
   // the sunken beds: earth a little over half a metre below the walks; myrtle along their edges,
@@ -143,9 +173,9 @@ function acequia(el, ctx) {
   for (const r of beds) {
     bag.add('ground', box(r[0], bedY - 0.25, r[1], r[2], bedY + 0.1, r[3])); col.floor(r, bedY + 0.1);
     const gy = bedY + 0.1, ux = (r[0] + r[2]) / 2;
-    for (let z = r[1] + 0.5; z < r[3] - 0.3; z += 0.75) for (const x of [r[0] + 0.32, r[2] - 0.32]) shrub(bag, x, gy, z, 0.36, 0.62 + rand() * 0.08, 6);
+    for (const x of [r[0] + 0.05, r[2] - 0.65]) for (const [za, zb] of [[r[1] + 0.05, (r[1] + r[3]) / 2 - 0.3], [(r[1] + r[3]) / 2 + 0.3, r[3] - 0.05]]) hedge(bag, [x, za, x + 0.6, zb], gy, 0.62);
     for (let z = r[1] + 1.4; z < r[3] - 1.2; z += 1.5) for (const x of [r[0] + 1.05, r[2] - 1.05]) {
-      shrub(bag, x, gy, z, 0.3, 0.45 + rand() * 0.2, 6);
+      shrub(bag, x, gy, z, 0.3, 0.45 + rand() * 0.2);
       for (let k = 0; k < 3; k++) { const a = rand() * 6.28, rr = 0.2 + rand() * 0.08, fx = x + Math.cos(a) * rr, fzz = z + Math.sin(a) * rr, fy = gy + 0.3 + rand() * 0.2; bag.add(rand() < 0.6 ? 'glaze_red' : 'glaze_white', box(fx - 0.035, fy, fzz - 0.035, fx + 0.035, fy + 0.06, fzz + 0.035)); }
     }
     const L = r[3] - r[1], n = Math.max(2, Math.round(L / 5.2));
@@ -206,6 +236,7 @@ function genNorth(el, ctx) {
   const us = [0.3, 2.55, 4.8, 8.0, 10.25, 12.5];
   for (const u of us) { const x = cx0 + u; bag.add('brick', box(x - 0.3, y, zp - 0.25, x + 0.3, y + hc - 0.14, zp + 0.25)); col.rect([x - 0.3, zp - 0.25, x + 0.3, zp + 0.25], y, y + hc); }
   archRun(bag, [cx0, zp], [cx1, zp], us.map((u) => ({ u, w: 0.3 })), y, hc, top, { sebka: true });
+  arcadeFrieze(bag, [[face('z', zp + 0.25, 1), y + top], [face('z', zp - 0.25, -1), y + top - 0.44]], cx0, cx1, 11);
   for (const [a, b] of [[x0, cx0], [cx1, x1]]) if (b - a > 0.05) { bag.add(PL, box(a, y - 0.6, zp - 0.25, b, y + top, zp + 0.25)); col.rect([a, zp - 0.25, b, zp + 0.25], y, y + top); }
   tileFloor(bag, col, [cx0, zg, cx1 + (el.passage ? 0 : 0), zp - 0.25], y);
   bag.add(MS, box(cx0, y - 0.3, zp - 0.25, cx1, y + 0.05, zp + 0.25)); col.floor([cx0, zp - 0.25, cx1, zp + 0.25], y + 0.05);
@@ -282,6 +313,7 @@ function genSouth(el, ctx) {
   const st = [[0.3, 'p'], [2.55, 'p'], [5.1, 'c'], [7.7, 'c'], [10.25, 'p'], [12.5, 'p']];
   for (const [u, k] of st) { const x = cx0 + u; if (k === 'p') { bag.add('brick', box(x - 0.3, y, zp - 0.25, x + 0.3, y + hc - 0.14, zp + 0.25)); col.rect([x - 0.3, zp - 0.25, x + 0.3, zp + 0.25], y, y + hc); } else nColumn(bag, col, x, zp, y, hc); }
   archRun(bag, [cx0, zp], [cx1, zp], st.map(([u, k]) => ({ u, w: k === 'p' ? 0.3 : 0.16 })), y, hc, top, { sebka: true });
+  arcadeFrieze(bag, [[face('z', zp - 0.25, -1), y + top], [face('z', zp + 0.25, 1), y + top - 0.28]], cx0, cx1, 23);
   for (const [a, b] of [[x0, cx0], [cx1, x1]]) { bag.add(PL, box(a, y - 0.6, zp - 0.25, b, y + top, zp + 0.25)); col.rect([a, zp - 0.25, b, zp + 0.25], y, y + top); }
   for (const [a, b] of [[x0, cx0], [cx1, x1]]) W(bag, col, PL, [a, zp + 0.25, b, zw], y - 0.6, y + top);
   tileFloor(bag, col, [cx0, zp + 0.25, cx1, zw], y);
@@ -386,12 +418,14 @@ function sultana(el, ctx) {
   bag.add(MS, box(pool[0], y - 0.3, pool[1], pool[2], y + 0.12, pool[3])); col.floor(pool, y + 0.12);
   bag.add(MS, lathe([[1.1, 0], [1.1, 0.14], [0.95, 0.14], [0.95, 0.03], [0.001, 0.03]], 20, null, cx, y + 0.12, cz));
   bag.add('water', disc(0.95, y + 0.22, 20, cx, cz));
-  bag.add('water_jet', rod([cx, y + 0.23, cz], [cx, y + 0.5, cz], 0.012, 4));
+  bag.add(MS, lathe([[0.07, 0], [0.045, 0.1], [0.001, 0.13]], 8, null, cx, y + 0.12, cz));
+  jet(bag, cx, y + 0.25, cz, 0.24, y + 0.22, 0.2);
   col.circle(cx, cz, 1.1, y, y + 0.26);
   for (const r of beds) {
     bag.add('ground', box(r[0], y - 0.2, r[1], r[2], y + 0.04, r[3])); col.floor(r, y + 0.04);
-    for (let x = r[0] + 0.3; x < r[2] - 0.2; x += 0.55) for (const z of [r[1] + 0.3, r[3] - 0.3]) shrub(bag, x, y + 0.04, z, 0.3, 0.7, 6);
-    for (let z = r[1] + 0.85; z < r[3] - 0.6; z += 0.55) for (const x of [r[0] + 0.3, r[2] - 0.3]) shrub(bag, x, y + 0.04, z, 0.3, 0.7, 6);
+    hedge(bag, [r[0], r[1], r[2], r[1] + 0.55], y + 0.04, 0.7); hedge(bag, [r[0], r[3] - 0.55, r[2], r[3]], y + 0.04, 0.7);
+    hedge(bag, [r[0], r[1] + 0.6, r[0] + 0.55, r[3] - 0.6], y + 0.04, 0.7); hedge(bag, [r[2] - 0.55, r[1] + 0.6, r[2], r[3] - 0.6], y + 0.04, 0.7);
+    for (let x = r[0] + 1.0; x < r[2] - 0.8; x += 1.1) for (let z = r[1] + 1.0; z < r[3] - 0.8; z += 1.1) if (Math.hypot(x - (r[0] + r[2]) / 2, z - (r[1] + r[3]) / 2) > 1.3) { shrub(bag, x, y + 0.04, z, 0.25, 0.4 + rand() * 0.2); if (rand() < 0.5) { const fy = y + 0.38; bag.add(rand() < 0.5 ? 'glaze_red' : 'glaze_white', box(x - 0.04, fy, z - 0.04, x + 0.04, fy + 0.06, z + 0.04)); } }
     const ux = (r[0] + r[2]) / 2, uz = (r[1] + r[3]) / 2;
     fruitTree(bag, ux, y + 0.04, uz, 1.1, rand); col.circle(ux, uz, 0.12, y, y + 1.4);
   }
@@ -447,7 +481,7 @@ function escalera(el, ctx) {
     bag.add(MS, lathe([[0.5, 0], [0.5, 0.22], [0.4, 0.22], [0.4, 0.08], [0.001, 0.08]], 16, null, xc, yl, z));
     bag.add('water', disc(0.4, yl + 0.18, 16, xc, z));
     bag.add(MS, lathe([[0.05, 0], [0.035, 0.12], [0.001, 0.15]], 8, null, xc, yl + 0.08, z));
-    bag.add('water_jet', rod([xc, yl + 0.2, z], [xc, yl + 0.4, z], 0.01, 4));
+    jet(bag, xc, yl + 0.23, z, 0.16, yl + 0.18, 0.12);
     col.circle(xc, z, 0.5, yl, yl + 0.22);
   }
   // the low walls between the terraces beside the stair, on the upper terrace's edge

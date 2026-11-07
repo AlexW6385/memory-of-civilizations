@@ -99,6 +99,15 @@ From the south up onto the hill, into the Court of the Myrtles, to the Court of 
 
 The oud and the Andalusian nawba over a drone; the fountains. [inferred]
 
+## 10. The Generalife (refinements)
+
+- **Planting of the Acequia's beds.** The beds were sunk below the walks; shallow, suggesting low plants such as myrtle, with deeper pits for larger plants like orange trees [stated: Wikipedia "Generalife"]; today myrtle, orange trees, cypresses and roses, the planting having changed with taste [stated: alhambradegranada.org]. Ours: the bed edges as continuous clipped myrtle hedges (0.6 m wide, 0.62 m high, rounded tops) broken at mid-length, rounded rose bushes with red and white flowers within, orange trees down the middle; the Sultana's beds edged all round with hedges, low shrubs inside [inferred: layout and sizes]. No cypresses (their date there is unknown) [inferred].
+- **Water jets.** The lines of jets along the channel "are not original and were installed in the 19th century" [stated: Wikipedia "Generalife"], so ours has none along the channel: only low jets in the fountain at the middle crossing, the two end basins, the Sultana's pool and the landings of the water stairway [inferred]. Each is now a short column of water breaking into a crown of threads falling back into its basin, from a small marble spout [inferred: form].
+- **Stucco of the porticoes.** The north portico's arches carry carved stucco with sebka and bands of cursive Arabic inscriptions [stated: Wikipedia "Generalife"]. Ours: a frieze of script in relief between moulded fillets over the sebka of the north and south porticoes, on both faces, kept under the gallery ceilings [inferred: its height and extent on the south portico].
+- **People (§10.7).** A private retreat and summer palace of the Nasrid rulers and their family, away from official business; much of the grounds orchards, horse pasture and kitchen gardens [stated: Wikipedia "Generalife"]. Turbans of any colour were back in favour; red and brown predominated in clothing [stated: balagan.info, a secondary hobby source]. Ours (`life.js`): a gardener squatting in an Acequia bed, two men talking by the channel, two men seated in the north gallery with a servant carrying a jar, a woman at a window of the west mirador, two veiled women in the Sultana's garden, a man at prayer in the oratory, two horses with grooms in the Dismount court, a man hoeing and another weeding in the huerta, a woman with a basket [inferred: numbers, places and dress].
+
+Sources for §10: [Generalife — Wikipedia](https://en.wikipedia.org/wiki/Generalife); [Patio de la Acequia — alhambradegranada.org](https://alhambradegranada.org/en/info/generalife/generalifepatiooftheirrigationditch.asp); [Painting guide for Muslims of al-Andalus — balagan.info](https://balagan.info/painting-guide-for-muslims-of-al-andalus).
+
 ## Sources
 
 - [Partal Palace — Wikipedia](https://en.wikipedia.org/wiki/Partal_Palace)
