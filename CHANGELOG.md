@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.88 — Fewer draw calls (2026-11-07)
+- Smoother: once a settlement has loaded, its unchanging parts are merged into one mesh per material and per repeated shape, town tiles are batched, and street life uses one mesh per shape; draw calls per frame fall by about a third on average (Barcelona 1530 to 560, New York 1330 to 604). Leaving a settlement now frees its buildings' memory.
+
 ## v9.87 — Seoul, c. 1888 (2026-11-07)
 - Joseon Seoul is now c. 1888, after Gyeongbokgung's rebuilding: Gyeonghoeru as rebuilt in 1867 on its 48 granite pillars, with its island, balustrade and bridges; the Hyangwonjeong pavilion on its lotus pond with the Chwihyanggyo bridge; Geoncheonggung; Amisan's terraces with their patterned chimneys; the licensed shops of Jongno and the bell pavilion; about 150 people in white coats, black hats and green head-cloaks, porters with A-frames, oxen with brushwood; hanok with papered doors, verandas and jar terraces.
 
