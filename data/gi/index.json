@@ -601,8 +601,8 @@
  },
  "isfahan-maidan": {
   "site": "isfahan",
-  "hash": "099f6197fac49923",
-  "rays": 160,
+  "hash": "109e860e699ce5c6",
+  "rays": 128,
   "probes": 37094,
   "boxes": [
    {
@@ -655,9 +655,9 @@
     ]
    }
   ],
-  "bytes": 620295,
-  "seconds": 564,
-  "baked": "2026-11-06"
+  "bytes": 635821,
+  "seconds": 178,
+  "baked": "2026-11-07"
  },
  "joseon-seoul-gyeongbokgung": {
   "site": "joseon-seoul",
