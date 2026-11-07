@@ -1,7 +1,7 @@
 {
  "amsterdam-dam": {
   "site": "amsterdam",
-  "hash": "ff2d521995f1fc67",
+  "hash": "1bf8015ab283b943",
   "rays": 128,
   "probes": 77056,
   "boxes": [
@@ -24,8 +24,8 @@
     ]
    }
   ],
-  "bytes": 1222505,
-  "seconds": 1010,
+  "bytes": 1237483,
+  "seconds": 409,
   "baked": "2026-11-07"
  },
  "angkor-wat": {
