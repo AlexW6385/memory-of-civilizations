@@ -1,7 +1,7 @@
 # Stonehenge, about 2500 BC — dossier
 
 Settlement id: `stonehenge` · Style: `neolithic` · Region: Britain (Salisbury Plain) · Code: `src/settlements/stonehenge/`
-Status of this dossier: L2, toward L3 (the Southern Circle and its avenue with the houses flanking it, long barrows and bowl barrows — §5b, §6a; the stones individually shaped and set in the ground — §1a; the Station Stones, the entrance stones and the Heel Stone's ditch; Durrington-type houses with interiors — §5a; people and animals — §10). Earlier: L1–L2 (the sarsen circle with its lintels, the five trilithons in a horseshoe open to the north-east, the bluestone circle and horseshoe, the altar, slaughter and heel stones; the circular ditch and bank; the Avenue toward the midsummer sunrise; round barrows on the down; the builders' houses brought near; ground, planting, weather, music). L3 recorded for later: each stone's surveyed shape, the Aubrey holes, Durrington Walls and Woodhenge at their true distance, the Cursus, the River Avon, gatherings at the solstices.
+Status of this dossier: L3 in part (tooling, crust and lichen — §1c; the midwinter feast — §10a). Before: L2, toward L3 (the Southern Circle and its avenue with the houses flanking it, long barrows and bowl barrows — §5b, §6a; the stones individually shaped and set in the ground — §1a; the Station Stones, the entrance stones and the Heel Stone's ditch; Durrington-type houses with interiors — §5a; people and animals — §10). Earlier: L1–L2 (the sarsen circle with its lintels, the five trilithons in a horseshoe open to the north-east, the bluestone circle and horseshoe, the altar, slaughter and heel stones; the circular ditch and bank; the Avenue toward the midsummer sunrise; round barrows on the down; the builders' houses brought near; ground, planting, weather, music). L3 recorded for later: each stone's surveyed shape, the Aubrey holes, Durrington Walls and Woodhenge at their true distance, the Cursus, the River Avon, gatherings at the solstices.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -26,6 +26,35 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **Station Stones:** four at the corners of a rectangle centred on the monument just inside the bank; two stood on mounds (the North and South "barrows") within ring ditches; the other two undressed sarsens [stated: Wikipedia "Station Stones"]. Rectangle 33 × 79 m with its short sides parallel to the axis [inferred: the usual reading].
 - **The earthwork:** the ditch was dug in segments [stated: Wikipedia, the first phase]; shown with an irregular depth, a bank inside and a low counterscarp outside, a wide causeway at the north-east entrance and a narrow one to the south [inferred: proportions].
 - **The Avenue:** "a parallel pair of ditches and banks" [stated: Wikipedia]; banks 14 m apart with a ditch outside each [inferred].
+
+## 1c. Tooling, crust and lichen (2026-11 L3; `standing_stone` with `tool`, `src/styles/neolithic/index.js`)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Pick-dressed faces | The dressed faces in a bright grey-white stone (`sandstone_white`), not the grey of today; worked in lanes of hammer-blows about a hand wide (16–24 cm), oblique, their direction varying from stone to stone, with the fine pitting of the blows over them | Pick-dressing removed the "brown and grey crust", exposing a "fine, bright grey-white surface" [stated: sarsen.org, after the laser scan]; freshly worked sarsens looked "much brighter and whiter than the grey stones you see" now [stated: EH "Discover more about the Stones"]; tool marks survive "everywhere we looked, on every surface"; "differences in patterns of tooling" across the monument [stated: heritagedaily; Historic England report 32-2012]; the lanes' width and direction [inferred] |
+| Which faces | Outer circle: the uprights within about 70° of the axis on the north-east dressed all over; the rest only on their inner faces (and the inner half of their sides), the backs left in their crust. Trilithons: the Great Trilithon dressed all over (its "extremely straight, neat outline and smooth surface"), the others on their inner faces. Lintels dressed all over | The stones on the north-east facing the Avenue "laboriously shaped" and pick-dressed; on the opposite side "only ... the inner faces" [stated: heritagedaily]; Great Trilithon [stated: sarsen.org]; lintels' faces "gently worked" [stated: EH]; the 70° limit [inferred] |
+| Crust | Where not dressed the old crust stands about 2 cm proud of the dressed face, knobbly | [inferred: dressing removes the crust] |
+| Lichen | Rosettes 3–12 cm across in loose colonies of 2–6, grey-green, yellow and pale grey, on the crust only: on the backs of the undressed uprights (about 14 colonies each), the four smaller trilithons' backs (8), the Heel Stone (70) and the Station Stones (30); none on the fresh dressed faces | 79 lichen species were counted on the stones at the last survey [stated: Stone Pages 2003]; the crusted sarsens lay exposed on the downs before they were brought, so their crusts carried lichens and the new faces none [inferred]; the colours of the common crustose and foliose kinds [inferred] |
+| Damp | The place's climate set damp 0.6: rain streaks and moss on shaded feet (the renderer's weathering) | [inferred: Salisbury Plain's rain] |
+
+Sources added:
+- [Stonehenge up close: digital laser scan reveals secrets of the past — HeritageDaily (2012)](https://www.heritagedaily.com/2012/10/stonehenge-up-close-digital-laser-scan-reveals-secrets-of-the-past/59390)
+- [Stonehenge Laser Scan: Archaeological Analysis — Historic England report 32-2012](https://historicengland.org.uk/research/results/reports/32-2012)
+- [Sarsen pick-dressing question — sarsen.org (2013)](https://www.sarsen.org/2013/02/sarsen-pick-dressing-question.html)
+- [Lichen survey at Stonehenge — Stone Pages (2003)](https://www.stonepages.com/news/archives/000177.html)
+
+## 10a. The midwinter feast (2026-11 L3; `feast_fire`, `midden`; placed in `town.js`)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Fires | Seven open fires in the spaces between the houses: a scorched scoop of ash ringed with burnt flint and chalk, logs laid in a star, the flames | "Burnt foot bones suggest that pigs were often roasted over open fires" [stated: EH "Monumental feasts"]; the ring of flint and chalk [inferred] |
+| The roast | Over each fire a pig on a hazel spit across two forked stakes, with a crank | Pigs were 90% of the bones and teeth, the rest mostly cattle; slaughtered at midwinter [stated: EH "Monumental feasts"]; pigs killed at about nine months "in time for the midwinter solstice" [stated: the-past.com]; the spit and stakes [inferred from roasting whole over an open fire] |
+| Pots | Two or three Grooved Ware pots cooking at the edge of each fire | "Large numbers of the pots were found to have been used for cooking pork and beef" [stated: EH] |
+| People | Five to eight round each fire, sitting on the ground, squatting at the pots, one standing to turn the spit | [inferred] |
+| Middens | Four heaps of dark refuse at the edge of the houses with the bones of pigs and cattle (long bones, skulls) and broken Grooved Ware | "Over 38,000 discarded animal bones have been found there" [stated: EH]; the heaps [inferred] |
+
+Sources added:
+- [Monumental feasts — English Heritage](https://english-heritage.org.uk/visit/inspire-me/cote-feasts-durrington)
 
 ## 2. Layout of the settlement (radius 360 m)
 

@@ -34,6 +34,7 @@ export const ground = {
     sky: { turbidity: 2.8, rayleigh: 1.1, mie: 0.006, mieG: 0.78, zenith: [0.08, 0.15, 0.38], horizon: [0.64, 0.68, 0.74] },
     fog: { color: [0.76, 0.78, 0.82], density: 0.0004, height: 0.012 },
     exposure: 0.5,
+    damp: 0.6,      // the Atlantic down: rain streaks on the stones, green on the north foot of the chalk walls
     wind: [0.9, 0.3],
     weather: [
       { id: 'changeable', weight: 3, clouds: 0.55, cloudDensity: 0.6, sun: 0.85, fog: 1.1 },

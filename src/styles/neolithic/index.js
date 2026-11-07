@@ -85,7 +85,9 @@ function bumps(rand, n = 5) {
  * bury (depth set below ground), rough (m), dress (1: the inner face dressed smooth), cap ('flat' | 'round' | 'peak'),
  * lean [toward +thickness, toward +width] (radians), lying (laid flat, its length across), natural, tenon, mat, seed }.
  */
-function standingStone(el, { bag, col }) {
+function standingStone(el, ctx) {
+  if (el.tool) return tooledStone(el, ctx);
+  const { bag, col } = ctx;
   const rand = rng(el.seed || 1), [x, z] = el.at, y = el.y ?? 0, a = el.yaw ?? 0;
   const h = el.top !== undefined ? el.top - y : el.h, bury = el.bury ?? 1;
   const w0 = el.w0 ?? 2, w1 = el.w1 ?? w0, d0 = el.d0 ?? 1, d1 = el.d1 ?? d0, rough = el.rough ?? 0.04, cap = el.cap ?? 'flat';
@@ -127,6 +129,119 @@ function standingStone(el, { bag, col }) {
     // the tenon on the top, which the lintel's mortise takes: a low knob, mostly hidden
     bag.add(el.mat || 'granite_rough', lathe([[0.32, 0], [0.3, 0.14], [0.22, 0.24], [0.001, 0.26]], 12, null, x, y + h - 0.01, z));
   }
+  const top = el.lying ? y + d0 - bury + 0.05 : y + h * Math.cos(ln);
+  if (el.lying) col.segment([x - tx * h / 2, z - tz * h / 2], [x + tx * h / 2, z + tz * h / 2], w0, y - 0.2, top);
+  else col.circle(x + ca * Math.sin(ln) * h * 0.3 + tx * Math.sin(lt) * h * 0.3, z + sa * Math.sin(ln) * h * 0.3 + tz * Math.sin(lt) * h * 0.3, Math.max(w0, d0) * 0.55, y - 0.5, top);
+}
+
+/** A smooth-shaded strip mesh from a grid of placed points G[i][j] (rows i, round j, closed round), the cells sorted
+ *  into buckets by pick(i, j); normals by central differences, turned away from each row's centre. */
+function gridMesh(G, pick, buckets) {
+  const M = G.length, N = G[0].length;
+  const cen = G.map((r) => r.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N, a[2] + p[2] / N], [0, 0, 0]));
+  const nor = G.map((r, i) => r.map((p, j) => {
+    const a = G[i][(j + 1) % N], b = G[i][(j + N - 1) % N], c = G[Math.min(M - 1, i + 1)][j], d = G[Math.max(0, i - 1)][j];
+    const u = [a[0] - b[0], a[1] - b[1], a[2] - b[2]], v = [c[0] - d[0], c[1] - d[1], c[2] - d[2]];
+    let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const m = [p[0] - cen[i][0], p[1] - cen[i][1], p[2] - cen[i][2]];
+    if (n[0] * m[0] + n[1] * m[1] + n[2] * m[2] < 0) n = n.map((q) => -q);
+    const l = Math.hypot(...n) || 1;
+    return n.map((q) => q / l);
+  }));
+  for (let i = 0; i < M - 1; i++) for (let j = 0; j < N; j++) {
+    const j1 = (j + 1) % N, B = buckets[pick(i, j)];
+    const q = [[i, j], [i, j1], [i + 1, j1], [i + 1, j]];
+    // wind so the face looks along its normal
+    const A = G[i][j], Bp = G[i][j1], C = G[i + 1][j1], n0 = nor[i][j];
+    const fn = [(Bp[1] - A[1]) * (C[2] - A[2]) - (Bp[2] - A[2]) * (C[1] - A[1]), (Bp[2] - A[2]) * (C[0] - A[0]) - (Bp[0] - A[0]) * (C[2] - A[2]), (Bp[0] - A[0]) * (C[1] - A[1]) - (Bp[1] - A[1]) * (C[0] - A[0])];
+    const tri = fn[0] * n0[0] + fn[1] * n0[1] + fn[2] * n0[2] >= 0 ? [q[0], q[1], q[2], q[0], q[2], q[3]] : [q[0], q[2], q[1], q[0], q[3], q[2]];
+    for (const [a, b] of tri) { B.pos.push(...G[a][b]); B.nor.push(...nor[a][b]); }
+  }
+  return { nor, cen };
+}
+const toGeom = ({ pos, nor }) => { const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(nor, 3)); return g; };
+
+/**
+ * A sarsen worked as at Stonehenge (docs/settlements/stonehenge.md §1c), standing_stone with `tool`: { faces ('all' |
+ * 'inner' | 'none'), lichen (patches on the crust) }. Pick-dressing took off the brown and grey crust and left a fine,
+ * bright grey-white face (`dressMat`), worked in lanes of hammer-blows a hand wide and pitted by them; where the stone was
+ * not dressed — the backs of the uprights away from the solstice axis, the natural stones — the old crust stands a little
+ * proud, knobbly, and carries the lichens it grew lying on the downs (grey-green, yellow and pale grey rosettes).
+ */
+function tooledStone(el, { bag, col }) {
+  const rand = rng(el.seed || 1), [x, z] = el.at, y = el.y ?? 0, a = el.yaw ?? 0;
+  const h = el.top !== undefined ? el.top - y : el.h, bury = el.bury ?? 1;
+  const w0 = el.w0 ?? 2, w1 = el.w1 ?? w0, d0 = el.d0 ?? 1, d1 = el.d1 ?? d0, rough = el.rough ?? 0.04, cap = el.cap ?? 'flat';
+  const faces = el.tool.faces ?? 'inner', N = 48, wave = bumps(rand), wave2 = bumps(rand, 3), wave3 = bumps(rand, 6);
+  const sec = section(1, 1, N, el.natural ? 2.6 : 4.5);
+  const dressedAt = (sz) => faces === 'all' || (faces === 'inner' && sz < 0.25);
+  // the lanes of the tooling: oblique bands a hand wide, their direction and pitch varying from stone to stone
+  const phi = (rand() - 0.5) * 1.4 + (rand() < 0.5 ? 0 : Math.PI / 2), lane = 0.16 + rand() * 0.08, per = (w0 + d0) * 2.1;
+  const ys = [-bury, -bury * 0.3, 0];
+  const top0 = h * (cap === 'flat' ? 0.97 : cap === 'round' ? 0.86 : 0.8), nr = Math.max(8, Math.round(top0 / 0.14));
+  for (let i = 1; i <= nr; i++) ys.push(top0 * (i / nr));
+  if (cap === 'flat') ys.push(h);
+  const skew = (rand() - 0.5) * 0.12, cls = [];
+  const ring = (yy, k, row) => sec.map(([sx, sz, t], j) => {
+    const f = Math.max(0, Math.min(1, yy / h)), w = (w0 + (w1 - w0) * f) / 2, d = (d0 + (d1 - d0) * f) / 2;
+    const dressed = dressedAt(sz) && yy > -0.25, m = Math.max(0.3, Math.min(w, d));
+    let r;
+    if (dressed) {
+      const s = t / (Math.PI * 2) * per, along = yy * Math.cos(phi) + s * Math.sin(phi);
+      const groove = 0.5 + 0.5 * Math.sin(along / lane * Math.PI * 2 + wave2(t * 3, yy) * 1.5);
+      r = 1 + (rough * 0.3 * (0.7 * wave(t, yy) + 0.3 * wave2(t * 2, yy * 2)) - 0.006 * groove + 0.0025 * wave3(t * 37, yy * 41)) / m;
+    } else r = 1 + (0.02 + rough * 1.5 * (0.6 * wave(t, yy) + 0.25 * wave2(t * 2, yy * 2) + 0.15 * wave3(t * 9, yy * 9))) / m;
+    if (row !== undefined) (cls[row] ||= [])[j] = dressed ? 0 : 1;
+    return [sx * w * r * k, yy, sz * d * r * k];
+  });
+  const rows = ys.map((yy, i) => ring(yy, 1, i));
+  if (cap === 'flat') rows[rows.length - 1] = rows[rows.length - 1].map((p) => [p[0] * 0.97, h, p[2] * 0.95]);
+  else {
+    const tops = cap === 'round' ? [[0.92, 0.75], [0.97, 0.45], [1, 0.12]] : [[0.88, 0.7], [0.95, 0.35], [1, 0.08]];
+    for (const [fy, k] of tops) { const i = rows.length; rows.push(ring(h * fy, k, i).map((p, j) => [p[0] + (cap === 'peak' ? skew * h * 0.4 : 0), p[1] + (j % 3) * 0.01 * h * (1 - k), p[2]])); }
+  }
+  const lt = el.lean?.[1] ?? 0, ln = el.lean?.[0] ?? 0, ca = Math.cos(a), sa = Math.sin(a), tx = -sa, tz = ca;
+  const place = ([u, v, w]) => {
+    let U = u, V = v, W = w;
+    if (el.lying) { U = v - h / 2; V = w + d0 / 2 - bury; W = u; } else { U = u + Math.sin(lt) * v; W = w + Math.sin(ln) * v; V = v * Math.cos(ln) * Math.cos(lt); }
+    return [x + tx * U + ca * W, y + V, z + tz * U + sa * W];
+  };
+  const G = rows.map((r) => r.map(place));
+  const buckets = [{ pos: [], nor: [] }, { pos: [], nor: [] }];
+  const pick = (i, j) => { const c = cls[i] || cls[cls.length - 1], c1 = cls[i + 1] || c; return c[j] + c[(j + 1) % N] + c1[j] + c1[(j + 1) % N] >= 2 ? 1 : 0; };
+  const { nor, cen } = gridMesh(G, pick, buckets);
+  // the caps: the top dressed flat on an upright that carries a lintel (else of the face's kind), the foot unseen
+  const fanUp = (row, B) => { const c = cen[row], R = G[row]; for (let j = 0; j < N; j++) { const p = R[j], q = R[(j + 1) % N]; const ux = p[0] - c[0], uz = p[2] - c[2], vx = q[0] - c[0], vz = q[2] - c[2]; const ccw = uz * vx - ux * vz > 0; for (const v of (ccw ? [c, p, q] : [c, q, p])) { B.pos.push(...v); B.nor.push(0, 1, 0); } } };
+  fanUp(G.length - 1, buckets[faces === 'none' ? 1 : 0]);
+  const dm = el.tool.dressMat || 'sandstone_white', cm = el.mat || 'granite_rough';
+  if (buckets[0].pos.length) bag.add(dm, toGeom(buckets[0]));
+  if (buckets[1].pos.length) bag.add(cm, toGeom(buckets[1]));
+  if (el.tenon && !el.lying) bag.add(dm, lathe([[0.32, 0], [0.3, 0.14], [0.22, 0.24], [0.001, 0.26]], 12, null, x, y + h - 0.01, z));
+  // the lichens on the crust: rosettes 3–12 cm across in loose colonies, each a hair off the face, on faces that see the sky
+  const nL = el.tool.lichen ?? 0, LM = ['plaster_damp', 'plaster_damp', 'plaster_ochre', 'plaster_grey'], disc = { plaster_damp: [], plaster_ochre: [], plaster_grey: [] };
+  for (let c = 0, tries = 0; c < nL && tries < nL * 20; tries++) {
+    const i = 3 + Math.floor(rand() * (G.length - 5)), j = Math.floor(rand() * N);
+    if (!cls[i] || cls[i][j] !== 1 || G[i][j][1] < y + 0.25 || nor[i][j][1] < -0.25) continue;
+    c++;
+    const m = LM[Math.floor(rand() * LM.length)], n = 2 + Math.floor(rand() * 5);
+    for (let k = 0; k < n; k++) {
+      const ii = Math.max(1, Math.min(G.length - 2, i + Math.round((rand() - 0.5) * 3))), jj = (j + Math.round((rand() - 0.5) * 3) + N) % N;
+      if (cls[ii]?.[jj] !== 1) continue;
+      const p = G[ii][jj], nn = nor[ii][jj], off = 0.004 + k * 0.0012 + (m === 'plaster_damp' ? 0 : 0.0006);
+      const e1 = Math.abs(nn[1]) < 0.9 ? [nn[2], 0, -nn[0]] : [1, 0, 0], l1 = Math.hypot(...e1), u = e1.map((q) => q / l1);
+      const v = [nn[1] * u[2] - nn[2] * u[1], nn[2] * u[0] - nn[0] * u[2], nn[0] * u[1] - nn[1] * u[0]];
+      const R = 0.015 + rand() * 0.05, cx = p[0] + nn[0] * off, cy = p[1] + nn[1] * off, cz = p[2] + nn[2] * off, S = 7;
+      for (let s = 0; s < S; s++) {
+        const a0 = s / S * Math.PI * 2, a1 = (s + 1) / S * Math.PI * 2, r0 = R * (0.8 + 0.3 * Math.sin(a0 * 3 + k)), r1 = R * (0.8 + 0.3 * Math.sin(a1 * 3 + k));
+        const P0 = [cx + (u[0] * Math.cos(a0) + v[0] * Math.sin(a0)) * r0, cy + (u[1] * Math.cos(a0) + v[1] * Math.sin(a0)) * r0, cz + (u[2] * Math.cos(a0) + v[2] * Math.sin(a0)) * r0];
+        const P1 = [cx + (u[0] * Math.cos(a1) + v[0] * Math.sin(a1)) * r1, cy + (u[1] * Math.cos(a1) + v[1] * Math.sin(a1)) * r1, cz + (u[2] * Math.cos(a1) + v[2] * Math.sin(a1)) * r1];
+        const ax = P0[0] - cx, ay = P0[1] - cy, az = P0[2] - cz, bx = P1[0] - cx, by = P1[1] - cy, bz = P1[2] - cz;
+        const out = (ay * bz - az * by) * nn[0] + (az * bx - ax * bz) * nn[1] + (ax * by - ay * bx) * nn[2] > 0;
+        disc[m].push(cx, cy, cz, ...(out ? [...P0, ...P1] : [...P1, ...P0]));
+      }
+    }
+  }
+  for (const [m, T] of Object.entries(disc)) if (T.length) bag.add(m, fromTriangles(T));
   const top = el.lying ? y + d0 - bury + 0.05 : y + h * Math.cos(ln);
   if (el.lying) col.segment([x - tx * h / 2, z - tz * h / 2], [x + tx * h / 2, z + tz * h / 2], w0, y - 0.2, top);
   else col.circle(x + ca * Math.sin(ln) * h * 0.3 + tx * Math.sin(lt) * h * 0.3, z + sa * Math.sin(ln) * h * 0.3 + tz * Math.sin(lt) * h * 0.3, Math.max(w0, d0) * 0.55, y - 0.5, top);
@@ -314,8 +429,76 @@ function timberCircle(el, { bag, col }) {
   }
 }
 
+/** A stick or log from p0 to p1 (radius r), as a lathe laid along the segment. */
+function stick(p0, p1, r, n = 6) {
+  const g = lathe([[r, 0], [r * 0.9, 1], [0.001, 1]], n);
+  const dx = p1[0] - p0[0], dy = p1[1] - p0[1], dz = p1[2] - p0[2], L = Math.hypot(dx, dy, dz);
+  g.scale(1, L, 1); g.rotateX(Math.atan2(Math.hypot(dx, dz), dy)); g.rotateY(Math.atan2(dx, dz)); g.translate(...p0);
+  return g;
+}
+/**
+ * feast_fire: { c, r (the ground kept round it, for those sitting at it), y, yaw, pig (a carcass roasting on the spit), seed } — the open fires of the midwinter feasts at
+ * Durrington (docs/settlements/stonehenge.md §10a): a shallow scoop ringed with burnt flints and chalk, a bed of ash and
+ * embers, logs laid in a star, the flames; across it, on two forked stakes, a green spit of hazel with a pig spitted
+ * along it, browned; Grooved Ware pots set at the edge of the fire, cooking.
+ */
+function feastFire(el, { bag, col }) {
+  const rand = rng(el.seed || 9), [x, z] = el.c ?? el.at, y = el.y ?? 0, a = el.yaw ?? 0, c = Math.cos(a), s = Math.sin(a);
+  const P = (u, yy, v) => [x + u * c - v * s, y + yy, z + u * s + v * c];
+  bag.add('pottery_dark', lathe([[1.15, -0.02], [1.0, 0.03], [0.55, 0.02], [0.001, 0.0]], 18, null, x, y, z));           // the scorched ground and ash
+  bag.add('linen', lathe([[0.62, 0], [0.5, 0.025], [0.001, 0.035]], 14, null, x, y + 0.005, z));                          // grey-white ash
+  for (let k = 0; k < 16; k++) {                                                                                          // the ring of burnt flints and chalk
+    const t = k / 16 * Math.PI * 2 + rand() * 0.2, r = 0.8 + rand() * 0.1, q = [x + Math.cos(t) * r, y, z + Math.sin(t) * r], sz = 0.07 + rand() * 0.06;
+    bag.add(k % 3 ? 'granite_rough' : 'chalk', lathe([[sz, 0], [sz * 0.9, sz * 0.6], [0.001, sz]], 5, null, ...q));
+  }
+  for (let k = 0; k < 6; k++) { const t = k / 6 * Math.PI * 2 + rand() * 0.4; bag.add(k % 2 ? 'log_pine' : 'bark_dark', stick([x + Math.cos(t) * 0.75, y + 0.04, z + Math.sin(t) * 0.75], [x + Math.cos(t) * 0.08, y + 0.16, z + Math.sin(t) * 0.08], 0.06)); }
+  bag.add('flame', lathe([[0.32, 0], [0.26, 0.25], [0.12, 0.55], [0.001, 0.75]], 9, null, x, y + 0.06, z));
+  // the spit on two forked hazel stakes
+  for (const sg of [-1, 1]) {
+    const f = P(sg * 1.05, 0, 0);
+    bag.add('timber', stick([f[0], y - 0.3, f[2]], [f[0], y + 0.95, f[2]], 0.035));
+    for (const d of [-1, 1]) bag.add('timber', stick(P(sg * 1.05, 0.88, 0), P(sg * 1.05, 1.08, d * 0.09), 0.02));
+    col.circle(f[0], f[2], 0.06, y, y + 1.0);
+  }
+  bag.add('timber', stick(P(-1.3, 0.95, 0), P(1.3, 0.95, 0), 0.025));
+  bag.add('timber', stick(P(1.3, 0.95, 0), P(1.3, 0.75, -0.25), 0.02));                                                  // the crank to turn it
+  if (el.pig !== false) {
+    // the carcass along the spit: the body, the head with its snout, the legs drawn out fore and aft, browned
+    const body = lathe([[0.001, 0], [0.12, 0.05], [0.2, 0.2], [0.23, 0.45], [0.22, 0.65], [0.16, 0.82], [0.001, 0.9]], 12);
+    body.scale(1, 1, 0.85); body.rotateZ(-Math.PI / 2); body.translate(-0.45, 0, 0); body.rotateY(-a); body.translate(x, y + 0.92, z);
+    bag.add('wood_ochre', body);
+    const head = lathe([[0.001, 0], [0.11, 0.04], [0.12, 0.14], [0.07, 0.26], [0.045, 0.3], [0.001, 0.31]], 10);
+    head.rotateZ(-Math.PI / 2); head.translate(0.42, -0.02, 0); head.rotateY(-a); head.translate(x, y + 0.92, z);
+    bag.add('wood_ochre', head);
+    for (const [u0, u1] of [[0.25, 0.62], [-0.3, -0.68]]) for (const d of [-0.07, 0.07]) bag.add('wood_ochre', stick(P(u0, 0.84, d), P(u1, 0.86, d * 1.3), 0.035, 5));
+  }
+  // pots at the fire's edge
+  for (let k = 0; k < 2 + Math.floor(rand() * 2); k++) {
+    const t = Math.PI / 2 + (k - 0.5) * 0.7 + rand() * 0.2, r = 0.62, q = [x + Math.cos(t + a) * r, y, z + Math.sin(t + a) * r];
+    bag.add(rand() < 0.6 ? 'pottery_dark' : 'terracotta', lathe(groovedWare(0.13 + rand() * 0.05, 0.22 + rand() * 0.08), 14, null, ...q));
+  }
+}
+/**
+ * midden: { c, y, r, seed } — a heap of the feasts' leavings: dark earthy refuse with ash, the bones of pigs and cattle
+ * (long bones, jaws, skulls) and broken Grooved Ware thrown on it.
+ */
+function midden(el, { bag }) {
+  const rand = rng(el.seed || 11), [x, z] = el.c ?? el.at, y = el.y ?? 0, R = el.r ?? 1.6;
+  const mound = lathe([[R, -0.05], [R * 0.85, 0.1], [R * 0.55, 0.26], [R * 0.25, 0.34], [0.001, 0.36]], 14);
+  mound.scale(1, 1, 0.75 + rand() * 0.2); mound.rotateY(rand() * 3); mound.translate(x, y, z);
+  bag.add('mud_plaster', mound);
+  const hgt = (r) => 0.36 * Math.max(0, 1 - (r / R) ** 1.6);
+  for (let k = 0; k < 26; k++) {
+    const t = rand() * 6.28, r = Math.sqrt(rand()) * R * 0.85, px = x + Math.cos(t) * r, pz = z + Math.sin(t) * r * 0.85, py = y + hgt(r) - 0.01;
+    const kind = rand();
+    if (kind < 0.55) { const L = 0.14 + rand() * 0.22, b = rand() * 6.28; bag.add('linen', stick([px - Math.cos(b) * L / 2, py, pz - Math.sin(b) * L / 2], [px + Math.cos(b) * L / 2, py + 0.02, pz + Math.sin(b) * L / 2], 0.018, 5)); }
+    else if (kind < 0.7) bag.add('linen', lathe([[0.001, 0], [0.07, 0.02], [0.08, 0.07], [0.05, 0.11], [0.001, 0.12]], 7, null, px, py - 0.03, pz));
+    else { const sz = 0.05 + rand() * 0.05, b = rand() * 6.28; bag.add('pottery_dark', box(-sz, 0, -0.01, sz, 0.012, 0.01).rotateY(b).rotateZ((rand() - 0.5) * 0.4).translate(px, py, pz)); }
+  }
+}
+
 registerStyle('neolithic', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle },
+  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle, feast_fire: feastFire, midden },
   objects: {},
 });
