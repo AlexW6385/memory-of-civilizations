@@ -630,6 +630,49 @@
   "seconds": 235,
   "baked": "2026-11-07"
  },
+ "lalibela-churches": {
+  "site": "lalibela",
+  "hash": "bc367f93245212a3",
+  "rays": 128,
+  "probes": 10971,
+  "boxes": [
+   {
+    "min": [
+     -5.15,
+     -11.05,
+     -100.15
+    ],
+    "n": [
+     31,
+     13,
+     21
+    ],
+    "spacing": 1,
+    "rooms": [
+     "medhane-in"
+    ]
+   },
+   {
+    "min": [
+     60.8,
+     -8.75,
+     -95.6
+    ],
+    "n": [
+     19,
+     11,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "maryam-in"
+    ]
+   }
+  ],
+  "bytes": 186678,
+  "seconds": 60,
+  "baked": "2026-11-07"
+ },
  "lhasa-potala": {
   "site": "lhasa",
   "hash": "29aab7996e9859a3",
