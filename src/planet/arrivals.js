@@ -42,7 +42,7 @@ export const ARRIVALS = {
   'rome':             [0, 0.1, -120, 3.1416, 0.15],      // the Pantheon across its forecourt
   'baroque-rome':     [110, 0.1, 0, 1.5708, 0.25],       // St Peter's, the obelisk and the colonnade's arms
   'stonehenge':       [34, null, -16, 2.01, 0.06],       // the circle, clear of the Heel Stone
-  'conques':          [-29.8, 6.9, -52.9, -2.88, 0.166], // Sainte-Foy's towers up the village lane
+  'conques':          [-47, null, 12, -1.29, 0.28],      // Sainte-Foy's west front and the Last Judgement tympanum, from the abbey terrace (the lane above was shut in by houses and bushes)
   'paris':            [-250, 1.1, -10, -1.5708, 0.25],   // the Sainte-Chapelle's rose and spire from the palace court
   'granada':          [19.5, 30.1, 3, 0, 0.25],          // the Court of the Myrtles to the Comares Tower (by the south arcade, clear of the pool's end)
   'florence':         [-142.6, 0, -21.9, -1.309, 0.216], // the Baptistery, the cathedral front and the campanile
