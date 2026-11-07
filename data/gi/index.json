@@ -1043,6 +1043,49 @@
   "seconds": 198,
   "baked": "2026-11-06"
  },
+ "petra-khazneh": {
+  "site": "petra",
+  "hash": "a90903d46c1ee60c",
+  "rays": 128,
+  "probes": 25095,
+  "boxes": [
+   {
+    "min": [
+     -81,
+     5.42,
+     70.9
+    ],
+    "n": [
+     47,
+     21,
+     17
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the Great Temple"
+    ]
+   },
+   {
+    "min": [
+     -165,
+     2.52,
+     15
+    ],
+    "n": [
+     27,
+     22,
+     14
+    ],
+    "spacing": 1,
+    "rooms": [
+     "Qasr al-Bint"
+    ]
+   }
+  ],
+  "bytes": 399611,
+  "seconds": 50,
+  "baked": "2026-11-07"
+ },
  "qing-beijing-palace": {
   "site": "qing-beijing",
   "hash": "193227250d3aafde",
