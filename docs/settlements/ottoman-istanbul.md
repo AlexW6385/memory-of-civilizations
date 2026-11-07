@@ -1,7 +1,7 @@
 # Ottoman Istanbul (the Süleymaniye), about 1560 — dossier
 
 Settlement id: `ottoman-istanbul` · Style: `ottoman` (with `vernacular` houses) · Region: the Bosphorus (the third hill above the Golden Horn) · Code: `src/settlements/ottoman-istanbul/`
-Status of this dossier: L3 in the prayer hall (§4.10); L1–L2 elsewhere (the Süleymaniye on its terrace — the central dome on its drum with semidomes and cascading domes, weight towers, the domed courtyard arcades and fountain, four minarets; the outer court's wall; the külliye round it — four medreses with porticoed courts, chimneyed cells and domed dershanes, the vaulted shops before them, the darüşşifa, the imaret, the hamam and the dar'ül-hadis (§4.4–§4.9); the terrace's retaining wall; timber houses down the slopes; ground, planting, weather, music). L3 recorded for later: the tomb of Süleyman (1566, after our moment), the Tıp medresesi, the tabhane and caravanserai, the sıbyan mektebi and dârülkurrâ, the Golden Horn itself with its boats, the Grand Bazaar, people.
+Status of this dossier: L3 in the prayer hall (§4.10); L1–L2 elsewhere (the Süleymaniye on its terrace — the central dome on its drum with semidomes and cascading domes, weight towers, the domed courtyard arcades and fountain, four minarets; the outer court's wall; the külliye round it — four medreses with porticoed courts, chimneyed cells and domed dershanes, the vaulted shops before them, the darüşşifa, the imaret, the hamam and the dar'ül-hadis (§4.4–§4.9); the terrace's retaining wall; timber houses down the slopes; ground, planting, weather, music). L3 recorded for later: the tomb of Süleyman (1566, after our moment), the Tıp medresesi, the tabhane and caravanserai, the sıbyan mektebi and dârülkurrâ, the Golden Horn itself with its boats, the Grand Bazaar. Phase D (§10): the coffee house, porters, water carriers, donkeys and horses, the tomb's Qur'an stands.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -114,6 +114,19 @@ Up the lanes onto the terrace, through the outer court into the courtyard, to th
 
 The call to prayer from the minarets; the ney; a makam over a drone. [inferred]
 
+## 10. Phase D: the coffee house, the street life, the tomb's readers (fourth pass)
+
+**The coffee house (kahvehane).** Coffee houses opened in Istanbul in the early 1550s; Peçevi writes that "a merchant named Hakem from Aleppo and a man named Şems from Damascus" opened the first at Tahtakale in 962 (1554–55), and that men of letters met in them in companies of twenty or thirty, some reading books, some playing backgammon and chess, others reciting the poems they had written [stated: TDV İslâm Ansiklopedisi, "Kahvehane"]. "Coffeehouse windows were usually left open", so that people looked in and out; the front room was like a house's sitting room, the footwear taken off at the door [stated: Wikipedia, "Ottoman coffeehouse"]; owners "hired beardless youths as servers" [stated: The Ottoman City, Sites of Knowing (arth780, omeka)]. Ours (`kahvehane`, `src/styles/ottoman/kahve.js`, on the lot nearest the lane west of the terrace by the west avenue's shops (the Tiryaki Çarşısı of TDV, §4.9), `layout.js` `COFFEE`): a room 10 × 8 m on a footing of stone, its floor of boards; timber-framed walls plastered white, the frame showing outside (posts at 1.2 m, sill, rail and plate); the front open to the lane between four posts above a low parapet of boards, a step of stone with the shoes left on it; a hipped roof of tiles over eaves 0.9 m deep on brackets; inside, raised benches (sedir) on three sides with mattresses and back cushions, a kilim on the floor; in the back corner the hearth of brick under a plaster hood on brackets to its chimney, three brass pots on the coals, a shelf of small cups and a tray stood behind them; a water jar on its stand by the door; a low stool with the backgammon board and its pieces between a man on the bench and one on the floor; a book on a bench; a lamp; the company seated cross-legged (`life.js`), the coffee-maker in his apron by the hearth, a boy serving [inferred: the building, its size and its furnishing; the 1554 coffee houses were in Tahtakale, below the Süleymaniye's hill toward the Golden Horn — ours stands nearer the mosque]. No pipe: tobacco reached Istanbul about 1600 [inferred from the date of our moment; not sourced].
+
+**The street life.** Porters (hamal) with loads on their backs and buyers at the shops in both avenues; water carriers (saka) with the waterskin on the back at the outer court's north gate; three donkeys with panniers, their driver and a pile of firewood at the soup kitchen's gate, for its ovens (§4.6); two saddled horses held at the north gate [inferred: the trades of the city, their places].
+
+**The tomb of Hürrem Sultan.** Two Qur'an stands (rahle) with their books open and a cushion before each, outside the rail on the side away from the door, for the readers endowed to recite in the tomb [inferred].
+
+Sources added:
+- [Kahvehane — TDV İslâm Ansiklopedisi](https://islamansiklopedisi.org.tr/kahvehane)
+- [Ottoman coffeehouse — Wikipedia](https://en.wikipedia.org/wiki/Ottoman_coffeehouse)
+- [Coffeehouses — The Ottoman City, Sites of Knowing (omeka)](https://arth780.omeka.net/exhibits/show/sites-of-knowing/the-street/coffeehouses)
+
 ## Sources
 
 - [Strolling through Istanbul — Freely and Sumner-Boyd, the Süleymaniye](https://erenow.org/common/strolling-through-istanbul-classic-guide-to-the-city/11.php) (the interior's piers, arcades, mihrab, minbar, glass, tiles)
@@ -128,3 +141,5 @@ The call to prayer from the minarets; the ney; a makam over a drone. [inferred]
 
 - [Süleymaniye Mosque — Wikipedia](https://en.wikipedia.org/wiki/S%C3%BCleymaniye_Mosque) (read through a Kiwix mirror)
 - [Süleymaniye Mosque — Republic of Türkiye Ministry of Culture and Tourism](https://www.ktb.gov.tr/EN-113783/suleymaniye-mosque.html)
+- [Kahvehane — TDV İslâm Ansiklopedisi](https://islamansiklopedisi.org.tr/kahvehane)
+- [Ottoman coffeehouse — Wikipedia](https://en.wikipedia.org/wiki/Ottoman_coffeehouse)

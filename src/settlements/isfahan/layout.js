@@ -49,6 +49,8 @@ export function houses() {
   }
   return HOUSES;
 }
+/** The house open to walk into (docs/settlements/isfahan.md §16): the one the lane from the square's east gap (z −180) meets. */
+export const OPEN_HOUSE = () => houses().reduce((b, h) => (Math.hypot((h.rect[0] + h.rect[2]) / 2 - 105, (h.rect[1] + h.rect[3]) / 2 + 180) < Math.hypot((b.rect[0] + b.rect[2]) / 2 - 105, (b.rect[1] + b.rect[3]) / 2 + 180) ? h : b));
 let GRID = null;
 /** Is (x, z) within m of a house? (a grid of 23 m cells over the lots) */
 export function inHouse(x, z, m = 0) {

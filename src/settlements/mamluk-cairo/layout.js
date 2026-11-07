@@ -24,6 +24,9 @@ export function onRoad(x, z, m = 0) { const q = roadAt(angleOf(x, z)); return !!
 export const SUQ = [-45, -116, -30, -14];
 // sabil-kuttabs on street corners: the crossing of the two lanes west of the madrasa, and the square's north-west corner
 export const SABILS = [[-155.5, -115.5], [-165, -130], [74, -86]];
+// the merchant's house with its qa'a, open and furnished (docs/settlements/mamluk-cairo.md §10): west of the covered
+// market street, its door on the lane beside it
+export const QAA = [-69, -70, -47, -48];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export function height(x, z) {
@@ -45,6 +48,7 @@ export function lots() {
     if (Math.hypot(cx, cz) > RADIUS - 45 || inRect([-90, -10, 90, 120], cx, cz, 8) || inRect(SQUARE, cx, cz, 6) || Math.hypot(cx - CITADEL.c[0], cz - CITADEL.c[1]) < CITADEL.r + 45 || rand() < 0.15) continue;
     if (Math.abs(cz + 120) < 5 || Math.abs(cx + 160) < 4) continue;
     if (x < SUQ[2] + 1 && x + w > SUQ[0] - 1 && z < SUQ[3] + 6 && z + d > SUQ[1] - 1) continue;   // the market street
+    if (x < QAA[2] + 1.5 && x + w > QAA[0] - 1.5 && z < QAA[3] + 1.5 && z + d > QAA[1] - 1.5) continue;   // the open house
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, storeys: 2 + (rand() < 0.4 ? 1 : 0), court: null, front: rand() < 0.5 ? 'n' : 's', plaster: rand() });
   }
   return LOTS;

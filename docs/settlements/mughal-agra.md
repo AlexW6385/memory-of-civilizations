@@ -1,7 +1,7 @@
 # Mughal Agra, 1632–1653 — dossier
 
 Settlement id: `mughal-agra` · Style: `mughal` · Region: India (the Yamuna plain) · Code: `src/settlements/mughal-agra/`
-Status of this dossier: L1–L2 (the Taj Mahal complex: riverfront terrace, plinth, mausoleum, minarets, mosque and jawab, charbagh with channels and pool, walls and towers, great gate, forecourt; the town of Taj Ganj; ground, planting, weather, music). L3 recorded for later: the pietra dura and calligraphy in full (the faces' bands, spandrels and dado are built, §4), the jali screens and the cenotaphs inside, the forecourt's bazaars and caravanserais in full, the subsidiary tombs, the river ghats and boats, people.
+Status of this dossier: L1–L2 (the Taj Mahal complex: riverfront terrace, plinth, mausoleum, minarets, mosque and jawab, charbagh with channels and pool, walls and towers, great gate, forecourt; the town of Taj Ganj; ground, planting, weather, music). L3 recorded for later: the pietra dura and calligraphy in full (the faces' bands, spandrels and dado are built, §4), the jali screens and the cenotaphs inside, the forecourt's bazaars and caravanserais in full, the subsidiary tombs, the river ghats. Phase D (§11): the two northern katras of the Taj Ganj with a furnished cell each, a furnished house, the houses' doors, windows and weathered feet, caravan animals, water carriers and porters.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -71,6 +71,18 @@ A raga on plucked strings over a drone; the shehnai at the gate (an oud-like str
 
 The settlement's latitude in `src/planet/sites.js` is set a little south and east of the true place (26.2°, 78.3°), so that the layout keeps its disc off the foothills the warped map puts north of Agra. [inferred]
 
+## 11. Phase D: the Taj Ganj's caravanserais, a furnished house, the houses' fronts, the street life (fourth pass)
+
+**The katras.** The Taj Ganj — first "Mumtazabad" — took "the characteristic form of a square divided by two cross axial streets with gates to the four cardinal points"; "Bazaars lined each street and the resultant squares to each corner housed the caravanserais": "the north western one was known as Katra Omar Khan", "the north eastern as Katra Fulel (Perfume Market)", "the south western as Katra Resham (Silk Market)" and "the south-eastern as Katra Jogidas"; built first to house the builders, then for trade whose revenue kept the tomb; contemporary sources dwell on the northern half, likely the only one imperially funded and the finer [stated: Wikipedia, Origins and architecture of the Taj Mahal]. A sarai of the same years and patronage — Amanat Khan's, the Taj's calligrapher, dated 1640–41 — is almost square (168 × 165 m) with gateways in the middle of two sides, rooms about 3.5 m square with vaulted ceilings, a three-domed mosque and a well 2 m across in the court [stated: Wikipedia, Sarai Amanat Khan]. Ours (`katra`, `layout.js` `KATRAS`): the two northern katras either side of the bazaar street on the axis, 44 × 31 m each (much smaller than Amanat Khan's — our town is compressed): on the north and south rows of vaulted cells 3.6 m wide behind arcaded verandahs of cusped arches on Shah Jahani columns (the forecourt's bazaar row, §5); east and west walls of red sandstone with blind arches and merlons, the gate in the middle of the wall on the street, its arch framed in inlaid flowers under kiosks; in the court a well with its parapet, posts, beam and pulley, a stone trough, bales stacked by a verandah, a charpoy; one cell of Katra Omar Khan and one of Katra Fulel furnished as a merchant's lodging — plastered inside, a dhurrie, a charpoy with its quilt and pillow, a saddlebag and bales along the back, a hookah, the water pot on its stand and a brass lota, an oil lamp on a ledge by the door; camels (some unloaded), zebu bullocks and a cart in the courts, merchants seated among sacks on the verandahs, a water carrier (bhishti) with his goatskin, porters with head loads, a keeper with his staff (`life.js`) [inferred: the plan, the size, the mosque left out, the furnishing; the hookah: tobacco smoking was established at the Mughal court from the early 1600s — not sourced here].
+
+**The furnished house.** Ours (`haveli_open`, `layout.js` `HAVELI_OPEN`, built with the shared courtyard house `src/styles/mughal/courthouse.js`): on the bazaar street south of the katras, the street door on the west in a frame of red sandstone with studded leaves and knockers into a vestibule whose inner door is set aside; the court paved in red sandstone round a raised platform (chabutra), the water pots (matka) on their stands, a charpoy set out; on the north the dalan, open to the court by three arches, each in a frame of red sandstone with marble rosettes in the spandrels, a chhajja on brackets over them and a crenellated parapet; in it a striped dhurrie, a takht (a low platform of wood) spread with a carpet with a long bolster (gao takiya) and cushions, a hookah, a brass tray on its stand, oil lamps and ewers on ledges; on the east a room with two charpoys, a chest and the bedding folded on it; the master seated on the takht, a woman by the water pots [inferred: the house type and its furnishing after Mughal paintings].
+
+**The houses' fronts.** Every `haveli` now has its door in a frame of red sandstone with two studded leaves and a step, small latticed windows in red sandstone frames high in the front, and the foot of its walls darkened to 0.6–1.1 m by the lane's dust (DESIGN §5) [inferred].
+
+Sources added:
+- [Origins and architecture of the Taj Mahal — Wikipedia](https://en.wikipedia.org/wiki/Origins_and_architecture_of_the_Taj_Mahal)
+- [Sarai Amanat Khan — Wikipedia](https://en.wikipedia.org/wiki/Sarai_Amanat_Khan)
+
 ## Sources
 
 - [Interior decoration — tajmahal.gov.in](https://tajmahal.gov.in/the-taj-interiors.aspx)
@@ -94,3 +106,4 @@ The settlement's latitude in `src/planet/sites.js` is set a little south and eas
 - [Taj Mahal, guida alla visita — archetravel](https://www.archetravel.com/blog/taj-mahal-india-guida-visita/)
 - [Taj Mahal Complex — Madain Project](https://madainproject.com/taj_mahal_complex)
 - [Taj Mahal — thailex](https://thailex.info/THAILEX/THAILEXENG/lexicon/India%20Lexicon%20-%20Taj%20Mahal.htm)
+- [Sarai Amanat Khan — Wikipedia](https://en.wikipedia.org/wiki/Sarai_Amanat_Khan)
