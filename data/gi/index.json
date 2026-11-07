@@ -100,7 +100,7 @@
  },
  "baroque-rome-stpeter": {
   "site": "baroque-rome",
-  "hash": "de7962e3f19f7cd3",
+  "hash": "4fd23f6820cb5242",
   "rays": 128,
   "probes": 73584,
   "boxes": [
@@ -121,8 +121,8 @@
     ]
    }
   ],
-  "bytes": 1113161,
-  "seconds": 768,
+  "bytes": 1142743,
+  "seconds": 315,
   "baked": "2026-11-07"
  },
  "byodo-in-phoenix-hall": {
