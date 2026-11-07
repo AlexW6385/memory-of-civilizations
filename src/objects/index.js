@@ -27,10 +27,44 @@ const POTS = {
   dark_pot: { m: 'pottery_dark', p: [[0.1, 0], [0.22, 0.1], [0.25, 0.25], [0.16, 0.38], [0.14, 0.44], [0.001, 0.44]] },
   glazed_jar: { m: 'glaze_green', p: [[0.16, 0], [0.3, 0.2], [0.34, 0.45], [0.26, 0.7], [0.16, 0.78], [0.17, 0.84], [0.001, 0.84]] },
   blue_jar: { m: 'glaze_blue', p: [[0.12, 0], [0.24, 0.15], [0.27, 0.38], [0.18, 0.58], [0.1, 0.62], [0.11, 0.68], [0.001, 0.68]] },
+  // the water stores by the doors: the Chinese and Korean water vat (水缸), wide-mouthed, glazed brown, a lid of
+  // boards and a gourd dipper on it; the Near Eastern zir, a tall porous jar with a pointed foot that cools the
+  // water by seeping, on a wooden stand, a board and a cup over its mouth; the Indian matka with a clay lid and a lota
+  vat: { m: 'pottery_dark', p: [[0.2, 0], [0.3, 0.12], [0.36, 0.34], [0.37, 0.5], [0.34, 0.62], [0.355, 0.64], [0.355, 0.67], [0.001, 0.67]], lid: 'boards', top: 0.67, r: 0.355 },
+  zir: { m: 'terracotta', p: [[0.001, 0], [0.07, 0.05], [0.19, 0.28], [0.24, 0.52], [0.22, 0.76], [0.12, 0.9], [0.135, 0.95], [0.135, 0.98], [0.001, 0.98]], lid: 'board', top: 0.98, r: 0.135, stand: 0.26 },
+  matka: { m: 'terracotta', p: [[0.08, 0], [0.2, 0.08], [0.24, 0.22], [0.18, 0.36], [0.08, 0.42], [0.1, 0.46], [0.001, 0.46]], lid: 'plate', top: 0.46, r: 0.1 },
 };
-/** pot: { kind, n (a cluster of n) } */
+/** The lid and the dipper of a water store (POTS[kind].lid), its mouth at height `top`, radius `r`: roles by material. */
+function potLid(a, P) {
+  const { top, r } = P;
+  if (P.lid === 'boards') {
+    // three boards side by side, a batten across them, the gourd dipper laid over
+    for (let k = 0; k < 3; k++) { const w = (2 * r + 0.04) / 3, x0 = -r - 0.02 + k * w; a('timber', box(x0 + 0.004, top, -Math.sqrt(Math.max(0.01, r * r - (x0 + w / 2) ** 2)) - 0.02, x0 + w - 0.004, top + 0.025, Math.sqrt(Math.max(0.01, r * r - (x0 + w / 2) ** 2)) + 0.02)); }
+    a('timber', box(-r * 0.8, top + 0.025, -0.03, r * 0.8, top + 0.05, 0.03));
+    a('wicker', at(slathe([[0.001, 0], [0.05, 0.005], [0.075, 0.035], [0.07, 0.04], [0.045, 0.012], [0.001, 0.01]], 10), 0.1, top + 0.05, 0.14));
+    a('wicker', tube([[0.1, top + 0.08, 0.08, 0.013], [0.06, top + 0.06, -0.2, 0.011]], 5));
+  } else if (P.lid === 'board') {
+    a('timber', box(-0.17, top, -0.17, 0.17, top + 0.025, 0.17));
+    a('bronze', at(slathe([[0.001, 0], [0.03, 0], [0.04, 0.06], [0.036, 0.062], [0.026, 0.008], [0.001, 0.008]], 10), 0.06, top + 0.025, 0.04));
+  } else if (P.lid === 'plate') {
+    a('terracotta', at(slathe([[0.001, 0.035], [0.08, 0.03], [0.14, 0.0], [0.13, 0.008], [0.075, 0.04], [0.001, 0.045]], 12), 0, top, 0));
+    a('bronze', at(slathe([[0.001, 0], [0.035, 0.0], [0.06, 0.05], [0.04, 0.1], [0.03, 0.11], [0.035, 0.125], [0.03, 0.125], [0.001, 0.11]], 10), 0, top + 0.04, 0));
+  }
+  if (P.stand) {
+    // the zir's stand: a ring on three splayed legs, the jar's foot through the ring
+    const h = P.stand;
+    a('timber', tube(Array.from({ length: 17 }, (_, k) => { const t = k / 16 * Math.PI * 2; return [Math.cos(t) * 0.19, h + 0.24, Math.sin(t) * 0.19, 0.022]; }), 4, { capA: false, capB: false }));
+    for (let k = 0; k < 3; k++) { const t = k / 3 * Math.PI * 2 + 0.3; a('timber', tube([[Math.cos(t) * 0.32, 0, Math.sin(t) * 0.32, 0.025], [Math.cos(t) * 0.19, h + 0.25, Math.sin(t) * 0.19, 0.022]], 5)); }
+  }
+}
+/** pot: { kind, n (a cluster of n) } — a water store (vat, zir, matka) stands alone with its lid. */
 function pot(el, { bag }) {
   const put = placer(el, bag), rand = rng(el.seed), P = POTS[el.kind] ?? POTS.water_pot, n = el.n ?? 1;
+  if (P.lid) {
+    const A = assembly(`pot-store|${el.kind}`, (a) => { a('jar', at(lz(P.p, 16), 0, P.stand ?? 0, 0)); potLid(a, { ...P, top: P.top + (P.stand ?? 0) }); });
+    for (const [role, g] of Object.entries(A)) put(role === 'jar' ? P.m : role, g.clone());
+    return;
+  }
   for (let i = 0; i < n; i++) { const a = rand() * 6.28, r = i ? 0.35 + rand() * 0.35 : 0, k = 0.75 + Math.floor(rand() * 4) * 0.115; const g = lz(P.p.map(([pr, py]) => [pr * k, py * k])); put(P.m, at(g, Math.cos(a) * r, 0, Math.sin(a) * r)); }
 }
 function basket(el, { bag }) {
@@ -252,7 +286,13 @@ function stall(el, { bag, col }) {
   const goods = el.goods ?? ['basket', 'produce', 'cloth'];
   // stores behind the table, on the seller's side, and a basket or two beside it
   for (let i = 0; i < 3; i++) { const x = -W / 2 + 0.35 + rand() * (W - 0.7); put(rand() < 0.5 ? 'wicker' : 'sacking', at(lz([[0.2, 0], [0.24, 0.25], [0.18, 0.4], [0.001, 0.42]], 8), x, 0, -D / 2 - 0.25 - rand() * 0.25)); }
-  for (let i = 0; i < 7; i++) {
+  // the wares of a culture (WARES): laid out in two rows of slots 0.6 m apart, the plain goods drawn small among them
+  const wares = goods.filter((k) => WARES.has(k));
+  if (wares.length) {
+    const n = Math.max(1, Math.floor((W - 0.1) / 0.6));
+    for (let row = 0; row < 2; row++) for (let i = 0; i < n - row; i++) ware(put, wares[Math.floor(rand() * wares.length)], -W / 2 + 0.05 + (i + 0.5 + row * 0.5) * (W - 0.1) / n, 0.805, row ? -0.27 : 0.25, rand, el);
+  }
+  for (let i = 0; i < (wares.length ? 0 : 7); i++) {
     const kind = goods[Math.floor(rand() * goods.length)], x = -W / 2 + 0.3 + (i % 4) * (W - 0.6) / 3 + (i >= 4 ? (W - 0.6) / 6 : 0), z = (i >= 4 ? -0.25 : 0.3) + (rand() - 0.5) * 0.1;
     if (x > W / 2 - 0.2) continue;
     if (kind === 'cloth') for (let k = 0; k < 3; k++) put(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_green'][Math.floor(rand() * 5)], at(lying(0.08, 0.6, 8), x, 0.885 + k * 0.155, z));
@@ -262,6 +302,183 @@ function stall(el, { bag, col }) {
   }
   const [x, z] = el.at, y = el.y ?? 0;
   col.circle(x, z, Math.min(W, D) / 2 + 0.2, y, y + 0.8);
+}
+// ---- the wares of the stalls and the ground sellers ------------------------------------------------
+// What was sold, by culture (the kits in src/objects/life.js): heaps of fruit on flat trays, bundles of greens,
+// fish laid out on a tray, open sacks of spices with their heaps standing above the rolled rims (the souks of
+// Cairo, Isfahan and Istanbul), folded bolts of cloth, stacks of bowls and jugs, round loaves, nested baskets for
+// sale (the Qingming scroll's and the Edo botefuri's baskets and dishes: https://nippon.com/en/japan-topics/g01009).
+// Each ware stands in about 0.5 × 0.45 m at (x, y, z) of its object; its shapes are shared, its colours tinted.
+export const WARES = new Set(['heap', 'melons', 'greens', 'fish', 'spice', 'bolts', 'pottery', 'bread', 'baskets']);
+const tray = (r = 0.25) => lz([[r, 0], [r + 0.02, 0.05], [r, 0.05], [r - 0.02, 0.015], [0.001, 0.015]], 12);
+function ware(put, kind, x, y, z, rand, el) {
+  const pr = el.produce ?? ['cloth_red', 'cloth_ochre', 'cloth_green'], c = (l) => l[Math.floor(rand() * l.length)], sh = () => 0.85 + rand() * 0.3;
+  const P = (g) => at(g, x, y, z);
+  if (kind === 'heap' || kind === 'melons') {
+    // a pyramid of fruit on a flat basket: seven, three, one (or three melons and one on them)
+    put('wicker', P(tray()));
+    const big = kind === 'melons', A = assembly(`ware-${kind}`, (a) => {
+      if (big) { for (let k = 0; k < 3; k++) { const t = k / 3 * Math.PI * 2; a('f', at(ball(0.1, 10).scale(1, 0.9, 1), Math.cos(t) * 0.12, 0.015, Math.sin(t) * 0.12)); } a('f', at(ball(0.1, 10).scale(1, 0.9, 1), 0, 0.15, 0)); return; }
+      const r = 0.05;
+      a('f', at(ball(r, 8), 0, 0.015, 0));
+      for (let k = 0; k < 6; k++) { const t = k / 6 * Math.PI * 2; a('f', at(ball(r, 8), Math.cos(t) * 0.102, 0.015, Math.sin(t) * 0.102)); }
+      for (let k = 0; k < 3; k++) { const t = k / 3 * Math.PI * 2 + 0.5; a('f', at(ball(r, 8), Math.cos(t) * 0.06, 0.015 + 0.078, Math.sin(t) * 0.06)); }
+      a('f', at(ball(r, 8), 0, 0.015 + 0.15, 0));
+    });
+    put(big ? c(['cloth_green', 'glaze_yellow', 'cloth_green']) : c(pr), P(A.f.clone()), sh());
+  } else if (kind === 'greens') {
+    // bundles of greens on a board, tied, their pale stalk ends together
+    put('timber', P(box(-0.27, 0, -0.2, 0.27, 0.02, 0.2)));
+    const A = assembly('ware-greens', (a) => {
+      for (let k = 0; k < 5; k++) {
+        const zz = -0.15 + (k % 4) * 0.1, yy = k < 4 ? 0.02 : 0.085, x0 = k < 4 ? 0 : 0.03;
+        a('g', tube([[x0 + 0.24, yy + 0.03, zz + (k < 4 ? 0 : 0.05), 0.035, 0.03], [x0 + 0.05, yy + 0.04, zz, 0.05, 0.04], [x0 - 0.12, yy + 0.03, zz, 0.035, 0.028], [x0 - 0.17, yy + 0.025, zz, 0.025, 0.022]], 7));
+        a('s', tube([[x0 - 0.16, yy + 0.025, zz, 0.024, 0.021], [x0 - 0.25, yy + 0.022, zz, 0.018, 0.016]], 6));
+        a('t', tube(Array.from({ length: 9 }, (_, q) => { const th = q / 8 * Math.PI * 2; return [x0 - 0.13, yy + 0.03 + Math.sin(th) * 0.032, zz + Math.cos(th) * 0.036, 0.006]; }), 4, { capA: false, capB: false }));
+      }
+    });
+    put('cloth_green', P(A.g.clone()), [sh(), sh() * 1.15, sh()]); put('cloth_white', P(A.s.clone()), 0.85); put('rope_fibre', P(A.t.clone()));
+  } else if (kind === 'fish') {
+    // fish laid side by side on a flat basket, heads out, one across them
+    put('wicker', P(tray(0.26)));
+    const A = assembly('ware-fish', (a) => {
+      const fish = (cx, cy, cz, ang, L = 0.26) => { const d = [Math.cos(ang), Math.sin(ang)], p = (u, rw, rh) => [cx + d[0] * u * L, cy, cz + d[1] * u * L, rw, rh];
+        a('f', tube([p(-0.5, 0.004, 0.003), p(-0.38, 0.026, 0.004), p(-0.3, 0.012, 0.006), p(-0.15, 0.03, 0.014), p(0.1, 0.042, 0.02), p(0.35, 0.03, 0.016), p(0.5, 0.004, 0.006)], 6)); };
+      for (let k = 0; k < 5; k++) fish(-0.12 + k * 0.06, 0.035, 0.0, Math.PI / 2 + (k % 2 ? 0.08 : -0.06));
+      fish(0, 0.07, 0.02, 0.15, 0.3);
+    });
+    put('lead', P(A.f.clone()), 1);
+  } else if (kind === 'spice') {
+    // three open sacks, their mouths rolled down, the spice standing in a cone above each
+    const A = assembly('ware-spice', (a) => {
+      [[-0.12, -0.08], [0.12, -0.08], [0, 0.12]].forEach(([sx, sz], k) => {
+        a('s', at(lz([[0.085, 0], [0.105, 0.07], [0.11, 0.15], [0.125, 0.17], [0.125, 0.19], [0.105, 0.195], [0.1, 0.18], [0.001, 0.18]], 10), sx, 0, sz));
+        a(`h${k}`, at(lz([[0.104, 0], [0.07, 0.045], [0.03, 0.075], [0.001, 0.085]], 10), sx, 0.178, sz));
+      });
+    });
+    put('sacking', P(A.s.clone()));
+    const sp = el.spices ?? ['cloth_red', 'cloth_ochre', 'cloth_brown', 'cloth_maroon', 'cloth_ochre', 'cloth_green'];
+    for (let k = 0; k < 3; k++) put(c(sp), P(A[`h${k}`].clone()), sh());
+  } else if (kind === 'bolts') {
+    // folded bolts of cloth stacked, each of its colour, a little off one another
+    const n = 3 + Math.floor(rand() * 2);
+    for (let k = 0; k < n; k++) put(c(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_green', 'cloth_maroon', 'cloth_black']), P(at(box(-0.2, 0, -0.12, 0.2, 0.058, 0.12), (k % 2 ? 0.02 : -0.015), k * 0.06, (k % 3 - 1) * 0.015)), sh());
+  } else if (kind === 'pottery') {
+    // a stack of nested bowls, and two jugs beside
+    const pm = el.pottery ?? 'terracotta';
+    const A = assembly('ware-pottery', (a) => {
+      for (let k = 0; k < 4; k++) a('b', at(lz([[0.001, 0], [0.055, 0], [0.12, 0.055], [0.125, 0.065], [0.115, 0.066], [0.05, 0.01], [0.001, 0.01]], 12), -0.1, k * 0.028, 0.02));
+      for (const [jx, jz] of [[0.14, -0.1], [0.15, 0.12]]) a('b', at(lz([[0.04, 0], [0.075, 0.06], [0.08, 0.12], [0.05, 0.19], [0.035, 0.22], [0.042, 0.24], [0.001, 0.24]], 10), jx, 0, jz));
+    });
+    put(pm, P(A.b.clone()));
+  } else if (kind === 'bread') {
+    put('wicker', P(tray(0.24)));
+    const A = assembly('ware-bread', (a) => {
+      a('l', at(ball(0.075, 10).scale(1, 0.5, 1), 0, 0.015, 0));
+      for (let k = 0; k < 5; k++) { const t = k / 5 * Math.PI * 2; a('l', at(ball(0.07, 10).scale(1, 0.5, 1), Math.cos(t) * 0.14, 0.015, Math.sin(t) * 0.14)); }
+      a('l', at(ball(0.07, 10).scale(1, 0.5, 1), 0.06, 0.085, 0.03));
+    });
+    put('hide_tan', P(A.l.clone()), 0.8 + rand() * 0.25);
+  } else if (kind === 'baskets') {
+    // baskets for sale, nested in a stack, one more on its side
+    const A = assembly('ware-baskets', (a) => {
+      for (let k = 0; k < 4; k++) a('w', at(lz([[0.13, 0], [0.18, 0.15], [0.17, 0.15], [0.12, 0.012], [0.001, 0.012]], 12), -0.06, k * 0.045, 0));
+      a('w', at(lz([[0.08, 0], [0.12, 0.13], [0.11, 0.13], [0.075, 0.01], [0.001, 0.01]], 10).rotateZ(Math.PI / 2), 0.25, 0.12, 0.05));
+    });
+    put('wicker', P(A.w.clone()));
+  }
+}
+/**
+ * goods_mat: { goods, produce, pottery, spices } — goods set out on a mat on the ground, the seller sitting
+ * behind it (−z): the way most of the markets of India, Africa, the Andes and Mesoamerica sold (the tianguis
+ * of the Aztec accounts; Djenne's Monday market).
+ */
+function goodsMat(el, { bag }) {
+  const put = placer(el, bag), rand = rng(el.seed), goods = el.goods ?? ['heap', 'baskets'];
+  put(el.mat ?? 'reed_mat', box(-0.8, 0, -0.55, 0.8, 0.015, 0.55));
+  for (const [x, z] of [[-0.42, 0.22], [0.42, 0.22], [-0.42, -0.25], [0.42, -0.25]]) {
+    const k = goods[Math.floor(rand() * goods.length)];
+    if (WARES.has(k)) ware(put, k, x, 0.015, z, rand, el);
+    else if (k === 'basket') put('wicker', at(lz([[0.16, 0], [0.22, 0.2], [0.2, 0.2], [0.14, 0.03], [0.001, 0.03]], 10), x, 0.015, z));
+    else if (POTS[k] && !POTS[k].lid) put(POTS[k].m, at(lz(POTS[k].p.map(([r, h]) => [r * 0.6, h * 0.6])), x, 0.015, z));
+  }
+}
+/** stool: a low stool (its seat 0.21 m up) of a board on four legs, for a figure 'sit_low' at the same place. */
+function stool(el, { bag }) {
+  const put = placer(el, bag), A = assembly('stool', (a) => {
+    a('t', box(-0.17, 0.18, -0.08, 0.17, 0.21, 0.2));
+    for (const sx of [-0.13, 0.13]) for (const sz of [-0.04, 0.16]) a('t', box(sx - 0.02, 0, sz - 0.02, sx + 0.02, 0.18, sz + 0.02));
+    for (const sz of [-0.04, 0.16]) a('t', box(-0.13, 0.06, sz - 0.012, 0.13, 0.085, sz + 0.012));
+  });
+  put(el.mat ?? 'timber', A.t.clone());
+}
+/**
+ * rain_tub: the Edo town's tensui-oke (天水桶) — a big tub of staves on a low stand at the corner of a house,
+ * kept full of rain against fire, a pyramid of fire buckets stacked on its lid.
+ */
+function rainTub(el, { bag, col }) {
+  const put = placer(el, bag), A = assembly('rain-tub', (a) => {
+    a('timber', box(-0.5, 0, -0.5, 0.5, 0.12, 0.5));
+    a('timber', at(slathe([[0.001, 0], [0.4, 0], [0.43, 0.8], [0.4, 0.8], [0.4, 0.74], [0.001, 0.74]], 18), 0, 0.12, 0));
+    for (const t of [0.15, 0.5, 0.82]) { const rr = 0.4 + 0.03 * t + 0.008; a('bamboo_culm', at(slathe([[rr, 0], [rr, 0.04], [rr - 0.012, 0.04], [rr - 0.012, 0]], 18), 0, 0.12 + 0.8 * t - 0.02, 0)); }
+    a('timber', at(lz([[0.43, 0], [0.43, 0.03], [0.001, 0.03]], 18), 0, 0.92, 0));
+    const B = { r: 0.12, h: 0.2 }, y0 = 0.95;
+    for (const [bx, bz] of [[-0.14, -0.14], [0.14, -0.14], [-0.14, 0.14], [0.14, 0.14]]) bucket(a, bx, y0, bz, { ...B, bail: false });
+    bucket(a, 0, y0 + 0.2, 0, { ...B, bail: false });
+  });
+  for (const [role, g] of Object.entries(A)) put(role, g.clone());
+  col.circle(el.at[0], el.at[1], 0.5, el.y ?? 0, (el.y ?? 0) + 1.3);
+}
+/**
+ * handcart: { load ('sacks' | 'baskets' | 'crates' | 'empty') } — a two-wheeled handcart: a plank bed with low
+ * sides on its axle, two handles running forward (−z) joined by a bar, resting level on two props at the front
+ * (the medieval handcart; Edo's daihachi-guruma; London's costermonger's barrow).
+ */
+function handcart(el, { bag, col }) {
+  const put = placer(el, bag), rand = rng(el.seed), r = 0.42, yb = r + 0.1, W = 0.95, L = 1.5, load = el.load ?? ['sacks', 'baskets', 'crates', 'empty', 'baskets'][Math.floor(rand() * 5)];
+  const F = assembly('handcart', (a) => {
+    for (const s of [-1, 1]) {
+      a('timber', box(s * W / 2 - 0.05, yb - 0.08, -L / 2 - 1.0, s * W / 2 + 0.0 * s, yb, L / 2).translate(s > 0 ? 0 : 0.05, 0, 0));
+      a('timber', box(s * W / 2 - 0.025, yb, -L / 2, s * W / 2 + 0.025, yb + 0.26, L / 2));                 // the side board
+      a('timber', box(s * W / 2 - 0.03, 0, -L / 2 + 0.05, s * W / 2 + 0.01, yb - 0.08, -L / 2 + 0.11));      // a prop
+    }
+    for (let k = 0; k < 5; k++) { const x0 = -W / 2 + 0.03 + k * (W - 0.06) / 5; a('timber', box(x0 + 0.006, yb, -L / 2, x0 + (W - 0.06) / 5 - 0.006, yb + 0.03, L / 2)); }
+    for (const zz of [-L / 2, L / 2 - 0.025]) a('timber', box(-W / 2 + 0.025, yb, zz, W / 2 - 0.025, yb + 0.2, zz + 0.025));
+    a('timber', at(lying(0.025, W - 0.15, 8), 0, yb - 0.04, -L / 2 - 0.95));                                      // the handle bar
+    a('timber', box(-W / 2 - 0.14, r - 0.04, 0.06, W / 2 + 0.14, r + 0.04, 0.14));                                  // the axle-tree
+    a('timber', box(-W / 2 + 0.05, r + 0.04, 0.06, W / 2 - 0.05, yb - 0.08, 0.14));
+  });
+  put('timber', F.timber.clone());
+  const Wh = assembly(`cart-wheel|${r}|10`, (a) => cartWheel(a, r, 10));
+  for (const s of [-1, 1]) { const M = new Matrix4().makeTranslation(s * (W / 2 + 0.11), r, 0.1); put('timber', Wh.timber.clone().applyMatrix4(M)); put('iron', Wh.iron.clone().applyMatrix4(M)); }
+  const y = yb + 0.03;
+  if (load === 'sacks') for (let i = 0; i < 3; i++) { const g = lz([[0.2, 0], [0.24, 0.12], [0.22, 0.32], [0.1, 0.44], [0.001, 0.45]], 9); g.scale(1, 0.6, 0.8); g.rotateZ(Math.PI / 2); put('sacking', at(g, 0.15 + (i === 2 ? -0.05 : 0), y + 0.17 + (i === 2 ? 0.27 : 0), i === 2 ? 0 : (i - 0.5) * 0.5)); }
+  else if (load === 'baskets') for (let i = 0; i < 4; i++) { const x = (i % 2 - 0.5) * 0.44, z = (Math.floor(i / 2) - 0.5) * 0.6; put('wicker', at(lz([[0.15, 0], [0.2, 0.22], [0.18, 0.22], [0.13, 0.02], [0.001, 0.02]], 10), x, y, z)); const A = assembly('cart-basket-fill', (a) => { a('f', lz([[0.18, 0], [0.12, 0.06], [0.001, 0.08]], 10)); }); put((el.produce ?? ['cloth_red', 'cloth_green', 'cloth_ochre'])[Math.floor(rand() * 3)], at(A.f.clone(), x, y + 0.19, z), 0.85 + rand() * 0.3); }
+  else if (load === 'crates') for (let i = 0; i < 2; i++) put('timber', box(-0.3, 0, -0.27, 0.3, 0.45, 0.27).translate(0, y, (i - 0.5) * 0.62));
+  const [x, z] = el.at, yy = el.y ?? 0;
+  col.circle(x, z, 0.8, yy, yy + 0.9);
+}
+/**
+ * The European wheelbarrow (from the early 13th century: https://medievaljames.blogspot.com/2011/06/medieval-wheelbarrows-and-handcarts.html):
+ * the wheel at the very front between the ends of the two rails, a tray of boards on the rails, the rails running
+ * back into the handles, two legs under the tray it rests on.
+ */
+function frontBarrow(el, put, rand) {
+  const r = 0.26, A = assembly('barrow-front', (a) => {
+    for (const s of [-1, 1]) {
+      a('timber', tube([[s * 0.16, r, -0.78, 0.028], [s * 0.21, 0.4, -0.2, 0.032], [s * 0.25, 0.47, 0.35, 0.032], [s * 0.28, 0.56, 0.95, 0.026]], 6));
+      a('timber', box(s * 0.22 - 0.025, 0, 0.27, s * 0.22 + 0.025, 0.45, 0.32));                                // a leg
+      a('timber', box(s * 0.3 - 0.015, 0.44, -0.42, s * 0.3 + 0.015, 0.7, 0.33));                               // the side board
+    }
+    a('timber', box(-0.3, 0.42, -0.42, 0.3, 0.45, 0.33));                                                        // the bottom
+    a('timber', box(-0.3, 0.45, 0.3, 0.3, 0.7, 0.33));                                                           // the back board
+    const g = box(-0.3, 0, -0.015, 0.3, 0.32, 0.015); g.rotateX(0.5); g.translate(0, 0.43, -0.44); a('timber', g);   // the front board, raked
+    for (const p of wheel(r, 0.05, 8)) a('timber', at(p, 0, r, -0.78));
+    a('iron', at(lying(0.012, 0.36, 6), 0, r, -0.78));
+  });
+  put('timber', A.timber.clone()); put('iron', A.iron.clone());
+  if (rand() < 0.5) put('sacking', at(lz([[0.17, 0], [0.2, 0.15], [0.16, 0.28], [0.001, 0.3]], 8).scale(1, 0.8, 1.2), 0, 0.45, -0.05));
+  else if (rand() < 0.5) put('bark_pine', at(lying(0.05, 0.55, 6), 0, 0.5, -0.1));
 }
 /** A spoked wheel in the x = 0 plane, radius r: felloes, a turned nave, round spokes (the old flat one for the barrow). */
 function wheel(r, w = 0.08, spokes = 8) {
@@ -341,6 +558,7 @@ function cart(el, { bag, col }) {
  */
 function barrow(el, { bag }) {
   const put = placer(el, bag), rand = rng(el.seed), r = 0.42;
+  if (el.kind === 'front') return frontBarrow(el, put, rand);
   const A = assembly('barrow', (a) => {
     const y = r + 0.08;
     for (const s of [-1, 1]) {
@@ -776,7 +994,7 @@ function oar(el, { bag }) {
 
 registerStyle('life', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { pot, basket, sacks, barrel, crates, firewood, bench, trough, well, stall, cart, sledge, barrow, ladder, laundry, haystack, animal, chickens, figure, boat, car, street_lamp: streetLamp, lantern, shop_sign: shopSign, hang_lantern: hangLantern, laundry_pole: laundryPole, tea_table: teaTable, drying_tray: dryingTray, oar },
+  elements: { pot, basket, sacks, barrel, crates, firewood, bench, trough, well, stall, cart, sledge, barrow, ladder, laundry, haystack, animal, chickens, figure, boat, car, street_lamp: streetLamp, lantern, shop_sign: shopSign, hang_lantern: hangLantern, laundry_pole: laundryPole, tea_table: teaTable, drying_tray: dryingTray, oar, goods_mat: goodsMat, stool, rain_tub: rainTub, handcart },
   objects: {},
 });
-export const LIFE_KINDS = ['pot', 'basket', 'sacks', 'barrel', 'crates', 'firewood', 'bench', 'trough', 'well', 'stall', 'cart', 'sledge', 'barrow', 'ladder', 'laundry', 'haystack', 'animal', 'chickens', 'figure', 'boat', 'car', 'street_lamp', 'lantern', 'shop_sign', 'hang_lantern', 'laundry_pole', 'tea_table', 'drying_tray', 'oar'];
+export const LIFE_KINDS = ['pot', 'basket', 'sacks', 'barrel', 'crates', 'firewood', 'bench', 'trough', 'well', 'stall', 'cart', 'sledge', 'barrow', 'ladder', 'laundry', 'haystack', 'animal', 'chickens', 'figure', 'boat', 'car', 'street_lamp', 'lantern', 'shop_sign', 'hang_lantern', 'laundry_pole', 'tea_table', 'drying_tray', 'oar', 'goods_mat', 'stool', 'rain_tub', 'handcart'];

@@ -73,3 +73,19 @@ test('the new dresses, poses, things held and the elephant build, and an old fig
   const tri = (el) => buildPlan(plan([el])).parts.reduce((n, p) => n + p.geometry.attributes.position.count, 0);
   assert.equal(tri({ t: 'figure', dress: 'robe', at: [0, 0], seed: 11 }), tri({ t: 'figure', dress: 'robe', carry: 'none', at: [0, 0], seed: 11 }));
 });
+
+test('the wares, the ground sellers, the water stores, the stool, the rain tub, the handcart and the front barrow build', () => {
+  const els = [
+    { t: 'stall', at: [0, 0], seed: 1, goods: ['heap', 'melons', 'greens', 'fish', 'spice', 'bolts', 'pottery', 'bread', 'baskets'] },
+    { t: 'goods_mat', at: [5, 0], seed: 2, goods: ['heap', 'spice', 'basket', 'water_pot'] },
+    ...['vat', 'zir', 'matka'].map((kind, i) => ({ t: 'pot', kind, at: [i * 2, 6], seed: 3 })),
+    { t: 'stool', at: [0, 9], seed: 1 }, { t: 'rain_tub', at: [3, 9], seed: 1 },
+    ...['sacks', 'baskets', 'crates', 'empty'].map((load, i) => ({ t: 'handcart', load, at: [i * 3, 12], seed: i })),
+    { t: 'barrow', kind: 'front', at: [0, 15], seed: 1 },
+  ];
+  for (const el of els) {
+    const b = buildPlan(plan([el]));
+    assert.ok(b.parts.length > 0, `${el.t} ${el.kind ?? el.load ?? ''} builds nothing`);
+    for (const p of b.parts) assert.ok(p.geometry.attributes.position.array.every(Number.isFinite), `${el.t}: not finite`);
+  }
+});
