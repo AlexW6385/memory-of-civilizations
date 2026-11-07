@@ -152,6 +152,8 @@ export class Climate {
     ENV.damp.value = a.damp;
     // under a roof the haze is the room's own dust and smoke, far thinner than the weather outside
     ENV.fogDensity.value = a.fog * (1 - 0.8 * (this.indoors || 0));
+    // and the room's dust and smoke in the beams (src/engine/air.js)
+    R.indoors = this.indoors || 0;
     ENV.fogFalloff.value = a.falloff;
     ENV.clouds.value = a.clouds;
     ENV.wind.value.set(a.wind[0], a.wind[1]);
