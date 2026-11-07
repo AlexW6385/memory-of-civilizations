@@ -10,7 +10,7 @@ import '../qing/index.js';
 import '../artdeco/index.js';
 import { rocksTerrace } from './rocks.js';
 import { archBridge } from './bridge.js';
-import { wharf } from './wharf.js';
+import { wharf, quayCrowd } from './wharf.js';
 import { seaWall } from './seawall.js';
 
 /** Both faces of a triangle. */
@@ -205,6 +205,6 @@ function ferry(el, { bag, col }) {
 }
 registerStyle('modern', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace, sea_wall: seaWall },
+  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace, sea_wall: seaWall, quay_crowd: quayCrowd },
   objects: {},
 });
