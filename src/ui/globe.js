@@ -73,7 +73,7 @@ export class GlobeView {
   /** The entrance record of each built settlement's first building. */
   recFor(S) { return [...this.world.plans.values()].find((r) => r.site?.S === S); }
   /** Go to a settlement at once (the travel fetches its plans if they have not come yet). */
-  go(S) { this.onBuilding(S); }
+  go(S) { return this.onBuilding(S); }
 
   fillList() {
     this.list.innerHTML = '';
@@ -185,47 +185,41 @@ export class GlobeView {
     }
   }
 
-  /** The settlements' marks and names over the cached map picture: names are kept apart (the hovered one, then those
-   *  nearest the centre, first); those that would overlap show as dots, and the hovered one in full. */
+  /** The settlements' marks and names over the cached map picture: every name always shown, at a fixed place to the
+   *  right of its dot (inside the canvas), overlap allowed; the hovered and the current settlement drawn last. */
   paintMarks() {
     const cv = this.canvas, W = cv.width, H = cv.height, dpr = devicePixelRatio || 1, sun = this.sun?.();
     const g = cv.getContext('2d');
-    g.font = `${Math.round(12 * dpr)}px system-ui, sans-serif`;
-    g.textAlign = 'left';
-    const c = this.basis().c, cur = this.here();
+    const cur = this.here();
     this.marks = [];
     for (const S of BUILT) {
       const p = this.project(S.u);
-      if (p) this.marks.push({ S, p, rank: (S === this.hover ? -2 : S === cur ? -1 : 0) - dot(S.u, c) });
+      if (p) this.marks.push({ S, p });
     }
-    this.marks.sort((a, b) => a.rank - b.rank);
-    const taken = [], pad = 2 * dpr, hit = (r) => taken.some((q) => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1]);
-    for (const m of this.marks) {
-      const { S, p } = m;
+    const order = [...this.marks].sort((a, b) => (a.S === this.hover) - (b.S === this.hover) || (a.S === cur) - (b.S === cur));
+    const px = Math.round(11 * dpr), m = 3 * dpr;
+    g.textAlign = 'left'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+    for (const { S, p } of order) {
+      const hov = S === this.hover, isCur = S === cur;
       // at night the settlements glow with their lamps
       if (sun && dot(S.u, sun) < 0.02) {
-        const gl = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], 14 * dpr);
-        gl.addColorStop(0, 'rgba(255, 200, 110, 0.75)'); gl.addColorStop(1, 'rgba(255, 170, 80, 0)');
-        g.fillStyle = gl; g.beginPath(); g.arc(p[0], p[1], 14 * dpr, 0, Math.PI * 2); g.fill();
+        const gl = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], 12 * dpr);
+        gl.addColorStop(0, 'rgba(255, 200, 110, 0.7)'); gl.addColorStop(1, 'rgba(255, 170, 80, 0)');
+        g.fillStyle = gl; g.beginPath(); g.arc(p[0], p[1], 12 * dpr, 0, Math.PI * 2); g.fill();
       }
-      g.shadowBlur = 0;
-      g.fillStyle = S === this.hover ? '#fff2c4' : '#ffd36b'; g.strokeStyle = '#2a2116'; g.lineWidth = 1.5 * dpr;
-      g.beginPath(); g.arc(p[0], p[1], (S === this.hover ? 5.5 : 4.5) * dpr, 0, Math.PI * 2); g.fill(); g.stroke();
-      // the name: to the right of the mark, else to its left, else a shifted place; none if all would overlap
-      const name = tr(S.site.name), tw = g.measureText(name).width, th = 14 * dpr, d = 8 * dpr;
-      const spots = [[p[0] + d, p[1]], [p[0] - d - tw, p[1]], [p[0] + d, p[1] - th], [p[0] + d, p[1] + th], [p[0] - d - tw, p[1] - th], [p[0] - d - tw, p[1] + th]];
-      let put = null;
-      for (const [x0, yc] of spots) {
-        const x = Math.max(4 * dpr, Math.min(W - 4 * dpr - tw, x0)), r = [x - pad, yc - th / 2 - pad, x + tw + pad, yc + th / 2 + pad];
-        if (S === this.hover || !hit(r)) { put = { x, yc, r }; break; }
-      }
-      if (!put) continue;
-      taken.push(put.r);
-      if (S === this.hover) { g.fillStyle = 'rgba(24, 20, 15, 0.85)'; g.fillRect(put.r[0], put.r[1], put.r[2] - put.r[0], put.r[3] - put.r[1]); }
-      g.fillStyle = '#fff8e8'; g.shadowColor = 'rgba(0,0,0,0.8)'; g.shadowBlur = 4 * dpr;
-      g.fillText(name, put.x, put.yc + 4 * dpr);
-      g.shadowBlur = 0;
+      // the dot: small, with a light ring (the current settlement's in blue, the hovered one larger)
+      const r = (hov ? 4 : 3) * dpr;
+      g.beginPath(); g.arc(p[0], p[1], r, 0, Math.PI * 2);
+      g.fillStyle = isCur ? '#7fd3ff' : hov ? '#fff2c4' : '#ffd36b'; g.fill();
+      g.lineWidth = 1.4 * dpr; g.strokeStyle = isCur ? 'rgba(235, 248, 255, 0.95)' : 'rgba(255, 250, 235, 0.9)'; g.stroke();
+      // the name, to the right of the dot; kept inside the canvas
+      g.font = `${hov || isCur ? '600 ' : ''}${px}px system-ui, sans-serif`;
+      const name = tr(S.site.name), tw = g.measureText(name).width;
+      const x = Math.max(m, Math.min(W - m - tw, p[0] + r + 4 * dpr)), y = Math.max(px / 2 + m, Math.min(H - px / 2 - m, p[1]));
+      g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(14, 12, 9, 0.85)'; g.strokeText(name, x, y);
+      g.fillStyle = hov ? '#ffffff' : isCur ? '#e3f5ff' : '#fff6e0'; g.fillText(name, x, y);
     }
+    g.textBaseline = 'alphabetic';
     if (this.you) {
       const p = this.project(this.you.u);
       if (p) {
