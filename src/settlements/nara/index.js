@@ -65,7 +65,7 @@ const rushana = {
     { t: 'nara_altar_set', at: [cx, cz + 9.3], y: Y + 1.02, w: 6.4 },
   ],
 };
-// the eye-opening of 9 April 752 (§10): the dance stage on the axis before the hall, the monks seated in rows either
+// the eye-opening on the 9th day of the 4th month of 752 (26 May; §10): the dance stage on the axis before the hall, the monks seated in rows either
 // side of the way, the musicians on mats beside the stage, two dancers on it, the court at the foot of the hall's stairs
 const STAGE = [0, -24.5], SA = 2.8, SH = 0.8;
 const ceremonySet = {

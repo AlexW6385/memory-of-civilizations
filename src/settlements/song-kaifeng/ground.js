@@ -62,6 +62,7 @@ export const ground = {
     sky: { turbidity: 4.5, rayleigh: 1.2, mie: 0.007, mieG: 0.82, zenith: [0.12, 0.19, 0.33], horizon: [0.68, 0.68, 0.66] },
     fog: { color: [0.77, 0.77, 0.75], density: 0.0007, height: 0.013 },
     exposure: 0.5,
+    damp: 0.4,      // the spring rains of Qingming on the plain: some streaking and moss at the foot of walls
     wind: [0.3, 0.2],
     weather: [
       { id: 'spring-haze', weight: 3, clouds: 0.35, cloudDensity: 0.4, sun: 0.85, fog: 1.5 },

@@ -5,6 +5,7 @@
 
 import { box, lathe, rod, fromTriangles, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
+import { LANDING_ELEMENTS } from './landing.js';
 
 /** Push the triangles of a convex polygon (points in order), turned to face `n` (a direction). */
 function face(out, pts, n) {
@@ -404,4 +405,4 @@ function songGate(el, { bag, col }) {
   bag.add('timber', fromTriangles(tim));
 }
 
-export const KAIFENG_ELEMENTS = { rainbow_bridge: rainbowBridge, song_boat: songBoat, parasol, caimen, sedan, song_gate: songGate };
+export const KAIFENG_ELEMENTS = { rainbow_bridge: rainbowBridge, song_boat: songBoat, parasol, caimen, sedan, song_gate: songGate, ...LANDING_ELEMENTS };
