@@ -3,6 +3,7 @@
 // `ok` turns false and the world builds on the main thread as before.
 
 import * as THREE from 'three/webgpu';
+import { HITCH } from './hitch.js';
 
 /** A job silent this long (ms) has failed (the first answer includes laying out the town). */
 const STALL = 25000;
@@ -53,7 +54,7 @@ export class Builder {
           on: (d) => {
             if (d.fatal || d.error) { reject(new Error(d.fatal || d.error)); return; }
             if (d.count !== undefined) { if (!counted) { counted = true; chain = chain.then(() => onCount(d.count, d.landmarks)); } }
-            else if (d.index !== undefined) chain = chain.then(() => onPlan(d.index, d.header, rebuild(d.built)));
+            else if (d.index !== undefined) chain = chain.then(() => onPlan(d.index, d.header, HITCH.time('stream rebuild', () => rebuild(d.built))));
             else if (d.done) chain.then(resolve, reject);
           },
         });

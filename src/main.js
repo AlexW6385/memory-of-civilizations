@@ -6,6 +6,7 @@ import { ENV } from './engine/env.js';
 import { World } from './engine/world.js';
 import { Perf } from './engine/perf.js';
 import { runBench } from './engine/bench.js';
+import { HITCH } from './engine/hitch.js';
 import { Controls } from './engine/controls.js';
 import { Music } from './engine/audio.js';
 import { roomAcoustics } from './engine/acoustics.js';
@@ -130,7 +131,10 @@ async function main() {
   const onErr = (e) => { if (!window.READY) progress.fail(String(e?.reason?.message || e?.message || e?.reason || e)); };
   addEventListener('error', onErr); addEventListener('unhandledrejection', onErr);
   progress.set('renderer', 0);
+  // the hitch logger (`?perf`): on before the renderer and the world make their workers
+  if (params.has('perf')) HITCH.enable();
   const R = await new Renderer(canvas).init(settings.quality);
+  HITCH.watchRenderer(R.renderer);
   mark('renderer');
   progress.set('renderer', 1);
   const world = new World(R);
@@ -458,7 +462,9 @@ async function main() {
   function frameOnce(dt) {
     if (!controls.free) { world.reanchor(controls); controls.apply(); }
     world.place(R.camera, !controls.free);
+    const tW = HITCH.mark();
     const here = world.update(R.camera, controls);
+    HITCH.since('world', tW);
     const c = R.camera.position;
     const u = world.here(controls), f = world.anchor.frame;
     R.setRange(world.camAlt ?? 2, c.y - world.collide.terrain(c.x, c.z));
@@ -474,13 +480,18 @@ async function main() {
       zones.push({ zone: { id: near.s.id, climate: near.s.S.ground?.climate || REGION[near.s.S.focus.region].climate }, w });
       for (const z of open) zones.push({ zone: z.zone, w: z.w * (1 - w) });
     } else zones.push(...open);
+    const tC = HITCH.mark();
     const cl = climate.update({ sun: dirToLocal(f, sunPlanet(climate.utc)), moon: dirToLocal(f, moonPlanet(climate.utc)), up: dirToLocal(f, u), zones }, Math.min(dt, 0.25));
+    HITCH.since('climate', tC);
     rain.update(dt, cl.rain, outdoors);
+    const tA = HITCH.mark();
     music.ambience(cl.rain, cl.windy, !outdoors);
+    HITCH.since('audio', tA);
     // the sounds of the place, sampled twice a second: water near, a town round, birds by day
     placeT -= dt;
     if (placeT <= 0) {
       placeT = 0.5;
+      const tP = HITCH.mark();
       let wetN = 0;
       for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; for (const d of [5, 14]) if (Number.isFinite(world.collide.waterLevel(c.x + Math.cos(a) * d, c.z + Math.sin(a) * d)) && world.collide.waterLevel(c.x + Math.cos(a) * d, c.z + Math.sin(a) * d) > world.collide.terrain(c.x + Math.cos(a) * d, c.z + Math.sin(a) * d)) wetN++; }
       const inTown = near ? 1 - sm(near.s.S.radius * 0.6, near.s.S.radius + 40, near.r) : 0, modern = near && MODERN.has(near.s.id);
@@ -518,6 +529,7 @@ async function main() {
         }
         music.surround(dists);
       }
+      HITCH.since('audio', tP);
     }
     // eye adaptation: open up in dark rooms (at most ~3 stops), close down outdoors
     // the light round the eye: the brightest of a few samples a step apart, so that one probe buried
@@ -538,10 +550,12 @@ async function main() {
     snap = false;
     R.renderer.toneMappingExposure = exposure;
     // the reverberation of the room one is in, worked out from its volume and materials
+    const tR = HITCH.mark();
     if (here.building !== preparedFor) { preparedFor = here.building; if (preparedFor) music.prepare(preparedFor.plan.rooms.map((r) => roomAcoustics(preparedFor.plan, r))); }
     music.room(here.building && here.room ? roomAcoustics(here.building.plan, here.room) : null);
     if (here.building) music.set(here.building.music, here.room?.kind || 'open');
     else music.set(world.anchor.site?.music || null, 'open');
+    HITCH.since('audio', tR);
     return here;
   }
   // the view moves when one looks round, walks, flies or falls; tools (controls.free) hold it still
@@ -557,12 +571,16 @@ async function main() {
     if (!perf.panel && !perf.record && !controls.free && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
     const dt = (now - last) / 1000;
     last = now;
-    controls.update(dt);
+    HITCH.time('controls', () => controls.update(dt));
     frameOnce(dt);
-    minimap?.update(world.here(controls), heading());
+    HITCH.time('minimap', () => minimap?.update(world.here(controls), heading()));
+    const tR = HITCH.mark();
     R.render();
-    stats.frames++; stats.ms = stats.ms * 0.9 + (performance.now() - now) * 0.1;
-    perf.tick(now, performance.now() - now);
+    HITCH.since('render', tR);
+    const js = performance.now() - now;
+    stats.frames++; stats.ms = stats.ms * 0.9 + js * 0.1;
+    perf.tick(now, js);
+    HITCH.frame(now, dt * 1000, js, R.renderer.info);
   };
   R.renderer.setAnimationLoop(frame);
 
@@ -594,6 +612,7 @@ async function main() {
     walk: async (keys, ms) => { controls.enabled = true; for (const k of keys) controls.keys.add(k); await new Promise((r) => setTimeout(r, ms)); controls.keys.clear(); },
     feet: () => ({ ...controls.feet }),
     world, renderer: R, controls, stats, music, climate, mapView, perf,
+    get hitches() { return HITCH.ring; },
     ground: (x, z) => world.collide.terrain(x, z),
   };
   window.READY = true;

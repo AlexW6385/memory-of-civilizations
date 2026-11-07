@@ -23,6 +23,7 @@ import { releaseAfterUpload } from './release.js';
 import { SPLIT_TRIS, SPLIT_INST, LOD_NEAR, LOD_FAR, FINE_SHADOW, THIN_FAR, OPEN_FAR, cellKey, lodKind, coarseSet, trianglesByCell, subGeometry } from './cells.js';
 import { SMALL, MID, NEAR_SHADOW, FAR_SHADOW } from './layers.js';
 import { MATERIALS } from '../core/palette.js';
+import { HITCH } from './hitch.js';
 
 /** Time a merge may take before it gives the frame back (ms). */
 const SLICE = 4;
@@ -80,7 +81,7 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
   }
   const out = [];
   let t = performance.now();
-  const breathe = async () => { if (performance.now() - t > SLICE) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); } };
+  const breathe = async () => { if (performance.now() - t > SLICE) { HITCH.add('merge', performance.now() - t); await new Promise((r) => setTimeout(r, 0)); t = performance.now(); } };
   // a member left as it is (a shape or material of one plan only, not worth cutting or choosing)
   const keep = (G) => { for (const { o } of G.list) { delete o.userData.merge; releaseAfterUpload(o); } };
   for (const G of groups.values()) {

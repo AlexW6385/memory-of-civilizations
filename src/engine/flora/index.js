@@ -9,6 +9,7 @@ import { foliageTexture } from './textures.js';
 import { MAX_DENSITY, NEAR_ONLY } from '../../world/flora-rules.js';
 import { material as paletteMaterial } from '../materials.js';
 import { ENV } from '../env.js';
+import { HITCH } from '../hitch.js';
 
 const BIG = 128, SMALL = 16, NEAR_R = 64;
 

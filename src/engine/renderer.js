@@ -15,6 +15,7 @@ import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
 import { CAMERA_MASK, cascadeMask } from './layers.js';
 import { AIR, airNode, airComposite, LampPool } from './air.js';
+import { HITCH } from './hitch.js';
 
 /** The depth buffer unless the address asks for another (see init). */
 const DEPTH_DEFAULT = 'reversed';
@@ -318,11 +319,21 @@ export class Renderer {
   }
 
   render() {
+    const t0 = HITCH.mark();
     this.update();
+    HITCH.since('render update', t0);
     // the shadow cascades: the nearest drawn every frame, the middle one every second frame, the
     // farthest every third — far shadows move by a texel or less in a frame; each map keeps the
     // matrix it was drawn with, so a map drawn a frame ago still falls where it should
     const csm = this.sun.shadow.shadowNode, L = csm?.lights;
+    if (HITCH.on && csm?._shadowNodes?.length && !csm._hitchTimed) {
+      // (each cascade's drawing timed: three calls renderShadow from inside the scene pass)
+      csm._hitchTimed = true;
+      csm._shadowNodes.forEach((node, i) => {
+        const f = node.renderShadow;
+        node.renderShadow = function (frame) { const t = performance.now(); try { return f.call(this, frame); } finally { HITCH.add('shadow ' + i, performance.now() - t); } };
+      });
+    }
     if (L?.length && this.sun.castShadow) {
       const n = this.frameNo = (this.frameNo || 0) + 1;
       for (let i = 0; i < L.length; i++) {

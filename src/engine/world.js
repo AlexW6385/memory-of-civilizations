@@ -21,6 +21,7 @@ import { markMergeable, mergeParts } from './merge.js';
 import { LifeInstances } from './life-instances.js';
 import { SMALL } from './layers.js';
 import { Builder } from './builder.js';
+import { HITCH } from './hitch.js';
 import { ENV } from './env.js';
 import { lampsOf, hazeOf } from './air.js';
 import { loadLand } from '../planet/land.js';
@@ -221,6 +222,7 @@ class Settlement {
   async addPart(id, plan, music, gen = this.gen, prebuilt = null) {
     const built = prebuilt ?? await buildPlanAsync(plan, undefined, { instancing: true, detail: true });
     const rec0 = {};
+    let tS = HITCH.mark();
     if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
     const group = new THREE.Group();
     group.name = plan.id;
@@ -258,15 +260,18 @@ class Settlement {
       built.lights.forEach((l, i) => inst.setMatrixAt(i, m4.makeTranslation(l.at[0], l.at[1] + 0.02, l.at[2])));
       group.add(inst);
     }
+    HITCH.since('stream meshes', tS);
     // its shaders compiled before it shows, not in the frame that first draws it (a hitch)
     await this.world.r.precompile?.(group);
+    tS = HITCH.mark();
     if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
     this.group.add(group);
     // the upper surfaces, to land and walk on (roofs, wall tops)
     if (!plan.nocollide) {
-      if (!prebuilt) built.colliders.tops = await topField(flatParts(built));
+      if (!prebuilt) { HITCH.since('stream add', tS); built.colliders.tops = await topField(flatParts(built)); tS = HITCH.mark(); }
       this.collide.add(built.colliders);
     }
+    HITCH.since('stream add', tS);
     const rec = { id, plan, music, group, built, settlement: this, lamps: rec0.lamps, detail: group.children.filter((o) => o.userData.detail) };
     for (const o of rec.detail) { o.visible = false; o.castShadow = false; }
     if (!plan.feature) try { rec.gi = await this.world.r.gi.fetch(plan.id, `data/gi/${plan.id}.gi`); } catch (e) { console.warn(e); }
@@ -274,8 +279,10 @@ class Settlement {
     if (gen !== this.gen) { this.world.r.gi.release?.(plan.id); return null; }
     // the collision and the bounds are made: the vertex arrays are not needed once on the GPU
     // (the meshes to be merged once the settlement is built keep their arrays until then)
+    tS = HITCH.mark();
     if (MERGE) markMergeable(plan, group);
     group.traverse((o) => { if (!o.userData.merge) releaseAfterUpload(o); });
+    HITCH.since('stream add', tS);
     if (lifeList.length) this.lifeParts.push({ rec, list: lifeList });
     this.parts.push(rec);
     this.done = (this.done || 0) + 1;
@@ -297,6 +304,7 @@ class Settlement {
   /** The life of the streets, settlement-wide (src/engine/life-instances.js). */
   buildLife() {
     if (!this.lifeParts?.length) return;
+    const t0 = HITCH.mark();
     this.life = new LifeInstances(this.group, castsShadow);
     // (the rarer shapes are merged settlement-wide by material, their copies chosen by distance)
     this.life.build(this.lifeParts);
@@ -304,6 +312,7 @@ class Settlement {
     this.lifeLamps = lampsOf({}, this.life.meshes.map((L) => ({ mat: L.near.name.split(":")[1], geometry: L.near.geometry, matrices: L.all })));
     this.lifeLamps.push(...lampsOf({}, this.life.rare.map((B) => ({ mat: B.near.name.split(":")[1], geometry: B.near.geometry }))));
     this.lifeParts = [];
+    HITCH.since('life build', t0);
   }
 
   /** The far view (tools/impostors.mjs): the settlement simplified, shown until it is built in full. */
@@ -683,9 +692,10 @@ export class World {
     const now = performance.now();
     const u = this.here(controls);
     const camP = toPlanet(this.anchor.frame, camera.position.toArray());
-    if (!this._next || now > this._next) { this._next = now + 400; this.ensureNear(u); }
-    if (!this._nextT || now > this._nextT) { this._nextT = now + 120; this.terrain.update(camP); }
-    if (!this._nextF || now > this._nextF) { this._nextF = now + 300; this.openFlora.update(camP, Math.hypot(camP[0], camP[1], camP[2]) - R); }
+    let t0 = HITCH.mark();
+    if (!this._next || now > this._next) { this._next = now + 400; this.ensureNear(u); HITCH.since('ensureNear', t0); t0 = HITCH.mark(); }
+    if (!this._nextT || now > this._nextT) { this._nextT = now + 120; this.terrain.update(camP); HITCH.since('terrain', t0); t0 = HITCH.mark(); }
+    if (!this._nextF || now > this._nextF) { this._nextF = now + 300; this.openFlora.update(camP, Math.hypot(camP[0], camP[1], camP[2]) - R); HITCH.since('open flora', t0); }
     this.camAlt = Math.hypot(camP[0], camP[1], camP[2]) - R;
     ENV.camAlt.value = this.camAlt;
     // the plants: of the settlement whose zone the visitor is in, or the nearest within reach
@@ -694,11 +704,14 @@ export class World {
     if (fs !== this.floraSite) { this.floraSite = fs; this.flora.setSite(fs ? fs.S.focus : null); }
     if (fs) {
       const L = toLocal(fs.S.frame, camP);
+      t0 = HITCH.mark();
       this.flora.update(L[0], L[2]);
+      HITCH.since('flora', t0);
     }
     // small things (the life of the streets) are drawn only near: each tile within its plan's reach,
     // in every settlement built (a neighbour's too: its streets' small things were all drawn, from
     // kilometres off, a draw call each)
+    t0 = HITCH.mark();
     if (!this._nextN || now > this._nextN) {
       this._nextN = now + 250;
       for (const st of this.settlements) {
@@ -721,6 +734,7 @@ export class World {
         if (st.merged) for (const m of st.merged.children) m.userData.batch?.choose();
       }
     }
+    HITCH.since('tiles', t0); t0 = HITCH.mark();
     // fine detail (pieces under 0.4 m, src/core/geom.js): drawn within DETAIL_REACH of the part's
     // bounds, casting shadows within DETAIL_SHADOW; indoors, only the building one is in casts
     if (!this._nextD || now > this._nextD) {
@@ -754,6 +768,7 @@ export class World {
         }
       }
     }
+    HITCH.since('detail', t0); t0 = HITCH.mark();
     // the life of the streets: the copies within reach, chosen four times a second
     if (!this._nextL || now > this._nextL) {
       this._nextL = now + 250;
@@ -767,11 +782,13 @@ export class World {
         s.life.update(L[0], L[1], L[2]);
       }
     }
+    HITCH.since('lod+life', t0); t0 = HITCH.mark();
     const here = this.locate(camera.position.x, camera.position.y, camera.position.z);
     this.indoorsIn = here.room && here.room.kind !== 'open' && here.distance === 0 ? here.building : null;
     // in a sealed room (its openings glazed or small) the town outside is not drawn (World.seal)
     const sealed = this.indoorsIn && here.room.sealed ? this.indoorsIn : null;
     if (sealed !== this.sealedIn || (sealed && now > (this._nextSeal || 0))) { this._nextSeal = now + 500; this.seal(sealed); }
+    HITCH.since('locate+seal', t0); t0 = HITCH.mark();
     // the air of the room one is in (its building's haze) and the lamps nearest the eye (src/engine/air.js)
     if (this.indoorsIn) this.r.haze = hazeOf(this.indoorsIn.plan.style);
     if (this.r.lamps && (!this._nextLamp || now > this._nextLamp)) {
@@ -787,6 +804,7 @@ export class World {
     }
     // the baked light of the landmark's rooms the viewer stands in (src/engine/gi.js)
     if (here.building?.gi) this.r.gi.use(here.building.gi, camera.position); else this.r.gi.clear?.();
+    HITCH.since('lamps+gi', t0);
     return here;
   }
 }

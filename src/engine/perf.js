@@ -8,6 +8,8 @@
 //
 // Nothing here changes the picture unless a switch is turned.
 
+import { HITCH } from './hitch.js';
+
 const SWITCHES = ['shadows', 'ao', 'bloom', 'flora', 'openFlora', 'terrain', 'others', 'impostors', 'life', 'detail', 'castDetail'];
 
 export class Perf {
@@ -91,6 +93,10 @@ export class Perf {
     el.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99;background:rgba(0,0,0,.72);color:#eee;font:12px/1.4 ui-monospace,monospace;padding:8px 10px;border-radius:6px;user-select:none';
     this.readout = document.createElement('div');
     el.appendChild(this.readout);
+    // the last hitches (src/engine/hitch.js): frames over 50 ms and what they spent it on
+    this.hitchOut = document.createElement('div');
+    this.hitchOut.style.cssText = 'margin-top:4px;color:#fc9;white-space:pre-wrap;font-size:11px;max-height:9em;overflow:auto';
+    el.appendChild(this.hitchOut);
     for (const name of SWITCHES) {
       const l = document.createElement('label');
       l.style.cssText = 'display:inline-block;margin:4px 8px 0 0;cursor:pointer';
@@ -100,12 +106,14 @@ export class Perf {
       l.append(c, ' ' + name);
       el.appendChild(l);
     }
-    el.style.maxWidth = '420px';
+    el.style.maxWidth = '520px';
     document.body.appendChild(el);
   }
 
   paint() {
     const s = this.stats(60);
+    const h = HITCH.lines(5);
+    this.hitchOut.textContent = h.length ? `hitches (palace.hitches):\n${h.join('\n')}` : '';
     this.readout.textContent = `${s.fps} fps · ${s.ms} ms (p95 ${s.p95}, worst ${s.worst}) · ${s.calls} draws · ${(s.triangles / 1e6).toFixed(2)} M tris`;
   }
 }
