@@ -178,6 +178,43 @@
   "seconds": 44,
   "baked": "2026-11-07"
  },
+ "hagia-sophia": {
+  "site": "constantinople",
+  "hash": "6c17db8549e4c88c",
+  "rays": 128,
+  "probes": 75600,
+  "boxes": [
+   {
+    "min": [
+     -50,
+     -0.5,
+     -40.5
+    ],
+    "n": [
+     48,
+     35,
+     45
+    ],
+    "spacing": 1.7,
+    "rooms": [
+     "outer-narthex",
+     "inner-narthex",
+     "west-gallery",
+     "ramp",
+     "nave",
+     "west-bay",
+     "bema",
+     "north-aisle",
+     "north-gallery",
+     "south-aisle",
+     "south-gallery"
+    ]
+   }
+  ],
+  "bytes": 1219377,
+  "seconds": 1086,
+  "baked": "2026-11-07"
+ },
  "isfahan-maidan": {
   "site": "isfahan",
   "hash": "099f6197fac49923",
