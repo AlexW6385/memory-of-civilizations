@@ -26,6 +26,10 @@ export function height(x, z) {
 }
 export const onWay = (x, z, m = 0) => Math.abs(x - WAY.x) < WAY.w / 2 + m && z > WAY.z0 && z < WAY.z1;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** The market at the east end of the bridge (docs/settlements/babylon.md §5.2): no houses on it. */
+export const MARKET = [-236, 8, -172, 66];
+/** Two houses on the Processional Way south of the palace that can be entered, furnished (§5.1), their doors on the Way. */
+const OPEN = new Set([757329, 866290]);
 let LOTS = null;
 export function lots() {
   if (LOTS) return LOTS;
@@ -34,7 +38,9 @@ export function lots() {
   for (let x = -RADIUS + 20; x < RADIUS - 20; x += 15) for (let z = WALL_Z + 30; z < RADIUS - 20; z += 14) {
     const w = 10 + rand() * 4, d = 10 + rand() * 3, cx = x + w / 2, cz = z + d / 2;
     if (Math.hypot(cx, cz) > RADIUS - 45 || [PALACE, PRECINCT, ESAGILA].some((r) => inRect(r, cx, cz, 14)) || onWay(cx, cz, 10) || Math.abs(cx - riverX(cz)) < RIVER.w / 2 + 16 || Math.abs(cz - 300) < 6 || rand() < 0.15) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
+    const seed = Math.floor(rand() * 1e6);
+    if (inRect(MARKET, cx, cz)) continue;
+    LOTS.push(OPEN.has(seed) ? { rect: [x, z, x + w, z + d], seed, open: true, door: 'w', white: seed === 866290 } : { rect: [x, z, x + w, z + d], seed });
   }
   return LOTS;
 }

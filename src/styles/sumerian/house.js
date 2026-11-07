@@ -193,19 +193,28 @@ function tbox(P, x0, y0, z0, x1, y1, z1) {
 const at = (P, g, lx, y, lz) => { const w = P(lx, y, lz); return g.translate(w[0], w[1], w[2]); };
 
 /**
- * scribe_kit: { at, y, rot } — where a scribe sits cross-legged (the figure is placed apart): his reed mat, before
+ * scribe_kit: { at, y, rot, scroll } — where a scribe sits cross-legged (the figure is placed apart): his reed mat, before
  * him tablets of unbaked clay drying in a row and the one he writes, a lump of clay wrapped in a damp cloth, a bowl
- * of water, a basket holding finished tablets, a jar of styluses of reed.
+ * of water, a basket holding finished tablets, a jar of styluses of reed; with `scroll` the Aramaic scribe's leather
+ * scroll on its board, an ink pot and a pen as well.
  */
 export function scribeKit(el, { bag }) {
   const P = frame(el);
   bag.add('reed_mat', tbox(P, -0.7, 0, -1.05, 0.7, 0.012, 0.55));
   for (let k = 0; k < 6; k++) { const x = -0.45 + k * 0.17, z = -0.85; bag.add('mud_plaster', tbox(P, x - 0.05, 0.012, z - 0.07, x + 0.05, 0.035, z + 0.07)); }
-  bag.add('mud_plaster', tbox(P, -0.09, 0.012, -0.5, 0.09, 0.04, -0.38));
+  if (!el.scroll) bag.add('mud_plaster', tbox(P, -0.09, 0.012, -0.5, 0.09, 0.04, -0.38));
   bag.add('linen', at(P, lathe([[0.001, 0], [0.11, 0.0], [0.12, 0.05], [0.07, 0.1], [0.001, 0.11]], 8), 0.45, 0.012, -0.45));
   bag.add('terracotta', at(P, lathe([[0.001, 0], [0.05, 0.0], [0.11, 0.05], [0.1, 0.055], [0.04, 0.012], [0.001, 0.01]], 12), -0.48, 0.012, -0.45));
   bag.add('wicker', at(P, lathe([[0.001, 0], [0.16, 0.0], [0.2, 0.22], [0.18, 0.23], [0.14, 0.03], [0.001, 0.03]], 12), 0.55, 0.012, 0.15));
   for (let k = 0; k < 4; k++) bag.add('mud_plaster', at(P, box(-0.05, 0, -0.07, 0.05, 0.03, 0.07), 0.55 + (k % 2 ? 0.04 : -0.05), 0.04 + k * 0.03 + 0.012, 0.15 + (k % 2 ? -0.03 : 0.04)));
+  if (el.scroll) {
+    // the Aramaic scribe's leather scroll unrolled on a board across his knees' place, its rolled ends, the ink pot and the pen
+    bag.add('timber', tbox(P, -0.32, 0.012, -0.52, 0.32, 0.03, -0.3));
+    bag.add('hide_tan', tbox(P, -0.24, 0.03, -0.5, 0.24, 0.034, -0.32));
+    for (const x of [-0.27, 0.27]) { const a = P(x, 0.055, -0.5), b = P(x, 0.055, -0.32), T = []; beamTris(T, [a[0], a[1] - 0.025, a[2]], [b[0], b[1] - 0.025, b[2]], 0.025, 0.05); bag.add('hide_tan', fromTriangles(T)); }
+    bag.add('pottery_dark', at(P, lathe([[0.001, 0], [0.035, 0], [0.04, 0.05], [0.015, 0.06], [0.001, 0.06]], 8), 0.36, 0.012, -0.4));
+    { const a = P(0.05, 0.036, -0.42), b = P(0.2, 0.04, -0.36), T = []; beamTris(T, a, b, 0.004, 0.005); bag.add('reed_mat', fromTriangles(T)); }
+  }
   bag.add('terracotta', at(P, lathe([[0.001, 0], [0.04, 0], [0.05, 0.1], [0.035, 0.16], [0.04, 0.18], [0.001, 0.17]], 10), -0.55, 0.012, 0.1));
   for (const dx of [-0.01, 0.012]) { const a = P(-0.55 + dx, 0.16, 0.1), b = P(-0.55 + dx * 3, 0.36, 0.1 + dx * 2), T = []; beamTris(T, a, b, 0.005, 0.006); bag.add('reed_mat', fromTriangles(T)); }
 }

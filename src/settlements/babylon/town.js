@@ -2,7 +2,7 @@
 // seated in his cella; priests in Esagila's court; Babylonians on the Processional Way and the bridge in the dress
 // Herodotus gives them (1.195: a linen tunic to the feet, a woollen one over it, a white mantle; long hair bound
 // with fillets; a carved staff); boatmen standing in the round boats, a live ass in the largest (1.194).
-import { RADIUS, WAY, WALL_Z, ESAGILA, RIVER, BRIDGE, QUAY, riverX, lots } from './layout.js';
+import { RADIUS, WAY, WALL_Z, ESAGILA, RIVER, BRIDGE, QUAY, MARKET, riverX, lots } from './layout.js';
 import { QUFFAS } from './plan.js';
 import { esagilaStatue } from '../../styles/babylonian/temple.js';
 
@@ -42,12 +42,40 @@ function people() {
   }
   // on the quay, at the moored boats: men carrying jars up from them
   for (const b of QUFFAS.filter((q) => q.moored)) { const x = riverX(b.z) + QUAY.d0 + 2.2; man([x, b.z - 1], QUAY.y, -Math.PI / 2, { carry: 'pot', over: 'none', dress: 'tunic' }); man([x + 1.4, b.z + 1.2], QUAY.y, Math.PI / 2, { pose: 'talk' }); }
+  // a caravan of camels coming down the road to the Ishtar Gate, its Arab drivers bareheaded in long robes (as the Arabs
+  // of the Apadana's reliefs); a man with a loaded donkey behind them
+  for (let k = 0; k < 4; k++) L.push({ t: 'animal', kind: 'camel', at: [WAY.x + 7.2 + (k % 2) * 0.5, -341 + k * 3.4], y: 0.12, rot: Math.PI + (rand() - 0.5) * 0.12, seed: Math.floor(rand() * 1e9), gear: true });
+  man([WAY.x + 6.4, -327.6], 0.12, Math.PI, { cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'sash', carry: 'staff', pose: 'staff', len: 1.8 });
+  man([WAY.x + 8.6, -343.6], 0.12, Math.PI, { cloth: 'cloth_brown', cloth2: 'cloth_white', over: 'cape', carry: 'staff', pose: 'staff', len: 1.7 });
+  L.push({ t: 'animal', kind: 'donkey', at: [WAY.x + 6.8, -350], y: 0.12, rot: Math.PI, seed: 77, gear: true });
+  man([WAY.x + 6.1, -348.5], 0.12, Math.PI, { carry: 'staff', len: 1.4, dress: 'tunic', over: 'belt' });
+  // the market at the bridge's east end: sellers behind their mats and stalls — dates, fish, greens, bread, pots, baskets,
+  // cloth — buyers before them, donkeys standing loaded
+  const [mx0, mz0, mx1, mz1] = MARKET, WARES = [['heap', 'baskets'], ['fish', 'fish'], ['greens', 'heap'], ['bread', 'baskets'], ['pottery', 'pottery'], ['bolts', 'bolts'], ['heap', 'melons']];
+  let w = 0;
+  for (const z of [mz0 + 10, mz1 - 10]) for (let x = mx0 + 14; x < mx1 - 4; x += 6.5) {
+    if (rand() < 0.12) continue;
+    const g = WARES[w++ % WARES.length], north = z < (mz0 + mz1) / 2, back = north ? -1 : 1, rot = north ? Math.PI : 0;   // the sellers on the outer side, facing the middle
+    if (w % 3 === 0) { L.push({ t: 'stall', at: [x, z], y: 0, rot: north ? 0 : Math.PI, seed: Math.floor(rand() * 1e9), awning: pick(['cloth_white', 'cloth_ochre', 'cloth_indigo']), stripe: 'none', goods: g, w: 2.6, d: 1.3 }); man([x + 0.4, z + back * 1.4], 0, rot, { carry: 'none', pose: 'talk' }); }
+    else { L.push({ t: 'goods_mat', at: [x, z], y: 0, rot, seed: Math.floor(rand() * 1e9), goods: g, mat: 'reed_mat' }); man([x - 0.2, z + back * 1.0], 0, rot, { pose: 'sit_ground', carry: 'none' }); }
+    if (rand() < 0.55) (rand() < 0.6 ? man : woman)([x + (rand() - 0.5), z - back * 1.7], 0, rot + Math.PI + (rand() - 0.5) * 0.5, {});
+  }
+  for (const [x, z] of [[mx1 - 6, mz0 + 18], [mx1 - 8, mz0 + 20.5]]) L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0, rot: Math.PI / 2, seed: Math.floor(rand() * 1e9), gear: true });
+  // on the quay by the moored boats two scribes record a cargo, one on a clay tablet in cuneiform, the other in Aramaic
+  // on a leather scroll (as the Assyrian reliefs show them, in pairs)
+  { const z = 103, x = riverX(z) + QUAY.d0 + 6.5;
+    man([x, z - 0.8], QUAY.y + 0.03, Math.PI / 2, { pose: 'cross', cloth: 'linen', over: 'sash', carry: 'none' });
+    man([x, z + 0.8], QUAY.y + 0.03, Math.PI / 2, { pose: 'cross', cloth: 'cloth_white', over: 'cape', carry: 'none' });
+    man([x - 2.2, z], QUAY.y, -Math.PI / 2, { pose: 'talk', cloth: 'cloth_indigo', carry: 'staff' }); }
   return { id: 'babylon-people', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, -370], facing: 's' }, center: [-60, 0], near: 420 };
 }
 
 export async function houses() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 160) plans.push(base(`babylon-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'ur_house', ...l }))));
+  // the market (a market room: the generic life pass adds to it) and the scribes' mats on the quay
+  const z = 103, x = riverX(z) + QUAY.d0 + 6.5;
+  plans.push({ ...base('babylon-market', [{ t: 'scribe_kit', at: [x, z - 0.8], y: QUAY.y, rot: Math.PI / 2 }, { t: 'scribe_kit', at: [x, z + 0.8], y: QUAY.y, rot: Math.PI / 2, scroll: true }]), rooms: [{ id: 'market', rect: MARKET, y: 0, kind: 'open', market: true }] });
   return plans;
 }
 export { people };
