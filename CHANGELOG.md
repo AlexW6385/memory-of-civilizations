@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.86 — Weather of each place, seasons (2026-11-07)
+- Each place now has its typical weather: monsoon downpours over Angkor, snow at Borgund and in Muscovy that whitens ground and roofs, harmattan dust over Djenne, morning mist on West Lake, fog on the Thames, haze and khamsin at Giza, morning mists at Borobudur, Machu Picchu and Venice. Mist lies low on ground and water; dust and fog veil the sky. The open country follows the season of your visit: straw grass in autumn, russet and bare broadleaf forests, a lower snow line and white northern lowlands in winter. ?weather= and ?season= hold a weather or season.
+
 ## v9.85 — South Asia and Java (2026-11-07)
 - Khajuraho: Kandariya with all 84 spires, carved porch doorways, lamps, bells and garlands, priests, pilgrims, flower sellers and cows. Sanchi: relief scenes along the gateways' architraves and on their posts, garlands and lamps, planting on the summit. Madurai: the Pudhu Mandapam with its Nayaka kings, four-armed gods on the gopurams, jasmine sellers. Borobudur: the 32 guardian lions, lamps and flowers.
 
