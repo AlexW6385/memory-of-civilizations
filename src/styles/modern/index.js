@@ -4,6 +4,7 @@
 // granite pylons; the Cahill Expressway and the quay; towers of concrete and glass; the Rocks'
 // sandstone terraces.
 
+import { concertHall } from './hall.js';
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, frustum } from '../../core/geom.js';
 import '../qing/index.js';
@@ -13,6 +14,20 @@ import { archBridge } from './bridge.js';
 import { wharf, quayCrowd } from './wharf.js';
 import { seaWall } from './seawall.js';
 
+/** The lowest inner surface of a hall's shells over (xx, zz), above the podium, from their section and profile. */
+function envOf(hall, xx, zz) {
+  let best = 0;
+  for (const [a, b, H, hw0] of hall.shells) {
+    const hw = hw0 ?? hall.hw, t = (zz - a) / (b - a); if (t < 0 || t > 1) continue;
+    const w = hw * (1 - 0.3 * t), sx = (xx - hall.x) / w; if (Math.abs(sx) >= 1) continue;
+    const c = 0.55, R = 1 + c, arc = (q) => Math.sqrt(Math.max(0, R * R - (q + c) * (q + c))), sect = (arc(Math.abs(sx)) - arc(1)) / (arc(0) - arc(1));
+    best = Math.max(best, H * (1 - (1 - t) ** 2.2) * sect - 0.6);
+  }
+  return best;
+}
+/** Where shells must not be drawn: inside the Concert Hall's room (the bases of the later shells cross it). */
+let CLIP = null;
+const clipped = (T) => { if (!CLIP) return T; const o = []; for (let i = 0; i < T.length; i += 9) { const x = (T[i] + T[i + 3] + T[i + 6]) / 3, y = (T[i + 1] + T[i + 4] + T[i + 7]) / 3, z = (T[i + 2] + T[i + 5] + T[i + 8]) / 3; if (!CLIP(x, y, z)) o.push(...T.slice(i, i + 9)); } return o; };
 /** Both faces of a triangle. */
 const tri2 = (t, a, b, c) => t.push(...a, ...b, ...c, ...a, ...c, ...b);
 /** One shell: from the south base at z0 to the mouth at z1 (z1 < z0: it opens north), half-width hw, height H, on y. */
@@ -27,23 +42,24 @@ function shell(bag, cx, z0, z1, hw, H, y) {
   };
   const T = [];
   for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { tri2(T, P(i, j), P(i + 1, j), P(i + 1, j + 1)); tri2(T, P(i, j), P(i + 1, j + 1), P(i, j + 1)); }
-  bag.add('tile_opera', fromTriangles(T));
+  bag.add('tile_opera', fromTriangles(clipped(T)));
   // the underside: the precast concrete of the shell, 0.4 m under the tiles, its edge at the mouth, and the ribs
   // running up it from the pedestal to the mouth (§1a)
   const Q = (i, j) => { const p = P(i, j); return [p[0], p[1] - 0.4, p[2]]; }, U = [], E = [];
   for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { tri2(U, Q(i, j), Q(i + 1, j), Q(i + 1, j + 1)); tri2(U, Q(i, j), Q(i + 1, j + 1), Q(i, j + 1)); }
   for (let i = 0; i < nu; i++) { tri2(E, P(i, nv), P(i + 1, nv), Q(i + 1, nv)); tri2(E, P(i, nv), Q(i + 1, nv), Q(i, nv)); }
-  bag.add('concrete_light', fromTriangles(U)); bag.add('concrete_light', fromTriangles(E));
-  for (let i = 1; i < nu; i++) for (let j = 1; j < nv; j++) { const a = Q(i, j), b = Q(i, j + 1); if (a[1] - y < 1.2) continue; bag.add('concrete_light', rod([a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], 0.2, 4)); }
+  bag.add('concrete_light', fromTriangles(clipped(U))); bag.add('concrete_light', fromTriangles(clipped(E)));
+  for (let i = 1; i < nu; i++) for (let j = 1; j < nv; j++) { const a = Q(i, j), b = Q(i, j + 1); if (a[1] - y < 1.2 || (CLIP && CLIP((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2))) continue; bag.add('concrete_light', rod([a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], 0.2, 4)); }
   // the ridge: a rib of the cream tiles along the top, and the ribs fanning down the shell's face
   const rib = [];
-  for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.28, 6)); }
-  for (const i of [3, 6, 10, 13]) for (let j = 2; j < nv; j++) { const a = P(i, j), b = P(i, j + 1); rib.push(rod(a, b, 0.12, 4)); }
+  for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); if (CLIP && CLIP((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2)) continue; rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.28, 6)); }
+  for (const i of [3, 6, 10, 13]) for (let j = 2; j < nv; j++) { const a = P(i, j), b = P(i, j + 1); if (CLIP && CLIP((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2)) continue; rib.push(rod(a, b, 0.12, 4)); }
   for (const g of rib) bag.add('tile_cream', g);
   // the chevrons of the tile lids: V-shaped joints of the cream tiles between the ribs, pointing up the shell
   const ch = [];
   for (const [ia, ib] of [[0, 3], [3, 6], [6, 8], [8, 10], [10, 13], [13, 16]]) for (let j = 3; j < nv - 1; j += 2) {
     const im = Math.round((ia + ib) / 2), a = P(ia, j), m = P(im, j + 1), b = P(ib, j);
+    if (CLIP && CLIP(m[0], m[1], m[2])) continue;
     ch.push(rod(a, m, 0.07, 4), rod(m, b, 0.07, 4));
   }
   for (const g of ch) bag.add('tile_cream', g);
@@ -55,9 +71,9 @@ function shell(bag, cx, z0, z1, hw, H, y) {
     if (a[1] - y < 0.3 && b[1] - y < 0.3) continue;
     tri2(G, a, b, fb); tri2(G, a, fb, fa);
   }
-  bag.add('glass_topaz', fromTriangles(G));        // Hall's topaz-tinted glass
+  bag.add('glass_topaz', fromTriangles(clipped(G)));        // Hall's topaz-tinted glass
   for (let i = 1; i < nu; i++) {
-    const a = P(i, nv), f = foot(i); if (a[1] - y < 1) continue;
+    const a = P(i, nv), f = foot(i); if (a[1] - y < 1 || (CLIP && (CLIP(f[0], y + 1, f[2]) || CLIP(a[0], (a[1] + y) / 2, a[2])))) continue;
     bag.add('steel_grey', rod([a[0], a[1] - 0.1, a[2]], f, 0.09, 5));
     for (let k = 1; k * 3.2 < a[1] - y; k++) {
       const t = k * 3.2 / (a[1] - y), b = P(i + 1, nv), fb = foot(i + 1), tb = k * 3.2 / Math.max(0.01, b[1] - y);
@@ -68,7 +84,7 @@ function shell(bag, cx, z0, z1, hw, H, y) {
   }
 }
 /** opera_house: { rect (the podium), y, h (podium height), halls: [{ x, hw, shells: [[z0, z1, H]] }], stair (depth, on the south) } */
-function operaHouse(el, { bag, col }) {
+function operaHouse(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 9, st = el.stair ?? 22;
   bag.add('granite_podium', box(x0, y - 4, z0, x1, y + h, z1)); col.rect(el.rect, y - 4, y + h); col.floor(el.rect, y + h);
   // the monumental stair up the south side
@@ -91,24 +107,23 @@ function operaHouse(el, { bag, col }) {
   for (let xx = x0 + 6; xx < x1 - 6; xx += 7) bag.add('glass_outer', box(xx, y + 1.2, z0 - 0.06, xx + 5.4, y + h / 2 - 0.4, z0));
   // the broadwalk round the podium's foot
   bag.add('granite_grey', box(x0 - 6, y - 4, z0 - 6, x1 + 6, y + 0.2, z1 + st + 2));
-  for (const hall of el.halls ?? []) for (const [a, b, H, hw] of hall.shells) shell(bag, hall.x, a, b, hw ?? hall.hw, H, y + h);
+  for (const hall of el.halls ?? []) {
+    // (inside the Concert Hall's room, below its ceiling, the later shells' bases are not drawn — hall.js)
+    const last = hall.shells[hall.shells.length - 1], zN = last[1] + (last[0] - last[1]) * 0.62, zS = hall.shells[0][0] - 10 - 16, aw = hall.hw * 0.55;
+    CLIP = hall.concert ? (px, py, pz) => px > hall.x - aw + 0.6 && px < hall.x + aw - 0.6 && pz > zN && pz < zS - 0.6 && py < y + h + envOf(hall, px, pz) * 0.82 - 1.2 : null;
+    for (const [a, b, H, hw] of hall.shells) shell(bag, hall.x, a, b, hw ?? hall.hw, H, y + h);
+    CLIP = null;
+  }
   // under each hall's shells: the auditorium's enclosure, clad in brush box, stepping up northward under the
   // shells' envelope to its north wall, and between that wall and the glass the northern foyer over the harbour:
   // its floor, the benches facing the glass, a bar against the enclosure, the lamps (§1a)
   const yf = y + h;
   for (const hall of el.halls ?? []) {
-    const env = (xx, zz) => {               // the lowest inner surface of the shells over (xx, zz), from their section and profile
-      let best = 0;
-      for (const [a, b, H, hw0] of hall.shells) {
-        const hw = hw0 ?? hall.hw, t = (zz - a) / (b - a); if (t < 0 || t > 1) continue;
-        const w = hw * (1 - 0.3 * t), sx = (xx - hall.x) / w; if (Math.abs(sx) >= 1) continue;
-        const c = 0.55, R = 1 + c, arc = (q) => Math.sqrt(Math.max(0, R * R - (q + c) * (q + c))), sect = (arc(Math.abs(sx)) - arc(1)) / (arc(0) - arc(1));
-        best = Math.max(best, H * (1 - (1 - t) ** 2.2) * sect - 0.6);
-      }
-      return best;
-    };
+    const env = (xx, zz) => envOf(hall, xx, zz);
     const last = hall.shells[hall.shells.length - 1], zMouth = last[1], zN = zMouth + (last[0] - last[1]) * 0.62, zS = hall.shells[0][0] - 10, aw = hall.hw * 0.55;
-    for (let zz = zS; zz > zN; zz -= 4) {
+    // the Concert Hall (the west hall) is built hollow and furnished (§1d); the opera theatre's enclosure stays solid
+    if (hall.concert) concertHall(bag, col, lights, { x: hall.x, aw, zS, zN, yf, env });
+    else for (let zz = zS; zz > zN; zz -= 4) {
       const zb = Math.max(zN, zz - 4), hh = Math.min(env(hall.x - aw, zz), env(hall.x - aw, zb), env(hall.x + aw, zz), env(hall.x + aw, zb)) * 0.82;
       if (hh < 3) continue;
       bag.add('brushbox', box(hall.x - aw, yf, zb, hall.x + aw, yf + hh, zz));
@@ -118,7 +133,7 @@ function operaHouse(el, { bag, col }) {
     for (let k = 0; k < 3; k++) bag.add('brushbox', box(hall.x - aw + k * 0.8, yf + hN * k / 3, zN - 3 + k * 1.0, hall.x + aw - k * 0.8, yf + hN * (k + 1) / 3 - 0.05, zN));
     for (let k = 0; k < 3; k++) for (let u = hall.x - aw + k * 0.8 + 0.4; u < hall.x + aw - k * 0.8 - 0.3; u += 0.6) bag.add('brushbox', box(u - 0.08, yf + hN * k / 3 + (k ? 0.05 : 0.3), zN - 3 + k * 1.0 - 0.1, u + 0.08, yf + hN * (k + 1) / 3 - 0.4, zN - 3 + k * 1.0));   // the brush-box battens
     for (let k = 1; k < 3; k++) bag.add('glass_outer', box(hall.x - aw + 2, yf + hN * k / 3 - 0.05 - 1.4, zN - 3 + (k - 1) * 1.0 - 0.02, hall.x + aw - 2, yf + hN * k / 3 - 0.35, zN - 3 + (k - 1) * 1.0));
-    col.rect([hall.x - aw, zN - 3, hall.x + aw, zS], yf, yf + 20);
+    col.rect([hall.x - aw, zN - 3, hall.x + aw, hall.concert ? zN : zS], yf, yf + 20);
     // the foyer's floor, the bar, benches facing the harbour, lamps on stands
     const f0 = zMouth + 2.5, f1 = zN - 3;
     bag.add('timber', box(hall.x - aw - 4, yf, f0, hall.x + aw + 4, yf + 0.04, f1));

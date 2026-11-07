@@ -3,7 +3,7 @@
 // the Passeig for it (both built with the landmark). The street life of 1910 (§5a): the trams on the
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
-import { RADIUS, PITCH, BLOCK, BATLLO, GRACIA_X, blocks, height, onDiagonal, bancsFanals } from './layout.js';
+import { RADIUS, PITCH, BLOCK, BATLLO, GRACIA_X, MERCAT, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements) => ({ id, style: 'modernisme', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 46], facing: 'n' } });
@@ -64,8 +64,25 @@ function carriages(rand) {
   return out;
 }
 
+function mercatLife() {
+  const L = [], rand = rng(1888), [cx, cz] = MERCAT, y = Math.max(Y(cx, cz - 27), Y(cx, cz + 27)) + 0.07, pick = (a) => a[Math.floor(rand() * a.length)];
+  const GOODS = [['fish', 'fish', 'heap'], ['greens', 'melons', 'heap'], ['bread', 'baskets'], ['heap', 'greens'], ['fish', 'heap'], ['melons', 'greens', 'baskets']];
+  const who = (at, rot, o = {}) => L.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.6 ? 'robe' : 'trousers', cloth: pick(['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo', 'cloth_white']), cloth2: pick(['cloth_white', 'linen', 'cloth_black']), skin: 'skin_light', hat: pick(['none', 'cap', 'brim']), hatMat: pick(['cloth_black', 'cloth_brown']), ...o });
+  // the stalls back to back down the middle nave and along the side naves, their sellers behind and the buyers before
+  for (const [zr, face] of [[-3.2, -1], [3.2, 1], [-15.5, 1], [15.5, -1]]) for (let x = cx - 25.5; x <= cx + 25.5; x += 3.4) {
+    if (Math.abs(x - cx) < 2) continue;
+    const rot = face > 0 ? 0 : Math.PI;
+    L.push({ t: 'stall', at: [x, cz + zr], y, rot, w: 2.8, d: 1.3, goods: pick(GOODS), awning: 'cloth_white', seed: Math.floor(rand() * 1e6) });
+    if (rand() < 0.7) who([x + (rand() - 0.5), cz + zr - face * 1.2], rot, { dress: 'robe', over: 'apron', hat: 'none' });
+    if (rand() < 0.45) who([x + (rand() - 0.5) * 1.5, cz + zr + face * 2.1], rot + Math.PI, { carry: rand() < 0.5 ? 'basket' : 'none' });
+  }
+  // the flower sellers on the pavement before the north side, a cart unloading
+  for (let x = cx - 24; x <= cx + 24; x += 6) { L.push({ t: 'goods_mat', goods: ['baskets', 'greens'], at: [x, cz - 25], y, rot: 0, seed: Math.floor(x * 7 + 1e4) }); who([x + 0.9, cz - 25.8], Math.PI, { dress: 'robe', hat: 'none', pose: rand() < 0.5 ? 'sit_ground' : 'stand' }); }
+  L.push({ t: 'cart', kind: 'two', load: 'sacks', beast: 'horse', at: [cx + 33, cz + 4], y, rot: 0, seed: 1888 });
+  return L;
+}
 export async function town() {
-  const els = blocks().filter((b) => b.special !== 'sagrada').map((b) => ({
+  const els = blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
     t: 'eixample_block', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
     ...(b.special === 'pedrera' ? { cut: { corner: 3, a: 22, b: 22 } } : {}),
     ...(b.special === 'batllo' ? { gaps: [{ side: 1, s0: BATLLO.s0, s1: BATLLO.s1 }] } : {}),
@@ -76,6 +93,10 @@ export async function town() {
   const rand = rng(1910), lines = tramLines();
   plans.push(base('barcelona-trams', [...lines, ...trams(lines, rand)]));
   plans.push(base('barcelona-carriages', carriages(rand)));
+  // the Mercat de la Concepció on its block, and its life: the stalls in rows down the naves, the sellers and the
+  // buyers, the flower sellers outside (§5d)
+  plans.push(base('barcelona-mercat', [{ t: 'mercat', c: MERCAT, y: Math.max(Y(MERCAT[0], MERCAT[1] - 27), Y(MERCAT[0], MERCAT[1] + 27)) + 0.02, L: 60, W: 44 }]));
+  plans.push({ ...base('barcelona-mercat-life', mercatLife()), style: 'life' });
   plans.push(base('barcelona-passeig', bancsFanals().map(([x, z], i) => ({ t: 'banc_fanal', at: [x, z], y: Y(x, z), rect: [x - 0.9, z - 2.3, x + 0.9, z + 2.3], seed: 1906 + i }))));
   return plans;
 }

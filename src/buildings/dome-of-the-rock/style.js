@@ -5,7 +5,7 @@
 
 import '../../styles/islamic/index.js';
 import { STYLES, registerStyle } from '../../core/build.js';
-import { lathe, fromTriangles } from '../../core/geom.js';
+import { lathe, fromTriangles, box } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
 
 const T22 = Math.tan(Math.PI / 8);
@@ -172,9 +172,185 @@ function rockScreen(el, { bag, col }) {
   col.segment(el.a, el.b, 0.12, y, y + h);
 }
 
+
+// ── the mosaics of 691/92 (docs/settlements/jerusalem.md §1c) ───────────────────────────────────
+// On the gold ground of the arcades and the drum: trees and acanthus scrolls rising from vases, in greens
+// and blues, set with jewels — red stones and mother-of-pearl — and crowned; along the top of the octagonal
+// arcade, on both faces, the inscription band of gold letters on a turquoise ground. Flat pieces a little proud
+// of the walls, built in a face's frame W(u, y, d).
+
+/** A flat polygon [[u, y] …] at depth d of a frame, both faces. */
+function flat(T, W, pts, d) {
+  for (let i = 1; i < pts.length - 1; i++) {
+    const a = W(pts[0][0], pts[0][1], d), b = W(pts[i][0], pts[i][1], d), c = W(pts[i + 1][0], pts[i + 1][1], d);
+    T.push(...a, ...b, ...c, ...a, ...c, ...b);
+  }
+}
+/** A leaf: a pointed lozenge from p along angle a, length l, width w. */
+const leaf = (T, W, [u, y], a, l, w, d) => { const c = Math.cos(a), s = Math.sin(a); flat(T, W, [[u, y], [u + c * l * 0.4 - s * w / 2, y + s * l * 0.4 + c * w / 2], [u + c * l, y + s * l], [u + c * l * 0.4 + s * w / 2, y + s * l * 0.4 - c * w / 2]], d); };
+/** A disc of n sides, radius r. */
+const disc = (T, W, [u, y], r, d, n = 8) => flat(T, W, Array.from({ length: n }, (_, k) => [u + Math.cos(k / n * 6.2832) * r, y + Math.sin(k / n * 6.2832) * r]), d);
+/** A jewel: a red stone in a ring of pearls. */
+function jewel(M, W, p, r, d) {
+  disc(M.pearl, W, p, r * 1.5, d, 10); disc(M.red, W, p, r, d + 0.004, 8);
+}
+/**
+ * A tree of the mosaics at uc from y0, h high, s its scale across: a vase on its foot, the stem rising from it, scrolls of
+ * acanthus leaves curling out to both sides (in greens, the turned leaves in blue), a jewel at the heart of each scroll,
+ * a crown of pearls and a red stone at the top.
+ */
+function mosaicTree(M, W, uc, y0, h, s, d) {
+  // the vase
+  flat(M.green, W, [[uc - 0.09 * s, y0], [uc + 0.09 * s, y0], [uc + 0.06 * s, y0 + 0.06 * s], [uc - 0.06 * s, y0 + 0.06 * s]], d);
+  flat(M.blue, W, [[uc - 0.06 * s, y0 + 0.06 * s], [uc + 0.06 * s, y0 + 0.06 * s], [uc + 0.2 * s, y0 + 0.2 * s], [uc + 0.16 * s, y0 + 0.34 * s], [uc - 0.16 * s, y0 + 0.34 * s], [uc - 0.2 * s, y0 + 0.2 * s]], d);
+  flat(M.pearl, W, [[uc - 0.16 * s, y0 + 0.34 * s], [uc + 0.16 * s, y0 + 0.34 * s], [uc + 0.12 * s, y0 + 0.38 * s], [uc - 0.12 * s, y0 + 0.38 * s]], d + 0.003);
+  flat(M.green, W, [[uc - 0.08 * s, y0 + 0.38 * s], [uc + 0.08 * s, y0 + 0.38 * s], [uc + 0.17 * s, y0 + 0.47 * s], [uc - 0.17 * s, y0 + 0.47 * s]], d);
+  jewel(M, W, [uc, y0 + 0.2 * s], 0.04 * s, d + 0.004);
+  // the stem
+  const yS = y0 + 0.47 * s, yT = y0 + h;
+  flat(M.green, W, [[uc - 0.035 * s, yS], [uc + 0.035 * s, yS], [uc + 0.025 * s, yT - 0.15 * s], [uc - 0.025 * s, yT - 0.15 * s]], d);
+  // the scrolls, alternating side to side, smaller as they rise
+  const n = Math.max(2, Math.round((yT - yS) / (0.36 * s)));
+  for (let k = 0; k < n; k++) {
+    const t = (k + 0.5) / n, yy = yS + (yT - yS - 0.2 * s) * t, side = k % 2 ? 1 : -1, R = (0.27 - 0.08 * t) * s, cxs = uc + side * (R + 0.04 * s);
+    // the scroll: a ring of leaves curling in to its jewel, an outer fringe of acanthus lobes
+    for (let j = 0; j < 9; j++) {
+      const a = -Math.PI / 2 + side * (Math.PI - j * 0.72), rr = R * (1 - j * 0.07);
+      leaf(j % 3 === 2 ? M.blue : M.green, W, [cxs + Math.cos(a) * rr, yy + Math.sin(a) * rr], a + side * Math.PI / 2, 0.2 * s * (1 - j * 0.05), 0.085 * s, d + 0.002);
+    }
+    for (let j = 0; j < 5; j++) { const a = side > 0 ? -0.9 + j * 0.45 : Math.PI + 0.9 - j * 0.45; leaf(j % 2 ? M.blue : M.green, W, [cxs + Math.cos(a) * R * 1.05, yy + Math.sin(a) * R * 1.05], a, 0.13 * s, 0.07 * s, d + 0.003); }
+    jewel(M, W, [cxs, yy], 0.032 * s, d + 0.005);
+    // the pair of leaves at the scroll's root on the stem
+    leaf(M.green, W, [uc, yy - R * 0.6], Math.PI / 2 + side * 0.9, 0.16 * s, 0.065 * s, d + 0.002);
+  }
+  // the crown: a band with pearls, a red stone, three points
+  const yc = yT - 0.15 * s;
+  flat(M.pearl, W, [[uc - 0.1 * s, yc], [uc + 0.1 * s, yc], [uc + 0.1 * s, yc + 0.05 * s], [uc - 0.1 * s, yc + 0.05 * s]], d + 0.002);
+  for (const k of [-1, 0, 1]) flat(M.green, W, [[uc + k * 0.07 * s - 0.03 * s, yc + 0.05 * s], [uc + k * 0.07 * s + 0.03 * s, yc + 0.05 * s], [uc + k * 0.07 * s, yc + 0.13 * s]], d + 0.002);
+  jewel(M, W, [uc, yc + 0.025 * s], 0.018 * s, d + 0.006);
+}
+/** The inscription band from u0 to u1 between y0 and y1: the turquoise ground, gold letters in the manner of the early Kufic — a baseline, the tall shafts and the low letters, the bowls and the joins — in words. */
+function inscription(M, W, u0, u1, y0, y1, d, seed) {
+  let r = seed >>> 0 || 7; const rnd = () => ((r = (r * 1664525 + 1013904223) >>> 0) / 4294967296);
+  flat(M.band, W, [[u0, y0], [u1, y0], [u1, y1], [u0, y1]], d);
+  const h = y1 - y0, base = y0 + h * 0.25, sw = h * 0.07, D = d + 0.006;
+  // thin gold rules along both edges of the band
+  flat(M.gold, W, [[u0, y0 + h * 0.04], [u1, y0 + h * 0.04], [u1, y0 + h * 0.09], [u0, y0 + h * 0.09]], D);
+  flat(M.gold, W, [[u0, y1 - h * 0.09], [u1, y1 - h * 0.09], [u1, y1 - h * 0.04], [u0, y1 - h * 0.04]], D);
+  let u = u0 + h * 0.3;
+  while (u < u1 - h * 0.6) {
+    const word = 2 + Math.floor(rnd() * 4), w0 = u;
+    for (let k = 0; k < word && u < u1 - h * 0.4; k++) {
+      const kind = rnd(), H = kind < 0.35 ? 0.62 : kind < 0.6 ? 0.3 : 0.18;
+      if (kind < 0.35) flat(M.gold, W, [[u, base], [u + sw, base], [u + sw, base + h * H], [u, base + h * H]], D);                 // alif, lam: the tall shaft
+      else if (kind < 0.6) { flat(M.gold, W, [[u, base], [u + sw, base], [u + sw, base + h * H], [u, base + h * H]], D); flat(M.gold, W, [[u, base + h * H - sw], [u + h * 0.16, base + h * H - sw], [u + h * 0.16, base + h * H], [u, base + h * H]], D); }   // the low letters with their heads
+      else if (kind < 0.8) { const c = [u + h * 0.09, base + h * 0.12]; flat(M.gold, W, Array.from({ length: 8 }, (_, j) => [c[0] + Math.cos(j / 8 * 6.28) * h * 0.1, c[1] + Math.sin(j / 8 * 6.28) * h * 0.1]), D); flat(M.band, W, Array.from({ length: 6 }, (_, j) => [c[0] + Math.cos(j / 6 * 6.28) * h * 0.045, c[1] + Math.sin(j / 6 * 6.28) * h * 0.045]), D + 0.003); }   // mim, waw: the bowls
+      else flat(M.gold, W, [[u, base - h * 0.14], [u + sw, base - h * 0.14], [u + h * 0.12, base], [u + h * 0.12 - sw, base]], D);  // the tails below the line
+      u += h * (0.18 + rnd() * 0.08);
+    }
+    flat(M.gold, W, [[w0 - sw * 0.5, base - sw], [u - h * 0.08, base - sw], [u - h * 0.08, base + sw * 0.3], [w0 - sw * 0.5, base + sw * 0.3]], D);  // the line joining the word
+    u += h * 0.3;
+  }
+}
+const MATS = { green: 'mosaic_green', blue: 'inlay_lapis', red: 'inlay_carnelian', pearl: 'glaze_white', gold: 'mosaic_gold', band: 'tile_turquoise' };
+const newM = () => Object.fromEntries(Object.keys(MATS).map((k) => [k, []]));
+function flush(bag, M) { for (const [k, T] of Object.entries(M)) if (T.length) bag.add(MATS[k], fromTriangles(T)); }
+/**
+ * dotr_mosaic: { o, u, L, th, arches, top, band: [y0, y1], faces: [1, -1] } — one side of an arcade: a tree in each
+ * spandrel (between the arches and at the ends) on both faces, and the inscription band along the top.
+ */
+function dotrMosaic(el, { bag }) {
+  const n = [-el.u[1], el.u[0]], M = newM(), A = el.arches, ring = el.ring ?? 0.42, W0 = frame(el.o, el.u, n);
+  for (const f of el.faces ?? [1, -1]) {
+    const W = (uu, y, dd) => W0(uu, y, f * dd), d = el.th / 2 + 0.03;
+    if (el.band) inscription(M, W, 0.15, el.L - 0.15, el.band[0], el.band[1], d - 0.01, (el.seed ?? 1) * 7 + (f > 0 ? 3 : 0));
+    // the spandrels: between neighbouring arches, and at the ends beyond the first and last
+    if (el.single) { const q = A[0]; mosaicTree(M, W, 0.12, q.spring + q.r * 0.78, el.top - 0.2 - q.spring - q.r * 0.78, 0.8, d + 0.005); continue; }
+    for (let i = 0; i <= A.length; i++) {
+      const a = A[i - 1], b = A[i];
+      const uc = a && b ? (a.uc + a.r + b.uc - b.r) / 2 : a ? Math.min(el.L - 0.25, a.uc + a.r + ring + 0.3) : Math.max(0.25, b.uc - b.r - ring - 0.3);
+      const q = a ?? b, top = el.band ? el.band[0] - 0.1 : el.top - 0.2, y0 = q.spring + q.r * (a && b ? 0.55 : 0.8), s = a && b ? 1.0 : 0.6;
+      if (top - y0 > 0.8) mosaicTree(M, W, uc, y0, top - y0, s, d + 0.005);
+    }
+  }
+  flush(bag, M);
+}
+/** drum_mosaic: { c, r (inner face), wins: [angles°], w, y0, y1 (the windows), base, top } — the drum's inside: a tree between each two windows, and below them, over the arcade, a frieze of scrolls. */
+function drumMosaic(el, { bag }) {
+  const M = newM(), [cx, cz] = el.c, R = el.r - 0.04, ws = el.wins;
+  for (let k = 0; k < ws.length; k++) {
+    const a = ((ws[k] + ws[(k + 1) % ws.length] + (k === ws.length - 1 ? 360 : 0)) / 2) * Math.PI / 180;
+    const n = [-Math.cos(a), -Math.sin(a)], u = [-Math.sin(a), Math.cos(a)], o = [cx - n[0] * R, cz - n[1] * R];
+    const W = frame(o, u, n);
+    // between the windows: a tall tree; below: a tree on the lower zone, a jewelled vase between
+    mosaicTree(M, W, 0, el.y0 - 0.3, el.y1 + 1.1 - el.y0, 1.55, 0.02);
+    mosaicTree(M, W, 0, el.base + 0.5, el.y0 - el.base - 1.3, 1.65, 0.02);
+    const am = ws[k] * Math.PI / 180, n2 = [-Math.cos(am), -Math.sin(am)], u2 = [-Math.sin(am), Math.cos(am)], o2 = [cx - n2[0] * R, cz - n2[1] * R];
+    mosaicTree(M, frame(o2, u2, n2), 0, el.base + 0.7, el.y0 - el.base - 1.5, 1.6, 0.02);
+  }
+  flush(bag, M);
+}
+
+// ── the Rock and its cave ──────────────────────────────────────────────────────────────────────
+/** The cave under the Rock's south-east (≈ 4.5 m square) and the steps down to it from the south. */
+export const CAVE = { rect: [0.4, 0.9, 4.9, 5.4], floor: -1.6, roof: 0.45, stair: [2.0, 5.4, 3.2, 8.1] };
+const inR = (r, x, z, m = 0) => x > r[0] - m && x < r[2] + m && z > r[1] - m && z < r[3] + m;
+/**
+ * sakhra: { at, rx, rz, h } — the Rock: an outcrop of grey limestone ≈ 17.7 × 13.5 m rising ≈ 1.5 m, highest toward the
+ * north-west; its surface broken and pitted, with flat-cut stretches; a low clean-cut scarp along its west and north
+ * edges; on the south a ledge, under which the steps go down into the cave (CAVE), cut away over the steps.
+ */
+function sakhra(el, { bag, col, lights }) {
+  const [x, z] = el.at, rx = el.rx, rz = el.rz, H = el.h, n = 112, m = 30;
+  const wob = (a) => 1 + 0.1 * Math.sin(a * 3 + 1) + 0.06 * Math.sin(a * 7) + 0.03 * Math.sin(a * 13 + 2);
+  const ht = (u, v, px, pz) => {
+    const r = Math.hypot(u, v);
+    if (r >= 0.999) return -0.15;
+    if (inR(CAVE.stair, px, pz, 0.35)) return -0.15;
+    let h = H * Math.pow(1 - r * r, 0.45) * (0.82 + 0.18 * Math.sin(u * 7.1 + 1.3) * Math.cos(v * 5.3 + 0.4) + 0.08 * Math.sin(u * 17 + v * 11) + 0.04 * Math.sin(u * 41 - v * 29));
+    h *= 1 - 0.28 * Math.max(0, u) - 0.15 * Math.max(0, v);                            // lower to the south-east
+    if (u < -0.82 || v < -0.85) h = Math.max(h, 0.55 + 0.1 * Math.sin(u * 23));        // the scarp on the west and north
+    if (Math.abs(u + 0.15) < 0.22 && Math.abs(v + 0.1) < 0.3) h = H * 0.86;             // a flat-cut stretch
+    return Math.max(h, inR(CAVE.rect, px, pz, 0.25) ? CAVE.roof + 0.45 : -0.15);
+  };
+  const P = (a, r) => { const px = x + Math.cos(a) * r * wob(a) * rx, pz = z + Math.sin(a) * r * wob(a) * rz; return [px, (el.y ?? 0) + ht(Math.cos(a) * r, Math.sin(a) * r, px, pz), pz]; };
+  const T = [];
+  for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) {
+    const a0 = 2 * Math.PI * i / n, a1 = 2 * Math.PI * (i + 1) / n, r0 = Math.pow(j / m, 0.8), r1 = Math.pow((j + 1) / m, 0.8);
+    const A = P(a0, r0), B = P(a1, r0), C = P(a1, r1), D = P(a0, r1);
+    T.push(...A, ...D, ...C, ...A, ...C, ...B, ...A, ...C, ...D, ...A, ...B, ...C);
+  }
+  bag.add('rock_boulder', fromTriangles(T));
+  col.circle(x, z, Math.min(rx, rz) * 0.85, CAVE.roof, H + 0.3);
+  // the cave: its floor of rock, walls of the rock, the roof (the Rock's underside), the steps down from the south
+  const [c0, d0, c1, d1] = CAVE.rect, F = CAVE.floor;
+  const bx = (m2, a, b, c, d, y0, y1) => bag.add(m2, box(a, y0, b, c, y1, d));
+  bx('rock_boulder', c0, d0, c1, d1, F - 0.3, F);
+  bx('rock_boulder', c0 - 0.4, d0 - 0.4, c1 + 0.4, d0, F - 0.3, CAVE.roof + 0.15);
+  bx('rock_boulder', c0 - 0.4, d0, c0, d1 + 0.4, F - 0.3, CAVE.roof + 0.15);
+  bx('rock_boulder', c1, d0, c1 + 0.4, d1 + 0.4, F - 0.3, CAVE.roof + 0.15);
+  const [s0, , s1, t1] = CAVE.stair;
+  bx('rock_boulder', c0, d1, s0, d1 + 0.4, F - 0.3, CAVE.roof + 0.15);
+  bx('rock_boulder', s1, d1, c1, d1 + 0.4, F - 0.3, CAVE.roof + 0.15);
+  bx('rock_boulder', c0, d0, c1, d1, CAVE.roof, CAVE.roof + 0.2);
+  col.floor([c0, d0, c1, d1], F);
+  col.rect([c0 - 0.4, d0 - 0.4, c1 + 0.4, d0], F, CAVE.roof); col.rect([c0 - 0.4, d0, c0, d1 + 0.4], F, CAVE.roof); col.rect([c1, d0, c1 + 0.4, d1 + 0.4], F, CAVE.roof);
+  col.rect([c0, d1, s0, d1 + 0.4], F, CAVE.roof); col.rect([s1, d1, c1, d1 + 0.4], F, CAVE.roof);
+  // the steps, cut in the rock, and their side walls down to the cave
+  const nst = Math.round(-F / 0.18), L2 = t1 - d1;
+  for (let k = 0; k < nst; k++) { const za = d1 + L2 * k / nst; bx('limestone', s0, za, s1, t1, F - 0.2, F + (-F) * (k + 1) / nst); }
+  for (const [a, b] of [[s0 - 0.3, s0], [s1, s1 + 0.3]]) { bx('rock_boulder', a, d1, b, t1, F - 0.3, 0.02); col.rect([a, d1, b, t1], F, 0.6); }
+  col.ramp([s0, d1, s1, t1], F, 0, 's');
+  // an oil lamp in a niche of the cave's north wall
+  bx('opening', c0 + 1.9, d0 + 0.005, c0 + 2.4, d0 + 0.02, F + 1.2, F + 1.6);
+  bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.01], [0.06, 0.03], [0.03, 0.045], [0.001, 0.05]], 10, null, c0 + 2.15, F + 1.2, d0 + 0.12));
+  bx('limestone', c0 + 1.85, d0, c0 + 2.45, d0 + 0.2, F + 1.15, F + 1.2);
+  lights?.push({ at: [c0 + 2.15, F + 1.35, d0 + 0.35], color: '#ffae5e', intensity: 1.6, distance: 5 });
+}
+
 const base = STYLES.islamic;
 registerStyle('islamic-dotr', {
   ...base,
-  elements: { ...base.elements, dotr_face: dotrFace, ablaq, drum_frames: drumFrames },
-  objects: { ...base.objects, rock_screen: rockScreen },
+  elements: { ...base.elements, dotr_face: dotrFace, ablaq, drum_frames: drumFrames, dotr_mosaic: dotrMosaic, drum_mosaic: drumMosaic },
+  objects: { ...base.objects, rock_screen: rockScreen, sakhra },
 });

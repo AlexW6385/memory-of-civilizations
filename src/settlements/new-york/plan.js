@@ -25,7 +25,8 @@ export const esb = {
   elements: [{ t: 'turned', angle: GRID, elements: [{ t: 'empire_state', rect: ESB, y: hy(ESB) }] }],
   // (Fifth Avenue's roadway in front of the tower: a box inside the turned avenue)
   rooms: [{ id: 'fifth', rect: [...P(0, 200).map((v) => v - 4), ...P(0, 200).map((v) => v + 4)], y: 0, kind: 'open' }],
-  walks: [Object.assign([P(4, 176), P(4, 230)], { y0: 0 })],
+  // (and in through the Fifth Avenue doors, down the lobby to the silhouette and along the corridor of the elevators)
+  walks: [Object.assign([P(4, 176), P(4, 230)], { y0: 0 }), Object.assign([P(2, 230), P(-14, 230), P(-37, 230), P(-29, 230), P(-29, 214), P(-29, 246)], { y0: hy(ESB) })],
 };
 export const midtown = {
   id: 'new-york-midtown', style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true,

@@ -5,19 +5,9 @@
 import { STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import './index.js';
+import { levantHouse } from './house.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-/** levant_house: { rect, seed, y } — rooms of limestone round a court, flat roofs with parapets, sometimes a little dome. */
-function house(el, { bag, col }) {
-  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = 3.6 + (rand() < 0.4 ? 3.2 : 0), d = Math.min(4.5, (z1 - z0) * 0.4);
-  const parts = [[x0, z0, x1, z0 + d], [x0, z0 + d, x0 + d, z1], [x1 - d, z0 + d, x1, z1], [x0 + d, z1 - 0.7, x1 - d, z1]];
-  parts.forEach((r, i) => {
-    const hh = i === 0 ? h : i === 3 ? 2.6 : 3.6;
-    bag.add('limestone', box(r[0], y - 0.6, r[1], r[2], y + hh, r[3])); col.rect(r, y - 0.6, y + hh); col.floor(r, y + hh);
-    if (i < 3 && !el.simple) bag.add('limestone', box(r[0] - 0.05, y + hh, r[1] - 0.05, r[2] + 0.05, y + hh + 0.5, r[3] + 0.05));
-  });
-  if (rand() < 0.45) { const cx = (x0 + x1) / 2, cz = z0 + d / 2, r = Math.min(d, x1 - x0) * 0.35; bag.add('plaster', lathe([[r, 0], [r * 0.9, r * 0.45], [r * 0.55, r * 0.85], [0.001, r]], 12, null, cx, y + h, cz)); }
-}
 /**
  * A reused column as the Umayyads set them up: a square plinth, an Attic base, a monolithic shaft
  * (of whatever marble or granite came to hand) and a Corinthian capital, simplified; an impost
@@ -122,4 +112,4 @@ function hypostyle(el, ctx) {
   OB.mihrab({ at: [cx, zi1 - 0.9], y, w: 1.6, h: 3.4, d: 0.6 }, ctx);
   if (OB.polykandelon) for (let k = 1; k < nb - 2; k += 3) OB.polykandelon({ at: [cx, zi0 + (k + 0.5) * b], y: y + 4.6, r: 0.8, n: 12, top: Hn - 0.3 }, ctx);
 }
-Object.assign(STYLES.islamic.elements, { levant_house: house, hypostyle, reused_column: reusedColumn });
+Object.assign(STYLES.islamic.elements, { levant_house: levantHouse, hypostyle, reused_column: reusedColumn });

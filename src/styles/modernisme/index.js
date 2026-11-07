@@ -10,6 +10,7 @@
 // mosaic front set with ceramic discs, mask-like iron balconies and scaled dragon roof with the
 // cross on its turret.
 
+import { mercat } from './mercat.js';
 import { bancFanal } from './bench.js';
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, disc } from '../../core/geom.js';
@@ -170,6 +171,14 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false) {
     for (let j = 0; j < n; j++) put(bag, fr, railBars(), m - L / 2 + j * 0.96, y + 7.45);
     for (const e of [m - L / 2, m + L / 2 - 0.04]) { bag.add(IRON, F(e, e + 0.04, 0, 0.86, y + 8.4, y + 8.45)); for (let k = 1; k < 5; k++) bag.add(IRON, F(e + 0.008, e + 0.032, k * 0.17 - 0.012, k * 0.17 + 0.012, y + 7.45, y + 8.4)); }
   }
+  // weathering (docs/settlements/barcelona.md §5c): the grime of the street on the lower stone of the ground floor,
+  // wavering, broken at the portal; rain streaks greyed down the stucco from the cornice between the bays
+  for (let i = 0; i < nb; i++) {
+    if (i === door && !tribune) continue;
+    const a = s0 + i * bw + (i === door + 1 && !tribune ? 0.9 : 0.05), b = s0 + (i + 1) * bw - (i === door - 1 && !tribune ? 0.9 : 0.05);
+    if (b - a > 0.3) bag.add('plaster_damp', F(a, b, 0.062, 0.07, y + 0.45, y + 0.72 + 0.16 * Math.sin(i * 2.3 + s0)));
+  }
+  for (let i = 1; i < nb; i++) if (rand() < 0.7) { const u = s0 + i * bw, L2 = 1.6 + rand() * 2.8; bag.add('plaster_streak', F(u - 0.16, u + 0.16, 0.006, 0.02, Math.max(y + 7.6, y + h - 0.62 - L2), y + h - 0.62)); }
   bag.add(S, F(s0, s1, 0, 0.24, y + h - 0.62, y + h - 0.42));
   bag.add(S, F(s0, s1, 0, 0.52, y + h - 0.42, y + h - 0.16));
   bag.add(mat, F(s0, s1, -0.3, 0, y + h - 0.16, y + h + 1.0));
@@ -703,6 +712,6 @@ function batllo(el, { bag, col }) {
 }
 registerStyle('modernisme', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, eixample_block: block, sagrada, pedrera, batllo, ...STREET, banc_fanal: bancFanal },
+  elements: { ...STYLES.qing.elements, mercat, eixample_block: block, sagrada, pedrera, batllo, ...STREET, banc_fanal: bancFanal },
   objects: {},
 });

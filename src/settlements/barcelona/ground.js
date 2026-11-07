@@ -1,20 +1,21 @@
 // Barcelona — the ground: the Eixample's paved streets and the planes along them, the courts'
 // gardens; the bright Mediterranean light.
 
-import { RADIUS, PITCH, BLOCK, SAGRADA, height, onDiagonal, bancsFanals } from './layout.js';
+import { RADIUS, PITCH, BLOCK, SAGRADA, MERCAT, height, onDiagonal, bancsFanals } from './layout.js';
 const BANCS = bancsFanals();
 
 const inBlock = (x, z, m = 0) => { const bx = Math.round(x / PITCH) * PITCH, bz = Math.round(z / PITCH) * PITCH; return Math.abs(x - bx) < BLOCK / 2 + m && Math.abs(z - bz) < BLOCK / 2 + m; };
 const onSite = (x, z, m = 0) => Math.abs(x - SAGRADA[0]) < BLOCK / 2 + m && Math.abs(z - SAGRADA[1]) < BLOCK / 2 + m;      // the temple's works
 function cover(x, z) {
   const c = { sand: 0.1, grass: 0.2, rock: 0, soil: 0.2, fields: 0, dry: 0.45, warmth: 0.6, red: 0.15, road: 0.85, snow: 0, forest: 0 };
+  if (Math.abs(x - MERCAT[0]) < BLOCK / 2 && Math.abs(z - MERCAT[1]) < BLOCK / 2) { c.road = 1; c.grass = 0; c.soil = 0; return c; }
   if (onSite(x, z)) { c.soil = 0.75; c.dry = 0.6; c.grass = 0.08; c.road = 0.1; c.sand = 0.2; return c; }
   if (inBlock(x, z, -18)) { c.grass = 0.6; c.road = 0.2; return c; }
   return c;
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || onSite(x, z, -1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || onSite(x, z, -1) || (Math.abs(x - MERCAT[0]) < BLOCK / 2 + 1 && Math.abs(z - MERCAT[1]) < BLOCK / 2 + 1)) return null;
   if (inBlock(x, z, -20)) return { date_palm: 0.0025, oleander: 0.01, fig: 0.003, cypress: 0.0015, grass: 12 };   // the courts' gardens
   if (inBlock(x, z, 1)) return null;
   // the rows of planes along both kerbs of every street, 7–8.3 m from its middle (clear of the tram poles at 9.6),
