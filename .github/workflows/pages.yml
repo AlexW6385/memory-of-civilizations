@@ -41,9 +41,9 @@ jobs:
           mkdir -p _site/v/$V
           cp -r data _site/
           cp -r src _site/v/$V/
-          # the code of the last versions too: a page opened before this deploy still finds the
+          # the code of the last versions too (eight): a page opened before this deploy still finds the
           # modules it fetches later (a settlement, a worker) under its own folder
-          for C in $(git rev-list --skip=1 --max-count=12 HEAD); do
+          for C in $(git rev-list --skip=1 --max-count=8 HEAD); do
             O=${C::8}; mkdir -p _site/v/$O
             git archive "$C" src | tar -x -C _site/v/$O || rm -rf _site/v/$O
           done
@@ -65,3 +65,5 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          timeout: 1800000   # the site is ~85 MB with the kept versions; Pages' sync can pass the 10-minute default
