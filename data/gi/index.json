@@ -661,7 +661,7 @@
  },
  "joseon-seoul-gyeongbokgung": {
   "site": "joseon-seoul",
-  "hash": "22bf09fb9b0e69a3",
+  "hash": "9f1ab18b81f3b4cc",
   "rays": 128,
   "probes": 22750,
   "boxes": [
@@ -682,8 +682,8 @@
     ]
    }
   ],
-  "bytes": 363796,
-  "seconds": 265,
+  "bytes": 358036,
+  "seconds": 83,
   "baked": "2026-11-07"
  },
  "kilwa-mosque": {
