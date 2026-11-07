@@ -42,6 +42,48 @@ export function script(bag, mat, f, u0, u1, y, h, d0, d1, seed = 1) {
     if (k === 1) bag.add(mat, box(...((r) => [r[0], y + h * 0.05, r[1], r[2], y + h * 0.16, r[3]])(f.R(d0, d1, u, u + 0.11))));
   }
 }
+/** A flat polygon pts [[u, v]…] (star-shaped about its first point's centroid) on face f at d off it, facing into the room. */
+function poly(out, f, pts, d) {
+  const cu = pts.reduce((s, p) => s + p[0], 0) / pts.length, cv = pts.reduce((s, p) => s + p[1], 0) / pts.length, C = f.P(cu, cv, d);
+  // counter-clockwise in (u, v) faces +z on a 'z' face and -x on an 'x' face
+  const rev = f.ax === 'z' ? f.n < 0 : f.n > 0;
+  for (let i = 0; i < pts.length; i++) { const A = f.P(...pts[i], d), B = f.P(...pts[(i + 1) % pts.length], d); rev ? out.push(...C, ...B, ...A) : out.push(...C, ...A, ...B); }
+}
+const ZC = ['glaze_blue', 'glaze_green', 'glaze_yellow', 'marble_dark'];
+/**
+ * The dado's field as tile mosaic (alicatado; docs/settlements/granada.md §4.8): on the white ground,
+ * rows of eight-pointed stars cut from single-coloured tiles (cobalt, green, honey, manganese black),
+ * a small four-pointed cross at each meeting of four stars; clear of the holes (free(u, v0, v1)).
+ */
+function zellij(bag, f, u0, u1, v0, v1, free) {
+  const H = v1 - v0; if (H < 0.3) return;
+  const rows = Math.max(1, Math.round(H / 0.46)), s = H / rows, n = Math.floor((u1 - u0) / s), m = ((u1 - u0) - n * s) / 2, T = ZC.map(() => []), X = [[], []];
+  const star = (cu, cv, R) => { const r = R * 0.62, out = []; for (let k = 0; k < 16; k++) { const t = k * Math.PI / 8 + Math.PI / 8, rr = k % 2 ? r : R; out.push([cu + Math.cos(t) * rr, cv + Math.sin(t) * rr]); } return out; };
+  for (let i = 0; i < n; i++) for (let j = 0; j < rows; j++) {
+    const cu = u0 + m + (i + 0.5) * s, cv = v0 + (j + 0.5) * s;
+    if (free(cu, cv - s / 2, cv + s / 2, s / 2)) poly(T[(i + j * 2) % 4], f, star(cu, cv, s * 0.4), 0.046);
+    if (i > 0 && j > 0 && free(cu - s / 2, cv - s / 2 - 0.1, cv - s / 2 + 0.1, 0.12)) {
+      const pu = cu - s / 2, pv = cv - s / 2, a = s * 0.15, w = s * 0.05;
+      poly(X[(i + j) % 2], f, [[pu - a, pv], [pu - w, pv - w], [pu, pv - a], [pu + w, pv - w], [pu + a, pv], [pu + w, pv + w], [pu, pv + a], [pu - w, pv + w]], 0.046);
+    }
+  }
+  T.forEach((t, k) => t.length && bag.add(ZC[k], fromTriangles(t)));
+  if (X[0].length) bag.add('glaze_green', fromTriangles(X[0])); if (X[1].length) bag.add('glaze_blue', fromTriangles(X[1]));
+}
+/**
+ * The Nasrid shield (escudo de la banda) in the stucco at u, centred at height yc: an upright field with
+ * its lower side brought to a point, in a plain frame; a band across it from the upper left bearing the
+ * motto, wa-la ghalib illa-llah (strokes); the field blue, the band gilt [inferred: the colours].
+ */
+function shield(bag, f, u, yc) {
+  const w = 0.24, top = yc + 0.32, sh = yc - 0.12, tip = yc - 0.34, e = 0.05, F = [], B = [], G = [];
+  poly(F, f, [[u - w - e, top + e], [u - w - e, sh], [u, tip - e * 1.4], [u + w + e, sh], [u + w + e, top + e]], 0.03);
+  poly(B, f, [[u - w, top], [u - w, sh], [u, tip], [u + w, sh], [u + w, top]], 0.042);
+  const L = yc + 0.17, R = yc - 0.06, bw = 0.055;
+  poly(G, f, [[u - w, L - bw], [u + w, R - bw], [u + w, R + bw], [u - w, L + bw]], 0.052);
+  bag.add(SW, fromTriangles(F)); bag.add('paint_blue', fromTriangles(B)); bag.add('gilt_bronze', fromTriangles(G));
+  for (let k = 0; k < 8; k++) { const t = (k + 0.5) / 8, uu = u - w + 2 * w * t, vv = L + (R - L) * t, hh = k % 3 === 1 ? 0.06 : 0.035; const r = f.R(0.052, 0.058, uu - 0.008, uu + 0.008); bag.add('marble_dark', box(r[0], vv - 0.025, r[1], r[2], vv - 0.025 + hh, r[3])); }
+}
 /**
  * The dressing of a room's wall face from u0 to u1, floor y to yTop: a dado of glazed tiles (green
  * field, a lapis border, a row of yellow lozenges), the stucco lining above, a band of script under
@@ -49,13 +91,16 @@ export function script(bag, mat, f, u0, u1, y, h, d0, d1, seed = 1) {
  */
 export function dress(bag, f, u0, u1, y, yTop, holes = [], o = {}) {
   const a = u0 + 0.045, b = u1 - 0.045, dado = o.dado ?? 1.3;
-  holedWall(bag, null, 'glaze_green', f.R(0, 0.04, a, b), y + 0.02, y + dado, holes, f.alongX);
+  holedWall(bag, null, 'glaze_white', f.R(0, 0.04, a, b), y + 0.02, y + dado, holes, f.alongX);
   holedWall(bag, null, 'glaze_lapis', f.R(0, 0.055, a, b), y + dado, y + dado + 0.12, holes, f.alongX);
   holedWall(bag, null, 'glaze_lapis', f.R(0, 0.055, a, b), y + 0.02, y + 0.12, holes, f.alongX);
-  const free = (u, v0, v1) => !holes.some((h) => u > h[0] - 0.3 && u < h[1] + 0.3 && v1 > h[2] && v0 < h[3]);
-  for (let u = a + 0.3; u < b - 0.2; u += 0.46) if (free(u, y + 0.3, y + 1.1)) { const r = f.R(0.04, 0.05, u - 0.13, u + 0.13); bag.add('glaze_yellow', box(r[0], y + 0.58, r[1], r[2], y + 0.84, r[3])); }
+  const free = (u, v0, v1, m = 0.3) => !holes.some((h) => u > h[0] - m && u < h[1] + m && v1 > h[2] && v0 < h[3]);
+  zellij(bag, f, a, b, y + 0.12, y + dado, free);
   if (yTop - y - dado < 0.5) return;
   holedWall(bag, null, SC, f.R(0, 0.025, a, b), y + dado + 0.12, yTop, holes, f.alongX);
+  // the Nasrid shield, carved and painted in the stucco at intervals (§4.8)
+  const ys0 = y + dado + 0.75, ys1 = yTop - (o.bandDrop ?? 0.75) - 0.15;
+  if (o.shields !== false && ys1 - ys0 > 1.0) { const yc = (ys0 + ys1) / 2, n = Math.floor((b - a) / 3.6); for (let i = 0; i < n; i++) { const u = a + (b - a) * (i + 0.5) / n; if (free(u, yc - 0.45, yc + 0.45, 0.45)) shield(bag, f, u, yc); } }
   if (o.band !== false && yTop - y > 3.4) {
     const yb = yTop - (o.bandDrop ?? 0.75), hs = holes.filter((h) => h[3] > yb - 0.05);
     holedWall(bag, null, SW, f.R(0.025, 0.05, a, b), yb, yb + 0.42, hs, f.alongX);
@@ -119,26 +164,30 @@ export function muqarnasDome(bag, cx, cz, yb, R, rise, ns, outer, shape = null, 
   const sh = (th, k) => (shape ? shape(th) * (1 - k / K) + k / K : 1);
   const bump = (th, n, ph) => Math.abs(Math.sin((th - ph) * n / 2));
   const P = (th, r, y) => [cx + Math.cos(th) * r, y, cz + Math.sin(th) * r];
+  // o.half [hx, hz]: only the half of the dome on that side (a niche's hood, its centre on the wall's face)
+  const keep = (th, m = 0) => !o.half || Math.cos(th) * o.half[0] + Math.sin(th) * o.half[1] > m;
   for (let k = 0; k < K; k++) {
     const n = ns[k], ph = (k % 2) * Math.PI / n, M = n * A, r0 = rad(k), r1 = rad(k + 1), y0 = hy(k), y1 = hy(k + 1), dk = d * (k === K - 1 ? 0.6 : 1);
     const at = (j, s) => { const th = j / M * Math.PI * 2; return P(th, Math.max(0.001, (r0 + (r1 - r0) * s) * sh(th, k + s) + dk * Math.pow(1 - s, 1.4) * bump(th, n, ph)), y0 + (y1 - y0) * (1 - Math.pow(1 - s, 1.6))); };
-    for (let j = 0; j < M; j++) for (let i = 0; i < S; i++) q4(cells[k % 2], at(j, i / S), at(j + 1, i / S), at(j + 1, (i + 1) / S), at(j, (i + 1) / S));
+    for (let j = 0; j < M; j++) if (keep((j + 0.5) / M * Math.PI * 2)) for (let i = 0; i < S; i++) q4(cells[k % 2], at(j, i / S), at(j + 1, i / S), at(j + 1, (i + 1) / S), at(j, (i + 1) / S));
     // the soffit at the tier's foot, from the tier below (or the drum) out to the niches' heads
     const inner = (th) => (k === 0 ? outer(th) : r0 * sh(th, k));
     const Mb = k === 0 ? Math.max(M, 128) : M;
     for (let j = 0; j < Mb; j++) {
       const t0 = j / Mb * Math.PI * 2, t1 = (j + 1) / Mb * Math.PI * 2;
+      if (!keep((t0 + t1) / 2)) continue;
       const e0 = r0 * sh(t0, k) + dk * bump(t0, n, ph), e1 = r0 * sh(t1, k) + dk * bump(t1, n, ph);
       q4(soff, P(t0, inner(t0), y0), P(t1, inner(t1), y0), P(t1, e1, y0), P(t0, e0, y0));
     }
     // pendants: small prisms hanging at the cells' meeting points
     if (k > 0 && k < K - 1 && o.pendants !== false) for (let c = 0; c < n; c++) {
       const th = ph + c / n * Math.PI * 2, rr = r0 * sh(th, k), w = Math.min(0.05, rr * Math.PI / n * 0.25);
+      if (!keep(th, 0.05)) continue;
       bag.add(o.pendant ?? SC, place(box(-0.04, -0.16, -w, 0.02, 0, w), cx + Math.cos(th) * (rr - 0.02), y0, cz + Math.sin(th) * (rr - 0.02), -th));
     }
   }
   bag.add(o.mats?.[0] ?? SC, dbl(cells[0])); bag.add(o.mats?.[1] ?? SC, dbl(cells[1])); bag.add(o.soffit ?? SW, dbl(soff));
-  bag.add(o.gilt ?? 'gilt_bronze', lathe([[0.001, 0.02], [0.14, -0.02], [0.08, -0.12], [0.001, -0.16]], 8, null, cx, yb + rise - 0.01, cz));
+  if (o.gilt !== false) bag.add(o.gilt ?? 'gilt_bronze', lathe([[0.001, 0.02], [0.14, -0.02], [0.08, -0.12], [0.001, -0.16]], 8, null, cx, yb + rise - 0.01, cz));
 }
 /** The rays from (cx, cz) at angle th meet the square of half size h at this distance. */
 export const sqR = (th, h) => h / Math.max(Math.abs(Math.cos(th)), Math.abs(Math.sin(th)));

@@ -58,14 +58,17 @@ const CL = { rect: [T.third.line[0] + T.third.w / 2 + 0.46, -19, T.second.terrac
 }
 for (const r of carve(T.base.rect, CL.basins)) E.push({ t: 'k_terrace', rect: r, y0: 0, y1: T.base.y });
 E.push({ t: 'k_cloister', rect: CL.rect, y: T.base.y, w: 4, h: 3.4, west: CL.west, stair: CL.stair, basins: CL.basins });
-E.push({ t: 'k_gallery', rect: T.third.line, y: T.base.y, w: T.third.w, h: T.third.h, solid: 'in', half: true, gates: true, gate: 22, gateH: 12, relief: true });
+E.push({ t: 'k_gallery', rect: T.third.line, y: T.base.y, w: T.third.w, h: T.third.h, solid: 'in', half: true, gates: true, gate: 22, gateH: 12,
+  // the eight panels of the bas-relief, two to a side (docs/settlements/angkor.md §13); the north-east pair not yet carved c. 1150
+  relief: { w: { s: 'kurukshetra', n: 'lanka' }, s: { w: 'procession', e: 'heavens' }, e: { s: 'churning', n: 'uncarved' }, n: { e: 'uncarved', w: 'gods' } } });
 E.push({ t: 'k_terrace', rect: T.second.terrace, y0: T.base.y, y1: T.second.y });
 E.push({ t: 'k_gallery', rect: T.second.line, y: T.second.y, w: T.second.w, h: T.second.h, solid: 'out', gates: true, gate: 12, gateH: 13, corner: 12, devatas: true });
 E.push({ t: 'k_terrace', rect: T.bakan.terrace, y0: T.second.y, y1: T.bakan.y });
 E.push({ t: 'k_gallery', rect: T.bakan.line, y: T.bakan.y, w: T.bakan.w, h: T.bakan.h, solid: 'out', gates: true, gate: 8, gateH: 10, windows: true });
-for (const [x, z] of [[CX - 28, -28], [CX + 28, -28], [CX - 28, 28], [CX + 28, 28]]) E.push({ t: 'k_tower', c: [x, z], y: T.bakan.y + T.bakan.h * 0.2, w: 9, h: 32, tiers: 5 });
+for (const [x, z] of [[CX - 28, -28], [CX + 28, -28], [CX - 28, 28], [CX + 28, 28]]) E.push({ t: 'k_tower', c: [x, z], y: T.bakan.y + T.bakan.h * 0.2, w: 9, h: 32, tiers: 5, gilt: true });
+// (the five towers' lotus crowns in gilded stucco, §14)
 // the central sanctuary, open on its four sides as built, the standing eight-armed Vishnu in its cella (§12)
-E.push({ t: 'k_tower', c: [CX, 0], y: T.bakan.y, w: 15, h: 65 - T.bakan.y, tiers: 6, cella: { half: 2.6, dw: 1.0, dh: 3.6, image: { face: 'w', h: 3.3 } } });
+E.push({ t: 'k_tower', c: [CX, 0], y: T.bakan.y, w: 15, h: 65 - T.bakan.y, tiers: 6, gilt: true, cella: { half: 2.6, dw: 1.0, dh: 3.6, image: { face: 'w', h: 3.3 } } });
 // the stairs: up the base terrace, up the second level, the steep stairs of the Bakan, on each axis
 const st = (rect, y0, y1, dir) => E.push({ t: 'stairs', rect, y0, y1, dir, mat: 'sandstone_khmer' });
 st([CX - 99 - 0.01 - 2.5, -6, CX - 99, 6], T.base.y - 0.2, T.base.y, 'e');

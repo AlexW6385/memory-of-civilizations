@@ -17,6 +17,8 @@ import { Matrix4, Vector3 } from '../../core/three.js';
 import '../qing/index.js';
 import { rectRoof, beamTris, flipTris } from '../ming/index.js';
 import { assembly, placer, tube, slathe } from '../../objects/kit.js';
+import { panel } from './reliefs.js';
+import { sugarPalm, palanquin, parasol } from './life.js';
 
 const S = 'sandstone_khmer', C = 'sandstone_carved';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -232,14 +234,18 @@ function kTower(el, ctx) {
     yy += h; sk = sn;
   }
   // the crown: the bud, wrapped at its foot by a ring of lotus petals
-  rings.push([sk, yy], [sk * 0.99, yy + bud * 0.2], [sk * 0.9, yy + bud * 0.38], [sk * 0.7, yy + bud * 0.58], [sk * 0.4, yy + bud * 0.78], [sk * 0.14, yy + bud * 0.93], [0.001, bud + yy]);
+  // (el.gilt: the bud and its petals covered in gilded stucco, as the towers once were — docs/settlements/angkor.md §14)
+  const crown = [[sk, yy], [sk * 0.99, yy + bud * 0.2], [sk * 0.9, yy + bud * 0.38], [sk * 0.7, yy + bud * 0.58], [sk * 0.4, yy + bud * 0.78], [sk * 0.14, yy + bud * 0.93], [0.001, bud + yy]];
+  const gt = el.gilt ? [] : t, gc = el.gilt ? [] : ca;
   stack(t, P, rings, cx, y, cz);
+  stack(gt, P, crown, cx, y, cz);
   // two registers of petals: the lower at the bud's foot, the upper, smaller, a third of the way up
   for (const [f, sc, ph] of [[0, sk, 0.34], [0.36, sk * 0.9, 0.28]]) {
     const pw = d * sc * 1.3, th = pw * 0.28;
-    for (const sp of redentSpots(hw, n, d)) prism(ca, scaled(LEAF, sp.mid ? pw * 2.2 : pw, bud * ph), [cx + sp.p[0] * sc - sp.dir[0] * th * 0.6, y + yy + bud * f - 0.05, cz + sp.p[1] * sc - sp.dir[1] * th * 0.6], perp(sp.dir), sp.dir, th);
+    for (const sp of redentSpots(hw, n, d)) prism(gc, scaled(LEAF, sp.mid ? pw * 2.2 : pw, bud * ph), [cx + sp.p[0] * sc - sp.dir[0] * th * 0.6, y + yy + bud * f - 0.05, cz + sp.p[1] * sc - sp.dir[1] * th * 0.6], perp(sp.dir), sp.dir, th);
   }
   bag.add(S, fromTriangles(t)); bag.add(C, fromTriangles(ca));
+  if (el.gilt) bag.add('clay_gilt', fromTriangles([...gt, ...gc]));
 }
 
 /**
@@ -361,7 +367,7 @@ const RELIEF_TILE = (() => {
  * with turned balusters in carved frames; on its face to the gallery (f) the bas-relief (el.relief),
  * on its other face devatas in twos and threes (el.devatas).
  */
-function wall(ctx, el, { wa, wb, len, ux, uz, y, h, np, f }) {
+function wall(ctx, el, { wa, wb, len, ux, uz, y, h, np, f, subject = null }) {
   const { bag } = ctx, P = (s, o = 0) => [wa[0] + ux * s + f[0] * o, wa[1] + uz * s + f[1] * o];
   const seg = (mat, s0, s1, y0, y1, o = 0, hw = 0.45) => { const t = [], a = P(s0, o), b = P(s1, o); beamTris(t, [a[0], y0, a[1]], [b[0], y0, b[1]], hw, y1 - y0); bag.add(mat, fromTriangles(t)); };
   const top = y + h + 0.4;
@@ -387,11 +393,29 @@ function wall(ctx, el, { wa, wb, len, ux, uz, y, h, np, f }) {
     seg(C, 0.3, len - 0.3, y + 0.75, y + 2.8, 0.46, 0.03);
     seg(C, 0.3, len - 0.3, y + 2.8, y + 3.0, 0.47, 0.04);
     seg(C, 0.3, len - 0.3, y + 0.6, y + 0.75, 0.47, 0.04);
-    const n = Math.floor((len - 0.8) / 2.4), s0 = (len - n * 2.4) / 2, U = [ux, uz];
-    for (let i = 0; i < n; i++) {
-      const O = P(s0 + i * 2.4, 0.48), t = [];
-      for (const part of RELIEF_TILE) prism(t, part, [O[0], y + 0.8, O[1]], U, f, 0.05);
-      bag.add('sandstone_relief', fromTriangles(t));
+    const U = [ux, uz];
+    if (typeof el.relief === 'object') {
+      // the panel told in its own composition (src/styles/khmer/reliefs.js), drawn in the viewer's frame:
+      // x from the viewer's left as he faces the wall (his right R = (f.z, −f.x)); its repeated tiles drawn
+      // once and placed as instances, their +x turned to R and their face to f
+      const pan = panel(subject, len - 0.8);
+      if (pan) {
+        const toRight = ux * f[1] - uz * f[0] > 0, sAt = (x) => (toRight ? 0.4 + x : len - 0.4 - x), O = P(0, 0.48), t = [];
+        for (const part of pan.unique) prism(t, part.map(([x, v]) => [sAt(x), v]), [O[0], y + 0.8, O[1]], U, f, part.t ?? 0.05);
+        if (t.length) bag.add('sandstone_relief', fromTriangles(t));
+        const rot = Math.atan2(f[0], f[1]);
+        for (const tl of pan.tiles) {
+          const A = assembly(`k-relief|${tl.key}`, (a) => { const q = []; for (const part of tl.parts) prism(q, part, [0, 0, 0], [1, 0], [0, 1], part.t ?? 0.05); a('stone', fromTriangles(q)); });
+          for (const x of tl.xs) { const p = P(sAt(x), 0.48); placer({ at: p, y: y + 0.8, rot }, bag)('sandstone_relief', A.stone.clone()); }
+        }
+      }
+    } else {
+      const n = Math.floor((len - 0.8) / 2.4), s0 = (len - n * 2.4) / 2;
+      for (let i = 0; i < n; i++) {
+        const O = P(s0 + i * 2.4, 0.48), t = [];
+        for (const part of RELIEF_TILE) prism(t, part, [O[0], y + 0.8, O[1]], U, f, 0.05);
+        bag.add('sandstone_relief', fromTriangles(t));
+      }
     }
   }
   // devatas on the other face, in twos and threes between the pillars
@@ -453,7 +477,10 @@ function kGallery(el, ctx) {
       // the wall
       const wa = [A[0] + n[0] * hw * out, A[1] + n[1] * hw * out], wb = [B[0] + n[0] * hw * out, B[1] + n[1] * hw * out];
       const np = Math.max(1, Math.round(len / 3.2));
-      wall(ctx, el, { wa, wb, len, ux, uz, y, h, np, f: [-n[0] * out, -n[1] * out] });
+      // the relief's subject on this half of this side (el.relief: { n: { w, e }, s: { w, e }, w: { n, s }, e: { n, s } })
+      const half = n[1] ? ((A[0] + B[0]) / 2 < (x0 + x1) / 2 ? 'w' : 'e') : ((A[1] + B[1]) / 2 < (z0 + z1) / 2 ? 'n' : 's');
+      const subject = typeof el.relief === 'object' ? el.relief[side]?.[half] ?? null : null;
+      wall(ctx, el, { wa, wb, len, ux, uz, y, h, np, f: [-n[0] * out, -n[1] * out], subject });
       col.segment(wa, wb, 0.9, y - 0.6, y + h + 0.4);
       // the pillars on the open side, and those of the half-gallery beyond them
       for (let k = 0; k <= np; k++) {
@@ -878,7 +905,7 @@ registerStyle('khmer', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu,
+    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol,
   },
   objects: {},
 });

@@ -1,7 +1,7 @@
 # Djenné, 14th c. — dossier
 
 Settlement id: `djenne` · Style: `sahel` · Region: the Sahel (inland Niger delta) · Code: `src/settlements/djenne/`
-Status of this dossier: L1–L2 (the Great Mosque on its platform, the market, the town of two-storey banco houses on its island, the channel and the floodplain; ground, planting, weather, music). L3 recorded for later: the mosque's interior arches and mihrabs, the courtyard galleries' arched openings, the carved doors and the window grilles of the houses, the yearly replastering festival (crépissage), boats (pirogues) on the river, people and the market's goods.
+Status of this dossier: L3 in part (§13: wear and the crépissage); L1–L2 (the Great Mosque on its platform, the market, the town of two-storey banco houses on its island, the channel and the floodplain; ground, planting, weather, music). L3 recorded for later: the mosque's interior arches and mihrabs, the courtyard galleries' arched openings, the carved doors and the window grilles of the houses, the yearly replastering festival (crépissage), boats (pirogues) on the river, people and the market's goods.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -75,6 +75,16 @@ The griot's kora and ngoni, the balafon, a voice (a plucked harp, a struck woode
 - **The court galleries:** the court is surrounded on three sides by galleries whose walls on the court are punctuated by arched openings [stated: Wikiwand]; the galleries are about 4 m wide [stated: Aramco World 1990]. Ours: arcades of pointed arches (1.7 m wide, springing at 2.5 m) between low pilasters with small pinnacles, 4 m in from the north, west and south walls, roofed with palm beams under banco at 5.2 m, the beams showing in the ceiling [arch rhythm and height inferred].
 - **Found, left alone:** the shared life layer (`src/objects/life.js`, kit `africa`) moors dhows with lateen sails in Djenné's channel; dhows belong to the Indian Ocean, not the Niger.
 
+
+## 13. L3: a year's rain on the banco, and the weeks before the crépissage (2026-11-07)
+
+- **The moment in the year.** The dry season under the harmattan (§8) is the end of the year's wear: the rains have been on the walls since the last replastering and the next is weeks away. "Mali's hot, dry climate, punctuated by torrential rain, is hard on mud and quickly causes leaks and fissures"; without the annual layer the mosque "would crumble" [stated: Roads & Kingdoms, 2018]; the replastering "shields the mosque from harsh weather" before the rainy season [stated: Arab News, 2025].
+- **Erosion on every banco face** (`erode` in `src/styles/sahel/index.js`): between the pilasters, at the foot of the walls where the rain splashes back, patches where the plaster has washed off and the mud bricks show in their courses; now and then such a patch higher up; and runnels washed paler down the face from the parapet. On the mosque's walls (all of `bancoWall`: the hall, the court, the galleries, the market's walls) and on the four walls of every house, on the house fronts above the facade benches and clear of the pilasters, the panel and the door [inferred: the form of the wear, after photographs of Djenné's walls before the crépissage; sizes and frequency ours].
+- **The clay soaking.** "Clay is left to soak in round pools on the riverbank for 20 days" before the crépissage; it arrives by donkey cart; "younger masons break it into chunks and mix in water"; rice husks are added at the end, working "like a glue"; young men carry it in wicker baskets from the pits to the mosque; the workers climb on wooden ladders and the protruding palm sticks [stated: Roads & Kingdoms]; women carry the water for the mix [stated: Arab News]; the banco mix of water, earth, rice bran, shea butter and baobab powder [stated: Arab News]. Ours (`town.js` `crepissage()`, element `mud_pit`): three round pits of wet mud with trodden lips on the south bank east of the landing, lumps of clay on their edges and a heap of rice husk by each; a young mason standing in each pit working it with a hoe, another squatting at the lumps; a donkey with panniers and its driver; women with water jars. At the mosque's north wall four long ladders already set up between the pilasters, baskets stacked at its foot, the chief mason and an elder looking the face over [inferred: their places]. The festival day itself — thousands at work, each quarter racing to finish its section [stated: Roads & Kingdoms] — is not shown: it would not fall on a market day.
+
+Sources added:
+- [The mud mosque of Mali — Roads & Kingdoms (2018)](https://roadsandkingdoms.com/2018/the-mud-mosque-of-mali)
+- [Ancient Malian city celebrates annual replastering of mosque — Arab News (2025)](https://www.arabnews.pk/node/2604511)
 
 ## Sources
 

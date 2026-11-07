@@ -1,7 +1,7 @@
 // The town round the mosque (docs/settlements/djenne.md §6, §11): the market square on market day,
 // the houses packed along the streets.
 
-import { RADIUS, MARKET, LEVEL, ISLAND, houses, shore } from './layout.js';
+import { RADIUS, MARKET, LEVEL, ISLAND, MOSQUE, houses, shore, inHouse } from './layout.js';
 import { ground } from './ground.js';
 import { boatFloat } from '../../objects/index.js';
 
@@ -129,10 +129,44 @@ function landing() {
   return { E, P };
 }
 
+/**
+ * Before the crépissage (docs/settlements/djenne.md §13): in the weeks before the yearly replastering the
+ * clay soaks in round pits on the river bank; young masons break the lumps and work water into it, a
+ * donkey brings more clay in panniers, women bring water in jars. At the mosque the ladders are already
+ * set against the north wall and baskets stacked at its foot for the day; the chief mason looks the wall over.
+ */
+function crepissage() {
+  const rand = rng(1907), E = [], P = [], W = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red'];
+  const pick = (a) => a[Math.floor(rand() * a.length)];
+  const fig = (p, y, rot, o) => P.push({ t: 'figure', at: p, y, rot, seed: Math.floor(rand() * 1e9), skin: 'skin_dark', cloth: pick(W), cloth2: pick(W), hatMat: pick(W), feet: 'bare', ...o });
+  const R = (a) => ISLAND + 14 * Math.sin(a * 3 + 1) + 8 * Math.sin(a * 7 + 2);
+  const at = (a, d) => [Math.cos(a) * (R(a) + d), Math.sin(a) * (R(a) + d)];
+  // three pits on the bank east of the landing
+  for (const [a, d, r] of [[Math.PI / 2 - 0.26, -6.5, 2.2], [Math.PI / 2 - 0.235, -12.5, 1.8], [Math.PI / 2 - 0.3, -10, 2.0]]) {
+    const c = at(a, d);
+    if (inHouse(c[0], c[1], r + 2.5)) continue;
+    E.push({ t: 'mud_pit', c, r, y: 0, seed: Math.floor(rand() * 1e6) });
+    // a young mason standing in the mud working it with a hoe, another squatting at the lumps on the edge
+    fig([c[0] + 0.4, c[1] - 0.3], -0.2, rand() * 6.28, { dress: 'tunic', legs: 'bare', top: 'bare', hat: 'none', carry: 'hoe' });
+    const b = rand() * 6.28; fig([c[0] + Math.cos(b) * (r + 1.3), c[1] + Math.sin(b) * (r + 1.3)], 0, Math.atan2(Math.cos(b), Math.sin(b)), { dress: 'tunic', legs: 'bare', hat: 'cap', pose: 'squat' });
+  }
+  // a donkey with its panniers of clay, its driver; women come with water jars on the head
+  { const c = at(Math.PI / 2 - 0.27, -17); if (!inHouse(c[0], c[1], 2)) { P.push({ t: 'animal', kind: 'donkey', at: c, y: 0, rot: 1.2, seed: 1907, gear: true }); fig([c[0] - 1.3, c[1] + 0.6], 0, 1.2, { dress: 'robe', hat: 'cap', carry: 'staff', len: 1.4 }); } }
+  for (let k = 0; k < 3; k++) { const c = at(Math.PI / 2 - 0.25 + k * 0.02, -3 - k * 2.5); if (!inHouse(c[0], c[1], 1)) fig(c, 0, rand() * 6.28, { dress: 'wrap', hat: 'turban', carry: 'pot' }); }
+  // at the mosque's north wall: ladders against it between the pilasters, baskets stacked at its foot,
+  // the chief mason and an elder looking the face over
+  const zW = MOSQUE.c[1] - MOSQUE.a + 8 - 0.45, py = MOSQUE.py;
+  for (const x of [-19.8, -4.6, 22.8, 28.4]) P.push({ t: 'ladder', at: [x, zW - 1.75], y: py, rot: Math.PI, len: 6.5, seed: 1 });          // (their feet 1.75 m out, their heads on the face)
+  for (const [x, n] of [[-12, 5], [-1, 4], [24.5, 6]]) for (let k = 0; k < n; k++) P.push({ t: 'basket', at: [x + (k % 3) * 0.55, zW - 2.0 - Math.floor(k / 3) * 0.55], y: py, seed: Math.floor(rand() * 1e6) });
+  fig([1.5, zW - 4.5], py, 0, { dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_indigo', hat: 'cap', hatMat: 'cloth_white', pose: 'talk', beard: true, h: 1.72 });
+  fig([0.6, zW - 4.9], py, 0.4, { dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'turban', hatMat: 'cloth_indigo', pose: 'stand', beard: true });
+  return { E, P };
+}
+
 export async function town() {
-  const { E, P } = market(), lnd = landing();
+  const { E, P } = market(), lnd = landing(), cr = crepissage();
   const water = { t: 'water_cells', rect: [-RADIUS + 20, -RADIUS + 20, RADIUS - 20, RADIUS - 20], y: LEVEL.water, cell: 2, inside: (x, z) => { const s = shore(x, z); return s > 7 && s < 39; } };
-  const plans = [base('djenne-market', [...E, water]), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }];
+  const plans = [base('djenne-market', [...E, water]), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }, base('djenne-crepissage', cr.E), { ...base('djenne-crepissage-life', cr.P), style: 'life' }];
   const all = houses();
   for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: 'sahel_house', ...h }))));
   return plans;

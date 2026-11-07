@@ -2,7 +2,7 @@
 // sultans' private retreat — gardeners in the beds and the huerta, men of the household talking and
 // seated, women walking in the Sultana's garden, a man at prayer, horses and grooms in the Dismount court.
 
-import { RADIUS, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y } from './layout.js';
+import { RADIUS, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y, HILL, LIONS, COMARES, MYRTLES, PARTAL } from './layout.js';
 
 export function life() {
   const L = [], T = Object.fromEntries(TERRACES.map((t) => [t.id, t]));
@@ -35,6 +35,41 @@ export function life() {
   gardener([T.orchard1.r[0] + 5.5, 19.0], T.orchard1.y + 0.02, 'n', { carry: 'hoe' });
   gardener([T.orchard1.r[0] + 1.4 + 0.9 * 3, -1.0], T.orchard1.y + 0.02, 'w', { pose: 'squat' });
   P([T.orchard1.r[0] + 11.9, 13.2], T.orchard1.y + 0.02, 'w', { dress: 'robe', cloth: 'cloth_red', cloth2: 'cloth_white', hat: 'veil', hair: 'long', carry: 'basket', h: 1.55 });
+  alhambra(P, man, woman);
+  return L;
+}
+/**
+ * The Alhambra's people about 1390 (§4.9): men of the court talking in the galleries of the Court of the
+ * Lions, envoys standing before the sultan's alcove in the Hall of the Ambassadors with a secretary,
+ * men walking by the pool of the Myrtles (clear of the arrival at its south end), a gardener at the
+ * hedges, two women seated by the Partal's pool.
+ */
+function alhambra(P, man, woman) {
+  const T = HILL.top + 0.05, [lx0, lz0, lx1, lz1] = LIONS;
+  man([lx0 + 6.2, lz0 + 1.3], T, 'e', { pose: 'talk', cloth: 'cloth_white' }); man([lx0 + 7.4, lz0 + 1.25], T, 'w', { pose: 'talk', cloth: 'cloth_red' });
+  man([lx1 - 1.0, lz1 - 2.8], T, 'n', { cloth: 'cloth_brown' });
+  man([lx0 + 18.5, lz1 - 1.3], T, 'w', { pose: 'talk', cloth: 'cloth_ochre' }); man([lx0 + 17.3, lz1 - 1.35], T, 'e', { pose: 'talk', cloth: 'cloth_white', hat: 'turban' });
+  const [c0, cz0, c1, cz1] = COMARES, hx = (c0 + c1) / 2;
+  man([hx - 0.6, cz0 + 7.6], T, 'n', { cloth: 'cloth_red', hat: 'turban' }); man([hx + 0.6, cz0 + 7.7], T, 'n', { cloth: 'cloth_white', hat: 'turban' });
+  man([c0 + 4.2, cz0 + 5.0], T, 'e', { pose: 'cross', cloth: 'cloth_white', hat: 'turban' });
+  const [mx0, mz0] = MYRTLES;
+  man([mx0 + 2.6, mz0 + 14.0], T, 's', { pose: 'talk', cloth: 'cloth_white' }); man([mx0 + 2.7, mz0 + 15.2], T, 'n', { pose: 'talk', cloth: 'cloth_brown' });
+  P([mx0 + 5.7, mz0 + 22.0], T, 'e', { dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_ochre', over: 'belt', hat: 'cap', hatMat: 'cloth_white', hair: 'short', beard: true, legs: 'bare', pose: 'squat' });
+  const [, , , pz1] = PARTAL.pool, px = (PARTAL.pool[0] + PARTAL.pool[2]) / 2;
+  woman([px - 1.2, pz1 + 1.0], T, 'n', { pose: 'sit_ground' }); woman([px - 0.1, pz1 + 1.05], T, 'n', { pose: 'sit_ground', cloth: 'cloth_ochre' });
+}
+/** At the Albaicín's cisterns (§5.1): women filling jars, now and then a water-carrier with his donkey. */
+export function aljibeLife(list) {
+  const L = []; let seed = 1391;
+  for (const [i, a] of list.entries()) {
+    const [x, z] = a.at, f = z + 1.3 + 0.9;
+    L.push({ t: 'figure', at: [x - 0.5, f], y: a.y, rot: Math.PI, seed: (seed += 7919), skin: 'skin_medium', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'veil', hair: 'long', h: 1.55, pose: 'stand', carry: 'pot' });
+    if (i % 2) L.push({ t: 'figure', at: [x + 0.7, f + 0.6], y: a.y, rot: Math.PI - 0.4, seed: (seed += 7919), skin: 'skin_medium', dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_white', hat: 'veil', hair: 'long', h: 1.55, pose: 'talk' });
+    if (i % 3 === 0) {
+      L.push({ t: 'animal', kind: 'donkey', at: [x + 2.6, f + 0.4], y: a.y, rot: Math.PI / 2, seed: (seed += 7919) });
+      L.push({ t: 'figure', at: [x + 1.4, f + 0.2], y: a.y, rot: -Math.PI / 2, seed: (seed += 7919), skin: 'skin_medium', dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_white', over: 'belt', hat: 'cap', hatMat: 'cloth_white', hair: 'short', beard: true, legs: 'bare', pose: 'stand' });
+    }
+  }
   return L;
 }
 export const lifePlan = () => ({ id: 'granada-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: life(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 's' } });
