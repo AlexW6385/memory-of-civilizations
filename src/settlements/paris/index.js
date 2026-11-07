@@ -7,9 +7,9 @@ import '../../styles/gothic/notre-dame.js';
 import '../../styles/gothic/palace.js';
 import '../../styles/vernacular/index.js';
 import '../../styles/ming/index.js';
-import { chapel, city, bridges, bridgeHouses, boats, river } from './plan.js';
+import { chapel, city, bridges, bridgeHouses, boats, river, streetLife } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';
 export { music };
 export const landmarks = [{ plan: chapel, music }];
-export async function town() { return [city, river, ...bridges, bridgeHouses(), boats, ...(await houses())]; }
+export async function town() { return [city, river, ...bridges, bridgeHouses(), boats, ...streetLife(), ...(await houses())]; }

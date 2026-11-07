@@ -59,6 +59,8 @@ for (const sz of [-1, 1]) {
   // painted dado below the windows, with its stone bench
   pwall({ o: [0, z + inS * (T / 2 + 0.03)], u: [1, 0], th: 0.06, u0: 0, u1: XA, y0: UP, y1: 11.0, mat: 'paint_castle', collide: false });
   add({ t: 'block', rect: [0, Math.min(z + inS * T / 2, z + inS * (T / 2 + 0.5)), XA, Math.max(z + inS * T / 2, z + inS * (T / 2 + 0.5))], y0: UP, y1: UP + 0.45, mat: 'limestone' });
+  // the blind arcade over the bench, bay by bay, with its medallions of the martyrs; the royal oratories in the third bay
+  for (let k = 0; k < NB; k++) add({ t: 'sc_dado', o: [0, z + inS * (T / 2 + 0.06)], u: [1, 0], n: [0, inS], u0: k * BAY + 0.42, u1: (k + 1) * BAY - 0.42, y0: UP + 0.45, y1: 11.0, count: 5, niche: k === 2 ? 2 : -1 });
   for (let k = 0; k < NB; k++) {
     const uc = (k + 0.5) * BAY;
     add({ t: 'gothic_window', o: [0, z], u: [1, 0], uc, w: 4.9, sill: 11.0, spring: SPR, f: 0.75, lancets: 4, inSide: inS });
@@ -91,6 +93,7 @@ for (let k = 0; k < APSE.sides; k++) {
   add({ t: 'gothic_window', o: a, u, uc: L / 2, w: 2.1, sill: 12.0, spring: 24.4, f: 0.8, lancets: 2, inSide: 1 });
   const n = [-u[1], u[0]], out = [u[1], -u[0]];
   pwall({ o: [a[0] + n[0] * (T / 2 + 0.03), a[1] + n[1] * (T / 2 + 0.03)], u, th: 0.06, u0: 0, u1: L, y0: UP, y1: 12.0, mat: 'paint_castle', collide: false });
+  add({ t: 'sc_dado', o: [a[0] + n[0] * (T / 2 + 0.06), a[1] + n[1] * (T / 2 + 0.06)], u, n, u0: 0.3, u1: L - 0.3, y0: UP, y1: 12.0, count: 2, niche: -1 });
   add({ t: 'sc_window_frame', o: a, u, n: out, d0: T / 2, arch: { uc: L / 2, r: 1.05, spring: 24.4, pointed: 0.8 }, sill: 12.0 });
   add({ t: 'sc_cornice', o: a, u, n: out, u0: -ext, u1: L + ext, y: EAVE + 0.04, d0: T / 2, p: 0.95 });
   add({ t: 'sc_balustrade', o: a, u, u0: 0.75, u1: L - 0.75, y: EAVE + 0.04, h: 0.9, d: -(T / 2 + 0.2) });

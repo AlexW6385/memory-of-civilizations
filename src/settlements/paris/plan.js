@@ -2,7 +2,7 @@
 // previous design, src/buildings/sainte-chapelle) in the palace court; the palace's great hall and
 // towers; Notre-Dame and its parvis; the bridges; the river.
 
-import { RADIUS, CHAPEL, CATHEDRAL, PALACE, GARDEN, QUAY, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER } from './layout.js';
+import { RADIUS, CHAPEL, CATHEDRAL, PALACE, GARDEN, QUAY, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER, PARVIS, height, inLot } from './layout.js';
 import chapelPlan from '../../buildings/sainte-chapelle/plan.js';
 
 const g = RIVER.ground;
@@ -69,6 +69,41 @@ export function bridgeHouses() {
   }
   return { id: 'paris-bridge-houses', style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [], elements: els };
 }
+// the life of the streets (docs/settlements/paris.md §2b): the money-changers' and goldsmiths' boards along the Grand Pont,
+// each with its man on a stool behind it and a customer or two before it; canons of Notre-Dame by the parvis; a water
+// porter; pigs loose on the banks and by the Petit Pont, dogs
+function lrng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const faceTo = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));
+export function streetLife() {
+  const rand = lrng(1249), T = [], L = [];
+  const CL = ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_green', 'cloth_ochre', 'cloth_indigo'], pick = (a) => a[Math.floor(rand() * a.length)];
+  const fig = (at, y, rot, o = {}) => L.push({ t: 'figure', at, y, rot, h: 1.58 + rand() * 0.16, seed: Math.floor(rand() * 1e9), dress: rand() < 0.5 ? 'robe' : 'tunic', cloth: pick(CL), cloth2: pick(CL), skin: 'skin_light', hat: pick(['cap', 'none', 'brim', 'cap']), hatMat: pick(['cloth_brown', 'cloth_red', 'cloth_black']), legs: 'hose', feet: 'shod', ...o });
+  const gp = PONTS[0].b, deck = DECK;
+  for (const [side, zs] of [[-1, [-158, -122, -114]], [1, [-160, -150, -138, -126, -116]]]) for (const z of zs) {
+    const x = gp.x + side * 2.0, a = side < 0 ? -Math.PI / 2 : Math.PI / 2, seed = Math.floor(rand() * 1000);
+    T.push({ t: 'changer_table', at: [x, z], y: deck, rot: a, seed });
+    const back = [x + side * 0.55, z], rot = Math.PI - a;
+    L.push({ t: 'bench', at: [back[0] + side * 0.1, z], y: deck, rot, len: 1.0 });
+    fig(back, deck, rot, { pose: 'sit', dress: 'robe', hat: 'cap', cloth: pick(['cloth_red', 'cloth_indigo', 'cloth_green', 'cloth_brown']) });
+    if (rand() < 0.7) { const at = [x - side * 1.05, z + (rand() - 0.5) * 0.6]; fig(at, deck, faceTo(at, [x, z]), { pose: rand() < 0.5 ? 'talk' : 'stand' }); }
+  }
+  // canons of Notre-Dame in black copes, talking at the north edge of the parvis by the cloister
+  for (const [x, z] of [[132, 43.4], [133.4, 44.1], [118, 43]]) fig([x, z], height(x, z), faceTo([x, z], [132.7, 43.8]) + (x < 125 ? 2 : 0), { dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_black', pose: 'talk', over: 'cape', legs: undefined });
+  // a water porter coming up from the river by the Petit Pont, his yoke and buckets
+  { const at = [104, 99]; fig(at, height(...at), Math.PI, { carry: 'pole', dress: 'tunic', cloth: 'cloth_brown', hat: 'cap' }); }
+  // pigs rooting loose on the strands and by the bridges' feet (one tripped a king's son's horse on a quay in 1131); dogs
+  let n = 0;
+  for (let k = 0; k < 400 && n < 12; k++) {
+    const x = -260 + rand() * 520, z = rand() < 0.5 ? -175 - rand() * 30 : 155 + rand() * 30;
+    if (inLot(x, z, 1.5) || Math.abs(x - BRIDGES[0].x) < 12 || Math.abs(x - BRIDGES[1].x) < 12 || Math.hypot(x, z) > RADIUS - 50) continue;
+    L.push({ t: 'animal', kind: n < 9 ? 'pig' : 'dog', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), mat: n < 9 && rand() < 0.6 ? 'hide_black' : undefined });
+    n++;
+  }
+  const P = (id, els, style) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [], elements: els });
+  void PARVIS;
+  return [P('paris-changers', T, 'gothic'), P('paris-street-life', L, 'life')];
+}
+
 // boats on the Seine: moored along the Right Bank's strand upstream of the Grand Pont (the port of the Grève),
 // a few under way, two at the Left Bank
 export const boats = {

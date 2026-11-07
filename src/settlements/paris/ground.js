@@ -28,6 +28,7 @@ export const ground = {
     sky: { turbidity: 3.0, rayleigh: 1.1, mie: 0.006, mieG: 0.78, zenith: [0.08, 0.15, 0.38], horizon: [0.62, 0.66, 0.72] },
     fog: { color: [0.76, 0.78, 0.8], density: 0.0004, height: 0.012 },
     exposure: 0.5,
+    damp: 0.7,      // the Seine's damp and rain: moss on the north feet of the walls and on the north slopes of the roofs, rain streaks
     wind: [0.6, 0.3],
     weather: [
       { id: 'changeable', weight: 3, clouds: 0.55, cloudDensity: 0.6, sun: 0.85, fog: 1.1 },
