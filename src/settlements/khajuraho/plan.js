@@ -2,6 +2,7 @@
 // terraces, Lakshmana's and Vishvanatha's corner shrines, the tank's water.
 
 import { RADIUS, TEMPLES, TANK, VARAHA } from './layout.js';
+import { rites, people } from './life.js';
 
 const E = [];
 for (const t of TEMPLES) {
@@ -14,6 +15,7 @@ for (const t of TEMPLES) {
   }
 }
 E.push({ t: 'varaha_mandapa', rect: VARAHA, plinth: 2.6, h: 3.6 });
+E.push(...rites());
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const K = TEMPLES[0];
 export const temples = {
@@ -36,4 +38,6 @@ export const tank = {
   entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [{ t: 'water_cells', rect: [TANK.c[0] - TANK.r[0], TANK.c[1] - TANK.r[1], TANK.c[0] + TANK.r[0], TANK.c[1] + TANK.r[1]], y: TANK.level, cell: 1.5, inside: (x, z) => Math.hypot((x - TANK.c[0]) / TANK.r[0], (z - TANK.c[1]) / TANK.r[1]) < 0.985 }],
 };
+/** The priests, pilgrims, flower sellers, cows and bathers (docs/settlements/khajuraho.md §11). */
+export const life = { id: 'khajuraho-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: people(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'w' }, center: [-20, -20], near: 260 };
 export default temples;

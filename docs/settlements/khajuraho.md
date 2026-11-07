@@ -1,7 +1,7 @@
 # Khajuraho (the Western Group), about 1050 — dossier
 
 Settlement id: `khajuraho` · Style: `nagara` · Region: India (Bundelkhand) · Code: `src/settlements/khajuraho/`
-Status of this dossier: L2 (Lakshmana's carved platform with its porched corner shrines, the Varaha pavilion — §10; the Western Group's five temples on their terraces — Kandariya Mahadeva, Jagadambi, Chitragupta, Lakshmana with its four corner shrines, Vishvanatha with its shrines — each a row of halls under stepped roofs rising to the sanctum's clustered tower; the Shivsagar tank; the village; ground, planting, weather, music). L3 recorded for later: the full 84 spires of the Kandariya tower (ours: 28, see §4), the sculpture bands figure by figure, the sardula figures at the terrace corners, the Varaha pavilion, the Matangeshvara temple, the Eastern and Southern groups, festivals and dance.
+Status of this dossier: L2 (Lakshmana's carved platform with its porched corner shrines, the Varaha pavilion — §10; the Western Group's five temples on their terraces — Kandariya Mahadeva, Jagadambi, Chitragupta, Lakshmana with its four corner shrines, Vishvanatha with its shrines — each a row of halls under stepped roofs rising to the sanctum's clustered tower; the Shivsagar tank; the village; ground, planting, weather, music). L3 built: Kandariya's 84 spires, the porch doorway, the things of the pūjā, priests, pilgrims, flower sellers, cows, bathers, lotus (§11). L3 recorded for later: the sculpture bands figure by figure, the sardula figures at the terrace corners, the Varaha pavilion, the Matangeshvara temple, the Eastern and Southern groups, festivals and dance.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -67,6 +67,19 @@ Sources added:
 - [Lakshmana Temple — arch-heritage](https://arch-heritage.blogspot.com/2025/11/lakshmana-temple-khajuraho.html)
 - [Lakshmana Temple — Smarthistory](https://smarthistory.org/lakshmana-temple)
 - [Varaha Temple, Khajuraho — Wikipedia (IPFS mirror)](https://ipfs.aleph.im/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/wiki/Varaha_Temple%2C_Khajuraho.html)
+
+## 11. Detail added (2026-11 L3 pass: the full tower, the things of the pūjā, the life of the temples)
+
+- **Kandariya's 84 spires.** The tower is made of 84 miniature spires [stated: Wikipedia; esamskriti], "clustered against its faces and flanks, and climbing them in tier upon tier" [stated: Studio Matrx]. Ours: the 28 of the earlier pass (§4) and 56 more climbing the main tower — on each face a column of three smaller towers stepping up the bhadra (on the east two, above the śukanāsa, and a small one higher), a pair flanking it at two levels; on each corner three climbing the karna, two small ones at its foot and two on its flanks — 84 with the main tower [stated: the count; inferred: the placement, after photographs of the north and south faces]. The other temples keep the abridged cluster.
+- **The doorway.** The porch now leads through a doorway into the halls: a dark opening framed by jambs in three bands (śākhās) rising to a stepped lintel with a small image at its middle, a half-round moonstone before the sill; the hall's sculpture bands stop either side of it [inferred: the Khajuraho doorway type].
+- **The things of the pūjā.** Pūjā lays flowers before the image or drapes garlands round it, burns incense, waves a burning lamp before the god and offers food; temple officiants are usually Brahmins [stated: encyclopedia.com, "Pūjā"]. Ours (`life.js`, element `rite`, `src/styles/indian/rites.js`): in each porch a bronze bell hung from the ceiling on the axis; two bronze lamp stands with five lit wicks at the door; a clay lamp, flowers heaped on a leaf and a water pot (kalaśa) with its sprig set down before it; rows of little clay lamps along the seats; two garlands swagged between the front pillars behind the torana; before the Varaha a row of lamps, an offering and a garland on its pedestal [inferred: the placing]. The flowers are white (jasmine) and red (oleander, karavīra): no marigolds, which came from the Americas with Spanish and Portuguese traders [stated: National Geographic].
+- **The life of the temples.** In each porch a priest at the sanctum's door — bare-chested in a white wrap, the hair in a top-knot — and a devotee kneeling with joined hands; pilgrims walking round each temple on its terrace with the temple on their right; at the foot of each stair two women selling jasmine and oleander from mats on the ground, a pilgrim coming with a basket of flowers; zebu cows grazing and lying on the lawns, a herdsman sitting by one; at the tank's north margin bathers at the water's edge, women filling pots, a priest at his prayers seated cross-legged [inferred: dress after the temple sculpture; the rest the usage of a temple town].
+- **The tank's lotus; plants.** Drifts of lotus pads, with now and then a pink flower on its stalk, along the tank's margins [inferred]; oleander in clumps round the terraces; a pipal (a fig) and neem by the tank [inferred].
+- **Weathering.** The place's climate is set damp (0.6): the materials' rain streaks darken the sandstone's faces and moss greens the shaded foot of the walls [inferred: the monsoon; the sandstone of Khajuraho weathers dark].
+
+Sources added:
+- [Pūjā: Hindu Pūjā — encyclopedia.com](https://encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/puja-hindu-puja)
+- [How the marigold became a global icon, from Mexico to India — National Geographic](https://www.nationalgeographic.com/history/article/how-the-marigold-became-a-global-icon-from-mexico-to-india)
 
 ## Sources
 
