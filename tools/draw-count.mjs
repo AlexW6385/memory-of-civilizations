@@ -26,7 +26,7 @@ import { MODULES } from '../src/settlements/grounds.js';
 import { buildPlan } from '../src/core/build.js';
 import { ARRIVALS } from '../src/planet/arrivals.js';
 import { MATERIALS } from '../src/core/palette.js';
-import { CELL, SPLIT_TRIS, LOD_NEAR, FINE_SHADOW, THIN_FAR, LIFE_FULL, SHADOW_IOU, cellKey, lodKind, coarse } from '../src/engine/cells.js';
+import { CELL, SPLIT_TRIS, SPLIT_INST, LOD_NEAR, FINE_SHADOW, THIN_FAR, LIFE_FULL, SHADOW_IOU, cellKey, lodKind, coarse } from '../src/engine/cells.js';
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
@@ -195,7 +195,7 @@ export function mergeScene(ms, { cells = true } = {}) {
       continue;
     }
     const all = [...C.values()];
-    if (g.tris < SPLIT) { out.push(base); continue; }
+    if (g.tris < (g.kind === 'instanced' ? SPLIT_INST : SPLIT)) { out.push(base); continue; }
     for (const c of all) out.push({ ...base, tris: c.tris, sphere: sphereOfBox(c.box), box: c.box });
   }
   return out;

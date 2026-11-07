@@ -21,8 +21,8 @@
 
 /** Side of a cell (m). */
 export const CELL = 128;
-/** A merged mesh is cut into cells from this many triangles. */
-export const SPLIT_TRIS = 80000;
+/** A merged mesh is cut into cells from this many triangles; an instanced shape's copies from SPLIT_INST. */
+export const SPLIT_TRIS = 80000, SPLIT_INST = 160000;
 /** A prototype is fine detail, with a coarse version, from this many triangles and up to this size (m). */
 export const FINE_TRIS = 40, FINE_SIZE = 3.2;
 /** Fine pieces farther than this (m) are drawn coarse; their coarse shadows are cast within FINE_SHADOW. */

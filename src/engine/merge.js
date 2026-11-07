@@ -20,7 +20,7 @@
 
 import * as THREE from 'three/webgpu';
 import { releaseAfterUpload } from './release.js';
-import { SPLIT_TRIS, LOD_NEAR, FINE_SHADOW, THIN_FAR, SHADOW_IOU, cellKey, lodKind, coarse, trianglesByCell, subGeometry } from './cells.js';
+import { SPLIT_TRIS, SPLIT_INST, LOD_NEAR, FINE_SHADOW, THIN_FAR, SHADOW_IOU, cellKey, lodKind, coarse, trianglesByCell, subGeometry } from './cells.js';
 import { SMALL, SHADOW } from './layers.js';
 
 /** Time a merge may take before it gives the frame back (ms). */
@@ -123,7 +123,7 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
       const low = lod === 'fine' ? coarse(P, N, I) : null;
       if (lod === 'fine' && !low) lod = null;
       const lowShadow = low ? coarse(P, N, I, SHADOW_IOU) ?? low : null;
-      if (G.list.length < 2 && !lod && n * tri < SPLIT_TRIS) { keep(G); continue; }
+      if (G.list.length < 2 && !lod && n * tri < SPLIT_INST) { keep(G); continue; }
       const matrices = new Float32Array(n * 16), colors = new Float32Array(n * 3);
       let k = 0;
       for (const { o } of G.list) {
@@ -137,7 +137,7 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
         const L = new LodSet(lod, proto, low && lowGeometry(proto, low), lowShadow && lowGeometry(proto, lowShadow), G.mat, matrices, colors, make, castsShadow(G.mat));
         lods.push(L);
         meshes = L.meshes;
-      } else if (n * tri >= SPLIT_TRIS) {
+      } else if (n * tri >= SPLIT_INST) {
         meshes = [];
         for (const idx of copiesByCell(proto, matrices)) {
           const Mc = new Float32Array(idx.length * 16), Cc = new Float32Array(idx.length * 3);
