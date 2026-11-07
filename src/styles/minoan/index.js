@@ -221,7 +221,11 @@ function fresco(el, { bag }) {
   const [x, z] = el.at, d = el.d ?? 0.008, off = 0.004, gth = 0.015;
   if (el.bg) bag.add(el.bg, box(...(() => { const a = [x - u[0] * el.w / 2 + O[0] * off, z - u[2] * el.w / 2 + O[2] * off], b = [x + u[0] * el.w / 2 + O[0] * (off + gth), z + u[2] * el.w / 2 + O[2] * (off + gth)]; return [Math.min(a[0], b[0]), el.y0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), el.y0 + el.h, Math.max(a[1], b[1])]; })()));
   const p = [x + O[0] * (off + gth + 0.001), el.y0, z + O[2] * (off + gth + 0.001)];
-  for (const { mat, parts } of FRESCO[el.kind](el.w, el.h)) if (parts.length) bag.add(mat, profile(parts, { p, u, o: O, s: 1, d, flip: !!el.flip }));
+  // each layer of the relief (each depth fraction) stands STEP further out than the one under it, beside its own
+  // depth: at a fine relief (d 8 mm) layers 0.2 apart were under 2 mm apart and flickered where they overlap
+  const comp = FRESCO[el.kind](el.w, el.h), STEP = 0.003;
+  const ranks = [...new Set(comp.flatMap(({ parts }) => parts.map(([, f]) => f)))].sort((a, b) => a - b);
+  for (const { mat, parts } of comp) if (parts.length) bag.add(mat, profile(parts.map(([q, f]) => [q, d * f + ranks.indexOf(f) * STEP]), { p, u, o: O, s: 1, d: 1, flip: !!el.flip }));
 }
 
 /** bastion: the raised portico of the North Entrance { rect, y, podium, front ('e' | 'w') }: a podium, a portico of two columns, the back wall with the charging bull. */
