@@ -185,13 +185,18 @@ export function bakeScene(site, plan, { rays = 128 } = {}) {
 function sceneHash(S, L, rays) {
   const h = createHash('sha256');
   h.update(`v${BAKE_VERSION} rays ${rays}\n`);
-  const q = new Int32Array(L.pos.length);
-  for (let i = 0; i < q.length; i++) q[i] = Math.round(L.pos[i] * 100);
-  h.update(new Uint8Array(q.buffer));
-  const a = new Uint16Array(L.alb.length + L.tr.length);
-  for (let i = 0; i < L.alb.length; i++) a[i] = Math.round(L.alb[i] * 1000);
-  for (let i = 0; i < L.tr.length; i++) a[L.alb.length + i] = Math.round((L.tr[i] + 1) * 1000);
-  h.update(new Uint8Array(a.buffer));
+  // (the triangles as a set: the order they come in from the build does not change the light, so each
+  // triangle's own hash is summed in two independent 32-bit lanes, which no reordering changes)
+  let s1 = 0, s2 = 0, x1 = 0;
+  for (let t = 0; t < L.tris; t++) {
+    let a = 2166136261, b = 5381;
+    const mix = (v) => { a = Math.imul(a ^ v, 16777619); b = (Math.imul(b, 33) + v) | 0; };
+    for (let k = 0; k < 9; k++) mix(Math.round(L.pos[t * 9 + k] * 100));
+    for (let k = 0; k < 3; k++) mix(Math.round(L.alb[t * 3 + k] * 1000));
+    for (let k = 0; k < 3; k++) mix(Math.round((L.tr[t * 3 + k] + 1) * 1000));
+    s1 = (s1 + (a >>> 0)) % 4294967296; s2 = (s2 + (b >>> 0)) % 4294967296; x1 ^= a;
+  }
+  h.update(`tris ${L.tris} ${s1} ${s2} ${x1}\n`);
   h.update(JSON.stringify(L.lights.map((l) => [l.at.map((v) => Math.round(v * 100)), l.color, l.intensity, l.distance])));
   h.update(JSON.stringify({ sun: S.climate.sun, sky: S.climate.sky }));
   h.update(JSON.stringify(S.grids));
