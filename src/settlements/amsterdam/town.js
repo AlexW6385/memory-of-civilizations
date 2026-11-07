@@ -2,11 +2,11 @@
 // porters at the Weigh House among the bales and casks, the fishwives at their benches, the carters walking
 // beside their horses and sledges, burghers in conversation, boats at the Damrak's head.
 import { RADIUS, GROUND, WATER, WAAG, DAMRAK, lots } from './layout.js';
-import { SLEDGES } from './plan.js';
+import { SLEDGES, BOATS } from './plan.js';
 const base = (id, elements) => ({ id, style: 'dutch', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' } });
 export async function houses() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l }))));
+  for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l, open: (l.front === 'n' && l.rect[1] === -203) || l.seed % 11 === 0 }))));
   return plans;
 }
 
@@ -58,5 +58,8 @@ export function damLife() {
   E.push({ t: 'animal', kind: 'dog', at: [6, -220], y: Y, rot: 1.1, seed: 77 });
   // boats moored at the Damrak's head and along its quays, the fishermen's catch sold live from them
   for (const [x, z, rot] of [[17.5, -261.5, 0], [24.5, -262.2, 0.08], [15.6, -270, 0], [26.4, -275, Math.PI], [15.6, -280, 0.03]]) E.push({ t: 'boat', kind: 'rowboat', at: [x, z], y: WATER, rot, len: 5.2, seed: Math.floor(rand() * 1e9) });
-  return [{ ...base('amsterdam-dam-life', E), style: 'life', center: [5, -235], near: 230 }];
+  // the boatmen on the praams' after decks, their poles in hand (docs §5.10)
+  const canal = [];
+  for (const [x, z, rot, len] of BOATS) { const k = len / 2 - 1.25; canal.push(person(rand, 'worker', [x + Math.sin(rot) * k, z + Math.cos(rot) * k], rot, { y: WATER + 0.42, pose: rand() < 0.5 ? 'punt' : 'stand', len: 4.5 })); }
+  return [{ ...base('amsterdam-dam-life', E), style: 'life', center: [5, -235], near: 230 }, { ...base('amsterdam-boatmen', canal), style: 'life' }];
 }

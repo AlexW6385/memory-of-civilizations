@@ -47,6 +47,21 @@ export const dam = {
   ],
   walks: [Object.assign([[20, -207], [20, -230]], { y0: GROUND })],
 };
+/**
+ * The lighters (praams) moored along the canals' quays and at the Damrak (docs §5.10): [x, z, rot, len, load],
+ * clear of the bridges; each has its boatman on the after deck (town.js).
+ */
+export const BOATS = (() => {
+  let s = 1613; const r = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296), out = [];
+  const loads = ['casks', 'bales', 'peat', 'casks', 'empty'];
+  for (const R of RINGS) for (const sd of [-1, 1]) for (let a = 0.12 + r() * 0.3; a < Math.PI - 0.1; a += 0.35 + r() * 0.5) {
+    const L = 9.5 + r() * 3, B = L * 0.27, rr = R + sd * (CANAL_W / 2 + QUAY - 0.5 - B / 2), x = C[0] + Math.cos(a) * rr, z = C[1] + Math.sin(a) * rr;
+    if (Math.hypot(x, z) > RADIUS - 78 || z < C[1] + 26 || BRIDGE_ANGLES.some((b) => Math.abs(b - a) * R < L / 2 + 6) || r() < 0.45) continue;
+    out.push([x, z, Math.atan2(-Math.sin(a), Math.cos(a)) + (r() < 0.5 ? Math.PI : 0), L, loads[Math.floor(r() * loads.length)]]);
+  }
+  out.push([DAMRAK[0] + 2.4, -291, 0, 10.5, 'casks'], [DAMRAK[2] - 2.4, -289, Math.PI, 11, 'bales']);
+  return out;
+})();
 // the canals' water and their bridges (radial streets crossing each ring)
 const inCanal = (x, z) => Math.hypot(x, z) < RADIUS - 60 && z > C[1] + 20 && RINGS.some((R) => Math.abs(Math.hypot(x - C[0], z - C[1]) - R) < CANAL_W / 2 + QUAY + 0.15);
 export const canals = {
@@ -62,6 +77,7 @@ export const canals = {
       const x = C[0] + Math.cos(a) * R, z = C[1] + Math.sin(a) * R;
       return Math.hypot(x, z) < RADIUS - 75 ? { t: 'canal_bridge', c: [x, z], dir: [Math.cos(a), Math.sin(a)], L: CANAL_W + 2 * QUAY + 8, w: 6.5, y: GROUND, water: WATER, bed: WATER - 1.8 } : null;
     })).filter(Boolean),
+    ...BOATS.map(([x, z, rot, len, load], k) => ({ t: 'praam', at: [x, z], rot, len, load, seed: 40 + k, y: WATER })),
     // the quay walls along both edges of every canal and along the IJ
     ...quays(),
   ],
