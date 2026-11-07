@@ -45,7 +45,7 @@ export const ARRIVALS = {
   'conques':          [-47, null, 12, -1.29, 0.28],      // Sainte-Foy's west front and the Last Judgement tympanum, from the abbey terrace (the lane above was shut in by houses and bushes)
   'paris':            [-250, 1.1, -10, -1.5708, 0.25],   // the Sainte-Chapelle's rose and spire from the palace court
   'granada':          [19.5, 30.1, 3, 0, 0.25],          // the Court of the Myrtles to the Comares Tower (by the south arcade, clear of the pool's end)
-  'florence':         [-142.6, 0, -21.9, -1.309, 0.216], // the Baptistery, the cathedral front and the campanile
+  'florence':         [-152, 0, -108, -1.68, 0.2],       // from the square's north-west corner: Brunelleschi's dome over the nave, the front, the campanile and the Baptistery (from the south-west the front and the campanile hid the dome)
   'venice':           [-60, 1.3, -5, -1.5708, 0.2],      // San Marco across the piazza
   'amsterdam':        [20, 1.1, -210, 1.5708, 0.2],      // the Town Hall on the Dam
   'versailles':       [-60, 6.1, 0, -1.5708, 0.15],      // the garden front over the water parterre
