@@ -11,6 +11,7 @@ import { box, frustum, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { rectRoof } from '../ming/index.js';
 import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
 import '../qing/index.js';
+import '../chinese/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -847,12 +848,14 @@ function thangka(bag, el) {
   };
   const ell = (cu, cv, ru, rv) => { const sh = new Shape(); sh.absellipse(cu, cv, ru, rv, 0, Math.PI * 2, false); return sh; };
   const poly = (pts) => { const sh = new Shape(); sh.moveTo(...pts[0]); for (const q of pts.slice(1)) sh.lineTo(...q); sh.closePath(); return sh; };
-  Q('cloth_indigo', -hw - 0.24, -0.42, hw + 0.24, h + 0.62, 0.03);                         // the mount
-  Q('cloth_red', -hw * 0.62, -0.38, hw * 0.62, -0.02, 0.036);                              // the "door"
-  Q('cloth_ochre', -hw * 0.5, -0.3, hw * 0.5, -0.1, 0.04);
-  for (const [m, e] of [['cloth_red', 0.07], ['cloth_ochre', 0.035]]) {                   // the rainbow borders
-    Q(m, -hw - e, -e, hw + e, 0, 0.037 + e * 0.02); Q(m, -hw - e, h, hw + e, h + e, 0.037 + e * 0.02);
-    Q(m, -hw - e, 0, -hw, h, 0.037 + e * 0.02); Q(m, hw, 0, hw + e, h, 0.037 + e * 0.02);
+  if (!el.mural) {
+    Q('cloth_indigo', -hw - 0.24, -0.42, hw + 0.24, h + 0.62, 0.03);                         // the mount
+    Q('cloth_red', -hw * 0.62, -0.38, hw * 0.62, -0.02, 0.036);                              // the "door"
+    Q('cloth_ochre', -hw * 0.5, -0.3, hw * 0.5, -0.1, 0.04);
+    for (const [m, e] of [['cloth_red', 0.07], ['cloth_ochre', 0.035]]) {                   // the rainbow borders
+      Q(m, -hw - e, -e, hw + e, 0, 0.037 + e * 0.02); Q(m, -hw - e, h, hw + e, h + e, 0.037 + e * 0.02);
+      Q(m, -hw - e, 0, -hw, h, 0.037 + e * 0.02); Q(m, hw, 0, hw + e, h, 0.037 + e * 0.02);
+    }
   }
   Q('paint_blue', -hw, h * 0.32, hw, h, 0.04); Q('cloth_green', -hw, 0, hw, h * 0.32, 0.04);   // sky and hills
   const kind = el.kind ?? 0, robe = ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_green'][kind % 4], fh = Math.min(w * 0.8, h * 0.62), cv = h * 0.2;
@@ -862,6 +865,7 @@ function thangka(bag, el) {
   flat('paint_ochre', ell(0, cv + fh * 0.86, fh * 0.1, fh * 0.12), 0.12);                // the gilt face
   for (let k = 0; k < 7; k++) { const u = -fh * 0.5 + fh * (k + 0.5) / 7; flat('cloth_white', poly([[u - fh * 0.08, cv + fh * 0.04], [u + fh * 0.08, cv + fh * 0.04], [u, cv - fh * 0.12]]), 0.1); }
   for (const sg of [-1, 1]) flat(kind % 2 ? 'cloth_red' : 'cloth_white', ell(sg * hw * 0.68, h * 0.84, hw * 0.16, hw * 0.16), 0.06);   // two small figures in the sky
+  if (el.mural) return;
   // the veil rolled at the top, its ribbons; the stick and the roller
   const t0 = P(-hw - 0.2, h + 0.5, 0.17), t1 = P(hw + 0.2, h + 0.5, 0.17);
   bag.add('cloth_ochre', rod(t0, t1, 0.07, 8));
@@ -899,6 +903,8 @@ function potalaHall(el, { bag, col }) {
   for (const z of zs) { bag.add('lacquer_red', box(x0, yb, z - 0.22, x1, yb + 0.42, z + 0.22)); bag.add('paint_dancheong', box(x0, yb + 0.1, z - 0.235, x1, yb + 0.3, z + 0.235)); }
   for (let x = x0 + 0.45; x < x1 - 0.2; x += 0.9) bag.add('paint_caihua', box(x - 0.07, yb + 0.42, z0, x + 0.07, yb + 0.58, z1));
   bag.add('ceiling_coffer', box(x0, yb + 0.58, z0, x1, yc - 0.02, z1));
+  // the north and south walls painted from the dado to the beams (the thangkas hang over the paintings)
+  if (el.murals !== false) { mural(bag, { a: [x0, z0], b: [x1, z0], y: y + 0.03, h: yb - y - 0.05, seed: 2 }); mural(bag, { a: [x1, z1], b: [x0, z1], y: y + 0.03, h: yb - y - 0.05, seed: 5 }); }
   // thangkas along the walls, one in each bay (not at the passage or the stair)
   const th = Math.min(2.4, yb - y - 1.9), tw = th * 0.66, skip = el.keep || [];
   const walls = [
@@ -942,8 +948,156 @@ function maniWheel(el, { bag }) {
   bag.add('iron', rod([x + Math.cos(a) * 0.045, y + 0.12, z + Math.sin(a) * 0.045], [wx, y + 0.1, wz], 0.003, 3));
   bag.add('bronze', lathe([[0.001, -0.015], [0.015, 0], [0.001, 0.015]], 6, null, wx, y + 0.1, wz));
 }
+/**
+ * mural: a wall painted as the chapels' walls are (docs/settlements/lhasa.md §13) { a, b ([x, z], the
+ * wall's run, the room on the left going from a to b), y, h, n (scenes) }: a red band at the foot, a
+ * band of scroll pattern at the top, between them the scenes side by side — each a deity on a lotus in
+ * a ring of light among green hills under a blue sky, small figures in the sky (the thangka's
+ * composition painted straight on the wall).
+ */
+function mural(bag, el) {
+  const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], n = [-u[1], u[0]];
+  const y = el.y, h = el.h;
+  const P = (s, v, d) => [ax + u[0] * s + n[0] * d, y + v, az + u[1] * s + n[1] * d];
+  const Q = (mat, s0, v0, s1, v1, d) => face(bag, mat, n, P(s0, v0, d), P(s1, v0, d), P(s1, v1, d), P(s0, v1, d));
+  Q('limewash_red', 0, 0, L, 0.9, 0.006); Q('cloth_ochre', 0, 0.9, L, 0.98, 0.008);
+  Q('cloth_red', 0, h - 0.3, L, h, 0.006); Q('cloth_ochre', 0, h - 0.36, L, h - 0.3, 0.008);
+  for (let i = 0; i < Math.round(L / 0.35); i++) Q(i % 2 ? 'cloth_green' : 'paint_blue', i * 0.35 + 0.05, h - 0.27, i * 0.35 + 0.3, h - 0.03, 0.01);
+  // the scenes in rows, each about 1.1 m wide: a deity in its ring of light, landscape behind, small figures above
+  const span = h - 0.36 - 0.98, rows = Math.max(1, Math.round(span / 1.35)), ph = span / rows, kk = el.n ?? Math.max(1, Math.round(L / 1.1)), cw = L / kk;
+  for (let r = 0; r < rows; r++) for (let i = 0; i < kk; i++) thangka(bag, { at: P(cw * (i + 0.5), 0, 0).filter((_, j) => j !== 1), u, n, y: y + 0.98 + r * ph, w: cw - 0.03, h: ph - 0.03, kind: (el.seed ?? 0) + i * 3 + r * 7, mural: true });
+}
+/**
+ * lhakhang: a chapel on the pilgrims' circuit with its great prayer wheel (a mani lhakhang) { rect, y,
+ * door ('w' | 'e' | 'n' | 's') }: battered whitewashed walls under a pembe band and a white coping, a
+ * Tibetan doorway; inside, a floor of polished earth, the great wheel turning on its axle from the
+ * floor to the ceiling beam — a drum of red lacquer banded in gilt, rows of gilt syllables round it —
+ * the walls painted with scenes, at the back the stepped altar with the gilt images and the rows of
+ * butter lamps burning before them; a pillar each side of the wheel, the beams and the board ceiling.
+ */
+function lhakhang(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, H = el.h ?? 5.2, t = 0.9, b = H * 0.07, door = el.door ?? 'w';
+  const yi = y + H - 0.55;           // the ceiling
+  // the walls: each battered outside, plumb inside; the door wall in two pieces round the opening, a lintel over it
+  const dw = 1.6, dh = 2.5, cxm = (x0 + x1) / 2, czm = (z0 + z1) / 2;
+  const walls = { w: [x0, z0, x0 + t, z1, b, 0, b, b], e: [x1 - t, z0, x1, z1, 0, b, b, b], n: [x0, z0, x1, z0 + t, b, b, b, 0], s: [x0, z1 - t, x1, z1, b, b, 0, b] };
+  for (const [side, [a0, c0, a1, c1, ixn, ixp, izn, izp]] of Object.entries(walls)) {
+    if (side !== door) { bag.add('limewash_white', frustum([a0, c0, a1, c1], y - 0.3, y + H, ixn, ixp, izn, izp)); continue; }
+    const alongZ = side === 'w' || side === 'e';
+    const m = alongZ ? czm : cxm, lo = alongZ ? c0 : a0, hi = alongZ ? c1 : a1;
+    const piece = (p0, p1, yA, yB, top) => {
+      const r = alongZ ? [a0, p0, a1, p1] : [p0, c0, p1, c1], f = (yB - yA) / (H + 0.3);
+      bag.add('limewash_white', frustum(r, yA, yB, ixn * f, ixp * f, izn * f, izp * f));
+    };
+    piece(lo, m - dw / 2, y - 0.3, y + H); piece(m + dw / 2, hi, y - 0.3, y + H);
+    // the wall over the door: its foot set back by the batter already climbed, its face leaning on with the rest
+    const f0 = (dh + 0.3) / (H + 0.3), f1 = (H - dh) / (H + 0.3);
+    const lr = alongZ ? [a0 + ixn * f0, m - dw / 2 - 0.01, a1 - ixp * f0, m + dw / 2 + 0.01] : [m - dw / 2 - 0.01, c0 + izn * f0, m + dw / 2 + 0.01, c1 - izp * f0];
+    bag.add('limewash_white', frustum(lr, y + dh, y + H, alongZ ? ixn * f1 : 0, alongZ ? ixp * f1 : 0, alongZ ? 0 : izn * f1, alongZ ? 0 : izp * f1));
+    const N = side, at = side === 'w' ? [x0, czm] : side === 'e' ? [x1, czm] : side === 'n' ? [cxm, z0] : [cxm, z1];
+    doorway({ at, n: N, y, w: dw, h: dh, k: b / H }, { bag });
+  }
+  for (const [a, c, d, e] of [[x0, z0, x1, z0 + t], [x0, z1 - t, x1, z1], [x0, z0, x0 + t, z1], [x1 - t, z0, x1, z1]]) {
+    const alongZ = d - a < e - c, isDoor = (door === 'w' && a === x0 && alongZ) || (door === 'e' && d === x1 && alongZ) || (door === 'n' && c === z0 && !alongZ) || (door === 's' && e === z1 && !alongZ);
+    if (!isDoor) { col.rect([a, c, d, e], y, y + H); continue; }
+    if (alongZ) { col.rect([a, c, d, czm - dw / 2], y, y + H); col.rect([a, czm + dw / 2, d, e], y, y + H); }
+    else { col.rect([a, c, cxm - dw / 2, e], y, y + H); col.rect([cxm + dw / 2, c, d, e], y, y + H); }
+  }
+  // the pembe band, the white coping, the roof
+  bag.add('pembe', frustum([x0 + b * 0.84, z0 + b * 0.84, x1 - b * 0.84, z1 - b * 0.84], y + H - 0.62, y + H - 0.12, 0.05 * b, 0.05 * b, 0.05 * b, 0.05 * b).translate(0, 0, 0));
+  bag.add('limewash_white', box(x0 + b - 0.12, y + H - 0.12, z0 + b - 0.12, x1 - b + 0.12, y + H + 0.1, z1 - b + 0.12));
+  bag.add('mud_plaster', box(x0 + t, yi + 0.3, z0 + t, x1 - t, y + H - 0.12, z1 - t));
+  // inside: the floor, the ceiling, two pillars and the beam over them
+  bag.add('lacquer_chestnut', box(x0 + t, y, z0 + t, x1 - t, y + 0.03, z1 - t));
+  col.floor([x0 + t, z0 + t, x1 - t, z1 - t], y + 0.03);
+  bag.add('ceiling_coffer', box(x0 + t, yi, z0 + t, x1 - t, yi + 0.3, z1 - t));
+  const alongX = door === 'w' || door === 'e', fx = door === 'w' ? -1 : door === 'e' ? 1 : 0, fz = door === 'n' ? -1 : door === 's' ? 1 : 0;
+  const ix0 = x0 + t, iz0 = z0 + t, ix1 = x1 - t, iz1 = z1 - t, icx = (ix0 + ix1) / 2, icz = (iz0 + iz1) / 2;
+  const span = alongX ? iz1 - iz0 : ix1 - ix0;
+  for (const sgn of [-1, 1]) {
+    const px = alongX ? icx : icx + sgn * span * 0.32, pz = alongX ? icz + sgn * span * 0.32 : icz;
+    bag.add('lacquer_red', lathe([[0.16, 0], [0.15, yi - y - 0.75], [0.17, yi - y - 0.7]], 10, null, px, y + 0.03, pz));
+    bag.add('paint_dancheong', box(px - 0.24, yi - 0.68, pz - 0.24, px + 0.24, yi - 0.45, pz + 0.24));
+    bag.add('lacquer_red', alongX ? box(px - 0.6, yi - 0.45, pz - 0.18, px + 0.6, yi - 0.3, pz + 0.18) : box(px - 0.18, yi - 0.45, pz - 0.6, px + 0.18, yi - 0.3, pz + 0.6));
+    col.circle(px, pz, 0.18, y, yi);
+  }
+  bag.add('lacquer_red', alongX ? box(icx - 0.17, yi - 0.3, iz0, icx + 0.17, yi, iz1) : box(ix0, yi - 0.3, icz - 0.17, ix1, yi, icz + 0.17));
+  // the great wheel, a little toward the door from the middle, on its axle
+  const wx = icx + fx * 0.6, wz = icz + fz * 0.6, R = Math.min(1.15, span * 0.2), wy0 = y + 0.5, wy1 = yi - 0.9;
+  bag.add('iron', lathe([[0.06, 0], [0.06, yi - y], [0.001, yi - y]], 8, null, wx, y, wz));
+  bag.add('wood_painted', lathe([[0.001, 0], [R + 0.25, 0], [R + 0.25, 0.4], [0.001, 0.4]], 20, null, wx, y + 0.03, wz));
+  bag.add('lacquer_red', lathe([[0.001, wy0], [R, wy0], [R, wy1], [0.001, wy1]], 24, null, wx, 0, wz));
+  for (const v of [wy0 + 0.05, wy0 + 0.45, wy1 - 0.45, wy1 - 0.05]) bag.add('gilt_bronze', lathe([[R + 0.012, v - 0.06], [R + 0.012, v + 0.06]], 24, null, wx, 0, wz));
+  for (let row = 0; row < 3; row++) for (let i = 0; i < 18; i++) {
+    const a = (i + row * 0.5) / 18 * Math.PI * 2, v = wy0 + 0.75 + row * (wy1 - wy0 - 1.5) / 2.2, cx2 = wx + Math.cos(a) * (R + 0.008), cz2 = wz + Math.sin(a) * (R + 0.008);
+    // a syllable of the mantra in raised gilt: the headline it hangs from, two or three strokes below, a vowel sign above some
+    const parts = [box(-0.008, 0.06, -0.075, 0.012, 0.085, 0.075), box(-0.008, -0.1, -0.06, 0.012, 0.06, -0.035), box(-0.008, -0.07, 0.03, 0.012, 0.06, 0.055)];
+    if ((i + row) % 2) parts.push(box(-0.008, -0.03, -0.035, 0.012, -0.005, 0.03)); else parts.push(box(-0.008, -0.11, -0.02, 0.012, -0.085, 0.06));
+    if ((i + row) % 3 === 0) { const c = box(-0.008, 0.085, -0.01, 0.012, 0.13, 0.012); c.rotateX(0.5); parts.push(c); }
+    for (const g of parts) { g.rotateY(-a); g.translate(cx2, v, cz2); bag.add('gilt_bronze', g); }
+  }
+  bag.add('lacquer_red', lathe([[R + 0.05, 0], [R + 0.05, 0.12], [0.001, 0.12]], 24, null, wx, wy1, wz));
+  col.circle(wx, wz, R + 0.3, y, yi);
+  // the painted walls (all but the door's and the altar's)
+  const yM = y + 0.03, hM = yi - y - 0.35;
+  const W4 = { n: [[ix0, iz0], [ix1, iz0]], e: [[ix1, iz0], [ix1, iz1]], s: [[ix1, iz1], [ix0, iz1]], w: [[ix0, iz1], [ix0, iz0]] };
+  const back = { w: 'e', e: 'w', n: 's', s: 'n' }[door];
+  let seed = 0;
+  for (const [side, [a, c]] of Object.entries(W4)) {
+    if (side === door) continue;
+    mural(bag, { a, b: c, y: yM, h: side === back ? 2.5 : hM, seed: seed += 3 });
+  }
+  // the altar against the back wall: three steps of painted wood, gilt images on the top, butter lamps in rows on the lower steps
+  const bw = span - 0.8, bd = 1.5, B0 = { e: [ix1, icz, -1, 0], w: [ix0, icz, 1, 0], n: [icx, iz0, 0, 1], s: [icx, iz1, 0, -1] }[back];
+  const [ox, oz, ux2, uz2] = B0, perp = [-uz2, ux2];
+  const BX = (d0, d1, yy0, yy1, m, w2 = bw) => { const p = [ox + ux2 * d0 + perp[0] * w2 / 2, oz + uz2 * d0 + perp[1] * w2 / 2], q = [ox + ux2 * d1 - perp[0] * w2 / 2, oz + uz2 * d1 - perp[1] * w2 / 2]; bag.add(m, box(Math.min(p[0], q[0]), yy0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), yy1, Math.max(p[1], q[1]))); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
+  col.rect(BX(0, bd, y, y + 0.7, 'wood_painted'), y, y + 1.5);
+  BX(0, bd * 0.66, y + 0.7, y + 1.15, 'wood_painted'); BX(0, bd * 0.33, y + 1.15, y + 1.6, 'wood_painted');
+  BX(bd - 0.02, bd + 0.005, y + 0.08, y + 0.62, 'cloth_ochre', bw - 0.3);                       // the cloth hung over the front
+  const B = STYLES.chinese.objects.buddha;
+  for (const k of [-1, 0, 1]) { const c = [ox + ux2 * 0.25 + perp[0] * k * bw * 0.3, oz + uz2 * 0.25 + perp[1] * k * bw * 0.3]; B({ at: c, y: y + 1.6, h: k ? 1.15 : 1.45, dir: [ux2, uz2], robe: 'gilt_bronze', gilt: 'gilt_bronze' }, { bag, col: { circle() {}, rect() {}, segment() {}, floor() {} } }); }
+  for (const [d, yy, n] of [[bd * 0.5, y + 1.15, 9], [bd * 0.83, y + 0.7, 13]]) for (let i = 0; i < n; i++) {
+    const c = [ox + ux2 * d + perp[0] * (i - (n - 1) / 2) * (bw - 0.4) / (n - 1), oz + uz2 * d + perp[1] * (i - (n - 1) / 2) * (bw - 0.4) / (n - 1)];
+    bag.add('gilt_bronze', lathe([[0.03, 0], [0.02, 0.07], [0.055, 0.12], [0.05, 0.15], [0.001, 0.14]], 8, null, c[0], yy, c[1]));
+    bag.add('flame', lathe([[0.001, 0], [0.012, 0.015], [0.001, 0.05]], 5, null, c[0], yy + 0.14, c[1]));
+  }
+  if (lights) lights.push({ at: [ox + ux2 * bd, y + 1.3, oz + uz2 * bd], color: '#ffb46b', intensity: 2.2, distance: 6 });
+}
+/**
+ * mani_gallery: a row of prayer wheels along the circuit { a, b ([x, z]), y: (x, z) => ground, side (+1:
+ * the wheels face the left of a → b) }: in steps of about 6 m, each on its own level, a whitewashed
+ * back wall under a pembe band and a narrow roof of slates on beams; on a ledge before it the wheels,
+ * a hand's breadth apart, each a red drum banded in gilt on its spindle between the ledge and a rail.
+ */
+function maniGallery(el, { bag, col }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], sd = el.side ?? 1, n = [-u[1] * sd, u[0] * sd];
+  const gy = typeof el.y === 'function' ? el.y : () => el.y ?? 0, step = 6, ns = Math.max(1, Math.round(L / step)), sl = L / ns;
+  // one wheel, built once (instanced): the drum, its bands, the spindle
+  const wheel = (cx, y, cz) => {
+    bag.add('lacquer_red', lathe([[0.001, 0], [0.13, 0], [0.13, 0.42], [0.001, 0.42]], 10, null, cx, y, cz));
+    bag.add('gilt_bronze', lathe([[0.134, 0.03], [0.134, 0.08]], 10, null, cx, y, cz));
+    bag.add('gilt_bronze', lathe([[0.134, 0.34], [0.134, 0.39]], 10, null, cx, y, cz));
+    bag.add('iron', lathe([[0.012, -0.06], [0.012, 0.52], [0.001, 0.52]], 5, null, cx, y, cz));
+  };
+  for (let i = 0; i < ns; i++) {
+    const s0 = i * sl, s1 = s0 + sl, sm = (s0 + s1) / 2, mx = ax + u[0] * sm, mz = az + u[1] * sm, y = gy(mx, mz);
+    const P = (s, d) => [ax + u[0] * s + n[0] * d, az + u[1] * s + n[1] * d];
+    const R = (sA, sB, dA, dB, y0, y1, m) => { const p = P(sA, dA), q = P(sB, dB); const r = [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); return r; };
+    // the back wall (behind the wheels, on the far side from the walker), the ledge, the rail, the roof
+    const wr = R(s0, s1 + 0.01, -0.95, -0.55, y - 0.6, y + 2.3, 'limewash_white'); col.rect(wr, y, y + 2.3);
+    R(s0, s1 + 0.01, -0.97, -0.53, y + 2.3, y + 2.55, 'pembe');
+    R(s0, s1 + 0.01, -0.55, -0.05, y - 0.6, y + 0.55, 'limewash_white');
+    R(s0, s1 + 0.01, -0.5, -0.1, y + 1.18, y + 1.26, 'wood_painted');
+    col.rect(R(s0, s1 + 0.01, -0.55, -0.05, y + 0.55, y + 0.56, 'wood_painted'), y, y + 1.2);
+    for (const s of [s0 + 0.05, s1 - 0.05]) R(s - 0.07, s + 0.07, -0.18, -0.04, y + 0.55, y + 2.4, 'lacquer_red');
+    R(s0 - 0.02, s1 + 0.03, -1.05, 0.25, y + 2.55, y + 2.65, 'wood_painted');
+    R(s0 - 0.04, s1 + 0.05, -1.08, 0.3, y + 2.65, y + 2.72, 'slate');
+    const nw = Math.floor((sl - 0.4) / 0.36);
+    for (let k = 0; k < nw; k++) { const p = P(s0 + 0.2 + (k + 0.5) * (sl - 0.4) / nw, -0.3); wheel(p[0], y + 0.66, p[1]); }
+  }
+}
 registerStyle('tibetan', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dzong, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, parkhang, mani_wheel: maniWheel },
+  elements: { ...STYLES.qing.elements, dzong, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery },
   objects: {},
 });

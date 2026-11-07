@@ -2,7 +2,7 @@
 // their courtyards; the printing house on Shöl's south-east corner; and the people (§12): monks in
 // their red robes in the Deyang Shar, below the palace and on the frontage roof; pilgrims walking the
 // circuit round the palace clockwise, turning their hand prayer wheels; the printers at their benches.
-import { RADIUS, POND, PRINTERY, BENCHES, lots, pondDist, inLot, inRect, SHOL } from './layout.js';
+import { RADIUS, POND, PRINTERY, BENCHES, CHAPEL, lots, pondDist, inLot, inRect, SHOL } from './layout.js';
 import { ground } from './ground.js';
 const base = (id, elements, style = 'tibetan') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-4, 60], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -27,7 +27,7 @@ function people() {
   };
   // the circuit round the palace and Shöl (sunwise: west along the south, north up the west side, east behind
   // the hill, south down the east side), the pilgrims in twos and threes along it
-  const free = (x, z) => !inLot(x, z, 1.5) && !inRect(SHOL, x, z, 3) && pondDist(x, z) > 2 && Math.hypot(x, z) < RADIUS - 20;
+  const free = (x, z) => !inLot(x, z, 1.5) && !inRect(SHOL, x, z, 3) && !inRect(CHAPEL, x, z, 1.2) && pondDist(x, z) > 2 && Math.hypot(x, z) < RADIUS - 20;
   const legs = [
     { a: [150, 222], b: [-190, 222] }, { a: [-213, 200], b: [-213, -40] },
     { a: [-150, -215], b: [150, -215] }, { a: [213, -40], b: [213, 200] },
@@ -71,5 +71,13 @@ export async function town() {
   plans.push(base('lhasa-parkhang', [{ t: 'parkhang', rect: PRINTERY, y: 0, seed: 1690, benches: BENCHES }]));
   // the pond behind the palace, where the earth for the Potala's mortar was dug (later the Lukhang's lake)
   plans.push(base('lhasa-pond', [{ t: 'water_cells', rect: [POND.c[0] - POND.rx - 2, POND.c[1] - POND.rz - 2, POND.c[0] + POND.rx + 2, POND.c[1] + POND.rz + 2], y: POND.level, cell: 1.5, inside: (x, z) => pondDist(x, z) < 0.6 }]));
+  // on the pilgrims' circuit: the rows of prayer wheels along its north leg behind the hill (on the
+  // walkers' right as they go sunwise), and the chapel of the great prayer wheel on its west leg (§13)
+  const gy = (x, z) => ground.height(x, z);
+  plans.push(base('lhasa-circuit', [
+    { t: 'mani_gallery', a: [-150, -211.2], b: [-24, -211.2], y: gy, side: -1 },
+    { t: 'mani_gallery', a: [24, -211.2], b: [150, -211.2], y: gy, side: -1 },
+    { t: 'lhakhang', rect: CHAPEL, y: gy((CHAPEL[0] + CHAPEL[2]) / 2, (CHAPEL[1] + CHAPEL[3]) / 2), door: 'w' },
+  ]));
   return [...plans, ...people()];
 }
