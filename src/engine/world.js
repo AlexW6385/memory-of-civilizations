@@ -660,7 +660,8 @@ export class World {
     }
     const here = this.locate(camera.position.x, camera.position.y, camera.position.z);
     this.indoorsIn = here.room && here.room.kind !== 'open' && here.distance === 0 ? here.building : null;
-    if (here.building?.gi) this.r.gi.use(here.building.gi); else this.r.gi.clear?.();
+    // the baked light of the landmark's rooms the viewer stands in (src/engine/gi.js)
+    if (here.building?.gi) this.r.gi.use(here.building.gi, camera.position); else this.r.gi.clear?.();
     return here;
   }
 }

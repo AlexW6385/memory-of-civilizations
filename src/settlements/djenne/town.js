@@ -1,7 +1,9 @@
 // The town round the mosque (docs/settlements/djenne.md §6, §11): the market square on market day,
 // the houses packed along the streets.
 
-import { RADIUS, MARKET, LEVEL, houses, shore } from './layout.js';
+import { RADIUS, MARKET, LEVEL, ISLAND, houses, shore } from './layout.js';
+import { ground } from './ground.js';
+import { boatFloat } from '../../objects/index.js';
 
 const base = (id, elements) => ({ id, style: 'sahel', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [70, 0], facing: 'w' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -78,10 +80,59 @@ function market() {
   return { E, P };
 }
 
+/**
+ * The landing on the south shore, toward the Bani (docs/settlements/djenne.md §12): pirogues — long,
+ * narrow plank canoes — moored along the bank and being poled out, two with a mat shelter amidships;
+ * more drawn up on the bank; fishermen's nets folded over poles to dry; dried fish in baskets, jars
+ * and sacks of grain waiting to be loaded; boatmen, porters, women come down for water and fish.
+ */
+function landing() {
+  const rand = rng(911), E = [], P = [], W = LEVEL.water + boatFloat('canoe');
+  const pick = (a) => a[Math.floor(rand() * a.length)];
+  const R = (a) => ISLAND + 14 * Math.sin(a * 3 + 1) + 8 * Math.sin(a * 7 + 2);
+  const at = (a, s) => [Math.cos(a) * (R(a) + s), Math.sin(a) * (R(a) + s)];
+  const W3 = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red', 'cloth_green'];
+  const fig = (p, y, rot, o) => P.push({ t: 'figure', at: p, y, rot, seed: Math.floor(rand() * 1e9), skin: 'skin_dark', cloth: pick(W3), cloth2: pick(W3), hatMat: pick(W3), ...o });
+  const A0 = Math.PI / 2 - 0.16, A1 = Math.PI / 2 + 0.16;
+  // moored along the bank, parallel to it
+  for (let a = A0; a < A1; a += 0.022 + rand() * 0.01) {
+    const s = 10.5 + rand() * 1.5, p = at(a, s), mat = rand() < 0.2;
+    E.push({ t: 'boat', kind: mat ? 'sampan' : 'canoe', len: mat ? 8 : 8 + rand() * 4, at: p, y: W, rot: -a + (rand() - 0.5) * 0.12, seed: Math.floor(rand() * 1e9) });
+    if (rand() < 0.4) fig([p[0] + Math.cos(a) * 0.1, p[1] + Math.sin(a) * 0.1], W - 0.1, -a + Math.PI / 2, { dress: 'tunic', legs: 'bare', feet: 'bare', hat: pick(['cap', 'none']), pose: pick(['squat', 'stand']) });
+  }
+  // two poled out into the channel, a boatman standing at the stern of each
+  for (const [a, s] of [[Math.PI / 2 - 0.05, 20], [Math.PI / 2 + 0.09, 24]]) {
+    const p = at(a, s), rot = -a + 0.25;
+    E.push({ t: 'boat', kind: 'canoe', len: 10, at: p, y: W, rot, seed: Math.floor(s * 97) });
+    fig([p[0] + Math.sin(rot) * 3.6, p[1] + Math.cos(rot) * 3.6], W - 0.1, rot + 0.5, { dress: 'tunic', legs: 'bare', feet: 'bare', hat: 'cap', pose: 'punt', len: 4.2, poleMat: 'timber' });
+    fig([p[0] - Math.sin(rot) * 1.5, p[1] - Math.cos(rot) * 1.5], W - 0.1, rot, { dress: 'wrap', feet: 'bare', hat: 'turban', pose: 'squat' });
+  }
+  // drawn up on the bank above the water's edge
+  for (let a = A0 + 0.03; a < A1; a += 0.05 + rand() * 0.03) {
+    const s = 2.2 + rand() * 0.6, p = at(a, s);
+    E.push({ t: 'boat', kind: 'canoe', len: 7 + rand() * 2, at: p, y: ground.height(p[0], p[1]) + 0.08, rot: -a + (rand() - 0.5) * 0.06, seed: Math.floor(rand() * 1e9) });
+  }
+  // nets drying over poles on the bank's top, baskets of dried fish, jars, sacks of grain to load
+  for (let a = A0 + 0.01; a < A1; a += 0.04 + rand() * 0.02) {
+    const s = -3 - rand() * 2, p = at(a, s), k = rand();
+    if (k < 0.35) E.push({ t: 'net_rack', at: p, rot: -a + Math.PI / 2, seed: Math.floor(rand() * 1e6) });
+    else if (k < 0.6) { P.push({ t: 'basket', at: p, y: 0, seed: Math.floor(rand() * 1e6) }); P.push({ t: 'basket', at: [p[0] + 0.7, p[1] - 0.2], y: 0, seed: Math.floor(rand() * 1e6) }); }
+    else if (k < 0.8) P.push({ t: 'sacks', at: p, y: 0, rot: rand() * 6, seed: Math.floor(rand() * 1e6) });
+    else P.push({ t: 'pot', at: p, y: 0, seed: Math.floor(rand() * 1e6) });
+  }
+  // people: porters carrying loads up, women come for fish and water, boatmen talking
+  for (let k = 0; k < 18; k++) {
+    const a = A0 + rand() * (A1 - A0), s = -1 - rand() * 6, p = at(a, s), rot = rand() * 6.28;
+    if (rand() < 0.5) fig(p, 0, rot, { dress: 'wrap', feet: 'bare', hat: 'turban', carry: rand() < 0.6 ? pick(['pot', 'basket']) : 'none', pose: 'stand' });
+    else fig(p, 0, rot, { dress: rand() < 0.5 ? 'robe' : 'tunic', legs: 'bare', feet: 'bare', hat: pick(['cap', 'none', 'turban']), pose: rand() < 0.4 ? 'talk' : 'stand' });
+  }
+  return { E, P };
+}
+
 export async function town() {
-  const { E, P } = market();
+  const { E, P } = market(), lnd = landing();
   const water = { t: 'water_cells', rect: [-RADIUS + 20, -RADIUS + 20, RADIUS - 20, RADIUS - 20], y: LEVEL.water, cell: 2, inside: (x, z) => { const s = shore(x, z); return s > 7 && s < 39; } };
-  const plans = [base('djenne-market', [...E, water]), { ...base('djenne-market-people', P), style: 'life' }];
+  const plans = [base('djenne-market', [...E, water]), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }];
   const all = houses();
   for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: 'sahel_house', ...h }))));
   return plans;
