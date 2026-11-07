@@ -1,7 +1,7 @@
 // The Western Group about 1050 (docs/settlements/khajuraho.md §2–§4): the temples on their
 // terraces, Lakshmana's and Vishvanatha's corner shrines, the tank's water.
 
-import { RADIUS, TEMPLES, TANK, VARAHA } from './layout.js';
+import { RADIUS, TEMPLES, TANK, VARAHA, inTankWater } from './layout.js';
 import { rites, people } from './life.js';
 
 const E = [];
@@ -36,7 +36,7 @@ temples.walks[0].y0 = 0;
 export const tank = {
   id: 'khajuraho-tank', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
-  elements: [{ t: 'water_cells', rect: [TANK.c[0] - TANK.r[0], TANK.c[1] - TANK.r[1], TANK.c[0] + TANK.r[0], TANK.c[1] + TANK.r[1]], y: TANK.level, cell: 1.5, inside: (x, z) => Math.hypot((x - TANK.c[0]) / TANK.r[0], (z - TANK.c[1]) / TANK.r[1]) < 0.985 }],
+  elements: [{ t: 'water_cells', rect: [TANK.c[0] - TANK.r[0] - 6, TANK.c[1] - TANK.r[1] - 6, TANK.c[0] + TANK.r[0] + 6, TANK.c[1] + TANK.r[1] + 6], y: TANK.level, cell: 1, inside: inTankWater }],
 };
 /** The priests, pilgrims, flower sellers, cows and bathers (docs/settlements/khajuraho.md §11). */
 export const life = { id: 'khajuraho-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: people(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'w' }, center: [-20, -20], near: 260 };

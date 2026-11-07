@@ -3,7 +3,7 @@
 // planet coordinates, with normals, what covers the ground, and the sea over it where there is sea.
 // A skirt hangs from the edges so that tiles of different detail meet without cracks.
 
-import { PLANET_RADIUS as R, surface, coverAt } from './relief.js';
+import { PLANET_RADIUS as R, surface, coverAt, seaHeight } from './relief.js';
 
 /** The six faces of the cube: normal n and the in-face axes a, b (a × b = n). */
 export const FACES = [
@@ -95,30 +95,46 @@ export function buildTile(face, level, i, j, n = 32) {
     idx.push(top[k], top[k2], low[k2], top[k], low[k2], low[k]);
   }
   const out = { position, normal, ground, ground2, ground3, index: total > 65535 ? new Uint32Array(idx) : new Uint16Array(idx), minH, maxH };
-  if (minH < 0.4) out.water = buildWater(face, s0, t0, size, Math.max(4, n / 2), (a, b) => G[at(a * 2, b * 2)].h);
+  if (minH < 0.4) out.water = buildWater(face, s0, t0, size, Math.max(4, n / 2), (a, b) => G[at(a * 2, b * 2)]);
   return out;
 }
 
-/** The sea's surface over a tile: m × m cells at the planet's radius, with the depth below each vertex. */
-function buildWater(face, s0, t0, size, m, hAt) {
+/**
+ * The sea's surface over a tile: m × m cells at the sea's level (relief.js, seaHeight: the sphere,
+ * or over the disc of a settlement on the sea the plane of its sea level), with the depth below
+ * each vertex. On a settlement's disc whose water is its own the sea is kept under the ground — its
+ * cells there left out, the vertices it shares with cells beyond sunk below the ground — so that a
+ * valley, a gorge or a cenote below the sea's level stays dry, and the settlement's own river or
+ * moat is not covered by the sea at another level.
+ */
+const SINK = 20;
+function buildWater(face, s0, t0, size, m, gAt) {
   const verts = (m + 1) * (m + 1), total = verts + 4 * m;
   const position = new Float32Array(total * 3), depth = new Float32Array(total);
+  const dry = new Uint8Array(verts);
   let v = 0;
   const put = (a, b, drop) => {
-    const u = faceDir(face, s0 + size * a / m, t0 + size * b / m), r = R - drop;
+    const u = faceDir(face, s0 + size * a / m, t0 + size * b / m), g = gAt(a, b), sh = seaHeight(g, u);
+    const r = R - drop + (sh ?? Math.min(0, g.h) - SINK);
     position[v * 3] = u[0] * r; position[v * 3 + 1] = u[1] * r; position[v * 3 + 2] = u[2] * r;
-    depth[v] = Math.max(0, -hAt(a, b));
+    depth[v] = Math.max(0, (sh ?? 0) - g.h);
+    if (v < verts) dry[v] = sh == null ? 1 : 0;
     return v++;
   };
   for (let b = 0; b <= m; b++) for (let a = 0; a <= m; a++) put(a, b, 0);
   const idx = [], id = (a, b) => b * (m + 1) + a;
-  for (let b = 0; b < m; b++) for (let a = 0; a < m; a++) { const p = id(a, b), q = id(a + 1, b), r = id(a + 1, b + 1), s = id(a, b + 1); idx.push(p, q, r, p, r, s); }
+  for (let b = 0; b < m; b++) for (let a = 0; a < m; a++) {
+    const p = id(a, b), q = id(a + 1, b), r = id(a + 1, b + 1), s = id(a, b + 1);
+    if (dry[p] && dry[q] && dry[r] && dry[s]) continue;
+    idx.push(p, q, r, p, r, s);
+  }
   const ring = [];
   for (let a = 0; a < m; a++) ring.push([a, 0]);
   for (let b = 0; b < m; b++) ring.push([m, b]);
   for (let a = m; a > 0; a--) ring.push([a, m]);
   for (let b = m; b > 0; b--) ring.push([0, b]);
   const top = ring.map(([a, b]) => id(a, b)), low = ring.map(([a, b]) => put(a, b, 1.5));
-  for (let k = 0; k < ring.length; k++) { const k2 = (k + 1) % ring.length; idx.push(top[k], top[k2], low[k2], top[k], low[k2], low[k]); }
+  for (let k = 0; k < ring.length; k++) { const k2 = (k + 1) % ring.length; if (dry[top[k]] && dry[top[k2]]) continue; idx.push(top[k], top[k2], low[k2], top[k], low[k2], low[k]); }
+  if (!idx.length) return null;
   return { position, depth, index: new Uint16Array(idx) };
 }

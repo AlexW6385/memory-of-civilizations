@@ -1,7 +1,7 @@
 // Khajuraho — the ground: lawns and packed earth round the temples, the red-brown plain of
 // Bundelkhand with fields, mango, neem and palms, the tank with its ghats; the hot, hazy sky.
 
-import { RADIUS, TANK, height, inTank, tankD, nearTemple, inLot } from './layout.js';
+import { RADIUS, TANK, height, inTank, inTankWater, tankD, nearTemple, inLot } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.2, grass: 0.35, rock: 0, soil: 0.45, fields: 0, dry: 0.65, warmth: 0.85, red: 0.5, road: 0, snow: 0, forest: 0 };
@@ -10,8 +10,8 @@ function cover(x, z, h) {
   if (Math.hypot(x, z) > 270) { c.fields = 0.7; c.grass = 0.2; return c; }
   return c;
 }
-function water(x, z, y) { return inTank(x, z) && y < TANK.level + 0.3; }
-function waterLevel(x, z) { return inTank(x, z) ? TANK.level : -Infinity; }
+function water(x, z, y) { return inTankWater(x, z) && y < TANK.level + 0.3; }
+function waterLevel(x, z) { return inTankWater(x, z) ? TANK.level : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, tankD(x, z))); }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inTank(x, z) || nearTemple(x, z, 6) || inLot(x, z, 1)) return null;

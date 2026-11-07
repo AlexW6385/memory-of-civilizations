@@ -27,7 +27,7 @@ export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0
 const rc = (x, z) => Math.hypot(x - C[0], z - C[1]);
 /** How far into water: a canal of the rings, or the IJ. */
 export function wet(x, z) {
-  const r = rc(x, z), inDisc = Math.hypot(x, z) < RADIUS - 60;
+  const r = rc(x, z), inDisc = Math.hypot(x, z) < RADIUS - 60 || z < IJ_Z;     // (the IJ runs on to a shore by the disc's edge)
   let d = Math.min(...RINGS.map((R) => Math.abs(r - R) - CANAL_W / 2));
   if (z < C[1] + 20) d = 9;                                  // the rings end at the IJ
   d = Math.min(d, z - IJ_Z);
@@ -41,7 +41,7 @@ export function height(x, z) {
   const h = w > QUAY + 0.05 ? GROUND : w > QUAY - 0.9 ? GROUND + (WATER - 1.8 - GROUND) * smooth(QUAY + 0.05, QUAY - 0.9, w) : WATER - 1.8;
   return h * (1 - smooth(RADIUS - 60, RADIUS - 15, r)) + 0;
 }
-export const inWater = (x, z) => wet(x, z) < QUAY - 0.1;
+export const inWater = (x, z) => wet(x, z) < QUAY - 0.1 && height(x, z) < WATER;
 export const westerkerk = () => { const a = Math.PI * 0.62, R = RINGS[3] + CANAL_W / 2 + 14; return [C[0] + Math.cos(a) * R, C[1] + Math.sin(a) * R]; };
 /** The Westerkerk's nave behind its tower: 22 m wide, 52 long, two transepts (docs §1: 58 × 29 m with the tower). */
 export const westerNave = () => { const [x, z] = westerkerk(); return [x - 11, z + 4.5, x + 11, z + 56.5]; };

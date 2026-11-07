@@ -165,8 +165,8 @@ function crepissage() {
 
 export async function town() {
   const { E, P } = market(), lnd = landing(), cr = crepissage();
-  const water = { t: 'water_cells', rect: [-RADIUS + 20, -RADIUS + 20, RADIUS - 20, RADIUS - 20], y: LEVEL.water, cell: 2, inside: (x, z) => { const s = shore(x, z); return s > 7 && s < 39; } };
-  const plans = [base('djenne-market', [...E, water]), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }, base('djenne-crepissage', cr.E), { ...base('djenne-crepissage-life', cr.P), style: 'life' }];
+  // (the channel's water is the planet's sea: ground.js, sea)
+  const plans = [base('djenne-market', E), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }, base('djenne-crepissage', cr.E), { ...base('djenne-crepissage-life', cr.P), style: 'life' }];
   const all = houses();
   for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: 'sahel_house', ...h }))));
   return plans;

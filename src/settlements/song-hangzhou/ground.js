@@ -36,6 +36,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
+  sea: LEVEL.river,   // the planet's sea is this water, at this level (src/planet/relief.js)
   maxDensity: { chinese_pine: 0.7, elm: 0.25, bamboo: 1.2, maple: 0.3, willow: 0.9 },
   climate: {
     sun: { az: 160, el: 42, color: [1.0, 0.94, 0.86], intensity: 2.9, lat: 30, dec: 0, hour: 10.5 },

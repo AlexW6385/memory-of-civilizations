@@ -21,6 +21,8 @@ export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >=
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const inCanal = (x, z) => Math.hypot(x, z) < ISLAND && CANALS.some((c) => inRect(c, x, z));
 export const inLake = (x, z) => Math.hypot(x, z) > ISLAND && !(x < 0 && z > CAUSEWAY.z0 && z < CAUSEWAY.z1 && !(x > GAP[0] && x < GAP[1]));
+/** The lake's water drawn by the town (town.js): the lake, the channels between the chinampas (from r 300) and the canals' mouths beyond the precinct's water (r > ISLAND − 6), wherever the ground h is below the water. */
+export const inLakeWater = (x, z, h) => h < LEVEL.water && (inLake(x, z) || Math.hypot(x, z) > 300 && !(inCanal(x, z) && Math.hypot(x, z) < ISLAND - 6));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 let HOUSES = null;

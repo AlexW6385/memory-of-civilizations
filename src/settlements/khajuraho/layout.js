@@ -24,6 +24,8 @@ export function height(x, z) {
   const d = tankD(x, z);
   return (d < 6 ? -3.5 * smooth(6, -2, d) : 0) * (1 - smooth(RADIUS - 40, RADIUS - 5, Math.hypot(x, z)));
 }
+/** The tank's water: out to where its sloping sides come up to the water's level. */
+export const inTankWater = (x, z) => tankD(x, z) < 6 && height(x, z) < TANK.level;
 export const nearTemple = (x, z, m = 0) => TEMPLES.some((t) => x > t.c[0] - t.w - m && x < t.c[0] + t.len + 12 + m && Math.abs(z - t.c[1]) < t.w + m);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let LOTS = null;

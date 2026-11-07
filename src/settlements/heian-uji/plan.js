@@ -12,11 +12,6 @@ export const bridge = {
   // projecting upstream (the river flows north; upstream is +z) in the third bay from the west
   elements: [{ t: 'uji_bridge', x0: rx - RIVER.w / 2 - 8, x1: rx + RIVER.w / 2 + 8, z: BRIDGE.z, w: 6, y: 0.2, rise: 1.4, bed: RIVER.bed, bay: 5.4, sannoma: { at: rx - RIVER.w / 2 - 8 + 2.5 * (RIVER.w + 16) / Math.round((RIVER.w + 16) / 5.4), out: 2.4, len: 3.6 } }],
 };
-export const river = {
-  id: 'heian-uji-river', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
-  entrance: { at: [0, 0], facing: 'e' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
-  elements: [{ t: 'water_cells', rect: [RIVER.x - RIVER.w, -(RADIUS - 70), RIVER.x + RIVER.w, RADIUS - 70], y: RIVER.level, cell: 1.5, inside: (x, z) => Math.abs(x - (RIVER.x + 15 * Math.sin(z / 110))) < RIVER.w / 2 - 2 && Math.hypot(x, z) < RADIUS - 70 }],
-};
 const riverX = (z) => RIVER.x + 15 * Math.sin(z / 110);
 /**
  * The life of the river (docs/settlements/heian-uji.md §6): the fishing weirs (ajiro) in the shallows above the bridge —

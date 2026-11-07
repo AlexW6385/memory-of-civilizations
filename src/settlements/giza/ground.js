@@ -22,8 +22,8 @@ function cover(x, z, h, ny) {
   if (inRect(TOWN, x, z)) { c.soil = 0.6; c.sand = 0.4; return c; }
   c.sand = 0.6 + 0.3 * hash2(x * 0.05, z * 0.05); c.rock = 1 - c.sand; return c;
 }
-function water(x, z, y) { return inRect(HARBOUR, x, z, -1) && y < VALLEY - 1.2 + 0.3; }
-function waterLevel(x, z) { return inRect(HARBOUR, x, z, -1) ? VALLEY - 1.2 : -Infinity; }
+function water(x, z, y) { return inRect(HARBOUR, x, z, 1) && y < VALLEY - 1.2 + 0.3; }
+function waterLevel(x, z) { return inRect(HARBOUR, x, z, 1) ? VALLEY - 1.2 : -Infinity; }
 function fromWater(x, z) { return inRect(HARBOUR, x, z, -1) ? -3 : 30; }
 /** Plants per 100 m²: nothing on the plateau; date palms and a sycamore fig by the harbour and in the valley. */
 function planting(x, z, p) {

@@ -1,5 +1,5 @@
 // Baroque Rome about 1670 (docs/settlements/baroque-rome.md §2–§4).
-import { RADIUS, CROSSING, FRONT_X, FLOOR, OVAL, RETTA, PALACE, SISTINE, CASTEL, TIBER, tiberX } from './layout.js';
+import { RADIUS, CROSSING, FRONT_X, FLOOR, OVAL, RETTA, PALACE, SISTINE, CASTEL, TIBER, tiberX, height } from './layout.js';
 
 export const stpeter = {
   id: 'baroque-rome-stpeter',
@@ -49,6 +49,7 @@ export const bridge = {
 export const river = {
   id: 'baroque-rome-tiber', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
-  elements: [{ t: 'water_cells', rect: [TIBER.x - 60, -(RADIUS - 55), TIBER.x + 60, RADIUS - 55], y: TIBER.level, cell: 1.5, inside: (x, z) => Math.abs(x - tiberX(z)) < TIBER.w / 2 - 2 && Math.hypot(x, z) < RADIUS - 55 }],
+  // (out to where its bed comes up to the water by the disc's edge)
+  elements: [{ t: 'water_cells', rect: [TIBER.x - 60, -RADIUS, TIBER.x + 60, RADIUS], y: TIBER.level, cell: 1.5, inside: (x, z) => Math.abs(x - tiberX(z)) < TIBER.w / 2 + 6 && height(x, z) < TIBER.level }],
 };
 export default stpeter;

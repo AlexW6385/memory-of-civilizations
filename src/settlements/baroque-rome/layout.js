@@ -19,7 +19,7 @@ export const BORGO = [-14, 14];                              // the Borgo Nuovo 
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const tiberX = (z) => TIBER.x + 14 * Math.sin(z / 110);
-export const inTiber = (x, z) => Math.abs(x - tiberX(z)) < TIBER.w / 2 - 3 && Math.hypot(x, z) < RADIUS - 55;
+export const inTiber = (x, z) => Math.abs(x - tiberX(z)) < TIBER.w / 2 + 6 && height(x, z) < TIBER.level - 0.3;
 export const inOval = (x, z, m = 0) => ((x - OVAL.c[0]) / (OVAL.ax * 1.18 + m)) ** 2 + ((z - OVAL.c[1]) / (OVAL.bz * 1.15 + m)) ** 2 < 1;
 export const inBasilica = (x, z, m = 0) => inRect([CROSSING[0] - 70, -75, FRONT_X + 10, 75], x, z, m);
 export function height(x, z) {

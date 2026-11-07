@@ -19,6 +19,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
+  sea: TIBER.level,   // the planet's sea is this water, at this level (src/planet/relief.js)
   maxDensity: { stone_pine: 0.03, cypress: 0.03, willow: 0.03 },
   climate: {
     sun: { az: 150, el: 55, color: [1.0, 0.96, 0.88], intensity: 3.5, lat: 42, dec: 12, hour: 10.5 },

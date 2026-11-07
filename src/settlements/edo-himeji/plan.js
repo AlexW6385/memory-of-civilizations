@@ -26,7 +26,11 @@ strip([ox0, oz1 - BW, OTEMON.x - gx, oz1], 'n', LEVEL.bed, 0.3, 1.4);
 strip([OTEMON.x + gx, oz1 - BW, ox1, oz1], 'n', LEVEL.bed, 0.3, 1.4);
 // the water in the moats
 for (const r of [[ox0, oz0, ox1, iz0], [ox0, iz1, OTEMON.x - gx, oz1], [OTEMON.x + gx, iz1, ox1, oz1], [ox0, iz0, ix0, iz1], [ix1, iz0, ox1, iz1]]) E.push({ t: 'water_rect', rect: r, y: LEVEL.water });
-{ const xm = Math.sqrt(RADIUS ** 2 - MIDDLE.z1 ** 2) - 24; E.push({ t: 'water_rect', rect: [-xm, MIDDLE.z0, -MIDDLE.gap / 2, MIDDLE.z1], y: LEVEL.water }, { t: 'water_rect', rect: [MIDDLE.gap / 2, MIDDLE.z0, xm, MIDDLE.z1], y: LEVEL.water }); }
+// (in strips, each out to where the moat's bed comes up toward the disc's edge)
+for (let k = 0; k < 3; k++) {
+  const z0 = MIDDLE.z0 + (MIDDLE.z1 - MIDDLE.z0) * k / 3, z1 = MIDDLE.z0 + (MIDDLE.z1 - MIDDLE.z0) * (k + 1) / 3, xm = Math.sqrt(RADIUS ** 2 - z1 ** 2) - 24;
+  E.push({ t: 'water_rect', rect: [-xm, z0, -MIDDLE.gap / 2, z1], y: LEVEL.water }, { t: 'water_rect', rect: [MIDDLE.gap / 2, z0, xm, z1], y: LEVEL.water });
+}
 // the walls on the rampart
 const wall = (a, b, y, sama = true) => E.push({ t: 'dobei', a, b, y, h: 2.3, sama });
 wall([ix0 + 1, iz0 + 1], [ix1 - 1, iz0 + 1], RT); wall([ix0 + 1, iz0 + 1], [ix0 + 1, iz1 - 1], RT); wall([ix1 - 1, iz0 + 1], [ix1 - 1, iz1 - 1], RT);

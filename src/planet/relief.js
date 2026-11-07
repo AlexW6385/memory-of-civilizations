@@ -8,6 +8,10 @@
 // the previous design take their local ground from their district of the old city
 // (src/world/regions.js, with its focus set), in the old city's coordinates; the others from their
 // own module (src/settlements/<id>/ground.js), in their own coordinates round the disc's centre.
+// The planet's sea is drawn over a disc only where the settlement says its water is the sea's
+// (G.sea, which sets the disc's level); every other settlement draws its own rivers, canals and
+// ponds at their own levels, and the sea is kept under its disc (chunk.js), as in its collision
+// (src/engine/world.js).
 
 import { PLANET_RADIUS as R, SITES, BLEND } from './sites.js';
 import { PLACED } from './layout.js';
@@ -47,8 +51,9 @@ export const BUILT = SITES.filter((s) => s.legacy || GROUNDS[s.id]).map((s) => {
       center: [0, 0],
       height: (x, z) => G.height(x, z),            // (the module fades its ground to its rim level, 0 or G.rim, at its rim)
       cover: (x, z, h, ny) => G.cover(x, z, h, ny),
-      water: (x, z, y) => G.water(x, z, y),
-      waterLevel: (x, z) => G.waterLevel(x, z),
+      // (on a disc on the sea, wherever its ground is below the sea's level, the sea: G.sea)
+      water: G.sea == null ? (x, z, y) => G.water(x, z, y) : (x, z, y) => G.water(x, z, y) || (y < G.sea + 0.3 && G.height(x, z) < G.sea - 0.3),
+      waterLevel: G.sea == null ? (x, z) => G.waterLevel(x, z) : (x, z) => { const l = G.waterLevel(x, z); return Number.isFinite(l) ? l : G.height(x, z) < G.sea ? G.sea : -Infinity; },
     };
   }
   return S;
@@ -85,8 +90,14 @@ function layRoads() {
 export function initRelief() {
   for (const S of BUILT) {
     // a settlement on a height (G.lift: Machu Picchu on its ridge) stands that much above the open
-    // country; its ground then comes down to -lift at its rim (G.rim), so that it meets the country
-    S.base = Math.max(2.5, natural(S.u).h) + (S.ground?.lift || 0);
+    // country; its ground then comes down to -lift at its rim (G.rim), so that it meets the country.
+    // A settlement on the planet's sea (G.sea: the local level of its sea, lagoon, lake or river —
+    // Kilwa, Venice, Rapa Nui) has the planet's sea for its water, drawn over its disc at that level
+    // and on across the blend to the open sea or to a shore in the country round it.
+    // The disc is flat (its frame's plane) and the sea round, so that plane at the local sea level
+    // meets the sea's sphere only along one circle: the disc stands so that it does so at its rim,
+    // and over the disc the sea is drawn on the plane (seaHeight).
+    S.base = S.ground?.sea != null ? R * Math.cos(S.radius / R) - R - S.ground.sea : Math.max(2.5, natural(S.u).h) + (S.ground?.lift || 0);
     S.enu = enuFrame(S.u, R + S.base);
     const [cx, cz] = S.local.center;
     S.frame = { ...S.enu, o: sub(S.enu.o, add(scale(S.enu.x, cx), scale(S.enu.z, cz))) };
@@ -146,6 +157,20 @@ export function surface(u) {
     return { h: n.h + (hp - n.h) * w, n, s: { S, x: x + cx, z: z + cz, H, w } };
   }
   return { h: n.h, n, s: null };
+}
+
+/**
+ * The sea's surface at u, from g = surface(u): its height above the sphere of the sea (m), or null
+ * where no sea is drawn — on the disc of a settlement whose water is its own (no G.sea). On the disc
+ * of a settlement on the sea, the plane of its local sea level (which meets the sphere at the rim);
+ * everywhere else the sphere.
+ */
+export function seaHeight(g, u) {
+  const s = g.s;
+  if (!s || s.w < 1) return 0;
+  const S = s.S, sea = S.ground?.sea;
+  if (sea == null) return null;
+  return (R + S.base + sea) / dot(S.enu.y, u) - R;
 }
 
 /** Height above the sea at u (m). */

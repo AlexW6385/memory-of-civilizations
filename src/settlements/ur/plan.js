@@ -25,10 +25,8 @@ E.push({ t: 'courtyard_block', rect: STORES, h: 5, ring: 9, door: 'e' });
 const [px0, pz0, px1, pz1] = TEMENOS;
 w([px0, pz0], [-7, pz0], 7, 4); w([7, pz0], [px1, pz0], 7, 4); w([px0, pz1], [px1, pz1], 7, 4); w([px0, pz0], [px0, pz1], 7, 4);
 w([px1, pz0], [px1, -26], 7, 4); w([px1, -14], [px1, pz1], 7, 4);
-// the harbour: the quay along its town side, water, reed boats
-const [hx0, hz0, hx1, hz1] = HARBOUR.rect, hz = (x) => Math.sqrt(Math.max(0, (RADIUS - 26) ** 2 - x * x));
-E.push({ t: 'water_rect', rect: [hx0 + 30, Math.max(hz0, -hz(hx0 + 30)), hx1, Math.min(hz1, hz(hx0 + 30))], y: HARBOUR.water });
-E.push({ t: 'water_rect', rect: [hx0 + 6, Math.max(hz0, -hz(hx0 + 6)), hx0 + 30, Math.min(hz1, hz(hx0 + 6))], y: HARBOUR.water });
+// the harbour: the quay along its town side, reed boats (its water is the planet's sea: ground.js, sea)
+const [hx0, hz0, hx1, hz1] = HARBOUR.rect;
 E.push({ t: 'block', walk: true, rect: [hx1 - 1.5, hz0 + 6, hx1 + 1.5, hz1 - 6], y0: HARBOUR.bed, y1: 0.6, mat: 'brick_baked' });
 // boats moored along the quay and out in the basin (§6.1); flights of brick steps down from the quay to the water;
 // mooring posts along its edge
