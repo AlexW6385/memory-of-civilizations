@@ -10,6 +10,10 @@ export const COURT = [-50, -140, 50, -78];
 export const GIPARU = [60, 40, 122, 104];
 export const PALACE = [70, -158, 122, -64];
 export const STORES = [-130, 40, -82, 108];
+/** The market square before the temenos's north gate (docs/settlements/ur.md §5.2). */
+export const MARKET = [-44, -217, 42, -178];
+/** The houses on the square's north side that can be entered, furnished (§5.1): their seeds, the street door toward the square. */
+const OPEN = new Set([987775, 589524, 632118]);
 export const HARBOUR = { rect: [-376, -150, -282, 70], bed: -3, water: -1.2 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -29,8 +33,10 @@ export function houses() {
     if (inRect(TEMENOS, cx, cz, w / 2 + 6) || inRect(HARBOUR.rect, cx, cz, w / 2 + 12)) continue;
     if (Math.abs(cx) < 6 && cz < TEMENOS[1]) continue;               // the street to the north gate
     if (Math.abs(cz + 20) < 5 && cx > TEMENOS[2]) continue;          // the street to the east gate
+    if (inRect(MARKET, cx, cz)) { rand(); rand(); continue; }
     if (rand() < 0.08) continue;
-    HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6) });
+    const seed = Math.floor(rand() * 1e6);
+    HOUSES.push(OPEN.has(seed) ? { rect: r, seed, open: true, door: 's', white: seed === 589524 } : { rect: r, seed });
   }
   return HOUSES;
 }

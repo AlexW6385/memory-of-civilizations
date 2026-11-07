@@ -2,7 +2,7 @@
 // basin holding water below its quay; date palms in groves by the water and at the edges, reeds in
 // the shallows; the hot, hazy sky of southern Mesopotamia.
 
-import { RADIUS, TEMENOS, COURT, HARBOUR, inRect, inHarbour, inHouse, smooth as sm } from './layout.js';
+import { RADIUS, TEMENOS, COURT, HARBOUR, MARKET, inRect, inHarbour, inHouse, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function height(x, z) {
@@ -29,7 +29,7 @@ function planting(x, z) {
   if (inRect(HARBOUR.rect, x, z, 3)) return { reeds: 6 };
   if (inRect(HARBOUR.rect, x, z, 14)) return { date_palm: 1.2, grass_dry: 10 };
   if (r > RADIUS - 34) return { date_palm: 0.8, grass_dry: 12 };
-  if (inRect(TEMENOS, x, z) || inHouse(x, z, 1)) return null;
+  if (inRect(TEMENOS, x, z) || inHouse(x, z, 1) || inRect(MARKET, x, z, 2) || (Math.abs(x + 4) < 10 && z < TEMENOS[1])) return null;   // (nor in the market square and the north street)
   return hash2(x * 0.1, z * 0.1) < 0.04 ? { date_palm: 0.3 } : null;
 }
 export const ground = {

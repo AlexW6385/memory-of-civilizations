@@ -8,6 +8,7 @@ import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/ge
 import { beamTris } from '../ming/index.js';
 import { loft, ring } from '../egyptian/objects.js';
 import '../qing/index.js';
+import { urHouseOpen, scribeKit, quayGoods } from './house.js';
 
 const BB = 'brick_baked', MB = 'mudbrick', MP = 'mud_plaster';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -15,7 +16,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
  * A straight flight of brick steps rect, rising y0 → y1 toward dir: each step a slab half a metre deep under its
  * tread, the whole on a wedge of brickwork (only its sides and back built: the rest lies under the steps).
  */
-function stairs(el, { bag, col }) {
+export function stairs(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, { y0, y1, dir } = el, mat = el.mat || BB, alongZ = dir === 'n' || dir === 's';
   const len = alongZ ? z1 - z0 : x1 - x0, n = Math.max(1, Math.round((y1 - y0) / 0.16)), rise = (y1 - y0) / n, tr = len / n, foot = y0 - 0.2;
   // s: distance along the run from its foot; (a, b): the plan coordinate across
@@ -277,7 +278,9 @@ function niched(bag, r, h, face, niches, low, up, base) {
  * latticed windows above; projecting gutters at the roof; a flat roof with a low parapet; a stair of brick in the
  * court to the roof or to the wooden gallery that runs round the court of a two-storey house.
  */
-function urHouse(el, { bag, col }) {
+function urHouse(el, ctx) {
+  if (el.open) return urHouseOpen(el, ctx);
+  const { bag, col } = ctx;
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0;
   const d = Math.min(3.8, Math.min(W, D) * 0.3), two = rand() < 0.45, H = two ? 6 : 3.4;
   const up = rand() < 0.3 ? 'limewash_white' : MP, base = 0.8 + Math.round(rand() * 3) * 0.15;
@@ -453,6 +456,6 @@ function reedBoat(el, { bag }) {
 
 registerStyle('sumerian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs },
+  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, quay_goods: quayGoods },
   objects: {},
 });
