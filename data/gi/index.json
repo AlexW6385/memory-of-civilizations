@@ -1504,6 +1504,33 @@
   "seconds": 128,
   "baked": "2026-11-07"
  },
+ "sydney-opera": {
+  "site": "sydney",
+  "hash": "35763f4a3d96e9d4",
+  "rays": 128,
+  "probes": 71208,
+  "boxes": [
+   {
+    "min": [
+     66,
+     11.4,
+     -220.5
+    ],
+    "n": [
+     24,
+     43,
+     69
+    ],
+    "spacing": 1.15,
+    "rooms": [
+     "box 0"
+    ]
+   }
+  ],
+  "bytes": 1191427,
+  "seconds": 576,
+  "baked": "2026-11-07"
+ },
  "ur-ziggurat": {
   "site": "ur",
   "hash": "67d2f0c3d623a766",
