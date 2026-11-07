@@ -29,7 +29,7 @@ export const ARRIVALS = {
   'petra':            [160, 0.1, -158, 1.5708, 0.25],    // the Treasury at the end of the Siq
   'jerusalem':        [-67.6, 18, -40, -1.78, 0.16],     // on the esplanade, the Dome of the Rock
   'constantinople':   [-70, null, 110, -0.517, 0.16],    // Hagia Sophia's dome over its buttresses, from the south-west
-  'ottoman-istanbul': [0, 22.1, -90, 3.1416, 0.25],      // the Süleymaniye's cascading domes and four minarets
+  'ottoman-istanbul': [0, 22.1, -91, 3.1416, 0.42],      // the Süleymaniye's cascading domes and four minarets, whole
   'giza':             [150, 0.1, -190, 2.36, 0.25],      // the Great Pyramid from its corner
   'edfu':             [0, 0.1, 150, 0, 0.2],             // the pylon with its flagpoles, through the palms
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square
