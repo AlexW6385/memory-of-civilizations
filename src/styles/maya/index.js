@@ -12,6 +12,7 @@ import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
 import { serpentHeadKit, chaacKit, chacmoolKit, warriorPanelKit, Kit } from './meso.js';
 import { emitFrame, ballPanelKit, ringKit, jaguarThroneKit } from './ballcourt.js';
+import { warriorsInterior, mOffering } from './sanctuary.js';
 
 const L = 'limestone_maya';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -145,7 +146,7 @@ function mTemple(el, { bag, col }) {
   // the walls with a doorway in the middle of each (the front with three, between serpent columns)
   for (const [k, a, b] of [['n', [cx - w, cz - d], [cx + w, cz - d]], ['s', [cx + w, cz + d], [cx - w, cz + d]], ['w', [cx - w, cz + d], [cx - w, cz - d]], ['e', [cx + w, cz - d], [cx + w, cz + d]]]) {
     const len = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / len, uz = (b[1] - a[1]) / len;
-    const front = k === el.doors, door = front ? Math.min(len * 0.6, 7.5) : 2.4;
+    const front = k === el.doors, door = front ? Math.min(len * 0.6, 7.5) : el.inner ? 0 : 2.4;   // a temple with a sanctuary inside is closed but at its front
     for (const [s0, s1] of [[0, (len - door) / 2], [(len + door) / 2, len]]) {
       const p = [a[0] + ux * s0, a[1] + uz * s0], q = [a[0] + ux * s1, a[1] + uz * s1], t = [];
       beamTris(t, [p[0], y1, p[1]], [q[0], y1, q[1]], wt / 2, wallH);
@@ -158,6 +159,7 @@ function mTemple(el, { bag, col }) {
       col.rect([px - 0.45, pz - 0.45, px + 0.45, pz + 0.45], y1, y1 + wallH);
     }
   }
+  if (el.inner === 'warriors' && el.doors === 'w') warriorsInterior(bag, col, { cx, cz, w, d, y: y1, H: wallH, wt }, warriorPillar);
   // the lintels, the frieze (painted plaster, or stone carved with masks), the roof and its crest
   const fy0 = y1 + wallH, fy1 = y1 + h * 0.9;
   bag.add(el.masks ? L : 'stucco_red', box(cx - w - 0.2, fy0, cz - d - 0.2, cx + w + 0.2, fy1, cz + d + 0.2));
@@ -441,7 +443,7 @@ registerStyle('maya', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    m_pyramid: mPyramid, m_temple: mTemple, m_ballcourt: mBallcourt, m_colonnade: mColonnade, m_platform: mPlatform, m_caracol: mCaracol, sacbe, maya_house: mayaHouse, albarrada, petate,
+    m_pyramid: mPyramid, m_temple: mTemple, m_ballcourt: mBallcourt, m_colonnade: mColonnade, m_platform: mPlatform, m_caracol: mCaracol, sacbe, maya_house: mayaHouse, albarrada, petate, m_offering: mOffering,
   },
   objects: {},
 });

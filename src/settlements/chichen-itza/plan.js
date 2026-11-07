@@ -15,7 +15,7 @@ E.push({ t: 'm_pyramid', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stair
 E.push({ t: 'm_ballcourt', rect: [-133, -110, -97, 36], wallH: 8.5, bench: 4.5 });
 // the Temple of the Warriors, its colonnade, the Thousand Columns
 // the temple's floor 45 ft (13.7 m) up; the chacmool before the serpent columns; the rain god's masks on the frieze's corners and middles
-E.push({ t: 'm_pyramid', c: [112, -14], base: 20, top: 14, h: 13, tiers: 4, stairs: 'w', steps: 52, stairW: 9, serpents: 'w', temple: { w: 21, d: 18, h: 6.5, doors: 'w', masks: true, chacmool: true } });
+E.push({ t: 'm_pyramid', c: [112, -14], base: 20, top: 14, h: 13, tiers: 4, stairs: 'w', steps: 52, stairW: 9, serpents: 'w', temple: { w: 21, d: 18, h: 6.5, doors: 'w', masks: true, chacmool: true, inner: 'warriors' } });
 E.push({ t: 'm_colonnade', rect: [62, -36, 86, 8], rows: 8, cols: 4, h: 4.2 });
 E.push({ t: 'm_colonnade', rect: [84, 28, 164, 46], rows: 4, cols: 20, h: 4.2 });
 E.push({ t: 'm_colonnade', rect: [146, -36, 164, 28], rows: 10, cols: 3, h: 4.2 });
