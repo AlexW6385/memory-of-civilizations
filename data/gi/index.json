@@ -416,6 +416,49 @@
   "seconds": 83,
   "baked": "2026-11-06"
  },
+ "madurai-meenakshi": {
+  "site": "madurai",
+  "hash": "5883c1fe8e2561b1",
+  "rays": 128,
+  "probes": 26650,
+  "boxes": [
+   {
+    "min": [
+     84,
+     0,
+     -114
+    ],
+    "n": [
+     40,
+     9,
+     65
+    ],
+    "spacing": 1,
+    "rooms": [
+     "thousand-pillar hall"
+    ]
+   },
+   {
+    "min": [
+     104,
+     0,
+     34
+    ],
+    "n": [
+     25,
+     10,
+     13
+    ],
+    "spacing": 1,
+    "rooms": [
+     "ashta shakti mandapam"
+    ]
+   }
+  ],
+  "bytes": 444515,
+  "seconds": 190,
+  "baked": "2026-11-07"
+ },
  "mamluk-cairo-hasan": {
   "site": "mamluk-cairo",
   "hash": "924983d813bdf625",
