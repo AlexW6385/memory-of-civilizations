@@ -3,7 +3,7 @@
 // and the north–south streets, and the grey-brick courtyard houses between the lanes, in plans of
 // a few dozen each so that they build in turn.
 
-import { RADIUS, LEVEL, MOAT, RING, AVENUE, lanes, houses } from './layout.js';
+import { RADIUS, LEVEL, MOAT, RING, AVENUE, TEMPLE, lanes, houses } from './layout.js';
 
 const R = RADIUS - 26;
 const base = (id, elements) => ({ id, style: 'qing', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' } });
@@ -37,10 +37,62 @@ function streets() {
   return base('qing-beijing-streets', E);
 }
 
+const d2 = (h) => ((h.rect[0] + h.rect[2]) / 2 + 30) ** 2 + ((h.rect[1] + h.rect[3]) / 2 - 225) ** 2;
 function courtyards() {
-  const all = houses(), plans = [];
-  for (let i = 0; i < all.length; i += 40) plans.push(base(`qing-beijing-houses-${i / 40}`, all.slice(i, i + 40).map((h) => ({ t: 'siheyuan', rect: h.rect, seed: h.seed }))));
+  // the two houses nearest the avenue's mouth below the moat are furnished inside (§14)
+  const near = [...houses()].sort((a, b) => d2(a) - d2(b)).slice(0, 2);
+  const all = houses().map((h) => (near.includes(h) ? { ...h, furnish: true } : h)), plans = [];
+  for (let i = 0; i < all.length; i += 40) plans.push(base(`qing-beijing-houses-${i / 40}`, all.slice(i, i + 40).map((h) => ({ t: 'siheyuan', rect: h.rect, seed: h.seed, furnish: h.furnish }))));
   return plans;
 }
 
-export async function town() { return [streets(), ...courtyards()]; }
+/**
+ * The Temple of Heaven's Hall of Prayer for Good Harvests (§13): the round altar and the hall
+ * (qinian, src/styles/qing/tiantan.js) in its square walled court — red walls under green-glazed
+ * copings, the Gate of Prayer for Good Harvests on the south, a gate on the west to the avenue —
+ * the court paved with brick.
+ */
+function temple() {
+  const E = [], [cx, cz] = TEMPLE.c, w = TEMPLE.wall, pal = { plaster: 'palace_wall', roof: 'tile_green', plinth: 'marble' };
+  E.push({ t: 'lane', rect: [cx - w + 0.6, cz - w + 0.6, cx + w - 0.6, cz + w - 0.6], y: 0.03 });
+  E.push({ t: 'qinian', c: [cx, cz], y: 0.03 });
+  const wall = (a, b, gates = []) => E.push({ t: 'ming_wall', a, b, y: 0, h: 3.6, th: 1.0, gates, pal });
+  wall([cx - w, cz - w], [cx + w, cz - w]);
+  wall([cx + w, cz - w], [cx + w, cz + w]);
+  wall([cx - w, cz + w], [cx - w, cz - w], [{ at: w, w: 4, h: 3.0 }]);
+  wall([cx - w, cz + w], [cx - 13, cz + w]); wall([cx + 13, cz + w], [cx + w, cz + w]);
+  E.push({ t: 'gate_doors', at: [cx - w, cz], along: 'z', w: 4, h: 3.0, y: 0.03, swing: 1, off: 0.5 });
+  // the Gate of Prayer for Good Harvests: a hall of five bays on a marble platform, its middle bays open
+  E.push({ t: 'qing_hall', rect: [cx - 12, cz + w - 4, cx + 12, cz + w + 4], y: 1.2, H: 5.4, roof: 'xieshan', bays: [5, 2], front: 'n', four: true, plat: 1.2, open: true, orn: { figures: 7 }, pal: { wood: 'paint_caihua', column: 'lacquer_red', soffit: 'paint_caihua', base: 'marble', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'palace_wall', plinth: 'marble', roof: 'tile_yellow' } });
+  for (const [z0, z1, dir] of [[cz + w - 8.4, cz + w - 4.9, 's'], [cz + w + 4.9, cz + w + 8.4, 'n']]) E.push({ t: 'stairs', rect: [cx - 3, z0, cx + 3, z1], y0: 0.03, y1: 1.2, dir });
+  // the path in from the avenue to the west gate
+  E.push({ t: 'lane', rect: [AVENUE[2] - 0.5, cz - 3, cx - w - 0.5, cz + 3], y: 0.035, mat: 'bluestone' });
+  return { ...base('qing-beijing-temple', E), center: [cx, cz] };
+}
+
+/**
+ * The traffic of the streets (§15): strings of camels bringing coal in sacks from the hills to the
+ * west, each led by its drover; Peking carts with their blue tops, the carter at the beast's head;
+ * on the avenue and the ring street people on foot.
+ */
+function traffic() {
+  const T = [], L = [], rand = rng(1697);
+  const man = (at, rot, extra = {}) => L.push({ t: 'figure', at, y: 0.03, rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.6 ? 'robe' : 'trousers', cloth: ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_black'][Math.floor(rand() * 4)], cloth2: ['cloth_black', 'cloth_grey', 'cloth_indigo'][Math.floor(rand() * 3)], skin: 'skin_light', hat: rand() < 0.6 ? 'cap' : 'none', hair: 'short', ...extra });
+  const face = ([dx, dz]) => Math.atan2(-dx, -dz);
+  for (const [at, dir, n] of [[[6, 300], [0, -1], 6], [[-60, 201.5], [1, 0], 5], [[-200, 173.5], [-1, 0], 5], [[138, 20], [0, 1], 6], [[-6, 352], [0, -1], 5]]) {
+    T.push({ t: 'camel_string', at, dir, n, y: 0.03, seed: Math.floor(rand() * 1e6) });
+    // the drover walking at the head of the string, the lead rope in his hand; his mate at the tail
+    man([at[0] + dir[0] * 2.3 + dir[1] * 0.6, at[1] + dir[1] * 2.3 - dir[0] * 0.6], face(dir), { dress: 'trousers', hat: rand() < 0.5 ? 'cap' : 'brim', carry: 'staff', pose: 'staff', len: 1.4, staffMat: 'timber', cloth: 'cloth_brown' });
+    if (rand() < 0.6) man([at[0] - dir[0] * (2.9 * n + 0.4) + dir[1] * 0.7, at[1] - dir[1] * (2.9 * n + 0.4) - dir[0] * 0.7], face(dir), { dress: 'trousers', cloth: 'cloth_grey' });
+  }
+  for (const [at, dir] of [[[-5, 262], [0, -1]], [[6, 236], [0, 1]], [[40, 201.5], [1, 0]], [[-170, 115.5], [1, 0]], [[230, -58.5], [-1, 0]], [[-260, 231.5], [1, 0]], [[138, -60], [0, -1]]]) {
+    const rot = face(dir);
+    T.push({ t: 'peking_cart', at, rot, y: 0.03, seed: Math.floor(rand() * 1e6), beast: 'horse', coat: ['hide_black', 'hide_brown', 'hide_grey'][Math.floor(rand() * 3)] });
+    // the carter standing at the beast's head, the whip in hand
+    man([at[0] + dir[0] * 3.9 + dir[1] * 0.75, at[1] + dir[1] * 3.9 - dir[0] * 0.75], rot + Math.PI / 2 * (rand() < 0.5 ? 1 : -1), { dress: 'trousers', carry: 'staff', pose: 'staff', len: 1.6, staffMat: 'timber' });
+  }
+  return [{ ...base('qing-beijing-traffic', T), center: [0, 120] }, { ...base('qing-beijing-people', L), style: 'life', center: [0, 120] }];
+}
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+
+export async function town() { return [streets(), temple(), ...traffic(), ...courtyards()]; }

@@ -5,6 +5,9 @@
 
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, T1, T2, CANAL, CANAL_STREETS, WAREHOUSES } from './layout.js';
 
+/** The river boats [x, z, heading (±1 along x), length − 4] (moored by the wall when z < 165, under sail beyond), and the canal boats [z, heading]. */
+export const RIVER_BOATS = [[-240, 160, 1, 12], [-60, 158, -1, 9], [20, 172, 1, 14], [100, 160, 1, 8], [190, 158, -1, 10], [250, 190, -1, 16], [-150, 215, 1, 18], [60, 240, -1, 11]];
+export const CANAL_BOATS = [[-280, 1], [-170, -1], [-60, 1], [40, -1], [112, 1]];
 const E = [];
 const RW = RADIUS - 30, half = (z) => Math.sqrt(Math.max(0, RW * RW - z * z));
 // ---- the flood wall (its top a walk), the road behind it, the lock where the canal meets the river
@@ -17,13 +20,13 @@ E.push({ t: 'block', walk: true, rect: [CANAL.x0 - 4, WALL.z0 + 5, CANAL.x1 + 4,
 E.push({ t: 'paving', rect: [-half(ROAD.z1), ROAD.z0, half(ROAD.z1), ROAD.z1], y: LEVEL.street + 0.04, th: 0.3 });
 // ---- the river: the river boats moored by the wall with their masts up and sails down, others under sail
 for (let z0 = WALL.z1; z0 < RW - 4; z0 += 10) { const z1 = Math.min(z0 + 10, RW - 4); E.push({ t: 'water_rect', rect: [-half(z1) + 2, z0, half(z1) - 2, z1], y: LEVEL.river }); }
-for (const [x, z, d, L] of [[-240, 160, 1, 12], [-60, 158, -1, 9], [20, 172, 1, 14], [100, 160, 1, 8], [190, 158, -1, 10], [250, 190, -1, 16], [-150, 215, 1, 18], [60, 240, -1, 11]]) E.push({ t: 'song_boat', at: [x, z], dir: [d, 0], len: L + 4, beam: (L + 4) * 0.27, mast: 0, sail: z > 165, y: LEVEL.river, seed: x });
+for (const [x, z, d, L] of RIVER_BOATS) E.push({ t: 'song_boat', at: [x, z], dir: [d, 0], len: L + 4, beam: (L + 4) * 0.27, mast: 0, sail: z > 165, y: LEVEL.river, seed: x });
 // ---- the canal: water, walls, streets, bridges, boats
 E.push({ t: 'water_rect', rect: [CANAL.x0, CANAL.z0 + 4, CANAL.x1, WALL.z0 + 3], y: LEVEL.canal });
 for (const x of [CANAL.x0, CANAL.x1]) E.push({ t: 'canal_wall', a: [x, CANAL.z0 + 4], b: [x, ROAD.z0], y: LEVEL.street + 0.05, bed: LEVEL.canalBed, th: 0.7 });
 for (const r of CANAL_STREETS) E.push({ t: 'paving', rect: [r[0], -half(r[0]) + 6, r[2], r[3]], y: LEVEL.street + 0.04, th: 0.3 });
 for (const z of [-230, -120, -10, 90, 136]) E.push({ t: 'ming_arch_bridge', at: [(CANAL.x0 + CANAL.x1) / 2, z], across: 'x', span: CANAL.x1 - CANAL.x0 + 0.4, width: 4, rise: 2.4, landing: 4.6, y: LEVEL.street + 0.04, water: LEVEL.canal, bed: LEVEL.canalBed });
-for (const [z, d] of [[-280, 1], [-170, -1], [-60, 1], [40, -1], [112, 1]]) E.push({ t: 'boat', at: [(CANAL.x0 + CANAL.x1) / 2 + (d > 0 ? -2 : 2), z], dir: [0, d], len: 7, y: LEVEL.canal });
+for (const [z, d] of CANAL_BOATS) E.push({ t: 'boat', at: [(CANAL.x0 + CANAL.x1) / 2 + (d > 0 ? -2 : 2), z], dir: [0, d], len: 7, y: LEVEL.canal });
 
 // ---- the pagoda on its terrace, the temple's halls, the stairs from the road
 E.push({ t: 'block', walk: true, rect: T1.rect, y0: 0, y1: T1.y, mat: 'granite_block' });
@@ -36,6 +39,7 @@ E.push({ t: 'pagoda_oct', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers
 // the steps up the base on the south, to the way onto the lowest gallery and the doors into the pagoda
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 3, PAGODA.c[1] + 15.3, PAGODA.c[0] + 3, PAGODA.c[1] + 19.3], y0: T1.y, y1: PAGODA.y + 2, dir: 'n', mat: 'granite_block' });
 E.push({ t: 'ming_hall', rect: [-129, -4, -91, 24], y: T2.y, H: 6, front: 's', four: true, roof: 'xieshan', plat: 0.8, eave: 1.8, sweep: 0.9 });
+E.push({ t: 'kaihua_hall', rect: [-129, -4, -91, 24], y: T2.y });
 E.push({ t: 'ming_hall', rect: [-140.5, 58, -131, 94], y: T1.y, H: 4.4, front: 'e', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
 E.push({ t: 'ming_hall', rect: [-89, 58, -79.5, 94], y: T1.y, H: 4.4, front: 'w', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
 // ---- the warehouses by the lock

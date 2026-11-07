@@ -4,6 +4,7 @@
 import { rod, box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, column, beamTris } from '../ming/index.js';
 import { hexa } from './kaifeng.js';
+import { STYLES } from '../../core/build.js';
 
 /**
  * view_tent: a stand for watching the bore { at, y, w (along x), d (along z), h, cloth, trim, open ('s' |
@@ -139,4 +140,61 @@ function teaHouse(el, { bag, col }) {
 }
 function rnd(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-export const HANGZHOU_ELEMENTS = { view_tent: viewTent, tea_house: teaHouse };
+/**
+ * kaihua_hall: the images and things of Kaihua Temple's main hall { rect (the hall), y (its floor) },
+ * the hall facing south (docs/settlements/song-hangzhou.md §11): against the north wall a long
+ * sumeru platform of grey brick, on it the Buddha of the present in the middle between two
+ * attendant Buddhas, each on his lotus throne with his mandorla; before each an altar table of red
+ * lacquer, on the middle one a great bronze censer between two candlesticks, flower vases at its
+ * ends; before the tables the oil lamps on their tall stands, the kneeling cushions; the bell in its
+ * frame on the east and the drum on its stand on the west.
+ */
+function kaihuaHall(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, cx = (x0 + x1) / 2;
+  const pz0 = z0 + 1.0, pz1 = pz0 + 5.2, ph = 0.95, py = y + ph;
+  // the platform: plinth, two mouldings, the waist, two mouldings, the cap
+  for (const [a, b, i] of [[0, 0.16, 0], [0.16, 0.26, 0.06], [0.26, 0.7, 0.14], [0.7, 0.8, 0.06], [0.8, 1, 0]]) bag.add('brick_grey', box(cx - 12 + i, y + a * ph, pz0 + i, cx + 12 - i, y + b * ph, pz1 - i));
+  col.rect([cx - 12, pz0, cx + 12, pz1], y, py);
+  const B = STYLES.chinese.objects.buddha;
+  for (const [dx, h] of [[0, 4.6], [-8.5, 3.8], [8.5, 3.8]]) {
+    B({ at: [cx + dx, pz0 + 2.4], y: py, h, dir: [0, 1], robe: 'clay_robe', gilt: 'clay_gilt' }, { bag, col });
+    // the altar table
+    const w = dx ? 2.2 : 3.4, tz = pz1 + 0.35;
+    bag.add('lacquer_red', box(cx + dx - w / 2, y + 0.86, tz, cx + dx + w / 2, y + 0.92, tz + 0.75));
+    bag.add('lacquer_red', box(cx + dx - w / 2 + 0.05, y, tz + 0.05, cx + dx + w / 2 - 0.05, y + 0.86, tz + 0.7));
+    bag.add('cloth_ochre', box(cx + dx - w / 2 + 0.12, y + 0.08, tz + 0.7, cx + dx + w / 2 - 0.12, y + 0.84, tz + 0.715));     // the altar cloth hung over its front
+    col.rect([cx + dx - w / 2, tz, cx + dx + w / 2, tz + 0.75], y, y + 0.92);
+    const ty = y + 0.92, zc = tz + 0.38;
+    bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.18, 0.08], [0.2, 0.2], [0.15, 0.28], [0.17, 0.31], [0.001, 0.31]], 14, null, cx + dx, ty, zc));
+    for (const sx of [-1, 1]) {
+      bag.add('bronze', lathe([[0.001, 0], [0.08, 0], [0.06, 0.04], [0.018, 0.08], [0.015, 0.4], [0.05, 0.42], [0.05, 0.45], [0.001, 0.45]], 10, null, cx + dx + sx * 0.6, ty, zc));
+      bag.add('linen', lathe([[0.02, 0], [0.02, 0.16], [0.001, 0.18]], 8, null, cx + dx + sx * 0.6, ty + 0.45, zc));
+      if (!dx) bag.add('glaze_white', lathe([[0.001, 0], [0.06, 0.01], [0.09, 0.12], [0.05, 0.26], [0.04, 0.3], [0.06, 0.34], [0.001, 0.34]], 10, null, cx + sx * 1.35, ty, zc));
+    }
+    // the kneeling cushions
+    bag.add('cloth_ochre', lathe([[0.001, 0], [0.3, 0], [0.32, 0.08], [0.28, 0.16], [0.001, 0.17]], 12, null, cx + dx, y, tz + 1.7));
+  }
+  // the oil lamps on their stands either side of the middle table
+  for (const sx of [-1, 1]) {
+    const lx = cx + sx * 2.6, lz = pz1 + 1.4;
+    bag.add('bronze', lathe([[0.001, 0], [0.22, 0], [0.18, 0.06], [0.04, 0.12], [0.03, 1.3], [0.16, 1.34], [0.18, 1.42], [0.14, 1.44], [0.001, 1.42]], 10, null, lx, y, lz));
+    bag.add('flame', lathe([[0.001, 0], [0.025, 0.03], [0.001, 0.1]], 6, null, lx, y + 1.44, lz));
+    col.circle(lx, lz, 0.22, y, y + 1.4);
+  }
+  // the bell in its frame (east) and the drum on its stand (west)
+  {
+    const bx = x1 - 3.2, bz = z1 - 6;
+    for (const sz of [-1, 1]) bag.add('lacquer_red', box(bx - 0.08, y, bz + sz * 0.9 - 0.08, bx + 0.08, y + 2.6, bz + sz * 0.9 + 0.08));
+    bag.add('lacquer_red', box(bx - 0.1, y + 2.6, bz - 1.1, bx + 0.1, y + 2.8, bz + 1.1));
+    bag.add('bronze', lathe([[0.001, 0.0], [0.42, 0.0], [0.45, 0.05], [0.4, 0.4], [0.36, 0.9], [0.3, 1.05], [0.12, 1.12], [0.06, 1.25], [0.001, 1.26]], 16, null, bx, y + 1.3, bz));
+    col.rect([bx - 0.5, bz - 1, bx + 0.5, bz + 1], y, y + 2.8);
+    const dx2 = x0 + 3.2;
+    for (const [a, b] of [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]]) bag.add('lacquer_red', box(dx2 + a - 0.05, y, bz + b - 0.05, dx2 + a + 0.05, y + 0.9, bz + b + 0.05));
+    const drum = lathe([[0.001, -0.45], [0.55, -0.45], [0.62, -0.25], [0.64, 0], [0.62, 0.25], [0.55, 0.45], [0.001, 0.45]], 18); drum.rotateZ(Math.PI / 2); drum.translate(dx2, y + 1.55, bz);
+    bag.add('lacquer_red', drum);
+    for (const sx of [-1, 1]) bag.add('hide_tan', lathe([[0.001, 0], [0.555, 0], [0.555, 0.01], [0.001, 0.01]], 18).rotateZ(-sx * Math.PI / 2).translate(dx2 + sx * 0.455, y + 1.55, bz));
+    col.rect([dx2 - 0.65, bz - 0.65, dx2 + 0.65, bz + 0.65], y, y + 2.2);
+  }
+}
+
+export const HANGZHOU_ELEMENTS = { view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall };

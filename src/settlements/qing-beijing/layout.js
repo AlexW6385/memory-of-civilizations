@@ -31,6 +31,15 @@ export const HALLS = {
   taihemen: { rect: [-26, 110.5, 26, 121.5], y: 3.2 },      // Gate of Supreme Harmony
 };
 
+/**
+ * The Temple of Heaven's Hall of Prayer for Good Harvests on its round altar (§13), brought in
+ * beside the avenue south of the palace (the real temple lies some 3 km south, east of the axis):
+ * the altar's centre and tiers, the square wall round it, the belt of old arborvitae round the wall.
+ */
+export const TEMPLE = { c: [72, 280], wall: 54, belt: [14, 214, 142, 352] };
+export const inTemple = (x, z, m = 0) => Math.abs(x - TEMPLE.c[0]) <= TEMPLE.wall + m && Math.abs(z - TEMPLE.c[1]) <= TEMPLE.wall + m;
+export const inBelt = (x, z, m = 0) => x >= TEMPLE.belt[0] - m && x <= TEMPLE.belt[2] + m && z >= TEMPLE.belt[1] - m && z <= TEMPLE.belt[3] + m;
+
 const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export { inRect };
 export function inMoat(x, z) { return inRect(MOAT.outer, x, z) && !inRect(MOAT.inner, x, z); }
@@ -43,7 +52,12 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 export const HUTONG_PERIOD = 29, HUTONG_W = 5;
 export function lanes() {
   const out = [];
-  for (let z = -380; z <= 380; z += HUTONG_PERIOD) out.push([-380, z, 380, z + HUTONG_W]);
+  const [b0, bz0, b1, bz1] = TEMPLE.belt;
+  for (let z = -380; z <= 380; z += HUTONG_PERIOD) {
+    // the lanes stop at the temple's belt of trees
+    if (z + HUTONG_W > bz0 && z < bz1) { out.push([-380, z, b0, z + HUTONG_W], [b1, z, 380, z + HUTONG_W]); continue; }
+    out.push([-380, z, 380, z + HUTONG_W]);
+  }
   for (const x of [-290, -214, 214, 290]) out.push([x - 4, -380, x + 4, 380]);
   return out;
 }
@@ -66,7 +80,7 @@ export function houses() {
       x += w;
       const far = Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b)));
       if (far > RADIUS - 28) continue;
-      if (rectsMeet(r, RING, 2) || rectsMeet(r, AVENUE, 2) || streets.some((s) => rectsMeet(r, s, 1))) continue;
+      if (rectsMeet(r, RING, 2) || rectsMeet(r, AVENUE, 2) || rectsMeet(r, TEMPLE.belt, 1) || streets.some((s) => rectsMeet(r, s, 1))) continue;
       if (rand() < 0.05) continue;
       HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6) });
     }

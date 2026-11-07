@@ -3,7 +3,7 @@
 // scholar trees and jujubes in the courtyards, willows along the moat; the sky of a clear Beijing
 // autumn. Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, LEVEL, MOAT, RIVER, RING, AVENUE, inRect, inMoat, inRiver, inPalace, lanes, inHouse, courtyardAt, smooth as sm } from './layout.js';
+import { RADIUS, LEVEL, MOAT, RIVER, RING, AVENUE, inRect, inMoat, inRiver, inPalace, lanes, inHouse, courtyardAt, inTemple, inBelt, smooth as sm } from './layout.js';
 
 const LANES = lanes();
 const onLane = (x, z, m = 0) => LANES.some((l) => inRect(l, x, z, m)) || inRect(RING, x, z, m) && !inRect(MOAT.outer, x, z) || inRect(AVENUE, x, z, m);
@@ -36,7 +36,9 @@ function cover(x, z, h, ny) {
   const r = Math.hypot(x, z);
   if (inPalace(x, z, 4)) { c.road = 1; c.soil = 1; return c; }
   if (r > RADIUS - 26) { c.fields = 0.7; c.grass = 0.3; return c; }
+  if (inTemple(x, z, 0.5)) { c.road = 1; c.soil = 1; return c; }                       // the altar's court, paved with brick
   if (onLane(x, z)) { c.road = 0.8; c.soil = 1; return c; }
+  if (inBelt(x, z)) { c.soil = 0.35; c.grass = 0.65; return c; }
   c.soil = 0.6 + 0.2 * hash2(x * 0.2, z * 0.2); c.grass = 1 - c.soil;
   return c;
 }
@@ -54,6 +56,9 @@ function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 8) return null;
   if (inPalace(x, z, 6) || channel(x, z) < 0.6) return null;
   if (inRect(MOAT.outer, x, z, 3) && !inRect(MOAT.outer, x, z, -0.01)) return { willow: 1.6 };
+  if (inTemple(x, z, 2.5)) return null;
+  // the old arborvitae (Platycladus orientalis) in their rows round the temple's wall
+  if (inBelt(x, z)) return onLane(x, z, 1) || Math.abs(x - 13) < 9 && Math.abs(z - 280) < 4 ? null : { arborvitae: 2.4, grass: 18 };
   if (courtyardAt(x, z)) return hash2(x * 0.05, z * 0.05) < 0.6 ? { elm: 1.2 } : { jujube: 1.6 };
   if (onLane(x, z) || inHouse(x, z, 0.4)) return null;
   if (inRect(RING, x, z, 8) || inRect(AVENUE, x, z, 30)) return null;                     // the paved ring before the walls and the approach
@@ -63,7 +68,7 @@ function planting(x, z, p) {
 
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 1.6, elm: 1.2, jujube: 1.6 },
+  maxDensity: { willow: 1.6, elm: 1.2, jujube: 1.6, arborvitae: 2.4 },
   // a clear autumn day in Beijing: a high blue sky, dry air, a cool wind from the north-west
   climate: {
     sun: { az: 160, el: 38, color: [1.0, 0.95, 0.86], intensity: 3.3, lat: 40, dec: -5, hour: 11 },

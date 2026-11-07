@@ -43,6 +43,7 @@ export const ground = {
     fog: { color: [0.75, 0.77, 0.78], density: 0.0008, height: 0.014 },
     exposure: 0.5,
     wind: [0.3, 0.2],
+    damp: 0.75,        // the river's damp: streaks down the white walls, moss at their shaded feet and on the north roofs (§11)
     weather: [
       { id: 'hazy', weight: 3, clouds: 0.4, cloudDensity: 0.45, sun: 0.85, fog: 1.4 },
       { id: 'autumn-clear', weight: 2, clouds: 0.15, cloudDensity: 0.3, sun: 1.0, fog: 1 },

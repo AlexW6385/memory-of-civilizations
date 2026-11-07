@@ -14,6 +14,8 @@ export function hill(x, z) {
   return Math.max(60 * fx * fz, c < 1 ? CHOKPORI.h * smooth(1, 0, c) : 0);
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** The chapel of the great prayer wheel on the circuit's west leg, between the path and Shöl's west wall (docs/settlements/lhasa.md §13). */
+export const CHAPEL = [-210.5, 18, -202.6, 28];
 /** The printing house (Shöl Parkhang, c. 1690), "a two-story building on the southeast corner of the Shol". */
 export const PRINTERY = [150, 164, 192, 198];
 /** The printers' benches in its upper room (pairs facing each other across each), along the room's middle. */
