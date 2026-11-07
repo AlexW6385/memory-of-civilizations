@@ -403,7 +403,7 @@ async function main() {
     if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
   $('map-random').onclick = () => mapView.random();
-  // the tour: settlement after settlement, one brisk loop through each; only Esc ends it
+  // the tour: settlement after settlement, an aerial circuit over each; only Esc ends it
   const tour = new Tour({ controls, world, go: (S) => mapView.go(S), note: $('tour-note'), onChange: () => { snap = true; } });
   $('map-tour').onclick = () => { closePanels(); tour.start(); };
   const minimap = new MiniMap(world, mapView, () => openPanel(mapPanel), () => sunPlanet(climate.utc));
