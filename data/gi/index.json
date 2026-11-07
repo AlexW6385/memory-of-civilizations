@@ -1130,7 +1130,7 @@
  },
  "norse-borgund-church": {
   "site": "norse-borgund",
-  "hash": "86d05a6f2cb13c5f",
+  "hash": "e056b522e8a9d939",
   "rays": 128,
   "probes": 6175,
   "boxes": [
@@ -1152,7 +1152,7 @@
     ]
    }
   ],
-  "bytes": 99005,
+  "bytes": 96614,
   "seconds": 7,
   "baked": "2026-11-07"
  },
