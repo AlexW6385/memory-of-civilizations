@@ -33,6 +33,14 @@ function people() {
   monk([ABBEY.origin[0] - 2.2, 16.2], face([0, 16.2], [1, 16.2]));
   monk([ABBEY.origin[0] - 2.4, 17.6], face([0, 17.6], [1, 16.6]), 'talk');
   monk([ABBEY.origin[0] - 6, 4.5], face([ABBEY.origin[0] - 6, 4.5], [ABBEY.origin[0] - 9, 2]), 'talk');
+  // inside: pilgrims kneeling in the choir aisles at the grilles, looking through at the Majesty, and in the ambulatory
+  // behind her; one standing with his staff (docs/settlements/conques.md §1e)
+  const O = ABBEY.origin, maj = [O[0] + 41.8, O[1]];
+  for (const [lx, lz] of [[35.2, -5.6], [37.4, -5.4], [36.3, 5.5], [38.6, 5.7], [48.2, -0.7], [48.1, 0.9]]) {
+    const at = [O[0] + lx, O[1] + lz];
+    L.push({ t: 'figure', at, y: 0, rot: face(at, maj), h: 1.58 + rand() * 0.14, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pick(['cloth_brown', 'cloth_grey', 'cloth_ochre']), cloth2: 'cloth_grey', skin: 'skin_light', hat: rand() < 0.5 ? 'cap' : 'none', hatMat: 'cloth_brown', pose: 'kneel', arms: 'pray' });
+  }
+  { const at = [O[0] + 33.6, O[1] - 6.2]; L.push({ t: 'figure', at, y: 0, rot: face(at, maj), h: 1.66, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_grey', skin: 'skin_light', hat: 'brim', hatMat: 'cloth_black', pose: 'staff', carry: 'staff', len: 1.8 }); }
   return [base('conques-people', L, 'life'), base('conques-staffs', S, 'romanesque')];
 }
 

@@ -2,7 +2,7 @@
 
 Settlement id: `conques` · Style: `romanesque` (with `vernacular` houses) · Region: France (the Rouergue, the gorge of the Dourdou) · Code: `src/settlements/conques/`
 Replaces the legacy district of the previous design. The abbey church itself is the full building from that design (`src/buildings/sainte-foy-conques`, dossier `docs/buildings/sainte-foy-conques.md`), with its cloister.
-Status of this dossier: L1–L2 (the steep south-facing hillside; the abbey church on its terrace with its retaining wall; the village of schist houses with lauze roofs on the slope; the Dourdou in its rocky bed with a stone bridge; woods and gardens; ground, planting, weather, music). L3 recorded for later: the monastic buildings round the cloister, the village gates and walls, the pilgrims' road (the Via Podiensis to Santiago), the chapel of Saint-Roch above, lanes and stairs, people and pilgrims.
+Status of this dossier: L3 in part (carved capitals — §1c; the altar and the treasure — §1d; wear, pilgrims inside, damp, river planting — §1e). Before: L1–L2 (the steep south-facing hillside; the abbey church on its terrace with its retaining wall; the village of schist houses with lauze roofs on the slope; the Dourdou in its rocky bed with a stone bridge; woods and gardens; ground, planting, weather, music). L3 recorded for later: the monastic buildings round the cloister, the village gates and walls, the pilgrims' road (the Via Podiensis to Santiago), the chapel of Saint-Roch above, lanes and stairs, people and pilgrims.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -28,6 +28,30 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **Lowest register:** on the left Abraham enthroned with souls in his lap among the just under the arcades of the heavenly Jerusalem, the gate of Paradise; on the right the mouth of Hell receiving the damned and Satan enthroned among the torments [stated: christianiconography.info; art-roman-conques.fr: the compartments as houses with gabled roofs, gates, walls and arcades].
 - **Archivolts:** three rings, the little "curious" heads peering over the inner one [stated: tourisme-conques.fr names them; their placing inferred].
 - Figures are composed as simple carved and painted masses in the manner of the sources, not copied from photographs [inferred].
+
+## 1c. The capitals (2026-11 L3; `pier` and `column` in `src/buildings/sainte-foy-conques/style.js`)
+
+- The church has 212 columns with decorated capitals, of palm leaves, symbols, biblical monsters and scenes from the life of Sainte Foy; they "functioned as didactic picture books for both monks and pilgrims" [stated: Wikipedia "Abbey Church of Sainte-Foy"].
+- **Built:** every capital of the piers' half-columns, the hemicycle, the tribunes' colonnettes and the cloister carved instead of the plain block: an astragal, a bell flaring to the square abacus with its chamfer, and on it either foliage — a lower tier of eight leaves and an upper tier of four rising at the corners into volutes under the abacus, in three patterns (broad leaves; with a rosette on the abacus; curling palms) — or figures: a figure on the middle of each face between the corner leaves (two sizes). The pattern of each capital is chosen by its place, about two in five figured [inferred: the proportion and the compositions, in the manner of the period's Corinthianising and historiated capitals; no single capital is copied].
+
+## 1d. The altar and the treasure (2026-11 L3; `foy_treasure`)
+
+- The treasure was "kept in the abbey-church until 1875" [stated: tourisme-conques "The treasure"]. Its pieces of our moment: the Majesty (built before); the "A of Charlemagne", ordered by Abbot Bégon III (1087–1107), of filigree and enamelled settings with an antique carnelian carved with a winged Victory; the "shrine of Pepin", a small reliquary of the 9th–11th century with Carolingian enamels, gems, filigree and an antique carnelian; Bégon's portable altar, a porphyry plaque framed in silver engraved and nielloed, with busts of Christ, the Virgin, Sainte Foy and saints on its sides; Bégon's "lantern", a reliquary in the form of an ancient mausoleum with an inscription round the base of its roof; the reliquary sent with Pascal II's relics in 1100, with the Crucifixion; the hexagonal reliquary of gold and silver plates with cabochons [stated: tourisme-conques "The treasure"; Callahan, Illinois Wesleyan, "A of Charlemagne", "reliquary of Pepin", "Begon's lantern"].
+- **Built:** the high altar under a linen cloth with a red frontal banded in gold, Bégon's portable altar in its middle (about 26 × 16 cm of porphyry), a gilt cross set with stones and two candlesticks with burning candles; on two stands under red cloths either side of the Majesty the A (0.42 m), the lantern (a hexagonal arcaded body under a pointed roof, 0.4 m) and the hexagonal reliquary on one, the shrine of Pepin (a little house-shaped casket, 0.19 m) and the Pascal II reliquary on the other, a candle before each [inferred: the sizes approximate, the stands and their place by the Majesty, the frontal].
+
+## 1e. Wear and the pilgrims inside (2026-11 L3)
+
+- **The threshold** of the west portal hollowed by feet in a shallow trough across the middle of the way (2 cm) [inferred: the pilgrims' traffic — Conques a stage of the Via Podiensis].
+- **Pilgrims inside:** four kneeling at the grilles of the choir in the aisles, two kneeling in the ambulatory behind the Majesty, one standing with his staff; the grilles let pilgrims see into the sanctuary, and seeing the reliquary "was the main goal of the pilgrims who came to Conques" [stated: Wikipedia "Abbey Church of Sainte-Foy"].
+- **Damp:** the climate set damp 0.75 — moss on the north feet of the walls and the north slopes of the lauze roofs, rain streaks (the renderer's weathering) [inferred: the misty gorge, §7].
+- **Plants:** willows and reeds at the Dourdou, poplars on the bank, elms and more apple trees among the houses [inferred: the gorge's vegetation, §6].
+
+Sources added:
+- [Abbey Church of Sainte-Foy — Wikipedia](https://en.wikipedia.org/wiki/Abbey_Church_of_Sainte-Foy)
+- [The treasure of goldsmith art — Conques tourist office](https://www.tourisme-conques.fr/en/en-conques/the-treasure)
+- [Conques treasury: «A of Charlemagne» — Callahan, Illinois Wesleyan](https://sun.iwu.edu/~callahan/conques-adecharles-e.html)
+- [Conques treasury: reliquary of Pepin — Callahan](https://sun.iwu.edu/~callahan/conques-pepin-e.html)
+- [Conques treasury: Begon's lantern — Callahan](https://sun.iwu.edu/~callahan/conques-lanternebegon-e.html)
 
 ## 2. Layout of the settlement (radius 360 m)
 
