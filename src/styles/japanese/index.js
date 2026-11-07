@@ -14,6 +14,7 @@ import { byzantineElements } from '../byzantine/index.js';
 import { bracketSet, hexa, obox, buddha, alongZ, hipRoof, gableRoofC } from '../chinese/index.js';
 import { tube, plate } from './shape.js';
 import { suhama } from './garden.js';
+import { byodoDais } from './dais.js';
 
 /** Round column on a stone base, or a square post { at, y, h, d, square, mat }. */
 function column(el, { bag, col }) {
@@ -376,6 +377,6 @@ registerStyle('japanese', {
   column,
   trim: () => {},
   opening: () => {},
-  elements: { ...byzantineElements, bracket_set: bracketSet, irimoya, pent_roof: pentRoof, hogyo, gable_roof_j: gableRoofC, railing, bridge, uji_bridge: ujiBridge, pond_water: pond, suhama },
+  elements: { ...byzantineElements, bracket_set: bracketSet, irimoya, pent_roof: pentRoof, hogyo, gable_roof_j: gableRoofC, railing, bridge, uji_bridge: ujiBridge, pond_water: pond, suhama, byodo_dais: byodoDais },
   objects: { amida, canopy, cloud_bodhisattva: cloudBodhisattva, lantern, phoenix },
 });
