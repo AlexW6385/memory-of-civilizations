@@ -62,5 +62,5 @@ export const ARRIVALS = {
   'new-york':         [-81.83, 0.1, 155.87, 2.6354, 0.6], // up Fifth Avenue between the towers (the grid turned 29°: Fifth at 35th, looking down the avenue)
   'rapa-nui':         [0, 0.3, 62, 3.1416, 0.12],        // the row of moai on their platform
   'maori':            [0, 0.2, 150, 0, 0.2],             // the pā's palisade and carved gateway
-  'sydney':           [220, null, -100, 0.901, 0.05],    // the Opera House across the cove, the Harbour Bridge behind
+  'sydney':           [214.5, null, -112, 1.0, 0.05],    // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
 };
