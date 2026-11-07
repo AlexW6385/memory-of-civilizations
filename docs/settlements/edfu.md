@@ -89,6 +89,8 @@ As for the temple (`docs/buildings/edfu.md` §9).
 - **Priests.** Eight priests (`priests` plan): shaven, in linen wraps, bare-chested, in sandals — one censing with raised hands before the naos, two at the table of the hall of offerings, others walking in the halls and the court [inferred: their dress from the general record of Egyptian priestly purity; the 2024 URL for Herodotus II.37 could not be fetched].
 - **A fix.** The vultures' wings and the winged discs of the hypostyle ceilings (§4.4) were never added (the call that added them sat inside a comment); they now are.
 
+- **The town's houses.** One house in five is furnished as at Giza (`mud_house`, docs/settlements/giza.md §5b): bench, sleeping niche, oven, granary, sunk jars, quern; every house has the lane's dirt along the foot of its walls [inferred: the Old Kingdom house type carried to the Ptolemaic town].
+
 Sources (2026-11-07):
 - [See an ancient Egyptian temple's brilliant colors newly revealed — Smithsonian Magazine](https://www.smithsonianmag.com/smart-news/see-an-ancient-egyptian-temples-brilliant-colors-newly-revealed-beneath-layers-of-dust-and-soot-180985108/)
 - [Ancient Egyptian religion — Wikipedia](https://en.wikipedia.org/wiki/Ancient_Egyptian_religion)

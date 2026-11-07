@@ -28,6 +28,8 @@ function fromWater(x, z) { return inRect(HARBOUR, x, z, -1) ? -3 : 30; }
 /** Plants per 100 m²: nothing on the plateau; date palms and a sycamore fig by the harbour and in the valley. */
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || inHarbour(x, z)) return null;
+  // papyrus and reeds along the harbour's open edges (not the quay on its west side)
+  if (inRect(HARBOUR, x, z, 5) && x > HARBOUR[0] + 7) return { papyrus: 10, reeds: 8 };
   if (x > 320) return { date_palm: 0.5, sycamore_fig: 0.03, halfa: 20 };
   if (inRect(TOWN, x, z, 10) && hash2(x * 0.2, z * 0.2) < 0.04) return { date_palm: 0.3 };
   return null;
