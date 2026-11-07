@@ -4,7 +4,7 @@
 // people hold (taiaha) and lay down in the challenge (rākau).
 
 import { Matrix4 } from '../../core/three.js';
-import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { box, lathe, fromTriangles, orientOutward, rod } from '../../core/geom.js';
 import { tube } from '../../objects/kit.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -212,4 +212,27 @@ function paepae(el, { bag, col }) {
   col.segment(el.a, el.b, 0.4, y, y + 0.47);
 }
 
-export const SCENES = { paepae, hangi, harakeke, weaving, whata, waka_build: wakaBuild, taiaha, rakau };
+/**
+ * hinaki: an eel pot { at, y, yaw, len, tilt (0 lying; else leaning) } — "a basket-like pot", its
+ * entrance (akura) "a ring of sticks pointing inward … touching in the centre, so the eel could push
+ * through to enter, but could not get back out"; made of mangemange stems in the north, of kiekie
+ * roots and aka vine elsewhere, of flax for a temporary one [stated: Te Ara "Te hopu tuna — eeling"].
+ * Ours: a long tapering basket woven of vine (`wicker`), bound with hoops, the mouth at the wide end
+ * with its cone of sticks, the far end tied shut; lying on the shore [inferred: the size, ~1.1 m].
+ */
+function hinaki(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, L = el.len ?? 1.1, R = 0.19;
+  const m = new Matrix4().makeRotationY(el.yaw ?? 0).multiply(new Matrix4().makeRotationZ(-Math.PI / 2 + (el.tilt ?? 0))).setPosition(x, y + R * 0.92, z);
+  const put = (mat, g) => { g.applyMatrix4(m); bag.add(mat, g); };
+  // the body along its axis (local y): the open mouth at y = 0, swelling, tapering to the tied end
+  const prof = [[R * 0.85, 0], [R, 0.12 * L], [R * 0.96, 0.45 * L], [R * 0.7, 0.8 * L], [R * 0.32, 0.97 * L], [0.04, L]];
+  put('wicker', lathe(prof, 14));
+  put('wicker', lathe(prof.map(([r, h]) => [r - 0.012, h]).reverse(), 14));                          // its inside
+  // the hoops round it and the cone of sticks in the mouth
+  for (const f of [0.05, 0.3, 0.58, 0.82]) { const r = f < 0.1 ? R * 0.9 : f < 0.4 ? R * 0.985 : f < 0.7 ? R * 0.88 : R * 0.62; put('timber', lathe([[r + 0.012, 0], [r + 0.012, 0.02], [r - 0.004, 0.02], [r - 0.004, 0]], 14, null, 0, f * L, 0)); }
+  for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; put('wicker', rod([Math.cos(a) * R * 0.82, 0.01, Math.sin(a) * R * 0.82], [Math.cos(a) * 0.02, 0.32 * L, Math.sin(a) * 0.02], 0.006, 3)); }
+  put('rope_fibre', lathe([[0.05, 0], [0.05, 0.04], [0.001, 0.06]], 8, null, 0, L - 0.02, 0));
+  col.circle(x, z, 0.25, y, y + 0.4);
+}
+
+export const SCENES = { hinaki, paepae, hangi, harakeke, weaving, whata, waka_build: wakaBuild, taiaha, rakau };

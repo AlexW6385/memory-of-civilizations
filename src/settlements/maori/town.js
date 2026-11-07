@@ -104,6 +104,23 @@ export async function town() {
     E.push({ t: 'whata', a: [x - 2.2, z], b: [x + 2.2, z], y: height(x, z), h: 2.0 }); taken.push([x, z]); nw++;
     if (nw === 1) { const at = [x + 0.6, z + 1.4]; woman(at, height(at[0], at[1]), face(at, [x, z]), { over: 'none' }); }
   }
+  // eel pots (hīnaki) on the shore by the racks, lying in twos and threes, one leaning on a rack's post
+  // [stated: the hīnaki, Te Ara "Te hopu tuna"; inferred: their places]
+  const racks = E.filter((e) => e.t === 'whata');
+  racks.forEach((r, k) => {
+    const cx = (r.a[0] + r.b[0]) / 2, cz = r.a[1];
+    for (let q = 0; q < 2 + (k % 2); q++) { const at = [cx - 1.4 + q * 0.55, cz + 2.4 + (q % 2) * 0.3]; E.push({ t: 'hinaki', at, y: height(at[0], at[1]), yaw: Math.PI / 2 + (rand() - 0.5) * 0.4, len: 1.0 + rand() * 0.3 }); taken.push(at); }
+  });
+  // kurī — "small, long-haired dogs about the size of a border collie … pricked ears … the tail was
+  // bushy"; coats black, white, mixed or yellow [stated: Te Ara "Kurī — Polynesian dogs"]
+  const KURI = ['hide_black', 'hide_white', 'hide_tan', 'hide_black', 'hide_white'];
+  for (let k = 0; k < 18; k++) {
+    const onTihi = k < 4, spots = [[hx + 4, hz + 21], [hx - 14, hz + 14], [hx + 18, hz - 6], [hx + 3, hz + 10]];
+    const at = onTihi ? spots[k] : [-220 + rand() * 440, -140 + rand() * 300];
+    if (!onTihi && (Math.hypot(at[0] - hx, at[1] - hz) < HILL.ditch + 8 || Math.hypot(at[0], at[1]) > RADIUS - 45 || !clear(at[0], at[1], 3))) continue;
+    if (onTihi && P.some((p) => Math.hypot(p.at[0] - at[0], p.at[1] - at[1]) < 1.5)) continue;
+    P.push({ t: 'animal', kind: 'dog', at, y: onTihi ? top : height(at[0], at[1]), rot: rand() * 6.28, mat: KURI[k % 5], seed: 900 + k });
+  }
   let nf = 0;
   for (let k = 0; k < 600 && nf < 70; k++) {
     const x = -220 + rand() * 440, z = shoreZ(x) + 7 + rand() * 16;

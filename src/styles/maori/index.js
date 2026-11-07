@@ -37,6 +37,26 @@ function board(a, b, wd, z0, z1) {
   return prism([[a[0] - nx, a[1] - ny], [b[0] - nx, b[1] - ny], [b[0] + nx, b[1] + ny], [a[0] + nx, a[1] + ny]], z0, z1);
 }
 
+/**
+ * Rauponga cut into the face of a board a→b (its centre line in the x–y plane, `wd` wide, its face at
+ * z = zf, standing toward −z): "a row of dog-tooth notches (pakati) on each side of which are parallel
+ * grooves (haehae) and ridges (raumoa)" [stated: Te Ara 1966, "Maori art"] — the ridges standing out
+ * of the face, the notches a row of teeth pointing either way along the middle; `rows` such bands
+ * across the board. Returns the pieces for one material.
+ */
+function rauponga(a, b, wd, zf, rows = 1) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, px = -uy, py = ux, out = [];
+  const P = (u, v) => [a[0] + ux * u + px * v, a[1] + uy * u + py * v];
+  const bw = wd / rows;
+  for (let r = 0; r < rows; r++) {
+    const c = -wd / 2 + bw * (r + 0.5);
+    for (const v of [-0.4, -0.22, 0.22, 0.4]) out.push(board(P(0.04, c + v * bw), P(L - 0.04, c + v * bw), bw * 0.07, zf - 0.022, zf + 0.004));
+    const step = Math.max(0.045, bw * 0.16);
+    for (let u = 0.08; u < L - 0.08; u += step) for (const sd of [-1, 1]) out.push(prism(sd < 0 ? [P(u, c), P(u + step * 0.9, c), P(u, c - 0.11 * bw)] : [P(u, c), P(u, c + 0.11 * bw), P(u + step * 0.9, c)], zf - 0.03, zf + 0.004));
+  }
+  return out;
+}
+
 // ---- carved figures ------------------------------------------------------------------------
 // A figure cut from a post or a slab, at unit height, front −z, feet at y = 0 (sculpt.js): the
 // head large (two-fifths of the figure), the eyes great slanting rings round inlaid pāua, a heavy
@@ -193,6 +213,7 @@ function whare(el, ctx) {
   if (carved) {
     // paepae across the porch's mouth, amo at its corners, poupou down its walls
     add(K, box(-w / 2 + t, -0.15, -l / 2 + 0.05, w / 2 - t, 0.28, -l / 2 + 0.3));
+    for (const g of rauponga([-w / 2 + t + 0.05, 0.075], [w / 2 - t - 0.05, 0.075], 0.36, -l / 2 + 0.05)) add(K, g);
     for (const s of [-1, 1]) {
       add(K, box(s * w / 2 - 0.18, -0.2, -l / 2 - 0.02, s * w / 2 + 0.18, 0.02, -l / 2 + 0.16));
       fig('slab', s * (w / 2 - 0.02), 0.02, -l / 2 + 0.07, e - 0.02);
@@ -203,7 +224,7 @@ function whare(el, ctx) {
     for (const s of [-1, 1]) {
       const A = [0, ridge + 0.12], Bp = [s * (w / 2 + ov + 0.1), e - 0.12], dx = Bp[0] - A[0], dy = Bp[1] - A[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
       add(K, board(A, Bp, mw, zm0, zm1));
-      add(K, board([A[0] + ux * 0.1, A[1] + uy * 0.1 + mw * 0.32], [Bp[0] - ux * 0.05, Bp[1] - uy * 0.05 + mw * 0.32], mw * 0.16, zm0 - 0.03, zm0));   // the raised rib
+      for (const g of rauponga([A[0] + ux * 0.45, A[1] + uy * 0.45], [Bp[0] - ux * 0.1, Bp[1] - uy * 0.1], mw * 0.86, zm0, 2)) add(K, g);   // the face carved in rauponga
       for (let k = 0; k < 3; k++) {                                     // the raparapa
         const off = (k - 1) * mw * 0.33, px = -uy * off, py = ux * off, len = 0.32 + 0.08 * (1 - Math.abs(k - 1));
         add(K, board([Bp[0] + px, Bp[1] + py], [Bp[0] + px + ux * len, Bp[1] + py + uy * len], mw * 0.22, zm0 + 0.01, zm1 - 0.01));
@@ -215,6 +236,8 @@ function whare(el, ctx) {
     const ph = Math.min(0.42, h - dh - 0.02);
     add(K, box(dl - 0.2, dh, zf - 0.1, dr + 0.2, dh + ph, zf));
     fig('face', (dl + dr) / 2, dh + 0.02, zf - 0.13, ph - 0.04);
+    for (const g of rauponga([dl - 0.17, dh + ph / 2], [(dl + dr) / 2 - ph * 0.42, dh + ph / 2], ph * 0.8, zf - 0.1)) add(K, g);
+    for (const g of rauponga([(dl + dr) / 2 + ph * 0.42, dh + ph / 2], [dr + 0.17, dh + ph / 2], ph * 0.8, zf - 0.1)) add(K, g);
   }
   if (rank > 1) {
     // inside: poutokomanawa, poupou and tukutuku round the walls, heke over each poupou, mats, the hearth
