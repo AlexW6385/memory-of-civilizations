@@ -209,7 +209,7 @@
  },
  "edfu": {
   "site": "edfu",
-  "hash": "ec481dab7d114aef",
+  "hash": "82de60451f691976",
   "rays": 128,
   "probes": 53352,
   "boxes": [
@@ -256,9 +256,9 @@
     ]
    }
   ],
-  "bytes": 872782,
-  "seconds": 637,
-  "baked": "2026-11-06"
+  "bytes": 872413,
+  "seconds": 84,
+  "baked": "2026-11-07"
  },
  "edo-himeji-castle": {
   "site": "edo-himeji",
