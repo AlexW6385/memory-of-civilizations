@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.99 — Indoor light, corrected (2026-11-07)
+- Every baked interior has been re-baked after a fix in the light baker, which had been taking the wrong surface's colour (and the wrong glass's transmission) at almost every bounce; interiors now take their light from their own walls. New bakes: the Great Pyramid's passages and King's Chamber, San Marco, St Basil's, the Empire State lobby, the Sydney Concert Hall. 44 landmarks are baked, all current.
+
 ## v9.98 — Fewer triangles (2026-11-07)
 - Smoother in the heaviest places: big merged meshes are cut into 128 m cells so what is out of view is skipped again; fine repeated pieces (balustrade posts, brackets, capitals) are simplified beyond 60 m and cast simpler shadows; thin bars are drawn within 100 m; street life is simplified beyond 50 m. Triangles per frame fall by about a quarter overall (Beijing 14.7 M to 9.0 M, the Maori pa 18.9 M to 4.6 M, the Sainte-Chapelle 4.6 M to 3.6 M).
 
