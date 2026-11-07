@@ -320,6 +320,36 @@
   "seconds": 7,
   "baked": "2026-11-07"
  },
+ "pantheon": {
+  "site": "rome",
+  "hash": "0e9cab4a0e991df8",
+  "rays": 128,
+  "probes": 74480,
+  "boxes": [
+   {
+    "min": [
+     -27.5,
+     0.8,
+     -17
+    ],
+    "n": [
+     49,
+     38,
+     40
+    ],
+    "spacing": 1.15,
+    "rooms": [
+     "rotunda",
+     "apse",
+     "niche-east",
+     "niche-west"
+    ]
+   }
+  ],
+  "bytes": 1193011,
+  "seconds": 832,
+  "baked": "2026-11-07"
+ },
  "parthenon": {
   "site": "athens",
   "hash": "abd5caaf47819a90",
