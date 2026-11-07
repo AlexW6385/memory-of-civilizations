@@ -688,7 +688,7 @@
  },
  "kilwa-mosque": {
   "site": "kilwa",
-  "hash": "f8c9be1f017d1514",
+  "hash": "a8d0f534e44262cb",
   "rays": 128,
   "probes": 54109,
   "boxes": [
@@ -728,8 +728,8 @@
     ]
    }
   ],
-  "bytes": 903207,
-  "seconds": 235,
+  "bytes": 899951,
+  "seconds": 118,
   "baked": "2026-11-07"
  },
  "knossos-palace": {
