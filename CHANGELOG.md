@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.1 — Lighter shadows, sealed rooms (2026-11-07)
+- Smoother again: shadows are cast by size - small things only into the nearest shadow layer, middle-sized into the first two, only big masses into the farthest - and each layer stops just past its own range. Standing in a closed hall (the Sainte-Chapelle's upper chapel, Hagia Sophia, the crossings of Florence and St Peter's), what lies far outside is not drawn. Wrought-iron railings are drawn within 150 m, the simplified versions of things are made off the main thread. The Sainte-Chapelle's upper chapel falls from 3.6 M to 2.3 M triangles a frame, Barcelona from 9.4 M to 5.9 M, Teotihuacan from 9.5 M to 5.3 M.
+
 ## v10.0 — Water where it belongs (2026-11-07)
 - Water across the planet is right now: the sea meets a settlement's flat ground exactly at its rim, so coasts, rivers and harbours sit at their level and boats float on them. Kilwa's and Rapa Nui's seas no longer sink away from the shore; the Nile at Edfu, the Yamuna at Agra, Tenochtitlan's lake, the cenote at Chichen Itza, Rano Raraku's crater lake, the Maori lake and Borgund's river are drawn at last; the Conques gorge, Jerusalem's valleys and Stonehenge are no longer flooded by the sea; Amsterdam's ships float on the IJ.
 
