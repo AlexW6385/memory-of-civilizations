@@ -30,6 +30,11 @@ const LEGS = {
   low: { drop: 0.58, lean: -0.12 },              // on a step or a low stool (seat ~0.22 m), the knees up, the feet flat before it
   ground: { drop: 0.75, lean: -0.04 },           // on the ground or a floor, the legs out before, a little bent, the heels down
   seiza: { drop: 0.61, lean: 0 },                // kneeling sat back on the heels, the shins along the ground beneath
+  // the dances (opt-in): the apsara's deep bend of the knees turned out, one foot lifted behind (plieR: the right);
+  // a folk dancer's step, the right foot lifted forward a little; astride (riding), the legs spread round a neck or a back
+  plieR: { drop: 0.12, lean: 0.04 }, plieL: { drop: 0.12, lean: 0.04 },
+  step: { drop: 0.03, lean: 0.03 },
+  astride: { drop: 0, lean: 0 },
 };
 /** arm = [shoulder, elbow, wrist, hand direction] for the left (s = −1) and right (s = +1) arms. */
 function arms(pose, s) {
@@ -52,6 +57,21 @@ function arms(pose, s) {
     case 'thighs': return [S, [s * 0.21, 1.12, 0.02], [s * 0.14, 1.02, -0.22], [0, -0.35, -0.94]];                            // the hands on the outstretched thighs
     case 'lap': return [S, [s * 0.2, 1.1, -0.02], [s * 0.13, 0.89, -0.22], [0, -0.3, -0.95]];                                 // the hands on the thighs, sat on the heels
     case 'hoe': return s > 0 ? [S, [0.22, 1.1, -0.12], [0.08, 1.07, -0.33], [-0.4, -0.1, -0.9]] : [S, [-0.2, 1.06, -0.1], [-0.02, 0.88, -0.42], [0.4, -0.2, -0.9]];
+    // the dances (opt-in). The Khmer apsara of the reliefs: the right arm raised, the elbow out, the hand above the
+    // shoulder with its fingers bent back; the left lowered and out to the side at the hip, the palm up, the fingers
+    // curled back too (the fifth entry: the way the fingers bend back). 'apsara2' is its mirror.
+    case 'apsara': return s > 0 ? [S, [0.37, 1.41, -0.03], [0.38, 1.64, -0.08], [0.12, 1, -0.15], [1, 0, 0.3]] : [S, [-0.34, 1.17, -0.01], [-0.46, 1.16, -0.21], [-0.35, 0.15, -0.92], [0, 1, 0]];
+    case 'apsara2': { const q = arms('apsara', -s); return q.map((v) => [-v[0], v[1], v[2]]); }
+    // a folk dance: the right arm up over the head, curved; the left hand on the hip
+    case 'folk': return s > 0 ? [S, [0.31, 1.6, 0.0], [0.18, 1.84, -0.03], [-0.65, 0.6, 0]] : [S, [-0.33, 1.13, 0.06], [-0.2, 0.99, -0.04], [0.45, -0.3, -0.6]];
+    // the musicians, seated: both hands on the heads of a drum across the lap; at an end-blown flute held down
+    // before the face; plucking a harp upright on the lap; a lute across the chest, the left hand on its neck
+    case 'drum': return [S, [s * 0.24, 1.1, -0.03], [s * 0.3, 1.1, -0.2], [-s * 0.45, -0.3, -0.8]];
+    case 'flute': return s > 0 ? [S, [0.2, 1.1, -0.14], [0.075, 1.25, -0.29], [-0.85, -0.1, -0.5]] : [S, [-0.2, 1.14, -0.12], [-0.075, 1.375, -0.19], [0.85, -0.1, -0.5]];
+    case 'harp': return s > 0 ? [S, [0.24, 1.12, -0.06], [0.1, 1.24, -0.22], [-0.55, 0, -0.8]] : [S, [-0.24, 1.14, -0.1], [-0.1, 1.3, -0.3], [0.55, 0, -0.8]];
+    case 'lute': return s > 0 ? [S, [0.26, 1.12, 0.0], [0.2, 1.08, -0.2], [-0.5, 0, -0.85]] : [S, [-0.32, 1.12, -0.04], [-0.26, 1.28, -0.14], [0.2, 0.5, -0.8]];
+    // riding astride (a mahout on an elephant's neck): the right hand forward holding the goad, the left on the thigh
+    case 'ride': return s > 0 ? [S, [0.24, 1.12, -0.08], [0.2, 1.1, -0.32], [0, 0.2, -1]] : [S, [-0.25, 1.1, 0.0], [-0.27, 0.88, -0.12], [-0.35, -0.3, -0.85]];
     default: return [S, [s * 0.205, 1.085, 0.025], [s * 0.21, 0.84, -0.02], [s * 0.05, -1, -0.12]];
   }
 }
@@ -116,7 +136,20 @@ function forearms(add, pose) {
   for (const s of [-1, 1]) { const [, E, W] = arms(pose, s); add('skin', tube([[...E, 0.042], [...va(E, va(W, E, -1), 0.5), 0.036], [...W, 0.03]], 7, { capA: false, capB: false })); }
 }
 /** The hands at the ends of the arms. */
-function hands(add, pose) { for (const s of [-1, 1]) { const [, , W, d] = arms(pose, s); hand(add, W, d, s); } }
+function hands(add, pose) { for (const s of [-1, 1]) { const [, , W, d, bk] = arms(pose, s); if (bk) danceHand(add, W, d, bk, s); else hand(add, W, d, s); } }
+/**
+ * A dancer's hand (the Khmer kbach): the palm along d, the fingers together and bent far back (toward bk),
+ * the thumb drawn in toward the index finger. Skin.
+ */
+function danceHand(add, W, d, bk, s) {
+  d = norm(d);
+  const kk = bk[0] * d[0] + bk[1] * d[1] + bk[2] * d[2], b = norm(va(bk, d, -kk));                // bk made square to d
+  const P0 = va(W, d, 0.08), P1 = va(va(P0, d, 0.028), b, 0.012), P2 = va(va(P1, d, 0.016), b, 0.026), P3 = va(va(P2, d, 0.002), b, 0.026);
+  add('skin', tube([[...W, 0.03, 0.026], [...va(W, d, 0.04), 0.037, 0.016], [...P0, 0.036, 0.013], [...P1, 0.032, 0.011], [...P2, 0.026, 0.009], [...P3, 0.014, 0.007]], 6));
+  const side = norm([d[1] * b[2] - d[2] * b[1], d[2] * b[0] - d[0] * b[2], d[0] * b[1] - d[1] * b[0]]);
+  const T0 = va(va(W, d, 0.03), side, -s * 0.026), T1 = va(va(T0, d, 0.045), side, s * 0.008);
+  add('skin', tube([[...T0, 0.012], [...T1, 0.009], [...va(va(T1, d, 0.012), side, s * 0.008), 0.006]], 5));
+}
 
 /** The legs (role: trousers, hose or skin), by the pose of the legs. */
 function legsOf(legs, s) {
@@ -127,6 +160,14 @@ function legsOf(legs, s) {
   if (legs === 'low') return [[s * 0.09, 0.3, 0.0], [s * 0.1, 0.47, -0.38], [s * 0.095, 0.1, -0.36]];
   if (legs === 'ground') return [[s * 0.09, 0.13, 0.0], [s * 0.1, 0.2, -0.4], [s * 0.09, 0.09, -0.77]];
   if (legs === 'seiza') return [[s * 0.09, 0.27, 0.0], [s * 0.1, 0.08, -0.38], [s * 0.095, 0.07, 0.0]];
+  if (legs === 'plieR' || legs === 'plieL') {
+    // the supporting leg bent, the knee turned out over the turned-out foot; the other knee out and forward, its
+    // shin back and level, the foot lifted behind (the Khmer apsara)
+    const up = (legs === 'plieR') === (s > 0);
+    return up ? [[s * 0.09, 0.74, 0.0], [s * 0.24, 0.45, -0.12], [s * 0.2, 0.44, 0.22]] : [[s * 0.09, 0.74, 0.0], [s * 0.21, 0.42, -0.12], [s * 0.12, 0.1, 0.0]];
+  }
+  if (legs === 'step') return s > 0 ? [[0.088, 0.83, 0.0], [0.1, 0.49, -0.15], [0.096, 0.17, -0.09]] : [[-0.088, 0.83, 0.0], [-0.094, 0.46, 0.01], [-0.09, 0.1, 0.03]];
+  if (legs === 'astride') return [[s * 0.1, 0.86, 0.0], [s * 0.42, 0.68, -0.14], [s * 0.5, 0.36, 0.04]];
   if (legs === 'brace') return s < 0 ? [[-0.088, 0.82, 0.0], [-0.094, 0.47, -0.2], [-0.088, 0.1, -0.2]] : [[0.088, 0.82, 0.0], [0.094, 0.46, 0.17], [0.088, 0.1, 0.36]];
   return [[s * 0.088, 0.86, 0.0], [s * 0.094, 0.48, -0.012], [s * 0.088, 0.1, 0.005]];
 }
@@ -144,6 +185,16 @@ function feet(add, role, legs) {
     // legs out on the ground: the foot up from the heel, the toes turned a little out
     if (legs === 'ground') { add(role, tube([[A[0], 0.07, A[2] + 0.045, 0.035, 0.035], [A[0], 0.09, A[2] - 0.015, 0.045, 0.04], [A[0] + s * 0.012, 0.165, A[2] - 0.06, 0.044, 0.03], [A[0] + s * 0.02, 0.215, A[2] - 0.075, 0.03, 0.022]], 7)); continue; }
     if (legs === 'kneel' || legs === 'seiza') { add(role, tube([[A[0], 0.075, A[2] - 0.04, 0.038, 0.035], [A[0], 0.055, A[2] + 0.06, 0.044, 0.032], [A[0] + s * 0.004, 0.035, A[2] + 0.15, 0.04, 0.022], [A[0] + s * 0.006, 0.028, A[2] + 0.2, 0.028, 0.016]], 7)); continue; }
+    if (legs === 'plieR' || legs === 'plieL' || legs === 'step' || legs === 'astride') {
+      const up = legs === 'astride' || (legs === 'plieR') === (s > 0) && legs !== 'step', lift = legs === 'step' && s > 0;
+      if (legs === 'astride') { add(role, tube([[A[0], A[1] - 0.02, A[2] + 0.05, 0.035, 0.035], [A[0], A[1] - 0.05, A[2] - 0.01, 0.045, 0.04], [A[0] - s * 0.01, A[1] - 0.1, A[2] - 0.1, 0.042, 0.03], [A[0] - s * 0.015, A[1] - 0.12, A[2] - 0.15, 0.028, 0.02]], 7)); continue; }
+      // the lifted foot flexed: the sole turned up behind, the toes bent up
+      if (up) { add(role, tube([[A[0], A[1] - 0.02, A[2] - 0.02, 0.036, 0.034], [A[0], A[1] - 0.045, A[2] + 0.05, 0.045, 0.034], [A[0] + s * 0.004, A[1] - 0.03, A[2] + 0.13, 0.042, 0.025], [A[0] + s * 0.006, A[1] + 0.01, A[2] + 0.17, 0.03, 0.018]], 7)); continue; }
+      // the foot on the ground turned out (the apsara), or lifted a hand's breadth, the toes down (the folk step)
+      const o = legs === 'step' ? 0.12 : 0.55, dx = s * Math.sin(o), dz = -Math.cos(o), y0 = lift ? A[1] - 0.06 : 0.045, dy = lift ? -0.02 : 0;
+      add(role, tube([[A[0] - dx * 0.06, y0, A[2] - dz * 0.06, 0.035, 0.035], [A[0] + dx * 0.02, y0 - 0.005 + dy * 0.3, A[2] + dz * 0.02, 0.045, 0.04], [A[0] + dx * 0.12, y0 - 0.013 + dy, A[2] + dz * 0.12, 0.044, 0.03], [A[0] + dx * 0.175, y0 - 0.017 + dy * 1.4, A[2] + dz * 0.175, 0.03, 0.022]], 7));
+      continue;
+    }
     if (legs === 'cross') { add(role, tube([[A[0], A[1], A[2] + 0.03, 0.035, 0.035], [A[0] - s * 0.06, A[1] - 0.01, A[2] + 0.02, 0.042, 0.038], [A[0] - s * 0.15, A[1] - 0.025, A[2] + 0.04, 0.04, 0.026], [A[0] - s * 0.2, A[1] - 0.03, A[2] + 0.05, 0.026, 0.018]], 7)); continue; }
     add(role, tube([[A[0], 0.045, z + 0.06, 0.035, 0.035], [A[0], 0.04, z - 0.02, 0.045, 0.04], [A[0] + s * 0.004, 0.032, z - 0.12, 0.044, 0.03], [A[0] + s * 0.006, 0.028, z - 0.175, 0.03, 0.022]], 7));
   }
@@ -297,6 +348,73 @@ function heldThing(a, carry, armPose, M, legs, len) {
   }
 }
 
+/**
+ * The short skirt of a dancer in the apsara's bend (the sampot to mid-thigh, its pleated front fold hanging
+ * between the knees), or the long flaring skirt of a robe or a wrap in the folk dancer's step. In the upper body's
+ * frame (lowered and leant with it).
+ */
+function danceSkirt(up, legs, dress, seed) {
+  if (legs === 'step') {
+    const hem = dress === 'robe' ? 0.15 : dress === 'wrap' ? 0.3 : 0.55, r0 = dress === 'robe' ? 0.34 : dress === 'wrap' ? 0.29 : 0.27;
+    up('c1', folded([[0.001, hem + 0.006], [r0 * 0.97, hem], [r0, hem + 0.012], [r0 * 0.96, hem + 0.06], [(r0 + 0.16) / 2 + 0.02, (hem + 0.92) / 2], [0.162, 0.92], [0.15, 1.0], [0.001, 1.01]], 18, 9, 0.08, seed).scale(1, 1, 0.86));
+    return;
+  }
+  up('c1', folded([[0.001, 0.606], [0.205, 0.6], [0.21, 0.614], [0.195, 0.72], [0.163, 0.92], [0.15, 1.0], [0.001, 1.01]], 16, 9, 0.06, seed).scale(1, 1, 0.86));
+  up('c1', tube([[0, 0.97, -0.127, 0.03, 0.006], [0, 0.8, -0.153, 0.055, 0.006], [0, 0.6, -0.17, 0.07, 0.005], [0, 0.5, -0.16, 0.06, 0.004]], 5));
+}
+/**
+ * The instruments of the seated musicians, in the upper body's frame (where the posed hands are): a barrel drum
+ * across the lap, its two heads laced to each other; an end-blown flute of cane from the lips; an arched harp, its
+ * boat-shaped sound box on the lap and its neck curving up from the far end, the strings between them (the Khmer
+ * pin of the Angkor reliefs); a lute, its bowl at the right hip and its neck up to the left, the pegbox bent back.
+ * Roles: timber, hide (drumheads), lacing, cane, string.
+ */
+function instrument(a, kind) {
+  if (kind === 'drum') {
+    const c = [0, 1.04, -0.27], L = 0.46, R = 0.14;
+    a('timber', slathe([[0.12, -L / 2], [0.135, -L / 4], [R, 0], [0.135, L / 4], [0.12, L / 2]], 16).rotateZ(Math.PI / 2).translate(...c));
+    for (const sx of [-1, 1]) {
+      a('hide', slathe([[0.001, 0], [0.122, 0], [0.126, 0.012], [0.001, 0.014]], 16).rotateZ(-sx * Math.PI / 2).translate(c[0] + sx * (L / 2 - 0.004), c[1], c[2]));
+      a('lacing', tube(Array.from({ length: 17 }, (_, k) => { const t = k / 16 * Math.PI * 2; return [c[0] + sx * (L / 2 - 0.02), c[1] + Math.cos(t) * 0.127, c[2] + Math.sin(t) * 0.127, 0.008]; }), 4, { capA: false, capB: false }));
+    }
+    for (let k = 0; k < 10; k++) {                                       // the laces from head to head, zigzag
+      const t0 = k / 10 * Math.PI * 2, t1 = (k + 0.5) / 10 * Math.PI * 2, P = (t, x, r) => [c[0] + x, c[1] + Math.cos(t) * r, c[2] + Math.sin(t) * r, 0.004];
+      a('lacing', tube([P(t0, -L / 2 + 0.02, 0.127), P((t0 + t1) / 2, -L / 4, 0.14), P(t1, 0, R + 0.004), P((t0 + t1) / 2 + 0.3, L / 4, 0.14), P(t0 + 0.6, L / 2 - 0.02, 0.127)], 3));
+    }
+  } else if (kind === 'flute') {
+    const m = [0, 1.507, -0.098], e = [0, 1.122, -0.438];
+    a('cane', tube([[...m, 0.011], [...va(m, va(e, m, -1), 0.5), 0.012], [...e, 0.013]], 7));
+    for (let k = 0; k < 6; k++) { const p = va(m, va(e, m, -1), 0.34 + k * 0.08); a('string', tube([[p[0], p[1] + 0.004, p[2] - 0.0115, 0.004], [p[0], p[1] + 0.006, p[2] - 0.0135, 0.0045]], 4)); }   // the finger holes
+    a('lacing', tube([[...va(m, va(e, m, -1), 0.2), 0.0125], [...va(m, va(e, m, -1), 0.23), 0.0125]], 7, { capA: false, capB: false }));
+  } else if (kind === 'harp') {
+    a('timber', tube([[0, 0.985, -0.05, 0.03, 0.02], [0, 0.995, -0.12, 0.07, 0.05], [0, 1.0, -0.26, 0.085, 0.06], [0, 1.0, -0.39, 0.07, 0.05], [0, 1.015, -0.47, 0.035, 0.03]], 10));
+    a('hide', tube([[0, 1.03, -0.1, 0.045, 0.006], [0, 1.045, -0.26, 0.062, 0.006], [0, 1.045, -0.4, 0.04, 0.006]], 8));    // the soundboard
+    const N = [[0, 1.02, -0.47], [0, 1.18, -0.52], [0, 1.36, -0.5], [0, 1.5, -0.41], [0, 1.58, -0.29], [0, 1.6, -0.2]];
+    a('timber', tube(N.map((p, i) => [...p, 0.022 - i * 0.002]), 7));
+    for (let k = 0; k < 5; k++) {                                           // the strings, from the neck to the soundboard
+      const t = 0.3 + k * 0.13, i = Math.min(N.length - 2, Math.floor(t * (N.length - 1))), f = t * (N.length - 1) - i, p = N[i].map((v, j) => v + (N[i + 1][j] - v) * f);
+      a('string', tube([[p[0], p[1], p[2] + 0.018, 0.0025], [0, 1.046, -0.12 - k * 0.055, 0.0025]], 3));
+    }
+  } else if (kind === 'lute') {
+    const b = new Vector3(0.12, 1.06, -0.17), h = new Vector3(-0.32, 1.38, -0.21), u = h.clone().sub(b).normalize();
+    const zA = new Vector3(0, 0, -1), xA = new Vector3().crossVectors(u, zA).normalize(), zB = new Vector3().crossVectors(xA, u).normalize();
+    const B = new Matrix4().makeBasis(xA, u, zB).setPosition(b);
+    const g = (geo) => geo.applyMatrix4(B);
+    a('timber', g(slathe([[0.001, -0.17], [0.09, -0.15], [0.13, -0.07], [0.125, 0.03], [0.085, 0.12], [0.03, 0.17], [0.022, 0.18]], 14, (th) => (Math.sin(th) < 0 ? 0.55 : 0.08))));   // the bowl behind (toward the player)
+    a('hide', g(slathe([[0.001, -0.16], [0.085, -0.145], [0.122, -0.07], [0.118, 0.03], [0.08, 0.115], [0.022, 0.17], [0.001, 0.171]], 14, (th) => (Math.sin(th) > 0 ? 0.1 : 0.04))));     // the soundboard
+    a('timber', g(tube([[0, 0.16, 0.0, 0.021, 0.014], [0, 0.4, 0.0, 0.017, 0.013]], 7)));
+    a('timber', g(tube([[0, 0.39, -0.002, 0.018, 0.012], [0, 0.45, -0.03, 0.017, 0.012], [0, 0.5, -0.06, 0.013, 0.01]], 6)));            // the pegbox bent back
+    for (const dx of [-0.008, 0.0, 0.008]) a('string', g(tube([[dx, -0.1, 0.017, 0.0018], [dx, 0.4, 0.018, 0.0018]], 3)));
+  } else if (kind === 'ankus') {
+    // the elephant goad: a short rod, its iron head with the point forward and the hook curved back
+    const w = [0.2, 1.1, -0.32], d = norm([0, 0.2, -1]), p = va(w, d, 0.06);
+    a('timber', tube([[...va(p, d, -0.22), 0.016], [...p, 0.017], [...va(p, d, 0.2), 0.016]], 6));
+    const t = va(p, d, 0.2);
+    a('iron', tube([[...t, 0.014], [...va(t, d, 0.08), 0.009], [...va(t, d, 0.14), 0.001]], 5));
+    a('iron', tube([[...va(t, d, 0.03), 0.01], [t[0], t[1] - 0.05, t[2] - 0.08, 0.008], [t[0], t[1] - 0.09, t[2] - 0.03, 0.006], [t[0], t[1] - 0.07, t[2] + 0.01, 0.001]], 5));
+  }
+}
+
 // ---- hair and hats -----------------------------------------------------------------------------------
 /** The face's dark parts (eyes, brows, mouth) and the beard. */
 function faceOf(add, beard) {
@@ -339,6 +457,17 @@ function hatOf(add, hat) {
   } else if (hat === 'straw') {                       // the conical straw hat, its rim turned down a little
     add('hat', slathe([[0.31, 1.618], [0.315, 1.625], [0.29, 1.636], [0.16, 1.7], [0.06, 1.77], [0.012, 1.8], [0.001, 1.802], [0.001, 1.79], [0.05, 1.755], [0.15, 1.69], [0.28, 1.628], [0.31, 1.618]], 18));
     add('hat', slathe([[0.096, 1.585], [0.1, 1.62], [0.001, 1.64]], 12));
+  } else if (hat === 'mkot') {
+    // the dancer's crown (the Khmer mkot, as the apsaras of Angkor Wat wear it): a diadem round the head, over it a
+    // tall cone rising in tiers to a spire, two lesser points either side of it; long earrings to the shoulder
+    add('hat', slathe([[0.001, 1.598], [0.097, 1.598], [0.101, 1.606], [0.101, 1.636], [0.094, 1.642], [0.086, 1.656], [0.089, 1.672], [0.079, 1.688], [0.071, 1.698],
+      [0.074, 1.713], [0.063, 1.728], [0.056, 1.738], [0.059, 1.753], [0.046, 1.773], [0.04, 1.783], [0.043, 1.798], [0.031, 1.818], [0.025, 1.838], [0.027, 1.852],
+      [0.015, 1.888], [0.007, 1.928], [0.001, 1.958]], 14, ell(0.92, 1.0)));
+    for (const s of [-1, 1]) {
+      add('hat', tube([[s * 0.06, 1.62, -0.015, 0.028, 0.02], [s * 0.085, 1.68, -0.02, 0.02, 0.014], [s * 0.105, 1.73, -0.022, 0.01, 0.008], [s * 0.115, 1.765, -0.022, 0.002]], 6));
+      add('hat', tube([[s * 0.086, 1.515, 0.0, 0.007], [s * 0.088, 1.46, 0.002, 0.009], [s * 0.09, 1.4, 0.004, 0.006]], 5));
+      add('hat', ball(0.012, 6, 5).translate(s * 0.09, 1.384, 0.004));
+    }
   } else if (hat === 'brim') {                        // a felt hat: a crown with a dent, a broad brim
     add('hat', slathe([[0.2, 1.61], [0.205, 1.618], [0.12, 1.628], [0.105, 1.64], [0.1, 1.72], [0.085, 1.745], [0.05, 1.738], [0.001, 1.732], [0.001, 1.722], [0.09, 1.705], [0.09, 1.632], [0.12, 1.616], [0.198, 1.604], [0.2, 1.61]], 18, ell(0.92, 1.05)));
   }
@@ -375,35 +504,45 @@ function heru(add) {
  * 'cloak' (to below the knee) | 'apron' | 'belt' | 'shawl' | 'wesekh' (the broad collar) | 'none'), legs ('hose' | 'bare'), feet ('bare' | 'shod') } — a still figure, facing −z.
  * The poses, dresses and things held beyond the first ones are opt-in: a figure without them is as it was.
  */
-const LEGS_OF = { sit: 'sit', squat: 'squat', row: 'sit', kneel: 'kneel', cross: 'cross', pull: 'brace', sit_low: 'low', sit_ground: 'ground', seiza: 'seiza' };
+const LEGS_OF = { sit: 'sit', squat: 'squat', row: 'sit', kneel: 'kneel', cross: 'cross', pull: 'brace', sit_low: 'low', sit_ground: 'ground', seiza: 'seiza',
+  apsara: 'plieR', apsara2: 'plieL', folk: 'step', drum: 'cross', flute: 'cross', harp: 'cross', lute: 'cross', ride: 'astride' };
 const SEAT_ARMS = { low: 'knees', ground: 'thighs', seiza: 'lap' };
-const HELD = { staff: 'staff', rope: 'pull', oars: 'row', punt: 'punt', child: 'child' };
-const POSE_HELD = { staff: 'staff', pull: 'rope', punt: 'punt' };
+const HELD = { staff: 'staff', rope: 'pull', oars: 'row', punt: 'punt', child: 'child', drum: 'drum', flute: 'flute', harp: 'harp', lute: 'lute', ankus: 'ride' };
+const POSE_HELD = { staff: 'staff', pull: 'rope', punt: 'punt', drum: 'drum', flute: 'flute', harp: 'harp', lute: 'lute', ride: 'ankus' };
+const INSTR = new Set(['drum', 'flute', 'harp', 'lute', 'ankus']), DANCE = new Set(['plieR', 'plieL', 'step']);
+const POSE_ARMS = ['pray', 'pull', 'staff', 'row', 'punt', 'apsara', 'apsara2', 'folk', 'ride'];
+// a child (el.child): about 1.0–1.3 m, slighter, its head larger for its height (scaled about the base of the neck)
+const CHILD_HEAD = new Matrix4().makeTranslation(0, 1.36, 0).multiply(new Matrix4().makeScale(1.24, 1.24, 1.24)).multiply(new Matrix4().makeTranslation(0, -1.36, 0));
 export function figure(el, { bag, col }) {
-  const r0 = rng(el.seed), H = el.h ?? 1.56 + r0() * 0.2, girth = 0.92 + r0() * 0.18;
+  const r0 = rng(el.seed), kid = !!el.child, H = el.h ?? (kid ? 1.0 + r0() * 0.3 : 1.56 + r0() * 0.2), girth = (kid ? 0.84 : 0.92) + r0() * 0.18;
   const put = placer(el, bag, H / HB, [girth, 1, 0.94 + (girth - 0.92) * 0.6]);
   const c1 = el.cloth ?? 'cloth_white', c2 = el.cloth2 ?? c1, sk = el.skin ?? 'skin_medium', dress = el.dress ?? 'robe';
   const pose = el.pose ?? 'stand', carry = el.carry && el.carry !== 'none' ? el.carry : POSE_HELD[pose] ?? 'none', hat = el.hat ?? 'none';
   const legs = LEGS_OF[pose] ?? 'stand';
   const armPose = el.arms ?? (carry === 'pot' || carry === 'basket' ? 'head' : carry === 'pole' ? 'pole' : carry === 'hoe' ? 'hoe' : HELD[carry] ? HELD[carry]
-    : legs === 'sit' || legs === 'squat' ? legs : SEAT_ARMS[legs] ? SEAT_ARMS[legs] : legs === 'cross' ? (pose === 'pray' ? 'pray' : 'cross') : ['pray', 'pull', 'staff', 'row', 'punt'].includes(pose) ? pose
-      : pose === 'talk' ? 'talk' : (r0() < 0.3 ? 'clasp' : 'hang'));
+    : legs === 'sit' || legs === 'squat' ? legs : SEAT_ARMS[legs] ? SEAT_ARMS[legs] : legs === 'cross' ? (pose === 'pray' ? 'pray' : 'cross')
+      : POSE_ARMS.includes(pose) ? pose : pose === 'talk' ? 'talk' : (r0() < 0.3 ? 'clasp' : 'hang'));
   const veiled = hat === 'veil';
   const style = veiled ? 'none' : hat === 'turban' ? 'under' : hat !== 'none' ? 'under' : el.hair ?? ['short', 'short', 'long', 'bun', 'short'][Math.floor(r0() * 5)];
-  const beard = el.beard ?? (!veiled && style !== 'long' && style !== 'bun' && r0() < 0.35);
+  const beard = !kid && (el.beard ?? (!veiled && style !== 'long' && style !== 'bun' && r0() < 0.35));
   const lower = dress === 'loincloth' || dress === 'shendyt' || dress === 'sheath' || dress === 'strands';             // the dresses of the lower body alone
   const bare = lower || ((el.top ?? (dress === 'loincloth' || dress === 'shendyt' ? 'bare' : '')) === 'bare' && (dress === 'wrap' || dress === 'trousers'));
   const over = el.over ?? (dress === 'robe' ? ['sash', 'none', 'collar'][Math.floor(r0() * 3)] : dress === 'wrap' ? (bare ? 'none' : 'shawl') : dress === 'tunic' || dress === 'shendyt' ? 'belt' : 'none');
   const bareLegs = dress === 'tunic' ? (el.legs ?? 'bare') === 'bare' : dress === 'wrap' || dress === 'loincloth' || dress === 'shendyt' || dress === 'strands';
   const shod = (el.feet ?? (dress === 'wrap' || lower ? 'bare' : 'shod')) !== 'bare';
-  const shade = () => 0.86 + r0() * 0.22, cs = shade(), cs2 = shade(), ss = 0.9 + r0() * 0.16;
+  // the skin's shade and its undertone (warmer or cooler, a little more olive), drawn from a stream of its own so
+  // that the rest of the figure is as it was
+  const shade = () => 0.86 + r0() * 0.22, cs = shade(), cs2 = shade(), sv = 0.9 + r0() * 0.16, ru = rng((el.seed ^ 0x5bd1e995) >>> 0), wu = (ru() - 0.5) * 0.1, ou = (ru() - 0.5) * 0.05;
+  const ss = [sv * (1 + wu), sv * (1 + ou), sv * (1 - wu)];
   const hairMat = el.hairMat ?? 'hide_black', hairShade = el.hairShade ?? (hairMat === 'hide_black' ? 0.7 : 1);
   const M = upperM(legs);
 
   // the skin: the head (with its neck), the hands (and bare forearms, or the bare arms and chest), any bare legs
   // and feet — each keyed only by what shapes it, so that few shapes serve every figure
   const up = (a) => (role, g) => a(role, g.applyMatrix4(M));
-  put(sk, assembly(`fig-head|${legs}`, (a) => head(up(a))).skin.clone(), ss);
+  // the head's pieces (skin, face, hair, hat, comb): a child's larger for its height
+  const KH = kid ? '|k' : '', uph = kid ? (a) => (role, g) => a(role, g.applyMatrix4(CHILD_HEAD).applyMatrix4(M)) : up;
+  put(sk, assembly(`fig-head|${legs}${KH}`, (a) => head(uph(a))).skin.clone(), ss);
   put(sk, assembly(`fig-hands|${armPose}|${legs}|${bare ? 'B' : dress === 'wrap' ? 'w' : ''}`, (a) => {
     hands(up(a), armPose);
     if (bare) { bareArms(up(a), armPose); torso(up(a), 'skin', 0.97); } else if (dress === 'wrap') forearms(up(a), armPose);
@@ -423,6 +562,8 @@ export function figure(el, { bag, col }) {
     else if (dress === 'shendyt') kilt(a, up(a), legs, 4);
     else if (dress === 'sheath') sheath(a, up(a), legs, 6);
     else if (dress === 'strands') strands(a, up(a), legs, 8);
+    // dancing: the apsara's short sampot, or the folk dancer's flaring skirt
+    else if (DANCE.has(legs) && (dress === 'robe' || dress === 'wrap' || dress === 'tunic')) danceSkirt(up(a), legs, dress, dress === 'robe' ? 5 : 7);
     // kneeling or cross-legged, a robe or a wrap lies pooled round the legs
     else if ((legs === 'kneel' || legs === 'cross' || legs === 'seiza') && (dress === 'robe' || dress === 'wrap')) pool(a, up(a), legs, dress === 'robe' ? 5 : 7, dress === 'robe');
     else if (dress === 'robe') skirt(a, 'c1', legs === 'brace' ? 'stand' : legs, { hem: 0.03, seed: 5 });
@@ -445,19 +586,23 @@ export function figure(el, { bag, col }) {
   });
   if (C.c2) put(c2, C.c2.clone(), cs2);
   // the hair (eyes, brows, beard) and the hat
-  put(hairMat, assembly(`fig-face|${legs}|${beard ? 'b' : ''}`, (a) => faceOf(up(a), beard)).hair.clone(), hairShade);
-  if (style !== 'shaven' && style !== 'none') put(hairMat, assembly(`fig-hair|${style}|${legs}`, (a) => hairOf(up(a), style)).hair.clone(), hairShade);
-  if (el.comb && style === 'topknot') put(el.combMat ?? 'ivory', assembly(`fig-heru|${legs}`, (a) => heru(up(a))).comb.clone());
+  put(hairMat, assembly(`fig-face|${legs}|${beard ? 'b' : ''}${KH}`, (a) => faceOf(uph(a), beard)).hair.clone(), hairShade);
+  if (style !== 'shaven' && style !== 'none') put(hairMat, assembly(`fig-hair|${style}|${legs}${KH}`, (a) => hairOf(uph(a), style)).hair.clone(), hairShade);
+  if (el.comb && style === 'topknot') put(el.combMat ?? 'ivory', assembly(`fig-heru|${legs}${KH}`, (a) => heru(uph(a))).comb.clone());
   if (hat !== 'none') {
-    const T = assembly(`fig-hat|${hat}|${legs}`, (a) => { const up = (role, g) => a(role, g.applyMatrix4(M)); if (hat === 'veil') veil(up); else hatOf(up, hat); });
-    const hm = el.hatMat ?? (hat === 'straw' ? 'thatch' : hat === 'turban' ? 'cloth_white' : hat === 'brim' ? 'cloth_black' : hat === 'veil' ? c1 : c2);
+    const T = assembly(`fig-hat|${hat}|${legs}${KH}`, (a) => { const up = uph(a); if (hat === 'veil') veil(up); else hatOf(up, hat); });
+    const hm = el.hatMat ?? (hat === 'straw' ? 'thatch' : hat === 'turban' ? 'cloth_white' : hat === 'brim' ? 'cloth_black' : hat === 'mkot' ? 'gilt_bronze' : hat === 'veil' ? c1 : c2);
     put(hm, T.hat.clone(), hat === 'veil' ? cs : 1);
   }
   if (shod) { const F = assembly(`fig-feet|${legs}`, (a) => feet(a, 'shoe', legs)); put('cloth_brown', F.shoe.clone()); }
   // what is carried: on the head or the shoulder; held in the hands of the pose; a child on the hip
   if (carry === 'child') {
     const K = assembly(`fig-child|${legs}`, (a) => child(up(a)));
-    put(sk, K.skin.clone(), ss * 1.03); put(el.childCloth ?? c2, K.c2.clone(), cs2); put(hairMat, K.hair.clone(), hairShade);
+    put(sk, K.skin.clone(), ss.map((v) => v * 1.03)); put(el.childCloth ?? c2, K.c2.clone(), cs2); put(hairMat, K.hair.clone(), hairShade);
+  } else if (INSTR.has(carry)) {
+    const K = assembly(`fig-instr|${carry}|${legs}`, (a) => instrument(up(a), carry));
+    const MAT = { timber: el.staffMat ?? 'timber', hide: 'hide_white', lacing: 'hide_brown', cane: 'bamboo_culm', string: 'cloth_white', iron: 'iron' };
+    for (const [role, g] of Object.entries(K)) put(MAT[role] ?? role, g.clone(), role === 'lacing' ? 0.6 : role === 'hide' ? 0.95 : 1);
   } else if (carry === 'staff' || carry === 'rope' || carry === 'oars' || carry === 'punt') {
     const K = assembly(`fig-held|${carry}|${armPose}|${legs}|${el.len ?? ''}`, (a) => heldThing(a, carry, armPose, M, legs, el.len));
     for (const [role, g] of Object.entries(K)) put(role === 'timber' ? el.staffMat ?? 'timber' : role === 'bamboo_culm' ? el.poleMat ?? 'bamboo_culm' : role === 'rope' ? 'cloth_brown' : role, g.clone(), role === 'rope' ? 0.85 : 1);

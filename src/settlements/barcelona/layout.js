@@ -27,3 +27,13 @@ export function blocks() {
   }
   return out;
 }
+/** Pere Falqués's bench-lamps (1906) along both pavements of the Passeig de Gràcia, two to each block's face, in the planes' row. */
+export function bancsFanals() {
+  const out = [];
+  for (let k = -4; k <= 4; k++) for (const dz of [-14, 14]) for (const sg of [-1, 1]) {
+    const x = GRACIA_X + sg * 7.65, z = k * PITCH + dz;
+    if (Math.hypot(x, z) > RADIUS - 45 || onDiagonal(x, z, 4)) continue;
+    out.push([x, z]);
+  }
+  return out;
+}

@@ -18,20 +18,20 @@ const KITS = {
   mediterranean: {
     fronts: [['laundry_pole', 1, 2], ['shop_sign:board', 0.4, 1]],
     door: [['lantern:oil', 0.7], ['pot:amphora', 3], ['pot:pithos', 1], ['basket', 2], ['bench', 1.5], ['firewood', 1], ['ladder', 0.6], ['laundry', 0.8]],
-    street: [['cart', 1], ['animal:donkey', 2], ['animal:goat', 1], ['animal:dog', 0.6], ['chickens', 0.8], ['sacks', 1], ['well', 0.2], ['figure', 2.5]],
+    street: [['cart', 1], ['animal:donkey', 2], ['animal:goat', 1], ['animal:dog', 0.6], ['animal:cat', 0.5], ['chickens', 0.8], ['sacks', 1], ['well', 0.2], ['figure', 2.5]],
     stall: ['pot:amphora', 'basket', 'produce', 'cloth'], boats: ['rowboat'], awnings: ['cloth_white', 'cloth_ochre', 'cloth_red'],
     figures: F(['robe', 'tunic'], ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red', 'cloth_indigo'], ['skin_medium', 'skin_light'], ['none', 'none', 'veil', 'cap'], { hair: ['short', 'short', 'bun', 'long'], beard: 0.5, over: ['cape', 'sash', 'none', 'cape'], hairs: [['hide_black', 0.7], ['hide_brown', 0.7]] }),
   },
   near_east: {
     fronts: [['hang_lantern:white', 0.25, 1], ['laundry_pole', 0.5, 2]],
     door: [['lantern:oil', 0.7], ['pot:water_pot', 3], ['pot:pithos', 1], ['basket', 2], ['sacks', 1], ['bench', 1], ['laundry', 0.6]],
-    street: [['animal:donkey', 2.5], ['animal:camel', 1.2], ['animal:goat', 1.2], ['animal:sheep', 0.8], ['chickens', 0.6], ['sacks', 1], ['figure', 2.5]],
+    street: [['animal:donkey', 2.5], ['animal:camel', 1.2], ['animal:goat', 1.2], ['animal:sheep', 0.8], ['animal:cat', 0.6], ['chickens', 0.6], ['sacks', 1], ['figure', 2.5]],
     stall: ['pot:water_pot', 'basket', 'produce', 'cloth'], boats: ['dhow', 'reed'], awnings: ['cloth_white', 'cloth_ochre', 'cloth_indigo'],
     figures: F(['robe'], ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_indigo', 'cloth_black'], ['skin_medium', 'skin_dark'], ['turban', 'veil', 'veil', 'none'], { hair: ['short', 'long'], beard: 0.65, over: ['sash', 'cape', 'none', 'sash'] }),
   },
   egypt: {
     door: [['lantern:oil', 0.7], ['pot:water_pot', 3], ['pot:dark_pot', 1.5], ['basket', 2], ['sacks', 1], ['firewood', 0.4]],
-    street: [['animal:donkey', 2], ['animal:ox', 1], ['animal:goat', 1.2], ['chickens', 0.5], ['sacks', 1.2], ['well', 0.25], ['figure', 2.5]],
+    street: [['animal:donkey', 2], ['animal:ox', 1], ['animal:goat', 1.2], ['animal:cat', 0.6], ['chickens', 0.5], ['chickens:goose', 0.5], ['sacks', 1.2], ['well', 0.25], ['figure', 2.5]],
     stall: ['pot:water_pot', 'basket', 'produce'], boats: ['reed', 'barge'], awnings: ['cloth_white', 'reed_mat'],
     // the wrapped linen kilt (shendyt) and the loincloth of the labourers, bare above the waist; the women's
     // sheath dress on two straps; the broad collar; wigs and shaven heads; barefoot
@@ -41,7 +41,7 @@ const KITS = {
   east_asia: {
     fronts: [['hang_lantern:paper', 1.4, 1], ['shop_sign', 1, 1], ['laundry_pole', 1, 2]],
     door: [['lantern:paper', 1.6], ['pot:glazed_jar', 3], ['pot:blue_jar', 1], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.2], ['laundry', 1], ['ladder', 0.5]],
-    street: [['barrow', 1.5], ['cart', 0.6], ['animal:ox', 0.8], ['animal:buffalo', 0.5], ['animal:dog', 0.6], ['chickens', 0.8], ['sacks', 0.6], ['well', 0.2], ['figure', 3]],
+    street: [['barrow', 1.5], ['cart', 0.6], ['animal:ox', 0.8], ['animal:buffalo', 0.5], ['animal:dog', 0.6], ['animal:cat', 0.3], ['chickens', 0.8], ['chickens:duck', 0.5], ['chickens:goose', 0.3], ['sacks', 0.6], ['well', 0.2], ['figure', 3]],
     stall: ['pot:glazed_jar', 'basket', 'produce', 'cloth'], boats: ['sampan'], awnings: ['cloth_indigo', 'reed_mat', 'cloth_white'],
     figures: F(['robe', 'trousers'], ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_black'], ['skin_light', 'skin_medium'], ['straw', 'cap', 'none', 'none'], { carry: ['pole', 'basket', 'none', 'none'] , hair: ['bun', 'bun', 'short'], beard: 0.12, over: ['collar', 'collar', 'sash'] }),
   },
@@ -54,7 +54,7 @@ const KITS = {
   japan: {
     fronts: [['hang_lantern:white', 1, 1], ['shop_sign', 0.7, 1]],
     door: [['lantern:white', 1.6], ['pot:dark_pot', 2], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.5], ['ladder', 0.5]],
-    street: [['barrow', 0.4], ['cart', 0.5], ['animal:ox', 0.7], ['animal:horse', 0.5], ['animal:dog', 0.5], ['well', 0.2], ['figure', 3]],
+    street: [['barrow', 0.4], ['cart', 0.5], ['animal:ox', 0.7], ['animal:horse', 0.5], ['animal:dog', 0.5], ['animal:cat', 0.4], ['well', 0.2], ['figure', 3]],
     stall: ['basket', 'produce', 'cloth', 'pot:dark_pot'], boats: ['sampan', 'rowboat'], awnings: ['cloth_indigo', 'reed_mat'],
     figures: F(['robe'], ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_black', 'cloth_white'], ['skin_light'], ['straw', 'none', 'none'], { carry: ['pole', 'none', 'none'] , hair: ['bun', 'bun', 'short'], beard: 0.05, over: ['collar', 'collar', 'sash'] }),
   },
@@ -67,21 +67,21 @@ const KITS = {
   },
   southeast_asia: {
     door: [['lantern:oil', 0.7], ['pot:dark_pot', 2.5], ['basket', 3], ['firewood', 1], ['ladder', 1]],
-    street: [['cart', 1], ['animal:buffalo', 1.5], ['animal:zebu', 1], ['chickens', 1.2], ['animal:pig', 0.6], ['figure', 2.5]],
+    street: [['cart', 1], ['animal:buffalo', 1.5], ['animal:zebu', 1], ['chickens', 1.2], ['chickens:duck', 0.7], ['animal:pig', 0.6], ['figure', 2.5]],
     stall: ['basket', 'produce', 'pot:dark_pot'], boats: ['canoe', 'sampan'], awnings: ['reed_mat', 'cloth_ochre'],
     figures: F(['wrap'], ['cloth_ochre', 'cloth_red', 'cloth_brown', 'cloth_white'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { carry: ['pole', 'basket', 'none'] , hair: ['bun', 'long', 'short'], beard: 0.05, feet: 'bare', tops: { wrap: ['bare', 'bare', ''] }, overs: { wrap: ['none', 'none', 'sash'] } }),
   },
   europe_medieval: {
     fronts: [['shop_sign:board', 1, 1], ['laundry_pole', 0.4, 2]],
     door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1], ['firewood', 2], ['bench', 1.2], ['ladder', 0.8], ['laundry', 0.8], ['basket', 1]],
-    street: [['cart', 2], ['animal:horse', 1.2], ['animal:pig', 0.8], ['animal:dog', 0.6], ['chickens', 1], ['sacks', 1], ['barrel', 1], ['well', 0.25], ['figure', 2.5]],
+    street: [['cart', 2], ['animal:horse', 1.2], ['animal:pig', 0.8], ['animal:dog', 0.6], ['animal:cat', 0.4], ['chickens', 1], ['chickens:goose', 0.4], ['chickens:duck', 0.3], ['sacks', 1], ['barrel', 1], ['well', 0.25], ['figure', 2.5]],
     stall: ['basket', 'produce', 'cloth', 'pot:dark_pot'], boats: ['rowboat', 'barge'], awnings: ['cloth_red', 'cloth_white', 'cloth_green', 'cloth_ochre'],
     figures: F(['robe', 'tunic'], ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_white'], ['skin_light'], ['cap', 'none', 'veil', 'brim'], { hair: ['short', 'short', 'long'], beard: 0.35, legs: 'hose', over: ['cape', 'sash', 'none', 'none'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_brown', 0.6], ['hide_tan', 0.8]] }),
   },
   europe_early_modern: {
     fronts: [['shop_sign:board', 1, 1], ['laundry_pole', 0.5, 2]],
     door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1.5], ['bench', 1.5], ['firewood', 0.8], ['ladder', 0.5], ['basket', 1]],
-    street: [['cart', 2], ['animal:horse', 1.5], ['animal:dog', 0.6], ['barrel', 1], ['sacks', 0.8], ['well', 0.15], ['figure', 3]],
+    street: [['cart', 2], ['animal:horse', 1.5], ['animal:dog', 0.6], ['animal:cat', 0.4], ['barrel', 1], ['sacks', 0.8], ['well', 0.15], ['figure', 3]],
     stall: ['basket', 'produce', 'cloth'], boats: ['rowboat', 'barge'], awnings: ['cloth_white', 'cloth_red', 'cloth_green'],
     figures: F(['robe', 'trousers'], ['cloth_black', 'cloth_brown', 'cloth_red', 'cloth_indigo', 'cloth_grey'], ['skin_light'], ['brim', 'cap', 'none', 'veil'], { hair: ['short', 'long', 'short'], beard: 0.15, legs: 'hose', over: ['cape', 'none', 'sash', 'cape'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_brown', 0.6], ['hide_tan', 0.8]] }),
   },
@@ -115,21 +115,21 @@ const KITS = {
   },
   north: {
     door: [['lantern:iron', 0.7], ['firewood', 3], ['barrel', 1.5], ['basket', 1], ['bench', 1], ['ladder', 0.5]],
-    street: [['cart', 1], ['animal:horse', 1], ['animal:sheep', 1.5], ['animal:goat', 0.8], ['haystack', 1.2], ['animal:dog', 0.5], ['chickens', 0.5], ['well', 0.25], ['figure', 2]],
+    street: [['cart', 1], ['animal:horse', 1], ['animal:sheep', 1.5], ['animal:goat', 0.8], ['haystack', 1.2], ['animal:dog', 0.5], ['animal:cat', 0.3], ['chickens', 0.5], ['chickens:goose', 0.5], ['well', 0.25], ['figure', 2]],
     stall: ['basket', 'produce', 'cloth'], boats: ['rowboat'], awnings: ['cloth_red', 'cloth_white'],
     figures: F(['robe', 'tunic'], ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_white', 'cloth_indigo'], ['skin_light'], ['cap', 'none', 'veil'], { hair: ['short', 'long', 'long'], beard: 0.5, legs: 'hose', over: ['cape', 'sash', 'none'], hairs: [['hide_tan', 0.9], ['hide_brown', 0.75], ['hide_tan', 1.05], ['hide_black', 0.7]] }),
   },
   venice: {
     fronts: [['laundry_pole', 1.2, 2], ['shop_sign:board', 0.5, 1]],
     door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1.5], ['bench', 1], ['basket', 1], ['laundry', 1.2], ['pot:water_pot', 0.6]],
-    street: [['barrel', 1], ['sacks', 1], ['crates', 0.8], ['animal:dog', 0.4], ['well', 0.3], ['figure', 4]],
+    street: [['barrel', 1], ['sacks', 1], ['crates', 0.8], ['animal:dog', 0.4], ['animal:cat', 0.7], ['well', 0.3], ['figure', 4]],
     stall: ['basket', 'produce', 'cloth'], boats: ['gondola', 'gondola', 'rowboat', 'barge'], awnings: ['cloth_red', 'cloth_white', 'cloth_ochre'],
     figures: F(['robe'], ['cloth_black', 'cloth_red', 'cloth_brown', 'cloth_indigo', 'cloth_white'], ['skin_light'], ['cap', 'veil', 'none'], { hair: ['short', 'long'], beard: 0.2, legs: 'hose', over: ['cape', 'cape', 'none', 'sash'], hairs: [['hide_black', 0.7], ['hide_brown', 0.7]] }),
   },
   industrial: {
     fronts: [['shop_sign:board', 0.8, 1]],
     door: [['lantern:iron', 0.7], ['barrel', 1.5], ['crates', 1.5], ['bench', 1], ['street_lamp', 0.4], ['pot:dark_pot', 0.5]],
-    street: [['cart', 2], ['animal:horse', 1.5], ['street_lamp', 0.6], ['figure', 3], ['sacks', 0.6]],
+    street: [['cart', 2], ['animal:horse', 1.5], ['animal:cat', 0.3], ['street_lamp', 0.6], ['figure', 3], ['sacks', 0.6]],
     stall: ['produce', 'cloth', 'basket'], boats: ['barge', 'rowboat'], awnings: ['cloth_green', 'cloth_white', 'cloth_red'],
     figures: F(['trousers', 'robe'], ['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo'], ['skin_light'], ['brim', 'brim', 'cap', 'none'], { hair: ['short', 'short', 'bun'], beard: 0.4, over: ['none'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_tan', 0.85], ['hide_grey', 1.1]] }),
   },
@@ -363,7 +363,10 @@ export function lifePlans(id, R, landmarks, town, G) {
       if (heavy && rand() < 0.35) el.kind = 'four';
       else if (rand() < 0.4) { const b = /europe|north|industrial|venice/.test(k) ? 'horse' : /mediterranean|near_east|africa|east_asia|egypt/.test(k) ? 'donkey' : null; if (b) el.beast = b; }
     }
-    if (t === 'figure') { Object.assign(el, dressed(kit, rand)); if (extra.pose) el.carry = 'none'; if (extra.carry) el.carry = extra.carry; if (extra.y !== undefined) el.y = extra.y; }
+    if (t === 'figure') {
+      Object.assign(el, dressed(kit, rand, rng((el.seed ^ 0x9e3779b9) >>> 0))); if (extra.pose) el.carry = 'none'; if (extra.carry) el.carry = extra.carry; if (extra.y !== undefined) el.y = extra.y;
+      if (el.child && extra.pose && extra.pose !== 'squat') delete el.child;          // no child on a bench built for grown-ups, at a craft, at work
+    }
     els.push(el);
   };
   const sz = (t) => ({ cart: 2.2, sledge: 2.2, stall: 2.2, animal: 1.4, haystack: 1.6, car: 2.6, laundry: 1.8, well: (WELL_OF[id] ?? WELL[KIT_OF[id]])?.kind === 'shaduf' ? 3.1 : 1.1, figure: 0.5, bench: 1, firewood: 1, crates: 0.8, ladder: 0.5, street_lamp: 0.4 }[t.split(':')[0]] ?? 0.6);
@@ -565,7 +568,7 @@ export function lifePlans(id, R, landmarks, town, G) {
   for (const [k, list] of tiles) { const [i, j] = k.split(',').map(Number); plans.push({ id: `${id}-street-life-${k}`, center: [i * 100 + 50, j * 100 + 50], near: 230, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: list, rooms: [], bounds: [-R, -R, R, R], entrance: { at: [0, 0], facing: 'n' } }); }
   return plans;
 }
-function dressed(kit, rand) {
+function dressed(kit, rand, r2 = null) {
   const f = kit.figures, c = (l) => l[Math.floor(rand() * l.length)];
   const o = { dress: c(f.dress), cloth: c(f.cloths), cloth2: c(f.cloths), skin: c(f.skin), hat: c(f.hats), carry: f.carry ? c(f.carry) : 'none' };
   // the region's hair, beards, second garment, legs and feet (where the kit says)
@@ -581,6 +584,14 @@ function dressed(kit, rand) {
   if (f.comb && o.hair === 'topknot' && rand() < f.comb) o.comb = true;
   const [hm, hs] = f.hairs ? c(f.hairs) : ['hide_black', 0.7];
   o.hairMat = hm; o.hairShade = hs;
+  // the variety of a crowd (drawn from a stream of its own, so that what the kit draws stays as it was): the hair's
+  // shade a little lighter or darker; the grey or white hair of the old; children among the grown-ups, bareheaded,
+  // carrying nothing, beardless (a kit may give its own share: `children`)
+  if (r2) {
+    const v = 0.9 + r2() * 0.2; o.hairShade = hs * v;
+    if (r2() < (f.children ?? 0.12)) { o.child = true; o.carry = 'none'; o.beard = false; if (o.hat !== 'veil' && o.hat !== 'straw') o.hat = 'none'; }
+    else if (r2() < 0.1 && o.hat !== 'veil') { o.hairMat = r2() < 0.6 ? 'hide_grey' : 'hide_white'; o.hairShade = 0.95 + r2() * 0.15; }
+  }
   return o;
 }
 

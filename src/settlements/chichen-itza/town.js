@@ -2,6 +2,7 @@
 // dry-stone walls, each with one to three oval houses of wattle and thatch.
 
 import { RADIUS, lots } from './layout.js';
+import { ground } from './ground.js';
 
 const base = (id, elements) => ({ id, style: 'maya', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 62], facing: 'n' } });
 
@@ -47,8 +48,38 @@ function market() {
   return [{ ...base('chichen-itza-market', L), style: 'life' }, base('chichen-itza-market-mats', M)];
 }
 
+/**
+ * The people of the rites (§12): priests at the Sacred Cenote's rim with their offerings and the pilgrims kneeling
+ * behind them, pilgrims coming and going on the sacbe, people crossing the plaza to the Castillo and climbing its
+ * south stair, priests on its summit and at the altar in the Temple of the Warriors.
+ */
+function rites() {
+  const rand = rng(1100), L = [], pick = (a) => a[Math.floor(rand() * a.length)];
+  const fig = (x, z, y, rot, o = {}) => {
+    const woman = o.woman ?? rand() < 0.4;
+    L.push({ t: 'figure', at: [x, z], y, rot, h: woman ? 1.5 : 1.6, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'wrap', cloth: 'cloth_white', cloth2: pick(['cloth_red', 'cloth_ochre', 'cloth_white']), skin: pick(['skin_dark', 'skin_dark', 'skin_medium']), hat: 'none', hair: woman ? pick(['long', 'bun']) : 'long', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: woman ? 'none' : pick(['cape', 'sash']), pose: 'stand', ...o });
+  };
+  const priest = (x, z, y, rot, o = {}) => fig(x, z, y, rot, { woman: false, cloth: 'cloth_white', cloth2: 'cloth_red', over: 'cloak', hat: 'cap', hatMat: 'stucco_leaf', ...o });
+  // at the cenote's rim, west of the sacbe's end: the priests facing the water, the pilgrims behind
+  const g = (x, z) => ground.height(x, z);
+  priest(-6.6, -241.0, g(-6.6, -241.0), 0, { pose: 'talk' }); priest(-4.6, -240.6, g(-4.6, -240.6), 0.2, { carry: 'staff', len: 1.9, staffMat: 'timber' });
+  for (const [x, z] of [[-7.8, -238.4], [-5.6, -238.0], [-3.6, -237.8]]) fig(x, z, g(x, z), 0, { pose: 'kneel', arms: 'pray', woman: rand() < 0.5 });
+  fig(-9.2, -237.2, g(-9.2, -237.2), -0.4, { carry: 'basket' });
+  // on the sacbe
+  for (let i = 0; i < 9; i++) { const z = -150 - i * 10 - rand() * 4, x = (i % 2 ? 1.4 : -1.4) + (rand() - 0.5) * 0.6; fig(x, z, 0.8, i % 3 ? 0 : Math.PI, { carry: pick(['none', 'basket', 'pot', 'none']), pose: rand() < 0.2 ? 'talk' : 'stand' }); }
+  // crossing the plaza toward the Castillo, and on its south stair (its foot 35.3 m out, 91 steps to 24 m)
+  for (let i = 0; i < 14; i++) { const x = -22 + rand() * 60, z = 40 + rand() * 26; fig(x, z, 0.04, Math.PI + (rand() - 0.5) * 1.2, { carry: pick(['none', 'none', 'basket', 'pot']), pose: rand() < 0.25 ? 'talk' : 'stand' }); }
+  const stepAt = (i) => [35.27 - 24 * (i + 0.5) / 91, 24 * (i + 1) / 91];
+  for (const [i, x, rot] of [[9, -2.2, Math.PI], [12, 1.6, Math.PI], [40, 0.6, 0], [66, -1.4, Math.PI], [70, 2.4, Math.PI]]) { const [z, y] = stepAt(i); fig(x, z, y, rot, { woman: false }); }
+  priest(2.6, 8.4, 24, Math.PI); priest(-3.0, 8.6, 24, Math.PI * 0.9, { carry: 'staff', len: 1.8, staffMat: 'timber' });
+  // in the Temple of the Warriors: a priest at the altar of the Atlanteans, another in the hall
+  priest(118.0, -13.2, 13.43, -Math.PI / 2, { pose: 'talk' }); priest(106.4, -16.6, 13.43, Math.PI / 2);
+  return { ...base('chichen-itza-rites', L), style: 'life' };
+}
+function riteObjects() { return base('chichen-itza-offering', [{ t: 'm_offering', at: [-5.6, -240.2], y: ground.height(-5.6, -240.2) + 0.02, dir: [0, -1] }]); }
+
 export async function town() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 30) plans.push(base(`chichen-itza-town-${i / 30}`, all.slice(i, i + 30).flatMap(lotElements)));
-  return [...plans, ...market()];
+  return [...plans, ...market(), rites(), riteObjects()];
 }
