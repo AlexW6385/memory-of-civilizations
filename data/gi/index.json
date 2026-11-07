@@ -1424,8 +1424,8 @@
  },
  "sainte-chapelle": {
   "site": "paris",
-  "hash": "5404af11cff5a464",
-  "rays": 160,
+  "hash": "f89805252ff8ae81",
+  "rays": 128,
   "probes": 16158,
   "boxes": [
    {
@@ -1462,9 +1462,9 @@
     ]
    }
   ],
-  "bytes": 265845,
-  "seconds": 204,
-  "baked": "2026-11-06"
+  "bytes": 272579,
+  "seconds": 45,
+  "baked": "2026-11-07"
  },
  "sainte-foy-conques": {
   "site": "conques",
