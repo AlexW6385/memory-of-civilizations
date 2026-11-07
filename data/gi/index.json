@@ -1558,6 +1558,34 @@
   "seconds": 6,
   "baked": "2026-11-07"
  },
+ "venice-san-marco": {
+  "site": "venice",
+  "hash": "7a2828fe2b9a5fdb",
+  "rays": 128,
+  "probes": 78720,
+  "boxes": [
+   {
+    "min": [
+     27.5,
+     0.7,
+     -32.2
+    ],
+    "n": [
+     41,
+     40,
+     48
+    ],
+    "spacing": 1.15,
+    "rooms": [
+     "basilica",
+     "transepts"
+    ]
+   }
+  ],
+  "bytes": 1252735,
+  "seconds": 209,
+  "baked": "2026-11-07"
+ },
  "versailles-chateau": {
   "site": "versailles",
   "hash": "baba2f2b63e11267",
