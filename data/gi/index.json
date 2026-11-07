@@ -71,6 +71,33 @@
   "seconds": 24,
   "baked": "2026-11-07"
  },
+ "babylon-centre": {
+  "site": "babylon",
+  "hash": "f31938d22125ab7b",
+  "rays": 128,
+  "probes": 8120,
+  "boxes": [
+   {
+    "min": [
+     -36,
+     -0.44,
+     203
+    ],
+    "n": [
+     20,
+     14,
+     29
+    ],
+    "spacing": 1,
+    "rooms": [
+     "cella of marduk"
+    ]
+   }
+  ],
+  "bytes": 128385,
+  "seconds": 46,
+  "baked": "2026-11-07"
+ },
  "baroque-rome-stpeter": {
   "site": "baroque-rome",
   "hash": "de7962e3f19f7cd3",
