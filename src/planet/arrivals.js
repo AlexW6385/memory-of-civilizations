@@ -60,7 +60,7 @@ export const ARRIVALS = {
   'cahokia':          [-25, 0.1, 20, 0, 0.25],           // Monks Mound across the Grand Plaza
   'taos':             [0, 0.1, 25, 0.3, 0.12],           // the north house across the plaza
   'new-york':         [-14.15, 0.1, 37.89, 2.282, 0.55], // the Empire State whole over Fifth Avenue's towers (the grid turned 29°: Fifth at 38th, looking down the avenue)
-  'rapa-nui':         [0, 0.3, 62, 3.1416, 0.12],        // the row of moai on their platform
+  'rapa-nui':         [0, 0.3, 46, 3.1416, 0.12],        // the row of moai on their platform, whole
   'maori':            [0, 0.2, 150, 0, 0.2],             // the pā's palisade and carved gateway
   'sydney':           [214.5, null, -112, 1.0, 0.05],    // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
 };
