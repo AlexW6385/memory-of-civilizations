@@ -596,11 +596,22 @@ export class Music {
     const key = A ? A.key : null;
     if (key === this.roomKey || !this.ctx) return;
     this.roomKey = key;
+    if (A && !this.irCache.has(key)) {
+      // the impulse response is generated in a worker: until it arrives keep the reverberation of
+      // the room before (it crossfades in when ready, see irReady())
+      this.irFor(A);
+      return;
+    }
+    this.applyRoom(A);
+  }
+
+  applyRoom(A) {
+    const key = A ? A.key : null;
     const ctx = this.ctx, t = ctx.currentTime;
     let target = null;
     if (A) {
       target = this.slots.find((s) => s.key === key) || this.slots.find((s) => s !== this.active) || this.slots[0];
-      if (target.key !== key) { target.conv.buffer = this.irFor(A); target.key = key; target.rt = Math.max(A.rt[0], A.mid); }
+      if (target.key !== key) { target.conv.buffer = this.irCache.get(key); target.key = key; target.rt = Math.max(A.rt[0], A.mid); }
       this.feed(target, true);
       target.gain.gain.setTargetAtTime(A.wet * 0.85, t, 0.5);
     }
@@ -628,21 +639,45 @@ export class Music {
    */
   prepare(list) {
     if (!this.ctx) return;
-    const todo = list.filter((A, i) => A && !this.irCache.has(A.key) && list.findIndex((B) => B?.key === A.key) === i).slice(0, 4);
+    const todo = list.filter((A, i) => A && !this.irCache.has(A.key) && !this.irPending?.has(A.key) && list.findIndex((B) => B?.key === A.key) === i).slice(0, 4);
     clearTimeout(this.prepT);
     const next = () => { const A = todo.shift(); if (!A) return; this.irFor(A); this.prepT = setTimeout(next, 400); };
     this.prepT = setTimeout(next, 400);
   }
 
-  /** The impulse response of a room, generated once per room (a few kept). */
+  /**
+   * The impulse response of a room: the cached buffer, or null while a worker generates it (once
+   * per room, a few kept). Rooms wanted are applied when their buffer arrives (irReady).
+   */
   irFor(A) {
     if (this.irCache.has(A.key)) return this.irCache.get(A.key);
-    const ctx = this.ctx, ch = impulseResponse(A, ctx.sampleRate);
+    this.irPending ||= new Map();
+    if (this.irPending.has(A.key)) return null;
+    this.irPending.set(A.key, A);
+    const sr = this.ctx.sampleRate;
+    if (this.irWorker === undefined) {
+      try {
+        this.irWorker = new Worker(new URL('./ir-worker.js', import.meta.url), { type: 'module' });
+        this.irWorker.onmessage = (e) => this.irReady(e.data.id, e.data.ch);
+        this.irWorker.onerror = () => { this.irWorker = null; for (const B of [...this.irPending.values()]) this.irReady(B.key, impulseResponse(B, sr)); };
+      } catch { this.irWorker = null; }
+    }
+    if (this.irWorker) this.irWorker.postMessage({ id: A.key, A, sr });
+    else setTimeout(() => this.irReady(A.key, impulseResponse(A, sr)), 0);
+    return null;
+  }
+
+  irReady(key, ch) {
+    const A = this.irPending?.get(key);
+    if (!A) return;
+    this.irPending.delete(key);
+    const ctx = this.ctx;
     const b = ctx.createBuffer(2, ch[0].length, ctx.sampleRate);
     b.getChannelData(0).set(ch[0]); b.getChannelData(1).set(ch[1]);
     if (this.irCache.size >= 5) this.irCache.delete(this.irCache.keys().next().value);
-    this.irCache.set(A.key, b);
-    return b;
+    this.irCache.set(key, b);
+    // the room one is in was waiting for it: crossfade now
+    if (this.roomKey === key && this.active?.key !== key) this.applyRoom(A);
   }
 
   /**
