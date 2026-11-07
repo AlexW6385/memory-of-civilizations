@@ -1114,6 +1114,97 @@
   "seconds": 198,
   "baked": "2026-11-06"
  },
+ "persepolis-terrace": {
+  "site": "persepolis",
+  "hash": "a7a740652bf430d5",
+  "rays": 128,
+  "probes": 75069,
+  "boxes": [
+   {
+    "min": [
+     -62,
+     16.25,
+     -92
+    ],
+    "n": [
+     42,
+     16,
+     42
+    ],
+    "spacing": 1.55,
+    "rooms": [
+     "apadana"
+    ]
+   },
+   {
+    "min": [
+     38,
+     14.45,
+     -132
+    ],
+    "n": [
+     49,
+     11,
+     49
+    ],
+    "spacing": 1.55,
+    "rooms": [
+     "hundred columns"
+    ]
+   },
+   {
+    "min": [
+     -64,
+     16.65,
+     10
+    ],
+    "n": [
+     14,
+     8,
+     14
+    ],
+    "spacing": 1.55,
+    "rooms": [
+     "tachara"
+    ]
+   },
+   {
+    "min": [
+     -32,
+     17.15,
+     73
+    ],
+    "n": [
+     29,
+     8,
+     29
+    ],
+    "spacing": 1.55,
+    "rooms": [
+     "hadish"
+    ]
+   },
+   {
+    "min": [
+     51,
+     13.56,
+     61
+    ],
+    "n": [
+     51,
+     7,
+     34
+    ],
+    "spacing": 1.55,
+    "rooms": [
+     "treasury"
+    ]
+   }
+  ],
+  "bytes": 1243260,
+  "seconds": 277,
+  "baked": "2026-11-07"
+ },
  "petra-khazneh": {
   "site": "petra",
   "hash": "a90903d46c1ee60c",
