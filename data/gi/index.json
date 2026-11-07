@@ -127,8 +127,8 @@
  },
  "byodo-in-phoenix-hall": {
   "site": "heian-uji",
-  "hash": "644a951c00323958",
-  "rays": 160,
+  "hash": "65d49872d00de28f",
+  "rays": 128,
   "probes": 5700,
   "boxes": [
    {
@@ -148,9 +148,9 @@
     ]
    }
   ],
-  "bytes": 101485,
-  "seconds": 76,
-  "baked": "2026-11-06"
+  "bytes": 98464,
+  "seconds": 21,
+  "baked": "2026-11-07"
  },
  "djenne-great-mosque": {
   "site": "djenne",
