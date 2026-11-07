@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.2 — Arrival views checked (2026-11-07)
+- Every settlement's arrival view was looked at and the poor ones moved: Giza now shows the Great Pyramid whole across the plateau, Florence the dome, nave, front, campanile and Baptistery together, Isfahan the dome beside its portal, Conques the west front and tympanum, Khajuraho the Kandariya's cluster of spires, Himeji the whole keep, Sydney the Opera House across open water with the Bridge behind, New York the Empire State whole down Fifth Avenue, Muscovy, the Suleymaniye, Foguang and Tongariki framed whole. Kilwa's mosque columns are dressed coral. An explicit ?weather= now holds every region (the closest state where a region lacks it).
+
 ## v10.1 — Lighter shadows, sealed rooms (2026-11-07)
 - Smoother again: shadows are cast by size - small things only into the nearest shadow layer, middle-sized into the first two, only big masses into the farthest - and each layer stops just past its own range. Standing in a closed hall (the Sainte-Chapelle's upper chapel, Hagia Sophia, the crossings of Florence and St Peter's), what lies far outside is not drawn. Wrought-iron railings are drawn within 150 m, the simplified versions of things are made off the main thread. The Sainte-Chapelle's upper chapel falls from 3.6 M to 2.3 M triangles a frame, Barcelona from 9.4 M to 5.9 M, Teotihuacan from 9.5 M to 5.3 M.
 
