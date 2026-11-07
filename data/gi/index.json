@@ -322,7 +322,7 @@
  },
  "foguang-east-hall": {
   "site": "tang-wutai",
-  "hash": "6dcc22aceb5b346a",
+  "hash": "fb49c3e6a320528b",
   "rays": 128,
   "probes": 8316,
   "boxes": [
@@ -344,8 +344,8 @@
     ]
    }
   ],
-  "bytes": 147825,
-  "seconds": 44,
+  "bytes": 146874,
+  "seconds": 23,
   "baked": "2026-11-07"
  },
  "giza-great-pyramid": {
