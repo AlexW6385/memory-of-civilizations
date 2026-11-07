@@ -327,8 +327,82 @@ function polykandelon(el, { bag, lights }) {
 }
 
 const base = STYLES.byzantine;
+/**
+ * The ambo (Paul the Silentiary, Descriptio Ambonis; docs/settlements/constantinople.md §4.7): "as an island rises amidst
+ * the swelling billows ... so in the middle space of the boundless temple rises upright the tower-like ambo of stone";
+ * an oval platform on eight posts with a vaulted space beneath it for the singers, reached by stairs from east and west;
+ * round it an enclosure of eight columns with parapet slabs between them about a man's height and an architrave on top;
+ * all of costly marbles with silver. { at [x, z], y, rx, rz (the platform's half-axes), h (its floor) }.
+ */
+function ambo(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, a = el.rx || 3.0, b = el.rz || 2.1, H = el.h || 2.4;
+  const oval = (prof, n, mat, sx = a, sz = b) => { const g = lathe(prof, n); g.scale(sx, 1, sz); g.translate(x, y, z); bag.add(mat, g); };
+  // the platform: a slab with a moulded edge; beneath it a shallow vault (the singers' space), the eight posts
+  oval([[0.001, H - 0.32], [0.97, H - 0.32], [1.0, H - 0.26], [1.0, H - 0.04], [1.02, H], [0.001, H]], 40, 'marble_smooth');
+  oval([[0.9, H - 0.32], [0.7, H - 0.42], [0.4, H - 0.5], [0.001, H - 0.53]], 32, 'mosaic_gold');
+  for (let k = 0; k < 8; k++) {
+    const t = 2 * Math.PI * (k + 0.5) / 8, px = x + Math.cos(t) * a * 0.68, pz = z + Math.sin(t) * b * 0.68;
+    bag.add('verde_antico', lathe([[0.12, 0], [0.11, H - 0.62]], 12, null, px, y, pz));
+    bag.add('marble', lathe([[0.17, 0], [0.17, 0.14], [0.12, 0.2], [0.001, 0.2]], 12, null, px, y, pz));
+    bag.add('silver', lathe([[0.11, 0], [0.19, 0.14], [0.2, 0.2], [0.001, 0.2]], 12, null, px, y + H - 0.62, pz));
+    col.circle(px, pz, 0.15, y, y + H);
+  }
+  // the parapet round the platform: panels of marble framed in silver, a silver coping, a gilt band; open at the stair heads
+  oval([[0.955, H], [0.995, H], [0.995, H + 1.0], [0.955, H + 1.0]], 48, 'pavonazzetto');
+  oval([[0.94, H + 1.0], [1.01, H + 1.0], [1.01, H + 1.07], [0.94, H + 1.07]], 48, 'silver');
+  oval([[0.995, H + 0.12], [1.002, H + 0.12], [1.002, H + 0.2], [0.995, H + 0.2]], 48, 'gold');
+  oval([[0.995, H + 0.82], [1.002, H + 0.82], [1.002, H + 0.9], [0.995, H + 0.9]], 48, 'gold');
+  for (let k = 0; k < 16; k++) {
+    const t = 2 * Math.PI * (k + 0.5) / 16, c = Math.cos(t), s = Math.sin(t);
+    if (Math.abs(c) > 0.97) continue;
+    // a silver cross on each panel
+    const px = x + c * a * 1.003, pz = z + s * b * 1.003, yaw = Math.atan2(-s * a, c * b);
+    for (const [w, h2] of [[0.06, 0.42], [0.28, 0.06]]) { const g = box(-w / 2, -h2 / 2, -0.008, w / 2, h2 / 2, 0.008); g.rotateY(-yaw + Math.PI / 2); g.translate(px, y + H + 0.5, pz); bag.add('silver', g); }
+  }
+  col.floor([x - a * 0.7, z - b * 0.7, x + a * 0.7, z + b * 0.7], y + H);
+  for (const s of [-1, 1]) col.segment([x - a * 0.8, z + s * b * 0.98], [x + a * 0.8, z + s * b * 0.98], 0.15, y + H, y + H + 1.07);
+  // the stairs from east and west: marble treads between parapets of green marble with silver copings, walked up
+  for (const s of [-1, 1]) {
+    const x0 = x + s * a * 0.72, x1 = x + s * (a + 4.2), n = Math.round(H / 0.2);
+    for (let i = 0; i < n; i++) {
+      const f1 = (i + 1) / n, xa = x1 + (x0 - x1) * (i / n);
+      bag.add('marble_smooth', box(Math.min(xa, x0), y, z - 0.7, Math.max(xa, x0), y + H * f1, z + 0.7));
+    }
+    for (const sz of [-1, 1]) {
+      const zz0 = z + sz * 0.7, zz1 = z + sz * 0.85, lo = Math.min(x0, x1), hi = Math.max(x0, x1);
+      // the parapet rising with the flight: in steps of its own, a rail on top
+      for (let i = 0; i < n; i += 2) {
+        const xa = x1 + (x0 - x1) * (i / n), xb = x1 + (x0 - x1) * Math.min(1, (i + 2) / n), yt = y + H * Math.min(1, (i + 2) / n) + 0.95;
+        bag.add('revetment_green', box(Math.min(xa, xb), y, Math.min(zz0, zz1), Math.max(xa, xb), yt, Math.max(zz0, zz1)));
+        bag.add('silver', box(Math.min(xa, xb), yt, Math.min(zz0, zz1) - 0.02, Math.max(xa, xb), yt + 0.05, Math.max(zz0, zz1) + 0.02));
+      }
+      col.segment([lo, (zz0 + zz1) / 2], [hi, (zz0 + zz1) / 2], 0.2, y, y + H + 1.0);
+    }
+    col.ramp([Math.min(x0, x1), z - 0.7, Math.max(x0, x1), z + 0.7], y, y + H, s > 0 ? 'w' : 'e');
+  }
+  // the enclosure: eight columns on an oval round it, the stair passages between the pairs at east and west, parapet
+  // slabs about a man's height between the others, the architrave carried round on the columns
+  const A = a + 1.5, B = b + 1.5, CH = 4.6;
+  const C = Array.from({ length: 8 }, (_, k) => { const t = 2 * Math.PI * (k + 0.5) / 8; return [x + Math.cos(t) * A, z + Math.sin(t) * B, Math.cos(t)]; });
+  for (const [cx, cz] of C) byzantineColumn({ at: [cx, cz], y, h: CH, d: 0.36, shaftMat: 'verde_antico', capMat: 'marble', impost: false }, { bag, col });
+  for (let k = 0; k < 8; k++) {
+    const [ax, az] = C[k], [bx, bz] = C[(k + 1) % 8], mxk = (ax + bx) / 2;
+    if (Math.abs(mxk - x) > A * 0.8) continue;                              // the passages east and west
+    const L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], n = [-u[1], u[0]], W = frame([ax, az], u, n);
+    const pl = [], sl = [];
+    fbox(pl, W, 0.22, L - 0.22, y, y + 1.75, -0.06, 0.06);
+    fbox(sl, W, 0.2, L - 0.2, y + 1.75, y + 1.82, -0.09, 0.09);
+    for (const d of [1, -1]) { fbox(sl, W, 0.35, L - 0.35, y + 0.15, y + 0.2, d * 0.06, d * 0.075); fbox(sl, W, 0.35, L - 0.35, y + 1.55, y + 1.6, d * 0.06, d * 0.075); ring(sl, W, L / 2, y + 0.88, 0.22, 0.27, d > 0 ? 0.06 : -0.075, d > 0 ? 0.075 : -0.06, 20); }
+    bag.add('proconnesian', fromTriangles(pl)); bag.add('silver', fromTriangles(sl));
+    col.segment([ax + u[0] * 0.2, az + u[1] * 0.2], [bx - u[0] * 0.2, bz - u[1] * 0.2], 0.14, y, y + 1.82);
+  }
+  // the architrave: an oval band of marble on the capitals, silver-faced
+  oval([[A - 0.25, y + CH - y], [A + 0.25, y + CH - y], [A + 0.25, y + CH + 0.5 - y], [A - 0.25, y + CH + 0.5 - y]].map(([r, h]) => [r / A, h]), 48, 'marble', A, B);
+  oval([[1 + 0.26 / A, CH + 0.12], [1 + 0.27 / A, CH + 0.12], [1 + 0.27 / A, CH + 0.4], [1 + 0.26 / A, CH + 0.4]], 48, 'silver', A, B);
+}
+
 registerStyle('byzantine-hs', {
   ...base,
   elements: { ...base.elements, dome_cross: domeCross, cornice_lamps: corniceLamps, n_cornice: nCornice, spandrel_discs: spandrelDiscs },
-  objects: { ...base.objects, chancel_screen: chancelScreen, ciborium, polykandelon },
+  objects: { ...base.objects, chancel_screen: chancelScreen, ciborium, polykandelon, ambo },
 });
