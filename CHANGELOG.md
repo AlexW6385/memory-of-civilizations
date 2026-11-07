@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.98 — Fewer triangles (2026-11-07)
+- Smoother in the heaviest places: big merged meshes are cut into 128 m cells so what is out of view is skipped again; fine repeated pieces (balustrade posts, brackets, capitals) are simplified beyond 60 m and cast simpler shadows; thin bars are drawn within 100 m; street life is simplified beyond 50 m. Triangles per frame fall by about a quarter overall (Beijing 14.7 M to 9.0 M, the Maori pa 18.9 M to 4.6 M, the Sainte-Chapelle 4.6 M to 3.6 M).
+
 ## v9.97 — Fixes (2026-11-07)
 - Venice's canals, basin and lagoon now hold water (they were dry, with boats hanging over their beds). Flames glow yellow to orange instead of pale cream. The dark spikes inside the Sydney Concert Hall are gone. Standing in a gap between a building's rooms no longer switches the indoor haze and exposure off. Kaifeng's signboards read the right way; Beijing's lanes stop at the moat street; Knossos' frescoes no longer flicker. Every part of the scene is now compiled before it shows (some, like the maquis, had silently failed to draw).
 
