@@ -389,6 +389,52 @@
   "seconds": 265,
   "baked": "2026-11-07"
  },
+ "kilwa-mosque": {
+  "site": "kilwa",
+  "hash": "f8c9be1f017d1514",
+  "rays": 128,
+  "probes": 54109,
+  "boxes": [
+   {
+    "min": [
+     -42,
+     2.97,
+     -12
+    ],
+    "n": [
+     65,
+     11,
+     55
+    ],
+    "spacing": 1,
+    "rooms": [
+     "prayer hall"
+    ]
+   },
+   {
+    "min": [
+     150.5,
+     9.53,
+     -147.5
+    ],
+    "n": [
+     33,
+     8,
+     56
+    ],
+    "spacing": 1,
+    "rooms": [
+     "pavilion",
+     "upper rooms",
+     "ante-room",
+     "second suite"
+    ]
+   }
+  ],
+  "bytes": 903207,
+  "seconds": 235,
+  "baked": "2026-11-07"
+ },
  "lhasa-potala": {
   "site": "lhasa",
   "hash": "29aab7996e9859a3",
