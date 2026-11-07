@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.3 — Parallel work written down (2026-11-07)
+- How the work runs with many agents in parallel is now written in docs/parallel-work.md and the brief every agent gets in docs/agent-brief.md.
+
 ## v10.2 — Arrival views checked (2026-11-07)
 - Every settlement's arrival view was looked at and the poor ones moved: Giza now shows the Great Pyramid whole across the plateau, Florence the dome, nave, front, campanile and Baptistery together, Isfahan the dome beside its portal, Conques the west front and tympanum, Khajuraho the Kandariya's cluster of spires, Himeji the whole keep, Sydney the Opera House across open water with the Bridge behind, New York the Empire State whole down Fifth Avenue, Muscovy, the Suleymaniye, Foguang and Tongariki framed whole. Kilwa's mosque columns are dressed coral. An explicit ?weather= now holds every region (the closest state where a region lacks it).
 
