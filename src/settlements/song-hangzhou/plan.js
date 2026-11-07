@@ -19,11 +19,11 @@ E.push({ t: 'block', rect: [CANAL.x0, WALL.z0 + 3, CANAL.x1, WALL.z0 + 3.5], y0:
 E.push({ t: 'block', walk: true, rect: [CANAL.x0 - 4, WALL.z0 + 5, CANAL.x1 + 4, WALL.z0 + 7], y0: 2.2, y1: 2.6, mat: 'timber' });
 E.push({ t: 'paving', rect: [-half(ROAD.z1), ROAD.z0, half(ROAD.z1), ROAD.z1], y: LEVEL.street + 0.04, th: 0.3 });
 // ---- the river: the river boats moored by the wall with their masts up and sails down, others under sail
-for (let z0 = WALL.z1; z0 < RW - 4; z0 += 10) { const z1 = Math.min(z0 + 10, RW - 4); E.push({ t: 'water_rect', rect: [-half(z1) + 2, z0, half(z1) - 2, z1], y: LEVEL.river }); }
+// (the river's water is the planet's sea: ground.js, sea)
 for (const [x, z, d, L] of RIVER_BOATS) E.push({ t: 'song_boat', at: [x, z], dir: [d, 0], len: L + 4, beam: (L + 4) * 0.27, mast: 0, sail: z > 165, y: LEVEL.river, seed: x });
 // ---- the canal: water, walls, streets, bridges, boats
-E.push({ t: 'water_rect', rect: [CANAL.x0, CANAL.z0 + 4, CANAL.x1, WALL.z0 + 3], y: LEVEL.canal });
-for (const x of [CANAL.x0, CANAL.x1]) E.push({ t: 'canal_wall', a: [x, CANAL.z0 + 4], b: [x, ROAD.z0], y: LEVEL.street + 0.05, bed: LEVEL.canalBed, th: 0.7 });
+E.push({ t: 'water_rect', rect: [CANAL.x0, CANAL.z0, CANAL.x1, WALL.z0 + 3], y: LEVEL.canal });
+for (const x of [CANAL.x0, CANAL.x1]) E.push({ t: 'canal_wall', a: [x, CANAL.z0], b: [x, ROAD.z0], y: LEVEL.street + 0.05, bed: LEVEL.canalBed, th: 0.7 });
 for (const r of CANAL_STREETS) E.push({ t: 'paving', rect: [r[0], -half(r[0]) + 6, r[2], r[3]], y: LEVEL.street + 0.04, th: 0.3 });
 for (const z of [-230, -120, -10, 90, 136]) E.push({ t: 'ming_arch_bridge', at: [(CANAL.x0 + CANAL.x1) / 2, z], across: 'x', span: CANAL.x1 - CANAL.x0 + 0.4, width: 4, rise: 2.4, landing: 4.6, y: LEVEL.street + 0.04, water: LEVEL.canal, bed: LEVEL.canalBed });
 for (const [z, d] of CANAL_BOATS) E.push({ t: 'boat', at: [(CANAL.x0 + CANAL.x1) / 2 + (d > 0 ? -2 : 2), z], dir: [0, d], len: 7, y: LEVEL.canal });

@@ -57,9 +57,4 @@ function embankments() {
   run(BRIDGE.z + BRIDGE.w / 2 + 1, RADIUS, 1, -1);
   return out;
 }
-export const river = {
-  id: 'london-thames', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
-  entrance: { at: [0, 0], facing: 'e' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
-  elements: [{ t: 'water_cells', rect: [RIVER.x0 - 10, -(RADIUS - 60), RIVER.x1 + 12, RADIUS - 60], y: RIVER.level, cell: 2, inside: (x, z) => x > RIVER.x0 + 6 * Math.sin(z / 90) + 1 && x < RIVER.x1 + 8 * Math.sin(z / 110) - 1 && Math.hypot(x, z) < RADIUS - 60 }],
-};
 export default westminster;

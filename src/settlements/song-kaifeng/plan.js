@@ -20,7 +20,7 @@ E.push({ t: 'shanmen', c: SHANMEN.c, bays: SHANMEN.bays, depth: 8.8, y: 0, plat:
 E.push({ t: 'qing_hall', rect: [PAGODA[0] - 18, mz0 + 10, PAGODA[0] + 18, mz0 + 32], y: 0, H: 6, double: 4.8, roof: 'xieshan', bays: [7, 4], front: 's', four: true, plat: 1, pal: { roof: 'tile_dark', soffit: 'lacquer_red', wood: 'lacquer_red', column: 'lacquer_red', plaster: 'plaster_white', plinth: 'granite_block', base: 'granite_block' } });
 for (const x of [mx0 + 14, mx1 - 14]) E.push({ t: 'ming_hall', rect: [x - 6, -200, x + 6, -170], y: 0, H: 4.2, front: x < PAGODA[0] ? 'e' : 'w', roof: 'xieshan', plat: 0.6, eave: 1.3, sweep: 0.8 });
 // ---- the river: water, stone landings near the bridge, the Rainbow Bridge, boats
-E.push({ t: 'water_rect', rect: [WALL_X + 2, RIVER.z0, half(RIVER.z1) - 2, RIVER.z1], y: RIVER.water });
+for (let z0 = RIVER.z0; z0 < RIVER.z1; z0 += 8) { const z1 = Math.min(z0 + 8, RIVER.z1); E.push({ t: 'water_rect', rect: [-half(z1) + 2, z0, half(z1) - 2, z1], y: RIVER.water }); }   // (in strips, out to the disc's edge; under the water gate too)
 for (const z of [RIVER.z0, RIVER.z1]) E.push({ t: 'canal_wall', a: [-STONE_BANK, z], b: [STONE_BANK, z], y: 0.05, bed: RIVER.bed, th: 0.8 });
 E.push({ t: 'rainbow_bridge', at: BRIDGE.at, across: 'z', span: BRIDGE.span, width: BRIDGE.width, spring: BRIDGE.spring, crown: BRIDGE.crown, y0: BRIDGE.y0, abut: (RIVER.z1 - RIVER.z0) / 2 - BRIDGE.span / 2 - 0.35, bed: RIVER.bed });
 // the grain boats: moored along the banks with their masts laid back on the crutch, two with masts up

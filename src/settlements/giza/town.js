@@ -65,7 +65,7 @@ export async function town() {
   plans.push({ ...base('giza-people', P.C), style: 'life' }, { ...base('giza-bakers', P.T, TOWN_Y), style: 'life' });
   plans.push(base('giza-valley', [
     { t: 'ok_temple', rect: VALLEY_TEMPLE.map((v, i) => v), h: 8, court: [318, 40, 340, 64], pillars: 5, door: 'e', backDoor: true },
-    { t: 'water_rect', rect: [HARBOUR[0] + 1, HARBOUR[1] + 1, HARBOUR[2], HARBOUR[3] - 1], y: -1.2 },
+    { t: 'water_rect', rect: [HARBOUR[0] - 1, HARBOUR[1] - 1, HARBOUR[2], HARBOUR[3] + 1], y: -1.2 },
     { t: 'block', walk: true, rect: [HARBOUR[0] - 2, 46, HARBOUR[0] + 10, 58], y0: -2.6, y1: 0.02, mat: 'tura_limestone' },
     // the quay along the temple's front, from the valley floor on either side to the landing
     { t: 'block', walk: true, rect: [HARBOUR[0] - 1, HARBOUR[1] - 1, HARBOUR[0] + 5, 46], y0: -2.6, y1: 0.02, mat: 'tura_limestone' },

@@ -2,7 +2,7 @@
 // earth ovens, chicken houses and garden walls with bananas in them, each set on the ground where it
 // stands; and the people (§4b): a gathering on the plaza before the ahu, a statue walked down the
 // road by three rope teams, canoes drawn up on the shore with their fishermen.
-import { RADIUS, ROAD, SEA, village, height, fields } from './layout.js';
+import { RADIUS, ROAD, SEA, RARAKU, village, height, fields } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -88,5 +88,8 @@ export async function town() {
     if (rand() < 0.6) { const b = [x - 1.3, z + 0.8]; fig({ at: b, y: y(b), rot: face(b, [x, z + 6]), pose: 'stand', man: true }); }
   }
   void SEA;
-  return [plan('rapa-nui-village', 'rapanui', E), plan('rapa-nui-people', 'life', P)];
+  // the crater lake of Rano Raraku (the sea round the island is the planet's: ground.js, sea)
+  const [lx, lz] = RARAKU.c, lr = RARAKU.crater;
+  const lake = plan('rapa-nui-crater-lake', 'ming', [{ t: 'water_cells', rect: [lx - lr, lz - lr, lx + lr, lz + lr], y: RARAKU.lake, cell: 1, inside: (x, z) => Math.hypot(x - lx, z - lz) < lr && height(x, z) < RARAKU.lake }]);
+  return [plan('rapa-nui-village', 'rapanui', E), plan('rapa-nui-people', 'life', P), lake];
 }

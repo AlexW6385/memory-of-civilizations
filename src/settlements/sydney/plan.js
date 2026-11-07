@@ -1,5 +1,5 @@
 // Modern Sydney, 1973 (docs/settlements/sydney.md §2–§4).
-import { RADIUS, LEVEL, OPERA, BRIDGE, QUAY, AUSTRALIA_SQ, height, inWater, seawalls } from './layout.js';
+import { RADIUS, LEVEL, OPERA, BRIDGE, QUAY, AUSTRALIA_SQ, height, seawalls } from './layout.js';
 
 const [ox0, oz0, ox1, oz1] = OPERA.rect, cw = ox0 + 21, ce = ox1 - 21;
 export const opera = {
@@ -47,10 +47,5 @@ export const harbour = {
     { t: 'round_tower', c: AUSTRALIA_SQ, r: 21, h: 170, y: height(...AUSTRALIA_SQ) },
     { t: 'skyscraper', rect: [-30, 40, 10, 66], y: height(-10, 53), h: 117, mat: 'facade_glass', seed: 1962 },     // the AMP Building at the quay
   ],
-};
-export const water = {
-  id: 'sydney-water', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
-  entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
-  elements: [{ t: 'water_cells', rect: [-(RADIUS - 50), -(RADIUS - 50), RADIUS - 50, 0], y: LEVEL, cell: 2, inside: (x, z) => inWater(x, z) }],
 };
 export default opera;

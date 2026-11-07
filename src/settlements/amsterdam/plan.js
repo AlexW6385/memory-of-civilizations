@@ -1,6 +1,6 @@
 // The Dam about 1670 (docs/settlements/amsterdam.md §2–§4): the Town Hall, the Nieuwe Kerk's tower,
 // the Westerkerk; the canals' water and bridges; ships on the IJ.
-import { RADIUS, C, RINGS, CANAL_W, HALL, DAM, IJ_Z, WATER, GROUND, QUAY, BRIDGE_ANGLES, DAMRAK, WAAG, FISH, NIEUWE_KERK, westerkerk, westerNave } from './layout.js';
+import { RADIUS, C, RINGS, CANAL_W, HALL, DAM, IJ_Z, WATER, GROUND, QUAY, BRIDGE_ANGLES, DAMRAK, WAAG, FISH, NIEUWE_KERK, westerkerk, westerNave, height } from './layout.js';
 
 const wk = westerkerk(), wn = westerNave();
 /** The sledges on the Dam (docs §5.6): [x, z, rot (their front along −z turned by rot), load]; each has its horse (town.js). */
@@ -35,7 +35,8 @@ export const dam = {
     ...[17, 21, 25, 29, 33, 37].map((x, k) => ({ t: 'fish_bench', at: [x, -247.6], rot: Math.PI, len: 2.4, seed: 31 + k, y: GROUND + 0.05 })),
     ...SLEDGES.map(([x, z, rot, load], k) => ({ t: 'sledge', at: [x, z], rot, load, seed: 7 + k, y: GROUND + 0.053 })),
     // ships on the IJ
-    ...[-180, -110, -40, 40, 120, 190].map((x, k) => ({ t: 'ship', at: [x, IJ_Z - 30 - (k % 2) * 25], dir: [1, 0.1], len: 28 + (k % 3) * 4, y: WATER })),
+    // (all on the open water, clear of the shore at the disc's edge and of the Damrak's mouth)
+    ...[[-120, -303], [-70, -317], [-15, -306], [45, -318], [95, -304], [135, -299]].map((at, k) => ({ t: 'ship', at, dir: [1, 0.1], len: 28 + (k % 3) * 4, y: WATER })),
   ],
   // the Town Hall's rooms first (a point in them is not on the Dam): the vestibule, the stair, the Burgerzaal and its galleries
   // (the Vierschaar is not a room: as in life it is seen from the vestibule through its bronze grilles, not entered)
@@ -69,7 +70,7 @@ export const canals = {
   entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [
     { t: 'water_cells', rect: [-RADIUS + 60, C[1], RADIUS - 60, RADIUS - 60], y: WATER, cell: 1.5, inside: inCanal },
-    { t: 'water_cells', rect: [-RADIUS + 60, -RADIUS + 60, RADIUS - 60, IJ_Z], y: WATER, cell: 2.5, inside: (x, z) => Math.hypot(x, z) < RADIUS - 60 && z < IJ_Z + QUAY + 0.15 },
+    { t: 'water_cells', rect: [-RADIUS, -RADIUS, RADIUS, IJ_Z], y: WATER, cell: 2.5, inside: (x, z) => z < IJ_Z + QUAY + 0.15 && height(x, z) < WATER },
     // the Damrak, from the IJ up to the Dam
     { t: 'water_cells', rect: [DAMRAK[0] - 2, IJ_Z, DAMRAK[2] + 2, DAMRAK[3] + 2], y: WATER, cell: 0.5, inside: (x, z) => x > DAMRAK[0] - QUAY - 0.15 && x < DAMRAK[2] + QUAY + 0.15 && z < DAMRAK[3] + QUAY + 0.15 },
     // the bridges: each street crossing every ring on a vaulted brick bridge

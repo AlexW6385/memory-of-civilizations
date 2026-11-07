@@ -2,7 +2,7 @@
 // the Ishtar Gate in the double wall, the Processional Way between glazed walls, the Southern
 // Palace, the river.
 
-import { RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX } from './layout.js';
+import { RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height } from './layout.js';
 
 const E = [];
 /** The round boats on the river: z, d (from the river's middle), r, cargo; the boatmen and an ass are placed in town.js. */
@@ -79,6 +79,7 @@ export const babylon = {
 export const river = {
   id: 'babylon-river', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
-  elements: [{ t: 'water_cells', rect: [RIVER.x - RIVER.w, -(RADIUS - 60), RIVER.x + RIVER.w, RADIUS - 60], y: RIVER.level, cell: 1.5, inside: (x, z) => Math.abs(x - (RIVER.x + 18 * Math.sin(z / 140))) < RIVER.w / 2 - 2 && Math.hypot(x, z) < RADIUS - 60 }],
+  // (out to where its bed comes up to the water by the disc's edge)
+  elements: [{ t: 'water_cells', rect: [RIVER.x - RIVER.w, -RADIUS, RIVER.x + RIVER.w, RADIUS], y: RIVER.level, cell: 1.5, inside: (x, z) => Math.abs(x - riverX(z)) < RIVER.w / 2 + 8 && height(x, z) < RIVER.level }],
 };
 export default babylon;

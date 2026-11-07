@@ -5,7 +5,7 @@
 import { RADIUS, RIVER_Z, TERRACE, GARDEN, KATRAS, HAVELI_OPEN, inRect, inHouse, walkDist, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
-const LEVEL = { water: -2.4, bed: -5 };
+export const LEVEL = { water: -2.4, bed: -5 };
 function height(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS) return 0;
@@ -14,7 +14,7 @@ function height(x, z) {
   if (z < RIVER_Z - 10) h = LEVEL.bed;
   return h * (1 - sm(RADIUS - 30, RADIUS, r));
 }
-const inRiver = (x, z) => z < RIVER_Z - 4 && !inRect(TERRACE.rect, x, z, 4);
+const inRiver = (x, z) => (z < RIVER_Z - 4 && !inRect(TERRACE.rect, x, z, 4)) || (z < RIVER_Z + 8 && height(x, z) < LEVEL.water - 0.3);
 function cover(x, z, h, ny) {
   const c = { sand: 0.2, grass: 0, rock: 0, soil: 0, fields: 0, dry: 0.5, warmth: 0.8, red: 0.25, road: 0, snow: 0, forest: 0 };
   if (z < RIVER_Z + 10) { c.sand = 0.8; c.soil = 0.2; return c; }

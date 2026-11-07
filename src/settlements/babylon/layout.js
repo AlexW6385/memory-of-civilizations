@@ -19,7 +19,7 @@ export const RIVER = { x: -290, w: 70, level: -3, bed: -6 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const riverX = (z) => RIVER.x + 18 * Math.sin(z / 140);
-export const inRiver = (x, z) => Math.abs(x - riverX(z)) < RIVER.w / 2 - 3 && Math.hypot(x, z) < RADIUS - 60;
+export const inRiver = (x, z) => Math.abs(x - riverX(z)) < RIVER.w / 2 + 8 && height(x, z) < RIVER.level - 0.3;
 export function height(x, z) {
   const d = Math.abs(x - riverX(z)), edge = smooth(RADIUS - 70, RADIUS - 40, Math.hypot(x, z));
   return RIVER.bed * smooth(RIVER.w / 2 + 8, RIVER.w / 2 - 6, d) * (1 - edge);

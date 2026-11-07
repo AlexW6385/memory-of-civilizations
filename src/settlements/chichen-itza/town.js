@@ -1,7 +1,7 @@
 // The town round the Great Plaza (docs/settlements/chichen-itza.md §6): house lots enclosed by
 // dry-stone walls, each with one to three oval houses of wattle and thatch.
 
-import { RADIUS, lots } from './layout.js';
+import { RADIUS, CENOTE, lots, cenoteDist } from './layout.js';
 import { ground } from './ground.js';
 
 const base = (id, elements) => ({ id, style: 'maya', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 62], facing: 'n' } });
@@ -116,5 +116,8 @@ function riteObjects() { return base('chichen-itza-offering', [{ t: 'm_offering'
 export async function town() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 30) plans.push(base(`chichen-itza-town-${i / 30}`, all.slice(i, i + 30).flatMap(lotElements)));
+  // the water in the Sacred Cenote, 20 m below the rim (docs/settlements/chichen-itza.md)
+  const [cx, cz] = CENOTE.c, r = CENOTE.r;
+  plans.push({ ...base('chichen-itza-cenote-water', [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: CENOTE.water, cell: 0.75, inside: (x, z) => cenoteDist(x, z) < 0 && ground.height(x, z) < CENOTE.water }]), style: 'ming' });
   return [...plans, ...market(), rites(), riteObjects(), ...ballgame()];
 }

@@ -2,7 +2,7 @@
 // walls, chinampa plots round its edge, the lake beyond with the causeway crossing it; willows by
 // the water, maize on the chinampas; the clear high sky of the Valley of Mexico.
 
-import { RADIUS, PRECINCT, PALACE, LEVEL, ISLAND, inRect, inCanal, inLake, inHouse, inChinampaHouse, smooth as sm } from './layout.js';
+import { RADIUS, PRECINCT, PALACE, LEVEL, ISLAND, inRect, inCanal, inLake, inLakeWater, inHouse, inChinampaHouse, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function height(x, z) {
@@ -14,7 +14,7 @@ function height(x, z) {
   else if (r > 300) { const cell = (Math.floor(x / 14) + Math.floor(z / 30)) % 2 === 0; const lane = Math.abs(((x % 14) + 14) % 14 - 7) > 6.2; h = lane ? LEVEL.canalBed * 0.6 : 0.1 * (cell ? 1 : 0); }
   return h * (1 - sm(RADIUS - 30, RADIUS, r));
 }
-const wet = (x, z) => (inLake(x, z) && Math.hypot(x, z) < RADIUS - 26) || inCanal(x, z);
+const wet = (x, z) => inCanal(x, z) || inLakeWater(x, z, height(x, z) + 0.1);
 function cover(x, z) {
   const r = Math.hypot(x, z);
   const c = { sand: 0.1, grass: 0.1, rock: 0, soil: 0.8, fields: 0, dry: 0.4, warmth: 0.55, red: 0.05, road: 0, snow: 0, forest: 0 };
