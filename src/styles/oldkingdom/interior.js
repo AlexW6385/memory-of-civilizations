@@ -164,9 +164,12 @@ export function pyramidInterior(el, { bag, col, lights }) {
   }
   // the Great Step to be climbed: timber blocks stacked before it, as the burial party would have set one
   col.floor([x - 1.03, zG, x + 1.03, zS1], F);
-  for (const [z0, z1, top] of [[zG - 0.75, zG - 0.5, G.Y + 0.23], [zG - 0.5, zG - 0.25, G.Y + 0.45], [zG - 0.25, zG, G.Y + 0.68]]) {
+  const blocks = [], y0b = yA(zG - 1.5), rise = (F - y0b) / 7;
+  for (let k = 0; k < 6; k++) blocks.push([zG - 1.5 + 0.25 * k, zG - 1.25 + 0.25 * k, y0b + rise * (k + 1)]);
+  // (walked as one ramp over the blocks, from the gallery floor to the step)
+  col.ramp([x - 0.48, zG - 1.5, x + 0.48, zG], y0b, F, 's');
+  for (const [z0, z1, top] of blocks) {
     wood.push(...flat(box(x - 0.48, yA(z0) - 0.1, z0, x + 0.48, top, z1 + (z1 === zG ? 0 : 0.0))));
-    col.rect([x - 0.48, z0, x + 0.48, z1], yA(z0) + 0.02, top);
   }
 
   // ── the three granite plugs, stored on the channel's floor at the gallery's foot, held by a cedar beam across the
@@ -199,9 +202,10 @@ export function pyramidInterior(el, { bag, col, lights }) {
   const level = (list, xa, xb, z0, z1, hh) => {                      // a level passage: floor, sides, roof
     list.push(...flat(box(xa, F - 0.4, z0, xb, F, z1)), ...flat(box(xa, F + hh, z0, xb, F + hh + 0.4, z1)));
     list.push(...flat(box(xa - 0.4, F - 0.4, z0, xa, F + hh + 0.4, z1)), ...flat(box(xb, F - 0.4, z0, xb + 0.4, F + hh + 0.4, z1)));
-    col.floor([xa, z0, xb, z1], F); seg([xa - 0.15, z0], [xa - 0.15, z1], 0.3, F - 0.4, F + hh); seg([xb + 0.15, z0], [xb + 0.15, z1], 0.3, F - 0.4, F + hh);
+    col.floor([xa, z0, xb, z1], F); seg([xa - 0.3, z0], [xa - 0.3, z1], 0.3, F - 0.4, F + hh); seg([xb + 0.3, z0], [xb + 0.3, z1], 0.3, F - 0.4, F + hh);
   };
   level(lime, x - w, x + w, zS1 + 0.4, za0, H);
+  col.floor([x - w, zS1, x + w, zS1 + 0.4], F);                     // the passage's mouth through the step's south wall
   level(gran, x - w, x + w, za1, zr0, H);
   // the antechamber: 2.97 m long, 3.78 m high; granite wainscots east and west with the grooves of the portcullises;
   // the granite leaf in its groove at the north end and the three slabs, all held up on ropes over cedar logs lying in
