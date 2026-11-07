@@ -1216,8 +1216,8 @@
  },
  "parthenon": {
   "site": "athens",
-  "hash": "abd5caaf47819a90",
-  "rays": 160,
+  "hash": "fd21d129c43040e7",
+  "rays": 128,
   "probes": 23040,
   "boxes": [
    {
@@ -1239,9 +1239,9 @@
     ]
    }
   ],
-  "bytes": 375996,
-  "seconds": 198,
-  "baked": "2026-11-06"
+  "bytes": 372567,
+  "seconds": 35,
+  "baked": "2026-11-07"
  },
  "persepolis-terrace": {
   "site": "persepolis",
