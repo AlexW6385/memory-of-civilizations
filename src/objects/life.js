@@ -7,6 +7,7 @@
 
 import { LIFE_KINDS, boatFloat } from './index.js';
 import { buildPlan, toWorld } from '../core/build.js';
+import { ARRIVALS } from '../planet/arrivals.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const hash = (str) => { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
@@ -345,6 +346,10 @@ export function lifePlans(id, R, landmarks, town, G) {
       if ((HOUSE.test(el.t) || !SKIP.test(el.t)) && w * d >= 10 && w * d <= 6000 && w > 2 && d > 2) houses.push({ r, front: el.front, y: el.y, storeys: el.storeys ?? (el.h && el.h > 5 ? 2 : 1), shop: !!el.shop, t: el.t, variant: el.variant });
     }
   }
+  // the arrival point (src/planet/arrivals.js): the visitor is set down there, so nothing of the street life stands
+  // within ~2 m of it (a figure was found standing on Wutai's arrival)
+  const AR = ARRIVALS[id], AR_CLEAR = 2;
+  if (AR) { const b = [AR[0] - AR_CLEAR, AR[2] - AR_CLEAR, AR[0] + AR_CLEAR, AR[2] + AR_CLEAR]; grid.fill(b, 1); egrid.fill(b, 1); }
   // the landmarks' paved floors (forecourts, plazas raised a little): figures and stalls stand on them
   const floors = [], built = [];
   if (MARKETS[id]?.length || PEOPLE[id]?.length || lmSquare) for (const plan of landmarks) { try { const b = buildPlan(plan); built.push([plan, b]); for (const f of b.colliders.floors) if (f.y1 === undefined) floors.push(f); } catch (e) { /* a plan that cannot build here keeps the ground */ } }
@@ -658,6 +663,8 @@ export function lifePlans(id, R, landmarks, town, G) {
       grid.fill(box, 2); nb++;
     }
   }
+  // (and what was put without asking the grid: kept off the arrival point too; the lines and poles overhead may cross it)
+  if (AR) for (let i = els.length - 1; i >= 0; i--) { const e = els[i]; if (e.t !== 'wash_line' && e.t !== 'laundry_pole' && Math.hypot(e.at[0] - AR[0], e.at[1] - AR[2]) < AR_CLEAR + sz(e.t) * 0.5) els.splice(i, 1); }
   // as plans of a few hundred objects each
   // as plans of one 100 m tile each, so that what is out of view or far is not drawn
   const tiles = new Map();
