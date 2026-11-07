@@ -108,6 +108,9 @@ function bancoWall(bag, col, a, b, y, h, th, opts = {}) {
   const step = opts.step ?? 3.2, n = Math.max(1, Math.round(L / step)), pw = opts.pw ?? 0.7, pd = opts.pd ?? 0.55, ph = opts.ph ?? 1.4;
   const clear = [...gaps.map((g) => [g.s0, g.s1]), ...(opts.skip || [])], free = (s, m) => !clear.some(([c0, c1]) => s > c0 - m && s < c1 + m);
   const rand = rng(opts.seed || 3);
+  // a year's rain on the face (opts.erode): between the pilasters the plaster washed off the foot of the
+  // wall by the splash, showing the bricks, and runnels washed pale down from the parapet
+  if (opts.erode !== false) erode(bag, (s, d) => [a[0] + ux * s + nx * d * out, a[1] + uz * s + nz * d * out], L, n, y, h, th / 2, (s, m) => free(s, m) && Math.abs(s - Math.round(s / (L / n)) * (L / n)) > pw * 0.8 + m, rng((opts.seed || 3) * 31 + 7));
   for (let k = 0; k <= n; k++) {
     const s = k * L / n, x = a[0] + ux * s + nx * (th / 2 + pd / 2) * out, z = a[1] + uz * s + nz * (th / 2 + pd / 2) * out;
     if (!free(s, pw * 0.8 + 0.1)) continue;
@@ -126,6 +129,24 @@ function bancoWall(bag, col, a, b, y, h, th, opts = {}) {
   }
 }
 
+/**
+ * The year's erosion on a banco face (docs/settlements/djenne.md §13), before the replastering: P(s, d) a point
+ * s along the face and d out from the wall's middle plane (the face at d = face); n bays; ok(s, m) a place
+ * clear of the pilasters and openings by m. Patches at the foot where the splash has washed the plaster off
+ * and the mud bricks show, a few higher up; runnels washed paler down from the top. Each stands 1.5 cm proud.
+ */
+export function erode(bag, P, L, n, y, h, face, ok, rand, foot = 0.02) {
+  const bricks = [], wash = [];
+  const strip = (out, s0, s1, y0, y1, e = 0.015) => { if (s1 - s0 < 0.1 || y1 - y0 < 0.05) return; const p = P(s0, face), q = P(s1, face); beamTris(out, [p[0], y0, p[1]], [q[0], y0, q[1]], e, y1 - y0); };
+  for (let k = 0; k < n; k++) {
+    const bay = L / n, c = (k + 0.5) * bay;
+    if (rand() < 0.55) { const w = 0.5 + rand() * Math.min(1.2, bay * 0.45), s0 = c - w / 2 + (rand() - 0.5) * bay * 0.2; if (ok(s0, 0.05) && ok(s0 + w, 0.05)) strip(bricks, s0, s0 + w, y + foot, y + foot + 0.25 + rand() * 0.7); }
+    if (rand() < 0.12 && h > 3) { const w = 0.3 + rand() * 0.5, s0 = c + (rand() - 0.5) * bay * 0.4, y0 = y + 1.2 + rand() * (h - 2.5); if (ok(s0, 0.05) && ok(s0 + w, 0.05)) strip(bricks, s0, s0 + w, y0, y0 + 0.2 + rand() * 0.35); }
+    if (rand() < 0.5) { const w = 0.1 + rand() * 0.16, s0 = c + (rand() - 0.5) * bay * 0.5; if (ok(s0, 0.05) && ok(s0 + w, 0.05)) strip(wash, s0, s0 + w, y + h * (0.25 + rand() * 0.3), y + h - 0.05, 0.012); }
+  }
+  if (bricks.length) bag.add('mudbrick', fromTriangles(bricks));
+  if (wash.length) bag.add('mud_plaster', fromTriangles(wash));
+}
 /** An axis-aligned slab of banco [x0, z0, x1, z1] from y0 to y1, pierced by holes [u0, u1, v0, v1] (u along its long side). */
 export function piercedSlab(bag, col, mat, r, y0, y1, holes = []) {
   const [x0, z0, x1, z1] = r, alongX = x1 - x0 >= z1 - z0, A0 = alongX ? x0 : z0, A1 = alongX ? x1 : z1;
@@ -417,6 +438,12 @@ function sahelHouse(el, { bag, col }) {
   lbox('wood_dark', mid - dw, mid + dw, -0.06, 0.015, 0, dh - 0.01);
   for (let k = 0; k < 5; k++) { const s = mid - dw + k * (2 * dw) / 5; lbox('timber', s + 0.008, s + 2 * dw / 5 - 0.008, -0.06, k % 2 ? 0.035 : 0.045, 0, dh); }
   for (const y of [0.35, 1.0, 1.7]) lbox('wood_dark', mid - dw, mid + dw, 0.04, 0.07, y, y + 0.09);
+  // the year's erosion on its four walls (§13): on the front clear of the pilasters, the panel and the door
+  for (const [ea, eb] of [[[x0, z1], [x1, z1]], [[x1, z0], [x0, z0]], [[x1, z1], [x1, z0]], [[x0, z0], [x0, z1]]]) {
+    const EL = Math.hypot(eb[0] - ea[0], eb[1] - ea[1]), ex = (eb[0] - ea[0]) / EL, ez = (eb[1] - ea[1]) / EL, front = ea[0] === a[0] && ea[1] === a[1] && eb[0] === b[0] && eb[1] === b[1];
+    const ok = front ? (q, m) => q > 0.85 + m && q < EL - 0.85 - m && Math.abs(q - mid) > hw + 0.65 + m : (q, m) => q > 0.25 + m && q < EL - 0.25 - m;
+    erode(bag, (q, d) => [ea[0] + ex * q - ez * d, ea[1] + ez * q + ex * d], EL, Math.max(1, Math.round(EL / (front ? 1.1 : 1.8))), 0, H, 0, ok, rng((el.seed || 1) * 13 + EL * 7), front ? 0.62 : 0.02);   // (on the front above the benches)
+  }
   { const [rx, rz] = P(mid + dw * 0.55, 0.09); bag.add('iron', lathe([[0.06, -0.06], [0.07, 0], [0.06, 0.06], [0.05, 0], [0.06, -0.06]], 8, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(Math.atan2(nx, nz)).translate(rx, 1.05, rz)); }
   // the facade bench (tintin) along the foot, either side of the entrance
   for (const [s0, s1] of [[0.8, mid - hw - 0.55], [mid + hw + 0.55, L - 0.8]]) if (s1 - s0 > 0.8) lbox('banco_smooth', s0, s1, -0.05, 0.5, 0, 0.45, true);
@@ -607,8 +634,29 @@ function netRack(el, { bag, col }) {
   for (const sx of [-hw, hw]) { const [px, pz] = Wp(sx, 0); col.circle(px, pz, 0.1, 0, ph); }
 }
 
+/**
+ * mud_pit: { c, r, y, seed } — a round pit by the river where the clay for the crépissage soaks for some
+ * twenty days (docs/settlements/djenne.md §13): a low lip of trodden mud round it, the wet mud inside
+ * a hand below the lip, lumps of clay waiting on its edge, a heap of rice husk to be worked in at the end.
+ */
+function mudPit(el, { bag, col }) {
+  const [cx, cz] = el.c, r = el.r ?? 2, y = el.y ?? 0, rand = rng(el.seed || 5);
+  bag.add(B, lathe([[r, -0.3], [r, 0.12], [r + 0.15, 0.22], [r + 0.4, 0.16], [r + 0.75, 0.02], [r + 0.8, -0.1]], 18, null, cx, y, cz));
+  // the wet mud, its surface churned
+  bag.add('silt', lathe([[0.001, 0.05], [r * 0.3, 0.07], [r * 0.6, 0.03], [r * 0.85, 0.08], [r + 0.02, 0.06], [r + 0.02, -0.3]], 18, (th) => 1 + 0.02 * Math.sin(th * 5), cx, y, cz));
+  col.circle(cx, cz, r + 0.6, y, y + 0.2);
+  // lumps of dry clay brought by cart and donkey, broken up on the edge; a heap of rice husk
+  const a0 = rand() * 6.28;
+  for (let k = 0; k < 9; k++) {
+    const a = a0 + (rand() - 0.5) * 1.2, d = r + 1.1 + rand() * 0.9, s = 0.18 + rand() * 0.2, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d;
+    bag.add(B, lathe([[s, 0], [s * 1.05, s * 0.5], [s * 0.6, s * 0.95], [0.001, s]], 6, null, x, y - 0.02, z));
+  }
+  const ha = a0 + Math.PI * 0.8, hx = cx + Math.cos(ha) * (r + 1.6), hz = cz + Math.sin(ha) * (r + 1.6);
+  bag.add('thatch', lathe([[0.9, 0], [0.75, 0.25], [0.4, 0.5], [0.001, 0.6]], 12, null, hx, y - 0.02, hz));
+}
+
 registerStyle('sahel', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat, net_rack: netRack },
+  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
   objects: {},
 });
