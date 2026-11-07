@@ -76,6 +76,14 @@ About 190 canal houses along the rings (the true density is higher; recorded for
 - Deep narrow plots developed into merchants' houses with daylight from two sides through a courtyard, rooms at the back; houses standing back to back had daylight at the front only [stated: DASH, "From Dwelling to Dwelling", Herengracht 249, TU Delft]. Cesspits — covered pits near the house or further out in the yard — served as privies [stated: UvA, "Huisraad uit beerputten toont diversiteit van verdwenen wijk Vlooienburg" (2022)]. Back walls with cross-windows (kruisvensters) to the back room are recorded in houses of the period [stated: *Jaarboek* (dbnl), Voorstraat 97: "eiken kruisvensters van de achterkamer"].
 - **Ours:** every back wall has a window a bay on each floor, in its frame, with a transom, a brick sill and a brick relieving arch, some with a shutter on the lower light; three in ten houses have cross-windows in the first-floor back rooms; a door to the yard; iron anchors; the back gable with its attic window and loading hatch, in three houses in ten boarded in tarred timber over a brick course with barge boards. About half the houses stand 3.4 m short of their plot's back with a one-storey brick annex (aanbouw) under a tiled lean-to roof on half the width, a window and a door to the lane, a brick yard wall with a stone coping across the rest, and the privy (secreet), a boarded closet with its own lean-to roof, in the yard's corner. [inferred: proportions, the share of each]
 
+
+### 5.8 Inside the Town Hall (built in `src/styles/dutch/townhall.js`)
+
+- **The Burgerzaal:** the citizens' hall runs across the building on the main floor, a marble hall under a barrel vault, galleries round it; its floor is inlaid with two maps of the hemispheres and a map of the northern sky; Atlas bearing the heavens stands at the west end, the Maid of Amsterdam enthroned over the east door [stated: Wikipedia "Royal Palace of Amsterdam"]. Ours: about 37 x 17 m [inferred: dimensions, fitted to the compressed plan], five arches each side to the galleries, pilasters and entablature, the vault with transverse ribs and round windows in its ends, the three maps 6.24 m across in marble with metal coasts, graticule and stars (the coastlines after the Blaeu maps, simplified [inferred]), relief panels over the arches as rounded figure masses [inferred: their subjects].
+- **The Vierschaar:** the tribunal on the ground floor, in white marble, where death sentences were pronounced; caryatids by Artus Quellinus and reliefs of judgement (Solomon, Zaleucus, Brutus); the public watched through bronze grilles [stated: Wikipedia "Royal Palace of Amsterdam"; Paleis Amsterdam, "Vierschaar"]. Ours: seen from the vestibule through three grilled openings, not entered.
+- **The vestibule and the stair:** the seven arches on the Dam open into a vestibule; narrow stairways lead up to the Burgerzaal [stated: Brewminate, "Architectural history of the Town Hall of Amsterdam"; inferred: the dimensions and the four-flight stair].
+- **Date:** built 1648–1665, inaugurated 1655 [stated: Wikipedia]; the settlement's date (about 1670) shows it finished.
+
 ## 6. Ground and water
 
 Brick quays and streets; rows of elms on the quays; canals; the IJ. [stated: elms along canals — inferred from paintings]
@@ -96,6 +104,7 @@ Carillons and the organ; the lute and the viol; songs in the taverns. [inferred]
 
 ## Sources
 
+- [Vierschaar — Paleis Amsterdam](https://www.paleisamsterdam.nl/en/)
 - [Royal Palace of Amsterdam — Wikipedia](https://en.wikipedia.org/wiki/Royal_Palace_of_Amsterdam)
 - [Canals of Amsterdam — Wikipedia](https://en.wikipedia.org/wiki/Canals_of_Amsterdam)
 - [Westerkerk — Wikipedia](https://en.wikipedia.org/wiki/Westerkerk)

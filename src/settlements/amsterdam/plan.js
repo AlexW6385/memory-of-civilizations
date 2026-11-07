@@ -16,7 +16,7 @@ export const dam = {
   view: [HALL[0] - 4, HALL[1] - 4, HALL[2] + 4, HALL[3] + 4],
   bakeTop: 60,
   elements: [
-    { t: 'town_hall', rect: HALL, h: 33, front: 'e', y: GROUND },
+    { t: 'town_hall', rect: HALL, h: 33, front: 'e', y: GROUND, interior: true },
     // the Nieuwe Kerk: Gothic, rebuilt after the fire of 1645; its great tower was begun and never finished, so a ridge turret
     { t: 'dutch_church', rect: NIEUWE_KERK, h: 16, transepts: [[DAM[1] + 9, DAM[1] + 23]], tw: 5, gothic: true, turret: true, gables: ['n', 's'], door: 's', y: GROUND },
     // the Westerkerk: the Westertoren by the Prinsengracht, the nave with its two transepts behind it
@@ -37,7 +37,14 @@ export const dam = {
     // ships on the IJ
     ...[-180, -110, -40, 40, 120, 190].map((x, k) => ({ t: 'ship', at: [x, IJ_Z - 30 - (k % 2) * 25], dir: [1, 0.1], len: 28 + (k % 3) * 4, y: WATER })),
   ],
-  rooms: [{ id: 'dam', rect: DAM, y: GROUND, kind: 'open' }],
+  // the Town Hall's rooms first (a point in them is not on the Dam): the vestibule, the stair, the Burgerzaal and its galleries
+  // (the Vierschaar is not a room: as in life it is seen from the vestibule through its bronze grilles, not entered)
+  rooms: [
+    { id: 'vestibule', rect: [HALL[2] - 6.6, -246.8, HALL[2] + 1.4, -220.2], y: GROUND + 0.15, kind: 'hall' },
+    { id: 'stair', rect: [HALL[2] - 15, -250.8, HALL[2] - 5, -246.8], y: GROUND + 0.15, kind: 'hall' },
+    { id: 'burgerzaal', rect: [HALL[0] + 4, -245, HALL[2] - 4, -222], y: GROUND + 15.9, kind: 'hall' },
+    { id: 'dam', rect: DAM, y: GROUND, kind: 'open' },
+  ],
   walks: [Object.assign([[20, -207], [20, -230]], { y0: GROUND })],
 };
 // the canals' water and their bridges (radial streets crossing each ring)

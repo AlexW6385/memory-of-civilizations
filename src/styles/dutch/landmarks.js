@@ -3,6 +3,9 @@
 
 import { box, frustum, lathe } from '../../core/geom.js';
 import { faceFrame, prism, fbox, outline, ngon, arch } from './facade.js';
+import { townHallInterior } from './townhall.js';
+import { relief } from '../norse/carving.js';
+import { Shape, Path } from '../../core/three.js';
 
 const ST = 'sandstone_dressed', RL = 'sandstone_relief';
 const sq = (x, z, s) => [x - s / 2, z - s / 2, x + s / 2, z + s / 2];
@@ -194,18 +197,40 @@ function balustrade(bag, x, z, s, v, hh) {
  * fronts under a pediment full of relief with statues on it; seven arches in front on the Dam; the lead
  * roof; the cupola — a round colonnade, a dome and the gilt cog ship on top.
  */
-export function townHall(el, { bag, col }) {
+export function townHall(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 33, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, front = el.front ?? 'e';
-  bag.add(ST, box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y - 0.5, y + h); col.floor(el.rect, y + h);
+  // the front's bays: an odd number on the long fronts so that the seven arches and the pediment stand on the axis
+  const bays = (L, long) => { let n = Math.round(L / 3.6); if (long && (n - 7) % 2) n += n * 3.6 > L ? -1 : 1; return n; };
+  const inside = el.interior && front === 'e';
+  if (inside) {
+    const L = z1 - z0, n = bays(L, true), bw = L / n, c0 = (n - 7) / 2;
+    townHallInterior(el, { bag, col, lights }, { zA: z1 - (c0 + 7) * bw, zB: z1 - c0 * bw });
+  } else { bag.add(ST, box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y - 0.5, y + h); }
+  col.floor(el.rect, y + h);
   const e1 = 15.4, e2 = h - 1.6;                                           // the two entablatures
   for (const f of 'nsew') {
     const F = faceFrame(el.rect, f), L = F.w, long = f === 'e' || f === 'w', A = (m, ...r) => bag.add(m, fbox(F, y, ...r));
-    const n = Math.round(L / 3.6), bw = L / n, pav = long ? 3 : 2, ctr = long ? 7 : 0;           // bays; corner pavilions; the centre
+    const n = bays(L, long), bw = L / n, pav = long ? 3 : 2, ctr = long ? 7 : 0;                  // bays; corner pavilions; the centre
     const c0 = Math.floor((n - ctr) / 2), proj = (i) => (ctr && i >= c0 && i < c0 + ctr ? 1.4 : i < pav || i >= n - pav ? 0.7 : 0);
-    A(ST, -0.6, L + 0.6, -0.5, 1.6, 0, 0.6);                                                           // the plinth
+    const open = inside && f === front;
+    // the plinth, broken by the seven arches where they open
+    if (open) { const aw = 2.4; let u = -0.6; for (let i = c0; i < c0 + ctr; i++) { const um = (i + 0.5) * bw; A(ST, u, um - aw / 2, -0.5, 1.6, 0, 0.6); u = um + aw / 2; } A(ST, u, L + 0.6, -0.5, 1.6, 0, 0.6); }
+    else A(ST, -0.6, L + 0.6, -0.5, 1.6, 0, 0.6);
     for (let i = 0; i < n; i++) {
       const u0 = i * bw, u1 = u0 + bw, um = (u0 + u1) / 2, p = proj(i);
-      if (p) A(ST, u0, u1, 1.6, h, 0, p);
+      const gate = open && i >= c0 && i < c0 + ctr;
+      if (gate) {
+        // the open arch: the wall (front block and projection) pierced from the vestibule's floor to the arch's crown, the stone above
+        const aw = 2.4, vs = 5.4, sh = new Shape(), hole = new Path();
+        sh.moveTo(0, 0); sh.lineTo(bw, 0); sh.lineTo(bw, 8.48); sh.lineTo(0, 8.48); sh.lineTo(0, 0);
+        hole.moveTo(bw / 2 - aw / 2, 0); hole.lineTo(bw / 2 + aw / 2, 0); hole.lineTo(bw / 2 + aw / 2, vs); hole.absarc(bw / 2, vs, aw / 2, 0, Math.PI, false); hole.lineTo(bw / 2 - aw / 2, 0); sh.holes.push(hole);
+        const [ox, oz] = F.at(u0, 0); bag.add(ST, relief(sh, [ox, y + 0.12, oz], [1, 0], -0.6, p, 12));
+        for (const [a, b] of [[u0, um - aw / 2], [um + aw / 2, u1]]) { const [ax, az] = F.at(a, 0), [bx, bz] = F.at(b, 0); col.rect([ax - 0.6, Math.min(az, bz), ax + p, Math.max(az, bz)], y, y + 8.6); }
+        A(ST, u0, u1, 8.6, h, 0, p);
+        { const r = aw / 2, b = 0.3, m = bw / 2, ring = new Shape(); ring.moveTo(m - r - b, 0); ring.lineTo(m - r, 0); ring.lineTo(m - r, vs); ring.absarc(m, vs, r, Math.PI, 0, true); ring.lineTo(m + r, 0); ring.lineTo(m + r + b, 0); ring.lineTo(m + r + b, vs); ring.absarc(m, vs, r + b, 0, Math.PI, false); ring.lineTo(m - r - b, 0);
+          bag.add(ST, relief(ring, [ox, y + 0.12, oz], [1, 0], p - 0.01, p + 0.12, 12)); }
+        bag.add(ST, prism(F, y, [[um - 0.3, vs + aw / 2 - 0.1], [um + 0.3, vs + aw / 2 - 0.1], [um + 0.38, vs + aw / 2 + 0.55], [um - 0.38, vs + aw / 2 + 0.55]], p, p + 0.22));   // the keystone
+      } else if (p) A(ST, u0, u1, 1.6, h, 0, p);
       // the giant pilasters of the two orders, their capitals and the entablatures over them
       for (const ue of [u0, u1]) { A(ST, ue - 0.4, ue + 0.4, 1.6, e1 - 1.0, p, p + 0.28); A(ST, ue - 0.52, ue + 0.52, e1 - 1.1, e1 - 0.55, p, p + 0.38); A(ST, ue - 0.4, ue + 0.4, e1 + 0.6, e2 - 1.0, p, p + 0.28); A(ST, ue - 0.52, ue + 0.52, e2 - 1.1, e2 - 0.55, p, p + 0.38); }
       for (const [v0, v1] of [[e1 - 0.55, e1 + 0.6], [e2 - 0.55, e2 + 0.4]]) A(ST, u0 - 0.02, u1 + 0.02, v0, v1, p, p + 0.42);
@@ -220,7 +245,7 @@ export function townHall(el, { bag, col }) {
         A('wood_dark', um - 0.05, um + 0.05, v0, v1, p + 0.14, p + 0.17); A('wood_dark', um - ww, um + ww, v0 + (v1 - v0) * 0.66 - 0.05, v0 + (v1 - v0) * 0.66 + 0.05, p + 0.14, p + 0.17);
         if (k === 0 || k === 2) A(ST, um - ww - 0.35, um + ww + 0.35, v1 + 0.2, v1 + 0.5, p, p + 0.3);           // the cornice over the main windows
       }
-      if (entry) { for (const q of arch(um, 1.6, 2.0, 5.2, false, 0.3)) bag.add(ST, prism(F, y, q, p, p + 0.16)); for (const q of arch(um, 1.6, 2.0, 5.2)) bag.add('opening', prism(F, y, q, p + 0.16, p + 0.2)); }
+      if (entry && !gate) { for (const q of arch(um, 1.6, 2.0, 5.2, false, 0.3)) bag.add(ST, prism(F, y, q, p, p + 0.16)); for (const q of arch(um, 1.6, 2.0, 5.2)) bag.add('opening', prism(F, y, q, p + 0.16, p + 0.2)); }
     }
     if (long && ctr) {
       // the pediment over the centre: a raking cornice round the tympanum and its relief, statues on its apex and ends
@@ -233,7 +258,7 @@ export function townHall(el, { bag, col }) {
     }
   }
   // the lead roof, the cupola's square base, the round colonnade, the dome, the lantern and the cog ship
-  bag.add('lead', frustum([x0 + 1, z0 + 1, x1 - 1, z1 - 1], y + h, y + h + 5, 6, 6, 6, 6));
+  bag.add('lead', frustum([x0 + 1, z0 + 1, x1 - 1, z1 - 1], y + h, y + h + 5, 6, 6, 6, 6, { noBottom: inside }));
   bag.add(ST, box(cx - 5.5, y + h + 3, cz - 5.5, cx + 5.5, y + h + 7.5, cz + 5.5));
   bag.add(ST, box(cx - 6, y + h + 7.5, cz - 6, cx + 6, y + h + 8.1, cz + 6));
   const yc = y + h + 8.1, rc = 4.4, hc = 7;
