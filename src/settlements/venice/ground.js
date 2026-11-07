@@ -2,7 +2,8 @@
 // campi, a few gardens with fig and pomegranate, the green water of the canals and the lagoon; the
 // soft, hazy, watery light.
 
-import { RADIUS, SEA, RIM, PIAZZA, PIAZZETTA, height, inWater, inRect, inLot } from './layout.js';
+import { RADIUS, SEA, RIM, PIAZZA, PIAZZETTA, BASILICA, height, inWater, inRect, inLot } from './layout.js';
+const CHURCH = [BASILICA.c[0] - BASILICA.s - 13, BASILICA.c[1] - BASILICA.s * 0.85, BASILICA.c[0] + BASILICA.s + 4, BASILICA.c[1] + BASILICA.s * 0.85];
 
 function cover(x, z, h) {
   const c = { sand: 0, grass: 0.1, rock: 0, soil: 0.2, fields: 0, dry: 0.3, warmth: 0.5, red: 0.15, road: 0.7, snow: 0, forest: 0 };
@@ -14,7 +15,7 @@ function water(x, z, y) { return inWater(x, z) && y < SEA + 0.3; }
 function waterLevel(x, z) { return inWater(x, z) ? SEA : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, height(x, z) - SEA)); }
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || height(x, z) < 0.5 || inRect(PIAZZA, x, z, 2) || inRect(PIAZZETTA, x, z, 2) || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || height(x, z) < 0.5 || inRect(PIAZZA, x, z, 2) || inRect(PIAZZETTA, x, z, 2) || inLot(x, z, 1) || inRect(CHURCH, x, z)) return null;
   return { fig: 0.01, grass: 4 };
 }
 export const ground = {
