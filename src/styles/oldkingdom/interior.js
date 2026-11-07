@@ -162,9 +162,9 @@ export function pyramidInterior(el, { bag, col, lights }) {
     const zb = Math.min(zS1, z + 1.5);
     for (const s of [-1, 1]) seg([x + s * (w + 0.15), z], [x + s * (w + 0.15), zb], 0.3, yA(z) - 0.4, yA(zb) + GH);
   }
-  // the Great Step to be climbed: a timber block before it, as the burial party would have set one
+  // the Great Step to be climbed: timber blocks stacked before it, as the burial party would have set one
   col.floor([x - 1.03, zG, x + 1.03, zS1], F);
-  for (const [z0, z1, top] of [[zG - 0.6, zG - 0.3, G.Y + 0.15], [zG - 0.3, zG, G.Y + 0.5]]) {
+  for (const [z0, z1, top] of [[zG - 0.75, zG - 0.5, G.Y + 0.23], [zG - 0.5, zG - 0.25, G.Y + 0.45], [zG - 0.25, zG, G.Y + 0.68]]) {
     wood.push(...flat(box(x - 0.48, yA(z0) - 0.1, z0, x + 0.48, top, z1 + (z1 === zG ? 0 : 0.0))));
     col.rect([x - 0.48, z0, x + 0.48, z1], yA(z0) + 0.02, top);
   }
