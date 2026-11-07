@@ -12,6 +12,8 @@ import { daibutsu } from './daibutsu.js';
 import { bosatsu } from './bosatsu.js';
 import { nio } from './nio.js';
 import { shika } from './shika.js';
+import { naraAltarSet } from './altar.js';
+import { bugakuStage } from './stage.js';
 
 export const NPAL = { wood: 'timber_red', column: 'timber_red', soffit: 'plaster_white', base: 'granite_block', floor: 'granite_block', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_block', roof: 'tile_grey', doors: 'plank' };
 const withN = (fn) => (el, ctx) => fn({ ...el, pal: { ...NPAL, ...(el.pal || {}) } }, ctx);
@@ -23,6 +25,8 @@ registerStyle('nara', {
     ...Object.fromEntries(['ming_hall', 'qing_hall', 'ming_gallery', 'palace_wall', 'terrace', 'stairs', 'ming_pavilion', 'corner_tower'].filter((k) => STYLES.qing.elements[k]).map((k) => [k, withN(STYLES.qing.elements[k])])),
     pagoda_oct: STYLES.song.elements.pagoda_oct,
     pagoda_jp: withPal(pagodaJp),
+    nara_altar_set: naraAltarSet,
+    bugaku_stage: bugakuStage,
   },
   objects: { hakkaku_toro: hakkakuToro, daibutsu, bosatsu, nio, shika },
 });

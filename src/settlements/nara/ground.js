@@ -26,6 +26,7 @@ export const ground = {
     sky: { turbidity: 3.0, rayleigh: 1.1, mie: 0.006, mieG: 0.78, zenith: [0.08, 0.15, 0.38], horizon: [0.64, 0.68, 0.72] },
     fog: { color: [0.78, 0.8, 0.82], density: 0.0004, height: 0.012 },
     exposure: 0.5,
+    damp: 0.65,     // the humid basin of Yamato: moss on the shaded foot of walls and on north roofs, rain streaks
     wind: [0.3, 0.2],
     weather: [
       { id: 'clear', weight: 3, clouds: 0.3, cloudDensity: 0.4, sun: 1.0, fog: 1 },

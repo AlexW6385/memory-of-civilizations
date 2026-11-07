@@ -1,7 +1,7 @@
 # Nara (Tōdai-ji), 752 — dossier
 
 Settlement id: `nara` · Style: `nara` (the qing/ming vocabulary with a Nara palette) and `vernacular` (houses) · Region: Japan (Yamato, the Nara basin) · Code: `src/settlements/nara/`
-Status of this dossier: L1–L2 (Tōdai-ji: the Great Buddha Hall in its corridored court, the Middle Gate, the Great South Gate, the twin seven-storey pagodas in their courts, the lecture hall and the monks' quarters; the grassy slope of Wakakusa and the wooded hills; the capital's houses to the west; ground, planting, weather, music). L3 built: the Great Buddha, the octagonal lantern, the square pagodas (§4). L3 built (this pass): the attendant bodhisattvas, the guardian kings of the Great South Gate, deer, the steps up to the gates (§4, §6, §8). L3 recorded for later: the hall's true bracketing, Kōfuku-ji and Kasuga shrine nearby, the Heijō palace and Suzaku avenue, the eye-opening ceremony.
+Status of this dossier: L1–L2 (Tōdai-ji: the Great Buddha Hall in its corridored court, the Middle Gate, the Great South Gate, the twin seven-storey pagodas in their courts, the lecture hall and the monks' quarters; the grassy slope of Wakakusa and the wooded hills; the capital's houses to the west; ground, planting, weather, music). L3 built: the Great Buddha, the octagonal lantern, the square pagodas (§4). L3 built (this pass): the attendant bodhisattvas, the guardian kings of the Great South Gate, deer, the steps up to the gates (§4, §6, §8). L3 built (third pass): the eye-opening ceremony in the court, the offerings on the altar, damp weathering (§10). L3 recorded for later: the hall's true bracketing (the halls are still the shared qing vocabulary with a Nara palette), the eye-opening cord and the scaffold at the Buddha's face, Kōfuku-ji and Kasuga shrine nearby, the Heijō palace and Suzaku avenue.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -73,7 +73,16 @@ Up the axis through the Great South Gate and the Middle Gate into the court befo
 
 Gagaku as at the eye-opening in 752 (the shō, the hichiriki, the biwa); chanting in the hall. [stated: gagaku at the ceremony — Wikipedia "Tōdai-ji"; instruments stand in]
 
+## 10. Detail (L3, third pass)
+
+- **The eye-opening ceremony (752).** "The eye-opening ceremony was held with an attendance of 10,000 monks and 4,000 dancers"; "the Indian priest Bodhisena performed the eye-opening for Emperor Shōmu" [stated: Wikipedia "Tōdai-ji"]; on 26 May 752 (by the Western calendar; 9th day of the 4th month) Japan's political, military and monastic forces gathered for it, with religious specialists from home and abroad and "music and dance troupes specializing in performing arts from Japan and mainland Asia", their costumes and movements preserved [stated: University of Bristol, "The World on Stage"]; the Shōsō-in keeps the brush Bodhisena used and the ceremonial dress of Shōmu and Kōmyō; dignitaries and monks from China, India and the Korean kingdoms attended [stated: Sainsbury Institute report]. Ours, at a scale the court can hold: 96 monks seated cross-legged on rush mats in four rows either side of the axis, facing the hall, some with palms joined, in ochre, brown and grey robes with ochre or maroon kesa, the way up the axis left open; a dance stage on the axis between the lantern and the hall's stairs — 5.6 m square and 0.8 m high, lacquered red with a black skirt, the floor spread with green silk, a railing with gilt finials, steps north and south [inferred: after the later bugaku stage]; two dancers on it in red and in green (the colours of the music of the left, Tang, and of the right, Korean) [inferred: the later convention], six musicians on mats each side with flutes and mouth organs, lutes, zithers and drums; ten officials in their ranks' colours standing either side of the hall's stairs [inferred]. The figures do not block the arrival's view of the hall.
+- **The altar's offerings.** On the altar before the Buddha (the red-lacquered table of before) a bronze censer on three feet with a domed lid, two bronze vases with a gilt band each holding a lotus flower, a bud and two leaves, and two oil lamps on slender stands, lit [inferred: the arrangement of incense, flowers and lamps; none of the 752 altar furniture survives in our sources].
+- **Weathering.** The climate's dampness set to 0.65 [inferred: the humid basin].
+
 ## Sources
+
+- [The World on Stage: the eye-opening ceremony — University of Bristol](https://www.bristol.ac.uk/arts-law-social-sciences/events/2024/november/the-world-on-stage.html)
+- [The Great Buddha of Nara and the treasures from the Silk Road — Sainsbury Institute](https://www.sainsbury-institute.org/e-bulletin/may-2025/report-on-the-talk-the-great-buddha-of-nara-and-the-treasures-from-the-silk-road/)
 
 - [Tōdai-ji — Wikipedia](https://en.wikipedia.org/wiki/T%C5%8Ddai-ji)
 - [Mount Wakakusa — Wikipedia](https://en.wikipedia.org/wiki/Mount_Wakakusa)
