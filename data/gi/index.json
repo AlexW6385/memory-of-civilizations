@@ -357,6 +357,82 @@
   "seconds": 174,
   "baked": "2026-11-07"
  },
+ "granada-generalife": {
+  "site": "granada",
+  "hash": "f1f1e2a2b9ee7481",
+  "rays": 128,
+  "probes": 7012,
+  "boxes": [
+   {
+    "min": [
+     279.2,
+     37.5,
+     -53.5
+    ],
+    "n": [
+     17,
+     15,
+     17
+    ],
+    "spacing": 1,
+    "rooms": [
+     "sala regia",
+     "mirador of ismail"
+    ]
+   },
+   {
+    "min": [
+     275.9,
+     37.5,
+     -15.95
+    ],
+    "n": [
+     7,
+     7,
+     10
+    ],
+    "spacing": 1,
+    "rooms": [
+     "west mirador"
+    ]
+   },
+   {
+    "min": [
+     279.2,
+     37.5,
+     14.5
+    ],
+    "n": [
+     17,
+     13,
+     7
+    ],
+    "spacing": 1,
+    "rooms": [
+     "south pavilion"
+    ]
+   },
+   {
+    "min": [
+     334.8,
+     47,
+     -40.7
+    ],
+    "n": [
+     8,
+     10,
+     8
+    ],
+    "spacing": 1,
+    "rooms": [
+     "oratory"
+    ]
+   }
+  ],
+  "bytes": 127453,
+  "seconds": 32,
+  "baked": "2026-11-07"
+ },
  "hagia-sophia": {
   "site": "constantinople",
   "hash": "6c17db8549e4c88c",
