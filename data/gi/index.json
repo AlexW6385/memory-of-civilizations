@@ -564,7 +564,7 @@
  },
  "hagia-sophia": {
   "site": "constantinople",
-  "hash": "6c17db8549e4c88c",
+  "hash": "b35e989f46b9c508",
   "rays": 128,
   "probes": 75600,
   "boxes": [
@@ -595,8 +595,8 @@
     ]
    }
   ],
-  "bytes": 1219377,
-  "seconds": 1086,
+  "bytes": 1251992,
+  "seconds": 241,
   "baked": "2026-11-07"
  },
  "isfahan-maidan": {
