@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.95 — Jerusalem and the modern cities (2026-11-07)
+- Jerusalem: the Dome of the Rock's mosaic trees in every spandrel and the gold-on-turquoise inscription band, the Rock remade with its cave beneath, every courtyard house rebuilt with cisterns, ovens and stairs, four houses to enter, pilgrims. New York: the Empire State lobby to walk into, a diner and a walk-up flat, soot on the fronts, people waiting at the corners. Sydney: the Concert Hall opened inside with its stage, rings and stalls, a salt band on the sea wall, passengers on the ferry. Barcelona: the Mercat de la Concepcio of 1888 with its stalls, grime and rain streaks on the Eixample fronts.
+
 ## v9.94 — Amsterdam, Muscovy, Borgund, Edo (2026-11-07)
 - Amsterdam: canal houses to walk into - marble halls, box beds, Delft tiles, paintings and maps; painted gable stones, door cases, lighters on the canals. Muscovy: St Basil's central church hollow up into its tent, with its iconostasis and candles; furnished izby with their stoves and icon corners; sledges and pedlars; the izby's roofs turned the right way. Borgund: carved masks and beasts on the staves; each farm's stue open, with its hearth, benches, loom and high-seat posts. Edo: machiya shops open with noren and goods, a samurai reception room with armour and scroll, a palanquin, pedlars.
 
