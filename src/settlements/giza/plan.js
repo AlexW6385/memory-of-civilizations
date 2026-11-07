@@ -4,6 +4,7 @@
 // the top of the causeway.
 
 import { PYRAMID, ENCLOSURE, TEMPLE, QUEENS, CAUSEWAY, VALLEY } from './layout.js';
+import { pyramidGeometry } from '../../styles/oldkingdom/interior.js';
 
 const E = [];
 const [ex0, ez0, ex1, ez1] = ENCLOSURE;
@@ -12,7 +13,8 @@ E.push({ t: 'lane', rect: [ex0 + 1, ez0 + 1, ex1 - 1, ez1 - 1], y: 0.05, mat: 't
 const wall = (a, b, gates = []) => E.push({ t: 'ming_wall', a, b, y: 0, h: 8, th: 3, gates, pal: { plaster: 'limestone_core', roof: 'limestone_core', plinth: 'limestone_core' } });
 wall([ex0, ez0], [ex1, ez0]); wall([ex0, ez1], [ex1, ez1]); wall([ex0, ez0], [ex0, ez1]);
 wall([ex1, ez0], [ex1, -66]); wall([ex1, -14], [ex1, ez1]);
-E.push({ t: 'ok_pyramid', c: PYRAMID.c, a: PYRAMID.a, h: PYRAMID.h });
+// the entrance left open in the north face for the burial (§4.6): the passages and chambers are a plan of their own (town.js)
+E.push({ t: 'ok_pyramid', c: PYRAMID.c, a: PYRAMID.a, h: PYRAMID.h, door: pyramidGeometry(PYRAMID.a, PYRAMID.h).hole });
 // its east door takes the causeway; the west door opens into the pyramid's court
 E.push({ t: 'ok_temple', rect: TEMPLE, h: 7.5, court: [133, -58, 160, -22], pillars: 6, door: 'e', backDoor: true });
 for (const [x, z, a, h] of QUEENS) {
@@ -30,6 +32,11 @@ for (const [x, z, a, h] of QUEENS) {
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('court', ENCLOSURE, 0, 'open'), room('temple', TEMPLE, 0.12, 'hall')];
+// the King's Chamber, reached by the entrance in the north face, the passages and the Grand Gallery (§4.6)
+{
+  const g = pyramidGeometry(PYRAMID.a, PYRAMID.h), [cx, cz] = PYRAMID.c;
+  rooms.push(room('kings-chamber', [cx + g.roomX[0] + 0.4, cz + g.room[0] + 0.4, cx + g.roomX[1] - 0.4, cz + g.room[1] - 0.4], g.F, 'hall'));
+}
 const walks = [[[200, -40], [170, -40], [150, -40], [127, -40], [117, -40]]];
 walks[0].y0 = 0;
 
