@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.7 — Brisker tour (2026-11-07)
+- The tour now takes one brisk loop through each whole settlement - past all its viewpoints and around its landmark at a running pace, gliding a little above the ground where a wall bars the way - with no wait on arrival, then moves on. Only Esc stops it; a small pill at the top says so.
+
 ## v10.6 — Tour (2026-11-07)
 - Every settlement's name now stands fixed beside its dot on the map, in a crisper small type with an outline, the current one in blue. A Tour button (or T) sets off on its own: from the nearest settlement it shows the arrival view, then walks slowly between the place's viewpoints, and after about a minute travels on to the next in a shuffled order, without end; any key, click or touch hands control back.
 
