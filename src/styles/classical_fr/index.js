@@ -11,6 +11,8 @@ import { courtRange, marbleCourt, grille } from './court.js';
 import { grandCorps } from './grand.js';
 import { ambassadors } from './stair.js';
 import { canalQuay } from './canal.js';
+import { orangeTrees } from './garden.js';
+import { coach, sedanChair } from '../baroque/street.js';
 
 const S = 'sandstone_dressed';
 /** range: a wing of the château { rect, h, y, front ('nsew' faces with windows), roof ('flat' balustraded | 'slate') }. */
@@ -172,6 +174,6 @@ function fountain(el, ctx) {
 }
 registerStyle('classical_fr', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, range, parterre, fountain, court_range: courtRange, marble_court: marbleCourt, grille, grand_corps: grandCorps, ambassadors, canal_quay: canalQuay },
+  elements: { ...STYLES.qing.elements, range, parterre, fountain, court_range: courtRange, marble_court: marbleCourt, grille, grand_corps: grandCorps, ambassadors, canal_quay: canalQuay, orange_trees: orangeTrees, coach, sedan_chair: sedanChair },
   objects: {},
 });
