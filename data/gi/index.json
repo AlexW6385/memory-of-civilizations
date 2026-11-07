@@ -821,8 +821,8 @@
  },
  "lhasa-potala": {
   "site": "lhasa",
-  "hash": "29aab7996e9859a3",
-  "rays": 160,
+  "hash": "329998687bb848ac",
+  "rays": 128,
   "probes": 14877,
   "boxes": [
    {
@@ -842,9 +842,9 @@
     ]
    }
   ],
-  "bytes": 166445,
-  "seconds": 83,
-  "baked": "2026-11-06"
+  "bytes": 170755,
+  "seconds": 36,
+  "baked": "2026-11-07"
  },
  "london-westminster": {
   "site": "london",
