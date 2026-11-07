@@ -151,7 +151,10 @@ const KIT_OVER = {
   // and drew its water from rain cisterns and the water boats, not from draw-wells in the street
   // Sumerian Ur: the men bare above a wrapped skirt to the shin (the fleeced kaunakes), heads shaven; the
   // women in a robe over one shoulder, the hair in a bun (the Standard of Ur, the Ur statues)
-  ur: { figures: F(['wrap', 'wrap', 'robe'], ['cloth_white', 'linen', 'cloth_ochre', 'cloth_brown'], ['skin_medium'], ['none'], { hair: ['shaven', 'shaven', 'bun', 'long'], beard: 0.4, feet: 'bare', over: ['shawl', 'sash'], tops: { wrap: ['bare'] }, overs: { wrap: ['none', 'belt'] } }) },
+  // (no camels or chickens yet in the Ur of c. 2050 BC: both came to Mesopotamia a millennium and more later)
+  ur: { street: [['animal:donkey', 2.5], ['animal:goat', 1.2], ['animal:sheep', 1], ['animal:dog', 0.6], ['chickens:pigeon', 0.4], ['sacks', 1], ['figure', 2.5]], figures: F(['wrap', 'wrap', 'robe'], ['cloth_white', 'linen', 'cloth_ochre', 'cloth_brown'], ['skin_medium'], ['none'], { hair: ['shaven', 'shaven', 'bun', 'long'], beard: 0.4, feet: 'bare', over: ['shawl', 'sash'], tops: { wrap: ['bare'] }, overs: { wrap: ['none', 'belt'] } }) },
+  // Neolithic Britain (c. 2500 BC): no market stalls, carts, horses, wells or fowl; sheep, dogs and people, firewood and baskets at the doors
+  stonehenge: { stall: [], mats: 0, door: [['firewood', 3], ['basket', 1.5], ['sweeper', 0.2]], street: [['animal:sheep', 1.5], ['animal:dog', 0.6], ['firewood', 0.6], ['figure', 2]] },
   // Minoan Knossos: the men's loincloth and kilt, bare above the waist, long-haired, beardless; the women's
   // long robes (the frescoes: the Cupbearer, the Prince of the Lilies)
   knossos: { figures: F(['loincloth', 'shendyt', 'robe', 'robe'], ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_indigo'], ['skin_medium'], ['none'], { hair: ['long', 'long', 'bun'], beard: 0, feet: 'bare', over: ['sash', 'none', 'cape'], overs: { shendyt: ['belt'], loincloth: ['none'] }, hairs: [['hide_black', 0.7], ['hide_brown', 0.6]] }) },
