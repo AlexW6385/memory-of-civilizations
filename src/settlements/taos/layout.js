@@ -31,6 +31,8 @@ function block(cols, rows, top, back, seed, alleys) {
 }
 export const NORTH = { x0: -75, z0: -98, heights: block(24, 9, 5, 'n', 1450, [8, 16]), front: 's' };
 export const SOUTH = { x0: -35, z0: 46, heights: block(19, 8, 4, 's', 1000, [9]), front: 'n' };
+/** The room opened and furnished (docs/settlements/taos.md §4.2): a ground-storey cell of the North House on the plaza, its doorway south. */
+export const ROOM = { i: 8, j: 11, door: 's' };
 const rectOf = (b) => [b.x0, b.z0, b.x0 + b.heights[0].length * CELL, b.z0 + b.heights.length * CELL];
 export const NORTH_RECT = rectOf(NORTH), SOUTH_RECT = rectOf(SOUTH);
 export const inHouses = (x, z, m = 0) => inRect(NORTH_RECT, x, z, m) || inRect(SOUTH_RECT, x, z, m);
