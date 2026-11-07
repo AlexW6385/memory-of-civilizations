@@ -4,7 +4,7 @@
 // on the terraces, cloud forest on the slopes; mist and cloud of the eastern Andes.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, TERRACE, PLAZA, PEAKS, HILL, inRect, outside, terraceAt, inHouse, paved, smooth as sm } from './layout.js';
+import { RADIUS, TERRACE, PLAZA, PEAKS, DITCH, FIELDS, STORES, HILL, KNOLL, hillHeight, inRect, outside, terraceAt, inHouse, paved, ploughed, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -26,8 +26,10 @@ function height(x, z) {
     // the plaza sunk 2.4 m, its banks falling over 6 m from its edge (about 30° at the steepest: one
     // walks down into it and up out of it)
     if (inRect(PLAZA, x, z)) h = -2.4 * sm(0, 6, Math.min(x - PLAZA[0], PLAZA[2] - x, z - PLAZA[1], PLAZA[3] - z));
-    const hd = Math.hypot(x - HILL.c[0], z - HILL.c[1]);
-    if (hd < HILL.r + 8) h = Math.max(h, Math.floor(Math.max(0, HILL.h * (1 - Math.max(0, hd - 3) / (HILL.r + 6))) / 2.2) * 2.2);
+    // the dry ditch across the saddle before the town wall, its west end closed
+    { const q = Math.abs(z - DITCH.z); if (q < DITCH.top) h = Math.min(h, -DITCH.depth * (1 - sm(DITCH.bottom, DITCH.top, q)) * sm(DITCH.x0, DITCH.x0 + 5, x)); }
+    // the Intihuatana's hill and the Guardhouse's knoll, in terraces
+    h = Math.max(h, hillHeight(HILL, x, z), hillHeight(KNOLL, x, z));
   } else {
     const k = terraceAt(d);
     // the terraces, then the slope down into the canyon, its floor
@@ -54,6 +56,8 @@ function cover(x, z, h, ny) {
   const c = { sand: 0, grass: 0, rock: 0, soil: 0, fields: 0, dry: 0.2, warmth: 0.45, red: 0.1, road: 0, snow: 0, forest: 0 };
   const d = outside(x, z);
   if (ny < 0.55) { c.rock = 0.55; c.grass = 0.3; c.soil = 0.15; c.forest = 0.45; return c; }      // the cloud forest clings to all but the sheerest rock
+  if (ploughed(x, z)) { c.soil = 1; c.grass = 0.05; c.dry = 0.05; return c; }      // the turned earth of the ploughed strips
+  if (d < 0 && inRect(FIELDS, x, z) && h < 0.5 && Math.abs(x - 2) > 2) { c.soil = 0.75; c.grass = 0.35; return c; }   // the fields
   if (d < TERRACE.w * TERRACE.n) { c.grass = 0.85; c.soil = 0.15; if (inHouse(x, z, 1)) { c.grass = 0.3; c.soil = 0.7; } return c; }
   c.grass = 0.3; c.forest = 0.85; c.rock = 0.1; c.soil = 0.6; return c;
 }
@@ -64,14 +68,20 @@ function fromWater() { return 50; }
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || paved(x, z)) return null;
   const d = outside(x, z);
+  if (d < 0 && inRect(FIELDS, x, z)) {
+    // the fields of maize south of the ditch, in plots with grass between; the path to the gate and the storehouses kept clear
+    if (Math.abs(x - 2) < 2.2 || STORES.some((r) => inRect(r, x, z, 1.5)) || ground.height(x, z) > 0.5) return { grass: 30 };
+    const plot = ((Math.floor((x + 200) / 9) + Math.floor(z / 7)) % 3);
+    return plot === 2 ? { grass: 45 } : { maize: 34, grass: 6 };
+  }
   if (d < 0) return inHouse(x, z, 0.6) ? null : { grass: 40, tamarisk: hash2(x * 0.2, z * 0.2) < 0.03 ? 0.3 : 0 };
-  if (d < TERRACE.w * TERRACE.n) return { grass: 50 };
+  if (d < TERRACE.w * TERRACE.n) return ploughed(x, z) ? null : { grass: 50 };
   return { grass: 25, teak: 0.25, neem: 0.3, oak: 0.08, reeds: 4 };
 }
 export const ground = {
   lift: LIFT, rim: RIM,
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { teak: 0.25, neem: 0.3, oak: 0.08, tamarisk: 0.3 },
+  maxDensity: { teak: 0.25, neem: 0.3, oak: 0.08, tamarisk: 0.3, maize: 34 },
   // the eastern Andes in the dry season's end: bright sun between clouds, mist rising from the canyon
   climate: {
     sun: { az: 40, el: 55, color: [1.0, 0.96, 0.9], intensity: 3.4, lat: -13, dec: -15, hour: 10 },

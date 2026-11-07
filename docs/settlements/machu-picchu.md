@@ -1,7 +1,7 @@
 # Machu Picchu, c. 1450–1530 — dossier
 
 Settlement id: `machu-picchu` · Style: `inca` · Region: the Andes (Eastern Cordillera) · Code: `src/settlements/machu-picchu/`
-Status of this dossier: L1–L2 (the saddle and its peaks, the terraces all round, the Temple of the Sun, the Sacred Plaza with the Main Temple and the Temple of the Three Windows, the Intihuatana on its hill, the Main Plaza, the houses in kanchas; ground, planting, weather, music). Second pass (§4.3): the canal and the sixteen fountains, the Royal Tomb under the Torreón, the Sacred Rock and its wayronas, the great stones, niches, pegs and altar of the Main Temple, the blind windows of the Three Windows. L3 recorded for later: the Temple of the Condor, the Guardhouse, Inti Punku and the trails, the walls' polygonal masonry in detail, llamas, people.
+Status of this dossier: L1–L2 (the saddle and its peaks, the terraces all round, the Temple of the Sun, the Sacred Plaza with the Main Temple and the Temple of the Three Windows, the Intihuatana on its hill, the Main Plaza, the houses in kanchas; ground, planting, weather, music). Second pass (§4.3): the canal and the sixteen fountains, the Royal Tomb under the Torreón, the Sacred Rock and its wayronas, the great stones, niches, pegs and altar of the Main Temple, the blind windows of the Three Windows. Third pass (§4.4, §5.1, §5.2): the plan turned the right way (it was mirrored north–south), the kanchas walled with their gateways, the town wall and its main gate, the dry ditch, the fields and the five storehouses, the Guardhouse on its knoll and the Funerary Rock, the quarry, the houses furnished, people and llamas. L3 recorded for later: the Temple of the Condor, Inti Punku and the trails, the walls' polygonal masonry in detail.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -24,10 +24,15 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Sacred Plaza | north-west of the plaza: the Main Temple (three walls), the Temple of the Three Windows | [stated: World History Encyclopedia; doc.surf] |
 | Intihuatana | on the highest point of the sacred complex, west of the plaza, on a terraced hill | [stated: World History Encyclopedia; Pressbooks] |
 | Houses | in kanchas on the west and east sides | [inferred] |
+| Quarry | between the Sacred Plaza and the Temple of the Sun, west of the Main Plaza | [stated: michaelstephenwills] |
+| Town wall, main gate, dry ditch | across the saddle at z 84–89, the gate at x 2 | the dry ditch "the result of a geographic fault line" parts the urban sector from the agricultural [stated: peru-explorer] |
+| Agricultural sector | south of the ditch: fields, five storehouses, the Guardhouse's knoll under Machu Picchu mountain | [stated: peru-explorer; imachupicchu] |
 
 ## 3. Orientation
 
 The ridge runs north–south; the town looks along it to Huayna Picchu. [stated: general]
+
+The first two passes had the plan mirrored north–south: the Intihuatana's hill, the Sacred Plaza and the Temple of the Sun lay south of the Main Plaza. As built now (−z north): Huayna Picchu and the Sacred Rock at the north end; the Intihuatana's hill north-west of the Main Plaza with the Sacred Plaza at its foot (Main Temple on its north side, Three Windows on its east, looking over the Main Plaza), then the quarry, then the Temple of the Sun and the royal residence by the first fountain; the eastern sector's kanchas across the plaza; the town wall, the ditch and the agricultural sector at the south end, the canal coming in from Machu Picchu mountain. [stated: the Sacred Plaza north-west of the Main Plaza — World History Encyclopedia; the agricultural sector to the south, the Guardhouse at its top — imachupicchu; inferred: distances, compressed to the ellipse]
 
 ## 4. The style
 
@@ -56,17 +61,42 @@ Dry-stone walls of granite — "smooth, seamless walls for elite buildings; roug
 - **The Temple of the Three Windows.** "An immense trapezoidal wall, 10 meters long", three large trapezoidal windows, and "on both sides there are two additional closed windows (like niches)" [stated: imachupicchu; michaelstephenwills]. Built: the two blind windows either side of the three, great stones in the lowest courses.
 - **The terrace walls** now run on to the very sides of the three stairs, where banks of bare earth 20 m long used to stand beside each flight.
 
+### 4.4 Third pass: the way in, the Guardhouse, the quarry (as built)
+
+- **The town wall and the main gate.** Built: a battered wall of rough stones 3 m high across the saddle from the canal to the east edge, its gateway 1.5 × 2.5 m double-jambed, and on its inner face over the lintel the stone ring and its boss for the bar that closed the door [stated: the main gate's ring — Machu Picchu guides; inferred: the sizes].
+- **The dry ditch.** "The agricultural and urban sectors are split by a dry ditch, the result of a geographic fault line" [stated: peru-explorer]. Built: a ditch 2 m deep and 6 m across before the wall, closed at its west end, with a flight down into it and up out of it on the way to the gate, a paved floor between [inferred: the sizes].
+- **The fields and storehouses.** "In the agricultural sector there are five rooms that look like Chincheros and Ollantaytambo storerooms" [stated: peru-explorer]. Built: maize in plots with grass between south of the ditch, the path to the gate kept clear; five small thatched stone rooms (5.4 × 4.2 m) in a row, their doors to the path, empty [inferred: sizes, places].
+- **The Guardhouse.** "A simple enclosure, made of small stone and adobe", roofed in beams and ichu, with "three squared windows that offer a complete view of Machu Picchu", in the upper part of the agricultural sector [stated: imachupicchu, "The guardian's house"]; three walls and one open long side [stated: The Only Peru Guide]. Built: on a knoll of six terraces (13.2 m) at the saddle's south end, under Machu Picchu mountain; rough granite walls 2.7 m high, open to the north over the town, three small windows in the south wall, a niche in each end wall, thatched; a stair up the knoll's north face [inferred: the knoll's form, the open side]. The arrival view is from beside it.
+- **The Funerary Rock.** "A capriciously carved stone monolith in the shape of a square" with a small staircase cut in the same rock, a few steps from the guardian's house [stated: same]. Built: a squared monolith with its cut stair on the knoll's top.
+- **The quarry.** The Inca quarried the granite for Machu Picchu on the ridge itself, in the town between its sectors [stated: michaelstephenwills, "Views from the Quarry"]. Built: a field of fractured boulders, blocks squared on their faces lined up along its east side for dressing [inferred: the arrangement].
+- **The foot plough.** The chakitaqlla: a shaft about 1.45 m long, a footrest of two pegs lashed on about 45 cm up, a handle near the top, the blade 40 cm long in a socket at the foot [stated: Museum of Old Techniques (MOT), "Chaquitaclla"]; "a hard-wood or bronze point" [stated: ancient-history-sites, "Work and Household Production in the Inca World"]. Built: as stated, the blade in the earth before each ploughman.
+- **The backstrap loom.** The near bar tied to the weaver's waist, the far bar to a post [stated: Wikipedia, "Backstrap loom"; "Andean textiles"]. Built: the two bars, the warp between with the cloth woven at the near end, a peeled post [inferred: sizes].
+
 ## 5. The houses
 
 Rectangular rooms of rough granite set in clay, a trapezoid door on the court, niches in a row inside, now and then a small window, stone gables with their pegs carrying steep thatched roofs; grouped in kanchas, "three (or more)" buildings round a walled patio [stated: World History Encyclopedia]. The royal residence's doorways double-jambed. [stated: thatch, trapezoids, pegs; inferred: the counts and sizes]
 
+### 5.1 The kanchas and the houses' things (as built)
+
+- **Kanchas.** "Three (or more)" one-room buildings round a patio, the whole walled, a single gateway into it [stated: World History Encyclopedia, "Inca Architecture"]. Built: 20 × 24 m enclosures in rows with lanes between, their gates to the Main Plaza's side; a long house across the back, a house on each side, the patio open to the gate; the kancha wall (2.4 m, rough stones, battered) runs only where no house stands, a gateway in the middle of the gate side, some double-jambed; single houses where no kancha fits [inferred: the arrangement, after the eastern sector].
+- **Furnishings.** "Textiles and mats furnished spaces that would otherwise have been bare floors", blankets, "clay cooking installations, earthenware pots and wooden utensils", jars, grinding stones [stated: ancient-history-sites, "Housing and Living Conditions in the Inca World"]. Built in every house: the clay stove (q'uncha) in a back corner with two pot holes, a pot on it and sticks beside it; the batán and its rocking stone with a bowl of meal; sleeping mats along a side wall with folded blankets; an urpu by the door; pots and bowls in some niches [inferred: the places, after Andean houses today].
+- **The urpu.** Pointed base, globular body, tall flaring neck, two strap handles low on the body and a lug on the shoulder for the carrying rope [stated: Met Museum, "Urpu (jar)"].
+
+### 5.2 People and animals (as built, `people.js`)
+
+- Ploughing teams on three terrace strips: men side by side with their foot ploughs, a woman facing them across the furrow with a hoe to break the clods [stated: men side by side — MOT; the wife "faced him with a hoe to break clods" — Rowe, in ancient-history-sites]; the strips' soil turned.
+- Llama herders and their animals grazing on the Main Plaza, a string of llamas on the way in through the fields.
+- Women weaving on backstrap looms in about half of the kanchas' patios, kneeling.
+- Quarrymen dressing blocks; a noble in a red mantle and a priest before the Main Temple; chosen women (aqllakuna) in white at the Three Windows; a guard seated in the Guardhouse.
+- Dress: the men's knee-length tunic (unku) and mantle, the women's ankle-length wrap (anaku) under a shawl (lliklla), sandals [stated: encyclopedia.com, "America, South: History of Dress"]. [inferred: the numbers, places and colours]
+
 ## 6. Ground
 
-The saddle level; the plaza sunk 2.4 m; the Intihuatana's hill in terraces to 11 m; the terraces stepping down 39 m; the slopes below falling into the canyon; the peaks. No water in the disc (the river is beyond it). (`ground.js`)
+The saddle level; the plaza sunk 2.4 m; the Intihuatana's hill in five terraces to 11 m; the Guardhouse's knoll in six to 13.2 m; the dry ditch 2 m deep; the terraces stepping down 39 m; the slopes below falling into the canyon; the peaks. No water in the disc (the river is beyond it). (`ground.js`)
 
 ## 7. Planting
 
-Grass on the terraces and the plazas; cloud forest on the slopes and the peaks. [inferred]
+Grass on the terraces and the plazas; maize in plots in the fields south of the ditch, the ploughed strips bare soil; cloud forest on the slopes and the peaks. [inferred]
 
 ## 8. Sky and weather
 
@@ -95,3 +125,12 @@ Panpipes and the quena flute, drums, the conch (a flute, a reed and a struck sou
 - [Main Temple — The Only Peru Guide](https://theonlyperuguide.com/?p=5989)
 - [The Temple of the 3 Windows — imachupicchu](https://imachupicchu.com/?p=209)
 - [Temple of the Three Windows — michaelstephenwills](https://michaelstephenwills.com/tag/temple-of-the-three-windows/)
+- [Machu Picchu — peru-explorer](https://www.peru-explorer.com/machu.htm)
+- [The guardian's house — imachupicchu](https://imachupicchu.com/?p=188)
+- [Views from the Quarry — michaelstephenwills](https://michaelstephenwills.com/2023/08/28/views-from-the-quarry)
+- [Chaquitaclla — Museum of Old Techniques (MOT)](https://www.mot.be/resource/Tool/chaquitaclla?lang=en)
+- [Chaquitaclla, the native footplough — MOT (PDF)](https://www.mot.be/webhdfs/v1/website/opzoeken/lectuur/artikels/chaquitaclla.pdf)
+- [Housing and Living Conditions in the Inca World — ancient-history-sites](https://www.ancient-history-sites.com/?p=141780)
+- [Urpu (jar) — The Met](https://www.metmuseum.org/art/collection/search/310520)
+- [America, South: History of Dress — encyclopedia.com](https://encyclopedia.com/fashion/encyclopedias-almanacs-transcripts-and-maps/america-south-history-dress)
+- [Andean textiles — Wikipedia](https://en.wikipedia.org/wiki/Andean_textiles)
