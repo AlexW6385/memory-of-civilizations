@@ -186,9 +186,61 @@ function more(S, L, rand, person, pick) {
   person([311.5, -79.2], 0, faceTo([-1, 0]), { dress: 'trousers', cloth: 'cloth_brown', hat: 'straw', carry: 'pole' });
 }
 
+/**
+ * The landing (§10, Landing): the grain boat moored off the south bank east of the bridge, unloading — two gangplanks
+ * from its foredeck up to the bank, mooring lines to stakes, sacks heaped on the deck and on the bank, porters carrying
+ * them up one plank and coming back down the other, a clerk tallying, the boatman at the stern.
+ */
+function landing() {
+  const S = [], L = [], faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
+  // the boat (plan.js): at (62, 84.5), bow west, 18 m by 4.5; its gunwale's height and its half-breadth along it
+  const BX = 62, BZ = 84.5, H = 9, Bm = 2.25, W = -1.6, t = (x) => (BX - x) / H;
+  const sheer = (x) => W + 0.95 + 0.35 * t(x) ** 2 + 0.7 * t(x) ** 6, half = (x) => Bm * (1 - 0.5 * Math.abs(t(x)) ** 2.6), deck = (x) => sheer(x) - 0.3;
+  const bank = 92, by = 0.04;
+  const planks = [57.5, 55.3].map((x) => ({ a: [x, sheer(x) + 0.06, BZ + half(x) - 0.12], b: [x, by + 0.06, bank + 1.0] }));
+  for (const p of planks) S.push({ t: 'gangplank', ...p, w: 0.42 });
+  S.push({ t: 'mooring', a: [50.6, by, bank + 1.3], b: [BX - H + 0.4, sheer(BX - H + 0.4) - 0.05, BZ + 0.6] });
+  S.push({ t: 'mooring', a: [73.2, by, bank + 1.3], b: [BX + H - 0.4, sheer(BX + H - 0.4) - 0.05, BZ + 0.6] });
+  S.push({ t: 'sack_pile', at: [59.6, BZ - 0.2], y: deck(59.6), rot: Math.PI / 2, rows: [3, 2] });
+  S.push({ t: 'sack_pile', at: [56.4, BZ - 0.6], y: deck(56.4), rot: Math.PI / 2, rows: [2, 1] });
+  S.push({ t: 'sack_pile', at: [58.6, bank + 4.2], y: by, rot: 0, rows: [5, 4, 3, 2] });
+  S.push({ t: 'sack_pile', at: [62.4, bank + 4.0], y: by, rot: 0.1, rows: [4, 3] });
+  let seed = 1120;
+  const man = (at, y, dir, o = {}) => L.push({ t: 'figure', at, y, rot: faceTo(dir), seed: seed++ * 6113, dress: 'trousers', cloth: 'cloth_white', cloth2: 'cloth_brown', skin: 'skin_medium', hat: 'none', carry: 'none', pose: 'stand', ...o });
+  const on = (p, f) => [[p.a[0], p.a[2] + (p.b[2] - p.a[2]) * f], p.a[1] + (p.b[1] - p.a[1]) * f + 0.035];
+  // up the first plank with a sack on the shoulder; down the second empty-handed
+  { const [at, y] = on(planks[0], 0.45); man(at, y, [0, 1], { carry: 'sack', cloth: 'cloth_grey', top: 'bare' }); }
+  { const [at, y] = on(planks[1], 0.6); man(at, y, [0, -1], { cloth: 'cloth_brown', hat: 'straw' }); }
+  // on the deck: one stooping to the heap, one lifting a sack to his shoulder
+  man([58.4, BZ + 0.9], deck(58.4), [0, -1], { pose: 'squat', cloth: 'cloth_white' });
+  man([57.6, BZ + 1.5], deck(57.6), [0, 1], { carry: 'sack', cloth: 'cloth_brown', top: 'bare' });
+  // on the bank: carrying sacks to the heap, one setting his down, the clerk with his tally, a porter going back
+  man([57.0, bank + 2.2], by, [0.3, 1], { carry: 'sack', cloth: 'cloth_white' });
+  man([60.6, bank + 3.4], by, [-0.5, 1], { pose: 'squat', cloth: 'cloth_grey', top: 'bare' });
+  man([64.6, bank + 2.8], by, [-1, -0.4], { dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_black', pose: 'talk' });
+  man([55.9, bank + 4.6], by, [0, -1], { cloth: 'cloth_brown', hat: 'straw' });
+  // the boatman on the stern deck, leaning on his pole
+  man([BX + 6.8, BZ - 0.5], deck(BX + 6.8) + 0.1, [-1, 0.3], { cloth: 'cloth_indigo', hat: 'straw', carry: 'staff' });
+  // the tax office by the gate road inside the wall (§10, Tax office): goods waiting at its door to be taxed, the official
+  // at his table under the eaves writing them into the register, the merchants waiting, a porter resting on his load
+  const tz = -84.2, tx = -282;
+  S.push({ t: 'sack_pile', at: [tx - 2.6, tz + 1.6], y: 0.04, rot: Math.PI / 2, rows: [3, 2] });
+  S.push({ t: 'sack_pile', at: [tx + 2.9, tz + 1.4], y: 0.04, rot: Math.PI / 2 + 0.15, rows: [2, 1] });
+  S.push({ t: 'block', rect: [tx - 0.8, tz + 0.25, tx + 0.8, tz + 0.95], y0: 0.04, y1: 0.78, mat: 'wood_dark', collide: true });
+  S.push({ t: 'block', rect: [tx - 0.85, tz + 0.2, tx + 0.85, tz + 1.0], y0: 0.78, y1: 0.82, mat: 'timber', collide: false });
+  S.push({ t: 'block', rect: [tx - 0.3, tz + 0.45, tx + 0.1, tz + 0.75], y0: 0.82, y1: 0.86, mat: 'paint_white', collide: false });
+  S.push({ t: 'block', rect: [tx + 0.25, tz + 0.5, tx + 0.37, tz + 0.62], y0: 0.82, y1: 0.85, mat: 'granite_black', collide: false });
+  S.push({ t: 'block', rect: [tx - 0.25, tz - 0.45, tx + 0.25, tz + 0.0], y0: 0.04, y1: 0.48, mat: 'wood_dark', collide: false });
+  man([tx, tz - 0.2], 0.04, [0, 1], { pose: 'sit', dress: 'robe', cloth: 'cloth_green', cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', beard: true });
+  man([tx - 0.4, tz + 1.9], 0.04, [0.2, -1], { dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'brim', pose: 'talk' });
+  man([tx + 0.7, tz + 2.3], 0.04, [-0.3, -1], { dress: 'robe', cloth: 'cloth_grey', cloth2: 'cloth_indigo', hat: 'cap', hatMat: 'cloth_black' });
+  man([tx + 3.3, tz + 2.6], 0.04, [-1, -0.2], { pose: 'squat', cloth: 'cloth_white', hat: 'straw' });
+  return [base('song-kaifeng-landing', S), base('song-kaifeng-landing-life', L, 'life')];
+}
+
 export async function town() {
   const tea = new Set(teaHouses()), all = lots().filter((l) => !tea.has(l)), plans = [];
   for (let i = 0; i < all.length; i += 150) plans.push(base(`song-kaifeng-houses-${i / 150}`, all.slice(i, i + 150).map((l) => ({ t: 'house_jiangnan', y: 0, ...l }))));
-  plans.push(...scroll());
+  plans.push(...scroll(), ...landing());
   return plans;
 }

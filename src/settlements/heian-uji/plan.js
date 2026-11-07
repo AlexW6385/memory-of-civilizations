@@ -1,7 +1,7 @@
 // Uji in 1053 (docs/settlements/heian-uji.md §2–§4): the Phoenix Hall with its pond and bridge (the
 // full building of the previous design, src/buildings/byodo-in-phoenix-hall); the Uji Bridge; the river.
 
-import { RADIUS, HALL, RIVER, BRIDGE } from './layout.js';
+import { RADIUS, HALL, RIVER, BRIDGE, height } from './layout.js';
 import hallPlan from '../../buildings/byodo-in-phoenix-hall/plan.js';
 
 const rx = RIVER.x + 15 * Math.sin(BRIDGE.z / 110);
@@ -71,5 +71,46 @@ function riverLife() {
 }
 export const [weirs, riverPeople] = riverLife();
 
-export const hall = { ...hallPlan, origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 9, -10, HALL.origin[0] + 10, 10] };
+// the hall's plain lacquered block under Amida is replaced by a sumeru dais with mother-of-pearl inlay and gilt fittings (§10)
+const isAltar = (e) => e.t === 'block' && e.mat === 'lacquer_black' && e.rect.join() === '-2.7,-2,1.2,2';
+export const hall = { ...hallPlan, elements: hallPlan.elements.filter((e) => !isAltar(e)), origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 9, -10, HALL.origin[0] + 10, 10] };
+const HF = 1.1, hx = HALL.origin[0];                // the central hall's floor; its centre in the settlement
+export const dais = {
+  id: 'heian-uji-dais', style: 'japanese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [],
+  bounds: [hx - 3, -2.5, hx + 1.5, 2.5], entrance: { at: [hx + 6, 0], facing: 'w' },
+  elements: [{ t: 'byodo_dais', rect: [hx - 2.7, -2.0, hx + 1.2, 2.0], y: HF, h: 1.0 }],
+};
+
+/**
+ * Worship (§10): from the east bank across the pond the face of Amida is seen through the round window of the hall;
+ * a courtier's party kneels there on mats facing west, a monk with them; in the hall two monks chant before the dais.
+ */
+function worship() {
+  const L = [], E = [], faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
+  let seed = 1053;
+  const person = (x, z, dir, extra) => L.push({ t: 'figure', at: [x, z], y: extra.y ?? height(x, z), rot: faceTo(dir), seed: seed++ * 4241, dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'none', pose: 'stand', ...extra });
+  const W = [-1, 0];
+  for (const [zc, n] of [[-6.5, 3], [6.5, 3]]) {
+    // a mat of rushes on the gravel for each group, and the party kneeling on it facing the hall
+    const x0 = 42, x1 = 45.6, za = zc - 2.0, zb = zc + 2.0, y = Math.max(height(x0, za), height(x1, zb), height(x0, zb), height(x1, za));
+    E.push({ t: 'block', rect: [x0, za, x1, zb], y0: y - 0.1, y1: y + 0.03, mat: 'reed_mat', collide: false });
+    const yy = y + 0.03;
+    for (let i = 0; i < n; i++) {
+      const z = za + 0.7 + i * 1.3;
+      if (i === 1) person(42.9, z, W, { y: yy, pose: 'seiza', arms: 'pray', cloth: 'cloth_black', cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', over: 'collar' });
+      else person(43.0, z, W, { y: yy, pose: 'seiza', arms: 'pray', cloth: i ? 'cloth_red' : 'cloth_green', cloth2: 'cloth_white', hair: 'long', h: 1.52, over: 'collar' });
+      person(44.6, z + 0.3, W, { y: yy, pose: 'seiza', cloth: i % 2 ? 'cloth_ochre' : 'cloth_maroon', cloth2: 'cloth_white', hair: 'long', h: 1.5 });
+    }
+  }
+  // the monk who leads them, standing at the water's edge with his staff; a servant standing behind
+  person(41.2, 0.8, W, { cloth: 'cloth_black', cloth2: 'cloth_ochre', hair: 'shaven', carry: 'staff', over: 'sash' });
+  person(46.4, 1.5, W, { cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', dress: 'trousers' });
+  // in the hall: two monks kneeling before the dais, chanting
+  for (const sz of [-1, 1]) person(hx + 2.3, sz * 0.75, W, { y: HF, pose: 'seiza', arms: 'pray', cloth: 'cloth_black', cloth2: 'cloth_ochre', hair: 'shaven', over: 'sash' });
+  return [
+    { id: 'heian-uji-worship', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], elements: L, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'e' } },
+    { id: 'heian-uji-mats', style: 'japanese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], elements: E, bounds: [40, -10, 47, 10], entrance: { at: [48, 0], facing: 'w' } },
+  ];
+}
+export const [worshippers, mats] = worship();
 export default hall;

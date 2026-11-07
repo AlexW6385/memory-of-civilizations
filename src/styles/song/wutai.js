@@ -103,4 +103,87 @@ function zushiPagoda(el, { bag, col }) {
   col.circle(x, z, 1.95, y, y + 6);
 }
 
-export const WUTAI_ELEMENTS = { tang_dharani: tangDharani, zushi_pagoda: zushiPagoda };
+/**
+ * A painted panel: flat shapes laid on a wall face, each layer a little in front of the last.
+ * a, b: the strip's ends on the face (settlement x, z), y0: its foot, n: the face's outward normal [nx, nz].
+ * Returns { disc, poly, strip, add } in panel coordinates (s along a→b, v up, d out from the face).
+ */
+function painter(a, b, y0, n) {
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, N = [n[0], 0, n[1]];
+  const bags = new Map();
+  const P = (s, v, d) => [a[0] + ux * s + n[0] * d, y0 + v, a[1] + uz * s + n[1] * d];
+  const tri = (mat, p, q, r) => {
+    const t = bags.get(mat) ?? []; bags.set(mat, t);
+    const e1 = [q[0] - p[0], q[1] - p[1], q[2] - p[2]], e2 = [r[0] - p[0], r[1] - p[1], r[2] - p[2]];
+    const c = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+    if (c[0] * N[0] + c[2] * N[2] >= 0) t.push(...p, ...q, ...r); else t.push(...p, ...r, ...q);
+  };
+  /** a convex outline [[s, v]…] filled from its centre */
+  const poly = (mat, pts, d) => { const cs = pts.reduce((m, p) => m + p[0], 0) / pts.length, cv = pts.reduce((m, p) => m + p[1], 0) / pts.length, C = P(cs, cv, d); for (let i = 0; i < pts.length; i++) { const p = pts[i], q = pts[(i + 1) % pts.length]; tri(mat, C, P(p[0], p[1], d), P(q[0], q[1], d)); } };
+  const disc = (mat, s, v, rs, rv, d, k = 14, a0 = 0, a1 = Math.PI * 2) => poly(mat, [...(a1 - a0 < 6.28 ? [[s, v]] : []), ...Array.from({ length: k + (a1 - a0 < 6.28 ? 1 : 0) }, (_, i) => { const t = a0 + (a1 - a0) * i / k; return [s + Math.cos(t) * rs, v + Math.sin(t) * rv]; })], d);
+  /** a ribbon of width w along the path [[s, v]…] */
+  const strip = (mat, path, w, d) => { for (let i = 0; i < path.length - 1; i++) { const [s0, v0] = path[i], [s1, v1] = path[i + 1], l = Math.hypot(s1 - s0, v1 - v0) || 1, ns = -(v1 - v0) / l * w / 2, nv = (s1 - s0) / l * w / 2; const A = P(s0 + ns, v0 + nv, d), B = P(s1 + ns, v1 + nv, d), C = P(s1 - ns, v1 - nv, d), D = P(s0 - ns, v0 - nv, d); tri(mat, A, B, C); tri(mat, A, C, D); } };
+  const add = (bag) => { for (const [m, t] of bags) bag.add(m, fromTriangles(t)); };
+  return { L, disc, poly, strip, add };
+}
+
+/**
+ * tang_mural: the Tang painting on the bracket-eye panel over the front inner architrave of the north
+ * secondary bay (docs/settlements/tang-wutai.md §10) { a, b, y0, h (0.66), n }: in the middle a seated Buddha
+ * in his mandorla among seven attendants, to each side a group round a seated bodhisattva, flying apsaras
+ * with trailing scarves over them, donor monks and officials kneeling at the two ends; stone green, red
+ * earth and a blue gone dark as iron on an ochre ground.
+ */
+function tangMural(el, { bag }) {
+  const h = el.h ?? 0.66, M = painter(el.a, el.b, el.y0, el.n), W = M.L, D = (k) => 0.004 + k * 0.003;
+  const G = 'fresco_green', R = 'clay_robe', B = 'paint_blue', F = 'stucco_warm', O = 'paint_ochre', Wt = 'paint_white';
+  M.poly(O, [[0, 0], [W, 0], [W, h], [0, h]], D(0));
+  // a border of red earth along the foot and the top
+  M.poly(R, [[0, 0], [W, 0], [W, 0.035], [0, 0.035]], D(1)); M.poly(R, [[0, h - 0.035], [W, h - 0.035], [W, h], [0, h]], D(1));
+  const seated = (s, v, k, robe, halo, big = false) => {      // k: height of the seated figure
+    if (big) M.disc(halo, s, v + k * 0.62, k * 0.42, k * 0.62, D(1), 18);                       // the mandorla
+    M.disc(halo === G ? 'paint_ochre' : G, s, v + k * 0.86, k * 0.17, k * 0.17, D(2));          // the head halo
+    M.disc(R, s, v + k * 0.08, k * 0.36, k * 0.1, D(2), 12, 0, Math.PI);                         // the lotus seat
+    M.poly(robe, [[s - k * 0.33, v + k * 0.1], [s + k * 0.33, v + k * 0.1], [s + k * 0.2, v + k * 0.26], [s - k * 0.2, v + k * 0.26]], D(3));   // the crossed legs
+    M.poly(robe, [[s - k * 0.17, v + k * 0.24], [s + k * 0.17, v + k * 0.24], [s + k * 0.15, v + k * 0.66], [s - k * 0.15, v + k * 0.66]], D(3));
+    M.disc(F, s, v + k * 0.8, k * 0.085, k * 0.11, D(4), 10);                                    // the face
+    M.disc(B, s, v + k * 0.93, k * 0.05, k * 0.04, D(5), 8);                                     // the hair's knot
+  };
+  const standing = (s, v, k, robe, sash) => {
+    M.disc(G, s, v + k * 0.9, k * 0.11, k * 0.11, D(1));
+    M.poly(robe, [[s - k * 0.12, v], [s + k * 0.12, v], [s + k * 0.08, v + k * 0.8], [s - k * 0.08, v + k * 0.8]], D(2));
+    M.strip(sash, [[s - k * 0.1, v + k * 0.6], [s, v + k * 0.45], [s + k * 0.11, v + k * 0.62]], k * 0.04, D(3));
+    M.disc(F, s, v + k * 0.88, k * 0.055, k * 0.07, D(3), 10);
+  };
+  const kneeling = (s, v, k, robe, dir) => {
+    M.poly(robe, [[s - k * 0.2 * dir, v], [s + k * 0.16 * dir, v], [s + k * 0.08 * dir, v + k * 0.55], [s - k * 0.06 * dir, v + k * 0.55]], D(2));
+    M.disc(F, s + k * 0.02 * dir, v + k * 0.64, k * 0.07, k * 0.085, D(3), 10);
+    M.strip(robe, [[s + k * 0.04 * dir, v + k * 0.42], [s + k * 0.17 * dir, v + k * 0.36]], k * 0.06, D(3));    // the hands held out
+  };
+  const apsara = (s, v, k, dir, robe) => {
+    M.disc(robe, s, v, k * 0.26, k * 0.06, D(2), 10);
+    M.disc(F, s + dir * k * 0.28, v + k * 0.04, k * 0.05, k * 0.06, D(3), 8);
+    const path = Array.from({ length: 9 }, (_, i) => [s - dir * k * (0.15 + i * 0.12), v + k * 0.08 + Math.sin(i * 0.9) * k * 0.08]);
+    M.strip(G, path, k * 0.035, D(3)); M.strip(R, path.map(([a, b]) => [a, b - k * 0.1]), k * 0.03, D(3));
+  };
+  const clouds = (s, v, w) => { for (let i = 0; i < 4; i++) M.disc(Wt, s - w / 2 + (i + 0.5) * w / 4, v + (i % 2) * 0.012, w / 7, 0.022, D(1), 10); };
+  const c = W / 2, v0 = 0.06;
+  // the middle: the Buddha (Amitābha?) and seven attendants
+  seated(c, v0, 0.5, R, G, true);
+  [[-0.42, B], [-0.3, G], [-0.19, R], [0.19, R], [0.3, G], [0.42, B]].forEach(([o, m], i) => standing(c + o * 1.15, v0 + (i % 2 ? 0.03 : 0), 0.42, m, i % 2 ? R : G));
+  standing(c, v0 + 0.02, 0.2, B, R);
+  // the side groups: a bodhisattva seated (Guanyin, Mahāsthāmaprāpta) with four attendants, on clouds
+  for (const sd of [-1, 1]) {
+    const g = c + sd * 1.3;
+    clouds(g, v0 - 0.02, 0.8);
+    seated(g, v0 + 0.02, 0.4, B, G);
+    [-0.33, -0.2, 0.2, 0.33].forEach((o, i) => standing(g + o, v0 + 0.01, 0.34, i % 2 ? G : R, B));
+    apsara(g - sd * 0.62, h - 0.12, 0.36, -sd, R);
+    // the donors at the ends: a monk in dark robes and an official, kneeling toward the middle
+    kneeling(sd < 0 ? 0.16 : W - 0.16, v0, 0.34, B, sd < 0 ? 1 : -1);
+    kneeling(sd < 0 ? 0.34 : W - 0.34, v0, 0.32, R, sd < 0 ? 1 : -1);
+  }
+  M.add(bag);
+}
+
+export const WUTAI_ELEMENTS = { tang_dharani: tangDharani, zushi_pagoda: zushiPagoda, tang_mural: tangMural };

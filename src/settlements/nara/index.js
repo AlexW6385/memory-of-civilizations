@@ -61,8 +61,51 @@ const rushana = {
     // the attendants: Kokūzō on the west (the visitor's left), Nyoirin Kannon on the east (§4)
     { t: 'obj', kind: 'bosatsu', bodhisattva: 'kokuzo', at: [cx - 15, cz + 2], y: Y, h: 5.2, dir: [0, 1] },
     { t: 'obj', kind: 'bosatsu', bodhisattva: 'nyoirin', at: [cx + 15, cz + 2], y: Y, h: 5.2, dir: [0, 1] },
+    // the offerings on the altar: the censer, two vases of lotus, two lamps (§10)
+    { t: 'nara_altar_set', at: [cx, cz + 9.3], y: Y + 1.02, w: 6.4 },
   ],
 };
+// the eye-opening on the 9th day of the 4th month of 752 (26 May; §10): the dance stage on the axis before the hall, the monks seated in rows either
+// side of the way, the musicians on mats beside the stage, two dancers on it, the court at the foot of the hall's stairs
+const STAGE = [0, -24.5], SA = 2.8, SH = 0.8;
+const ceremonySet = {
+  id: 'nara-ceremony-set', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-60, -40, 60, 14], entrance: { at: [0, 20], facing: 'n' },
+  elements: [
+    { t: 'bugaku_stage', c: STAGE, half: SA, y: 0, h: SH },
+    { t: 'stair', rect: [STAGE[0] - 0.9, STAGE[1] + SA + 0.04, STAGE[0] + 0.9, STAGE[1] + SA + 1.24], dir: 'n', y0: 0, y1: SH, riser: 0.16, base: 0, mat: 'lacquer_red' },
+    { t: 'stair', rect: [STAGE[0] - 0.9, STAGE[1] - SA - 1.24, STAGE[0] + 0.9, STAGE[1] - SA - 0.04], dir: 's', y0: 0, y1: SH, riser: 0.16, base: 0, mat: 'lacquer_red' },
+  ],
+};
+const ceremonyPeople = { id: 'nara-ceremony', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 20], facing: 'n' }, elements: [] };
+{
+  const P = ceremonyPeople.elements, faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
+  let seed = 7521;
+  const r = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const fig = (x, z, y, dir, o) => P.push({ t: 'figure', at: [x, z], y, rot: faceTo(dir) + (r() - 0.5) * 0.12, seed: Math.floor(r() * 1e9), dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'none', ...o });
+  // the monks: four rows a side on rush mats, facing the hall, the way up the axis (|x| < 9) left open
+  for (const sd of [-1, 1]) for (let row = 0; row < 4; row++) {
+    const z = -6 + row * 2.4, xa = sd * 10, xb = sd * 33;
+    ceremonySet.elements.push({ t: 'block', rect: [Math.min(xa, xb) - 0.6, z - 0.7, Math.max(xa, xb) + 0.6, z + 0.7], y0: -0.1, y1: 0.03, mat: 'reed_mat', collide: false });
+    for (let k = 0; k < 12; k++) {
+      const x = xa + sd * k * 2.0;
+      fig(x, z, 0.03, [0, -1], { pose: 'cross', arms: r() < 0.5 ? 'pray' : undefined, hair: 'shaven', cloth: ['cloth_ochre', 'cloth_brown', 'cloth_grey', 'cloth_ochre'][Math.floor(r() * 4)], cloth2: r() < 0.6 ? 'cloth_ochre' : 'cloth_maroon', over: 'sash', beard: false });
+    }
+  }
+  // the musicians of the Tang and Korean music on mats either side of the stage, facing it: mouth organs and flutes,
+  // lutes and zithers, drums
+  const kinds = ['flute', 'flute', 'lute', 'harp', 'drum', 'flute'];
+  for (const sd of [-1, 1]) {
+    const x0 = sd * 6.5;
+    ceremonySet.elements.push({ t: 'block', rect: [Math.min(x0, x0 + sd * 3.4), STAGE[1] - 4.2, Math.max(x0, x0 + sd * 3.4), STAGE[1] + 4.2], y0: -0.1, y1: 0.03, mat: 'reed_mat', collide: false });
+    kinds.forEach((pose, i) => fig(x0 + sd * (1.0 + (i % 2) * 1.5), STAGE[1] - 3.2 + Math.floor(i / 2) * 2.6, 0.03, [-sd, 0], { pose, cloth: sd < 0 ? 'cloth_red' : 'cloth_green', cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', over: 'collar' }));
+  }
+  // two dancers on the stage, in the red of the music of the left and the green of the right
+  fig(STAGE[0] - 1.1, STAGE[1] + 0.4, SH, [0.4, 1], { pose: 'plieR', cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'cap', hatMat: 'gilt_bronze', over: 'cape' });
+  fig(STAGE[0] + 1.1, STAGE[1] - 0.3, SH, [-0.4, 1], { pose: 'step', cloth: 'cloth_green', cloth2: 'cloth_ochre', hat: 'cap', hatMat: 'gilt_bronze', over: 'cape' });
+  // the court: officials in their ranks' colours standing either side of the hall's stairs, facing the axis
+  for (const sd of [-1, 1]) for (let i = 0; i < 5; i++) fig(sd * (9 + (i % 3) * 1.6), -31.5 + Math.floor(i / 3) * 1.8 + (i % 3) * 0.2, 0, [-sd, 0.2], { cloth: ['cloth_maroon', 'cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_red'][i], cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', over: 'collar', beard: r() < 0.5 });
+}
+
 // the deer of the hills: a few small herds on the lawns outside the temple's courts and up the
 // grassy slope of Wakakusa, standing, grazing or lying folded (§6)
 const deer = { id: 'nara-deer', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 180], facing: 'n' }, elements: [] };
@@ -75,4 +118,4 @@ const deer = { id: 'nara-deer', style: 'nara', origin: [0, 0], base: 0, yaw: 0, 
     }
   }
 }
-export async function town() { return [daibutsu, rushana, deer, ...(await houses())]; }
+export async function town() { return [daibutsu, rushana, deer, ceremonySet, ceremonyPeople, ...(await houses())]; }
