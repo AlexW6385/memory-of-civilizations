@@ -122,6 +122,11 @@ Sources added:
 - [Angkor Wat, other sections — penang-traveltips](https://www.penang-traveltips.com/cambodia/angkor/angkor-wat/other-sections.htm)
 - [Angkor Wat — Wikipedia (text mirror)](https://wiki.krisyotam.com/content/wikipedia_en_all_nopic_2026-03/Ankor_Wat)
 
+## 14. L3: gilding, the surfaces at 1150, the market, elephants, palanquins, sugar palms (2026-11-07)
+
+- **Gilded crowns.** The temple's "gilded stucco on the towers" and "gilding on some figures on the bas-reliefs" have been lost to looting and time; a 16th-century Portuguese account (Diogo do Couto after António da Madalena) speaks of "many smaller towers of similar style, in the same stone, which are gilded" [stated: Wikipedia, Angkor Wat]. Ours: the lotus-bud crowns of the five towers of the Bakan and their two registers of petals in gilded stucco (`clay_gilt`); the tiers below left in stone, since how far down the gilding ran is not recorded [inferred].
+- **Weathering at 1150.** The temple is newly finished: no lichen, moss or black crusts yet (those of today's photographs belong to eight centuries of monsoons); the sandstone keeps its fresh grey, darkened only at the foot of walls by the climate's damp, as the materials draw it [inferred].
+
 ## Sources
 
 - [Angkor Wat — wondermondo](https://wondermondo.com/angkor-wat)

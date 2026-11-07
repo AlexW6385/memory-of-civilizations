@@ -233,14 +233,18 @@ function kTower(el, ctx) {
     yy += h; sk = sn;
   }
   // the crown: the bud, wrapped at its foot by a ring of lotus petals
-  rings.push([sk, yy], [sk * 0.99, yy + bud * 0.2], [sk * 0.9, yy + bud * 0.38], [sk * 0.7, yy + bud * 0.58], [sk * 0.4, yy + bud * 0.78], [sk * 0.14, yy + bud * 0.93], [0.001, bud + yy]);
+  // (el.gilt: the bud and its petals covered in gilded stucco, as the towers once were — docs/settlements/angkor.md §14)
+  const crown = [[sk, yy], [sk * 0.99, yy + bud * 0.2], [sk * 0.9, yy + bud * 0.38], [sk * 0.7, yy + bud * 0.58], [sk * 0.4, yy + bud * 0.78], [sk * 0.14, yy + bud * 0.93], [0.001, bud + yy]];
+  const gt = el.gilt ? [] : t, gc = el.gilt ? [] : ca;
   stack(t, P, rings, cx, y, cz);
+  stack(gt, P, crown, cx, y, cz);
   // two registers of petals: the lower at the bud's foot, the upper, smaller, a third of the way up
   for (const [f, sc, ph] of [[0, sk, 0.34], [0.36, sk * 0.9, 0.28]]) {
     const pw = d * sc * 1.3, th = pw * 0.28;
-    for (const sp of redentSpots(hw, n, d)) prism(ca, scaled(LEAF, sp.mid ? pw * 2.2 : pw, bud * ph), [cx + sp.p[0] * sc - sp.dir[0] * th * 0.6, y + yy + bud * f - 0.05, cz + sp.p[1] * sc - sp.dir[1] * th * 0.6], perp(sp.dir), sp.dir, th);
+    for (const sp of redentSpots(hw, n, d)) prism(gc, scaled(LEAF, sp.mid ? pw * 2.2 : pw, bud * ph), [cx + sp.p[0] * sc - sp.dir[0] * th * 0.6, y + yy + bud * f - 0.05, cz + sp.p[1] * sc - sp.dir[1] * th * 0.6], perp(sp.dir), sp.dir, th);
   }
   bag.add(S, fromTriangles(t)); bag.add(C, fromTriangles(ca));
+  if (el.gilt) bag.add('clay_gilt', fromTriangles([...gt, ...gc]));
 }
 
 /**
