@@ -22,6 +22,13 @@ export const ENV = {
   wet: uniform(0),                              // 0 dry … 1 soaked
   damp: uniform(0.4),                           // how damp the place's climate is (moss, rain streaks): 0 desert … 1 Atlantic
   rain: uniform(0),
+  snow: uniform(0),                             // snow falling 0…1 (src/planet/setpieces.js)
+  dust: uniform(0),                             // dust blowing 0…1
+  snowCover: uniform(0),                        // fresh snow lying on the ground and roofs 0…1
+  // the season of the open country, for the northern hemisphere (the southern negates them):
+  // winter 1 mid-January … −1 mid-July, autumn 1 mid-October … −1 mid-April
+  seasonWinter: uniform(0),
+  seasonAutumn: uniform(0),
   night: uniform(0),                            // 0 day … 1 full night
   moonDir: uniform(new Vector3(0, -1, 0)),
   moonUp: uniform(0),                           // how much the moon lights the night (0…1)

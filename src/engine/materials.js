@@ -117,7 +117,9 @@ function weather(col, roof) {
   const north = smoothstep(0.2, 0.9, normalLocal.z.negate());
   if (roof) {
     const moss = north.mul(smoothstep(0.0, 0.5, patch.add(0.2))).mul(ENV.damp).mul(float(1).sub(vertical));
-    return mix(col, vec3(0.14, 0.17, 0.08), moss.mul(0.35));
+    // fresh snow lying on the roof's slopes while it snows (ENV.snowCover), thinner on the steep
+    const snow = ENV.snowCover.mul(smoothstep(0.35, 0.7, normalLocal.y)).mul(smoothstep(-0.7, -0.2, patch.add(ENV.snowCover.mul(0.5))));
+    return mix(mix(col, vec3(0.14, 0.17, 0.08), moss.mul(0.35)), vec3(0.9, 0.92, 0.95), snow.mul(0.92));
   }
   const foot = smoothstep(1.3, 0.0, y.add(patch.mul(0.35))).mul(vertical);
   const streak = smoothstep(0.3, 0.75, mx_noise_float(vec3(P.x.add(P.z).mul(1.7), y.mul(0.12), 0.3))).mul(vertical).mul(ENV.damp);

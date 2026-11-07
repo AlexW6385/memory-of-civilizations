@@ -105,13 +105,37 @@ export function groundMaterial() {
   const fieldCol = mix(crop.mul(rows.mul(0.18).add(0.86)).mul(fine.mul(0.08).add(1)), soil, bank);
   const wsum = g.x.add(g.y).add(g.z).add(g.w).add(g2.x).max(0.001);
   let col3 = sand.mul(g.x).add(grass.mul(g.y)).add(rock.mul(g.z)).add(soil.mul(g.w)).add(fieldCol.mul(g2.x)).div(wsum);
+  // the seasons of the open country (src/planet/setpieces.js), outside the tropics and off the
+  // settlements' discs (g3.w), which keep their own moment: grass straw in autumn, dun in winter,
+  // fresh in spring; the broadleaf belt's canopy turning and then bare; the snow line lower in winter
+  const sl = abs(S.up.y), hemi = sign(S.up.y);
+  const temperate = smoothstep(0.42, 0.8, sl).mul(float(1).sub(g3.w));
+  const autumnK = clamp(ENV.seasonAutumn.mul(hemi), 0, 1).mul(temperate);
+  const winterK = clamp(ENV.seasonWinter.mul(hemi), 0, 1).mul(temperate);
+  const springK = clamp(ENV.seasonAutumn.mul(hemi).negate(), 0, 1).mul(clamp(float(1).sub(ENV.seasonWinter.mul(hemi).abs()), 0, 1)).mul(temperate);
+  const grassShare = g.y.add(g2.x.mul(0.5)).div(wsum);
+  let seasonal = mix(col3, col3.mul(vec3(1.22, 1.04, 0.66)), autumnK.mul(0.6));
+  seasonal = mix(seasonal, vec3(dot(col3, vec3(0.33, 0.34, 0.33))).mul(vec3(1.08, 0.97, 0.78)), winterK.mul(0.55));
+  seasonal = mix(seasonal, col3.mul(vec3(0.9, 1.12, 0.84)), springK.mul(0.4));
+  col3 = mix(col3, seasonal, grassShare);
   // forest seen from afar: the dark mottled green of a canopy (trees themselves stand near settlements)
   const canopyN = when(g3.z.greaterThan(ON), () => mx_fractal_noise_float(Pb.mul(0.09), 3, 2.0, 0.5));
-  const canopy = mix(C('#2f4224'), C('#46592c'), canopyN.mul(0.5).add(0.5)).mul(mix(float(1), float(0.82), g2.y.mul(0.5)));
+  let canopy = mix(C('#2f4224'), C('#46592c'), canopyN.mul(0.5).add(0.5)).mul(mix(float(1), float(0.82), g2.y.mul(0.5)));
+  // (broadleaf from ~25° to ~55°; the boreal forest beyond stays dark; conifers mixed in by the noise)
+  const broadleaf = smoothstep(0.42, 0.6, sl).mul(smoothstep(0.86, 0.76, sl)).mul(smoothstep(-0.25, 0.15, mid));
+  const turned = mix(C('#7d4a1f'), C('#a8782e'), smoothstep(-0.4, 0.5, canopyN.add(mid.mul(0.6))));
+  canopy = mix(canopy, turned, autumnK.mul(broadleaf).mul(0.75));
+  canopy = mix(canopy, C('#5b5045').mul(canopyN.mul(0.15).add(1)), winterK.mul(broadleaf).mul(0.7));
   col3 = mix(col3, canopy, g3.z.mul(smoothstep(-0.35, 0.1, canopyN)));
-  // snow: white with blue shade, thinner where steep
+  // snow: white with blue shade, thinner where steep; in winter a lower snow line (and the north's
+  // lowlands white); and fresh snow lying wherever it has been snowing (ENV.snowCover, on the
+  // settlements too)
   const slopeUp = dot(normalLocal, S.up);
-  const snowA = g3.y.mul(smoothstep(0.45, 0.75, slopeUp).mul(0.7).add(0.3));
+  const line = mix(float(165), mix(float(78), float(22), smoothstep(0.66, 0.9, sl)), winterK);
+  const winterSnow = max(smoothstep(line, line.add(18), Pb.y), smoothstep(0.82, 0.92, sl).mul(smoothstep(0.35, 0.85, ENV.seasonWinter.mul(hemi))).mul(float(1).sub(g3.w)))
+    .mul(winterK.greaterThan(0.001).select(float(1), float(0))).mul(smoothstep(-0.75, -0.3, big.add(huge.mul(0.5))));
+  const freshSnow = ENV.snowCover.mul(smoothstep(0.55, 0.85, slopeUp)).mul(smoothstep(-0.55, -0.1, big.add(mid.mul(0.5)).add(ENV.snowCover.mul(0.6))));
+  const snowA = max(max(g3.y, winterSnow.mul(0.95)).mul(smoothstep(0.45, 0.75, slopeUp).mul(0.7).add(0.3)), freshSnow);
   col3 = mix(col3, C('#eef1f5').mul(big.mul(0.05).add(0.97)), snowA);
   col3 = col3.mul(fine.mul(0.06).add(1));
   // rain: darker and glossier where the ground faces the sky; puddles in the low spots (the noise
