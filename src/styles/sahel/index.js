@@ -266,6 +266,29 @@ function greatMosque(el, { bag, col }) {
   // the hall's west wall on the court, pierced by pointed-arched openings in line with the bays
   // (Wikipedia: the galleries' walls facing the court are punctuated by arched openings)
   w([xm, z0 + 1], [xm, z1 - 1], { out: 1, h: 9, toron: false, gaps: [1, 3, 4, 5, 6, 8].map((j) => ({ s0: bayZ(j) - 0.9 - (z0 + 1), s1: bayZ(j) + 0.9 - (z0 + 1), top: 2.5, arch: true })) });
+  // the galleries round the court on its north, west and south sides (Wikipedia: the court is
+  // "surrounded on three sides by galleries", their walls on the court "punctuated by arched
+  // openings"; Aramco World: galleries about 4 m wide): an arcade of pointed arches on low pilasters
+  // 4 m in from the outer walls, a flat roof of palm beams under banco from it to the outer wall
+  { const gw = 4, yR = py + 5.2, xa = x0 + 0.45, xb = xm - 0.45, za = z0 + 0.45, zb = z1 - 0.45;
+    const arcade = (a, b, out) => {
+      const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(2, Math.round(L / 3.2)), p = L / n;
+      bancoWall(bag, col, a, b, py, 5.2, 0.6, { out, step: p, pw: 0.42, pd: 0.3, ph: 0.9, toron: false, seed: 11, gaps: Array.from({ length: n }, (_, k) => ({ s0: (k + 0.5) * p - 0.85, s1: (k + 0.5) * p + 0.85, top: 2.5, arch: true })) });
+    };
+    arcade([xa + gw, za + gw], [xb, za + gw], 1);         // the north gallery, its arches facing south
+    arcade([xb, zb - gw], [xa + gw, zb - gw], 1);         // the south gallery
+    arcade([xa + gw, zb - gw - 0.3], [xa + gw, za + gw + 0.3], 1);   // the west gallery
+    const roof = (r) => {
+      bag.add('timber', box(r[0], yR, r[1], r[2], yR + 0.25, r[3]));
+      bag.add('banco_smooth', box(r[0] - 0.02, yR + 0.25, r[1] - 0.02, r[2] + 0.02, yR + 0.65, r[3] + 0.02));
+      col.rect(r, yR, yR + 0.65); col.floor(r, yR + 0.65);
+      // the palm beams showing in the ceiling, across the gallery
+      const tt = [], along = r[2] - r[0] > r[3] - r[1], L = along ? r[2] - r[0] : r[3] - r[1], n = Math.floor(L / 0.6);
+      for (let k = 0; k < n; k++) { const u = (along ? r[0] : r[1]) + (k + 0.5) * L / n; if (along) beamTris(tt, [u, yR - 0.14, r[1]], [u, yR - 0.14, r[3]], 0.07, 0.14); else beamTris(tt, [r[0], yR - 0.14, u], [r[2], yR - 0.14, u], 0.07, 0.14); }
+      bag.add('timber', fromTriangles(tt));
+    };
+    roof([xa, za, xb, za + gw + 0.3]); roof([xa, zb - gw - 0.3, xb, zb]); roof([xa, za + gw + 0.3, xa + gw + 0.3, zb - gw - 0.3]);
+  }
   stairTower(bag, col, { r: [ST[0], ST[1], ST[2], ST[3]], py, top: py + 10.5, door: [stDoor[0], stDoor[1], py, py + 2.3], exit: [ST[0] + 0.75, ST[0] + 2.05, py + 10.5, py + 12.6] });
   // the hall's roof on nine arcaded walls running north–south (docs/settlements/djenne.md §2): each
   // a row of massive piers joined by tall pointed arches, ninety piers in all; the flat roof of palm
@@ -344,44 +367,108 @@ function greatMosque(el, { bag, col }) {
 }
 
 /**
- * sahel_house: a town house { rect, front ('n'|'s'|'e'|'w'), storeys, seed }: banco walls, a flat
- * roof with a parapet, on the street side the facade: pilasters up to pinnacles framing the door,
- * a canopy over it, a small window above; a court behind with a lower room.
+ * sahel_house: a town house { rect, front ('n'|'s'|'e'|'w'), storeys, seed, kind ('tukulor' |
+ * 'moroccan', by default chosen by seed) } (docs/settlements/djenne.md §5, §12): banco walls, a flat
+ * roof behind a parapet; on the street the "Sudan facade": corner pilasters (sarafar har) rising as
+ * tall pinnacles, the two pilasters framing the entrance rising higher still, and between them over
+ * the door the facade panel crowned by a row of small mitre-shaped pinnacles (sarafar idye) over a
+ * frieze of recesses; toron in rows, clay spouts, the facade bench (tintin) either side of the door,
+ * the plank door in its frame. A Tukulor house has the massive covered porch before the door and a
+ * single small window over it; a Moroccan house no porch and small ornate windows with wooden grilles.
  */
 function sahelHouse(el, { bag, col }) {
-  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, st = el.storeys ?? (rand() < 0.65 ? 2 : 1), H = st * 3.1, th = 0.5;
+  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, st = el.storeys ?? (rand() < 0.65 ? 2 : 1), H = st * 3.1;
+  const kind = el.kind ?? (st > 1 && rand() < 0.55 ? 'moroccan' : 'tukulor');
   bag.add(B, box(x0, 0, z0, x1, H, z1));
   bag.add('banco_smooth', box(x0 - 0.1, H, z0 - 0.1, x1 + 0.1, H + 0.15, z1 + 0.1));
   // the parapet round the roof terrace
-  for (const [a, b] of [[[x0, z0], [x1, z0]], [[x1, z0], [x1, z1]], [[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]]]) { const t = []; beamTris(t, [a[0], H, a[1]], [b[0], H, b[1]], 0.18, 0.9); bag.add(B, fromTriangles(t)); }
+  for (const [a, b] of [[[x0, z0], [x1, z0]], [[x1, z0], [x1, z1]], [[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]]]) { const t = []; beamTris(t, [a[0], H + 0.15, a[1]], [b[0], H + 0.15, b[1]], 0.18, 0.75); bag.add(B, fromTriangles(t)); }
   col.rect([x0, z0, x1, z1], 0, H);
   col.floor([x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3], H + 0.15);
-  // the facade
+  // the facade's frame: s along the front from a to b, d outward from its plane
   const f = el.front || 's';
   const [a, b] = f === 's' ? [[x0, z1], [x1, z1]] : f === 'n' ? [[x1, z0], [x0, z0]] : f === 'e' ? [[x1, z1], [x1, z0]] : [[x0, z0], [x0, z1]];
-  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = uz, nz = -ux;   // n: outward
-  const mid = L / 2;
-  // pilasters: two framing the door, two at the corners, rising above the parapet as pinnacles
-  for (const s of [0.25, mid - 1.2, mid + 1.2, L - 0.25]) {
-    const px = a[0] + ux * s + nx * 0.25, pz = a[1] + uz * s + nz * 0.25, ph = H + (s === mid - 1.2 || s === mid + 1.2 ? 2.4 : 1.4);
-    taper(bag, px, pz, 0, ph * 0.85, 0.45, 0.32, ph * 0.15);
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux;   // n: outward
+  const P = (s, d) => [a[0] + ux * s + nx * d, a[1] + uz * s + nz * d];
+  const R = (s0, s1, d0, d1) => { const p = P(s0, d0), q = P(s1, d1); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
+  const lbox = (mat, s0, s1, d0, d1, y0, y1, solid = false) => { const r = R(s0, s1, d0, d1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); if (solid) col.rect(r, y0, y1); };
+  const mid = L / 2, hw = Math.min(1.35, L / 2 - 1.2), top = H + 0.9;
+  // a mitre-shaped pinnacle: a rounded blade, flattened across the facade
+  const mitre = (s, d, y, h, w) => { const [x, z] = P(s, d), g = lathe([[w, 0], [w * 0.95, h * 0.45], [w * 0.6, h * 0.8], [0.02, h]], 8, null, 0, 0, 0); g.scale(Math.abs(ux) > 0.5 ? 1 : 0.45, 1, Math.abs(ux) > 0.5 ? 0.45 : 1); bag.add(B, g.translate(x, y, z)); };
+  // the corner pilasters (sarafar har) and the two framing the entrance, battered, rising as pinnacles
+  for (const [s, extra, w] of [[0.3, 1.2, 0.42], [L - 0.3, 1.2, 0.42], [mid - hw, 2.6, 0.5], [mid + hw, 2.6, 0.5]]) {
+    const [px, pz] = P(s, 0.22), ph = H + extra;
+    taper(bag, px, pz, 0, ph * 0.86, w, w * 0.72, ph * 0.14);
+    col.rect(R(s - w, s + w, 0, 0.22 + w), 0, ph * 0.86);
   }
-  // the door, the canopy over it, the window above
-  const dx = a[0] + ux * mid + nx * 0.02, dz = a[1] + uz * mid + nz * 0.02;
-  bag.add('timber', box(dx - Math.abs(ux) * 0.7 - Math.abs(nx) * 0.05, 0, dz - Math.abs(uz) * 0.7 - Math.abs(nz) * 0.05, dx + Math.abs(ux) * 0.7 + Math.abs(nx) * 0.05, 2.2, dz + Math.abs(uz) * 0.7 + Math.abs(nz) * 0.05));
-  bag.add('banco_smooth', box(dx - Math.abs(ux) * 1.3 + Math.min(0, nx), 2.5, dz - Math.abs(uz) * 1.3 + Math.min(0, nz), dx + Math.abs(ux) * 1.3 + Math.max(0, nx), 2.75, dz + Math.abs(uz) * 1.3 + Math.max(0, nz)));
-  if (st > 1) bag.add('lacquer_black', box(dx - Math.abs(ux) * 0.4 - Math.abs(nx) * 0.04, 4.1, dz - Math.abs(uz) * 0.4 - Math.abs(nz) * 0.04, dx + Math.abs(ux) * 0.4 + Math.abs(nx) * 0.04, 4.9, dz + Math.abs(uz) * 0.4 + Math.abs(nz) * 0.04));
-  // toron in a row high on the facade, clay spouts from the roof
-  for (let k = 1; k < 4; k++) {
-    const tx = a[0] + ux * L * k / 4, tz = a[1] + uz * L * k / 4, t = [];
-    beamTris(t, [tx, H - 0.6, tz], [tx + nx * 0.6, H - 0.6, tz + nz * 0.6], 0.05, 0.08);
-    bag.add('timber', fromTriangles(t));
+  // intermediate pilasters along a long front, lower
+  for (const s of [(0.3 + mid - hw) / 2, (mid + hw + L - 0.3) / 2]) if (Math.abs(s - 0.3) > 1.6 && Math.abs(s - (mid - hw)) > 1.2 && Math.abs(s - (mid + hw)) > 1.2) { const [px, pz] = P(s, 0.15); taper(bag, px, pz, 0, H + 0.6, 0.3, 0.22, 0.9); }
+  // the facade panel between the entrance pilasters: proud of the wall, up past the parapet, a band of
+  // square recesses (the frieze), a moulding, and the row of small mitre pinnacles along its top
+  lbox(B, mid - hw + 0.35, mid + hw - 0.35, -0.05, 0.14, 2.9, top + 0.35);
+  lbox('banco_smooth', mid - hw + 0.3, mid + hw - 0.3, 0.1, 0.24, top + 0.35, top + 0.5);
+  { const n = 5; for (let k = 0; k < n; k++) mitre(mid - hw + 0.6 + (2 * hw - 1.2) * k / (n - 1), 0.12, top + 0.5, k % 2 ? 0.75 : 0.95, 0.17); }
+  if (st > 1) { const n = Math.max(3, Math.round((2 * hw - 0.9) / 0.5)); for (let k = 0; k < n; k++) { const s = mid - hw + 0.55 + (2 * hw - 1.1) * (k + 0.5) / n; lbox('banco_smooth', s - 0.12, s + 0.12, 0.14, 0.17, H - 0.55, H - 0.3); } }
+  lbox('banco_smooth', mid - hw + 0.3, mid + hw - 0.3, 0.14, 0.26, H - 0.2, H - 0.05);
+  // the door: a plank leaf in a banco frame, the frame's timber lintel; an iron ring
+  const dw = 0.55, dh = 2.05;
+  lbox('banco_smooth', mid - dw - 0.2, mid - dw, -0.05, 0.2, 0, dh + 0.2); lbox('banco_smooth', mid + dw, mid + dw + 0.2, -0.05, 0.2, 0, dh + 0.2);
+  lbox('timber', mid - dw - 0.3, mid + dw + 0.3, -0.05, 0.22, dh, dh + 0.14);
+  lbox('wood_dark', mid - dw, mid + dw, -0.06, 0.015, 0, dh - 0.01);
+  for (let k = 0; k < 5; k++) { const s = mid - dw + k * (2 * dw) / 5; lbox('timber', s + 0.008, s + 2 * dw / 5 - 0.008, -0.06, k % 2 ? 0.035 : 0.045, 0, dh); }
+  for (const y of [0.35, 1.0, 1.7]) lbox('wood_dark', mid - dw, mid + dw, 0.04, 0.07, y, y + 0.09);
+  { const [rx, rz] = P(mid + dw * 0.55, 0.09); bag.add('iron', lathe([[0.06, -0.06], [0.07, 0], [0.06, 0.06], [0.05, 0], [0.06, -0.06]], 8, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(Math.atan2(nx, nz)).translate(rx, 1.05, rz)); }
+  // the facade bench (tintin) along the foot, either side of the entrance
+  for (const [s0, s1] of [[0.8, mid - hw - 0.55], [mid + hw + 0.55, L - 0.8]]) if (s1 - s0 > 0.8) lbox('banco_smooth', s0, s1, -0.05, 0.5, 0, 0.45, true);
+  if (kind === 'tukulor') {
+    // the massive covered porch before the door: two piers, a roof of palm beams under banco, a
+    // timber lintel over its mouth
+    const pd = 0.95, pw = hw - 0.1;
+    if (pw - dw - 0.25 > 0.3) {
+    lbox(B, mid - pw - 0.05, mid - dw - 0.25, 0.2, pd, 0, 2.75, true); lbox(B, mid + dw + 0.25, mid + pw + 0.05, 0.2, pd, 0, 2.75, true);
+    lbox('timber', mid - pw - 0.1, mid + pw + 0.1, pd - 0.18, pd + 0.02, 2.4, 2.56);
+    lbox('banco_smooth', mid - pw - 0.12, mid + pw + 0.12, 0.1, pd + 0.08, 2.75, 2.95);
+    for (let k = 0; k < 5; k++) { const s = mid - pw + 0.2 + (2 * pw - 0.4) * k / 4; lbox('timber', s - 0.05, s + 0.05, 0.1, pd + 0.18, 2.62, 2.74); }
+    lbox(B, mid - pw - 0.05, mid + pw + 0.05, 0.2, pd, 2.56, 2.75);
+    }
+    // the single small window over the entrance, its timber grille of bars
+    if (st > 1) {
+      lbox('lacquer_black', mid - 0.28, mid + 0.28, 0.16, 0.2, 4.0, 4.65);
+      lbox('banco_smooth', mid - 0.42, mid + 0.42, 0.16, 0.34, 3.88, 4.0); lbox('banco_smooth', mid - 0.42, mid + 0.42, 0.16, 0.34, 4.65, 4.77);
+      for (const s of [mid - 0.36, mid + 0.36]) lbox('banco_smooth', s - 0.06, s + 0.06, 0.16, 0.3, 4.0, 4.65);
+      for (let k = 0; k < 4; k++) { const s = mid - 0.21 + k * 0.14; lbox('timber', s - 0.02, s + 0.02, 0.2, 0.26, 4.0, 4.65); }
+    }
+  } else {
+    // Moroccan: small ornate windows in the upper storey, each in a moulded banco frame with a
+    // pointed head, a wooden grille of crossed laths before a dark opening, a little sill
+    const ws = [mid - hw - 1.1, mid + hw + 1.1].filter((s) => s > 1.0 && s < L - 1.0);
+    ws.push(mid);
+    for (const s of ws) {
+      const y0 = s === mid ? 4.05 : 3.9, wh = 0.75, ww = 0.32, o = s === mid ? 0.16 : 0;
+      const wb = (mat, s0, s1, d0, d1, ya, yb) => lbox(mat, s0, s1, d0 + o, d1 + o, ya, yb);
+      wb('lacquer_black', s - ww, s + ww, 0.02, 0.06, y0, y0 + wh);
+      wb('banco_smooth', s - ww - 0.14, s - ww, 0.0, 0.2, y0 - 0.1, y0 + wh); wb('banco_smooth', s + ww, s + ww + 0.14, 0.0, 0.2, y0 - 0.1, y0 + wh);
+      wb('banco_smooth', s - ww - 0.2, s + ww + 0.2, 0.0, 0.3, y0 - 0.2, y0 - 0.08);
+      for (const sg of [-1, 1]) for (let k = 0; k < 3; k++) { const s0 = s + sg * (ww + 0.14 - (k + 1) * (ww + 0.14) / 3); wb('banco_smooth', Math.min(s0, s + sg * (ww + 0.14)) , Math.max(s0, s + sg * (ww + 0.14)), 0.0, 0.2, y0 + wh + k * 0.1, y0 + wh + (k + 1) * 0.1); }
+      wb('banco_smooth', s - 0.05, s + 0.05, 0.0, 0.2, y0 + wh + 0.3, y0 + wh + 0.42);
+      for (let k = 0; k < 4; k++) { const sx = s - ww + 0.08 + k * (2 * ww - 0.16) / 3; wb('timber', sx - 0.018, sx + 0.018, 0.07, 0.11, y0, y0 + wh); }
+      for (let k = 0; k < 5; k++) { const yy = y0 + 0.08 + k * (wh - 0.16) / 4; wb('timber', s - ww, s + ww, 0.11, 0.14, yy - 0.018, yy + 0.018); }
+    }
+    // a canopy of palm sticks and banco on brackets over the door
+    lbox('banco_smooth', mid - dw - 0.4, mid + dw + 0.4, 0.0, 0.7, 2.45, 2.62);
+    for (const s of [mid - dw - 0.3, mid + dw + 0.3]) lbox('timber', s - 0.05, s + 0.05, 0.2, 0.75, 2.33, 2.45);
   }
-  const t2 = [], sx = a[0] + ux * L * 0.8, sz = a[1] + uz * L * 0.8;
-  beamTris(t2, [sx, H + 0.1, sz], [sx + nx * 0.9, H + 0.05, sz + nz * 0.9], 0.1, 0.14);
-  bag.add('banco_smooth', fromTriangles(t2));
+  // toron in rows across the front, between the pilasters
+  const tt = [];
+  for (let r = 1; r <= st; r++) for (let k = 1; k < 8; k++) {
+    const s = L * k / 8; if (Math.abs(s - mid) < hw + 0.6 || Math.abs(s - 0.3) < 0.6 || Math.abs(s - L + 0.3) < 0.6 || rand() < 0.25) continue;
+    const [tx, tz] = P(s, 0.0), y = r * 3.1 - 0.7 + (rand() - 0.5) * 0.1, len = 0.5 + rand() * 0.25;
+    beamTris(tt, [tx, y, tz], [tx + nx * len, y + 0.03, tz + nz * len], 0.06, 0.1);
+  }
+  if (tt.length) bag.add('timber', fromTriangles(tt));
+  // fired clay spouts through the parapet throwing the rain off the roof, one either side of the panel
+  for (const s of [mid - hw - 0.9, mid + hw + 0.9]) if (s > 0.9 && s < L - 0.9) { const [sx, sz] = P(s, -0.15); bag.add('terracotta', fromTriangles(halfPipe([sx, H + 0.25, sz], [nx, 0, nz], 0.95, 0.09))); }
 }
-
 /** sahel_wall: a plain banco wall (courts, the market) { a, b, h }. */
 function sahelWall(el, { bag, col }) { bancoWall(bag, col, el.a, el.b, el.y ?? 0, el.h ?? 2.6, 0.45, { step: 4, ph: 0.6, toron: false, pw: 0.4, pd: 0.3 }); }
 
@@ -492,8 +579,36 @@ function marketMat(el, { bag }) {
   }
 }
 
+/**
+ * net_rack: a fisherman's nets hung to dry { at, rot, seed }: two forked poles, a cross pole in their
+ * forks, the folded nets draped over it in heavy swags hanging to either side, their lower edges
+ * ragged, a few gourd floats; a coil of rope at the foot.
+ */
+function netRack(el, { bag, col }) {
+  const [X, Z] = el.at, r = el.rot ?? 0, c = Math.cos(r), sn = Math.sin(r), rand = rng(el.seed || 1);
+  const Wp = (x, z) => [X + x * c + z * sn, Z - x * sn + z * c];
+  const put = (mat, g) => bag.add(mat, g.rotateY(r).translate(X, 0, Z));
+  const hw = 1.3 + rand() * 0.4, ph = 1.75;
+  for (const sx of [-hw, hw]) {
+    put('timber', lathe([[0.05, 0], [0.045, ph], [0.001, ph]], 6, null, sx, 0, 0));
+    for (const sg of [-1, 1]) { const g = lathe([[0.025, 0], [0.02, 0.22], [0.001, 0.22]], 5, null, 0, 0, 0); g.rotateZ(sg * 0.45); put('timber', g.translate(sx, ph - 0.05, 0)); }
+  }
+  put('timber', lathe([[0.035, 0], [0.035, 2 * hw + 0.4], [0.001, 2 * hw + 0.4]], 6, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(hw + 0.2, ph + 0.03, 0));
+  // the swags: a sheet hanging on each side of the pole, its edge ragged
+  const T = [], N = 10, M = 4;
+  const Q = (u, v, sg) => { const x = -hw * 0.92 + 2 * hw * 0.92 * u, drop = 0.9 + 0.35 * Math.sin(u * 9 + sg * 2 + el.seed) * 0.5 + 0.2 * Math.sin(u * 23 + el.seed); return [x, ph + 0.04 - v * drop - 0.08 * Math.sin(Math.PI * u) * v, sg * (0.05 + 0.12 * v + 0.04 * Math.sin(u * 13) * v)]; };
+  for (const sg of [-1, 1]) for (let i = 0; i < N; i++) for (let j = 0; j < M; j++) {
+    const a = Q(i / N, j / M, sg), b = Q((i + 1) / N, j / M, sg), d = Q((i + 1) / N, (j + 1) / M, sg), e = Q(i / N, (j + 1) / M, sg);
+    T.push(...a, ...b, ...d, ...a, ...d, ...e, ...a, ...d, ...b, ...a, ...e, ...d);
+  }
+  put('rope_fibre', fromTriangles(T));
+  for (let k = 0; k < 5; k++) { const u = (k + 0.5) / 5, sg = k % 2 ? 1 : -1, p = Q(u, 0.98, sg); put('hide_tan', lathe([[0.001, -0.06], [0.06, -0.03], [0.065, 0.02], [0.03, 0.06], [0.001, 0.07]], 6, null, p[0], p[1] - 0.06, p[2] + sg * 0.05)); }
+  put('rope_fibre', lathe([[0.001, 0], [0.22, 0], [0.24, 0.05], [0.2, 0.1], [0.12, 0.1], [0.1, 0.05], [0.001, 0.05]], 10, null, hw * 0.4, 0, 0.5));
+  for (const sx of [-hw, hw]) { const [px, pz] = Wp(sx, 0); col.circle(px, pz, 0.1, 0, ph); }
+}
+
 registerStyle('sahel', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat },
+  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat, net_rack: netRack },
   objects: {},
 });

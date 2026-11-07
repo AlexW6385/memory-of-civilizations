@@ -472,8 +472,35 @@ function fowl(pose, cock) {
     }
   });
 }
-/** chickens: { n } — a few fowls about a yard: hens pecking or looking up, now and then a cock among them. */
+/**
+ * A duck or a goose (front along −z) as an assembly: 'p' its plumage, 'h' its head and neck (a drake's darker), 'y'
+ * its bill, legs and webbed feet. The duck low and boat-shaped, its tail turned up, the flat bill; the goose larger
+ * and upright, the long neck raised or stretched down to graze, the bill with its knob (the Chinese goose) or plain.
+ */
+function waterfowl(kind, pose) {
+  return assembly(`waterfowl|${kind}|${pose}`, (a) => {
+    const goose = kind === 'goose', k = goose ? 1.55 : 1, by = 0.12 * k, graze = pose === 'peck' && goose;
+    a('p', tube([[0, by + 0.035 * k, 0.15 * k, 0.012 * k, 0.02 * k], [0, by + 0.01 * k, 0.11 * k, 0.06 * k, 0.05 * k], [0, by, 0.02 * k, 0.075 * k, 0.068 * k], [0, by + 0.005 * k, -0.06 * k, 0.07 * k, 0.065 * k], [0, by + 0.02 * k, -0.11 * k, 0.045 * k, 0.05 * k]], 10));
+    for (const s of [-1, 1]) a('p', tube([[s * 0.065 * k, by + 0.025 * k, -0.06 * k, 0.012 * k, 0.04 * k], [s * 0.07 * k, by + 0.03 * k, 0.03 * k, 0.014 * k, 0.045 * k], [s * 0.035 * k, by + 0.045 * k, 0.13 * k, 0.008 * k, 0.02 * k]], 6));   // the folded wings
+    const nb = [0, by + 0.04 * k, -0.1 * k];
+    const head = graze ? [0, 0.04 * k, -0.23 * k] : goose ? [0, by + 0.27 * k, -0.16 * k] : [0, by + 0.12 * k, -0.13 * k];
+    const mid = graze ? [0, by - 0.01 * k, -0.19 * k] : [0, (nb[1] + head[1]) / 2, (nb[2] + head[2]) / 2 - 0.01 * k];
+    a('h', tube([[...nb, 0.04 * k], [...mid, goose ? 0.022 * k : 0.03 * k], [...head, goose ? 0.02 * k : 0.026 * k]], 7));
+    const hr = goose ? 0.028 * k : 0.032;
+    a('h', tube([[head[0], head[1], head[2] + hr * 0.6, hr * 0.8], [head[0], head[1] + hr * 0.2, head[2] - hr * 0.2, hr], [head[0], head[1], head[2] - hr * 0.9, hr * 0.7]], 8));
+    const fw = graze ? [0, -0.8, -0.6] : [0, -0.15, -1], P = (d) => [head[0], head[1] + fw[1] * d, head[2] + fw[2] * d];
+    a('y', tube([[...P(hr * 0.9), goose ? 0.011 * k : 0.017, goose ? 0.011 * k : 0.008], [...P(hr * 0.9 + (goose ? 0.035 : 0.045) * k), goose ? 0.008 * k : 0.019, goose ? 0.006 * k : 0.005], [...P(hr * 0.9 + (goose ? 0.05 : 0.055) * k), goose ? 0.002 : 0.012, 0.003]], 6));
+    if (goose && kind === 'goose') a('y', at(ball(0.012 * k, 6).scale(1, 0.8, 1.2), ...P(hr * 0.75).map((v, i) => v + [0, 0.004 * k, 0][i])));                  // the knob
+    for (const s of [-1, 1]) {
+      const hx = s * 0.03 * k, hz = 0.01 * k;
+      a('y', tube([[hx, by - 0.04 * k, hz, 0.011 * k], [hx, 0.012, hz - 0.005, 0.008 * k]], 5));
+      a('y', slathe([[0.001, 0], [0.03 * k, 0.002], [0.001, 0.006]], 6, (th) => (Math.sin(th) < 0 ? 1.2 : 0.35)).translate(hx, 0.003, hz - 0.012 * k));       // the webbed foot
+    }
+  });
+}
+/** chickens: { n, kind ('hen' | 'duck' | 'goose') } — a few fowls about a yard: hens pecking or looking up, now and then a cock among them; or ducks, or geese. */
 function chickens(el, { bag }) {
+  if (el.kind === 'duck' || el.kind === 'goose') return flock(el, bag);
   const rand = rng(el.seed), n = el.n ?? 4, [x, z] = el.at, rot = el.rot ?? 0, c = Math.cos(rot), sn = Math.sin(rot);
   const PL = [['hide_white', 'hide_white'], ['hide_brown', 'hide_black'], ['hide_tan', 'hide_brown'], ['hide_black', 'hide_black'], ['hide_brown', 'hide_brown']];
   let cock = rand() < 0.4;
@@ -482,6 +509,18 @@ function chickens(el, { bag }) {
     const put = placer({ ...el, at: [x + dx * c + dz * sn, z - dx * sn + dz * c], rot: rot + Math.floor(rand() * 12) * Math.PI / 6, s: (el.s ?? 1) * (isCock ? 1 : 0.92 + Math.floor(rand() * 3) * 0.05) }, bag);
     const sh = 0.85 + rand() * 0.3;
     put(pm, A.p.clone(), sh); put(tm, A.t.clone(), tm === pm ? sh * 0.85 : 1); put('cloth_red', A.r.clone()); put('hide_tan', A.y.clone(), [1.15, 1.0, 0.55]);
+  }
+}
+/** A few ducks or geese about a yard or at the water's edge: the ducks white or brown with the drake's dark head, the geese white or grey. */
+function flock(el, bag) {
+  const rand = rng(el.seed), goose = el.kind === 'goose', n = el.n ?? (goose ? 3 : 4), [x, z] = el.at, rot = el.rot ?? 0, c = Math.cos(rot), sn = Math.sin(rot);
+  const PL = goose ? [['hide_white', 'hide_white'], ['hide_grey', 'hide_grey'], ['hide_white', 'hide_white']] : [['hide_white', 'hide_white'], ['hide_brown', 'hide_brown'], ['hide_brown', 'hide_black'], ['hide_white', 'hide_white']];
+  const sp = goose ? 2.4 : 1.6;
+  for (let i = 0; i < n; i++) {
+    const dx = (rand() - 0.5) * sp, dz = (rand() - 0.5) * sp, A = waterfowl(el.kind, rand() < 0.35 ? 'peck' : 'up'), [pm, hm] = PL[Math.floor(rand() * PL.length)];
+    const put = placer({ ...el, at: [x + dx * c + dz * sn, z - dx * sn + dz * c], rot: rot + (rand() - 0.5) * 1.6, s: (el.s ?? 1) * (0.92 + rand() * 0.14) }, bag);
+    const sh = 0.88 + rand() * 0.2;
+    put(pm, A.p.clone(), sh); put(hm, A.h.clone(), hm === 'hide_black' ? [0.55, 0.8, 0.6] : sh); put('hide_tan', A.y.clone(), [1.35, 0.85, 0.35]);
   }
 }
 /**

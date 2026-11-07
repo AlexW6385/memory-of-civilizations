@@ -1,6 +1,6 @@
 // The Alhambra about 1390 (docs/settlements/granada.md §2–§4): the Nasrid palaces' two courts and
 // the Comares Tower, the Alcazaba, the walls and towers round the hill.
-import { HILL, MYRTLES, COMARES, LIONS, ALCAZABA, PARTAL, RAUDA, height } from './layout.js';
+import { HILL, MYRTLES, COMARES, LIONS, ALCAZABA, PARTAL, RAUDA, GEN, height } from './layout.js';
 
 const T = HILL.top, E = [];
 // the Comares palace: the Court of the Myrtles, its porticoes, the Sala de la Barca, the Comares Tower
@@ -21,11 +21,12 @@ E.push({ t: 'rauda', rect: RAUDA.rect, garden: RAUDA.garden, y: T });
 // the walls round the rim with square towers
 const n = 26;
 // the pieces of a run a→b outside the rects (the Partal's tower and mirador stand in the line of the north wall)
-const CUT = [[PARTAL.tower[0], PARTAL.tower[1] - 3.4, PARTAL.tower[2], PARTAL.tower[3]]];
+// (and the postern at the east end, §10.1, whose tower the runs end inside)
+const CUT = [[[PARTAL.tower[0], PARTAL.tower[1] - 3.4, PARTAL.tower[2], PARTAL.tower[3]], 1.1], [GEN.gate, -0.6]];
 function outside(a, b) {
   let pieces = [[0, 1]];
-  for (const r of CUT) {
-    const N = 400, inR = (t) => { const x = a[0] + (b[0] - a[0]) * t, z = a[1] + (b[1] - a[1]) * t; return x > r[0] - 1.1 && x < r[2] + 1.1 && z > r[1] - 1.1 && z < r[3] + 1.1; };
+  for (const [r, m] of CUT) {
+    const N = 400, inR = (t) => { const x = a[0] + (b[0] - a[0]) * t, z = a[1] + (b[1] - a[1]) * t; return x > r[0] - m && x < r[2] + m && z > r[1] - m && z < r[3] + m; };
     let t0 = null, t1 = null;
     for (let i = 0; i <= N; i++) if (inR(i / N)) { if (t0 === null) t0 = i / N; t1 = i / N; }
     if (t0 === null) continue;
@@ -42,8 +43,10 @@ for (let k = 0; k < n; k++) {
     const [lo, hi] = a[0] < b[0] ? [a, b] : [b, a];
     E.push({ t: 'nasrid_wall', a: lo, b: [COMARES[0], lo[1]], h: 8, th: 2.4, y: T }, { t: 'nasrid_wall', a: [COMARES[2], hi[1]], b: hi, h: 8, th: 2.4, y: T });
   } else for (const [p, q] of outside(a, b)) E.push({ t: 'nasrid_wall', a: p, b: q, h: 8, th: 2.4, y: T });
-  if (k % 2 === 0) E.push({ t: 'nasrid_tower', rect: [a[0] - 4, a[1] - 4, a[0] + 4, a[1] + 4], h: 15, y: T });
+  if (k % 2 === 0 && k > 0) E.push({ t: 'nasrid_tower', rect: [a[0] - 4, a[1] - 4, a[0] + 4, a[1] + 4], h: 15, y: T });
 }
+// the postern at the east end, where the sultan's passage leaves for the Generalife (§10.1): it stands for the tower at the end of the hill
+E.push({ t: 'gen_postern', rect: GEN.gate, y: T, h: 14, z: (GEN.gate[1] + GEN.gate[3]) / 2 });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 export const alhambra = {
   id: 'granada-alhambra',
