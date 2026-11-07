@@ -10,7 +10,9 @@ import '../qing/index.js';
 import { pointedSpandrel, orientBy } from '../sahel/index.js';
 import { HUSUNI } from './husuni.js';
 import { house } from './house.js';
-import { wall } from './kit.js';
+import { coconutPalm, baobab, tusks } from './plants.js';
+import { wall, carvedPanel, wallFace } from './kit.js';
+import { Quaternion, Vector3, Matrix4 } from '../../core/three.js';
 
 const C = 'lime_plaster_rough', R = 'coral_rag';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -68,6 +70,38 @@ function vaultBay(out, r, yT, pd, yTop, openN, openS) {
   }
   for (const [zz, open, sg] of ends) if (!open) for (const sx of [-1, 1]) face(out, [0, 0, -sg], [cx, yT, zz], [cx + sx * hx, yT, zz], [cx + sx * hx, yR, zz]);
 }
+/** One inset bowl, its glazed hollow facing +y (rim proud of the vault's face, the hollow a little lower). */
+const BOWL = (() => lathe([[0.1, -0.03], [0.1, 0.012], [0.088, 0.02], [0.05, 0.01], [0.001, 0.004]], 8))();
+const GLAZES = ['glaze_green', 'glaze_white', 'glaze_blue', 'glaze_green'];
+function insetBowls(bag, { x0, z0, x1, z1, nx, nz, sx, sz, yT, PD, mid, kindOf }) {
+  const q = new Quaternion(), m = new Matrix4(), up = new Vector3(0, 1, 0), nv = new Vector3();
+  let k = 0;
+  const put = (p, n) => { nv.set(...n).normalize(); q.setFromUnitVectors(up, nv); m.compose(new Vector3(p[0] + nv.x * 0.02, p[1] + nv.y * 0.02, p[2] + nv.z * 0.02), q, new Vector3(1, 1, 1)); bag.add(GLAZES[k++ % 4], BOWL.clone().applyMatrix4(m)); };
+  for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+    const bx0 = i === 0 ? x0 + 0.8 : x0 + i * sx, bx1 = i === nx - 1 ? x1 - 0.8 : x0 + (i + 1) * sx;
+    const bz0 = j === 0 ? z0 + 0.8 : z0 + j * sz, bz1 = j === nz - 1 ? z1 - 0.8 : z0 + (j + 1) * sz;
+    const cx = (bx0 + bx1) / 2, cz = (bz0 + bz1) / 2, kind = kindOf(i, j);
+    if (kind === 'vault') {
+      // five rows along the vault (its section a half circle of radius hx springing at yT + PD), the faces' sag allowed for
+      const hx = (bx1 - bx0) / 2, yR = yT + PD;
+      for (const f of [0.28, 0.39, 0.5, 0.61, 0.72]) for (let zz = bz0 + 0.55; zz < bz1 - 0.4; zz += 0.9) {
+        const a = Math.PI * f, c = Math.cos(a), s2 = Math.sin(a), r = hx;
+        put([cx + c * r, yR + s2 * r, zz], [-c, -s2, 0]);
+      }
+      continue;
+    }
+    const hx = (bx1 - bx0) / 2, hz = (bz1 - bz0) / 2, ri = Math.min(hx, hz) - 0.05, rise = 0.82, yD = yT + PD + (kind === 'great' ? 1.4 : 0);
+    const rings = kind === 'great' ? [[0.42, 16], [0.62, 12], [0.8, 8], [1, 1]] : [[0.62, 5], [1, 1]];
+    for (const [ff, n] of rings) {
+      const f = ff * Math.PI / 2 * (ff === 1 ? 1 : 1);
+      for (let t = 0; t < n; t++) {
+        const th = t / n * Math.PI * 2 + (ff * 3), cf = Math.cos(f) * (ff === 1 ? 0 : 1), sf = ff === 1 ? 1 : Math.sin(f);
+        const p = [cx + Math.cos(th) * ri * cf, yD + ri * rise * sf, cz + Math.sin(th) * ri * cf];
+        put(p, [-Math.cos(th) * cf / ri, -sf / (ri * rise * rise), -Math.sin(th) * cf / ri]);
+      }
+    }
+  }
+}
 /** swahili_mosque: { rect, y, bay, big (index of the bay carrying the great dome) } — a walled hall of bays on pillars, each bay roofed by a small dome. */
 function mosque(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, b = el.bay ?? 4.5, yS = y + 3.4, yT = y + 6.1, PD = 0.5, yTop = yT + PD + 0.35, h = yTop - y - 0.6;
@@ -84,6 +118,16 @@ function mosque(el, { bag, col }) {
       if (i % 2 === 0) { f('limestone', -1.0, -0.7, 0, 3.0, -0.01, 0.12); f('limestone', 0.7, 1.0, 0, 3.0, -0.01, 0.12); f('limestone', -0.7, 0.7, 2.6, 3.0, -0.01, 0.12); } else { f('limestone', -0.5, 0.5, 2.8, 4.0, -0.01, 0.1); f('opening', -0.35, 0.35, 3.0, 3.8, 0.09, 0.12); }
       f(C, L / n / 2 - 0.45, L / n / 2 + 0.45, -0.5, h + 0.6, -0.01, 0.55);
     }
+  }
+  // weathering: the darker damp band at the foot of the outer walls, broken by the doorways' frames; rain streaks
+  // greying the whitewash under the cresting (the spouts' and the merlons' runs), between the windows
+  for (const [a, b2, zz, alongX, sg] of [[x0, x1, z0, true, -1], [x0, x1, z1, true, 1], [z0, z1, x0, false, -1], [z0, z1, x1, false, 1]]) {
+    const L = b2 - a, n = Math.floor(L / (b * 2)), cuts = [];
+    for (let i = 0; i < n; i += 2) { const u = a + (i + 0.5) * L / n; cuts.push([u - 1.02, u + 1.02]); }
+    const band = (m, u0, u1, v0, v1, d) => { const p0 = zz + sg * -0.002, p1 = zz + sg * d; bag.add(m, alongX ? box(u0, y + v0, Math.min(p0, p1), u1, y + v1, Math.max(p0, p1)) : box(Math.min(p0, p1), y + v0, u0, Math.max(p0, p1), y + v1, u1)); };
+    let u = a + 0.02;
+    for (const [c0, c1] of [...cuts, [b2 - 0.02, b2]]) { if (c0 - u > 0.2) band('plaster_damp', u, c0, -0.3, 0.85 + 0.1 * Math.sin(u), 0.012); u = c1; }
+    for (let i = 0; i < n; i++) { const um = a + (i + 1) * L / n - L / n * 0.25, hs = 1.4 + 0.9 * ((i * 7) % 5) / 5; band('plaster_streak', um - 0.14, um + 0.14, h + 0.6 - hs, h + 0.6, 0.008); }
   }
   // a stepped merlon cresting along the roof's edge
   for (let x = x0 + 0.6; x < x1 - 0.4; x += 1.4) for (const zz of [z0 + 0.1, z1 - 0.7]) bag.add(C, box(x, y + h + 0.6, zz, x + 0.7, y + h + 1.3, zz + 0.6));
@@ -119,13 +163,26 @@ function mosque(el, { bag, col }) {
   bag.add(C, fromTriangles(roof));
   bag.add('flagstone', box(x0, y - 0.3, z0, x1, y + 0.05, z1)); col.floor([x0, z0, x1, z1], y + 0.05);
   if (el.simple) return;
-  // the mihrab in the middle of the qibla (north) wall: a stepped frame of dressed coral, the niche dark
-  // within under its pointed head, a band of inset bowls over it; the minbar of three steps beside it
-  const mx = (x0 + x1) / 2, qz = z0 + 0.8;
-  for (let k = 0; k < 3; k++) bag.add('limestone', box(mx - 1.5 + k * 0.25, y, qz, mx + 1.5 - k * 0.25, y + 3.6 - k * 0.2, qz + 0.35 - k * 0.1));
-  bag.add('opening', box(mx - 0.75, y + 0.05, qz + 0.36, mx + 0.75, y + 2.2, qz + 0.4));
-  for (let k = 0; k < 5; k++) { const t0 = k / 5, w = 0.75 * (1 - t0 * 0.9); bag.add('opening', box(mx - w, y + 2.2 + k * 0.16, qz + 0.36, mx + w, y + 2.36 + k * 0.16, qz + 0.4)); }
-  for (let k = -3; k <= 3; k++) { const g = lathe([[0.001, 0], [0.16, 0.01], [0.16, 0.05], [0.001, 0.05]], 10); g.rotateX(Math.PI / 2); g.translate(mx + k * 0.42, y + 3.85, qz + 0.36); bag.add('glaze_blue', g); }
+  // inset glazed bowls in the domes and vaults (docs/settlements/kilwa.md §15: three concentric rings in the
+  // great dome, rows of bowls along the barrel vaults); a crown bowl and a ring in each small dome
+  insetBowls(bag, { x0, z0, x1, z1, nx, nz, sx, sz, yT, PD, mid, kindOf });
+  // the mihrab in the middle of the qibla (north) wall: three frames of dressed coral stepping in to the niche,
+  // dark under its pointed head; a herringbone cable carved up the outer jambs; over it a carved plaque with two
+  // bowls inset either side (Archnet: "two bowls are inset into either side of a rectangular plaque"); carved
+  // bosses in the spandrels either side; the minbar of three steps beside it
+  const mx = (x0 + x1) / 2, qz = z0 + 0.8, L = 'limestone';
+  for (const [wo, wi, top, hd, dz] of [[1.5, 1.15, 3.0, 0.6, 0.35], [1.15, 0.95, 2.8, 0.2, 0.25], [0.95, 0.8, 2.6, 0.2, 0.15]]) {
+    for (const sg of [-1, 1]) bag.add(L, box(Math.min(mx + sg * wo, mx + sg * wi), y, qz, Math.max(mx + sg * wo, mx + sg * wi), y + top, qz + dz));
+    bag.add(L, box(mx - wo, y + top, qz, mx + wo, y + top + hd, qz + dz));
+  }
+  bag.add(L, box(mx - 0.8, y + 2.2, qz, mx + 0.8, y + 2.6, qz + 0.03));
+  bag.add('opening', box(mx - 0.8, y + 0.05, qz, mx + 0.8, y + 2.2, qz + 0.035));
+  for (let k = 0; k < 5; k++) { const w = 0.8 * (1 - (k + 1) / 5 * 0.85); bag.add('opening', box(mx - w, y + 2.2 + k * 0.08, qz + 0.03, mx + w, y + 2.28 + k * 0.08, qz + 0.045)); }
+  const FM = wallFace('x', qz + 0.35, 1, y), ctxM = { bag, col };
+  for (const sg of [-1, 1]) carvedPanel(ctxM, FM, mx + (sg < 0 ? -1.45 : 1.2), 0.35, mx + (sg < 0 ? -1.2 : 1.45), 2.9, 'cable');
+  carvedPanel(ctxM, FM, mx - 0.85, 3.06, mx + 0.85, 3.54, 'stars');
+  for (const dx of [-1.32, -1.04, 1.04, 1.32]) { const g = lathe([[0.11, -0.01], [0.11, 0.012], [0.1, 0.02], [0.06, 0.012], [0.001, 0.006]], 10); g.rotateX(Math.PI / 2); g.translate(mx + dx, y + 3.3, qz + 0.35); bag.add(dx % 0.5 ? 'glaze_green' : 'glaze_white', g); }
+  for (const dx of [-2.25, 2.25]) carvedPanel(ctxM, wallFace('x', qz, 1, y), mx + dx - 0.3, 2.9, mx + dx + 0.3, 3.5, 'boss');
   for (let k = 0; k < 3; k++) bag.add('wood_dark', box(mx + 2.0, y, qz + 0.4 + k * 0.5, mx + 2.8, y + 0.4 + k * 0.4, qz + 0.9 + k * 0.5));
   bag.add('wood_dark', box(mx + 2.0, y, qz + 0.4, mx + 2.8, y + 1.9, qz + 0.7));
   for (const sx of [2.0, 2.72]) bag.add('wood_dark', box(mx + sx, y + 0.4, qz + 0.7, mx + sx + 0.08, y + 1.6, qz + 1.9));
@@ -182,6 +239,6 @@ function mtepe(el, { bag, col }) {
 }
 registerStyle('swahili', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, swahili_mosque: mosque, swahili_house: house, ...HUSUNI, mtepe },
+  elements: { ...STYLES.qing.elements, swahili_mosque: mosque, swahili_house: house, ...HUSUNI, mtepe, coconut_palm: coconutPalm, baobab, tusks },
   objects: {},
 });
