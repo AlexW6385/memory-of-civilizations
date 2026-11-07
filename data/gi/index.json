@@ -411,6 +411,34 @@
   "seconds": 7,
   "baked": "2026-11-07"
  },
+ "ottoman-istanbul-suleymaniye": {
+  "site": "ottoman-istanbul",
+  "hash": "b91ede0b86c3e5c1",
+  "rays": 128,
+  "probes": 75600,
+  "boxes": [
+   {
+    "min": [
+     -28.55,
+     21.55,
+     -8.55
+    ],
+    "n": [
+     42,
+     30,
+     60
+    ],
+    "spacing": 1.4,
+    "rooms": [
+     "prayer hall",
+     "tomb of hurrem sultan"
+    ]
+   }
+  ],
+  "bytes": 1185036,
+  "seconds": 648,
+  "baked": "2026-11-07"
+ },
  "pantheon": {
   "site": "rome",
   "hash": "0e9cab4a0e991df8",
