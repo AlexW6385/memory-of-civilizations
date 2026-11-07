@@ -1047,6 +1047,33 @@
   "seconds": 623,
   "baked": "2026-11-06"
  },
+ "muscovy-red-square": {
+  "site": "muscovy",
+  "hash": "ccfa7f3abae53d1f",
+  "rays": 128,
+  "probes": 10192,
+  "boxes": [
+   {
+    "min": [
+     19.6,
+     3.5,
+     121.6
+    ],
+    "n": [
+     14,
+     52,
+     14
+    ],
+    "spacing": 1,
+    "rooms": [
+     "intercession"
+    ]
+   }
+  ],
+  "bytes": 179588,
+  "seconds": 32,
+  "baked": "2026-11-07"
+ },
  "nara-todaiji": {
   "site": "nara",
   "hash": "edd7393285a48023",
