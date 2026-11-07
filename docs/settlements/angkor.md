@@ -98,6 +98,30 @@ Sources added:
 
 Not done here: the outer enclosure's five-entrance gopura with its elephant gates (the gopura is 240 m long, beyond our compressed enclosure) [stated: helloangkor]; the baray (the Western Baray lies kilometres away, outside the settlement) [inferred].
 
+## 13. L3: the eight panels of the bas-relief (2026-11-07)
+
+The relief band of the third gallery (§10) told its single subject (an army on the march) everywhere. It now carries the eight panels, two to each side, each in its own composition:
+
+| Where | Subject | What we draw | Basis |
+|---|---|---|---|
+| West gallery, south half | Battle of Kurukshetra | two armies in three registers advancing from either end and meeting in a melee in the middle; chiefs on horses and, every fourth bay, on elephants | "the Kauravas advance from the left and the Pandavas from the right" [stated: helloangkor] |
+| South gallery, west half | Procession of Suryavarman II | at its start two registers — the king, the largest figure, seated on a throne under parasols with his ministers kneeling before him above, court ladies in palanquins borne on poles below — then one register: the army in file, a commander on an elephant every 4.7 m, twenty in all, the king again on the twelfth elephant under fifteen parasols | the gallery "carved in two tiers", the upper a royal audience, the lower the procession, merging into one; the king "the biggest figure on the wall", then on the twelfth elephant "sheltered by 15 parasols"; commanders on elephants "twenty of them all together"; ladies of the court with palanquins [stated: penang-traveltips]; "attendants holding fifteen umbrellas identify the king" [stated: Phnom Penh Post] |
+| South gallery, east half | The 37 heavens and 32 hells | three tiers: in the middle the souls walking in file toward Yama on his buffalo, his many arms fanned; below, the hells — Yama's servants with clubs, the damned beaten down and thrown headlong; above, to the right of Yama, the heavens — pavilions with a soul seated in each, their platforms on the raised arms of garudas; to the left the great going up under parasols | "three tiers with Yama (the judge) atop a bull at the center"; the lowest the punishments of hell, the upper the souls going to judgment, the upper right heaven "held up by garudas" [stated: helloangkor] |
+| East gallery, south half | The churning of the ocean of milk | the serpent's body along the panel at mid-height; on the left the asuras pulling its head, their many-headed chief at its five-headed hood; on the right the devas pulling its tail, Hanuman at the end; in the middle Mount Mandara as a pillar with the serpent wound round it, on the turtle Kurma, the four-armed Vishnu before it with the discus and the conch, Indra flying above; apsaras flying both ways along the top; fish and crocodiles along the foot, some cut in pieces | one 49 m panel; Ravana "holding the five heads of Vasuki"; "92 identical asuras pulling in unison"; the creatures of the lower tier "sliced into pieces"; "Mount Mandara is column-like, almost hidden behind the four-armed Vishnu"; the turtle Kurma below; "Indra flying to keep the mountain steady"; apsaras "flying in two directions above"; Hanuman "holding Vasuki's tail" [stated: penang-traveltips]; Vishnu atop a tortoise, "92 asuras on the left and 88 devas on the right" [stated: helloangkor]; three tiers [stated: Phnom Penh Post] |
+| East gallery, north half; north gallery, east half | Victory of Vishnu over the asuras; Krishna and Bana | **left smooth**: not yet carved about 1150 | "many bas-reliefs were only added later, between 1546 and 1564", their workmanship "visibly inferior" [stated: penang-traveltips]; the Vishnu panel "a 16th-century addition" [stated: Wikipedia, Angkor Wat]; the Krishna panel taken with it as the north-east pair, as commonly attributed [inferred] |
+| North gallery, west half | Battle of the gods and the asuras | the gods in their tall crowns from the left, the asuras in round head-dresses from the right | "all 21 gods are recorded, battling Asuras" [stated: helloangkor]; 94 m, "well executed" [stated: penang-traveltips] |
+| West gallery, north half | Battle of Lanka | Rama's monkeys leaping from the left against the rakshasas | "an inextricable entanglement of monkeys and rakshasas" (Coedès) [stated: helloangkor] |
+
+Ours: each panel 2 m high on the polished band, the figures in low relief 5 cm proud and the principal figures (the king, Yama, Vishnu and Indra, the chief at the serpent's head, Hanuman, the elephants) 8–10 cm; the long files are tiles of 1.3–4.7 m repeated along the panel (drawn once, placed as instances). The panels are shorter than the real ones (about 82 m each half against 49–94 m) and the figures' forms simplified [inferred]. The direction of the procession's march and the place of the king's audience along it are ours [inferred].
+
+Sources added:
+- [Angkor Wat – The Bas-Relief Galleries — helloangkor](https://helloangkor.com/attractions/angkor-wat-the-bas-relief-galleries/)
+- [Bas-reliefs: Angkor Wat's wondrous wallpaper — Phnom Penh Post](https://www.phnompenhpost.com/national/bas-reliefs-angkor-wats-wondrous-wallpaper)
+- [Churning of the Ocean of Milk — penang-traveltips](https://www.penang-traveltips.com/cambodia/angkor/angkor-wat/churning-the-ocean-of-milk.htm)
+- [Procession of King Suryavarman — penang-traveltips](https://www.penang-traveltips.com/cambodia/angkor/angkor-wat/procession-of-king-suryavarman.htm)
+- [Angkor Wat, other sections — penang-traveltips](https://www.penang-traveltips.com/cambodia/angkor/angkor-wat/other-sections.htm)
+- [Angkor Wat — Wikipedia (text mirror)](https://wiki.krisyotam.com/content/wikipedia_en_all_nopic_2026-03/Ankor_Wat)
+
 ## Sources
 
 - [Angkor Wat — wondermondo](https://wondermondo.com/angkor-wat)
