@@ -10,6 +10,8 @@ import { Shape, Path } from '../../core/three.js';
 import '../qing/index.js';
 import { slab, hexa, pitched, pyr, wallShape } from '../norse/index.js';
 import { cathedralInside } from './dormition.js';
+import { izbaInside } from './izba.js';
+import { intercession } from './intercession.js';
 import { ivanTower, archangel, annunciation } from './kremlin.js';
 
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
@@ -91,7 +93,7 @@ function bellTower(el, { bag, col }) {
  * west); the central tented church rising from tiers of kokoshniks; four great and four small
  * chapels, each crowned by a ring of kokoshniks and an onion dome on its drum.
  */
-function pokrov(el, { bag, col }) {
+function pokrov(el, { bag, col, lights }) {
   const [cx, cz] = el.c, y = el.y ?? 0, s = el.s ?? 1, P = 4 * s, E = 21 * s;
   col.rect([cx - E, cz - E, cx + E, cz + E], y, y + P); col.floor([cx - E, cz - E, cx + E, cz + E], y + P);
   // the podklet: an arcaded outer wall (seven open bays a side), the solid core behind it, the platform's slab on top
@@ -126,11 +128,15 @@ function pokrov(el, { bag, col }) {
     const r = dirx ? [cx - E - L - 0.2, cz - hw - 0.3, cx - E + 0.2, cz + hw + 0.3] : [cx - hw - 0.3, cz - E - L - 0.2, cx + hw + 0.3, cz - E + 0.2];
     bag.add('timber', box(r[0], y + P + 2.6, r[1], r[2], y + P + 2.8, r[3]));
     pitched(bag, 'planks_grey', 'planks_grey', r, y + P + 2.8, 0.9, 0.35, dirx);
+    // the flight walkable from the square up to the platform
+    col.ramp(dirx ? [cx - E - L, cz - hw, cx - E, cz + hw] : [cx - hw, cz - E - L, cx + hw, cz - E], y, y + P, dirx ? 'e' : 's');
   };
   stair(true, false); stair(false, true);
   const yb = y + P;
   // the central church: an octagon, the tiers of kokoshniks at its head, the tall tent and its small onion
-  bag.add(BR, lathe([[7.5 * s, 0], [7.5 * s, 20 * s], [8 * s, 20.2 * s], [8 * s, 20.5 * s], [7.3 * s, 20.5 * s], [7.3 * s, 25 * s], [0.001, 25 * s]], 8, null, cx, yb, cz)); col.circle(cx, cz, 7.5 * s, yb, yb + 20 * s);
+  // its walls hollow round the tall room inside, open up into the tent (./intercession.js); outside, the cornice and the drum
+  bag.add(BR, lathe([[7.5 * s, 20 * s], [8 * s, 20.2 * s], [8 * s, 20.5 * s], [7.3 * s, 20.5 * s], [7.3 * s, 25 * s]], 8, null, cx, yb, cz));
+  intercession(bag, col, lights, cx, cz, yb, s);
   for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; bag.add(WS, orientedBox([cx + Math.cos(a) * 7.6 * s, cz + Math.sin(a) * 7.6 * s], [cx + Math.cos(a + Math.PI / 4) * 7.6 * s, cz + Math.sin(a + Math.PI / 4) * 7.6 * s], 0.25, yb + 19.6 * s, yb + 20 * s)); }
   const ap = Math.cos(Math.PI / 8);
   for (let k = 0; k < 8; k++) {
@@ -292,7 +298,21 @@ function izba(el, { bag, col }) {
   const u0 = ex ? z0 : x0, u1 = ex ? z1 : x1, um = (u0 + u1) / 2;
   // a box given in the front's frame: u along the face, v up, w out from the face
   const B = (a0, a1, v0, v1, w0, w1) => { const p = f + sg * w0, q = f + sg * w1; return ex ? box(Math.min(p, q), v0, a0, Math.max(p, q), v1, a1) : box(a0, v0, Math.min(p, q), a1, v1, Math.max(p, q)); };
-  bag.add(LOG, box(x0, foot, z0, x1, y + H, z1)); col.rect(el.rect, foot, y + H);
+  const open = !!el.open, D = ex ? x1 - x0 : z1 - z0, fl = y + 0.32, T = 0.28;
+  const toW = (c) => (c - f) * sg;                                                      // a coordinate along the depth axis → w
+  const Cb = (a0, a1, w0, w1, v0, v1) => { const p = f + sg * w0, q = f + sg * w1; col.rect(ex ? [Math.min(p, q), a0, Math.max(p, q), a1] : [a0, Math.min(p, q), a1, Math.max(p, q)], v0, v1); };
+  const dLo = ex ? (front === 'x0' ? x1 - 2.2 : x0 + 1.2) : (front === 'z0' ? z1 - 2.2 : z0 + 1.2), dW = [toW(dLo), toW(dLo + 0.95)].sort((a, b) => a - b);
+  if (!open) { bag.add(LOG, box(x0, foot, z0, x1, y + H, z1)); col.rect(el.rect, foot, y + H); }
+  else {
+    // the shell round the one room: the log base under the floor, the four walls (the door's gap in the u0 side)
+    bag.add(LOG, box(x0, foot, z0, x1, fl - 0.04, z1)); col.rect(el.rect, foot, fl - 0.04);
+    { const p = f + sg * -T, q = f + sg * (-D + T); col.floor(ex ? [Math.min(p, q), u0 + T, Math.max(p, q), u1 - T] : [u0 + T, Math.min(p, q), u1 - T, Math.max(p, q)], fl); }
+    const wt = y + H;
+    const W = (a0, a1, w0, w1, v1 = wt) => { bag.add(LOG, B(a0, a1, fl - 0.04, v1, w0, w1)); Cb(a0, a1, w0, w1, fl - 0.04, v1); };
+    W(u0, u1, -T, 0); W(u0, u1, -D, -D + T); W(u1 - T, u1, -D + T, -T);
+    W(u0, u0 + T, -D + T, dW[0]); W(u0, u0 + T, dW[1], -T);
+    bag.add(LOG, B(u0, u0 + T, fl + 1.9, wt, dW[0], dW[1])); Cb(u0, u0 + T, dW[0], dW[1], fl + 1.9, wt);
+  }
   // the street front in round logs, their ends standing out at the corners
   for (let v = foot + 0.14; v < y + H - 0.05; v += 0.27) {
     const a = [ex ? f : u0 - 0.28, v, ex ? u0 - 0.28 : f], b = [ex ? f : u1 + 0.28, v, ex ? u1 + 0.28 : f];
@@ -310,10 +330,11 @@ function izba(el, { bag, col }) {
   }
   // the door in a side wall, under a small lintel
   { const dz = ex ? z0 : z1, ds = ex ? -1 : 1, dx0 = ex ? (front === 'x0' ? x1 - 2.2 : x0 + 1.2) : x0 - 0.05, dc = ex ? dx0 : (front === 'z0' ? z1 - 2.2 : z0 + 1.2);
-    if (ex) bag.add('timber', box(dc, y + 0.3, Math.min(dz, dz + ds * 0.08), dc + 0.95, y + 2.2, Math.max(dz, dz + ds * 0.08)));
+    if (open) { bag.add('timber', B(u0 + T, u0 + T + 0.9, fl, fl + 1.85, dW[1] - 0.05, dW[1])); bag.add('timber', B(u0 - 0.06, u0 + T, fl + 1.9, fl + 2.05, dW[0] - 0.1, dW[1] + 0.1)); }
+    else if (ex) bag.add('timber', box(dc, y + 0.3, Math.min(dz, dz + ds * 0.08), dc + 0.95, y + 2.2, Math.max(dz, dz + ds * 0.08)));
     else bag.add('timber', box(Math.min(x0, x0 - 0.08), y + 0.3, dc, Math.max(x0, x0 - 0.08), y + 2.2, dc + 0.95)); }
   // the roof: steep planks, the gable in logs, the barge boards and the towel board, the ridge log and its horse's head
-  const pitch = 1.05, o = 0.5, yt = y + H + o * pitch, half = (u1 - u0) / 2, yr = pitched(bag, 'planks_grey', LOG, el.rect, yt, pitch, o, !ex, 0.12);
+  const pitch = 1.05, o = 0.5, yt = y + H + o * pitch, half = (u1 - u0) / 2, yr = pitched(bag, 'planks_grey', LOG, el.rect, yt, pitch, o, ex, 0.12);
   const P = (u, v, w) => ex ? [f + sg * w, v, u] : [u, v, f + sg * w], wb = o + 0.03;
   for (const [ua, ub] of [[u0 - o, um + 0.1], [u1 + o, um - 0.1]]) bag.add('timber', hexa([P(ua, yt - o * pitch - 0.3, wb), P(ub, yr - 0.3, wb), P(ub, yr - 0.3, wb + 0.07), P(ua, yt - o * pitch - 0.3, wb + 0.07), P(ua, yt - o * pitch + 0.04, wb), P(ub, yr + 0.04, wb), P(ub, yr + 0.04, wb + 0.07), P(ua, yt - o * pitch + 0.04, wb + 0.07)]));
   bag.add('timber', B(um - 0.13, um + 0.13, yr - 1.3, yr - 0.25, wb + 0.07, wb + 0.13));
@@ -321,6 +342,13 @@ function izba(el, { bag, col }) {
   bag.add('timber', hexa([P(um - 0.16, yr - 0.08, back), P(um + 0.16, yr - 0.08, back), P(um + 0.16, yr - 0.08, wb + 0.25), P(um - 0.16, yr - 0.08, wb + 0.25), P(um - 0.16, yr + 0.24, back), P(um + 0.16, yr + 0.24, back), P(um + 0.16, yr + 0.24, wb + 0.25), P(um - 0.16, yr + 0.24, wb + 0.25)]));
   bag.add('timber', hexa([P(um - 0.1, yr + 0.05, wb + 0.1), P(um + 0.1, yr + 0.05, wb + 0.1), P(um + 0.1, yr + 0.05, wb + 0.42), P(um - 0.1, yr + 0.05, wb + 0.42), P(um - 0.1, yr + 0.75, wb + 0.32), P(um + 0.1, yr + 0.75, wb + 0.32), P(um + 0.1, yr + 0.75, wb + 0.56), P(um - 0.1, yr + 0.75, wb + 0.56)]));   // the neck
   bag.add('timber', hexa([P(um - 0.09, yr + 0.6, wb + 0.36), P(um + 0.09, yr + 0.6, wb + 0.36), P(um + 0.09, yr + 0.5, wb + 0.82), P(um - 0.09, yr + 0.5, wb + 0.82), P(um - 0.09, yr + 0.86, wb + 0.32), P(um + 0.09, yr + 0.86, wb + 0.32), P(um + 0.09, yr + 0.72, wb + 0.8), P(um - 0.09, yr + 0.72, wb + 0.8)]));   // the head
+  // the strip of the gables between the walls' top and the roof's foot, closed in logs (front and back)
+  for (const wg of [-0.12, -D + 0.12]) {
+    const sh = new Shape(), L = u1 - u0, ye = y + H + 0.3;
+    sh.moveTo(0, 0); sh.lineTo(L, 0); sh.lineTo(L, ye - y - H); sh.lineTo(L - 0.25, yt - 0.02 - y - H); sh.lineTo(0.25, yt - 0.02 - y - H); sh.lineTo(0, ye - y - H); sh.lineTo(0, 0);
+    bag.add(LOG, slab(sh, 0.2, ex ? [f + sg * wg, u0] : [u0, f + sg * wg], ex ? [f + sg * wg, u1] : [u1, f + sg * wg], y + H - 0.02, 1));
+  }
+  if (open) izbaInside(bag, { B, at: (u, v, w) => (ex ? [f + sg * w, v, u] : [u, v, f + sg * w]), u0, u1, D, fl, top: y + H, yr: yr - 0.12, door: dW, dh: 1.85, wins: Array.from({ length: nw }, (_, k) => um + (k - (nw - 1) / 2) * 1.35), wy, C: Cb });
 }
 /**
  * lobnoye: { c, r, y } — the Lobnoye Mesto as rebuilt in stone in 1599: the round platform (13 m across,
