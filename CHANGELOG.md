@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.85 — South Asia and Java (2026-11-07)
+- Khajuraho: Kandariya with all 84 spires, carved porch doorways, lamps, bells and garlands, priests, pilgrims, flower sellers and cows. Sanchi: relief scenes along the gateways' architraves and on their posts, garlands and lamps, planting on the summit. Madurai: the Pudhu Mandapam with its Nayaka kings, four-armed gods on the gopurams, jasmine sellers. Borobudur: the 32 guardian lions, lamps and flowers.
+
 ## v9.84 — Life, sound, Oceania and North America (2026-11-07)
 - Porters with loads (sacks, bundles, the Korean jige, yokes, carrying poles, head-loads), sweepers, people on stools at their doors, laundry strung across the lanes of Venice, Rome and Cairo, sellers on ground mats, pigeons and turkeys. Each hall now rings with its own reverberation, worked out from its volume and materials; rain sounds on the roof you stand under; birds, insects and animals by place; bells, drums and the call to prayer at their hours. Taos: a furnished room, worn plaster, turkeys. Cahokia: thatch, four furnished houses, chunkey players. Rapa Nui: weathered moai, stone-mulched gardens, a house being rethatched. Maori pa: carved bargeboards, eel pots, kuri.
 
