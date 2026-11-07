@@ -33,7 +33,11 @@ function workerMain() {
   const geo = new BufferGeometry();
   geo.setAttribute('position', new Float32BufferAttribute(new Float32Array(pos), 3));
   const bvh = new MeshBVH(geo, { targetLeafSize: 8 });
-  const A = new Float32Array(alb), TR = new Float32Array(tr);
+  // the BVH reorders the triangles of the index it makes, and a hit's faceIndex counts in that order:
+  // the albedo and transmission are put in the same order (triangle f is the original index[3f] / 3)
+  const A0 = new Float32Array(alb), T0 = new Float32Array(tr), A = new Float32Array(A0.length), TR = new Float32Array(T0.length);
+  const order = geo.index.array;
+  for (let f = 0; f < A.length / 3; f++) { const o = order[3 * f] / 3; for (let k = 0; k < 3; k++) { A[3 * f + k] = A0[3 * o + k]; TR[3 * f + k] = T0[3 * o + k]; } }
   const ray = new Ray(new Vector3(), new Vector3());
   const sray = new Ray(new Vector3(), new Vector3());
   const sun = new Vector3(...SUN_DIR);

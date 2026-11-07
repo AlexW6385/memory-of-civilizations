@@ -17,7 +17,7 @@ import { albedo, MATERIALS } from '../../src/core/palette.js';
 export const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 export const INDEX = `${ROOT}data/gi/index.json`;
 /** Bumped when the tracer or the box rules change in a way that should mark every bake stale. */
-export const BAKE_VERSION = 4;
+export const BAKE_VERSION = 5;
 /** Probes per landmark (all its boxes): ~15 bytes each in the shipped file. */
 export const PROBE_BUDGET = 80000;
 

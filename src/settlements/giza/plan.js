@@ -52,14 +52,19 @@ export const pyramid = {
   view: [-116, -156, 116, 76],
   bakeTop: 147,
   // the bake traces the passages and chambers with the pyramid (they are a plan of their own, town.js), in boxes
-  // round them: the descending and ascending passages, the Grand Gallery, the antechamber and the King's Chamber
+  // round them: the descending passage, the ascending passage with the gallery's foot, the Grand Gallery, and the
+  // antechamber and the King's Chamber with the gallery's head (the boxes overlap so that the light bounced from a
+  // neighbouring space is looked up in the bake, not taken from the open sky)
   bakeElements: [{ t: 'ok_pyramid_interior', c: PYRAMID.c, a: PYRAMID.a, h: PYRAMID.h }],
   bakeBoxes: (() => {
     const g = pyramidGeometry(PYRAMID.a, PYRAMID.h), [cx, cz] = PYRAMID.c, x = cx + g.X;
+    const yA = (dz) => g.A.Y + dz * Math.tan(g.be);                     // the gallery's floor dz north of its foot
+    // (where boxes overlap the viewer takes the first: the chamber's, then the passages', then the gallery's)
     return [
-      [x - 2, cz + g.E.Z - 1.5, x + 2, cz + g.A.Z + 0.8, g.J.Y - 0.8, g.E.Y + g.hd + 2.5],
-      [x - 2.5, cz + g.A.Z - 0.8, x + 2.5, cz + g.step[1] + 0.6, g.A.Y - 1, g.F + 9],
-      [cx + g.roomX[0] - 0.8, cz + g.step[1], x + 2.3, cz + g.room[1] + 0.8, g.F - 0.6, g.F + 6.8],
+      [cx + g.roomX[0] - 0.8, cz + g.G.Z - 9, x + 2.5, cz + g.room[1] + 0.8, yA(g.G.Z - 9 - g.A.Z) - 1, g.F + 9],
+      [x - 2, cz + g.E.Z - 1.5, x + 2, cz + g.J.Z + 2, g.J.Y - 0.8, g.E.Y + g.hd + 2.5],
+      [x - 2, cz + g.J.Z - 1, x + 2, cz + g.A.Z + 8, g.J.Y - 0.8, yA(8) + 9],
+      [x - 2.5, cz + g.A.Z - 0.8, x + 2.5, cz + g.ante[1] + 0.5, g.A.Y - 1, g.F + 9],
     ];
   })(),
   bakeSpacing: 0.6,
