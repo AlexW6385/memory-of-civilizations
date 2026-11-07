@@ -27,12 +27,12 @@ export function height(x, z) {
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let LOTS = null;
-/** Terraces in rows along the streets on both banks. */
+/** Terraces in rows along the streets on both banks, back to back, each row's front on its street (7 m between the rows' fronts). */
 export function lots() {
   if (LOTS) return LOTS;
   LOTS = [];
   const rand = rng(1870);
-  for (let z = -RADIUS + 30; z < RADIUS - 30; z += 30) for (const [za, front] of [[z, 's'], [z + 12, 'n']]) for (let x = -RADIUS + 30; x < RADIUS - 30;) {
+  for (let z = -RADIUS + 30; z < RADIUS - 30; z += 30) for (const [za, front] of [[z, 'n'], [z + 12, 's']]) for (let x = -RADIUS + 30; x < RADIUS - 30;) {
     const w = 5.5 + rand() * 1.5, cx = x + w / 2, cz = za + 5.5;
     x += w;
     const [a, b] = bank(cz);

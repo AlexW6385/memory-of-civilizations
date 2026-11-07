@@ -169,4 +169,38 @@ function boatSeine(el, { bag, col }) {
   if (ld === 'wood') for (let k = 0; k < 3; k++) for (let i = 0; i < 5; i++) { const v = -B * 0.3 + i * B * 0.15; bag.add('bark_dark', rod(P(-L * 0.3, v, bot + 0.2 + k * 0.28), P(L * 0.3, v, bot + 0.2 + k * 0.28), 0.13, 6)); }
   col.circle(x, z, L * 0.5, bot, gun + 0.3);
 }
-Object.assign(STYLES.gothic.elements, { pont, mill_pendant: millPendant, boat_seine: boatSeine });
+/**
+ * changer_table: { at, y, rot (the side the changer sits, −z when 0: he faces +z, the street), seed } — a money-changer's
+ * or goldsmith's board on the Grand Pont (docs/settlements/paris.md §2b): a trestle table under a green cloth, piles of
+ * silver deniers and a few gold pieces, the balance with its two pans on its stand, the weights in their box, an
+ * iron-bound coffer beside it; for a goldsmith (seed odd) cups and a ring tray instead of the coin heaps.
+ */
+function changerTable(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, a = el.rot ?? 0, c = Math.cos(a), sn = Math.sin(a), gold = (el.seed ?? 0) % 2 === 1;
+  const put = (m, g) => bag.add(m, g.rotateY(-a).translate(x, y, z));
+  const W = 1.5, D = 0.7, H = 0.8;
+  for (const sx of [-0.62, 0.62]) { put('timber', box(sx - 0.03, 0, -0.3, sx + 0.03, H - 0.04, -0.24)); put('timber', box(sx - 0.03, 0, 0.24, sx + 0.03, H - 0.04, 0.3)); put('timber', box(sx - 0.03, H * 0.35, -0.3, sx + 0.03, H * 0.35 + 0.05, 0.3)); }
+  put('timber', box(-W / 2, H - 0.04, -D / 2, W / 2, H, D / 2));
+  put('cloth_green', box(-W / 2 - 0.01, H, -D / 2 - 0.01, W / 2 + 0.01, H + 0.006, D / 2 + 0.01));
+  put('cloth_green', box(-W / 2 - 0.01, H - 0.28, D / 2 + 0.005, W / 2 + 0.01, H + 0.006, D / 2 + 0.012));
+  const t = H + 0.006;
+  if (!gold) {
+    for (const [px, pz, n, m] of [[-0.45, 0.12, 6, 'silver'], [-0.35, -0.05, 9, 'silver'], [-0.22, 0.15, 4, 'silver'], [-0.5, -0.12, 5, 'gold'], [-0.12, 0.02, 7, 'silver']])
+      put(m, lathe([[0.001, 0], [0.012, 0], [0.012, n * 0.0025], [0.001, n * 0.0025]], 8).translate(px, t, pz));
+    put('silver', box(-0.3, t, 0.18, -0.05, t + 0.002, 0.28));            // deniers spread out to be counted
+  } else {
+    for (const [px, pz, h] of [[-0.45, 0.1, 0.16], [-0.25, 0.08, 0.12]]) put('silver', lathe([[0.03, 0], [0.012, 0.02], [0.01, h * 0.5], [0.05, h * 0.85], [0.055, h], [0.045, h], [0.001, h * 0.85]], 10).translate(px, t, pz));
+    put('wood_dark', box(-0.2, t, -0.15, 0.05, t + 0.025, 0.0)); for (let i = 0; i < 4; i++) put('gold', lathe([[0.012, 0], [0.012, 0.004]], 6).translate(-0.17 + i * 0.06, t + 0.025, -0.08));
+  }
+  // the balance: a post on a foot, the beam, two pans hung by cords
+  put('bronze', lathe([[0.05, 0], [0.04, 0.02], [0.008, 0.03], [0.007, 0.36], [0.001, 0.37]], 8).translate(0.3, t, -0.05));
+  put('bronze', box(0.12, t + 0.33, -0.054, 0.48, t + 0.342, -0.046));
+  for (const px of [0.14, 0.46]) { put('bronze', lathe([[0.001, 0], [0.055, 0.005], [0.06, 0.02], [0.001, 0.012]], 10).translate(px, t + 0.12, -0.05)); for (const d of [-0.03, 0.03]) put('cloth_brown', box(px + d - 0.002, t + 0.135, -0.052, px + d + 0.002, t + 0.335, -0.048)); }
+  put('wood_dark', box(0.48, t, 0.1, 0.66, t + 0.06, 0.24));                // the box of weights
+  // the coffer at the changer's feet
+  put('wood_dark', box(0.82, 0, -0.3, 1.32, 0.4, 0.05)); for (const px of [0.92, 1.22]) put('iron', box(px - 0.02, 0, -0.31, px + 0.02, 0.41, 0.06));
+  void c; void sn;
+  col.circle(x, z, 0.8, y, y + H);
+}
+
+Object.assign(STYLES.gothic.elements, { changer_table: changerTable, pont, mill_pendant: millPendant, boat_seine: boatSeine });

@@ -23,9 +23,13 @@ for (let i = 0; i < 30; i++) {
   const a = AXIS + (i + 0.5) / 30 * Math.PI * 2, at = [Math.cos(a) * R, Math.sin(a) * R];
   const narrow = i === 19;                                    // Stone 11, in the south-west: half as wide
   const y = height(at[0], at[1]);
-  E.push({ t: 'standing_stone', at, y, top: TOP, yaw: a, w0: narrow ? 1.05 : 1.95 + rand() * 0.2, w1: narrow ? 1.1 : 2.15 + rand() * 0.15, d0: 1.05 + rand() * 0.1, d1: 1.0, dress: 1, rough: 0.035, bury: 1.3, mat: 'granite_rough', seed: Math.floor(rand() * 1e9) });
+  // pick-dressed all over on the north-east, toward the Avenue; elsewhere only the inner faces, the backs left in
+  // their crust and its lichens (§1c)
+  const rel = Math.abs(Math.atan2(Math.sin(a - AXIS), Math.cos(a - AXIS))), ne = rel < 1.25;
+  const tool = { faces: ne ? 'all' : 'inner', lichen: ne ? 0 : 14 };
+  E.push({ t: 'standing_stone', at, y, top: TOP, yaw: a, w0: narrow ? 1.05 : 1.95 + rand() * 0.2, w1: narrow ? 1.1 : 2.15 + rand() * 0.15, d0: 1.05 + rand() * 0.1, d1: 1.0, dress: 1, rough: 0.035, bury: 1.3, mat: 'granite_rough', tool, seed: Math.floor(rand() * 1e9) });
 }
-E.push({ t: 'lintel_ring', c: [0, 0], r: R, n: 30, a0: AXIS + 0.5 / 30 * Math.PI * 2, y: TOP, w: 1.0, h: 0.8, mat: 'granite_rough', seed: 7 });
+E.push({ t: 'lintel_ring', c: [0, 0], r: R, n: 30, a0: AXIS + 0.5 / 30 * Math.PI * 2, y: TOP, w: 1.0, h: 0.8, mat: 'sandstone_white', seed: 7 });      // the lintels worked all over (§1c)
 
 // ── the five trilithons in a horseshoe 13.7 m across, rising to the Great Trilithon in the south-west ──
 const TRI = [[-104, 6.0], [-52, 6.5], [0, 7.3], [52, 6.5], [104, 6.0]];
@@ -39,8 +43,8 @@ for (const [deg, h] of TRI) {
   const yaw = Math.atan2(c[1] - P(UC, 0)[1], c[0] - P(UC, 0)[0]);    // the face toward the horseshoe's centre
   const yc = Math.max(height(pa[0], pa[1]), height(pb[0], pb[1]));
   const top = Y0 + h - 1.0;
-  for (const p of [pa, pb]) E.push({ t: 'standing_stone', at: p, y: height(p[0], p[1]), top, yaw, w0: 2.25, w1: 2.0, d0: 1.25, d1: 1.15, dress: 1, rough: 0.04, bury: h > 7 ? 2.4 : 1.8, mat: 'granite_rough', tenon: true, seed: Math.floor(rand() * 1e9) });
-  E.push({ t: 'lintel', a: P(u + du * (half + 1.2), v + dv * (half + 1.2)), b: P(u - du * (half + 1.2), v - dv * (half + 1.2)), y: top, w: 1.1, h: 1.0, mat: 'granite_rough', seed: Math.floor(rand() * 1e9), ground: yc });
+  for (const p of [pa, pb]) E.push({ t: 'standing_stone', at: p, y: height(p[0], p[1]), top, yaw, w0: 2.25, w1: 2.0, d0: 1.25, d1: 1.15, dress: 1, rough: 0.04, bury: h > 7 ? 2.4 : 1.8, mat: 'granite_rough', tenon: true, tool: { faces: deg === 0 ? 'all' : 'inner', lichen: deg === 0 ? 0 : 8 }, seed: Math.floor(rand() * 1e9) });
+  E.push({ t: 'lintel', a: P(u + du * (half + 1.2), v + dv * (half + 1.2)), b: P(u - du * (half + 1.2), v - dv * (half + 1.2)), y: top, w: 1.1, h: 1.0, mat: 'sandstone_white', seed: Math.floor(rand() * 1e9), ground: yc });
 }
 
 // ── the bluestones: a circle of about 60 pillars between the sarsen circle and the horseshoe ──
@@ -61,9 +65,9 @@ for (let k = 0; k < 19; k++) {
 
 // ── at the entrance: the Slaughter Stone and its partner, standing; the Heel Stone, unshaped and leaning in ──
 for (const v of [-3.2, 2.4]) { const at = P(47 + (v > 0 ? 0.4 : 0), v); stone(at, AXIS, { h: v > 0 ? 4.0 : 3.6, w0: 2.1, w1: 1.9, d0: 0.95, d1: 0.85, rough: 0.06, bury: 1.2, mat: 'granite_rough' }); }
-{ const at = P(HEEL.d, 0.6); stone(at, AXIS + 0.25, { h: 4.9, w0: 2.6, w1: 1.4, d0: 2.3, d1: 1.4, rough: 0.16, bury: 1.6, cap: 'peak', lean: [-0.38, 0.05], natural: true, mat: 'rock_boulder' }); }
+{ const at = P(HEEL.d, 0.6); stone(at, AXIS + 0.25, { h: 4.9, w0: 2.6, w1: 1.4, d0: 2.3, d1: 1.4, rough: 0.16, bury: 1.6, cap: 'peak', lean: [-0.38, 0.05], natural: true, mat: 'rock_boulder', tool: { faces: 'none', lichen: 70 } }); }
 // the Station Stones: small undressed sarsens, two on their mounds
-for (const s of STATIONS) stone(s.at, AXIS + rand() * 0.5, { h: s.n === 91 ? 2.7 : s.n === 93 ? 1.3 : 1.6, w0: s.n === 91 ? 1.6 : 1.1, w1: 0.8, d0: 0.8, d1: 0.6, rough: 0.1, bury: 0.8, cap: 'round', natural: true, mat: 'rock_boulder' });
+for (const s of STATIONS) stone(s.at, AXIS + rand() * 0.5, { h: s.n === 91 ? 2.7 : s.n === 93 ? 1.3 : 1.6, w0: s.n === 91 ? 1.6 : 1.1, w1: 0.8, d0: 0.8, d1: 0.6, rough: 0.1, bury: 0.8, cap: 'round', natural: true, mat: 'rock_boulder', tool: { faces: 'none', lichen: 30 } });
 
 export const henge = {
   id: 'stonehenge-henge',

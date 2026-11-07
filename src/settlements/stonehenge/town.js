@@ -64,11 +64,45 @@ function timberCircle() {
   return [{ t: 'timber_circle', posts }];
 }
 
+/** The midwinter feast (§10a): open fires in the spaces between the houses, a pig roasting on the spit over each, people
+ *  sitting and squatting round them; the leavings thrown on middens at the edge of the houses. */
+function feast() {
+  const rand = rng(2503), F = [], L = [], H = houses(), others = people();
+  const clear = (x, z, m) => others.every((o) => Math.hypot(o.at[0] - x, o.at[1] - z) > m - 1) && H.every((h) => Math.hypot(h.c[0] - x, h.c[1] - z) > h.s * 0.75 + m) && Math.hypot(x - DURR.c[0], z - DURR.c[1]) > DURR.r + 6;
+  const fires = [];
+  for (let n = 0; n < 800 && fires.length < 7; n++) {
+    const a = rand() * 6.28, d = 25 + rand() * 60, x = VILLAGE.c[0] + Math.cos(a) * d, z = VILLAGE.c[1] + Math.sin(a) * d;
+    if (!clear(x, z, 4.5) || Math.hypot(x, z) > RADIUS - 60 || fires.some((f) => Math.hypot(f[0] - x, f[1] - z) < 18)) continue;
+    fires.push([x, z]);
+  }
+  const middens = [];
+  for (let n = 0; n < 800 && middens.length < 4; n++) {
+    const a = rand() * 6.28, d = 40 + rand() * 50, x = VILLAGE.c[0] + Math.cos(a) * d, z = VILLAGE.c[1] + Math.sin(a) * d;
+    if (!clear(x, z, 3.5) || Math.hypot(x, z) > RADIUS - 60 || fires.some((f) => Math.hypot(f[0] - x, f[1] - z) < 7) || middens.some((f) => Math.hypot(f[0] - x, f[1] - z) < 25)) continue;
+    middens.push([x, z]);
+    F.push({ t: 'midden', c: [x, z], y: height(x, z) - 0.03, r: 1.4 + rand() * 0.8, seed: Math.floor(rand() * 1e6) });
+  }
+  for (const [x, z] of fires) {
+    const yaw = rand() * 6.28;
+    F.push({ t: 'feast_fire', c: [x, z], r: 2.8, y: height(x, z), yaw, seed: Math.floor(rand() * 1e6) });
+    // round the fire, clear of the spit's stakes: some sitting on the ground, one squatting to the pots, one standing to turn the spit
+    const n = 4 + Math.floor(rand() * 4);
+    for (let k = 0; k < n; k++) {
+      const t = yaw + Math.PI / 2 + (k / n - 0.5) * 2.4 + (k % 2 ? Math.PI : 0), r = 2.0 + rand() * 0.5, at = [x + Math.cos(t) * r, z + Math.sin(t) * r];
+      L.push({ t: 'figure', at, y: height(...at), rot: face(at, [x, z]), seed: Math.floor(rand() * 1e9), dress: rand() < 0.6 ? 'robe' : 'tunic', cloth: CLOTH[Math.floor(rand() * CLOTH.length)], cloth2: CLOTH[Math.floor(rand() * CLOTH.length)], skin: 'skin_light', hat: 'none', pose: k === 0 ? 'squat' : rand() < 0.6 ? 'sit_ground' : 'talk' });
+    }
+    const st = [x + Math.cos(yaw) * 1.55, z + Math.sin(yaw) * 1.55];
+    L.push({ t: 'figure', at: st, y: height(...st), rot: face(st, [x, z]), seed: Math.floor(rand() * 1e9), dress: 'tunic', cloth: 'hide_tan', cloth2: 'hide_brown', skin: 'skin_light', hat: 'none' });
+  }
+  return [base('stonehenge-feast', F, 'neolithic'), base('stonehenge-feast-people', L, 'life')];
+}
+
 export async function town() {
   return [
     base('stonehenge-timber-circle', timberCircle(), 'neolithic'),
     base('stonehenge-houses', houses().map((h) => ({ t: 'neolithic_house', ...h })), 'neolithic'),
     base('stonehenge-people', people(), 'life'),
+    ...feast(),
   ];
 }
 void avenue;

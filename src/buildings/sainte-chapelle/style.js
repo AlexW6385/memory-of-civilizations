@@ -516,8 +516,68 @@ function stairArcade(el, { bag }) {
   bag.add('limestone', fromTriangles(S));
 }
 
+/**
+ * sc_dado { o (a point on the dado's face), u (along it), n (into the chapel), u0, u1, y0 (the bench's top), y1 (the
+ * windows' sill), count (arches), niche (the index of an arch made a deep royal oratory, or −1) } — the upper chapel's
+ * blind arcade under the windows (docs/settlements/paris.md §1d): colonnettes on bases with crocket capitals carrying
+ * trefoiled pointed arches, gilt; in each spandrel a quatrefoil medallion of a saint or martyr painted on a blue ground
+ * with its gilt glass ring, like an enamel of Limoges; the field of the arcade painted, the band above with its moulding.
+ */
+function dado(el, { bag }) {
+  const W = frame(el.o, el.u, el.n), { u0, u1, y0, y1 } = el, n = el.count, st = (u1 - u0) / n;
+  const gold = [], stone = [], blue = [], robe = [], glass = [], deep = [];
+  const ys = y0 + (y1 - y0) * 0.5, r = st / 2 - 0.06, spr = { r, spring: ys, pointed: 0.62 };
+  for (let k = 0; k <= n; k++) {
+    const u = u0 + k * st;
+    // the colonnette: base, shaft, capital with its abacus
+    fbox(stone, W, u - 0.07, u + 0.07, y0, y0 + 0.08, 0, 0.16);
+    const c = W(u, 0, 0.08);
+    gold.push(...triOf(lathe([[0.045, 0], [0.04, ys - y0 - 0.24]], 8, null, c[0], y0 + 0.08, c[2])));
+    gold.push(...triOf(lathe([[0.04, 0], [0.06, 0.1], [0.075, 0.13], [0.001, 0.13]], 8, null, c[0], ys - 0.16, c[2])));
+    fbox(gold, W, u - 0.08, u + 0.08, ys - 0.03, ys, 0, 0.17);
+  }
+  for (let k = 0; k < n; k++) {
+    const uc = u0 + (k + 0.5) * st, a = { ...spr, uc };
+    // the arch: a gilt moulding round the pointed head, and its three cusps (the trefoil) inside it
+    archBand(gold, W, a, 0, 0.055, 0.04, 0.13, 8);
+    for (const [cu, cy, cr] of [[uc - r * 0.45, ys + 0.02, r * 0.42], [uc + r * 0.45, ys + 0.02, r * 0.42], [uc, ys + archRise(a) * 0.55, r * 0.4]]) {
+      for (let i = 0; i < 6; i++) {
+        const ta = Math.PI * i / 6, tb = Math.PI * (i + 1) / 6;
+        const P = (t, e, d) => W(cu + Math.cos(t) * (cr + e), cy + Math.sin(t) * (cr + e) * (cy > ys + 0.05 ? 1 : 0.9), d);
+        hexa(gold, [P(ta, 0, 0.03), P(ta, 0.03, 0.03), P(tb, 0.03, 0.03), P(tb, 0, 0.03)], [P(ta, 0, 0.07), P(ta, 0.03, 0.07), P(tb, 0.03, 0.07), P(tb, 0, 0.07)]);
+      }
+    }
+    if (k === el.niche) {
+      // the king's oratory: the arch's field sunk deep into the wall, dark, a cushioned seat in it
+      fbox(deep, W, uc - r + 0.04, uc + r - 0.04, y0 + 0.02, ys + archRise(a) * 0.6, -0.002, 0.006);
+      fbox(robe, W, uc - r + 0.15, uc + r - 0.15, y0, y0 + 0.05, 0.01, 0.4);
+    }
+  }
+  // the medallions in the spandrels, at the colonnettes between arches: four gilt lobes, the blue ground, the saint
+  for (let k = 1; k < n; k++) {
+    const u = u0 + k * st, yc = ys + archRise({ ...spr, uc: u }) * 0.72 + 0.05, R = Math.min(0.2, st * 0.18);
+    for (const [du, dy] of [[R * 0.55, 0], [-R * 0.55, 0], [0, R * 0.55], [0, -R * 0.55]]) {
+      const ring = (rr, d, out) => { for (let i = 0; i < 10; i++) { const ta = i / 10 * Math.PI * 2, tb = (i + 1) / 10 * Math.PI * 2; const c = W(u + du, yc + dy, d), A = W(u + du + Math.cos(ta) * rr, yc + dy + Math.sin(ta) * rr, d), B = W(u + du + Math.cos(tb) * rr, yc + dy + Math.sin(tb) * rr, d); out.push(...c, ...B, ...A, ...c, ...A, ...B); } };
+      ring(R * 0.62, 0.012, glass);
+      ring(R * 0.52, 0.016, blue);
+    }
+    fbox(blue, W, u - R * 0.52, u + R * 0.52, yc - R * 0.52, yc + R * 0.52, 0.004, 0.016);
+    // the saint: a robed figure with a gilt nimbus (the martyr's palm in his hand)
+    fbox(robe, W, u - R * 0.18, u + R * 0.18, yc - R * 0.7, yc + R * 0.25, 0.016, 0.024);
+    fbox(gold, W, u - R * 0.12, u + R * 0.12, yc + R * 0.28, yc + R * 0.52, 0.016, 0.026);
+    fbox(stone, W, u + R * 0.2, u + R * 0.26, yc - R * 0.3, yc + R * 0.35, 0.016, 0.022);
+  }
+  // the band above the arcade, moulded, painted with a row of gilt fleurs-de-lis on blue
+  fbox(gold, W, u0, u1, y1 - 0.24, y1 - 0.2, 0, 0.08);
+  fbox(blue, W, u0, u1, y1 - 0.2, y1 - 0.04, 0, 0.03);
+  fbox(gold, W, u0, u1, y1 - 0.04, y1, 0, 0.1);
+  for (let uu = u0 + 0.2; uu < u1 - 0.1; uu += 0.4) fbox(gold, W, uu - 0.04, uu + 0.04, y1 - 0.16, y1 - 0.08, 0.03, 0.036);
+  for (const [m, T] of [['gold', gold], ['paint_fleur', stone], ['paint_blue', blue], ['paint_robe', robe], ['mosaic_gold', glass], ['opening', deep]]) if (T.length) bag.add(m, fromTriangles(T));
+}
+const triOf = (g) => Array.from(g.attributes.position.array);
+
 const base = STYLES.gothic;
 registerStyle('gothic-chapelle', {
   ...base,
-  elements: { ...base.elements, sc_turret: turret, sc_portal: portal, sc_balustrade: balustrade, sc_gablet: gablet, sc_front: frontFrames, sc_keep: keep, sc_gable: wgable, sc_pinnacle: scPinnacle, sc_cornice: cornice, sc_window_frame: windowFrame, sc_roof_dress: roofDress, sc_fleche: fleche, sc_tri_window: triWindow, sc_gallery: gallery, sc_stair_rail: stairRail, sc_stair_arcade: stairArcade },
+  elements: { ...base.elements, sc_turret: turret, sc_portal: portal, sc_balustrade: balustrade, sc_gablet: gablet, sc_front: frontFrames, sc_keep: keep, sc_gable: wgable, sc_pinnacle: scPinnacle, sc_cornice: cornice, sc_window_frame: windowFrame, sc_roof_dress: roofDress, sc_fleche: fleche, sc_tri_window: triWindow, sc_gallery: gallery, sc_stair_rail: stairRail, sc_stair_arcade: stairArcade, sc_dado: dado },
 });

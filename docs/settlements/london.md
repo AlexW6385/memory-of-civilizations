@@ -1,7 +1,7 @@
 # Victorian London (Westminster), about 1870 — dossier
 
 Settlement id: `london` · Style: `victorian` (on the gothic vocabulary) · Region: Britain (the Thames at Westminster) · Code: `src/settlements/london/`
-Status of this dossier: L1–L2 (the Palace of Westminster's river front in bays of tall windows and pinnacles, its inner ranges, the Clock Tower with its four faces and spire, the Victoria Tower, the central spire, Westminster Hall; Westminster Abbey's massing; Parliament Square; Westminster Bridge; the Thames; brick terraces on both banks; ground, planting, weather, music). L3 in part (v. north2): the river front's Perpendicular detail, Westminster Bridge's iron arches, the embankments with their dolphin lamps, chimney pots (§1.1); Westminster Abbey's true form with Hawksmoor's towers and Henry VII's chapel (§1.2). L3 in part (v. lv): Westminster Hall rebuilt and enterable with its hammerbeam roof (§1.3); cabs, omnibuses, gas lamps, steamers, lighters and a pier (§1.4). L3 in part (v. west2): the palace's principal floor enterable from Westminster Hall — St Stephen's Porch and Hall, the Central Lobby under the Central Tower, the Commons Corridor, Lobby and Chamber, the Lords Corridor, Peers' Lobby and Chamber (§1.5); the Great Clock's dials (§1.6). Still for later: St Margaret's, St Thomas' Hospital across the river, fog.
+Status of this dossier: L3 in part (a terrace house's hall, front parlour and back room — §5a; costermongers, coster women and passers-by — §5b). Before: L1–L2 (the Palace of Westminster's river front in bays of tall windows and pinnacles, its inner ranges, the Clock Tower with its four faces and spire, the Victoria Tower, the central spire, Westminster Hall; Westminster Abbey's massing; Parliament Square; Westminster Bridge; the Thames; brick terraces on both banks; ground, planting, weather, music). L3 in part (v. north2): the river front's Perpendicular detail, Westminster Bridge's iron arches, the embankments with their dolphin lamps, chimney pots (§1.1); Westminster Abbey's true form with Hawksmoor's towers and Henry VII's chapel (§1.2). L3 in part (v. lv): Westminster Hall rebuilt and enterable with its hammerbeam roof (§1.3); cabs, omnibuses, gas lamps, steamers, lighters and a pier (§1.4). L3 in part (v. west2): the palace's principal floor enterable from Westminster Hall — St Stephen's Porch and Hall, the Central Lobby under the Central Tower, the Commons Corridor, Lobby and Chamber, the Lords Corridor, Peers' Lobby and Chamber (§1.5); the Great Clock's dials (§1.6). Still for later: St Margaret's, St Thomas' Hospital across the river, fog.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -79,6 +79,32 @@ Gothic Revival in Anston limestone with iron roofs; brick terraces with slate ro
 ## 5. The town
 
 About 2,900 terrace houses on both banks. [inferred]
+
+### 5a. A terrace house inside, about 1870 (2026-11 L3; `terraceInterior` in `src/styles/victorian/index.js`)
+
+The two houses nearest the Lambeth end of the bridge stand open on the ground floor (DESIGN §4.4).
+
+| Room | What we build | Basis |
+|---|---|---|
+| Hall | The front door up two stone steps into a hall along the party wall on the door's side, the door folded back, the fanlight over it; a red runner; the stair rising toward the back with its banister and balusters; doors into the front parlour and the back room | the common plan of the London terrace [inferred]; stair, hall and fanlight [inferred] |
+| Front parlour | "The fireplace was black with coloured tiles at each side", the black fender; a velvet drape over the mantelpiece, deep plum with gold daisies; "a large black and gold framed mirror hung above"; a suite of two armchairs and a sofa in green and brown brocade, upright chairs; occasional tables, one "a polished table with three twisted legs"; "all parlours had the traditional aspidistra houseplant", in an ornate pot; prints hung from the picture rail, wallpaper below it and a plain frieze above; the front room "often the only one to have a large carpet"; lace across the lower half of the window; kept for Sundays and visitors. Built so, with a clock and two vases on the mantel and a gasolier from the ceiling rose | [stated: 1900s.org.uk "The parlour" — a recollection of the 1900s, taken back to 1870 as the type was the same: inferred]; the gasolier [inferred: gas lighting general in London houses by 1870] |
+| Back room | The family's room: the black kitchen range in the chimney breast with its brass rail and a kettle on the hob, a dresser with plates against the hall wall, a table under a cloth with chairs, a dark-boarded dado | [inferred: the back room as kitchen and living room of a small terrace house] |
+| The rows | The rows of each block now stand back to back, each front on its street (the fronts had faced each other across a 1 m gap); the open houses face the road from the bridge | [inferred: the London terrace street] |
+
+### 5b. Street sellers and passers-by (2026-11 L3; `streetFolk` in `town.js`)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Costermongers | Barrows (handcarts with baskets) at the kerbs of Bridge Street and of the road from the bridge into Lambeth, and a donkey-cart; each coster in corduroy, a small cloth cap (some red), a neckerchief | The costermonger's handbarrow; "pony—or donkey—carts", the donkey "by far the more usual beast of draught"; fruit, vegetables and fish on the carts [stated: Mayhew, *London Labour and the London Poor* I]; dress: "small cloth cap, a little on side", waistcoat of "broad-ribbed corduroy", the silk neckerchief, strong boots; caps "of red and yellow plush" in the crowd [stated: Mayhew I, "Of the Dress of the Costermongers"; the street markets] |
+| Coster women | With the round willow head-basket ("sieve") on the head, a shawl, a net cap or bonnet, printed gowns | the sieve "a round willow basket, containing about one-third of a bushel"; the women's bonnets, net caps, silk neckerchiefs and printed cotton gowns [stated: Mayhew I] |
+| Passers-by | Gentlemen in black with hats and cloaks, ladies in maroon or green with capes, along both pavements; a crossing sweeper with his broom at the corner of Parliament Street; a policeman in dark blue | [inferred: the street of 1870] |
+| Damp | The place's climate set damp 0.7 (the renderer's streaks and moss) | [inferred: §7] |
+
+Sources added:
+- [The parlour — 1900s.org.uk](https://www.1900s.org.uk/1900s-parlour.htm)
+- [Mayhew, London Labour and the London Poor, vol. 1: costermongers' barrows and carts — Tufts Digital Library](https://dl.tufts.edu/teiviewer/parent/73666f96f/chapter/c4s21)
+- [Mayhew, vol. 1: the street markets — Tufts](https://dl.tufts.edu/teiviewer/parent/73666f96f/chapter/c4s22)
+- [Mayhew, vol. 1: of the dress of the costermongers — Tufts](https://dl.tufts.edu/teiviewer/parent/73666f96f/chapter/c4s37)
 
 ## 6. Ground and water
 

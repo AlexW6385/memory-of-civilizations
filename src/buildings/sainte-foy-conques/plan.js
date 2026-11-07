@@ -102,6 +102,8 @@ for (const sz of [-1, 1]) add({ t: 'block', rect: [0, Math.min(sz * 1.5, sz * 4.
 for (const sz of [-1, 1]) for (const [z0, x0] of [[3.35, 0.35], [2.4, 0.9]]) add({ t: 'block', rect: [x0, Math.min(sz * z0, sz * 4.4), 1.5, Math.max(sz * z0, sz * 4.4)], y0: 0, y1: 4.85, mat: 'sandstone_red' });
 add({ t: 'tympanum', x: 1.0, zc: 0, y: 4.6, w: 6.7, h: 3.6 });
 add({ t: 'obj', kind: 'doors', at: [2.6, 0], y: 0, yaw: Math.PI / 2, w: 3.0, h: 4.6, th: 0.12, depth: 0 });
+// the threshold hollowed by the pilgrims' feet, in the doorway under the leaves (docs/settlements/conques.md §1e)
+add({ t: 'worn_sill', rect: [1.55, -1.5, 2.45, 1.5], y: 0, h: 0.035, dip: 0.022, mat: 'limestone_yellow' });
 add({ t: 'gable_roof', x0: 1.5, x1: XC0 - PS, z0: -AI - 0.25, z1: AI + 0.25, y: EAVE, ridge: RIDGE, ends: false });
 add({ t: 'block', rect: [0, -AI, 1.5, AI], y0: EAVE, y1: EAVE + 0.01, mat: 'limestone_yellow', collide: false });
 // the gable of the west front, in stone: the triangle with its coping and cross, the corbel table at its foot
@@ -242,6 +244,8 @@ for (const a of CHAPELS) {
 // ── furnishings: the high altar, the saint, the grilles, lamps ───────────────
 add({ t: 'block', rect: [37.6, -1.0, 38.8, 1.0], y0: 0, y1: 1.05, mat: 'limestone_yellow' });
 add({ t: 'obj', kind: 'reliquary', at: [XH + 1.2, 0], y: 0 });
+// the altar dressed, and the abbey's treasure on two stands either side of the Majesty (docs/settlements/conques.md §1d; kept in the church till 1875)
+add({ t: 'foy_treasure', altar: [37.6, -1.0, 38.8, 1.0], y: 1.05, floor: 0, stands: [[XH + 1.25, -1.35], [XH + 1.25, 1.35]] });
 for (const sz of [-1, 1]) add({ t: 'grille', a: [XC1 + PS + 0.2, sz * (HN - 0.1)], b: [XH - PS - 0.1, sz * (HN - 0.1)], y0: 0, y1: 2.4 });
 // lamps hung in the choir and before the saint, down the nave and in the arms of the transept
 for (const [x, z, y] of [[38.2, 0, 4.2], [XH + 1.2, 0, 4.5], [5.2, 0, 5.5], [11.7, 0, 5.5], [18.6, 0, 5.5], [XM, 0, 6.0], [XM, -11, 5.0], [XM, 11, 5.0]]) add({ t: 'lamp', at: [x, y, z], intensity: 6, distance: 12 });

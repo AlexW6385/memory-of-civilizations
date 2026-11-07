@@ -17,17 +17,24 @@ function fromWater(x, z) { return inRiver(x, z) ? -2 : Math.max(-5, Math.min(40,
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inRect(ABBEY.terrace, x, z, 3) || inLot(x, z, 1)) return null;
   const r = Math.hypot(x, z);
+  // by the Dourdou: willows and reeds at the water, poplars on the flat of the bank
+  const dz = Math.abs(z - (RIVER.z + 14 * Math.sin(x / 90)));
+  if (dz < RIVER.w / 2 + 4) return { willow: 0.12, reeds: 3, grass: 20 };
+  if (dz < RIVER.w / 2 + 16) return { poplar: 0.06, willow: 0.03, grass: 25 };
   if (r > 170) return { oak: 0.35, grass: 15 };
+  // elms and walnuts (elms stand in) by the houses, apples in the terraced gardens
+  if (inLot(x, z, 6)) return { elm: 0.02, apple: 0.05, grass: 18 };
   return { apple: 0.03, oak: 0.05, grass: 20 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { oak: 0.35, apple: 0.03 },
+  maxDensity: { oak: 0.35, apple: 0.05, willow: 0.12, poplar: 0.06, elm: 0.02, reeds: 3 },
   climate: {
     sun: { az: 160, el: 45, color: [1.0, 0.96, 0.9], intensity: 3.3, lat: 45, dec: 8, hour: 11 },
     sky: { turbidity: 2.8, rayleigh: 1.05, mie: 0.006, mieG: 0.78, zenith: [0.08, 0.15, 0.38], horizon: [0.64, 0.68, 0.72] },
     fog: { color: [0.78, 0.8, 0.82], density: 0.0005, height: 0.014 },
     exposure: 0.5,
+    damp: 0.75,     // mist and rain in the gorge: moss on the north feet of the schist walls and on the lauzes, rain streaks
     wind: [0.3, 0.2],
     weather: [
       { id: 'clear', weight: 3, clouds: 0.25, cloudDensity: 0.4, sun: 1.0, fog: 1 },
