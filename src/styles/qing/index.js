@@ -12,8 +12,11 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import '../ming/index.js';
 import { rectRoof, pyramidRoof, column, beamTris, flipTris, latticeBay, mingHall, mingPavilion, mingWall, withPal } from '../ming/index.js';
-import { dapo, dapoHeight, meoricho, postLines } from '../joseon/dancheong.js';
+import { dapo as dapoJ, dapoHeight, meoricho, postLines } from '../joseon/dancheong.js';
 import { throneHall } from './throne.js';
+import { hexiRun, dougong, dougongHeight } from './caihua.js';
+import { qinian } from './tiantan.js';
+import { pekingCart, camelString } from './street.js';
 import { Parts, ball, limb, T, sumeru, post, limb as limbG, seated, crouching, vat, tripod, tortoise, crane, sundial, jialiang, balustradeCarved, spout, roofOrnaments, gateDoors } from './carving.js';
 
 export const IMPERIAL = { wood: 'paint_caihua', column: 'lacquer_red', soffit: 'paint_caihua', base: 'marble', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'palace_wall', plinth: 'marble', roof: 'tile_yellow' };
@@ -135,8 +138,13 @@ function qingHall(el, ctx) {
   const ornament = (r, figures, ends) => roofOrnaments(bag, r, { mat: omat, joseon: !!orn.joseon, white: !!orn.joseon && ends, figures, ends, lead: orn.lead });
   const lower = { ...el, t: 'ming_hall', roof: el.double || orn ? 'none' : (el.roof || 'xieshan'), front: el.front || 's' };
   mingHall(lower, ctx);
+  if (!el.pal?.roof || el.pal.roof === 'tile_yellow') if (!orn?.joseon && el.caihua !== false) paintBeams(el, bag);
   // Joseon: moru dancheong at the beams' ends, dapo bracket sets under the eaves (raising them by bk)
-  const jo = !!orn?.joseon, bk = el.dapo ? dapoHeight(el.dapo) : 0, fy = el.y + (el.H ?? 4.2);
+  const jo = !!orn?.joseon, fy = el.y + (el.H ?? 4.2);
+  // the Qing bracket sets under the eaves of the palace's halls (caihua.js), where no Joseon dapo is asked for
+  const qb = !jo && !el.dapo && el.dougong !== false && (orn || el.double) && omat === 'tile_yellow' ? { tiers: el.dougong?.tiers ?? ((el.H ?? 4.2) > 8 ? 3 : 2), pitch: el.dougong?.pitch ?? 1.0 } : null;
+  const bk = el.dapo ? dapoHeight(el.dapo) : qb ? dougongHeight(qb) : 0;
+  const dapo = (bag_, rect, posts, yf, o, soffit) => (qb ? dougong(bag_, rect, posts, yf, qb, soffit) : dapoJ(bag_, rect, posts, yf, o, soffit));
   if (jo) meoricho(bag, el.rect, postLines(el), fy - 0.55, fy - 0.17, 0.14);
   /** The underside of roof r at d metres out from a wall line set back by `set` from its eave. */
   const under = (r, set) => (d) => r.y + r.rise * Math.pow(Math.max(0, (set - d) / r.B), r.p ?? 1.7) - 0.14;
@@ -183,6 +191,42 @@ function qingHall(el, ctx) {
     bag.add(el.pal?.roof || 'tile_yellow', box(e[0] - 0.5, top - 0.1, e[1] - 0.5, e[0] + 0.5, top + 1.9, e[1] + 0.5));       // chiwen
   }
   void beasts; void col;
+}
+
+/**
+ * The hexi painting (caihua.js) on a palace hall's architraves, outside: the frieze beam under the
+ * eaves on all four sides, the tie beam over the doors of a tall hall's walled sides, and the deep
+ * frieze of a double-eaved hall's upper body. Bays as mingHall lays them out.
+ */
+function paintBeams(el, bag) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, H = el.H ?? 4.2, along = (x1 - x0) >= (z1 - z0), Lx = x1 - x0, Lz = z1 - z0;
+  const nb = el.bays?.[0] ?? Math.max(1, Math.round((along ? Lx : Lz) / 3.6)), nd = el.bays?.[1] ?? Math.max(1, Math.round((along ? Lz : Lx) / 3.4));
+  const nx = along ? nb : nd, nz = along ? nd : nb;
+  const xs = Array.from({ length: nx + 1 }, (_, i) => Lx * i / nx), zs = Array.from({ length: nz + 1 }, (_, j) => Lz * j / nz);
+  const d = H > 6 ? 0.28 + (H - 6) * 0.07 : 0.28, tall = H > 8, hd = Math.min(H - 0.5, 5.5 + (H - 8) * 0.15);
+  const kind = el.caihua ?? ((el.orn?.figures ?? 0) >= 9 ? 'jinlong' : 'longfeng'), T = {};
+  const rev = (tk, L) => tk.map((v) => L - v).reverse();
+  // the four faces, each run from its left end seen from outside: [a, b, ticks, outward normal, front?]
+  const sides = [
+    ['s', [x1, z1], [x0, z1], rev(xs, Lx), [0, 0, 1]], ['n', [x0, z0], [x1, z0], xs, [0, 0, -1]],
+    ['e', [x1, z0], [x1, z1], zs, [1, 0, 0]], ['w', [x0, z1], [x0, z0], rev(zs, Lz), [-1, 0, 0]],
+  ];
+  for (const [k, a, b, tk, n] of sides) {
+    hexiRun(T, a, b, tk, y + H - 0.55, 0.38, n, 0.14, d / 2, k === 's' || k === 'e', kind);
+    if (tall && (el.four || k === (el.front || 's'))) hexiRun(T, a, b, tk, y + hd, 0.45, n, 0.17, d / 2, !(k === 's' || k === 'e'), kind);
+  }
+  if (el.double) {
+    const inset = el.inset ?? Math.min(Lx, Lz) / ((el.bays?.[1] ?? 4) + 0.5), u = [x0 + inset, z0 + inset, x1 - inset, z1 - inset], D = el.double, yb = y + H;
+    const ux = u[2] - u[0], uz = u[3] - u[1], n1 = el.bays?.[0] ?? 7, n2 = el.bays?.[1] ?? 4;
+    const tx = Array.from({ length: Math.max(1, n1 - 2) + 1 }, (_, i) => ux * i / Math.max(1, n1 - 2)), tz = Array.from({ length: Math.max(1, n2 - 2) + 1 }, (_, j) => uz * j / Math.max(1, n2 - 2));
+    const [tl, ts] = along ? [tx, tz] : [tz, tx];
+    const up = [
+      ['s', [u[2], u[3]], [u[0], u[3]], rev(along ? tl : ts, ux), [0, 0, 1], along], ['n', [u[0], u[1]], [u[2], u[1]], along ? tl : ts, [0, 0, -1], along],
+      ['e', [u[2], u[1]], [u[2], u[3]], along ? ts : tl, [1, 0, 0], !along], ['w', [u[0], u[3]], [u[0], u[1]], rev(along ? ts : tl, uz), [-1, 0, 0], !along],
+    ];
+    for (const [k, a, b, tk, n, cols] of up) hexiRun(T, a, b, tk, yb + D - 1.12, 0.84, n, 0.05, cols ? 0.21 : 0, !(k === 's' || k === 'e'), kind);
+  }
+  for (const [m, gs] of Object.entries(T)) for (const g of gs) bag.add(m, g);
 }
 
 /** palace_wall: a red wall { a, b, y, h, th, gates } with a marble footing and a coping of yellow tiles. */
@@ -360,6 +404,84 @@ function siheyuan(el, ctx) {
   for (const k of [-1, 1]) if (rand() < 0.8) { pom.emit(bag, cx + k * 2.4, 0.03, pz0 + 0.8); col.circle(cx + k * 2.4, pz0 + 0.8, 0.4, 0, 0.7); }
   const pots = new Parts(); flowerPots(pots);
   pots.emit(bag, cx + (rand() < 0.5 ? -5.4 : 3.8), 0.03, pz0 + 0.3);
+  if (el.furnish) furnishMain(bag, col, main, 0.6, W > 22 ? 5 : 3);
+}
+
+/**
+ * The main house's rooms, furnished (docs/settlements/qing-beijing.md §14): in the hall of the
+ * middle bay, facing the door, the square Eight Immortals table with a chair each side; against the
+ * north wall the long table with a vase at each end (feather dusters in them) and the censer between,
+ * over it the hanging painting (zhongtang) between the two scrolls of a couplet. In the east bay the
+ * kang, the heated brick bed, under its reed mat, the low kang table on it, the quilts folded at
+ * the back; in the west bay a tall wardrobe pair and a chest. rect the house, y its floor, nb its bays.
+ */
+function furnishMain(bag, col, [hx0, hz0, hx1, hz1], y, nb) {
+  const bw = (hx1 - hx0) / nb, cx = (hx0 + hx1) / 2, zb = hz0 + 0.16, W = 'wood_dark';
+  const P = new Parts();
+  // a table: top, apron, four legs (w × d, h high), at (x, z)
+  const table = (x, z, w, d, h, m = W, low = false) => {
+    P.add(m, box(x - w / 2, y + h - 0.045, z - d / 2, x + w / 2, y + h, z + d / 2));
+    P.add(m, box(x - w / 2 + 0.04, y + h - 0.13, z - d / 2 + 0.04, x + w / 2 - 0.04, y + h - 0.045, z + d / 2 - 0.04));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) P.add(m, box(x + sx * (w / 2 - 0.07) - 0.03, y, z + sz * (d / 2 - 0.07) - 0.03, x + sx * (w / 2 - 0.07) + 0.03, y + h - 0.045, z + sz * (d / 2 - 0.07) + 0.03));
+    if (!low) for (const sz of [-1, 1]) P.add(m, box(x - w / 2 + 0.07, y + 0.12, z + sz * (d / 2 - 0.07) - 0.015, x + w / 2 - 0.07, y + 0.15, z + sz * (d / 2 - 0.07) + 0.015));
+  };
+  // the long table (tiao'an) with its everted ends, the vases, the censer
+  table(cx, zb + 0.28, Math.min(2.4, bw - 0.6), 0.45, 0.92);
+  for (const sx of [-1, 1]) P.add(W, box(cx + sx * Math.min(1.2, bw / 2 - 0.3) - 0.05, y + 0.92, zb + 0.06, cx + sx * Math.min(1.2, bw / 2 - 0.3) + 0.05, y + 0.99, zb + 0.5));
+  for (const sx of [-1, 1]) {
+    const vx = cx + sx * Math.min(0.9, bw / 2 - 0.55);
+    P.add('glaze_blue', lathe([[0.06, 0], [0.11, 0.06], [0.12, 0.2], [0.06, 0.36], [0.045, 0.46], [0.06, 0.5], [0.001, 0.5]], 12, null, vx, y + 0.92, zb + 0.28));
+    P.add('timber', lathe([[0.012, 0], [0.012, 0.42], [0.001, 0.42]], 5, null, vx, y + 1.38, zb + 0.28));
+    P.add('hide_brown', T(ball(0.07, 0.2, 0.07, 6, 5), vx, y + 1.9, zb + 0.28));
+  }
+  P.add('bronze', lathe([[0.07, 0], [0.1, 0.03], [0.11, 0.1], [0.08, 0.15], [0.09, 0.16], [0.001, 0.16]], 12, null, cx, y + 0.92, zb + 0.28));
+  // the hanging painting and the couplet on the north wall
+  P.add('cloth_indigo', box(cx - 0.42, y + 1.25, zb - 0.005, cx + 0.42, y + 2.75, zb + 0.005));
+  P.add('paint_white', box(cx - 0.34, y + 1.38, zb + 0.005, cx + 0.34, y + 2.55, zb + 0.012));
+  // an ink landscape: far peaks pale, the near ranges dark, a pine on the near bank
+  const peaks = (mat, list, d) => { const t = []; for (const [u0, u1, top, base] of list) { const um = (u0 + u1) / 2; t.push(cx + u0, y + base, zb + d, cx + u1, y + base, zb + d, cx + um + 0.03, y + top, zb + d); t.push(cx + u0 + 0.05, y + base, zb + d, cx + um, y + base, zb + d, cx + u0 + 0.1, y + top - 0.2, zb + d); } P.add(mat, fromTriangles(t)); };
+  peaks('slate', [[-0.3, 0.05, 2.45, 1.95], [-0.05, 0.32, 2.3, 1.9]], 0.014);
+  peaks('lacquer_black', [[-0.32, 0.0, 1.95, 1.45], [0.02, 0.3, 1.8, 1.42]], 0.017);
+  P.add('lacquer_black', box(cx + 0.14, y + 1.45, zb + 0.017, cx + 0.155, y + 1.75, zb + 0.02));
+  P.add('lotus_leaf', T(ball(0.07, 0.04, 0.01, 6, 4), cx + 0.15, y + 1.76, zb + 0.022));
+  for (const sx of [-1, 1]) {
+    const x = cx + sx * 0.7;
+    P.add('cloth_red', box(x - 0.13, y + 1.2, zb - 0.005, x + 0.13, y + 2.75, zb + 0.008));
+    for (let k = 0; k < 7; k++) P.add('lacquer_black', box(x - 0.06, y + 2.55 - k * 0.2, zb + 0.008, x + 0.06, y + 2.55 - k * 0.2 + 0.11, zb + 0.012));
+  }
+  // the Eight Immortals table facing the door, a chair each side
+  const tz = zb + 1.25;
+  table(cx, tz, 0.95, 0.95, 0.86);
+  for (const sx of [-1, 1]) {
+    const x = cx + sx * 0.85;
+    table(x, tz, 0.56, 0.46, 0.5);
+    P.add(W, box(x - 0.26 * sx - 0.02, y + 0.5, tz - 0.21, x - 0.26 * sx + 0.02, y + 1.12, tz + 0.21));                // the back
+    for (const sz of [-1, 1]) P.add(W, box(x - 0.25, y + 0.68, tz + sz * 0.21 - 0.015, x + 0.25, y + 0.71, tz + sz * 0.21 + 0.015));   // the arms
+  }
+  col.rect([cx - 1.2, zb, cx + 1.2, zb + 0.55], y, y + 1);
+  col.rect([cx - 1.15, tz - 0.5, cx + 1.15, tz + 0.5], y, y + 0.9);
+  // the kang in the east bay: the brick bed across the bay's back, its mat, the kang table, the quilts
+  const kx0 = cx + bw / 2 + 0.05, kx1 = cx + bw * 1.5 - 0.2, kz1 = zb + 1.9;
+  P.add('brick_grey', box(kx0, y, zb, kx1, y + 0.6, kz1));
+  P.add('reed_mat', box(kx0 + 0.02, y + 0.6, zb + 0.02, kx1 - 0.02, y + 0.62, kz1 - 0.02));
+  P.add('wood_dark', box(kx0 - 0.02, y + 0.55, kz1 - 0.04, kx1 + 0.02, y + 0.64, kz1 + 0.02));
+  table((kx0 + kx1) / 2, zb + 1.0, 0.8, 0.5, 0.3, 'lacquer_red', true);
+  for (const [m, h] of [['cloth_red', 0.14], ['cloth_indigo', 0.13], ['cloth_green', 0.12]]) {
+    const yy = y + 0.62 + (m === 'cloth_red' ? 0 : m === 'cloth_indigo' ? 0.14 : 0.27);
+    P.add(m, box(kx0 + 0.25, yy, zb + 0.05, kx0 + 1.25, yy + h, zb + 0.55));
+  }
+  col.rect([kx0, zb, kx1, kz1], y, y + 0.62);
+  // the west bay: a pair of tall wardrobes against the north wall and a chest before the kang's place
+  const wx = cx - bw;
+  for (const sx of [-1, 1]) {
+    const x = wx + sx * 0.5;
+    P.add(W, box(x - 0.46, y, zb, x + 0.46, y + 1.95, zb + 0.5));
+    P.add('lacquer_red', box(x - 0.43, y + 0.1, zb + 0.5, x + 0.43, y + 1.85, zb + 0.51));
+    P.add('gilt_bronze', box(x - 0.15, y + 0.9, zb + 0.51, x + 0.15, y + 1.05, zb + 0.52));
+  }
+  P.add('lacquer_red', box(wx - 0.6, y, zb + 1.2, wx + 0.6, y + 0.55, zb + 1.75));
+  col.rect([wx - 1, zb, wx + 1, zb + 0.5], y, y + 2); col.rect([wx - 0.6, zb + 1.2, wx + 0.6, zb + 1.75], y, y + 0.55);
+  P.emit(bag);
 }
 
 /** A goldfish jar (yugang): a wide glazed earthenware bowl on a low brick stand, its water and fish, a lotus leaf or two. */
@@ -443,7 +565,7 @@ registerStyle('qing', {
     qing_hall: (el, ctx) => withPal(qingHall)({ ...el, pal: el.pal || IMPERIAL }, ctx),
     palace_wall: (el, ctx) => withPal(palaceWall)({ ...el, pal: { plaster: 'palace_wall', roof: 'tile_yellow', plinth: 'marble' } }, ctx),
     ming_arch_bridge: archBridgeRailed, gate_doors: gateDoors,
-    corner_tower: withPal(cornerTower), low_wall: withPal(lowWall), throne_hall: (el, ctx) => withPal(throneHall)({ ...el, pal: el.pal || IMPERIAL }, ctx), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail),
+    corner_tower: withPal(cornerTower), low_wall: withPal(lowWall), throne_hall: (el, ctx) => withPal(throneHall)({ ...el, pal: el.pal || IMPERIAL }, ctx), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail), qinian: (el, ctx) => withPal(qinian)({ ...el, pal: el.pal || IMPERIAL }, ctx), peking_cart: pekingCart, camel_string: camelString,
   },
   objects: {},
 });
