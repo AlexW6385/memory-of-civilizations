@@ -75,6 +75,18 @@ The Valley Ruins "include a number of structures that offer evidence that the si
 
 The dry walls' faces were turned by the centre of the whole wall, so the inner face of every curved wall (the Great Enclosure's included) faced away and was invisible from inside. Each face is now turned by its own side of the wall (outer, top, inner); the chevron's blocks each by their own centre.
 
+## 14. Inside the houses, cattle and the coast trade (L3, 2026-11-07)
+
+- **The furnished daga house.** A Zimbabwean kitchen house has "a central hearth where cooking fire was ignited"; "The hearth comes in the form of a shallow depression within which are lodged three hearth stones", a pot set over them; the interior walls carry shelves for plates and cups [stated: Herald, "Iziko: linking the hearth and human sexuality"]. A traditional kitchen holds "a short 'rukuva' (a seeming round hut curved rectangular prism bench)" about half a metre high, on it clay pots "on top of each other"; "'rukukwe' (a traditional sitting or sleeping reed woven mat)"; "'guyo nehuyo'", the lower and upper grinding stones [stated: Herald, "Inside women's traditional space" — a modern rural kitchen shown in the National Gallery]. Ours (`daga_hut` with `open`): the daga wall 0.22 m thick with a real doorway (lintel at 2.05 m), the hearth's kerbed hollow with ash, three stones, a cooking pot and sticks, the fire glowing between the stones; the rukuva moulded against the back wall, three pairs of pots on it; the mat, the grinding stones, a water pot on its grass ring inside the door; the thatch seen from within blackened by smoke, fourteen rafters and two rings of withies. That the 14th-century houses were furnished as the ethnographic kitchen is [inferred]. All the houses of the Western Enclosure and the Valley Ruins and one in six in the valley are open and furnished.
+- **Cattle.** "Cattle, in particular, were a key source of wealth and could also be used as draft power" [stated: Met, "Great Zimbabwe"]. Ours (`life.js`): four herds of six to nine head (humpless long-horned and humped beasts, for the Sanga type) grazing in the open grass, each with a herd boy and his stick; three kraals of close-set rough posts bound by withy rails, a gate with bars laid by it, the trodden, dunged ground inside, four beasts in each [kraal form inferred from Shona homesteads].
+- **The coast trade.** The Valley Ruins held Chinese porcelain, south-east Asian beads and copper ingots [stated: Smarthistory]; glass beads, porcelain, gold foil, and crucibles used "to melt gold, copper, bronze, and brass" [stated: Met]. Ours (`trade_goods`): in the first Valley court, on a mat, coils of blue, green and yellow glass beads, two celadon bowls and a white one, a crosswise stack of cast copper bars, coils of gold wire, two iron hoes, a crucible; a trader in a white cloth sitting by them [the ingots' form and the arrangement inferred].
+- **People.** Women kneeling at the grinding stones and carrying water pots in the Valley courts; a man in a hide cape and a woman with a basket in the Western Enclosure; two men in the Great Enclosure [inferred].
+
+Sources (2026-11-07):
+- [Iziko: linking the hearth and human sexuality — The Herald](https://www.heraldonline.co.zw/iziko-linking-the-hearth-and-human-sexuality/)
+- [Inside women's traditional space — The Herald](https://www.herald.co.zw/inside-womens-traditional-space/)
+- [Great Zimbabwe — The Met, Heilbrunn Timeline](https://www.metmuseum.org/essays/great-zimbabwe)
+
 ## Sources
 
 - [Great Zimbabwe — Wikipedia](https://en.wikipedia.org/wiki/Great_Zimbabwe)

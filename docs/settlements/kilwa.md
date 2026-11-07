@@ -1,7 +1,7 @@
 # Kilwa Kisiwani, about 1330 — dossier
 
 Settlement id: `kilwa` · Style: `swahili` · Region: the Swahili coast (an island off Tanzania) · Code: `src/settlements/kilwa/`
-Status of this dossier: L2 (Husuni Kubwa and the stone houses rebuilt 2026-11-06, §11–§12; the island town on its north shore; the Great Mosque's hall of bays on pillars under small domes, with its great dome; Husuni Kubwa on its cliff with two courts and the octagonal pool; stone houses round courts; dhows on the beach; the sea round the island; ground, planting, weather, music). L3 recorded for later: the mosque's older northern prayer hall and its vaults, the Small Domed Mosque, Husuni Ndogo, the carved doors and niches, the coin mint, the reef and the trade (gold from Great Zimbabwe), people.
+Status of this dossier: L2–L3 (§15 inset bowls, the carved mihrab, trees and the shore trade added 2026-11-07; Husuni Kubwa and the stone houses rebuilt 2026-11-06, §11–§12; the island town on its north shore; the Great Mosque's hall of bays on pillars under small domes, with its great dome; Husuni Kubwa on its cliff with two courts and the octagonal pool; stone houses round courts; dhows on the beach; the sea round the island; ground, planting, weather, music). L3 recorded for later: the mosque's older northern prayer hall and its vaults, the Small Domed Mosque, Husuni Ndogo, the carved doors and niches, the coin mint, the reef and the trade (gold from Great Zimbabwe), people.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -124,3 +124,15 @@ All [stated] items from Archnet site 3780.
 - [Origins and Development of Swahili Architecture — African History Extra](https://www.africanhistoryextra.com/p/origins-and-development-of-swahili)
 - [Vernacular Housing of Lamu — Archnet](https://www.archnet.org/sites/6076)
 - [Swahili architecture — Wikipedia](https://en.wikipedia.org/wiki/Swahili_architecture)
+
+## 15. Inset bowls, the carved mihrab, weathering, trees and the shore trade (L3, 2026-11-07)
+
+- **Inset bowls.** In the domed mosque at Kilwa recorded by Archnet (site 3783): "The interior of the dome is decorated with three concentric circles of inlaid glazed ceramic bowls"; barrel vaults "each decorated with five rows of ceramic bowls and fine cornicing"; the corner domes "fluted" and undecorated [stated]. Ours, in the Great Mosque: the great dome with three rings of bowls (16, 12, 8) and one at the crown; each barrel vault of the central aisle with five rows of bowls 0.9 m apart; each small dome with a crown bowl and a ring of five; celadon, white and blue glazes in turn. Carrying the domed mosque's scheme to the Great Mosque's every dome is [inferred].
+- **The mihrab.** "Above the mihrab, two bowls are inset into either side of a rectangular plaque", a feature of the early classic East African mihrab; "Interlaced carved coral bosses" on the spandrels beside it [stated: Archnet 3783]. Ours: three frames of dressed coral stepping in to the dark niche under its stepped pointed head; a herringbone cable carved up the outer jambs; over the frame a carved plaque of eight-pointed stars between cable borders, two bowls either side of it; a carved boss in each spandrel beside the mihrab [the cable and the plaque's motifs inferred from Husuni Kubwa's carving, §11].
+- **Weathering.** The darker damp band (0.85 m) at the foot of the mosque's outer walls, broken by the doorways' frames; grey rain streaks down from the cresting between the windows [inferred, DESIGN §5].
+- **Trees.** Coconut oil was among Kilwa's exports [stated: Wikipedia "Kilwa Kisiwani"]. Ours (`life.js`, `src/styles/swahili/plants.js`): built coconut palms — the ringed trunk curving up from its swollen foot, twenty arching fronds with hanging leaflets, the dead fronds hanging, bunches of nuts — in a belt along the top of the beach leaning seaward and in groves among the houses (58); nine baobabs on the open ground behind the town, the swollen ribbed grey trunk, short forking limbs, leafless as in the dry season with the fruits hanging [the baobabs and their place inferred]. The date-palm and banyan stand-ins are gone from the planting.
+- **The shore trade.** Kilwa's exports included "spices, tortoiseshell, coconut oil, ivory, cotton cloth, and incense", traded "for beads, textiles, jewelry, porcelain and spices from Asia"; Ibn Battuta found it a wealthy city of the gold trade [stated: Wikipedia "Kilwa Kisiwani"]. Ours: three landing places on the beach by the mtepe, each with a stack of ivory tusks, sacks, a mat of cloth bolts and pottery, glazed jars; merchants in white robes and caps or turbans, porters with head loads; two ocean dhows (18 m) riding at anchor in the harbour [inferred: the arrangement, the dress].
+
+Sources (2026-11-07):
+- [Domed mosque, Kilwa Kisiwani — Archnet site 3783](https://www.archnet.org/sites/3783)
+- [Kilwa Kisiwani — Wikipedia](https://en.wikipedia.org/wiki/Kilwa_Kisiwani)

@@ -711,13 +711,15 @@ export function astroCeiling(el, { bag }) {
         const s = W * 0.92;
         if (k % 2) {                                                   // the winged disc, its wings across the aisle
           const g = wingedDisc(s, s * 0.3, 0.02);
-          g.applyMatrix4(new Matrix4().makeRotationY(Math.PI).multiply(new Matrix4().makeRotationX(Math.PI / 2))); g.translate(cx, Y - 0.02, z1 - u);   // the wings' leading edge toward the sanctuary put('paint_ochre', g);
+          g.applyMatrix4(new Matrix4().makeRotationY(Math.PI).multiply(new Matrix4().makeRotationX(Math.PI / 2))); g.translate(cx, Y - 0.02, z1 - u);   // the wings' leading edge toward the sanctuary
+          put('paint_ochre', g);
           continue;
         }
         // the vulture seen from below: the wings spread across the aisle in their tiers of feathers, the head toward the
         // sanctuary, the tail fanned behind, a shen ring in each foot
         const vc = W / 2, g = wingedDisc(s, s * 0.34, 0.02);
-        g.applyMatrix4(new Matrix4().makeRotationY(Math.PI).multiply(new Matrix4().makeRotationX(Math.PI / 2))); g.translate(cx, Y - 0.02, z1 - u);   // the wings' leading edge toward the sanctuary put('fresco_green', g);
+        g.applyMatrix4(new Matrix4().makeRotationY(Math.PI).multiply(new Matrix4().makeRotationX(Math.PI / 2))); g.translate(cx, Y - 0.02, z1 - u);   // the wings' leading edge toward the sanctuary
+        put('fresco_green', g);
         prism('plaster_white', [[u + 0.1 * s, vc - 0.07 * s], [u + 0.13 * s, vc], [u + 0.1 * s, vc + 0.07 * s], [u - 0.12 * s, vc + 0.1 * s], [u - 0.2 * s, vc + 0.08 * s], [u - 0.2 * s, vc - 0.08 * s], [u - 0.12 * s, vc - 0.1 * s]], place, 0.05);   // the body
         prism('egyptian_blue', [[u - 0.19 * s, vc - 0.07 * s], [u - 0.19 * s, vc + 0.07 * s], [u - 0.36 * s, vc + 0.13 * s], [u - 0.38 * s, vc], [u - 0.36 * s, vc - 0.13 * s]], place, 0.045);   // the tail
         prism('paint_ochre', [[u + 0.12 * s, vc - 0.03 * s], [u + 0.12 * s, vc + 0.03 * s], [u + 0.22 * s, vc + 0.03 * s], [u + 0.27 * s, vc + 0.01 * s], [u + 0.25 * s, vc - 0.02 * s], [u + 0.22 * s, vc - 0.03 * s]], place, 0.055);   // the neck and head
@@ -744,4 +746,83 @@ export function astroCeiling(el, { bag }) {
     }
   }
   for (const [m, list] of Object.entries(parts)) bag.add(m, mergeLocal(list));
+}
+
+/**
+ * Painted relief (docs/settlements/edfu.md §10): a figure of FIG whose parts each take their own colour — the
+ * skin red-brown, the crowns blue, red and white, the sceptres and offerings yellow or gold — with the white kilt
+ * and the broad collar painted over the body a little prouder.
+ */
+const PAINT = {
+  offer: (body) => [body, 'egyptian_blue', body, 'gold'],
+  god: (body) => [body, 'limewash_red', 'plaster_white', body, 'paint_ochre', 'paint_ochre', 'paint_ochre', 'paint_ochre', 'paint_ochre', 'paint_ochre'],
+  seated: (body) => [body, body, 'paint_ochre', 'paint_ochre', 'paint_ochre'],
+};
+const KILT = [[-0.07, 0.31], [0.1, 0.31], [0.078, 0.465], [-0.062, 0.465]], COLLAR = [[-0.06, 0.605], [0.068, 0.605], [0.07, 0.65], [-0.058, 0.66]];
+function paintedFigure(bag, kind, body, place, u0, v0, h, dir, d) {
+  const mats = PAINT[kind](body), parts = {};
+  const add = (m, P, dd) => {
+    const T = parts[m] ??= [], tri = CUTS.get(P) ?? (CUTS.set(P, earClip(P)), CUTS.get(P)), V = ([u, v], w) => place(u0 + dir * u * h * 1.15, v0 + v * h, w);
+    for (const [a, b, c] of tri) T.push(...V(P[a], dd), ...V(P[b], dd), ...V(P[c], dd), ...V(P[a], dd), ...V(P[c], dd), ...V(P[b], dd));
+    for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length], q = [V(a, 0), V(b, 0), V(b, dd), V(a, dd)]; T.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3], ...q[0], ...q[2], ...q[1], ...q[0], ...q[3], ...q[2]); }
+  };
+  FIG[kind].forEach((P, k) => add(mats[k] ?? body, P, d * (0.82 + 0.06 * (k % 4))));
+  if (kind !== 'seated') { add('plaster_white', KILT, d * 1.08); add(kind === 'god' ? 'fresco_green' : 'egyptian_blue', COLLAR, d * 1.08); }
+  for (const [m, T] of Object.entries(parts)) bag.add(m, fromTriangles(T));
+}
+/**
+ * wall_reliefs: the painted reliefs of a wall face inside the temple (docs/settlements/edfu.md §10) { a, b (the face's
+ * ends in plan), n (its normal into the room), y (the floor), v0 (the first register's ground line above the floor),
+ * top, reg (register height), inward (+1 if the sanctuary lies toward b), gods ('gold' or 'paint'), gaps: [[u0, u1]]
+ * (doorways, from a) }: under a band of sky and a frieze of khekher knots, registers of scenes — the king, in the blue
+ * crown, his kilt white, coming in toward the sanctuary with his offering before a falcon-headed god in the double
+ * crown or a god enthroned — each with its columns of text painted blue, on blue ground lines; a dado frieze of
+ * coloured blocks under the lowest register.
+ */
+export function wallReliefs(el, { bag }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), U = [(bx - ax) / L, (bz - az) / L], N = el.n, y = el.y ?? 0;
+  const place = (u, v, d) => [ax + U[0] * u + N[0] * (0.012 + d), y + v, az + U[1] * u + N[1] * (0.012 + d)];
+  const gaps = el.gaps ?? [], free = (u0, u1) => u0 > 0.1 && u1 < L - 0.1 && !gaps.some(([g0, g1]) => u1 > g0 - 0.2 && u0 < g1 + 0.2);
+  const band = (m, u0, u1, v0, v1, d) => { const p = place(u0, v0, 0), q = place(u1, v1, d); bag.add(m, box(Math.min(p[0], q[0]), p[1], Math.min(p[2], q[2]), Math.max(p[0], q[0]), q[1], Math.max(p[2], q[2]))); };
+  const runs = (fn) => { let u = 0.15; for (const [g0, g1] of [...gaps, [L - 0.15, L]]) { if (g0 - u > 0.4) fn(u, g0 - 0.05); u = g1 + 0.05; } };
+  const reg = el.reg ?? 2.2, n = Math.max(1, Math.floor((el.top - el.v0) / reg)), dir = el.inward ?? 1, body = 'paint_robe', godBody = el.gods === 'gold' ? 'gold' : 'paint_robe';
+  let seed = Math.round(ax * 13 + az * 7);
+  // the dado frieze of coloured blocks and its ground line
+  runs((u0, u1) => { band('egyptian_blue', u0, u1, el.v0 - 0.06, el.v0, 0.02); for (let u = u0, k = 0; u < u1 - 0.2; u += 0.25, k++) band(['limewash_red', 'egyptian_blue', 'fresco_green', 'paint_ochre'][k % 4], u + 0.02, u + 0.21, el.v0 - 0.42, el.v0 - 0.14, 0.015); });
+  for (let j = 0; j < n; j++) {
+    const vy = el.v0 + j * reg, hh = reg * 0.82, sw = hh * 1.15;
+    if (j) runs((u0, u1) => band('egyptian_blue', u0, u1, vy - 0.06, vy, 0.02));
+    // scenes along the register: the king toward the sanctuary, the god facing him
+    runs((u0, u1) => {
+      const k = Math.max(1, Math.floor((u1 - u0) / sw)), w = (u1 - u0) / k;
+      for (let i = 0; i < k; i++) {
+        const s0 = u0 + i * w, s1 = s0 + w; if (!free(s0, s1)) continue;
+        const king = dir > 0 ? s0 + w * 0.3 : s1 - w * 0.3, god = dir > 0 ? s1 - w * 0.28 : s0 + w * 0.28, gk = (i * 2 + j) % 3 === 0 ? 'seated' : 'god';
+        paintedFigure(bag, 'offer', body, place, king, vy, hh * 0.9, dir, 0.05);
+        paintedFigure(bag, gk, godBody, place, god, vy, hh * (gk === 'seated' ? 0.85 : 0.94), -dir, 0.05);
+        glyphColumn(bag, 'egyptian_blue', place, (king + god) / 2 - hh * 0.05, vy + hh * 0.55, vy + hh * 0.98, hh * 0.085, seed++, 0.035, [-1, 1]);
+        glyphColumn(bag, 'egyptian_blue', place, (king + god) / 2 + hh * 0.05, vy + hh * 0.55, vy + hh * 0.98, hh * 0.085, seed++, 0.035, [1]);
+      }
+    });
+  }
+  // the band of sky over the registers and the khekher frieze above it
+  const vt = el.v0 + n * reg;
+  runs((u0, u1) => { band('egyptian_blue', u0, u1, vt - 0.06, vt + 0.1, 0.022); for (let u = u0 + 0.1; u < u1 - 0.12; u += 0.24) { band('paint_ochre', u - 0.05, u + 0.05, vt + 0.14, vt + 0.46, 0.02); band('fresco_green', u - 0.035, u + 0.035, vt + 0.46, vt + 0.52, 0.026); } });
+}
+/**
+ * offering_table: before the god's shrine (docs/settlements/edfu.md §10) { at, y, yaw }: a round table of stone on its
+ * pedestal heaped with round loaves, a haunch, figs, lotus flowers laid over, two jars of wine and water beside it;
+ * a tall bronze incense stand with a burning pan.
+ */
+export function offeringTable(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, yaw = el.yaw ?? 0, c = Math.cos(yaw), s = Math.sin(yaw), W = (u, v) => [x + c * u - s * v, z + s * u + c * v];
+  bag.add('granite_black', lathe([[0.22, 0], [0.22, 0.06], [0.12, 0.1], [0.1, 0.78], [0.38, 0.84], [0.4, 0.9], [0.001, 0.9]], 16, null, x, y, z));
+  for (const [u, v, r] of [[-0.18, -0.1, 0.1], [0.12, -0.14, 0.09], [0.0, 0.14, 0.1], [0.2, 0.12, 0.08], [-0.2, 0.15, 0.08]]) { const [px, pz] = W(u, v); bag.add('limewash_yellow', lathe([[0.001, 0], [r, 0.01], [r * 0.95, 0.05], [r * 0.5, 0.08], [0.001, 0.085]], 9, null, px, y + 0.9, pz)); }
+  { const [px, pz] = W(0, -0.02); bag.add('limewash_red', lathe([[0.001, 0], [0.08, 0.02], [0.07, 0.18], [0.03, 0.26], [0.001, 0.27]], 8).rotateZ(Math.PI / 2.4).translate(px, y + 1.02, pz)); }
+  for (const [u, v] of [[0.06, 0.02], [-0.08, 0.04], [0.02, -0.12]]) { const [px, pz] = W(u, v); bag.add('fresco_green', lathe([[0.001, 0], [0.05, 0.03], [0.07, 0.09], [0.06, 0.1], [0.04, 0.05], [0.001, 0.04]], 8, null, px, y + 0.97, pz)); }
+  for (const u of [-0.55, 0.55]) { const [px, pz] = W(u, 0.1); bag.add('terracotta', lathe([[0.001, 0], [0.08, 0.02], [0.16, 0.25], [0.15, 0.42], [0.07, 0.55], [0.08, 0.6], [0.001, 0.6]], 10, null, px, y, pz)); }
+  const [ix, iz] = W(0.75, -0.3);
+  bag.add('bronze', lathe([[0.14, 0], [0.14, 0.03], [0.03, 0.06], [0.025, 1.15], [0.12, 1.22], [0.13, 1.28], [0.1, 1.27], [0.001, 1.25]], 10, null, ix, y, iz));
+  bag.add('pottery_dark', lathe([[0.09, 0], [0.09, 0.02], [0.001, 0.025]], 8, null, ix, y + 1.255, iz));
+  col.circle(x, z, 0.42, y, y + 1.0); col.circle(ix, iz, 0.15, y, y + 1.3);
 }

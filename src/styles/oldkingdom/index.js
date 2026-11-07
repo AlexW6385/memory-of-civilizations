@@ -5,7 +5,7 @@
 // roofs and courtyards — and the great stone Wall of the Crow with its tunnel gate.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles, frustum } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
 import { loft, ring } from '../egyptian/objects.js';
@@ -284,37 +284,76 @@ function causeway(el, { bag, col }) {
 }
 
 /**
- * mud_house: a house of the workers' town { rect, seed }: mudbrick walls plastered with mud, a
- * door, a small court open to the sky at one end, flat roofs of palm logs and mud, a few
- * storage bins and an oven in the court.
+ * mud_house: a house of the workers' town (docs/settlements/giza.md §5b) { rect, seed, furnish }: mudbrick walls
+ * plastered with mud, the foot of the outer walls darker with the dirt of the lane; the door from the lane into the
+ * court (or into the room where there is no court) with its palm-log lintel and stone threshold; the roofed part of
+ * palm logs under mud. Furnished (AERA's Eastern Town House: "a main room with a sitting bench, and a sleeping niche";
+ * "an area for grinding and storage facilities, pottery jars set in the floor, and a small circular granary"): in the
+ * room a mud bench along the back wall and the sleeping niche walled off at one end, a mat and a headrest in it, the
+ * logs of the roof seen from beneath; in the court a domed oven, the granary, jars sunk in the floor, the saddle quern
+ * on its kerb, water and storage jars.
  */
 function mudHouse(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 2.6 + rand() * 0.6, th = 0.45;
-  const W = x1 - x0, D = z1 - z0, court = rand() < 0.7;
-  const split = court ? x0 + W * (0.45 + rand() * 0.2) : x1;
-  for (const [a, b, gap] of [[[x0, z0], [x1, z0], false], [[x1, z0], [x1, z1], false], [[x1, z1], [x0, z1], true], [[x0, z1], [x0, z0], false]]) {
-    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
-    const pieces = gap ? [[0, L * 0.3], [L * 0.3 + 1.0, L]] : [[0, L]];
-    for (const [s0, s1] of pieces) {
-      const p = [a[0] + ux * s0, a[1] + uz * s0], q = [a[0] + ux * s1, a[1] + uz * s1], t = [];
-      beamTris(t, [p[0], 0, p[1]], [q[0], 0, q[1]], th / 2, h);
-      bag.add('mud_plaster', fromTriangles(t));
-      col.segment(p, q, th, 0, h);
-    }
-  }
+  const W = x1 - x0, court = rand() < 0.7, split = court ? x0 + W * (0.45 + rand() * 0.2) : x1, F = !!el.furnish;
+  const xd = court ? (split + x1) / 2 : (x0 + split) / 2, dw = 0.9;
+  const seg = (p, q, mat = 'mud_plaster', y1 = h) => { const t = []; beamTris(t, [p[0], 0, p[1]], [q[0], 0, q[1]], th / 2, y1); bag.add(mat, fromTriangles(t)); col.segment(p, q, th, 0, y1); };
+  // the outer walls (the long ones run past the corners, the ends stop against them), the door in the south wall
+  seg([x0 - th / 2, z0], [x1 + th / 2, z0]); seg([x0, z0 + th / 2], [x0, z1 - th / 2]); seg([x1, z0 + th / 2], [x1, z1 - th / 2]);
+  seg([x0 - th / 2, z1], [xd - dw / 2, z1]); seg([xd + dw / 2, z1], [x1 + th / 2, z1]);
+  bag.add('timber', box(xd - dw / 2 - 0.25, 1.95, z1 - th / 2 - 0.02, xd + dw / 2 + 0.25, 2.12, z1 + th / 2 + 0.02));
+  bag.add('mud_plaster', box(xd - dw / 2 - 0.02, 2.11, z1 - th / 2 + 0.01, xd + dw / 2 + 0.02, h - 0.01, z1 + th / 2 - 0.01));
+  bag.add('limestone_core', box(xd - dw / 2 + 0.01, -0.05, z1 - th / 2 - 0.05, xd + dw / 2 - 0.01, 0.08, z1 + th / 2 + 0.05));
+  // the lane's dirt on the foot of the outer walls
+  const e = 0.012, o = th / 2;
+  [[x0 - o - e, z0 - o - e, x1 + o + e, z0 - o + 0.003, 0.45], [x0 - o - e, z0 - o, x0 - o + 0.003, z1 + o, 0.5], [x1 + o - 0.003, z0 - o, x1 + o + e, z1 + o, 0.55],
+    [x0 - o - e, z1 + o - 0.003, xd - dw / 2 - 0.01, z1 + o + e, 0.6], [xd + dw / 2 + 0.01, z1 + o - 0.003, x1 + o + e, z1 + o + e, 0.62]].forEach(([p0, p1, q0, q1, t]) => bag.add('banco_rough', box(p0, -0.05, p1, q0, t, q1)));
   if (court) {
-    const t = [];
-    beamTris(t, [split, 0, z0], [split, 0, z1 - 1.4], th / 2, h);
-    bag.add('mud_plaster', fromTriangles(t));
-    col.segment([split, z0], [split, z1 - 1.4], th, 0, h);
-    // an oven and two storage bins in the court
-    bag.add('mudbrick', box(split + 0.6, 0, z0 + 0.6, split + 1.6, 0.9, z0 + 1.6));
-    bag.add('mud_plaster', box(x1 - 1.4, 0, z0 + 0.6, x1 - 0.6, 1.2, z0 + 1.4));
+    seg([split, z0 + th / 2], [split, z1 - 1.4]);
+    if (!F) { bag.add('mudbrick', box(split + 0.6, 0, z0 + 0.6, split + 1.6, 0.9, z0 + 1.6)); bag.add('mud_plaster', box(x1 - 1.4, 0, z0 + 0.6, x1 - 0.6, 1.2, z0 + 1.4)); }
   }
-  bag.add('timber', box(x0 - 0.1, h, z0 - 0.1, split + 0.1, h + 0.12, z1 + 0.1));
-  bag.add('mud_plaster', box(x0 - 0.1, h + 0.12, z0 - 0.1, split + 0.1, h + 0.3, z1 + 0.1));
-  col.floor([x0, z0, split, z1], h + 0.3);
-  void W; void D;
+  // the roof: palm logs under mud, the eaves of the logs showing
+  const rx1 = split + (court ? th / 2 : 0);
+  bag.add('timber', box(x0 - 0.25, h, z0 - 0.25, rx1 + 0.1, h + 0.12, z1 + 0.25));
+  bag.add('mud_plaster', box(x0 - 0.25, h + 0.12, z0 - 0.25, rx1 + 0.1, h + 0.3, z1 + 0.25));
+  col.floor([x0, z0, rx1, z1], h + 0.3);
+  if (!F) return;
+  const ix0 = x0 + th / 2, iz0 = z0 + th / 2, iz1 = z1 - th / 2, ix1 = split - (court ? th / 2 : th / 2), logs = [];
+  // the logs seen from beneath, across the short span
+  for (let x = ix0 + 0.12; x < ix1 - 0.05; x += 0.26) beamTris(logs, [x, h - 0.12, iz0], [x, h - 0.12, iz1], 0.1, 0.12);
+  bag.add('palm_trunk', fromTriangles(logs));
+  // the sitting bench along the back (north) wall, the sleeping niche walled off at the west end
+  const nw = Math.min(2.0, (ix1 - ix0) * 0.4);
+  bag.add('mud_plaster', box(ix0 + nw + 0.13, 0, iz0 - 0.02, ix1 - 0.1, 0.38, iz0 + 0.48)); col.rect([ix0 + nw + 0.15, iz0, ix1 - 0.1, iz0 + 0.48], 0, 0.38);
+  bag.add('mud_plaster', box(ix0 - 0.02, 0, iz0 - 0.02, ix0 + nw + 0.02, 0.42, iz0 + 1.0)); col.rect([ix0, iz0, ix0 + nw, iz0 + 1.0], 0, 0.42);
+  bag.add('mud_plaster', box(ix0 + nw, 0, iz0 - 0.02, ix0 + nw + 0.15, 1.5, iz0 + 1.15)); col.rect([ix0 + nw, iz0, ix0 + nw + 0.15, iz0 + 1.15], 0, 1.5);
+  bag.add('reed_mat', box(ix0 + 0.05, 0.425, iz0 + 0.06, ix0 + nw - 0.08, 0.442, iz0 + 0.94));
+  bag.add('limestone_core', lathe([[0.001, 0], [0.09, 0.0], [0.03, 0.03], [0.03, 0.12], [0.1, 0.17], [0.11, 0.19], [0.001, 0.18]], 8).scale(1, 1, 0.45).translate(ix0 + 0.25, 0.442, iz0 + 0.5));
+  bag.add('terracotta', lathe([[0.001, 0], [0.07, 0.01], [0.13, 0.12], [0.12, 0.25], [0.07, 0.32], [0.08, 0.35], [0.001, 0.35]], 10, null, ix1 - 0.4, 0.38, iz0 + 0.24));
+  if (!court) return;
+  const cx0 = split + th / 2, cz0 = z0 + th / 2, cx1 = x1 - th / 2;
+  // the domed oven in the court's north-west corner, its mouth to the south, soot over the mouth
+  const ox = cx0 + 0.65, oz = cz0 + 0.65;
+  bag.add('mudbrick', lathe([[0.55, 0], [0.56, 0.3], [0.45, 0.65], [0.25, 0.85], [0.001, 0.9]], 14, null, ox, 0, oz));
+  bag.add('pottery_dark', box(ox - 0.18, 0.05, oz + 0.47, ox + 0.18, 0.4, oz + 0.53));
+  col.circle(ox, oz, 0.56, 0, 0.9);
+  // the small circular granary in the north-east corner, its filling hole at the top, a stone on it
+  const gx = cx1 - 0.6, gz = cz0 + 0.6;
+  bag.add('mud_plaster', lathe([[0.52, 0], [0.55, 0.5], [0.5, 1.0], [0.32, 1.35], [0.1, 1.45], [0.1, 1.5], [0.001, 1.5]], 14, null, gx, 0, gz));
+  bag.add('limestone_core', lathe([[0.001, 0], [0.13, 0], [0.12, 0.06], [0.001, 0.08]], 8, null, gx, 1.5, gz));
+  col.circle(gx, gz, 0.55, 0, 1.5);
+  // jars set in the floor (their rims and dark mouths at the floor) along the east wall
+  for (let k = 0; k < 2; k++) { const jz = gz + 1.1 + k * 0.62; if (jz > z1 - 1.0) break; bag.add('terracotta', lathe([[0.22, 0], [0.23, 0.04], [0.17, 0.05], [0.16, 0.03]], 12, null, cx1 - 0.45, 0, jz)); bag.add('pottery_dark', lathe([[0.16, 0.0], [0.16, 0.012], [0.001, 0.012]], 10, null, cx1 - 0.45, 0, jz)); }
+  // the saddle quern on its low kerb, its grinding stone on it, by the court's west wall
+  const qz = Math.min(z1 - 1.6, cz0 + 1.9), qx = cx0 + 0.45;
+  if (qz > oz + 0.9) {
+    bag.add('mud_plaster', box(qx - 0.3, 0, qz - 0.45, qx + 0.3, 0.18, qz + 0.45));
+    const g = frustum([-0.2, -0.32, 0.2, 0.32], 0, 0.1, 0.02, 0.02, 0.02, 0.02); g.rotateX(-0.12); g.translate(qx, 0.2, qz); bag.add('granite_red', g);
+    bag.add('basalt', lathe([[0.001, 0], [0.05, 0.005], [0.06, 0.04], [0.04, 0.07], [0.001, 0.075]], 8).scale(2.6, 1, 1).rotateY(Math.PI / 2).translate(qx, 0.29, qz + 0.05));
+    col.rect([qx - 0.3, qz - 0.45, qx + 0.3, qz + 0.45], 0, 0.35);
+  }
+  // a water jar by the court door
+  bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.02], [0.2, 0.2], [0.19, 0.38], [0.1, 0.5], [0.11, 0.55], [0.001, 0.55]], 10, null, Math.min(cx1 - 0.35, xd + dw / 2 + 0.4), 0, z1 - th / 2 - 0.35));
 }
 
 /** gallery_hall: one of the long halls of the workers' town { rect, h } — a colonnade down the middle under a roof, a porch at the end, sleeping platforms along the walls. */
@@ -327,10 +366,31 @@ function galleryHall(el, { bag, col }) {
     col.segment(a, b, th, 0, h);
   }
   const zc = (z0 + z1) / 2, n = Math.round((x1 - x0) / 3.2);
-  for (let k = 1; k < n; k++) { const x = x0 + (x1 - x0) * k / n; bag.add('timber', box(x - 0.18, 0, zc - 0.18, x + 0.18, h, zc + 0.18)); col.rect([x - 0.2, zc - 0.2, x + 0.2, zc + 0.2], 0, h); }
-  bag.add('timber', box(x0, h, z0, x1, h + 0.15, z1));
-  bag.add('mud_plaster', box(x0 - 0.2, h + 0.15, z0 - 0.2, x1 + 0.2, h + 0.4, z1 + 0.2));
-  for (const z of [z0 + 0.9, z1 - 0.9]) bag.add('mudbrick', box(x0 + 2, 0, z - 0.6, x1 - 0.5, 0.5, z + 0.6));
+  // the colonnade down the middle: round wooden posts on limestone bases, a beam along their heads carrying the roof's logs
+  for (let k = 1; k < n; k++) {
+    const x = x0 + (x1 - x0) * k / n;
+    bag.add('limestone_core', lathe([[0.3, -0.1], [0.3, 0.12], [0.24, 0.18], [0.001, 0.18]], 10, null, x, 0, zc));
+    bag.add('timber', lathe([[0.15, 0.17], [0.13, h - 0.28], [0.001, h - 0.28]], 8, null, x, 0, zc));
+    col.rect([x - 0.25, zc - 0.25, x + 0.25, zc + 0.25], 0, h);
+  }
+  { const t = []; beamTris(t, [x0 + 0.3, h - 0.3, zc], [x1 - 0.3, h - 0.3, zc], 0.14, 0.3); bag.add('timber', fromTriangles(t)); }
+  const logs = [];
+  for (let x = x0 + 0.5; x < x1 - 0.3; x += 0.32) beamTris(logs, [x, h - 0.13, z0 + 0.1], [x, h - 0.13, z1 - 0.1], 0.11, 0.12);
+  bag.add('palm_trunk', fromTriangles(logs));
+  bag.add('mud_plaster', box(x0 - 0.2, h, z0 - 0.2, x1 + 0.2, h + 0.4, z1 + 0.2));
+  // the sleeping platforms along both walls, mats and bundles on them; a hearth and jars in the open porch at the west end
+  for (const [z, s2] of [[z0 + th / 2, 1], [z1 - th / 2, -1]]) {
+    bag.add('mudbrick', box(x0 + 2, 0, Math.min(z - s2 * 0.02, z + s2 * 1.0), x1 - th / 2 + 0.02, 0.5, Math.max(z - s2 * 0.02, z + s2 * 1.0)));
+    col.rect([x0 + 2, Math.min(z, z + s2 * 1.0), x1, Math.max(z, z + s2 * 1.0)], 0, 0.5);
+    for (let x = x0 + 2.3, k = 0; x < x1 - 2; x += 2.1, k++) {
+      if ((k + (s2 > 0 ? 0 : 1)) % 3 === 2) continue;
+      bag.add('reed_mat', box(x, 0.505, Math.min(z + s2 * 0.08, z + s2 * 0.92), x + 1.85, 0.52, Math.max(z + s2 * 0.08, z + s2 * 0.92)));
+      if (k % 2) bag.add('cloth_white', lathe([[0.001, 0], [0.16, 0.02], [0.18, 0.12], [0.12, 0.2], [0.001, 0.22]], 8).scale(1.6, 1, 1).translate(x + 0.4, 0.52, z + s2 * 0.3));
+    }
+  }
+  bag.add('plaster_grey', lathe([[0.5, 0], [0.5, 0.03], [0.001, 0.03]], 12, null, x0 + 1.0, 0, zc - 0.9));
+  for (let k = 0; k < 3; k++) { const t = k * 2.1; bag.add('limestone_core', lathe([[0.001, 0], [0.1, 0.01], [0.11, 0.12], [0.001, 0.14]], 6, null, x0 + 1.0 + Math.cos(t) * 0.32, 0, zc - 0.9 + Math.sin(t) * 0.32)); }
+  for (const dz of [0.6, 1.2]) bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.02], [0.2, 0.25], [0.18, 0.5], [0.09, 0.62], [0.1, 0.66], [0.001, 0.66]], 10, null, x0 + 0.7, 0, zc + dz));
   col.floor([x0, z0, x1, z1], h + 0.4);
 }
 
@@ -380,6 +440,13 @@ function bakery(el, { bag, col }) {
     const g = lathe(bell, 9); g.rotateX(Math.PI); g.translate(sx + ox, 0.08 + 0.31 + k * 0.24, sz + oz); bag.add('pottery_dark', g);
   }
   col.rect([sx - 0.55, sz - 0.55, sx + 0.55, sz + 0.55], 0, 0.9);
+  // beer brewed from the same dough (AERA: grain distributed "to create the beer and bread"): tall jars stoppered
+  // with mud, stood in a row along the east wall
+  for (let k = 0; k < 4; k++) {
+    const jx = x1 - th / 2 - 0.25, jz = z0 + th / 2 + 2.2 + k * 0.42; if (jz > hz0 - 0.3) break;
+    bag.add('terracotta', lathe([[0.04, 0], [0.12, 0.08], [0.17, 0.35], [0.14, 0.62], [0.07, 0.72], [0.08, 0.76], [0.001, 0.76]], 10, null, jx, 0, jz));
+    bag.add('mud_plaster', lathe([[0.09, 0], [0.09, 0.03], [0.06, 0.1], [0.001, 0.12]], 8, null, jx, 0.75, jz));
+  }
   // the two vats for the dough, sunk in rings of mudbrick
   for (const vx of [mx + 0.9, x1 - th / 2 - 0.8]) {
     const vz = z0 + th / 2 + 1.1;
@@ -532,12 +599,35 @@ function royalShip(el, { bag }) {
 }
 const X = [1, 0, 0], Y = [0, 1, 0];
 
+/**
+ * stone_sledge: a block of limestone on its wooden sledge, as hauled from the quay up to the works (docs/settlements/
+ * giza.md §5c) { at, y, rot, w (block width), len }: two runners turned up at the front, crossbars, the block lashed
+ * down with ropes over it, the hauling rope running forward from the runners' noses and lying slack on the ground.
+ */
+function stoneSledge(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, a = el.rot ?? 0, c = Math.cos(a), s2 = Math.sin(a), W = el.w ?? 1.2, Lb = el.len ?? 1.8;
+  const P = (u, v, h) => [x + c * u - s2 * v, y + h, z + s2 * u + c * v];
+  const T = [], R = [];
+  for (const v of [-W * 0.42, W * 0.42]) {
+    beamTris(T, P(-Lb / 2 - 0.3, v, 0), P(Lb / 2 + 0.2, v, 0), 0.08, 0.16);
+    beamTris(T, P(Lb / 2 + 0.2, v, 0.02), P(Lb / 2 + 0.6, v, 0.3), 0.08, 0.14);
+  }
+  for (let u = -Lb / 2 - 0.1; u < Lb / 2 + 0.2; u += 0.45) beamTris(T, P(u, -W * 0.55, 0.16), P(u, W * 0.55, 0.16), 0.06, 0.1);
+  bag.add('timber', fromTriangles(T));
+  bag.add('tura_limestone', turnedBox(x, z, a, Lb / 2, W / 2, y + 0.26, y + 0.26 + W * 0.85));
+  for (const u of [-Lb * 0.3, Lb * 0.3]) for (const sg of [-1, 1]) beamTris(R, P(u, sg * (W / 2 + 0.02), 0.2), P(u, sg * (W / 2 + 0.02), 0.26 + W * 0.85 + 0.02), 0.02, 0.0001 + 0.03);
+  for (const u of [-Lb * 0.3, Lb * 0.3]) beamTris(R, P(u, -W / 2 - 0.02, 0.26 + W * 0.85), P(u, W / 2 + 0.02, 0.26 + W * 0.85), 0.02, 0.03);
+  for (const v of [-W * 0.42, W * 0.42]) beamTris(R, P(Lb / 2 + 0.6, v, 0.3), P(Lb / 2 + 4.5, v * 0.3, 0.02), 0.02, 0.03);
+  beamTris(R, P(Lb / 2 + 4.5, 0, 0.0), P(Lb / 2 + 9, 0.6, 0.0), 0.025, 0.04);
+  bag.add('rope_fibre', fromTriangles(R));
+  col.rect([x - Lb / 2 - 0.4, z - Lb / 2 - 0.4, x + Lb / 2 + 0.4, z + Lb / 2 + 0.4].map((v, i) => v + (i % 2 ? 0 : 0)), y, y + 0.3 + W);
+}
 registerStyle('oldkingdom', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
     ok_pyramid: okPyramid, mastaba, ok_temple: okTemple, causeway, mud_house: mudHouse, gallery_hall: galleryHall, crow_wall: crowWall,
-    boat_pit: boatPit, royal_ship: royalShip, bakery, ok_pyramid_interior: pyramidInterior,
+    boat_pit: boatPit, royal_ship: royalShip, bakery, ok_pyramid_interior: pyramidInterior, stone_sledge: stoneSledge,
   },
   objects: {},
 });

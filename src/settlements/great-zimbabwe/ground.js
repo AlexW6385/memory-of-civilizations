@@ -3,6 +3,7 @@
 // in) and msasa trees beyond; the high plateau's clear, bright sky.
 
 import { RADIUS, HILL, height, huts, inEnclosure, inWalled, onAscent } from './layout.js';
+import { kraals } from './life.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.05, grass: 0.6, rock: 0, soil: 0.35, fields: 0, dry: 0.75, warmth: 0.7, red: 0.55, road: 0, snow: 0, forest: 0 };
@@ -13,7 +14,7 @@ function cover(x, z, h, ny) {
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inEnclosure(x, z, 4) || inWalled(x, z, 3) || onAscent(x, z, 3) || huts().some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.r + 2)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inEnclosure(x, z, 4) || inWalled(x, z, 3) || onAscent(x, z, 3) || huts().some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.r + 2) || kraals().some((k) => Math.hypot(k.c[0] - x, k.c[1] - z) < k.r + 3)) return null;
   const h = height(x, z);
   if (h > 6) return { boulder: 0.6, grass_dry: 6, acacia: 0.02 };
   // miombo savanna: open woodland of msasa (stood in for by acacia and neem), wild figs, granite boulders in the long dry grass
