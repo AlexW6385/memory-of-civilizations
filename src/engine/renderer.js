@@ -7,7 +7,7 @@ import { Fn, rtt, pass, mrt, output, normalView, directionToColor, colorToDirect
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { smaa } from 'three/addons/tsl/display/SMAANode.js';
-import { CSMShadowNode } from 'three/addons/csm/CSMShadowNode.js';
+import { CachedCSM } from './shadow-cache.js';
 import { SkyMesh, SKY_FAR } from './sky.js';
 import { PLANET_RADIUS } from '../planet/sites.js';
 import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
@@ -109,7 +109,10 @@ export class Renderer {
     r.setPixelRatio(this.dprPin ?? Math.min(devicePixelRatio, Q.pixelRatio));
     sun.shadow.mapSize.set(Q.shadowMap, Q.shadowMap);
     if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
-    const csm = new CSMShadowNode(sun, { cascades: Q.cascades, maxFar: 320, mode: 'practical', lightMargin: LIGHT_MARGIN });
+    // the static casters' depth kept per cascade and drawn again only when it would change
+    // (src/engine/shadow-cache.js); `?shadowcache=0` draws every cascade whole, as before
+    const cache = new URLSearchParams(location.search).get('shadowcache') !== '0';
+    const csm = new CachedCSM(sun, { cascades: Q.cascades, maxFar: 320, mode: 'practical', lightMargin: LIGHT_MARGIN }, cache);
     csm.fade = true;
     sun.shadow.shadowNode = csm;
     // the lamps' pool: a fixed number of lights per preset (a change recompiles every material)
@@ -331,7 +334,8 @@ export class Renderer {
     HITCH.since('render update', t0);
     // the shadow cascades: the nearest drawn every frame, the middle one every second frame, the
     // farthest every third — far shadows move by a texel or less in a frame; each map keeps the
-    // matrix it was drawn with, so a map drawn a frame ago still falls where it should
+    // matrix it was drawn with, so a map drawn a frame ago still falls where it should (the cadence
+    // and the cache of static casters: src/engine/shadow-cache.js)
     const csm = this.sun.shadow.shadowNode, L = csm?.lights;
     if (HITCH.on && csm?._shadowNodes?.length && !csm._hitchTimed) {
       // (each cascade's drawing timed: three calls renderShadow from inside the scene pass)
@@ -342,9 +346,7 @@ export class Renderer {
       });
     }
     if (L?.length && this.sun.castShadow) {
-      const n = this.frameNo = (this.frameNo || 0) + 1;
       for (let i = 0; i < L.length; i++) {
-        L[i].shadow.autoUpdate = false; if (i === 0 || n % (i + 1) === 0) L[i].shadow.needsUpdate = true;
         // shadow casters by size (src/engine/layers.js): the small things in the first cascade
         // only, the middle-sized in the first two, the big masses in all three
         L[i].shadow.camera.layers.mask = cascadeMask(i, L.length);
