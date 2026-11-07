@@ -129,5 +129,8 @@ function monks() {
 }
 export const people = monks();
 
-export const hall = { ...hallPlan, elements: hallPlan.elements.filter((e) => !(e.t === 'obj' && (e.kind === 'pagoda' || e.kind === 'dharani_pillar'))), origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 14, -20, HALL.origin[0] + 11, 20], viewY: 13 };
+// the upper terrace's open room split either side of the axis, so that the street life's people stand beside the way
+// up to the hall and not on it (the arrival is on the axis)
+const rooms = hallPlan.rooms.flatMap((r) => (r.id === 'upper-terrace' ? [{ ...r, id: 'upper-terrace-north', rect: [r.rect[0], r.rect[1], r.rect[2], -3] }, { ...r, id: 'upper-terrace-south', rect: [r.rect[0], 3, r.rect[2], r.rect[3]] }] : [r]));
+export const hall = { ...hallPlan, rooms, elements: hallPlan.elements.filter((e) => !(e.t === 'obj' && (e.kind === 'pagoda' || e.kind === 'dharani_pillar'))), origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 14, -20, HALL.origin[0] + 11, 20], viewY: 13 };
 export default hall;
