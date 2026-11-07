@@ -40,10 +40,15 @@ function templeLife() {
   fig([CX - 14.6, 1.8], T.bakan.y, [-1, 0], { ...brahmin, pose: 'stand' });
   // the dancers on the Terrace of Honour (CX − 113 … CX − 99, z ± 12, 1.4 up), off the axis of the approach
   const ty = 1.4;
-  for (const [x, z, d] of [[CX - 107.5, -4.2, [0, 1]], [CX - 105.5, -5.6, [0, 1]], [CX - 107.5, 4.2, [0, -1]], [CX - 105.5, 5.6, [0, -1]]]) {
-    fig([x, z], ty, d, { dress: 'wrap', top: 'bare', cloth: seed % 2 ? 'cloth_red' : 'cloth_ochre', cloth2: 'cloth_ochre', hair: 'bun', over: 'sash', feet: 'bare', pose: 'stand', arms: 'pray', h: 1.55 });
-  }
-  for (const [x, z] of [[CX - 110.5, -8.5], [CX - 109, -9.6], [CX - 110.5, 8.5], [CX - 109, 9.6]]) fig([x, z], ty, [0, -Math.sign(z)], { dress: 'wrap', top: 'bare', cloth: 'cloth_white', cloth2: 'cloth_brown', hair: 'short', feet: 'bare', pose: 'cross' });
+  // dancing as the apsaras of the reliefs dance: the knees bent and turned out, one foot lifted behind, the hands
+  // with their fingers bent back; in the tall three-pointed crown (mkot), a jewelled collar, the short sampot
+  // (the crown "with three points", as at Angkor Wat: https://en.wikipedia.org/wiki/Apsara_Dance [stated])
+  [[CX - 107.5, -4.2, [0, 1], 'apsara'], [CX - 105.5, -5.6, [0, 1], 'apsara2'], [CX - 107.5, 4.2, [0, -1], 'apsara2'], [CX - 105.5, 5.6, [0, -1], 'apsara']].forEach(([x, z, d, pose], i) => {
+    fig([x, z], ty, d, { dress: 'wrap', top: 'bare', cloth: i % 2 ? 'cloth_red' : 'cloth_ochre', cloth2: 'gilt_bronze', hair: 'bun', over: 'wesekh', hat: 'mkot', hatMat: 'gilt_bronze', feet: 'bare', pose, h: 1.55 });
+  });
+  // their musicians seated by them: an arched harp, drums across the lap, a flute (the harps, drums and flutes of
+  // the Angkorian reliefs: https://www.soundsofangkor.org/english/orchestras/old-orchestras-7-16th-c [stated])
+  [[CX - 110.5, -8.5, 'harp'], [CX - 109, -9.6, 'drum'], [CX - 110.5, 8.5, 'flute'], [CX - 109, 9.6, 'drum']].forEach(([x, z, pose]) => fig([x, z], ty, [0, -Math.sign(z)], { dress: 'wrap', top: 'bare', cloth: 'cloth_white', cloth2: 'cloth_brown', hair: 'short', feet: 'bare', pose }));
   // devotees on the causeway, walking in to the temple with their offerings
   const carries = ['basket', 'pot', 'pole', 'basket', 'none', 'pot', 'basket'];
   carries.forEach((carry, i) => fig([CAUSEWAY.outer[0] + 6 + i * 6.1, (i % 2 ? 1 : -1) * 1.6], 1.0, [1, 0], { dress: 'wrap', top: i % 3 ? 'bare' : '', cloth: ['cloth_red', 'cloth_ochre', 'cloth_brown', 'cloth_white'][i % 4], cloth2: 'cloth_white', hair: i % 2 ? 'bun' : 'short', feet: 'bare', carry }));

@@ -16,6 +16,7 @@ import { box, lathe, fromTriangles, rod, orientOutward } from '../../core/geom.j
 import { Matrix4, Vector3 } from '../../core/three.js';
 import '../qing/index.js';
 import { rectRoof, beamTris, flipTris } from '../ming/index.js';
+import { assembly, placer, tube, slathe } from '../../objects/kit.js';
 
 const S = 'sandstone_khmer', C = 'sandstone_carved';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -631,26 +632,91 @@ function kLibrary(el, ctx) {
   for (const N of [NS, [-NS[0], -NS[1]]]) portico(ctx, { c, N, y, d0: B, depth: dS, width: Math.min(3.2, A * 0.6), h: h * 0.75, tiers: 1 });
 }
 
-/** k_lion: a guardian lion { at, y, face (e|w|n|s), s } sitting up on its haunches on a moulded pedestal, its mane a ruff round the head. */
+/**
+ * k_lion: a guardian lion { at, y, face (e|w|n|s), s } on a moulded pedestal — the stylised Khmer singha of the
+ * Angkor Wat terraces: seated upright on its haunches, the forelegs straight and the chest thrown out, the head
+ * raised with its jaws open on bared fangs, the eyes bulging under a heavy brow; the mane in rows of flame-like
+ * curls round the face and down the chest and neck, a jewelled collar, the bushy tail curled up the back to a
+ * flame of hair. ("seated on their haunches", "a curled mane", "bulging eyes and bared fangs", "poised with open
+ * jaws", "symbolic forms … rather than realistic animals", some "adorned with jewelry":
+ * https://www.hdasianart.com/blogs/news/guardians-of-the-sacred-the-temple-lions-of-angkor [stated]; the proportions,
+ * the number and order of the curls, the collar [inferred].) The pedestal in stone courses; the lion one carved
+ * piece, built once and placed as an instance.
+ */
 function kLion(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, s = el.s ?? 1, f = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] }[el.face ?? 'e'], U = perp(f);
   const P = (u, v, w) => [x + (f[0] * w + U[0] * u) * s, y + v * s, z + (f[1] * w + U[1] * u) * s];
   const R = (u0, u1, w0, w1) => { const a = P(u0, 0, w0), b = P(u1, 0, w1); return [Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])]; };
-  bag.add(C, boxR(R(-0.42, 0.42, -0.62, 0.55), y, y + 0.15 * s));
-  bag.add(S, boxR(R(-0.36, 0.36, -0.56, 0.49), y + 0.15 * s, y + 0.58 * s));
-  bag.add(C, boxR(R(-0.4, 0.4, -0.6, 0.53), y + 0.58 * s, y + 0.7 * s));
-  col.rect(R(-0.42, 0.42, -0.62, 0.55), y, y + 1.9 * s);
-  const parts = [
-    [P(-0.2, 0.92, -0.26), P(0.2, 0.92, -0.26), 0.22], [P(0, 0.92, -0.26), P(0, 1.42, 0.08), 0.23],      // haunches, body
-    [P(-0.21, 0.76, -0.12), P(-0.21, 0.76, 0.14), 0.075], [P(0.21, 0.76, -0.12), P(0.21, 0.76, 0.14), 0.075], // hind feet
-    [P(-0.13, 0.74, 0.22), P(-0.12, 1.28, 0.1), 0.075], [P(0.13, 0.74, 0.22), P(0.12, 1.28, 0.1), 0.075],     // forelegs
-    [P(0, 1.62, 0.0), P(0, 1.62, 0.13), 0.28],                                                              // the mane
-    [P(0, 1.63, 0.1), P(0, 1.63, 0.3), 0.17], [P(0, 1.56, 0.28), P(0, 1.55, 0.42), 0.1],                     // head, muzzle
-    [P(-0.12, 1.8, 0.12), P(-0.14, 1.88, 0.12), 0.04], [P(0.12, 1.8, 0.12), P(0.14, 1.88, 0.12), 0.04],       // ears
-    [P(0, 0.76, -0.48), P(0, 1.0, -0.5), 0.04], [P(0, 1.0, -0.5), P(0, 1.3, -0.38), 0.04],                   // the tail curled up the back
-  ];
-  for (const [a, b, r] of parts) bag.add(C, limb(a, b, r * s, 10));
-  for (const u of [-0.13, 0.13]) bag.add(C, boxR(R(u - 0.08, u + 0.08, 0.16, 0.3), y + 0.7 * s, y + 0.78 * s));
+  // the pedestal: a plinth, a fillet, the die, a fillet and the overhanging cap in two steps
+  const courses = [[0.46, 0.64, 0, 0.1, C], [0.42, 0.6, 0.1, 0.15, C], [0.36, 0.54, 0.15, 0.55, S], [0.39, 0.57, 0.55, 0.6, C], [0.43, 0.61, 0.6, 0.66, C], [0.405, 0.585, 0.66, 0.7, C]];
+  for (const [hu, hw, v0, v1, m] of courses) bag.add(m, boxR(R(-hu, hu, -hw + 0.04, hw + 0.04), y + v0 * s, y + v1 * s));
+  col.rect(R(-0.46, 0.46, -0.6, 0.68), y, y + 1.95 * s);
+  const L = assembly('k-lion', lionParts);
+  const put = placer({ at: P(0, 0, 0.06).filter((_, i) => i !== 1), y: y + 0.7 * s, rot: Math.atan2(-f[0], -f[1]), s }, bag);
+  put(C, L.stone.clone());
+}
+/** A flame-like curl of the mane: from its root out along `o`, the tip turning up (`u`) and back on itself. */
+function flame(a, b, o, u, len, r) {
+  const p = (k, m) => [b[0] + o[0] * len * k + u[0] * len * m, b[1] + o[1] * len * k + u[1] * len * m, b[2] + o[2] * len * k + u[2] * len * m];
+  a('stone', tube([[...p(-0.15, 0), r], [...p(0.35, 0.02), r * 0.9], [...p(0.7, 0.14), r * 0.7], [...p(0.88, 0.38), r * 0.5], [...p(0.78, 0.56), r * 0.32], [...p(0.6, 0.52), r * 0.1]], 6));
+}
+/** The lion's carved body (front −z, the soles on y 0, about 1.25 high), one role: stone. */
+function lionParts(a) {
+  const st = (g) => a('stone', g), B = (r, p, k = [1, 1, 1]) => slathe(Array.from({ length: 9 }, (_, i) => { const t = i / 8 * Math.PI; return [Math.max(0.001, Math.sin(t) * r), -Math.cos(t) * r]; }), 14).scale(...k).translate(...p);
+  // the haunches and the body rising from them to the thrown-out chest
+  for (const sx of [-1, 1]) st(B(0.2, [sx * 0.17, 0.25, 0.14], [0.9, 1.05, 1.25]));
+  st(tube([[0, 0.12, 0.3, 0.16, 0.14], [0, 0.26, 0.22, 0.25, 0.24], [0, 0.5, 0.06, 0.22, 0.22], [0, 0.72, -0.07, 0.2, 0.23], [0, 0.88, -0.1, 0.17, 0.19]], 12));
+  // the hind legs folded along the sides, the feet forward on the pedestal
+  for (const sx of [-1, 1]) {
+    st(tube([[sx * 0.24, 0.2, 0.2, 0.08, 0.09], [sx * 0.27, 0.09, 0.06, 0.07, 0.065], [sx * 0.26, 0.05, -0.12, 0.06, 0.05]], 8));
+    paw(a, [sx * 0.26, 0, -0.12]);
+    // the forelegs: straight, a little apart, the elbows at the chest
+    st(tube([[sx * 0.12, 0.72, -0.13, 0.085, 0.09], [sx * 0.135, 0.5, -0.2, 0.075, 0.08], [sx * 0.135, 0.22, -0.24, 0.06, 0.065], [sx * 0.135, 0.07, -0.26, 0.06, 0.065]], 8));
+    paw(a, [sx * 0.135, 0, -0.27]);
+    for (const k of [0, 1, 2]) st(tube([[sx * (0.1 + k * 0.012), 0.6 - k * 0.12, -0.255 + k * 0.017, 0.012], [sx * (0.17 + k * 0.012), 0.62 - k * 0.12, -0.24 + k * 0.017, 0.012]], 5));   // the feathered hair at the elbows
+  }
+  // the head: the skull, the heavy brow, the bulging eyes, the broad nose, the open jaws and their fangs
+  const h = [0, 1.06, -0.16];
+  st(B(0.18, [0, 1.17, -0.17], [1.05, 0.9, 0.95]));
+  st(tube([[-0.13, 1.16, -0.29, 0.03], [-0.06, 1.18, -0.33, 0.035], [0.06, 1.18, -0.33, 0.035], [0.13, 1.16, -0.29, 0.03]], 6));
+  for (const sx of [-1, 1]) {
+    st(B(0.042, [sx * 0.075, 1.16, -0.315], [1, 0.85, 0.8]));
+    st(tube([[sx * 0.13, 1.28, -0.12, 0.04, 0.025], [sx * 0.16, 1.36, -0.1, 0.03, 0.02], [sx * 0.165, 1.4, -0.1, 0.004]], 6));                // the ears
+    st(tube([[sx * 0.1, 1.04, -0.33, 0.045], [sx * 0.07, 1.03, -0.4, 0.04], [sx * 0.035, 1.04, -0.43, 0.035]], 6));                          // the cheek of the upper lip
+    st(tube([[sx * 0.075, 1.0, -0.4, 0.014], [sx * 0.075, 0.96, -0.41, 0.003]], 5));                                                        // the upper fangs
+    st(tube([[sx * 0.06, 0.955, -0.375, 0.012], [sx * 0.06, 0.995, -0.385, 0.003]], 5));                                                       // the lower fangs
+  }
+  st(tube([[0, 1.14, -0.33, 0.045, 0.04], [0, 1.1, -0.42, 0.06, 0.045], [0, 1.07, -0.45, 0.065, 0.045]], 8));                                 // the nose
+  st(tube([[0, 1.05, -0.22, 0.12, 0.07], [0, 1.03, -0.36, 0.11, 0.05], [0, 1.02, -0.43, 0.08, 0.04]], 10));                                  // the upper jaw
+  st(tube([[0, 0.97, -0.2, 0.1, 0.05], [0, 0.935, -0.33, 0.085, 0.035], [0, 0.935, -0.39, 0.06, 0.025]], 10));                                 // the lower jaw, dropped open
+  st(tube([[0, 0.965, -0.22, 0.05, 0.02], [0, 0.968, -0.35, 0.04, 0.014]], 6));                                                               // the tongue
+  // the mane: a ring of flame curls round the face, a second behind it, a bib of them down the chest
+  const ring = (n, cz, rad, len, r, back) => {
+    for (let k = 0; k < n; k++) {
+      const t = (k + 0.5) / n * Math.PI * 2, o = [Math.cos(t), Math.sin(t), back], l = Math.hypot(...o), oo = o.map((v) => v / l);
+      flame(a, [Math.cos(t) * rad, h[1] + 0.07 + Math.sin(t) * rad * 1.05, cz], oo, [0, 0, 1], len, r);
+    }
+  };
+  ring(16, -0.16, 0.2, 0.085, 0.034, 0.5);
+  ring(15, -0.05, 0.235, 0.095, 0.038, 0.75);
+  ring(12, 0.07, 0.2, 0.09, 0.036, 1.1);
+  for (let row = 0; row < 3; row++) for (let k = 0; k < 4 - (row > 1 ? 1 : 0); k++) {
+    const n = 4 - (row > 1 ? 1 : 0), xx = (k - (n - 1) / 2) * 0.085;
+    flame(a, [xx, 0.86 - row * 0.1, -0.255 + row * 0.015], [0, -1, -0.25].map((v) => v / Math.hypot(0, 1, 0.25)), [0, 0, -1], 0.12, 0.03);
+  }
+  for (let k = 0; k < 4; k++) flame(a, [0, 1.12 - k * 0.1, 0.06 + k * 0.03], [0, -0.3, 1].map((v) => v / Math.hypot(0.3, 1)), [0, 1, 0], 0.12, 0.034);   // down the back of the neck
+  // the jewelled collar round the neck, a pendant on the chest
+  st(tube(Array.from({ length: 17 }, (_, k) => { const t = k / 16 * Math.PI * 2; return [Math.cos(t) * 0.205, 0.82 + Math.sin(t) * 0.04, -0.1 + Math.sin(t) * 0.215, 0.022]; }), 6, { capA: false, capB: false }));
+  for (let k = 0; k < 9; k++) { const t = Math.PI + (k + 0.5) / 9 * Math.PI; st(B(0.022, [Math.cos(t) * 0.215, 0.82 + Math.sin(t) * 0.04 + 0.01, -0.1 + Math.sin(t) * 0.225])); }
+  st(B(0.035, [0, 0.79, -0.33], [1, 1.3, 0.6]));
+  // the tail: up the back from the rump, its flame of hair over the shoulders
+  st(tube([[0, 0.12, 0.38, 0.045], [0, 0.35, 0.42, 0.04], [0, 0.6, 0.33, 0.035], [0, 0.75, 0.2, 0.032]], 7));
+  for (const [dx, k] of [[-0.05, 0], [0.05, 0.6], [0, 1.2]]) flame(a, [dx, 0.75, 0.2], [dx * 4, 0.5, -0.3 + k * 0.1].map((v, _, q) => v / Math.hypot(...q)), [0, 0, 1], 0.16, 0.035);
+}
+/** A paw on the ground at p: its pad and four toes, forward (−z). */
+function paw(a, p) {
+  a('stone', tube([[p[0], 0.05, p[2] + 0.04, 0.07, 0.05], [p[0], 0.04, p[2] - 0.03, 0.075, 0.04]], 8));
+  for (let k = 0; k < 4; k++) { const dx = (k - 1.5) * 0.034; a('stone', tube([[p[0] + dx, 0.03, p[2] - 0.04, 0.02, 0.028], [p[0] + dx * 1.2, 0.025, p[2] - 0.085, 0.017, 0.022], [p[0] + dx * 1.25, 0.012, p[2] - 0.1, 0.006]], 6)); }
 }
 
 /**
