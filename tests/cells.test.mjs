@@ -51,7 +51,7 @@ test('a settlement merged: the same triangles and copies, chosen once each', asy
     const b = buildPlan(plan, { instancing: true, detail: true });
     const group = new THREE.Group();
     for (const { mat, geometry, detail, shadowBig } of b.parts) { const m = make(geometry, mat); m.name = `${plan.id}:${mat}`; if (detail) m.userData.detail = true; if (shadowBig !== undefined) m.userData.shadowBig = shadowBig; group.add(m); if (!detail) before += tris(m); }
-    for (const { mat, geometry, matrices, colors, detail, big } of b.instanced) { const m = make(geometry, mat, matrices, colors); m.name = `${plan.id}:${mat}:inst`; if (detail) m.userData.detail = true; if (big !== undefined) m.userData.big = big; group.add(m); if (!detail) { before += tris(m); copies += m.count; } }
+    for (const { mat, geometry, matrices, colors, detail, big, first } of b.instanced) { const m = make(geometry, mat, matrices, colors); m.name = `${plan.id}:${mat}:inst`; if (detail) m.userData.detail = true; if (big !== undefined) m.userData.big = big; if (first) m.userData.first = first; group.add(m); if (!detail) { before += tris(m); copies += m.count; } }
     markMergeable(plan, group);
     recs.push({ group, plan });
   }

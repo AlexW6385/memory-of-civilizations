@@ -268,7 +268,8 @@ function instCells(p) {
   if (!g.boundingBox) g.computeBoundingBox();
   const bb = g.boundingBox, tri = g.index.count / 3, M = p.matrices, T = new THREE.Matrix4(), B = new THREE.Box3();
   const ext = [bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z];
-  let lod = lodKind(tri, ext, M);
+  const f0 = p.first ?? 0;
+  let lod = lodKind(tri, ext, M.subarray(f0 * 16, f0 * 16 + 16));
   // (pieces placed to be seen only near: world.js NEAR_REACH, merge.js)
   let reach = 0;
   if (p.reach?.length) { for (const v of p.reach) reach = Math.max(reach, v); if (reach < 200 && lod !== 'thin') lod = 'near'; }

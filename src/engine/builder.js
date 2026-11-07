@@ -109,7 +109,7 @@ function rebuild(b) {
     g.boundingSphere = new THREE.Sphere(new THREE.Vector3(sphere[0], sphere[1], sphere[2]), sphere[3]);
     return { mat, detail, shadowBig, geometry: g };
   });
-  const instanced = b.instanced.map(({ mat, key, detail, big, lod, pos, nor, index, matrices, colors, reach, reals }) => {
+  const instanced = b.instanced.map(({ mat, key, detail, big, first, lod, pos, nor, index, matrices, colors, reach, reals }) => {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
@@ -117,7 +117,7 @@ function rebuild(b) {
     g.computeBoundingBox(); g.computeBoundingSphere();
     // its coarse versions, made in the worker (merge.js, life-instances.js use them)
     if (lod !== undefined) g.userData.coarse = lod;
-    return { mat, key, detail, big, geometry: g, matrices, colors, reach, reals };
+    return { mat, key, detail, big, first, geometry: g, matrices, colors, reach, reals };
   });
   return { parts, instanced, lights: b.lights, colliders: b.colliders };
 }

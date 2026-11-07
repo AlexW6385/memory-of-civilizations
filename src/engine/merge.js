@@ -126,7 +126,8 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
       const proto = G.list[0].o.geometry;
       if (!proto.boundingBox) proto.computeBoundingBox();
       const tri = proto.index.count / 3, bb = proto.boundingBox;
-      const M0 = G.list[0].o.instanceMatrix.array;
+      // (the shape judged by its first copy as its plan found it: src/core/geom.js `first`)
+      const f0 = G.list[0].o.userData.first ?? 0, M0 = G.list[0].o.instanceMatrix.array.subarray(f0 * 16, f0 * 16 + 16);
       let lod = lodKind(tri, [bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z], M0);
       // pieces their plan places to be seen only near (a plant's spines: their reach)
       const reach = G.list.every(({ o }) => o.userData.reach !== undefined) ? Math.max(...G.list.map(({ o }) => o.userData.reach)) : null;

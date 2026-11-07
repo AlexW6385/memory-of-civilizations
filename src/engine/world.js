@@ -237,9 +237,10 @@ class Settlement {
     // repeated pieces: one prototype, a matrix per copy (src/core/geom.js, GeoBag); the life of the
     // streets is gathered settlement-wide once all its tiles are built (buildLife)
     const lifeList = plan.style === 'life' ? built.instanced : [];
-    for (const { mat, geometry, matrices, colors, detail, big, reach } of plan.style === 'life' ? [] : built.instanced) {
+    for (const { mat, geometry, matrices, colors, detail, big, first, reach } of plan.style === 'life' ? [] : built.instanced) {
       const m = buildingMesh(geometry, mat, matrices, colors);
       if (big !== undefined) m.userData.big = big;
+      if (first) m.userData.first = first;
       // placed pieces meant to be seen only near (their reach, src/core/geom.js addInstance): merge.js
       if (reach?.length) { let r = 0; for (const v of reach) r = Math.max(r, v); if (r < NEAR_REACH) m.userData.reach = r; }
       m.castShadow = castsShadow(mat);

@@ -351,6 +351,8 @@ function bigFirst(entry, big) {
   const perm = (A, w) => { if (!A) return A; const B = new A.constructor(A.length); order.forEach((i, j) => { for (let c = 0; c < w; c++) B[j * w + c] = A[i * w + c]; }); return B; };
   entry.matrices = perm(entry.matrices, 16); entry.colors = perm(entry.colors, 3); entry.reach = perm(entry.reach, 1);
   if (entry.reals) entry.reals = order.map((i) => entry.reals[i]);
+  const k0 = order.indexOf(0);
+  if (k0 > 0) entry.first = k0;
   return nb;
 }
 
@@ -534,6 +536,8 @@ export class GeoBag {
         for (const idx of groups) {
           const n = all[idx[0]].attributes.position.count;
           if (idx.length < INSTANCING.minCount || (idx.length - 1) * n < INSTANCING.minSaved) continue;
+          // (fine detail or not by the first piece as found, before the big ones are put first)
+          const i0 = idx[0];
           if (big) idx.sort((a, b) => big[b] - big[a] || a - b);
           const first = shapes[idx[0]];
           const { geometry, flat } = prototypeOf(all[idx[0]], first, d);
@@ -552,8 +556,10 @@ export class GeoBag {
             }
             M[o] = sx; M[o + 5] = sy; M[o + 10] = sz; M[o + 12] = tx; M[o + 13] = ty; M[o + 14] = tz; M[o + 15] = 1;
           });
-          const entry = { mat, geometry, matrices: M, detail: this.detail && isSmall(geometry, M) };
+          const k0 = idx.indexOf(i0), entry = { mat, geometry, matrices: M, detail: this.detail && isSmall(geometry, M.subarray(k0 * 16, k0 * 16 + 16)) };
           if (big && !entry.detail) { let nb = 0; for (const i of idx) nb += big[i]; if (nb < idx.length) entry.big = nb; }
+          // (the copy that was first, which the viewer's merge judges the shape by: merge.js lodKind)
+          if (k0 > 0) entry.first = k0;
           this.instanced.push(entry);
           for (const i of idx) take.add(i);
         }
