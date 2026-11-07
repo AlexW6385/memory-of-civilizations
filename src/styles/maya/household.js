@@ -77,11 +77,19 @@ export function soot(bag, c, n, w, h, seed = 1) {
 export function put(bag, kit, x, y, z, yaw = 0, s = 1) {
   for (const [mat, list] of kit.m) for (const g of list) bag.add(mat, place(g.clone(), x, y, z, yaw, s));
 }
-/** A patch on a face (plaster re-laid, or fallen away to show the core): an irregular flat piece of `mat` centred at c, facing n, w × h, standing `off` out. */
-export function patch(bag, mat, c, n, w, h, seed = 1, off = 0.008) {
+/**
+ * A patch on a face (plaster re-laid, fallen away to show the core, a crust of lichen): an irregular flat piece of
+ * `mat` centred at c, facing n (horizontal for a wall), w × h, standing `off` out; `tilt` leans its top back into a
+ * battered face (radians); `seg` its outline's points.
+ */
+export function patch(bag, mat, c, n, w, h, seed = 1, off = 0.008, tilt = 0, seg = 16) {
   const r = rng(seed), p1 = r() * 6, p2 = r() * 6, p3 = r() * 6;
-  const g = lathe([[0.001, 0], [0.5, 0], [0.5, 0.006], [0.001, 0.006]], 16, (th) => 0.86 + 0.1 * Math.sin(th * 2 + p1) + 0.05 * Math.sin(th * 5 + p2) + 0.03 * Math.sin(th * 9 + p3));
+  const g = lathe([[0.001, 0], [0.5, 0], [0.5, 0.006], [0.001, 0.006]], seg, (th) => 0.86 + 0.1 * Math.sin(th * 2 + p1) + 0.05 * Math.sin(th * 5 + p2) + 0.03 * Math.sin(th * 9 + p3));
   g.scale(w, 1, h);
-  if (Math.abs(n[1]) < 0.5) { g.rotateX(Math.PI / 2); g.rotateY(Math.atan2(n[0], n[2])); } else if (n[1] < 0) g.rotateX(Math.PI);
-  bag.add(mat, g.translate(c[0] + n[0] * off, c[1] + n[1] * off, c[2] + n[2] * off));
+  let o = n;
+  if (Math.abs(n[1]) < 0.5) {
+    g.rotateX(Math.PI / 2); if (tilt) g.rotateX(-tilt); g.rotateY(Math.atan2(n[0], n[2]));
+    if (tilt) { const l = Math.hypot(n[0], n[2]); o = [n[0] / l * Math.cos(tilt), Math.sin(tilt), n[2] / l * Math.cos(tilt)]; }
+  } else if (n[1] < 0) g.rotateX(Math.PI);
+  bag.add(mat, g.translate(c[0] + o[0] * off, c[1] + o[1] * off, c[2] + o[2] * off));
 }

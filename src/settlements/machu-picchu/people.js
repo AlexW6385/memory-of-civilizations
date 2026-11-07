@@ -67,5 +67,16 @@ export function people() {
 
   // the guard at the Guardhouse, seated in its open side
   figures.push(man({ at: [KNOLL.c[0] - 3.2, KNOLL.c[1] + 1.6], y: 2.2 * KNOLL.n + 0.3, rot: N, pose: 'sit_low', over: 'cape' }));
+  // the chaski's post on the road south of the fields (§5.3): a runner seated on the bench by its hut, his pututu and
+  // quipu beside him, another standing at the road's edge looking south for the next to come; travellers on the road
+  // with their loads in a cloth on the back (q'ipi), a woman with her child, a porter, a string of two llamas
+  gear.push({ t: 'chaski_bench', at: [5.75, 121.9], y: ground.height(5.75, 121.9), rot: 0 });
+  figures.push(man({ at: [5.55, 121.7], y: ground.height(5.55, 121.7), rot: W, pose: 'sit', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'belt', h: 1.62 }));
+  figures.push(man({ at: [3.5, 123.6], y: ground.height(3.5, 123.6), rot: S, cloth: 'cloth_white', cloth2: 'cloth_red', over: 'belt', pose: 'stand', h: 1.64 }));
+  for (const [x, z, rot, o] of [[5.6, 131, N, { carry: 'bundle' }], [6.6, 134, N, { carry: 'bundle', over: 'cape' }], [2.2, 112.5, S, {}], [5.8, 146, N, { carry: 'bundle' }]]) figures.push(man({ at: [x, z], y: ground.height(x, z), rot, ...o }));
+  figures.push(woman({ at: [6.9, 140.5], y: ground.height(6.9, 140.5), rot: N, carry: 'child', h: 1.5 }));
+  figures.push(woman({ at: [5.4, 137.8], y: ground.height(5.4, 137.8), rot: N, carry: 'bundle', h: 1.48 }));
+  for (const [x, z] of [[6.6, 149.5], [6.8, 152.0]]) figures.push({ t: 'animal', kind: 'llama', at: [x, z], y: ground.height(x, z), rot: N + (rand() - 0.5) * 0.2, seed: seed(), graze: false });
+  figures.push(man({ at: [6.4, 154.4], y: ground.height(6.4, 154.4), rot: N, pose: 'staff', staffMat: 'wood_dark', len: 1.1, over: 'cape' }));
   return { figures, gear };
 }
