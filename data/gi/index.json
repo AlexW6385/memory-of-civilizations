@@ -1379,7 +1379,7 @@
  },
  "qing-beijing-palace": {
   "site": "qing-beijing",
-  "hash": "193227250d3aafde",
+  "hash": "6b4c4e514bc90144",
   "rays": 128,
   "probes": 78200,
   "boxes": [
@@ -1402,8 +1402,8 @@
     ]
    }
   ],
-  "bytes": 1198555,
-  "seconds": 614,
+  "bytes": 1210284,
+  "seconds": 274,
   "baked": "2026-11-07"
  },
  "sainte-chapelle": {
