@@ -26,6 +26,7 @@ export const ground = {
     sky: { turbidity: 6.0, rayleigh: 1.3, mie: 0.012, mieG: 0.82, zenith: [0.12, 0.15, 0.24], horizon: [0.6, 0.6, 0.58] },
     fog: { color: [0.62, 0.6, 0.56], density: 0.0012, height: 0.02 },
     exposure: 0.55,
+    damp: 0.7,      // the Thames' damp and the rain: streaks on the stone and the brick, moss on the north feet of the walls
     wind: [0.5, 0.2],
     weather: [
       { id: 'overcast', weight: 3, clouds: 0.8, cloudDensity: 0.7, sun: 0.6, fog: 1.3 },

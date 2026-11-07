@@ -1,4 +1,4 @@
-import { lodTiles } from '../lod.js';
+import { lodTiles, openLots } from '../lod.js';
 // The terraces of Westminster and Lambeth (docs/settlements/london.md §5); the traffic of about 1870 (§5a): hansom
 // cabs and knifeboard omnibuses on Westminster Bridge, in Bridge Street and Parliament Street, gas lamps along them;
 // on the Thames the penny steamers, one at the floating pier by the bridge, and the coal lighters.
@@ -31,8 +31,39 @@ function traffic() {
   for (const e of L) e.riders = false;
   return [base('london-traffic', L), base('london-traffic-life', L.flatMap(ridersOf), 'life')];
 }
+/** The street sellers and passers-by about 1870 (§5b): costermongers with their barrows and a donkey-cart at the kerbs of
+ *  Bridge Street and of the road from the bridge into Lambeth, coster women with the round head-basket, gentlemen and
+ *  ladies, a crossing sweeper, a policeman. */
+function streetFolk() {
+  let sd = 1871; const rand = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296), L = [];
+  const fig = (at, rot, o) => { if (!inLot(at[0], at[1], 0.6)) L.push({ t: 'figure', at, y: GROUND, rot, h: 1.6 + rand() * 0.15, seed: Math.floor(rand() * 1e9), skin: 'skin_light', feet: 'shod', ...o }); };
+  const coster = (at, rot) => fig(at, rot, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_brown', hat: 'cap', hatMat: rand() < 0.5 ? 'cloth_red' : 'cloth_brown', over: 'collar', pose: rand() < 0.5 ? 'talk' : 'stand' });
+  const kerbs = [[62, BRIDGE.z - 5.6, W], [92, BRIDGE.z + 5.6, E], [280, BRIDGE.z - 5.6, W], [300, BRIDGE.z + 5.6, E], [318, BRIDGE.z - 5.6, W]];
+  for (const [i, [x, z, rot]] of kerbs.entries()) {
+    if (inLot(x, z, 2)) continue;
+    const side = z < BRIDGE.z ? -1 : 1;
+    if (i === 2) L.push({ t: 'cart', at: [x, z], y: GROUND, rot: rot + Math.PI, seed: 40 + i, kind: 'two', load: 'sacks', beast: 'donkey' });
+    else L.push({ t: 'handcart', at: [x, z], y: GROUND, rot: rot + Math.PI, seed: 40 + i, load: 'baskets' });
+    coster([x + 1.4, z + side * 0.9], side < 0 ? N : S);
+    if (rand() < 0.7) fig([x - 1.0, z - side * 0.9], side < 0 ? S : N, { dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'cap', hatMat: 'cloth_white', over: 'shawl', carry: rand() < 0.5 ? 'basket' : 'none' });
+  }
+  // the coster women with the round willow sieve on the head, walking
+  for (const [x, z, rot] of [[76, BRIDGE.z + 5.0, W], [290, BRIDGE.z - 5.2, E]]) fig([x, z], rot, { dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_red', hat: 'none', over: 'shawl', carry: 'basket' });
+  // gentlemen in black with their hats, ladies, a clerk hurrying, along both pavements of Bridge Street and Parliament Street
+  for (const [x, z, rot] of [[56, BRIDGE.z + 5.8, E], [70, BRIDGE.z - 5.8, W], [84, BRIDGE.z - 5.4, E], [100, BRIDGE.z + 5.6, W], [44.6, -200, N], [44.8, -188, S], [270, BRIDGE.z + 5.6, W]]) {
+    const lady = rand() < 0.35;
+    fig([x, z], rot, lady ? { dress: 'robe', cloth: rand() < 0.5 ? 'cloth_maroon' : 'cloth_green', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cape' }
+      : { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', beard: rand() < 0.5 });
+  }
+  // the crossing sweeper with his broom at the corner of Parliament Street, the policeman on his beat
+  fig([46, BRIDGE.z - 5.2], E, { dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'cap', hatMat: 'cloth_grey', carry: 'staff', pose: 'staff', len: 1.5, h: 1.45 });
+  fig([108, BRIDGE.z + 5.6], W, { dress: 'trousers', cloth: 'prussian_blue', cloth2: 'prussian_blue', hat: 'brim', hatMat: 'prussian_blue', over: 'belt' });
+  return L;
+}
+
 export async function houses() {
-  const all = lots(), plans = [];
-  plans.push(...lodTiles('london-terraces', 'victorian', all.map((l) => ({ t: 'terrace_house', ...l })), { R: RADIUS }));
-  return [...plans, ...traffic()];
+  // the two houses nearest the Lambeth end of the bridge stand open: hall, front parlour and back room (§5a)
+  const all = lots(), plans = [], open = openLots(all, [272, BRIDGE.z + 14], 2);
+  plans.push(...lodTiles('london-terraces', 'victorian', all.map((l) => ({ t: 'terrace_house', ...l, ...(open.has(l) ? { open: true } : {}) })), { R: RADIUS }));
+  return [...plans, ...traffic(), base('london-street-folk', streetFolk(), 'life')];
 }
