@@ -4,9 +4,9 @@
 // Court of the Lions: the Two Sisters with the Sala de los Ajimeces and the Mirador de Lindaraja, the
 // Abencerrajes, the Hall of the Kings.
 
-import { box, rod, place } from '../../core/geom.js';
+import { box, rod, place, fromTriangles } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
-import { holedWall, face, dress, archHead, cupola, starDome, starCeiling, plankVault, hipRoof, tileFloor, floorFountain, crenels, nColumn, archRun, dbl } from './halls.js';
+import { holedWall, face, dress, muqarnasDome, archHead, cupola, starDome, starCeiling, plankVault, hipRoof, tileFloor, floorFountain, crenels, nColumn, archRun, dbl } from './halls.js';
 
 const PL = 'plaster_white', SC = 'stucco_cream', SW = 'stucco_warm', MS = 'marble_smooth', RED = 'tuff_red';
 const q4 = (out, a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
@@ -51,6 +51,31 @@ function closedDoor(bag, f, u, y, w = 1.0, h = 2.9) {
 function pier(bag, col, r, y, h) { bag.add(SC, box(r[0], y, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h); }
 
 /**
+ * A niche under a muqarnas hood in a wall whose face f opens onto a gallery (docs/settlements/granada.md
+ * §4.8): the hole u0..u1 from the floor y to yt already cut through the wall (thickness `th` behind the
+ * face); the back filled from depth D, a raised floor, the lining dressed; the hood a half dome of
+ * niches springing at ys; a flat spandrel over it in the face, an alfiz of mouldings round the mouth.
+ */
+function muqarnasNiche(bag, col, f, u0, u1, y, ys, yt, th) {
+  const R = (u1 - u0) / 2, uc = (u0 + u1) / 2, D = R, rise = yt - ys - 0.05;
+  const back = f.R(-th, -D, u0, u1); bag.add(PL, box(back[0], y - 0.5, back[1], back[2], yt, back[3])); col.rect(back, y - 0.5, yt);
+  const fl = f.R(-D, 0, u0, u1); bag.add(MS, box(fl[0], y - 0.3, fl[1], fl[2], y + 0.14, fl[3])); col.floor(fl, y + 0.14);
+  const o = { band: false, dadoScript: false, shields: false, dado: 1.0 };
+  dress(bag, face(f.ax, f.at - f.n * D, f.n), u0, u1, y + 0.14, ys, [], o);
+  for (const [uu, s] of [[u0, 1], [u1, -1]]) dress(bag, face(f.ax === 'x' ? 'z' : 'x', uu, s), Math.min(f.at, f.at - f.n * D), Math.max(f.at, f.at - f.n * D), y + 0.14, ys, [], o);
+  const C = f.P(uc, 0, 0), hd = f.ax === 'x' ? [-f.n, 0] : [0, -f.n];
+  const outer = (t) => { const c = Math.abs(Math.cos(t) * hd[0] + Math.sin(t) * hd[1]), sN = Math.sqrt(Math.max(0, 1 - c * c)); return Math.min(c > 1e-3 ? D / c : 1e9, sN > 1e-3 ? R / sN : 1e9); };
+  muqarnasDome(bag, C[0], C[2], ys, R - 0.06, rise, [12, 12, 8, 8, 4], outer, null, { half: hd, gilt: false, depth: 0.12 });
+  // the spandrel in the face over the hood's mouth (the ellipse of the hood's front edge to the hole's top)
+  const t = [], K = 16;
+  for (let k = 0; k < K; k++) {
+    const a0 = Math.PI * k / K, a1 = Math.PI * (k + 1) / K, p0 = [uc + Math.cos(a0) * R, ys + Math.sin(a0) * rise], p1 = [uc + Math.cos(a1) * R, ys + Math.sin(a1) * rise];
+    q4(t, f.P(p0[0], p0[1], 0.012), f.P(p1[0], p1[1], 0.012), f.P(p1[0], yt, 0.012), f.P(p0[0], yt, 0.012));
+  }
+  bag.add(SC, dbl(t));
+  for (const [a, b] of [[[u0 - 0.12, y + 0.14], [u0 - 0.12, yt + 0.14]], [[u0 - 0.12, yt + 0.14], [u1 + 0.12, yt + 0.14]], [[u1 + 0.12, yt + 0.14], [u1 + 0.12, y + 0.14]]]) bag.add(SC, rod(f.P(a[0], a[1], 0.05), f.P(b[0], b[1], 0.05), 0.04, 4));
+}
+/**
  * comares: { rect (the Court of the Myrtles' open court), y } — the Comares palace (§4.2).
  */
 export function comares(el, ctx) {
@@ -79,10 +104,14 @@ export function comares(el, ctx) {
   }
   // ——— the side ranges east and west: rooms behind plain faces (doors, small windows); a passage east to the Court of the Lions
   const zN = z0 - 10.4, zS = z1 + 5.2, pass = [-9.6, -7.4];
+  // at the galleries' east and west ends, niches under muqarnas vaults (§4.8)
+  const nich = [[z0 - 3.75, z0 - 0.75], [z1 + 0.75, z1 + 3.75]], NY = [y + 2.55, y + 4.45];
   for (const [r, f, doors, holes] of [[[x0 - 7, zN, x0, zS], face('x', x0, 1), [-24, -14, -4], []], [[x1, zN, x1 + 7, zS], face('x', x1, -1), [-24, -16, -2], [[pass[0], pass[1], y, y + 3.4]]]]) {
-    Wl(r, y - 0.5, y + 9, holes); hipRoof(bag, r, y + 9, 1.6, 0.3);
-    const dh = doors.map((u) => [u - 1.1, u + 1.1, y, y + 3.1]), all = dh.concat(holes);
+    const nh = nich.map(([a, b]) => [a, b, y - 0.5, NY[1]]);
+    Wl(r, y - 0.5, y + 9, holes.concat(nh)); hipRoof(bag, r, y + 9, 1.6, 0.3);
+    const dh = doors.map((u) => [u - 1.1, u + 1.1, y, y + 3.1]), all = dh.concat(holes, nh.map((h) => [h[0] - 0.14, h[1] + 0.14, h[2], h[3] + 0.2]));
     dress(bag, f, z0 - 4.5, z1 + 4.4, y, y + 6.2, all);
+    for (const [a, b] of nich) muqarnasNiche(bag, col, f, a, b, y, NY[0], NY[1], 7);
     for (const u of doors) { closedDoor(bag, f, u, y); for (const [a, b] of [[[u - 1.25, y], [u - 1.25, y + 3.5]], [[u - 1.25, y + 3.5], [u + 1.25, y + 3.5]], [[u + 1.25, y + 3.5], [u + 1.25, y]]]) bag.add(SC, rod(f.P(a[0], a[1], 0.05), f.P(b[0], b[1], 0.05), 0.04, 4)); }
     for (const u of [-28, -20, -10, 0]) { const o = f.R(0.025, 0.03, u - 0.4, u + 0.4); bag.add('opening', box(o[0], y + 4.4, o[1], o[2], y + 5.4, o[3])); }
   }
