@@ -30,7 +30,7 @@ export const ARRIVALS = {
   'jerusalem':        [-67.6, 18, -40, -1.78, 0.16],     // on the esplanade, the Dome of the Rock
   'constantinople':   [-70, null, 110, -0.517, 0.16],    // Hagia Sophia's dome over its buttresses, from the south-west
   'ottoman-istanbul': [0, 22.1, -90, 3.1416, 0.25],      // the Süleymaniye's cascading domes and four minarets
-  'giza':             [150, 0.1, -190, 2.36, 0.25],      // the Great Pyramid from its corner
+  'giza':             [160, 0.1, -285, 2.563, 0.2],      // the Great Pyramid whole from the north-east across the plateau, two faces (the enclosure's corner had stood in front)
   'edfu':             [0, 0.1, 150, 0, 0.2],             // the pylon with its flagpoles, through the palms
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square
   'djenne':           [95, 0.1, 30, 1.25, 0.13],         // the Great Mosque over the market
