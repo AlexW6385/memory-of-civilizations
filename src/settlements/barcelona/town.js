@@ -3,7 +3,7 @@
 // the Passeig for it (both built with the landmark). The street life of 1910 (§5a): the trams on the
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
-import { RADIUS, PITCH, BLOCK, BATLLO, GRACIA_X, blocks, height, onDiagonal } from './layout.js';
+import { RADIUS, PITCH, BLOCK, BATLLO, GRACIA_X, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements) => ({ id, style: 'modernisme', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 46], facing: 'n' } });
@@ -76,5 +76,6 @@ export async function town() {
   const rand = rng(1910), lines = tramLines();
   plans.push(base('barcelona-trams', [...lines, ...trams(lines, rand)]));
   plans.push(base('barcelona-carriages', carriages(rand)));
+  plans.push(base('barcelona-passeig', bancsFanals().map(([x, z], i) => ({ t: 'banc_fanal', at: [x, z], y: Y(x, z), rect: [x - 0.9, z - 2.3, x + 0.9, z + 2.3], seed: 1906 + i }))));
   return plans;
 }

@@ -1,13 +1,14 @@
 // Modern Sydney — the ground: the harbour's green-blue water, the sandstone foreshore and sea
 // walls, the city's streets, the Botanic Garden's lawns with Moreton Bay figs and palms; the bright
 // southern light.
-import { RADIUS, LEVEL, GARDEN, BENNELONG, height, shore, inWater, inRect, inLot } from './layout.js';
+import { RADIUS, LEVEL, GARDEN, BENNELONG, MACQUARIE, height, shore, inWater, inRect, inLot } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.1, grass: 0.2, rock: 0, soil: 0.1, fields: 0, dry: 0.2, warmth: 0.55, red: 0.1, road: 0.75, snow: 0, forest: 0 };
   const d = shore(x, z);
-  if (d < 4) { c.rock = 0.7; c.sand = 0.3; c.road = 0; return c; }
-  if (inRect(GARDEN, x, z)) { c.grass = 0.9; c.road = 0.1; return c; }
+  if (d < 1.2) { c.rock = 0.7; c.sand = 0.3; c.road = 0; return c; }                // (under the sea wall's coping)
+  if (d < 7) { c.road = 1; c.grass = 0; c.sand = 0; c.dry = 0.1; return c; }        // the paved walk along the wall
+  if (inRect(GARDEN, x, z) || inRect(MACQUARIE, x, z)) { c.grass = 0.9; c.road = 0.1; return c; }
   if (inRect(BENNELONG, x, z)) { c.road = 1; c.grass = 0; c.sand = 0; c.dry = 0; return c; }
   return c;
 }
@@ -16,6 +17,7 @@ function waterLevel(x, z) { return inWater(x, z) ? LEVEL : -Infinity; }
 function fromWater(x, z) { return inWater(x, z) ? -3 : Math.max(-5, Math.min(40, height(x, z) - LEVEL)); }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || shore(x, z) < 5 || inLot(x, z, 1) || inRect(BENNELONG, x, z, 2)) return null;
+  if (inRect(MACQUARIE, x, z)) return { grass: 22 };                                             // the point's open lawn
   if (inRect(GARDEN, x, z)) return { fig: 0.008, banyan: 0.004, date_palm: 0.005, grass: 22 };   // the Moreton Bay figs (stand-ins) and palms
   return null;
 }

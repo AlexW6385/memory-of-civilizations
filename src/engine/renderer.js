@@ -3,7 +3,7 @@
 // same scene pass (one pass draws colour and normals), bloom, AgX tone mapping.
 
 import * as THREE from 'three/webgpu';
-import { pass, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
+import { pass, mrt, output, normalView, directionToColor, colorToDirection, sample, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { smaa } from 'three/addons/tsl/display/SMAANode.js';
@@ -118,11 +118,16 @@ export class Renderer {
       // the sun is dimmed where the shadows of the clouds pass
       getShadow: ({ light, shadowColorNode }) => (light === this.sun ? shadowColorNode.mul(cloudShadow) : shadowColorNode),
     });
+    // with the occlusion on, the scene pass also writes its view normals (one more target in the
+    // same draw): GTAO rebuilding them from a reversed depth buffer came out mirrored about the
+    // screen's middle row, a seam across every view with the lower half darker
+    if (Q.ao) scenePass.setMRT(mrt({ output, normal: directionToColor(normalView) }));
     let color = scenePass.getTextureNode('output');
     if (Q.ao) {
       // with a reversed buffer the pass works unchanged: it rebuilds view positions through the
       // camera's own (reversed) projection, and the sky, at depth 0, lies on the far plane
-      const aoPass = ao(scenePass.getTextureNode('depth'), null, camera);
+      const normalTex = scenePass.getTextureNode('normal');
+      const aoPass = ao(scenePass.getTextureNode('depth'), sample((q) => colorToDirection(normalTex.sample(q))), camera);
       aoPass.resolutionScale = 0.5;
       aoPass.distanceExponent.value = 1.0;
       aoPass.radius.value = 0.9;
