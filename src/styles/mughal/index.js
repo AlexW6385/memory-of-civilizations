@@ -8,6 +8,8 @@
 
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
+import * as F from './furnish.js';
+import { courtHouse } from './courthouse.js';
 import { box, lathe, fromTriangles, frustum, disc, rod, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
@@ -649,7 +651,21 @@ function haveli(el, { bag, col }) {
   bag.add(mat, box(x0 - 0.15, H, z0 - 0.15, x1 + 0.15, H + 0.9, z0 + 0.15)); bag.add(mat, box(x0 - 0.15, H, z1 - 0.15, x1 + 0.15, H + 0.9, z1 + 0.15));
   col.rect([x0, z0, x1, z1], 0, H); col.floor([x0, z0, x1, z1], H);
   const zf = z1 + 0.02, xc = (x0 + x1) / 2;
-  bag.add('timber', box(xc - 0.8, 0, zf - 0.05, xc + 0.8, 2.4, zf + 0.05));
+  // the door: a frame of red sandstone, two leaves of dark planks with iron studs, a step; the foot of the walls darkened
+  // by the lane's dust; small latticed windows high in the front (docs/settlements/mughal-agra.md §11)
+  bag.add('sandstone_red', box(xc - 0.95, 0, z1, xc - 0.75, 2.6, z1 + 0.1)); bag.add('sandstone_red', box(xc + 0.75, 0, z1, xc + 0.95, 2.6, z1 + 0.1)); bag.add('sandstone_red', box(xc - 0.95, 2.4, z1, xc + 0.95, 2.75, z1 + 0.12));
+  bag.add('wood_dark', box(xc - 0.75, 0.15, z1, xc - 0.01, 2.4, z1 + 0.05)); bag.add('wood_dark', box(xc + 0.01, 0.15, z1, xc + 0.75, 2.4, z1 + 0.05));
+  for (let i = 0; i < 4; i++) for (const u of [-0.5, -0.2, 0.2, 0.5]) bag.add('iron', box(xc + u - 0.02, 0.5 + i * 0.5, z1 + 0.05, xc + u + 0.02, 0.54 + i * 0.5, z1 + 0.07));
+  bag.add('sandstone_red', box(xc - 1.0, 0, z1, xc + 1.0, 0.15, z1 + 0.45));
+  for (const [ax, az, bx, bz, nx, nz] of [[x0, z1, x1, z1, 0, 1], [x0, z0, x1, z0, 0, -1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
+    const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
+    for (let k = 0; k < 3; k++) {
+      const s0 = k * L / 3, s1 = (k + 1) * L / 3, hh = 0.6 + rand() * 0.5;
+      const pieces = nz === 1 ? [[s0, Math.min(s1, xc - 1.0 - x0)], [Math.max(s0, xc + 1.0 - x0), s1]] : [[s0, s1]];
+      for (const [p0, p1] of pieces) { if (p1 - p0 < 0.05) continue; const a = [ax + ux * p0, az + uz * p0], b = [ax + ux * p1 + nx * 0.016, az + uz * p1 + nz * 0.016]; bag.add('earth_wall', box(Math.min(a[0], b[0]), 0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), hh, Math.max(a[1], b[1]))); }
+    }
+  }
+  if (st > 1) for (const u of [-1, 1]) { const wx = xc + u * Math.min(2.6, (x1 - x0) / 2 - 0.9); if (Math.abs(wx - xc) < 1.6) continue; bag.add('lattice', box(wx - 0.4, 4.0, z1, wx + 0.4, 5.0, z1 + 0.03)); bag.add('sandstone_red', box(wx - 0.5, 3.9, z1, wx + 0.5, 4.0, z1 + 0.12)); bag.add('sandstone_red', box(wx - 0.5, 5.0, z1, wx + 0.5, 5.12, z1 + 0.12)); }
   if (st > 1) {
     bag.add('sandstone_red', box(xc - 1.4, 3.6, zf, xc + 1.4, 3.8, zf + 1.0));
     for (const s of [-1, 1]) bag.add('sandstone_red', box(xc + s * 1.3 - 0.1, 3.8, zf + 0.85, xc + s * 1.3 + 0.1, 5.6, zf + 1.0));
@@ -712,7 +728,7 @@ function bazaarRow(el, { bag, col }) {
     bx(xc - dw / 2, xc + dw / 2, zc, zc + s * 0.45, py + dh, H, 'lime_plaster');
     bx(xc - dw / 2 - 0.12, xc + dw / 2 + 0.12, zc + s * 0.45, zc + s * 0.5, py + dh, py + dh + 0.14, 'sandstone_red');
     // the dark inside, the door's two leaves folded back
-    bx(xc - dw / 2, xc + dw / 2, zb + s * 0.52, zb + s * 0.56, py, py + dh, 'lacquer_black');
+    if (!(el.lit ?? []).includes(k)) bx(xc - dw / 2, xc + dw / 2, zb + s * 0.52, zb + s * 0.56, py, py + dh, 'lacquer_black');
     for (const sg of [-1, 1]) bx(Math.min(xc + sg * (dw / 2 + 0.04), xc + sg * (dw / 2 + 0.62)), Math.max(xc + sg * (dw / 2 + 0.04), xc + sg * (dw / 2 + 0.62)), zc + s * 0.45, zc + s * 0.51, py + 0.02, py + dh - 0.05, 'wood_dark');   // folded back flat against the front
   }
   // the roof over cells and verandah, the chhajja on brackets, the parapet with merlons
@@ -763,6 +779,111 @@ function bazaarGate(el, { bag, col }) {
   for (const [st, sc] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const p = P(st * (d / 2 - 1), sc * (w / 2 - 1)); chhatri(bag, null, p[0], h + 0.4, p[1], 0.9, 1.8, 6, R, W); }
 }
 
+/**
+ * haveli_open: a town house of the Taj Ganj one can walk into, furnished (docs/settlements/mughal-agra.md §11) { rect,
+ * entry }: plastered walls on a plinth line of red sandstone; the street door into a vestibule with its inner door set
+ * aside; the court (chauk) paved in sandstone with a raised platform (chabutra) and a water pot on its stand; on the
+ * north the dalan, a hall open to the court by three arches, its floor spread with a dhurrie and a carpet, a takht (a
+ * low wooden platform) with its bolster (gao takiya) and cushions, a hookah, brass vessels, lamps in the niches; on
+ * the east a room with the charpoys, a chest and the bedding; the rest closed (kitchen, stores).
+ */
+function haveliOpen(el, ctx) {
+  const { bag, col, lights } = ctx;
+  const M = { out: 'stucco_warm', in: 'lime_plaster', floor: 'sandstone_red', court: 'sandstone_red', ceiling: 'ceiling_painted', beam: 'wood_dark', leaf: 'wood_dark', lattice: 'lattice', base: 'earth_wall', trim: 'sandstone_red' };
+  const H = courtHouse(bag, col, {
+    rect: el.rect, y: 0, th: 0.55, ti: 0.45, fh: 0.45, H: 5.4, d: { n: 4.6, s: 3.4, w: 3.4, e: 3.8 }, mats: M,
+    entry: { side: el.entry ?? 'w', span: [0.25, 0.7], at: 0.3, inner: 0.78, w: 1.25 },
+    wings: { n: { kind: 'open', h: 6.4, arches: [0.2, 0.5, 0.8].map((at) => ({ at, w: 2.0, h: 3.4 })) }, e: { kind: 'room', h: 5.4, arches: [{ at: 0.5, w: 1.1, h: 2.4 }], windows: [{ at: 0.2, w: 0.9, h: 1.3 }, { at: 0.8, w: 0.9, h: 1.3 }] }, s: { kind: 'solid', h: 5.4 }, w: { kind: 'solid', h: 5.4 } },
+  });
+  const c = H.court, cx = (c[0] + c[2]) / 2, cz = (c[1] + c[3]) / 2;
+  // the court: the chabutra, a pot stand with the matkas, a charpoy set out
+  bag.add('sandstone_red', box(cx - 1.4, 0.04, cz - 1.4, cx + 1.4, 0.5, cz + 1.4)); col.rect([cx - 1.4, cz - 1.4, cx + 1.4, cz + 1.4], 0, 0.5); col.floor([cx - 1.4, cz - 1.4, cx + 1.4, cz + 1.4], 0.5);
+  bag.add('lime_plaster', box(cx - 1.3, 0.5, cz - 1.3, cx + 1.3, 0.52, cz + 1.3));
+  F.waterJar(bag, c[0] + 0.6, 0.04, c[3] - 0.6, 0.8); F.waterJar(bag, c[0] + 1.35, 0.04, c[3] - 0.6, 0.7);
+  F.charpoy(bag, col, c[2] - 1.0, 0.04, cz + 0.5, Math.PI / 2, { made: false });
+  // the dalan's face on the court: each arch in a frame of red sandstone with a white marble rosette in each spandrel,
+  // a chhajja (a sloping stone eave on brackets) over the three, a crenellated parapet
+  { const zf = H.n.room[3] + 0.45, ytop = 6.4;
+    for (const a of H.n.arches) {
+      const ax = a.p[0], hw = a.w / 2;
+      for (const sg of [-1, 1]) bag.add('sandstone_red', box(ax + sg * hw - (sg > 0 ? 0 : 0.22), 0.04, zf, ax + sg * hw + (sg > 0 ? 0.22 : 0), 4.15, zf + 0.08));
+      bag.add('sandstone_red', box(ax - hw - 0.22, 3.93, zf, ax + hw + 0.22, 4.15, zf + 0.08));
+      for (const sg of [-1, 1]) { bag.add('marble_smooth', lathe([[0.001, 0], [0.13, 0], [0.13, 0.02], [0.001, 0.02]], 12).rotateX(Math.PI / 2).translate(ax + sg * (hw - 0.28), 3.6, zf + 0.1)); }
+    }
+    const xa = H.n.room[0] - 0.1, xb = H.n.room[2] + 0.1;
+    const g = box(xa, -0.05, 0, xb, 0.05, 0.75); g.rotateX(0.3); g.translate(0, 4.6, zf); bag.add('sandstone_red', g);
+    for (let x = xa + 0.3; x < xb; x += 1.1) { bag.add('sandstone_red', box(x - 0.07, 4.25, zf, x + 0.07, 4.62, zf + 0.5)); }
+    bag.add('stucco_warm', box(xa, ytop, zf - 0.25, xb, ytop + 0.35, zf)); for (let x = xa + 0.35; x < xb - 0.2; x += 0.7) bag.add('stucco_warm', box(x - 0.18, ytop + 0.35, zf - 0.23, x + 0.18, ytop + 0.72, zf - 0.02)); }
+  // the dalan: the dhurrie and carpet, the takht with its bolster and cushions, the hookah, brass, lamps in niches
+  const t = H.n.room, ty = H.n.y, tx = (t[0] + t[2]) / 2, tz = (t[1] + t[3]) / 2, tw = t[2] - t[0];
+  F.kilim(bag, tx, ty, tz + 0.2, tw - 0.6, t[3] - t[1] - 0.6, 0, ['cloth_white', 'cloth_indigo', 'cloth_indigo', 'cloth_white']);
+  bag.add('wood_dark', box(tx - 1.6, ty, t[1] + 0.1, tx + 1.6, ty + 0.4, t[1] + 1.9)); col.rect([tx - 1.6, t[1] + 0.1, tx + 1.6, t[1] + 1.9], ty, ty + 0.4);
+  F.carpet(bag, tx, ty + 0.4, t[1] + 1.0, 3.1, 1.7, 0, 'mughal');
+  F.bolster(bag, tx, ty + 0.42, t[1] + 0.32, 1.8, 0.17, 0, 'cloth_red', 'cloth_ochre');
+  for (const s of [-1, 1]) F.cushion(bag, tx + s * 1.25, ty + 0.42, t[1] + 1.0, 0.5, 0.5, 0.1, 0, 'cloth_green');
+  F.hookah(bag, tx + 0.6, ty + 0.012, t[1] + 2.4, 0.4);
+  F.trayTable(bag, tx - 0.9, ty + 0.012, t[1] + 2.5, { r: 0.3, h: 0.22, seed: 5 });
+  for (const u of [-tw / 2 + 0.7, tw / 2 - 0.7]) { bag.add('sandstone_red', box(tx + u - 0.3, ty + 1.3, t[1] + 0.03, tx + u + 0.3, ty + 1.36, t[1] + 0.22)); F.oilLamp(bag, lights, tx + u, ty + 1.36, t[1] + 0.12, 'bronze', 1.2); F.ewer(bag, tx + u + 0.18, ty + 1.36, t[1] + 0.12, 0.5); }
+  // the room on the east: two charpoys, a chest, the bedding rolled on it
+  const e = H.e.room, ey = H.e.y;
+  F.charpoy(bag, col, (e[0] + e[2]) / 2 + 0.3, ey, e[1] + 1.4, 0, { quilt: 'cloth_red' });
+  F.charpoy(bag, col, (e[0] + e[2]) / 2 + 0.3, ey, e[3] - 1.4, 0, { quilt: 'cloth_indigo' });
+  F.chest(bag, e[2] - 0.4, ey, (e[1] + e[3]) / 2, 0.5, 1.0, 0.5, Math.PI / 2);
+  for (let k = 0; k < 3; k++) F.cushion(bag, e[2] - 0.4, ey + 0.55 + k * 0.1, (e[1] + e[3]) / 2, 0.45, 0.9, 0.095, 0, ['cloth_white', 'cloth_ochre', 'cloth_red'][k]);
+}
+
+/**
+ * katra: a caravanserai of the Taj Ganj (docs/settlements/mughal-agra.md §11) { rect, gate ('w' | 'e'), lit (the
+ * index of the north row's cell that is furnished) }: the Taj Ganj was "a square divided by two cross axial streets
+ * with gates to the four cardinal points", bazaars along the streets and a caravanserai in each corner square —
+ * Katra Omar Khan (north-west), Katra Fulel, the perfume market (north-east), Katra Resham, the silk market, and
+ * Katra Jogidas [stated: Wikipedia, Origins and architecture of the Taj Mahal]; a sarai of the same years, Amanat Khan's
+ * (1640–41), has a gateway in the middle of a side, rooms about 3.5 m square under vaults, a well and a three-domed
+ * mosque in its court [stated: Wikipedia, Sarai Amanat Khan]. Ours: rows of vaulted cells behind arcaded verandahs
+ * on the north and south (the bazaar row's cells), the walls east and west, the gate in the middle of the west (or
+ * east) wall, a well and a trough in the court (the mosque is left out); one cell furnished as a merchant's lodging.
+ */
+function katra(el, ctx) {
+  const { bag, col, lights } = ctx, [x0, z0, x1, z1] = el.rect, zc = (z0 + z1) / 2, T = 1.6, gw = 12, D = 4, V = 3, cw = 3.6;
+  const gx = el.gate === 'e' ? x1 : x0, mx = el.gate === 'e' ? x0 : x1;
+  const rx0 = x0 + T, rx1 = x1 - T;
+  bazaarRow({ x0: rx0, x1: rx1, z: z0 + D + V + 0.5, facing: 's', cell: cw, deep: D, ver: V, h: 5, lit: [el.lit ?? 2] }, ctx);
+  bazaarRow({ x0: rx0, x1: rx1, z: z1 - D - V - 0.5, facing: 'n', cell: cw, deep: D, ver: V, h: 5 }, ctx);
+  // the side walls (the gate's gap in one), the gate, the mosque against the other
+  mughalWall({ a: [gx, z0], b: [gx, zc - gw / 2], h: 6, inside: [(x0 + x1) / 2, zc] }, ctx);
+  mughalWall({ a: [gx, zc + gw / 2], b: [gx, z1], h: 6, inside: [(x0 + x1) / 2, zc] }, ctx);
+  mughalWall({ a: [mx, z0], b: [mx, z1], h: 6, inside: [(x0 + x1) / 2, zc] }, ctx);
+  bazaarGate({ c: [gx, zc], axis: 'x', w: gw, d: 8, h: 9.5, aw: 4.4, ah: 6.4 }, ctx);
+  const s = el.gate === 'e' ? 1 : -1;
+  // the court: beaten earth, a well with its parapet and pulley posts, troughs of stone
+  const cx = (x0 + x1) / 2, wx = cx + s * 3, wz = zc;
+  bag.add(R, lathe([[1.0, 0], [1.0, 0.7], [1.1, 0.75], [1.1, 0.85], [0.8, 0.85], [0.8, 0.2], [0.001, 0.2]], 12, null, wx, 0, wz)); col.circle(wx, wz, 1.1, 0, 0.85);
+  bag.add('water', disc(0.8, 0.45, 12, wx, wz));
+  for (const sg of [-1, 1]) bag.add(R, box(wx + sg * 1.05 - 0.12, 0.85, wz - 0.12, wx + sg * 1.05 + 0.12, 2.5, wz + 0.12));
+  bag.add('timber', box(wx - 1.2, 2.4, wz - 0.06, wx + 1.2, 2.52, wz + 0.06));
+  bag.add('timber', lathe([[0.001, -0.06], [0.14, -0.05], [0.14, 0.05], [0.001, 0.06]], 10).rotateZ(Math.PI / 2).translate(wx, 2.25, wz));
+  bag.add('hide_tan', rod([wx, 2.2, wz + 0.14], [wx, 1.0, wz + 0.14], 0.008, 3));
+  bag.add('limestone', box(wx + 1.8, 0, wz - 0.4, wx + 4.2, 0.55, wz + 0.4)); bag.add('water', box(wx + 1.9, 0.1, wz - 0.3, wx + 4.1, 0.48, wz + 0.3)); col.rect([wx + 1.8, wz - 0.4, wx + 4.2, wz + 0.4], 0, 0.55);
+  // goods in the court: bales stacked by the south verandah, a charpoy under the north one
+  for (let k = 0; k < 4; k++) F.bale(bag, rx0 + 6 + k * 0.95, 0, z1 - D - V - 1.6, 0.85, 0.55, 0.6, 0.1 * k, k % 2 ? 'sacking' : 'cloth_white');
+  F.bale(bag, rx0 + 6.5, 0.55, z1 - D - V - 1.6, 0.85, 0.5, 0.6, 0.2, 'cloth_indigo');
+  F.charpoy(bag, col, rx1 - 5, 0.35, z0 + D + V - 1.2, 0, { made: false });
+  // the furnished cell: plastered inside, a dhurrie on the floor, the charpoy with its quilt, saddlebags and bales
+  // along the back, a hookah, the water pot on its stand, a brass lota, a lamp in the niche by the door
+  const k = el.lit ?? 2, n = Math.max(1, Math.round((rx1 - rx0) / cw)), bw = (rx1 - rx0) / n, ca = rx0 + k * bw + 0.18, cb = rx0 + (k + 1) * bw - 0.18, za = z0 + 1.0, zb = z0 + D + 0.5, fy = 0.35;
+  for (const r of [[ca, za, cb, za + 0.03], [ca, za + 0.03, ca + 0.03, zb], [cb - 0.03, za + 0.03, cb, zb]]) bag.add('lime_plaster', box(r[0], fy, r[1], r[2], 4.95, r[3]));
+  bag.add('lime_plaster', box(ca, 4.6, za, cb, 4.62, zb));
+  const mxm = (ca + cb) / 2;
+  F.kilim(bag, mxm, fy, (za + zb) / 2 + 0.2, cb - ca - 0.4, zb - za - 1.0, 0, ['cloth_indigo', 'cloth_white', 'cloth_red', 'cloth_white']);
+  F.charpoy(bag, col, ca + 0.55, fy, (za + zb) / 2 - 0.1, Math.PI / 2, { L: 1.85, W: 0.85, quilt: 'cloth_red' });
+  F.saddlebag(bag, cb - 0.6, fy, za + 0.45, 0.1); F.bale(bag, cb - 0.55, fy, za + 1.2, 0.7, 0.45, 0.5, 0.0, 'cloth_white'); F.bale(bag, cb - 0.55, fy + 0.45, za + 1.2, 0.65, 0.4, 0.45, 0.2, 'sacking');
+  F.hookah(bag, cb - 0.8, fy + 0.012, zb - 1.2, Math.PI);
+  F.waterJar(bag, cb - 0.4, fy, zb - 0.45, 0.7, 'terracotta');
+  F.ewer(bag, cb - 0.85, fy + 0.012, zb - 0.45, 0.6, 1);
+  bag.add(R, box(ca + 0.03, fy + 1.4, zb - 0.32, ca + 0.3, fy + 1.45, zb - 0.02));
+  F.oilLamp(bag, lights, ca + 0.15, fy + 1.45, zb - 0.17, 'terracotta', 1.0);
+}
+
 /** A fountain at (x, z): a lotus of marble rising from the water floor (y0) to just above the surface (y),
  *  a copper nozzle, the jet of water h high. */
 function fountain(bag, x, z, y0, y, h = 1.6) {
@@ -780,7 +901,7 @@ registerStyle('mughal', {
     minaret: (el, { bag, col }) => minaret(bag, col, el.c[0], el.y, el.c[1], el.h, el.r),
     chhatri: (el, { bag, col }) => chhatri(bag, col, el.c[0], el.y, el.c[1], el.r, el.h, el.n ?? 8, el.mat ?? W, el.domeMat ?? W),
     fountains: (el, { bag }) => { for (const [x, z] of el.pts) fountain(bag, x, z, el.y0 ?? 0, el.y, el.h ?? 1.6); },
-    red_hall: redHall, great_gate: greatGate, bazaar_row: bazaarRow, bazaar_gate: bazaarGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli,
+    red_hall: redHall, great_gate: greatGate, bazaar_row: bazaarRow, bazaar_gate: bazaarGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli, katra, haveli_open: haveliOpen,
   },
   objects: {},
 });

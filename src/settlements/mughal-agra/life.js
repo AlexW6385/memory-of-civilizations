@@ -2,7 +2,7 @@
 // the forecourt's bazaar cells with their keepers sitting by them and buyers in the street; horses held by grooms in
 // the forecourt, where visitors dismounted; boats on the Yamuna below the riverfront terrace.
 
-import { RADIUS, FORECOURT } from './layout.js';
+import { RADIUS, FORECOURT, KATRAS, HAVELI_OPEN } from './layout.js';
 import { boatFloat } from '../../objects/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -52,6 +52,21 @@ export function life() {
     person([x + Math.cos(rot) * 1.9, z - Math.sin(rot) * 1.9 - 0.8], 0.05, rot, { man: true, pose: 'stand', cloth: 'cloth_white' });
   }
   for (let k = 0; k < 8; k++) person([(rand() - 0.5) * 70, 184 + rand() * 8], 0.05, rand() * 6.28);
+  // the caravanserais of the Taj Ganj (§11): camels kneeling and standing in the courts with their bales, bullocks and a
+  // cart, the merchants on the verandahs among their goods, the keeper at the gate, a water carrier (bhishti) with his
+  // goatskin, porters bringing bales in; the lodger seated in the furnished cell
+  for (const k of KATRAS) {
+    const [x0, z0, x1, z1] = k.rect, zc = (z0 + z1) / 2, cx = (x0 + x1) / 2, g = k.gate === 'e' ? 1 : -1;
+    for (let i = 0; i < 3; i++) L.push({ t: 'animal', kind: 'camel', at: [cx - g * (6 + i * 3.2), zc + (i % 2 ? 2.2 : -2.4)], y: 0.04, rot: Math.PI / 2 + (rand() - 0.5) * 0.6, seed: Math.floor(rand() * 1e9), gear: i !== 1 });
+    for (let i = 0; i < 2; i++) L.push({ t: 'animal', kind: 'zebu', at: [cx + g * (9 + i * 2.2), zc - 3.5], y: 0.04, rot: -g * Math.PI / 2, seed: Math.floor(rand() * 1e9) });
+    L.push({ t: 'cart', at: [cx + g * 12.5, zc + 2.6], y: 0.04, rot: Math.PI / 2, seed: Math.floor(rand() * 1e9) });
+    person([cx - g * 4.5, zc + 0.6], 0.04, rand() * 6.28, { man: true, pose: 'staff', cloth: 'cloth_white', cloth2: 'cloth_red' });
+    person([k.gate === 'e' ? x1 - 2.5 : x0 + 2.5, zc + 1.6], 0.04, g * Math.PI / 2, { man: true, carry: 'bundle', loadCloth: 'hide_brown', cloth: 'cloth_white', cloth2: 'cloth_white' });
+    person([k.gate === 'e' ? x1 - 3.2 : x0 + 3.2, zc - 1.5], 0.04, -g * Math.PI / 2, { man: true, carry: 'headload', loadCloth: pick(['cloth_white', 'sacking', 'cloth_indigo']) });
+    for (const [zv, face] of [[z0 + 6.2, Math.PI], [z1 - 6.2, 0]]) for (let i = 0; i < 4; i++) { if (rand() < 0.35) continue; const x = x0 + 4 + i * 9 + rand() * 3; person([x, zv], 0.35, face, { man: true, pose: 'cross' }); L.push({ t: 'sacks', n: 2 + Math.floor(rand() * 3), at: [x + 1.0, zv], y: 0.35, rot: face, seed: Math.floor(rand() * 1e9), mat: k.id === 'fulel' ? 'linen' : 'sacking' }); }
+  }
+  // the open house: the master on his takht with the hookah, a woman by the water pots in the court
+  { const [x0, z0, x1, z1] = HAVELI_OPEN, tx = (x0 + 3.4 + x1 - 3.8) / 2; person([tx - 0.3, z0 + 1.3], 0.45 + 0.4 + 0.02, Math.PI, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_green' }); person([x0 + 3.4 + 1.6, z1 - 3.4 - 1.3], 0.04, -Math.PI / 2, { cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'veil', hair: 'long', beard: false, over: 'none' }); }
   // boats on the Yamuna: thatch-roofed barges and rowing boats along the river, below the terrace
   for (const [x, z, kind, len] of [[-95, -276, 'barge', 12], [-40, -292, 'rowboat', 5], [10, -281, 'barge', 11], [70, -296, 'rowboat', 4.5], [118, -277, 'barge', 12.5], [160, -300, 'rowboat', 5], [-150, -290, 'rowboat', 4.8]]) {
     if (Math.hypot(x, z) > RADIUS - 40) continue;

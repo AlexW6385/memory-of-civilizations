@@ -22,6 +22,11 @@ export function walkDist(x, z) {
   for (const c of GWALKS) d = Math.min(d, Math.abs(ax - c) - GW, Math.abs(az - c) - GW);
   return d;
 }
+// the Taj Ganj's two northern caravanserais either side of the bazaar street on the axis (docs/settlements/mughal-agra.md
+// §11): Katra Omar Khan on the north-west, Katra Fulel (the perfume market) on the north-east, their gates on the street;
+// and an open, furnished house on the street south of them
+export const KATRAS = [{ id: 'omar-khan', rect: [-58, 235, -14, 266], gate: 'e' }, { id: 'fulel', rect: [14, 235, 58, 266], gate: 'w' }];
+export const HAVELI_OPEN = [8, 277, 30, 299];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -39,6 +44,7 @@ export function houses() {
     if (inRect([-172, -262, 172, 232], cx, cz, 4)) continue;                 // the Taj complex and its walls
     if (Math.abs(cx) < 9 && cz > 230) continue;                              // the bazaar street on the axis
     if ((Math.abs(cz - 270) < 6 || Math.abs(cx - 200) < 5 || Math.abs(cx + 200) < 5)) continue;   // streets
+    if ([...KATRAS.map((k) => k.rect), HAVELI_OPEN].some((q) => r[0] < q[2] + 1.5 && r[2] > q[0] - 1.5 && r[1] < q[3] + 1.5 && r[3] > q[1] - 1.5)) continue;
     if (rand() < 0.18) continue;
     HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6) });
   }
