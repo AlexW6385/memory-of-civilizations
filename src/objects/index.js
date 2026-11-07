@@ -594,6 +594,55 @@ function hanging(f, nu, nv, th = 0.006) {
   return fromTriangles(T);
 }
 /**
+ * The wash hung over a line or a pole from x = xa to xb (the line's height lineY(x), the cloths' roles c0, c1 …):
+ * sheets and cloths folded over it (their backs a little shorter), shirts with their sleeves out, each rippled
+ * and swelling a little in the air, with gaps; `drop` the longest a cloth may hang, `th` the line's half-thickness.
+ */
+function hangWash(a, r, xa, xb, lineY, { drop = 1.05, th = 0.012, max = 6 } = {}) {
+  let x = xa, k = 0;
+  while (x < xb - 0.25 && k < max) {
+    const room = xb - x;
+    let type = r() < 0.3 ? 'shirt' : r() < 0.5 ? 'sheet' : 'cloth', w = type === 'sheet' ? 0.9 + r() * 0.4 : type === 'shirt' ? 0.42 : 0.35 + r() * 0.3;
+    if (type === 'shirt' && (x - 0.2 < xa - 0.05 || x + w + 0.2 > xb + 0.05)) type = 'cloth';                  // a shirt's sleeves within the line
+    if (w > room) { if (room < 0.3) break; type = 'cloth'; w = room; }       // the last a cloth that fits
+    const h = Math.min(drop, type === 'sheet' ? 0.75 + r() * 0.3 : type === 'shirt' ? 0.62 : 0.4 + r() * 0.35), ph = r() * 6.28, x0 = x;
+    const f = (side) => (u, vv) => {
+      const xx = x0 + w * u, y = lineY(xx), d = vv * (side ? h * 0.35 : h);
+      return [xx, y - th - d + Math.sin(u * Math.PI) * 0.015 * vv, (side ? -th - 0.004 : th) + (side ? -1 : 1) * (0.025 * Math.sin(u * Math.PI * 3 + ph) * vv + 0.05 * vv * Math.sin(u * Math.PI))];
+    };
+    a(`c${k}`, hanging(f(false), 6, 3)); a(`c${k}`, hanging(f(true), 6, 1));
+    if (type === 'shirt') for (const s of [0, 1]) { const sx = s ? x0 + w : x0, sw = 0.2; a(`c${k}`, hanging((u, vv) => { const xx = s ? sx + sw * u : sx - sw * (1 - u), y = lineY(sx) - 0.06 - vv * 0.16 - (s ? u : 1 - u) * 0.12; return [xx, y, th + 0.02 * vv]; }, 2, 1)); }
+    x += w + 0.08 + r() * 0.15; k++;
+  }
+}
+/**
+ * wash_line: { len, pole, emb, clear, drop } — washing hung across a lane between the upper storeys of two houses, along x from
+ * −len/2 to +len/2 at y (the ends `emb` [a, b] metres inside the two walls, out of sight): a rope sagging between
+ * iron hooks in the walls, strung from window to window (Venice, Naples, Rome's Trastevere, Cairo), or, `pole`, a
+ * bamboo pole laid across from wall to wall on iron brackets, the wash hung over it and the shirts threaded on it
+ * (the lanes of Jiangnan and of Edo). `clear` [a, b]: the wash kept that far from each wall (clear of jetties, bays,
+ * eaves); `drop` the longest a cloth hangs. Nothing under it but the lane.
+ */
+function washLine(el, { bag }) {
+  const put = placer(el, bag), L = Math.round((el.len ?? 4) * 4) / 4, [ea, eb] = el.emb ?? [0.15, 0.15], pole = !!el.pole, v = (el.seed ?? 1) % 4;
+  const [ca, cb] = el.clear ?? [0.3, 0.3], xa = -L / 2 + ea, xb = L / 2 - eb, sag = pole ? 0 : 0.06 + (xb - xa) * 0.025;
+  const lineY = (x) => -sag * (1 - (2 * (x - (xa + xb) / 2) / (xb - xa)) ** 2);
+  const A = assembly(`wash-line|${L}|${ea}|${eb}|${ca}|${cb}|${pole ? 1 : 0}|${el.drop ?? 0.95}|${v}`, (a) => {
+    const r = rng(29 + v * 17);
+    if (pole) {
+      a('bamboo_culm', tube([[-L / 2, 0, 0, 0.022], [L / 2, 0, 0, 0.02]], 6));
+      // the brackets: an iron hook out of each wall under the pole
+      for (const [x, s] of [[xa, 1], [xb, -1]]) a('iron', tube([[x - s * 0.12, -0.08, 0, 0.008], [x + s * 0.05, -0.04, 0, 0.007], [x + s * 0.06, 0.02, 0, 0.006]], 4));
+    } else {
+      a('rope', tube([[-L / 2, 0, 0, 0.006], ...sagged([xa, 0, 0], [xb, 0, 0], sag, 13).map((p) => [...p, 0.006]), [L / 2, 0, 0, 0.006]], 4));
+      for (const x of [xa, xb]) a('iron', tube(Array.from({ length: 7 }, (_, k) => { const t = k / 6 * Math.PI * 2; return [x + Math.sin(t) * 0.022, Math.cos(t) * 0.022, 0, 0.005]; }), 4, { capA: false, capB: false }));
+    }
+    hangWash(a, r, xa + ca, xb - cb, lineY, { drop: el.drop ?? 0.95, th: pole ? 0.026 : 0.01, max: 8 });
+  });
+  const rand = rng(el.seed), cl = ['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_grey', 'linen', 'cloth_white', 'cloth_brown'];
+  for (const [role, g] of Object.entries(A)) put(role === 'rope' ? 'sacking' : role[0] === 'c' ? cl[Math.floor(rand() * cl.length)] : role, g.clone(), role[0] === 'c' ? 0.9 + rand() * 0.2 : 1);
+}
+/**
  * laundry: { len } — a washing line between two forked props driven into the ground, the line sagging
  * between them, the wash hung over it: sheets and cloths folded over the line (their backs a little
  * shorter), shirts with their sleeves out, each rippled and swelling a little in the air. Four
@@ -611,21 +660,7 @@ function laundry(el, { bag }) {
       for (const q of [-1, 1]) a('timber', tube([[top[0], top[1] - 0.02, 0, 0.03], [top[0] + s * 0.03, top[1] + 0.16, q * 0.07, 0.022]], 5));
     }
     a('rope', tube(sagged([-L / 2, H, 0], [L / 2, H, 0], sag, 13).map((p) => [...p, 0.007]), 4));
-    // the wash, from one end to the other, with gaps
-    let x = -L / 2 + 0.25, k = 0;
-    while (x < L / 2 - 0.45 && k < 6) {
-      const room = L / 2 - 0.2 - x;
-      let type = r() < 0.3 ? 'shirt' : r() < 0.5 ? 'sheet' : 'cloth', w = type === 'sheet' ? 0.9 + r() * 0.4 : type === 'shirt' ? 0.42 : 0.35 + r() * 0.3;
-      if (w > room) { if (room < 0.3) break; type = 'cloth'; w = room; }       // the last a cloth that fits
-      const h = type === 'sheet' ? 0.75 + r() * 0.3 : type === 'shirt' ? 0.62 : 0.4 + r() * 0.35, ph = r() * 6.28, x0 = x;
-      const f = (side) => (u, vv) => {
-        const xx = x0 + w * u, y = lineY(xx), d = vv * (side ? h * 0.35 : h);
-        return [xx, y - 0.012 - d + Math.sin(u * Math.PI) * 0.015 * vv, (side ? -0.016 : 0.012) + (side ? -1 : 1) * (0.025 * Math.sin(u * Math.PI * 3 + ph) * vv + 0.05 * vv * Math.sin(u * Math.PI))];
-      };
-      a(`c${k}`, hanging(f(false), 6, 3)); a(`c${k}`, hanging(f(true), 6, 1));
-      if (type === 'shirt') for (const s of [0, 1]) { const sx = s ? x0 + w : x0, sw = 0.2; a(`c${k}`, hanging((u, vv) => { const xx = s ? sx + sw * u : sx - sw * (1 - u), y = lineY(sx) - 0.06 - vv * 0.16 - (s ? u : 1 - u) * 0.12; return [xx, y, 0.012 + 0.02 * vv]; }, 2, 1)); }
-      x += w + 0.08 + r() * 0.15; k++;
-    }
+    hangWash(a, r, -L / 2 + 0.25, L / 2 - 0.2, lineY);
   });
   const cl = ['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_grey', 'linen', 'cloth_white', 'cloth_brown'];
   for (const [role, g] of Object.entries(A)) put(role === 'rope' ? 'sacking' : role === 'timber' ? 'timber' : cl[Math.floor(rand() * cl.length)], g.clone(), role[0] === 'c' ? 0.9 + rand() * 0.2 : 1);
@@ -716,9 +751,68 @@ function waterfowl(kind, pose) {
     }
   });
 }
-/** chickens: { n, kind ('hen' | 'duck' | 'goose') } — a few fowls about a yard: hens pecking or looking up, now and then a cock among them; or ducks, or geese. */
+/**
+ * A pigeon, the rock dove of the squares (front along −z) as an assembly: 'p' its grey plumage (the folded wings with
+ * their two dark bars), 'n' the neck's green and purple sheen, 't' the tail with its dark end band, 'y' the beak, the
+ * cere and the short red legs. pose 'up' or 'peck'.
+ */
+function pigeon(pose) {
+  return assembly(`pigeon|${pose}`, (a) => {
+    const peck = pose === 'peck';
+    a('p', tube([[0, 0.088, 0.085, 0.022, 0.018], [0, 0.09, 0.04, 0.045, 0.042], [0, 0.088, -0.015, 0.052, 0.05], [0, 0.1, -0.055, 0.045, 0.045], [0, 0.115, -0.075, 0.03, 0.03]], 9));
+    for (const s of [-1, 1]) a('p', tube([[s * 0.046, 0.1, -0.04, 0.008, 0.028], [s * 0.05, 0.1, 0.02, 0.009, 0.032], [s * 0.03, 0.095, 0.1, 0.006, 0.016]], 5));
+    for (const s of [-1, 1]) for (const z of [0.0, 0.035]) a('t', tube([[s * 0.0545, 0.098, z - 0.008, 0.003, 0.016], [s * 0.0545, 0.098, z + 0.008, 0.003, 0.016]], 4));
+    a('t', tube([[0, 0.092, 0.085, 0.024, 0.007], [0, 0.085, 0.13, 0.034, 0.005], [0, 0.081, 0.16, 0.036, 0.004]], 6));
+    const head = peck ? [0, 0.035, -0.12] : [0, 0.165, -0.085];
+    a('n', tube([[0, 0.11, -0.06, 0.034], [(0 + head[0]) / 2, (0.11 + head[1]) / 2 + (peck ? 0.02 : 0), (head[2] - 0.06) / 2, 0.026], [...head, 0.02]], 7));
+    a('p', at(ball(0.021, 8).scale(0.9, 0.95, 1.15), head[0], head[1] - 0.019, head[2]));
+    const fw = peck ? [0, -0.7, -0.7] : [0, -0.05, -1], P = (d) => [head[0], head[1] + fw[1] * d, head[2] + fw[2] * d];
+    a('y', tube([[...P(0.017), 0.006, 0.005], [...P(0.034), 0.002]], 4));
+    for (const sx of [-1, 1]) { const hx = sx * 0.022; a('r', tube([[hx, 0.06, 0.0, 0.007], [hx, 0.006, -0.004, 0.005]], 4)); for (const t of [-0.45, 0, 0.45]) a('r', tube([[hx, 0.005, -0.004, 0.004], [hx + Math.sin(t) * 0.03, 0.004, -0.004 - Math.cos(t) * 0.03, 0.003]], 3)); }
+  });
+}
+/**
+ * A turkey (Meleagris gallopavo, the huexolotl of Mesoamerica and the Pueblos' bird; front along −z) as an assembly: 'p'
+ * the bronze-black plumage, 'w' the barred wing feathers, 'h' the bare bluish head and neck, 'r' the red wattle and
+ * the snood over the beak, 'y' the beak and the long legs. The tom larger, its tail spread in a fan and its beard on
+ * the breast; the hen smaller, her tail down. pose 'up' or 'peck'.
+ */
+function turkey(pose, tom) {
+  return assembly(`turkey|${pose}|${tom ? 1 : 0}`, (a) => {
+    const k = tom ? 1.15 : 0.85, peck = pose === 'peck' && !tom, by = 0.4 * k;
+    a('p', tube([[0, by - 0.01 * k, 0.24 * k, 0.06 * k, 0.07 * k], [0, by, 0.15 * k, 0.15 * k, 0.15 * k], [0, by - 0.01 * k, 0.0, 0.17 * k, 0.17 * k], [0, by + 0.02 * k, -0.12 * k, 0.14 * k, 0.15 * k], [0, by + 0.06 * k, -0.19 * k, 0.07 * k, 0.08 * k]], 10));
+    for (const s of [-1, 1]) a('w', tube([[s * 0.15 * k, by + 0.03 * k, -0.08 * k, 0.02 * k, 0.08 * k], [s * 0.165 * k, by + 0.0, 0.07 * k, 0.025 * k, 0.1 * k], [s * 0.1 * k, by - 0.04 * k, 0.22 * k, 0.015 * k, 0.05 * k]], 6));
+    if (tom) {
+      // the fan: a half disc of tail feathers raised behind, both faces, its rim of paler tips
+      const R0 = 0.06, R1 = 0.5 * k, Rb = R1 * 0.86, c = [0, by + 0.05 * k, 0.24 * k], n = 12;
+      const p = (r, t, dz) => [c[0] + Math.cos(t) * r, c[1] + Math.sin(t) * r, c[2] + dz + r * 0.12];
+      for (const [role, ra, rb] of [['p', R0, Rb], ['w', Rb, R1]]) {
+        const T = [];
+        for (let i = 0; i < n; i++) { const t0 = Math.PI * (0.02 + 0.96 * i / n), t1 = Math.PI * (0.02 + 0.96 * (i + 1) / n); for (const [dz, f] of [[0.006, 0], [-0.006, 1]]) { const q = [p(ra, t0, dz), p(rb, t0, dz), p(rb, t1, dz), p(ra, t1, dz)]; for (const v of f ? [q[0], q[1], q[2], q[0], q[2], q[3]] : [q[0], q[2], q[1], q[0], q[3], q[2]]) T.push(...v); } }
+        a(role, fromTriangles(T));
+      }
+      a('p', tube([[0, by - 0.02 * k, -0.17 * k, 0.012], [0, by - 0.12 * k, -0.2 * k, 0.018, 0.008]], 4));   // the beard
+    } else a('p', tube([[0, by, 0.22 * k, 0.07 * k, 0.03 * k], [0, by - 0.06 * k, 0.4 * k, 0.12 * k, 0.015 * k], [0, by - 0.1 * k, 0.48 * k, 0.12 * k, 0.01 * k]], 6));
+    const nb = [0, by + 0.08 * k, -0.18 * k], head = peck ? [0, 0.09, -0.42 * k] : [0, by + 0.32 * k, -0.27 * k];
+    a('h', tube([[...nb, 0.05 * k], [(nb[0] + head[0]) / 2, (nb[1] + head[1]) / 2 + (peck ? 0.04 : 0), (nb[2] + head[2]) / 2 - 0.02, 0.03 * k], [...head, 0.024 * k]], 7));
+    a('h', at(ball(0.033 * k, 8).scale(0.85, 0.95, 1.2), head[0], head[1] - 0.031 * k, head[2]));
+    const fw = peck ? [0, -0.7, -0.7] : [0, -0.15, -1], P = (d) => [head[0], head[1] + fw[1] * d * k, head[2] + fw[2] * d * k];
+    a('y', tube([[...P(0.03), 0.011 * k, 0.009 * k], [...P(0.058), 0.003]], 4));
+    a('r', tube([[...P(0.022).map((v, i) => v + [0, 0.012, 0][i]), 0.006], [...P(0.05).map((v, i) => v + [0, -0.01 * (tom ? 3 : 1), 0][i]), 0.005]], 4));   // the snood
+    a('r', at(ball(0.018 * k, 6).scale(0.6, 1.4, 1), ...P(0.0).map((v, i) => v + [0, -0.05 * k, 0.01][i])));               // the wattle
+    for (const s of [-1, 1]) {
+      const hx = s * 0.06 * k, ly = by - 0.12 * k;
+      a('y', tube([[hx, ly, 0.02, 0.022 * k], [hx, ly - 0.08 * k, 0.03, 0.015 * k], [hx, 0.015, 0.01, 0.011 * k]], 5));
+      for (const t of [-0.5, 0, 0.5]) a('y', tube([[hx, 0.01, 0.01, 0.008], [hx + Math.sin(t) * 0.09 * k, 0.007, 0.01 - Math.cos(t) * 0.09 * k, 0.005]], 3));
+      a('y', tube([[hx, 0.01, 0.01, 0.007], [hx, 0.007, 0.06 * k, 0.005]], 3));
+    }
+  });
+}
+/** chickens: { n, kind ('hen' | 'duck' | 'goose' | 'pigeon' | 'turkey') } — a few fowls about a yard: hens pecking or looking up, now and then a cock among them; or ducks, or geese; pigeons on a square; turkeys. */
 function chickens(el, { bag }) {
   if (el.kind === 'duck' || el.kind === 'goose') return flock(el, bag);
+  if (el.kind === 'pigeon') return pigeons(el, bag);
+  if (el.kind === 'turkey') return turkeys(el, bag);
   const rand = rng(el.seed), n = el.n ?? 4, [x, z] = el.at, rot = el.rot ?? 0, c = Math.cos(rot), sn = Math.sin(rot);
   const PL = [['hide_white', 'hide_white'], ['hide_brown', 'hide_black'], ['hide_tan', 'hide_brown'], ['hide_black', 'hide_black'], ['hide_brown', 'hide_brown']];
   let cock = rand() < 0.4;
@@ -727,6 +821,27 @@ function chickens(el, { bag }) {
     const put = placer({ ...el, at: [x + dx * c + dz * sn, z - dx * sn + dz * c], rot: rot + Math.floor(rand() * 12) * Math.PI / 6, s: (el.s ?? 1) * (isCock ? 1 : 0.92 + Math.floor(rand() * 3) * 0.05) }, bag);
     const sh = 0.85 + rand() * 0.3;
     put(pm, A.p.clone(), sh); put(tm, A.t.clone(), tm === pm ? sh * 0.85 : 1); put('cloth_red', A.r.clone()); put('hide_tan', A.y.clone(), [1.15, 1.0, 0.55]);
+  }
+}
+/** A flock of pigeons on a square or a lane, most pecking, spread over a few metres, a few of them darker or paler (the rock dove's colours). */
+function pigeons(el, bag) {
+  const rand = rng(el.seed), n = el.n ?? 6 + Math.floor(rand() * 6), [x, z] = el.at, sp = el.spread ?? 2.6;
+  for (let i = 0; i < n; i++) {
+    const dx = (rand() - 0.5) * sp, dz = (rand() - 0.5) * sp, A = pigeon(rand() < 0.6 ? 'peck' : 'up'), v = rand(), pm = v < 0.12 ? 'hide_black' : v < 0.2 ? 'hide_white' : 'hide_grey';
+    const put = placer({ ...el, at: [x + dx, z + dz], rot: rand() * 6.28, s: (el.s ?? 1) * (0.92 + rand() * 0.14) }, bag), sh = 0.9 + rand() * 0.2;
+    put(pm, A.p.clone(), pm === 'hide_grey' ? [sh * 0.92, sh * 0.95, sh * 1.05] : sh); put(pm === 'hide_white' ? 'hide_white' : 'hide_grey', A.n.clone(), pm === 'hide_white' ? 1 : [0.62, 0.8, 0.7]); put('hide_black', A.t.clone(), 0.9);
+    put('hide_black', A.y.clone(), 1); put('cloth_red', A.r.clone(), [1.0, 0.75, 0.8]);
+  }
+}
+/** A few turkeys about a yard: hens pecking, a tom with his tail spread among them now and then. */
+function turkeys(el, bag) {
+  const rand = rng(el.seed), n = el.n ?? 2 + Math.floor(rand() * 3), [x, z] = el.at, rot = el.rot ?? 0;
+  let tom = rand() < 0.5;
+  for (let i = 0; i < n; i++) {
+    const isTom = tom && i === 0, A = turkey(rand() < 0.5 ? 'peck' : 'up', isTom), dx = (rand() - 0.5) * 2.2, dz = (rand() - 0.5) * 2.2;
+    const put = placer({ ...el, at: [x + dx, z + dz], rot: rot + rand() * 6.28, s: (el.s ?? 1) * (0.92 + rand() * 0.12) }, bag), sh = 0.85 + rand() * 0.25;
+    put('hide_black', A.p.clone(), [sh * 1.25, sh * 1.05, sh * 0.85]); put('hide_brown', A.w.clone(), [sh * 0.8, sh * 0.75, sh * 0.7]); put('hide_grey', A.h.clone(), [0.75, 0.9, 1.25]);
+    put('cloth_red', A.r.clone()); put('hide_tan', A.y.clone(), [1.1, 0.8, 0.75]);
   }
 }
 /** A few ducks or geese about a yard or at the water's edge: the ducks white or brown with the drake's dark head, the geese white or grey. */
@@ -994,7 +1109,7 @@ function oar(el, { bag }) {
 
 registerStyle('life', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { pot, basket, sacks, barrel, crates, firewood, bench, trough, well, stall, cart, sledge, barrow, ladder, laundry, haystack, animal, chickens, figure, boat, car, street_lamp: streetLamp, lantern, shop_sign: shopSign, hang_lantern: hangLantern, laundry_pole: laundryPole, tea_table: teaTable, drying_tray: dryingTray, oar, goods_mat: goodsMat, stool, rain_tub: rainTub, handcart },
+  elements: { pot, basket, sacks, barrel, crates, firewood, bench, trough, well, stall, cart, sledge, barrow, ladder, laundry, haystack, animal, chickens, figure, boat, car, street_lamp: streetLamp, lantern, shop_sign: shopSign, hang_lantern: hangLantern, laundry_pole: laundryPole, tea_table: teaTable, drying_tray: dryingTray, oar, goods_mat: goodsMat, stool, rain_tub: rainTub, handcart, wash_line: washLine },
   objects: {},
 });
-export const LIFE_KINDS = ['pot', 'basket', 'sacks', 'barrel', 'crates', 'firewood', 'bench', 'trough', 'well', 'stall', 'cart', 'sledge', 'barrow', 'ladder', 'laundry', 'haystack', 'animal', 'chickens', 'figure', 'boat', 'car', 'street_lamp', 'lantern', 'shop_sign', 'hang_lantern', 'laundry_pole', 'tea_table', 'drying_tray', 'oar', 'goods_mat', 'stool', 'rain_tub', 'handcart'];
+export const LIFE_KINDS = ['pot', 'basket', 'sacks', 'barrel', 'crates', 'firewood', 'bench', 'trough', 'well', 'stall', 'cart', 'sledge', 'barrow', 'ladder', 'laundry', 'haystack', 'animal', 'chickens', 'figure', 'boat', 'car', 'street_lamp', 'lantern', 'shop_sign', 'hang_lantern', 'laundry_pole', 'tea_table', 'drying_tray', 'oar', 'goods_mat', 'stool', 'rain_tub', 'handcart', 'wash_line'];
