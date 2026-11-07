@@ -9,14 +9,48 @@ import { box, lathe, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
 import { loft, ring } from '../egyptian/objects.js';
+import { pyramidInterior } from './interior.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A frustum over a rectangle centred at (cx, cz): half-sizes (a0, b0) at y0 to (a1, b1) at y1. */
 function frust(bag, mat, cx, cz, a0, b0, a1, b1, y0, y1) {
   const B = [[-a0, -b0], [a0, -b0], [a0, b0], [-a0, b0]], T = [[-a1, -b1], [a1, -b1], [a1, b1], [-a1, b1]], t = [];
   const P = (q, y) => [cx + q[0], y, cz + q[1]];
-  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; t.push(...P(B[i], y0), ...P(T[j], y1), ...P(T[i], y1), ...P(B[i], y0), ...P(B[j], y0), ...P(T[j], y1)); }
-  if (a1 > 0.01) t.push(...P(T[0], y1), ...P(T[2], y1), ...P(T[3], y1), ...P(T[0], y1), ...P(T[1], y1), ...P(T[2], y1));
+  // (wound counter-clockwise seen from outside)
+  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; t.push(...P(B[i], y0), ...P(T[i], y1), ...P(T[j], y1), ...P(B[i], y0), ...P(T[j], y1), ...P(B[j], y0)); }
+  if (a1 > 0.01) t.push(...P(T[0], y1), ...P(T[3], y1), ...P(T[2], y1), ...P(T[0], y1), ...P(T[2], y1), ...P(T[1], y1));
+  bag.add(mat, fromTriangles(t));
+}
+
+/** The four faces of a pyramid's casing up to the pyramidion, in pieces of about 6 m (the top field takes a triangle's
+ *  points with a tolerance proportional to its size: great triangles would reach over the arrises and over an
+ *  opening); `door` [x0, y0, x1, y1] (east–west from the centre and heights, optional): the entrance left open in the
+ *  north face, a window of 2 m pieces round it. */
+function casing(bag, mat, cx, cz, a, h, ph, y, door) {
+  const t = [], top = h - ph, half = (v) => a * (1 - v / h);
+  // a point of face f (north, east, south, west) at u (along the foot, to the left seen from outside) and height v
+  const FACE = [(u, v) => [cx + u, y + v, cz - half(v)], (u, v) => [cx + half(v), y + v, cz + u], (u, v) => [cx - u, y + v, cz + half(v)], (u, v) => [cx - half(v), y + v, cz - u]];
+  const quad = (f, p, q, r, s, size = 6) => {
+    const L = (A, B) => Math.hypot(B[0] - A[0], B[1] - A[1]), n = Math.max(1, Math.ceil(Math.max(L(p, q), L(s, r)) / size)), m = Math.max(1, Math.ceil(Math.max(L(p, s), L(q, r)) / size));
+    const at = (i, j) => { const a0 = [p[0] + (q[0] - p[0]) * i / n, p[1] + (q[1] - p[1]) * i / n], a1 = [s[0] + (r[0] - s[0]) * i / n, s[1] + (r[1] - s[1]) * i / n]; return FACE[f](a0[0] + (a1[0] - a0[0]) * j / m, a0[1] + (a1[1] - a0[1]) * j / m); };
+    // (wound counter-clockwise seen from outside)
+    for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) t.push(...at(i, j), ...at(i + 1, j + 1), ...at(i + 1, j), ...at(i, j), ...at(i, j + 1), ...at(i + 1, j + 1));
+  };
+  for (let f = 1; f < 4; f++) quad(f, [-half(0), 0], [half(0), 0], [half(top), top], [-half(top), top]);
+  if (!door) quad(0, [-half(0), 0], [half(0), 0], [half(top), top], [-half(top), top]);
+  else {
+    const [u0, v0, u1, v1] = door, U0 = u0 - 12, U1 = u1 + 12, V0 = Math.max(0, v0 - 8), V1 = v1 + 12;
+    if (V0 > 0) quad(0, [-half(0), 0], [half(0), 0], [half(V0), V0], [-half(V0), V0]);
+    quad(0, [-half(V0), V0], [U0, V0], [U0, V1], [-half(V1), V1]);
+    quad(0, [U1, V0], [half(V0), V0], [half(V1), V1], [U1, V1]);
+    quad(0, [-half(V1), V1], [half(V1), V1], [half(top), top], [-half(top), top]);
+    const cuts = (a0, a1) => { const n = Math.max(1, Math.ceil((a1 - a0) / 2)); return Array.from({ length: n + 1 }, (_, i) => a0 + (a1 - a0) * i / n); };
+    const us = [...cuts(U0, u0), ...cuts(u0, u1).slice(1), ...cuts(u1, U1).slice(1)], vs = [...cuts(V0, v0), ...cuts(v0, v1).slice(1), ...cuts(v1, V1).slice(1)];
+    for (let i = 0; i < us.length - 1; i++) for (let j = 0; j < vs.length - 1; j++) {
+      if (us[i] >= u0 - 1e-6 && us[i + 1] <= u1 + 1e-6 && vs[j] >= v0 - 1e-6 && vs[j + 1] <= v1 + 1e-6) continue;   // the opening
+      quad(0, [us[i], vs[j]], [us[i + 1], vs[j]], [us[i + 1], vs[j + 1]], [us[i], vs[j + 1]], 3);
+    }
+  }
   bag.add(mat, fromTriangles(t));
 }
 
@@ -29,7 +63,7 @@ function okPyramid(el, { bag, col }) {
   const [cx, cz] = el.c, a = el.a, h = el.h, y = el.y ?? 0;
   // the casing up to the foot of the pyramidion, the pyramidion gilded (electrum) at the top
   const ph = Math.min(3, h * 0.03), ap = a * ph / h;
-  frust(bag, el.mat || 'tura_limestone', cx, cz, a, a, ap, ap, y, y + h - ph);
+  casing(bag, el.mat || 'tura_limestone', cx, cz, a, h, ph, y, el.door);
   frust(bag, 'gilt_bronze', cx, cz, ap, ap, 0, 0, y + h - ph, y + h);
   frust(bag, 'tura_limestone', cx, cz, a + 0.6, a + 0.6, a, a, y - 0.4, y + 0.3);                 // the pavement's edge
   // climbing the faces: each face as strips of ramps, from the foot up to where the strip meets the
@@ -37,10 +71,20 @@ function okPyramid(el, { bag, col }) {
   const n = 40;
   for (let i = 0; i < n; i++) {
     const u0 = -a + 2 * a * i / n, u1 = -a + 2 * a * (i + 1) / n;
-    const reach = a - (u0 * u1 < 0 ? 0 : (Math.abs(u0) + Math.abs(u1)) / 2);            // how far in the strip climbs (to its middle line's arris)
+    // how far in the strip climbs: to the arris its nearer edge meets (on past the arris a little where the strip is
+    // crossed by it: every point of the face lies on its own face's ramp, at the face's own height)
+    const reach = a - (u0 * u1 < 0 ? 0 : Math.min(Math.abs(u0), Math.abs(u1)));
     if (reach <= 0.5) continue;
     const top = y + h * reach / a;
-    col.ramp([cx + u0, cz - a, cx + u1, cz - a + reach], y, top, 's');               // the north face
+    const D = el.door;
+    if (D && u1 > D[0] && u0 < D[2]) {
+      // the north face round the entrance: beside it as before; in its width up to its sill and on from its head
+      if (D[0] > u0) col.ramp([cx + u0, cz - a, cx + D[0], cz - a + reach], y, top, 's');
+      if (D[2] < u1) col.ramp([cx + D[2], cz - a, cx + u1, cz - a + reach], y, top, 's');
+      const d0 = D[1] * a / h, d1 = D[3] * a / h;
+      col.ramp([cx + D[0], cz - a, cx + D[2], cz - a + d0], y, y + D[1], 's');
+      if (reach > d1) col.ramp([cx + D[0], cz - a + d1, cx + D[2], cz - a + reach], y + D[3], top, 's');
+    } else col.ramp([cx + u0, cz - a, cx + u1, cz - a + reach], y, top, 's');               // the north face
     col.ramp([cx + u0, cz + a - reach, cx + u1, cz + a], y, top, 'n');               // the south face
     col.ramp([cx - a, cz + u0, cx - a + reach, cz + u1], y, top, 'e');               // the west face
     col.ramp([cx + a - reach, cz + u0, cx + a, cz + u1], y, top, 'w');               // the east face
@@ -493,7 +537,7 @@ registerStyle('oldkingdom', {
   elements: {
     ...STYLES.qing.elements,
     ok_pyramid: okPyramid, mastaba, ok_temple: okTemple, causeway, mud_house: mudHouse, gallery_hall: galleryHall, crow_wall: crowWall,
-    boat_pit: boatPit, royal_ship: royalShip, bakery,
+    boat_pit: boatPit, royal_ship: royalShip, bakery, ok_pyramid_interior: pyramidInterior,
   },
   objects: {},
 });

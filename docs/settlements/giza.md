@@ -1,7 +1,7 @@
 # Giza, c. 2560 BC — dossier
 
 Settlement id: `giza` · Style: `oldkingdom` · Region: Egypt (the Memphite plateau) · Code: `src/settlements/giza/`
-Status of this dossier: L2 for the mastaba streets with their chapels, the temples' painted reliefs and ceilings and the people (§4.4, §4.5, §5); L1–L2 for the rest (the Great Pyramid and its complex, the queens' pyramids, the causeway, the five sealed boat pits, the valley temple and harbour with the king's ship, the two cemeteries of mastabas, the Wall of the Crow and the workers' town with its bakeries; ground, planting, weather, music). L3 recorded for later: Khafre's and Menkaure's pyramids and the Sphinx (they are of the following reigns), the pyramid's interior (the Grand Gallery, the King's Chamber), the reliefs of the temples, people and the building ramps.
+Status of this dossier: L2 for the mastaba streets with their chapels, the temples' painted reliefs and ceilings and the people (§4.4, §4.5, §5); L1–L2 for the rest (the Great Pyramid and its complex (its interior to the King's Chamber, §4.6), the queens' pyramids, the causeway, the five sealed boat pits, the valley temple and harbour with the king's ship, the two cemeteries of mastabas, the Wall of the Crow and the workers' town with its bakeries; ground, planting, weather, music). L3 recorded for later: Khafre's and Menkaure's pyramids and the Sphinx (they are of the following reigns), the reliefs of the temples, people and the building ramps.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -52,6 +52,10 @@ Ours: the ship afloat in the harbour beside the landing, as before her burial, b
 - Khufu's mortuary temple: a large court took most of its area, its floor "plastered with irregular slabs of basalt"; "rectangular granite pillars supported the roof which surrounded the court"; "the limestone walls of the temple were richly decorated with painted reliefs and hieroglyphic inscriptions" [stated: Wikipedia draft]; fragments of the court's wall reliefs show the king's thirty-year jubilee, relief-carved and painted [stated: AERA, "The Great Pyramid Temple"].
 - **Ours (all the pyramid temples):** on the inner faces of the walls under the roofed ambulatory, registers 1.95 m high of offering bearers in painted raised relief (red-brown skin, white kilts, black wigs) striding toward the middle of each wall, bringing a loaf, a beer jar, a lotus or a trussed fowl, on blue ground lines; under the roof a band of blue and a frieze of khekher knots; the roof's undersides painted as the night sky, blue with yellow stars, stopping short of the architraves [inferred: the subjects (offering bearers stand in for the jubilee scenes), the sizes, the star ceiling — known from later Old Kingdom buildings].
 
+### 4.6 The pyramid's interior, as at the burial
+
+The entrance in the north face 16.98 m above the base and 7.29 m east of the centre line; the descending passage at 26°31' and 1.04 m wide; the ascending passage at 26°02' from 28.2 m down it, 39.3 m long; the Grand Gallery 46.68 m long and 8.6 m high, 2.06 m wide over its benches (0.51 m wide, 0.53 m high), with 27 slots a side in the benches, the walls rising 2.29 m and then corbelled in seven courses of about 7.6 cm a side to 1.04 m at the roof, the roof slabs each set a little steeper than the floor in its own notch; the Great Step 0.9 m high at its head; the antechamber 2.97 m long and 3.78 m high with granite wainscots, the grooves of the granite leaf and three portcullis slabs, and the half-round hollows over them; the King's Chamber of red granite 10.47 × 5.234 m and 5.974 m high in five courses, roofed by nine granite beams, the mouths of the two shafts in the north and south walls about 0.91 m up; the lidless granite sarcophagus 2.28 × 0.98 × 1.05 m by the west wall, its rim cut back for a sliding lid [stated: Petrie 1883, ch. 7; Maragioglio and Rinaldi 1965]. The three granite plugs stored in the gallery on beams across the slots, to be slid down after the burial, and the portcullis slabs held up on ropes over logs [inferred: the plugs are still in the ascending passage and the slots and hollows fit this use, Lehner 1997, 112–113]; the timber block before the Great Step, the stair over the plugs, the lid laid out on timbers and the oil lamps [inferred]. The sloping and low passages are given a walker's headroom of 2.1 m (real 1.05–1.2 m) [inferred, a concession to the walker]; the descending passage ends in the dark 60 m in (the subterranean chamber is not built).
+
 ## 5. The town
 
 Long galleries (halls with a central colonnade and sleeping platforms), houses with a court, an oven and bins; flat roofs of logs and mud. [inferred]
@@ -79,6 +83,10 @@ Clear and hot, haze now and then, the khamsin's dust in spring. Latitude 30° N.
 Harp, flute and singer (a plucked harp, a flute, a voice stand in). [inferred]
 
 ## Sources
+
+- W. M. Flinders Petrie, *The Pyramids and Temples of Gizeh* (1883), ch. 7 (the Great Pyramid's passages and chambers): https://www.ronaldbirdsall.com/gizeh/petrie/c7.html
+- V. Maragioglio and C. Rinaldi, *L'architettura delle piramidi menfite* IV (1965).
+- M. Lehner, *The Complete Pyramids* (1997), 108–115.
 
 - [Great Pyramid of Giza — Wikipedia](https://en.wikipedia.org/wiki/Great_Pyramid_of_Giza)
 - [Great Pyramid of Giza — Wikipedia (IPFS snapshot)](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Great_Pyramid_of_Giza)

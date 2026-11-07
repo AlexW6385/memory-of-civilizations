@@ -2,7 +2,7 @@
 // valley temple and the harbour with the king's ship, the boat pits, the Wall of the Crow and the
 // workers' town south of it.
 
-import { RADIUS, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOAT_PITS, SHIP, mastabas, town as townLots } from './layout.js';
+import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOAT_PITS, SHIP, mastabas, town as townLots } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -30,6 +30,8 @@ const base = (id, elements, y = 0) => ({ id, style: 'oldkingdom', origin: [0, 0]
 
 export async function town() {
   const plans = [];
+  // the Great Pyramid's passages and chambers, open for the burial (docs/settlements/giza.md §4.6)
+  plans.push(base('giza-pyramid-interior', [{ t: 'ok_pyramid_interior', c: PYRAMID.c, a: PYRAMID.a, h: PYRAMID.h }]));
   plans.push(base('giza-cemeteries', mastabas().map((m) => ({ t: 'mastaba', ...m }))));
   const P = people();
   plans.push({ ...base('giza-people', P.C), style: 'life' }, { ...base('giza-bakers', P.T, TOWN_Y), style: 'life' });
