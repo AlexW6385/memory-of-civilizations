@@ -69,7 +69,7 @@ export function buildTile(face, level, i, j, n = 32) {
       const c = coverAt(g, up, u);
       ground[v * 4] = c.sand; ground[v * 4 + 1] = c.grass; ground[v * 4 + 2] = c.rock; ground[v * 4 + 3] = c.soil;
       ground2[v * 4] = c.fields; ground2[v * 4 + 1] = c.dry; ground2[v * 4 + 2] = c.warmth; ground2[v * 4 + 3] = c.red;
-      ground3[v * 4] = c.road; ground3[v * 4 + 1] = c.snow; ground3[v * 4 + 2] = c.forest; ground3[v * 4 + 3] = 0;
+      ground3[v * 4] = c.road; ground3[v * 4 + 1] = c.snow; ground3[v * 4 + 2] = c.forest; ground3[v * 4 + 3] = g.s ? g.s.w : 0;   // (w: on a settlement's disc, which keeps its own season)
       minH = Math.min(minH, g.h); maxH = Math.max(maxH, g.h);
     }
     return v++;

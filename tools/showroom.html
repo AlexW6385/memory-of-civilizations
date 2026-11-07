@@ -20,7 +20,8 @@ import '../src/styles/vernacular/houses-med.js';
 import { material, useGI } from '../src/engine/materials.js';
 import { ENV } from '../src/engine/env.js';
 import { GIVolume } from '../src/engine/gi.js';
-import { Climate, sunPlanet, moonPlanet } from '../src/engine/climate.js';
+import { Climate, sunPlanet, moonPlanet, forceWeather } from '../src/engine/climate.js';
+import { Rain } from '../src/engine/rain.js';
 import { dirToLocal, toPlanet, latLon, enuFrame } from '../src/planet/geo.js';
 import { BUILT_BY_ID, PLANET_RADIUS, BLEND } from '../src/planet/relief.js';
 import { REGION } from '../src/world/regions.js';
@@ -84,6 +85,7 @@ setFov();
 mark('renderer');
 
 // ── the climate: the sky, the sun and the indirect light of a settlement at an hour ─────────────
+if (cfg.weather) forceWeather(cfg.weather);
 const climate = R ? new Climate(R) : null;
 function sky(S, frame, up = [0, 1, 0], zones = null) {
   if (!climate) return null;
@@ -239,6 +241,7 @@ async function siteView() {
   world.update(cam, ctl);
   if (!cfg.noflora) await world.flora.ready(x, z, null, 140);
   mark('plants');
+  const rain = new Rain(R.scene);
   // the sky and the exposure as the frame loop sets them (src/main.js frameOnce)
   const frameOnce = () => {
     place();
@@ -255,6 +258,7 @@ async function siteView() {
       for (const zz of open) zones.push({ zone: zz.zone, w: zz.w * (1 - w) });
     } else zones.push(...open);
     const cl = sky(site.S, f, dirToLocal(f, u), zones);
+    rain.update(10, cl.rain, climate.indoors < 0.5);   // (a long step: the rain, snow or dust at once)
     const openAmb = R.gi.openAmbient();
     let amb = 0;
     for (const [dx, dy, dz] of [[0, 0, 0], [1.2, 0, 0], [-1.2, 0, 0], [0, 0, 1.2], [0, 0, -1.2], [0, 0.9, 0]]) amb = Math.max(amb, R.gi.ambientAt(c.x + dx, c.y + dy, c.z + dz));

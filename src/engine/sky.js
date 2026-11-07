@@ -1,5 +1,6 @@
 // Forked from three.js examples/jsm/objects/SkyMesh.js (MIT, © 2010-2025 three.js authors): adds
-// `horizonDip`, so that the sky's horizon follows the dipped horizon of a small planet.
+// `horizonDip`, so that the sky's horizon follows the dipped horizon of a small planet, and `haze`,
+// a veil of the weather's haze over the sky (dust, mist, fog: src/planet/setpieces.js).
 import {
 	BackSide,
 	BoxGeometry,
@@ -9,6 +10,7 @@ import {
 } from 'three/webgpu';
 
 import { Fn, float, floor, fract, vec2, vec3, acos, asin, sin, add, mul, clamp, cos, dot, exp, max, min, mix, modelViewProjection, normalize, positionWorld, pow, smoothstep, sub, varyingProperty, vec4, uniform, cameraPosition, time, If, Loop } from 'three/tsl';
+import { ENV } from './env.js';
 
 /**
  * Represents a skydome for scene backgrounds. Based on [A Practical Analytic Model for Daylight](https://www.researchgate.net/publication/220720443_A_Practical_Analytic_Model_for_Daylight)
@@ -136,6 +138,13 @@ class SkyMesh extends Mesh {
 		 * @type {UniformNode<float>}
 		 */
 		this.horizonDip = uniform( 0 );
+
+		/**
+		 * How much the weather's haze (ENV.fogColor) veils the sky: 0 none … 1 the sky lost in it.
+		 *
+		 * @type {UniformNode<float>}
+		 */
+		this.haze = uniform( 0 );
 
 		/**
 		 * This flag can be used for type testing.
@@ -391,6 +400,21 @@ class SkyMesh extends Mesh {
 				// Composite through the atmosphere so distant clouds dissolve into haze
 				const cloudAerial = mix( texColor, cloudColor, Fex );
 				texColor.assign( mix( texColor, cloudAerial, alpha ) );
+
+			} );
+
+			// the weather's haze over the sky: lit as an overcast cloud is (the sky's light and the sun's
+			// through the air), in the haze's colour, thickest toward the horizon; the sun a pale disc in it
+			If( this.haze.greaterThan( 0.001 ), () => {
+
+				const luma = vec3( 0.2126, 0.7152, 0.0722 );
+				const lit = dot( Lin.mul( 0.04 ), luma ).min( 4.0 ).mul( 0.6 ).add( dot( vSunE.mul( Fex ).mul( 0.22 * 0.04 ), luma ).min( 4.0 ).mul( 0.55 ) );
+				// (the hue deepened: the bright sky is desaturated by the tone mapping more than the ground)
+				const hue = ENV.fogColor.mul( ENV.fogColor );
+				const veil = hue.div( dot( hue, luma ).max( 0.01 ) ).mul( lit );
+				const k = this.haze.mul( mix( 1.0, 0.75, clamp( direction.y, 0.0, 1.0 ) ) );
+				const disc = clamp( cosTheta.sub( 0.99985 ).mul( 6000.0 ), 0.0, 1.0 ).mul( this.showSunDisc ).mul( this.haze ).mul( lit ).mul( 1.6 );
+				texColor.assign( mix( texColor, veil, k ).add( ENV.fogColor.mul( disc ) ) );
 
 			} );
 

@@ -10,13 +10,17 @@
 import { CITY, sunDirection, skyRadiance } from '../world/regions.js';
 import { ENV } from './env.js';
 import { unit } from '../planet/geo.js';
+import { withSetPieces, seasonNow, weightNow } from '../planet/setpieces.js';
 
 /** Direction toward the sun in planet coordinates at an hour of the prime meridian (and the moon's). */
 export function sunPlanet(utc) { return unit(0, (12 - utc) * 15); }
 export function moonPlanet(utc) { return unit(-4, (24 - utc) * 15); }
 
 const params = new URLSearchParams(location.search);
-const FORCE = params.get('weather');            // e.g. ?weather=shower (screenshots, tests)
+let FORCE = params.get('weather');              // e.g. ?weather=shower (screenshots, tests)
+/** Hold every region in one weather state by id (the tools' --weather), or null to let it run. */
+export function forceWeather(id) { FORCE = id || null; }
+const SEASON = seasonNow();
 /** Length of a day in real seconds. */
 export const DAY_SECONDS = 1800;
 const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -27,21 +31,23 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 /** The weather: a slow random walk through its states, each held for minutes. */
 class RegionWeather {
-  constructor(region, seed) {
-    this.r = region; this.rand = rng(seed);
+  constructor(region, seed, hour = 12) {
+    this.r = region; this.rand = rng(seed); this.hour = hour;
     const S = region.climate.weather;
     this.cur = this.pick(); this.next = this.cur; this.t = 1;
     if (FORCE) { const i = S.findIndex((w) => w.id === FORCE); if (i >= 0) { this.cur = this.next = i; } }
     this.hold = 120 + this.rand() * 240;
   }
   pick() {
-    const S = this.r.climate.weather, tot = S.reduce((s, w) => s + w.weight, 0);
+    // (a state's weight follows the hour and the month: a morning mist, a winter fog, src/planet/setpieces.js)
+    const S = this.r.climate.weather, W = S.map((w) => weightNow(w, this.hour, SEASON.month)), tot = W.reduce((s, w) => s + w, 0);
     let x = this.rand() * tot;
-    for (let i = 0; i < S.length; i++) { x -= S[i].weight; if (x <= 0) return i; }
+    for (let i = 0; i < S.length; i++) { x -= W[i]; if (x <= 0) return i; }
     return 0;
   }
-  update(dt) {
-    if (FORCE) return;
+  update(dt, hour) {
+    if (hour !== undefined) this.hour = hour;
+    if (FORCE) { const i = this.r.climate.weather.findIndex((w) => w.id === FORCE); if (i >= 0) this.cur = this.next = i, this.t = 1; return; }
     if (this.t < 1) { this.t = Math.min(1, this.t + dt / 75); if (this.t >= 1) this.cur = this.next; return; }
     this.hold -= dt;
     if (this.hold <= 0) { this.next = this.pick(); this.t = this.next === this.cur ? 1 : 0; this.hold = 150 + this.rand() * 330; }
@@ -53,6 +59,7 @@ class RegionWeather {
     const fc = a.fogColor || this.r.climate.fog.color, fd = b.fogColor || this.r.climate.fog.color;
     return {
       clouds: v('clouds'), cloudDensity: v('cloudDensity', 0.4), sun: v('sun', 1), fog: v('fog', 1), rain: v('rain'), windy: v('windy'),
+      snow: v('snow'), dust: v('dust'), fall: v('fall', 1),
       fogColor: [0, 1, 2].map((i) => lerp(fc[i], fd[i], this.cur === this.next ? 0 : t)),
       id: this.t < 1 ? `${S[this.cur].id}→${S[this.next].id}` : S[this.cur].id,
     };
@@ -67,6 +74,8 @@ export class Climate {
     this.hemis = new Map();
     this.state = null;
     this.wet = 0;
+    this.snowCover = 0;            // snow lying on the ground and roofs: grows while it snows, melts after
+    this.forced = null;
     // the time: 'cycle' (days pass) or an hour held fixed; kept as the hour at the prime meridian
     this.mode = 'cycle';
     this.utc = 12;
@@ -78,7 +87,10 @@ export class Climate {
   set hour(h) { this.utc = ((h - this.lonHours) % 24 + 24) % 24; }
 
   weatherOf(zone) {
-    if (!this.weathers.has(zone.id)) this.weathers.set(zone.id, new RegionWeather(zone, 7919 + zone.id.length * 131 + (Date.now() / 3.6e6 | 0)));
+    if (!this.weathers.has(zone.id)) {
+      const z = { ...zone, climate: withSetPieces(zone.id, zone.climate) };
+      this.weathers.set(zone.id, new RegionWeather(z, 7919 + zone.id.length * 131 + (Date.now() / 3.6e6 | 0), this.hour));
+    }
     return this.weathers.get(zone.id);
   }
 
@@ -97,7 +109,7 @@ export class Climate {
     if (this.mode === 'cycle') this.utc = (this.utc + dt * 24 / DAY_SECONDS) % 24;
     const acc = { sun: [0, 0, 0], sunColor: [0, 0, 0], zen: [0, 0, 0], hor: [0, 0, 0], fogColor: [0, 0, 0], fog: 0, falloff: 0, clouds: 0, density: 0,
       turb: 0, ray: 0, mie: 0, mieG: 0, exposure: 0, wind: [0, 0], rain: 0, sunFactor: 0, sky: [0, 0, 0], ground: [0, 0, 0], windy: 0,
-      day: 0, moon: [0, 0, 0], moonLight: 0, sunEl: 0, damp: 0 };
+      day: 0, moon: [0, 0, 0], moonLight: 0, sunEl: 0, damp: 0, snow: 0, dust: 0, fall: 0 };
     const up = ctx.up || [0, 1, 0];
     const el = Math.asin(Math.max(-1, Math.min(1, ctx.sun[0] * up[0] + ctx.sun[1] * up[1] + ctx.sun[2] * up[2]))) * 180 / Math.PI;
     const moonEl = Math.asin(Math.max(-1, Math.min(1, ctx.moon[0] * up[0] + ctx.moon[1] * up[1] + ctx.moon[2] * up[2]))) * 180 / Math.PI;
@@ -105,7 +117,7 @@ export class Climate {
     for (const { zone, w } of ctx.zones) {
       if (w < 1e-4) continue;
       const W = this.weatherOf(zone);
-      W.update(dt);
+      W.update(dt, this.hour);
       if (!this.hemis.has(zone.id)) this.hemis.set(zone.id, hemisphere(zone.climate));
       const hemi = this.hemis.get(zone.id);
       const c = zone.climate, wx = W.get();
@@ -125,7 +137,8 @@ export class Climate {
       }
       acc.moonLight += w * moonUp * (0.35 + 0.65 * wx.sun);
       acc.day += w * day; acc.sunEl += w * el;
-      acc.fog += w * c.fog.density * wx.fog; acc.falloff += w * c.fog.height;
+      acc.fog += w * c.fog.density * wx.fog; acc.falloff += w * c.fog.height * wx.fall;
+      acc.snow += w * wx.snow; acc.dust += w * wx.dust; acc.fall += w * wx.fall;
       acc.clouds += w * wx.clouds; acc.density += w * wx.cloudDensity;
       acc.turb += w * c.sky.turbidity * (1 + wx.clouds); acc.ray += w * c.sky.rayleigh; acc.mie += w * c.sky.mie * (1 + wx.fog * 0.3); acc.mieG += w * c.sky.mieG;
       acc.exposure += w * c.exposure; acc.wind[0] += w * c.wind[0] * (1 + 2 * wx.windy); acc.wind[1] += w * c.wind[1] * (1 + 2 * wx.windy);
@@ -137,8 +150,14 @@ export class Climate {
     // wetness: soaks in under rain within a minute, dries over several
     this.wet += (acc.rain > 0.3 ? (1 - this.wet) * dt / 50 : -this.wet * dt / 400);
     this.wet = Math.min(1, Math.max(0, this.wet));
+    // snow: settles over a minute and a half while it falls, melts over some minutes (faster where
+    // the place is warm: out of the snowing zone the cover goes)
+    this.snowCover += acc.snow > 0.3 ? (Math.min(1, acc.snow) - this.snowCover) * dt / 90 : -this.snowCover * dt / (acc.snow > 0.05 ? 400 : 120);
+    this.snowCover = Math.min(1, Math.max(0, this.snowCover));
+    // a weather held by the tools is seen as it is after a while: the ground already wet or white
+    if (FORCE && this.forced !== FORCE) { this.forced = FORCE; if (acc.rain > 0.3) this.wet = 1; if (acc.snow > 0.3) this.snowCover = Math.min(1, acc.snow); }
     this.apply(acc, dt);
-    this.state = { ...acc, wet: this.wet, ids, zone: ctx.zones[0]?.zone.id };
+    this.state = { ...acc, wet: this.wet, snowCover: this.snowCover, ids, zone: ctx.zones[0]?.zone.id };
     return this.state;
   }
 
@@ -159,6 +178,11 @@ export class Climate {
     ENV.cloudOffset.value.y -= a.wind[1] * dt * 6;
     ENV.wet.value = this.wet;
     ENV.rain.value = a.rain;
+    ENV.snow.value = a.snow;
+    ENV.dust.value = a.dust;
+    ENV.snowCover.value = this.snowCover;
+    ENV.seasonWinter.value = SEASON.winter;
+    ENV.seasonAutumn.value = SEASON.autumn;
     // one light: the sun by day; when it has set, the moon (fainter, bluer), which casts the shadows
     const sunI = Math.max(...a.sunColor), moonI = 0.32 * a.moonLight;
     if (sunI >= moonI) {
@@ -176,6 +200,8 @@ export class Climate {
     const sky = R.sky;
     sky.turbidity.value = a.turb; sky.rayleigh.value = a.ray; sky.mieCoefficient.value = a.mie * 0.6; sky.mieDirectionalG.value = Math.min(a.mieG, 0.74);   // a softer, smaller halo round the sun
     sky.cloudCoverage.value = a.clouds; sky.cloudDensity.value = a.density;
+    // thick haze (a dust storm, a fog, a mist) veils the sky too, less where it lies low (fall)
+    sky.haze.value = Math.min(0.95, smooth(0.0015, 0.0075, a.fog) / (1 + 0.12 * Math.max(0, a.fall - 1)) + 0.6 * a.dust);
     sky.cloudSpeed.value = 0.00002 * (1 + 2 * a.windy);
     sky.sunPosition.value.set(a.sun[0], a.sun[1], a.sun[2]).multiplyScalar(1000);
     // the outdoor fallback for indirect light, and the strength of the baked light under cloud

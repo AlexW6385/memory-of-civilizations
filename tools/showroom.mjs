@@ -22,6 +22,9 @@
 //                              and a hemisphere light (faster; metals still reflect the sky)
 //   --climate <site id>        whose sky, sun and climate light the elements (default athens)
 //   --hour 10.5                the local hour (default mid-morning; --night 1 means 22)
+//   --weather <id>             hold the weather in this state (as ?weather=: snow, monsoon, lake-mist,
+//                              fog, harmattan, khamsin … src/planet/setpieces.js and the grounds)
+//   --season winter|spring|summer|autumn   the open country's season (as ?season=; default today's)
 //   --fov 68                   the camera's field of view (default the game's: 68°, 78° portrait)
 //   --night 1  --size 1280x720 --quality high|medium|low  --frames 2
 //   --timeout 1200             seconds to wait for the page to build and draw, and again for the
@@ -69,7 +72,7 @@ if (!['game', 'simple'].includes(light)) { console.log('--light game | simple');
 // the page's configuration, served as JSON (an element list of any size: the address held ~8 kB)
 const cfg = {
   items, cols: +opt('cols', 6), gap: +opt('gap', 4), night: +opt('night', 0), style: opt('style', 'life'), imports, ground: opt('ground', '0'),
-  inplace: flag('inplace'), cam: opt('cam'), look: opt('look'), weld: flag('weld'), light, climate: opt('climate'), hour: opt('hour'),
+  inplace: flag('inplace'), cam: opt('cam'), look: opt('look'), weld: flag('weld'), light, climate: opt('climate'), hour: opt('hour'), weather: opt('weather'),
   fov: opt('fov'), quality: opt('quality'), frames: opt('frames'),
   site, at: opt('at'), arrival: flag('arrival'), free: flag('free'), radius: opt('radius'), trim: opt('trim'), noflora: flag('noflora'),
 };
@@ -98,7 +101,7 @@ const out = opt('out', 'shots/showroom.png');
 mkdirSync(dirname(resolve(out)), { recursive: true });
 try {
   // (no build workers: the page builds only what it was asked for)
-  await page.goto(`http://127.0.0.1:${srv.address().port}/tools/showroom.html?worker=0`, { timeout: TIMEOUT });
+  await page.goto(`http://127.0.0.1:${srv.address().port}/tools/showroom.html?worker=0${opt('season') ? '&season=' + opt('season') : ''}`, { timeout: TIMEOUT });
   await Promise.race([page.waitForFunction('window.DONE === true', null, { timeout: TIMEOUT, polling: 1000 }), failed]);
   await page.screenshot({ path: out, timeout: TIMEOUT });
   const info = await page.evaluate(() => window.INFO), times = await page.evaluate(() => window.TIMES);
