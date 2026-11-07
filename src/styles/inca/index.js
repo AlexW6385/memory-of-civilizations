@@ -9,6 +9,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, frustum, rod, quad, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { rectRoof, beamTris } from '../ming/index.js';
+import { houseInterior, INCA_LIFE } from './life.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -220,6 +221,8 @@ function incaHouse(el, { bag, col }) {
   const walls = rectWalls(bag, col, el.rect, y, h, th, mat, ops);
   bag.add('granite_inca', box(x0 - th / 2 - 0.12, y - 0.3, z0 - th / 2 - 0.12, x1 + th / 2 + 0.12, y + 0.04, z1 + th / 2 + 0.12));
   col.floor([x0, z0, x1, z1], y + 0.04);
+  // the things of the house: the stove, the grinding stone, the mats, the urpu, pots in the niches
+  if (!el.empty) houseInterior(bag, col, el, walls, ops, f);
   // pegs inside under the wall-head, for hangings and the roof's poles [stated: World History Encyclopedia]
   for (const k of ['n', 'e', 's', 'w']) {
     const { F, off } = walls[k], list = [];
@@ -281,7 +284,7 @@ function incaTemple(el, { bag, col }) {
     const nw = k === el.windowSide ? (el.windows ?? 3) : 0, nb = k === el.windowSide && el.blind ? 2 : 0;
     for (let i = 0; i < nw + nb; i++) {
       const at = (i + 1) * L / (nw + nb + 1), blind = nb && (i === 0 || i === nw + nb - 1);
-      list.push(blind ? { kind: 'niche', at, w: 1.0, h: 1.3, sill: 1.0, depth: 0.4, jamb: !!el.jamb } : { kind: 'window', at, w: 1.25, h: 1.45, sill: 0.95, jamb: !!el.jamb });
+      list.push(blind ? { kind: 'niche', at, w: 1.0, h: 1.3, sill: 1.0, depth: 0.4, jamb: !!el.jamb } : { kind: 'window', at, w: el.win?.w ?? 1.25, h: el.win?.h ?? 1.45, sill: el.win?.sill ?? 0.95, jamb: !!el.jamb });
     }
     if (el.door?.side === k) list.push({ kind: 'door', at: L / 2, w: 1.15, h: 2.3, jamb: !!el.door.jamb });
     else if (!nw) { const n = el.niches?.[k] ?? Math.max(1, Math.floor((L - 1.4) / 1.6)); for (let i = 0; i < n; i++) list.push({ kind: 'niche', at: 0.7 + (i + 0.5) * (L - 1.4) / n, w: 0.72, h: 1.1, sill: 1.0, depth: 0.34, jamb: !!el.jamb }); }
@@ -621,11 +624,21 @@ function sacredRock(el, { bag, col }) {
 /** stone_block: a battered wall of rough stones a→b { w (half-thickness), y0, y1 }, laid in two leaning faces. */
 function stoneBlock(el, { bag, col }) {
   const L = Math.hypot(el.b[0] - el.a[0], el.b[1] - el.a[1]), F = lineFrame(el.a, el.b);
-  incaWall(bag, col, F, { y: el.y0, h: el.y1 - el.y0, th: el.w * 2, mat: 'granite_rough', ends: ['cap', 'cap'], out: -1, stones: Math.min(1.2, (el.y1 - el.y0) * 0.8), seed: Math.round(L * 77) });
+  // a gateway through it (el.door: { at (from a), w, h (above the ground, 0.3 m over the wall's foot), jamb })
+  const openings = el.door ? [{ kind: 'door', at: el.door.at, w: el.door.w ?? 1.1, h: (el.door.h ?? 1.95) + 0.3, jamb: !!el.door.jamb }] : [];
+  const { off } = incaWall(bag, col, F, { y: el.y0, h: el.y1 - el.y0, th: el.w * 2, mat: 'granite_rough', ends: ['cap', 'cap'], out: -1, openings, stones: Math.min(1.2, (el.y1 - el.y0) * 0.8), seed: Math.round(L * 77) });
+  // the ring of stone over the lintel on the inner (-n) face, for the bar that held the door [stated: the main gate's ring — Machu Picchu guides]
+  if (el.door?.ring) {
+    const v = openings[0].h + 0.28, p = F.at(el.door.at), n = F.n(el.door.at), k = -(off(v) + 0.04);
+    const g = lathe([[0.07, -0.03], [0.1, 0], [0.07, 0.03], [0.04, 0], [0.07, -0.03]], 12);
+    g.rotateX(Math.PI / 2); g.rotateY(Math.atan2(n[0], n[1])); g.translate(p[0] + n[0] * (k - 0.06), el.y0 + v, p[1] + n[1] * (k - 0.06));
+    bag.add('granite_inca', g);
+    bag.add('granite_inca', box(p[0] - 0.16 + n[0] * k, el.y0 + v - 0.08, p[1] - 0.16 + n[1] * k, p[0] + 0.16 + n[0] * k, el.y0 + v + 0.08, p[1] + 0.16 + n[1] * k));
+  }
 }
 
 registerStyle('inca', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock },
+  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock, ...INCA_LIFE },
   objects: {},
 });

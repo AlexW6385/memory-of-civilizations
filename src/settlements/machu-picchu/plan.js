@@ -3,7 +3,7 @@
 // Temple of the Three Windows, the Intihuatana on its terraced hill, the Main Plaza; the terraces'
 // walls round the saddle, with stairs down them.
 
-import { SITE, TERRACE, HILL, PLAZA, SACRED_ROCK, waterworks } from './layout.js';
+import { SITE, TERRACE, HILL, KNOLL, hillRing, PLAZA, TOWN_WALL, DITCH, STORES, SACRED_ROCK, waterworks } from './layout.js';
 import { ground } from './ground.js';
 
 const E = [];
@@ -30,35 +30,67 @@ for (let k = 0; k < TERRACE.n; k++) {
   if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1 });
   // the stairs down through the gaps
   for (const g of [0, Math.PI, Math.PI / 2]) {
-    const x = Math.cos(g), z = Math.sin(g), r0 = [x * a, z * b], r1 = [x * (a + TERRACE.w), z * (b + TERRACE.w)];
+    const x = Math.round(Math.cos(g)), z = Math.round(Math.sin(g)), r0 = [x * a, z * b], r1 = [x * (a + TERRACE.w), z * (b + TERRACE.w)];
     const rect = [Math.min(r0[0], r1[0]) - (z ? 1.1 : 0), Math.min(r0[1], r1[1]) - (x ? 1.1 : 0), Math.max(r0[0], r1[0]) + (z ? 1.1 : 0), Math.max(r0[1], r1[1]) + (x ? 1.1 : 0)];
     E.push({ t: 'stairs', rect, y0, y1, dir: x > 0.5 ? 'w' : x < -0.5 ? 'e' : 'n', mat: 'granite_rough' });
   }
   rings.push(k);
 }
-// the Intihuatana's hill: its little terraces and the stone on top
-for (let k = 0; k < Math.floor(HILL.h / 2.2); k++) {
-  const r = HILL.r + 6 - (k + 1) * 2.4, pts = [];
-  for (let i = 0; i <= 36; i++) { const t = i / 36 * Math.PI * 2; pts.push([HILL.c[0] + Math.cos(t) * r, HILL.c[1] + Math.sin(t) * r]); }
-  E.push({ t: 'ring_wall', pts, y0: k * 2.2, y1: (k + 1) * 2.2, mat: 'granite_inca' });
+// the terraced hills: the Intihuatana's, the stone on its top; the Guardhouse's knoll at the south end. Each
+// ring wall stands on the radius its terrace's edge has in the ground (layout hillRing), left open for the stair.
+function hill(H, stairSide, mat) {
+  for (let k = 0; k < H.n; k++) {
+    const r = hillRing(H, k), y0 = 2.2 * k, y1 = 2.2 * (k + 1), gap = Math.asin(1.2 / r) + 0.01;
+    let pts = [];
+    const flush = () => { if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1, mat }); pts = []; };
+    for (let i = 0; i <= 72; i++) {
+      const t = stairSide + gap + i / 72 * (Math.PI * 2 - 2 * gap), p = [H.c[0] + Math.cos(t) * r, H.c[1] + Math.sin(t) * r];
+      if (ground.height(p[0], p[1]) > y1 + 1 || ground.height(H.c[0] + Math.cos(t) * (r + 1.2), H.c[1] + Math.sin(t) * (r + 1.2)) > y0 + 0.3) { flush(); continue; }   // in the mountain's slope
+      pts.push(p);
+    }
+    flush();
+  }
 }
-E.push({ t: 'intihuatana', c: HILL.c, y: Math.floor(HILL.h / 2.2) * 2.2 });
-E.push({ t: 'stairs', rect: [HILL.c[0] + 4, HILL.c[1] - 1.2, HILL.c[0] + HILL.r + 6, HILL.c[1] + 1.2], y0: 0, y1: Math.floor(HILL.h / 2.2) * 2.2, dir: 'w', mat: 'granite_rough' });
-// the Temple of the Sun on its rock, the royal residence beside it
-// the Torreón stands on its rock over the cave of the Royal Tomb, the mouth in the rock's east face; a stair up beside it
-E.push({ t: 'torreon', c: [-36, -22], r: 5.5, y: 3.0, h: 4.6, tomb: { at: 11.5, w: 2.4, d: 4 } });
-E.push({ t: 'stair', rect: [-27.35, -29.6, -22.85, -27.4], y0: 0, y1: 3.0, dir: 'w', riser: 0.2, mat: 'granite_inca' });
-E.push({ t: 'inca_house', rect: [-52, -10, -42, 2], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', jamb: true, seed: 9 });
-E.push({ t: 'inca_house', rect: [-56, -32, -46, -20], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', jamb: true, seed: 10 });
-// the Sacred Plaza: the Main Temple (three walls, open to the south), the Temple of the Three Windows (open to the west)
+hill(HILL, 0, 'granite_inca');
+E.push({ t: 'intihuatana', c: HILL.c, y: 2.2 * HILL.n });
+E.push({ t: 'stairs', rect: [HILL.c[0] + hillRing(HILL, HILL.n - 1) - 0.6, HILL.c[1] - 1.1, HILL.c[0] + HILL.r + 6, HILL.c[1] + 1.1], y0: 0, y1: 2.2 * HILL.n, dir: 'w', mat: 'granite_rough' });
+hill(KNOLL, -Math.PI / 2, 'granite_rough');
+{
+  const top = 2.2 * KNOLL.n, ri = hillRing(KNOLL, KNOLL.n - 1);
+  // the stair up the knoll's north face, starting out on the level ground
+  E.push({ t: 'stairs', rect: [KNOLL.c[0] - 1.1, KNOLL.c[1] - KNOLL.r - 10, KNOLL.c[0] + 1.1, KNOLL.c[1] - ri + 0.6], y0: 0, y1: top, dir: 's', mat: 'granite_rough' });
+  // the Guardhouse at the top of the agricultural sector: three walls and one open long side, of rough stones, thatched
+  // [stated: theonlyperuguide], three windows over the site [stated: imachupicchu]; open to the north over the town [inferred]
+  E.push({ t: 'inca_temple', rect: [KNOLL.c[0] - 5.5, KNOLL.c[1] + 1, KNOLL.c[0] + 2.5, KNOLL.c[1] + 5], y: top + 0.3, h: 2.7, th: 0.75, open: 'n', roof: 'thatch', windowSide: 's', windows: 3, win: { w: 0.55, h: 0.6, sill: 1.15 }, niches: { e: 1, w: 1 }, seed: 71 });
+  // the Funerary Rock a few steps from it: a square-cut monolith with a little stair cut in the same rock [stated: imachupicchu]
+  E.push({ t: 'funerary_rock', c: [KNOLL.c[0] + 8, KNOLL.c[1] + 3], y: top, yaw: 0.4 });
+}
+// the Temple of the Sun on its rock south of the Sacred Plaza, the royal residence beside it, the first fountain's
+// stair between: the Torreón stands on its rock over the cave of the Royal Tomb, the mouth in the rock's east face; a stair up beside it
+E.push({ t: 'torreon', c: [-36, 22], r: 5.5, y: 3.0, h: 4.6, tomb: { at: 11.5, w: 2.4, d: 4 } });
+E.push({ t: 'stair', rect: [-27.35, 14.4, -22.85, 16.6], y0: 0, y1: 3.0, dir: 'w', riser: 0.2, mat: 'granite_inca' });
+E.push({ t: 'inca_house', rect: [-52, -4, -42, 8], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', jamb: true, seed: 9 });
+E.push({ t: 'inca_house', rect: [-56, 34, -46, 46], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', jamb: true, seed: 10 });
+// the way in: from the fields down into the dry ditch and up out of it to the main gate (the wall is built with the kanchas')
+{ const g = TOWN_WALL.gate, zb = DITCH.z;
+  E.push({ t: 'stairs', rect: [g - 1.1, zb + DITCH.bottom - 0.4, g + 1.1, zb + DITCH.top + 0.3], y0: -DITCH.depth, y1: 0, dir: 's', mat: 'granite_rough' });
+  E.push({ t: 'stairs', rect: [g - 1.1, zb - DITCH.top - 0.3, g + 1.1, zb - DITCH.bottom + 0.4], y0: -DITCH.depth, y1: 0, dir: 'n', mat: 'granite_rough' });
+  E.push({ t: 'lane', rect: [g - 1.1, zb - DITCH.bottom + 0.4, g + 1.1, zb + DITCH.bottom - 0.4], y: -DITCH.depth + 0.02, mat: 'granite_rough' }); }
+// the five storehouses (qollqa) in the fields: small stone rooms in a row, thatched, their doors to the path
+for (const [i, r] of STORES.entries()) E.push({ t: 'inca_house', rect: r, y: 0, h: 2.4, th: 0.6, front: 'n', empty: true, seed: 300 + i });
+// the quarry between the Sacred Plaza and the Temple of the Sun, west of the Main Plaza
+E.push({ t: 'quarry', rect: [-40, -21, -24, -7], y: 0, seed: 41 });
+// the Sacred Plaza at the Intihuatana hill's foot: the Main Temple on its north side (three walls, open to the south), the
+// Temple of the Three Windows on its east (open to the west, its windows looking east over the Main Plaza)
 // the Main Temple: seventeen niches, six great pegs on the rear wall, its base of great stones, the altar block [stated: theonlyperuguide]
-E.push({ t: 'inca_temple', rect: [-50, 34, -34, 46], y: 0.6, h: 3.8, open: 's', jamb: true, niches: { n: 7, e: 5, w: 5 }, pegs: { n: 6 }, altar: { side: 'n', w: 4.2, d: 0.9, h: 0.95 }, stones: 0.9, seed: 3 });
+E.push({ t: 'inca_temple', rect: [-50, -56, -34, -44], y: 0.6, h: 3.8, open: 's', jamb: true, niches: { n: 7, e: 5, w: 5 }, pegs: { n: 6 }, altar: { side: 'n', w: 4.2, d: 0.9, h: 0.95 }, stones: 0.9, seed: 3 });
 // the Temple of the Three Windows: the windows and, either side of them, two blind windows like niches [stated: imachupicchu]
-E.push({ t: 'inca_temple', rect: [-30, 34, -20, 48], y: 0.6, h: 3.6, open: 'w', windowSide: 'e', windows: 3, blind: true, stones: 0.85, seed: 4 });
+E.push({ t: 'inca_temple', rect: [-30, -56, -20, -42], y: 0.6, h: 3.6, open: 'w', windowSide: 'e', windows: 3, blind: true, stones: 0.85, seed: 4 });
 // four low steps up to each temple's raised floor (0.6 m), before its open side
-E.push({ t: 'stair', rect: [-46, 47, -38, 48.2], y0: 0, y1: 0.6, dir: 'n', riser: 0.15, mat: 'granite_inca' });
-E.push({ t: 'stair', rect: [-32.2, 37, -31, 45], y0: 0, y1: 0.6, dir: 'e', riser: 0.15, mat: 'granite_inca' });
-E.push({ t: 'inca_house', rect: [-46, 52, -36, 60], y: 0.2, h: 2.8, front: 's', mat: 'granite_inca', roof: 'thatch', seed: 11 });
+E.push({ t: 'stair', rect: [-46, -43, -38, -41.8], y0: 0, y1: 0.6, dir: 'n', riser: 0.15, mat: 'granite_inca' });
+E.push({ t: 'stair', rect: [-32.2, -53, -31, -45], y0: 0, y1: 0.6, dir: 'e', riser: 0.15, mat: 'granite_inca' });
+// the house of the priest closing the plaza on the south
+E.push({ t: 'inca_house', rect: [-46, -34, -36, -26], y: 0.2, h: 2.8, front: 'n', mat: 'granite_inca', roof: 'thatch', seed: 11 });
 // the Main Plaza's edge: a low wall with stairs down into it
 E.push({ t: 'lane', rect: [PLAZA[0] - 4, PLAZA[1] - 4, PLAZA[0] - 1, PLAZA[3] + 4], y: 0.02, mat: 'granite_rough' });
 
@@ -70,8 +102,8 @@ E.push({ t: 'sacred_rock', c: SACRED_ROCK.c, y: 0, yaw: 0, w: 6.8, h: 3.0 });
 for (const [r, open] of SACRED_ROCK.wayronas) E.push({ t: 'inca_temple', rect: r, y: 0.3, h: 2.8, th: 0.8, open, roof: 'thatch', niches: { n: 2, s: 2, e: 4, w: 4 }, seed: r[0] + 50 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('sacred-plaza', [-52, 30, -18, 62], 0.6, 'open'), room('town', [-95, -175, 95, 175], 0, 'open')];
-const walks = [[[2, 110], [-6, 60], [-20, 10], [-30, -12]]];
+const rooms = [room('sacred-plaza', [-52, -62, -18, -24], 0.6, 'open'), room('town', [-95, -175, 95, 175], 0, 'open')];
+const walks = [[[2, 110], [-6, 60], [-14, 30], [-21, 15.5]]];
 walks[0].y0 = 0;
 
 export const town = {
@@ -82,8 +114,8 @@ export const town = {
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [2, 110], facing: 'n' },
   bounds: [-140, -220, 140, 220],
-  bakeBounds: [-60, -40, -10, 65],
-  view: [-56, -30, -18, 62],
+  bakeBounds: [-60, -70, -10, 40],
+  view: [-56, -62, -18, 32],
   bakeTop: 12,
   elements: E,
   rooms,

@@ -56,7 +56,7 @@ export const ARRIVALS = {
   'teotihuacan':      [0, 0.1, 60, 0, 0.1],              // up the Avenue of the Dead
   'chichen-itza':     [30, 0.1, 75, 0.38, 0.17],         // El Castillo
   'tenochtitlan':     [-10, 0.1, 30, -1.293, 0.25],      // the Templo Mayor's twin shrines
-  'machu-picchu':     [0, null, 150, 0.06, 0.12],        // from the saddle's south end, over the town to Huayna Picchu
+  'machu-picchu':     [-17.6, null, 128.6, -0.07, -0.02],    // from the Guardhouse's knoll at the saddle's south end, over the town to Huayna Picchu
   'cahokia':          [-25, 0.1, 20, 0, 0.25],           // Monks Mound across the Grand Plaza
   'taos':             [0, 0.1, 25, 0.3, 0.12],           // the north house across the plaza
   'new-york':         [-81.83, 0.1, 155.87, 2.6354, 0.6], // up Fifth Avenue between the towers (the grid turned 29°: Fifth at 35th, looking down the avenue)
