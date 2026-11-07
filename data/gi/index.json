@@ -1076,7 +1076,7 @@
  },
  "nara-todaiji": {
   "site": "nara",
-  "hash": "edd7393285a48023",
+  "hash": "5dc2201c6edc9a3b",
   "rays": 128,
   "probes": 76738,
   "boxes": [
@@ -1097,8 +1097,8 @@
     ]
    }
   ],
-  "bytes": 1216743,
-  "seconds": 407,
+  "bytes": 1185414,
+  "seconds": 152,
   "baked": "2026-11-07"
  },
  "new-york-esb": {
