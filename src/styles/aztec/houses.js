@@ -11,6 +11,9 @@ import { STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import { Kit, carved } from '../maya/meso.js';
 import { Matrix4 } from '../../core/three.js';
+import { hearthKit, ollaKit, storeJarKit, bowlsKit, bedKit, metateKit, waterJarKit, soot, put } from '../maya/household.js';
+import { maguey, nopal, mesoPlants } from '../maya/plants.js';
+export { mesoPlants };
 
 const W = 'plaster_white', R = 'stucco_red', ST = 'andesite', FL = 'stucco';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -81,6 +84,44 @@ function room(bag, col, { r, y, h, door, t = 0.45, dw = 0.95, dh = 1.9, lintel =
   return yr;
 }
 
+/**
+ * The things inside a room { r (outer rect), y (floor), h, door, t } by its use: 'hearth' (the hearth of three
+ * stones and the comal in a back corner, the soot over it on the beams' ceiling, ollas, a mat and blanket by the
+ * side wall, a stored jar), 'sleep' (mats along the back wall with folded blankets, a reed chest, a basket, the
+ * cups) or 'store' (jars along the back wall, baskets, a bale of cloth). Florentine Codex (via ancient-history-sites):
+ * the hearth, the comal, the metate beside the hearth, reed mats with a pillow, pots and baskets.
+ */
+function roomThings(ctx, { r, y, h, door, t = 0.45 }, role, rand) {
+  const { bag, col } = ctx, L = STYLES.life.elements, [x0, z0, x1, z1] = [r[0] + t, r[1] + t, r[2] - t, r[3] - t];
+  const F = { n: [0, -1], s: [0, 1], w: [-1, 0], e: [1, 0] }[door], fx = F[0], fz = F[1];
+  const front = fx ? (fx > 0 ? x1 : x0) : (fz > 0 ? z1 : z0), U0 = fx ? z0 : x0, U1 = fx ? z1 : x1, D = fx ? x1 - x0 : z1 - z0, sgn = fx || fz;
+  const at3 = (u, v) => (fx ? [front - sgn * v, y, u] : [u, y, front - sgn * v]), inward = Math.atan2(-fx, -fz), m = (U0 + U1) / 2, ceil = y + h + 0.17;
+  if (D < 1.8 || U1 - U0 < 2.4) return;
+  if (role === 'hearth') {
+    const hu = U0 + 0.85, hv = D - 0.85, [hx, , hz] = at3(hu, hv);
+    put(bag, hearthKit('andesite'), hx, y, hz, inward); col.circle(hx, hz, 0.45, y, y + 0.3);
+    soot(bag, [hx, ceil, hz], [0, -1, 0], 1.6, 1.4, Math.floor(rand() * 1e6));
+    put(bag, ollaKit(), ...at3(hu + 0.95, hv + 0.1), 0); put(bag, ollaKit(), ...at3(hu, hv - 1.0), 0);
+    put(bag, bedKit(rand() < 0.6 ? 'cloth_white' : 'cloth_ochre', 'cloth_red'), ...at3(U1 - 0.6, D - 1.25), inward + Math.PI / 2);
+    put(bag, storeJarKit(), ...at3(U1 - 0.45, 0.5), 0);
+    L.basket({ at: at3(m + 1.1, D - 0.4).filter((_, i) => i !== 1), y, seed: Math.floor(rand() * 1e6), n: 1 }, ctx);
+  } else if (role === 'sleep') {
+    for (const k of (U1 - U0 > 4.2 ? [0, 1] : [0])) put(bag, bedKit(rand() < 0.7 ? 'cloth_white' : 'cloth_ochre', rand() < 0.5 ? 'cloth_red' : 'cloth_indigo'), ...at3(k ? U1 - 1.2 : U0 + 1.2, D - 0.55), inward);
+    put(bag, chestKit(), ...at3(U0 + 0.45, 0.9), inward + Math.PI / 2);
+    put(bag, bowlsKit('paint_ochre'), ...at3(U1 - 0.5, 0.5), inward);
+    L.basket({ at: at3(U1 - 0.5, 1.2).filter((_, i) => i !== 1), y, seed: Math.floor(rand() * 1e6), n: 1 }, ctx);
+  } else {
+    for (let k = 0; k < Math.min(6, Math.floor((U1 - U0 - 0.6) / 0.62)); k++) { const p = at3(U0 + 0.45 + k * 0.62, D - 0.4); put(bag, storeJarKit(), ...p, 0); col.circle(p[0], p[2], 0.26, y, y + 0.6); }
+    L.basket({ at: at3(U1 - 0.6, 0.9).filter((_, i) => i !== 1), y, seed: Math.floor(rand() * 1e6), n: 3 }, ctx);
+    put(bag, chestKit(), ...at3(U0 + 0.5, 0.8), inward + Math.PI / 2);
+  }
+}
+/** A reed chest (petlacalli): a lidded box of woven reed, 0.7 × 0.45 × 0.4 m, along x. */
+const chestKit = () => carved('petlacalli', (k) => {
+  k.bx('wicker', -0.35, 0.35, 0, 0.36, -0.22, 0.22);
+  k.bx('reed_mat', -0.37, 0.37, 0.36, 0.42, -0.24, 0.24);
+});
+
 /** The metate: the sloping grinding slab of basalt on three legs, the mano lying on it. */
 const metate = () => carved('mx-metate', (k) => {
   for (const [x, z] of [[-0.14, -0.2], [0.14, -0.2], [0, 0.22]]) k.fy('basalt', [x - 0.04, x + 0.04, z - 0.04, z + 0.04], [x - 0.03, x + 0.03, z - 0.03, z + 0.03], 0, z < 0 ? 0.13 : 0.2);
@@ -148,7 +189,7 @@ export function calli(el, ctx) {
       rooms.push({ r, door: OPP[f], side: f, ds });
     }
   }
-  const tops = rooms.map((q) => room(bag, col, { r: q.r, y: P, h: H(), door: q.door }));
+  const tops = rooms.map((q, i) => { const hh = H(); roomThings(ctx, { r: q.r, y: P, h: hh, door: q.door }, i === 0 ? 'hearth' : rand() < 0.65 ? 'sleep' : 'store', rand); return room(bag, col, { r: q.r, y: P, h: hh, door: q.door }); });
   // the compound wall along the rest of the perimeter (the walls on x run full length, those on z
   // between them), its gate on the street
   const t = 0.4, wh = P + 1.9;
@@ -406,4 +447,54 @@ export function tzompantli(el, ctx) {
       }
     }
   }
+}
+
+/**
+ * chinampa_house: a farmer's house on a chinampa { c [x, z], y, door ('e' | 'w'), seed }: one room 3.4 × 4.6 m of
+ * wattle and daub on a footing of stones, a peaked roof thatched with straw over gables of daub, the door in the
+ * middle of a long side; inside the hearth of three stones with the comal, ollas, the metate, sleeping mats, the
+ * water jar, a basket; before it the cuezcomatl granary, maguey and a nopal [Florentine Codex via ancient-history-
+ * sites: wattle and daub, peaked roofs thatched with straw, the hearth and smoke hole, the comal, the metate, the
+ * mats; the arrangement inferred].
+ */
+export function chinampaHouse(el, ctx) {
+  const { bag, col } = ctx, [cx, cz] = el.c, y = el.y ?? 0, rand = rng(el.seed || 3), hx = 1.7, hz = 2.3, t = 0.16, H = 2.0, ridge = 3.9, L = STYLES.life.elements;
+  const sx = el.door === 'w' ? -1 : 1, dw = 0.5, dh = 1.75;
+  B(bag, 'andesite', [cx - hx - 0.08, cz - hz - 0.08, cx + hx + 0.08, cz + hz + 0.08], y - 0.15, y + 0.25);                  // the footing
+  B(bag, 'mud_plaster', [cx - hx + t, cz - hz + t, cx + hx - t, cz + hz - t], y + 0.25, y + 0.27);                       // the beaten floor
+  col.floor([cx - hx, cz - hz, cx + hx, cz + hz], y + 0.27);
+  const yw = y + 0.25, W = (r) => { B(bag, 'mud_plaster', r, yw, y + H); col.rect(r, yw, y + H); };
+  W([cx - hx, cz - hz, cx + hx, cz - hz + t]); W([cx - hx, cz + hz - t, cx + hx, cz + hz]);
+  const back = sx > 0 ? cx - hx : cx + hx - t; W([back, cz - hz + t, back + t, cz + hz - t]);
+  const fr = sx > 0 ? cx + hx - t : cx - hx; W([fr, cz - hz + t, fr + t, cz - dw]); W([fr, cz + dw, fr + t, cz + hz - t]);
+  B(bag, 'mud_plaster', [fr, cz - dw, fr + t, cz + dw], y + 0.25 + dh, y + H);
+  B(bag, 'timber', [fr - 0.03, cz - dw - 0.2, fr + t + 0.03, cz + dw + 0.2], y + 0.25 + dh - 0.1, y + 0.25 + dh);          // the lintel
+  // the gables (daub over the end walls, up to the ridge) and the thatch: two thick slopes from the eaves over the long sides
+  const k = new Kit(), ov = 0.45, ye = y + H - 0.25;
+  for (const s of [-1, 1]) {
+    const z0 = s < 0 ? -hz : hz - t, z1 = z0 + t;
+    k.hex('mud_plaster', [[-hx, y + H, z0], [hx, y + H, z0], [hx, y + H, z1], [-hx, y + H, z1], [0, ridge + y - 0.25, z0], [0, ridge + y - 0.25, z0], [0, ridge + y - 0.25, z1], [0, ridge + y - 0.25, z1]]);
+  }
+  for (const s of [-1, 1]) {
+    const xe = s * (hx + ov), ye2 = ye - ov * (ridge - H) / hx, th = 0.28;
+    k.hex('thatch', [[xe, ye2, -hz - ov], [0, y + ridge - th, -hz - ov], [0, y + ridge - th, hz + ov], [xe, ye2, hz + ov], [xe, ye2 + th, -hz - ov], [0, y + ridge, -hz - ov], [0, y + ridge, hz + ov], [xe, ye2 + th, hz + ov]]);
+  }
+  k.seg('thatch', [0, y + ridge - 0.05, -hz - ov - 0.05], [0, y + ridge - 0.05, hz + ov + 0.05], 0.16, 0.12);   // the ridge bundle
+  k.emit(bag, cx, 0, cz, 0, 1);
+  col.rect([cx - hx - ov, cz - hz - ov, cx + hx + ov, cz + hz + ov], y + H + 0.1, y + ridge);
+  // inside: the hearth in the back corner, the soot on the thatch over it, the pots, the metate, the beds, the water jar
+  const f = y + 0.27, bx = cx - sx * (hx - t - 0.75);
+  put(bag, hearthKit('andesite'), bx, f, cz - hz + t + 0.75, 0); col.circle(bx, cz - hz + t + 0.75, 0.45, f, f + 0.3);
+  put(bag, ollaKit(), bx + sx * 0.85, f, cz - hz + t + 0.45, 0);
+  put(bag, metateKit(), cx + sx * 0.6, f, cz - hz + t + 0.55, 0);
+  put(bag, bedKit(rand() < 0.6 ? 'cloth_white' : 'cloth_ochre', 'cloth_red'), cx - sx * (hx - t - 0.55), f, cz + 0.9, Math.PI / 2);
+  put(bag, waterJarKit(), cx + sx * (hx - t - 0.4), f, cz + hz - t - 0.45, 0); col.circle(cx + sx * (hx - t - 0.4), cz + hz - t - 0.45, 0.33, f, f + 0.8);
+  L.basket({ at: [cx + sx * 0.2, cz + hz - t - 0.4], y: f, seed: el.seed, n: 1 }, ctx);
+  // before the door: the granary, the maguey and a nopal, a woman at work or a man with his coa
+  const gx = cx + sx * (hx + 2.4), gz = cz - hz + 0.6;
+  granary().emit(bag, gx, y, gz, 0, 1); col.circle(gx, gz, 0.8, y, y + 2.4);
+  maguey(bag, col, cx + sx * (hx + 1.6), y, cz + hz + 1.4, 0.75, rand() < 0.5 ? 0 : Math.PI / 2, el.seed % 3);
+  maguey(bag, col, cx - sx * (hx + 1.4), y, cz + hz + 0.9, 0.6, rand() < 0.5 ? Math.PI : -Math.PI / 2, (el.seed + 1) % 3);
+  if (rand() < 0.6) nopal(bag, col, cx - sx * (hx + 1.6), y, cz - hz - 0.8, 0.85, 0, el.seed % 3);
+  if (rand() < 0.5) L.figure({ at: [cx + sx * (hx + 1.1), cz + 0.6], y, rot: sx > 0 ? -Math.PI / 2 : Math.PI / 2, seed: el.seed, pose: 'kneel', dress: 'wrap', cloth: 'cloth_white', cloth2: 'cloth_ochre', skin: 'skin_medium', hair: 'long', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: 'none' }, ctx);
 }

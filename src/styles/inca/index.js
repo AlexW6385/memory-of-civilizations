@@ -11,6 +11,8 @@ import '../qing/index.js';
 import { rectRoof, beamTris } from '../ming/index.js';
 import { houseInterior, INCA_LIFE } from './life.js';
 
+import { patch } from '../maya/household.js';
+import { incaPlants } from './plants.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 // ---- the wall -------------------------------------------------------------------------------------
@@ -34,6 +36,21 @@ const arcFrame = (c, r, a0, a1) => {
     n: (u) => [-Math.cos(ang(u)) * s, -Math.sin(ang(u)) * s],
   };
 };
+/**
+ * Lichen on a wall's faces (the granite of Machu Picchu is colonised by lichens, algae and mosses — Sacred Rock
+ * study, Univ. of the Basque Country): small crusts, pale grey-green, whitish and now and then rust-orange, more
+ * toward the wall's head, on the outer face (both faces of a freestanding wall), kept off the openings. W, off, bat: the wall's own frame.
+ */
+function lichen(bag, F, W, off, bat, o) {
+  const { h, openings = [] } = o, rand = rng(Math.round(F.L * 131 + h * 17 + (F.at(0)[0] + F.at(0)[1]) * 7)), n = Math.round(F.L * h * 0.09 + rand());
+  const tilt = Math.atan2(bat, h);
+  for (let i = 0; i < n; i++) {
+    const u = 0.35 + rand() * (F.L - 0.7), v = Math.min(h - 0.15, h * (0.25 + 0.7 * Math.sqrt(rand()))), s = o.lichenBoth && rand() < 0.4 ? -(o.out ?? -1) : (o.out ?? -1);
+    if (openings.some((op) => Math.abs(u - op.at) < op.w / 2 + 0.45) || F.L < 1) continue;
+    const nn = F.n(u), p = W(u, v, s * off(v)), m = rand(), size = 0.12 + rand() * 0.32;
+    patch(bag, m < 0.55 ? 'plaster_damp' : m < 0.88 ? 'lime_plaster_rough' : 'paint_ochre', p, [nn[0] * s, 0, nn[1] * s], size, size * (0.6 + rand() * 0.5), Math.floor(rand() * 1e6), F.curved ? 0.007 : 0.004, tilt, 9);
+  }
+}
 /** Push triangle a b c, turned to face `want`. */
 function tri(out, a, b, c, want) {
   const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
@@ -172,6 +189,7 @@ function incaWall(bag, col, F, o) {
   let s = 0;
   for (const d of doors) { if (d.c - d.wb - s > 0.05) solid(s, d.c - d.wb, y, y + h); solid(d.c - d.wb, d.c + d.wb, y + d.v1, y + h); s = d.c + d.wb; }
   if (L - s > 0.05) solid(s, L, y, y + h);
+  if (o.lichen !== false) lichen(bag, F, W, off, bat, o);
   return { off, bat };
 }
 
@@ -626,7 +644,7 @@ function stoneBlock(el, { bag, col }) {
   const L = Math.hypot(el.b[0] - el.a[0], el.b[1] - el.a[1]), F = lineFrame(el.a, el.b);
   // a gateway through it (el.door: { at (from a), w, h (above the ground, 0.3 m over the wall's foot), jamb })
   const openings = el.door ? [{ kind: 'door', at: el.door.at, w: el.door.w ?? 1.1, h: (el.door.h ?? 1.95) + 0.3, jamb: !!el.door.jamb }] : [];
-  const { off } = incaWall(bag, col, F, { y: el.y0, h: el.y1 - el.y0, th: el.w * 2, mat: 'granite_rough', ends: ['cap', 'cap'], out: -1, openings, stones: Math.min(1.2, (el.y1 - el.y0) * 0.8), seed: Math.round(L * 77) });
+  const { off } = incaWall(bag, col, F, { y: el.y0, h: el.y1 - el.y0, th: el.w * 2, mat: 'granite_rough', ends: ['cap', 'cap'], out: -1, openings, lichenBoth: true, stones: Math.min(1.2, (el.y1 - el.y0) * 0.8), seed: Math.round(L * 77) });
   // the ring of stone over the lintel on the inner (-n) face, for the bar that held the door [stated: the main gate's ring — Machu Picchu guides]
   if (el.door?.ring) {
     const v = openings[0].h + 0.28, p = F.at(el.door.at), n = F.n(el.door.at), k = -(off(v) + 0.04);
@@ -639,6 +657,6 @@ function stoneBlock(el, { bag, col }) {
 
 registerStyle('inca', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock, ...INCA_LIFE },
+  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock, inca_plants: incaPlants, ...INCA_LIFE },
   objects: {},
 });

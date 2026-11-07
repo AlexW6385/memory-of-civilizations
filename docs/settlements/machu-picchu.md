@@ -1,7 +1,7 @@
 # Machu Picchu, c. 1450–1530 — dossier
 
 Settlement id: `machu-picchu` · Style: `inca` · Region: the Andes (Eastern Cordillera) · Code: `src/settlements/machu-picchu/`
-Status of this dossier: L1–L2 (the saddle and its peaks, the terraces all round, the Temple of the Sun, the Sacred Plaza with the Main Temple and the Temple of the Three Windows, the Intihuatana on its hill, the Main Plaza, the houses in kanchas; ground, planting, weather, music). Second pass (§4.3): the canal and the sixteen fountains, the Royal Tomb under the Torreón, the Sacred Rock and its wayronas, the great stones, niches, pegs and altar of the Main Temple, the blind windows of the Three Windows. Third pass (§4.4, §5.1, §5.2): the plan turned the right way (it was mirrored north–south), the kanchas walled with their gateways, the town wall and its main gate, the dry ditch, the fields and the five storehouses, the Guardhouse on its knoll and the Funerary Rock, the quarry, the houses furnished, people and llamas. L3 recorded for later: the Temple of the Condor, Inti Punku and the trails, the walls' polygonal masonry in detail.
+Status of this dossier: L1–L2 (the saddle and its peaks, the terraces all round, the Temple of the Sun, the Sacred Plaza with the Main Temple and the Temple of the Three Windows, the Intihuatana on its hill, the Main Plaza, the houses in kanchas; ground, planting, weather, music). Second pass (§4.3): the canal and the sixteen fountains, the Royal Tomb under the Torreón, the Sacred Rock and its wayronas, the great stones, niches, pegs and altar of the Main Temple, the blind windows of the Three Windows. Third pass (§4.4, §5.1, §5.2): the plan turned the right way (it was mirrored north–south), the kanchas walled with their gateways, the town wall and its main gate, the dry ditch, the fields and the five storehouses, the Guardhouse on its knoll and the Funerary Rock, the quarry, the houses furnished, people and llamas. L3 (§4.5, §5.3, §7.1): lichen on the walls, the chaski's post and travellers on the road, tree ferns and bromeliads of the cloud forest. L3 recorded for later: the Temple of the Condor, Inti Punku and the trails, the walls' polygonal masonry in detail.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -72,6 +72,10 @@ Dry-stone walls of granite — "smooth, seamless walls for elite buildings; roug
 - **The foot plough.** The chakitaqlla: a shaft about 1.45 m long, a footrest of two pegs lashed on about 45 cm up, a handle near the top, the blade 40 cm long in a socket at the foot [stated: Museum of Old Techniques (MOT), "Chaquitaclla"]; "a hard-wood or bronze point" [stated: ancient-history-sites, "Work and Household Production in the Inca World"]. Built: as stated, the blade in the earth before each ploughman.
 - **The backstrap loom.** The near bar tied to the weaver's waist, the far bar to a post [stated: Wikipedia, "Backstrap loom"; "Andean textiles"]. Built: the two bars, the warp between with the cloth woven at the near end, a peeled post [inferred: sizes].
 
+### 4.5 L3: lichen on the stone (as built)
+
+- The granite of the Sacred Rock is colonised by "a wide variety of biocolonizer species" — lichens, algae, mosses, cyanobacteria — most of which have penetrated the porous stone [stated: ScienceDaily, "Biocolonizer species are putting the conservation of the granite at Machu Picchu at risk" (Univ. of the Basque Country, 2019)]. **Built** (`lichen`, src/styles/inca/index.js): on every Inca wall small crusts 0.1–0.45 m across — pale grey-green, whitish, now and then rust-orange — about one to every eleven square metres of face, more toward the wall's head, laid on the battered face at its lean; on the outer face of houses and temples, on both faces of the kancha walls and the town wall; kept off the openings [inferred: the colours, the density]. The rough stone (`granite_rough`, the rocks and the Sacred Rock) already carries lichen in its material.
+
 ## 5. The houses
 
 Rectangular rooms of rough granite set in clay, a trapezoid door on the court, niches in a row inside, now and then a small window, stone gables with their pegs carrying steep thatched roofs; grouped in kanchas, "three (or more)" buildings round a walled patio [stated: World History Encyclopedia]. The royal residence's doorways double-jambed. [stated: thatch, trapezoids, pegs; inferred: the counts and sizes]
@@ -90,6 +94,10 @@ Rectangular rooms of rough granite set in clay, a trapezoid door on the court, n
 - Quarrymen dressing blocks; a noble in a red mantle and a priest before the Main Temple; chosen women (aqllakuna) in white at the Three Windows; a guard seated in the Guardhouse.
 - Dress: the men's knee-length tunic (unku) and mantle, the women's ankle-length wrap (anaku) under a shawl (lliklla), sandals [stated: encyclopedia.com, "America, South: History of Dress"]. [inferred: the numbers, places and colours]
 
+### 5.3 L3: the chaski's post and the road (as built)
+
+- "Each chasqui carried two items, a quipu and a pututu"; the quipu stored and carried information in knotted strings; the pututu was a conch shell used as a trumpet to signal a runner's approach so that the next could get ready; relay stations (tambos) and huts for rest and shelter (chaskiwasi) [stated: Wikipedia, "Chasqui"]; Guaman Poma names the "hatun chaski" (chief courier) and the "churu mullu chaski" (the courier who carries a trumpet shell) [stated: Guaman Poma, Nueva corónica, drawing 138 (Royal Danish Library)]. **Built:** by the road south of the fields a small thatched hut of rough stone, its door to the road (`inca_house`), a granite bench before it (`chaski_bench`) with a pututu and a quipu laid out on it (the main cord, ten pendant cords in white, brown, red, ochre and black with their knots); a runner seated on the bench, another standing at the road's edge looking south; on the road travellers with their loads in a cloth on the back, a woman carrying her child, another with a load, a man going out, two llamas and their driver [inferred: the post's place, the runners' white tunics with a red belt, the travellers].
+
 ## 6. Ground
 
 The saddle level; the plaza sunk 2.4 m; the Intihuatana's hill in five terraces to 11 m; the Guardhouse's knoll in six to 13.2 m; the dry ditch 2 m deep; the terraces stepping down 39 m; the slopes below falling into the canyon; the peaks. No water in the disc (the river is beyond it). (`ground.js`)
@@ -97,6 +105,10 @@ The saddle level; the plaza sunk 2.4 m; the Intihuatana's hill in five terraces 
 ## 7. Planting
 
 Grass on the terraces and the plazas; maize in plots in the fields south of the ditch, the ploughed strips bare soil; cloud forest on the slopes and the peaks. [inferred]
+
+### 7.1 L3: the cloud forest's tree ferns and bromeliads (as built)
+
+- In the cloud forest of the Machu Picchu area "the most spectacular are the arboreal ferns", Cyathea "7 to 15 meters" high, living in fresh, humid and shady places [stated: Inkaterra Asociación, "Ferns, Heliconia & Bromeliads"]. **Built** (`src/styles/inca/plants.js`, instanced solids — the flora catalogue has neither): some 700 plants on the slopes below the lowest terrace and round the peaks, within 70 m of the terraces: tree ferns 3–5 m high (smaller than the stated, as young plants among the trees) with a dark trunk and a crown of eleven arching fronds cut into pinnae; terrestrial bromeliads, rosettes of stiff strap leaves round a red heart [inferred: the bromeliads, the sizes and the density].
 
 ## 8. Sky and weather
 
@@ -134,3 +146,7 @@ Panpipes and the quena flute, drums, the conch (a flute, a reed and a struck sou
 - [Urpu (jar) — The Met](https://www.metmuseum.org/art/collection/search/310520)
 - [America, South: History of Dress — encyclopedia.com](https://encyclopedia.com/fashion/encyclopedias-almanacs-transcripts-and-maps/america-south-history-dress)
 - [Andean textiles — Wikipedia](https://en.wikipedia.org/wiki/Andean_textiles)
+- [Biocolonizer species are putting the conservation of the granite at Machu Picchu at risk — ScienceDaily](https://www.sciencedaily.com/releases/2019/02/190214100044.htm)
+- [Chasqui — Wikipedia (IPFS mirror)](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Chasqui)
+- [Guaman Poma, Nueva corónica y buen gobierno, drawing 138 — Royal Danish Library](https://poma.kb.dk/permalink/2006/poma/352/en/text)
+- [Ferns, Heliconia & Bromeliads — Inkaterra Asociación](https://inkaterra.com/inkaterra-asociacion-org/en/research/cloud-forest/ferns-heliconia-bromeliads)

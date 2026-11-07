@@ -8,6 +8,7 @@
 // huehuetl drum at the summit. Each image is a carving (meso.js) about 3.6 m tall, built facing +z.
 
 import { box, lathe } from '../../core/geom.js';
+import { soot } from '../maya/household.js';
 import { Kit, carved } from '../maya/meso.js';
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue', BK = 'paint_minoan_black', G = 'gold', J = 'inlay_jade', GG = 'glaze_green', OC = 'paint_ochre';
@@ -153,6 +154,7 @@ export function shrineInterior(bag, col, [i0, j0, i1, j1], y, h, god) {
     bag.add('pottery_dark', lathe([[0.001, 0.7], [0.36, 0.72], [0.2, 0.84], [0.001, 0.86]], 10, null, bx, y + 0.05, bz));
     bag.add('flame', lathe([[0.18, 0.82], [0.1, 1.0], [0.001, 1.15]], 8, null, bx, y + 0.05, bz));
     col.circle(bx, bz, 0.45, y, y + 1);
+    soot(bag, [bx, y + h, bz], [0, -1, 0], 2.2, 2.0, i0 * 7 + s);                     // the copal smoke on the ceiling between the vigas
   }
   for (let i = 0; i < 5; i++) {
     const oz = zc - 0.9 + i * 0.45, ox = dx0 - 1.0;

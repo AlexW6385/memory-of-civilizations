@@ -10,6 +10,7 @@ import { box, frustum, lathe } from '../../core/geom.js';
 import { carved, Kit } from '../maya/meso.js';
 import '../../objects/index.js';
 import { ttStair, tablero, ttPyramid, teoSerpent } from './index.js';
+import { soot } from '../maya/household.js';
 
 const RD = 'stucco_red', RF = 'limewash_red', WH = 'stucco_pale', PL = 'plaster_white', STN = 'andesite', OB = 'paint_minoan_black', GR = 'stucco_leaf';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -145,7 +146,7 @@ const jaguarHead = () => carved('jaguar-head', (k) => {
  * front a framed stage of clay plaques round a face mask, flanges of plaques and a crest of feathers;
  * about 0.75 m high, facing +z. [inferred: after the excavated censers of the city's ritual]
  */
-const theatreCenser = () => carved('tt-censer', (k) => {
+export const theatreCenser = () => carved('tt-censer', (k) => {
   k.geo('terracotta', lathe([[0.16, 0], [0.12, 0.08], [0.09, 0.18], [0.15, 0.3], [0.2, 0.32], [0.001, 0.32]], 14));
   k.geo('terracotta', lathe([[0.19, 0.32], [0.16, 0.4], [0.08, 0.48], [0.001, 0.48]], 14));
   k.bx('terracotta', -0.05, 0.05, 0.42, 0.66, -0.05, 0.05);
@@ -507,6 +508,7 @@ export function ttTempleInside(I, y, ceil, fx, seed, ctx) {
   bag.add(WH, frustum([ax - a + 0.18, zc - a + 0.18, ax + a - 0.18, zc + a - 0.18], f + 0.8, f + 0.92, 0, 0, 0, 0, { noBottom: true }));
   col.rect([ax - a, zc - a, ax + a, zc + a], f, f + 0.92);
   theatreCenser().emit(bag, ax, f + 0.92, zc, fx, 0);
+  soot(bag, [ax, ceil, zc], [0, -1, 0], 2.6, 2.2, seed + 5);                           // the censers' smoke on the ceiling between the beams
   for (const s of [-1, 1]) { theatreCenser().emit(bag, ax + fx * 2.4, f, zc + s * 1.8, fx, 0); col.circle(ax + fx * 2.4, zc + s * 1.8, 0.4, f, f + 1); }
   bag.add('reed_mat', box(Math.min(ax + fx * 1.2, ax + fx * 3.4), f, zc - 0.9, Math.max(ax + fx * 1.2, ax + fx * 3.4), f + 0.02, zc + 0.9));
   for (let i = 0; i < 6; i++) bag.add(i % 2 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.13, 0.01], [0.19, 0.1], [0.18, 0.11], [0.001, 0.04]], 10, null, ax - fx * (a + 0.5), f, zc - 1.25 + i * 0.5));

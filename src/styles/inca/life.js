@@ -216,4 +216,27 @@ function backstrapLoom(el, { bag, col }) {
   sheet(0.78, 1, -0.045, 0.012, 0.004, 'linen');
 }
 
-export const INCA_LIFE = { chakitaqlla, quarry, funerary_rock: funeraryRock, backstrap_loom: backstrapLoom };
+/**
+ * chaski_bench: the bench of a chaski's post (chaskiwasi) beside the road { at, y, rot (the bench's length along
+ * (sin rot, cos rot)) }: a slab of granite on two stones, on it the pututu — the conch trumpet that warned the next
+ * runner — and a quipu laid out, its main cord with the pendant cords knotted [stated: each chaski carried a quipu
+ * and a pututu; Wikipedia, "Chasqui"; Guaman Poma's "churu mullu chaski", the runner with the shell].
+ */
+function chaskiBench(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = el.rot ?? 0, c = Math.cos(r), sn = Math.sin(r);
+  const P = (u, v, w) => [x + u * c + w * sn, y + v, z - u * sn + w * c];    // u across, w along the bench
+  const blk = (mat, u0, u1, v0, v1, w0, w1) => { const t = [], A = [P(u0, v0, w0), P(u1, v0, w0), P(u1, v0, w1), P(u0, v0, w1), P(u0, v1, w0), P(u1, v1, w0), P(u1, v1, w1), P(u0, v1, w1)];
+    const q = (a, b, cc, d) => t.push(...A[a], ...A[b], ...A[cc], ...A[a], ...A[cc], ...A[d]); q(0, 1, 2, 3); q(4, 5, 6, 7); q(0, 1, 5, 4); q(1, 2, 6, 5); q(2, 3, 7, 6); q(3, 0, 4, 7); bag.add(mat, fromTriangles(orientOutward(t))); };
+  for (const w of [-0.5, 0.5]) blk('granite_rough', -0.18, 0.18, -0.1, 0.34, w - 0.15, w + 0.15);
+  blk('granite_inca', -0.22, 0.22, 0.34, 0.45, -0.75, 0.75);
+  col.rect([Math.min(P(-0.22, 0, -0.75)[0], P(0.22, 0, 0.75)[0]), Math.min(P(-0.22, 0, -0.75)[2], P(0.22, 0, 0.75)[2]), Math.max(P(-0.22, 0, -0.75)[0], P(0.22, 0, 0.75)[0]), Math.max(P(-0.22, 0, -0.75)[2], P(0.22, 0, 0.75)[2])], y, y + 0.45);
+  // the pututu lying on the slab: the conch's body tapering to its spire, the lip, the mouthpiece at the spire
+  const pu = lathe([[0.001, 0], [0.05, 0.02], [0.085, 0.09], [0.08, 0.17], [0.05, 0.24], [0.02, 0.29], [0.012, 0.31], [0.001, 0.31]], 10);
+  pu.rotateZ(Math.PI / 2); pu.rotateY(r + Math.PI / 2); const pp = P(0.02, 0.45 + 0.075, 0.38); pu.translate(pp[0], pp[1], pp[2]); bag.add('plaster_white', pu);
+  // the quipu: the main cord along the slab, ten pendant cords hanging across it, knots on them
+  const top = 0.452, cords = ['cloth_white', 'cloth_brown', 'cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_black'];
+  bag.add('cloth_brown', rod(P(-0.12, top + 0.008, -0.55), P(-0.12, top + 0.008, 0.05), 0.008, 4));
+  for (let i = 0; i < 10; i++) { const w = -0.52 + i * 0.06; bag.add(cords[i % 6], rod(P(-0.12, top + 0.006, w), P(0.18, top + 0.006, w + 0.01), 0.005, 3));
+    for (let k = 0; k < 1 + (i * 7) % 3; k++) bag.add(cords[i % 6], lathe([[0.001, -0.009], [0.011, 0], [0.001, 0.009]], 6, null, ...P(-0.02 + k * 0.07, top + 0.009, w + 0.003 * k))); }
+}
+export const INCA_LIFE = { chakitaqlla, quarry, funerary_rock: funeraryRock, backstrap_loom: backstrapLoom, chaski_bench: chaskiBench };
