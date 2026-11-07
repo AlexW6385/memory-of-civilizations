@@ -1,8 +1,10 @@
-// Baked indirect light: an irradiance volume per building (a grid of L1 spherical-harmonic
-// probes computed offline by tools/bake.mjs), sampled per fragment by world position and
-// normal. Outside every volume, a sky/ground hemisphere stands in.
+// Baked indirect light: irradiance volumes per landmark (grids of L1 spherical-harmonic probes
+// computed offline by tools/bake.mjs, one per group of its indoor rooms), sampled per fragment by
+// world position and normal. The volume in force is the one the viewer stands in; outside every
+// volume, a sky/ground hemisphere stands in.
 //
-// File format (data/gi/<id>.gi): a 36-byte header
+// File format (data/gi/<id>.gi), version 4: u32 magic 'MPGI', u32 4, u32 count, then per volume a
+// u32 byte length and the volume as a version-3 file. Version 3 (one volume): a 36-byte header
 //   u32 magic 'MPGI', u32 version (3), u32 nx, u32 ny, u32 nz, f32 minX, f32 minY, f32 minZ, f32 spacing
 // then a gzip stream of 12 planes of nx·ny·nz half floats (SH coefficients c0.rgb, cy.rgb, cz.rgb,
 // cx.rgb, each plane delta-coded along the grid) whose bytes are shuffled (all low bytes, then all
@@ -39,13 +41,36 @@ export class GIVolume {
     this._open = 0.5;
   }
 
+  /**
+   * The landmark's baked volumes: { id, parts: [volume] }, or null when it has none. Only plans
+   * listed in data/gi/index.json are fetched (the others would be a 404 each).
+   */
   async fetch(id, url) {
+    if (this.cache.has(id)) return this.cache.get(id);
+    const dir = url.slice(0, url.lastIndexOf('/') + 1);
+    this.index ??= fetch(dir + 'index.json').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    const index = await this.index;
+    if (index && !index[id]) return null;
     if (this.cache.has(id)) return this.cache.get(id);
     const res = await fetch(url);
     if (!res.ok) return null;
     const buf = await res.arrayBuffer();
+    const head = new Uint32Array(buf, 0, 3);
+    if (head[0] !== 0x4947504D) throw new Error('bad GI file ' + url);
+    const parts = [];
+    if (head[1] === 4) {
+      const dv = new DataView(buf);
+      for (let k = 0, o = 12; k < head[2]; k++) { const n = dv.getUint32(o, true); parts.push(await this.decode(id, buf.slice(o + 4, o + 4 + n))); o += 4 + n; }
+    } else parts.push(await this.decode(id, buf));
+    const set = { id, parts };
+    this.cache.set(id, set);
+    return set;
+  }
+
+  /** One volume (a version-3 file's bytes) as three half-float 3D textures. */
+  async decode(id, buf) {
     const u32 = new Uint32Array(buf, 0, 5);
-    if (u32[0] !== 0x4947504D) throw new Error('bad GI file ' + url);
+    if (u32[0] !== 0x4947504D || u32[1] !== 3) throw new Error('bad GI volume in ' + id);
     const [nx, ny, nz] = [u32[2], u32[3], u32[4]];
     const f32 = new Float32Array(buf, 20, 4);
     const N = nx * ny * nz, M = N * 12;
@@ -67,24 +92,35 @@ export class GIVolume {
       d3.unpackAlignment = 1; d3.needsUpdate = true;
       return d3;
     });
-    const vol = { id, nx, ny, nz, min: [f32[0], f32[1], f32[2]], spacing: f32[3], tex, c0: tex[0].image.data };
-    this.cache.set(id, vol);
-    return vol;
+    return { id, nx, ny, nz, min: [f32[0], f32[1], f32[2]], spacing: f32[3], tex, c0: tex[0].image.data };
   }
 
   /** Let go of a volume whose building was unloaded (kept while it is the active one). */
   release(id) {
-    const vol = this.cache.get(id);
-    if (!vol || vol === this.current) return;
-    for (const t of vol.tex) t.dispose();
+    const set = this.cache.get(id);
+    if (!set?.parts || set.parts.includes(this.current)) return;
+    for (const vol of set.parts) for (const t of vol.tex) t.dispose();
     this.cache.delete(id);
   }
 
-  /** Make a loaded volume the active one. */
-  use(vol) {
-    if (!vol || this.current === vol) return;
+  /**
+   * Make the volume of a landmark's set that contains p (the viewer, in the scene) the active one;
+   * none in force when p is in none of them (without p, a set of one is used wherever one is).
+   */
+  use(set, p = null) {
+    const parts = set?.parts || (set ? [set] : []);
+    let vol = parts.length === 1 ? parts[0] : null;
+    if (p) {
+      vol = null;
+      for (const v of parts) {
+        const s = v.spacing, m = 0.5 * s;
+        if (p.x >= v.min[0] - m && p.x <= v.min[0] + (v.nx - 1) * s + m && p.y >= v.min[1] - m && p.y <= v.min[1] + (v.ny - 1) * s + m && p.z >= v.min[2] - m && p.z <= v.min[2] + (v.nz - 1) * s + m) { vol = v; break; }
+      }
+    }
+    if (!vol) { this.clear(); return; }
+    if (this.current === vol) return;
     this.current = vol;
-    for (let t = 0; t < 3; t++) this.nodes[t].value = vol.tex[t];
+    for (let t = 0; t < 3; t++) { this.tex[t] = vol.tex[t]; if (this.nodes) this.nodes[t].value = vol.tex[t]; }
     const s = vol.spacing;
     this.uMin.value.set(vol.min[0] - s / 2, vol.min[1] - s / 2, vol.min[2] - s / 2);
     this.uSize.value.set(vol.nx * s, vol.ny * s, vol.nz * s);

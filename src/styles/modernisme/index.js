@@ -10,6 +10,7 @@
 // mosaic front set with ceramic discs, mask-like iron balconies and scaled dragon roof with the
 // cross on its turret.
 
+import { bancFanal } from './bench.js';
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, disc } from '../../core/geom.js';
 import { Matrix4, BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
@@ -702,6 +703,6 @@ function batllo(el, { bag, col }) {
 }
 registerStyle('modernisme', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, eixample_block: block, sagrada, pedrera, batllo, ...STREET },
+  elements: { ...STYLES.qing.elements, eixample_block: block, sagrada, pedrera, batllo, ...STREET, banc_fanal: bancFanal },
   objects: {},
 });

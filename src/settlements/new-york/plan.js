@@ -38,6 +38,9 @@ export const midtown = {
     { t: 'beaux_arts', rect: LIBRARY, y: hy(LIBRARY), h: 22, front: 'e', cols: 6, mat: 'marble' },
     { t: 'park', rect: BRYANT, y: hy(BRYANT) },
     { t: 'el_track', x: AVENUES[0][0], z0: -400, z1: 400, y: 0, yAt: (z) => height(AVENUES[0][0], z), stations: EL_STATIONS },
+    // trains on it: four cars standing at 42nd Street on the uptown track, five running downtown below 35th Street
+    { t: 'el_train', x: AVENUES[0][0] + 2, avenue: AVENUES[0][0], z: EL_STATIONS[2] + 1, y: 10.4, cars: 4 },
+    { t: 'el_train', x: AVENUES[0][0] - 2, avenue: AVENUES[0][0], z: 118, y: 10.4, cars: 5 },
   ] }],
 };
 export default esb;
