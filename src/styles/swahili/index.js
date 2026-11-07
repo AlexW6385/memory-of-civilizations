@@ -137,8 +137,14 @@ function mosque(el, { bag, col }) {
   const nx = Math.floor((x1 - x0) / b), nz = Math.floor((z1 - z0) / b), sx = (x1 - x0) / nx, sz = (z1 - z0) / nz;
   for (let i = 1; i < nx; i++) for (let k = 1; k < nz; k++) {
     const x = x0 + i * sx, z = z0 + k * sz;
-    bag.add(R, lathe([[0.36, -0.05], [0.36, 0.25], [0.32, 0.3], [0.32, 1.6], [0.001, 1.6]], 8, null, x, y, z));
-    bag.add(R, box(x - 0.26, y + 1.6, z - 0.26, x + 0.26, y + 3.0, z + 0.26));
+    // faced in dressed coral like the capitals, "rectangular coral panels on the alternating faces" of the octagon
+    // (dunyacamileri, after Archnet); not the dark rubble core, which showed as dark shafts lit pale at the foot
+    bag.add('limestone', lathe([[0.36, -0.05], [0.36, 0.25], [0.32, 0.3], [0.32, 1.6], [0.001, 1.6]], 8, null, x, y, z));
+    bag.add('limestone', box(x - 0.26, y + 1.6, z - 0.26, x + 0.26, y + 3.0, z + 0.26));
+    for (let f = 0; f < 8; f += 2) {
+      const a = (f + 0.5) * Math.PI / 4, ap = 0.32 * Math.cos(Math.PI / 8);
+      bag.add('limestone_carved', box(-0.006, -0.52, -0.085, 0.006, 0.52, 0.085).rotateY(-a).translate(x + Math.cos(a) * (ap + 0.004), y + 0.93, z + Math.sin(a) * (ap + 0.004)));
+    }
     bag.add('limestone', frustum([x - 0.26, z - 0.26, x + 0.26, z + 0.26], y + 3.0, y + 3.16, -0.1, -0.1, -0.1, -0.1));
     bag.add('limestone', frustum([x - 0.36, z - 0.36, x + 0.36, z + 0.36], y + 3.16, y + 3.3, -0.1, -0.1, -0.1, -0.1));
     bag.add('limestone', box(x - 0.47, y + 3.3, z - 0.47, x + 0.47, y + 3.4, z + 0.47));
