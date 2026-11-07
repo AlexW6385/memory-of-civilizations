@@ -778,7 +778,7 @@
  },
  "lalibela-churches": {
   "site": "lalibela",
-  "hash": "bc367f93245212a3",
+  "hash": "59f77bd9ab0d7de9",
   "rays": 128,
   "probes": 10971,
   "boxes": [
@@ -815,8 +815,8 @@
     ]
    }
   ],
-  "bytes": 186678,
-  "seconds": 60,
+  "bytes": 185058,
+  "seconds": 29,
   "baked": "2026-11-07"
  },
  "lhasa-potala": {
