@@ -274,7 +274,9 @@ class Settlement {
     const into = this.merged = new THREE.Group();
     into.name = 'merged';
     this.group.add(into);
-    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen }); } catch (e) { console.warn('merging', this.id, e); }
+    // the shapes drawn by distance (merge.js LodSet), their copies chosen with the street life's
+    const lods = this.lods = [];
+    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods }); } catch (e) { console.warn('merging', this.id, e); }
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
 
@@ -331,7 +333,7 @@ class Settlement {
     this.world.scene.remove(this.group);
     // (an instanced mesh's dispose() leaves its geometry: both are let go of)
     this.group.traverse((o) => { o.geometry?.dispose(); if (o.isInstancedMesh) o.dispose(); });
-    this.merged = null; this.merging = null; this.quietFor = undefined;
+    this.merged = null; this.merging = null; this.quietFor = undefined; this.lods = null;
     this.group.clear();
     this.life?.dispose(); this.life = null; this.lifeParts = []; this.lifeLamps = null;
     for (const rec of this.parts) this.world.r.gi.release?.(rec.plan.id);
@@ -667,7 +669,7 @@ export class World {
           if (rec.quiet !== quiet) {
             rec.quiet = quiet;
             rec.group.traverse((o) => { if (o.isMesh && !o.userData.detail) o.castShadow = quiet ? false : (rec.plan.style === 'life' ? rec.cast !== false : castsShadow(o.material.name)); });
-            if (s.life) for (const L2 of [...s.life.meshes, ...s.life.rare]) L2.near.castShadow = !quiet && castsShadow(L2.near.material.name);
+            if (s.life) for (const L2 of [...s.life.meshes, ...s.life.rare]) for (const m of [L2.near, L2.far]) if (m) m.castShadow = !quiet && castsShadow(m.material.name);
           }
         }
         // the merged meshes: indoors, those that hold no part of the building one is in cast no shadow
@@ -682,8 +684,11 @@ export class World {
     if (!this._nextL || now > this._nextL) {
       this._nextL = now + 250;
       for (const s of this.settlements) {
-        if (!s.life) continue;
+        if (!s.life && !s.lods?.length) continue;
         const L = toLocal(s.S.frame, camP);
+        // the shapes drawn by distance (merge.js LodSet)
+        if (s.lods) for (const D of s.lods) D.update(L[0], L[1], L[2]);
+        if (!s.life) continue;
         s.life.group.visible = !this.lifeHidden;
         s.life.update(L[0], L[1], L[2]);
       }
