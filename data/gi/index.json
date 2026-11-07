@@ -1311,6 +1311,33 @@
   "seconds": 128,
   "baked": "2026-11-07"
  },
+ "ur-ziggurat": {
+  "site": "ur",
+  "hash": "67d2f0c3d623a766",
+  "rays": 128,
+  "probes": 1664,
+  "boxes": [
+   {
+    "min": [
+     -7.7,
+     29,
+     2.8
+    ],
+    "n": [
+     16,
+     8,
+     13
+    ],
+    "spacing": 1,
+    "rooms": [
+     "shrine"
+    ]
+   }
+  ],
+  "bytes": 29895,
+  "seconds": 6,
+  "baked": "2026-11-07"
+ },
  "versailles-chateau": {
   "site": "versailles",
   "hash": "baba2f2b63e11267",
