@@ -13,11 +13,14 @@ import { PLANET_RADIUS } from '../planet/sites.js';
 import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
 import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
-import { SMALL, SHADOW } from './layers.js';
+import { CAMERA_MASK, cascadeMask } from './layers.js';
 import { AIR, airNode, airComposite, LampPool } from './air.js';
 
 /** The depth buffer unless the address asks for another (see init). */
 const DEPTH_DEFAULT = 'reversed';
+/** How far (m) each shadow cascade's box reaches toward the sun past its slice of the view: a
+ *  caster up to ~130 m above the slice's ground still shadows it with the sun at 40° (DESIGN §12). */
+const LIGHT_MARGIN = 200;
 
 // air: dust, incense and coloured light in the beams indoors (src/engine/air.js); lamps: how many of
 // the nearest lamps light the room as point lights
@@ -59,7 +62,7 @@ export class Renderer {
 
     const scene = this.scene = new THREE.Scene();
     const camera = this.camera = new THREE.PerspectiveCamera(68, 1, 0.08, 4000);
-    camera.layers.enable(SMALL);           // small things: seen, but shadowed by the first cascade only
+    camera.layers.mask = CAMERA_MASK;      // small and middle-sized things: seen, shadowed by the nearer cascades only (layers.js)
     camera.rotation.order = 'YXZ';
 
     // sky
@@ -105,7 +108,7 @@ export class Renderer {
     r.setPixelRatio(Math.min(devicePixelRatio, Q.pixelRatio));
     sun.shadow.mapSize.set(Q.shadowMap, Q.shadowMap);
     if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
-    const csm = new CSMShadowNode(sun, { cascades: Q.cascades, maxFar: 320, mode: 'practical', lightMargin: 200 });
+    const csm = new CSMShadowNode(sun, { cascades: Q.cascades, maxFar: 320, mode: 'practical', lightMargin: LIGHT_MARGIN });
     csm.fade = true;
     sun.shadow.shadowNode = csm;
     // the lamps' pool: a fixed number of lights per preset (a change recompiles every material)
@@ -324,11 +327,13 @@ export class Renderer {
       const n = this.frameNo = (this.frameNo || 0) + 1;
       for (let i = 0; i < L.length; i++) {
         L[i].shadow.autoUpdate = false; if (i === 0 || n % (i + 1) === 0) L[i].shadow.needsUpdate = true;
-        // the small things (layer SMALL) cast into the first cascade only: in the outer ones their
-        // shadows are a texel or two but cost a draw each. (A mask of layer 0 alone would be taken
-        // by three for "unset" and replaced by the camera's, so the outer ones carry an unused bit.)
-        // Layer SHADOW (casters the camera does not see, merge.js LodSet) goes into every cascade.
-        L[i].shadow.camera.layers.mask = (i === 0 ? (1 | (1 << SMALL)) : (1 | (1 << 3))) | (1 << SHADOW);
+        // shadow casters by size (src/engine/layers.js): the small things in the first cascade
+        // only, the middle-sized in the first two, the big masses in all three
+        L[i].shadow.camera.layers.mask = cascadeMask(i, L.length);
+        // the box's depth: from the light margin to just past the cascade's slice (it reached 900 m
+        // past the light, drawing casters below and behind the slice that shadow nothing in it)
+        const sc = L[i].shadow.camera, far = Math.ceil(LIGHT_MARGIN + 2 * sc.right + 20);
+        if (sc.far !== far) { sc.far = far; sc.updateProjectionMatrix(); }
       }
     }
     this.pipeline.render();

@@ -100,22 +100,24 @@ export class Builder {
 
 /** The worker's arrays as geometries again (bounds as the worker computed them). */
 function rebuild(b) {
-  const parts = b.parts.map(({ mat, detail, pos, nor, index, box, sphere }) => {
+  const parts = b.parts.map(({ mat, detail, shadowBig, pos, nor, index, box, sphere }) => {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('normal', new THREE.BufferAttribute(nor, 3, nor instanceof Int16Array));
     if (index) g.setIndex(new THREE.BufferAttribute(index, 1, index instanceof Uint16Array));
     g.boundingBox = new THREE.Box3(new THREE.Vector3(box[0], box[1], box[2]), new THREE.Vector3(box[3], box[4], box[5]));
     g.boundingSphere = new THREE.Sphere(new THREE.Vector3(sphere[0], sphere[1], sphere[2]), sphere[3]);
-    return { mat, detail, geometry: g };
+    return { mat, detail, shadowBig, geometry: g };
   });
-  const instanced = b.instanced.map(({ mat, key, detail, pos, nor, index, matrices, colors, reach, reals }) => {
+  const instanced = b.instanced.map(({ mat, key, detail, big, first, lod, pos, nor, index, matrices, colors, reach, reals }) => {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
     g.setIndex(new THREE.BufferAttribute(index, 1, index instanceof Uint16Array));
     g.computeBoundingBox(); g.computeBoundingSphere();
-    return { mat, key, detail, geometry: g, matrices, colors, reach, reals };
+    // its coarse versions, made in the worker (merge.js, life-instances.js use them)
+    if (lod !== undefined) g.userData.coarse = lod;
+    return { mat, key, detail, big, first, geometry: g, matrices, colors, reach, reals };
   });
   return { parts, instanced, lights: b.lights, colliders: b.colliders };
 }

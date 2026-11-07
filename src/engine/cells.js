@@ -25,8 +25,13 @@ export const CELL = 128;
 export const SPLIT_TRIS = 80000, SPLIT_INST = 160000;
 /** A prototype is fine detail, with a coarse version, from this many triangles and up to this size (m). */
 export const FINE_TRIS = 40, FINE_SIZE = 3.2;
-/** Fine pieces farther than this (m) are drawn coarse; their coarse shadows are cast within FINE_SHADOW. */
-export const LOD_NEAR = 60, FINE_SHADOW = 130;
+/** Fine pieces farther than LOD_NEAR (m) are drawn coarse, farther than LOD_FAR coarser still (the
+ *  version their shadows bear); those shadows are cast within FINE_SHADOW, in the first two cascades. */
+export const LOD_NEAR = 60, LOD_FAR = 130, FINE_SHADOW = 130;
+/** Openwork of metal (railings, grilles: a fine piece without a faithful coarse version, its outline
+ *  less than OPEN_FILL full) is drawn within OPEN_FAR (m), shadowed in the first cascade only: beyond,
+ *  its bars are a fifth of a pixel. */
+export const OPEN_FAR = 150, OPEN_FILL = 0.5;
 /** The street life's copies (src/engine/life-instances.js) farther than this (m) are drawn coarse. */
 export const LIFE_FULL = 50;
 /** Rods and bars thinner than this (m, their second side) are drawn within THIN_FAR (m). */
@@ -100,6 +105,38 @@ export function lodKind(tris, ext, M) {
   return null;
 }
 
+/** May a prototype be fine at some copy's scale (the smallest)? (The build worker makes its coarse
+ *  versions ahead for these: src/engine/build-worker.js.) */
+export function mayBeFine(tris, ext, M) {
+  if (tris < FINE_TRIS) return false;
+  let s = Infinity;
+  for (let o = 0; o < M.length; o += 16) s = Math.min(s, Math.max(Math.hypot(M[o], M[o + 1], M[o + 2]), Math.hypot(M[o + 4], M[o + 5], M[o + 6]), Math.hypot(M[o + 8], M[o + 9], M[o + 10])));
+  return Math.max(...ext) * s <= FINE_SIZE;
+}
+
+/**
+ * The distance versions of a fine piece: { low (outline within MIN_IOU, or null), shadow (within
+ * SHADOW_IOU, or low: casting the shadows), far (shadow, drawn beyond LOD_FAR, where it saves enough
+ * over low), open (no faithful version, an outline less than OPEN_FILL full: openwork) }. metal: only
+ * metal may be openwork (a wooden frame hidden far off would leave its roof in the air).
+ */
+export function coarseSet(pos, nor, index, metal = false) {
+  const box = boundsOf(pos), full = silhouettes(pos, index, box);
+  const low = coarse(pos, nor, index, MIN_IOU, undefined, full);
+  const shadow = coarse(pos, nor, index, SHADOW_IOU, undefined, full) ?? low;
+  const far = shadow && (!low || shadow.index.length <= low.index.length * 0.75) ? shadow : null;
+  let open = false;
+  if (!low && !far && metal) {
+    // the outline seen across its broadest face
+    const ex = [box[3] - box[0], box[4] - box[1], box[5] - box[2]], faces = [ex[1] * ex[2], ex[2] * ex[0], ex[0] * ex[1]];
+    const a = faces.indexOf(Math.max(...faces)), m = full[a];
+    let k = 0;
+    for (let i = 0; i < m.length; i++) k += m[i];
+    open = k / m.length < OPEN_FILL;
+  }
+  return { low, far, shadow, open };
+}
+
 /**
  * A coarse version of a small piece (an indexed prototype; pos Float32 3 a vertex, nor any typed
  * array 3 a vertex, normalized or not), or null where none is both cheaper and faithful. Its
@@ -110,8 +147,9 @@ export function lodKind(tris, ext, M) {
 export const MIN_IOU = 0.9, SIL = 48;
 /** Shadows bear a coarser version (their edges are soft, a few texels wide): its outline within this. */
 export const SHADOW_IOU = 0.8;
-export function coarse(pos, nor, index, minIoU = MIN_IOU, divs = [4, 5, 6, 8, 10, 12, 16, 20, 24]) {
-  const box = boundsOf(pos), full = silhouettes(pos, index, box);
+export function coarse(pos, nor, index, minIoU = MIN_IOU, divs = [4, 5, 6, 8, 10, 12, 16, 20, 24], full = null) {
+  const box = boundsOf(pos);
+  full ??= silhouettes(pos, index, box);
   for (const div of divs) {
     const c = cluster(pos, nor, index, div, box);
     if (!c) continue;

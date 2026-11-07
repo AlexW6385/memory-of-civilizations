@@ -20,8 +20,9 @@
 
 import * as THREE from 'three/webgpu';
 import { releaseAfterUpload } from './release.js';
-import { SPLIT_TRIS, SPLIT_INST, LOD_NEAR, FINE_SHADOW, THIN_FAR, SHADOW_IOU, cellKey, lodKind, coarse, trianglesByCell, subGeometry } from './cells.js';
-import { SMALL, SHADOW } from './layers.js';
+import { SPLIT_TRIS, SPLIT_INST, LOD_NEAR, LOD_FAR, FINE_SHADOW, THIN_FAR, OPEN_FAR, cellKey, lodKind, coarseSet, trianglesByCell, subGeometry } from './cells.js';
+import { SMALL, MID, NEAR_SHADOW, FAR_SHADOW } from './layers.js';
+import { MATERIALS } from '../core/palette.js';
 
 /** Time a merge may take before it gives the frame back (ms). */
 const SLICE = 4;
@@ -107,47 +108,81 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
       let tris = 0;
       for (const { o } of G.list) tris += o.geometry.index.count / 3;
       if (G.list.length < 2 && tris < SPLIT_TRIS) { keep(G); continue; }
+      // which triangles are of pieces big for the shadows (src/core/geom.js MID_SIZE): each member's first shadowBig
+      let big = null;
+      if (G.list.some(({ o }) => o.userData.shadowBig !== undefined)) {
+        big = new Uint8Array(tris).fill(1);
+        let t = 0;
+        for (const { o } of G.list) { const n = o.geometry.index.count / 3, b = o.userData.shadowBig ?? n; big.fill(0, t + b, t + n); t += n; }
+      }
       const geometry = await mergeGeometries(G.list.map(({ o }) => o.geometry), breathe, stale);
       if (!geometry) return out;
-      meshes = tris >= SPLIT_TRIS ? await cutIntoCells(geometry, G.mat, make, breathe) : [make(geometry, G.mat)];
-      for (const m of meshes) { m.castShadow = castsShadow(G.mat); m.name = `merged:${G.mat}`; }
+      meshes = tris >= SPLIT_TRIS ? await cutIntoCells(geometry, G.mat, make, breathe, big) : [wholePart(geometry, G.mat, make, big)];
+      meshes = farSiblings(meshes, G.mat, make, false);
+      for (const m of meshes) { m.castShadow = castsShadow(G.mat); m.name = `merged:${G.mat}${m.userData.farOf ? ':far' : ''}`; }
     } else {
       let n = 0;
       for (const { o } of G.list) n += o.count;
       const proto = G.list[0].o.geometry;
       if (!proto.boundingBox) proto.computeBoundingBox();
       const tri = proto.index.count / 3, bb = proto.boundingBox;
-      const M0 = G.list[0].o.instanceMatrix.array;
+      // (the shape judged by its first copy as its plan found it: src/core/geom.js `first`)
+      const f0 = G.list[0].o.userData.first ?? 0, M0 = G.list[0].o.instanceMatrix.array.subarray(f0 * 16, f0 * 16 + 16);
       let lod = lodKind(tri, [bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z], M0);
-      const P = proto.attributes.position.array, N = proto.attributes.normal.array, I = proto.index.array;
-      const low = lod === 'fine' ? coarse(P, N, I) : null;
-      if (lod === 'fine' && !low) lod = null;
-      const lowShadow = low ? coarse(P, N, I, SHADOW_IOU) ?? low : null;
+      // pieces their plan places to be seen only near (a plant's spines: their reach)
+      const reach = G.list.every(({ o }) => o.userData.reach !== undefined) ? Math.max(...G.list.map(({ o }) => o.userData.reach)) : null;
+      if (reach !== null && lod !== 'thin') lod = 'near';
+      let set = null;
+      if (lod === 'fine') {
+        // its coarse versions, made in the build worker (build-worker.js); made here only when the
+        // plans were built in the page
+        set = G.list.map(({ o }) => o.geometry.userData.coarse).find((c) => c !== undefined) ?? null;
+        if (!set) {
+          await breathe();
+          const P = proto.attributes.position.array, N = proto.attributes.normal.array, I = proto.index.array;
+          set = coarseSet(P, N, I, MATERIALS[G.mat]?.kind === 'metal');
+          t = performance.now();
+        }
+        if (set.open) lod = 'open';
+        else if (!set.low && !set.far) lod = null;
+      }
       if (G.list.length < 2 && !lod && n * tri < SPLIT_INST) { keep(G); continue; }
       const matrices = new Float32Array(n * 16), colors = new Float32Array(n * 3);
+      // the copies big for the shadows (src/core/geom.js MID_SIZE): each member's first `big`
+      let big = null;
+      if (!lod && G.list.some(({ o }) => o.userData.big !== undefined)) big = new Uint8Array(n).fill(1);
       let k = 0;
       for (const { o } of G.list) {
         matrices.set(o.instanceMatrix.array.subarray(0, o.count * 16), k * 16);
         colors.set(o.instanceColor.array.subarray(0, o.count * 3), k * 3);
+        if (big && o.userData.big !== undefined) big.fill(0, k + o.userData.big, k + o.count);
         k += o.count;
       }
       // (a copy of the prototype: one still used by a mesh let go of (its render objects disposed)
       // took its buffers with it, and the GPU process crashed drawing the merged mesh)
       if (lod) {
-        const L = new LodSet(lod, proto, low && lowGeometry(proto, low), lowShadow && lowGeometry(proto, lowShadow), G.mat, matrices, colors, make, castsShadow(G.mat));
+        const made = new Map(), geo = (v) => v && (made.get(v) || made.set(v, lowGeometry(proto, v)).get(v));
+        const L = new LodSet(lod, proto, { low: geo(set?.low), far: geo(set?.far), shadow: geo(set?.shadow) }, G.mat, matrices, colors, make, castsShadow(G.mat));
+        L.reach = reach ?? 0;
         lods.push(L);
         meshes = L.meshes;
-      } else if (n * tri >= SPLIT_INST) {
+      } else {
+        // the copies by cell (or all as one), the big ones first in each
+        const lists = n * tri >= SPLIT_INST ? copiesByCell(proto, matrices) : [[...Array(n).keys()]];
         meshes = [];
-        for (const idx of copiesByCell(proto, matrices)) {
+        for (const idx of lists) {
+          if (big) idx.sort((a, b) => big[b] - big[a] || a - b);
           const Mc = new Float32Array(idx.length * 16), Cc = new Float32Array(idx.length * 3);
           idx.forEach((i, j) => { Mc.set(matrices.subarray(i * 16, i * 16 + 16), j * 16); Cc.set(colors.subarray(i * 3, i * 3 + 3), j * 3); });
-          meshes.push(make(proto.clone(), G.mat, Mc, Cc));
+          const m = make(proto.clone(), G.mat, Mc, Cc);
+          if (big) { let nb = 0; for (const i of idx) nb += big[i]; if (nb < idx.length) m.userData.big = nb; }
+          meshes.push(m);
         }
-      } else meshes = [make(proto.clone(), G.mat, matrices, colors)];
+        meshes = farSiblings(meshes, G.mat, make, true);
+      }
       for (const m of meshes) {
         if (!m.userData.lod) m.castShadow = castsShadow(G.mat);
-        m.name = `merged:${G.mat}:inst`;
+        m.name = `merged:${G.mat}:inst${m.userData.farOf ? ':far' : ''}`;
       }
     }
     if (stale()) { for (const m of meshes) { m.geometry.dispose(); m.dispose(); } return out; }
@@ -167,14 +202,16 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
 }
 
 /** A merged geometry cut into cells of the ground (src/engine/cells.js): a mesh each. */
-async function cutIntoCells(geometry, mat, make, breathe) {
+async function cutIntoCells(geometry, mat, make, breathe, big = null) {
   const names = Object.keys(geometry.attributes), I = geometry.index.array;
   const attrs = names.map((k) => ({ array: geometry.attributes[k].array, size: geometry.attributes[k].itemSize }));
   const byCell = trianglesByCell(geometry.attributes.position.array, I);
-  if (byCell.size < 2) return [make(geometry, mat)];
+  if (byCell.size < 2) return [wholePart(geometry, mat, make, big)];
   const out = [];
-  for (const { tri } of byCell.values()) {
-    const sub = subGeometry(attrs, I, tri, names.indexOf('position'));
+  for (const e of byCell.values()) {
+    // (the triangles of big pieces first: farSiblings)
+    const nb = big ? bigFirst(e.tri, big) : e.tri.length;
+    const sub = subGeometry(attrs, I, e.tri, names.indexOf('position'));
     const g = new THREE.BufferGeometry();
     names.forEach((k, a) => g.setAttribute(k, new THREE.BufferAttribute(sub.arrays[a], attrs[a].size, geometry.attributes[k].normalized)));
     // a Uint16 index flagged normalized stays 16-bit on the GPU (src/core/geom.js, indexAttribute)
@@ -182,10 +219,73 @@ async function cutIntoCells(geometry, mat, make, breathe) {
     const b = sub.box;
     g.boundingBox = new THREE.Box3(new THREE.Vector3(b[0], b[1], b[2]), new THREE.Vector3(b[3], b[4], b[5]));
     g.boundingSphere = g.boundingBox.getBoundingSphere(new THREE.Sphere());
-    out.push(make(g, mat));
+    const m = make(g, mat);
+    if (nb < e.tri.length) m.userData.big = nb;
+    out.push(m);
     await breathe();
   }
   geometry.dispose();
+  return out;
+}
+
+/** A list of triangle numbers, those of big pieces (big[t]) first, in place; returns how many. */
+function bigFirst(tri, big) {
+  const a = [], b = [];
+  for (let i = 0; i < tri.length; i++) (big[tri[i]] ? a : b).push(tri[i]);
+  tri.set(a, 0); tri.set(b, a.length);
+  return a.length;
+}
+
+/** A merged part as one mesh, its index reordered so that the triangles of big pieces come first. */
+function wholePart(geometry, mat, make, big) {
+  if (!big) return make(geometry, mat);
+  const I = geometry.index.array, nt = I.length / 3, tri = new Uint32Array(nt);
+  for (let t = 0; t < nt; t++) tri[t] = t;
+  const nb = bigFirst(tri, big);
+  if (nb < nt) {
+    const J = new I.constructor(I.length);
+    for (let i = 0; i < nt; i++) { const t = tri[i] * 3; J[i * 3] = I[t]; J[i * 3 + 1] = I[t + 1]; J[i * 3 + 2] = I[t + 2]; }
+    I.set(J);
+  }
+  const m = make(geometry, mat);
+  if (nb < nt) m.userData.big = nb;
+  return m;
+}
+
+/**
+ * Shadow casters by size (src/engine/layers.js): a merged mesh holding middle-sized pieces as well
+ * as big ones (userData.big: its first triangles, or copies, that are big) is put on MID — seen,
+ * and casting into the first two cascades — and given a sibling the camera does not see that casts
+ * the big ones alone into the third (FAR_SHADOW): the same vertices and index (or copies) drawn to
+ * a shorter range, so it costs no memory. They are made, shown and let go of together.
+ */
+function farSiblings(meshes, mat, make, copies) {
+  const out = [];
+  for (const m of meshes) {
+    out.push(m);
+    const nb = m.userData.big;
+    if (nb === undefined) continue;
+    m.layers.set(MID);
+    if (!nb) continue;
+    let s;
+    if (copies) {
+      s = make(m.geometry, mat, m.instanceMatrix.array.subarray(0, nb * 16), m.instanceColor.array.subarray(0, nb * 3));
+      s.instanceMatrix = m.instanceMatrix; s.instanceColor = m.instanceColor; s.count = nb;
+    } else {
+      const src = m.geometry, g = new THREE.BufferGeometry();
+      for (const [k, a] of Object.entries(src.attributes)) g.setAttribute(k, a);
+      g.setIndex(src.index);
+      g.setDrawRange(0, nb * 3);
+      // its bounds those of the big triangles
+      const P = src.attributes.position.array, I = src.index.array, b = new THREE.Box3(), v = new THREE.Vector3();
+      for (let i = 0; i < nb * 3; i++) b.expandByPoint(v.fromArray(P, I[i] * 3));
+      g.boundingBox = b; g.boundingSphere = b.getBoundingSphere(new THREE.Sphere());
+      s = make(g, mat);
+    }
+    s.layers.set(FAR_SHADOW);
+    s.userData.farOf = m;
+    out.push(s);
+  }
   return out;
 }
 
@@ -211,19 +311,22 @@ function lowGeometry(proto, low) {
 }
 
 /**
- * An instanced shape drawn by distance (src/engine/cells.js): 'thin' — the copies within THIN_FAR
- * of the eye, shadowed in the first cascade only (layer SMALL); 'fine' — the copies within LOD_NEAR
- * in full, the others coarse, and the copies within FINE_SHADOW, coarser still, drawn into every shadow
- * cascade (layer SHADOW: not seen by the camera) as the shadows of both. The copies are chosen as
- * the street life's are (life-instances.js), when the eye has moved a few metres.
+ * An instanced shape drawn by distance (src/engine/cells.js): 'thin' (rods and bars), 'open'
+ * (metal openwork) and 'near' (pieces their plan gives a short reach) — the copies within
+ * THIN_FAR / OPEN_FAR / their reach of the eye, shadowed in the first
+ * cascade only (layer SMALL); 'fine' — the copies within LOD_NEAR in full, to LOD_FAR coarse (v.low),
+ * beyond coarser still (v.far; where a version is missing the one before it goes on), and the
+ * copies within FINE_SHADOW drawn as v.shadow into the first two shadow cascades (layer
+ * NEAR_SHADOW: not seen by the camera) as the shadows of all. The copies are chosen as the street
+ * life's are (life-instances.js), when the eye has moved a few metres.
  */
 export class LodSet {
-  constructor(kind, proto, low, lowShadow, mat, matrices, colors, make, cast) {
+  constructor(kind, proto, v, mat, matrices, colors, make, cast) {
     this.kind = kind;
     const n = this.n = matrices.length / 16;
     this.all = matrices; this.colors = colors;
-    const pos = this.pos = new Float32Array(n * 3), c = proto.boundingBox.getCenter(new THREE.Vector3()), v = new THREE.Vector3(), M = new THREE.Matrix4();
-    for (let i = 0; i < n; i++) { v.copy(c).applyMatrix4(M.fromArray(matrices, i * 16)); pos[i * 3] = v.x; pos[i * 3 + 1] = v.y; pos[i * 3 + 2] = v.z; }
+    const pos = this.pos = new Float32Array(n * 3), c = proto.boundingBox.getCenter(new THREE.Vector3()), w = new THREE.Vector3(), M = new THREE.Matrix4();
+    for (let i = 0; i < n; i++) { w.copy(c).applyMatrix4(M.fromArray(matrices, i * 16)); pos[i * 3] = w.x; pos[i * 3 + 1] = w.y; pos[i * 3 + 2] = w.z; }
     const mk = (g) => {
       const m = make(g, mat, matrices, colors);
       m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.instanceColor.setUsage(THREE.DynamicDrawUsage);
@@ -234,11 +337,13 @@ export class LodSet {
     // until its first choice (a quarter second at most), every copy in full: the picture as before
     this.full.count = n; this.full.visible = true;
     this.meshes = [this.full];
-    if (kind === 'thin') { this.full.layers.set(SMALL); this.full.castShadow = cast; return; }
+    if (kind !== 'fine') { this.full.layers.set(SMALL); this.full.castShadow = cast; return; }
     this.full.castShadow = false;
-    this.far = mk(low); this.far.castShadow = false;
-    this.shadow = mk(lowShadow); this.shadow.castShadow = cast; this.shadow.layers.set(SHADOW);
-    this.meshes.push(this.far, this.shadow);
+    this.mid = v.low ? mk(v.low) : null;
+    this.far = v.far ? mk(v.far) : null;
+    for (const m of [this.mid, this.far]) if (m) { m.castShadow = false; this.meshes.push(m); }
+    this.shadow = mk(v.shadow); this.shadow.castShadow = cast; this.shadow.layers.set(NEAR_SHADOW);
+    this.meshes.push(this.shadow);
     this.last = null;
   }
 
@@ -246,17 +351,25 @@ export class LodSet {
   update(x, y, z, force = false) {
     if (!force && this.last && Math.hypot(x - this.last[0], y - this.last[1], z - this.last[2]) < 3) return;
     this.last = [x, y, z];
-    const { n, pos } = this, thin = this.kind === 'thin';
-    const near = this._near ??= new Uint32Array(n), far = this._far ??= new Uint32Array(n), sh = this._sh ??= new Uint32Array(n);
-    let a = 0, b = 0, c = 0;
-    const r1 = (thin ? THIN_FAR : LOD_NEAR) ** 2, r2 = FINE_SHADOW ** 2;
+    const { n, pos, kind, mid, far } = this, fine = kind === 'fine';
+    const A = this._a ??= new Uint32Array(n), B = fine ? this._b ??= new Uint32Array(n) : null, C = fine ? this._c ??= new Uint32Array(n) : null, S = fine ? this._s ??= new Uint32Array(n) : null;
+    let a = 0, b = 0, c = 0, sh = 0;
+    // full within r1 (to LOD_FAR where there is no coarse version), coarse to r2 (all the rest
+    // where there is no coarser one), coarser beyond
+    const r1 = (kind === 'thin' ? THIN_FAR : kind === 'open' ? OPEN_FAR : kind === 'near' ? this.reach : mid ? LOD_NEAR : LOD_FAR) ** 2, r2 = far ? LOD_FAR ** 2 : Infinity, rs = FINE_SHADOW ** 2;
     for (let i = 0; i < n; i++) {
       const dx = pos[i * 3] - x, dy = pos[i * 3 + 1] - y, dz = pos[i * 3 + 2] - z, d2 = dx * dx + dy * dy + dz * dz;
-      if (d2 < r1) near[a++] = i; else if (!thin) far[b++] = i;
-      if (!thin && d2 < r2) sh[c++] = i;
+      if (d2 < r1) A[a++] = i;
+      else if (!fine) continue;
+      else if (mid && d2 < r2) B[b++] = i;
+      else C[c++] = i;
+      if (fine && d2 < rs) S[sh++] = i;
     }
-    this.fill(this.full, near, a);
-    if (!thin) { this.fill(this.far, far, b); this.fill(this.shadow, sh, c); }
+    this.fill(this.full, A, a);
+    if (!fine) return;
+    if (mid) this.fill(mid, B, b);
+    if (far) this.fill(far, C, c);
+    this.fill(this.shadow, S, sh);
   }
 
   /** A mesh's copies: those listed (written only if the list changed). */

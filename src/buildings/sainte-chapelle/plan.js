@@ -170,13 +170,14 @@ add({ t: 'sc_keep', at: [8, 38], y: 0, r: 4.2, h: 22, roof: 11, roofMat: 'slate'
 add({ t: 'sc_keep', at: [30, 40], y: 0, r: 4.6, h: 24, roof: 12, roofMat: 'slate' });
 
 // ── rooms and walks ──────────────────────────────────────────────────────────
-const room = (id, rect, y, kind) => ({ id, rect, y, kind });
+// sealed: its openings glazed or small, the town outside not drawn from within (src/engine/world.js seal)
+const room = (id, rect, y, kind, sealed) => ({ id, rect, y, kind, ...(sealed ? { sealed } : {}) });
 const rooms = [
   room('courtyard', [-35, 10, -10, 30], 0, 'open'),
   room('lower-chapel', [4, -2, 24, 2], 0.15, 'hall'),
   room('upper-porch', [-4, -4, -1.2, 4], UP, 'open'),
   room('kings-gallery', [-4.4, -32, -1.4, -11], UP, 'hall'),
-  room('upper-chapel', [4, -3, 26, 3], UP, 'hall'),
+  room('upper-chapel', [4, -3, 26, 3], UP, 'hall', true),
 ];
 const walks = [
   // from the courtyard into the lower chapel and along it

@@ -58,6 +58,12 @@ export function buildingMesh(geometry, mat, matrices = IDENTITY, colors = null) 
  */
 /** Fine detail is drawn within this distance (m) of its part's bounds, and casts shadows within the second. */
 const DETAIL_REACH = 160, DETAIL_SHADOW = 50;
+/** How far (m) past its sealed rooms a building's surroundings are still drawn from inside them (World.seal). */
+const SEALED_MARGIN = 40;
+/** A layer nothing draws: meshes hidden from a sealed room (World.seal). */
+const SEALED_OUT = 9;
+/** Placed pieces of a plan whose reach is under this (m) are drawn only within it (merge.js LodSet 'near'). */
+const NEAR_REACH = 200;
 /** How far (m) past a closed room of a plan one may stand, under a roof, and still be in it (world.locate). */
 const GAP = 5;
 /** Static meshes merged across a settlement's plans (src/engine/merge.js); `?merge=0` keeps them per plan, to compare. */
@@ -218,8 +224,10 @@ class Settlement {
     if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
     const group = new THREE.Group();
     group.name = plan.id;
-    for (const { mat, geometry, detail } of built.parts) {
+    for (const { mat, geometry, detail, shadowBig } of built.parts) {
       const m = buildingMesh(geometry, mat);
+      // (how many of its first triangles are big for the shadows: merge.js, src/core/geom.js MID_SIZE)
+      if (shadowBig !== undefined) m.userData.shadowBig = shadowBig;
       m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
       if (detail) { m.userData.detail = true; m.layers.set(SMALL); }
@@ -229,8 +237,12 @@ class Settlement {
     // repeated pieces: one prototype, a matrix per copy (src/core/geom.js, GeoBag); the life of the
     // streets is gathered settlement-wide once all its tiles are built (buildLife)
     const lifeList = plan.style === 'life' ? built.instanced : [];
-    for (const { mat, geometry, matrices, colors, detail } of plan.style === 'life' ? [] : built.instanced) {
+    for (const { mat, geometry, matrices, colors, detail, big, first, reach } of plan.style === 'life' ? [] : built.instanced) {
       const m = buildingMesh(geometry, mat, matrices, colors);
+      if (big !== undefined) m.userData.big = big;
+      if (first) m.userData.first = first;
+      // placed pieces meant to be seen only near (their reach, src/core/geom.js addInstance): merge.js
+      if (reach?.length) { let r = 0; for (const v of reach) r = Math.max(r, v); if (r < NEAR_REACH) m.userData.reach = r; }
       m.castShadow = castsShadow(mat);
       m.receiveShadow = true;
       m.name = `${plan.id}:${mat}:inst`;
@@ -573,6 +585,45 @@ export class World {
     return { building: best, room, distance: bd };
   }
 
+  /**
+   * Standing in a sealed room of a building (rooms with `sealed`: their openings glazed or small,
+   * DESIGN §8), the meshes that lie wholly away from the building's sealed rooms — by more than
+   * the room's `sealed` metres (true: SEALED_MARGIN), enough for what its doors show — are drawn
+   * neither by the camera nor into the shadows (whose light comes in through the building's own
+   * windows: World.update quiets them indoors already); the other settlements built are not drawn.
+   * Called again every half second while sealed (merged meshes and tiles come and go); null lets go.
+   */
+  seal(rec) {
+    this.sealedIn = rec;
+    let box = null;
+    if (rec) {
+      const P = rec.plan, rooms = P.rooms.filter((r) => r.sealed);
+      box = [Infinity, Infinity, -Infinity, -Infinity];
+      for (const r of rooms) {
+        const m = r.sealed === true ? SEALED_MARGIN : r.sealed;
+        const a = toWorld(P, r.rect[0], r.rect[1]), b = toWorld(P, r.rect[2], r.rect[3]);
+        box[0] = Math.min(box[0], a[0] - m, b[0] - m); box[1] = Math.min(box[1], a[2] - m, b[2] - m);
+        box[2] = Math.max(box[2], a[0] + m, b[0] + m); box[3] = Math.max(box[3], a[2] + m, b[2] + m);
+      }
+    }
+    for (const s of this.settlements) {
+      if (s.state === 'idle') continue;
+      const own = rec && rec.settlement === s;
+      s.group.traverse((o) => {
+        if (!o.isMesh) return;
+        let hide = !!rec && !own;
+        if (own) {
+          // (an instanced mesh's bounds are its copies'; one not yet bounded is kept)
+          const S = o.isInstancedMesh ? o.boundingSphere : o.geometry.boundingSphere;
+          if (S) { const c = S.center, d = Math.hypot(Math.max(box[0] - c.x, 0, c.x - box[2]), Math.max(box[1] - c.z, 0, c.z - box[3])); hide = d > S.radius; }
+        }
+        const u = o.userData;
+        if (hide && u.mask0 === undefined) { u.mask0 = o.layers.mask; o.layers.mask = 1 << SEALED_OUT; }
+        else if (!hide && u.mask0 !== undefined) { o.layers.mask = u.mask0; delete u.mask0; }
+      });
+    }
+  }
+
   /** Is there a roof (a building's upper surface) over (x, z) above y, and 1.5 m round it on every side? */
   roofed(site, x, y, z) {
     const tops = site.collide?.tops || [];
@@ -718,6 +769,9 @@ export class World {
     }
     const here = this.locate(camera.position.x, camera.position.y, camera.position.z);
     this.indoorsIn = here.room && here.room.kind !== 'open' && here.distance === 0 ? here.building : null;
+    // in a sealed room (its openings glazed or small) the town outside is not drawn (World.seal)
+    const sealed = this.indoorsIn && here.room.sealed ? this.indoorsIn : null;
+    if (sealed !== this.sealedIn || (sealed && now > (this._nextSeal || 0))) { this._nextSeal = now + 500; this.seal(sealed); }
     // the air of the room one is in (its building's haze) and the lamps nearest the eye (src/engine/air.js)
     if (this.indoorsIn) this.r.haze = hazeOf(this.indoorsIn.plan.style);
     if (this.r.lamps && (!this._nextLamp || now > this._nextLamp)) {
