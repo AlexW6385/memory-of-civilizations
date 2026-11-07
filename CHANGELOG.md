@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.97 — Fixes (2026-11-07)
+- Venice's canals, basin and lagoon now hold water (they were dry, with boats hanging over their beds). Flames glow yellow to orange instead of pale cream. The dark spikes inside the Sydney Concert Hall are gone. Standing in a gap between a building's rooms no longer switches the indoor haze and exposure off. Kaifeng's signboards read the right way; Beijing's lanes stop at the moat street; Knossos' frescoes no longer flicker. Every part of the scene is now compiled before it shows (some, like the maquis, had silently failed to draw).
+
 ## v9.96 — Angkor, Djenne, Lalibela, Granada (2026-11-07)
 - Angkor: the eight bas-relief galleries told by subject, the towers' gilded lotus crowns, Zhou Daguan's market of women on mats, an elephant and a palanquin on the moat road, sugar palms with tappers' ladders. Djenne: a year's rain worn into every mud-brick face, clay soaking for the replastering, ladders and baskets at the mosque. Lalibela: the tuff's layers and the masons' ledges in every cut face, drainage channels, the pools in Bete Maryam's court. Granada: star-tile dados and the Nasrid shield in the palaces, the muqarnas niches of the Myrtles, courtiers and envoys; Albaicin patio houses with porticoes and viewing towers, cisterns with women filling jars. Street life keeps clear of each arrival point; guards carry spears, not porters' loads.
 
