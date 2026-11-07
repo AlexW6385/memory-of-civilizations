@@ -114,7 +114,8 @@ export class Perf {
     const s = this.stats(60);
     const h = HITCH.lines(5);
     this.hitchOut.textContent = h.length ? `hitches (palace.hitches):\n${h.join('\n')}` : '';
-    this.readout.textContent = `${s.fps} fps · ${s.ms} ms (p95 ${s.p95}, worst ${s.worst}) · ${s.calls} draws · ${(s.triangles / 1e6).toFixed(2)} M tris`;
+    const dpr = this.R.renderer.getPixelRatio(), D = this.dynres;
+    this.readout.textContent = `${s.fps} fps · ${s.ms} ms (p95 ${s.p95}, worst ${s.worst}) · ${s.calls} draws · ${(s.triangles / 1e6).toFixed(2)} M tris · ${this.R.quality} @${dpr.toFixed(2)}${D?.pin ? ' (pinned)' : D?.active ? ` (auto, gpu ${D.gpu.toFixed(1)} ms)` : ''}`;
   }
 }
 

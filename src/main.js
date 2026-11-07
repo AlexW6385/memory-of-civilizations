@@ -7,6 +7,7 @@ import { World } from './engine/world.js';
 import { Perf } from './engine/perf.js';
 import { runBench } from './engine/bench.js';
 import { HITCH } from './engine/hitch.js';
+import { DynamicResolution } from './engine/dynres.js';
 import { Controls } from './engine/controls.js';
 import { Music } from './engine/audio.js';
 import { roomAcoustics } from './engine/acoustics.js';
@@ -142,6 +143,8 @@ async function main() {
   // frame costs (`?perf` shows the panel; tools/perf.mjs uses window.palace.perf)
   const perf = new Perf(world, R);
   if (params.has('perf')) perf.show();
+  // the pixel ratio lowered and raised by the frame time on the high preset; ?dpr=x pins it
+  const dynres = perf.dynres = new DynamicResolution(R, params.has('dpr') ? parseFloat(params.get('dpr')) : null);
   mark('plans');
   progress.set('plans', 1);
   const climate = new Climate(R);
@@ -559,7 +562,7 @@ async function main() {
     return here;
   }
   // the view moves when one looks round, walks, flies or falls; tools (controls.free) hold it still
-  let lookYaw = 0, lookPitch = 0;
+  let lookYaw = 0, lookPitch = 0, fullWas = false;
   const frame = () => {
     const now = performance.now();
     const looked = controls.yaw !== lookYaw || controls.pitch !== lookPitch;
@@ -581,6 +584,10 @@ async function main() {
     stats.frames++; stats.ms = stats.ms * 0.9 + js * 0.1;
     perf.tick(now, js);
     HITCH.frame(now, dt * 1000, js, R.renderer.info);
+    // (the frames of a view held still are drawn at 24 fps on purpose: not counted)
+    const full = !!(perf.panel || perf.record) || now - (R.movedAt ?? -1e9) < 900;
+    dynres.update(now, dt * 1000, full && fullWas);
+    fullWas = full;
   };
   R.renderer.setAnimationLoop(frame);
 
@@ -613,6 +620,7 @@ async function main() {
     feet: () => ({ ...controls.feet }),
     world, renderer: R, controls, stats, music, climate, mapView, perf,
     get hitches() { return HITCH.ring; },
+    dynres,
     ground: (x, z) => world.collide.terrain(x, z),
   };
   window.READY = true;

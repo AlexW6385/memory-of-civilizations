@@ -106,7 +106,7 @@ export class Renderer {
     const Q = this.Q = QUALITY[q] || QUALITY.high;
     this.quality = q;
     const r = this.renderer, sun = this.sun;
-    r.setPixelRatio(Math.min(devicePixelRatio, Q.pixelRatio));
+    r.setPixelRatio(this.dprPin ?? Math.min(devicePixelRatio, Q.pixelRatio));
     sun.shadow.mapSize.set(Q.shadowMap, Q.shadowMap);
     if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
     const csm = new CSMShadowNode(sun, { cascades: Q.cascades, maxFar: 320, mode: 'practical', lightMargin: LIGHT_MARGIN });
@@ -260,6 +260,13 @@ export class Renderer {
    */
   setMotion(moving, now = performance.now()) {
     if (moving) this.movedAt = now;
+  }
+
+  /** The picture's pixel ratio (src/engine/dynres.js): the passes' targets follow at the next frame. */
+  setPixelRatio(ratio) {
+    if (Math.abs(this.renderer.getPixelRatio() - ratio) < 1e-3) return;
+    this.renderer.setPixelRatio(ratio);
+    this.resize();
   }
 
   resize() {
