@@ -17,6 +17,7 @@ import { throneHall } from './throne.js';
 import { hexiRun, dougong, dougongHeight } from './caihua.js';
 import { qinian } from './tiantan.js';
 import { pekingCart, camelString } from './street.js';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { Parts, ball, limb, T, sumeru, post, limb as limbG, seated, crouching, vat, tripod, tortoise, crane, sundial, jialiang, balustradeCarved, spout, roofOrnaments, gateDoors } from './carving.js';
 
 export const IMPERIAL = { wood: 'paint_caihua', column: 'lacquer_red', soffit: 'paint_caihua', base: 'marble', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'palace_wall', plinth: 'marble', roof: 'tile_yellow' };
@@ -352,7 +353,29 @@ function lowWall(el, { bag, col }) {
  * lane, the main house on the north side (raised a little, three or five bays), the side houses
  * east and west, the courtyard paved with brick.
  */
-function siheyuan(el, ctx) {
+/**
+ * A bag for the town's houses that leaves out what is never seen: the ming builders add each lattice slab
+ * and door frame as a closed block plus the same block turned inside out (so 20 triangles for 10), and
+ * inside-out copies of a closed block are only ever seen from within the wood.
+ */
+function lean(bag) {
+  const w = Object.create(bag);
+  w.add = (mat, g) => {
+    if (g && !g.index && g.attributes.position.count === 60) {
+      const P = g.attributes.position.array;
+      let same = true;
+      for (let t = 0; t < 10 && same; t++) {
+        const a = t * 9, b = (t + 10) * 9;      // the flipped copy swaps each triangle's 2nd and 3rd corners
+        for (let k = 0; k < 3; k++) if (Math.abs(P[a + k] - P[b + k]) + Math.abs(P[a + 3 + k] - P[b + 6 + k]) + Math.abs(P[a + 6 + k] - P[b + 3 + k]) > 1e-5) { same = false; break; }
+      }
+      if (same) { const h = new BufferGeometry(); h.setAttribute('position', new Float32BufferAttribute(P.slice(0, 90), 3)); if (g.attributes.normal) h.setAttribute('normal', new Float32BufferAttribute(g.attributes.normal.array.slice(0, 90), 3)); g = h; }
+    }
+    bag.add(mat, g);
+  };
+  return w;
+}
+function siheyuan(el, ctx0) {
+  const ctx = { ...ctx0, bag: lean(ctx0.bag) };
   const { bag, col } = ctx, rand = rng(el.seed || 1);
   const [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, pal = HOUSE;
   el.simple = true;
@@ -501,8 +524,8 @@ function pomegranate(P, seed = 1) {
   for (let i = 0; i < 2; i++) P.add('bark_dark', limb(trunk[i], trunk[i + 1], 0.07 - i * 0.015, 0.055 - i * 0.015, 6));
   const crown = [];
   for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 + r(), d = 0.35 + r() * 0.2, c = [Math.cos(a) * d, 1.75 + r() * 0.35, Math.sin(a) * d]; crown.push(c); P.add('bark_dark', limb(trunk[2], c, 0.04, 0.02, 5)); }
-  for (const c of [...crown, [0, 2.0, 0]]) P.add('lotus_leaf', T(ball(0.42, 0.34, 0.42, 9, 5), c[0], c[1], c[2]));
-  for (let k = 0; k < 9; k++) { const a = r() * Math.PI * 2, c = crown[k % 5]; P.add('glaze_red', T(ball(0.075, 0.075, 0.075, 6, 4), c[0] + Math.cos(a) * 0.43, c[1] - 0.12 + r() * 0.2, c[2] + Math.sin(a) * 0.43)); }
+  for (const c of [...crown, [0, 2.0, 0]]) P.add('lotus_leaf', T(ball(0.42, 0.34, 0.42, 7, 4), c[0], c[1], c[2]));
+  for (let k = 0; k < 9; k++) { const a = r() * Math.PI * 2, c = crown[k % 5]; P.add('glaze_red', T(ball(0.075, 0.075, 0.075, 5, 3), c[0] + Math.cos(a) * 0.43, c[1] - 0.12 + r() * 0.2, c[2] + Math.sin(a) * 0.43)); }
 }
 /** A row of flower pots: glazed and earthen pots of chrysanthemums (autumn) on the paving. */
 function flowerPots(P) {

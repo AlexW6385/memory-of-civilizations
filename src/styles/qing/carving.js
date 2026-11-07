@@ -203,19 +203,21 @@ export function jialiang(P) {
 }
 
 // ── the balustrade ──────────────────────────────────────────────────────────────────────────────
-/** A post's carved head: 'dragon' (a cylinder wound by a dragon), 'phoenix' (wings folded round it, a flame on top), 'lotus' (the Joseon bud). */
+/**
+ * A post's carved head: 'dragon' (a column wound by a dragon), 'phoenix' (wings folded round it, a flame on top), 'lotus' (the Joseon bud).
+ * About 100 triangles a post: the shaft one box, the head one lathe whose radius is swung by angle (a spiral
+ * for the dragon's coils, three lobes for the phoenix's wings) so that few segments still read as carved.
+ */
 export function post(P, m, head, H = 0.98) {
   P.add(m, box(-0.11, 0, -0.11, 0.11, H, 0.11));
-  if (head === 'lotus') { P.add(m, lathe([[0.125, H], [0.125, H + 0.04], [0.1, H + 0.06], [0.13, H + 0.12], [0.14, H + 0.22], [0.11, H + 0.32], [0.05, H + 0.4], [0.001, H + 0.42]], 8)); return; }
+  if (head === 'lotus') { P.add(m, lathe([[0.125, H], [0.1, H + 0.06], [0.14, H + 0.2], [0.07, H + 0.36], [0.001, H + 0.42]], 6)); return; }
   if (head === 'beast') { P.add(m, box(-0.14, H, -0.14, 0.14, H + 0.06, 0.14)); return; }
-  P.add(m, lathe([[0.125, H], [0.125, H + 0.05], [0.105, H + 0.07], [0.105, H + 0.4], [0.12, H + 0.42], [0.12, H + 0.45], [0.09, H + 0.5], [0.04, H + 0.55], [0.001, H + 0.57]], 8));
   if (head === 'phoenix') {
-    for (let k = 0; k < 3; k++) { const a = k * 2 * Math.PI / 3, g = ball(0.03, 0.13, 0.07, 6); g.rotateY(-a); P.add(m, T(g, Math.cos(a) * 0.1, H + 0.24, Math.sin(a) * 0.1)); }
-    P.add(m, lathe([[0.04, H + 0.53], [0.05, H + 0.58], [0.001, H + 0.68]], 6));
+    // cap, neck, the folded wings (three lobes), the crown and flame, in one lathe
+    P.add(m, lathe([[0.125, H], [0.105, H + 0.05], [0.14, H + 0.2], [0.1, H + 0.4], [0.12, H + 0.44], [0.05, H + 0.54], [0.001, H + 0.68]], 6, (th, i) => (i >= 2 && i <= 3 ? 1 + 0.32 * Math.cos(th * 3) : 1)));
   } else {
-    const pts = []; for (let k = 0; k <= 8; k++) { const a = k * 0.95; pts.push([Math.cos(a) * 0.105, H + 0.1 + k * 0.035, Math.sin(a) * 0.105]); }
-    for (let k = 0; k < 8; k++) P.add(m, limb(pts[k], pts[k + 1], 0.024, 0.024, 5));
-    P.add(m, T(ball(0.045, 0.04, 0.05, 6), pts[8][0], pts[8][1] + 0.02, pts[8][2]));
+    // cap and a column wound by the dragon: rings of the body swung round by the spiral
+    P.add(m, lathe([[0.125, H], [0.1, H + 0.05], [0.12, H + 0.13], [0.1, H + 0.21], [0.12, H + 0.29], [0.1, H + 0.37], [0.125, H + 0.44], [0.05, H + 0.52], [0.001, H + 0.57]], 8, (th, i) => (i >= 2 && i <= 5 ? 1 + 0.3 * Math.cos(th - i * 1.6) : 1)));
   }
 }
 /**
@@ -246,20 +248,20 @@ export function balustradeCarved(bag, col, a, b, y, open, o = {}) {
     posts.push(s);
     if (k < n && !isOpen(s + l * 0.5)) {
       // the bay, built at the origin along +x, turned onto the run and moved (bays of one run share their shape)
-      const t = [], l0 = 0.1, l1 = l - 0.1, at = (u, w) => [u, 0, w], beam = (u0, u1, y0, h, w) => beamTris(t, [u0, y0, 0], [u1, y0, 0], w, h);
+      const t = [], l0 = 0.1, l1 = l - 0.1, at = (u, w) => [u, 0, w], beam = (u0, u1, y0, h, w) => beamTris(t, [u0, y0, 0], [u1, y0, 0], w, h, true);
       beam(l0, l1, 0, 0.1, 0.14);                                // the sill
       beam(l0, l1, 0.1, 0.4, 0.07);                              // the panel
-      beam(l0, l1, 0.1, 0.06, 0.085); beam(l0, l1, 0.445, 0.05, 0.085);   // its frame
-      beam(l0, l0 + 0.06, 0.1, 0.395, 0.085); beam(l1 - 0.06, l1, 0.1, 0.395, 0.085);
+      beam(l0, l1, 0.1, 0.06, 0.085); beam(l0, l1, 0.445, 0.05, 0.085);   // its frame (the stiles are hidden by the posts)
       beam(l0, l1, 0.5, 0.06, 0.055);                            // the cloud band
       const BP = new Parts(); BP.add(m, fromTriangles(t));
-      if (!joseon) for (const sg of [-1, 1]) BP.add(m, T(ball((l1 - l0) * 0.3, 0.12, 0.025, 12), l / 2, 0.3, sg * 0.07));   // the carved medallion
+      if (!joseon) for (const sg of [-1, 1]) BP.add(m, T(ball((l1 - l0) * 0.3, 0.12, 0.025, 8, 2), l / 2, 0.3, sg * 0.07));   // the carved medallion
       for (const j of [1, 2]) {
-        const u = l0 + (l1 - l0) * j / 3, c = [];
-        BP.add(m, lathe([[0.03, 0], [0.055, 0.04], [0.07, 0.09], [0.045, 0.15], [0.03, 0.18], [0.05, 0.2], [0.001, 0.2]].map(([r, yy]) => [r, yy + 0.56]), 8, null, u, 0, 0));
-        beamTris(c, at(u - 0.12, 0), at(u + 0.12, 0), 0.05, 0.075); BP.add(m, T(fromTriangles(c), 0, 0.76, 0));
+        const u = l0 + (l1 - l0) * j / 3;
+        // the vase-shaped baluster and its cloud cap
+        BP.add(m, lathe([[0.055, 0], [0.07, 0.09], [0.03, 0.18], [0.05, 0.2], [0.001, 0.2]].map(([r, yy]) => [r, yy + 0.56]), 6, null, u, 0, 0));
+        const c = []; beamTris(c, at(u - 0.12, 0), at(u + 0.12, 0), 0.05, 0.075, true); BP.add(m, T(fromTriangles(c), 0, 0.76, 0));
       }
-      BP.add(m, limb([l0 - 0.06, 0.86, 0], [l1 + 0.06, 0.86, 0], 0.045, 0.045, 8));   // the handrail
+      BP.add(m, limb([l0 - 0.06, 0.86, 0], [l1 + 0.06, 0.86, 0], 0.045, 0.045, 6));   // the handrail
       void at; BP.emit(bag, p[0], y, p[1], rot);
     }
   }
@@ -269,10 +271,11 @@ export function balustradeCarved(bag, col, a, b, y, open, o = {}) {
 }
 /** A dragon-head spout (chishou) jutting from a terrace's face, facing +z, its throat the drain. */
 export function spout(P, m = 'marble_smooth') {
-  P.add(m, box(-0.12, -0.15, -0.06, 0.12, 0.1, 0.34));
-  P.add(m, limb([0, -0.02, 0.3], [0, -0.05, 0.7], 0.11, 0.075, 8));
-  P.add(m, T(ball(0.1, 0.05, 0.07, 8), 0, 0.03, 0.68)); P.add(m, T(ball(0.075, 0.035, 0.13, 8), 0, -0.12, 0.6));
-  for (const sx of [-1, 1]) { P.add(m, T(ball(0.035, 0.035, 0.035, 6), sx * 0.09, 0.06, 0.42)); P.add(m, limb([sx * 0.06, 0.08, 0.3], [sx * 0.09, 0.13, 0.02], 0.035, 0.018, 5)); }
+  // (about 120 triangles: thousands of them line the terraces)
+  P.add(m, box(-0.12, -0.15, 0, 0.12, 0.1, 0.34));
+  P.add(m, limb([0, -0.02, 0.3], [0, -0.05, 0.7], 0.11, 0.075, 6));
+  P.add(m, T(ball(0.1, 0.05, 0.07, 6, 3), 0, 0.03, 0.68)); P.add(m, T(ball(0.075, 0.035, 0.13, 6, 3), 0, -0.12, 0.6));
+  for (const sx of [-1, 1]) { P.add(m, T(ball(0.035, 0.035, 0.035, 4, 2), sx * 0.09, 0.06, 0.42)); P.add(m, limb([sx * 0.06, 0.08, 0.3], [sx * 0.09, 0.13, 0.02], 0.035, 0.018, 3)); }
 }
 
 // ── the roof's ornaments ───────────────────────────────────────────────────────────────────────
