@@ -359,7 +359,7 @@ function ambo(el, { bag, col }) {
     const px = x + c * a * 1.003, pz = z + s * b * 1.003, yaw = Math.atan2(-s * a, c * b);
     for (const [w, h2] of [[0.06, 0.42], [0.28, 0.06]]) { const g = box(-w / 2, -h2 / 2, -0.008, w / 2, h2 / 2, 0.008); g.rotateY(-yaw + Math.PI / 2); g.translate(px, y + H + 0.5, pz); bag.add('silver', g); }
   }
-  col.floor([x - a * 0.7, z - b * 0.7, x + a * 0.7, z + b * 0.7], y + H);
+  col.floor([x - a * 0.85, z - b * 1.02, x + a * 0.85, z + b * 1.02], y + H);   // (under the parapets too: they stand on it)
   for (const s of [-1, 1]) col.segment([x - a * 0.8, z + s * b * 0.98], [x + a * 0.8, z + s * b * 0.98], 0.15, y + H, y + H + 1.07);
   // the stairs from east and west: marble treads between parapets of green marble with silver copings, walked up
   for (const s of [-1, 1]) {
