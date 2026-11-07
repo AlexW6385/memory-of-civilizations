@@ -635,16 +635,17 @@ async function main() {
   // the plants' reach) changes now; the rest (the lamps, the shadow maps, the occlusion) with the
   // next visit, which starts at the remembered quality
   if (!askedQuality && !storedQuality && settings.quality === 'high') {
-    const t0 = performance.now() + 1500, t1 = t0 + 4000, dts = [];
+    // (four seconds and 30 frames at least; on a machine too slow for 30 frames in 15 s, low)
+    const t0 = performance.now() + 1500, t1 = t0 + 4000, t2 = t0 + 15000, dts = [];
     measuring = (now, dt) => {
       if (document.hidden) { measuring = null; return; }      // measured again next visit
       if (now < t0 || controls.free) return;
-      if (dt < 250) dts.push(dt);
-      if (now < t1) return;
+      if (dt < 3000) dts.push(dt);
+      if (now < t1 || (dts.length < 30 && now < t2)) return;
       measuring = null;
       dts.sort((a, b) => a - b);
-      const p50 = dts[dts.length >> 1] ?? 16.7, q = p50 <= 30 ? 'high' : p50 <= 50 ? 'medium' : 'low';
-      try { localStorage.setItem('mp.quality', JSON.stringify({ q, p50: +p50.toFixed(1), ratio: R.renderer.getPixelRatio(), at: Date.now() })); } catch { /* storage unavailable */ }
+      const p50 = dts.length < 30 ? Infinity : dts[dts.length >> 1], q = p50 <= 30 ? 'high' : p50 <= 50 ? 'medium' : 'low';
+      try { localStorage.setItem('mp.quality', JSON.stringify({ q, p50: Number.isFinite(p50) ? +p50.toFixed(1) : null, frames: dts.length, ratio: R.renderer.getPixelRatio(), at: Date.now() })); } catch { /* storage unavailable */ }
       console.info('[memory of civilizations] quality:', q, `(median frame ${p50.toFixed(1)} ms over ${dts.length} frames)`);
       if (q !== 'high') {
         R.setQualityLive(q);
