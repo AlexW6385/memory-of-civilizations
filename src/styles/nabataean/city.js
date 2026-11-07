@@ -15,7 +15,7 @@ import { floralCapital } from './khazneh.js';
 const R = 'sandstone_rose', A = 'sandstone_rose_ashlar', ST = 'stucco', RED = 'stucco_red';
 
 /** A column: Attic base, the shaft (its foot stuccoed red to `dado` where given), the floral capital; its collider. */
-function pillar(bag, C, x, z, y, h, r, { shaft = A, cap = A, dado = 0 } = {}) {
+export function pillar(bag, C, x, z, y, h, r, { shaft = A, cap = A, dado = 0 } = {}) {
   bag.add(cap, lathe([[r * 1.42, 0], [r * 1.42, 0.1 * r * 2], [r * 1.28, 0.2 * r * 2], [r * 1.16, 0.28 * r * 2], [r * 1.24, 0.36 * r * 2], [r * 1.08, 0.45 * r * 2], [r, 0.5 * r * 2]], 16, null, x, y, z));
   const yb = y + r, capH = Math.min(1.6, r * 2.2), L = h - r - capH;
   if (dado > 0) {
@@ -74,7 +74,7 @@ function hexPaving(bag, mat, r0, y, holes = [], R6 = 0.55) {
   bag.add(mat, fromTriangles(t));
 }
 /** A flight rising toward `dir` across rect from y0 to y1 in steps of about `riser`. */
-function steps(bag, C, r, y0, y1, dir, mat = A, riser = 0.18) {
+export function steps(bag, C, r, y0, y1, dir, mat = A, riser = 0.18) {
   const n = Math.max(1, Math.round((y1 - y0) / riser));
   for (let i = 0; i < n; i++) {
     const f0 = i / n, yt = y0 + (y1 - y0) * (i + 1) / n;
