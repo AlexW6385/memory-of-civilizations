@@ -177,6 +177,39 @@
   "seconds": 637,
   "baked": "2026-11-06"
  },
+ "edo-himeji-castle": {
+  "site": "edo-himeji",
+  "hash": "e03b2c435652edbf",
+  "rays": 128,
+  "probes": 72000,
+  "boxes": [
+   {
+    "min": [
+     -60,
+     45.5,
+     -98
+    ],
+    "n": [
+     48,
+     30,
+     50
+    ],
+    "spacing": 1.35,
+    "rooms": [
+     "main keep",
+     "main keep floor 1",
+     "main keep floor 2",
+     "main keep floor 3",
+     "main keep floor 4",
+     "main keep floor 5",
+     "keep"
+    ]
+   }
+  ],
+  "bytes": 1136508,
+  "seconds": 354,
+  "baked": "2026-11-07"
+ },
  "florence-centre": {
   "site": "florence",
   "hash": "cc7f125afd565cf1",
