@@ -53,9 +53,13 @@ export async function resolve(ids) {
   return all.filter(({ site, plan }) => ids.includes(site) || ids.includes(plan.id));
 }
 
-/** The landmark built, as triangle soup: { pos, alb, tr, lights, tris } (ground not yet added). */
+/**
+ * The landmark built, as triangle soup: { pos, alb, tr, lights, tris } (ground not yet added).
+ * A plan's `bakeElements` are built with it for the bake only: rooms whose walls and ceilings the
+ * viewer shows from a feature plan of their own (the Great Pyramid's passages and chambers).
+ */
 function landmarkTriangles(plan) {
-  const built = buildPlan(plan, { detail: true });
+  const built = buildPlan(plan.bakeElements ? { ...plan, elements: [...plan.elements, ...plan.bakeElements] } : plan, { detail: true });
   const parts = flatParts(built).filter(({ mat }) => !SKIP.has(mat) && !SKIP_KINDS.has(MATERIALS[mat]?.kind));
   let n = 0;
   for (const { geometry } of parts) n += geometry.attributes.position.count / 3;

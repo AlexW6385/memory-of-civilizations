@@ -22,6 +22,12 @@ export const esb = {
   bounds: boxOf([ESB[0] - 1, ESB[1] - 1, ESB[2] + 1, ESB[3] + 1]),
   view: boxOf(ESB),
   bakeTop: 390,
+  // the bake's boxes round the lobby (src/styles/artdeco/esb.js): the hall from the Fifth Avenue doors to the
+  // silhouette, three storeys high, and the corridor of the elevators across it, two storeys high
+  bakeBoxes: (() => {
+    const y = hy(ESB), xr = ESB[2] - 2.2, cz = (ESB[1] + ESB[3]) / 2;
+    return [[[xr - 30, cz - 7, xr + 2.5, cz + 7], 15.8], [[xr - 22.5, ESB[1] + 4.5, xr - 13, ESB[3] - 4.5], 8.6]].map(([r, top]) => [...boxOf(r), y - 0.6, y + top]);
+  })(),
   elements: [{ t: 'turned', angle: GRID, elements: [{ t: 'empire_state', rect: ESB, y: hy(ESB) }] }],
   // (Fifth Avenue's roadway in front of the tower: a box inside the turned avenue)
   rooms: [{ id: 'fifth', rect: [...P(0, 200).map((v) => v - 4), ...P(0, 200).map((v) => v + 4)], y: 0, kind: 'open' }],

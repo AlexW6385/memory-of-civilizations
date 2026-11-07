@@ -51,6 +51,18 @@ export const pyramid = {
   bakeBounds: [-116, -156, 116, 76],
   view: [-116, -156, 116, 76],
   bakeTop: 147,
+  // the bake traces the passages and chambers with the pyramid (they are a plan of their own, town.js), in boxes
+  // round them: the descending and ascending passages, the Grand Gallery, the antechamber and the King's Chamber
+  bakeElements: [{ t: 'ok_pyramid_interior', c: PYRAMID.c, a: PYRAMID.a, h: PYRAMID.h }],
+  bakeBoxes: (() => {
+    const g = pyramidGeometry(PYRAMID.a, PYRAMID.h), [cx, cz] = PYRAMID.c, x = cx + g.X;
+    return [
+      [x - 2, cz + g.E.Z - 1.5, x + 2, cz + g.A.Z + 0.8, g.J.Y - 0.8, g.E.Y + g.hd + 2.5],
+      [x - 2.5, cz + g.A.Z - 0.8, x + 2.5, cz + g.step[1] + 0.6, g.A.Y - 1, g.F + 9],
+      [cx + g.roomX[0] - 0.8, cz + g.step[1], x + 2.3, cz + g.room[1] + 0.8, g.F - 0.6, g.F + 6.8],
+    ];
+  })(),
+  bakeSpacing: 0.6,
   elements: E,
   rooms,
   walks,

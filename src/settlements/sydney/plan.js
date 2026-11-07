@@ -12,6 +12,8 @@ export const opera = {
   bounds: [ox0 - 8, oz0 - 8, ox1 + 8, oz1 + OPERA.stair + 4],
   view: [ox0, oz0, ox1, oz1],
   bakeTop: 72,
+  // the bake's box round the Concert Hall's enclosure under the west shells (src/styles/modern/hall.js)
+  bakeBoxes: [[cw - 13, oz1 - 92.5, cw + 13, oz1 - 14, height(100, -190) + OPERA.h - 0.6, height(100, -190) + OPERA.h + 48]],
   elements: [{
     t: 'opera_house', rect: OPERA.rect, y: height(100, -190), h: OPERA.h, stair: OPERA.stair,
     halls: [
