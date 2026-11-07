@@ -6,12 +6,13 @@
  * The attribute keeps its count and its array type (empty), which is all the renderer reads after
  * the upload; nothing reads the vertices of a built part after its collision is made.
  */
-export function releaseAfterUpload(o) {
+export function releaseAfterUpload(o, { keepIndex = false } = {}) {
   if (!o.isMesh || o.userData.released) return;
   const before = o.onAfterRender;
   o.onAfterRender = function (renderer, ...a) {
     before.call(this, renderer, ...a);
-    const g = this.geometry, attrs = [...Object.values(g.attributes), g.index].filter(Boolean);
+    // (keepIndex: an index written again later, src/engine/merge.js TileBatch)
+    const g = this.geometry, attrs = [...Object.values(g.attributes), keepIndex ? null : g.index].filter(Boolean);
     // only once every attribute is on the GPU (a shadow pass uploads the positions alone)
     const be = renderer.backend;
     if (!attrs.every((at) => { const d = be.get(at); return d.buffer !== undefined || d.bufferGPU !== undefined; })) return;
