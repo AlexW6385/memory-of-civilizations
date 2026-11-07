@@ -15,6 +15,8 @@ export function mountain(x, z) {
   return 90 * smooth(165, 330, x) * f;
 }
 export const ROAD = [-400, -146, -150, -134];               // the road from the plain to the stair
+/** The market of Parsa beside the road to the terrace (docs/settlements/persepolis.md §14): no houses on it. */
+export const MARKET = [-300, -128, -238, -92];
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let LOTS = null;
 /** Houses of Parsa on the plain west and south-west of the terrace. */
@@ -26,7 +28,9 @@ export function lots() {
     if (Math.hypot(x, z) > RADIUS - 30 || inRect(ROAD, x, z, 8) || inRect(ROAD, x + 12, z + 11, 8)) continue;
     if (rand() < 0.3) continue;
     const w = 9 + rand() * 4, d = 9 + rand() * 3;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
+    const seed = Math.floor(rand() * 1e6);
+    if (inRect(MARKET, x + w / 2, z + d / 2, 4)) continue;
+    LOTS.push({ rect: [x, z, x + w, z + d], seed });
   }
   return LOTS;
 }
