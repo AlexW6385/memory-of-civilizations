@@ -262,7 +262,7 @@
  },
  "edo-himeji-castle": {
   "site": "edo-himeji",
-  "hash": "e03b2c435652edbf",
+  "hash": "fbdc13eee7232758",
   "rays": 128,
   "probes": 72000,
   "boxes": [
@@ -289,8 +289,8 @@
     ]
    }
   ],
-  "bytes": 1136508,
-  "seconds": 354,
+  "bytes": 1079698,
+  "seconds": 100,
   "baked": "2026-11-07"
  },
  "florence-centre": {
