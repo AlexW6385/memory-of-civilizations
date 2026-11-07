@@ -29,9 +29,13 @@ import { ARRIVALS } from './planet/arrivals.js';
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 
-// the picture is always made at the highest quality (?quality=medium|low for testing); the music's
-// level and the look sensitivity are fixed; only the time of day is remembered between visits
-const settings = { quality: params.get('quality') || 'high', music: 0.6, sensitivity: 1, timeRuns: true, utc: 14, ...load('mp.time', {}) };
+// the picture's quality: measured on the first visit (autoQuality below) and remembered, or as the
+// address says (?quality=high|medium|low); the music's level and the look sensitivity are fixed;
+// the time of day is remembered between visits
+const QUALITIES = ['high', 'medium', 'low'];
+const storedQuality = (() => { try { const q = JSON.parse(localStorage.getItem('mp.quality') || 'null')?.q; return QUALITIES.includes(q) ? q : null; } catch { return null; } })();
+const askedQuality = QUALITIES.includes(params.get('quality')) ? params.get('quality') : null;
+const settings = { quality: askedQuality || storedQuality || 'high', music: 0.6, sensitivity: 1, timeRuns: true, utc: 14, ...load('mp.time', {}) };
 
 function sm(e0, e1, x) { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); }
 function load(k, d) { try { return { ...d, ...JSON.parse(localStorage.getItem(k) || '{}') }; } catch { return d; } }
@@ -562,7 +566,7 @@ async function main() {
     return here;
   }
   // the view moves when one looks round, walks, flies or falls; tools (controls.free) hold it still
-  let lookYaw = 0, lookPitch = 0, fullWas = false;
+  let lookYaw = 0, lookPitch = 0, fullWas = false, measuring = null;
   const frame = () => {
     const now = performance.now();
     const looked = controls.yaw !== lookYaw || controls.pitch !== lookPitch;
@@ -571,7 +575,7 @@ async function main() {
     R.setMotion(moving, now);
     // held still for a second: the scene only sways, flickers and drifts, so it is drawn at
     // ~24 fps instead of 60, leaving the machine (and the rest of the picture) its breath
-    if (!perf.panel && !perf.record && !controls.free && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
+    if (!perf.panel && !perf.record && !measuring && !controls.free && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
     const dt = (now - last) / 1000;
     last = now;
     HITCH.time('controls', () => controls.update(dt));
@@ -586,7 +590,8 @@ async function main() {
     HITCH.frame(now, dt * 1000, js, R.renderer.info);
     // (the frames of a view held still are drawn at 24 fps on purpose: not counted)
     const full = !!(perf.panel || perf.record) || now - (R.movedAt ?? -1e9) < 900;
-    dynres.update(now, dt * 1000, full && fullWas);
+    if (measuring) measuring(now, dt * 1000);
+    else dynres.update(now, dt * 1000, full && fullWas);
     fullWas = full;
   };
   R.renderer.setAnimationLoop(frame);
@@ -624,6 +629,30 @@ async function main() {
     ground: (x, z) => world.collide.terrain(x, z),
   };
   window.READY = true;
+  // the first visit (no quality asked for or remembered): the frame times measured for a few
+  // seconds, every frame drawn, and the quality chosen from them and remembered. What can change
+  // without compiling every material again (the pixel ratio, the air's pass, the edge smoothing,
+  // the plants' reach) changes now; the rest (the lamps, the shadow maps, the occlusion) with the
+  // next visit, which starts at the remembered quality
+  if (!askedQuality && !storedQuality && settings.quality === 'high') {
+    const t0 = performance.now() + 1500, t1 = t0 + 4000, dts = [];
+    measuring = (now, dt) => {
+      if (document.hidden) { measuring = null; return; }      // measured again next visit
+      if (now < t0 || controls.free) return;
+      if (dt < 250) dts.push(dt);
+      if (now < t1) return;
+      measuring = null;
+      dts.sort((a, b) => a - b);
+      const p50 = dts[dts.length >> 1] ?? 16.7, q = p50 <= 30 ? 'high' : p50 <= 50 ? 'medium' : 'low';
+      try { localStorage.setItem('mp.quality', JSON.stringify({ q, p50: +p50.toFixed(1), ratio: R.renderer.getPixelRatio(), at: Date.now() })); } catch { /* storage unavailable */ }
+      console.info('[memory of civilizations] quality:', q, `(median frame ${p50.toFixed(1)} ms over ${dts.length} frames)`);
+      if (q !== 'high') {
+        R.setQualityLive(q);
+        world.flora.scale = world.openFlora.scale = floraScale[q];
+        world.flora.dirty = true;
+      }
+    };
+  }
   // the other settlements' landmark plans (for the map), now that the world is open
   setTimeout(() => world.prefetch(world.here(controls)), 2000);
   if (params.has('bench')) setTimeout(() => runBench(window.palace), 1000);

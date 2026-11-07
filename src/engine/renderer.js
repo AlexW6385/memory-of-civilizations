@@ -122,6 +122,22 @@ export class Renderer {
     this.resize();
   }
 
+  /**
+   * Down to another quality without compiling every material again (src/main.js, the first
+   * visit's measure): the pixel ratio, the edge smoothing and the air's pass now; the lamps, the
+   * shadow maps and the occlusion (each a change of every material's pipeline) stay as they are
+   * until the next start, made at the remembered quality.
+   */
+  setQualityLive(q) {
+    const N = QUALITY[q];
+    if (!N) return;
+    this.quality = q;
+    this.Q = { ...this.Q, pixelRatio: N.pixelRatio, aa: N.aa, air: N.air };
+    if (!this.dprPin) this.renderer.setPixelRatio(Math.min(devicePixelRatio, N.pixelRatio));
+    this.buildPipeline();
+    this.resize();
+  }
+
   buildPipeline() {
     const { scene, camera, Q } = this;
     // one scene pass: every material is compiled and drawn once per frame (a separate normal
