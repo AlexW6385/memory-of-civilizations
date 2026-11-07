@@ -459,5 +459,37 @@
   "bytes": 265845,
   "seconds": 204,
   "baked": "2026-11-06"
+ },
+ "sainte-foy-conques": {
+  "site": "conques",
+  "hash": "5709bfb2b8dfecbf",
+  "rays": 128,
+  "probes": 65170,
+  "boxes": [
+   {
+    "min": [
+     -18,
+     -0.5,
+     -17
+    ],
+    "n": [
+     49,
+     38,
+     35
+    ],
+    "spacing": 1,
+    "rooms": [
+     "nave",
+     "crossing",
+     "choir",
+     "ambulatory",
+     "north-transept",
+     "south-transept"
+    ]
+   }
+  ],
+  "bytes": 1075205,
+  "seconds": 878,
+  "baked": "2026-11-07"
  }
 }
