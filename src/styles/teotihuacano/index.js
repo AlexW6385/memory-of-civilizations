@@ -7,6 +7,9 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import '../qing/index.js';
 import { carved, Kit } from '../maya/meso.js';
+import { porticoRooms } from './rooms.js';
+import { patch } from '../maya/household.js';
+import { mesoPlants } from '../maya/plants.js';
 import { ttPalace, ttJaguars, ttPlazaAltars, ttCrossAltar, ttGoddess, ttTempleInside, ttPeople } from './palace.js';
 
 const S = 'stucco_ochre', RD = 'stucco_red', RF = 'limewash_red', RB = 'rubble_teo', HS = 'andesite';
@@ -223,7 +226,8 @@ function ttFloor(el, { bag, col }) {
  * raised on low talud platforms and opened to it by porticoes of square pillars, the principal room on
  * its north side higher, with a crest of almenas; a small talud-tablero altar in the patio's middle.
  */
-function compound(el, { bag, col }) {
+function compound(el, ctx) {
+  const { bag, col } = ctx;
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 3.2, gate = Math.floor(rand() * 4), gw = 0.9;
   // the outer wall, a doorway in the middle of one side
   const xm = (x0 + x1) / 2, zm = (z0 + z1) / 2;
@@ -237,6 +241,16 @@ function compound(el, { bag, col }) {
     }
   });
   bag.add(RB, frustum([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], 0, 0.9, 0.5, 0.5, 0.5, 0.5, { noBottom: true }));
+  // the outer wall's plaster patched where it was re-laid, here and there fallen away from the rubble core
+  for (const [nx, nz, c] of [[0, -1, z0], [0, 1, z1], [-1, 0, x0], [1, 0, x1]]) {
+    const L = nx ? z1 - z0 : x1 - x0, a0 = nx ? z0 : x0;
+    for (let i = 0; i < 2 + Math.floor(rand() * 3); i++) {
+      const u = a0 + 1.5 + rand() * (L - 3), spall = rand() < 0.3, w = spall ? 0.4 + rand() * 0.6 : 0.9 + rand() * 1.6, hh = spall ? 0.3 + rand() * 0.4 : 0.6 + rand() * 0.9;
+      const y = spall ? 1.15 + rand() * 0.5 : 1.0 + hh / 2 + rand() * (2.9 - 1.0 - hh);
+      if (Math.abs(u - (nx ? zm : xm)) < gw + w / 2 + 0.3) continue;                      // clear of the doorway
+      patch(bag, spall ? RB : rand() < 0.5 ? 'lime_plaster' : 'stucco_pale', nx ? [c, y, u] : [u, y, c], [nx, 0, nz], w, hh, Math.floor(rand() * 1e6), spall ? 0.004 : 0.01);
+    }
+  }
   // rooms: a grid of blocks, the middle cell the main patio, another the second patio
   const nx = 3, nz = 3, cw = (x1 - x0 - 2) / nx, cd = (z1 - z0 - 2) / nz, second = [0, 2, 6, 8][Math.floor(rand() * 4)];
   const P = [x0 + 1 + cw, z0 + 1 + cd, x0 + 1 + 2 * cw, z0 + 1 + 2 * cd];            // the main patio
@@ -269,10 +283,11 @@ function compound(el, { bag, col }) {
     ttStair({ rect: fx ? [fx > 0 ? edge : edge - ph * 1.6, mz - 1.4, fx > 0 ? edge + ph * 1.6 : edge, mz + 1.4] : [mx - 1.4, fz > 0 ? edge : edge - ph * 1.6, mx + 1.4, fz > 0 ? edge + ph * 1.6 : edge], y0: 0.06, y1: ph, dir: { e: 'w', w: 'e', s: 'n', n: 's' }[face], mat: S }, { bag, col });
     // the room set back behind its portico; the roof over both; two pillars at the front
     const back = fx ? (fx > 0 ? [r[0], r[1], r[2] - pd, r[3]] : [r[0] + pd, r[1], r[2], r[3]]) : (fz > 0 ? [r[0], r[1], r[2], r[3] - pd] : [r[0], r[1] + pd, r[2], r[3]]);
-    bag.add(S, box(back[0], ph, back[1], back[2], rh, back[3])); col.rect(back, ph, rh);
+    // the rooms behind it, each with its doorway on the portico, furnished (rooms.js)
+    const across = fx ? back[3] - back[1] : back[2] - back[0], nr = across > 11 ? 3 : 2;
+    const roles = principal ? (nr === 3 ? ['sleep', 'shrine', 'sleep'] : ['shrine', 'sleep']) : Array.from({ length: nr }, (_, j) => (k === 1 && j === 0 ? 'kitchen' : ['sleep', 'store', 'kitchen', 'sleep'][Math.floor(rand() * 4)]));
+    porticoRooms(ctx, back, [fx, fz], ph, rh - 0.45, roles, rand);
     bag.add(S, box(r[0], rh - 0.45, r[1], r[2], rh, r[3])); col.floor(r, rh);
-    const dw = 0.8, dz = fx ? (fx > 0 ? back[2] : back[0]) : (fz > 0 ? back[3] : back[1]);
-    bag.add('opening', fx ? box(dz - 0.05, ph, mz - dw, dz + 0.05, ph + 2.1, mz + dw) : box(mx - dw, ph, dz - 0.05, mx + dw, ph + 2.1, dz + 0.05));
     const L = fx ? r[3] - r[1] : r[2] - r[0];
     for (const t of [1 / 3, 2 / 3]) {
       const u = (fx ? r[1] : r[0]) + L * t;
@@ -287,6 +302,6 @@ function compound(el, { bag, col }) {
 
 registerStyle('teotihuacano', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople },
+  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople, meso_plants: mesoPlants },
   objects: {},
 });
