@@ -30,7 +30,7 @@
  },
  "angkor-wat": {
   "site": "angkor",
-  "hash": "58ed19dd15dceff3",
+  "hash": "22868afb98c30df4",
   "rays": 128,
   "probes": 7064,
   "boxes": [
@@ -67,8 +67,8 @@
     ]
    }
   ],
-  "bytes": 112916,
-  "seconds": 24,
+  "bytes": 111687,
+  "seconds": 21,
   "baked": "2026-11-07"
  },
  "babylon-centre": {
