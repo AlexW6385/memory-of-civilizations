@@ -14,7 +14,7 @@ export const ARRIVALS = {
   'lhasa':            [-4, 0.1, 120, 0, 0.32],           // the Potala over the town's lanes
   'nara':             [0, 0.1, 20, 0, 0.25],             // the Great Buddha Hall from its court
   'heian-uji':        [40, null, 0, 1.5708, 0.06],       // the Phoenix Hall across its pond, wings spread
-  'edo-himeji':       [-20, 37.1, -12, 0, 0.38],         // the keep and its turrets from the inner bailey
+  'edo-himeji':       [-25, 37.1, -3, 0, 0.36],          // the keep cluster whole on its stone base, from the Honmaru's south edge (from 9 m nearer the top roof was cut)
   'joseon-seoul':     [0, 0.1, 80, 0, 0.15],             // the throne hall across its court and rank stones
   'sanchi':           [0, 22.1, 60, 0, 0.15],            // the Great Stupa, its gateway and Ashoka's pillar
   'khajuraho':        [0, 0.1, -60, 1.5708, 0.3],        // Kandariya Mahadeva rising among the temples
