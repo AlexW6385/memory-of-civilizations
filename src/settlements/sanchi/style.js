@@ -7,6 +7,7 @@ import '../../buildings/sanchi-great-stupa/style.js';
 import { STYLES, registerStyle } from '../../core/build.js';
 import { lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { hexa, obox } from '../../styles/chinese/index.js';
+import { rite } from '../../styles/indian/rites.js';
 
 const RAIL = 'sandstone_rail', STONE = 'sandstone_dressed';
 
@@ -225,4 +226,4 @@ function oct(x, z, r0, r1, y0, y1) {
 void obox;
 
 const base = STYLES['indian-sanchi'];
-registerStyle('sanchi-site', { ...base, elements: { ...base.elements, stupa2, temple40 } });
+registerStyle('sanchi-site', { ...base, elements: { ...base.elements, stupa2, temple40, rite } });

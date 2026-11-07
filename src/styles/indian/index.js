@@ -34,7 +34,9 @@ function railRing(bag, col, c, r, y, h, gaps = [], gap = 1.8, mat = RAIL, walls 
     const uu = [(qx - px) / (2 * L), (qz - pz) / (2 * L)], nn = [-uu[1], uu[0]];
     for (let b = 0; b < 3; b++) { const yb = y + h * (0.2 + b * 0.22); obox(bars, m, uu, nn, L, post * 0.55, yb, yb + h * 0.14); }
     obox(bars, m, uu, nn, L + 0.02, post * 1.05, y + h * 0.81, y + h * 0.93);
-    obox(bars, m, uu, nn, L + 0.02, post * 0.8, y + h * 0.93, y + h);
+    // the coping (uṣṇīṣa) rounded on top, as the timber rail it copies
+    { const w = post * 0.8, y0 = y + h * 0.93 - y, ch = h * 0.07, L2 = L + 0.02;
+      relief(bars, [[[-w, y0], [w, y0], [w, y0 + ch * 0.35], [w * 0.75, y0 + ch * 0.75], [0, y0 + ch], [-w * 0.75, y0 + ch * 0.75], [-w, y0 + ch * 0.35]]], [m[0] - uu[0] * L2, y, m[1] - uu[1] * L2], nn, uu, 2 * L2); }
     if (walls && col) col.segment([px, pz], [qx, qz], post * 2, y, y + h);
   }
   bag.add(mat, fromTriangles(posts));
@@ -111,6 +113,37 @@ function curvedBeam(out, at, u, n, half, d, y0, h, rise, segs = 12) {
   for (const t of [-1, 1]) q(P(t, -d, 0), P(t, d, 0), P(t, d, h), P(t, -d, h));
 }
 
+
+// ---- the gateways' reliefs: scenes cut as shallow outlines on the faces (after the South Gateway's
+// architraves and posts: the stūpas and trees adored by figures, the elephants of the Chaddanta, the
+// processions of horsemen, elephants and footmen — photodharma, after Marshall) ----
+/** Convex outlines [[u, v]] stood at O (u along U, v up), each extruded along N a little further than the last (no coplanar faces). */
+function relief(out, outlines, O, U, N, t) {
+  outlines.forEach((ol, k) => {
+    const tk = t * (1 + 0.06 * (k % 5)), P = (u, v, w) => [O[0] + U[0] * u + N[0] * w, O[1] + v, O[2] + U[1] * u + N[1] * w], T = [], m = ol.length;
+    for (let i = 1; i + 1 < m; i++) { T.push(...P(...ol[0], 0), ...P(...ol[i], 0), ...P(...ol[i + 1], 0)); T.push(...P(...ol[0], tk), ...P(...ol[i], tk), ...P(...ol[i + 1], tk)); }
+    for (let i = 0; i < m; i++) { const a = ol[i], b = ol[(i + 1) % m]; T.push(...P(...a, 0), ...P(...b, 0), ...P(...b, tk), ...P(...a, 0), ...P(...b, tk), ...P(...a, tk)); }
+    out.push(...orientOutward(T));
+  });
+}
+const RING = (cu, cv, rx, ry, m = 8, a0 = 0, a1 = Math.PI * 2) => Array.from({ length: m }, (_, i) => { const a = a0 + (a1 - a0) * i / (a1 - a0 < 6 ? m - 1 : m); return [cu + Math.cos(a) * rx, cv + Math.sin(a) * ry]; });
+const QUAD = (u0, v0, u1, v1) => [[u0, v0], [u1, v0], [u1, v1], [u0, v1]];
+/** The motifs, in a band 1 high (v 0…1), centred on u = 0; d = ±1 the way a beast faces. */
+const MOTIF = {
+  figure: () => [[[-0.07, 0], [0.07, 0], [0.06, 0.4], [-0.06, 0.4]], [[-0.07, 0.4], [0.07, 0.4], [0.06, 0.66], [-0.06, 0.66]], RING(0, 0.73, 0.055, 0.065, 8), RING(0, 0.81, 0.085, 0.045, 8)],
+  bearer: () => [...MOTIF.figure(), [[0.06, 0.62], [0.2, 0.74], [0.18, 0.78], [0.05, 0.66]], [[-0.06, 0.62], [-0.05, 0.66], [-0.18, 0.78], [-0.2, 0.74]], RING(0, 0.78, 0.2, 0.03, 8, Math.PI * 1.05, Math.PI * 1.95)],
+  stupa: () => [QUAD(-0.26, 0, 0.26, 0.12), QUAD(-0.22, 0.12, 0.22, 0.22), [[0.21, 0.22], ...RING(0, 0.22, 0.21, 0.36, 9, 0.12, Math.PI - 0.12).slice(1, -1), [-0.21, 0.22]], QUAD(-0.06, 0.55, 0.06, 0.66), QUAD(-0.01, 0.66, 0.01, 0.8), QUAD(-0.13, 0.8, 0.13, 0.84)],
+  tree: () => [QUAD(-0.2, 0, 0.2, 0.16), QUAD(-0.03, 0.16, 0.03, 0.5), RING(0, 0.68, 0.22, 0.2, 10), RING(-0.17, 0.56, 0.09, 0.08, 7), RING(0.17, 0.56, 0.09, 0.08, 7)],
+  wheel: () => [QUAD(-0.1, 0, 0.1, 0.06), QUAD(-0.035, 0.06, 0.035, 0.5), QUAD(-0.08, 0.5, 0.08, 0.56), RING(0, 0.76, 0.2, 0.2, 12), RING(0, 0.76, 0.06, 0.06, 8)],
+  elephant: (d = 1) => [RING(0, 0.42, 0.3, 0.2, 10), RING(d * 0.3, 0.5, 0.13, 0.15, 8), [[d * 0.38, 0.5], [d * 0.44, 0.48], [d * 0.42, 0.06], [d * 0.37, 0.06]], ...[-0.2, -0.08, 0.08, 0.2].map((x) => QUAD(x - 0.045, 0, x + 0.045, 0.32)), [[-d * 0.12, 0.6], [d * 0.06, 0.6], [d * 0.04, 0.8], [-d * 0.1, 0.8]], RING(-d * 0.03, 0.86, 0.05, 0.06, 7)],
+  horse: (d = 1) => [RING(0, 0.44, 0.22, 0.12, 9), [[d * 0.15, 0.46], [d * 0.24, 0.48], [d * 0.32, 0.7], [d * 0.24, 0.72]], RING(d * 0.32, 0.68, 0.07, 0.045, 7), ...[-0.16, -0.08, 0.08, 0.15].map((x) => QUAD(x - 0.025, 0, x + 0.025, 0.36)), [[-d * 0.06, 0.55], [d * 0.06, 0.55], [d * 0.05, 0.78], [-d * 0.05, 0.78]], RING(0, 0.84, 0.05, 0.06, 7)],
+};
+/** The programme of an architrave's face: b 0 lowest … 2 top; front the outer face. */
+function scenes(b, front) {
+  if (b === 2) return ['tree', 'figure', 'stupa', 'figure', 'tree', 'figure', 'stupa', 'figure', 'tree', 'figure', 'stupa', 'figure', 'tree'];
+  if (b === 1) return front ? ['elephant', 'horse', 'figure', 'figure', 'bearer', 'stupa', 'bearer', 'figure', 'figure', 'horse', 'elephant'] : ['tree', 'elephant', 'elephant', 'elephant', 'tree', 'elephant', 'elephant', 'elephant', 'tree'];
+  return front ? ['bearer', 'bearer', 'bearer', 'bearer', 'bearer', 'bearer', 'bearer', 'bearer', 'bearer', 'bearer', 'bearer'] : ['horse', 'figure', 'elephant', 'figure', 'figure', 'horse', 'figure', 'elephant', 'figure', 'horse'];
+}
 /**
  * A gateway (torana) at { at, dir (outward), y, s (scale) }: two square posts carved in panels,
  * capitals of four elephants back to back, three architraves curving up to their spiral ends and
@@ -127,7 +160,10 @@ function torana(bag, col, at, dir, y, s = 1, kind = 'elephant') {
     // the carved panels on the front and back faces of the post
     for (const f of [-1, 1]) for (const [p0, p1] of [[0.8, 2.4], [2.6, 4.2], [4.4, 6.0]]) {
       obox(carve, [c[0] + dir[0] * f * (P + 0.025 * s), c[1] + dir[1] * f * (P + 0.025 * s)], u, dir, P * 0.82, 0.025 * s, y + p0 * s, y + p1 * s);
-      obox(carve, [c[0] + dir[0] * f * (P + 0.06 * s), c[1] + dir[1] * f * (P + 0.06 * s)], u, dir, P * 0.42, 0.02 * s, y + (p0 + 0.3) * s, y + (p1 - 0.3) * s);
+      // in each panel a scene: the wheel on its pillar, a stūpa, the tree of the Enlightenment, each adored by two figures
+      const pc = [c[0] + dir[0] * f * (P + 0.05 * s), c[1] + dir[1] * f * (P + 0.05 * s)], sc = (p1 - p0 - 0.2) * s, mid = { 0.8: 'tree', 2.6: 'stupa', 4.4: 'wheel' }[p0];
+      const pan = [...MOTIF[mid]().map((o) => o.map(([a, v]) => [a * 0.9, v])), ...[-1, 1].flatMap((g) => MOTIF.figure().map((o) => o.map(([a, v]) => [g * 0.34 + a * 0.75, v * 0.62])))];
+      relief(carve, pan.map((o) => o.map(([a, v]) => [a * sc * 0.55, v * sc])), [pc[0], y + (p0 + 0.1) * s, pc[1]], u, [dir[0] * f, dir[1] * f], 0.03 * s);
     }
     // the capital: an abacus, four elephants standing back to back
     obox(caps, c, u, dir, P * 1.2, P * 1.2, y + H - 0.25 * s, y + H);
@@ -155,10 +191,16 @@ function torana(bag, col, at, dir, y, s = 1, kind = 'elephant') {
   for (let b = 0; b < 3; b++) {
     const yb = y + H + 1.2 * s + b * 1.5 * s, half = 4.3 * s, rise = 0.22 * s, d = 0.32 * s;
     const beam = []; curvedBeam(beam, at, u, dir, half, d, yb, 0.6 * s, rise); out.push(...orientOutward(beam));
-    for (const f of [-1, 1]) for (let t = -0.88; t <= 0.89; t += 0.105) {
-      if (Math.abs(Math.abs(t * half) - W) < 0.45 * s) continue;     // not where the posts and uprights cross
-      const hgt = (Math.round(t * 20) % 2 ? 0.34 : 0.26) * s, yy = yb + rise * t * t + 0.12 * s;
-      obox(carve, [at[0] + u[0] * t * half + dir[0] * f * (d + 0.03 * s), at[1] + u[1] * t * half + dir[1] * f * (d + 0.03 * s)], u, dir, 0.13 * s, 0.03 * s, yy, yy + hgt);
+    for (const f of [-1, 1]) {
+      // the face's scenes in a row along the beam, each at the beam's height where it stands, clear of the posts' crossings
+      const base = scenes(b, f > 0), sc = 0.5 * s, nI = Math.floor(1.72 * half / (0.34 * s)), step = 1.72 / nI;
+      const prog = Array.from({ length: nI }, (_, i) => base[Math.floor(i * base.length / nI)]);
+      prog.forEach((m, i) => {
+        const t = -0.86 + (i + 0.5) * step, uu = t * half;
+        if (Math.abs(Math.abs(uu) - W) < 0.42 * s) return;
+        const dd = uu < 0 ? 1 : -1, yy = yb + rise * t * t + 0.08 * s, pc = [at[0] + u[0] * uu + dir[0] * f * d, at[1] + u[1] * uu + dir[1] * f * d];
+        relief(carve, MOTIF[m](dd * f).map((o) => o.map(([a, v]) => [a * sc, v * sc])), [pc[0], yy, pc[1]], u, [dir[0] * f, dir[1] * f], 0.035 * s);
+      });
     }
     for (const k of [-1, 1]) {
       const e = at2(k * half), ye = yb + rise + 0.3 * s;
