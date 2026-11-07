@@ -103,8 +103,10 @@ export class LifeInstances {
         // faithful coarse version: made later, a shape at a time (a few ms each, update())
         const near = make(true), shape = { near, far: null, all, colors, pos, reach, n: s.n };
         const g = s.geometry, P = g.attributes.position.array, N = g.attributes.normal.array, I = g.index.array;
+        // (made in the build worker where the tiles were built there: build-worker.js)
+        const pre = s.chunks.map(({ p }) => p.geometry.userData.coarse).find((c) => c !== undefined);
         shape.makeFar = () => {
-          const low = coarse(P, N, I);
+          const low = pre ? pre.low : coarse(P, N, I);
           if (!low) return;
           const lg = new THREE.BufferGeometry();
           lg.setAttribute('position', new THREE.BufferAttribute(low.pos, 3));
@@ -114,6 +116,7 @@ export class LifeInstances {
           shape.far = make(true, lg);
           shape.far.castShadow = near.castShadow;
         };
+        shape.pre = !!pre;
         this.meshes.push(shape);
       }
     }
@@ -163,7 +166,8 @@ export class LifeInstances {
       const t0 = performance.now();
       for (const L of this.meshes) {
         if (!L.makeFar) continue;
-        if (performance.now() - t0 > 3) break;
+        // (one shape at a time when they are made here: a large one alone takes a few ms)
+        if (performance.now() - t0 > (L.pre ? 3 : 0.5)) break;
         const f = L.makeFar; L.makeFar = null; f();
         if (L.far) force = true;
       }

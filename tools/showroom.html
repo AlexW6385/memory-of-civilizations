@@ -73,6 +73,7 @@ if (lightMode === 'game') {
   await renderer.init();
   scene = new THREE.Scene(); scene.background = new THREE.Color(0x9fb4c8);
   cam = new THREE.PerspectiveCamera(68, innerWidth / innerHeight, 0.05, 1000);
+  cam.layers.mask = (await import('../src/engine/layers.js')).CAMERA_MASK;
   cam.rotation.order = 'YXZ';
   // reflections (and only those: the hemisphere light below lights the diffuse) from the baked-light
   // volume's open-air fallback, as the game's metals have outside every volume
@@ -111,8 +112,10 @@ async function draw(frames, before = () => {}) {
       // game draws the outer ones every second and third frame): two frames make the whole picture
       R.update();
       // (and each cascade's layers, as R.render sets them: the first frame's came before the cascades
-      // existed — SMALL (2) in the first only, SHADOW (4) in all, src/engine/layers.js)
-      (R.sun.shadow.shadowNode?.lights || []).forEach((l, i) => { l.shadow.needsUpdate = true; l.shadow.camera.layers.mask = (i === 0 ? (1 | 1 << 2) : (1 | 1 << 3)) | 1 << 4; });
+      // existed — casters by size per cascade, src/engine/layers.js)
+      const { cascadeMask } = await import('../src/engine/layers.js');
+      const Ls = R.sun.shadow.shadowNode?.lights || [];
+      Ls.forEach((l, i) => { l.shadow.needsUpdate = true; l.shadow.camera.layers.mask = cascadeMask(i, Ls.length); });
       R.pipeline.render();
     }
     // (read now: the renderer's own frame loop resets the counts at the next animation frame)

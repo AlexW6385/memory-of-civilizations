@@ -22,7 +22,7 @@ export const stpeter = {
   rooms: [
     { id: 'piazza', rect: [RETTA[0], -90, OVAL.c[0] + OVAL.ax, 90], y: 0, kind: 'open' },
     { id: 'nave', rect: [CROSSING[0] + 21, -13.75, FRONT_X - 4 - 9.2, 13.75], y: FLOOR, kind: 'hall' },
-    { id: 'crossing', rect: [CROSSING[0] - 21, -21, CROSSING[0] + 21, 21], y: FLOOR, kind: 'hall' },
+    { id: 'crossing', rect: [CROSSING[0] - 21, -21, CROSSING[0] + 21, 21], y: FLOOR, kind: 'hall', sealed: true },
   ],
   walks: [Object.assign([[125, 0], [40, 0], [FRONT_X + 26, 0]], { y0: 0 })],
 };

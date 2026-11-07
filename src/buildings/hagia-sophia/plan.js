@@ -306,19 +306,20 @@ for (const sz of [-1, 1]) for (const x of [-25, -6, 6, 27]) obj('polykandelon', 
 for (const sz of [-1, 1]) for (const x of [-25, -6, 6, 27]) obj('polykandelon', x, sz * 25.4, GF + 4.5, { r: 0.9, n: 8, top: 21.4, light: 0.8, lights: 1, distance: 8 });
 
 // ── rooms and walks ──────────────────────────────────────────────────────────
-const room = (id, rect, y, kind) => ({ id, rect, y, kind });
+// sealed: its openings glazed or small, the town outside not drawn from within (src/engine/world.js seal)
+const room = (id, rect, y, kind, sealed) => ({ id, rect, y, kind, ...(sealed ? { sealed } : {}) });
 const rooms = [
   room('atrium', [-90, -16, -58, 16], 0, 'open'),
   room('outer-narthex', [-48, -30, -44, 30], 0, 'hall'),
   room('inner-narthex', [-41.5, -30, -34, 30], 0, 'hall'),
-  room('nave', [-12, -10, 12, 10], 0, 'hall'),
-  room('west-bay', [-28, -4, -20, 4], 0, 'hall'),
-  room('bema', [24, -6, 28.5, 6], 0, 'hall'),
-  room('north-aisle', [-12, -32, 12, -18], 0, 'hall'),
-  room('south-aisle', [-12, 18, 12, 32], 0, 'hall'),
-  room('north-gallery', [-12, -32, 12, -18], GF, 'hall'),
-  room('south-gallery', [-12, 18, 12, 32], GF, 'hall'),
-  room('west-gallery', [-41.5, -12, -34, 12], GF, 'hall'),
+  room('nave', [-12, -10, 12, 10], 0, 'hall', true),
+  room('west-bay', [-28, -4, -20, 4], 0, 'hall', true),
+  room('bema', [24, -6, 28.5, 6], 0, 'hall', true),
+  room('north-aisle', [-12, -32, 12, -18], 0, 'hall', true),
+  room('south-aisle', [-12, 18, 12, 32], 0, 'hall', true),
+  room('north-gallery', [-12, -32, 12, -18], GF, 'hall', true),
+  room('south-gallery', [-12, 18, 12, 32], GF, 'hall', true),
+  room('west-gallery', [-41.5, -12, -34, 12], GF, 'hall', true),
   room('ramp', [-39.5, -38.5, -38, -37], 0, 'hall'),
   room('augustaion', [-40, 50, 20, 90], 0, 'open'),
 ];

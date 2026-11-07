@@ -307,6 +307,53 @@ function isSmall(geometry, M) {
   const b = geometry.boundingBox, s = Math.max(Math.hypot(M[0], M[1], M[2]), Math.hypot(M[4], M[5], M[6]), Math.hypot(M[8], M[9], M[10]));
   return Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z) * s < DETAIL_SIZE;
 }
+/**
+ * Pieces smaller than MID_SIZE (m, their box's largest side) are middle-sized: they cast shadows
+ * into the first two of the sun's cascades only, not into the third (120–320 m off, a third of a
+ * metre a texel), where only the big masses cast (src/engine/layers.js). Unless many lie close
+ * together: middle-sized pieces of one material whose faces (their boxes' two largest sides) cover
+ * more than MASS of a MASS_CELL-metre cell's side between them (stones of a wall, tiles of a roof,
+ * brackets in a cluster) make a mass, and cast with the big ones.
+ */
+export const MID_SIZE = 2, MASS_CELL = 2, MASS = 0.5;
+/** A piece's box sides, largest first, and its centre: [e0, e1, e2, cx, cy, cz]. */
+function boxOf(P, M = null) {
+  let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
+  for (let i = 0; i < P.length; i += 3) {
+    let x = P[i], y = P[i + 1], z = P[i + 2];
+    if (M) { const a = x, b = y, c = z; x = M[0] * a + M[4] * b + M[8] * c + M[12]; y = M[1] * a + M[5] * b + M[9] * c + M[13]; z = M[2] * a + M[6] * b + M[10] * c + M[14]; }
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z;
+  }
+  const e = [x1 - x0, y1 - y0, z1 - z0].sort((a, b) => b - a);
+  return [e[0], e[1], e[2], (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2];
+}
+/** Which of these boxes (boxOf) are big for the shadows (1) or middle-sized (0): see MID_SIZE. */
+export function bigPieces(boxes) {
+  const big = new Uint8Array(boxes.length), cover = new Map(), key = new Array(boxes.length);
+  for (let i = 0; i < boxes.length; i++) {
+    const b = boxes[i];
+    if (b[0] >= MID_SIZE) { big[i] = 1; continue; }
+    const k = key[i] = `${Math.floor(b[3] / MASS_CELL)},${Math.floor(b[4] / MASS_CELL)},${Math.floor(b[5] / MASS_CELL)}`;
+    cover.set(k, (cover.get(k) || 0) + b[0] * b[1]);
+  }
+  const lim = MASS * MASS_CELL * MASS_CELL;
+  for (let i = 0; i < boxes.length; i++) if (!big[i] && cover.get(key[i]) > lim) big[i] = 1;
+  return big;
+}
+/** An instanced shape's copies, the big ones first (bigPieces): its arrays reordered in place;
+ *  returns how many are big (all: undefined). */
+function bigFirst(entry, big) {
+  const k = big.length;
+  let nb = 0;
+  for (let i = 0; i < k; i++) nb += big[i];
+  if (nb === k) return undefined;
+  const order = [...Array(k).keys()].sort((a, b) => big[b] - big[a] || a - b);
+  const perm = (A, w) => { if (!A) return A; const B = new A.constructor(A.length); order.forEach((i, j) => { for (let c = 0; c < w; c++) B[j * w + c] = A[i * w + c]; }); return B; };
+  entry.matrices = perm(entry.matrices, 16); entry.colors = perm(entry.colors, 3); entry.reach = perm(entry.reach, 1);
+  if (entry.reals) entry.reals = order.map((i) => entry.reals[i]);
+  return nb;
+}
+
 function mergeInto(mat, list, d, detail, join = false) {
   let count = 0;
   for (const g of list) count += g.attributes.position.count;
@@ -453,13 +500,23 @@ export class GeoBag {
         const colors = e.items.some((it) => it.color) ? new Float32Array(k * 3).fill(1) : null;
         const reals = e.items.map((it) => it.real);
         e.items.forEach((it, i) => { matrices.set(it.m, i * 16); reach[i] = it.reach; if (it.color && colors) colors.set(it.color, i * 3); });
-        this.instanced.push({ mat: e.mat, key: e.key, geometry, matrices, colors, reach, reals, detail: this.detail && isSmall(geometry, matrices) });
+        const entry = { mat: e.mat, key: e.key, geometry, matrices, colors, reach, reals, detail: this.detail && isSmall(geometry, matrices) };
+        // (the viewer: the copies big for the shadows first, by their size alone: MID_SIZE)
+        if (this.detail && !entry.detail) {
+          const b = geometry.boundingBox, e0 = Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z), big = new Uint8Array(k);
+          for (let i = 0; i < k; i++) { const o = i * 16, sc = Math.max(Math.hypot(matrices[o], matrices[o + 1], matrices[o + 2]), Math.hypot(matrices[o + 4], matrices[o + 5], matrices[o + 6]), Math.hypot(matrices[o + 8], matrices[o + 9], matrices[o + 10])); big[i] = e0 * sc >= MID_SIZE ? 1 : 0; }
+          entry.big = bigFirst(entry, big);
+        }
+        this.instanced.push(entry);
       }
     }
     this.explicit.clear();
     for (const [mat, all] of this.parts) {
       const d = depthRank(mat) * DEPTH_STEP;
       let list = all;
+      // (the viewer: which pieces are big for the shadows, bigPieces)
+      const big = this.detail ? bigPieces(all.map((g) => boxOf(g.attributes.position.array))) : null;
+      let rest = null;
       if (this.instancing && all.length >= INSTANCING.minCount) {
         // pieces by coarse key, then split into groups of the same shape
         const byKey = new Map(), shapes = new Array(all.length), groups = [];
@@ -477,6 +534,7 @@ export class GeoBag {
         for (const idx of groups) {
           const n = all[idx[0]].attributes.position.count;
           if (idx.length < INSTANCING.minCount || (idx.length - 1) * n < INSTANCING.minSaved) continue;
+          if (big) idx.sort((a, b) => big[b] - big[a] || a - b);
           const first = shapes[idx[0]];
           const { geometry, flat } = prototypeOf(all[idx[0]], first, d);
           const M = new Float32Array(idx.length * 16);
@@ -494,12 +552,22 @@ export class GeoBag {
             }
             M[o] = sx; M[o + 5] = sy; M[o + 10] = sz; M[o + 12] = tx; M[o + 13] = ty; M[o + 14] = tz; M[o + 15] = 1;
           });
-          this.instanced.push({ mat, geometry, matrices: M, detail: this.detail && isSmall(geometry, M) });
+          const entry = { mat, geometry, matrices: M, detail: this.detail && isSmall(geometry, M) };
+          if (big && !entry.detail) { let nb = 0; for (const i of idx) nb += big[i]; if (nb < idx.length) entry.big = nb; }
+          this.instanced.push(entry);
           for (const i of idx) take.add(i);
         }
-        if (take.size) list = all.filter((_, i) => !take.has(i));
+        if (take.size) { rest = []; for (let i = 0; i < all.length; i++) if (!take.has(i)) rest.push(i); list = rest.map((i) => all[i]); }
       }
       if (!list.length) continue;
+      // the pieces big for the shadows first; the part knows how many triangles they make (shadowBig)
+      let bigOf = null;
+      if (big) {
+        const ids = rest ?? [...all.keys()];
+        const order = ids.map((_, j) => j).sort((a, b) => big[ids[b]] - big[ids[a]] || a - b);
+        list = order.map((j) => list[j]);
+        bigOf = new WeakMap(order.map((j, n) => [list[n], big[ids[j]]]));
+      }
       // with `detail` (the viewer), the small pieces of a material (under DETAIL_SIZE) are a mesh of
       // their own, which the world draws only near (src/engine/world.js)
       if (this.detail) {
@@ -508,7 +576,11 @@ export class GeoBag {
         if (small.length && big.length) { res.push(...mergeInto(mat, small, d, true, this.weld)); list = big; }
         else if (small.length) { res.push(...mergeInto(mat, small, d, true, this.weld)); continue; }
       }
-      res.push(...mergeInto(mat, list, d, false, this.weld));
+      let nb = 0, nt = 0;
+      if (bigOf) for (const g of list) { const t = g.attributes.position.count / 3; nt += t; if (bigOf.get(g)) nb += t; }
+      const out = mergeInto(mat, list, d, false, this.weld);
+      if (bigOf && nb < nt) out[0].shadowBig = nb;
+      res.push(...out);
     }
     this.parts.clear();
     return res;
