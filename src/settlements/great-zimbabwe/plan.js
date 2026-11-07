@@ -3,6 +3,7 @@
 // Valley Ruins' enclosures.
 
 import { ENCLOSURE, HILL, WEST, RECESS, ASCENT, VALLEY, height, inWalled, onAscent } from './layout.js';
+import { goodsAt, kraals } from './life.js';
 
 const E = [];
 const ellipse = (c, r, n, a0 = 0, a1 = Math.PI * 2) => Array.from({ length: n + 1 }, (_, k) => { const a = a0 + (a1 - a0) * k / n; return [c[0] + Math.cos(a) * r[0], c[1] + Math.sin(a) * r[1]]; });
@@ -35,7 +36,7 @@ E.push({ t: 'dry_wall', pts: ellipse(HILL.c, [HILL.r[0] * 0.5, HILL.r[1] * 0.42]
   }
   for (const [dx, dz, r] of [[-10, -4, 2.6], [-3, -7, 2.4], [5, -5, 2.7], [-8, 4, 2.5], [1, 3, 2.3], [9, 3, 2.6]]) {
     const x = wx + dx, z = wz + dz, a = Math.atan2(wz + 12 - z, wx - x);     // the doors toward the court's south side
-    E.push({ t: 'daga_hut', c: [x, z], r, y: WEST.y, h: 2.1, seed: (Math.round(a * 100) % 628 + 628) % 628 });
+    E.push({ t: 'daga_hut', c: [x, z], r, y: WEST.y, h: 2.1, seed: (Math.round(a * 100) % 628 + 628) % 628, open: true });
   }
   // the Recess Enclosure: a small walled space open to the north, its roof of thatch on four posts in the walls
   const [rx, rz] = RECESS.c, [ra2, rb2] = RECESS.r;
@@ -54,9 +55,13 @@ for (const V of VALLEY) {
   E.push({ t: 'daga_yard', c: V.c, r: [ra1 - 1.0, rb1 - 1.0], y });
   for (const da of [Math.PI, Math.PI - 2.0, Math.PI + 2.0]) {
     const a = gm + da, x = cx + Math.cos(a) * ra1 * 0.5, z = cz + Math.sin(a) * rb1 * 0.5, toC = Math.atan2(cz - z, cx - x);
-    E.push({ t: 'daga_hut', c: [x, z], r: 2.4 + (Math.abs(da - Math.PI) < 0.1 ? 0.4 : 0), y: y + 0.06, h: 2.1, seed: (Math.round(toC * 100) % 628 + 628) % 628 });
+    E.push({ t: 'daga_hut', c: [x, z], r: 2.4 + (Math.abs(da - Math.PI) < 0.1 ? 0.4 : 0), y: y + 0.06, h: 2.1, seed: (Math.round(toC * 100) % 628 + 628) % 628, open: true });
   }
 }
+
+// the goods of the coast in the first court of the Valley Ruins; the cattle kraals by the homesteads (life.js)
+E.push({ t: 'trade_goods', ...goodsAt() });
+for (const K of kraals()) E.push({ t: 'kraal', ...K });
 
 // the Eastern Enclosure at the hill's east end: a curved wall, the stone platform with the soapstone
 // birds on their columns in a row and tall monoliths behind them (Wikipedia, Zimbabwe Bird: eight
