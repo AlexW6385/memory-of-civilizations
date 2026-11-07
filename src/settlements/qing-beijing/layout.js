@@ -54,7 +54,8 @@ export function lanes() {
   const out = [];
   const [b0, bz0, b1, bz1] = TEMPLE.belt;
   for (let z = -380; z <= 380; z += HUTONG_PERIOD) {
-    // the lanes stop at the temple's belt of trees
+    // the lanes stop at the street round the moat (not under the palace and the moat) and at the temple's belt of trees
+    if (z + HUTONG_W > RING[1] && z < RING[3]) { out.push([-380, z, RING[0], z + HUTONG_W], [RING[2], z, 380, z + HUTONG_W]); continue; }
     if (z + HUTONG_W > bz0 && z < bz1) { out.push([-380, z, b0, z + HUTONG_W], [b1, z, 380, z + HUTONG_W]); continue; }
     out.push([-380, z, 380, z + HUTONG_W]);
   }

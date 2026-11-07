@@ -264,7 +264,8 @@ function signboard(el, { bag, col }) {
   const n = el.chars ?? 6, ch = Math.min(w * 0.8, (h - 0.2) / n - 0.05);
   for (let k = 0; k < n; k++) for (const side of [-1, 1]) {
     const yy = y0 + h - 0.1 - (k + 1) * (h - 0.2) / n + ((h - 0.2) / n - ch) / 2;
-    strokes(ink, (u, v, kk) => P(-side * u, yy + v, side * (0.025 + kk)), ch, ch, (el.seed ?? 1) * 31 + k);
+    // (read from either face: across it from the reader's left to right, which is −x on the face toward −z)
+    strokes(ink, (u, v, kk) => P(side * u, yy + v, side * (0.025 + kk)), ch, ch, (el.seed ?? 1) * 31 + k);
   }
   // the hood: two sloped boards over the top
   for (const s of [-1, 1]) hexa(hood, [P(-w / 2 - 0.22, y0 + h + 0.12, s * 0.3), P(w / 2 + 0.22, y0 + h + 0.12, s * 0.3), P(w / 2 + 0.22, y0 + h + 0.32, 0), P(-w / 2 - 0.22, y0 + h + 0.32, 0), P(-w / 2 - 0.22, y0 + h + 0.16, s * 0.3), P(w / 2 + 0.22, y0 + h + 0.16, s * 0.3), P(w / 2 + 0.22, y0 + h + 0.36, 0), P(-w / 2 - 0.22, y0 + h + 0.36, 0)]);

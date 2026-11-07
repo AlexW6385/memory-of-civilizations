@@ -3,7 +3,7 @@
 // same scene pass (one pass draws colour and normals), bloom, AgX tone mapping.
 
 import * as THREE from 'three/webgpu';
-import { rtt, pass, mrt, output, normalView, directionToColor, colorToDirection, sample, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
+import { Fn, rtt, pass, mrt, output, normalView, directionToColor, colorToDirection, sample, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { smaa } from 'three/addons/tsl/display/SMAANode.js';
@@ -130,7 +130,23 @@ export class Renderer {
     // with the occlusion on, the scene pass also writes its view normals (one more target in the
     // same draw): GTAO rebuilding them from a reversed depth buffer came out mirrored about the
     // screen's middle row, a seam across every view with the lower half darker
-    if (Q.ao) scenePass.setMRT(mrt({ output, normal: directionToColor(normalView) }));
+    // The normals are blended by the alpha of what does not write depth (rain, snow, dust, halos:
+    // the surface behind keeps its normal where they are clear), written outright by the rest.
+    // Their outputs are matched to the pass's own target, not to whatever target the renderer has
+    // when the fragment stage is set up: a shader compiled off the frame (precompile, three's
+    // async build, which yields between its stages) otherwise left out the normal ("color target
+    // has no corresponding fragment stage output (targets[1])")
+    if (Q.ao) {
+      const normalA = Fn((builder) => (builder.material?.depthWrite === false ? output.a : float(1)))();
+      const sceneMRT = mrt({ output, normal: vec4(directionToColor(normalView), normalA) }).setBlendMode('normal', new THREE.BlendMode(THREE.NormalBlending));
+      const setup = sceneMRT.setup;
+      sceneMRT.setup = function (builder) {
+        const r = builder.renderer, rt = r._renderTarget;
+        r._renderTarget = scenePass.renderTarget;
+        try { return setup.call(this, builder); } finally { r._renderTarget = rt; }
+      };
+      scenePass.setMRT(sceneMRT);
+    }
     let color = scenePass.getTextureNode('output');
     if (Q.ao) {
       // with a reversed buffer the pass works unchanged: it rebuilds view positions through the
@@ -186,24 +202,30 @@ export class Renderer {
       seen.add(key); reps.push(o);
     });
     if (!reps.length) return Promise.resolve();
-    // set up as the scene pass does; three's compileAsync gathers what to compile synchronously and
-    // only then awaits, so all of this is put back before any frame can see it
-    const prev = { rt: r.getRenderTarget(), mrt: r.getMRT(), ctx: r.contextNode };
-    const tmp = new THREE.Group(), homes = reps.map((o) => [o, o.parent, o.frustumCulled, o.visible, o.count]);
-    for (const o of reps) { tmp.add(o); o.frustumCulled = false; o.visible = true; if (o.isInstancedMesh && !o.count) o.count = 1; }
-    const jobs = [];
-    try {
-      r.setRenderTarget(sp.renderTarget); r.setMRT(sp.getMRT?.() ?? sp._mrt ?? null); r.contextNode = ctx;
-      jobs.push(r.compileAsync(tmp, this.camera, this.scene));
-      // (not the sun's shadow pass: three's compileAsync compiles each object later, after the
-      // shadow pass's shared depth material has been reset, so what it would compile is not what
-      // the shadow pass draws; those small shaders are still compiled on first use)
-    } catch (e) { jobs.push(Promise.reject(e)); }
-    finally {
-      r.setRenderTarget(prev.rt); r.setMRT(prev.mrt); r.contextNode = prev.ctx;
-      for (const [o, parent, fc, vis, n] of homes) { parent ? parent.add(o) : tmp.remove(o); o.frustumCulled = fc; o.visible = vis; if (o.isInstancedMesh) o.count = n; }
-    }
-    return Promise.all(jobs).catch((e) => console.warn('precompile:', e.message));
+    // set up as the scene pass does. three's compileAsync gathers what to compile synchronously,
+    // but builds each object's shader only in turn, awaiting between them: the second object on
+    // was set up without the scene pass's outputs (its pipeline failed: "color target has no
+    // corresponding fragment stage output"). So one object per call, each call's synchronous part
+    // (the gathering and the start of the object's build) run with the scene pass's state, which
+    // is put back before any frame can see it; the calls one after another
+    const one = (o) => {
+      const prev = { rt: r.getRenderTarget(), mrt: r.getMRT(), ctx: r.contextNode };
+      const tmp = new THREE.Group(), home = [o.parent, o.frustumCulled, o.visible, o.count];
+      tmp.add(o); o.frustumCulled = false; o.visible = true; if (o.isInstancedMesh && !o.count) o.count = 1;
+      try {
+        r.setRenderTarget(sp.renderTarget); r.setMRT(sp.getMRT?.() ?? sp._mrt ?? null); r.contextNode = ctx;
+        return r.compileAsync(tmp, this.camera, this.scene);
+        // (not the sun's shadow pass: three's compileAsync compiles each object later, after the
+        // shadow pass's shared depth material has been reset, so what it would compile is not what
+        // the shadow pass draws; those small shaders are still compiled on first use)
+      } catch (e) { return Promise.reject(e); }
+      finally {
+        r.setRenderTarget(prev.rt); r.setMRT(prev.mrt); r.contextNode = prev.ctx;
+        const [parent, fc, vis, n] = home;
+        parent ? parent.add(o) : tmp.remove(o); o.frustumCulled = fc; o.visible = vis; if (o.isInstancedMesh) o.count = n;
+      }
+    };
+    return reps.reduce((p, o) => p.then(() => one(o)), Promise.resolve()).catch((e) => console.warn('precompile:', e.message));
   }
 
   /** A depth-aware 5×5 average of the half-resolution occlusion, one of its texels apart: its

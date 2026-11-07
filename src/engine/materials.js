@@ -8,7 +8,7 @@ import { MeshStandardNodeMaterial, DoubleSide, Color } from 'three/webgpu';
 import {
   Fn, float, vec2, vec3, vec4, positionWorld, positionLocal, normalWorld, normalLocal, normalView, positionView, abs, floor, fract, min, max,
   mix, smoothstep, hash, mx_noise_float, mx_fractal_noise_float, mx_worley_noise_float, dot, cross, normalize,
-  sign, select, time, sin, cos, clamp, length, cameraPosition, uniform, attribute, reflect, pow, fwidth,
+  sign, select, time, sin, cos, clamp, length, cameraPosition, uniform, attribute, reflect, pow, fwidth, toneMappingExposure,
 } from 'three/tsl';
 import { ENV, cloudShadow } from './env.js';
 import { MATERIALS } from '../core/palette.js';
@@ -433,8 +433,10 @@ function make(spec) {
       break;
     }
     case 'flame': {
+      // a naked flame: a yellow core (where one looks into the flame) and deep orange edges; kept
+      // within the tone curve's saturated range (brighter, AgX bleaches it to a pale cream cone)
       m.colorNode = vec3(0, 0, 0);
-      m.emissiveNode = vec3(6.0, 3.2, 1.0).mul(sin(time.mul(9.0).add(P.x.mul(13.0))).mul(0.08).add(1));
+      m.emissiveNode = flameGlow(sin(time.mul(9.0).add(P.x.mul(13.0))).mul(0.08).add(1));
       break;
     }
     case 'bark': {
@@ -800,6 +802,17 @@ function make(spec) {
 export function flameMaterial() {
   const m = new MeshStandardNodeMaterial();
   m.colorNode = vec3(0, 0, 0);
-  m.emissiveNode = vec3(6.0, 3.2, 1.0).mul(sin(time.mul(9.0)).mul(0.08).add(1));
+  m.emissiveNode = flameGlow(sin(time.mul(9.0)).mul(0.08).add(1));
   return m;
+}
+
+/**
+ * A flame's light: the core yellow where the view meets the surface square on, the rim deep orange;
+ * divided by the exposure, so that it shows as the eye sees a flame by day, at night and in a dark
+ * room alike (a fixed radiance came out a dull tan by day and, at a dark room's exposure, bleached
+ * by the tone curve to a pale cream cone)
+ */
+function flameGlow(flick) {
+  const core = pow(abs(dot(normalView, normalize(positionView).negate())), 1.5);
+  return mix(vec3(0.75, 0.09, 0.004), vec3(1.5, 0.45, 0.03), core).mul(flick).div(max(toneMappingExposure, 0.05));
 }

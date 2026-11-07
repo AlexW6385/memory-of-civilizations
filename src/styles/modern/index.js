@@ -27,7 +27,24 @@ function envOf(hall, xx, zz) {
 }
 /** Where shells must not be drawn: inside the Concert Hall's room (the bases of the later shells cross it). */
 let CLIP = null;
-const clipped = (T) => { if (!CLIP) return T; const o = []; for (let i = 0; i < T.length; i += 9) { const x = (T[i] + T[i + 3] + T[i + 6]) / 3, y = (T[i + 1] + T[i + 4] + T[i + 7]) / 3, z = (T[i + 2] + T[i + 5] + T[i + 8]) / 3; if (!CLIP(x, y, z)) o.push(...T.slice(i, i + 9)); } return o; };
+// (a triangle crossing the room's walls is split until its pieces lie inside or outside: the glass walls' long
+// triangles, kept or dropped whole by their centre, stood in the room as dark slivers)
+const clipped = (T) => {
+  if (!CLIP) return T;
+  const o = [], mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2], len = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  const cut = (a, b, c, d) => {
+    const ab = mid(a, b), bc = mid(b, c), ca = mid(c, a), g = [(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3];
+    const n = [a, b, c, ab, bc, ca, g].reduce((k, p) => k + (CLIP(p[0], p[1], p[2]) ? 1 : 0), 0);
+    if (n === 0) { o.push(...a, ...b, ...c); return; }
+    if (n === 7) return;
+    if (d > 7 || Math.max(len(a, b), len(b, c), len(c, a)) < 0.3) { if (!CLIP(g[0], g[1], g[2])) o.push(...a, ...b, ...c); return; }
+    cut(a, ab, ca, d + 1); cut(ab, b, bc, d + 1); cut(ca, bc, c, d + 1); cut(ab, bc, ca, d + 1);
+  };
+  for (let i = 0; i < T.length; i += 9) cut(T.slice(i, i + 3), T.slice(i + 3, i + 6), T.slice(i + 6, i + 9), 0);
+  return o;
+};
+/** Whether a straight piece from a to b passes through the clipped room (sampled every half metre or so). */
+const hits = (a, b) => { if (!CLIP) return false; const n = Math.max(2, Math.ceil(Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) / 0.5)); for (let k = 0; k <= n; k++) { const t = k / n; if (CLIP(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t)) return true; } return false; };
 /** Both faces of a triangle. */
 const tri2 = (t, a, b, c) => t.push(...a, ...b, ...c, ...a, ...c, ...b);
 /** One shell: from the south base at z0 to the mouth at z1 (z1 < z0: it opens north), half-width hw, height H, on y. */
@@ -49,17 +66,17 @@ function shell(bag, cx, z0, z1, hw, H, y) {
   for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { tri2(U, Q(i, j), Q(i + 1, j), Q(i + 1, j + 1)); tri2(U, Q(i, j), Q(i + 1, j + 1), Q(i, j + 1)); }
   for (let i = 0; i < nu; i++) { tri2(E, P(i, nv), P(i + 1, nv), Q(i + 1, nv)); tri2(E, P(i, nv), Q(i + 1, nv), Q(i, nv)); }
   bag.add('concrete_light', fromTriangles(clipped(U))); bag.add('concrete_light', fromTriangles(clipped(E)));
-  for (let i = 1; i < nu; i++) for (let j = 1; j < nv; j++) { const a = Q(i, j), b = Q(i, j + 1); if (a[1] - y < 1.2 || (CLIP && CLIP((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2))) continue; bag.add('concrete_light', rod([a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], 0.2, 4)); }
+  for (let i = 1; i < nu; i++) for (let j = 1; j < nv; j++) { const a = Q(i, j), b = Q(i, j + 1); if (a[1] - y < 1.2 || hits(a, b)) continue; bag.add('concrete_light', rod([a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], 0.2, 4)); }
   // the ridge: a rib of the cream tiles along the top, and the ribs fanning down the shell's face
   const rib = [];
-  for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); if (CLIP && CLIP((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2)) continue; rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.28, 6)); }
-  for (const i of [3, 6, 10, 13]) for (let j = 2; j < nv; j++) { const a = P(i, j), b = P(i, j + 1); if (CLIP && CLIP((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2)) continue; rib.push(rod(a, b, 0.12, 4)); }
+  for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); if (hits(a, b)) continue; rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.28, 6)); }
+  for (const i of [3, 6, 10, 13]) for (let j = 2; j < nv; j++) { const a = P(i, j), b = P(i, j + 1); if (hits(a, b)) continue; rib.push(rod(a, b, 0.12, 4)); }
   for (const g of rib) bag.add('tile_cream', g);
   // the chevrons of the tile lids: V-shaped joints of the cream tiles between the ribs, pointing up the shell
   const ch = [];
   for (const [ia, ib] of [[0, 3], [3, 6], [6, 8], [8, 10], [10, 13], [13, 16]]) for (let j = 3; j < nv - 1; j += 2) {
     const im = Math.round((ia + ib) / 2), a = P(ia, j), m = P(im, j + 1), b = P(ib, j);
-    if (CLIP && CLIP(m[0], m[1], m[2])) continue;
+    if (hits(a, m) || hits(m, b)) continue;
     ch.push(rod(a, m, 0.07, 4), rod(m, b, 0.07, 4));
   }
   for (const g of ch) bag.add('tile_cream', g);
@@ -73,12 +90,13 @@ function shell(bag, cx, z0, z1, hw, H, y) {
   }
   bag.add('glass_topaz', fromTriangles(clipped(G)));        // Hall's topaz-tinted glass
   for (let i = 1; i < nu; i++) {
-    const a = P(i, nv), f = foot(i); if (a[1] - y < 1 || (CLIP && (CLIP(f[0], y + 1, f[2]) || CLIP(a[0], (a[1] + y) / 2, a[2])))) continue;
+    const a = P(i, nv), f = foot(i); if (a[1] - y < 1 || hits([a[0], a[1] - 0.1, a[2]], f)) continue;
     bag.add('steel_grey', rod([a[0], a[1] - 0.1, a[2]], f, 0.09, 5));
     for (let k = 1; k * 3.2 < a[1] - y; k++) {
       const t = k * 3.2 / (a[1] - y), b = P(i + 1, nv), fb = foot(i + 1), tb = k * 3.2 / Math.max(0.01, b[1] - y);
       if (tb >= 1 || i + 1 >= nu) continue;
       const p = [f[0] + (a[0] - f[0]) * t, f[1] + (a[1] - f[1]) * t, f[2] + (a[2] - f[2]) * t], q = [fb[0] + (b[0] - fb[0]) * tb, fb[1] + (b[1] - fb[1]) * tb, fb[2] + (b[2] - fb[2]) * tb];
+      if (hits(p, q)) continue;
       bag.add('steel_grey', rod(p, q, 0.05, 4));
     }
   }
@@ -110,7 +128,7 @@ function operaHouse(el, { bag, col, lights }) {
   for (const hall of el.halls ?? []) {
     // (inside the Concert Hall's room, below its ceiling, the later shells' bases are not drawn — hall.js)
     const last = hall.shells[hall.shells.length - 1], zN = last[1] + (last[0] - last[1]) * 0.62, zS = hall.shells[0][0] - 10 - 16, aw = hall.hw * 0.55;
-    CLIP = hall.concert ? (px, py, pz) => px > hall.x - aw + 0.6 && px < hall.x + aw - 0.6 && pz > zN && pz < zS - 0.6 && py < y + h + envOf(hall, px, pz) * 0.82 - 1.2 : null;
+    CLIP = hall.concert ? (px, py, pz) => px > hall.x - aw + 0.25 && px < hall.x + aw - 0.25 && pz > zN && pz < zS - 0.25 && py < y + h + envOf(hall, px, pz) * 0.82 - 1.2 : null;
     for (const [a, b, H, hw] of hall.shells) shell(bag, hall.x, a, b, hw ?? hall.hw, H, y + h);
     CLIP = null;
   }
