@@ -2,11 +2,12 @@
 // (totora) in its crater lake, boulders of basalt, the dark rocky shore and the Pacific; few trees
 // left — a palm or two by the lake, banana and sugar cane in the garden walls; trade-wind cloud.
 
-import { RADIUS, SEA, RIM, RARAKU, PLAZA, AHU, ROAD_W, height, inLake, inSea, inRect, village, roadDist } from './layout.js';
+import { RADIUS, SEA, RIM, RARAKU, PLAZA, AHU, ROAD_W, height, inLake, inSea, inRect, village, roadDist, fields } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0, grass: 0.75, rock: 0, soil: 0.25, fields: 0, dry: 0.35, warmth: 0.55, red: 0.45, road: 0, snow: 0, forest: 0 };
   if (inRect(PLAZA, x, z)) { c.grass = 0.4; c.soil = 0.6; return c; }
+  if (fields().some((r) => inRect(r, x, z))) { c.grass = 0.2; c.soil = 0.8; c.rock = 0.25; return c; }
   const rd = roadDist(x, z);
   if (rd < ROAD_W / 2 + 0.8) { const k = rd < ROAD_W / 2 - 0.4 ? 1 : 0.5; c.road = 0.7 * k; c.soil = 0.5; c.grass = 0.75 - 0.5 * k; return c; }
   if (h < 0.5 && !inLake(x, z)) { c.rock = 0.8; c.grass = 0.1; return c; }
@@ -22,6 +23,7 @@ function planting(x, z) {
   const v = village();
   if (v.houses.some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.len / 2 + 2) || v.moa.some((m) => Math.hypot(m.c[0] - x, m.c[1] - z) < 4)) return null;
   if (roadDist(x, z) < ROAD_W / 2 + 0.5) return null;
+  if (fields().some((r) => inRect(r, x, z, 0.5))) return { grass: 6 };
   if (v.gardens.some((g) => Math.hypot(g.c[0] - x, g.c[1] - z) < g.r)) return { grass: 30 };
   if (Math.hypot(x - RARAKU.c[0], z - RARAKU.c[1]) < RARAKU.crater + 2) return { reeds: 30, grass: 20, date_palm: 0.02 };
   return { grass: 45, boulder: 0.08 };

@@ -88,3 +88,22 @@ export function village() {
   for (let k = 0; k < 1500 && out.gardens.length < 40; k++) { const x = -280 + rand() * 560, z = -200 + rand() * 330; if (free(x, z, 3)) out.gardens.push({ c: [x, z], r: 2 + rand() * 2.5 }); }
   return (HOUSES = out);
 }
+
+let FIELDS = null;
+/**
+ * The gardens of sweet potato under a mulch of stones (docs/settlements/rapa-nui.md §4c): plots on the
+ * plain north and east of the village, clear of the houses, the road and the cone. [x0, z0, x1, z1].
+ */
+export function fields() {
+  if (FIELDS) return FIELDS;
+  const rand = rng(1722), v = village(), out = [];
+  for (let k = 0; k < 900 && out.length < 16; k++) {
+    const w = 8 + rand() * 6, d = 6 + rand() * 5, x = -250 + rand() * 480, z = -230 + rand() * 260, r = [x - w / 2, z - d / 2, x + w / 2, z + d / 2];
+    const corners = [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [x, z]];
+    if (corners.some(([a, b]) => Math.hypot(a, b) > RADIUS - 40 || Math.hypot(a - RARAKU.c[0], b - RARAKU.c[1]) < RARAKU.r + 8 || roadDist(a, b) < ROAD_W / 2 + 3 || inRect(PLAZA, a, b, 6) || height(a, b) < 0.8)) continue;
+    if ([...v.houses, ...v.moa, ...v.gardens].some((o) => inRect(r, o.c[0], o.c[1], (o.len ?? 6) / 2 + 3))) continue;
+    if (out.some((q) => inRect(q, x, z, Math.max(w, d) / 2 + 4))) continue;
+    out.push(r);
+  }
+  return (FIELDS = out);
+}

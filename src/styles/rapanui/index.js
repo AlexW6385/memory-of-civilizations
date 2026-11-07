@@ -107,8 +107,20 @@ function moaiRelief(kind) {
         r += back * b;
       }
     }
+    // the weathering of the soft tuff: a broad unevenness and shallow pits where it has begun to
+    // flake, a little deeper on the head and shoulders that take the weather [stated: the tuff "porous
+    // and unusually soft", salt making it "flake or spall" — BBC Future 2025; inferred: mild, as the
+    // statues are at most a few centuries old in 1500]
+    const n1 = vnoise(x * 11, y * 11, z * 11), n2 = vnoise(x * 26 + 7, y * 26, z * 26 + 3), up = 0.6 + 0.4 * smooth(0.3, 0.9, y);
+    r -= up * (0.0022 * n1 + 0.0045 * Math.max(0, n2 - 0.62) / 0.38);
     return r;
   };
+}
+/** Smooth value noise in 3D, 0…1. */
+function vnoise(x, y, z) {
+  const h = (i, j, k) => { let n = (i * 374761393 + j * 668265263 + k * 1440662683) | 0; n = Math.imul(n ^ (n >>> 13), 1274126177); return ((n ^ (n >>> 16)) >>> 0) / 4294967296; };
+  const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z), f = (t) => t * t * (3 - 2 * t), u = f(x - xi), v = f(y - yi), w = f(z - zi), L = (a, b, t) => a + (b - a) * t;
+  return L(L(L(h(xi, yi, zi), h(xi + 1, yi, zi), u), L(h(xi, yi + 1, zi), h(xi + 1, yi + 1, zi), u), v), L(L(h(xi, yi, zi + 1), h(xi + 1, yi, zi + 1), u), L(h(xi, yi + 1, zi + 1), h(xi + 1, yi + 1, zi + 1), u), v), w);
 }
 const MOAI = {};
 function moaiGeometry(kind) {
@@ -351,12 +363,27 @@ function harePaenga(el, { bag, col }) {
     }
     grid.push(row);
   }
+  // a house being thatched anew (strip): the old thatch stripped from its west end down to the frame
+  // of arched poles and the battens tied across them, the cut edge a thick roll of bundles, the
+  // inside seen through the frame [inferred: the thatch's renewal]
+  const cut = el.strip ? Math.round(NU * 0.6) : NU;
   const t = [];
-  for (let i = 0; i < NU; i++) for (let j = 0; j < NS; j++) {
+  for (let i = NU - cut; i < NU; i++) for (let j = 0; j < NS; j++) {
     const a = grid[i][j], b = grid[i + 1][j], c = grid[i + 1][j + 1], d = grid[i][j + 1];
     t.push(...a, ...d, ...c, ...a, ...c, ...b);
   }
-  add('thatch', fromTriangles(t));
+  add('thatch', fromTriangles(el.strip ? t.concat(flipTris(t)) : t));
+  if (el.strip) {
+    const i0 = NU - cut;
+    for (let i = 1; i <= i0; i++) for (let j = 0; j < NS; j++) add('timber', rod(grid[i][j], grid[i][j + 1], 0.028, 5));
+    for (let j = 1; j < NS; j += 2) for (let i = 1; i < i0; i++) add('timber', rod(grid[i][j], grid[i + 1][j], 0.018, 4));
+    for (let j = 0; j < NS; j++) add('thatch', rod(grid[i0][j], grid[i0][j + 1], 0.09, 6));
+    add('timber', rod([grid[1][NS / 2][0], grid[1][NS / 2][1] + 0.03, 0], [grid[i0][NS / 2][0], grid[i0][NS / 2][1] + 0.03, 0], 0.045, 6));
+    // inside: mats of reed over the floor; outside, bundles of new reed laid by the house
+    add('reed_mat', box(-L * 0.33, 0.03, -W * 0.32, L * 0.22, 0.05, W * 0.32));
+    add('hide_white', rod([-L * 0.25, 0.1, -W * 0.18], [-L * 0.25 + 1.1, 0.1, -W * 0.18], 0.07, 7));
+    for (let k = 0; k < 7; k++) { const row = k < 4 ? 0 : 1, q = row ? k - 4 : k, r = 0.1; add('thatch', lathe([[0.001, 0], [r * 0.8, 0.03], [r, 0.25], [r * 0.9, 1.6], [r * 1.15, 2.1], [0.001, 2.15]], 8).rotateX(Math.PI / 2).translate(-L / 2 - 1.2 - q * 0.21 - row * 0.105, r + row * 0.18, W / 2 + 0.8)); }
+  }
   // the ridge bundle along the top
   const ridge = (u) => [u, 0.2 + H * Math.max(0, 1 - (2 * u / L) ** 2) ** 0.4 + 0.03, 0];
   for (let k = 0; k < 6; k++) add('thatch', rod(ridge(-L * 0.42 + L * 0.84 * k / 6), ridge(-L * 0.42 + L * 0.84 * (k + 1) / 6), 0.1, 6));
@@ -399,7 +426,7 @@ function harePaenga(el, { bag, col }) {
   add('pebbles', fromTriangles(orientOutward(fan)));
   for (let k = 0; k < 26; k++) { const a = rand() * Math.PI, rr = Math.sqrt(rand()) * (R - 0.3), br = 0.08 + rand() * 0.07; stone('pebbles', Math.cos(a) * rr, 0.08, -Math.sin(a) * rr * 0.75 + cv, br, k * 1.3); }
   // the earth oven: stones set on edge round a hollow of ash
-  const [ou, ov] = [L * 0.3 * (rand() < 0.5 ? -1 : 1), dv - 2.4];
+  const [ou, ov] = [L * 0.3 * ((el.seed ?? 11) % 2 ? -1 : 1), dv - 2.4];
   for (let k = 0; k < 6; k++) {
     const a = k / 6 * Math.PI * 2, b = (k + 1) / 6 * Math.PI * 2, rr = 0.55;
     add(B, orientedBox([ou + Math.cos(a) * rr, ov + Math.sin(a) * rr], [ou + Math.cos(b) * rr, ov + Math.sin(b) * rr], 0.12, -0.3, 0.2 + (k % 2) * 0.05, -0.04));
@@ -436,9 +463,44 @@ function manavai(el, { bag, col }) {
   for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2, b = (k + 1) / 10 * Math.PI * 2; col.segment([x + Math.cos(a) * (r + 0.3), z + Math.sin(a) * (r + 0.3)], [x + Math.cos(b) * (r + 0.3), z + Math.sin(b) * (r + 0.3)], 0.6, y0, y0 + 1.3); }
 }
 
+/**
+ * mulch_garden: a garden of sweet potato under a mulch of stones { rect, ground (x, z → y), seed } —
+ * "lithic mulching – the practice of covering fields with gravel or rocks to trap moisture and improve
+ * soil fertility"; sweet potatoes the main crop [stated: Wikipedia "Easter Island"]. Stones strewn
+ * thick over the plot, the vines spreading between them in low clumps of heart-shaped leaves; a row
+ * of bigger stones along its edge [inferred: the arrangement].
+ */
+let VINE = null;
+function vineGeometry() {
+  if (VINE) return VINE;
+  const t = [];
+  for (let k = 0; k < 9; k++) {
+    const a = k * 2.4, r = 0.12 + (k % 3) * 0.1, cx = Math.cos(a) * r, cz = Math.sin(a) * r, y = 0.06 + (k % 4) * 0.035, s = 0.07 + (k % 2) * 0.02, ra = a + 0.6;
+    const c = Math.cos(ra), sn = Math.sin(ra), P = (u, v, h) => [cx + u * c - v * sn, y + h, cz + u * sn + v * c];
+    // a leaf: a heart of four triangles, tilted up a little toward its tip
+    const tip = P(s * 1.6, 0, 0.03), l = P(s * 0.6, -s, 0.01), rr = P(s * 0.6, s, 0.01), base = P(0, 0, 0), notch = P(s * 0.15, 0, 0.012);
+    t.push(...base, ...l, ...tip, ...base, ...tip, ...rr, ...notch, ...l, ...base, ...notch, ...base, ...rr);
+  }
+  const g = fromTriangles(t.concat(flipTris(t)));
+  return (VINE = g);
+}
+const flipTris = (t) => { const o = []; for (let i = 0; i < t.length; i += 9) o.push(t[i], t[i + 1], t[i + 2], t[i + 6], t[i + 7], t[i + 8], t[i + 3], t[i + 4], t[i + 5]); return o; };
+function mulchGarden(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, gy = el.ground ?? (() => el.y ?? 0), rand = rng(el.seed ?? 5), A = (x1 - x0) * (z1 - z0);
+  for (let k = 0; k < A * 2.6; k++) { const x = x0 + rand() * (x1 - x0), z = z0 + rand() * (z1 - z0); boulder(bag, rand() < 0.7 ? B : 'pebbles', x, gy(x, z) - 0.02, z, 0.05 + rand() ** 2 * 0.14, k * 0.37 + x); }
+  for (let x = x0; x < x1; x += 0.55 + rand() * 0.25) for (const z of [z0, z1]) boulder(bag, B, x, gy(x, z) - 0.05, z, 0.16 + rand() * 0.08, x + z);
+  for (let z = z0 + 0.6; z < z1; z += 0.55 + rand() * 0.25) for (const x of [x0, x1]) boulder(bag, B, x, gy(x, z) - 0.05, z, 0.16 + rand() * 0.08, x + z * 1.3);
+  const vg = vineGeometry();
+  for (let x = x0 + 0.6; x < x1 - 0.4; x += 0.8) for (let z = z0 + 0.6 + (Math.round(x / 0.8) % 2) * 0.4; z < z1 - 0.4; z += 0.8) {
+    if (rand() < 0.1) continue;
+    const px = x + (rand() - 0.5) * 0.3, pz = z + (rand() - 0.5) * 0.3, s = 1.5 + rand() * 0.8, m = new Matrix4().makeRotationY(rand() * 6.28).scale(new Vector3(s, s, s)).setPosition(px, gy(px, pz), pz);
+    if (bag.addInstance) bag.addInstance('flax_leaf', vg, m, { reach: 200 }); else bag.add('flax_leaf', vg.clone().applyMatrix4(m));
+  }
+}
+
 registerStyle('rapanui', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, moai, quarry_bay: quarryBay, ahu, hare_paenga: harePaenga, hare_moa: hareMoa, manavai, moai_walk: moaiWalk, ...SCENES },
+  elements: { ...STYLES.qing.elements, moai, quarry_bay: quarryBay, ahu, hare_paenga: harePaenga, hare_moa: hareMoa, manavai, moai_walk: moaiWalk, mulch_garden: mulchGarden, ...SCENES },
   objects: {},
 });
 export { sculpt, moaiGeometry };
