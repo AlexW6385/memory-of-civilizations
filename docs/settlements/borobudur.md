@@ -1,7 +1,7 @@
 # Sailendra Java (Borobudur), c. 825 — dossier
 
 Settlement id: `borobudur` · Style: `javanese` · Region: Java (the Kedu plain) · Code: `src/settlements/borobudur/`
-Status of this dossier: L2 (Borobudur at true size — the base, five square terraces with their galleries, balustrades, niches and small stupas, the stairs on the four sides, the three circular terraces with 72 latticed stupas, the crowning stupa; the hill it encloses; a monastery compound of timber halls; villages of houses on posts among palms, bamboo and fields; ground, planting, weather, music). Detail of §10: the pierced stupas with their Buddhas, the crowning stupa's finial, the kala–makara gateways, the makara spouts, pilgrims on the galleries; and §12: the niche Buddhas with the mudra of each direction, the relief panels with composed scenes on the main walls and the balustrades, devotees, monks and the monastery's life. L3 recorded for later: the 2,672 relief panels told one by one (each its own subject), the 32 lions at the gates, Mendut and Pawon, the volcanoes and rivers, processions.
+Status of this dossier: L2 (Borobudur at true size — the base, five square terraces with their galleries, balustrades, niches and small stupas, the stairs on the four sides, the three circular terraces with 72 latticed stupas, the crowning stupa; the hill it encloses; a monastery compound of timber halls; villages of houses on posts among palms, bamboo and fields; ground, planting, weather, music). Detail of §10: the pierced stupas with their Buddhas, the crowning stupa's finial, the kala–makara gateways, the makara spouts, pilgrims on the galleries; and §12: the niche Buddhas with the mudra of each direction, the relief panels with composed scenes on the main walls and the balustrades, devotees, monks and the monastery's life. L3 built: the 32 lions, offerings, weathering (§13). L3 recorded for later: the 2,672 relief panels told one by one (each its own subject), Mendut and Pawon, the volcanoes and rivers, processions.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -82,6 +82,20 @@ The 72 stupas, 32, 24 and 16 on the three round terraces, the top tier's "slight
 Sources added:
 - [The Buddha Statues and Chaityas at Borobudur — photodharma (Foucher)](https://photodharma.net/Indonesia/13-Buddhas-and-Chaityas/index.htm)
 - [Balustrade: Jataka and Avadana — arisguidetour](https://arisguidetour.blogspot.com/2023/04/balustrade-jataka-and-avadana.html)
+
+## 13. Fourth pass: the lions, offerings, weathering (2026-11 L3)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| The 32 lions | Guardian lions (singa) of andesite seated upright on their haunches on low square plinths, the mane in rows of curls, the jaws open, the tail curled up the back: on every side a pair beyond the foot of the ground flight and a pair beside the head of each of the next three flights, facing out — 32 in all | "The entrance is guarded by stone lions; other lions watch on the various levels of the pyramid — a total of 32 lion statues"; the stairs climb "through a series of arched gates guarded by 32 lion statues" [stated: arisguide]; a lion at the foot of a stair [stated: Rijksmuseum, photograph title]; the pose and the placing of the upper pairs beside the flights' heads (the galleries leave no room before their feet) [inferred] |
+| Offerings | At the foot of each ground flight, between its lions, a row of five clay lamps and white and red flowers heaped on leaves; round the crowning stupa on the four axes an offering of a lamp, flowers and a water pot | flowers, lamps and incense offered at shrines across the Indic world [stated in outline: encyclopedia.com, "Pūjā"]; their place here [inferred] |
+| Weathering | The place's climate set damp (0.8): rain streaks down the andesite faces and moss on the shaded foot of the walls, light, the monument being new | [inferred: the wet tropics] |
+| Bodhi tree | Figs (a pipal) among the banyans and teak by the monastery | [inferred] |
+
+Sources added:
+- [Structural Design of Chandi Borobudur — arisguide](https://arisguide.blogspot.com/2023/02/design-chandi.html)
+- [Statue in the form of a lion at the foot of a stair at Borobudur — Rijksmuseum](https://www.rijksmuseum.nl/en/collection/object/Beeld-in-de-vorm-van-een-leeuw-aan-de-voet-van-een-trap-bij-de-Borobudur--219d53e3ed7bcf1048f2df797b17ff56)
+- [Pūjā: Hindu Pūjā — encyclopedia.com](https://encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/puja-hindu-puja)
 
 ## Sources
 

@@ -28,17 +28,18 @@ function planting(x, z) {
   if (r > RADIUS - 6 || r < 100) return r < 100 && r > 75 ? { grass: 30 } : null;
   if (inHouse(x, z, 1.5) || inRect(MONASTERY, x, z, 1)) return null;
   if (nearHamlet(x, z)) return { date_palm: 1.0, bamboo: 0.8, banyan: 0.08, teak: 0.25, grass: 25 };
-  if (inRect(MONASTERY, x, z, 14)) return { banyan: 0.3, teak: 0.4 };
+  if (inRect(MONASTERY, x, z, 14)) return { banyan: 0.3, teak: 0.4, fig: 0.15 };      // a bodhi tree (a fig) by the monks' compound
   return hash2(x * 0.05, z * 0.05) < 0.3 ? { date_palm: 0.12, grass: 15 } : { grass: 12 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { date_palm: 1.0, bamboo: 0.8, banyan: 0.3, teak: 0.4 },
+  maxDensity: { date_palm: 1.0, bamboo: 0.8, banyan: 0.3, teak: 0.4, fig: 0.15 },
   climate: {
     sun: { az: 20, el: 50, color: [1.0, 0.95, 0.88], intensity: 3.2, lat: -8, dec: 10, hour: 9.5 },
     sky: { turbidity: 4.2, rayleigh: 1.2, mie: 0.006, mieG: 0.82, zenith: [0.11, 0.19, 0.35], horizon: [0.66, 0.69, 0.72] },
     fog: { color: [0.77, 0.79, 0.8], density: 0.0007, height: 0.014 },
     exposure: 0.5,
+    damp: 0.8,      // the wet tropics: rain streaks down the andesite, moss on the shaded foot of the walls
     wind: [0.2, 0.1],
     weather: [
       { id: 'morning-mist', weight: 2, clouds: 0.3, cloudDensity: 0.4, sun: 0.7, fog: 3.2, fogColor: [0.8, 0.82, 0.82] },

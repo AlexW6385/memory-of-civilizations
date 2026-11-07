@@ -20,6 +20,18 @@ E.push({ t: 'borobudur', c: MONUMENT.c, base: MONUMENT.base, squares: SQUARES, c
   }
 }
 E.push({ t: 'lane', rect: [64, -2, 300, 2], y: 0.03, mat: 'andesite' });
+// offerings (docs/settlements/borobudur.md §13): flowers on leaves and clay lamps at the foot of each ground
+// flight between its lions, and round the crowning stupa on the four axes
+{
+  const B = MONUMENT.base, d = B.a + B.p + Math.max(2.4, B.h) + 0.6, top = CIRCLES[CIRCLES.length - 1].y, fl = [['cloth_white', 'cloth_red'], ['cloth_white']];
+  for (const [i, [nx, nz]] of [[0, -1], [0, 1], [-1, 0], [1, 0]].entries()) {
+    const ux = -nz, uz = nx, at = (a, u) => [nx * a + ux * u, nz * a + uz * u];
+    const gy = nx > 0 ? 0.03 : 0.002;                  // on the paved way from the east, else on the ground
+    E.push({ t: 'rite', kind: 'lamps', at: at(d + 0.2, -1.2), to: at(d + 0.2, 1.2), y: gy, count: 5 });
+    for (const k of [-1, 1]) E.push({ t: 'rite', kind: 'plate', at: at(d + 0.5, k * 1.45), y: gy, mats: fl[i % 2] });
+    E.push({ t: 'rite', kind: 'offering', at: at(nz > 0 ? 7.1 : 6.7, 0), y: top, n: [nx, nz], seed: i, mats: fl[(i + 1) % 2] });
+  }
+}
 // the monastery: a walled compound with open pavilions and houses for the monks
 const [mx0, mz0, mx1, mz1] = MONASTERY, wall = (a, b) => E.push({ t: 'pagar', a, b, h: 2.2 });
 wall([mx0, mz0], [mx1, mz0]); wall([mx0, mz1], [mx1, mz1]); wall([mx0, mz0], [mx0, mz1]);
