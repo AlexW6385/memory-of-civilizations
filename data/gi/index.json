@@ -295,7 +295,7 @@
  },
  "florence-centre": {
   "site": "florence",
-  "hash": "cc7f125afd565cf1",
+  "hash": "d0cb7f988b228550",
   "rays": 128,
   "probes": 73440,
   "boxes": [
@@ -316,8 +316,8 @@
     ]
    }
   ],
-  "bytes": 1139549,
-  "seconds": 1009,
+  "bytes": 1118992,
+  "seconds": 190,
   "baked": "2026-11-07"
  },
  "foguang-east-hall": {
