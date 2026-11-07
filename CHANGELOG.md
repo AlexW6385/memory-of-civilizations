@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.83 — Wave 9 finished (2026-11-06)
+- Chichen Itza's Temple of the Warriors opened, with its painted procession and Atlantean altar, and offerings at the Sacred Cenote; Lalibela's Bete Medhane Alem and Bete Maryam hollowed, with deacons and pilgrims; the Great Pyramid's interior from the north entrance up the Grand Gallery to the King's Chamber; Amsterdam's Town Hall vestibule, Vierschaar and Burgerzaal; Machu Picchu turned the right way, with its walls, storehouses and people; the Generalife's hedges, jets, stucco and people; Sydney's wharves peopled; market goods, water jars, handcarts and barrows per culture.
+
 ## v9.82 — Wave 9 merged (2026-11-06)
 - The Generalife on its hill; Djenné facades and the landing; Teotihuacan and Tenochtitlan shrines opened; Falqués bench-lamps, the Sixth Avenue El, Sydney's sea wall; Ivan the Great, the Archangel and Annunciation; Borgund's dragons and portal; dance poses, musicians, cats, ducks, geese, elephants with howdahs; light baked for ten landmarks in their settlements.
 
