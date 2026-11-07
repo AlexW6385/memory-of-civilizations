@@ -1022,8 +1022,8 @@
  },
  "muscovy-dormition": {
   "site": "muscovy",
-  "hash": "e351796c6108981c",
-  "rays": 160,
+  "hash": "fbbf6ac84da50057",
+  "rays": 128,
   "probes": 36720,
   "boxes": [
    {
@@ -1043,9 +1043,9 @@
     ]
    }
   ],
-  "bytes": 612870,
-  "seconds": 623,
-  "baked": "2026-11-06"
+  "bytes": 625124,
+  "seconds": 116,
+  "baked": "2026-11-07"
  },
  "muscovy-red-square": {
   "site": "muscovy",
