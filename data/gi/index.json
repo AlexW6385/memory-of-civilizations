@@ -630,6 +630,50 @@
   "seconds": 235,
   "baked": "2026-11-07"
  },
+ "knossos-palace": {
+  "site": "knossos",
+  "hash": "d6a29517684634ad",
+  "rays": 128,
+  "probes": 28002,
+  "boxes": [
+   {
+    "min": [
+     -43,
+     -0.5,
+     -50
+    ],
+    "n": [
+     26,
+     13,
+     75
+    ],
+    "spacing": 1,
+    "rooms": [
+     "throne room",
+     "long corridor"
+    ]
+   },
+   {
+    "min": [
+     21,
+     -0.5,
+     4
+    ],
+    "n": [
+     13,
+     17,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "queen's megaron"
+    ]
+   }
+  ],
+  "bytes": 468115,
+  "seconds": 102,
+  "baked": "2026-11-07"
+ },
  "lalibela-churches": {
   "site": "lalibela",
   "hash": "bc367f93245212a3",
