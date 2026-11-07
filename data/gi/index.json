@@ -848,7 +848,7 @@
  },
  "london-westminster": {
   "site": "london",
-  "hash": "34bc692ebcc7bedd",
+  "hash": "28eb39c6befb29bb",
   "rays": 128,
   "probes": 78540,
   "boxes": [
@@ -875,8 +875,8 @@
     ]
    }
   ],
-  "bytes": 1241833,
-  "seconds": 378,
+  "bytes": 1209978,
+  "seconds": 179,
   "baked": "2026-11-07"
  },
  "madurai-meenakshi": {
