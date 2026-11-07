@@ -1186,7 +1186,7 @@
  },
  "pantheon": {
   "site": "rome",
-  "hash": "0e9cab4a0e991df8",
+  "hash": "dfe867915a82f1a7",
   "rays": 128,
   "probes": 74480,
   "boxes": [
@@ -1210,8 +1210,8 @@
     ]
    }
   ],
-  "bytes": 1193011,
-  "seconds": 832,
+  "bytes": 1206665,
+  "seconds": 216,
   "baked": "2026-11-07"
  },
  "parthenon": {
