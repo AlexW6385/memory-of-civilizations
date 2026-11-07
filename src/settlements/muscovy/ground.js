@@ -27,6 +27,7 @@ export const ground = {
     sky: { turbidity: 2.6, rayleigh: 1.1, mie: 0.005, mieG: 0.78, zenith: [0.08, 0.16, 0.42], horizon: [0.64, 0.68, 0.74] },
     fog: { color: [0.78, 0.8, 0.82], density: 0.0004, height: 0.01 },
     exposure: 0.5,
+    damp: 0.6,      // a northern continental summer: some moss on the north faces and roofs, rain streaks (DESIGN §5)
     wind: [0.4, 0.2],
     weather: [
       { id: 'clear', weight: 3, clouds: 0.25, cloudDensity: 0.4, sun: 1.0, fog: 1 },

@@ -1,8 +1,39 @@
-// The castle town (docs/settlements/edo-himeji.md §5): samurai compounds round the inner moat, the merchants' machiya beyond the middle moat.
-import { RADIUS, lots } from './layout.js';
-const base = (id, elements) => ({ id, style: 'edo', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' } });
+// The castle town (docs/settlements/edo-himeji.md §5): samurai compounds round the inner moat, the merchants' machiya
+// beyond the middle moat; some houses open inside (§5.1); the life of the street and the avenue (§5.2): a palanquin
+// and its bearers, samurai with their two swords, pedlars with their carrying poles, the shopkeepers at their counters.
+import { RADIUS, STREET, OUTER, lots } from './layout.js';
+const base = (id, elements, style = 'edo') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' } });
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** Which houses are open inside: a machiya in three (its shop), a samurai house in six (its reception room). */
+export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 3 === 0 : l.seed % 6 === 0);
+
+function life() {
+  const rand = rng(1620), P = [], E = [];
+  const fig = (at, rot, o = {}) => P.push({ t: 'figure', at, y: o.y ?? 0, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: ['cloth_indigo', 'cloth_brown', 'cloth_grey', 'cloth_black'][Math.floor(rand() * 4)], cloth2: 'cloth_grey', skin: 'skin_light', hat: 'none', hair: 'topknot', hairMat: 'hair_dark', beard: 0, feet: 'shod', over: 'collar', ...o });
+  // samurai on duty with the long and the short sword (the edict of 1629): on the avenue from the main gate and in the street
+  const samurai = (at, rot) => { const h = 1.6 + rand() * 0.08; fig(at, rot, { h, cloth: rand() < 0.5 ? 'cloth_black' : 'cloth_indigo', cloth2: 'cloth_grey', over: 'collar' }); E.push({ t: 'daisho', at, y: 0, rot, h }); };
+  for (const [x, z, r] of [[-6, OUTER[3] + 22, Math.PI], [-5.2, OUTER[3] + 23.2, Math.PI], [7, OUTER[3] + 48, 0.2], [5, 286, Math.PI * 0.9], [-30, 336.5, Math.PI / 2], [44, 335, -Math.PI / 2], [45.1, 336.1, -Math.PI / 2 + 0.3]]) samurai([x, z], r);
+  // the palanquin on the avenue: the passenger seated in it, a bearer at each end of the pole, a retainer walking after
+  { const x = 5, z = OUTER[3] + 36, rot = 0, ph = 1.44;
+    E.push({ t: 'kago', at: [x, z], y: 0, rot, h: ph });
+    for (const dz of [-1.55, 1.55]) fig([x, z + dz], rot, { h: 1.63, arms: 'pole', dress: 'wrap', top: 'bare', cloth: 'cloth_white', hair: 'topknot', over: 'none', feet: 'bare' });
+    fig([x + 0.15, z + 0.0], rot, { y: 0.54, pose: 'cross', cloth: 'cloth_maroon', hair: 'bun' });
+    samurai([x - 0.6, z + 3.4], rot); }
+  // pedlars in the merchants' street with their carrying poles: water or soy in pails, greens and fish in baskets
+  for (let k = 0; k < 9; k++) { const x = -260 + k * 62 + rand() * 20, z = STREET.z0 + 1.5 + rand() * 5; if (Math.abs(x) < 8) continue; fig([x, z], rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2, { carry: k % 2 ? 'pails' : 'pole', dress: 'wrap', cloth: 'cloth_indigo', hat: k % 3 ? 'straw' : 'none' }); }
+  // the shopkeepers kneeling at their counters in the open shops, a customer sat on the shop's edge in some
+  for (const l of lots()) if (l.t === 'machiya' && isOpen(l)) {
+    const [x0, z0, x1, z1] = l.rect, f = l.front || 's', dep = Math.min(11, z1 - z0), s = f === 's' ? 1 : -1, fz = f === 's' ? z1 : z0, Z = (q) => fz - s * q;
+    const qm = Math.min(4.6, dep * 0.45), q0 = qm - 1.7, ub = x1 - 0.15, du = x0 + 0.15 + 1.55, rot = f === 's' ? Math.PI : 0;
+    if (q0 > 1.6) fig([ub - 1.5 + 0.75, Z(q0 + 0.95)], rot, { y: 0.45, pose: 'seiza', cloth: 'cloth_brown', over: 'apron', cloth2: 'cloth_indigo' });
+    if (rand() < 0.5) fig([du + 1.4, Z(0.42)], rot, { pose: 'sit', y: 0, cloth: rand() < 0.5 ? 'cloth_maroon' : 'cloth_grey', hair: rand() < 0.5 ? 'bun' : 'topknot' });
+  }
+  return [base('edo-himeji-street', E), base('edo-himeji-people', P, 'life')];
+}
+
 export async function town() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 60) plans.push(base(`edo-himeji-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ ...l, simple: true }))));
+  for (let i = 0; i < all.length; i += 60) plans.push(base(`edo-himeji-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ ...l, simple: true, open: isOpen(l) }))));
+  plans.push(...life());
   return plans;
 }

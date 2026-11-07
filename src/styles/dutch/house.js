@@ -7,6 +7,7 @@
 
 import { box, frustum } from '../../core/geom.js';
 import { faceFrame, prism, fbox, outline, ngon, slab4, sideprism } from './facade.js';
+import { canalInterior } from './interior.js';
 
 const ST = 'sandstone_dressed';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -15,10 +16,10 @@ const sstep = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 
 /** A cross-window: frame bars over the glass, the transom at 62%, the lower lights shuttered (closed or folded open). */
 export function crossWindow(bag, F, y, u, v0, ww, hh, o) {
   const A = (m, ...r) => bag.add(m, fbox(F, y, ...r)), u0 = u - ww / 2, u1 = u + ww / 2, vt = v0 + hh * 0.62, b = 0.07;
-  A(ST, u0 - 0.1, u1 + 0.1, v0 - 0.14, v0, -0.02, 0.12);                       // the sill
+  A(ST, u0 - 0.1, u1 + 0.1, v0 - 0.14, v0, o.open ? 0 : -0.02, 0.12);           // the sill
   A(ST, u0 - 0.16, u1 + 0.16, v0 + hh, v0 + hh + 0.24, 0, 0.05);              // the lintel
   A(ST, u - 0.13, u + 0.13, v0 + hh - 0.02, v0 + hh + 0.34, 0.05, 0.09);      // its keystone
-  A('opening', u0, u1, v0, v0 + hh, -0.02, 0.04);                              // the glass
+  if (!o.open) A('opening', u0, u1, v0, v0 + hh, -0.02, 0.04);                  // the glass (a window open to a furnished room shows it)
   A(o.frame, u0, u0 + b, v0, v0 + hh, 0, 0.1); A(o.frame, u1 - b, u1, v0, v0 + hh, 0, 0.1);
   A(o.frame, u0 + b, u1 - b, v0 + hh - b, v0 + hh, 0, 0.1); A(o.frame, u0 + b, u1 - b, v0, v0 + b, 0, 0.1);
   A(o.frame, u - b / 2, u + b / 2, v0 + b, v0 + hh - b, 0, 0.1); A(o.frame, u0 + b, u - b / 2, vt - b / 2, vt + b / 2, 0, 0.1); A(o.frame, u + b / 2, u1 - b, vt - b / 2, vt + b / 2, 0, 0.1);
@@ -26,6 +27,72 @@ export function crossWindow(bag, F, y, u, v0, ww, hh, o) {
   for (const [a, c] of [[u0 + b, u - b / 2], [u + b / 2, u1 - b]]) { const m = (a + c) / 2; A('lead', m - 0.012, m + 0.012, vt + b / 2, v0 + hh - b, 0.04, 0.06); A('lead', a, c, (vt + v0 + hh) / 2 - 0.012, (vt + v0 + hh) / 2 + 0.012, 0.04, 0.06); }
   if (o.shut === 'closed') for (const [a, c] of [[u0 + b, u - b / 2], [u + b / 2, u1 - b]]) { A(o.shutter, a + 0.01, c - 0.01, v0 + b + 0.01, vt - b / 2 - 0.01, 0.04, 0.08); A(o.shutter, (a + c) / 2 - 0.12, (a + c) / 2 + 0.12, (v0 + vt) / 2 - 0.2, (v0 + vt) / 2 + 0.2, 0.08, 0.1); }
   else if (o.shut === 'open') for (const s of [-1, 1]) { const e = s < 0 ? u0 - 0.04 : u1 + 0.04, f = e + s * (ww / 2 - 0.05); A(o.shutter, Math.min(e, f), Math.max(e, f), v0 + 0.02, vt - 0.02, 0, 0.04); }
+}
+
+/**
+ * The stone case of the front door: the plain one (two jambs and a band), or (half of them) the classical one of
+ * the period — Tuscan pilasters on their bases with capitals, the entablature with a frieze of carved festoons
+ * and a projecting cornice, on some a low segmental pediment (docs §5.9).
+ */
+function doorCase(bag, F, y, u, d0, dv, dh, r) {
+  const A = (m, ...q) => bag.add(m, fbox(F, y, ...q)), Pz = (m, pts, a, b) => bag.add(m, prism(F, y, pts, a, b));
+  if (r() < 0.5) { A(ST, u - d0 - 0.2, u - d0, dv, dv + dh + 0.95, 0, 0.14); A(ST, u + d0, u + d0 + 0.2, dv, dv + dh + 0.95, 0, 0.14); A(ST, u - d0 - 0.3, u + d0 + 0.3, dv + dh + 0.95, dv + dh + 1.25, 0, 0.2); return; }
+  const vt = dv + dh + 0.95;
+  for (const s of [-1, 1]) {
+    const a = u + s * (d0 + 0.03), c = u + s * (d0 + 0.27), lo = Math.min(a, c), hi = Math.max(a, c);
+    A(ST, u + s * d0 < u ? u - d0 - 0.03 : u + d0, u + s * d0 < u ? u - d0 : u + d0 + 0.03, dv, vt, 0, 0.08);   // the architrave round the opening
+    A(ST, lo - 0.03, hi + 0.03, dv, dv + 0.28, 0, 0.19);                                                       // the base
+    A(ST, lo, hi, dv + 0.28, vt - 0.14, 0, 0.14);                                                               // the shaft
+    A(ST, lo - 0.02, hi + 0.02, vt - 0.14, vt - 0.08, 0, 0.17); A(ST, lo - 0.035, hi + 0.035, vt - 0.08, vt, 0, 0.19);   // the capital
+  }
+  const ew = d0 + 0.33;
+  A(ST, u - ew, u + ew, vt, vt + 0.08, 0, 0.17);                                                                // the architrave
+  A(ST, u - ew + 0.02, u + ew - 0.02, vt + 0.08, vt + 0.22, 0, 0.13);                                          // the frieze
+  for (let k = 0; k < 6; k++) { const c = u - ew + 0.2 + k * (2 * ew - 0.4) / 5; Pz('sandstone_relief', ngon(c, vt + 0.15, 0.05, 8), 0.13, 0.16); if (k < 5) { const m = c + (2 * ew - 0.4) / 10; Pz('sandstone_relief', [[m - 0.12, vt + 0.17], [m + 0.12, vt + 0.17], [m + 0.06, vt + 0.11], [m - 0.06, vt + 0.11]], 0.13, 0.15); } }
+  A(ST, u - ew - 0.06, u + ew + 0.06, vt + 0.22, vt + 0.32, 0, 0.24);                                          // the cornice
+  if (r() < 0.45) {
+    const R = ew + 0.06, rise = 0.17, rr = (R * R + rise * rise) / (2 * rise), n = 8;
+    for (let k = 0; k < n; k++) {
+      const t0 = -1 + 2 * k / n, t1 = -1 + 2 * (k + 1) / n, h = (t) => Math.sqrt(Math.max(0, rr * rr - (t * R) ** 2)) - (rr - rise);
+      Pz(ST, [[u + t0 * R, vt + 0.32], [u + t1 * R, vt + 0.32], [u + t1 * R, vt + 0.32 + h(t1)], [u + t0 * R, vt + 0.32 + h(t0)]], 0, 0.2);
+    }
+  }
+}
+/**
+ * gevelsteen: a gable stone — a carved and painted relief in its moulded stone frame, set in the front about 4 m
+ * up to name the house before there were numbers (docs §5.9): a ship under sail on the sea, a tree on its
+ * ground, a gilt sun, or two crossed keys; a dark band under it for the name and the year.
+ */
+function gableStone(bag, F, y, u, v, wd, r) {
+  const A = (m, ...q) => bag.add(m, fbox(F, y, ...q)), Pz = (m, pts, a, b) => bag.add(m, prism(F, y, pts, a, b));
+  const hh = wd * 1.05, u0 = u - wd / 2, u1 = u + wd / 2, fr = 0.055, kind = Math.floor(r() * 4);
+  A(ST, u0, u1, v, v + fr, 0, 0.08); A(ST, u0, u1, v + hh - fr, v + hh, 0, 0.08); A(ST, u0, u0 + fr, v + fr, v + hh - fr, 0, 0.08); A(ST, u1 - fr, u1, v + fr, v + hh - fr, 0, 0.08);
+  A(ST, u0 - 0.03, u1 + 0.03, v - 0.12, v, 0, 0.09); A('lacquer_black', u0 + 0.04, u1 - 0.04, v - 0.095, v - 0.025, 0.09, 0.095);
+  const a0 = u0 + fr, a1 = u1 - fr, b0 = v + fr, b1 = v + hh - fr, W = a1 - a0, Hh = b1 - b0, U = (t) => a0 + t * W, V = (t) => b0 + t * Hh;
+  A(kind === 3 ? 'cloth_red' : kind === 2 ? 'paint_blue' : 'stucco_sky', a0, a1, b0, b1, 0, 0.03);
+  if (kind === 0) {                       // the ship: the sea, the hull, three masts with their sails, a pennant
+    A('paint_blue', a0, a1, b0, V(0.2), 0.03, 0.04);
+    Pz('paint_ochre', [[U(0.15), V(0.22)], [U(0.85), V(0.22)], [U(0.95), V(0.38)], [U(0.05), V(0.38)]], 0.03, 0.065);
+    Pz('paint_ochre', [[U(0.72), V(0.38)], [U(0.93), V(0.38)], [U(0.93), V(0.46)], [U(0.74), V(0.46)]], 0.03, 0.06);
+    for (const [t, top] of [[0.3, 0.85], [0.52, 0.92], [0.75, 0.78]]) { A('wood_dark', U(t) - 0.006, U(t) + 0.006, V(0.38), V(top), 0.04, 0.05); A('paint_white', U(t - 0.1), U(t + 0.1), V(0.48), V(top - 0.1), 0.045, 0.06); }
+    Pz('cloth_red', [[U(0.52), V(0.92)], [U(0.66), V(0.89)], [U(0.52), V(0.86)]], 0.045, 0.055);
+  } else if (kind === 1) {                // the tree: its ground, the trunk, the round crown in leafy lobes
+    A('fresco_green', a0, a1, b0, V(0.18), 0.03, 0.045);
+    Pz('wood_dark', [[U(0.45), V(0.18)], [U(0.55), V(0.18)], [U(0.53), V(0.55)], [U(0.47), V(0.55)]], 0.03, 0.06);
+    for (const [cu, cv, cr] of [[0.5, 0.68, 0.24], [0.32, 0.6, 0.15], [0.68, 0.6, 0.15], [0.4, 0.8, 0.14], [0.6, 0.8, 0.14]]) Pz('cloth_green', ngon(U(cu), V(cv), cr * W, 10), 0.03, 0.06 + cr * 0.03);
+  } else if (kind === 2) {                // the sun: a gilt disc and its rays
+    Pz('gold', ngon(U(0.5), V(0.5), W * 0.18, 14), 0.03, 0.07);
+    for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2, c = Math.cos(a), s2 = Math.sin(a), e = W * 0.2, f = W * (k & 1 ? 0.36 : 0.42), q = W * 0.035;
+      Pz('gold', [[U(0.5) + c * e - s2 * q, V(0.5) + s2 * e + c * q], [U(0.5) + c * e + s2 * q, V(0.5) + s2 * e - c * q], [U(0.5) + c * f, V(0.5) + s2 * f]], 0.03, 0.055); }
+  } else {                                // two keys crossed: the bows, the shanks, the bits
+    for (const s2 of [-1, 1]) {
+      const p = (t) => [U(0.5 + s2 * (0.32 - 0.64 * t)), V(0.15 + 0.7 * t)], q = 0.02;
+      const [x0, z0] = p(0), [x1, z1] = p(1), L = Math.hypot(x1 - x0, z1 - z0), nx = -(z1 - z0) / L * q, nz = (x1 - x0) / L * q;
+      Pz('gold', [[x0 + nx, z0 + nz], [x0 - nx, z0 - nz], [x1 - nx, z1 - nz], [x1 + nx, z1 + nz]], 0.03, 0.06);
+      Pz('gold', ngon(...p(0.98), W * 0.09, 8), 0.03, 0.065);
+      const [bx, bz] = p(0.08); Pz('gold', [[bx, bz], [bx + s2 * W * 0.1, bz], [bx + s2 * W * 0.1, bz + W * 0.08], [bx, bz + W * 0.08]], 0.03, 0.06);
+    }
+  }
 }
 
 /** canal_house: { rect (its narrow front on `front`), storeys, seed, y }. */
@@ -42,10 +109,12 @@ export function canalHouse(el, { bag, col }) {
   // annex (aanbouw) in a yard behind the main block, with the privy in the yard's other corner (docs §5.1)
   const rb = rng((el.seed || 1) * 7 + 13), annex = !warehouse && D >= 11 && rb() < 0.55, Dm = annex ? D - 3.4 : D;
   const main = ((r, k) => ({ s: [r[0], r[1] + k, r[2], r[3]], n: [r[0], r[1], r[2], r[3] - k], e: [r[0] + k, r[1], r[2], r[3]], w: [r[0], r[1], r[2] - k, r[3]] })[f])(el.rect, D - Dm);
-  bag.add(mat, box(main[0], y - 0.6, main[1], main[2], y + H, main[3])); col.rect(main, y - 0.6, y + H);
+  const open = !!el.open && !warehouse, hallWins = [];
+  if (!open) { bag.add(mat, box(main[0], y - 0.6, main[1], main[2], y + H, main[3])); col.rect(main, y - 0.6, y + H); }
   A(ST, -0.02, w + 0.02, base - 0.16, base, 0, 0.06);                            // the water table over the basement
   A(mat, 0, w, H - 0.5, H, 0, 0.08); A(ST, -0.03, w + 0.03, H - 0.12, H + 0.02, 0, 0.14);  // a brick band and its stone cap at the eaves line
   const bays = w >= 6.4 ? 3 : 2, bw = w / bays, ww = Math.min(1.2, bw - 0.95), door = rand() < 0.5 ? 0 : bays - 1;
+  let doorU = null, doorLeaf = 'wood_dark', stoneAt = -1;
   // the ground floor: the door up its stoop, tall windows, basement windows below them
   for (let i = 0; i < bays; i++) {
     const u = (i + 0.5) * bw;
@@ -55,15 +124,16 @@ export function canalHouse(el, { bag, col }) {
     }
     if (i === door && !warehouse) {
       const d0 = 0.75, dv = base, dh = 2.45;
-      A(ST, u - d0 - 0.2, u - d0, dv, dv + dh + 0.95, 0, 0.14); A(ST, u + d0, u + d0 + 0.2, dv, dv + dh + 0.95, 0, 0.14);  // the stone door case
-      A(ST, u - d0 - 0.3, u + d0 + 0.3, dv + dh + 0.95, dv + dh + 1.25, 0, 0.2);
+      doorCase(bag, F, y, u, d0, dv, dh, rng((el.seed || 1) * 13 + 5));                                                 // the stone door case
+      doorU = u;
       A(ST, u - d0, u + d0, dv + dh, dv + dh + 0.1, 0, 0.1);                                                             // the transom over the door
-      A(shutter === 'lacquer_red' ? 'wood_dark' : shutter, u - d0, u, dv, dv + dh, -0.02, 0.05); A(shutter === 'lacquer_red' ? 'wood_dark' : shutter, u, u + d0, dv, dv + dh, -0.02, 0.05);
-      for (const s of [-1, 1]) { A('wood_dark', Math.min(u + s * 0.15, u + s * 0.6), Math.max(u + s * 0.15, u + s * 0.6), dv + 0.4, dv + 1.1, 0.05, 0.08); A('wood_dark', Math.min(u + s * 0.15, u + s * 0.6), Math.max(u + s * 0.15, u + s * 0.6), dv + 1.4, dv + 2.15, 0.05, 0.08); }
-      A('iron', u + 0.12, u + 0.2, dv + 1.15, dv + 1.25, 0.05, 0.11);                                                     // the knocker
+      const leaf = shutter === 'lacquer_red' ? 'wood_dark' : shutter; doorLeaf = leaf;
+      if (!open) { A(leaf, u - d0, u, dv, dv + dh, -0.02, 0.05); A(leaf, u, u + d0, dv, dv + dh, -0.02, 0.05); }
+      if (!open) for (const s of [-1, 1]) { A('wood_dark', Math.min(u + s * 0.15, u + s * 0.6), Math.max(u + s * 0.15, u + s * 0.6), dv + 0.4, dv + 1.1, 0.05, 0.08); A('wood_dark', Math.min(u + s * 0.15, u + s * 0.6), Math.max(u + s * 0.15, u + s * 0.6), dv + 1.4, dv + 2.15, 0.05, 0.08); }
+      if (!open) A('iron', u + 0.12, u + 0.2, dv + 1.15, dv + 1.25, 0.05, 0.11);                                         // the knocker
       A('opening', u - d0, u + d0, dv + dh + 0.1, dv + dh + 0.95, -0.02, 0.04);                                         // the fanlight and its bars
       for (let k = 1; k < 5; k++) { const a = u - d0 + k * 2 * d0 / 5; A('wood_painted', a - 0.025, a + 0.025, dv + dh + 0.1, dv + dh + 0.95, 0, 0.07); }
-      if (rand() < 0.35) A('sandstone_relief', u - 0.45, u + 0.45, dv + dh + 1.45, dv + dh + 2.05, 0, 0.07);              // a gable stone over the door
+      if (rand() < 0.35) stoneAt = i;                                                                                  // a gable stone (gevelsteen) by the door
       // the stoop: a stone landing at the door's sill, steps down to the quay, an iron rail each side
       const L = 1.15, steps = 3, rise = base / (steps + 1);
       A(ST, u - 0.95, u + 0.95, -0.6, base - 0.02, 0, L);
@@ -73,10 +143,14 @@ export function canalHouse(el, { bag, col }) {
         A('iron', ue - 0.025, ue + 0.025, base + 0.85, base + 0.9, 0, L);
         for (const dd of [0.3, 0.7, L - 0.05]) A('iron', ue - 0.015, ue + 0.015, base, base + 0.85, dd - 0.015, dd + 0.015);
       }
-      { const p0 = F.at(u - 0.95, 0), p1 = F.at(u + 0.95, L + steps * 0.3); col.rect([p0[0], p0[1], p1[0], p1[1]], y - 0.6, y + base * 0.5); }
+      if (open) {                                                                                                     // walkable: the landing, the flight down to the quay
+        const p0 = F.at(u - 0.95, 0), p1 = F.at(u + 0.95, L), q0 = F.at(u - 0.8, L), q1 = F.at(u + 0.8, L + steps * 0.3), nr = (a, c) => [Math.min(a[0], c[0]), Math.min(a[1], c[1]), Math.max(a[0], c[0]), Math.max(a[1], c[1])];
+        col.floor(nr(p0, p1), y + base - 0.02); col.ramp(nr(q0, q1), y + rise * 0.5, y + base - 0.02, { s: 'n', n: 's', e: 'w', w: 'e' }[f]);
+        for (const s of [-1, 1]) { const a = F.at(u + s * 0.88, 0), c = F.at(u + s * 0.95, L); col.rect(nr(a, c), y + base - 0.02, y + base + 0.9); }
+      } else { const p0 = F.at(u - 0.95, 0), p1 = F.at(u + 0.95, L + steps * 0.3); col.rect([p0[0], p0[1], p1[0], p1[1]], y - 0.6, y + base * 0.5); }
       continue;
     }
-    crossWindow(bag, F, y, u, base + 0.45, ww, 2.55, { frame, shutter, shut: shutMode() });
+    crossWindow(bag, F, y, u, base + 0.45, ww, 2.55, { frame, shutter, shut: shutMode(), open }); if (open) hallWins.push(u);
     A(ST, u - ww / 2 - 0.08, u + ww / 2 + 0.08, 0.05, 0.12, 0, 0.08);                                                    // the basement window: its sill, glass and bars
     A('opening', u - ww / 2, u + ww / 2, 0.12, base - 0.3, -0.02, 0.04);
     for (let k = 1; k < 5; k++) { const a = u - ww / 2 + k * ww / 5; A('iron', a - 0.015, a + 0.015, 0.12, base - 0.3, 0.04, 0.07); }
@@ -87,6 +161,9 @@ export function canalHouse(el, { bag, col }) {
     const top = s === n - 1, hh = top ? st - 1.05 : st - 0.85;
     crossWindow(bag, F, y, (i + 0.5) * bw, floors[s] + 0.5, ww * (warehouse ? 0.8 : 1), hh, { frame, shutter, shut: warehouse ? 'closed' : shutMode() });
   }
+  // the gable stone in the pier of the first floor beside the door's bay (gable stones stood about 4 m up: docs §5.9)
+  if (stoneAt >= 0 && n > 1) { const pu = (stoneAt === 0 ? 1 : stoneAt) * bw; gableStone(bag, F, y, pu, floors[1] + 0.5 + (st - 0.85) * 0.62 + 0.14, Math.min(0.56, bw - ww - 0.36), rng((el.seed || 1) * 31 + 3)); }
+  if (open && doorU !== null) canalInterior(bag, col, F, y, { w, Dm, base, g, H, mat, du: doorU, dw: 0.75, dh: 2.45, wins: hallWins, ww, leaf: doorLeaf });
   // iron wall anchors at each floor, holding the front to the beams
   for (let s = 1; s < n; s++) for (const u of [0.32, w - 0.32]) { const v = floors[s] - 0.15; A('iron', u - 0.03, u + 0.03, v - 0.32, v + 0.32, 0, 0.04); A('iron', u - 0.16, u + 0.16, v - 0.03, v + 0.03, 0, 0.05); }
 
@@ -165,8 +242,8 @@ export function canalHouse(el, { bag, col }) {
     for (const q of outline(uc, (v) => Math.max(0.3, cover(v - G)), G, G + rh + 0.15, 4, 0.06)) Pz(wood ? 'wood_dark' : ST, q, -Dm - 0.04, -Dm + 0.5);
     { const ga = G + 0.35, gb = G + Math.min(1.5, rh * 0.32); A(frame, uc - 0.42, uc + 0.42, ga, gb, -Dm - 0.05, -Dm + 0.02); A('opening', uc - 0.34, uc + 0.34, ga + 0.08, gb - 0.08, -Dm - 0.08, -Dm - 0.05);
       const hv = G + rh * 0.5, hh = Math.min(1.1, rh * 0.22); if (rh > 4.2) A(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, uc - 0.4, uc + 0.4, hv, hv + hh, -Dm - 0.06, -Dm + 0.02); }
-    // a chimney on the party wall, behind the gable
-    { const cu = rand() < 0.5 ? 0.35 : w - 0.35, cd = -Dm * 0.45; A(mat, cu - 0.3, cu + 0.3, H - 0.2, H + rh * 0.55 + 1.3, cd - 0.45, cd + 0.45); A(ST, cu - 0.38, cu + 0.38, H + rh * 0.55 + 1.3, H + rh * 0.55 + 1.45, cd - 0.53, cd + 0.53); }
+    // a chimney on the party wall, behind the gable, soot round its mouth
+    { const cu = rand() < 0.5 ? 0.35 : w - 0.35, cd = -Dm * 0.45; A(mat, cu - 0.3, cu + 0.3, H - 0.2, H + rh * 0.55 + 1.3, cd - 0.45, cd + 0.45); A('cloth_black', cu - 0.305, cu + 0.305, H + rh * 0.55 + 0.9, H + rh * 0.55 + 1.3, cd - 0.455, cd + 0.455); A(ST, cu - 0.38, cu + 0.38, H + rh * 0.55 + 1.3, H + rh * 0.55 + 1.45, cd - 0.53, cd + 0.53); }
   }
   // ---- the back: a window a bay on each floor in its frame, under a brick relieving arch; some houses with cross-windows
   // in the back rooms of the first floor; the door to the yard; the annex with its lean-to roof, the privy, the yard wall

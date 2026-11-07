@@ -51,6 +51,7 @@ export const ground = {
     sky: { turbidity: 3.2, rayleigh: 1.2, mie: 0.005, mieG: 0.8, zenith: [0.11, 0.19, 0.36], horizon: [0.64, 0.67, 0.7] },
     fog: { color: [0.76, 0.78, 0.8], density: 0.0005, height: 0.012 },
     exposure: 0.5,
+    damp: 0.6,      // the Inland Sea's wet summers: moss on the north faces of the walls and roofs, rain streaks down the plaster (DESIGN §5)
     wind: [0.3, 0.2],
     weather: [
       { id: 'clear', weight: 3, clouds: 0.2, cloudDensity: 0.35, sun: 1.0, fog: 1 },

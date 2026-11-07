@@ -26,6 +26,7 @@ export const ground = {
     sky: { turbidity: 3.0, rayleigh: 1.1, mie: 0.006, mieG: 0.78, zenith: [0.09, 0.16, 0.36], horizon: [0.66, 0.7, 0.74] },
     fog: { color: [0.76, 0.78, 0.82], density: 0.0005, height: 0.012 },
     exposure: 0.52,
+    damp: 0.85,     // the Atlantic Low Countries: moss on the north faces and roofs, rain streaks down the brick (DESIGN §5)
     wind: [1.0, 0.4],
     weather: [
       { id: 'big-clouds', weight: 3, clouds: 0.6, cloudDensity: 0.6, sun: 0.85, fog: 1.1 },

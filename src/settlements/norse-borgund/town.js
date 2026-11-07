@@ -32,6 +32,9 @@ export function life() {
     p = near([fx, fz], 14); if (p) put('sledge', p, { load: rand() < 0.5 ? 'empty' : 'bales' });
     if (i % 2 === 0) { p = near([fx, fz], 10); if (p) beast('dog', p, rand() * 6.28); }
     if (i % 3 === 0) { p = near([fx, fz], 14); if (p) put('barrel', p, { n: 2 }); }
+    // water carried up from the river on the shoulder yoke; wood split at the block by the woodpile
+    p = near([fx, fz], 13); if (p) fig(p, rand() * 6.28, { carry: 'yoke', dress: 'robe', hair: 'long', beard: 0 });
+    if (i % 2 === 1) { p = near([fx, fz], 10); if (p) { put('firewood', [p[0] + 1.2, p[1]], { rot: 0, len: 1.6 }); fig(p, -Math.PI / 2, { pose: 'squat', dress: 'tunic' }); } }
   });
   // haymaking in the meadows by the farms: the mowers with their scythes (a pole), the rakers, the stacks rising
   for (const [fx, fz] of FARMS.filter((_, i) => i % 2 === 1)) {
@@ -56,7 +59,7 @@ export function life() {
 
 export function farms() {
   return [
-    base('norse-borgund-farms', 'norse', buildings().map((b) => ({ t: 'log_house', ...b }))),
+    base('norse-borgund-farms', 'norse', buildings().map((b) => ({ t: 'log_house', ...b, open: b.kind === 'stue' && (b.rect[2] - b.rect[0]) * (b.rect[3] - b.rect[1]) > 40 }))),
     base('norse-borgund-life', 'life', life()),
   ];
 }
