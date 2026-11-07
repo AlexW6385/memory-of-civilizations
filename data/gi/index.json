@@ -760,6 +760,50 @@
   "seconds": 103,
   "baked": "2026-11-07"
  },
+ "ming-suzhou-garden": {
+  "site": "ming-suzhou",
+  "hash": "84e2ff44facff7ae",
+  "rays": 128,
+  "probes": 9460,
+  "boxes": [
+   {
+    "min": [
+     -9.2,
+     0.4,
+     -21.5
+    ],
+    "n": [
+     19,
+     11,
+     15
+    ],
+    "spacing": 1,
+    "rooms": [
+     "yuanxiang"
+    ]
+   },
+   {
+    "min": [
+     -12,
+     0.1,
+     30
+    ],
+    "n": [
+     25,
+     11,
+     23
+    ],
+    "spacing": 1,
+    "rooms": [
+     "main-hall",
+     "sedan-hall"
+    ]
+   }
+  ],
+  "bytes": 159860,
+  "seconds": 55,
+  "baked": "2026-11-07"
+ },
  "mughal-agra-taj": {
   "site": "mughal-agra",
   "hash": "e5649986d256c60a",
