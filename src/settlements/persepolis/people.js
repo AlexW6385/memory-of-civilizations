@@ -63,7 +63,7 @@ export function people() {
     if (rand() < 0.15) continue;
     const g = WARES[w++ % WARES.length], north = z < (MARKET[1] + MARKET[3]) / 2, back = north ? -1 : 1, rot = north ? S : N;
     const seller = { t: 'figure', y: 0, seed: seed(), dress: rand() < 0.5 ? 'robe' : 'trousers', cloth: ['cloth_white', 'cloth_brown', 'cloth_ochre', 'cloth_indigo'][Math.floor(rand() * 4)], cloth2: 'cloth_white', over: 'sash', hat: rand() < 0.5 ? 'cap' : 'none', hatMat: 'cloth_white', beard: true, skin: 'skin_medium', feet: 'shod' };
-    if (w % 3 === 0) { figures.push({ t: 'stall', at: [x, z], y: 0, rot: north ? N : S, seed: seed(), awning: ['cloth_white', 'cloth_ochre', 'cloth_red'][w % 3 === 0 ? (w / 3) % 3 : 0], stripe: 'none', goods: g, w: 2.6, d: 1.3 }); figures.push({ ...seller, at: [x + 0.3, z + back * 1.4], rot, pose: 'talk' }); }
+    if (w % 3 === 0) { figures.push({ t: 'stall', at: [x, z], y: 0, rot: north ? N : S, seed: seed(), awning: ['cloth_white', 'cloth_ochre', 'cloth_red'][w % 3 === 0 ? (w / 3) % 3 : 0], stripe: null, goods: g, w: 2.6, d: 1.3 }); figures.push({ ...seller, at: [x + 0.3, z + back * 1.4], rot, pose: 'talk' }); }
     else { figures.push({ t: 'goods_mat', at: [x, z], y: 0, rot, seed: seed(), goods: g, mat: 'reed_mat' }); figures.push({ ...seller, at: [x - 0.2, z + back * 1.0], rot, pose: 'sit_ground' }); }
     if (rand() < 0.5) figures.push({ ...seller, seed: seed(), cloth: 'cloth_red', at: [x + (rand() - 0.5), z - back * 1.7], rot: rot + S + (rand() - 0.5) * 0.5, pose: 'stand' });
   }

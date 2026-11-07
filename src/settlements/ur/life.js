@@ -42,7 +42,7 @@ export function urLife() {
     if (rand() < 0.15) continue;
     const g = WARES[w++ % WARES.length], south = z > -195, srot = south ? S : N, rot = south ? N : S, back = south ? 1.0 : -1.0;   // the stall's front and the seller face the aisle
     if ((w % 4) === 0) {
-      figures.push({ t: 'stall', at: [x, z], y: 0, rot: srot, seed: seed(), awning: 'reed_mat', stripe: 'none', goods: g, w: 2.4, d: 1.2 });
+      figures.push({ t: 'stall', at: [x, z], y: 0, rot: srot, seed: seed(), awning: 'reed_mat', stripe: null, goods: g, w: 2.4, d: 1.2 });
       man([x + 0.3, z + back * 1.3], 0, rot, { pose: 'stand', arms: 'clasp' });
     } else {
       figures.push({ t: 'goods_mat', at: [x, z], y: 0, rot, seed: seed(), goods: g, mat: 'reed_mat' });

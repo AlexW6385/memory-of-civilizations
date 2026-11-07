@@ -56,7 +56,7 @@ function people() {
   for (const z of [mz0 + 10, mz1 - 10]) for (let x = mx0 + 14; x < mx1 - 4; x += 6.5) {
     if (rand() < 0.12) continue;
     const g = WARES[w++ % WARES.length], north = z < (mz0 + mz1) / 2, back = north ? -1 : 1, rot = north ? Math.PI : 0;   // the sellers on the outer side, facing the middle
-    if (w % 3 === 0) { L.push({ t: 'stall', at: [x, z], y: 0, rot: north ? 0 : Math.PI, seed: Math.floor(rand() * 1e9), awning: pick(['cloth_white', 'cloth_ochre', 'cloth_indigo']), stripe: 'none', goods: g, w: 2.6, d: 1.3 }); man([x + 0.4, z + back * 1.4], 0, rot, { carry: 'none', pose: 'talk' }); }
+    if (w % 3 === 0) { L.push({ t: 'stall', at: [x, z], y: 0, rot: north ? 0 : Math.PI, seed: Math.floor(rand() * 1e9), awning: pick(['cloth_white', 'cloth_ochre', 'cloth_indigo']), stripe: null, goods: g, w: 2.6, d: 1.3 }); man([x + 0.4, z + back * 1.4], 0, rot, { carry: 'none', pose: 'talk' }); }
     else { L.push({ t: 'goods_mat', at: [x, z], y: 0, rot, seed: Math.floor(rand() * 1e9), goods: g, mat: 'reed_mat' }); man([x - 0.2, z + back * 1.0], 0, rot, { pose: 'sit_ground', carry: 'none' }); }
     if (rand() < 0.55) (rand() < 0.6 ? man : woman)([x + (rand() - 0.5), z - back * 1.7], 0, rot + Math.PI + (rand() - 0.5) * 0.5, {});
   }
