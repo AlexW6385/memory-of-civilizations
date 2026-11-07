@@ -1484,7 +1484,7 @@
  },
  "song-hangzhou-liuhe": {
   "site": "song-hangzhou",
-  "hash": "6cc302370a205444",
+  "hash": "5a9e314ae77fe9cf",
   "rays": 128,
   "probes": 28237,
   "boxes": [
@@ -1527,8 +1527,8 @@
     ]
    }
   ],
-  "bytes": 450570,
-  "seconds": 128,
+  "bytes": 446339,
+  "seconds": 65,
   "baked": "2026-11-07"
  },
  "sydney-opera": {
