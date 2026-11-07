@@ -1336,9 +1336,9 @@
  },
  "petra-khazneh": {
   "site": "petra",
-  "hash": "a90903d46c1ee60c",
+  "hash": "d440158247dca919",
   "rays": 128,
-  "probes": 25095,
+  "probes": 27075,
   "boxes": [
    {
     "min": [
@@ -1358,6 +1358,22 @@
    },
    {
     "min": [
+     -155.5,
+     -0.36,
+     -43.6
+    ],
+    "n": [
+     12,
+     15,
+     11
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the triclinium"
+    ]
+   },
+   {
+    "min": [
      -165,
      2.52,
      15
@@ -1373,8 +1389,8 @@
     ]
    }
   ],
-  "bytes": 399611,
-  "seconds": 50,
+  "bytes": 435156,
+  "seconds": 60,
   "baked": "2026-11-07"
  },
  "qing-beijing-palace": {
