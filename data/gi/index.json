@@ -329,6 +329,33 @@
   "seconds": 564,
   "baked": "2026-11-06"
  },
+ "joseon-seoul-gyeongbokgung": {
+  "site": "joseon-seoul",
+  "hash": "22bf09fb9b0e69a3",
+  "rays": 128,
+  "probes": 22750,
+  "boxes": [
+   {
+    "min": [
+     -17,
+     2.7,
+     11
+    ],
+    "n": [
+     35,
+     25,
+     26
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hall"
+    ]
+   }
+  ],
+  "bytes": 363796,
+  "seconds": 265,
+  "baked": "2026-11-07"
+ },
  "lhasa-potala": {
   "site": "lhasa",
   "hash": "29aab7996e9859a3",
