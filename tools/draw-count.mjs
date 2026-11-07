@@ -1,15 +1,24 @@
 #!/usr/bin/env node
-// Draw calls of a frame, counted in Node (DESIGN §8: ≤ 800): a settlement built as the viewer
-// builds it, its meshes made as the viewer makes them (src/engine/world.js, life-instances.js) and
-// shown and hidden by the same rules (tiles' near / far, fine detail within reach, street life's
-// copies by distance), then culled against the camera's frustum and the three shadow cascades'
-// boxes as three.js culls them. Headless Chromium draws WebGPU in software and its renderer.info
-// is of a trimmed scene (tools/showroom.mjs --site); this counts the whole settlement exactly
-// (the cascades' boxes are approximated as CSMShadowNode fits them). Ground, plants, sky and the
-// post-processing passes are not counted (about 60–120 more draws).
+// Draw calls and triangles of a frame, counted in Node (DESIGN §8: ≤ 800 draws, ≤ 3 M visible
+// triangles): a settlement built as the viewer builds it, its meshes made as the viewer makes them
+// (src/engine/world.js, merge.js, life-instances.js) and shown and hidden by the same rules (tiles'
+// near / far, fine detail within reach, street life's copies by distance, merged meshes cut into
+// cells, thin and fine shapes chosen by distance: src/engine/cells.js), then culled against the
+// camera's frustum and the three shadow cascades' boxes as three.js culls them. Headless Chromium
+// draws WebGPU in software and its renderer.info is of a trimmed scene (tools/showroom.mjs --site);
+// this counts the whole settlement exactly (the cascades' boxes are approximated as CSMShadowNode
+// fits them). Ground, plants, sky and the post-processing passes are not counted (about 60–120 more
+// draws). "A frame" counts the scene pass, the first cascade, half the second and a third of the
+// third (as they are drawn, src/engine/renderer.js); "worst frame" all three cascades.
 //
-// usage: node tools/draw-count.mjs <id>... [--at x,y,z,yaw,pitch] [--sun azimuthDeg,elevationDeg]
-//        [--nomerge] [--json out.json]   (--nomerge: plans' meshes kept apart, as before src/engine/merge.js; default pose: the settlement's arrival, src/planet/arrivals.js)
+// usage: node tools/draw-count.mjs [<id>...] [--at x,y,z,yaw,pitch] [--views] [--top [n]]
+//        [--sun azimuthDeg,elevationDeg] [--before] [--nomerge] [--cell m] [--split tris] [--json out.json]
+//   no ids: every settlement; default pose: its arrival (src/planet/arrivals.js)
+//   --views    also the interiors and heavy places of VIEWS (each the worst of four ways)
+//   --top      the largest meshes' triangles in the view and in each cascade
+//   --before   as before cells and distance detail (merged meshes whole, every copy in full)
+//   --nomerge  plans' meshes kept apart, as before src/engine/merge.js
+//   --cell, --split   try other cell sizes and thresholds (src/engine/cells.js CELL, SPLIT_TRIS)
 
 import * as THREE from '../src/vendor/three/build/three.core.js';
 import { writeFile } from 'node:fs/promises';
@@ -17,6 +26,7 @@ import { MODULES } from '../src/settlements/grounds.js';
 import { buildPlan } from '../src/core/build.js';
 import { ARRIVALS } from '../src/planet/arrivals.js';
 import { MATERIALS } from '../src/core/palette.js';
+import { CELL, SPLIT_TRIS, SPLIT_INST, LOD_NEAR, FINE_SHADOW, THIN_FAR, LIFE_FULL, SHADOW_IOU, cellKey, lodKind, coarse } from '../src/engine/cells.js';
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
@@ -30,9 +40,9 @@ const castsShadow = (mat) => !NO_SHADOW.has(mat) && !NO_SHADOW_KINDS.has(MATERIA
 const { LIFE_MIN } = await import('../src/engine/life-instances.js').catch(() => ({ LIFE_MIN: 13 }));
 
 /** A frame's draws: the meshes of a settlement (with the viewer's options), and the counts at a pose. */
-export async function drawCount(id, { at = null, sun = [135, 40], build = null, merge = true } = {}) {
+export async function drawCount(id, { at = null, sun = [135, 40], build = null, merge = true, cells = true } = {}) {
   let meshes = build ?? await sceneOf(id);
-  if (merge) meshes = mergeScene(meshes);
+  if (merge) meshes = mergeScene(meshes, { cells });
   const pose = at ?? ARRIVALS[id] ?? [0, 0, 0, 0, 0.1];
   const [x, y0, z, yaw, pitch] = pose;
   const eye = new THREE.Vector3(x, (y0 ?? 0) + 1.6, z);
@@ -45,7 +55,9 @@ export async function drawCount(id, { at = null, sun = [135, 40], build = null, 
   const inFr = (f, m) => f.intersectsSphere(S.copy(m.sphere));
   const main = { all: 0 };
   let tris = 0;
-  for (const m of vis) if (inFr(fr, m)) { main.all++; tris += m.tris || 0; main[m.kind] = (main[m.kind] || 0) + 1; }
+  const top = [];
+  for (const m of vis) if (!m.shadowOnly && inFr(fr, m)) { main.all++; tris += m.tris || 0; main[m.kind] = (main[m.kind] || 0) + 1; top.push({ kind: m.kind, mat: m.mat, plan: m.plan?.id ?? m.batch?.[0]?.plan?.id, tris: Math.round(m.tris || 0), r: Math.round(m.sphere.radius) }); }
+  top.sort((a, b) => b.tris - a.tris);
   // the cascades (CSMShadowNode 'practical', maxFar 320, lightMargin 200): each an orthographic box
   // round the sphere of its slice of the view, reaching 200 m toward the sun
   const n = 3, near = cam.near, far = 320, splits = [near];
@@ -67,14 +79,17 @@ export async function drawCount(id, { at = null, sun = [135, 40], build = null, 
     const lf = new THREE.Frustum().setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(lc.projectionMatrix, lc.matrixWorldInverse));
     let k = 0, kt = 0;
     const kinds = {};
-    for (const m of vis) if (m.cast && (c === 0 || !m.small) && inFr(lf, m)) { k++; kt += m.tris || 0; kinds[m.kind] = (kinds[m.kind] || 0) + 1; }
+    const ctop = [];
+    for (const m of vis) if (m.cast && (c === 0 || !m.small) && inFr(lf, m)) { k++; kt += m.tris || 0; kinds[m.kind] = (kinds[m.kind] || 0) + 1; ctop.push({ kind: m.kind, mat: m.mat, plan: m.plan?.id ?? m.batch?.[0]?.plan?.id, tris: Math.round(m.tris || 0), r: Math.round(m.sphere.radius) }); }
+    (shadow.top ??= []).push(ctop.sort((a, b) => b.tris - a.tris));
     (shadow.kinds ??= []).push(kinds);
     shadow.tris = (shadow.tris || 0) + kt / (c + 1);
+    (shadow.ctris ??= []).push(Math.round(kt));
     shadow.cascades.push(k); shadow.all += k; shadow.perFrame += k / (c + 1);
   }
   shadow.perFrame = Math.round(shadow.perFrame);
   const objects = meshes.length;
-  return { id, pose, objects, visible: vis.length, main, shadow, frame: main.all + shadow.perFrame, tris: { main: Math.round(tris), shadow: Math.round(shadow.tris) } };
+  return { id, pose, objects, visible: vis.length, main, shadow, frame: main.all + shadow.perFrame, tris: { main: Math.round(tris), shadow: Math.round(shadow.tris), cascades: shadow.ctris, frame: Math.round(tris + shadow.tris), worst: Math.round(tris + shadow.ctris.reduce((a, b) => a + b, 0)) }, top };
 }
 
 /** The meshes shown at eye (with their shadow flags), by the viewer's rules. */
@@ -99,6 +114,22 @@ function visibleSet(meshes, eye) {
       if (P.near ? d >= P.near : d < P.far) continue;
       if (P.style === 'life') { out.push({ ...m, cast: m.cast && d < LIFE_SHADOW }); continue; }
     }
+    if (m.lod && m.centers) {
+      // thin and fine shapes (src/engine/cells.js, merge.js LodSet): the copies by distance
+      const C = m.centers, sets = { near: [], far: [], shadow: [] };
+      for (let i = 0; i < C.length; i += 3) {
+        const d = Math.hypot(C[i] - eye.x, C[i + 1] - eye.y, C[i + 2] - eye.z), p = [C[i], C[i + 1], C[i + 2]];
+        if (m.lod === 'thin') { if (d < THIN_FAR) sets.near.push(p); continue; }
+        (d < LOD_NEAR ? sets.near : sets.far).push(p);
+        if (d < FINE_SHADOW) sets.shadow.push(p);
+      }
+      const sph = (pts) => { const s = new THREE.Sphere().setFromPoints(pts.map((p) => new THREE.Vector3(...p))); s.radius += m.r; return s; };
+      if (m.lod === 'thin') { if (sets.near.length) out.push({ ...m, tris: sets.near.length * m.tri, sphere: sph(sets.near), small: true }); continue; }
+      if (sets.near.length) out.push({ ...m, tris: sets.near.length * m.tri, sphere: sph(sets.near), cast: false });
+      if (sets.far.length) out.push({ ...m, tris: sets.far.length * m.coarseTri, sphere: sph(sets.far), cast: false });
+      if (sets.shadow.length && m.cast) out.push({ ...m, tris: sets.shadow.length * m.shadowTri, sphere: sph(sets.shadow), shadowOnly: true });
+      continue;
+    }
     if (m.detail) {
       const d = eye.distanceTo(m.sphere.center) - m.sphere.radius;
       if (d >= DETAIL_REACH) continue;
@@ -110,16 +141,17 @@ function visibleSet(meshes, eye) {
   // street life (instanced shapes and the rare ones by material): one mesh each, of the copies within reach
   for (const m of meshes) {
     if (!m.n) continue;
-    const pts = [[]];
+    // (the copies beyond LIFE_FULL coarse, where the shape has a coarse version: life-instances.js)
+    const pts = [[], []];
     for (let i = 0; i < m.n; i++) {
       const dx = m.pos[i * 3] - eye.x, dy = (m.pos[i * 3 + 1] - eye.y) * 0.7, dz = m.pos[i * 3 + 2] - eye.z, d2 = dx * dx + dy * dy + dz * dz;
       if (d2 > m.reach[i] ** 2) continue;
-      pts[0].push(new THREE.Vector3(m.pos[i * 3], m.pos[i * 3 + 1], m.pos[i * 3 + 2]));
+      pts[m.lowTri && d2 > LIFE_FULL ** 2 ? 1 : 0].push(new THREE.Vector3(m.pos[i * 3], m.pos[i * 3 + 1], m.pos[i * 3 + 2]));
     }
     pts.forEach((p, w) => {
       if (!p.length) return;
       const s = new THREE.Sphere().setFromPoints(p); s.radius += m.r;
-      out.push({ kind: m.kind, tris: (m.tri || 0) * p.length, mat: m.mat, sphere: s, cast: w === 0 && m.cast, small: true });
+      out.push({ kind: m.kind, tris: (w ? m.lowTri : m.tri || 0) * p.length, mat: m.mat, sphere: s, cast: m.cast, small: true });
     });
   }
   return out;
@@ -129,20 +161,44 @@ function visibleSet(meshes, eye) {
  * The viewer's merge (src/engine/merge.js): the meshes of plans always shown (no near / far, not
  * street life), fine detail apart, merged settlement-wide per material and per repeated shape.
  */
-export function mergeScene(ms) {
+export function mergeScene(ms, { cells = true } = {}) {
   const out = [], groups = new Map(), far = new Map();
   for (const m of ms) {
     const P = m.plan;
     // the town's tiles: batched per material and version, the tiles shown chosen (merge.js TileBatch)
     if (P && (m.kind === 'tileFar' || m.kind === 'tileNear')) { const k = m.kind + m.mat; (far.get(k) || far.set(k, []).get(k)).push(m); continue; }
-    if (!P || P.near || P.far || P.style === 'life' || (m.kind !== 'landmark' && m.kind !== 'instanced')) { out.push(m); continue; }
-    const k = `${m.kind}|${m.mat}|${m.key ?? ''}`, g = groups.get(k);
-    if (!g) groups.set(k, { ...m, sphere: m.sphere.clone() }); else { g.sphere.union(m.sphere); g.tris += m.tris; }
+    if (!P || P.near || P.far || P.style === 'life' || (m.kind !== 'landmark' && m.kind !== 'instanced')) { out.push(!cells && m.lowTri ? { ...m, lowTri: 0 } : m); continue; }
+    const k = `${m.kind}|${m.mat}|${m.key ?? ''}`;
+    let g = groups.get(k);
+    if (!g) groups.set(k, (g = { ...m, sphere: m.sphere.clone(), cells: new Map(), n: 0, plans: [], centerList: [] }));
+    else { g.sphere.union(m.sphere); g.tris += m.tris; g.r = Math.max(g.r, m.r); }
+    if (m.centers) g.centerList.push(m.centers);
+    g.n++; g.plans.push(P.id);
+    for (const [ck, e] of m.cells ?? []) {
+      const c = g.cells.get(ck);
+      if (!c) g.cells.set(ck, { tris: e.tris, n: e.n ?? 0, box: e.box.slice() });
+      else { c.tris += e.tris; c.n += e.n ?? 0; grow(c.box, e.box); }
+    }
   }
   for (const list of far.values()) {
     if (list.length < 2) out.push(...list); else out.push({ kind: list[0].kind, batch: list, mat: list[0].mat, cast: list[0].cast });
   }
-  return [...out, ...groups.values()];
+  for (const g of groups.values()) {
+    const { cells: C, n, plans, centerList, centers, ...base } = g;
+    if (!cells || !C.size) { out.push(base); continue; }
+    if (g.lod) {
+      // thin and fine shapes: their copies chosen by distance (merge.js LodSet)
+      const all = new Float32Array(centerList.reduce((s, a) => s + a.length, 0));
+      let o = 0;
+      for (const a of centerList) { all.set(a, o); o += a.length; }
+      out.push({ ...base, centers: all });
+      continue;
+    }
+    const all = [...C.values()];
+    if (g.tris < (g.kind === 'instanced' ? SPLIT_INST : SPLIT)) { out.push(base); continue; }
+    for (const c of all) out.push({ ...base, tris: c.tris, sphere: sphereOfBox(c.box), box: c.box });
+  }
+  return out;
 }
 
 /** A prototype's identity (its key and its vertices, rounded). */
@@ -151,6 +207,52 @@ function protoKey(p) {
   let h = 0;
   for (let i = 0; i < A.length; i++) h = (h * 31 + Math.round(A[i] * 1e4)) | 0;
   return `${p.key ?? ''}|${A.length}|${p.geometry.index?.count}|${h}`;
+}
+
+/** A box grown by another [x0, y0, z0, x1, y1, z1]. */
+const grow = (a, b) => { for (let c = 0; c < 3; c++) { a[c] = Math.min(a[c], b[c]); a[c + 3] = Math.max(a[c + 3], b[c + 3]); } return a; };
+const sphereOfBox = (b) => new THREE.Sphere(new THREE.Vector3((b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2), Math.hypot(b[3] - b[0], b[4] - b[1], b[5] - b[2]) / 2);
+
+/** A merged part's triangles by cell (src/engine/cells.js): key → { tris, box }. */
+function partCells(g) {
+  const P = g.attributes.position.array, I = g.index.array, out = new Map();
+  for (let t = 0; t < I.length; t += 3) {
+    const a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3;
+    const k = cellKey((P[a] + P[b] + P[c]) / 3, (P[a + 2] + P[b + 2] + P[c + 2]) / 3, SIZE);
+    let e = out.get(k);
+    if (!e) out.set(k, (e = { tris: 0, box: [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity] }));
+    e.tris++;
+    for (const v of [a, b, c]) for (let q = 0; q < 3; q++) { if (P[v + q] < e.box[q]) e.box[q] = P[v + q]; if (P[v + q] > e.box[q + 3]) e.box[q + 3] = P[v + q]; }
+  }
+  return out;
+}
+
+/**
+ * An instanced shape's copies (merge.js): by cell, or (thin and fine shapes, chosen by distance)
+ * their centres: { cells: key → { tris, n, box }, lod, centers, r, tri, coarseTri }.
+ */
+function instCells(p) {
+  const g = p.geometry;
+  if (!g.boundingBox) g.computeBoundingBox();
+  const bb = g.boundingBox, tri = g.index.count / 3, M = p.matrices, T = new THREE.Matrix4(), B = new THREE.Box3();
+  const ext = [bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z];
+  const lod = lodKind(tri, ext, M);
+  const c = lod === 'fine' ? coarse(g.attributes.position.array, g.attributes.normal.array, g.index.array) : null;
+  const cs = c ? coarse(g.attributes.position.array, g.attributes.normal.array, g.index.array, SHADOW_IOU) ?? c : null;
+  const cells = new Map(), centers = new Float32Array(M.length / 16 * 3);
+  let r = 0;
+  for (let i = 0; i < M.length; i += 16) {
+    T.fromArray(M, i); B.copy(bb).applyMatrix4(T);
+    const cx = (B.min.x + B.max.x) / 2, cy = (B.min.y + B.max.y) / 2, cz = (B.min.z + B.max.z) / 2;
+    centers.set([cx, cy, cz], i / 16 * 3);
+    r = Math.max(r, B.max.distanceTo(B.min) / 2);
+    const k = cellKey(cx, cz, SIZE);
+    let e = cells.get(k);
+    if (!e) cells.set(k, (e = { tris: 0, n: 0, box: [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity] }));
+    e.n++; e.tris += tri;
+    grow(e.box, [B.min.x, B.min.y, B.min.z, B.max.x, B.max.y, B.max.z]);
+  }
+  return { cells, lod: lod === 'fine' && !c ? null : lod, centers, r, tri, coarseTri: c ? c.index.length / 3 : 0, shadowTri: cs ? cs.index.length / 3 : 0 };
 }
 
 /** Every mesh the viewer makes for a settlement: { kind, mat, plan, sphere, cast, small, detail }. */
@@ -170,13 +272,14 @@ export async function sceneOf(id) {
   for (const plan of plans) {
     const b = buildPlan(plan, { instancing: true, detail: true });
     const isLife = plan.style === 'life';
-    for (const p of b.parts) out.push({ tris: (p.geometry.index ? p.geometry.index.count : p.geometry.attributes.position.count) / 3, kind: p.detail ? 'detail' : isLife ? 'lifeTile' : plan.near ? 'tileNear' : plan.far ? 'tileFar' : 'landmark', mat: p.mat, plan, sphere: sphereOf(p.geometry), cast: castsShadow(p.mat), small: !!p.detail || isLife, detail: !!p.detail });
+    const always = !isLife && !plan.near && !plan.far;
+    for (const p of b.parts) out.push({ tris: (p.geometry.index ? p.geometry.index.count : p.geometry.attributes.position.count) / 3, kind: p.detail ? 'detail' : isLife ? 'lifeTile' : plan.near ? 'tileNear' : plan.far ? 'tileFar' : 'landmark', mat: p.mat, plan, sphere: sphereOf(p.geometry), cast: castsShadow(p.mat), small: !!p.detail || isLife, detail: !!p.detail, cells: always && !p.detail && p.geometry.index ? partCells(p.geometry) : null });
     for (const p of b.instanced) {
       if (isLife) {
         const k = `${p.key}|${p.mat}`, e = life.get(k) || life.set(k, { mat: p.mat, chunks: [], n: 0 }).get(k);
         p.__plan = plan; e.chunks.push(p); e.n += p.matrices.length / 16; continue;
       }
-      out.push({ tris: p.geometry.index.count / 3 * p.matrices.length / 16, kind: p.detail ? 'detail' : 'instanced', mat: p.mat, plan, key: protoKey(p), sphere: sphereOf(p.geometry, p.matrices), cast: castsShadow(p.mat), small: !!p.detail, detail: !!p.detail });
+      out.push({ tris: p.geometry.index.count / 3 * p.matrices.length / 16, kind: p.detail ? 'detail' : 'instanced', mat: p.mat, plan, key: protoKey(p), sphere: sphereOf(p.geometry, p.matrices), cast: castsShadow(p.mat), small: !!p.detail, detail: !!p.detail, ...(always && !p.detail ? instCells(p) : {}) });
     }
     if (b.lights.length) out.push({ kind: 'flames', mat: 'flame', plan, sphere: new THREE.Sphere().setFromPoints(b.lights.map((l) => new THREE.Vector3(...l.at))), cast: false });
   }
@@ -193,7 +296,8 @@ export async function sceneOf(id) {
         if (!p.geometry.boundingSphere) p.geometry.computeBoundingSphere();
         r = Math.max(r, p.geometry.boundingSphere.radius * 2);
       }
-      out.push({ kind: 'life', tri: e.chunks[0].geometry.index.count / 3, mat: e.mat, n: e.n, pos, reach, r, cast: castsShadow(e.mat) });
+      const g = e.chunks[0].geometry, low = coarse(g.attributes.position.array, g.attributes.normal.array, g.index.array);
+      out.push({ kind: 'life', tri: g.index.count / 3, lowTri: low ? low.index.length / 3 : 0, mat: e.mat, n: e.n, pos, reach, r, cast: castsShadow(e.mat) });
     } else {
       for (const p of e.chunks) {
         if (!p.geometry.boundingSphere) p.geometry.computeBoundingSphere();
@@ -210,15 +314,47 @@ export async function sceneOf(id) {
   return out;
 }
 
+/**
+ * Views measured with --views (besides each settlement's arrival): dense interiors and heavy
+ * places, [x, feet y, z] in the settlement's frame; the frame counted looking each of four ways
+ * (the worst reported), level.
+ */
+export const VIEWS = {
+  paris: [['sainte-chapelle upper chapel', [-192, 8.6, -10]]],
+  florence: [['duomo nave', [-30, 0, -60]]],
+  'new-york': [['fifth avenue', [4, 0.1, 176]]],
+  'qing-beijing': [['taihe terrace', [40, 8.15, 20]]],
+};
+
+const M = (v) => (v / 1e6).toFixed(2);
+const SIZE = +opt('cell', CELL), SPLIT = +opt('split', SPLIT_TRIS);
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   const at = opt('at') ? opt('at').split(',').map((v) => (v === '' || v === 'g' ? null : +v)) : null;
-  const sun = opt('sun', '135,40').split(',').map(Number), merge = !args.includes('--nomerge');
+  const sun = opt('sun', '135,40').split(',').map(Number), merge = !args.includes('--nomerge'), cells = !args.includes('--before');
   const rows = [];
-  for (const id of ids) {
-    const R = await drawCount(id, { at, sun, merge });
-    rows.push(R);
-    const f = (o) => Object.entries(o).filter(([k]) => k !== 'all').map(([k, v]) => `${k} ${v}`).join(', ');
-    console.log(`${id}: frame ≈ ${R.frame} draws (main ${R.main.all}: ${f(R.main)}; shadow ${R.shadow.cascades.join('/')} per cascade, ${R.shadow.perFrame} a frame); ${R.objects} meshes made, ${R.visible} shown`);
+  for (const id of ids.length ? ids : Object.keys(ARRIVALS)) {
+    const build = await sceneOf(id);
+    const poses = [['arrival', at ?? ARRIVALS[id]]];
+    if (args.includes('--views')) for (const [name, [x, y, z]] of VIEWS[id] ?? []) poses.push([name, [x, y, z, 0, 0.05]]);
+    for (const [name, pose] of poses) {
+      let R = null;
+      // an interior: the worst of four ways
+      const yaws = name === 'arrival' ? [pose[3]] : [0, 1, 2, 3].map((k) => k * Math.PI / 2);
+      for (const yaw of yaws) {
+        const r = await drawCount(id, { at: [pose[0], pose[1], pose[2], yaw, pose[4] ?? 0.1], sun, build, merge, cells });
+        if (!R || r.tris.frame > R.tris.frame) R = r;
+      }
+      R.view = name;
+      rows.push(R);
+      const f = (o) => Object.entries(o).filter(([k]) => k !== 'all').map(([k, v]) => `${k} ${v}`).join(', ');
+      console.log(`${id} [${name}]: ${M(R.tris.frame)} M tris a frame (main ${M(R.tris.main)}, shadow ${R.tris.cascades.map(M).join('/')} per cascade; worst frame ${M(R.tris.worst)}); ≈ ${R.frame} draws (main ${R.main.all}: ${f(R.main)}; shadow ${R.shadow.cascades.join('/')} per cascade, ${R.shadow.perFrame} a frame); ${R.objects} meshes made, ${R.visible} shown`);
+      if (args.includes('--top')) {
+        const sum = (list) => { const m = new Map(); for (const t of list) { const k = `${t.kind} ${t.mat} ${t.plan}`; m.set(k, (m.get(k) || 0) + t.tris); } return [...m].sort((a, b) => b[1] - a[1]).slice(0, +opt('top', 10) || 10); };
+        console.log('   main:', sum(R.top).map(([k, v]) => `${k} ${Math.round(v / 1000)}k`).join('; '));
+        R.shadow.top.forEach((l, c) => console.log(`   cascade ${c}:`, sum(l).map(([k, v]) => `${k} ${Math.round(v / 1000)}k`).join('; ')));
+      }
+    }
   }
-  if (opt('json')) await writeFile(opt('json'), JSON.stringify(rows, null, 1));
+  if (opt('json')) await writeFile(opt('json'), JSON.stringify(rows.map(({ top, ...r }) => r), null, 1));
 }

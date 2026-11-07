@@ -13,7 +13,7 @@ import { PLANET_RADIUS } from '../planet/sites.js';
 import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
 import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
-import { SMALL } from './layers.js';
+import { SMALL, SHADOW } from './layers.js';
 import { AIR, airNode, airComposite, LampPool } from './air.js';
 
 /** The depth buffer unless the address asks for another (see init). */
@@ -327,7 +327,8 @@ export class Renderer {
         // the small things (layer SMALL) cast into the first cascade only: in the outer ones their
         // shadows are a texel or two but cost a draw each. (A mask of layer 0 alone would be taken
         // by three for "unset" and replaced by the camera's, so the outer ones carry an unused bit.)
-        L[i].shadow.camera.layers.mask = i === 0 ? (1 | (1 << SMALL)) : (1 | (1 << 3));
+        // Layer SHADOW (casters the camera does not see, merge.js LodSet) goes into every cascade.
+        L[i].shadow.camera.layers.mask = (i === 0 ? (1 | (1 << SMALL)) : (1 | (1 << 3))) | (1 << SHADOW);
       }
     }
     this.pipeline.render();
