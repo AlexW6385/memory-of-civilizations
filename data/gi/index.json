@@ -1549,7 +1549,7 @@
  },
  "sydney-opera": {
   "site": "sydney",
-  "hash": "35763f4a3d96e9d4",
+  "hash": "7110370b3edf60dc",
   "rays": 128,
   "probes": 71208,
   "boxes": [
@@ -1570,8 +1570,8 @@
     ]
    }
   ],
-  "bytes": 1191427,
-  "seconds": 576,
+  "bytes": 1191092,
+  "seconds": 270,
   "baked": "2026-11-07"
  },
  "ur-ziggurat": {
