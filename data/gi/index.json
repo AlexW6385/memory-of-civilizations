@@ -1,7 +1,7 @@
 {
  "amsterdam-dam": {
   "site": "amsterdam",
-  "hash": "1bf8015ab283b943",
+  "hash": "01ae013e72f29337",
   "rays": 128,
   "probes": 77056,
   "boxes": [
@@ -24,8 +24,8 @@
     ]
    }
   ],
-  "bytes": 1237483,
-  "seconds": 409,
+  "bytes": 1235060,
+  "seconds": 200,
   "baked": "2026-11-07"
  },
  "angkor-wat": {
@@ -1500,7 +1500,7 @@
  },
  "song-hangzhou-liuhe": {
   "site": "song-hangzhou",
-  "hash": "5a9e314ae77fe9cf",
+  "hash": "2483fb354b49376d",
   "rays": 128,
   "probes": 28237,
   "boxes": [
@@ -1543,8 +1543,8 @@
     ]
    }
   ],
-  "bytes": 446339,
-  "seconds": 65,
+  "bytes": 446353,
+  "seconds": 60,
   "baked": "2026-11-07"
  },
  "sydney-opera": {
