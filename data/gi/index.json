@@ -491,6 +491,39 @@
   "seconds": 83,
   "baked": "2026-11-06"
  },
+ "london-westminster": {
+  "site": "london",
+  "hash": "34bc692ebcc7bedd",
+  "rays": 128,
+  "probes": 78540,
+  "boxes": [
+   {
+    "min": [
+     10,
+     1.55,
+     -124
+    ],
+    "n": [
+     35,
+     33,
+     68
+    ],
+    "spacing": 2.1,
+    "rooms": [
+     "westminster hall",
+     "st stephen's porch",
+     "st stephen's hall",
+     "central lobby",
+     "lords corridor and peers' lobby",
+     "house of lords",
+     "house of commons"
+    ]
+   }
+  ],
+  "bytes": 1241833,
+  "seconds": 378,
+  "baked": "2026-11-07"
+ },
  "madurai-meenakshi": {
   "site": "madurai",
   "hash": "5883c1fe8e2561b1",
