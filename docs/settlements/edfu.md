@@ -82,6 +82,17 @@ From the fields in the south to the pylon's forecourt and into the temple. [infe
 
 As for the temple (`docs/buildings/edfu.md` §9).
 
+## 10. Painted reliefs, the sanctuary's rite and the priests (L3, 2026-11-07)
+
+- **Colour.** Cleaning of the temple (2021–24) removed "dust, bird droppings, soot and other deposits" from the sandstone reliefs and found "the reliefs' original painted coloring: varied hues of red and blue"; the higher reliefs depicting deities "still contain traces of thin gold leaf" [stated: Smithsonian Magazine, 2024]. Ours: a painted-relief kit (`wall_reliefs`, `src/styles/egyptian/objects.js`) on the inner walls of the sanctuary, the hall of offerings, the hall of appearances and the pronaos (eight faces): under a band of blue sky and a frieze of khekher knots (yellow, their tops green), registers of scenes on blue ground lines — the king, skin red-brown, the blue crown, a white kilt and blue collar, coming in toward the sanctuary with a gilded offering before a falcon-headed god in the red and white double crown, his was-sceptre and ankh yellow, or a god enthroned — with columns of hieroglyphs painted blue between them; a dado frieze of red, blue, green and yellow blocks under the lowest register. In the sanctuary the gods are gilded. The subjects and the palette beyond red, blue and gold are [inferred: the standard Ptolemaic temple scheme].
+- **The rite.** The sanctuary held the god's statue; in the morning a priest "washed, anointed, and elaborately dressed the god's statue before presenting it with offerings", the offerings afterwards "distributed among the priests"; at festivals the image went out "in a model barque" [stated: Wikipedia "Ancient Egyptian religion"]. Ours: before the naos, behind the barque on its stand, an offering table of black granite heaped with loaves, a haunch, figs and lotus, wine and water jars, a bronze incense stand with its pan; a second table in the hall of offerings.
+- **Priests.** Eight priests (`priests` plan): shaven, in linen wraps, bare-chested, in sandals — one censing with raised hands before the naos, two at the table of the hall of offerings, others walking in the halls and the court [inferred: their dress from the general record of Egyptian priestly purity; the 2024 URL for Herodotus II.37 could not be fetched].
+- **A fix.** The vultures' wings and the winged discs of the hypostyle ceilings (§4.4) were never added (the call that added them sat inside a comment); they now are.
+
+Sources (2026-11-07):
+- [See an ancient Egyptian temple's brilliant colors newly revealed — Smithsonian Magazine](https://www.smithsonianmag.com/smart-news/see-an-ancient-egyptian-temples-brilliant-colors-newly-revealed-beneath-layers-of-dust-and-soot-180985108/)
+- [Ancient Egyptian religion — Wikipedia](https://en.wikipedia.org/wiki/Ancient_Egyptian_religion)
+
 ## Sources
 
 - The temple's own sources: `docs/buildings/edfu.md`
