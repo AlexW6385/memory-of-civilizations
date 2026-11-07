@@ -4,7 +4,8 @@
 // the south-west; the village of round houses on the slopes round about. Pure data. +x east, +z south.
 
 export const RADIUS = 380;
-export const EDGE = 3;                                 // the band where a cut's wall stands
+export const EDGE = 3;                                 // the band inside a cut's edge where its wall stands
+export const OUTER = 2;                                // the walls reach this far outside the edge (under the ground)
 // pits: { rect, depth }; churches stand on their floors
 export const PITS = {
   giyorgis: { rect: [-216, 114, -174, 156], depth: 12 },     // the cross 25.6 m over its plinth, a court of about 5 m round it
@@ -31,15 +32,18 @@ export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >=
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 const edgeIn = (r, x, z) => Math.min(x - r[0], r[2] - x, z - r[1], r[3] - z);
 /** The depth of the cuts at (x, z) (0 outside them): full on their floors, falling to 0 across the wall band at their edges. */
-// the ground is cut only inside the rock walls' inner faces, so that it stays level up to the walls
-// and the walls' tops lie flush with it
+// the ground drops sharply half a metre in from the cut's edge, well inside the rock walls (which
+// stand from 2 m outside the edge to EDGE inside it): the ground's mesh, some 2 m between vertices
+// and not aligned with the cuts, then slopes down only within the walls, never in front of their
+// faces nor in a dip before their kerbs
+const DROP = (e) => Math.max(0, Math.min(1, (e - 0.35) / 0.3));
 export function cutDepth(x, z) {
   let d = 0;
-  for (const p of Object.values(PITS)) if (inRect(p.rect, x, z)) d = Math.max(d, p.depth * Math.max(0, Math.min(1, (edgeIn(p.rect, x, z) - EDGE + 0.4) / 0.8)));
+  for (const p of Object.values(PITS)) if (inRect(p.rect, x, z)) d = Math.max(d, p.depth * DROP(edgeIn(p.rect, x, z)));
   for (const t of TRENCHES) if (inRect(t.rect, x, z)) {
     const [x0, z0, x1, z1] = t.rect, u = t.axis === 'x' ? (x - x0) / (x1 - x0) : (z - z0) / (z1 - z0);
     const side = t.axis === 'x' ? Math.min(z - z0, z1 - z) : Math.min(x - x0, x1 - x);
-    d = Math.max(d, (t.d0 + (t.d1 - t.d0) * u) * Math.max(0, Math.min(1, (side - EDGE + 0.4) / 0.8)));
+    d = Math.max(d, (t.d0 + (t.d1 - t.d0) * u) * DROP(side));
   }
   return d;
 }

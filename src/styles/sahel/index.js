@@ -127,7 +127,7 @@ function bancoWall(bag, col, a, b, y, h, th, opts = {}) {
 }
 
 /** An axis-aligned slab of banco [x0, z0, x1, z1] from y0 to y1, pierced by holes [u0, u1, v0, v1] (u along its long side). */
-function piercedSlab(bag, col, mat, r, y0, y1, holes = []) {
+export function piercedSlab(bag, col, mat, r, y0, y1, holes = []) {
   const [x0, z0, x1, z1] = r, alongX = x1 - x0 >= z1 - z0, A0 = alongX ? x0 : z0, A1 = alongX ? x1 : z1;
   const cuts = [...new Set([A0, A1, ...holes.flatMap((h) => [h[0], h[1]])])].filter((u) => u >= A0 && u <= A1).sort((p, q) => p - q);
   const put = (u0, u1, v0, v1) => {

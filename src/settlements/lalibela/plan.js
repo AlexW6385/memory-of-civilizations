@@ -2,7 +2,7 @@
 // on the floor of its pit, the pits' and trenches' rock walls (open where a trench joins), Bete
 // Giyorgis alone to the south-west.
 
-import { PITS, TRENCHES, EDGE, inRect, slope } from './layout.js';
+import { PITS, TRENCHES, EDGE, OUTER, inRect, slope } from './layout.js';
 
 const E = [];
 // ---- the walls of the cuts: each pit edge and trench side, broken where another cut opens onto it
@@ -11,7 +11,9 @@ const half = EDGE / 2;
 for (const c of cuts) {
   const [x0, z0, x1, z1] = c.rect;
   const sides = [];
-  if (c.pit || c.axis === 'x') sides.push(['z', z0 + half, x0, x1], ['z', z1 - half, x0, x1]);
+  // a pit's north and south walls run on past its corners under the ground, to cover them
+  const xo = c.pit ? OUTER : 0;
+  if (c.pit || c.axis === 'x') sides.push(['z', z0 + half, x0 - xo, x1 + xo], ['z', z1 - half, x0 - xo, x1 + xo]);
   if (c.pit || c.axis === 'z') sides.push(['x', x0 + half, z0, z1], ['x', x1 - half, z0, z1]);
   for (const [k, v, u0, u1] of sides) {
     let pieces = [[u0, u1]];
@@ -31,7 +33,8 @@ for (const c of cuts) {
       const n = Math.max(1, Math.ceil((q - p) / 2));
       for (let i = 0; i < n; i++) {
         const s0 = p + (q - p) * i / n, s1 = p + (q - p) * (i + 1) / n, m = (s0 + s1) / 2, [mx, mz] = k === 'z' ? [m, v] : [v, m];
-        E.push({ t: 'rock_cut', a: k === 'z' ? [s0, v] : [v, s0], b: k === 'z' ? [s1, v] : [v, s1], y0: -c.depth - 0.2, th: EDGE, top: slope(mx, mz) });
+        const vo = v + (v < (k === 'z' ? (z0 + z1) / 2 : (x0 + x1) / 2) ? -OUTER / 2 : OUTER / 2);   // widened outward, under the ground
+        E.push({ t: 'rock_cut', a: k === 'z' ? [s0, vo] : [vo, s0], b: k === 'z' ? [s1, vo] : [vo, s1], y0: -c.depth - 0.2, th: EDGE + OUTER, top: slope(mx, mz) + 0.12 });   // a hewn kerb a hand proud of the ground (its top flush with the ground had flickered with it)
       }
     }
   }
@@ -49,15 +52,16 @@ E.push({ t: 'giyorgis', c: gc, y0: -G.depth + 0.15, h: G.depth - 0.15 - 0.42, a:
 {
   const T = TRENCHES[0], [, tz0, , tz1] = T.rect, x1 = G.rect[0] + EDGE;
   const zc = (tz0 + tz1) / 2, wT = tz1 - tz0 - 2 * EDGE;
-  E.push({ t: 'rock_cut', a: [x1 - 8, zc], b: [x1, zc], y0: -7.4, th: wT, top: 0 });
+  E.push({ t: 'rock_cut', a: [x1 - 8, zc], b: [x1, zc], y0: -7.4, th: wT, top: 0.12 });
   E.push({ t: 'block', walk: true, rect: [x1 - 8, tz0 + EDGE, x1, tz1 - EDGE], y0: -0.3, y1: 0, mat: 'tuff_red', collide: false });
   // the tunnel's mouths, each under a hewn band standing a little proud of the rock face
   for (const x of [x1 - 8 - 0.06, x1 + 0.06]) E.push({ t: 'rock_cut', a: [x, tz0 + EDGE - 0.2], b: [x, tz1 - EDGE + 0.2], y0: -7.75, th: 0.12, top: -7.1 });
 }
 const M = PITS.medhane, mc = [(M.rect[0] + M.rect[2]) / 2, (M.rect[1] + M.rect[3]) / 2];
-E.push({ t: 'basilica', rect: [mc[0] - 16.75, mc[1] - 11.75, mc[0] + 16.75, mc[1] + 11.75], y0: -M.depth + 0.15, h: 11, cols: [11, 7] });
+E.push({ t: 'basilica', rect: [mc[0] - 16.75, mc[1] - 11.75, mc[0] + 16.75, mc[1] + 11.75], y0: -M.depth + 0.15, h: 11, cols: [12, 7] });
+{ const p = PITS.maryam; E.push({ t: 'maryam', c: [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2], y0: -p.depth + 0.15, h: 9 }); }
 const ch = (p, w, d, h) => { const c = [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2]; E.push({ t: 'aksumite', rect: [c[0] - w / 2, c[1] - d / 2, c[0] + w / 2, c[1] + d / 2], y0: -p.depth + 0.15, h }); };
-ch(PITS.maryam, 15, 11, 8.5); ch(PITS.golgotha, 22, 12, 8); ch(PITS.amanuel, 18, 12, 11.5); ch(PITS.gabriel, 16, 10, 9);
+ch(PITS.golgotha, 22, 12, 8); ch(PITS.amanuel, 18, 12, 11.5); ch(PITS.gabriel, 16, 10, 9);
 
 // cells and tombs cut into the rock faces of Bete Giyorgis' pit (sensesatlas: its walls have "a
 // number of caves", lodgings of priests and burial places), some at the floor, some on a ledge
@@ -69,7 +73,7 @@ ch(PITS.maryam, 15, 11, 8.5); ch(PITS.golgotha, 22, 12, 8); ch(PITS.amanuel, 18,
   for (const [c, n, up] of caves) E.push({ t: 'cave', c, n, y: yf + 0.25 + up, floor: yf, w: up ? 0.9 : 1.05, h: up ? 1.4 : 1.75 });
 }
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open')];
+const rooms = [room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open'), room('medhane-in', [mc[0] - 13.15, mc[1] - 8.15, mc[0] + 13.15, mc[1] + 8.15], -M.depth + 0.95, 'hall'), room('maryam-in', [62.8, -93.6, 77.2, -86.4], -PITS.maryam.depth + 0.75, 'hall')];
 const walks = [[[-280, 128], [-262, 128], [-216, 128], [-210, 130]]];
 walks[0].y0 = 0;
 
