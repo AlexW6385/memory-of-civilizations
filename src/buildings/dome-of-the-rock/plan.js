@@ -3,7 +3,8 @@
 // +x east, +z south; y = 0 at the top of the platform (4 m above the esplanade). Metres.
 
 import { SITES } from '../../world/regions.js';
-import './style.js';
+import { CAVE } from './style.js';
+import { subtractRects } from '../../core/build.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -31,14 +32,23 @@ function side(k, a) {
 }
 
 // ── the platform, its stairs, the esplanade below ────────────────────────────
-add({ t: 'block', rect: [-70, -60, 70, 60], y0: -P, y1: 0, mat: 'limestone', walk: true });
-add({ t: 'floor', rect: [-70, -60, 70, 60], y: 0, mat: 'travertine', th: 0.3 });
+// (cut where the steps go down to the cave under the Rock)
+const HOLES = [[CAVE.rect[0] - 0.4, CAVE.rect[1] - 0.4, CAVE.rect[2] + 0.4, CAVE.rect[3] + 0.4], [CAVE.stair[0] - 0.3, CAVE.rect[3] + 0.4, CAVE.stair[2] + 0.3, CAVE.stair[3]]];
+for (const r of subtractRects([-70, -60, 70, 60], HOLES)) {
+  add({ t: 'block', rect: r, y0: -P, y1: 0, mat: 'limestone', walk: true });
+  add({ t: 'floor', rect: r, y: 0, mat: 'travertine', th: 0.3 });
+}
 add({ t: 'stair', rect: [-77.5, -6, -70, 6], dir: 'e', y0: -P, y1: 0, riser: 0.167, mat: 'limestone' });
 add({ t: 'stair', rect: [70, -6, 77.5, 6], dir: 'w', y0: -P, y1: 0, riser: 0.167, mat: 'limestone' });
 add({ t: 'stair', rect: [-6, -67.5, 6, -60], dir: 's', y0: -P, y1: 0, riser: 0.167, mat: 'limestone' });
 add({ t: 'stair', rect: [-6, 60, 6, 67.5], dir: 'n', y0: -P, y1: 0, riser: 0.167, mat: 'limestone' });
 // the marble floor of the shrine, a little above the platform's paving
-add({ t: 'ring_slab', c: [0, 0], outer: { n: 8, a: AO }, inner: { n: 0, a: 0.01 }, y0: -0.05, y1: 0.03, mat: 'proconnesian' });
+add({ t: 'ring_slab', c: [0, 0], outer: { n: 8, a: AO }, inner: { n: 0, a: 8.9 }, y0: -0.05, y1: 0.03, mat: 'proconnesian' });
+// within it, round the Rock, the marble laid in strips about the opening of the cave's steps
+for (let z = -9.0; z < 9.0 - 1e-6; z += 0.9) {
+  const zn = Math.min(Math.abs(z), Math.abs(z + 0.9)), hw = Math.sqrt(Math.max(0, 9.05 ** 2 - (z * (z + 0.9) < 0 ? 0 : zn) ** 2)) + 0.1;
+  for (const r of subtractRects([-hw, z, hw, z + 0.9], HOLES)) add({ t: 'slab', rect: r, y0: -0.05, y1: 0.03, mat: 'proconnesian', holes: [] });
+}
 
 // ── the outer octagon: walls, windows and doors, marble below, mosaic above ──
 for (let k = 0; k < 8; k++) {
@@ -79,6 +89,8 @@ for (let k = 0; k < 8; k++) {
   const arches = [0, 1, 2].map((i) => ({ uc: 0.8 + bay * (i + 0.5), r: (bay - 0.7) / 2, spring: 6.2 }));
   pwall({ o: s.o, u: s.u, th: 1.1, u0: 0, u1: s.L, y0: 0, y1: CEIL, arches, arcade: true, noEnds: true, mat: 'mosaic_gold' });
   add({ t: 'ablaq', o: s.o, u: s.u, th: 1.1, arches, ring: 0.42 });
+  // the mosaics: a tree in each spandrel on both faces, the inscription band along the top (docs/settlements/jerusalem.md §1c)
+  add({ t: 'dotr_mosaic', o: s.o, u: s.u, L: s.L, th: 1.1, arches, ring: 0.42, band: [8.5, 9.12], top: CEIL, seed: k + 1 });
   for (const i of [1, 2]) { const u = 0.8 + bay * i; column(s.o[0] + s.u[0] * u, s.o[1] + s.u[1] * u, 0, 5.9, 0.62, 'marble_dark'); }
   // the pier at the corner where this side begins
   const ang = (k * 45 - 22.5) * D2R, rv = AA / Math.cos(22.5 * D2R);
@@ -95,6 +107,7 @@ for (let k = 0; k < 16; k++) {
   const L = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]), u = [(pb[0] - pa[0]) / L, (pb[1] - pa[1]) / L];
   pwall({ o: pa, u, th: 1.2, u0: 0, u1: L, y0: 6.0, y1: 9.2, arches: [{ uc: L / 2, r: (L - 0.8) / 2, spring: 6.0 }], arcade: true, noEnds: true, mat: 'mosaic_gold', collide: false });
   add({ t: 'ablaq', o: pa, u, th: 1.2, arches: [{ uc: L / 2, r: (L - 0.8) / 2, spring: 6.0 }], ring: 0.36, n: 9 });
+  add({ t: 'dotr_mosaic', o: pa, u, L, th: 1.2, arches: [{ uc: L / 2, r: (L - 0.8) / 2, spring: 6.0 }], ring: 0.36, top: 9.2, single: true });
   if (k % 4 === 0) {
     const ra = [Math.cos(a) * (RC - 1.1), Math.sin(a) * (RC - 1.1)], rb = [Math.cos(a) * (RC + 1.1), Math.sin(a) * (RC + 1.1)];
     add({ t: 'wall', a: ra, b: rb, th: 1.6, y0: 0, y1: 6.0, openings: [], mat: 'revetment_byz' });
@@ -102,11 +115,12 @@ for (let k = 0; k < 16; k++) {
   // a low wooden screen between the supports, round the Rock
   const q0 = [pa[0] + u[0] * (k % 4 === 0 ? 0.85 : 0.4), pa[1] + u[1] * (k % 4 === 0 ? 0.85 : 0.4)];
   const q1 = [pb[0] - u[0] * ((k + 1) % 4 === 0 ? 0.85 : 0.4), pb[1] - u[1] * ((k + 1) % 4 === 0 ? 0.85 : 0.4)];
-  obj('rock_screen', 0, 0, 0, { a: q0, b: q1, h: 1.4 });
+  if (k !== 1) obj('rock_screen', 0, 0, 0, { a: q0, b: q1, h: 1.4 });      // (open on the south-east, where the steps go down to the cave)
 }
 add({ t: 'arc_wall', c: [0, 0], r0: RC - 0.25, r1: RC + 0.25, a0: 0, a1: 360, y0: 5.6, y1: 5.9, mat: 'gilt_bronze', collide: false, step: 3 });
 add({ t: 'arc_wall', c: [0, 0], r0: RD, r1: RDO, a0: 0, a1: 360, y0: 9.2, y1: SPR, mat: 'mosaic_gold', collide: false, step: 3,
   gaps: Array.from({ length: 16 }, (_, k) => ({ a: 11.25 + 22.5 * k, w: 1.3, y0: 15.6, y1: 19.0 })) });
+add({ t: 'drum_mosaic', c: [0, 0], r: RD, wins: Array.from({ length: 16 }, (_, k) => 11.25 + 22.5 * k), w: 1.3, y0: 15.6, y1: 19.0, base: 9.2 });
 add({ t: 'drum_frames', c: [0, 0], r: RDO, wins: Array.from({ length: 16 }, (_, k) => 11.25 + 22.5 * k), w: 1.3, y0: 15.6, y1: 19.0, base: 14.0 });
 add({ t: 'arc_wall', c: [0, 0], r0: RDO - 0.05, r1: RDO + 0.45, a0: 0, a1: 360, y0: SPR - 0.5, y1: SPR + 0.2, mat: 'limestone', collide: false, step: 3 });
 // the dome: inner shell (gilded), outer shell (gilded metal over timber), finial
@@ -120,7 +134,7 @@ add({ t: 'ring_slab', c: [0, 0], outer: { n: 8, a: AO - TH }, inner: { n: 8, a: 
 add({ t: 'ring_slab', c: [0, 0], outer: { n: 8, a: AA - 0.55 }, inner: { n: 0, a: RDO - 0.1 }, y0: CEIL - 0.4, y1: CEIL - 0.1, mat: 'ceiling_painted' });
 
 // ── the Rock ─────────────────────────────────────────────────────────────────
-obj('rock', 0, 0, 0, { rx: 6.4, rz: 8.6, h: 1.5 });
+obj('sakhra', 0, 0, 0, { rx: 6.4, rz: 8.6, h: 1.5 });
 
 // ── the Dome of the Chain, east of the shrine ────────────────────────────────
 {
