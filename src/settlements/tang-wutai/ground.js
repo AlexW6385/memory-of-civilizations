@@ -25,6 +25,7 @@ export const ground = {
     sky: { turbidity: 2.4, rayleigh: 1.0, mie: 0.004, mieG: 0.78, zenith: [0.07, 0.15, 0.42], horizon: [0.62, 0.66, 0.72] },
     fog: { color: [0.78, 0.8, 0.83], density: 0.0003, height: 0.01 },
     exposure: 0.48,
+    damp: 0.25,     // the mountain's summer rains: a little streaking and moss on the shaded foot of walls
     wind: [0.5, 0.2],
     weather: [
       { id: 'clear', weight: 4, clouds: 0.2, cloudDensity: 0.35, sun: 1.0, fog: 1 },

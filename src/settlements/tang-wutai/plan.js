@@ -9,6 +9,27 @@ import hallPlan from '../../buildings/foguang-east-hall/plan.js';
 const T = 13;                                   // the upper terrace (hall plan, y above the courtyard)
 const at = (x, z) => [HALL.origin[0] + x, HALL.origin[1] + z];   // a point of the hall plan in the settlement
 export const PILLAR = at(-22, -8), ZUSHI = at(6, 32);
+const F = T + 1.0, H0 = 4.99;                   // the hall's floor; its column height at the centre
+
+/**
+ * The bracket-eye panels (gongyan bi) of the hall's inner ring: plastered boards between the bracket sets, from the
+ * top of the inner architrave to the first column-head fang; on the front inner architrave of the north secondary bay
+ * the Tang painting that survives there (docs/settlements/tang-wutai.md §10).
+ */
+function innerPanels() {
+  const E = [], ZI = [-12.6, -7.56, -2.52, 2.52, 7.56, 12.6], XI = [-4.415, 0, 4.415], y0 = F + H0 - 0.02, y1 = F + H0 + 1.02;
+  const panel = (p, q) => {
+    const alongZ = Math.abs(p[0] - q[0]) < 0.01, [X0, Z0] = at(...p), [X1, Z1] = at(...q);
+    E.push(alongZ ? { t: 'block', rect: [X0 - 0.06, Math.min(Z0, Z1) + 0.34, X0 + 0.06, Math.max(Z0, Z1) - 0.34], y0, y1, mat: 'paint_white', collide: false }
+      : { t: 'block', rect: [Math.min(X0, X1) + 0.34, Z0 - 0.06, Math.max(X0, X1) - 0.34, Z0 + 0.06], y0, y1, mat: 'paint_white', collide: false });
+  };
+  for (const x of [-4.415, 4.415]) for (let i = 0; i < ZI.length - 1; i++) panel([x, ZI[i]], [x, ZI[i + 1]]);
+  for (const z of [-12.6, 12.6]) for (let i = 0; i < XI.length - 1; i++) panel([XI[i], z], [XI[i + 1], z]);
+  // the painting: 4.5 by 0.66 m on the west face of the north secondary bay's panel ("right" from the hall's own side)
+  const xf = -4.415 - 0.06, [ax, az] = at(xf, -2.52 - 0.27), [bx, bz] = at(xf, -7.56 + 0.27);
+  E.push({ t: 'tang_mural', a: [ax, az], b: [bx, bz], y0: F + H0 + 0.18, h: 0.66, n: [-1, 0] });
+  return E;
+}
 
 export const pagoda = {
   id: 'tang-wutai-stones', style: 'song', origin: [0, 0], base: 0, yaw: 0, feature: true,
@@ -16,6 +37,9 @@ export const pagoda = {
   elements: [
     { t: 'tang_dharani', at: PILLAR, y: T, h: 3.24 },
     { t: 'zushi_pagoda', at: ZUSHI, y: T, door: 'w' },
+    ...innerPanels(),
+    // the low lacquered seat of the monk Yuancheng's portrait under the south end bay's window
+    { t: 'block', rect: [...at(-8.25, 14.15), ...at(-7.15, 15.45)], y0: F - 0.02, y1: F + 0.3, mat: 'lacquer_red', collide: false },
   ],
 };
 
@@ -96,6 +120,11 @@ function monks() {
   // before the monks' quarters: one sitting on the platform's edge, one sweeping-still with a pole, one at a door
   monk([-92.3, -35.0], 0.45, [0, 1], { pose: 'talk' }); monk([-85, -33.2], 0, [0, 1], { carry: 'pole' });
   monk([-80.3, 34.9], 0.45, [0, -1]);
+  // the portraits in painted clay of the hall's two founders, life size and seated cross-legged (§10): the donor Ning
+  // Gongyu at the altar platform's south end beside the heavenly king, hands in her sleeves, a cloak over her robe;
+  // the monk Yuancheng under the south end bay's window, facing the platform
+  L.push({ t: 'figure', at: at(-2.5, 10.5), y: F + 0.9, rot: faceTo([-1, 0]), seed: 8571, dress: 'robe', cloth: 'clay_robe', cloth2: 'clay_green', over: 'collar', skin: 'stucco_warm', hair: 'bun', hairMat: 'hide_black', hat: 'none', pose: 'cross', arms: 'clasp', h: 1.58, beard: false });
+  L.push({ t: 'figure', at: at(-7.7, 14.8), y: F + 0.3, rot: faceTo([1, -0.45]), seed: 8572, dress: 'robe', cloth: 'clay_robe', cloth2: 'clay_robe', over: 'sash', skin: 'stucco_warm', hair: 'shaven', hat: 'none', pose: 'cross', arms: 'clasp', h: 1.66, beard: false });
   return { id: 'tang-wutai-monks', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-360, -360, 360, 360], entrance: { at: [-80, 0], facing: 'e' } };
 }
 export const people = monks();
