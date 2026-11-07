@@ -1,7 +1,8 @@
 import { lodTiles } from '../lod.js';
 // The city's houses (docs/settlements/mamluk-cairo.md §5): Cairene town houses (house_mamluk, style
 // vernacular) — and sabil-kuttabs on three street corners in place of a house.
-import { RADIUS, lots, SABILS, SUQ } from './layout.js';
+import { RADIUS, lots, SABILS, SUQ, QAA } from './layout.js';
+import { lifePlan } from './life.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-37, -30], facing: 's' } });
 const dist = (l, [x, z]) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
 export async function town() {
@@ -21,5 +22,9 @@ export async function town() {
   plans.push({ ...base('mamluk-cairo-sabils', sabils), style: 'mamluk' });
   // the covered market street north from the madrasa's portal
   plans.push({ ...base('mamluk-cairo-suq', [{ t: 'suq_covered', rect: SUQ, y: 0, street: 5, seed: 1363 }]), style: 'mamluk', bounds: [SUQ[0] - 2, SUQ[1] - 2, SUQ[2] + 2, SUQ[3] + 2] });
+  // the merchant's house with its qa'a (§10)
+  plans.push({ ...base('mamluk-cairo-qaa', [{ t: 'cairo_qaa', rect: QAA, entry: 'e', seed: 1350 }]), style: 'mamluk', bounds: [QAA[0] - 2, QAA[1] - 2, QAA[2] + 2, QAA[3] + 2],
+    rooms: [{ id: 'qaa', rect: [QAA[0] + 3.6, QAA[1] + 0.7, QAA[2] - 3.4, QAA[1] + 6.5], y: 0.3, kind: 'hall' }, { id: 'house court', rect: [QAA[0] + 3.6, QAA[1] + 7, QAA[2] - 3.4, QAA[3] - 4], y: 0, kind: 'open' }] });
+  plans.push(lifePlan());
   return plans;
 }

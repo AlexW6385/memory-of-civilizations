@@ -14,11 +14,13 @@ const PI = Math.PI;
 const put = (bag, mat, g, x, y, z, yaw = 0) => bag.add(mat, place(g, x, y, z, yaw));
 /** A flat polygon facing up at height y (points [x, z] in order, either way round). */
 export function flatUp(pts, y) {
-  const t = [];
-  for (let i = 1; i + 1 < pts.length; i++) t.push(pts[0][0], y, pts[0][1], pts[i][0], y, pts[i][1], pts[i + 1][0], y, pts[i + 1][1]);
-  // the normal is (c − b) × (a − b): make it point up
-  const [ax, , az, bx, , bz, cx, , cz] = t, ny = (cz - bz) * (ax - bx) - (cx - bx) * (az - bz);
-  if (ny < 0) for (let i = 0; i < t.length; i += 9) for (let k = 0; k < 3; k++) { const s = t[i + 3 + k]; t[i + 3 + k] = t[i + 6 + k]; t[i + 6 + k] = s; }
+  // a fan from the centroid (the polygons here are all star-shaped about it), each triangle turned to face up
+  const t = [], cx = pts.reduce((a, p) => a + p[0], 0) / pts.length, cz = pts.reduce((a, p) => a + p[1], 0) / pts.length;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length], up = (b[1] - cz) * (a[0] - cx) - (b[0] - cx) * (a[1] - cz) < 0;
+    // the normal of (p0, p1, p2) is (p2 − p1) × (p0 − p1); order the corners so that its y is positive
+    if (up) t.push(cx, y, cz, a[0], y, a[1], b[0], y, b[1]); else t.push(cx, y, cz, b[0], y, b[1], a[0], y, a[1]);
+  }
   return fromTriangles(t);
 }
 const lozenge = (cx, cz, a, b, n = 8) => Array.from({ length: n }, (_, k) => { const t = k / n * PI * 2, c = Math.cos(t), s = Math.sin(t); const r = 1 / (Math.abs(c) / a + Math.abs(s) / b); return [cx + c * r, cz + s * r]; });
@@ -102,7 +104,7 @@ export function kilim(bag, x, y, z, w, d, yaw = 0, mats = ['cloth_red', 'cloth_i
 /** A reed mat (hasır, hasira) w × d, its edge bound. */
 export function reedMat(bag, x, y, z, w, d, yaw = 0) {
   put(bag, 'reed_mat', box(-w / 2, 0, -d / 2, w / 2, 0.01, d / 2), x, y, z, yaw);
-  for (const s of [-1, 1]) put(bag, 'cloth_brown', box(-w / 2, 0.008, s * d / 2 - (s > 0 ? 0.05 : 0), w / 2, 0.012, s * d / 2 + (s < 0 ? 0.05 : 0)), x, y, z, yaw);
+  for (const s of [-1, 1]) put(bag, 'hide_tan', box(-w / 2, 0.008, s * d / 2 - (s > 0 ? 0.05 : 0), w / 2, 0.012, s * d / 2 + (s < 0 ? 0.05 : 0)), x, y, z, yaw);
 }
 
 // ---- cushions, bolsters, divans -------------------------------------------------------------------------------

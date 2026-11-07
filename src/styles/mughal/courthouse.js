@@ -70,10 +70,17 @@ export function courtHouse(bag, col, spec) {
     const top = h - 0.55;
     const holes = (list, isCourt) => list.map((q) => ({ at: s0 + q.at, w: q.w + 0.06, y0: q.pass ? fy : y + q.sill, y1: Math.min(top, y + (q.sill ?? 0) + q.h + 0.05) })).filter(() => true).map((q) => (isCourt ? q : q));
     lining(bag, M.in, rr, fy, top, side, holes(streetDoor, false), holes(arches, true));
-    bag.add(M.ceiling, box(rr[0], top, rr[1], rr[2], top + 0.08, rr[3]));
+    // a square opening in the ceiling and the roof for a lantern over the room's middle (W.lantern: { at, w })
+    const hole = W.lantern ? (() => { const L2 = along ? rr[2] - rr[0] : rr[3] - rr[1], c0 = (along ? rr[0] : rr[1]) + L2 * W.lantern.at, cm = along ? (rr[1] + rr[3]) / 2 : (rr[0] + rr[2]) / 2, hw = W.lantern.w / 2; return along ? [c0 - hw, cm - hw, c0 + hw, cm + hw] : [cm - hw, c0 - hw, cm + hw, c0 + hw]; })() : null;
+    const slabs = (r, ya, yb, m) => { if (!hole) { bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3])); return; } for (const q of [[r[0], r[1], r[2], hole[1]], [r[0], hole[3], r[2], r[3]], [r[0], hole[1], hole[0], hole[3]], [hole[2], hole[1], r[2], hole[3]]]) if (q[2] - q[0] > 0.01 && q[3] - q[1] > 0.01) bag.add(m, box(q[0], ya, q[1], q[2], yb, q[3])); };
+    slabs(rr, top, top + 0.08, M.ceiling);
     const len = along ? rr[2] - rr[0] : rr[3] - rr[1], nb = Math.max(2, Math.round(len / 0.7));
-    for (let k = 0; k < nb; k++) { const s = (k + 0.5) / nb * len; if (along) bag.add(M.beam, box(rr[0] + s - 0.07, top - 0.16, rr[1] + 0.035, rr[0] + s + 0.07, top, rr[3] - 0.035)); else bag.add(M.beam, box(rr[0] + 0.035, top - 0.16, rr[1] + s - 0.07, rr[2] - 0.035, top, rr[1] + s + 0.07)); }
-    bag.add(M.out, box(room[0], top + 0.08, room[1], room[2], h, room[3])); col.floor(room, h);
+    for (let k = 0; k < nb; k++) {
+      const s = (k + 0.5) / nb * len, a0 = (along ? rr[0] : rr[1]) + s;
+      if (hole && a0 > (along ? hole[0] : hole[1]) - 0.1 && a0 < (along ? hole[2] : hole[3]) + 0.1) continue;
+      if (along) bag.add(M.beam, box(rr[0] + s - 0.07, top - 0.16, rr[1] + 0.035, rr[0] + s + 0.07, top, rr[3] - 0.035)); else bag.add(M.beam, box(rr[0] + 0.035, top - 0.16, rr[1] + s - 0.07, rr[2] - 0.035, top, rr[1] + s + 0.07));
+    }
+    slabs(room, top + 0.08, h, M.out); col.floor(room, h);
     parapet(bag, M, room, h, side);
     // a step up from the court before each raised opening
     const P = (at, n) => (along ? [s0 + at, n] : [n, s0 + at]);
@@ -85,7 +92,7 @@ export function courtHouse(bag, col, spec) {
     }
     if (M.base) baseBand(bag, M.base, oa, ob, th, y, side, streetDoor);
     if (isEntry) for (const q of streetDoor) doorway(bag, M, oa, ob, q, th, y, side);
-    out[side] = { room: rr, y: fy, top, kind: W.kind, entry: isEntry, arches: arches.map((q) => ({ ...q, p: P(q.at, nIn) })), toCourt };
+    out[side] = { room: rr, y: fy, top, h, hole, kind: W.kind, entry: isEntry, arches: arches.map((q) => ({ ...q, p: P(q.at, nIn) })), toCourt };
   }
   // the darkened foot of the outer faces of the solid wings and the corners
   if (M.base) for (const [a, b, side] of [[[x0, z0], [x1, z0], 'n'], [[x0, z1], [x1, z1], 's'], [[x0, z0], [x0, z1], 'w'], [[x1, z0], [x1, z1], 'e']]) {
