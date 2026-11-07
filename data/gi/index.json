@@ -150,6 +150,33 @@
   "seconds": 637,
   "baked": "2026-11-06"
  },
+ "florence-centre": {
+  "site": "florence",
+  "hash": "cc7f125afd565cf1",
+  "rays": 128,
+  "probes": 73440,
+  "boxes": [
+   {
+    "min": [
+     -72,
+     -0.5,
+     -79.5
+    ],
+    "n": [
+     68,
+     36,
+     30
+    ],
+    "spacing": 1.35,
+    "rooms": [
+     "nave"
+    ]
+   }
+  ],
+  "bytes": 1139549,
+  "seconds": 1009,
+  "baked": "2026-11-07"
+ },
  "foguang-east-hall": {
   "site": "tang-wutai",
   "hash": "6dcc22aceb5b346a",
