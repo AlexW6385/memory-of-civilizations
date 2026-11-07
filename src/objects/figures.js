@@ -45,6 +45,12 @@ function arms(pose, s) {
     case 'sit': return [S, [s * 0.21, 1.1, -0.06], [s * 0.13, 0.95, -0.33], [0, -0.45, -0.85]];
     case 'squat': return [S, [s * 0.2, 1.12, -0.12], [s * 0.12, 1.06, -0.38], [0, -0.75, -0.6]];
     case 'head': return s > 0 ? [S, [0.255, 1.56, -0.02], [0.11, 1.74, -0.01], [-0.5, 0.75, 0]] : arms('hang', s);
+    // the loads (opt-in): a sack on the right shoulder steadied by the right hand; the straps of a back load or a
+    // jige held at the chest; the yoke's ropes held at the sides; a broom held across the body, the left hand above
+    case 'sack': return s > 0 ? [S, [0.27, 1.14, -0.12], [0.24, 1.3, -0.3], [0, 0.6, 0.8]] : arms('hang', s);
+    case 'straps': return [S, [s * 0.22, 1.12, -0.08], [s * 0.13, 1.22, -0.2], [-s * 0.3, 0.85, 0.3]];
+    case 'yoke': return [S, [s * 0.29, 1.13, 0.02], [s * 0.47, 0.97, 0.0], [s * 0.05, -1, -0.1]];
+    case 'sweep': return s > 0 ? [S, [0.19, 1.1, -0.1], [0.03, 0.93, -0.28], SWEEP] : [S, [-0.2, 1.12, -0.03], [-0.03, 1.13, -0.19], SWEEP];
     case 'pole': return s > 0 ? [S, [0.215, 1.15, -0.1], [0.16, 1.36, -0.28], [0, 0.85, 0.2]] : [S, [-0.205, 1.09, 0.0], [-0.17, 0.86, -0.08], [0.1, -0.9, -0.3]];
     case 'pray': return [S, [s * 0.19, 1.1, -0.07], [s * 0.024, 1.17, -0.2], [0, 0.88, -0.28]];                                  // the palms joined before the chest
     case 'pull': return s > 0 ? [S, [0.2, 1.12, -0.13], [0.045, 1.06, -0.4], [-0.1, 0, -1]] : [S, [-0.2, 1.11, -0.09], [-0.015, 1.05, -0.27], [0.12, 0, -1]];
@@ -75,6 +81,8 @@ function arms(pose, s) {
     default: return [S, [s * 0.205, 1.085, 0.025], [s * 0.21, 0.84, -0.02], [s * 0.05, -1, -0.12]];
   }
 }
+// the broom's handle: from before the chest down and forward to the ground at the right foot's front
+const SWEEP = [0.215, -0.866, -0.45], SWEEP0 = [-0.06, 1.3, -0.1];
 const norm = (v) => { const l = Math.hypot(...v) || 1; return v.map((x) => x / l); };
 const va = (a, b, k = 1) => a.map((x, i) => x + b[i] * k);
 
@@ -509,6 +517,8 @@ const LEGS_OF = { sit: 'sit', squat: 'squat', row: 'sit', kneel: 'kneel', cross:
 const SEAT_ARMS = { low: 'knees', ground: 'thighs', seiza: 'lap' };
 const HELD = { staff: 'staff', rope: 'pull', oars: 'row', punt: 'punt', child: 'child', drum: 'drum', flute: 'flute', harp: 'harp', lute: 'lute', ankus: 'ride' };
 const POSE_HELD = { staff: 'staff', pull: 'rope', punt: 'punt', drum: 'drum', flute: 'flute', harp: 'harp', lute: 'lute', ride: 'ankus' };
+// the arms of each load carried (the loads on the head steadied by the right hand)
+const CARRY_ARMS = { pot: 'head', basket: 'head', headload: 'head', wood_head: 'head', pole: 'pole', pails: 'pole', hoe: 'hoe', sack: 'sack', bundle: 'straps', jige: 'straps', yoke: 'yoke', broom: 'sweep', besom: 'sweep' };
 const INSTR = new Set(['drum', 'flute', 'harp', 'lute', 'ankus']), DANCE = new Set(['plieR', 'plieL', 'step']);
 const POSE_ARMS = ['pray', 'pull', 'staff', 'row', 'punt', 'apsara', 'apsara2', 'folk', 'ride'];
 // a child (el.child): about 1.0–1.3 m, slighter, its head larger for its height (scaled about the base of the neck)
@@ -519,7 +529,7 @@ export function figure(el, { bag, col }) {
   const c1 = el.cloth ?? 'cloth_white', c2 = el.cloth2 ?? c1, sk = el.skin ?? 'skin_medium', dress = el.dress ?? 'robe';
   const pose = el.pose ?? 'stand', carry = el.carry && el.carry !== 'none' ? el.carry : POSE_HELD[pose] ?? 'none', hat = el.hat ?? 'none';
   const legs = LEGS_OF[pose] ?? 'stand';
-  const armPose = el.arms ?? (carry === 'pot' || carry === 'basket' ? 'head' : carry === 'pole' ? 'pole' : carry === 'hoe' ? 'hoe' : HELD[carry] ? HELD[carry]
+  const armPose = el.arms ?? (CARRY_ARMS[carry] ? CARRY_ARMS[carry] : HELD[carry] ? HELD[carry]
     : legs === 'sit' || legs === 'squat' ? legs : SEAT_ARMS[legs] ? SEAT_ARMS[legs] : legs === 'cross' ? (pose === 'pray' ? 'pray' : 'cross')
       : POSE_ARMS.includes(pose) ? pose : pose === 'talk' ? 'talk' : (r0() < 0.3 ? 'clasp' : 'hang'));
   const veiled = hat === 'veil';
@@ -608,12 +618,34 @@ export function figure(el, { bag, col }) {
     for (const [role, g] of Object.entries(K)) put(role === 'timber' ? el.staffMat ?? 'timber' : role === 'bamboo_culm' ? el.poleMat ?? 'bamboo_culm' : role === 'rope' ? 'cloth_brown' : role, g.clone(), role === 'rope' ? 0.85 : 1);
   } else if (carry !== 'none') {
     const K = assembly(`fig-carry|${carry}`, (a) => carried(a, carry));
-    for (const [role, g] of Object.entries(K)) put(role, g.clone());
+    // (the cloth of a bundle drawn from a stream of its own, so that the rest of the figure is as it was)
+    const load = el.loadCloth ?? LOADS[Math.floor(rng((el.seed ^ 0x27d4eb2f) >>> 0)() * LOADS.length)];
+    for (const [role, g] of Object.entries(K)) put(role === 'bucket' ? el.bucketMat ?? 'timber' : role === 'load' ? load : role, g.clone(), role === 'load' ? 0.85 + (el.seed % 7) * 0.05 : 1);
   }
   const [x, z] = el.at, y = el.y ?? 0;
   col.circle(x, z, 0.25, y, y + H * (legs === 'kneel' ? 0.78 : legs === 'cross' || legs === 'ground' ? 0.55 : legs === 'seiza' ? 0.6 : legs === 'low' ? 0.68 : 1));
 }
-/** The things carried: a water pot or a basket on the head, the carrying pole with its two baskets, the hoe. */
+const LOADS = ['cloth_ochre', 'cloth_indigo', 'cloth_brown', 'cloth_white', 'cloth_red', 'cloth_grey'];
+/** A staved pail or bucket (role 'bucket') with two iron hoops and water in it, its foot at (x, y0, z), h high; a bail over it, or the two staves of a Chinese pail standing up to a cross-bar. */
+function pail(a, x, y0, z, { r = 0.15, h = 0.3, bail = 'arc', turn = 0 } = {}) {
+  const rb = r * 0.88, R = (y) => rb + (r - rb) * (y - y0) / h;
+  a('bucket', slathe([[0.001, y0], [rb, y0], [r, y0 + h], [r - 0.014, y0 + h], [rb - 0.014, y0 + 0.03], [0.001, y0 + 0.03]], 14).translate(x, 0, z));
+  for (const f of [0.18, 0.78]) { const yy = y0 + h * f, rr = R(yy) + 0.003; a('iron', slathe([[rr, yy - 0.018], [rr + 0.004, yy - 0.012], [rr + 0.004, yy + 0.012], [rr, yy + 0.018]], 14).translate(x, 0, z)); }
+  a('water', slathe([[r - 0.016, y0 + h - 0.05], [0.001, y0 + h - 0.05]], 14).translate(x, 0, z));
+  const c = Math.cos(turn), s = Math.sin(turn), P = (u, yy, v = 0) => [x + c * u + s * v, yy, z - s * u + c * v];
+  if (bail === 'arc') { a('iron', tube(Array.from({ length: 9 }, (_, k) => { const t = k / 8 * Math.PI; return [...P(-Math.cos(t) * (r + 0.006), y0 + h - 0.04 + Math.sin(t) * r * 0.6), 0.006]; }), 4)); return y0 + h - 0.04 + r * 0.6; }
+  // the Chinese pail: two opposite staves carried up past the rim, a cross-bar through their heads
+  for (const u of [-1, 1]) a('bucket', tube([[...P(u * (r - 0.01), y0 + h - 0.05), 0.022, 0.012], [...P(u * (r - 0.01), y0 + h + 0.24), 0.02, 0.012]], 4));
+  a('bucket', tube([[...P(-r - 0.01, y0 + h + 0.21), 0.018], [...P(r + 0.01, y0 + h + 0.21), 0.018]], 5));
+  return y0 + h + 0.23;
+}
+/** A sack, a bundle or a load lofted as a tube through [x, y, z, rw, rh] (smooth, closed). */
+const lump = (pts, n = 9) => tube(pts, n);
+/** The two straps (role) of a back load, from its top over each shoulder to the chest and back under the arm to its foot. */
+function straps(a, role, top, foot, w = 0.012) {
+  for (const s of [-1, 1]) a(role, tube([[s * 0.13, top[0], top[1], w, w], [s * 0.13, 1.43, 0.05, w, w * 0.7], [s * 0.12, 1.405, -0.06, w, w * 0.7], [s * 0.11, 1.27, -0.128, w, w * 0.7], [s * 0.165, 1.12, -0.12, w, w * 0.7], [s * 0.2, 0.99, -0.02, w, w * 0.7], [s * 0.18, foot[0], foot[1], w, w]], 4));
+}
+/** The things carried: a water pot or a basket on the head, the carrying pole with its two baskets, the hoe; the porters' loads. */
 function carried(a, carry) {
   if (carry === 'pot') {
     a('terracotta', slathe([[0.001, 1.7], [0.06, 1.702], [0.13, 1.74], [0.165, 1.8], [0.15, 1.87], [0.09, 1.915], [0.06, 1.94], [0.075, 1.965], [0.065, 1.97], [0.05, 1.95], [0.001, 1.95]], 14));
@@ -630,6 +662,69 @@ function carried(a, carry) {
       a('wicker', slathe([[0.001, 0.3], [0.14, 0.3], [0.2, 0.42], [0.21, 0.6], [0.195, 0.61], [0.185, 0.43], [0.13, 0.33], [0.001, 0.33]], 12).translate(0.15, 0, zz));
       a('cloth_green', slathe([[0.19, 0.56], [0.12, 0.64], [0.001, 0.67]], 10).translate(0.15, 0, zz));
     }
+  } else if (carry === 'pails') {
+    // the carrying pole (biandan, the tenbinbō) on the right shoulder, a pail of water hung from each end by a cord
+    // to the cross-bar of its two raised staves (the water-carriers of the Qingming scroll, of Edo's water-sellers)
+    const P0 = [0.15, 1.35, -0.88], P1 = [0.15, 1.455, 0], yAt = (zz) => P1[1] - (P1[1] - P0[1]) * Math.abs(zz) / 0.88;
+    a('bamboo_culm', tube([[...P0, 0.02], [...P1, 0.024], [P0[0], P0[1], -P0[2], 0.02]], 6));
+    for (const zz of [-0.8, 0.8]) { const top = pail(a, 0.15, 0.3, zz, { r: 0.155, h: 0.3, bail: 'staves', turn: Math.PI / 2 }); a('cloth_brown', tube([[0.15, yAt(zz) + 0.01, zz, 0.006], [0.15, top, zz, 0.006]], 3)); }
+  } else if (carry === 'yoke') {
+    // the shoulder yoke across both shoulders, hollowed behind the neck, a bucket on a rope from each end, the hands
+    // on the ropes (Venice's bigolo, the Russian koromyslo bowed, the European milk and water yoke)
+    a('timber', tube([[-0.52, 1.3, 0.02, 0.026, 0.022], [-0.34, 1.375, 0.03, 0.032, 0.026], [-0.17, 1.44, 0.035, 0.04, 0.03], [-0.07, 1.465, 0.075, 0.045, 0.032], [0.07, 1.465, 0.075, 0.045, 0.032], [0.17, 1.44, 0.035, 0.04, 0.03], [0.34, 1.375, 0.03, 0.032, 0.026], [0.52, 1.3, 0.02, 0.026, 0.022]], 7));
+    for (const s of [-1, 1]) {
+      a('iron', tube([[s * 0.52, 1.33, 0.02, 0.008], [s * 0.52, 1.25, 0.02, 0.008]], 4));                    // the hook at the end
+      const top = pail(a, s * 0.52, 0.28, 0.02, { r: 0.15, h: 0.31 });
+      a('cloth_brown', tube([[s * 0.52, 1.25, 0.02, 0.007], [s * 0.52, top, 0.02, 0.007]], 4));
+    }
+  } else if (carry === 'sack') {
+    // a full sack over the right shoulder, the mouth tied, hanging down the back; the right hand steadying its front
+    a('sacking', lump([[0.2, 1.33, -0.21, 0.09, 0.08], [0.2, 1.47, -0.08, 0.12, 0.1], [0.2, 1.51, 0.06, 0.13, 0.11], [0.2, 1.42, 0.22, 0.13, 0.11], [0.19, 1.24, 0.3, 0.11, 0.09], [0.19, 1.1, 0.3, 0.07, 0.06]]));
+    a('sacking', tube([[0.2, 1.31, -0.25, 0.035], [0.2, 1.27, -0.3, 0.05, 0.03]], 6));                              // the tied mouth
+    a('cloth_brown', tube([[0.2, 1.325, -0.235, 0.04, 0.012], [0.2, 1.315, -0.25, 0.04, 0.012]], 6));
+  } else if (carry === 'bundle') {
+    // a load wrapped in a cloth on the back (the furoshiki, the Andean q'ipi, the porter's bale), its corners
+    // brought over the shoulders and under the arms and knotted on the chest
+    a('load', slathe([[0.001, 0.9], [0.13, 0.915], [0.2, 0.99], [0.225, 1.14], [0.215, 1.3], [0.165, 1.42], [0.08, 1.47], [0.001, 1.48]], 14, (th) => (Math.sin(th) < 0 ? 0.62 : 0.72)).translate(0, 0, 0.255));
+    straps(a, 'load', [1.43, 0.16], [0.97, 0.15], 0.022);
+    a('load', lump([[-0.05, 1.27, -0.14, 0.03], [0, 1.275, -0.15, 0.04, 0.035], [0.05, 1.27, -0.14, 0.03]], 7));     // the knot
+  } else if (carry === 'jige') {
+    // the Korean jige (지게): two pine side-pieces spreading downward, four cross-bars, a prong (gaji) angled up and back
+    // from each to hold the load, a pad of straw (deungtae) against the back, two straw straps (milppi) from the upper
+    // bar over the shoulders to the foot; loaded with a stack of pine wood, corded (https://en.wikipedia.org/wiki/Jige)
+    const X = (y) => 0.15 + (1.85 - y) / 1.43 * 0.1, Z = (y) => 0.17 + (1.85 - y) / 1.43 * 0.09;
+    for (const s of [-1, 1]) {
+      a('timber', tube([[s * X(0.42), 0.42, Z(0.42), 0.03, 0.035], [s * X(1.2), 1.2, Z(1.2), 0.032, 0.036], [s * X(1.85), 1.85, Z(1.85), 0.026, 0.03]], 6));
+      a('timber', tube([[s * X(0.78), 0.78, Z(0.78) + 0.02, 0.026], [s * (X(0.78) + 0.02), 0.93, 0.45, 0.024], [s * (X(0.78) + 0.025), 1.04, 0.6, 0.018]], 5));
+    }
+    for (const y of [0.6, 0.95, 1.3, 1.65]) a('timber', tube([[-X(y) - 0.01, y, Z(y), 0.018], [X(y) + 0.01, y, Z(y), 0.018]], 5));
+    a('thatch', lump([[0, 0.98, 0.145, 0.13, 0.035], [0, 1.15, 0.14, 0.15, 0.04], [0, 1.32, 0.135, 0.12, 0.032]], 8));
+    straps(a, 'sacking', [1.3, Z(1.3)], [0.6, Z(0.6)], 0.014);
+    const r = rng(77);
+    for (let row = 0; row < 7; row++) for (let c = 0; c < 3; c++) {
+      const y = 0.86 + row * 0.095 + (c % 2) * 0.03, z = Z(y) + 0.09 + c * 0.095, L = 0.36 + r() * 0.12, d = (r() - 0.5) * 0.08, rr = 0.036 + r() * 0.012;
+      if (z > 0.3 + (y - 0.85) * 0.35 + 0.22) continue;
+      a('bark_pine', tube([[-L + d, y + (r() - 0.5) * 0.03, z, rr], [L + d, y + (r() - 0.5) * 0.03, z + (r() - 0.5) * 0.04, rr]], 6));
+    }
+    for (const x of [-0.18, 0.18]) a('cloth_brown', tube(Array.from({ length: 11 }, (_, k) => { const t = k / 10 * Math.PI * 2; return [x, 1.15 + Math.sin(t) * 0.38, Z(1.15) + 0.15 + Math.cos(t) * 0.17, 0.008]; }), 4, { capA: false, capB: false }));
+  } else if (carry === 'headload') {
+    // a load tied up in a cloth, carried on the head on a ring pad (Africa, India)
+    a('cloth_white', slathe([[0.05, 1.682], [0.075, 1.69], [0.07, 1.705], [0.045, 1.7]], 10));
+    a('load', slathe([[0.001, 1.695], [0.14, 1.7], [0.235, 1.75], [0.25, 1.82], [0.2, 1.89], [0.1, 1.93], [0.001, 1.94]], 14, (th) => (Math.abs(Math.cos(th)) > 0.7 ? 1.12 : 0.86)));
+    a('load', lump([[-0.03, 1.935, 0, 0.035], [0.02, 1.96, 0.01, 0.05, 0.035], [0.06, 1.945, 0.02, 0.03]], 6));      // the knot on top
+  } else if (carry === 'wood_head') {
+    // a bundle of firewood along the head, on a ring pad, tied with two cords
+    a('cloth_white', slathe([[0.05, 1.682], [0.075, 1.69], [0.07, 1.705], [0.045, 1.7]], 10));
+    const r = rng(53);
+    for (let k = 0; k < 9; k++) { const t = k / 9 * Math.PI * 2, d = k ? 0.07 : 0, x = Math.cos(t) * d, y = 1.79 + Math.sin(t) * d * 0.8, L0 = 0.55 + r() * 0.15, L1 = 0.6 + r() * 0.2, rr = 0.026 + r() * 0.01; a('bark_pine', tube([[x + (r() - 0.5) * 0.04, y, -L0, rr], [x, y, L1, rr * 0.85]], 5)); }
+    for (const zz of [-0.28, 0.3]) a('cloth_brown', tube(Array.from({ length: 11 }, (_, k) => { const t = k / 10 * Math.PI * 2; return [Math.cos(t) * 0.112, 1.79 + Math.sin(t) * 0.094, zz, 0.008]; }), 4, { capA: false, capB: false }));
+  } else if (carry === 'broom' || carry === 'besom') {
+    // a broom held across the body, its head on the ground before the right foot: the East Asian broom of bamboo twigs
+    // on a bamboo handle; the besom of birch twigs bound round a stick
+    const P = (t) => SWEEP0.map((v, i) => v + SWEEP[i] * t), bam = carry === 'broom';
+    a(bam ? 'bamboo_culm' : 'timber', tube([[...P(0.08), 0.014], [...P(bam ? 1.12 : 1.0), 0.014]], 6));
+    if (bam) a('thatch', tube([[...P(1.05), 0.025], [...P(1.2), 0.06, 0.05], [...P(1.34), 0.1, 0.07], [...P(1.42), 0.125, 0.08]], 8));
+    else { a('thatch', tube([[...P(0.98), 0.03], [...P(1.08), 0.045], [...P(1.26), 0.065], [...P(1.42), 0.08]], 8)); for (const t of [1.0, 1.06]) a('cloth_brown', tube([[...P(t), 0.036], [...P(t + 0.02), 0.04]], 8)); }
   } else if (carry === 'hoe') {
     a('timber', tube([[0.11, 1.12, -0.2, 0.017], [0.08, 0.13, -0.95, 0.017]], 6));
     a('iron', tube([[0.08, 0.16, -0.97, 0.012], [0.08, 0.05, -1.02, 0.01]], 5));

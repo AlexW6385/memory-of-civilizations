@@ -17,22 +17,23 @@ const F = (dress, cloths, skin, hats, extra = {}) => ({ dress, cloths, skin, hat
 const KITS = {
   mediterranean: {
     fronts: [['laundry_pole', 1, 2], ['shop_sign:board', 0.4, 1]],
-    door: [['lantern:oil', 0.7], ['pot:amphora', 3], ['pot:pithos', 1], ['basket', 2], ['bench', 1.5], ['firewood', 1], ['ladder', 0.6], ['laundry', 0.8]],
-    street: [['cart', 1], ['animal:donkey', 2], ['animal:goat', 1], ['animal:dog', 0.6], ['animal:cat', 0.5], ['chickens', 0.8], ['sacks', 1], ['well', 0.2], ['figure', 2.5]],
+    door: [['lantern:oil', 0.7], ['pot:amphora', 3], ['pot:pithos', 1], ['basket', 2], ['bench', 1.5], ['stool', 0.6], ['sweeper', 0.3], ['firewood', 1], ['ladder', 0.6], ['laundry', 0.8]],
+    street: [['cart', 1], ['animal:donkey', 2], ['animal:goat', 1], ['animal:dog', 0.6], ['animal:cat', 0.5], ['chickens', 0.8], ['chickens:pigeon', 0.4], ['sacks', 1], ['well', 0.2], ['figure', 2.5]],
     stall: ['heap', 'greens', 'fish', 'bread', 'bolts', 'pottery', 'pot:amphora'], produce: ['cloth_maroon', 'cloth_green', 'cloth_red', 'cloth_ochre'], boats: ['rowboat'], awnings: ['cloth_white', 'cloth_ochre', 'cloth_red'],
-    figures: F(['robe', 'tunic'], ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red', 'cloth_indigo'], ['skin_medium', 'skin_light'], ['none', 'none', 'veil', 'cap'], { hair: ['short', 'short', 'bun', 'long'], beard: 0.5, over: ['cape', 'sash', 'none', 'cape'], hairs: [['hide_black', 0.7], ['hide_brown', 0.7]] }),
+    figures: F(['robe', 'tunic'], ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red', 'cloth_indigo'], ['skin_medium', 'skin_light'], ['none', 'none', 'veil', 'cap'], { carry: ['none', 'none', 'none', 'none', 'none', 'sack', 'pot'], broom: 'besom', hair: ['short', 'short', 'bun', 'long'], beard: 0.5, over: ['cape', 'sash', 'none', 'cape'], hairs: [['hide_black', 0.7], ['hide_brown', 0.7]] }),
   },
   near_east: {
     fronts: [['hang_lantern:white', 0.25, 1], ['laundry_pole', 0.5, 2]],
-    door: [['lantern:oil', 0.7], ['pot:water_pot', 2], ['pot:zir', 1.2], ['pot:pithos', 1], ['basket', 2], ['sacks', 1], ['bench', 1], ['laundry', 0.6]],
-    street: [['animal:donkey', 2.5], ['animal:camel', 1.2], ['animal:goat', 1.2], ['animal:sheep', 0.8], ['animal:cat', 0.6], ['chickens', 0.6], ['sacks', 1], ['figure', 2.5]],
-    stall: ['spice', 'spice', 'heap', 'bolts', 'pottery', 'baskets', 'bread'], produce: ['cloth_red', 'cloth_ochre', 'cloth_maroon', 'cloth_green'], boats: ['dhow', 'reed'], awnings: ['cloth_white', 'cloth_ochre', 'cloth_indigo'],
-    figures: F(['robe'], ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_indigo', 'cloth_black'], ['skin_medium', 'skin_dark'], ['turban', 'veil', 'veil', 'none'], { hair: ['short', 'long'], beard: 0.65, over: ['sash', 'cape', 'none', 'sash'] }),
+    door: [['lantern:oil', 0.7], ['pot:water_pot', 2], ['pot:zir', 1.2], ['pot:pithos', 1], ['basket', 2], ['sacks', 1], ['bench', 1], ['stool', 0.5], ['sweeper', 0.3], ['laundry', 0.6]],
+    // the street dogs of Cairo and Istanbul, ownerless and fed by the quarter; pigeons about the mosques' courts and the squares
+    street: [['animal:donkey', 2.5], ['animal:camel', 1.2], ['animal:goat', 1.2], ['animal:sheep', 0.8], ['animal:dog', 0.8], ['animal:cat', 0.6], ['chickens', 0.6], ['chickens:pigeon', 0.6], ['sacks', 1], ['figure', 2.5]],
+    stall: ['spice', 'spice', 'heap', 'bolts', 'pottery', 'baskets', 'bread'], mats: 0.2, produce: ['cloth_red', 'cloth_ochre', 'cloth_maroon', 'cloth_green'], boats: ['dhow', 'reed'], awnings: ['cloth_white', 'cloth_ochre', 'cloth_indigo'],
+    figures: F(['robe'], ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_indigo', 'cloth_black'], ['skin_medium', 'skin_dark'], ['turban', 'veil', 'veil', 'none'], { carry: ['none', 'none', 'none', 'none', 'none', 'sack', 'bundle', 'pot'], broom: 'broom', hair: ['short', 'long'], beard: 0.65, over: ['sash', 'cape', 'none', 'sash'] }),
   },
   egypt: {
     door: [['lantern:oil', 0.7], ['pot:water_pot', 3], ['pot:dark_pot', 1.5], ['basket', 2], ['sacks', 1], ['firewood', 0.4]],
-    street: [['animal:donkey', 2], ['animal:ox', 1], ['animal:goat', 1.2], ['animal:cat', 0.6], ['chickens', 0.5], ['chickens:goose', 0.5], ['sacks', 1.2], ['well', 0.25], ['figure', 2.5]],
-    stall: ['heap', 'bread', 'fish', 'pottery', 'baskets'], produce: ['cloth_green', 'cloth_maroon', 'cloth_ochre'], boats: ['reed', 'barge'], awnings: ['cloth_white', 'reed_mat'],
+    street: [['animal:donkey', 2], ['animal:ox', 1], ['animal:goat', 1.2], ['animal:dog', 0.4], ['animal:cat', 0.6], ['chickens', 0.5], ['chickens:goose', 0.5], ['sacks', 1.2], ['well', 0.25], ['figure', 2.5]],
+    stall: ['heap', 'bread', 'fish', 'pottery', 'baskets'], mats: 0.4, produce: ['cloth_green', 'cloth_maroon', 'cloth_ochre'], boats: ['reed', 'barge'], awnings: ['cloth_white', 'reed_mat'],
     // the wrapped linen kilt (shendyt) and the loincloth of the labourers, bare above the waist; the women's
     // sheath dress on two straps; the broad collar; wigs and shaven heads; barefoot
     // (https://en.wikipedia.org/wiki/Clothing_in_ancient_Egypt)
@@ -40,70 +41,73 @@ const KITS = {
   },
   east_asia: {
     fronts: [['hang_lantern:paper', 1.4, 1], ['shop_sign', 1, 1], ['laundry_pole', 1, 2]],
-    door: [['lantern:paper', 1.6], ['pot:glazed_jar', 2], ['pot:vat', 1.5], ['pot:blue_jar', 1], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.2], ['laundry', 1], ['ladder', 0.5]],
+    door: [['lantern:paper', 1.6], ['pot:glazed_jar', 2], ['pot:vat', 1.5], ['pot:blue_jar', 1], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.2], ['stool', 1], ['sweeper', 0.5], ['laundry', 1], ['ladder', 0.5]],
     street: [['barrow', 1.5], ['cart', 0.6], ['animal:ox', 0.8], ['animal:buffalo', 0.5], ['animal:dog', 0.6], ['animal:cat', 0.3], ['chickens', 0.8], ['chickens:duck', 0.5], ['chickens:goose', 0.3], ['sacks', 0.6], ['well', 0.2], ['figure', 3]],
-    stall: ['greens', 'greens', 'fish', 'heap', 'baskets', 'pottery', 'bolts'], produce: ['cloth_ochre', 'cloth_red', 'cloth_green', 'glaze_yellow'], pottery: 'glaze_white', boats: ['sampan'], awnings: ['cloth_indigo', 'reed_mat', 'cloth_white'],
-    figures: F(['robe', 'trousers'], ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_black'], ['skin_light', 'skin_medium'], ['straw', 'cap', 'none', 'none'], { carry: ['pole', 'basket', 'none', 'none'] , hair: ['bun', 'bun', 'short'], beard: 0.12, over: ['collar', 'collar', 'sash'] }),
+    stall: ['greens', 'greens', 'fish', 'heap', 'baskets', 'pottery', 'bolts'], mats: 0.15, produce: ['cloth_ochre', 'cloth_red', 'cloth_green', 'glaze_yellow'], pottery: 'glaze_white', boats: ['sampan'], awnings: ['cloth_indigo', 'reed_mat', 'cloth_white'],
+    figures: F(['robe', 'trousers'], ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_black'], ['skin_light', 'skin_medium'], ['straw', 'cap', 'none', 'none'], { carry: ['pole', 'pails', 'bundle', 'sack', 'none', 'none', 'none', 'none'], broom: 'broom', hair: ['bun', 'bun', 'short'], beard: 0.12, over: ['collar', 'collar', 'sash'] }),
   },
   tibet: {
     door: [['lantern:oil', 0.4], ['firewood', 1.5], ['basket', 2], ['pot:dark_pot', 1.5], ['sacks', 1]],
     street: [['animal:yak', 3], ['animal:goat', 1], ['animal:sheep', 1.2], ['animal:dog', 0.8], ['sacks', 0.8], ['figure', 3]],
-    stall: ['basket', 'cloth', 'produce', 'pot:dark_pot'], boats: [], awnings: ['cloth_red', 'cloth_ochre', 'cloth_white'],
-    figures: F(['robe'], ['cloth_brown', 'cloth_red', 'cloth_black', 'cloth_ochre', 'cloth_grey'], ['skin_medium', 'skin_dark'], ['cap', 'none', 'brim', 'none'], { hair: ['long', 'bun', 'short'], beard: 0.1, over: ['sash', 'sash', 'collar'] }),
+    stall: ['basket', 'cloth', 'produce', 'pot:dark_pot'], mats: 0.6, boats: [], awnings: ['cloth_red', 'cloth_ochre', 'cloth_white'],
+    figures: F(['robe'], ['cloth_brown', 'cloth_red', 'cloth_black', 'cloth_ochre', 'cloth_grey'], ['skin_medium', 'skin_dark'], ['cap', 'none', 'brim', 'none'], { carry: ['none', 'none', 'none', 'bundle'], hair: ['long', 'bun', 'short'], beard: 0.1, over: ['sash', 'sash', 'collar'] }),
   },
   japan: {
     fronts: [['hang_lantern:white', 1, 1], ['shop_sign', 0.7, 1]],
-    door: [['lantern:white', 1.6], ['pot:dark_pot', 2], ['rain_tub', 0.6], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.5], ['ladder', 0.5]],
+    door: [['lantern:white', 1.6], ['pot:dark_pot', 2], ['rain_tub', 0.6], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.5], ['sweeper', 0.5], ['laundry', 0.5], ['ladder', 0.5]],
     street: [['barrow', 0.4], ['handcart', 0.6], ['cart', 0.5], ['animal:ox', 0.7], ['animal:horse', 0.5], ['animal:dog', 0.5], ['animal:cat', 0.4], ['well', 0.2], ['figure', 3]],
     stall: ['greens', 'fish', 'fish', 'baskets', 'pottery', 'heap'], produce: ['cloth_ochre', 'cloth_red', 'cloth_green'], pottery: 'pottery_dark', boats: ['sampan', 'rowboat'], awnings: ['cloth_indigo', 'reed_mat'],
-    figures: F(['robe'], ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_black', 'cloth_white'], ['skin_light'], ['straw', 'none', 'none'], { carry: ['pole', 'none', 'none'] , hair: ['bun', 'bun', 'short'], beard: 0.05, over: ['collar', 'collar', 'sash'] }),
+    figures: F(['robe'], ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_black', 'cloth_white'], ['skin_light'], ['straw', 'none', 'none'], { carry: ['pole', 'pails', 'bundle', 'none', 'none', 'none'], broom: 'broom', hair: ['bun', 'bun', 'short'], beard: 0.05, over: ['collar', 'collar', 'sash'] }),
   },
   south_asia: {
     fronts: [['laundry_pole', 0.8, 2], ['hang_lantern:white', 0.4, 1]],
-    door: [['lantern:oil', 0.7], ['pot:water_pot', 2.2], ['pot:matka', 1.3], ['basket', 2], ['firewood', 0.8], ['bench', 0.8], ['laundry', 1]],
-    street: [['cart', 1.2], ['animal:zebu', 2.2], ['animal:buffalo', 0.8], ['animal:goat', 1], ['animal:dog', 0.6], ['well', 0.25], ['figure', 3]],
-    stall: ['spice', 'heap', 'greens', 'bolts', 'pottery', 'pot:water_pot'], produce: ['cloth_ochre', 'cloth_green', 'cloth_red', 'glaze_yellow'], boats: ['rowboat'], awnings: ['cloth_red', 'cloth_ochre', 'cloth_white'],
-    figures: F(['wrap', 'robe'], ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_indigo'], ['skin_medium', 'skin_dark'], ['turban', 'veil', 'none'], { carry: ['pot', 'none', 'none'] , hair: ['bun', 'long', 'short'], beard: 0.4, feet: 'bare', over: ['shawl', 'sash', 'none'], tops: { wrap: ['bare', '', ''] }, overs: { wrap: ['shawl', 'shawl', 'none'] } }),
+    door: [['lantern:oil', 0.7], ['pot:water_pot', 2.2], ['pot:matka', 1.3], ['basket', 2], ['firewood', 0.8], ['bench', 0.8], ['stool', 0.6], ['sweeper', 0.3], ['laundry', 1]],
+    street: [['cart', 1.2], ['animal:zebu', 2.2], ['animal:buffalo', 0.8], ['animal:goat', 1], ['animal:dog', 0.6], ['chickens', 0.4], ['well', 0.25], ['figure', 3]],
+    stall: ['spice', 'heap', 'greens', 'bolts', 'pottery', 'pot:water_pot'], mats: 0.5, produce: ['cloth_ochre', 'cloth_green', 'cloth_red', 'glaze_yellow'], boats: ['rowboat'], awnings: ['cloth_red', 'cloth_ochre', 'cloth_white'],
+    figures: F(['wrap', 'robe'], ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_indigo'], ['skin_medium', 'skin_dark'], ['turban', 'veil', 'none'], { carry: ['pot', 'headload', 'wood_head', 'basket', 'none', 'none', 'none', 'none'], broom: 'broom', hair: ['bun', 'long', 'short'], beard: 0.4, feet: 'bare', over: ['shawl', 'sash', 'none'], tops: { wrap: ['bare', '', ''] }, overs: { wrap: ['shawl', 'shawl', 'none'] } }),
   },
   southeast_asia: {
     door: [['lantern:oil', 0.7], ['pot:dark_pot', 2.5], ['basket', 3], ['firewood', 1], ['ladder', 1]],
-    street: [['cart', 1], ['animal:buffalo', 1.5], ['animal:zebu', 1], ['chickens', 1.2], ['chickens:duck', 0.7], ['animal:pig', 0.6], ['figure', 2.5]],
-    stall: ['heap', 'melons', 'greens', 'fish', 'baskets', 'pottery'], produce: ['glaze_yellow', 'cloth_green', 'cloth_red', 'cloth_ochre'], pottery: 'pottery_dark', boats: ['canoe', 'sampan'], awnings: ['reed_mat', 'cloth_ochre'],
+    street: [['cart', 1], ['animal:buffalo', 1.5], ['animal:zebu', 1], ['chickens', 1.2], ['chickens:duck', 0.7], ['animal:pig', 0.6], ['animal:dog', 0.5], ['figure', 2.5]],
+    stall: ['heap', 'melons', 'greens', 'fish', 'baskets', 'pottery'], mats: 0.5, produce: ['glaze_yellow', 'cloth_green', 'cloth_red', 'cloth_ochre'], pottery: 'pottery_dark', boats: ['canoe', 'sampan'], awnings: ['reed_mat', 'cloth_ochre'],
     figures: F(['wrap'], ['cloth_ochre', 'cloth_red', 'cloth_brown', 'cloth_white'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { carry: ['pole', 'basket', 'none'] , hair: ['bun', 'long', 'short'], beard: 0.05, feet: 'bare', tops: { wrap: ['bare', 'bare', ''] }, overs: { wrap: ['none', 'none', 'sash'] } }),
   },
   europe_medieval: {
     fronts: [['shop_sign:board', 1, 1], ['laundry_pole', 0.4, 2]],
-    door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1], ['firewood', 2], ['bench', 1.2], ['ladder', 0.8], ['laundry', 0.8], ['basket', 1]],
-    street: [['cart', 2], ['handcart', 0.8], ['barrow:front', 0.6], ['animal:horse', 1.2], ['animal:pig', 0.8], ['animal:dog', 0.6], ['animal:cat', 0.4], ['chickens', 1], ['chickens:goose', 0.4], ['chickens:duck', 0.3], ['sacks', 1], ['barrel', 1], ['well', 0.25], ['figure', 2.5]],
+    door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1], ['firewood', 2], ['bench', 1.2], ['stool', 0.5], ['sweeper', 0.4], ['ladder', 0.8], ['laundry', 0.8], ['basket', 1]],
+    street: [['cart', 2], ['handcart', 0.8], ['barrow:front', 0.6], ['animal:horse', 1.2], ['animal:pig', 0.8], ['animal:dog', 0.6], ['animal:cat', 0.4], ['chickens', 1], ['chickens:goose', 0.4], ['chickens:duck', 0.3], ['chickens:pigeon', 0.4], ['sacks', 1], ['barrel', 1], ['well', 0.25], ['figure', 2.5]],
     stall: ['bread', 'heap', 'melons', 'fish', 'pottery', 'bolts', 'baskets'], produce: ['cloth_red', 'cloth_green', 'cloth_ochre'], pottery: 'pottery_dark', boats: ['rowboat', 'barge'], awnings: ['cloth_red', 'cloth_white', 'cloth_green', 'cloth_ochre'],
-    figures: F(['robe', 'tunic'], ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_white'], ['skin_light'], ['cap', 'none', 'veil', 'brim'], { hair: ['short', 'short', 'long'], beard: 0.35, legs: 'hose', over: ['cape', 'sash', 'none', 'none'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_brown', 0.6], ['hide_tan', 0.8]] }),
+    figures: F(['robe', 'tunic'], ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_white'], ['skin_light'], ['cap', 'none', 'veil', 'brim'], { carry: ['none', 'none', 'none', 'none', 'none', 'none', 'sack', 'yoke', 'bundle'], broom: 'besom', hair: ['short', 'short', 'long'], beard: 0.35, legs: 'hose', over: ['cape', 'sash', 'none', 'none'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_brown', 0.6], ['hide_tan', 0.8]] }),
   },
   europe_early_modern: {
     fronts: [['shop_sign:board', 1, 1], ['laundry_pole', 0.5, 2]],
-    door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1.5], ['bench', 1.5], ['firewood', 0.8], ['ladder', 0.5], ['basket', 1]],
-    street: [['cart', 2], ['handcart', 1], ['barrow:front', 0.6], ['animal:horse', 1.5], ['animal:dog', 0.6], ['animal:cat', 0.4], ['barrel', 1], ['sacks', 0.8], ['well', 0.15], ['figure', 3]],
+    door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1.5], ['bench', 1.5], ['stool', 0.4], ['sweeper', 0.4], ['firewood', 0.8], ['ladder', 0.5], ['basket', 1]],
+    street: [['cart', 2], ['handcart', 1], ['barrow:front', 0.6], ['animal:horse', 1.5], ['animal:dog', 0.6], ['animal:cat', 0.4], ['chickens:pigeon', 0.6], ['barrel', 1], ['sacks', 0.8], ['well', 0.15], ['figure', 3]],
     stall: ['heap', 'melons', 'greens', 'fish', 'bread', 'bolts'], produce: ['cloth_red', 'cloth_green', 'cloth_ochre', 'glaze_yellow'], boats: ['rowboat', 'barge'], awnings: ['cloth_white', 'cloth_red', 'cloth_green'],
-    figures: F(['robe', 'trousers'], ['cloth_black', 'cloth_brown', 'cloth_red', 'cloth_indigo', 'cloth_grey'], ['skin_light'], ['brim', 'cap', 'none', 'veil'], { hair: ['short', 'long', 'short'], beard: 0.15, legs: 'hose', over: ['cape', 'none', 'sash', 'cape'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_brown', 0.6], ['hide_tan', 0.8]] }),
+    figures: F(['robe', 'trousers'], ['cloth_black', 'cloth_brown', 'cloth_red', 'cloth_indigo', 'cloth_grey'], ['skin_light'], ['brim', 'cap', 'none', 'veil'], { carry: ['none', 'none', 'none', 'none', 'none', 'none', 'sack', 'yoke'], broom: 'besom', hair: ['short', 'long', 'short'], beard: 0.15, legs: 'hose', over: ['cape', 'none', 'sash', 'cape'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_brown', 0.6], ['hide_tan', 0.8]] }),
   },
   americas: {
     door: [['pot:dark_pot', 2.5], ['pot:water_pot', 1.5], ['basket', 2.5], ['firewood', 1], ['ladder', 0.6]],
-    street: [['animal:dog', 1.2], ['chickens', 0.6], ['basket', 1], ['pot:dark_pot', 1], ['figure', 3]],
-    stall: ['basket', 'produce', 'pot:dark_pot', 'cloth'], boats: ['canoe'], awnings: ['cloth_white', 'reed_mat'],
+    // no chickens before 1492: the turkey, kept for its meat, eggs and feathers in Mesoamerica and by the Pueblos
+    // (https://en.wikipedia.org/wiki/Domestic_turkey; https://phys.org/news/2016-11-turkeys-major-ancestral-pueblo-life.html)
+    street: [['animal:dog', 1.2], ['chickens:turkey', 0.6], ['basket', 1], ['pot:dark_pot', 1], ['figure', 3]],
+    stall: ['basket', 'produce', 'pot:dark_pot', 'cloth'], mats: 0.85, boats: ['canoe'], awnings: ['cloth_white', 'reed_mat'],
     // the men's loincloth (maxtlatl, ex) with a cloak knotted at the shoulder (tilmatli), the women's huipil
     // (a tunic) and wrapped skirt
-    figures: F(['loincloth', 'loincloth', 'tunic', 'wrap'], ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_brown'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { carry: ['basket', 'pot', 'none', 'none'] , hair: ['long', 'bun', 'short'], beard: 0, feet: 'bare', over: ['sash', 'none'], overs: { loincloth: ['cape', 'none', 'cape'], wrap: ['none', 'shawl'] } }),
+    figures: F(['loincloth', 'loincloth', 'tunic', 'wrap'], ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_brown'], ['skin_medium', 'skin_dark'], ['none', 'none', 'cap'], { carry: ['basket', 'pot', 'bundle', 'none', 'none'], hair: ['long', 'bun', 'short'], beard: 0, feet: 'bare', over: ['sash', 'none'], overs: { loincloth: ['cape', 'none', 'cape'], wrap: ['none', 'shawl'] } }),
   },
   andes: {
     door: [['pot:dark_pot', 2], ['basket', 2], ['firewood', 1]],
     street: [['animal:llama', 3], ['animal:dog', 0.4], ['figure', 2.5]],
-    stall: ['basket', 'produce', 'cloth'], boats: [], awnings: ['cloth_red'],
-    figures: F(['tunic', 'wrap'], ['cloth_red', 'cloth_ochre', 'cloth_brown', 'cloth_black'], ['skin_medium'], ['cap', 'none'], { hair: ['short', 'long'], beard: 0, over: ['none'] }),
+    stall: ['basket', 'produce', 'cloth'], mats: 0.8, boats: [], awnings: ['cloth_red'],
+    // the q'ipi, the load wrapped in a cloth on the back and knotted at the chest
+    figures: F(['tunic', 'wrap'], ['cloth_red', 'cloth_ochre', 'cloth_brown', 'cloth_black'], ['skin_medium'], ['cap', 'none'], { carry: ['bundle', 'none', 'none', 'none'], hair: ['short', 'long'], beard: 0, over: ['none'] }),
   },
   africa: {
     door: [['lantern:oil', 0.7], ['pot:water_pot', 3], ['pot:dark_pot', 2], ['basket', 2.5], ['firewood', 1]],
-    street: [['animal:goat', 2], ['animal:zebu', 1], ['animal:sheep', 0.8], ['chickens', 1], ['animal:donkey', 0.6], ['figure', 3]],
-    stall: ['heap', 'fish', 'pottery', 'bolts', 'baskets', 'spice'], produce: ['cloth_red', 'cloth_ochre', 'cloth_green'], spices: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_brown'], boats: ['canoe', 'dhow'], awnings: ['cloth_white', 'reed_mat', 'cloth_indigo'],
-    figures: F(['wrap', 'robe'], ['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_red'], ['skin_dark'], ['none', 'turban', 'veil'], { carry: ['pot', 'basket', 'none'] , hair: ['short', 'short', 'bun'], beard: 0.3, feet: 'bare', over: ['shawl', 'sash', 'none'] }),
+    street: [['animal:goat', 2], ['animal:zebu', 1], ['animal:sheep', 0.8], ['chickens', 1], ['animal:donkey', 0.6], ['animal:dog', 0.4], ['figure', 3]],
+    stall: ['heap', 'fish', 'pottery', 'bolts', 'baskets', 'spice'], mats: 0.6, produce: ['cloth_red', 'cloth_ochre', 'cloth_green'], spices: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_brown'], boats: ['canoe', 'dhow'], awnings: ['cloth_white', 'reed_mat', 'cloth_indigo'],
+    figures: F(['wrap', 'robe'], ['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_red'], ['skin_dark'], ['none', 'turban', 'veil'], { carry: ['pot', 'basket', 'headload', 'wood_head', 'none', 'none'], hair: ['short', 'short', 'bun'], beard: 0.3, feet: 'bare', over: ['shawl', 'sash', 'none'] }),
   },
   pacific: {
     door: [['basket', 3], ['firewood', 1.5], ['pot:dark_pot', 0.2]],
@@ -114,28 +118,29 @@ const KITS = {
     figures: F(['loincloth', 'wrap', 'loincloth'], ['cloth_brown', 'cloth_ochre', 'hide_tan', 'cloth_white'], ['skin_medium', 'skin_dark'], ['none'], { hair: ['bun', 'long', 'short'], beard: 0.3, feet: 'bare', over: ['none'], tops: { wrap: ['bare', 'bare', ''] }, overs: { loincloth: ['none', 'none', 'cape'], wrap: ['none', 'cape'] } }),
   },
   north: {
-    door: [['lantern:iron', 0.7], ['firewood', 3], ['barrel', 1.5], ['basket', 1], ['bench', 1], ['ladder', 0.5]],
+    door: [['lantern:iron', 0.7], ['firewood', 3], ['barrel', 1.5], ['basket', 1], ['bench', 1], ['sweeper', 0.3], ['ladder', 0.5]],
     street: [['cart', 1], ['animal:horse', 1], ['animal:sheep', 1.5], ['animal:goat', 0.8], ['haystack', 1.2], ['animal:dog', 0.5], ['animal:cat', 0.3], ['chickens', 0.5], ['chickens:goose', 0.5], ['well', 0.25], ['figure', 2]],
     stall: ['basket', 'produce', 'cloth'], boats: ['rowboat'], awnings: ['cloth_red', 'cloth_white'],
-    figures: F(['robe', 'tunic'], ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_white', 'cloth_indigo'], ['skin_light'], ['cap', 'none', 'veil'], { hair: ['short', 'long', 'long'], beard: 0.5, legs: 'hose', over: ['cape', 'sash', 'none'], hairs: [['hide_tan', 0.9], ['hide_brown', 0.75], ['hide_tan', 1.05], ['hide_black', 0.7]] }),
+    figures: F(['robe', 'tunic'], ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_white', 'cloth_indigo'], ['skin_light'], ['cap', 'none', 'veil'], { carry: ['none', 'none', 'none', 'none', 'none', 'sack', 'yoke', 'bundle'], broom: 'besom', hair: ['short', 'long', 'long'], beard: 0.5, legs: 'hose', over: ['cape', 'sash', 'none'], hairs: [['hide_tan', 0.9], ['hide_brown', 0.75], ['hide_tan', 1.05], ['hide_black', 0.7]] }),
   },
   venice: {
     fronts: [['laundry_pole', 1.2, 2], ['shop_sign:board', 0.5, 1]],
-    door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1.5], ['bench', 1], ['basket', 1], ['laundry', 1.2], ['pot:water_pot', 0.6]],
-    street: [['barrel', 1], ['sacks', 1], ['crates', 0.8], ['animal:dog', 0.4], ['animal:cat', 0.7], ['well', 0.3], ['figure', 4]],
+    door: [['lantern:iron', 0.7], ['barrel', 2], ['crates', 1.5], ['bench', 1], ['stool', 0.6], ['sweeper', 0.4], ['basket', 1], ['laundry', 1.2], ['pot:water_pot', 0.6]],
+    // the pigeons of the campi and of the Piazza
+    street: [['barrel', 1], ['sacks', 1], ['crates', 0.8], ['animal:dog', 0.4], ['animal:cat', 0.7], ['chickens:pigeon', 1], ['well', 0.3], ['figure', 4]],
     stall: ['fish', 'fish', 'heap', 'greens', 'bolts', 'bread'], produce: ['cloth_red', 'cloth_green', 'cloth_ochre', 'glaze_yellow'], boats: ['gondola', 'gondola', 'rowboat', 'barge'], awnings: ['cloth_red', 'cloth_white', 'cloth_ochre'],
-    figures: F(['robe'], ['cloth_black', 'cloth_red', 'cloth_brown', 'cloth_indigo', 'cloth_white'], ['skin_light'], ['cap', 'veil', 'none'], { hair: ['short', 'long'], beard: 0.2, legs: 'hose', over: ['cape', 'cape', 'none', 'sash'], hairs: [['hide_black', 0.7], ['hide_brown', 0.7]] }),
+    figures: F(['robe'], ['cloth_black', 'cloth_red', 'cloth_brown', 'cloth_indigo', 'cloth_white'], ['skin_light'], ['cap', 'veil', 'none'], { carry: ['none', 'none', 'none', 'none', 'none', 'yoke', 'sack'], broom: 'besom', bucket: 'bronze', hair: ['short', 'long'], beard: 0.2, legs: 'hose', over: ['cape', 'cape', 'none', 'sash'], hairs: [['hide_black', 0.7], ['hide_brown', 0.7]] }),
   },
   industrial: {
     fronts: [['shop_sign:board', 0.8, 1]],
     door: [['lantern:iron', 0.7], ['barrel', 1.5], ['crates', 1.5], ['bench', 1], ['street_lamp', 0.4], ['pot:dark_pot', 0.5]],
-    street: [['cart', 2], ['handcart', 1.4], ['animal:horse', 1.5], ['animal:cat', 0.3], ['street_lamp', 0.6], ['figure', 3], ['sacks', 0.6]],
+    street: [['cart', 2], ['handcart', 1.4], ['animal:horse', 1.5], ['animal:dog', 0.4], ['animal:cat', 0.3], ['chickens:pigeon', 0.5], ['street_lamp', 0.6], ['figure', 3], ['sacks', 0.6]],
     stall: ['produce', 'cloth', 'basket'], boats: ['barge', 'rowboat'], awnings: ['cloth_green', 'cloth_white', 'cloth_red'],
-    figures: F(['trousers', 'robe'], ['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo'], ['skin_light'], ['brim', 'brim', 'cap', 'none'], { hair: ['short', 'short', 'bun'], beard: 0.4, over: ['none'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_tan', 0.85], ['hide_grey', 1.1]] }),
+    figures: F(['trousers', 'robe'], ['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo'], ['skin_light'], ['brim', 'brim', 'cap', 'none'], { carry: ['none', 'none', 'none', 'none', 'none', 'none', 'sack'], broom: 'besom', hair: ['short', 'short', 'bun'], beard: 0.4, over: ['none'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_tan', 0.85], ['hide_grey', 1.1]] }),
   },
   modern: {
     door: [['street_lamp', 0.6], ['bench', 1], ['crates', 0.5]],
-    street: [['car', 4], ['street_lamp', 2], ['bench', 0.8], ['figure', 3]],
+    street: [['car', 4], ['street_lamp', 2], ['bench', 0.8], ['chickens:pigeon', 0.4], ['figure', 3]],
     stall: ['produce', 'cloth'], boats: ['ferry', 'rowboat'], awnings: ['cloth_green', 'cloth_red', 'cloth_white'],
     figures: F(['trousers', 'robe'], ['cloth_black', 'cloth_grey', 'cloth_indigo', 'cloth_brown', 'cloth_red'], ['skin_light', 'skin_medium'], ['brim', 'none', 'none'], { hair: ['short', 'short', 'long'], beard: 0.1, over: ['none'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_tan', 0.9], ['hide_grey', 1.1]] }),
   },
@@ -159,7 +164,13 @@ const KIT_OVER = {
   // barefoot (Te Ara, "Māori clothing and adornment – kākahu Māori": https://teara.govt.nz/en/maori-clothing-and-adornment-kakahu-maori;
   // Wikipedia, "Māori traditional textiles": https://en.wikipedia.org/wiki/M%C4%81ori_traditional_textiles). Unlike Rapa
   // Nui's hami and bark cloth (the pacific kit): no loincloths in sight, a cloak on most, the topknot.
-  maori: { figures: F(['strands', 'strands', 'wrap'], ['cloth_ochre', 'cloth_brown', 'linen', 'cloth_ochre'], ['skin_medium'], ['none'], { hair: ['topknot', 'topknot', 'long', 'long'], comb: 0.4, beard: 0.15, feet: 'bare', tops: { wrap: ['bare', ''] }, cloths2: ['linen', 'cloth_ochre', 'cloth_brown', 'cloth_black', 'hide_white', 'linen'], overs: { strands: ['cloak', 'cloak', 'cloak', 'none'], wrap: ['cloak', 'cloak', 'none'] }, hairs: [['hide_black', 0.7], ['hide_black', 0.6]] }) },
+  maori: { street: [['animal:dog', 0.8], ['basket', 1], ['figure', 2.5]], figures: F(['strands', 'strands', 'wrap'], ['cloth_ochre', 'cloth_brown', 'linen', 'cloth_ochre'], ['skin_medium'], ['none'], { hair: ['topknot', 'topknot', 'long', 'long'], comb: 0.4, beard: 0.15, feet: 'bare', tops: { wrap: ['bare', ''] }, cloths2: ['linen', 'cloth_ochre', 'cloth_brown', 'cloth_black', 'hide_white', 'linen'], overs: { strands: ['cloak', 'cloak', 'cloak', 'none'], wrap: ['cloak', 'cloak', 'none'] }, hairs: [['hide_black', 0.7], ['hide_black', 0.6]] }) },
+  // Joseon Seoul: the men's jige (A-frame) on the back; the women carrying on the head, the water jar (dongi) and the basket
+  // on a ring pad (https://en.wikipedia.org/wiki/Jige)
+  'joseon-seoul': { fig: { carry: ['jige', 'jige', 'jige', 'basket', 'pot', 'none', 'none', 'none', 'none'] } },
+  // the Polynesians brought the chicken and the rat to Rapa Nui, and no dog; to Aotearoa the dog (kurī) and the rat,
+  // and no chicken (https://en.wikipedia.org/wiki/Easter_Island; https://en.wikipedia.org/wiki/Kur%C4%AB)
+  'rapa-nui': { street: [['chickens', 1.4], ['basket', 1], ['figure', 2.5]] },
   amsterdam: { street: [['sledge', 2], ['animal:horse', 0.8], ['animal:dog', 0.6], ['barrel', 1.2], ['sacks', 0.8], ['figure', 3]] },
 };
 // the draw-well of each kit (src/objects/index.js well): its kind, its curb, a roof over it
@@ -223,6 +234,26 @@ const FLAT = /paving|road|street|causeway|terrace|lane|sacbe|field|parterre|gard
 const HOUSE = /house|hut|home|insula|siheyuan|hanok|machiya|compound|izba|shop|cottage|_block|skyscraper|dwelling/i;
 const SKIP = /water|paving|park|wall|bridge|viaduct|wharf|fence|field|terrace|platform|road|street|canal|moat|ditch|bank|rim|pool|tank|lake|garden|parterre|ramp|stair|causeway|track|esplanade|precinct|enclosure|palisade|ring|circle|avenue|barrow|mound|cells/i;
 
+// the settlements that hung their washing across the lanes, from window to window or on poles laid from wall to
+// wall: p the share of house fronts that do, y the height of the line over the street, the wash's longest drop, the
+// most lines. Venice's calli and rii; Rome's Trastevere and the lanes of the Regola; the lanes of Cairo; the lanes
+// of the Jiangnan towns, the poles of bamboo across them (https://historywalksvenice.com/tag/bigolo-yoke; [inferred]
+// from the views of the period and the custom that lasted into the photographs of the nineteenth century)
+const ACROSS = {
+  venice: { p: 0.16, y: [4.6, 5.4], drop: 0.95, max: 60 }, 'baroque-rome': { p: 0.1, y: [4.6, 5.4], drop: 0.95, max: 45 },
+  'mamluk-cairo': { p: 0.08, y: [4.9, 5.4], drop: 0.8, max: 40 },
+  'song-hangzhou': { p: 0.12, y: [4.5, 4.9], drop: 0.85, max: 45, pole: true }, 'ming-suzhou': { p: 0.14, y: [4.5, 4.9], drop: 0.85, max: 40, pole: true }, 'song-kaifeng': { p: 0.1, y: [4.5, 4.9], drop: 0.85, max: 40, pole: true },
+};
+// how far the wall of each face of a house stands inside its rectangle at the height of a line, and how far things
+// stand out beyond the rectangle there (the jettied upper storeys and the mashrabiyas of Cairo, the balconies,
+// sills and shutters of the Italian fronts): [inset, out], from the builders (src/styles/vernacular/houses-med.js,
+// house-mamluk.js; src/styles/ming/index.js houseJiangnan: the upper lattice 0.9 m in from the front, the back wall 0.25)
+const FACES = {
+  house_med: (f, h) => (h.variant === 'ottoman' ? [0, 1.5] : [0, f === 'front' ? 0.9 : 0.1]),
+  house_mamluk: (f) => [0, f === 'front' ? 1.6 : 0.1],
+  house_jiangnan: (f) => (f === 'front' ? [0.9, 0.25] : f === 'back' ? [0.25, 0.1] : [0, 0.1]),
+};
+
 /** The settlement's footprints on a half-metre grid, in settlement coordinates. */
 class Grid {
   constructor(R, c = 0.5) { this.c = c; this.R = Math.ceil(R); this.n = Math.ceil(this.R * 2 / c); this.a = new Uint8Array(this.n * this.n); }
@@ -250,7 +281,9 @@ const isFull = (plan, R) => TOWN_LANDMARKS.has(plan.id) || (plan.bounds && plan.
 
 /** The plans of a settlement's life, from its landmarks, its townscape and its ground. */
 export function lifePlans(id, R, landmarks, town, G) {
-  const kit = { ...KITS[KIT_OF[id] ?? 'mediterranean'], ...KIT_OVER[id] }, rand = rng(hash(id)), grid = new Grid(R + 2), egrid = new Grid(R + 2), houses = [], squares = [], strollAreas = [];
+  const kit = { ...KITS[KIT_OF[id] ?? 'mediterranean'], ...KIT_OVER[id] };
+  if (kit.fig) kit.figures = { ...kit.figures, ...kit.fig };
+  const rand = rng(hash(id)), grid = new Grid(R + 2), egrid = new Grid(R + 2), houses = [], squares = [], strollAreas = [];
   let lmSquare = false;
   // the lots of a `turned` element (New York's grid, 29° off the axes): each house kept in its own frame —
   // its rectangle and front in the grid's, `T` its points into the settlement's, `ang` the turn of
@@ -306,7 +339,7 @@ export function lifePlans(id, R, landmarks, town, G) {
       egrid.fill([r[0] - 0.3, r[1] - 0.3, r[2] + 0.3, r[3] + 0.3]);
       if (!full) continue;
       grid.fill([r[0] - 0.3, r[1] - 0.3, r[2] + 0.3, r[3] + 0.3]);
-      if ((HOUSE.test(el.t) || !SKIP.test(el.t)) && w * d >= 10 && w * d <= 6000 && w > 2 && d > 2) houses.push({ r, front: el.front, y: el.y, storeys: el.storeys ?? (el.h && el.h > 5 ? 2 : 1), shop: !!el.shop });
+      if ((HOUSE.test(el.t) || !SKIP.test(el.t)) && w * d >= 10 && w * d <= 6000 && w > 2 && d > 2) houses.push({ r, front: el.front, y: el.y, storeys: el.storeys ?? (el.h && el.h > 5 ? 2 : 1), shop: !!el.shop, t: el.t, variant: el.variant });
     }
   }
   // the landmarks' paved floors (forecourts, plazas raised a little): figures and stalls stand on them
@@ -365,18 +398,34 @@ export function lifePlans(id, R, landmarks, town, G) {
       if (heavy && rand() < 0.35) el.kind = 'four';
       else if (rand() < 0.4) { const b = /europe|north|industrial|venice/.test(k) ? 'horse' : /mediterranean|near_east|africa|east_asia|egypt/.test(k) ? 'donkey' : null; if (b) el.beast = b; }
     }
+    if (t === 'chickens' && sub === 'pigeon') el.n = 5 + Math.floor(rand() * 7);
     if (t === 'figure') {
       Object.assign(el, dressed(kit, rand, rng((el.seed ^ 0x9e3779b9) >>> 0))); if (extra.pose) el.carry = 'none'; if (extra.carry) el.carry = extra.carry; if (extra.y !== undefined) el.y = extra.y;
+      if (el.carry === 'yoke' && kit.figures.bucket) el.bucketMat = kit.figures.bucket;
       if (el.child && extra.pose && extra.pose !== 'squat') delete el.child;          // no child on a bench built for grown-ups, at a craft, at work
     }
     els.push(el);
   };
-  const sz = (t) => ({ cart: 2.2, handcart: 1.6, rain_tub: 0.7, sledge: 2.2, stall: 2.2, animal: 1.4, haystack: 1.6, car: 2.6, laundry: 1.8, well: (WELL_OF[id] ?? WELL[KIT_OF[id]])?.kind === 'shaduf' ? 3.1 : 1.1, figure: 0.5, bench: 1, firewood: 1, crates: 0.8, ladder: 0.5, street_lamp: 0.4 }[t.split(':')[0]] ?? 0.6);
+  const sz = (t) => ({ stool: 0.6, sweeper: 0.85, wash_line: 0, goods_mat: 1.1, cart: 2.2, handcart: 1.6, rain_tub: 0.7, sledge: 2.2, stall: 2.2, animal: 1.4, haystack: 1.6, car: 2.6, laundry: 1.8, well: (WELL_OF[id] ?? WELL[KIT_OF[id]])?.kind === 'shaduf' ? 3.1 : 1.1, figure: 0.5, bench: 1, firewood: 1, crates: 0.8, ladder: 0.5, street_lamp: 0.4 }[t.split(':')[0]] ?? 0.6);
   const tryPut = (spec, x, z, rot, extra, k = 1, ax = 0) => {
     const s = sz(spec) * k, box = [x - s, z - s, x + s, z + s];
     if (!inside(x, z) || !grid.free(box) || wet(x, z) || !flat(x, z, s)) return false;
     put(spec, x, z, rot, extra, ax); grid.fill(box, 2); return true;
   };
+  // goods set out on a mat on the ground, the seller sitting cross-legged or squatting behind them (−z), facing them
+  const matGoods = [...new Set((kit.stall ?? []).map((g) => (g === 'produce' ? 'heap' : g === 'cloth' ? 'bolts' : g.startsWith('pot:') ? g.slice(4) : g)))];
+  const matCloth = { andes: 'cloth_red', americas: 'reed_mat' }[KIT_OF[id]] ?? 'reed_mat';
+  const putMat = (x, z, rot, both = false) => {
+    const box = [x - 1.25, z - 1.25, x + 1.25, z + 1.25];
+    if (!inside(x, z, 20) || !grid.free(box) || (both && !egrid.free(box)) || wet(x, z) || !flat(x, z, 1.2)) return false;
+    els.push({ t: 'goods_mat', at: [x, z], y: H(x, z), rot, seed: Math.floor(rand() * 1e9), goods: matGoods.length ? matGoods : ['heap', 'baskets'], mat: matCloth, ...wareOpts });
+    if (rand() < 0.85) put('figure', x - Math.sin(rot) * 0.95, z - Math.cos(rot) * 0.95, rot + Math.PI + (rand() - 0.5) * 0.3, { pose: rand() < 0.6 ? 'cross' : 'squat' });
+    grid.fill(box, 2); if (both) egrid.fill(box, 2);
+    return true;
+  };
+  // a flock of pigeons on an open place (the kits that have them in their streets)
+  const pigeonsIn = kit.street.some(([s]) => s === 'chickens:pigeon');
+  const flocks = ([x0, z0, x1, z1], per) => { if (!pigeonsIn) return; const n = Math.min(8, Math.floor((x1 - x0) * (z1 - z0) / per)); for (let q = 0, t = 0; q < n && t < n * 6; t++) { const x = x0 + 4 + rand() * (x1 - x0 - 8), z = z0 + 4 + rand() * (z1 - z0 - 8), b = [x - 1.6, z - 1.6, x + 1.6, z + 1.6]; if (!inside(x, z, 20) || !egrid.free(b) || !grid.free(b) || wet(x, z) || !flat(x, z, 1.5)) continue; put('chickens:pigeon', x, z, 0); grid.fill(b, 2); egrid.fill(b, 2); q++; } };
   // by the doors
   const sides = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
   // (a house's rectangle and front are in its frame: `T` its points into the settlement's, `ang` its turn; most houses' frame is the settlement's)
@@ -391,6 +440,10 @@ export function lifePlans(id, R, landmarks, town, G) {
       for (const f of order) {
         const [nx, nz] = sides[f], off = 0.25 + sz(spec) * 0.7 + rand() * 0.2;
         const [x, z] = T(nx ? (nx > 0 ? x1 + off : x0 - off) : x0 + (x1 - x0) * t, nz ? (nz > 0 ? z1 + off : z0 - off) : z0 + (z1 - z0) * t);
+        const out = (nx ? Math.PI / 2 : 0) + (nx > 0 || nz > 0 ? Math.PI : 0) + ang;           // the turn of a figure facing out to the street
+        // someone sitting out at the door on a low stool, facing the street; someone sweeping before the door, along the wall
+        if (spec === 'stool') { if (tryPut('stool', x, z, out, {}, 0.7, ang)) { if (rand() < 0.75) put('figure', x, z, out, { pose: 'sit_low' }); break; } continue; }
+        if (spec === 'sweeper') { if (kit.figures.broom && tryPut('figure', x, z, out + Math.PI / 2 * (rand() < 0.5 ? 1 : -1), { carry: kit.figures.broom }, 1.6, ang)) break; continue; }
         if (tryPut(spec, x, z, (nx ? Math.PI / 2 : 0) + ang, {}, 0.7, ang)) {
           // someone sitting on the bench, or squatting at the pots and baskets
           if (spec === 'bench' && rand() < 0.45) put('figure', x, z, (nx ? Math.PI / 2 : 0) + (nx > 0 || nz > 0 ? Math.PI : 0) + ang, { pose: 'sit' });
@@ -418,6 +471,38 @@ export function lifePlans(id, R, landmarks, town, G) {
     else if (t === 'shop_sign') els.push({ t, at: P(sf, -0.05), y: yb, rot, h: sub === 'board' ? 3.1 : 2.75, board: sub === 'board', len: 1 + rand() * 0.6, cloth: sub === 'board' ? undefined : ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_black'][Math.floor(rand() * 4)], seed });
     else if (t === 'laundry_pole') els.push({ t, at: P(lf, -0.05), y: yb + 4.1, rot, len: 1.3 + rand() * 0.5, prop: false, seed });
   }
+  // washing hung across the lanes between the upper storeys, from wall to wall (the settlements where it was the custom)
+  const AX = ACROSS[id];
+  if (AX) {
+    const hmap = new Map(), key = (i, j) => i * 100003 + j;
+    const ok = (h) => !h.T && FACES[h.t] && (h.storeys ?? 1) >= 2;
+    for (const h of houses) if (ok(h)) for (let i = Math.floor(h.r[0] / 8); i <= Math.floor(h.r[2] / 8); i++) for (let j = Math.floor(h.r[1] / 8); j <= Math.floor(h.r[3] / 8); j++) { const k = key(i, j); if (!hmap.has(k)) hmap.set(k, []); hmap.get(k).push(h); }
+    const houseAt = (x, z) => (hmap.get(key(Math.floor(x / 8), Math.floor(z / 8))) ?? []).find((h) => x >= h.r[0] - 0.05 && x <= h.r[2] + 0.05 && z >= h.r[1] - 0.05 && z <= h.r[3] + 0.05);
+    // a face of a house: its front, its back or a side, as seen along (dx, dz) out of it
+    const faceOf = (h, dx, dz) => { const [fx, fz] = sides[h.front] ?? [0, 0]; return fx === dx && fz === dz ? 'front' : fx === -dx && fz === -dz ? 'back' : 'side'; };
+    const lines = [];
+    for (const h of houses) {
+      if (lines.length >= AX.max || !ok(h) || !sides[h.front] || rand() > AX.p) continue;
+      // (most from the front; a side or the back where the houses stand close)
+      const fc = rand() < 0.6 ? h.front : 'nsew'[Math.floor(rand() * 4)];
+      const [x0, z0, x1, z1] = h.r, [nx, nz] = sides[fc], t = 0.25 + rand() * 0.5;
+      const near = nx ? (nx > 0 ? x1 : x0) : (nz > 0 ? z1 : z0), sx = nx ? near : x0 + (x1 - x0) * t, sz0 = nz ? near : z0 + (z1 - z0) * t;
+      // out across the lane to the next footprint: a house of the kind, two storeys or more, wide enough there
+      let hit = null, d = 0.9;                                   // (past the near house's own margin in the grid)
+      for (; d <= 8.5 && !hit; d += 0.25) if (grid.get(sx + nx * d, sz0 + nz * d) === 1) hit = houseAt(sx + nx * (d + 0.5), sz0 + nz * (d + 0.5)) ?? -1;
+      if (!hit || hit === -1 || hit === h || (nx ? sz0 < hit.r[1] + 0.6 || sz0 > hit.r[3] - 0.6 : sx < hit.r[0] + 0.6 || sx > hit.r[2] - 0.6)) continue;
+      const far = nx > 0 ? hit.r[0] : nx < 0 ? hit.r[2] : nz > 0 ? hit.r[1] : hit.r[3], gap = Math.abs(far - near);
+      const [inN, outN] = FACES[h.t](faceOf(h, nx, nz), h), [inF, outF] = FACES[hit.t](faceOf(hit, -nx, -nz), hit);
+      if (gap < 1.5 || gap - outN - outF < 1.2 || gap > 7.5) continue;
+      const yb = Math.max(h.y ?? H(sx, sz0), hit.y ?? H(sx + nx * gap, sz0 + nz * gap)), y = yb + AX.y[0] + rand() * (AX.y[1] - AX.y[0]);
+      // (the lengths in quarter metres, rounded up, so that lines of a length share their shape; the ends always inside the walls)
+      const q = (v) => Math.ceil(v * 4 - 1e-6) / 4, ea = q(inN + 0.15), eb = q(inF + 0.15), len = q(gap + ea + eb);
+      const mid = [sx + nx * (len / 2 - ea), sz0 + nz * (len / 2 - ea)];
+      if (lines.some((p) => Math.hypot(p[0] - mid[0], p[1] - mid[1]) < 3.5) || fronted.some((p) => Math.hypot(p[0] - sx, p[1] - sz0) < 2)) continue;
+      lines.push(mid);
+      els.push({ t: 'wash_line', at: mid, y, rot: Math.atan2(-nz, nx), len, emb: [ea, eb], clear: [q(Math.max(0.3, inN + outN + 0.25)), q(Math.max(0.3, inF + outF + 0.25))], pole: !!AX.pole, drop: AX.drop, seed: Math.floor(rand() * 1e9) });
+    }
+  }
   // crafts at the doors: a potter among his pots, a basket-maker, a dyer's cloth on lines, a carpenter's timber
   const CRAFT = { east_asia: ['potter', 'basket', 'dyer', 'carpenter'], japan: ['potter', 'basket', 'carpenter'], south_asia: ['potter', 'dyer', 'basket'], southeast_asia: ['potter', 'basket'], near_east: ['potter', 'dyer', 'carpenter'], egypt: ['potter', 'basket'], africa: ['potter', 'basket', 'dyer'], americas: ['potter', 'basket'], andes: ['potter', 'dyer'], mediterranean: ['potter', 'carpenter'], europe_medieval: ['carpenter', 'potter', 'cooper'], europe_early_modern: ['cooper', 'carpenter'], venice: ['cooper', 'carpenter'], north: ['carpenter'], pacific: ['basket'] }[KIT_OF[id] ?? 'mediterranean'] ?? [];
   if (CRAFT.length) for (const h of houses) {
@@ -442,6 +527,9 @@ export function lifePlans(id, R, landmarks, town, G) {
     if (!h) break;
     const [x0, z0, x1, z1] = h.r, a = rand() * 6.28, d = 3 + rand() * 6, ax = h.ang ?? 0, [cx, cz] = (h.T ?? ID)((x0 + x1) / 2 + Math.cos(a) * ((x1 - x0) / 2 + d), (z0 + z1) / 2 + Math.sin(a) * ((z1 - z0) / 2 + d));
     const [spec] = pick(rand, rand() < 0.35 ? kit.door : kit.street);
+    if (spec === 'stool') continue;                                          // (a stool only by a door)
+    if (spec === 'sweeper') { if (kit.figures.broom && tryPut('figure', cx, cz, rand() * 6.28, { carry: kit.figures.broom }, 1.6, ax)) k++; continue; }
+    if (kit.mats && rand() < 0.05 * kit.mats) { if (putMat(cx, cz, Math.round(rand() * 4) * Math.PI / 2 + ax)) k++; continue; }
     if (spec === 'figure' && rand() < 0.45) {
       // a knot of two or three talking, facing each other
       const n = 2 + (rand() < 0.35 ? 1 : 0), a0 = rand() * 6.28;
@@ -462,6 +550,7 @@ export function lifePlans(id, R, landmarks, town, G) {
       let u = rand() * per, x, z, rot;
       if (u < x1 - x0) { x = x0 + u; z = z0 + 4; rot = 0; } else if ((u -= x1 - x0) < z1 - z0) { x = x1 - 4; z = z0 + u; rot = -Math.PI / 2; } else if ((u -= z1 - z0) < x1 - x0) { x = x0 + u; z = z1 - 4; rot = Math.PI; } else { u -= x1 - x0; x = x0 + 4; z = z0 + u; rot = Math.PI / 2; }
       const s = 2.2, box = [x - s, z - s, x + s, z + s];
+      if (kit.mats && rand() < kit.mats) { putMat(x, z, rot, true); continue; }
       if (!inside(x, z, 20) || !grid.free(box) || !egrid.free(box) || wet(x, z) || !flat(x, z, 1.6)) continue;
       els.push({ t: 'stall', at: [x, z], y: H(x, z), rot, seed: Math.floor(rand() * 1e9), awning: kit.awnings[Math.floor(rand() * kit.awnings.length)], goods: kit.stall, ...wareOpts });
       grid.fill(box, 2); egrid.fill(box, 2);
@@ -470,6 +559,7 @@ export function lifePlans(id, R, landmarks, town, G) {
       if (rand() < 0.7) tryPut('figure', x + Math.sin(rot) * 2.4, z + Math.cos(rot) * 2.4, rot + (rand() - 0.5) * 0.6, { pose: rand() < 0.5 ? 'talk' : 'stand' });
     }
     for (let k = 0; k < 12; k++) tryPut('figure', x0 + 8 + rand() * (x1 - x0 - 16), z0 + 8 + rand() * (z1 - z0 - 16), rand() * 6.28);
+    flocks(sq.rect, 500);
   }
   // the great market squares: rows of stalls with aisles between, buyers and sellers among them
   for (const [x0, z0, x1, z1] of MARKETS[id] ?? []) {
@@ -482,12 +572,14 @@ export function lifePlans(id, R, landmarks, town, G) {
     for (const [x, z] of cand) {
       if (n >= cap) break;
       const px = x + (rand() - 0.5) * 1.5, pz = z + (rand() - 0.5) * 1.5, rot = (Math.floor((z - z0) / 9) % 2) * Math.PI, b = [px - 1.8, pz - 1.4, px + 1.8, pz + 1.4];
+      if (kit.mats && rand() < kit.mats) { if (putMat(px, pz, rot, true)) n++; continue; }
       if (!inside(px, pz, 20) || !egrid.free(b) || !grid.free(b) && false || wet(px, pz) || !flat(px, pz, 1.6)) continue;
       els.push({ t: 'stall', at: [px, pz], y: H(px, pz), rot, seed: Math.floor(rand() * 1e9), awning: kit.awnings[Math.floor(rand() * kit.awnings.length)], goods: kit.stall, ...wareOpts });
       egrid.fill(b, 2); grid.fill(b, 2); n++;
       if (rand() < 0.7) { const fx = px - Math.sin(rot) * 1.55, fz = pz - Math.cos(rot) * 1.55; if (egrid.free([fx - 0.3, fz - 0.3, fx + 0.3, fz + 0.3]) || rand() < 0.5) { put('figure', fx, fz, rot + Math.PI + (rand() - 0.5) * 0.4, { pose: rand() < 0.25 ? 'squat' : rand() < 0.5 ? 'talk' : 'stand' }); egrid.fill([fx - 0.3, fz - 0.3, fx + 0.3, fz + 0.3], 2); } }
       for (let q = 0; q < 2; q++) if (rand() < 0.6) { const fx = px + (rand() - 0.5) * 3, fz = pz + Math.cos(rot) * (2.6 + rand() * 1.2), bb = [fx - 0.35, fz - 0.35, fx + 0.35, fz + 0.35]; if (egrid.free(bb)) { put('figure', fx, fz, rot + (rand() - 0.5), { pose: rand() < 0.4 ? 'talk' : 'stand' }); egrid.fill(bb, 2); } }
     }
+    flocks([x0, z0, x1, z1], 900);
   }
   // people in the open places of the landmarks: knots talking, some walking with loads (the listed places, then the
   // landmarks' other open rooms, more thinly; a terrace well above the ground keeps its own height)
@@ -506,6 +598,7 @@ export function lifePlans(id, R, landmarks, town, G) {
         egrid.fill(b, 2); k++;
       }
     }
+    if (yOver === undefined) flocks([x0, z0, x1, z1], 1400);
   }
   // work in the fields: people hoeing or bent over the crop in twos and threes, an ox or buffalo, a basket at the field's edge
   if (G.cover) {

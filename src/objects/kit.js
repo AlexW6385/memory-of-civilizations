@@ -25,7 +25,7 @@ export function tint(mat, shade = 1) {
   return null;
 }
 /** How far off an object is still drawn (m): the small things nearer. */
-const REACH = { shop_sign: 160, hang_lantern: 120, laundry_pole: 150, tea_table: 120, drying_tray: 90, oar: 150, figure: 170, animal: 190, chickens: 90, pot: 120, basket: 110, sacks: 120, firewood: 110, crates: 140, barrel: 140, ladder: 140, laundry: 150, lantern: 120 };
+const REACH = { shop_sign: 160, hang_lantern: 120, laundry_pole: 150, tea_table: 120, drying_tray: 90, oar: 150, figure: 170, animal: 190, chickens: 90, pot: 120, basket: 110, sacks: 120, firewood: 110, crates: 140, barrel: 140, ladder: 140, laundry: 150, wash_line: 160, lantern: 120, goods_mat: 110, stool: 100 };
 const _q = new Quaternion(), _up = new Vector3(0, 1, 0), _p = new Vector3(), _s = new Vector3();
 /**
  * A placer: builds at the origin, then scales, turns and moves each piece to the object's place —
