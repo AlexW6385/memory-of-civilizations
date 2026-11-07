@@ -1158,7 +1158,7 @@
  },
  "ottoman-istanbul-suleymaniye": {
   "site": "ottoman-istanbul",
-  "hash": "b91ede0b86c3e5c1",
+  "hash": "524c9f4d9a5e5c3e",
   "rays": 128,
   "probes": 75600,
   "boxes": [
@@ -1180,8 +1180,8 @@
     ]
    }
   ],
-  "bytes": 1185036,
-  "seconds": 648,
+  "bytes": 1225686,
+  "seconds": 193,
   "baked": "2026-11-07"
  },
  "pantheon": {
