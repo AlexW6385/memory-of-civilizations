@@ -52,7 +52,7 @@ export const ARRIVALS = {
   'london':           [200, 2.5, -170, 1.9, 0.2],        // the Clock Tower and Westminster from the bridge
   'barcelona':        [239.5, null, -101, 1.712, 0.45],  // the Nativity façade's portals, from the far pavement of the Carrer de la Marina (south of the tram standing at the façade)
   'norse-borgund':    [-30, null, -28, -1.509, 0.27],     // the stave church in its valley, across the churchyard wall (8 m off)
-  'muscovy':          [40, 0.1, 40, 3.1416, 0.3],        // St Basil's and the Kremlin wall across Red Square
+  'muscovy':          [40, 0.1, 40, 3.0, 0.22],          // St Basil's and the Kremlin wall across Red Square
   'teotihuacan':      [0, 0.1, 60, 0, 0.1],              // up the Avenue of the Dead
   'chichen-itza':     [30, 0.1, 75, 0.38, 0.17],         // El Castillo
   'tenochtitlan':     [-10, 0.1, 30, -1.293, 0.25],      // the Templo Mayor's twin shrines
