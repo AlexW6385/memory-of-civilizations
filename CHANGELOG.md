@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.90 — Africa, Mesopotamia, the Levant (2026-11-07)
+- Great Zimbabwe: daga houses to walk into, furnished, cattle in kraals, coast trade goods. Kilwa: the Great Mosque's inset porcelain bowls and carved mihrab, coconut palms and baobabs, ivory and dhows on the beach. Edfu: painted reliefs in the inner halls, offering tables, priests censing. Giza: the workers' houses rebuilt and furnished, bakeries and brewers, a block hauled on a sledge, barges and skiffs; the walk reaches the King's Chamber again. Ur and Babylon: houses to enter, furnished room by room, markets, scribes, donkeys and caravans; Nebuchadnezzar's glazed inscription; reed layers in the walls. Persepolis: the bull capitals carved, the Treasury furnished, an archive of tablets. Petra: the garden and pool of Aretas IV with its island pavilion, a triclinium with diners and musicians, a camel caravan.
+
 ## v9.89 — Light in the air (2026-11-07)
 - Inside, sunbeams now show as shafts of light in dust; stained glass throws coloured shafts down to its pools on the floor; temples hold incense haze by tradition (thick in Buddhist, Hindu, Egyptian and Orthodox halls, light in mosques); the nearest lamps and lanterns light the walls round you and flicker; water shows the moon's glitter path at night.
 
