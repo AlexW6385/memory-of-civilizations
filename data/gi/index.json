@@ -356,6 +356,33 @@
   "seconds": 83,
   "baked": "2026-11-06"
  },
+ "mamluk-cairo-hasan": {
+  "site": "mamluk-cairo",
+  "hash": "924983d813bdf625",
+  "rays": 128,
+  "probes": 20475,
+  "boxes": [
+   {
+    "min": [
+     -12,
+     -0.5,
+     54
+    ],
+    "n": [
+     25,
+     39,
+     21
+    ],
+    "spacing": 1,
+    "rooms": [
+     "qibla iwan"
+    ]
+   }
+  ],
+  "bytes": 317150,
+  "seconds": 103,
+  "baked": "2026-11-07"
+ },
  "muscovy-dormition": {
   "site": "muscovy",
   "hash": "e351796c6108981c",
