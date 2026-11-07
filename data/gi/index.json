@@ -1576,7 +1576,7 @@
  },
  "ur-ziggurat": {
   "site": "ur",
-  "hash": "67d2f0c3d623a766",
+  "hash": "135acf10ea62083f",
   "rays": 128,
   "probes": 1664,
   "boxes": [
@@ -1597,8 +1597,8 @@
     ]
    }
   ],
-  "bytes": 29895,
-  "seconds": 6,
+  "bytes": 29995,
+  "seconds": 3,
   "baked": "2026-11-07"
  },
  "venice-san-marco": {
