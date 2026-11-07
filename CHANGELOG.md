@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v9.84 — Life, sound, Oceania and North America (2026-11-07)
+- Porters with loads (sacks, bundles, the Korean jige, yokes, carrying poles, head-loads), sweepers, people on stools at their doors, laundry strung across the lanes of Venice, Rome and Cairo, sellers on ground mats, pigeons and turkeys. Each hall now rings with its own reverberation, worked out from its volume and materials; rain sounds on the roof you stand under; birds, insects and animals by place; bells, drums and the call to prayer at their hours. Taos: a furnished room, worn plaster, turkeys. Cahokia: thatch, four furnished houses, chunkey players. Rapa Nui: weathered moai, stone-mulched gardens, a house being rethatched. Maori pa: carved bargeboards, eel pots, kuri.
+
 ## v9.83 — Wave 9 finished (2026-11-06)
 - Chichen Itza's Temple of the Warriors opened, with its painted procession and Atlantean altar, and offerings at the Sacred Cenote; Lalibela's Bete Medhane Alem and Bete Maryam hollowed, with deacons and pilgrims; the Great Pyramid's interior from the north entrance up the Grand Gallery to the King's Chamber; Amsterdam's Town Hall vestibule, Vierschaar and Burgerzaal; Machu Picchu turned the right way, with its walls, storehouses and people; the Generalife's hedges, jets, stucco and people; Sydney's wharves peopled; market goods, water jars, handcarts and barrows per culture.
 
