@@ -75,7 +75,7 @@ export async function measureSite(id) {
   // their tiles' meshes, indexed (vertices and indices as copies; their tiles' meshes are already counted)
   for (const e of life.values()) {
     S.tris += (e.idx / 3) * e.n;
-    if (e.n >= LIFE_MIN) { S.meshes += 2; S.protoVerts += e.v; S.instances += e.n; S.bytes += e.bytes + e.n * (64 + (e.colors ? 12 : 0)); }
+    if (e.n >= LIFE_MIN) { S.meshes += 1; S.protoVerts += e.v; S.instances += e.n; S.bytes += e.bytes + e.n * (64 + (e.colors ? 12 : 0)); }
     else { S.verts += e.v * e.n; S.bytes += e.n * (e.v * 24 + e.idx * 4); }
   }
   return S;
