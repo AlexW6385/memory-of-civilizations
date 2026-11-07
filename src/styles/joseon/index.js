@@ -1,15 +1,15 @@
-// Joseon architecture (15th c.; docs/settlements/joseon-seoul.md §4): palace halls of the qing/ming
+// Joseon architecture (docs/settlements/joseon-seoul.md §4, §12): palace halls of the qing/ming
 // vocabulary with a Joseon palette — grey tiles, red columns, dancheong in green and blue, granite
-// platforms — Gyeonghoeru on its 48 stone pillars, and hanok houses: L- and U-shaped wings round a
-// yard in a walled lot, tiled or thatched.
+// platforms — and hanok houses: L- and U-shaped wings round a yard in a walled lot, tiled or
+// thatched. The buildings and things of Gojong's palace and the 1880s town are in gojong.js.
 
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, beamTris, withPal, latticeBay } from '../ming/index.js';
 import '../qing/index.js';
 import { roofOrnaments, Parts, limb } from '../qing/carving.js';
-import { columnDragon } from '../qing/throne.js';
 import { dapo, dapoHeight, meoricho, muryangRoof, postLines } from './dancheong.js';
+import { GOJONG } from './gojong.js';
 
 export const JPAL = { wood: 'paint_dancheong', column: 'lacquer_red', soffit: 'paint_dancheong', base: 'granite_korea', floor: 'granite_korea', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_korea', roof: 'tile_grey' };
 const withJ = (fn) => (el, ctx) => fn({ ...el, pal: { ...JPAL, ...(el.pal || {}) } }, ctx);
@@ -17,74 +17,6 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 function roof(bag, [x0, z0, x1, z1], y, o, kind, rise, mat, alongZ, soffit = 'paint_dancheong') {
   const w = x1 - x0 + 2 * o, d = z1 - z0 + 2 * o, az = alongZ ?? d > w;
   rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (az ? d : w) / 2, B: (az ? w : d) / 2, y, rise: rise ?? Math.min(w, d) * 0.3, kind, sweep: 0.6, p: 1.5, alongZ: az, curl: false, mat, soffit }, bag);
-}
-
-/**
- * nu: Gyeonghoeru as Taejong built it in 1412 (and Sejong had it repaired in 1429) { rect, y (the
- * island's top), bays: [7, 5], h1 (the stone storey), h2 }: 48 round stone pillars each carved with
- * a dragon wriggling up it; the timber upper floor with its cornice, open on all sides, its railing
- * of posts, rails and balusters; the red posts with moru dancheong on the beams; the roof in two
- * tiers — a skirt of eaves round the upper floor and, over the inner bays, a raised storey of white
- * plaster between dancheong rails under the hip-and-gable roof; white ridges, chwidu, japsang.
- */
-function nu(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y, [nx, nz] = el.bays, h1 = el.h1 ?? 4.8, h2 = el.h2 ?? 4.6;
-  const P = new Parts(); columnDragon(P, 'granite_korea', 0.42, 0.45, h1 - 0.5, 0.12, 1.5, 0.6);
-  for (let i = 0; i <= nx; i++) for (let j = 0; j <= nz; j++) {
-    if (i > 1 && i < nx - 1 && j > 1 && j < nz - 1) continue;      // the innermost bays carried by the floor's beams
-    const x = x0 + (x1 - x0) * i / nx, z = z0 + (z1 - z0) * j / nz;
-    // the pillar: a square plinth, the round shaft, a capital block under the beams; the dragon round it
-    bag.add('granite_korea', box(x - 0.6, y, z - 0.6, x + 0.6, y + 0.3, z + 0.6));
-    bag.add('granite_korea', lathe([[0.55, 0], [0.48, 0.15], [0.42, 0.3], [0.42, h1 - 0.35], [0.5, h1 - 0.2], [0.001, h1 - 0.2]], 16, null, x, y + 0.3, z));
-    bag.add('granite_korea', box(x - 0.55, y + h1 - 0.2, z - 0.55, x + 0.55, y + h1 + 0.02, z + 0.55));
-    P.emit(bag, x, y, z);
-    col.circle(x, z, 0.55, y, y + h1);
-  }
-  const y2 = y + h1, yf = y2 + 0.7;
-  // the floor: the beams over the pillars, the cornice, the boards
-  bag.add('paint_dancheong', box(x0 - 0.6, y2, z0 - 0.6, x1 + 0.6, yf - 0.12, z1 + 0.6));
-  bag.add('timber', box(x0 - 0.75, yf - 0.12, z0 - 0.75, x1 + 0.75, yf, z1 + 0.75)); col.floor([x0 - 0.75, z0 - 0.75, x1 + 0.75, z1 + 0.75], yf);
-  for (let i = 0; i <= nx; i++) for (const z of [z0, z1]) { const x = x0 + (x1 - x0) * i / nx; bag.add('lacquer_red', lathe([[0.28, 0], [0.26, h2]], 10, null, x, yf, z)); col.circle(x, z, 0.3, yf, yf + h2); }
-  for (let j = 1; j < nz; j++) for (const x of [x0, x1]) { const z = z0 + (z1 - z0) * j / nz; bag.add('lacquer_red', lathe([[0.28, 0], [0.26, h2]], 10, null, x, yf, z)); col.circle(x, z, 0.3, yf, yf + h2); }
-  // the railing round the floor's edge (gyeja nangan): posts at each bay and between, a sill, balusters, the round rail on bracket arms
-  const e = 0.55;
-  for (const [a, b, n] of [[[x0 - e, z0 - e], [x1 + e, z0 - e], nx], [[x0 - e, z1 + e], [x1 + e, z1 + e], nx], [[x0 - e, z0 - e], [x0 - e, z1 + e], nz], [[x1 + e, z0 - e], [x1 + e, z1 + e], nz]]) {
-    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), m = n * 2, pt = (t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-    for (let k = 0; k <= m; k++) { const [px, pz] = pt(k / m); bag.add('lacquer_red', box(px - 0.06, yf, pz - 0.06, px + 0.06, yf + 0.62, pz + 0.06)); }
-    const t = [], q = [];
-    beamTris(t, [a[0], yf + 0.08, a[1]], [b[0], yf + 0.08, b[1]], 0.07, 0.08);            // the sill
-    beamTris(t, [a[0], yf + 0.5, a[1]], [b[0], yf + 0.5, b[1]], 0.05, 0.05);              // the middle rail
-    bag.add('lacquer_red', fromTriangles(t));
-    const nb = Math.round(L / 0.22);
-    for (let k = 1; k < nb; k++) { const [px, pz] = pt(k / nb); bag.add('paint_dancheong', box(px - 0.025, yf + 0.16, pz - 0.025, px + 0.025, yf + 0.5, pz + 0.025)); }
-    for (let k = 0; k < m; k++) { const [px, pz] = pt((k + 0.5) / m); q.push(px, pz); bag.add('lacquer_red', box(px - 0.035, yf + 0.55, pz - 0.035, px + 0.035, yf + 0.8, pz + 0.035)); }
-    bag.add('lacquer_red', limb([a[0], yf + 0.84, a[1]], [b[0], yf + 0.84, b[1]], 0.045, 0.045, 8));
-    col.segment(a, b, 0.2, yf, yf + 0.9);
-  }
-  // the head beams with their moru dancheong
-  const yh = yf + h2;
-  bag.add('paint_dancheong', box(x0 - 0.3, yh - 0.6, z0 - 0.3, x1 + 0.3, yh, z1 + 0.3));
-  const posts = [Array.from({ length: nx + 1 }, (_, i) => x0 + (x1 - x0) * i / nx), Array.from({ length: nz + 1 }, (_, j) => z0 + (z1 - z0) * j / nz)];
-  meoricho(bag, el.rect, posts, yh - 0.55, yh - 0.12, 0.31);
-  // the lower roof: a skirt of eaves round the upper floor, up to the raised storey
-  const o = 2.4, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, A = (x1 - x0) / 2 + o, B = (z1 - z0) / 2 + o, inset = (z1 - z0) / nz;
-  const skirt = { c: [cx, cz], A, B, y: yh - 0.1, rise: (inset + o) * 0.35, p: 1.25, kind: 'hip', sweep: 0.5, alongZ: false, mat: 'tile_grey', soffit: 'paint_dancheong', curl: false };
-  rectRoof(skirt, bag);
-  roofOrnaments(bag, skirt, { mat: 'tile_grey', joseon: true, ends: false, figures: el.figures ?? 11, tLimit: (inset + o) / B, reach: 0.75 });
-  // the raised storey over the inner bays: white plaster between dancheong rails, a band of lattice, red posts
-  const u = [x0 + inset, z0 + inset, x1 - inset, z1 - inset], yb = yh + (inset + o) * 0.35, D = 2.4;
-  bag.add('plaster_white', box(u[0], yh, u[1], u[2], yb + D - 0.9, u[3]));
-  for (const [ya, yc] of [[yb - 0.15, yb + 0.25], [yb + D * 0.32 - 0.14, yb + D * 0.32], [yb + D * 0.7, yb + D * 0.7 + 0.12]]) bag.add('paint_dancheong', box(u[0] - 0.06, ya, u[1] - 0.06, u[2] + 0.06, yc, u[3] + 0.06));
-  for (const [a, b] of [[[u[0], u[3] + 0.06], [u[2], u[3] + 0.06]], [[u[2], u[1] - 0.06], [u[0], u[1] - 0.06]]]) latticeBay(bag, null, a, b, yb + D * 0.33, D * 0.36, 'window', 0.02);
-  bag.add('paint_dancheong', box(u[0] - 0.08, yb + D - 0.9, u[1] - 0.08, u[2] + 0.08, yb + D, u[3] + 0.08));
-  const ux = Array.from({ length: nx - 1 }, (_, i) => u[0] + (u[2] - u[0]) * i / (nx - 2)), uz = Array.from({ length: nz - 1 }, (_, j) => u[1] + (u[3] - u[1]) * j / (nz - 2));
-  for (const x of ux) for (const z of [u[1] - 0.1, u[3] + 0.1]) bag.add('lacquer_red', lathe([[0.2, 0], [0.19, yb + D - 0.9 - yh], [0.001, yb + D - 0.9 - yh]], 10, null, x, yh, z));
-  meoricho(bag, u, [ux, uz], yb + D - 0.85, yb + D - 0.12, 0.09);
-  // the upper roof, hip-and-gable, with the white ridges, the chwidu and the japsang
-  const A2 = (u[2] - u[0]) / 2 + o, B2 = (u[3] - u[1]) / 2 + o;
-  const upper = { c: [cx, cz], A: A2, B: B2, y: yb + D - 0.1, rise: B2 * 0.62, kind: 'xieshan', sweep: 0.6, p: 1.5, alongZ: false, mat: 'tile_grey', soffit: 'paint_dancheong', curl: false, gableAt: 0.45 };
-  rectRoof(upper, bag);
-  roofOrnaments(bag, upper, { mat: 'tile_grey', joseon: true, white: true, figures: el.figures ?? 11 });
 }
 
 /** ming_hall with el.orn (Joseon): the roof drawn here without curled ridge ends, to carry its white ridges, chwidu and japsang. */
@@ -103,41 +35,93 @@ function hallOrn(el, ctx) {
   roofOrnaments(ctx.bag, r, { mat: el.pal.roof, joseon: true, white: !el.muryang, ends: !el.muryang, figures: el.orn?.figures ?? 5 });
 }
 
-/** hanok: a house in its walled lot { rect, seed, thatch }: an L- or U-shaped range of rooms on a stone base, white walls between timber posts, tiled (or thatched) roofs, the lot's wall with a gate. */
+/**
+ * hanok: a house in its walled lot { rect, seed, thatch } (docs/settlements/joseon-seoul.md §5, §12):
+ * an L- or U-shaped range of rooms on a stone base; toward the yard the posts with lattice doors
+ * papered inside (changho) and a narrow wooden veranda (toenmaru) along them, an open-fronted hall
+ * (daecheong) in the main range's middle bay; the back and the ends plastered white over the stone,
+ * greyed by damp along the foot; tiled (or thatched) roofs; a low chimney at a wing's end; the crock
+ * terrace (jangdokdae) in a corner of the yard with its earthenware jars of soy, paste and kimchi;
+ * the lot's wall of fieldstone below and plaster above under a coping, its gate under a little roof.
+ */
 function hanok(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, thatch = el.thatch ?? rand() < 0.35;
-  const d = Math.min(5, D * 0.32), mat = thatch ? 'thatch' : 'tile_grey', h = 2.6;
-  const wings = [[x0 + 1.5, z0 + 1.5, x1 - 1.5, z0 + 1.5 + d]];                    // the main range along the north side
-  if (rand() < 0.7) wings.push([x0 + 1.5, z0 + 1.5 + d, x0 + 1.5 + d * 0.9, z1 - 3]);
-  if (!thatch && rand() < 0.5) wings.push([x1 - 1.5 - d * 0.9, z0 + 1.5 + d, x1 - 1.5, z1 - 4]);
-  for (const r of wings) {
-    bag.add('granite_korea', box(r[0] - 0.3, 0, r[1] - 0.3, r[2] + 0.3, 0.6, r[3] + 0.3));
-    bag.add('plaster_white', box(r[0], 0.6, r[1], r[2], 0.6 + h, r[3]));
-    col.rect(r, 0, 0.6 + h);
-    const along = r[2] - r[0] > r[3] - r[1];
-    const n = Math.max(2, Math.round((along ? r[2] - r[0] : r[3] - r[1]) / 2.4));
+  const d = Math.min(5, D * 0.32), mat = thatch ? 'thatch' : 'tile_grey', h = 2.6, yb = 0.6;
+  const wings = [[x0 + 1.5, z0 + 1.5, x1 - 1.5, z0 + 1.5 + d, 's']];                    // the main range along the north side, facing the yard
+  if (rand() < 0.7) wings.push([x0 + 1.5, z0 + 1.5 + d, x0 + 1.5 + d * 0.9, z1 - 3, 'e']);
+  if (!thatch && rand() < 0.5) wings.push([x1 - 1.5 - d * 0.9, z0 + 1.5 + d, x1 - 1.5, z1 - 4, 'w']);
+  for (const [i, wg] of wings.entries()) {
+    const r = wg.slice(0, 4), face = wg[4], along = face === 's';
+    bag.add('granite_korea', box(r[0] - 0.3, 0, r[1] - 0.3, r[2] + 0.3, yb, r[3] + 0.3));
+    // the core of the rooms, set back from the yard front by the veranda's depth
+    const v = 0.8, core = face === 's' ? [r[0], r[1], r[2], r[3] - v] : face === 'e' ? [r[0], r[1], r[2] - v, r[3]] : [r[0] + v, r[1], r[2], r[3]];
+    bag.add('plaster_white', box(core[0], yb, core[1], core[2], yb + h, core[3]));
+    bag.add('plaster_damp', box(core[0] - 0.012, yb, core[1] - 0.012, core[2] + 0.012, yb + 0.45, core[3] + 0.012));
+    col.rect(core, 0, yb + h);
+    // the posts along the yard front and the lattice doors between them, the veranda boards
+    const n = Math.max(2, Math.round((along ? r[2] - r[0] : r[3] - r[1]) / 2.4)), L0 = along ? r[0] : r[1], L1 = along ? r[2] : r[3];
+    const fl = face === 's' ? r[3] : face === 'e' ? r[2] : r[0], fc = face === 's' ? core[3] : face === 'e' ? core[2] : core[0], sg = face === 'w' ? -1 : 1;
+    const P = (t, off) => (along ? [t, fl - 0.12 * sg + off] : [fl - 0.12 * sg + off, t]);
     for (let k = 0; k <= n; k++) {
-      const f = k / n, px = along ? r[0] + (r[2] - r[0]) * f : r[2] + 0.02, pz = along ? r[3] + 0.02 : r[1] + (r[3] - r[1]) * f;
-      bag.add('timber', box(px - 0.1, 0.6, pz - 0.1, px + 0.1, 0.6 + h, pz + 0.1));
+      const t = L0 + (L1 - L0) * k / n, [px, pz] = P(t, 0);
+      bag.add('timber', box(px - 0.1, yb, pz - 0.1, px + 0.1, yb + h, pz + 0.1));
+      if (k < n) {
+        const ta = t + 0.12, tb = L0 + (L1 - L0) * (k + 1) / n - 0.12, hall = i === 0 && n >= 3 && k === Math.floor(n / 2);
+        const a = along ? [ta, fc + 0.03 * sg] : [fc + 0.03 * sg, ta], b = along ? [tb, fc + 0.03 * sg] : [fc + 0.03 * sg, tb];
+        if (hall) {
+          // the daecheong: open to the yard, its board floor and the dark of the hall behind
+          const [qa, qb] = along ? [[ta, fc - 1.2], [tb, fc + 0.02]] : sg > 0 ? [[fc - 1.2, ta], [fc + 0.02, tb]] : [[fc - 0.02, ta], [fc + 1.2, tb]];
+          bag.add('opening', box(Math.min(qa[0], qb[0]), yb + 0.5, Math.min(qa[1], qb[1]), Math.max(qa[0], qb[0]), yb + h - 0.35, Math.max(qa[1], qb[1])));
+        } else latticeBay(bag, null, a, b, yb + 0.4, h - 0.55, rand() < 0.4 ? 'window' : 'door', 0.04);
+      }
     }
-    roof(bag, r, 0.6 + h - 0.05, 0.9, thatch ? 'hip' : 'xieshan', Math.min(r[2] - r[0], r[3] - r[1]) * (thatch ? 0.5 : 0.42), mat, !along, 'timber');
+    const t = [];
+    beamTris(t, along ? [L0, yb + h - 0.28, fl - 0.12 * sg] : [fl - 0.12 * sg, yb + h - 0.28, L0], along ? [L1, yb + h - 0.28, fl - 0.12 * sg] : [fl - 0.12 * sg, yb + h - 0.28, L1], 0.11, 0.28);
+    bag.add('timber', fromTriangles(t));
+    const vr = face === 's' ? [r[0], core[3], r[2], r[3] + 0.1] : face === 'e' ? [core[2], r[1], r[2] + 0.1, r[3]] : [r[0] - 0.1, r[1], core[0], r[3]];
+    bag.add('timber', box(vr[0], yb + 0.32, vr[1], vr[2], yb + 0.4, vr[3]));
+    col.floor(vr, yb + 0.4);
+    roof(bag, r, yb + h - 0.05, 0.9, thatch ? 'hip' : 'xieshan', Math.min(r[2] - r[0], r[3] - r[1]) * (thatch ? 0.5 : 0.42), mat, !along, 'timber');
+    // a low chimney of stone and mud off the end of the range (the ondol's flue comes out there)
+    if (i === 0) {
+      const cx = rand() < 0.5 ? r[0] - 0.75 : r[2] + 0.75, cz = r[1] + 0.6;
+      if (cx > x0 + 0.5 && cx < x1 - 0.5) { bag.add('schist_rubble', box(cx - 0.3, 0, cz - 0.3, cx + 0.3, 1.5, cz + 0.3)); bag.add('pottery_dark', lathe([[0.14, 0], [0.12, 0.35], [0.001, 0.35]], 8, null, cx, 1.5, cz)); col.rect([cx - 0.3, cz - 0.3, cx + 0.3, cz + 0.3], 0, 1.5); }
+    }
   }
-  // the lot's wall (stone below, plaster above, a tiled coping) and its gate on the south
+  // the crock terrace in the yard's south-east corner: a stone step, jars in rows
+  const jx = x1 - 4.2, jz = z1 - 2.6;
+  if (jx > x0 + 2 + d && rand() < 0.85) {
+    bag.add('granite_korea', box(jx - 1.3, 0, jz - 0.8, jx + 1.3, 0.25, jz + 0.8));
+    col.rect([jx - 1.3, jz - 0.8, jx + 1.3, jz + 0.8], 0, 0.9);
+    for (let a = 0; a < 3; a++) for (let b = 0; b < 2; b++) {
+      if (rand() < 0.2) continue;
+      const big = b === 0, rr = big ? 0.3 : 0.22, hh = big ? 0.68 : 0.48, x = jx - 0.85 + a * 0.85 + (rand() - 0.5) * 0.08, z = jz - 0.35 + b * 0.7;
+      bag.add('pottery_dark', lathe([[rr * 0.55, 0], [rr * 0.95, hh * 0.35], [rr, hh * 0.55], [rr * 0.7, hh * 0.9], [rr * 0.55, hh], [0.001, hh]], 10, null, x, 0.25, z));
+      bag.add('pottery_dark', lathe([[rr * 0.62, 0], [rr * 0.58, 0.05], [0.001, 0.09]], 10, null, x, 0.25 + hh, z));
+    }
+  }
+  // the lot's wall (fieldstone below, plaster above, a coping) and its gate on the south under a little roof
   const xc = (x0 + x1) / 2;
   for (const [a, b] of [[[x0, z0], [x1, z0]], [[x0, z0], [x0, z1]], [[x1, z0], [x1, z1]], [[x0, z1], [xc - 1.2, z1]], [[xc + 1.2, z1], [x1, z1]]]) {
-    const t = []; beamTris(t, [a[0], 0, a[1]], [b[0], 0, b[1]], 0.25, 1.9); bag.add('plaster_grey', fromTriangles(t));
+    const t = []; beamTris(t, [a[0], 0, a[1]], [b[0], 0, b[1]], 0.27, 0.95); bag.add('schist_rubble', fromTriangles(t));
+    const u = []; beamTris(u, [a[0], 0.95, a[1]], [b[0], 0.95, b[1]], 0.25, 0.95); bag.add('plaster_grey', fromTriangles(u));
     const c = []; beamTris(c, [a[0], 1.9, a[1]], [b[0], 1.9, b[1]], 0.4, 0.25); bag.add(thatch ? 'thatch' : 'tile_grey', fromTriangles(c));
     col.segment(a, b, 0.5, 0, 2.1);
   }
+  for (const sx of [-1, 1]) bag.add('timber', box(xc + sx * 1.2 - 0.1, 0, z1 - 0.1, xc + sx * 1.2 + 0.1, 2.5, z1 + 0.1));
+  bag.add('timber', box(xc - 1.4, 2.35, z1 - 0.12, xc + 1.4, 2.55, z1 + 0.12));
+  roof(bag, [xc - 1.3, z1 - 0.5, xc + 1.3, z1 + 0.5], 2.5, 0.5, thatch ? 'hip' : 'gable', 0.7, mat, false, 'timber');
 }
 
+const hanokPal = { wood: 'timber', column: 'timber', soffit: 'timber', lattice: 'shoji', plaster: 'plaster_white', base: 'granite_korea' };
 registerStyle('joseon', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
     ...Object.fromEntries(['ming_hall', 'qing_hall', 'ming_gallery', 'palace_wall', 'terrace', 'stairs', 'ming_pavilion', 'corner_tower', 'throne_hall'].filter((k) => STYLES.qing.elements[k]).map((k) => [k, withJ(STYLES.qing.elements[k])])),
     ming_hall: withJ(withPal(hallOrn)),
-    nu: withJ(withPal(nu)), hanok: withPal(hanok),
+    ...Object.fromEntries(Object.entries(GOJONG).map(([k, f]) => [k, withJ(withPal(f))])),
+    hanok: (el, ctx) => withPal(hanok)({ ...el, pal: { ...hanokPal, ...(el.pal || {}) } }, ctx),
   },
   objects: {},
 });

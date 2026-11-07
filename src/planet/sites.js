@@ -30,7 +30,7 @@ export const SITES = [
   { id: 'nara', name: { en: 'Nara Japan', zh: '奈良' }, era: '8th c.', region: 'japan', lat: 34.69, lon: 135.84, water: true, island: true, radius: 340 },
   { id: 'heian-uji', name: { en: 'Heian Japan', zh: '平安日本' }, era: '11th c.', region: 'japan', lat: 34.89, lon: 135.81, radius: 360 },
   { id: 'edo-himeji', name: { en: 'Edo Japan', zh: '江户日本' }, era: '17th c.', region: 'japan', lat: 34.8, lon: 133.6, radius: 400 },
-  { id: 'joseon-seoul', name: { en: 'Joseon Korea', zh: '朝鲜王朝' }, era: '15th c.', region: 'korea', lat: 37.58, lon: 126.98, radius: 400 },
+  { id: 'joseon-seoul', name: { en: 'Joseon Korea', zh: '朝鲜王朝' }, era: '19th c.', region: 'korea', lat: 37.58, lon: 126.98, radius: 400 },
   // ── India and South-East Asia ──
   { id: 'sanchi', name: { en: 'Early Buddhist India', zh: '早期佛教印度' }, era: '1st c.', region: 'india', lat: 23.48, lon: 77.74, radius: 300 },
   { id: 'khajuraho', name: { en: 'Medieval Hindu India', zh: '中世纪印度教' }, era: '11th c.', region: 'india', lat: 24.85, lon: 79.92, radius: 360 },
