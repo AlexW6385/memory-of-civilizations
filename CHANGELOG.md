@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.4 — Smoother (2026-11-07)
+- Fewer stutters and a lighter frame: the buildings' shadows are kept and redrawn only when the sun or the view has moved enough, with only moving things drawn each frame; the picture's resolution steps down a little when the graphics card is behind and back up when it has room; the first visit picks its quality from the frame rate; shaders are prepared before things appear, plants and new buildings are put in over several frames, and a hall's reverberation is worked out off the main thread. Beijing's marble balustrades, posts and dragon spouts are rebuilt lighter. With ?perf, any frame over 50 ms is logged with what took the time (palace.hitches).
+
 ## v10.3 — Parallel work written down (2026-11-07)
 - How the work runs with many agents in parallel is now written in docs/parallel-work.md and the brief every agent gets in docs/agent-brief.md.
 
