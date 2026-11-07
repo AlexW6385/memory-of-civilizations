@@ -6,7 +6,7 @@
 // Each was chosen by looking: from the screenshot tool's viewpoints (tools/viewpoints.json) where one
 // was good, otherwise composed on the spot. Change one only after looking at it again.
 export const ARRIVALS = {
-  'tang-wutai':       [38, 13.1, 0, -1.5708, 0.22],      // on the upper terrace, the Great East Hall's front and its Buddhas
+  'tang-wutai':       [35, 13.1, 6, -1.40, 0.36],        // on the upper terrace, the Great East Hall's front, eaves and Buddhas
   'song-kaifeng':     [160, 0.1, -140, 0, 0.38],         // the Iron Pagoda, whole, in its enclosure
   'song-hangzhou':    [-110, 0.1, 138, 0, 0.32],         // the stair up to the pagoda
   'ming-suzhou':      [0, 0.95, -23.5, 0, -0.04],        // across the lotus pond to the pavilion
