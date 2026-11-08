@@ -1,7 +1,7 @@
 // The tour: one click and the visitor is carried from settlement to settlement, about a minute in each:
-// the arrival view held for a few seconds, then the free camera rises smoothly up and outward to an
-// overview sized to the place and circles it once, always looking at the landmark, so the whole city is
-// seen from the air. Any input ends it.
+// the arrival view held for a few seconds, then the free camera lifts off from the walker's own eye (from
+// rest, first straight up) and flies a smooth low route across the whole town, past the landmark, so the
+// city is seen from just above its roofs. Any input ends it.
 import { footing, EYE } from '../core/walk.js';
 import { ARRIVALS } from '../planet/arrivals.js';
 import { BUILT } from '../planet/relief.js';
@@ -12,9 +12,9 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const yawTo = (dx, dz) => Math.atan2(-dx, -dz);       // the camera looks along (-sin yaw, -cos yaw)
 const ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
-const HOLD = 3, RISE = 8, ORBIT = 48;                 // seconds: the arrival view, the climb, one full turn
+const HOLD = 3, RISE = 8, FLY = 49;                   // seconds: the arrival view, the climb, the flyover (60 s in all)
 const INPUTS = ['keydown', 'pointerdown', 'mousedown', 'mousemove', 'wheel', 'touchstart', 'touchmove'];
-const CLEAR = 22;                                     // m the camera keeps above the ground and buildings
+const CLEAR = 15;                                     // m the camera keeps above the ground and buildings
 
 export class Tour {
   /**
@@ -106,24 +106,65 @@ export class Tour {
     return t;
   }
 
-  /** The leg for S: hold the arrival pose, climb to the overview, circle the landmark once. */
+  /** The leg for S: hold the arrival view, lift off, fly a low route over the whole town. */
   begin(S) {
-    const C = this.controls, id = S.site.id;
+    const id = S.site.id;
     const R = clamp(S.radius || 150, 60, 380);
     const A = ARRIVALS[id] || [0, null, 60, 0, 0.1];
     const ax = A[0], az = A[2], ayaw = A[3], apitch = A[4];
-    const ay = (A[1] ?? this.ground(ax, az)) ;
     // the landmark: where the arrival's line of sight comes closest to the centre (if that is near it), else the centre
     const dx = -Math.sin(ayaw), dz = -Math.cos(ayaw);
     const t = Math.max(0, -(ax * dx + az * dz));
     let tx = ax + dx * t, tz = az + dz * t;
     if (Math.hypot(tx, tz) > 0.35 * R) { tx = 0; tz = 0; }
     const ty = this.ground(tx, tz) + 0.1 * R;
-    const rad = clamp(0.8 * R, 70, 300);
-    const h = clamp(0.5 * R, 45, 190);
-    const a0 = Math.atan2(ax - tx, az - tz);          // the arrival's side, as an angle round the landmark
     this.arrival = { site: world_site(this.world), x: ax, y: A[1], z: az, yaw: ayaw, pitch: apitch };
-    this.leg = { site: world_site(this.world), t: 0, ax, ay: ay + EYE, az, ayaw, apitch, tx, ty, tz, rad, top: this.ground(tx, tz) + h, a0, lift: 0 };
+    // the route: from the arrival side across the districts to the far side and back, an S that passes
+    // close beside the landmark twice (waypoints in units of R along / across the arrival's line of sight)
+    const nx = dz, nz = -dx;
+    const W = [[-0.4, 0.45], [-0.08, 0.12], [0.35, -0.45], [0.75, -0.05], [0.4, 0.5], [0.05, -0.12], [-0.45, -0.45], [-0.7, 0.05]];
+    const pts = [[ax, az]];
+    for (const [s, q] of W) {
+      let x = tx + (dx * s + nx * q) * R, z = tz + (dz * s + nz * q) * R;
+      const r = Math.hypot(x, z); if (r > 0.88 * R) { x *= 0.88 * R / r; z *= 0.88 * R / r; }
+      const l = pts[pts.length - 1];
+      if (Math.hypot(x - l[0], z - l[1]) > 0.06 * R) pts.push([x, z]);
+    }
+    // centripetal Catmull-Rom through them, resampled at even spacing
+    const dense = [];
+    const ext = [[2 * pts[0][0] - pts[1][0], 2 * pts[0][1] - pts[1][1]], ...pts, [2 * pts.at(-1)[0] - pts.at(-2)[0], 2 * pts.at(-1)[1] - pts.at(-2)[1]]];
+    for (let i = 1; i < ext.length - 2; i++) crSeg(ext[i - 1], ext[i], ext[i + 1], ext[i + 2], 40, dense);
+    dense.push(pts.at(-1));
+    const STEP = 6, X = [dense[0][0]], Z = [dense[0][1]];
+    let acc = 0;
+    for (let i = 1; i < dense.length; i++) {
+      let [px, pz] = dense[i - 1]; const [qx, qz] = dense[i];
+      let seg = Math.hypot(qx - px, qz - pz);
+      while (acc + seg >= STEP) {
+        const k = (STEP - acc) / seg;
+        px += (qx - px) * k; pz += (qz - pz) * k; seg = Math.hypot(qx - px, qz - pz); acc = 0;
+        X.push(px); Z.push(pz);
+      }
+      acc += seg;
+    }
+    const M = X.length;
+    // altitude: base above the ground, at least CLEAR over everything within 60 m along the path, smoothed
+    const base = clamp(0.28 * R, 25, 60);
+    const g = X.map((x, i) => this.ground(x, Z[i]));
+    let Y = g.map((v, i) => {
+      let m = v; for (let j = Math.max(0, i - 10); j <= Math.min(M - 1, i + 10); j++) m = Math.max(m, g[j]);
+      return Math.max(v + base, m + CLEAR + 3);
+    });
+    for (let pass = 0; pass < 2; pass++) {
+      Y = Y.map((_, i) => { let s = 0, n = 0; for (let j = Math.max(0, i - 4); j <= Math.min(M - 1, i + 4); j++) { s += Y[j]; n++; } return s / n; });
+    }
+    this.leg = { site: world_site(this.world), t: 0, R, tx, ty, tz, X, Z, Y, M, STEP, base, lift: 0, start: null, s: 0 };
+  }
+
+  /** The route's point at arc length s: [x, z, y]. */
+  at(L, s) {
+    const f = clamp(s / L.STEP, 0, L.M - 1), i = Math.min(L.M - 2, Math.floor(f)), k = f - i;
+    return [L.X[i] + (L.X[i + 1] - L.X[i]) * k, L.Z[i] + (L.Z[i + 1] - L.Z[i]) * k, L.Y[i] + (L.Y[i + 1] - L.Y[i]) * k];
   }
 
   /** Every frame, before the controls: move the camera along the leg. */
@@ -136,25 +177,70 @@ export class Tour {
     if (!L) return;
     dt = Math.min(dt, 0.1);
     L.t += dt;
+    const END = HOLD + RISE + FLY;
     // the frame changed under us (left the settlement's zone) or the minute is spent: this leg is over
-    if (world_site(this.world) !== L.site || L.t > HOLD + RISE + ORBIT) { L.done?.(); return; }
+    if (world_site(this.world) !== L.site || L.t > END) { L.done?.(); return; }
     if (L.t <= HOLD) return;                         // holding the arrival view (the walker stands there)
-    if (!C.free) C.free = true;
-    const e = ease((L.t - HOLD) / RISE);
-    const turn = clamp((L.t - HOLD - RISE) / ORBIT, 0, 1);
-    // the orbit's start is on the arrival's side; the circle is run at constant angular speed
-    const a = L.a0 + turn * 2 * Math.PI;
-    const ox = L.tx + Math.sin(a) * L.rad, oz = L.tz + Math.cos(a) * L.rad;
-    const x = L.ax + (ox - L.ax) * e, z = L.az + (oz - L.az) * e;
-    let y = L.ay + (L.top - L.ay) * e;
-    // over buildings and rising ground: lift (at once when needed, settling back slowly)
-    const need = Math.max(0, this.ground(x, z) + CLEAR - y);
-    L.lift = Math.max(need, L.lift + (need - L.lift) * Math.min(1, dt * 1.5));
-    y += L.lift;
-    const ddx = L.tx - x, ddz = L.tz - z, hd = Math.hypot(ddx, ddz) || 1;
-    const lookYaw = yawTo(ddx, ddz), lookPitch = Math.atan2(L.ty - y, hd);
-    C.yaw = L.ayaw + wrap(lookYaw - L.ayaw) * e;
-    C.pitch = L.apitch + (lookPitch - L.apitch) * e;
+    const total = (L.M - 1) * L.STEP;
+    if (!L.start) {
+      // the hand-over: the free camera starts exactly where the walker's eye is, looking where it looks
+      L.start = { x: F.x, y: F.y + EYE, z: F.z, yaw: C.yaw, pitch: C.pitch };
+      L.yaw = C.yaw; L.pitch = C.pitch; L.wy = 0; L.wp = 0;
+      L.s0 = Math.min(0.15 * L.R, total * 0.2);
+      const [qx, qz, qy] = this.at(L, L.s0), [rx, rz, ry] = this.at(L, L.s0 + L.STEP);
+      const tl = Math.hypot(rx - qx, rz - qz) || 1;
+      L.V = (total - L.s0) / (FLY - 1.5);
+      L.end = { x: qx, y: qy, z: qz, tx: (rx - qx) / tl, tz: (rz - qz) / tl, ty: (ry - qy) / tl };
+      L.s = L.s0;
+      C.free = true;
+    }
+    const S0 = L.start, E = L.end;
+    let x, y, z, look;                               // look: the arc length the gaze aims ahead of
+    const tr = (L.t - HOLD) / RISE;
+    if (tr < 1) {
+      // lift-off: a Hermite curve that leaves the eye from rest, first straight up, then leaning out and
+      // joining the route at its cruising velocity (time warped by u = t²(2 − t): zero speed at the start)
+      const u = tr * tr * (2 - tr), u2 = u * u, u3 = u2 * u;
+      const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+      const m = L.V * RISE;
+      const m0y = 1.3 * (E.y - S0.y);
+      x = h00 * S0.x + h01 * E.x + h11 * m * E.tx;
+      z = h00 * S0.z + h01 * E.z + h11 * m * E.tz;
+      y = h00 * S0.y + h10 * m0y + h01 * E.y + h11 * m * E.ty;
+      look = L.s0 * ease(tr);
+    } else {
+      const sm = ease(clamp((END - L.t) / 2.5, 0, 1));   // the last seconds ease to a halt: no snap into the next travel
+      L.s = Math.min(total, L.s + L.V * sm * dt);
+      [x, z, y] = this.at(L, L.s);
+      look = L.s;
+      // over buildings and rising ground, beyond what the route already clears: lift, rate-limited
+      const need = Math.max(0, this.ground(x, z) + CLEAR - y);
+      L.lift += clamp(need - L.lift, -6 * dt, 14 * dt);
+      y += L.lift;
+    }
+    // gaze: ahead along the route and down, turned toward the landmark when near it; rate- and
+    // acceleration-limited so it never jerks
+    const lk = clamp(0.2 * L.R, 25, 70);
+    const [gx, gz] = this.at(L, look + lk);
+    let wantYaw = yawTo(gx - x, gz - z), wantPitch = -0.44;
+    const ldx = L.tx - x, ldz = L.tz - z, ld = Math.hypot(ldx, ldz) || 1;
+    const near = 0.7 * ease((0.6 * L.R - ld) / (0.35 * L.R));
+    wantYaw += wrap(yawTo(ldx, ldz) - wantYaw) * near;
+    wantPitch += (clamp(Math.atan2(L.ty - y, ld), -0.8, -0.15) - wantPitch) * near;
+    if (tr < 1) { const k = ease(tr); wantYaw = S0.yaw + wrap(wantYaw - S0.yaw) * k; wantPitch = S0.pitch + (wantPitch - S0.pitch) * k; }
+    const steer = (cur, vel, want, wrapIt, max) => {
+      const err = wrapIt ? wrap(want - cur) : want - cur;
+      const goal = clamp(err * 1.4, -max, max);
+      vel += clamp(goal - vel, -0.5 * dt, 0.5 * dt);
+      return [cur + vel * dt, vel];
+    };
+    if (tr < 1) { L.yaw = wantYaw; L.pitch = wantPitch; }   // lift-off: the blend above is already smooth from the walker's view
+    else {
+      if (!L.fly) { L.fly = true; L.wy = 0; L.wp = 0; }
+      [L.yaw, L.wy] = steer(L.yaw, L.wy, wantYaw, true, 0.5);
+      [L.pitch, L.wp] = steer(L.pitch, L.wp, wantPitch, false, 0.3);
+    }
+    C.yaw = wrap(L.yaw); C.pitch = L.pitch;
     F.x = x; F.z = z; F.y = y - EYE; F.vy = 0; C.vy = 0;
     C.apply();
   }
@@ -165,6 +251,18 @@ export class Tour {
     if (!C.free) return;
     if (A && A.site === world_site(this.world)) C.setPose(A.x, (A.y ?? this.ground(A.x, A.z)) + 0.02, A.z, A.yaw, A.pitch);
     else { const F = C.feet; C.setPose(F.x, F.y, F.z, C.yaw, C.pitch); }
+  }
+}
+
+/** Centripetal Catmull-Rom segment p1→p2 (Barry-Goldman), n samples appended to out. */
+function crSeg(p0, p1, p2, p3, n, out) {
+  const d = (a, b) => Math.sqrt(Math.hypot(b[0] - a[0], b[1] - a[1]));
+  const t0 = 0, t1 = t0 + d(p0, p1), t2 = t1 + d(p1, p2), t3 = t2 + d(p2, p3);
+  const mix = (a, b, ta, tb, t) => [(a[0] * (tb - t) + b[0] * (t - ta)) / (tb - ta), (a[1] * (tb - t) + b[1] * (t - ta)) / (tb - ta)];
+  for (let k = 0; k < n; k++) {
+    const t = t1 + (t2 - t1) * k / n;
+    const A1 = mix(p0, p1, t0, t1, t), A2 = mix(p1, p2, t1, t2, t), A3 = mix(p2, p3, t2, t3, t);
+    out.push(mix(mix(A1, A2, t0, t2, t), mix(A2, A3, t1, t3, t), t1, t2, t));
   }
 }
 
