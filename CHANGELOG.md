@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.17 — Level tour (2026-11-07)
+- The tour flies level: its line takes the highest roof within about 90 m either side along the way, so it no longer bobs between roofs and lanes, and climbs or descends gently only where the town really rises; the in-flight safety lift now acts only in an emergency.
+
 ## v10.16 — Preload fixes (2026-11-07)
 - The ground built ahead for the next settlement is no longer thrown away by the tile cache before you get there, and the first settlement of the random order is built ahead from the moment the world opens.
 

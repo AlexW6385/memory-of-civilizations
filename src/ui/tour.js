@@ -153,13 +153,13 @@ export class Tour {
     const base = 10;
     const g = X.map((x, i) => {
       const a = Math.max(0, i - 1), b = Math.min(M - 1, i + 1);
-      const tx = X[b] - X[a], tz = Z[b] - Z[a], l = Math.hypot(tx, tz) || 1, nx = -tz / l * 6, nz = tx / l * 6;
+      const tx = X[b] - X[a], tz = Z[b] - Z[a], l = Math.hypot(tx, tz) || 1, nx = -tz / l * 10, nz = tx / l * 10;
       return Math.max(this.ground(x, Z[i]), this.ground(x + nx, Z[i] + nz), this.ground(x - nx, Z[i] - nz));
     });
-    const W = Math.round(40 / STEP), WA = Math.round(80 / STEP), KC = 0.1, KD = 0.07;   // (wide: the small ups and downs of the roofs are ignored, the line glides over them)
+    const W = Math.round(90 / STEP), WA = Math.round(120 / STEP), KC = 0.08, KD = 0.05;   // (wide: the line runs level over the roofs and the lanes between them, climbing only for what really rises)
     const env = g.map((v, i) => {
       let m = v; for (let j = Math.max(0, i - W); j <= Math.min(M - 1, i + W); j++) m = Math.max(m, g[j]);
-      return Math.max(m + CLEAR, v + base);
+      return m + CLEAR;
     });
     let Y = env.slice();
     const limit = () => {
@@ -228,11 +228,12 @@ export class Tour {
       [x, z, y] = this.at(L, L.s);
       look = L.s;
       // over buildings and rising ground, beyond what the route already clears: lift, rate-limited
-      const hx = Math.sin(L.yaw), hz = Math.cos(L.yaw);
-      const gr = Math.max(this.ground(x, z), this.ground(x - hx * 8, z - hz * 8));
-      const need = Math.max(0, gr + CLEAR - 2 - y);
+      // (an emergency margin only: the planned line already clears everything, so the small differences
+      // between roofs and lanes never move the camera)
+      const gr = this.ground(x, z);
+      const need = Math.max(0, gr + 3 - y);
       // critically damped: no jump
-      const w = 1.3, acc = w * w * (need - L.lift) - 2 * w * L.liftV;
+      const w = 0.8, acc = w * w * (need - L.lift) - 2 * w * L.liftV;
       L.liftV += acc * dt; L.lift += L.liftV * dt;
       y += Math.max(0, L.lift);
     }
