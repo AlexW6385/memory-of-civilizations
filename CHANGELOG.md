@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.11 — Buttons, tour, phones (2026-11-07)
+- The map's Random city and Tour buttons now look like buttons (filled, with an icon, a pointer and a press). Sound, language, the corner map and its zoom no longer end the tour - only input on the world itself or a key does. On phones a double tap no longer zooms the page.
+
 ## v10.10 — Closer tour (2026-11-07)
 - The tour flies lower and closer - just over the roofs - and makes one even loop round the landmark in a minute, at about half the earlier speed, looking steadily ahead and a little in toward the landmark.
 

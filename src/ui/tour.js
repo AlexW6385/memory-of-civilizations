@@ -32,6 +32,9 @@ export class Tour {
       if (!this.active || performance.now() - this.t0 < 500) return;
       if (e.type === 'keydown' && e.repeat && e.code === this.startKey) return;
       if (e.type === 'mousemove' && !e.buttons) return;
+      // the page's own controls (sound, language, the corner map and its zoom, the panels, the clock) do
+      // not end the tour: only input on the world itself (the view, the walking stick) or a key does
+      if (e.type !== 'keydown' && e.target instanceof Element && !(e.target.id === 'view' || e.target.id === 'stick' || e.target === document.body || e.target === document.documentElement)) return;
       e.stopImmediatePropagation(); e.preventDefault?.();
       this.stop();
     };

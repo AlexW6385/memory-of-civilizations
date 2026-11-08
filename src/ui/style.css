@@ -11,6 +11,7 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: #1b1712; color: var(--ink); font-family: var(--sans); overflow: hidden; }
 body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+html, body { touch-action: manipulation; }   /* no double-tap zoom on phones */
 canvas#view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; outline: none; }
 
 button { font: inherit; color: inherit; cursor: pointer; }
@@ -108,9 +109,12 @@ body.panel-open #btn-mute, body.panel-open #btn-lang, body.panel-open #corner, b
 .map .map-hint { grid-column: 1; grid-row: 3; font-size: 12.5px; color: var(--ink-dim); margin: 8px 2px 0; }
 #map-list li.head { position: sticky; top: 0; z-index: 1; margin: 0; padding: 12px 6px 4px; font: 600 11px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: #1c1813; border-bottom: 1px solid var(--line); }
 .map header { gap: 12px; }
-.map-random { margin-right: 0; margin-left: 6px; background: rgba(243, 234, 217, 0.06); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 13px; color: var(--ink); }
+.map-random { margin-right: 0; margin-left: 8px; background: #c79a4b; border: 1px solid #e0b866; border-radius: 999px; padding: 6px 16px; font-size: 13px; font-weight: 600; color: #1e1a15; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); transition: background 0.15s, transform 0.1s; }
+.map-random::before { content: '⇄ '; }
+.map-tour::before { content: '▶ '; }
+.map-random:active { transform: translateY(1px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
 .map-tour { margin-right: auto; margin-left: 0; }
-.map-random:hover { background: rgba(243, 234, 217, 0.16); }
+.map-random:hover { background: #ddb35f; }
 #map-list { grid-column: 2; grid-row: 2 / 4; list-style: none; margin: 0; padding: 0; overflow: auto; min-height: 0; }
 #map-list li button { width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 10px 6px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 #map-list li button:hover { background: rgba(255, 255, 255, 0.05); }
