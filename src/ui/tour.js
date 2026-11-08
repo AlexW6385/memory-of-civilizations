@@ -114,6 +114,7 @@ export class Tour {
   /** The leg for S: hold the arrival view, lift off, fly a low route over the whole town. */
   begin(S) {
     const id = S.site.id;
+    window.__tourLeg = id;   // (read by the promo recorder)
     const R = clamp(S.radius || 150, 60, 380);
     const A = ARRIVALS[id] || [0, null, 60, 0, 0.1];
     const ax = A[0], az = A[2], ayaw = A[3], apitch = A[4];

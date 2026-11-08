@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.20 — Fixed tour order (2026-11-07)
+- ?tour=a,b,c sets a fixed tour order (used by the promo recorder); the tour records the current settlement in window.__tourLeg.
+
 ## v10.19 — Capture mode (2026-11-07)
 - A ?capture mode for making films: every frame advances the world by exactly 1/30 s whatever the machine's real speed, and each drawn frame can be handed to a recorder, so a recording plays back smooth.
 
