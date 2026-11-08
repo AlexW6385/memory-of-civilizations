@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.13 — Random order, preload (2026-11-07)
+- Random city and the tour now share one shuffled order of all settlements (no repeats until every one has been visited). R works anywhere, without opening the map; during the tour it skips to the next settlement and the tour carries on. The next settlement in the order is built quietly in the background, so the jump to it is almost instant. The loading screen's controls explain Random city and the Tour, on phones too.
+
 ## v10.12 — Smooth tour (2026-11-07)
 - Within a settlement the tour never jumps or jerks: its height follows the roofs from a dense survey of the ground and buildings along the loop with clearance, climbing and descending gently and never dipping below them; turns are eased; the gaze lifts if something stands close ahead. Stopping the tour leaves you exactly where you are, floating if you were in the air.
 
