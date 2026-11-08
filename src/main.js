@@ -618,6 +618,7 @@ async function main() {
     return here;
   }
   // the view moves when one looks round, walks, flies or falls; tools (controls.free) hold it still
+  const CAPTURE = new URLSearchParams(location.search).has('capture');
   let lookYaw = 0, lookPitch = 0, fullWas = false, measuring = null;
   const frame = () => {
     const now = performance.now();
@@ -627,8 +628,10 @@ async function main() {
     R.setMotion(moving, now);
     // held still for a second: the scene only sways, flickers and drifts, so it is drawn at
     // ~24 fps instead of 60, leaving the machine (and the rest of the picture) its breath
-    if (!perf.panel && !perf.record && !measuring && !(controls.free && !tour.moving) && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
-    const dt = (now - last) / 1000;
+    if (!CAPTURE && !perf.panel && !perf.record && !measuring && !(controls.free && !tour.moving) && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
+    // ?capture: every frame advances the world by exactly 1/30 s whatever the real time, and a recorder
+    // (window.__onFrame) takes each drawn frame - for making smooth films of a slow machine's picture
+    const dt = CAPTURE ? 1 / 30 : (now - last) / 1000;
     last = now;
     tour.update(dt);
     HITCH.time('controls', () => controls.update(dt));
@@ -637,6 +640,7 @@ async function main() {
     const tR = HITCH.mark();
     R.render();
     HITCH.since('render', tR);
+    if (CAPTURE) window.__onFrame?.();
     const js = performance.now() - now;
     stats.frames++; stats.ms = stats.ms * 0.9 + js * 0.1;
     perf.tick(now, js);
