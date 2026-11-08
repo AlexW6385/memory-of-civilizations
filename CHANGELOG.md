@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.12 — Smooth tour (2026-11-07)
+- Within a settlement the tour never jumps or jerks: its height follows the roofs from a dense survey of the ground and buildings along the loop with clearance, climbing and descending gently and never dipping below them; turns are eased; the gaze lifts if something stands close ahead. Stopping the tour leaves you exactly where you are, floating if you were in the air.
+
 ## v10.11 — Buttons, tour, phones (2026-11-07)
 - The map's Random city and Tour buttons now look like buttons (filled, with an icon, a pointer and a press). Sound, language, the corner map and its zoom no longer end the tour - only input on the world itself or a key does. On phones a double tap no longer zooms the page.
 
