@@ -2,59 +2,74 @@
 
 [中文说明](README.zh-CN.md)
 
-A small planet you can walk and fly over, on which the civilizations of Earth — each a place at a time — stand where they stood, as realistic, detailed 3D **settlements**: a famous landmark built after the real building, with its full interior, and round it the townscape of its people and time — streets, houses, markets, gardens, walls, water, the things of daily use — with real materials, light and shadow, and music in the manner of its civilization.
+A small planet you can walk and fly over, on which the civilizations of Earth stand where they stood, each as a place at one moment in time. Every **settlement** is a realistic, detailed 3D town: a famous landmark built after the real building, with its interior, and round it the townscape of its people and time — streets, houses, markets, gardens, walls, water, people at work — with real materials, light and shadow, weather, and music in the manner of its civilization.
 
-**Walk it: <https://alexw6385.github.io/memory-of-civilizations/>** — desktop or phone, a browser with WebGPU (Chrome, Edge, Safari 26). English or Chinese.
+**Walk it: <https://alexw6385.github.io/memory-of-civilizations/>** — desktop or phone, in a browser with WebGPU (Chrome, Edge, Safari 26). English or Chinese.
 
 The name means only that these buildings are the memory of civilizations. This is a world to walk, not a study tool: no notes, no markers, no route.
 
-> **State of the site (v8.0, 2026-11-03):** the planet stands, with Earth's continents and the ten landmarks of the previous design on it, each in its settlement. The other forty-odd civilizations of the list ([DESIGN.md](DESIGN.md) §7) come next.
+> **State of the site (v10.20, 2026-11-07):** 57 settlements stand on the planet, each built from a sourced dossier, with 44 interiors under baked light. Phase D (detail, light, sound, life) is complete; Phase E (more civilizations) is next. See [DESIGN.md](DESIGN.md) §13.
 
-## What you can visit
+## The settlements
 
-- **The Temple of Horus at Edfu** (Ptolemaic Egypt, 237–57 BC), the best preserved temple of ancient Egypt, at true scale: the pylon with its flagpoles and granite falcons, the court of 32 columns, the pronaos of 18, the hall of appearances, the offering hall, the hall of the Ennead, the sanctuary with the granite naos of Nectanebo II and the sacred barque, the corridor of mysteries and its nine chapels, and the ambulatory inside the enclosure wall — each hall higher, lower and darker than the last. Among the mud-brick houses and palms of its town.
+| Region | Settlements |
+|---|---|
+| Africa | Giza (c. 2560 BC) · Edfu (1st c. BC) · Lalibela (c. 1220) · Kilwa Kisiwani (c. 1330) · Great Zimbabwe (c. 1350) · Djenné (14th c.) · Mamluk Cairo (c. 1363) |
+| Western Asia | Ur (c. 2050 BC) · Babylon (c. 570 BC) · Persepolis (c. 480 BC) · Petra (c. AD 50) · Umayyad Jerusalem (c. 700) · Ottoman Istanbul (c. 1560) · Safavid Isfahan (c. 1630) |
+| Europe | Stonehenge (c. 2500 BC) · Knossos (c. 1600 BC) · Classical Athens (c. 410 BC) · Hadrian's Rome (c. 128) · Justinian's Constantinople (c. 562) · Conques (c. 1120) · Gothic Paris (1248) · Borgund, Norway (c. 1250) · Nasrid Granada (c. 1390) · Renaissance Florence (c. 1480) · Venice (c. 1500) · Muscovy (c. 1600) · Amsterdam (c. 1670) · Baroque Rome (c. 1670) · Versailles (c. 1690) · Victorian London (c. 1870) · Barcelona (c. 1910) |
+| South Asia | Sanchi (1st c.) · Khajuraho (c. 1050) · Mughal Agra (1632–1653) · Madurai (c. 1650) · Lhasa (1694) |
+| East Asia | Nara (752) · Mount Wutai (857) · Uji (1053) · Northern Song Kaifeng (c. 1120) · Southern Song Hangzhou (c. 1200) · Ming Suzhou (c. 1530) · Edo Himeji (c. 1620) · Ming–Qing Beijing · Joseon Hanyang (c. 1888) |
+| Southeast Asia | Borobudur (c. 825) · Angkor (c. 1150) |
+| The Americas | Teotihuacan (c. 400) · Chichén Itzá (c. 1000) · Cahokia (c. 1175) · Machu Picchu (c. 1450–1530) · Taos Pueblo (c. 1500) · Tenochtitlan (1519) · New York (1931) |
+| Oceania | Rapa Nui (c. 1500) · a Māori pā by Lake Rotorua (18th c.) · Sydney (1973) |
 
-- **The Parthenon** (Athens, 447–432 BC) on its Acropolis rock: the full Doric order, the pediments, the two-tier colonnade around the gold-and-ivory Athena Parthenos and the pool before her, and the treasury room with its four Ionic columns.
-- **The Pantheon** (Rome, c. AD 114–128): the portico of sixteen granite columns, the bronze doors, the rotunda of coloured marbles under the coffered dome and its open oculus.
-- **The Dome of the Rock** (Jerusalem, 691/92): the golden dome over the Rock, the octagon of marble and mosaic, its two ambulatories and gilded arcades, on its platform with the Dome of the Chain, on its hill among olive trees and domed stone houses.
-- **The Sainte-Chapelle** (Paris, 1242–1248): the lower chapel of painted columns, and above it the upper chapel, a cage of fifteen stained-glass windows under a blue vault of gold stars — the coloured sunlight falls across the floor. Among timber-framed houses and orchards.
-- **The Great East Hall of Foguang Monastery** (Mount Wutai, 857): the grandest Tang timber hall, up three terraces, its great bracket sets and deep eaves under a hipped roof, the Buddhas on their altar in the half-light.
-- **The Phoenix Hall of Byōdō-in** (Uji, 1053): Amida's palace across its pond, the central hall with gilt phoenixes on the ridge between wing corridors that turn forward to their corner towers; over the bridge and in through the doors to the gilt Amida under his canopy. Among red pines, autumn maples and bamboo.
-- **The Great Stupa at Sanchi** (1st century BCE – 1st century CE): the white dome on its hill, walked round between the stone railing and the drum and again on the terrace, entered through four carved gateways, by Ashoka's lion pillar.
-- **Sainte-Foy de Conques** (c. 1050–1120), a pilgrimage church on the road to Santiago: under the carved Last Judgment of its west portal into the tall, dim barrel-vaulted nave between its tribunes, to the crossing lit by its lantern, and round the ambulatory past three chapels; the cloister with its green serpentine basin. Among schist houses under stone-slab roofs on a slope.
-- **Hagia Sophia** (Constantinople, 532–537, dome rebuilt 562): the dome on its ring of forty windows over pendentives, semidomes and exedrae, galleries, gold mosaic and marble, the chancel and ambo, the narthexes and the atrium — on its hill among tiled houses.
-
-They stand on **a small planet**: a sphere of 8 km radius with Earth's continents and latitudes, each civilization near its true place (the crowded parts of the world gently magnified), open country between them — coasts, hills, mountain ranges, deserts, forests, snow — and the sea. One sun: high at Sanchi, low in Paris, evening in Uji while it is afternoon in Athens. Fly up and the ground curves away below. How it is laid out: [docs/world.md](docs/world.md).
+They stand on a sphere of 8 km radius with Earth's continents and latitudes, each near its true place (crowded regions gently magnified), with open country, roads, rivers and the sea between them. One sun lights the whole planet, so it can be noon in one city and evening in another. Weather and seasons change by region. Fly up and the ground curves away below. Layout: [docs/world.md](docs/world.md).
 
 ## Controls
 
-W A S D or arrows to walk, mouse to look (click to capture the mouse), Shift to run, **hold Space to fly** (let go to glide down — onto the ground or a roof), M for the globe, Esc to pause. On a phone: left thumb on the stick to walk, drag anywhere to look, hold the arrow button to fly. Click to look around (the world opens by itself once loaded). Top left: the small map (click it for the large map; it can be hidden), the clock — drag it to choose the hour, or pause and run the days — and how you are moving: walking, running or flying, how fast and how high. The higher you fly, the faster. The globe (M, or click the small map): drag to turn it, wheel to come closer; click a settlement to go to its landmark, or anywhere on the land to go there.
+| Desktop | |
+|---|---|
+| W A S D / arrows | walk |
+| Mouse (double-click to capture) | look |
+| Q / E | turn |
+| Shift | run |
+| Hold Space | fly (faster the longer you hold); let go to glide down onto the ground or a roof |
+| Space twice | cruise |
+| M | the globe map: drag to turn, wheel to zoom, click a city to go there |
+| R | a random city |
+| T | tour: an aerial loop over each city in turn, about a minute each; R skips ahead, any other input stops it where you are |
+| Esc | close panels, release the mouse |
+
+On a phone: left thumb on the stick to walk, drag to look, hold ↑ to fly, tap the corner map for the globe and its Random city and Tour buttons. The corner card's slider sets the hour.
 
 ## How it is made
 
-- **Dossier first.** Every building is built from a sourced dossier in [`docs/buildings/`](docs/buildings) (moving to `docs/settlements/`, with a townscape part) (real example, plan and dimensions, structure, use, materials, decoration, light, music; what is stated by sources and what is inferred). The world layout is in [`docs/world.md`](docs/world.md).
-- **Plan is data, look is code.** A building is a plan of walls, openings, floors, roofs, columns and objects in metres (`src/buildings/<id>/plan.js`), drawn by the reusable vocabulary of its civilization (`src/styles/<civilization>/`: columns and capitals, torus and cornice, pylons, door frames, statues).
-- **Renderer:** three.js WebGPU (WebGL 2 fallback), procedural physically based materials aligned to each wall's real coursing, cascaded sun shadows, GTAO, bloom, AgX tone mapping, and eye adaptation.
-- **Baked light:** indirect light (sky, sun bounced off stone, oil lamps) is ray traced offline into an irradiance volume per building (`tools/bake.mjs` → `data/gi/`), loaded with the building.
-- **World:** v7.1 — one height function for the city, terrain chunks with levels of detail built in workers, houses on one grid of blocks (`src/world/`); v8.0 — the planet (`src/planet/`: sphere, continents, biomes, ocean, atmosphere, sun by latitude) and a designed townscape per settlement. Trees and grass instanced, with levels of detail and wind (`src/engine/flora/`).
-- **Music:** synthesised in the browser from each building's score (`src/buildings/<id>/music.js`); it changes as you pass from open courts to halls to the sanctuary.
+- **Dossier first.** Each settlement is built from a sourced dossier in [`docs/settlements/`](docs/settlements): landmark (plan, dimensions, structure, materials, decoration, light), townscape and sound, with what sources state kept apart from what is inferred.
+- **Plan is data, look is code.** A settlement is a plan of walls, openings, floors, roofs, columns and objects in metres (`src/settlements/<id>/`, `src/buildings/`), drawn by the reusable vocabulary of its civilization (`src/styles/<style>/`). Street life, markets and everyday objects come from `src/objects/`.
+- **Renderer:** three.js WebGPU with a reversed depth buffer; procedural physically based materials aligned to each wall's coursing; cascaded shadows with a shadow cache; GTAO; bloom; AgX tone mapping and eye adaptation; indoor air with light shafts and coloured glass; lamp light at night.
+- **Baked light:** indirect light is ray traced offline into an irradiance volume per interior (`tools/bake.mjs` → `data/gi/`).
+- **Speed:** static meshes merged per settlement, cells with coarse levels of detail, dynamic resolution, automatic quality, and the next city of the random order preloaded so jumps are near instant.
+- **Planet:** sphere terrain streamed in workers, biomes, ocean, atmosphere, instanced trees and grass with wind and levels of detail (`src/planet/`, `src/engine/flora/`).
+- **Sound:** music and ambience synthesised in the browser per settlement; rooms have their own reverberation.
 
-Pure static ES modules — no build step, no server. three.js comes from a CDN.
+Pure static ES modules: no build step and no server. three.js is vendored in `src/vendor/`.
 
 ## Development
 
 ```bash
-npm install                      # dev tools only: playwright, three, three-mesh-bvh
-npm run serve                    # http://127.0.0.1:8000
-npm run check                    # plan check: walkability, every room reachable, doors connect, nothing floating
-npm run bake -- edfu             # bake a building's indirect light into data/gi/edfu.bin
-npm run shot -- --building edfu  # screenshots at the fixed viewpoints in tools/viewpoints.json → shots/
-npm run budget                   # load and size budgets
+npm install                        # dev tools only
+npm run serve                      # http://127.0.0.1:8000
+npm run check                      # plan check: walkability, reachable rooms, nothing floating
+npm run bake -- edfu               # bake a settlement's indirect light into data/gi/
+npm run shot -- --building edfu    # screenshots at fixed viewpoints → shots/
+npm run budget                     # load and size budgets
 npm test
 ```
 
-Every push to `master` runs the checks and publishes the site to GitHub Pages.
+URL switches: `?perf` (frame-time panel), `?capture` (fixed 1/30 s steps for recording), `?tour=a,b,c` (fixed tour order).
+
+Every push to `master` runs the checks and publishes the site to GitHub Pages. How the work is run with parallel agents: [docs/parallel-work.md](docs/parallel-work.md).
 
 ## License
 
-MIT. Third-party assets are listed in [ASSETS.md](ASSETS.md).
+MIT. Third-party assets (CC0/MIT only) are listed in [ASSETS.md](ASSETS.md).
