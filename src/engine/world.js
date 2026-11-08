@@ -21,6 +21,7 @@ import { markMergeable, mergeParts } from './merge.js';
 import { LifeInstances } from './life-instances.js';
 import { SMALL } from './layers.js';
 import { Builder } from './builder.js';
+import { ARRIVALS } from '../planet/arrivals.js';
 import { HITCH } from './hitch.js';
 import { ENV } from './env.js';
 import { lampsOf, hazeOf } from './air.js';
@@ -515,6 +516,11 @@ export class World {
       await this.plansOf(site);
       await idle();
       if (this.kept === site && site.state === 'idle') await site.load();
+      // and the ground round its arrival view, built ahead the same way (after the present view's tiles)
+      if (this.kept === site && this.terrain) {
+        const A = ARRIVALS[S.id] || [0, null, 0];
+        this.terrain.prefetch(toPlanet(S.frame, [A[0], (A[1] ?? 0) + 1.7, A[2]]));
+      }
     } catch (e) { console.warn('preload', S.id, e); }
   }
 

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.15 — Ground preloaded too (2026-11-07)
+- The jump to the next settlement of the random order is quicker: besides its buildings, the ground round its arrival view is now built ahead in the background (it was the 4-second wait that remained).
+
 ## v10.14 — Tour: M and a gentler line (2026-11-07)
 - During the tour, M opens and closes the map without ending it (Esc closes the map too). The tour's height glides over the roofs in a gentle line, ignoring their small ups and downs, while still never touching them.
 

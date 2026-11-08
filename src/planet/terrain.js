@@ -163,8 +163,21 @@ export class PlanetTerrain {
     }
   }
 
+  /** Build ahead the tiles a camera at planet position cam will want (the next settlement of the random
+   *  order), after whatever the present view still needs: arriving there then finds its ground ready. */
+  prefetch(cam) {
+    this.pre = this.layout(cam).filter((w) => !this.tiles.has(w.k));
+    this.pump();
+  }
+
   pump() {
     if (!this.workerList) return;
+    // the present view first; the prefetch only when nothing of it waits
+    if (!this.queue.length && this.pre?.length) {
+      this.pre = this.pre.filter((w) => !this.tiles.has(w.k) && !this.pending.has(w.k));
+      const idle = this.workerList.filter((w) => w.idle).length;
+      this.queue = this.pre.splice(0, idle);
+    }
     for (const w of this.workerList) {
       if (!w.idle || !this.queue.length) continue;
       const job = this.queue.shift();
