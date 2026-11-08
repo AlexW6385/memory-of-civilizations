@@ -30,7 +30,7 @@ export class Tour {
       if (!this.active || performance.now() - this.t0 < 500) return;
       if (e.type === 'keydown' && e.repeat && e.code === this.startKey) return;
       // R skips to the next settlement (main.js) and the tour goes on there
-      if (e.type === 'keydown' && e.code === 'KeyR' && !e.ctrlKey && !e.metaKey && !e.altKey) return;
+      if (e.type === 'keydown' && (e.code === 'KeyR' || e.code === 'KeyM' || (e.code === 'Escape' && !document.getElementById('map')?.hidden)) && !e.ctrlKey && !e.metaKey && !e.altKey) return;
       if (e.type === 'mousemove' && !e.buttons) return;
       // the page's own controls (sound, language, the corner map and its zoom, the panels, the clock) do
       // not end the tour: only input on the world itself (the view, the walking stick) or a key does
@@ -156,7 +156,7 @@ export class Tour {
       const tx = X[b] - X[a], tz = Z[b] - Z[a], l = Math.hypot(tx, tz) || 1, nx = -tz / l * 6, nz = tx / l * 6;
       return Math.max(this.ground(x, Z[i]), this.ground(x + nx, Z[i] + nz), this.ground(x - nx, Z[i] - nz));
     });
-    const W = Math.round(12 / STEP), WA = Math.round(20 / STEP), KC = 0.25, KD = 0.2;
+    const W = Math.round(40 / STEP), WA = Math.round(80 / STEP), KC = 0.1, KD = 0.07;   // (wide: the small ups and downs of the roofs are ignored, the line glides over them)
     const env = g.map((v, i) => {
       let m = v; for (let j = Math.max(0, i - W); j <= Math.min(M - 1, i + W); j++) m = Math.max(m, g[j]);
       return Math.max(m + CLEAR, v + base);
@@ -166,7 +166,7 @@ export class Tour {
       for (let i = 1; i < M; i++) Y[i] = Math.max(Y[i], Y[i - 1] - KD * STEP);     // no steeper descent
       for (let i = M - 2; i >= 0; i--) Y[i] = Math.max(Y[i], Y[i + 1] - KC * STEP); // no steeper climb: start earlier
     };
-    for (let pass = 0; pass < 6; pass++) {
+    for (let pass = 0; pass < 10; pass++) {
       limit();
       const Y0 = Y;
       Y = Y0.map((_, i) => { let s = 0, n = 0; for (let j = Math.max(0, i - WA); j <= Math.min(M - 1, i + WA); j++) { s += Y0[j]; n++; } return Math.max(s / n, env[i]); });

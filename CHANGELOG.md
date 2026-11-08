@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.14 — Tour: M and a gentler line (2026-11-07)
+- During the tour, M opens and closes the map without ending it (Esc closes the map too). The tour's height glides over the roofs in a gentle line, ignoring their small ups and downs, while still never touching them.
+
 ## v10.13 — Random order, preload (2026-11-07)
 - Random city and the tour now share one shuffled order of all settlements (no repeats until every one has been visited). R works anywhere, without opening the map; during the tour it skips to the next settlement and the tour carries on. The next settlement in the order is built quietly in the background, so the jump to it is almost instant. The loading screen's controls explain Random city and the Tour, on phones too.
 

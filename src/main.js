@@ -418,7 +418,7 @@ async function main() {
     // R works anywhere; in a tour it skips to the next settlement and the tour goes on there
     if (e.code === 'KeyR' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { if (tour.active) tour.skip(); else randomCity(); }
     if (e.code === 'KeyT' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { closePanels(); tour.start('KeyT'); }
-    if (e.code === 'KeyM' && !tour.active) mapPanel.hidden ? openPanel(mapPanel) : closePanels();
+    if (e.code === 'KeyM') mapPanel.hidden ? openPanel(mapPanel) : closePanels();
     if (e.code === 'Escape' && panelsOpen()) closePanels();
   });
 
