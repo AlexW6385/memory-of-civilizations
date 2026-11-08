@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.9 — Flyover tour (2026-11-07)
+- The tour lifts off smoothly from where you stand - straight up at first, then leaning out - and flies low over the whole town along a winding route that passes the landmark, looking ahead and down, about a minute a settlement.
+
 ## v10.8 — Aerial tour (2026-11-07)
 - The tour is now an aerial overview: at each settlement it stands a moment at the arrival view, rises smoothly over the town and circles once round the landmark so the whole place is seen, about a minute, then flies on to the next in a shuffled order, without end. Nothing is shown while it runs; any key, click or touch stops it.
 
