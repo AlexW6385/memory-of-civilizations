@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.10 — Closer tour (2026-11-07)
+- The tour flies lower and closer - just over the roofs - and makes one even loop round the landmark in a minute, at about half the earlier speed, looking steadily ahead and a little in toward the landmark.
+
 ## v10.9 — Flyover tour (2026-11-07)
 - The tour lifts off smoothly from where you stand - straight up at first, then leaning out - and flies low over the whole town along a winding route that passes the landmark, looking ahead and down, about a minute a settlement.
 

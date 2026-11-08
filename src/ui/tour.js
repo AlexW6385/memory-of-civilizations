@@ -14,7 +14,7 @@ const yawTo = (dx, dz) => Math.atan2(-dx, -dz);       // the camera looks along 
 const ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const HOLD = 3, RISE = 8, FLY = 49;                   // seconds: the arrival view, the climb, the flyover (60 s in all)
 const INPUTS = ['keydown', 'pointerdown', 'mousedown', 'mousemove', 'wheel', 'touchstart', 'touchmove'];
-const CLEAR = 15;                                     // m the camera keeps above the ground and buildings
+const CLEAR = 6;                                      // m the camera keeps above the ground and buildings
 
 export class Tour {
   /**
@@ -119,17 +119,15 @@ export class Tour {
     if (Math.hypot(tx, tz) > 0.35 * R) { tx = 0; tz = 0; }
     const ty = this.ground(tx, tz) + 0.1 * R;
     this.arrival = { site: world_site(this.world), x: ax, y: A[1], z: az, yaw: ayaw, pitch: apitch };
-    // the route: from the arrival side across the districts to the far side and back, an S that passes
-    // close beside the landmark twice (waypoints in units of R along / across the arrival's line of sight)
-    const nx = dz, nz = -dx;
-    const W = [[-0.4, 0.45], [-0.08, 0.12], [0.35, -0.45], [0.75, -0.05], [0.4, 0.5], [0.05, -0.12], [-0.45, -0.45], [-0.7, 0.05]];
+    // the route: one even loop round the landmark at about 0.4 R, from the arrival side and back to it,
+    // so a minute shows the whole town close below without weaving
+    const rr = clamp(0.4 * R, 45, 150), a0 = Math.atan2(ax - tx, az - tz);
     const pts = [[ax, az]];
-    for (const [s, q] of W) {
-      let x = tx + (dx * s + nx * q) * R, z = tz + (dz * s + nz * q) * R;
-      const r = Math.hypot(x, z); if (r > 0.88 * R) { x *= 0.88 * R / r; z *= 0.88 * R / r; }
-      const l = pts[pts.length - 1];
-      if (Math.hypot(x - l[0], z - l[1]) > 0.06 * R) pts.push([x, z]);
+    for (let k = 1; k <= 12; k++) {
+      const a = a0 + (k / 12) * Math.PI * 2;
+      pts.push([tx + Math.sin(a) * rr, tz + Math.cos(a) * rr]);
     }
+    pts.push([ax, az]);
     // centripetal Catmull-Rom through them, resampled at even spacing
     const dense = [];
     const ext = [[2 * pts[0][0] - pts[1][0], 2 * pts[0][1] - pts[1][1]], ...pts, [2 * pts.at(-1)[0] - pts.at(-2)[0], 2 * pts.at(-1)[1] - pts.at(-2)[1]]];
@@ -149,11 +147,12 @@ export class Tour {
     }
     const M = X.length;
     // altitude: base above the ground, at least CLEAR over everything within 60 m along the path, smoothed
-    const base = clamp(0.28 * R, 25, 60);
+    // altitude: just over the roofs - a little above the highest ground or building within ~25 m along the path
+    const base = 10;
     const g = X.map((x, i) => this.ground(x, Z[i]));
     let Y = g.map((v, i) => {
-      let m = v; for (let j = Math.max(0, i - 10); j <= Math.min(M - 1, i + 10); j++) m = Math.max(m, g[j]);
-      return Math.max(v + base, m + CLEAR + 3);
+      let m = v; for (let j = Math.max(0, i - 4); j <= Math.min(M - 1, i + 4); j++) m = Math.max(m, g[j]);
+      return Math.max(v + base, m + CLEAR + 2);
     });
     for (let pass = 0; pass < 2; pass++) {
       Y = Y.map((_, i) => { let s = 0, n = 0; for (let j = Math.max(0, i - 4); j <= Math.min(M - 1, i + 4); j++) { s += Y[j]; n++; } return s / n; });
@@ -222,11 +221,9 @@ export class Tour {
     // acceleration-limited so it never jerks
     const lk = clamp(0.2 * L.R, 25, 70);
     const [gx, gz] = this.at(L, look + lk);
-    let wantYaw = yawTo(gx - x, gz - z), wantPitch = -0.44;
-    const ldx = L.tx - x, ldz = L.tz - z, ld = Math.hypot(ldx, ldz) || 1;
-    const near = 0.7 * ease((0.6 * L.R - ld) / (0.35 * L.R));
-    wantYaw += wrap(yawTo(ldx, ldz) - wantYaw) * near;
-    wantPitch += (clamp(Math.atan2(L.ty - y, ld), -0.8, -0.15) - wantPitch) * near;
+    let wantYaw = yawTo(gx - x, gz - z), wantPitch = -0.3;
+    const ldx = L.tx - x, ldz = L.tz - z;
+    wantYaw += wrap(yawTo(ldx, ldz) - wantYaw) * 0.35;   // a steady quarter-turn in toward the landmark
     if (tr < 1) { const k = ease(tr); wantYaw = S0.yaw + wrap(wantYaw - S0.yaw) * k; wantPitch = S0.pitch + (wantPitch - S0.pitch) * k; }
     const steer = (cur, vel, want, wrapIt, max) => {
       const err = wrapIt ? wrap(want - cur) : want - cur;
