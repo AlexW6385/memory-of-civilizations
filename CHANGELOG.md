@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.18 — Clean jumps (2026-11-07)
+- Jumps no longer leave the Travelling notice behind: travels run one at a time and nothing of a finished one can show it again. The view now goes dark before anything moves, so the next place is never glimpsed first, and the notice appears only if a jump takes a while. The plants round the next settlement's arrival are prepared ahead along with its buildings and ground. The tour no longer slows and turns at the end of each settlement: it flies on at its pace into the jump.
+
 ## v10.17 — Level tour (2026-11-07)
 - The tour flies level: its line takes the highest roof within about 90 m either side along the way, so it no longer bobs between roofs and lanes, and climbs or descends gently only where the town really rises; the in-flight safety lift now acts only in an emergency.
 

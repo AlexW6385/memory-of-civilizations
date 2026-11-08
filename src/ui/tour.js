@@ -207,7 +207,7 @@ export class Tour {
       L.s0 = Math.min(0.15 * L.R, total * 0.2);
       const [qx, qz, qy] = this.at(L, L.s0), [rx, rz, ry] = this.at(L, L.s0 + L.STEP);
       const tl = Math.hypot(rx - qx, rz - qz) || 1;
-      L.V = (total - L.s0) / (FLY - 1.5);
+      L.V = (total - L.s0) / (FLY + 0.4);
       L.end = { x: qx, y: qy, z: qz, tx: (rx - qx) / tl, tz: (rz - qz) / tl, ty: (ry - qy) / tl };
       L.s = L.s0;
       C.free = true; this.pp = null; this.vel = null;
@@ -227,7 +227,7 @@ export class Tour {
       y = h00 * S0.y + h10 * m0y + h01 * E.y + h11 * m * E.ty;
       look = L.s0 * ease(tr);
     } else {
-      const sm = ease(clamp((END - L.t) / 2.5, 0, 1));   // the last seconds ease to a halt: no snap into the next travel
+      const sm = 1;   // no slowing at the end: the leg flies on at its pace into the fade to the next settlement
       L.s = Math.min(total, L.s + L.V * sm * dt);
       [x, z, y] = this.at(L, L.s);
       look = L.s;

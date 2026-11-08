@@ -390,21 +390,28 @@ async function main() {
   });
   const journey = async ({ fn, resolve, reject }) => {
     busy = true;
-    closePanels(); toast(t('travelling'));
-    clearTimeout(fadeT); fade.hidden = false; requestAnimationFrame(() => { if (busy) fade.classList.add('on'); });
+    closePanels();
+    // the notice only if the travel takes a while (a preloaded place is ready almost at once)
+    const noticeT = setTimeout(() => { if (!report.over) toast(t('travelling')); }, 700);
+    // the view goes dark before anything moves: the new place is never glimpsed before the fade
+    clearTimeout(fadeT);
+    if (!fade.classList.contains('on')) {
+      fade.hidden = false; fade.getBoundingClientRect(); fade.classList.add('on');
+      await new Promise((r) => setTimeout(r, 380));
+    }
     T0 = performance.now(); times = {};
     // the notice counts down what is still being made ready
     const f = { build: 0, land: 0, plants: 0 };
     const report = (stage, v) => {
       if (report.over) return;
-      f[stage] = v; toast(`${t('travelling')} ${Math.round((f.build * 0.45 + f.land * 0.35 + f.plants * 0.2) * 90)}%`);
+      f[stage] = v; if (performance.now() - T0 < 700) return; toast(`${t('travelling')} ${Math.round((f.build * 0.45 + f.land * 0.35 + f.plants * 0.2) * 90)}%`);
     };
     report.over = false;
     let error = null;
     try {
       await fn(report);
       frameOnce(0);
-      toast(`${t('travelling')} 95%`);
+      if (performance.now() - T0 > 700) toast(`${t('travelling')} 95%`);
       await R.warmup();
       mark('shaders');
       console.info('[memory of civilizations] travel (ms):', JSON.stringify(times));
@@ -412,7 +419,7 @@ async function main() {
       world.preload(peek(nearest(world.here(controls))));
     } catch (e) { error = e; }
     finally {
-      report.over = true;
+      report.over = true; clearTimeout(noticeT);
       busy = false;
       const next = waiting; waiting = null;
       if (next) journey(next);                // the fade stays down: straight on to the next place
