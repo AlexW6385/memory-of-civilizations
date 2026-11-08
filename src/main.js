@@ -26,6 +26,7 @@ import { REGION } from './world/regions.js';
 import { openClimate } from './planet/climates.js';
 import { ARRIVALS } from './planet/arrivals.js';
 import { Tour } from './ui/tour.js';
+import { nearest, peek, take } from './ui/order.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -384,6 +385,8 @@ async function main() {
       await R.warmup();
       mark('shaders');
       console.info('[memory of civilizations] travel (ms):', JSON.stringify(times));
+      // the next settlement of the shared random order is built ahead, in the background
+      world.preload(peek(nearest(world.here(controls))));
     } finally {
       toast(''); fade.classList.remove('on'); setTimeout(() => { fade.hidden = true; }, 400);
     }
@@ -402,7 +405,9 @@ async function main() {
     document.body.classList.add('panel-open');
     if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
-  $('map-random').onclick = () => mapView.random();
+  // Random city: the next settlement of the one shared random order (src/ui/order.js), from wherever one is
+  const randomCity = () => { const S = take(nearest(world.here(controls))); if (S) mapView.go(S); };
+  $('map-random').onclick = randomCity;
   // the tour: settlement after settlement, an aerial circuit over each; any input ends it
   const tour = new Tour({ controls, world, go: (S) => mapView.go(S), onChange: () => { snap = true; } });
   $('map-tour').onclick = () => { closePanels(); tour.start(); };
@@ -410,7 +415,8 @@ async function main() {
 
   for (const c of document.querySelectorAll('.panel .close')) c.onclick = closePanels;
   addEventListener('keydown', (e) => {
-    if (e.code === 'KeyR' && !e.repeat && panelsOpen() && !e.target.closest?.('input, select')) mapView.random();
+    // R works anywhere; in a tour it skips to the next settlement and the tour goes on there
+    if (e.code === 'KeyR' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { if (tour.active) tour.skip(); else randomCity(); }
     if (e.code === 'KeyT' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { closePanels(); tour.start('KeyT'); }
     if (e.code === 'KeyM' && !tour.active) mapPanel.hidden ? openPanel(mapPanel) : closePanels();
     if (e.code === 'Escape' && panelsOpen()) closePanels();

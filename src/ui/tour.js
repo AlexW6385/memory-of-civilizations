@@ -5,11 +5,10 @@
 import { footing, EYE } from '../core/walk.js';
 import { ARRIVALS } from '../planet/arrivals.js';
 import { BUILT } from '../planet/relief.js';
-import { dot } from '../planet/geo.js';
+import { nearest, take, visit } from './order.js';
 
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const yawTo = (dx, dz) => Math.atan2(-dx, -dz);       // the camera looks along (-sin yaw, -cos yaw)
 const ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const HOLD = 3, RISE = 8, FLY = 49;                   // seconds: the arrival view, the climb, the flyover (60 s in all)
@@ -24,13 +23,14 @@ export class Tour {
   constructor(o) {
     Object.assign(this, o);
     this.active = false;
-    this.queue = [];
     this.leg = null;
     this.runId = 0;
     // any input ends the tour (the first half second is ignored, and the repeat of the start key)
     this._stop = (e) => {
       if (!this.active || performance.now() - this.t0 < 500) return;
       if (e.type === 'keydown' && e.repeat && e.code === this.startKey) return;
+      // R skips to the next settlement (main.js) and the tour goes on there
+      if (e.type === 'keydown' && e.code === 'KeyR' && !e.ctrlKey && !e.metaKey && !e.altKey) return;
       if (e.type === 'mousemove' && !e.buttons) return;
       // the page's own controls (sound, language, the corner map and its zoom, the panels, the clock) do
       // not end the tour: only input on the world itself (the view, the walking stick) or a key does
@@ -46,7 +46,7 @@ export class Tour {
   start(startKey = null) {
     if (this.active) return;
     this.startKey = startKey;
-    this.active = true; this.t0 = performance.now(); this.leg = null; this.queue = [];
+    this.active = true; this.t0 = performance.now(); this.leg = null;
     this.controls.keys.clear(); this.controls.flyHeld = false;
     for (const t of INPUTS) addEventListener(t, this._stop, { capture: true, passive: false });
     this.onChange?.(true);
@@ -66,20 +66,18 @@ export class Tour {
 
   toggle() { if (this.active) this.stop(); else this.start(); }
 
-  /** The next settlement: the nearest to the visitor first, then a shuffled round of all the others. */
+  /** Skip to the next settlement of the shared random order: the current leg ends, the tour goes on there. */
+  skip() { if (this.active && this.leg) this.leg.done?.(); }
+
+  /** The next settlement: the nearest to the visitor first, then the page's shared random order (src/ui/order.js). */
   next() {
     if (this.first) {
       this.first = false;
-      const u = this.world.here(this.controls);
-      let best = null, bd = -2;
-      for (const S of BUILT) { const d = dot(u, S.u); if (d > bd) { bd = d; best = S; } }
-      this.queue = this.queue.filter((S) => S !== best);
+      const best = nearest(this.world.here(this.controls));
+      visit(best);
       return best;
     }
-    if (!this.queue.length) {
-      this.queue = shuffle(BUILT.filter((S) => S !== this.last));
-    }
-    return this.queue.shift();
+    return take(this.last);
   }
 
   async run() {

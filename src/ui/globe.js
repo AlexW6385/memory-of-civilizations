@@ -8,6 +8,7 @@ import { coastAt, climateAt } from '../planet/land.js';
 import { BUILT, PLANET_RADIUS } from '../planet/relief.js';
 import { SITES } from '../planet/sites.js';
 import { PLACED } from '../planet/layout.js';
+import { take } from './order.js';
 import { unit, latLon, eastNorth, dot, norm, cross } from '../planet/geo.js';
 
 const sm = (e0, e1, x) => { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); };
@@ -103,10 +104,10 @@ export class GlobeView {
     return best;
   }
 
-  /** Travel to a random settlement other than the current one. */
+  /** Travel to the next settlement of the shared random order (src/ui/order.js), other than the current one. */
   random() {
-    const cur = this.here(), pool = BUILT.filter((S) => S !== cur);
-    if (pool.length) this.go(pool[Math.floor(Math.random() * pool.length)]);
+    const S = take(this.here());
+    if (S) this.go(S);
   }
 
   /** Open centred on the visitor (direction u), facing north up. */

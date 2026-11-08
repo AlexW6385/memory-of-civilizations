@@ -497,6 +497,27 @@ export class World {
     }
   }
 
+  /**
+   * Keep the settlement S (a map settlement of src/planet/relief.js, or null) built ahead of a visit: its
+   * plans fetched, then built in the background when the page is idle (the load is time-sliced like all
+   * streaming) and kept from the far-unload. At most one besides the current one: a stale one is let go.
+   */
+  async preload(S) {
+    const site = S ? this.settlements.find((s) => s.S === S) : null;
+    const old = this.kept;
+    if (old && old !== site && old !== this.anchor?.site) old.unload();
+    this.kept = site;
+    if (!site || site === this.anchor?.site) return;
+    const idle = () => new Promise((r) => (globalThis.requestIdleCallback ? requestIdleCallback(r, { timeout: 3000 }) : setTimeout(r, 300)));
+    try {
+      await idle();
+      if (this.kept !== site) return;
+      await this.plansOf(site);
+      await idle();
+      if (this.kept === site && site.state === 'idle') await site.load();
+    } catch (e) { console.warn('preload', S.id, e); }
+  }
+
   /** The entrance record of a settlement's first landmark, its module fetched if need be. */
   async recordFor(S) {
     const find = () => [...this.plans.values()].find((r) => r.site?.S === S);
@@ -716,7 +737,7 @@ export class World {
     const near = this.settlements.map((s) => [World.rimDistance(s, u), s]).sort((a, b) => a[0] - b[0]);
     near.forEach(([d, s], i) => {
       if (d < radius + lift && (i < MAX_BUILT || s === this.anchor?.site)) wanted.push(s.load());
-      else if (d > UNLOAD + lift || i > MAX_BUILT) { if (s !== this.anchor?.site) s.unload(); }
+      else if (d > UNLOAD + lift || i > MAX_BUILT) { if (s !== this.anchor?.site && s !== this.kept) s.unload(); }
       if (d < 6000) s.loadImpostor();
     });
     await Promise.all(wanted);
