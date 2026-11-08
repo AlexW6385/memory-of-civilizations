@@ -17,7 +17,8 @@ const CLEAR = 8;                                      // m the camera keeps abov
 
 export class Tour {
   /**
-   * @param {object} o  controls, world, go(S) → Promise (travels and waits until the place is ready),
+   * @param {object} o  controls, world, go(S) → Promise (travels and waits until the place is ready;
+   *                    false if another travel asked for meanwhile took its place),
    *                    onChange(active)
    */
   constructor(o) {
@@ -86,8 +87,11 @@ export class Tour {
     while (this.active && id === this.runId) {
       const S = this.next();
       if (!S) break;
-      try { await this.go(S); } catch (e) { console.warn('[tour]', e); await new Promise((r) => setTimeout(r, 3000)); continue; }
+      let ok;
+      try { ok = await this.go(S); } catch (e) { console.warn('[tour]', e); await new Promise((r) => setTimeout(r, 3000)); continue; }
       if (!this.active || id !== this.runId) break;
+      // (a travel asked for elsewhere, the map, took the place of this one: the visitor chose; the tour ends)
+      if (ok === false) break;
       this.last = S;
       this.begin(S);
       // the leg ends by itself (the loop is closed or its time spent), or the tour is stopped
