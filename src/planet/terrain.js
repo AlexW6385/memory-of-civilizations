@@ -138,7 +138,7 @@ export class PlanetTerrain {
     }
     // let go of tiles unused for a while (beyond a reserve)
     if (this.tiles.size > 700) {
-      const old = [...this.tiles.entries()].filter(([k, t]) => !show.has(k) && !this.wantKeys.has(k)).sort((a, b) => a[1].used - b[1].used);
+      const old = [...this.tiles.entries()].filter(([k, t]) => !show.has(k) && !this.wantKeys.has(k) && !this.preKeys?.has(k)).sort((a, b) => a[1].used - b[1].used);
       for (const [k, t] of old.slice(0, this.tiles.size - 600)) this.drop(k, t);
     }
     return this.queue.length + this.pending.size;
@@ -166,7 +166,9 @@ export class PlanetTerrain {
   /** Build ahead the tiles a camera at planet position cam will want (the next settlement of the random
    *  order), after whatever the present view still needs: arriving there then finds its ground ready. */
   prefetch(cam) {
-    this.pre = this.layout(cam).filter((w) => !this.tiles.has(w.k));
+    const want = this.layout(cam);
+    this.preKeys = new Set(want.map((w) => w.k));     // kept from the eviction below until used or replaced
+    this.pre = want.filter((w) => !this.tiles.has(w.k));
     this.pump();
   }
 

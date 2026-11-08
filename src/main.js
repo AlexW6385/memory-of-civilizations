@@ -318,6 +318,8 @@ async function main() {
   console.info('[memory of civilizations] start (ms):', JSON.stringify(times));
   progress.set('shaders', 1);
   progress.finish();
+  // the first settlement of the shared random order is built ahead from the start
+  setTimeout(() => world.preload(peek(nearest(world.here(controls)))), 4000);
 
   // interface: the world opens by itself; a click (or a key) starts looking and the music
   const intro = $('intro'), mapPanel = $('map');

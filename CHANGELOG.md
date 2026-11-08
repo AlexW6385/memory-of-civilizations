@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.16 — Preload fixes (2026-11-07)
+- The ground built ahead for the next settlement is no longer thrown away by the tile cache before you get there, and the first settlement of the random order is built ahead from the moment the world opens.
+
 ## v10.15 — Ground preloaded too (2026-11-07)
 - The jump to the next settlement of the random order is quicker: besides its buildings, the ground round its arrival view is now built ahead in the background (it was the 4-second wait that remained).
 
