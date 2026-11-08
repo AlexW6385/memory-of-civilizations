@@ -74,15 +74,18 @@ export class Flora {
       w.onmessage = (e) => {
         if (e.data.species) { this.species = e.data.species; this.pump(); return; }
         w.idle = true;
-        const c = this.cells.get(e.data.id);
-        if (c && e.data.gen === this.gen) { c.data = e.data.data; c.state = 'done'; this.dirty = true; }
-        else if (c) c.state = 'queued';
+        const { id, gen, data } = e.data, c = this.cells.get(id);
+        // (a cell of the arrival made ahead and taken over by setSite: its job's own gen)
+        if (c && c.state === 'pending' && (gen === this.gen || gen === c.job)) { c.data = data; c.state = 'done'; c.job = undefined; this.dirty = true; }
+        else if (c && c.state === 'pending' && c.job === undefined) { c.state = 'queued'; this.queue.push(id); }   // (made for a settlement left meanwhile: again)
+        else { const a = this.ahead?.cells.get(id); if (a && a.state === 'pending' && gen === this.ahead.gen) { a.data = data; a.state = 'done'; this.aheadStep(); } }
         this.pump();
       };
       return w;
     });
     this.maxLod = Math.max(...Object.values(SPECIES).map((s) => s.lod[1]));
     this.focus = null;               // the settlement whose plants these are (src/world/regions.js focus)
+    this.ahead = null;               // the plants round the next settlement's arrival, made ahead (prefetch)
     this.scale = 1;                 // view distance of plants, by picture quality
   }
 
@@ -108,7 +111,81 @@ export class Flora {
     this.focus = focus;
     for (const [k, c] of this.cells) if (c.state !== 'pending') this.cells.delete(k);
     this.gen = (this.gen || 0) + 1;
+    // arriving where the plants were made ahead: those cells taken over as they are (done, or still
+    // in a worker: its answer is taken by the job's gen)
+    const A = this.ahead;
+    if (A && focus && A.focus === focus) {
+      this.ahead = null;
+      for (const [k, a] of A.cells) {
+        if (a.state === 'done') this.cells.set(k, { state: 'done', rect: a.rect, near: a.near, d: 0, data: a.data, prep: a.prep });
+        else if (a.state === 'pending') this.cells.set(k, { state: 'pending', rect: a.rect, near: a.near, d: 0, job: A.gen });
+      }
+    }
+    this.wantAt = null;
     this.dirty = true;
+  }
+
+  /** The cells wanted round (x, z) for the settlement `focus`: key → { rect, near, d } (d: from (x, z) to the cell's centre). */
+  wanted(x, z, focus = this.focus) {
+    const out = new Map();
+    const [fx, fz] = focus.center, fr = focus.radius;
+    const [X0, Z0, X1, Z1] = [fx - fr + 400, fz - fr + 400, fx + fr - 400, fz + fr - 400];
+    const R = this.maxLod;
+    const add = (kind, cx, cz, size) => out.set(`${kind}:${cx},${cz}`, { rect: [cx, cz, cx + size, cz + size], near: kind === 'S', d: Math.hypot(cx + size / 2 - x, cz + size / 2 - z) });
+    for (let cx = Math.floor((x - R) / BIG) * BIG; cx < x + R; cx += BIG) for (let cz = Math.floor((z - R) / BIG) * BIG; cz < z + R; cz += BIG) {
+      if (cx + BIG < X0 - 400 || cx > X1 + 400 || cz + BIG < Z0 - 400 || cz > Z1 + 400) continue;
+      const d = Math.hypot(Math.max(cx - x, 0, x - cx - BIG), Math.max(cz - z, 0, z - cz - BIG));
+      if (d < R) add('B', cx, cz, BIG);
+    }
+    for (let cx = Math.floor((x - NEAR_R) / SMALL) * SMALL; cx < x + NEAR_R; cx += SMALL) for (let cz = Math.floor((z - NEAR_R) / SMALL) * SMALL; cz < z + NEAR_R; cz += SMALL) {
+      const d = Math.hypot(Math.max(cx - x, 0, x - cx - SMALL), Math.max(cz - z, 0, z - cz - SMALL));
+      if (d < NEAR_R) add('S', cx, cz, SMALL);
+    }
+    return out;
+  }
+
+  /**
+   * Make ahead, in the background, the plants within `near` metres of (x, z) in the settlement
+   * `focus` (the next one to be visited), without touching the present view's: scattered by the
+   * workers when they have nothing of the view's to do, made ready to be drawn, and their meshes'
+   * shaders compiled. setSite(focus) takes them over. One such set is kept (a new call replaces it).
+   */
+  prefetch(focus, x, z, near = 200) {
+    if (!focus) { this.ahead = null; return; }
+    if (this.ahead && this.ahead.focus === focus && Math.hypot(this.ahead.x - x, this.ahead.z - z) < 4) return;
+    if (focus === this.focus) { this.ahead = null; return; }
+    const cells = new Map();
+    for (const [k, c] of this.wanted(x, z, focus)) if (c.d < near) cells.set(k, { ...c, state: 'queued' });
+    this.ahead = { focus, x, z, cells, gen: `ahead:${(this.aheadN = (this.aheadN || 0) + 1)}`, queue: [...cells.entries()].sort((a, b) => a[1].d - b[1].d).map(([k]) => k), readied: false };
+    this.pump();
+  }
+
+  /** A cell made ahead came back: once all have, they are made ready to be drawn and their meshes compiled. */
+  aheadStep() {
+    const A = this.ahead;
+    if (!A || A.readied || !this.species) return;
+    for (const a of A.cells.values()) if (a.state !== 'done') return;
+    A.readied = true;
+    const counts = new Map();                // kv → plants, for the meshes' size
+    const work = [...A.cells.values()];
+    const step = () => {
+      if (this.ahead !== A) return;
+      const t0 = performance.now();
+      while (work.length && performance.now() - t0 < 4) {
+        const a = work.pop();
+        if (!a.data?.length) continue;
+        this.prepare(a); a.prep.src = a.data;
+        for (const k of a.prep.kv) counts.set(k, (counts.get(k) || 0) + 1);
+      }
+      if (work.length) { setTimeout(step, 0); return; }
+      // then the meshes of the species and variants there (either level of detail), a few at a time:
+      // their shaders compiled off the frame (batch → precompile), ready to be filled on arrival
+      if (!meshes) meshes = [...counts].flatMap(([k, n]) => [[k, 0, n], [k, 1, n]]);
+      while (meshes.length && performance.now() - t0 < 4) { const [k, lod, n] = meshes.pop(), [sp, v] = this.kvList[k]; if (!this.batches.has(`${sp}/${v}/${lod}`)) this.batch(sp, v, lod, n); }   // (one drawn now is left as it is: made again, it would be empty until the next rebuild)
+      if (meshes.length) setTimeout(step, 0);
+    };
+    let meshes = null;
+    step();
   }
 
   /** Cells wanted around (x, z): far cells for trees, near cells for grass. */
@@ -117,23 +194,8 @@ export class Flora {
     // the cells wanted, again only when the viewer has moved a few metres (or the site changed)
     if (!this.wantAt || this.wantGen !== this.gen || Math.hypot(x - this.wantAt[0], z - this.wantAt[1]) > 4) {
       this.wantAt = [x, z]; this.wantGen = this.gen;
-      const want = new Set();
-      const [fx, fz] = this.focus.center, fr = this.focus.radius;
-      const [X0, Z0, X1, Z1] = [fx - fr + 400, fz - fr + 400, fx + fr - 400, fz + fr - 400];
-      const R = this.maxLod;
-      for (let cx = Math.floor((x - R) / BIG) * BIG; cx < x + R; cx += BIG) for (let cz = Math.floor((z - R) / BIG) * BIG; cz < z + R; cz += BIG) {
-        if (cx + BIG < X0 - 400 || cx > X1 + 400 || cz + BIG < Z0 - 400 || cz > Z1 + 400) continue;
-        const d = Math.hypot(Math.max(cx - x, 0, x - cx - BIG), Math.max(cz - z, 0, z - cz - BIG));
-        if (d < R) want.add(`B:${cx},${cz}`);
-      }
-      for (let cx = Math.floor((x - NEAR_R) / SMALL) * SMALL; cx < x + NEAR_R; cx += SMALL) for (let cz = Math.floor((z - NEAR_R) / SMALL) * SMALL; cz < z + NEAR_R; cz += SMALL) {
-        const d = Math.hypot(Math.max(cx - x, 0, x - cx - SMALL), Math.max(cz - z, 0, z - cz - SMALL));
-        if (d < NEAR_R) want.add(`S:${cx},${cz}`);
-      }
-      for (const k of want) if (!this.cells.has(k)) {
-        const [kind, rest] = k.split(':'), [cx, cz] = rest.split(',').map(Number), size = kind === 'B' ? BIG : SMALL;
-        this.cells.set(k, { state: 'queued', rect: [cx, cz, cx + size, cz + size], near: kind === 'S', d: 0 });
-      }
+      const want = this.wanted(x, z);
+      for (const [k, c] of want) if (!this.cells.has(k)) this.cells.set(k, { state: 'queued', rect: c.rect, near: c.near, d: 0 });
       for (const [k, c] of this.cells) if (!want.has(k) && c.state !== 'pending') { this.cells.delete(k); this.dirty = true; }
       for (const c of this.cells.values()) c.d = Math.hypot((c.rect[0] + c.rect[2]) / 2 - x, (c.rect[1] + c.rect[3]) / 2 - z);
       this.queue = [...this.cells.entries()].filter(([, c]) => c.state === 'queued').sort((a, b) => a[1].d - b[1].d).map(([k]) => k);
@@ -145,9 +207,10 @@ export class Flora {
   }
 
   /** Resolve when the plants within `near` metres are placed; farther ones follow. onProgress(0…1). */
-  async ready(x, z, onProgress, near = 260) {
+  async ready(x, z, onProgress, near = 260, alive = () => true) {
     let total = 0;
     for (;;) {
+      if (!alive()) return;                 // (the travel that waits is over: nothing more to report)
       this.update(x, z);
       let left = 0;
       for (const c of this.cells.values()) if (c.state !== 'done' && c.d < near) left++;
@@ -160,13 +223,23 @@ export class Flora {
 
   pump() {
     if (!this.species) return;
+    const A = this.ahead;
     for (const w of this.workers) {
-      if (!w.idle || !this.queue.length) continue;
-      const k = this.queue.shift(), c = this.cells.get(k);
+      if (!w.idle) continue;
+      // the view's cells first; the arrival's made ahead only by a worker with nothing else to do
+      let k = null, c = null;
+      while (this.queue.length && !c) { k = this.queue.shift(); c = this.cells.get(k); if (c && c.state !== 'queued') c = null; }
+      if (c) {
+        c.state = 'pending'; c.job = undefined; w.idle = false;
+        w.postMessage({ id: k, rect: c.rect, near: c.near, focus: this.focus, gen: this.gen });
+        continue;
+      }
+      while (A?.queue.length && !c) { k = A.queue.shift(); c = A.cells.get(k); }
       if (!c) continue;
       c.state = 'pending'; w.idle = false;
-      w.postMessage({ id: k, rect: c.rect, near: c.near, focus: this.focus, gen: this.gen });
+      w.postMessage({ id: k, rect: c.rect, near: c.near, focus: A.focus, gen: A.gen });
     }
+    if (A && !A.queue.length) this.aheadStep();
   }
 
   /**

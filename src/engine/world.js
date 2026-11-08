@@ -501,26 +501,35 @@ export class World {
   /**
    * Keep the settlement S (a map settlement of src/planet/relief.js, or null) built ahead of a visit: its
    * plans fetched, then built in the background when the page is idle (the load is time-sliced like all
-   * streaming) and kept from the far-unload. At most one besides the current one: a stale one is let go.
+   * streaming) and kept from the far-unload; the plants round its arrival view scattered ahead (without
+   * touching the present view's: src/engine/flora prefetch), the ground there built ahead, and, once its
+   * merging is done, its meshes' shaders compiled off the frame, so that arriving there has nothing left
+   * to make or compile. At most one besides the current one: a stale one is let go (and its plants).
+   * A jump there before this is done still works: the arrival takes over what is made and waits for the rest.
    */
   async preload(S) {
     const site = S ? this.settlements.find((s) => s.S === S) : null;
     const old = this.kept;
     if (old && old !== site && old !== this.anchor?.site) old.unload();
     this.kept = site;
-    if (!site || site === this.anchor?.site) return;
+    if (!site || site === this.anchor?.site) { this.flora.prefetch(null); return; }
     const idle = () => new Promise((r) => (globalThis.requestIdleCallback ? requestIdleCallback(r, { timeout: 3000 }) : setTimeout(r, 300)));
+    const still = () => this.kept === site && site !== this.anchor?.site;
+    const A = ARRIVALS[S.id] || [0, null, 0];
     try {
       await idle();
-      if (this.kept !== site) return;
+      if (!still()) return;
       await this.plansOf(site);
+      // the plants round the arrival (by the plant workers when they are idle: no wait on the buildings)
+      if (still()) this.flora.prefetch(S.focus, A[0], A[2]);
       await idle();
-      if (this.kept === site && site.state === 'idle') await site.load();
+      if (still() && site.state === 'idle') await site.load();
       // and the ground round its arrival view, built ahead the same way (after the present view's tiles)
-      if (this.kept === site && this.terrain) {
-        const A = ARRIVALS[S.id] || [0, null, 0];
-        this.terrain.prefetch(toPlanet(S.frame, [A[0], (A[1] ?? 0) + 1.7, A[2]]));
-      }
+      if (still() && this.terrain) this.terrain.prefetch(toPlanet(S.frame, [A[0], (A[1] ?? 0) + 1.7, A[2]]));
+      // the merged meshes made: whatever of the settlement was not compiled yet (its parts and merged
+      // meshes are compiled as they come; this catches the rest, a no-op for what was) compiled now
+      if (still()) await site.merging;
+      if (still()) { await idle(); if (still() && site.state === 'ready') await this.r.precompile?.(site.group); }
     } catch (e) { console.warn('preload', S.id, e); }
   }
 

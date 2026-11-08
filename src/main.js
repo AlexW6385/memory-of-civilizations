@@ -182,14 +182,19 @@ async function main() {
   const arrive = async (report = null) => {
     const site = world.anchor.site;
     const u = world.here(controls);
+    // (a travel's report says when the travel is over: report.over, src/main.js travel)
+    const alive = () => !report?.over;
     const poll = site && report ? setInterval(() => report('build', site.fraction, `${Math.min(site.done | 0, site.expected | 0)}/${site.expected | 0}`), 150) : null;
-    await Promise.all([
-      (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 1); mark('buildings'); }),
-      world.terrain.readyAt(camPlanet, (f) => report?.('land', f, `${Math.round(f * 100)}%`)).then(() => mark('land')),
-    ]);
+    try {
+      await Promise.all([
+        (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 1); mark('buildings'); }),
+        world.terrain.readyAt(camPlanet, (f) => report?.('land', f, `${Math.round(f * 100)}%`)).then(() => mark('land')),
+      ]);
+    } finally { clearInterval(poll); }
+    if (!alive()) return;
     world.ensureNear(u);
     world.update(R.camera, controls);
-    if (site) { const F = controls.feet; const L = [F.x, F.z]; await world.flora.ready(L[0], L[1], (f) => report?.('plants', f), 140); }
+    if (site) { const F = controls.feet; const L = [F.x, F.z]; await world.flora.ready(L[0], L[1], (f) => report?.('plants', f), 140, alive); }
     report?.('plants', 1); mark('plants');
   };
   const boot = (stage, f, detail) => progress.set(stage, f, detail);
@@ -373,13 +378,29 @@ async function main() {
   // travelling: the view fades out, the new place is made ready (ground, plants, buildings, their
   // shaders), and the view fades in there
   const fade = $('fade');
-  const travel = async (fn) => {
+  // One travel at a time: a travel asked for while another runs waits for it (the latest such
+  // request only: an older waiting one is dropped and resolves false), and the fade stays down
+  // between them. Each travel's progress callbacks are no-ops once it is over, so that nothing of a
+  // finished travel (a poll, a late report) can show the notice again.
+  let busy = false, waiting = null, fadeT = 0;
+  const travel = (fn) => new Promise((resolve, reject) => {
+    const job = { fn, resolve, reject };
+    if (busy) { waiting?.resolve(false); waiting = job; return; }
+    journey(job);
+  });
+  const journey = async ({ fn, resolve, reject }) => {
+    busy = true;
     closePanels(); toast(t('travelling'));
-    fade.hidden = false; requestAnimationFrame(() => fade.classList.add('on'));
+    clearTimeout(fadeT); fade.hidden = false; requestAnimationFrame(() => { if (busy) fade.classList.add('on'); });
     T0 = performance.now(); times = {};
     // the notice counts down what is still being made ready
     const f = { build: 0, land: 0, plants: 0 };
-    const report = (stage, v) => { f[stage] = v; toast(`${t('travelling')} ${Math.round((f.build * 0.45 + f.land * 0.35 + f.plants * 0.2) * 90)}%`); };
+    const report = (stage, v) => {
+      if (report.over) return;
+      f[stage] = v; toast(`${t('travelling')} ${Math.round((f.build * 0.45 + f.land * 0.35 + f.plants * 0.2) * 90)}%`);
+    };
+    report.over = false;
+    let error = null;
     try {
       await fn(report);
       frameOnce(0);
@@ -389,8 +410,17 @@ async function main() {
       console.info('[memory of civilizations] travel (ms):', JSON.stringify(times));
       // the next settlement of the shared random order is built ahead, in the background
       world.preload(peek(nearest(world.here(controls))));
-    } finally {
-      toast(''); fade.classList.remove('on'); setTimeout(() => { fade.hidden = true; }, 400);
+    } catch (e) { error = e; }
+    finally {
+      report.over = true;
+      busy = false;
+      const next = waiting; waiting = null;
+      if (next) journey(next);                // the fade stays down: straight on to the next place
+      else {
+        toast(''); fade.classList.remove('on');
+        clearTimeout(fadeT); fadeT = setTimeout(() => { if (!busy) fade.hidden = true; }, 400);
+      }
+      if (error) reject(error); else resolve(true);
     }
   };
   // from the map: a settlement (its landmark's record fetched during the travel if not yet here)
@@ -408,7 +438,7 @@ async function main() {
     if (p === mapPanel) mapView.open(world.here(controls), heading());
   };
   // Random city: the next settlement of the one shared random order (src/ui/order.js), from wherever one is
-  const randomCity = () => { const S = take(nearest(world.here(controls))); if (S) mapView.go(S); };
+  const randomCity = () => { if (busy) return; const S = take(nearest(world.here(controls))); if (S) mapView.go(S); };
   $('map-random').onclick = randomCity;
   // the tour: settlement after settlement, an aerial circuit over each; any input ends it
   const tour = new Tour({ controls, world, go: (S) => mapView.go(S), onChange: () => { snap = true; } });
@@ -418,7 +448,7 @@ async function main() {
   for (const c of document.querySelectorAll('.panel .close')) c.onclick = closePanels;
   addEventListener('keydown', (e) => {
     // R works anywhere; in a tour it skips to the next settlement and the tour goes on there
-    if (e.code === 'KeyR' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { if (tour.active) tour.skip(); else randomCity(); }
+    if (e.code === 'KeyR' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { if (busy) return; if (tour.active) tour.skip(); else randomCity(); }
     if (e.code === 'KeyT' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest?.('input, select')) { closePanels(); tour.start('KeyT'); }
     if (e.code === 'KeyM') mapPanel.hidden ? openPanel(mapPanel) : closePanels();
     if (e.code === 'Escape' && panelsOpen()) closePanels();
