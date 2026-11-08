@@ -14,7 +14,7 @@ const yawTo = (dx, dz) => Math.atan2(-dx, -dz);       // the camera looks along 
 const ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const HOLD = 3, RISE = 8, FLY = 49;                   // seconds: the arrival view, the climb, the flyover (60 s in all)
 const INPUTS = ['keydown', 'pointerdown', 'mousedown', 'mousemove', 'wheel', 'touchstart', 'touchmove'];
-const CLEAR = 6;                                      // m the camera keeps above the ground and buildings
+const CLEAR = 8;                                      // m the camera keeps above the ground and buildings
 
 export class Tour {
   /**
@@ -136,7 +136,7 @@ export class Tour {
     const ext = [[2 * pts[0][0] - pts[1][0], 2 * pts[0][1] - pts[1][1]], ...pts, [2 * pts.at(-1)[0] - pts.at(-2)[0], 2 * pts.at(-1)[1] - pts.at(-2)[1]]];
     for (let i = 1; i < ext.length - 2; i++) crSeg(ext[i - 1], ext[i], ext[i + 1], ext[i + 2], 40, dense);
     dense.push(pts.at(-1));
-    const STEP = 6, X = [dense[0][0]], Z = [dense[0][1]];
+    const STEP = 2, X = [dense[0][0]], Z = [dense[0][1]];
     let acc = 0;
     for (let i = 1; i < dense.length; i++) {
       let [px, pz] = dense[i - 1]; const [qx, qz] = dense[i];
@@ -149,18 +149,32 @@ export class Tour {
       acc += seg;
     }
     const M = X.length;
-    // altitude: base above the ground, at least CLEAR over everything within 60 m along the path, smoothed
-    // altitude: just over the roofs - a little above the highest ground or building within ~25 m along the path
+    // altitude: sample the ground and buildings densely along the path and 6 m to each side, take the upper
+    // envelope (max over +-12 m), add clearance, then shape it with limited climb/descent slopes and a smoothing
+    // that never goes below the envelope (limit, average, re-max, repeated)
     const base = 10;
-    const g = X.map((x, i) => this.ground(x, Z[i]));
-    let Y = g.map((v, i) => {
-      let m = v; for (let j = Math.max(0, i - 4); j <= Math.min(M - 1, i + 4); j++) m = Math.max(m, g[j]);
-      return Math.max(v + base, m + CLEAR + 2);
+    const g = X.map((x, i) => {
+      const a = Math.max(0, i - 1), b = Math.min(M - 1, i + 1);
+      const tx = X[b] - X[a], tz = Z[b] - Z[a], l = Math.hypot(tx, tz) || 1, nx = -tz / l * 6, nz = tx / l * 6;
+      return Math.max(this.ground(x, Z[i]), this.ground(x + nx, Z[i] + nz), this.ground(x - nx, Z[i] - nz));
     });
-    for (let pass = 0; pass < 2; pass++) {
-      Y = Y.map((_, i) => { let s = 0, n = 0; for (let j = Math.max(0, i - 4); j <= Math.min(M - 1, i + 4); j++) { s += Y[j]; n++; } return s / n; });
+    const W = Math.round(12 / STEP), WA = Math.round(20 / STEP), KC = 0.25, KD = 0.2;
+    const env = g.map((v, i) => {
+      let m = v; for (let j = Math.max(0, i - W); j <= Math.min(M - 1, i + W); j++) m = Math.max(m, g[j]);
+      return Math.max(m + CLEAR, v + base);
+    });
+    let Y = env.slice();
+    const limit = () => {
+      for (let i = 1; i < M; i++) Y[i] = Math.max(Y[i], Y[i - 1] - KD * STEP);     // no steeper descent
+      for (let i = M - 2; i >= 0; i--) Y[i] = Math.max(Y[i], Y[i + 1] - KC * STEP); // no steeper climb: start earlier
+    };
+    for (let pass = 0; pass < 6; pass++) {
+      limit();
+      const Y0 = Y;
+      Y = Y0.map((_, i) => { let s = 0, n = 0; for (let j = Math.max(0, i - WA); j <= Math.min(M - 1, i + WA); j++) { s += Y0[j]; n++; } return Math.max(s / n, env[i]); });
     }
-    this.leg = { site: world_site(this.world), t: 0, R, tx, ty, tz, X, Z, Y, M, STEP, base, lift: 0, start: null, s: 0 };
+    limit();
+    this.leg = { site: world_site(this.world), t: 0, R, tx, ty, tz, X, Z, Y, M, STEP, base, lift: 0, liftV: 0, start: null, s: 0 };
   }
 
   /** The route's point at arc length s: [x, z, y]. */
@@ -194,7 +208,7 @@ export class Tour {
       L.V = (total - L.s0) / (FLY - 1.5);
       L.end = { x: qx, y: qy, z: qz, tx: (rx - qx) / tl, tz: (rz - qz) / tl, ty: (ry - qy) / tl };
       L.s = L.s0;
-      C.free = true;
+      C.free = true; this.pp = null; this.vel = null;
     }
     const S0 = L.start, E = L.end;
     let x, y, z, look;                               // look: the arc length the gaze aims ahead of
@@ -216,9 +230,13 @@ export class Tour {
       [x, z, y] = this.at(L, L.s);
       look = L.s;
       // over buildings and rising ground, beyond what the route already clears: lift, rate-limited
-      const need = Math.max(0, this.ground(x, z) + CLEAR - y);
-      L.lift += clamp(need - L.lift, -6 * dt, 14 * dt);
-      y += L.lift;
+      const hx = Math.sin(L.yaw), hz = Math.cos(L.yaw);
+      const gr = Math.max(this.ground(x, z), this.ground(x - hx * 8, z - hz * 8));
+      const need = Math.max(0, gr + CLEAR - 2 - y);
+      // critically damped: no jump
+      const w = 1.3, acc = w * w * (need - L.lift) - 2 * w * L.liftV;
+      L.liftV += acc * dt; L.lift += L.liftV * dt;
+      y += Math.max(0, L.lift);
     }
     // gaze: ahead along the route and down, turned toward the landmark when near it; rate- and
     // acceleration-limited so it never jerks
@@ -228,29 +246,38 @@ export class Tour {
     const ldx = L.tx - x, ldz = L.tz - z;
     wantYaw += wrap(yawTo(ldx, ldz) - wantYaw) * 0.35;   // a steady quarter-turn in toward the landmark
     if (tr < 1) { const k = ease(tr); wantYaw = S0.yaw + wrap(wantYaw - S0.yaw) * k; wantPitch = S0.pitch + (wantPitch - S0.pitch) * k; }
+    // never look into a wall close ahead: raise the gaze over whatever stands within 45 m of it
+    {
+      const fx = -Math.sin(L.yaw), fz = -Math.cos(L.yaw);
+      for (const d of [6, 12, 20, 32, 45]) {
+        const req = Math.atan2(this.ground(x + fx * d, z + fz * d) + 3 - y, d);
+        if (req > wantPitch) wantPitch = Math.min(req, 0.35);
+      }
+    }
     const steer = (cur, vel, want, wrapIt, max) => {
       const err = wrapIt ? wrap(want - cur) : want - cur;
       const goal = clamp(err * 1.4, -max, max);
       vel += clamp(goal - vel, -0.5 * dt, 0.5 * dt);
       return [cur + vel * dt, vel];
     };
-    if (tr < 1) { L.yaw = wantYaw; L.pitch = wantPitch; }   // lift-off: the blend above is already smooth from the walker's view
-    else {
-      if (!L.fly) { L.fly = true; L.wy = 0; L.wp = 0; }
-      [L.yaw, L.wy] = steer(L.yaw, L.wy, wantYaw, true, 0.5);
-      [L.pitch, L.wp] = steer(L.pitch, L.wp, wantPitch, false, 0.3);
-    }
+    // always rate- and acceleration-limited, from the walker's own view on
+    [L.yaw, L.wy] = steer(L.yaw, L.wy, wantYaw, true, 0.5);
+    [L.pitch, L.wp] = steer(L.pitch, L.wp, wantPitch, false, 0.3);
     C.yaw = wrap(L.yaw); C.pitch = L.pitch;
+    if (this.pp && dt > 0) { this.vel = { x: (x - this.pp.x) / dt, y: (y - this.pp.y) / dt, z: (z - this.pp.z) / dt }; }
+    this.pp = { x, y, z };
     F.x = x; F.z = z; F.y = y - EYE; F.vy = 0; C.vy = 0;
     C.apply();
   }
 
-  /** Back to walking: if the camera is airborne, at the arrival point of the current settlement. */
+  /** Stay exactly where the camera is: if airborne, float there (cruise) with the same yaw and pitch and the pace it had. */
   land() {
-    const C = this.controls, A = this.arrival;
+    const C = this.controls;
     if (!C.free) return;
-    if (A && A.site === world_site(this.world)) C.setPose(A.x, (A.y ?? this.ground(A.x, A.z)) + 0.02, A.z, A.yaw, A.pitch);
-    else { const F = C.feet; C.setPose(F.x, F.y, F.z, C.yaw, C.pitch); }
+    const v = this.vel || { x: 0, y: 0, z: 0 };
+    C.free = false; C.glide = true; C._aloft = true;
+    C.vel = { x: v.x, z: v.z }; C.vy = C.feet.vy = v.y;
+    C.setCruise(true);
   }
 }
 
