@@ -28,6 +28,36 @@ export const STREETS = [
   [-215, 88, 215, 91],             // the back lane south of the canal houses
   [-215, -215, -116, -212],
 ];
+// ── the quarter continues beyond the first ring: back streets behind the canal rows, lanes (2.4 m) between rows of houses
+// running off to the rim, a few cross alleys. The rows are the STRIPS built below; both are pure data.
+const REACH = RADIUS - 3, LANE = 1.2, PITCH = 26.4;
+STREETS.push([128, -205, 134, 62], [-134, -205, -128, 62], [-215, 119, 215, 125]);        // the back streets east and west, and south of the canal rows
+const OUTER = [];                                      // the rows of the outer districts (added to STRIPS)
+for (let k = 0; k < 10; k++) {                         // east and west: lanes running east–west, rows of houses facing them
+  const zc = -190 + PITCH * k;
+  for (const sg of [1, -1]) {
+    const a = sg > 0 ? 146 : -REACH, b = sg > 0 ? REACH : -146, c = sg > 0 ? 134 : -REACH, d = sg > 0 ? REACH : -134;
+    STREETS.push([c, zc - LANE, d, zc + LANE]);
+    OUTER.push({ rect: [a, zc - LANE - 12, b, zc - LANE], front: 's', shops: 0.05, outer: true }, { rect: [a, zc + LANE, b, zc + LANE + 12], front: 'n', shops: 0.05, outer: true });
+  }
+}
+OUTER.push({ rect: [134, -205, 146, 60], front: 'w', shops: 0.2, outer: true }, { rect: [-146, -205, -134, 60], front: 'e', shops: 0.2, outer: true });
+// south: rows behind the street at z 119–125, lanes at 150.6, 177.4, 204.2
+OUTER.push({ rect: [-215, 125, 215, 137], front: 'n', shops: 0.3, outer: true }, { rect: [-215, 137, 215, 149.4], front: 's', shops: 0.05, outer: true },
+  { rect: [-215, 151.8, 215, 163.8], front: 'n', shops: 0.05, outer: true }, { rect: [-215, 163.8, 215, 176.2], front: 's', shops: 0.05, outer: true },
+  { rect: [-215, 178.6, 215, 190.6], front: 'n', shops: 0.05, outer: true }, { rect: [-215, 190.6, 215, 203], front: 's', shops: 0.05, outer: true });
+for (const zc of [150.6, 177.4, 204.2]) STREETS.push([-215, zc - LANE, 215, zc + LANE]);
+// north of the north lane: lanes between the canals' streets at z −121.8 − 26.4 k
+for (let k = 0; k < 4; k++) {
+  const zc = -121.8 - PITCH * k;
+  STREETS.push([-91, zc - LANE, 90, zc + LANE]);
+  OUTER.push({ rect: [-91, zc - LANE - 12, 90, zc - LANE], front: 's', shops: 0.05, outer: true });
+  OUTER.push({ rect: [-91, zc + LANE, 90, zc + LANE + 12], front: 'n', shops: 0.05, outer: true });
+}
+// cross alleys: between the rows, through to the rim
+for (const x of [-150, -75, 0, 75, 150]) STREETS.push([x - LANE, 91, x + LANE, 210]);
+for (const x of [-55, 0, 55]) STREETS.push([x - LANE, -210, x + LANE, -96]);
+for (const x of [-178, 178]) STREETS.push([x - LANE, -205, x + LANE, 60]);
 /** Stone bridges over the canals: { at [x, z], across ('z': over an east–west canal), span, width }. */
 export const BRIDGES = [
   { at: [-150, 72], across: 'z', span: 8, width: 4.2 },
@@ -107,14 +137,14 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
  */
 const STRIPS = [
   { rect: [-215, 76, 215, 88], front: 'n', water: true, shops: 0.15 },     // "every house pillowed on the river"
-  { rect: [-215, 91, 215, 103], front: 'n', shops: 0 },
-  { rect: [-215, 103, 215, 115], front: 's', shops: 0 },
+  { rect: [-215, 91, 215, 105], front: 'n', shops: 0.04 },
+  { rect: [-215, 105, 215, 119], front: 's', shops: 0.04 },
   { rect: [-90, 42, -43, 54], front: 'n', shops: 0 },
   { rect: [-90, 56.8, -43, 62], front: 's', shops: 0.7 },
   { rect: [43, 42, 90, 54], front: 'n', shops: 0 },
   { rect: [43, 56.8, 90, 62], front: 's', shops: 0.7 },
-  { rect: [76, -91, 90, 42], front: 'e', shops: 0.35 },
-  { rect: [-91, -91, -77, 42], front: 'w', shops: 0.35 },
+  { rect: [76, -80, 90, 42], front: 'e', shops: 0.35 },
+  { rect: [-91, -80, -77, 42], front: 'w', shops: 0.35 },
   { rect: [103, -215, 116, 68], front: 'w', water: true, shops: 0.1 },
   { rect: [116, -215, 128, 68], front: 'e', shops: 0 },
   { rect: [-116, -212, -104, 68], front: 'e', water: true, shops: 0.1 },
@@ -124,36 +154,82 @@ const STRIPS = [
   { rect: [76, -91, 90, -80], front: 'n', shops: 0 },
 ];
 
-let LOTS = null;
+let LOTS = null, GRID = null;
+const TRADES = ['cloth', 'tea', 'rice', 'medicine', 'lacquer', 'books'];
 /**
- * Every house of the quarter: { rect, front, storeys, shop, water, seed } (computed once).
- * Lots run along their strip, 4.5–8 m wide (one to two bays), left out where a bridge lands
- * or beyond the disc; now and then a lot stays open (a yard, a gate).
+ * Every house of the quarter (computed once): { rect, front, storeys, shop, trade, water, seed, kind
+ * ('row' | 'court' | 'grand' | 'yard' | 'simple'), roof ('gable' | 'horse' | 'guanyin' | 'hip'),
+ * bays, detail (2 full … 0 cheap), overhang, balcony, tone }. Lots run along their strip, one to
+ * four bays wide (3.4–15 m) and of differing depth (a deep house has courts behind its front);
+ * they stop at lanes and alleys, thin out toward the rim, where they sink to one storey and give
+ * way to walled yards with trees (the city goes on, under the mist).
  */
 export function lots() {
   if (LOTS) return LOTS;
   LOTS = [];
-  const rand = rng(1513);
-  for (const S of STRIPS) {
+  const rand = rng(1513), pickW = (w) => { let t = rand() * w.reduce((a, b) => a + b[1], 0); for (const [v, p] of w) if ((t -= p) < 0) return v; return w[0][0]; };
+  for (const S of [...STRIPS, ...OUTER]) {
     const [x0, z0, x1, z1] = S.rect, along = S.front === 'n' || S.front === 's';
-    const a0 = along ? x0 : z0, a1 = along ? x1 : z1;
-    let a = a0;
+    const a0 = along ? x0 : z0, a1 = along ? x1 : z1, depth = along ? z1 - z0 : x1 - x0;
+    // lanes and streets crossing the strip cut it: their stretches along the strip are gaps
+    const gaps = STREETS.filter((r) => r[0] < x1 && r[2] > x0 && r[1] < z1 && r[3] > z0 && (along ? r[1] <= z0 + 0.5 || r[3] >= z1 - 0.5 || (r[3] - r[1]) > 3 : r[0] <= x0 + 0.5 || r[2] >= x1 - 0.5 || (r[2] - r[0]) > 3))
+      .map((r) => (along ? [r[0] - 0.3, r[2] + 0.3] : [r[1] - 0.3, r[3] + 0.3])).filter(([g0, g1]) => g1 - g0 < 6 || true).sort((p, q) => p[0] - q[0]);
+    let a = a0, prevGap = false;
     while (a < a1 - 3) {
-      const w = Math.min(a1 - a, 4.5 + rand() * 3.5);
-      const r = along ? [a, z0, a + w - 0.12, z1] : [x0, a, x1, a + w - 0.12];
+      const g = gaps.find(([g0, g1]) => a + 3 > g0 && a < g1);
+      if (g) { a = g[1]; prevGap = true; continue; }
+      const bays = pickW(S.outer ? [[1, 0.4], [2, 0.45], [3, 0.15]] : [[1, 0.3], [2, 0.42], [3, 0.2], [4, 0.08]]);
+      let w = bays * 3.4 + (rand() - 0.5) * 1.1 + (bays === 4 ? 1.2 : 0);
+      const nextGap = gaps.find(([g0]) => g0 > a && g0 < a + w + 2.5);
+      if (nextGap) w = Math.max(3.4, nextGap[0] - a);
+      w = Math.min(w, a1 - a);
+      const cornerLot = prevGap || !!nextGap || a + w > a1 - 3.1;
+      prevGap = false;
+      const d = Math.max(5, depth * (0.66 + 0.34 * rand()));
+      const r = S.front === 'n' ? [a, z0, a + w - 0.12, z0 + d] : S.front === 's' ? [a, z1 - d, a + w - 0.12, z1] : S.front === 'e' ? [x1 - d, a, x1, a + w - 0.12] : [x0, a, x0 + d, a + w - 0.12];
       a += w;
       const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
       const far = Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([x, z]) => Math.hypot(x, z)));
-      if (far > RADIUS - 14) continue;
-      if (onBridge(cx, cz, 2) || rand() < 0.06) continue;
+      const rr = Math.hypot(cx, cz);
+      if (far > RADIUS - 8) continue;
+      if (onBridge(cx, cz, 2) || rand() < 0.05 + 0.3 * sm(168, 205, rr)) continue;
       if (inRect(GARDEN, cx, cz, 1) || inRect(RESIDENCE, cx, cz, 1)) continue;
-      LOTS.push({ rect: r, front: S.front, storeys: rand() < 0.72 ? 2 : 1, shop: rand() < S.shops, water: !!S.water, seed: Math.floor(rand() * 1e6) });
+      const L = along ? r[2] - r[0] : r[3] - r[1], dd = along ? r[3] - r[1] : r[2] - r[0], fromGate = Math.hypot(cx, cz - 40);
+      const detail = fromGate < 105 ? 2 : fromGate < 150 ? 1 : 0;
+      const edge = sm(150, 196, rr);                              // toward the rim: lower, walled yards
+      let kind = 'row';
+      if (rand() < 0.22 * edge + 0.1 * (rr > 190) && !S.water) kind = 'yard';
+      else if (detail === 0) kind = 'simple';
+      else if (dd >= 11.4 && L >= 9.4 && !S.water && rand() < 0.45) kind = 'grand';
+      else if (dd >= 9 && L >= 3.8 && rand() < 0.7) kind = 'court';
+      const shop = kind !== 'yard' && kind !== 'grand' && rand() < S.shops;
+      const storeys = kind === 'yard' ? 1 : rand() < 0.72 - 0.75 * edge ? 2 : (kind === 'grand' && rand() < 0.5 ? 3 : 1);
+      const roll = rand();
+      let roof = roll < 0.46 ? 'gable' : roll < 0.78 ? 'horse' : roll < 0.87 ? 'guanyin' : 'hip';
+      if (cornerLot && rand() < 0.6) roof = 'hip';
+      if (kind === 'simple' && roof === 'guanyin') roof = 'horse';
+      if (L < 4.6 && roof === 'guanyin') roof = 'gable';
+      LOTS.push({
+        rect: r, front: S.front, storeys: storeys === 3 ? 2 : storeys, shop, water: !!S.water, seed: Math.floor(rand() * 1e6), kind, roof, bays, detail,
+        trade: shop ? TRADES[Math.floor(rand() * TRADES.length)] : null,
+        overhang: storeys > 1 && !S.water && rand() < (shop ? 0.5 : 0.2),
+        balcony: !!S.water && storeys > 1 ? (rand() < 0.4 ? 'water' : rand() < 0.5 ? 'upper' : null) : null,
+        tone: pickW([['white', 5], ['grey', 3], ['patched', 2], ['damp', 1.2]]),
+        storeysTall: storeys === 3, edge,
+      });
     }
   }
   return LOTS;
 }
 /** Is (x, z) inside a house lot? */
-export function inLot(x, z, m = 0) { return lots().some((l) => inRect(l.rect, x, z, m)); }
+export function inLot(x, z, m = 0) {
+  if (!GRID) {
+    GRID = new Map();
+    for (const l of lots()) for (let i = Math.floor((l.rect[0] - 4) / 16); i <= Math.floor((l.rect[2] + 4) / 16); i++) for (let j = Math.floor((l.rect[1] - 4) / 16); j <= Math.floor((l.rect[3] + 4) / 16); j++) { const k = i * 4096 + j; (GRID.get(k) || GRID.set(k, []).get(k)).push(l); }
+  }
+  const c = GRID.get(Math.floor(x / 16) * 4096 + Math.floor(z / 16));
+  return !!c && c.some((l) => inRect(l.rect, x, z, m));
+}
 
 // ── the garden's buildings (their details in plan.js; docs/settlements/ming-suzhou.md §4) ──
 /**
