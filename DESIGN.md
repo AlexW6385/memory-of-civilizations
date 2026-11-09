@@ -294,7 +294,7 @@ Targets on the author's machine (Apple M2, 8 GB, native resolution, "high"). The
 
 - **Frame:** aim 60 fps in a settlement; ≥ 40 in the densest interior; ≥ 30 in high flight; no frame over 50 ms ever. Visible triangles ≤ 3 M; draw calls ≤ 800; GPU memory ≤ 1.5 GB; three shadow cascades.
 - **Start:** first frame ≤ 6 s on a warm cache, ≤ 15 MB transferred; only the start settlement and the planet's base are loaded.
-- **Streaming:** settlements load within 700 m of their rim and unload beyond 1300 m (`src/engine/world.js`); a settlement's geometry ≤ 45 MB on the GPU and ≤ 1500 meshes (`tools/geo-budget.mjs`), its data loaded on demand ≤ 25 MB; loading is time-sliced and never costs a frame more than 4 ms. Far settlements are **impostors** (`tools/impostors.mjs` → `data/impostors/`) so the skyline is there from across the sea.
+- **Streaming:** settlements load within 700 m of their rim and unload beyond 1300 m (`src/engine/world.js`); a settlement's geometry ≤ 45 MB on the GPU and ≤ 1500 meshes (`tools/geo-budget.mjs`), its data loaded on demand ≤ 25 MB, not counting the shared material library, which is fetched once and cached; loading is time-sliced and never costs a frame more than 4 ms. Far settlements are **impostors** (`tools/impostors.mjs` → `data/impostors/`) so the skyline is there from across the sea.
 - **Terrain:** chunked quadtree LOD on the sphere, built in workers; ≤ 400 k triangles on screen in flight.
 - **Vegetation and objects:** instanced, LOD, culled on the GPU; ≤ 600 k instances on screen.
 - **Files:** any committed file ≤ 50 MB, no LFS; repository ≤ 500 MB; baked data under `data/`, loaded on demand.
@@ -308,6 +308,15 @@ Targets on the author's machine (Apple M2, 8 GB, native resolution, "high"). The
 - **Plan is data, look is code.** A settlement is a module under `src/settlements/<id>/`: `index.js`, `layout.js` (where things stand), `plan.js` (the landmark), `town.js` (the townscape), `ground.js` (ground and planting), `music.js`, and where it has them `life.js` or `people.js`. The plans of the first ten landmarks are still in `src/buildings/` (their dossiers in `docs/buildings/`) and are reused by their settlements. Civilization vocabularies are in `src/styles/<civilization>/`, used by landmark and houses alike; shared objects of use, figures and street life in `src/objects/`. The planet is `src/planet/`; the renderer, world streaming, light, sound and flora are `src/engine/`.
 - **Renderer:** procedural PBR materials in TSL; cascaded sun shadows with a cache of static casters; GTAO; baked irradiance volumes for interiors (`tools/bake.mjs` → `data/gi/`); atmosphere; bloom; AgX tone mapping; eye adaptation; dynamic resolution and automatic quality. Shaders are shared through uniforms and instanced attributes and compiled before a part shows.
 - **Materials and assets:** CC0/MIT only, listed in `ASSETS.md`; no copyrighted models. No photographic textures or scans are used yet; CC0 sets (Poly Haven, ambientCG) may be layered in where they raise the picture.
+- **Compute once what does not change** (the frame is bound by per-pixel shading, measured; decided 2026-11-09, being done on Ming Suzhou first):
+  - *Materials:* the costly noise of a material — grain, weathering, moss, stains — is baked offline into tileable texture sets (colour, normal, roughness; KTX2, compressed on the GPU) and read at run time; what follows each wall's dossier — coursing, block sizes, joints — stays procedural and cheap, and wall-by-wall variation (height, facing, climate) stays as parameters mixed over the textures. One shared library for the whole site, each settlement using a dozen or so; low resolution first, full resolution when near.
+  - *Distance:* far surfaces use a cheaper version of their material.
+  - *Ground:* each terrain tile gets a small map of its cover (grass, sand, rock), made in the worker that builds the tile, instead of working the cover out per pixel.
+  - *Weathering and dirt:* worked out when the geometry is built and stored in its vertices.
+  - *Built geometry:* kept in the browser's storage after the first build, so a settlement is not rebuilt from code on every visit.
+  - *Sky and air:* the scattering precomputed into lookup tables, updated when the sun moves.
+  - *Ambient occlusion:* at half resolution, or reusing the last frame's.
+  - *Music:* rendered offline to compressed audio if measuring shows the live synthesis costs a noticeable part of the CPU.
 - **Music:** synthesised in the browser per settlement and zone; small CC0 samples where synthesis cannot reach the timbre.
 - **Tools** (`tools/`): `surface-check`, `plan-check`, `walk-check`, `geo-one` and `geo-budget`, `budget`, `load-check`, `audio-check`, `showroom` and `shot` (pictures), `bake`, `impostors`, `planet-layout`. Who runs which, and when, is in `docs/parallel-work.md`.
 
