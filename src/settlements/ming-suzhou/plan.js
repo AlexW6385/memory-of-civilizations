@@ -75,30 +75,32 @@ wall([lx0, lz1], [lx0, lz0], { ...low, gates: [{ at: 10.5, r: 1.15 }], windows: 
 wall([lx0, lz0], [lx1, lz0], { ...low, gates: [{ at: 9, w: 1.6, h: 2.3 }], windows: [leaky(3.5, 1, 0.9, 0.9, 1.3), leaky(15, 4, 0.9, 0.9, 1.3)] });
 
 // ── the galleries, along the walls and between the halls ─────────────────────
-GALLERIES.forEach((pts, i) => E.push({ t: 'ming_gallery', fine: true, pts, y: G + 0.3, w: 2.0, H: 2.8, side: i === 0 ? -1 : i === 1 ? 1 : i === 2 ? 1 : 0 }));
+// the beauty's rest (mei ren kao) where a bench looks on water (within 5.5 m of the pond), a plain bench elsewhere
+const wet = (x, z) => pondDistance(x, z) < 5.5;
+GALLERIES.forEach((pts, i) => E.push({ t: 'ming_gallery', fine: true, wet, pts, y: G + 0.3, w: 2.0, H: 2.8, side: i === 0 ? -1 : i === 1 ? 1 : i === 2 ? 1 : 0 }));
 
 // ── the halls and pavilions ──────────────────────────────────────────────────
 const B = BUILDINGS;
 // the Hall of Distant Fragrance: lattice on all four sides, a terrace north over the pond
 E.push({ t: 'paving', rect: [-10, -26, 10, -19.6], y: G + B.yuanxiang.y - 0.05, th: 1.6, mat: 'bluestone' });
-E.push({ t: 'ming_hall', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, H: 5.0, front: 'n', four: true, roof: 'xieshan', plat: 0.6, eave: 1.5, sweep: 1.3 });
-E.push({ t: 'ming_hall', rect: B.yiyu.rect, y: G + B.yiyu.y, H: 3.8, front: B.yiyu.front, four: true, roof: 'xieshan', plat: 0.4 });
-E.push({ t: 'ming_hall', rect: B.linglong.rect, y: G + B.linglong.y, H: 3.9, front: 'w', four: false, roof: 'xieshan', plat: 0.35 });
+E.push({ t: 'ming_hall', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, H: 5.0, front: 'n', four: true, roof: 'xieshan', plat: 0.6, eave: 1.5, sweep: 1.3, ...B.yuanxiang.hall });
+E.push({ t: 'ming_hall', rect: B.yiyu.rect, y: G + B.yiyu.y, H: 3.8, front: B.yiyu.front, four: true, roof: 'xieshan', plat: 0.4, ...B.yiyu.hall });
+E.push({ t: 'ming_hall', rect: B.linglong.rect, y: G + B.linglong.y, H: 3.9, front: 'w', four: false, roof: 'xieshan', plat: 0.35, ...B.linglong.hall });
 E.push({ t: 'stone_boat', rect: B.xiangzhou.rect, y: G + B.xiangzhou.y });
 E.push({ t: 'lou', rect: B.jianshan.rect, y: G + B.jianshan.y });
 // Little Canglang: a water pavilion standing over the inlet on stone piers
 E.push({ t: 'ming_slab_bridge', pts: [[-52, 5], [-42, 5]], w: 5, y: G + B.xiaocanglang.y, bed: LEVEL.pondBed });
-E.push({ t: 'ming_hall', rect: B.xiaocanglang.rect, y: G + B.xiaocanglang.y, H: 3.4, front: 'n', four: true, roof: 'xieshan', plat: 0.01, eave: 1.0 });
+E.push({ t: 'ming_hall', rect: B.xiaocanglang.rect, y: G + B.xiaocanglang.y, H: 3.4, front: 'n', four: true, roof: 'xieshan', plat: 0.01, eave: 1.0, platMargin: 0.02, ...B.xiaocanglang.hall });
 // Small Flying Rainbow: a covered bridge, the only one in the city's gardens
 {
   const [x0, z0, x1, z1] = B.xiaofeihong.rect, zc = (z0 + z1) / 2;
   E.push({ t: 'ming_slab_bridge', pts: [[x0 - 1, zc], [(x0 + x1) / 2, zc], [x1 + 1, zc]], w: z1 - z0 + 0.2, y: G + B.xiaofeihong.y, bed: LEVEL.pondBed });
-  E.push({ t: 'ming_gallery', fine: true, pts: [[x0, zc], [x1, zc]], y: G + B.xiaofeihong.y + 0.01, w: z1 - z0 - 0.4, H: 2.7, side: 0 });
+  E.push({ t: 'ming_gallery', fine: true, wet, pts: [[x0, zc], [x1, zc]], y: G + B.xiaofeihong.y + 0.01, w: z1 - z0 - 0.4, H: 2.7, side: 0 });
 }
 for (const id of ['hefeng', 'xuexiang', 'daishuang', 'wuzhu', 'lvyi']) {
   const b = B[id], hill = b.y > 1.5;
   const shape = b.kind === 'hex' ? 'hex' : b.kind === 'pav_rect' ? 'rect' : 'square';
-  E.push({ t: 'ming_pavilion', fine: true, c: b.c, shape, r: b.r, w: b.w, d: b.d, y: G + b.y, H: b.moons ? 4.4 : 3.3, moons: b.moons, plat: hill ? 1.4 : 0.45, open: shape === 'hex' ? [1, 4] : [0, 2] });
+  E.push({ t: 'ming_pavilion', fine: true, wet, c: b.c, shape, r: b.r, w: b.w, d: b.d, y: G + b.y, H: b.moons ? 4.4 : 3.3, moons: b.moons, plat: hill ? 1.4 : 0.45, open: shape === 'hex' ? [1, 4] : [0, 2] });
 }
 
 // ── the bridges over the pond and the paths ──────────────────────────────────
@@ -129,17 +131,17 @@ rwall([rx0, rz1], [-6, rz1], { gates: [{ at: -12 - rx0, w: 1.6, h: 2.6 }] }); rw
 // granite steps from the street up to the gate hall's platform
 E.push({ t: 'stair', rect: [-3, rz1 + 0.9, 3, rz1 + 2.1], y0: LEVEL.street, y1: G + 0.45, dir: 'n', riser: 0.15, mat: 'granite_block' });
 const halls = [
-  { rect: [-6, 54, 6, 60], H: 4.0, roof: 'gable', four: false },      // the gate hall, its door on the street
-  { rect: [-8, 43, 8, 49.5], H: 4.2, roof: 'gable', four: true },      // the sedan-chair hall
-  { rect: [-10, 32, 10, 39.5], H: 5.0, roof: 'xieshan', four: true },  // the main hall
-  { rect: [-11, 24.6, 11, 29], H: 6.6, roof: 'gable', four: true },    // the women's building
+  { rect: [-6, 54, 6, 60], H: 4.0, roof: 'gable', four: false, lat: 'lattice_bubujin' },      // the gate hall, its door on the street
+  { rect: [-8, 43, 8, 49.5], H: 4.2, roof: 'gable', four: true, walls: { e: 'plaster', w: 'plaster' }, doors: ['n'], winWall: true, lat: 'lattice_lantern' },   // the sedan-chair hall: doors to both courts, plastered sides
+  { rect: [-10, 32, 10, 39.5], H: 5.0, roof: 'xieshan', four: true, walls: { n: 'board', e: 'plaster', w: 'plaster' }, doors: ['n'], winWall: true, lat: 'lattice_bubujin' },  // the main hall: boards behind, brick-plastered gable walls
+  { rect: [-11, 24.6, 11, 29], H: 6.6, roof: 'gable', four: true, walls: { n: 'plaster', e: 'plaster', w: 'plaster' }, winWall: true, lat: { door: 'lattice_haitang', window: 'lattice_haitang' } },    // the women's building: lattice to the court only
 ];
-for (const h of halls) E.push({ t: 'ming_hall', rect: h.rect, y: G + 0.45, H: h.H, front: 's', four: h.four, roof: h.roof, plat: 0.45, eave: 1.0 });
+for (const h of halls) E.push({ t: 'ming_hall', rect: h.rect, y: G + 0.45, H: h.H, front: 's', four: h.four, roof: h.roof, plat: 0.45, eave: 1.0, walls: h.walls, doors: h.doors, winWall: h.winWall, lat: h.lat });
 // the courtyards' cross walls, each with a carved brick gateway on the axis
 for (const z of [52, 41]) { rwall([rx0, z], [-1.5, z], { h: 4.6 }); rwall([1.5, z], [rx1, z], { h: 4.6 }); }
 // side courtyards: a small study hall each side with its rockery and a well
-E.push({ t: 'ming_hall', rect: [-34, 30, -22, 36], y: G + 0.35, H: 3.8, front: 'e', four: true, roof: 'xieshan', plat: 0.35 });
-E.push({ t: 'ming_hall', rect: [22, 44, 34, 50], y: G + 0.35, H: 3.8, front: 'w', four: false, roof: 'gable', plat: 0.35 });
+E.push({ t: 'ming_hall', rect: [-34, 30, -22, 36], y: G + 0.35, H: 3.8, front: 'e', four: true, roof: 'xieshan', plat: 0.35, walls: { n: 'plaster', s: 'plaster', w: 'board' }, winWall: true, lat: { door: 'lattice_ice', window: 'lattice_ice' } });
+E.push({ t: 'ming_hall', rect: [22, 44, 34, 50], y: G + 0.35, H: 3.8, front: 'w', four: false, roof: 'gable', plat: 0.35, winWall: true, lat: { door: 'lattice_wan', window: 'lattice_wan' } });
 E.push({ t: 'taihu', c: [-30, 44], r: 1.6, h: 2.6, y: G, seed: 77, solid: true });
 E.push({ t: 'taihu', c: [28, 32], r: 1.2, h: 2.0, y: G, seed: 78, solid: true });
 
@@ -151,7 +153,7 @@ E.push({ t: 'hall_furniture', rect: B.linglong.rect, y: G + B.linglong.y, front:
 // the inscribed boards under the eaves over the doorways (the doorway is the front's middle bay, as ming_hall lays it out)
 const board = (at, y, facing, w, n, seed, extra = {}) => E.push({ t: 'plaque', at, y, facing, w, h: 0.72, n, seed, ...extra });
 board([1.8, B.yuanxiang.rect[1] - 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, -1], 2.4, 4, 11);
-board([0, B.yuanxiang.rect[3] + 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, 1], 2.4, 3, 12);
+board([1.8, B.yuanxiang.rect[3] + 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, 1], 2.4, 3, 12);
 board([-20, B.yiyu.rect[1] - 0.2], G + B.yiyu.y + 3.8 - 0.98, [0, -1], 1.8, 3, 13, { h: 0.6 });
 board([B.linglong.rect[0] - 0.2, -3.375], G + B.linglong.y + 3.9 - 0.98, [-1, 0], 1.8, 4, 14, { h: 0.6 });
 board([1.67, 39.7], G + 0.45 + 5.0 - 1.02, [0, 1], 2.4, 4, 15);

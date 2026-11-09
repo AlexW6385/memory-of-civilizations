@@ -470,26 +470,62 @@ function make(spec) {
       break;
     }
     case 'lattice': {
-      // a latticed door or window: thin wooden bars on a fine grid (or an "ice-crack" pattern of
-      // broken lines), paper behind them, lit through when the sun is on the other side
+      // a latticed door or window: thin wooden bars over paper, in one of the Jiangnan patterns
+      // (spec.pattern: 'grid' the square lattice, 'ice' cracked ice (bing lie), 'bubujin' step by
+      // step brocade, 'lantern' the lantern frame (deng long kuang), 'wan' the swastika fret,
+      // 'haitang' the crab-apple quatrefoil); the paper behind is lit through (spec.lit: how much)
+      // and glows a little more at night
       const { u, v } = wallUV();
       const c = float(spec.cell ?? 0.09);
-      let d;
-      if (spec.ice) {
-        const w = mx_worley_noise_float(vec3(u.div(c), v.div(c), 0.5));
-        d = smoothstep(0.03, 0.07, w);
+      const pat = spec.pattern || (spec.ice ? 'ice' : 'grid');
+      const q = vec2(u.div(c), v.div(c));
+      const f = fract(q);
+      // distance in cells from f to the segment a–b (cell coordinates)
+      const seg = (ax, ay, bx, by) => {
+        const pa = vec2(f.x.sub(ax), f.y.sub(ay)), ba = vec2(bx - ax, by - ay);
+        const h = clamp(dot(pa, ba).div((bx - ax) * (bx - ax) + (by - ay) * (by - ay)), 0, 1);
+        return length(pa.sub(ba.mul(h)));
+      };
+      const edge = (t) => min(t, float(1).sub(t));
+      let d, avg = 0.62;
+      if (pat === 'ice') {
+        const w = mx_worley_noise_float(vec3(q.x, q.y, 0.5));
+        d = smoothstep(0.03, 0.07, w); avg = 0.82;
       } else {
-        const fu = fract(u.div(c)), fv = fract(v.div(c));
-        const du = min(fu, float(1).sub(fu)), dv = min(fv, float(1).sub(fv));
-        d = smoothstep(0.06, 0.14, min(du, dv));
+        let dist;
+        if (pat === 'bubujin') {
+          // upright bars every cell, rails every third row, and between them a rail stepping up and down a cell per column
+          const m = floor(q.x).sub(floor(q.x.div(4)).mul(4)), p = fract(q.y.div(3)).mul(3);
+          const lev = float(2.5).sub(abs(m.sub(2)));
+          dist = min(min(edge(f.x), min(p, float(3).sub(p))), abs(p.sub(lev)));
+          avg = 0.6;
+        } else if (pat === 'lantern') {
+          // upright bars, and the rails bunched near the top and foot of each five-cell frame
+          const p = fract(q.y.div(5)).mul(5);
+          dist = min(min(edge(f.x), min(p, float(5).sub(p))), min(abs(p.sub(1)), abs(p.sub(4))));
+          avg = 0.7;
+        } else if (pat === 'wan') {
+          // the swastika that never ends: each tile's arms turn to the corners and meet the next tile's
+          dist = min(min(min(seg(0.5, 0, 0.5, 1), seg(0, 0.5, 1, 0.5)), min(seg(0.5, 1, 1, 1), seg(1, 0.5, 1, 0))), min(seg(0.5, 0, 0, 0), seg(0, 0.5, 0, 1)));
+          avg = 0.68;
+        } else if (pat === 'haitang') {
+          // rings of the crab-apple flower: circles on the cells' centres and on their corners overlapping in four-lobed flowers
+          const g = fract(q.add(0.5)).sub(0.5);
+          dist = min(abs(length(f.sub(0.5)).sub(0.5)), abs(length(g).sub(0.32)));
+          avg = 0.7;
+        } else {
+          dist = min(edge(f.x), edge(f.y));
+        }
+        d = smoothstep(0.06, 0.14, dist);
       }
       // seen from afar the bars are finer than a pixel: fade to their average (no moiré)
-      const fw = max(fwidth(u.div(c)), fwidth(v.div(c)));
-      d = mix(d, float(spec.ice ? 0.82 : 0.62), smoothstep(0.25, 0.7, fw));
+      const fw = max(fwidth(q.x), fwidth(q.y));
+      d = mix(d, float(avg), smoothstep(0.25, 0.7, fw));
       const paper = uniform(new Color(spec.paper || '#e9e2cf'));
       m.colorNode = mix(baseNode, paper, d);
       m.roughnessNode = mix(roughU, float(0.95), d);
       m.normalNode = bump(float(1).sub(d).mul(0.006), 1);
+      if (spec.lit) m.emissiveNode = paper.mul(d).mul(float(spec.lit).mul(ENV.night.mul(2.0).add(1.0)));
       break;
     }
     case 'taihu': {

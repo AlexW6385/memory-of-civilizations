@@ -9,7 +9,7 @@ export const ARRIVALS = {
   'tang-wutai':       [35, 13.1, 6, -1.40, 0.36],        // on the upper terrace, the Great East Hall's front, eaves and Buddhas
   'song-kaifeng':     [160, 0.1, -140, 0, 0.38],         // the Iron Pagoda, whole, in its enclosure
   'song-hangzhou':    [-110, 0.1, 138, 0, 0.32],         // the stair up to the pagoda
-  'ming-suzhou':      [0, 0.95, -23.5, 0, -0.04],        // across the lotus pond to the pavilion
+  'ming-suzhou':      [4, 0.3, -49.5, 3.027, 0.08],      // from the zigzag bridge between the two islands, south across the lotus pond to the Hall of Distant Fragrance, whole on its terrace
   'qing-beijing':     [0, 0.05, 70, 0, 0.1],             // the Hall of Supreme Harmony on its marble terrace, up the imperial way
   'lhasa':            [-4, 0.1, 120, 0, 0.32],           // the Potala over the town's lanes
   'nara':             [0, 0.1, 20, 0, 0.25],             // the Great Buddha Hall from its court
