@@ -37,8 +37,9 @@ export function isDynamic(o) {
   if (o.userData.dynamic) return true;
   const m = o.material;
   if (!m) return false;
-  if (Array.isArray(m)) return m.some((x) => x.positionNode || x.castShadowPositionNode);
-  return !!(m.positionNode || m.castShadowPositionNode);
+  // (a material marked staticShadow casts from a fixed shape: src/engine/flora/index.js)
+  const moves = (x) => !x.userData?.staticShadow && !!(x.positionNode || x.castShadowPositionNode);
+  return Array.isArray(m) ? m.some(moves) : moves(m);
 }
 
 export class CachedCSM extends CSMShadowNode {
@@ -99,7 +100,12 @@ export class CachedCSM extends CSMShadowNode {
       const width = sc.right - sc.left, texel = width / shadow.mapSize.width, step = width / SNAP;
       // the sun's direction held until it has turned by the angle that moves a tall caster's
       // shadow by half a texel here
-      if (!C.dir || C.dir.angleTo(_dir) > 0.5 * texel / TALL) (C.dir ||= new THREE.Vector3()).copy(_dir);
+      // (in the first cascade, a few tens of metres across, nothing near 40 m tall stands as a rule:
+      // the tip of a 40 m caster's shadow may step by a texel and a half there, an 8 m one's by a
+      // third of a texel; that cascade, drawn every frame, was otherwise drawn again every third
+      // frame as the sun moves)
+      const slack = i === 0 ? 1.5 : 0.5;
+      if (!C.dir || C.dir.angleTo(_dir) > slack * texel / TALL) (C.dir ||= new THREE.Vector3()).copy(_dir);
       _eye.copy(light.position);
       _orient.lookAt(_eye, _c.copy(_eye).add(C.dir), _up);
       _orientInv.copy(_orient).invert();

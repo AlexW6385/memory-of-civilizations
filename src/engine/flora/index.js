@@ -25,6 +25,14 @@ function swayNode(amount) {
   return positionLocal.add(vec3(sin(time.mul(1.7).add(ph)).mul(amp).add(ENV.wind.x.mul(amp).mul(0.6)), 0, cos(time.mul(1.3).add(ph)).mul(amp).add(ENV.wind.y.mul(amp).mul(0.6))));
 }
 
+/**
+ * The plants' shadows are cast from their resting shape, not swayed: then they are static casters,
+ * kept in the shadow cascades' caches (src/engine/shadow-cache.js) instead of every cascade being
+ * drawn again each frame for the plants alone. (The sway is a few centimetres; its shadow's
+ * movement was not worth a redraw of every cascade every frame — decision 2026-11-09.)
+ */
+function staticShadow(m) { m.castShadowPositionNode = positionLocal; m.userData.staticShadow = true; }
+
 const mats = new Map();
 export function foliageMaterial(kind, amount) {
   const key = `f:${kind}`;
@@ -40,6 +48,7 @@ export function foliageMaterial(kind, amount) {
   const back = max(dot(normalWorld, ENV.sunDir).negate(), 0).mul(0.18);
   m.emissiveNode = t.rgb.mul(ENV.sunColor).mul(back).mul(0.25);
   m.positionNode = swayNode(amount);
+  staticShadow(m);
   // a crown or a tuft is lit as a whole, not card by card: bend the cards' normals up toward the
   // sky, so that cards seen from behind are not black
   const nW = normalize(normalWorld.mul(faceDirection).mul(0.4).add(vec3(0, 0.6, 0)));
@@ -52,6 +61,7 @@ export function solidMaterial(key, amount) {
   if (mats.has(k)) return mats.get(k);
   const m = paletteMaterial(key).clone();
   m.positionNode = swayNode(amount);
+  staticShadow(m);
   mats.set(k, m);
   return m;
 }

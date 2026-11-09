@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.25 — Cheaper shadows (2026-11-09)
+- Plants' shadows no longer sway, so the shadow maps are kept between frames instead of being drawn again every frame for the plants; the nearest shadow map is redrawn less often as the sun moves.
+
 ## v10.24 — Suzhou's halls, lattices and the map's cards (2026-11-09)
 - Suzhou's halls get their real lattice patterns (cracked ice, step-by-step brocade, lantern frame, swastika fret, crab-apple) over glowing paper, solid plaster and board walls where the halls had them, bargeboards with the hanging fish, kerbed platforms with steps, beauty's-rest benches by the water, a rebuilt stone boat and a new arrival view across the pond to the Hall of Distant Fragrance; the halls and the study are furnished inside, with boat-canopy ceilings, screens, lanterns and the residence courts' vats, drums and screen wall.
 - On the globe map a click on a settlement opens its card (introduction, main sights, Go); the Taihu stones are lighter on the GPU.
