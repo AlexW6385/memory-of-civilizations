@@ -15,12 +15,28 @@
 // lamps of the settlement — the plans' own lamps (`lamp` elements, lights[]) at any hour, and the
 // shades of the `glow` materials (lanterns) at dusk and night — fading in and out as they are
 // handed over, flickering as flames do. The pool's size is fixed per preset (a change in the number
-// of lights would recompile every material).
+// of lights would recompile every material): high 4, medium 2, low 0 (renderer.js QUALITY).
+//
+// HOW TO DECLARE A LAMP (for the plans and the objects):
+//   - A lantern, lit at dusk and through the night: give its shade (paper, horn, glass) one of the
+//     `glow` materials of src/core/palette.js (lamp_paper, lamp_white, lamp_glass; a new one is
+//     { kind: 'glow', color, glow: its light's colour, power }). Nothing else is needed: the shade
+//     glows by itself (materials.js 'glow', no cost beyond its own pixels), and every separate
+//     piece of a glow material (pieces within 0.6 m of each other are one lantern; one per copy
+//     when instanced, as the street life's lanterns are) is a lamp that the pool may light.
+//   - A flame that burns at any hour (an altar lamp, a brazier, a hearth): a `lamp` element
+//     { t: 'lamp', at: [x, y, z], color, intensity (6), distance (9 m), stand } (src/core/build.js);
+//     the light bake (tools/bake.mjs) also lights the rooms with these.
+//   A settlement may have hundreds: what each costs is its share of the choice below (a distance
+//   test four times a second) and its glowing pixels. Only the nearest few (within 22 m, the
+//   brightest first) are real lights, and a slot with no lamp in it costs nothing in the frame:
+//   the lights are LampLights, whose shading is skipped while they are dark (LampLightNode), so by
+//   day, with no lamp lit, the pool costs no shading at all.
 
-import { Color, Vector3, PointLight } from 'three/webgpu';
+import { Color, Vector3, Matrix4, PointLight, PointLightNode } from 'three/webgpu';
 import {
   Fn, uniform, uv, float, vec2, vec3, vec4, length, normalize, dot, max, min, exp, mix, select, sin, atan, sqrt,
-  texture, getViewPosition, screenCoordinate, fract, abs, time, pow,
+  texture, getViewPosition, screenCoordinate, fract, abs, time, pow, If,
 } from 'three/tsl';
 import { MATERIALS } from '../core/palette.js';
 
@@ -77,49 +93,54 @@ export function airNode({ depth, camera, shadow, reversed, lamps, steps = 16 }) 
   const sM = uniform(shadow.matrix), bias = float(Math.abs(shadow.bias || 0.0004) + 0.0002);
   const dTex = shadow.map.depthTexture, cTex = shadow.map.texture;
   return Fn(() => {
-    const c = uv();
-    const vp = getViewPosition(c, depth.sample(c).r, projInv);
-    const L = max(length(vp), 1e-3);
-    const dist = min(L, AIR.reach);
-    const o = camWorld.mul(vec4(0, 0, 0, 1)).xyz;
-    const dir = normalize(camWorld.mul(vec4(vp.div(L), 0)).xyz);
-    const j = ign(screenCoordinate.xy);
-    const dt = dist.div(steps);
-    // the beams: the light at each sample (1 in the sun, the glass's colour behind it, 0 in shade),
-    // the dust a little uneven (slow drifting folds), each sample dimmed by the air before it
-    let beam = vec3(0);
-    const tt = time.mul(0.12);
-    for (let i = 0; i < steps; i++) {
-      const t = dt.mul(j.add(i));
-      const p = o.add(dir.mul(t));
-      const sc = sM.mul(vec4(p, 1));
-      const q = sc.xyz.div(sc.w);
-      const su = vec2(q.x, float(1).sub(q.y));
-      const z = reversed ? q.z.add(bias) : q.z.sub(bias);
-      const vis = texture(dTex, su).compare(z);
-      const tc = texture(cTex, su);
-      const lit = mix(vec3(1), mix(tc.rgb, vec3(1), vis), tc.a);
-      const inMap = abs(su.x.sub(0.5)).lessThan(0.5).and(abs(su.y.sub(0.5)).lessThan(0.5));
-      const folds = sin(p.x.mul(0.9).add(sin(p.z.mul(0.53).add(tt)).mul(1.7)).add(p.y.mul(1.3)).sub(tt.mul(2.0))).mul(0.35)
-        .add(sin(p.z.mul(1.7).sub(p.y.mul(0.8)).add(tt.mul(3.1))).mul(0.2)).add(1);
-      beam = beam.add(select(inMap, lit, vec3(0)).mul(folds).mul(exp(AIR.sigma.mul(t).mul(-0.5))));
-    }
-    // Henyey–Greenstein, mostly forward (dust and smoke): the beams brightest looking toward the light
-    const g = 0.45, cosT = dot(dir, AIR.dir);
-    const phase = float((1 - g * g) / (4 * Math.PI)).div(pow(float(1 + g * g).sub(cosT.mul(2 * g)), 1.5)).add(0.03);
-    let col = beam.mul(dt).mul(AIR.sigma).mul(AIR.gain).mul(phase).mul(AIR.sun);
-    // the lamps' halos in the smoke: ∫ dt / (h² + (t − t0)²) along the ray, from 0 to dist
-    const sl = AIR.sigma.mul(AIR.gain).mul(0.15).add(AIR.incense.mul(1.5));
-    for (const lp of lamps.uniforms) {
-      const d = lp.pos.sub(o), t0 = dot(d, dir), h2 = max(dot(d, d).sub(t0.mul(t0)), 0.0004), h = sqrt(h2);
-      const I = atan(dist.sub(t0).div(h)).add(atan(t0.div(h))).div(h);
-      col = col.add(lp.col.mul(I).mul(sl).mul(1 / (4 * Math.PI)));
-    }
-    // the smoke's own glow in the room's light, drifting in layers
-    const layer = sin(o.y.add(dir.y.mul(dist.mul(0.5))).mul(1.1).add(tt.mul(1.4))).mul(0.25).add(1);
-    col = col.add(AIR.ambient.mul(float(1).sub(exp(AIR.incense.negate().mul(dist)))).mul(layer));
-    const T = exp(AIR.sigma.mul(0.35).add(AIR.incense.mul(0.6)).negate().mul(dist));
-    return vec4(col, T);
+    // outdoors (no dust, no smoke) nothing to add: the whole pass skipped, the same for every pixel
+    const out = vec4(0, 0, 0, 1).toVar();
+    If(AIR.sigma.add(AIR.incense).greaterThan(0), () => {
+      const c = uv();
+      const vp = getViewPosition(c, depth.sample(c).r, projInv);
+      const L = max(length(vp), 1e-3);
+      const dist = min(L, AIR.reach);
+      const o = camWorld.mul(vec4(0, 0, 0, 1)).xyz;
+      const dir = normalize(camWorld.mul(vec4(vp.div(L), 0)).xyz);
+      const j = ign(screenCoordinate.xy);
+      const dt = dist.div(steps);
+      // the beams: the light at each sample (1 in the sun, the glass's colour behind it, 0 in shade),
+      // the dust a little uneven (slow drifting folds), each sample dimmed by the air before it
+      let beam = vec3(0);
+      const tt = time.mul(0.12);
+      for (let i = 0; i < steps; i++) {
+        const t = dt.mul(j.add(i));
+        const p = o.add(dir.mul(t));
+        const sc = sM.mul(vec4(p, 1));
+        const q = sc.xyz.div(sc.w);
+        const su = vec2(q.x, float(1).sub(q.y));
+        const z = reversed ? q.z.add(bias) : q.z.sub(bias);
+        const vis = texture(dTex, su).compare(z);
+        const tc = texture(cTex, su);
+        const lit = mix(vec3(1), mix(tc.rgb, vec3(1), vis), tc.a);
+        const inMap = abs(su.x.sub(0.5)).lessThan(0.5).and(abs(su.y.sub(0.5)).lessThan(0.5));
+        const folds = sin(p.x.mul(0.9).add(sin(p.z.mul(0.53).add(tt)).mul(1.7)).add(p.y.mul(1.3)).sub(tt.mul(2.0))).mul(0.35)
+          .add(sin(p.z.mul(1.7).sub(p.y.mul(0.8)).add(tt.mul(3.1))).mul(0.2)).add(1);
+        beam = beam.add(select(inMap, lit, vec3(0)).mul(folds).mul(exp(AIR.sigma.mul(t).mul(-0.5))));
+      }
+      // Henyey–Greenstein, mostly forward (dust and smoke): the beams brightest looking toward the light
+      const g = 0.45, cosT = dot(dir, AIR.dir);
+      const phase = float((1 - g * g) / (4 * Math.PI)).div(pow(float(1 + g * g).sub(cosT.mul(2 * g)), 1.5)).add(0.03);
+      let col = beam.mul(dt).mul(AIR.sigma).mul(AIR.gain).mul(phase).mul(AIR.sun);
+      // the lamps' halos in the smoke: ∫ dt / (h² + (t − t0)²) along the ray, from 0 to dist
+      const sl = AIR.sigma.mul(AIR.gain).mul(0.15).add(AIR.incense.mul(1.5));
+      for (const lp of lamps.uniforms) {
+        const d = lp.pos.sub(o), t0 = dot(d, dir), h2 = max(dot(d, d).sub(t0.mul(t0)), 0.0004), h = sqrt(h2);
+        const I = atan(dist.sub(t0).div(h)).add(atan(t0.div(h))).div(h);
+        col = col.add(lp.col.mul(I).mul(sl).mul(1 / (4 * Math.PI)));
+      }
+      // the smoke's own glow in the room's light, drifting in layers
+      const layer = sin(o.y.add(dir.y.mul(dist.mul(0.5))).mul(1.1).add(tt.mul(1.4))).mul(0.25).add(1);
+      col = col.add(AIR.ambient.mul(float(1).sub(exp(AIR.incense.negate().mul(dist)))).mul(layer));
+      const T = exp(AIR.sigma.mul(0.35).add(AIR.incense.mul(0.6)).negate().mul(dist));
+      out.assign(vec4(col, T));
+    });
+    return out;
   })();
 }
 
@@ -127,28 +148,35 @@ export function airNode({ depth, camera, shadow, reversed, lamps, steps = 16 }) 
  * The air laid over the picture: the half-resolution air averaged over 3×3 of its texels, each
  * weighted by how near its depth lies to this pixel's (no halo across the edges of columns).
  */
-export function airComposite(color, airTex, depth, camera, texel) {
-  const projInv = uniform(camera.projectionMatrixInverse);
-  const c = uv(), zc = getViewPosition(c, depth.sample(c).r, projInv).z;
-  const tol = abs(zc).mul(0.03).add(0.08);
-  let sum = vec4(0), wsum = float(0);
-  // two texels apart: the samples along the rays are offset per pixel (a 4×4 noise), so a wider
-  // average takes the grain out of the beams' edges
-  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
-    const q = c.add(vec2(i, j).mul(texel).mul(1.5));
-    const z = getViewPosition(q, depth.sample(q).r, projInv).z;
-    const w = max(float(1).sub(abs(z.sub(zc)).div(tol)), 0).add(i === 0 && j === 0 ? 1e-3 : 0).mul(i === 0 && j === 0 ? 2 : 1);
-    sum = sum.add(airTex.sample(q).mul(w)); wsum = wsum.add(w);
-  }
-  const a = sum.div(wsum);
-  return vec4(color.rgb.mul(a.a).add(a.rgb), color.a);
+export function airComposite(color, airTex, depth, camera, texel, zk) {
+  const dist = (d) => float(1).div(max(zk.x.mul(d).add(zk.y), 1e-6));
+  return Fn(() => {
+    const out = vec4(color).toVar();
+    // outdoors the air is clear (the pass above wrote nothing): the picture as it is
+    If(AIR.sigma.add(AIR.incense).greaterThan(0), () => {
+      const c = uv(), zc = dist(depth.sample(c).r);
+      const tol = zc.mul(0.03).add(0.08);
+      let sum = vec4(0), wsum = float(0);
+      // two texels apart: the samples along the rays are offset per pixel (a 4×4 noise), so a wider
+      // average takes the grain out of the beams' edges
+      for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+        const q = c.add(vec2(i, j).mul(texel).mul(1.5));
+        const z = dist(depth.sample(q).r);
+        const w = max(float(1).sub(abs(z.sub(zc)).div(tol)), 0).add(i === 0 && j === 0 ? 1e-3 : 0).mul(i === 0 && j === 0 ? 2 : 1);
+        sum = sum.add(airTex.sample(q).mul(w)); wsum = wsum.add(w);
+      }
+      const a = sum.div(wsum);
+      out.assign(vec4(color.rgb.mul(a.a).add(a.rgb), color.a));
+    });
+    return out;
+  })();
 }
 
 // ── lamps ─────────────────────────────────────────────────────────────────────────────────────
 
 /** Lamps are lit within this distance of the eye (m); beyond it they fade out. */
 const LAMP_REACH = 22;
-const _v = new Vector3();
+const _e = new Vector3(), _inv = new Matrix4();
 
 /**
  * The lamps of a built part, in its settlement's frame: { p: [x, y, z], color: Color, power,
@@ -208,13 +236,25 @@ function spots(geometry, matrices) {
   return out;
 }
 
+/** A point light of the lamps' pool (its node, LampLightNode, registered by the renderer). */
+export class LampLight extends PointLight {}
+
+/** A point light whose shading is skipped, for every pixel alike, while the light is dark. */
+export class LampLightNode extends PointLightNode {
+  static get type() { return 'LampLightNode'; }
+  setup(builder) {
+    const c = this.colorNode;
+    If(c.r.add(c.g).add(c.b).greaterThan(0), () => { super.setup(builder); });
+  }
+}
+
 /** A fixed pool of point lights given to the nearest lamps. */
 export class LampPool {
   constructor(scene, n) {
     this.slots = [];
     this.uniforms = [];
     for (let i = 0; i < n; i++) {
-      const light = new PointLight(0xffb46b, 0, 8, 2);
+      const light = new LampLight(0xffb46b, 0, 8, 2);
       light.castShadow = false;
       light.name = 'lamp' + i;
       scene.add(light);
@@ -227,22 +267,28 @@ export class LampPool {
 
   /**
    * Choose the lamps nearest the eye: sources = [{ list (lampsOf entries), matrix (frame → scene) }].
-   * Called four times a second.
+   * Called four times a second. The eye is taken into each source's frame once (its matrix is
+   * rigid), so that each lamp costs a squared distance; only those within reach are placed.
    */
   choose(eye, sources, night) {
     this.night = night;
     if (!this.slots.length) return;
     const lit = (l) => (l.night ? smooth(0.15, 0.6, night) : 1);
+    const nightOn = lit({ night: true }) >= 0.02, R2 = LAMP_REACH * LAMP_REACH;
     const cand = [];
-    for (const { list, matrix } of sources) for (const l of list) {
-      if (lit(l) < 0.02) continue;
-      _v.set(l.p[0], l.p[1], l.p[2]).applyMatrix4(matrix);
-      const d = _v.distanceTo(eye);
-      if (d > LAMP_REACH) continue;
-      cand.push({ l, d, at: _v.clone(), score: l.power * lit(l) / (1 + d * d) });
+    let last = null;
+    for (const { list, matrix } of sources) {
+      if (matrix !== last) { _e.copy(eye).applyMatrix4(_inv.copy(matrix).invert()); last = matrix; }
+      for (const l of list) {
+        if (l.night && !nightOn) continue;
+        const dx = l.p[0] - _e.x, dy = l.p[1] - _e.y, dz = l.p[2] - _e.z, d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 > R2) continue;
+        cand.push({ l, d: Math.sqrt(d2), matrix, score: l.power * lit(l) / (1 + d2) });
+      }
     }
-    cand.sort((a, b) => b.score - a.score);
+    if (cand.length > this.slots.length) cand.sort((a, b) => b.score - a.score);
     const want = cand.slice(0, this.slots.length), taken = new Set();
+    for (const c of want) c.at = new Vector3(c.l.p[0], c.l.p[1], c.l.p[2]).applyMatrix4(c.matrix);
     // a lamp that has a slot keeps it (its place refreshed); a slot whose lamp is no longer wanted fades out
     for (const s of this.slots) {
       if (!s.cur) continue;
