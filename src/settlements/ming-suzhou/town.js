@@ -5,6 +5,7 @@
 // each builds in turn while the visitor already walks.
 
 import { RADIUS, LEVEL, CANALS, STREETS, BRIDGES, lots, onBridge } from './layout.js';
+import { northPlans } from './north.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const R = RADIUS - 26;                                  // the town stops where the ground fades out
@@ -212,5 +213,5 @@ function riverLife() {
 }
 
 export async function town() {
-  return [waterways(), ...houses(), ...riverLife()];
+  return [waterways(), ...houses(), ...riverLife(), ...northPlans()];
 }
