@@ -128,9 +128,22 @@ Sources: architectural and urban histories, published plans and surveys, archaeo
 
 ## 7. The civilizations
 
-The settlements are listed in `src/planet/sites.js` (id, name, era, region, true position) and each is described in its dossier, `docs/settlements/<id>.md`; where each stands on the planet is in `docs/world.md`. Do not keep a second list here.
+**Built:** listed in `src/planet/sites.js` (id, name, era, region, true position), each described in its dossier, `docs/settlements/<id>.md`; where each stands on the planet is in `docs/world.md`. Do not repeat that list here.
 
-A civilization is chosen so that (a) it is a distinct place-and-time, (b) each region has at least one landmark most people know, (c) the planet has no empty continent, (d) the eras of each region stand together, from prehistory to the modern, and (e) sources exist to build it truthfully. The set is not closed: a better-documented example may replace one within a civilization, and places and eras still missing may be added (Thai, Burmese, Ottoman provinces, Hanseatic Germany, colonial Latin America, West African kingdoms, Polynesia, the Arctic…).
+A civilization is chosen so that (a) it is a distinct place-and-time, (b) each region has at least one landmark most people know, (c) the planet has no empty continent, (d) the eras of each region stand together, from prehistory to the modern, and (e) sources exist to build it truthfully.
+
+**Candidates** — the author's wish list (2026-11-09), not yet built. **Bold** = build first. The dossier fixes the exact moment and may substitute a better-documented example. When one is built it moves to `sites.js` and its entry is deleted here. Where little stands today (Baghdad, Ye, Linzi, Karakorum) the dossier must say plainly what is reconstructed from texts and excavation. For living Indigenous cultures use only what the communities and published heritage documentation share publicly; nothing secret or sacred is depicted.
+
+- **China through its dynasties:** **Shang — Yinxu, Anyang (c. 1250 BC)** · Warring States — Linzi, capital of Qi (c. 320 BC) · **Qin — Xianyang and the First Emperor's mausoleum (c. 210 BC)** · **Han Chang'an (c. 100 BC)** · **Three Kingdoms — Ye, the Bronze Bird Terrace (c. 215)** · Northern Wei Luoyang — Yongning Pagoda, Longmen (c. 520) · **Tang Chang'an — Daming Palace, Great Wild Goose Pagoda, wards and West Market (c. 750)** · **Five Dynasties and Ten Kingdoms — Southern Tang Jinling (c. 960)** · Liao — the Wooden Pagoda of Yingxian (1056) · Yuan Dadu (c. 1290) · Huizhou village — Hongcun (c. 1700) · Hakka tulou, Fujian (c. 1710).
+- **Buddhist and Chan/Zen:** **Nalanda (c. 640)** · **Ajanta caves (c. 480)** · Gandhara — Taxila and Takht-i-Bahi (c. 150) · Ellora, the Kailasa (c. 770) · Polonnaruwa, Sri Lanka (c. 1180) · **Dunhuang — the Mogao caves (9th c.)** · **Shaolin Monastery and Mount Song (Chan)** · **Muromachi Kyoto — Ryōan-ji, Ginkaku-ji (Zen, c. 1490)** · Silla Gyeongju — Bulguksa, Seokguram (c. 770) · **Bagan (c. 1200)** · Sukhothai (c. 1300).
+- **India and its neighbours:** **Mohenjo-daro (c. 2500 BC)** · Vijayanagara — Hampi (c. 1520) · Bhaktapur, Nepal (c. 1700) · Jaipur (c. 1800) · Huế, Vietnam (c. 1840) · Ise Shrine, Japan.
+- **The Silk Road and the steppe:** **Timurid Samarkand (c. 1420)** · Bukhara (c. 1550) · Bamiyan (c. 630) · Jiaohe and Gaochang, Turfan (c. 700) · Seljuk Merv (c. 1150) · Mongol Karakorum (c. 1254).
+- **The Arab and Persian world:** **Abbasid Baghdad — the Round City of the *Thousand and One Nights*, with Samarra's Great Mosque as the built evidence (c. 800)** · Umayyad Damascus (c. 715) · **Córdoba (c. 970)** · **Fez (c. 1350)** · Shibam, Hadhramaut — mud tower houses (16th c. on) · Sasanian Ctesiphon (c. 550).
+- **The ancient Near East and the Nile:** Çatalhöyük (c. 6500 BC) · **New Kingdom Thebes — Karnak, Luxor, Deir el-Medina (c. 1250 BC)** · Hattusa (c. 1250 BC) · Assyrian Dur-Sharrukin (c. 706 BC) · Carthage (c. 200 BC) · Meroë, Kush (c. 100 BC) · Aksum (c. 350).
+- **African peoples and kingdoms:** **Dogon villages of the Bandiagara cliff** · **Benin City (c. 1600)** · Hausa Kano (c. 1500) · Gondar (c. 1680) · Asante Kumasi (c. 1817) · **Zulu uMgungundlovu (1830s)** · Buganda — the Kasubi royal enclosure (c. 1882) · Kassena painted houses, Tiébélé.
+- **Australia and the Pacific:** **Budj Bim — Gunditjmara stone houses and eel traps** · **Kakadu — the rock shelters of Ubirr** · Nan Madol, Pohnpei (c. 1300) · Hawai'i — Pu'uhonua o Hōnaunau (c. 1700) · a Sepik spirit house village, New Guinea.
+- **The Americas:** Caral (c. 2600 BC) · **Classic Maya Tikal (c. 750)** · Tiwanaku (c. 700) · Mesa Verde (c. 1250) · Chan Chan (c. 1450) · Haudenosaunee longhouse village (c. 1600) · colonial Mexico City (c. 1750) · Mandan earthlodge village (c. 1830) · Haida village, SG̱ang Gwaay (c. 1850) · an Inuit winter village · Chicago (c. 1893) · Brasília (1960).
+- **Europe:** Skara Brae (c. 3000 BC) · Mycenae (c. 1250 BC) · Hellenistic Pergamon (c. 150 BC) · Carolingian Aachen (c. 800) · Viking Hedeby (c. 950) · Novgorod (c. 1100) · Norman Palermo (c. 1150) · Siena (c. 1340) · Prague (c. 1380) · Bruges (c. 1450) · Manueline Lisbon (c. 1520) · Palladio's Vicenza (c. 1570) · Tudor London (c. 1600) · St Petersburg (c. 1760) · Georgian Bath (c. 1780) · Haussmann's Paris (c. 1889) · Vienna (c. 1900) · Bauhaus Dessau (1926).
 
 ## 8. Performance and budgets
 
@@ -161,7 +174,7 @@ Replace these lines, never append to them; keep them few.
 
 - v10.20 (2026-11-07): 57 settlements stand on the planet, 44 interiors under baked light. Every civilization first listed is built.
 - **The gap is depth.** By their own dossiers 27 of the 57 are still at L1–L2, 14 at L2, 6 at L2–L3, and 10 reach L3 only in parts; none meets §5 throughout.
-- **Next:** bring settlements to L3 before adding new ones — the lowest and the best known first. A new civilization is added only when the author asks.
+- **Next:** bring the built settlements to L3 — the lowest and the best known first. New civilizations come from the candidates of §7, bold ones first, when the author says to start them.
 - Open: frame times and jumps are still to be measured on the author's M2.
 
 ## 11. Rules
