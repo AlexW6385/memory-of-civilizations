@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.22 — Suzhou's north, cards, smoother first sight (2026-11-09)
+- Ming Suzhou gains the Bao'en Temple pagoda, its temple court and a stretch of the city wall with land and water gates; settlement cards are written for all 57 built settlements; figures get a proper crossed collar, aprons and the Ming square cap.
+- Every instanced mesh's shader is now built before it is shown, instead of in the frame that first draws it (which made hitches of up to half a second when turning or flying).
+
 ## v10.21 — Suzhou benchmark (2026-11-09)
 - ?bench=suzhou measures Ming Suzhou (by the pond, along the canal street, inside the main hall); every leg first waits for steady frames and reports how long that took.
 

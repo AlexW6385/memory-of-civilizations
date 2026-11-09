@@ -209,8 +209,8 @@ export class Renderer {
   /**
    * Compile, off the frame, the shaders and pipelines that the meshes under `roots` (one or a list) will need, before
    * they are shown: three otherwise compiles them in the frame that first draws them, a hitch of a
-   * tenth of a second to a second. One mesh of each kind (material, attributes, instancing) not
-   * seen before is compiled, with the scene pass's own target, outputs and context, so that what is
+   * tenth of a second to a second. Every instanced mesh not seen before is compiled, and one plain
+   * mesh of each kind (material, attributes), with the scene pass's own target, outputs and context, so that what is
    * compiled is what the frame will look for. Resolves when done (never rejects).
    */
   precompile(roots) {
@@ -220,7 +220,13 @@ export class Renderer {
     for (const root of Array.isArray(roots) ? roots : [roots]) root.traverse((o) => {
       if (!o.isMesh || !o.material || !o.geometry) return;
       const g = o.geometry;
-      const key = `${o.material.uuid}|${o.isInstancedMesh ? 1 : 0}${o.instanceColor ? 1 : 0}${g.index ? 1 : 0}${o.receiveShadow ? 1 : 0}|${Object.keys(g.attributes).sort().join()}`;
+      // (three keys an instanced mesh's node build by the mesh itself — its instance buffers are
+      // bound into the build — so every instanced mesh needs its own build, ~5–10 ms of this
+      // thread: one per material left the others to be built in the frame that first drew them,
+      // e.g. 24 cells of merged roof tiles in one frame, a quarter of a second; the shader code and
+      // the pipeline are shared, so the GPU's part is done once)
+      const key = o.isInstancedMesh ? `i:${o.uuid}|${o.material.uuid}|${o.receiveShadow ? 1 : 0}`
+        : `${o.material.uuid}|0${g.index ? 1 : 0}${o.receiveShadow ? 1 : 0}|${Object.keys(g.attributes).sort().join()}`;
       if (seen.has(key)) return;
       seen.add(key); reps.push(o);
     });
