@@ -1,6 +1,6 @@
 # History — the Memory Palace era (2026-10)
 
-The decisions log of the second brief (Memory Palace, v5.0–v7.1), kept for reference. Decisions about individual landmarks (which example, which date, what was inferred) still hold; decisions about the flat compact city are superseded by DESIGN.md §12 (2026-11-03). The full earlier brief is in git history (`git show v7.1:DESIGN.md`).
+The decisions log of the second brief (Memory Palace, v5.0–v7.1), kept for reference. Decisions about individual landmarks (which example, which date, what was inferred) still hold; decisions about the flat compact city are superseded by the planet (2026-11-03; `docs/decisions.md`). The full earlier brief is in git history (`git show v7.1:DESIGN.md`).
 
 
 - 2026-10 — Rebuilt from scratch as a memory palace, replacing the Knowledge Universe. Reason: spatial, built places are what memory needs; graph/RAG was the wrong tool.
@@ -47,3 +47,31 @@ The decisions log of the second brief (Memory Palace, v5.0–v7.1), kept for ref
 - 2026-10-28 — World L2 detail: each district gets a paved square with a well where the way to its building leaves the avenue — the nearest level block, left open; nothing grows on it.
 - 2026-10-26 — Edfu's roof stairs and roof terrace, the New Year court, the nilometer and the pylon's internal stairs are deferred to L2 of the building; the mammisi is a separate building for later.
 
+## The move from the flat city (v7) to the planet — plan of 2026-11-03, carried out
+
+Formerly `DESIGN.md` §10.
+
+Keep only what still fits; do not bend the new world round old code.
+
+**Kept (migrate, do not rewrite)**
+- The ten landmarks and their dossiers, plans, style modules and music (`src/buildings/*`, `src/styles/*`, `docs/buildings/*` → `src/settlements/*`, `docs/settlements/*`).
+- The renderer core: materials, shadows, GTAO, bloom, tone mapping, eye adaptation, the bake pipeline and the `.gi` volumes (rebake only where a settlement's hour changes).
+- Movement: the walker (body, step height, collision), flight (extended with height-scaled speed), the controls layout (corner map + clock top left, settings top right), the phone controls.
+- The clock, day/night, moon and stars.
+- Bilingual UI and i18n; the loading sequence (open when the near things are ready; time-sliced building; cache of left buildings).
+- The vegetation species system.
+- Tools: shot, bake, plan-check, walk-check, budget, audio-check.
+
+**Rebuilt**
+- The world: `src/world/*` (city layout, Voronoi districts, avenue grid, house-block grid, flat terrain grid, the city edge) is deleted and replaced by `src/planet/*` and per-settlement `town.js`.
+- Terrain: flat chunked grid → spherical quadtree with relief, coasts, rivers, ocean.
+- Sky: per-district fixed sky and the city sky → one atmosphere model with the sun by latitude.
+- Houses: one city-wide block grid with per-district house type → per-settlement townscape designed from its dossier.
+- Vegetation placement: flat-terrain rules → biome-by-latitude on the sphere plus per-settlement planting.
+- Map: 2D city map → globe. Corner map stays.
+- The `*-wip` branches are deleted; `v2` is kept as history.
+
+**Dropped**
+- District squares with wells (the dossier decides each settlement's public space).
+- The `?time=baked` view.
+- Separate "regions" with blended climates (the word *region* now means a group of civilizations, §4.2).

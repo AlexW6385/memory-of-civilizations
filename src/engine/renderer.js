@@ -20,7 +20,7 @@ import { HITCH } from './hitch.js';
 /** The depth buffer unless the address asks for another (see init). */
 const DEPTH_DEFAULT = 'reversed';
 /** How far (m) each shadow cascade's box reaches toward the sun past its slice of the view: a
- *  caster up to ~130 m above the slice's ground still shadows it with the sun at 40° (DESIGN §12). */
+ *  caster up to ~130 m above the slice's ground still shadows it with the sun at 40° (docs/decisions.md). */
 const LIGHT_MARGIN = 200;
 
 // air: dust, incense and coloured light in the beams indoors (src/engine/air.js); lamps: how many of

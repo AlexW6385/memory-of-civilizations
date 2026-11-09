@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Budget check (DESIGN.md §6): initial load ≤ 15 MB, each building's on-demand data ≤ 25 MB,
+// Budget check (DESIGN.md §8): initial load ≤ 15 MB, each building's on-demand data ≤ 25 MB,
 // every committed file ≤ 50 MB, the repository ≤ 500 MB. Sizes are as transferred (gzip).
 
 import { readFile, readdir, stat } from 'node:fs/promises';
