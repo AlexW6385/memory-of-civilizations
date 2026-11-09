@@ -10,6 +10,8 @@ How work on this repository is run with many agents at once. The coordinating se
 
 ## Assignments
 
+- **Set the model on every agent call** (`model: "sonnet"` for implementers, `"opus"` only for hard engine work): an agent started without one runs on the coordinator's model. Set the effort the roles above give.
+
 - One agent per group of settlements of one style family, or one engine topic. Groups must not share files: the rule is that an agent edits only its settlements' folders, its own style directories under `src/styles/`, its dossiers, and new tests of its own.
 - Shared code is off-limits to settlement agents: `src/styles/vernacular`, `ming`, `chinese`, `roman`, `src/objects/*`, `src/engine/*`, `src/planet/*`, `src/core/palette.js`, `src/planet/arrivals.js` (unless the assignment names a line in it). An agent that needs a change there says so in its report; the coordinator gives it to the agent that owns that file in the next wave, or does it.
 - New civilizations, when the owner asks for them, go one per agent: dossier first, then the settlement.

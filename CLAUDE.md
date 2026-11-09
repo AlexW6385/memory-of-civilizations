@@ -1,6 +1,6 @@
 # Instructions for agents
 
-Read `DESIGN.md` in full before doing anything, and work within it. It is the brief for this project: what it is, what it is not, the priorities, the detail standard, the rules, the phases, and what you may decide yourself. Keep it short and current: it holds the design as it stands, never a log. When your work changes the design, edit the section concerned; update the few status lines of §10 in place; put the reason for a decision in one line in `docs/decisions.md`, and what a version changed in `CHANGELOG.md` (one or two plain sentences).
+If you are an implementing agent with an assignment, read what `docs/agent-brief.md` lists and nothing more. Otherwise read `DESIGN.md` in full before doing anything, and work within it. It is the brief for this project: what it is, what it is not, the priorities, the detail standard, the rules, the phases, and what you may decide yourself. Keep it short and current: it holds the design as it stands, never a log. When your work changes the design, edit the section concerned; update the few status lines of §10 in place; put the reason for a decision in one line in `docs/decisions.md`, and what a version changed in `CHANGELOG.md` (one or two plain sentences).
 
 `CHANGELOG.md`, `docs/decisions.md`, `docs/status-log.md` and `docs/history.md` are records. Do not read them in full for a task; grep them when you need one specific thing, and add to `CHANGELOG.md` at its top without reading the rest.
 
