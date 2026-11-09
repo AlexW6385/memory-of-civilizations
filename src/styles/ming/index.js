@@ -16,6 +16,9 @@ import { box, lathe, fromTriangles, frustum, orientOutward } from '../../core/ge
 // Beijing: red columns, yellow glazed tiles, white marble (src/styles/qing/).
 export const DEFAULT_PAL = { wood: 'lacquer_chestnut', column: 'lacquer_chestnut', soffit: 'lacquer_chestnut', base: 'granite_block', floor: 'bluestone', lattice: 'lattice', leaky: 'lattice_ice', plaster: 'plaster_white', plinth: 'plaster_grey', roof: 'tile_dark' };
 let PAL = DEFAULT_PAL, LOW = false;           // LOW: fewer segments (houses of the town, seen in hundreds)
+// the richer detail of the Suzhou garden's vocabulary (kerbed platforms with steps, framed dado panels, deep
+// bargeboards, the beauty's rest): only with the default materials; an element with its own (Qing Beijing) keeps the plainer forms
+const rich = () => PAL === DEFAULT_PAL;
 /** Wrap an element builder so that it uses the element's materials (el.pal) over the defaults. */
 export const withPal = (fn) => (el, ctx) => { const prev = PAL, low = LOW; PAL = el.pal ? { ...DEFAULT_PAL, ...el.pal } : DEFAULT_PAL; LOW = low || !!el.simple; try { fn(el, ctx); } finally { PAL = prev; LOW = low; } };
 
@@ -154,7 +157,7 @@ function ridgeCurl(out, p, dir, size, w) {
 function rectRoof(el, bag) {
   const [cx, cz] = el.c, A = el.A, B = el.B, y = el.y, R = el.rise, sw = el.sweep ?? 0.9, kind = el.kind || 'xieshan';
   const mat = el.mat || PAL.roof, soffit = el.soffit || PAL.soffit, p = el.p ?? 1.7, gAt = el.gableAt ?? 0.42;
-  const L = kind === 'gable' ? A : A - B;                 // half-length of the ridge
+  const L = kind === 'gable' ? A : kind === 'xieshan' && rich() ? A - gAt * B - 0.3 : A - B;      // half-length of the ridge (a xieshan's runs to its gable lines)
   // small roofs (houses) need fewer rings: the curve still reads, at half the vertices
   const small = B < 5.5, NX = LOW ? Math.max(4, Math.round(A * 0.8)) : small ? Math.max(6, Math.round(A * 1.3)) : Math.max(8, Math.round(A * 2)), NZ = LOW ? 6 : small ? 8 : 12;
   const out = [], under = [];
@@ -243,28 +246,84 @@ function rectRoof(el, bag) {
   bag.add(mat, fromTriangles(r));
   // the xieshan's gable: the tiles of the upper roof stop at the gable line (the step there is left
   // open), a plastered gable board closes the triangle between the upper roof and the hips, its top
-  // following the concave roof just under the tiles; along its top the bargeboards (bo feng), and
-  // over them a roll of tiles along the verge
+  // following the concave roof just under the tiles; along its top the bargeboards (bo feng), a
+  // deep timber board following the slope, and over them a roll of tiles along the verge; at the
+  // apex the hanging fish (xuan yu); the ends of the purlins stand out of the board
+  const hzAt = (z) => y + R * Math.pow(Math.max(0, (B - Math.abs(z)) / B), p);
   if (kind === 'xieshan') {
-    const xg = A - gAt * B, y0 = y + R * Math.pow(gAt, p), yb = y0 - 0.1, zz = B - gAt * B;
-    const g = [], bb = [], vg = [], NB = LOW ? 3 : 5;
-    const hz = (z) => y + R * Math.pow(Math.max(gAt, (B - Math.abs(z)) / B), p);
-    for (const s of [-1, 1]) {
-      const prof = [];
-      for (let k = 0; k <= 2 * NB; k++) { const z = -zz + zz * k / NB; prof.push([z, hz(z)]); }
-      for (let k = 0; k < 2 * NB; k++) {
-        const [za, ha] = prof[k], [zb, hb] = prof[k + 1];
-        const a0 = rot(cx + s * xg, cz + za), a1 = rot(cx + s * xg, cz + zb);
-        g.push(a0[0], yb, a0[1], a1[0], yb, a1[1], a1[0], hb - 0.03, a1[1], a0[0], yb, a0[1], a1[0], hb - 0.03, a1[1], a0[0], ha - 0.03, a0[1]);
-        const c0 = rot(cx + s * (xg + 0.06), cz + za), c1 = rot(cx + s * (xg + 0.06), cz + zb);
-        beamTris(bb, [c0[0], Math.max(y0 - 0.02, ha - 0.3), c0[1]], [c1[0], Math.max(y0 - 0.02, hb - 0.3), c1[1]], 0.04, 0.26);
-        const v0 = rot(cx + s * (xg + 0.02), cz + za), v1 = rot(cx + s * (xg + 0.02), cz + zb);
-        beamTris(vg, [v0[0], ha - 0.06, v0[1]], [v1[0], hb - 0.06, v1[1]], 0.13, 0.16);
+    const xg = A - gAt * B, y0 = y + R * Math.pow(gAt, p), zz = B - gAt * B;
+    gableEnd(bag, { deep: rich(), rot, cx, cz, plane: xg, bbPlane: xg + 0.06, vgPlane: xg + 0.02, zz, yb: y0 - 0.1, floor: y0 - 0.02, hz: hzAt, soffit, mat, plaster: PAL.plaster, fish: el.fish, wood: PAL.wood, rise: R - R * Math.pow(gAt, p), NB: LOW ? 3 : 5, A });
+  } else if (el.gableBoard !== undefined) {
+    // a gabled roof whose end wall stands set back under the overhang: the plastered triangle in the
+    // wall's plane, the bargeboards on the verge
+    const xw = A - el.gableBoard, zz = B - el.gableBoard;
+    gableEnd(bag, { deep: true, rot, cx, cz, plane: xw, bbPlane: A + 0.02, vgPlane: A, zz, bbZ: B, yb: y - 0.3, floor: y - 0.1, hz: hzAt, soffit, mat, plaster: PAL.plaster, fish: el.fish, wood: PAL.wood, rise: R * 0.7, NB: LOW ? 3 : 6, A, verge: true });
+  }
+}
+
+/**
+ * The end of a gabled roof, at both ends: o.plane the plane of the plastered board (distance from
+ * the centre), o.zz its half-width, o.hz(z) the roof's height; the bargeboard (bo feng) on o.bbPlane
+ * over o.bbZ (the board's width or the roof's, for a verge), the tile roll on o.vgPlane, the hanging
+ * fish (xuan yu) at the apex, the three purlin ends standing out of the board.
+ */
+function gableEnd(bag, o) {
+  const { rot, cx, cz, plane, bbPlane, vgPlane, zz, yb, hz, soffit, mat, plaster, wood, NB } = o, bbZ = o.bbZ ?? zz;
+  const g = [], bb = [], vg = [], pe = [];
+  const prof = [], pb = [];
+  for (let k = 0; k <= 2 * NB; k++) { const z = -zz + zz * k / NB; prof.push([z, hz(z)]); }
+  for (let k = 0; k <= 2 * NB; k++) { const z = -bbZ + bbZ * k / NB; pb.push([z, hz(z)]); }
+  for (const s of [-1, 1]) {
+    for (let k = 0; k < 2 * NB; k++) {
+      const [za, ha] = prof[k], [zb, hb] = prof[k + 1];
+      const a0 = rot(cx + s * plane, cz + za), a1 = rot(cx + s * plane, cz + zb);
+      g.push(a0[0], yb, a0[1], a1[0], yb, a1[1], a1[0], hb - 0.03, a1[1], a0[0], yb, a0[1], a1[0], hb - 0.03, a1[1], a0[0], ha - 0.03, a0[1]);
+    }
+    for (let k = 0; k < 2 * NB; k++) {
+      const [za, ha] = pb[k], [zb, hb] = pb[k + 1];
+      const c0 = rot(cx + s * bbPlane, cz + za), c1 = rot(cx + s * bbPlane, cz + zb);
+      const bh = o.deep ? 0.4 : 0.26, off = o.deep ? 0.42 : 0.3;
+      beamTris(bb, [c0[0], Math.max(o.floor, ha - off), c0[1]], [c1[0], Math.max(o.floor, hb - off), c1[1]], o.deep ? 0.035 : 0.04, bh);
+      const v0 = rot(cx + s * vgPlane, cz + za), v1 = rot(cx + s * vgPlane, cz + zb);
+      beamTris(vg, [v0[0], ha - 0.06, v0[1]], [v1[0], hb - 0.06, v1[1]], 0.13, 0.16);
+    }
+    // the purlin ends: round-ended timbers standing 0.14 m out of the board, under the apex
+    if (!LOW && o.deep) for (const f of [0.3, 0.6]) {
+      const hh = yb + (hz(0) - yb) * f;
+      for (const zo of [-1, 1]) {
+        const zq = zo * zz * (1 - f) * 0.8, h2 = Math.min(hz(zq) - 0.3, hh), q0 = rot(cx + s * plane, cz + zq), q1 = rot(cx + s * (plane + 0.16), cz + zq);
+        beamTris(pe, [q0[0], h2, q0[1]], [q1[0], h2, q1[1]], 0.05, 0.1);
       }
     }
-    bag.add(PAL.plaster, fromTriangles(g.concat(flipTris(g))));
-    bag.add(soffit, fromTriangles(bb));
-    bag.add(mat, fromTriangles(vg));
+  }
+  bag.add(plaster, fromTriangles(g.concat(flipTris(g))));
+  bag.add(soffit, fromTriangles(bb));
+  bag.add(mat, fromTriangles(vg));
+  if (pe.length) bag.add(wood, fromTriangles(pe));
+  if (o.fish) fishEnds(bag, o);
+}
+
+/** The hanging fish (xuan yu) at a gable's apex: a carved board, its head under the bargeboards' meeting, belly and tail below. */
+function fishEnds(bag, o) {
+  const { rot, cx, cz, bbPlane, wood } = o, top = o.hz(0) - 0.36, len = Math.min(1.15, Math.max(0.5, o.rise * 0.42));
+  const sh = new Shape(), W = len * 0.17;
+  // from the hanger (a small knob at the top) down the belly to the swallow tail, and back up the other side
+  const prof = [[0, 0], [0.06, -0.06], [0.2, -0.2], [0.4, -0.38], [0.46, -0.56], [0.34, -0.7], [0.12, -0.8], [0.4, -1.0]];
+  const pts = prof.map(([w, v]) => [w * W / 0.5, v * len]);
+  sh.moveTo(0, 0);
+  for (const [x, v] of pts.slice(1)) sh.lineTo(x, v);
+  sh.lineTo(0, -0.9 * len);
+  for (const [x, v] of pts.slice().reverse().slice(0, -1)) sh.lineTo(-x, v);
+  sh.lineTo(0, 0);
+  const g0 = new ExtrudeGeometry(sh, { depth: 0.045, bevelEnabled: false });
+  for (const s of [-1, 1]) {
+    const e = rot(cx + s, cz), e0 = rot(cx, cz), ez = [e[0] - e0[0], e[1] - e0[1]];      // outward, in plan
+    const g = g0.clone();
+    const m = new Matrix4().makeBasis({ x: ez[1], y: 0, z: -ez[0] }, { x: 0, y: 1, z: 0 }, { x: ez[0], y: 0, z: ez[1] });
+    const c = rot(cx + s * bbPlane, cz);
+    m.setPosition(c[0] + ez[0] * 0.02, top, c[1] + ez[1] * 0.02);
+    g.applyMatrix4(m);
+    bag.add(wood, g);
   }
 }
 
@@ -284,17 +343,66 @@ function column(bag, col, x, z, y, h, d, mat = PAL.column, slim = false) {
   col?.circle(x, z, d / 2, y, y + h);
 }
 
-/** A stone platform with a bluestone top and a granite kerb. */
-function platform(bag, col, rect, y0, y1) {
-  const [x0, z0, x1, z1] = rect;
-  bag.add(PAL.base, box(x0, y0 - 0.6, z0, x1, y1 - 0.06, z1));
-  bag.add(PAL.floor, box(x0 + 0.02, y1 - 0.06, z0 + 0.02, x1 - 0.02, y1, z1 - 0.02));
+/**
+ * A stone platform (tai ji): a granite core under a bluestone floor, edged with long kerb slabs
+ * (jie tiao shi) in courses with open joints, a corner stone (jiao shi) standing a little proud
+ * at each corner, and steps (ta duo) of stacked slabs at the doorways: `steps` [{ side ('n'|'s'|'e'|
+ * 'w'), c (the coordinate along that side), w }]. A platform barely above the ground is a slab.
+ */
+function platform(bag, col, rect, y0, y1, steps = []) {
+  const [x0, z0, x1, z1] = rect, hgt = y1 - y0;
+  if (hgt < 0.15 || LOW || !rich() || x1 - x0 < 1.6 || z1 - z0 < 1.6) {
+    bag.add(PAL.base, box(x0, y0 - 0.6, z0, x1, y1 - 0.06, z1));
+    bag.add(PAL.floor, box(x0 + 0.02, y1 - 0.06, z0 + 0.02, x1 - 0.02, y1, z1 - 0.02));
+    col.floor(rect, y1);
+    if (y1 - y0 > 0.25) col.rect(rect, y0 - 0.6, y1 - 0.31);
+    return;
+  }
+  const kw = 0.4, cs = 0.5, kh = 0.12, ov = 0.04;
+  // the core, its face a hair inside the kerb's edge
+  bag.add(PAL.base, box(x0 + ov, y0 - 0.6, z0 + ov, x1 - ov, y1 - kh, z1 - ov));
+  bag.add(PAL.floor, box(x0 + kw, y1 - kh, z0 + kw, x1 - kw, y1, z1 - kw));
+  // the kerb, side by side in slabs about 1.4 m long, skipping the steps' openings
+  const open = (side, u0, u1) => steps.some((st) => st.side === side && u1 > st.c - st.w / 2 && u0 < st.c + st.w / 2);
+  const run = (side, a0, a1, mk) => {
+    const n = Math.max(1, Math.round((a1 - a0) / 1.4)), gap = 0.012;
+    for (let i = 0; i < n; i++) {
+      const u0 = a0 + (a1 - a0) * i / n + gap, u1 = a0 + (a1 - a0) * (i + 1) / n - gap;
+      if (!open(side, u0, u1)) bag.add(PAL.base, mk(u0, u1));
+    }
+  };
+  run('n', x0 + cs, x1 - cs, (u0, u1) => box(u0, y1 - kh, z0, u1, y1, z0 + kw));
+  run('s', x0 + cs, x1 - cs, (u0, u1) => box(u0, y1 - kh, z1 - kw, u1, y1, z1));
+  run('w', z0 + cs, z1 - cs, (u0, u1) => box(x0, y1 - kh, u0, x0 + kw, y1, u1));
+  run('e', z0 + cs, z1 - cs, (u0, u1) => box(x1 - kw, y1 - kh, u0, x1, y1, u1));
+  // the corner stones, larger than the kerb and 2 cm proud of it
+  for (const [cx, cz] of [[x0, z0], [x1 - cs, z0], [x0, z1 - cs], [x1 - cs, z1 - cs]]) bag.add(PAL.base, box(cx, y1 - kh - 0.02, cz, cx + cs, y1 + 0.02, cz + cs));
   col.floor(rect, y1);
-  if (y1 - y0 > 0.25) col.rect(rect, y0 - 0.6, y1 - 0.31);
+  if (hgt > 0.25) col.rect(rect, y0 - 0.6, y1 - 0.31);
+  // the steps: stacked slabs, each a tread 0.32 m deep, the risers about 17 cm
+  const nr = Math.max(1, Math.round(hgt / 0.17)), rise = hgt / nr, tread = 0.32;
+  if (nr < 2) return;
+  for (const st of steps) {
+    const hw = st.w / 2, sd = st.side;
+    // the floor runs out to the edge where the kerb is left open
+    bag.add(PAL.floor, sd === 'n' ? box(st.c - hw, y1 - kh, z0, st.c + hw, y1, z0 + kw) : sd === 's' ? box(st.c - hw, y1 - kh, z1 - kw, st.c + hw, y1, z1) : sd === 'w' ? box(x0, y1 - kh, st.c - hw, x0 + kw, y1, st.c + hw) : box(x1 - kw, y1 - kh, st.c - hw, x1, y1, st.c + hw));
+    for (let j = 1; j < nr; j++) {
+      const top = y1 - j * rise, dpt = j * tread, w = hw + (j > 1 ? 0.04 * (j - 1) : 0);
+      const [bx0, bx1, bz0, bz1] = sd === 'n' ? [st.c - w, st.c + w, z0 - dpt, z0 + 0.02] : sd === 's' ? [st.c - w, st.c + w, z1 - 0.02, z1 + dpt] : sd === 'w' ? [x0 - dpt, x0 + 0.02, st.c - w, st.c + w] : [x1 - 0.02, x1 + dpt, st.c - w, st.c + w];
+      bag.add(PAL.base, box(bx0, y0 - 0.15, bz0, bx1, top, bz1));
+    }
+    const D = nr * tread, asc = { n: 's', s: 'n', e: 'w', w: 'e' }[sd];
+    const rr = sd === 'n' ? [st.c - hw, z0 - D, st.c + hw, z0] : sd === 's' ? [st.c - hw, z1, st.c + hw, z1 + D] : sd === 'w' ? [x0 - D, st.c - hw, x0, st.c + hw] : [x1, st.c - hw, x1 + D, st.c + hw];
+    col.ramp(rr, y0, y1, asc);
+  }
 }
 
-/** Lattice panels (long doors) between two posts, with a solid lower board; open (no panels) where `open`. */
-function latticeBay(bag, col, a, b, y, h, kind = 'door', th = 0.06) {
+/**
+ * Lattice panels (long doors, 'door'; windows over a plastered sill wall, 'window'; a bare latticed
+ * 'pane' with no lower part) between two posts, in lattice material `mat` (default the palette's);
+ * a door's foot is a framed dado panel (qun ban) with a raised medallion.
+ */
+function latticeBay(bag, col, a, b, y, h, kind = 'door', th = 0.06, mat = null) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz * th, nz = ux * th;
   const n = LOW ? Math.max(1, Math.round(L / 1.8)) : Math.max(2, Math.round(L / 0.62));
   const lowH = kind === 'window' ? 0.95 : 0.55, topH = h - 0.12;
@@ -331,10 +439,35 @@ function latticeBay(bag, col, a, b, y, h, kind = 'door', th = 0.06) {
     if (col) col.segment(a, b, th * 2, y, y + h);
     return;
   }
+  const lat = mat || PAL.lattice;
+  const rch = rich() && !LOW && th >= 0.05;
+  // a door leaf's foot: stiles and rails round a recessed board, a raised medallion on it
+  const dado = (s0, s1, y0, y1) => {
+    if (!rch || s1 - s0 < 0.35 || y1 - y0 < 0.3) { slab(s0, s1, y0, y1, PAL.wood); return; }
+    const f = 0.05, sm = (s0 + s1) / 2, ym = (y0 + y1) / 2;
+    slab(s0, s1, y0, y1, PAL.wood, 0.5);
+    slab(s0, s0 + f, y0, y1, PAL.wood); slab(s1 - f, s1, y0, y1, PAL.wood);
+    slab(s0 + f, s1 - f, y0, y0 + f, PAL.wood); slab(s0 + f, s1 - f, y1 - f, y1, PAL.wood);
+    slab(sm - 0.09, sm + 0.09, ym - 0.06, ym + 0.06, PAL.wood, 1.25);
+  };
+  if (kind === 'pane') {
+    const np = Math.max(1, Math.round(L / 0.9));
+    for (let k = 0; k < np; k++) {
+      const s0 = k * L / np + 0.03, s1 = (k + 1) * L / np - 0.03;
+      slab(s0, s1, y + 0.05, y + h - 0.05, lat);
+      slab(s0 - 0.03, s0 + 0.03, y, y + h, PAL.wood);
+    }
+    slab(0, L, y, y + 0.05, PAL.wood, 1.25); slab(0, L, y + h - 0.05, y + h, PAL.wood, 1.25);
+    if (col) col.segment(a, b, th * 2, y, y + h);
+    return;
+  }
   for (let k = 0; k < n; k++) {
     const s0 = k * L / n + 0.03, s1 = (k + 1) * L / n - 0.03;
-    slab(s0, s1, y + (kind === 'window' ? 0 : 0.05), y + lowH, kind === 'window' ? PAL.plaster : PAL.wood);
-    slab(s0, s1, y + lowH, y + topH, PAL.lattice);
+    if (kind === 'window') slab(s0, s1, y, y + lowH, PAL.plaster); else dado(s0, s1, y + 0.05, y + lowH);
+    if (rch) {
+      slab(s0, s1, y + lowH + 0.05, y + topH - 0.05, lat);
+      slab(s0, s1, y + lowH, y + lowH + 0.05, PAL.wood, 1.25); slab(s0, s1, y + topH - 0.05, y + topH, PAL.wood, 1.25);
+    } else slab(s0, s1, y + lowH, y + topH, lat);
     slab(s0 - 0.03, s0 + 0.03, y, y + topH, PAL.wood);
   }
   slab(0, L, y + topH, y + h, PAL.wood);
@@ -374,8 +507,26 @@ function guaLuo(out, a, b, yb, r = 0.1) {
   bar(e, -leg + 0.06, e + 0.16, -band); bar(L - e, -leg + 0.06, L - e - 0.16, -band);
 }
 
-/** A bench rail (mei ren kao): the seat on low panels, the curved back leaning out. */
-function benchRail(bag, col, a, b, y) {
+/**
+ * A square-section strip swept along a curve C of [d, v] points in a vertical plane (d across the
+ * rail, v up), half-width hw along the rail and half-thickness ht across the curve; W3(d, v, b)
+ * puts (d, v) and the offset b along the rail into the world. Each stretch a closed little box.
+ */
+function sweepBox(out, W3, C, hw, ht) {
+  const sec = C.map((q, i) => {
+    const a = C[Math.max(0, i - 1)], b = C[Math.min(C.length - 1, i + 1)], td = b[0] - a[0], tv = b[1] - a[1], tl = Math.hypot(td, tv) || 1, nd = -tv / tl * ht, nv = td / tl * ht;
+    return [[nd, nv, -hw], [nd, nv, hw], [-nd, -nv, hw], [-nd, -nv, -hw]].map(([dd, vv, bb]) => W3(q[0] + dd, q[1] + vv, bb));
+  });
+  for (let i = 0; i + 1 < sec.length; i++) {
+    const loc = [];
+    for (let k = 0; k < 4; k++) loc.push(...sec[i][k], ...sec[i + 1][k], ...sec[i + 1][(k + 1) % 4], ...sec[i][k], ...sec[i + 1][(k + 1) % 4], ...sec[i][(k + 1) % 4]);
+    for (const S of [sec[i], sec[i + 1]]) loc.push(...S[0], ...S[1], ...S[2], ...S[0], ...S[2], ...S[3]);
+    out.push(...orientOutward(loc));
+  }
+}
+
+/** The older bench rail (Qing Beijing's pavilions): a white box seat with thin rails leaning out. */
+function benchRailPlain(bag, col, a, b, y) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux;
   const t = [];
   const P = (s, o, yy) => [a[0] + ux * s + nx * o, yy, a[1] + uz * s + nz * o];
@@ -388,51 +539,129 @@ function benchRail(bag, col, a, b, y) {
   col.segment(a, b, 0.3, y, y + 0.5);
 }
 
+/**
+ * A bench along a→b standing on the floor y, the open side the one `lean` (±1) times the left
+ * normal. 'beauty' (mei ren kao, the "beauty's rest", also called Wu Wang kao): a seat plank on a
+ * low plastered wall, behind it a back of slender uprights curving out over the water in an ogee,
+ * a crest rail on top and a middle rail; 'plain': the seat on its low wall, no back.
+ */
+function benchRail(bag, col, a, b, y, mode = 'beauty', lean = 1) {
+  if (!rich()) { benchRailPlain(bag, col, a, b, y); return; }
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz * lean, nz = ux * lean;
+  const t = [];
+  const P = (s, o, yy) => [a[0] + ux * s + nx * o, yy, a[1] + uz * s + nz * o];
+  const seatW = mode === 'beauty' ? 0.19 : 0.24;
+  beamTris(t, P(0, mode === 'beauty' ? -0.03 : 0, y + 0.36), P(L, mode === 'beauty' ? -0.03 : 0, y + 0.36), seatW, 0.06);
+  if (mode === 'beauty') {
+    // the back: o(t) = 0.2 + 0.27 (t − sin 2πt / 2π), up from the seat's back edge to the crest rail
+    const v0 = y + 0.42, v1 = y + 1.0, oF = (k) => 0.17 + 0.27 * (k - Math.sin(Math.PI * 2 * k) / (Math.PI * 2));
+    const n = Math.max(2, Math.round(L / 0.3)), NS = 6;
+    const C = Array.from({ length: NS + 1 }, (_, i) => [oF(i / NS), v0 + (v1 - v0) * i / NS]);
+    for (let k = 0; k <= n; k++) {
+      const s = Math.min(L - 0.02, Math.max(0.02, k * L / n));
+      sweepBox(t, (o, v, bb) => P(s + bb, o, v), C, 0.012, 0.013);
+    }
+    beamTris(t, P(0, oF(1), v1 - 0.02), P(L, oF(1), v1 - 0.02), 0.05, 0.065);                      // the crest rail
+    beamTris(t, P(0, oF(0.5), v0 + (v1 - v0) * 0.5 - 0.02), P(L, oF(0.5), v0 + (v1 - v0) * 0.5 - 0.02), 0.018, 0.04);   // the middle rail
+    beamTris(t, P(0, oF(0), v0 - 0.01), P(L, oF(0), v0 - 0.01), 0.025, 0.04);                        // the foot rail on the seat
+  }
+  bag.add(PAL.wood, fromTriangles(t));
+  const p0 = P(0, -0.12, 0), p1 = P(L, 0.12, 0);
+  bag.add(PAL.plaster, box(Math.min(p0[0], p1[0]), y, Math.min(p0[2], p1[2]), Math.max(p0[0], p1[0]), y + 0.36, Math.max(p0[2], p1[2])));
+  col.segment(a, b, mode === 'beauty' ? 0.5 : 0.3, y, y + (mode === 'beauty' ? 1.0 : 0.5));
+}
+
 // ── elements ─────────────────────────────────────────────────────────────────
 
 /**
  * ming_hall: { rect, y (floor), H (eaves), front ('n'|'s'|'e'|'w'), four (lattice on all four sides,
  * a hall to be seen from), roof ('xieshan' | 'hip' | 'gable'), plat (platform height) }
+ * Per wall (docs/settlements/ming-suzhou.md §4): walls { n, s, e, w: 'lat' (latticed long doors or
+ * windows) | 'plaster' (a plastered wall on a brick skirt) | 'board' (timber boards) } over the
+ * default (four: all 'lat'; else only the front); winWall: a latticed window in the middle of each
+ * wide bay of a plastered wall; doors ['s', …]: sides besides the front with a doorway in the
+ * middle bay; lat: the lattice material (a string, or { door, window, n, s, e, w }) over the
+ * palette's; winSide ('door'|'window'): the latticed sides other than the front as long doors
+ * (to the floor, with dado panels) or as windows over a plastered sill; fish: the hanging fish on
+ * the gable ends (default: where no el.pal); platMargin, platform: false.
  */
 function mingHall(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, H = el.H ?? 4.2, ylo = y - (el.plat ?? y);
-  platform(bag, col, [x0 - 0.9, z0 - 0.9, x1 + 0.9, z1 + 0.9], ylo, y);
   const along = (x1 - x0) >= (z1 - z0), Lx = x1 - x0, Lz = z1 - z0;
   const nb = el.bays?.[0] ?? Math.max(1, Math.round((along ? Lx : Lz) / 3.6)), nd = el.bays?.[1] ?? Math.max(1, Math.round((along ? Lz : Lx) / 3.4));
   const xs = [], zs = [];
   for (let i = 0; i <= (along ? nb : nd); i++) xs.push(x0 + Lx * i / (along ? nb : nd));
   for (let j = 0; j <= (along ? nd : nb); j++) zs.push(z0 + Lz * j / (along ? nd : nb));
+  const front = el.front || 's';
+  const wallKind = (k) => el.walls?.[k] ?? (el.four || k === front ? 'lat' : 'plaster');
+  const doorSide = (k) => k === front || !!el.doors?.includes(k);
+  const latOf = (k, kind) => (typeof el.lat === 'string' ? el.lat : el.lat?.[k] ?? el.lat?.[kind] ?? null);
+  const sides = { n: [[x0, z0], [x1, z0], xs], s: [[x1, z1], [x0, z1], xs], w: [[x0, z1], [x0, z0], zs], e: [[x1, z0], [x1, z1], zs] };
+  // the platform, with steps at every doorway
+  const mid = (ticks) => Math.floor((ticks.length - 1) / 2);
+  const steps = [];
+  for (const [k, [, , ticks]] of Object.entries(sides)) if (doorSide(k)) {
+    const i = mid(ticks), c = (ticks[i] + ticks[i + 1]) / 2;
+    steps.push({ side: k, c, w: Math.min(Math.abs(ticks[i + 1] - ticks[i]) * 0.8, 2.6) });
+  }
+  const pm = el.platMargin ?? 0.9;
+  if (el.platform !== false) platform(bag, col, [x0 - pm, z0 - pm, x1 + pm, z1 + pm], ylo, y, steps);
   // the posts round the edge; the hall's floor of square bricks
   // posts thicken with the height of the hall (a 15 m hall stands on posts near a metre thick)
   const d = H > 6 ? 0.28 + (H - 6) * 0.07 : 0.28, tall = H > 8, hd = Math.min(H - 0.5, 5.5 + (H - 8) * 0.15);
   for (const x of xs) for (const z of zs) if (x === x0 || x === x1 || z === z0 || z === z1) column(bag, col, x, z, y, H - 0.2, d);
   bag.add(PAL.floor, box(x0, y - 0.04, z0, x1, y + 0.01, z1));
   // lattice doors (or plaster walls with windows) between the posts
-  const sides = { n: [[x0, z0], [x1, z0], xs], s: [[x1, z1], [x0, z1], xs], w: [[x0, z1], [x0, z0], zs], e: [[x1, z0], [x1, z1], zs] };
   for (const [k, [a, b, ticks]] of Object.entries(sides)) {
-    const isFront = k === (el.front || 's');
+    const isFront = k === front, kind = wallKind(k), ns = k === 'n' || k === 's';
     for (let i = 0; i + 1 < ticks.length; i++) {
-      const p = (v) => (k === 'n' || k === 's' ? [v, a[1]] : [a[0], v]);
+      const p = (v) => (ns ? [v, a[1]] : [a[0], v]);
       const A = p(ticks[i]), B = p(ticks[i + 1]);
-      if (el.four || isFront) {
-        // the middle bay of the front stands open as the doorway
-        const doorway = isFront && i === Math.floor((ticks.length - 1) / 2);
+      const lo = [Math.min(A[0], B[0]), Math.min(A[1], B[1])], hi = [Math.max(A[0], B[0]), Math.max(A[1], B[1])];
+      const wallBox = (y0, y1, t, mat, u0 = null, u1 = null) => {
+        const [l0, l1] = u0 === null ? [ns ? lo[0] : lo[1], ns ? hi[0] : hi[1]] : [u0, u1];
+        bag.add(mat, ns ? box(l0, y0, lo[1] - t, l1, y1, lo[1] + t) : box(lo[0] - t, y0, l0, lo[0] + t, y1, l1));
+      };
+      const doorway = doorSide(k) && i === mid(ticks);
+      if (kind === 'lat') {
         if (doorway && !tall) continue;
-        if (!tall) { latticeBay(bag, col, A, B, y, H - 0.5, el.four && !isFront ? 'window' : 'door'); continue; }
+        const lk = isFront || el.winSide === 'door' ? 'door' : 'window', lm = latOf(k, lk);
+        if (!tall) { latticeBay(bag, col, A, B, y, H - 0.5, lk, 0.06, lm); continue; }
         // a tall hall: doors at the foot, a tie beam over them, plaster above with a band of lattice windows
-        if (!doorway) latticeBay(bag, col, A, B, y, hd, 'door');
-        const lo = [Math.min(A[0], B[0]), Math.min(A[1], B[1])], hi = [Math.max(A[0], B[0]), Math.max(A[1], B[1])], ns = k === 'n' || k === 's';
+        if (!doorway) latticeBay(bag, col, A, B, y, hd, 'door', 0.06, lm);
         const wall = (y0, y1, t, mat) => bag.add(mat, box(lo[0] - (ns ? 0 : t), y0, lo[1] - (ns ? t : 0), hi[0] + (ns ? 0 : t), y1, hi[1] + (ns ? t : 0)));
         wall(y + hd, y + hd + 0.45, 0.17, PAL.wood);
         wall(y + hd + 0.45, y + H - 0.55, 0.11, PAL.plaster);
         const span = H - 1.0 - hd;
-        latticeBay(bag, null, A, B, y + hd + 0.45 + span * 0.3, span * 0.42, 'window', 0.14);
+        latticeBay(bag, null, A, B, y + hd + 0.45 + span * 0.3, span * 0.42, 'window', 0.14, latOf(k, 'window'));
         col.segment(A, B, 0.3, y + (doorway ? hd : 0), y + H);
-      } else {
-        const L = Math.hypot(B[0] - A[0], B[1] - A[1]);
-        bag.add(PAL.plaster, box(Math.min(A[0], B[0]) - (k === 'w' || k === 'e' ? 0.14 : 0), y, Math.min(A[1], B[1]) - (k === 'n' || k === 's' ? 0.14 : 0), Math.max(A[0], B[0]) + (k === 'w' || k === 'e' ? 0.14 : 0), y + H - 0.4, Math.max(A[1], B[1]) + (k === 'n' || k === 's' ? 0.14 : 0)));
+      } else if (doorway && !tall) {
+        continue;
+      } else if (tall && el.walls?.[k]) {
+        // a tall hall's solid side: plaster to the tie beam and over it, the band of windows above
+        wallBox(y, y + hd + 0.45, 0.14, PAL.plaster);
+        wallBox(y + hd + 0.45, y + H - 0.55, 0.11, PAL.plaster);
+        const span = H - 1.0 - hd;
+        latticeBay(bag, null, A, B, y + hd + 0.45 + span * 0.3, span * 0.42, 'window', 0.14, latOf(k, 'window'));
         col.segment(A, B, 0.28, y, y + H);
-        void L;
+      } else if (kind === 'board') {
+        // timber boards on the frame: battens over the joints
+        const L = Math.hypot(B[0] - A[0], B[1] - A[1]), top = y + H - 0.45;
+        wallBox(y, top, 0.09, PAL.wood);
+        if (!LOW) { const nbat = Math.max(2, Math.round(L / 0.3)); for (let q = 0; q <= nbat; q++) { const u = (ns ? lo[0] : lo[1]) + (L * q) / nbat; wallBox(y + 0.1, top - 0.1, 0.105, PAL.wood, u - 0.02, u + 0.02); } }
+        col.segment(A, B, 0.2, y, y + H);
+      } else {
+        // a plastered wall on a skirt of grey brick, with a latticed window in the middle of a wide bay
+        const L = Math.hypot(B[0] - A[0], B[1] - A[1]), top = y + H - 0.4, u0 = ns ? lo[0] : lo[1], u1 = ns ? hi[0] : hi[1];
+        if (rich()) wallBox(y, y + 0.36, 0.16, PAL.plinth);
+        if (el.winWall && L > 2.6 && H > 3) {
+          const ww = Math.min(1.5, L - 1.3), c = (u0 + u1) / 2, sill = 0.95, wt = Math.min(y + 2.5, top - 0.55);
+          wallBox(y + 0.36, y + sill, 0.14, PAL.plaster); wallBox(wt, top, 0.14, PAL.plaster);
+          wallBox(y + sill, wt, 0.14, PAL.plaster, u0, c - ww / 2); wallBox(y + sill, wt, 0.14, PAL.plaster, c + ww / 2, u1);
+          const pa = ns ? [c - ww / 2, A[1]] : [A[0], c - ww / 2], pb = ns ? [c + ww / 2, A[1]] : [A[0], c + ww / 2];
+          latticeBay(bag, null, pa, pb, y + sill, wt - y - sill, 'pane', 0.05, latOf(k, 'window'));
+        } else wallBox(rich() ? y + 0.36 : y, top, 0.14, PAL.plaster);
+        col.segment(A, B, 0.28, y, y + H);
       }
     }
   }
@@ -443,7 +672,7 @@ function mingHall(el, { bag, col }) {
   // the ceiling and the roof
   bag.add(PAL.wood, box(x0, y + H - 0.2, z0, x1, y + H - 0.12, z1));
   const o = el.eave ?? 1.25;
-  if (el.roof !== 'none') rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (along ? Lx : Lz) / 2 + o, B: (along ? Lz : Lx) / 2 + o, y: y + H - 0.25, rise: el.rise ?? ((along ? Lz : Lx) / 2 + o) * 0.62, kind: el.roof || 'xieshan', sweep: el.sweep ?? 1.0, alongZ: !along }, bag);
+  if (el.roof !== 'none') rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (along ? Lx : Lz) / 2 + o, B: (along ? Lz : Lx) / 2 + o, y: y + H - 0.25, rise: el.rise ?? ((along ? Lz : Lx) / 2 + o) * 0.62, kind: el.roof || 'xieshan', sweep: el.sweep ?? 1.0, alongZ: !along, fish: el.fish ?? !el.pal, gableBoard: el.roof === 'gable' && !el.pal ? o : undefined }, bag);
 }
 
 /** ming_pavilion: { c, shape ('hex'|'square'|'oct'|'rect'), r (or w, d), y, H, bench, moons (round openings: square only) } */
@@ -459,7 +688,14 @@ function mingPavilion(el, { bag, col }) {
   }
   const ext = (p, m) => { const dx = p[0] - cx, dz = p[1] - cz, l = Math.hypot(dx, dz); return [cx + dx / l * (l + m), cz + dz / l * (l + m)]; };
   const xs = poly.map((p) => p[0]), zs = poly.map((p) => p[1]);
-  platform(bag, col, [Math.min(...xs) - 0.5, Math.min(...zs) - 0.5, Math.max(...xs) + 0.5, Math.max(...zs) + 0.5], y - Math.max(0.3, el.plat ?? 0.45), y);
+  const open0 = el.open ?? [0], pn = poly.length, plat = Math.max(0.3, el.plat ?? 0.45);
+  // steps at the open sides of a square or rectangular pavilion on a low platform (a hill's pavilion has its rock path)
+  const steps = [];
+  if (el.steps !== false && (el.shape === 'rect' || el.shape === 'square') && plat <= 0.7) for (const k of open0) {
+    const a = poly[k], b = poly[(k + 1) % pn], side = ['n', 'e', 's', 'w'][k];
+    steps.push({ side, c: side === 'n' || side === 's' ? (a[0] + b[0]) / 2 : (a[1] + b[1]) / 2, w: Math.min(1.6, Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.5) });
+  }
+  if (el.platform !== false) platform(bag, col, [Math.min(...xs) - 0.5, Math.min(...zs) - 0.5, Math.max(...xs) + 0.5, Math.max(...zs) + 0.5], y - plat, y, steps);
   for (const p of poly) column(bag, col, p[0], p[1], y, H - 0.2, 0.22);
   // a bench rail between the posts, left open at the entrances
   const n = poly.length;
@@ -469,7 +705,14 @@ function mingPavilion(el, { bag, col }) {
     for (let k = 0; k < n; k++) roundWall(bag, col, poly[k], poly[(k + 1) % n], y, hw, 0.22, Math.min(side * 0.33, (hw - 0.35) / 2));
   } else if (el.bench !== false) {
     const open = el.open ?? [0];
-    for (let k = 0; k < n; k++) if (!open.includes(k)) benchRail(bag, col, poly[k], poly[(k + 1) % n], y);
+    for (let k = 0; k < n; k++) {
+      if (open.includes(k)) continue;
+      const a = poly[k], b = poly[(k + 1) % n], L = Math.hypot(b[0] - a[0], b[1] - a[1]), nx = -(b[1] - a[1]) / L, nz = (b[0] - a[0]) / L;
+      const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], lean = (m[0] - cx) * nx + (m[1] - cz) * nz >= 0 ? 1 : -1;
+      // the beauty's rest where the pavilion looks on water (el.wet(x, z)), a plain bench elsewhere
+      const mode = el.wet ? (el.wet(m[0] + nx * lean * 2, m[1] + nz * lean * 2) ? 'beauty' : 'plain') : 'beauty';
+      benchRail(bag, col, a, b, y, mode, lean);
+    }
   }
   const fr = [];
   // fine: a lighter beam, and under it a hanging fretwork (gua luo) between the posts on every
@@ -482,7 +725,7 @@ function mingPavilion(el, { bag, col }) {
     } else beamTris(fr, [a[0], y + H - 0.55, a[1]], [b[0], y + H - 0.55, b[1]], 0.12, 0.34);
   }
   bag.add(PAL.wood, fromTriangles(fr));
-  if (el.shape === 'rect') rectRoof({ c: [cx, cz], A: el.w / 2 + 1.0, B: (el.d ?? el.w) / 2 + 1.0, y: y + H - 0.2, rise: ((el.d ?? el.w) / 2 + 1) * 0.7, kind: 'xieshan', sweep: 0.9 }, bag);
+  if (el.shape === 'rect') rectRoof({ c: [cx, cz], A: el.w / 2 + 1.0, B: (el.d ?? el.w) / 2 + 1.0, y: y + H - 0.2, rise: ((el.d ?? el.w) / 2 + 1) * 0.7, kind: 'xieshan', sweep: 0.9, fish: el.fish ?? !el.pal }, bag);
   else pyramidRoof(poly.map((p) => ext(p, 1.0)), y + H - 0.2, (el.r ?? el.w / 2) * 1.05 + 0.9, el.sweep ?? 1.0, bag, PAL.roof, PAL.wood);
 }
 
@@ -913,7 +1156,10 @@ function mingGallery(el, { bag, col }) {
     for (let k = 0; k < n; k++) {
       if (n > 2 && k % 4 === 2) continue;
       const s0 = k * L / n, s1 = (k + 1) * L / n;
-      benchRail(bag, col, [a[0] + ux * s0 + nx * w * sg2, a[1] + uz * s0 + nz * w * sg2], [a[0] + ux * s1 + nx * w * sg2, a[1] + uz * s1 + nz * w * sg2], y);
+      const A2 = [a[0] + ux * s0 + nx * w * sg2, a[1] + uz * s0 + nz * w * sg2], B2 = [a[0] + ux * s1 + nx * w * sg2, a[1] + uz * s1 + nz * w * sg2];
+      // the beauty's rest where this bay looks on water (el.wet(x, z)), a plain bench elsewhere
+      const mode = el.wet ? (el.wet((A2[0] + B2[0]) / 2 + nx * sg2 * 2, (A2[1] + B2[1]) / 2 + nz * sg2 * 2) ? 'beauty' : 'plain') : 'beauty';
+      benchRail(bag, col, A2, B2, y, mode, sg2);
     }
     col.floor([Math.min(a[0], b[0]) - (Math.abs(nx) * w + 0.2), Math.min(a[1], b[1]) - (Math.abs(nz) * w + 0.2), Math.max(a[0], b[0]) + (Math.abs(nx) * w + 0.2), Math.max(a[1], b[1]) + (Math.abs(nz) * w + 0.2)], y);
   }
@@ -1981,31 +2227,56 @@ function paving(el, { bag, col }) {
 /** A path of pebble mosaic along a polyline { pts, w, y } (garden-stone.js). */
 function path(el, ctx) { pebblePath(el, ctx); }
 
-/** A boat-shaped pavilion (shi fang): a deck on the water like a boat's bow, a hall, a two-storey stern on the shore. */
+/**
+ * A boat-shaped pavilion (shi fang): a hull of stone in the water with a bluestone deck and a
+ * granite coaming, its bow pointing east and rounded in an ellipse over the last 4.2 m, its stern
+ * square against the shore; on the deck the bow pavilion, the middle cabin and the two-storey
+ * stern (a tower), all standing on the deck itself (no platforms of their own to hang off the hull).
+ */
 function stoneBoat(el, ctx) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, { bag, col } = ctx;
-  const zc = (z0 + z1) / 2, W = (z1 - z0) / 2;
-  // the hull of stone, in the water, its bow pointing east
-  const hull = [];
-  const P = (x, o, yy) => [x, yy, zc + o];
-  for (let i = 0; i < 12; i++) {
-    const xa = x0 + (x1 - x0) * i / 12, xb = x0 + (x1 - x0) * (i + 1) / 12;
-    const wa = W * Math.min(1, (x1 - xa) / 3.5 + 0.35), wb = W * Math.min(1, (x1 - xb) / 3.5 + 0.35);
-    for (const sg of [-1, 1]) hull.push(...P(xa, sg * wa, y), ...P(xb, sg * wb, y), ...P(xb, sg * wb * 0.8, -1.4), ...P(xa, sg * wa, y), ...P(xb, sg * wb * 0.8, -1.4), ...P(xa, sg * wa * 0.8, -1.4));
-    hull.push(...P(xa, -wa, y), ...P(xb, -wb, y), ...P(xb, wb, y), ...P(xa, -wa, y), ...P(xb, wb, y), ...P(xa, wa, y));
+  const zc = (z0 + z1) / 2, W = (z1 - z0) / 2, xb = x1 - 4.2, bot = -1.4;
+  // the outline: half-widths from the stern to the bow's tip (a blunt 0.3 m at the end)
+  const xsamp = [x0, x0 + (xb - x0) / 3, x0 + 2 * (xb - x0) / 3, xb];
+  for (let i = 1; i <= 8; i++) xsamp.push(xb + (x1 - xb) * i / 8);
+  const hw = xsamp.map((x) => (x <= xb ? W : Math.max(0.3, W * Math.sqrt(Math.max(0, 1 - ((x - xb) / (x1 - xb)) ** 2)))));
+  const T = (x, o, yy) => [x, yy, zc + o];
+  const hull = [], deck = [];
+  const quadT = (out, a, b2, c, d) => out.push(...a, ...b2, ...c, ...a, ...c, ...d);
+  for (let i = 0; i + 1 < xsamp.length; i++) {
+    const xa = xsamp[i], xb2 = xsamp[i + 1], wa = hw[i], wb = hw[i + 1];
+    quadT(deck, T(xa, -wa, y), T(xb2, -wb, y), T(xb2, wb, y), T(xa, wa, y));
+    // the sides lean in 0.2 m towards the keel
+    quadT(hull, T(xa, -wa, y), T(xa, -wa * 0.88, bot), T(xb2, -wb * 0.88, bot), T(xb2, -wb, y));
+    quadT(hull, T(xa, wa, y), T(xb2, wb, y), T(xb2, wb * 0.88, bot), T(xa, wa * 0.88, bot));
   }
-  bag.add('granite_block', fromTriangles(hull.concat(flipTris(hull))));
-  col.floor([x0, zc - W * 0.8, x1 - 1.0, zc + W * 0.8], y);
-  // the bow platform's open pavilion, the middle cabin, the two-storey stern (a tower)
-  mingPavilion({ c: [x1 - 2.6, zc], shape: 'rect', w: 3.0, d: W * 1.6, y, H: 3.0, bench: true, open: [3] }, ctx);
-  mingHall({ rect: [x0 + 3.6, zc - W * 0.75, x1 - 4.4, zc + W * 0.75], y, H: 3.1, front: 'e', four: true, roof: 'gable', plat: 0.01, eave: 0.6 }, ctx);
-  mingHall({ rect: [x0, zc - W * 0.8, x0 + 3.6, zc + W * 0.8], y, H: 5.8, front: 'e', four: true, roof: 'xieshan', plat: 0.01, eave: 0.8 }, ctx);
+  const n = xsamp.length - 1;
+  quadT(hull, T(xsamp[n], -hw[n], y), T(xsamp[n], -hw[n] * 0.88, bot), T(xsamp[n], hw[n] * 0.88, bot), T(xsamp[n], hw[n], y));   // the bow's end
+  quadT(hull, T(x0, -W, y), T(x0, W, y), T(x0, W * 0.88, bot), T(x0, -W * 0.88, bot));                                          // the stern's
+  quadT(hull, T(x0, -W * 0.88, bot), T(x0, W * 0.88, bot), T(xsamp[n], hw[n] * 0.88, bot), T(xsamp[n], -hw[n] * 0.88, bot));    // the keel, closed
+  bag.add(PAL.base, fromTriangles(hull.concat(flipTris(hull))));
+  bag.add(PAL.floor, fromTriangles(deck.concat(flipTris(deck))));
+  // the coaming: a granite kerb all round the deck's edge, 0.28 m wide, 12 cm high
+  const ko = [];
+  for (const sg of [-1, 1]) for (let i = 0; i + 1 < xsamp.length; i++) {
+    const wa = Math.max(0.12, hw[i] - 0.14), wb = Math.max(0.12, hw[i + 1] - 0.14);
+    beamTris(ko, [xsamp[i], y, zc + sg * wa], [xsamp[i + 1], y, zc + sg * wb], 0.14, 0.12, true);
+  }
+  beamTris(ko, [x0 + 0.14, y, zc - W + 0.14], [x0 + 0.14, y, zc + W - 0.14], 0.14, 0.12, true);
+  bag.add(PAL.base, fromTriangles(ko));
+  col.floor([x0, zc - W * 0.85, x1 - 1.2, zc + W * 0.85], y);
+  // the bow pavilion, the middle cabin, the two-storey stern, all on the deck
+  mingPavilion({ c: [x1 - 3.0, zc], shape: 'rect', w: 2.6, d: 2.4, y, H: 3.0, bench: true, open: [3], platform: false, fine: true, wet: () => true }, ctx);
+  mingHall({ rect: [x0 + 3.6, zc - W * 0.72, x1 - 4.6, zc + W * 0.72], y, H: 3.1, front: 'e', four: true, roof: 'gable', plat: 0.01, eave: 0.6, platform: false, lat: 'lattice_bubujin', winSide: 'door', doors: ['w'] }, ctx);
+  mingHall({ rect: [x0, zc - W * 0.78, x0 + 3.6, zc + W * 0.78], y, H: 5.8, front: 'e', four: true, roof: 'xieshan', plat: 0.01, eave: 0.8, platform: false, lat: 'lattice_wan' }, ctx);
 }
 
 /** A two-storey tower on the water (lou), its upper floor reached by a stair of rockery outside. */
 function lou(el, ctx) {
   const [x0, z0, x1, z1] = el.rect, y = el.y;
-  mingHall({ rect: el.rect, y, H: 6.4, front: 'e', four: true, roof: 'xieshan', plat: 0.4, eave: 1.1 }, ctx);
+  // the lower floor: lattice long doors on the water front (east) in the lantern frame, windows in ice-crack on the
+  // north and south, a plastered back wall to the west with a window
+  mingHall({ rect: el.rect, y, H: 6.4, front: 'e', four: true, roof: 'xieshan', plat: 0.4, eave: 1.1, walls: { w: 'plaster' }, winWall: true, lat: { door: 'lattice_lantern', window: 'lattice_ice' } }, ctx);
   // the upper floor's balcony rail and the pent roof between the floors
   const t = [];
   for (const [a, b] of [[[x0, z0], [x1, z0]], [[x1, z0], [x1, z1]], [[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]]]) beamTris(t, [a[0], y + 3.2, a[1]], [b[0], y + 3.2, b[1]], 0.5, 0.18);

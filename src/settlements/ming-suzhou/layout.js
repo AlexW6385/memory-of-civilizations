@@ -258,18 +258,23 @@ export function inLot(x, z, m = 0) {
  * Rectangles [x0, z0, x1, z1]; pavilions by centre and size. `y`: floor above the garden.
  */
 export const BUILDINGS = {
-  yuanxiang: { kind: 'hall4', rect: [-7.2, -19.5, 7.2, -10], y: 0.75 },                 // Hall of Distant Fragrance
-  yiyu: { kind: 'hall', rect: [-25, -18.5, -15, -12], y: 0.45, front: 'n' },             // Leaning Jade Pavilion (xuan)
+  // `hall`: how each hall's walls are made (ming_hall's walls / doors / lat / winSide / winWall, docs/settlements/ming-suzhou.md §4)
+  yuanxiang: { kind: 'hall4', rect: [-7.2, -19.5, 7.2, -10], y: 0.75,                    // Hall of Distant Fragrance: long windows on all four sides
+    hall: { winSide: 'door', doors: ['s'], lat: { door: 'lattice_bubujin', window: 'lattice_bubujin', e: 'lattice_ice', w: 'lattice_ice' } } },
+  yiyu: { kind: 'hall', rect: [-25, -18.5, -15, -12], y: 0.45, front: 'n',               // Leaning Jade Pavilion (xuan): latticed to the pond, a plastered back and west wall
+    hall: { walls: { s: 'plaster', w: 'plaster' }, winWall: true, lat: { n: 'lattice_ice', e: 'lattice_ice', window: 'lattice_haitang' } } },
   xiangzhou: { kind: 'boat', rect: [-58, -40.5, -44, -35.5], y: 0.35 },                 // the Fragrant Isle, a stone boat
   xiaofeihong: { kind: 'covered_bridge', rect: [-53.5, -15.2, -40.5, -12.6], y: 0.45 },  // Small Flying Rainbow
-  xiaocanglang: { kind: 'water_pavilion', rect: [-52, 2.5, -42, 7.5], y: 0.4 },          // Little Canglang
+  xiaocanglang: { kind: 'water_pavilion', rect: [-52, 2.5, -42, 7.5], y: 0.4,           // Little Canglang
+    hall: { winSide: 'door', lat: 'lattice_wan' } },
   jianshan: { kind: 'lou', rect: [-63, -71, -53, -63], y: 0.35 },                        // Mountain-in-View Tower
   hefeng: { kind: 'hex', c: [-27, -31], r: 2.5, y: 0.7 },                                 // Lotus Breeze on Four Sides
   xuexiang: { kind: 'pav_rect', c: [-12, -50.5], w: 4.2, d: 3.0, y: 3.5 },                // Snowy Fragrance and Rosy Clouds
   daishuang: { kind: 'hex', c: [17, -52], r: 2.1, y: 2.75 },                             // Waiting for Frost
   wuzhu: { kind: 'pav_square', c: [57, -44], w: 6.0, y: 0.45, moons: true },              // Wutong and Bamboo Retreat
   lvyi: { kind: 'pav_square', c: [60, -68], w: 3.4, y: 2.35 },                           // Green Ripples
-  linglong: { kind: 'hall', rect: [35, -7.5, 45, -2], y: 0.4, front: 'w' },              // the Exquisite Jade hall, in the loquat court
+  linglong: { kind: 'hall', rect: [35, -7.5, 45, -2], y: 0.4, front: 'w',                // the Exquisite Jade hall, in the loquat court: plastered on three sides
+    hall: { winWall: true, lat: { door: 'lattice_lantern', window: 'lattice_haitang' } } },
 };
 /** Covered galleries (lang): polylines with their floor height, 2 m wide. */
 export const GALLERIES = [
