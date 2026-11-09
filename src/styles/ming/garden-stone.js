@@ -220,9 +220,15 @@ export function stoneParts(v, lod = 1) {
   if (CACHE.has(key)) return CACHE.get(key);
   const [kind, seed] = STONES[((v % STONES.length) + STONES.length) % STONES.length];
   const S = makeStone(kind, seed);
-  const cell = lod === 0 ? Math.max(0.05, S.H * 0.028) : Math.max(0.085, S.H * 0.065);
-  const lo = [-S.bx, BASE - cell * 1.5, -S.bz], hi = [S.bx, S.H + cell * 2.5, S.bz];
-  const { P, N, I } = surfaceNets(S.sdf, lo, hi, cell);
+  // the grid coarsens until the stone is within its triangle budget (near 1.5 k, far 400): the holes that survive are the big ones
+  const target = lod === 0 ? 1500 : 400;
+  let cell = lod === 0 ? Math.max(0.075, S.H * 0.05) : Math.max(0.16, S.H * 0.1), net;
+  for (let it = 0; it < 16; it++) {
+    net = surfaceNets(S.sdf, [-S.bx, BASE - cell * 1.5, -S.bz], [S.bx, S.H + cell * 2.5, S.bz], cell);
+    if (net.I.length / 3 <= target) break;
+    cell *= 1.1;
+  }
+  const { P, N, I } = net;
   const a = [], b = [];
   for (let i = 0; i < I.length; i += 3) {
     const cx = (P[I[i] * 3] + P[I[i + 1] * 3] + P[I[i + 2] * 3]) / 3, cy = (P[I[i] * 3 + 1] + P[I[i + 1] * 3 + 1] + P[I[i + 2] * 3 + 1]) / 3, cz = (P[I[i] * 3 + 2] + P[I[i + 1] * 3 + 2] + P[I[i + 2] * 3 + 2]) / 3;
