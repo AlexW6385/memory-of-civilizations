@@ -265,6 +265,28 @@ function onTorso(x, y, front, off = 0.006) {
   const k = front && y > 1.12 && y < 1.36 ? 1.08 : 1, rx = r * k, rz = r * 0.66 * k;
   return [x, y, (front ? -1 : 1) * (rz * Math.sqrt(Math.max(0, 1 - (x / rx) ** 2)) + off)];
 }
+
+/**
+ * The crossed collar (jiaoling youren, the right-lapel wrap of Chinese dress, as the kimono's too): the wearer's left
+ * panel lies over the right and closes at the right side; its edge runs from the left of the neck down across the chest
+ * to the right underarm, the right panel's collar showing at the neck and under it. Standing frame, lying on the torso.
+ */
+function crossCollar(up) {
+  const ring = Array.from({ length: 13 }, (_, k) => { const t = k / 12 * Math.PI * 2; return [Math.cos(t) * 0.058, 1.424 - Math.max(0, -Math.sin(t)) * 0.03, Math.sin(t) * 0.058 * 0.9 + 0.006, 0.013, 0.01]; });
+  up('c2', tube(ring, 5, { capA: false, capB: false }));                                              // the stand of the collar round the neck
+  const over = [[-0.05, 1.41], [-0.035, 1.35], [0.02, 1.285], [0.085, 1.21], [0.13, 1.14], [0.14, 1.07]];
+  up('c2', tube(over.map(([x, y]) => [...onTorso(x, y, true, 0.012), 0.018, 0.008]), 5));         // the top lapel's edge, a facing band
+  const under = [[0.05, 1.41], [0.03, 1.36], [-0.005, 1.31], [-0.02, 1.275]];
+  up('c2', tube(under.map(([x, y]) => [...onTorso(x, y, true, 0.006), 0.013, 0.006]), 5));          // the under lapel, a narrow band, going under the top one
+}
+/** The apron (bib, waist cord, panel to the knee; across the lap seated), in the standing frame. */
+function apron(a, up, legs) {
+  const Z = (y) => y > 1.1 ? 0.13 : y > 0.9 ? 0.15 : y > 0.7 ? 0.17 : 0.185;
+  up('c2', tube([[-0.07, 1.28, -0.122, 0.006], [-0.045, 1.37, -0.09, 0.006], [0, 1.425, -0.056, 0.006], [0.045, 1.37, -0.09, 0.006], [0.07, 1.28, -0.122, 0.006]], 4, { capA: false, capB: false }));   // the neck cord
+  up('c2', tube(Array.from({ length: 15 }, (_, k) => { const t = k / 14 * Math.PI * 2; return [Math.cos(t) * 0.17, 1.0, Math.sin(t) * 0.17 * 0.82, 0.016, 0.012]; }), 5, { capA: false, capB: false }));   // the waist cord
+  if (legs === 'stand') a('c2', tube([[0, 1.3, -0.128, 0.075, 0.005], [0, 1.2, -Z(1.2) , 0.09, 0.005], [0, 1.0, -Z(1.0), 0.125, 0.005], [0, 0.78, -Z(0.78), 0.15, 0.005], [0, 0.55, -Z(0.55), 0.16, 0.005]], 6));
+  else { up('c2', tube([[0, 1.3, -0.128, 0.075, 0.005], [0, 1.2, -0.13, 0.09, 0.005], [0, 1.02, -0.17, 0.115, 0.005]], 6)); if (legs === 'sit') up('c2', tube([[0, 1.0, -0.17, 0.12, 0.005], [0, 1.005, -0.3, 0.13, 0.005], [0, 0.995, -0.42, 0.12, 0.005]], 6)); }
+}
 function loinCloth(a, up, legs, seed) {
   up('c1', slathe([[0.158, 0.79], [0.163, 0.82], [0.163, 0.9], [0.156, 0.935], [0.142, 0.94]], 14, (th) => ell(1, 0.7)(th)));
   if (legs === 'stand' || legs === 'kneel' || legs === 'brace') for (const f of [-1, 1]) up('c1', tube([[0, 0.9, f * 0.112, 0.055, 0.008], [0, 0.78, f * 0.118, 0.065, 0.007], [0, 0.62, f * 0.112, 0.06, 0.006]], 5));
@@ -434,7 +456,7 @@ function faceOf(add, beard) {
 }
 /** hair: { style: 'short' | 'long' | 'bun' | 'shaven' | 'under' (beneath a hat) } */
 function hairOf(add, style) {
-  if (style === 'short' || style === 'long' || style === 'bun' || style === 'under' || style === 'topknot') {
+  if (style === 'short' || style === 'long' || style === 'bun' || style === 'under' || style === 'topknot' || style === 'netknot') {
     const fx = ell(0.88, 1.0), low = style === 'under' ? 1.54 : 1.5;
     add('hair', slathe([[0.075, low], [0.086, 1.54], [0.093, 1.585], [0.091, 1.618], [0.08, 1.645], [0.056, 1.665], [0.028, 1.674], [0.001, 1.676]], 12,
       (th, i, r, y) => fx(th) * 1.08 * (FRONT(th) && y < 1.612 ? (Math.abs(Math.cos(th)) < 0.55 ? 0.62 : 0.86) : 1)).translate(0, 0, -0.004));
@@ -447,10 +469,18 @@ function hairOf(add, style) {
   if (style === 'long') add('hair', tube([[0, 1.6, 0.075, 0.075, 0.03], [0, 1.47, 0.1, 0.085, 0.028], [0, 1.3, 0.1, 0.075, 0.022], [0, 1.24, 0.095, 0.05, 0.015]], 8));
   // the topknot (tikitiki, rāhiri): the hair drawn up from all round and twisted into a knot on the crown
   if (style === 'topknot') { const b = ball(0.052, 10, 7); b.scale(1, 0.9, 1); b.translate(0, 1.655, 0.012); add('hair', b); add('hair', tube([[0, 1.64, 0.01, 0.035], [0, 1.67, 0.012, 0.032], [0, 1.69, 0.012, 0.022]], 8)); }
+  // the Ming man's hair: the topknot drawn up tight, held by the net (wangjin) whose band runs round the brow
+  if (style === 'netknot') { const b = ball(0.05, 10, 7); b.scale(1, 1.0, 1); b.translate(0, 1.672, 0.0); add('hair', b); add('hair', tube(Array.from({ length: 15 }, (_, k) => { const t = k / 14 * Math.PI * 2; return [Math.cos(t) * 0.093 * 0.88, 1.607, Math.sin(t) * 0.093 + (Math.sin(t) < 0 ? 0.0 : 0.003), 0.008, 0.012]; }), 5, { capA: false, capB: false })); }
   if (style === 'bun') { const b = ball(0.05, 9, 6); b.scale(1, 0.85, 0.9); b.translate(0, 1.565, 0.098); add('hair', b); }
 }
-function hatOf(add, hat) {
-  if (hat === 'cap') {                                // a soft cap, a little full at the back
+/** A rounded square (superellipse) section, 1 along the axes: the fangjin's square crown. */
+const sqr = (th) => 1 / (Math.cos(th) ** 4 + Math.sin(th) ** 4) ** 0.25;
+function hatOf(add, hat, cap) {
+  if (hat === 'cap' && cap === 'ming') {              // the scholar's square cap (fangjin): a soft crown, square from above, rising from a plain band
+    const sq = (th, i, r, y) => ell(0.92, 1.05)(th) * (1 + Math.min(1, Math.max(0, (y - 1.6) / 0.12)) * (sqr(th) * 0.84 - 1) * 0.85);
+    add('hat', slathe([[0.098, 1.55], [0.102, 1.585], [0.101, 1.62], [0.099, 1.7], [0.097, 1.76], [0.092, 1.795], [0.075, 1.812], [0.04, 1.818], [0.001, 1.819]], 16, sq).translate(0, 0, 0.004));
+    add('hat', tube(Array.from({ length: 17 }, (_, k) => { const t = k / 16 * Math.PI * 2; return [Math.cos(t) * 0.103 * 0.92, 1.595, Math.sin(t) * 0.103 * 1.05 + 0.004, 0.011, 0.016]; }), 5, { capA: false, capB: false }));
+  } else if (hat === 'cap') {                                // a soft cap, a little full at the back
     add('hat', slathe([[0.097, 1.56], [0.1, 1.6], [0.094, 1.64], [0.075, 1.67], [0.04, 1.688], [0.001, 1.692]], 14, ell(0.9, 1.05)).translate(0, 0, 0.004));
     add('hat', slathe([[0.1, 1.555], [0.103, 1.56], [0.103, 1.585], [0.098, 1.59], [0.001, 1.59]], 14, ell(0.9, 1.05)).translate(0, 0, 0.004));
   } else if (hat === 'corno') {                      // the doge's corno: a stiff cap rising behind to a rounded horn, over the white linen cuffia
@@ -508,7 +538,7 @@ function heru(add) {
  * 'talk' | 'sit' (on a chair or bench, seat 0.46 m) | 'sit_low' (on a step or low stool, seat ~0.22 m, y at the feet) | 'sit_ground' (on the
  * ground or a floor, legs out) | 'seiza' (sat back on the heels) | 'squat' | 'kneel' | 'cross' (seated cross-legged) | 'pray' | 'pull' (hauling a rope) | 'staff' |
  * 'row' (seated at the oars) | 'punt' (standing, poling)), staffMat, poleMat (of the staff or oars, of the punting pole), arms (an arm pose of its own, e.g. 'pray' with pose 'kneel'),
- * hair ('short' | 'long' | 'bun' | 'shaven' | 'wig' | 'topknot'), comb (a heru in the topknot), combMat, hairMat, beard, over ('sash' | 'collar' | 'cape' |
+ * hair ('short' | 'long' | 'bun' | 'shaven' | 'wig' | 'topknot' | 'netknot' (the Ming man's, with the net band)), cap ('ming': hat 'cap' as the scholar's square cap), comb (a heru in the topknot), combMat, hairMat, beard, over ('sash' | 'collar' | 'cape' |
  * 'cloak' (to below the knee) | 'apron' | 'belt' | 'shawl' | 'wesekh' (the broad collar) | 'none'), legs ('hose' | 'bare'), feet ('bare' | 'shod') } — a still figure, facing −z.
  * The poses, dresses and things held beyond the first ones are opt-in: a figure without them is as it was.
  */
@@ -587,7 +617,8 @@ export function figure(el, { bag, col }) {
     if (dress === 'trousers' || (dress === 'tunic' && !bareLegs)) legTubes(a, 'c2', legs);
     if (over === 'sash' || over === 'belt') up('c2', tube(Array.from({ length: 15 }, (_, k) => { const t = k / 14 * Math.PI * 2; return [Math.cos(t) * 0.152, 1.0, Math.sin(t) * 0.152 * 0.68, 0.03, over === 'belt' ? 0.018 : 0.032]; }), 5, { capA: false, capB: false }));
     if (over === 'sash' && legs === 'stand') a('c2', tube([[0.06, 0.99, -0.108, 0.035, 0.008], [0.07, 0.8, -0.13, 0.04, 0.007], [0.075, 0.64, -0.14, 0.035, 0.006]], 5));
-    if (over === 'collar') for (const s of [-1, 1]) up('c2', tube([[s * 0.06, 1.43, 0.02, 0.022, 0.01], [s * 0.075, 1.4, -0.07, 0.024, 0.01], [-s * 0.02, 1.25, -0.125, 0.026, 0.012], [-s * 0.07, 1.05, -0.105, 0.024, 0.01]], 5));
+    if (over === 'collar') crossCollar(up);
+    if (over === 'apron') apron(a, up, legs);
     if (over === 'cape') up('c2', folded([[0.26, 1.02], [0.24, 1.15], [0.215, 1.3], [0.185, 1.36], [0.1, 1.42], [0.06, 1.445], [0.001, 1.446]], 16, 7, 0.06, 13).scale(1, 1, 0.78));
     // a cloak (kahu) of flax or dog skin from the shoulders to below the knees, wrapped round: standing; seated it lies as a cape
     if (over === 'cloak') { if (legs === 'stand' || legs === 'brace') a('c2', folded([[0.29, 0.42], [0.285, 0.45], [0.27, 0.7], [0.262, 0.95], [0.262, 1.15], [0.255, 1.3], [0.215, 1.37], [0.11, 1.425], [0.06, 1.448], [0.001, 1.449]], 18, 9, 0.05, 15).scale(1, 1, 0.8)); else up('c2', folded([[0.27, 0.9], [0.24, 1.15], [0.215, 1.3], [0.185, 1.36], [0.1, 1.42], [0.06, 1.445], [0.001, 1.446]], 16, 7, 0.06, 13).scale(1, 1, 0.78)); }
@@ -600,7 +631,7 @@ export function figure(el, { bag, col }) {
   if (style !== 'shaven' && style !== 'none') put(hairMat, assembly(`fig-hair|${style}|${legs}${KH}`, (a) => hairOf(uph(a), style)).hair.clone(), hairShade);
   if (el.comb && style === 'topknot') put(el.combMat ?? 'ivory', assembly(`fig-heru|${legs}${KH}`, (a) => heru(uph(a))).comb.clone());
   if (hat !== 'none') {
-    const T = assembly(`fig-hat|${hat}|${legs}${KH}`, (a) => { const up = uph(a); if (hat === 'veil') veil(up); else hatOf(up, hat); });
+    const T = assembly(`fig-hat|${hat}${hat === 'cap' && el.cap ? '|' + el.cap : ''}|${legs}${KH}`, (a) => { const up = uph(a); if (hat === 'veil') veil(up); else hatOf(up, hat, el.cap); });
     const hm = el.hatMat ?? (hat === 'straw' ? 'thatch' : hat === 'turban' ? 'cloth_white' : hat === 'brim' ? 'cloth_black' : hat === 'mkot' ? 'gilt_bronze' : hat === 'veil' ? c1 : c2);
     put(hm, T.hat.clone(), hat === 'veil' ? cs : 1);
   }
@@ -655,9 +686,9 @@ function carried(a, carry) {
     a('cloth_ochre', slathe([[0.22, 1.85], [0.15, 1.9], [0.06, 1.925], [0.001, 1.93]], 12));
   } else if (carry === 'pole') {
     // the pole on the right shoulder, front and back; a basket hanging from each end on three cords
-    a('bamboo_culm', tube([[0.15, 1.33, -0.95, 0.02], [0.15, 1.455, 0, 0.024], [0.15, 1.33, 0.95, 0.02]], 6));
+    a('bamboo_culm', tube([[0.15, 1.325, -0.95, 0.02], [0.15, 1.447, -0.3, 0.023], [0.15, 1.447, 0.3, 0.023], [0.15, 1.325, 0.95, 0.02]], 6));
     for (const zz of [-0.88, 0.88]) {
-      const top = [0.15, 1.35, zz];
+      const top = [0.15, 1.34, zz];
       for (let k = 0; k < 3; k++) { const b = k / 3 * Math.PI * 2; a('timber', tube([[...top, 0.005], [0.15 + Math.cos(b) * 0.17, 0.62, zz + Math.sin(b) * 0.17, 0.005]], 3)); }
       a('wicker', slathe([[0.001, 0.3], [0.14, 0.3], [0.2, 0.42], [0.21, 0.6], [0.195, 0.61], [0.185, 0.43], [0.13, 0.33], [0.001, 0.33]], 12).translate(0.15, 0, zz));
       a('cloth_green', slathe([[0.19, 0.56], [0.12, 0.64], [0.001, 0.67]], 10).translate(0.15, 0, zz));
@@ -665,7 +696,7 @@ function carried(a, carry) {
   } else if (carry === 'pails') {
     // the carrying pole (biandan, the tenbinbō) on the right shoulder, a pail of water hung from each end by a cord
     // to the cross-bar of its two raised staves (the water-carriers of the Qingming scroll, of Edo's water-sellers)
-    const P0 = [0.15, 1.35, -0.88], P1 = [0.15, 1.455, 0], yAt = (zz) => P1[1] - (P1[1] - P0[1]) * Math.abs(zz) / 0.88;
+    const P0 = [0.15, 1.34, -0.88], P1 = [0.15, 1.447, 0], yAt = (zz) => P1[1] - (P1[1] - P0[1]) * Math.abs(zz) / 0.88;
     a('bamboo_culm', tube([[...P0, 0.02], [...P1, 0.024], [P0[0], P0[1], -P0[2], 0.02]], 6));
     for (const zz of [-0.8, 0.8]) { const top = pail(a, 0.15, 0.3, zz, { r: 0.155, h: 0.3, bail: 'staves', turn: Math.PI / 2 }); a('cloth_brown', tube([[0.15, yAt(zz) + 0.01, zz, 0.006], [0.15, top, zz, 0.006]], 3)); }
   } else if (carry === 'yoke') {
