@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.24 — Suzhou's halls, lattices and the map's cards (2026-11-09)
+- Suzhou's halls get their real lattice patterns (cracked ice, step-by-step brocade, lantern frame, swastika fret, crab-apple) over glowing paper, solid plaster and board walls where the halls had them, bargeboards with the hanging fish, kerbed platforms with steps, beauty's-rest benches by the water, a rebuilt stone boat and a new arrival view across the pond to the Hall of Distant Fragrance; the halls and the study are furnished inside, with boat-canopy ceilings, screens, lanterns and the residence courts' vats, drums and screen wall.
+- On the globe map a click on a settlement opens its card (introduction, main sights, Go); the Taihu stones are lighter on the GPU.
+
 ## v10.23 — Suzhou's town and garden water (2026-11-09)
 - The canal town is rebuilt with varied houses (one to four bays, courtyard houses and gate towers, horse-head and Guanyin-hood gables, plank shopfronts, verandas over the water, weathered plaster), six trades of open shops, lit windows and lanterns at night, and lanes running on to the edge of the city.
 - In the garden: pierced and wrinkled Taihu stones, stone revetments along every shore, denser lotus with flowers and pods, water lilies, pebble-mosaic courts, willows along the canals and moss and mondo grass under the trees.
