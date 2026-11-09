@@ -8,7 +8,7 @@ A small planet you can walk and fly over, on which the civilizations of Earth st
 
 The name means only that these buildings are the memory of civilizations. This is a world to walk, not a study tool: no notes, no markers, no route.
 
-> **State of the site (v10.20, 2026-11-07):** 57 settlements stand on the planet, each built from a sourced dossier, with 44 interiors under baked light. Phase D (detail, light, sound, life) is complete; Phase E (more civilizations) is next. See [DESIGN.md](DESIGN.md) §13.
+> **State of the site (v10.20, 2026-11-07):** 57 settlements stand on the planet, each built from a sourced dossier, with 44 interiors under baked light. Next: bringing every settlement up to the full detail standard. See [DESIGN.md](DESIGN.md) §10.
 
 ## The settlements
 

@@ -1,4 +1,4 @@
-// The civilizations of the planet (DESIGN.md §7): every settlement, built or still to come, with
+// The civilizations of the planet (DESIGN.md §7; this is the one list of them): every settlement, with
 // its true place on Earth. Where each one stands on the planet (`placed`) is worked out by
 // tools/planet-layout.mjs from these and written to src/planet/layout.js; the reasoning is in
 // docs/world.md.

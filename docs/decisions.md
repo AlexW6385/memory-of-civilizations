@@ -1,6 +1,6 @@
 # Decisions log
 
-The record of decisions behind `DESIGN.md` (its §12 points here). **Agents do not read this file as part of a task**; grep it when you need the reason for one specific thing. Append a line only for a decision that constrains future work: date, decision, reason — one or two sentences. Anything a decision changes in the design itself is written into `DESIGN.md` where it belongs, not only here. The log of the Memory Palace era (2026-10) is in `docs/history.md`.
+The record of decisions behind `DESIGN.md` (its §11 points here). **Agents do not read this file as part of a task**; grep it when you need the reason for one specific thing. Append a line only for a decision that constrains future work: date, decision, reason — one or two sentences. Anything a decision changes in the design itself is written into `DESIGN.md` where it belongs, not only here. The log of the Memory Palace era (2026-10) is in `docs/history.md`.
 
 - 2026-11-03 — **Renamed to Memory of Civilizations / 文明的记忆;** repository `memory-of-civilizations`. Reason: the project is about civilizations, not one palace or a memory technique.
 - 2026-11-03 — **The world is a small planet** (r = 4 km, see below for 8 km) with Earth's continents and latitudes; regions at true positions, pushed apart where crowded; open country between them. Supersedes the compact city of 2026-10-28. Reason: author's vision — every civilization where it stood; sun, climate and the globe map come for free; sparsity helps frame times.

@@ -1,6 +1,6 @@
 # Status log, 2026-11-03 to 2026-11-07 (closed)
 
-What used to be `DESIGN.md` §13: the per-settlement and per-version working notes up to v10.20. **Closed — nothing is appended here, and agents do not read it as part of a task.** Kept as a record; grep it for a specific settlement or mechanism. What changed in each version since is in `CHANGELOG.md`; the current state is in `DESIGN.md` §13.
+What used to be `DESIGN.md` §13: the per-settlement and per-version working notes up to v10.20. **Closed — nothing is appended here, and agents do not read it as part of a task.** Kept as a record; grep it for a specific settlement or mechanism. What changed in each version since is in `CHANGELOG.md`; the current state is in `DESIGN.md` §10.
 
 ## Entries
 

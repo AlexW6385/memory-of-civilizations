@@ -49,7 +49,7 @@ The decisions log of the second brief (Memory Palace, v5.0–v7.1), kept for ref
 
 ## The move from the flat city (v7) to the planet — plan of 2026-11-03, carried out
 
-Formerly `DESIGN.md` §10.
+Formerly a section of `DESIGN.md`.
 
 Keep only what still fits; do not bend the new world round old code.
 

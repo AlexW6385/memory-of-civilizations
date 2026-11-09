@@ -32,4 +32,4 @@ EXTRA RULES (learned from earlier waves; see also docs/parallel-work.md):
 - tools/showroom.mjs: --inplace (keeps positions), --ground <y>|off, --timeout, game lighting by default (--light simple for 3 s renders), 68° FOV, any list size, and --site <id> --arrival | --at x,y,z,yaw,pitch for real in-game views (2–4 min). surface-check is fast now and reports elements that fail to build. tools/plan-check.mjs <id> checks walkability from the arrival point.
 - If you add or change rooms or music zones, run `node --test tests/planet.test.mjs` once before finishing with `timeout 1800` (it takes ~15 min on this loaded machine; a timeout is not a failure).
 - Checks are light for you (surface-check, geo-one, plan-check, worker test; one or two showroom renders at most); the coordinator runs the heavy ones after merging.
-- The goal and phase of the wave are given in your assignment; read DESIGN §5 and §11 before starting.
+- The goal and phase of the wave are given in your assignment; read DESIGN §5 before starting.
