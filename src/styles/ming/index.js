@@ -1162,28 +1162,26 @@ function waterCells(el, { bag }) {
   bag.add('water', fromTriangles(t));
 }
 
+import { stoneParts, putStone, stoneMerged, placement, lotusField, revetmentBuild, pebblePaving, pebblePath } from './garden-stone.js';
 /**
- * taihu: a heap of Taihu rocks { c, r, h, seed, n } — the limestone of Lake Tai worn by the water
- * into the four qualities the connoisseurs prized: thin (shou), open (tou), perforated (lou) and
- * wrinkled (zhou) (docs/settlements/ming-suzhou.md §5). Lumps leaning on each other; the tall stones
- * of the hills (solid) stand as waisted uprights, some built of two legs leaning together under a
- * cap, so that one sees through them.
+ * taihu: one Taihu stone { c, y, v (shape 0…14, src/styles/ming/garden-stone.js), s (scale) or h
+ * (height), yaw, tx, tz (lean), lod (0 near and fine, 1 far), solid (blocks the walker), plinth }:
+ * the limestone of Lake Tai worn by the water into the four qualities the connoisseurs prized —
+ * thin (shou), open (tou), perforated (lou) and wrinkled (zhou) (docs/settlements/ming-suzhou.md
+ * §5): a thin, tall, waisted body with true through-holes and hollows (pale, the hollows darker),
+ * extracted from a distance field; shapes are built once and placed as instances.
  */
 function taihu(el, { bag, col }) {
   const rand = rng(el.seed || 7), [cx, cz] = el.c, y = el.y ?? 0;
-  const n = el.n ?? Math.max(1, Math.round(el.r * 1.6));
-  for (let k = 0; k < n; k++) {
-    const a = rand() * Math.PI * 2, d = rand() * el.r * 0.7, s = (0.35 + rand() * 0.65) * Math.min(1.6, el.r * 0.6 + 0.4);
-    const x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d, hh = s * (0.8 + rand() * 1.4) * (el.h ? el.h / 1.2 : 1);
-    const y0 = y - rand() * 0.15, tall = hh > s * 1.8;
-    if (el.solid && tall && rand() < 0.55) {
-      // an open stone: two legs leaning together, a cap across them, the light through the gap
-      const b = rand() * Math.PI, bu = Math.cos(b), bv = Math.sin(b), gap = s * 0.62, lh = hh * (0.6 + rand() * 0.1);
-      for (const sg of [-1, 1]) bag.add('taihu', rock(x + bu * gap * sg, y0, z + bv * gap * sg, s * 0.36, lh, rand, [-bu * sg * gap * 0.75 / lh, -bv * sg * gap * 0.75 / lh], true));
-      bag.add('taihu', rock(x + (rand() - 0.5) * 0.2 * s, y0 + lh * 0.82, z + (rand() - 0.5) * 0.2 * s, s * 0.55, hh * 0.5, rand, [(rand() - 0.5) * 0.4, (rand() - 0.5) * 0.4], true));
-    } else bag.add('taihu', rock(x, y0, z, s * (tall ? 0.75 : 1), hh, rand, tall ? [(rand() - 0.5) * 0.35, (rand() - 0.5) * 0.35] : [0, 0], !!el.solid && !LOW));
+  const v = el.v ?? (el.h > 2.4 ? 0 : el.h > 1.7 ? 2 + (el.seed % 3) : el.h > 1 ? 7 + (el.seed % 3) : 10 + (el.seed % 3));
+  const lod = el.lod ?? 1, P = stoneParts(v, lod), s = el.s ?? (el.h ? el.h / P.H : 1);
+  putStone(bag, v, lod, placement(cx, y, cz, el.yaw ?? rand() * Math.PI * 2, s, el.tx ?? 0, el.tz ?? 0));
+  if (el.plinth) {
+    // a rough stone foot under a standing stone in a court
+    const w = Math.max(P.bx, P.bz) / 1.55 * s * 0.9;
+    bag.add('granite_block', box(cx - w, y - 0.25, cz - w * 0.65, cx + w, y + 0.06, cz + w * 0.65));
   }
-  if (el.solid) col.circle(cx, cz, el.r * 0.7, y, y + (el.h ?? 1.2));
+  if (el.solid) col.circle(cx, cz, Math.max(0.35, P.bx / 1.55 * s * 0.75), y, y + P.H * s);
 }
 /**
  * ming_rockery: a path climbing among piled Taihu stone, as the rockery hills of the Suzhou
@@ -1223,98 +1221,47 @@ function rockery(el, { bag, col }) {
     col.floor([q.x - 0.36, q.z - 0.36, q.x + 0.36, q.z + 0.36], top);
   }
   bag.add('taihu', fromTriangles(tr));
-  // the stones along both sides, kept clear of the path's two ends
+  // the stones along both sides, kept clear of the path's two ends: Taihu stones from knee to twice a
+  // man's height, their broad faces along the path, leaning a little away from it
   const cave = el.cave ?? -1, sC = cave * Ltot;
+  const pick = (h) => { const set = h > 1.8 ? [2, 3] : h > 1.0 ? [5, 6, 7, 8, 9] : [10, 12]; return set[Math.floor(rand() * set.length)]; };
   for (const sg of [-1, 1]) {
     for (let s = 0.9 + rand() * 0.4; s < Ltot - 0.9; s += 0.95 + rand() * 0.7) {
       if (cave >= 0 && Math.abs(s - sC) < 1.3) continue;
-      const q = at(s), nx = -q.uz * sg, nz = q.ux * sg, r = 0.35 + rand() * 0.4, off = hw + 0.45 + r * 1.5;
-      const x = q.x + nx * off, z = q.z + nz * off, b = bedAt(x, z, q.y) - 0.15;
-      const h = (q.y - b) + 0.6 + rand() * 2.0;
-      // leaning a little away from the path, so that none hangs over it
-      bag.add('taihu', rock(x, b, z, r, h, rand, [nx * 0.06, nz * 0.06]));
-      col.circle(x, z, r * 0.9, b, b + h);
+      const q = at(s), nx = -q.uz * sg, nz = q.ux * sg, h0 = 0.6 + rand() * 2.0, v = pick(h0), P = stoneParts(v, 0);
+      const sc = Math.max(0.55, Math.min(1.5, h0 / P.H)), wid = P.bz / 1.55 * sc, off = hw + 0.2 + wid * 1.15;
+      const x = q.x + nx * off, z = q.z + nz * off, b = bedAt(x, z, q.y) - 0.15, hh = P.H * sc;
+      putStone(bag, v, 0, placement(x, b + 0.3, z, -Math.atan2(q.uz, q.ux) + (rand() - 0.5) * 0.5, sc, nz * 0.05, -nx * 0.05));
+      col.circle(x, z, Math.max(0.3, wid * 1.2), b, b + hh);
     }
   }
   // the cave: two tall stones either side, a lintel slab across on them, a stone heaped on that
   if (cave >= 0) {
-    const q = at(sC), nx = -q.uz, nz = q.ux, clear = 2.3, lw = 0.9;
+    const q = at(sC), nx = -q.uz, nz = q.ux, clear = 2.3;
     for (const sg of [-1, 1]) {
-      const x = q.x + nx * (hw + 0.75) * sg, z = q.z + nz * (hw + 0.75) * sg, b = bedAt(x, z, q.y) - 0.15;
-      bag.add('taihu', rock(x, b, z, 0.45, q.y + clear + 0.5 - b, rand, [0, 0], true));
-      col.circle(x, z, 0.45, b, q.y + clear + 0.3);
+      const x = q.x + nx * (hw + 0.75) * sg, z = q.z + nz * (hw + 0.75) * sg, b = bedAt(x, z, q.y) - 0.15, top = q.y + clear + 0.5 - b;
+      const v = 2 + Math.floor(rand() * 2), P = stoneParts(v, 0), sc = top / P.H;
+      putStone(bag, v, 0, placement(x, b + 0.3, z, -Math.atan2(q.uz, q.ux) + 1.57 * 0 + (rand() - 0.5) * 0.3, sc));
+      col.circle(x, z, 0.5, b, q.y + clear + 0.3);
     }
-    // the lintel: a long stone lying across, flattened (thin side down), its ends in the pillars
-    const span = hw + 1.2, lin = rock(0, 0.05, 0, 0.4, 2 * span, rand, [0, 0], true);
-    lin.applyMatrix4(new Matrix4().makeBasis({ x: q.ux, y: 0, z: q.uz }, { x: nx, y: 0, z: nz }, { x: 0, y: -1, z: 0 }).setPosition(q.x - nx * span, q.y + clear + 0.3, q.z - nz * span));
-    bag.add('taihu', lin);
+    // the lintel: a long stone lying across, its ends on the pillars, its underside over a walker's head
+    const span = hw + 1.2;
+    bag.add('taihu', stoneMerged(14, 1, placement(q.x, q.y + clear + 0.3, q.z, -Math.atan2(nz, nx), (2 * span) / 3.6)));
     // a stone heaped on it over one pillar (not over the way)
     const hx = q.x + nx * (hw + 0.75), hz = q.z + nz * (hw + 0.75);
-    bag.add('taihu', rock(hx, q.y + clear + 0.45, hz, 0.4, 0.8 + rand() * 0.5, rand, [0, 0], true));
+    putStone(bag, 10, 0, placement(hx, q.y + clear + 0.7, hz, rand() * 6, 1.0));
     col.rect([Math.min(q.x - nx * span, q.x + nx * span) - 0.4, Math.min(q.z - nz * span, q.z + nz * span) - 0.4, Math.max(q.x - nx * span, q.x + nx * span) + 0.4, Math.max(q.z - nz * span, q.z + nz * span) + 0.4], q.y + clear + 0.02, q.y + clear + 1.6);
   }
 }
-/**
- * One stone: a waisted, lumpy body leaning by lean [dx, dz] per metre of height, its skin furrowed
- * in vertical folds (the wrinkles) and pitted, its top rounded over (not a point).
- */
+/** One stone as a geometry (rock(x, y, z, s, h, rand, lean)): a Taihu stone of height h on its foot (not instanced). */
 function rock(x, y, z, s, h, rand, lean = [0, 0], fine = false) {
-  const nn = fine ? 11 : 7, NS = fine ? 14 : 10, ph = rand() * 6.28, ph2 = rand() * 6.28, sz = 0.9 + 0.2 * rand();
-  const prof = [];
-  for (let i = 0; i <= nn; i++) {
-    const t = i / nn, body = Math.sin(Math.PI * (0.08 + 0.84 * Math.min(1, t * 1.12)));
-    const waist = 1 + 0.26 * Math.sin(t * Math.PI * 2.4 + ph) + 0.1 * Math.sin(t * Math.PI * 5.2 + ph2);
-    prof.push([Math.max(0.02, s * sz * (0.35 + 0.65 * body) * waist), t * h]);
-  }
-  prof[nn][0] = s * 0.2; prof.push([s * 0.1, h + s * 0.08], [0, h + s * 0.11]);
-  // the folds wind slowly up the stone (a function of the height, not of the ring, so no banding);
-  // the axis wanders (the stone is not turned on a lathe); the section is flattened (a thin stone);
-  // then the whole leans and turns
-  const k1 = 2 + Math.floor(rand() * 2), k2 = 5 + Math.floor(rand() * 3), k3 = 9 + Math.floor(rand() * 4), p1 = rand() * 6.28, p2 = rand() * 6.28, tw = (rand() - 0.5) * 1.6 / Math.max(0.5, h);
-  const wa = s * 0.22, wf = 2.2 / Math.max(0.6, h), wp = rand() * 6.28, wp2 = rand() * 6.28, flat = 0.5 + 0.3 * rand(), turn = rand() * Math.PI;
-  const ct = Math.cos(turn), st = Math.sin(turn);
-  const G = prof.map(([r, yy]) => {
-    const row = [];
-    for (let k = 0; k < NS; k++) {
-      const th = k / NS * Math.PI * 2, q = th + yy * tw;
-      const m = 1 + 0.22 * Math.sin(q * k1 + p1 + yy * 0.9) + 0.11 * Math.sin(q * k2 + p2 - yy * 1.7) + 0.06 * Math.sin(q * k3 + yy * 3.1);
-      const lx = Math.cos(th) * r * m + wa * Math.sin(yy * wf * 3.1 + wp), lz = (Math.sin(th) * r * m + wa * Math.sin(yy * wf * 2.3 + wp2)) * flat;
-      const rx = lx * ct - lz * st, rz = lx * st + lz * ct;
-      row.push([x + rx + lean[0] * yy, y - 0.05 + yy, z + rz + lean[1] * yy]);
-    }
-    return row;
-  });
-  // smooth normals from the grid: across the ring and up the stone
-  const sub = (p, q) => [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
-  const N = G.map((row, i) => row.map((_, k) => {
-    const a = sub(row[(k + 1) % NS], row[(k + NS - 1) % NS]), b = sub(G[Math.min(nn + 2, i + 1)][k], G[Math.max(0, i - 1)][k]);
-    let n = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-    if (i === nn + 2) return [0, 1, 0];
-    const l = Math.hypot(...n) || 1; return [-n[0] / l, -n[1] / l, -n[2] / l];
-  }));
-  const pos = [], nor = [];
-  for (let i = 0; i + 1 < G.length; i++) for (let k = 0; k < NS; k++) {
-    const k2b = (k + 1) % NS;
-    for (const [ii, kk] of [[i, k], [i + 1, k], [i + 1, k2b], [i, k], [i + 1, k2b], [i, k2b]]) { pos.push(...G[ii][kk]); nor.push(...N[ii][kk]); }
-  }
-  // (no bottom: every stone is bedded in the ground or the pond's bed)
-  const g = new BufferGeometry();
-  g.setAttribute('position', new Float32BufferAttribute(pos, 3));
-  g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
-  return g;
+  const v = h > 1.8 ? 2 + Math.floor(rand() * 3) : h > 1 ? 7 + Math.floor(rand() * 3) : 10 + Math.floor(rand() * 3), P = stoneParts(v, fine ? 0 : 1);
+  void s;
+  return stoneMerged(v, fine ? 0 : 1, placement(x, y + 0.25, z, rand() * 6.28, h / P.H, lean[1], -lean[0]));
 }
 
-/** lotus: leaves floating on the pond (and a few on stems above it), with a bud or two { c, r, y, n, seed }. */
-function lotus(el, { bag }) {
-  const rand = rng(el.seed || 3), [cx, cz] = el.c, y = el.y;
-  for (let k = 0; k < (el.n ?? 30); k++) {
-    const a = rand() * Math.PI * 2, d = Math.sqrt(rand()) * el.r, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d;
-    const lift = rand() < 0.35 ? 0.3 + rand() * 0.7 : 0.02, rr = 0.25 + rand() * 0.3;
-    bag.add('lotus_leaf', lathe([[0.001, lift + 0.06], [rr * 0.6, lift + 0.03], [rr, lift + 0.07], [rr * 1.02, lift + 0.05]], 12, null, x, y, z));
-    if (lift > 0.1) bag.add('lotus_leaf', box(x - 0.012, y - 0.4, z - 0.012, x + 0.012, y + lift + 0.04, z + 0.012));
-    if (rand() < 0.08) bag.add('paint_robe', lathe([[0.001, 0], [0.06, 0.08], [0.05, 0.16], [0.001, 0.22]], 6, null, x + 0.2, y + lift + 0.5, z));
-  }
-}
+/** lotus: leaves, flowers, buds and pods in clumps over the pond { c, r, n, y, seed, inside } (garden-stone.js). */
+function lotus(el, ctx) { lotusField(el, ctx); }
 
 // ── the houses of the canal town ──────────────────────────────────────────────
 // (docs/settlements/ming-suzhou.md §5: Pingjiang Road, Shantang Street, the Qingming scrolls)
@@ -2031,15 +1978,8 @@ function paving(el, { bag, col }) {
   col.floor(el.rect, el.y);
 }
 
-/** A path of pebble mosaic along a polyline { pts, w, y }. */
-function path(el, { bag }) {
-  const w = (el.w ?? 1.4) / 2, y = el.y ?? 0.17;
-  for (let i = 0; i + 1 < el.pts.length; i++) {
-    const t = [];
-    beamTris(t, [el.pts[i][0], y - 0.12, el.pts[i][1]], [el.pts[i + 1][0], y - 0.12, el.pts[i + 1][1]], w, 0.14);
-    bag.add(el.mat || 'pebble_mosaic', fromTriangles(t));
-  }
-}
+/** A path of pebble mosaic along a polyline { pts, w, y } (garden-stone.js). */
+function path(el, ctx) { pebblePath(el, ctx); }
 
 /** A boat-shaped pavilion (shi fang): a deck on the water like a boat's bow, a hall, a two-storey stern on the shore. */
 function stoneBoat(el, ctx) {
@@ -2091,6 +2031,7 @@ registerStyle('ming', {
     house_jiangnan: withPal(houseJiangnan),
     water_steps: withPal(waterSteps),
     stone_boat: withPal(stoneBoat),
+    revetment: withPal(revetmentBuild), pebble_paving: withPal(pebblePaving), water_lily: withPal((el, ctx) => lotusField({ ...el, kind: 'lily' }, ctx)),
     taihu: withPal(taihu), lotus: withPal(lotus), boat: withPal(boat), paving: withPal(paving), path: withPal(path), lou: withPal(lou),
   },
   objects: {},
