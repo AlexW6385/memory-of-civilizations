@@ -22,14 +22,36 @@ export const BAKE_VERSION = 5;
 export const PROBE_BUDGET = 80000;
 
 // light let through: coloured by stained glass; whole through the clear skins the viewer casts no
-// shadow from (glass, window openings, daylight planes, lamps); partly through paper lattices
+// shadow from (glass, window openings, daylight planes, lamps). Paper behind a lattice is a
+// diffuser (encoded 2 + its diffuse transmission): a ray that meets it stops there and sees the
+// paper lit through from the far side, as the viewer draws it (src/engine/materials.js paperLight,
+// whose numbers these are); the sun passes straight through only the little the paper leaks.
 const CLEAR = new Set(['glass_outer', 'glass_topaz', 'opening', 'daylight', 'daylight_plain', 'glass_lamp']);
+/** The paper's diffuse transmission, its straight leak (both × its share of the lattice), its share. */
+export const PAPER = { T: 0.55, leak: 0.04, share: (spec) => (spec.ice ? 0.82 : 0.62) };
+const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+const rgb = (hex) => { const h = parseInt(hex.slice(1), 16); return [lin((h >> 16) & 255), lin((h >> 8) & 255), lin(h & 255)]; };
+/** A lattice backed by light paper (not the dark openings of a grille): { tint, share }, or null. */
+export function paperOf(mat) {
+  const spec = MATERIALS[mat];
+  if (spec?.kind !== 'lattice' || !spec.paper) return null;
+  const p = rgb(spec.paper), m = Math.max(...p);
+  if (0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2] < 0.35) return null;
+  return { paper: p, tint: p.map((v) => v / m), share: PAPER.share(spec) };
+}
 function transmission(mat) {
   if (mat === 'stained_glass') return [0.45, 0.24, 0.5];
   const kind = MATERIALS[mat]?.kind;
   if (CLEAR.has(mat) || kind === 'glow' || kind === 'daylight') return [1, 1, 1];
+  const pp = paperOf(mat);
+  if (pp) return pp.tint.map((t) => 2 + PAPER.T * pp.share * t);
   if (kind === 'lattice') return [0.3, 0.3, 0.28];
   return null;
+}
+/** The albedo the tracer gives a material: a paper lattice's bars and paper together. */
+function albedoOf(mat) {
+  const a = albedo(mat), pp = paperOf(mat);
+  return pp ? a.map((v, k) => v * (1 - pp.share) + pp.paper[k] * (1 - PAPER.T) * pp.share) : a;
 }
 const SKIP = new Set(['water', 'flame']);
 const SKIP_KINDS = new Set(['water', 'foam']);
@@ -66,7 +88,7 @@ function landmarkTriangles(plan) {
   const pos = new Float32Array(n * 9), alb = new Float32Array(n * 3), tr = new Float32Array(n * 3);
   let t = 0;
   for (const { mat, geometry } of parts) {
-    const p = geometry.attributes.position.array, a = albedo(mat), T = transmission(mat) || [-1, -1, -1];
+    const p = geometry.attributes.position.array, a = albedoOf(mat), T = transmission(mat) || [-1, -1, -1];
     pos.set(p, t * 9);
     for (let k = 0; k < p.length / 9; k++, t++) { alb.set(a, t * 3); tr.set(T, t * 3); }
     geometry.dispose();

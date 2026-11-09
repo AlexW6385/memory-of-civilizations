@@ -4,7 +4,7 @@
 // recorded in each dossier (a tiling photo texture cannot follow a wall's coursing). Average colours come from src/core/palette.js,
 // which the light baker shares.
 
-import { MeshStandardNodeMaterial, DoubleSide, Color } from 'three/webgpu';
+import { MeshStandardNodeMaterial, DoubleSide, Color, PhysicalLightingModel } from 'three/webgpu';
 import {
   Fn, float, vec2, vec3, vec4, positionWorld, positionLocal, normalWorld, normalLocal, normalView, positionView, abs, floor, fract, min, max,
   mix, smoothstep, hash, mx_noise_float, mx_fractal_noise_float, mx_worley_noise_float, dot, cross, normalize,
@@ -13,6 +13,7 @@ import {
 import { ENV, cloudShadow } from './env.js';
 import { MATERIALS } from '../core/palette.js';
 import { GISpecularNode } from './gi.js';
+import { waterSky } from './water-reflect.js';
 
 const cache = new Map();
 const PLAIN = typeof location !== 'undefined' && new URLSearchParams(location.search).get('plain') === '1';
@@ -33,7 +34,7 @@ export function material(key) {
   // ?plain=1 (benchmark only): flat materials, to measure what the procedural detail costs
   const m = PLAIN ? plainMaterial(spec) : make(spec);
   m.name = key;
-  if (GI) {
+  if (GI && !m.userData.water) {
     const spec2 = GI.radianceNode();
     m.setupLightMap = () => new GISpecularNode(spec2);
   }
@@ -426,7 +427,9 @@ function make(spec) {
       break;
     }
     case 'glow': {
-      // a lantern's shade: its own colour by day, lit from within at dusk and night (a slow flicker)
+      // a lantern's shade: its own colour by day, lit from within at dusk and night (a slow flicker).
+      // Every separate piece of a glow material is also a lamp that the lamps' pool may light
+      // with a real light when the eye is near — how to declare lamps: src/engine/air.js (header)
       const flick = sin(time.mul(7.0).add(positionLocal.x.mul(3.1))).mul(0.06).add(sin(time.mul(2.3).add(positionLocal.z)).mul(0.04)).add(1);
       m.colorNode = baseNode;
       m.emissiveNode = uniform(new Color(spec.glow || spec.color)).mul(float(spec.power ?? 3)).mul(smoothstep(0.15, 0.6, ENV.night)).mul(flick);
@@ -633,17 +636,35 @@ function make(spec) {
       break;
     }
     case 'water': {
+      // still water: ripples moving slowly over it; it mirrors the sky (waterSky, the same sky the
+      // reflection pass swaps for the buildings and trees it finds on screen on "high":
+      // src/engine/water-reflect.js) by Fresnel, from 2 % looking straight down to all of it at a
+      // grazing angle, and the body beneath shows through the rest. The sky is dimmed where a
+      // baked volume says the sky is hidden over the water (a basin indoors, a pavilion over it).
+      // The sun's glint comes from the light itself (a near-mirror's roughness). The material marks
+      // its pixels for the reflection pass (userData.water) and takes no baked reflection of its own.
       const t = time.mul(0.35);
       const w = mx_noise_float(vec3(P.x.mul(0.7).add(t), P.z.mul(0.7), t.mul(0.6))).add(mx_noise_float(vec3(P.x.mul(2.3), P.z.mul(2.3).sub(t), t)).mul(0.4));
-      m.colorNode = baseNode;
       m.roughness = 0.04;
       m.metalness = 0.0;
-      m.normalNode = bump(w.mul(0.02), 1);
+      // (the ripples fade out with distance, before they are finer than a pixel and glitter)
+      const far = float(1).sub(smoothstep(12, 60, length(positionWorld.sub(cameraPosition))));
+      m.normalNode = bump(w.mul(0.02).mul(far), 1);
+      const v = normalize(positionWorld.sub(cameraPosition)), N = normalWorld;
+      const r = reflect(v, N);
+      const fres = float(0.02).add(float(0.98).mul(pow(float(1).sub(max(dot(N, v.negate()), 0)), 5)));
+      let open = float(1);
+      if (GI) {
+        const up = GI.irradianceNode(vec3(0, 1, 0)), sky = GI.skyE;
+        open = clamp(dot(up, vec3(0.2126, 0.7152, 0.0722)).div(max(dot(sky, vec3(0.2126, 0.7152, 0.0722)).mul(GI.uIntensity), 1e-4)), 0, 1);
+      }
+      m.colorNode = baseNode.mul(float(1).sub(fres));
+      m.userData.water = true;
       // at night the moon's broken path across the water, toward the eye (its own glints, wider
       // than the one highlight the moon's light gives a still surface)
       const wn = normalize(vec3(w.mul(0.06), 1, mx_noise_float(vec3(P.z.mul(0.9).sub(t), P.x.mul(0.9), t.mul(0.7))).mul(0.06)));
-      const rv = reflect(normalize(positionWorld.sub(cameraPosition)), wn);
-      m.emissiveNode = moonGlint(rv).mul(smoothstep(0.6, 0.9, normalLocal.y));
+      const rv = reflect(v, wn);
+      m.emissiveNode = waterSky(r).mul(fres).mul(open).add(moonGlint(rv).mul(smoothstep(0.6, 0.9, normalLocal.y)));
       break;
     }
     case 'leaf': {
@@ -831,7 +852,56 @@ function make(spec) {
     }
   }
   if (!spec.clean && m.colorNode && (WEATHERED.has(spec.kind ?? 'smooth') || ROOFS.has(spec.kind))) m.colorNode = weather(m.colorNode, ROOFS.has(spec.kind));
+  if (spec.kind === 'lattice') paperLight(m, spec, baseNode);
   return m;
+}
+
+// ── paper behind a lattice: lit through from the far side ─────────────────────────────────────
+// (kept out of the lattice's own case above, which draws its patterns)
+//
+// Window paper is a diffuser: the sun and sky on its far side come through it scattered, so that
+// from inside a hall latticed on four sides the walls glow, brightest where the sun is on them,
+// and at night a lamp inside makes the paper glow seen from the garden. What comes through:
+// T · E_far / π, E_far the light on the far side — the sun (its shadows included: the paper casts a
+// faint shadow, PAPER.leak of the sun, so the far side's own shadow lookup says whether the eaves
+// or a wall keep the sun off it), the lamps, and the baked light past the panel (the probes there,
+// or the open sky). The light bake treats the paper the same way (tools/lib/gi-scene.mjs PAPER,
+// tools/bake.mjs), so the halls are lit from their paper walls. Only light papers (the dark
+// "paper" of grilles and koshi is the dark of an opening, left as it was).
+// Cost: one more baked-light read (3 texels) and a few operations per light, on lattice pixels only.
+const PAPER = { T: 0.55, leak: 0.04 };
+
+class PaperLightingModel extends PhysicalLightingModel {
+  constructor(through) { super(); this.through = through; }
+  direct(input, builder) {
+    super.direct(input, builder);
+    const { lightDirection, lightColor, reflectedLight, lightNode } = input;
+    const back = normalView.dot(lightDirection).negate().clamp();
+    // a light that casts shadows has already passed the panel's own leak (castShadowNode below)
+    const k = lightNode?.light?.castShadow ? 1 / PAPER.leak : 1;
+    reflectedLight.directDiffuse.addAssign(lightColor.mul(back).mul(this.through).mul(k / Math.PI));
+  }
+}
+
+function paperLight(m, spec, baseNode) {
+  const paper = new Color(spec.paper || '#e9e2cf'), base = new Color(spec.color);
+  if (0.2126 * paper.r + 0.7152 * paper.g + 0.0722 * paper.b < 0.35) return;
+  const mx = Math.max(paper.r, paper.g, paper.b), tint = vec3(paper.r / mx, paper.g / mx, paper.b / mx);
+  // where the paper shows between the bars: the lattice's own mask if it gives one, else read back
+  // from its colour, a blend of the bars' colour and the paper's
+  let d = m.userData.paperNode;
+  if (!d) {
+    const dv = new Color(paper.r - base.r, paper.g - base.g, paper.b - base.b), dd = dv.r * dv.r + dv.g * dv.g + dv.b * dv.b;
+    d = clamp(dot(m.colorNode.rgb.sub(baseNode), vec3(dv.r, dv.g, dv.b)).div(dd), 0, 1);
+  }
+  const through = tint.mul(d).mul(PAPER.T);
+  m.castShadowNode = vec4(tint.mul(d).mul(PAPER.leak), 1);
+  m.setupLightingModel = () => new PaperLightingModel(through);
+  if (GI) {
+    const far = GI.irradianceNode(normalWorld.negate(), -1);
+    const glow = far.mul(through).mul(1 / Math.PI);
+    m.emissiveNode = m.emissiveNode ? m.emissiveNode.add(glow) : glow;
+  }
 }
 
 /** Warm emissive flame for oil lamps. */

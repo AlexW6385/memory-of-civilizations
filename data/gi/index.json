@@ -951,7 +951,7 @@
  },
  "ming-suzhou-garden": {
   "site": "ming-suzhou",
-  "hash": "38c512cedda4463e",
+  "hash": "11ca9844e0bd71fe",
   "rays": 128,
   "probes": 9460,
   "boxes": [
@@ -989,9 +989,9 @@
     ]
    }
   ],
-  "bytes": 158815,
-  "seconds": 48,
-  "baked": "2026-11-07"
+  "bytes": 156906,
+  "seconds": 17,
+  "baked": "2026-11-09"
  },
  "mughal-agra-taj": {
   "site": "mughal-agra",

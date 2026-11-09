@@ -3,7 +3,7 @@
 // same scene pass (one pass draws colour and normals), bloom, AgX tone mapping.
 
 import * as THREE from 'three/webgpu';
-import { Fn, rtt, pass, mrt, output, normalView, directionToColor, colorToDirection, sample, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
+import { Fn, rtt, pass, mrt, output, normalView, packNormalToRGB, sample, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { smaa } from 'three/addons/tsl/display/SMAANode.js';
@@ -14,8 +14,9 @@ import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
 import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
 import { CAMERA_MASK, cascadeMask } from './layers.js';
-import { AIR, airNode, airComposite, LampPool } from './air.js';
+import { AIR, airNode, airComposite, LampPool, LampLight, LampLightNode } from './air.js';
 import { HITCH } from './hitch.js';
+import { waterReflection, waterComposite, unpackSceneNormal, depthToDistance, WATER_MARK } from './water-reflect.js';
 
 /** The depth buffer unless the address asks for another (see init). */
 const DEPTH_DEFAULT = 'reversed';
@@ -24,11 +25,13 @@ const DEPTH_DEFAULT = 'reversed';
 const LIGHT_MARGIN = 200;
 
 // air: dust, incense and coloured light in the beams indoors (src/engine/air.js); lamps: how many of
-// the nearest lamps light the room as point lights
+// the nearest lamps light the room as point lights; ssr: the reflections in water traced on screen
+// (src/engine/water-reflect.js; needs the occlusion's normal target) — without it the water
+// mirrors the sky alone
 export const QUALITY = {
-  high: { pixelRatio: 1.5, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: true, lamps: 4 },
-  medium: { pixelRatio: 1.0, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: false, lamps: 2 },
-  low: { pixelRatio: 0.75, shadowMap: 1024, cascades: 2, ao: false, aa: false, air: false, lamps: 0 },
+  high: { pixelRatio: 1.5, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: true, lamps: 4, ssr: true },
+  medium: { pixelRatio: 1.0, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: false, lamps: 2, ssr: false },
+  low: { pixelRatio: 0.75, shadowMap: 1024, cascades: 2, ao: false, aa: false, air: false, lamps: 0, ssr: false },
 };
 
 export class Renderer {
@@ -54,6 +57,8 @@ export class Renderer {
     const caps = r.backend.capabilities;
     if (caps?.getUniformBufferLimit) caps.getUniformBufferLimit = () => 0;
     this.webgpu = r.backend.isWebGPUBackend === true;
+    // the lamps' lights: shaded only while lit (src/engine/air.js)
+    r.library.addLight(LampLightNode, LampLight);
     r.toneMapping = THREE.AgXToneMapping;
     r.toneMappingExposure = 0.55;          // set each frame from the climate and the eye's adaptation
     r.shadowMap.enabled = true;
@@ -132,7 +137,7 @@ export class Renderer {
     const N = QUALITY[q];
     if (!N) return;
     this.quality = q;
-    this.Q = { ...this.Q, pixelRatio: N.pixelRatio, aa: N.aa, air: N.air };
+    this.Q = { ...this.Q, pixelRatio: N.pixelRatio, aa: N.aa, air: N.air, ssr: N.ssr };
     if (!this.dprPin) this.renderer.setPixelRatio(Math.min(devicePixelRatio, N.pixelRatio));
     this.buildPipeline();
     this.resize();
@@ -159,9 +164,11 @@ export class Renderer {
     // when the fragment stage is set up: a shader compiled off the frame (precompile, three's
     // async build, which yields between its stages) otherwise left out the normal ("color target
     // has no corresponding fragment stage output (targets[1])")
+    // The water's pixels carry a mark in it (its packed normal plus WATER_MARK, src/engine/water-reflect.js).
     if (Q.ao) {
       const normalA = Fn((builder) => (builder.material?.depthWrite === false ? output.a : float(1)))();
-      const sceneMRT = mrt({ output, normal: vec4(directionToColor(normalView), normalA) }).setBlendMode('normal', new THREE.BlendMode(THREE.NormalBlending));
+      const mark = Fn((builder) => float(builder.material?.userData?.water ? WATER_MARK : 0))();
+      const sceneMRT = mrt({ output, normal: vec4(packNormalToRGB(normalView).add(mark), normalA) }).setBlendMode('normal', new THREE.BlendMode(THREE.NormalBlending));
       const setup = sceneMRT.setup;
       sceneMRT.setup = function (builder) {
         const r = builder.renderer, rt = r._renderTarget;
@@ -171,11 +178,25 @@ export class Renderer {
       scenePass.setMRT(sceneMRT);
     }
     let color = scenePass.getTextureNode('output');
+    // 1 / distance = a · depth + b, from the projection (set each frame in update)
+    this.zk ??= uniform(depthToDistance(camera));
+    // the reflections in the water, traced at half resolution where the water is (high only; not
+    // with a logarithmic depth buffer, whose depth is not the projection's)
+    const ssrOn = Q.ao && Q.ssr && !this.renderer.logarithmicDepthBuffer && new URLSearchParams(location.search).get('ssr') !== '0';
+    this.onSsrResize = null;
+    if (ssrOn) {
+      const normalTex = scenePass.getTextureNode('normal'), depthTex = scenePass.getTextureNode('depth');
+      const refl = rtt(waterReflection({ depth: depthTex, normal: normalTex, color, camera, zk: this.zk }), null, null, { resolutionScale: 0.5 });
+      const texel = uniform(new THREE.Vector2(1e-3, 1e-3));
+      this.onSsrResize = () => { const v = new THREE.Vector2(); this.renderer.getDrawingBufferSize(v); texel.value.set(2 / Math.max(1, v.x), 2 / Math.max(1, v.y)); };
+      this.onSsrResize();
+      color = waterComposite(color, refl, normalTex, depthTex, camera, texel);
+    }
     if (Q.ao) {
       // with a reversed buffer the pass works unchanged: it rebuilds view positions through the
       // camera's own (reversed) projection, and the sky, at depth 0, lies on the far plane
       const normalTex = scenePass.getTextureNode('normal');
-      const aoPass = ao(scenePass.getTextureNode('depth'), sample((q) => colorToDirection(normalTex.sample(q))), camera);
+      const aoPass = ao(scenePass.getTextureNode('depth'), sample((q) => unpackSceneNormal(normalTex.sample(q))), camera);
       aoPass.resolutionScale = 0.5;
       aoPass.distanceExponent.value = 1.0;
       aoPass.radius.value = 0.9;
@@ -184,7 +205,7 @@ export class Renderer {
       // the occlusion comes out of GTAO speckled (a 5×5 noise pattern turns its sample directions,
       // meant to be averaged by a denoiser): averaged here over about 5×5 of its texels, each
       // weighted by how near its depth lies to this pixel's, so that it does not bleed across edges
-      const a = this.aoBlur(aoPass.getTextureNode(), scenePass.getTextureNode('depth'), camera);
+      const a = this.aoBlur(aoPass.getTextureNode(), scenePass.getTextureNode('depth'));
       const lit = smoothstep(0.6, 3.0, luminance(color.rgb));
       color = vec4(color.rgb.mul(mix(a, mix(1, a, 0.35), lit)), color.a);
     }
@@ -192,7 +213,7 @@ export class Renderer {
     const sh0 = this.airShadow;
     if (Q.air && sh0) {
       const airTex = this.airTex = rtt(airNode({ depth: scenePass.getTextureNode('depth'), camera, shadow: sh0, reversed: this.renderer.reversedDepthBuffer, lamps: this.lamps }), null, null, { resolutionScale: 0.5 });
-      color = airComposite(color, airTex, scenePass.getTextureNode('depth'), camera, this.airTexel = uniform(new THREE.Vector2(1e-3, 1e-3)));
+      color = airComposite(color, airTex, scenePass.getTextureNode('depth'), camera, this.airTexel = uniform(new THREE.Vector2(1e-3, 1e-3)), this.zk);
       this.onAirResize = () => { const s = new THREE.Vector2(); this.renderer.getDrawingBufferSize(s); this.airTexel.value.set(2 / Math.max(1, s.x), 2 / Math.max(1, s.y)); };
       this.onAirResize();
     } else this.onAirResize = null;
@@ -258,23 +279,28 @@ export class Renderer {
   }
 
   /** A depth-aware 5×5 average of the half-resolution occlusion, one of its texels apart: its
-   *  noise pattern repeats every 5 texels, so a 5-wide average takes it out. */
-  aoBlur(aoTex, depthTex, camera) {
-    const projInv = uniform(camera.projectionMatrixInverse), texel = uniform(new THREE.Vector2());
+   *  noise pattern repeats every 5 texels, so a 5-wide average takes it out. Drawn at half
+   *  resolution itself (the occlusion's own), and read by the picture with one bilinear tap: at
+   *  full resolution its 50 reads a pixel were among the frame's dearest passes. The depths as
+   *  distances straight from the projection (1/z = a·depth + b), not through its inverse. */
+  aoBlur(aoTex, depthTex) {
+    const texel = uniform(new THREE.Vector2()), zk = this.zk;
     this.onResize = () => { const s = new THREE.Vector2(); this.renderer.getDrawingBufferSize(s); texel.value.set(2 / Math.max(1, s.x), 2 / Math.max(1, s.y)); };
     this.onResize();
-    const c = uv(), zc = getViewPosition(c, depthTex.sample(c).r, projInv).z;
-    const tol = abs(zc).mul(0.02).add(0.05);
+    const dist = (d) => float(1).div(max(zk.x.mul(d).add(zk.y), 1e-6));
+    const c = uv(), zc = dist(depthTex.sample(c).r);
+    const tol = zc.mul(0.02).add(0.05);
     let sum = float(0), wsum = float(0);
     for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++) {
       const q = c.add(vec2(i, j).mul(texel));
-      const z = getViewPosition(q, depthTex.sample(q).r, projInv).z;
+      const z = dist(depthTex.sample(q).r);
       const w = max(float(1).sub(abs(z.sub(zc)).div(tol)), 0).add(i === 0 && j === 0 ? 1e-3 : 0);
       sum = sum.add(aoTex.sample(q).r.mul(w)); wsum = wsum.add(w);
     }
     // farther than a few tens of metres the occlusion's radius (0.9 m) is a few pixels, and what it
     // finds there is mostly the noise and the depth's own error mottling open ground: faded out
-    return mix(sum.div(wsum), 1, smoothstep(25, 70, zc.negate()));
+    const a = mix(sum.div(wsum), 1, smoothstep(25, 70, zc));
+    return rtt(vec4(a, a, a, 1), null, null, { resolutionScale: 0.5 }).r;
   }
 
   /**
@@ -300,6 +326,7 @@ export class Renderer {
     this.renderer.setSize(w, h, false);
     this.onResize?.();
     this.onAirResize?.();
+    this.onSsrResize?.();
     this.camera.aspect = w / h;
     this.camera.fov = w < h ? 78 : 68;
     this.camera.updateProjectionMatrix();
@@ -326,6 +353,7 @@ export class Renderer {
       const L0 = this.sun.shadow.shadowNode?.lights?.[0]?.shadow;
       if (L0?.map?.depthTexture) { this.airShadow = L0; this.buildPipeline(); }
     }
+    if (this.zk) depthToDistance(this.camera, this.zk.value);
     const c = this.camera.position;
     this.sky.position.copy(c);
     this.stars.position.copy(c);

@@ -38,6 +38,8 @@ function workerMain() {
   const A0 = new Float32Array(alb), T0 = new Float32Array(tr), A = new Float32Array(A0.length), TR = new Float32Array(T0.length);
   const order = geo.index.array;
   for (let f = 0; f < A.length / 3; f++) { const o = order[3 * f] / 3; for (let k = 0; k < 3; k++) { A[3 * f + k] = A0[3 * o + k]; TR[3 * f + k] = T0[3 * o + k]; } }
+  // paper's straight leak over its diffuse transmission (tools/lib/gi-scene.mjs PAPER: 0.04 / 0.55)
+  const LEAK_OF_T = 0.04 / 0.55;
   const ray = new Ray(new Vector3(), new Vector3());
   const sray = new Ray(new Vector3(), new Vector3());
   const sun = new Vector3(...SUN_DIR);
@@ -66,12 +68,13 @@ function workerMain() {
       if (!h) return T;
       const f = h.faceIndex;
       if (TR[f * 3] < 0) return null;
-      for (let c = 0; c < 3; c++) T[c] *= TR[f * 3 + c];
+      // paper: only its straight leak (the rest it scatters, lighting itself: see firstHit's shading)
+      for (let c = 0; c < 3; c++) T[c] *= TR[f * 3 + c] >= 2 ? (TR[f * 3 + c] - 2) * LEAK_OF_T : TR[f * 3 + c];
       ox = h.point.x + d[0] * 0.01; oy = h.point.y + d[1] * 0.01; oz = h.point.z + d[2] * 0.01; left -= h.distance + 0.01;
     }
     return null;
   };
-  /** First opaque hit along a ray, and the colour of the glass passed on the way. */
+  /** First opaque hit (or paper, which stops a ray) along a ray, and the colour of the glass passed on the way. */
   const firstHit = (o, d, far, T) => {
     let ox = o[0], oy = o[1], oz = o[2], left = far;
     for (let k = 0; k < 6; k++) {
@@ -79,7 +82,7 @@ function workerMain() {
       const h = bvh.raycastFirst(ray, DoubleSide, 0, left);
       if (!h) return null;
       const f = h.faceIndex;
-      if (TR[f * 3] < 0) return h;
+      if (TR[f * 3] < 0 || TR[f * 3] >= 2) return h;
       for (let c = 0; c < 3; c++) T[c] *= TR[f * 3 + c];
       ox = h.point.x + d[0] * 0.01; oy = h.point.y + d[1] * 0.01; oz = h.point.z + d[2] * 0.01; left -= h.distance + 0.01;
     }
@@ -106,6 +109,33 @@ function workerMain() {
       }
     }
   };
+  /** Irradiance at p (just off a surface) for the normal nn: the sun (through what lets it
+   *  through), the lamps, and the bounce — the previous pass's probes, or a dim open sky in the first. */
+  const irradiance = (p, nn) => {
+    const E = [0, 0, 0];
+    const ndl = nn[0] * sun.x + nn[1] * sun.y + nn[2] * sun.z;
+    if (ndl > 0) { const Ts = transmitted(p, SUN_DIR, 800); if (Ts) for (let k = 0; k < 3; k++) E[k] += sunE[k] * ndl * Ts[k]; }
+    for (const l of lights) {
+      const lx = l.at[0] - p[0], ly = l.at[1] - p[1], lz = l.at[2] - p[2];
+      const dd = Math.hypot(lx, ly, lz);
+      if (dd > l.distance) continue;
+      const ln = (nn[0] * lx + nn[1] * ly + nn[2] * lz) / dd;
+      if (ln <= 0) continue;
+      if (occluded(p, [lx / dd, ly / dd, lz / dd], dd - 0.15)) continue;
+      const att = Math.pow(Math.max(0, 1 - Math.pow(dd / l.distance, 4)), 2) / Math.max(dd * dd, 0.09);
+      const col = hex(l.color);
+      for (let k = 0; k < 3; k++) E[k] += col[k] * l.intensity * ln * att;
+    }
+    if (prevV) {
+      sampleE([p[0] + nn[0] * 0.45, p[1] + nn[1] * 0.45, p[2] + nn[2] * 0.45], nn, tmp);
+      if (tmp[0] >= 0) for (let k = 0; k < 3; k++) E[k] += tmp[k];
+      else for (let k = 0; k < 3; k++) E[k] += Math.PI * sky0[k] * Math.max(0, nn[1] * 0.5 + 0.5);
+    } else {
+      // first pass: approximate the bounce with a dim open-sky term (refined in pass two)
+      for (let k = 0; k < 3; k++) E[k] += Math.PI * sky0[k] * 0.15;
+    }
+    return E;
+  };
   const out = new Float32Array((zs[1] - zs[0]) * ny * nx * 12);
   const valid = new Uint8Array((zs[1] - zs[0]) * ny * nx);
   const tmp = [0, 0, 0];
@@ -129,35 +159,22 @@ function workerMain() {
             L = d[1] >= 0 ? skyRadiance(d) : groundL;
           } else {
             const n = hit.face.normal;
-            const facing = n.x * d[0] + n.y * d[1] + n.z * d[2];
+            const tri = hit.faceIndex, paper = TR[tri * 3] >= 2;
+            let facing = n.x * d[0] + n.y * d[1] + n.z * d[2];
+            // (paper panels are wound both ways: the face toward the ray is the one seen)
+            if (paper && facing > 0) { n.negate(); facing = -facing; }
             if (facing > 0) { back++; continue; }
-            const tri = hit.faceIndex;
             const al = [A[tri * 3], A[tri * 3 + 1], A[tri * 3 + 2]];
             const p = [hit.point.x + n.x * 0.02, hit.point.y + n.y * 0.02, hit.point.z + n.z * 0.02];
             const nn = [n.x, n.y, n.z];
-            const E = [0, 0, 0];
-            const ndl = nn[0] * sun.x + nn[1] * sun.y + nn[2] * sun.z;
-            if (ndl > 0) { const Ts = transmitted(p, SUN_DIR, 800); if (Ts) for (let k = 0; k < 3; k++) E[k] += sunE[k] * ndl * Ts[k]; }
-            for (const l of lights) {
-              const lx = l.at[0] - p[0], ly = l.at[1] - p[1], lz = l.at[2] - p[2];
-              const dd = Math.hypot(lx, ly, lz);
-              if (dd > l.distance) continue;
-              const ln = (nn[0] * lx + nn[1] * ly + nn[2] * lz) / dd;
-              if (ln <= 0) continue;
-              if (occluded(p, [lx / dd, ly / dd, lz / dd], dd - 0.15)) continue;
-              const att = Math.pow(Math.max(0, 1 - Math.pow(dd / l.distance, 4)), 2) / Math.max(dd * dd, 0.09);
-              const col = hex(l.color);
-              for (let k = 0; k < 3; k++) E[k] += col[k] * l.intensity * ln * att;
+            const E = irradiance(p, nn);
+            if (paper) {
+              // the paper lit from the far side of its panel (past the panel's thickness) and
+              // scattering that light out on this side: T · E_far / π
+              const q = [hit.point.x - n.x * 0.16, hit.point.y - n.y * 0.16, hit.point.z - n.z * 0.16], Eb = irradiance(q, [-n.x, -n.y, -n.z]);
+              for (let k = 0; k < 3; k++) L[k] = (TR[tri * 3 + k] - 2) * Eb[k] / Math.PI;
             }
-            if (prevV) {
-              sampleE([p[0] + nn[0] * 0.45, p[1] + nn[1] * 0.45, p[2] + nn[2] * 0.45], nn, tmp);
-              if (tmp[0] >= 0) for (let k = 0; k < 3; k++) E[k] += tmp[k];
-              else for (let k = 0; k < 3; k++) E[k] += Math.PI * sky0[k] * Math.max(0, nn[1] * 0.5 + 0.5);
-            } else {
-              // first pass: approximate the bounce with a dim open-sky term (refined in pass two)
-              for (let k = 0; k < 3; k++) E[k] += Math.PI * sky0[k] * 0.15;
-            }
-            for (let k = 0; k < 3; k++) L[k] = (al[k] / Math.PI) * E[k];
+            for (let k = 0; k < 3; k++) L[k] += (al[k] / Math.PI) * E[k];
           }
           for (let k = 0; k < 3; k++) L[k] *= Tg[k];
           for (let k = 0; k < 3; k++) {

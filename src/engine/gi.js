@@ -162,15 +162,18 @@ export class GIVolume {
     this._open = (lum(sky) + lum(ground)) / 2;
   }
 
-  /** TSL irradiance at the current fragment, for the surface normal (diffuse) or any direction. */
-  irradianceNode(dir = normalWorld) {
+  /**
+   * TSL irradiance at the current fragment, for the surface normal (diffuse) or any direction.
+   * side −1: on the far side of a thin panel (paper behind a lattice: the probes past it, facing away).
+   */
+  irradianceNode(dir = normalWorld, side = 1) {
     const self = this;
     if (!this.nodes) this.nodes = this.tex.map((t) => texture3D(t));
     return Fn(() => {
       const N = dir;
       const fallback = mix(self.groundE, self.skyE, clamp(N.y.mul(0.5).add(0.5), 0, 1));
       // sample a little off the surface, toward the room it faces (limits leaks through walls)
-      const p = positionWorld.add(normalWorld.mul(0.45));
+      const p = positionWorld.add(normalWorld.mul(0.45 * side));
       const uvw = p.sub(self.uMin).div(self.uSize);
       const edge = min(min(uvw.x, float(1).sub(uvw.x)), min(uvw.z, float(1).sub(uvw.z)));
       const top = float(1).sub(uvw.y);
