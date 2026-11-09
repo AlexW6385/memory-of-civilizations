@@ -201,10 +201,23 @@ E.push({ t: 'pebble_paving', rect: [-21.4, 29.5, -12.8, 40.3], y: G + 0.035, fie
 E.push({ t: 'pebble_paving', rect: [-38, 42.2, -14, 51.2], y: G + 0.035, field: 'coin', medallion: 'plum', at: [-21, 46.7], d: 5.2, seed: 5 });
 
 // ── the halls furnished, their boards and couplets, potted landscapes in the courts (§11) ──
-E.push({ t: 'hall_furniture', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, front: 'n' });
-E.push({ t: 'scholar_study', rect: [-34, 30, -22, 36], y: G + 0.35, door: 'e' });
-E.push({ t: 'hall_furniture', rect: [-10, 32, 10, 39.5], y: G + 0.45, front: 's' });
-E.push({ t: 'hall_furniture', rect: B.linglong.rect, y: G + B.linglong.y, front: 'w' });
+E.push({ t: 'hall_furniture', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, front: 'n', H: 5.0 });
+E.push({ t: 'scholar_study', rect: [-34, 30, -22, 36], y: G + 0.35, door: 'e', H: 3.8 });
+E.push({ t: 'hall_furniture', rect: [-10, 32, 10, 39.5], y: G + 0.45, front: 's', H: 5.0, variant: 'main' });
+E.push({ t: 'hall_furniture', rect: B.linglong.rect, y: G + B.linglong.y, front: 'w', H: 3.9 });
+E.push({ t: 'hall_furniture', rect: B.yiyu.rect, y: G + B.yiyu.y, front: B.yiyu.front, H: 3.8 });
+// ── the residence's courts: stone drums at the gate, the screen wall before the side door, the great vats, a well, plants in tubs (§11)
+{
+  const g = G + 0.02;
+  for (const s of [-1, 1]) E.push({ t: 'court_piece', kind: 'drum', at: [s * 2.55, 60.45], y: G + 0.45, yaw: 0 });
+  E.push({ t: 'court_piece', kind: 'screen', at: [-12, 56.8], y: g, yaw: 0, w: 3.8, h: 3.3 });
+  for (const [x, z] of [[-14.5, 38.5], [14.5, 38.5], [-13.5, 47], [13.5, 47]]) E.push({ t: 'court_piece', kind: 'vat', at: [x, z], y: g });
+  E.push({ t: 'court_piece', kind: 'well', at: [-17, 46], y: g });
+  const plants = [[-12.2, 33, 'shrub'], [12.2, 33, 'shrub'], [-12.2, 36, 'orchid'], [12.2, 36, 'orchid'], [-12.4, 27, 'bamboo'], [12.4, 27, 'bamboo'],
+    [-9.5, 51, 'orchid'], [9.5, 51, 'orchid'], [38.6, 28, 'bamboo'], [38.6, 33, 'bamboo'], [38.6, 38, 'bamboo'], [-38.6, 28, 'bamboo'], [-38.6, 38, 'bamboo'],
+    [-20, 56, 'shrub'], [-8.5, 56, 'orchid'], [-30, 56, 'bamboo'], [20, 56, 'shrub'], [32, 56, 'bamboo']];
+  plants.forEach(([x, z, plant], i) => E.push({ t: 'court_piece', kind: 'plant', at: [x, z], y: g, plant, seed: 200 + i }));
+}
 // the inscribed boards under the eaves over the doorways (the doorway is the front's middle bay, as ming_hall lays it out)
 const board = (at, y, facing, w, n, seed, extra = {}) => E.push({ t: 'plaque', at, y, facing, w, h: 0.72, n, seed, ...extra });
 board([1.8, B.yuanxiang.rect[1] - 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, -1], 2.4, 4, 11);
