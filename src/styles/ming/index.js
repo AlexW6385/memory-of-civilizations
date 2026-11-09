@@ -1316,19 +1316,40 @@ function lotus(el, { bag }) {
   }
 }
 
+// ── the houses of the canal town ──────────────────────────────────────────────
+// (docs/settlements/ming-suzhou.md §5: Pingjiang Road, Shantang Street, the Qingming scrolls)
+const TONES = { white: ['plaster_white', 'plaster_damp'], grey: ['plaster_grey', 'plaster_damp'], patched: ['plaster_white', 'plaster_damp'], damp: ['plaster_damp', 'granite_grey'] };
+const WINDOW_LATTICE = ['lattice', 'lattice', 'lattice_ice', 'lattice', 'timber'];
+
+/** A small tree for the courts and yards: a trunk and two or three blobs of leaf. */
+function yardTree(bag, x, y, z, r, h, rand) {
+  const lv = ['doum_leaf', 'papyrus', 'palm_leaf'][Math.floor(rand() * 3)];
+  bag.add('timber', lathe([[0.2, 0], [0.13, h * 0.35], [0.08, h * 0.7], [0.001, h * 0.8]], 6, null, x, y, z));
+  for (let k = 0; k < 3; k++) {
+    const a = rand() * 6.28, d = k ? r * 0.35 : 0, rr = r * (k ? 0.7 : 1), yy = h * (0.55 + 0.15 * k) + 0.2;
+    bag.add(lv, lathe([[0.001, 0], [rr * 0.7, rr * 0.18], [rr, rr * 0.55], [rr * 0.7, rr * 0.95], [0.001, rr * 1.1]], 8, null, x + Math.cos(a) * d, y + yy, z + Math.sin(a) * d));
+  }
+}
+
 /**
- * house_jiangnan: a house of the canal town { rect, y, front, storeys, shop, water (a canal under
- * one side), seed }: a granite plinth, white walls, a gabled roof of black tiles along the street,
- * plank shutters or lattice on the ground floor, latticed windows above with a little pent eave,
- * gable walls rising over the roof in steps (horse-head walls) on some.
+ * house_jiangnan: a house of the canal town { rect, y, front, storeys, shop, trade, water, seed,
+ * kind ('row' | 'court' | 'grand' | 'yard' | 'simple'), roof ('gable' | 'horse' | 'guanyin' | 'hip'),
+ * detail (0–2), overhang, balcony ('water' | 'upper'), tone, open }.
+ * Local frame: u along the front, v from the street (0) to the back. Granite plinth, plaster walls
+ * (the lower metre darker with damp), a roof of black tiles with its ridge along the street; on the
+ * shop streets the front is a row of timber posts with plank shutters (paimen ban), on the lanes a
+ * plaster wall with a door under a little tiled hood and small windows; the upper floor with
+ * lattice windows, bamboo blinds and drying poles; some with the upper floor jutting over the
+ * street or a veranda over the canal on stilts; deep lots hold courts and halls one behind the
+ * other (jin), the rich ones behind a gate tower (menlou) of carved brick; the gable ends plain,
+ * stepped (horse-head), or curved (guanyin hood), the corner houses hipped.
  */
 function houseJiangnan(el, { bag, col }) {
   const rand = rng(el.seed || 1);
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, f = el.front || 's';
   const along = f === 'n' || f === 's';
   const L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
-  const storey = 3.1, H = el.storeys * storey;
-  // local frame: u along the front, v from the front to the back
+  const kind = el.kind || 'row', det = el.simple ? 0 : (el.detail ?? 2), open = !!el.open;
   const ox = f === 's' ? x1 : f === 'n' ? x0 : f === 'e' ? x1 : x0, oz = f === 's' ? z1 : f === 'n' ? z0 : f === 'e' ? z0 : z1;
   const u = f === 's' ? [-1, 0] : f === 'n' ? [1, 0] : f === 'e' ? [0, 1] : [0, -1];
   const v = [-u[1], u[0]];
@@ -1337,89 +1358,408 @@ function houseJiangnan(el, { bag, col }) {
     const p = [W(a0, b0, 0), W(a1, b1, 0)];
     bag.add(mat, box(Math.min(p[0][0], p[1][0]), ya, Math.min(p[0][2], p[1][2]), Math.max(p[0][0], p[1][0]), yb, Math.max(p[0][2], p[1][2])));
   };
-  const plinthBottom = el.water ? -2.6 : y - 0.4;
-  B(0, 0, L, D, plinthBottom, y + 0.45, 'granite_block');
-  const back = D - 0.25, front = 0.6;
-  // the walls: plaster all round the upper parts and the sides; the front's ground floor of boards
-  B(0.0, front, 0.25, back, y + 0.45, y + H, 'plaster_white');
-  B(L - 0.25, front, L, back, y + 0.45, y + H, 'plaster_white');
-  B(0, back - 0.25, L, back, y + 0.45, y + H, 'plaster_white');
-  if (el.shop) {
-    // a shop front: a counter of boards, the upper part open (the shutters taken down for the day); an
-    // open shop leaves a way in at one end of the counter
-    if (el.open) { B(0.25, front, L - 1.35, front + 0.12, y + 0.45, y + 1.4, 'timber'); col.rect(boxRect(W(0.25, front, 0), W(L - 1.35, front + 0.12, 0)), y, y + 1.4); }
-    else B(0.25, front, L - 0.25, front + 0.12, y + 0.45, y + 1.4, 'timber');
-    B(0.25, front - 0.05, L - 0.25, front + 0.12, y + storey - 0.35, y + storey, 'lacquer_chestnut');
-    B(0.3, front + 1.4, L - 0.3, front + 1.5, y + 0.45, y + 0.95, 'timber');            // a table inside
-  } else {
-    const nb = Math.max(2, Math.round(L / 1.2));
-    for (let k = 0; k < nb; k++) {
-      const a0 = 0.25 + (L - 0.5) * k / nb, a1 = 0.25 + (L - 0.5) * (k + 1) / nb - 0.04;
-      const door = k === Math.floor(nb / 2);
-      if (el.open && door) { B(a0 - 0.02, front - 0.02, a0 + 0.06, front + 0.7, y + 0.45, y + storey - 0.3, 'lacquer_chestnut'); continue; }   // the door leaf stands open, folded in
-      B(a0, front, a1, front + 0.08, y + 0.45, y + storey - 0.3, door ? 'lacquer_chestnut' : (rand() < 0.5 ? 'timber' : 'lattice'));
-      if (el.open) col.rect(boxRect(W(a0, front, 0), W(a1, front + 0.08, 0)), y, y + storey);
+  // triangles gathered per material and added once
+  const acc = new Map();
+  const put = (mat, arr) => { let A = acc.get(mat); if (!A) acc.set(mat, A = []); for (let i = 0; i < arr.length; i++) A.push(arr[i]); };
+  const dirV = (s) => [s * v[0], 0, s * v[1]], dirU = (s) => [s * u[0], 0, s * u[1]];
+  /** A vertical quad in the plane v = b, facing the street (side −1) or the back (+1). */
+  const qF = (mat, a0, a1, ya, yb, b, side = -1, two = false) => {
+    const p0 = W(a0, b, ya), p1 = W(a1, b, ya), p2 = W(a1, b, yb), p3 = W(a0, b, yb), t = [...p0, ...p1, ...p2, ...p0, ...p2, ...p3];
+    put(mat, facing(t, dirV(side))); if (two) put(mat, facing(t, dirV(-side)));
+  };
+  /** A vertical quad in the plane u = a, facing −u (side −1) or +u. */
+  const qU = (mat, b0, b1, ya, yb, a, side) => {
+    const p0 = W(a, b0, ya), p1 = W(a, b1, ya), p2 = W(a, b1, yb), p3 = W(a, b0, yb);
+    put(mat, facing([...p0, ...p1, ...p2, ...p0, ...p2, ...p3], dirU(side)));
+  };
+  /** A horizontal quad facing up or down. */
+  const qH = (mat, a0, a1, b0, b1, yy, up = true) => {
+    const p0 = W(a0, b0, yy), p1 = W(a1, b0, yy), p2 = W(a1, b1, yy), p3 = W(a0, b1, yy);
+    put(mat, facing([...p0, ...p1, ...p2, ...p0, ...p2, ...p3], [0, up ? 1 : -1, 0]));
+  };
+  const quad4 = (mat, P, dir) => put(mat, facing([...P[0], ...P[1], ...P[2], ...P[0], ...P[2], ...P[3]], dir));
+  const boxRectL = (a0, b0, a1, b1) => boxRect(W(a0, b0, 0), W(a1, b1, 0));
+
+  const y0 = y + 0.45, water = !!el.water;
+  const [wallMat, bandMat] = TONES[el.tone || 'white'] || TONES.white;
+  const roofMat = rand() < 0.22 ? 'tile_grey' : 'tile_dark';
+  const plinthBottom = water ? -2.6 : y - 0.4;
+  /** A wall box in two bands: the lower metre darkened by damp, the rest plaster. */
+  const wall = (a0, b0, a1, b1, ya, yb) => {
+    const m = Math.min(yb, ya + 0.95);
+    B(a0, b0, a1, b1, ya, m, bandMat);
+    if (yb > m) B(a0, b0, a1, b1, m, yb, wallMat);
+  };
+
+  // ── the roofs ──
+  /** A roof over eaves a0..a1 × vf..vb at height yE: rise r, 'gable' (open ends) or 'hip'. Returns the profile function and the ridge. */
+  const roofOf = (a0, a1, vf, vb, yE, rise, type, nt) => {
+    const vm = (vf + vb) / 2, hip = type === 'hip';
+    let ra0 = a0, ra1 = a1;
+    if (hip) { const ins = Math.min((vb - vf) / 2 - 0.1, (a1 - a0) / 2 - 0.2); ra0 = a0 + ins; ra1 = a1 - ins; }
+    const yR = yE + rise;
+    const panel = (E0, E1, R0, R1) => {
+      const P = (s, t) => { const ea = E0[0] + (E1[0] - E0[0]) * s, eb = E0[1] + (E1[1] - E0[1]) * s, ra = R0[0] + (R1[0] - R0[0]) * s, rb = R0[1] + (R1[1] - R0[1]) * s, k = Math.pow(t, 1.35); return W(ea + (ra - ea) * t, eb + (rb - eb) * t, yE + rise * k); };
+      const T = [];
+      for (let i = 0; i < nt; i++) { const t0 = i / nt, t1 = (i + 1) / nt, p0 = P(0, t0), p1 = P(1, t0), p2 = P(1, t1), p3 = P(0, t1); T.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3); }
+      put(roofMat, facing(T, [0, 1, 0]));
+      return P;
+    };
+    const pF = panel([a0, vf], [a1, vf], [ra0, vm], [ra1, vm]), pB = panel([a1, vb], [a0, vb], [ra1, vm], [ra0, vm]);
+    if (hip) { panel([a0, vb], [a0, vf], [ra0, vm], [ra0, vm]); panel([a1, vf], [a1, vb], [ra1, vm], [ra1, vm]); }
+    // the fascia of the eave tiles and the board under it
+    const fas = [];
+    for (const [b, s] of [[vf, -1], [vb, 1]]) { const p0 = W(a0, b, yE - 0.14), p1 = W(a1, b, yE - 0.14), p2 = W(a1, b, yE + 0.03), p3 = W(a0, b, yE + 0.03); fas.push(...facing([...p0, ...p1, ...p2, ...p0, ...p2, ...p3], dirV(s))); }
+    put(roofMat, fas);
+    // the ridge, with its ends turned up
+    const rd = [];
+    beamTris(rd, W(ra0, vm, yR - 0.04), W(ra1, vm, yR - 0.04), 0.1, 0.22);
+    if (!hip && type === 'gable') for (const [a, sg] of [[ra0, -1], [ra1, 1]]) { const c = W(a + sg * 0.1, vm, yR); beamTris(rd, [c[0] - u[0] * sg * 0.22, yR + 0.1, c[2] - u[1] * sg * 0.22], [c[0] + u[0] * sg * 0.12, yR + 0.34, c[2] + u[1] * sg * 0.12], 0.07, 0.1); }
+    if (hip) for (const [a0h, sg, ra] of [[a0, -1, ra0], [a1, 1, ra1]]) for (const bb of [vf, vb]) beamTris(rd, W(ra, vm, yR - 0.04), W(a0h, bb, yE + 0.02), 0.07, 0.1);   // the hips
+    put(roofMat, rd);
+    const prof = (vv) => { const t = vv <= vm ? (vv - vf) / (vm - vf) : (vb - vv) / (vb - vm); return yE + rise * Math.pow(Math.max(0, Math.min(1, t)), 1.35); };
+    return { P: pF, PB: pB, prof, vm, yR, ra0, ra1 };
+  };
+  /** Slipped tiles and patches on a roof slope (det ≥ 1). */
+  const roofWear = (R, n) => {
+    for (let k = 0; k < n; k++) {
+      const s0 = 0.1 + rand() * 0.7, t0 = 0.15 + rand() * 0.6, ds = 0.06 + rand() * 0.1, dt = 0.07 + rand() * 0.1, P = rand() < 0.65 ? R.P : R.PB, hole = rand() < 0.3;
+      const c = [P(s0, t0), P(s0 + ds, t0), P(s0 + ds, t0 + dt), P(s0, t0 + dt)].map((p) => [p[0], p[1] + 0.025, p[2]]);
+      quad4(hole ? 'wood_dark' : (rand() < 0.5 ? 'tile_grey' : 'tile_dark'), c, [0, 1, 0]);
     }
-  }
-  B(0, front - 0.05, L, front + 0.15, y + storey - 0.3, y + storey + 0.05, 'lacquer_chestnut');
-  if (!el.open) col.rect([x0, z0, x1, z1], plinthBottom, y + H);
-  else {
-    // an open house: the plinth a floor, the walls solid, a step up at the front; the interior furnished
-    col.rect([x0, z0, x1, z1], plinthBottom, y + 0.2);
-    col.floor([x0, z0, x1, z1], y + 0.45);
-    for (const [a0, b0, a1, b1] of [[0, front, 0.25, back], [L - 0.25, front, L, back], [0, back - 0.25, L, back]]) col.rect(boxRect(W(a0, b0, 0), W(a1, b1, 0)), y, y + H);
-    houseInterior(bag, col, { W, B, L, D, front, back, y: y + 0.45, storey, storeys: el.storeys, shop: el.shop, rand });
-  }
-  if (el.storeys > 1) {
-    // a little pent eave over the ground floor, then the upper floor's lattice windows
-    const pe = [];
-    const pa = W(0, front + 0.1, y + storey + 0.25), pb = W(L, front + 0.1, y + storey + 0.25), pc = W(L, front - 0.75, y + storey - 0.15), pd = W(0, front - 0.75, y + storey - 0.15);
-    pe.push(...pa, ...pb, ...pc, ...pa, ...pc, ...pd);
-    bag.add('tile_dark', fromTriangles(pe.concat(flipTris(pe))));
-    const nw = Math.max(2, Math.round(L / 1.0));
-    for (let k = 0; k < nw; k++) {
-      const a0 = 0.25 + (L - 0.5) * k / nw + 0.03, a1 = 0.25 + (L - 0.5) * (k + 1) / nw - 0.03;
-      B(a0, front + 0.3, a1, front + 0.36, y + storey + 0.35, y + storey + 1.1, 'plaster_white');
-      B(a0, front + 0.3, a1, front + 0.36, y + storey + 1.1, y + H - 0.3, rand() < 0.85 ? 'lattice' : 'timber');
-    }
-    B(0.25, front + 0.3, L - 0.25, front + 0.36, y + H - 0.3, y + H, 'lacquer_chestnut');
-  }
-  // the roof: two slopes along the front, the ridge with curled ends
-  const o = 0.55, rise = D * 0.3, yr = y + H;
-  const rf = [], uf = [];
-  const eF = [W(-0.15, front - o, yr), W(L + 0.15, front - o, yr)], eB = [W(-0.15, D + o * 0.5, yr - 0.2), W(L + 0.15, D + o * 0.5, yr - 0.2)];
-  const mid = (front + D) / 2, rg = [W(-0.15, mid, yr + rise), W(L + 0.15, mid, yr + rise)];
-  const sag = (p, q, r2, s) => { const n = 6, pts = []; for (let k = 0; k <= n; k++) { const t = k / n; const yy = p[1] + (r2[1] - p[1]) * Math.pow(t, 1.35); pts.push([p[0] + (r2[0] - p[0]) * t, yy, p[2] + (r2[2] - p[2]) * t], [q[0] + (s[0] - q[0]) * t, yy, q[2] + (s[2] - q[2]) * t]); } return pts; };
-  for (const [ea, eb] of [[eF[0], eF[1]], [eB[0], eB[1]]]) {
-    const pts = sag(ea, eb, rg[0], rg[1]);
-    for (let k = 0; k + 3 < pts.length; k += 2) { rf.push(...pts[k], ...pts[k + 1], ...pts[k + 3], ...pts[k], ...pts[k + 3], ...pts[k + 2]); uf.push(pts[k][0], pts[k][1] - 0.08, pts[k][2], pts[k + 3][0], pts[k + 3][1] - 0.08, pts[k + 3][2], pts[k + 1][0], pts[k + 1][1] - 0.08, pts[k + 1][2], pts[k][0], pts[k][1] - 0.08, pts[k][2], pts[k + 2][0], pts[k + 2][1] - 0.08, pts[k + 2][2], pts[k + 3][0], pts[k + 3][1] - 0.08, pts[k + 3][2]); }
-  }
-  bag.add('tile_dark', fromTriangles(rf.concat(flipTris(rf))));
-  bag.add('timber', fromTriangles(uf.concat(flipTris(uf))));
-  const rd = [];
-  beamTris(rd, [rg[0][0], rg[0][1] - 0.05, rg[0][2]], [rg[1][0], rg[1][1] - 0.05, rg[1][2]], 0.12, 0.3);
-  for (const [p, sgn] of [[rg[0], -1], [rg[1], 1]]) ridgeCurl(rd, [p[0], p[1] + 0.25, p[2]], [u[0] * sgn, u[1] * sgn], 0.42, 0.1);
-  bag.add('tile_dark', fromTriangles(rd));
-  // the gable ends: plastered triangles; on some houses stepped horse-head walls above the roof
-  const g = [];
-  const step = rand() < 0.35;
-  for (const a of [0.0, L]) {
-    const p0 = W(a, front - 0.1, yr), p1 = W(a, D, yr), p2 = W(a, mid, yr + rise + 0.05);
-    g.push(...p0, ...p1, ...p2);
-    if (step) {
-      for (let s2 = 0; s2 < 3; s2++) {
-        const b0 = front + (mid - front) * s2 / 3, b1 = front + (mid - front) * (s2 + 1) / 3, yy = yr + rise * (s2 + 1) / 3 + 0.5;
-        const c0 = W(a - 0.13, b0, 0), c1 = W(a + 0.13, D - (b0 - front), 0);
-        bag.add('plaster_white', box(Math.min(c0[0], c1[0]), yr, Math.min(c0[2], c1[2]), Math.max(c0[0], c1[0]), yy, Math.max(c0[2], c1[2])));
-        const t2 = [];
-        const d0 = W(a, b0, yy), d1 = W(a, D - (b0 - front), yy);
-        beamTris(t2, d0, d1, 0.24, 0.16);
-        bag.add('tile_dark', fromTriangles(t2));
-        void b1;
+  };
+
+  /** The gable ends of a hall of eaves a0..a1: plain, stepped (horse-head), curved (guanyin hood). */
+  const gables = (R, o, type) => {
+    const { vf, vb, yE, rise, vw0, vw1 } = o, vm = R.vm;
+    for (const [a, s] of [[0, -1], [L, 1]]) {
+      if (type === 'hip') continue;
+      const wa = s < 0 ? 0 : L - 0.26;                       // the wall stands on the end wall: u in [wa, wa + 0.26]
+      if (type === 'gable' || !det) {
+        const N = 5, T = [];
+        for (let i = 0; i < N; i++) for (const [p, q] of [[vf + (vm - vf) * i / N, vf + (vm - vf) * (i + 1) / N], [vb - (vb - vm) * i / N, vb - (vb - vm) * (i + 1) / N]]) T.push(...W(a, p, yE - 0.02), ...W(a, q, yE - 0.02), ...W(a, q, R.prof(q) - 0.02), ...W(a, p, yE - 0.02), ...W(a, q, R.prof(q) - 0.02), ...W(a, p, R.prof(p) - 0.02));
+        put(wallMat, facing(T, dirU(s)));
+        if (type !== 'gable') for (const [p, q] of [[vf, vm], [vm, vb]]) { const cp = []; beamTris(cp, W(a + s * 0.02, p, R.prof(p) + 0.02), W(a + s * 0.02, q, R.prof(q) + 0.02), 0.08, 0.08); put(roofMat, cp); }
+        continue;
+      }
+      if (type === 'horse') {
+        const ns = det > 1 && rand() < 0.5 ? 3 : 2, cp = [];
+        // steps from the eaves toward the ridge, the middle one over the ridge; each top a little above the roof at the step's upper end
+        const vs = [], vq = [];
+        for (let k = 0; k <= ns; k++) { vs.push(vw0 + (vm - vw0) * k / ns); vq.push(vw1 - (vw1 - vm) * k / ns); }
+        const topAt = (vv) => R.prof(vv) + 0.5;
+        const list = [];
+        for (let k = 0; k < ns - 1; k++) { list.push([vs[k], vs[k + 1], topAt(vs[k + 1])]); list.push([vq[k + 1], vq[k], topAt(vq[k + 1])]); }
+        list.push([vs[ns - 1], vq[ns - 1], R.yR + 0.5]);
+        for (const [p, q, top] of list) {
+          B(wa, p, wa + 0.26, q, yE - 0.3, top, wallMat);
+          B(wa - 0.03, p - 0.02, wa + 0.29, q + 0.02, top, top + 0.1, roofMat);
+        }
+        // the lowest steps end in a little upturned eave
+        for (const [p, sg] of [[vw0, 1], [vw1, -1]]) B(wa - 0.03, p - (sg > 0 ? 0.12 : -0.02), wa + 0.29, p + (sg > 0 ? -0.02 : 0.12), R.prof(p) + 0.5 - 0.02, R.prof(p) + 0.62, roofMat);
+        void cp;
+      } else {
+        // the Guanyin hood: a smooth arch over the roof, in plaster, with a tiled coping
+        const N = det > 1 ? 10 : 6, top = (t) => yE + 0.25 + (rise + 0.4) * Math.pow(Math.sin(Math.PI * t), 0.7);
+        const pts = [];
+        for (let i = 0; i <= N; i++) { const t = i / N; pts.push([vw0 + (vw1 - vw0) * t, top(t)]); }
+        const T = [], T2 = [], cp = [];
+        for (let i = 0; i < N; i++) {
+          const [p, hp] = pts[i], [q, hq] = pts[i + 1], b = yE - 0.3;
+          const quadU = [W(wa, p, b), W(wa, q, b), W(wa, q, hq), W(wa, p, hp)], quadI = [W(wa + 0.26, p, b), W(wa + 0.26, q, b), W(wa + 0.26, q, hq), W(wa + 0.26, p, hp)];
+          T.push(...quadU[0], ...quadU[1], ...quadU[2], ...quadU[0], ...quadU[2], ...quadU[3]);
+          T2.push(...quadI[0], ...quadI[1], ...quadI[2], ...quadI[0], ...quadI[2], ...quadI[3]);
+          beamTris(cp, W(wa + 0.13, p, hp), W(wa + 0.13, q, hq), 0.17, 0.1);
+        }
+        put(wallMat, facing(T, dirU(s))); put(wallMat, facing(T2, dirU(-s))); put(roofMat, cp);
       }
     }
+  };
+
+  // ── the plan: the halls one behind the other ──
+  const st0 = el.storeys || 1;
+  const bdOf = (st) => (st > 1 ? 4.6 : 4.1) + rand() * 0.9;
+  const h1Of = (shopHall) => (shopHall ? 3.35 : 2.95 + rand() * 0.4), h2Of = () => 2.45 + rand() * 0.4;
+  const ovh = !!el.overhang && st0 > 1 && kind !== 'simple' && !open;
+  const roofType = el.roof || 'gable';
+  const halls = [];
+  const FV = ovh ? 1.15 : 0.7;
+  if (kind === 'yard') {
+    // a walled yard with a tree (and maybe a shed): the town goes on, behind its walls
+    const wh = 3.0 + rand() * 0.5;
+    wall(0, 0.3, L, 0.55, y0 - 0.45, y + wh); B(-0.02, 0.28, L + 0.02, 0.57, y + wh, y + wh + 0.11, roofMat);
+    for (const [a0, a1] of [[0, 0.25], [L - 0.25, L]]) { wall(a0, 0.55, a1, D, y0 - 0.45, y + wh - 0.2); B(a0 - 0.03, 0.55, a1 + 0.03, D, y + wh - 0.2, y + wh - 0.1, roofMat); }
+    wall(0.25, D - 0.25, L - 0.25, D, y0 - 0.45, y + wh - 0.2); B(0.25, D - 0.28, L - 0.25, D + 0.03, y + wh - 0.2, y + wh - 0.1, roofMat);
+    const gx = Math.min(L - 1.4, 0.8 + rand() * (L - 2.2));
+    B(gx - 0.1, 0.26, gx + 1.1, 0.32, y0, y0 + 2.2, 'lacquer_chestnut'); B(gx - 0.2, 0.26, gx + 1.2, 0.36, y0 + 2.2, y0 + 2.35, 'granite_grey');
+    yardTree(bag, L * (0.3 + 0.4 * rand()) * u[0] + ox + v[0] * (D * 0.55), y, L * (0.3 + 0.4 * rand()) * u[1] + oz + v[1] * (D * 0.55), 2.3 + rand() * 1.2, 5 + rand() * 2.5, rand);
+    if (rand() < 0.5) { const sA = L * 0.5; B(sA - 1.2, D - 3.2, sA + 1.2, D - 0.6, y0 - 0.45, y0 + 2.4, wallMat); const R = roofOf(sA - 1.5, sA + 1.5, D - 3.5, D - 0.3, y0 + 2.4, 0.7, 'gable', 2); void R; }
+    col.rect([x0, z0, x1, z1], plinthBottom, y + wh);
+    flush();
+    return;
   }
-  bag.add('plaster_white', fromTriangles(g.concat(flipTris(g))));
+  if (kind === 'simple' || (kind === 'row' && D < 7.4)) {
+    halls.push({ v0: FV, vb: kind === 'simple' ? Math.min(D - 0.15, FV + bdOf(st0) + 0.6) : D - 0.15, st: st0, front: 'street', rear: 'lane' });
+  } else if (kind === 'row') {
+    halls.push({ v0: FV, vb: Math.min(D - 2, FV + bdOf(st0)), st: st0, front: 'street', rear: 'yard' });
+  } else if (kind === 'court') {
+    const bd1 = bdOf(st0), st2 = rand() < 0.6 ? Math.max(1, st0) : 1, bd2 = bdOf(st2) - 0.4, vb2 = D - 0.15;
+    halls.push({ v0: FV, vb: FV + bd1, st: st0, front: 'street', rear: 'court' });
+    halls.push({ v0: vb2 - bd2, vb: vb2, st: st2, front: 'court', rear: 'lane' });
+    if (halls[1].v0 - halls[0].vb < 1.4) halls.pop(), halls[0].vb = D - 0.15, halls[0].rear = 'lane';
+  } else if (kind === 'grand') {
+    const g0 = 0.6, hallD = 4.4 + rand() * 0.4, vb2 = D - 0.15, bd3 = 3.7 + rand() * 0.4;
+    halls.push({ v0: g0 + 2.4, vb: g0 + 2.4 + hallD, st: 1, front: 'court', rear: 'court', tall: true });
+    halls.push({ v0: vb2 - bd3, vb: vb2, st: 2, front: 'court', rear: 'lane' });
+    if (halls[1].v0 - halls[0].vb < 1.3) halls.pop(), halls[0].vb = D - 0.15, halls[0].rear = 'lane';
+  }
+  const lastB = halls[halls.length - 1].vb;
+
+  // the ground of the courts: grey bricks between the halls, walls round them
+  if (kind === 'court' || kind === 'grand') {
+    const first = halls[0], vA = kind === 'grand' ? 0.3 : first.vb, vC = halls.length > 1 ? halls[1].v0 : D;
+    if (kind === 'court') B(0, first.vb, L, vC, y0 - 0.45, y0 - 0.37, 'brick_grey');
+    const wh = 3.3;
+    // side walls of the court
+    if (halls.length > 1) for (const [a0, a1] of [[0, 0.24], [L - 0.24, L]]) { wall(a0, first.vb, a1, vC, y0 - 0.45, y + wh + 0.45); B(a0 - 0.03, first.vb, a1 + 0.03, vC, y + wh + 0.45, y + wh + 0.56, roofMat); }
+    if (kind === 'grand') {
+      // the forecourt behind the gate wall, the middle court; walls all round
+      B(0.24, 0.55, L - 0.24, first.v0, y0 - 0.45, y0 - 0.37, 'brick_grey');
+      for (const [a0, a1] of [[0, 0.24], [L - 0.24, L]]) { wall(a0, 0.3, a1, first.v0, y0 - 0.45, y + 3.6); B(a0 - 0.03, 0.3, a1 + 0.03, first.v0, y + 3.6, y + 3.71, roofMat); }
+      if (halls.length > 1) B(0.24, first.vb, L - 0.24, vC, y0 - 0.45, y0 - 0.37, 'brick_grey');
+      // the gate wall on the street with the gate tower in the middle
+      const gw = 2.6, gc = L / 2, gA = gc - gw / 2, gB = gc + gw / 2, gy = y0;
+      wall(0, 0.3, gA - 0.5, 0.75, y0 - 0.45, y + 3.55); wall(gB + 0.5, 0.3, L, 0.75, y0 - 0.45, y + 3.55);
+      B(-0.03, 0.27, gA - 0.5, 0.78, y + 3.55, y + 3.66, roofMat); B(gB + 0.5, 0.27, L + 0.03, 0.78, y + 3.55, y + 3.66, roofMat);
+      for (const [a0, a1] of [[gA - 0.5, gA], [gB, gB + 0.5]]) B(a0, 0.25, a1, 0.8, y0 - 0.45, gy + 3.1, 'brick_grey');
+      B(gA - 0.5, 0.2, gB + 0.5, 0.85, gy + 3.1, gy + 3.3, 'granite_grey');
+      B(gA - 0.35, 0.2, gB + 0.35, 0.8, gy + 3.3, gy + 3.85, 'brick_grey');           // the carved frieze band
+      for (let k = 0; k < 6; k++) { const a = gA - 0.2 + (gw + 0.4) * (k + 0.1) / 6; B(a, 0.16, a + (gw + 0.4) / 6 * 0.8, 0.2, gy + 3.38, gy + 3.78, k % 2 ? 'granite_grey' : 'plaster_grey'); }
+      B(gA, 0.62, gB, 0.7, gy, gy + 3.1, 'lacquer_black');                           // the door leaves
+      B(gc - 0.02, 0.58, gc + 0.02, 0.62, gy, gy + 3.1, 'iron');
+      for (let r = 0; r < 4; r++) for (const sg of [-1, 1]) B(gc + sg * (0.2 + 0.55 * (r % 2 + 0.5) / 2) - 0.04, 0.585, gc + sg * (0.2 + 0.55 * (r % 2 + 0.5) / 2) + 0.04, 0.62, gy + 0.9 + r * 0.45, gy + 0.98 + r * 0.45, 'gilt_bronze');
+      B(gA - 0.1, 0.1, gB + 0.1, 0.95, gy - 0.03, gy + 0.1, 'granite_grey');
+      for (let k = 0; k < 3; k++) { const a = gA + (gw) * (k + 0.5) / 3; B(a - 0.07, 0.1, a + 0.07, 0.3, gy + 3.15, gy + 3.35, 'lacquer_chestnut'); }
+      roofOf(gA - 0.9, gB + 0.9, 0.0, 1.55, gy + 3.95, 0.85, 'hip', 3);
+      for (const a of [gA - 0.25, gB + 0.25]) { const p = W(a, 0.4, gy + 2.55); bag.add('lamp_paper', lathe([[0.07, 0], [0.18, 0.08], [0.2, 0.22], [0.16, 0.36], [0.07, 0.44], [0.001, 0.44]], 8, null, p[0], p[1], p[2])); }
+    }
+  }
+
+  // ── each hall ──
+  let first = true;
+  for (const hl of halls) {
+    const street = hl.front === 'street';
+    const shopHall = !!el.shop && street, st = hl.st;
+    const h1 = h1Of(shopHall) + (hl.tall ? 1.4 : 0), h2 = h2Of(), yf = y0 + h1, yE = y0 + h1 + (st > 1 ? h2 : 0);
+    const v0 = hl.v0, vb = hl.vb, uf = st > 1 ? (ovh && street ? v0 - 0.55 : v0 + (street ? 0.3 : 0.2)) : v0;
+    const vf = (st > 1 ? uf : v0) - (street ? 0.6 : 0.55), vbE = vb + 0.35;
+    const isFirst = first; first = false;
+    const lastHall = hl === halls[halls.length - 1];
+    // plinth
+    B(0, v0 - 0.12, L, vb, isFirst && water ? plinthBottom : y - 0.4, y0, 'granite_block');
+    if (det) B(-0.02, v0 - 0.14, L + 0.02, vb + 0.02, y0 - 0.14, y0 + 0.04, 'granite_grey');      // the plinth's cap course, a little proud
+    // walls: sides and back
+    for (const [a0, a1] of [[0, 0.25], [L - 0.25, L]]) { wall(a0, v0, a1, vb, y0, yf); if (st > 1) B(a0, uf, a1, vb, yf, yE, wallMat); }
+    wall(0.25, vb - 0.25, L - 0.25, vb, y0, yf); if (st > 1) B(0.25, vb - 0.25, L - 0.25, vb, yf, yE, wallMat);
+    // ground floor, front
+    if (street && !open && shopHall) {
+      // timber posts, the plank shutters (paimen ban) of the bays, some down: a counter or goods behind
+      const nb = Math.max(1, Math.round(L / 3.3)), bw = (L - 0.5) / nb;
+      B(0, v0 - 0.02, L, v0 + 0.15, yf - 0.5, yf, 'lacquer_chestnut');
+      B(0.0, v0 - 0.04, 0.25, v0 + 0.2, y0, yf - 0.5, 'lacquer_chestnut'); B(L - 0.25, v0 - 0.04, L, v0 + 0.2, y0, yf - 0.5, 'lacquer_chestnut');
+      for (let k = 1; k < nb; k++) { const a = 0.25 + bw * k; B(a - 0.1, v0 - 0.04, a + 0.1, v0 + 0.18, y0, yf - 0.5, 'lacquer_chestnut'); }
+      B(0.25, v0 + 0.05, L - 0.25, v0 + 0.25, y0, y0 + 0.2, 'granite_grey');                      // the groove's sill
+      for (let k = 0; k < nb; k++) {
+        const a0 = 0.25 + bw * k + 0.1, a1 = 0.25 + bw * (k + 1) - 0.1, openBay = (k === 0 && rand() < 0.75) || rand() < 0.3;
+        qF('wood_dark', a0, a1, y0 + 0.2, yf - 0.5, v0 + 0.15, -1);
+        if (openBay) {
+          B(a0, 0.56, a1, 0.8, y0, y0 + 0.95, 'timber');                                          // the counter: a board across the opening
+          B(a0, 0.52, a1, 0.58, y0 + 0.95, y0 + 1.0, 'wood_dark');
+          qF('wood_dark', a0, a1, y0 + 1.0, yf - 0.5, v0 + 0.5, -1);
+          for (let s = 0; s < 4; s++) B(a0 + s * 0.3, v0 - 0.05, a0 + s * 0.3 + 0.26, v0, y0 + 0.2, y0 + 0.2 + 0.04 + s * 0.02, 'timber');
+          if (det > 1) goodsOnCounter(a0, a1, 0.68, y0 + 0.95, el.trade);
+        } else {
+          const np = Math.max(3, Math.round((a1 - a0) / 0.29)), pw = (a1 - a0) / np;
+          const gone = rand() < 0.3 ? 1 + Math.floor(rand() * 3) : 0;
+          for (let p = gone; p < np; p++) qF('timber', a0 + p * pw + 0.01, a0 + (p + 1) * pw - 0.01, y0 + 0.2, yf - 0.5, v0 + 0.15 - 0.17 + (p % 2) * 0.02, -1);
+        }
+      }
+      if (det) {
+        B(0.25, v0 - 0.18, L - 0.25, v0 - 0.02, yf - 0.95, yf - 0.55, 'lacquer_black');          // the shop board
+        for (let k = 0; k < 4; k++) { const a = L * (0.28 + k * 0.15); qF('gilt_bronze', a, a + 0.07, yf - 0.9, yf - 0.6, v0 - 0.2, -1); }
+      }
+    } else if (street) {
+      // a lane front: plaster wall, a door under a tiled hood, small windows
+      const nbk = Math.max(1, Math.round(L / 1.4)), dk = Math.floor(rand() * Math.max(1, nbk - 0) / 1);
+      if (open) {
+        // an open house: the door leaf folded back, lattice panels and boards between, the shop's counter
+        if (el.shop) {
+          B(0.25, v0, L - 1.35, v0 + 0.12, y0, y0 + 0.95, 'timber'); col.rect(boxRectL(0.25, v0, L - 1.35, v0 + 0.12), y, y + 1.4);
+          B(0.25, v0 - 0.05, L - 0.25, v0 + 0.12, yf - 0.35, yf, 'lacquer_chestnut');
+          B(0.0, v0 - 0.04, 0.25, v0 + 0.2, y0, yf - 0.35, 'lacquer_chestnut'); B(L - 0.25, v0 - 0.04, L, v0 + 0.2, y0, yf - 0.35, 'lacquer_chestnut');
+          for (let s = 0; s < 5; s++) B(L - 1.3 + s * 0.2, v0 - 0.08, L - 1.3 + s * 0.2 + 0.18, v0 - 0.03, y0, yf - 0.35, 'timber');     // the shutters, stacked at the end
+        } else {
+          const nb = Math.max(2, Math.round(L / 1.2));
+          for (let k = 0; k < nb; k++) {
+            const a0 = 0.25 + (L - 0.5) * k / nb, a1 = 0.25 + (L - 0.5) * (k + 1) / nb - 0.04, door = k === Math.floor(nb / 2);
+            if (door) { B(a0 - 0.02, v0 - 0.02, a0 + 0.06, v0 + 0.7, y0, yf - 0.3, 'lacquer_chestnut'); continue; }
+            B(a0, v0, a1, v0 + 0.08, y0, yf - 0.3, rand() < 0.5 ? 'timber' : 'lattice'); col.rect(boxRectL(a0, v0, a1, v0 + 0.08), y, yf);
+          }
+          B(0, v0 - 0.05, L, v0 + 0.15, yf - 0.3, yf + 0.05, 'lacquer_chestnut');
+        }
+      } else {
+        wall(0.25, v0, L - 0.25, v0 + 0.22, y0, yf);
+        const dc = L * (0.25 + 0.5 * rand()), dwid = 0.95;
+        // the door: granite jambs and lintel, lacquered leaves, a step, the hood
+        B(dc - dwid / 2 - 0.14, v0 - 0.08, dc - dwid / 2, v0 + 0.22, y0, y0 + 2.3, 'granite_grey'); B(dc + dwid / 2, v0 - 0.08, dc + dwid / 2 + 0.14, v0 + 0.22, y0, y0 + 2.3, 'granite_grey');
+        B(dc - dwid / 2 - 0.18, v0 - 0.1, dc + dwid / 2 + 0.18, v0 + 0.22, y0 + 2.3, y0 + 2.5, 'granite_grey');
+        B(dc - dwid / 2, v0 - 0.03, dc + dwid / 2, v0 + 0.1, y0, y0 + 2.3, 'lacquer_chestnut');
+        B(dc - dwid / 2 - 0.1, v0 - 0.4, dc + dwid / 2 + 0.1, v0 - 0.02, y0 - 0.0, y0 + 0.1, 'granite_grey');
+        if (det) {
+          const hp = [W(dc - 0.95, v0 + 0.1, y0 + 3.0), W(dc + 0.95, v0 + 0.1, y0 + 3.0), W(dc + 0.95, v0 - 0.5, y0 + 2.65), W(dc - 0.95, v0 - 0.5, y0 + 2.65)];
+          quad4(roofMat, hp, [0, 1, 0]); quad4('timber', hp, [0, -1, 0]);
+          for (const sg of [-1, 1]) B(dc + sg * 0.88 - 0.04, v0 - 0.45, dc + sg * 0.88 + 0.04, v0 - 0.37, y0 + 2.5, y0 + 2.7, 'lacquer_chestnut');
+          B(dc - 0.95, v0 - 0.52, dc + 0.95, v0 - 0.46, y0 + 2.6, y0 + 2.68, roofMat);
+        }
+        // small windows, set high, with a lattice and a stone sill
+        const nw = det > 1 ? (L > 6 ? 2 : 1) : (L > 5 ? 1 : 0);
+        for (let k = 0; k < nw; k++) {
+          const wc = dc < L / 2 ? L * (0.62 + 0.28 * k / Math.max(1, nw)) : L * (0.12 + 0.3 * (nw - 1 - k) / Math.max(1, nw)) + 0.5;
+          if (Math.abs(wc - dc) < 1.4 || wc < 0.8 || wc > L - 0.8) continue;
+          B(wc - 0.4, v0 - 0.05, wc + 0.4, v0 + 0.02, y0 + 1.45, y0 + 2.15, WINDOW_LATTICE[Math.floor(rand() * 4)]);
+          B(wc - 0.5, v0 - 0.1, wc + 0.5, v0 + 0.04, y0 + 1.3, y0 + 1.45, 'granite_grey'); B(wc - 0.46, v0 - 0.06, wc + 0.46, v0 + 0.04, y0 + 2.15, y0 + 2.27, 'granite_grey');
+        }
+        void dk;
+      }
+    } else {
+      // the front of an inner hall: its lattice doors (ge shan) between the posts, facing the court
+      B(0.25, v0, L - 0.25, v0 + 0.2, y0, yf, wallMat);
+      if (det) {
+        const nb = Math.max(2, Math.round((L - 1.2) / 1.0));
+        B(0.5, v0 - 0.12, L - 0.5, v0 - 0.02, y0 + 2.35, y0 + 2.6, 'lacquer_chestnut');
+        for (let k = 0; k < nb; k++) { const a0 = 0.6 + (L - 1.2) * k / nb, a1 = 0.6 + (L - 1.2) * (k + 1) / nb - 0.03; B(a0, v0 - 0.06, a1, v0 - 0.02, y0 + 0.75, y0 + 2.35, k % 3 === 1 ? 'lattice_ice' : 'lattice'); B(a0, v0 - 0.06, a1, v0 - 0.02, y0, y0 + 0.75, 'lacquer_chestnut'); }
+        for (let k = 0; k <= nb; k++) { const a = 0.6 + (L - 1.2) * k / nb; B(a - 0.1, v0 - 0.16, a + 0.1, v0 + 0.04, y0, y0 + 2.6, 'lacquer_chestnut'); }
+      }
+    }
+    // damp stains: ragged tongues of the dark band up the front, patches, rain streaks under the eave
+    if (det && street && !open && !shopHall) {
+      for (let k = 0; k < 3; k++) { const a = 0.4 + rand() * (L - 1.2); qF(bandMat, a, a + 0.3 + rand() * 0.5, y0 + 0.95, y0 + 1.25 + rand() * 0.6, v0 - 0.012, -1); }
+    }
+    // ── the upper floor ──
+    if (st > 1) {
+      const slab = [uf, uf + 0.22];
+      B(0.25, slab[0], L - 0.25, slab[1], yf, yE, wallMat);
+      if (ovh && street) {
+        // the floor jutting out over the street on its beam ends, boards under it
+        B(0, uf, L, v0 + 0.1, yf - 0.28, yf + 0.0, 'lacquer_chestnut');
+        const nbm = Math.max(3, Math.round(L / 0.9));
+        for (let k = 0; k < nbm; k++) { const a = 0.15 + (L - 0.45) * k / (nbm - 1); B(a, uf, a + 0.15, v0 + 0.2, yf - 0.5, yf - 0.28, 'lacquer_chestnut'); }
+        qH('timber', 0.15, L - 0.15, uf, v0, yf - 0.5 + 0.0, false);
+      } else if (street) {
+        // the pent eave over the ground floor
+        const pe = [W(0, uf, yf + 0.4), W(L, uf, yf + 0.4), W(L, v0 - 0.62, yf - 0.05), W(0, v0 - 0.62, yf - 0.05)];
+        quad4(roofMat, pe, [0, 1, 0]); quad4('timber', pe, [0, -1, 0]);
+        const fa = [W(0, v0 - 0.62, yf - 0.05), W(L, v0 - 0.62, yf - 0.05), W(L, v0 - 0.62, yf - 0.17), W(0, v0 - 0.62, yf - 0.17)];
+        quad4(roofMat, fa, dirV(-1));
+      }
+      // the windows: panels of lattice over paper (lit at night in some), sills, blinds, drying poles
+      const nw = Math.max(2, Math.round(L / (det > 1 ? 1.3 : 1.7))), ww = Math.min(1.0, (L - 0.5) / nw - 0.3);
+      for (let k = 0; k < nw; k++) {
+        const wc = 0.25 + (L - 0.5) * (k + 0.5) / nw, a0 = wc - ww / 2, a1 = wc + ww / 2, ya = yf + 0.55, yb = yf + 1.75;
+        const lat = WINDOW_LATTICE[Math.floor(rand() * WINDOW_LATTICE.length)], lit = rand() < 0.3;
+        if (lat !== 'timber') qF(lit ? 'lamp_white' : 'wood_dark', a0, a1, ya, yb, uf - 0.012, -1);
+        if (!det) { B(a0, uf - 0.04, a1, uf, ya, yb, lat); continue; }
+        B(a0, uf - 0.06, a1, uf, ya, yb, lat);
+        B(a0 - 0.08, uf - 0.1, a1 + 0.08, uf, ya - 0.1, ya, 'lacquer_chestnut'); B(a0 - 0.08, uf - 0.08, a1 + 0.08, uf, yb, yb + 0.1, 'lacquer_chestnut');
+        if (det > 1) {
+          for (const a of [a0 - 0.08, a1]) B(a, uf - 0.08, a + 0.08, uf, ya, yb, 'lacquer_chestnut');
+          if (rand() < 0.22) { qF('bamboo_culm', a0 - 0.05, a1 + 0.05, yb - 0.75, yb + 0.02, uf - 0.13, -1); B(a0 - 0.07, uf - 0.17, a1 + 0.07, uf - 0.11, yb - 0.02, yb + 0.08, 'bamboo_culm'); }
+        }
+      }
+      if (det > 1 && street && rand() < 0.2 && L > 4) {
+        // a drying pole on two brackets out of the upper window, a few cloths hanging
+        const a = 0.7 + rand() * (L - 3.4), ln = Math.min(2.4, L - a - 0.5), yy = yf + 1.95, vb2 = uf - 0.85;
+        for (const aa of [a, a + ln]) B(aa - 0.025, vb2, aa + 0.025, uf, yy - 0.04, yy + 0.04, 'bamboo_culm');
+        B(a, vb2 - 0.03, a + ln, vb2 + 0.03, yy + 0.04, yy + 0.1, 'bamboo_culm');
+        for (let k = 0; k < 3; k++) { const c = a + 0.3 + k * ln / 3.2; qF(['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_brown'][Math.floor(rand() * 4)], c, c + 0.4 + rand() * 0.2, yy - 0.8 - rand() * 0.3, yy + 0.04, vb2, -1, true); }
+      }
+      // the stains under the eave and the patches
+      if (det) {
+        qF('plaster_streak', 0.25, L - 0.25, yE - 0.32, yE, uf - 0.02, -1);
+        for (let k = 0; k < 4; k++) { const a = 0.4 + rand() * (L - 1.0); qF('plaster_streak', a, a + 0.1 + rand() * 0.1, yE - 1.1 - rand() * 0.6, yE - 0.32, uf - 0.02, -1); }
+        if (el.tone === 'patched') for (let k = 0; k < 3; k++) { const a = 0.4 + rand() * (L - 1.4), yy = yf + 0.2 + rand() * 1.4; qF(rand() < 0.4 ? 'brick_grey' : 'plaster_grey', a, a + 0.35 + rand() * 0.6, yy, yy + 0.3 + rand() * 0.5, uf - 0.035, -1); }
+      }
+    } else if (det && street && !open) {
+      // one-storey fronts: the stain under the eave
+      qF('plaster_streak', 0.25, L - 0.25, yE - 0.3, yE, v0 - 0.02, -1);
+      if (el.tone === 'patched' && !shopHall) for (let k = 0; k < 2; k++) { const a = 0.4 + rand() * (L - 1.4), yy = y0 + 1.0 + rand() * 0.8; qF(rand() < 0.4 ? 'brick_grey' : 'plaster_grey', a, a + 0.35 + rand() * 0.6, yy, yy + 0.3 + rand() * 0.5, v0 - 0.035, -1); }
+    }
+    // a window high in the back wall toward the lane
+    if (det && hl.rear === 'lane' && L > 3.2) { const wc = L * (0.3 + 0.4 * rand()); B(wc - 0.35, vb, wc + 0.35, vb + 0.05, yE - 1.25, yE - 0.35, 'lattice'); }
+    // the roof
+    const bd = vbE - vf, rise = Math.max(0.9, (vb - v0 + 0.9) * 0.26);
+    const type = hl.tall ? 'horse' : roofType;
+    const R = roofOf(type === 'hip' ? -0.25 : type === 'gable' ? -0.15 : 0, type === 'hip' ? L + 0.25 : type === 'gable' ? L + 0.15 : L, vf, vbE, yE, type === 'hip' ? rise * 0.9 : rise, type === 'hip' ? 'hip' : 'gable', det > 1 ? 5 : det ? 4 : 3);
+    if (det) roofWear(R, det > 1 ? 4 : 2);
+    gables(R, { vf, vb: vbE, yE, rise: type === 'hip' ? rise * 0.9 : rise, vw0: st > 1 ? uf : v0, vw1: vb }, type === 'hip' ? 'hip' : type);
+    void bd; void lastHall;
+    // a tree in the court of the middle of a court house
+  }
+  if ((kind === 'court' || kind === 'grand') && halls.length > 1 && det > 1 && rand() < 0.7) {
+    const mid = (halls[0].vb + halls[1].v0) / 2, c = W(L / 2 + (rand() - 0.5) * L * 0.3, mid, 0);
+    yardTree(bag, c[0], y0 - 0.37, c[2], 1.4 + rand() * 0.6, 3.2 + rand() * 1.5, rand);
+  }
+  // the back yard of a house on a deep lot: a wall round it, a tree
+  if (kind === 'row' && D - lastB > 2.2) {
+    const vy0 = lastB + 0.2, wh = 2.6;
+    for (const [a0, a1] of [[0, 0.22], [L - 0.22, L]]) { wall(a0, vy0, a1, D, y0 - 0.45, y + wh); B(a0 - 0.03, vy0, a1 + 0.03, D, y + wh, y + wh + 0.1, roofMat); }
+    wall(0.22, D - 0.22, L - 0.22, D, y0 - 0.45, y + wh); B(0.19, D - 0.25, L - 0.19, D + 0.03, y + wh, y + wh + 0.1, roofMat);
+    if (det && rand() < 0.5) { const c = W(L * (0.3 + 0.4 * rand()), (vy0 + D) / 2, 0); yardTree(bag, c[0], y0 - 0.45, c[2], 1.6 + rand() * 0.8, 3.5 + rand() * 2, rand); }
+  }
+  // the veranda over the canal on stilts (shui ge, diao jiao lou): a deck on posts, a rail, a little roof
+  if (water && el.balcony === 'water' && kind !== 'simple' && !open && L > 3.2) {
+    const a0 = 0.4, a1 = L - 0.4, bo = -1.5, deckY = y0 + 0.1;
+    B(a0, bo, a1, FV - 0.1, deckY - 0.12, deckY, 'timber');
+    for (const [a, b] of [[a0 + 0.05, bo + 0.05], [a1 - 0.2, bo + 0.05], [(a0 + a1) / 2, bo + 0.05], [a0 + 0.05, -0.2], [a1 - 0.2, -0.2]]) B(a, b, a + 0.16, b + 0.16, -2.6, deckY - 0.1, 'wood_dark');
+    for (const [p, q] of [[[a0, bo], [a1, bo]], [[a0, bo], [a0 + 0.06, FV - 0.1]], [[a1 - 0.06, bo], [a1, FV - 0.1]]]) {
+      B(p[0], p[1], q[0] + 0.06, q[1] + 0.06, deckY + 0.9, deckY + 0.98, 'lacquer_chestnut');
+      B(p[0], p[1], p[0] + 0.07, p[1] + 0.07, deckY, deckY + 0.98, 'lacquer_chestnut');
+      if (det) B(p[0], p[1], q[0] + 0.05, q[1] + 0.05, deckY + 0.2, deckY + 0.5, 'lattice');
+    }
+    const rp = [W(a0 - 0.2, FV - 0.1, deckY + 2.5), W(a1 + 0.2, FV - 0.1, deckY + 2.5), W(a1 + 0.2, bo - 0.3, deckY + 2.1), W(a0 - 0.2, bo - 0.3, deckY + 2.1)];
+    quad4(roofMat, rp, [0, 1, 0]); quad4('timber', rp, [0, -1, 0]);
+    for (const a of [a0 + 0.05, a1 - 0.2]) B(a, bo + 0.05, a + 0.14, bo + 0.19, deckY, deckY + 2.2, 'lacquer_chestnut');
+  } else if (water && el.balcony === 'upper' && halls[0].st > 1 && kind !== 'simple' && !open && L > 3.2) {
+    // a balcony over the water on the upper floor: boards on brackets, a railing of lattice
+    const h = halls[0], yy = y0 + 3.0, a0 = 0.4, a1 = L - 0.4, bo = -1.0;
+    B(a0, bo, a1, h.v0 + 0.3, yy - 0.12, yy, 'timber');
+    for (const a of [a0 + 0.05, (a0 + a1) / 2, a1 - 0.2]) B(a, bo + 0.1, a + 0.14, h.v0 + 0.1, yy - 0.55, yy - 0.12, 'lacquer_chestnut');
+    for (const [p, q] of [[[a0, bo], [a1, bo]], [[a0, bo], [a0 + 0.06, h.v0]], [[a1 - 0.06, bo], [a1, h.v0]]]) { B(p[0], p[1], q[0] + 0.06, q[1] + 0.06, yy + 0.9, yy + 0.97, 'lacquer_chestnut'); if (det) B(p[0], p[1], q[0] + 0.05, q[1] + 0.05, yy + 0.2, yy + 0.85, 'lattice'); }
+  }
+  // collision: the whole house (an open house: floor, walls)
+  if (!open) col.rect([x0, z0, x1, z1], plinthBottom, y0 + 3.2);
+  else {
+    col.rect([x0, z0, x1, z1], plinthBottom, y + 0.2);
+    col.floor([x0, z0, x1, z1], y0);
+    const h = halls[0], yy = y0 + 3.4;
+    for (const [a0, b0, a1, b1] of [[0, h.v0, 0.25, h.vb], [L - 0.25, h.v0, L, h.vb], [0, h.vb - 0.25, L, h.vb]]) col.rect(boxRectL(a0, b0, a1, b1), y, yy);
+    houseInterior(bag, col, { W, B, L, D, front: h.v0, back: h.vb, y: y0, storey: Math.max(3.0, h.st > 1 ? 3.35 : 3.35), storeys: h.st, shop: !!el.shop, trade: el.trade, rand });
+  }
+  flush();
+
+  function flush() { for (const [mat, arr] of acc) if (arr.length) bag.add(mat, fromTriangles(arr)); }
+
+  /** The goods on a shop's counter, by trade (det 2): stacks of cloth, tea tins, grain measures, small jars, lacquer bowls, books. */
+  function goodsOnCounter(a0, a1, vv, top, trade) {
+    const w = a1 - a0;
+    const bolts = ['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_grey'];
+    if (trade === 'cloth') for (let k = 0; k < Math.floor(w / 0.35); k++) { const a = a0 + 0.2 + k * 0.35; B(a - 0.14, vv - 0.14, a + 0.14, vv + 0.14, top, top + 0.12 + (k % 2) * 0.12, bolts[(k + Math.floor(rand() * 3)) % 5]); }
+    else if (trade === 'tea') for (let k = 0; k < Math.floor(w / 0.45); k++) { const p = W(a0 + 0.25 + k * 0.45, vv, 0); bag.add(k % 2 ? 'glaze_white' : 'pottery_dark', lathe([[0.001, 0], [0.12, 0.02], [0.13, 0.22], [0.09, 0.3], [0.001, 0.3]], 8, null, p[0], top, p[2])); }
+    else if (trade === 'rice') for (let k = 0; k < 2; k++) { const a = a0 + 0.3 + k * Math.max(0.6, w - 0.8); B(a - 0.22, vv - 0.18, a + 0.22, vv + 0.18, top, top + 0.22, 'timber'); B(a - 0.19, vv - 0.15, a + 0.19, vv + 0.15, top + 0.18, top + 0.26, 'plaster'); }
+    else if (trade === 'medicine') for (let k = 0; k < Math.floor(w / 0.4); k++) { const p = W(a0 + 0.2 + k * 0.4, vv, 0); bag.add(k % 3 ? 'pottery_dark' : 'glaze_green', lathe([[0.001, 0], [0.08, 0.01], [0.1, 0.12], [0.06, 0.2], [0.001, 0.2]], 7, null, p[0], top, p[2])); }
+    else if (trade === 'lacquer') for (let k = 0; k < Math.floor(w / 0.4); k++) { const p = W(a0 + 0.2 + k * 0.4, vv, 0); bag.add(k % 2 ? 'lacquer_red' : 'lacquer_black', lathe([[0.001, 0], [0.12, 0.0], [0.15, 0.06], [0.13, 0.14], [0.001, 0.14]], 8, null, p[0], top, p[2])); }
+    else if (trade === 'books') for (let k = 0; k < Math.floor(w / 0.5); k++) { const a = a0 + 0.3 + k * 0.5; B(a - 0.17, vv - 0.12, a + 0.17, vv + 0.12, top, top + 0.1 + (k % 3) * 0.06, k % 2 ? 'cloth_indigo' : 'cloth_white'); }
+  }
 }
 
 const boxRect = (p, q) => [Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])];
@@ -1430,7 +1770,7 @@ const boxRect = (p, q) => [Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(
  * against the back wall (incense burner, vase, a hanging scroll above), the square table with two
  * armchairs before it, and a canopied bed screened off at one side.
  */
-function houseInterior(bag, col, { W, B, L, D, front, back, y, storey, storeys, shop, rand }) {
+function houseInterior(bag, col, { W, B, L, D, front, back, y, storey, storeys, shop, trade, rand }) {
   const ib = back - 0.25, il = 0.25, ir = L - 0.25, fin = front + 0.15;
   B(il, fin, ir, ib, y - 0.02, y + 0.01, 'brick_grey');
   if (storeys > 1) {
@@ -1441,21 +1781,80 @@ function houseInterior(bag, col, { W, B, L, D, front, back, y, storey, storeys, 
   const block = (a0, b0, a1, b1, h) => { const p = W(a0, b0, 0), q = W(a1, b1, 0); col.rect(boxRect(p, q), y - 0.45, y + h); };
   const pot = (a, b, ya, s2, mat) => { const p = W(a, b, 0); bag.add(mat, lathe([[0.1 * s2, 0], [0.16 * s2, 0.08 * s2], [0.17 * s2, 0.2 * s2], [0.1 * s2, 0.3 * s2], [0.06 * s2, 0.34 * s2], [0.001, 0.34 * s2]], 10, null, p[0], y + ya, p[2])); };
   if (shop) {
-    // shelves along the back wall, three boards on uprights, jars and bolts of cloth on them
-    const sb0 = ib - 0.45;
-    for (const a of [il + 0.1, (il + ir) / 2, ir - 0.14]) put('wood_dark', a, sb0, a + 0.05, ib, 0, 2.2);
-    for (const hh of [0.5, 1.15, 1.8]) {
-      put('wood_dark', il + 0.1, sb0, ir - 0.1, ib, hh - 0.04, hh);
-      for (let a = il + 0.35; a < ir - 0.3; a += 0.42) { if (rand() < 0.35) continue; if (rand() < 0.6) pot(a, sb0 + 0.22, hh, 0.9, ['glaze_blue', 'glaze_green', 'pottery_dark', 'glaze_white'][Math.floor(rand() * 4)]); else put(['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre'][Math.floor(rand() * 4)], a - 0.15, sb0 + 0.05, a + 0.15, ib - 0.05, hh, hh + 0.22); }
+    const tr = trade || 'cloth', sb0 = ib - 0.45, mid = (il + ir) / 2;
+    const BOLT = ['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_grey', 'cloth_brown', 'cloth_black'];
+    const lamp = () => { const lp = W(L / 2, (fin + ib) / 2, 0); bag.add('lamp_paper', lathe([[0.07, 0], [0.17, 0.07], [0.19, 0.2], [0.16, 0.34], [0.07, 0.4], [0.001, 0.4]], 12, null, lp[0], y + 2.0, lp[2])); };
+    // the back wall: shelving, differing by trade
+    if (tr === 'medicine') {
+      // the wall of small drawers (baizi gui) under a row of jars, herbs hung from the boards
+      put('lacquer_chestnut', il + 0.1, sb0, ir - 0.1, ib, 0, 1.9);
+      const nc = Math.max(5, Math.floor((ir - il - 0.3) / 0.3));
+      for (let r = 0; r < 6; r++) for (let c = 0; c < nc; c++) {
+        const a = il + 0.15 + c * (ir - il - 0.3) / nc, hh = 0.1 + r * 0.26;
+        put('wood_dark', a + 0.01, sb0 - 0.04, a + (ir - il - 0.3) / nc - 0.02, sb0, hh, hh + 0.23);
+        const m2 = a + (ir - il - 0.3) / nc / 2; put('gilt_bronze', m2 - 0.03, sb0 - 0.06, m2 + 0.03, sb0 - 0.04, hh + 0.1, hh + 0.14);
+      }
+      put('wood_dark', il + 0.1, sb0, ir - 0.1, ib, 1.9, 1.95);
+      for (let a = il + 0.4; a < ir - 0.3; a += 0.5) pot(a, sb0 + 0.2, 1.95, 1.1, ['glaze_blue', 'glaze_white', 'pottery_dark'][Math.floor(rand() * 3)]);
+      block(il, sb0 - 0.04, ir, ib, 2.2);
+      for (let k = 0; k < 6; k++) { const a = il + 0.7 + k * (ir - il - 1.4) / 5; put(['cloth_brown', 'thatch', 'cloth_ochre'][k % 3], a - 0.05, fin + 0.9 + (k % 2) * 0.4, a + 0.05, fin + 1.0 + (k % 2) * 0.4, 1.55, 2.4); }
+    } else if (tr === 'rice') {
+      // big bins of rice along the back wall, sacks stacked beside, bushel measures
+      const nb = Math.max(2, Math.floor((ir - il - 0.3) / 1.0));
+      for (let k = 0; k < nb; k++) {
+        const a = il + 0.15 + k * (ir - il - 0.3) / nb, a2 = a + (ir - il - 0.3) / nb - 0.1;
+        put('timber', a, sb0 - 0.1, a2, ib, 0, 0.95); put('plaster', a + 0.06, sb0 - 0.04, a2 - 0.06, ib - 0.06, 0.88, 0.97); put('wood_dark', a, sb0 - 0.12, a2, sb0 - 0.1, 0.5, 0.56);
+      }
+      put('lacquer_chestnut', il + 0.1, ib - 0.12, ir - 0.1, ib - 0.02, 1.5, 2.2);
+      block(il, sb0 - 0.1, ir, ib, 0.95);
+      for (let k = 0; k < 6; k++) put(k % 3 ? 'cloth_ochre' : 'cloth_white', ir - 0.95 + (k % 3) * 0.3, fin + 0.2 + (k > 2 ? 0.0 : 0.0) + 0.0, ir - 0.7 + (k % 3) * 0.3, fin + 0.75, Math.floor(k / 3) * 0.24, Math.floor(k / 3) * 0.24 + 0.24);
+      block(ir - 0.95, fin + 0.2, ir - 0.05, fin + 0.75, 0.5);
+      put('timber', il + 0.2, fin + 0.5, il + 0.45, fin + 0.75, 0, 0.3); put('timber', il + 0.55, fin + 0.5, il + 0.8, fin + 0.75, 0, 0.22);
+    } else {
+      // shelves of three boards on uprights; what lies on them depends on the trade
+      for (const a of [il + 0.1, mid, ir - 0.14]) put('wood_dark', a, sb0, a + 0.05, ib, 0, 2.2);
+      for (const hh of [0.5, 1.15, 1.8]) {
+        put('wood_dark', il + 0.1, sb0, ir - 0.1, ib, hh - 0.04, hh);
+        for (let a = il + 0.3; a < ir - 0.25; a += tr === 'cloth' ? 0.3 : tr === 'books' ? 0.22 : 0.4) {
+          if (rand() < 0.12) continue;
+          if (tr === 'cloth') put(BOLT[Math.floor(rand() * BOLT.length)], a - 0.12, sb0 + 0.04, a + 0.12, ib - 0.04, hh, hh + 0.2 + rand() * 0.06);
+          else if (tr === 'books') { const n = 2 + Math.floor(rand() * 3); for (let q = 0; q < n; q++) put(rand() < 0.5 ? 'cloth_indigo' : 'cloth_white', a - 0.1, sb0 + 0.06, a + 0.1, ib - 0.06, hh + q * 0.06, hh + q * 0.06 + 0.055); }
+          else if (tr === 'tea') { const p = W(a, sb0 + 0.22, 0), m = ['glaze_white', 'pottery_dark', 'glaze_blue'][Math.floor(rand() * 3)]; bag.add(m, lathe([[0.001, 0], [0.12, 0.01], [0.14, 0.2], [0.1, 0.32], [0.07, 0.36], [0.001, 0.36]], 9, null, p[0], y + hh, p[2])); }
+          else if (tr === 'lacquer') { const p = W(a, sb0 + 0.22, 0), n = 1 + Math.floor(rand() * 3); for (let q = 0; q < n; q++) bag.add(rand() < 0.6 ? 'lacquer_red' : 'lacquer_black', lathe([[0.001, 0], [0.13 - q * 0.01, 0], [0.16 - q * 0.01, 0.07], [0.001, 0.07]], 9, null, p[0], y + hh + q * 0.08, p[2])); }
+          else pot(a, sb0 + 0.22, hh, 0.9, ['glaze_blue', 'glaze_green', 'pottery_dark', 'glaze_white'][Math.floor(rand() * 4)]);
+        }
+      }
+      block(il, sb0, ir, ib, 2.2);
+      if (tr === 'books') {
+        // a reading table with a bench, and a rack of scrolls
+        put('lacquer_chestnut', ir - 1.4, fin + 0.5, ir - 0.4, fin + 1.2, 0.74, 0.8); for (const [da, db] of [[0, 0], [0.95, 0], [0, 0.65], [0.95, 0.65]]) put('lacquer_chestnut', ir - 1.4 + da, fin + 0.5 + db, ir - 1.35 + da, fin + 0.55 + db, 0, 0.74);
+        put('cloth_white', ir - 1.2, fin + 0.65, ir - 0.8, fin + 1.0, 0.8, 0.85); block(ir - 1.4, fin + 0.5, ir - 0.4, fin + 1.2, 0.8);
+        put('timber', ir - 1.3, fin + 1.35, ir - 0.5, fin + 1.65, 0, 0.45);
+        for (let k = 0; k < 7; k++) put('bamboo_culm', il + 0.15 + k * 0.1, fin + 0.5, il + 0.2 + k * 0.1, fin + 0.55, 0.3, 1.4);
+      } else if (tr === 'tea') {
+        // a low table with the tea set, two stools, a brazier and kettle
+        const ta = il + 0.3; put('lacquer_chestnut', ta, fin + 0.9, ta + 0.8, fin + 1.5, 0.4, 0.45); for (const [da, db] of [[0, 0], [0.74, 0], [0, 0.54], [0.74, 0.54]]) put('lacquer_chestnut', ta + da, fin + 0.9 + db, ta + da + 0.05, fin + 0.95 + db, 0, 0.4);
+        pot(ta + 0.3, fin + 1.2, 0.45, 0.8, 'glaze_white'); for (const dd of [0.1, 0.55]) pot(ta + dd, fin + 1.0, 0.45, 0.25, 'glaze_white');
+        pot(ta + 1.2, fin + 1.2, 0, 1.2, 'iron'); pot(ta + 1.2, fin + 1.2, 0.4, 0.7, 'bronze'); block(ta, fin + 0.9, ta + 0.8, fin + 1.5, 0.45);
+        put('timber', ta + 0.1, fin + 1.6, ta + 0.4, fin + 1.9, 0, 0.35);
+      } else if (tr === 'lacquer') {
+        // a standing screen of red lacquer with a gilt border
+        put('lacquer_red', ir - 1.6, fin + 0.9, ir - 0.3, fin + 0.96, 0.15, 1.7); put('gilt_bronze', ir - 1.6, fin + 0.89, ir - 0.3, fin + 0.97, 1.65, 1.7); put('gilt_bronze', ir - 1.6, fin + 0.89, ir - 1.55, fin + 0.97, 0.15, 1.7); put('gilt_bronze', ir - 0.35, fin + 0.89, ir - 0.3, fin + 0.97, 0.15, 1.7);
+        put('lacquer_black', ir - 1.7, fin + 0.8, ir - 1.5, fin + 1.1, 0, 0.15); put('lacquer_black', ir - 0.4, fin + 0.8, ir - 0.2, fin + 1.1, 0, 0.15);
+        block(ir - 1.7, fin + 0.8, ir - 0.2, fin + 1.1, 1.7);
+      } else if (tr === 'cloth') {
+        // a table of cut cloth, a measuring rod
+        put('timber', il + 0.2, fin + 0.9, il + 1.3, fin + 1.5, 0.7, 0.76); for (const [da, db] of [[0, 0], [1.05, 0], [0, 0.55], [1.05, 0.55]]) put('timber', il + 0.2 + da, fin + 0.9 + db, il + 0.25 + da, fin + 0.95 + db, 0, 0.7);
+        put('cloth_indigo', il + 0.3, fin + 1.0, il + 0.9, fin + 1.4, 0.76, 0.82); put('cloth_red', il + 0.5, fin + 1.05, il + 1.1, fin + 1.35, 0.82, 0.88); block(il + 0.2, fin + 0.9, il + 1.3, fin + 1.5, 0.76);
+      }
     }
-    block(il, sb0, ir, ib, 2.2);
     // on the counter: an abacus and a steelyard; behind it a stool; a lantern overhead
     const cb = fin;
     put('wood_dark', 0.6, cb - 0.12, 0.95, cb + 0.05, 0.95, 1.0);
     for (let k = 0; k < 6; k++) put('wood_dark', 0.63 + k * 0.05, cb - 0.1, 0.645 + k * 0.05, cb + 0.03, 1.0, 1.04);
     put('iron', 1.3, cb - 0.04, 1.85, cb - 0.02, 1.25, 1.27); put('timber', 1.4, cb - 0.06, 1.44, cb, 0.97, 1.25);
     put('timber', 1.0, fin + 0.7, 1.35, fin + 1.05, 0, 0.45);
-    const lp = W(L / 2, (fin + ib) / 2, 0); bag.add('lamp_paper', lathe([[0.07, 0], [0.17, 0.07], [0.19, 0.2], [0.16, 0.34], [0.07, 0.4], [0.001, 0.4]], 12, null, lp[0], y + 2.0, lp[2]));
+    lamp();
   } else {
     // the hall: the long table against the back wall with its incense burner and a vase, the scroll over it
     const t0 = ib - 0.45, mid = L / 2;

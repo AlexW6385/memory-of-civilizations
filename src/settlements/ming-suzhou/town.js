@@ -8,7 +8,10 @@ import { RADIUS, LEVEL, CANALS, STREETS, BRIDGES, lots, onBridge } from './layou
 import { northPlans } from './north.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const R = RADIUS - 26;                                  // the town stops where the ground fades out
+const R = RADIUS - 26;                                  // the street life stops here (the people are drawn near)
+// the figure builder on master knows cap 'ming' and hair 'netknot'; this branch's does not yet (set true after the merge)
+const CAP_MING = false;
+const RS = RADIUS - 8, RC = RADIUS - 15;               // the streets and lanes run on to the rim; the canals, whose bed the fading ground would lift, to RC
 /** Clip a rectangle to the disc of radius r (keeps the part whose middle line lies inside). */
 function clip([x0, z0, x1, z1], r = R) {
   const horiz = x1 - x0 > z1 - z0;
@@ -25,9 +28,28 @@ const LANDINGS = [];
 function waterways() {
   const E = [], rand = rng(1606);
   MOORED.length = 0; LANDINGS.length = 0;
-  for (const s of STREETS) { const r = clip(s); if (r) E.push({ t: 'paving', rect: r, y: LEVEL.street + 0.04, th: 0.3 }); }
+  // the streets, each cut by those before it (no two pavings lie over each other)
+  const done = [];
+  const minus = (r, o) => {
+    if (o[0] >= r[2] || o[2] <= r[0] || o[1] >= r[3] || o[3] <= r[1]) return [r];
+    const out = [];
+    if (o[1] > r[1]) out.push([r[0], r[1], r[2], o[1]]);
+    if (o[3] < r[3]) out.push([r[0], o[3], r[2], r[3]]);
+    const z0 = Math.max(r[1], o[1]), z1 = Math.min(r[3], o[3]);
+    if (o[0] > r[0]) out.push([r[0], z0, o[0], z1]);
+    if (o[2] < r[2]) out.push([o[2], z0, r[2], z1]);
+    return out.filter((q) => q[2] - q[0] > 0.05 && q[3] - q[1] > 0.05);
+  };
+  for (const s of STREETS) {
+    const r = clip(s, RS);
+    if (!r) continue;
+    let pieces = [r];
+    for (const o of done) pieces = pieces.flatMap((q) => minus(q, o));
+    for (const q of pieces) E.push({ t: 'paving', rect: q, y: LEVEL.street + 0.04, th: 0.3 });
+    done.push(r);
+  }
   for (const c of CANALS) {
-    const r = clip(c, R - 2);
+    const r = clip(c, RC);
     if (!r) continue;
     E.push({ t: 'water_rect', rect: r, y: LEVEL.canal });
     const horiz = r[2] - r[0] > r[3] - r[1];
@@ -56,7 +78,7 @@ function waterways() {
       const dir = horiz ? [0, 1] : [r[0] < 0 ? -1 : 1, 0], u = horiz ? [1, 0] : [0, 1];
       const face = horiz ? [at, r[1] + 0.35] : [r[0] < 0 ? r[2] - 0.35 : r[0] + 0.35, at];
       E.push({ t: 'water_steps', a: [face[0] - u[0] * hl, face[1] - u[1] * hl], b: [face[0] + u[0] * hl, face[1] + u[1] * hl], dir, y: LEVEL.street, water: LEVEL.canal, double, moor: true });
-      if (rand() < 0.5 && Math.hypot(...face) < R - 14) {
+      if (rand() < 0.5 && Math.hypot(...face) < RC - 14) {
         // the boat alongside the landing, its bow by the mooring stone, the rope to the stone's ring
         const bl = 6.5 + rand(), c = [face[0] + u[0] * (bl / 2 - 0.4) + dir[0] * 2.45, face[1] + u[1] * (bl / 2 - 0.4) + dir[1] * 2.45];
         const ring = [face[0] + dir[0] * 0.13, LEVEL.canal + 0.6, face[1] + dir[1] * 0.13];
@@ -76,20 +98,26 @@ function waterways() {
   return base('ming-suzhou-waterways', E);
 }
 
-/** The houses, in plans of a few hundred each (by quadrant). */
+/** The houses, in plans by quadrant and by how rich their detail is (so that the far, cheap ones cull apart from the near). */
+const TRADE_ORDER = ['cloth', 'medicine', 'tea', 'books', 'rice', 'lacquer'];
 function houses() {
   const all = lots(), plans = [];
-  // a few houses by the south street can be entered (DESIGN §4.3): the two shops and two homes nearest the way in
+  // a few houses by the south street can be entered (DESIGN §4.3): the six shops (one of each trade: cloth, medicine,
+  // tea, books, rice, lacquer) and three homes nearest the way in
   const near = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 - 60);
-  const dry = all.filter((l) => !l.water && (l.front === 's' || l.front === 'n') && l.rect[2] - l.rect[0] > 3.6).sort((a, b) => near(a) - near(b));
-  const open = new Set([...dry.filter((l) => l.shop).slice(0, 2), ...dry.filter((l) => !l.shop).slice(0, 2)]);
-  const quads = [[], [], [], []];
+  const depth = (l) => (l.front === 's' || l.front === 'n' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]);
+  const dry = all.filter((l) => !l.water && (l.front === 's' || l.front === 'n') && l.kind === 'row' && depth(l) < 7.4 && l.rect[2] - l.rect[0] > 4.2).sort((a, b) => near(a) - near(b));
+  const open = new Set();
+  const shopsNear = dry.filter((l) => l.shop).slice(0, 6);
+  shopsNear.forEach((l, k) => { l.trade = TRADE_ORDER[k]; l.overhang = false; open.add(l); });
+  for (const l of dry.filter((q) => !q.shop).slice(0, 3)) { l.overhang = false; open.add(l); }
+  const quads = [[], [], [], [], [], [], [], []];
   for (const l of all) {
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
-    quads[(cx > 0 ? 1 : 0) + (cz > 0 ? 2 : 0)].push(l);
+    quads[(cx > 0 ? 1 : 0) + (cz > 0 ? 2 : 0) + (l.detail > 0 ? 0 : 4)].push(l);
   }
   quads.forEach((q, i) => {
-    const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, water: l.water, seed: l.seed, open: open.has(l) }));
+    const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
     if (E.length) plans.push(base(`ming-suzhou-houses-${i}`, E));
   });
   return plans;
@@ -112,19 +140,25 @@ function frontOf(l) {
  */
 function riverLife() {
   const L = [], M = [], rand = rng(1533), pick = (a) => a[Math.floor(rand() * a.length)];
-  const person = (at, y, rot, extra = {}) => L.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.6 ? 'robe' : 'trousers', cloth: pick(CLOTH), cloth2: pick(CLOTH), skin: rand() < 0.7 ? 'skin_light' : 'skin_medium', hat: pick(['none', 'none', 'cap', 'straw']), carry: 'none', ...extra });
+  const person = (at, y, rot, extra = {}) => {
+    const { woman, ...rest } = extra;
+    const e = { t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.6 ? 'robe' : 'trousers', cloth: pick(CLOTH), cloth2: pick(CLOTH), skin: rand() < 0.7 ? 'skin_light' : 'skin_medium', hat: pick(['none', 'none', 'cap', 'straw']), carry: 'none', ...rest };
+    if (CAP_MING && e.hat === 'cap') e.cap = 'ming';            // the Ming scholar's square cap
+    if (CAP_MING && !woman) e.hair = 'netknot';                 // the Ming man's topknot with its net band (women keep their own hair)
+    L.push(e);
+  };
   const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
   const inDisc = ([x, z], m = 30) => Math.hypot(x, z) < R - m;
   for (const l of lots()) {
     const F = frontOf(l), out = F.n, y = LEVEL.street;
-    if (!inDisc(F.P(0.5, 0))) continue;
+    if (!inDisc(F.P(0.5, 0)) || l.kind === 'yard') continue;
     if (l.shop) {
       // the banner at one end of the front, a pair of lanterns under the eave
-      if (rand() < 0.8) { const t = rand() < 0.5 ? 0.1 : 0.9; L.push({ t: 'shop_sign', at: F.P(t, -0.6), y, rot: F.rot, h: 2.75, len: 1.1 + rand() * 0.6, cloth: pick(['cloth_indigo', 'cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_black']), seed: Math.floor(rand() * 1e9) }); }
-      if (rand() < 0.65) for (const t of [0.3, 0.7]) L.push({ t: 'hang_lantern', at: F.P(t, -0.15), y: y + 2.95, rot: F.rot, kind: rand() < 0.8 ? 'paper' : 'white', seed: 1 });
+      if (rand() < 0.8) { const t = rand() < 0.5 ? 0.1 : 0.9; L.push({ t: 'shop_sign', at: F.P(t, -0.6), y, rot: F.rot, h: 2.75, len: 1.1 + rand() * 0.6, cloth: ({ cloth: 'cloth_indigo', tea: 'cloth_ochre', rice: 'cloth_white', medicine: 'cloth_black', lacquer: 'cloth_red', books: 'cloth_white' })[l.trade] || pick(['cloth_indigo', 'cloth_white', 'cloth_ochre']), seed: Math.floor(rand() * 1e9) }); }
+      if (rand() < 0.9) for (const t of [0.3, 0.7]) L.push({ t: 'hang_lantern', at: F.P(t, -0.15), y: y + 2.95, rot: F.rot, kind: rand() < 0.8 ? 'paper' : 'white', seed: 1 });
       // goods on the counter: jars, baskets, cloth
-      const ware = pick(['jar', 'basket', 'mixed', 'sacks']);
-      for (let k = 0; k < 4; k++) { const t = 0.2 + k * 0.2 + (rand() - 0.5) * 0.06; const kind = ware === 'jar' || (ware === 'mixed' && k % 2) ? 'pot' : ware === 'sacks' ? 'sacks' : 'basket'; L.push({ t: kind, at: F.P(t, -0.66), y: y + 1.4, rot: rand() * 6.28, s: 0.6, kind: kind === 'pot' ? pick(['glazed_jar', 'blue_jar', 'water_pot']) : undefined, seed: Math.floor(rand() * 1e9) }); }
+      const ware = ({ tea: 'jar', medicine: 'jar', rice: 'sacks' })[l.trade] || pick(['jar', 'basket', 'mixed', 'sacks']);
+      if (l.detail < 2 || ware === 'sacks') for (let k = 0; k < 4; k++) { const t = 0.2 + k * 0.2 + (rand() - 0.5) * 0.06; const kind = ware === 'jar' || (ware === 'mixed' && k % 2) ? 'pot' : ware === 'sacks' ? 'sacks' : 'basket'; L.push({ t: kind, at: F.P(t, -0.66), y: y + 1.4, rot: rand() * 6.28, s: 0.6, kind: kind === 'pot' ? pick(['glazed_jar', 'blue_jar', 'water_pot']) : undefined, seed: Math.floor(rand() * 1e9) }); }
       if (rand() < 0.55) person(F.P(0.35 + rand() * 0.3, -1.5), y + 0.45, faceTo(out), { pose: 'stand' });
       if (rand() < 0.45 && !l.water) person(F.P(0.3 + rand() * 0.4, 0.75), y, faceTo([-out[0], -out[1]]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' });
       // a tea table out in front (the street is 6 m wide), people sitting at it
@@ -134,7 +168,7 @@ function riverLife() {
       }
     } else if (!l.water) {
       if (rand() < 0.3) L.push({ t: 'drying_tray', at: F.P(0.2 + rand() * 0.6, 0.7), y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
-      if (rand() < 0.2) L.push({ t: 'hang_lantern', at: F.P(0.5, -0.15), y: y + 2.95, rot: F.rot, kind: 'white', seed: 2 });
+      if (rand() < 0.5) L.push({ t: 'hang_lantern', at: F.P(0.5, -0.15), y: y + 2.95, rot: F.rot, kind: 'white', seed: 2 });
     }
     // washing out of an upper window: over the water behind the waterside houses, over the lanes on a few others
     if (l.storeys > 1 && rand() < (l.water ? 0.45 : 0.12)) L.push({ t: 'laundry_pole', at: F.P(0.25 + rand() * 0.5, -0.5), y: y + 4.2, rot: F.rot, len: l.water ? 2.2 + rand() * 0.6 : 1.4, prop: false, seed: Math.floor(rand() * 1e9) });
@@ -142,7 +176,7 @@ function riverLife() {
     if (l.water && rand() < 0.3) {
       const t = 0.5, w = 1.0 / F.L, a = F.P(t - w, 0.35), b = F.P(t + w, 0.35);
       M.push({ t: 'water_steps', a, b, dir: out, y, water: LEVEL.canal });
-      if (rand() < 0.7) { const p = F.P(t + (rand() - 0.5) * w, 0.35 + 1.44); person(p, y - 0.6, faceTo(out), { pose: 'squat', dress: 'robe', cloth: pick(['cloth_indigo', 'cloth_white', 'cloth_grey']), hat: 'none' }); L.push({ t: 'basket', at: F.P(t + w * 0.8, 0.35 + 0.8), y: y - 0.3, rot: 0, s: 0.8, seed: Math.floor(rand() * 1e9) }); }
+      if (rand() < 0.7) { const p = F.P(t + (rand() - 0.5) * w, 0.35 + 1.44); person(p, y - 0.6, faceTo(out), { pose: 'squat', dress: 'robe', cloth: pick(['cloth_indigo', 'cloth_white', 'cloth_grey']), hat: 'none', woman: true }); L.push({ t: 'basket', at: F.P(t + w * 0.8, 0.35 + 0.8), y: y - 0.3, rot: 0, s: 0.8, seed: Math.floor(rand() * 1e9) }); }
     }
   }
   // the public landings with no boat: women washing at the bottom slab — squatting at the water's
@@ -153,10 +187,10 @@ function riverLife() {
     const yS = LEVEL.canal + 0.14, n = rand() < 0.45 ? 2 : 1;
     for (let k = 0; k < n; k++) {
       const off = (k - (n - 1) / 2) * 0.9, p = [g.c[0] + g.u[0] * off + g.dir[0] * 0.2, g.c[1] + g.u[1] * off + g.dir[1] * 0.2];
-      person(p, yS, faceTo(g.dir), { pose: 'squat', dress: 'robe', cloth: pick(['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_indigo']), hat: 'none' });
+      person(p, yS, faceTo(g.dir), { pose: 'squat', dress: 'robe', cloth: pick(['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_indigo']), hat: 'none', woman: true });
     }
     L.push({ t: 'basket', at: [g.c[0] - g.u[0] * (n * 0.45 + 0.35) - g.dir[0] * 0.15, g.c[1] - g.u[1] * (n * 0.45 + 0.35) - g.dir[1] * 0.15], y: yS, rot: rand() * 6.28, s: 0.8, seed: Math.floor(rand() * 1e9) });
-    if (rand() < 0.35) person([g.c[0] - g.dir[0] * 1.6 + g.u[0] * 1.2, g.c[1] - g.dir[1] * 1.6 + g.u[1] * 1.2], LEVEL.street, faceTo(g.dir), { pose: 'stand', dress: 'robe', carry: 'basket', hat: 'none' });
+    if (rand() < 0.35) person([g.c[0] - g.dir[0] * 1.6 + g.u[0] * 1.2, g.c[1] - g.dir[1] * 1.6 + g.u[1] * 1.2], LEVEL.street, faceTo(g.dir), { pose: 'stand', dress: 'robe', carry: 'basket', hat: 'none', woman: true });
   }
   // the boats: along each canal, some moving with the boatman at the oar, some moored with cargo
   for (const c of CANALS) {
