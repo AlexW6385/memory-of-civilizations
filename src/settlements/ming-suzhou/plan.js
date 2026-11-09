@@ -19,32 +19,89 @@ const H = (x, z) => ground.height(x, z);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const rand = rng(1509);
 
-// ── the pond: its water, the rock along its shores, the lotus ───────────────
+// ── the pond: its water, its stone edge, the rock along its shores, the lotus ─
 E.push({ t: 'water_cells', rect: [GARDEN[0], GARDEN[1], GARDEN[2], GARDEN[3]], y: LEVEL.pond, cell: 0.5, inside: (x, z) => pondDistance(x, z) < -0.05 });
-// Taihu rock heaped along the shores (every 1.5–3 m round each ellipse, where the shore is open)
+const TAU = Math.PI * 2;
+function segDist(x, z, a, b) {
+  const vx = b[0] - a[0], vz = b[1] - a[1], l2 = vx * vx + vz * vz || 1, t = Math.max(0, Math.min(1, ((x - a[0]) * vx + (z - a[1]) * vz) / l2));
+  return Math.hypot(x - a[0] - vx * t, z - a[1] - vz * t);
+}
+const polyDist = (x, z, pts) => { let d = Infinity; for (let i = 0; i + 1 < pts.length; i++) d = Math.min(d, segDist(x, z, pts[i], pts[i + 1])); return d; };
+const nearBridge = (x, z, m) => GARDEN_BRIDGES.some((b) => polyDist(x, z, b.pts) < m);
+const nearBuilding = (x, z, m) => Object.values(BUILDINGS).some((b) => (b.rect ? inRect(b.rect, x, z, m) : Math.hypot(x - b.c[0], z - b.c[1]) < (b.r || b.w / 2) + m));
+// the garden's paths (pebble mosaic) — the first of them leaves the court before the Hall of Distant Fragrance
+const PATHS = [
+  [[14, 23], [8, 14], [0, 8], [-1.7, 0.5]],                            // from the garden gate to the hall's court
+  [[-9.45, -7.4], [-12, -8], [-20, -11.8]],                             // to the Leaning Jade
+  [[9.45, -3.4], [16, -2], [26, -4], [30, -2.5]],                       // east to the loquat court's moon gate
+  [[-22, -19], [-26, -21], [-28, -23]],                                  // to the bridge for the Lotus Breeze islet
+  [[-38, 2], [-42, 3.5]],
+  [[-58, 14], [-48, 10], [-44, 7.6]],
+  [[48, -30], [54, -38], [56, -40.5]],                                   // to the Wutong and Bamboo Retreat
+  [[45, -57], [52, -62], [57, -66]],                                     // up to the Green Ripples
+  [[-56, -50], [-58, -44], [-55, -40.6]],
+];
+const nearWalk = (x, z, m) => PATHS.some((p) => polyDist(x, z, p) < m) || nearBridge(x, z, m) || nearBuilding(x, z, m) || nearRockPath(x, z, m);
+// the revetment (bo an): rubble laid along the shore of the pond and of every island, two courses
+// stepping down into the water, so that nowhere does turf meet the water; it stops at the bridges'
+// landings, the buildings on piers and the rockery paths
 const shore = [...POND, ...ISLANDS];
-for (const s of shore) {
-  const per = Math.PI * (s.r[0] + s.r[1]), n = Math.round(per / 2.2);
-  for (let k = 0; k < n; k++) {
-    const a = (k + rand() * 0.6) / n * Math.PI * 2;
-    const x = s.c[0] + Math.cos(a) * s.r[0], z = s.c[1] + Math.sin(a) * s.r[1];
-    if (Math.abs(pondDistance(x, z)) > 0.9) continue;           // inside another lobe: not a shore
-    if (Object.values(BUILDINGS).some((b) => (b.rect ? inRect(b.rect, x, z, 1.2) : Math.hypot(x - b.c[0], z - b.c[1]) < (b.r || b.w / 2) + 1.4))) continue;
-    if (GARDEN_BRIDGES.some((b) => b.pts.some((p) => Math.hypot(p[0] - x, p[1] - z) < 1.8))) continue;
-    E.push({ t: 'taihu', c: [x, z], r: 0.7 + rand() * 0.9, h: 0.7 + rand() * 0.9, y: LEVEL.pond - 0.25, seed: 100 + k * 7 + Math.round(s.c[0] * 13) });
+const arcs = [];
+for (const sh of shore) {
+  const per = Math.PI * (sh.r[0] + sh.r[1]), n = Math.ceil(per / 0.3);
+  let arc = [];
+  for (let k = 0; k <= n; k++) {
+    const a = k / n * TAU, x = sh.c[0] + Math.cos(a) * sh.r[0], z = sh.c[1] + Math.sin(a) * sh.r[1];
+    const ok = Math.abs(pondDistance(x, z)) < 0.12 && !nearBuilding(x, z, 1.1) && !nearBridge(x, z, 1.5) && !nearRockPath(x, z, 1.3);
+    if (ok) arc.push([x, z]); else { if (arc.length > 2) arcs.push(arc); arc = []; }
+  }
+  if (arc.length > 2) arcs.push(arc);
+}
+E.push({ t: 'revetment', arcs, dist: pondDistance, ground: H, water: LEVEL.pond, seed: 31 });
+// Taihu stones along the shores and on the hills: a few standing in the water, some on the bank,
+// singly or in pairs, none on a path; the near ones fine, the far ones plain (garden-stone.js).
+// The near shapes (lod 0) and the far (lod 1) are drawn from short lists so that each is instanced many times.
+const FAR = [7, 10, 12, 13], NEAR = [5, 6, 7, 8, 9, 10, 12, 13];
+const stones = [];
+for (const [si, sh] of shore.entries()) {
+  const per = Math.PI * (sh.r[0] + sh.r[1]);
+  for (let a = rand() * 0.2; a < TAU;) {
+    const x = sh.c[0] + Math.cos(a) * sh.r[0], z = sh.c[1] + Math.sin(a) * sh.r[1];
+    a += (3.2 + rand() * 6.5) / per * Math.PI;           // every 3–10 m
+    if (Math.abs(pondDistance(x, z)) > 0.15 || nearBuilding(x, z, 2) || nearBridge(x, z, 2.2) || nearRockPath(x, z, 2)) continue;
+    const e = 0.2, gx = pondDistance(x + e, z) - pondDistance(x - e, z), gz = pondDistance(x, z + e) - pondDistance(x, z - e), gl = Math.hypot(gx, gz) || 1;
+    const nx = gx / gl, nz = gz / gl;                    // toward the land
+    const m = 1 + (rand() < 0.4 ? 1 : 0);
+    for (let k = 0; k < m; k++) {
+      const off = (rand() < 0.35 ? -0.4 : 0.55 + rand() * 0.6) + k * 0.5, t = k * 1.1 + (rand() - 0.5) * 0.4;
+      const px = x + nx * off - nz * t, pz = z + nz * off + nx * t;
+      stones.push({ x: px, z: pz, near: nearWalk(px, pz, 7), s: 0.65 + rand() * 0.7, si });
+    }
   }
 }
-// the rockery hills on the islands and the mounds: tall single stones and piles
+const nNear = stones.filter((q) => q.near).length, nFar = stones.length - nNear;
+const useNear = NEAR.slice(0, Math.max(1, Math.min(NEAR.length, Math.floor(nNear / 12)))), useFar = FAR.slice(0, Math.max(1, Math.min(FAR.length, Math.floor(nFar / 12))));
+let kn = 0, kf = 0;
+for (const q of stones) {
+  const near = q.near, v = near ? useNear[kn++ % useNear.length] : useFar[kf++ % useFar.length];
+  E.push({ t: 'taihu', c: [q.x, q.z], y: H(q.x, q.z) + 0.12, v, s: q.s, lod: near ? 0 : 1, yaw: rand() * TAU, tx: (rand() - 0.5) * 0.12, tz: (rand() - 0.5) * 0.12 });
+}
+// the rockery hills on the islands and the mounds: tall single stones (the peaks of the garden) and piles
 for (const [i, s] of [...ISLANDS.slice(0, 2), ...MOUNDS].entries()) {
-  for (let k = 0; k < 6; k++) {
-    const a = rand() * Math.PI * 2, d = 0.35 + rand() * 0.45;
+  let tall = 0;
+  for (let k = 0; k < 9 && tall + k < 14; k++) {
+    const a = rand() * TAU, d = 0.3 + rand() * 0.5;
     const x = s.c[0] + Math.cos(a) * s.r[0] * d, z = s.c[1] + Math.sin(a) * s.r[1] * d;
-    if (Object.values(BUILDINGS).some((b) => (b.rect ? inRect(b.rect, x, z, 2) : Math.hypot(x - b.c[0], z - b.c[1]) < (b.r || b.w / 2) + 2.2))) continue;
-    const r = 0.6 + rand() * 0.8, h = 1.2 + rand() * 1.8;
-    if (nearRockPath(x, z, r + 1.4)) continue;
-    E.push({ t: 'taihu', c: [x, z], r, h, y: H(x, z) - 0.1, seed: 900 + i * 31 + k, solid: true });
+    if (nearBuilding(x, z, 2.4) || nearRockPath(x, z, 2.2) || nearBridge(x, z, 2)) continue;
+    const feature = tall < 2 && i < 2;
+    if (feature) tall++;
+    const v = feature ? 2 + ((i + tall) % 2) : [5, 6, 7, 8, 9, 10][(i + k) % 6];
+    E.push({ t: 'taihu', c: [x, z], y: H(x, z) - 0.05, v, s: feature ? 0.8 + rand() * 0.35 : 0.7 + rand() * 0.5, lod: 0, yaw: rand() * TAU, tx: (rand() - 0.5) * 0.08, tz: (rand() - 0.5) * 0.08, solid: true });
   }
 }
+// the standing stones at the focal points: two peaks flanking the terrace of the Hall of Distant
+// Fragrance, one in the loquat court's corner, one at the lake's west end by the Leaning Jade
+for (const [x, z, v, sc] of [[-12.5, -26.6, 0, 0.95], [12.5, -26.6, 2, 1.15], [47.8, -11, 3, 0.85], [-33.5, -21, 2, 0.9]]) E.push({ t: 'taihu', c: [x, z], y: H(x, z) - 0.05, v, s: sc, lod: 0, yaw: x > 0 ? 0.3 : -0.3, plinth: true, solid: true });
 // the paths up the island hills among piled stone, from the bridges to the hill pavilions (a
 // short grotto on the way up to Snowy Fragrance; docs/settlements/ming-suzhou.md §5)
 ROCK_PATHS.forEach((p, i) => {
@@ -52,8 +109,10 @@ ROCK_PATHS.forEach((p, i) => {
   const pts = p.pts.map(([x, z], k) => [x, z, k === n - 1 ? p.end : Math.max(G + 0.05, H(x, z) + 0.06)]);
   E.push({ t: 'ming_rockery', pts, w: 1.3, ground: H, cave: p.cave, seed: 4100 + i * 17 });
 });
-// lotus north of the Hall of Distant Fragrance and in the west bay
-for (const [c, r, n] of [[[0, -32], 9, 80], [[-38, -40], 6, 40], [[34, -42], 6, 36], [[-48, -60], 4, 22]]) E.push({ t: 'lotus', c, r, n, y: LEVEL.pond, seed: c[0] * 7 + 3 });
+// lotus in clumps with open water between, north of the Hall of Distant Fragrance and in the bays; water lilies in the smaller bays
+const wet = (x, z) => pondDistance(x, z) < -1.2 && !nearBridge(x, z, 1.4) && !nearBuilding(x, z, 0.8);
+for (const [c, r, n, sq] of [[[0, -36], 24, 300, 0.42], [[-38, -40], 12, 150, 0.9], [[35, -45], 14, 160, 0.8], [[-48, -61], 8, 70, 0.8], [[-47, -18], 14, 45, 0.35]]) E.push({ t: 'lotus', c, r, n, sq, y: LEVEL.pond, seed: Math.round(c[0] * 7 + 3), inside: wet });
+for (const [c, r, n, sq] of [[[-49, -62], 9, 44, 0.8], [[-47, -10], 12, 32, 0.4], [[-47, 0], 5, 20, 0.8], [[35, -48], 14, 50, 0.8], [[-36, -38], 11, 40, 0.9], [[0, -40], 22, 60, 0.5]]) E.push({ t: 'water_lily', c, r, n, sq, y: LEVEL.pond, seed: Math.round(c[0] * 5 + 11), inside: wet });
 
 // ── the walls, their gates and windows ───────────────────────────────────────
 const [gx0, gz0, gx1, gz1] = GARDEN;
@@ -103,18 +162,10 @@ for (const id of ['hefeng', 'xuexiang', 'daishuang', 'wuzhu', 'lvyi']) {
 
 // ── the bridges over the pond and the paths ──────────────────────────────────
 for (const b of GARDEN_BRIDGES) E.push({ t: 'ming_slab_bridge', pts: b.pts, w: b.w, y: G + 0.05, bed: LEVEL.pondBed });
-const paths = [
-  [[14, 23], [8, 14], [0, 8], [-2, 0], [0, -8], [0, -9.8]],            // from the garden gate to the hall
-  [[-2, -6], [-12, -8], [-20, -11.8]],                                  // to the Leaning Jade
-  [[3, -4], [16, -2], [26, -4], [30, -2.5]],                            // east to the loquat court's moon gate
-  [[-22, -19], [-26, -21], [-28, -23]],                                  // to the bridge for the Lotus Breeze islet
-  [[-38, 2], [-42, 3.5]],
-  [[-58, 14], [-48, 10], [-44, 7.6]],
-  [[48, -30], [54, -38], [56, -40.5]],                                   // to the Wutong and Bamboo Retreat
-  [[45, -57], [52, -62], [57, -66]],                                     // up to the Green Ripples
-  [[-56, -50], [-58, -44], [-55, -40.6]],
-];
-for (const p of paths) E.push({ t: 'path', pts: p.map(([x, z]) => [x, z]), w: 1.4, y: Math.max(G, ...p.map(([x, z]) => H(x, z))) + 0.03 });
+for (const p of PATHS) E.push({ t: 'path', pts: p.map(([x, z]) => [x, z]), w: 1.4, y: Math.max(G, ...p.map(([x, z]) => H(x, z))) + 0.03 });
+// the courts in pebble mosaic (hua jie pu di): the court behind the Hall of Distant Fragrance, where one arrives, with a crane; the loquat court with a plum blossom
+E.push({ t: 'pebble_paving', rect: [-9, -9.1, 9, -0.3], y: G + 0.03, field: 'hex', medallion: 'crane', at: [0, -4.7], d: 4.6, seed: 1 });
+E.push({ t: 'pebble_paving', rect: [32, -1.2, 48.5, 7.4], y: G + 0.03, field: 'coin', medallion: 'plum', at: [40, 1.6], d: 2.8, seed: 2 });
 
 // ── the residence ────────────────────────────────────────────────────────────
 // on one axis from the street north: the gate hall, the sedan-chair hall, the main hall (ting),
@@ -140,8 +191,12 @@ for (const z of [52, 41]) { rwall([rx0, z], [-1.5, z], { h: 4.6 }); rwall([1.5, 
 // side courtyards: a small study hall each side with its rockery and a well
 E.push({ t: 'ming_hall', rect: [-34, 30, -22, 36], y: G + 0.35, H: 3.8, front: 'e', four: true, roof: 'xieshan', plat: 0.35 });
 E.push({ t: 'ming_hall', rect: [22, 44, 34, 50], y: G + 0.35, H: 3.8, front: 'w', four: false, roof: 'gable', plat: 0.35 });
-E.push({ t: 'taihu', c: [-30, 44], r: 1.6, h: 2.6, y: G, seed: 77, solid: true });
-E.push({ t: 'taihu', c: [28, 32], r: 1.2, h: 2.0, y: G, seed: 78, solid: true });
+// standing stones on rough stone feet in the side courts; round them the courts are paved in pebble mosaic: a crane before the east hall's door, a lotus before the study's, coins and a plum in the west court
+E.push({ t: 'taihu', c: [-30, 44], y: G + 0.04, v: 3, s: 0.95, lod: 0, yaw: 0.4, plinth: true, solid: true });
+E.push({ t: 'taihu', c: [28, 32], y: G + 0.04, v: 3, s: 1.0, lod: 0, yaw: -0.5, plinth: true, solid: true });
+E.push({ t: 'pebble_paving', rect: [12.5, 42.2, 21.2, 51.2], y: G + 0.035, field: 'hex', medallion: 'crane', at: [16.85, 46.7], d: 5.2, seed: 3 });
+E.push({ t: 'pebble_paving', rect: [-21.4, 29.5, -12.8, 40.3], y: G + 0.035, field: 'coin', medallion: 'lotus', at: [-17.1, 35], d: 5.4, seed: 4 });
+E.push({ t: 'pebble_paving', rect: [-38, 42.2, -14, 51.2], y: G + 0.035, field: 'coin', medallion: 'plum', at: [-21, 46.7], d: 5.2, seed: 5 });
 
 // ── the halls furnished, their boards and couplets, potted landscapes in the courts (§11) ──
 E.push({ t: 'hall_furniture', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, front: 'n' });

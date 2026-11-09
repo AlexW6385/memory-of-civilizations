@@ -38,7 +38,8 @@ function height(x, z) {
   // the pond: its bed, rising to the rockery shore; the islands and the hills
   if (inRect(GARDEN, x, z, -0.5)) {
     const pd = pondDistance(x, z);
-    if (pd < 1.5) h = LEVEL.pondBed + (h - LEVEL.pondBed) * sm(-2.5, 1.5, pd);
+    // (the bank climbs from the water to the garden's level within a metre and a half: the revetment's face)
+    if (pd < 0.3) h = LEVEL.pondBed + (h - LEVEL.pondBed) * sm(-1.9, 0.3, pd);
     h += bump(ISLANDS, x, z) + bump(MOUNDS, x, z);
   }
   return h * (1 - sm(RADIUS - 30, RADIUS, r));
@@ -51,8 +52,11 @@ function cover(x, z, h, ny) {
   const steep = sm(0.88, 0.62, ny);
   if (inRect(GARDEN, x, z)) {
     // moss and grass under the trees, beaten earth on the paths' edges, rock on the hills' flanks
-    c.rock = Math.max(steep, sm(1.2, 2.6, h) * 0.35);
-    c.grass = (0.72 + 0.12 * n) * (1 - c.rock); c.soil = 1 - c.grass - c.rock; c.dry = 0.06;
+    // (moss and low groundcover cover it: grass colour nearly everywhere, the bare earth only in patches)
+    c.rock = Math.max(steep, sm(1.4, 2.8, h) * 0.3);
+    c.grass = (0.9 + 0.08 * n) * (1 - c.rock); c.soil = 1 - c.grass - c.rock; c.dry = 0.02; c.warmth = 0.2;
+    const pd = pondDistance(x, z);
+    if (pd < 0.6) { c.soil = 0.6; c.rock = 0.3; c.grass = 0.1; }     // the wet bank under the revetment
   } else if (r > RADIUS - 28) {
     // rice fields beyond the last houses
     c.fields = 0.85; c.grass = 0.15;
@@ -79,33 +83,47 @@ function fromWater(x, z) { return Math.min(Math.max(-5, canalDistance(x, z)), in
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6) return null;
   const cd = canalDistance(x, z);
-  if (cd < 0.6 || onBridge(x, z, 1)) return null;
-  // willows along the canals, on the street's edge above the water
-  if (cd < 1.2 && onStreet(x, z)) return { willow: 1.1 };
+  if (cd < 0.5 || onBridge(x, z, 3)) return null;
+  // willows along the canals, on the street's edge above the water: in loose groups, a gap between
+  if (cd < 1.3 && onStreet(x, z)) {
+    const n = vnoise(x * 0.11 + 7, z * 0.11 - 3);
+    return { willow: 20 * sm(-0.5, 0.15, n) };
+  }
   if (onStreet(x, z) || inLot(x, z, 0.6) || inRect(RESIDENCE, x, z, 0.5)) return null;
   if (inRect(GARDEN, x, z)) {
     if (FOOTPRINTS.some((r) => inRect(r, x, z, 1.2)) || nearGallery(x, z) || nearRockPath(x, z, 2.4)) return null;
     const pd = pondDistance(x, z);
-    if (pd < 0.8) return pd < -0.4 ? null : { willow: 2 };
+    if (pd < 1.0) return null;                                  // the revetment's course and the bank above it
     const wall = Math.min(x - GARDEN[0], GARDEN[2] - x, z - GARDEN[1], GARDEN[3] - z);
-    const n = vnoise(x * 0.05 + 3, z * 0.05);
-    if (inRect(LOQUAT_COURT, x, z)) return { fig: 1.5, grass: 30 };
-    const out = { grass: 45 * p.g.grass };
-    if (pd < 4) out.willow = 0.9;
-    if (p.h > 0.7) { out.chinese_pine = 0.7; out.maple = 0.9; out.apple = 0.6; out.bamboo = 0.6 * sm(0.0, 0.4, n); }
-    else {
-      if (wall < 7) out.bamboo = 3 * sm(-0.1, 0.3, n);
-      out.holm_oak = 0.25; out.maple = 0.25 * sm(0.1, 0.5, n); out.apple = 0.3 * sm(0.2, 0.6, -n);
+    const n = vnoise(x * 0.05 + 3, z * 0.05), tn = vnoise(x * 0.13 - 5, z * 0.13 + 9), gn = vnoise(x * 0.07 + 11, z * 0.07 - 4);
+    if (inRect(LOQUAT_COURT, x, z)) return { fig: 1.2, grass: 6 * sm(0.0, 0.6, tn) };
+    const out = {};
+    // mondo grass (grass stands in for it): thick strips along the walls, the galleries and the stone, thin patches elsewhere
+    // under the trees; most of the ground bare of tufts (moss and groundcover in its colour)
+    const edge = wall < 1.7 || nearGallery(x, z, 3.2) || nearRockPath(x, z, 3.6) ? 1 : 0;
+    out.grass = p.g.grass * (1.5 + 30 * sm(0.2, 0.55, tn) + 55 * edge);
+    // willows over the water, leaning in groups
+    if (pd < 5) out.willow = 6 * sm(0.0, 0.45, vnoise(x * 0.09 + 21, z * 0.09));
+    if (p.h > 0.7) {
+      // the hills: Chinese pines (the red pine's clumped pads read best) near the tops only, maples, plums, azalea-like clipped shrubs
+      out.red_pine = 0.32 * sm(1.4, 2.4, p.h);
+      out.maple = 0.7; out.apple = 0.55; out.maquis = 0.8 * sm(-0.1, 0.4, tn);
+    } else {
+      // bamboo groves by the walls: in stands with clearings between
+      if (wall < 6) out.bamboo = 3 * sm(0.0, 0.3, gn);
+      out.holm_oak = 0.2; out.maple = 0.25 * sm(0.1, 0.5, n); out.apple = 0.3 * sm(0.2, 0.6, -n);
+      out.maquis = 0.5 * sm(0.2, 0.6, tn);
     }
     return out;
   }
-  // yards and the town's edges: grass, now and then a camphor tree or a loquat
-  return { grass: 25, oak: 0.08, fig: 0.06 };
+  // yards and the town's edges: moss and low weeds, tufts only in patches, now and then a camphor tree or a loquat
+  const tn = vnoise(x * 0.1 + 2, z * 0.1 - 8), wallish = inLot(x, z, 2.2) ? 1 : 0;
+  return { grass: 1 + 14 * sm(0.1, 0.5, tn) + 18 * wallish, oak: 0.08, fig: 0.06 };
 }
 
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 2, bamboo: 3, fig: 1.5, chinese_pine: 0.7, maple: 0.9, apple: 0.6, holm_oak: 0.25, oak: 0.08 },
+  maxDensity: { willow: 20, bamboo: 3, fig: 1.5, red_pine: 0.32, maple: 0.9, apple: 0.6, holm_oak: 0.25, oak: 0.08, maquis: 0.8, grass: 80 },
   // late spring in Jiangnan (the plum rains near): soft hazy sun, drizzle and mist over the water
   climate: {
     sun: { az: 140, el: 40, color: [1.0, 0.92, 0.82], intensity: 3.0, lat: 31, dec: 15, hour: 10 },
