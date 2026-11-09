@@ -58,6 +58,25 @@ for (let k = 0; k < 4; k++) {
 for (const x of [-150, -75, 0, 75, 150]) STREETS.push([x - LANE, 91, x + LANE, 210]);
 for (const x of [-55, 0, 55]) STREETS.push([x - LANE, -210, x + LANE, -96]);
 for (const x of [-178, 178]) STREETS.push([x - LANE, -205, x + LANE, 60]);
+// the north (north.js): the Bao'en Temple's court and the city wall with its moat and gate road
+// are kept free of houses and lanes; the canal streets pass the wall by their gates
+export const TEMPLE_COURT = [-76, -159.5, -4, -111.8];
+export const NORTH_KEEP = [TEMPLE_COURT, [-120, -184, 120, -160], [-92, -192, 92, -160], [13, -192, 21, -108]];
+const GATE_STREETS = new Set([STREETS[1], STREETS[2]]);       // the east and west canal streets
+const NORTH_CUT = [[-77, -160.5, -3, -110.8], [-121, -215, 121, -160]];
+/** r minus the rectangle k, along r's long axis (the pieces left, longer than 2 m). */
+function cutRect(r, k) {
+  if (!(r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1])) return [r];
+  const out = [];
+  if (r[2] - r[0] >= r[3] - r[1]) { if (k[0] - r[0] > 2) out.push([r[0], r[1], k[0], r[3]]); if (r[2] - k[2] > 2) out.push([k[2], r[1], r[2], r[3]]); }
+  else { if (k[1] - r[1] > 2) out.push([r[0], r[1], r[2], k[1]]); if (r[3] - k[3] > 2) out.push([r[0], k[3], r[2], r[3]]); }
+  return out;
+}
+{
+  const kept = [];
+  for (const r of STREETS) { if (GATE_STREETS.has(r)) { kept.push(r); continue; } let pieces = [r]; for (const k of NORTH_CUT) pieces = pieces.flatMap((q) => cutRect(q, k)); kept.push(...pieces); }
+  STREETS.length = 0; STREETS.push(...kept);
+}
 /** Stone bridges over the canals: { at [x, z], across ('z': over an east–west canal), span, width }. */
 export const BRIDGES = [
   { at: [-150, 72], across: 'z', span: 8, width: 4.2 },
@@ -219,6 +238,8 @@ export function lots() {
       });
     }
   }
+  // (none in the temple's court or under the wall: north.js)
+  { const ov = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1]; const keep = LOTS.filter((l) => !NORTH_KEEP.some((k) => ov(l.rect, k))); LOTS.length = 0; LOTS.push(...keep); }
   return LOTS;
 }
 /** Is (x, z) inside a house lot? */

@@ -10,7 +10,7 @@ import { northPlans } from './north.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const R = RADIUS - 26;                                  // the street life stops here (the people are drawn near)
 // the figure builder on master knows cap 'ming' and hair 'netknot'; this branch's does not yet (set true after the merge)
-const CAP_MING = false;
+const CAP_MING = true;
 const RS = RADIUS - 8, RC = RADIUS - 15;               // the streets and lanes run on to the rim; the canals, whose bed the fading ground would lift, to RC
 /** Clip a rectangle to the disc of radius r (keeps the part whose middle line lies inside). */
 function clip([x0, z0, x1, z1], r = R) {

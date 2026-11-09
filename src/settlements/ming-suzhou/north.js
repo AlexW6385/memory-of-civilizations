@@ -11,13 +11,13 @@ import { box, fromTriangles, lathe } from '../../core/geom.js';
 import '../../styles/ming/index.js';
 import '../../styles/song/index.js';
 import { beamTris } from '../../styles/ming/index.js';
-import { LEVEL, RADIUS } from './layout.js';
+import { LEVEL, RADIUS, TEMPLE_COURT, NORTH_KEEP as KEEP } from './layout.js';
 
 // ── where things stand (m, +x east, +z south; the north is −z) ──────────────
 /** The pagoda's centre: north of the garden, in the temple's court. */
 export const PAGODA_AT = [-40, -145];
 /** The temple court (x0, z0, x1, z1). */
-export const COURT = [-76, -159.5, -4, -111.8];
+export const COURT = TEMPLE_COURT;
 /** The city wall's line (its middle), where it runs from x0 to x1, and its base and top widths and height. */
 export const WALL = { z: -168, x0: -118, x1: 118, base: 9.4, top: 7.0, H: 9.0 };
 /**
@@ -25,7 +25,7 @@ export const WALL = { z: -168, x0: -118, x1: 118, base: 9.4, top: 7.0, H: 9.0 };
  * not placed there; the planting should keep out of them): the temple court, the wall with its bastions
  * and the moat, the road to the gate.
  */
-export const NORTH_KEEP = [COURT, [-120, -184, 120, -160], [-92, -192, 92, -160], [13, -192, 21, -108]];
+export const NORTH_KEEP = KEEP;
 
 const PI = Math.PI;
 const ngon = (cx, cz, r, n = 8, rot = PI / 8) => Array.from({ length: n }, (_, k) => [cx + Math.cos(rot + k / n * PI * 2) * r, cz + Math.sin(rot + k / n * PI * 2) * r]);
