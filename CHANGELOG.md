@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.26 — Building stays off the page (2026-11-09)
+- A settlement waiting its turn in the build workers no longer makes the page give up on the workers and build everything itself (which made arriving slow and every frame heavy); the next random city is built ahead only once the one you are in is finished.
+
 ## v10.25 — Cheaper shadows (2026-11-09)
 - Plants' shadows no longer sway, so the shadow maps are kept between frames instead of being drawn again every frame for the plants; the nearest shadow map is redrawn less often as the sun moves.
 

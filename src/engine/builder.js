@@ -6,7 +6,7 @@ import * as THREE from 'three/webgpu';
 import { HITCH } from './hitch.js';
 
 /** A job silent this long (ms) has failed (the first answer includes laying out the town). */
-const STALL = 25000;
+const STALL = 45000;
 
 export class Builder {
   constructor(n = 2) {
@@ -22,7 +22,7 @@ export class Builder {
     this.workers = Array.from({ length: n }, () => {
       const w = new Worker(new URL('./build-worker.js', import.meta.url), { type: 'module' });
       w.load = 0;
-      w.onmessage = (e) => this.receive(e.data);
+      w.onmessage = (e) => { w.heard = performance.now(); this.receive(e.data); };
       w.onerror = (e) => { console.warn('build worker failed', e.message); this.fail(); };
       w.postMessage({ init: url });
       return w;
@@ -76,8 +76,12 @@ export class Builder {
   watch() {
     const now = performance.now();
     for (const j of this.jobs.values()) {
-      if (now - j.heard > STALL) {
-        console.warn('build worker silent for', Math.round((now - j.heard) / 1000), 's: building in the page');
+      // (a job waits its turn while its worker builds another settlement's plans: what counts is
+      // whether the worker itself has fallen silent — several settlements loading at once, one
+      // waiting behind the others for over STALL, sent the whole world to the main thread)
+      const heard = Math.max(j.heard, j.worker.heard ?? 0);
+      if (now - heard > STALL) {
+        console.warn('build worker silent for', Math.round((now - heard) / 1000), 's: building in the page');
         for (const w of this.workers) w.terminate();
         this.fail();
         return;

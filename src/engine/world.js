@@ -229,7 +229,8 @@ class Settlement {
       this.done = this.expected;
       this.state = 'ready';
       // the plans' static meshes merged per material and shape, in the background (src/engine/merge.js)
-      this.merging = this.mergeStatic(gen);
+      this.mergingNow = true;
+      this.merging = this.mergeStatic(gen).finally(() => { this.mergingNow = false; });
       return this;
     })();
     return this.loading;
@@ -379,7 +380,7 @@ class Settlement {
     this.world.scene.remove(this.group);
     // (an instanced mesh's dispose() leaves its geometry: both are let go of)
     this.group.traverse((o) => { o.geometry?.dispose(); if (o.isInstancedMesh) o.dispose(); });
-    this.merged = null; this.merging = null; this.quietFor = undefined; this.lods = null;
+    this.merged = null; this.merging = null; this.mergingNow = false; this.quietFor = undefined; this.lods = null;
     this.group.clear();
     this.life?.dispose(); this.life = null; this.lifeParts = []; this.lifeLamps = null;
     for (const rec of this.parts) this.world.r.gi.release?.(rec.plan.id);
@@ -517,6 +518,9 @@ export class World {
     const still = () => this.kept === site && site !== this.anchor?.site;
     const A = ARRIVALS[S.id] || [0, null, 0];
     try {
+      // (only once the settlement one is in and its neighbours are built and merged: a settlement
+      // built ahead took the build workers from the one being visited, which then came in slowly)
+      for (let k = 0; k < 600 && still() && this.settlements.some((s) => s !== site && (s.state === 'loading' || s.mergingNow)); k++) await new Promise((r) => setTimeout(r, 500));
       await idle();
       if (!still()) return;
       await this.plansOf(site);
