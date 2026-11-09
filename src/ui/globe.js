@@ -1,6 +1,6 @@
 // The large map: the planet itself, as a globe to turn (drag) and come closer to (wheel, pinch),
-// with the settlements marked and named. A click on a settlement takes the visitor to its
-// building's entrance; a click anywhere else on the land, there. The list below names every
+// with the settlements marked and named. A click on a settlement opens its card (card.js), whose Go
+// button takes the visitor to its building's entrance; a click anywhere else on the land, there. The list below names every
 // settlement with its time.
 
 import { t, tr, onLang } from './i18n.js';
@@ -9,6 +9,7 @@ import { BUILT, PLANET_RADIUS } from '../planet/relief.js';
 import { SITES } from '../planet/sites.js';
 import { PLACED } from '../planet/layout.js';
 import { take } from './order.js';
+import { SettlementCard } from './card.js';
 import { unit, latLon, eastNorth, dot, norm, cross } from '../planet/geo.js';
 
 const sm = (e0, e1, x) => { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); };
@@ -66,9 +67,11 @@ export class GlobeView {
     this.up = [0, 0, -1];
     this.zoom = 1;
     this.you = null;
+    this.sel = null;
+    this.card = new SettlementCard(this.canvas.parentElement, this.canvas, (S) => this.go(S), () => { this.sel = null; if (this.canvas.offsetParent) this.repaintMarks(); });
     this.bind();
     this.fillList();
-    onLang(() => { this.fillList(); this.draw(); });
+    onLang(() => { this.fillList(); this.card.fill(); this.draw(); });
   }
 
   /** The entrance record of each built settlement's first building. */
@@ -112,6 +115,7 @@ export class GlobeView {
 
   /** Open centred on the visitor (direction u), facing north up. */
   open(u, heading) {
+    this.card.close();
     this.you = { u, heading };
     this.center = u.slice();
     const [, n] = eastNorth(u);
@@ -173,6 +177,7 @@ export class GlobeView {
     g.drawImage(this.off, 0, 0, W, H);
     this.drawFaint(g);
     this.paintMarks();
+    this.card.place(this.marks.find((m) => m.S === this.sel));
   }
 
   drawFaint(g) {
@@ -200,8 +205,9 @@ export class GlobeView {
     const order = [...this.marks].sort((a, b) => (a.S === this.hover) - (b.S === this.hover) || (a.S === cur) - (b.S === cur));
     const px = Math.round(11 * dpr), m = 3 * dpr;
     g.textAlign = 'left'; g.textBaseline = 'middle'; g.lineJoin = 'round';
-    for (const { S, p } of order) {
-      const hov = S === this.hover, isCur = S === cur;
+    for (const mk of order) {
+      const { S, p } = mk;
+      const hov = S === this.hover || S === this.sel, isCur = S === cur;
       // at night the settlements glow with their lamps
       if (sun && dot(S.u, sun) < 0.02) {
         const gl = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], 12 * dpr);
@@ -217,6 +223,7 @@ export class GlobeView {
       g.font = `${hov || isCur ? '600 ' : ''}${px}px system-ui, sans-serif`;
       const name = tr(S.site.name), tw = g.measureText(name).width;
       const x = Math.max(m, Math.min(W - m - tw, p[0] + r + 4 * dpr)), y = Math.max(px / 2 + m, Math.min(H - px / 2 - m, p[1]));
+      mk.left = p[0] - r; mk.right = x + tw;
       g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(14, 12, 9, 0.85)'; g.strokeText(name, x, y);
       g.fillStyle = hov ? '#ffffff' : isCur ? '#e3f5ff' : '#fff6e0'; g.fillText(name, x, y);
     }
@@ -296,12 +303,21 @@ export class GlobeView {
     }, { passive: false });
   }
 
+  /** Open the settlement card of a marked settlement. */
+  openCard(m) {
+    this.sel = m.S;
+    this.repaintMarks();
+    this.card.show(m.S, this.marks.find((q) => q.S === m.S));
+  }
+
   click(e) {
     const rect = this.canvas.getBoundingClientRect(), dpr = devicePixelRatio || 1;
     const px = (e.clientX - rect.left) * dpr, py = (e.clientY - rect.top) * dpr;
     for (const m of this.marks || []) {
-      if (Math.hypot(m.p[0] - px, m.p[1] - py) < 14 * dpr) { this.go(m.S); return; }
+      if (Math.hypot(m.p[0] - px, m.p[1] - py) < 14 * dpr) { this.openCard(m); return; }
     }
+    // with a card open, a click elsewhere on the map only closes it
+    if (this.card.isOpen) { this.card.close(); return; }
     const v = this.unproject(px, py);
     if (!v) return;
     // near a settlement (within about a kilometre of its rim, or a few pixels of its mark): there
@@ -311,7 +327,7 @@ export class GlobeView {
       if (d < nd) { nd = d; near = S; }
     }
     const perPx = 2 / (Math.min(this.canvas.width, this.canvas.height) * 0.46 * this.zoom) * PLANET_RADIUS / 2;
-    if (near && nd < Math.max(1000, 30 * dpr * perPx)) { this.go(near); return; }
+    if (near && nd < Math.max(1000, 30 * dpr * perPx)) { const m = (this.marks || []).find((q) => q.S === near); if (m) this.openCard(m); else this.go(near); return; }
     const [la, lo] = latLon(v);
     this.onPlace(la, lo);
   }

@@ -147,6 +147,22 @@ body.panel-open #btn-mute, body.panel-open #btn-lang, body.panel-open #corner, b
   .sky-range { margin: 9px 0 8px; }
   .speed-name { font-size: 13px; }
 }
-}
 
 /* the tour's small pill, top centre (above the corner card and the other overlays) */
+
+/* the settlement card over the globe map: beside the clicked marker; a bottom sheet on phones */
+.site-card { position: absolute; z-index: 3; width: 320px; max-height: 60%; padding: 16px 18px 14px; display: flex; flex-direction: column; background: rgba(24, 20, 15, 0.9); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5); }
+.site-card[hidden] { display: none; }
+.site-card .close { position: absolute; top: 6px; right: 8px; }
+.site-card .sc-name { font-family: var(--serif); font-weight: 600; font-size: 21px; line-height: 1.2; margin: 0 26px 2px 0; letter-spacing: 0.02em; }
+.site-card .sc-era { font-size: 12.5px; color: var(--accent); letter-spacing: 0.06em; margin-bottom: 10px; }
+.site-card .sc-body { overflow-y: auto; min-height: 0; padding-right: 4px; -webkit-user-select: text; user-select: text; overscroll-behavior: contain; border-top: 1px solid var(--line); padding-top: 10px; }
+.site-card .sc-body[hidden] { display: none; }
+.site-card .sc-body p { margin: 0 0 9px; font-size: 13.5px; line-height: 1.55; color: var(--ink-dim); }
+.site-card .sc-body p:first-child { color: var(--ink); }
+.site-card .sc-body strong { font-weight: 650; color: var(--ink); }
+.site-card .sc-foot { padding-top: 8px; display: flex; justify-content: flex-end; }
+.site-card button.primary { padding: 8px 28px; font-size: 14px; }
+@media (max-width: 700px) {
+  .site-card { left: 0 !important; right: 0; top: auto !important; bottom: 0; width: auto; max-height: 46dvh !important; border-radius: 16px 16px 0 0; padding: 16px 16px max(14px, env(safe-area-inset-bottom)); }
+}
