@@ -44,7 +44,8 @@ Resolve conflicts in this order, but the first three are near-equals: none is sa
 - A sphere of **radius 8 km** (circumference ≈ 50 km). Ground is the sphere plus relief (≤ 300 m: hills, a few mountains, coasts). The whole planet is walkable except open water and slopes over ~40°.
 - Gravity points to the centre; the walker's "up" is the local normal. Settlements are built on their local tangent plane (flat ground) blended into the sphere at their edge — nothing in a settlement needs to know the world is round.
 - **Walk, run, fly.** Walking 2.0 m/s, running 5.2. Hold Space to rise, release to glide down; speed grows with height (9 m/s near the ground, +0.22 per metre up to 120 m/s; with Shift 18, +0.45 per metre up to 240; `src/core/walk.js`), so the ground below reads as a landscape, not a blur. Ceiling ~1.5 km above the ground, high enough to see the curve and the atmosphere.
-- **The map is a globe.** The corner map shows the land round you (north up); the large map is the planet itself, turnable, with the settlements marked and named by civilization and date; a click flies you there (fade, load, arrive at the settlement's chosen view of its landmark, §4.4).
+- **The map is a globe.** The corner map shows the land round you (north up); the large map is the planet itself, turnable, with the settlements marked and named by civilization and date; a click on one opens its **card** (below), whose **Go** button flies you there (fade, load, arrive at the settlement's chosen view of its landmark, §4.4).
+- **The settlement card.** Name, era, then a short plain text in the site's language: the place's background, time, civilization and style, and the names of its main sights with what marks each. Description only — no guidance, no suggested route, no purpose or call to act. Below it, the Go button. Texts in English and Chinese, one per settlement, in `src/planet/cards.js`, written from its dossier and its row in §7.
 - **The clock:** drag to set the hour, let the days run. One global time; what differs by place is the sun (§4.3).
 
 ### 4.2 Geography
@@ -316,8 +317,8 @@ Replace these lines, never append to them; keep them few.
 
 - v10.20 (2026-11-07): 57 settlements stand on the planet, 44 interiors under baked light. Every civilization first listed is built.
 - **The gap is depth.** By their own dossiers 27 of the 57 are still at L1–L2, 14 at L2, 6 at L2–L3, and 10 reach L3 only in parts; none meets §5 throughout.
-- **Next:** bring the built settlements to L3 — the lowest and the best known first. New ones come from the L0 settlements of §7 when the author says to start them.
-- **Decided, not yet done:** the planet is enlarged so that 100 settlements stand without crowding (`PLANET_RADIUS` in `src/planet/sites.js`, 8 km now; the layout tool finds the size, about 12 km). Settlements of one place at different times (Qin, Han and Tang at Xi'an; the two Romes) stand side by side; a true position within a few hundred metres is not required.
+- **Next: Ming Suzhou as the showcase** (the author, 2026-11-09): brought to L3 throughout and kept there as the example for every other settlement and as the testbed for the speed work (measured on the M2 first). Then the other built settlements to L3; new ones from the L0 settlements of §7 when the author says to start them.
+- **Decided, not yet done:** the settlement cards on the globe map (§4.1), for the 57 built. The planet is enlarged so that 100 settlements stand without crowding (`PLANET_RADIUS` in `src/planet/sites.js`, 8 km now; the layout tool finds the size, about 12 km). Settlements of one place at different times (Qin, Han and Tang at Xi'an; the two Romes) stand side by side; a true position within a few hundred metres is not required.
 - Open: frame times and jumps are still to be measured on the author's M2.
 
 ## 11. Rules
@@ -325,7 +326,7 @@ Replace these lines, never append to them; keep them few.
 - **This document stays short.** It holds the design as it stands and nothing else: no dated entries, no per-version or per-settlement notes, no account of work done. When a decision changes the design, edit the section it belongs to; its date and reason go in one line in `docs/decisions.md`, and only if it constrains future work. What a version changed goes in `CHANGELOG.md` (one or two plain sentences), a settlement's facts in its dossier. `CHANGELOG.md`, `docs/decisions.md`, `docs/status-log.md` and `docs/history.md` are records: nobody reads them in full for a task; grep them for one thing.
 - Dossier first (§6). Every element traces to its dossier.
 - Metres; true scale for buildings and townscapes; the planet and open country are compressed.
-- No study features, markers, labels in the world. UI: corner map, clock-and-speed card, globe map, language button — nothing else without a recorded decision.
+- No study features, markers, labels in the world. UI: corner map, clock-and-speed card, globe map with its settlement cards, language button — nothing else without a recorded decision.
 - Budgets (§8) are targets; a change that breaks one is fixed by engineering before merge, and only as a last resort by thinning detail, recorded as a decision.
 - Picture quality on the author's machine never goes down silently; a change that lowers it is recorded as a decision.
 - Checks: per settlement touched, the surface, geometry and plan checks; pictures of what changed; the heavy checks after merging (`docs/parallel-work.md`).
