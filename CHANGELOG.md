@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.23 — Suzhou's town and garden water (2026-11-09)
+- The canal town is rebuilt with varied houses (one to four bays, courtyard houses and gate towers, horse-head and Guanyin-hood gables, plank shopfronts, verandas over the water, weathered plaster), six trades of open shops, lit windows and lanterns at night, and lanes running on to the edge of the city.
+- In the garden: pierced and wrinkled Taihu stones, stone revetments along every shore, denser lotus with flowers and pods, water lilies, pebble-mosaic courts, willows along the canals and moss and mondo grass under the trees.
+
 ## v10.22 — Suzhou's north, cards, smoother first sight (2026-11-09)
 - Ming Suzhou gains the Bao'en Temple pagoda, its temple court and a stretch of the city wall with land and water gates; settlement cards are written for all 57 built settlements; figures get a proper crossed collar, aprons and the Ming square cap.
 - Every instanced mesh's shader is now built before it is shown, instead of in the frame that first draws it (which made hitches of up to half a second when turning or flying).
