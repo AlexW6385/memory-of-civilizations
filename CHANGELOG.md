@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.21 — Suzhou benchmark (2026-11-09)
+- ?bench=suzhou measures Ming Suzhou (by the pond, along the canal street, inside the main hall); every leg first waits for steady frames and reports how long that took.
+
 ## v10.20 — Fixed tour order (2026-11-07)
 - ?tour=a,b,c sets a fixed tour order (used by the promo recorder); the tour records the current settlement in window.__tourLeg.
 

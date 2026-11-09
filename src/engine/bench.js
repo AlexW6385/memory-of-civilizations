@@ -6,6 +6,13 @@
 // data on the GPU, the settlements built, and the hitches (frames over 50 ms). The results are
 // printed to the console (as a table and as JSON) and shown on screen; `window.BENCH` holds them.
 //
+// `?bench=suzhou` runs the Ming Suzhou route instead (the showcase, DESIGN §10): turning by the
+// pond, walking the south canal street, turning inside the Hall of Distant Fragrance. Before each
+// leg the bench waits until the frames are steady again and reports that wait (`steadyS`): the
+// stall after arriving somewhere new (shaders compiled, parts streamed in) is measured apart.
+// Pin the pixel ratio (`?dpr=2`) and the quality (`?quality=high`) to compare runs: otherwise the
+// automatic resolution and the remembered quality change under the measurement.
+//
 // A/B switches for the benchmark only (never in the UI): `?logdepth=0` (no logarithmic depth
 // buffer), `?plain=1` (flat materials, no procedural detail — the cost of the material shaders).
 
@@ -21,9 +28,25 @@ export async function runBench(P) {
   const say = (t) => { panel.textContent = t; };
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const settle = async () => { await Promise.all(world.settlements.map((s) => s.loading)); await wait(1500); };
+  // until 40 frames in a row are under 150 ms (at most 150 s): the seconds it took
+  const steady = async () => {
+    const t0 = performance.now(); let run = 0;
+    perf.record = (x) => { run = x.dt < 150 ? run + 1 : 0; };
+    while (run < 40 && performance.now() - t0 < 150000) await wait(200);
+    perf.record = null;
+    return +((performance.now() - t0) / 1000).toFixed(1);
+  };
   controls.free = false; controls.enabled = true;
 
-  const legs = [
+  const turn = (on) => { controls.keys.clear(); if (on) controls.keys.add('KeyQ'); };
+  const walk = (on) => { controls.keys.clear(); if (on) controls.keys.add('KeyW'); };
+  const suzhou = [
+    { name: 'sz-pond-turn', start: async () => { await P.pose('ming-suzhou', 0, 0.95, -23.5, 0, -0.04); controls.free = false; await settle(); }, drive: turn },
+    { name: 'sz-canal-walk', start: async () => { await P.pose('ming-suzhou', -80, 0.1, 65, -Math.PI / 2, 0.02); controls.free = false; await settle(); }, drive: walk },
+    { name: 'sz-hall-turn', start: async () => { await P.pose('ming-suzhou', 0, 0.8, -14.7, 0, 0); controls.free = false; await settle(); }, drive: turn },
+  ];
+  const route = new URLSearchParams(location.search).get('bench');
+  const legs = route === 'suzhou' ? suzhou : [
     {
       name: 'edfu-turn',
       start: async () => { await P.pose('edfu', 0, 0.1, 150, 0, 0.12); controls.free = false; await settle(); },
@@ -50,6 +73,8 @@ export async function runBench(P) {
   for (const leg of legs) {
     say(`bench: ${leg.name} — getting ready…\n\n` + report(out));
     await leg.start();
+    say(`bench: ${leg.name} — waiting for steady frames…\n\n` + report(out));
+    const steadyS = await steady();
     const samples = [];
     perf.record = (s) => samples.push(s);
     const t0 = performance.now();
@@ -61,7 +86,7 @@ export async function runBench(P) {
     }
     leg.drive(false);
     perf.record = null;
-    out.legs.push(summarise(leg.name, samples, world, R));
+    out.legs.push({ ...summarise(leg.name, samples, world, R), steadyS });
   }
   controls.keys.clear(); controls.flyHeld = false;
   const text = report(out);
@@ -118,7 +143,7 @@ export function gpuGeometry(scene) {
 
 function report(out) {
   const head = `${out.backend} · ${out.size} @${out.dpr} · ${out.params || '(no switches)'}`;
-  const cols = ['leg', 'fps', 'p95ms', 'jsMs', 'draws', 'tris', 'hitches', 'heapMB', 'gpuGeoMB', 'jsGeoMB', 'geometries', 'built'];
+  const cols = ['leg', 'steadyS', 'fps', 'p95ms', 'jsMs', 'draws', 'tris', 'hitches', 'heapMB', 'gpuGeoMB', 'jsGeoMB', 'geometries', 'built'];
   const rows = out.legs.map((l) => cols.map((c) => String(l[c] ?? '–')));
   const w = cols.map((c, i) => Math.max(c.length, ...rows.map((r) => r[i].length)));
   const line = (r) => r.map((x, i) => x.padStart(w[i])).join('  ');
