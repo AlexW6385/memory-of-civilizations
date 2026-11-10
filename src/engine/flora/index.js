@@ -5,6 +5,8 @@
 import * as THREE from 'three/webgpu';
 import { uniform, texture, uv, positionLocal, time, sin, cos, vec3, vec4, float, attribute, instanceIndex, hash, mix, normalWorld, max, dot, normalize, faceDirection, cameraViewMatrix } from 'three/tsl';
 import { SPECIES, VARIANTS, speciesGeometry } from './species.js';
+/** Shapes per species at the far level of detail (of VARIANTS near). */
+const FAR_VARIANTS = 2;
 import { foliageTexture } from './textures.js';
 import { MAX_DENSITY, NEAR_ONLY } from '../../world/flora-rules.js';
 import { material as paletteMaterial } from '../materials.js';
@@ -258,7 +260,7 @@ export class Flora {
    */
   prepare(c) {
     const d = c.data, n = d.length / 8;
-    const M = new Float32Array(n * 16), col = new Float32Array(n * 3), kv = new Int32Array(n), reach0 = new Float32Array(n), reach1 = new Float32Array(n), px = new Float32Array(n), pz = new Float32Array(n);
+    const M = new Float32Array(n * 16), col = new Float32Array(n * 3), kv = new Int32Array(n), kf = new Int32Array(n), reach0 = new Float32Array(n), reach1 = new Float32Array(n), px = new Float32Array(n), pz = new Float32Array(n);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
     const kvs = this.kvs ??= new Map(), kvList = this.kvList ??= [];
     for (let j = 0, i = 0; j < n; j++, i += 8) {
@@ -266,6 +268,12 @@ export class Flora {
       let k = kvs.get(key);
       if (k === undefined) { k = kvList.length; kvs.set(key, k); kvList.push([sp, v]); }
       kv[j] = k;
+      // the far level of detail in fewer shapes (FAR_VARIANTS): at that distance the yaw, size and
+      // tint of each plant are what tell them apart, and every shape is two draw calls
+      const keyF = `${sp}/${v % FAR_VARIANTS}`;
+      let kF = kvs.get(keyF);
+      if (kF === undefined) { kF = kvList.length; kvs.set(keyF, kF); kvList.push([sp, v % FAR_VARIANTS]); }
+      kf[j] = kF;
       reach0[j] = S.lod[0]; reach1[j] = S.lod[1];
       px[j] = d[i + 2]; pz[j] = d[i + 4];
       const sc = S.scale[0] + (S.scale[1] - S.scale[0]) * d[i + 6];
@@ -273,7 +281,7 @@ export class Flora {
       m.compose(p, q, s).toArray(M, j * 16);
       col[j * 3] = 0.88 + 0.24 * d[i + 7]; col[j * 3 + 1] = 0.9 + 0.2 * d[i + 7]; col[j * 3 + 2] = 0.86 + 0.2 * ((d[i + 7] * 7) % 1);
     }
-    c.prep = { n, M, col, kv, reach0, reach1, px, pz, cid: (this.cellIds = (this.cellIds || 0) + 1) };
+    c.prep = { n, M, col, kv, kf, reach0, reach1, px, pz, cid: (this.cellIds = (this.cellIds || 0) + 1) };
   }
 
   /**
@@ -293,7 +301,7 @@ export class Flora {
         if (performance.now() - t0 > budget) { all = false; continue; }
         this.prepare(c); c.prep.src = c.data;
       }
-      const P = c.prep, { n, kv, reach0, reach1, px, pz } = P;
+      const P = c.prep, { n, kv, kf, reach0, reach1, px, pz } = P;
       // (a whole cell beyond every plant's reach skipped)
       const r = c.rect, cdx = Math.max(r[0] - x, 0, x - r[2]), cdz = Math.max(r[1] - z, 0, z - r[3]);
       if (cdx * cdx + cdz * cdz > (this.maxLod * sc) ** 2) continue;
@@ -302,7 +310,7 @@ export class Flora {
         const dx = px[j] - x, dz = pz[j] - z, d2 = dx * dx + dz * dz;
         const lod = d2 < reach0[j] * reach0[j] * sc2 ? 0 : d2 < reach1[j] * reach1[j] * sc2 ? 1 : -1;
         if (lod < 0) continue;
-        const b = kv[j] * 2 + lod;
+        const b = (lod ? kf[j] : kv[j]) * 2 + lod;
         let list = buckets.get(b);
         if (!list) buckets.set(b, (list = []));
         list.push(P, j);

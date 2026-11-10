@@ -81,7 +81,7 @@ export class OpenFlora {
         const dist = Math.hypot(d[i] - cam[0], d[i + 1] - cam[1], d[i + 2] - cam[2]);
         const lod = dist < S.lod[0] * this.scale ? 0 : dist < Math.min(S.lod[1], REACH) * this.scale ? 1 : -1;
         if (lod < 0) continue;
-        const key = `${sp}/${d[i + 4] % VARIANTS}/${lod}`;
+        const key = `${sp}/${d[i + 4] % (lod ? 2 : VARIANTS)}/${lod}`;          // (two shapes at the far level: src/engine/flora/index.js FAR_VARIANTS)
         if (!buckets.has(key)) buckets.set(key, []);
         buckets.get(key).push(d, i);
       }

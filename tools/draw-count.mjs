@@ -37,7 +37,7 @@ const DETAIL_REACH = 160, DETAIL_SHADOW = 50, LIFE_SHADOW = 120;
 const NO_SHADOW = new Set(['water', 'glass_outer', 'glass_topaz', 'opening', 'daylight', 'daylight_plain']);
 const NO_SHADOW_KINDS = new Set(['glow', 'water', 'foam']);
 const castsShadow = (mat) => !NO_SHADOW.has(mat) && !NO_SHADOW_KINDS.has(MATERIALS[mat]?.kind);
-const { LIFE_MIN } = await import('../src/engine/life-instances.js').catch(() => ({ LIFE_MIN: 13 }));
+const { LIFE_MIN, lifeInstanced } = await import('../src/engine/life-instances.js').catch(() => ({ LIFE_MIN: 13, lifeInstanced: (n) => n >= 13 }));
 
 /** A frame's draws: the meshes of a settlement (with the viewer's options), and the counts at a pose. */
 export async function drawCount(id, { at = null, sun = [135, 40], build = null, merge = true, cells = true } = {}) {
@@ -331,7 +331,7 @@ export async function sceneOf(id) {
   // life: settlement-wide instanced shapes, or merged into their tiles by real material
   const rare = new Map();
   for (const e of life.values()) {
-    if (e.n >= LIFE_MIN) {
+    if (lifeInstanced(e.n, e.chunks[0].geometry)) {
       const pos = new Float32Array(e.n * 3), reach = new Float32Array(e.n);
       let o = 0, r = 0;
       for (const p of e.chunks) {

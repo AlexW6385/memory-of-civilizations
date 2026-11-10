@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.28 — Fewer draw calls (2026-11-09)
+- Small things of the street life with few copies are merged by material instead of each costing a draw call (Suzhou: from about 140 to about 50); far trees use two shapes per species instead of four.
+
 ## v10.27 — Reflections and light through paper (2026-11-09)
 - Water reflects the buildings and trees round it (screen-space, on high; sky by Fresnel everywhere); paper lattices let the daylight and the lamps through, and the halls of Suzhou are baked again with that light, now three to four times brighter inside; the study is a room of its own. Lamps cost nothing by day.
 

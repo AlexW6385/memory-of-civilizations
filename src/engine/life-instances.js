@@ -15,6 +15,12 @@ import { coarse, LIFE_FULL } from './cells.js';
 
 /** A shape is instanced settlement-wide from this many copies; rarer ones are merged per tile. */
 export const LIFE_MIN = 13;
+/** ...and only if its copies hold more than this many triangles in all: a small shape with few
+ *  copies (a cord, a lid, a cup: 13 copies of 12 triangles) cost a draw call of its own, and Suzhou's
+ *  street life had 124 of them; merged by material, 88 of them cost about 6 MB and no draw. */
+export const LIFE_MIN_TRIS = 10000;
+/** Is a shape of n copies of this geometry instanced (else merged by real material)? */
+export const lifeInstanced = (n, geometry) => n >= LIFE_MIN && n * ((geometry.index ? geometry.index.count : geometry.attributes.position.count) / 3) > LIFE_MIN_TRIS;
 
 const samePrototype = (a, b) => {
   const A = a.attributes.position.array, B = b.attributes.position.array;
@@ -57,7 +63,7 @@ export class LifeInstances {
     const M = new THREE.Matrix4();
     for (const alts of shapes.values()) {
       for (const s of alts) {
-        if (s.n < LIFE_MIN) {
+        if (!lifeInstanced(s.n, s.geometry)) {
           // rare: merged into its tile, by real material (indexed: a lathe's vertices are shared by
           // about six triangle corners, so a copy kept indexed costs a fraction of an unrolled one)
           const local = s.geometry.clone();
