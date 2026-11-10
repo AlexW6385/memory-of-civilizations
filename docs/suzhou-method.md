@@ -20,9 +20,9 @@ Each step builds on the one before; do not skip ahead to the visible layers.
 ## 2. Detail rules that mattered
 
 - **Real modules give realism cheaply.** A hall with the right number of bays (odd: the central bay is the door), the right eave overhang and roof curve reads as real before any ornament.
-- **No floating, no gaps, no overlaps.** Everything sits on what holds it up. A path, a terrace or a step that crosses uneven ground must follow the ground's height function or the ground must be levelled under it; a flat slab laid over a mound floats.
+- **No floating, no gaps, no overlaps.** Everything sits on what holds it up. A path, a terrace or a step that crosses uneven ground must follow the ground's height function or the ground must be levelled under it; a flat slab laid over a mound floats (Suzhou's garden paths took one height each, the highest ground along them; now each vertex is set on the ground).
 - **Layers of time and use**: grime at the foot of walls, rising damp, salts, algae, moss on north faces, rain streaks, a waterline where walls stand in water. Generic, by material kind (`src/engine/materials.js`), so every settlement gets it for free; tune per climate (`damp`), not per wall.
-- **Motion makes a place alive**, but each moving thing must be cheap and must not clip: boats keep to lanes and keep their distance, walkers keep to streets, cloth sways about its attachment only.
+- **Motion makes a place alive**, but each moving thing must be cheap and must not clip: boats use their real hull size (`BOAT.hull` in the settlement's `movers.js`), keep right, keep their distance, pass bridges and narrows one direction at a time and back out of a face-off; walkers keep to streets; cloth sways about its attachment only. Test movers with a Node harness that steps the simulation for simulated hours and reports the closest hulls and the stalls.
 - **Remove what looks posed.** Static boats placed mid-canal looked wrong once boats moved; moored ones at the banks stay.
 
 ## 3. Walkability
@@ -63,7 +63,7 @@ Target (DESIGN §8): 60 fps in a settlement, no frame over 50 ms, ≤ 800 draw c
 **What brought Suzhou from ~20 to ~60 fps:**
 
 - **Fewer draws.** Parts merged per material (`mergeParts`), fine detail within 160 m merged per material per 128 m cell (`mergeDetail`; smaller cells made more draws), street life instanced only above 30 000 triangles a shape and merged otherwise, one form of each material (no plain-and-instanced duplicates), view culling of fine copies.
-- **Shadows cheap.** Static casters cached in the cascades, which are not refitted on every turn; plants cast from their resting shape; small things only in the first cascade.
+- **Shadows cheap.** Static casters cached in the cascades; each cascade covers a sphere round the viewer, so turning on the spot never redraws it (fitted to the view, refits cost a 30–40 ms frame every few frames of a turn); one cascade a frame takes the sun's new direction; street life rechosen only every 35° of turn (each choice redraws the first cascade); plants cast from their resting shape; small things only in the first cascade.
 - **No `DynamicDrawUsage`** on instance or index buffers: three.js re-uploads them at every draw of every pass. Static buffers with `needsUpdate` when changed.
 - **Global uniforms in the render group**, not each object's group.
 - **Far settlements as impostors**: a built settlement more than 600 m past its edge shows its far view; sea not drawn under land well above it.
