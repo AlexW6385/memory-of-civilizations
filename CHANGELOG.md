@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.39 — Suzhou at night, deeper eaves (2026-11-10)
+
+Nights are no longer black: moonlight and starlight fill the town, lanterns throw warm pools on shop fronts and the canal, and only a few rooms glow behind their paper. The pagoda's eaves are deep tiled roofs and the temple halls have long curving eaves instead of a flat slab with a spike.
+
 ## v10.38 — Eras in Chinese, the map's hint (2026-11-10)
 - Settlement eras read in Chinese on the Chinese site (16 世纪, 公元前 5 世纪); the map's hint describes the cards.
 
