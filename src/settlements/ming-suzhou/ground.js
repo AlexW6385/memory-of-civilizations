@@ -80,6 +80,12 @@ function waterLevel(x, z) {
 }
 function fromWater(x, z) { return Math.min(Math.max(-5, canalDistance(x, z)), inRect(GARDEN, x, z) ? pondDistance(x, z) : 99); }
 
+/** The corridor of the arrival view (the zigzag bridge, south to the Hall of Distant Fragrance): no tall plants in it. */
+function viewWedge(x, z) {
+  if (z < -60 || z > -6) return false;
+  return Math.abs(x - 4) < 11 + Math.max(0, z + 50) * 0.35;
+}
+
 /** Plants per 100 m² at a place ({ x, z, h, ny, g }), or null where nothing grows. */
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6) return null;
@@ -100,6 +106,7 @@ function planting(x, z, p) {
     const n = vnoise(x * 0.05 + 3, z * 0.05), tn = vnoise(x * 0.13 - 5, z * 0.13 + 9), gn = vnoise(x * 0.07 + 11, z * 0.07 - 4);
     if (inRect(LOQUAT_COURT, x, z)) return { fig: 1.2, grass: 6 * sm(0.0, 0.6, tn) };
     const out = {};
+    const vw = viewWedge(x, z);
     // mondo grass (grass stands in for it): thick strips along the walls, the galleries and the stone, thin patches elsewhere
     // under the trees; most of the ground bare of tufts (moss and groundcover in its colour)
     const edge = wall < 1.7 || nearGallery(x, z, 3.2) || nearRockPath(x, z, 3.6) ? 1 : 0;
@@ -116,6 +123,7 @@ function planting(x, z, p) {
       out.holm_oak = 0.2; out.maple = 0.25 * sm(0.1, 0.5, n); out.apple = 0.3 * sm(0.2, 0.6, -n);
       out.maquis = 0.5 * sm(0.2, 0.6, tn);
     }
+    if (vw) for (const k of ['willow', 'red_pine', 'maple', 'apple', 'holm_oak', 'bamboo', 'fig', 'oak']) delete out[k];
     return out;
   }
   // yards and the town's edges: moss and low weeds, tufts only in patches, now and then a camphor tree or a loquat

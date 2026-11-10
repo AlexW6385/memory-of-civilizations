@@ -95,6 +95,20 @@ function surfaceNets(sdf, lo, hi, cell) {
   const cnt = new Map(); for (let i = 0; i < I.length; i += 3) { const r = find(I[i]); cnt.set(r, (cnt.get(r) || 0) + 1); }
   const big = Math.max(...cnt.values()), I2 = [];
   for (let i = 0; i < I.length; i += 3) if (cnt.get(find(I[i])) >= big * 0.2) I2.push(I[i], I[i + 1], I[i + 2]);
+  // smooth normals: the face normals averaged at every vertex (area-weighted), so that the shading runs across the mesh and shows no facets;
+  // the field's gradient (noisy at this grid) only decides which way is out where a vertex has no faces left
+  const A = new Float32Array(P.length);
+  for (let i = 0; i < I2.length; i += 3) {
+    const a = I2[i] * 3, b = I2[i + 1] * 3, c = I2[i + 2] * 3;
+    const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2], wx = P[c] - P[a], wy = P[c + 1] - P[a + 1], wz = P[c + 2] - P[a + 2];
+    const fx = uy * wz - uz * wy, fy = uz * wx - ux * wz, fz = ux * wy - uy * wx;
+    for (const v of [a, b, c]) { A[v] += fx; A[v + 1] += fy; A[v + 2] += fz; }
+  }
+  for (let v = 0; v < P.length; v += 3) {
+    const l = Math.hypot(A[v], A[v + 1], A[v + 2]);
+    if (l > 1e-9) { N[v] = N[v] * 0.15 + A[v] / l * 0.85; N[v + 1] = N[v + 1] * 0.15 + A[v + 1] / l * 0.85; N[v + 2] = N[v + 2] * 0.15 + A[v + 2] / l * 0.85; }
+    const m = Math.hypot(N[v], N[v + 1], N[v + 2]) || 1; N[v] /= m; N[v + 1] /= m; N[v + 2] /= m;
+  }
   return { P, N, I: I2 };
 }
 
@@ -468,16 +482,19 @@ export function lotusField(el, { bag }) {
  */
 export function revetmentBuild(el, { bag }) {
   const rand = rng(el.seed || 5), dist = el.dist, ground = el.ground, wl = el.water;
-  const mats = ['sandstone_carved', 'sandstone_carved', 'granite_rough', 'taihu'];   // yellowstone (here warm grey-brown), grey Taihu and granite among it
-  const T = { sandstone_carved: [], granite_rough: [], taihu: [] };
+  // yellowstone (here warm grey-brown) with grey Taihu and granite among it; a dark backing shows in the joints
+  const mats = ['sandstone_carved', 'sandstone_carved', 'sandstone_carved', 'granite_rough', 'taihu'];
+  const B = {};
+  const out = (m) => (B[m] ||= { P: [], N: [], I: [] });
   for (const arc of el.arcs) {
     for (const row of [0, 1]) {
       let carry = 0;
+      const back = [];                                                         // the dark backing along this course
       for (let i = 0; i + 1 < arc.length; i++) {
         const [ax, az] = arc[i], [bx, bz] = arc[i + 1], len = Math.hypot(bx - ax, bz - az), tx = (bx - ax) / len, tz = (bz - az) / len;
         let s = carry;
         while (s < len) {
-          const L = 0.65 + rand() * 0.6, W = row === 0 ? 0.42 + rand() * 0.16 : 0.36 + rand() * 0.16;
+          const L = 0.5 + rand() * 0.75, W = row === 0 ? 0.5 + rand() * 0.2 : 0.46 + rand() * 0.2;
           const sc = s + L / 2;
           if (sc > len) { carry = s - len; break; }
           const px = ax + tx * sc, pz = az + tz * sc;
@@ -487,20 +504,85 @@ export function revetmentBuild(el, { bag }) {
           const off = row === 0 ? -0.33 + (rand() - 0.5) * 0.14 : 0.04 + (rand() - 0.5) * 0.14;
           const x = px - nx * off, z = pz - nz * off;                            // (off < 0: toward the water)
           const gh = ground(x, z);
-          const yb = gh - 0.22;
-          const yt = row === 0 ? Math.max(yb + 0.3, wl + 0.02 + rand() * 0.2) : Math.max(yb + 0.25, gh + 0.05 + rand() * 0.28);
-          const tris = [];
-          rubble(tris, x, z, Math.atan2(tz, tx) + (rand() - 0.5) * 0.35, L, W, yb, yt, rand);
+          const yb = gh - 0.3 - rand() * 0.06;                                  // sunk into the bank
+          const yt = row === 0 ? Math.max(yb + 0.36, wl + 0.03 + rand() * 0.2) : Math.max(yb + 0.34, gh + 0.06 + rand() * 0.26);
+          const ang = Math.atan2(tz, tx) + (rand() - 0.5) * 0.45;
           const m = mats[Math.floor(rand() * mats.length)];
-          T[m].push(...faceOut(tris, x, (yb + yt) / 2, z));
-          s += L + 0.01 + rand() * 0.05;
+          blob(out(m), x, (yb + yt) / 2, z, ang, L * 0.5, (yt - yb) * 0.5, W * 0.5, 8, 4, rand, 0.13);
+          back.push([px - nx * off * 0.8, pz - nz * off * 0.8, Math.min(yt - 0.12, wl + 0.12)]);
+          // a small stone wedged in the joint on the water side or on the bank above
+          if (rand() < 0.6) {
+            const r = 0.07 + rand() * 0.1, side = row === 0 ? -(W * 0.42) : (rand() < 0.5 ? W * 0.45 : -W * 0.3);
+            const jx = px + tx * L * 0.5 - nx * (off + side), jz = pz + tz * L * 0.5 - nz * (off + side);
+            const jy = row === 0 ? Math.max(wl + 0.0, yb + r) : ground(jx, jz) + r * 0.3;
+            blob(out(mats[Math.floor(rand() * 3)]), jx, jy, jz, rand() * 3, r * 1.2, r * 0.8, r, 6, 3, rand, 0.2);
+          }
+          s += L + 0.012 + rand() * 0.04;
           carry = s - len;
         }
         if (s >= len) carry = Math.max(0, s - len);
       }
+      // the dark joints: a low backing ribbon behind the stones
+      for (let k = 0; k + 1 < back.length; k++) {
+        const [x0, z0, y0] = back[k], [x1, z1, y1] = back[k + 1];
+        if (Math.hypot(x1 - x0, z1 - z0) > 1.6) continue;
+        const dx = x1 - x0, dz = z1 - z0, l = Math.hypot(dx, dz) || 1, w = 0.22, ox = -dz / l * w, oz = dx / l * w, yb0 = Math.min(y0, y1) - 0.5;
+        const o = out('marble_dark'), n = o.P.length / 3;
+        o.P.push(x0 - ox, yb0, z0 - oz, x1 - ox, yb0, z1 - oz, x1 - ox, y1, z1 - oz, x0 - ox, y0, z0 - oz, x0 + ox, y0, z0 + oz, x1 + ox, y1, z1 + oz, x1 + ox, yb0, z1 + oz, x0 + ox, yb0, z0 + oz);
+        for (let q = 0; q < 8; q++) o.N.push(0, 1, 0);
+        o.I.push(n + 3, n + 4, n + 5, n + 3, n + 5, n + 2, n, n + 1, n + 2, n, n + 2, n + 3, n + 4, n + 7, n + 6, n + 4, n + 6, n + 5);
+      }
     }
   }
-  for (const m of Object.keys(T)) if (T[m].length) bag.add(m, fromTriangles(T[m]));
+  for (const m of Object.keys(B)) if (B[m].I.length) bag.add(m, nonIndexed(B[m].P, B[m].N, B[m].I));
+}
+
+/**
+ * One rounded rubble block appended to a mesh { P, N, I }: a superellipsoid (a squared block with
+ * rounded edges) of half-sizes (hu along ang, hh up, hv across), its surface bumped by `rough`,
+ * the underside flattened, the whole tilted a little; smooth vertex normals averaged over the faces.
+ */
+function blob(o, cx, cy, cz, ang, hu, hh, hv, seg, rings, rand, rough) {
+  const ca = Math.cos(ang), sa = Math.sin(ang), n0 = o.P.length / 3, ex = 2 / 2.7;
+  const sp = (c, e) => Math.sign(c) * Math.pow(Math.abs(c), e);
+  const tl = (rand() - 0.5) * 0.3, tw = (rand() - 0.5) * 0.24;            // tilt along and across
+  const ph = rand() * 6.28, amp = rough * (0.6 + rand() * 0.8);
+  const vert = (u, v) => {
+    const cv = Math.cos(v), sv = Math.sin(v);
+    let X = sp(cv, ex) * sp(Math.cos(u), ex) * hu, Y = sp(sv, ex) * hh, Z = sp(cv, ex) * sp(Math.sin(u), ex) * hv;
+    const k = 1 + amp * Math.sin(u * 3 + ph + v * 2) * 0.6 + amp * 0.5 * Math.sin(u * 5 - ph * 1.7 + v * 3);
+    X *= k; Z *= k; Y *= 1 + amp * 0.5 * Math.sin(u * 2 + ph * 0.5) ;
+    if (Y < -hh * 0.55) Y = -hh * 0.55 - (-hh * 0.55 - Y) * 0.25;             // a flatter, sunk underside
+    // tilt: about the long axis and the cross axis
+    const Y1 = Y * Math.cos(tw) - Z * Math.sin(tw), Z1 = Y * Math.sin(tw) + Z * Math.cos(tw);
+    const Y2 = Y1 * Math.cos(tl) - X * Math.sin(tl), X2 = Y1 * Math.sin(tl) + X * Math.cos(tl);
+    return [cx + X2 * ca - Z1 * sa, cy + Y2, cz + X2 * sa + Z1 * ca];
+  };
+  const top = vert(0, Math.PI / 2), bot = vert(0, -Math.PI / 2);
+  o.P.push(...top); const T = n0; o.P.push(...bot); const Bt = n0 + 1;
+  const ring = (r) => n0 + 2 + r * seg;
+  for (let r = 0; r < rings - 1; r++) {
+    const v = Math.PI / 2 - (r + 1) / rings * Math.PI;
+    for (let j = 0; j < seg; j++) o.P.push(...vert(j / seg * Math.PI * 2, v));
+  }
+  const tris = [];
+  for (let j = 0; j < seg; j++) {
+    const k = (j + 1) % seg;
+    tris.push([T, ring(0) + k, ring(0) + j]);
+    for (let r = 0; r < rings - 2; r++) { tris.push([ring(r) + j, ring(r) + k, ring(r + 1) + k]); tris.push([ring(r) + j, ring(r + 1) + k, ring(r + 1) + j]); }
+    tris.push([Bt, ring(rings - 2) + j, ring(rings - 2) + k]);
+  }
+  const acc = new Float32Array((o.P.length / 3 - n0) * 3), P = o.P;
+  for (const [a, b, c] of tris) {
+    const ux = P[b * 3] - P[a * 3], uy = P[b * 3 + 1] - P[a * 3 + 1], uz = P[b * 3 + 2] - P[a * 3 + 2];
+    const wx = P[c * 3] - P[a * 3], wy = P[c * 3 + 1] - P[a * 3 + 1], wz = P[c * 3 + 2] - P[a * 3 + 2];
+    let nx = uy * wz - uz * wy, ny = uz * wx - ux * wz, nz = ux * wy - uy * wx;
+    const mx = (P[a * 3] + P[b * 3] + P[c * 3]) / 3 - cx, my = (P[a * 3 + 1] + P[b * 3 + 1] + P[c * 3 + 1]) / 3 - cy, mz = (P[a * 3 + 2] + P[b * 3 + 2] + P[c * 3 + 2]) / 3 - cz;
+    const flip = nx * mx + ny * my + nz * mz < 0;
+    if (flip) { nx = -nx; ny = -ny; nz = -nz; o.I.push(a, c, b); } else o.I.push(a, b, c);
+    for (const v of [a, b, c]) { acc[(v - n0) * 3] += nx; acc[(v - n0) * 3 + 1] += ny; acc[(v - n0) * 3 + 2] += nz; }
+  }
+  for (let v = 0; v < acc.length; v += 3) { const l = Math.hypot(acc[v], acc[v + 1], acc[v + 2]) || 1; o.N.push(acc[v] / l, acc[v + 1] / l, acc[v + 2] / l); }
 }
 
 // ── pebble-mosaic paving (hua jie pu di) ────────────────────────────────────
