@@ -10,7 +10,7 @@ import { STYLES, registerStyle } from '../../core/build.js';
 import { box, fromTriangles, lathe } from '../../core/geom.js';
 import '../../styles/ming/index.js';
 import '../../styles/song/index.js';
-import { beamTris } from '../../styles/ming/index.js';
+import { beamTris, rectRoof } from '../../styles/ming/index.js';
 import { LEVEL, RADIUS, TEMPLE_COURT, NORTH_KEEP as KEEP } from './layout.js';
 
 // ── where things stand (m, +x east, +z south; the north is −z) ──────────────
@@ -51,6 +51,73 @@ function qd(out, a, b, c, d, n) {
   const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
   const dot = (uy * vz - uz * vy) * n[0] + (uz * vx - ux * vz) * n[1] + (ux * vy - uy * vx) * n[2];
   if (dot >= 0) out.push(...a, ...b, ...c, ...a, ...c, ...d); else out.push(...a, ...c, ...b, ...a, ...d, ...c);
+}
+
+
+
+/** A cheap rafter from a to b: underside, two sides and the end face (its top is buried in the roof above); w is the half-width, h the depth above a/b's height. */
+function rafterTris(out, a, b, w, h) {
+  const dx = b[0] - a[0], dz = b[2] - a[2], l = Math.hypot(dx, dz) || 1, nx = -dz / l * w, nz = dx / l * w;
+  const L0 = [a[0] - nx, a[1], a[2] - nz], R0 = [a[0] + nx, a[1], a[2] + nz], L1 = [b[0] - nx, b[1], b[2] - nz], R1 = [b[0] + nx, b[1], b[2] + nz];
+  const T = (q) => [q[0], q[1] + h, q[2]];
+  qd(out, L0, R0, R1, L1, [0, -1, 0]); qd(out, L0, L1, T(L1), T(L0), [-nx, 0, -nz]); qd(out, R0, R1, T(R1), T(R0), [nx, 0, nz]); qd(out, L1, R1, T(R1), T(L1), [dx, 0, dz]);
+}
+
+// ── a deep timber eave: tiled upper surface with rolls and hip ridges, a drip lip, a fascia board, a
+// thick soffit with the rafters' ends under it, the corners swept up, a wind bell at each corner ──
+/**
+ * An octagonal eave from the inner ring (r0 at y0, hidden under the storey above) out and down to the
+ * outer ring (r1 at y1), the corners swept up by `sweep`; `T` thick. `pw` shapes the slope (>1: flat
+ * near the wall, steeper outward; <1: steep at the top, flat at the edge).
+ */
+function deepEave(bag, cx, cz, r0, y0, r1, y1, sweep, { T = 0.36, pw = 1.4, bells = true, hips = true, rolls = 3, rafters = 7, under = 'lacquer_red', top = 'tile_dark' } = {}) {
+  const I = ngon(cx, cz, r0), O = ngon(cx, cz, r1), M = 6, U = 4;
+  const f = (u) => Math.pow(u, pw);
+  const hh = (t) => y1 + sweep * Math.abs(2 * t - 1) ** 2.2;
+  const S = (k, t, u, dy = 0) => {
+    const a = I[k], b = I[(k + 1) % 8], c = O[k], d = O[(k + 1) % 8];
+    const ix = a[0] + (b[0] - a[0]) * t, iz = a[1] + (b[1] - a[1]) * t, ox = c[0] + (d[0] - c[0]) * t, oz = c[1] + (d[1] - c[1]) * t;
+    return [ix + (ox - ix) * u, y0 + (hh(t) - y0) * f(u) + dy, iz + (oz - iz) * u];
+  };
+  const up = [], dn = [], fas = [], lip = [], roll = [], raf = [], hip = [];
+  for (let k = 0; k < 8; k++) {
+    const am = Math.PI / 8 + (k + 0.5) / 8 * Math.PI * 2, nrm = [Math.cos(am), 0, Math.sin(am)];
+    for (let j = 0; j < M; j++) {
+      const t0 = j / M, t1 = (j + 1) / M;
+      for (let i = 0; i < U; i++) {
+        const u0 = i / U, u1 = (i + 1) / U;
+        qd(up, S(k, t0, u0), S(k, t0, u1), S(k, t1, u1), S(k, t1, u0), [0, 1, 0]);
+        qd(dn, S(k, t0, u0, -T), S(k, t0, u1, -T), S(k, t1, u1, -T), S(k, t1, u0, -T), [0, -1, 0]);
+      }
+      qd(fas, S(k, t0, 1), S(k, t1, 1), S(k, t1, 1, -T), S(k, t0, 1, -T), nrm);
+      beamTris(lip, S(k, t0, 1, -0.02), S(k, t1, 1, -0.02), 0.13, 0.2, true);
+    }
+    // the rolls of tiles (radial ridges) and the rafters under the soffit
+    for (let q = 1; q < rolls; q++) {
+      const t = q / rolls;
+      for (let i = 0; i < U; i += 2) beamTris(roll, S(k, t, i / U, -0.03), S(k, t, (i + 2) / U, -0.03), 0.04, 0.08, true);
+    }
+    for (let q = 0; q < rafters; q++) {
+      const t = (q + 0.5) / rafters;
+      const a = S(k, t, 0.4, -T - 0.13), b = S(k, t, 1, -T - 0.13);
+      b[0] += nrm[0] * 0.2; b[2] += nrm[2] * 0.2;
+      rafterTris(raf, a, b, 0.045, 0.15);
+    }
+    if (hips) for (let i = 1; i < U; i++) beamTris(hip, S(k, 0, i / U, -0.06), S(k, 0, (i + 1) / U, -0.06), 0.1, 0.24, true);
+  }
+  bag.add(top, fromTriangles(up)); bag.add(under, fromTriangles(dn)); bag.add(under, fromTriangles(fas));
+  bag.add(top, fromTriangles(lip)); bag.add('tile_grey', fromTriangles(roll)); bag.add('timber_red', fromTriangles(raf)); bag.add(top, fromTriangles(hip));
+  for (let k = 0; k < 8; k++) {
+    const e = S(k, 0, 1, 0.1);
+    bag.add(top, lathe([[0.0001, 0], [0.2, 0], [0.16, 0.14], [0.08, 0.34], [0.0001, 0.5]], 8, null, e[0], e[1], e[2]));
+    if (!bells) continue;
+    // the wind bell under the corner: hook, bell, clapper and wind plate
+    const rr = r1 - 0.3, u = (rr - r0) / (r1 - r0), c = S(k, 0, u, -T), x = c[0], z = c[2], yy = c[1];
+    bag.add('iron', lathe([[0.025, -0.3], [0.025, 0.04]], 5, null, x, yy, z));
+    bag.add('iron', lathe([[0.001, -0.3], [0.05, -0.3], [0.1, -0.36], [0.15, -0.6], [0.17, -0.7], [0.16, -0.71], [0.001, -0.66]], 10, null, x, yy, z));
+    bag.add('iron', lathe([[0.012, -0.95], [0.012, -0.62]], 4, null, x, yy, z));
+    bag.add('iron', box(x - 0.09, yy - 1.12, z - 0.012, x + 0.09, yy - 0.95, z + 0.012));
+  }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -116,8 +183,97 @@ function beisiPagoda(el, ctx) {
   // the pagoda itself, the brick body and the timber of its galleries
   const tiers = [];
   for (let i = 0; i < 9; i++) tiers.push({ r: 6.2 - 0.42 * i, h: 9.2 - 0.5 * i });
-  STYLES.song.elements.pagoda_oct({ c: el.c, y: y0 + hC + 0.34 - 0.05, base: { r: 0.3, h: 0.05 }, tiers, spire: 5.6, bells: 'iron', core: 'brick_grey', frame: 'timber_red', eave: 'tile_dark' }, ctx);
+  // (the song style's own eaves are thin plates: they are left out here, their tile and soffit
+  // materials dropped, and replaced by deep eaves of our own)
+  const fb = Object.create(bag);
+  fb.add = (m, g) => { if (m !== 'tile_dark' && m !== 'lacquer_red') bag.add(m, g); };
+  STYLES.song.elements.pagoda_oct({ c: el.c, y: y0 + hC + 0.34 - 0.05, base: { r: 0.3, h: 0.05 }, tiers, spire: 5.6, bells: null, core: 'brick_grey', frame: 'timber_red', eave: 'tile_dark' }, { ...ctx, bag: fb });
+  let y = y0 + hC + 0.34;
+  tiers.forEach((t, i) => {
+    const g = t.r + 2.4, top = y + t.h;
+    if (i === tiers.length - 1) deepEave(bag, cx, cz, t.r + 0.6, top + 1.1, g + 1.5, top - 0.2, 0.8, { T: 0.4, pw: 0.8 });
+    else deepEave(bag, cx, cz, g - 0.9, top - 0.3, g + 1.6, top - 1.5, 0.9);
+    y = top;
+  });
+  // the crowning roof: a steep octagonal pyramid, concave, with hips
+  const rt = tiers[tiers.length - 1].r;
+  deepEave(bag, cx, cz, 0.6, y + 4.2, rt + 3.6, y + 0.2, 0.8, { T: 0.5, pw: 0.65, rafters: 12, rolls: 6 });
   void LEVEL;
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Halls with a deep xieshan roof
+// ═════════════════════════════════════════════════════════════════════════════
+/**
+ * suzhou_hall: ming_hall (walls, posts, platform) under a roof of our own: the ming roof with the
+ * corner curve spread over a longer run (the stock roof flicks its eave corner up within 2.7 m, a long
+ * flat slab ending in a spike), a drip lip and a fascia board along the whole edge, rafters under the
+ * soffit and a thick hip rafter at each corner. Same parameters as ming_hall.
+ */
+function suzhouHall(el, ctx) {
+  const { bag } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, H = el.H ?? 4.2;
+  ctx.style.elements.ming_hall({ ...el, roof: 'none' }, ctx);
+  const along = (x1 - x0) >= (z1 - z0), Lx = x1 - x0, Lz = z1 - z0, o = el.eave ?? 1.25;
+  // the ceiling: a flat board would read as a dark slab, so the tie beams and the purlins show under it (halls of 5 m or more)
+  if (H >= 5) {
+    const nb = Math.max(1, Math.round((along ? Lx : Lz) / 3.6)), nd = Math.max(1, Math.round((along ? Lz : Lx) / 3.4)), bm = [], yc = y + H - 0.2;
+    const [La, Lb, a0, b0] = along ? [Lx, Lz, x0, z0] : [Lz, Lx, z0, x0];
+    const P = (u, v, h) => (along ? [a0 + u, h, b0 + v] : [b0 + v, h, a0 + u]);
+    for (let i = 0; i <= nb; i++) beamTris(bm, P(La * i / nb, 0, yc - 0.34), P(La * i / nb, Lb, yc - 0.34), 0.13, 0.34, true);
+    for (let j = 0; j <= nd; j++) beamTris(bm, P(0, Lb * j / nd, yc - 0.18), P(La, Lb * j / nd, yc - 0.18), 0.09, 0.18, true);
+    bag.add('lacquer_chestnut', fromTriangles(bm));
+  }
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, A = (along ? Lx : Lz) / 2 + o, B = (along ? Lz : Lx) / 2 + o;
+  const rise = el.rise ?? B * 0.62, sw = el.sweep ?? 1.2, gAt = el.gableAt ?? 0.8, ry = y + H - 0.25, p = 1.7;
+  rectRoof({ c: [cx, cz], A, B, y: ry, rise, kind: 'xieshan', sweep: sw, gableAt: gAt, alongZ: !along, fish: true }, bag);
+  // the roof's height at (x, z) (local: x along the ridge), as rectRoof computes it
+  const hAt = (x, z, off = 0) => {
+    const ax = Math.abs(x), az = Math.abs(z), ts = Math.max(0, Math.min(1, (B - az) / B));
+    let te = Math.max(0, (A - ax) / B); if (te > gAt) te = 9;
+    const t = Math.min(ts, te), corner = Math.max(0, 1 - te / 0.5) * Math.max(0, 1 - ts / 0.5);
+    return ry + rise * Math.pow(t, p) + sw * corner * corner + off;
+  };
+  const W = (x, z, off = 0) => { const h = hAt(x, z, off); return along ? [cx + x, h, cz + z] : [cx - z, h, cz + x]; };
+  const fas = [], lip = [], raf = [], hip = [];
+  const pts = (len, n) => Array.from({ length: n + 1 }, (_, i) => -len + 2 * len * i / n);
+  const nA = Math.max(10, Math.round(A * 1.6)), nB = Math.max(8, Math.round(B * 1.6));
+  const loop = [];
+  for (const x of pts(A, nA)) loop.push([x, -B]);
+  for (const z of pts(B, nB).slice(1)) loop.push([A, z]);
+  for (const x of pts(A, nA).reverse().slice(1)) loop.push([x, B]);
+  for (const z of pts(B, nB).reverse().slice(1, -1)) loop.push([-A, z]);
+  for (let k = 0; k < loop.length; k++) {
+    const a = loop[k], b = loop[(k + 1) % loop.length];
+    const pa = W(a[0], a[1], -0.2), pb = W(b[0], b[1], -0.2);
+    beamTris(fas, [pa[0], pa[1] - 0.5, pa[2]], [pb[0], pb[1] - 0.5, pb[2]], 0.07, 0.5, true);     // the fascia board, hung under the edge
+    beamTris(lip, W(a[0], a[1], -0.03), W(b[0], b[1], -0.03), 0.15, 0.2, true);                    // the drip tiles
+  }
+  // rafters under the soffit: every 0.55 m, front and back (rafters run in z) and on the hip ends (in x)
+  const rafter = (a, b, n) => {
+    for (let i = 0; i < n; i++) {
+      const u0 = i / n, u1 = (i + 1) / n, P0 = [a[0] + (b[0] - a[0]) * u0, a[1] + (b[1] - a[1]) * u0], P1 = [a[0] + (b[0] - a[0]) * u1, a[1] + (b[1] - a[1]) * u1];
+      const q0 = W(P0[0], P0[1], -0.14 - 0.16), q1 = W(P1[0], P1[1], -0.14 - 0.16);
+      if (i === n - 1) { const dx = b[0] - a[0], dz = b[1] - a[1], l = Math.hypot(dx, dz); const e = along ? [dx / l * 0.2, dz / l * 0.2] : [-dz / l * 0.2, dx / l * 0.2]; q1[0] += e[0]; q1[2] += e[1]; }
+      rafterTris(raf, q0, q1, 0.05, 0.18);
+    }
+  };
+  const wallIn = o - 0.1, zf = B - wallIn, xf = A - wallIn;
+  for (let x = -A + 0.7; x < A - 0.6; x += 1.0) for (const s of [-1, 1]) rafter([x, s * zf], [x, s * B], 2);
+  for (let z = -B + 0.9; z < B - 0.8; z += 1.0) for (const s of [-1, 1]) rafter([s * xf, z], [s * A, z], 2);
+  // the hip rafters: thick, from the wall's corner out to the tip, following the soffit
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const n = 5;
+    for (let i = 0; i < n; i++) {
+      const a = [sx * (A - wallIn + wallIn * i / n), sz * (B - wallIn + wallIn * i / n)], b = [sx * (A - wallIn + wallIn * (i + 1) / n), sz * (B - wallIn + wallIn * (i + 1) / n)];
+      beamTris(hip, W(a[0], a[1], -0.14 - 0.34), W(b[0], b[1], -0.14 - 0.34), 0.11, 0.36);
+    }
+    const t = W(sx * A, sz * B, 0.1);
+    const k = Math.min(1, B / 6);
+    bag.add('tile_dark', lathe([[0.0001, 0], [0.22 * k, 0], [0.17 * k, 0.16 * k], [0.09 * k, 0.4 * k], [0.0001, 0.6 * k]], 8, null, t[0], t[1], t[2]));
+  }
+  bag.add('lacquer_chestnut', fromTriangles(fas)); bag.add('tile_dark', fromTriangles(lip));
+  bag.add('timber_red', fromTriangles(raf)); bag.add('lacquer_chestnut', fromTriangles(hip));
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -260,7 +416,7 @@ function northWall(el, ctx) {
     }
     col.segment([tx0, tz0 + 0.27], [tx1, tz0 + 0.27], 0.55, yy, yy + 2);
     col.segment([tx0 + 0.22, tz0], [tx0 + 0.22, zi], 0.45, yy, yy + 1); col.segment([tx1 - 0.22, tz0], [tx1 - 0.22, zi], 0.45, yy, yy + 1);
-    if (b.turret) ctx.style.elements.ming_hall({ rect: [b.x - 3.0, tz0 + 1.6, b.x + 3.0, tz0 + 6.2], y: yy + 0.3, H: 3.7, front: 'n', four: false, roof: 'xieshan', plat: 0.3, eave: 1.3 }, ctx);
+    if (b.turret) ctx.style.elements.suzhou_hall({ rect: [b.x - 3.0, tz0 + 1.6, b.x + 3.0, tz0 + 6.2], y: yy + 0.3, H: 3.7, front: 'n', four: false, roof: 'xieshan', plat: 0.3, eave: 1.3 }, ctx);
   }
   // ── the stair-ramps up the inner face (mading): treads of granite between two parapet walls that
   // rise with the slope, a landing at the top flush with the wall-walk
@@ -287,7 +443,7 @@ function northWall(el, ctx) {
   }
   // ── the gate hall over each land gate that has one
   for (const g of gates) {
-    if (g.tower) ctx.style.elements.ming_hall({ rect: [g.x - g.tower / 2, z - 2.5, g.x + g.tower / 2, z + 2.5], y: H + 0.3, H: 5.0, front: 'n', four: false, roof: 'xieshan', plat: 0.3, eave: 1.5, sweep: 1.3 }, ctx);
+    if (g.tower) ctx.style.elements.suzhou_hall({ rect: [g.x - g.tower / 2, z - 2.5, g.x + g.tower / 2, z + 2.5], y: H + 0.3, H: 5.0, front: 'n', four: false, roof: 'xieshan', plat: 0.3, eave: 1.5, sweep: 1.3 }, ctx);
   }
 }
 
@@ -308,7 +464,7 @@ function moatPool({ rect, y, gaps = [] }, { bag }) {
 
 registerStyle('suzhou-north', {
   ...STYLES.ming,
-  elements: { ...STYLES.ming.elements, beisi_pagoda: beisiPagoda, north_wall: northWall, moat_pool: moatPool },
+  elements: { ...STYLES.ming.elements, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool },
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -329,10 +485,10 @@ function templePlan() {
   wall([x0, z1], [x1, z1], { gates: [{ at: cx - x0, w: 3.2, h: 3.5, plaque: true }] });
   wall([x0, z0], [x1, z0]); wall([x0, z1], [x0, z0]); wall([x1, z0], [x1, z1]);
   // the main hall (nine bays wide in the temple's scale, here five), its steps; the side halls facing the axis
-  E.push({ t: 'ming_hall', rect: [cx - 12, -127, cx + 12, -117.5], y: 1.15, H: 7.2, front: 's', four: false, roof: 'xieshan', plat: 1.15, eave: 1.7, sweep: 1.4 });
+  E.push({ t: 'suzhou_hall', rect: [cx - 12, -127, cx + 12, -117.5], y: 1.15, H: 7.2, front: 's', four: false, roof: 'xieshan', plat: 1.15, eave: 1.7, sweep: 1.4 });
   E.push({ t: 'stair', rect: [cx - 3, -116.6, cx + 3, -114.6], y0: 0.04, y1: 1.15, dir: 'n', riser: 0.18, mat: 'granite_block' });
-  E.push({ t: 'ming_hall', rect: [-72, -128, -63, -120], y: 0.4, H: 4.4, front: 'e', four: false, roof: 'xieshan', plat: 0.4 });
-  E.push({ t: 'ming_hall', rect: [-17, -128, -8, -120], y: 0.4, H: 4.4, front: 'w', four: false, roof: 'xieshan', plat: 0.4 });
+  E.push({ t: 'suzhou_hall', rect: [-72, -128, -63, -120], y: 0.4, H: 4.4, front: 'e', four: false, roof: 'xieshan', plat: 0.4 });
+  E.push({ t: 'suzhou_hall', rect: [-17, -128, -8, -120], y: 0.4, H: 4.4, front: 'w', four: false, roof: 'xieshan', plat: 0.4 });
   return base('ming-suzhou-temple', E);
 }
 
