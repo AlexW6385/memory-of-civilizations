@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.44 — Cinema quality (2026-11-10)
+
+For recording films: `?quality=cinema` (with `?capture`) renders at twice the page's size, with 4096² shadows in four cascades reaching 480 m, full-resolution occlusion, water reflections and air, eight lamps, and plants seen 1.6 times farther. Only when asked for in the address; never chosen or remembered on its own.
+
 ## v10.43 — Suzhou alive (2026-11-10)
 
 Boats are sculled along Suzhou's canals and people walk its streets and bridges (porters with shoulder poles, umbrellas in the rain); fish swim in the pond, swallows skim the canals, sparrows hop and fly off, herons stand at the shore; kitchen smoke at mealtimes, incense at the temple, steam at the tea shops, morning mist on the canals. Some 200 shops show their goods with name boards, hanging signs and trade banners that sway in the wind, as does the laundry. Walls carry rising damp, moss, salts and rain streaks, canal walls their waterline; rain wets the paving, fills puddles and rings the water; plum blossom, autumn maples and bare winter trees follow the seasons; the canals, streets, night watch and temple bell and drum are heard.
