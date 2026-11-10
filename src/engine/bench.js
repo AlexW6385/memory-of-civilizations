@@ -27,7 +27,8 @@ export async function runBench(P) {
   document.body.appendChild(panel);
   const say = (t) => { panel.textContent = t; };
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const settle = async () => { await Promise.all(world.settlements.map((s) => s.loading)); await wait(1500); };
+  // (not the settlement built ahead of the next visit: its shaders are compiled in idle moments only)
+  const settle = async () => { await Promise.all(world.settlements.filter((s) => !s.ahead?.()).map((s) => s.loading)); await wait(1500); };
   // until 40 frames in a row are under 150 ms (at most 150 s): the seconds it took
   const steady = async () => {
     const t0 = performance.now(); let run = 0;
