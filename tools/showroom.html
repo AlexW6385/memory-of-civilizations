@@ -101,7 +101,12 @@ function setFrame(frame) {
 const exposureOf = (cl) => cl.exposure * (1 + 2.6 * (1 - cl.day));
 
 let LAST_DRAWS = null;
+// Drawn into a target and read back unless ?off=0: presenting to a WebGPU canvas fails in some
+// headless set-ups ("A valid external Instance reference no longer exists"), drawing to a target works.
+const OFFSCREEN = new URLSearchParams(location.search).get('off') !== '0';
+const OFF = new THREE.RenderTarget(1, 1, { type: THREE.HalfFloatType });
 async function draw(frames, before = () => {}) {
+  if (OFFSCREEN) { const sz = renderer.getDrawingBufferSize(new THREE.Vector2()); OFF.setSize(sz.x, sz.y); renderer.setRenderTarget(OFF); }
   for (let k = 0; k < frames; k++) {
     before(k);
     renderer.info.reset();
@@ -126,6 +131,21 @@ async function draw(frames, before = () => {}) {
 }
 
 if (cfg.site) await siteView(); else await elements();
+if (OFFSCREEN) {
+  const sz = renderer.getDrawingBufferSize(new THREE.Vector2());
+  const px = await renderer.readRenderTargetPixelsAsync(OFF, 0, 0, sz.x, sz.y);
+  const c2 = document.createElement('canvas'); c2.width = sz.x; c2.height = sz.y; c2.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh';
+  const g = c2.getContext('2d'), im = g.createImageData(sz.x, sz.y);
+  const h = (v) => THREE.DataUtils.fromHalfFloat(v), enc = (v) => Math.round(255 * Math.min(1, Math.max(0, v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)));
+  const half = px instanceof Uint16Array;
+  for (let y = 0; y < sz.y; y++) for (let x = 0; x < sz.x; x++) {
+    const i = (y * sz.x + x) * 4, o = (y * sz.x + x) * 4;
+    for (let k = 0; k < 3; k++) im.data[o + k] = window.OFF_SRGB ? enc(half ? h(px[i + k]) : px[i + k]) : Math.round(255 * Math.min(1, Math.max(0, half ? h(px[i + k]) : px[i + k])));
+    im.data[o + 3] = 255;
+  }
+  g.putImageData(im, 0, 0); document.body.appendChild(c2);
+  document.getElementById('view').remove();
+}
 window.DONE = true;
 
 // ── elements ───────────────────────────────────────────────────────────────────
