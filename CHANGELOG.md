@@ -2,7 +2,8 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
-## v10.32 — Nothing drawn beyond the horizon (2026-11-09)
+## v10.32 — Precompiled shaders actually used; nothing drawn beyond the horizon (2026-11-09)
+- Shaders compiled ahead were filed under another key than the frame's (three keys them by the renderer's nesting depth), so every object was built again on first sight — the main cause of the hitches when turning or arriving, and of doubled memory.
 - A settlement built ahead for the next journey, beyond the horizon, is no longer drawn (it was, in full, wherever the view faced it).
 
 ## v10.31 — Shaders kept across pipeline rebuilds; Suzhou's residence courts; real open-country trees (2026-11-09)

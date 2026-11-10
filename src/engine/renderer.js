@@ -242,6 +242,19 @@ export class Renderer {
    * mesh of each kind (material, attributes), with the scene pass's own target, outputs and context, so that what is
    * compiled is what the frame will look for. Resolves when done (never rejects).
    */
+  /** The renderer's nesting depth when the scene pass draws: that of its render context (the first made for its target and outputs). */
+  scenePassDepth(rcs, sp) {
+    if (this._spDepth?.sp === sp) return this._spDepth.d;
+    const rt = sp.renderTarget, mrt = sp.getMRT?.() ?? sp._mrt ?? null;
+    if (!rt || !rcs?._renderContexts) return null;
+    const head = `${rt.textures.length}:${rt.texture.format}:${rt.texture.type}:${rt.samples}:${rt.depthBuffer}:${rt.stencilBuffer}-${mrt ? mrt.id : 'default'}-`;
+    let best = null;
+    for (const [k, v] of Object.entries(rcs._renderContexts)) if (k.startsWith(head) && (!best || v.id < best.id)) best = { id: v.id, d: +k.slice(head.length) };
+    if (!best) return null;
+    this._spDepth = { sp, d: best.d };
+    return best.d;
+  }
+
   precompile(roots) {
     const r = this.renderer, sp = this.scenePass, ctx = sp?._contextNodeCache?.context;
     if (!r || !sp?.renderTarget || !ctx) return Promise.resolve();      // before the first frame
@@ -270,14 +283,21 @@ export class Renderer {
       const prev = { rt: r.getRenderTarget(), mrt: r.getMRT(), ctx: r.contextNode };
       const tmp = new THREE.Group(), home = [o.parent, o.frustumCulled, o.visible, o.count];
       tmp.add(o); o.frustumCulled = false; o.visible = true; if (o.isInstancedMesh && !o.count) o.count = 1;
+      const rcs = r._renderContexts, get0 = rcs.get;
       try {
         r.setRenderTarget(sp.renderTarget); r.setMRT(sp.getMRT?.() ?? sp._mrt ?? null); r.contextNode = ctx;
+        // (three keys a build by its render context too, and a context by the renderer's nesting
+        // depth: the scene pass draws nested in the picture's pipeline, compileAsync at depth 0 —
+        // every precompiled build had another key than the frame's and was built again in it)
+        const depth = this.scenePassDepth(rcs, sp);
+        if (depth !== null) rcs.get = function (t, m, d = depth) { return get0.call(this, t, m, d); };
         return r.compileAsync(tmp, this.camera, this.scene);
         // (not the sun's shadow pass: three's compileAsync compiles each object later, after the
         // shadow pass's shared depth material has been reset, so what it would compile is not what
         // the shadow pass draws; those small shaders are still compiled on first use)
       } catch (e) { return Promise.reject(e); }
       finally {
+        rcs.get = get0;
         r.setRenderTarget(prev.rt); r.setMRT(prev.mrt); r.contextNode = prev.ctx;
         const [parent, fc, vis, n] = home;
         parent ? parent.add(o) : tmp.remove(o); o.frustumCulled = fc; o.visible = vis; if (o.isInstancedMesh) o.count = n;
