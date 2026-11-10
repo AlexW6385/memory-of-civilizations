@@ -116,24 +116,24 @@ function planting(x, z, p) {
     if (p.h > 0.7) {
       // the hills: Chinese pines (the red pine's clumped pads read best) near the tops only, maples, plums, azalea-like clipped shrubs
       out.red_pine = 0.32 * sm(1.4, 2.4, p.h);
-      out.maple = 0.7; out.apple = 0.55; out.maquis = 0.8 * sm(-0.1, 0.4, tn);
+      out.maple = 0.7; out.apple = 0.55; out.tea = 0.8 * sm(-0.1, 0.4, tn);
     } else {
       // bamboo groves by the walls: in stands with clearings between
       if (wall < 6) out.bamboo = 3 * sm(0.0, 0.3, gn);
-      out.holm_oak = 0.2; out.maple = 0.25 * sm(0.1, 0.5, n); out.apple = 0.3 * sm(0.2, 0.6, -n);
-      out.maquis = 0.5 * sm(0.2, 0.6, tn);
+      out.camphor = 0.1; out.maple = 0.25 * sm(0.1, 0.5, n); out.apple = 0.3 * sm(0.2, 0.6, -n);
+      out.tea = 0.5 * sm(0.2, 0.6, tn);
     }
-    if (vw) for (const k of ['willow', 'red_pine', 'maple', 'apple', 'holm_oak', 'bamboo', 'fig', 'oak']) delete out[k];
+    if (vw) for (const k of ['willow', 'red_pine', 'maple', 'apple', 'camphor', 'bamboo', 'fig']) delete out[k];
     return out;
   }
   // yards and the town's edges: moss and low weeds, tufts only in patches, now and then a camphor tree or a loquat
   const tn = vnoise(x * 0.1 + 2, z * 0.1 - 8), wallish = inLot(x, z, 2.2) ? 1 : 0;
-  return { grass: 1 + 14 * sm(0.1, 0.5, tn) + 18 * wallish, oak: 0.08, fig: 0.06 };
+  return { grass: 1 + 14 * sm(0.1, 0.5, tn) + 18 * wallish, camphor: 0.06, fig: 0.06 };
 }
 
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 20, bamboo: 3, fig: 1.5, red_pine: 0.32, maple: 0.9, apple: 0.6, holm_oak: 0.25, oak: 0.08, maquis: 0.8, grass: 80 },
+  maxDensity: { willow: 20, bamboo: 3, fig: 1.5, red_pine: 0.32, maple: 0.9, apple: 0.6, camphor: 0.12, tea: 0.8, grass: 80 },
   // late spring in Jiangnan (the plum rains near): soft hazy sun, drizzle and mist over the water
   climate: {
     sun: { az: 140, el: 40, color: [1.0, 0.92, 0.82], intensity: 3.0, lat: 31, dec: 15, hour: 10 },
