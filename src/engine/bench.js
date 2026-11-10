@@ -1,5 +1,5 @@
 // The benchmark (`?bench`, DESIGN §8): a fixed route in three legs of ~15 s, measured on the machine
-// it runs on — turning on the ground at Edfu, walking a street in Florence, flying high over Italy.
+// it runs on — turning by the pond in Ming Suzhou, walking a street in Florence, flying high over Italy.
 //
 // For each leg: median fps, the worst 5% of frame times, the JavaScript time per frame, draw calls
 // and triangles, the JS heap, the number of geometries and textures and an estimate of the vertex
@@ -48,11 +48,7 @@ export async function runBench(P) {
   ];
   const route = new URLSearchParams(location.search).get('bench');
   const legs = route === 'suzhou' ? suzhou : [
-    {
-      name: 'edfu-turn',
-      start: async () => { await P.pose('edfu', 0, 0.1, 150, 0, 0.12); controls.free = false; await settle(); },
-      drive: (on) => { if (on) controls.keys.add('KeyQ'); else controls.keys.clear(); },
-    },
+    suzhou[0],
     {
       name: 'florence-walk',
       start: async () => { await P.pose('florence', -150, 0.1, -20, -1.2, 0.05); controls.free = false; await settle(); },

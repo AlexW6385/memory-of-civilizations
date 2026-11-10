@@ -5,7 +5,7 @@
 // builders multiplied capital types — palm, open papyrus (campaniform), closed papyrus bud,
 // lotus, and "composite" capitals of several tiers of flowers — and paired them across the
 // axis of a hall or court. Proportions here follow Arnold, *Temples of the Last Pharaohs*
-// (see docs/buildings/edfu.md): capital ≈ 0.22–0.26 of the height, open capitals spreading to
+// (see the removed Edfu dossier in git history): capital ≈ 0.22–0.26 of the height, open capitals spreading to
 // about twice the shaft diameter, abacus ≈ shaft diameter wide.
 
 import { lathe, disc, box, place } from '../../core/geom.js';

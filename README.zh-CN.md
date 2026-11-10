@@ -60,8 +60,8 @@
 npm install                        # 仅开发工具
 npm run serve                      # http://127.0.0.1:8000
 npm run check                      # 平面检查：可行走、房间可达、无悬空
-npm run bake -- edfu               # 烘焙间接光到 data/gi/
-npm run shot -- --building edfu    # 固定机位截图 → shots/
+npm run bake -- giza               # 烘焙间接光到 data/gi/
+npm run shot -- --building parthenon    # 固定机位截图 → shots/
 npm run budget                     # 加载与体积预算
 npm test
 ```

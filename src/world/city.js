@@ -1,5 +1,5 @@
 // The houses of the city: every district's quarters round its building, of that district's time —
-// mud-brick tower and courtyard houses at Edfu, tiled houses in Rome, Athens and Constantinople,
+// mud-brick courtyard houses on the Nile, tiled houses in Rome, Athens and Constantinople,
 // stone houses with domed roofs by the Haram, timber-framed houses in Paris, walled courtyard
 // houses of grey brick at Foguang, timber houses at Uji, brick and thatch at Sanchi.
 // The sources for each are in the buildings' dossiers (§10, surroundings) and docs/world.md.

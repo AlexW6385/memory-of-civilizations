@@ -23,25 +23,6 @@ export const CARDS = {
     ],
   },
 
-  'edfu': {
-    en: [
-      'Edfu lies on the west bank of the Nile in Upper Egypt, where the town of Behdet (Apollinopolis Magna) grew on a mound beside the temple of Horus. The moment shown is about 57 BC, with the temple, begun in 237 BC under the Ptolemies, completed. The Ptolemies were Macedonian Greek kings who ruled as pharaohs, and the temple keeps the old Egyptian form: sandstone walls that slope inward, a great gate between two towers, halls of columns with plant capitals, every surface carved and painted with reliefs and hieroglyphs, all inside a mudbrick enclosure. The town round it is of mudbrick.',
-      'The pylon — the gateway of two sloping towers, covered with colossal reliefs of the king smiting his enemies before Horus, with flagpoles in niches in its face and two granite falcons of Horus at the door.',
-      'The hypostyle halls and sanctuary — halls of columns whose ceilings are painted as the night sky, leading to the inner sanctuary, where a black granite shrine of Nectanebo II holds a gilded falcon.',
-      'The birth house — a small temple before the pylon, to the west, with a ring of columns whose tops carry figures of the god Bes, built under Ptolemy VIII for the myth of the birth of Horus.',
-      'The sacred lake — a stone-lined pool east of the temple for the priests\' rites.',
-      'The town and the quay — about seven hundred mudbrick houses to the north and west, and a stone quay on the Nile with barges and skiffs.',
-    ],
-    zh: [
-      '埃德富在上埃及，位于尼罗河西岸；古城贝赫代特（希腊人称阿波罗城）在荷鲁斯神庙旁的土丘上发展起来。画面定格在约公元前 57 年，始建于公元前 237 年的神庙已经完工。托勒密王朝是马其顿希腊人的王室，却以法老的身份统治，神庙因而保持了古埃及的形制：向内倾斜的砂岩墙体、两座塔楼夹着的巨大塔门、立着植物柱头的多柱厅、满布浮雕与象形文字的彩绘墙面，四周围着泥砖围墙。神庙周围的城镇用泥砖建成。',
-      '塔门 —— 两座向内倾斜的塔楼，满刻国王在荷鲁斯面前击打敌人的巨幅浮雕；塔面凹槽里立着旗杆，门前两侧是荷鲁斯的花岗岩猎鹰像。',
-      '多柱厅与圣所 —— 天花板绘成夜空的多柱厅，通向内殿；内殿里有奈克塔内布二世的黑色花岗岩神龛，供着一只镀金的猎鹰。',
-      '诞生屋 —— 塔门前西侧的小神殿，柱廊环绕，柱顶刻着贝斯神像，由托勒密八世时期建造，用以纪念荷鲁斯诞生的神话。',
-      '圣湖 —— 神庙以东的石砌水池，供祭司举行仪式。',
-      '城镇与码头 —— 神庙北侧和西侧约七百座泥砖房屋，以及尼罗河边停着驳船和小船的石砌码头。',
-    ],
-  },
-
   'mamluk-cairo': {
     en: [
       'Cairo in 1363 is the capital of the Mamluk sultans of Egypt and Syria, on the east bank of the Nile below the Muqattam hills, and one of the largest cities of the Islamic world. The moment shown is the year Sultan Hasan\'s mosque-madrasa was completed, facing the Citadel across the Rumayla square. The architecture is Mamluk: monumental stone masonry in banded courses, deep portals, stalactite (muqarnas) cornices and slender minarets, and, for houses, two and three storeys of brick on stone footings, with projecting turned-wood lattice windows (mashrabiya) and shaded lanes.',

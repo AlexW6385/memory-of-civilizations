@@ -235,18 +235,6 @@ export const HALLS = {
     'kings-chamber': S_({ ...box(10.47, 5.23, 5.97, 1.0), surf: { stone: 0.99, open: 0.01 } }),
     temple: S_({ ...box(52, 41, 6, 1.4), surf: { stone: 0.6, open: 0.4 } }),
   },
-  // Edfu: the hypostyle hall (pronaos) 18 columns, about 34 × 13 m (inside) and 15 m high, its
-  // front screened only to half height; the inner hypostyle and the halls behind darker and closed
-  // [after the dossier, figures not re-checked: inferred]; sandstone
-  edfu: (() => {
-    const inner = (L, W, H) => ({ ...box(L, W, H, 1.2), surf: { stone: 0.97, open: 0.03 } });
-    return {
-      pronaos: { ...box(34, 13.3, 15, 1.6), surf: { stone: 0.82, open: 0.18 } },
-      'hall-of-appearances': { ...box(20.4, 11.8, 12, 1.5), surf: { stone: 0.95, open: 0.05 } },
-      'offering-hall': inner(20.4, 6.8, 10), 'hall-of-the-ennead': inner(20.4, 5.8, 9),
-      sanctuary: inner(5.2, 11.2, 8),
-    };
-  })(),
   // Persepolis: the Apadana 60 × 60 m, 36 columns 19–20 m high, the cedar roof; mud-brick walls
   // plastered, open porticoes on three sides [after the dossier, figures not re-checked: inferred]
   'persepolis-terrace': {

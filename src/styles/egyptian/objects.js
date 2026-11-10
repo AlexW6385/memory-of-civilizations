@@ -41,7 +41,7 @@ const FIG = {
     [[-0.1, 0.28], [-0.088, 0.28], [-0.088, 0.36], [-0.1, 0.36]], [[-0.125, 0.36], [-0.063, 0.36], [-0.063, 0.375], [-0.125, 0.375]], circ(-0.094, 0.405, 0.02, 0.03)],
   offer: [STAND(false), [[-0.06, 0.81], [0.05, 0.81], [0.06, 0.87], [0.03, 0.93], [-0.03, 0.94], [-0.08, 0.9]],             // the king in the blue crown
     [[0.03, 0.65], [0.075, 0.68], [0.19, 0.66], [0.19, 0.62], [0.06, 0.6]], circ(0.205, 0.68, 0.03, 0.035)],
-  // Bes, frontal: the lion-maned dwarf god in his crown of plumes, hands on his bowed legs (edfu.md §4.2)
+  // Bes, frontal: the lion-maned dwarf god in his crown of plumes, hands on his bowed legs (Edfu dossier §4.2, removed, in git history)
   bes: (() => { const R = [[0.04, 1.0], [0.06, 0.9], [0.09, 1.0], [0.11, 0.9], [0.14, 0.98], [0.15, 0.8], [0.2, 0.78], [0.24, 0.7], [0.22, 0.6], [0.27, 0.55], [0.32, 0.45], [0.24, 0.33], [0.25, 0.26], [0.27, 0.12], [0.29, 0.02], [0.3, 0], [0.11, 0], [0.13, 0.1], [0.09, 0.2], [0.02, 0.22], [0.03, 0.08], [0.015, 0.06]];
     return [[...R, ...R.slice().reverse().map(([u, v]) => [-u, v])], circ(0, 0.67, 0.16, 0.11, 14), circ(0, 0.4, 0.15, 0.1, 12)]; })(),
   seated: [[[-0.2, 0], [0.14, 0], [0.14, 0.02], [0.11, 0.03], [0.1, 0.33], [0.03, 0.35], [0.02, 0.52], [0.07, 0.6], [0.065, 0.66], [0.025, 0.69], [0.04, 0.72], [0.09, 0.745], [0.04, 0.77], [0.04, 0.8], [-0.02, 0.82], [-0.07, 0.79], [-0.09, 0.64], [-0.075, 0.5], [-0.08, 0.44], [-0.2, 0.44]],
@@ -149,7 +149,7 @@ export function pylonTower(el, { bag, col, style }) {
     }
   }
   if (el.trim) trim({ ...el, t: 'block', y0, y1: y0 + H, batter: [...(el.batterEnds ?? [b, b]), b, b] }, { bag, style });
-  // the reliefs on the front (docs/settlements/edfu.md §4.1): in each field clear of the flagpole
+  // the reliefs on the front (Edfu dossier §4.1, removed, in git history): in each field clear of the flagpole
   // niches the colossal scene of the king smiting the captives he holds by the hair before Horus,
   // who holds out the was-sceptre; columns of text above and between them; over that two registers
   // of the king offering to seated gods, each scene with its column of text, on ruled ground lines
@@ -190,7 +190,7 @@ export function pylonTower(el, { bag, col, style }) {
     }
   }
   // the clamps that held the flagpoles: a cedar beam out of a window in the tower's face to a collar
-  // round the pole, one in the niche and one above it (docs/settlements/edfu.md §4.1)
+  // round the pole, one in the niche and one above it (Edfu dossier §4.1, removed, in git history)
   if (!el.simple) for (const n of niches) {
     const pz = zf - sg * (n.pole ?? 0.15), PH = n.poleH ?? 40;
     for (const yy of [n.top * 0.6, n.top + 2.5]) {
@@ -208,7 +208,7 @@ export function pylonTower(el, { bag, col, style }) {
 
 /**
  * The Bes dado: the tall block set on a column's abacus under the architrave in the birth houses, a
- * figure of Bes in relief on each of its faces (docs/settlements/edfu.md §4.2).
+ * figure of Bes in relief on each of its faces (Edfu dossier §4.2, removed, in git history).
  * el = { at, y (foot), w (side), h }
  */
 export function besDado(el, { bag }) {
@@ -221,7 +221,7 @@ export function besDado(el, { bag }) {
   }
 }
 
-/** Tall cedar flagpole, tapering, standing on a stone base in a niche of the pylon, pennants at its top (docs/settlements/edfu.md §4.1). */
+/** Tall cedar flagpole, tapering, standing on a stone base in a niche of the pylon, pennants at its top (Edfu dossier §4.1, removed, in git history). */
 export function flagpole(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 38;
   bag.add('cedar', lathe([[0.42, 0], [0.4, h * 0.3], [0.3, h * 0.75], [0.16, h]], 12, null, x, y, z));
@@ -293,7 +293,7 @@ function ellipsoid(c, r, n = 16) {
 
 /**
  * Granite falcon of Horus wearing the double crown, on a plinth, as the pair before the pylon of
- * Edfu (docs/settlements/edfu.md §4.1): the bird upright and heavy-chested, the folded wings
+ * Edfu (Edfu dossier §4.1, removed, in git history): the bird upright and heavy-chested, the folded wings
  * wrapping the body and crossing over the tail, the tail falling straight to the plinth as the
  * statue's third support, short feathered legs and talons, the round head with the hooked beak, the
  * eye and the falcon's cheek stripe, the red crown with its tall back and curl and the white crown
@@ -362,7 +362,7 @@ export function falcon(el, { bag, col }) {
 
 /** The granite naos (shrine) of Nectanebo II: a monolith with a pyramidal roof, cornice and door. */
 export function naos(el, { bag, col }) {
-  // the naos of Nectanebo II in the sanctuary (docs/settlements/edfu.md §4.3): a monolith of dark granite on a stepped
+  // the naos of Nectanebo II in the sanctuary (Edfu dossier §4.3, removed, in git history): a monolith of dark granite on a stepped
   // plinth; the body bound at its corners and under the cornice by torus rolls; the cavetto cornice; a pyramidal top;
   // the deep door in the front under a frame of jambs and lintel carrying a winged disc, the jambs carved with columns
   // of text; on the sides registers of the king before the gods; bronze doors standing open; in the dark of the
@@ -635,7 +635,7 @@ export function wingedDiscObj(el, { bag }) {
 }
 
 /**
- * The reliefs of a temple gateway's face (docs/settlements/edfu.md §4.1) { z (the face), face ('zp' faces +z, 'zn'
+ * The reliefs of a temple gateway's face (Edfu dossier §4.1, removed, in git history) { z (the face), face ('zp' faces +z, 'zn'
  * −z), x0, x1 (the face between its corner rolls), door: [xa, xb], doorTop, from (the lintel's carved field begins
  * above the winged disc), top (under the torus), y }: on the lintel, registers of the king offering to the gods, the
  * scenes mirrored about the axis so that the king walks in toward it; on each jamb a stack of scenes of the king
@@ -679,7 +679,7 @@ export function gateReliefs(el, { bag }) {
 }
 
 /**
- * The painted ceiling of a hypostyle hall (docs/settlements/edfu.md §4.4) { y (the soffit), bays: [[x0, z0, x1, z1,
+ * The painted ceiling of a hypostyle hall (Edfu dossier §4.4, removed, in git history) { y (the soffit), bays: [[x0, z0, x1, z1,
  * kind]], holes: [[x0, z0, x1, z1]] (light slits to keep clear) }: each bay between the architraves the night sky —
  * blue sown with stars — and on it, in the central aisle ('vultures'), vultures with spread wings alternating with
  * winged discs, flying in toward the sanctuary; in the side aisles ('sky') the sky goddess Nut stretched the length of
@@ -749,7 +749,7 @@ export function astroCeiling(el, { bag }) {
 }
 
 /**
- * Painted relief (docs/settlements/edfu.md §10): a figure of FIG whose parts each take their own colour — the
+ * Painted relief (Edfu dossier §10, removed, in git history): a figure of FIG whose parts each take their own colour — the
  * skin red-brown, the crowns blue, red and white, the sceptres and offerings yellow or gold — with the white kilt
  * and the broad collar painted over the body a little prouder.
  */
@@ -771,7 +771,7 @@ function paintedFigure(bag, kind, body, place, u0, v0, h, dir, d) {
   for (const [m, T] of Object.entries(parts)) bag.add(m, fromTriangles(T));
 }
 /**
- * wall_reliefs: the painted reliefs of a wall face inside the temple (docs/settlements/edfu.md §10) { a, b (the face's
+ * wall_reliefs: the painted reliefs of a wall face inside the temple (Edfu dossier §10, removed, in git history) { a, b (the face's
  * ends in plan), n (its normal into the room), y (the floor), v0 (the first register's ground line above the floor),
  * top, reg (register height), inward (+1 if the sanctuary lies toward b), gods ('gold' or 'paint'), gaps: [[u0, u1]]
  * (doorways, from a) }: under a band of sky and a frieze of khekher knots, registers of scenes — the king, in the blue
@@ -810,7 +810,7 @@ export function wallReliefs(el, { bag }) {
   runs((u0, u1) => { band('egyptian_blue', u0, u1, vt - 0.06, vt + 0.1, 0.022); for (let u = u0 + 0.1; u < u1 - 0.12; u += 0.24) { band('paint_ochre', u - 0.05, u + 0.05, vt + 0.14, vt + 0.46, 0.02); band('fresco_green', u - 0.035, u + 0.035, vt + 0.46, vt + 0.52, 0.026); } });
 }
 /**
- * offering_table: before the god's shrine (docs/settlements/edfu.md §10) { at, y, yaw }: a round table of stone on its
+ * offering_table: before the god's shrine (Edfu dossier §10, removed, in git history) { at, y, yaw }: a round table of stone on its
  * pedestal heaped with round loaves, a haunch, figs, lotus flowers laid over, two jars of wine and water beside it;
  * a tall bronze incense stand with a burning pan.
  */

@@ -207,59 +207,6 @@
   "seconds": 24,
   "baked": "2026-11-07"
  },
- "edfu": {
-  "site": "edfu",
-  "hash": "dbf17efcc445cfef",
-  "rays": 128,
-  "probes": 53352,
-  "boxes": [
-   {
-    "min": [
-     -19.2,
-     -0.05,
-     -68.2
-    ],
-    "n": [
-     39,
-     19,
-     72
-    ],
-    "spacing": 1,
-    "rooms": [
-     "pronaos",
-     "robing-room",
-     "library",
-     "hall-of-appearances",
-     "offering-hall",
-     "hall-of-the-ennead",
-     "stair-west",
-     "chapel-of-min",
-     "treasury",
-     "stair-east",
-     "linen-room",
-     "nile-room",
-     "sanctuary",
-     "corridor-w",
-     "chapel-of-khonsu",
-     "chapel-of-hathor",
-     "chapel-of-the-throne-of-re",
-     "corridor-e",
-     "chapel-of-the-spread-wings",
-     "chapel-of-the-throne-of-the-gods",
-     "chapel-of-horus-the-victor",
-     "corridor-n",
-     "chapel-of-osiris",
-     "tomb-of-osiris",
-     "chapel-of-the-west",
-     "laboratory",
-     "liquid-offerings"
-    ]
-   }
-  ],
-  "bytes": 872413,
-  "seconds": 84,
-  "baked": "2026-11-07"
- },
  "edo-himeji-castle": {
   "site": "edo-himeji",
   "hash": "bd747b4eab7b0a1e",

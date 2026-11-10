@@ -31,7 +31,6 @@ export const ARRIVALS = {
   'constantinople':   [-70, null, 110, -0.517, 0.16],    // Hagia Sophia's dome over its buttresses, from the south-west
   'ottoman-istanbul': [0, 22.1, -91, 3.1416, 0.42],      // the Süleymaniye's cascading domes and four minarets, whole
   'giza':             [160, 0.1, -285, 2.563, 0.2],      // the Great Pyramid whole from the north-east across the plateau, two faces (the enclosure's corner had stood in front)
-  'edfu':             [0, 0.1, 150, 0, 0.2],             // the pylon with its flagpoles, through the palms
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square
   'djenne':           [95, 0.1, 30, 1.25, 0.13],         // the Great Mosque over the market
   'lalibela':         [-217, 0.1, 113, -2.356, -0.42],   // at the pit's north-west corner, down its diagonal onto the cross

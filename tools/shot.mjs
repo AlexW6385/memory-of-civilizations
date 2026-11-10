@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Screenshots at fixed viewpoints (tools/viewpoints.json) in headless Chromium.
 //
-// usage: node tools/shot.mjs [--building edfu] [--only name,name] [--size 1280x800] [--time 15.5|cycle]
+// usage: node tools/shot.mjs [--building parthenon] [--only name,name] [--size 1280x800] [--time 15.5|cycle]
 //                            [--out shots] [--webgl] [--quality high] [--wait 2500]
 //        node tools/shot.mjs --sites athens,rome --first   (each settlement's first view)
 //        node tools/shot.mjs --pose site,x,y,z,yaw,pitch --name custom   (a settlement's frame, feet)

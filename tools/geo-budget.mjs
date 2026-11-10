@@ -8,7 +8,7 @@
 // counts are exact and are what memory and upload depend on. Real frame times: `?bench` on the
 // author's machine (src/engine/bench.js).
 //
-// usage: node tools/geo-budget.mjs [--sites edfu,paris] [--json out.json] [--strict]
+// usage: node tools/geo-budget.mjs [--sites ming-suzhou,paris] [--json out.json] [--strict]
 // --strict fails (exit 1) when a settlement exceeds the limits below.
 
 import { writeFile } from 'node:fs/promises';

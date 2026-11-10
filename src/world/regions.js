@@ -339,7 +339,6 @@ export function inCity(x, z) {
 /** Where each building stands: origin [x, z], yaw (degrees), base height, district, and the
  *  rectangle (building-local) over which the ground is levelled to the base. */
 export const SITES = {
-  edfu: { origin: [0, 50], yaw: 0, base: 0, region: 'nile', pad: [-48, -140, 48, 32] },
   pantheon: { origin: [0, -170], yaw: 0, base: 0, region: 'rome', pad: [-48, -165, 48, 32] },
   parthenon: { origin: [-225, 0], yaw: 0, base: 24, region: 'greece', pad: [-46, -26, 50, 26] },
   'hagia-sophia': { origin: [280, -265], yaw: 0, base: 14, region: 'byzantium', pad: [-106, -52, 48, 102] },
@@ -648,7 +647,6 @@ export const ROADS = [
   { id: 'eastern-lane', width: 6, points: [[372, 210], [372, 440]] },
   { id: 'south-street', width: 6, points: [[100, 440], [625, 440]] },
   // to the entrances
-  { id: 'to-edfu', width: 9, points: [[0, 150], [0, 76]], paved: 1 },
   { id: 'to-pantheon', width: 7, points: [[0, -355], [0, -330]], paved: 1 },
   { id: 'to-parthenon', width: 6, points: [[-225, -135], [-225, -66], [-225, -40], [-165, -40], [-165, 0], [-179, 0]] },
   { id: 'to-hagia-sophia', width: 7, points: [[110, -265], [178, -265]], paved: 1 },

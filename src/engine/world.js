@@ -499,8 +499,8 @@ export class World {
     // are fetched by the settlements that use them); the others' come after the start: fetched by
     // the build workers when they are idle, nearest first (warm), so that the page never evaluates
     // them while one walks and a click on the map finds them in the cache
-    this.setAnchor(this.byId.edfu.S.frame, this.byId.edfu);
-    await this.plansOf(this.byId.edfu);
+    this.setAnchor(this.byId['ming-suzhou'].S.frame, this.byId['ming-suzhou']);
+    await this.plansOf(this.byId['ming-suzhou']);
     onStep('plans', 1);
   }
 

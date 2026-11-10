@@ -30,7 +30,6 @@ export const PLACED = {
   'constantinople': [38.13324, 37.46158],
   'ottoman-istanbul': [47.88564, 30.92861],
   'giza': [25.40195, 25.0295],
-  'edfu': [16.65822, 37.04762],
   'mamluk-cairo': [24.08438, 33.99643],
   'djenne': [11.07898, -6.41566],
   'lalibela': [9.27589, 40.63665],

@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.46 — Six settlements taken out (2026-11-10)
+
+Edfu is gone from the planet (its temple form is Thebes's), and five planned ones are struck from the list: Linzi, Southern Tang Jinling, Herculaneum, uMgungundlovu and Budj Bim. The set is now 94. A first visit now starts in Ming Suzhou.
+
 ## v10.45 — Quicker travels (2026-11-10)
 
 A travel waits only for the first mesh of each kind of shader (as before v10.22); the other instanced meshes' own builds are done afterwards in idle moments, so a settlement no longer takes 15–30 s to open. The travel notice counts the building from its start rather than appearing only at the end.

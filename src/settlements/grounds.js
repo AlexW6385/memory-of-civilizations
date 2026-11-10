@@ -33,7 +33,6 @@ import { ground as athens } from './athens/ground.js';
 import { ground as rome } from './rome/ground.js';
 import { ground as constantinople } from './constantinople/ground.js';
 import { ground as jerusalem } from './jerusalem/ground.js';
-import { ground as edfu } from './edfu/ground.js';
 import { ground as paris } from './paris/ground.js';
 import { ground as conques } from './conques/ground.js';
 import { ground as tangWutai } from './tang-wutai/ground.js';
@@ -92,7 +91,6 @@ export const GROUNDS = {
   rome,
   constantinople,
   jerusalem,
-  edfu,
   paris,
   conques,
   'tang-wutai': tangWutai,
@@ -155,7 +153,6 @@ const LOADERS = {
   rome: () => import('./rome/index.js'),
   constantinople: () => import('./constantinople/index.js'),
   jerusalem: () => import('./jerusalem/index.js'),
-  edfu: () => import('./edfu/index.js'),
   paris: () => import('./paris/index.js'),
   conques: () => import('./conques/index.js'),
   'tang-wutai': () => import('./tang-wutai/index.js'),

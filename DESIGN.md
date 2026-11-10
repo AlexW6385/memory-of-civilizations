@@ -130,20 +130,19 @@ Sources: architectural and urban histories, published plans and surveys, archaeo
 
 ## 7. The civilizations
 
-**The set is 100** (the author, 2026-11-09). It is closed: one is added only by taking another out. Three reasons bring a settlement in, and all three count: it shaped history; its form is like no other; or without it a people or a continent would be missing.
+**The set is 94** (the author, 2026-11-09; six without a place of their own taken out 2026-11-10). Quality over number: every settlement must hold a reason no other covers, and none is kept to fill a count; small is fine when the form is its own. The set is closed: one is added only for such a reason. Three reasons bring a settlement in, and all three count: it shaped history; its form is like no other; or without it a people or a continent would be missing.
 
 The list below is the plan: every settlement, built or not, with its moment, why it is here, the works and ideas tied to it, and what it holds. **L** is its level (§5); **L0** = not built yet. A built settlement's level is the one its dossier states — set by the agent that built it, not yet checked against §5 in the browser; when a dossier's level changes, change it here. The data the code uses (id, true position, disc radius) is in `src/planet/sites.js`; a settlement's facts and sources are in its dossier. The dossier fixes the exact moment and may substitute a better-documented example; "moment to be fixed" marks a place with several possible periods.
 
-Where little stands today (Baghdad, Ye, Linzi, Chang'an, Karakorum) the dossier says plainly what is reconstructed from texts and excavation. For living Indigenous cultures, use only what the communities and published heritage documentation share publicly; nothing secret or sacred is depicted. Settlements of one place at different times (Qin, Han and Tang at Xi'an; the two Romes; Giza and Cairo) stand side by side.
+Where little stands today (Baghdad, Ye, Chang'an, Karakorum) the dossier says plainly what is reconstructed from texts and excavation. For living Indigenous cultures, use only what the communities and published heritage documentation share publicly; nothing secret or sacred is depicted. Settlements of one place at different times (Qin, Han and Tang at Xi'an; the two Romes; Giza and Cairo) stand side by side.
 
-57 built, 43 at L0.
+56 built, 38 at L0.
 
-**China and Tibet (17)**
+**China and Tibet (15)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
 | Shang — Yinxu, Anyang (c. 1250 BC) | L0 | Capital under Wu Ding; the first Chinese city known from its own writing | Oracle-bone inscriptions; the Shang hymns of the *Shijing*; Lady Fu Hao | Rammed-earth platforms with thatched halls and temples, the Huan river, bronze foundries, oracle-bone pits, chariot burials, Fu Hao's tomb |
-| Warring States — Linzi, capital of Qi (c. 320 BC) | L0 | The largest city of the east in its day; seat of the Jixia Academy | The *Zhanguo ce* on its crowded streets; Mencius and Xunzi at Jixia | Great and small walled cities, drains, markets, the Jixia halls, cuju and cockfighting |
 | Qufu — Confucius's Lu (moment to be fixed) | L0 | Home of Confucius | The *Analects*; teaching at the Apricot Altar | Temple of Confucius and its Dacheng Hall, the Kong mansion, the Kong forest, the Apricot Altar |
 | Qin — Xianyang and the First Emperor's mausoleum (c. 210 BC) | L0 | The first unified empire | Sima Qian's annals of the First Emperor; Han Feizi and Li Si | Raised palace terraces, imperial roads, the painted terracotta army in its pits, standard weights and measures |
 | Han Chang'an (c. 100 BC) | L0 | Capital under Emperor Wu; the eastern end of the Silk Road | Sima Qian's *Shiji*; Ban Gu's rhapsodies on the two capitals; Confucianism made state doctrine | Weiyang Palace's front hall, Changle Palace, the East and West Markets, walled wards, Kunming Lake, the Imperial Academy |
@@ -151,7 +150,6 @@ Where little stands today (Baghdad, Ye, Linzi, Chang'an, Karakorum) the dossier 
 | Tang Chang'an (c. 750) | L0 | A city of a million under Xuanzong, the metropolis of its world | Li Bai, Du Fu, Wang Wei; *Song of Everlasting Sorrow*; Xuanzang's record of the Western Regions | Daming Palace's Hanyuan Hall, the Great Wild Goose Pagoda, 108 wards, the West Market's foreign merchants, Qujiang Pool, Zhuque Avenue |
 | Tang — Foguang Monastery, Mount Wutai (857) | L1–L2 | The most important timber hall surviving from the Tang | Tang Buddhism; found by Liang Sicheng and Lin Huiyin in 1937 | The East Hall with its bracket sets and statues, the hillside monastery, a village |
 | Northern Song Kaifeng (c. 1120) | L1–L2 | The city of *Along the River during Qingming*; China's commercial revolution | Zhang Zeduan's scroll; Meng Yuanlao's *Dongjing meng hua lu* | Iron Pagoda, Rainbow Bridge, grain boats on the Bian canal, shops along the streets, markets |
-| Southern Tang Jinling (c. 960) | L0 | The most cultured court of the Five Dynasties and Ten Kingdoms | Li Yu's ci poems; Gu Hongzhong's *Night Revels of Han Xizai*; Dong Yuan's landscapes | The palace city, the Qinhuai river, a scholar-official's house at night, the Qixia Temple relic pagoda |
 | Southern Song Lin'an, Hangzhou (c. 1200) | L1–L2 | Among the largest and richest cities in the world | Wu Zimu's *Mengliang lu*; West Lake poetry; Marco Polo's Quinsai | Liuhe Pagoda, West Lake, the Qiantang river, tea houses, pleasure boats |
 | Ming Suzhou (c. 1530) | L2–L3 | The model of the Jiangnan garden and water town | Wen Zhengming's album of the Humble Administrator's Garden; the Wu school; kunqu | The Humble Administrator's Garden, canal lanes, white walls and black tiles, stone bridges |
 | Ming–Qing Beijing (17th c.) | L1–L2 | The late imperial capital, the Forbidden City and the Temple of Heaven together | Ritual and the order of heaven; the age of *Dream of the Red Chamber* | The Forbidden City's Outer Court, the Hall of Prayer for Good Harvests, walls and moat, hutongs and courtyard houses |
@@ -216,7 +214,7 @@ Where little stands today (Baghdad, Ye, Linzi, Chang'an, Karakorum) the dossier 
 | Safavid Isfahan (c. 1630) | L2, L3 in part | Shah Abbas I's capital, "half the world" | Persian miniatures; Mulla Sadra and the school of Isfahan | Naqsh-e Jahan Square, the Shah Mosque, the Sheikh Lotfollah Mosque, Ali Qapu, the Grand Bazaar |
 | Shibam, Hadhramaut (16th c. on) | L0 | A city of mud-brick towers, like no other | The merchants and emigrants of the Hadhramaut | About 500 tower houses of five to eleven storeys, the wall, the dry valley |
 
-**Egypt and Africa (14)**
+**Egypt and Africa (12)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
@@ -224,7 +222,6 @@ Where little stands today (Baghdad, Ye, Linzi, Chang'an, Karakorum) the dossier 
 | New Kingdom Thebes (c. 1250 BC) | L0 | Under Ramesses II, the summit of the Egyptian temple | The *Book of the Dead*; the Kadesh poem; love songs and strike records on the ostraca of Deir el-Medina | The Karnak hypostyle, Luxor temple, Hatshepsut's temple, the Valley of the Kings, Deir el-Medina, the Opet procession |
 | Abu Simbel (c. 1250 BC) | L0 | Ramesses II's temple cut into the cliff | The sun reaching the sanctuary twice a year | Four colossi, halls deep in the rock, Nefertari's temple, the Nile |
 | Alexandria (c. 250 BC) | L0 | The learned capital of the ancient world | Euclid's *Elements*; Eratosthenes measuring the Earth; the Septuagint | The Pharos, the Library and Museum, two harbours, the Serapeum, the Canopic Way |
-| Ptolemaic Egypt — Edfu (1st c. BC) | L2 | The best-preserved Egyptian temple | The myth of Horus; the temple's inscriptions | The Temple of Horus with its pylon and hypostyles, mud-brick tower houses, the Nile |
 | Mamluk Cairo (c. 1363) | L1–L2 | The largest city of the medieval Islamic world | Ibn Khaldun, later a judge here; the Cairo tales of the *Nights* | The Sultan Hasan mosque-madrasa, lanes, mashrabiya, the bazaar |
 | Ethiopia — Lalibela (c. 1220) | L2 | Eleven churches cut whole from the rock | "A new Jerusalem"; Ethiopian Orthodoxy | Rock-hewn churches, trenches and courts with pools, a round-house village |
 | The Sahel — Djenné (14th c.) | L2, L3 in part | The largest mud building in the world | The Mali Empire; the learning of Timbuktu | The Great Mosque, the market, two-storey banco houses, the yearly replastering |
@@ -233,9 +230,8 @@ Where little stands today (Baghdad, Ye, Linzi, Chang'an, Karakorum) the dossier 
 | The Swahili coast — Kilwa (15th c.) | L2–L3 | A coral-stone city of the Indian Ocean trade | Ibn Battuta's visit; the Kilwa Chronicle | The Great Mosque, Husuni Kubwa, coral houses, dhows |
 | Zimbabwe — Great Zimbabwe (c. 1350) | L1–L2 | The largest ancient stone building south of the Sahara | Shona kingship | The Great Enclosure and its conical tower, the Hill Complex, valley enclosures, daga houses, cattle |
 | Benin City (c. 1600) | L0 | The Edo kingdom, its walls and moats of astonishing extent | The Benin bronzes; Dapper's description | The Oba's palace with its bronze-plaqued pillars, broad avenues, walls, the bronze-casters' guild |
-| Zulu — uMgungundlovu (1830s) | L0 | Dingane's royal kraal | The Zulu kingdom and its cattle | The great oval cattle enclosure, beehive huts, the royal house, the parade ground |
 
-**Europe (22)**
+**Europe (21)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
@@ -244,7 +240,6 @@ Where little stands today (Baghdad, Ye, Linzi, Chang'an, Karakorum) the dossier 
 | Mycenae (c. 1250 BC) | L0 | Agamemnon's city in Homer | The *Iliad*; Aeschylus's *Oresteia* | The Lion Gate, Grave Circle A, the Treasury of Atreus, Cyclopean walls, the palace |
 | Delphi (c. 400 BC) | L0 | The centre of the Greek world and its oracle | "Know thyself"; the oracle that named Socrates wisest; Pindar | The Temple of Apollo, the cities' treasuries, the theatre, the stadium, the Sacred Way, the Castalian spring |
 | Classical Athens (c. 410 BC) | L2 | The city of democracy and philosophy | Socrates, Sophocles, Thucydides | The Parthenon, the Acropolis, the Agora, houses. To add as part of this settlement (c. 300 BC): the schools — the Academy, the Lyceum, the Painted Stoa, Epicurus' Garden |
-| Herculaneum (AD 79) | L0 | The Villa of the Papyri, the only library surviving from antiquity | Philodemus' Epicurean scrolls; Vesuvius; Pliny the Younger's letters | The Villa's peristyle and long pool, the seaside baths, timber-framed houses with upper floors, shops |
 | Hadrian's Rome (c. 128) | L1–L2 | The empire at its height | Hadrian; Epictetus the Stoic | The Pantheon, atrium houses, insulae, shops |
 | Romanesque Conques (c. 1120) | L2, L3 in part | A pilgrimage church on the road to Santiago | The pilgrimage; the *Book of the Miracles of Sainte Foy* | Sainte-Foy and its Last Judgement tympanum, the hill village |
 | Norse — Borgund (c. 1250) | L1–L2 | The most complete stave church | The Norse sagas; the conversion | Borgund stave church, a timber wharf of the Bryggen kind |
@@ -277,11 +272,10 @@ Where little stands today (Baghdad, Ye, Linzi, Chang'an, Karakorum) the dossier 
 | Modern New York (1931) | L1–L2 | The Empire State Building completed; the Art Deco skyscraper | The age of *The Great Gatsby*; jazz | The Empire State Building, Manhattan blocks |
 | Brasília (1960) | L0 | A capital planned whole by modernism | Niemeyer and Costa | The Congress towers and bowls, the cathedral, the superblocks |
 
-**Oceania (6)**
+**Oceania (5)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Budj Bim — Gunditjmara country | L0 | Eel aquaculture over 6,600 years old, among the oldest in the world | Gunditjmara knowledge of land and water | Stone channels and eel traps on the lava flow, stone house bases, woven eel baskets, smoking trees |
 | Kakadu — the rock shelters of Ubirr | L0 | A tradition of rock painting tens of thousands of years long | X-ray style painting; only what is shared publicly of the Dreaming | Painted rock faces, wetlands, the dry and the wet season |
 | Nan Madol, Pohnpei (c. 1300) | L0 | An island city of stacked basalt columns, seat of the Saudeleur dynasty | Pohnpeian traditions of the Saudeleur | Nearly a hundred artificial islets, walls of crossed basalt columns, canals, royal tombs |
 | Rapa Nui (c. 1500) | L2 | The island of the moai | Ancestor veneration; the later Birdman rite | Ahu Tongariki and its fifteen moai, the Rano Raraku quarry, stone houses |
@@ -300,7 +294,7 @@ Targets on the author's machine (Apple M2, 8 GB, native resolution, "high"). The
 - **Files:** any committed file ≤ 50 MB, no LFS; repository ≤ 500 MB; baked data under `data/`, loaded on demand.
 - **Phone:** the same world at "medium" (half shadow resolution, no GTAO, shorter streaming radius, fewer small objects), ≥ 30 fps.
 
-`tools/budget.mjs` measures the load. Frame times cannot be measured headless (Chromium's WebGPU there is software), so the frame is measured in two ways: `tools/geo-budget.mjs` builds every settlement in Node and counts what memory and upload depend on — vertex data on the GPU, instances, meshes, build time — and `npm test` fails when a settlement exceeds its limits; `?bench` runs a fixed route on the author's machine (Edfu turning, Florence walking, high flight) and reports fps, the worst 5% of frames, JavaScript time, draw calls, triangles, memory and hitches (`src/engine/bench.js`). `?perf` shows a panel with switches that turn one part of the picture off at a time.
+`tools/budget.mjs` measures the load. Frame times cannot be measured headless (Chromium's WebGPU there is software), so the frame is measured in two ways: `tools/geo-budget.mjs` builds every settlement in Node and counts what memory and upload depend on — vertex data on the GPU, instances, meshes, build time — and `npm test` fails when a settlement exceeds its limits; `?bench` runs a fixed route on the author's machine (Suzhou pond turning, Florence walking, high flight) and reports fps, the worst 5% of frames, JavaScript time, draw calls, triangles, memory and hitches (`src/engine/bench.js`). `?perf` shows a panel with switches that turn one part of the picture off at a time.
 
 ## 9. Technical architecture
 
@@ -324,10 +318,10 @@ Targets on the author's machine (Apple M2, 8 GB, native resolution, "high"). The
 
 Replace these lines, never append to them; keep them few.
 
-- v10.29 (2026-11-09): 57 settlements stand on the planet, each with its card on the globe map. Ming Suzhou rebuilt as the showcase in one wave: lattices, hall walls, platforms, Taihu stones, revetments, lotus, pebble paving, the canal town's varied houses and trades, the Bao'en pagoda and the city wall, furnished halls and study, water reflections, light through paper.
-- **The gap is depth.** Elsewhere 27 of the 57 are still at L1–L2 by their own dossiers; none meets §5 throughout. Suzhou's new work has not yet been checked piece by piece in the browser.
+- v10.29 (2026-11-09): 56 settlements stand on the planet (Edfu taken out 2026-11-10), each with its card on the globe map. Ming Suzhou rebuilt as the showcase in one wave: lattices, hall walls, platforms, Taihu stones, revetments, lotus, pebble paving, the canal town's varied houses and trades, the Bao'en pagoda and the city wall, furnished halls and study, water reflections, light through paper.
+- **The gap is depth.** Elsewhere 26 of the 56 are still at L1–L2 by their own dossiers; none meets §5 throughout. Suzhou's new work has not yet been checked piece by piece in the browser.
 - **Speed at Suzhou** (M2, Chrome, 60 Hz, `?bench=suzhou`, 2026-11-10): pond turn, canal walk and hall turn each 59.9 fps with no hitch, p95 18–22 ms, 500–560 draw calls with shadows, 3–4 M triangles; the dynamic resolution runs the garden at 0.75–0.85×. The limit is the cost per draw call (three.js ~20 µs on this thread, and Chrome's GPU process), not the shading: flat materials gain ~13%, a quarter of the pixels ~20%. Next: the first look after arriving still builds some shadow shaders in the frame; fewer draw calls (street life's shapes ~74, terrain and sea ~100, the garden's own materials); the aerial view (≈1000 draws, 8 M triangles: 12 fps); a build worker now and then falls silent (restarted after 3 min: why is open).
-- **Next after Suzhou:** the other built settlements to L3; new ones from the L0 settlements of §7 when the author says to start them. Decided, not yet done: the planet enlarged so that 100 settlements stand without crowding (`PLANET_RADIUS` in `src/planet/sites.js`, 8 km now; about 12 km).
+- **Next after Suzhou:** the other built settlements to L3; new ones from the L0 settlements of §7 when the author says to start them. Decided, not yet done: the planet enlarged so that 94 settlements stand without crowding (`PLANET_RADIUS` in `src/planet/sites.js`, 8 km now; about 12 km).
 
 ## 11. Rules
 

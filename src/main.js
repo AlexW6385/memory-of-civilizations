@@ -299,9 +299,9 @@ async function main() {
     if (!place()) settle();
     world.place(R.camera);
   };
-  let first = world.plans.get(params.get('start') || 'edfu');
+  let first = world.plans.get(params.get('start') || 'ming-suzhou-garden');
   if (!first && params.get('start')) { await world.loadPlans(); first = world.plans.get(params.get('start')); }
-  first ||= world.plans.get('edfu');
+  first ||= world.plans.get('ming-suzhou-garden');
   if (params.get('pose')) {
     // ?pose=site,x,y,z,yaw,pitch (in the settlement's frame) or ?pose=lat,lon (on the planet)
     const p = params.get('pose').split(',');

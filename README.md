@@ -14,7 +14,7 @@ The name means only that these buildings are the memory of civilizations. This i
 
 | Region | Settlements |
 |---|---|
-| Africa | Giza (c. 2560 BC) · Edfu (1st c. BC) · Lalibela (c. 1220) · Kilwa Kisiwani (c. 1330) · Great Zimbabwe (c. 1350) · Djenné (14th c.) · Mamluk Cairo (c. 1363) |
+| Africa | Giza (c. 2560 BC) · Lalibela (c. 1220) · Kilwa Kisiwani (c. 1330) · Great Zimbabwe (c. 1350) · Djenné (14th c.) · Mamluk Cairo (c. 1363) |
 | Western Asia | Ur (c. 2050 BC) · Babylon (c. 570 BC) · Persepolis (c. 480 BC) · Petra (c. AD 50) · Umayyad Jerusalem (c. 700) · Ottoman Istanbul (c. 1560) · Safavid Isfahan (c. 1630) |
 | Europe | Stonehenge (c. 2500 BC) · Knossos (c. 1600 BC) · Classical Athens (c. 410 BC) · Hadrian's Rome (c. 128) · Justinian's Constantinople (c. 562) · Conques (c. 1120) · Gothic Paris (1248) · Borgund, Norway (c. 1250) · Nasrid Granada (c. 1390) · Renaissance Florence (c. 1480) · Venice (c. 1500) · Muscovy (c. 1600) · Amsterdam (c. 1670) · Baroque Rome (c. 1670) · Versailles (c. 1690) · Victorian London (c. 1870) · Barcelona (c. 1910) |
 | South Asia | Sanchi (1st c.) · Khajuraho (c. 1050) · Mughal Agra (1632–1653) · Madurai (c. 1650) · Lhasa (1694) |
@@ -60,8 +60,8 @@ Pure static ES modules: no build step and no server. three.js is vendored in `sr
 npm install                        # dev tools only
 npm run serve                      # http://127.0.0.1:8000
 npm run check                      # plan check: walkability, reachable rooms, nothing floating
-npm run bake -- edfu               # bake a settlement's indirect light into data/gi/
-npm run shot -- --building edfu    # screenshots at fixed viewpoints → shots/
+npm run bake -- giza               # bake a settlement's indirect light into data/gi/
+npm run shot -- --building parthenon    # screenshots at fixed viewpoints → shots/
 npm run budget                     # load and size budgets
 npm test
 ```
