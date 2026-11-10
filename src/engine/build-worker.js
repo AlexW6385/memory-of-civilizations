@@ -15,6 +15,9 @@ let build, collide, grounds, cells, palette;
 /** The coarse versions made, by shape (a hash of the prototype). */
 const coarseCache = new Map();
 
+// a beat every 2 s while the worker is free between plans: the page tells a worker gone from a busy one (builder.js STALL)
+setInterval(() => self.postMessage({ beat: 1 }), 2000);
+
 self.onmessage = async (e) => {
   const d = e.data;
   if (d.init) {

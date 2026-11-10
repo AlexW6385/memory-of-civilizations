@@ -5,12 +5,13 @@
 import * as THREE from 'three/webgpu';
 import { HITCH } from './hitch.js';
 
-/** A job silent this long (ms) has failed (the first answer includes laying out the town). A worker
- *  cannot answer while it computes, and a worker laying out one town while another's plans wait
- *  behind it was silent for 46 s: judged dead, the whole world went to the main thread, which then
- *  froze for a minute and more at each settlement (Florence → Suzhou: 84 s). Only a worker truly
- *  gone stays silent for minutes. */
-const STALL = 180000;
+/** A job silent this long (ms) has failed. The worker beats every 2 s whenever it is not in the
+ *  middle of one plan (build-worker.js; a plan takes a few seconds at most), so only a worker gone
+ *  (the browser let it go for its memory) stays silent this long. */
+const STALL = 40000;
+/** Settlements built by the same workers before they are started afresh, when idle: a worker kept
+ *  everything it ever loaded and, city after city, was let go of by the browser in mid-build. */
+const FRESH_AFTER = 4;
 
 export class Builder {
   constructor(n = 2) {
@@ -85,8 +86,9 @@ export class Builder {
       w.postMessage({ job, id, part, of: this.workers.length });
       return { job, w, done };
     });
+    this.built = (this.built || 0) + 1;
     return {
-      done: Promise.all(subs.map((x) => x.done)).then(() => chain),
+      done: Promise.all(subs.map((x) => x.done)).then(() => chain).finally(() => this.freshen()),
       cancel: () => { for (const x of subs) x.w.postMessage({ cancel: x.job }); },
     };
   }
@@ -117,7 +119,16 @@ export class Builder {
     ids.forEach((id, i) => this.workers[i % this.workers.length].postMessage({ warm: id }));
   }
 
+  /** Started afresh when idle after FRESH_AFTER settlements (see there). */
+  freshen() {
+    if (!this.ok || this.jobs.size || this.built < FRESH_AFTER) return;
+    this.built = 0;
+    for (const w of this.workers) w.terminate();
+    this.spawn();
+  }
+
   receive(d) {
+    if (d.beat) return;
     const j = this.jobs.get(d.job);
     if (j) j.heard = performance.now();
     if (d.fatal) { console.warn('build worker:', d.fatal); this.fail(); return; }
