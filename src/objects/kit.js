@@ -3,7 +3,7 @@
 // the pieces of one material into one shape, cached, so that a figure or a beast is a handful of
 // instances (one per material) rather than dozens.
 
-import { lathe } from '../core/geom.js';
+import { lathe, isWind, windMat, baseMat, placeHanging } from '../core/geom.js';
 import { BufferGeometry, Float32BufferAttribute, Matrix4, Quaternion, Vector3, Color } from '../core/three.js';
 import { MATERIALS } from '../core/palette.js';
 
@@ -16,11 +16,13 @@ export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 166
 const FAMILY = { cloth_: 'cloth_white', hide_: 'hide_white', skin_: 'skin_light' };
 const _lin = new Color(), _base = new Color();
 export function tint(mat, shade = 1) {
+  // (cloth in the wind, "<cloth>+wind": its family's base in the wind, cloth_white+wind)
+  const wind = isWind(mat), plain = baseMat(mat);
   for (const [pre, base] of Object.entries(FAMILY)) {
-    if (!mat.startsWith(pre) || !MATERIALS[mat] || !MATERIALS[base]) continue;
-    const a = _lin.set(MATERIALS[mat].color).toArray(), b = _base.set(MATERIALS[base].color).toArray();
+    if (!plain.startsWith(pre) || !MATERIALS[plain] || !MATERIALS[base]) continue;
+    const a = _lin.set(MATERIALS[plain].color).toArray(), b = _base.set(MATERIALS[base].color).toArray();
     const sh = Array.isArray(shade) ? shade : [shade, shade, shade];
-    return { base, color: [a[0] / b[0] * sh[0], a[1] / b[1] * sh[1], a[2] / b[2] * sh[2]] };
+    return { base: wind ? windMat(base) : base, color: [a[0] / b[0] * sh[0], a[1] / b[1] * sh[1], a[2] / b[2] * sh[2]] };
   }
   return null;
 }
@@ -38,22 +40,25 @@ export function placer(el, bag, k = 1, sc = null) {
   const [x, z] = el.at, y = el.y ?? 0, rot = el.rot ?? 0, s = (el.s ?? 1) * k;
   const S = sc ? [s * sc[0], s * sc[1], s * sc[2]] : [s, s, s];
   const M = new Matrix4().compose(_p.set(x, y, z), _q.setFromAxisAngle(_up, rot), _s.set(...S));
-  if (!bag.addInstance) return (mat, g) => { g.applyMatrix4(M); bag.add(mat, g); };
+  if (!bag.addInstance) return (mat, g) => { placeHanging(g, M); bag.add(mat, g); };
   const reach = REACH[el.t] ?? 230;
   return (mat, g, shade = 1) => { const t = tint(mat, shade); bag.addInstance(t ? t.base : mat, g, M, { color: t?.color ?? null, real: mat, reach }); };
 }
 
-/** Merge pieces (non-indexed position + normal) into one geometry. */
+/** Merge pieces (non-indexed position + normal, and hang where cloth hangs) into one geometry. */
 export function merge(list) {
   const gs = list.filter(Boolean).map((g) => (g.index ? g.toNonIndexed() : g));
   let n = 0;
   for (const g of gs) n += g.attributes.position.array.length;
   const pos = new Float32Array(n), nor = new Float32Array(n);
+  // (cloth in the wind keeps its hang: src/core/geom.js hangFrom; a piece without one hangs 0)
+  const hang = gs.some((g) => g.attributes.hang) ? new Float32Array(n / 3) : null;
   let o = 0;
-  for (const g of gs) { pos.set(g.attributes.position.array, o); nor.set(g.attributes.normal.array, o); o += g.attributes.position.array.length; }
+  for (const g of gs) { pos.set(g.attributes.position.array, o); nor.set(g.attributes.normal.array, o); if (hang && g.attributes.hang) hang.set(g.attributes.hang.array, o / 3); o += g.attributes.position.array.length; }
   const m = new BufferGeometry();
   m.setAttribute('position', new Float32BufferAttribute(pos, 3));
   m.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  if (hang) m.setAttribute('hang', new Float32BufferAttribute(hang, 1));
   return m;
 }
 

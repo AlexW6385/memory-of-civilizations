@@ -122,7 +122,7 @@ export class OpenFlora {
     const sway = sp.includes('palm') ? 0.12 : 0.08;
     if (geo.trunk) meshes.push(new THREE.InstancedMesh(geo.trunk, S.bark === 'rock_boulder' ? paletteMaterial('rock_boulder') : solidMaterial(S.bark, sway * 0.3), cap));
     if (geo.leaves) {
-      const mesh = new THREE.InstancedMesh(geo.leaves, geo.solidLeaves ? solidMaterial(S.leafMat, sway) : foliageMaterial(S.foliage, sway), cap);
+      const mesh = new THREE.InstancedMesh(geo.leaves, geo.solidLeaves ? solidMaterial(S.leafMat, sway) : foliageMaterial(S.foliage, sway, sp), cap);
       mesh.userData.tinted = true;
       mesh.setColorAt(0, new THREE.Color(1, 1, 1));
       meshes.push(mesh);

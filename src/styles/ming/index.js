@@ -10,7 +10,7 @@
 
 import { BufferGeometry, Float32BufferAttribute, Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import { registerStyle } from '../../core/build.js';
-import { box, lathe, fromTriangles, frustum, orientOutward } from '../../core/geom.js';
+import { box, lathe, fromTriangles, frustum, orientOutward, addCloth } from '../../core/geom.js';
 
 // The materials of the vocabulary; an element may change them (el.pal), e.g. the palace halls of
 // Beijing: red columns, yellow glazed tiles, white marble (src/styles/qing/).
@@ -1586,6 +1586,15 @@ function houseJiangnan(el, { bag, col }) {
     const p0 = W(a0, b, ya), p1 = W(a1, b, ya), p2 = W(a1, b, yb), p3 = W(a0, b, yb), t = [...p0, ...p1, ...p2, ...p0, ...p2, ...p3];
     put(mat, facing(t, dirV(side))); if (two) put(mat, facing(t, dirV(-side)));
   };
+  /** A cloth hung in the wind in the plane v = b from its top yb down to ya, seen from both sides, in rows (it bends as it sways). */
+  const qCloth = (mat, a0, a1, ya, yb, b) => {
+    const t = [], n = Math.max(2, Math.ceil((yb - ya) / 0.25));
+    for (let k = 0; k < n; k++) {
+      const y0 = ya + (yb - ya) * k / n, y1 = ya + (yb - ya) * (k + 1) / n, p0 = W(a0, b, y0), p1 = W(a1, b, y0), p2 = W(a1, b, y1), p3 = W(a0, b, y1);
+      t.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3);
+    }
+    addCloth(bag, mat, fromTriangles(facing(t, dirV(-1)).concat(facing(t, dirV(1)))), yb);
+  };
   /** A vertical quad in the plane u = a, facing −u (side −1) or +u. */
   const qU = (mat, b0, b1, ya, yb, a, side) => {
     const p0 = W(a, b0, ya), p1 = W(a, b1, ya), p2 = W(a, b1, yb), p3 = W(a, b0, yb);
@@ -1900,7 +1909,7 @@ function houseJiangnan(el, { bag, col }) {
         const a = 0.7 + rand() * (L - 3.4), ln = Math.min(2.4, L - a - 0.5), yy = yf + 1.95, vb2 = uf - 0.85;
         for (const aa of [a, a + ln]) B(aa - 0.025, vb2, aa + 0.025, uf, yy - 0.04, yy + 0.04, 'bamboo_culm');
         B(a, vb2 - 0.03, a + ln, vb2 + 0.03, yy + 0.04, yy + 0.1, 'bamboo_culm');
-        for (let k = 0; k < 3; k++) { const c = a + 0.3 + k * ln / 3.2; qF(['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_brown'][Math.floor(rand() * 4)], c, c + 0.4 + rand() * 0.2, yy - 0.8 - rand() * 0.3, yy + 0.04, vb2, -1, true); }
+        for (let k = 0; k < 3; k++) { const c = a + 0.3 + k * ln / 3.2; qCloth(['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_brown'][Math.floor(rand() * 4)], c, c + 0.4 + rand() * 0.2, yy - 0.8 - rand() * 0.3, yy + 0.04, vb2); }
       }
       // the stains under the eave and the patches
       if (det) {

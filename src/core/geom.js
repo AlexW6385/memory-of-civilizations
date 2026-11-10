@@ -1,7 +1,8 @@
 // Geometry primitives for architecture. Pure three.js core: runs in the browser and in Node
 // (the baker and the plan checker build the same geometry the viewer shows).
 //
-// Every primitive returns a non-indexed BufferGeometry with `position` and `normal` only. The
+// Every primitive returns a non-indexed BufferGeometry with `position` and `normal` only (cloth hung
+// in the wind adds `hang`, see hangFrom; the bag keeps it through merging and instancing). The
 // viewer's merged meshes are indexed (GeoBag weld); the tools' stay triangle soups.
 // Materials are procedural and work from world position, so no UVs are needed.
 
@@ -192,6 +193,63 @@ export function place(g, x = 0, y = 0, z = 0, yaw = 0, s = 1) {
   return g;
 }
 
+/**
+ * Cloth hung in the wind (src/engine/materials.js clothSway): a material key "<key>+wind" draws the
+ * piece swayed downwind by how far each vertex hangs below its attachment, read from the piece's
+ * `hang` attribute (metres, 0 at the pole, bracket or line). windMat(mat) gives the key, baseMat
+ * the plain one; hangFrom(g, top) sets `hang` from the attachment's height.
+ */
+export const WIND = '+wind';
+export const isWind = (mat) => typeof mat === 'string' && mat.endsWith(WIND);
+export const windMat = (mat) => (isWind(mat) ? mat : mat + WIND);
+export const baseMat = (mat) => (isWind(mat) ? mat.slice(0, -WIND.length) : mat);
+/**
+ * Set a piece's `hang` (Float32, one a vertex: three's WebGPU backend takes no 8- or 16-bit
+ * attribute of one component, and only cloth carries it): how far below its attachment each vertex
+ * hangs, top - y (never below 0). `top` is the attachment's height (a number, in the piece's own
+ * coordinates) or a function (x, z) => height (a sagging line, a sloping pole). Returns g.
+ */
+export function hangFrom(g, top) {
+  const P = g.attributes.position.array, n = P.length / 3, H = new Float32Array(n);
+  const f = typeof top === 'function' ? top : null;
+  for (let i = 0; i < n; i++) H[i] = Math.max(0, (f ? f(P[3 * i], P[3 * i + 2]) : top) - P[3 * i + 1]);
+  g.setAttribute('hang', new Float32BufferAttribute(H, 1));
+  return g;
+}
+/**
+ * A piece of cloth as a box whose four sides are cut into rows at most `row` metres high (the sway
+ * bends a hanging piece: a side of one row would stay straight, and what lies on it — letters, a
+ * trim — would part from it; at a quarter metre a row the bend is followed to a few millimetres).
+ * For banners, curtains, washing, hung cloth signs.
+ */
+export function clothBox(x0, y0, z0, x1, y1, z1, row = 0.25) {
+  const n = Math.max(1, Math.ceil((y1 - y0) / row - 1e-6)), out = [];
+  const b = (y) => [[x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]];
+  const B0 = b(y0), T1 = b(y1);
+  quad(out, T1[0], T1[3], T1[2], T1[1]);
+  quad(out, B0[0], B0[1], B0[2], B0[3]);
+  for (let k = 0; k < n; k++) {
+    const lo = b(y0 + (y1 - y0) * k / n), hi = b(y0 + (y1 - y0) * (k + 1) / n);
+    quad(out, lo[0], hi[0], hi[1], lo[1]); quad(out, lo[1], hi[1], hi[2], lo[2]);
+    quad(out, lo[2], hi[2], hi[3], lo[3]); quad(out, lo[3], hi[3], hi[0], lo[0]);
+  }
+  return fromTriangles(out);
+}
+/** A cloth hung in the wind added to a bag: material mat+wind, `hang` from the attachment's height `top` (hangFrom). */
+export function addCloth(bag, mat, g, top) {
+  if (!g) return;
+  bag.add(windMat(mat), hangFrom(g, top));
+}
+/** A matrix's stretch along y (the factor a piece's hang grows by when the matrix places it). */
+const yScale = (e) => Math.hypot(e[4], e[5], e[6]);
+/** A piece placed by a matrix: its hang (if any) scaled with it. */
+export function placeHanging(g, M) {
+  g.applyMatrix4(M);
+  const h = g.attributes.hang, s = yScale(M.elements);
+  if (h && Math.abs(s - 1) > 1e-6) { const H = h.array; for (let i = 0; i < H.length; i++) H[i] *= s; h.needsUpdate = true; }
+  return g;
+}
+
 function sub2(a, b) { return [a[0] - b[0], a[1] - b[1]]; }
 function norm2(a) { const l = Math.hypot(a[0], a[1]) || 1; return [a[0] / l, a[1] / l]; }
 
@@ -201,6 +259,8 @@ export const DEPTH_STEP = 0.0003;
 // overrides where two materials laid in one plane would otherwise share a rank (tools/surface-check.mjs finds them)
 const RANK_OVERRIDE = { paint_minoan_red: 20, plaster_white: 16, brick_paving: 6, stucco_ochre: 14, stucco_warm: 11, pavonazzetto: 5, vault_stars: 1, paint_dancheong: 8, stucco_cream: 15, plaster_castle: 17, raupo: 18, brick: 19, paint_cab_yellow: 3, cloth_indigo: 13, cloth_grey: 21 };
 export function depthRank(mat) {
+  // (cloth in the wind stands off as its plain cloth does)
+  mat = baseMat(mat);
   if (mat in RANK_OVERRIDE) return RANK_OVERRIDE[mat];
   let h = 2166136261;
   for (let i = 0; i < mat.length; i++) h = Math.imul(h ^ mat.charCodeAt(i), 16777619);
@@ -227,7 +287,8 @@ function shapeOf(mat, g, moveOnly = false) {
     const x = P[i], y = P[i + 1], z = P[i + 2];
     if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z;
   }
-  let axis = !moveOnly;
+  // (a hanging piece is never stretched: its hang would have to stretch with it)
+  let axis = !moveOnly && !g.attributes.hang;
   if (axis) for (let i = 0; i < N.length; i++) { const v = Math.abs(N[i]); if (v > AXIS_EPS && Math.abs(v - 1) > AXIS_EPS) { axis = false; break; } }
   const sx = x1 - x0, sy = y1 - y0, sz = z1 - z0;
   if (!(sx + sy + sz > 0) || !Number.isFinite(sx + sy + sz)) return null;
@@ -244,7 +305,7 @@ function shapeOf(mat, g, moveOnly = false) {
   const r = (v) => Math.round((v / n) * 1000);
   const size = axis ? '' : `${Math.round(sx * 1000)},${Math.round(sy * 1000)},${Math.round(sz * 1000)}`;
   return {
-    key: `${mat}|${n}|${axis ? 's' : 't'}|${size}|${r(cx)},${r(cy)},${r(cz)},${r(qx)},${r(qy)},${r(qz)}|${r(nx * 10)},${r(ny * 10)},${r(nz * 10)}`,
+    key: `${mat}|${g.attributes.hang ? 'h' : ''}${n}|${axis ? 's' : 't'}|${size}|${r(cx)},${r(cy)},${r(cz)},${r(qx)},${r(qy)},${r(qz)}|${r(nx * 10)},${r(ny * 10)},${r(nz * 10)}`,
     axis, t: [x0, y0, z0], s: axis ? [ix === 1 && !(sx > 1e-6) ? 1 : sx, iy === 1 && !(sy > 1e-6) ? 1 : sy, iz === 1 && !(sz > 1e-6) ? 1 : sz] : [1, 1, 1],
     inv: [ix, iy, iz],
   };
@@ -255,6 +316,9 @@ function sameShape(ga, a, gb, b) {
   const PA = ga.attributes.position.array, PB = gb.attributes.position.array;
   const NA = ga.attributes.normal.array, NB = gb.attributes.normal.array;
   if (PA.length !== PB.length) return false;
+  const HA = ga.attributes.hang?.array, HB = gb.attributes.hang?.array;
+  if (!HA !== !HB) return false;
+  if (HA) for (let i = 0; i < HA.length; i++) if (Math.abs(HA[i] - HB[i]) > 2e-4) return false;
   const tol = 2e-4;
   for (let i = 0; i < PA.length; i += 3) {
     for (let k = 0; k < 3; k++) {
@@ -267,21 +331,23 @@ function sameShape(ga, a, gb, b) {
 
 /** The prototype of a piece: its shape at the origin (normalised if stretched), indexed. */
 function prototypeOf(g, sh, d) {
-  const P = g.attributes.position.array, N = g.attributes.normal.array, n = P.length / 3;
+  const P = g.attributes.position.array, N = g.attributes.normal.array, n = P.length / 3, H = g.attributes.hang?.array;
   const [x0, y0, z0] = sh.t, [ix, iy, iz] = sh.inv;
+  const hang = H ? [] : null;
   const pos = [], nor = [], index = new (n > 65535 ? Uint32Array : Uint16Array)(n), seen = new Map();
   for (let i = 0; i < n; i++) {
     let x = (P[3 * i] - x0) * ix, y = (P[3 * i + 1] - y0) * iy, z = (P[3 * i + 2] - z0) * iz;
     // moved pieces take the material's stand-off here; stretched ones in their matrices
     if (!sh.axis && d) { x += N[3 * i] * d; y += N[3 * i + 1] * d; z += N[3 * i + 2] * d; }
-    const k = `${Math.round(x * 1e5)},${Math.round(y * 1e5)},${Math.round(z * 1e5)},${Math.round(N[3 * i] * 1e3)},${Math.round(N[3 * i + 1] * 1e3)},${Math.round(N[3 * i + 2] * 1e3)}`;
+    const k = `${Math.round(x * 1e5)},${Math.round(y * 1e5)},${Math.round(z * 1e5)},${Math.round(N[3 * i] * 1e3)},${Math.round(N[3 * i + 1] * 1e3)},${Math.round(N[3 * i + 2] * 1e3)}${H ? ',' + Math.round(H[i] * 1e4) : ''}`;
     let j = seen.get(k);
-    if (j === undefined) { j = pos.length / 3; seen.set(k, j); pos.push(x, y, z); nor.push(N[3 * i], N[3 * i + 1], N[3 * i + 2]); }
+    if (j === undefined) { j = pos.length / 3; seen.set(k, j); pos.push(x, y, z); nor.push(N[3 * i], N[3 * i + 1], N[3 * i + 2]); if (H) hang.push(H[i]); }
     index[i] = j;
   }
   const m = new BufferGeometry();
   m.setAttribute('position', new Float32BufferAttribute(pos, 3));
   m.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  if (hang) m.setAttribute('hang', new Float32BufferAttribute(hang, 1));
   m.setIndex(indexAttribute(index));
   m.computeBoundingBox(); m.computeBoundingSphere();
   // the stand-off of a stretched piece: its box grown by d where it has depth, moved by d toward
@@ -360,22 +426,26 @@ function mergeInto(mat, list, d, detail, join = false) {
   let count = 0;
   for (const g of list) count += g.attributes.position.count;
   const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3);
+  // cloth in the wind keeps its hang (a piece without one hangs nowhere: 0); other materials none
+  const hang = isWind(mat) ? new Float32Array(count) : null;
   let o = 0;
   // copy and let go of each piece as it is copied, so the peak is one merged copy, not two
-  for (let i = 0; i < list.length; i++) { const g = list[i]; pos.set(g.attributes.position.array, o); nor.set(g.attributes.normal.array, o); o += g.attributes.position.array.length; list[i] = null; }
+  for (let i = 0; i < list.length; i++) { const g = list[i]; pos.set(g.attributes.position.array, o); nor.set(g.attributes.normal.array, o); if (hang && g.attributes.hang) hang.set(g.attributes.hang.array, o / 3); o += g.attributes.position.array.length; list[i] = null; }
   // each material stands off its faces by its own fraction of a millimetre or so, so that two
   // materials laid in the same plane (a lattice in its frame, paving on a terrace) never fight
   // in the depth buffer
   if (d) for (let k = 0; k < pos.length; k++) pos[k] += nor[k] * d;
   const m = new BufferGeometry();
   if (join) {
-    const w = weld(pos, nor);
+    const w = weld(pos, nor, hang);
     m.setAttribute('position', new Float32BufferAttribute(w.pos, 3));
     m.setAttribute('normal', new Float32BufferAttribute(w.nor, 3));
+    if (w.hang) m.setAttribute('hang', new Float32BufferAttribute(w.hang, 1));
     m.setIndex(indexAttribute(w.index));
   } else {
     m.setAttribute('position', new Float32BufferAttribute(pos, 3));
     m.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+    if (hang) m.setAttribute('hang', new Float32BufferAttribute(hang, 1));
   }
   m.computeBoundingBox(); m.computeBoundingSphere();
   return detail ? [{ mat, geometry: m, detail }] : [{ mat, geometry: m }];
@@ -409,9 +479,11 @@ export function packNormals(g) {
  * index (Uint16 under 65536 vertices, else Uint32). Only bit-identical corners are joined, so the
  * picture is exactly the soup's: a flat face keeps its own normals, a crease stays a crease.
  */
-export function weld(pos, nor) {
+export function weld(pos, nor, hang = null) {
   const n = pos.length / 3;
   const P = new Uint32Array(pos.buffer, pos.byteOffset, pos.length), N = new Uint32Array(nor.buffer, nor.byteOffset, nor.length);
+  // (with a hang, corners are the same vertex only if they hang the same too)
+  const Hb = hang ? new Uint32Array(hang.buffer, hang.byteOffset, hang.length) : null;
   let size = 1;
   while (size < n * 2) size <<= 1;
   const mask = size - 1, table = new Int32Array(size).fill(-1);
@@ -426,26 +498,28 @@ export function weld(pos, nor) {
     h = Math.imul(h ^ (h >>> 15) ^ e, 0x165667b1);
     h = Math.imul(h ^ (h >>> 13) ^ f, 0x85ebca6b);
     h = Math.imul(h ^ (h >>> 16) ^ g, 0xc2b2ae35);
+    if (Hb) h = Math.imul(h ^ (h >>> 13) ^ Hb[i], 0x27d4eb2f);
     h ^= h >>> 15;
     let s = h & mask, j;
     for (;;) {
       j = table[s];
       if (j < 0) { j = kept++; table[s] = j; first[j] = i; break; }
       const q = 3 * first[j];
-      if (P[q] === a && P[q + 1] === b && P[q + 2] === c && N[q] === e && N[q + 1] === f && N[q + 2] === g) break;
+      if (P[q] === a && P[q + 1] === b && P[q + 2] === c && N[q] === e && N[q + 1] === f && N[q + 2] === g && (!Hb || Hb[first[j]] === Hb[i])) break;
       s = (s + 1) & mask;
     }
     index[i] = j;
   }
-  const outP = new Float32Array(kept * 3), outN = new Float32Array(kept * 3);
+  const outP = new Float32Array(kept * 3), outN = new Float32Array(kept * 3), outH = hang ? new Float32Array(kept) : null;
   for (let j = 0; j < kept; j++) {
     const q = 3 * first[j], o = 3 * j;
+    if (outH) outH[j] = hang[first[j]];
     outP[o] = pos[q]; outP[o + 1] = pos[q + 1]; outP[o + 2] = pos[q + 2];
     outN[o] = nor[q]; outN[o + 1] = nor[q + 1]; outN[o + 2] = nor[q + 2];
   }
   // the index type follows the vertices kept, not the corners
   const idx = kept <= 65535 && index instanceof Uint32Array ? Uint16Array.from(index) : index;
-  return { pos: outP, nor: outN, index: idx };
+  return { pos: outP, nor: outN, hang: outH, index: idx };
 }
 
 export class GeoBag {
@@ -463,8 +537,10 @@ export class GeoBag {
   addInstance(mat, g, matrix, { color = null, real = mat, reach = 230 } = {}) {
     if (!g) return;
     if (g.index) g = g.toNonIndexed();
+    // (a hang only on cloth in the wind; such a piece's family and real material are both "+wind")
+    if (g.attributes.hang && !isWind(mat)) g.deleteAttribute('hang');
     const sh = shapeOf(mat, g, true);
-    if (!sh) { this.add(real, g.applyMatrix4(matrix)); return; }
+    if (!sh) { this.add(real, placeHanging(g, matrix)); return; }
     let list = this.explicit.get(sh.key);
     if (!list) this.explicit.set(sh.key, (list = []));
     let e = list.find((x) => sameShape(x.g, x.sh, g, sh));
@@ -476,6 +552,7 @@ export class GeoBag {
   add(mat, g) {
     if (!g) return;
     if (!this.parts.has(mat)) this.parts.set(mat, []);
+    if (g.attributes.hang && !isWind(mat)) g.deleteAttribute('hang');
     this.parts.get(mat).push(g.index ? g.toNonIndexed() : g);
   }
   /**
@@ -493,7 +570,7 @@ export class GeoBag {
         if (!worth) {
           const local = prototypeOf(e.g, e.sh, 0).geometry.toNonIndexed();
           const M = new Matrix4();
-          for (const it of e.items) this.add(it.real, local.clone().applyMatrix4(M.fromArray(it.m)));
+          for (const it of e.items) this.add(it.real, placeHanging(local.clone(), M.fromArray(it.m)));
           continue;
         }
         const d = depthRank(e.mat) * DEPTH_STEP;

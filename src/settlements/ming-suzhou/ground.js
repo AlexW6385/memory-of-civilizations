@@ -136,6 +136,7 @@ export const ground = {
   maxDensity: { willow: 20, bamboo: 3, fig: 1.5, red_pine: 0.32, maple: 0.9, apple: 0.6, camphor: 0.12, tea: 0.8, grass: 80 },
   // late spring in Jiangnan (the plum rains near): soft hazy sun, drizzle and mist over the water
   climate: {
+    waterline: LEVEL.canal,              // the canals' still water: the stain line on their walls (src/engine/materials.js)
     sun: { az: 140, el: 40, color: [1.0, 0.92, 0.82], intensity: 3.0, lat: 31, dec: 15, hour: 10 },
     sky: { turbidity: 4.4, rayleigh: 1.35, mie: 0.0055, mieG: 0.8, zenith: [0.11, 0.15, 0.25], horizon: [0.33, 0.34, 0.34] },
     fog: { color: [0.64, 0.67, 0.68], density: 0.0007, height: 0.012 },

@@ -12,6 +12,7 @@ import { material } from './materials.js';
 import { SMALL } from './layers.js';
 import { releaseAfterUpload } from './release.js';
 import { coarse, LIFE_FULL } from './cells.js';
+import { placeHanging } from '../core/geom.js';
 
 /** The view culling of the copies (as merge.js): drawn within 80° of the view, chosen again each 10° of turn; all within 6 m. */
 const COS_VIEW = Math.cos(80 * Math.PI / 180), COS_TURN = Math.cos(10 * Math.PI / 180), NEAR_ALL2 = 36;
@@ -29,6 +30,10 @@ const samePrototype = (a, b) => {
   const A = a.attributes.position.array, B = b.attributes.position.array;
   if (A.length !== B.length || a.index.count !== b.index.count) return false;
   for (let i = 0; i < A.length; i++) if (Math.abs(A[i] - B[i]) > 1e-4) return false;
+  // (cloth in the wind: hung the same too)
+  const HA = a.attributes.hang?.array, HB = b.attributes.hang?.array;
+  if (!HA !== !HB) return false;
+  if (HA) for (let i = 0; i < HA.length; i++) if (Math.abs(HA[i] - HB[i]) > 1e-4) return false;
   return true;
 };
 
@@ -72,7 +77,7 @@ export class LifeInstances {
           const local = s.geometry.clone();
           for (const { p } of s.chunks) {
             for (let i = 0; i < p.reals.length; i++) {
-              const g = local.clone().applyMatrix4(M.fromArray(p.matrices, i * 16));
+              const g = placeHanging(local.clone(), M.fromArray(p.matrices, i * 16));
               const list = rareByMat.get(p.reals[i]) || rareByMat.set(p.reals[i], []).get(p.reals[i]);
               list.push({ g, x: p.matrices[i * 16 + 12], y: p.matrices[i * 16 + 13], z: p.matrices[i * 16 + 14], reach: p.reach[i] });
             }
@@ -115,7 +120,8 @@ export class LifeInstances {
         const g = s.geometry, P = g.attributes.position.array, N = g.attributes.normal.array, I = g.index.array;
         // (made in the build worker where the tiles were built there: build-worker.js)
         const pre = s.chunks.map(({ p }) => p.geometry.userData.coarse).find((c) => c !== undefined);
-        shape.makeFar = () => {
+        // (cloth in the wind: no coarse version, which would have no hang)
+        if (!g.attributes.hang) shape.makeFar = () => {
           const low = pre ? pre.low : coarse(P, N, I);
           if (!low) return;
           const lg = new THREE.BufferGeometry();
@@ -151,6 +157,7 @@ export class LifeInstances {
         const g = new THREE.BufferGeometry();
         g.setAttribute('position', merged.attributes.position);
         g.setAttribute('normal', merged.attributes.normal);
+        if (merged.attributes.hang) g.setAttribute('hang', merged.attributes.hang);
         // (of even length: a 16-bit index is written to the GPU in whole 4-byte words, below)
         g.setIndex(new THREE.BufferAttribute(new index.constructor(index.length + (index.length & 1)), 1, merged.index.normalized));
         g.index.setUsage(THREE.DynamicDrawUsage);
@@ -278,10 +285,13 @@ function mergeList(gs) {
   let n = 0, ni = 0;
   for (const g of gs) { n += g.attributes.position.count; ni += g.index ? g.index.count : g.attributes.position.count; }
   const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), idx = n > 65535 ? new Uint32Array(ni) : new Uint16Array(ni);
+  // (cloth in the wind keeps its hang: src/core/geom.js hangFrom)
+  const hang = gs.some((g) => g.attributes.hang) ? new Float32Array(n) : null;
   let o = 0, oi = 0;
   for (const g of gs) {
     const v = g.attributes.position.count;
     pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3);
+    if (hang && g.attributes.hang) hang.set(g.attributes.hang.array, o);
     if (g.index) { const I = g.index.array; for (let k = 0; k < I.length; k++) idx[oi + k] = I[k] + o; oi += I.length; }
     else { for (let k = 0; k < v; k++) idx[oi + k] = o + k; oi += v; }
     o += v; g.dispose();
@@ -289,6 +299,7 @@ function mergeList(gs) {
   const m = new THREE.BufferGeometry();
   m.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   m.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  if (hang) m.setAttribute('hang', new THREE.Float32BufferAttribute(hang, 1));
   // a Uint16 index flagged normalized stays 16-bit on the GPU (src/core/geom.js, indexAttribute)
   m.setIndex(new THREE.BufferAttribute(idx, 1, idx instanceof Uint16Array));
   m.computeBoundingBox(); m.computeBoundingSphere();
