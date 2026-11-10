@@ -434,7 +434,6 @@ export class LodSet {
     for (let i = 0; i < n; i++) { w.copy(c).applyMatrix4(M.fromArray(matrices, i * 16)); pos[i * 3] = w.x; pos[i * 3 + 1] = w.y; pos[i * 3 + 2] = w.z; }
     const mk = (g) => {
       const m = make(g, mat, matrices, colors);
-      m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.instanceColor.setUsage(THREE.DynamicDrawUsage);
       m.count = 0; m.visible = false; m.userData.lod = this; m.userData.sig = -1;
       return m;
     };
@@ -569,7 +568,6 @@ export class TileBatch {
     }
     // (of even length: a 16-bit index is written to the GPU in whole 4-byte words)
     const index = new THREE.BufferAttribute(new this.index.constructor(this.index.length + (this.index.length & 1)), 1, geometry.index.normalized);
-    index.setUsage(THREE.DynamicDrawUsage);
     const g = new THREE.BufferGeometry();
     for (const [k, a] of Object.entries(geometry.attributes)) g.setAttribute(k, a);
     g.setIndex(index);

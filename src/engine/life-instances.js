@@ -104,9 +104,8 @@ export class LifeInstances {
         // second mesh was only a second draw.)
         const make = (cast, geometry = s.geometry) => {
           const mesh = new THREE.InstancedMesh(geometry, material(s.mat), s.n);
-          mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
           // always with instance colours (white where untinted): one form of each material (world.js buildingMesh)
-          mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(s.n * 3).fill(1), 3); mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+          mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(s.n * 3).fill(1), 3);
           mesh.count = 0; mesh.visible = false;
           mesh.castShadow = cast && this.castsShadow(s.mat);
           mesh.receiveShadow = true;
@@ -161,7 +160,6 @@ export class LifeInstances {
         if (merged.attributes.hang) g.setAttribute('hang', merged.attributes.hang);
         // (of even length: a 16-bit index is written to the GPU in whole 4-byte words, below)
         g.setIndex(new THREE.BufferAttribute(new index.constructor(index.length + (index.length & 1)), 1, merged.index.normalized));
-        g.index.setUsage(THREE.DynamicDrawUsage);
         g.setDrawRange(0, 0);
         g.boundingBox = merged.boundingBox.clone(); g.boundingSphere = merged.boundingSphere.clone();
         const mesh = new THREE.InstancedMesh(g, material(mat), 1);

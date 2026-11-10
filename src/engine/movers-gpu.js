@@ -180,8 +180,7 @@ export class MoverSet {
     this.max = max; this.n = 0;
     this.group = new THREE.Group(); this.group.name = `movers:${name}`;
     this.ibuf = new THREE.InstancedInterleavedBuffer(new Float32Array(max * ISTRIDE), ISTRIDE, 1);
-    this.ibuf.setUsage(THREE.DynamicDrawUsage);
-    this.matrix = new THREE.InstancedBufferAttribute(new Float32Array(max * 16), 16); this.matrix.setUsage(THREE.DynamicDrawUsage);
+    this.matrix = new THREE.InstancedBufferAttribute(new Float32Array(max * 16), 16);
     this.meshes = [];
     for (const [group, d] of Object.entries(data.groups)) {
       const n = d.position.length / 3, v = new Float32Array(n * VSTRIDE);
@@ -246,7 +245,7 @@ export class WakeSet {
     g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array([0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0]), 3));
     g.setIndex([0, 2, 1, 0, 3, 2]);
     this.a = {};
-    for (const [k, size] of [['iP', 4], ['iT', 4], ['iW', 4]]) { const at = new THREE.InstancedBufferAttribute(new Float32Array(max * size), size); at.setUsage(THREE.DynamicDrawUsage); this.a[k] = at; g.setAttribute(k, at); }
+    for (const [k, size] of [['iP', 4], ['iT', 4], ['iW', 4]]) { const at = new THREE.InstancedBufferAttribute(new Float32Array(max * size), size); this.a[k] = at; g.setAttribute(k, at); }
     this.al = Object.values(this.a);
     g.boundingSphere = BIG; g.boundingBox = BIGBOX;
     this.mesh = new THREE.InstancedMesh(g, wakeMaterial(), max);
