@@ -108,6 +108,8 @@ export function buildTile(face, level, i, j, n = 32) {
  * moat is not covered by the sea at another level.
  */
 const SINK = 20;
+/** A sea vertex with the ground this far above it (m) is under the ground. */
+const DRY_ABOVE = 1;
 function buildWater(face, s0, t0, size, m, gAt) {
   const verts = (m + 1) * (m + 1), total = verts + 4 * m;
   const position = new Float32Array(total * 3), depth = new Float32Array(total);
@@ -118,7 +120,9 @@ function buildWater(face, s0, t0, size, m, gAt) {
     const r = R - drop + (sh ?? Math.min(0, g.h) - SINK);
     position[v * 3] = u[0] * r; position[v * 3 + 1] = u[1] * r; position[v * 3 + 2] = u[2] * r;
     depth[v] = Math.max(0, (sh ?? 0) - g.h);
-    if (v < verts) dry[v] = sh == null ? 1 : 0;
+    // (dry too where the ground stands a metre above the sea: the sea is a sphere round the whole
+    // planet, and every tile on land had a sea under its ground, drawn for nothing)
+    if (v < verts) dry[v] = sh == null || g.h > sh + DRY_ABOVE ? 1 : 0;
     return v++;
   };
   for (let b = 0; b <= m; b++) for (let a = 0; a <= m; a++) put(a, b, 0);
