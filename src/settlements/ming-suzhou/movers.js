@@ -184,7 +184,8 @@ export function walkerShapes(sb) {
  * sculling oar left out (the movers' own oar sways on the pin) — and the oar itself. Built at
  * 7 m, bow toward −z, the waterline at y 0. Variants `covered|near`, `covered|far`, `cargo|…`, `oar`.
  */
-export const BOAT = { L: 7, pin: [0.2, 0.774, 3.15], deck: 0.57, stern: 2.35, passenger: [-0.05, 0.1, -0.3] };
+// (hull: its half-beam over the gunwale and half-length, stem to stern, at scale 1: the moving boats keep these clear of one another)
+export const BOAT = { L: 7, pin: [0.2, 0.774, 3.15], deck: 0.57, stern: 2.35, passenger: [-0.05, 0.1, -0.3], hull: [1.34, 3.55] };
 export function boatShapes(sb) {
   const got = [];
   STYLES.ming.elements.boat({ at: [0, 0], dir: [0, 1], len: BOAT.L, y: 0 }, { bag: { add: (m, g) => got.push([m, g]) }, col: { circle() {}, box() {} } });

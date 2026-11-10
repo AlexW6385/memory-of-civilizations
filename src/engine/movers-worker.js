@@ -24,7 +24,7 @@ self.onmessage = async (e) => {
     const ww = D.walkways(), walk = graphFromRects(ww.rects, ww.links, ww.clip);
     const wa = D.waterways(), water = graphFromRects(wa.rects, [], wa.clip);
     water.bridges = wa.bridges;
-    water.lanes = waterLanes(water, await D.staticBoats(), D.PARAMS.boats);
+    water.lanes = waterLanes(water, await D.staticBoats(), D.BOAT.hull);
     self.postMessage({ id, sets: { walkers: pack(W), boats: pack(B) }, walk, water, params: D.PARAMS, kinds: { walkers: D.WALKERS, crew: D.CREW, boat: D.BOAT } }, transfer);
   } catch (err) {
     self.postMessage({ id, error: String(err?.stack || err) });
@@ -34,11 +34,12 @@ self.onmessage = async (e) => {
 /**
  * The lanes of each canal edge, kept clear of the boats that stand in it: lane offsets across
  * (m, from the middle line, to the right of a → b), sampled every metre along; a sample is blocked
- * where a moving boat there (half-length 3.5, half-beam 1.0) would touch a standing one.
+ * where a moving boat there (the largest: the settlement's boat hull [half-beam, half-length]
+ * at the largest scale movers.js gives it, 0.82 across and 7.4 / 7 along) would come within 0.3 m of a standing one.
  * Per edge { off: [offsets], step: 1, n (samples), blocked: Uint8Array(n × lanes) }.
  */
-function waterLanes(G, statics, P) {
-  const HB = P.halfBeam ?? 1.0, HL = 3.5, out = [];
+function waterLanes(G, statics, hull = [1.34, 3.55]) {
+  const HB = hull[0] * 0.82, HL = hull[1] * 7.4 / 7, out = [];
   for (const e of G.edges) {
     const [ax, az] = G.nodes[e.a], [bx, bz] = G.nodes[e.b], L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
     const u = Math.max(0, e.w - HB - 0.3), K = Math.max(1, 2 * Math.floor(u / 0.25) + 1), off = Array.from({ length: K }, (_, k) => (K === 1 ? 0 : -u + 2 * u * k / (K - 1)));
@@ -49,8 +50,8 @@ function waterLanes(G, statics, P) {
       // (its extent along and across this canal: the standing boats lie along the canals)
       const along = Math.abs(S.u[0] * ux + S.u[1] * uz), sl = S.hl * along + S.hw * (1 - along), so = S.hw * along + S.hl * (1 - along);
       for (let j = 0; j < n; j++) {
-        if (Math.abs(j - ds) >= sl + HL) continue;
-        for (let k = 0; k < K; k++) if (Math.abs(off[k] - dO) < so + HB + 0.08) blocked[j * K + k] = 1;
+        if (Math.abs(j - ds) >= sl + HL + 0.3) continue;
+        for (let k = 0; k < K; k++) if (Math.abs(off[k] - dO) < so + HB + 0.3) blocked[j * K + k] = 1;
       }
     }
     out.push({ off, step: 1, n, blocked });
