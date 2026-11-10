@@ -1,6 +1,8 @@
-// Dynamic resolution (DESIGN §8): on the high preset the picture's pixel ratio is lowered a step
-// (1.5 → 1.25 → 1.0, never below 1.0) when the frames stay slow, and raised again when there is
-// room for a while. `?dpr=1.25` pins the ratio (on any preset) and turns this off.
+// Dynamic resolution (DESIGN §8): the picture's pixel ratio is lowered a step (high: 1.5 → 1.25 →
+// 1.0 → 0.85; medium: 1.0 → 0.85, and → 0.75 on a screen of two pixels a point, where that is
+// still 1.5 screen pixels to one) when the frames stay slow, and raised again when there is room
+// for a while. (A view that missed every other refresh at 1.0 — Suzhou on an M2 at 60 Hz, the GPU
+// the limit — is smooth at 0.85, and a little softer.) `?dpr=1.25` pins the ratio (on any preset) and turns this off.
 //
 // Slow: the frame interval, smoothed over ~20 frames drawn at the full rate (the frames of a view
 // held still, drawn at 24 fps on purpose, are not counted), above SLOW ms for DOWN_HOLD ms, with
@@ -10,7 +12,7 @@
 // on a slow machine): changes are kept apart by GAP ms at least, and a step up followed soon by a
 // step down doubles the wait before the next step up (to at most four minutes).
 
-const STEPS = [1.5, 1.25, 1.0];
+const STEPS = { high: [1.5, 1.25, 1.0, 0.85], medium: [1.0, 0.85, 0.75] };
 const SLOW = 20, ROOM = 13, DOWN_HOLD = 2000, UP_HOLD = 6000, GAP = 5000;
 
 export class DynamicResolution {
@@ -26,9 +28,12 @@ export class DynamicResolution {
   }
 
   /** The steps for this screen (none above the screen's own ratio). */
-  get steps() { return [...new Set(STEPS.map((s) => Math.min(s, globalThis.devicePixelRatio || 1)))]; }
+  get steps() {
+    const dpr = globalThis.devicePixelRatio || 1, floor = dpr >= 1.5 ? 0.75 : 0.85;
+    return [...new Set((STEPS[this.R.quality] || []).filter((s) => s >= floor).map((s) => Math.min(s, dpr)))];
+  }
 
-  get active() { return !this.pin && this.R.quality === 'high' && this.steps.length > 1; }
+  get active() { return !this.pin && this.steps.length > 1; }
 
   get ratio() { return this.R.renderer.getPixelRatio(); }
 

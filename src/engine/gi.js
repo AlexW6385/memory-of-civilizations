@@ -171,9 +171,11 @@ export class GIVolume {
   irradianceNode(dir = normalWorld, side = 1) {
     const self = this;
     if (!this.nodes) this.nodes = this.tex.map((t) => texture3D(t).setGroup(renderGroup));
-    return Fn(() => {
-      const N = dir;
-      const fallback = mix(self.groundE, self.skyE, clamp(N.y.mul(0.5).add(0.5), 0, 1));
+    // the probes' coefficients at the fragment, read once per side and shared by every direction
+    // evaluated there (the diffuse light along the normal, the reflections along the reflected ray:
+    // the same three lookups, which the shader otherwise made twice)
+    this.coef ??= new Map();
+    if (!this.coef.has(side)) {
       // sample a little off the surface, toward the room it faces (limits leaks through walls)
       const p = positionWorld.add(normalWorld.mul(0.45 * side));
       const uvw = p.sub(self.uMin).div(self.uSize);
@@ -182,7 +184,12 @@ export class GIVolume {
       const w = smoothstep(0.0, 0.02, edge).mul(smoothstep(0.0, 0.06, top)).mul(smoothstep(-0.05, 0.0, uvw.y)).mul(self.uActive);
       const c = clamp(uvw, 0.0, 1.0);
       const a = self.nodes[0].sample(c), b = self.nodes[1].sample(c), d = self.nodes[2].sample(c);
-      const s0 = a.rgb, sy = vec3(a.a, b.r, b.g), sz = vec3(b.b, b.a, d.r), sx = d.gba;
+      this.coef.set(side, { w, s0: a.rgb, sy: vec3(a.a, b.r, b.g), sz: vec3(b.b, b.a, d.r), sx: d.gba });
+    }
+    const { w, s0, sy, sz, sx } = this.coef.get(side);
+    return Fn(() => {
+      const N = dir;
+      const fallback = mix(self.groundE, self.skyE, clamp(N.y.mul(0.5).add(0.5), 0, 1));
       const E = max(s0.mul(0.282095).add(sy.mul(N.y).add(sz.mul(N.z)).add(sx.mul(N.x)).mul(0.488603)), vec3(0));
       return mix(fallback, E, w).mul(self.uIntensity);
     })();
