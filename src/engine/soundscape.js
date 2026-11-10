@@ -29,6 +29,36 @@
 //   a dawn bell [inferred].
 // - Suzhou: the bell of Hanshan Temple heard at midnight from the boats outside the city wall
 //   (Zhang Ji, 枫桥夜泊, "姑苏城外寒山寺，夜半钟声到客船") [stated, Tang poem; kept in Ming, inferred].
+// - Suzhou's night watches (打更): the night ran in five watches (更) from about 7 pm to 5 am, each
+//   two hours (戌 亥 子 丑 寅; https://en.wikipedia.org/wiki/Traditional_Chinese_timekeeping, "geng");
+//   outside the drum-tower cities a watchman announced each by striking a gong or clapper of bamboo
+//   or wood as he walked, calling a warning against fire ("天干物燥，小心火烛": the weather is dry,
+//   beware of fire; the call and a gong of 2 strokes at 9 pm, 3 at midnight, 4 at 3 am as the last
+//   watchmen still gave them: China Daily, "On patrol with the last traditional night watchman",
+//   2018). Ours: at each watch's start (7, 9, 11 pm, 1, 3 am) a few clapper beats, as many gong
+//   strokes as the watch's number, and the call; between the watches, at night, a watchman
+//   passing in some street with clapper beats and now and then the call [the stroke counts and
+//   the clapper rhythm inferred; no Ming source for the pattern was found].
+// - Suzhou's temple (the Bao'en Temple of the north, src/settlements/ming-suzhou/north.js): the big
+//   bell rung at dawn and dusk, traditionally 108 strokes, in three runs of 18 (fast, slow,
+//   between) twice over (https://www.sohu.com/a/213979662_671412; 108 each morning and night:
+//   https://en.wikipedia.org/wiki/Bell_tower_(Chinese_Buddhism)); the Chan rule (Chanyuan Qinggui)
+//   had the big bell at the fifth watch wake the monks, the drums marking the watches and the bells
+//   the diǎn (https://emptysqua.re/blog/zen-monastery-timekeeping/). So 晨钟暮鼓: in the morning
+//   the bell and then the drum, in the evening the drum and then the bell [the order inferred from
+//   the saying], then the morning or evening service (早晚课) with the wooden fish (木鱼) beating
+//   the time of the chant [inferred: the chant "Namo Amitabha" of the Pure Land recitation, usual in
+//   Jiangnan]. Ours compresses the 108 to 18 strokes (three runs of six) so that the bell lasts
+//   under a minute of a day that passes in thirty.
+// - Suzhou's water and streets [inferred from the dossier's townscape and the Qingming scrolls]: the
+//   lap of the canal against its stone walls; the creak and swish of a stern oar worked from side to
+//   side (the yuloh, whose peg creaks on each push) and the boatman's call; the cries of hawkers (a
+//   sung call on a few notes, vowels only, as the flower sellers' "gardenia, magnolia", the
+//   sweet-soup sellers'; "ZI zi hoo, ba lam hoo" in Shanghai:
+//   https://www.pressreader.com/china/shanghai-daily/20180807/281560881613364), the pedlar's
+//   rattle-drum (拨浪鼓), the bamboo clapper of the snack sellers, a teahouse's cups and the
+//   storyteller's block (醒木) slapped on the table; the soft hubbub of the market streets by day;
+//   eave drips and rain on the water in the rain.
 // - Buddhist monasteries of China, Japan: "the morning bell and the evening drum" (晨钟暮鼓) [inferred];
 //   the bonshō struck slowly with a swung log (https://www.bells.org/blog/campanology-word-day-bonsho).
 // - The call to prayer: Fajr when the sun is 18° below the horizon, Dhuhr just after noon, Asr when a
@@ -53,6 +83,18 @@ const EAS = { warbler: 0.8, sparrow: 0.7, crow: 0.6 };              // East Asia
 const TROP = { tropic: 1, dove: 0.6, koel: 0.2 };
 const AMER = { warbler: 0.8, tropic: 0.4, dove: 0.4 };
 const FARM = { rooster: 1, dog: 0.6, donkey: 0.3, cattle: 0.3 };
+
+/**
+ * The voices of a place's waters and streets (the audio engine's `life`): weights 0…1 of
+ * canal (lapping at stone walls), oar (a sculled boat passing, by day, with its boatman's call),
+ * hawkers (cries, a rattle-drum, a bamboo clapper, by day), market (the hubbub of the streets,
+ * by day), teahouse (cups, the storyteller's block, by day), patrol (a night watchman's rounds, at
+ * night), eaves (drips from the eaves, and rain pocking the water, in the rain). It rides on the
+ * animals object under a symbol, so that it passes through `music.place({ animals })` and is not
+ * mistaken for an animal.
+ */
+export const LIFE = Symbol('life');
+const withLife = (animals, life) => ({ ...animals, [LIFE]: life });
 
 export const PROFILES = {
   amsterdam: T({ ...EU, gull: 0.8 }, { animals: { dog: 0.3, horse: 0.3 }, roof: 'tile', bells: 'carillon' }),
@@ -87,7 +129,10 @@ export const PROFILES = {
   madurai: T(IND, { cicadas: 0.5, frogs: 0.5, animals: { cattle: 0.7, rooster: 0.4, goat: 0.4, dog: 0.3 }, roof: 'tile', bells: 'puja' }),
   'mamluk-cairo': T(NEAR, { animals: { donkey: 0.8, horse: 0.3, rooster: 0.3, dog: 0.4 }, roof: 'flat', adhan: 1 }),
   maori: T({ warbler: 1, tropic: 0.5 }, { cicadas: 0.6, animals: { dog: 0.3 }, roof: 'thatch' }),
-  'ming-suzhou': T(EAS, { cicadas: 0.7, frogs: 0.8, animals: { rooster: 0.4, dog: 0.3 }, roof: 'tile', bells: 'hanshan' }),
+  'ming-suzhou': T(EAS, {
+    cicadas: 0.7, frogs: 0.8, roof: 'xiaoqing', bells: 'suzhou',
+    animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1 }),
+  }),
   'mughal-agra': T(IND, { cicadas: 0.5, animals: { cattle: 0.4, horse: 0.3, rooster: 0.3, dog: 0.3 }, roof: 'flat', adhan: 2 }),
   muscovy: T({ crow: 1, sparrow: 0.8, warbler: 0.4 }, { animals: { horse: 0.7, dog: 0.4, rooster: 0.4, cattle: 0.2 }, roof: 'shingle', bells: 'zvon' }),
   nara: T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { dog: 0.2 }, roof: 'tile', bells: 'bonsho' }),
@@ -136,6 +181,9 @@ const HOURS = {
   bosingak: [[4, 'bosingak'], [22, 'bosingak']],
   drumbell: [[5, 'zhong'], [19, 'drum-tower']],
   hanshan: [[0, 'hanshan']],
+  // Suzhou: Hanshan's bell at midnight, far off; the Bao'en Temple's bell and drum at the fifth
+  // watch's end and at dusk; the watchman's five watches (戌 7 pm, 亥 9, 子 11, 丑 1, 寅 3)
+  suzhou: [[0, 'hanshan'], [4.6, 'temple-am'], [18.5, 'temple-pm'], [19, 'watch:1'], [21, 'watch:2'], [23, 'watch:3'], [1, 'watch:4'], [3, 'watch:5']],
   monastery: [[5, 'zhong'], [18.5, 'gu']],
   bonsho: [[5.5, 'bonsho'], [18.2, 'bonsho']],
   zvon: [[6.5, 'zvon'], [17, 'zvon']],
