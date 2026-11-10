@@ -324,11 +324,10 @@ Targets on the author's machine (Apple M2, 8 GB, native resolution, "high"). The
 
 Replace these lines, never append to them; keep them few.
 
-- v10.20 (2026-11-07): 57 settlements stand on the planet, 44 interiors under baked light. Every civilization first listed is built.
-- **The gap is depth.** By their own dossiers 27 of the 57 are still at L1–L2, 14 at L2, 6 at L2–L3, and 10 reach L3 only in parts; none meets §5 throughout.
-- **Next: Ming Suzhou as the showcase** (the author, 2026-11-09): brought to L3 throughout and kept there as the example for every other settlement and as the testbed for the speed work (measured on the M2 first). Then the other built settlements to L3; new ones from the L0 settlements of §7 when the author says to start them.
-- **Decided, not yet done:** the settlement cards on the globe map (§4.1), for the 57 built. The planet is enlarged so that 100 settlements stand without crowding (`PLANET_RADIUS` in `src/planet/sites.js`, 8 km now; the layout tool finds the size, about 12 km). Settlements of one place at different times (Qin, Han and Tang at Xi'an; the two Romes) stand side by side; a true position within a few hundred metres is not required.
-- Open: frame times and jumps are still to be measured on the author's M2.
+- v10.29 (2026-11-09): 57 settlements stand on the planet, each with its card on the globe map. Ming Suzhou rebuilt as the showcase in one wave: lattices, hall walls, platforms, Taihu stones, revetments, lotus, pebble paving, the canal town's varied houses and trades, the Bao'en pagoda and the city wall, furnished halls and study, water reflections, light through paper.
+- **The gap is depth.** Elsewhere 27 of the 57 are still at L1–L2 by their own dossiers; none meets §5 throughout. Suzhou's new work has not yet been checked piece by piece in the browser.
+- **Speed at Suzhou** (M2, Chrome, measured 2026-11-09): about 17–21 fps at 2× pixels, about 1000 draw calls and 8 M triangles a frame by the pond — over the budgets of §8. Done: shaders built before a part shows, cached plant shadows, cascades held while turning, small street-life shapes merged, two far shapes per plant species. Next: fewer draw calls (merged prototypes, terrain and plants), triangles back under 3 M (figures, lotus, halls' detail), then the baked material textures (measured worth at most 10–15%).
+- **Next after Suzhou:** the other built settlements to L3; new ones from the L0 settlements of §7 when the author says to start them. Decided, not yet done: the planet enlarged so that 100 settlements stand without crowding (`PLANET_RADIUS` in `src/planet/sites.js`, 8 km now; about 12 km).
 
 ## 11. Rules
 
