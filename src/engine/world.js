@@ -44,6 +44,8 @@ const PRELOAD_AFTER = 30000;
 
 /** Beyond the horizon by this much (m: the tallest buildings' own horizon), a built settlement is not drawn. */
 const BEYOND = 1200;
+/** A settlement built (not the one visited) further than this past its edge shows its far view instead (m). */
+const FULL_BEYOND = 600;
 const _pc = new THREE.Vector3(), _sc = new THREE.Vector3(), _vd = new THREE.Vector3(), _ld = new THREE.Vector3(), _li = new THREE.Vector3(), _inv = new THREE.Matrix4();
 
 /**
@@ -683,7 +685,10 @@ export class World {
       if (s.state === 'idle') continue;
       s.group.matrix.multiplyMatrices(S, planetFromFrame(s.S.frame, this._m2));
       s.group.matrixWorldNeedsUpdate = true;
-      const far = _sc.setFromMatrixPosition(s.group.matrix).distanceTo(cam) > sight + (s.S.radius || 200);
+      // (and one with a far view standing more than FULL_BEYOND past its edge, not the one visited:
+      // Edo, built ahead 1.6 km from Suzhou on this small planet, was drawn whole from Suzhou's garden)
+      const d = _sc.setFromMatrixPosition(s.group.matrix).distanceTo(cam), r = s.S.radius || 200;
+      const far = d > sight + r || (s.impostor && s !== this.anchor?.site && d > r + FULL_BEYOND);
       s.group.visible = !far;
       s.hiddenFar = far;
     }
