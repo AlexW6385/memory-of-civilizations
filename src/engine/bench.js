@@ -28,7 +28,7 @@ export async function runBench(P) {
   const say = (t) => { panel.textContent = t; };
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   // (not the settlement built ahead of the next visit: its shaders are compiled in idle moments only)
-  const settle = async () => { await Promise.all(world.settlements.filter((s) => !s.ahead?.()).map((s) => s.loading)); await wait(1500); };
+  const settle = async () => { await Promise.race([Promise.all(world.settlements.filter((s) => !s.ahead?.() && s.state !== 'idle').map((s) => s.loading)), wait(90000)]); await wait(1500); };
   // until 40 frames in a row are under 150 ms (at most 150 s): the seconds it took
   const steady = async () => {
     const t0 = performance.now(); let run = 0;
@@ -69,7 +69,9 @@ export async function runBench(P) {
 
   for (const leg of legs) {
     say(`bench: ${leg.name} — getting ready…\n\n` + report(out));
-    await leg.start();
+    // (at most 3 min: a start that never ends is reported in the console and the leg measured anyway)
+    const late = await Promise.race([leg.start().then(() => false), wait(180000).then(() => true)]);
+    if (late) console.warn('bench:', leg.name, 'start did not end in 3 min');
     say(`bench: ${leg.name} — waiting for steady frames…\n\n` + report(out));
     const steadyS = await steady();
     const samples = [];
