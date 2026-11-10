@@ -34,7 +34,7 @@ import { withFocus } from '../world/regions.js';
 import { MODULES } from '../settlements/grounds.js';
 
 /** A settlement is built when the visitor comes within LOAD of its rim and let go beyond UNLOAD. */
-export const LOAD = 700, UNLOAD = 1300;
+export const LOAD = 350, UNLOAD = 800;
 /** At most this many settlements are built at once (the nearest); from the air the reach grows, the count does not. */
 export const MAX_BUILT = 4;
 /** Beyond the horizon by this much (m: the tallest buildings' own horizon), a built settlement is not drawn. */

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.34 — Neighbours as far views (2026-11-10)
+- Settlements are built in full only within 350 m of their rim (was 700): from one settlement its neighbours show as their far views, and arriving has a third as much to build and compile.
+
 ## v10.33 — Faster precompiling (2026-11-10)
 - Shaders are compiled ahead in three chains side by side, so a settlement's are ready within its loading rather than minutes after arriving.
 
