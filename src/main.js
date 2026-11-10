@@ -30,6 +30,7 @@ import { nearest, peek, take } from './ui/order.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
+let started; const startedP = new Promise((r) => { started = r; });
 
 // the picture's quality: measured on the first visit (autoQuality below) and remembered, or as the
 // address says (?quality=high|medium|low, or cinema for recording films: never remembered); the music's level and the look sensitivity are fixed;
@@ -327,6 +328,7 @@ async function main() {
   await warmAround();
   mark('shaders');
   console.info('[memory of civilizations] start (ms):', JSON.stringify(times));
+  started();
   progress.set('shaders', 1);
   progress.finish();
   // the first settlement of the shared random order is built ahead from the start
@@ -738,7 +740,8 @@ async function main() {
   }
   // the other settlements' landmark plans (for the map), now that the world is open
   setTimeout(() => world.prefetch(world.here(controls)), 2000);
-  if (params.has('bench')) setTimeout(() => runBench(window.palace), 1000);
+  // (once the start is over: a pose in the middle of it waited for ever)
+  if (params.has('bench')) startedP.then(() => runBench(window.palace));
 }
 
 main().catch((e) => {
