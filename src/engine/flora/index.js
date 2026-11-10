@@ -10,6 +10,7 @@ import { SPECIES, VARIANTS, speciesGeometry } from './species.js';
  *  few plants in four shapes each); the yaw, size and tint of each plant tell them apart. */
 const NEAR_VARIANTS = 2, FAR_VARIANTS = 2;
 import { foliageTexture } from './textures.js';
+import { PHEN, seasonLook } from './phenology.js';
 import { MAX_DENSITY, NEAR_ONLY } from '../../world/flora-rules.js';
 import { material as paletteMaterial } from '../materials.js';
 import { ENV } from '../env.js';
@@ -38,8 +39,9 @@ function swayNode(amount) {
 function staticShadow(m) { m.castShadowPositionNode = positionLocal; m.userData.staticShadow = true; }
 
 const mats = new Map();
-export function foliageMaterial(kind, amount) {
-  const key = `f:${kind}`;
+export function foliageMaterial(kind, amount, sp) {
+  const P = sp && PHEN[sp];
+  const key = P ? `f:${kind}:${sp}` : `f:${kind}`;
   if (mats.has(key)) return mats.get(key);
   const tex = foliageTexture(FOLIAGE_TEX[kind] || kind);
   const m = new THREE.MeshStandardNodeMaterial({ side: THREE.DoubleSide, alphaTest: 0.5, transparent: false });
@@ -47,10 +49,18 @@ export function foliageMaterial(kind, amount) {
   const tint = new THREE.Color(FOLIAGE_TINT[kind] || '#ffffff');
   m.colorNode = t.rgb.mul(uniform(tint));
   m.opacityNode = t.a;
+  if (P) {
+    // a deciduous species: colour and leaf cover by the season (src/engine/flora/phenology.js)
+    const lum = dot(t.rgb, vec3(0.3, 0.59, 0.11)).div(tex.userData.lum || 0.1).clamp(0.4, 1.8);
+    const look = seasonLook(P, t.rgb.mul(uniform(tint)), lum);
+    m.colorNode = look.color;
+    m.opacityNode = t.a.mul(look.keep);
+    m.maskShadowNode = look.keep.greaterThan(0.5);
+  }
   m.roughness = 0.8;
   // light through the leaves: a little of the sun's colour on the side away from it
   const back = max(dot(normalWorld, ENV.sunDir).negate(), 0).mul(0.18);
-  m.emissiveNode = t.rgb.mul(ENV.sunColor).mul(back).mul(0.25);
+  m.emissiveNode = (P ? m.colorNode : t.rgb).mul(ENV.sunColor).mul(back).mul(0.25);
   m.positionNode = swayNode(amount);
   staticShadow(m);
   // a crown or a tuft is lit as a whole, not card by card: bend the cards' normals up toward the
@@ -362,7 +372,7 @@ export class Flora {
       meshes.push(mesh);
     }
     if (geo.leaves) {
-      const mt = geo.solidLeaves ? solidMaterial(S.leafMat, sway) : foliageMaterial(S.foliage, sway);
+      const mt = geo.solidLeaves ? solidMaterial(S.leafMat, sway) : foliageMaterial(S.foliage, sway, sp);
       const mesh = new THREE.InstancedMesh(geo.leaves, mt, cap);
       mesh.userData.tinted = true;
       mesh.setColorAt(0, new THREE.Color(1, 1, 1));

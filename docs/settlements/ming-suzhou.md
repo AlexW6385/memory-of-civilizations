@@ -176,3 +176,11 @@ Code: `src/settlements/ming-suzhou/north.js` (style `suzhou-north`, built on `mi
 - [Rocks and Mountains, Chinese gardens — University of Washington](https://depts.washington.edu/chinaciv/home/tgarrock.htm)
 - [The Paving Patterns of Liu Fang Yuan — The Huntington (ArcGIS StoryMaps)](https://storymaps.arcgis.com/stories/af8ad1932e964a37ac0b8fb5053ebf70)
 - [The Lion Grove Garden — Terebess (quoting *Classical Chinese Gardens*, *Sights and Scenes of Suzhou*)](https://terebess.hu/kert/magankert/garden2.html)
+
+## Seasons in the plants
+
+Phenology per species in `src/engine/flora/phenology.js` (day of year; the foliage material colours the cards and thins their cover by day, a per-plant random staggers the timing; evergreens: camphor, pines, bamboo, tea, fig are unchanged). Force a day with `?day=N` (1-365) or `?season=winter|spring|summer|autumn` (months 1, 4, 7, 10).
+- Plum (the `apple` stand-in) and peach/cherry: blossom [stated, general Jiangnan calendar: plum mid-Feb to mid-Mar, peach and cherry March-April] before the leaves, pink-white petals in place of leaves from about 5 Feb, falling by mid-April [inferred from the calendar].
+- Willow: leafs out early March in a fresh yellow-green, deep green by summer, yellows in December, hanging golden bare threads in winter [stated: Salix babylonica leafs early and drops late]. Catkins (liuxu): a drifting white-floss cloud from about 10 April to 25 May, peak third week of April (`src/engine/catkins.js`) [stated: willow and poplar seed floss, April-May].
+- Maple: green in summer, scarlet and orange from late October, full red in November, bare in winter [stated: Jiangnan maples colour in Nov]. Mulberry, elm, poplar: yellow in November, bare in winter.
+Sources: general Jiangnan phenology (plum Feb-Mar, peach Mar-Apr, willow floss Apr-May, maple red Nov); dates are approximations to be checked against a phenology table, not measured values.

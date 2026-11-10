@@ -94,9 +94,9 @@ const DRAW = {
       if (rand() < 0.35) { g.fillStyle = jitter(rand, '#a1906a', 20); g.beginPath(); g.ellipse(x0 + lean, top + S * 0.03, S * 0.02, S * 0.06, 0.2, 0, Math.PI * 2); g.fill(); }
     }
   },
-  /** Japanese maple in autumn: small palmate leaves, scarlet, orange and a little late green. */
+  /** Maple: small palmate leaves, in summer green (the autumn red is the season's: src/engine/flora/phenology.js). */
   maple(g, S, rand) {
-    const cols = ['#b8321e', '#c94a1c', '#d8741f', '#9a2a1c', '#c9a13a', '#6f7a34'];
+    const cols = ['#4f7a2c', '#5a8230', '#456f28', '#6a8a34', '#3f6626', '#5d7d2e'];
     for (let k = 0; k < 360; k++) {
       const r = Math.sqrt(rand()) * S * 0.46, a = rand() * Math.PI * 2, x = S / 2 + Math.cos(a) * r, y = S / 2 + Math.sin(a) * r;
       const c = jitter(rand, cols[Math.floor(Math.pow(rand(), 1.4) * cols.length)], 24), L = S * (0.022 + rand() * 0.014), rot = rand() * Math.PI * 2;
@@ -144,12 +144,15 @@ export function foliageTexture(kind) {
   let sum = [0, 0, 0], n = 0;
   for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 128) { sum[0] += d[i]; sum[1] += d[i + 1]; sum[2] += d[i + 2]; n++; }
   const avg = sum.map((v) => v / Math.max(1, n));
+  const lin = (v) => Math.pow(v / 255, 2.2);
+  const avgLum = 0.3 * lin(avg[0]) + 0.59 * lin(avg[1]) + 0.11 * lin(avg[2]);
   for (let i = 0; i < d.length; i += 4) if (d[i + 3] < 8) { d[i] = avg[0]; d[i + 1] = avg[1]; d[i + 2] = avg[2]; d[i + 3] = 3; }   // alpha 3, not 0: canvases drop the colour of fully transparent texels
   g.putImageData(img, 0, 0);
   const t = new THREE.CanvasTexture(cv);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 4;
   t.generateMipmaps = true;
+  t.userData.lum = avgLum;
   cache.set(kind, t);
   return t;
 }
