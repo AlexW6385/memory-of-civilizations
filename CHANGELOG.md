@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.43 — Suzhou alive (2026-11-10)
+
+Boats are sculled along Suzhou's canals and people walk its streets and bridges (porters with shoulder poles, umbrellas in the rain); fish swim in the pond, swallows skim the canals, sparrows hop and fly off, herons stand at the shore; kitchen smoke at mealtimes, incense at the temple, steam at the tea shops, morning mist on the canals. Some 200 shops show their goods with name boards, hanging signs and trade banners that sway in the wind, as does the laundry. Walls carry rising damp, moss, salts and rain streaks, canal walls their waterline; rain wets the paving, fills puddles and rings the water; plum blossom, autumn maples and bare winter trees follow the seasons; the canals, streets, night watch and temple bell and drum are heard.
+
 ## v10.42 — Open ways, quicker cruise (2026-11-10)
 
 Cruising (Space twice) now settles within a few metres instead of sliding on, so a double tap near the ground no longer lands one. Suzhou's side gates, the space under its bridges, the garden's sedan-chair hall, main hall and moon gate are open (an arch's underside counted as solid, parapets sealed the arches, an even number of bays put a post in the doorway); halls always have an odd number of bays. The willows by the canals stand taller and a little sparser.

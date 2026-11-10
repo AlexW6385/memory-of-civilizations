@@ -2,3 +2,4 @@
 import '../settlements/ming-suzhou/smoke.js';
 import './catkins.js';
 import './fauna.js';
+import './movers.js';

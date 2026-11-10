@@ -218,7 +218,10 @@ function riverLife() {
     L.push({ t: 'basket', at: [g.c[0] - g.u[0] * (n * 0.45 + 0.35) - g.dir[0] * 0.15, g.c[1] - g.u[1] * (n * 0.45 + 0.35) - g.dir[1] * 0.15], y: yS, rot: rand() * 6.28, s: 0.8, seed: Math.floor(rand() * 1e9) });
     if (rand() < 0.35) person([g.c[0] - g.dir[0] * 1.6 + g.u[0] * 1.2, g.c[1] - g.dir[1] * 1.6 + g.u[1] * 1.2], LEVEL.street, faceTo(g.dir), { pose: 'stand', dress: 'robe', carry: 'basket', hat: 'none', woman: true });
   }
-  // the boats: along each canal, some moving with the boatman at the oar, some moored with cargo
+  // the boats once posed mid-canal at the oar: now sculled along by src/engine/movers.js, so these
+  // are drawn for nothing but kept out of the plan (L cut back after the loop: the draws stay, so
+  // the rest of the life keeps its places)
+  const before = L.length;
   for (const c of CANALS) {
     const r = clip(c, R - 8);
     if (!r) continue;
@@ -241,6 +244,7 @@ function riverLife() {
       else person(amid(0.2), yw + 0.15, faceTo(dir), { pose: 'sit', dress: 'robe', hat: 'cap' });
     }
   }
+  L.length = before;
   // the streets: people walking (some with loads on shoulder poles), knots talking; benches by the water under the willows
   for (const st of STREETS.slice(0, 3)) {
     const r = clip(st);
