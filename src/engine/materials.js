@@ -7,10 +7,10 @@
 import { MeshStandardNodeMaterial, DoubleSide, Color, PhysicalLightingModel } from 'three/webgpu';
 import {
   Fn, float, vec2, vec3, vec4, positionWorld, positionLocal, normalWorld, normalLocal, normalView, positionView, abs, floor, fract, min, max,
-  mix, smoothstep, hash, mx_noise_float, mx_fractal_noise_float, mx_worley_noise_float, dot, cross, normalize,
+  mix, smoothstep, hash, dot, cross, normalize,
   sign, select, time, sin, cos, clamp, length, cameraPosition, uniform, attribute, reflect, pow, fwidth, toneMappingExposure, If,
 } from 'three/tsl';
-import { ENV, cloudShadow, noiseT } from './env.js';
+import { ENV, cloudShadow, noiseT, fbmT, worleyT } from './env.js';
 import { MATERIALS } from '../core/palette.js';
 import { GISpecularNode } from './gi.js';
 import { waterSky } from './water-reflect.js';
@@ -307,7 +307,7 @@ function weatherSurface(m, spec, roughU) {
 function clothSway(m) {
   const hang = attribute('hang', 'float'), P = positionLocal, w = ENV.wind;
   const speed = length(w), dir = vec3(w.x, 0, w.y).div(max(speed, 0.05));
-  const ph = mx_noise_float(vec3(P.x.mul(0.3), 0.5, P.z.mul(0.3))).mul(6.0);
+  const ph = noiseT(vec3(P.x.mul(0.3), 0.5, P.z.mul(0.3))).mul(6.0);
   const gust = sin(time.mul(0.41).add(ph)).mul(sin(time.mul(0.17).add(ph.mul(0.5)))).mul(0.5).add(0.5);
   const k = clamp(speed.mul(0.4), 0.2, 1);
   const lean = k.mul(gust.mul(0.75).add(0.25)).mul(0.16);
@@ -341,10 +341,10 @@ function make(spec) {
       // fade out (else they shimmer in moiré)
       const far = float(1).sub(smoothstep(0.12, 0.45, max(fwidth(v), fwidth(u)).div(min(course, blk))));
       const joint = float(1).sub(smoothstep(jointW * 0.4, jointW * 2.2, b.d)).mul(far);
-      const stain = mx_fractal_noise_float(P.mul(0.11), 4, 2.0, 0.5);
-      const streak = mx_noise_float(vec3(P.x.mul(1.3), P.y.mul(0.08), P.z.mul(1.3)));
-      const grain = mx_noise_float(P.mul(9.0)).mul(detailFade());
-      const fine = mx_noise_float(P.mul(41.0)).mul(detailFade());
+      const stain = fbmT(P.mul(0.11));
+      const streak = noiseT(vec3(P.x.mul(1.3), P.y.mul(0.08), P.z.mul(1.3)));
+      const grain = noiseT(P.mul(9.0)).mul(detailFade());
+      const fine = noiseT(P.mul(41.0)).mul(detailFade());
       const tone = b.id.sub(0.5).mul(spec.kind === 'paving' ? 0.24 : 0.16).mul(far).add(1);
       const hueShift = vec3(1.02, 1.0, 0.96).mul(b.id).add(vec3(0.98, 1.0, 1.04).mul(float(1).sub(b.id)));
       let col = baseNode.mul(tone).mul(hueShift)
@@ -371,9 +371,9 @@ function make(spec) {
       const joint = float(1).sub(smoothstep(0.003, 0.012, dv));
       const row = floor(P.y.div(course));
       const id = hash(row.mul(17.3).add(floor(P.x.mul(0.3)).mul(7.1)).add(floor(P.z.mul(0.3)).mul(3.3)));
-      const stain = mx_fractal_noise_float(P.mul(0.18), 3, 2.0, 0.5);
-      const grain = mx_noise_float(P.mul(10.0)).mul(detailFade());
-      const fine = mx_noise_float(P.mul(45.0)).mul(detailFade());
+      const stain = fbmT(P.mul(0.18));
+      const grain = noiseT(P.mul(10.0)).mul(detailFade());
+      const fine = noiseT(P.mul(45.0)).mul(detailFade());
       let col = baseNode.mul(id.sub(0.5).mul(0.12).add(1)).mul(stain.mul(0.16).add(1)).mul(grain.mul(0.05).add(fine.mul(0.03)).add(1));
       col = mix(col, col.mul(0.6), joint.mul(0.8));
       m.colorNode = col;
@@ -382,10 +382,10 @@ function make(spec) {
       break;
     }
     case 'granite': {
-      const w1 = mx_worley_noise_float(P.mul(38.0));
-      const w2 = mx_worley_noise_float(P.mul(90.0).add(7.0));
+      const w1 = worleyT(P.mul(38.0));
+      const w2 = worleyT(P.mul(90.0).add(7.0));
       const speck = smoothstep(0.05, 0.25, w1).mul(0.6).add(smoothstep(0.1, 0.3, w2).mul(0.4));
-      const cloud = mx_fractal_noise_float(P.mul(0.6), 3, 2.0, 0.5);
+      const cloud = fbmT(P.mul(0.6));
       const col = baseNode.mul(speck.mul(0.55).add(0.7)).mul(cloud.mul(0.15).add(1));
       m.colorNode = col;
       m.roughnessNode = roughU.add(cloud.abs().mul(0.12)).add(float(1).sub(speck).mul(0.06));
@@ -393,24 +393,24 @@ function make(spec) {
     }
     case 'wood': {
       // cedar boards: grain runs vertically
-      const g = mx_noise_float(vec3(P.x.mul(18), P.y.mul(0.9), P.z.mul(18)));
+      const g = noiseT(vec3(P.x.mul(18), P.y.mul(0.9), P.z.mul(18)));
       const rings = fract(g.mul(6.0));
-      const col = baseNode.mul(rings.mul(0.16).add(0.92)).mul(mx_noise_float(P.mul(3.0)).mul(0.1).add(1));
+      const col = baseNode.mul(rings.mul(0.16).add(0.92)).mul(noiseT(P.mul(3.0)).mul(0.1).add(1));
       m.colorNode = col;
       m.roughnessNode = roughU.add(rings.mul(0.08));
       m.normalNode = bump(rings.mul(0.0006), 1);
       break;
     }
     case 'metal': {
-      const n = mx_fractal_noise_float(P.mul(4.0), 3, 2.0, 0.5);
+      const n = fbmT(P.mul(4.0));
       m.colorNode = baseNode.mul(n.mul(0.12).add(1));
       m.roughnessNode = roughU.add(n.abs().mul(0.15));
       break;
     }
     case 'ground': {
-      const big = mx_fractal_noise_float(P.mul(0.05), 4, 2.0, 0.5);
-      const mid = mx_fractal_noise_float(P.mul(0.6), 3, 2.0, 0.5);
-      const peb = mx_worley_noise_float(P.mul(6.0));
+      const big = fbmT(P.mul(0.05));
+      const mid = fbmT(P.mul(0.6));
+      const peb = worleyT(P.mul(6.0));
       const pebbles = float(1).sub(smoothstep(0.0, 0.18, peb)).mul(detailFade());
       const col = baseNode.mul(big.mul(0.22).add(1)).mul(mid.mul(0.12).add(1)).mul(pebbles.mul(-0.18).add(1));
       m.colorNode = col;
@@ -433,7 +433,7 @@ function make(spec) {
       let col = mix(field, inner, disc.mul(parity.mul(0.6).add(0.4)));
       col = mix(col, C[3], ring);
       col = mix(col, C[1].mul(0.9), band);
-      const vein = mx_noise_float(P.mul(3.0)).mul(detailFade());
+      const vein = noiseT(P.mul(3.0)).mul(detailFade());
       m.colorNode = col.mul(vein.mul(0.06).add(1));
       m.roughnessNode = roughU.add(band.mul(0.2));
       m.normalNode = bump(band.mul(-0.002).add(vein.mul(0.0003)), 1);
@@ -452,7 +452,7 @@ function make(spec) {
       const aa = float(1).sub(smoothstep(0.25, 0.7, fw));
       const e = min(min(min(f.x, float(1).sub(f.x)), min(f.y, float(1).sub(f.y))), min(f.z, float(1).sub(f.z)));
       const grout = float(1).sub(smoothstep(0.05, 0.14, e)).mul(aa);
-      const big = mx_fractal_noise_float(P.mul(0.4), 3, 2.0, 0.5);
+      const big = fbmT(P.mul(0.4));
       const col = baseNode.mul(mix(float(1), id.mul(0.5).add(0.75), aa)).mul(big.mul(0.1).add(1));
       m.colorNode = mix(col, groutCol, grout.mul(0.7));
       m.metalnessNode = uniform(spec.metalness ?? 1).mul(float(1).sub(grout.mul(0.9)));
@@ -476,13 +476,13 @@ function make(spec) {
       const nb = C.length - 1;
       let body = C[0];
       for (let i = 1; i < nb; i++) body = select(slab.greaterThan(i / nb), C[i], body);
-      const w1 = mx_fractal_noise_float(vec3(lu.mul(2.2), lv.mul(1.4), slab.mul(17.0)), 4, 2.0, 0.5);
-      const w2 = mx_noise_float(vec3(lu.mul(0.9).add(w1.mul(0.8)), lv.mul(1.5), slab.mul(5.0)));
+      const w1 = fbmT(vec3(lu.mul(2.2), lv.mul(1.4), slab.mul(17.0)));
+      const w2 = noiseT(vec3(lu.mul(0.9).add(w1.mul(0.8)), lv.mul(1.5), slab.mul(5.0)));
       const vw = max(fwidth(w2).mul(1.5), 0.018);
       const vein = float(1).sub(smoothstep(0.0, vw, abs(w2))).mul(0.45).mul(smoothstep(-0.2, 0.3, w1));
       const d = min(min(lu, float(1).sub(lu)).mul(bw), min(lv, float(1).sub(lv)).mul(bh));
       const joint = float(1).sub(smoothstep(0.0015, 0.005, d));
-      const cloud = mx_fractal_noise_float(vec3(lu.mul(4.0), lv.mul(4.0), slab.mul(3.0)), 3, 2.0, 0.5);
+      const cloud = fbmT(vec3(lu.mul(4.0), lv.mul(4.0), slab.mul(3.0)));
       let col = mix(body.mul(cloud.mul(0.07).add(1)), C[nb], vein.clamp(0, 1).mul(0.6));
       col = mix(col, col.mul(0.55), joint);
       m.colorNode = col;
@@ -502,7 +502,7 @@ function make(spec) {
       const aa = float(1).sub(smoothstep(0.25, 0.9, fwidth(ph)));
       const ch = sin(ph).mul(aa);
       const lap = float(1).sub(smoothstep(0.0, 0.18, lv)).mul(aa);
-      const stain = mx_fractal_noise_float(P.mul(0.3), 3, 2.0, 0.5);
+      const stain = fbmT(P.mul(0.3));
       m.colorNode = baseNode.mul(id.sub(0.5).mul(0.3).mul(aa).add(1)).mul(ch.mul(0.1).add(1)).mul(lap.mul(-0.35).add(1)).mul(stain.mul(0.2).add(1));
       m.normalNode = bump(ch.mul(0.02).add(lv.mul(0.012).mul(aa)), 1);
       break;
@@ -535,7 +535,7 @@ function make(spec) {
       const fw = fwidth(q.x).add(fwidth(q.y));
       const lead = float(1).sub(smoothstep(0.05, 0.1, min(min(fq.x, float(1).sub(fq.x)), min(fq.y, float(1).sub(fq.y))))).mul(float(1).sub(smoothstep(0.3, 0.8, fw)));
       const light = ENV.horizon.mul(0.2).add(ENV.sunColor.mul(0.011)).add(ENV.zenith.mul(0.1));
-      const streak = mx_noise_float(P.mul(11.0)).mul(0.3).add(1);
+      const streak = noiseT(P.mul(11.0)).mul(0.3).add(1);
       m.colorNode = vec3(0.02, 0.02, 0.025);
       m.emissiveNode = col.mul(light).mul(streak).mul(float(1).sub(lead.mul(0.95)));
       // the sun through the glass: its colour, dimmed, and the leads' shadow
@@ -577,7 +577,7 @@ function make(spec) {
         : float(1).sub(smoothstep(0.1, 0.16, max(abs(f2.x).mul(1.6), abs(f2.y).add(abs(f2.x).mul(0.8)).sub(0.05))));
       const aa = float(1).sub(smoothstep(0.3, 0.9, fwidth(g.x).add(fwidth(g.y))));
       const motif = star.mul(aa).mul(spec.stars ? hash(cell.x.mul(3.1).add(cell.y.mul(7.7))).greaterThan(0.25).select(float(1), float(0)) : float(1));
-      const n = mx_fractal_noise_float(P.mul(1.5), 3, 2.0, 0.5);
+      const n = fbmT(P.mul(1.5));
       m.colorNode = mix(C[0].mul(n.mul(0.08).add(1)), C[1], motif);
       m.metalnessNode = motif.mul(0.85);
       m.roughnessNode = roughU.sub(motif.mul(0.25));
@@ -592,7 +592,7 @@ function make(spec) {
       const brace = smoothstep(0.07, 0.04, abs(fract(u.div(2.2).add(v.div(3.0))).sub(0.5))).mul(hash(floor(u.div(2.2)).add(floor(v.div(3.0)).mul(7.0))).greaterThan(0.55).select(float(1), float(0)));
       const aa = float(1).sub(smoothstep(0.2, 0.6, fwidth(u).mul(4)));
       const wood = clamp(post.add(rail).add(brace), 0, 1).mul(aa);
-      const n = mx_fractal_noise_float(P.mul(0.8), 3, 2.0, 0.5);
+      const n = fbmT(P.mul(0.8));
       m.colorNode = mix(baseNode.mul(n.mul(0.12).add(1)), vec3(0.17, 0.11, 0.07), wood);
       m.roughnessNode = roughU;
       break;
@@ -630,15 +630,15 @@ function make(spec) {
       break;
     }
     case 'bark': {
-      const fiss = mx_worley_noise_float(vec3(P.x.mul(6), P.y.mul(spec.plates ? 1.2 : 0.8), P.z.mul(6)));
-      const n = mx_noise_float(P.mul(3.0));
+      const fiss = worleyT(vec3(P.x.mul(6), P.y.mul(spec.plates ? 1.2 : 0.8), P.z.mul(6)));
+      const n = noiseT(P.mul(3.0));
       m.colorNode = baseNode.mul(smoothstep(0.0, 0.35, fiss).mul(0.45).add(0.6)).mul(n.mul(0.12).add(1));
       m.normalNode = bump(smoothstep(0.0, 0.35, fiss).mul(0.01), 1);
       break;
     }
     case 'rock': {
-      const n = mx_fractal_noise_float(P.mul(1.2), 4, 2.0, 0.5), f = mx_noise_float(P.mul(9.0)).mul(detailFade());
-      const lichen = smoothstep(0.25, 0.5, mx_noise_float(P.mul(0.8).add(3))).mul(smoothstep(0.3, 0.9, normalLocal.y));
+      const n = fbmT(P.mul(1.2)), f = noiseT(P.mul(9.0)).mul(detailFade());
+      const lichen = smoothstep(0.25, 0.5, noiseT(P.mul(0.8).add(3))).mul(smoothstep(0.3, 0.9, normalLocal.y));
       m.colorNode = mix(baseNode.mul(n.mul(0.25).add(1)), vec3(0.42, 0.42, 0.33), lichen.mul(0.35)).mul(f.mul(0.08).add(1));
       m.normalNode = bump(n.mul(0.05).add(f.mul(0.004)), 1);
       break;
@@ -679,7 +679,7 @@ function make(spec) {
       const edge = (t) => min(t, float(1).sub(t));
       let d, avg = 0.62;
       if (pat === 'ice') {
-        const w = mx_worley_noise_float(vec3(q.x, q.y, 0.5));
+        const w = worleyT(vec3(q.x, q.y, 0.5));
         d = smoothstep(0.03, 0.07, w); avg = 0.82;
       } else {
         let dist;
@@ -732,8 +732,9 @@ function make(spec) {
     }
     case 'taihu': {
       // Taihu stone: grey limestone eaten by water into hollows and holes, pale on its ridges
-      const w1 = mx_worley_noise_float(P.mul(1.3)), w2 = mx_worley_noise_float(P.mul(4.1).add(3));
-      const n = mx_fractal_noise_float(P.mul(2.0), 3, 2.0, 0.5), f = mx_noise_float(P.mul(14.0)).mul(detailFade());
+      // (baked fields: two cellular and three Perlin noises cost the pond's view ~5 ms of the GPU)
+      const w1 = worleyT(P.mul(1.3)), w2 = worleyT(vec3(P.z, P.x, P.y).mul(4.1).add(3));
+      const n = fbmT(P.mul(2.0)), f = noiseT(P.mul(14.0)).mul(detailFade());
       const pit = smoothstep(0.12, 0.0, w1).add(smoothstep(0.1, 0.0, w2).mul(0.5));
       m.colorNode = baseNode.mul(n.mul(0.18).add(1)).mul(float(1).sub(pit.mul(0.55))).mul(f.mul(0.06).add(1));
       m.normalNode = bump(n.mul(0.04).sub(pit.mul(0.05)).add(f.mul(0.003)), 1);
@@ -763,30 +764,32 @@ function make(spec) {
       const g = attribute('ground', 'vec4'), g2 = attribute('ground2', 'vec4'), rd = attribute('road', 'float');
       const C = (h) => { const c = new Color(h); return vec3(c.r, c.g, c.b); };
       const fade = detailFade();
-      const big = mx_fractal_noise_float(P.mul(0.03), 4, 2.0, 0.5);
-      const mid = mx_fractal_noise_float(P.mul(0.35), 3, 2.0, 0.5);
-      const fine = mx_noise_float(P.mul(6.0)).mul(fade);
+      // (the noises from the baked fields, a lookup or two each: a dozen Perlin octaves and a cellular
+      // noise on every ground pixel cost Suzhou ~5 ms of the GPU a frame)
+      const big = fbmT(P.mul(0.03));
+      const mid = fbmT(P.mul(0.35));
+      const fine = noiseT(P.mul(6.0)).mul(fade);
       // sand: wind ripples across the wind, streaks along it
       const wdir = normalize(vec2(0.8, 0.6));
       const along = dot(P.xz, wdir), across = dot(P.xz, vec2(wdir.y.negate(), wdir.x));
-      const rphase = along.mul(48.0).add(mx_noise_float(vec3(P.x.mul(0.6), 0, P.z.mul(0.6))).mul(5.0));
+      const rphase = along.mul(48.0).add(noiseT(vec3(P.x.mul(0.6), 0, P.z.mul(0.6))).mul(5.0));
       // fade fine patterns before they alias (more than about a cycle per pixel)
       const aaFade = (ph) => float(1).sub(smoothstep(0.25, 0.9, fwidth(ph)));
       // ripples come and go in patches, and are strongest where the sand is loose
-      const patch = smoothstep(-0.15, 0.45, mx_noise_float(vec3(P.x.mul(0.07), 0, P.z.mul(0.07))));
+      const patch = smoothstep(-0.15, 0.45, noiseT(vec3(P.x.mul(0.07), 0, P.z.mul(0.07))));
       const ripple = sin(rphase).mul(aaFade(rphase)).mul(patch);
-      const sand = C('#c8aa80').mul(big.mul(0.16).add(1)).mul(mx_noise_float(vec3(across.mul(0.08), 0, along.mul(0.6))).mul(0.06).add(1));
+      const sand = C('#c8aa80').mul(big.mul(0.16).add(1)).mul(noiseT(vec3(across.mul(0.08), 0, along.mul(0.6))).mul(0.06).add(1));
       // grass: green to straw, in clumps
-      const clump = mx_worley_noise_float(P.mul(0.9));
+      const clump = worleyT(vec3(P.x.add(P.z.mul(0.3)), P.y, P.z.sub(P.x.mul(0.3))).mul(0.9));
       const grass = mix(C('#66733f'), C('#ad9e6b'), clamp(g2.y.add(mid.mul(0.35)), 0, 1)).mul(smoothstep(0.0, 0.5, clump).mul(0.28).add(0.78));
       // rock: grey limestone or buff sandstone, in strata
-      const strata = mx_noise_float(vec3(P.x.mul(0.04), P.y.mul(1.1), P.z.mul(0.04)));
+      const strata = noiseT(vec3(P.x.mul(0.04), P.y.mul(1.1), P.z.mul(0.04)));
       const rock = mix(C('#9e9a91'), C('#b29470'), g2.z).mul(strata.mul(0.16).add(1)).mul(mid.mul(0.14).add(1));
       // soil: brown, red in Attica, dark silt by the river in Egypt
       let soil = mix(mix(C('#6e5845'), C('#94502e'), g2.w), C('#5b4a39'), g2.z.mul(0.7)).mul(mid.mul(0.15).add(1));
       // fields: plots of crops in strips, separated by earth banks
       // roads: pale beaten earth, with wheel ruts and footprints of dust
-      const roadCol = mix(C('#a08a6c'), C('#c2a982'), g2.z).mul(mid.mul(0.12).add(1)).mul(mx_noise_float(P.mul(1.7)).mul(0.08).add(1));
+      const roadCol = mix(C('#a08a6c'), C('#c2a982'), g2.z).mul(mid.mul(0.12).add(1)).mul(noiseT(P.mul(1.7)).mul(0.08).add(1));
       soil = mix(soil, roadCol, rd);
       const fu = P.x.mul(0.98).add(P.z.mul(0.2)), fv = P.z.mul(0.98).sub(P.x.mul(0.2));
       const row = floor(fv.div(38.0));
@@ -806,7 +809,7 @@ function make(spec) {
       col3 = col3.mul(fine.mul(0.06).add(1));
       // rain: darker and glossier where the ground faces the sky; puddles in the low spots
       const flat = smoothstep(0.75, 0.95, normalLocal.y);
-      const puddle = smoothstep(0.55, 0.75, mx_fractal_noise_float(P.mul(0.12), 2, 2.0, 0.5).mul(-1).add(0.5)).mul(ENV.wet).mul(flat).mul(float(1).sub(g.z));
+      const puddle = smoothstep(0.55, 0.75, fbmT(P.mul(0.12)).mul(-1).add(0.5)).mul(ENV.wet).mul(flat).mul(float(1).sub(g.z));
       const wet = ENV.wet.mul(flat.mul(0.6).add(0.4));
       m.colorNode = col3.mul(float(1).sub(wet.mul(0.38))).mul(float(1).sub(puddle.mul(0.5)));
       m.roughnessNode = float(0.95).sub(wet.mul(0.4)).sub(puddle.mul(0.5)).sub(g.z.mul(0.1));
@@ -819,9 +822,9 @@ function make(spec) {
       // water: the sky mirrored at a grazing angle, the sun's glitter, a silty body beneath
       const t = time.mul(0.6);
       const flow = vec2(0.0, t.mul(0.9));
-      const w1 = mx_noise_float(vec3(P.x.mul(0.18).add(flow.x), P.z.mul(0.12).add(flow.y), t.mul(0.15)));
-      const w2 = mx_noise_float(vec3(P.x.mul(0.9), P.z.mul(0.7).add(flow.y.mul(2.0)), t.mul(0.4)));
-      const w3 = mx_noise_float(vec3(P.x.mul(3.1), P.z.mul(2.6).add(flow.y.mul(4.0)), t)).mul(detailFade());
+      const w1 = noiseT(vec3(P.x.mul(0.18).add(flow.x), P.z.mul(0.12).add(flow.y), t.mul(0.15)));
+      const w2 = noiseT(vec3(P.x.mul(0.9), P.z.mul(0.7).add(flow.y.mul(2.0)), t.mul(0.4)));
+      const w3 = noiseT(vec3(P.x.mul(3.1), P.z.mul(2.6).add(flow.y.mul(4.0)), t)).mul(detailFade());
       const nrm = normalize(vec3(w1.mul(0.06).add(w2.mul(0.04)).add(w3.mul(0.03)), 1, w1.mul(0.05).add(w2.mul(0.035)).add(w3.mul(0.03))));
       const v = normalize(positionWorld.sub(cameraPosition));
       const r = reflect(v, nrm);
@@ -846,7 +849,7 @@ function make(spec) {
       // ripples rougher: rainRings, two cells' hashes and a sine per layer, only while it rains.
       const t = time.mul(0.35);
       const open = skyOpen(), rainK = ENV.rain.mul(open);
-      const w = mx_noise_float(vec3(P.x.mul(0.7).add(t), P.z.mul(0.7), t.mul(0.6))).add(mx_noise_float(vec3(P.x.mul(2.3), P.z.mul(2.3).sub(t), t)).mul(rainK.mul(0.6).add(0.4)));
+      const w = noiseT(vec3(P.x.mul(0.7).add(t), P.z.mul(0.7), t.mul(0.6))).add(noiseT(vec3(P.x.mul(2.3), P.z.mul(2.3).sub(t), t)).mul(rainK.mul(0.6).add(0.4)));
       m.roughness = 0.04;
       m.roughnessNode = float(0.04).add(rainK.mul(0.08));
       m.metalness = 0.0;
@@ -862,14 +865,14 @@ function make(spec) {
       m.userData.water = true;
       // at night the moon's broken path across the water, toward the eye (its own glints, wider
       // than the one highlight the moon's light gives a still surface)
-      const wn = normalize(vec3(w.mul(0.06), 1, mx_noise_float(vec3(P.z.mul(0.9).sub(t), P.x.mul(0.9), t.mul(0.7))).mul(0.06)));
+      const wn = normalize(vec3(w.mul(0.06), 1, noiseT(vec3(P.z.mul(0.9).sub(t), P.x.mul(0.9), t.mul(0.7))).mul(0.06)));
       const rv = reflect(v, wn);
       m.emissiveNode = waterSky(r).mul(fres).mul(open).add(moonGlint(rv).mul(smoothstep(0.6, 0.9, normalLocal.y)));
       break;
     }
     case 'leaf': {
       // palm leaflets: double sided, a little translucent-looking (brighter, yellower toward the tips)
-      const n = mx_noise_float(P.mul(2.0));
+      const n = noiseT(P.mul(2.0));
       m.colorNode = baseNode.mul(n.mul(0.25).add(1)).mul(vec3(1.0, 1.0, 0.85).mul(hash(floor(P.y.mul(3))).mul(0.2).add(0.9)));
       m.side = DoubleSide;
       m.shadowSide = DoubleSide;
@@ -882,8 +885,8 @@ function make(spec) {
       const V = normalize(cameraPosition.sub(positionWorld));
       const ndv = abs(dot(normalWorld, V));
       const t = time.mul(2.2);
-      const streak = mx_noise_float(vec3(P.x.mul(14.0), P.y.mul(2.2).sub(t), P.z.mul(14.0)));
-      const bubbles = mx_worley_noise_float(P.mul(36.0).add(vec3(0, t.mul(0.5), 0)));
+      const streak = noiseT(vec3(P.x.mul(14.0), P.y.mul(2.2).sub(t), P.z.mul(14.0)));
+      const bubbles = worleyT(P.mul(36.0).add(vec3(0, t.mul(0.5), 0)));
       m.colorNode = baseNode.mul(streak.mul(0.06).add(0.96)).mul(smoothstep(0.0, 0.45, bubbles).mul(0.07).add(0.94));
       // the light it scatters: a little of the sky's, so it stays white in shade
       m.emissiveNode = ENV.zenith.mul(0.3).add(ENV.horizon.mul(0.2)).mul(baseNode);
@@ -949,10 +952,10 @@ function make(spec) {
       // greens and violets, in wavy growth bands with dark seams
       const V = normalize(cameraPosition.sub(positionWorld));
       const ndv = clamp(dot(normalWorld, V), 0, 1);
-      const bands = mx_fractal_noise_float(P.mul(18.0), 3, 2.0, 0.5);
+      const bands = fbmT(P.mul(18.0));
       const t = ndv.mul(1.3).add(bands.mul(0.9)).mul(Math.PI * 2);
       const rainbow = vec3(cos(t).mul(0.5).add(0.5), cos(t.sub(2.1)).mul(0.5).add(0.5), cos(t.sub(4.2)).mul(0.5).add(0.5));
-      const seam = smoothstep(0.04, 0.0, abs(mx_noise_float(P.mul(40.0)))).mul(detailFade());
+      const seam = smoothstep(0.04, 0.0, abs(noiseT(P.mul(40.0)))).mul(detailFade());
       const col = mix(baseNode, rainbow.mul(vec3(0.4, 0.72, 0.9)), 0.6).mul(float(1).sub(seam.mul(0.5)));
       m.colorNode = col;
       m.metalnessNode = float(0.55);
@@ -1023,7 +1026,7 @@ function make(spec) {
       const aa = float(1).sub(smoothstep(0.3, 0.9, fwidth(u.div(bw)).mul(8)));
       const rib = float(1).sub(smoothstep(0.012, 0.022, du)).mul(aa);
       const lap = float(1).sub(smoothstep(0.0, 0.06, lv)).mul(aa);
-      const stain = mx_fractal_noise_float(P.mul(0.4), 3, 2.0, 0.5);
+      const stain = fbmT(P.mul(0.4));
       m.colorNode = baseNode.mul(id.sub(0.5).mul(0.12).mul(aa).add(1)).mul(rib.mul(0.12).add(1)).mul(lap.mul(-0.3).add(1)).mul(stain.mul(0.15).add(1));
       m.roughnessNode = roughU.add(stain.abs().mul(0.15));
       m.normalNode = bump(rib.mul(0.012).add(lv.mul(0.006).mul(aa)), 1);
@@ -1033,20 +1036,20 @@ function make(spec) {
       // mud plaster as laid by hand: broad lumps, the smears of the palms, straw flecks, and the
       // runnels the rains cut down the walls
       const vertical = float(1).sub(smoothstep(0.5, 0.8, abs(normalLocal.y)));
-      const lump = mx_fractal_noise_float(P.mul(1.6), 3, 2.0, 0.5);
-      const smear = smoothstep(0.0, 0.5, mx_worley_noise_float(vec3(P.x.mul(4.5), P.y.mul(6.5), P.z.mul(4.5))));
-      const runnel = smoothstep(0.5, 0.8, mx_noise_float(vec3(P.x.add(P.z).mul(3.5), P.y.mul(0.22), 0.7))).mul(vertical);
+      const lump = fbmT(P.mul(1.6));
+      const smear = smoothstep(0.0, 0.5, worleyT(vec3(P.x.mul(4.5), P.y.mul(6.5), P.z.mul(4.5))));
+      const runnel = smoothstep(0.5, 0.8, noiseT(vec3(P.x.add(P.z).mul(3.5), P.y.mul(0.22), 0.7))).mul(vertical);
       const fade = detailFade();
-      const fine = mx_noise_float(P.mul(28.0)).mul(fade);
-      const straw = float(1).sub(smoothstep(0.0, 0.06, mx_worley_noise_float(P.mul(55.0)))).mul(fade).mul(uniform(spec.straw ?? 1));   // lime plasters: no straw
+      const fine = noiseT(P.mul(28.0)).mul(fade);
+      const straw = float(1).sub(smoothstep(0.0, 0.06, worleyT(P.mul(55.0)))).mul(fade).mul(uniform(spec.straw ?? 1));   // lime plasters: no straw
       m.colorNode = baseNode.mul(lump.mul(0.14).add(1)).mul(smear.mul(0.08).add(0.94)).mul(float(1).sub(runnel.mul(0.12))).mul(fine.mul(0.05).add(1)).mul(straw.mul(0.18).add(1));
       m.roughnessNode = roughU;
       m.normalNode = bump(lump.mul(0.03).add(smear.mul(0.004)).sub(runnel.mul(0.006)).add(fine.mul(0.0008)), 1);
       break;
     }
     default: {
-      const n = mx_fractal_noise_float(P.mul(0.8), 3, 2.0, 0.5);
-      const f = mx_noise_float(P.mul(20.0)).mul(detailFade());
+      const n = fbmT(P.mul(0.8));
+      const f = noiseT(P.mul(20.0)).mul(detailFade());
       m.colorNode = baseNode.mul(n.mul(0.1).add(1)).mul(f.mul(0.04).add(1));
       m.normalNode = bump(f.mul(0.0005), 1);
     }

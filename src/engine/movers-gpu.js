@@ -16,12 +16,11 @@
 
 import * as THREE from 'three/webgpu';
 import {
-  Fn, attribute, positionGeometry, vec3, float, sin, cos, abs, clamp, smoothstep, select, max, floor, fract, exp2, varying,
-  mx_noise_float, uniform, time, mix, length, positionView,
+  Fn, attribute, positionGeometry, vec3, float, sin, cos, abs, clamp, smoothstep, select, max, floor, fract, exp2, varying, uniform, time, mix, length, positionView,
 } from 'three/tsl';
 import { MATERIALS } from '../core/palette.js';
 import { material as paletteMaterial } from './materials.js';
-import { ENV } from './env.js';
+import { ENV, noiseT, fbmT, worleyT } from './env.js';
 import { GROUP_BASE, LIMB } from './movers-kit.js';
 
 /** Instance attributes: name → [offset, item size] in one interleaved instance buffer (WebGPU allows 8 vertex buffers). */
@@ -114,21 +113,21 @@ export function moverMaterial(group) {
   const rest = varying(positionGeometry, 'vMoverRest'), tint = varying(slotColour(), 'vMoverTint');
   const base = uniform(new THREE.Color(spec.color));
   let pat;
-  if (group === 'skin') pat = mx_noise_float(rest.mul(22)).mul(0.04).add(1);
+  if (group === 'skin') pat = noiseT(rest.mul(22)).mul(0.04).add(1);
   else if (group === 'cloth') {
     // a fine weave and the slow unevenness of hand-dyed cloth; a little darker in the folds low down
-    pat = mx_noise_float(rest.mul(5)).mul(0.07).add(mx_noise_float(rest.mul(70)).mul(0.035)).add(1);
+    pat = noiseT(rest.mul(5)).mul(0.07).add(noiseT(rest.mul(70)).mul(0.035)).add(1);
   } else if (group === 'fibre') {
     // plaited strips: two sets crossing, over and under in a checker
     const a = rest.x.add(rest.z).mul(38), b = rest.y.mul(38).add(rest.x.sub(rest.z).mul(12));
     const over = sin(a).mul(sin(b)).greaterThan(0);
     const strip = select(over, abs(sin(b.mul(2))), abs(sin(a.mul(2))));
-    pat = strip.mul(0.22).add(0.84).mul(mx_noise_float(rest.mul(4)).mul(0.1).add(1));
+    pat = strip.mul(0.22).add(0.84).mul(noiseT(rest.mul(4)).mul(0.1).add(1));
   } else {
     // the grain running along the planks and the oar (the mover's z), rings and streaks
-    const streak = mx_noise_float(vec3(rest.x.mul(34), rest.y.mul(34), rest.z.mul(0.9)));
-    const fine = mx_noise_float(vec3(rest.x.mul(120), rest.y.mul(120), rest.z.mul(3)));
-    pat = streak.mul(0.12).add(fine.mul(0.05)).add(0.97).mul(mx_noise_float(rest.mul(1.7)).mul(0.08).add(1));
+    const streak = noiseT(vec3(rest.x.mul(34), rest.y.mul(34), rest.z.mul(0.9)));
+    const fine = noiseT(vec3(rest.x.mul(120), rest.y.mul(120), rest.z.mul(3)));
+    pat = streak.mul(0.12).add(fine.mul(0.05)).add(0.97).mul(noiseT(rest.mul(1.7)).mul(0.08).add(1));
   }
   m.colorNode = base.mul(tint).mul(pat);
   MATS.set(group, m);
@@ -158,7 +157,7 @@ export function wakeMaterial() {
   const armA = smoothstep(0.35, 0.0, abs(arm)).mul(ridges.mul(0.6).add(0.4)).mul(smoothstep(12, 1, z)).mul(smoothstep(-0.6, 0.2, z));
   // the foam along the hull at the waterline, the stirred water behind the stern where the oar works
   const hull = smoothstep(0.3, 0.0, abs(x.sub(mix(0.55, 0.95, smoothstep(-0.2, 1.5, z).mul(smoothstep(7.4, 5.5, z)))))).mul(smoothstep(-0.3, 0.4, z)).mul(smoothstep(7.6, 6.0, z)).mul(0.35);
-  const swirl = smoothstep(1.2, 0.0, length(vec3(x.mul(0.8), 0, z.sub(9.2)))).mul(mx_noise_float(vec3(loc.x.mul(3), time.mul(0.7), loc.z.mul(3))).mul(0.5).add(0.5)).mul(0.5);
+  const swirl = smoothstep(1.2, 0.0, length(vec3(x.mul(0.8), 0, z.sub(9.2)))).mul(noiseT(vec3(loc.x.mul(3), time.mul(0.7), loc.z.mul(3))).mul(0.5).add(0.5)).mul(0.5);
   // (fading off with distance: the fine ripples would only shimmer far away)
   const far = smoothstep(70, 22, length(positionView));
   const a = max(max(armA.mul(0.38), hull), swirl).mul(str).mul(far);

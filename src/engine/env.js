@@ -107,7 +107,42 @@ const CLOUD_TEX = cloudField();
 /** The baked field read as cheap smooth noise (about -1…1, like mx_noise_float's spread, features
  *  of about one unit): one texture lookup for the materials' weathering instead of a 3D Perlin noise. */
 const NOISE_T = texture3D(CLOUD_TEX).setGroup(renderGroup);
-export const noiseT = (p) => NOISE_T.sample(p.div(CLOUD_CELLS)).r.sub(0.5).mul(2.6);
+export const noiseT = (p) => NOISE_T.sample(p.div(CLOUD_CELLS)).level(0).r.sub(0.5).mul(2.6);
+/** Two lookups of it, the second turned and finer: an fBm-like field whose repeat does not show. */
+export const fbmT = (p) => noiseT(p).mul(0.7).add(noiseT(vec3(p.z.add(p.x.mul(0.6)), p.y.mul(0.9).add(0.37), p.x.sub(p.z.mul(0.6))).mul(1.83)).mul(0.4));
+
+/**
+ * A tiling cellular field (the distance to the nearest of one jittered point per cell, WORLEY_CELLS
+ * cells across, WORLEY_N texels a side), baked once: one lookup instead of mx_worley_noise_float's
+ * 27 cells at every pixel (Taihu stone and grass clumps cost Suzhou several ms of the GPU a frame).
+ * Features of about one unit, like mx_worley_noise_float; values 0 … ~1.
+ */
+const WORLEY_N = 64, WORLEY_CELLS = 8;
+function worleyField() {
+  const N = WORLEY_N, L = WORLEY_CELLS, k = L / N, pts = new Float32Array(L * L * L * 3);
+  const rnd = (i, s) => { let h = Math.imul(i * 2654435761 + s * 40503, 1274126177); h ^= h >>> 15; h = Math.imul(h, 2246822519); return ((h ^ (h >>> 13)) >>> 0) / 4294967296; };
+  for (let i = 0; i < L * L * L; i++) for (let a = 0; a < 3; a++) pts[i * 3 + a] = rnd(i, a + 1);
+  const data = new Uint8Array(N * N * N);
+  for (let z = 0; z < N; z++) for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const px = (x + 0.5) * k, py = (y + 0.5) * k, pz = (z + 0.5) * k, cx = Math.floor(px), cy = Math.floor(py), cz = Math.floor(pz);
+    let d = 9;
+    for (let dz = -1; dz <= 1; dz++) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const X = cx + dx, Y = cy + dy, Z = cz + dz, j = ((((Z % L) + L) % L) * L + (((Y % L) + L) % L)) * L + (((X % L) + L) % L);
+      const ex = X + pts[j * 3] - px, ey = Y + pts[j * 3 + 1] - py, ez = Z + pts[j * 3 + 2] - pz;
+      const q = ex * ex + ey * ey + ez * ez; if (q < d) d = q;
+    }
+    data[(z * N + y) * N + x] = Math.min(255, Math.round(Math.sqrt(d) * 255));
+  }
+  const t = new Data3DTexture(data, N, N, N);
+  t.format = RedFormat; t.type = UnsignedByteType;
+  t.wrapS = t.wrapT = t.wrapR = RepeatWrapping;
+  t.magFilter = t.minFilter = LinearFilter;
+  t.generateMipmaps = false; t.unpackAlignment = 1;
+  t.needsUpdate = true;
+  return t;
+}
+const WORLEY_T = texture3D(worleyField()).setGroup(renderGroup);
+export const worleyT = (p) => WORLEY_T.sample(p.div(WORLEY_CELLS)).level(0).r;
 
 /**
  * Shadow of the clouds on the ground: a drifting field matched to the cloud cover. 1 = sun,

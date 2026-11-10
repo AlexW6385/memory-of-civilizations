@@ -7,10 +7,10 @@
 import { MeshStandardNodeMaterial, Color } from 'three/webgpu';
 import {
   Fn, float, vec2, vec3, positionLocal, normalLocal, normalView, positionView, positionWorld, cameraPosition, abs, floor, fract, min, max,
-  mix, smoothstep, hash, mx_noise_float, mx_fractal_noise_float, mx_worley_noise_float, dot, cross, normalize, sign, select, time, sin,
+  mix, smoothstep, hash, dot, cross, normalize, sign, select, time, sin,
   clamp, length, attribute, pow, fwidth, atan, asin, mod, reflect, uniform, If,
 } from 'three/tsl';
-import { ENV } from '../engine/env.js';
+import { ENV, noiseT, fbmT, worleyT } from '../engine/env.js';
 import { PLANET_RADIUS as R } from './sites.js';
 
 const C = (h) => { const c = new Color(h); return vec3(c.r, c.g, c.b); };
@@ -57,10 +57,10 @@ export function groundMaterial() {
   const g = attribute('ground', 'vec4'), g2 = attribute('ground2', 'vec4'), g3 = attribute('ground3', 'vec4');
   const S = surfaceCoords(), P = S.fine, Pb = S.big;
   const fade = detailFade();
-  const big = mx_fractal_noise_float(Pb.mul(0.03), 4, 2.0, 0.5);
-  const huge = mx_fractal_noise_float(Pb.mul(0.004), 3, 2.0, 0.5);
-  const mid = mx_fractal_noise_float(P.mul(0.35), 3, 2.0, 0.5);
-  const fine = when(fade.greaterThan(0), () => mx_noise_float(P.mul(6.0)).mul(fade));
+  const big = fbmT(Pb.mul(0.03));
+  const huge = fbmT(Pb.mul(0.004));
+  const mid = fbmT(P.mul(0.35));
+  const fine = when(fade.greaterThan(0), () => noiseT(P.mul(6.0)).mul(fade));
   const aaFade = (w) => float(1).sub(smoothstep(0.25, 0.9, w));
   // sand: wind ripples across the wind, in patches
   const along = P.x.mul(0.8).add(P.z.mul(0.6)), across = P.z.mul(0.8).sub(P.x.mul(0.6));
@@ -68,25 +68,25 @@ export function groundMaterial() {
   // (what feeds the bump's height — ripples, strata, the grass's relief — is computed everywhere:
   // derivatives of values computed in only some pixels of a 2×2 quad are undefined on the GPU and
   // showed as black specks)
-  const rnoise = mx_noise_float(vec3(P.x.mul(0.6), 0, P.z.mul(0.6)));
+  const rnoise = noiseT(vec3(P.x.mul(0.6), 0, P.z.mul(0.6)));
   const rphase = along.mul(48.0).add(rnoise.mul(5.0));
-  const patch = smoothstep(-0.15, 0.45, mx_noise_float(vec3(P.x.mul(0.07), 0, P.z.mul(0.07))));
+  const patch = smoothstep(-0.15, 0.45, noiseT(vec3(P.x.mul(0.07), 0, P.z.mul(0.07))));
   const ripple = sin(rphase).mul(aaFade(fwidth(along.mul(48.0)))).mul(patch);
-  const sandN = when(sandOn, () => mx_noise_float(vec3(across.mul(0.08), 0, along.mul(0.6))));
+  const sandN = when(sandOn, () => noiseT(vec3(across.mul(0.08), 0, along.mul(0.6))));
   const sand = C('#c8aa80').mul(big.mul(0.16).add(1)).mul(huge.mul(0.12).add(1)).mul(sandN.mul(0.06).add(1));
   // grass: green to straw, in clumps; tropical grass richer
-  const clump = when(g.y.greaterThan(ON), () => mx_worley_noise_float(P.mul(0.9)), 0.5);
+  const clump = when(g.y.greaterThan(ON), () => worleyT(P.mul(0.9)), 0.5);
   const grassBase = mix(mix(C('#66733f'), C('#5d7a34'), g2.w), C('#ad9e6b'), clamp(g2.y.add(mid.mul(0.35)).add(huge.mul(0.2)), 0, 1));
   const grass = grassBase.mul(smoothstep(0.0, 0.5, clump).mul(0.28).add(0.78));
   // rock: grey or buff, in strata
   const rockOn = g.z.greaterThan(ON);
-  const strata = mx_noise_float(vec3(P.x.mul(0.04), P.y.mul(1.1), P.z.mul(0.04)));
+  const strata = noiseT(vec3(P.x.mul(0.04), P.y.mul(1.1), P.z.mul(0.04)));
   // red sandstone (Petra, Rajasthan) where the ground is red: rose to ochre in wavy bands
-  const bands = when(rockOn.and(g2.w.greaterThan(0.3)), () => sin(P.y.mul(1.7).add(mx_noise_float(vec3(P.x.mul(0.05), P.y.mul(0.2), P.z.mul(0.05))).mul(4.0))));
+  const bands = when(rockOn.and(g2.w.greaterThan(0.3)), () => sin(P.y.mul(1.7).add(noiseT(vec3(P.x.mul(0.05), P.y.mul(0.2), P.z.mul(0.05))).mul(4.0))));
   const sandstone = mix(C('#8e4433'), C('#b56f47'), bands.mul(0.5).add(0.5)).mul(strata.mul(0.12).add(1));
   const rock = mix(mix(C('#9e9a91'), C('#b29470'), g2.z), sandstone, smoothstep(0.35, 0.75, g2.w)).mul(strata.mul(0.16).add(1)).mul(mid.mul(0.14).add(1));
   let soil = mix(mix(C('#6e5845'), C('#94502e'), g2.w), C('#5b4a39'), g2.z.mul(0.7)).mul(mid.mul(0.15).add(1));
-  const roadN = when(g3.x.greaterThan(ON), () => mx_noise_float(P.mul(1.7)));
+  const roadN = when(g3.x.greaterThan(ON), () => noiseT(P.mul(1.7)));
   const roadCol = mix(C('#a08a6c'), C('#c2a982'), g2.z).mul(mid.mul(0.12).add(1)).mul(roadN.mul(0.08).add(1));
   soil = mix(soil, roadCol, g3.x);
   // fields in strips separated by banks
@@ -119,7 +119,7 @@ export function groundMaterial() {
   seasonal = mix(seasonal, col3.mul(vec3(0.9, 1.12, 0.84)), springK.mul(0.4));
   col3 = mix(col3, seasonal, grassShare);
   // forest seen from afar: the dark mottled green of a canopy (trees themselves stand near settlements)
-  const canopyN = when(g3.z.greaterThan(ON), () => mx_fractal_noise_float(Pb.mul(0.09), 3, 2.0, 0.5));
+  const canopyN = when(g3.z.greaterThan(ON), () => fbmT(Pb.mul(0.09)));
   let canopy = mix(C('#2f4224'), C('#46592c'), canopyN.mul(0.5).add(0.5)).mul(mix(float(1), float(0.82), g2.y.mul(0.5)));
   // (broadleaf from ~25° to ~55°; the boreal forest beyond stays dark; conifers mixed in by the noise)
   const broadleaf = smoothstep(0.42, 0.6, sl).mul(smoothstep(0.86, 0.76, sl)).mul(smoothstep(-0.25, 0.15, mid));
@@ -141,13 +141,13 @@ export function groundMaterial() {
   // rain: darker and glossier where the ground faces the sky; puddles in the low spots (the noise
   // only while it is wet: ENV.wet is the same for every pixel)
   const flat = smoothstep(0.75, 0.95, slopeUp);
-  const pn = when(ENV.wet.greaterThan(0.001), () => mx_fractal_noise_float(P.mul(0.12), 2, 2.0, 0.5));
+  const pn = when(ENV.wet.greaterThan(0.001), () => fbmT(P.mul(0.12)));
   const puddle = smoothstep(0.55, 0.75, pn.mul(-1).add(0.5)).mul(ENV.wet).mul(flat).mul(float(1).sub(g.z)).mul(float(1).sub(g3.y));
   const wet = ENV.wet.mul(flat.mul(0.6).add(0.4));
   m.colorNode = col3.mul(float(1).sub(wet.mul(0.38))).mul(float(1).sub(puddle.mul(0.5)));
   m.roughnessNode = float(0.95).sub(wet.mul(0.4)).sub(puddle.mul(0.5)).sub(g.z.mul(0.1)).sub(snowA.mul(0.25));
   const h = ripple.mul(0.0035).mul(g.x).add(mid.mul(0.04)).add(strata.mul(g.z).mul(0.08)).add(rows.mul(g2.x).mul(0.02)).add(bank.mul(g2.x).mul(0.05))
-    .add(float(1).sub(smoothstep(-0.3, 0.3, mx_noise_float(P.mul(0.9)))).mul(g.y).mul(0.015)).mul(float(1).sub(puddle)).mul(float(1).sub(snowA.mul(0.7)));
+    .add(float(1).sub(smoothstep(-0.3, 0.3, noiseT(P.mul(0.9)))).mul(g.y).mul(0.015)).mul(float(1).sub(puddle)).mul(float(1).sub(snowA.mul(0.7)));
   m.normalNode = bump(h, 1);
   m.name = 'planet-ground';
   return m;
@@ -159,16 +159,16 @@ export function seaMaterial() {
   const S = surfaceCoords(), P = S.fine;
   const depth = attribute('depth', 'float');
   const t = time.mul(0.5);
-  const w1 = mx_noise_float(vec3(P.x.mul(0.05).add(t.mul(0.3)), t.mul(0.1), P.z.mul(0.05)));
-  const w2 = mx_noise_float(vec3(P.x.mul(0.31), t.mul(0.35), P.z.mul(0.27).sub(t.mul(0.6))));
-  const w3 = mx_noise_float(vec3(P.x.mul(1.7), t.mul(0.9), P.z.mul(1.5))).mul(detailFade());
+  const w1 = noiseT(vec3(P.x.mul(0.05).add(t.mul(0.3)), t.mul(0.1), P.z.mul(0.05)));
+  const w2 = noiseT(vec3(P.x.mul(0.31), t.mul(0.35), P.z.mul(0.27).sub(t.mul(0.6))));
+  const w3 = noiseT(vec3(P.x.mul(1.7), t.mul(0.9), P.z.mul(1.5))).mul(detailFade());
   const hgt = w1.mul(0.35).add(w2.mul(0.12)).add(w3.mul(0.03));
   // the surface normal in world space: the planet's up at this point, tilted by the waves
   const nrm = bump(hgt, 1);
   m.normalNode = nrm;
   const shallow = smoothstep(6.0, 0.0, depth);
-  const foam = smoothstep(0.6, 0.0, depth).mul(smoothstep(-0.2, 0.5, mx_noise_float(vec3(P.x.mul(0.8), t.mul(1.5), P.z.mul(0.8)))));
-  const deep = mix(C('#0d2a3a'), C('#123b44'), mx_fractal_noise_float(S.big.mul(0.002), 2, 2, 0.5).mul(0.5).add(0.5));
+  const foam = smoothstep(0.6, 0.0, depth).mul(smoothstep(-0.2, 0.5, noiseT(vec3(P.x.mul(0.8), t.mul(1.5), P.z.mul(0.8)))));
+  const deep = mix(C('#0d2a3a'), C('#123b44'), fbmT(S.big.mul(0.002)).mul(0.5).add(0.5));
   const body = mix(deep, C('#2f6f6a'), shallow.mul(0.8));
   m.colorNode = mix(body, C('#e8ecec'), foam.mul(0.8));
   m.roughnessNode = mix(float(0.04), float(0.6), foam);
