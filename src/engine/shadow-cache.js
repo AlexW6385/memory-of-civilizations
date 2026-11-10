@@ -26,20 +26,11 @@ import { HITCH } from './hitch.js';
 
 /** The cascade's centre is snapped to its width over SNAP (and the box widened by one step). */
 const SNAP = 16;
-/**
- * The view's turn (rad) before the cascades follow it: each cascade is fitted to the view as it was
- * when last fitted, and kept while the view turns less than half of TURN from it (the boxes widened
- * so that the slice still lies inside). Turning on the spot drew every cascade again every frame —
- * about 400 shadow draws a frame at Suzhou, measured on the M2 — now once every TURN/2 of turning.
- * Quality: the cascades' texels about a fifth larger (decision 2026-11-09).
- */
-const TURN = 0.42;
-const WIDEN = 1 + Math.sin(TURN / 2);
-const _held = new THREE.Matrix4(), _q = new THREE.Quaternion(), _p = new THREE.Vector3(), _s = new THREE.Vector3();
+const _p = new THREE.Vector3();
 /** The height (m) of the tallest casters whose shadow may shift by half a texel before a redraw. */
 const TALL = 40;
 
-const _dir = new THREE.Vector3(), _orient = new THREE.Matrix4(), _orientInv = new THREE.Matrix4(), _toLight = new THREE.Matrix4();
+const _dir = new THREE.Vector3(), _orient = new THREE.Matrix4(), _orientInv = new THREE.Matrix4();
 const _box = new THREE.Box3(), _c = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0), _eye = new THREE.Vector3();
 
 /** Does this caster move its vertices by itself (so that its shadow must be drawn every time)? */
@@ -79,15 +70,22 @@ export class CachedCSM extends CSMShadowNode {
     });
   }
 
-  /** Widened by the snapping step, so that the slice still lies in the box wherever the snap puts it. */
+  /**
+   * Each cascade covers a sphere round the viewer, the distance of its slice's far corners: then
+   * turning on the spot never moves it. (Fitted to the view's slice and refitted as the view turned,
+   * the cascades were drawn again every few frames of a turn, 250–500 shadow draws and a 30–40 ms
+   * frame each time; on the wide view the sphere's square is no larger than the slice's widened box
+   * was, ~3.7 × the slice's far distance.) Widened by the snapping step.
+   */
   _updateShadowBounds() {
     super._updateShadowBounds();
     if (!this.cache) return;
-    for (const L of this.lights) {
-      const c = L.shadow.camera, w = (c.right - c.left) * SNAP / (SNAP - 1) * WIDEN;
+    this.radii = this.frustums.map((f) => Math.max(...f.vertices.far.map((v) => v.length())));
+    this.lights.forEach((L, i) => {
+      const c = L.shadow.camera, w = 2 * this.radii[i] * SNAP / (SNAP - 1);
       c.left = -w / 2; c.right = w / 2; c.top = w / 2; c.bottom = -w / 2;
       c.updateProjectionMatrix();
-    }
+    });
   }
 
   updateBefore(frame) {
@@ -103,22 +101,11 @@ export class CachedCSM extends CSMShadowNode {
     for (const L of this.lights) if (L.parent === null) { parent.add(L.target); parent.add(L); }
     this.signature(frame.scene ?? parent);
     _dir.subVectors(light.target.position, light.position).normalize();
-    // the view's orientation as last fitted, at the view's present place
-    // (each cascade holds its own orientation, refitted from 0.4 × TURN on; the far cascades take
-    // turns, one refit a frame, before the limit of TURN / 2: refitted together, the three were
-    // drawn again in the same few frames, ~700 shadow draws, a 40 ms frame every 12° of turning)
-    camera.matrixWorld.decompose(_p, _q, _s);
-    let farRefit = false;
+    camera.getWorldPosition(_p);
     for (let i = 0; i < this.frustums.length; i++) {
       const L = this.lights[i], shadow = L.shadow, sc = shadow.camera, node = this._shadowNodes[i], C = node?._cascade;
       shadow.autoUpdate = false;
       if (!C) continue;
-      const turned = C.q ? C.q.angleTo(_q) : Infinity;
-      if (turned > TURN / 2 || (turned > TURN * 0.4 && (i === 0 || (!farRefit && due(i))))) {
-        (C.q ||= new THREE.Quaternion()).copy(_q);
-        if (i > 0) farRefit = true;
-      }
-      _held.compose(_p, C.q, _s);
       const width = sc.right - sc.left, texel = width / shadow.mapSize.width, step = width / SNAP;
       // the sun's direction held until it has turned by the angle that moves a tall caster's
       // shadow by half a texel here
@@ -131,12 +118,9 @@ export class CachedCSM extends CSMShadowNode {
       _eye.copy(light.position);
       _orient.lookAt(_eye, _c.copy(_eye).add(C.dir), _up);
       _orientInv.copy(_orient).invert();
-      _toLight.multiplyMatrices(_orientInv, _held);
-      this.frustums[i].toSpace(_toLight, this._lsf ||= new this.frustums[i].constructor());
-      const V = this._lsf.vertices;
-      _box.makeEmpty();
-      for (let j = 0; j < 4; j++) { _box.expandByPoint(V.near[j]); _box.expandByPoint(V.far[j]); }
-      _box.getCenter(_c);
+      _c.copy(_p).applyMatrix4(_orientInv);
+      const R = this.radii?.[i] ?? width / 2;
+      _box.min.set(_c.x - R, _c.y - R, _c.z - R); _box.max.set(_c.x + R, _c.y + R, _c.z + R);
       // snapped: the box moves by whole steps (each a whole number of texels)
       const qx = Math.floor(_c.x / step), qy = Math.floor(_c.y / step), qz = Math.ceil((_box.max.z + this.lightMargin) / step);
       _c.set((qx + 0.5) * step, (qy + 0.5) * step, qz * step).applyMatrix4(_orient);
