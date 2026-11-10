@@ -48,7 +48,9 @@ export class Renderer {
     const qp = new URLSearchParams(location.search);
     const depthMode = qp.get('depth') || (qp.get('logdepth') === '0' ? 'standard' : qp.get('logdepth') === '1' ? 'log' : DEPTH_DEFAULT);
     const r = this.renderer = new THREE.WebGPURenderer({ canvas: this.canvas, antialias: false, forceWebGL: !this.webgpu, powerPreference: 'high-performance',
-      logarithmicDepthBuffer: depthMode === 'log', reversedDepthBuffer: depthMode === 'reversed' });
+      logarithmicDepthBuffer: depthMode === 'log', reversedDepthBuffer: depthMode === 'reversed',
+      // ?gputime: GPU timestamps per pass (renderer.resolveTimestampsAsync), for profiling only
+      trackTimestamp: qp.has('gputime') });
     await r.init();
     SKY_FAR.value = r.reversedDepthBuffer ? 0 : 1;
     // instance matrices always as vertex attributes: below 64 kB three.js puts them in a uniform
