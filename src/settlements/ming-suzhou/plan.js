@@ -238,6 +238,7 @@ const rooms = [
   room('yuanxiang', B.yuanxiang.rect, G + B.yuanxiang.y, 'hall'),
   room('main-hall', [-10, 32, 10, 39.5], G + 0.45, 'hall'),
   room('sedan-hall', [-8, 43, 8, 49.5], G + 0.45, 'hall'),
+  room('study', [-34, 30, -22, 36], G + 0.35, 'hall'),
   room('garden', GARDEN, G, 'open'),
   room('residence', RESIDENCE, G, 'open'),
 ];

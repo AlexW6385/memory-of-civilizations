@@ -262,7 +262,7 @@
  },
  "edo-himeji-castle": {
   "site": "edo-himeji",
-  "hash": "71c18396bc0d8888",
+  "hash": "bd747b4eab7b0a1e",
   "rays": 128,
   "probes": 72000,
   "boxes": [
@@ -289,9 +289,9 @@
     ]
    }
   ],
-  "bytes": 1079698,
-  "seconds": 100,
-  "baked": "2026-11-07"
+  "bytes": 1079759,
+  "seconds": 82,
+  "baked": "2026-11-10"
  },
  "florence-centre": {
   "site": "florence",
@@ -488,7 +488,7 @@
  },
  "granada-generalife": {
   "site": "granada",
-  "hash": "88e36831bb27df7a",
+  "hash": "076a87b26f345b6a",
   "rays": 128,
   "probes": 7012,
   "boxes": [
@@ -558,9 +558,9 @@
     ]
    }
   ],
-  "bytes": 125298,
-  "seconds": 18,
-  "baked": "2026-11-07"
+  "bytes": 125255,
+  "seconds": 10,
+  "baked": "2026-11-10"
  },
  "hagia-sophia": {
   "site": "constantinople",
@@ -601,7 +601,7 @@
  },
  "isfahan-maidan": {
   "site": "isfahan",
-  "hash": "1772455520b25f97",
+  "hash": "4221892871bad492",
   "rays": 128,
   "probes": 37094,
   "boxes": [
@@ -655,13 +655,13 @@
     ]
    }
   ],
-  "bytes": 635821,
-  "seconds": 178,
-  "baked": "2026-11-07"
+  "bytes": 632349,
+  "seconds": 78,
+  "baked": "2026-11-10"
  },
  "joseon-seoul-gyeongbokgung": {
   "site": "joseon-seoul",
-  "hash": "c06137752bc915ee",
+  "hash": "698fc220a2b004db",
   "rays": 128,
   "probes": 22750,
   "boxes": [
@@ -682,9 +682,9 @@
     ]
    }
   ],
-  "bytes": 358036,
-  "seconds": 83,
-  "baked": "2026-11-07"
+  "bytes": 354992,
+  "seconds": 36,
+  "baked": "2026-11-10"
  },
  "kilwa-mosque": {
   "site": "kilwa",
@@ -821,7 +821,7 @@
  },
  "lhasa-potala": {
   "site": "lhasa",
-  "hash": "8ecaad412cdf4b14",
+  "hash": "5ae673ee2e058e9f",
   "rays": 128,
   "probes": 14877,
   "boxes": [
@@ -842,13 +842,13 @@
     ]
    }
   ],
-  "bytes": 170755,
-  "seconds": 36,
-  "baked": "2026-11-07"
+  "bytes": 170683,
+  "seconds": 18,
+  "baked": "2026-11-10"
  },
  "london-westminster": {
   "site": "london",
-  "hash": "aee792ac182d8679",
+  "hash": "e8c9e01005697a95",
   "rays": 128,
   "probes": 78540,
   "boxes": [
@@ -875,9 +875,9 @@
     ]
    }
   ],
-  "bytes": 1209978,
-  "seconds": 179,
-  "baked": "2026-11-07"
+  "bytes": 1210580,
+  "seconds": 109,
+  "baked": "2026-11-10"
  },
  "madurai-meenakshi": {
   "site": "madurai",
@@ -951,9 +951,9 @@
  },
  "ming-suzhou-garden": {
   "site": "ming-suzhou",
-  "hash": "11ca9844e0bd71fe",
+  "hash": "1a3447ffa3d90729",
   "rays": 128,
-  "probes": 9460,
+  "probes": 11143,
   "boxes": [
    {
     "min": [
@@ -987,11 +987,27 @@
      "main-hall",
      "sedan-hall"
     ]
+   },
+   {
+    "min": [
+     -36,
+     0,
+     28
+    ],
+    "n": [
+     17,
+     9,
+     11
+    ],
+    "spacing": 1,
+    "rooms": [
+     "study"
+    ]
    }
   ],
-  "bytes": 156906,
-  "seconds": 17,
-  "baked": "2026-11-09"
+  "bytes": 187598,
+  "seconds": 20,
+  "baked": "2026-11-10"
  },
  "mughal-agra-taj": {
   "site": "mughal-agra",
@@ -1076,7 +1092,7 @@
  },
  "nara-todaiji": {
   "site": "nara",
-  "hash": "87c4a97dfdd539a1",
+  "hash": "0d30c303d02e94fc",
   "rays": 128,
   "probes": 76738,
   "boxes": [
@@ -1097,9 +1113,9 @@
     ]
    }
   ],
-  "bytes": 1185414,
-  "seconds": 152,
-  "baked": "2026-11-07"
+  "bytes": 1185435,
+  "seconds": 88,
+  "baked": "2026-11-10"
  },
  "new-york-esb": {
   "site": "new-york",
@@ -1395,7 +1411,7 @@
  },
  "qing-beijing-palace": {
   "site": "qing-beijing",
-  "hash": "0f7acc47678f9297",
+  "hash": "b803055dfbfae443",
   "rays": 128,
   "probes": 78200,
   "boxes": [
@@ -1418,9 +1434,9 @@
     ]
    }
   ],
-  "bytes": 1210284,
-  "seconds": 274,
-  "baked": "2026-11-07"
+  "bytes": 1190480,
+  "seconds": 120,
+  "baked": "2026-11-10"
  },
  "sainte-chapelle": {
   "site": "paris",
@@ -1500,7 +1516,7 @@
  },
  "song-hangzhou-liuhe": {
   "site": "song-hangzhou",
-  "hash": "5ef31f5b2fdf1acd",
+  "hash": "b08a45a5bc2d9e7e",
   "rays": 128,
   "probes": 28237,
   "boxes": [
@@ -1543,9 +1559,9 @@
     ]
    }
   ],
-  "bytes": 446353,
-  "seconds": 60,
-  "baked": "2026-11-07"
+  "bytes": 436907,
+  "seconds": 36,
+  "baked": "2026-11-10"
  },
  "sydney-opera": {
   "site": "sydney",

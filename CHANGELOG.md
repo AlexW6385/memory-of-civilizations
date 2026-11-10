@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.27 — Reflections and light through paper (2026-11-09)
+- Water reflects the buildings and trees round it (screen-space, on high; sky by Fresnel everywhere); paper lattices let the daylight and the lamps through, and the halls of Suzhou are baked again with that light, now three to four times brighter inside; the study is a room of its own. Lamps cost nothing by day.
+
 ## v10.26 — Building stays off the page (2026-11-09)
 - A settlement waiting its turn in the build workers no longer makes the page give up on the workers and build everything itself (which made arriving slow and every frame heavy); the next random city is built ahead only once the one you are in is finished.
 
