@@ -23,14 +23,33 @@ export class Builder {
     try { url = new URL(JSON.parse(document.querySelector('script[type="importmap"]').textContent).imports.three, location.href).href.replace(/three\.webgpu\.js$/, 'three.core.js'); } catch { /* no import map */ }
     if (!url) { this.ok = false; return; }
     this.timer = setInterval(() => this.watch(), 2000);
-    this.workers = Array.from({ length: n }, () => {
+    this.url = url; this.n = n; this.restarts = 0;
+    this.spawn();
+  }
+
+  spawn() {
+    this.workers = Array.from({ length: this.n }, () => {
       const w = new Worker(new URL('./build-worker.js', import.meta.url), { type: 'module' });
       w.load = 0;
       w.onmessage = (e) => { w.heard = performance.now(); this.receive(e.data); };
-      w.onerror = (e) => { console.warn('build worker failed', e.message); this.fail(); };
-      w.postMessage({ init: url });
+      w.onerror = (e) => { console.warn('build worker failed', e.message); this.restart(); };
+      w.postMessage({ init: this.url });
       return w;
     });
+  }
+
+  /**
+   * The workers let go of and new ones started (a worker killed for its memory falls silent; one
+   * that failed to start throws): the jobs running fail with `restart` and are sent again by the
+   * world (world.js load). After a few restarts the world builds on the main thread.
+   */
+  restart() {
+    for (const w of this.workers) w.terminate();
+    const jobs = [...this.jobs.values()];
+    this.jobs.clear();
+    if (++this.restarts > 3) { this.ok = false; clearInterval(this.timer); }
+    else this.spawn();
+    for (const j of jobs) j.reject(Object.assign(new Error('build worker restarted'), { restart: this.ok }));
   }
 
   fail() {
@@ -74,8 +93,8 @@ export class Builder {
 
   /**
    * A worker that falls silent (killed for its memory, a module that never arrives) would leave a
-   * settlement unbuilt for ever: a job that hears nothing for STALL ms fails, the workers are let go
-   * of, and the world builds on the main thread from then on.
+   * settlement unbuilt for ever: a job that hears nothing for STALL ms fails and the workers are
+   * started again (restart).
    */
   watch() {
     const now = performance.now();
@@ -85,9 +104,8 @@ export class Builder {
       // waiting behind the others for over STALL, sent the whole world to the main thread)
       const heard = Math.max(j.heard, j.worker.heard ?? 0);
       if (now - heard > STALL) {
-        console.warn('build worker silent for', Math.round((now - heard) / 1000), 's: building in the page');
-        for (const w of this.workers) w.terminate();
-        this.fail();
+        console.warn('build worker silent for', Math.round((now - heard) / 1000), 's: workers started again');
+        this.restart();
         return;
       }
     }

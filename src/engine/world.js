@@ -206,17 +206,23 @@ class Settlement {
           // laid out and built in a worker (src/engine/build-worker.js); the main thread only makes
           // the meshes. A failure falls back to building here, from what is not yet built.
           const got = new Set();
-          const job = B.settlement(S.id,
-            (count, nl) => { this.expected = nl * 3 + (count - nl); },
-            async (i, header, built) => {
-              if (stale()) return;
-              const L = mod.landmarks[i];
-              await this.addPart((L ? L.plan : header).id, L ? L.plan : header, L ? L.music : null, gen, built);
-              if (L) this.done += 2;
-              got.add(i);
-            });
-          this.job = job;
-          try { await job.done; inWorker = true; } catch (e) { console.warn('building', S.id, 'in the page:', e.message); }
+          // (sent again when the workers were started again: builder.js restart; the plans already
+          // in are skipped)
+          for (let attempt = 0; attempt < 3 && B.ok && !inWorker; attempt++) {
+            const job = B.settlement(S.id,
+              (count, nl) => { this.expected = nl * 3 + (count - nl); },
+              async (i, header, built) => {
+                if (stale() || got.has(i)) return;
+                got.add(i);
+                const L = mod.landmarks[i];
+                await this.addPart((L ? L.plan : header).id, L ? L.plan : header, L ? L.music : null, gen, built);
+                if (L) this.done += 2;
+              });
+            this.job = job;
+            try { await job.done; inWorker = true; } catch (e) { console.warn('building', S.id, e.restart ? 'again' : 'in the page', ':', e.message); if (!e.restart) break; }
+            this.job = null;
+            if (stale()) return this;
+          }
           this.job = null;
           if (stale()) return this;
           if (!inWorker) this.got = got;

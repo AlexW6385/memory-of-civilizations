@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.41 — No freezes on the way (2026-11-10)
+
+A build worker that was busy, or let go of by the browser, no longer sends all building to the page itself (a minute's freeze at each city): the workers are started again and the city is built where it was. The next city is prepared only in idle moments.
+
 ## v10.40 — Suzhou smooth (2026-11-10)
 
 Suzhou's garden draws about 430 things a frame instead of 520 and holds 60 fps on an M2: empty plant batches, the sea buried under dry land and far cities' outlines are no longer drawn, small repeated pieces are merged, the next city is prepared only in idle moments, and the picture's resolution drops a little when the machine falls behind. The garden's Mediterranean stand-in plants are now camphors and tea shrubs.

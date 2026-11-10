@@ -33,6 +33,9 @@ self.onmessage = async (e) => {
   if (d.cancel !== undefined) { cancelled.add(d.cancel); return; }
   if (d.warm) { warmQueue.push(d.warm); pumpWarm(); return; }
   const { job, id, part = 0, of = 1 } = d;
+  // (the coarse versions kept for the shapes of a few settlements at most: a worker that kept every
+  // one it ever made grew settlement after settlement until the browser let it go)
+  if (coarseCache.size > 1500) coarseCache.clear();
   active++;
   try {
     await ready;

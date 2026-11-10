@@ -92,3 +92,4 @@ The record of decisions behind `DESIGN.md` (its §11 points here). **Agents do n
 - 2026-11-10 Global uniforms (ENV, baked-light bounds and volumes) in the render's shared group: each object's own group is checked at each of its draws (~500 a frame).
 - 2026-11-10 Draw calls are Suzhou's limit, not shading (flat materials −13%, ¼ pixels −20%, half the draws −40%): fewer draws first; baked material textures stay deferred.
 - 2026-11-10 Build-worker watchdog 180 s (was 45): a busy worker cannot answer, and the false alarm moved all building to the main thread, freezing it for a minute per settlement.
+- 2026-11-10 Build workers restarted (and the job sent again) when one falls silent, at most three times, before the page builds itself: falling back to the main thread froze it for minutes.
