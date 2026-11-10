@@ -334,12 +334,15 @@ export class Renderer {
     // left the scene meanwhile (unloaded, or merged away); a frame that meets one first builds it
     this._one = one;                            // (the latest setting-up: the scene pass may have been made again)
     if (later.length) {
-      (this._later ??= []).push(...later);
+      // (held weakly: a settlement let go of before its turn is not kept in memory by the queue)
+      (this._later ??= []).push(...later.map((o) => new WeakRef(o)));
       this._laterRun ??= (async () => {
         const inScene = (o) => { while (o.parent) o = o.parent; return o === this.scene; };
-        for (let o; (o = this._later.shift());) {
+        for (let w; (w = this._later.shift());) {
+          const o = w.deref();
+          if (!o || !inScene(o)) continue;
           const d = await idle();
-          if (d && !d.didTimeout && d.timeRemaining() < 8) { this._later.unshift(o); continue; }
+          if (d && !d.didTimeout && d.timeRemaining() < 8) { this._later.unshift(w); continue; }
           if (!inScene(o)) continue;
           try { await this._one(o); } catch (e) { /* built in the frame instead */ }
         }
