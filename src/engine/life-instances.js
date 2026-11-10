@@ -21,8 +21,9 @@ const COS_VIEW = Math.cos(80 * Math.PI / 180), COS_TURN = Math.cos(10 * Math.PI 
 export const LIFE_MIN = 13;
 /** ...and only if its copies hold more than this many triangles in all: a small shape with few
  *  copies (a cord, a lid, a cup: 13 copies of 12 triangles) cost a draw call of its own, and Suzhou's
- *  street life had 124 of them; merged by material, 88 of them cost about 6 MB and no draw. */
-export const LIFE_MIN_TRIS = 10000;
+ *  street life had 124 of them; merged by material, 88 of them cost about 6 MB and no draw. Raised
+ *  to 30 000 when the shops' goods came: Suzhou's canal street 73 life draws → 7.) */
+export const LIFE_MIN_TRIS = 30000;
 /** Is a shape of n copies of this geometry instanced (else merged by real material)? */
 export const lifeInstanced = (n, geometry) => n >= LIFE_MIN && n * ((geometry.index ? geometry.index.count : geometry.attributes.position.count) / 3) > LIFE_MIN_TRIS;
 
