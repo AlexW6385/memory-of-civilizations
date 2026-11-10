@@ -109,7 +109,7 @@ function prepareShops(open) {
   const all = lots();
   if (all.prepared) return;
   all.prepared = true;
-  const r = rng(+(process.env.SHOPSEED || 2718));
+  const r = rng(2718);
   for (const l of all) { l.shop0 = l.shop; l.trade0 = l.trade; }
   const main = STREETS.slice(0, 4);
   for (const l of all) {
@@ -292,5 +292,5 @@ let openLots = new Set();
 
 export async function town() {
   const hs = houses();
-  return [waterways(), ...hs, ...riverLife(), ...(process.env.NOSHOPS ? [] : shopFronts()), ...northPlans()];
+  return [waterways(), ...hs, ...riverLife(), ...shopFronts(), ...northPlans()];
 }

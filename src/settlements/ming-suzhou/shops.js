@@ -320,7 +320,6 @@ function suzhouShop(el, { bag, col }) {
   const [cx, cz] = el.at, y0 = el.y ?? 0, rot = el.rot, L = el.L, v0 = el.v0, trade = el.trade, c = Math.cos(rot), s = Math.sin(rot);
   const loc = (lx, lz) => [cx + lx * c + lz * s, cz - lx * s + lz * c];
   const put = (name, { mats = {}, x = 0, z = 0, y = 0, ry = 0, k = 1 } = {}) => {
-    if (process.env.SKIPU && process.env.SKIPU.split(',').some((q) => name.startsWith(q))) return;
     const P = placer({ t: el.t, at: loc(x, z), y: y0 + y, rot: rot + ry, s: k }, bag);
     for (const [role, g] of Object.entries(U[name])) { const m = mats[role] ?? DEF[name][role]; if (globalThis.__shopStat) { const key = `${name}.${role}:${m}`; globalThis.__shopStat[key] = (globalThis.__shopStat[key] || 0) + 1; } P(m, g.clone()); }
   };
