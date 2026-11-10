@@ -163,6 +163,9 @@ class Settlement {
     C.water = (x, z, y) => (on(x, z) ? L.water(x, z, y) : (groundInFrame(S.frame, x, z) < seaInFrame(S.frame, x, z) - 0.3 && y < seaInFrame(S.frame, x, z) + 0.3));
     C.waterLevel = (x, z) => (on(x, z) ? L.waterLevel(x, z) : (groundInFrame(S.frame, x, z) < seaInFrame(S.frame, x, z) ? seaInFrame(S.frame, x, z) : -Infinity));
     this.music = null;                     // the settlement's own music, in its streets (its module's)
+    // true while it is built ahead of a visit (World.preload), not visited: its shaders compiled in
+    // the page's idle moments only (renderer.js precompile)
+    this.ahead = () => this.world.kept === this && this !== this.world.anchor?.site;
   }
 
   /** How much of the settlement is built (0…1), while it loads. */
@@ -290,7 +293,7 @@ class Settlement {
     }
     HITCH.since('stream meshes', tS);
     // its shaders compiled before it shows, not in the frame that first draws it (a hitch)
-    await this.world.r.precompile?.(group);
+    await this.world.r.precompile?.(group, { background: this.ahead });
     // and its buffers sent to the GPU in a frame with room for them
     await this.world.uploadSlot(bytesOf(group));
     tS = HITCH.mark();
@@ -327,7 +330,7 @@ class Settlement {
     this.group.add(into);
     // the shapes drawn by distance (merge.js LodSet), their copies chosen with the street life's
     const lods = this.lods = [];
-    const precompile = async (list) => { await this.world.r.precompile?.(list); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b); };
+    const precompile = async (list) => { await this.world.r.precompile?.(list, { background: this.ahead }); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b); };
     try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile }); } catch (e) { console.warn('merging', this.id, e); }
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
@@ -547,7 +550,7 @@ export class World {
       // the merged meshes made: whatever of the settlement was not compiled yet (its parts and merged
       // meshes are compiled as they come; this catches the rest, a no-op for what was) compiled now
       if (still()) await site.merging;
-      if (still()) { await idle(); if (still() && site.state === 'ready') await this.r.precompile?.(site.group); }
+      if (still()) { await idle(); if (still() && site.state === 'ready') await this.r.precompile?.(site.group, { background: site.ahead }); }
     } catch (e) { console.warn('preload', S.id, e); }
   }
 

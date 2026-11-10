@@ -261,7 +261,13 @@ export class Renderer {
     return best.d;
   }
 
-  precompile(roots) {
+  /**
+   * (opts.background: a function, true while this is work for later — a settlement built ahead of
+   * a visit: then one object at a time, each in a moment the page is idle, so that the frames of
+   * the place being visited keep their time; ~5–10 ms of this thread an object, which three chains
+   * gave the frames in the middle of the walk)
+   */
+  precompile(roots, opts = {}) {
     const r = this.renderer, sp = this.scenePass, ctx = sp?._contextNodeCache?.context;
     if (!r || !sp?.renderTarget || !ctx) return Promise.resolve();      // before the first frame
     const seen = this._compiled ??= new Set(), reps = [];
@@ -313,8 +319,11 @@ export class Renderer {
     // after another they came in at about 16 a second, and a settlement's thousand meshes were still
     // being compiled minutes after arriving, the ones not yet done built in the frame that met them;
     // a few chains side by side, each call's setting-up still synchronous and alone)
-    const CHAINS = 3, chains = [];
-    for (let c = 0; c < CHAINS; c++) chains.push(reps.filter((_, i) => i % CHAINS === c).reduce((p, o) => p.then(() => one(o)), Promise.resolve()));
+    const bg = opts.background || (() => false);
+    const idle = () => new Promise((res) => (globalThis.requestIdleCallback ? requestIdleCallback((d) => res(d), { timeout: 2000 }) : setTimeout(res, 50)));
+    const quiet = async () => { while (bg()) { const d = await idle(); if (!d || d.didTimeout || d.timeRemaining() > 8) return; } };
+    const CHAINS = bg() ? 1 : 3, chains = [];
+    for (let c = 0; c < CHAINS; c++) chains.push(reps.filter((_, i) => i % CHAINS === c).reduce((p, o) => p.then(quiet).then(() => one(o)), Promise.resolve()));
     return Promise.all(chains).catch((e) => console.warn('precompile:', e.message));
   }
 

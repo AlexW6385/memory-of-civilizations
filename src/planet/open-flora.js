@@ -81,12 +81,13 @@ export class OpenFlora {
         const dist = Math.hypot(d[i] - cam[0], d[i + 1] - cam[1], d[i + 2] - cam[2]);
         const lod = dist < S.lod[0] * this.scale ? 0 : dist < Math.min(S.lod[1], REACH) * this.scale ? 1 : -1;
         if (lod < 0) continue;
-        const key = `${sp}/${d[i + 4] % (lod ? 2 : VARIANTS)}/${lod}`;          // (two shapes at the far level: src/engine/flora/index.js FAR_VARIANTS)
+        const key = `${sp}/${d[i + 4] % VARIANTS % 2}/${lod}`;          // (two shapes at each level: src/engine/flora/index.js NEAR_VARIANTS)
         if (!buckets.has(key)) buckets.set(key, []);
         buckets.get(key).push(d, i);
       }
     }
-    for (const [key, b] of this.batches) if (!buckets.has(key)) for (const m of b.meshes) m.count = 0;
+    // (an instanced mesh of no copies is still a draw call: hidden)
+    for (const [key, b] of this.batches) if (!buckets.has(key)) for (const m of b.meshes) { m.count = 0; m.visible = false; }
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), qy = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(), Y = new THREE.Vector3(0, 1, 0), col = new THREE.Color();
     for (const [key, list] of buckets) {
       const [sp, v, lod] = key.split('/'), n = list.length / 2, b = this.batch(sp, +v, +lod, n), S = SPECIES[sp];
@@ -104,6 +105,7 @@ export class OpenFlora {
       }
       for (const mesh of b.meshes) {
         mesh.count = n;
+        mesh.visible = b.ready && n > 0;
         mesh.instanceMatrix.needsUpdate = true;
         if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
       }
@@ -133,11 +135,12 @@ export class OpenFlora {
     }
     // a species not drawn before: hidden until its shaders are compiled (set by the world), so that
     // the frame that first shows it does not stop to compile them
+    b = { meshes, cap, ready: !this.precompile };
+    for (const mesh of meshes) mesh.visible = false;
     if (this.precompile) {
-      for (const mesh of meshes) mesh.visible = false;
-      this.precompile(meshes).then(() => { for (const mesh of meshes) mesh.visible = true; });
+      const bb = b;
+      this.precompile(meshes).then(() => { bb.ready = true; for (const mesh of meshes) mesh.visible = mesh.count > 0; });
     }
-    b = { meshes, cap };
     this.batches.set(key, b);
     return b;
   }

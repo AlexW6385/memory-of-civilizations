@@ -5,8 +5,10 @@
 import * as THREE from 'three/webgpu';
 import { uniform, texture, uv, positionLocal, time, sin, cos, vec3, vec4, float, attribute, instanceIndex, hash, mix, normalWorld, max, dot, normalize, faceDirection, cameraViewMatrix } from 'three/tsl';
 import { SPECIES, VARIANTS, speciesGeometry } from './species.js';
-/** Shapes per species at the far level of detail (of VARIANTS near). */
-const FAR_VARIANTS = 2;
+/** Shapes per species near and at the far level of detail (of the VARIANTS made): each shape of
+ *  each species is two draw calls at each level (Suzhou's garden had 130 flora draws, species of a
+ *  few plants in four shapes each); the yaw, size and tint of each plant tell them apart. */
+const NEAR_VARIANTS = 2, FAR_VARIANTS = 2;
 import { foliageTexture } from './textures.js';
 import { MAX_DENSITY, NEAR_ONLY } from '../../world/flora-rules.js';
 import { material as paletteMaterial } from '../materials.js';
@@ -264,7 +266,7 @@ export class Flora {
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
     const kvs = this.kvs ??= new Map(), kvList = this.kvList ??= [];
     for (let j = 0, i = 0; j < n; j++, i += 8) {
-      const sp = this.species[d[i]], S = SPECIES[sp], v = d[i + 1] % VARIANTS, key = `${sp}/${v}`;
+      const sp = this.species[d[i]], S = SPECIES[sp], v = d[i + 1] % VARIANTS % NEAR_VARIANTS, key = `${sp}/${v}`;
       let k = kvs.get(key);
       if (k === undefined) { k = kvList.length; kvs.set(key, k); kvList.push([sp, v]); }
       kv[j] = k;
@@ -317,7 +319,8 @@ export class Flora {
       }
     }
     // hide what is no longer used
-    for (const [key, b] of this.batches) if (!buckets.has(b.id)) { for (const mesh of b.meshes) mesh.count = 0; b.sig = 0; }
+    // (an instanced mesh of no copies is still a draw call: hidden)
+    for (const [key, b] of this.batches) if (!buckets.has(b.id)) { for (const mesh of b.meshes) { mesh.count = 0; mesh.visible = false; } b.sig = 0; }
     for (const [id, list] of buckets) {
       const [sp, v] = this.kvList[id >> 1], lod = id & 1;
       const n = list.length / 2;
@@ -336,6 +339,7 @@ export class Flora {
           if (C) { C[k * 3] = P.col[i * 3]; C[k * 3 + 1] = P.col[i * 3 + 1]; C[k * 3 + 2] = P.col[i * 3 + 2]; }
         }
         mesh.count = n;
+        mesh.visible = b.ready && n > 0;
         mesh.instanceMatrix.clearUpdateRanges(); mesh.instanceMatrix.addUpdateRange(0, n * 16); mesh.instanceMatrix.needsUpdate = true;
         if (mesh.instanceColor) { mesh.instanceColor.clearUpdateRanges(); mesh.instanceColor.addUpdateRange(0, n * 3); mesh.instanceColor.needsUpdate = true; }
       }
@@ -373,11 +377,12 @@ export class Flora {
       this.group.add(mesh);
     }
     // its shaders compiled off the frame before it shows (src/engine/renderer.js precompile)
+    b = { meshes, cap, ready: !this.precompile };
+    for (const mesh of meshes) mesh.visible = false;
     if (this.precompile) {
-      for (const mesh of meshes) mesh.visible = false;
-      this.precompile(meshes).then(() => { for (const mesh of meshes) mesh.visible = true; });
+      const bb = b;
+      this.precompile(meshes).then(() => { bb.ready = true; for (const mesh of meshes) mesh.visible = mesh.count > 0; });
     }
-    b = { meshes, cap };
     this.batches.set(key, b);
     return b;
   }
