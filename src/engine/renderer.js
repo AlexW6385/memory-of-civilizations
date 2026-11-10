@@ -292,7 +292,9 @@ export class Renderer {
       // the first mesh of each kind (its shader and pipeline) is awaited; the other instanced
       // meshes' own builds are done afterwards in idle moments (`later`). Awaiting all of them made
       // every travel wait on ~800 builds one after another, latency-bound at ~50 a second (~16 s)
-      if (!kinds.has(kind)) { kinds.add(kind); reps.push(o); } else later.push(o);
+      // (a settlement built ahead, opts.background, has every build done now: it is off the travel's
+      // path, and left to the arrival's look round they cost ~30 s of frames)
+      if (!kinds.has(kind) || opts.background?.()) { kinds.add(kind); reps.push(o); } else later.push(o);
     });
     if (!reps.length && !later.length) return Promise.resolve();
     // set up as the scene pass does. three's compileAsync gathers what to compile synchronously,
