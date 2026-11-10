@@ -368,12 +368,12 @@ function lowGeometry(proto, low) {
 
 /**
  * The fine detail (pieces under 0.4 m, drawn only near: src/engine/world.js DETAIL_REACH) merged
- * across the plans, per material in cells of `cell` metres: each plan's detail was a draw call per
+ * across the plans, per material in cells of `cell` metres (about DETAIL_REACH: one to four in reach): each plan's detail was a draw call per
  * material — a street of shops, its goods, two dozen draws a plan within reach. The merged pieces
  * take the originals' place in their first plan's detail list (shown and hidden by distance as
  * they were). Pieces marked userData.detailMerge (world.js addPart) keep their arrays until then.
  */
-export async function mergeDetail(recs, make, { stale = () => false, precompile = null, cell = 32 } = {}) {
+export async function mergeDetail(recs, make, { stale = () => false, precompile = null, cell = 128 } = {}) {
   const groups = new Map();
   const add = (key, mat, e) => { let G = groups.get(key); if (!G) groups.set(key, (G = { mat, list: [] })); G.list.push(e); };
   const M = new THREE.Matrix4(), P = new THREE.Vector3();
