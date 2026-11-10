@@ -11,7 +11,7 @@
 // each as one instanced mesh), so a street of shops costs a few hundred matrices, not geometry.
 // Local frame of a shop: x along the front, z out into the street, y up from the street.
 
-import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod, hangFrom, windMat } from '../../core/geom.js';
 import { placer, assembly, rng } from '../../objects/kit.js';
 import { prismX } from './props.js';
 
@@ -77,6 +77,13 @@ function glyphUnit(ch) {
   });
 }
 for (const ch of Object.keys(GLYPHS)) glyphUnit(ch);
+/** the roles of a unit that are cloth in the wind (their `hang` set from the attachment's height) */
+const WINDY = new Set(['flag.c', 'flag.e', 'streamers.c']);
+// the characters on a flag (cloth, sewn on: they sway with it; its top is 1.04 above the cell's middle at the flag's scale)
+for (const ch of ['酒', '茶', '面']) {
+  unit(`f${ch}`, { g: 'cloth_black' }, (a) => { const t = []; for (const s of GLYPHS[ch]) stroke(t, s, 0.004, 0, 0.09); a('g', hangFrom(fromTriangles(t), 1.04)); });
+  WINDY.add(`f${ch}.g`);
+}
 
 // the name board: a lacquered field in a raised frame, W 1.9 m, H 0.46, 0.05 deep (its face at z 0.05)
 unit('plate', { f: 'lacquer_black', b: 'gilt_bronze' }, (a) => {
@@ -132,11 +139,11 @@ unit('pole', { p: 'bamboo_culm', s: 'granite_grey', w: 'timber' }, (a) => {
 unit('flag', { c: 'cloth_white', w: 'timber', e: 'cloth_black' }, (a) => {
   a('w', box(-0.02, -0.05, 0.12, 0.02, 0.02, 0.88));
   const f = prismX([[0.14, -0.04], [0.86, -0.04], [0.86, -1.18], [0.5, -0.94], [0.14, -1.18]], -0.008, 0.008);
-  a('c', f); a('e', prismX([[0.14, -0.04], [0.86, -0.04], [0.86, -0.1], [0.14, -0.1]], -0.011, 0.011));
+  a('c', hangFrom(f, -0.04)); a('e', hangFrom(prismX([[0.14, -0.04], [0.86, -0.04], [0.86, -0.1], [0.14, -0.1]], -0.011, 0.011), -0.04));
 });
 unit('streamers', { c: 'cloth_indigo', w: 'timber' }, (a) => {
   a('w', box(-0.02, -0.04, 0.1, 0.02, 0.02, 0.9));
-  for (const [z, h] of [[0.2, 1.15], [0.38, 0.8], [0.56, 1.3], [0.74, 0.95]]) a('c', prismX([[z - 0.07, -0.04], [z + 0.07, -0.04], [z + 0.07, -h], [z, -h + 0.14], [z - 0.07, -h]], -0.008, 0.008));
+  for (const [z, h] of [[0.2, 1.15], [0.38, 0.8], [0.56, 1.3], [0.74, 0.95]]) a('c', hangFrom(prismX([[z - 0.07, -0.04], [z + 0.07, -0.04], [z + 0.07, -h], [z, -h + 0.14], [z - 0.07, -h]], -0.008, 0.008), -0.04));
 });
 unit('gourd', { g: 'lacquer_chestnut', t: 'cloth_red' }, (a) => {
   a('g', ly([[0.001, -0.62], [0.11, -0.64], [0.2, -0.76], [0.21, -0.9], [0.14, -1.0], [0.1, -1.02], [0.12, -1.12], [0.2, -1.26], [0.21, -1.4], [0.13, -1.5], [0.001, -1.52]], 10, 0, 0, 0.5));
@@ -321,7 +328,7 @@ function suzhouShop(el, { bag, col }) {
   const loc = (lx, lz) => [cx + lx * c + lz * s, cz - lx * s + lz * c];
   const put = (name, { mats = {}, x = 0, z = 0, y = 0, ry = 0, k = 1 } = {}) => {
     const P = placer({ t: el.t, at: loc(x, z), y: y0 + y, rot: rot + ry, s: k }, bag);
-    for (const [role, g] of Object.entries(U[name])) { const m = mats[role] ?? DEF[name][role]; if (globalThis.__shopStat) { const key = `${name}.${role}:${m}`; globalThis.__shopStat[key] = (globalThis.__shopStat[key] || 0) + 1; } P(m, g.clone()); }
+    for (const [role, g] of Object.entries(U[name])) { let m = mats[role] ?? DEF[name][role]; if (WINDY.has(`${name}.${role}`)) m = windMat(m); if (globalThis.__shopStat) { const key = `${name}.${role}:${m}`; globalThis.__shopStat[key] = (globalThis.__shopStat[key] || 0) + 1; } P(m, g.clone()); }
   };
   const glyph = (ch, o) => put(`g${ch}`, { mats: { g: o.m }, x: o.x, z: o.z, y: o.y, ry: o.ry ?? 0, k: o.k });
   const tc = TRADE_CHAR[trade] || '本';
@@ -351,7 +358,7 @@ function suzhouShop(el, { bag, col }) {
     if (bn === 'flag') {
       const cl = pick(FLAG[trade] || FLAG.wine);
       put('flag', { mats: { c: cl, e: cl === 'cloth_white' ? 'cloth_black' : 'cloth_white' }, ...hang });
-      for (const ry of [Math.PI / 2, -Math.PI / 2]) glyph(tc, { m: cl === 'cloth_white' || cl === 'cloth_ochre' ? 'cloth_black' : 'cloth_white', x: x + Math.sin(ry) * 0.012, z: zp + 0.5, y: 4.28 - 0.56, ry, k: 0.5 });
+      for (const ry of [Math.PI / 2, -Math.PI / 2]) put(`f${tc}`, { mats: { g: cl === 'cloth_white' || cl === 'cloth_ochre' ? 'cloth_black' : 'cloth_white' }, x: x + Math.sin(ry) * 0.012, z: zp + 0.5, y: 4.28 - 0.56, ry, k: 0.5 });
     } else if (bn === 'streamers') put('streamers', { mats: { c: pick(CLOTHS.slice(0, 5)) }, ...hang });
     else if (bn === 'hlantern') {
       put('hlantern', hang);
