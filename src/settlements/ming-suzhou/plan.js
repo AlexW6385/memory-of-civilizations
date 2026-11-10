@@ -165,7 +165,8 @@ for (const id of ['hefeng', 'xuexiang', 'daishuang', 'wuzhu', 'lvyi']) {
 
 // ── the bridges over the pond and the paths ──────────────────────────────────
 for (const b of GARDEN_BRIDGES) E.push({ t: 'ming_slab_bridge', pts: b.pts, w: b.w, y: G + 0.05, bed: LEVEL.pondBed });
-for (const p of PATHS) E.push({ t: 'path', pts: p.map(([x, z]) => [x, z]), w: 1.4, y: Math.max(G, ...p.map(([x, z]) => H(x, z))) + 0.03 });
+// (each laid on the ground under it, 4 cm proud, its sides sunk: the path up the Green Ripples' mound climbs it)
+for (const p of PATHS) E.push({ t: 'path', pts: p.map(([x, z]) => [x, z]), w: 1.4, ground: H, lift: 0.04 });
 // the courts in pebble mosaic (hua jie pu di): the court behind the Hall of Distant Fragrance, where one arrives, with a crane; the loquat court with a plum blossom
 E.push({ t: 'pebble_paving', rect: [-9, -9.1, 9, -0.3], y: G + 0.03, field: 'hex', medallion: 'crane', at: [0, -4.7], d: 4.6, seed: 1 });
 E.push({ t: 'pebble_paving', rect: [32, -1.2, 48.5, 7.4], y: G + 0.03, field: 'coin', medallion: 'plum', at: [40, 1.6], d: 2.8, seed: 2 });
