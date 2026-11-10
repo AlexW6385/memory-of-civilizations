@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.31 — Shaders kept across pipeline rebuilds; Suzhou's residence courts; real open-country trees (2026-11-09)
+- The scene pass is kept when the picture's pipeline is rebuilt (the air's pass after the first shadows, the first visit's quality measure), so the shaders built before are not all built again on first sight. Suzhou's residence is a true sequence of halls and courts with a brick-carved gate tower; the open country grows the trees of its real biome (camphor, Chinese fir, masson pine and bamboo in Jiangnan; Mediterranean trees only where the climate is Mediterranean).
+
 ## v10.30 — No second shader build for merged meshes (2026-11-09)
 - Merged meshes were compiled before being told to receive shadows, so each was built again in the frame that first showed it; turning round no longer hitches on them. The garden's arrival view is clear of trees, the shore stones are rounded rubble and the Taihu stones shade smoothly.
 

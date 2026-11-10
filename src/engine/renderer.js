@@ -148,35 +148,43 @@ export class Renderer {
     // one scene pass: every material is compiled and drawn once per frame (a separate normal
     // pre-pass for the ambient occlusion doubled both the shaders to compile and the drawing);
     // the occlusion reads the depth alone and rebuilds the normals from it
-    const scenePass = this.scenePass = pass(scene, camera);
-    const gi = this.giNode;
-    scenePass.contextNode = context({
-      getGI: (input, { material }) => (material.transparent ? input : (input !== null ? input.add(gi) : gi)),
-      // the sun is dimmed where the shadows of the clouds pass
-      getShadow: ({ light, shadowColorNode }) => (light === this.sun ? shadowColorNode.mul(cloudShadow) : shadowColorNode),
-    });
-    // with the occlusion on, the scene pass also writes its view normals (one more target in the
-    // same draw): GTAO rebuilding them from a reversed depth buffer came out mirrored about the
-    // screen's middle row, a seam across every view with the lower half darker
-    // The normals are blended by the alpha of what does not write depth (rain, snow, dust, halos:
-    // the surface behind keeps its normal where they are clear), written outright by the rest.
-    // Their outputs are matched to the pass's own target, not to whatever target the renderer has
-    // when the fragment stage is set up: a shader compiled off the frame (precompile, three's
-    // async build, which yields between its stages) otherwise left out the normal ("color target
-    // has no corresponding fragment stage output (targets[1])")
-    // The water's pixels carry a mark in it (its packed normal plus WATER_MARK, src/engine/water-reflect.js).
-    if (Q.ao) {
-      const normalA = Fn((builder) => (builder.material?.depthWrite === false ? output.a : float(1)))();
-      const mark = Fn((builder) => float(builder.material?.userData?.water ? WATER_MARK : 0))();
-      const sceneMRT = mrt({ output, normal: vec4(packNormalToRGB(normalView).add(mark), normalA) }).setBlendMode('normal', new THREE.BlendMode(THREE.NormalBlending));
-      const setup = sceneMRT.setup;
-      sceneMRT.setup = function (builder) {
-        const r = builder.renderer, rt = r._renderTarget;
-        r._renderTarget = scenePass.renderTarget;
-        try { return setup.call(this, builder); } finally { r._renderTarget = rt; }
-      };
-      scenePass.setMRT(sceneMRT);
+    // The scene pass is kept when the pipeline is rebuilt (the air's pass once the first shadows
+    // exist, a lower quality after the first visit's measure): a new pass is a new context for
+    // every material, and every shader built until then — the precompiled ones too — was built
+    // again in the frame that first drew it after the rebuild (hundreds, seconds of hitches)
+    if (!this.scenePass || this.scenePassAo !== Q.ao) {
+      const scenePass = this.scenePass = pass(scene, camera);
+      this.scenePassAo = Q.ao;
+      const gi = this.giNode;
+      scenePass.contextNode = context({
+        getGI: (input, { material }) => (material.transparent ? input : (input !== null ? input.add(gi) : gi)),
+        // the sun is dimmed where the shadows of the clouds pass
+        getShadow: ({ light, shadowColorNode }) => (light === this.sun ? shadowColorNode.mul(cloudShadow) : shadowColorNode),
+      });
+      // with the occlusion on, the scene pass also writes its view normals (one more target in the
+      // same draw): GTAO rebuilding them from a reversed depth buffer came out mirrored about the
+      // screen's middle row, a seam across every view with the lower half darker
+      // The normals are blended by the alpha of what does not write depth (rain, snow, dust, halos:
+      // the surface behind keeps its normal where they are clear), written outright by the rest.
+      // Their outputs are matched to the pass's own target, not to whatever target the renderer has
+      // when the fragment stage is set up: a shader compiled off the frame (precompile, three's
+      // async build, which yields between its stages) otherwise left out the normal ("color target
+      // has no corresponding fragment stage output (targets[1])")
+      // The water's pixels carry a mark in it (its packed normal plus WATER_MARK, src/engine/water-reflect.js).
+      if (Q.ao) {
+        const normalA = Fn((builder) => (builder.material?.depthWrite === false ? output.a : float(1)))();
+        const mark = Fn((builder) => float(builder.material?.userData?.water ? WATER_MARK : 0))();
+        const sceneMRT = mrt({ output, normal: vec4(packNormalToRGB(normalView).add(mark), normalA) }).setBlendMode('normal', new THREE.BlendMode(THREE.NormalBlending));
+        const setup = sceneMRT.setup;
+        sceneMRT.setup = function (builder) {
+          const r = builder.renderer, rt = r._renderTarget;
+          r._renderTarget = scenePass.renderTarget;
+          try { return setup.call(this, builder); } finally { r._renderTarget = rt; }
+        };
+        scenePass.setMRT(sceneMRT);
+      }
     }
+    const scenePass = this.scenePass;
     let color = scenePass.getTextureNode('output');
     // 1 / distance = a · depth + b, from the projection (set each frame in update)
     this.zk ??= uniform(depthToDistance(camera));
