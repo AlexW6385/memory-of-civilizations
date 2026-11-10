@@ -4,7 +4,7 @@ Newest first. What you can visit and what looks better, in plain words.
 
 ## v10.47 — A smooth globe (2026-11-10)
 
-The large map's globe is drawn on the GPU from a land texture baked once, every display frame at full sharpness; a drag let go keeps the globe turning a moment, the wheel zooms smoothly, and the scene behind the map is drawn at 10 fps.
+The large map's globe is drawn on the GPU from a land texture baked once, every display frame at full sharpness, with a crisp coast at any zoom, relief shading, the sun's glint on the sea and a rim of air; a drag let go keeps the globe turning a moment, the wheel zooms smoothly, and the scene behind the map is drawn at 10 fps.
 
 ## v10.45 — The map is the globe alone (2026-11-10)
 
