@@ -64,7 +64,7 @@ Resolve conflicts in this order, but the first three are near-equals: none is sa
 
 ### 4.4 A settlement
 
-A settlement is ~300 × 300 m (larger where the landmark or the urban form needs it — Beijing, Venice, Tenochtitlan, Hangzhou; smaller for a monastery or a village). It holds:
+A settlement's size follows its class (§4.5). It holds:
 
 - **The landmark** at true scale, built to its dossier, with its interior.
 - **The townscape:** the real urban pattern (grid, organic, canal, walled compound, terraces), the house types of the place and period (plan, storeys, roof, materials), the public spaces (square, market, well, bathhouse, precinct, walls, gates), the gardens, fields or orchards at the edge, the water (quay, canal, pond, river bank), and the plants of the place. Houses are instances of a few sourced types with variation, built from the same style modules as the landmark. Several houses, a shop, a workshop and an inn or the like can be entered and are furnished.
@@ -75,6 +75,17 @@ A settlement is ~300 × 300 m (larger where the landmark or the urban form needs
 - **Its arrival view:** travelling there from the map sets the visitor down on foot at the place, height and direction from which the landmark is seen best — whole and framed, not cut off, blocked by a wall, stall, tree or column, or seen from too close or too far — at its classic approach where it has one (the Taj Mahal down its water channel, the Opera House across the cove with the Harbour Bridge behind). Each settlement's view is chosen by looking at it and written down in `src/planet/arrivals.js` as [x, y, z, yaw, pitch] in its frame; a new settlement gets its view when it is built, and a view is checked again whenever the settlement changes round it. The automatic choice (`viewpoint`) is only a fallback for a settlement without one.
 
 Two landmarks that stood in one city at one time (Sainte-Chapelle and Notre-Dame; the Forbidden City and the Temple of Heaven) share one settlement.
+
+### 4.5 Size and density
+
+Each settlement has a **size class**, which sets its disc radius (`radius` in `src/planet/sites.js`), and a **density**, which says how much there is per square metre: carving, interiors and townscape. The two together set its work and its budget (§8). A large settlement spends on extent: more streets, quarters and street life. A small one spends everything on density. Small is no lesser: Ming Suzhou, at 215 m, is the reference. A settlement is brought to its class's radius when it is next rebuilt toward L3. A large dense city is not filled at once: its core is built first, at full detail, and the outer quarters follow at lower detail, with impostors beyond.
+
+Density: ●●● dense (ornament, interiors and townscape throughout) · ●● middling · ● carried by mass or landscape.
+
+- **Large — capitals, radius 450–600 m (21).** ●●●: Tang Chang'an, Ming–Qing Beijing, Northern Song Kaifeng, Southern Song Lin'an, Justinian's Constantinople, Ottoman Istanbul, Mamluk Cairo, Hadrian's Rome, Gothic Paris, Venice, Victorian London, Versailles. ●●: Han Chang'an, Abbasid Baghdad, Alexandria, Babylon, Tenochtitlan, Modern New York, Angkor, Teotihuacan. ●: Brasília.
+- **Medium — cities and towns, radius 250–400 m (39).** ●●●: Ming Suzhou, Renaissance Florence, Safavid Isfahan, Nasrid Granada, Muromachi Kyoto, Lhasa, Joseon Hanyang, Baroque Rome, Classical Athens, New Kingdom Thebes, Madurai, Timurid Samarkand, Amsterdam, Vienna, Fez. ●●: Umayyad Jerusalem, Mughal Agra, Muscovy, Barcelona, Manueline Lisbon, Djenné, Ayutthaya, Benin City, Ye, Qin Xianyang, Qufu, Nara, Himeji, Tikal, Chichén Itzá, Ur, Petra, Persepolis, Giza. ●: Yinxu, Mohenjo-daro, Cahokia, Bagan, Modern Sydney.
+- **Small — precincts and villages, radius 120–250 m (30).** ●●●: Heian Uji, Dunhuang, Ajanta, Khajuraho, Bhaktapur, Borobudur. ●●: Foguang Monastery, Shaolin, Nalanda, Sanchi, the Balinese temple village, Delphi, Knossos, Conques, Borgund, Lalibela, Abu Simbel, Kilwa, Shibam, Machu Picchu, the Hakka tulou, SG̱ang Gwaay, Bauhaus Dessau. ●: Mycenae, Great Zimbabwe, Taos, Rapa Nui, the Māori pā, Nan Madol, Karakorum.
+- **Point — a single site, radius 60–120 m (4).** ●: Çatalhöyük, the Dogon villages, Stonehenge, Kakadu.
 
 ## 5. The detail standard
 

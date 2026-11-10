@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.47 — Size classes (2026-11-10)
+
+DESIGN.md now sorts every settlement into four size classes (large, medium, small, point) with a density mark. These set the radius each one is brought to when it is next rebuilt. Nothing on the planet moves yet.
+
 ## v10.46 — Six settlements taken out (2026-11-10)
 
 Edfu is gone from the planet (its temple form is Thebes's), and five planned ones are struck from the list: Linzi, Southern Tang Jinling, Herculaneum, uMgungundlovu and Budj Bim. The set is now 94. A first visit now starts in Ming Suzhou.
