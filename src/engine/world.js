@@ -9,6 +9,8 @@
 // settlement's blend, the view is turned little by little from the settlement's up to the true up
 // of the place, so that the switch from one frame to the other cannot be seen.
 
+import { SYSTEMS } from './systems.js';
+import './systems-list.js';
 import * as THREE from 'three/webgpu';
 import { BUILDINGS } from '../buildings/index.js';
 import { buildPlanAsync, toWorld, flatParts } from '../core/build.js';
@@ -248,6 +250,8 @@ class Settlement {
       this.buildLife();
       this.done = this.expected;
       this.state = 'ready';
+      // the living additions (src/engine/systems.js): boats, walkers, birds, smoke...
+      for (const Sy of SYSTEMS) { try { Sy.attach?.(this, this.world); } catch (e) { console.warn('system attach', e); } }
       // the plans' static meshes merged per material and shape, in the background (src/engine/merge.js)
       this.mergingNow = true;
       this.merging = this.mergeStatic(gen).finally(() => { this.mergingNow = false; });
@@ -395,6 +399,7 @@ class Settlement {
 
   unload() {
     if (this.state === 'idle') return;
+    if (this.state === 'ready') for (const Sy of SYSTEMS) { try { Sy.detach?.(this, this.world); } catch (e) { console.warn('system detach', e); } }
     this.gen++;                            // a load still running stops adding parts
     this.job?.cancel(); this.job = null;
     this.world.scene.remove(this.group);
@@ -809,6 +814,8 @@ export class World {
   /** Called every frame: load and unload by distance, the ground's detail, the plants, the baked light. */
   update(camera, controls) {
     const now = performance.now();
+    const dtS = Math.min(0.1, (now - (this._lastUpdate ?? now)) / 1000); this._lastUpdate = now;
+    { const t = HITCH.mark(); for (const Sy of SYSTEMS) Sy.update?.(dtS, camera, this); HITCH.since('systems', t); }
     this.letUploadsIn();
     const u = this.here(controls);
     const camP = toPlanet(this.anchor.frame, camera.position.toArray());
