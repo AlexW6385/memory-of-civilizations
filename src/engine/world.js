@@ -37,6 +37,10 @@ import { MODULES } from '../settlements/grounds.js';
 export const LOAD = 700, UNLOAD = 1300;
 /** At most this many settlements are built at once (the nearest); from the air the reach grows, the count does not. */
 export const MAX_BUILT = 4;
+/** Beyond the horizon by this much (m: the tallest buildings' own horizon), a built settlement is not drawn. */
+const BEYOND = 1200;
+const _pc = new THREE.Vector3(), _sc = new THREE.Vector3();
+
 /**
  * Every mesh of a building is an instanced mesh with instance colours — a merged part is one copy
  * at its place, white — so that each material is compiled once, in one form: plain and instanced
@@ -631,14 +635,23 @@ export class World {
     const S = sceneFromPlanet(this.anchor.frame, this._m);
     this.planet.matrix.copy(S);
     this.planet.matrixWorldNeedsUpdate = true;
+    // a settlement built but beyond the horizon (one built ahead for the next journey, half the
+    // planet away) is not drawn: the view's far plane reaches round the planet, and every one of its
+    // meshes was drawn, and its shaders built, as if in sight; its far view stands for it
+    const pc = _pc.setFromMatrixPosition(this.planet.matrix), cam = camera.position;
+    const alt = Math.max(0, cam.distanceTo(pc) - R);
+    const sight = Math.sqrt(2 * R * alt + alt * alt) + BEYOND;
     for (const s of this.settlements) {
       if (s.state === 'idle') continue;
       s.group.matrix.multiplyMatrices(S, planetFromFrame(s.S.frame, this._m2));
       s.group.matrixWorldNeedsUpdate = true;
+      const far = _sc.setFromMatrixPosition(s.group.matrix).distanceTo(cam) > sight + (s.S.radius || 200);
+      s.group.visible = !far;
+      s.hiddenFar = far;
     }
     for (const s of this.settlements) {
       if (!s.impostor) continue;
-      s.impostor.visible = s.state !== 'ready';
+      s.impostor.visible = s.state !== 'ready' || s.hiddenFar;
       if (s.impostor.visible) { s.impostor.matrix.multiplyMatrices(S, planetFromFrame(s.S.frame, this._m2)); s.impostor.matrixWorldNeedsUpdate = true; }
     }
     const fs = this.floraSite;
