@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.32 — Nothing drawn beyond the horizon (2026-11-09)
+- A settlement built ahead for the next journey, beyond the horizon, is no longer drawn (it was, in full, wherever the view faced it).
+
 ## v10.31 — Shaders kept across pipeline rebuilds; Suzhou's residence courts; real open-country trees (2026-11-09)
 - The scene pass is kept when the picture's pipeline is rebuilt (the air's pass after the first shadows, the first visit's quality measure), so the shaders built before are not all built again on first sight. Suzhou's residence is a true sequence of halls and courts with a brick-carved gate tower; the open country grows the trees of its real biome (camphor, Chinese fir, masson pine and bamboo in Jiangnan; Mediterranean trees only where the climate is Mediterranean).
 
