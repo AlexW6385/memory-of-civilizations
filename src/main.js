@@ -32,11 +32,11 @@ const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 
 // the picture's quality: measured on the first visit (autoQuality below) and remembered, or as the
-// address says (?quality=high|medium|low); the music's level and the look sensitivity are fixed;
+// address says (?quality=high|medium|low, or cinema for recording films: never remembered); the music's level and the look sensitivity are fixed;
 // the time of day is remembered between visits
 const QUALITIES = ['high', 'medium', 'low'];
 const storedQuality = (() => { try { const q = JSON.parse(localStorage.getItem('mp.quality') || 'null')?.q; return QUALITIES.includes(q) ? q : null; } catch { return null; } })();
-const askedQuality = QUALITIES.includes(params.get('quality')) ? params.get('quality') : null;
+const askedQuality = [...QUALITIES, 'cinema'].includes(params.get('quality')) ? params.get('quality') : null;
 const settings = { quality: askedQuality || storedQuality || 'high', music: 0.6, sensitivity: 1, timeRuns: true, utc: 14, ...load('mp.time', {}) };
 
 function sm(e0, e1, x) { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); }
@@ -159,7 +159,7 @@ async function main() {
   climate.utc = Number.isFinite(+settings.utc) ? +settings.utc : 14;
   climate.setTime(settings.timeRuns ? 'cycle' : 'held');
   const tq = params.get('time');
-  const floraScale = { high: 1, medium: 0.7, low: 0.45 };
+  const floraScale = { cinema: 1.6, high: 1, medium: 0.7, low: 0.45 };
   world.flora.scale = world.openFlora.scale = floraScale[settings.quality] ?? 1;
   const controls = new Controls(R.camera, canvas, world.collide);
   world.onCollide = (c) => { controls.collide = c; };

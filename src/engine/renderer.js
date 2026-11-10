@@ -28,7 +28,12 @@ const LIGHT_MARGIN = 200;
 // the nearest lamps light the room as point lights; ssr: the reflections in water traced on screen
 // (src/engine/water-reflect.js; needs the occlusion's normal target) — without it the water
 // mirrors the sky alone
+// cinema (`?quality=cinema`, never chosen by itself nor remembered): for recording films with
+// `?capture`, where the frame rate does not matter — the picture rendered at twice the page's size
+// whatever the screen (supersampled), 4096² shadows in four cascades reaching farther, the
+// occlusion, the water's reflections and the air at full resolution with more samples, eight lamps
 export const QUALITY = {
+  cinema: { pixelRatio: 2, overScreen: true, shadowMap: 4096, cascades: 4, shadowFar: 480, ao: true, aoScale: 1, aoSamples: 24, aa: true, air: true, airScale: 1, airSteps: 32, lamps: 8, ssr: true, ssrScale: 1 },
   high: { pixelRatio: 1.5, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: true, lamps: 4, ssr: true },
   medium: { pixelRatio: 1.0, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: false, lamps: 2, ssr: false },
   low: { pixelRatio: 0.75, shadowMap: 1024, cascades: 2, ao: false, aa: false, air: false, lamps: 0, ssr: false },
@@ -113,13 +118,13 @@ export class Renderer {
     const Q = this.Q = QUALITY[q] || QUALITY.high;
     this.quality = q;
     const r = this.renderer, sun = this.sun;
-    r.setPixelRatio(this.dprPin ?? Math.min(devicePixelRatio, Q.pixelRatio));
+    r.setPixelRatio(this.dprPin ?? (Q.overScreen ? Q.pixelRatio : Math.min(devicePixelRatio, Q.pixelRatio)));
     sun.shadow.mapSize.set(Q.shadowMap, Q.shadowMap);
     if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
     // the static casters' depth kept per cascade and drawn again only when it would change
     // (src/engine/shadow-cache.js); `?shadowcache=0` draws every cascade whole, as before
     const cache = new URLSearchParams(location.search).get('shadowcache') !== '0';
-    const csm = new CachedCSM(sun, { cascades: Q.cascades, maxFar: 320, mode: 'practical', lightMargin: LIGHT_MARGIN }, cache);
+    const csm = new CachedCSM(sun, { cascades: Q.cascades, maxFar: Q.shadowFar ?? 320, mode: 'practical', lightMargin: LIGHT_MARGIN }, cache);
     csm.fade = true;
     sun.shadow.shadowNode = csm;
     // the lamps' pool: a fixed number of lights per preset (a change recompiles every material)
@@ -198,7 +203,7 @@ export class Renderer {
     this.onSsrResize = null;
     if (ssrOn) {
       const normalTex = scenePass.getTextureNode('normal'), depthTex = scenePass.getTextureNode('depth');
-      const refl = rtt(waterReflection({ depth: depthTex, normal: normalTex, color, camera, zk: this.zk }), null, null, { resolutionScale: 0.5 });
+      const refl = rtt(waterReflection({ depth: depthTex, normal: normalTex, color, camera, zk: this.zk }), null, null, { resolutionScale: Q.ssrScale ?? 0.5 });
       const texel = uniform(new THREE.Vector2(1e-3, 1e-3));
       this.onSsrResize = () => { const v = new THREE.Vector2(); this.renderer.getDrawingBufferSize(v); texel.value.set(2 / Math.max(1, v.x), 2 / Math.max(1, v.y)); };
       this.onSsrResize();
@@ -211,7 +216,8 @@ export class Renderer {
       // camera's own (reversed) projection, and the sky, at depth 0, lies on the far plane
       const normalTex = scenePass.getTextureNode('normal');
       const aoPass = ao(scenePass.getTextureNode('depth'), sample((q) => unpackSceneNormal(normalTex.sample(q))), camera);
-      aoPass.resolutionScale = 0.5;
+      aoPass.resolutionScale = Q.aoScale ?? 0.5;
+      if (Q.aoSamples) aoPass.samples.value = Q.aoSamples;
       aoPass.distanceExponent.value = 1.0;
       aoPass.radius.value = 0.9;
       aoPass.thickness.value = 1.0;
@@ -226,7 +232,7 @@ export class Renderer {
     // the air of the room (air.js): needs the nearest cascade's map, made by the first frame (render)
     const sh0 = this.airShadow;
     if (Q.air && sh0) {
-      const airTex = this.airTex = rtt(airNode({ depth: scenePass.getTextureNode('depth'), camera, shadow: sh0, reversed: this.renderer.reversedDepthBuffer, lamps: this.lamps }), null, null, { resolutionScale: 0.5 });
+      const airTex = this.airTex = rtt(airNode({ depth: scenePass.getTextureNode('depth'), camera, shadow: sh0, reversed: this.renderer.reversedDepthBuffer, lamps: this.lamps, ...(Q.airSteps ? { steps: Q.airSteps } : {}) }), null, null, { resolutionScale: Q.airScale ?? 0.5 });
       color = airComposite(color, airTex, scenePass.getTextureNode('depth'), camera, this.airTexel = uniform(new THREE.Vector2(1e-3, 1e-3)), this.zk);
       this.onAirResize = () => { const s = new THREE.Vector2(); this.renderer.getDrawingBufferSize(s); this.airTexel.value.set(2 / Math.max(1, s.x), 2 / Math.max(1, s.y)); };
       this.onAirResize();
