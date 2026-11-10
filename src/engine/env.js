@@ -104,6 +104,11 @@ function cloudField() {
 }
 const CLOUD_TEX = cloudField();
 
+/** The baked field read as cheap smooth noise (about -1…1, like mx_noise_float's spread, features
+ *  of about one unit): one texture lookup for the materials' weathering instead of a 3D Perlin noise. */
+const NOISE_T = texture3D(CLOUD_TEX).setGroup(renderGroup);
+export const noiseT = (p) => NOISE_T.sample(p.div(CLOUD_CELLS)).r.sub(0.5).mul(2.6);
+
 /**
  * Shadow of the clouds on the ground: a drifting field matched to the cloud cover. 1 = sun,
  * down to ~0.25 under a cloud. Drawn in planet coordinates, so it lies over buildings and ground alike.

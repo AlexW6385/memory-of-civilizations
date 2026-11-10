@@ -10,7 +10,7 @@ import {
   mix, smoothstep, hash, mx_noise_float, mx_fractal_noise_float, mx_worley_noise_float, dot, cross, normalize,
   sign, select, time, sin, cos, clamp, length, cameraPosition, uniform, attribute, reflect, pow, fwidth, toneMappingExposure, If,
 } from 'three/tsl';
-import { ENV, cloudShadow } from './env.js';
+import { ENV, cloudShadow, noiseT } from './env.js';
 import { MATERIALS } from '../core/palette.js';
 import { GISpecularNode } from './gi.js';
 import { waterSky } from './water-reflect.js';
@@ -170,7 +170,9 @@ const skyOpen = () => {
 
 function weather(col, roof, open) {
   const P = positionLocal, y = P.y, vertical = float(1).sub(smoothstep(0.5, 0.8, abs(normalLocal.y)));
-  const patch = mx_noise_float(P.mul(0.7)), fine = mx_noise_float(P.mul(3.1));
+  // (the noise from the baked field, one lookup each: four 3D Perlin noises on every wall pixel cost
+  // Suzhou ~10 ms of the GPU a frame)
+  const patch = noiseT(P.mul(0.7)), fine = noiseT(P.mul(3.1));
   const north = smoothstep(0.2, 0.9, normalLocal.z.negate());
   if (roof) {
     const moss = north.mul(smoothstep(0.0, 0.5, patch.add(0.2))).mul(ENV.damp).mul(float(1).sub(vertical));
@@ -190,8 +192,8 @@ function weather(col, roof, open) {
   const algae = shade.mul(smoothstep(0.75, 0.05, y.add(patch.mul(0.3)))).mul(smoothstep(-0.15, 0.35, patch.add(fine.mul(0.35)))).mul(ENV.damp).mul(vertical);
   const moss = north.mul(smoothstep(2.4, 0.2, y.add(patch.mul(0.6)))).mul(smoothstep(0.0, 0.5, patch.add(0.25))).mul(ENV.damp).mul(vertical);
   // rain streaks: narrow runs (~10 cm) down the face, broken into lengths by a second field
-  const run = mx_noise_float(vec3(u.mul(9.0), y.mul(0.3), 0.3));
-  const len = mx_noise_float(vec3(u.mul(1.3), y.mul(0.9), 1.7));
+  const run = noiseT(vec3(u.mul(9.0), y.mul(0.3), 0.3));
+  const len = noiseT(vec3(u.mul(1.3), y.mul(0.9), 1.7));
   const streak = smoothstep(0.2, 0.6, run).mul(smoothstep(-0.05, 0.35, len)).mul(vertical).mul(ENV.damp).mul(open.mul(0.6).add(0.4));
   // the waterline: algae and silt up to 0.3–0.6 m above the still water, a pale dried band above
   const wd = y.sub(ENV.waterLine), band = patch.mul(0.15).add(fine.mul(0.04)).add(0.45);
@@ -266,20 +268,27 @@ function weatherSurface(m, spec, roughU) {
   if (PUDDLES.has(kind)) {
     // puddles: in the hollows of a low-frequency field over the flat, growing with the wetness
     const P = positionLocal, flat = smoothstep(0.93, 0.99, ny).mul(smoothstep(0.4, 0.8, open));
-    const pn = when(ENV.wet.greaterThan(0.02), () => mx_fractal_noise_float(vec3(P.x.mul(0.28), 0.5, P.z.mul(0.28)), 2, 2.0, 0.5));
+    const pn = when(ENV.wet.greaterThan(0.02), () => noiseT(vec3(P.x.mul(0.28), 0.5, P.z.mul(0.28))).mul(0.8));
     const puddle = smoothstep(0.2, 0.3, pn.negate().add(ENV.wet.mul(0.12))).mul(ENV.wet).mul(flat);
     // rain rings on them while it rains, fading with distance (before they are finer than a pixel)
     const dist = length(positionWorld.sub(cameraPosition));
     const ring = whenV(ENV.rain.greaterThan(0.02).and(ENV.wet.greaterThan(0.02)), () => rainRings(P.x, P.z)).mul(puddle).mul(smoothstep(12, 3, dist)).mul(ENV.rain.mul(0.4).add(0.3));
     col = mix(col, col.mul(0.42), puddle);
     rough = mix(rough, float(0.03), puddle);
-    const flatN = normalView;
-    m.normalNode = normalize(mix(m.normalNode ?? flatN, bump(ring.x.mul(0.0008), 1), puddle));
+    // (the rings' normal and the mirrored sky only while it is wet: dry, every paving pixel paid for both)
+    const wetNow = ENV.wet.greaterThan(0.02), base = m.normalNode ?? normalView;
+    m.normalNode = Fn(() => {
+      const n = vec3(base).toVar();
+      If(wetNow, () => { n.assign(normalize(mix(base, bump(ring.x.mul(0.0008), 1), puddle))); });
+      return n;
+    })();
     // the sky mirrored in the puddle (the same sky as the water's), by Fresnel, the rings bending it
-    const v = normalize(positionWorld.sub(cameraPosition));
-    const N = normalize(normalWorld.add(vec3(ring.y, 0, ring.z).mul(0.0008)));
-    const fres = float(0.02).add(float(0.98).mul(pow(float(1).sub(max(dot(N, v.negate()), 0)), 5)));
-    const sky = waterSky(reflect(v, N)).mul(fres).mul(puddle).mul(0.8);
+    const sky = whenV(wetNow, () => {
+      const v = normalize(positionWorld.sub(cameraPosition));
+      const N = normalize(normalWorld.add(vec3(ring.y, 0, ring.z).mul(0.0008)));
+      const fres = float(0.02).add(float(0.98).mul(pow(float(1).sub(max(dot(N, v.negate()), 0)), 5)));
+      return waterSky(reflect(v, N)).mul(fres).mul(puddle).mul(0.8);
+    });
     m.emissiveNode = m.emissiveNode ? m.emissiveNode.add(sky) : sky;
   }
   m.colorNode = col;
