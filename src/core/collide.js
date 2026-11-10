@@ -126,6 +126,9 @@ export class CollisionWorld {
         const i = Math.floor((x + dx - T.x0) / T.res), j = Math.floor((z + dz - T.z0) / T.res);
         if (i < 0 || j < 0 || i >= T.w || j >= T.h) continue;
         const o = j * T.w + i, top = T.data[o];
+        // (not under a top that is an underside, shaded as facing down: an arch's soffit over an open
+        // passage, which made a gate a wall from the ground to its crown)
+        if (T.dn?.[o]) continue;
         // (not where a floor or a ramp runs at about that height, at the cell's centre where the top
         // was taken: the top is what one walks on there)
         if (top > climb && top > y0 && T.under[o] < y1 && this.groundAt(T.x0 + (i + 0.5) * T.res, T.z0 + (j + 0.5) * T.res, top + 0.05) < top - 0.3) return true;
@@ -185,10 +188,12 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer',
   if (!Number.isFinite(x0)) return null;
   const w = Math.ceil((x1 - x0) / res) + 1, h = Math.ceil((z1 - z0) / res) + 1;
   const data = new Float32Array(w * h).fill(-Infinity);
+  // the cells whose top is a face shaded as facing down (see inShell)
+  const dn = new Uint8Array(w * h);
   let t = performance.now();
   for (const { mat, geometry } of parts) {
     if (skip.includes(mat)) continue;
-    const P = geometry.attributes.position.array;
+    const P = geometry.attributes.position.array, N = geometry.attributes.normal;
     for (let k = 0; k < P.length; k += 9) {
       const ax = P[k], ay = P[k + 1], az = P[k + 2], bx = P[k + 3], by = P[k + 4], bz = P[k + 5], cx = P[k + 6], cy = P[k + 7], cz = P[k + 8];
       // faces less steep than about 72°, whichever way they are wound (some roofs are wound
@@ -196,6 +201,8 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer',
       const ux = bx - ax, uy = by - ay, uz = bz - az, vx = cx - ax, vy = cy - ay, vz = cz - az;
       const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
       if (Math.abs(ny) <= 0.3 * Math.hypot(nx, ny, nz)) continue;
+      // (a face shaded as facing down, by its normals: an arch's soffit, a ceiling, an eave's underside)
+      const down = N ? N.getY(k / 3) + N.getY(k / 3 + 1) + N.getY(k / 3 + 2) < -0.9 : false;
       const det = ux * vz - uz * vx;
       if (Math.abs(det) < 1e-9) continue;
       const i0 = Math.max(0, Math.floor((Math.min(ax, bx, cx) - x0) / res)), i1 = Math.min(w - 1, Math.floor((Math.max(ax, bx, cx) - x0) / res));
@@ -205,7 +212,7 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer',
         const s = (px * vz - pz * vx) / det, q = (ux * pz - uz * px) / det;
         if (s < -0.02 || q < -0.02 || s + q > 1.02) continue;
         const y = ay + uy * s + vy * q, o = j * w + i;
-        if (y > data[o]) data[o] = y;
+        if (y > data[o]) { data[o] = y; dn[o] = down ? 1 : 0; }
       }
       if ((k & 1023) === 0 && performance.now() - t > 8) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); }
     }
@@ -235,7 +242,7 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer',
       if ((k & 1023) === 0 && performance.now() - t > 8) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); }
     }
   }
-  return { x0, z0, res, w, h, data, under };
+  return { x0, z0, res, w, h, data, under, dn };
 }
 
 /**

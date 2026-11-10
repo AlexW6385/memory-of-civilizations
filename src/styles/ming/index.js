@@ -583,12 +583,15 @@ function benchRail(bag, col, a, b, y, mode = 'beauty', lean = 1) {
  * middle bay; lat: the lattice material (a string, or { door, window, n, s, e, w }) over the
  * palette's; winSide ('door'|'window'): the latticed sides other than the front as long doors
  * (to the floor, with dado panels) or as windows over a plastered sill; fish: the hanging fish on
- * the gable ends (default: where no el.pal); platMargin, platform: false.
+ * the gable ends (default: where no el.pal); platMargin, platform: false; doorBays { n: 'sides', … }: that
+ * side's doorways in the two bays beside the middle one (behind a main hall's screen).
  */
 function mingHall(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, H = el.H ?? 4.2, ylo = y - (el.plat ?? y);
   const along = (x1 - x0) >= (z1 - z0), Lx = x1 - x0, Lz = z1 - z0;
-  const nb = el.bays?.[0] ?? Math.max(1, Math.round((along ? Lx : Lz) / 3.6)), nd = el.bays?.[1] ?? Math.max(1, Math.round((along ? Lz : Lx) / 3.4));
+  // (the bays across the front always odd: a doorway in the middle bay, never a post on the axis — an
+  // even count put one in the sedan-chair hall's doorway, on the garden's axis)
+  const nb = el.bays?.[0] ?? Math.max(1, 2 * Math.round(((along ? Lx : Lz) / 3.6 - 1) / 2) + 1), nd = el.bays?.[1] ?? Math.max(1, Math.round((along ? Lz : Lx) / 3.4));
   const xs = [], zs = [];
   for (let i = 0; i <= (along ? nb : nd); i++) xs.push(x0 + Lx * i / (along ? nb : nd));
   for (let j = 0; j <= (along ? nd : nb); j++) zs.push(z0 + Lz * j / (along ? nd : nb));
@@ -599,10 +602,15 @@ function mingHall(el, { bag, col }) {
   const sides = { n: [[x0, z0], [x1, z0], xs], s: [[x1, z1], [x0, z1], xs], w: [[x0, z1], [x0, z0], zs], e: [[x1, z0], [x1, z1], zs] };
   // the platform, with steps at every doorway
   const mid = (ticks) => Math.floor((ticks.length - 1) / 2);
+  // the bays of a side with a doorway: the middle one, or (doorBays[k] 'sides') the two beside it —
+  // behind a main hall's screen and altar table the way out is round them, by the side bays
+  const doorBays = (k, ticks) => (el.doorBays?.[k] === 'sides' && ticks.length > 3 ? [mid(ticks) - 1, mid(ticks) + 1] : [mid(ticks)]);
   const steps = [];
   for (const [k, [, , ticks]] of Object.entries(sides)) if (doorSide(k)) {
-    const i = mid(ticks), c = (ticks[i] + ticks[i + 1]) / 2;
-    steps.push({ side: k, c, w: Math.min(Math.abs(ticks[i + 1] - ticks[i]) * 0.8, 2.6) });
+    for (const i of doorBays(k, ticks)) {
+      const c = (ticks[i] + ticks[i + 1]) / 2;
+      steps.push({ side: k, c, w: Math.min(Math.abs(ticks[i + 1] - ticks[i]) * 0.8, 2.6) });
+    }
   }
   const pm = el.platMargin ?? 0.9;
   if (el.platform !== false) platform(bag, col, [x0 - pm, z0 - pm, x1 + pm, z1 + pm], ylo, y, steps);
@@ -622,7 +630,7 @@ function mingHall(el, { bag, col }) {
         const [l0, l1] = u0 === null ? [ns ? lo[0] : lo[1], ns ? hi[0] : hi[1]] : [u0, u1];
         bag.add(mat, ns ? box(l0, y0, lo[1] - t, l1, y1, lo[1] + t) : box(lo[0] - t, y0, l0, lo[0] + t, y1, l1));
       };
-      const doorway = doorSide(k) && i === mid(ticks);
+      const doorway = doorSide(k) && doorBays(k, ticks).includes(i);
       if (kind === 'lat') {
         if (doorway && !tall) continue;
         const lk = isFront || el.winSide === 'door' ? 'door' : 'window', lm = latOf(k, lk);
@@ -1088,7 +1096,8 @@ function mingWall(el, { bag, col }) {
   if (L - s > 0.05) col.segment([ax + ux * s, az + uz * s], [bx, bz], th, y - 0.3, y + h + 0.4);
 }
 
-/** ming_gallery: a covered walk { pts, y, w, H, side (the side with a white wall: 1 | -1 | 0) } on posts, with a bench rail. */
+/** ming_gallery: a covered walk { pts, y, w, H, side (the side with a white wall: 1 | -1 | 0), gates (round
+ *  doorways through that wall: [{ at: [x, z], r }]) } on posts, with a bench rail. */
 function mingGallery(el, { bag, col }) {
   const pts = el.pts, y = el.y ?? 0.3, w = (el.w ?? 2.0) / 2, H = el.H ?? 2.8;
   for (let i = 0; i + 1 < pts.length; i++) {
@@ -1126,7 +1135,15 @@ function mingGallery(el, { bag, col }) {
         ? Array.from({ length: n }, (_, k) => k).filter((k) => k % 3 === 1).map((k, j) => ({ at: (k + 0.5) * L / n, w: 0.95, h: 0.95, sill: 1.05, shape: SH[(i * 3 + j) % 7], pattern: ['lattice', 'ice', 'lattice', 'turtle'][(i + j) % 4] }))
         : L > 4 ? [{ at: L / 2, w: 1.0, h: 1.0, sill: 1.1, shape: SH[i % 7] }] : [];
       for (const wd of wins) if (wd.shape === 'fan') { wd.w *= 1.25; wd.h *= 0.8; }
-      mingWall({ a: A, b: B, y, h: H - 0.2, th: 0.24, windows: wins }, { bag, col });
+      // round doorways through the wall (el.gates: [{ at: [x, z], r }], where they fall on this run;
+      // no window beside one)
+      const gates = [];
+      for (const g of el.gates || []) {
+        const u = (g.at[0] - A[0]) * (B[0] - A[0]) / L + (g.at[1] - A[1]) * (B[1] - A[1]) / L, off = Math.abs((g.at[0] - A[0]) * nx + (g.at[1] - A[1]) * nz);
+        if (u > g.r + 0.3 && u < L - g.r - 0.3 && off < w + 1) gates.push({ at: u, r: g.r });
+      }
+      const winsFree = wins.filter((wd) => gates.every((g) => Math.abs(wd.at - g.at) > g.r + wd.w / 2 + 0.4));
+      mingWall({ a: A, b: B, y, h: H - 0.2, th: 0.24, windows: winsFree, gates }, { bag, col });
     }
     // fine: the frame under the roof — a tie beam across at each pair of posts with a short post
     // on it carrying the ridge purlin, purlins along the slopes — and a hanging fretwork (gua luo)
@@ -1338,7 +1355,16 @@ function archBridge(el, { bag, col }) {
   };
   const K = 8;
   for (let k = 0; k < K; k++) ramp(-half + 2 * half * k / K, -half + 2 * half * (k + 1) / K);
-  for (const o of [-W - 0.12, W + 0.12]) { const a = P(-half, o, 0), b = P(half, o, 0); col.segment([a[0], a[2]], [b[0], b[2]], 0.24, y0 - 1, y0 + R + 0.6); }
+  // the parapets: in pieces following the deck, from a little under it to a little over the rail (one
+  // wall from below the street to the crown along the whole bridge closed the arch to a boat or a
+  // visitor flying under it)
+  for (const o of [-W - 0.12, W + 0.12]) {
+    for (let k = 0; k < K; k++) {
+      const sA = -half + 2 * half * k / K, sB = -half + 2 * half * (k + 1) / K, a = P(sA, o, 0), b = P(sB, o, 0);
+      const lo = Math.min(top(sA), top(sB)), hi = Math.max(top(sA), top(sB));
+      col.segment([a[0], a[2]], [b[0], b[2]], 0.24, lo - 0.6, hi + 0.6);
+    }
+  }
 }
 
 /**

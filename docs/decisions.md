@@ -93,3 +93,4 @@ The record of decisions behind `DESIGN.md` (its §11 points here). **Agents do n
 - 2026-11-10 Draw calls are Suzhou's limit, not shading (flat materials −13%, ¼ pixels −20%, half the draws −40%): fewer draws first; baked material textures stay deferred.
 - 2026-11-10 Build-worker watchdog 180 s (was 45): a busy worker cannot answer, and the false alarm moved all building to the main thread, freezing it for a minute per settlement.
 - 2026-11-10 Build workers restarted (and the job sent again) when one falls silent, at most three times, before the page builds itself: falling back to the main thread froze it for minutes.
+- 2026-11-10 Ming halls always odd bays (a doorway in the middle bay, never a post on the axis); a top-field cell whose top is a downward-shaded face is not a shell (an arch's soffit over a passage), kept as a flag so nothing else changes.

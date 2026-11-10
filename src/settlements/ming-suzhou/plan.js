@@ -136,7 +136,8 @@ wall([lx0, lz0], [lx1, lz0], { ...low, gates: [{ at: 9, w: 1.6, h: 2.3 }], windo
 // ── the galleries, along the walls and between the halls ─────────────────────
 // the beauty's rest (mei ren kao) where a bench looks on water (within 5.5 m of the pond), a plain bench elsewhere
 const facesWater = (x, z) => pondDistance(x, z) < 5.5;
-GALLERIES.forEach((pts, i) => E.push({ t: 'ming_gallery', fine: true, wet: facesWater, pts, y: G + 0.3, w: 2.0, H: 2.8, side: i === 0 ? -1 : i === 1 ? 1 : i === 2 ? 1 : 0 }));
+// (the south gallery's wall: a moon gate from the residence's side yard into the garden)
+GALLERIES.forEach((pts, i) => E.push({ t: 'ming_gallery', fine: true, wet: facesWater, pts, y: G + 0.3, w: 2.0, H: 2.8, side: i === 0 ? -1 : i === 1 ? 1 : i === 2 ? 1 : 0, gates: i === 2 ? [{ at: [11, 15.1], r: 1.05 }] : [] }));
 
 // ── the halls and pavilions ──────────────────────────────────────────────────
 const B = BUILDINGS;
@@ -188,10 +189,10 @@ E.push({ t: 'stair', rect: [-3, 61.6, 3, 62.8], y0: LEVEL.street, y1: G + 0.45, 
 const halls = [
   { rect: [-6, 57.0, 6, 60.8], H: 4.0, roof: 'gable', four: false, doors: ['n'], pm: 0.8, lat: 'lattice_bubujin' },      // the gate hall, its door on the street
   { rect: [-8, 46.8, 8, 50.8], H: 4.2, roof: 'gable', four: true, walls: { e: 'plaster', w: 'plaster' }, doors: ['n'], winWall: true, lat: 'lattice_lantern' },   // the sedan-chair hall: doors to both courts, plastered sides
-  { rect: [-8.5, 35.4, 8.5, 40.2], H: 5.0, roof: 'xieshan', four: true, walls: { n: 'board', e: 'plaster', w: 'plaster' }, doors: ['n'], winWall: true, lat: 'lattice_bubujin' },  // the main hall: boards behind, brick-plastered gable walls
+  { rect: [-8.5, 35.4, 8.5, 40.2], H: 5.0, roof: 'xieshan', four: true, walls: { n: 'board', e: 'plaster', w: 'plaster' }, doors: ['n'], doorBays: { n: 'sides' }, winWall: true, lat: 'lattice_bubujin' },  // the main hall: boards behind, brick-plastered gable walls
   { rect: [-9.5, 24.6, 9.5, 28.0], H: 6.6, roof: 'gable', four: true, walls: { n: 'plaster', e: 'plaster', w: 'plaster' }, winWall: true, lat: { door: 'lattice_haitang', window: 'lattice_haitang' } },    // the women's building: lattice to the court only
 ];
-for (const h of halls) E.push({ t: 'ming_hall', rect: h.rect, y: G + 0.45, H: h.H, front: 's', four: h.four, roof: h.roof, plat: 0.45, platMargin: h.pm ?? 0.3, eave: 0.8, walls: h.walls, doors: h.doors, winWall: h.winWall, lat: h.lat });
+for (const h of halls) E.push({ t: 'ming_hall', rect: h.rect, y: G + 0.45, H: h.H, front: 's', four: h.four, roof: h.roof, plat: 0.45, platMargin: h.pm ?? 0.3, eave: 0.8, walls: h.walls, doors: h.doors, doorBays: h.doorBays, winWall: h.winWall, lat: h.lat });
 // the cross walls close the courts at their south ends, behind the gate hall and the sedan hall, each with a gateway on the axis;
 // the third, before the women's building, carries the brick-carved gate tower (menlou)
 const SX = 15.8;        // the side walls of the axial courts; beyond them the side yards
@@ -213,7 +214,7 @@ E.push({ t: 'pebble_paving', rect: [-38, 42.2, -16.2, 51.2], y: G + 0.035, field
 E.push({ t: 'pebble_paving', rect: [-15.4, 40.9, 15.4, 46.0], y: G + 0.035, field: 'coin', medallion: 'plum', at: [0, 43.4], d: 3.8, seed: 6 });
 
 // ── the halls furnished, their boards and couplets, potted landscapes in the courts (§11) ──
-E.push({ t: 'hall_furniture', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, front: 'n', H: 5.0 });
+E.push({ t: 'hall_furniture', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, front: 'n', H: 5.0, backDoor: true });
 E.push({ t: 'scholar_study', rect: [-34, 30, -22, 36], y: G + 0.35, door: 'e', H: 3.8 });
 E.push({ t: 'hall_furniture', rect: [-8.5, 35.4, 8.5, 40.2], y: G + 0.45, front: 's', H: 5.0, variant: 'main' });
 E.push({ t: 'hall_furniture', rect: B.linglong.rect, y: G + B.linglong.y, front: 'w', H: 3.9 });
@@ -255,7 +256,7 @@ const rooms = [
   room('garden', GARDEN, G, 'open'),
   room('residence', RESIDENCE, G, 'open'),
 ];
-const walks = [[[0, 64], [0, 62], [0, 58.8], [0, 54], [0, 49], [0, 44], [0, 38], [0, 33], [0, 29.6], [14, 29.6], [14, 25.5], [14, 22], [8, 14], [0, 8], [0, -9], [0, -21], [-12, -8], [-21, -12]]];
+const walks = [[[0, 64], [0, 62], [0, 58.8], [0, 54], [0, 49], [0, 44], [0, 39.7], [3.4, 39.7], [3.4, 34.6], [0, 33], [0, 29.6], [14, 29.6], [14, 25.5], [14, 22], [11, 16.4], [11, 12.8], [0, 8], [0, -9], [0, -21], [0, -9.2], [-12, -8], [-20, -10.8]]];
 walks[0].y0 = 0;
 
 export const garden = {

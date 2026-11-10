@@ -10,6 +10,8 @@ export const WALK = 2.0, RUN = 5.2, GRAVITY = 18;
  *  height too, so that the planet can be crossed in minutes. CEILING is the highest the feet may
  *  rise above the open ground. */
 export const FLY = 12, FLY_FAST = 24, SINK = 0.8, VERTICAL_RISE = 0.6, CEILING = 1500;
+/** How fast the vertical speed dies away on cruising (1/s): the height changes by speed / this. */
+export const CRUISE_SETTLE = 4.5;
 /** Flight speeds at a height above the ground (m/s): horizontal { fly, fast }, and the top
  *  vertical speed, rising (falling is SINK of it) { vertical }. */
 export function flightSpeeds(alt) {
@@ -20,7 +22,9 @@ export function flightSpeeds(alt) {
 /** The vertical speed aloft after dt (P: vy, lift, cruise; fs from flightSpeeds). */
 export function flyVy(P, fs, dt) {
   let vy = P.vy;
-  if (P.cruise && !P.lift) return vy * Math.exp(-dt * 0.9);   // the climb or fall dies away
+  // cruising: the climb or fall dies away quickly, a few metres at most (a quarter of a second's
+  // worth of the speed one had: at 1.1 s, a fall begun near the ground slid on to the ground)
+  if (P.cruise && !P.lift) return vy * Math.exp(-dt * CRUISE_SETTLE);
   const top = fs.vertical, target = P.lift ? top : -top * SINK;   // falling a little slower than rising
   const acc = Math.max(16, top / VERTICAL_RISE) * dt;          // also slows one to a lower top speed
   return vy < target ? Math.min(target, vy + acc) : Math.max(target, vy - acc);

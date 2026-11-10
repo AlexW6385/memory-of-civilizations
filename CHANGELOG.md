@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.42 — Open ways, quicker cruise (2026-11-10)
+
+Cruising (Space twice) now settles within a few metres instead of sliding on, so a double tap near the ground no longer lands one. Suzhou's side gates, the space under its bridges, the garden's sedan-chair hall, main hall and moon gate are open (an arch's underside counted as solid, parapets sealed the arches, an even number of bays put a post in the doorway); halls always have an odd number of bays. The willows by the canals stand taller and a little sparser.
+
 ## v10.41 — No freezes on the way (2026-11-10)
 
 A build worker that was busy, or let go of by the browser, no longer sends all building to the page itself (a minute's freeze at each city): the workers are started again and the city is built where it was. The next city is prepared only in idle moments.

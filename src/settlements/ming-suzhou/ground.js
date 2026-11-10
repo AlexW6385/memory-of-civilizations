@@ -95,7 +95,7 @@ function planting(x, z, p) {
   // willows along the canals, on the street's edge above the water: in loose groups, a gap between
   if (cd < 1.3 && onStreet(x, z)) {
     const n = vnoise(x * 0.11 + 7, z * 0.11 - 3);
-    return { willow: 20 * sm(-0.5, 0.15, n) };
+    return { willow: 14 * sm(-0.5, 0.15, n) };
   }
   if (onStreet(x, z) || inLot(x, z, 0.6) || inRect(RESIDENCE, x, z, 0.5)) return null;
   if (inRect(GARDEN, x, z)) {

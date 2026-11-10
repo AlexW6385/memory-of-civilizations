@@ -25,7 +25,8 @@ export function hallFurniture(el, { bag, col }) {
   const S = new Parts(), put = (Q, a, b, yw = 0, up = 0) => Q.emit(S, a, up, b, yw);
   const inner = Wd >= 8;
   // the bays of the hall as mingHall lays them out, and the doorway's bay (local a)
-  const nLat = Math.max(1, Math.round(Wd / (Wd >= Dp ? 3.6 : 3.4))), bw = Wd / nLat;
+  // (odd, as mingHall lays them out: src/styles/ming/index.js)
+  const nLat = Math.max(1, 2 * Math.round((Wd / (Wd >= Dp ? 3.6 : 3.4) - 1) / 2) + 1), bw = Wd / nLat;
   const dk = Math.floor(nLat / 2), lo = alongX ? x0 : z0, oc = alongX ? origin[0] : origin[1];
   const dLoc = [lo + dk * bw, lo + (dk + 1) * bw].map((v) => (front === 's' || front === 'w' ? v - oc : oc - v)).sort((p, q) => p - q);
   const fb = Math.min(2.7, Math.max(1.7, Dp * 0.28)), yB = H - 1.1;
@@ -68,30 +69,33 @@ export function hallFurniture(el, { bag, col }) {
     for (let k = 0; k <= n; k++) { const b = 0.15 + (Dp - 0.3) * k / n; S.add(W, prismZ(arcBand(-Wd / 2 + 0.15, Wd / 2 - 0.15, H - 1.15 - 0.035, H - 0.55 - 0.035, 0.06, 8), b - 0.025, b + 0.025)); }
     for (let k = 1; k < Math.round(Dp / 2.5); k++) { const b = Dp * k / Math.round(Dp / 2.5); S.add(W, box(-Wd / 2 + 0.14, H - 1.3, b - 0.1, Wd / 2 - 0.14, H - 1.15, b + 0.1)); }
   }
-  // ── the back: a screen of door panels, the painting over the long table, the couplets
-  const sw = Math.min(main ? 8.4 : 7.2, Wd - 2.4), sh = Math.min(3.0, H - 1.45);
-  { const P = new Parts(); backScreen(P, sw, sh); put(P, 0, 0.2); }
-  const cw = Math.min(2.05, sw / 2 - 0.4);
-  for (const [s, seed] of [[-1, 41], [1, 42]]) { const P = new Parts(); plaqueBuild(P, { w: 0.3, h: Math.min(2.2, sh - 0.8), n: 7, vertical: true, seed, field: 'paint_white', ink: 'lacquer_black' }); put(P, s * cw, 0.292, 0, 0.7); }
-  if (!main) { const P = new Parts(); hangingScroll(P, 1.15, Math.min(1.9, sh - 1.05), 6); put(P, 0, 0.292, 0, 1.0); }
-  // ── the table before it
-  if (main) {
-    { const P = new Parts(); shrine(P); put(P, 0, 0.3 + 0.28); lblk(-1.4, 0.2, 1.4, 0.9, 2.5); }
-    { const P = new Parts(), h = 1.0; longTable(P, 3.0, 0.5, h);
-      P.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.12, 0.05], [0.11, 0.12], [0.085, 0.13], [0.09, 0.16], [0.001, 0.16]], 14, null, 0, h, 0));
-      for (const a of [0, 2.1, 4.2]) P.add('bronze', limb([Math.cos(a) * 0.08, h + 0.03, Math.sin(a) * 0.08], [Math.cos(a) * 0.1, h - 0.01, Math.sin(a) * 0.1], 0.011, 0.009, 4));
-      for (const s of [-1, 1]) { P.add('bronze', lathe([[0.001, 0], [0.04, 0], [0.012, 0.04], [0.012, 0.16], [0.03, 0.18], [0.001, 0.18]], 8, null, s * 0.5, h, 0)); P.add('lacquer_red', lathe([[0.001, 0.18], [0.016, 0.18], [0.016, 0.3], [0.001, 0.3]], 8, null, s * 0.5, h, 0)); P.add('flame', lathe([[0.001, 0.3], [0.011, 0.31], [0.001, 0.355]], 6, null, s * 0.5, h, 0)); }
-      for (const s of [-1, 1]) { const V = new Parts(); plumVase(V, 12 + s); V.emit(P, s * 1.1, h, 0); }
-      put(P, 0, 1.3); lblk(-1.6, 1.0, 1.6, 1.6, 1.1); }
-    { const P = new Parts(); table(P, 0.95, 0.95, 0.85); const Tea = new Parts(); teaSet(Tea); Tea.emit(P, 0, 0.85, 0); put(P, 0, fb + 1.35); lblk(-0.5, fb + 0.85, 0.5, fb + 1.85, 0.9);
-      for (const s of [-1, 1]) { const C = new Parts(); armchair(C); put(C, s * 1.0, fb + 1.35, faceYaw(-s, 0)); lblk(s * 1.0 - 0.3, fb + 1.05, s * 1.0 + 0.3, fb + 1.65, 1.1); } }
-  } else {
-    { const P = new Parts(), h = 0.9; longTable(P, 2.6, 0.5, h); const R = new Parts(); rock(R, 0.7, 23); R.emit(P, -0.8, h, 0);
-      P.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.12, 0.05], [0.11, 0.12], [0.085, 0.13], [0.09, 0.16], [0.001, 0.16]], 14, null, 0.15, h, 0));
-      for (const a of [0, 2.1, 4.2]) P.add('bronze', limb([0.15 + Math.cos(a) * 0.08, h + 0.03, Math.sin(a) * 0.08], [0.15 + Math.cos(a) * 0.1, h - 0.01, Math.sin(a) * 0.1], 0.011, 0.009, 4));
-      for (const s of [0.75, 1.05]) P.add('glaze_blue', lathe([[0.001, 0], [0.07, 0.01], [0.1, 0.12], [0.06, 0.29], [0.04, 0.33], [0.055, 0.36], [0.001, 0.36]], 12, null, s, h, 0));
-      put(P, 0, 0.62); lblk(-1.5, 0.3, 1.5, 0.95, 1.0); }
-    for (const s of [-1, 1]) { const P = new Parts(); candleStand(P, 1.1); put(P, s * Math.min(2.0, cw), 1.05); lcirc(s * Math.min(2.0, cw), 1.05, 0.2, 1.4); }
+  // ── the back (not in a hall with a doorway there, el.backDoor: a hall open on all sides, its way
+  // through not to be closed by the table)
+  const sw = Math.min(main ? 8.4 : 7.2, Wd - 2.4), sh = Math.min(3.0, H - 1.45), cw = Math.min(2.05, sw / 2 - 0.4);
+  if (!el.backDoor) {
+    // ── the back: a screen of door panels, the painting over the long table, the couplets
+    { const P = new Parts(); backScreen(P, sw, sh); put(P, 0, 0.2); }
+    for (const [s, seed] of [[-1, 41], [1, 42]]) { const P = new Parts(); plaqueBuild(P, { w: 0.3, h: Math.min(2.2, sh - 0.8), n: 7, vertical: true, seed, field: 'paint_white', ink: 'lacquer_black' }); put(P, s * cw, 0.292, 0, 0.7); }
+    if (!main) { const P = new Parts(); hangingScroll(P, 1.15, Math.min(1.9, sh - 1.05), 6); put(P, 0, 0.292, 0, 1.0); }
+    // ── the table before it
+    if (main) {
+      { const P = new Parts(); shrine(P); put(P, 0, 0.3 + 0.28); lblk(-1.4, 0.2, 1.4, 0.9, 2.5); }
+      { const P = new Parts(), h = 1.0; longTable(P, 3.0, 0.5, h);
+        P.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.12, 0.05], [0.11, 0.12], [0.085, 0.13], [0.09, 0.16], [0.001, 0.16]], 14, null, 0, h, 0));
+        for (const a of [0, 2.1, 4.2]) P.add('bronze', limb([Math.cos(a) * 0.08, h + 0.03, Math.sin(a) * 0.08], [Math.cos(a) * 0.1, h - 0.01, Math.sin(a) * 0.1], 0.011, 0.009, 4));
+        for (const s of [-1, 1]) { P.add('bronze', lathe([[0.001, 0], [0.04, 0], [0.012, 0.04], [0.012, 0.16], [0.03, 0.18], [0.001, 0.18]], 8, null, s * 0.5, h, 0)); P.add('lacquer_red', lathe([[0.001, 0.18], [0.016, 0.18], [0.016, 0.3], [0.001, 0.3]], 8, null, s * 0.5, h, 0)); P.add('flame', lathe([[0.001, 0.3], [0.011, 0.31], [0.001, 0.355]], 6, null, s * 0.5, h, 0)); }
+        for (const s of [-1, 1]) { const V = new Parts(); plumVase(V, 12 + s); V.emit(P, s * 1.1, h, 0); }
+        put(P, 0, 1.3); lblk(-1.6, 1.0, 1.6, 1.6, 1.1); }
+      { const P = new Parts(); table(P, 0.95, 0.95, 0.85); const Tea = new Parts(); teaSet(Tea); Tea.emit(P, 0, 0.85, 0); put(P, 0, fb + 1.35); lblk(-0.5, fb + 0.85, 0.5, fb + 1.85, 0.9);
+        for (const s of [-1, 1]) { const C = new Parts(); armchair(C); put(C, s * 1.0, fb + 1.35, faceYaw(-s, 0)); lblk(s * 1.0 - 0.3, fb + 1.05, s * 1.0 + 0.3, fb + 1.65, 1.1); } }
+    } else {
+      { const P = new Parts(), h = 0.9; longTable(P, 2.6, 0.5, h); const R = new Parts(); rock(R, 0.7, 23); R.emit(P, -0.8, h, 0);
+        P.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.12, 0.05], [0.11, 0.12], [0.085, 0.13], [0.09, 0.16], [0.001, 0.16]], 14, null, 0.15, h, 0));
+        for (const a of [0, 2.1, 4.2]) P.add('bronze', limb([0.15 + Math.cos(a) * 0.08, h + 0.03, Math.sin(a) * 0.08], [0.15 + Math.cos(a) * 0.1, h - 0.01, Math.sin(a) * 0.1], 0.011, 0.009, 4));
+        for (const s of [0.75, 1.05]) P.add('glaze_blue', lathe([[0.001, 0], [0.07, 0.01], [0.1, 0.12], [0.06, 0.29], [0.04, 0.33], [0.055, 0.36], [0.001, 0.36]], 12, null, s, h, 0));
+        put(P, 0, 0.62); lblk(-1.5, 0.3, 1.5, 0.95, 1.0); }
+      for (const s of [-1, 1]) { const P = new Parts(); candleStand(P, 1.1); put(P, s * Math.min(2.0, cw), 1.05); lcirc(s * Math.min(2.0, cw), 1.05, 0.2, 1.4); }
+    }
   }
   // ── the seats along the sides: armchairs facing across with a tea stand between each pair
   const ay = Wd / 2 - 1.05, bc = Dp / 2 + (main ? -0.4 : 0), nSet = Dp > 8 ? 2 : (Dp > 6 ? 2 : 1);
