@@ -14,8 +14,10 @@ import { releaseAfterUpload } from './release.js';
 import { coarse, LIFE_FULL } from './cells.js';
 import { placeHanging } from '../core/geom.js';
 
-/** The view culling of the copies (as merge.js): drawn within 80° of the view, chosen again each 10° of turn; all within 6 m. */
-const COS_VIEW = Math.cos(80 * Math.PI / 180), COS_TURN = Math.cos(10 * Math.PI / 180), NEAR_ALL2 = 36;
+/** The view culling of the copies: drawn within 110° of the view, chosen again each 35° of turn; all within 6 m.
+ *  (Each choice changes the first shadow cascade's casters, which is then drawn again in full: at 80° and
+ *  every 10°, as merge.js does for fine pieces, a turn redrew it eight times a second.) */
+const COS_VIEW = Math.cos(110 * Math.PI / 180), COS_TURN = Math.cos(35 * Math.PI / 180), NEAR_ALL2 = 36;
 
 /** A shape is instanced settlement-wide from this many copies; rarer ones are merged per tile. */
 export const LIFE_MIN = 13;
@@ -193,7 +195,7 @@ export class LifeInstances {
       if (!this.idling && this.meshes.some((L) => L.makeFar && !L.pre)) this.idleLow();
       this.lowDone = !this.meshes.some((L) => L.makeFar);
     }
-    // chosen again after a step of 4 m or a turn of 10° (dir: the view's direction, in the
+    // chosen again after a step of 4 m or a turn of 35° (dir: the view's direction, in the
     // settlement's frame); the copies well behind the view are left out, as merge.js LodSet does
     // (those within NEAR_ALL kept: their shadows may fall into the view)
     const turned = dir && (!this.lastDir || dir[0] * this.lastDir[0] + dir[1] * this.lastDir[1] + dir[2] * this.lastDir[2] < COS_TURN);

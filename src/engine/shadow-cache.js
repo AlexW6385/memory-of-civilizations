@@ -102,6 +102,7 @@ export class CachedCSM extends CSMShadowNode {
     this.signature(frame.scene ?? parent);
     _dir.subVectors(light.target.position, light.position).normalize();
     camera.getWorldPosition(_p);
+    let sunTaken = false;
     for (let i = 0; i < this.frustums.length; i++) {
       const L = this.lights[i], shadow = L.shadow, sc = shadow.camera, node = this._shadowNodes[i], C = node?._cascade;
       shadow.autoUpdate = false;
@@ -113,8 +114,10 @@ export class CachedCSM extends CSMShadowNode {
       // the tip of a 40 m caster's shadow may step by a texel and a half there, an 8 m one's by a
       // third of a texel; that cascade, drawn every frame, was otherwise drawn again every third
       // frame as the sun moves)
-      const slack = i === 0 ? 1.5 : 0.5;
-      if (!C.dir || C.dir.angleTo(_dir) > slack * texel / TALL) (C.dir ||= new THREE.Vector3()).copy(_dir);
+      // (one cascade a frame takes the sun's new direction, the others on later frames: the sun's
+      // steady turn redrew all three in the same frame, ~500 draws; slack of a texel, not half)
+      const slack = i === 0 ? 2 : 1;
+      if (!C.dir || (C.dir.angleTo(_dir) > slack * texel / TALL && !sunTaken && due(i))) { (C.dir ||= new THREE.Vector3()).copy(_dir); sunTaken = true; }
       _eye.copy(light.position);
       _orient.lookAt(_eye, _c.copy(_eye).add(C.dir), _up);
       _orientInv.copy(_orient).invert();
