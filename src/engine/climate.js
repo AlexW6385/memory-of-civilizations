@@ -43,6 +43,12 @@ export function forcedIndex(S, id = FORCE) {
 export const DAY_SECONDS = 1800;
 const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 const MOON = [0.55, 0.64, 0.9];
+/**
+ * The level of a settlement's still water (its canals' or its pond's, in its own coordinates), for
+ * the waterline stain on the walls standing in it (ENV.waterLine): a climate's own `waterline`, else
+ * this table (to move into the settlements' climates in their ground.js).
+ */
+const WATERLINE = { 'ming-suzhou': -0.75 };
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -132,8 +138,11 @@ export class Climate {
     const el = Math.asin(Math.max(-1, Math.min(1, ctx.sun[0] * up[0] + ctx.sun[1] * up[1] + ctx.sun[2] * up[2]))) * 180 / Math.PI;
     const moonEl = Math.asin(Math.max(-1, Math.min(1, ctx.moon[0] * up[0] + ctx.moon[1] * up[1] + ctx.moon[2] * up[2]))) * 180 / Math.PI;
     const ids = [];
+    let wl = -1e4, wlW = 0;
     for (const { zone, w } of ctx.zones) {
       if (w < 1e-4) continue;
+      const line = zone.climate.waterline ?? WATERLINE[zone.id];
+      if (line !== undefined && w > wlW) { wl = line; wlW = w; }
       const W = this.weatherOf(zone);
       W.update(dt, this.hour);
       if (!this.hemis.has(zone.id)) this.hemis.set(zone.id, hemisphere(zone.climate));
@@ -165,8 +174,10 @@ export class Climate {
     }
     acc.sun = ctx.sun.slice();
     acc.moon = ctx.moon.slice();
-    // wetness: soaks in under rain within a minute, dries over several
-    this.wet += (acc.rain > 0.3 ? (1 - this.wet) * dt / 50 : -this.wet * dt / 400);
+    acc.waterLine = wl;
+    // wetness: soaks in under rain within a minute or two (faster the harder it rains), and dries
+    // over some twenty minutes after (a time constant of 400 s: 5 % left after 20 min)
+    this.wet += (acc.rain > 0.15 ? (1 - this.wet) * dt * Math.min(1, acc.rain * 1.6) / 50 : -this.wet * dt / 400);
     this.wet = Math.min(1, Math.max(0, this.wet));
     // snow: settles over a minute and a half while it falls, melts over some minutes (faster where
     // the place is warm: out of the snowing zone the cover goes)
@@ -198,6 +209,7 @@ export class Climate {
     ENV.cloudOffset.value.y -= a.wind[1] * dt * 6;
     ENV.wet.value = this.wet;
     ENV.rain.value = a.rain;
+    ENV.waterLine.value = a.waterLine ?? -1e4;
     ENV.snow.value = a.snow;
     ENV.dust.value = a.dust;
     ENV.snowCover.value = this.snowCover;
