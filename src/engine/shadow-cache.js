@@ -57,7 +57,7 @@ export class CachedCSM extends CSMShadowNode {
     super(light, data);
     this.cache = cache;
     this.frameNo = 0;
-    this.sig = 0;                          // the static casters' signature this frame
+    this.sigs = new Map();                 // the static casters' signatures this frame, by layer mask
     this.dynMask = 0;                      // the layers of the dynamic casters visible this frame
     this.stats = { full: 0, cached: 0, skipped: 0 };
   }
@@ -138,26 +138,43 @@ export class CachedCSM extends CSMShadowNode {
       L.updateMatrixWorld(); L.target.updateMatrixWorld();
       if (!due(i)) continue;
       C.dyn = (this.dynMask & sc.layers.mask) !== 0;
-      if (key !== C.key || this.sig !== C.sig || !C.rt) { C.dirty = true; C.key = key; C.sig = this.sig; }
+      const sig = this.sigFor(sc.layers.mask);
+      if (key !== C.key || sig !== C.sig || !C.rt) { C.dirty = true; C.key = key; C.sig = sig; }
       if (C.dirty || C.dyn) shadow.needsUpdate = true;
       else this.stats.skipped++;
     }
     HITCH.since('shadow cache', t0);
   }
 
-  /** The static casters' signature, and the layers the dynamic ones are on (once a frame). */
+  /** The signature of the static casters a cascade drawing these layers sees. */
+  sigFor(mask) {
+    let s = 2166136261 | 0;
+    for (const [m, h] of this.sigs) if (m & mask) s = Math.imul(s ^ h ^ m, 16777619);
+    return s;
+  }
+
+  /**
+   * The static casters' signatures, one per layer mask (a cascade is drawn again only when the
+   * casters on its own layers change: the street life, in the first cascade only, chosen again as
+   * one walks and turns, no longer redraws the other two), and the layers the dynamic ones are on
+   * (once a frame).
+   */
   signature(scene) {
-    let h = 2166136261 | 0, dyn = 0;
+    const sigs = this.sigs ??= new Map();
+    sigs.clear();
+    let h = 0, dyn = 0;
     const mix = (v) => { h = Math.imul(h ^ (v | 0), 16777619); };
     scene.traverseVisible((o) => {
       if (!o.castShadow || !(o.isMesh || o.isLine || o.isPoints)) return;
       if (isDynamic(o)) { dyn |= o.layers.mask; return; }
+      h = sigs.get(o.layers.mask) ?? (2166136261 | 0);
       const g = o.geometry, e = o.matrixWorld.elements;
       mix(o.id); mix(o.layers.mask); mix(o.count ?? 1); mix(g.id); mix(g.drawRange.start); mix(g.drawRange.count === Infinity ? -1 : g.drawRange.count);
       mix(g.index?.version ?? 0); mix(o.instanceMatrix?.version ?? 0); mix(o.material?.id ?? 0);
       mix(e[12] * 256); mix(e[13] * 256); mix(e[14] * 256); mix(e[0] * 65536); mix(e[2] * 65536); mix(e[5] * 65536);
+      sigs.set(o.layers.mask, h);
     });
-    this.sig = h; this.dynMask = dyn;
+    this.dynMask = dyn;
   }
 }
 

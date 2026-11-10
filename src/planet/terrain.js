@@ -17,7 +17,7 @@ import { climateAt } from './land.js';
 // the finest level's tiles carry twice the samples (64) of the others (32): the same 2 m grid near
 // the visitor as eight levels of 32 gave, in a quarter of the tiles (each tile is a draw call, and
 // one more in each shadow cascade it touches)
-const MAX_LEVEL = 7, N = 32, N_FINE = 64, SPLIT = 2.1;
+const MAX_LEVEL = 7, N = 32, N_FINE = 64, SPLIT = 1.7;
 
 const key = (f, L, i, j) => `${f}/${L}/${i}/${j}`;
 const parentKey = (f, L, i, j) => (L ? key(f, L - 1, i >> 1, j >> 1) : null);

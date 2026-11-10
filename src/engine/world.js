@@ -657,8 +657,11 @@ export class World {
     }
     for (const s of this.settlements) {
       if (!s.impostor) continue;
-      s.impostor.visible = s.state !== 'ready' || s.hiddenFar;
-      if (s.impostor.visible) { s.impostor.matrix.multiplyMatrices(S, planetFromFrame(s.S.frame, this._m2)); s.impostor.matrixWorldNeedsUpdate = true; }
+      // the far view too is drawn only within sight (Beijing's, 1000 km off, was drawn from Suzhou)
+      if (s.state === 'ready' && !s.hiddenFar) { s.impostor.visible = false; continue; }
+      s.impostor.matrix.multiplyMatrices(S, planetFromFrame(s.S.frame, this._m2));
+      s.impostor.visible = _sc.setFromMatrixPosition(s.impostor.matrix).distanceTo(cam) < sight + (s.S.radius || 200);
+      if (s.impostor.visible) s.impostor.matrixWorldNeedsUpdate = true;
     }
     const fs = this.floraSite;
     if (fs) { this.legacy.matrix.multiplyMatrices(S, planetFromFrame(fs.S.frame, this._m2)); this.legacy.matrixWorldNeedsUpdate = true; }
@@ -886,6 +889,8 @@ export class World {
       _ld.copy(_vd).transformDirection(_inv);
       const L = _li.copy(camera.position).applyMatrix4(_inv), dir = [_ld.x, _ld.y, _ld.z];
       for (const D of s.lods) if (D.kind === 'fine') D.update(L.x, L.y, L.z, false, dir);
+      // the street life too: its copies well behind the view are not drawn
+      if (s.life && s.life.group.visible) s.life.update(L.x, L.y, L.z, false, dir);
     }
     // the life of the streets: the copies within reach, chosen four times a second
     if (!this._nextL || now > this._nextL) {
@@ -897,7 +902,7 @@ export class World {
         if (s.lods) for (const D of s.lods) if (D.kind !== 'fine' || s.hiddenFar) D.update(L[0], L[1], L[2]);
         if (!s.life) continue;
         s.life.group.visible = !this.lifeHidden && s.life.ready !== false;
-        s.life.update(L[0], L[1], L[2]);
+        if (!s.lods?.length || s.hiddenFar) s.life.update(L[0], L[1], L[2]);
       }
     }
     HITCH.since('lod+life', t0); t0 = HITCH.mark();

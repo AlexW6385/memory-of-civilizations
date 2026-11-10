@@ -13,6 +13,9 @@ import { SMALL } from './layers.js';
 import { releaseAfterUpload } from './release.js';
 import { coarse, LIFE_FULL } from './cells.js';
 
+/** The view culling of the copies (as merge.js): drawn within 80° of the view, chosen again each 10° of turn; all within 6 m. */
+const COS_VIEW = Math.cos(80 * Math.PI / 180), COS_TURN = Math.cos(10 * Math.PI / 180), NEAR_ALL2 = 36;
+
 /** A shape is instanced settlement-wide from this many copies; rarer ones are merged per tile. */
 export const LIFE_MIN = 13;
 /** ...and only if its copies hold more than this many triangles in all: a small shape with few
@@ -170,7 +173,7 @@ export class LifeInstances {
   }
 
   /** Choose the copies within reach of the viewer (x, y, z in the settlement's frame). */
-  update(x, y, z, force = false) {
+  update(x, y, z, force = false, dir = null) {
     // the shapes' coarse versions made a few at each call (~3 ms), until all are (src/engine/cells.js)
     if (!this.lowDone) {
       // those made in the build worker, ~3 ms of them a call; those to be made here (coarse(), a
@@ -184,8 +187,15 @@ export class LifeInstances {
       if (!this.idling && this.meshes.some((L) => L.makeFar && !L.pre)) this.idleLow();
       this.lowDone = !this.meshes.some((L) => L.makeFar);
     }
-    if (!force && this.last && Math.hypot(x - this.last[0], y - this.last[1], z - this.last[2]) < 4) return;
+    // chosen again after a step of 4 m or a turn of 10° (dir: the view's direction, in the
+    // settlement's frame); the copies well behind the view are left out, as merge.js LodSet does
+    // (those within NEAR_ALL kept: their shadows may fall into the view)
+    const turned = dir && (!this.lastDir || dir[0] * this.lastDir[0] + dir[1] * this.lastDir[1] + dir[2] * this.lastDir[2] < COS_TURN);
+    if (!force && !turned && this.last && Math.hypot(x - this.last[0], y - this.last[1], z - this.last[2]) < 4) return;
     this.last = [x, y, z];
+    if (dir) this.lastDir = [dir[0], dir[1], dir[2]];
+    const vx = dir ? dir[0] : 0, vy = dir ? dir[1] : 0, vz = dir ? dir[2] : 0;
+    const behind = (dx, dy, dz, d2, r) => dir && d2 > NEAR_ALL2 && dx * vx + dy * vy + dz * vz < Math.sqrt(d2) * COS_VIEW - r;
     const full2 = LIFE_FULL * LIFE_FULL;
     for (const L of this.meshes) {
       const { near, far, all, colors, pos, reach, n } = L;
@@ -194,6 +204,7 @@ export class LifeInstances {
       for (let i = 0; i < n; i++) {
         const dx = pos[i * 3] - x, dy = (pos[i * 3 + 1] - y) * 0.7, dz = pos[i * 3 + 2] - z, r = reach[i], d2 = dx * dx + dy * dy + dz * dz;
         if (d2 > r * r) continue;
+        if (behind(dx, pos[i * 3 + 1] - y, dz, d2, 3)) continue;
         // (the coarse copies beyond LIFE_FULL, where the shape has a coarse version)
         const toFar = far && d2 > full2, M = toFar ? Mf : Mn, C = toFar ? Cf : Cn, k = toFar ? f++ : c++;
         M.set(all.subarray(i * 16, i * 16 + 16), k * 16);
@@ -219,7 +230,9 @@ export class LifeInstances {
       for (let i = 0; i < n; i++) {
         const px = pos[i * 3], py = pos[i * 3 + 1], pz = pos[i * 3 + 2];
         const dx = px - x, dy = (py - y) * 0.7, dz = pz - z, r = reach[i];
-        if (dx * dx + dy * dy + dz * dz > r * r) continue;
+        const d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 > r * r) continue;
+        if (behind(dx, py - y, dz, d2, size)) continue;
         const s0 = ranges[i * 2], k = ranges[i * 2 + 1];
         dst.set(index.subarray(s0, s0 + k), fill); fill += k;
         if (px < x0) x0 = px; if (py < y0) y0 = py; if (pz < z0) z0 = pz;
