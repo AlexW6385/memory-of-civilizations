@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.35 — Looked round before arriving (2026-11-10)
+- Behind the loading screen the view turns once round with the world's updates, so the shadow pass's shaders and the far versions are built then, not in the first turn after arriving.
+
 ## v10.34 — Neighbours as far views (2026-11-10)
 - Settlements are built in full only within 350 m of their rim (was 700): from one settlement its neighbours show as their far views, and arriving has a third as much to build and compile.
 

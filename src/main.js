@@ -318,7 +318,7 @@ async function main() {
   progress.set('shaders', 0);
   progress.shaderT0 = performance.now();
   frameOnce(0);
-  await R.warmup();
+  await warmAround();
   mark('shaders');
   console.info('[memory of civilizations] start (ms):', JSON.stringify(times));
   progress.set('shaders', 1);
@@ -412,7 +412,7 @@ async function main() {
       await fn(report);
       frameOnce(0);
       if (performance.now() - T0 > 700) toast(`${t('travelling')} 95%`);
-      await R.warmup();
+      await warmAround();
       mark('shaders');
       console.info('[memory of civilizations] travel (ms):', JSON.stringify(times));
       // the next settlement of the shared random order is built ahead, in the background
@@ -518,6 +518,24 @@ async function main() {
   };
 
   // frame loop
+  /**
+   * Looked round once before the arrival is shown (behind the loading screen): eight directions,
+   * three frames each, with the world's updates (the levels of detail and the street life chosen,
+   * every shadow cascade drawn), so that what three still builds on first sight — the shadow pass's
+   * shaders, the far versions — is built now, not in the first turn round (a hundred builds, ~1 s).
+   */
+  async function warmAround() {
+    const yaw = controls.yaw;
+    for (let k = 0; k < 8; k++) {
+      controls.yaw = yaw + k * Math.PI / 4;
+      for (let j = 0; j < 3; j++) frameOnce(0);
+      await new Promise((r) => setTimeout(r, 0));
+    }
+    controls.yaw = yaw;
+    frameOnce(0);
+    await R.warmup();
+  }
+
   function frameOnce(dt) {
     if (!controls.free) { world.reanchor(controls); controls.apply(); }
     world.place(R.camera, !controls.free);
