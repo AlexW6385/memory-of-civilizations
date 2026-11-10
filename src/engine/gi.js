@@ -12,7 +12,7 @@
 //   (already convolved with the cosine lobe, so E(n) = c0·Y0 + Y1·(cy·n.y + cz·n.z + cx·n.x)).
 
 import { Data3DTexture, HalfFloatType, RGBAFormat, LinearFilter, ClampToEdgeWrapping, DataUtils } from 'three/webgpu';
-import { Fn, vec3, float, uniform, texture3D, positionWorld, normalWorld, reflectVector, clamp, min, max, mix, smoothstep } from 'three/tsl';
+import { Fn, vec3, float, uniform, texture3D, positionWorld, normalWorld, reflectVector, clamp, min, max, mix, smoothstep, renderGroup } from 'three/tsl';
 import { LightingNode } from 'three/webgpu';
 import { Color } from 'three/webgpu';
 
@@ -38,6 +38,8 @@ export class GIVolume {
     // outdoor fallback, set by the climate: irradiance from the sky above and the ground below
     this.skyE = uniform(new Color(0.5, 0.55, 0.65));
     this.groundE = uniform(new Color(0.4, 0.35, 0.3));
+    // the same for every object: the render's shared uniform group (see env.js)
+    for (const u of [this.uMin, this.uSize, this.uRes, this.uActive, this.uIntensity, this.skyE, this.groundE]) u.setGroup(renderGroup);
     this._open = 0.5;
   }
 
@@ -168,7 +170,7 @@ export class GIVolume {
    */
   irradianceNode(dir = normalWorld, side = 1) {
     const self = this;
-    if (!this.nodes) this.nodes = this.tex.map((t) => texture3D(t));
+    if (!this.nodes) this.nodes = this.tex.map((t) => texture3D(t).setGroup(renderGroup));
     return Fn(() => {
       const N = dir;
       const fallback = mix(self.groundE, self.skyE, clamp(N.y.mul(0.5).add(0.5), 0, 1));

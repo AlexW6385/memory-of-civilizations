@@ -1,10 +1,10 @@
 // Shared environment uniforms, written by the climate each frame and read by materials, fog,
 // cloud shadows and water. One place so that everything agrees about the sky.
 
-import { Color, Vector2, Vector3, Matrix3 } from 'three/webgpu';
+import { Color, Vector2, Vector3, Matrix3, Data3DTexture, RedFormat, UnsignedByteType, RepeatWrapping, LinearFilter } from 'three/webgpu';
 import {
   uniform, vec2, vec3, float, Fn, positionWorld, cameraPosition, normalize, dot, max, exp, pow, clamp, smoothstep, mix,
-  mx_fractal_noise_float, time, length, normalWorld,
+  time, length, normalWorld, texture3D, renderGroup,
 } from 'three/tsl';
 import { PLANET_RADIUS } from '../planet/sites.js';
 
@@ -41,19 +41,79 @@ export const ENV = {
   camAlt: uniform(2),                           // the camera's height above the sea (m)
 };
 
+// set once a frame for all: in the render's shared uniform group, not the per-object one (each
+// object's group is checked and written at each of its draws, several hundred a frame)
+for (const u of Object.values(ENV)) u.setGroup(renderGroup);
+
 /** Planet coordinates (metres from the centre) of the current fragment. */
 export const planetPosition = Fn(() => ENV.planetO.add(ENV.planetM.mul(positionWorld)))();
 /** Height above the sea of the current fragment. */
 export const seaHeight = Fn(() => length(planetPosition).sub(PLANET_RADIUS))();
 
 /**
+ * A tiling field of smooth noise (three octaves of value noise, CLOUD_CELLS cells across at the
+ * coarsest, CLOUD_N texels a side), baked once: the cloud shadows read it with two lookups instead
+ * of computing four octaves of 3D Perlin noise at every pixel (a shared cost of every surface).
+ * Scaled to the spread of that noise (mean 0.5, deviation ~0.115).
+ */
+const CLOUD_N = 64, CLOUD_CELLS = 4;
+function cloudField() {
+  const N = CLOUD_N, out = new Float32Array(N * N * N);
+  const hash = (x, y, z, L) => {
+    let h = (((x % L) + L) % L) * 374761393 + (((y % L) + L) % L) * 668265263 + (((z % L) + L) % L) * 2147483647;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  };
+  const fade = (t) => t * t * (3 - 2 * t);
+  for (let o = 0, amp = 1, L = CLOUD_CELLS; o < 3; o++, amp *= 0.5, L *= 2) {
+    const k = L / N, lat = new Float32Array(L * L * L);
+    for (let i = 0; i < lat.length; i++) lat[i] = hash(i % L, Math.floor(i / L) % L, Math.floor(i / (L * L)), L);
+    // per axis: the lattice cells either side and the smoothed weight
+    const i0 = new Int32Array(N), i1 = new Int32Array(N), wt = new Float32Array(N);
+    for (let x = 0; x < N; x++) { const f = x * k, i = Math.floor(f); i0[x] = i % L; i1[x] = (i + 1) % L; wt[x] = fade(f - i); }
+    for (let z = 0; z < N; z++) {
+      const z0 = i0[z] * L * L, z1 = i1[z] * L * L, w = wt[z];
+      for (let y = 0; y < N; y++) {
+        const y0 = i0[y] * L, y1 = i1[y] * L, v = wt[y], row = (z * N + y) * N;
+        for (let x = 0; x < N; x++) {
+          const a = i0[x], b = i1[x], u = wt[x];
+          const c000 = lat[z0 + y0 + a], c100 = lat[z0 + y0 + b], c010 = lat[z0 + y1 + a], c110 = lat[z0 + y1 + b];
+          const c001 = lat[z1 + y0 + a], c101 = lat[z1 + y0 + b], c011 = lat[z1 + y1 + a], c111 = lat[z1 + y1 + b];
+          const x00 = c000 + (c100 - c000) * u, x10 = c010 + (c110 - c010) * u, x01 = c001 + (c101 - c001) * u, x11 = c011 + (c111 - c011) * u;
+          const e0 = x00 + (x10 - x00) * v, e1 = x01 + (x11 - x01) * v;
+          out[row + x] += amp * (e0 + (e1 - e0) * w - 0.5);
+        }
+      }
+    }
+  }
+  let m = 0, q = 0;
+  for (const a of out) { m += a; q += a * a; }
+  m /= out.length; const sd = Math.sqrt(q / out.length - m * m) || 1;
+  const data = new Uint8Array(out.length);
+  for (let i = 0; i < out.length; i++) data[i] = Math.max(0, Math.min(255, Math.round((0.5 + (out[i] - m) / sd * 0.115) * 255)));
+  const t = new Data3DTexture(data, N, N, N);
+  t.format = RedFormat; t.type = UnsignedByteType;
+  t.wrapS = t.wrapT = t.wrapR = RepeatWrapping;
+  t.magFilter = t.minFilter = LinearFilter;
+  t.generateMipmaps = false; t.unpackAlignment = 1;
+  t.needsUpdate = true;
+  return t;
+}
+const CLOUD_TEX = cloudField();
+
+/**
  * Shadow of the clouds on the ground: a drifting field matched to the cloud cover. 1 = sun,
  * down to ~0.25 under a cloud. Drawn in planet coordinates, so it lies over buildings and ground alike.
+ * (Two lookups of the baked field, at scales 1 and 1/2.7 turned apart, so that its repeat, 1.4 km,
+ * does not show.)
  */
 export const cloudShadow = Fn(() => {
-  const P = planetPosition.mul(0.0028);
-  const o = ENV.cloudOffset.mul(0.0028);
-  const n = mx_fractal_noise_float(vec3(P.x.add(o.x), P.y.add(time.mul(0.004)), P.z.add(o.y)), 4, 2.0, 0.5).mul(0.5).add(0.5);
+  const P = planetPosition.mul(0.0028 / CLOUD_CELLS);
+  const o = ENV.cloudOffset.mul(0.0028 / CLOUD_CELLS);
+  const q = vec3(P.x.add(o.x), P.y.add(time.mul(0.004 / CLOUD_CELLS)), P.z.add(o.y));
+  const T = texture3D(CLOUD_TEX).setGroup(renderGroup);
+  const a = T.sample(q).r, b = T.sample(vec3(q.z.add(q.x.mul(0.6)), q.y.mul(0.9).add(0.37), q.x.sub(q.z.mul(0.6))).mul(0.37)).r;
+  const n = a.mul(0.7).add(b.mul(0.3)).sub(0.5).mul(1.25).add(0.5);
   const cover = ENV.clouds;
   // the more cover, the lower the threshold: patches merge into overcast
   const shade = smoothstep(float(1).sub(cover).sub(0.08), float(1).sub(cover).add(0.12), n);
