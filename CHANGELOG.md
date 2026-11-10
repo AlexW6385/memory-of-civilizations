@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.33 — Faster precompiling (2026-11-10)
+- Shaders are compiled ahead in three chains side by side, so a settlement's are ready within its loading rather than minutes after arriving.
+
 ## v10.32 — Precompiled shaders actually used; nothing drawn beyond the horizon (2026-11-09)
 - Shaders compiled ahead were filed under another key than the frame's (three keys them by the renderer's nesting depth), so every object was built again on first sight — the main cause of the hitches when turning or arriving, and of doubled memory.
 - A settlement built ahead for the next journey, beyond the horizon, is no longer drawn (it was, in full, wherever the view faced it).

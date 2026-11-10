@@ -303,7 +303,13 @@ export class Renderer {
         parent ? parent.add(o) : tmp.remove(o); o.frustumCulled = fc; o.visible = vis; if (o.isInstancedMesh) o.count = n;
       }
     };
-    return reps.reduce((p, o) => p.then(() => one(o)), Promise.resolve()).catch((e) => console.warn('precompile:', e.message));
+    // (each object's build waits on its pipeline and gives the frame back between its stages: one
+    // after another they came in at about 16 a second, and a settlement's thousand meshes were still
+    // being compiled minutes after arriving, the ones not yet done built in the frame that met them;
+    // a few chains side by side, each call's setting-up still synchronous and alone)
+    const CHAINS = 3, chains = [];
+    for (let c = 0; c < CHAINS; c++) chains.push(reps.filter((_, i) => i % CHAINS === c).reduce((p, o) => p.then(() => one(o)), Promise.resolve()));
+    return Promise.all(chains).catch((e) => console.warn('precompile:', e.message));
   }
 
   /** A depth-aware 5×5 average of the half-resolution occlusion, one of its texels apart: its
