@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.36 — Fine pieces behind the view left out (2026-11-10)
+- The merged copies of fine pieces (stones, brackets, carvings) well behind the view are no longer drawn (their shadows still are): their sets span the whole settlement, so every copy's vertices went to the GPU whichever way one looked.
+
 ## v10.35 — Looked round before arriving (2026-11-10)
 - Behind the loading screen the view turns once round with the world's updates, so the shadow pass's shaders and the far versions are built then, not in the first turn after arriving.
 

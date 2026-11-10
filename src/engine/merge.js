@@ -25,6 +25,10 @@ import { SMALL, MID, NEAR_SHADOW, FAR_SHADOW } from './layers.js';
 import { MATERIALS } from '../core/palette.js';
 import { HITCH } from './hitch.js';
 
+/** The fine pieces' copies drawn within this angle of the view's direction (the view's half
+ *  diagonal, about 52°, and a margin for the turn between two choices), chosen again each VIEW_TURN. */
+const COS_VIEW = Math.cos(THREE.MathUtils.degToRad(80)), COS_TURN = Math.cos(THREE.MathUtils.degToRad(10));
+
 /** Time a merge may take before it gives the frame back (ms). */
 const SLICE = 4;
 
@@ -363,11 +367,21 @@ export class LodSet {
     this.last = null;
   }
 
-  /** Choose the copies for an eye at x, y, z (the settlement's frame). */
-  update(x, y, z, force = false) {
-    if (!force && this.last && Math.hypot(x - this.last[0], y - this.last[1], z - this.last[2]) < 3) return;
+  /**
+   * Choose the copies for an eye at x, y, z (the settlement's frame); `dir`, the view's direction
+   * in that frame: the fine pieces' copies well behind the view are left out of what is drawn (not
+   * of their shadows, drawn apart). A merged set of copies spans the whole settlement, so its bounds
+   * were in view whichever way one looked, and the GPU took every copy's vertices every frame —
+   * looking straight up at Suzhou, 2.6 M triangles. Chosen again as the view turns by VIEW_TURN.
+   */
+  update(x, y, z, force = false, dir = null) {
+    const turned = dir && (!this.lastDir || dir[0] * this.lastDir[0] + dir[1] * this.lastDir[1] + dir[2] * this.lastDir[2] < COS_TURN);
+    if (!force && !turned && this.last && Math.hypot(x - this.last[0], y - this.last[1], z - this.last[2]) < 3) return;
     this.last = [x, y, z];
     const { n, pos, kind, mid, far } = this, fine = kind === 'fine';
+    const view = fine && dir;
+    if (dir) this.lastDir = [dir[0], dir[1], dir[2]];
+    const R = this.radius ??= (this.full.geometry.boundingSphere || (this.full.geometry.computeBoundingSphere(), this.full.geometry.boundingSphere)).radius + 1;
     const A = this._a ??= new Uint32Array(n), B = fine ? this._b ??= new Uint32Array(n) : null, C = fine ? this._c ??= new Uint32Array(n) : null, S = fine ? this._s ??= new Uint32Array(n) : null;
     let a = 0, b = 0, c = 0, sh = 0;
     // full within r1 (to LOD_FAR where there is no coarse version), coarse to r2 (all the rest
@@ -375,6 +389,7 @@ export class LodSet {
     const r1 = (kind === 'thin' ? THIN_FAR : kind === 'open' ? OPEN_FAR : kind === 'near' ? this.reach : mid ? LOD_NEAR : LOD_FAR) ** 2, r2 = far ? LOD_FAR ** 2 : Infinity, rs = FINE_SHADOW ** 2;
     for (let i = 0; i < n; i++) {
       const dx = pos[i * 3] - x, dy = pos[i * 3 + 1] - y, dz = pos[i * 3 + 2] - z, d2 = dx * dx + dy * dy + dz * dz;
+      if (view && d2 > R * R && dx * dir[0] + dy * dir[1] + dz * dir[2] < Math.sqrt(d2) * COS_VIEW - R) { if (d2 < rs) S[sh++] = i; continue; }
       if (d2 < r1) A[a++] = i;
       else if (!fine) continue;
       else if (mid && d2 < r2) B[b++] = i;

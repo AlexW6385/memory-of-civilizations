@@ -39,7 +39,7 @@ export const LOAD = 350, UNLOAD = 800;
 export const MAX_BUILT = 4;
 /** Beyond the horizon by this much (m: the tallest buildings' own horizon), a built settlement is not drawn. */
 const BEYOND = 1200;
-const _pc = new THREE.Vector3(), _sc = new THREE.Vector3();
+const _pc = new THREE.Vector3(), _sc = new THREE.Vector3(), _vd = new THREE.Vector3(), _ld = new THREE.Vector3(), _li = new THREE.Vector3(), _inv = new THREE.Matrix4();
 
 /**
  * Every mesh of a building is an instanced mesh with instance colours — a merged part is one copy
@@ -871,6 +871,16 @@ export class World {
       }
     }
     HITCH.since('detail', t0); t0 = HITCH.mark();
+    // the fine pieces' copies chosen again as the view turns (merge.js LodSet: those well behind
+    // the view are not drawn), every frame — the choosing itself only after a turn of 10°
+    camera.getWorldDirection(_vd);
+    for (const s of this.settlements) {
+      if (!s.lods?.length || s.state !== 'ready' || s.hiddenFar) continue;
+      _inv.copy(s.group.matrixWorld).invert();
+      _ld.copy(_vd).transformDirection(_inv);
+      const L = _li.copy(camera.position).applyMatrix4(_inv), dir = [_ld.x, _ld.y, _ld.z];
+      for (const D of s.lods) if (D.kind === 'fine') D.update(L.x, L.y, L.z, false, dir);
+    }
     // the life of the streets: the copies within reach, chosen four times a second
     if (!this._nextL || now > this._nextL) {
       this._nextL = now + 250;
@@ -878,7 +888,7 @@ export class World {
         if (!s.life && !s.lods?.length) continue;
         const L = toLocal(s.S.frame, camP);
         // the shapes drawn by distance (merge.js LodSet)
-        if (s.lods) for (const D of s.lods) D.update(L[0], L[1], L[2]);
+        if (s.lods) for (const D of s.lods) if (D.kind !== 'fine' || s.hiddenFar) D.update(L[0], L[1], L[2]);
         if (!s.life) continue;
         s.life.group.visible = !this.lifeHidden && s.life.ready !== false;
         s.life.update(L[0], L[1], L[2]);
