@@ -951,9 +951,9 @@
  },
  "ming-suzhou-garden": {
   "site": "ming-suzhou",
-  "hash": "1a3447ffa3d90729",
+  "hash": "fae466da7c290a59",
   "rays": 128,
-  "probes": 11143,
+  "probes": 9218,
   "boxes": [
    {
     "min": [
@@ -973,14 +973,14 @@
    },
    {
     "min": [
-     -12,
+     -10.5,
      0.1,
-     30
+     33.4
     ],
     "n": [
-     25,
-     11,
-     23
+     22,
+     10,
+     20
     ],
     "spacing": 1,
     "rooms": [
@@ -1005,7 +1005,7 @@
     ]
    }
   ],
-  "bytes": 187598,
+  "bytes": 153971,
   "seconds": 20,
   "baked": "2026-11-10"
  },
