@@ -367,6 +367,55 @@ function lowGeometry(proto, low) {
 }
 
 /**
+ * The fine detail (pieces under 0.4 m, drawn only near: src/engine/world.js DETAIL_REACH) merged
+ * across the plans, per material in cells of `cell` metres: each plan's detail was a draw call per
+ * material — a street of shops, its goods, two dozen draws a plan within reach. The merged pieces
+ * take the originals' place in their first plan's detail list (shown and hidden by distance as
+ * they were). Pieces marked userData.detailMerge (world.js addPart) keep their arrays until then.
+ */
+export async function mergeDetail(recs, make, { stale = () => false, precompile = null, cell = 32 } = {}) {
+  const groups = new Map();
+  const add = (key, mat, e) => { let G = groups.get(key); if (!G) groups.set(key, (G = { mat, list: [] })); G.list.push(e); };
+  const M = new THREE.Matrix4(), P = new THREE.Vector3();
+  for (const rec of recs) for (const o of rec.detail || []) {
+    if (!o.userData.detailMerge || o.userData.released) continue;
+    const g = o.geometry;
+    if (o.count === 1) {
+      const b = g.boundingSphere || (g.computeBoundingSphere(), g.boundingSphere);
+      add(`${o.material.name}|${formatOf(g)}|${Math.floor(b.center.x / cell)},${Math.floor(b.center.z / cell)}`, o.material.name, { o, rec, geometry: g });
+    } else {
+      // a small instanced shape, untinted: its copies baked, each into its own cell's piece
+      for (let i = 0; i < o.count; i++) {
+        M.fromArray(o.instanceMatrix.array, i * 16); P.setFromMatrixPosition(M);
+        add(`${o.material.name}|${formatOf(g)}|${Math.floor(P.x / cell)},${Math.floor(P.z / cell)}`, o.material.name, { o, rec, geometry: g.clone().applyMatrix4(M), copy: true });
+      }
+    }
+  }
+  let t = performance.now();
+  const breathe = async () => { if (performance.now() - t > SLICE) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); } };
+  let n = 0;
+  for (const G of groups.values()) {
+    if (G.list.length < 2 && !G.list[0].copy) { for (const { o } of G.list) { delete o.userData.detailMerge; releaseAfterUpload(o); } continue; }
+    const g = await mergeGeometries(G.list.map((x) => x.geometry), breathe, stale);
+    if (!g || stale()) return n;
+    const first = G.list[0].o, m = make(g, G.mat);
+    m.userData.detail = true; m.layers.mask = first.layers.mask;
+    m.visible = false; m.castShadow = false;
+    const host = G.list[0].rec;
+    host.group.add(m);
+    if (precompile) await precompile([m]);
+    if (stale()) return n;
+    host.detail.push(m);
+    for (const { o, rec } of G.list) { const k = rec.detail.indexOf(o); if (k >= 0) rec.detail.splice(k, 1); letGo(o); }
+    for (const x of G.list) if (x.copy) x.geometry.dispose();
+    releaseAfterUpload(m);
+    n++;
+    await breathe();
+  }
+  return n;
+}
+
+/**
  * An instanced shape drawn by distance (src/engine/cells.js): 'thin' (rods and bars), 'open'
  * (metal openwork) and 'near' (pieces their plan gives a short reach) — the copies within
  * THIN_FAR / OPEN_FAR / their reach of the eye, shadowed in the first

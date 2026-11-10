@@ -19,7 +19,7 @@ import { Flora } from './flora/index.js';
 import { material, flameMaterial } from './materials.js';
 import { MATERIALS } from '../core/palette.js';
 import { releaseAfterUpload } from './release.js';
-import { markMergeable, mergeParts } from './merge.js';
+import { markMergeable, mergeParts, mergeDetail } from './merge.js';
 import { LifeInstances } from './life-instances.js';
 import { SMALL } from './layers.js';
 import { Builder } from './builder.js';
@@ -147,6 +147,16 @@ function relTo(S, u) {
 }
 
 /** One settlement in the viewer: its group, its collision world, its buildings and houses. */
+/** The most triangles of a small instanced detail shape baked into the merged detail (merge.js mergeDetail). */
+const DETAIL_BAKE = 8000;
+/** An instanced mesh whose copies are not tinted (none, or all white). */
+function untinted(o) {
+  const c = o.instanceColor?.array;
+  if (!c) return true;
+  for (let i = 0; i < o.count * 3; i++) if (Math.abs(c[i] - 1) > 0.004) return false;
+  return true;
+}
+
 class Settlement {
   constructor(S, world) {
     this.S = S; this.world = world;
@@ -324,7 +334,14 @@ class Settlement {
     // (the meshes to be merged once the settlement is built keep their arrays until then)
     tS = HITCH.mark();
     if (MERGE) markMergeable(plan, group);
-    group.traverse((o) => { if (!o.userData.merge) releaseAfterUpload(o); });
+    // (the fine detail merged across the plans once all are in: merge.js mergeDetail)
+    if (MERGE) for (const o of rec.detail) {
+      if (!o.geometry.index || !o.material?.name) continue;
+      if (o.count === 1 && o.name.endsWith(':' + o.material.name)) o.userData.detailMerge = true;
+      // (a small instanced shape untinted: baked in too, at most DETAIL_BAKE triangles in all)
+      else if (o.name.endsWith(':inst') && o.count * o.geometry.index.count / 3 <= DETAIL_BAKE && untinted(o)) o.userData.detailMerge = true;
+    }
+    group.traverse((o) => { if (!o.userData.merge && !o.userData.detailMerge) releaseAfterUpload(o); });
     HITCH.since('stream add', tS);
     if (lifeList.length) this.lifeParts.push({ rec, list: lifeList });
     this.parts.push(rec);
@@ -342,6 +359,7 @@ class Settlement {
     const lods = this.lods = [];
     const precompile = async (list) => { await this.world.r.precompile?.(list, { background: this.ahead }); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b); };
     try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile }); } catch (e) { console.warn('merging', this.id, e); }
+    try { await mergeDetail(this.parts, buildingMesh, { stale: () => gen !== this.gen, precompile: (list) => this.world.r.precompile?.(list, { background: this.ahead }) }); } catch (e) { console.warn('merging detail', this.id, e); }
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
 
