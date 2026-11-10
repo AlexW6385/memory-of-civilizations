@@ -15,7 +15,7 @@ import { addFigure, factor, flat, SLOT, LIMB } from '../../engine/movers-kit.js'
 // ── how many, how fast ───────────────────────────────────────────────────────
 export const PARAMS = {
   walkers: {
-    day: 46, night: 7, rain: 0.7,        // within reach of the visitor (night: hour from ENV.night; rain thins them)
+    day: 34, night: 6, rain: 0.7,        // within reach of the visitor (night: hour from ENV.night; rain thins them)
     reach: 150, spawnMin: 28,            // spawned out of the visitor's sight or beyond spawnMin, let go of beyond reach
     far: 42,                             // the simpler figure beyond (m)
   },

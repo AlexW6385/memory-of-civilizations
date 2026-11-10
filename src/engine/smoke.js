@@ -20,7 +20,7 @@ import * as THREE from 'three/webgpu';
 import { attribute, uniform, vec2, vec3, vec4, float, fract, time, normalize, cross, dot, mix, sin, cos, atan, length, smoothstep, clamp, pow, varying } from 'three/tsl';
 import { ENV } from './env.js';
 
-export const FAR = 300;                       // m: no sprite is drawn beyond this
+export const FAR = 220;                       // m: no sprite is drawn beyond this
 const ORDER = ['kitchen', 'incense', 'steam', 'mist'];
 /**
  * Per kind: n sprites an emitter, life (s), rise (m/s), size at birth and at death (m), strength
@@ -28,10 +28,10 @@ const ORDER = ['kitchen', 'incense', 'steam', 'mist'];
  * out when nearer the eye than this, so no sprite fills the view), colour.
  */
 export const KINDS = {
-  kitchen: { n: 9, life: 12, rise: 0.85, s0: 0.22, s1: 1.7, strength: 0.15, wind: 0.55, curl: 0.5, near: 2.0, color: [0.64, 0.65, 0.68] },
+  kitchen: { n: 6, life: 10, rise: 0.85, s0: 0.22, s1: 1.25, strength: 0.18, wind: 0.55, curl: 0.5, near: 2.0, color: [0.64, 0.65, 0.68] },
   incense: { n: 30, life: 9, rise: 0.36, s0: 0.05, s1: 0.28, strength: 0.3, wind: 0.2, curl: 0.22, near: 0.7, color: [0.86, 0.88, 0.92] },
   steam: { n: 7, life: 3.2, rise: 0.55, s0: 0.1, s1: 0.62, strength: 0.2, wind: 0.35, curl: 0.12, near: 0.8, color: [0.97, 0.97, 0.98] },
-  mist: { n: 3, life: 36, rise: 0.015, s0: 6.5, s1: 8.5, strength: 0.07, wind: 0.2, curl: 3.0, near: 12, color: [0.9, 0.93, 0.97] },
+  mist: { n: 2, life: 36, rise: 0.015, s0: 4.5, s1: 6.0, strength: 0.07, wind: 0.2, curl: 3.0, near: 12, color: [0.9, 0.93, 0.97] },
 };
 
 /** The local solar hour (0…24) from the sun's direction in the scene (x east, z south): 12 when due south. */
