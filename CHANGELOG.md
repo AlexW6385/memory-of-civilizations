@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.40 — Suzhou smooth (2026-11-10)
+
+Suzhou's garden draws about 430 things a frame instead of 520 and holds 60 fps on an M2: empty plant batches, the sea buried under dry land and far cities' outlines are no longer drawn, small repeated pieces are merged, the next city is prepared only in idle moments, and the picture's resolution drops a little when the machine falls behind. The garden's Mediterranean stand-in plants are now camphors and tea shrubs.
+
 ## v10.39 — Suzhou at night, deeper eaves (2026-11-10)
 
 Nights are no longer black: moonlight and starlight fill the town, lanterns throw warm pools on shop fronts and the canal, and only a few rooms glow behind their paper. The pagoda's eaves are deep tiled roofs and the temple halls have long curving eaves instead of a flat slab with a spike.
