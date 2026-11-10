@@ -673,6 +673,7 @@ async function main() {
 
   // hooks for the screenshot and walk-through tools (poses in a settlement's frame, or on the planet)
   window.palace = {
+    hitch: HITCH,
     pose: async (site, x, y, z, yaw = 0, pitch = 0) => {
       const s = world.byId[site];
       world.setAnchor(s.S.frame, s); world.tilt.identity();

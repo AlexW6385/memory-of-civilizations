@@ -66,6 +66,8 @@ class HitchLog {
       this.ring.push(h);
       if (this.ring.length > RING) this.ring.shift();
     }
+    // a running sum of every frame's parts, for profiling a steady view (window.palace.hitch.acc = {})
+    if (this.acc) { for (const k in this.cur) this.acc[k] = (this.acc[k] || 0) + this.cur[k]; this.acc.js = (this.acc.js || 0) + js; this.acc.frames = (this.acc.frames || 0) + 1; }
     this.cur = Object.create(null);
     this.counts = Object.create(null);
     this.wasHidden = false;
