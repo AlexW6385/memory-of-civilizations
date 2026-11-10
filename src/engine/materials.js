@@ -8,7 +8,7 @@ import { MeshStandardNodeMaterial, DoubleSide, Color, PhysicalLightingModel } fr
 import {
   Fn, float, vec2, vec3, vec4, positionWorld, positionLocal, normalWorld, normalLocal, normalView, positionView, abs, floor, fract, min, max,
   mix, smoothstep, hash, mx_noise_float, mx_fractal_noise_float, mx_worley_noise_float, dot, cross, normalize,
-  sign, select, time, sin, cos, clamp, length, cameraPosition, uniform, attribute, reflect, pow, fwidth, toneMappingExposure,
+  sign, select, time, sin, cos, clamp, length, cameraPosition, uniform, attribute, reflect, pow, fwidth, toneMappingExposure, If,
 } from 'three/tsl';
 import { ENV, cloudShadow } from './env.js';
 import { MATERIALS } from '../core/palette.js';
@@ -16,6 +16,7 @@ import { GISpecularNode } from './gi.js';
 import { waterSky } from './water-reflect.js';
 
 const cache = new Map();
+const WIND = '+wind';
 /** The colour of oil-lamp light through paper or from a room within (linear): a warm orange. */
 const LAMPLIGHT = vec3(1.0, 0.43, 0.13);
 const PLAIN = typeof location !== 'undefined' && new URLSearchParams(location.search).get('plain') === '1';
@@ -29,12 +30,17 @@ let GI = null;
 /** The baked-light volume used for reflections (set once by the renderer). */
 export function useGI(gi) { GI = gi; }
 
-/** Material for a palette key. */
+/**
+ * Material for a palette key. A key ending in "+wind" is that material on cloth hung in the wind
+ * (a shop's banner, washing on a pole): the same look, its vertices swayed (clothSway below).
+ */
 export function material(key) {
   if (cache.has(key)) return cache.get(key);
-  const spec = MATERIALS[key] || MATERIALS.sandstone;
+  const wind = key.endsWith(WIND), base = wind ? key.slice(0, -WIND.length) : key;
+  const spec = MATERIALS[base] || MATERIALS.sandstone;
   // ?plain=1 (benchmark only): flat materials, to measure what the procedural detail costs
   const m = PLAIN ? plainMaterial(spec) : make(spec);
+  if (wind) clothSway(m);
   m.name = key;
   if (GI && !m.userData.water) {
     const spec2 = GI.radianceNode();
@@ -118,13 +124,51 @@ const flags = (u, v, size) => {
   return { id, d };
 };
 
-// Weathering (DESIGN §5 "Surfaces"): the darker lower metre of walls along the ground, rain
-// streaks down the faces and moss on the north side near the ground, and on north-facing roofs —
-// streaks and moss by how damp the place's climate is (ENV.damp). In settlement coordinates (the
-// ground at y ≈ 0, north = −z).
+// Weathering (DESIGN §5 "Surfaces"; the Jiangnan sources in docs/settlements/ming-suzhou.md
+// "Weathering and rain"). In settlement coordinates (the ground at y ≈ 0, north = −z), by how damp
+// the place's climate is (ENV.damp):
+// - the foot of a wall: rising damp, darker up to a wavering tide line 0.3–0.7 m up with a thin pale
+//   line of salts at its top; the grime of the lower metre (splash and dirt); green-black algae and
+//   moss in the damp foot, thickest on the north side and where little sky reaches (a narrow lane);
+//   moss higher up the north faces;
+// - rain streaks: thin dark-grey runs down the faces where the rain off the copings, eaves and sills
+//   has carried the dirt, starting and stopping at random heights, strongest on white lime plaster;
+// - a waterline where walls and revetments stand in still water (ENV.waterLine): black-green algae
+//   and silt from below the surface up to 0.3–0.6 m above it, and above that a pale band where the
+//   water's lime and salts dried out;
+// - moss on north-facing roofs, fresh snow lying on the slopes while it snows.
 const WEATHERED = new Set(['ashlar', 'mudbrick', 'granite', 'smooth', 'facade', 'wood', 'timberframe', 'veined', 'drums', 'sectile', 'rock', 'mud', 'tukutuku', 'kowhaiwhai']);
 const ROOFS = new Set(['tiles', 'plates']);
-function weather(col, roof) {
+/** Kinds that stand in water and take its waterline (beyond the weathered walls). */
+const WATERLINE = new Set(['paving', 'taihu', 'pebbles']);
+/** Kinds that get wet in the rain, and those of them that hold puddles where they lie flat. */
+const WETTED = new Set([...WEATHERED, ...ROOFS, ...WATERLINE, 'metal', 'ground', 'bark']);
+const PUDDLES = new Set(['paving', 'pebbles', 'ground']);
+const LUM = vec3(0.2126, 0.7152, 0.0722);
+/** A value computed only while a uniform condition holds (the same for every pixel), else `otherwise`. */
+const when = (cond, make, otherwise = 0) => Fn(() => {
+  const v = float(otherwise).toVar();
+  If(cond, () => { v.assign(make()); });
+  return v;
+})();
+const whenV = (cond, make) => Fn(() => {
+  const v = vec3(0).toVar();
+  If(cond, () => { v.assign(make()); });
+  return v;
+})();
+
+/**
+ * How open to the sky the fragment is (0 under a roof or deep eaves … 1 in the open): the baked light
+ * from straight overhead against the open sky's. The probes' coefficients are read once per pixel
+ * and shared with the baked reflections (gi.js), so this costs a few operations. 1 without a bake.
+ */
+const skyOpen = () => {
+  if (!GI) return float(1);
+  const up = GI.irradianceNode(vec3(0, 1, 0)), sky = GI.skyE;
+  return clamp(dot(up, LUM).div(max(dot(sky, LUM).mul(GI.uIntensity), 1e-4)), 0, 1);
+};
+
+function weather(col, roof, open) {
   const P = positionLocal, y = P.y, vertical = float(1).sub(smoothstep(0.5, 0.8, abs(normalLocal.y)));
   const patch = mx_noise_float(P.mul(0.7)), fine = mx_noise_float(P.mul(3.1));
   const north = smoothstep(0.2, 0.9, normalLocal.z.negate());
@@ -134,12 +178,134 @@ function weather(col, roof) {
     const snow = ENV.snowCover.mul(smoothstep(0.35, 0.7, normalLocal.y)).mul(smoothstep(-0.7, -0.2, patch.add(ENV.snowCover.mul(0.5))));
     return mix(mix(col, vec3(0.14, 0.17, 0.08), moss.mul(0.35)), vec3(0.9, 0.92, 0.95), snow.mul(0.92));
   }
+  const { u } = wallUV();
+  const light = smoothstep(0.2, 0.55, dot(col, LUM));                // white plaster shows dirt the most
+  // the foot: grime of the lower metre, rising damp to its tide line, salts at the line
   const foot = smoothstep(1.3, 0.0, y.add(patch.mul(0.35))).mul(vertical);
-  const streak = smoothstep(0.3, 0.75, mx_noise_float(vec3(P.x.add(P.z).mul(1.7), y.mul(0.12), 0.3))).mul(vertical).mul(ENV.damp);
+  const tide = patch.mul(0.2).add(fine.mul(0.05)).add(0.5);
+  const dampF = smoothstep(tide, tide.sub(0.14), y).mul(vertical).mul(ENV.damp);
+  const salt = float(1).sub(smoothstep(0.0, 0.035, abs(y.sub(tide).sub(0.02)))).mul(vertical).mul(ENV.damp).mul(light).mul(smoothstep(-0.2, 0.3, fine));
+  // green-black growth in the damp foot (north and shaded sides), moss higher up the north faces
+  const shade = max(north, float(1).sub(open).mul(0.8));
+  const algae = shade.mul(smoothstep(0.75, 0.05, y.add(patch.mul(0.3)))).mul(smoothstep(-0.15, 0.35, patch.add(fine.mul(0.35)))).mul(ENV.damp).mul(vertical);
   const moss = north.mul(smoothstep(2.4, 0.2, y.add(patch.mul(0.6)))).mul(smoothstep(0.0, 0.5, patch.add(0.25))).mul(ENV.damp).mul(vertical);
-  let c = col.mul(float(1).sub(foot.mul(0.22).mul(fine.mul(0.35).add(1))));
-  c = c.mul(float(1).sub(streak.mul(0.1)));
-  return mix(c, vec3(0.15, 0.19, 0.09), moss.mul(0.45));
+  // rain streaks: narrow runs (~10 cm) down the face, broken into lengths by a second field
+  const run = mx_noise_float(vec3(u.mul(9.0), y.mul(0.3), 0.3));
+  const len = mx_noise_float(vec3(u.mul(1.3), y.mul(0.9), 1.7));
+  const streak = smoothstep(0.2, 0.6, run).mul(smoothstep(-0.05, 0.35, len)).mul(vertical).mul(ENV.damp).mul(open.mul(0.6).add(0.4));
+  // the waterline: algae and silt up to 0.3–0.6 m above the still water, a pale dried band above
+  const wd = y.sub(ENV.waterLine), band = patch.mul(0.15).add(fine.mul(0.04)).add(0.45);
+  const slime = smoothstep(band, band.sub(0.07), wd).mul(smoothstep(-2.5, -1.0, wd));
+  const pale = smoothstep(band.sub(0.02), band.add(0.02), wd).mul(smoothstep(band.add(0.32), band.add(0.04), wd));
+  let c = col.mul(float(1).sub(foot.mul(0.2).mul(fine.mul(0.35).add(1))));
+  c = c.mul(float(1).sub(dampF.mul(0.18)));
+  c = mix(c, vec3(dot(c, LUM).mul(1.1).add(0.08)), salt.mul(0.35));
+  c = mix(c, c.mul(0.55).add(vec3(0.05, 0.052, 0.05)).mul(run.mul(0.15).add(0.9)), streak.mul(light.mul(0.55).add(0.12)));
+  c = mix(c, vec3(0.15, 0.19, 0.09), moss.mul(0.4));
+  c = mix(c, vec3(0.045, 0.06, 0.032).mul(fine.mul(0.3).add(1)), algae.mul(0.55));
+  c = mix(c, vec3(dot(c, LUM)).mul(1.12).add(0.04), pale.mul(0.28));
+  return mix(c, c.mul(0.3).add(vec3(0.03, 0.038, 0.025)), slime.mul(0.85));
+}
+
+/** For the kinds that take a waterline but no other weathering (paving, revetment stones): the stained band alone (no noise: a wavering of sines). */
+function waterline(col) {
+  const P = positionLocal, wd = P.y.sub(ENV.waterLine);
+  const band = sin(P.x.mul(1.7).add(P.z.mul(0.6))).mul(0.06).add(sin(P.z.mul(4.3).sub(P.x.mul(2.9))).mul(0.03)).add(0.45);
+  const slime = smoothstep(band, band.sub(0.07), wd).mul(smoothstep(-2.5, -1.0, wd));
+  const pale = smoothstep(band.sub(0.02), band.add(0.02), wd).mul(smoothstep(band.add(0.32), band.add(0.04), wd));
+  const c = mix(col, vec3(dot(col, LUM)).mul(1.12).add(0.04), pale.mul(0.25));
+  return mix(c, c.mul(0.3).add(vec3(0.03, 0.038, 0.025)), slime.mul(0.85));
+}
+
+/**
+ * Rain on still water: each drop a ring spreading from where it fell (to ~12 cm in 0.6 s) and dying
+ * away; two staggered layers of cells, a drop per cell and cycle, fewer in lighter rain. Returns
+ * vec3(height, its slope along x, along z) per metre of amplitude.
+ */
+function rainRings(x, z) {
+  let out = vec3(0);
+  for (const [k, cell, rate] of [[0, 0.55, 1.6], [1, 0.45, 1.9]]) {
+    const q = vec2(x, z).div(cell).add(k * 0.37), c = floor(q), f = fract(q);
+    const id = hash(c.x.mul(12.9898).add(c.y.mul(78.233)).add(k * 41.3));
+    const ctr = vec2(hash(id.mul(7.13).add(1.7)), hash(id.mul(3.71).add(5.3))).mul(0.5).add(0.25);
+    const t = time.mul(rate).add(id.mul(17.0)), age = fract(t);
+    const on = select(hash(floor(t).add(id.mul(31.0))).lessThan(ENV.rain.mul(1.5).add(0.15)), float(1), float(0));
+    const dv = f.sub(ctr).mul(cell), d = max(length(dv), 1e-4);
+    const x0 = d.sub(age.mul(0.12));
+    const win = float(1).sub(smoothstep(0.0, 0.04, abs(x0))).mul(float(1).sub(age).pow(2)).mul(on);
+    const K = Math.PI * 2 / 0.04;
+    out = out.add(vec3(sin(x0.mul(K)).mul(win), dv.mul(cos(x0.mul(K)).mul(win).mul(K).div(d))));
+  }
+  return out;
+}
+
+/**
+ * The weather on a material's surface, after its own look (m.colorNode, its roughness): weathering
+ * and waterline, then the rain — outdoors (by skyOpen) surfaces darker (the porous more) and glossier,
+ * flat paving holding puddles in its low spots that mirror the sky, rain rings on them while it rains.
+ */
+function weatherSurface(m, spec, roughU) {
+  const kind = spec.kind ?? 'smooth', roof = ROOFS.has(kind);
+  const weathered = !spec.clean && (WEATHERED.has(kind) || roof), lined = !spec.clean && WATERLINE.has(kind);
+  if (!m.colorNode || !(weathered || lined || WETTED.has(kind))) return;
+  const open = skyOpen();
+  let col = m.colorNode;
+  if (weathered) col = weather(col, roof, open);
+  else if (lined) col = waterline(col);
+  if (!WETTED.has(kind)) { m.colorNode = col; return; }
+  // the rain's reach: the faces turned to the sky fully, the walls half (driving rain and runs), the
+  // undersides not; nothing under a roof
+  const ny = normalLocal.y;
+  const facing = smoothstep(-0.2, 0.2, ny).mul(0.5).add(smoothstep(0.6, 0.9, ny).mul(0.5));
+  const wetK = ENV.wet.mul(smoothstep(0.3, 0.7, open)).mul(facing);
+  // the porous (lime plaster, brick, stone, earth) darken most; glazes, lacquer and metal hardly
+  const porous = kind === 'metal' ? 0.12 : (spec.roughness ?? 0.8) > 0.6 ? 0.36 : 0.2;
+  col = col.mul(float(1).sub(wetK.mul(porous)));
+  let rough = (m.roughnessNode ?? roughU);
+  rough = mix(rough, mix(float(0.38), float(0.14), smoothstep(0.6, 0.9, ny)), wetK.mul(0.85));
+  if (PUDDLES.has(kind)) {
+    // puddles: in the hollows of a low-frequency field over the flat, growing with the wetness
+    const P = positionLocal, flat = smoothstep(0.93, 0.99, ny).mul(smoothstep(0.4, 0.8, open));
+    const pn = when(ENV.wet.greaterThan(0.02), () => mx_fractal_noise_float(vec3(P.x.mul(0.28), 0.5, P.z.mul(0.28)), 2, 2.0, 0.5));
+    const puddle = smoothstep(0.2, 0.3, pn.negate().add(ENV.wet.mul(0.12))).mul(ENV.wet).mul(flat);
+    // rain rings on them while it rains, fading with distance (before they are finer than a pixel)
+    const dist = length(positionWorld.sub(cameraPosition));
+    const ring = whenV(ENV.rain.greaterThan(0.02).and(ENV.wet.greaterThan(0.02)), () => rainRings(P.x, P.z)).mul(puddle).mul(smoothstep(12, 3, dist)).mul(ENV.rain.mul(0.4).add(0.3));
+    col = mix(col, col.mul(0.42), puddle);
+    rough = mix(rough, float(0.03), puddle);
+    const flatN = normalView;
+    m.normalNode = normalize(mix(m.normalNode ?? flatN, bump(ring.x.mul(0.0008), 1), puddle));
+    // the sky mirrored in the puddle (the same sky as the water's), by Fresnel, the rings bending it
+    const v = normalize(positionWorld.sub(cameraPosition));
+    const N = normalize(normalWorld.add(vec3(ring.y, 0, ring.z).mul(0.0008)));
+    const fres = float(0.02).add(float(0.98).mul(pow(float(1).sub(max(dot(N, v.negate()), 0)), 5)));
+    const sky = waterSky(reflect(v, N)).mul(fres).mul(puddle).mul(0.8);
+    m.emissiveNode = m.emissiveNode ? m.emissiveNode.add(sky) : sky;
+  }
+  m.colorNode = col;
+  m.roughnessNode = rough;
+}
+
+/**
+ * Cloth hung in the wind (materials "<key>+wind"): each vertex leans downwind by the angle of the
+ * moment's gust about the cloth's attachment and flutters across, by how far below the attachment it
+ * hangs — the geometry's `hang` attribute, in metres (0 at the pole or bracket, so the attachment
+ * stays put; without the attribute nothing moves). The phase is a smooth field of the position, so
+ * that all the vertices of a piece move together and touching pieces stay touching. The shadow is
+ * cast from the resting cloth, as the plants' are (src/engine/flora/index.js): the cloth then stays
+ * among the static casters of the shadow cache, and its sway is a few centimetres.
+ */
+function clothSway(m) {
+  const hang = attribute('hang', 'float'), P = positionLocal, w = ENV.wind;
+  const speed = length(w), dir = vec3(w.x, 0, w.y).div(max(speed, 0.05));
+  const ph = mx_noise_float(vec3(P.x.mul(0.3), 0.5, P.z.mul(0.3))).mul(6.0);
+  const gust = sin(time.mul(0.41).add(ph)).mul(sin(time.mul(0.17).add(ph.mul(0.5)))).mul(0.5).add(0.5);
+  const k = clamp(speed.mul(0.4), 0.2, 1);
+  const lean = k.mul(gust.mul(0.75).add(0.25)).mul(0.16);
+  const flap = sin(time.mul(2.7).add(ph.mul(3.0)).sub(hang.mul(3.5))).mul(k).mul(gust.add(0.3)).mul(0.035);
+  const side = vec3(dir.z.negate(), 0, dir.x);
+  const a = lean.add(flap.mul(0.5));
+  m.positionNode = P.add(dir.mul(sin(a).mul(hang))).add(vec3(0, float(1).sub(cos(a)).mul(hang), 0)).add(side.mul(flap.mul(hang)));
 }
 
 function make(spec) {
@@ -176,11 +342,15 @@ function make(spec) {
         .mul(stain.mul(0.18).add(1))
         .mul(select(isTop, float(1), streak.mul(0.08).add(1)))
         .mul(grain.mul(0.05).add(fine.mul(0.03)).add(1));
-      col = mix(col, col.mul(0.5), joint.mul(spec.kind === 'mudbrick' ? 0.85 : 0.55));
-      m.colorNode = col;
-      m.roughnessNode = roughU.add(grain.mul(0.05)).add(joint.mul(0.08));
-      // chipped arrises: blocks slightly pillowed toward their edges
-      const pillow = smoothstep(0.0, 0.05, b.d).mul(0.0025);
+      // where feet pass, the tops of paving and steps are worn smooth: a little lighter (the dirt
+      // and the weathered skin rubbed off), glossier, the joints shallower; in patches and paths
+      // (the stain field, already computed); not the brick
+      const worn = spec.kind === 'mudbrick' ? float(0) : select(isTop, float(1), float(0)).mul(smoothstep(-0.15, 0.3, stain)).mul(smoothstep(0.7, 0.95, normalLocal.y));
+      col = mix(col, col.mul(0.5), joint.mul(spec.kind === 'mudbrick' ? 0.85 : 0.55).mul(float(1).sub(worn.mul(0.35))));
+      m.colorNode = col.mul(worn.mul(0.07).add(1));
+      m.roughnessNode = roughU.add(grain.mul(0.05)).add(joint.mul(0.08)).sub(worn.mul(0.2));
+      // chipped arrises: blocks slightly pillowed toward their edges (rounder where worn)
+      const pillow = smoothstep(0.0, worn.mul(0.04).add(0.05), b.d).mul(worn.mul(0.002).add(0.0025));
       const h = pillow.add(grain.mul(0.0006)).add(fine.mul(0.0003)).sub(joint.mul(0.004));
       m.normalNode = bump(h, 1);
       break;
@@ -663,21 +833,22 @@ function make(spec) {
       // baked volume says the sky is hidden over the water (a basin indoors, a pavilion over it).
       // The sun's glint comes from the light itself (a near-mirror's roughness). The material marks
       // its pixels for the reflection pass (userData.water) and takes no baked reflection of its own.
+      // In the rain (ENV.rain, where the sky is open over the water) rain rings all over it, and the
+      // ripples rougher: rainRings, two cells' hashes and a sine per layer, only while it rains.
       const t = time.mul(0.35);
-      const w = mx_noise_float(vec3(P.x.mul(0.7).add(t), P.z.mul(0.7), t.mul(0.6))).add(mx_noise_float(vec3(P.x.mul(2.3), P.z.mul(2.3).sub(t), t)).mul(0.4));
+      const open = skyOpen(), rainK = ENV.rain.mul(open);
+      const w = mx_noise_float(vec3(P.x.mul(0.7).add(t), P.z.mul(0.7), t.mul(0.6))).add(mx_noise_float(vec3(P.x.mul(2.3), P.z.mul(2.3).sub(t), t)).mul(rainK.mul(0.6).add(0.4)));
       m.roughness = 0.04;
+      m.roughnessNode = float(0.04).add(rainK.mul(0.08));
       m.metalness = 0.0;
       // (the ripples fade out with distance, before they are finer than a pixel and glitter)
-      const far = float(1).sub(smoothstep(12, 60, length(positionWorld.sub(cameraPosition))));
-      m.normalNode = bump(w.mul(0.02).mul(far), 1);
-      const v = normalize(positionWorld.sub(cameraPosition)), N = normalWorld;
+      const dist = length(positionWorld.sub(cameraPosition));
+      const far = float(1).sub(smoothstep(12, 60, dist));
+      const ring = whenV(ENV.rain.greaterThan(0.02), () => rainRings(P.x, P.z)).mul(smoothstep(16, 3, dist)).mul(rainK.mul(0.5).add(0.5)).mul(smoothstep(0.2, 0.5, open));
+      m.normalNode = bump(w.mul(float(0.02).add(rainK.mul(0.012))).mul(far).add(ring.x.mul(0.0012)), 1);
+      const v = normalize(positionWorld.sub(cameraPosition)), N = normalize(normalWorld.add(vec3(ring.y, 0, ring.z).mul(0.0012)));
       const r = reflect(v, N);
       const fres = float(0.02).add(float(0.98).mul(pow(float(1).sub(max(dot(N, v.negate()), 0)), 5)));
-      let open = float(1);
-      if (GI) {
-        const up = GI.irradianceNode(vec3(0, 1, 0)), sky = GI.skyE;
-        open = clamp(dot(up, vec3(0.2126, 0.7152, 0.0722)).div(max(dot(sky, vec3(0.2126, 0.7152, 0.0722)).mul(GI.uIntensity), 1e-4)), 0, 1);
-      }
       m.colorNode = baseNode.mul(float(1).sub(fres));
       m.userData.water = true;
       // at night the moon's broken path across the water, toward the eye (its own glints, wider
@@ -871,7 +1042,7 @@ function make(spec) {
       m.normalNode = bump(f.mul(0.0005), 1);
     }
   }
-  if (!spec.clean && m.colorNode && (WEATHERED.has(spec.kind ?? 'smooth') || ROOFS.has(spec.kind))) m.colorNode = weather(m.colorNode, ROOFS.has(spec.kind));
+  weatherSurface(m, spec, roughU);
   if (spec.kind === 'lattice') paperLight(m, spec, baseNode);
   return m;
 }

@@ -22,6 +22,9 @@ export const ENV = {
   wet: uniform(0),                              // 0 dry … 1 soaked
   damp: uniform(0.4),                           // how damp the place's climate is (moss, rain streaks): 0 desert … 1 Atlantic
   rain: uniform(0),
+  // the level of the settlement's still water (canals, ponds) in its own coordinates, for the
+  // waterline stain on the walls and revetments that stand in it (materials.js); far below when none
+  waterLine: uniform(-1e4),
   snow: uniform(0),                             // snow falling 0…1 (src/planet/setpieces.js)
   dust: uniform(0),                             // dust blowing 0…1
   snowCover: uniform(0),                        // fresh snow lying on the ground and roofs 0…1
