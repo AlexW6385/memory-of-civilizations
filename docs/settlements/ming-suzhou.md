@@ -161,7 +161,7 @@ Code: `src/engine/smoke.js` (generic: soft sprites moved on the GPU, one draw ca
 - **Mist.** A faint low mist over the canals at dawn (about 04:30-07:00), banks 6-8 m wide drifting slowly [inferred: a canal town in a humid climate at early morning].
 - **Budget.** One draw call for all, drawn within 300 m, no per-frame allocation (about 2,800 sprites of four vertices); thin plumes of small sprites, the near ones faded out.
 
-## 13. The sounds of the water, the streets and the temple (L3)
+## 14. The sounds of the water, the streets and the temple (L3)
 
 Code: `src/engine/soundscape.js` (the schedule and the sources; `LIFE` in Suzhou's profile), `src/engine/audio.js` (the synthesis). All synthesized with the Web Audio API; no audio files. The engine has no listener position, so nothing is placed in 3D: what is near water is read from the engine's `water` level (the canals and the pond alike), a passing boat or watchman is given a pan that drifts across the stereo field and a distance by a lowpass.
 
@@ -171,6 +171,14 @@ Code: `src/engine/soundscape.js` (the schedule and the sources; `LIFE` in Suzhou
 - **The temple.** The Bao'en Temple's bell and drum, *chen zhong mu gu* (morning bell, evening drum): in the morning the bell and then the drum, in the evening the drum and then the bell, then the service with the wooden fish (*muyu*) beating the time of a low chant of a chorus of voices ("na-mo-e-mi-tuo-fo" vowels). The bell is struck 108 times at dawn and dusk, in three runs of 18 (fast, slow, between) twice over [stated: https://www.sohu.com/a/213979662_671412; https://en.wikipedia.org/wiki/Bell_tower_(Chinese_Buddhism)]; the Chan rule had the big bell at the fifth watch wake the monks [stated: https://emptysqua.re/blog/zen-monastery-timekeeping/]. Ours is shortened to 6 + 6 + 6 strokes (a day passes in thirty minutes) at 4:36 and 18:30; the order bell/drum and the chant are [inferred from the saying and Pure Land practice in Jiangnan]. Hanshan's bell at midnight, far off across the water, stays (§9; Zhang Ji's poem [stated]). Heard everywhere in the town: the engine cannot place the chant at the temple hall (see below).
 - **Rain.** The small grey tiles (`xiaoqing`, a lighter tick than a heavy fired tile, a quarter of the drops with a hollow tock from the air under the roof) [inferred]; rain pocking the canal (a loop of tiny rising chirps, only near water); drips from the eaves (random plinks, more of them the harder the rain).
 - **Left for a listener position.** If the engine gave the audio a listener (`place({ at: {x, z}, yaw })` from `main.js`), the oar and the boatman could be heard from the canal's actual nearest reach (`canalDistance` and `CANALS` of `layout.js`), the watchman from the streets, and the chant and the bell from the temple court (`TEMPLE_COURT`, x -76...-4, z -159.5...-111.8) in place of the town-wide mix; the wooden fish near the hall would then sound only in the court.
+
+## 15. Seasons in the plants (L3)
+
+Phenology per species in `src/engine/flora/phenology.js` (day of year; the foliage material colours the cards and thins their cover by day, a per-plant random staggers the timing; evergreens: camphor, pines, bamboo, tea, fig are unchanged). Force a day with `?day=N` (1-365) or `?season=winter|spring|summer|autumn` (months 1, 4, 7, 10).
+- Plum (the `apple` stand-in) and peach/cherry: blossom [stated, general Jiangnan calendar: plum mid-Feb to mid-Mar, peach and cherry March-April] before the leaves, pink-white petals in place of leaves from about 5 Feb, falling by mid-April [inferred from the calendar].
+- Willow: leafs out early March in a fresh yellow-green, deep green by summer, yellows in December, hanging golden bare threads in winter [stated: Salix babylonica leafs early and drops late]. Catkins (liuxu): a drifting white-floss cloud from about 10 April to 25 May, peak third week of April (`src/engine/catkins.js`) [stated: willow and poplar seed floss, April-May].
+- Maple: green in summer, scarlet and orange from late October, full red in November, bare in winter [stated: Jiangnan maples colour in Nov]. Mulberry, elm, poplar: yellow in November, bare in winter.
+Sources: general Jiangnan phenology (plum Feb-Mar, peach Mar-Apr, willow floss Apr-May, maple red Nov); dates are approximations to be checked against a phenology table, not measured values.
 
 ## Sources
 
@@ -198,12 +206,3 @@ Code: `src/engine/soundscape.js` (the schedule and the sources; `LIFE` in Suzhou
 - [The Paving Patterns of Liu Fang Yuan — The Huntington (ArcGIS StoryMaps)](https://storymaps.arcgis.com/stories/af8ad1932e964a37ac0b8fb5053ebf70)
 - [The Lion Grove Garden — Terebess (quoting *Classical Chinese Gardens*, *Sights and Scenes of Suzhou*)](https://terebess.hu/kert/magankert/garden2.html)
 - [Temple Tales: The Main Courtyard (censers in a Chinese Buddhist temple court)](https://templetales.thetempleguy.org/2019/11/the-main-courtyard.html)
-
-
-## Seasons in the plants
-
-Phenology per species in `src/engine/flora/phenology.js` (day of year; the foliage material colours the cards and thins their cover by day, a per-plant random staggers the timing; evergreens: camphor, pines, bamboo, tea, fig are unchanged). Force a day with `?day=N` (1-365) or `?season=winter|spring|summer|autumn` (months 1, 4, 7, 10).
-- Plum (the `apple` stand-in) and peach/cherry: blossom [stated, general Jiangnan calendar: plum mid-Feb to mid-Mar, peach and cherry March-April] before the leaves, pink-white petals in place of leaves from about 5 Feb, falling by mid-April [inferred from the calendar].
-- Willow: leafs out early March in a fresh yellow-green, deep green by summer, yellows in December, hanging golden bare threads in winter [stated: Salix babylonica leafs early and drops late]. Catkins (liuxu): a drifting white-floss cloud from about 10 April to 25 May, peak third week of April (`src/engine/catkins.js`) [stated: willow and poplar seed floss, April-May].
-- Maple: green in summer, scarlet and orange from late October, full red in November, bare in winter [stated: Jiangnan maples colour in Nov]. Mulberry, elm, poplar: yellow in November, bare in winter.
-Sources: general Jiangnan phenology (plum Feb-Mar, peach Mar-Apr, willow floss Apr-May, maple red Nov); dates are approximations to be checked against a phenology table, not measured values.
