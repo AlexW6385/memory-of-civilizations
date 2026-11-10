@@ -104,13 +104,21 @@ export class CachedCSM extends CSMShadowNode {
     this.signature(frame.scene ?? parent);
     _dir.subVectors(light.target.position, light.position).normalize();
     // the view's orientation as last fitted, at the view's present place
+    // (each cascade holds its own orientation, refitted from 0.4 × TURN on; the far cascades take
+    // turns, one refit a frame, before the limit of TURN / 2: refitted together, the three were
+    // drawn again in the same few frames, ~700 shadow draws, a 40 ms frame every 12° of turning)
     camera.matrixWorld.decompose(_p, _q, _s);
-    if (!this.heldQ || this.heldQ.angleTo(_q) > TURN / 2) (this.heldQ ||= new THREE.Quaternion()).copy(_q);
-    _held.compose(_p, this.heldQ, _s);
+    let farRefit = false;
     for (let i = 0; i < this.frustums.length; i++) {
       const L = this.lights[i], shadow = L.shadow, sc = shadow.camera, node = this._shadowNodes[i], C = node?._cascade;
       shadow.autoUpdate = false;
       if (!C) continue;
+      const turned = C.q ? C.q.angleTo(_q) : Infinity;
+      if (turned > TURN / 2 || (turned > TURN * 0.4 && (i === 0 || (!farRefit && due(i))))) {
+        (C.q ||= new THREE.Quaternion()).copy(_q);
+        if (i > 0) farRefit = true;
+      }
+      _held.compose(_p, C.q, _s);
       const width = sc.right - sc.left, texel = width / shadow.mapSize.width, step = width / SNAP;
       // the sun's direction held until it has turned by the angle that moves a tall caster's
       // shadow by half a texel here
