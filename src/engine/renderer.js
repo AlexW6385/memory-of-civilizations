@@ -200,7 +200,9 @@ export class Renderer {
       this.onSsrResize();
       color = waterComposite(color, refl, normalTex, depthTex, camera, texel);
     }
-    if (Q.ao) {
+    // A/B switches for measuring a pass's cost (never in the UI): ?aopass=0, ?bloom=0, ?aa=0
+    const ab = new URLSearchParams(location.search), off = (k) => ab.get(k) === '0';
+    if (Q.ao && !off('aopass')) {
       // with a reversed buffer the pass works unchanged: it rebuilds view positions through the
       // camera's own (reversed) projection, and the sky, at depth 0, lies on the far plane
       const normalTex = scenePass.getTextureNode('normal');
@@ -228,8 +230,8 @@ export class Renderer {
     // the sun's disc is thousands of times brighter than the sky: clamp it before the bloom, or its
     // glow floods half the picture when one looks toward a low sun
     const glowSrc = vec4(min(color.rgb, vec3(2.5)), 1);
-    let out = renderOutput(color.add(bloom(glowSrc, 0.07, 0.3, 1.4)));
-    if (Q.aa) out = smaa(out);
+    let out = renderOutput(off('bloom') ? color : color.add(bloom(glowSrc, 0.07, 0.3, 1.4)));
+    if (Q.aa && !off('aa')) out = smaa(out);
     this.pipeline.outputColorTransform = false;
     this.pipeline.outputNode = out;
     this.pipeline.needsUpdate = true;
