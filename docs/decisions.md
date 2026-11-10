@@ -101,3 +101,4 @@ The record of decisions behind `DESIGN.md` (its §11 points here). **Agents do n
 - 2026-11-10 No DynamicDrawUsage on instance and index buffers: three.js uploads a dynamic buffer at every draw (each pass), 123 uploads and 6.5 ms a frame in Suzhou; static buffers with needsUpdate upload once, when changed.
 - 2026-11-10 Build workers beat every 2 s and are restarted after 40 s of silence, and started afresh when idle every four settlements: a worker kept all it loaded and was let go of by the browser mid-build (New York, Jerusalem), silent for minutes.
 - 2026-11-10 Weathering noise from the baked 3D field (one lookup each), puddle reflection and normals only while wet: the dry walls and paving paid ~10 ms of GPU a frame in Suzhou.
+- 2026-11-10 Build ahead on opening a settlement's card, and the next one 10 s (not 30 s) after arriving: travels to a prepared settlement take a few seconds; the first look round is slightly busier.

@@ -40,7 +40,7 @@ export const LOAD = 350, UNLOAD = 800;
 /** At most this many settlements are built at once (the nearest); from the air the reach grows, the count does not. */
 export const MAX_BUILT = 4;
 /** How long after arriving the next settlement starts being built ahead (ms). */
-const PRELOAD_AFTER = 30000;
+const PRELOAD_AFTER = 10000;
 
 /** Beyond the horizon by this much (m: the tallest buildings' own horizon), a built settlement is not drawn. */
 const BEYOND = 1200;
@@ -553,7 +553,7 @@ export class World {
    * to make or compile. At most one besides the current one: a stale one is let go (and its plants).
    * A jump there before this is done still works: the arrival takes over what is made and waits for the rest.
    */
-  async preload(S) {
+  async preload(S, { now = false } = {}) {
     const site = S ? this.settlements.find((s) => s.S === S) : null;
     const old = this.kept;
     if (old && old !== site && old !== this.anchor?.site) old.unload();
@@ -565,10 +565,11 @@ export class World {
     try {
       // (only once the settlement one is in and its neighbours are built and merged: a settlement
       // built ahead took the build workers from the one being visited, which then came in slowly)
-      // and not in the first half minute there (its building, merging and compiling on this thread
+      // and not in the first ten seconds there (its building, merging and compiling on this thread
       // made the first look round after arriving heavy: about 100 frames over 50 ms in 12 s)
-      await new Promise((r) => setTimeout(r, PRELOAD_AFTER));
-      for (let k = 0; k < 600 && still() && this.settlements.some((s) => s !== site && (s.state === 'loading' || s.mergingNow)); k++) await new Promise((r) => setTimeout(r, 500));
+      // (a settlement whose card is open on the map is built at once: the map is up, nothing to spare)
+      if (!now) await new Promise((r) => setTimeout(r, PRELOAD_AFTER));
+      for (let k = 0; k < 600 && !now && still() && this.settlements.some((s) => s !== site && (s.state === 'loading' || s.mergingNow)); k++) await new Promise((r) => setTimeout(r, 500));
       await idle();
       if (!still()) return;
       await this.plansOf(site);

@@ -308,6 +308,8 @@ export class GlobeView {
     this.sel = m.S;
     this.repaintMarks();
     this.card.show(m.S, this.marks.find((q) => q.S === m.S));
+    // built while its card is read: a Go after a few seconds finds much of it made (world.js preload)
+    this.world.preload?.(m.S, { now: true });
   }
 
   click(e) {

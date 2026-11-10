@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.46 — Building ahead sooner (2026-11-10)
+
+A settlement starts building as soon as its card is opened on the map, and the next one is built ahead 10 s after arriving instead of 30 s.
+
 ## v10.47 — Size classes (2026-11-10)
 
 DESIGN.md now sorts every settlement into four size classes (large, medium, small, point) with a density mark. These set the radius each one is brought to when it is next rebuilt. Nothing on the planet moves yet.
