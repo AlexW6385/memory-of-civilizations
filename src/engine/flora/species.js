@@ -344,6 +344,11 @@ export const SPECIES = {
   wheat: { make: (s, l) => tuft(s, l, { h: 0.95, w: 0.6, cards: 3 }), foliage: 'grass_dry', scale: [0.85, 1.15], shadow: false, lod: [40, 80] },
   rice: { make: (s, l) => tuft(s, l, { h: 0.7, w: 0.45, cards: 3 }), foliage: 'grass', scale: [0.85, 1.15], shadow: false, lod: [40, 80] },
   maize: { make: (s, l) => tuft(s, l, { h: 2.1, w: 0.8, cards: 4 }), foliage: 'reed', scale: [0.85, 1.15], shadow: false, lod: [55, 110] },
+  camphor: { make: (s, l) => tree({ height: 16, trunk: { r: 0.5, lean: 0.04, fork: 0.3, limbs: 7, gnarl: 0.4 }, crown: { shape: 'round', w: 9, h: 6.5, y: 0.62, clumps: 15, cards: 52, card: 1.9, up: 0.2 } }, s, l), foliage: 'broad_dark', bark: 'bark_grey', scale: [0.75, 1.2], shadow: true, lod: [190, 1700] },
+  chinese_fir: { make: (s, l) => tree({ height: 22, trunk: { r: 0.3, lean: 0.01, fork: 0.15, limbs: 0 }, crown: { shape: 'spindle', w: 3.8, h: 15, y: 0.55, clumps: 18, cards: 36, card: 1.5, up: -0.1, clumpR: 1.7 } }, s, l), foliage: 'sugi', bark: 'bark_redpine', scale: [0.75, 1.15], shadow: true, lod: [200, 1800] },
+  masson_pine: { make: (s, l) => tree({ height: 15, trunk: { r: 0.26, lean: 0.14, fork: 0.6, limbs: 6, gnarl: 0.3 }, crown: { shape: 'clumps', w: 5, h: 3.2, y: 0.8, clumps: 10, cards: 34, card: 1.5, up: 0.5 } }, s, l), foliage: 'needles', bark: 'bark_redpine', scale: [0.75, 1.2], shadow: true, lod: [180, 1600] },
+  mulberry: { make: (s, l) => tree({ height: 5.5, trunk: { r: 0.18, lean: 0.1, fork: 0.22, limbs: 6, gnarl: 0.5 }, crown: { shape: 'round', w: 4.2, h: 2.8, y: 0.58, clumps: 10, cards: 36, card: 1.3, up: 0.2 } }, s, l), foliage: 'broad', bark: 'bark_grey', scale: [0.8, 1.2], shadow: true, lod: [130, 1000] },
+  tea: { make: (s, l) => tree({ height: 1.1, trunk: { r: 0.03, lean: 0.1, fork: 0.1, limbs: 3, gnarl: 0.2 }, crown: { shape: 'round', w: 1.2, h: 0.7, y: 0.5, clumps: 5, cards: 20, card: 0.7, up: 0.3 } }, s, l), foliage: 'broad_dark', bark: 'bark_dark', scale: [0.7, 1.3], shadow: false, lod: [60, 300] },
   boulder: { make: boulder, bark: 'rock_boulder', scale: [0.4, 2.4], shadow: true, lod: [160, 1000] },
 };
 
