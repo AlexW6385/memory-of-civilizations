@@ -198,6 +198,12 @@ async function main() {
     report?.('plants', 1); mark('plants');
   };
   const boot = (stage, f, detail) => progress.set(stage, f, detail);
+  // a settlement built before its arrival view is set (goTo, goNear): its progress shown from the
+  // start of the build, not only once arrive() is reached
+  const loadSite = async (site, report) => {
+    const poll = report ? setInterval(() => report('build', site.fraction, `${Math.min(site.done | 0, site.expected | 0)}/${site.expected | 0}`), 150) : null;
+    try { await site.load(); } finally { clearInterval(poll); }
+  };
   // a free place to stand near (x, z), once everything there is built: on the ground or a floor,
   // not in water, with nothing built over the head and no wall in the body — so that one never
   // arrives inside a building, under a roof or below the ground
@@ -224,7 +230,7 @@ async function main() {
     const [x, y, z, yaw] = world.entrance(rec.plan);
     controls.feet = { x, y, z }; controls.yaw = yaw; controls.pitch = 0.04;
     world.tilt.identity();
-    await site.load();
+    await loadSite(site, report);
     controls.setPose(x, y, z, yaw, 0.04);
     world.place(R.camera);
     await arrive(report);
@@ -259,7 +265,7 @@ async function main() {
     inFrame();
     const [lx, lz] = site.S.local.center;
     controls.setPose(lx, 1e4, lz, 0, 0);
-    await site.load();
+    await loadSite(site, report);
     inFrame();
     // the settlement's chosen arrival (src/planet/arrivals.js): exactly there, facing its view
     const A = ARRIVALS[site.id];

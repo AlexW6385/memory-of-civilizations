@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.45 — Quicker travels (2026-11-10)
+
+A travel waits only for the first mesh of each kind of shader (as before v10.22); the other instanced meshes' own builds are done afterwards in idle moments, so a settlement no longer takes 15–30 s to open. The travel notice counts the building from its start rather than appearing only at the end.
+
 ## v10.44 — Cinema quality (2026-11-10)
 
 For recording films: `?quality=cinema` (with `?capture`) renders at twice the page's size, with 4096² shadows in four cascades reaching 480 m, full-resolution occlusion, water reflections and air, eight lamps, and plants seen 1.6 times farther. Only when asked for in the address; never chosen or remembered on its own.

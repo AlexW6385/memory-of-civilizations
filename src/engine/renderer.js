@@ -276,7 +276,7 @@ export class Renderer {
   precompile(roots, opts = {}) {
     const r = this.renderer, sp = this.scenePass, ctx = sp?._contextNodeCache?.context;
     if (!r || !sp?.renderTarget || !ctx) return Promise.resolve();      // before the first frame
-    const seen = this._compiled ??= new Set(), reps = [];
+    const seen = this._compiled ??= new Set(), kinds = this._kinds ??= new Set(), reps = [], later = [];
     for (const root of Array.isArray(roots) ? roots : [roots]) root.traverse((o) => {
       if (!o.isMesh || !o.material || !o.geometry) return;
       const g = o.geometry;
@@ -285,12 +285,16 @@ export class Renderer {
       // thread: one per material left the others to be built in the frame that first drew them,
       // e.g. 24 cells of merged roof tiles in one frame, a quarter of a second; the shader code and
       // the pipeline are shared, so the GPU's part is done once)
-      const key = o.isInstancedMesh ? `i:${o.uuid}|${o.material.uuid}|${o.receiveShadow ? 1 : 0}`
-        : `${o.material.uuid}|0${g.index ? 1 : 0}${o.receiveShadow ? 1 : 0}|${Object.keys(g.attributes).sort().join()}`;
+      const kind = `${o.material.uuid}|${o.isInstancedMesh ? 1 : 0}${o.instanceColor ? 1 : 0}${g.index ? 1 : 0}${o.receiveShadow ? 1 : 0}|${Object.keys(g.attributes).sort().join()}`;
+      const key = o.isInstancedMesh ? `i:${o.uuid}|${o.material.uuid}|${o.receiveShadow ? 1 : 0}` : kind;
       if (seen.has(key)) return;
-      seen.add(key); reps.push(o);
+      seen.add(key);
+      // the first mesh of each kind (its shader and pipeline) is awaited; the other instanced
+      // meshes' own builds are done afterwards in idle moments (`later`). Awaiting all of them made
+      // every travel wait on ~800 builds one after another, latency-bound at ~50 a second (~16 s)
+      if (!kinds.has(kind)) { kinds.add(kind); reps.push(o); } else later.push(o);
     });
-    if (!reps.length) return Promise.resolve();
+    if (!reps.length && !later.length) return Promise.resolve();
     // set up as the scene pass does. three's compileAsync gathers what to compile synchronously,
     // but builds each object's shader only in turn, awaiting between them: the second object on
     // was set up without the scene pass's outputs (its pipeline failed: "color target has no
@@ -325,8 +329,25 @@ export class Renderer {
     // after another they came in at about 16 a second, and a settlement's thousand meshes were still
     // being compiled minutes after arriving, the ones not yet done built in the frame that met them;
     // a few chains side by side, each call's setting-up still synchronous and alone)
-    const bg = opts.background || (() => false);
     const idle = () => new Promise((res) => (globalThis.requestIdleCallback ? requestIdleCallback((d) => res(d), { timeout: 2000 }) : setTimeout(res, 50)));
+    // the deferred builds: one queue for the page, one object in each idle moment, skipping what has
+    // left the scene meanwhile (unloaded, or merged away); a frame that meets one first builds it
+    this._one = one;                            // (the latest setting-up: the scene pass may have been made again)
+    if (later.length) {
+      (this._later ??= []).push(...later);
+      this._laterRun ??= (async () => {
+        const inScene = (o) => { while (o.parent) o = o.parent; return o === this.scene; };
+        for (let o; (o = this._later.shift());) {
+          const d = await idle();
+          if (d && !d.didTimeout && d.timeRemaining() < 8) { this._later.unshift(o); continue; }
+          if (!inScene(o)) continue;
+          try { await this._one(o); } catch (e) { /* built in the frame instead */ }
+        }
+        this._laterRun = null;
+      })();
+    }
+    if (!reps.length) return Promise.resolve();
+    const bg = opts.background || (() => false);
     const quiet = async () => { while (bg()) { const d = await idle(); if (!d || d.didTimeout || d.timeRemaining() > 8) return; } };
     const CHAINS = bg() ? 1 : 3, chains = [];
     for (let c = 0; c < CHAINS; c++) chains.push(reps.filter((_, i) => i % CHAINS === c).reduce((p, o) => p.then(quiet).then(() => one(o)), Promise.resolve()));
