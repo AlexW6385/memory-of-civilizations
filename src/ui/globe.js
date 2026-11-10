@@ -10,6 +10,7 @@ import { PLACED } from '../planet/layout.js';
 import { take } from './order.js';
 import { SettlementCard } from './card.js';
 import { unit, latLon, eastNorth, dot, norm, cross } from '../planet/geo.js';
+import { GlobeGL } from './globe-gl.js';
 
 const sm = (e0, e1, x) => { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); };
 
@@ -50,7 +51,18 @@ export class GlobeView {
     this.center = [0, 1, 0];
     this.up = [0, 0, -1];
     this.zoom = 1;
+    this.zoomTo = 1;                   // the wheel's aim: the zoom eases toward it
+    this.spin = null;                  // the turn still going after a drag let go: [ax, ay] per ms
     this.you = null;
+    // the globe drawn on the GPU under the marks' canvas (globe-gl.js); the old drawing until its
+    // texture is baked, or where WebGL2 is not to be had
+    try {
+      const gc = document.createElement('canvas');
+      gc.className = 'map-globe';
+      gc.style.cssText = 'grid-column:1;grid-row:2;width:100%;height:100%;min-height:0;border-radius:10px;background:#1e1a15;pointer-events:none';
+      this.canvas.before(gc);
+      this.gl = new GlobeGL(gc, landColour);
+    } catch (e) { this.gl = null; }
     this.sel = null;
     this.card = new SettlementCard(this.canvas.parentElement, this.canvas, (S) => this.go(S), () => { this.sel = null; if (this.canvas.offsetParent) this.repaintMarks(); });
     this.bind();
@@ -83,7 +95,9 @@ export class GlobeView {
     this.center = u.slice();
     const [, n] = eastNorth(u);
     this.up = n;
-    this.zoom = 2.2;
+    this.zoom = this.zoomTo = 2.2;
+    this.spin = null;
+    if (this.gl && !this.gl.ready) this.gl.bake().then(() => { this.canvas.style.background = 'transparent'; this.request(); });
     requestAnimationFrame(() => this.draw());
     // the night moves on while the map is open
     clearInterval(this._tick);
@@ -113,11 +127,54 @@ export class GlobeView {
     return [W / 2 + dot(v, r) * rad, H / 2 - dot(v, u) * rad];
   }
 
+  /** Ask for a frame: one drawing per display frame however many moves come in. */
+  request() {
+    if (this._raf) return;
+    this._raf = requestAnimationFrame((now) => { this._raf = 0; this.frame(now); });
+  }
+
+  /** A display frame: the turn after a drag and the zoom's easing advanced, then the picture drawn. */
+  frame(now) {
+    const dt = Math.min(50, now - (this._last ?? now)); this._last = now;
+    let more = false;
+    if (this.spin) {
+      const [ax, ay] = this.spin;
+      this.turn(ax * dt, ay * dt);
+      const k = Math.exp(-dt / 260);             // the turn dies away in about half a second
+      this.spin = [ax * k, ay * k];
+      if (Math.hypot(ax, ay) * 1000 < 0.002) this.spin = null; else more = true;
+    }
+    if (Math.abs(this.zoomTo - this.zoom) > 1e-4) {
+      this.zoom += (this.zoomTo - this.zoom) * (1 - Math.exp(-dt / 70));
+      if (Math.abs(this.zoomTo - this.zoom) < 1e-4) this.zoom = this.zoomTo; else more = true;
+    }
+    this.draw(more || this._dragging);
+    if (more) this.request(); else this._last = undefined;
+  }
+
+  /** Turn the globe by (ax, ay) radii of screen (right, up). */
+  turn(ax, ay) {
+    const { c, r, u } = this.basis();
+    this.center = norm([c[0] + r[0] * ax + u[0] * ay, c[1] + r[1] * ax + u[1] * ay, c[2] + r[2] * ax + u[2] * ay]);
+    // keep north up where possible
+    const [, n] = eastNorth(this.center);
+    this.up = n;
+  }
+
   draw(coarse = false) {
     const cv = this.canvas, dpr = devicePixelRatio || 1;
     const W = Math.round(cv.clientWidth * dpr), H = Math.round(cv.clientHeight * dpr);
     if (!W || !H) return;
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    if (this.gl?.ready) {
+      this.gl.draw(W, H, Math.min(W, H) * 0.46 * this.zoom, this.basis(), this.sun?.());
+      const g = cv.getContext('2d');
+      g.clearRect(0, 0, W, H);
+      this.drawFaint(g);
+      this.paintMarks();
+      this.card.place(this.marks.find((m) => m.S === this.sel));
+      return;
+    }
     const res = coarse ? 160 : 360, sx = Math.ceil(W / (Math.min(W, H) / res)), sy = Math.ceil(H / (Math.min(W, H) / res));
     this.off.width = sx; this.off.height = sy;
     const og = this.off.getContext('2d'), img = og.createImageData(sx, sy), sun = this.sun?.();
@@ -202,6 +259,7 @@ export class GlobeView {
 
   /** Repaint only the marks (the hover), over the map picture already made. */
   repaintMarks() {
+    if (this.gl?.ready) { this.request(); return; }
     const cv = this.canvas, g = cv.getContext('2d');
     g.clearRect(0, 0, cv.width, cv.height);
     g.drawImage(this.off, 0, 0, cv.width, cv.height);
@@ -216,7 +274,8 @@ export class GlobeView {
     cv.addEventListener('pointerdown', (e) => {
       cv.setPointerCapture(e.pointerId);
       pinch.set(e.pointerId, [e.clientX, e.clientY]);
-      drag = { x: e.clientX, y: e.clientY }; moved = 0;
+      drag = { x: e.clientX, y: e.clientY, t: performance.now(), v: [0, 0] }; moved = 0;
+      this.spin = null; this._dragging = true;
     });
     cv.addEventListener('pointermove', (e) => {
       if (!pinch.has(e.pointerId)) {
@@ -232,27 +291,29 @@ export class GlobeView {
         pinch.set(e.pointerId, [e.clientX, e.clientY]);
         const [c2, d2] = [...pinch.values()], d1 = Math.hypot(c2[0] - d2[0], c2[1] - d2[1]);
         this.zoom = Math.max(0.9, Math.min(14, this.zoom * d1 / Math.max(1, d0)));
-        moved += 10; this.draw(true); return;
+        moved += 10; this.zoomTo = this.zoom; this.gl?.ready ? this.request() : this.draw(true); return;
       }
       pinch.set(e.pointerId, [e.clientX, e.clientY]);
       if (!drag) return;
-      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-      drag = { x: e.clientX, y: e.clientY };
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y, now = performance.now();
       moved += Math.abs(dx) + Math.abs(dy);
       // turn the globe under the pointer
       const rad = Math.min(cv.clientWidth, cv.clientHeight) * 0.46 * this.zoom;
-      const { c, r, u } = this.basis(), ax = -dx / rad, ay = dy / rad;
-      this.center = norm([c[0] + r[0] * ax + u[0] * ay, c[1] + r[1] * ax + u[1] * ay, c[2] + r[2] * ax + u[2] * ay]);
-      // keep north up where possible
-      const [, n] = eastNorth(this.center);
-      this.up = n;
-      this.draw(true);
+      const ax = -dx / rad, ay = dy / rad, dt = Math.max(1, now - drag.t);
+      this.turn(ax, ay);
+      // the speed of the last moves, for the turn to carry on when let go
+      const k = Math.min(1, dt / 50);
+      drag = { x: e.clientX, y: e.clientY, t: now, v: [drag.v[0] * (1 - k) + (ax / dt) * k, drag.v[1] * (1 - k) + (ay / dt) * k] };
+      this.gl?.ready ? this.request() : this.draw(true);
     });
     const end = (e) => {
       pinch.delete(e.pointerId);
+      this._dragging = false;
       if (!drag) return;
-      drag = null;
-      if (moved < 6) this.click(e);
+      const d = drag; drag = null;
+      if (moved < 6) { this.click(e); return; }
+      // let go while moving: the globe turns on and slows (not after a pause before letting go)
+      if (this.gl?.ready && performance.now() - d.t < 80 && Math.hypot(...d.v) > 2e-5) { this.spin = d.v; this.request(); }
       else this.draw();
     };
     cv.addEventListener('pointerleave', () => { if (this.hover) { this.hover = null; this.repaintMarks(); } });
@@ -260,7 +321,9 @@ export class GlobeView {
     cv.addEventListener('pointercancel', (e) => { pinch.delete(e.pointerId); drag = null; this.draw(); });
     cv.addEventListener('wheel', (e) => {
       e.preventDefault();
-      this.zoom = Math.max(0.9, Math.min(14, this.zoom * Math.exp(-e.deltaY * 0.0015)));
+      this.zoomTo = Math.max(0.9, Math.min(14, this.zoomTo * Math.exp(-e.deltaY * 0.0015)));
+      if (this.gl?.ready) { this.request(); return; }
+      this.zoom = this.zoomTo;
       this.draw(true);
       clearTimeout(this._wt); this._wt = setTimeout(() => this.draw(), 160);
     }, { passive: false });

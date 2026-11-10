@@ -655,6 +655,9 @@ async function main() {
     // held still for a second: the scene only sways, flickers and drifts, so it is drawn at
     // ~24 fps instead of 60, leaving the machine (and the rest of the picture) its breath
     if (!CAPTURE && !perf.panel && !perf.record && !measuring && !(controls.free && !tour.moving) && now - (R.movedAt ?? -1e9) > 1000 && now - last < 1000 / 24 - 2) return;
+    // with the large map open the scene behind it is only a backdrop: ~10 fps, leaving the machine to
+    // the globe being turned
+    if (!CAPTURE && !measuring && !mapPanel.hidden && now - last < 1000 / 10 - 2) return;
     // ?capture: every frame advances the world by exactly 1/30 s whatever the real time, and a recorder
     // (window.__onFrame) takes each drawn frame - for making smooth films of a slow machine's picture
     const dt = CAPTURE ? 1 / 30 : (now - last) / 1000;

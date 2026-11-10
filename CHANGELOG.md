@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.47 — A smooth globe (2026-11-10)
+
+The large map's globe is drawn on the GPU from a land texture baked once, every display frame at full sharpness; a drag let go keeps the globe turning a moment, the wheel zooms smoothly, and the scene behind the map is drawn at 10 fps.
+
 ## v10.45 — The map is the globe alone (2026-11-10)
 
 The list of settlements beside the map is gone: the map is the globe with its cities marked; click one for its card, then Go to travel there.
