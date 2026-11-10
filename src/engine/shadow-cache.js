@@ -26,6 +26,16 @@ import { HITCH } from './hitch.js';
 
 /** The cascade's centre is snapped to its width over SNAP (and the box widened by one step). */
 const SNAP = 16;
+/**
+ * The view's turn (rad) before the cascades follow it: each cascade is fitted to the view as it was
+ * when last fitted, and kept while the view turns less than half of TURN from it (the boxes widened
+ * so that the slice still lies inside). Turning on the spot drew every cascade again every frame —
+ * about 400 shadow draws a frame at Suzhou, measured on the M2 — now once every TURN/2 of turning.
+ * Quality: the cascades' texels about a fifth larger (decision 2026-11-09).
+ */
+const TURN = 0.42;
+const WIDEN = 1 + Math.sin(TURN / 2);
+const _held = new THREE.Matrix4(), _q = new THREE.Quaternion(), _p = new THREE.Vector3(), _s = new THREE.Vector3();
 /** The height (m) of the tallest casters whose shadow may shift by half a texel before a redraw. */
 const TALL = 40;
 
@@ -74,7 +84,7 @@ export class CachedCSM extends CSMShadowNode {
     super._updateShadowBounds();
     if (!this.cache) return;
     for (const L of this.lights) {
-      const c = L.shadow.camera, w = (c.right - c.left) * SNAP / (SNAP - 1);
+      const c = L.shadow.camera, w = (c.right - c.left) * SNAP / (SNAP - 1) * WIDEN;
       c.left = -w / 2; c.right = w / 2; c.top = w / 2; c.bottom = -w / 2;
       c.updateProjectionMatrix();
     }
@@ -93,6 +103,10 @@ export class CachedCSM extends CSMShadowNode {
     for (const L of this.lights) if (L.parent === null) { parent.add(L.target); parent.add(L); }
     this.signature(frame.scene ?? parent);
     _dir.subVectors(light.target.position, light.position).normalize();
+    // the view's orientation as last fitted, at the view's present place
+    camera.matrixWorld.decompose(_p, _q, _s);
+    if (!this.heldQ || this.heldQ.angleTo(_q) > TURN / 2) (this.heldQ ||= new THREE.Quaternion()).copy(_q);
+    _held.compose(_p, this.heldQ, _s);
     for (let i = 0; i < this.frustums.length; i++) {
       const L = this.lights[i], shadow = L.shadow, sc = shadow.camera, node = this._shadowNodes[i], C = node?._cascade;
       shadow.autoUpdate = false;
@@ -109,7 +123,7 @@ export class CachedCSM extends CSMShadowNode {
       _eye.copy(light.position);
       _orient.lookAt(_eye, _c.copy(_eye).add(C.dir), _up);
       _orientInv.copy(_orient).invert();
-      _toLight.multiplyMatrices(_orientInv, camera.matrixWorld);
+      _toLight.multiplyMatrices(_orientInv, _held);
       this.frustums[i].toSpace(_toLight, this._lsf ||= new this.frustums[i].constructor());
       const V = this._lsf.vertices;
       _box.makeEmpty();

@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.29 — Turning without redrawing the shadows (2026-11-09)
+- Looking round no longer redraws the shadow maps every frame; they follow the view every 12° of turning.
+
 ## v10.28 — Fewer draw calls (2026-11-09)
 - Small things of the street life with few copies are merged by material instead of each costing a draw call (Suzhou: from about 140 to about 50); far trees use two shapes per species instead of four.
 
