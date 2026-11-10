@@ -5,8 +5,12 @@
 import * as THREE from 'three/webgpu';
 import { HITCH } from './hitch.js';
 
-/** A job silent this long (ms) has failed (the first answer includes laying out the town). */
-const STALL = 45000;
+/** A job silent this long (ms) has failed (the first answer includes laying out the town). A worker
+ *  cannot answer while it computes, and a worker laying out one town while another's plans wait
+ *  behind it was silent for 46 s: judged dead, the whole world went to the main thread, which then
+ *  froze for a minute and more at each settlement (Florence → Suzhou: 84 s). Only a worker truly
+ *  gone stays silent for minutes. */
+const STALL = 180000;
 
 export class Builder {
   constructor(n = 2) {

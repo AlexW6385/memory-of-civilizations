@@ -91,3 +91,4 @@ The record of decisions behind `DESIGN.md` (its §11 points here). **Agents do n
 - 2026-11-10 Dynamic resolution on medium too, down to 0.85 (0.75 on 2× screens): measured on an M2 at 60 Hz, Suzhou's garden missed every other refresh at 1.0 with the GPU the limit (draw submission ~11 ms, GPU ~20 ms); a softer picture beats a halting one.
 - 2026-11-10 Global uniforms (ENV, baked-light bounds and volumes) in the render's shared group: each object's own group is checked at each of its draws (~500 a frame).
 - 2026-11-10 Draw calls are Suzhou's limit, not shading (flat materials −13%, ¼ pixels −20%, half the draws −40%): fewer draws first; baked material textures stay deferred.
+- 2026-11-10 Build-worker watchdog 180 s (was 45): a busy worker cannot answer, and the false alarm moved all building to the main thread, freezing it for a minute per settlement.
