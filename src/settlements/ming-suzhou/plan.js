@@ -178,44 +178,57 @@ const rwall = (a, b, opts = {}) => E.push({ t: 'ming_wall', a, b, y: G, h: 5.2, 
 rwall([rx0, rz1], [rx0, rz0]); rwall([rx1, rz0], [rx1, rz1]);
 // the street front: the gate hall in the middle, and west of it the side door to the side passage
 // (bei long) by which the household goes from court to court without crossing the halls
-rwall([rx0, rz1], [-6, rz1], { gates: [{ at: -12 - rx0, w: 1.6, h: 2.6 }] }); rwall([6, rz1], [rx1, rz1]);
+rwall([rx0, rz1], [-6, rz1], { gates: [{ at: -22 - rx0, w: 1.6, h: 2.6 }] }); rwall([6, rz1], [rx1, rz1]);
 // granite steps from the street up to the gate hall's platform
-E.push({ t: 'stair', rect: [-3, rz1 + 0.9, 3, rz1 + 2.1], y0: LEVEL.street, y1: G + 0.45, dir: 'n', riser: 0.15, mat: 'granite_block' });
+E.push({ t: 'stair', rect: [-3, 61.6, 3, 62.8], y0: LEVEL.street, y1: G + 0.45, dir: 'n', riser: 0.15, mat: 'granite_block' });
+// The axis, south to north (z falls northward): the gate hall, its court (4.6 m between the cross wall and the sedan hall's platform),
+// the sedan-chair hall, the main court (5.5 m), the main hall, the back court with the carved gate tower, the skywell, the women's
+// building against the garden's wall. The platforms stand 0.3 m out (0.8 at the gate hall, for the drums). The whole sequence is
+// squeezed into the 37 m between the street (z 62) and the garden wall (z 24).
 const halls = [
-  { rect: [-6, 54, 6, 60], H: 4.0, roof: 'gable', four: false, lat: 'lattice_bubujin' },      // the gate hall, its door on the street
-  { rect: [-8, 43, 8, 49.5], H: 4.2, roof: 'gable', four: true, walls: { e: 'plaster', w: 'plaster' }, doors: ['n'], winWall: true, lat: 'lattice_lantern' },   // the sedan-chair hall: doors to both courts, plastered sides
-  { rect: [-10, 32, 10, 39.5], H: 5.0, roof: 'xieshan', four: true, walls: { n: 'board', e: 'plaster', w: 'plaster' }, doors: ['n'], winWall: true, lat: 'lattice_bubujin' },  // the main hall: boards behind, brick-plastered gable walls
-  { rect: [-11, 24.6, 11, 29], H: 6.6, roof: 'gable', four: true, walls: { n: 'plaster', e: 'plaster', w: 'plaster' }, winWall: true, lat: { door: 'lattice_haitang', window: 'lattice_haitang' } },    // the women's building: lattice to the court only
+  { rect: [-6, 57.0, 6, 60.8], H: 4.0, roof: 'gable', four: false, doors: ['n'], pm: 0.8, lat: 'lattice_bubujin' },      // the gate hall, its door on the street
+  { rect: [-8, 46.8, 8, 50.8], H: 4.2, roof: 'gable', four: true, walls: { e: 'plaster', w: 'plaster' }, doors: ['n'], winWall: true, lat: 'lattice_lantern' },   // the sedan-chair hall: doors to both courts, plastered sides
+  { rect: [-8.5, 35.4, 8.5, 40.2], H: 5.0, roof: 'xieshan', four: true, walls: { n: 'board', e: 'plaster', w: 'plaster' }, doors: ['n'], winWall: true, lat: 'lattice_bubujin' },  // the main hall: boards behind, brick-plastered gable walls
+  { rect: [-9.5, 24.6, 9.5, 28.0], H: 6.6, roof: 'gable', four: true, walls: { n: 'plaster', e: 'plaster', w: 'plaster' }, winWall: true, lat: { door: 'lattice_haitang', window: 'lattice_haitang' } },    // the women's building: lattice to the court only
 ];
-for (const h of halls) E.push({ t: 'ming_hall', rect: h.rect, y: G + 0.45, H: h.H, front: 's', four: h.four, roof: h.roof, plat: 0.45, eave: 1.0, walls: h.walls, doors: h.doors, winWall: h.winWall, lat: h.lat });
-// the courtyards' cross walls, each with a carved brick gateway on the axis
-for (const z of [52, 41]) { rwall([rx0, z], [-1.5, z], { h: 4.6 }); rwall([1.5, z], [rx1, z], { h: 4.6 }); }
+for (const h of halls) E.push({ t: 'ming_hall', rect: h.rect, y: G + 0.45, H: h.H, front: 's', four: h.four, roof: h.roof, plat: 0.45, platMargin: h.pm ?? 0.3, eave: 0.8, walls: h.walls, doors: h.doors, winWall: h.winWall, lat: h.lat });
+// the cross walls close the courts at their south ends, behind the gate hall and the sedan hall, each with a gateway on the axis;
+// the third, before the women's building, carries the brick-carved gate tower (menlou)
+const SX = 15.8;        // the side walls of the axial courts; beyond them the side yards
+for (const z of [55.95, 46.225]) { rwall([-SX, z], [-1.5, z], { h: 4.6 }); rwall([1.5, z], [SX, z], { h: 4.6 }); }
+rwall([-SX, 31.1], [-2.7, 31.1]); rwall([2.7, 31.1], [SX, 31.1]);
+E.push({ t: 'court_piece', kind: 'gate_tower', at: [0, 31.1], y: G + 0.02, yaw: 0 });
+// the side walls with a door into the side yard from each court (and the skywell)
+for (const s of [-1, 1]) rwall([s * SX, rz1], [s * SX, rz0], { gates: [54, 44, 33.3, 26.3].map((z) => ({ at: rz1 - z, w: 1.6, h: 2.6 })) });
 // side courtyards: a small study hall each side with its rockery and a well
 E.push({ t: 'ming_hall', rect: [-34, 30, -22, 36], y: G + 0.35, H: 3.8, front: 'e', four: true, roof: 'xieshan', plat: 0.35, walls: { n: 'plaster', s: 'plaster', w: 'board' }, winWall: true, lat: { door: 'lattice_ice', window: 'lattice_ice' } });
 E.push({ t: 'ming_hall', rect: [22, 44, 34, 50], y: G + 0.35, H: 3.8, front: 'w', four: false, roof: 'gable', plat: 0.35, winWall: true, lat: { door: 'lattice_wan', window: 'lattice_wan' } });
 // standing stones on rough stone feet in the side courts; round them the courts are paved in pebble mosaic: a crane before the east hall's door, a lotus before the study's, coins and a plum in the west court
 E.push({ t: 'taihu', c: [-30, 44], y: G + 0.04, v: 3, s: 0.95, lod: 0, yaw: 0.4, plinth: true, solid: true });
 E.push({ t: 'taihu', c: [28, 32], y: G + 0.04, v: 3, s: 1.0, lod: 0, yaw: -0.5, plinth: true, solid: true });
-E.push({ t: 'pebble_paving', rect: [12.5, 42.2, 21.2, 51.2], y: G + 0.035, field: 'hex', medallion: 'crane', at: [16.85, 46.7], d: 5.2, seed: 3 });
-E.push({ t: 'pebble_paving', rect: [-21.4, 29.5, -12.8, 40.3], y: G + 0.035, field: 'coin', medallion: 'lotus', at: [-17.1, 35], d: 5.4, seed: 4 });
-E.push({ t: 'pebble_paving', rect: [-38, 42.2, -14, 51.2], y: G + 0.035, field: 'coin', medallion: 'plum', at: [-21, 46.7], d: 5.2, seed: 5 });
+E.push({ t: 'pebble_paving', rect: [16.2, 42.2, 21.2, 51.2], y: G + 0.035, field: 'hex', medallion: 'crane', at: [18.7, 46.7], d: 4.6, seed: 3 });
+E.push({ t: 'pebble_paving', rect: [-21.4, 29.5, -16.2, 40.3], y: G + 0.035, field: 'coin', medallion: 'lotus', at: [-18.8, 35], d: 4.6, seed: 4 });
+E.push({ t: 'pebble_paving', rect: [-38, 42.2, -16.2, 51.2], y: G + 0.035, field: 'coin', medallion: 'plum', at: [-26, 46.7], d: 5.2, seed: 5 });
+// the main court's pebble mosaic, a plum blossom on the axis
+E.push({ t: 'pebble_paving', rect: [-15.4, 40.9, 15.4, 46.0], y: G + 0.035, field: 'coin', medallion: 'plum', at: [0, 43.4], d: 3.8, seed: 6 });
 
 // ── the halls furnished, their boards and couplets, potted landscapes in the courts (§11) ──
 E.push({ t: 'hall_furniture', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, front: 'n', H: 5.0 });
 E.push({ t: 'scholar_study', rect: [-34, 30, -22, 36], y: G + 0.35, door: 'e', H: 3.8 });
-E.push({ t: 'hall_furniture', rect: [-10, 32, 10, 39.5], y: G + 0.45, front: 's', H: 5.0, variant: 'main' });
+E.push({ t: 'hall_furniture', rect: [-8.5, 35.4, 8.5, 40.2], y: G + 0.45, front: 's', H: 5.0, variant: 'main' });
 E.push({ t: 'hall_furniture', rect: B.linglong.rect, y: G + B.linglong.y, front: 'w', H: 3.9 });
 E.push({ t: 'hall_furniture', rect: B.yiyu.rect, y: G + B.yiyu.y, front: B.yiyu.front, H: 3.8 });
 // ── the residence's courts: stone drums at the gate, the screen wall before the side door, the great vats, a well, plants in tubs (§11)
 {
   const g = G + 0.02;
-  for (const s of [-1, 1]) E.push({ t: 'court_piece', kind: 'drum', at: [s * 2.55, 60.45], y: G + 0.45, yaw: 0 });
-  E.push({ t: 'court_piece', kind: 'screen', at: [-12, 56.8], y: g, yaw: 0, w: 3.8, h: 3.3 });
-  for (const [x, z] of [[-14.5, 38.5], [14.5, 38.5], [-13.5, 47], [13.5, 47]]) E.push({ t: 'court_piece', kind: 'vat', at: [x, z], y: g });
-  E.push({ t: 'court_piece', kind: 'well', at: [-17, 46], y: g });
-  const plants = [[-12.2, 33, 'shrub'], [12.2, 33, 'shrub'], [-12.2, 36, 'orchid'], [12.2, 36, 'orchid'], [-12.4, 27, 'bamboo'], [12.4, 27, 'bamboo'],
-    [-9.5, 51, 'orchid'], [9.5, 51, 'orchid'], [38.6, 28, 'bamboo'], [38.6, 33, 'bamboo'], [38.6, 38, 'bamboo'], [-38.6, 28, 'bamboo'], [-38.6, 38, 'bamboo'],
-    [-20, 56, 'shrub'], [-8.5, 56, 'orchid'], [-30, 56, 'bamboo'], [20, 56, 'shrub'], [32, 56, 'bamboo']];
+  for (const s of [-1, 1]) E.push({ t: 'court_piece', kind: 'drum', at: [s * 2.55, 61.2], y: G + 0.45, yaw: 0 });
+  E.push({ t: 'court_piece', kind: 'screen', at: [-22, 58.4], y: g, yaw: 0, w: 3.8, h: 3.3 });
+  for (const [x, z] of [[-13.5, 43.2], [13.5, 43.2], [-13.5, 53.4], [13.5, 53.4]]) E.push({ t: 'court_piece', kind: 'vat', at: [x, z], y: g });
+  E.push({ t: 'court_piece', kind: 'well', at: [-19, 46], y: g });
+  const plants = [[-11.5, 38, 'shrub'], [11.5, 38, 'shrub'], [-11.5, 35.6, 'orchid'], [11.5, 35.6, 'orchid'], [-13, 33.5, 'bamboo'], [13, 33.5, 'bamboo'],
+    [-12.8, 29.5, 'bamboo'], [12.8, 29.5, 'bamboo'], [-10.5, 43.2, 'orchid'], [10.5, 43.2, 'orchid'], [-10, 53.4, 'orchid'], [10, 53.4, 'orchid'],
+    [-10.5, 59, 'shrub'], [10.5, 59, 'shrub'], [38.6, 28, 'bamboo'], [38.6, 33, 'bamboo'], [38.6, 38, 'bamboo'], [-38.6, 28, 'bamboo'], [-38.6, 38, 'bamboo'],
+    [-30, 58.8, 'bamboo'], [-18.5, 58.8, 'shrub'], [20, 58.8, 'shrub'], [32, 58.8, 'bamboo']];
   plants.forEach(([x, z, plant], i) => E.push({ t: 'court_piece', kind: 'plant', at: [x, z], y: g, plant, seed: 200 + i }));
 }
 // the inscribed boards under the eaves over the doorways (the doorway is the front's middle bay, as ming_hall lays it out)
@@ -224,7 +237,7 @@ board([1.8, B.yuanxiang.rect[1] - 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, -1],
 board([1.8, B.yuanxiang.rect[3] + 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, 1], 2.4, 3, 12);
 board([-20, B.yiyu.rect[1] - 0.2], G + B.yiyu.y + 3.8 - 0.98, [0, -1], 1.8, 3, 13, { h: 0.6 });
 board([B.linglong.rect[0] - 0.2, -3.375], G + B.linglong.y + 3.9 - 0.98, [-1, 0], 1.8, 4, 14, { h: 0.6 });
-board([1.67, 39.7], G + 0.45 + 5.0 - 1.02, [0, 1], 2.4, 4, 15);
+board([0, 40.4], G + 0.45 + 5.0 - 1.02, [0, 1], 2.4, 4, 15);
 board([-21.8, 34.5], G + 0.35 + 3.8 - 0.98, [1, 0], 1.6, 3, 16, { h: 0.55 });
 // the couplet on the two columns of the Hall of Distant Fragrance's doorway, facing the pond
 for (const x of [0, 3.6]) E.push({ t: 'plaque', at: [x, B.yuanxiang.rect[1] - 0.17], y: G + B.yuanxiang.y + 1.2, facing: [0, -1], w: 0.3, h: 2.5, n: 7, vertical: true, seed: 20 + x, field: 'lacquer_black', ink: 'gilt_bronze' });
@@ -236,13 +249,13 @@ for (const [at, kind, seed] of [[[33, 4.5], 'pine', 1], [[36.5, 4.5], 'rock', 2]
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('yuanxiang', B.yuanxiang.rect, G + B.yuanxiang.y, 'hall'),
-  room('main-hall', [-10, 32, 10, 39.5], G + 0.45, 'hall'),
-  room('sedan-hall', [-8, 43, 8, 49.5], G + 0.45, 'hall'),
+  room('main-hall', [-8.5, 35.4, 8.5, 40.2], G + 0.45, 'hall'),
+  room('sedan-hall', [-8, 46.8, 8, 50.8], G + 0.45, 'hall'),
   room('study', [-34, 30, -22, 36], G + 0.35, 'hall'),
   room('garden', GARDEN, G, 'open'),
   room('residence', RESIDENCE, G, 'open'),
 ];
-const walks = [[[0, 64], [0, 57], [0, 46], [0, 40], [0, 30.6], [14, 30.6], [14, 25.5], [14, 22], [8, 14], [0, 8], [0, -9], [0, -21], [-12, -8], [-21, -12]]];
+const walks = [[[0, 64], [0, 62], [0, 58.8], [0, 54], [0, 49], [0, 44], [0, 38], [0, 33], [0, 29.6], [14, 29.6], [14, 25.5], [14, 22], [8, 14], [0, 8], [0, -9], [0, -21], [-12, -8], [-21, -12]]];
 walks[0].y0 = 0;
 
 export const garden = {

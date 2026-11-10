@@ -93,7 +93,7 @@ export const BRIDGES = [
 // ── the garden and the residence ─────────────────────────────────────────────
 /** The garden's walls (its central part, the Ming garden) and the residence south of it. */
 export const GARDEN = [-74, -80, 74, 24];
-export const RESIDENCE = [-40, 24, 40, 60];
+export const RESIDENCE = [-40, 24, 40, 61.6];
 
 /** The pond: a union of ellipses { c, r } (water inside, minus the islands). */
 export const POND = [
