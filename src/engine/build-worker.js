@@ -93,18 +93,22 @@ async function buildOne(plan) {
   if (tops) transfer.push(tops.data.buffer, tops.under.buffer, tops.dn.buffer);
   const parts = b.parts.map(({ mat, geometry, detail, shadowBig }) => {
     const pos = geometry.attributes.position.array, nor = geometry.attributes.normal.array, index = geometry.index?.array ?? null;
+    // (cloth in the wind: how far each vertex hangs, src/core/geom.js hangFrom)
+    const hang = geometry.attributes.hang?.array ?? null;
     const bb = geometry.boundingBox, bs = geometry.boundingSphere;
     transfer.push(pos.buffer, nor.buffer);
     if (index) transfer.push(index.buffer);
-    return { mat, detail, shadowBig, pos, nor, index, box: [bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z], sphere: [bs.center.x, bs.center.y, bs.center.z, bs.radius] };
+    if (hang) transfer.push(hang.buffer);
+    return { mat, detail, shadowBig, pos, nor, hang, index, box: [bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z], sphere: [bs.center.x, bs.center.y, bs.center.z, bs.radius] };
   });
   const instanced = b.instanced.map((p) => {
-    const g = p.geometry, pos = g.attributes.position.array, nor = g.attributes.normal.array, index = g.index.array;
+    const g = p.geometry, pos = g.attributes.position.array, nor = g.attributes.normal.array, index = g.index.array, hang = g.attributes.hang?.array ?? null;
     const lod = coarseOf(plan, p, transfer);
     transfer.push(pos.buffer, nor.buffer, index.buffer, p.matrices.buffer);
+    if (hang) transfer.push(hang.buffer);
     if (p.colors) transfer.push(p.colors.buffer);
     if (p.reach) transfer.push(p.reach.buffer);
-    return { mat: p.mat, key: p.key, detail: p.detail, big: p.big, first: p.first, lod, pos, nor, index, matrices: p.matrices, colors: p.colors, reach: p.reach, reals: p.reals };
+    return { mat: p.mat, key: p.key, detail: p.detail, big: p.big, first: p.first, lod, pos, nor, hang, index, matrices: p.matrices, colors: p.colors, reach: p.reach, reals: p.reals };
   });
   b.colliders.tops = tops;
   return { built: { parts, instanced, lights: b.lights, colliders: b.colliders }, transfer: [...new Set(transfer)] };
@@ -119,6 +123,8 @@ async function buildOne(plan) {
 function coarseOf(plan, p, transfer) {
   const g = p.geometry, P = g.attributes.position.array, N = g.attributes.normal.array, I = g.index.array, life = plan.style === 'life';
   if (p.detail && !life) return undefined;
+  // (cloth in the wind has no coarse version: a coarse one would have no hang, and hang still)
+  if (p.mat.endsWith('+wind')) return undefined;
   if (!life) {
     if (!g.boundingBox) g.computeBoundingBox();
     const bb = g.boundingBox;

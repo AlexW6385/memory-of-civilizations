@@ -2,7 +2,7 @@
 // procedural detail on top) and the light baker (which needs only the average albedo).
 // Colours are linear-ish sRGB hex of the average surface; roughness/metalness as in PBR.
 
-export const MATERIALS = {
+const SPECS = {
   // Nubian sandstone from Gebel el-Silsila: warm buff, fine grained, laid in ashlar courses
   sandstone:        { color: '#c2aa89', roughness: 0.88, kind: 'ashlar', course: 0.52, block: 1.15 },
   sandstone_column: { color: '#c0a886', roughness: 0.86, kind: 'drums', course: 0.72 },
@@ -390,6 +390,16 @@ export const MATERIALS = {
   concrete_light:   { color: '#c8c3b7', roughness: 0.9, kind: 'smooth' },
   brushbox:         { color: '#8b5a3b', roughness: 0.7, kind: 'wood' },
 };
+
+/**
+ * The materials by key. A key "<key>+wind" (cloth hung in the wind, src/core/geom.js windMat) is
+ * its plain key's material wherever it is looked up — the light baker's albedo, the shadows, the
+ * tints — though only the plain keys are listed.
+ */
+export const MATERIALS = new Proxy(SPECS, {
+  get: (t, k) => (typeof k === 'string' && k.endsWith('+wind') ? t[k.slice(0, -5)] : t[k]),
+  has: (t, k) => (typeof k === 'string' && k.endsWith('+wind') ? k.slice(0, -5) in t : k in t),
+});
 
 export function albedo(key) {
   const m = MATERIALS[key] || MATERIALS.sandstone;

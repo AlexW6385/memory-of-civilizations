@@ -5,7 +5,7 @@
 // takes { at: [x, z], y, rot (radians about +y), s (scale), seed, … } in its plan's coordinates.
 
 import { registerStyle } from '../core/build.js';
-import { box, lathe, fromTriangles } from '../core/geom.js';
+import { box, lathe, fromTriangles, clothBox, hangFrom, windMat } from '../core/geom.js';
 
 import { rng, placer, assembly, tube, slathe, folded } from './kit.js';
 import { Matrix4 } from '../core/three.js';
@@ -610,8 +610,10 @@ function hangWash(a, r, xa, xb, lineY, { drop = 1.05, th = 0.012, max = 6 } = {}
       const xx = x0 + w * u, y = lineY(xx), d = vv * (side ? h * 0.35 : h);
       return [xx, y - th - d + Math.sin(u * Math.PI) * 0.015 * vv, (side ? -th - 0.004 : th) + (side ? -1 : 1) * (0.025 * Math.sin(u * Math.PI * 3 + ph) * vv + 0.05 * vv * Math.sin(u * Math.PI))];
     };
-    a(`c${k}`, hanging(f(false), 6, 3)); a(`c${k}`, hanging(f(true), 6, 1));
-    if (type === 'shirt') for (const s of [0, 1]) { const sx = s ? x0 + w : x0, sw = 0.2; a(`c${k}`, hanging((u, vv) => { const xx = s ? sx + sw * u : sx - sw * (1 - u), y = lineY(sx) - 0.06 - vv * 0.16 - (s ? u : 1 - u) * 0.12; return [xx, y, th + 0.02 * vv]; }, 2, 1)); }
+    // (each hung from the line, swinging in the wind below it: its hang)
+    const hl = (g) => hangFrom(g, (xx) => lineY(xx));
+    a(`c${k}`, hl(hanging(f(false), 6, 3))); a(`c${k}`, hl(hanging(f(true), 6, 1)));
+    if (type === 'shirt') for (const s of [0, 1]) { const sx = s ? x0 + w : x0, sw = 0.2; a(`c${k}`, hl(hanging((u, vv) => { const xx = s ? sx + sw * u : sx - sw * (1 - u), y = lineY(sx) - 0.06 - vv * 0.16 - (s ? u : 1 - u) * 0.12; return [xx, y, th + 0.02 * vv]; }, 2, 1))); }
     x += w + 0.08 + r() * 0.15; k++;
   }
 }
@@ -640,7 +642,7 @@ function washLine(el, { bag }) {
     hangWash(a, r, xa + ca, xb - cb, lineY, { drop: el.drop ?? 0.95, th: pole ? 0.026 : 0.01, max: 8 });
   });
   const rand = rng(el.seed), cl = ['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_grey', 'linen', 'cloth_white', 'cloth_brown'];
-  for (const [role, g] of Object.entries(A)) put(role === 'rope' ? 'sacking' : role[0] === 'c' ? cl[Math.floor(rand() * cl.length)] : role, g.clone(), role[0] === 'c' ? 0.9 + rand() * 0.2 : 1);
+  for (const [role, g] of Object.entries(A)) put(role === 'rope' ? 'sacking' : role[0] === 'c' ? windMat(cl[Math.floor(rand() * cl.length)]) : role, g.clone(), role[0] === 'c' ? 0.9 + rand() * 0.2 : 1);
 }
 /**
  * laundry: { len } — a washing line between two forked props driven into the ground, the line sagging
@@ -663,7 +665,7 @@ function laundry(el, { bag }) {
     hangWash(a, r, -L / 2 + 0.25, L / 2 - 0.2, lineY);
   });
   const cl = ['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_grey', 'linen', 'cloth_white', 'cloth_brown'];
-  for (const [role, g] of Object.entries(A)) put(role === 'rope' ? 'sacking' : role === 'timber' ? 'timber' : cl[Math.floor(rand() * cl.length)], g.clone(), role[0] === 'c' ? 0.9 + rand() * 0.2 : 1);
+  for (const [role, g] of Object.entries(A)) put(role === 'rope' ? 'sacking' : role === 'timber' ? 'timber' : windMat(cl[Math.floor(rand() * cl.length)]), g.clone(), role[0] === 'c' ? 0.9 + rand() * 0.2 : 1);
 }
 /**
  * haystack: { kind ('rick' | 'pole') } — a stack of hay round a pole whose head shows at the top
@@ -1028,11 +1030,26 @@ function shopSign(el, { bag }) {
   put('timber', box(-0.04, h - 0.05, 0, 0.04, h + 0.04, out));
   put('timber', seg([0, h - 0.6, 0.02], [0, h, out * 0.6], 0.025, 0.025, 4));
   put('timber', box(-0.035, h - 0.13, z0 - 0.04, 0.035, h - 0.07, z1 + 0.04));
-  put(c, box(-0.012, h - 0.13 - len, z0, 0.012, h - 0.13, z1));
-  put(el.trim ?? 'cloth_white', box(-0.014, h - 0.13 - len - 0.1, z0, 0.014, h - 0.13 - len, z1));
+  // the banner, its trim, letters and tassels swing in the wind from the bar (all hung from it alike,
+  // so that what lies on the banner moves with it)
+  const yT = h - 0.13, cl = (mat, g) => put(windMat(mat), hangFrom(g, yT));
+  cl(c, clothBox(-0.012, h - 0.13 - len, z0, 0.012, h - 0.13, z1));
+  cl(el.trim ?? 'cloth_white', clothBox(-0.014, h - 0.13 - len - 0.1, z0, 0.014, h - 0.13 - len, z1));
   const letters = el.letters ?? 3;
-  for (let k = 0; k < letters; k++) { const yy = h - 0.32 - k * (len - 0.25) / letters, hh = Math.min(0.28, (len - 0.3) / letters - 0.08); put(el.ink ?? 'cloth_white', box(-0.016, yy - hh, zm - 0.13, 0.016, yy, zm + 0.13)); put(c, box(-0.019, yy - hh + 0.04, zm - 0.025, 0.019, yy - 0.04, zm + 0.025)); put(c, box(-0.019, yy - hh / 2 - 0.02, zm - 0.09, 0.019, yy - hh / 2 + 0.02, zm + 0.09)); }
-  for (const zz of [z0 + 0.05, z1 - 0.05]) put('cloth_red', seg([0, h - 0.13 - len - 0.1, zz], [0, h - 0.13 - len - 0.4, zz], 0.02, 0.012, 4));
+  // (the letters' squares and strokes painted on both faces: a sheet each side, a few mm proud — each
+  // hangs at its own height, so they are shapes of their own, kept light)
+  for (let k = 0; k < letters; k++) { const yy = h - 0.32 - k * (len - 0.25) / letters, hh = Math.min(0.28, (len - 0.3) / letters - 0.08); cl(el.ink ?? 'cloth_white', faces(0.016, yy - hh, yy, zm - 0.13, zm + 0.13)); cl(c, faces(0.019, yy - hh + 0.04, yy - 0.04, zm - 0.025, zm + 0.025)); cl(c, faces(0.019, yy - hh / 2 - 0.02, yy - hh / 2 + 0.02, zm - 0.09, zm + 0.09)); }
+  for (const zz of [z0 + 0.05, z1 - 0.05]) cl('cloth_red', seg([0, h - 0.13 - len - 0.1, zz], [0, h - 0.13 - len - 0.4, zz], 0.02, 0.012, 4));
+}
+/** Two sheets at x = ±t facing out (−x, +x), from y0 to y1 and z0 to z1, in rows of at most 0.25 m (cloth painted on both faces). */
+function faces(t, y0, y1, z0, z1) {
+  const n = Math.max(1, Math.ceil((y1 - y0) / 0.25 - 1e-6)), T = [];
+  for (let k = 0; k < n; k++) {
+    const a = y0 + (y1 - y0) * k / n, b = y0 + (y1 - y0) * (k + 1) / n;
+    T.push(t, a, z0, t, b, z0, t, b, z1, t, a, z0, t, b, z1, t, a, z1);
+    T.push(-t, a, z0, -t, a, z1, -t, b, z1, -t, a, z0, -t, b, z1, -t, b, z0);
+  }
+  return fromTriangles(T);
 }
 /** The European shop sign: an iron bracket with a scroll out of the wall (along +z), a painted board hanging edge-on to the wall, a device on it. */
 function boardSign(el, bag) {
@@ -1067,8 +1084,9 @@ function laundryPole(el, { bag }) {
   for (let k = 0; k < n; k++) {
     const t = 0.25 + k * 0.7 / n + rand() * 0.05, zz = -0.3 + (L + 0.3) * t, yy = yb + (ye - yb) * t, w = 0.25 + Math.floor(rand() * 4) * 0.11, h = 0.4 + Math.floor(rand() * 4) * 0.19, c = CL[Math.floor(rand() * CL.length)];
     const xo = (k % 2 ? 1 : -1) * 0.045;                                      // alternate sides of the pole, so neighbours never share a plane
-    put(c, box(xo - 0.015, yy - h, zz - w / 2, xo + 0.015, yy, zz + w / 2));
-    if (rand() < 0.4) for (const s of [-1, 1]) put(c, box(xo - 0.014, yy - h * 0.55, zz + s * (w / 2 + 0.1) - 0.08, xo + 0.014, yy - 0.05, zz + s * (w / 2 + 0.1) + 0.08));   // a jacket's sleeves
+    // (hung from the pole, swinging in the wind; nothing lies on them, so they swing whole, unbent)
+    put(windMat(c), hangFrom(box(xo - 0.015, yy - h, zz - w / 2, xo + 0.015, yy, zz + w / 2), yy));
+    if (rand() < 0.4) for (const s of [-1, 1]) put(windMat(c), hangFrom(box(xo - 0.014, yy - h * 0.55, zz + s * (w / 2 + 0.1) - 0.08, xo + 0.014, yy - 0.05, zz + s * (w / 2 + 0.1) + 0.08), yy));   // a jacket's sleeves
   }
   if (el.prop !== false) put('bamboo_culm', seg([0, -1.6, L * 0.8], [0, ye - 0.02, L * 0.8], 0.018, 0.018, 5));
 }

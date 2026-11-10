@@ -66,6 +66,8 @@ function hashGeometry(g) {
   };
   const I = g.index.array;
   mix(g.attributes.position.array); mix(g.attributes.normal.array); mix(I);
+  // (cloth in the wind: two shapes alike but hung differently are two)
+  if (g.attributes.hang) mix(g.attributes.hang.array);
   return `${g.attributes.position.count}:${I.length}:${(h >>> 0).toString(36)}`;
 }
 
@@ -105,6 +107,8 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
     for (const { o, rec } of G.list) {
       for (let i = 0; i < o.count; i++) {
         const g = proto.clone().applyMatrix4(M.fromArray(o.instanceMatrix.array, i * 16));
+        // (a hanging cloth's hang grows with the copy's scale: src/core/geom.js placeHanging)
+        if (g.attributes.hang) { const e = M.elements, k = Math.hypot(e[4], e[5], e[6]), H = g.attributes.hang.array; if (Math.abs(k - 1) > 1e-6) for (let j = 0; j < H.length; j++) H[j] *= k; }
         // (the copies beyond the mesh's first `big` are small for the shadows: no big triangles)
         P.list.push({ o: { geometry: g, userData: { shadowBig: o.userData.big !== undefined && i >= o.userData.big ? 0 : undefined }, baked: o }, rec });
         baked++;
@@ -175,6 +179,8 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
       // (the shape judged by its first copy as its plan found it: src/core/geom.js `first`)
       const f0 = G.list[0].o.userData.first ?? 0, M0 = G.list[0].o.instanceMatrix.array.subarray(f0 * 16, f0 * 16 + 16);
       let lod = lodKind(tri, [bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z], M0);
+      // cloth in the wind has no coarse versions (they would have no hang): drawn as it is
+      if (lod === 'fine' && proto.attributes.hang) lod = null;
       // pieces their plan places to be seen only near (a plant's spines: their reach)
       const reach = G.list.every(({ o }) => o.userData.reach !== undefined) ? Math.max(...G.list.map(({ o }) => o.userData.reach)) : null;
       if (reach !== null && lod !== 'thin') lod = 'near';
