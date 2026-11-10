@@ -29,6 +29,9 @@ import { HITCH } from './hitch.js';
  *  diagonal, about 52°, and a margin for the turn between two choices), chosen again each VIEW_TURN. */
 const COS_VIEW = Math.cos(THREE.MathUtils.degToRad(80)), COS_TURN = Math.cos(THREE.MathUtils.degToRad(10));
 
+/** An instanced shape of at most this many triangles in all is baked into its material's merged part. */
+const BAKE_TRIS = 6000;
+
 /** Time a merge may take before it gives the frame back (ms). */
 const SLICE = 4;
 
@@ -83,7 +86,34 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
       G.list.push({ o, rec });
     }
   }
+  let baked = 0;
+  // small instanced shapes (a few thousand triangles in all, untinted, not chosen by distance) baked
+  // into their material's merged part: each was a draw call of its own (Suzhou's garden: a dozen
+  // groups of Taihu stones, six of lattice, nine of lotus leaves...)
+  for (const [key, G] of [...groups]) {
+    if (G.kind !== 'inst') continue;
+    const proto = G.list[0].o.geometry, tri = proto.index.count / 3;
+    let n = 0;
+    for (const { o } of G.list) n += o.count;
+    if (!n || n * tri > BAKE_TRIS || G.list.some(({ o }) => o.userData.reach !== undefined)) continue;
+    const white = G.list.every(({ o }) => { const c = o.instanceColor?.array; if (!c) return true; for (let i = 0; i < o.count * 3; i++) if (Math.abs(c[i] - 1) > 0.004) return false; return true; });
+    if (!white) continue;
+    const pk = `p|${G.mat}|${formatOf(proto)}`;
+    let P = groups.get(pk);
+    if (!P) groups.set(pk, (P = { kind: 'part', mat: G.mat, key: pk, list: [] }));
+    const M = new THREE.Matrix4();
+    for (const { o, rec } of G.list) {
+      for (let i = 0; i < o.count; i++) {
+        const g = proto.clone().applyMatrix4(M.fromArray(o.instanceMatrix.array, i * 16));
+        // (the copies beyond the mesh's first `big` are small for the shadows: no big triangles)
+        P.list.push({ o: { geometry: g, userData: { shadowBig: o.userData.big !== undefined && i >= o.userData.big ? 0 : undefined }, baked: o }, rec });
+        baked++;
+      }
+    }
+    groups.delete(key);
+  }
   const out = [];
+  out.baked = baked;                     // (the copies baked into parts, for tests/cells.test.mjs)
   let t = performance.now();
   const breathe = async () => { if (performance.now() - t > SLICE) { HITCH.add('merge', performance.now() - t); await new Promise((r) => setTimeout(r, 0)); t = performance.now(); } };
   // a member left as it is (a shape or material of one plan only, not worth cutting or choosing)
@@ -97,7 +127,7 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
   };
   // without workers the coarse versions are made here: when the page is idle, a shape at a time
   const idle = () => new Promise((r) => (globalThis.requestIdleCallback ? requestIdleCallback(() => r(), { timeout: 1000 }) : setTimeout(r, 0)));
-  const keep = (G) => { for (const { o } of G.list) { delete o.userData.merge; releaseAfterUpload(o); } };
+  const keep = (G) => { for (const { o } of G.list) { const m = o.baked ?? o; if (m.userData.released || m.userData.kept) continue; delete m.userData.merge; m.userData.kept = true; releaseAfterUpload(m); } };
   for (const G of groups.values()) {
     if (stale()) return out;
     const recSet = new Set(G.list.map(({ rec }) => rec));
@@ -215,7 +245,7 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
       into.add(m);
       out.push(m);
     }
-    for (const { o } of G.list) letGo(o);
+    for (const { o } of G.list) letGo(o.baked ?? o);
     await breathe();
   }
   return out;
@@ -427,6 +457,7 @@ export class LodSet {
 /** A merged mesh's member let go of: off the scene, its GPU data freed, its arrays emptied (the
  *  part's record still holds its geometry, src/engine/world.js). */
 function letGo(o) {
+  if (o.userData.released) return;
   o.removeFromParent();
   o.geometry.dispose();
   o.dispose();

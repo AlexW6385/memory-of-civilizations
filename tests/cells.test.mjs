@@ -56,7 +56,7 @@ test('a settlement merged: the same triangles and copies, chosen once each', asy
     recs.push({ group, plan });
   }
   const into = new THREE.Group(), lods = [];
-  await mergeParts(recs, into, make, { castsShadow: () => true, lods });
+  const merged = await mergeParts(recs, into, make, { castsShadow: () => true, lods });
   assert.ok(lods.some((L) => L.kind === 'fine') && lods.some((L) => L.kind === 'thin'), 'balustrades drawn by distance');
   // what is drawn with every copy in full: the triangles of before
   const inLod = new Set(lods.flatMap((L) => L.meshes));
@@ -79,7 +79,8 @@ test('a settlement merged: the same triangles and copies, chosen once each', asy
   assert.ok(siblings > 0, 'big pieces cast into the third cascade alone');
   for (const L of lods) { after += L.n * L.full.geometry.index.count / 3; n += L.n; }
   assert.equal(after, before);
-  assert.equal(n, copies);
+  // (small shapes' copies baked into their material's parts: merge.js BAKE_TRIS)
+  assert.equal(n + merged.baked, copies);
   // from the arrival: each copy of a shape drawn by distance in one version only; its shadow within reach
   const [x, y, z] = [0, 1.65, 70];
   for (const L of lods) {
