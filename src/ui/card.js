@@ -2,7 +2,7 @@
 // (src/planet/cards.js) in the site's language, and a Go button. A panel over the map only, never in the
 // world. Desktop: beside the clicked marker, off to the side that has room; narrow screens: a bottom sheet.
 
-import { t, tr, getLang } from './i18n.js';
+import { t, tr, era, getLang } from './i18n.js';
 import { CARDS } from '../planet/cards.js';
 
 const SEP = { en: ' — ', zh: ' —— ' };
@@ -34,7 +34,7 @@ export class SettlementCard {
     const lang = getLang(), id = S.site.id;
     this.q('.close').setAttribute('aria-label', t('card-close'));
     this.q('.sc-name').textContent = tr(S.site.name);
-    this.q('.sc-era').textContent = S.site.era || '';
+    this.q('.sc-era').textContent = era(S.site.era);
     this.q('.sc-go').textContent = t('go');
     const body = this.q('.sc-body'), paras = (CARDS[id] && (CARDS[id][lang] || CARDS[id].en)) || [];
     body.innerHTML = ''; body.hidden = !paras.length;

@@ -3,7 +3,7 @@
 // button takes the visitor to its building's entrance; a click anywhere else on the land, there. The list below names every
 // settlement with its time.
 
-import { t, tr, onLang } from './i18n.js';
+import { t, tr, era, onLang } from './i18n.js';
 import { coastAt, climateAt } from '../planet/land.js';
 import { BUILT, PLANET_RADIUS } from '../planet/relief.js';
 import { SITES } from '../planet/sites.js';
@@ -93,7 +93,7 @@ export class GlobeView {
       const li = document.createElement('li'), b = document.createElement('button');
       b.innerHTML = `<span class="name"></span><span class="era"></span>`;
       b.querySelector('.name').textContent = tr(S.site.name);
-      b.querySelector('.era').textContent = S.site.era;
+      b.querySelector('.era').textContent = era(S.site.era);
       b.onclick = () => this.go(S);
       li.appendChild(b); this.list.appendChild(li);
     }

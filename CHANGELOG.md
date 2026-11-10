@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.38 — Eras in Chinese, the map's hint (2026-11-10)
+- Settlement eras read in Chinese on the Chinese site (16 世纪, 公元前 5 世纪); the map's hint describes the cards.
+
 ## v10.37 — The next city built later (2026-11-10)
 - The next random settlement is built ahead only half a minute after arriving, so the first look round is not slowed by it.
 

@@ -2,7 +2,7 @@
 // country's colours, the settlements' discs with their names — and the visitor's arrow. Click it
 // to open the globe. Night darkens it as it darkens the globe.
 
-import { tr } from './i18n.js';
+import { tr, era } from './i18n.js';
 import { coastAt, climateAt } from '../planet/land.js';
 import { PLANET_RADIUS as R, BUILT } from '../planet/relief.js';
 import { eastNorth, dot } from '../planet/geo.js';
@@ -71,6 +71,6 @@ export class MiniMap {
     g.fillStyle = '#ffd36b'; g.strokeStyle = '#2a2116'; g.lineWidth = 1.5 * dpr;
     g.beginPath(); g.moveTo(0, -9 * dpr); g.lineTo(6 * dpr, 7 * dpr); g.lineTo(0, 3.5 * dpr); g.lineTo(-6 * dpr, 7 * dpr); g.closePath(); g.fill(); g.stroke();
     g.restore();
-    this.label.textContent = here ? `${tr(here.site.name)} · ${here.site.era}` : '';
+    this.label.textContent = here ? `${tr(here.site.name)} · ${era(here.site.era)}` : '';
   }
 }

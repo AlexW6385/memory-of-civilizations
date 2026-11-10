@@ -7,7 +7,7 @@ const STRINGS = {
     loading: 'Preparing the world…',
     compiling: 'Lighting the halls…',
     'st-start': 'Starting the renderer', 'st-land': 'Shaping the land', 'st-build': 'Raising the buildings', 'st-plants': 'Planting', 'st-shaders': 'Preparing the light',
-    'stale': 'The site has been updated: reload the page to keep exploring.', 'travelling': 'Travelling…', 'map-hint': 'Click anywhere on the map to go there; on or near a settlement, you arrive beside its landmark. Night is shaded.',
+    'stale': 'The site has been updated: reload the page to keep exploring.', 'travelling': 'Travelling…', 'map-hint': 'Click a settlement for its card, then Go to travel there; click elsewhere on the map to go to that place. Night is shaded.',
     ready: 'Ready.',
     enter: 'Enter',
     resume: 'Continue',
@@ -40,7 +40,7 @@ const STRINGS = {
     loading: '正在准备世界……',
     compiling: '正在点亮殿堂……',
     'st-start': '正在启动渲染器', 'st-land': '正在塑造地形', 'st-build': '正在建造建筑', 'st-plants': '正在种植植物', 'st-shaders': '正在准备光照',
-    'stale': '网站已更新，请刷新页面后继续浏览。', 'travelling': '正在前往……', 'map-hint': '点击地图上任意位置即可前往；点在建筑群上或附近，会直接到达其主建筑旁。阴影部分为黑夜。',
+    'stale': '网站已更新，请刷新页面后继续浏览。', 'travelling': '正在前往……', 'map-hint': '点击城市查看介绍，按“前往”即可到达；点击地图其他位置则前往该处。阴影部分为黑夜。',
     ready: '准备好了。',
     enter: '进入',
     resume: '继续',
@@ -94,6 +94,12 @@ export const onLang = (f) => listeners.push(f);
 export const t = (k) => STRINGS[lang][k] ?? STRINGS.en[k] ?? k;
 /** Pick the current language from a {en, zh} object. */
 export const tr = (o) => (o && (o[lang] ?? o.en)) || '';
+/** A settlement's era ('16th c.', '5th c. BC') in the language shown. */
+export const era = (e) => {
+  if (lang !== 'zh' || !e) return e || '';
+  const m = /^(\d+)\w*\s*c\.(\s*BC)?$/.exec(e.trim());
+  return m ? `${m[2] ? '公元前 ' : ''}${m[1]} 世纪` : e;
+};
 
 function apply() {
   document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
