@@ -51,6 +51,10 @@ export function buildingMesh(geometry, mat, matrices = IDENTITY, colors = null) 
   if (!colors) { colors = new Float32Array(n * 3); for (let i = 0; i < n; i++) colors.set(WHITE, i * 3); }
   m.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
   m.computeBoundingSphere();
+  // (before its shaders are compiled: whether a mesh receives shadows is part of three's key for
+  // its build, and merged meshes were set to receive them only after being compiled — each built a
+  // second time in the frame that first drew it, 5–13 ms each, the hitches of turning round)
+  m.receiveShadow = true;
   return m;
 }
 

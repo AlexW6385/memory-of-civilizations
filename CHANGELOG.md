@@ -2,6 +2,9 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.30 — No second shader build for merged meshes (2026-11-09)
+- Merged meshes were compiled before being told to receive shadows, so each was built again in the frame that first showed it; turning round no longer hitches on them. The garden's arrival view is clear of trees, the shore stones are rounded rubble and the Taihu stones shade smoothly.
+
 ## v10.29 — Turning without redrawing the shadows (2026-11-09)
 - Looking round no longer redraws the shadow maps every frame; they follow the view every 12° of turning.
 
