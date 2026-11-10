@@ -10,7 +10,7 @@ import { smaa } from 'three/addons/tsl/display/SMAANode.js';
 import { CachedCSM } from './shadow-cache.js';
 import { SkyMesh, SKY_FAR } from './sky.js';
 import { PLANET_RADIUS } from '../planet/sites.js';
-import { ENV, cloudShadow, fogFactor, fogColor } from './env.js';
+import { ENV, cloudShadow, fogFactor, fogColor, nightFillNode } from './env.js';
 import { GIVolume } from './gi.js';
 import { useGI } from './materials.js';
 import { CAMERA_MASK, cascadeMask } from './layers.js';
@@ -121,7 +121,7 @@ export class Renderer {
     csm.fade = true;
     sun.shadow.shadowNode = csm;
     // the lamps' pool: a fixed number of lights per preset (a change recompiles every material)
-    if (this.lamps?.slots.length !== Q.lamps) { this.lamps?.dispose(); this.lamps = new LampPool(this.scene, Q.lamps); }
+    if (this.lamps?.slots.length !== Q.lamps) { this.lamps?.dispose(); this.lamps = new LampPool(this.scene, Q.lamps); this.lamps.view = this.camera; }
     this.airShadow = null;
     this.buildPipeline();
     this.resize();
@@ -155,7 +155,9 @@ export class Renderer {
     if (!this.scenePass || this.scenePassAo !== Q.ao) {
       const scenePass = this.scenePass = pass(scene, camera);
       this.scenePassAo = Q.ao;
-      const gi = this.giNode;
+      // the indirect light: the baked volumes (or the open sky's hemisphere), and at night the
+      // moonlit sky's blue fill (env.js nightFillNode; black by day, a few operations a pixel)
+      const gi = this.giNode.add(nightFillNode);
       scenePass.contextNode = context({
         getGI: (input, { material }) => (material.transparent ? input : (input !== null ? input.add(gi) : gi)),
         // the sun is dimmed where the shadows of the clouds pass
@@ -409,8 +411,14 @@ export class Renderer {
     AIR.dir.value.set(d[0], d[1], d[2]).normalize();
     const amb = (this.gi.ambientAt(c.x, c.y, c.z) || 0) * this.gi.uIntensity.value;
     AIR.ambient.value.setRGB(0.95 * amb, 0.88 * amb, 0.78 * amb);
+    // the night's fill (env.js nightFillNode): the moonlit sky, deep blue, and a little starlight
+    // and airglow when the moon is down or behind cloud; comes in as the twilight goes, faint under
+    // a roof (the room's own baked light and lamps take over)
+    const nf = smoothFill(ENV.night.value) * (1 - 0.85 * k) * (NIGHT_FILL.stars + NIGHT_FILL.moon * ENV.moonUp.value * (1 - 0.6 * ENV.clouds.value));
+    ENV.nightFill.value.setRGB(NIGHT_FILL.color[0] * nf, NIGHT_FILL.color[1] * nf, NIGHT_FILL.color[2] * nf);
     const now = performance.now() / 1000;
-    this.lamps?.update(now, Math.min(0.1, now - (this._lampT ?? now)));
+    // (the step clamped at a second: a lamp handed over during a stall is simply there after it)
+    this.lamps?.update(now, Math.min(1, now - (this._lampT ?? now)));
     this._lampT = now;
   }
 
@@ -458,6 +466,11 @@ export class Renderer {
     if (device) await device.queue.onSubmittedWorkDone();
   }
 }
+
+/** The night's fill light (irradiance at full night): its colour, and its strength from the stars and from the full moon. */
+const NIGHT_FILL = { color: [0.42, 0.56, 1.0], stars: 0.022, moon: 0.12 };
+/** How much of the night's fill there is by how far the night has come (none in the twilight, whose sky still lights the town). */
+function smoothFill(n) { const t = Math.max(0, Math.min(1, (n - 0.45) / 0.55)); return t * t * (3 - 2 * t); }
 
 /**
  * The night sky: a dome inside the sky's, adding stars (a few thousand points of different

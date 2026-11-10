@@ -23,13 +23,14 @@
 //     { kind: 'glow', color, glow: its light's colour, power }). Nothing else is needed: the shade
 //     glows by itself (materials.js 'glow', no cost beyond its own pixels), and every separate
 //     piece of a glow material (pieces within 0.6 m of each other are one lantern; one per copy
-//     when instanced, as the street life's lanterns are) is a lamp that the pool may light.
+//     when instanced, as the street life's lanterns are) is a lamp that the pool may light. A flat
+//     sheet of a glow material (the lit paper behind a window) glows but is not a lamp.
 //   - A flame that burns at any hour (an altar lamp, a brazier, a hearth): a `lamp` element
 //     { t: 'lamp', at: [x, y, z], color, intensity (6), distance (9 m), stand } (src/core/build.js);
 //     the light bake (tools/bake.mjs) also lights the rooms with these.
 //   A settlement may have hundreds: what each costs is its share of the choice below (a distance
-//   test four times a second) and its glowing pixels. Only the nearest few (within 22 m, the
-//   brightest first) are real lights, and a slot with no lamp in it costs nothing in the frame:
+//   test four times a second) and its glowing pixels. Only the nearest few (within 40 m, the
+//   brightest first, those ahead of the eye before those behind it) are real lights, and a slot with no lamp in it costs nothing in the frame:
 //   the lights are LampLights, whose shading is skipped while they are dark (LampLightNode), so by
 //   day, with no lamp lit, the pool costs no shading at all.
 
@@ -174,9 +175,9 @@ export function airComposite(color, airTex, depth, camera, texel, zk) {
 
 // ── lamps ─────────────────────────────────────────────────────────────────────────────────────
 
-/** Lamps are lit within this distance of the eye (m); beyond it they fade out. */
-const LAMP_REACH = 22;
-const _e = new Vector3(), _inv = new Matrix4();
+/** Lamps are lit within this distance of the eye (m); beyond it they fade out (a canal street's lanterns are seen 30–40 m off). */
+const LAMP_REACH = 40;
+const _e = new Vector3(), _v = new Vector3(), _inv = new Matrix4();
 
 /**
  * The lamps of a built part, in its settlement's frame: { p: [x, y, z], color: Color, power,
@@ -189,8 +190,10 @@ export function lampsOf(built, glowMeshes = []) {
   for (const { mat, geometry, matrices } of glowMeshes) {
     const spec = MATERIALS[mat];
     if (spec?.kind !== 'glow') continue;
-    const color = new Color(spec.glow || spec.color), power = (spec.power ?? 3) * 0.7;
-    for (const p of spots(geometry, matrices)) out.push({ p, color, power, range: 8, night: true, flame: false });
+    // a paper lantern's light: a warm pool some 3 m round on the walls, the paving and the water
+    // beneath it, gone by 10 m
+    const color = new Color(spec.glow || spec.color), power = (spec.power ?? 3) * 1.1;
+    for (const p of spots(geometry, matrices)) out.push({ p, color, power, range: 10, night: true, flame: false });
   }
   return out;
 }
@@ -214,23 +217,31 @@ function spots(geometry, matrices) {
   for (let i = 0; i < pos.count; i += step) {
     const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
     const k = key(Math.floor(x / S), Math.floor(y / S), Math.floor(z / S));
-    const e = cells.get(k) || cells.set(k, [0, 0, 0, 0]).get(k);
+    const e = cells.get(k) || cells.set(k, [0, 0, 0, 0, x, y, z, x, y, z]).get(k);
     e[0] += x; e[1] += y; e[2] += z; e[3]++;
+    if (x < e[4]) e[4] = x; if (y < e[5]) e[5] = y; if (z < e[6]) e[6] = z; if (x > e[7]) e[7] = x; if (y > e[8]) e[8] = y; if (z > e[9]) e[9] = z;
   }
-  // the cells of one shade touch: each group of touching cells is one lamp, at its vertices' mean
+  // the cells of one shade touch: each group of touching cells is one lamp, at its vertices' mean.
+  // A flat piece (a few vertices, all in one plane: the glowing paper behind a lit window) is not a
+  // lantern: it glows by its material, but a light there would sit inside the lattice in front of it
+  // and blaze through the paper (and the windows of a street, hundreds, took every slot of the pool
+  // from the lanterns)
   const out = [], seen = new Set();
   for (const [k0] of cells) {
     if (seen.has(k0)) continue;
     seen.add(k0);
     const acc = [0, 0, 0, 0], stack = [k0];
+    let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
     while (stack.length) {
       const k = stack.pop(), e = cells.get(k);
       acc[0] += e[0]; acc[1] += e[1]; acc[2] += e[2]; acc[3] += e[3];
+      x0 = Math.min(x0, e[4]); y0 = Math.min(y0, e[5]); z0 = Math.min(z0, e[6]); x1 = Math.max(x1, e[7]); y1 = Math.max(y1, e[8]); z1 = Math.max(z1, e[9]);
       for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) for (let dl = -1; dl <= 1; dl++) {
         const n = k + (di * 2048 + dl) * 128 + dj;
         if (!seen.has(n) && cells.has(n)) { seen.add(n); stack.push(n); }
       }
     }
+    if (acc[3] * step < 8 || Math.min(x1 - x0, y1 - y0, z1 - z0) < 0.02) continue;
     out.push([acc[0] / acc[3], acc[1] / acc[3], acc[2] / acc[3]]);
   }
   return out;
@@ -268,7 +279,9 @@ export class LampPool {
   /**
    * Choose the lamps nearest the eye: sources = [{ list (lampsOf entries), matrix (frame → scene) }].
    * Called four times a second. The eye is taken into each source's frame once (its matrix is
-   * rigid), so that each lamp costs a squared distance; only those within reach are placed.
+   * rigid), so that each lamp costs a squared distance; only those within reach are placed. A lamp
+   * behind the eye (more than a few metres off) counts for a third: its pool is not seen, the next
+   * lantern ahead along the street is (this.view: the camera, set by the renderer).
    */
   choose(eye, sources, night) {
     this.night = night;
@@ -278,12 +291,16 @@ export class LampPool {
     const cand = [];
     let last = null;
     for (const { list, matrix } of sources) {
-      if (matrix !== last) { _e.copy(eye).applyMatrix4(_inv.copy(matrix).invert()); last = matrix; }
+      if (matrix !== last) {
+        _e.copy(eye).applyMatrix4(_inv.copy(matrix).invert()); last = matrix;
+        if (this.view) this.view.getWorldDirection(_v).transformDirection(_inv); else _v.set(0, 0, 0);
+      }
       for (const l of list) {
         if (l.night && !nightOn) continue;
         const dx = l.p[0] - _e.x, dy = l.p[1] - _e.y, dz = l.p[2] - _e.z, d2 = dx * dx + dy * dy + dz * dz;
         if (d2 > R2) continue;
-        cand.push({ l, d: Math.sqrt(d2), matrix, score: l.power * lit(l) / (1 + d2) });
+        const d = Math.sqrt(d2), ahead = d < 5 ? 1 : 0.33 + 0.67 * smooth(-0.35, 0.3, (dx * _v.x + dy * _v.y + dz * _v.z) / d);
+        cand.push({ l, d, matrix, score: l.power * lit(l) * ahead / (1 + d2) });
       }
     }
     if (cand.length > this.slots.length) cand.sort((a, b) => b.score - a.score);

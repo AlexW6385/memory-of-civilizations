@@ -16,6 +16,8 @@ import { GISpecularNode } from './gi.js';
 import { waterSky } from './water-reflect.js';
 
 const cache = new Map();
+/** The colour of oil-lamp light through paper or from a room within (linear): a warm orange. */
+const LAMPLIGHT = vec3(1.0, 0.43, 0.13);
 const PLAIN = typeof location !== 'undefined' && new URLSearchParams(location.search).get('plain') === '1';
 function plainMaterial(spec) {
   const m = new MeshStandardNodeMaterial({ color: new Color(spec.color), roughness: spec.roughness ?? 0.8, metalness: spec.metalness ?? 0 });
@@ -418,21 +420,27 @@ function make(spec) {
     }
     case 'opening': {
       // a window or doorway: the dark of the room within, a little lighter toward its bottom (the
-      // floor catching the day); at night about one in four is lit from inside by a lamp or a fire
+      // floor catching the day); at night about one in seven is lit from inside by an oil lamp or a
+      // fire: a dim warm orange, each at its own strength (a lamp near the window, or far back)
       const P2 = positionLocal, cell = floor(P2.mul(0.45)), h = hash(cell.x.add(cell.y.mul(17.0)).add(cell.z.mul(131.0)));
-      const lit = smoothstep(0.72, 0.74, h).mul(smoothstep(0.2, 0.7, ENV.night));
-      const flick = sin(time.mul(3.0).add(h.mul(40.0))).mul(0.08).add(1);
+      const lit = smoothstep(0.85, 0.87, h).mul(smoothstep(0.35, 0.8, ENV.night)).mul(hash(h.mul(7.3).add(0.4)).mul(0.6).add(0.4));
+      const flick = sin(time.mul(3.0).add(h.mul(40.0))).mul(0.06).add(1);
       m.colorNode = baseNode.mul(fract(P2.y.mul(0.3)).mul(0.15).add(0.92));
-      m.emissiveNode = vec3(1.0, 0.52, 0.2).mul(lit).mul(flick).mul(1.6);
+      m.emissiveNode = LAMPLIGHT.mul(lit).mul(flick).mul(0.34);
       break;
     }
     case 'glow': {
       // a lantern's shade: its own colour by day, lit from within at dusk and night (a slow flicker).
       // Every separate piece of a glow material is also a lamp that the lamps' pool may light
       // with a real light when the eye is near — how to declare lamps: src/engine/air.js (header)
+      // The shade is lit from within: brightest where one looks through it square on toward the
+      // flame, darker and redder toward its rim, where the light crosses more paper; kept within the
+      // tone curve's saturated range (as bright as its light's power, AgX bleached it to a pale pink)
       const flick = sin(time.mul(7.0).add(positionLocal.x.mul(3.1))).mul(0.06).add(sin(time.mul(2.3).add(positionLocal.z)).mul(0.04)).add(1);
+      const face = abs(dot(normalView, normalize(positionView).negate()));
+      const glowC = uniform(new Color(spec.glow || spec.color));
       m.colorNode = baseNode;
-      m.emissiveNode = uniform(new Color(spec.glow || spec.color)).mul(float(spec.power ?? 3)).mul(smoothstep(0.15, 0.6, ENV.night)).mul(flick);
+      m.emissiveNode = mix(glowC.mul(vec3(0.8, 0.45, 0.3)), glowC, face).mul(face.mul(0.6).add(0.4)).mul(float((spec.power ?? 3) * 0.4)).mul(smoothstep(0.15, 0.6, ENV.night)).mul(flick);
       break;
     }
     case 'flame': {
@@ -528,7 +536,19 @@ function make(spec) {
       m.colorNode = mix(baseNode, paper, d);
       m.roughnessNode = mix(roughU, float(0.95), d);
       m.normalNode = bump(float(1).sub(d).mul(0.006), 1);
-      if (spec.lit) m.emissiveNode = paper.mul(d).mul(float(spec.lit).mul(ENV.night.mul(2.0).add(1.0)));
+      // by day the paper is lit through by the day beyond it (spec.lit); at night by the oil lamps of
+      // the rooms behind: about one room in six (cells of a bay by a storey) lit, each at its own
+      // strength, a soft warm glow brightest low in the room where its lamp stands and fading toward
+      // the room's edges; the bars stand dark against it. The rest stay dark paper in the moonlight.
+      const RB = 3.4, RH = 3.0;
+      const rc = floor(positionLocal.div(vec3(RB, RH, RB)));
+      const hr = hash(rc.x.mul(7.13).add(rc.y.mul(31.7)).add(rc.z.mul(113.1)));
+      const room = smoothstep(0.83, 0.85, hr).mul(hash(hr.mul(17.3).add(0.5)).mul(0.6).add(0.4));
+      const pool = smoothstep(0.62, 0.05, length(vec2(fract(u.div(RB)).sub(0.5), fract(v.div(RH)).sub(0.38).mul(1.2))));
+      const lamp = LAMPLIGHT.mul(room).mul(pool).mul(0.38).mul(sin(time.mul(2.1).add(hr.mul(40.0))).mul(0.05).add(1));
+      const night = smoothstep(0.35, 0.8, ENV.night);
+      const day = spec.lit ? paper.mul(float(spec.lit).mul(float(1).sub(ENV.night))) : vec3(0);
+      m.emissiveNode = day.add(lamp.mul(night)).mul(d);
       break;
     }
     case 'taihu': {
@@ -877,9 +897,13 @@ class PaperLightingModel extends PhysicalLightingModel {
     super.direct(input, builder);
     const { lightDirection, lightColor, reflectedLight, lightNode } = input;
     const back = normalView.dot(lightDirection).negate().clamp();
-    // a light that casts shadows has already passed the panel's own leak (castShadowNode below)
-    const k = lightNode?.light?.castShadow ? 1 / PAPER.leak : 1;
-    reflectedLight.directDiffuse.addAssign(lightColor.mul(back).mul(this.through).mul(k / Math.PI));
+    // a light that casts shadows has already passed the panel's own leak (castShadowNode below):
+    // undone, but never past the light's own unshadowed colour — where the panel's own shadow does
+    // not fall on its face (a single sheet, a thin panel within the shadow's bias) the light was not
+    // dimmed, and the 1/leak made the paper blaze (the moon behind a street's windows lit them white)
+    let L = lightColor;
+    if (lightNode?.light?.castShadow) { L = L.mul(1 / PAPER.leak); if (lightNode.baseColorNode) L = min(L, lightNode.baseColorNode); }
+    reflectedLight.directDiffuse.addAssign(L.mul(back).mul(this.through).mul(1 / Math.PI));
   }
 }
 
