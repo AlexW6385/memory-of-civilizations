@@ -4,7 +4,7 @@
 import { Color, Vector2, Vector3, Matrix3 } from 'three/webgpu';
 import {
   uniform, vec2, vec3, float, Fn, positionWorld, cameraPosition, normalize, dot, max, exp, pow, clamp, smoothstep, mix,
-  mx_fractal_noise_float, time, length,
+  mx_fractal_noise_float, time, length, normalWorld,
 } from 'three/tsl';
 import { PLANET_RADIUS } from '../planet/sites.js';
 
@@ -32,6 +32,9 @@ export const ENV = {
   night: uniform(0),                            // 0 day … 1 full night
   moonDir: uniform(new Vector3(0, -1, 0)),
   moonUp: uniform(0),                           // how much the moon lights the night (0…1)
+  // the night's fill light (irradiance from the open sky overhead): the moonlit sky and the
+  // starlight, deep blue, set each frame by the renderer (renderer.js update); black by day
+  nightFill: uniform(new Color(0, 0, 0)),
   // the scene's frame on the planet (DESIGN §4): planet position = planetO + planetM · scene position
   planetO: uniform(new Vector3(0, PLANET_RADIUS, 0)),
   planetM: uniform(new Matrix3()),
@@ -56,6 +59,14 @@ export const cloudShadow = Fn(() => {
   const shade = smoothstep(float(1).sub(cover).sub(0.08), float(1).sub(cover).add(0.12), n);
   return float(1).sub(shade.mul(clamp(cover.mul(1.6), 0, 0.78)));
 })();
+
+/**
+ * The night's fill at the current fragment (irradiance): the dim blue of the moonlit sky from above,
+ * a third of it from below (the pale paving and walls giving some back). Added to every opaque
+ * material's indirect light (renderer.js getGI), so that at night walls, streets and water out of the
+ * moon's direct light keep their forms instead of going black.
+ */
+export const nightFillNode = Fn(() => ENV.nightFill.mul(clamp(normalWorld.y.mul(0.35).add(0.65), 0.3, 1)))();
 
 /** Fog: denser near the ground, glowing toward the sun (aerial perspective). */
 export const fogFactor = Fn(() => {
