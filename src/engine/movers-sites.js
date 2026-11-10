@@ -1,0 +1,6 @@
+// The settlements with a moving life (src/engine/movers.js): their data modules, by settlement id.
+// A settlement gets boats and walkers by having src/settlements/<id>/movers.js (its ways, who walks,
+// what floats; see the Suzhou one) and a line here.
+export const MOVER_SITES = {
+  'ming-suzhou': () => import('../settlements/ming-suzhou/movers.js'),
+};
