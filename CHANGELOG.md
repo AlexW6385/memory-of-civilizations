@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.48 — Lighter surfaces (2026-11-10)
+
+Every surface's grain, stains and stone pits now come from two small baked noise textures instead of being computed per pixel: with all the new street life, smoke and weathering, Suzhou's garden turns at 58 fps again (it had dropped to 48).
+
 ## v10.46 — Building ahead sooner (2026-11-10)
 
 A settlement starts building as soon as its card is opened on the map, and the next one is built ahead 10 s after arriving instead of 30 s.
