@@ -101,13 +101,12 @@ body.panel-open #btn-mute, body.panel-open #btn-lang, body.panel-open #corner, b
 .speed-bar i { display: block; height: 100%; width: 0; border-radius: 2px; background: linear-gradient(90deg, #d9b77a, var(--accent)); transition: width 0.25s linear, background 0.4s; }
 .speed-bar i.fly { background: linear-gradient(90deg, #9fc3e8, #e3f0ff); }
 
-/* the large map: the globe and, beside it (below it on narrow screens), the list of settlements */
-.map { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(1080px, calc(100vw - 32px)); height: min(720px, calc(100vh - 32px)); padding: 14px 18px 16px; display: grid; grid-template-columns: 1fr 280px; grid-template-rows: auto 1fr auto; column-gap: 18px; }
+/* the large map: the globe alone, its settlements marked on it */
+.map { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(1080px, calc(100vw - 32px)); height: min(720px, calc(100vh - 32px)); padding: 14px 18px 16px; display: grid; grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
 .map[hidden] { display: none; }
 .map header { grid-column: 1 / -1; margin-bottom: 8px; }
 #map-canvas { grid-column: 1; grid-row: 2; width: 100%; height: 100%; min-height: 0; cursor: crosshair; border-radius: 10px; background: #1e1a15; touch-action: none; }
 .map .map-hint { grid-column: 1; grid-row: 3; font-size: 12.5px; color: var(--ink-dim); margin: 8px 2px 0; }
-#map-list li.head { position: sticky; top: 0; z-index: 1; margin: 0; padding: 12px 6px 4px; font: 600 11px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: #1c1813; border-bottom: 1px solid var(--line); }
 .map header { gap: 12px; }
 .map-random { margin-right: 0; margin-left: 8px; background: #c79a4b; border: 1px solid #e0b866; border-radius: 999px; padding: 6px 16px; font-size: 13px; font-weight: 600; color: #1e1a15; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); transition: background 0.15s, transform 0.1s; }
 .map-random::before { content: '⇄ '; }
@@ -115,11 +114,6 @@ body.panel-open #btn-mute, body.panel-open #btn-lang, body.panel-open #corner, b
 .map-random:active { transform: translateY(1px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
 .map-tour { margin-right: auto; margin-left: 0; }
 .map-random:hover { background: #ddb35f; }
-#map-list { grid-column: 2; grid-row: 2 / 4; list-style: none; margin: 0; padding: 0; overflow: auto; min-height: 0; }
-#map-list li button { width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 10px 6px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-#map-list li button:hover { background: rgba(255, 255, 255, 0.05); }
-#map-list .name { font-family: var(--serif); font-size: 17px; }
-#map-list .era { font-size: 12px; color: var(--ink-dim); white-space: nowrap; }
 
 #touch-btns { position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: max(34px, env(safe-area-inset-bottom)); display: flex; gap: 12px; z-index: 4; }
 #touch-btns[hidden] { display: none; }
@@ -134,11 +128,9 @@ body.panel-open #btn-mute, body.panel-open #btn-lang, body.panel-open #corner, b
 
 /* phones */
 @media (max-width: 700px) {
-  .map { inset: 0; left: 0; top: 0; transform: none; width: 100vw; height: 100dvh; border-radius: 0; border: 0; padding: max(10px, env(safe-area-inset-top)) 14px max(10px, env(safe-area-inset-bottom)); grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 56%) auto minmax(0, 1fr); }
+  .map { inset: 0; left: 0; top: 0; transform: none; width: 100vw; height: 100dvh; border-radius: 0; border: 0; padding: max(10px, env(safe-area-inset-top)) 14px max(10px, env(safe-area-inset-bottom)); grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
   #map-canvas { grid-row: 2; }
   .map .map-hint { grid-row: 3; font-size: 12px; }
-  #map-list { grid-column: 1; grid-row: 4; margin-top: 8px; }
-  #map-list .name { font-size: 16px; }
 }
 @media (max-width: 560px) {
   #corner { width: 168px; border-radius: 12px; }

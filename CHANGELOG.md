@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.45 — The map is the globe alone (2026-11-10)
+
+The list of settlements beside the map is gone: the map is the globe with its cities marked; click one for its card, then Go to travel there.
+
 ## v10.49 — Smoother turning, grounded paths (2026-11-10)
 
 Turning on the spot no longer redraws the sun's shadows every few frames, so Suzhou turns at 55–57 fps with far fewer stutters. The garden path up to the Green Ripples pavilion now climbs its mound instead of floating above it.

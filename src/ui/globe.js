@@ -1,9 +1,8 @@
 // The large map: the planet itself, as a globe to turn (drag) and come closer to (wheel, pinch),
 // with the settlements marked and named. A click on a settlement opens its card (card.js), whose Go
-// button takes the visitor to its building's entrance; a click anywhere else on the land, there. The list below names every
-// settlement with its time.
+// button takes the visitor to its building's entrance; a click anywhere else on the land, there.
 
-import { t, tr, era, onLang } from './i18n.js';
+import { t, tr, onLang } from './i18n.js';
 import { coastAt, climateAt } from '../planet/land.js';
 import { BUILT, PLANET_RADIUS } from '../planet/relief.js';
 import { SITES } from '../planet/sites.js';
@@ -40,20 +39,6 @@ export function landColour(d, [mount, moist, warm]) {
   return [r, g, b].map((v) => Math.max(0, Math.min(255, v)));
 }
 
-// The list's groups, in order, and the regions (sites.js) each holds.
-const GROUPS = [
-  ['east', ['china', 'tibet', 'japan', 'korea']],
-  ['south', ['india', 'indochina', 'java']],
-  ['mena', ['mesopotamia', 'persia', 'levant', 'bosphorus', 'egypt']],
-  ['africa', ['sahel', 'ethiopia', 'swahili', 'zimbabwe']],
-  ['europe', ['aegean', 'latium', 'britain', 'france', 'iberia', 'italy', 'lowlands', 'scandinavia', 'russia']],
-  ['americas', ['mexico', 'yucatan', 'andes', 'mississippi', 'southwest', 'northeast']],
-  ['oceania', ['polynesia', 'aotearoa', 'australia']],
-];
-const groupOf = (region) => (GROUPS.find(([, rs]) => rs.includes(region)) || ['other'])[0];
-/** "9th c." → 9, "21st c. BC" → -21: a sortable date. */
-const eraKey = (era) => { const m = /(\d+)/.exec(era || ''); const n = m ? +m[1] : 0; return /BC/i.test(era) ? -n : n; };
-
 export class GlobeView {
   constructor(world, onBuilding, onPlace, sun = null) {
     this.sun = sun;
@@ -61,7 +46,6 @@ export class GlobeView {
     this.onBuilding = onBuilding;
     this.onPlace = onPlace;
     this.canvas = document.getElementById('map-canvas');
-    this.list = document.getElementById('map-list');
     this.off = document.createElement('canvas');
     this.center = [0, 1, 0];
     this.up = [0, 0, -1];
@@ -70,34 +54,13 @@ export class GlobeView {
     this.sel = null;
     this.card = new SettlementCard(this.canvas.parentElement, this.canvas, (S) => this.go(S), () => { this.sel = null; if (this.canvas.offsetParent) this.repaintMarks(); });
     this.bind();
-    this.fillList();
-    onLang(() => { this.fillList(); this.card.fill(); this.draw(); });
+    onLang(() => { this.card.fill(); this.draw(); });
   }
 
   /** The entrance record of each built settlement's first building. */
   recFor(S) { return [...this.world.plans.values()].find((r) => r.site?.S === S); }
   /** Go to a settlement at once (the travel fetches its plans if they have not come yet). */
   go(S) { return this.onBuilding(S); }
-
-  fillList() {
-    this.list.innerHTML = '';
-    const order = [...GROUPS.map(([g]) => g), 'other'];
-    const sorted = [...BUILT].sort((a, b) => order.indexOf(groupOf(a.site.region)) - order.indexOf(groupOf(b.site.region)) || eraKey(a.site.era) - eraKey(b.site.era));
-    let last = null;
-    for (const S of sorted) {
-      const g = groupOf(S.site.region);
-      if (g !== last) {
-        last = g;
-        const h = document.createElement('li'); h.className = 'head'; h.textContent = t('regions')[g]; this.list.appendChild(h);
-      }
-      const li = document.createElement('li'), b = document.createElement('button');
-      b.innerHTML = `<span class="name"></span><span class="era"></span>`;
-      b.querySelector('.name').textContent = tr(S.site.name);
-      b.querySelector('.era').textContent = era(S.site.era);
-      b.onclick = () => this.go(S);
-      li.appendChild(b); this.list.appendChild(li);
-    }
-  }
 
   /** The settlement the visitor is at (the nearest), or null. */
   here() {
