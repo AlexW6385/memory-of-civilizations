@@ -225,7 +225,7 @@ export class SiteMovers {
     const V = (set, name) => set.variants.indexOf(name);
     this.wv = d.sets.walkers; this.bv = d.sets.boats;
     this.walkers = new MoverSet('walkers', d.sets.walkers, 96, { layer: SMALL, cast: true });
-    this.boatSet = new MoverSet('boats', d.sets.boats, 32, { layer: MID, cast: true });
+    this.boatSet = new MoverSet('boats', d.sets.boats, 32, { layer: SMALL, cast: true });   // (their shadows in the first cascade only: farther they cost a dynamic redraw of the second and are not seen)
     this.wakes = new WakeSet(16);
     this.root = new THREE.Group(); this.root.name = 'movers';
     this.root.add(this.walkers.group, this.boatSet.group, this.wakes.mesh);
