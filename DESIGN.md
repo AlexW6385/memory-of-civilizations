@@ -89,7 +89,7 @@ Density: ●●● dense (ornament, interiors and townscape throughout) · ●�
 
 ## 5. The detail standard
 
-What "detailed" means. Every settlement reaches all of this at L3; L1 and L2 are the steps there (levels at the end of this section).
+What "detailed" means. Every settlement reaches all of this at L3; L1 and L2 are the steps there (levels at the end of this section). Ming Suzhou is the worked example: how it was made, walked and made fast is in `docs/suzhou-method.md`.
 
 **Surfaces.** Masonry follows the real coursing, block sizes and joints; timber shows its grain, joints and pegs; plaster is uneven and patched; tiles and shingles are laid as they were, with the odd slipped or broken one. Every material responds to light as the real one does (polish, roughness, subsurface in marble and jade, sheen on silk and lacquer, dust on cloth). Weathering and use everywhere they would be: wear on thresholds, steps and handrails; soot over lamps and hearths; damp, moss and lichen on the shady and the wet side; dust in corners; rain streaks under sills; patina on bronze; the darker lower metre of walls along a street.
 
