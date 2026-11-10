@@ -1859,8 +1859,8 @@ function houseJiangnan(el, { bag, col }) {
       const nw = Math.max(2, Math.round(L / (det > 1 ? 1.3 : 1.7))), ww = Math.min(1.0, (L - 0.5) / nw - 0.3);
       for (let k = 0; k < nw; k++) {
         const wc = 0.25 + (L - 0.5) * (k + 0.5) / nw, a0 = wc - ww / 2, a1 = wc + ww / 2, ya = yf + 0.55, yb = yf + 1.75;
-        const lat = WINDOW_LATTICE[Math.floor(rand() * WINDOW_LATTICE.length)], lit = rand() < 0.3;
-        if (lat !== 'timber') qF(lit ? 'lamp_white' : 'wood_dark', a0, a1, ya, yb, uf - 0.012, -1);
+        const lat = WINDOW_LATTICE[Math.floor(rand() * WINDOW_LATTICE.length)]; rand(); // lit windows now come from the lattice paper shader
+        if (lat !== 'timber') qF('wood_dark', a0, a1, ya, yb, uf - 0.012, -1);
         if (!det) { B(a0, uf - 0.04, a1, uf, ya, yb, lat); continue; }
         B(a0, uf - 0.06, a1, uf, ya, yb, lat);
         B(a0 - 0.08, uf - 0.1, a1 + 0.08, uf, ya - 0.1, ya, 'lacquer_chestnut'); B(a0 - 0.08, uf - 0.08, a1 + 0.08, uf, yb, yb + 0.1, 'lacquer_chestnut');
