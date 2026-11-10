@@ -6,6 +6,7 @@
 
 import { RADIUS, LEVEL, CANALS, STREETS, BRIDGES, lots, onBridge } from './layout.js';
 import { northPlans } from './north.js';
+import './style.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const R = RADIUS - 26;                                  // the street life stops here (the people are drawn near)
@@ -100,6 +101,30 @@ function waterways() {
 
 /** The houses, in plans by quadrant and by how rich their detail is (so that the far, cheap ones cull apart from the near). */
 const TRADE_ORDER = ['cloth', 'medicine', 'tea', 'books', 'rice', 'lacquer'];
+// the trades of the shops outside the six open ones (weights), and the interior the house builder gives each (it knows six)
+const TRADE_W = { cloth: 1, tea: 1.2, rice: 1, medicine: 0.9, lacquer: 0.7, books: 0.8, wine: 1.2, pottery: 0.9, iron: 0.7, fans: 0.7, food: 1.2 };
+const HOUSE_TRADE = { wine: 'tea', food: 'tea', pottery: 'lacquer', iron: 'lacquer', fans: 'books' };
+/** More shops along the main streets, and every shop but the open six given one of the eleven trades (a separate stream: the lots stay as they were). */
+function prepareShops(open) {
+  const all = lots();
+  if (all.prepared) return;
+  all.prepared = true;
+  const r = rng(+(process.env.SHOPSEED || 2718));
+  for (const l of all) { l.shop0 = l.shop; l.trade0 = l.trade; }
+  const main = STREETS.slice(0, 4);
+  for (const l of all) {
+    if (open.has(l) || l.kind === 'yard' || l.kind === 'grand' || l.water) continue;
+    const F = frontOf(l), p = F.P(0.5, 3), near = main.some((s) => p[0] > s[0] - 1 && p[0] < s[2] + 1 && p[1] > s[1] - 1 && p[1] < s[3] + 1);
+    const q = r(), d = Math.hypot(p[0], p[1] - 40);
+    if (!l.shop && F.L > 3.3 && q < (near ? (d < 150 ? 1 : 0.9) : 0.4)) l.shop = true;
+  }
+  // every shop but the open six takes its trade in turn from a shuffled list, so that each trade has as many as another
+  const mine = all.filter((l) => l.shop && !open.has(l));
+  for (let i = mine.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [mine[i], mine[j]] = [mine[j], mine[i]]; }
+  const names = Object.keys(TRADE_W);
+  mine.sort((a, b) => (a.water ? 1 : 0) - (b.water ? 1 : 0));            // (the shops on the canals show no goods outside: the others first, so that each trade has as many)
+  mine.forEach((l, i) => { l.trade = names[i % names.length]; });
+}
 function houses() {
   const all = lots(), plans = [];
   // a few houses by the south street can be entered (DESIGN §4.3): the six shops (one of each trade: cloth, medicine,
@@ -107,17 +132,18 @@ function houses() {
   const near = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 - 60);
   const depth = (l) => (l.front === 's' || l.front === 'n' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]);
   const dry = all.filter((l) => !l.water && (l.front === 's' || l.front === 'n') && l.kind === 'row' && depth(l) < 7.4 && l.rect[2] - l.rect[0] > 4.2).sort((a, b) => near(a) - near(b));
-  const open = new Set();
+  const open = new Set(); openLots = open;
   const shopsNear = dry.filter((l) => l.shop).slice(0, 6);
   shopsNear.forEach((l, k) => { l.trade = TRADE_ORDER[k]; l.overhang = false; open.add(l); });
   for (const l of dry.filter((q) => !q.shop).slice(0, 3)) { l.overhang = false; open.add(l); }
+  prepareShops(open);
   const quads = [[], [], [], [], [], [], [], []];
   for (const l of all) {
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
     quads[(cx > 0 ? 1 : 0) + (cz > 0 ? 2 : 0) + (l.detail > 0 ? 0 : 4)].push(l);
   }
   quads.forEach((q, i) => {
-    const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
+    const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: HOUSE_TRADE[l.trade] || l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
     if (E.length) plans.push(base(`ming-suzhou-houses-${i}`, E));
   });
   return plans;
@@ -152,23 +178,23 @@ function riverLife() {
   for (const l of lots()) {
     const F = frontOf(l), out = F.n, y = LEVEL.street;
     if (!inDisc(F.P(0.5, 0)) || l.kind === 'yard') continue;
-    if (l.shop) {
-      // the banner at one end of the front, a pair of lanterns under the eave
-      if (rand() < 0.8) { const t = rand() < 0.5 ? 0.1 : 0.9; L.push({ t: 'shop_sign', at: F.P(t, -0.6), y, rot: F.rot, h: 2.75, len: 1.1 + rand() * 0.6, cloth: ({ cloth: 'cloth_indigo', tea: 'cloth_ochre', rice: 'cloth_white', medicine: 'cloth_black', lacquer: 'cloth_red', books: 'cloth_white' })[l.trade] || pick(['cloth_indigo', 'cloth_white', 'cloth_ochre']), seed: Math.floor(rand() * 1e9) }); }
-      if (rand() < 0.9) for (const t of [0.3, 0.7]) L.push({ t: 'hang_lantern', at: F.P(t, -0.15), y: y + 2.95, rot: F.rot, kind: rand() < 0.8 ? 'paper' : 'white', seed: 1 });
-      // goods on the counter: jars, baskets, cloth
-      const ware = ({ tea: 'jar', medicine: 'jar', rice: 'sacks' })[l.trade] || pick(['jar', 'basket', 'mixed', 'sacks']);
-      if (l.detail < 2 || ware === 'sacks') for (let k = 0; k < 4; k++) { const t = 0.2 + k * 0.2 + (rand() - 0.5) * 0.06; const kind = ware === 'jar' || (ware === 'mixed' && k % 2) ? 'pot' : ware === 'sacks' ? 'sacks' : 'basket'; L.push({ t: kind, at: F.P(t, -0.66), y: y + 1.4, rot: rand() * 6.28, s: 0.6, kind: kind === 'pot' ? pick(['glazed_jar', 'blue_jar', 'water_pot']) : undefined, seed: Math.floor(rand() * 1e9) }); }
-      if (rand() < 0.55) person(F.P(0.35 + rand() * 0.3, -1.5), y + 0.45, faceTo(out), { pose: 'stand' });
-      if (rand() < 0.45 && !l.water) person(F.P(0.3 + rand() * 0.4, 0.75), y, faceTo([-out[0], -out[1]]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' });
+    if (l.shop0) {
+      // (the banner, the name board and the goods are the shop front's own: shops.js; the draws stay, so that the life keeps its places)
+      if (rand() < 0.8) { rand(); if (!({ cloth: 1, tea: 1, rice: 1, medicine: 1, lacquer: 1, books: 1 })[l.trade0 || l.trade]) rand(); rand(); rand(); rand(); }
+      const rail = ['cloth', 'medicine', 'fans', 'food'].includes(l.trade);
+      if (rand() < 0.9) for (const t of [0.3, 0.7]) { rand(); if (!rail) L.push({ t: 'hang_lantern', at: F.P(t, -0.15), y: y + 2.95, rot: F.rot, kind: 'paper', seed: 1 }); }
+      const ware = ({ tea: 'jar', medicine: 'jar', rice: 'sacks' })[l.trade0 || l.trade] || pick(['jar', 'basket', 'mixed', 'sacks']);
+      if (l.detail < 2 || ware === 'sacks') for (let k = 0; k < 4; k++) { rand(); rand(); rand(); rand(); }
+      if (rand() < 0.55 && openLots.has(l)) person(F.P(0.35 + rand() * 0.3, -1.5), y + 0.45, faceTo(out), { pose: 'stand' });   // (the shopkeeper: seen only in the open shops)
+      if (rand() < 0.45 && !l.water) person(F.P(0.3 + rand() * 0.4, 1.5), y, faceTo([-out[0], -out[1]]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' });
       // a tea table out in front (the street is 6 m wide), people sitting at it
       if (!l.water && rand() < 0.22) {
-        const c = F.P(0.5, 2.0); L.push({ t: 'tea_table', at: c, c, r: 1.1, y, rot: F.rot, seed: Math.floor(rand() * 1e9) });
+        const c = F.P(0.5, 2.4); L.push({ t: 'tea_table', at: c, c, r: 1.1, y, rot: F.rot, seed: Math.floor(rand() * 1e9) });
         for (const [dx, dz] of [[0.85, 0], [-0.85, 0], [0, 0.85]]) if (rand() < 0.7) { const p = [c[0] + dx, c[1] + dz]; person(p, y, faceTo([-dx, -dz]), { pose: 'sit', dress: 'robe' }); }
       }
     } else if (!l.water) {
-      if (rand() < 0.3) L.push({ t: 'drying_tray', at: F.P(0.2 + rand() * 0.6, 0.7), y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
-      if (rand() < 0.5) L.push({ t: 'hang_lantern', at: F.P(0.5, -0.15), y: y + 2.95, rot: F.rot, kind: 'white', seed: 2 });
+      if (rand() < 0.3 && !l.shop) L.push({ t: 'drying_tray', at: F.P(0.2 + rand() * 0.6, 0.7), y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+      if (rand() < 0.5 && !l.shop) L.push({ t: 'hang_lantern', at: F.P(0.5, -0.15), y: y + 2.95, rot: F.rot, kind: 'white', seed: 2 });
     }
     // washing out of an upper window: over the water behind the waterside houses, over the lanes on a few others
     if (l.storeys > 1 && rand() < (l.water ? 0.45 : 0.12)) L.push({ t: 'laundry_pole', at: F.P(0.25 + rand() * 0.5, -0.5), y: y + 4.2, rot: F.rot, len: l.water ? 2.2 + rand() * 0.6 : 1.4, prop: false, seed: Math.floor(rand() * 1e9) });
@@ -246,6 +272,25 @@ function riverLife() {
   return plans;
 }
 
+/** The signs and goods of every shop front (shops.js), in tiles of the street life. */
+function shopFronts() {
+  const tiles = new Map(), open = openLots;
+  for (const l of lots()) {
+    if (!l.shop) continue;
+    const F = frontOf(l);
+    if (!inDisc(F.P(0.5, 0), 20)) continue;
+    const ovh = !!l.overhang && l.storeys > 1 && l.kind !== 'simple' && !open.has(l);
+    const at = F.P(0.5, 0), e = { t: 'suzhou_shop', at, y: LEVEL.street, rot: F.rot, L: F.L, v0: ovh ? 1.15 : 0.7, trade: l.trade, seed: l.seed + 7, open: open.has(l), detail: l.detail, water: l.water };
+    const k = `${Math.floor(at[0] / 100)},${Math.floor(at[1] / 100)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push(e);
+  }
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`ming-suzhou-shops-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
+}
+function inDisc([x, z], m = 30) { return Math.hypot(x, z) < R - m; }
+let openLots = new Set();
+
 export async function town() {
-  return [waterways(), ...houses(), ...riverLife(), ...northPlans()];
+  const hs = houses();
+  return [waterways(), ...hs, ...riverLife(), ...(process.env.NOSHOPS ? [] : shopFronts()), ...northPlans()];
 }

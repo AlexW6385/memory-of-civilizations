@@ -5,6 +5,8 @@
 // (docs/settlements/ming-suzhou.md §11).
 
 import { STYLES, registerStyle } from '../../core/build.js';
+import '../../objects/index.js';
+import { suzhouShop } from './shops.js';
 import '../../styles/ming/index.js';
 import { Parts, table, rock, pine, plaqueBuild, box, lathe } from './props.js';
 import { scholarStudy } from './study.js';
@@ -36,3 +38,6 @@ function penjing(el, { bag, col }) {
 }
 const base = STYLES.ming;
 registerStyle('suzhou-site', { ...base, elements: { ...base.elements, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing } });
+
+// the shop fronts are an element of the street life (instanced pieces, shared settlement-wide)
+STYLES.life.elements.suzhou_shop = suzhouShop;
