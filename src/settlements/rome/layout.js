@@ -11,8 +11,20 @@ export const SAEPTA = [78, -230, 138, 90];
 export const STADIUM = [-290, -175, -184, 100];
 export const FORUM = [-152, -158, -56, -70];                  // the square west of the Pantheon's forecourt, a temple at its west end
 export const TEMPLE = [-150, -127, -114, -101];               // the podium, facing east onto the square
+export const SAEPTA_GATES = { w: [-150, -70, 10], e: [-150, -70, 10], n: [108], s: [108] };
+/** Shops under the Saepta's portico, set against the long walls with their fronts to the court. */
+export function saeptaRows() {
+  const [x0, z0, x1, z1] = SAEPTA, out = [], t = 1.4, dep = 5, rand = rng(31);
+  for (let z = z0 + 8; z + 13.2 < z1 - 8; z += 13.2) {
+    if (SAEPTA_GATES.w.some((g) => z + 13.2 > g - 6 && z < g + 6)) continue;
+    out.push({ rect: [x0 + t, z, x0 + t + dep, z + 13.2], front: 'e', n: 3, storeys: 1, seed: Math.floor(rand() * 1e6) });
+    out.push({ rect: [x1 - t - dep, z, x1 - t, z + 13.2], front: 'w', n: 3, storeys: 1, seed: Math.floor(rand() * 1e6) });
+  }
+  return out;
+}
 export const PISTRINUM = [80, 149, 94, 160];                  // the mill-bakery on the street at the south
 export const LATRINE = [100, 152, 109, 160];
+export const INN = [-10, -232, 12, -214], FULLER = [16, -232, 35, -216];     // the lots behind the arrival's clearing: an inn and a fuller's, walked into
 export const VIA_LATA = { x: 175, w: 10 };
 export const TIBER = { x: -370, w: 46, level: -5 };
 /** Rows of tabernae under flats: both sides of the Via Lata and the north side of the street before the Pantheon. */
@@ -42,7 +54,7 @@ export function fountains() {
 }
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
-const riverX = (z) => TIBER.x + 28 * Math.sin(z / 120);
+export const riverX = (z) => TIBER.x + 28 * Math.sin(z / 120);
 export const inRiver = (x, z) => Math.abs(x - riverX(z)) < TIBER.w / 2 - 3 && Math.hypot(x, z) < RADIUS - 30;
 export function height(x, z) {
   const d = Math.abs(x - riverX(z)), edge = smooth(RADIUS - 70, RADIUS - 25, Math.hypot(x, z));
@@ -61,9 +73,49 @@ export function lots() {
   for (let x = -RADIUS + 20; x < RADIUS - 20; x += 26) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 24) {
     const w = 18 + rand() * 5, d = 16 + rand() * 5, cx = x + w / 2, cz = z + d / 2;
     if (Math.hypot(cx, cz) > RADIUS - 45 || [PANTHEON, BATHS, SAEPTA, STADIUM, FORUM, PISTRINUM, LATRINE].some((r) => inRect(r, cx, cz, 18)) || rows().some((r) => overlaps(r.rect, [x, z, x + w, z + d], 3)) || onStreet(cx, cz, 14)) continue;
-    if (Math.abs(cx - riverX(cz)) < TIBER.w / 2 + 22 || rand() < 0.12) continue;
+    if (Math.abs(cx - riverX(cz)) < TIBER.w / 2 + 34) continue;
+    if (rand() < 0.12) { GARDENS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) }); continue; }
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
   }
   return LOTS;
 }
+let GARDENS = [];
+/** The walled gardens (horti) in the blocks left empty by the insulae: planted with trees, laid out with a pool, a pergola and beds. */
+export function gardens() { lots(); return GARDENS; }
+export const inGarden = (x, z, m = 0) => gardens().some((g) => inRect(g.rect, x, z, m));
+/** The inhabited belt: paved alleys between the blocks, no wild planting. */
+export const urban = (x, z) => Math.hypot(x, z) < RADIUS - 45 && Math.abs(x - riverX(z)) > TIBER.w / 2 + 6;
+/** The alleys between the rows of tabernae, closed at the street by a wall with an arched passage, or (at a fountain) by the back of a recess. */
+let FILLS = null;
+export function fills() {
+  if (FILLS) return FILLS;
+  FILLS = [];
+  const fs = fountains(), has = (side, za, zb) => fs.some((f) => (side === 'e' ? f.rot > 0 : f.rot < 0) && f.at[1] > za && f.at[1] < zb && f.kind === 'lacus');
+  const R = rows(), xs = VIA_LATA.x, hw = VIA_LATA.w / 2;
+  for (let z = -160; z + 26 < 140; z += 26) {
+    FILLS.push({ rect: [xs - hw - 8.4, z + 22, xs - hw - 0.4, z + 26], front: 'e', fountain: has('e', z + 22, z + 26), seed: z * 7 + 1 });
+    FILLS.push({ rect: [xs + hw + 0.4, z + 22, xs + hw + 8.4, z + 26], front: 'w', fountain: has('w', z + 22, z + 26), seed: z * 7 + 2 });
+  }
+  const north = R.filter((r) => r.front === 's').sort((a, b) => a.rect[0] - b.rect[0]);
+  for (let i = 0; i + 1 < north.length; i++) if (Math.abs(north[i + 1].rect[0] - north[i].rect[2] - 4) < 0.01) FILLS.push({ rect: [north[i].rect[2], -188.5, north[i + 1].rect[0], -180.5], front: 's', fountain: false, seed: i * 13 + 5 });
+  return FILLS;
+}
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+
+/** The water's edge on one side of the Tiber (side −1 the west bank, +1 the east): points every 6 m where the river is drawn. */
+export function riverEdge(side, off = 21.6) {
+  const out = [];
+  for (let z = -140; z <= 140; z += 6) { const x = riverX(z) + side * off; if (Math.hypot(x, z) < RADIUS - 40 && inRiver(riverX(z), z)) out.push([x, z]); }
+  return out;
+}
+
+/** Warehouses and shops along the east quay of the Tiber, their fronts to the water. */
+export function quayRows() {
+  const out = [], rand = rng(9);
+  for (let z = -48; z < 130; z += 24) {
+    const xr = riverX(z + 11) + 21.6 + 11.5 + 1.0 + 0.4;
+    if (!inRiver(riverX(z + 11), z + 11) || Math.hypot(xr + 8, z) > RADIUS - 44) continue;
+    out.push({ rect: [xr, z, xr + 8, z + 22], front: 'w', n: 4, storeys: 1, seed: Math.floor(rand() * 1e6) });
+  }
+  return out;
+}

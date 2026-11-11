@@ -10,6 +10,7 @@ import { merge as mergeGeoms } from '../greek/columns.js';
 import { planarWall, arcSolid } from '../byzantine/index.js';
 import '../../objects/index.js';
 import './index.js';
+import * as D_ from './dress.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** Arched openings (dark) along one face of a block: { r: rect, face, y0, h, w, step }. */
@@ -32,8 +33,15 @@ function arches(bag, r, face, y0, h, w, step) {
  */
 function insula(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, far = !!el.simple;
-  const n = 4 + (rand() < 0.4 ? 1 : 0), g0 = 4.6, sh = 3.2, H = g0 + (n - 1) * sh;
-  bag.add('brick', box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); col.floor(el.rect, y + H);
+  const n = 3 + (rand() < 0.55 ? 1 : 0) + (rand() < 0.3 ? 1 : 0), g0 = 4.6, sh = 3.2, H = g0 + (n - 1) * sh;
+  // the facing: bare brick, or plastered above the shops in white, warm or ochre (a third of the blocks)
+  const vr = rand(), upper = vr < 0.55 ? 'brick' : vr < 0.78 ? 'stucco_rome' : vr < 0.92 ? 'stucco_warm' : 'paint_ochre';
+  if (upper === 'brick') bag.add('brick', box(x0, y - 0.5, z0, x1, y + H, z1));
+  else { bag.add('brick', box(x0, y - 0.5, z0, x1, y + g0 - 0.3, z1)); bag.add(upper, box(x0, y + g0 - 0.3, z0, x1, y + H, z1)); }
+  col.rect(el.rect, y - 0.5, y + H); col.floor(el.rect, y + H);
+  /** The dressing tools of a face: d negative toward the street, as in street.js. */
+  const tl = (F) => ({ bag, col, y, P: (u, d) => [F.a[0] + F.u[0] * u - F.o[0] * d, F.a[1] + F.u[1] * u - F.o[1] * d],
+    B: (mat, u0, u1, d0, d1, ya, yb) => fb(F, u0, u1, y + ya, y + yb, -d1, -d0, mat) });
   const faces = [
     { a: [x0, z0], u: [1, 0], o: [0, -1], L: x1 - x0 }, { a: [x0, z1], u: [1, 0], o: [0, 1], L: x1 - x0 },
     { a: [x0, z0], u: [0, 1], o: [-1, 0], L: z1 - z0 }, { a: [x1, z0], u: [0, 1], o: [1, 0], L: z1 - z0 },
@@ -67,6 +75,16 @@ function insula(el, { bag, col }) {
       const r = rand();
       if (r < 0.3) fb(F, uc - w / 2, uc + w / 2, y + 0.12, y + 3.3, 0.03, 0.08, 'shutter_brown');   // shut with its boards
       else if (r < 0.65) fb(F, uc - w / 2, uc + w / 2 - 0.9, y + 0.12, y + 1.0, -0.05, 0.5, 'travertine');   // a counter in the door
+      // the dressing at the door (the street rows carry the full set; the blocks a lighter one)
+      const T = tl(F), q = rand();
+      if (r >= 0.3 && rand() < 0.4) D_.awning(T, uc - w / 2 - 0.1, uc + w / 2 + 0.1, 3.35, 2.6, 1.5, ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_green'][Math.floor(rand() * 5)]);
+      if (q < 0.18) D_.amphoraRack(T, uc - w / 2 - 0.1, 3 + Math.floor(rand() * 3), rand);
+      else if (q < 0.3) D_.potStall(T, uc - w / 2, Math.min(1.4, w - 0.4), rand);
+      else if (q < 0.42) D_.litter(T, uc - w / 2 + 0.1, rand, Math.floor(rand() * 3));
+      else if (q < 0.52) D_.signBoard(T, uc + w / 2 + 0.2, 2.55, rand);
+      else if (q < 0.62) D_.lampBracket(T, uc - w / 2 - 0.25, 2.2);
+      else if (q < 0.74) D_.notice(T, uc + w / 2 + 0.3, 1.2, 0.4, 1.0, rand);
+      else if (q < 0.82) D_.stoneBench(T, uc - w / 2 + 0.1, 1.3);
     }
     // the upper storeys: windows with sills and shutters, a string course at each floor
     const nw = Math.max(1, Math.floor((F.L - 1.0) / (el.winStep ?? 3.1))), ww = (F.L - 1.0) / nw;
@@ -78,12 +96,15 @@ function insula(el, { bag, col }) {
         fb(F, uc - 0.5, uc + 0.5, wy, wy + wh, -0.05, 0.02, 'opening');
         if (far) continue;
         fb(F, uc - 0.62, uc + 0.62, wy - 0.1, wy, -0.05, 0.12, 'travertine');
+        { const q = rand(); if (q < 0.1) D_.flowerBox(tl(F), uc, wy - y - 0.1, rand); else if (q < 0.17) D_.washing(tl(F), uc, wy - y - 0.1, rand); }
         const r = rand();
         if (r < 0.12) fb(F, uc - 0.5, uc + 0.5, wy, wy + wh, 0.03, 0.07, 'shutter_brown');
         else if (r < 0.45) for (const s of [-1, 1]) fb(F, s < 0 ? uc - 1.0 : uc + 0.53, s < 0 ? uc - 0.53 : uc + 1.0, wy, wy + wh, -0.05, 0.04, 'shutter_brown');
       }
     }
     if (far) return;
+    D_.weather(tl(F), 0.2, F.L - 0.2, 4.2, H - 1.0, rand, 0.8);
+    if (rand() < 0.18) D_.maenianum(tl(F), 1.0, Math.min(F.L - 1.0, 4.5 + rand() * 5), g0 + sh + 0.1, rand);
     // the cornice of corbelled brick under the eaves
     fb(F, -0.25, F.L + 0.25, y + H - 0.32, y + H - 0.12, -0.05, 0.22, 'brick');
     fb(F, -0.4, F.L + 0.4, y + H - 0.12, y + H, -0.05, 0.36, 'travertine');
@@ -97,6 +118,7 @@ function insula(el, { bag, col }) {
       fb(F, 0.35, F.L - 0.35, yb + 0.45, yb + 0.5, 1.02, 1.06, 'timber');
     }
   });
+  if (!far) for (let k = 0, nc = 1 + Math.floor(rand() * 3); k < nc; k++) { const cx = x0 + 2 + rand() * (x1 - x0 - 4), cz = (z0 + z1) / 2 + (rand() - 0.5) * 2; bag.add('brick', box(cx - 0.35, y + H, cz - 0.35, cx + 0.35, y + H + Math.min(x1 - x0, z1 - z0) * 0.22 + 1.2, cz + 0.35)); bag.add('travertine', box(cx - 0.45, y + H + Math.min(x1 - x0, z1 - z0) * 0.22 + 1.2, cz - 0.45, cx + 0.45, y + H + Math.min(x1 - x0, z1 - z0) * 0.22 + 1.35, cz + 0.45)); }
   const rise = Math.min(x1 - x0, z1 - z0) * 0.22, ov = far ? 0.3 : 0.55;
   bag.add('roof_tile', frustum([x0 - ov, z0 - ov, x1 + ov, z1 + ov], y + H, y + H + rise, (x1 - x0) * 0.2, (x1 - x0) * 0.2, (z1 - z0) / 2 + ov - 0.05, (z1 - z0) / 2 + ov - 0.05));
 }

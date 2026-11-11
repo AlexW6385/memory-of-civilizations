@@ -3,7 +3,7 @@
 // in the forum, the baths' furnace smoke. The engine part is src/engine/smoke.js; positions from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { lots, rows, RADIUS, PISTRINUM, BATHS, TEMPLE } from './layout.js';
+import { lots, rows, RADIUS, PISTRINUM, BATHS, TEMPLE, INN, FULLER } from './layout.js';
 
 const ID = 'rome';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -20,6 +20,12 @@ export function emitters() {
   E.push({ p: [PISTRINUM[2] - 0.5 - 2.2, 5.9, PISTRINUM[3] - 0.5 - 2.0], kind: 'kitchen', seed: 31, thr: 0 });
   E.push({ p: [(TEMPLE[2] + 6), 1.4, (TEMPLE[1] + TEMPLE[3]) / 2], kind: 'incense', thr: 0, seed: 9 });
   E.push({ p: [(BATHS[0] + BATHS[2]) / 2 + 20, 21, BATHS[3] - 12], kind: 'kitchen', seed: 5, thr: 0 });
+  // the baths: the caldarium's hot air and steam from the oculus, the furnaces (praefurnia) at the back of the block
+  { const cx = (BATHS[0] + BATHS[2]) / 2, cz = BATHS[1] + 72;
+    E.push({ p: [cx, 33.5, cz], kind: 'steam', thr: 0.1, seed: 41 }, { p: [cx - 20, 20, BATHS[3] - 10], kind: 'kitchen', seed: 43, thr: 0 }, { p: [cx + 20, 20, BATHS[3] - 10], kind: 'kitchen', seed: 44, thr: 0 }); }
+  // the inn's kitchen (a brazier in the court) and the fuller's: steam from the vats, the sulphur frame's pale smoke
+  E.push({ p: [INN[0] + 17, 1.2, INN[3] - 12], kind: 'kitchen', seed: 51, thr: 0.1 });
+  E.push({ p: [FULLER[0] + 4, 1.0, FULLER[3] - 9], kind: 'steam', thr: 0, seed: 52 }, { p: [FULLER[0] + 2.4, 2.0, FULLER[1] + 3.0], kind: 'steam', thr: 0.2, seed: 53 });
   return E;
 }
 const ATT = [];
