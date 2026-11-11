@@ -39,6 +39,12 @@ export const QUALITY = {
   low: { pixelRatio: 0.75, shadowMap: 1024, cascades: 2, ao: false, aa: false, air: false, lamps: 0, ssr: false },
 };
 
+/** A geometry's vertex layout as the pipeline sees it: each attribute's name, size, array type and normalization, and the index's type. */
+function layoutOf(g) {
+  const a = g.attributes, ks = Object.keys(a).sort();
+  return ks.map((k) => `${k}${a[k].itemSize}${a[k].array?.constructor.name[0] ?? ''}${a[k].array?.BYTES_PER_ELEMENT ?? ''}${a[k].normalized ? 'n' : ''}`).join() + (g.index ? `/${g.index.array.BYTES_PER_ELEMENT}` : '');
+}
+
 export class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
@@ -285,7 +291,10 @@ export class Renderer {
       // thread: one per material left the others to be built in the frame that first drew them,
       // e.g. 24 cells of merged roof tiles in one frame, a quarter of a second; the shader code and
       // the pipeline are shared, so the GPU's part is done once)
-      const kind = `${o.material.uuid}|${o.isInstancedMesh ? 1 : 0}${o.instanceColor ? 1 : 0}${g.index ? 1 : 0}${o.receiveShadow ? 1 : 0}|${Object.keys(g.attributes).sort().join()}`;
+      // (the vertex layout is part of the pipeline: a merged mesh with plain float normals and a part
+      // with packed ones are two pipelines of one material; keyed by names alone, the second was
+      // taken as compiled and built in the frame that first drew it, after arriving)
+      const kind = `${o.material.uuid}|${o.isInstancedMesh ? 1 : 0}${o.instanceColor ? 1 : 0}${g.index ? 1 : 0}${o.receiveShadow ? 1 : 0}|${layoutOf(g)}`;
       const key = o.isInstancedMesh ? `i:${o.uuid}|${o.material.uuid}|${o.receiveShadow ? 1 : 0}` : kind;
       if (seen.has(key)) return;
       seen.add(key);
@@ -501,6 +510,16 @@ export class Renderer {
    * ways (behind the loading screen or the travel fade), so that the pipelines of everything near
    * are compiled exactly as the scene pass uses them, then wait for the GPU to finish.
    */
+  /**
+   * One frame drawn before anything is loaded (behind the loading screen): the scene pass's target
+   * and context exist from then on, so precompile works during the start's loading. Without it every
+   * precompile of the start returned at once ("before the first frame") and all the start's shaders
+   * and pipelines (~200) were built one after another in the look round's first frame.
+   */
+  prime() {
+    try { this.render(); } catch (e) { console.warn('prime:', e.message); }
+  }
+
   async warmup() {
     const cam = this.camera, yaw = cam.rotation.y;
     for (let k = 0; k < 4; k++) { cam.rotation.y = yaw + k * Math.PI / 2; cam.updateMatrixWorld(); this.render(); }
