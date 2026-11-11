@@ -3,7 +3,9 @@
 // wall below the pagoda, the crowd on the wall looking out for the bore, tea tables on the road; the
 // peddlers come to the riverbank for the crowd: stalls along the foot of the flood wall, hawkers with
 // their shoulder poles, a fruit seller under a parasol.
-import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, lots } from './layout.js';
+import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells, riverTeaHouses } from './layout.js';
+import { lifePlans, interiorLots } from './life.js';
+import './townscape.js';
 import { RIVER_BOATS, CANAL_BOATS } from './plan.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 136], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -55,7 +57,7 @@ function tideDay() {
   }
   teaInside(S, L, rand, person);
   // the shops' name boards over their fronts, on the beam over the opening; the tea houses' on their front beam
-  const tea = new Set(teaHouses()), F = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
+  const tea = new Set([...teaHouses(), ...Object.entries(interiorLots()).filter(([k]) => k !== 'house').flatMap(([, v]) => v)]), F = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
   for (const l of lots()) {
     if (!l.shop) continue;
     const [x0, z0, x1, z1] = l.rect, o = F[l.front], len = o[0] ? z1 - z0 : x1 - x0, edge = [o[0] > 0 ? x1 : o[0] < 0 ? x0 : (x0 + x1) / 2, o[1] > 0 ? z1 : o[1] < 0 ? z0 : (z0 + z1) / 2];
@@ -66,13 +68,8 @@ function tideDay() {
   return [base('song-hangzhou-stands', S), base('song-hangzhou-tide-crowd', L, 'life')];
 }
 
-/** The tea houses on the road below the pagoda: three of the wide shop lots nearest its stair. */
-let TEA = null;
-export function teaHouses() {
-  if (TEA) return TEA;
-  TEA = lots().filter((l) => l.front === 's' && l.rect[3] > ROAD.z0 - 1 && l.rect[0] < -30 && l.rect[2] - l.rect[0] > 8).slice(0, 3);
-  return TEA;
-}
+/** The tea houses on the road below the pagoda (layout.js). */
+export const teaHouses = riverTeaHouses;
 /** Inside each tea house: tea tables with their benches, customers seated round them, the host at the counter. */
 function teaInside(S, L, rand, person) {
   for (const l of teaHouses()) {
@@ -112,9 +109,90 @@ function boatPeople() {
   return { ...base('song-hangzhou-boat-people', L, 'life'), center: [0, 120] };
 }
 
+
+/**
+ * The city and the lake (docs/settlements/song-hangzhou.md §12): the wall with its two gates, bastions and
+ * parapets, the streets' paving, the wells, the fire-watch towers, the storehouses and landings on the
+ * canal, the lake with the Su Causeway, its bridges, lotus and boats.
+ */
+function fabric() {
+  const E = [], rand = rng(1089), top = CITY.h, th = CITY.th, zs = CITY.zs, zn = CITY.zn, b = 2.5;
+  const wallBlock = (rect, batter) => E.push({ t: 'block', walk: true, rect, y0: -0.5, y1: top, mat: 'earth_wall', batter });
+  const xw = CITY.xw + th / 2, X1 = CITY.x1;
+  const pr = (a, c, y, extra = {}) => E.push({ t: 'song_parapet', a, b: c, y, th: 0.55, h: 1.5, ...extra });
+  const cut = (lo, hi, holes) => { let segs = [[lo, hi]]; for (const [h0, h1] of holes) segs = segs.flatMap(([p, q]) => (h1 <= p || h0 >= q ? [[p, q]] : [[p, h0], [h1, q]].filter(([m, n]) => n - m > 1.5))); return segs; };
+  // ---- the south and north walls: pieces from the west wall to the gate, on to the water gate, over the canal, to the east end
+  const SB = [58, 190, 270, 362, 452], NB = [190, 270, 362, 452];
+  const sideWall = (zc, gate, along, bast, outSign, towerFront) => {
+    const z0 = zc - th / 2, z1 = zc + th / 2, pieces = [[xw, gate.rect[0]], [gate.rect[2], WATER_GATE[0]], [WATER_GATE[1], X1]];
+    for (const [a, c] of pieces) wallBlock([a, z0, c, z1], [0, 0, b, b]);
+    E.push({ t: 'block', walk: true, rect: [WATER_GATE[0], z0, WATER_GATE[1], z1], y0: 4.6, y1: top, mat: 'brick_grey', batter: [0, 0, b, b] });
+    E.push({ t: 'song_gate', rect: gate.rect, along: 'z', w: gate.w, h: 5, top: 7.4, tw: 5, H: gate.H, mat: 'brick_grey' });
+    E.push({ t: 'ming_hall', rect: [gate.rect[0] + 3, zc - 6, gate.rect[2] - 3, zc + 6], y: gate.H, H: 5.4, front: towerFront, four: true, roof: 'xieshan', plat: 0.3, eave: 1.7, sweep: 0.9 });
+    // bastions (mamian) on the outer face, with their parapets; the main parapets cut where they stand
+    const zOutFace = outSign > 0 ? z1 : z0, zOutLine = zOutFace - outSign * (b + 0.05), zInLine = (outSign > 0 ? z0 : z1) + outSign * (b + 0.05);
+    for (const x of bast) {
+      const o = outSign > 0 ? [zOutFace - b - 0.6, zOutFace + 6] : [zOutFace - 6, zOutFace + b + 0.6];
+      E.push({ t: 'block', walk: true, rect: [x - 7, o[0], x + 7, o[1]], y0: -0.5, y1: top, mat: 'earth_wall', batter: [0.8, 0.8, outSign > 0 ? 0 : 1.6, outSign > 0 ? 1.6 : 0] });
+      const zo = outSign > 0 ? o[1] - 1.7 : o[0] + 1.7, zi = outSign > 0 ? o[0] + 0.6 : o[1] - 0.6;
+      pr([x - 6.2, zo], [x + 6.2, zo], top); pr([x - 6.45, zi], [x - 6.45, zo], top); pr([x + 6.45, zi], [x + 6.45, zo], top);
+    }
+    const holes = [[gate.rect[0], gate.rect[2]], ...bast.map((x) => [x - 7.1, x + 7.1])];
+    for (const [a, c] of [pieces[0], pieces[1], [WATER_GATE[0], WATER_GATE[1]], pieces[2]]) for (const [p, q] of cut(a, c, holes)) { pr([p, zOutLine - outSign * 0.3 + outSign * 0.3], [q, zOutLine], top); pr([p, zInLine], [q, zInLine], top, { inner: true }); }
+  };
+  sideWall(zs, GATE, 'z', SB, 1, 's');
+  sideWall(zn, LAKE_GATE, 'z', NB, -1, 'n');
+  // ---- the west wall between them, with its bastions and parapets
+  const xa = CITY.xw - th / 2, xb = CITY.xw + th / 2, wz0 = zn + th / 2, wz1 = zs - th / 2, WB = [-80, -125, -170];
+  wallBlock([xa, wz0, xb, wz1], [b, b, 0, 0]);
+  for (const z of WB) { E.push({ t: 'block', walk: true, rect: [xa - 5.4, z - 7, xb - b - 0.6, z + 7], y0: -0.5, y1: top, mat: 'earth_wall', batter: [1.6, 0, 0.8, 0.8] }); pr([xa - 3.7, z - 6.2], [xa - 3.7, z + 6.2], top); pr([xa - 5.4 + 0.6, z - 6.45], [xa - 3.7, z - 6.45], top); pr([xa - 5.4 + 0.6, z + 6.45], [xa - 3.7, z + 6.45], top); }
+  for (const [p, q] of cut(wz0, wz1, WB.map((z) => [z - 7.1, z + 7.1]))) { pr([xa + b + 0.05, p], [xa + b + 0.05, q], top); pr([xb - b - 0.05, p], [xb - b - 0.05, q], top, { inner: true }); }
+  // the paving through the gates and on the shore before the lake gate
+  for (const [g, zc] of [[GATE, zs], [LAKE_GATE, zn]]) E.push({ t: 'paving', rect: [g.x - g.w / 2, zc - th / 2 - 0.2, g.x + g.w / 2, zc + th / 2 + 0.2], y: LEVEL.street + 0.04, th: 0.3 });
+  // ---- the streets' paving
+  for (const s of streets()) E.push({ t: 'paving', rect: s.r, y: LEVEL.street + 0.04, th: 0.3 });
+  // the Imperial Way's own surface: slabs at the sides, the gravel between, the ruts and the drain covers
+  streets().filter((s) => s.kind === 'imperial').forEach((s, i) => { if (s.r[3] - s.r[1] > 8) E.push({ t: 'hz_imperial_way', rect: s.r, y: LEVEL.street + 0.04, seed: 31 + i }); });
+  // ---- wells in the lanes
+  for (const p of wells()) E.push({ t: 'town_well', at: p, y: LEVEL.street + 0.04, rot: rand() * 6.28 });
+  // ---- the fire-watch towers (wang huo lou): a brick base, a timber room under a hipped roof, on the Imperial Way's corners
+  for (const [x0, zz0, x1, zz1] of WATCH_TOWERS) {
+    const cx = (x0 + x1) / 2, cz = (zz0 + zz1) / 2;
+    E.push({ t: 'block', rect: [x0, zz0, x1, zz1], y0: -0.3, y1: 5.8, mat: 'brick_grey', batter: [0.35, 0.35, 0.35, 0.35] });
+    E.push({ t: 'ming_pavilion', c: [cx, cz], shape: 'square', w: 5.4, d: 5.4, y: 5.8, H: 3.4, open: [0, 1, 2, 3], plat: 0.3 });
+  }
+  // ---- the storehouses on the canal (tafang) with their loading platforms: sacks and jars on them
+  TAFANG.forEach((r, i) => {
+    const f = TAFANG_FRONT[i];
+    E.push({ t: 'tafang', rect: r, y: LEVEL.street, front: f, seed: i });
+    const px = f === 'w' ? r[0] - 1.1 : r[2] + 1.1, rot = f === 'w' ? Math.PI / 2 : -Math.PI / 2;
+    for (let z = r[1] + 5; z < r[3] - 6; z += 14) E.push(rand() < 0.5 ? { t: 'sack_pile', at: [px, z], y: LEVEL.street + 0.38, rot, rows: [3, 2] } : { t: 'jar_heap', at: [px, z], y: LEVEL.street + 0.38, rot, n: 4, rows: 2 });
+  });
+  // ---- landings down to the canal on both banks: granite steps
+  for (const west of [true, false]) {
+    for (let z = -420; z < 120; z += 31 + rand() * 12) {
+      if (CANAL_BRIDGES.some((bz) => Math.abs(bz - z) < 12) || Math.abs(z - zs) < 18 || Math.abs(z - zn) < 18) continue;
+      const fx = west ? CANAL.x0 + 0.35 : CANAL.x1 - 0.35, dir = [west ? 1 : -1, 0], hl = rand() < 0.4 ? 2.2 : 1.1;
+      E.push({ t: 'water_steps', a: [fx, z - hl], b: [fx, z + hl], dir, y: LEVEL.street, water: LEVEL.canal, double: hl > 2, moor: true });
+    }
+  }
+  // ---- the West Lake: its water over the bowl the ground makes (the causeway, pavilion and jetty are the landmark's), lotus in the shallows
+  E.push({ t: 'water_rect', rect: WEST_LAKE.rect, y: WEST_LAKE.level });
+  const shallows = (x, z) => { const d = lakeDepth(x, z); return d > WEST_LAKE.waterDepth + 1 && d < WEST_LAKE.waterDepth + 18; };
+  for (const [cx, cz, r, n] of [[60, -290, 16, 70], [-60, -305, 16, 70], [-180, -300, 16, 70], [-290, -330, 14, 60]]) E.push({ t: 'lotus', c: [cx, cz], r, n, y: WEST_LAKE.level, seed: Math.floor(Math.abs(cx) * 7 + 3), inside: shallows });
+  return base('song-hangzhou-city', E);
+}
+
 export async function town() {
-  const tea = new Set(teaHouses()), all = lots().filter((l) => !tea.has(l)), plans = [];
-  for (let i = 0; i < all.length; i += 150) plans.push(base(`song-hangzhou-houses-${i / 150}`, all.slice(i, i + 150).map((l) => ({ t: 'house_jiangnan', y: LEVEL.street, ...l }))));
-  plans.push(...tideDay(), boatPeople());
+  const chosen = interiorLots(), tea = new Set(teaHouses()), inter = new Set(Object.values(chosen).flat());
+  const all = lots().filter((l) => !tea.has(l) && !inter.has(l)), plans = [];
+  const order = [...all].sort((a, b) => b.detail - a.detail);
+  const N = 120;
+  for (let i = 0; i < order.length; i += N) plans.push(base(`song-hangzhou-houses-${i / N}`, order.slice(i, i + N).map((l) => ({ t: 'house_jiangnan', y: LEVEL.street, ...l, simple: l.detail === 0 ? true : undefined }))));
+  // the lots the life furnishes (life.js): their shells raised here, the floor 0.45 m over the street; the furniture is the life's
+  const shells = [];
+  for (const [kind, list] of Object.entries(chosen)) for (const l of list) shells.push({ t: 'hz_shell', rect: l.rect, front: l.front, y: LEVEL.street, kind, seed: l.seed, roof: l.roof });
+  plans.push(base('song-hangzhou-shells', shells));
+  plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base));
   return plans;
 }
