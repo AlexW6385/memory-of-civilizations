@@ -83,6 +83,12 @@ Clay flutes, the slit drum and turtle-shell drums (a flute and a struck wooden s
 - **A game in the Great Ball Court.** The basic outfit a loincloth, sometimes with leather hip guards; kneepads; elaborate headdresses likely only in ritual; teams of two to four; the Great Ballcourt's field 96.5 × 30 m, its rings 6 m up; scholars think it may never have been used for games [stated: Wikipedia, "Mesoamerican ballgame"]. **Built:** two teams of four in loincloths with hide hip belts (red and indigo), one player in a plumed cap, one kneeling, the solid rubber ball near the middle line; watchers sitting and standing along the inner edges of both platforms' tops and on the end temples' platforms [inferred: shown as a game despite the doubt; the numbers and the places of the watchers].
 - **Agave.** Two to five agaves (the maguey solid of `plants.js`, smaller) along the walls of each house lot, kept clear of the houses and the gateway [inferred for Yucatán from Joya de Cerén's agave and the Yucatec henequen]. The ceiba (yaxche) of the plaza is wanted but the flora catalogue has no ceiba; the banyan stands in, as before.
 
+## 14. Living systems (2026-11-11): walkers, birds, smoke
+
+- **Walkers** (`movers.js`): men in the loincloth (ex) with a cotton cape, workmen in the loincloth alone, women in the long white cotton dress, bearers with jars on the head, porters with sacks, priests in long cloaks and caps, boys; barefoot, dark-skinned, long hair [inferred: dress after Maya murals and figurines, as §11–12]. Ways: the plaza (busiest), the sacbe, and lanes in the gaps of the 34 m lot grid beyond the plaza, stopping short of the cenote. No boats (the cenote lies 20 m down).
+- **Birds** (`fauna.js`): swallows looping over and into the Sacred Cenote and over the plaza, vultures (as crows) high over the temples, sparrows on the plaster and sacbe, an egret on the cenote's south rim [inferred: Yucatán species; the swallows nesting in the cenote's walls are a well-known sight there].
+- **Smoke** (`smoke.js`): hearth smoke from a scatter of the house lots' houses at the meals, through the thatch; copal incense at the Castillo's summit, the Temple of the Warriors' altar and the cenote's offering [stated: copal burnt in ceramic bowls at the cenote, The Met; inferred: the temple places].
+
 ## Sources
 
 - [El Castillo, Chichen Itza — Wikipedia](https://en.wikipedia.org/wiki/Temple_of_Kukulc%C3%A1n)
