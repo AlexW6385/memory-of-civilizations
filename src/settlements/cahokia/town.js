@@ -43,7 +43,10 @@ function fences(all) {
   return out;
 }
 /** The empty cells of the grid, filled: a lone granary, a yard fire, a garden, a woodpile, a rack of maize. */
-function fillers() {
+let FILL = null;
+/** The yards' fillers as plan elements (cached: the smoke and the fauna read them too). */
+export function fillerList() {
+  if (FILL) return FILL;
   const E = [];
   for (const g of gaps()) {
     const [cx, cz] = g.c;
@@ -57,7 +60,10 @@ function fillers() {
     else if (k === 4) E.push({ t: 'drying_rack', rect: [cx - 2.4, cz - 0.3, cx + 2.4, cz + 0.3], y: height, kind: g.seed % 3 ? 'maize' : 'fish', seed: g.seed });
     else E.push({ t: 'craft_arbor', rect: [cx - 1.6, cz - 1.2, cx + 1.6, cz + 1.2], y: height, trade: g.seed % 2 ? 'pottery' : 'shell', seed: g.seed });
   }
-  const out = [];
+  return (FILL = E);
+}
+function fillers() {
+  const E = fillerList(), out = [];
   for (let i = 0; i < E.length; i += 120) out.push(base(`cahokia-fill-${i / 120}`, E.slice(i, i + 120)));
   return out;
 }

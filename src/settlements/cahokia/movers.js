@@ -13,7 +13,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 30, night: 4, rain: 0.6, reach: 150, spawnMin: 28, far: 42 },
+  walkers: { day: 44, night: 5, rain: 0.6, reach: 150, spawnMin: 28, far: 42 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: CREEK.level,
 };
@@ -46,6 +46,9 @@ export function walkways() {
   for (const z of [5, 70, 130]) push([PLAZA[0] + 4, z - 1.5, PLAZA[2] - 4, z + 1.5], 1.4, 'street', 0.5);
   // the ramp of Monks Mound up to the first terrace and the summit's edge
   push([-26.2, -200, -23.8, -38], 1.0, 'street');
+  // the first terrace of Monks Mound, and the path along the creek's bank from landing to landing
+  push([-56, -85, 56, -83], 0.7, 'street');
+  for (let x = -330; x < 330; x += 20) push([x, creekZ(x + 10) + CREEK.w / 2 + 3.5, x + 20, creekZ(x + 10) + CREEK.w / 2 + 4.8], 0.5, 'lane');
   // the lanes of the neighbourhoods, busier near the plaza
   for (const r of lanes()) push(r, 0.5, 'lane');
   // the ways round the small plazas
@@ -67,6 +70,10 @@ export const WALKERS = [
     c1: [CL.fibre, CL.tan, CL.ochre], c2: [CL.tan], c3: [CL.black], speed: [0.95, 1.2], stride: 1.1, pole: true, h: [0.9, 0.97] },
   { id: 'hunter', weight: 0.5, market: 0.3, el: { dress: 'trousers', hair: 'topknot', arms: 'staff', carry: 'staff', staffMat: 'timber', len: 1.8, feet: 'shod' },
     c1: [CL.tan, CL.brown], c2: [CL.tan, CL.brown], c3: [CL.black], speed: [1.1, 1.4], stride: 1.5 },
+  { id: 'water', weight: 0.7, market: 0.8, el: { dress: 'wrap', hair: 'long', over: 'none', carry: 'pot', feet: 'shod' }, wet: 'cape', swing: 0.4,
+    c1: [CL.fibre, CL.tan, CL.ochre], c2: [CL.tan], c3: [CL.black], speed: [0.9, 1.1], stride: 1.1, h: [0.9, 0.97] },
+  { id: 'elder', weight: 0.3, market: 0.5, el: { dress: 'trousers', hair: 'bun', over: 'cape', arms: 'staff', carry: 'staff', staffMat: 'timber', len: 1.6, feet: 'shod' }, wet: 'cape',
+    c1: [CL.white, CL.tan, CL.grey], c2: [CL.tan, CL.brown], c3: [CL.black], speed: [0.7, 0.9], stride: 1.1 },
   { id: 'boy', weight: 0.4, market: 0.3, el: { dress: 'trousers', hair: 'bun', arms: 'hang' },
     c1: [CL.tan, CL.brown], c2: [CL.tan], c3: [CL.black], speed: [1.2, 1.7], stride: 1.0, h: [0.55, 0.68], swing: 1.1 },
 ];

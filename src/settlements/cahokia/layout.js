@@ -41,6 +41,9 @@ function ramp(x, z) {
   if (z > -148 && z <= -108) return 12 + 18 * smooth(-108, -148, z);
   return 0;
 }
+/** A ramp up each small platform mound's south face: 5 m wide, its foot 2.5 heights out. */
+export const mRamp = ([x, z, s, h]) => ({ x, zOut: z + s + 2.5 * h, zIn: z + s - 1.1 * h, h });
+const SRAMP = MOUNDS.map((m) => { const r = mRamp(m); return (px, pz) => (Math.abs(px - r.x) > 4.5 || pz > r.zOut || pz < r.zIn - 0.5 ? 0 : r.h * smooth(r.zOut, r.zIn, pz) * smooth(4.5, 2.5, Math.abs(px - r.x))); });
 const CONE = CONES.map(([cx, cz, r, h]) => (x, z) => h * smooth(r, 0, Math.hypot(x - cx, z - cz)));
 const RIDGE = RIDGES.map(([x0, z0, x1, z1, h]) => (x, z) => {
   const mz = (z0 + z1) / 2, hw = (z1 - z0) / 2 + h * 1.3, across = 1 - Math.min(1, Math.abs(z - mz) / hw) ** 2, along = smooth(0, h * 2.2, Math.min(x - x0 + h * 1.3, x1 + h * 1.3 - x));
@@ -49,6 +52,7 @@ const RIDGE = RIDGES.map(([x0, z0, x1, z1, h]) => (x, z) => {
 export function mounds(x, z) {
   let h = Math.max(MAIN(x, z), FIRST(x, z), WEST(x, z), EAST(x, z), FOXP(x, z), ramp(x, z), ROUNDTOP[3] * smooth(ROUNDTOP[2], 0, Math.hypot(x - ROUNDTOP[0], z - ROUNDTOP[1])));
   for (const f of SMALL) h = Math.max(h, f(x, z));
+  for (const f of SRAMP) h = Math.max(h, f(x, z));
   for (const f of CONE) h = Math.max(h, f(x, z));
   for (const f of RIDGE) h = Math.max(h, f(x, z));
   return h;

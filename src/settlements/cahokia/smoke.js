@@ -6,16 +6,20 @@
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { lots, smallPlazas, RADIUS, CREEK, creekZ, SUMMIT, FOX, height } from './layout.js';
+import { fillerList, openSet } from './town.js';
 
 const ID = 'cahokia';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 
 function emitters() {
   const E = [], rand = rng(1175);
-  for (const l of lots()) if (rand() < 0.38) {
+  for (const l of lots()) if (rand() < 0.42) {
     const [x0, z0, x1, z1] = l.rect;
     E.push({ p: [(x0 + x1) / 2 + (rand() - 0.5) * 1.2, l.y + 2 + 3.0, (z0 + z1) / 2], kind: 'kitchen', thr: rand() * 0.6, seed: l.seed + 1 });
   }
+  // the yard fires and the arbors' pits of the town's gaps; the open houses' hearths
+  for (const e of fillerList()) if (e.t === 'yard_fire' || e.t === 'craft_arbor') { const [x, z] = e.c || [(e.rect[0] + e.rect[2]) / 2 + 3.4, (e.rect[1] + e.rect[3]) / 2]; E.push({ p: [x, height(x, z) + 0.6, z], kind: 'kitchen', thr: 0.2 + rand() * 0.5, seed: e.seed + 5 }); }
+  { const L = lots(); for (const k of openSet().keys()) { const [x0, z0, x1, z1] = L[k].rect; E.push({ p: [(x0 + x1) / 2, L[k].y + 2.2 + 3.2, (z0 + z1) / 2], kind: 'kitchen', thr: 0, seed: L[k].seed + 9 }); } }
   smallPlazas().forEach((p, i) => {
     E.push({ p: [p.c[0], height(p.c[0], p.c[1]) + 0.5, p.c[1]], kind: 'kitchen', thr: 0.3 + rand() * 0.4, seed: p.seed + 3 });
     if (i % 2) E.push({ p: [p.c[0] + 8.6, height(p.c[0] + 8.6, p.c[1] - 5.5) + 0.6, p.c[1] - 5.5], kind: 'kitchen', thr: 0.5 + rand() * 0.3, seed: p.seed + 4 });   // the pottery pit
