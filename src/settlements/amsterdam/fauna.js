@@ -28,6 +28,15 @@ for (const R of RINGS) for (const a of [0.6, 1.5, 2.3]) {
   if (Math.hypot(x, z) > RADIUS - 80) continue;
   perches.push({ kind: 'sparrow', x, z, y: GROUND + 0.1, rot: a, range: [1.6, 1.2] });
 }
+for (const R of RINGS) for (const a of [0.9, 1.3, 1.8, 2.2, 2.7]) {          // more sparrows: the quays by the stoops, on the bridges' approaches
+  const r = R - 11.5, x = C[0] + Math.cos(a) * r, z = C[1] + Math.sin(a) * r;
+  if (Math.hypot(x, z) > RADIUS - 80) continue;
+  perches.push({ kind: 'sparrow', x, z, y: GROUND + 0.1, rot: a + 1, range: [1.8, 1.2] });
+}
+{ const a = 1.1, r = RINGS[1] + 12.3, x = C[0] + Math.cos(a) * r, z = C[1] + Math.sin(a) * r;          // a heron on a canal's quay
+  perches.push({ kind: 'heron', x, z, y: GROUND, rot: a + Math.PI, stay: [80, 240], gone: [40, 150], alert: 10 }); }
+flights.push({ kind: 'crow', n: 6, loop: { c: [59, -238], a: [24, 20], rot: 0.3 }, y: [30, 18], speed: 9 },
+  { kind: 'swallow', n: 4, loop: { c: [0, -120], a: [90, 40], rot: 0.2 }, y: [10, 5], speed: 8 });
 perches.push({ kind: 'heron', x: 70, z: IJ_Z + 1.4, y: GROUND, rot: -Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
 void DAM;
 export default { fish, flights, perches };

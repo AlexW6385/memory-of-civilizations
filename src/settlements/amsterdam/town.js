@@ -6,7 +6,7 @@ import { SLEDGES, BOATS } from './plan.js';
 const base = (id, elements) => ({ id, style: 'dutch', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' } });
 export async function houses() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l, open: (l.front === 'n' && l.rect[1] === -203) || l.seed % 11 === 0 }))));
+  for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l, open: (l.front === 'n' && l.rect[1] === -203) || l.seed % (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 230) < 190 ? 4 : 9) === 0 }))));
   return plans;
 }
 
@@ -16,9 +16,9 @@ export function warehouses() {
 }
 
 const Y = GROUND + 0.05;
-function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A figure of 1670 Amsterdam: a burgher in black with a broad hat and collar, a woman in a hood, a working man or woman. */
-function person(rand, kind, at, rot, extra = {}) {
+export function person(rand, kind, at, rot, extra = {}) {
   const c = (l) => l[Math.floor(rand() * l.length)], hair = [['hide_brown', 0.7], ['hide_tan', 0.85], ['hide_black', 0.7], ['hide_brown', 0.55]][Math.floor(rand() * 4)];
   const o = { t: 'figure', at, y: Y, rot, seed: Math.floor(rand() * 1e9), skin: 'skin_light', hairMat: hair[0], hairShade: hair[1], legs: 'hose', ...extra };
   if (kind === 'burgher') Object.assign(o, { dress: 'robe', cloth: c(['cloth_black', 'cloth_black', 'cloth_brown']), cloth2: 'cloth_white', over: 'collar', hat: 'brim', hatMat: 'cloth_black', hair: 'long', beard: rand() < 0.4 });

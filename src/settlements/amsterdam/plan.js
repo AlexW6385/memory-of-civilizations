@@ -84,6 +84,8 @@ export const canals = {
       const x = C[0] + Math.cos(a) * R, z = C[1] + Math.sin(a) * R;
       return Math.hypot(x, z) < RADIUS - 75 ? { t: 'canal_bridge', c: [x, z], dir: [Math.cos(a), Math.sin(a)], L: CANAL_W + 2 * QUAY + 8, w: 6.5, y: GROUND, water: WATER, bed: WATER - 1.8 } : null;
     })).filter(Boolean),
+    // the smock mills on the bastions of the rampart beyond the last canal's houses, turned to the south-west wind
+    ...[22, 44, 66, 90, 114, 136, 158].map((deg, k) => { const a = deg * Math.PI / 180, r = 350, x = Math.cos(a) * r, z = Math.sin(a) * r; return { t: 'windmill', at: [x, z], y: height(x, z), h: 14 + (k % 3), yaw: -1.9 + (k % 3 - 1) * 0.25, seed: 5 + k }; }),
     ...BOATS.map(([x, z, rot, len, load], k) => ({ t: 'praam', at: [x, z], rot, len, load, seed: 40 + k, y: WATER })),
     // the quay walls along both edges of every canal and along the IJ
     ...quays(),
