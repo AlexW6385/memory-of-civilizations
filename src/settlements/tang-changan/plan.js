@@ -50,7 +50,7 @@ const rooms = [
   room('daci-en', DACI.rect, 0, 'open'),
   ...interiorRooms(),
 ];
-const walks = [[[28, 20], [28, 28], [60, 205], [ax, 210], [ax, 190], [ax, 150], [ax, 128]]];
+const walks = [[[28, 20], [28, 210], [ax, 210], [ax, 172], [ax - 15, 172], [ax - 15, 128], [ax - 2.5, 128], [ax - 1.8, 123.5]]];
 walks[0].y0 = 0;
 
 export const temple = {

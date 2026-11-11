@@ -89,6 +89,13 @@ Kitchen smoke at the morning and midday meals, steam from the food stalls, incen
 
 Walkers by trade and hour: officials in procession, women, Sogdian merchants, camel drivers, porters, monks, soldiers of the ward guard; the camel trains on the avenue and into the West Market; horses; fauna: sparrows, crows, pigeons round the pagoda, magpies, dogs, and a cat or two.
 
+## 14. What is built (first pass) and what is inferred
+
+- `src/styles/tang/`: `tang_hall` (platform of brick-faced rammed earth, red columns on stone bases, tiered bracket sets, white frieze panels, doors and barred windows, deep-eaved low roof with owl tails: `kit.js` `tangRoof`), `tang_house` (courtyard house in a rammed-earth wall: gate, main hall, wings, thatched hut), `tang_shop_row` (a run of open-fronted shops under one roof, counters, goods by trade, sign poles), `fang_wall` / `fang_gate` / `drum_tower` (ward wall 3.2 m, battered, tile-capped; gate with earth piers, timber deck and a three-bay gate building; the street drum pavilion), `tang_pagoda` (the Dayan Pagoda), `tang_interior` (Hu wine shop, official's hall), `tang_jars`.
+- The sizes are the sources' where given (wall 3 m, wall thickness 2.6 m, pagoda 58 m, 25 m first storey, 4.2 m platform, bays 9/9/7/7/5/5/5); the layout is compressed (§2). Bracket sets are simplified tiers of arms, cross arms and blocks, not a measured Tang set [inferred]; house plans after the murals [inferred].
+- The pagoda's interior (stairs, floors) is not modelled: the tower is solid, its doors recessed panels [inferred: simplification].
+- Interiors: the Hu wine shop (dais with low tables, earthen counter with jars, tables with folding stools, round carpet, a dancer, lute, flute and drum players, patrons) and the hall of an official's house (dais, screen, low table, zither player, guests) are walkable; the temple halls use the style's `temple_interior`.
+
 ## Sources
 
 See §1; further: [Culturechina, what did people wear in the Tang](https://www.culturechina.com/blog/what-did-people-wear-in-the-tang-dynasty.html); [Wikipedia, Women's clothing in China](https://en.wikipedia.org/wiki/Women%27s_clothing_in_China); the tang-wutai dossier of this repo for the Foguang hall's proportions.

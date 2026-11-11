@@ -31,7 +31,7 @@ export function interiorElements() {
   const px = f[0] + 1.2, pz = f[3] + 1.9;
   E.push({ t: 'block', rect: [px - 0.06, pz - 0.06, px + 0.06, pz + 0.06], y0: 0, y1: 5.6, mat: 'bamboo_culm' });
   E.push({ t: 'block', rect: [px + 0.06, pz - 0.02, px + 0.9, pz + 0.02], y0: 3.9, y1: 5.4, mat: 'cloth_ochre', collide: false });
-  for (let k = 0; k < 4; k++) E.push({ t: 'block', rect: [f[0] + 4 + k * 1.1, f[3] + 1.6, f[0] + 4.5 + k * 1.1, f[3] + 2.1], y0: 0, y1: 0.55, mat: 'pottery_dark' });
+  E.push({ t: 'tang_jars', at: [f[0] + 4, f[3] + 1.8], n: 5, y: 0, dir: [1, 0], seed: 4 });
   return E;
 }
 /** The rooms (music zones): the wine shop (with the apron before it) and the furnished house's hall. */

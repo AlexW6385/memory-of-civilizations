@@ -74,8 +74,16 @@ function house(L, el) {
   void col;
 }
 
+/** tang_jars { at: [x, z], n, y, dir: [dx, dz], mat }: a row of wine jars with red cloth stoppers standing on the ground, as before a wine shop. */
+function jars(el, { bag, col }) {
+  const [x, z] = el.at, d = el.dir || [1, 0], rand = rng(el.seed || 3);
+  for (let k = 0; k < (el.n || 4); k++) {
+    const px = x + d[0] * k * 0.62, pz = z + d[1] * k * 0.62, h = 0.55 + rand() * 0.15;
+    jar(bag, px, el.y ?? 0, pz, 0.26, h, el.mat || 'pottery_dark'); bag.add('cloth_red', box(px - 0.09, (el.y ?? 0) + h, pz - 0.09, px + 0.09, (el.y ?? 0) + h + 0.05, pz + 0.09)); col.circle(px, pz, 0.26, el.y ?? 0, (el.y ?? 0) + h + 0.05);
+  }
+}
 export { wine as furnishWine, house as furnishHouse };
 export function tangInterior(el, ctx) {
   inFrame(ctx, el.c, YAW[el.face || 's'], (L) => (el.kind === 'wine' ? wine(L, el) : house(L, el)));
 }
-export const INTERIOR_ELEMENTS = { tang_interior: tangInterior };
+export const INTERIOR_ELEMENTS = { tang_interior: tangInterior, tang_jars: jars };
