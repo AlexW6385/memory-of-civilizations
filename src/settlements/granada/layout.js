@@ -151,6 +151,7 @@ export const GREAT_MOSQUE = [-38, 114, -4, 152];
 const RESERVED = [...Object.values(SITES).map((s) => s.rect), SOUK, GREAT_MOSQUE];
 const reserved = (r, m = 5) => RESERVED.some((k) => r[0] < k[2] + m && r[2] > k[0] - m && r[1] < k[3] + m && r[3] > k[1] - m);
 // the walks of the Carrera del Darro (both banks along the water) and the lanes of the medina inside the walls
+export const inReserved = (x, z, m = 3) => reserved([x, z, x, z], m);
 export const MEDINA_X = (k) => -91.25 + 12.5 * k;       // the cross lanes (3 m wide) between the columns of houses
 export const MEDINA_LANES = [-23.75, 1.25, 26.25];       // the lanes between the rows (2.5 m wide)
 let LOTS = null;
