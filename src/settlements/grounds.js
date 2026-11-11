@@ -91,6 +91,7 @@ import { ground as baliVillage } from './bali-village/ground.js';
 import { ground as bagan } from './bagan/ground.js';
 import { ground as kakadu } from './kakadu/ground.js';
 import { ground as beninCity } from './benin-city/ground.js';
+import { ground as dogon } from './dogon/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -179,6 +180,7 @@ export const GROUNDS = {
   bagan,
   kakadu,
   'benin-city': beninCity,
+  dogon,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -272,6 +274,7 @@ const LOADERS = {
   'bali-village': () => import('./bali-village/index.js'),
   bagan: () => import('./bagan/index.js'),
   kakadu: () => import('./kakadu/index.js'),
+  dogon: () => import('./dogon/index.js'),
 };
 
 /** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */

@@ -1176,4 +1176,20 @@ export const CARDS = {
       "院宅与伊亚 —— 沿街一排排山墙朝街、门户敞开的黏土房，酋长之宅带二层，四周是土堤与壕沟，城门以整块木材制成。",
     ],
   },
+  'dogon': {
+    en: [
+      "The Dogon villages lie along the Bandiagara Escarpment in what is now central Mali, a sandstone cliff some 150 km long above the sandy Seno plain, a landscape the UNESCO list took in 1989. The moment shown is about 1930, at the end of the rains, with the millet standing ripe and the granaries filling. The houses are of mud, cow dung and millet straw, built tightly together at the cliff's foot on terraces cut into the talus; the Dogon came in the 14th century and took the cliff from the Tellem, whose dwellings still stand in its face.",
+      "The toguna — the men's house, open on every side under a roof of eight layers of millet stalks held up by eight carved wooden posts; so low that no one can stand in it, it is where the village's talk is settled.",
+      "The family compound and its ginna — the house of the senior man, with a windowless facade of rows of niches and carved doors, a central room, a storeroom and a round kitchen from which a ladder climbs to the roof; round granaries with straw hats stand in the courtyard.",
+      "The Tellem dwellings — small rooms and round granaries of mud and stone on ledges high in the cliff, under the overhangs of the sandstone.",
+      "The place, altars and fields — conical mud altars at the ends of the lanes, the round punulu huts at the village's edge, a baobab, and the millet fields on the plain below.",
+    ],
+    zh: [
+      "多贡村落沿今马里中部的邦贾加拉悬崖分布，这道砂岩悬崖长约150公里，俯瞰沙质的塞诺平原，1989年被列入联合国教科文组织名录。画面定格在约1930年雨季结束时，小米已熟，谷仓渐满。房屋以泥、牛粪和小米秸秆建成，紧挨着建在崖脚的坡积层梯田上；多贡人14世纪迁来，从泰莱姆人手中接过这面悬崖，泰莱姆人的居所至今仍嵌在崖壁里。",
+      "托古纳（议事屋）—— 四面敞开的男人之屋，八根雕花木柱撑着八层小米秸秆的屋顶，低得没人能站直，村里的事便在这里商议。",
+      "家族院落与吉纳 —— 家中长者之屋，无窗的立面排满壁龛并配有雕花门，里面有中厅、储藏室和圆形厨房，梯子从厨房通向屋顶；院里立着戴草帽的圆形谷仓。",
+      "泰莱姆人的居所 —— 高处崖壁的岩架上，砂岩悬岩之下，是泥和石砌的小屋与圆形谷仓。",
+      "广场、祭坛与田地 —— 巷子尽头的圆锥形泥祭坛，村边的圆形经期小屋，一棵猴面包树，以及坡下平原上的小米田。",
+    ],
+  },
 };
