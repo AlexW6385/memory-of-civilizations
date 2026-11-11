@@ -772,22 +772,22 @@ function imperialWay(el, ctx) {
   // the gravel's wear: patches of beaten earth and mud where the carts turn, cobbles and flints worked up through it, horse dung, straw and the sweepings of the stalls, ruts' edges broken
   const gw = gx1 - gx0, patch = [], cob = [], dung = [], strw = [], cob2 = [];
   for (let z = z0 + 0.5; z < z1 - 0.5; z += 1.1 + rand() * 1.6) {
-    const px = gx0 + 0.4 + rand() * (gw - 0.8), rx = 0.35 + rand() * 0.9, rz = 0.3 + rand() * 0.7;
-    patch.push(lathe([[0.001, 0.008], [1, 0.006], [1.02, 0]], 9).scale(rx, 1, rz).translate(px, y + 0.03, z));
+    const px = gx0 + 0.4 + rand() * (gw - 0.8), rx = 0.25 + rand() * 0.6, rz = 0.2 + rand() * 0.5;
+    patch.push(lathe([[1.02, 0], [1, 0.006], [0.001, 0.008]], 9).scale(rx, 1, rz).translate(px, y + 0.03, z));
   }
-  for (let z = z0 + 0.3; z < z1 - 0.3; z += 0.5 + rand() * 0.7) for (let q = 0; q < 2; q++) {
-    const px = gx0 + 0.2 + rand() * (gw - 0.4), r = 0.07 + rand() * 0.14, h = r * (0.35 + rand() * 0.3);
-    (rand() < 0.6 ? cob : cob2).push(lathe([[0.001, h], [r * 0.8, h * 0.85], [r, h * 0.3], [r * 1.05, 0]], 6).scale(1, 1, 0.7 + rand() * 0.4).rotateY(rand() * 6.28).translate(px, y + 0.03, z + rand() * 0.4));
+  for (let z = z0 + 0.3; z < z1 - 0.3; z += 0.3 + rand() * 0.5) for (let q = 0; q < 3; q++) {
+    const px = gx0 + 0.2 + rand() * (gw - 0.4), r = 0.04 + rand() * 0.09, h = r * (0.3 + rand() * 0.3);
+    (rand() < 0.6 ? cob : cob2).push(lathe([[r * 1.05, 0], [r, h * 0.3], [r * 0.8, h * 0.85], [0.001, h]], 6).scale(1, 1, 0.7 + rand() * 0.4).rotateY(rand() * 6.28).translate(px, y + 0.03, z + rand() * 0.4));
   }
   for (let z = z0 + 5 + rand() * 9; z < z1 - 3; z += 8 + rand() * 12) {
     const px = gx0 + 0.6 + rand() * (gw - 1.2);
-    for (let q = 0, n = 1 + Math.floor(rand() * 3); q < n; q++) dung.push(lathe([[0.001, 0.07], [0.09, 0.055], [0.13, 0.02], [0.14, 0]], 7).scale(1, 1, 0.8).translate(px + (rand() - 0.5) * 0.6, y + 0.03, z + (rand() - 0.5) * 0.6));
+    for (let q = 0, n = 1 + Math.floor(rand() * 3); q < n; q++) dung.push(lathe([[0.14, 0], [0.13, 0.02], [0.09, 0.055], [0.001, 0.07]], 7).scale(1, 1, 0.8).translate(px + (rand() - 0.5) * 0.6, y + 0.03, z + (rand() - 0.5) * 0.6));
   }
   for (let z = z0 + 1; z < z1 - 1; z += 2.5 + rand() * 4) {
     const px = gx0 + 0.3 + rand() * (gw - 0.6), cxs = rand() * 6.28;
     for (let q = 0; q < 6; q++) { const a = cxs + (rand() - 0.5) * 1.2, l = 0.12 + rand() * 0.22, ox = px + (rand() - 0.5) * 0.5, oz = z + (rand() - 0.5) * 0.5; strw.push(rod([ox, y + 0.035, oz], [ox + Math.cos(a) * l, y + 0.04, oz + Math.sin(a) * l], 0.004, 3)); }
   }
-  for (const g of patch) bag.add('ground', g); for (const g of cob) bag.add('granite_grey', g); for (const g of cob2) bag.add('bluestone', g);
+  for (const g of patch) bag.add('slate', g); for (const g of cob) bag.add('granite_grey', g); for (const g of cob2) bag.add('bluestone', g);
   for (const g of dung) bag.add('cloth_brown', g); for (const g of strw) bag.add('reed_mat', g);
   // the slab bands' edges: the gutter between each band and its shop fronts is not drawn here (the fronts' aprons begin at the plot line); here: short broken places where a slab has been lifted and refilled with gravel
   for (let z = z0 + 4 + rand() * 7, k = 0; z < z1 - 3; z += 9 + rand() * 11, k++) { const sd = k % 2 ? 1 : -1, xx = sd < 0 ? x0 + 0.6 + rand() * (band - 1.4) : x1 - band + 0.8 + rand() * (band - 1.4), w2 = 0.5 + rand() * 0.6, d2 = 0.4 + rand() * 0.6; bag.add('pebbles', box(xx, y + 0.028, z, xx + w2, y + 0.036, z + d2)); }
