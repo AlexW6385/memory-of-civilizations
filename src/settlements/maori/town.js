@@ -2,7 +2,7 @@
 // work and the people of the pā (§4b): a pōwhiri on the marae ātea before the chief's house, the
 // cooking place and the weavers on the tihi, men on the fighting stages, and on the lake shore the
 // flax, the fish racks and a canoe being hollowed.
-import { RADIUS, PATH, HILL, LAKE, village, inGarden, height } from './layout.js';
+import { RADIUS, PATH, HILL, LAKE, VENTS, village, inGarden, height, inLake } from './layout.js';
 import pa from './plan.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -127,5 +127,27 @@ export async function town() {
     if (Math.hypot(x, z) > RADIUS - 45 || !clear(x, z, 5)) continue;
     E.push({ t: 'harakeke', at: [x, z], y: height(x, z), h: 1.5 + rand() * 0.8, seed: Math.floor(rand() * 1e5) }); taken.push([x, z]); nf++;
   }
+  // ---- the hot ground: pools with their steam boxes, and women cooking at them ----------------
+  VENTS.forEach(([x, z], k) => {
+    if (inLake(x, z) || !clear(x, z, 4)) return;
+    E.push({ t: 'ngawha', c: [x, z], y: height(x, z), r: 1.2 + 0.5 * rand(), yaw: rand() * 6.28, seed: 30 + k }); taken.push([x, z]);
+    if (k % 2 === 0) { const at = [x + 2.6, z + 1.2]; woman(at, height(at[0], at[1]), face(at, [x, z]), { pose: 'squat', over: 'none' }); }
+  });
+  // ---- the household work of the kāinga: before each few houses the cooking place or the racks, the flax, the weaver, a man at his adze or net -----------
+  const houses = v.houses.slice(1).filter((h) => Math.hypot(h.c[0] - hx, h.c[1] - hz) > HILL.ditch + 10 && Math.hypot(h.c[0], h.c[1]) < RADIUS - 60 && !inLake(h.c[0], h.c[1] - 12));
+  const door = (h, d) => [h.c[0] - Math.sin(h.yaw) * (h.l / 2 + d), h.c[1] - Math.cos(h.yaw) * (h.l / 2 + d)];   // before the porch
+  houses.forEach((h, k) => {
+    const rot = h.yaw + Math.PI, at0 = door(h, 3.2);
+    if (Math.hypot(at0[0], at0[1]) > RADIUS - 55 || !clear(at0[0], at0[1], 1.5)) return;
+    const gy = (p) => height(p[0], p[1]);
+    if (k % 7 === 0) { E.push({ t: 'hangi', c: door(h, 5.5), y: gy(door(h, 5.5)), yaw: rot, seed: 40 + k }); taken.push(door(h, 5.5)); const w1 = door(h, 3.4); woman(w1, gy(w1), face(w1, door(h, 5.5)), { pose: 'squat', over: 'none' }); }
+    else if (k % 7 === 2) { const w = [at0[0] + Math.cos(h.yaw) * 1.4, at0[1] - Math.sin(h.yaw) * 1.4]; E.push({ t: 'weaving', at: w, y: gy(w), yaw: rot, seed: 50 + k }); const q = [w[0] - Math.sin(rot) * 1.5, w[1] - Math.cos(rot) * 1.5]; woman(q, gy(q), face(q, w), { pose: 'squat', over: 'none' }); }
+    else if (k % 7 === 4) { const a = [at0[0] - Math.cos(h.yaw) * 5, at0[1] + Math.sin(h.yaw) * 5], b = [at0[0] + Math.cos(h.yaw) * 0 - Math.cos(h.yaw) * 1, at0[1] + Math.sin(h.yaw) * 1]; E.push({ t: 'whata', a, b, y: gy(a), h: 1.9 }); taken.push(a, b); }
+    else if (k % 7 === 5) { const q = door(h, 2.6); man(q, gy(q), face(q, h.c), { pose: 'squat' }); }
+    // flax at the corner of the house, a hīnaki or two by the wall
+    const hk = [h.c[0] + Math.cos(h.yaw) * (h.w / 2 + 1.6), h.c[1] - Math.sin(h.yaw) * (h.w / 2 + 1.6)];
+    if (clear(hk[0], hk[1], 2)) E.push({ t: 'harakeke', at: hk, y: gy(hk), h: 1.4 + rand() * 0.7, seed: Math.floor(rand() * 1e5) });
+    if (k % 3 === 0) { const hn = [hk[0] - Math.cos(h.yaw) * 1.2, hk[1] + Math.sin(h.yaw) * 1.2]; E.push({ t: 'hinaki', at: hn, y: gy(hn), yaw: rand() * 3, len: 1.0 + rand() * 0.3 }); }
+  });
   return [plan('maori-kainga', 'maori', E), plan('maori-people', 'life', P)];
 }

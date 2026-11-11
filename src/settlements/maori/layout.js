@@ -10,7 +10,7 @@ export const LAKE = { z: -175, level: -1.5 };                 // the shore runs 
 export const PATH = { x: 0, w: 3.2 };                         // up the south face
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
-const shoreZ = (x) => LAKE.z + 14 * Math.sin(x / 41) + 6 * Math.sin(x / 13 + 2);
+export const shoreZ = (x) => LAKE.z + 14 * Math.sin(x / 41) + 6 * Math.sin(x / 13 + 2);
 /** The terraced hill (flat terraces, steep scarps), the ditch at its foot, the path's ramp, the shore. */
 export function height(x, z) {
   const r = Math.hypot(x - HILL.c[0], z - HILL.c[1]);
@@ -67,3 +67,6 @@ export function village() {
   return (V = out);
 }
 export const inGarden = (x, z) => Math.abs(x) < 120 && z > 150 && Math.hypot(x, z) < RADIUS - 40;
+
+/** Where the ground steams: hot pools and vents on the flat between the hill and the shore (the geothermal ground of Rotorua's south shore). */
+export const VENTS = [[-150, -128], [-132, -122], [176, -118], [190, -96], [158, -135]];

@@ -166,6 +166,44 @@ function palisade(el, { bag, col }) {
 }
 
 // ---- houses --------------------------------------------------------------------------------
+
+/**
+ * The inside of a common house (wharepuni) and its banked earth: a floor of fern and flax mats over the sunk earth; the
+ * hearth of stones and ash a little inside the door, a few brands laid across it; sleeping places along both side walls
+ * — a bed of fern and rushes with the cloaks folded on it — the heads to the walls; a carved box (waka huia) and a
+ * kete at the back; kete hung from the rafters; the smoke-darkened thatch above; and the earth banked against the
+ * outside of the side walls against the wind [stated: Te Ara "Māori housing": earth floors with fern and mats, a hearth with
+ * the passage past it, sleeping places down both sides, "some had earth banked against the walls"].
+ */
+function commonHouse(add, { w, l, h, t, zf, e, under }) {
+  const zi0 = zf + 0.3, zi1 = l / 2 - t - 0.1, xi = w / 2 - t - 0.05, zm = (zi0 + zi1) / 2;
+  add('reed_mat', box(-xi, -0.2, zi0, xi, 0.035, zi1));
+  // the sleeping places along each wall: a raised bed of fern, a mat over it, a folded cloak or two
+  for (const s of [-1, 1]) {
+    const x0 = s > 0 ? xi - 0.95 : -xi, x1 = s > 0 ? xi : -xi + 0.95;
+    add('rope_fibre', box(x0, 0.03, zi0 + 0.25, x1, 0.13, zi1 - 0.05));
+    add('wicker', box(x0 + 0.03, 0.13, zi0 + 0.3, x1 - 0.03, 0.15, zi1 - 0.1));
+    for (let k = 0; k < 3; k++) { const z0 = zi0 + 0.6 + k * (zi1 - zi0 - 1.2) / 2.4; add(k === 1 ? 'hide_tan' : 'cloth_brown', box(x0 + 0.1, 0.15, z0, x1 - 0.1, 0.27, z0 + 0.5)); }
+    add('timber', box(s > 0 ? xi - 0.1 : -xi, 0.15, zi0 + 0.25, s > 0 ? xi : -xi + 0.1, 0.36, zi1 - 0.05));     // the head-board
+  }
+  // the hearth: a ring of stones, the ash and the coals, brands across
+  add('opening', box(-0.32, 0.036, zm - 0.32, 0.32, 0.05, zm + 0.32));
+  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; add('basalt', box(Math.cos(a) * 0.4 - 0.08, 0.0, zm + Math.sin(a) * 0.4 - 0.08, Math.cos(a) * 0.4 + 0.08, 0.12, zm + Math.sin(a) * 0.4 + 0.08)); }
+  add('flame', lathe([[0.09, 0.05], [0.03, 0.22], [0.001, 0.3]], 6, null, 0.06, 0, zm - 0.04));
+  for (const a of [0.3, 1.9, 3.5]) add('bark_dark', rod([-Math.cos(a) * 0.32, 0.1, zm - Math.sin(a) * 0.32], [Math.cos(a) * 0.14, 0.09, zm + Math.sin(a) * 0.14], 0.035, 5));
+  // a carved box (waka huia) and a pair of kete against the back wall; kete hung from the rafters, a fishing net over a beam
+  add('wood_dark', box(-0.4, 0.035, zi1 - 0.5, 0.2, 0.34, zi1 - 0.08));
+  for (const [x, z] of [[0.45, zi1 - 0.3], [0.8, zi1 - 0.35]]) add('wicker', lathe([[0.001, 0], [0.19, 0.02], [0.22, 0.2], [0.17, 0.36], [0.001, 0.36]], 9, null, x, 0.03, z));
+  for (const [x, z] of [[-0.55, zm - 0.5], [0.5, zm + 0.45], [0.0, zi1 - 1.0]]) {
+    const top = under(Math.abs(x)) - 0.1;
+    add('rope_fibre', rod([x, top, z], [x, top - 0.6, z], 0.012, 4));
+    add('wicker', lathe([[0.001, 0], [0.15, 0.02], [0.19, 0.16], [0.14, 0.3], [0.001, 0.3]], 9, null, x, top - 0.9, z));
+  }
+  // the earth banked against the outside of the side walls and round the back
+  for (const s of [-1, 1]) add('sod', prism([[s * (w / 2 + 0.01), 0.6], [s * (w / 2 + 0.01), -0.2], [s * (w / 2 + 0.95), -0.2], [s * (w / 2 + 0.5), 0.2]], zf + 0.4, l / 2 - 0.1));
+  void e; void h;
+}
+
 /**
  * whare: a house { c, y, yaw, w, l, h (walls), rise, porch, carved, rank, walls (material) } facing
  * −z (its porch). Every house: low side walls running forward to make the porch, the front wall
@@ -256,6 +294,7 @@ function whare(el, ctx) {
     for (let k = 0; k < 4; k++) add('pebbles', box(-0.45 + (k % 2) * 0.75, -0.2, zf + 0.35 + Math.floor(k / 2) * 0.55, -0.3 + (k % 2) * 0.75, 0.1, zf + 0.5 + Math.floor(k / 2) * 0.55));
     add('opening', box(-0.3, -0.2, zf + 0.5, 0.3, 0.04, zf + 0.9));
   }
+  if (rank === 0 && !small && el.furnished !== false) commonHouse(add, { w, l, h, t, zf, e, under, rank });
   col.segment(W2(-w / 2, -l / 2 + 0.1), W2(-w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(w / 2, -l / 2 + 0.1), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(-w / 2, l / 2), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise);
@@ -273,6 +312,12 @@ function pataka(el, ctx) {
   for (const s of [-1, 1]) add('timber', box(s * (w / 2 - 0.2) - 0.08, lift - 0.25, -l / 2 - 0.1, s * (w / 2 - 0.2) + 0.08, lift - 0.1, l / 2 + 0.05));
   add('timber', box(-w / 2 - 0.1, lift - 0.1, -l / 2 - 0.15, w / 2 + 0.1, lift + 0.02, l / 2 + 0.1));
   whare({ c: [0, 0], yaw: 0, w, l, h: 0.9, rise: w * 0.5, porch: 0.45, y: lift + 0.02, rank: 1, walls: 'timber' }, { bag: { add: (mat, g) => add(mat, g), addInstance: bag.addInstance ? (mat, g, m, o) => bag.addInstance(mat, g, M.clone().multiply(m), o) : undefined }, col: { segment() {}, circle() {}, rect() {}, floor() {} } });
+  // the carved side panels: poupou-like slabs on both side walls between the posts, the walls' lower boards cut in rauponga
+  for (const s of [-1, 1]) for (const z of [-l / 2 + 0.65, -l / 2 + 1.4, -l / 2 + 2.15]) {
+    if (z > l / 2 - 0.2) continue;
+    const q = P2(s * (w / 2 + 0.01), z);
+    figure(bag, 'slab', q[0], y0 + lift + 0.04, q[1], 0.86, yaw - s * Math.PI / 2, 200);
+  }
   // the notched pole (arawhata) leaning to the deck's front
   const z0 = -l / 2 - lift * 0.55, z1 = -l / 2 - 0.1;
   add('timber', rod([0.45, -0.1, z0], [0.45, lift, z1], 0.07, 7));
