@@ -76,8 +76,8 @@ export function makeShops(H) {
     const lat = (m, prof, s, d, y, seg = 7) => b.add(m, lathe(prof, seg, null, S(s), y, d));
     const rd = (m, p, q, rr, seg = 6) => b.add(m, rod([S(p[0]), p[2], p[1]], [S(q[0]), q[2], q[1]], rr, seg));
     const pick = (a) => a[Math.floor(r() * a.length)];
-    const jar = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.004], [rr, 0], [rr, h * 0.75], [rr * 0.55, h * 0.9], [rr * 0.6, h], [0.001, h]], s, d, y, 6);
-    const bottle = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.004], [rr, 0], [rr, h * 0.55], [rr * 0.3, h * 0.78], [rr * 0.3, h], [0.001, h]], s, d, y, 6);
+    const jar = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.02], [rr, 0], [rr, h * 0.75], [rr * 0.55, h * 0.9], [rr * 0.6, h], [0.001, h]], s, d, y, 8);
+    const bottle = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.02], [rr, 0], [rr, h * 0.55], [rr * 0.3, h * 0.78], [rr * 0.3, h], [0.001, h]], s, d, y, 8);
     const barrel = (m, s, d, y, rr, h) => { lat(m, [[0.001, 0], [rr * 0.85, 0], [rr, h * 0.5], [rr * 0.85, h], [0.001, h]], s, d, y, 9); lat(IRON, [[rr * 0.86, h * 0.2], [rr * 0.92, h * 0.2], [rr * 0.92, h * 0.25], [rr * 0.86, h * 0.25]], s, d, y, 9); lat(IRON, [[rr * 0.86, h * 0.75], [rr * 0.92, h * 0.75], [rr * 0.92, h * 0.8], [rr * 0.86, h * 0.8]], s, d, y, 9); };
     const sack = (m, s, d, y) => lat(m, [[0.001, 0], [0.26, 0], [0.3, 0.2], [0.24, 0.5], [0.12, 0.62], [0.001, 0.6]], s, d, y, 7);
     const crateOf = (s, d, y, fruit) => { bx('wood_ochre', s - 0.25, s + 0.25, d - 0.17, d + 0.17, y, y + 0.2); for (let k = 0; k < 6; k++) lat(fruit[k % fruit.length], [[0.001, 0], [0.05, 0.03], [0.065, 0.07], [0.04, 0.115], [0.001, 0.12]], s - 0.16 + (k % 3) * 0.16, d - 0.07 + Math.floor(k / 3) * 0.14, y + 0.2, 6); };
