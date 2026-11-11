@@ -134,12 +134,24 @@ function fabric() {
     for (const x of bast) {
       const o = outSign > 0 ? [zOutFace - b - 0.6, zOutFace + 6] : [zOutFace - 6, zOutFace + b + 0.6];
       E.push({ t: 'block', walk: true, rect: [x - 7, o[0], x + 7, o[1]], y0: -0.5, y1: top, mat: 'earth_wall', batter: [0.8, 0.8, outSign > 0 ? 0 : 1.6, outSign > 0 ? 1.6 : 0] });
+      const zf = outSign > 0 ? o[1] : o[0], sd = Math.round(x * 3 + zc);
+      E.push({ t: 'hz_wall_skin', a: [x - 7, zf], b: [x + 7, zf], n: outSign, off: zf, batter: 1.6, yBase: -0.5, y0: -0.1, y1: top, seed: sd });
+      for (const sx of [-1, 1]) E.push({ t: 'hz_wall_skin', a: [x + sx * 7, o[0]], b: [x + sx * 7, o[1]], n: sx, off: x + sx * 7, batter: 0.8, yBase: -0.5, y0: -0.1, y1: top, seed: sd + sx });
       const zo = outSign > 0 ? o[1] - 1.7 : o[0] + 1.7, zi = outSign > 0 ? o[0] + 0.6 : o[1] - 0.6;
       pr([x - 6.2, zo], [x + 6.2, zo], top); pr([x - 6.45, zi], [x - 6.45, zo], top); pr([x + 6.45, zi], [x + 6.45, zo], top);
     }
     const holes = [[gate.rect[0], gate.rect[2]], ...bast.map((x) => [x - 7.1, x + 7.1])];
     for (const [a, c] of [pieces[0], pieces[1], [WATER_GATE[0], WATER_GATE[1]], pieces[2]]) for (const [p, q] of cut(a, c, holes)) { pr([p, zOutLine - outSign * 0.3 + outSign * 0.3], [q, zOutLine], top); pr([p, zInLine], [q, zInLine], top, { inner: true }); }
   };
+  // the brick facing on both faces of each run (not at the gates, the bastions or the water gate's bridge)
+  const skin = (zc, gate, bast, outSign) => {
+    const faces = [[zc + th / 2, 1], [zc - th / 2, -1]];
+    for (const [zf, n] of faces) {
+      const outer = n === outSign, holes = [[gate.rect[0] - 0.5, gate.rect[2] + 0.5], [WATER_GATE[0], WATER_GATE[1]], ...(outer ? bast.map((x) => [x - 7.6, x + 7.6]) : [])];
+      for (const [p, q] of cut(xw, X1, holes)) E.push({ t: 'hz_wall_skin', a: [p, zf], b: [q, zf], n, off: zf, batter: b, yBase: -0.5, y0: -0.1, y1: top, seed: Math.round(zf + p) });
+    }
+  };
+  skin(zs, GATE, SB, 1); skin(zn, LAKE_GATE, NB, -1);
   sideWall(zs, GATE, 'z', SB, 1, 's');
   sideWall(zn, LAKE_GATE, 'z', NB, -1, 'n');
   // ---- the west wall between them, with its bastions and parapets
@@ -147,6 +159,7 @@ function fabric() {
   wallBlock([xa, wz0, xb, wz1], [b, b, 0, 0]);
   for (const z of WB) { E.push({ t: 'block', walk: true, rect: [xa - 5.4, z - 7, xb - b - 0.6, z + 7], y0: -0.5, y1: top, mat: 'earth_wall', batter: [1.6, 0, 0.8, 0.8] }); pr([xa - 3.7, z - 6.2], [xa - 3.7, z + 6.2], top); pr([xa - 5.4 + 0.6, z - 6.45], [xa - 3.7, z - 6.45], top); pr([xa - 5.4 + 0.6, z + 6.45], [xa - 3.7, z + 6.45], top); }
   for (const [p, q] of cut(wz0, wz1, WB.map((z) => [z - 7.1, z + 7.1]))) { pr([xa + b + 0.05, p], [xa + b + 0.05, q], top); pr([xb - b - 0.05, p], [xb - b - 0.05, q], top, { inner: true }); }
+  for (const [xf, n, holes] of [[xb, 1, []], [xa, -1, WB.map((z) => [z - 7.6, z + 7.6])]]) for (const [p, q] of cut(wz0, wz1, holes)) E.push({ t: 'hz_wall_skin', a: [xf, p], b: [xf, q], n, off: xf, batter: b, yBase: -0.5, y0: -0.1, y1: top, seed: Math.round(p + xf) });
   // the paving through the gates and on the shore before the lake gate
   for (const [g, zc] of [[GATE, zs], [LAKE_GATE, zn]]) E.push({ t: 'paving', rect: [g.x - g.w / 2, zc - th / 2 - 0.2, g.x + g.w / 2, zc + th / 2 + 0.2], y: LEVEL.street + 0.04, th: 0.3 });
   // ---- the streets' paving

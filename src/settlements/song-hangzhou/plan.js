@@ -32,7 +32,10 @@ for (const [z, d] of CANAL_BOATS) E.push({ t: 'boat', at: [(CANAL.x0 + CANAL.x1)
 // ---- the pagoda on its terrace, the temple's halls, the stairs from the road
 E.push({ t: 'block', walk: true, rect: T1.rect, y0: 0, y1: T1.y, mat: 'granite_block' });
 E.push({ t: 'block', walk: true, rect: T2.rect, y0: 0, y1: T2.y, mat: 'granite_block' });
-E.push({ t: 'stairs', rect: [PAGODA.c[0] - 6, T1.rect[3], PAGODA.c[0] + 6, ROAD.z0], y0: 0, y1: T1.y, dir: 'n', mat: 'granite_block' });
+// the processional stair from the river road: three flights with landings (lions on the first, steles on the second), balustrades, worn slabs; stone lamps at its foot, old camphors and a ginkgo on either side
+E.push({ t: 'hz_stair', x0: PAGODA.c[0] - 6, x1: PAGODA.c[0] + 6, zTop: T1.rect[3], zBot: ROAD.z0, y0: 0, y1: T1.y, flights: 3, landing: 2.4, seed: 17 });
+for (const dx of [-10.5, 10.5]) E.push({ t: 'stone_lamp', at: [PAGODA.c[0] + dx, ROAD.z0 - 1.5], y: 0 });
+for (const [dx, dz, kind, h, seed] of [[-19, 120, 'camphor', 13, 3], [20, 123, 'camphor', 12, 4], [-27, 110, 'ginkgo', 15, 5], [28, 108, 'camphor', 14, 6], [-10.5, 105, 'ginkgo', 11, 7]]) E.push({ t: 'hz_tree', at: [PAGODA.c[0] + dx, dz], y: 0, kind, h, seed });
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 4, T2.rect[3], PAGODA.c[0] + 4, T1.rect[1]], y0: T1.y, y1: T2.y, dir: 'n', mat: 'granite_block' });
 const tiers = [{ r: 10.5, h: 9.5 }];
 for (let i = 1; i < 7; i++) tiers.push({ r: 10.5 - 0.6 * i, h: 6.7 });
