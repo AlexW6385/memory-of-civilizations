@@ -2,7 +2,7 @@
 // the ground rising toward the mountain in the north-east; cottonwoods and willows by the creek,
 // fields beyond the wall, sagebrush; the high desert sky.
 
-import { RADIUS, WALL, CREEK, creekZ, inCreek, inHouses, KIVAS, inRect, smooth as sm } from './layout.js';
+import { RADIUS, WALL, CREEK, creekZ, inCreek, inHouses, KIVAS, inRect, smooth as sm, onKeep, NORTH_RECT, SOUTH_RECT } from './layout.js';
 
 function height(x, z) {
   const r = Math.hypot(x, z);
@@ -16,7 +16,13 @@ function cover(x, z) {
   const r = Math.hypot(x, z);
   const c = { sand: 0.3, grass: 0.2, rock: 0, soil: 0.5, fields: 0, dry: 0.6, warmth: 0.55, red: 0.25, road: 0, snow: 0, forest: 0 };
   if (inCreek(x, z, 1)) { c.sand = 0.5; c.soil = 0.5; return c; }
-  if (inRect(WALL, x, z)) { c.road = 0.5; return c; }
+  if (inRect(WALL, x, z)) {
+    // the trodden ground: swept hard where the visitor and the people go, dry and dusty at the houses' feet and in the alleys, damp soil by the creek
+    c.road = onKeep(x, z, 2.2) ? 0.9 : 0.5;
+    if (inRect(NORTH_RECT, x, z, 6) || inRect(SOUTH_RECT, x, z, 6)) { c.dry = 0.8; c.soil = 0.65; c.road = Math.min(c.road, 0.35); }
+    if (Math.abs(z - creekZ(x)) < 9) { c.soil = 0.75; c.grass = 0.3; }
+    return c;
+  }
   if (r < RADIUS - 30 && r > 175) { c.fields = 0.7; c.grass = 0.3; return c; }
   return c;
 }
@@ -28,7 +34,12 @@ function planting(x, z) {
   const r = Math.hypot(x, z), dz = Math.abs(z - creekZ(x));
   if (r > RADIUS - 6 || inCreek(x, z) || inHouses(x, z, 1) || KIVAS.some(([kx, kz, kr]) => Math.hypot(x - kx, z - kz) < kr + 2.6) || (Math.abs(z + 44) < 1.6 && [-52, -17, 18, 30].some((bx) => Math.abs(x - bx) < 2.6))) return null;
   if (dz < 9 && !inRect([-60, -45, 60, 40], x, z)) return { poplar: 0.9, willow: 0.7, grass: 30 };
-  if (inRect(WALL, x, z)) return null;
+  if (inRect(WALL, x, z)) {
+    // chamisa and dry grass in the corners of the wall and behind the North House, none on the trodden plaza
+    const edge = Math.min(x - WALL[0], WALL[2] - x, z - WALL[1], WALL[3] - z);
+    if (!inRect([-75, -48, 75, 44], x, z) && (edge < 9 || z < -102) && !onKeep(x, z, 4)) return { maquis: 0.3, grass_dry: 10 };
+    return null;
+  }
   if (r > 175) return { grass: 30 };
   return { maquis: 0.6, grass_dry: 12, poplar: 0.02 };
 }

@@ -1,6 +1,6 @@
 // Taos Pueblo — the dress of the houses' feet, the plaza, the creek and the fields (docs/settlements/taos.md §4.5): the list of
 // `pueblo_dress` items (styles/pueblo/dress.js) derived from layout.js — nothing hard-coded to a coordinate but the pens.
-import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, YARDS, PENS, PLAZA, RACKS, nearYard, creekZ, inCreek, inRect, isRoom, roomsOf, onKeep, bankY } from './layout.js';
+import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, YARDS, PENS, PLAZA, RACKS, nearYard, creekZ, inCreek, inRect, isRoom, roomsOf, nearRoom, onKeep, bankY } from './layout.js';
 import { ground } from './ground.js';
 
 const ST = 2.7;
@@ -18,8 +18,26 @@ function faces(x0, z0) {
   ];
 }
 
-/** `wood`: the set of 'B:i:j' cells that already carry a woodpile on their plaza face. */
-export function dressItems(wood = new Set()) {
+/** The woodpiles at the feet of the plaza faces (about two cells in five, not beside a room): the elements, and the set of 'B:i:j' cells that carry one. */
+export function woodpiles() {
+  const piles = [], wood = new Set();
+  let s = 4711; const rand = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+  for (const [B, face] of [[NORTH, 1], [SOUTH, -1]]) {
+    const H = B.heights;
+    for (let i = 0; i < H.length; i++) for (let j = 0; j < H[0].length; j++) {
+      if (!H[i][j] || nearRoom(B, i, j)) continue;
+      const nb = (H[i + face] ?? [])[j] ?? 0;
+      if (nb || rand() > 0.4) continue;
+      const cx = B.x0 + (j + 0.5) * CELL, cz = face > 0 ? B.z0 + (i + 1) * CELL + 0.55 : B.z0 + i * CELL - 0.55;
+      wood.add(`${B === NORTH ? 'N' : 'S'}:${i}:${j}`);
+      piles.push({ t: 'woodpile', at: [cx + (rand() - 0.5) * 1.2, cz], yaw: 0, len: 1.6 + rand() * 1.0, rows: 3 + Math.floor(rand() * 3), seed: i * 40 + j });
+    }
+  }
+  return { wood, piles };
+}
+
+export function dressItems() {
+  const { wood } = woodpiles();
   const rand = rng(4242), I = [];
   const add = (k, at, y, rot, v, o = {}) => I.push({ k, at: [+at[0].toFixed(2), +at[1].toFixed(2)], y, rot, v, ...o });
   // 1. the feet of the house faces: benches, jars, maize on the viga ends, hides, blankets airing, squash, by face and by what the face looks on
@@ -49,6 +67,8 @@ export function dressItems(wood = new Set()) {
       }
       // 2. the roofs: a rack of maize and squash on about one roof in nine
       const n = H[i][j];
+      if (!room && rand() < 0.1) add('squash', [x0 + CELL * 0.3, B === NORTH ? z0 + CELL - 1.4 : z0 + 1.4], n * ST, rand() * 6.28, Math.floor(rand() * 2), { reach: 60 });
+      if (!room && rand() < 0.1) add('jars', [x0 + CELL * 0.35, B === NORTH ? z0 + 1.0 : z0 + CELL - 1.0], n * ST, rand() * 6.28, Math.floor(rand() * 4), { reach: 60 });
       if (!room && rand() < 0.11) add('roofrack', [x0 + CELL * 0.62, B === NORTH ? z0 + CELL - 1.1 : z0 + 1.1], n * ST, B === NORTH ? 0 : Math.PI, Math.floor(rand() * 2), { reach: 70 });
     }
   }

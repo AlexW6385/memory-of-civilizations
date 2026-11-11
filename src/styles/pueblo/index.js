@@ -88,6 +88,18 @@ function pueblo(el, ctx) {
             const g = lathe([[0.001, -0.02], [0.9, 0], [1, 0.2], [0.6, 0.7], [0.001, 1]], 6); g.scale(0.3 + rand() * 0.15, 0.12 + rand() * 0.1, 0.22 + rand() * 0.1).rotateY(rand() * 6).translate(px, 0, pz); bag.add('banco_rough', g);
           }
         }
+        // hairline cracks where the earth has shrunk, and the damp dark band under the parapet where the roof sheds its water
+        if (!room && rand() < 0.35) {
+          let cu = (0.1 + rand() * 0.8) * L, cy = (s - 1) * ST + 0.3 + rand() * 1.4;
+          const segs = 3 + Math.floor(rand() * 3);
+          for (let q = 0; q < segs; q++) {
+            const nu = Math.max(0.05, Math.min(L - 0.05, cu + (rand() - 0.5) * 0.35)), ny = cy + 0.25 + rand() * 0.3;
+            const ax = a[0] + ux * cu, az = a[1] + uz * cu, bx = a[0] + ux * nu, bz = a[1] + uz * nu;
+            bag.add('pottery_dark', box(Math.min(ax, bx) - 0.012, cy, Math.min(az, bz) - 0.012, Math.max(ax, bx) + 0.012 + Math.abs(nx) * 0.012, ny, Math.max(az, bz) + 0.012 + Math.abs(nz) * 0.012));
+            cu = nu; cy = ny;
+          }
+        }
+        if (s === n && !room && rand() < 0.5) along(rand() * L * 0.5, rand() * L * 0.4 + L * 0.5, s * ST - 0.2, s * ST - 0.03, 0.045, 'mud_plaster');
         if (s === 1 && m === 0 && !room && !door) {
           const k = 3;
           for (let q = 0; q < k; q++) along(q ? q * L / k : -0.05, q < k - 1 ? (q + 1) * L / k : L + 0.05, -0.15, 0.34 + rand() * 0.24, 0.05 - q * 0.004, 'banco_rough');
@@ -100,6 +112,10 @@ function pueblo(el, ctx) {
           const w = door ? 0.4 : 0.26, hh = door ? 1.45 : 0.45, yy = (s - 1) * ST + (door ? 0.15 : 1.25);
           const f = 0.3 + rand() * 0.4, px = a[0] + (b[0] - a[0]) * f, pz = a[1] + (b[1] - a[1]) * f, ux = Math.abs(nz), uz = Math.abs(nx);
           bag.add('lacquer_black', box(Math.min(px - ux * w, px + nx * 0.02), yy, Math.min(pz - uz * w, pz + nz * 0.02), Math.max(px + ux * w, px + nx * 0.02), yy + hh, Math.max(pz + uz * w, pz + nz * 0.02)));
+          // the soot of the smoke and the rain's stain above and below; a hide hung in a doorway, a skin laced over some windows
+          if (!door) bag.add('lacquer_black', box(Math.min(px - ux * (w + 0.06), px + nx * 0.012), yy + hh + 0.1, Math.min(pz - uz * (w + 0.06), pz + nz * 0.012), Math.max(px + ux * (w + 0.06), px + nx * 0.012), yy + hh + 0.1 + 0.12 + rand() * 0.25, Math.max(pz + uz * (w + 0.06), pz + nz * 0.012)));
+          const flap = door ? rand() < 0.6 : rand() < 0.22;
+          if (flap) { const sh = door ? 0.5 + rand() * 0.45 : 1, fa = [px - ux * (w + 0.04) + nx * 0.025, pz - uz * (w + 0.04) + nz * 0.025], fb = [px + ux * (w + 0.04) + nx * 0.05, pz + uz * (w + 0.04) + nz * 0.05]; bag.add(rand() < 0.5 ? 'hide_tan' : 'hide_brown', box(Math.min(fa[0], fb[0]), door ? 0.05 : yy + 0.05, Math.min(fa[1], fb[1]), Math.max(fa[0], fb[0]), yy + hh + 0.05 - (door ? 0 : 0.1) - (door ? hh * (1 - sh) * 0 : 0), Math.max(fa[1], fb[1]))); }
           const ly = yy + hh + 0.07;
           bag.add(V, rod([px - ux * (w + 0.22) + nx * 0.03, ly, pz - uz * (w + 0.22) + nz * 0.03], [px + ux * (w + 0.22) + nx * 0.03, ly, pz + uz * (w + 0.22) + nz * 0.03], 0.06, 6));
         }

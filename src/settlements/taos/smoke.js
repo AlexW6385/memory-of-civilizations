@@ -3,6 +3,7 @@
 // the griddles of the cook yards. The engine part is src/engine/smoke.js; positions come from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
+import { dressItems } from './dress.js';
 import { NORTH, SOUTH, CELL, KIVAS, YARDS, ROOMS, RADIUS, isRoom, roomsOf } from './layout.js';
 
 const ID = 'taos';
@@ -23,6 +24,8 @@ export function emitters() {
   for (const B of [NORTH, SOUTH]) for (const q of roomsOf(B)) if (q.kind === 'home' || q.kind === 'sleep' || q.kind === 'weave') E.push({ p: [B.x0 + q.j * CELL + CELL / 2 + 0.35, ST + 0.9, B.z0 + q.i * CELL + CELL / 2 - 0.25], kind: 'kitchen', thr: q === ROOMS[0] ? 0 : 0.1 + 0.4 * ((q.j * 7) % 5) / 5, seed: 5 + q.j });
   for (const [x, z] of KIVAS) E.push({ p: [x, 1.4, z], kind: 'kitchen', thr: 0.35, seed: Math.round(x) });
   for (const [x, z] of YARDS.cook) { E.push({ p: [x - 1.5, 0.5, z], kind: 'steam', thr: 0.1, seed: 21 }); E.push({ p: [x + 1.3, 0.55, z], kind: 'kitchen', thr: 0.05, seed: 22 }); }
+  // the plaza's hearth rings with a fire (the dress items' variants 0 and 2)
+  for (const it of dressItems()) if (it.k === 'hearth' && it.v % 2 === 0) E.push({ p: [it.at[0], 0.7, it.at[1]], kind: 'kitchen', thr: 0.2 + 0.3 * ((it.v + 1) / 4), seed: Math.round(it.at[0] * 3 + it.at[1]) });
   return E;
 }
 

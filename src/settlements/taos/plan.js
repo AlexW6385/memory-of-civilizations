@@ -3,7 +3,7 @@
 // plaza's north side, the perimeter wall.
 
 import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, ROOMS, YARDS, bankY, creekZ, inCreek, roomsOf, isRoom, nearRoom } from './layout.js';
-import { dressItems } from './dress.js';
+import { dressItems, woodpiles } from './dress.js';
 
 const E = [];
 E.push({ t: 'pueblo_block', x0: NORTH.x0, z0: NORTH.z0, cell: CELL, heights: NORTH.heights, front: NORTH.front, seed: 7, rooms: roomsOf(NORTH) });
@@ -19,21 +19,8 @@ for (const x of [-35, 30]) { const z = creekZ(x); E.push({ t: 'log_bridge', a: [
 for (const c of YARDS.cook) E.push({ t: 'cook_yard', c, yaw: 0 });
 for (const c of YARDS.mud) E.push({ t: 'mud_yard', c, yaw: 0 });
 for (const [x, z, yaw] of YARDS.vigas) E.push({ t: 'viga_stack', at: [x, z], yaw, n: 6, seed: Math.round(x) });
-const wood = new Set();
-{
-  let s = 4711; const rand = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
-  for (const [B, face] of [[NORTH, 1], [SOUTH, -1]]) {
-    const H = B.heights;
-    for (let i = 0; i < H.length; i++) for (let j = 0; j < H[0].length; j++) {
-      if (!H[i][j] || nearRoom(B, i, j)) continue;
-      const nb = (H[i + face] ?? [])[j] ?? 0;
-      if (nb || rand() > 0.4) continue;
-      const cx = B.x0 + (j + 0.5) * CELL, cz = face > 0 ? B.z0 + (i + 1) * CELL + 0.55 : B.z0 + i * CELL - 0.55;
-      wood.add(`${B === NORTH ? 'N' : 'S'}:${i}:${j}`);
-      E.push({ t: 'woodpile', at: [cx + (rand() - 0.5) * 1.2, cz], yaw: 0, len: 1.6 + rand() * 1.0, rows: 3 + Math.floor(rand() * 3), seed: i * 40 + j });
-    }
-  }
-}
+const { wood, piles } = woodpiles();
+E.push(...piles);
 // Red Willow Creek: stepping stones at two fords and cobbles strewn on both banks
 {
   let s = 99; const rand = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
@@ -52,7 +39,7 @@ const [gw0, gw1] = gap(wx0), [ge0, ge1] = gap(wx1);
 w([wx0, wz0], [wx1, wz0]); w([wx0, wz1], [-6, wz1]); w([6, wz1], [wx1, wz1]);
 w([wx0, wz0], [wx0, gw0]); w([wx0, gw1], [wx0, wz1]); w([wx1, wz0], [wx1, ge0]); w([wx1, ge1], [wx1, wz1]);
 
-E.push({ t: 'pueblo_dress', items: dressItems(wood) });
+E.push({ t: 'pueblo_dress', items: dressItems() });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('plaza', [-70, -45, 70, 40], 0, 'open')];
 // each furnished room of the plaza faces is a hall of its own (the music and the ambience change at its door)
