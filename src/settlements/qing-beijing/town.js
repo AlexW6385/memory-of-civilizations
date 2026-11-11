@@ -46,7 +46,7 @@ function streets() {
   const zw = RING[3], pal = { plaster: 'palace_wall', roof: 'tile_yellow', plinth: 'marble' };
   E.push({ t: 'palace_wall', a: [-nx, zw], b: [nx, zw], y: 0, h: 5.5, th: 2.4, gates: [{ at: nx, w: 7, h: 5.2 }, { at: nx - 14, w: 4.6, h: 4.6 }, { at: nx + 14, w: 4.6, h: 4.6 }] });
   for (const sx of [-1, 1]) E.push({ t: 'palace_wall', a: [sx * nx, b1], b: [sx * nx, zw - 1.2], y: 0, h: 5.5, th: 2.4 });
-  E.push({ t: 'qing_hall', rect: [-19, zw - 1.7, 19, zw + 1.7], y: 5.5, H: 4.4, double: 3.4, roof: 'xieshan', bays: [7, 2], front: 's', four: true, plat: 0.3, orn: { figures: 7 } });
+  E.push({ t: 'qing_hall', rect: [-19, zw - 1.7, 19, zw + 1.7], y: 5.5, H: 4.4, double: 3.4, roof: 'xieshan', bays: [7, 2], front: 's', four: true, plat: 0.3, orn: { figures: 5 } });
   for (const [x, w, h] of [[0, 7, 5.2], [-14, 4.6, 4.6], [14, 4.6, 4.6]]) E.push({ t: 'gate_doors', at: [x, zw], along: 'x', w, h, y: 0.03, swing: -1, off: 1.25, nails: 7 });
   E.push({ t: 'lane', rect: [-26, zw + 1.2, 26, zw + 12], y: 0.03, mat: 'brick_paving' });
   E.push({ t: 'lane', rect: [-3.6, zw + 1.2, 3.6, zw + 12], y: 0.06, mat: 'marble_floor' });

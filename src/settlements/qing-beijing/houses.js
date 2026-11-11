@@ -152,7 +152,7 @@ export function house(bag, col, F, o) {
   const lintelY = y + H - 0.5;
   for (let i = 0; i <= bays; i++) {
     const s = s0 + 0.25 + (L - 0.5) * i / bays;
-    if (i === 0 || i === bays) continue;          // the ends are the walls
+    if (i === 0 || i === bays || lod >= 3) continue;          // the ends are the walls (the far houses' posts are left out)
     F.B(bag, 'lacquer_red', s - 0.12, dF - 0.24, s + 0.12, dF, y, lintelY);
   }
   F.B(bag, 'lacquer_red', s0 + 0.5, dF - 0.26, s1 - 0.5, dF, lintelY, y + H - 0.2);                     // the lintel (feng)
@@ -174,7 +174,7 @@ export function house(bag, col, F, o) {
     else F.B(bag, 'brick_grey', Math.min(i === 0 ? s0 + 0.5 : s0 + 0.25 + (L - 0.5) * i / bays, s1), dW - 0.2, Math.min(i === bays - 1 ? s1 - 0.5 : s0 + 0.25 + (L - 0.5) * (i + 1) / bays, s1), dW, y, lintelY);
   }
   // the verandah's floor (the plinth is its floor) and the steps to the door
-  if (o.steps !== false) {
+  if (o.steps !== false && lod < 3) {
     const sc = s0 + 0.25 + (L - 0.5) * (door + 0.5) / bays, n = Math.max(1, Math.round(y / 0.17));
     for (let k = 0; k < n; k++) F.B(bag, 'granite_grey', sc - 0.9 - 0.0 * k, dF + 0.05 + 0.0, sc + 0.9, dF + 0.05 + 0.3 * (n - k), -0.05, y * (k + 1) / (n + 1) * 1 - (k === n - 1 ? 0 : 0));
   }
@@ -454,7 +454,7 @@ function chuihua(bag, col, cx, z, lod) {
 export function houseParts(el) {
   const lod = el.lod ?? 0, [x0, z0, x1, z1] = el.rect, W = x1 - x0, courts = el.courts || 1, G = GATE[el.gate || 'ruyi'];
   const dS = 4.6, dN = 6.45, dE = Math.min(3.8, W * 0.14), zN = z1 - 0.2 - dS;
-  const sideM = lod === 2 ? 1.0 : dE * 0.5;
+  const sideM = lod >= 2 ? 1.0 : dE * 0.5;
   const main = [x0 + 0.44 + sideM, z0 + 0.3, x1 - 0.44 - sideM, z0 + 0.3 + dN], mb = W > 27 ? 5 : 3;
   const yardTop = z0 + 0.3 + dN + 0.9, zWall = courts === 2 ? z0 + 12.95 : null;
   const wingZ1 = (zWall ?? zN) - (courts === 2 ? 0.6 : 2.2), wingZ0 = yardTop + 0.2, ww = Math.min(3.4, W * 0.13);
@@ -482,7 +482,7 @@ export function hutongHouse(el, ctx0) {
   bag.add('brick_paving', box(x0 + 0.45, -0.2, z0 + 0.45, x1 - 0.45, 0.03, zN - 0.1));
   col.floor([x0 + 0.45, z0 + 0.45, x1 - 0.45, zN - 0.1], 0.03);
   // the main house: three bays or five, on the north side facing south
-  const sideM = lod === 2 ? 1.0 : dE * 0.5;
+  const sideM = lod >= 2 ? 1.0 : dE * 0.5;
   const mainR = [x0 + 0.44 + sideM, z0 + 0.3, x1 - 0.44 - sideM, z0 + 0.3 + dN];
   const mb = W > 27 ? 5 : 3;
   const Fm = Frame((mainR[0] + mainR[2]) / 2, (mainR[1] + mainR[3]) / 2, 's'), mL = mainR[2] - mainR[0];

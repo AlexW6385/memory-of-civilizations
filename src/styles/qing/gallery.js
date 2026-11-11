@@ -84,11 +84,11 @@ export function qingGallery(el, { bag, col }) {
     bag.add('tile_yellow', bx(-0.35, L + 0.35, vEave - 0.02, vEave + 0.1, hEave - 0.06, hEave + 0.1));
     // the ridge at the wall (a half-round of tiles along the roof's upper edge) and the roof's ribs
     bag.add('tile_yellow', bx(-0.35, L + 0.35, vTop - 0.15, vTop + 0.45, hAt(0) - 0.05, hAt(0) + 0.22));
-    const ribs = [], nr = Math.round((L + 0.7) / 0.34);
+    const ribs = [], nr = Math.round((L + 0.7) / 0.5), NR = 4;
     for (let k = 0; k < nr; k++) {
       const s = -0.35 + (L + 0.7) * (k + 0.5) / nr;
-      for (let i = 0; i < NS; i++) {
-        const v0 = vEave - (vEave - vTop) * i / NS, v1 = vEave - (vEave - vTop) * (i + 1) / NS;
+      for (let i = 0; i < NR; i++) {
+        const v0 = vEave - (vEave - vTop) * i / NR, v1 = vEave - (vEave - vTop) * (i + 1) / NR;
         beamTris(ribs, W(s, v0, hAt(v0)), W(s, v1, hAt(v1)), 0.035, 0.03, true);
       }
     }

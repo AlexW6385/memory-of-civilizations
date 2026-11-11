@@ -123,7 +123,7 @@ export function houses() {
       const gate = wealth > 0.74 ? 'guangliang' : wealth > 0.6 ? (q2 < 0.6 ? 'jinzhu' : 'ruyi') : wealth > 0.34 ? (q2 < 0.14 ? 'manzi' : q2 < 0.88 ? 'ruyi' : 'wall') : (q2 < 0.55 ? 'wall' : q2 < 0.9 ? 'ruyi' : 'manzi');
       const courts = wealth > 0.52 && q2 > 0.25 || gate === 'guangliang' ? 2 : 1;
       // full detail only near the avenue's mouth, where the visitor walks in (115 m), the middle ring to 220 m, the rest light
-      const d = Math.hypot(cx + 30, cz - 225), lod = d < 115 ? 0 : d < 220 ? 1 : 2;
+      const d = Math.hypot(cx + 30, cz - 225), lod = d < 115 ? 0 : d < 190 ? 1 : d < 290 ? 2 : 3;
       HOUSES.push({ rect: r, seed, gate, courts, wealth, lod });
     }
   }
