@@ -203,7 +203,7 @@ function kTower(el, ctx) {
   const sides = [['e', [1, 0]], ['w', [-1, 0]], ['s', [0, 1]], ['n', [0, -1]]];
   for (const [f, N] of sides) {
     if (el.porches !== false) portico(ctx, { c: [cx, cz], N, y, d0: hw, depth: w * 0.24, width: w * 0.36, h: body * 0.7, tiers: w > 8 ? 2 : 1, open: cel ? { dw: cel.dw, dh: cel.dh } : null });
-    else if ((el.doors ?? 'nesw').includes(f)) doorway(bag, [cx, cz], N, hw, y + 0.8, Math.min(1.1, w * 0.12), Math.min(3.2, body * 0.55));
+    else if ((el.doors ?? 'nesw').includes(f)) { if (cel) openDoorway(bag, [cx, cz], N, hw, y + 0.7, cel.dw, cel.dh); else doorway(bag, [cx, cz], N, hw, y + 0.8, Math.min(1.1, w * 0.12), Math.min(3.2, body * 0.55)); }
     // devatas on the wall either side of the door
     const s = Math.min(1.9, body * 0.16), U = perp(N);
     if (hw - n * d > w * 0.18 + s * 0.4 + 0.3 && el.devatas !== false) for (const side of [-1, 1]) {
@@ -269,8 +269,9 @@ function cella(ctx, { cx, cz, y, hw, c, body, half, dw, dh, image }) {
   for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) col.rect([cx + Math.min(sx * c, sx * hw), cz + Math.min(sz * c, sz * hw), cx + Math.max(sx * c, sx * hw), cz + Math.max(sz * c, sz * hw)], y, top);
   // the corbelled ceiling: four courses each stepping in 0.45, then the capstone
   let e = half;
+  const stp = Math.min(0.45, (half - 0.2) / 4);
   for (let k = 0; k < 4; k++) {
-    const w = half - (e - 0.45), y0 = top + 0.5 * k, y1 = y0 + 0.5; e -= 0.45;
+    const w = half - (e - stp), y0 = top + 0.5 * k, y1 = y0 + 0.5; e -= stp;
     bag.add(S, box(cx - half, y0, cz - half, cx + half, y1, cz - e)); bag.add(S, box(cx - half, y0, cz + e, cx + half, y1, cz + half));
     bag.add(S, box(cx - half, y0, cz - e, cx - e, y1, cz + e)); bag.add(S, box(cx + e, y0, cz - e, cx + half, y1, cz + e));
     void w;
@@ -512,7 +513,9 @@ function kGallery(el, ctx) {
       }
       col.floor([Math.min(A[0], B[0]) - Math.abs(n[0]) * hw, Math.min(A[1], B[1]) - Math.abs(n[1]) * hw, Math.max(A[0], B[0]) + Math.abs(n[0]) * hw, Math.max(A[1], B[1]) + Math.abs(n[1]) * hw], y);
     }
-    if (gate) kTower({ c: [a[0] + ux * L / 2, a[1] + uz * L / 2], y: y - 0.6, w: Math.min(gate * 0.55, 9), h: el.gateH ?? h * 3.2, tiers: 3, porches: false }, ctx);
+    // (gatePass: a gate tower wide enough is hollowed with a passage on each axis, a narrower one left out: the way runs through)
+    const gw = Math.min(gate * 0.55, 9);
+    if (gate && !(el.gatePass && gw < 6)) kTower({ c: [a[0] + ux * L / 2, a[1] + uz * L / 2], y: y - 0.6, w: gw, h: el.gateH ?? h * 3.2, tiers: 3, porches: false, ...(el.gatePass ? { cella: { half: Math.min(2.2, gw / 2 * (1 - 0.27) - 0.1), dw: 1.1, dh: 3.2 } } : {}) }, ctx);
   }
   if (el.corner) for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) kTower({ c: [x, z], y: y - 0.6, w: w * 1.1, h: el.corner, tiers: 4, porches: false }, ctx);
 }
@@ -878,7 +881,7 @@ registerStyle('khmer', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse2, k_granary: granary, k_sala: sala, k_lotus: lotus, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol, k_banana: banana, k_areca: areca, k_fence: fence, k_rack: rack, k_hammock: hammock, k_loom: loom, k_workshop: workshop, k_bund: bund, k_offering: offering, k_banner: banner, k_shade: shade,
+    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse2, k_granary: granary, k_sala: sala, k_lotus: lotus, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol, k_banana: banana, k_areca: areca, k_fence: fence, k_rack: rack, k_hammock: hammock, k_loom: loom, k_workshop: workshop, k_bund: bund, k_offering: offering, k_banner: banner, k_shade: shade, k_clearway: () => {},
   },
   objects: {},
 });

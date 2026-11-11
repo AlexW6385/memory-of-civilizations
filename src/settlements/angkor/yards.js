@@ -196,6 +196,8 @@ export function yardPlans() {
 /** The enclosure's paths of laterite, its quarters' own ponds' lotus. */
 export function enclosurePlan() {
   const E = ENC_PATHS.map((r) => ({ t: 'lane', rect: r, y: 0.03, mat: 'laterite' }));
+  // the axis of the way in kept clear of the street life's strollers (draws nothing; the footprint is read by objects/life.js)
+  E.push({ t: 'k_clearway', rect: [-205, -0.8, -8, 0.8] });
   return base('angkor-enclosure', E);
 }
 /** The boats standing in the moat, as hulls for the moving boats to keep clear of. */
