@@ -86,7 +86,7 @@ export function people() {
  */
 function squareLife(L, rand, fig, face) {
   const taken = [[40, 20, 7], [LOBNOYE[0], LOBNOYE[1], 18], [LOBNOYE[0], LOBNOYE[1] + 16, 8], [BASIL[0], BASIL[1], 36]];
-  const free = (x, z, r = 1.5) => !taken.some(([a, b, c]) => Math.hypot(x - a, z - b) < c + r) && !(x > -9 && x < 6 && z > -125 && z < 55);
+  const free = (x, z, r = 1.5) => !taken.some(([a, b, c]) => Math.hypot(x - a, z - b) < c + r) && !(x > -9 && x < 6 && z > -125 && z < 55) && !(x > 33 && x < 47 && z > 8 && z < 102);
   const spot = (r) => { for (let k = 0; k < 40; k++) { const x = -8 + rand() * 52, z = -140 + rand() * 235; if (free(x, z, r)) { taken.push([x, z, r]); return [x, z]; } } return null; };
   const y = (p) => height(p[0], p[1]);
   // the guards at the gates: pairs of streltsy in coats of one colour, staves in hand, before the Spassky and Nikolsky bridges
