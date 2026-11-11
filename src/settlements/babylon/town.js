@@ -3,7 +3,8 @@
 // Herodotus gives them (1.195: a linen tunic to the feet, a woollen one over it, a white mantle; long hair bound
 // with fillets; a carved staff); boatmen standing in the round boats, a live ass in the largest (1.194).
 import { RADIUS, WAY, WALL_Z, ESAGILA, RIVER, BRIDGE, QUAY, MARKET, riverX, lots, yards, alleys, laneRects, laneProps } from './layout.js';
-import { frameOf } from '../../styles/babylonian/shop.js';
+import { lifePlans } from './life.js';
+import { height as ground0 } from './layout.js';
 import { QUFFAS } from './plan.js';
 import { esagilaStatue } from '../../styles/babylonian/temple.js';
 
@@ -71,6 +72,19 @@ function people() {
   return { id: 'babylon-people', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, -370], facing: 's' }, center: [-60, 0], near: 420 };
 }
 
+/** Standards of Marduk and braziers along the Processional Way, between its paving and the glazed walls. */
+function wayProps() {
+  const P = [];
+  for (const [z0, z1] of [[-368, -318], [-262, -166], [-152, -70]]) for (let z = z0; z <= z1; z += 24) for (const s of [-1, 1]) P.push({ kind: 'standard', at: [WAY.x + s * 9.0, z + (s > 0 ? 6 : 0)], rot: s > 0 ? Math.PI / 2 : -Math.PI / 2, y: 0.12, seed: 1 });
+  for (const [dx, z] of [[-5, -64], [5, -64], [-5, -266], [5, -266], [-5, -322], [5, -322]]) P.push({ kind: 'brazier', at: [WAY.x + dx, z], rot: 0, y: 0.12, seed: 2 });
+  return P;
+}
+/** Shadufs on the west bank, lifting the river to the gardens. */
+function bankProps() {
+  const P = [];
+  for (const z of [-110, -30, 120, 190]) { const x = riverX(z) - 46; P.push({ kind: 'shaduf', at: [x, z], rot: 0, y: ground0(x, z), seed: z }); }
+  return P;
+}
 const storeysOf = (seed) => (rng(seed || 1)() < 0.45 ? 2 : 1);
 const CORE_C = [-40, -100];
 export async function houses() {
@@ -89,7 +103,8 @@ export async function houses() {
   // the walled yards of the blocks
   plans.push(base('babylon-yards', yards().map((y) => ({ t: 'babylon_yard', rect: y.rect, door: y.door, kind: y.kind, seed: y.seed, front: y.door }))));
   // the paving of the lanes in the core, the alleys' gutters, the street shrines, troughs, benches and water stands
-  plans.push(base('babylon-lanes', [{ t: 'babylon_lanes', rects: laneRects(), alleys: alleys().filter((r) => Math.hypot((r[0] + r[2]) / 2 + 40, (r[1] + r[3]) / 2 + 60) < 250), props: laneProps() }]));
+  plans.push(base('babylon-lanes', [{ t: 'babylon_lanes', rects: laneRects(), alleys: alleys().filter((r) => Math.hypot((r[0] + r[2]) / 2 + 40, (r[1] + r[3]) / 2 + 60) < 250), props: [...laneProps(), ...wayProps(), ...bankProps()] }]));
+  plans.push(...lifePlans(base));
   // the market (a market room: the generic life pass adds to it) and the scribes' mats on the quay
   const z = 103, x = riverX(z) + QUAY.d0 + 6.5;
   plans.push({ ...base('babylon-market', [{ t: 'scribe_kit', at: [x, z - 0.8], y: QUAY.y, rot: Math.PI / 2 }, { t: 'scribe_kit', at: [x, z + 0.8], y: QUAY.y, rot: Math.PI / 2, scroll: true }]), rooms: [{ id: 'market', rect: MARKET, y: 0, kind: 'open', market: true }] });
