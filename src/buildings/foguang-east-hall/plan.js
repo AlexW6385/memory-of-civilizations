@@ -194,6 +194,15 @@ for (const sz of [-1, 1]) st('king', -2.35, sz * 11.6, 3.2, { robe: 'clay_green'
 // oil lamps on bronze stands before the three Buddhas, the hall's only light besides the open doors
 for (const z0 of [0, -5.04, 5.04]) for (const k of [-1, 1]) add({ t: 'tang_lamp', at: [-3.55, z0 + k * 1.1], y: F, h: 1.25 });
 
+// the altar platform's mouldings: a plinth of dark stone at the foot, a projecting cornice under the top, a step before it
+block([-3.25, -12.45, 4.05, 12.45], F, F + 0.14, 'granite_grey', { collide: false });
+block([-3.1, -12.3, 3.9, 12.3], A - 0.16, A - 0.03, 'limestone', { collide: false });
+block([-3.5, -12.2, -3.0, 12.2], F, F + 0.4, 'limestone', { collide: false });
+// the floor worn into a path from the middle door to the altar, slab by slab; the kneeling mats before the three Buddhas
+for (let x = -8.7; x < -3.55; x += 1.25) for (const r of [-1, 0, 1]) block([x + 0.03, r * 0.9 - 0.42, x + 1.2, r * 0.9 + 0.42], F, F + 0.015 + ((Math.round(x * 7) + r + 9) % 3) * 0.006, 'bluestone', { collide: false });
+for (const z0 of [0, -5.04, 5.04]) block([-4.25, z0 - 0.45, -3.65, z0 + 0.45], F, F + 0.05, 'cloth_ochre', { collide: false });
+// hanging banners (fan) of silk from the inner ring's beams, one at each of its middle bays, and over the front bays' ends
+for (const z of [-10.08, -5.04, 0, 5.04, 10.08]) for (const x of [-4.2, 4.2]) block([x - 0.01, z - 0.28, x + 0.01, z + 0.28], F + H0 - 3.1, F + H0 - 0.45, z === 0 ? 'cloth_red' : 'cloth_ochre', { collide: false });
 // ── the roof ─────────────────────────────────────────────────────────────────
 // eaves 4.0 m past the column line on rafters and flying rafters; the lowest slope about 0.3, steeper toward the ridge
 add({ t: 'hip_roof', c: [0, 0], A: 17.0 + 4.0, B: 8.83 + 4.0, alongZ: true, y: F + 7.5, rise: 5.0, eaveSlope: 0.3, pow: 1.6, lift: 0.6, mat: 'tile_grey', soffit: 'timber_red', rafters: { out: 4.0, sp: 0.32 }, tangChiwei: 2.3 });

@@ -5,6 +5,7 @@
 
 import { HALL, RADIUS } from './layout.js';
 import { monasteryElements } from './monastery.js';
+import { courtElements } from './courts.js';
 import hallPlan from '../../buildings/foguang-east-hall/plan.js';
 
 const T = 13;                                   // the upper terrace (hall plan, y above the courtyard)
@@ -142,3 +143,6 @@ export default hall;
 
 /** The Hall of Manjusri, the bell pavilion, the incense burners and the side stairs (monastery.js). */
 export const monastery = { id: 'tang-wutai-monastery', style: 'chinese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: monasteryElements(), rooms: [], bounds: [-16, -52, 32, 52], entrance: { at: [-2, 0], facing: 'e' } };
+
+/** The courts' worn paths, moss and the pines' beds (courts.js). */
+export const courts = { id: 'tang-wutai-courts', style: 'chinese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: courtElements(), rooms: [], bounds: [-60, -50, 96, 50], entrance: { at: [-20, 0], facing: 'e' } };

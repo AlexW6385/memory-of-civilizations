@@ -101,3 +101,9 @@ Radius cut from 360 to 250 m (small class): the monastery (x −58…94) and the
 - [袈裟 — 澎湃 (thepaper)](https://www.thepaper.cn/newsDetail_forward_2493909)
 - [píng'àn 平闇 — Architectura Sinica](https://architecturasinica.org/keyword/k000244)
 - [Nan Lian Garden notes (Foguang East Hall) — EDB Hong Kong](https://www.edb.gov.hk/attachment/sc/curriculum-development/kla/pshe/references-and-resources/ethics-and-religious-studies/Nan_Lian_Garden/3iii_sc.pdf)
+
+## Second pass (B1 deepening) [inferred unless marked]
+
+- Courts: a worn axial path of bluestone slabs, moss and weeds at the foot of retaining walls and stairs, raised brick beds with old Chinese pines (Pinus tabuliformis, the common pine of Wutai's hills) in the three courts. The pines in the courts are [inferred] from the monastery's present old trees.
+- East Hall: altar plinth and cornice mouldings, a front step, worn floor slabs from the middle door to the altar, kneeling mats, hanging silk banners (fan) in the inner ring [inferred from Tang halls; Dunhuang paintings show banners hung in halls].
+- Village: yard walls vary in height and cap (tile, sorghum thatch, bare earth), plaster fallen in patches, rubble piers; yard goods of a mountain village: drying trays of corn and peppers, millstones and stone rollers, carts, barrows, troughs, washing lines, stools and baskets, sacks, firewood and haystacks outside the walls, beasts and seated figures by gates [inferred from the region's rural life].

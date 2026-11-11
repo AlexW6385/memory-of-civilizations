@@ -207,15 +207,30 @@ export function wutaiYard(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, g = (x, z) => { const a = (x - x0) / (x1 - x0), b = (z - z0) / (z1 - z0); return (h00 * (1 - a) + h10 * a) * (1 - b) + (h01 * (1 - a) + h11 * a) * b; };
   const [gu, gw] = el.gate ?? [L / 2, 2.2], T = 0.5;
   // a wall run in the local frame along u (at v) or along v (at u), in steps of 2 m following the ground
+  const wr = rng((el.seed || 1) + 5), capKind = el.wall === 'mud_plaster' || wr() < 0.35 ? (wr() < 0.6 ? 1 : 2) : 0;
   const run = (a0, a1, fixed, alongU, skip = null) => {
     for (let a = a0; a < a1 - 1e-6; a += 2) {
       const b = Math.min(a1, a + 2), m = (a + b) / 2;
       if (skip && m > skip[0] && m < skip[1]) continue;
       const [x, z] = alongU ? fr.P(m, fixed) : fr.P(fixed, m), yy = g(x, z) - 0.05;
       const r = alongU ? [a, fixed - T / 2, b, fixed + T / 2] : [fixed - T / 2, a, fixed + T / 2, b];
-      B('schist_rubble', r[0], r[1], r[2], r[3], yy - 0.4, yy + 0.55, true);
-      B(el.wall ?? 'earth_wall', r[0] + 0.03, r[1] + 0.03, r[2] - 0.03, r[3] - 0.03, yy + 0.55, yy + 2.0, true);
-      B('tile_grey', r[0] - 0.05, r[1] - 0.05, r[2] + 0.05, r[3] + 0.05, yy + 2.0, yy + 2.1, false);
+      const wh = 1.75 + wr() * 0.4, rub = 0.45 + wr() * 0.25;                          // the wall's height and its rubble foot vary run to run
+      B('schist_rubble', r[0], r[1], r[2], r[3], yy - 0.4, yy + rub, true);
+      B(el.wall ?? 'earth_wall', r[0] + 0.03, r[1] + 0.03, r[2] - 0.03, r[3] - 0.03, yy + rub, yy + wh, true);
+      // the cap: grey tiles, or (poorer yards) a thatch of sorghum straw with its ends hanging, or a crumbled top of bare earth
+      const cap = capKind;
+      if (cap === 0) B('tile_grey', r[0] - 0.05, r[1] - 0.05, r[2] + 0.05, r[3] + 0.05, yy + wh, yy + wh + 0.1, false);
+      else if (cap === 1) B('thatch', r[0] - 0.12, r[1] - 0.14, r[2] + 0.12, r[3] + 0.14, yy + wh, yy + wh + 0.22, false);
+      else B('mud_plaster', r[0], r[1] + 0.06, r[2], r[3] - 0.06, yy + wh, yy + wh + 0.08 + wr() * 0.1, false);
+      // plaster fallen off in patches, showing the courses under it; a few stones that stand out
+      for (const sd of [-1, 1]) if (wr() < 0.4) {
+        const m = a + 0.3 + wr() * (b - a - 0.9), pw = 0.5 + wr() * 0.5, ph = 0.4 + wr() * 0.5, py = yy + rub + 0.1 + wr() * (wh - rub - ph - 0.3), mt = wr() < 0.5 ? 'brick_grey' : 'schist_rubble';
+        const f = sd < 0 ? r[(alongU ? 1 : 0)] + 0.025 : (alongU ? r[3] : r[2]) - 0.025;
+        if (alongU) B(mt, m, f - 0.02, m + pw, f + 0.02, py, py + ph, false);
+        else B(mt, f - 0.02, m, f + 0.02, m + pw, py, py + ph, false);
+      }
+      // a pier of rubble at the run's joint on the outer side, hiding the seam and holding the wall
+      if (a > 0.1 && (Math.round(a / 2) % 3 === 0)) { const q = alongU ? [a - 0.25, fixed - T / 2 - 0.12, a + 0.25, fixed + T / 2 + 0.12] : [fixed - T / 2 - 0.12, a - 0.25, fixed + T / 2 + 0.12, a + 0.25]; B('schist_rubble', q[0], q[1], q[2], q[3], yy - 0.3, yy + wh - 0.15, true); B('limestone', q[0] - 0.03, q[1] - 0.03, q[2] + 0.03, q[3] + 0.03, yy + wh - 0.15, yy + wh - 0.05, false); }
     }
   };
   run(0, L, T / 2, true, [gu - gw / 2, gu + gw / 2]); run(0, L, D - T / 2, true); run(T / 2, D - T / 2, T / 2, false); run(T / 2, D - T / 2, L - T / 2, false);
@@ -266,4 +281,20 @@ export function wutaiRack({ at: [x, z], y, rot = 0, len = 3.6 }, { bag }) {
   for (let a = -len / 2 + 0.35; a < len / 2 - 0.2; a += 0.32) { bx('paint_ochre', a - 0.07, -0.07, a + 0.07, 0.07, y + 1.4, y + 2.08); }
   for (let a = -len / 2 + 0.5; a < len / 2 - 0.2; a += 0.7) bx('lacquer_red', a - 0.03, -0.03, a + 0.03, 0.03, y + 0.7, y + 1.18);
 }
-export const villageElements = { wutai_house: wutaiHouse, wutai_yard: wutaiYard, wutai_well: wutaiWell, wutai_mill: wutaiMill, wutai_rack: wutaiRack };
+/** wutai_pine { at, y, h, seed }: an old Chinese pine (Pinus tabuliformis) of a courtyard bed: the red-scaled, leaning trunk, a crown of flat tiers. */
+export function wutaiPine({ at: [x, z], y, h = 6, seed = 1 }, { bag, col }) {
+  const rand = rng(seed + 99), lean = (rand() - 0.5) * 0.5, a = rand() * 6.28;
+  const tr = lathe([[0.001, -0.3], [0.38, -0.3], [0.36, 0], [0.27, 1.4], [0.2, h * 0.55], [0.12, h * 0.9], [0.001, h * 0.9]], 10, null, 0, 0, 0);
+  const pos = tr.attributes.position;
+  for (let i = 0; i < pos.count; i++) { const t = Math.max(0, pos.getY(i)) / h; pos.setX(i, pos.getX(i) + Math.cos(a) * lean * t * t * h * 0.35); pos.setZ(i, pos.getZ(i) + Math.sin(a) * lean * t * t * h * 0.35); }
+  tr.translate(x, y, z); bag.add('bark_redpine', tr);
+  for (let k = 0; k < 5; k++) {
+    const t = 0.5 + k * 0.1, R = (1.5 + rand() * 0.8) * (1.15 - k * 0.12) * (h / 6), oa = rand() * 6.28, off = R * 0.35 * (k > 0), yy = y + t * h - 0.1;
+    const cx = x + Math.cos(a) * lean * t * t * h * 0.35 + Math.cos(oa) * off, cz = z + Math.sin(a) * lean * t * t * h * 0.35 + Math.sin(oa) * off;
+    bag.add('flax_leaf', lathe([[0.001, -0.35], [R * 0.55, -0.22], [R, 0.0], [R * 0.9, 0.3], [R * 0.55, 0.55], [0.001, 0.68]], 12, null, cx, yy, cz));
+    bag.add('bark_redpine', lathe([[0.001, 0], [0.07, 0], [0.05, R * 0.2], [0.001, R * 0.2]], 5, null, cx, yy - 0.4, cz));
+  }
+  col.circle(x, z, 0.4, y, y + h * 0.5);
+}
+
+export const villageElements = { wutai_pine: wutaiPine, wutai_house: wutaiHouse, wutai_yard: wutaiYard, wutai_well: wutaiWell, wutai_mill: wutaiMill, wutai_rack: wutaiRack };
