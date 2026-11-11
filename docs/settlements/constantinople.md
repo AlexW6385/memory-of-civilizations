@@ -123,6 +123,16 @@ Along the Mese from the Forum of Constantine to the Augustaion, and into Hagia S
 
 As for Hagia Sophia (`docs/buildings/hagia-sophia.md` §9).
 
+## 14. Deepening pass: lanes, gardens, working houses
+
+- **The grid.** North-south lanes every 41 m and east-west lanes every 35 m (5 m wide), the Mese's own corridor taking one slot at x = -180 and the lanes at z = 40 and z = 110. Between two east-west lanes stand two rows of houses back to back, 15 m deep, the houses of a row sharing their side walls so that each lane is a continuous front on both sides [inferred: the dense, party-walled tenement street, after "Houses in Constantinople stood close, sometimes sharing walls" (§11, stated)]. About 800 tenements replace the 400 spaced ones; the outer ring is thinned with walled gardens and market gardens, which the city's inner walls enclosed [inferred; the Theodosian walls enclosed fields and gardens, general knowledge, not checked this pass].
+- **Walled gardens** (`byz_walled_yard`, src/styles/byzantine/lanes.js): a whole block behind a brick wall with a gate: a well-head, a vine pergola with a bench, beds, a store; planted with figs, olives, apples and cypresses; some with a niche fountain on the lane wall [inferred].
+- **Lane kit** (lanes.js): house-bridges (a passage on a timber lintel across the lane between two tenements, with a window), cloth awnings strung from eave to eave with a hung lamp, wall shrines (a pier with an icon in a niche and a lamp). Zeno's law on balconies and the closeness of houses (§11) are the grounds for the narrow, built-over lanes [inferred].
+- **Fronts.** `byz_house` now takes `front` (the face to the lane, so the shared street dressing puts doors' goods, benches and washing on the right side), `abut` (party walls drawn plain, no overhang toward the neighbour) and `storeys`; the tabernae have goods on their counters, oil lamps on brackets and painted boards; weathering at eye level: rising damp on plastered walls, rain streaks under sills, patches where the plaster has fallen away and the brick shows.
+- **Working houses you can enter** (`byz_home` variants): a cook-shop (popina) with tables, benches, a counter with jars, wine pithoi and a hearth; a bakery with a dome oven, a kneading trough, bread racks and sacks; a weaver's with two warp-weighted looms, bolts of cloth, dye jars and a vat; three more homes; all with the stair and the upper floor and the gallery of the house [inferred: trades after the Book of the Eparch's guilds, not read this pass; the loom type is general Mediterranean knowledge].
+- **Life.** Walkers (56 by day) also use the lanes; pigeons and sparrows perch at the lane ends; the Great Palace's gaps between courts are grass with cypresses, planes and olives.
+- Not done: the sea and the harbours (need the site registered with water, a rim and a sea level; the coordinator's files), Hagia Eirene's, the Senate house's and the Chalke's interiors, the Basilica Cistern.
+
 ## Sources
 
 - [Zeno's constitution on private buildings (Scott, Corpus Juris Civilis) — droitromain.univ-grenoble-alpes.fr](https://droitromain.univ-grenoble-alpes.fr/Anglica/N63_Scott.htm)

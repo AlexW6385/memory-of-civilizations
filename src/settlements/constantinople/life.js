@@ -27,7 +27,7 @@ export function life() {
     const [ax, az] = st.a, [bx, bz] = st.b, len = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / len, (bz - az) / len], s = st.side, D = 5;
     const ns = Math.max(1, Math.round(len / 4.4)), sw = len / ns;
     for (let k = 0; k < ns; k++) {
-      if (rand() < 0.45) continue;
+      if (rand() < 0.25) continue;
       const c = (k + 0.5) * sw, g = pick(GOODS), dy = 0.18, face = Math.atan2(u[1] * s, -u[0] * s);   // facing the street
       const P = (along, t) => fp(st.a, u, c + along, t * s);
       if (g[0] === 'cloth' || g[0] === 'produce') L.push({ t: 'stall', at: P(0, D - 1.0), y: height(ax, az) + dy, rot: face, seed: Math.floor(rand() * 1e9), w: 2.2, d: 0.9, awning: pick(['cloth_white', 'cloth_ochre', 'linen']), goods: [g[0], g[0] === 'cloth' ? 'cloth' : 'basket'] });

@@ -34,7 +34,7 @@ export function townElements() {
   const E = lots().map((l) => ({ t: 'byz_house', balcony: 0.55, ...l, storeys: undefined }));
   const fountainAt = [];
   for (const g of gardens()) {
-    const e = { t: 'byz_garden', rect: g.rect, y: Math.min(...[[g.rect[0], g.rect[1]], [g.rect[2], g.rect[3]]].map(([x, z]) => height(x, z))), seed: g.seed };
+    const e = { t: 'byz_walled_yard', rect: g.rect, y: Math.min(...[[g.rect[0], g.rect[1]], [g.rect[2], g.rect[3]]].map(([x, z]) => height(x, z))), seed: g.seed };
     if (g.seed % 3 === 0 && Math.hypot(g.rect[0], g.rect[1]) < 320) { e.gate = 's'; fountainAt.push([(g.rect[0] + g.rect[2]) / 2 + (g.seed % 7) - 3, g.rect[1] + 0.15, e.y]); }
     E.push(e);
   }

@@ -13,7 +13,7 @@ const shopsOf = () => {
   for (const st0 of MESE_STOAS) {
     if (!st0.shops) continue;
     const st = { ...st0, y: height(...st0.a), depth: st0.depth ?? 5 }, L = Math.hypot(st.b[0] - st.a[0], st.b[1] - st.a[1]), ns = Math.max(1, Math.round(L / 4.4));
-    for (let k = 0; k < ns; k++) if (rand() < 0.75) out.push({ st, k, ns, trade: TRADES[Math.floor(rand() * TRADES.length)], seed: Math.floor(rand() * 1e6) });
+    for (let k = 0; k < ns; k++) if (rand() < 0.93) out.push({ st, k, ns, trade: TRADES[Math.floor(rand() * TRADES.length)], seed: Math.floor(rand() * 1e6) });
   }
   return out;
 };

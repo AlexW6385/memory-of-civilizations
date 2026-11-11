@@ -8,7 +8,7 @@ import { box, frustum, lathe } from '../../core/geom.js';
 import { solid8, rng } from './houses.js';
 import '../roman/town.js';
 
-/** byz_garden: { rect, y, seed, gate ('n'|'s'|'e'|'w') } — the walled garden of a whole block. */
+/** byz_walled_yard: { rect, y, seed, gate ('n'|'s'|'e'|'w') } — the walled garden of a whole block. */
 function garden(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, th = 0.5, wh = 2.6 + rand() * 0.4, far = !!el.simple;
   const gate = el.gate ?? 'sens'[Math.floor(rand() * 4)], gc = (a, b) => (a + b) / 2 + (rand() - 0.5) * 6, gw = 2.2;
@@ -83,4 +83,4 @@ function shrine(el, { bag, col }) {
   part(-0.6, 0.35, 0.6, 0.8, y, y + 0.15, 'limestone');
 }
 
-Object.assign(STYLES.roman.elements, { byz_garden: garden, byz_bridge: bridge, byz_awning: awning, byz_shrine: shrine });
+Object.assign(STYLES.roman.elements, { byz_walled_yard: garden, byz_bridge: bridge, byz_awning: awning, byz_shrine: shrine });
