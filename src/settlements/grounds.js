@@ -41,6 +41,7 @@ import { ground as tangWutai } from './tang-wutai/ground.js';
 import { ground as heianUji } from './heian-uji/ground.js';
 import { ground as sanchi } from './sanchi/ground.js';
 import { ground as nara } from './nara/ground.js';
+import { ground as muromachiKyoto } from './muromachi-kyoto/ground.js';
 import { ground as khajuraho } from './khajuraho/ground.js';
 import { ground as babylon } from './babylon/ground.js';
 import { ground as ottomanIstanbul } from './ottoman-istanbul/ground.js';
@@ -102,6 +103,7 @@ export const GROUNDS = {
   'heian-uji': heianUji,
   sanchi,
   nara,
+  'muromachi-kyoto': muromachiKyoto,
   khajuraho,
   babylon,
   'ottoman-istanbul': ottomanIstanbul,
@@ -168,6 +170,7 @@ const LOADERS = {
   'heian-uji': () => import('./heian-uji/index.js'),
   sanchi: () => import('./sanchi/index.js'),
   nara: () => import('./nara/index.js'),
+  'muromachi-kyoto': () => import('./muromachi-kyoto/index.js'),
   khajuraho: () => import('./khajuraho/index.js'),
   babylon: () => import('./babylon/index.js'),
   'ottoman-istanbul': () => import('./ottoman-istanbul/index.js'),

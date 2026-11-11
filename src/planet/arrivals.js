@@ -12,6 +12,7 @@ export const ARRIVALS = {
   'ming-suzhou':      [4, 0.3, -49.5, 3.027, 0.08],      // from the zigzag bridge between the two islands, south across the lotus pond to the Hall of Distant Fragrance, whole on its terrace
   'qing-beijing':     [0, 0.05, 70, 0, 0.1],             // the Hall of Supreme Harmony on its marble terrace, up the imperial way
   'lhasa':            [-4, 0.1, 120, 0, 0.32],           // the Potala over the town's lanes
+  'muromachi-kyoto':  [200, 0.1, 25, 0, 0.14],           // the Kannon-den of Ginkaku-ji whole across its pond
   'nara':             [0, 0.1, 20, 0, 0.25],             // the Great Buddha Hall from its court
   'heian-uji':        [40, null, 0, 1.5708, 0.06],       // the Phoenix Hall across its pond, wings spread
   'edo-himeji':       [-25, 37.1, -3, 0, 0.36],          // the keep cluster whole on its stone base, from the Honmaru's south edge (from 9 m nearer the top roof was cut)
