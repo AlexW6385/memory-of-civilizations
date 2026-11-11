@@ -85,7 +85,28 @@ Hot and dry, dust haze, clear desert nights. Latitude 31° N. [inferred]
 
 The lyre and the harp, a reed pipe, frame drums (a plucked string, the ney and a reed organ stand in). [inferred]
 
+### 4.3 The Giparu (built, walkable)
+
+- **Sources.** Woolley's Giparu: a nearly square compound 79 × 76.5 m inside brick walls over 4.5 m thick, buttressed on three sides; a central passage splits it into two blocks, each with its own formal entrance. The southeast block is the Ningal temple: a monumental gateway with towers and a long passage, two offset lobbies so the street cannot see in, a forecourt, the main court with a lustration tank, a limestone pillar, a platform for a stela, a brick altar (1.55 x 0.95 x 1.05 m) and votive platforms, antechambers that are shrines to lesser gods, the inner sanctum with the statue pedestal and a priestess's platform, a bedchamber, a treasury, a weaver's workspace, and a kitchen court with a well, water tank, fireplaces, bread oven and cooking range. The northwest block has a double doorway, three bitumen-lined tanks for lustration beside the entrance, a forecourt and main court, a lustration antechamber, a room with a platform in a niche, a room of clay tablets, antechambers to a cella with an altar and votive pedestals, a treasury. Under the east corner lie subterranean brick tombs, one per room, perhaps of high priestesses [stated: odysseyadventures, "The Giparu"].
+- **Ours** (`giparu`, src/styles/sumerian/temple.js): the same plan scaled to the lot (62 x 64 m), entered by the west gateway between two towers and cedar doors; the street through the middle with the two blocks' gateways and towers on it; every room above built hollow with doorways, roofs of mud on palm trunks, a stair from the forecourt to the north range's roof; furnished as listed above (statue of limestone with a gold crown on a stepped podium, offering table, lamps, loom with warp and cloth, couch and chests, jars and ingots, tablets on a bench, well and tanks); relaid-brick patches over the vaults [inferred: sizes, the furnishings' forms, the scaling].
+
+### 5.3 Public chapels (built)
+
+- **Sources.** Woolley found small public shrines at prominent places, especially intersections, "to meet the religious needs of ordinary people"; a small open court with a small room as the shrine, plus lobbies, antechambers, storerooms; grander doorways than houses with reveals, guarded by terracotta protective demons; sited higher than the street; a lobby with a deep alcove for ablutions, a storeroom for cult equipment; a brick altar in the court before the cult room with a pedestal each side, one hollowed and bitumen-lined for libations; a cult room with a heavy outward-swinging wooden door and an inward reed screen door and a niche with a mud-brick platform for the statue; a pair of rooms perhaps for robing and waiting; minor gods (Hendursag, Nin-shubur) [stated: odysseyadventures, "Ur of the Chaldees: the chapels"; Woolley's "public chapels" in Isin-Larsa and Old Babylonian periods (a little after our date), Heidelberg catalogue record].
+- **Ours** (`ur_chapel`): about one lot in twelve of those at least 10.8 m across, the door facing the temenos: a step up from the lane, three-stepped reveals, a lintel and header, a guardian demon of terracotta on a plinth each side, the court with altar, two pedestals (one lined with bitumen), the cult room with niche and platform, a lamp, the screen folded beside the door, the robing room, the equipment store, the lobby with its alcove [inferred: the proportions, the share of lots].
+
+### 5.4 The school (built)
+
+Scribal schooling took place in private houses (§5.2). One furnished house beside the market (`school: true` on its lot: the nearest to `SCHOOL_AT`) has, in place of the reception room, rows of low mud-brick benches with tablets, the master's stool, a basket of finished tablets, a lamp; and in the court two clay-lined bins and a basin for the clay (the Nippur school houses had clay-lined bins in the court) [inferred from the school tablets of Ur's Quiet Street and Broad Street houses and from the Nippur schools; the arrangement is ours].
+
+## 10. Living systems (built)
+
+`movers.js` (walkers in the kilt or wrap, priests and scribes in the robe with a shawl, women in shawled robes, porters, boys; ways: the north street, the market, the temenos avenue, the east street, the quay; no moving boats), `fauna.js` (carp in the basin, swallows, kites, sparrows, an egret), `smoke.js` (house kitchens at the meals, the Giparu's kitchen, incense at the altar and the Edublalmah) [inferred: counts, ways].
+
 ## Sources
+
+- [The Giparu — odysseyadventures](https://www.odysseyadventures.ca/articles/ur%20of%20the%20chaldees/ur_article02gip.html)
+- [Ur of the Chaldees: the chapels — odysseyadventures](https://odysseyadventures.ca/articles/ur%20of%20the%20chaldees/ur_article05chapels.html)
 
 - [Ziggurat at Ur — Britannica](https://www.britannica.com/topic/ziggurat-at-Ur)
 - [The Bricks of the Ziggurat of Ur — Alberti's Window](https://albertis-window.com/2015/05/the-bricks-of-the-ziggurat-of-ur/)

@@ -39,8 +39,8 @@ export function houses() {
     if (rand() < 0.08) continue;
     const seed = Math.floor(rand() * 1e6);
     const open = OPEN.has(seed), big = Math.min(w, d) >= 10.8;
-    // a public chapel (Woolley's "public chapels" stood at street corners): about one lot in forty-five that is big enough, its door toward the temenos
-    const chapel = !open && big && seed % 45 === 0, face = Math.abs(cz) > Math.abs(cx) ? (cz > 0 ? 'n' : 's') : (cx > 0 ? 'w' : 'e');
+    // a public chapel (Woolley's "public chapels" stood at street corners): about one lot in twelve that is big enough, its door toward the temenos
+    const chapel = !open && big && seed % 12 === 0, face = Math.abs(cz) > Math.abs(cx) ? (cz > 0 ? 'n' : 's') : (cx > 0 ? 'w' : 'e');
     HOUSES.push(open ? { rect: r, seed, open: true, door: 's', white: seed === 589524 } : chapel ? { rect: r, seed, chapel: true, door: face } : { rect: r, seed });
   }
   // the house of a scribal school beside the market: the lot nearest to SCHOOL_AT, entered, furnished with benches and clay bins (§5.4)
