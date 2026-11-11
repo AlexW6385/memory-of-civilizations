@@ -33,8 +33,8 @@ const E = [
   { t: 'floor', rect: [231, -66, 237, -36], y: g + 0.06, th: 0.2, mat: 'sandstone_floor' },
   { t: 'floor', rect: [GARDEN[0], -54, GARDEN[2], -48], y: g + 0.06, th: 0.2, mat: 'sandstone_floor' },
   { t: 'floor', rect: [228, -57, 240, -45], y: g + 0.1, th: 0.3, mat: 'marble_floor' },
-  { t: 'stoa', rect: [190, -80, 302, -66], front: 's', y: g, h: 5.2, d: 0.7, sp: 2.8, flutes: 20, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', inner: { d: 0.56, every: 2 }, seed: 11 },
-  { t: 'stoa', rect: [296, -66, 328, -36], front: 'w', y: g, h: 5.2, d: 0.7, sp: 2.8, flutes: 20, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', rooms: { n: 1, depth: 14 }, seed: 12 },
+  { t: 'stoa', rect: [190, -80, 302, -66], front: 's', y: g, h: 5.2, d: 0.7, sp: 2.8, flutes: 12, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', inner: { d: 0.56, every: 2 }, seed: 11 },
+  { t: 'stoa', rect: [296, -66, 328, -36], front: 'w', y: g, h: 5.2, d: 0.7, sp: 2.8, flutes: 12, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', rooms: { n: 1, depth: 14 }, seed: 12 },
   { t: 'exedra', c: [206, -51], r: 5, y: g, face: -Math.PI / 2 },
   ...halls.map((r, i) => ({ t: 'library_hall', rect: r, front: 'n', y: g, seed: 20 + i })),
   // the royal quarter's fronts on the harbour: long colonnades, the palace on the Lochias

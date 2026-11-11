@@ -103,7 +103,7 @@ export const SHIPS = [
   { kind: 'galley', at: [-104, -97], rot: Math.PI / 2, len: 34, seed: 3 }, { kind: 'merchant', at: [-56, -97], rot: Math.PI / 2, len: 24, seed: 4 },
   { kind: 'lighter', at: [-22, -95.5], rot: Math.PI / 2 + 0.05, len: 9, seed: 5 }, { kind: 'lighter', at: [-8, -95.5], rot: Math.PI / 2 - 0.04, len: 9, seed: 6 },
   { kind: 'merchant', at: [26, -97], rot: Math.PI / 2, len: 25, seed: 7 }, { kind: 'lighter', at: [62, -95.5], rot: Math.PI / 2, len: 9, seed: 8 },
-  { kind: 'merchant', at: [96, -97.5], rot: Math.PI / 2, len: 26, seed: 9 }, { kind: 'galley', at: [214, -98.5], rot: Math.PI / 2, len: 34, seed: 10 },
+  { kind: 'merchant', at: [150, -97.5], rot: Math.PI / 2, len: 26, seed: 9 }, { kind: 'galley', at: [214, -98.5], rot: Math.PI / 2, len: 34, seed: 10 },
   { kind: 'galley', at: [262, -98.5], rot: Math.PI / 2, len: 34, seed: 11 }, { kind: 'merchant', at: [330, -97], rot: Math.PI / 2, len: 24, seed: 12 },
   { kind: 'merchant', at: [-330, -97], rot: Math.PI / 2, len: 24, seed: 13 }, { kind: 'merchant', at: [-292, -97], rot: Math.PI / 2, len: 26, seed: 14 },
   { kind: 'lighter', at: [-372, -95.5], rot: Math.PI / 2, len: 9, seed: 15 }, { kind: 'merchant', at: [-120, -257.5], rot: Math.PI / 2, len: 24, seed: 16 },

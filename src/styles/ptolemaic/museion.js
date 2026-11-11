@@ -34,8 +34,8 @@ function shelves(ctx, K, alongU, c, a, b, face, H, rand, density = 0.7) {
   for (let r = 0; r < rows; r++) for (let k = 0; k < n; k++) {
     if (rand() > density) continue;
     const u0 = a + k * cw + 0.1, y0 = 0.25 + r * rowH + 0.05;
-    S(u0, u0 + 0.13, y0, y0 + 0.13, 'papyrus', 0.08, 0.46);
-    if (rand() < 0.4) S(u0 + 0.15, u0 + 0.28, y0, y0 + 0.13, 'linen', 0.08, 0.46);
+    S(u0, u0 + 0.13, y0, y0 + 0.13, 'ivory', 0.08, 0.46);
+    if (rand() < 0.4) S(u0 + 0.15, u0 + 0.28, y0, y0 + 0.13, 'plaster_ochre', 0.08, 0.46);
     S(u0 + 0.02, u0 + 0.1, y0 + 0.04, y0 + 0.1, 'cloth_red', 0.46, 0.5);          // the tag (sillybos) on the scroll's end
   }
 }
@@ -101,13 +101,13 @@ function libraryHall(el, ctx) {
       for (const u of [u0 + 0.2, u1 - 0.3]) R(u, v - 0.4, u + 0.1, v + 0.4, 0, 0.72, 'wood_dark', false);
       col.rect(F.R(u0, v - 0.5, u1, v + 0.5), y, y + 0.8);
       for (const dv of [-0.95, 0.95]) { R(u0, v + dv - 0.18, u1, v + dv + 0.18, 0.0, 0.44, 'timber', false); col.rect(F.R(u0, v + dv - 0.18, u1, v + dv + 0.18), y, y + 0.44); }
-      for (let s = 0; s < 3; s++) { const uu = u0 + 0.6 + s * 1.7; R(uu, v - 0.25, uu + 0.6, v + 0.25, 0.8, 0.82, 'papyrus', false); R(uu, v - 0.25, uu + 0.06, v + 0.25, 0.82, 0.88, 'linen', false); R(uu + 0.54, v - 0.25, uu + 0.6, v + 0.25, 0.82, 0.88, 'linen', false); }
+      for (let s = 0; s < 3; s++) { const uu = u0 + 0.6 + s * 1.7; R(uu, v - 0.25, uu + 0.6, v + 0.25, 0.8, 0.82, 'ivory', false); R(uu, v - 0.25, uu + 0.06, v + 0.25, 0.82, 0.88, 'linen', false); R(uu + 0.54, v - 0.25, uu + 0.6, v + 0.25, 0.82, 0.88, 'linen', false); }
     }
     const [lx, lz] = F.P(u1 + 0.5, vi);
     lampstand(ctx, lx, lz, y, 1.5);
   }
   // baskets and chests of scrolls at the foot of the back shelves, busts of the poets by the door
-  for (let k = 0; k < 4; k++) { const [x, z] = F.P(5 + k * 6.2, D - T - ds - 0.6); bag.add('wicker', lathe([[0.3, 0], [0.34, 0.3], [0.3, 0.46], [0.001, 0.46]], 10, null, x, y, z)); col.circle(x, z, 0.34, y, y + 0.46); bag.add('papyrus', box(x - 0.2, y + 0.44, z - 0.06, x + 0.2, y + 0.56, z + 0.06)); }
+  for (let k = 0; k < 4; k++) { const [x, z] = F.P(5 + k * 6.2, D - T - ds - 0.6); bag.add('wicker', lathe([[0.3, 0], [0.34, 0.3], [0.3, 0.46], [0.001, 0.46]], 10, null, x, y, z)); col.circle(x, z, 0.34, y, y + 0.46); bag.add('ivory', box(x - 0.2, y + 0.44, z - 0.06, x + 0.2, y + 0.56, z + 0.06)); }
   for (const u of [2.8, L - 2.8]) { const [x, z] = F.P(u, 1.6); bust(ctx, x, z, y); }
   void lights; void kline; void vase;
 }
@@ -152,7 +152,7 @@ function palaceFront(el, ctx) {
   R(0, D - 1.2, L, D, 0.6, h + 1.6, 'sandstone_white'); R(0, D - 1.3, L, D - 1.1, 3.6, 5.0, 'paint_ochre', false);
   R(0, D - 1.3, L, D - 1.1, h + 0.4, h + 0.9, 'egyptian_blue', false);
   const n = Math.round(L / 3.6);
-  for (let k = 0; k <= n; k++) { const u = 0.8 + k * (L - 1.6) / n; STYLES.greek.column({ at: F.P(u, D - 3.3), y: y + 0.6, h, d: 0.8, mat: 'marble_column', flutes: 20, simple: false }, ctx); }
+  for (let k = 0; k <= n; k++) { const u = 0.8 + k * (L - 1.6) / n; STYLES.greek.column({ at: F.P(u, D - 3.3), y: y + 0.6, h, d: 0.8, mat: 'marble_column', flutes: 0, simple: false }, ctx); }
   R(0, D - 4.0, L, D - 2.6, h + 0.6, h + 1.3, 'marble', false); R(0, D - 4.0, L, D - 2.6, h + 1.3, h + 1.6, 'egyptian_blue', false);
   R(0, D - 2.6, L, D - 1.0, h + 0.6, h + 1.5, 'timber', false);
   R(-0.1, D - 4.2, L + 0.1, D - 0.9, h + 1.6, h + 1.9, 'marble', false);

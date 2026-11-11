@@ -23,27 +23,34 @@ function harbour() {
   E.push({ t: 'floor', rect: [MOLE[0], -138, MOLE[2], -91], y: g + 0.04, th: 0.2, mat: 'sandstone_floor' });
   return base('alexandria-harbour', E);
 }
-const TR6 = [...TRADES, 'wine'];
-/** The shops of the Canopic Way: stoas with a row of workshops behind them, along both sides, each room fitted for its trade. */
+/**
+ * The shops of the Canopic Way: stoas with a row of workshops behind them, along both sides, each room fitted for its trade — in
+ * full only near the crossing (the rest are fronts with the colonnade; their rooms are not furnished). Tiled by 100 m, near and far.
+ */
 function shopStoas() {
-  const out = [], rooms = [];
+  const els = [], rooms = [];
   for (const north of [true, false]) {
     const z0 = north ? 46 : 82, z1 = north ? 58 : 94, front = north ? 's' : 'n';
-    for (let x = -440; x < 440; x += 60) {
-      const x1 = x + 60, cx = x + 30;
+    for (let x = -440; x < 440; x += 50) {
+      const x1 = x + 50, cx = x + 25;
       if (x1 > SOMA[0] - 4 && x < SOMA[2] + 4) continue;
       if (!north && x1 > AGORA[0] - 2 && x < GYM[2] + 70) continue;
       if (wet(x + 3, z0) < 3 || wet(x1 - 3, z0) < 3 || Math.hypot(cx, z0) > RADIUS - 70) continue;
-      if (north && inRect(ROYAL, cx, z0, -4) && x > ROYAL[0] && false) continue;
-      const k = Math.round(x / 60), seed = 40 + k;
-      out.push({ t: 'stoa', rect: [x, z0, x1, z1], front, y: g, h: 4.4, d: 0.6, sp: 2.5, flutes: 0, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', rooms: { n: 6, depth: 6, trades: TR6 }, seed });
-      if (Math.abs(cx - 60) < 150) {
-        const F = frame([x, z0, x1, z1], front), wt = 0.7, rw = (60 - 2 * wt) / 6;
-        for (let r = 0; r < 6; r++) rooms.push({ id: `shop: ${TR6[r]} ${rooms.length}`, rect: F.R(wt + r * rw + 0.3, 12 - 6 + 0.55, wt + (r + 1) * rw - 0.1, 12 - 0.8), y: g, kind: 'inner', market: false });
+      const k = Math.round(x / 50), full = Math.abs(cx - 60) < 150;
+      els.push({ t: 'stoa', rect: [x, z0, x1, z1], front, y: g, h: 4.4, d: 0.6, sp: 2.5, flutes: 0, simple: true, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', ...(full ? { rooms: { n: 5, depth: 6, trades: TRADES } } : {}), seed: 40 + k });
+      if (full) {
+        const F = frame([x, z0, x1, z1], front), wt = 0.7, rw = (50 - 2 * wt) / 5;
+        for (let r = 0; r < 5; r++) rooms.push({ id: `shop: ${TRADES[r]} ${rooms.length}`, rect: F.R(wt + r * rw + 0.3, 12 - 6 + 0.55, wt + (r + 1) * rw - 0.1, 12 - 0.8), y: g, kind: 'inner', market: false, _c: [cx, (z0 + z1) / 2] });
       }
     }
   }
-  return base('alexandria-shops', out, { rooms });
+  const plans = lodTiles('alexandria-shops', 'ptolemaic', els, { R: RADIUS });
+  for (const p of plans) if (p.id.endsWith('-far')) p.elements = p.elements.map((e) => ({ ...e, rooms: undefined }));
+  for (const r of rooms) {
+    const [cx, cz] = r._c, id = `alexandria-shops-${Math.floor(cx / 100)},${Math.floor(cz / 100)}`;
+    delete r._c; plans.find((p) => p.id === id).rooms.push(r);
+  }
+  return plans;
 }
 function civic() {
   const E = [];
@@ -74,7 +81,7 @@ function serapeum() {
   return base('alexandria-serapeum', E);
 }
 export async function town() {
-  const plans = [harbour(), shopStoas(), civic(), serapeum()];
+  const plans = [harbour(), ...shopStoas(), civic(), serapeum()];
   const els = lots().map((l) => {
     const r = l.rect;
     if (l.quarter === 'egyptian') { const w = r[2] - r[0], d = r[3] - r[1]; return { t: 'egyptian_house', rect: [r[0] + 1.5, r[1] + 1.5, r[2] - 1.5 - Math.max(0, w - 12), r[3] - 1.5 - Math.max(0, d - 11)], seed: l.seed, y: l.y }; }
