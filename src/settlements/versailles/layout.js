@@ -47,17 +47,84 @@ export const AVE0 = 75;
 export const STABLES = [{ x: 214, z: -40, side: -1 }, { x: 214, z: 40, side: 1 }];
 export const onAvenue = (x, z, m = 0) => x > PLACE[2] - 5 && [[0, 0], [AVE0, 0.35], [-AVE0, -0.35]].some(([o, s]) => Math.abs(z - (o + (x - PLACE[2]) * s)) < 12 + m);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+// ---- the town (docs/settlements/versailles.md §5, "The town's fabric"): terraced rows that touch, party wall to party wall,
+// fronting the three avenues (on both sides) and the cross streets; blocks of two rows back to back between them.
+export const STREET = 9, DEPTH = 13, PITCH = 2 * DEPTH + STREET, LANE = 5;
+const avenueZ = (o, s, x) => o + (x - PLACE[2]) * s;
+/** The three avenues' centre lines, [offset, slope]. */
+export const AVENUES = [[0, 0], [AVE0, 0.35], [-AVE0, -0.35]];
+const TRADES = ['baker', 'tavern', 'draper', 'apothecary', 'cobbler', 'barber', 'cutler', 'vintner', 'bookseller', 'butcher', 'hatter', 'chandler'];
 let LOTS = null;
-/** The town's houses east of the Place d'Armes, between the avenues. */
+const inTown = (cx, cz) => Math.hypot(cx, cz) < RADIUS - 45 && !inRect(PLACE, cx, cz, 10) && !STABLES.some((s) => inRect([s.x - 16, s.z - 30, s.x + 62, s.z + 30], cx, cz, 5)) && !(cx < 160 && Math.abs(cz) < 230) && cx > 118;
+const overlap = (a, b, m = -0.05) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
+/** The town's houses east of the Place d'Armes: { rect, front, storeys, kind, trade, row, seed, y, foot }. */
 export function lots() {
   if (LOTS) return LOTS;
   LOTS = [];
-  const rand = rng(1690);
-  for (let x = 120; x < RADIUS - 20; x += 14) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 13) {
-    const w = 10 + rand() * 3, d = 9 + rand() * 3, cx = x + w / 2, cz = z + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 45 || inRect(PLACE, cx, cz, 10) || STABLES.some((s) => inRect([s.x - 16, s.z - 30, s.x + 62, s.z + 30], cx, cz, 4)) || onAvenue(cx, cz, 8) || (cx < 160 && Math.abs(cz) < 230) || rand() < 0.2) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: RISE, foot: RISE - 0.4, storeys: 3, front: rand() < 0.5 ? 'n' : 's', plaster: true });
+  const rand = rng(1690), grid = new Map();
+  const key = (x, z) => `${Math.floor(x / 40)},${Math.floor(z / 40)}`;
+  const taken = (r) => { for (let i = Math.floor((r[0] - 1) / 40); i <= Math.floor((r[2] + 1) / 40); i++) for (let j = Math.floor((r[1] - 1) / 40); j <= Math.floor((r[3] + 1) / 40); j++) for (const q of grid.get(`${i},${j}`) ?? []) if (overlap(r, q.rect)) return true; return false; };
+  const add = (rect, front, row, extra = {}) => {
+    const cx = (rect[0] + rect[2]) / 2, cz = (rect[1] + rect[3]) / 2;
+    if (!inTown(cx, cz) || taken(rect)) return;
+    const near = Math.hypot(cx - 215, cz), L = rect[2] - rect[0];
+    const shopP = row === 'avenue' ? 0.62 : near < 110 ? 0.34 : 0.14;
+    const hotel = row === 'avenue' && near < 200 && L >= 13.5;
+    const shop = !hotel && rand() < shopP;
+    const l = { rect, front, row, seed: Math.floor(rand() * 1e6), y: RISE, foot: RISE - 0.4, storeys: hotel ? 4 : row === 'avenue' || near < 120 ? 3 + (rand() < 0.25 ? 1 : 0) : 2 + (rand() < 0.55 ? 1 : 0), kind: hotel ? 'hotel' : shop ? 'shop' : 'house', shop, ...extra };
+    if (shop) l.trade = TRADES[Math.floor(rand() * TRADES.length)];
+    LOTS.push(l);
+    const k = key(cx, cz); if (!grid.has(k)) grid.set(k, []); grid.get(k).push(l);
+  };
+  // 1. the avenues' frontages: runs of houses sharing a line, stepping with the avenue's slope (the diagonal ones in steps of three or four)
+  for (const [o, s] of AVENUES) for (const sg of [-1, 1]) {
+    let x = o === 0 ? STABLES[0].x + 66 : PLACE[2] + 4;
+    while (x < RADIUS - 40) {
+      const run = 3 + Math.floor(rand() * 2), ws = [];
+      for (let k = 0; k < run; k++) ws.push(rand() < 0.14 ? 14 + rand() * 2 : o === 0 ? 8 + rand() * 3.5 : 8.5 + rand() * 3.5);
+      const total = ws.reduce((a, b) => a + b, 0), zc = avenueZ(o, s, x + total / 2), d = DEPTH - 1 + rand() * 2;
+      let xx = x;
+      for (const w of ws) {
+        const e = sg > 0 ? [xx, zc + 12.5, xx + w, zc + 12.5 + d] : [xx, zc - 12.5 - d, xx + w, zc - 12.5];
+        add(e, sg > 0 ? 'n' : 's', 'avenue');
+        xx += w;
+      }
+      x = xx + (rand() < 0.35 ? LANE : 0);
+    }
   }
+  // 2. the blocks between: two rows back to back, a lane between runs of houses
+  for (let b = -Math.ceil(RADIUS / PITCH); b <= Math.ceil(RADIUS / PITCH); b++) {
+    const zb = b * PITCH + 4;
+    for (const [z0, front] of [[zb, 'n'], [zb + DEPTH, 's']]) {
+      let x = 118 + rand() * 6, run = 0, maxRun = 40 + rand() * 20;
+      while (x < RADIUS - 40) {
+        if (run > maxRun) { x += LANE; run = 0; maxRun = 40 + rand() * 20; continue; }
+        const w = 8 + rand() * 4, d = DEPTH - 0.5 + rand();
+        const rect = front === 'n' ? [x, z0, x + w, z0 + d] : [x, z0 + DEPTH - d, x + w, z0 + DEPTH];
+        const cx = x + w / 2, cz = (rect[1] + rect[3]) / 2;
+        if (!AVENUES.some(([o, s]) => Math.abs(cz - avenueZ(o, s, cx)) < 26 && cx > PLACE[2] - 5)) add(rect, front, 'block');
+        x += w; run += w;
+      }
+    }
+  }
+  // the houses to open (§5): shops and homes about the avenue de Paris at the Place's east edge
+  const o = openSet(LOTS); for (const [l, use] of o) { l.open = true; l.use = use; if (use !== 'home' && use !== 'hotel') l.trade = use; }
   return LOTS;
 }
+const THE_TRADES = ['baker', 'tavern', 'draper', 'apothecary', 'cobbler', 'barber', 'cutler', 'vintner', 'bookseller', 'butcher', 'hatter', 'chandler'];
+function openSet(all, [px, pz] = [226, 0]) {
+  const ok = all.filter((l) => l.rect[2] - l.rect[0] >= 6 && l.rect[3] - l.rect[1] >= 8 && (l.front === 'n' || l.front === 's'));
+  const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - px, (l.rect[1] + l.rect[3]) / 2 - pz);
+  const out = new Map(), used = new Set();
+  const shops = ok.filter((l) => l.kind === 'shop').sort((a, b) => d(a) - d(b));
+  // one of each trade, the nearest first
+  for (const t of THE_TRADES) { const l = shops.find((q) => q.trade === t && !out.has(q)); if (l && d(l) < 330) { out.set(l, t); used.add(t); } }
+  // two more of the busiest trades and homes
+  for (const l of shops) { if (out.size >= 16) break; if (!out.has(l)) out.set(l, l.trade); }
+  for (const l of ok.filter((q) => q.kind === 'house').sort((a, b) => d(a) - d(b)).slice(0, 8)) out.set(l, 'home');
+  for (const l of ok.filter((q) => q.kind === 'hotel').sort((a, b) => d(a) - d(b)).slice(0, 2)) out.set(l, 'hotel');
+  return out;
+}
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** A town house's height to its eave (townhouse.js: ground 3.7, then 3.9, 3.4, 3.1; a hotel's first floor 0.5 more). */
+export const houseH = (l) => 3.7 + [3.9, 3.4, 3.1].slice(0, l.storeys - 1).reduce((a, b) => a + b, 0) + (l.kind === 'hotel' ? 0.5 : 0);

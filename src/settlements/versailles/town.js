@@ -1,5 +1,4 @@
-import { lodTiles, openLots } from '../lod.js';
-import { ARRIVALS } from '../../planet/arrivals.js';
+import { lodTiles } from '../lod.js';
 // The town (docs/settlements/versailles.md §5); the court in the gardens (§5a): courtiers walking and talking on
 // the terrace before the garden front and down the walk between the basins of the water parterre, others at the
 // Latona basin; on the Grand Canal the gondolas sent by Venice (1674) with their gondoliers, and the King's rowing boats.
@@ -48,8 +47,8 @@ function canal() {
 }
 
 export async function houses() {
-  const all = lots(), plans = [], open = openLots(all, [ARRIVALS['versailles'][0], ARRIVALS['versailles'][2]]);
-  plans.push(...lodTiles('versailles-houses', 'vernacular', all.map((l) => ({ t: 'house_med', variant: 'french', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) })), { R: RADIUS }));
+  const all = lots(), plans = [];
+  plans.push(...lodTiles('versailles-houses', 'classical_fr', all.map((l) => ({ t: 'fr_house', ...l, shop: false })), { R: RADIUS }));
   plans.push({ id: 'versailles-stables', style: 'classical_fr', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [180, 0], facing: 'w' }, bounds: [150, -100, 300, 100], rooms: [], center: [240, 0], near: 320,
     elements: STABLES.map((s) => ({ t: 'ecurie', ...s, y: RISE })) });
   return [...plans, court(), canal()];
