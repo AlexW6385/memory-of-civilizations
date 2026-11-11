@@ -4,6 +4,7 @@
 // its colonnades, porticoes and shops; the Church of the Holy Sepulchre on the Cardo's west side;
 // and the markets: stalls, people and beasts in the Cardo and in the street to the Haram.
 
+import { sepulchreFurnish, sepulchreLife } from './sepulchre-detail.js';
 import { haramFurnish, haramLife } from './haram-detail.js';
 import { RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, PALACES, height } from './layout.js';
 
@@ -233,6 +234,8 @@ export function city() {
     plan('jerusalem-walls', 'islamic', walls()),
     plan('jerusalem-cardo', 'islamic', cardo()),
     plan('jerusalem-sepulchre', 'islamic', sepulchre(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
+    plan('jerusalem-sepulchre-furnish', 'islamic', sepulchreFurnish(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
+    plan('jerusalem-sepulchre-life', 'life', sepulchreLife(), { bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
     plan('jerusalem-palaces', 'islamic', palaces()),
     plan('jerusalem-markets', 'life', markets()),
     plan('jerusalem-haram-furnish', 'islamic', haramFurnish(), { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
