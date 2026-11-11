@@ -328,6 +328,18 @@ function greatMosque(el, { bag, col }) {
     for (let j = 0; j < 10; j++) pointedSpandrel(tris, x, t, piers[j] + (j === 0 ? 0.7 : 0.8), piers[j + 1] - (j === 9 ? 0.7 : 0.8), ys, yT);
     bag.add('banco_smooth', fromTriangles(tris));
   }
+  // the floor of the prayer hall: strips of reed matting laid down the aisles between the rows of piers, and the three mihrabs
+  // (the niche of the qibla, its dark recess in a pointed frame) on the inner face of the qibla wall, in line with the towers
+  for (let i = 0; i < 8; i++) {
+    const xa2 = (rowX(i) + rowX(i + 1)) / 2;
+    for (let z = z0 + 0.8; z < z1 - 3.1; z += 3.2) bag.add((Math.floor(z / 3.2) + i) % 5 === 0 ? 'cloth_ochre' : 'reed_mat', box(xa2 - 0.65, py, z, xa2 + 0.65, py + 0.02, z + 3.0));
+  }
+  { const qx = x1 - 0.45;
+    for (const [zc, w] of [[cz, 1.2], [cz - 13, 0.9], [cz + 13, 0.9]]) {
+      bag.add('lacquer_black', box(qx - 0.03, py, zc - w, qx, py + 2.6, zc + w));
+      for (const sg of [-1, 1]) { const za = sg < 0 ? zc - w - 0.18 : zc + w, zb = sg < 0 ? zc - w : zc + w + 0.18; bag.add('banco_smooth', box(qx - 0.12, py, za, qx, py + 2.6, zb)); }
+      const tris = []; pointedSpandrel(tris, qx - 0.06, 0.06, zc - w - 0.18, zc + w + 0.18, py + 2.6, py + 4.0); bag.add('banco_smooth', fromTriangles(tris));
+    } }
   bag.add('timber', box(xm, py + 9.6, z0, x1, py + 9.9, z1));
   bag.add('banco_smooth', box(xm - 0.5, py + 9.9, z0 - 0.5, x1 + 0.5, py + 10.5, z1 + 0.5));
   col.floor([xm, z0, x1, z1], py + 10.5);
@@ -408,7 +420,15 @@ function sahelHouse(el, { bag, col }) {
   // the parapet round the roof terrace
   for (const [a, b] of [[[x0, z0], [x1, z0]], [[x1, z0], [x1, z1]], [[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]]]) { const t = []; beamTris(t, [a[0], H + 0.15, a[1]], [b[0], H + 0.15, b[1]], 0.18, 0.75); bag.add(B, fromTriangles(t)); }
   col.rect([x0, z0, x1, z1], 0, H);
-  col.floor([x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3], H + 0.15);
+  col.floor([x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3], H + 0.15);  // the roof terrace: a vent of the kitchen below, capped with an inverted fired bowl as on the mosque's roof, water jars,
+  // sometimes a mat spread to dry and a bundle of palm sticks (the next replastering's toron)
+  { const r2 = rng((el.seed || 1) * 7 + 3), y = H + 0.15, W = x1 - x0, D = z1 - z0;
+    const vx = x0 + W * (0.3 + r2() * 0.4), vz = z0 + D * (0.3 + r2() * 0.4);
+    bag.add('banco_smooth', lathe([[0.3, -0.05], [0.3, 0.16], [0.25, 0.2], [0.001, 0.2]], 8, null, vx, y, vz));
+    bag.add('terracotta', lathe([[0.001, 0.19], [0.33, 0.19], [0.33, 0.24], [0.28, 0.33], [0.18, 0.4], [0.001, 0.42]], 10, null, vx, y, vz));
+    for (let i = 0; i < 1 + Math.floor(r2() * 3); i++) { const jx = x0 + 0.8 + r2() * (W - 1.6), jz = z0 + 0.8 + r2() * (D - 1.6); if (Math.hypot(jx - vx, jz - vz) > 0.9) bag.add(r2() < 0.5 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.12, 0.03], [0.2, 0.2], [0.15, 0.36], [0.09, 0.44], [0.11, 0.5], [0.001, 0.48]], 9, null, jx, y, jz)); }
+    if (r2() < 0.4) { const mx = x0 + 0.9 + r2() * Math.max(0.1, W - 3.4), mz = z0 + 0.9 + r2() * Math.max(0.1, D - 2.6); bag.add(r2() < 0.5 ? 'reed_mat' : 'cloth_indigo', box(mx, y, mz, mx + 1.6, y + 0.02, mz + 1.0)); }
+  }
   }
   // the facade's frame: s along the front from a to b, d outward from its plane
   const f = el.front || 's';
