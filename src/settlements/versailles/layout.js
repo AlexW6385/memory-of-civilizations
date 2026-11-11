@@ -19,6 +19,10 @@ export const CANAL = { x0: -340, w: 40, cross: -390, crossW: 24, end: -362 };
 export const CHAPEL = [50, -106, 74, -64];
 export const PLACE = [100, -70, 210, 70];
 export const RISE = 6;
+// the parterres de broderie north and south of the water parterre, the lawns of Latona, the hornbeam walls of the walks
+export const BRODERIE = [[-68, -124, -8, -68], [-68, 68, -8, 124]];
+export const LAWNS = [[-140, 10, -72, 34], [-140, -34, -72, -10]];
+export const HEDGE_Z = 36;
 // the first floor (§1c): the Hall of Mirrors along the garden front (bays 4–20 of its 25), the Salons of War and Peace,
 // the King's Grand Apartment running east from the Salon of War into the block's extension, the Ambassadors' Staircase
 // in the court north of the Royal Court (its rect is the hall inside its walls; the fronts stand outside it)
@@ -125,6 +129,14 @@ function openSet(all, [px, pz] = [226, 0]) {
   for (const l of ok.filter((q) => q.kind === 'hotel').sort((a, b) => d(a) - d(b)).slice(0, 2)) out.set(l, 'hotel');
   return out;
 }
-export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+let LGRID = null;
+/** Is (x, z) in a town lot (within m of it)? A 24 m grid of the lots. */
+export function inLot(x, z, m = 0) {
+  if (!LGRID) { LGRID = new Map(); for (const l of lots()) for (let i = Math.floor((l.rect[0] - 3) / 24); i <= Math.floor((l.rect[2] + 3) / 24); i++) for (let j = Math.floor((l.rect[1] - 3) / 24); j <= Math.floor((l.rect[3] + 3) / 24); j++) { const k = i + ',' + j; if (!LGRID.has(k)) LGRID.set(k, []); LGRID.get(k).push(l); } }
+  const c = LGRID.get(Math.floor(x / 24) + ',' + Math.floor(z / 24));
+  return !!c && c.some((l) => inRect(l.rect, x, z, m));
+}
+/** The paved streets of the town: inside its disc, east of the Place's line, off the lots (and the gardens). */
+export const inStreets = (x, z) => x > 112 && Math.hypot(x, z) < RADIUS - 28 && !(x < 160 && Math.abs(z) < 230) && !inLot(x, z, -0.3);
 /** A town house's height to its eave (townhouse.js: ground 3.7, then 3.9, 3.4, 3.1; a hotel's first floor 0.5 more). */
 export const houseH = (l) => 3.7 + [3.9, 3.4, 3.1].slice(0, l.storeys - 1).reduce((a, b) => a + b, 0) + (l.kind === 'hotel' ? 0.5 : 0);

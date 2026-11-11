@@ -109,6 +109,8 @@ export function townHouse(el, { bag, col }) {
   B(trim, -0.02, -0.5, L + 0.02, 0.1, y + H - 0.3, y + H);                           // the cornice
   if (!simple) for (let u = 0.4; u < L - 0.2; u += 0.8) B(trim, u, -0.4, u + 0.2, -0.1, y + H - 0.5, y + H - 0.3);   // its modillions
 
+  // the kerb and the gutter stone along the street front
+  if (!simple) { B('granite_grey', -0.0, -1.5, L, -1.3, y, y + 0.1); B('granite_black', 0, -1.3, L, -1.25, y, y + 0.03); }
   // the ground openings
   const board = pick(rand, BOARD);
   for (const o of ops) {
