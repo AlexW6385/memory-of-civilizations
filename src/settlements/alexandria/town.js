@@ -31,16 +31,19 @@ function shopStoas() {
   const els = [], rooms = [];
   for (const north of [true, false]) {
     const z0 = north ? 46 : 82, z1 = north ? 58 : 94, front = north ? 's' : 'n';
-    for (let x = -440; x < 440; x += 50) {
-      const x1 = x + 50, cx = x + 25;
-      if (x1 > SOMA[0] - 4 && x < SOMA[2] + 4) continue;
-      if (!north && x1 > AGORA[0] - 2 && x < GYM[2] + 70) continue;
-      if (wet(x + 3, z0) < 3 || wet(x1 - 3, z0) < 3 || Math.hypot(cx, z0) > RADIUS - 70) continue;
-      const k = Math.round(x / 50), full = Math.abs(cx - 60) < 150;
-      els.push({ t: 'stoa', rect: [x, z0, x1, z1], front, y: g, h: 4.4, d: 0.6, sp: 2.5, flutes: 0, simple: true, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', ...(full ? { rooms: { n: 5, depth: 6, trades: TRADES } } : {}), seed: 40 + k });
-      if (full) {
-        const F = frame([x, z0, x1, z1], front), wt = 0.7, rw = (50 - 2 * wt) / 5;
-        for (let r = 0; r < 5; r++) rooms.push({ id: `shop: ${TRADES[r]} ${rooms.length}`, rect: F.R(wt + r * rw + 0.3, 12 - 6 + 0.55, wt + (r + 1) * rw - 0.1, 12 - 0.8), y: g, kind: 'inner', market: false, _c: [cx, (z0 + z1) / 2] });
+    // the runs of the street's side between the great crossing and the open ground of the agora and the Gymnasium
+    const spans = north ? [[-440, SOMA[0] - 4], [SOMA[2] + 4, 440]] : [[-440, SOMA[0] - 4], [GYM[2] + 72, 440]];
+    for (const [a, b] of spans) {
+      const n = Math.max(1, Math.round((b - a) / 50)), len = (b - a) / n;
+      for (let i = 0; i < n; i++) {
+        const x = a + i * len, x1 = x + len, cx = x + len / 2;
+        if (wet(x + 3, z0) < 3 || wet(x1 - 3, z0) < 3 || Math.hypot(cx, z0) > RADIUS - 70) continue;
+        const full = Math.abs(cx - 60) < 150;
+        els.push({ t: 'stoa', rect: [x, z0, x1, z1], front, y: g, h: 4.4, d: 0.6, sp: 2.5, flutes: 0, simple: true, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', ...(full ? { rooms: { n: 5, depth: 6, trades: TRADES } } : {}), seed: 40 + Math.round(x / 10) });
+        if (full) {
+          const F = frame([x, z0, x1, z1], front), wt = 0.7, rw = (len - 2 * wt) / 5;
+          for (let r = 0; r < 5; r++) rooms.push({ id: `shop: ${TRADES[r]} ${rooms.length}`, rect: F.R(wt + r * rw + 0.3, 12 - 6 + 0.55, wt + (r + 1) * rw - 0.1, 12 - 0.8), y: g, kind: 'inner', market: false, _c: [cx, (z0 + z1) / 2] });
+        }
       }
     }
   }

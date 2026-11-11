@@ -38,7 +38,7 @@ const E = [
   { t: 'exedra', c: [206, -51], r: 5, y: g, face: -Math.PI / 2 },
   ...halls.map((r, i) => ({ t: 'library_hall', rect: r, front: 'n', y: g, seed: 20 + i })),
   // the royal quarter's fronts on the harbour: long colonnades, the palace on the Lochias
-  { t: 'palace_front', rect: [128, -80, 190, -64], front: 's', y: g, seed: 31 },
+  { t: 'palace_front', rect: [128, -80, 168, -64], front: 's', y: g, seed: 31 },
   { t: 'palace_front', rect: [330, -80, 436, -64], front: 's', y: g, seed: 32 },
   { t: 'palace_front', rect: [LOCHIAS[0] + 10, -150, LOCHIAS[2] - 10, -134], front: 's', y: g, seed: 33 },
 ];
@@ -58,6 +58,6 @@ export const museion = {
     ...halls.map((r, i) => ({ id: `reading hall ${i + 1}`, rect: [r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 1], y: g, kind: 'hall' })),
     { id: 'dining hall', rect: [314.8, -65.3, 327.3, -36.7], y: g, kind: 'inner' },
   ],
-  walks: [Object.assign([[100, -86], [150, -86], [150, -50], [186, -50], [200, -45], [210.5, -42], [210.5, -20]], { y0: g })],
+  walks: [Object.assign([[100, -86], [180, -86], [180, -58], [196, -48], [210.5, -42], [210.5, -20]], { y0: g })],
 };
 void ISLAND; void MUSEION;
