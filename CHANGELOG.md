@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.59 — B1 third pass (2026-11-11)
+
+Kaifeng's river streets become a paved walk by the shops and a willow-lined earth bank with mooring posts, stalls and landing steps; the upper storeys carry balconies with washing, blinds and boards; the main hall has its stone balustrade. Lin'an's trees are rebuilt from leaves and twigs, its city gates are vaulted in brick with granite voussoirs, the pleasure boats are fitted out, the pagoda's lower storeys detailed. Beijing gains proper Qing galleries with the Xiehe and Xihe gates, a closed forecourt with its gate hall, the Temple of Heaven's raised Danbi way between cypresses, and shrines, benches under pagoda trees and coal carts in the hutongs, while its frame drops under budget (2.9 M triangles, 776 draws at the arrival). Foguang's 35 clay figures are painted Tang figures at Liang Sicheng's heights, its village filled and weathered.
+
 ## v10.58 — Beijing's streets and a quicker start (2026-11-11)
 
 Beijing's shop street is a narrow Qing street again: an earth carriageway with a stone strip, raised walks, carved and gilt fascia boards, signboards on stone feet and lanterns, goods by trade, a barber, a tea stall, water barrows, Peking carts and camels; the hutongs are rutted earth lanes with door gods, knockers and mounting blocks at the gates, dust-weathered walls, coal, cabbages and bird cages; the Hall of Supreme Harmony's terrace has its bronzes. Shaders are now compiled while the page loads and the arrival waits for merging, so the first minutes after arriving should no longer stutter.
