@@ -35,5 +35,6 @@ export const MOVER_SITES = {
   'knossos': () => import('../settlements/knossos/movers.js'),
   'chichen-itza': () => import('../settlements/chichen-itza/movers.js'),
   'sanchi': () => import('../settlements/sanchi/movers.js'),
+  'new-york': () => import('../settlements/new-york/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
