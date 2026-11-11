@@ -16,5 +16,7 @@ const spar = (x, z, y = 0.02) => perches.push({ kind: 'sparrow', x, z, y, rot: 0
 for (const [x, z] of [[-60, WALL[3] + 19], [-12, WALL[3] + 18], [30, WALL[3] + 20], [70, WALL[3] + 18], [WALL[2] + 19, -60], [WALL[2] + 20, 30], [WALL[0] - 19, 20], [WALL[0] - 20, -70], [-80, WALL[1] - 19], [20, WALL[1] - 19]]) spar(x, z);
 for (const [x, z] of [[-40, 128], [-15, 140], [-30, 100], [10, 95], [-70, 112], [60, 108]]) spar(x, z);
 for (const x of [-110, -50, 20, 90]) spar(x, WALL[3] + 76);
+// sparrows on the thinnais' edge and the paving of the first rings, in the lanes between the axial streets
+for (let i = 0; i < 16; i++) { const o = [14, 20, 75, 31][i % 4], a = i * 0.39 + 0.2; spar(Math.cos(a) * (WALL[2] + o + (i % 3)) * 1.0, Math.sin(a) * (WALL[3] + o + (i % 3)) * 1.0); }
 void RADIUS;
 export default { fish, flights, perches };

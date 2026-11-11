@@ -101,6 +101,14 @@ Sources added:
 - [Negotiated sacred urbanism: temple streets as adaptive heritage landscapes — aimsr.edu.in](https://aimsr.edu.in/shodhaditya/images/research_paper_images/acaad/negotiated-sacred-urbanism-temple-streets-as-adaptive-heritage-landscapes-in-vidhyalaxmi.pdf)
 - [A study of transition spaces in traditional houses of Tamil Nadu — IJTK](https://or.niscpr.res.in/index.php/IJTK/article/view/3343)
 
+## 14. Deepening pass: enterable houses and shops, eye-level detail (2026-11)
+
+- **Hollow rooms.** In the four inner streets' rows (to 125 m from the temple wall: about 220 shops, 340 houses, 330 agraharam houses) each building's front room is open: a doorway from the thinnai (house, 1.1 m, the two door leaves swung back against the front) or from the shop's platform (1.3 m, at the end away from the seller), a floored room 4.7 m (house), 5 m (shop) or 6.4 m (agraharam) deep with a ceiling of timber beams, the rest of the lot solid [inferred: the Tamil house's front hall behind the thinnai, Studio Matrx, section 12]. Outside that distance the houses stay solid.
+- **Shop interiors.** Shelves along both side walls (two tiers over a low cupboard) with the stock of the trade: folded cloth in red, indigo, white, ochre, green, maroon; vessels of brass; sacks and baskets of grain; coconuts and bundles; trays and the sweet-maker's stove; flowers in baskets; the cashier's low platform with a white mattress, a bolster, a cash box and a ledger against the back wall, a shelf of vessels above, a hanging brass lamp (a light in every third) [inferred from the shop fronts of section 12; the gaddi seat is the usual South Indian shopkeeper's seat].
+- **House interiors.** The hall with a chest, a rope cot (charpai), a reed mat with brass plates, a shelf of vessels on the back wall with the framed gods and a lit lamp dish, water jars, the clay hearth in the corner (pot, soot on the wall, firewood), a cloth hung on a line [inferred].
+- **Eye-level dressing.** Name boards under every shop's awning (cloth-coloured by trade, chalk strokes for the script), mango-leaf toranam over house doors, a water pot, a cot, firewood, the stone grinder or a line of washing on the thinnai of some houses; damp streaks, rain streaks under the cornice and patches of fallen plaster with the brick showing [inferred: the dossier's damp 0.55 climate].
+- **Life.** A seated cashier in every second shop beyond the first and a woman at home in one house in four of the inner rows; walkers doubled (day 80, night 8); more sparrows in the lanes; neem trees along the edge of the Avani Moola street (clear of the axial streets).
+
 ## Sources
 
 - [Meenakshi Temple — Wikipedia](https://en.wikipedia.com/wiki/Meenakshi_Temple)
