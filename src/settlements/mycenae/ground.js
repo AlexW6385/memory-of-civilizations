@@ -28,7 +28,7 @@ function planting(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6 || inCitadel(x, z, -9) || onRamp(x, z, 3) || onLane(x, z, 3) || inHouse(x, z, 2.5)) return null;
   if (x > TREAS.x0 - 8 && x < TREAS.xf + 4 && Math.abs(z - TREAS.z) < 10) return null;
-  if (x < -86 && x > -195 && Math.abs(z) < 14) return null;                                              // the approach road and its court
+  if (x < -86 && x > -195 && Math.abs(z) < 8) return null;                                               // the approach road and its court
   if (inMound(x, z)) return { grass_dry: 14, maquis: 0.1 };
   if (inCitadel(x, z, -2)) return { maquis: 0.15, grass_dry: 6 };                                           // the footing of the wall
   const k = hash2(x * 0.2, z * 0.2);

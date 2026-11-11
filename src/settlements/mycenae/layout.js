@@ -127,7 +127,7 @@ export function lots() {
   const placed = [];
   const clear = (r) => !(sdCircuit((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) < 22 || inTreasury(r) || placed.some((p) => !(r[2] + 1.5 < p[0] || r[0] - 1.5 > p[2] || r[3] + 1.5 < p[1] || r[1] - 1.5 > p[3]))
     || Math.hypot((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) > RADIUS - 28 || onLane(...[(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], 2.6) || inRect(BASTION, (r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 22) || inRect(STUB, (r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 14)
-    || (Math.abs((r[1] + r[3]) / 2) < 12 && (r[0] + r[2]) / 2 > -170));
+    || (Math.abs((r[1] + r[3]) / 2) < 6 && (r[0] + r[2]) / 2 > -170));
   for (const lane of LANES) {
     for (let i = 0; i < lane.length - 1; i++) {
       const [ax, az] = lane[i], [bx, bz] = lane[i + 1], L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
