@@ -65,4 +65,5 @@ export function houses() {
   }
   return HOUSES;
 }
-export const nearHouse = (x, z, m = 0) => houses().some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.r + m);
+export const HUT = { c: [-224, 104], r: 3.9, door: Math.PI };   // the house one can enter, near the arrival
+export const nearHouse = (x, z, m = 0) => Math.hypot(HUT.c[0] - x, HUT.c[1] - z) < HUT.r + 1.2 + m || houses().some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.r + m);

@@ -35,6 +35,22 @@ function people() {
   for (let k = 0; k < 4; k++) { const p = [8 + rand() * 4, -140 + k * 6]; pilgrim(p, face(p, [p[0], p[1] + 5])); }
   priest([mc[0] - 4, M.rect[3] - 6.2], face([mc[0] - 4, M.rect[3] - 6.2], [mc[0] - 4, M.rect[3] - 2]));
   priest([M.rect[0] + 4.2, mc[1] + 2], face([M.rect[0] + 4.2, mc[1] + 2], mc));
+  // a procession in Medhane Alem's south court (§14), going west along the church: the processional cross, priests in white
+  // under the velvet umbrellas their deacons hold, deacons with sistra behind
+  { const zp = M.rect[3] - 8.6, rot = Math.PI / 2, y = yAt(mc[0], zp), hand = (at, k = 1) => { const hx = 0.152 * k, hz = -0.33 * k, c = Math.cos(rot), s = Math.sin(rot); return [at[0] + hx * c + hz * s, at[1] - hx * s + hz * c]; };
+    const fig = (at, cl, H = 1.66, hat = 'turban') => L.push({ t: 'figure', at, y, rot, h: H, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: cl, cloth2: 'cloth_ochre', hat, hatMat: 'cloth_white', skin: 'skin_dark', pose: 'talk' });
+    const x0 = mc[0] + 12;
+    let at = [x0, zp]; fig(at, 'cloth_white'); Z.push({ t: 'proc_cross', at: hand(at), y: y + 1.09 * 1.66 / 1.65, rot });
+    for (const [dx, cl, vel, trim] of [[-3.2, 'cloth_white', 'cloth_red', 'cloth_ochre'], [-7.4, 'cloth_ochre', 'cloth_blue', 'cloth_white']]) {
+      const pr = [x0 + dx, zp + 0.55], ho = [x0 + dx, zp - 0.45];
+      fig(pr, cl, 1.7); fig(ho, 'cloth_white', 1.6); Z.push({ t: 'umbrella', at: hand(ho, 1.6 / 1.65), y: y + 1.09 * 1.6 / 1.65, rot, mat: vel, trim });
+      if (dx === -3.2) Z.push({ t: 'hand_cross', at: hand(pr, 1.7 / 1.65), y: y + 1.09 * 1.7 / 1.65, rot });
+    }
+    for (let k = 0; k < 2; k++) { at = [x0 - 10.2 - k * 1.1, zp + (k ? 0.5 : -0.4)]; fig(at, 'cloth_white', 1.6); Z.push({ t: 'sistrum', at: hand(at, 1.6 / 1.65), y: y + 1.09 * 1.6 / 1.65, rot }); } }
+  // inside Bete Giyorgis (§13): pilgrims seated on the mats of the west arm facing the sanctuary's curtain, a priest before it
+  { const yf = -G.depth + 0.15 + 1.8 + 0.015;
+    for (let k = 0; k < 5; k++) { const p = [gc[0] - 9 + (k % 3) * 2.2 + rand() * 0.4, gc[1] + (k < 3 ? -0.7 : 0.8) + (rand() - 0.5) * 0.2]; L.push({ t: 'figure', at: p, y: yf, rot: -Math.PI / 2 + (rand() - 0.5) * 0.3, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', hat: rand() < 0.7 ? 'veil' : 'none', hatMat: 'cloth_white', skin: 'skin_dark', pose: 'sit_ground' }); }
+    priestAt([gc[0] + 5.4, gc[1] + 0.3], yf - 0.015, Math.PI / 2); }
   // inside Bete Medhane Alem (§11): mats down the nave, the sanctuary's curtain across its east end,
   // pilgrims seated on the mats facing it, a priest before it with his cross, drums laid by a pillar
   { const yf = -M.depth + 0.95, cx = mc[0], cz = mc[1];

@@ -6,6 +6,7 @@ export default {
   tempo: 54,
   zones: {
     open: { drone: { notes: [-12, -5, 0], level: 0.045, timbre: 'voice' }, harp: { density: 0.22, range: [0, 14], level: 0.16, timbre: 'oud' }, reverb: 0.4 },
+    hut: { drone: { notes: [-12], level: 0.015, timbre: 'voice' }, reverb: 0.12 },
     hall: { drone: { notes: [-12, 0], level: 0.06, timbre: 'voice' }, lead: { timbre: 'voice', density: 0.25, range: [0, 12], level: 0.07 }, reverb: 0.8 },
   },
 };
