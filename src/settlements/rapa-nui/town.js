@@ -40,8 +40,12 @@ export async function town() {
   const v = village(), E = [], P = [], rand = rng(1722), y = (c) => height(c[0], c[1]);
   // the house nearest the plaza being thatched anew (docs/settlements/rapa-nui.md §4c)
   const plain = v.houses.filter((h) => !h.chief);
-  const strip = plain.reduce((b, h) => (Math.hypot(h.c[0], h.c[1] - 40) < Math.hypot(b.c[0], b.c[1] - 40) ? h : b), plain[0]);
-  for (const h of plain) E.push({ t: 'hare_paenga', ...h, y: y(h.c), strip: h === strip });
+  const strip = plain.find((h) => h.strip);
+  for (const h of plain) {
+    E.push({ t: h.inside ? 'hare_house' : 'hare_paenga', ...h, y: y(h.c), strip: h === strip });
+    E.push({ t: 'house_yard', ...h, y: y(h.c) });
+    if (h !== strip) E.push({ t: 'thatch_wear', ...h, y: y(h.c) });
+  }
   E.push({ t: 'hare_paenga_long', ...CHIEF, y: y(CHIEF.c) });
   for (const [tx, tz, r, h, yaw] of TUPA) E.push({ t: 'tupa', c: [tx, tz], y: height(tx, tz), r, h, yaw, seed: Math.floor(tx * 3 + tz) });
   PETRO.forEach(([px, pz, , motifs], k) => E.push({ t: 'carved_rock', c: [px, pz], y: height(px, pz), motifs, seed: 9 + k }));

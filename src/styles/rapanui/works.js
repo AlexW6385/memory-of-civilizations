@@ -328,5 +328,6 @@ function longHouse(el, { bag, col }) {
   void H;
 }
 
+export { kavakava, tokiGeometry, GOURD };
 export const WORKS = { tupa, carved_rock: carvedRock, quarry_camp: quarryCamp, hare_paenga_long: longHouse };
 void tube;
