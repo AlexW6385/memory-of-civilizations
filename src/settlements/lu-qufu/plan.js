@@ -7,7 +7,7 @@ import { TEMPLE, INNER_X, WALL_Z, TEMPLE_WALL, GATE_HALLS, GATE_D, LINGXING, TAI
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TEMPLE, W = TEMPLE_WALL;
-const wall = (a, b, gates) => E.push({ t: 'palace_wall', a, b, y: 0, h: W.h, th: W.th, ...(gates ? { gates } : {}) });
+const wall = (a, b, gates, dh = 0, th = W.th) => E.push({ t: 'palace_wall', a, b, y: 0, h: W.h + dh, th, ...(gates ? { gates } : {}) });
 
 // ── the ground: the stone way on the axis, the great court's brick ──
 E.push({ t: 'lane', rect: [-3.6, tz0 + 2, 3.6, 170], y: 0.05, mat: 'bluestone' });
@@ -15,9 +15,13 @@ E.push({ t: 'lane', rect: [-INNER_X + 1, tz0 + 2, INNER_X - 1, WALL_Z.dacheng - 
 E.push({ t: 'lane', rect: [-12, 30, 12, 118], y: 0.03, mat: 'brick_paving' });
 
 // ── the walls: outer, the cross walls with the gate halls between their halves, the compound's side walls ──
-wall([tx0, tz1], [tx0, tz0]); wall([tx1, tz1], [tx1, tz0]); wall([tx0, tz0], [tx1, tz0]);
-for (const g of GATE_HALLS) { const z = g.z; wall([tx0, z], [-g.w / 2 - 1, z]); wall([g.w / 2 + 1, z], [tx1, z]); }
-for (const s of [-1, 1]) wall([s * INNER_X, WALL_Z.dacheng], [s * INNER_X, tz0], [{ at: Math.abs(SIDE_GATE_Z - WALL_Z.dacheng), w: 3.8, h: 3.6 }]);
+const h = W.th / 2;
+const side = [{ at: tz1 + h - 40, w: 3.8, h: 3.6 }];                  // the side gates of the outer wall (west and east), at z 40
+wall([tx0, tz1 + h], [tx0, tz0 + 5], side, 0.13); wall([tx1, tz1 + h], [tx1, tz0 + 5], side, 0.13); wall([tx0 + 5, tz0], [tx1 - 5, tz0], null, 0.13);
+// the corner towers of the temple's wall (jiaolou), at the two north corners
+for (const sx of [-1, 1]) E.push({ t: 'corner_tower', c: [sx * (tx1 - 1.5), tz0 + 1.5], y: 0, s: 0.42, out: [sx, -1] });
+for (const g of GATE_HALLS) { const z = g.z; wall([tx0 + h, z], [-g.w / 2 - 1, z], null, -0.12); wall([g.w / 2 + 1, z], [tx1 - h, z], null, -0.12); }
+for (const s of [-1, 1]) wall([s * INNER_X, WALL_Z.dacheng - h], [s * INNER_X, tz0 + h], [{ at: Math.abs(SIDE_GATE_Z - WALL_Z.dacheng) - h, w: 3.8, h: 3.6 }], -0.06);
 
 // ── the gate halls ──
 for (const g of GATE_HALLS) {

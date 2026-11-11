@@ -1,0 +1,27 @@
+{
+  "site": { "id": "lu-qufu", "name": { "en": "Qufu", "zh": "曲阜" }, "era": "Qing, c. 1730", "region": "china", "lat": 35.60, "lon": 116.99, "radius": 330 },
+  "cls": "M",
+  "arrival": [0, null, -60, 0, 0.2],
+  "arrivalNote": "from the court before the Dacheng Hall: the Apricot Altar, then the hall on its stone base and moon terrace, ten dragon columns under yellow double eaves, the Wu corridors and the old cypresses",
+  "card": {
+    "en": [
+      "Qufu in Shandong, the home town of Confucius and once the capital of the state of Lu, is shown in 1730, the year the Yongzheng Emperor's rebuilding of the Dacheng Hall was finished after the fire of 1724. The Temple of Confucius, which grew from his house, lies on one north-south axis of gates, courts and halls inside the Ming city wall of 1522, with the Kong Family Mansion beside it. The architecture is imperial Qing at the temple: red walls, yellow glazed tiles, stone terraces and dragon columns; the town is of grey brick and grey tile.",
+      "The Dacheng Hall — the Great Hall of Accomplishment, 45.7 m long and 24.8 m high, with nine bays under double yellow eaves, on a stone base 2.1 m high with its moon terrace. The ten front columns of stone are wound by coiled dragons; inside, the clay and gilt statue of Confucius sits in its shrine under the tablet of the hall, with the Four Correlates and the Twelve Wise Men, the table of offerings with its bronze vessels, the bells and chimes and the drum.",
+      "The axis of the Temple — the stone portals of Lingxing Gate and the Taihe Yuanqi archway, the Shengshi and Hongdao gates, the Bishui pool with its bridge, Kuiwen Pavilion with its Ming steles, and the Thirteen Stele Pavilions where the emperors' steles stand on stone tortoises.",
+      "The Apricot Altar — the square double-eaved pavilion in the court before the Dacheng Hall, where Confucius is said to have taught under an apricot tree, between the long Wu corridors of the sages' tablets, with the Resting Hall and the Hall of Sage Traces behind.",
+      "The Kong Mansion — the house of the Dukes Yansheng, the direct descendants of Confucius, east of the Temple: the gate, the courts of the offices, the Gate of Double Glory and the three halls in a row, the inner gate and the residence behind, with the garden at the north.",
+      "The town and the Forest's edge — the Ming city's south gate, the Wanren Gongqiang, and the street of shops of incense, paper, books and rubbings that runs from it to the Temple; the courtyard houses of the town; and, at the north edge, the old cypresses of the Kong Forest round the tomb of Confucius."
+    ],
+    "zh": [
+      "曲阜位于山东，是孔子的故乡，也曾是鲁国的都城。画面所示为1730年，雍正帝在1724年大火之后重建的大成殿刚刚落成。孔庙由孔子旧宅发展而来，位于1522年所筑明代城墙之内，一条南北中轴线上依次排列门、院与殿堂，孔府在其东侧。孔庙的建筑是清代官式：红墙、黄琉璃瓦、石台基与蟠龙石柱；城中民居则是青砖灰瓦。",
+      "大成殿 —— 孔庙的正殿，长45.7米，高24.8米，面阔九间，重檐黄瓦，坐落在高2.1米的石台基上，前有月台。前檐十根石柱，每根都盘着浮雕的蟠龙；殿内神龛中供奉泥塑贴金的孔子像，龛上悬殿匾，两侧是四配十二哲，前设供案、铜礼器，另有编钟、编磬和鼓。",
+      "孔庙中轴线 —— 棂星门与太和元气坊两座石坊，圣时门、弘道门，璧水桥与泮池，立着明代碑刻的奎文阁，以及十三御碑亭，亭中是驮在石龟背上的历代帝王御碑。",
+      "杏坛 —— 大成殿前院中的方形重檐亭，相传孔子曾在杏树下讲学；两侧是长长的两庑，供奉先贤先儒牌位；殿后是寝殿和圣迹殿。",
+      "孔府 —— 位于孔庙以东，是孔子嫡系后裔衍圣公的府第：大门、官署所在的前院、重光门与前后三堂，再往北是内宅，最北是后花园。",
+      "城与孔林 —— 明代曲阜城的南门“万仞宫墙”，从这里通向孔庙的一条街，两侧是卖香烛、纸张、书籍和碑帖拓片的店铺；城内成排的四合院；北面是孔林边缘的古柏，环绕着孔子墓。"
+    ]
+  },
+  "soundscape": "T(EAS, { cicadas: 0.5, frogs: 0.2, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' })",
+  "lifeRegion": "east_asia",
+  "crop": "wheat"
+}

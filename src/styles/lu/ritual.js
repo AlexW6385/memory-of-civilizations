@@ -26,7 +26,7 @@ export function pailou(el, { bag, col }) {
     const by = mid ? h - 1.0 : h - 2.4;
     add(mat, a, by, -0.3, b, by + 0.5, 0.3);
     add(mat, a, by - 0.9, -0.22, b, by - 0.7, 0.22);
-    if (mid) { add('lacquer_black', a + 0.9, by + 0.5, -0.06, b - 0.9, by + 1.5, 0.06); add('gilt_bronze', a + 1.1, by + 0.65, -0.07, b - 1.1, by + 1.3, 0.07); }
+    if (mid) { add('lacquer_black', a + 0.9, by + 0.5, -0.06, b - 0.9, by + 1.5, 0.06); add('gilt_bronze', a + 1.1, by + 0.65, -0.1, b - 1.1, by + 1.3, 0.1); }
   }
   if (el.roof) for (let i = 0; i + 1 < n; i++) {
     const a = us[i], b = us[i + 1], mid = i === Math.floor((n - 1) / 2);
