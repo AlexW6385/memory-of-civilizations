@@ -11,6 +11,7 @@ import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
 import { box, lathe, frustum, fromTriangles, orientOutward } from '../../core/geom.js';
 import { byzantineElements } from '../byzantine/index.js';
 import { doors } from '../greek/objects.js';
+import { villageElements } from './village.js';
 
 const D2R = Math.PI / 180;
 
@@ -478,6 +479,6 @@ registerStyle('romanesque', {
   column,
   trim: () => {},
   opening: () => {},
-  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille, west_gable: westGable, bourdon, pont },
+  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille, west_gable: westGable, bourdon, pont, ...villageElements },
   objects: { doors, reliquary, basin },
 });
