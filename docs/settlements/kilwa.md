@@ -136,3 +136,13 @@ All [stated] items from Archnet site 3780.
 Sources (2026-11-07):
 - [Domed mosque, Kilwa Kisiwani — Archnet site 3783](https://www.archnet.org/sites/3783)
 - [Kilwa Kisiwani — Wikipedia](https://en.wikipedia.org/wiki/Kilwa_Kisiwani)
+
+## 17. Streets, market, people, harbour and the air (batch, 2026-11-11)
+
+**Sources.** [Kilwa Kisiwani — Wikipedia](https://en.wikipedia.org/wiki/Kilwa_Kisiwani); [Ibn Battuta in East Africa — Sacred Footsteps](https://sacredfootsteps.com/2023/07/03/ibn-battuta-in-east-africa/); [Monsoon dhows — Smithsonian](https://indian-ocean.africa.si.edu/monsoon-dhows/); Songo Mnara and Swahili architecture sources of §12.
+
+- **Streets** [inferred]: the stone town had lanes between its houses; ours are kept clear of houses in `layout.js` (STREETS): a market street (soko) along the harbour side of the town, the street before the Great Mosque's north door, a spine between them and six lanes down to the beach (three at the landing places of §15). Ground there is trodden coral earth.
+- **Market** [stated, goods]: exports "spices, tortoiseshell, coconut oil, ivory, cotton cloth, and incense", imports "beads, textiles, jewelry, porcelain and spices from Asia" (Wikipedia); Swahili ports imported "cloth, beads, and Chinese pottery" and exported hardwoods, timber and ivory (Smithsonian). Ours (`life.js market()`): stalls under palm-mat awnings and goods laid on mats along both sides of the market street and before the mosque; porcelain-like glazed jars, cotton bolts, spices, baskets; sellers and talkers [layout of stalls inferred].
+- **People** [stated/inferred]: Ibn Battuta found Kilwa "amongst the most beautiful of cities and most elegantly built"; its people were African, the sultan humble, eating with the poor; the sultan changed his robes after Friday prayers (Sacred Footsteps). Ours: townsmen in long white robes with caps, wrapped waist-cloths, traders in turbans and coloured robes (Arabia, Persia, India) [inferred], women in wrapped cloth with a head-cloth, jar-bearers, porters, boys; bare feet [inferred].
+- **Boats** [stated]: sewn hulls, planks stitched with coir, flexible over reefs (Smithsonian); ours: mtepe under a hoisted slanting mat sail (`mtepe` with `afloat`), a steering sweep, working the harbour; a merchant amidships or a load of sacks and jars [rig inferred].
+- **Air** [inferred]: cooking smoke from the houses at the meals, pots at market stalls, incense (uvumba) at the mosque door and the audience court, dawn mist on the harbour; pied crows, swallows, sparrows, reef egrets.
