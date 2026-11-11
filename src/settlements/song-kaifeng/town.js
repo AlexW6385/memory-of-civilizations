@@ -261,6 +261,8 @@ function waterside() {
   return base('song-kaifeng-waterside', E, 'kaifeng-site');
 }
 
+import { streetPlans } from './street.js';
+
 export async function town() {
   const plans = [], groups = new Map();
   for (const l of lots()) {
@@ -276,5 +278,6 @@ export async function town() {
   plans.push(base('song-kaifeng-shops', shopElements(), 'life'));
   plans.push(base('song-kaifeng-interiors', interiorElements()));
   plans.push(base('song-kaifeng-interior-life', interiorLife(), 'life'));
+  plans.push(...streetPlans(base));
   return plans;
 }

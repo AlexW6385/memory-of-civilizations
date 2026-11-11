@@ -183,6 +183,8 @@ function fabric() {
   return base('song-hangzhou-city', E);
 }
 
+import { streetPlans } from './street.js';
+
 export async function town() {
   const chosen = interiorLots(), tea = new Set(teaHouses()), inter = new Set(Object.values(chosen).flat());
   const all = lots().filter((l) => !tea.has(l) && !inter.has(l)), plans = [];
@@ -194,5 +196,6 @@ export async function town() {
   for (const [kind, list] of Object.entries(chosen)) for (const l of list) shells.push({ t: 'hz_shell', rect: l.rect, front: l.front, y: LEVEL.street, kind, seed: l.seed, roof: l.roof });
   plans.push(base('song-hangzhou-shells', shells));
   plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base));
+  plans.push(...streetPlans(base));
   return plans;
 }
