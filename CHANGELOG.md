@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.58 — Beijing's streets and a quicker start (2026-11-11)
+
+Beijing's shop street is a narrow Qing street again: an earth carriageway with a stone strip, raised walks, carved and gilt fascia boards, signboards on stone feet and lanterns, goods by trade, a barber, a tea stall, water barrows, Peking carts and camels; the hutongs are rutted earth lanes with door gods, knockers and mounting blocks at the gates, dust-weathered walls, coal, cabbages and bird cages; the Hall of Supreme Harmony's terrace has its bronzes. Shaders are now compiled while the page loads and the arrival waits for merging, so the first minutes after arriving should no longer stutter.
+
 ## v10.57 — Ming–Qing Beijing at 520 m (2026-11-11)
 
 Beijing grows to a 520 m city: the Meridian Gate with its full wings over a forecourt, carved imperial ramps and stair balustrades, paved courts with drain covers, the Temple of Heaven's dragon-well caisson, spouts and altar; 368 hutong courtyard houses with their gates by rank, a Qing shop street with booths, a tea house and a pharmacy to walk into, furnished courtyard houses, walkers in Qing dress with carts, donkeys and camels, pigeons, crows and coal smoke.
