@@ -804,4 +804,22 @@ export const CARDS = {
       "城墙、城门与河谷 —— 带角塔的泥墙围住全城，唯一的城门朝南，通向河谷底的椰枣园、农田和干涸的河道。",
     ],
   },
+  'delphi': {
+    en: [
+      "Delphi lies on the south-facing slope of Mount Parnassus in Phocis, above the gorge of the Pleistos, in the heart of mainland Greece. The moment shown is about 400 BC, when the Greek cities, from Athens to Sparta, send their questions to the oracle of Apollo and their gifts to his sanctuary; Socrates is said to have been named the wisest of men by it. The architecture is Greek: the Doric order of the archaic temple, the Ionic of the Athenians' stoa and the Siphnian maidens, painted marble and limestone.",
+      "The Temple of Apollo — a Doric temple of six columns by fifteen, its east front of white marble and its flanks of limestone, standing on a terrace held by the polygonal wall. In the porch are cut \"Know thyself\" and \"Nothing in excess\"; in the cella burns the hearth of Apollo; and at the west end, sunk below the floor, the adyton holds the omphalos, the gilded Apollo and the tripod where the Pythia sits.",
+      "The Sacred Way and the treasuries — a paved road that climbs in zigzags from the gate past the little marble treasuries in which the cities keep their offerings: the Athenian, with its painted metopes of Theseus and Herakles, the Siphnian with its two maidens for columns, the Sicyonian, the Theban, the Corinthian, the Cnidian; the Athenian stoa stands under the terrace wall.",
+      "The terrace's offerings — the black altar of the Chians before the temple, the bronze Serpent Column of the victory at Plataea, the sphinx of the Naxians on its Ionic column, the bull of Corcyra, tripods and bronze statues on their bases.",
+      "The theatre, the stadium and the spring — above the temple, a theatre cut in the slope with benches on the earth, and farther up the earthen track of the stadium where the Pythian games are run; in the ravine to the east the Castalian spring, where pilgrims and the Pythia wash before the oracle.",
+      "The village — the courtyard houses of the Delphians on terraces west and east of the sanctuary, the stalls of the sellers of votive goods at the gate, pilgrims and priests, goats on the slope.",
+    ],
+    zh: [
+      "德尔斐位于福基斯的帕纳索斯山南坡，俯瞰普莱斯托斯河谷，在希腊本土的中心。画面定格在约公元前 400 年：从雅典到斯巴达的各城邦都向阿波罗的神谕所提问，并把礼物送到他的圣所；据说苏格拉底曾被神谕称为最智慧的人。建筑属希腊风格：古风神庙的多立克柱式，雅典人的柱廊与锡弗诺斯少女像所用的爱奥尼柱式，彩绘的大理石与石灰岩。",
+      "阿波罗神庙 —— 正面六柱、侧面十五柱的多立克神庙，东面为白色大理石，两侧为石灰岩，立在多边形石墙承托的平台上。门廊刻着“认识你自己”和“凡事勿过度”；殿内燃着阿波罗的圣火；西端下沉的内殿里放着大地肚脐石、镀金的阿波罗像，以及皮提亚坐着的三足鼎。",
+      "圣道与宝库 —— 铺石的圣道自大门起曲折而上，两旁是各城邦存放供品的小型大理石宝库：雅典宝库带有绘彩的忒修斯与赫拉克勒斯柱间壁，锡弗诺斯宝库以两尊少女像代替立柱，另有西锡安、底比斯、科林斯和克尼多斯的宝库；雅典柱廊立在平台墙下。",
+      "平台上的供奉 —— 神庙前希俄斯人的黑色祭坛、纪念普拉蒂亚之胜的青铜蛇柱、纳克索斯人立在爱奥尼柱上的狮身人面像、科西拉的青铜公牛，以及台座上的三足鼎与青铜像。",
+      "剧场、体育场与泉水 —— 神庙上方是依山势开凿的剧场，座席为土台上的木凳；再往上是举行皮提亚竞技的土质跑道；东面的峡谷里是卡斯塔利亚泉，朝圣者与皮提亚在问卜前在此沐浴。",
+      "村落 —— 圣所东西两侧台地上德尔斐人的庭院住宅，大门口售卖供品的摊位，朝圣者与祭司，山坡上的山羊。",
+    ],
+  },
 };
