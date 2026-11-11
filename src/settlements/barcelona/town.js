@@ -4,7 +4,7 @@
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
 import { blockShops } from '../../styles/modernisme/index.js';
-import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
+import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, SAGRADA, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements) => ({ id, style: 'modernisme', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 46], facing: 'n' } });
@@ -170,6 +170,17 @@ function vendors(els) {
   });
   return L;
 }
+/** The people of the works (§10): the modellers at Gaudí's bench and the drawing table, a teacher at the board of each classroom of the Schools. */
+function worksLife() {
+  const L = [], r = rng(1909), [cx, cz] = SAGRADA, wy = height(cx - 30, cz + 3) + 0.06, sy = height(cx - 12, cz + 25) + 0.08;
+  const fig = (at, y, face, o) => L.push({ t: 'figure', at, y, rot: Math.atan2(-face[0], -face[1]), seed: Math.floor(r() * 1e9), skin: 'skin_light', pose: 'stand', hair: 'short', ...o });
+  const man = (o = {}) => ({ dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', over: 'apron', hat: 'cap', hatMat: 'cloth_grey', beard: r() < 0.5 ? 0.8 : 0, ...o });
+  const xw = cx - 33 + 0.28 + 1.45;
+  fig([xw, cz - 2], wy, [-1, 0], man({ cloth: 'cloth_white', pose: 'talk' })); fig([xw, cz + 6.2], wy, [-1, 0], man()); fig([xw, cz - 5.8], wy, [-1, 0], man({ cloth: 'cloth_brown' }));
+  fig([cx - 27 - 0.28 - 1.6, cz + 11], wy, [1, 0], man({ cloth: 'cloth_white', hat: 'none', beard: 0.8 }));
+  for (let k = 0; k < 3; k++) fig([cx - 12 - 10 + 0.32 + k * (20 / 3) + (k ? 0.1 : 0) + 0.45, cz + 25 + 2.4], sy + 0.12, [-1, 0], { dress: 'robe', cloth: ['cloth_black', 'cloth_grey', 'cloth_indigo'][k], cloth2: 'cloth_white', hair: 'bun', hat: 'none', over: 'shawl' });
+  return L;
+}
 /** The Eixample's block elements (the smoke finds the chimneys from the same plan). */
 export function blockElements() {
   return blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
@@ -189,6 +200,7 @@ export async function town() {
   plans.push({ ...base('barcelona-casa-life', casaLife()), style: 'life' });
   // the shops' people, a plan to a few blocks
   shopLife(els).forEach((L, i) => plans.push({ ...base(`barcelona-shop-life-${i}`, L), style: 'life' }));
+  plans.push({ ...base('barcelona-works-life', worksLife()), style: 'life' });
   plans.push({ ...base('barcelona-vendors', vendors(els)), style: 'life' });
   plans.push(base('barcelona-trams', [...lines.map((l) => ({ ...l, wires: false })), ...trams(lines, rand)]));
   // the wires apart, colliding with nothing

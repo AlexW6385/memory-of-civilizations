@@ -20,7 +20,7 @@ import { nativity } from './nativity.js';
 import { STREET } from './street.js';
 import { casaCafe } from './interior.js';
 import { FURNITURE } from './furniture.js';
-import { schoolRooms } from './school.js';
+import { schoolRooms, workshopRooms } from './school.js';
 import { makeShops, plotShops, shopPeople } from './shops.js';
 
 const S = 'limestone_yellow', P = 'stucco_cream', IRON = 'iron';
@@ -190,7 +190,11 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
   const mirador = !tribune && !own && nb >= 4 && dr() < 0.2;
   const tb = tribune ? door : mirador ? (dr() < 0.5 ? 0 : nb - 1) : -1;
   if (!own) {
-    bag.add('granite_grey', F(s0, s1, -0.04, 0.1, y - 1.25, y + 0.45));
+    { // the plinth, in pieces round the shops' doors
+      const gaps = shops.map((q) => { const d = q.door === 'L' ? q.s0 + q.bw / 2 : q.s1 - q.bw / 2; return [d - 0.9, d + 0.9]; }).sort((p, q) => p[0] - q[0]);
+      let c0 = s0; for (const [g0, g1] of gaps) { if (g0 > c0 + 0.05) bag.add('granite_grey', F(c0, g0, -0.04, 0.1, y - 1.25, y + 0.45)); c0 = g1; }
+      if (s1 > c0 + 0.05) bag.add('granite_grey', F(c0, s1, -0.04, 0.1, y - 1.25, y + 0.45));
+    }
     // the stone ground floor, in pieces round the shops' own fronts
     let c = s0; const cuts = [...shops].sort((p, q) => p.s0 - q.s0);
     const stone = (a, b) => { if (b - a < 0.05) return; bag.add(S, F(a, b, -0.02, 0.06, y - 1.1, y + 4.6)); for (let yy = y + 1.0; yy < y + 4.4; yy += 0.6) bag.add('limestone', F(a, b, 0.06, 0.075, yy - 0.03, yy)); };
@@ -607,16 +611,22 @@ function schools(bag, col, lights, cx, cz, y) {
   schoolRooms({ bag, col, lights }, { cx, cz, y, L, Wd, wz, roofAt: (x) => roof(x, 0), N });
 }
 /** The workshop: a long timber shed under a lean-to roof of tiles; the stone yard's blocks. */
-function workshop(bag, col, [x0, z0, x1, z1], y, rand) {
-  bag.add('planks_grey', box(x0, y - 0.8, z0, x1, y + 3.6, z1)); col.rect([x0, z0, x1, z1], y - 0.8, y + 4.6);
+function workshop(bag, col, lights, [x0, z0, x1, z1], y, rand) {
+  // the walls of boards, a wide door in the east wall (the stone yard side) and a second at the south end; inside: Gaudí's workshop (workshopRooms)
+  const zm = (z0 + z1) / 2, th = 0.28, hw = 3.6;
+  bag.add('planks_grey', box(x0, y - 0.8, z0, x1 - th, y + hw, z0 + th)); bag.add('planks_grey', box(x0, y - 0.8, z1 - th, x1 - th, y + hw, z1)); bag.add('planks_grey', box(x0, y - 0.8, z0, x0 + th, y + hw, z1));
+  bag.add('planks_grey', box(x1 - th, y - 0.8, z0, x1, y + hw, zm - 1.3)); bag.add('planks_grey', box(x1 - th, y - 0.8, zm + 1.3, x1, y + hw, z1)); bag.add('planks_grey', box(x1 - th, y + 3.1, zm - 1.3, x1, y + hw, zm + 1.3));
+  bag.add('wood_painted', box(x1 - th - 0.02, y, zm - 1.4, x1 + 0.04, y + 3.12, zm - 1.3)); bag.add('wood_painted', box(x1 - th - 0.02, y, zm + 1.3, x1 + 0.04, y + 3.12, zm + 1.4));
+  col.rect([x0, z0, x1 - th, z0 + th], y - 0.8, y + 4.6); col.rect([x0, z1 - th, x1 - th, z1], y - 0.8, y + 4.6); col.rect([x0, z0, x0 + th, z1], y - 0.8, y + 4.6);
+  col.rect([x1 - th, z0, x1, zm - 1.3], y - 0.8, y + 4.6); col.rect([x1 - th, zm + 1.3, x1, z1], y - 0.8, y + 4.6);
+  workshopRooms({ bag, col, lights }, { x0, z0, x1, z1, y, zm, th });
   const T = [], h0 = y + 4.7, h1 = y + 3.7, e = 0.4;
   const v = [[x0 - e, h0, z0 - e], [x1 + e, h1, z0 - e], [x1 + e, h1, z1 + e], [x0 - e, h0, z1 + e]];
   quad(T, v[0], v[3], v[2], v[1]); quad(T, [v[0][0], v[0][1] - 0.12, v[0][2]], [v[1][0], v[1][1] - 0.12, v[1][2]], [v[2][0], v[2][1] - 0.12, v[2][2]], [v[3][0], v[3][1] - 0.12, v[3][2]]);
   bag.add('roof_tile', fromTriangles(both(T)));
   const G = []; for (const z of [z0, z1]) { const s = z === z0 ? -1 : 1; const a = [x0, y + 3.6, z + s * 0.001], b = [x1, y + 3.6, z + s * 0.001], c = [x1, h1 - 0.12, z + s * 0.001], d = [x0, h0 - 0.12, z + s * 0.001]; G.push(...a, ...b, ...c, ...a, ...c, ...d); }
   bag.add('planks_grey', fromTriangles(both(G)));
-  for (let z = z0 + 2; z < z1 - 2; z += 4) bag.add('opening', box(x1, y + 1.2, z, x1 + 0.04, y + 2.6, z + 1.6));
-  bag.add('opening', box(x1, y, (z0 + z1) / 2 - 1.2, x1 + 0.04, y + 3, (z0 + z1) / 2 + 1.2));
+  for (let z = z0 + 2; z < z1 - 2; z += 4) if (Math.abs(z + 0.8 - zm) > 2.2) bag.add('opening', box(x1, y + 1.2, z, x1 + 0.04, y + 2.6, z + 1.6));
   for (let k = 0; k < 26; k++) {
     const bx = x1 + 3 + rand() * 18, bz = z0 + rand() * (z1 - z0), w = 0.8 + rand() * 1.0, d = 0.6 + rand() * 0.6, hh = 0.5 + rand() * 0.5, st = rand() < 0.3 ? 2 : 1;
     for (let s = 0; s < st; s++) bag.add(s ? 'sandstone' : S, box(bx, y - 0.3 + s * hh, bz, bx + w - s * 0.2, y + hh * (s + 1) - 0.3, bz + d - s * 0.1));
@@ -628,7 +638,7 @@ function sagrada(el, { bag, col, lights }) {
   apse(bag, col, [cx, cz - 16], y);
   nativity(bag, col, cx + 22, y, cz);
   schools(bag, col, lights, cx - 12, cz + 25, y);
-  workshop(bag, col, [cx - 33, cz - 8, cx - 27, cz + 14], y, rand);
+  workshop(bag, col, lights, [cx - 33, cz - 8, cx - 27, cz + 14], y, rand);
   derrick(bag, cx + 12, y, cz + 30, 46, [cx + 23, y + 38, cz + 16]);
 }
 
