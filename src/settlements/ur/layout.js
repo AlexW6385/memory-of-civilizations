@@ -14,6 +14,8 @@ export const STORES = [-130, 40, -82, 108];
 export const MARKET = [-44, -217, 42, -178];
 /** The houses on the square's north side that can be entered, furnished (§5.1): their seeds, the street door toward the square. */
 const OPEN = new Set([987775, 589524, 632118]);
+/** Where the scribal school's house stands: the lot nearest to this point west of the market square. */
+export const SCHOOL_AT = [-62, -200];
 export const HARBOUR = { rect: [-376, -150, -282, 70], bed: -3, water: -1.2 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -36,8 +38,15 @@ export function houses() {
     if (inRect(MARKET, cx, cz)) { rand(); rand(); continue; }
     if (rand() < 0.08) continue;
     const seed = Math.floor(rand() * 1e6);
-    HOUSES.push(OPEN.has(seed) ? { rect: r, seed, open: true, door: 's', white: seed === 589524 } : { rect: r, seed });
+    const open = OPEN.has(seed), big = Math.min(w, d) >= 10.8;
+    // a public chapel (Woolley's "public chapels" stood at street corners): about one lot in forty-five that is big enough, its door toward the temenos
+    const chapel = !open && big && seed % 45 === 0, face = Math.abs(cz) > Math.abs(cx) ? (cz > 0 ? 'n' : 's') : (cx > 0 ? 'w' : 'e');
+    HOUSES.push(open ? { rect: r, seed, open: true, door: 's', white: seed === 589524 } : chapel ? { rect: r, seed, chapel: true, door: face } : { rect: r, seed });
   }
+  // the house of a scribal school beside the market: the lot nearest to SCHOOL_AT, entered, furnished with benches and clay bins (§5.4)
+  let best = null, bd = 1e9;
+  for (const h of HOUSES) if (!h.open && !h.chapel) { const dd = Math.hypot((h.rect[0] + h.rect[2]) / 2 - SCHOOL_AT[0], (h.rect[1] + h.rect[3]) / 2 - SCHOOL_AT[1]); if (dd < bd) { bd = dd; best = h; } }
+  if (best) { best.open = true; best.school = true; best.door = 's'; }
   return HOUSES;
 }
 let GRID = null;

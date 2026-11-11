@@ -134,7 +134,7 @@ export function urHouseOpen(el, { bag, col, lights }) {
     for (let k = 0; k < 4; k++) { const a = W(ua + 0.9 + k * 0.08, vC0 + 0.12), b = W(ua + 0.98 + k * 0.08, vC0 + 1.1), T = []; beamTris(T, [a[0], h0, a[1]], [b[0], h0 + 0.05, b[1]], 0.025, 0.04); bag.add('palm_trunk', fromTriangles(T)); }
     lights.push({ at: LP(ub - 0.4, vk, 0.45), color: '#ff9a4a', intensity: 3, distance: 5 }); }
   // ---- the reception room: reed mats, the couch, stools, a low table with a jug and cups, a lamp in a niche
-  { const ra = recep[0], rb = recep[1], va = V - t - dB, vb = V - t, h0 = 0.06;
+  if (!el.school) { const ra = recep[0], rb = recep[1], va = V - t - dB, vb = V - t, h0 = 0.06;
     B('reed_mat', ra + 0.25, va + 0.25, rb - 0.25, vb - 0.25, h0, h0 + 0.012);
     // the couch: a timber frame on four legs, a webbing of cord, a linen mattress and a red coverlet, along the back wall
     const cu0 = ra + 0.4, cu1 = cu0 + 1.9, cv1 = vb - 0.08, cv0 = cv1 - 0.85, ch = 0.45;
@@ -157,6 +157,27 @@ export function urHouseOpen(el, { bag, col, lights }) {
     lights.push({ at: LP(ra + 0.35, nv, 1.45), color: '#ffb46b', intensity: 2.5, distance: 6 });
     B('cedar', rb - 0.95, vb - 0.6, rb - 0.15, vb - 0.1, h0 + 0.012, 0.55); B('bronze', rb - 0.96, vb - 0.61, rb - 0.14, vb - 0.09, 0.5, 0.52); col.rect(R(rb - 0.95, vb - 0.6, rb - 0.15, vb - 0.1), 0, 0.55);
     L('wicker', [[0.001, 0], [0.16, 0.01], [0.2, 0.28], [0.18, 0.29], [0.14, 0.04], [0.001, 0.04]], rb - 0.5, va + 0.45, h0 + 0.012, 12);
+  }
+  // ---- the school (edubba) in place of the reception room (el.school): rows of low mud-brick benches facing the master's
+  // seat, tablets drying on them, baskets of finished tablets, clay bins and a basin of water in the court for the clay ----
+  if (el.school) {
+    const ra = recep[0], rb = recep[1], va = V - t - dB, vb = V - t, h0 = 0.06, mid = (va + vb) / 2;
+    B('reed_mat', ra + 0.2, va + 0.2, rb - 0.2, vb - 0.2, h0, h0 + 0.012);
+    for (const [v0, v1] of [[va + 0.35, va + 0.8], [va + 1.25, va + 1.7]]) {
+      B(MP, ra + 0.9, v0, rb - 0.35, v1, h0, 0.42); col.rect(R(ra + 0.9, v0, rb - 0.35, v1), 0, 0.42);                   // a bench of mud brick, the pupils sitting on its far side
+      for (let u = ra + 1.1; u < rb - 0.7; u += 0.5) B('mud_plaster', u, v0 + 0.1, u + 0.3, v1 - 0.1, 0.42, 0.455);          // the tablets they are copying
+    }
+    B('timber', ra + 0.25, mid - 0.2, ra + 0.65, mid + 0.2, h0 + 0.012, 0.4); col.rect(R(ra + 0.25, mid - 0.2, ra + 0.65, mid + 0.2), 0, 0.4);   // the master's stool
+    L('wicker', [[0.001, 0], [0.2, 0.01], [0.24, 0.3], [0.22, 0.31], [0.18, 0.04], [0.001, 0.04]], rb - 0.5, vb - 0.4, h0 + 0.012, 12);
+    for (let k = 0; k < 5; k++) B('mud_plaster', rb - 0.62 + (k % 2) * 0.06, vb - 0.46, rb - 0.4 + (k % 2) * 0.06, vb - 0.34, h0 + 0.2 + k * 0.03, h0 + 0.23 + k * 0.03);
+    soot(ra + 0.012, mid, 0.14, 0.05, 1.3, 1.95);
+    L('terracotta', [[0.001, 0], [0.05, 0.005], [0.06, 0.03], [0.03, 0.045], [0.001, 0.04]], ra + 0.12, mid, 1.25, 10); B(MP, ra, mid - 0.15, ra + 0.24, mid + 0.15, 1.12, 1.25);
+    B('flame', ra + 0.17, mid - 0.012, ra + 0.19, mid + 0.012, 1.29, 1.33);
+    lights.push({ at: LP(ra + 0.35, mid, 1.45), color: '#ffb46b', intensity: 2.5, distance: 6 });
+    // the court: two clay-lined bins sunk in a corner (the clay is soaked and reused) and a basin of water
+    const bu = uC0 + 1.2, bv = vC1 - 0.9;
+    for (const du of [0, 1.2]) { B(MP, bu + du, bv, bu + du + 0.95, bv + 0.7, 0.06, 0.4); B('bitumen', bu + du + 0.1, bv + 0.1, bu + du + 0.85, bv + 0.6, 0.38, 0.41); col.rect(R(bu + du, bv, bu + du + 0.95, bv + 0.7), 0, 0.4); }
+    L('terracotta', [[0.001, 0], [0.2, 0.0], [0.34, 0.14], [0.36, 0.2], [0.3, 0.21], [0.001, 0.15]], bu + 3.0, bv + 0.35, 0.06, 14);
   }
   // ---- the chapel: the niche in the end wall and the altar of brickwork before it, offering bowls, a clay
   // figurine, a lamp; the family's dead lie under its pavement ---------------------------------------------

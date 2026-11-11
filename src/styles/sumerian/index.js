@@ -9,6 +9,7 @@ import { beamTris } from '../ming/index.js';
 import { loft, ring } from '../egyptian/objects.js';
 import '../qing/index.js';
 import { urHouseOpen, scribeKit, quayGoods } from './house.js';
+import { giparu, urChapel } from './temple.js';
 
 const BB = 'brick_baked', MB = 'mudbrick', MP = 'mud_plaster';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -35,7 +36,7 @@ export function stairs(el, { bag, col }) {
   col.ramp([x0, z0, x1, z1], y0, y1, dir);
 }
 /** Shallow buttresses along the faces of a sloping stage [x0, z0, x1, z1] from y to y + h (inset at the top by b). */
-function buttresses(bag, [x0, z0, x1, z1], y, h, b, step = 3.2, skip = null, mat = BB, hw = 0.55) {
+export function buttresses(bag, [x0, z0, x1, z1], y, h, b, step = 3.2, skip = null, mat = BB, hw = 0.55) {
   for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
     const L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / step);
     for (let i = 1; i < n; i++) {
@@ -456,6 +457,6 @@ function reedBoat(el, { bag }) {
 
 registerStyle('sumerian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, quay_goods: quayGoods },
+  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, giparu, ur_chapel: urChapel, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, quay_goods: quayGoods },
   objects: {},
 });

@@ -19,7 +19,7 @@ E.push({ t: 'gate_tower', rect: [-8, -146, 8, -134], door: 'n', w: 3, h: 9, dh: 
 E.push({ t: 'gate_tower', rect: [-10, -176, 10, -164], door: 'n', w: 4, h: 10, dh: 5, mat: 'mudbrick' });
 const [cx0, cz0, cx1, cz1] = COURT;
 w([cx0, cz0], [-5, cz0], 5, 2.5); w([5, cz0], [cx1, cz0], 5, 2.5); w([cx0, cz0], [cx0, cz1], 5, 2.5); w([cx1, cz0], [cx1, cz1], 5, 2.5);
-E.push({ t: 'courtyard_block', rect: GIPARU, h: 6, ring: 11, door: 'w' });
+E.push({ t: 'giparu', rect: GIPARU, door: 'w' });
 E.push({ t: 'courtyard_block', rect: PALACE, h: 7, ring: 12, door: 'w' });
 E.push({ t: 'courtyard_block', rect: STORES, h: 5, ring: 9, door: 'e' });
 const [px0, pz0, px1, pz1] = TEMENOS;
