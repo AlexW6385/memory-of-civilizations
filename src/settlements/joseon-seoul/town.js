@@ -34,14 +34,81 @@ function court() {
 }
 
 // Jongno's shop rows, cut into blocks by the lanes running south, and the bell pavilion at the corner
-function jongno() {
-  const L = [];
+const blocksOf = () => {
+  const out = [];
   for (const [x0, z0, x1, z1] of SHOPS) {
     let x = x0, k = 0;
-    while (x < x1 - 8) { const xe = Math.min(x1, x + 20.8); L.push({ t: 'sijeon', rect: [x, z0, xe, z1], front: 'n', seed: 1880 + 7 * k++ + Math.round(x) }); x = xe + 3.2; }
+    while (x < x1 - 8) { const xe = Math.min(x1, x + 20.8), nb = Math.max(1, Math.round((xe - x) / 2.6)); out.push({ rect: [x, z0, xe, z1], k: k++, nb, bw: (xe - x) / nb }); x = xe + 3.2; }
   }
+  return out;
+};
+function jongno() {
+  const L = [];
+  for (const b of blocksOf()) L.push({ t: 'sijeon', rect: b.rect, front: 'n', seed: 1880 + 7 * b.k + Math.round(b.rect[0]) });
   L.push({ t: 'bell_pavilion', rect: BELL });
   return { ...base('joseon-seoul-jongno', L), feature: false };
+}
+
+// what stands and hangs before the shops: cloth banners on their brackets at the party walls, paper lanterns over the maru,
+// the pots and baskets of the trade on the paving, a dog asleep in the sun
+function shopfronts() {
+  const rand = rng(1894), L = [];
+  for (const b of blocksOf()) {
+    const [x0, z0] = b.rect;
+    for (let k = 0; k <= b.nb; k++) if (k % 3 === 0 && k < b.nb) L.push({ t: 'shop_sign', at: [x0 + k * b.bw + 0.12, z0 - 0.1], y: 0.42, rot: Math.PI, h: 2.0, len: 0.95, out: 0.85, cloth: ['cloth_indigo', 'cloth_white', 'cloth_red', 'cloth_ochre'][Math.floor(rand() * 4)], letters: 2 + Math.floor(rand() * 2) });
+    for (let k = 0; k < b.nb; k++) {
+      const xa = x0 + k * b.bw + 0.12;
+      if (rand() < 0.5) L.push({ t: 'hang_lantern', at: [xa + 0.35, z0 - 0.3], y: 0.42 + 2.08, rot: 0, kind: rand() < 0.6 ? 'paper' : 'white', drop: 0.15, seed: 1 });
+      const r = rand(), px = xa + 0.4 + rand() * 0.9, pz = z0 - 1.25 - rand() * 0.4;
+      if (r < 0.28) L.push({ t: 'pot', kind: rand() < 0.5 ? 'dark_pot' : 'vat', at: [px, pz], y: 0.03, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 3), seed: Math.floor(rand() * 1e9) });
+      else if (r < 0.5) L.push({ t: 'basket', at: [px, pz], y: 0.03, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 3), seed: Math.floor(rand() * 1e9) });
+      else if (r < 0.62) L.push({ t: 'sacks', at: [px, pz], y: 0.03, rot: Math.PI, n: 2 + Math.floor(rand() * 4), seed: Math.floor(rand() * 1e9) });
+      else if (r < 0.7) L.push({ t: 'stool', at: [px, pz], y: 0.03, rot: rand() * 6.28 });
+    }
+  }
+  for (const x of [-112, -48, 60, 118]) L.push({ t: 'animal', kind: 'dog', at: [x, JONGNO[1] + 1.6], y: 0.03, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: false, mat: rand() < 0.5 ? 'hide_tan' : 'hide_white' });
+  return { ...base('joseon-seoul-shopfronts', L), style: 'life', feature: false, center: [0, 357], near: 260 };
+}
+
+// the lanes of the hanok quarters, dressed at eye level: against each lot's outer wall the firewood and jars,
+// baskets, sacks and drying trays of the household, a bench by the gate, paper lanterns hung at the gate's eave,
+// a hen or a dog about; in tiles of 100 m, drawn within 230 m
+function lanedress() {
+  const tiles = new Map(), rand = rng(1888 ^ 0x5a5a);
+  const put = (e, x, z) => { const k = Math.floor(x / 100) + ',' + Math.floor(z / 100); if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); };
+  const sd = () => Math.floor(rand() * 1e9);
+  for (const l of lots()) {
+    const [x0, z0, x1, z1] = l.rect, xc = (x0 + x1) / 2;
+    if (Math.hypot(xc, (z0 + z1) / 2) > 330 && rand() < 0.4) continue;
+    // the gate: a lantern at each side of its little roof, a bench or a pair of jars beside it
+    const lant = rand() < 0.7 ? 'white' : 'paper';
+    put({ t: 'hang_lantern', at: [xc + 1.35, z1 + 0.62], y: 2.38, rot: 0, kind: lant, drop: 0.12, seed: 1 }, xc, z1);
+    const side = rand() < 0.5 ? -1 : 1, gx = xc + side * (2.6 + rand() * 2.5), gz = z1 + 0.75;
+    const r = rand();
+    if (r < 0.25) { put({ t: 'bench', at: [gx, gz + 0.1], y: 0.03, rot: 0, len: 1.6 }, gx, gz); if (rand() < 0.6) put({ t: 'figure', at: [gx + 0.3, gz + 0.1], y: 0.04, rot: Math.PI, seed: sd(), dress: 'robe', cloth: rand() < 0.5 ? 'cloth_white' : 'linen', skin: 'skin_medium', hat: rand() < 0.6 ? 'brim' : 'none', hatMat: 'lacquer_black', pose: 'sit', beard: true, h: 1.6, hair: 'topknot' }, gx, gz); }
+    else if (r < 0.55) put({ t: 'pot', kind: 'dark_pot', at: [gx, gz + 0.1], y: 0.03, rot: rand() * 6.28, n: 2 + Math.floor(rand() * 3), seed: sd() }, gx, gz);
+    else if (r < 0.75) put({ t: 'firewood', at: [gx, gz + 0.15], y: 0.03, rot: Math.PI / 2, len: 1.5, seed: sd() }, gx, gz);
+    else put({ t: 'drying_tray', at: [gx, gz + 0.45], y: 0.03, rot: rand() * 6.28, seed: sd() }, gx, gz);
+    // the other walls: one or two things each, against the wall's outer face
+    for (const [a, b, nx, nz] of [[[x0, z0], [x1, z0], 0, -1], [[x0, z0], [x0, z1], -1, 0], [[x1, z0], [x1, z1], 1, 0], [[x0, z1], [x1, z1], 0, 1]]) {
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = a[1] === z1 && b[1] === z1 ? 1 : 1 + (rand() < 0.5 ? 1 : 0);
+      for (let q = 0; q < n; q++) {
+        if (rand() < 0.35) continue;
+        const t = 2 + rand() * (len - 4);
+        if (nz === 1 && Math.abs(a[0] + t - xc) < 3.5) continue;
+        const px = a[0] + (b[0] - a[0]) * t / len + nx * 0.75, pz = a[1] + (b[1] - a[1]) * t / len + nz * 0.75, along = nz !== 0 ? 0 : Math.PI / 2, k = rand();
+        if (k < 0.28) put({ t: 'firewood', at: [px, pz], y: 0.03, rot: nz !== 0 ? Math.PI / 2 : 0, len: 1.25 + rand() * 0.5, seed: sd() }, px, pz);
+        else if (k < 0.5) put({ t: 'pot', kind: rand() < 0.4 ? 'vat' : 'dark_pot', at: [px, pz], y: 0.03, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 3), seed: sd() }, px, pz);
+        else if (k < 0.62) put({ t: 'basket', at: [px, pz], y: 0.03, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 2), seed: sd() }, px, pz);
+        else if (k < 0.72) put({ t: 'sacks', at: [px, pz], y: 0.03, rot: along, n: 2 + Math.floor(rand() * 3), seed: sd() }, px, pz);
+        else if (k < 0.8 && l.thatch) put({ t: 'haystack', at: [px + nx * 0.6, pz + nz * 0.6], y: 0.03, rot: rand() * 6.28, seed: sd() }, px, pz);
+        else if (k < 0.88) put({ t: 'chickens', at: [px + nx * 0.5, pz + nz * 0.5], y: 0.03, rot: rand() * 6.28, n: 3, kind: 'hen', seed: sd() }, px, pz);
+        else if (k < 0.94) put({ t: 'animal', kind: 'dog', at: [px + nx * 0.5, pz + nz * 0.5], y: 0.03, rot: rand() * 6.28, seed: sd(), graze: false, mat: rand() < 0.5 ? 'hide_tan' : 'hide_brown' }, px, pz);
+        else put({ t: 'bench', at: [px + nx * 0.2, pz + nz * 0.2], y: 0.03, rot: along, len: 1.4 }, px, pz);
+      }
+    }
+  }
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`joseon-seoul-lanedress-${k}`, list), style: 'life', feature: false, center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
 }
 
 // the people of the streets: men in the white coat (durumagi) and the black gat, women under the green
@@ -73,7 +140,11 @@ function street() {
   };
   // Jongno: merchants on their shop floors, buyers before them, people walking both ways
   const [jx0, jz0, jx1, jz1] = JONGNO;
-  for (const [x0, z0, x1] of SHOPS) for (let x = x0 + 1.3; x < x1 - 1; x += 2.6) {
+  const shopx = [];
+  for (const b of blocksOf()) for (let k = 0; k < b.nb; k++) shopx.push([b.rect[0] + k * b.bw + 0.12 + (b.bw - 0.24 - 0.95) / 2, b.rect[1], b.rect[0] + (k + 1) * b.bw - 0.12 - 0.5]);
+  for (const [x, z0, xin] of shopx) {
+    // the shopkeeper on his maru (seen over the goods), a customer or two before it, a boy by the bay's way in now and then
+    if (rand() < 0.15) P.push({ t: 'figure', at: [xin, z0 + 2.2], y: 0.42, rot: Math.PI, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', skin: skin(), hat: 'brim', hatMat: 'lacquer_black', beard: rand() < 0.6, h: 1.62, pose: 'stand' });
     if (rand() < 0.45) P.push({ t: 'figure', at: [x, z0 + 0.75], y: 0.88, rot: 0, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', skin: skin(), hat: 'brim', hatMat: 'lacquer_black', pose: 'cross', beard: rand() < 0.6, h: 1.62 });
     if (rand() < 0.3) (rand() < 0.65 ? man : woman)(x + (rand() - 0.5), z0 - 1.1 - rand() * 0.5, Math.PI + (rand() - 0.5) * 0.6);
   }
@@ -103,6 +174,6 @@ export async function town() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 80) plans.push(base(`joseon-seoul-hanok-${i / 80}`, all.slice(i, i + 80).map((l) => ({ t: 'hanok', ...l, simple: true }))));
   plans.push({ ...base('joseon-seoul-yangban', [{ t: 'yangban_house', rect: YANGBAN, seed: 1888 }]), feature: false });
-  plans.push(court(), jongno(), ...street());
+  plans.push(court(), jongno(), shopfronts(), ...lanedress(), ...street());
   return plans;
 }

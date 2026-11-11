@@ -147,3 +147,11 @@ Sources for §12:
 Sources for §13:
 - [Anchae — Wikipedia](https://en.wikipedia.org/wiki/Anchae)
 - [Illustrated Vocabulary of Traditional Korean Furniture](https://www.koreanantiquefurniture.com/?p=12888)
+
+## 15. Deepening pass (Suzhou standard)
+
+- **Lots fill their cells.** The hanok lots (20–22.4 × 19.4–22.4 m, within 0.8 m of the lane seams) now stand wall to wall along the lanes, so the lanes are walled streets rather than lots floating in bare ground; no lot is left empty [inferred: late-19th-century Hanyang's dense lane blocks, as in photographs].
+- **Hanok at eye level.** Plank gate leaves (daemun, one swung back, the other shut with an iron ring), a threshold stone, a storehouse (gwangchae) against the street wall, strings of red peppers, corn and persimmons hung under the veranda's eave [inferred: the household economy of the hanok; strings of peppers and persimmons dried under eaves are customary]. Outside the walls (`town.js` `lanedress`): firewood, onggi jars, baskets, sacks, drying trays, benches with an old man sitting, hens and dogs (almost every house kept a small dog [stated: Korea Times, §12]), paper lanterns hung at the gate's eave.
+- **Yards planted.** Persimmon and jujube (now and then a pine) in the open of each yard, pagoda trees (Sophora japonica) and pines in the ministries' courts, pines in the palace's east and west belts [inferred].
+- **Jongno's shops walk-in.** Each one-bay shop of the sijeon has a 0.95 m way in beside the maru (a step stone to the earth floor), and inside: a low table with the stock stacked on it, a ledger desk with an abacus, a stool, bundles of the shop's goods hung from a rail under the roof, a paper lantern; cloth banners on brackets at the party walls, lanterns over the maru, the trade's pots, baskets and sacks on the paving; shopkeepers placed on their marus by bay (`shopfronts`).
+- **Gwanghwamun and the gate halls walkable.** The gate's stone base had a solid pier on the axis (the real gate has three ways, the king's in the middle): now three ways (6 m and two of 5.6 m) between piers under a lintel at 4.8 m; Heungnyemun and Geunjeongmun got a doorway in their back walls so the axis can be walked from the avenue to the throne court [stated: three gates of Gwanghwamun, Wikipedia; inferred: widths].

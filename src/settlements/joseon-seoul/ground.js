@@ -2,7 +2,7 @@
 // courts level, the pond and the stream; pines and willows in the palace, pines on the northern
 // slopes, a few trees in the yards; Korea's clear autumn sky.
 
-import { RADIUS, PALACE, POND, ISLAND, HYANG, HISLE, JONGNO, AVENUE, AMISAN, inRect, inPond, inHyang, inStream, inLot, amisan, smooth as sm } from './layout.js';
+import { RADIUS, PALACE, POND, ISLAND, HYANG, HISLE, JONGNO, AVENUE, AMISAN, inRect, inPond, inHyang, inStream, inLot, lotAt, MINISTRIES, amisan, smooth as sm } from './layout.js';
 const WATER = -1.2, BED = -2.6;
 function height(x, z) {
   const r = Math.hypot(x, z);
@@ -42,14 +42,24 @@ function planting(x, z) {
     if (AMISAN.faces.some((f) => z < f + 1 && z > f - 3) || Math.abs(Math.abs(x) - AMISAN.hw) < 3 || (Math.abs(x) < 21 && z > -229)) return { grass: 30 };
     return { maple: 0.5, red_pine: 0.3, grass: 30 };
   }
+  // the palace's east and west belts, between its halls: pines
+  if (inRect(PALACE, x, z) && Math.abs(x) > 72 && Math.abs(x) < 168 && z > -190 && z < 170 && !(x < 0 && inRect([-186, -60, -66, 54], x, z, 4)) && ![[110, -60], [110, 10], [100, 90], [-60, 190], [70, 190], [100, -200]].some(([a, b]) => Math.abs(x - a) < 18 && Math.abs(z - b) < 12)) return { red_pine: 0.22, grass: 12 };
   if (inRect(PALACE, x, z)) return inRect(PALACE, x, z, -6) ? null : { red_pine: 0.15 };
   if (-z > 300) return { red_pine: 0.9, maple: 0.2, grass: 20 };
-  if (inLot(x, z, 0.5)) return null;
+  // the hanok yards: a persimmon or a jujube, now and then a pine, in the open of the yard (south of the main range, clear of the wings, the gate and the crock terrace)
+  const lot = lotAt(x, z, 0);
+  if (lot) {
+    const [a, b, c, d] = lot.rect, xc = (a + c) / 2;
+    if (z > b + 7.6 && z < d - 4.6 && x > a + 7.4 && x < c - 7.4 && Math.abs(x - xc) > 1.6) return lot.seed % 7 === 0 ? { red_pine: 1.4, grass: 6 } : lot.seed % 3 === 0 ? { jujube: 1.5, grass: 8 } : { persimmon: 1.8, grass: 8 };
+    return null;
+  }
+  // the ministries' courts: pagoda trees and pines in the yards beside the halls
+  for (const m of MINISTRIES) if (inRect(m, x, z, -3) && Math.abs(x - (m[0] + m[2]) / 2) > 19) return { pagoda_tree: 0.7, red_pine: 0.4, grass: 8 };
   return null;
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 1.2, red_pine: 0.9, maple: 0.8 },
+  maxDensity: { willow: 1.2, red_pine: 1.4, maple: 0.8, persimmon: 1.8, jujube: 1.5, pagoda_tree: 0.7 },
   climate: {
     sun: { az: 165, el: 38, color: [1.0, 0.95, 0.87], intensity: 3.1, lat: 37.6, dec: -5, hour: 10.5 },
     sky: { turbidity: 2.8, rayleigh: 1.1, mie: 0.004, mieG: 0.8, zenith: [0.1, 0.18, 0.38], horizon: [0.63, 0.67, 0.72] },

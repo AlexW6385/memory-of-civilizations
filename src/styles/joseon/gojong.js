@@ -369,11 +369,13 @@ export function sijeon(el, { bag, col }) {
   rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (x1 - x0) / 2 + 1.0, B: D / 2 + 1.0, y: 0.42 + h - 0.1, rise: (D / 2 + 1) * 0.55, kind: 'xieshan', sweep: 0.5, p: 1.5, alongZ: false, mat: 'tile_grey', soffit: 'timber', curl: false }, bag);
   for (let k = 0; k < nb; k++) {
     const xa = x0 + k * bw + 0.12, xb = x0 + (k + 1) * bw - 0.12, good = el.goods ?? GOODS[Math.floor(rand() * GOODS.length)];
-    // the maru at the front, on short posts
-    const mz = [Math.min(Zf(0.15), Zf(1.15)), Math.max(Zf(0.15), Zf(1.15))];
-    bag.add('timber', box(xa, 0.42 + 0.38, mz[0], xb, 0.42 + 0.46, mz[1]));
-    for (const xx of [xa + 0.1, xb - 0.1]) bag.add('wood_dark', box(xx - 0.05, 0.42, Zf(0.25) - 0.05, xx + 0.05, 0.42 + 0.38, Zf(0.25) + 0.05));
-    col.rect([xa, mz[0], xb, mz[1]], 0.42, 0.42 + 0.46);
+    // the maru at the front, on short posts, across the left part of the bay; the right 0.95 m is the way in (earth floor at the stone's level)
+    const xm = xb - 0.95, mz = [Math.min(Zf(0.15), Zf(1.15)), Math.max(Zf(0.15), Zf(1.15))];
+    bag.add('timber', box(xa, 0.42 + 0.38, mz[0], xm, 0.42 + 0.46, mz[1]));
+    for (const xx of [xa + 0.1, xm - 0.1]) bag.add('wood_dark', box(xx - 0.05, 0.42, Zf(0.25) - 0.05, xx + 0.05, 0.42 + 0.38, Zf(0.25) + 0.05));
+    col.rect([xa, mz[0], xm, mz[1]], 0.42, 0.42 + 0.46);
+    bag.add('granite_korea', box(xm + 0.1, 0.1, Math.min(Zf(-0.35), Zf(0.15)), xb - 0.1, 0.42, Math.max(Zf(-0.35), Zf(0.15))));   // the step stone at the way in
+    col.floor([xm + 0.1, Math.min(Zf(-0.35), Zf(0.15)), xb - 0.1, Math.max(Zf(-0.35), Zf(0.15))], 0.3);
     // the shutters, hooked up under the eave, slanting out over the street
     const t = [], y2 = 0.42 + h - 0.3;
     beamTris(t, [(xa + xb) / 2, y2 - 0.02, Zf(0.25)], [(xa + xb) / 2, y2 + 0.35, Zf(-0.9)], (xb - xa) / 2, 0.04);
@@ -397,8 +399,31 @@ export function sijeon(el, { bag, col }) {
       }
     }
     // goods laid out on the maru too
-    if (good !== 'jars' && good !== 'fish') for (let s = 0; s < 3; s++) { const xx = xa + 0.2 + s * (xb - xa - 0.4) / 3, mats = BOLT[good] ?? ['paint_white']; bag.add(mats[Math.floor(rand() * mats.length)], box(xx, 0.88, Zf(0.5) - 0.12, xx + 0.4, 0.88 + 0.08 * (1 + Math.floor(rand() * 3)), Zf(0.5) + 0.12)); }
-    else bag.add('wicker', lathe([[0.2, 0], [0.26, 0.12], [0.001, 0.12]], 10, null, (xa + xb) / 2, 0.88, Zf(0.6)));
+    if (good !== 'jars' && good !== 'fish') for (let s2 = 0; s2 < 2; s2++) { const xx = xa + 0.2 + s2 * (xm - xa - 0.4) / 2, mats = BOLT[good] ?? ['paint_white']; bag.add(mats[Math.floor(rand() * mats.length)], box(xx, 0.88, Zf(0.5) - 0.12, xx + 0.4, 0.88 + 0.08 * (1 + Math.floor(rand() * 3)), Zf(0.5) + 0.12)); }
+    else bag.add('wicker', lathe([[0.2, 0], [0.26, 0.12], [0.001, 0.12]], 10, null, (xa + xm) / 2, 0.88, Zf(0.6)));
+    // inside, behind the maru: a low table with the stock stacked on it, a ledger desk with the abacus on the maru's back edge, a stool, bundles hung from a rail under the roof, a lamp
+    const zr = (d0, d1) => [Math.min(Zf(d0), Zf(d1)), Math.max(Zf(d0), Zf(d1))], tz = zr(2.3, 3.3), cxm = xa + 0.55;
+    bag.add('wood_dark', box(xa + 0.1, 0.42 + 0.42, tz[0], xa + 1.0, 0.42 + 0.47, tz[1]));
+    for (const xx of [xa + 0.15, xa + 0.95]) for (const zz of [tz[0] + 0.05, tz[1] - 0.05]) bag.add('wood_dark', box(xx - 0.03, 0.42, zz - 0.03, xx + 0.03, 0.42 + 0.42, zz + 0.03));
+    col.rect([xa + 0.08, tz[0], xa + 1.02, tz[1]], 0.42, 0.42 + 0.5);
+    const mats = BOLT[good] ?? ['paint_white', 'wicker'];
+    for (let q = 0; q < 3; q++) bag.add(mats[Math.floor(rand() * mats.length)], box(xa + 0.15 + (q % 2) * 0.38, 0.42 + 0.47 + Math.floor(q / 2) * 0.12, tz[0] + 0.1, xa + 0.5 + (q % 2) * 0.38, 0.42 + 0.58 + Math.floor(q / 2) * 0.12, tz[1] - 0.1));
+    const dz = zr(1.2, 1.55);
+    bag.add('wood_dark', box(xm - 0.55, 0.42 + 0.28, dz[0], xm - 0.1, 0.42 + 0.33, dz[1]));       // the desk, low, standing on the floor behind the maru's edge
+    bag.add('paint_white', box(xm - 0.5, 0.42 + 0.33, dz[0] + 0.03, xm - 0.3, 0.42 + 0.345, dz[1] - 0.03));
+    bag.add('wood_dark', box(xm - 0.27, 0.42 + 0.33, dz[0] + 0.04, xm - 0.14, 0.42 + 0.37, dz[0] + 0.2));   // the abacus (jupan)
+    bag.add('timber', box(xm - 0.55 + 0.05, 0.42, dz[0] + 0.03, xm - 0.5 + 0.05, 0.42 + 0.28, dz[0] + 0.08));
+    col.rect([xm - 0.55, dz[0], xm - 0.1, dz[1]], 0.42, 0.42 + 0.34);
+    const st = zr(1.9, 2.2); bag.add('timber', box(xm + 0.05, 0.42, st[0], xm + 0.35, 0.42 + 0.3, st[1]));
+    const rz = zr(1.7, 1.78), ry = 0.42 + h - 0.45;
+    bag.add('timber', box(xa, ry, rz[0], xb, ry + 0.05, rz[1]));
+    for (let q = 0; q < 3; q++) {
+      const xx = xa + 0.3 + q * (xm - xa - 0.6) / 2, m2 = good === 'fish' ? 'wicker' : good === 'jars' ? 'pottery_dark' : mats[Math.floor(rand() * mats.length)];
+      bag.add('rope_fibre', box(xx - 0.008, ry - 0.5, rz[0] + 0.03, xx + 0.008, ry, rz[0] + 0.05));
+      bag.add(m2, box(xx - 0.1, ry - 0.9, rz[0] - 0.02, xx + 0.1, ry - 0.5, rz[1] + 0.12));
+    }
+    bag.add('lamp_paper', box(xb - 0.45, ry - 0.2, zr(3.2, 3.4)[0], xb - 0.25, ry + 0.1, zr(3.2, 3.4)[1]));
+    void cxm;
   }
 }
 

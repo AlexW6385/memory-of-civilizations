@@ -13,16 +13,17 @@ const wall = (a, b, gates = [], h = 5.5) => E.push({ t: 'ming_wall', a, b, y: 0,
 wall([px0, pz0], [px1, pz0], [{ at: (px1 - px0) / 2, w: 5, h: 4 }]); wall([px0, pz0], [px0, pz1], [{ at: 200, w: 4.5, h: 3.8 }]); wall([px1, pz0], [px1, pz1], [{ at: 200, w: 4.5, h: 3.8 }]);
 wall([px0, pz1], [-22, pz1]); wall([22, pz1], [px1, pz1]);
 // Gwanghwamun: the stone base with three arched ways, the two-storey gate pavilion on it
-E.push({ t: 'block', walk: true, rect: [-22, pz1 - 8, -8, pz1 + 8], y0: 0, y1: 7, mat: 'granite_korea' });
-E.push({ t: 'block', walk: true, rect: [8, pz1 - 8, 22, pz1 + 8], y0: 0, y1: 7, mat: 'granite_korea' });
-E.push({ t: 'block', walk: true, rect: [-3.2, pz1 - 8, 3.2, pz1 + 8], y0: 0, y1: 7, mat: 'granite_korea' });
-E.push({ t: 'block', walk: true, rect: [-8, pz1 - 8, -3.2, pz1 + 8], y0: 4.8, y1: 7, mat: 'granite_korea' });
-E.push({ t: 'block', walk: true, rect: [3.2, pz1 - 8, 8, pz1 + 8], y0: 4.8, y1: 7, mat: 'granite_korea' });
+// three ways through it: the king's in the middle (6 m), the civil and military on either side (5.6 m), the piers between;
+// the lintel at 4.8 m under the gate's floor at 7 m
+E.push({ t: 'block', walk: true, rect: [-22, pz1 - 8, -10.8, pz1 + 8], y0: 0, y1: 7, mat: 'granite_korea' });
+E.push({ t: 'block', walk: true, rect: [10.8, pz1 - 8, 22, pz1 + 8], y0: 0, y1: 7, mat: 'granite_korea' });
+for (const sx of [-1, 1]) E.push({ t: 'block', walk: true, rect: sx < 0 ? [-5.2, pz1 - 8, -3, pz1 + 8] : [3, pz1 - 8, 5.2, pz1 + 8], y0: 0, y1: 7, mat: 'granite_korea' });
+E.push({ t: 'block', walk: true, rect: [-10.8, pz1 - 8, 10.8, pz1 + 8], y0: 4.8, y1: 7, mat: 'granite_korea' });
 E.push({ t: 'qing_hall', rect: [-15, pz1 - 6, 15, pz1 + 6], y: 7, H: 5, double: 4.2, roof: 'xieshan', bays: [3, 2], front: 's', four: true, plat: 0.3, open: true, orn: { joseon: true, figures: 7 }, dapo: { tiers: 2, inter: 3 } });
 // the haetae (haechi) before the gate, the beasts that know right from wrong
 for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'haetae', at: [s * 13, pz1 + 16], y: 0.03, s: 0.85, face: [0, 1], stone: 'granite_korea', ped: 1.0 });
 // the courts' cross walls with their gate halls; the stream and its bridge
-const gateHall = (z, w = 16) => E.push({ t: 'ming_hall', rect: [-w / 2, z - 4.5, w / 2, z + 4.5], y: 0, H: 5.2, front: 's', roof: 'xieshan', plat: 0.8, eave: 1.6, sweep: 0.8, open: true, orn: { figures: 5 }, dapo: { tiers: 2, inter: 2 } });
+const gateHall = (z, w = 16) => E.push({ t: 'ming_hall', rect: [-w / 2, z - 4.5, w / 2, z + 4.5], y: 0, H: 5.2, front: 's', doors: ['n'], roof: 'xieshan', plat: 0.8, eave: 1.6, sweep: 0.8, open: true, orn: { figures: 5 }, dapo: { tiers: 2, inter: 2 } });
 for (const z of [160, 92]) { wall([px0, z], [-9, z], [], 4.6); wall([9, z], [px1, z], [], 4.6); gateHall(z); }
 E.push({ t: 'water_rect', rect: [-150, STREAM.z0, 150, STREAM.z1], y: -1.2 });
 E.push({ t: 'canal_wall', a: [-150, STREAM.z0], b: [150, STREAM.z0], y: 0.05, bed: -2.6, th: 0.6 });
