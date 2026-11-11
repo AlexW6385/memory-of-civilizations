@@ -13,6 +13,7 @@ import { crowTomb, royalTomb } from './tombs.js';
 import { colonnadeStreet as street, greatTemple, qasr } from './city.js';
 import { poolGarden } from './garden.js';
 import { triclinium } from './triclinium.js';
+import { house } from './house.js';
 
 const R = 'sandstone_rose', A = 'sandstone_rose_ashlar';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -123,13 +124,6 @@ function theatre(el, { bag, col: C }) {
     }
     SB(-L, 6.0, L, 7.5, y0 + h, y0 + h + 0.7);                                                  // the entablature over the storey
   }
-}
-
-/** nabataean_house: { rect, seed, y }: a flat-roofed house of rose ashlar, a stair to the roof. */
-function house(el, { bag, col: C }) {
-  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = rand() < 0.5 ? 3.4 : 6.4;
-  bag.add(A, box(x0, y - 1.5, z0, x1, y + h, z1)); C.rect(el.rect, y - 1.5, y + h); C.floor(el.rect, y + h);
-  bag.add('plaster', box(x0 - 0.05, y + h, z0 - 0.05, x1 + 0.05, y + h + 0.5, z1 + 0.05));
 }
 
 registerStyle('nabataean', {
