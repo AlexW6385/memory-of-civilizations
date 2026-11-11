@@ -72,10 +72,7 @@ export function bjShopgoods(el, { bag, col }) {
     if (tr === 'tea') { P.add('bronze', lathe([[0.001, 0], [0.2, 0.02], [0.26, 0.22], [0.18, 0.4], [0.07, 0.46], [0.001, 0.46]], 10, null, w / 2 - 0.5, 0, off(1.0))); P.add('brick_grey', box(w / 2 - 0.85, 0, off(0.7), w / 2 - 0.15, 0.4, off(1.3))); }
     if (tr === 'medicine') for (let i = 0; i < 3; i++) P.add('wicker', lathe([[0.001, 0], [0.3, 0.0], [0.34, 0.05], [0.001, 0.05]], 10, null, -w / 2 + 0.6 + i * 0.9, 0.34, off(0.37)));
   }
-  // by all of them: a bench or stools, a pot or a basket at the post's foot
-  if (r() < 0.55) { P.add('timber', box(w / 2 + 0.05, 0.4, off(0.02), w / 2 + 1.2, 0.45, off(0.3))); for (const sx of [w / 2 + 0.15, w / 2 + 1.1]) P.add('timber', box(sx - 0.03, 0, off(0.04), sx + 0.03, 0.4, off(0.28))); }
-  if (r() < 0.6) P.add(pick(r, ['pottery_dark', 'glaze_blue']), lathe([[0.001, 0], [0.12, 0.01], [0.22, 0.2], [0.12, 0.42], [0.1, 0.46], [0.001, 0.46]], 9, null, -w / 2 - 0.3, 0, off(0.2)));
-  else P.add('wicker', lathe([[0.001, 0], [0.22, 0], [0.28, 0.3], [0.25, 0.3], [0.19, 0.03], [0.001, 0.03]], 9, null, -w / 2 - 0.3, 0, off(0.2)));
+  // (the bench, the pots and baskets at the posts are the front's own: shopfront.js)
   P.emit(bag, el.at[0], el.y ?? 0.04, el.at[1], el.rot ?? 0);
   const c = Math.cos(el.rot ?? 0), s = Math.sin(el.rot ?? 0);
   for (let i = 0; i < Math.max(1, Math.floor(w / 0.9)); i++) { const lx = -w / 2 + 0.45 + i * 0.9; col?.circle?.(el.at[0] + lx * c + off(0.4) * s, el.at[1] - lx * s + off(0.4) * c, 0.45, el.y ?? 0, (el.y ?? 0) + 1.0); }

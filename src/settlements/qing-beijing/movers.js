@@ -64,11 +64,11 @@ export function walkways() {
   const [a0, b0, a1, b1] = MOAT.outer;
   // the ring street, its four sides
   for (const r of [[RING[0], RING[1], RING[2], b0], [RING[0], b1, -NOTCH.x, RING[3]], [NOTCH.x, b1, RING[2], RING[3]], [RING[0], b0, a0, b1], [a1, b0, RING[2], b1]]) push(r, 1.0, 'street');
-  push(AVENUE, 1.7, 'street');
+  push([-2, AVENUE[1], 2, AVENUE[3]], 1.7, 'street');      // the middle of the carriageway: the stands, carts and camels keep to its edges
   // the paved aprons before the shop fronts (the shoppers stand and walk there)
   for (const r of SHOP_APRONS) {
     // the shoppers walk the street side of the apron: the goods stand on the shop side
-    const w = r[2] - r[0], cut = Math.max(0, Math.min(1.7, w - 1.2));
+    const w = r[2] - r[0], cut = Math.max(0, Math.min(2.6, w - 1.1));
     push(r[0] < 0 ? [r[0] + cut, r[1], r[2], r[3]] : [r[0], r[1], r[2] - cut, r[3]], 0.9, 'street');
   }
   return { rects, links: [], clip: RADIUS - 14 };

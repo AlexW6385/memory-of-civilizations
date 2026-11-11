@@ -5,7 +5,7 @@
 // few officials at the foot of the terrace: no crowds), pigeons in the lanes. Positions come from
 // layout.js; nothing is hard-coded but the buildings' places on the avenue (shops.js).
 import './style.js';
-import { RADIUS, AVENUE, HALLS, TIERS, RING, TEMPLE, SHOP_APRONS, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
+import { RADIUS, AVENUE, HALLS, TIERS, RING, TEMPLE, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
 import { SHOP_SITES } from './shops.js';
 
 const base = (id, style, elements, center = [0, 0]) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' }, center, near: 230 });
@@ -58,11 +58,11 @@ function streetPlans(rand) {
   // before the shops: the goods of each trade, benches, a lantern or two
   for (const row of shopRows()) for (const sh of row.shops) {
     const west = row.side === 'w', out = west ? 1 : -1, rot = west ? Math.PI / 2 : -Math.PI / 2, cz = (sh.z0 + sh.z1) / 2, w = Math.min(sh.z1 - sh.z0 - 2.7, 3.8);
-    const apronW = Math.abs(Math.abs(row.front) - aw);
-    if (sh.interior) { L.push({ t: 'stool', at: [row.front + out * 0.7, sh.z0 + 0.9], y: 0.04, rot, seed: seed() }, { t: 'stool', at: [row.front + out * 0.7, sh.z1 - 0.9], y: 0.04, rot, seed: seed() }); continue; }
-    if (w < 1.6 || apronW < 1.8) continue;
-    L.push({ t: 'bj_shopgoods', at: [row.front, cz], y: 0.04, rot, w, trade: sh.trade, seed: sh.seed, d0: 0.5 });
-    if (rand() < 0.4) fig([row.front + out * (apronW > 2.4 ? 1.9 : 1.5), cz + (rand() - 0.5) * w * 0.6], rot + Math.PI * (rand() < 0.5 ? 0 : 1), { pose: rand() < 0.5 ? 'stand' : 'talk' });
+    const apronW = Math.abs(Math.abs(row.front) - CARRIAGE);
+    if (sh.interior) { L.push({ t: 'stool', at: [row.front + out * 1.0, sh.z0 + 0.9], y: 0.04 + WALK_UP, rot, seed: seed() }, { t: 'stool', at: [row.front + out * 1.0, sh.z1 - 0.9], y: 0.04 + WALK_UP, rot, seed: seed() }); continue; }
+    if (w < 1.6 || apronW < 3.0) continue;
+    L.push({ t: 'bj_shopgoods', at: [row.front, cz], y: 0.04 + WALK_UP, rot, w, trade: sh.trade, seed: sh.seed, d0: 1.4 });
+    if (rand() < 0.4) fig([row.front + out * 3.0, cz + (rand() - 0.5) * w * 0.6], rot + Math.PI * (rand() < 0.5 ? 0 : 1), { pose: rand() < 0.5 ? 'stand' : 'talk' });
   }
   // the avenue: stands and stalls at its two edges, clear of the booths and the temple's way
   const taken = (x, z, r) => SHOP_SITES.some((b) => Math.hypot(b.at[0] - x, b.at[1] - z) < r + 1) || lanes().some((l) => l[2] - l[0] > 40 && x > l[0] && x < l[2] && z > l[1] - r && z < l[3] + r && Math.abs(z - (l[1] + l[3]) / 2) < r + 3) || Math.abs(z - TEMPLE.c[1]) < 6 + r;
@@ -73,26 +73,26 @@ function streetPlans(rand) {
   }
   let nB = 0, nT = 0, nW = 0, nS = 0, nC = 0, nD = 0;
   for (const [sd, z, k] of spots) {
-    const x = sd * (aw - 6.3 - rand() * 1.5), rot = sd < 0 ? Math.PI / 2 : -Math.PI / 2, inward = [-sd, 0], faceIn = face(inward);
+    const x = sd * (CARRIAGE - 0.5 - rand() * 0.5), rot = sd < 0 ? Math.PI / 2 : -Math.PI / 2, inward = [-sd, 0], faceIn = face(inward);
     if (taken(x, z, 2.5)) continue;
     if (k < 0.1 && nB < 3) { nB++; L.push({ t: 'bj_barber', at: [x, z], y: 0.04, rot: rot + Math.PI, seed: seed() }); }
     else if (k < 0.2 && nT < 3) { nT++; L.push({ t: 'bj_teastall', at: [x + sd * 0.0, z], y: 0.04, rot, seed: seed() }); }
     else if (k < 0.3 && nW < 3) { nW++; L.push({ t: 'bj_watercart', at: [x, z], y: 0.04, rot: rot + Math.PI / 2, seed: seed() }); }
     else if (k < 0.37 && nS < 3) { nS++; L.push({ t: 'bj_sedan', at: [x, z], y: 0.04, rot: rot + Math.PI / 2, seed: seed() }); }
-    else if (k < 0.5 && nC < 5) { nC++; L.push({ t: 'peking_cart', at: [x, z], y: 0.04, rot: Math.PI / 2 * (rand() < 0.5 ? 0 : 2), seed: seed(), beast: rand() < 0.4 ? 'donkey' : 'horse', coat: ['hide_black', 'hide_brown', 'hide_grey'][Math.floor(rand() * 3)] }); fig([x + 0.9, z - 4.2], 0.3, { dress: 'trousers', pose: 'squat', hat: 'brim', cloth: 'cloth_brown' }); }
-    else if (k < 0.62 && nD < 6) { nD++; L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0.04, rot: rand() * 6.28, gear: true, graze: false, seed: seed() }); fig([x + 1.0, z + 0.5], faceIn, { dress: 'trousers', pose: 'squat', hat: 'brim', cloth: 'cloth_brown' }); }
+    else if (k < 0.5 && nC < 5) { nC++; L.push({ t: 'peking_cart', at: [x, z], y: 0.04, rot: Math.PI / 2 * (rand() < 0.5 ? 0 : 2), seed: seed(), beast: rand() < 0.4 ? 'donkey' : 'horse', coat: ['hide_black', 'hide_brown', 'hide_grey'][Math.floor(rand() * 3)] }); fig([x - sd * 1.0, z - 4.2], 0.3, { dress: 'trousers', pose: 'squat', hat: 'brim', cloth: 'cloth_brown' }); }
+    else if (k < 0.62 && nD < 6) { nD++; L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0.04, rot: rand() * 6.28, gear: true, graze: false, seed: seed() }); fig([x - sd * 1.0, z + 0.5], faceIn, { dress: 'trousers', pose: 'squat', hat: 'brim', cloth: 'cloth_brown' }); }
     else if (k < 0.8) { // a hawker with his pole, or a knot talking
       if (rand() < 0.6) fig([x, z], rot + (rand() - 0.5), { carry: 'pole', dress: 'trousers', cloth: 'cloth_brown', hat: rand() < 0.5 ? 'brim' : 'cap' });
       else { fig([x, z], faceIn + 0.5, { pose: 'talk' }); fig([x + sd * 0.6, z + 0.7], faceIn - 2.2, { pose: 'talk' }); }
     }
-    else if (k < 0.9) { L.push({ t: 'bench', at: [x + sd * 1.2, z], y: 0.04, rot: Math.PI / 2, seed: seed() }); for (const q of [-0.4, 0.4]) if (rand() < 0.7) fig([x + sd * 1.2 + (rand() < 0.5 ? 0 : 0), z + q], faceIn, { pose: 'sit' }); }
+    else if (k < 0.9) { L.push({ t: 'bench', at: [x - sd * 0.4, z], y: 0.04, rot: Math.PI / 2, seed: seed() }); for (const q of [-0.4, 0.4]) if (rand() < 0.7) fig([x - sd * 0.4, z + q], faceIn, { pose: 'sit' }); }
     else { L.push({ t: 'animal', kind: rand() < 0.5 ? 'dog' : 'cat', at: [x, z], y: 0.04, rot: rand() * 6.28, seed: seed() }); fig([x + sd * 1.0, z + 1.2], faceIn + 1, { child: true, pose: 'squat', dress: 'trousers', hat: 'none', cloth: 'cloth_red' }); }
   }
   // a string of camels at rest on the avenue's far end, their drovers squatting by them
   const zc = A[3] - 30;
-  if (!taken(-aw + 5, zc, 8)) { L.push({ t: 'camel_string', at: [-aw + 5, zc], dir: [0, -1], n: 4, y: 0.04, seed: seed() }); fig([-aw + 6.2, zc - 4], 0, { dress: 'trousers', pose: 'squat', hat: 'brim', cloth: 'cloth_brown' }); }
+  if (!taken(-CARRIAGE + 1.2, zc, 8)) { L.push({ t: 'camel_string', at: [-CARRIAGE + 1.2, zc], dir: [0, -1], n: 4, y: 0.04, seed: seed() }); fig([-CARRIAGE + 2.4, zc - 4], 0, { dress: 'trousers', pose: 'squat', hat: 'brim', cloth: 'cloth_brown' }); }
   // hawkers and idlers about the avenue's mouth, where the visitor arrives
-  for (let i = 0; i < 6; i++) { const x = (rand() - 0.5) * 12, z = 222 + rand() * 40; if (!taken(x, z, 1)) fig([x, z], rand() * 6.28, i % 2 ? { carry: 'pole', dress: 'trousers', cloth: 'cloth_brown', hat: 'brim' } : { pose: 'talk' }); }
+  for (let i = 0; i < 6; i++) { const x = (rand() - 0.5) * 5, z = 222 + rand() * 40; if (!taken(x, z, 1)) fig([x, z], rand() * 6.28, i % 2 ? { carry: 'pole', dress: 'trousers', cloth: 'cloth_brown', hat: 'brim' } : { pose: 'talk' }); }
   plans.push(...tiled('qing-beijing-street-life', L));
   // the hutong: what the households put out at their gates, a cat or a dog now and then
   const H = [];

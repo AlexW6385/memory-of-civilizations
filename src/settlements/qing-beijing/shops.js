@@ -23,10 +23,12 @@ export const SHOP_SITES = (() => {
   const [tcx, tcz] = TEMPLE.c;
   for (let z = az0 + 16; z < az1 - 14; z += 9 + rand() * 2.5) for (const s of [-1, 1]) {
     // (the west edge faces east: out = +x; rot turns local +z into the world)
-    const x = s < 0 ? ax0 + 1.4 : ax1 - 1.4;
+    const x = s < 0 ? ax0 + 0.3 : ax1 - 0.3;
     const zz = z + (s > 0 ? 4 : 0), w = 4.2 + rand() * 1.4, trade = TRADES[(k++ + (s > 0 ? 3 : 0)) % TRADES.length], seed = 100 + k * 17;
     const edge = s < 0 ? ax0 : ax1;
     // stalls also stand before the shop fronts (Qianmen's street market), but not before a door that opens (the tea house, the pharmacy)
+    // the shop fronts have their own goods now (shopfront.js, streetlife.js): booths only where no shop stands
+    if ((s < 0 && zz + w / 2 > 211) || (s > 0 && zz + w / 2 > 355)) continue;
     if (s < 0 && interiorShops().some((p) => zz + w / 2 + 1.2 > p.z0 && zz - w / 2 - 1.2 < p.z1)) continue;
     // not over a lane's mouth (a hutong meets the avenue every 29 m), nor on the path to the temple
     if (lanes().some((l) => l[2] - l[0] > 40 && zz + w / 2 + 0.6 > l[1] && zz - w / 2 - 0.6 < l[3] && l[0] <= edge + 1 && l[2] >= edge - 1)) continue;
