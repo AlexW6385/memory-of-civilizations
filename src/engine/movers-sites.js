@@ -14,5 +14,6 @@ export const MOVER_SITES = {
   'lhasa': () => import('../settlements/lhasa/movers.js'),
   'khajuraho': () => import('../settlements/khajuraho/movers.js'),
   'edo-himeji': () => import('../settlements/edo-himeji/movers.js'),
+  'heian-uji': () => import('../settlements/heian-uji/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
