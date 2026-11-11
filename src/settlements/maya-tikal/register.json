@@ -1,0 +1,45 @@
+{
+  "site": {
+    "id": "maya-tikal",
+    "name": {
+      "en": "Classic Maya Tikal",
+      "zh": "古典玛雅蒂卡尔"
+    },
+    "era": "c. 750",
+    "region": "yucatan",
+    "lat": 17.22,
+    "lon": -89.62,
+    "radius": 330
+  },
+  "arrival": [
+    -18,
+    0.1,
+    28,
+    -1.2,
+    0.3
+  ],
+  "arrivalNote": "Temple I across the Great Plaza, its red tiers, steep stair and roof comb over the plaza's plaster, the North Acropolis on the left",
+  "card": {
+    "en": [
+      "Tikal lies in the rainforest of the Petén in northern Guatemala, one of the great cities of the Classic Maya. The moment shown is about 750, at its height, a generation after the burial of the king Jasaw Chan K'awiil. The temples are of limestone rubble faced with stucco painted red, in steep stepped pyramids with a single stair, a shrine of vaulted chambers on top and a tall roof comb; the palaces are ranges of corbel-vaulted rooms on terraces; the houses are of poles, daub and palm thatch on low platforms round small courts.",
+      "Temple I — the Temple of the Great Jaguar, 47 m high with its roof comb, nine tiers rising to a shrine of three narrow vaulted chambers, the tomb of Jasaw Chan K'awiil beneath it; the stair is climbable and the shrine can be entered.",
+      "Temple II — the Temple of the Mask, three broad tiers with a wide stair and a shrine and comb, 42 m high, facing Temple I across the plaza, 70 m away.",
+      "The North Acropolis — a platform 100 m by 80 m with its broad stair and its temples with roof combs, the front lined with carved stelae and round altars.",
+      "The Central Acropolis — a maze of vaulted palaces round courts at several levels south of the plaza, with rooms (some entered and furnished) with benches along the walls, and a stepped palace of five levels.",
+      "The ball court and the causeways — the small ball court beside Temple I, and the raised white causeways (sacbeob) running out through the forest, Tozzer to Temple IV, 70 m high at its end.",
+      "The reservoirs and the houses — plastered reservoirs that held the city's water, and patio groups in the forest, each with a shrine on its east side and thatched houses round the court."
+    ],
+    "zh": [
+      "蒂卡尔位于危地马拉北部佩滕的热带雨林中，是古典玛雅最伟大的城市之一。画面定格在约 750 年，城市的鼎盛期，国王贾萨乌·占·卡维尔下葬后一代人的时间。神庙用石灰岩碎石筑成，外覆涂成红色的灰泥，是陡峭的阶梯金字塔，只有一道台阶，顶上是带拱顶房间的神殿和高高的屋脊饰；宫殿是台地上叠涩拱顶的成排房间；住宅是木杆、泥墙和棕榈茅草屋顶，建在低矮的台基上，围着小院。",
+      "一号神庙 —— 大美洲豹神庙，连屋脊饰高 47 米，九层台阶通向由三间狭窄拱顶室组成的神殿，贾萨乌·占·卡维尔的陵墓就在其下；台阶可以攀登，神殿可以进入。",
+      "二号神庙 —— 面具神庙，三层宽阔的台阶、宽大的阶梯、神殿和屋脊饰，高 42 米，与一号神庙隔着广场相对，相距 70 米。",
+      "北卫城 —— 长 100 米、宽 80 米的平台，有宽阔的台阶，台上是带屋脊饰的神庙，前沿排列着雕刻的石碑和圆形祭坛。",
+      "中央卫城 —— 广场以南、分布在几层高低不同院落周围的拱顶宫殿群，其中一些房间可以进入并布置了陈设，墙边有石凳，还有一座五层的阶梯式宫殿。",
+      "球场与堤道 —— 一号神庙旁的小球场，以及穿过森林的白色高架堤道（萨克贝），托泽堤道通向高 70 米的四号神庙。",
+      "水库与住宅 —— 储存全城用水的灰泥水库，以及森林中的院落式住宅群，每组东侧有神龛，周围是茅草屋。"
+    ]
+  },
+  "soundscape": "T(TROP, { cicadas: 1, frogs: 0.7, animals: { dog: 0.3 }, roof: 'thatch' })",
+  "lifeRegion": "americas",
+  "crop": "maize"
+}
