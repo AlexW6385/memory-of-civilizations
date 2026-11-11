@@ -670,4 +670,22 @@ export const CARDS = {
       "巴扎 —— 带拱顶的店铺街交汇于穹顶的十字街口（恰尔苏），四周是带院的民居、小巷里的灌渠和果园。",
     ],
   },
+  'dunhuang': {
+    en: [
+      "Dunhuang, the oasis of Shazhou on the edge of the Taklamakan and Gobi deserts, was the gate of China on the Silk Road, where the northern, central and southern routes met. About 850 the Tibetan rule of sixty years has just ended (848) and the Guiyi Army governors under Zhang Yichao rule it; the Buddhist cave temples of Mogao, cut since 366 into a conglomerate cliff above a dry river, are painted and furnished by the town's families, monks and merchants.",
+      "The Mogao cliff — a wall of caves in four tiers, reached by timber galleries and stairs, with timber porches on the larger caves and bells on their eaves.",
+      "The Nine-Storey building and the Great Buddha — the 35-metre seated Maitreya of 695 in a cave of the rock, his hall fronted by a nine-storey timber structure stepping back under tiled eaves.",
+      "A hall cave — a truncated-pyramid ceiling, an altar with a Buddha, disciples, bodhisattvas and heavenly kings of painted clay, walls covered with Pure Land paradises, thousand Buddhas, flying apsaras and rows of donors.",
+      "A central-pillar cave — an older plan for walking round a pillar with a niche, a gabled front ceiling and a flat rear one; and a monk's cell with its kang, stove and sutras.",
+      "The oasis town — earth-walled houses round courtyards along a main street under poplars, the east gate, a market under awnings, and the caravanserai where Sogdian merchants and their camels rest; the Crescent Spring in the dunes to the south.",
+    ],
+    zh: [
+      "敦煌，沙州绿洲，位于塔克拉玛干与戈壁边缘，是丝绸之路北、中、南三道交汇的中国门户。约850年，吐蕃六十余年的统治刚刚结束（848年），张议潮的归义军政权统治沙州；自公元366年起开凿于干涸河谷上方砾岩崖壁的莫高窟，由城中的世家、僧人和商人绘制和供养。",
+      "莫高窟崖面——四层洞窟，以木构栈道和台阶相连，较大的洞窟前有木构窟檐，檐角悬风铃。",
+      "九层楼与大佛——695年的35米坐姿弥勒大佛凿于崖体之中，前面是逐层收分、覆灰瓦檐的九层木构窟檐。",
+      "殿堂窟——覆斗形窟顶，佛坛上塑佛、弟子、菩萨与天王，四壁满绘净土变、千佛、飞天和供养人行列。",
+      "中心柱窟——绕柱礼拜的早期形制，前部人字披、后部平顶；还有僧人的小禅窟，内有土炕、灶和经卷。",
+      "绿洲城镇——主街两侧杨树下的夯土院落、东门、搭着凉棚的集市，以及粟特商人和骆驼歇脚的客栈；南面沙丘中是月牙泉。",
+    ],
+  },
 };
