@@ -47,7 +47,7 @@ export const PAVE_R = 190;
  * street and the two cross shop streets only the middle is paved, the margins by the fronts are beaten earth with the shops' goods standing on them.
  */
 export const RIVER_WALK = 5;
-export const BRIDGE_APRON = 9;
+export const BRIDGE_APRON = 5.5;
 export const PAVED_HALF = { 0: 3.8, 1: 3.8, 4: 2.6, 5: 2.6 };
 /** The paved parts of street i (a list of [x0, z0, x1, z1]); the whole rectangle for the streets not narrowed. */
 export function paveRects(i) {
