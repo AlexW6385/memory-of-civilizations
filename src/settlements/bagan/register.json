@@ -1,0 +1,26 @@
+{
+  "site": { "id": "bagan", "name": { "en": "Pagan (Bagan)", "zh": "蒲甘" }, "era": "c. 1200", "region": "burma", "lat": 21.17, "lon": 94.86, "radius": 330 },
+  "arrival": [30, null, 0, -1.5708, 0.12],
+  "arrivalNote": "inside the Ananda precinct's west gate, looking east along the cross passage's axis to the temple: porch, terraces and gilded spire",
+  "card": {
+    "en": [
+      "Pagan, now Bagan, on the east bank of the Irrawaddy in the dry heart of Burma, was the capital of the first Burmese kingdom. The year is about 1200, under King Narapatisithu, the high noon of the kingdom: merit-making kings, queens and officials are still raising temples across the plain, in the end some ten thousand temples, stupas and monasteries. It is a Theravada Buddhist city of brick: temples and stupas of red brick under whitewash and gilding, the walled city on the river, timber halls under tiered roofs and the stilt houses of bamboo and thatch.",
+      "The Ananda Temple — built in 1105 under King Kyansittha: a cruciform brick temple with a porch on each of the four sides, two vaulted corridors round a central cube, and in the niches of the cube four standing Buddhas about 9.5 m tall; stepped terraces carry the gilded spire, 51 m above the ground, with a small stupa at each corner and over each porch.",
+      "The Tharabar Gate and the walled city — the brick gate in the east wall of the old city, its niches for the guardian spirits, and the wall with its crenellated top; to the west the city opens on the river, with a brick ghat and moored boats.",
+      "The Thatbyinnyu and the palace — the great five-storey white temple in its enclosure, entered by a porch from the east, and the royal compound with timber halls under tiers of roofs.",
+      "The Shwezigon and the Sulamani — the gilded bell stupa on its five square terraces with its four stairs and standing Buddhas, and the two-storey brick temple of Sithu II with its porches on four sides.",
+      "The plain — stilt houses of bamboo and thatch in their yards, kyaungs and rest houses, the brickworks and the village tank, and the temples and stupas of every size among palmyra palms and thorn."
+    ],
+    "zh": [
+      "蒲甘位于缅甸干旱地带的伊洛瓦底江东岸，是缅甸第一个王朝的都城。所示约在1200年那罗波帝悉都在位时，是王朝的鼎盛期：国王、王后与官员仍在平原上不断兴建功德寺塔，最终共有约一万座寺、塔与僧院。这是一座上座部佛教的砖城：红砖寺塔外抹白灰、饰金箔，临江有城墙，另有木构多层屋顶的殿堂和竹木茅草的高脚屋。",
+      "阿难陀寺 —— 建于1105年江喜陀王时期：十字形砖寺，四面各有一座门廊，两道拱顶回廊环绕中央方体，方体的壁龛里立着四尊约9.5米高的立佛；层层收分的平台托起镀金塔顶，距地51米，各角及门廊上都有小塔。",
+      "塔拉巴门与城墙 —— 古城东墙上的砖门，门旁有供守护神灵的壁龛，城墙顶部有垛口；城西敞向江岸，有砖砌的码头台阶和停泊的船。",
+      "瑞山陀寺与王宫 —— 五层的白色大寺立于围院之中，由东面门廊进入；宫城里是多重屋顶的木构殿堂。",
+      "瑞喜宫塔与苏拉玛尼寺 —— 立在五层方形台基上的镀金钟形塔，有四道台阶和立佛；以及悉都二世的两层砖寺，四面皆有门廊。",
+      "平原 —— 竹木茅草的高脚屋和院落、僧院与凉亭、砖窑和村中水塘，还有散布在糖棕与荆棘之间大大小小的寺与塔。"
+    ]
+  },
+  "soundscape": "T(NEAR, { animals: { buffalo: 1, dog: 1, goat: 1 }, roof: 'thatch' })",
+  "lifeRegion": "southeast_asia",
+  "crop": null
+}
