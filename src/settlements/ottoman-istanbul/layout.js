@@ -31,7 +31,27 @@ export const KULLIYE_RECTS = [
   DARUSSIFA, IMARET, [HAMAM[0] - 1, HAMAM[1], HAMAM[2] + 3.5, HAMAM[3]], [DARULHADIS.at[0] - 1, DARULHADIS.at[1] - 1, DARULHADIS.at[0] + 21 * 4 + 0.5, DARULHADIS.at[1] + 16.5],
 ];
 export const inKulliye = (x, z, m = 0) => KULLIYE_RECTS.some((r) => inRect(r, x, z, m));
-export const TERRACE = [-160, -110, 160, 110];
+export const TERRACE = [-160, -110, 160, 156];
+/**
+ * The covered market of the quarter south of the külliye (docs/settlements/ottoman-istanbul.md §11): the old bedesten (a domed
+ * hall of 5 × 3 bays, after the Old Bedesten of the Grand Bazaar, 43.3 × 29.5 m) with a vaulted lane of shops through its west
+ * and east gates and cross lanes, each lane a trade. Lanes: { id, horiz, c (the axis: z when horiz, else x), a, b (the ends along it), trade }.
+ */
+export const CARSI = {
+  y: TOP, w: 4.6, sd: 2.6, ys: 3.7,
+  bedesten: [-81.65, 116.25, -38.35, 145.75],
+  lanes: [
+    { id: 'zenneciler', horiz: true, c: 131, a: -150, b: -81.65, trade: 'cloth' },
+    { id: 'kuyumcular', horiz: true, c: 131, a: -38.35, b: 62, trade: 'brass' },
+    { id: 'sahaflar', horiz: false, c: -60, a: 106, b: 116.25, trade: 'books' },
+    { id: 'takkeciler', horiz: false, c: -60, a: 145.75, b: 154, trade: 'caps' },
+    { id: 'haffaflar', horiz: false, c: -120, a: 110, b: 154, trade: 'shoes' },
+    { id: 'bahariye', horiz: false, c: 15, a: 110, b: 154, trade: 'spice' },
+  ],
+};
+export const inCarsi = (x, z, m = 0) => inRect([-152, 104, 64, 156], x, z, m);
+/** The street fountains (çeşme): [x, z (the centre of the back), the way it faces], backed on the outer court's wall. */
+export const CESMES = [[-75, -80, 'w'], [75, -80, 'e'], [-75, 60, 'w'], [75, 20, 'e'], [-40, 90, 's'], [40, 90, 's']];
 // behind the qibla wall: Hürrem Sultan's tomb (1558) in the burial garden; Süleyman's own (1566) is not yet built
 export const TOMB = { c: [22, 68], r: 4.4 };
 export const CEMETERY = [-62, 54, 64, 86];
@@ -44,7 +64,7 @@ export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >=
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 /** The hill: level on its crown (the terrace), falling to the north toward the Golden Horn and on all sides to the rim. */
 export function height(x, z) {
-  const dx = Math.max(Math.abs(x) - 160, 0), dz = z < 0 ? Math.max(-z - 110, 0) * 1.4 : Math.max(z - 110, 0);
+  const dx = Math.max(Math.abs(x) - 160, 0), dz = z < 0 ? Math.max(-z - 110, 0) * 1.4 : Math.max(z - 156, 0);
   const d = Math.hypot(dx, dz);
   return TOP * smooth(240, 0, d) * (1 - smooth(RADIUS - 40, RADIUS - 5, Math.hypot(x, z)));
 }
