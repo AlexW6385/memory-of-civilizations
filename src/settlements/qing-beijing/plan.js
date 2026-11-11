@@ -111,14 +111,26 @@ for (const [z0, z1] of [[RIVER[3], wz1 - 10], [124, RIVER[1]], [TIERS[0].rect[3]
 E.push({ t: 'gate_doors', at: [wx0, 65], along: 'z', w: 5, h: 6, y: 0.03, swing: 1, off: WT / 2 });
 E.push({ t: 'gate_doors', at: [wx1, 65], along: 'z', w: 5, h: 6, y: 0.03, swing: -1, off: WT / 2 });
 
-// ── the great courtyard: galleries along its sides, the two pavilions facing each other ──
+// ── the great courtyard: galleries along its sides (qing_gallery: yellow lean-to roofs on a red wall, verandah of red
+// columns, §28), the two pavilions facing each other, and the Xiehe (east) and Xihe (west) gates in the galleries ──
+const GZ = -6, GATE_W = 24, GATE_D = 10.6, GATE_Y = 2.62;                    // the gates' centre line z, width, depth, base height
 for (const s of [-1, 1]) {
-  const x = s * 98;
-  E.push({ t: 'ming_gallery', pts: [[x, 104], [x, 66]], y: 0.6, w: 4.5, H: 4.4, side: s, pal: IMPERIAL });
+  const x = s * 101.5, front = [-s, 0];
   E.push({ t: 'qing_hall', rect: s < 0 ? [-108, 46, -88, 64] : [88, 46, 108, 64], y: 1.2, H: 6, double: 4.5, roof: 'xieshan', bays: [5, 3], front: s < 0 ? 'e' : 'w', four: true, plat: 1.2, orn: { figures: 7 } });
-  E.push({ t: 'ming_gallery', pts: [[x, 44], [x, -40]], y: 0.6, w: 4.5, H: 4.4, side: s, pal: IMPERIAL });
-  // the stone aprons before the galleries' platforms, with a step down to the court
-  for (const [za, zb] of [[66, 104], [-40, 44]]) E.push({ t: 'gallery_apron', rect: s < 0 ? [x + 2.25, za, x + 3.75, zb] : [x - 3.75, za, x - 2.25, zb], y: 0.15 });
+  // eleven bays south of the pavilions, eleven each side of the gate
+  for (const [za, zb] of [[104, 66], [44, GZ + GATE_W / 2 + 1.2], [GZ - GATE_W / 2 - 1.2, -56]]) E.push({ t: 'qing_gallery', pts: [[x, za], [x, zb]], front, y: 0.6, H: 4.4, w: 5.2, bays: 11 });
+  // the stone aprons before the galleries' steps
+  for (const [za, zb] of [[66, 104], [GZ + GATE_W / 2 + 1.2, 44], [-56, GZ - GATE_W / 2 - 1.2]]) E.push({ t: 'gallery_apron', rect: s < 0 ? [x + 5.2 + 0.7, za, x + 5.2 + 2.2, zb] : [x - 5.2 - 2.2, za, x - 5.2 - 0.7, zb], y: 0.15 });
+  // the gate: a marble base 2.62 m high with balustrades, stairs and a ramp slab on each side, the hall of five bays, its doors
+  const gx = s * 98, hx = GATE_D / 2 + 1.2;
+  E.push({ t: 'terrace', rect: [gx - hx, GZ - GATE_W / 2 - 1.2, gx + hx, GZ + GATE_W / 2 + 1.2], y0: 0, y1: GATE_Y, open: { w: [[6.0, 20.4]], e: [[6.0, 20.4]] }, carve: 'qing' });
+  for (const dir of ['e', 'w']) {
+    const out = dir === 'e' ? gx - hx : gx + hx;                               // the face the flight rises from
+    const r = dir === 'e' ? [out - 5.2, out] : [out, out + 5.2];
+    for (const [a, b, slab] of [[-2.3, 2.3, true], [-7.0, -2.7, false], [2.7, 7.0, false]]) E.push({ t: 'stairs', rect: [r[0], GZ + a, r[1], GZ + b], y0: 0.03, y1: GATE_Y, dir, slab, rakes: !slab });
+  }
+  E.push({ t: 'qing_side_gate', c: [gx, GZ], face: front, y: GATE_Y, W: GATE_W, D: GATE_D, H: 5.4 });
+  for (const dz of [-GATE_W / 5, 0, GATE_W / 5]) E.push({ t: 'gate_doors', at: [gx - s * GATE_D / 2, GZ + dz], along: 'z', w: GATE_W / 5, h: 4.5, y: GATE_Y, swing: s, nails: 7 });
 }
 
 // ── the terrace in three tiers, its stairs, the bronzes on it ──
