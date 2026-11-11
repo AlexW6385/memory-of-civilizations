@@ -9,6 +9,7 @@ import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { beamTris, flipTris } from '../ming/index.js';
 import { Matrix4 } from '../../core/three.js';
 import '../qing/index.js';
+import { YARD_ELEMENTS } from './yards.js';
 
 const A = 'adobe_taos', V = 'viga';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -51,7 +52,7 @@ function pueblo(el, ctx) {
     const x0 = el.x0 + j * c, z0 = el.z0 + i * c, x1 = x0 + c, z1 = z0 + c, top = n * ST, room = roomAt(i, j);
     if (room) {
       // a ground-storey room opened and furnished (pueblo_room); any storeys over it solid
-      puebloRoom({ rect: [x0, z0, x1, z1], door: room.door, seed: el.seed * 31 + j, out: { n: at(i - 1, j) < 1, s: at(i + 1, j) < 1 } }, ctx);
+      puebloRoom({ rect: [x0, z0, x1, z1], door: room.door, store: room.store, seed: el.seed * 31 + j, out: { n: at(i - 1, j) < 1, s: at(i + 1, j) < 1 } }, ctx);
       if (n > 1) { bag.add(A, box(x0, ST, z0, x1, top, z1)); col.rect([x0, z0, x1, z1], ST, top); col.floor([x0, z0, x1, z1], top); }
     } else { bag.add(A, box(x0, 0, z0, x1, top, z1)); col.rect([x0, z0, x1, z1], 0, top); col.floor([x0, z0, x1, z1], top); }
     // the edges where this roof stands above its neighbour: a parapet; the faces below: vigas, openings
@@ -65,6 +66,8 @@ function pueblo(el, ctx) {
         if (nz && !room) for (let k = 0; k < 5; k++) {
           const f = (k + 0.5) / 5 + (rand() - 0.5) * 0.05, out = 0.25 + rand() * 0.65, r = 0.08 + rand() * 0.04, px = a[0] + (b[0] - a[0]) * f, pz = a[1] + (b[1] - a[1]) * f;
           bag.add(V, rod([px, y, pz - nz * 0.3], [px, y - out * 0.03, pz + nz * out], r, 7));
+          // rain running off the viga ends washes a pale streak down the plaster under them
+          if (rand() < 0.5) { const sx = nx ? 0 : 0.07; void sx; bag.add('kahgel', box(Math.min(px - 0.07, px + 0.07), y - 0.5 - rand() * 0.9, Math.min(pz, pz + nz * 0.014), Math.max(px - 0.07, px + 0.07), y - 0.18, Math.max(pz, pz + nz * 0.014))); }
         }
         // now and then a small window under its lintel pole; on the ground storey, rarely, a low doorway
         const opening = !room && rand() < 0.45, door = opening && s === 1 && rand() < 0.2;
@@ -76,6 +79,14 @@ function pueblo(el, ctx) {
           const ax = a[0] + ux * u0, az = a[1] + uz * u0, bx = a[0] + ux * u1, bz = a[1] + uz * u1;
           bag.add(mat, box(Math.min(ax, bx, ax + nx * off), y0, Math.min(az, bz, az + nz * off), Math.max(ax, bx, ax + nx * off), y1, Math.max(az, bz, az + nz * off)));
         };
+        if (s === 1 && m === 0 && !room && !door && rand() < 0.45) {
+          // fallen plaster and crumbled mud heaped at the foot of the wall where the rain has bitten
+          const ul = rand() * L * 0.6, un = 3 + Math.floor(rand() * 3);
+          for (let q = 0; q < un; q++) {
+            const u = ul + q * 0.55 + rand() * 0.2, px = a[0] + ux * Math.min(u, L - 0.2) + nx * (0.18 + rand() * 0.14), pz = a[1] + uz * Math.min(u, L - 0.2) + nz * (0.18 + rand() * 0.14);
+            const g = lathe([[0.001, -0.02], [0.9, 0], [1, 0.2], [0.6, 0.7], [0.001, 1]], 6); g.scale(0.3 + rand() * 0.15, 0.12 + rand() * 0.1, 0.22 + rand() * 0.1).rotateY(rand() * 6).translate(px, 0, pz); bag.add('banco_rough', g);
+          }
+        }
         if (s === 1 && m === 0 && !room && !door) {
           const k = 3;
           for (let q = 0; q < k; q++) along(q ? q * L / k : -0.05, q < k - 1 ? (q + 1) * L / k : L + 0.05, -0.15, 0.34 + rand() * 0.24, 0.05 - q * 0.004, 'banco_rough');
@@ -340,7 +351,7 @@ function drape(bag, mat, x, h, z, w, d, dirX = true) {
  * basket. The doorway is made a man's height so the room can be walked into [inferred: §4.2].
  */
 function puebloRoom(el, { bag, col, lights }) {
-  const [x0, z0, x1, z1] = el.rect, T = 0.5, rand = rng(el.seed || 3), door = el.door ?? 's';
+  const [x0, z0, x1, z1] = el.rect, T = 0.5, rand = rng(el.seed || 3), door = el.door ?? 's', store = !!el.store;
   const ix0 = x0 + T, iz0 = z0 + T, ix1 = x1 - T, iz1 = z1 - T, cx = (ix0 + ix1) / 2, cz = (iz0 + iz1) / 2, F = 0.06, PL = 0.025, LIN = 'earth_wall';
   const dw = 0.8, dh = 1.95, du = (door === 's' || door === 'n') ? cx + 0.3 : cz - 0.3;     // the doorway, off the middle
   const nicheH = (u, lo) => ({ a: u - 0.22, b: u + 0.22, lo, hi: lo + 0.36, niche: 0.28 });
@@ -399,14 +410,18 @@ function puebloRoom(el, { bag, col, lights }) {
   col.rect([hx - hr - 0.16, hz - hr - 0.16, hx + hr + 0.16, hz + hr + 0.16], ST, ST + 0.22);
   ladder(bag, hx - 0.15, F, hz - 0.62, ST - F, 0, 1, 0.5, 1.8);
   col.segment([hx - 0.45, hz - 0.62], [hx + 0.15, hz - 0.62], 0.12, F, ST);
-  // the fire pit: four slabs on edge round a square of ash, the embers, a small fire
   const fx = hx, fz = hz + 0.15, fr = 0.3;
+  if (!store) {
+  // the fire pit: four slabs on edge round a square of ash, the embers, a small fire
   for (const [a0, b0, a1, b1] of [[fx - fr - 0.05, fz - fr - 0.05, fx + fr + 0.05, fz - fr], [fx - fr - 0.05, fz + fr, fx + fr + 0.05, fz + fr + 0.05], [fx - fr - 0.05, fz - fr, fx - fr, fz + fr], [fx + fr, fz - fr, fx + fr + 0.05, fz + fr]]) bag.add('flagstone', box(a0, F - 0.15, b0, a1, F + 0.08, b1));
   bag.add('opening', box(fx - fr, F - 0.06, fz - fr, fx + fr, F + 0.005, fz + fr));
   for (let k = 0; k < 4; k++) { const a = k * 1.7 + 0.4; bag.add('bark_dark', rod([fx + Math.cos(a) * 0.26, F + 0.02, fz + Math.sin(a) * 0.26], [fx + Math.cos(a) * 0.03, F + 0.07, fz + Math.sin(a) * 0.03], 0.03, 5)); }
   bag.add('flame', lathe([[0.1, 0], [0.08, 0.08], [0.04, 0.2], [0.001, 0.3]], 8, (th) => 1 + 0.25 * Math.sin(th * 3), fx, F + 0.04, fz));
   col.rect([fx - fr - 0.05, fz - fr - 0.05, fx + fr + 0.05, fz + fr + 0.05], F, F + 0.1);
   if (lights) lights.push({ at: [fx, F + 0.5, fz], color: '#ff9a4a', intensity: 3, distance: 6 });
+  }
+  if (store) storeFurniture(bag, col, ST, { ix0, iz0, ix1, iz1, cx, cz, hx, hz, hr, F, PL, vx, rand, door });
+  else {
   // the mealing bins against the back wall, the grinder's side toward the room
   const back = door === 's' ? 'n' : door === 'n' ? 's' : door === 'e' ? 'w' : 'e', byaw = { n: 0, s: Math.PI, w: -Math.PI / 2, e: Math.PI / 2 }[back];
   const bc = back === 'n' ? [cx - 0.1, iz0 + PL + 0.48] : back === 's' ? [cx + 0.1, iz1 - PL - 0.48] : back === 'w' ? [ix0 + PL + 0.48, cz] : [ix1 - PL - 0.48, cz];
@@ -427,13 +442,53 @@ function puebloRoom(el, { bag, col, lights }) {
   drape(bag, 'hide_grey', px, py, pz0 + 0.55, 0.42, 0.95, false);           // a blanket of turkey feathers
   drape(bag, 'hide_white', px, py, pz0 + 1.45, 0.38, 0.8, false);           // a blanket of rabbit fur
   drape(bag, 'hide_tan', px, py, pz1 - 0.25, 0.2, 0.6, false);              // a deerskin
+  }
+  if (!store) {
   // bedding rolled along the south-west wall; a basket; the water jar with its gourd dipper; the cooking pot by the fire
   for (const [z, mat, r] of [[iz1 - PL - 0.2, 'hide_white', 0.13], [iz1 - PL - 0.47, 'hide_tan', 0.12]]) bag.add(mat, rod([ix0 + PL + 0.1, F + r, z], [ix0 + PL + 1.25, F + r, z], r, 9));
+  }
   jar(bag, 'olla', ix1 - PL - 0.35, F, iz1 - PL - 0.4, 1.2);
   bag.add('wicker', lathe([[0.001, 0], [0.06, 0.005], [0.075, 0.04], [0.07, 0.045], [0.05, 0.012], [0.001, 0.01]], 10, null, ix1 - PL - 0.35, F + 0.565, iz1 - PL - 0.4));
-  jar(bag, 'cook', fx - fr - 0.3, F, fz + 0.2, 1, 'pottery_dark');
-  jar(bag, 'bowl', fx + fr + 0.25, F, fz + 0.35, 1);
-  bag.add('wicker', lathe([[0.001, 0], [0.12, 0.005], [0.2, 0.09], [0.24, 0.2], [0.21, 0.2], [0.18, 0.1], [0.001, 0.07]], 14, null, ix0 + PL + 0.4, F, iz0 + PL + 0.4));
+  if (!store) { jar(bag, 'cook', fx - fr - 0.3, F, fz + 0.2, 1, 'pottery_dark'); jar(bag, 'bowl', fx + fr + 0.25, F, fz + 0.35, 1); }
+  if (store && lights) lights.push({ at: [hx, ST - 0.7, hz], color: '#ffe6bd', intensity: 1.6, distance: 6 });
+  if (!store) bag.add('wicker', lathe([[0.001, 0], [0.12, 0.005], [0.2, 0.09], [0.24, 0.2], [0.21, 0.2], [0.18, 0.1], [0.001, 0.07]], 14, null, ix0 + PL + 0.4, F, iz0 + PL + 0.4));
+}
+
+/**
+ * storeFurniture: what a pueblo storeroom holds [stated: rooms served "weaving, grinding corn, and
+ * storage" — NPS Bandelier; "carved and plastered niches, probably for storing pots" — same; maize,
+ * beans and squash the crops of the valley — dossier §7; inferred: the arrangement]. Along the west
+ * wall three low adobe bins heaped with shelled corn, beans and dried squash rings; big storage jars
+ * along the east wall; strings of maize ears hanging from the vigas; folded hides and baskets.
+ */
+function storeFurniture(bag, col, ST, { ix0, iz0, ix1, iz1, F, PL, vx, rand }) {
+  const bx0 = ix0 + PL + 0.02, bx1 = bx0 + 0.85, T = 0.09, H = 0.62;
+  const heaps = [['cloth_ochre', 0.3], ['pottery_dark', 0.26], ['paint_ochre', 0.28]];
+  for (let k = 0; k < 3; k++) {
+    const z0 = iz0 + 0.3 + k * 1.0, z1 = z0 + 0.85;
+    for (const [a, b, c, d] of [[bx0, z0, bx1, z0 + T], [bx0, z1 - T, bx1, z1], [bx0, z0 + T, bx0 + T, z1 - T], [bx1 - T, z0 + T, bx1, z1 - T]]) bag.add(A, box(a, F, b, c, H, d));
+    const [mat, hh] = heaps[k], mx = (bx0 + bx1) / 2, mz = (z0 + z1) / 2;
+    bag.add(mat, lathe([[0.001, H - 0.12], [0.34, H - 0.12], [0.3, H - 0.02], [0.18, H + hh * 0.35], [0.001, H + hh * 0.5]], 12, (t) => 1 + 0.05 * Math.sin(t * 5 + k), mx, 0, mz));
+    if (k === 0) for (let e = 0; e < 5; e++) { const a = e * 1.3; bag.add('paint_ochre', rod([mx + Math.cos(a) * 0.12 - 0.06, H + 0.16, mz + Math.sin(a) * 0.1], [mx + Math.cos(a) * 0.12 + 0.07, H + 0.2, mz + Math.sin(a) * 0.1 + 0.03], 0.03, 5)); }
+    col.rect([bx0, z0, bx1, z1], F, H);
+  }
+  // large storage jars along the east wall, their mouths stopped with a flat stone
+  for (let k = 0; k < 3; k++) {
+    const jx = ix1 - PL - 0.4, jz = iz0 + 0.5 + k * 0.85, sc = 1.5 + 0.25 * (k % 2);
+    bag.add(rand() < 0.5 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.1, 0.02], [0.2, 0.12], [0.23, 0.24], [0.19, 0.36], [0.12, 0.42], [0.125, 0.47], [0.11, 0.47], [0.1, 0.43], [0.001, 0.42]].map(([r, h]) => [r * sc, h * sc]), 14, null, jx, F, jz));
+    bag.add('flagstone', lathe([[0.001, 0.47 * sc], [0.15 * sc, 0.47 * sc], [0.15 * sc, 0.49 * sc], [0.001, 0.49 * sc]], 10, null, jx, F, jz));
+    col.circle(jx, jz, 0.34 * sc, F, 0.7);
+  }
+  // strings of maize hung from two vigas
+  for (const x of [vx[0], vx[3]]) for (let k = 0; k < 3; k++) {
+    const z = iz0 + 0.8 + k * 1.1 + (rand() - 0.5) * 0.2, top = ST - 0.5, len = 0.7 + rand() * 0.3;
+    bag.add('linen', rod([x, top + 0.05, z], [x, top - len, z], 0.012, 4));
+    for (let e = 0; e * 0.16 < len - 0.1; e++) { const a = e * 2.1; bag.add(e % 4 === 2 ? 'paint_ochre' : 'cloth_ochre', lathe([[0.001, 0], [0.035, 0.04], [0.045, 0.11], [0.03, 0.17], [0.001, 0.19]], 6, null, x + Math.cos(a) * 0.06, top - 0.15 - e * 0.16 - 0.19, z + Math.sin(a) * 0.06)); }
+  }
+  // folded hides and baskets in the south-west corner, a stack of cotton bags of meal
+  for (let k = 0; k < 4; k++) bag.add(k % 2 ? 'hide_tan' : 'hide_brown', box(ix0 + PL + 1.0, F + k * 0.07, iz1 - PL - 0.8, ix0 + PL + 1.75, F + k * 0.07 + 0.065, iz1 - PL - 0.2));
+  col.rect([ix0 + PL + 1.0, iz1 - PL - 0.8, ix0 + PL + 1.75, iz1 - PL - 0.2], F, 0.3);
+  for (let k = 0; k < 3; k++) bag.add('cloth_white', lathe([[0.001, 0], [0.2, 0.03], [0.24, 0.14], [0.17, 0.26], [0.06, 0.3], [0.001, 0.29]], 9, (t) => 1 + 0.06 * Math.sin(t * 3 + k), ix0 + PL + 2.5 + k * 0.5, F, iz1 - PL - 0.35));
 }
 
 /**
@@ -475,6 +530,6 @@ function turkey(el, { bag }) {
 
 registerStyle('pueblo', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, pueblo_block: pueblo, kiva, rack, adobe_wall: adobeWall, log_bridge: logBridge, mealing_bin: mealingBin, pueblo_room: puebloRoom, turkey },
+  elements: { ...STYLES.qing.elements, pueblo_block: pueblo, kiva, rack, adobe_wall: adobeWall, log_bridge: logBridge, mealing_bin: mealingBin, pueblo_room: puebloRoom, turkey, ...YARD_ELEMENTS },
   objects: {},
 });

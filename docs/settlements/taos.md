@@ -50,6 +50,22 @@ Sun-dried adobe bricks, walls several feet thick, roofs of packed earth on vigas
 - **Animals:** nine dogs; three flocks of five turkeys (`turkey`, style `pueblo`: a fanned tom and hens) [stated: turkeys kept by Ancestral Puebloans — Archaeology; inferred: dogs, the flocks loose on the plaza].
 - **Still not built, on purpose:** hornos (after 1540, §4.1); chile; doors and windows of the Spanish kind.
 
+### 4.3 Fourth pass: the working yards, the storeroom, the creek, the wear of the walls
+
+- **Era kept at c. 1500, so what came after is left out.** *Hornos*: "Sixteenth-century Spanish explorers brought *hornos*"; before contact "there is no archaeological evidence of ovens", and "the enclosures that resembled ovens — pit ovens — were steaming chambers" [stated: Native American Foods, "Oven Baking" (ckbk)]. Adobe *bricks*, the mission church, latillas, the corner fireplace and chile are likewise later [stated: "Pueblo builders first used puddled adobe until they learned to build with adobe bricks", bricks being a Spanish introduction — Terrain.org; NPS "Hornos"; Wikipedia "Taos Pueblo"]. They are not built.
+- **Cook yard** (`cook_yard`, two on the plaza, `YARDS.cook`): in place of the horno a steaming pit — a ring of river stones round wet husks under a heap of earth, steam rising — and a hot-stone griddle (a smooth slab on two stone cheeks over a fire) with thin cornmeal sheets stacked beside it, a bowl of batter, a meal basket and split wood; a woman kneels at each [stated: steaming pits, above; inferred: the griddle for thin cornmeal bread, as the Pueblos' piki, and the arrangement].
+- **Mud yard** (`mud_yard`, two by the creek): the adobe of c. 1500 was puddled in courses, so a pit of wet mud with a bank of trodden earth, a heap of dry grass for temper, loaves of puddled mud stacked ready, a length of wall raised in courses with the newest paler, digging sticks, baskets of mud, a water jar, a hide to smooth with [stated: puddled adobe — Terrain.org; walls re-mudded by hand each year — ICT News; inferred: tools and layout].
+- **Woodpiles and vigas** (`woodpile`, `viga_stack`): split piñon and juniper stacked at the feet of free house faces, held by stakes; new peeled vigas on sleepers on the plaza's edge [stated: vigas hauled from the mountains — ICT News, taos.org; inferred: placing and sizes].
+- **Storeroom** (`STORE` in layout.js, `store` in `pueblo_room`): a second walkable ground-storey room beside the first, with no fire: three low adobe bins of shelled maize, beans and dried squash, tall storage jars with stone lids, strings of maize hung from the vigas, folded hides, cotton bags of meal [stated: rooms served "weaving, grinding corn, and storage" — NPS Bandelier; inferred: arrangement].
+- **Red Willow Creek** (`creek_stones`): two fords of flat-topped stepping stones standing out of the water, and cobbles strewn along both banks at the bank's true height [inferred: a snowmelt stream in a shallow bed].
+- **Weathering**: pale streaks of washed plaster under about half the viga ends; fallen plaster and crumbled mud heaped at the foot of some ground-storey faces, beside the existing coarse re-mudded band [inferred: the erosion of earth walls by rain run-off from the roof ends].
+
+### 4.4 Living systems
+
+- **People** (`movers.js`): the plaza's two banks, the bridges and fords, the alleys between the houses and the road out by the south gap; women in the manta, water-bearers, men in deerskin, elders with rabbit-fur blankets, wood-carriers, boys, about 34 by day [inferred: dress as §4.2].
+- **Animals** (`fauna.js`): swallows, ravens high over the terraces, small birds on the plaza and a parapet, an egret on the creek bank, small trout in the creek [inferred].
+- **Smoke** (`smoke.js`): hearth smoke from a fifth of the roofs at the meals, from the furnished room and the kivas, steam from the cook yards [inferred: one fire a household, smoke out by the hatch — §4.1].
+
 ## 5. The town
 
 The pueblo is the town: rooms stacked in winding ranges crossed by alleys, from one to five storeys [stated: SAH Archipedia].
@@ -78,6 +94,8 @@ Drums and voices, rattles, a cedar flute (a drone, a voice and the ney stand in)
 - [Taos Pueblo — ICT News](https://ictnews.org/?p=99156)
 - [Taos Pueblo — New World Encyclopedia](https://www.newworldencyclopedia.org/entry/Taos_Pueblo)
 - [Taos Pueblo — travelpast50](https://travelpast50.com/?p=14611)
+- [Native American Foods, Oven Baking (ckbk)](https://app.ckbk.com/reference/food34962c14s001e006e003e026/oven-baking)
+- [Taos Pueblo — Terrain.org](https://www.terrain.org/articles/2/ham1.htm)
 - [Viga (architecture) — Wikipedia](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Viga_(architecture))
 - [Taos Pueblo — Wikipedia (IPFS snapshot)](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Taos_Pueblo)
 - [Hornos — National Park Service, Petrified Forest](https://www.nps.gov/petr/planyourvisit/hornos.htm)
