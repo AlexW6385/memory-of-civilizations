@@ -10,7 +10,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 52, night: 4, rain: 0.5, reach: 170, spawnMin: 24, far: 46 },
+  walkers: { day: 60, night: 4, rain: 0.5, reach: 170, spawnMin: 24, far: 46 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -64,6 +64,14 @@ export const WALKERS = [
     c1: [CL.white, CL.ochre, CL.brown], c2: [CL.brown], c3: [CL.brown], speed: [0.85, 1.15], stride: 1.3 },
   { id: 'priest', weight: 0.9, market: 0.3, el: { dress: 'tunic', legs: 'bare', feet: 'bare', over: 'cape', hat: 'cap', arms: 'hang', hair: 'long' },
     c1: [CL.white], c2: [CL.red, CL.red, CL.indigo], c3: [CL.green], speed: [0.8, 1.0], stride: 1.3 },
+  { id: 'waterwife', weight: 0.7, market: 0.9, el: { dress: 'wrap', over: 'shawl', carry: 'pails', arms: 'pole', hair: 'bun', hat: 'none', feet: 'bare' }, swing: 0.5,
+    c1: [CL.white, CL.ochre, CL.red], c2: [CL.white], c3: [CL.white], speed: [0.8, 1.0], stride: 1.15, h: [0.9, 0.97] },
+  { id: 'elder', weight: 0.6, market: 0.5, el: { dress: 'tunic', legs: 'bare', feet: 'bare', over: 'cape', carry: 'staff', arms: 'staff', hair: 'long', hat: 'none' },
+    c1: [CL.white, CL.ochre], c2: [CL.white], c3: [CL.brown], speed: [0.6, 0.8], stride: 1.0 },
+  { id: 'mother', weight: 0.6, market: 1.2, el: { dress: 'wrap', over: 'shawl', carry: 'child', hair: 'bun', hat: 'none', feet: 'bare' }, swing: 0.5,
+    c1: [CL.red, CL.indigo, CL.white], c2: [CL.white], c3: [CL.ochre], speed: [0.75, 0.95], stride: 1.1, h: [0.9, 0.97] },
+  { id: 'porter', weight: 0.8, market: 1.4, el: { dress: 'tunic', legs: 'bare', feet: 'bare', over: 'none', carry: 'headload', arms: 'head', hair: 'long', hat: 'none' }, swing: 0.45,
+    c1: [CL.ochre, CL.brown, CL.white], c2: [CL.brown], c3: [CL.brown], speed: [0.8, 1.0], stride: 1.2 },
   { id: 'boy', weight: 0.6, market: 0.8, el: { dress: 'tunic', legs: 'bare', feet: 'bare', over: 'none', arms: 'hang', hair: 'long', hat: 'none' },
     c1: [CL.white, CL.ochre], c2: [CL.brown], c3: [CL.brown], speed: [1.1, 1.5], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
 ];

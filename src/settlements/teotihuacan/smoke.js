@@ -4,6 +4,7 @@
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { RADIUS, compounds, LEVELS } from './layout.js';
+import { brazierSpots } from './dress.js';
 
 const ID = 'teotihuacan';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -19,6 +20,8 @@ export function emitters() {
   // the censers on the arrival plaza's great altar (9 m, 1.6 m high) and the lone altar, the Moon Plaza's altar
   const y = LEVELS[2];
   for (const [x, yy, z, s] of [[-1.5, y + 1.9, 15, 31], [1.5, y + 1.9, 15, 32], [-9, y + 1.6, 42, 33], [0, 3 + 1.2, -209, 34]]) E.push({ p: [x, yy + 0.4, z], kind: 'incense', thr: 0, seed: s });
+  // the braziers along the arrival plaza's sides and about the Moon Plaza's Cross
+  brazierSpots().forEach(([x, y, z], i) => E.push({ p: [x, y + 0.05, z], kind: 'incense', thr: 0, seed: 100 + i }));
   return E;
 }
 

@@ -1,7 +1,7 @@
 // Teotihuacan — what is set about the avenue's plazas and the Moon Plaza (docs/settlements/teotihuacan.md §15):
 // braziers, drain slabs, the worn way, litter, offerings, the plasterers, sweepers, bearers resting, sellers on
 // mats, groups, boys, dogs and turkeys. Pure data from layout.js; built by the style's `tt_avenue`.
-import { AVENUE, CROSS, STEP, LEVELS, MOON, PLAZA } from './layout.js';
+import { AVENUE, CROSS, STEP, LEVELS, MOON, PLAZA, CIUD } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const SR = 3.6;
@@ -51,8 +51,25 @@ export function avenueItems() {
     for (let n = 0; n < 40; n++) { const [x, z] = spot(); out.push({ k: 'litter', x, z, y, seed: 760 + n }); }
     for (let q = 0; q < 6; q++) { const a = q * 1.1; out.push({ k: 'offering', x: -12 + Math.cos(a) * 3.5, z: -212 + Math.sin(a) * 3.5, y, seed: q + 40 }); }
   }
+  // the Ciudadela's court (a plastered floor at 0.03 between the banks): about the Feathered Serpent Pyramid and its Adosada
+  {
+    const r = rng(333), y = 0.06, [x0, z0, x1, z1] = [CIUD[0] + 22, CIUD[1] + 22, CIUD[2] - 22, CIUD[3] - 22];
+    const solid = (x, z, m = 2.5) => (x > 89 - m && x < 119 + m && z > 237 - m && z < 283 + m) || (x > 117.5 - m && x < 182.5 + m && z > 227.5 - m && z < 292.5 + m);
+    const spot = () => { for (let t = 0; t < 60; t++) { const x = x0 + 4 + r() * (x1 - x0 - 8), z = z0 + 4 + r() * (z1 - z0 - 8); if (!solid(x, z)) return [x, z]; } return [x0 + 6, z0 + 6]; };
+    for (let n = 0; n < 16; n++) { const [x, z] = spot(); out.push({ k: 'group', x, z, y, n: 2 + n % 3, seed: 1000 + n * 13 }); }
+    for (let n = 0; n < 8; n++) { const [x, z] = spot(); out.push({ k: 'sweeper', x, z, y, rot: r() * 6.28, seed: 1100 + n }); }
+    for (let n = 0; n < 6; n++) { const [x, z] = spot(); out.push({ k: 'rest', x, z, y, rot: r() * 6.28, seed: 1150 + n }); }
+    for (let n = 0; n < 4; n++) { const [x, z] = spot(); out.push({ k: 'boys', x, z, y, seed: 1200 + n * 3 }); }
+    for (let n = 0; n < 4; n++) { const [x, z] = spot(); out.push({ k: 'dog', x, z, y, rot: r() * 6.28, seed: 1250 + n }); }
+    for (let n = 0; n < 60; n++) { const [x, z] = spot(); out.push({ k: 'litter', x, z, y, seed: 1300 + n }); }
+    const bz = [215, 238, 260, 282, 305];
+    for (const z of bz) for (const x of [66, 172 + 10]) if (!solid(x, z, 0)) out.push({ k: 'brazier', x, z, y });
+    for (const x of [100, 130, 160]) for (const z of [208, 312]) out.push({ k: 'brazier', x, z, y });
+    for (let q = 0; q < 10; q++) { const a = q * 0.9; out.push({ k: 'offering', x: 78 + Math.cos(a) * 2.5, z: 260 + Math.sin(a) * 4, y, seed: q + 60 }); }
+    out.push({ k: 'crew', x: 70, z: 215, y, seed: 1400 });
+  }
   CACHE = out;
   return out;
 }
 /** The braziers whose incense the smoke system rises from: those of the arrival plaza and the Moon Plaza, [x, y, z]. */
-export function brazierSpots() { return avenueItems().filter((o) => o.k === 'brazier' && (o.y < 0.5 && o.y > -0.1 && o.z > -4 && o.z < 120 || o.y > 2.5)).map((o) => [o.x, o.y + 0.7, o.z]); }
+export function brazierSpots() { return avenueItems().filter((o) => o.k === 'brazier' && ((o.y < 0.5 && o.y > -0.1 && o.z > -4 && o.z < 120 && Math.abs(o.x) < 20) || o.y > 2.5 || (o.x > 50 && o.z > 190))).map((o) => [o.x, o.y + 0.7, o.z]); }

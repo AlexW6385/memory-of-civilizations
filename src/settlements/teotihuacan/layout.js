@@ -38,6 +38,7 @@ export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >=
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let LOTS = null;
+let EMPTY = [];
 /** Apartment compounds of 46–58 m on a grid of 64 m, clear of the avenue and the monuments. */
 export function compounds() {
   if (LOTS) return LOTS;
@@ -47,7 +48,7 @@ export function compounds() {
     const w = 46 + rand() * 12, d = 46 + rand() * 12, r = [x + 3, z + 3, x + 3 + w, z + 3 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
     if (Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) > RADIUS - 26) continue;
     if (Math.abs(cx) < 34 + w / 2 || [...KEEP_CLEAR, PALACE_CLEAR].some((k) => inRect(k, cx, cz, w / 2 + 4))) continue;
-    if (rand() < 0.1) continue;
+    if (rand() < 0.1) { EMPTY.push(r); continue; }
     if (inRect(MARKET, cx, cz, w / 2 + 6)) continue;
     const seed = Math.floor(rand() * 1e6), h = (seed * 2654435761 >>> 0) / 4294967296;
     // the compounds with a painted room (Tepantitla's) and those of the obsidian workers (nearer the Ciudadela and the Moon)
@@ -64,3 +65,5 @@ export function inStreet(x, z) {
   const u = (((x + RADIUS) % 64) + 64) % 64, v = (((z + RADIUS) % 64) + 64) % 64;
   return u < 3 || u > 58.5 || v < 3 || v > 58.5;
 }
+/** The lots left without a compound (kept as plots of maguey and nopal). */
+export function emptyLots() { compounds(); return EMPTY; }
