@@ -41,3 +41,8 @@ export function bancsFanals() {
 }
 /** The house with the café, the shop and the flat (docs/settlements/barcelona.md §6): 16 m of the Passeig's west side, in the gap of the block north-west of Casa Milà's. */
 export const CASA = { block: [-184, -92], side: 1, s0: 14, s1: 30, fx: -149, z0: -101, w: 16, d: 18, h: 21.1 };
+/** The blocks whose ground floors are shops you can walk into (the arrival's streets, the Passeig's house, the market's) — the rest keep closed fronts. */
+export const ARRIVAL = [239.5, -101];
+export function shopCore(c) {
+  return Math.hypot(c[0] - ARRIVAL[0], c[1] - ARRIVAL[1]) < 178 || Math.hypot(c[0] + 149, c[1] + 101) < 118 || Math.hypot(c[0] - MERCAT[0], c[1] - MERCAT[1]) < 112;
+}

@@ -3,7 +3,8 @@
 // the Passeig for it (both built with the landmark). The street life of 1910 (§5a): the trams on the
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
-import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, blocks, height, onDiagonal, bancsFanals } from './layout.js';
+import { blockShops } from '../../styles/modernisme/index.js';
+import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, SAGRADA, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements) => ({ id, style: 'modernisme', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 46], facing: 'n' } });
@@ -37,6 +38,7 @@ function trams(lines, rand) {
     const d = [pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]], l = Math.hypot(...d), o = [-d[1] / l, d[0] / l];
     const px = x + o[0] * side * 1.55, pz = z + o[1] * side * 1.55, dir = side > 0 ? d : [-d[0], -d[1]];
     if (Math.hypot(px, pz) > RADIUS - 40) return;
+    if (Math.abs(px - PITCH * 2.5) < 4 && Math.abs(pz + 90) < 11) return;                       // (none standing across the walk from the Marina to the façade)
     out.push({ t: 'tram', at: [px, pz], y: Y(px, pz) + 0.03, rot: Math.atan2(-dir[0], -dir[1]), kind, wire: 5.87, seed: Math.floor(rand() * 1e9) });
   };
   const len = (pts) => { let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); return L; };
@@ -111,10 +113,78 @@ function mercatLife() {
   L.push({ t: 'cart', kind: 'two', load: 'sacks', beast: 'horse', at: [cx + 33, cz + 4], y, rot: 0, seed: 1888 });
   return L;
 }
+/** The people of the shops (§9): the shopkeeper behind the counter in the dress of the trade, a customer in some, a few keepers on their doorsteps. */
+function shopLife(els) {
+  const out = [];
+  els.forEach((el, bi) => {
+    const rand = rng(7000 + bi * 13), L = [], pick = (a) => a[Math.floor(rand() * a.length)];
+    for (const sh of blockShops(el)) {
+      const white = sh.trade === 'farmacia' || sh.trade === 'perruqueria' || sh.trade === 'forn';
+      const rot = (f) => Math.atan2(-f[0], -f[1]);
+      const o = { skin: 'skin_light', pose: 'stand', seed: 0 };
+      for (const q of sh.people) {
+        if (q.role === 'customer' && rand() > 0.38) continue;
+        const keeper = q.role === 'keeper', lady = !keeper && rand() < 0.55;
+        if (keeper && rand() < 0.07) continue;
+        L.push({ t: 'figure', at: q.at, y: sh.y + 0.12, rot: rot(q.face), ...o, seed: Math.floor(rand() * 1e9), hair: lady ? 'bun' : 'short',
+          ...(lady ? { dress: 'robe', cloth: pick(['cloth_maroon', 'cloth_indigo', 'cloth_grey', 'cloth_green']), cloth2: 'cloth_white', over: 'shawl', hat: 'none' }
+            : keeper ? { dress: 'trousers', cloth: white ? 'cloth_white' : pick(['cloth_brown', 'cloth_grey', 'cloth_black']), cloth2: 'cloth_black', over: white ? 'none' : 'apron', hat: sh.trade === 'forn' ? 'cap' : 'none', hatMat: 'cloth_white', beard: rand() < 0.4 ? 0.8 : 0 }
+              : { dress: 'trousers', cloth: pick(['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo']), cloth2: 'cloth_black', hat: pick(['brim', 'cap']), hatMat: pick(['cloth_black', 'cloth_grey']), beard: rand() < 0.4 ? 0.8 : 0 }) });
+      }
+      if (rand() < 0.22) { const d = sh.door, nx = sh.n[0], nz = sh.n[1]; L.push({ t: 'figure', at: [d[0] + nx * 1.1 + nz * 0.9, d[1] + nz * 1.1 - nx * 0.9], y: sh.y + 0.04, rot: rot([nx, nz]), ...o, seed: Math.floor(rand() * 1e9), hair: 'short', dress: 'trousers', cloth: white ? 'cloth_white' : 'cloth_brown', cloth2: 'cloth_black', over: white ? 'none' : 'apron', hat: 'none', beard: 0.8, pose: rand() < 0.5 ? 'talk' : 'stand' }); }
+    }
+    if (L.length) out.push(L);
+  });
+  return out;
+}
+/** Street sellers on the pavements of the arrival's streets and the Passeig's house (not on the tram streets, where the poles stand): a fruiterer's stall under an awning, flower and bread sellers on mats, with their buyers. */
+function vendors(els) {
+  const L = [], rand = rng(1911), pick = (a) => a[Math.floor(rand() * a.length)];
+  const half = BLOCK / 2 + 2.6, tramX = [GRACIA_X, PITCH * 2.5], tramZ = [PITCH / 2];
+  els.forEach((el) => {
+    if (!el.shops) return;
+    const [cx, cz] = el.c, sides = [];
+    for (const sg of [-1, 1]) {
+      if (!tramX.some((t) => Math.abs(cx + sg * (BLOCK / 2 + 11) - t) < 1)) sides.push({ f: [sg, 0], p: [cx + sg * half, cz] });
+      if (!tramZ.some((t) => Math.abs(cz + sg * (BLOCK / 2 + 11) - t) < 1)) sides.push({ f: [0, sg], p: [cx, cz + sg * half] });
+    }
+    for (let n = 0; n < 2; n++) {
+      if (!sides.length || rand() < 0.2) continue;
+      const sd = sides.splice(Math.floor(rand() * sides.length), 1)[0], al = (rand() - 0.5) * 36;
+      const x = sd.p[0] + (sd.f[0] ? 0 : al), z = sd.p[1] + (sd.f[1] ? 0 : al), y = height(x, z) + 0.05, fx = sd.f[0] * 0 + 0;
+      // the stall's front is toward the house wall (the buyers on the pavement's inner side), its seller by the kerb
+      const wx = -sd.f[0], wz = -sd.f[1], rot = Math.atan2(wx, wz), ax = x + sd.f[0] * 0.2, az = z + sd.f[1] * 0.2;
+      void fx;
+      if (Math.hypot(x, z) > RADIUS - 60 || onDiagonal(x, z, 8)) continue;
+      const kind = rand();
+      const cust = () => L.push({ t: 'figure', at: [ax + wx * 1.9 + (rand() - 0.5) * 0.8 * Math.abs(wz), az + wz * 1.9 + (rand() - 0.5) * 0.8 * Math.abs(wx)], y, rot, seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: 'stand', hair: 'bun', dress: 'robe', cloth: pick(['cloth_maroon', 'cloth_indigo', 'cloth_grey']), cloth2: 'cloth_white', over: 'shawl', hat: 'none', carry: 'basket' });
+      if (kind < 0.5) {
+        L.push({ t: 'stall', at: [ax, az], y, rot, w: 2.4, d: 1.1, goods: pick([['melons', 'greens'], ['greens', 'heap'], ['bread', 'baskets'], ['fish', 'heap']]), awning: pick(['cloth_red', 'cloth_green', 'cloth_ochre', 'cloth_white']), seed: Math.floor(rand() * 1e6) });
+        L.push({ t: 'figure', at: [ax - wx * 1.2, az - wz * 1.2], y, rot: rot + Math.PI, seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: 'stand', hair: 'short', dress: 'trousers', cloth: pick(['cloth_brown', 'cloth_grey']), cloth2: 'cloth_black', over: 'apron', hat: 'cap', hatMat: 'cloth_brown', beard: 0.8 });
+      } else {
+        L.push({ t: 'goods_mat', at: [ax, az], y, rot, goods: kind < 0.75 ? ['baskets', 'greens'] : ['bread', 'baskets'], seed: Math.floor(rand() * 1e9) });
+        L.push({ t: 'figure', at: [ax - wx * 0.95, az - wz * 0.95], y, rot: rot + Math.PI, seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: 'sit_ground', hair: 'bun', dress: 'robe', cloth: pick(['cloth_maroon', 'cloth_green', 'cloth_grey']), cloth2: 'cloth_white', over: 'shawl', hat: 'none' });
+      }
+      if (rand() < 0.7) cust();
+    }
+  });
+  return L;
+}
+/** The people of the works (§10): the modellers at Gaudí's bench and the drawing table, a teacher at the board of each classroom of the Schools. */
+function worksLife() {
+  const L = [], r = rng(1909), [cx, cz] = SAGRADA, wy = height(cx - 30, cz + 3) + 0.06, sy = height(cx - 12, cz + 25) + 0.08;
+  const fig = (at, y, face, o) => L.push({ t: 'figure', at, y, rot: Math.atan2(-face[0], -face[1]), seed: Math.floor(r() * 1e9), skin: 'skin_light', pose: 'stand', hair: 'short', ...o });
+  const man = (o = {}) => ({ dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', over: 'apron', hat: 'cap', hatMat: 'cloth_grey', beard: r() < 0.5 ? 0.8 : 0, ...o });
+  const xw = cx - 33 + 0.28 + 1.45;
+  fig([xw, cz - 2], wy, [-1, 0], man({ cloth: 'cloth_white', pose: 'talk' })); fig([xw, cz + 6.2], wy, [-1, 0], man()); fig([xw, cz - 5.8], wy, [-1, 0], man({ cloth: 'cloth_brown' }));
+  fig([cx - 27 - 0.28 - 1.6, cz + 11], wy, [1, 0], man({ cloth: 'cloth_white', hat: 'none', beard: 0.8 }));
+  for (let k = 0; k < 3; k++) fig([cx - 12 - 10 + 0.32 + k * (20 / 3) + (k ? 0.1 : 0) + 0.45, cz + 25 + 2.4], sy + 0.12, [-1, 0], { dress: 'robe', cloth: ['cloth_black', 'cloth_grey', 'cloth_indigo'][k], cloth2: 'cloth_white', hair: 'bun', hat: 'none', over: 'shawl' });
+  return L;
+}
 /** The Eixample's block elements (the smoke finds the chimneys from the same plan). */
 export function blockElements() {
   return blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
-    t: 'eixample_block', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
+    t: 'eixample_block', shops: shopCore(b.c), pave: Math.abs(b.c[0] - GRACIA_X) < 60 ? 'tile_grey' : 'flagstone', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
     ...(b.special === 'pedrera' ? { cut: { corner: 3, a: 22, b: 22 } } : {}),
     ...(Math.hypot(b.c[0] - CASA.block[0], b.c[1] - CASA.block[1]) < 1 ? { gaps: [{ side: CASA.side, s0: CASA.s0, s1: CASA.s1 }] } : {}),
     ...(b.special === 'batllo' ? { gaps: [{ side: 1, s0: BATLLO.s0, s1: BATLLO.s1 }] } : {}),
@@ -128,7 +198,13 @@ export async function town() {
   const rand = rng(1910), lines = tramLines();
   plans.push(base('barcelona-casa', [{ t: 'casa_cafe', fx: CASA.fx, z0: CASA.z0, y: height(CASA.fx - 9, CASA.z0 + 8), h: CASA.h, seed: 1910 }]));
   plans.push({ ...base('barcelona-casa-life', casaLife()), style: 'life' });
-  plans.push(base('barcelona-trams', [...lines, ...trams(lines, rand)]));
+  // the shops' people, a plan to a few blocks
+  shopLife(els).forEach((L, i) => plans.push({ ...base(`barcelona-shop-life-${i}`, L), style: 'life' }));
+  plans.push({ ...base('barcelona-works-life', worksLife()), style: 'life' });
+  plans.push({ ...base('barcelona-vendors', vendors(els)), style: 'life' });
+  plans.push(base('barcelona-trams', [...lines.map((l) => ({ ...l, wires: false })), ...trams(lines, rand)]));
+  // the wires apart, colliding with nothing
+  plans.push({ ...base('barcelona-wires', lines.map((l) => ({ ...l, wires: 'only' }))), nocollide: true });
   plans.push(base('barcelona-carriages', carriages(rand)));
   // the Mercat de la Concepció on its block, and its life: the stalls in rows down the naves, the sellers and the
   // buyers, the flower sellers outside (§5d)
