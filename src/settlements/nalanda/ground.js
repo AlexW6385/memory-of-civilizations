@@ -18,12 +18,12 @@ const EYE = [-3, 62];
 function inView(x, z) { return Math.hypot(x - EYE[0], z - EYE[1]) < 60 && x > -75 && x < 40 && z > -10; }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inTank(x, z, 1) || nearCore(x, z, 2) || inLot(x, z, 1)) return null;
-  if (inView(x, z)) return { grass: 20 };
-  if (tankD(x, z) < 8) return { reeds: 10, grass: 20 };
+  if (inView(x, z)) return { grass: 9 };
+  if (tankD(x, z) < 8) return { reeds: 8, grass: 10 };
   // the mango groves of the monasteries, pipal by the tanks, tala palms on the bunds
-  if (tankD(x, z) < 24) return { fig: 0.05, neem: 0.05, date_palm: 0.05, grass_dry: 14 };
-  if (x < -70 || x > 124 || z < -130) return { neem: 0.12, fig: 0.03, banyan: 0.012, date_palm: 0.05, grass_dry: 12 };
-  return { neem: 0.03, grass_dry: 20 };
+  if (tankD(x, z) < 24) return { fig: 0.05, neem: 0.05, date_palm: 0.05, grass_dry: 7 };
+  if (x < -70 || x > 124 || z < -130) return { neem: 0.12, fig: 0.03, banyan: 0.012, date_palm: 0.05, grass_dry: 6 };
+  return { neem: 0.03, grass_dry: 9 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,

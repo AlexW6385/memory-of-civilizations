@@ -91,7 +91,7 @@ function monastery(el, ctx) {
   const cx0 = x0 + BLOCK + VER, cz0 = z0 + BLOCK + VER, cx1 = x1 - BLOCK - VER, cz1 = z1 - BLOCK - VER;   // the court's edge
   const W2 = x0 + 7.6, N2 = z0 + 7.6, E2 = x1 - 7.6, S2 = z1 - 7.6;
   // the floor of the whole building and its court, flush with the ground
-  bag.add('brick_paving', frustum([x0, z0, x1, z1], -0.45, 0, 0, 0, 0, 0, { noBottom: true }));
+  bag.add('cotto_floor', frustum([x0, z0, x1, z1], -0.45, 0, 0, 0, 0, 0, { noBottom: true }));
   col.floor(el.rect, 0, el.room);
   const stair = { x0: W2, z0: z0 + BLOCK + 0.15, x1: W2 + 6.7, z1: z0 + BLOCK + 1.85 };
   const sides = [
@@ -247,7 +247,7 @@ function monastery(el, ctx) {
     }
   }
   // the court's paving: a darker way from the gate to the shrine
-  bag.add('brick_paving', frustum([x0 + BLOCK + 2.9, mz - 1.4, sx0 - 0.5, mz + 1.4], 0, 0.02, 0, 0, 0, 0, { noBottom: true }));
+  bag.add('cotto_floor', frustum([x0 + BLOCK + 2.9, mz - 1.4, sx0 - 0.5, mz + 1.4], 0, 0.02, 0, 0, 0, 0, { noBottom: true }));
 }
 const rectOf = (p, q, y0, y1) => [Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1])];
 const rectOf2 = (p, q) => [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])];

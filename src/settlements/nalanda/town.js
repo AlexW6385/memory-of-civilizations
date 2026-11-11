@@ -16,7 +16,7 @@ function votives() {
   const at = [];
   const gates = MONASTERIES.map((m) => mgate(m)[1]);
   for (let z = -128; z <= 128; z += 7) {
-    if (Math.abs(z) < 30) continue;                                           // before Temple 3's stair the way stays open
+    if (Math.abs(z) < 30 || Math.abs(z + 92) < 3.5 || z > 112) continue;                                           // before Temple 3's stair the way stays open
     at.push([WAY.x0 - 2.5, z, 0.85]);
     if (!gates.some((g) => Math.abs(g - z) < 5)) at.push([WAY.x1 + 2.5, z, 0.85]);
   }
@@ -62,7 +62,7 @@ function people() {
   woman([ts + 3.5, 8.5], 0, [-1, 0], { pose: 'sit_ground', carry: 'none' }); lay([ts + 0.5, 7.8], 0, [1, 0.2], { pose: 'talk' });
   monk([ts - 7, -2.5], 0, [-1, 0]); monk([ts - 4, 3], 0, [-1, 0], { pose: 'talk' }); monk([ts - 3, 4.5], 0, [-1, 0], { pose: 'talk' });
   // at the east tank's ghats: women filling pots, a monk washing, a boy
-  for (const [gz, k] of [[0, 0], [-50, 1], [50, 2]]) {
+  for (const [gz, k] of [[-75, 2], [-25, 0], [25, 1], [75, 2]]) {
     const gx = TANKS[0].rect[0] - 3.7;
     woman([gx - 0.6, gz + 1.0], 0, [1, 0], { pose: 'stand' });
     if (k === 0) monk([gx - 1.2, gz - 1.6], 0, [1, 0.2], { pose: 'squat', carry: 'none' });

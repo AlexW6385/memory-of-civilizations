@@ -1,0 +1,25 @@
+{
+  "site": { "id": "nalanda", "name": { "en": "Nalanda", "zh": "那烂陀" }, "era": "c. 640", "region": "india", "lat": 25.14, "lon": 85.44, "radius": 190 },
+  "cls": "S",
+  "arrival": [-2, null, 70, 0.2, 0.28],
+  "arrivalNote": "from the sacred way, the Great Temple's stepped east face of four brick tiers with their rows of stucco Buddhas and its stair, and the long brick row of the monasteries with their corner turrets across the way",
+  "card": {
+    "en": [
+      "Nalanda, in Bihar on the plain of the Ganges, was the great monastic university of Buddhist India, shown about 640 as the Chinese pilgrim Xuanzang saw it during his years of study under the abbot Śīlabhadra. Some 1,500 teachers taught Mahayana and the eighteen schools, logic, grammar, medicine and the Vedas, and monks came from all over Asia. A brick wall enclosed the whole; the architecture is red brick under lime plaster and stucco, in rows: monasteries on one side of a broad way, great stepped temples on the other.",
+      "Monastery 1 — a court of 52 by 46 m ringed by cells on two storeys, each cell with its doorway on a verandah of brick piers, a brick bed, a pot and a lamp; a stair to the upper gallery; in the court the octagonal well, the lecture platform with the teacher's seat and the students' mats before it, and across from the gate the shrine with its seated Buddha. A gate with a porch and turrets at the corners mark the top.",
+      "The Great Temple (Śāriputra's stūpa) — a solid stepped mass of brick in four tiers, about 31 m high, each wall with niches of stucco Buddhas and bodhisattvas, a stair up the east face, votive stūpas at the corners of every terrace, and on the summit four corner towers and the shrine with its Buddha; round it stand hundreds of small votive stūpas.",
+      "The library (Dharmaganja) — three brick towers in a walled yard, the tallest of nine storeys, with rows of slit windows; a ground hall with shelves of palm-leaf manuscripts and the copyists at their desks.",
+      "The row of monasteries and temples along the sacred way, with the tanks round them — long rectangular pools edged in brick, with steps down to the water where the monks bathe each morning and women fill their pots, and the village of the lay people beyond among neem, pipal and palms."
+    ],
+    "zh": [
+      "那烂陀位于恒河平原上的比哈尔邦，是印度佛教最大的寺院大学，画面所示约为640年，即玄奘在戒贤法师门下求学的年代。约一千五百名教师讲授大乘与小乘十八部、因明、声明、医方明与吠陀，僧人来自亚洲各地。砖墙围着全寺；建筑为红砖加石灰抹面与灰塑，成排而立：宽阔的通道一侧是僧院，另一侧是巨大的阶梯形砖塔。",
+      "一号僧院 —— 长52米、宽46米的院落，四周是两层的僧房，每间房门朝向砖墩的回廊，房内有砖床、水罐与灯龛；有楼梯通向上层回廊；院中有八角井、设讲座与学僧坐席的讲台，正对寺门的是供奉坐佛的小殿。寺门带门廊，屋顶四角立着小塔楼。",
+      "大塔（舍利弗塔）—— 实心的四层阶梯形砖塔，高约31米，每层墙面有灰塑佛与菩萨的龛，东面有台阶直通塔顶，每层平台的四角立着小窣堵波，塔顶有四座角塔和供佛的小殿；周围立着数以百计的小还愿塔。",
+      "藏经楼（法宝藏）—— 围墙内的三座砖楼，最高的九层，墙上排着细长的窗；底层大厅里有成排的贝叶经书架和伏案抄写的僧人。",
+      "沿着通道排开的僧院与寺塔，以及环绕它们的水池 —— 长方形的池子以砖砌边，有台阶通向水面，僧人每晨在此沐浴，妇女在此取水；池外是俗人的村落，掩映在楝树、菩提树与枣椰之间。"
+    ]
+  },
+  "soundscape": "T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.5, goat: 0.3, rooster: 0.3, dog: 0.2 }, roof: 'flat', bells: 'puja' })",
+  "lifeRegion": "south_asia",
+  "crop": "rice"
+}
