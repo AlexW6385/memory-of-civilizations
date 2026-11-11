@@ -69,6 +69,19 @@ Sources added: [NRHP nomination, Empire State Building (NPS)](https://npgallery.
 
 Sources added: [Empire State Building, Ground Floor (Historic Districts Council)](https://hdc.org/buildings/empire-state-building-ground-floor/); [The Empire Strikes Back (Traditional Building)](https://www.traditionalbuilding.com/projects/empire-strikes-back); [Architecture & Design (ESB)](https://www.esbnyc.com/about/architecture-design); [Boulevard Diner (Wikipedia)](https://en.wikipedia.org/wiki/Boulevard_Diner); [Living large in small spaces (Tenement Museum)](https://tokyojinjaindoha.com/2011/08/03/living-large-in-small-spaces-fdr-home-relief-and-cream-cheese-boxes-at-the-tenement-museum-of-new-york); [The History of Air Pollution in New York City (Earth.org)](https://earth.org/data_visualization/the-history-of-air-pollution-in-new-york-city/); [Pollution writ in stone (Physics World)](https://physicsworld.com/a/pollution-writ-in-stone/).
 
+### 1h. Rows, cast-iron fronts, stacks, the subway (2026-11-11)
+
+- **Brownstone rows.** Row houses of Manhattan were commonly built on 20-foot-wide lots (about 6 m) in brownstone or brick, three to five storeys over a raised basement entered by a high stoop, the doors paired at the party walls, an iron areaway railing along the pavement and a bracketed cornice [inferred from the common type of the 1850s-80s blocks; the 20-foot lot is the usual Manhattan lot width, stated in general histories, not re-sourced here]. Built (`src/styles/artdeco/blocks.js` `rowhouses`, on the Murray Hill lots under 21 m): houses of ~5.8 m, brownstone or brick, a granite raised basement, a side-run stoop of seven steps (walkable ramp) to a stone-surrounded door with transom, windows with lintels, sills and sashes, stringcourses, a bracketed cornice, areaway pickets, a basement window with grille.
+- **Cast-iron fronts.** Painted cast-iron loft fronts (columns and entablatures per floor, plate glass between, bracketed cornice) were the commercial type of the later 19th century [inferred]. Built (`castIronFront`): on 45% of the older mid-rise lots outside the garment district and Murray Hill, over the shop fronts, bays ~2.2 m, in cream, white, green or pale paint.
+- **Roofs.** Brick chimney stacks on a third of the low buildings (coal heating, §1g) and at each pair of party walls in the rows; roof bulkheads on taller lofts. The smoke emitters (`smoke.js`) stand on the same stacks (`chimneyAt`, `rowStacks`), burning with the heating by hour.
+- **Subway entrances.** The IRT Lexington Avenue line served 33rd and 42nd (Grand Central) Streets and the BMT Broadway line 34th and 42nd [inferred from the lines' opening dates, 1904 and 1917]. Built (`subway_entrance`): four railed stair-heads on Lexington Avenue's pavements at 33rd and 42nd, iron railing with newels, two green-globed lamp standards, a blue enamel sign; the stair itself (below the ground) is not modelled.
+- **Steam.** The steam company's mains ran under Manhattan's streets from 1882, venting at manholes [inferred]; 17 steam emitters in the roadways.
+
+## 10. The moving life and the animals (2026-11-11)
+
+- **Walkers** (`movers.js`): a lattice of pavements along both sides of every avenue and cross street with crossings at the corners, in the grid turned 29°; ~46 by day, 9 at night. Dress of 1931 [inferred]: men in dark suits, overcoats and felt hats; women in coats and cloche-like caps with skirts below the knee; shop girls; workers in caps; porters with sacks; newsboys with bundles; messengers and policemen in blue.
+- **Animals** (`fauna.js`): house sparrows (standing for sparrows and pigeons) on the pavements and in Bryant Park, crows over the park and the Library at dusk [inferred].
+
 ## 2. Layout of the settlement (radius 460 m)
 
 | Part | Where (m, in the grid's frame: +x along the streets, +z down the avenues; turned 29°, §3) | Notes |

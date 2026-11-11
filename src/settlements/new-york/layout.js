@@ -45,6 +45,8 @@ const SPECIAL = [ESB, LIBRARY, BRYANT, GCT, CHRYSLER, CHANIN, LINCOLN];
 /** Inside one of the landmarks' lots, or on Park Avenue's viaduct. */
 export const inSpecial = (x, z, m = 0) => SPECIAL.some((s) => s !== BRYANT && inRect(s, x, z, m)) || (Math.abs(x - VIADUCT.x) < VIADUCT.w / 2 + 0.6 + m && z > GCT[3] - m && z < VIADUCT.z1 + m);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** The lot of the diner (on 34th Street east of Fifth) and the walk-up beside it (rooms.js), docs §1f. */
+export const DINER_AT = [43, 185], WALKUP_AT = [75, 185];
 let LOTS = null;
 /** The buildings: each block cut into lots along its two street fronts; heights by district (lofts west of Fifth, towers near 42nd, brownstones in Murray Hill). */
 export function lots() {
@@ -72,10 +74,21 @@ export function lots() {
         const front = z0 === bz0 ? 'n' : 's';
         if (h < 70) { if (front === 'n') r[3] -= 3.5; else r[1] += 3.5; }
         const shops = front + (r[0] <= bx0 + 0.01 ? 'w' : '') + (x >= bx1 - 6 || x + 0.01 >= bx1 ? 'e' : '');   // the street front, and the side at a corner
-        LOTS.push({ rect: r, y: height(cx, cz), h: Math.round(h), mat: mats[Math.floor(rand() * mats.length)], seed: Math.floor(rand() * 1e6), front, shops });
+        const mat = mats[Math.floor(rand() * mats.length)], seed = Math.floor(rand() * 1e6), r2 = rng(seed ^ 0x51ed27), hh = Math.round(h);
+        // the older blocks (docs/settlements/new-york.md §1h): rows of brownstones in Murray Hill, cast-iron loft fronts among the older mid-rise (their own rng: the town's is unchanged)
+        const row = murray && h < 21 && !inRect(r, DINER_AT[0], DINER_AT[1]) && !inRect(r, WALKUP_AT[0], WALKUP_AT[1]), iron = !row && !garment && h >= 18 && h < 48 && r2() < 0.45;
+        LOTS.push({ rect: r, y: height(cx, cz), h: hh, mat, seed, front, shops, ...(row ? { row: true } : {}), ...(iron ? { iron: true } : {}) });
       }
     }
   }
   return LOTS;
+}
+/** The chimney stack on a building's roof (the grid's frame: [x, z]) or null: a third of the low buildings that are not rows (a row has its own stacks, blocks.js rowStacks). */
+export function chimneyAt(l) {
+  if (l.row || l.h >= 60) return null;
+  const r = rng(l.seed ^ 0x7777);
+  if (r() > 0.38) return null;
+  const [x0, z0, x1, z1] = l.rect;
+  return [x0 + (x1 - x0) * (0.2 + 0.6 * r()), z0 + (z1 - z0) * (0.3 + 0.4 * r())];
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

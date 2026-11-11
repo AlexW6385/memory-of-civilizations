@@ -1,7 +1,7 @@
 // The blocks' buildings (docs/settlements/new-york.md §5) and the street's life (§5a): the traffic of
 // 1931 on the avenues and cross streets — Checker and Yellow cabs among black, cream and blue
 // motor cars — people on the pavements, lamp posts along the avenues.
-import { RADIUS, AVENUES, STREETS, lots, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity } from './layout.js';
+import { RADIUS, AVENUES, STREETS, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity } from './layout.js';
 import { entranceOf } from './plan.js';
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
 // settlement's by the style's `turned`, the life of the streets — single placed things — moved and
@@ -18,7 +18,16 @@ const NEWSSTANDS = (() => {
   }
   return out;
 })();
-const nearStand = (x, z, m) => NEWSSTANDS.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < m);
+/** The subway's stair-heads (§1h): the Lexington Avenue line's stations at 33rd and 42nd Streets, one on each pavement just beyond the crossing. */
+const SUBWAYS = (() => {
+  const out = [], [ax, w] = AVENUES.find((a) => a[2] === 'Lexington');
+  for (const [n, dz] of [[33, -10.5], [42, 10.5]]) for (const sg of [-1, 1]) {
+    const x = ax + sg * (w / 2 + 1.65), z = streetZ(n) + dz;
+    out.push({ t: 'subway_entrance', at: [x, z], y: height(x, z), rot: dz < 0 ? 0 : Math.PI, seed: n * 7 + sg });
+  }
+  return out;
+})();
+const nearStand = (x, z, m) => [...NEWSSTANDS, ...SUBWAYS].some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < m);
 const base = (id, elements) => ({ id, style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t: 'turned', angle: GRID, elements }], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: entranceOf() });
 /** A placed thing of the grid's frame in the settlement's: its place and its turn. */
 const placed = (e) => ({ ...e, at: toCity(...e.at), rot: (e.rot ?? 0) + GRID });
@@ -72,7 +81,7 @@ function streetLife() {
 }
 /** The tenements' rear yards east of Lexington Avenue, washing on the lines from their back windows to a pole (§1d). */
 function yards() {
-  const rand = rng0(1932), out = [...NEWSSTANDS], all = lots();
+  const rand = rng0(1932), out = [...NEWSSTANDS, ...SUBWAYS], all = lots();
   for (const l of all) {
     const [x0, , x1, zb] = l.rect, cx = (x0 + x1) / 2;
     if (l.front !== 'n' || l.h > 35 || cx < 275 || x1 - x0 < 8 || rand() < 0.3) continue;
@@ -88,14 +97,13 @@ function yards() {
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-yards-${k}`, list), center: toCity(i * 150 + 75, j * 150 + 75), near: 300 }; });
 }
 /** The lot of the diner (on 34th Street east of Fifth) and the walk-up (beside it), §1f. */
-const DINER_AT = [43, 185], WALKUP_AT = [75, 185];
 const lotAt = ([x, z]) => lots().find((l) => inRect(l.rect, x, z));
 function special(l) {
   if (l === lotAt(DINER_AT)) return [{ t: 'diner', rect: l.rect, y: l.y }];
   if (l === lotAt(WALKUP_AT)) {
     // the walk-up takes the east 7.6 m of its lot (a 25-foot tenement), the rest a building as before
     const [x0, z0, x1, z1] = l.rect, xs = x1 - 7.6;
-    return [{ t: 'skyscraper', ...l, rect: [x0, z0, xs - 0.3, z1], shops: l.shops.replace('e', '') }, { t: 'walkup', rect: [xs, z0, x1, z1], y: l.y, h: 15.5, seed: l.seed }];
+    return [{ t: 'skyscraper', ...l, rect: [x0, z0, xs - 0.3, z1], shops: l.shops.replace('e', ''), row: false, iron: false }, { t: 'walkup', rect: [xs, z0, x1, z1], y: l.y, h: 15.5, seed: l.seed }];
   }
   return null;
 }
@@ -115,7 +123,7 @@ function dinerLife() {
 }
 export async function buildings() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l }])));
+  for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l) }])));
   const dl = dinerLife(), c = toCity(...DINER_AT);
   return [...plans, ...streetLife(), ...yards(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }
