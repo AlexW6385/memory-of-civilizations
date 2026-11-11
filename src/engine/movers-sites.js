@@ -13,5 +13,6 @@ export const MOVER_SITES = {
   'paris': () => import('../settlements/paris/movers.js'),
   'lhasa': () => import('../settlements/lhasa/movers.js'),
   'khajuraho': () => import('../settlements/khajuraho/movers.js'),
+  'edo-himeji': () => import('../settlements/edo-himeji/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
