@@ -12,6 +12,7 @@ import { ground as djenne } from './djenne/ground.js';
 import { ground as machuPicchu } from './machu-picchu/ground.js';
 import { ground as mughalAgra } from './mughal-agra/ground.js';
 import { ground as isfahan } from './isfahan/ground.js';
+import { ground as timuridSamarkand } from './timurid-samarkand/ground.js';
 import { ground as edoHimeji } from './edo-himeji/ground.js';
 import { ground as songHangzhou } from './song-hangzhou/ground.js';
 import { ground as borobudur } from './borobudur/ground.js';
@@ -71,6 +72,7 @@ export const GROUNDS = {
   'machu-picchu': machuPicchu,
   'mughal-agra': mughalAgra,
   isfahan,
+  'timurid-samarkand': timuridSamarkand,
   'edo-himeji': edoHimeji,
   'song-hangzhou': songHangzhou,
   borobudur,
@@ -134,6 +136,7 @@ const LOADERS = {
   'machu-picchu': () => import('./machu-picchu/index.js'),
   'mughal-agra': () => import('./mughal-agra/index.js'),
   isfahan: () => import('./isfahan/index.js'),
+  'timurid-samarkand': () => import('./timurid-samarkand/index.js'),
   'edo-himeji': () => import('./edo-himeji/index.js'),
   'song-hangzhou': () => import('./song-hangzhou/index.js'),
   borobudur: () => import('./borobudur/index.js'),
