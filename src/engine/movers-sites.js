@@ -18,5 +18,6 @@ export const MOVER_SITES = {
   'constantinople': () => import('../settlements/constantinople/movers.js'),
   'nara': () => import('../settlements/nara/movers.js'),
   'madurai': () => import('../settlements/madurai/movers.js'),
+  'ottoman-istanbul': () => import('../settlements/ottoman-istanbul/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
