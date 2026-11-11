@@ -117,6 +117,16 @@ function wing(el, { bag, col }) {
       const m = Math.floor(L / 0.6);
       for (let i = 0; i < m; i++) bag.add(i % 3 === 0 ? 'egyptian_blue' : i % 3 === 1 ? RED : 'paint_ochre', at(i * L / m, (i + 1) * L / m - 0.04, y + H - 0.85, y + H - 0.35, 0.09));
     }
+    // weathering of the outer faces: the damp and splash darkening the plaster over the gypsum base, plaster fallen from the rubble in patches, rain streaks under the roof's edge
+    { const w2 = rng((el.seed || 3) * 977 + 11);
+      for (const f of el.windows ?? 'nesw') {
+        const alongX = f === 'n' || f === 's', L = alongX ? x1 - x0 : z1 - z0, a0 = alongX ? x0 : z0, fp = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
+        const at = (mat, u0, u1, v0, v1, d0, d1) => { const p0 = fp + sg * d0, p1 = fp + sg * d1; const q = alongX ? [a0 + u0, Math.min(p0, p1), a0 + u1, Math.max(p0, p1)] : [Math.min(p0, p1), a0 + u0, Math.max(p0, p1), a0 + u1]; bag.add(mat, box(q[0], v0, q[1], q[2], v1, q[3])); };
+        const free = (u0, u1) => !holes.some((o) => (alongX ? (f === 'n' ? o.rect[1] <= z0 + 0.01 : o.rect[3] >= z1 - 0.01) && o.rect[0] < a0 + u1 && o.rect[2] > a0 + u0 : (f === 'w' ? o.rect[0] <= x0 + 0.01 : o.rect[2] >= x1 - 0.01) && o.rect[1] < a0 + u1 && o.rect[3] > a0 + u0));
+        for (let u = 0.1; u < L - 0.5; u += 1.8 + w2() * 1.6) { const w = Math.min(L - 0.1 - u, 1.2 + w2() * 2.4); if (free(u, u + w)) at('plaster_damp', u, u + w, y + 1.22, y + 1.5 + w2() * 0.7, 0.0, 0.012); }
+        for (let i = 0, m = Math.floor(L / 6); i < m; i++) { const u = 0.5 + w2() * (L - 1.5), w = 0.3 + w2() * 0.6, v = y + 1.4 + w2() * (H - 3.2); if (free(u, u + w)) at(w2() < 0.7 ? 'rubble' : 'plaster_white', u, u + w, v, v + 0.2 + w2() * 0.5, 0.02, w2() < 0.5 ? 0.036 : 0.05); }
+        for (let u = 1 + w2() * 3; u < L - 0.6; u += 4 + w2() * 5) if (free(u, u + 0.3)) at('plaster_streak', u, u + 0.28, y + H - 2.4 - w2() * 1.2, y + H - 0.9, 0.03, 0.044);
+      } }
     if (el.horns !== false) {
       for (let x = x0 + 2; x < x1 - 1; x += 4) { horns(bag, x, y + H, z0 + 0.4); horns(bag, x, y + H, z1 - 0.4); }
       for (let z = z0 + 2; z < z1 - 1; z += 4) { horns(bag, x0 + 0.4, y + H, z, 1, false); horns(bag, x1 - 0.4, y + H, z, 1, false); }
@@ -429,7 +439,7 @@ function royalRoad(el, { bag, col }) {
     if (Math.abs(by - ay) < 0.02) col.floor(r, ay + 0.12); else col.ramp(r, Math.min(ay, by) + 0.12, Math.max(ay, by) + 0.12, Math.abs(ux) > 0.5 ? ((by > ay) === (ux > 0) ? 'e' : 'w') : ((by > ay) === (uz > 0) ? 's' : 'n'));
   }
 }
-export { column as minoanColumn, fresco as minoanFresco, pithos as minoanPithos };
+export { column as minoanColumn, fresco as minoanFresco, pithos as minoanPithos, horns as minoanHorns };
 registerStyle('minoan', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: { ...STYLES.qing.elements, wing, portico, steps, minoan_house: house, fresco, bastion, throne_room: throneRoom, lightwell_tiers: lightwellTiers, town_house: townHouse, pithos, magazines, royal_road: royalRoad },
