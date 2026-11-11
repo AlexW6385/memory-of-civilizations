@@ -110,7 +110,7 @@ function gymnasium(el, ctx) {
     for (let k = 0; k < 5; k++) bag.add('wood_dark', rod([x - 0.2 + k * 0.12, y + 0.05, z - 0.12 * 0 - 0.2], [x - 0.2 + k * 0.12, y + 2.4, z + 0.05], 0.014, 4)); col.rect(F.R(L - PD - 2.5, PD + 2.3, L - PD - 1.9, PD + 3.5), y, y + 2.0); }
   { const [x, z] = F.P(L - PD - 5.5, vc - 2.5);
     bag.add('timber', rod([x - 0.9, y, z], [x - 0.9, y + 2.7, z], 0.08, 6)); bag.add('timber', rod([x + 0.9, y, z], [x + 0.9, y + 2.7, z], 0.08, 6)); bag.add('timber', rod([x - 0.9, y + 2.65, z], [x + 0.9, y + 2.65, z], 0.07, 6));
-    bag.add('rope', rod([x, y + 2.65, z], [x, y + 1.9, z], 0.012, 4)); bag.add('hide_tan', lathe([[0.001, 0], [0.14, 0.12], [0.16, 0.45], [0.1, 0.8], [0.001, 0.82]], 10, null, x, y + 1.15, z)); col.rect([x - 1, z - 0.15, x + 1, z + 0.15], y, y + 2.7); }
+    bag.add('rope_fibre', rod([x, y + 2.65, z], [x, y + 1.9, z], 0.012, 4)); bag.add('hide_tan', lathe([[0.001, 0], [0.14, 0.12], [0.16, 0.45], [0.1, 0.8], [0.001, 0.82]], 10, null, x, y + 1.15, z)); col.rect([x - 1, z - 0.15, x + 1, z + 0.15], y, y + 2.7); }
   { const [x, z] = F.P(L / 2, (PD + vc) / 2 + 2.0);
     bag.add('limestone', box(x - 0.6, y, z - 0.45, x + 0.6, y + 0.25, z + 0.45)); bag.add('limestone', box(x - 0.45, y + 0.25, z - 0.32, x + 0.45, y + 0.95, z + 0.32)); bag.add('limestone', box(x - 0.55, y + 0.95, z - 0.4, x + 0.55, y + 1.05, z + 0.4)); col.rect([x - 0.6, z - 0.45, x + 0.6, z + 0.45], y, y + 1.05); }
   void B; void figurine;
