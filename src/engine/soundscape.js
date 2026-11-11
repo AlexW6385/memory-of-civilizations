@@ -116,6 +116,7 @@ export const PROFILES = {
   dunhuang: T({ warbler: 0.3, crow: 0.8, dove: 0.4, sparrow: 0.6 }, { animals: { dog: 0.3, donkey: 0.3, camel: 0.2 }, roof: 'flat', bells: 'monastery' }),
   'muromachi-kyoto': T(EAS, { cicadas: 0.5, frogs: 0.5, animals: { dog: 0.2, crow: 0.2 }, roof: 'flat', bells: 'bonsho' }),
   'abu-simbel': T(NEAR, { animals: { donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
+  'qin-xianyang': T(NEAR, { animals: { cattle: 0.5, dog: 0.3, horse: 0.3 }, roof: 'tile' }),
   thebes: T(NEAR, { animals: { donkey: 0.5, dog: 0.3, cattle: 0.3 }, roof: 'flat' }),
   giza: T(NEAR, { animals: { donkey: 0.5, cattle: 0.4, dog: 0.3 }, roof: 'flat' }),
   granada: T(MED, { cicadas: 0.7, animals: { donkey: 0.4, rooster: 0.4, horse: 0.2 }, adhan: 1 }),
