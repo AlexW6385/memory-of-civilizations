@@ -169,28 +169,29 @@ add({ t: 'tang_inscription', a: [-8.6, -7.56], b: [-4.65, -7.56], y: F + 7.2, w:
 // Samantabhadra on the elephant (north) and the lion-rider read as Guanyin (south), each with two attendant
 // bodhisattvas and the groom leading the animal; Kāśyapa and Ānanda beside Śākyamuni, attendant bodhisattvas at the
 // sides of each Buddha and two kneeling offering bodhisattvas on lotuses before them; armoured heavenly kings with
-// swords at the front corners of the end bays
+// swords at the front corners of the end bays; heights after Liang's survey (the Buddhas with their seats 5.3 m, the
+// attendant bodhisattvas 3.7, the kneeling ones with their lotuses 1.95, the kings 4.1)
 const A = F + 0.9, W = [-1, 0];
 block([-3.0, -12.2, 3.8, 12.2], F, A, 'limestone', { walk: false });
 obj('buddha', 0.8, 0, A, { h: 5.2, dir: W, mudra: 'earth' });
 obj('buddha', 0.8, -5.04, A, { h: 5.2, dir: W, pendant: true });
 obj('buddha', 0.8, 5.04, A, { h: 5.2, dir: W, hexSeat: true });
 const st = (type, x, z, h, extra = {}) => obj('statue', x, z, A, { type, h, dir: W, ...extra });
-st('disciple', 0.4, -1.9, 2.6, { robe: 'clay_robe', robe2: 'clay_green' });
-st('disciple', 0.4, 1.9, 2.6, { robe: 'clay_robe', robe2: 'clay_robe' });
+st('disciple', 0.4, -1.9, 3.3, { robe: 'clay_robe', robe2: 'clay_green' });
+st('disciple', 0.4, 1.9, 3.3, { robe: 'clay_robe', robe2: 'clay_robe' });
 for (const z0 of [0, -5.04, 5.04]) {
-  for (const k of [-1, 1]) st('bodhisattva', -0.9, z0 + k * 2.05, 2.8, { robe: 'clay_robe', robe2: 'clay_green' });
-  for (const k of [-1, 1]) st('kneel', -2.2, z0 + k * 0.85, 2.0, { robe: 'clay_green', robe2: 'clay_robe' });
+  for (const k of [-1, 1]) st('bodhisattva', -0.9, z0 + k * 2.05, 3.7, { robe: 'clay_robe', robe2: 'clay_green' });
+  for (const k of [-1, 1]) st('kneel', -2.2, z0 + k * 0.85, 1.95, { robe: 'clay_green', robe2: 'clay_robe' });
 }
 obj('mount', 0.7, -10.08, A, { animal: 'elephant', dir: W, rider: 2.9 });
 obj('mount', 0.7, 10.08, A, { animal: 'lion', dir: W, rider: 2.9 });
 for (const z0 of [-10.08, 10.08]) {
-  for (const k of [-1, 1]) st('bodhisattva', 0.6, z0 + k * 1.75, 2.6, { robe: 'clay_green', robe2: 'clay_robe' });
-  st('groom', -2.1, z0 - Math.sign(z0) * 0.9, 2.1, { robe: 'clay_robe', robe2: 'clay_green', dir: [-0.6, Math.sign(z0) * 0.8] });
+  for (const k of [-1, 1]) st('bodhisattva', 0.6, z0 + k * 1.75, 3.7, { robe: 'clay_green', robe2: 'clay_robe' });
+  st('groom', -2.1, z0 - Math.sign(z0) * 0.9, 2.6, { robe: 'clay_robe', robe2: 'clay_green', dir: [-0.6, Math.sign(z0) * 0.8] });
 }
 // a rear row of attendants behind the three Buddhas' groups
-for (const [z0, k, r] of [[0, -1, 0], [0, 1, 1], [-5.04, -1, 1], [-5.04, 1, 0], [5.04, -1, 0], [5.04, 1, 1]]) st('bodhisattva', 2.55, z0 + k * 3.45, 2.5, { robe: r ? 'clay_robe' : 'clay_green', robe2: r ? 'clay_green' : 'clay_robe' });
-for (const sz of [-1, 1]) st('king', -2.35, sz * 11.6, 3.2, { robe: 'clay_green', robe2: 'clay_robe' });
+for (const [z0, k, r] of [[0, -1, 0], [0, 1, 1], [-5.04, -1, 1], [-5.04, 1, 0], [5.04, -1, 0], [5.04, 1, 1]]) st('bodhisattva', 2.55, z0 + k * 3.45, 3.5, { robe: r ? 'clay_robe' : 'clay_green', robe2: r ? 'clay_green' : 'clay_robe' });
+for (const sz of [-1, 1]) st('king', -2.35, sz * 11.6, 4.1, { robe: 'clay_green', robe2: 'clay_robe' });
 // oil lamps on bronze stands before the three Buddhas, the hall's only light besides the open doors
 for (const z0 of [0, -5.04, 5.04]) for (const k of [-1, 1]) add({ t: 'tang_lamp', at: [-3.55, z0 + k * 1.1], y: F, h: 1.25 });
 

@@ -10,6 +10,7 @@ import { box, lathe, fromTriangles, orientOutward, place } from '../../core/geom
 import { byzantineElements } from '../byzantine/index.js';
 import { villageElements } from './village.js';
 import { hallElements, hallObjects } from './hallwork.js';
+import { statue } from './statues.js';
 
 export function hexa(out, b, t) {
   const tris = [];
@@ -424,7 +425,7 @@ export function petal(th, r0, y0, len, w, lift) {
 export function buddha(el, { bag }) {
   const [x, z] = el.at, H = el.h || 5.2, s = H / 5.2, dir = el.dir || [-1, 0];
   const robe = el.robe || 'clay_robe', gilt = el.gilt || 'clay_gilt', simple = el.simple;
-  const R = [], G = [], tri = [];
+  const R = [], G = [], tri = [], K = [], RD = [], C = [];
   const b = 1.6;
   if (el.hexSeat || el.pendant) {
     // a sumeru seat: plinth, mouldings stepping in to a waist, stepping out again to the seat (six-sided, or square for the pendant pose)
@@ -513,15 +514,16 @@ export function buddha(el, { bag }) {
   G.push(ellipsoid([0, b + 2.4, 0.33], 0.035, 0.1, 0.05, 6, 4), ellipsoid([0, b + 2.53, 0.32], 0.022, 0.022, 0.02, 6, 3));
   for (const k of [-1, 1]) {
     G.push(ellipsoid([k * 0.34, b + 2.36, 0], 0.045, 0.2, 0.09, 8, 5));
-    G.push(ellipsoid([k * 0.12, b + 2.48, 0.29], 0.075, 0.018, 0.03, 8, 3));
+    K.push(ellipsoid([k * 0.12, b + 2.48, 0.29], 0.075, 0.018, 0.03, 8, 3), ellipsoid([k * 0.12, b + 2.42, 0.298], 0.05, 0.014, 0.024, 8, 3));
   }
+  RD.push(ellipsoid([0, b + 2.235, 0.285], 0.07, 0.016, 0.03, 8, 3), ellipsoid([0, b + 2.2, 0.28], 0.055, 0.016, 0.028, 8, 3), ellipsoid([0, b + 2.53, 0.325], 0.02, 0.02, 0.012, 6, 3));
   if (!simple && !el.crown) {
     // the curls: rings of small knots over the crown and the topknot
     for (const [ry, rr, n, cy] of [[2.62, 0.32, 26, 0], [2.7, 0.28, 22, 0], [2.77, 0.21, 16, 0], [2.81, 0.12, 9, 0], [2.86, 0.19, 14, 1], [2.95, 0.14, 10, 1], [3.0, 0.06, 5, 1]]) {
       for (let i = 0; i < n; i++) {
         const a = (i / n) * Math.PI * 2 + ry;
         if (!cy && Math.sin(a) > 0.55 && ry < 2.66) continue;
-        G.push(ellipsoid([Math.cos(a) * rr, b + ry, Math.sin(a) * rr * 0.92 + 0.02], 0.04, 0.035, 0.04, 6, 3));
+        C.push(ellipsoid([Math.cos(a) * rr, b + ry, Math.sin(a) * rr * 0.92 + 0.02], 0.04, 0.035, 0.04, 6, 3));
       }
     }
   }
@@ -529,6 +531,9 @@ export function buddha(el, { bag }) {
   const put = (g) => place(g, x, el.y, z, yaw, s);
   for (const g of R) bag.add(robe, put(g));
   for (const g of G) bag.add(gilt, put(g));
+  for (const g of K) bag.add('lacquer_black', put(g));
+  for (const g of RD) bag.add('lacquer_red', put(g));
+  for (const g of C) bag.add(el.hair || 'paint_blue', put(g));
   if (tri.length) bag.add(el.noThrone ? robe : gilt, put(fromTriangles(tri)));
   if (el.noHalo) return;
   // the mandorla: a pointed leaf with a flame edge, standing behind
@@ -581,108 +586,6 @@ function ribbon(out, pts, r) { for (let i = 0; i < pts.length - 1; i++) out.push
 function lotusBase(G, tri, r, hgt) {
   G.push(lathe([[0.001, 0], [r * 1.05, 0], [r * 1.05, hgt * 0.25], [r * 0.7, hgt * 0.4], [r * 0.7, hgt * 0.8], [r * 0.9, hgt], [0.001, hgt]], 18));
   for (let i = 0; i < 12; i++) tri.push(...petal((i / 12) * Math.PI * 2, r * 0.65, hgt * 0.42, r * 0.42, r * 0.28, 1.25));
-}
-
-/**
- * A standing clay statue { at, y, h, dir, type, robe, robe2 } — built at 2.4 m and scaled:
- * 'bodhisattva': bare chest with a necklace, a dhoti in folds, a scarf (tianyi) over the shoulders looping across the thighs,
- *   a high chignon and crown, a halo; on a lotus; one hand raised, the other holding a vase;
- * 'disciple': a monk (Kāśyapa, Ānanda) in a long robe, the head shaven, the hands joined;
- * 'king': a heavenly king in armour — greaves, a flared armoured skirt, breastplates, shoulder guards, a helmet — both hands
- *   on a sword planted before him; on a rock;
- * 'groom': the man who leads the animal, in a short coat and trousers, one arm out on the rein;
- * 'kneel': an offering bodhisattva kneeling on a lotus, the hands raised with an offering.
- */
-function statue(el, { bag }) {
-  const [x, z] = el.at, H = el.h || 2.4, type = el.type || 'bodhisattva', dir = el.dir || [-1, 0];
-  const robe = el.robe || 'clay_robe', robe2 = el.robe2 || 'clay_green', skin = 'clay_gilt';
-  const R = [], R2 = [], G = [], tri = [];
-  const kneel = type === 'kneel', king = type === 'king', monk = type === 'disciple', groom = type === 'groom';
-  // the base: lotus, or rock under the king and the groom
-  const b = king || groom ? 0.22 : 0.3;
-  if (king || groom) R2.push(lathe([[0.001, 0], [0.5, 0], [0.52, 0.08], [0.46, 0.16], [0.4, b], [0.001, b]], 9, (th) => 1 + 0.12 * Math.sin(th * 3) + 0.06 * Math.cos(th * 7)));
-  else lotusBase(G, tri, kneel ? 0.42 : 0.36, b);
-  // the build height without the base: 2.1 m (standing), so a kneeling figure is scaled from the same body
-  const by = kneel ? b - 0.62 : b;            // kneeling: the body sinks; the folded legs below
-  if (kneel) {
-    R.push(ellipsoid([0, b + 0.16, 0.05], 0.3, 0.17, 0.36, 12, 6));
-    for (const k of [-1, 1]) R.push(ellipsoid([k * 0.14, b + 0.14, 0.3], 0.12, 0.13, 0.2, 10, 5));
-  } else {
-    // feet, and the lower garment
-    for (const k of [-1, 1]) (monk || king || groom ? R2 : G).push(ellipsoid([k * 0.1, b + 0.04, 0.08], 0.07, 0.05, 0.13, 8, 4));
-    if (king) {
-      for (const k of [-1, 1]) R2.push(lathe([[0.075, 0], [0.085, 0.3], [0.09, 0.5], [0.06, 0.52]], 10, null, k * 0.11, b, 0));        // greaves
-      R.push(lathe([[0.12, 0.42], [0.32, 0.5], [0.28, 0.8], [0.22, 1.05], [0.001, 1.06]], 16, (th) => 1 + 0.05 * Math.abs(Math.cos(th * 6)), 0, b, 0).scale(1, 1, 0.8));
-      R2.push(lathe([[0.31, 0.58], [0.33, 0.62], [0.3, 0.64]], 16, null, 0, b, 0).scale(1, 1, 0.8));
-    } else if (groom) {
-      for (const k of [-1, 1]) R2.push(lathe([[0.07, 0], [0.09, 0.2], [0.1, 0.7], [0.12, 0.9], [0.001, 0.92]], 10, null, k * 0.1, b, 0));
-      R.push(lathe([[0.001, 0.62], [0.24, 0.62], [0.22, 0.9], [0.2, 1.05], [0.001, 1.06]], 14).scale(1, 1, 0.8).translate(0, b, 0));
-    } else {
-      const skirt = lathe([[0.001, 0.02], [0.22, 0.02], [0.27, 0.12], [0.24, 0.5], [0.21, 0.88], [0.2, 1.04], [0.001, 1.06]], 18, (th) => 1 + 0.045 * Math.cos(th * 9));
-      skirt.scale(1, 1, 0.8); skirt.translate(0, b, 0); R.push(skirt);
-      if (!monk) R2.push(lathe([[0.215, 0.92], [0.225, 0.95], [0.215, 0.98]], 18).scale(1, 1, 0.8).translate(0, b, 0));   // the sash at the waist
-    }
-  }
-  // torso
-  const bareChest = type === 'bodhisattva' || kneel;
-  const torso = lathe([[0.001, 1.0], [0.19, 1.02], [0.17, 1.2], [0.2, 1.36], [0.22, 1.48], [0.13, 1.57], [0.001, 1.6]], 16);
-  torso.scale(king ? 1.15 : 1, 1, 0.72); torso.translate(0.02 * (bareChest ? 1 : 0), by, 0);
-  (bareChest ? G : monk ? R : R2).push(torso);
-  if (monk) {
-    // the robe over the left shoulder, down to the feet
-    const kasaya = lathe([[0.001, 0.05], [0.26, 0.05], [0.25, 0.6], [0.22, 1.1], [0.23, 1.45], [0.15, 1.56], [0.001, 1.58]], 18, (th) => 1 + 0.035 * Math.cos(th * 11));
-    kasaya.scale(1.02, 1, 0.78); kasaya.translate(0, b, 0); R2.push(kasaya);
-  }
-  if (bareChest) {
-    // the necklace, a U of jewels across the chest, and the scarf over the shoulders, looping across the thighs
-    for (let i = 0; i <= 8; i++) { const t = i / 8, a = Math.PI * (0.15 + 0.7 * t); G.push(ellipsoid([Math.cos(a) * 0.15, by + 1.5 - 0.12 * Math.sin(Math.PI * t), Math.sin(a) * 0.14 + 0.02], 0.025, 0.025, 0.02, 6, 3)); }
-    if (!kneel) {
-      ribbon(R2, [[-0.22, by + 1.5, -0.04], [-0.3, by + 1.2, 0.0], [-0.34, by + 0.8, 0.06], [-0.32, by + 0.3, 0.05]], 0.025);
-      ribbon(R2, [[0.22, by + 1.5, -0.04], [0.3, by + 1.2, 0.0], [0.34, by + 0.8, 0.06], [0.32, by + 0.3, 0.05]], 0.025);
-      ribbon(R2, [[-0.26, by + 1.0, 0.1], [-0.12, by + 0.78, 0.2], [0.1, by + 0.74, 0.2], [0.26, by + 0.9, 0.12]], 0.022);
-    }
-  }
-  if (king) {
-    // the breastplates (two discs), the belt, the shoulder guards with their flared rims, the sleeves fluttering
-    for (const k of [-1, 1]) G.push(ellipsoid([k * 0.1, by + 1.38, 0.15], 0.085, 0.085, 0.03, 12, 4));
-    G.push(lathe([[0.21, 1.02], [0.235, 1.06], [0.21, 1.1]], 16).scale(1.1, 1, 0.8).translate(0, by, 0));
-    for (const k of [-1, 1]) { R.push(ellipsoid([k * 0.27, by + 1.46, 0], 0.13, 0.1, 0.13, 10, 5)); G.push(ellipsoid([k * 0.31, by + 1.4, 0], 0.1, 0.05, 0.12, 10, 4)); }
-    ribbon(R, [[-0.3, by + 1.3, -0.05], [-0.42, by + 1.0, -0.08], [-0.46, by + 0.6, -0.02]], 0.035);
-    ribbon(R, [[0.3, by + 1.3, -0.05], [0.42, by + 1.0, -0.08], [0.46, by + 0.6, -0.02]], 0.035);
-  }
-  // arms
-  const arm = (k, sh, el2, hd, rr = 0.06) => { (bareChest ? G : R2).push(rodG(sh, el2, rr, rr * 0.85), ellipsoid(el2, rr * 0.85, rr * 0.85, rr * 0.85, 8, 4)); (bareChest ? G : R2).push(rodG(el2, hd, rr * 0.85, rr * 0.7)); G.push(ellipsoid(hd, 0.045, 0.06, 0.03, 8, 4)); };
-  const sh = (k) => [k * 0.22, by + 1.48, 0];
-  if (monk || kneel) { for (const k of [-1, 1]) arm(k, sh(k), [k * 0.25, by + 1.18, 0.08], [k * 0.03, by + 1.32, 0.2]); }
-  else if (king) { for (const k of [-1, 1]) arm(k, sh(k), [k * 0.3, by + 1.15, 0.1], [k * 0.05, by + 1.02, 0.28], 0.075); }
-  else if (groom) { arm(-1, sh(-1), [-0.3, by + 1.2, 0.15], [-0.25, by + 1.25, 0.45]); arm(1, sh(1), [0.26, by + 1.18, 0.02], [0.28, by + 0.92, 0.08]); }
-  else { arm(-1, sh(-1), [-0.27, by + 1.2, 0.04], [-0.2, by + 1.38, 0.2]); arm(1, sh(1), [0.27, by + 1.2, 0.02], [0.26, by + 0.98, 0.1]); }
-  if (type === 'bodhisattva') G.push(lathe([[0.001, 0], [0.04, 0.02], [0.05, 0.08], [0.02, 0.13], [0.015, 0.2], [0.001, 0.21]], 10, null, 0.26, by + 0.92, 0.12));   // the vase
-  if (monk) R2.push(ellipsoid([0, by + 1.22, 0.16], 0.13, 0.14, 0.08, 10, 5));      // the hands in the sleeves
-  if (kneel) G.push(lathe([[0.001, 0], [0.06, 0.02], [0.08, 0.08], [0.001, 0.1]], 10, null, 0, by + 1.34, 0.22));   // the offering
-  if (king) {
-    // the sword: a long straight blade, point down before the feet, the hilt under the hands
-    G.push(box(-0.025, b + 0.02, 0.34, 0.025, by + 1.0, 0.36), box(-0.12, by + 0.98, 0.31, 0.12, by + 1.02, 0.39), box(-0.02, by + 1.02, 0.33, 0.02, by + 1.16, 0.37));
-  }
-  // neck, head, hair
-  G.push(lathe([[0.06, 1.55], [0.055, 1.62], [0.001, 1.64]], 10, null, 0, by, 0));
-  const head = ellipsoid([0, by + 1.72, 0.01], 0.1, 0.13, 0.11, 12, 6); G.push(head);
-  for (const k of [-1, 1]) G.push(ellipsoid([k * 0.1, by + 1.69, 0], 0.02, 0.06, 0.03, 6, 3));
-  if (type === 'bodhisattva' || kneel) {
-    R2.push(ellipsoid([0, by + 1.88, -0.01], 0.065, 0.11, 0.06, 10, 5));                       // chignon
-    G.push(lathe([[0.1, 0], [0.108, 0.02], [0.115, 0.07], [0.1, 0.075]], 14, (th) => 1 + 0.12 * Math.max(0, Math.cos(th * 3)), 0, by + 1.78, 0.01));   // crown
-    // the halo behind the head
-    G.push(lathe([[0.2, -0.008], [0.24, -0.008], [0.24, 0.008], [0.2, 0.008]], 24).rotateX(Math.PI / 2).translate(0, by + 1.74, -0.16));
-  } else if (king) {
-    R2.push(lathe([[0.001, 0.0], [0.13, 0.0], [0.12, 0.08], [0.08, 0.16], [0.02, 0.2], [0.001, 0.26]], 12, null, 0, by + 1.76, 0));   // helmet
-    G.push(lathe([[0.14, -0.01], [0.16, 0.0], [0.13, 0.04]], 12, null, 0, by + 1.74, 0));
-  } else if (groom) R2.push(lathe([[0.001, 0], [0.11, 0], [0.1, 0.06], [0.04, 0.12], [0.001, 0.13]], 10, null, 0, by + 1.79, 0));    // cap
-  const yaw = Math.atan2(dir[0], dir[1]), s = H / 2.4;
-  const put = (g) => place(g, x, el.y, z, yaw, s);
-  for (const g of R) bag.add(robe, put(g));
-  for (const g of R2) bag.add(robe2, put(g));
-  for (const g of G) bag.add(skin, put(g));
-  if (tri.length) bag.add(skin, put(fromTriangles(tri)));
 }
 
 /**
