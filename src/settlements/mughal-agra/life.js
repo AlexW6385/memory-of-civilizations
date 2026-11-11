@@ -87,7 +87,7 @@ export function life() {
 
 
 
-  // ── inside the Taj's halls (§15): the faithful at prayer in the mosque, a reader in the jawab and the pavilions, the guards in the gate's rooms ──
+  // ── inside the Taj's halls (§14): the faithful at prayer in the mosque, a reader in the jawab and the pavilions, the guards in the gate's rooms ──
   { const ty = TERRACE.y + 0.05, X0 = -138 + 1.6, mz0 = -232 + 1.4, mw = 0.91, ml = 1.95;
     // the mosque's rows: men kneeling on their rugs facing the qibla (west), the front rows fuller; the imam before the mihrab
     for (let row = 0; row < 3; row++) for (let c = 0; c < 56; c++) {

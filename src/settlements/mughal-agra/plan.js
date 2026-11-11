@@ -46,7 +46,8 @@ for (const r of [[-3.6, gz0 + 2, -3, gz1 - 2], [3, gz0 + 2, 3.6, gz1 - 2], [gx0 
 for (const [xa, xb] of [[tx0 + 4.2, tx1 - 4.2]]) E.push({ t: 'mughal_wall', a: [xa, tz0], b: [xb, tz0], y: -4.6, h: 7.1, inside: [0, 0] });
 // the walls round the garden and the forecourt, their octagonal towers, the pavilions on the east and west walls
 const wall = (a, b) => E.push({ t: 'mughal_wall', a, b, h: 7 });
-wall([gx0, gz0], [gx0, gz1]); wall([gx1, gz0], [gx1, gz1]);
+// (the pavilions stand on the middle of the east and west walls: the walls stop at them)
+for (const gx of [gx0, gx1]) { wall([gx, gz0], [gx, -15]); wall([gx, 15], [gx, gz1]); }
 wall([gx0, gz1], [-GATE.w / 2, gz1]); wall([GATE.w / 2, gz1], [gx1, gz1]);
 for (const [x, z] of [[gx0, gz1], [gx1, gz1], [tx0, tz0], [tx1, tz0]]) E.push({ t: 'octa_tower', c: [x, z], h: 12, r: 4 });
 for (const s of [-1, 1]) E.push({ t: 'red_hall', rect: s < 0 ? [gx0 - 10, -14, gx0 + 2, 14] : [gx1 - 2, -14, gx1 + 10, 14], y: 0.2, h: 9, front: s < 0 ? 'e' : 'w', interior: 'pavilion' });

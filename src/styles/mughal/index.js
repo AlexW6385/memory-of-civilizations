@@ -120,8 +120,13 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
   for (const sg of [-1, 1]) {
     const A = per[sg < 0 ? 0 : 3], Bk = per[sg < 0 ? 1 : 2], off = oct ? 0 : sg * sideT / 2;
     const pa = Q(A[0] + off, oct ? A[1] : th / 2), pb = Q(Bk[0] + off, Bk[1] + (ar.pass ? 0.2 : 0));
-    bag.add(SM, orientedBox(pa, pb, sideT, y0, ys + 0.05, oct ? 0.12 : 0));         // a rect recess's sides meet the wall's back face, flush with the opening
-    if (col && sill < 0.5) col.segment(pa, pb, sideT, y0, ys);
+    // (`gap`: a door through each side, [t0, t1] along it from the opening: the gate's guard rooms open into the iwan)
+    const lerp = (t) => [pa[0] + (pb[0] - pa[0]) * t, pa[1] + (pb[1] - pa[1]) * t], runs = ar.gap ? [[pa, lerp(ar.gap[0])], [lerp(ar.gap[1]), pb]] : [[pa, pb]];
+    for (const [ra, rb] of runs) {
+      bag.add(SM, orientedBox(ra, rb, sideT, y0, ys + 0.05, oct ? 0.12 : 0));         // a rect recess's sides meet the wall's back face, flush with the opening
+      if (col && sill < 0.5) col.segment(ra, rb, sideT, y0, ys);
+    }
+    if (ar.gap) { const g0 = lerp(ar.gap[0]), g1 = lerp(ar.gap[1]); bag.add(SM, orientedBox(g0, g1, sideT, y0 + 3.7, ys + 0.05, oct ? 0.12 : 0)); if (col && sill < 0.5) col.segment(g0, g1, sideT, y0 + 3.7, ys); }
   }
   if (!ar.pass) bag.add(ar.backMat ?? SM, orientedBox(Q(-wb / 2 - 0.1, n1 + 0.15), Q(wb / 2 + 0.1, n1 + 0.15), 0.3, y0, ys + 0.05));
   // the floor of a raised niche, from the wall's back face to the back wall (the wall's own sill fills the opening)
@@ -209,7 +214,7 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
  */
 function pishtaqFace(bag, col, a, b, y, h, iw, mat, niches = true, inside = null, trim = 'marble_dark') {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
-  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass, alcove: iw.alcove && (iw.pass ? 'rect' : iw.alcove) }];
+  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass, alcove: iw.alcove && (iw.pass ? 'rect' : iw.alcove), gap: iw.gap }];
   if (niches) for (const s of [-1, 1]) {
     const c = L / 2 + s * (iw.w / 2 + (L - iw.w) / 4);
     const nw = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45);
@@ -618,7 +623,7 @@ function redHall(el, ctx) {
 
 
 /**
- * A hall of the red sandstone, opened (docs/settlements/mughal-agra.md §15): the arcade's arches pass through into a hall
+ * A hall of the red sandstone, opened (docs/settlements/mughal-agra.md §14): the arcade's arches pass through into a hall
  * under a ceiling; the mosque (`interior: 'mosque'`, qibla on the back, west, wall) with its mihrab and minbar, the
  * floor of white marble set with the outlines of the prayer rugs, three inner domes over the bays, lamps on chains,
  * Qur'an stands; the jawab (`'jawab'`) the same without the mihrab; the garden's pavilions (`'pavilion'`) a flat
@@ -702,14 +707,14 @@ function hollowHall(el, ctx) {
   }
 }
 
-/** One of the gate's side blocks hollowed to a guard room (chowki, docs/settlements/mughal-agra.md §15): the door on the passage, a charpoy for each watchman, spears racked and shields on the walls, water jars, a hookah, the ceiling of painted beams. sg: −1 west, +1 east. */
+/** One of the gate's side blocks hollowed to a guard room (chowki, docs/settlements/mughal-agra.md §14): the door on the passage, a charpoy for each watchman, spears racked and shields on the walls, water jars, a hookah, the ceiling of painted beams. sg: −1 west, +1 east. */
 function guardRoom(bag, col, cx, cz, y, w, d, h, sg) {
   const bx0 = sg < 0 ? cx - w : cx + w * 0.3, bx1 = sg < 0 ? cx - w * 0.3 : cx + w, bz0 = cz - d + 1.2, bz1 = cz + d - 1.2, T = 1.2, CH = 5.4;
   const ix0 = bx0 + T, ix1 = bx1 - T, iz0 = bz0 + T, iz1 = bz1 - T, door = sg < 0 ? ix1 : ix0, pass = sg < 0 ? bx1 : bx0;   // the passage side wall at [ix1, bx1] (west block) or [bx0, ix0]
   const wall = (r, y0, y1) => { bag.add(R, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
   wall([bx0, bz0, bx1, iz0], y, y + h); wall([bx0, iz1, bx1, bz1], y, y + h);                   // the walls toward the faces
   wall(sg < 0 ? [bx0, iz0, ix0, iz1] : [ix1, iz0, bx1, iz1], y, y + h);                         // the outer wall
-  const pw = sg < 0 ? [ix1, iz0, bx1, iz1] : [bx0, iz0, ix0, iz1], zc = (iz0 + iz1) / 2, dw = 1.3;
+  const pw = sg < 0 ? [ix1, iz0, bx1, iz1] : [bx0, iz0, ix0, iz1], zc = cz + d - (1.18 + 1.2 + d - 1.5) / 2, dw = 1.3;   // the door opposite the gap in the iwan's side wall (half-way along it)
   wall([pw[0], pw[1], pw[2], zc - dw], y, y + CH); wall([pw[0], zc + dw, pw[2], pw[3]], y, y + CH);   // the passage wall with the door gap
   bag.add(R, box(pw[0], y + 3.7, zc - dw, pw[2], y + CH, zc + dw)); col.rect([pw[0], zc - dw, pw[2], zc + dw], y + 3.7, y + CH);
   // door frame: marble jambs, a lintel, an arch-shaped dark panel above
@@ -734,7 +739,7 @@ function guardRoom(bag, col, cx, cz, y, w, d, h, sg) {
 /** great_gate: the gate { c, y, w, d, h, front ('n'|'s') }: a block of red sandstone, its faces with great iwans, a row of small chhatris along the top, towers with kiosks at its corners. */
 function greatGate(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y ?? 0, w = el.w / 2, d = el.d / 2, h = el.h;
-  for (const s of [-1, 1]) pishtaqFace(bag, col, [cx + w * s, cz + d * s], [cx - w * s, cz + d * s], y, h, { w: w * 0.6, h: h * 0.75, depth: d - 1.5, alcove: 'oct' }, R, true, [cx, cz]);
+  for (const s of [-1, 1]) pishtaqFace(bag, col, [cx + w * s, cz + d * s], [cx - w * s, cz + d * s], y, h, { w: w * 0.6, h: h * 0.75, depth: d - 1.5, alcove: 'oct', gap: el.rooms && s > 0 ? [0.38, 0.62] : undefined }, R, true, [cx, cz]);
   if (el.rooms) for (const sg of [-1, 1]) guardRoom(bag, col, cx, cz, y, w, d, h, sg);
   else {
     bag.add(R, box(cx - w, y, cz - d + 1.2, cx - w * 0.3, y + h, cz + d - 1.2));
