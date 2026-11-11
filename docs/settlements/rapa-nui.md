@@ -78,9 +78,24 @@ Moai of yellow-brown tuff; ahu of fitted basalt with a paved ramp of rounded sto
 - **Smoke** (`smoke.js`): steam from earth ovens at about half the forecourts at midday and evening, hearth smoke through the thatch of some houses and the long house [inferred].
 - **Animals** (`fauna.js`): terns and noddies over the shore (drawn with the swallow's shape), frigatebirds high over the crater (the crow's shape) [inferred; the island's seabird colonies are noted in Wikipedia "Easter Island"].
 
+## 4f. Deepening pass: hamlets, houses to walk into, yards, wear, the open places
+
+- **Hamlets** (`HAMLETS`, `village()` in layout.js): the village is 56 hare paenga in eight clusters (kainga) — round the chief's house, either side of the road's end, and out on the plain — each house clear of its neighbours by its length along the axis or by the forecourt and oven (9.5 m) across it; the doors face the sea or inland by hamlet [inferred: clustering of dwellings with their forecourts, as in the archaeology of hare paenga; the island's population is put at several thousand, so a village of this size is modest].
+- **Common houses to walk into** (`hare_house`): the 21 houses nearest the arrival are widened (3.0–3.45 m) and raised (2.8–3.2 m) so that they can be entered, as the chief's long house is (the real door was a crawl — easterisland.travel "Hare Paenga" [stated]); the one nearest the arrival stays the open house being thatched. Furnished by kind [inferred: furnishing, from the long house and what is known of Polynesian houses]: sleeping (mats, bark-cloth blankets, wooden headrests, gourds, baskets of sweet potato, obsidian-headed spears), cooking (stone-ringed hearth, firewood, baskets of tubers, gourds of water, a flat stone for pounding, banana-leaf bundles, baskets hung), net-making (a net on two posts, festoons, coils of line, gourd floats, bone hooks, an adze), bark cloth (a basalt anvil with beaters, bast strips, sheets drying on a line, rolls, a dye of red earth), carving (a log of toromiro with a figure begun, adzes, obsidian flakes, shavings, a finished kavakava). The mulberry bast beaten into bark cloth is the island's mahute [stated: Wikipedia "Moai kavakava"/bark cloth are mentioned in §4b; the paper mulberry itself — inferred]. Someone at the work in each.
+- **Yards** (`house_yard`): every house has three of: firewood and brush stacked at the wall; a rack with split fish and octopus drying; a frame of bark cloth; a net on poles with gourd floats; baskets and gourds; a mortar and grinding stone; reed bundles leaned at the end wall for the next thatching; wicker fish traps and sinker stones; a slab to sit on; always gourds and a basket at the door and stones strewn [inferred].
+- **Wear of the thatch** (`thatch_wear`): paler patches of mended reed, hoops of lashing, damp streaks at the eaves, loose straw hanging [inferred: reed thatch in a wet trade-wind climate]. The ground about each house is trodden earth.
+- **Planting**: sugar cane and paper mulberry inside the manavai (with the modelled bananas) — the manavai sheltered crops from wind and held moisture [stated: Vernian Era "Features and sites"; which crops — inferred]; toromiro scrub on the cone's north-west side, away from the quarry; stones of the shore.
+
+## 4g. The open places: plaza, shore and lake
+
+- **The plaza** (`plaza_dress`): three feast ovens (umu: a ring of stones round a pit, hot scoria stones, a cover of leaves, wood heaped); four rows of offerings on mats at the foot of the ramp (baskets of sweet potato, gourds, bunches of bananas, fish); eight poles hung with white bark cloth beside the walk; ten slabs to sit on along the edges; stones strewn on the pavement. [inferred: the ceremonies the ahu stood for; the earth oven (umu) is the island's way of cooking — easterisland.travel "Hare Paenga" [stated]].
+- **The working shore** (`shore_works`): two fish racks, a net hung to dry on a line of five poles, the canoe builders' shed (thatch on four posts over a keel and ribs with planks laid on, stacked planks, an adze, sewing cord), driftwood, baskets and stones; five small plank canoes now. [stated: canoes of small sewn planks — Hōkūleʻa archive, §4b; the shed and the work — inferred].
+- **The lake** (`pora`): two rafts of totora reed bundles on the crater lake [stated: reed-filled lake in the crater — Wikipedia "Rano Raraku"; the raft — inferred].
+- **Life**: 36 walkers by day; steam over the plaza ovens; hearth smoke from the houses (always from cooks' houses); terns over the shore, frigatebirds over the sea; chickens in the yards.
+
 ## 5. The town
 
-About forty hare paenga, chicken houses and garden walls scattered on the plain, kept off the statue road. [inferred]
+Fifty-six hare paenga, chicken houses and garden walls in eight hamlets on the plain, kept off the statue road (§4f). [inferred]
 
 ## 6. Ground and water
 

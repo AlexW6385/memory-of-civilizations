@@ -81,6 +81,18 @@ export async function town() {
     if (rand() < 0.5) { const ou = h.len * 0.3 * (h.seed % 2 ? -1 : 1), b = L2W(h, ou + 0.95, -h.w / 2 - 2.4); fig({ at: b, y: y(b), rot: face(b, L2W(h, ou, -h.w / 2 - 2.4)), pose: 'squat', man: false }); }
   });
   for (const m of v.moa) for (const s of [-1, 1]) if (rand() < 0.7) { const at = [m.c[0] + s * 2.4, m.c[1] + (rand() - 0.5) * 2]; P.push({ t: 'chickens', at, y: y(at), n: 3 + Math.floor(rand() * 3), rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) }); }
+  // inside the houses, someone at the work of each; chickens in the yards (§4f)
+  v.houses.forEach((h) => {
+    if (!h.inside) return;
+    const [u, vv, pose, tu, tv] = { sleep: [-1.9, 0.85, 'squat', -1.9, 0], cook: [4.0, 1.4, 'squat', 4.0, 0.3], net: [3.9, 0.55, 'sit_ground', 3.9, 1.05], tapa: [3.75, -0.8, 'squat', 3.75, -0.1], carver: [4.3, -0.6, 'sit_ground', 3.4, 0.05] }[h.kind];
+    const at = L2W(h, u, vv); fig({ at, y: y(at) + 0.07, rot: face(at, L2W(h, tu, tv)), pose, man: h.kind === 'net' || h.kind === 'carver' });
+  });
+  v.houses.forEach((h, k) => {
+    if (h.chief || h === strip || k % 5 > 2) return;
+    const at = L2W(h, (rand() - 0.5) * 4, -h.w / 2 - 3.2); P.push({ t: 'chickens', at, y: y(at), n: 2 + Math.floor(rand() * 3), rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
+  });
+  // the shore: a woman splitting fish at the racks, a man mending a net
+  for (const [x, z, pose] of [[62, 146.4, 'squat'], [100, 145.6, 'stand'], [84, 137.4, 'stand']]) { const at = [x, z]; fig({ at, y: y(at), rot: face(at, [x, z - 1]), pose, man: pose === 'stand' }); }
   // the statue walked down the road
   const w = walking(rand);
   E.push(w.statue);
@@ -102,7 +114,7 @@ export async function town() {
   });
   { const at = [CHIEF.c[0] + 6, CHIEF.c[1] + 4.5]; fig({ at, y: y(at), rot: face(at, [CHIEF.c[0] + 6, CHIEF.c[1] + 2]), pose: 'stand', man: true }); }
   // canoes drawn up above the shore east of the ahu, bow to the sea; a fisherman or two by each
-  for (const [x, z] of [[66, 150], [74, 151], [86, 152]]) {
+  for (const [x, z] of [[58, 148], [66, 150], [74, 151], [86, 152], [106, 149]]) {
     const yaw = Math.PI + (rand() - 0.5) * 0.3;
     E.push({ t: 'vaka', c: [x, z], y: y([x, z]) - 0.02, yaw, l: 3.3 + rand() * 0.7 });
     const a = [x + 1.1, z - 0.6 + rand()];

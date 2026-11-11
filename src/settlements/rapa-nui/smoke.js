@@ -14,9 +14,14 @@ export function emitters() {
       const o = L2W(h, h.len * 0.16, -h.w / 2 - 3.75); E.push({ p: [o[0], height(o[0], o[1]) + 0.35, o[1]], kind: 'steam', thr: 0.1, seed: 12 });
       continue;
     }
+    if (h.inside) {
+      const p = L2W(h, -1.9, 0); E.push({ p: [p[0], height(p[0], p[1]) + h.h + 0.4, p[1]], kind: 'kitchen', thr: h.kind === 'cook' ? 0 : 0.25 + 0.5 * r(), seed: h.seed + 2 });
+      if (h.kind === 'cook') { const c = L2W(h, 4.0, 0.3); E.push({ p: [c[0], height(c[0], c[1]) + h.h + 0.4, c[1]], kind: 'kitchen', thr: 0.1, seed: h.seed + 3 }); }
+    }
     if (r() < 0.45) { const o = L2W(h, h.len * 0.3 * (h.seed % 2 ? -1 : 1), -h.w / 2 - 2.4); E.push({ p: [o[0], height(o[0], o[1]) + 0.35, o[1]], kind: 'steam', thr: r() * 0.6, seed: h.seed }); }
     if (r() < 0.3) { E.push({ p: [h.c[0], height(h.c[0], h.c[1]) + h.h + 0.4, h.c[1]], kind: 'kitchen', thr: 0.2 + 0.7 * r(), seed: h.seed + 1 }); }
   }
+  for (const [x, z] of [[-34, 71], [37, 69], [-16, 94]]) E.push({ p: [x, 0.5, z], kind: 'steam', thr: 0.15, seed: Math.floor(x * 7 + z) });   // the feast ovens of the plaza
   return E;
 }
 const ATT = [];
