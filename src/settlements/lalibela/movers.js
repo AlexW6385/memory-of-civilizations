@@ -4,7 +4,7 @@
 // the churches' courts, down the trenches and the Jordan and along the paths to the village. Data for the
 // engine's movers (src/engine/movers.js, read in its worker); the ways come from layout.js. No boats.
 
-import { RADIUS, PITS, TRENCHES, EDGE } from './layout.js';
+import { RADIUS, PITS, TRENCHES, EDGE, LINKS, lanes } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
@@ -49,8 +49,9 @@ export function walkways() {
   R([-55, -252, -49, -99.5], 0.8); R([-252, -252, 10, -248], 0.7);                                   // to Golgotha
   R([29, -93, 58.6, -87], 1.0);                                        // Medhane Alem to Maryam
   R([37, -19, 43, 49], 1.0); R([117, -19, 123, 33], 0.9);            // the Jordan to Amanuel and to Gabriel-Rufael
-  // the village: footpaths from the Jordan's roads out over the slopes
-  links.push({ a: [-250, -14], b: [-250, -250], w: 1.2, kind: 'street', weight: 0.5 }, { a: [-250, -14], b: [-250, 128], w: 1.2, kind: 'street', weight: 0.5 }, { a: [250, -14], b: [250, 150], w: 1.2, kind: 'street', weight: 0.5 });
+  // the village: footpaths from the Jordan's roads out over the slopes, and the lanes of the hamlets to their compounds' gates
+  for (const l of LINKS) links.push({ a: l.a, b: l.b, w: l.w, kind: 'street', weight: 0.5 });
+  for (const l of lanes()) links.push({ a: l.a, b: l.b, w: l.w, kind: 'street', weight: l.w > 1.6 ? 0.45 : 0.2 });
   void TRENCHES;
   return { rects, links, clip: RADIUS - 12 };
 }

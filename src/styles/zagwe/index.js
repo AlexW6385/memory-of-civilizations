@@ -12,6 +12,7 @@ import '../qing/index.js';
 import { orientBy, piercedSlab } from '../sahel/index.js';
 import { hut } from './hut.js';
 import { umbrella, procCross } from './liturgy.js';
+import { yardEl, terraceEl } from './compound.js';
 
 const TU = 'tuff_red', TH = 'tuff_hewn';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -434,8 +435,9 @@ function tukul(el, { bag, col }) {
   bag.add(TU, lathe([[r + 0.1, -1.0], [r + 0.1, 0], [r, H], [0.001, H]], 20, (th) => 1 + 0.012 * Math.sin(th * 7 + el.seed), x, y, z));
   // the courses: thin proud bands of flatter stones every 0.6 m or so
   for (let yy = 0.55; yy < H - 0.3; yy += 0.55 + rand() * 0.15) { const rr = r + 0.1 - 0.1 * yy / H + 0.015; bag.add('rubble', lathe([[rr, yy], [rr, yy + 0.07], [0.001, yy + 0.07]], 20, null, x, y, z)); }
+  bag.add('plaster_damp', lathe([[r + 0.112, -0.2], [r + 0.112, 0.0], [r + 0.1, 0.5], [r + 0.0, 0.5], [0.001, 0.5]].slice(0, 3), 20, (th) => 1 + 0.012 * Math.sin(th * 7 + el.seed), x, y, z));
   col.circle(x, z, r + 0.05, y, y + H);
-  const a = rand() * Math.PI * 2, dx = Math.cos(a), dz = Math.sin(a), ex = -dz, ez = dx;
+  const a0r = rand() * Math.PI * 2, a = el.door ?? a0r, dx = Math.cos(a), dz = Math.sin(a), ex = -dz, ez = dx;
   const P = (s, d) => [x + dx * (r + d) + ex * s, z + dz * (r + d) + ez * s];
   const bar = (mat, s0, s1, d0, d1, y0, y1) => { const p = P((s0 + s1) / 2, (d0 + d1) / 2); bag.add(mat, orientedBox(P(s0, (d0 + d1) / 2), P(s1, (d0 + d1) / 2), d1 - d0, y + y0, y + y1)); void p; };
   // the door: a dark opening, its plank leaf ajar inside, the timber frame proud of the stone
@@ -556,6 +558,6 @@ function curtain(el, { bag, col }) {
 
 registerStyle('zagwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain },
+  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain, yard: yardEl, terrace: terraceEl },
   objects: {},
 });

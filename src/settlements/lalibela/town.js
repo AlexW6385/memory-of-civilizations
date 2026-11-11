@@ -1,7 +1,7 @@
 // The village round the churches (docs/settlements/lalibela.md §5): round stone houses with conical thatch;
 // and the people of the churches (§10): pilgrims wrapped in white in the pits, the trenches and on
 // the rims looking down, priests among them holding their hand crosses.
-import { RADIUS, PITS, PRECINCT, cutDepth, houses, slope, inRect } from './layout.js';
+import { RADIUS, PITS, PRECINCT, TERR, cutDepth, houses, compounds, slope, inRect } from './layout.js';
 const base = (id, elements, style = 'zagwe') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-240, 100], facing: 's' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -73,8 +73,20 @@ function people() {
   return [base('lalibela-people', L, 'life'), base('lalibela-crosses', Z)];
 }
 
+const quad = (x, z) => (x < 0 ? 0 : 1) + (z < 0 ? 0 : 2);
 export async function town() {
-  const all = houses(), plans = [];
-  for (let i = 0; i < all.length; i += 140) plans.push(base(`lalibela-village-${i / 140}`, all.slice(i, i + 140).map((h) => ({ t: 'tukul', ...h, y: slope(h.c[0], h.c[1]), yard: Math.hypot(h.c[0], h.c[1]) < PRECINCT - h.r - 5 }))));
+  const all = houses(), plans = [], Q = [[], [], [], []], Y = [[], [], [], []];
+  for (const h of all) {
+    if (h.enter) { Q[quad(...h.c)].push({ t: 'hut', c: h.c, r: h.r, y: slope(h.c[0], h.c[1]), door: h.door, seed: h.seed, kind: h.enter }); continue; }
+    Q[quad(...h.c)].push({ t: 'tukul', c: h.c, r: h.r, storeys: h.storeys, seed: h.seed, door: h.door, y: slope(h.c[0], h.c[1]), yard: h.kind === 'lone' && Math.hypot(h.c[0], h.c[1]) < PRECINCT - h.r - 5 });
+  }
+  for (const q of compounds()) Y[quad(...q.c)].push({ t: 'yard', c: q.c, R: q.R, gate: q.gate, seed: q.seed, stone: q.stone, main: { c: q.main.c, r: q.main.r, door: q.main.door }, granary: q.granary, pen: q.pen });
+  for (let k = 0; k < 4; k++) plans.push(base(`lalibela-village-${k}`, Q[k]), base(`lalibela-yards-${k}`, Y[k]));
+  // the terraces: each riser's wall in four arcs
+  for (let k = 0; k < 4; k++) {
+    const E = [];
+    for (let n = 0; n < TERR.n; n++) E.push({ t: 'terrace', n, from: -Math.PI + k * Math.PI / 2, to: -Math.PI + (k + 1) * Math.PI / 2 });
+    plans.push(base(`lalibela-terraces-${k}`, E));
+  }
   return [...plans, ...people()];
 }
