@@ -141,7 +141,6 @@ export const PLANNED = [
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },
   { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, region: 'guinea', lat: 6.34, lon: 5.62, radius: 320 },
   { id: 'mycenae', name: { en: 'Mycenae', zh: '迈锡尼' }, region: 'aegean', lat: 37.73, lon: 22.76, radius: 160 },
-  { id: 'delphi', name: { en: 'Delphi', zh: '德尔斐' }, region: 'aegean', lat: 38.48, lon: 22.50, radius: 200 },
   { id: 'manueline-lisbon', name: { en: 'Manueline Lisbon', zh: '曼努埃尔里斯本' }, region: 'iberia', lat: 38.70, lon: -9.21, radius: 300 },
   { id: 'vienna', name: { en: 'Vienna', zh: '维也纳' }, region: 'danube', lat: 48.21, lon: 16.37, radius: 340 },
   { id: 'bauhaus-dessau', name: { en: 'Bauhaus Dessau', zh: '包豪斯德绍' }, region: 'germany', lat: 51.84, lon: 12.23, radius: 170 },
