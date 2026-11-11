@@ -86,7 +86,7 @@ export function lots() {
     if (pondDistance(cx, cz) < 14 || height(cx, cz) > 1.5) return false;
     if (Math.abs(cz - BRIDGE.z) < 7 && !own) return false;
     for (const s of STREETS) if (s !== own && overlap(r, streetRect(s), -0.2)) return false;
-    return !LOTS.some((l) => overlap(l.rect, r, 0.35));
+    return !LOTS.some((l) => overlap(l.rect, r, 1.9));
   };
   for (const s of STREETS) {
     const horiz = s.a[1] === s.b[1], [t0, t1] = horiz ? [Math.min(s.a[0], s.b[0]), Math.max(s.a[0], s.b[0])] : [Math.min(s.a[1], s.b[1]), Math.max(s.a[1], s.b[1])];
@@ -101,7 +101,7 @@ export function lots() {
         if (ok(r, s) && rand() >= smooth(110, 290, Math.hypot((r[0] + r[2]) / 2, (r[1] + r[3]) / 2)) * 0.55) {
           const seed = Math.floor(rand() * 1e6), tr = TRADES[seed % TRADES.length];
           LOTS.push({ rect: r.map((v) => +v.toFixed(2)), seed, y: 0, foot: -0.2, front, trade: tr, street: s.id, kind: s.kind });
-          t += fw + (rand() < 0.2 ? 1.2 + rand() * 2.5 : 0.25 + rand() * 0.9);
+          t += fw + (rand() < 0.2 ? 1.2 + rand() * 2.5 : 2.0 + rand() * 0.6);
         } else t += 2;
       }
     }

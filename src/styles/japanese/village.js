@@ -18,7 +18,7 @@ export function dressHouse(el, { bag, col }, g) {
   // weathering: damp at the foot of the walls in patches, rain streaks under the eaves, the mud thrown up by rain
   if (wallMat === 'plaster_white') {
     for (let u = 0.2; u < L - 0.5; u += 0.9 + r() * 1.6) if (Math.abs(u - door) > 0.7) B('plaster_damp', u, -0.03, u + 0.8 + r() * 1.2, 0.0, fy, fy + 0.3 + r() * 0.5);
-    for (let k = 0; k < 3; k++) { const u = 0.4 + r() * (L - 1); if (Math.abs(u - door) > 0.7) B('plaster_streak', u, -0.03, u + 0.25, 0.0, y + H - 1.3 - r() * 0.5, y + H - 0.16); }
+    for (let k = 0; k < 3; k++) { const u = 0.4 + r() * (L - 1); if (Math.abs(u - door) > 0.7) B('plaster_streak', u, -0.05, u + 0.25, -0.02, y + H - 1.3 - r() * 0.5, y + H - 0.16); }
   } else B('earth_wall', 0.02, -0.07, L - 0.02, -0.04, fy + 0.1, fy + 0.3);
   // the doorstep: a flat stone, and a plank over the gutter
   B('limestone', door - 0.55, -0.55, door + 0.55, -0.02, y - 0.2, fy - 0.12);
@@ -80,7 +80,7 @@ export function dressHouse(el, { bag, col }, g) {
     }
     case 'woodman': {                                           // brushwood bundles and cut logs stacked to the eave
       const u = free(2.4);
-      if (u >= 0) { w2(u, -0.9, u + 2.4, -0.1, y, y + 1.45, 'bark_dark'); for (let k = 0; k < 6; k++) { const p = P(u + 0.2 + k * 0.4, -0.95); bag.add('wood_dark', lathe([[0.05, 0], [0.05, 0.05], [0.05, 0.1]], 5, null, p[0], y + 1.45, p[1])); } }
+      if (u >= 0) { w2(u, -0.9, u + 2.4, -0.22, y, y + 1.45, 'bark_dark'); for (let k = 0; k < 6; k++) { const p = P(u + 0.2 + k * 0.4, -0.95); bag.add('wood_dark', lathe([[0.05, 0], [0.05, 0.05], [0.05, 0.1]], 5, null, p[0], y + 1.45, p[1])); } }
       for (let k = 0; k < 4; k++) { const p = P(L + 0.6, 0.4 + k * 0.55); bundle(bag, 'thatch', p[0], y, p[1], 1.3); }
       break;
     }
@@ -100,7 +100,7 @@ export function dressHouse(el, { bag, col }, g) {
     const rect = g.rc(L + 0.1, 0.5, L + 2.5, D - 0.5);
     for (const [px, pz] of [[rect[0] + 0.1, rect[1] + 0.1], [rect[2] - 0.1, rect[1] + 0.1], [rect[0] + 0.1, rect[3] - 0.1], [rect[2] - 0.1, rect[3] - 0.1]]) { bag.add('wood_dark', box(px - 0.07, y, pz - 0.07, px + 0.07, y + 2.1, pz + 0.07)); col.circle(px, pz, 0.12, y, y + 2.1); }
     const cx = (rect[0] + rect[2]) / 2, cz = (rect[1] + rect[3]) / 2, wx = rect[2] - rect[0], wz = rect[3] - rect[1];
-    g.gabled(bag, { x0: rect[0], z0: rect[1], x1: rect[2], z1: rect[3], y: y + 2.1, rise: 0.45, o: 0.25, ov: 0.2, th: 0.1, alongX: wx > wz, mat: 'roof_bark', gable: 'timber' });
+    g.gabled(bag, { x0: rect[0], z0: rect[1], x1: rect[2], z1: rect[3], y: y + 2.0, rise: 0.4, o: 0.25, ov: 0.2, th: 0.1, alongX: wx > wz, mat: 'roof_bark', gable: 'timber' });
     bag.add('bark_dark', box(cx - wx * 0.35, y, cz - wz * 0.35, cx + wx * 0.1, y + 0.9, cz + wz * 0.1));
     jar(bag, 'pottery_dark', rect[2] - 0.5, y, rect[3] - 0.5, 0.3, 0.7);
   }

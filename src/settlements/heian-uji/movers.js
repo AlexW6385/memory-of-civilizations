@@ -4,14 +4,14 @@
 // with the soft cap or the straw hat, porters with a pole, children. No boats (the river's boats stand, plan.js).
 // In rain the villagers wear the straw hat and the palm-fibre cape (mino). Data for src/engine/movers.js.
 
-import { RADIUS, RIVER, BRIDGE, COMPOUNDS, lots, inRect } from './layout.js';
+import { RADIUS, RIVER, BRIDGE, STREETS, MARKET, streetRect } from './layout.js';
 import '../../styles/japanese/index.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 30, night: 4, rain: 0.6, reach: 150, spawnMin: 28, far: 42 },
+  walkers: { day: 52, night: 5, rain: 0.6, reach: 150, spawnMin: 24, far: 42 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: 0,
 };
@@ -19,13 +19,16 @@ export const PARAMS = {
 const rx = RIVER.x + 15 * Math.sin(BRIDGE.z / 110);
 /** The lanes (the gaps of the house grid, layout.js lots), the road to the bridge, the bank path, the bridge. */
 export function walkways() {
-  const rects = [], keep = (r) => !COMPOUNDS.some((c) => inRect(c, (r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 2)) && Math.hypot((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) < RADIUS - 60;
-  const L = lots();
-  const busy = (r) => L.some((l) => l.rect[0] < r[2] + 8 && l.rect[2] > r[0] - 8 && l.rect[1] < r[3] + 8 && l.rect[3] > r[1] - 8);
-  // lanes along x between the rows of houses, and along z between the columns
-  for (let z = -300; z < 280; z += 14) { const r = [-300, z + 10.6, 120, z + 13.4]; for (let x = -300; x < 120; x += 60) { const s = [x, r[1], x + 60, r[3]]; if (keep(s) && busy(s)) rects.push({ r: s, weight: 0.7, market: 0.3, kind: 'lane' }); } }
-  for (let x = -300; x < 120; x += 15) { for (let z = -300; z < 280; z += 60) { const s = [x + 12.4, z, x + 14.6, z + 60]; if (keep(s) && busy(s)) rects.push({ r: s, weight: 0.5, market: 0.3, kind: 'lane' }); } }
-  rects.push({ r: [-300, BRIDGE.z - 1.5, rx - 40, BRIDGE.z + 1.5], weight: 1.4, market: 0.3, kind: 'street' });           // the road to the bridge
+  const rects = [], inside = (r) => Math.hypot((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) < RADIUS - 50;
+  // the streets of layout.js, cut in runs of 60 m; the market and the ferry landing draw the crowd
+  for (const s of STREETS) {
+    const R = streetRect(s, -0.6), horiz = s.a[1] === s.b[1], w = s.kind === 'road' ? 1.3 : 0.8;
+    for (let t = horiz ? R[0] : R[1]; t < (horiz ? R[2] : R[3]); t += 60) {
+      const q = horiz ? [t, R[1], Math.min(t + 60, R[2]), R[3]] : [R[0], t, R[2], Math.min(t + 60, R[3])];
+      if (inside(q)) rects.push({ r: q, weight: w, market: s.id === 'temple-s' || s.id === 'south' ? 0.9 : 0.3, kind: s.kind === 'road' ? 'street' : 'lane' });
+    }
+  }
+  rects.push({ r: MARKET, weight: 1.8, market: 1, kind: 'street' });
   rects.push({ r: [47, -70, 52, 38], weight: 1.2, market: 0, kind: 'street' });                                      // the east bank of the pond
   rects.push({ r: [-100, 72, 48, 76], weight: 0.8, market: 0, kind: 'street' });                                     // the south shore path
   const links = [{ a: [rx - 41, BRIDGE.z], b: [rx + 41, BRIDGE.z], w: 2.6, kind: 'bridge', weight: 1.4 }];
