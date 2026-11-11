@@ -121,6 +121,41 @@ function teaHouse(el, { bag, col }) {
       for (let z = cz0 + 0.12; z < cz1 - 0.1; z += 0.14) bag.add(hh > 2 ? 'glaze_white' : 'pottery_dark', lathe([[0.001, 0], [0.025, 0], [0.04, 0.025], [0.06, 0.06], [0.055, 0.065], [0.001, 0.02]], 8, null, ex - 0.16, Y + hh, z));
     }
   }
+  // the roof's frame, open to the room: a tie beam over each bay from the back wall to the front beam, a king post and struts up to the ridge purlin, purlins along the slopes, a lantern hung
+  // from each tie beam (the Song timber frame as the Yingzao fashi gives it, in a house of the Jiangnan type)
+  {
+    const half = D / 2 + 0.55, rise = D * 0.3, yRf = (zz) => Y + H - 0.05 + rise * (1 - Math.min(1, Math.abs(zz - cz) / half)) - 0.28, nbay = Math.max(2, Math.round((L - 0.5) / 3.2));
+    const timb = [], dark = [];
+    for (const f of [0.35, 0.7]) for (const sg of [-1, 1]) { const zz = cz + sg * half * f; beamTris(timb, [x0 + 0.25, yRf(zz), zz], [x1 - 0.25, yRf(zz), zz], 0.1, 0.16); }
+    beamTris(timb, [x0 + 0.25, yRf(cz) - 0.04, cz], [x1 - 0.25, yRf(cz) - 0.04, cz], 0.11, 0.2);
+    for (let i = 0; i <= nbay; i++) {
+      const xx = x0 + 0.25 + (L - 0.5) * i / nbay, xb = Math.min(x1 - 0.31, Math.max(x0 + 0.31, xx)), ty = Y + H - 0.22;
+      beamTris(timb, [xb, ty, z0 + 0.25], [xb, ty, fz], 0.14, 0.3);                           // the tie beam
+      beamTris(dark, [xb, ty + 0.15, cz], [xb, yRf(cz) - 0.12, cz], 0.12, 0.12);               // the king post
+      for (const sg of [-1, 1]) beamTris(dark, [xb, ty + 0.15, cz + sg * half * 0.04 ], [xb, yRf(cz + sg * half * 0.35) - 0.1, cz + sg * half * 0.35], 0.07, 0.07);   // the struts
+      if (i > 0 && i < nbay) for (const sg of [-1, 1]) { const zl = cz + sg * D * 0.26; bag.add('rope_fibre', rod([xb, ty, zl], [xb, ty - 0.3, zl], 0.008, 3)); bag.add('lamp_paper', lathe([[0.001, -0.2], [0.11, -0.12], [0.15, 0], [0.11, 0.12], [0.001, 0.2]], 8, null, xb, ty - 0.5, zl)); bag.add('lacquer_black', lathe([[0.08, 0.2], [0.08, 0.25]], 6, null, xb, ty - 0.5, zl)); bag.add('cloth_red', rod([xb, ty - 0.7, zl], [xb, ty - 1.0, zl], 0.012, 4)); }
+    }
+    bag.add('lacquer_chestnut', fromTriangles(timb)); bag.add('wood_dark', fromTriangles(dark));
+  }
+  // the west wall: two lattice windows with their sills and a pair of couplets on boards between them; the east wall carries the counter
+  {
+    const wx = x0 + 0.25, nwin = Math.min(2, Math.floor((fz - z0 - 1) / 3.4)), lt = [], fr = [];
+    for (let k = 0; k < nwin; k++) {
+      const zc = z0 + 0.25 + (fz - z0 - 0.25) * (k + 0.5) / nwin * 0.88 + 0.4, wy0 = Y + 1.05, wy1 = Y + 2.35, a = zc - 0.6, b = zc + 0.6;
+      bag.add('lacquer_chestnut', box(wx, wy0 - 0.08, a - 0.1, wx + 0.06, wy1 + 0.1, b + 0.1));
+      bag.add('shoji', box(wx + 0.06, wy0, a, wx + 0.065, wy1, b));
+      for (let u = a + 0.06; u < b - 0.03; u += 0.14) beamTris(lt, [wx + 0.08, wy0, u], [wx + 0.08, wy1, u], 0.02, 0.02);
+      for (let q = 0; q <= 4; q++) { const yy = wy0 + (wy1 - wy0) * q / 4; beamTris(lt, [wx + 0.08, yy, a], [wx + 0.08, yy, b], 0.02, 0.02); }
+      bag.add('granite_grey', box(wx, wy0 - 0.14, a - 0.2, wx + 0.14, wy0 - 0.08, b + 0.2));
+      // the couplet board to the south of the window: two boards, black lacquer with characters picked out in ochre
+      const cb = zc + 1.3;
+      if (cb + 0.2 < fz - 0.5) for (const dz of [-0.17, 0.17]) {
+        bag.add('lacquer_black', box(wx, Y + 0.9, cb + dz - 0.12, wx + 0.035, Y + 2.5, cb + dz + 0.12));
+        for (let q = 0; q < 7; q++) bag.add('paint_ochre', box(wx + 0.035, Y + 1.0 + q * 0.2, cb + dz - 0.06 - (rand() - 0.5) * 0.02, wx + 0.042, Y + 1.13 + q * 0.2, cb + dz + 0.06));
+      }
+    }
+    bag.add('lattice_red', fromTriangles(lt)); void fr;
+  }
   // the flower rack by the door (inside the west post): three steps of boards, potted pines on them
   {
     const rx0 = x0 + 0.35, rx1 = x0 + 1.55, rz = fz - 0.55;
@@ -614,6 +649,52 @@ function pagodaFront(bag, el) {
 }
 
 /**
+ * The pagoda's stone base dressed as a Song brick pagoda's sumeru plinth (须弥座) { c, y, base: { r, h } }: on each of the eight faces a foot moulding, a row of recessed
+ * hu-men panels (the arched, cusped frames of Song pagoda basements) between small stone posts, each with a carved lotus rosette in it, a band of lotus petals and the cap
+ * moulding with its drip; a post at every corner. [inferred: after the Song brick pagodas' basements (the Liuhe's own is a plain stone terrace today; Kaihua Temple's pagoda
+ * stands on a sumeru base in the Southern Song record, docs/settlements/song-hangzhou.md §2)]
+ */
+function pagodaBase(bag, el) {
+  const [cx, cz] = el.c, y0 = el.y, B = el.base, C8 = Math.cos(Math.PI / 8), batter = 0.6, hF = B.h;
+  const ap = (t) => (B.r + batter * (1 - t)) * C8;       // the face's distance from the axis at height fraction t
+  const out = { grey: [], blue: [], dark: [], block: [] };
+  const petals = [];
+  for (let k = 0; k < 8; k++) {
+    const th = Math.PI / 8 + (k + 0.5) * Math.PI / 4, mx = Math.cos(th), mz = Math.sin(th), tx = -mz, tz = mx;
+    const L = 2 * B.r * Math.sin(Math.PI / 8), Q = (u, t, d) => [cx + mx * (ap(t) + d) + tx * u, y0 + hF * t, cz + mz * (ap(t) + d) + tz * u];
+    const bx = (arr, u0, u1, ta, tb, d0, d1) => hexa(arr, [Q(u0, ta, d0), Q(u1, ta, d0), Q(u1, ta, d1), Q(u0, ta, d1), Q(u0, tb, d0), Q(u1, tb, d0), Q(u1, tb, d1), Q(u0, tb, d1)]);
+    const hl = L / 2 - 0.55;
+    bx(out.grey, -hl, hl, 0.02, 0.15, 0.0, 0.07);                  // the foot moulding
+    bx(out.grey, -hl, hl, 0.15, 0.2, 0.0, 0.035);
+    bx(out.grey, -hl - 0.1, hl + 0.1, 0.9, 1.0, 0.0, 0.16);        // the cap with its drip
+    bx(out.blue, -hl, hl, 0.76, 0.9, 0.0, 0.06);                   // the band of the petals
+    // the panels: n of them between posts
+    const n = Math.max(3, Math.round(hl * 2 / 2.1)), pw = hl * 2 / n;
+    for (let i = 0; i <= n; i++) { const u = -hl + i * pw; bx(out.block, u - 0.14, u + 0.14, 0.2, 0.76, 0.0, 0.1); }
+    for (let i = 0; i < n; i++) {
+      const uc = -hl + (i + 0.5) * pw, hw = pw / 2 - 0.2;
+      bx(out.blue, uc - hw - 0.05, uc + hw + 0.05, 0.25, 0.7, 0.0, 0.05);   // the panel's raised ground
+      // the hu-men: a dark recess, rectangular below and a stepped cusped arch above, framed in granite
+      const a0 = 0.3, a1 = 0.46, tt = 0.64;
+      bx(out.dark, uc - hw * 0.8, uc + hw * 0.8, a0, a1, 0.05, 0.065);
+      for (let q = 0; q < 6; q++) { const f = q / 6, w = hw * 0.8 * Math.sqrt(1 - f * f * 0.9); bx(out.dark, uc - w, uc + w, a1 + (tt - a1) * f, a1 + (tt - a1) * (f + 1 / 6) + 0.002, 0.05, 0.065); }
+      for (const sg of [-1, 1]) bx(out.grey, uc + sg * hw * 0.8 + (sg < 0 ? -0.05 : 0), uc + sg * hw * 0.8 + (sg < 0 ? 0 : 0.05), a0, a1 + 0.03, 0.05, 0.085);
+      bx(out.grey, uc - hw * 0.8, uc + hw * 0.8, a0 - 0.03, a0, 0.05, 0.085);
+      // a lotus rosette carved in it
+      for (let q = 0; q < 8; q++) { const a = q * Math.PI / 4, c0 = Q(uc, 0.47, 0.075), c1 = Q(uc + Math.cos(a) * 0.17, 0.47 + Math.sin(a) * 0.17 / hF, 0.075); petals.push(rod(c0, c1, 0.028, 4)); }
+      bag.add('granite_grey', ell(0.05, 0.05, 0.05, ...Q(uc, 0.47, 0.075), 6));
+    }
+    // lotus petals along the band, each a pointed flat leaf standing up on the band
+    for (let u = -hl + 0.2; u < hl - 0.1; u += 0.26) { const [px, py, pz] = Q(u, 0.77, 0.06); petals.push(lathe([[0.001, 0], [0.11, 0.02], [0.06, 0.2], [0.001, 0.26]], 6).scale(1, 0.55, 0.3).rotateY(Math.PI / 2 - th).translate(px, py, pz)); }
+    // the corner post: a stone post with a lotus capital at each vertex
+    const [vx, , vz] = Q(L / 2, 0.5, 0.0);
+    bag.add('granite_block', lathe([[0.3, 0], [0.3, hF * 0.75], [0.36, hF * 0.82], [0.2, hF * 1.0], [0.001, hF * 1.0]], 8, null, vx, y0, vz));
+  }
+  bag.add('granite_grey', fromTriangles(out.grey)); bag.add('bluestone', fromTriangles(out.blue)); bag.add('slate', fromTriangles(out.dark)); bag.add('granite_block', fromTriangles(out.block));
+  for (const g of petals) bag.add('granite_grey', g);
+}
+
+/**
  * liuhe_pagoda: pagoda_oct with the song style's finished spire and the niches (same parameters as pagoda_oct, `interior` and `images` for the walkable inside).
  */
 function liuhePagoda(el, ctx) {
@@ -623,7 +704,7 @@ function liuhePagoda(el, ctx) {
   const top = el.y + el.base.h + el.tiers.reduce((a, t) => a + t.h, 0), rt = el.tiers[el.tiers.length - 1].r, R = rt + 3.6;
   songSpire(ctx.bag, el.c[0], top + 4.2, el.c[1], R, top + 1.0);
   if (el.interior && el.niches !== false) pagodaNiches(ctx.bag, el);
-  if (el.dress !== false) pagodaFront(ctx.bag, el);
+  if (el.dress !== false) { pagodaFront(ctx.bag, el); pagodaBase(ctx.bag, el); }
 }
 
 /**
@@ -683,7 +764,8 @@ function courtPaving(el, { bag }) {
       for (let u = u0 - (row % 2) * 0.6; u < u1; u += 1.2) {
         const ua = Math.max(u, u0), ub = Math.min(u + 1.2, u1); if (ub - ua < 0.2) continue;
         const wear = Math.abs((v + vb) / 2 - (v0 + v1) / 2) < (v1 - v0) * 0.22, sink = rand() < 0.2 ? 0.012 : 0, r = rand();
-        const m = r < 0.25 ? 'granite_grey' : wear && r < 0.6 ? 'slate' : 'bluestone';
+        // calm: a street laid in one stone with a few slabs of another (the courts keep their worn dark middle and their grey granite)
+        const m = el.calm ? (r < 0.1 ? 'granite_block' : r < 0.17 ? 'slate' : 'bluestone') : r < 0.25 ? 'granite_grey' : wear && r < 0.6 ? 'slate' : 'bluestone';
         const [a, b, c, d] = along ? [vb > v ? v + 0.02 : v, ua + 0.02, Math.min(vb, v1) - 0.02, ub - 0.02] : [ua + 0.02, v + 0.02, ub - 0.02, Math.min(vb, v1) - 0.02];
         bag.add(m, box(a, y, b, c, y + 0.03 - sink, d));
       }
@@ -768,12 +850,24 @@ function imperialWay(el, ctx) {
   const gx0 = x0 + band + kb, gx1 = x1 - band - kb;
   bag.add('pebbles', box(gx0, y, z0, gx1, y + 0.03, z1));
   for (const [a, b] of [[x0 + band, gx0], [gx1, x1 - band]]) { bag.add('granite_grey', box(a, y, z0, b, y + 0.09, z1)); ctx.col?.floor([a, z0, b, z1], y + 0.09); }   // (the kerb a step to walk over)
-  for (const s of [-1, 1]) bag.add('slate', box(xc + s * 2.6 - 0.14, y, z0, xc + s * 2.6 + 0.14, y + 0.05, z1));   // the wheel ruts
+  // the wheel ruts: two lines of packed brown earth worn into the gravel, broken here and there and wandering a little, not a rail
+  for (const s of [-1, 1]) for (let z = z0; z < z1 - 0.5;) {
+    const l = Math.min(z1 - z, 3 + rand() * 9), w = 0.12 + rand() * 0.1, off = (rand() - 0.5) * 0.3;
+    rand(); bag.add('silt', box(xc + s * 2.6 + off - w, y + 0.028, z, xc + s * 2.6 + off + w, y + 0.0345, z + l));
+    z += l + 0.3 + rand() * 1.8;
+  }
   // the gravel's wear: patches of beaten earth and mud where the carts turn, cobbles and flints worked up through it, horse dung, straw and the sweepings of the stalls, ruts' edges broken
-  const gw = gx1 - gx0, patch = [], cob = [], dung = [], strw = [], cob2 = [];
-  for (let z = z0 + 0.5; z < z1 - 0.5; z += 1.1 + rand() * 1.6) {
-    const px = gx0 + 0.4 + rand() * (gw - 0.8), rx = 0.25 + rand() * 0.6, rz = 0.2 + rand() * 0.5;
-    patch.push(lathe([[1.02, 0], [1, 0.006], [0.001, 0.008]], 9).scale(rx, 1, rz).translate(px, y + 0.03, z));
+  const gw = gx1 - gx0, patch = [], patchS = [], patchB = [], cob = [], dung = [], strw = [], cob2 = [];
+  // the gravel's beaten earth and dust, laid in the carts' direction (long along the street, soft-edged, the three tones of dust, mud and ground brick), so that the bed has its
+  // own mottling at 30–100 m, where the eye no longer sees a cobble; and the long dust streaks along the wheel lines
+  const ell2 = (rx, rz, px, pz, h) => lathe([[1.02, 0], [1, h * 0.7], [0.001, h]], 14).scale(rx, 1, rz).translate(px, y + 0.0355, pz);
+  for (let z = z0 + 0.5; z < z1 - 0.5; z += 0.9 + rand() * 1.5) {
+    const px = gx0 + 0.4 + rand() * (gw - 0.8), rx = 0.35 + rand() * 1.1, rz = 0.7 + rand() * 2.4, r = rand();
+    (r < 0.45 ? patch : r < 0.75 ? patchS : patchB).push(ell2(rx, rz, px, z, 0.004 + rand() * 0.004));
+  }
+  for (let z = z0 + 2; z < z1 - 8; z += 6 + rand() * 9) {
+    const cxm = xc + (rand() < 0.5 ? -1 : 1) * (1.4 + rand() * 2.9), l = 3 + rand() * 7, w = 0.25 + rand() * 0.5;
+    patchS.push(ell2(w, l / 2, cxm, z + l / 2, 0.003));
   }
   for (let z = z0 + 0.3; z < z1 - 0.3; z += 0.3 + rand() * 0.5) for (let q = 0; q < 3; q++) {
     const px = gx0 + 0.2 + rand() * (gw - 0.4), r = 0.04 + rand() * 0.09, h = r * (0.3 + rand() * 0.3);
@@ -787,7 +881,8 @@ function imperialWay(el, ctx) {
     const px = gx0 + 0.3 + rand() * (gw - 0.6), cxs = rand() * 6.28;
     for (let q = 0; q < 6; q++) { const a = cxs + (rand() - 0.5) * 1.2, l = 0.12 + rand() * 0.22, ox = px + (rand() - 0.5) * 0.5, oz = z + (rand() - 0.5) * 0.5; strw.push(rod([ox, y + 0.035, oz], [ox + Math.cos(a) * l, y + 0.04, oz + Math.sin(a) * l], 0.004, 3)); }
   }
-  for (const g of patch) bag.add('slate', g); for (const g of cob) bag.add('granite_grey', g); for (const g of cob2) bag.add('bluestone', g);
+  for (const g of patch) bag.add('ground', g); for (const g of patchS) bag.add('silt', g); for (const g of patchB) bag.add('brick_grey', g);
+  for (const g of cob) bag.add('granite_grey', g); for (const g of cob2) bag.add('bluestone', g);
   for (const g of dung) bag.add('cloth_brown', g); for (const g of strw) bag.add('reed_mat', g);
   // the slab bands' edges: the gutter between each band and its shop fronts is not drawn here (the fronts' aprons begin at the plot line); here: short broken places where a slab has been lifted and refilled with gravel
   for (let z = z0 + 4 + rand() * 7, k = 0; z < z1 - 3; z += 9 + rand() * 11, k++) { const sd = k % 2 ? 1 : -1, xx = sd < 0 ? x0 + 0.6 + rand() * (band - 1.4) : x1 - band + 0.8 + rand() * (band - 1.4), w2 = 0.5 + rand() * 0.6, d2 = 0.4 + rand() * 0.6; bag.add('pebbles', box(xx, y + 0.028, z, xx + w2, y + 0.036, z + d2)); }
@@ -805,7 +900,7 @@ function imperialWay(el, ctx) {
  */
 function hzSlabs(el, ctx) {
   const { bag } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, rand = rnd(el.seed ?? 9);
-  courtPaving({ y, seed: el.seed ?? 9, rects: [el.rect] }, ctx);
+  courtPaving({ y, seed: el.seed ?? 9, rects: [el.rect], calm: true }, ctx);
   for (let z = z0 + 5 + rand() * 9, k = 0; z < z1 - 4; z += 18 + rand() * 6, k++) {
     const cx = el.side === 'w' ? x1 - 1.0 : x0 + 1.0;
     bag.add('granite_grey', box(cx - 0.4, y + 0.03, z - 0.3, cx + 0.4, y + 0.075, z + 0.3));
@@ -1031,6 +1126,13 @@ function hzTree(el, { bag, col }) {
   const R = cr * (kind === 'willow' ? 0.75 : 0.9), per = Math.round(kind === 'peach' ? 60 : kind === 'willow' ? 90 : 200 * (R / 3) ** 2 + 60);
   for (const [lx, ly, lz] of lobes) {
     const ry = R * (kind === 'willow' ? 0.8 : 0.85);
+    // a dark underside under each lobe (a disc a little way under its equator, facing down): the collision's top field takes a crown for a roof, and a column through
+    // the lobe's rim has leaf cards on top but no face under them, which made the rim a solid wall to the walker (west lake route 2)
+    {
+      const uy = ly - ry * 0.25, ur = R * 1.15, fan = [];
+      for (let q = 0; q < 10; q++) { const a1 = q * 0.6283, a2 = (q + 1) * 0.6283; fan.push(lx, uy, lz, lx + Math.cos(a1) * ur, uy, lz + Math.sin(a1) * ur, lx + Math.cos(a2) * ur, uy, lz + Math.sin(a2) * ur); }
+      bag.add(kind === 'willow' ? spec.mats[1] : coreMat, fromTriangles(fan));
+    }
     if (kind !== 'willow') bag.add(coreMat, lathe(Array.from({ length: 9 }, (_, q) => { const t = q / 8 * Math.PI; return [Math.max(0.001, Math.sin(t)), -Math.cos(t)]; }), 14).scale(R * 0.8, ry * 0.8, R * 0.8).translate(lx, ly, lz));
     for (let t = 0; t < per; t++) {
       const th = rand() * 6.28, ph = Math.acos(rand() * 1.7 - 0.7);                    // not much of the underside
@@ -1124,12 +1226,52 @@ function hzWallSkin(el, { bag }) {
   for (let u = u0 + 3 + rand() * 2; u < u1 - 1.5; u += 6.5 + rand() * 1.5) {
     layer(pil, u - 0.32, u + 0.32, yp + 0.1, y1 - 2.3, 0.05, 0.2); layer(plinth, u - 0.4, u + 0.4, y0, yp + 0.1, 0.1, 0.24);
   }
-  for (let k = 0; k < Math.ceil((u1 - u0) / 9); k++) {
-    const w = 0.9 + rand() * 1.6, u = u0 + rand() * Math.max(0.1, u1 - u0 - w), ya = yp + 0.5 + rand() * (y1 - yp - 5), h = 0.7 + rand() * 1.6;
-    layer(patch, u, u + w, ya, Math.min(ya + h, y1 - 2.5), 0.05, 0.068);
+  // the damp of a brick wall: dark streaks running down from the string course (rain off the coping, in bands narrower toward their foot), and moss at the foot of the wall above its plinth
+  const moss = [];
+  for (let k = 0; k < Math.ceil((u1 - u0) / 3.2); k++) {
+    const w = 0.12 + rand() * 0.34, u = u0 + rand() * Math.max(0.1, u1 - u0 - w), h = 0.9 + rand() * 2.6, yt = y1 - 2.35 - rand() * 0.6;
+    if (yt - h < yp + 0.3) continue;
+    layer(patch, u, u + w, yt - h, yt, 0.05, 0.056); layer(patch, u + w * 0.25, u + w * 0.75, yt - h - 0.5, yt - h, 0.05, 0.056);
   }
+  for (let u = u0 + rand() * 1.2; u < u1 - 0.4; u += 0.6 + rand() * 1.4) { const w = 0.3 + rand() * 0.9; layer(moss, u, Math.min(u + w, u1), yp + 0.1, yp + 0.18 + rand() * 0.42, 0.05, 0.056); }
   bag.add('granite_block', fromTriangles([...plinth])); bag.add('granite_grey', fromTriangles([...cap, ...str]));
-  bag.add('brick_grey', fromTriangles([...brick, ...pil])); bag.add('slate', fromTriangles(mortar)); bag.add('plaster_damp', fromTriangles(patch));
+  bag.add('brick_grey', fromTriangles([...brick, ...pil])); bag.add('slate', fromTriangles(mortar)); bag.add('slate', fromTriangles(patch)); bag.add('lotus_leaf', fromTriangles(moss));
+}
+
+/**
+ * hz_revetment { a [x, z], b [x, z], n (+1/-1: which way the face looks), off (the face's coordinate across), y0, y1, seed }: the dressing of a granite terrace wall (the temple's
+ * terraces): a plinth course, a pilaster every 7 m with its capital, a string course under the coping and the coping with its drip; between the pilasters at the string course
+ * a stone dragon-head spout (chitou) projecting 0.5 m, with the dark streak of the water below it. [inferred: Song terrace walls were drained by chitou spouts; the form after the
+ * Yingzao fashi's stone work]
+ */
+function hzRevetment(el, { bag }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, n = el.n ?? 1, y0 = el.y0 ?? 0, y1 = el.y1, off = el.off, rand = rnd(el.seed ?? 3);
+  const alongX = Math.abs(bz - az) < 1e-6, u0 = alongX ? Math.min(ax, bx) : Math.min(az, bz), u1 = alongX ? Math.max(ax, bx) : Math.max(az, bz);
+  const P = (u, y, d) => (alongX ? [u, y, off + n * d] : [off + n * d, y, u]);
+  const box3 = (out, p, q, ya, yb, d0, d1) => hexa(out, [P(p, ya, d0), P(q, ya, d0), P(q, ya, d1), P(p, ya, d1), P(p, yb, d0), P(q, yb, d0), P(q, yb, d1), P(p, yb, d1)]);
+  const grey = [], blk = [], dark = [], spouts = [];
+  const H = y1 - y0;
+  box3(blk, u0, u1, y0, y0 + 0.55, 0.0, 0.07); box3(grey, u0, u1, y0 + 0.55, y0 + 0.65, 0.0, 0.11);
+  box3(grey, u0, u1, y1 - 1.5, y1 - 1.38, 0.0, 0.1); box3(blk, u0, u1, y1 - 1.38, y1 - 1.0, 0.0, 0.05);
+  box3(grey, u0 - 0.05, u1 + 0.05, y1 - 0.14, y1, 0.0, 0.2);
+  box3(blk, u0, u1, y1 - 0.34, y1 - 0.14, 0.0, 0.08);
+  const np = Math.max(1, Math.round((u1 - u0) / 7)), step = (u1 - u0) / np;
+  for (let i = 0; i <= np; i++) {
+    const u = u0 + i * step, w = i === 0 || i === np ? 0.3 : 0.26, c = Math.min(Math.max(u, u0 + w), u1 - w);
+    box3(blk, c - w, c + w, y0 + 0.65, y1 - 0.34, 0.0, 0.13);
+    box3(grey, c - w - 0.05, c + w + 0.05, y1 - 0.62, y1 - 0.34, 0.0, 0.18);
+    box3(grey, c - w - 0.04, c + w + 0.04, y0 + 0.65, y0 + 0.78, 0.0, 0.17);
+  }
+  for (let i = 0; i < np; i++) {
+    const uc = u0 + (i + 0.5) * step, [sx, sy, sz] = P(uc, y1 - 1.18, 0.0), [ex, , ez] = P(uc, y1 - 1.18, 0.55), dirx = ex - sx, dirz = ez - sz;
+    spouts.push(rod([sx, sy, sz], [ex, sy - 0.02, ez], 0.1, 8));
+    spouts.push(ell(0.17, 0.15, 0.17, ex + dirx * 0.12, sy - 0.02, ez + dirz * 0.12, 8));            // the head
+    for (const sg of [-1, 1]) { const [qx, , qz] = P(uc + sg * 0.1, y1 - 1.1, 0.62); spouts.push(rod([qx, sy + 0.12, qz], [qx, sy + 0.27, qz], 0.03, 4)); }   // the horns
+    const w = 0.18 + rand() * 0.12; box3(dark, uc - w, uc + w, y0 + 1.2 + rand() * 1.5, y1 - 1.5, 0.0, 0.02);
+  }
+  bag.add('granite_block', fromTriangles(blk)); bag.add('granite_grey', fromTriangles(grey)); bag.add('slate', fromTriangles(dark));
+  for (const g of spouts) bag.add('granite_grey', g);
+  void H;
 }
 
 /**
@@ -1245,4 +1387,4 @@ function hzLanding(el, { bag, col }) {
   void t;
 }
 
-export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_slabs: hzSlabs, hz_landing: hzLanding };
+export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_revetment: hzRevetment, hz_slabs: hzSlabs, hz_landing: hzLanding };
