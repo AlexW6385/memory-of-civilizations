@@ -64,5 +64,6 @@ export const MOVER_SITES = {
   'abu-simbel': () => import('../settlements/abu-simbel/movers.js'),
   'thebes': () => import('../settlements/thebes/movers.js'),
   'fez': () => import('../settlements/fez/movers.js'),
+  'catalhoyuk': () => import('../settlements/catalhoyuk/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

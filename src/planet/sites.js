@@ -135,7 +135,6 @@ export const PLANNED = [
   { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
   { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, region: 'siam', lat: 14.36, lon: 100.56, radius: 300 },
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, region: 'java', lat: 8.37, lon: 115.45, radius: 180 },
-  { id: 'catalhoyuk', name: { en: 'Çatalhöyük', zh: '加泰土丘' }, region: 'anatolia', lat: 37.67, lon: 32.83, radius: 100 },
   { id: 'abbasid-baghdad', name: { en: 'Abbasid Baghdad', zh: '阿拔斯巴格达' }, region: 'mesopotamia', lat: 33.31, lon: 44.36, radius: 500 },
   { id: 'shibam', name: { en: 'Shibam', zh: '希巴姆' }, region: 'arabia', lat: 15.93, lon: 48.63, radius: 180 },
   { id: 'alexandria', name: { en: 'Alexandria', zh: '亚历山大港' }, region: 'egypt', lat: 31.20, lon: 29.92, radius: 500 },

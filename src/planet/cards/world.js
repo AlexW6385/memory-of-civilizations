@@ -774,4 +774,18 @@ export const CARDS = {
       "毡帐 —— 以木格栅为骨、顶有天窗圈的毡帐，门朝南，有的立在地上，有的架在大车上；城外是汗庭的营地，以及成群的马和骆驼。",
     ],
   },
+  'catalhoyuk': {
+    en: [
+      "Çatalhöyük stands on the Konya Plain in central Anatolia, beside a former channel of the Çarşamba River, one of the first towns in the world, lived in from about 7500 to 5950 BC. The moment shown is about 6500 BC, when some six to eight hundred people may have lived on the East Mound. Its houses are of sun-dried mudbrick, built wall to wall with no streets between them: the flat mud roofs are the way through the town, and each house is entered by a ladder through a hatch in its roof, which is also the smoke hole. Houses were rebuilt on the rubble of their ancestors, which raised the mound.",
+      "The roofscape — the packed houses of mudbrick under flat roofs of beams, reeds and mud, with ladders, hatches, roof ovens, baskets and people at work; the open cells between them are middens and courts.",
+      "The opened house — climb the ladder against the south wall, cross the roof and go down through the hatch: the main room has the hearth and the domed oven under the hatch, raised plastered platforms along the north and east walls with burials beneath, white plaster and red paint, the aurochs and hunters painted on the west wall, bands of zig-zag and diamonds, and bucrania — cattle skulls and horns set in plaster on the walls and the pillar. A low opening leads to the storeroom, with its mud bins of grain, jars, baskets and grinding stone.",
+      "The pens, the marsh and the plain — hurdle pens for sheep and cattle at the edge of the town, reed marsh pools of the old river channel, steppe grass and small fields of wheat and barley.",
+    ],
+    zh: [
+      "加泰土丘位于安纳托利亚中部的科尼亚平原，紧邻恰尔桑巴河的一条古河道，是世界上最早的城镇之一，约从公元前 7500 年到前 5950 年有人居住。画面定格在约公元前 6500 年，东丘上大约住着六七百人。房屋用晒干的泥砖建成，墙挨着墙，没有街道：平整的泥顶就是穿行全镇的路，每座房子都从屋顶的天窗用梯子进出，天窗同时也是排烟口。房屋一代代在先人的废墟上重建，土丘也越垒越高。",
+      "屋顶之城 —— 紧挨在一起的泥砖房，平顶由木梁、芦苇和泥铺成，上面有梯子、天窗、屋顶烤炉、篮子和干活的人；房屋之间的空格是垃圾堆和院子。",
+      "敞开的房子 —— 沿南墙的梯子爬上屋顶，从天窗下去：正房里天窗下是灶膛和圆顶烤炉，北墙与东墙边是抹白灰的高台，台下葬着死者，墙上白灰与红色颜料，西墙绘着野牛与猎人，还有锯齿和菱形的带饰，以及公牛头骨和牛角——嵌在墙上和柱子上的牛头骨。一个低矮的开口通向储藏间，里面有盛粮的泥仓、陶罐、篮子和磨石。",
+      "畜栏、沼泽与平原 —— 镇边用柴篱围成的羊栏和牛栏，古河道留下的芦苇沼泽水塘，草原和小块的麦田、大麦田。",
+    ],
+  },
 };
