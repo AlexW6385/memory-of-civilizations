@@ -44,6 +44,7 @@ function kannonDen(el, ctx) {
     for (let k = 0; k < 3; k++) B('granite_block', -1.3, y0 + k * 0.3, hd + 1.5 + (2 - k) * 0.4, 1.3, y0 + (k + 1) * 0.3, hd + 1.5 + (3 - k) * 0.4 + (k === 2 ? 0 : 0));
     col.ramp([-1.3, hd + 1.5, 1.3, hd + 2.7], y0, y1 - 0.12, 'n');
     col.floor([-hw - 0.3, hd, hw + 0.3, hd + 1.5], y1);
+    for (const r of [[-hw - 0.3, hd + 1.4, -1.35, hd + 1.5], [1.35, hd + 1.4, hw + 0.3, hd + 1.5], [-hw - 0.3, hd, -hw - 0.2, hd + 1.5], [hw + 0.2, hd, hw + 0.3, hd + 1.5]]) { col.rect(r, y0, y1 - 0.1); B(WD, r[0], y0 + 0.3, r[1], r[2], y1 - 0.12, r[3]); }
     col.rect([-hw, -hd, hw, hd], y0, yU + 4);
     // the pent roof between the floors, the upper floor of 3 × 2 bays on the lower ceiling
     const ux = 3.15, uz = 2.1;

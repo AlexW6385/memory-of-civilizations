@@ -1,6 +1,6 @@
 {
   "site": { "id": "muromachi-kyoto", "name": { "en": "Muromachi Kyoto", "zh": "室町京都" }, "era": "15th c.", "region": "japan", "lat": 35.03, "lon": 135.80, "radius": 330 },
-  "arrival": [200, 0.1, 62, 0, 0.12],
+  "arrival": [200, 0.1, 25, 0, 0.14],
   "arrivalNote": "The Kannon-den of Ginkaku-ji whole across its pond, from the gravel walk on the south bank.",
   "card": {
     "en": [

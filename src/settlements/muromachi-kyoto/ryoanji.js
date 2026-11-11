@@ -16,7 +16,7 @@ for (const [x, z] of [[-226, -110], [-104, -110], [-226, -150], [-104, -160]]) E
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('hojo', [hx - 13, hz - 6, hx + 13, hz + 6], 0.85, 'hall'), room('ryoanji', RYOAN.rect, 0, 'open')];
-const walks = [[[gx, gz + 6], [gx, gz - 4], [gx, hz + 12], [hx, hz + 9], [hx - 1, hz + 3], [hx - 1, hz - 4], [hx, hz - 9]]];
+const walks = [[[gx, gz + 6], [gx, gz - 4], [gx, hz + 14], [hx - 19, hz + 14], [hx - 19, hz - 7.5], [hx - 14.6, hz - 7.5], [hx - 11, hz - 7.5], [hx - 4, hz - 7.5], [hx + 3.3 - 0.0, hz - 5], [hx + 3.3, hz - 1]]];
 walks[0].y0 = 0;
 
 export const ryoanji = {

@@ -8,9 +8,9 @@ export const SW = 3.5;                                           // half the wid
 export const NS = [-250, -180, -110, -40, 30, 90];              // the north–south streets (x)
 export const EW = [-170, -100, -30, 40, 100, 170, 240];          // the east–west streets (z)
 export const STREAM = { x0: 96.5, x1: 101.5, level: -0.55, bed: -1.9, top: 0.15 };
-export const GINKAKU = { rect: [115, -80, 278, 92], gate: [190, 92], pond: { c: [200, 6], r: [52, 26], level: -0.4, bed: -1.5 }, kannon: [200, -34], togudo: [136, -4] };
-export const RYOAN = { rect: [-235, -218, -95, -98], gate: [-165, -98], garden: [-177.5, -152, -152.5, -142], hojo: [-165, -132.6], pond: { c: [-165, -190], r: [46, 16], level: -0.4, bed: -1.4 } };
-export const SHRINE = { rect: [-72, 150, 78, 252], torii: [3, 160], hall: [3, 214], noh: [-6, 186] };
+export const GINKAKU = { rect: [115, -80, 278, 92], gate: [190, 92], pond: { c: [200, 4], r: [52, 15], level: -0.4, bed: -1.5 }, kannon: [200, -26], togudo: [136, -4] };
+export const RYOAN = { rect: [-232, -206, -116, -104], gate: [-165, -104], garden: [-177.5, -152, -152.5, -142], hojo: [-165, -132.6], pond: { c: [-165, -190], r: [46, 14], level: -0.4, bed: -1.4 } };
+export const SHRINE = { rect: [-10, 176, 70, 252], torii: [30, 182], hall: [30, 232], noh: [52, 212] };
 export const TEA = { hut: [-153, -8] };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -30,8 +30,8 @@ export function streets() {
   for (const x of NS) { let seg = [[za, zb]]; for (const p of PRECINCTS) if (x > p[0] - SW && x < p[2] + SW) seg = seg.flatMap(([a, b]) => (p[3] <= a || p[1] >= b ? [[a, b]] : [[a, p[1] - 1], [p[3] + 1, b]].filter(([c, d]) => d - c > 6))); for (const [a, b] of seg) STREETS.push([x - SW, a, x + SW, b]); }
   STREETS.push([xb, 100 - SW, 190 + SW, 100 + SW]);                                // over the stream to Ginkaku-ji's gate
   STREETS.push([GINKAKU.gate[0] - 2.5, 92, GINKAKU.gate[0] + 2.5, 100]);
-  STREETS.push([RYOAN.gate[0] - 2.5, RYOAN.rect[3], RYOAN.gate[0] + 2.5, RYOAN.rect[3] + 3 + SW]);
-  STREETS.push([SHRINE.torii[0] - 3, SHRINE.rect[1] - SW - 1, SHRINE.torii[0] + 3, SHRINE.hall[1] + 0.5]);
+  STREETS.push([RYOAN.gate[0] - 2.5, RYOAN.rect[3] - 1, RYOAN.gate[0] + 2.5, RYOAN.rect[3] + 3 + SW]);
+  STREETS.push([SHRINE.torii[0] - 3, SHRINE.rect[1] - 2, SHRINE.torii[0] + 3, SHRINE.hall[1] - 0.5]);
   return (STREETS = STREETS.filter((r) => r[2] - r[0] > 2 && r[3] - r[1] > 2 && !farRect(r, 18)));
 }
 export const BRIDGES = [[99, 100]];            // [x, z] of each bridge over the stream (the stream runs along z; the bridge spans x)
@@ -48,7 +48,7 @@ export function lots() {
   const rand = rng(1490), TR = ['cloth', 'sake', 'pottery', 'rice', 'tea', 'lacquer'];
   for (let i = 0; i < NS.length - 1; i++) for (let j = 0; j < EW.length - 1; j++) {
     const bx0 = NS[i] + SW, bx1 = NS[i + 1] - SW, bz0 = EW[j] + SW, bz1 = EW[j + 1] - SW, block = [bx0, bz0, bx1, bz1];
-    if (inPrecinct(block, 2) || farRect(block, 30)) continue;
+    if (inPrecinct(block, -0.5) || farRect(block, 30)) continue;
     if (i === NS.length - 2 && false) continue;
     const D = () => 10 + rand() * 2;
     const row = (a0, a1, mk) => { for (let u = a0; u < a1 - 5;) { const w = 5 + rand() * 2.5; if (u + w > a1) break; mk(u + w / 2, w, D()); u += w + 0.25; } };

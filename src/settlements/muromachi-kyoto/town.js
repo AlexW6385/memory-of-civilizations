@@ -19,11 +19,11 @@ function civic() {
   // the shrine: the torii on the approach, the hall at its end, the Noh stage in its court, lanterns along the way, a fence
   E.push({ t: 'torii', at: SHRINE.torii, y: 0, facing: 's' });
   E.push({ t: 'torii', at: [SHRINE.torii[0], SHRINE.torii[1] + 22], y: 0, facing: 's', s: 0.8 });
-  E.push({ t: 'shrine_hall', at: SHRINE.hall, y: 0, facing: 's', w: 9, d: 6 });
+  E.push({ t: 'shrine_hall', at: SHRINE.hall, y: 0, facing: 'n', w: 9, d: 6 });
   E.push({ t: 'noh_stage', at: SHRINE.noh, y: 0, facing: 's' });
   for (let z = SHRINE.torii[1] + 6; z < SHRINE.hall[1] - 8; z += 7) for (const sx of [-1, 1]) E.push({ t: 'ishidoro', at: [SHRINE.torii[0] + sx * 4.2, z], y: 0, s: 0.9 });
   const [sx0, sz0, sx1, sz1] = SHRINE.rect;
-  E.push({ t: 'bamboo_fence', a: [sx0, sz1], b: [sx1, sz1], h: 1.4 }, { t: 'bamboo_fence', a: [sx0, sz0 + 12], b: [sx0, sz1], h: 1.4 }, { t: 'bamboo_fence', a: [sx1, sz0 + 12], b: [sx1, sz1], h: 1.4 });
+  E.push({ t: 'bamboo_fence', a: [sx0, sz1], b: [sx1, sz1], h: 1.4 }, { t: 'bamboo_fence', a: [sx0, sz0 + 8], b: [sx0, sz1], h: 1.4 }, { t: 'bamboo_fence', a: [sx1, sz0 + 8], b: [sx1, sz1], h: 1.4 });
   // the tea hut in a block's yard, its roji garden and fence
   E.push({ t: 'tea_hut', at: TEA.hut, y: 0, facing: 's' }, { t: 'roji', at: [TEA.hut[0], TEA.hut[1] + 2], y: 0, facing: 's', seed: 7 });
   E.push({ t: 'ishidoro', at: [TEA.hut[0] + 4.5, TEA.hut[1] + 6], y: 0, s: 0.7 });

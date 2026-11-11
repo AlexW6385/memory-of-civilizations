@@ -42,12 +42,12 @@ const inYard = (x, z) => yardList.some((y) => inRect(y, x, z));
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || inStream(x, z, 1) || inPond(x, z, 1) || onStreet(x, z, 1) || inLot(x, z, 1)) return null;
   if (inRect(RYOAN.garden, x, z, 3) || inRect([RYOAN.hojo[0] - 15, RYOAN.hojo[1] - 8, RYOAN.hojo[0] + 15, RYOAN.hojo[1] + 12], x, z) || Math.hypot(x - GINKAKU.kannon[0], z - GINKAKU.kannon[1]) < 12 || inRect([GINKAKU.togudo[0] - 7, GINKAKU.togudo[1] - 8, GINKAKU.togudo[0] + 10, GINKAKU.togudo[1] + 8], x, z)) return null;
-  if (inRect(SHRINE.rect, x, z)) { if (inRect([-72, 195, 40, 232], x, z) && !inRect([-72, 195, 40, 232], x, z, -3)) return null; return Math.abs(x - SHRINE.torii[0]) < 5 ? null : { sugi: 0.02, grass: 12 }; }
+  if (inRect(SHRINE.rect, x, z)) return Math.abs(x - SHRINE.torii[0]) < 5 || Math.hypot(x - SHRINE.noh[0] + 5, z - SHRINE.noh[1] - 2) < 15 || Math.hypot(x - SHRINE.hall[0], z - SHRINE.hall[1]) < 9 ? null : { sugi: 0.03, grass: 8 };
   if (inRect(GINKAKU.rect, x, z)) {
     const n = vnoise(x * 0.05 + 3, z * 0.05), pd = Math.hypot((x - GINKAKU.pond.c[0]) / GINKAKU.pond.r[0], (z - GINKAKU.pond.c[1]) / GINKAKU.pond.r[1]);
-    if (Math.hypot(x - GINKAKU.kannon[0], z - GINKAKU.kannon[1] - 12) < 20 && x > 160 && x < 240) return { grass: 5 };       // the court before the pavilion
-    if (pd < 1.35) return { red_pine: 0.12 * sm(0, 0.5, n), boulder: 0.03, grass: 30 };
-    return { red_pine: 0.07, maple: 0.12 * sm(-0.2, 0.3, n), sugi: 0.05 * sm(0.1, 0.5, p.h / 20), bamboo: 0.6 * sm(0.3, 0.7, -n), grass: 40, boulder: 0.01 };
+    if (Math.hypot(x - GINKAKU.kannon[0], z - GINKAKU.kannon[1] - 12) < 20 && x > 160 && x < 240) return { grass: 1 };       // the court before the pavilion
+    if (pd < 1.35) return { red_pine: 0.12 * sm(0, 0.5, n), boulder: 0.03, grass: 10 };
+    return { red_pine: 0.07, maple: 0.12 * sm(-0.2, 0.3, n), sugi: 0.05 * sm(0.1, 0.5, p.h / 20), bamboo: 0.6 * sm(0.3, 0.7, -n), grass: 12, boulder: 0.01 };
   }
   if (inRect(RYOAN.rect, x, z)) return { grass: 14, red_pine: 0.03, maple: 0.06, sugi: 0.02, boulder: 0.01 };
   if (p.h > 3) return { sugi: 0.3 * sm(2, 10, p.h), red_pine: 0.15, maple: 0.1, grass: 8 };

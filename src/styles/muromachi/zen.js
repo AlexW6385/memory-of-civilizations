@@ -53,6 +53,7 @@ function togudo(el, ctx) {
     B(TM, -h - 0.3, y1 - 0.14, h, h + 0.3, y1, h + 1.3);
     for (const x of [-h - 0.2, -1.8, 0, 1.8, h + 0.2]) B(WD, x - 0.07, y0 + 0.2, h + 1.18, x + 0.07, y1 - 0.14, h + 1.3);
     col.floor([-h - 0.3, h, h + 0.3, h + 1.3], y1);
+    for (const [a, b, c, d] of [[-h - 0.3, h + 1.2, -0.9, h + 1.3], [0.9, h + 1.2, h + 0.3, h + 1.3], [-h - 0.3, h, -h - 0.2, h + 1.3], [h + 0.2, h, h + 0.3, h + 1.3]]) { B(WD, a, y0 + 0.3, c === h + 1.3 ? b : c, b, y1 - 0.14, d); col.rect([a, b, c, d], y0, y1 - 0.1); }
     for (let k = 0; k < 2; k++) B('granite_block', -0.9, y0 + k * 0.33, h + 1.3 + (1 - k) * 0.35, 0.9, y0 + (k + 1) * 0.33, h + 1.3 + (2 - k) * 0.35);
     col.ramp([-0.9, h + 1.3, 0.9, h + 2.0], y0, y1 - 0.14, 'n');
     col.floor([-h + 0.1, -h + 0.1, h - 0.1, h - 0.1], y1);
@@ -114,8 +115,10 @@ function hojo(el, ctx) {
     B(TM, -hw - 0.3, y1 - 0.14, hd, hw + 0.3, y1, hd + 1.9);
     for (let i = 0; i <= 12; i++) B(WD, -hw + i * bay - 0.08, y0 + 0.2, hd + 1.78, -hw + i * bay + 0.08, y1 - 0.14, hd + 1.9);
     col.floor([-hw - 0.3, hd, hw + 0.3, hd + 1.9], y1);
-    for (let k = 0; k < 3; k++) B('granite_block', -1.2, y0 + k * 0.28, hd + 1.9 + (2 - k) * 0.35, 1.2, y0 + (k + 1) * 0.28, hd + 1.9 + (3 - k) * 0.35);
-    col.ramp([-1.2, hd + 1.9, 1.2, hd + 3.0], y0, y1 - 0.14, 'n');
+    for (let k = 0; k < 3; k++) B('granite_block', hw + 0.3 + (2 - k) * 0.4, y0 + k * 0.28, hd + 0.2, hw + 0.3 + (3 - k) * 0.4, y0 + (k + 1) * 0.28, hd + 1.7);
+    col.ramp([hw + 0.3, hd + 0.2, hw + 1.5, hd + 1.7], y0, y1 - 0.14, 'w');
+    for (const [p0, q0, p1, q1] of [[-hw - 0.3, hd + 1.8, hw + 0.3, hd + 1.9], [-hw - 0.3, hd, -hw - 0.2, hd + 1.9], [hw + 0.2, hd, hw + 0.3, hd + 1.9]]) col.rect([p0, q0, p1, q1], y0, y1 - 0.1);
+    B(WD, -hw - 0.3, y0 + 0.3, hd + 1.8, hw + 0.3, y1 - 0.14, hd + 1.9);
     // rooms: two rows of three; screens with the gaps where the way goes
     const cx = [-hw, -hw + W / 3, -hw + 2 * W / 3, hw], zm = 0;
     col.floor([-hw + 0.1, -hd + 0.1, hw - 0.1, hd - 0.1], y1);
