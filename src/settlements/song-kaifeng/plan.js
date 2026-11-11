@@ -3,7 +3,8 @@
 // with its stone landings, the Rainbow Bridge and grain boats; the east wall, its water gate and the
 // city gate with its tower; the streets' paving.
 
-import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE, FIELDS_X, STONE_BANK } from './layout.js';
+import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE, FIELDS_X, STONE_BANK, APPROACH } from './layout.js';
+import { interiorRooms } from './interiors.js';
 
 const E = [];
 const RW = RADIUS - 26, half = (z) => Math.sqrt(Math.max(0, RW * RW - z * z));
@@ -22,6 +23,8 @@ const SONG_PAL = { roof: 'tile_dark', soffit: 'lacquer_red', wood: 'lacquer_red'
 const MAIN = [PAGODA[0] - 18, mz0 + 10, PAGODA[0] + 18, mz0 + 32];
 E.push({ t: 'qing_hall', rect: MAIN, y: 0.9, H: 6, double: 4.8, roof: 'xieshan', bays: [7, 4], front: 's', four: true, plat: 0.9, pal: SONG_PAL });
 E.push({ t: 'temple_interior', rect: MAIN, y: 0.9, H: 6, front: 's', kind: 'main' });
+// the steps up the terrace's south face on the axis (0.9 m; the walker's step is 0.5)
+E.push({ t: 'stairs', rect: [PAGODA[0] - 2.6, MAIN[3] + 0.8, PAGODA[0] + 2.6, MAIN[3] + 3.0], y0: 0.04, y1: 0.9, dir: 'n', mat: 'granite_block' });
 for (const x of [mx0 + 14, mx1 - 14]) {
   const west = x < PAGODA[0], rect = [x - 6, -200, x + 6, -170], front = west ? 'e' : 'w';
   E.push({ t: 'qing_hall', rect, y: 0.6, H: 4.6, roof: 'xieshan', front, plat: 0.6, eave: 1.3, sweep: 0.8, pal: SONG_PAL, caihua: false });
@@ -55,6 +58,8 @@ wz(-half(WALL_X) + 4, GATE.rect[1] + 0.5); wz(GATE.rect[3] - 0.5, RIVER.z0 - 1.5
 E.push({ t: 'block', walk: true, rect: [WALL_X - 8, RIVER.z0 - 2, WALL_X + 8, RIVER.z1 + 2], y0: 4.5, y1: 9, mat: 'brick_grey' });
 E.push({ t: 'song_gate', rect: GATE.rect, along: 'x', w: 5.2, h: 4.2, top: 5.8, tw: 3.2, H: 9.5, mat: 'brick_grey' });
 E.push({ t: 'qing_hall', rect: [WALL_X - 6.5, GATE.z - 13, WALL_X + 6.5, GATE.z + 13], y: 9.5, H: 5, roof: 'hip', bays: [5, 3], front: 'e', four: true, plat: 0.3, pal: { roof: 'tile_dark', soffit: 'lacquer_red', wood: 'lacquer_red', column: 'lacquer_red', plaster: 'plaster_white', plinth: 'brick_grey', base: 'brick_grey' } });
+// the approach: the way from the shop street to the gate hall, paved
+E.push({ t: 'paving', rect: APPROACH, y: 0.04, th: 0.3 });
 // ---- the streets' paving: none in the fields; beyond the stone banks the riverside streets stop
 // 4 m short of the water's edge, leaving the earth bank (the towpath on the north side)
 const pave = (r) => { if (r[2] > r[0] + 0.5 && r[3] > r[1] + 0.5) E.push({ t: 'paving', rect: r, y: 0.04, th: 0.3 }); };
@@ -72,8 +77,17 @@ for (const s of STREETS) {
 }
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('monastery', MONASTERY, 0, 'open')];
-const walks = [[[0, 200], [0, 100], [0, 76], [0, 50], [0, -80], [160, -80], [160, -150]]];
+// the halls (kind 'hall': the chant zone) come first, the monastery's court 'open' after them; the shops' and houses' rooms (tea, tavern, inn, shop, house) are
+// interiors.js's, in the lot's footprint on its floor. The halls' rects and floors are the elements' above.
+const rooms = [
+  room('gate-hall', [SHANMEN.c[0] - smW / 2, SHANMEN.c[1] - 4.4, SHANMEN.c[0] + smW / 2, SHANMEN.c[1] + 4.4], 0.42, 'hall'),
+  room('main-hall', MAIN, 0.9, 'hall'),
+  room('sutra-hall', [mx0 + 8, -200, mx0 + 20, -170], 0.6, 'hall'),
+  room('guanyin-hall', [mx1 - 20, -200, mx1 - 8, -170], 0.6, 'hall'),
+  room('monastery', MONASTERY, 0, 'open'),
+  ...interiorRooms(),
+];
+const walks = [[[0, 108], [0, 100], [0, 76], [0, 50], [0, -80], [160, -80], [160, -150]]];
 walks[0].y0 = 0;
 
 export const pagoda = {
@@ -83,8 +97,10 @@ export const pagoda = {
   style: 'song',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [160, -130], facing: 'n' },
-  bounds: [WALL_X - 8, -260, 300, 110],
-  bakeBounds: [WALL_X - 8, -260, 245, 100],
+  // the landmark's precinct: the gate and its wall, the monastery, the bridge and the two river streets. The generic street life (src/objects/life.js) keeps out of the bounds
+  // (the town's own scroll life dresses them); the town's streets beyond, out to the disc's edge (RADIUS 520), are the townscape's.
+  bounds: [WALL_X - 8, -262, 300, 112],
+  bakeBounds: [WALL_X - 8, -262, 300, 112],
   view: [150, -200, 170, -180],
   bakeTop: 62,
   elements: E,

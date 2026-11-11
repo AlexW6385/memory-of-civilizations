@@ -30,7 +30,15 @@ const GOODS = {
   rope: { items: ['rope_fibre', 'wicker', 'rope_fibre'], shape: 'sacks' },
   bamboo: { items: ['bamboo_culm', 'bamboo_culm', 'wicker'], shape: 'sacks' },
   wine: { items: ['pottery_dark', 'terracotta', 'pottery_dark'], shape: 'jars' },
+  rice: { items: ['sacking', 'sacking', 'wicker'], shape: 'sacks' },
+  food: { items: ['iron', 'glaze_white', 'wicker'], shape: 'jars' },
+  butcher: { items: ['cloth_red', 'wood_dark', 'cloth_white'], shape: 'bolts' },
+  saddlery: { items: ['hide_brown', 'hide_black', 'iron'], shape: 'sacks' },
+  lacquer: { items: ['lacquer_red', 'lacquer_black', 'glaze_white'], shape: 'jars' },
+  inn: { items: ['pottery_dark', 'wicker', 'glaze_white'], shape: 'jars' },
 };
+/** The end of a shop's front at which its sign pole stands (shops.js): the house-frame position a (along the front, from its u-origin). */
+export const poleA = (seed, L) => ((seed >> 2) & 1 ? 0.25 : L - 0.25);
 const WALLS = ['plaster_white', 'plaster_white', 'plaster_grey', 'lime_plaster', 'plaster_damp'];
 const FLAGS = ['cloth_indigo', 'cloth_white', 'cloth_indigo', 'cloth_red'];
 
@@ -266,7 +274,7 @@ export function houseSong(el, { bag, col }) {
       }
       cRect(0, fb + 0.45, L, D, 0, yTop);
       // the shop's inside, seen through the open front: the back wall's shelves with goods
-      if (det >= 2) {
+      if (det >= 2 && !el.furnished) {
         const bk = D - 0.3;
         B('wood_dark', 0.35, bk - 0.42, L - 0.35, bk, P0, P0 + 2.1); B('timber', 0.3, bk - 0.47, L - 0.3, bk - 0.42, P0 + 2.1, P0 + 2.18);
         const nbx = Math.floor((L - 0.7) / 0.5);
@@ -275,33 +283,14 @@ export function houseSong(el, { bag, col }) {
           B(m, a, bk - 0.46, a + 0.38, bk - 0.42 + 0.02, P0 + 0.12 + r * 0.66, P0 + 0.5 + r * 0.66);
         }
       }
-      // the sign: a vertical board on a bracket (hanging), the wine flag on its pole for wine and tea
-      if (det >= 1) {
-        const flag = trade === 'wine' || trade === 'tea' || kind === 'wine' || kind === 'tea';
-        if (flag || rand() < 0.35) {
-          const ae = nb > 2 && rand() < 0.5 ? L - 0.55 : 0.55, ya = yF + (two ? -0.2 : 0.4);
-          B('timber', ae - 0.04, -1.35, ae + 0.04, fb, ya + 1.25, ya + 1.35);     // the arm over the street
-          B('timber', ae - 0.05, -1.4, ae + 0.05, -1.3, ya + 1.3 - 0.15, ya + 1.35);
-          if (flag) {
-            const c = pick(rand, FLAGS), q = W(ae, -1.35, 0), c2 = c === 'cloth_white' ? 'cloth_indigo' : 'cloth_white';
-            const cl = clothBox(q[0] - 0.015, ya - 1.2, q[2] - 0.015, q[0] + 0.015, ya + 1.28, q[2] + 0.015, 0.3);
-            void cl;
-            // the flag hangs along the street (its flat toward the walker coming along the front)
-            const a0 = ae - 0.3, a1 = ae + 0.3, pa = W(a0, -1.34, 0), pb = W(a1, -1.34, 0);
-            addCloth(bag, c, clothBox(Math.min(pa[0], pb[0]), ya - 1.0, Math.min(pa[2], pb[2]) - 0.01, Math.max(pa[0], pb[0]), ya + 1.28, Math.max(pa[2], pb[2]) + 0.01, 0.25), ya + 1.28);
-            addCloth(bag, c2, clothBox(Math.min(pa[0], pb[0]) + 0.1, ya - 0.35, Math.min(pa[2], pb[2]) - 0.02, Math.max(pa[0], pb[0]) - 0.1, ya + 0.6, Math.max(pa[2], pb[2]) + 0.02, 0.25), ya + 1.28);
-          } else {
-            const c = pick(rand, ['paint_white', 'lacquer_black', 'lacquer_red']);
-            B(c, ae - 0.03, -1.36, ae + 0.03, -1.28, ya - 0.6, ya + 1.25);
-            B('timber', ae - 0.05, -1.4, ae + 0.05, -1.24, ya - 0.66, ya - 0.6);
-          }
-        }
-      }
+      // (the trade's sign — the wine flag, the gourd, the measure — stands on its pole in the street: shops.js)
       // the mat awning over the street in front of the door bays
+      const pa0 = poleA(el.seed || 1, L);
       if (det >= 1 && !two && rand() < 0.55 || (det >= 1 && two && rand() < 0.25)) {
         const aa0 = rand() < 0.5 ? 0.0 : bayA(Math.max(0, doorBay - 1)), aa1 = Math.min(L, aa0 + (rand() < 0.5 ? L : 2 * bayW)), yA = Math.min(yF - 0.35, 3.0), reach = 2.4;
         const aw0 = Math.max(0, aa0), aw1 = Math.max(aw0 + 2.2, aa1);
         const a1 = Math.min(L, aw1), y1 = yA - 0.55;
+        if (!(pa0 > aw0 - 0.9 && pa0 < a1 + 0.9)) {
         surf('reed_mat', [W(aw0, -0.15, yA), W(a1, -0.15, yA), W(a1, -reach, y1), W(aw0, -reach, y1)], [0, 1, 0]);
         surf('reed_mat', [W(aw0, -0.15, yA - 0.05), W(aw0, -reach, y1 - 0.05), W(a1, -reach, y1 - 0.05), W(a1, -0.15, yA - 0.05)], [0, -1, 0]);
         const vc = pick(rand, ['cloth_white', 'cloth_indigo', 'cloth_ochre']);
@@ -309,6 +298,7 @@ export function houseSong(el, { bag, col }) {
         addCloth(bag, vc, clothBox(Math.min(pa[0], pb[0]), y1 - 0.42, Math.min(pa[2], pb[2]) - 0.015, Math.max(pa[0], pb[0]), y1 - 0.04, Math.max(pa[2], pb[2]) + 0.015, 0.21), y1 - 0.04);
         for (const a of [aw0 + 0.1, a1 - 0.1]) { B('bamboo_culm', a - 0.04, -reach - 0.04, a + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(a, -reach, 0.1, 0, y1); }
         if (a1 - aw0 > 6) { const am = (aw0 + a1) / 2; B('bamboo_culm', am - 0.04, -reach - 0.04, am + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(am, -reach, 0.1, 0, y1); }
+        }
       }
     }
     // ---- the upper storey: the balcony, posts, lattice windows between them

@@ -10,6 +10,9 @@ import { RADIUS, RIVER, BRIDGE, GATE, WALL_X, FIELDS_X, STREETS, inRect, inLot, 
 import './style.js';
 import { STONE_BANK, WHARVES, STEPS, LANES, onLane } from './layout.js';
 import { ground } from './ground.js';
+import { tradeOf } from './trades.js';
+import { shopElements } from './shops.js';
+import { interiorElements, interiorLife, furnishedLots } from './interiors.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [160, -130], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -266,7 +269,12 @@ export async function town() {
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k).push(l);
   }
-  for (const [k, all] of [...groups].sort()) for (let i = 0; i < all.length; i += 120) plans.push(base(`song-kaifeng-houses-${k.replace(':', '-')}-${i / 120}`, all.slice(i, i + 120).map((l) => ({ t: 'house_song', y: 0, ...l })), 'kaifeng-site'));
+  const furnished = furnishedLots();
+  for (const [k, all] of [...groups].sort()) for (let i = 0; i < all.length; i += 120) plans.push(base(`song-kaifeng-houses-${k.replace(':', '-')}-${i / 120}`, all.slice(i, i + 120).map((l) => ({ t: 'house_song', y: 0, ...l, trade: tradeOf(l) ?? l.trade, furnished: furnished.has(l) })), 'kaifeng-site'));
   plans.push(waterside(), ...scroll(), ...landing());
+  // the shops' signs on their poles and goods in the street; the rooms of the shops, wine shops and tea shops furnished, their people
+  plans.push(base('song-kaifeng-shops', shopElements(), 'life'));
+  plans.push(base('song-kaifeng-interiors', interiorElements()));
+  plans.push(base('song-kaifeng-interior-life', interiorLife(), 'life'));
   return plans;
 }
