@@ -15,6 +15,7 @@ import { laundry, newsstand } from './street.js';
 import { turned } from './turn.js';
 import { pavement, curb } from './pave.js';
 import { shopRoom } from './shoprooms.js';
+import { library } from './library.js';
 import { rowhouses, castIronFront, chimney, bulkhead, subwayEntrance, face } from './blocks.js';
 import { shopName, shopSign, bladeText, nearEntrance, rng as rng2, Quads, letters, textLen, fitCell, readDir } from './dress.js';
 
@@ -272,6 +273,6 @@ function beauxArts(el, { bag, col }) {
 function park(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('granite_grey', box(x0, y - 0.3, z0, x1, y + 0.25, z0 + 1.5)); bag.add('granite_grey', box(x0, y - 0.3, z1 - 1.5, x1, y + 0.25, z1)); }
 registerStyle('artdeco', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, diner, walkup, skyscraper, empire_state: empireState, grand_central: grandCentral, laundry, newsstand, subway_entrance: subwayEntrance, pavement, curb, chrysler, beaux_arts: beauxArts, el_track: elTrack, el_train: elTrain, park, turned },
+  elements: { ...STYLES.qing.elements, diner, walkup, skyscraper, empire_state: empireState, grand_central: grandCentral, laundry, newsstand, subway_entrance: subwayEntrance, pavement, curb, library, chrysler, beaux_arts: beauxArts, el_track: elTrack, el_train: elTrain, park, turned },
   objects: {},
 });

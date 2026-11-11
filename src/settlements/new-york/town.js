@@ -1,9 +1,10 @@
 // The blocks' buildings (docs/settlements/new-york.md §5) and the street's life (§5a): the traffic of
 // 1931 on the avenues and cross streets — Checker and Yellow cabs among black, cream and blue
 // motor cars — people on the pavements, lamp posts along the avenues.
-import { RADIUS, AVENUES, STREETS, GCT, BRYANT, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity, frontPoint, pavements, roomLots } from './layout.js';
+import { RADIUS, AVENUES, STREETS, GCT, BRYANT, LIBRARY, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity, frontPoint, pavements, roomLots } from './layout.js';
 import { entranceOf } from './plan.js';
 import { concoursePeople } from '../../styles/artdeco/concourse.js';
+import { libraryPeople } from '../../styles/artdeco/library.js';
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
 // settlement's by the style's `turned`, the life of the streets — single placed things — moved and
 // turned here, and each tile's centre with it)
@@ -229,9 +230,16 @@ function gctLife() {
   });
   return { ...base('new-york-gct-life', []), elements: list, style: 'life', center: toCity((x0 + x1) / 2, (z0 + z1) / 2), near: 160 };
 }
+/** The Library's people (life style): readers at the long tables of the Main Reading Room, librarians at the desks, visitors in Astor Hall. */
+function libraryLife() {
+  const rand = rng(1937), y = height((LIBRARY[0] + LIBRARY[2]) / 2, (LIBRARY[1] + LIBRARY[3]) / 2), DR = ['cloth_grey', 'cloth_brown', 'cloth_black', 'cloth_indigo'], pick = (a) => a[Math.floor(rand() * a.length)];
+  const list = libraryPeople(LIBRARY, y).map((p) => { const woman = rand() < 0.4, desk = p.role === 'desk';
+    return placed({ t: 'figure', at: p.at, y: p.y, rot: p.rot, seed: Math.floor(rand() * 1e9), skin: pick(['skin_light', 'skin_light', 'skin_medium']), pose: p.role === 'read' ? 'sit' : 'stand', dress: woman ? 'robe' : 'trousers', cloth: pick(DR), cloth2: desk ? 'cloth_white' : pick(['cloth_white', 'cloth_grey']), hat: p.role === 'read' || desk ? 'none' : woman ? pick(['cap', 'none']) : 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']) }); });
+  return { ...base('new-york-library-life', []), elements: list, style: 'life', center: toCity((LIBRARY[0] + LIBRARY[2]) / 2, (LIBRARY[1] + LIBRARY[3]) / 2), near: 160 };
+}
 export async function buildings() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l) }])));
   const dl = dinerLife(), c = toCity(...DINER_AT);
-  return [...plans, ...streetLife(), ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
+  return [...plans, ...streetLife(), ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), libraryLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }
