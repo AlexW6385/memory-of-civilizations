@@ -10,7 +10,7 @@ import { loft, ring } from '../egyptian/objects.js';
 import '../qing/index.js';
 import { urHouseOpen, scribeKit, quayGoods } from './house.js';
 import { giparu, urChapel } from './temple.js';
-import { dressFront, roofLife } from './dress.js';
+import { dressFront, roofLife, urPen } from './dress.js';
 import { courtDress } from './court.js';
 import { urHall } from './hall.js';
 import { palm } from '../egyptian/objects.js';
@@ -276,6 +276,13 @@ function niched(bag, r, h, face, niches, low, up, base) {
   add(slab(u, Bn, 0, T), -0.3, h);
 }
 
+/** The door of an ordinary house { rect, seed } as urHouse lays it out: the face that has it and the door's middle along it (world), by the same stream of random numbers. */
+export function doorOf(el) {
+  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, d = Math.min(3.8, Math.min(W, D) * 0.3);
+  rand(); rand(); rand();
+  const side = Math.floor(rand() * 4), f = ['n', 's', 'w', 'e'][side], [s0, s1] = f === 'n' || f === 's' ? [x0 + 0.8, x1 - 0.8] : [z0 + d + 0.8, z1 - d - 0.8];
+  return { face: f, dc: s0 + (rand() < 0.5 ? 0.25 : 0.75) * (s1 - s0) };
+}
 /**
  * ur_house: a courtyard house { rect, seed } (Woolley's houses at Ur): rooms round a court paved in brick, one or
  * two storeys; the walls of baked brick in their lower courses and plastered mud brick above, some whitewashed;
@@ -465,6 +472,6 @@ function reedBoat(el, { bag }) {
 
 registerStyle('sumerian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, giparu, ur_chapel: urChapel, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, ur_court: courtDress, ur_hall: urHall, ur_palm: palm, quay_goods: quayGoods },
+  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, giparu, ur_chapel: urChapel, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, ur_court: courtDress, ur_pen: urPen, ur_hall: urHall, ur_palm: palm, quay_goods: quayGoods },
   objects: {},
 });

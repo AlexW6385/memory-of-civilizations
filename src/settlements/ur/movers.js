@@ -24,6 +24,7 @@ export function walkways() {
   L([0, MARKET[3]], [0, TEMENOS[1] + 6], 4, 2.4);                                // through the gate
   L([0, TEMENOS[1] + 6], [0, COURT[3] + 4], 6, 2.0);                             // on to the Court of Nanna
   L([TEMENOS[2], -20], [TEMENOS[2] + 120, -20], 4, 1.6);                         // the east street
+  L([0, -155], [62, -155], 5, 1.3); L([62, -155], [62, -111], 4, 1.1); L([62, -111], [100, -111], 4, 0.9);   // to the palace's gate and court
   L([qx, qz0], [qx, qz1], 2.4, 2.4);                                             // the quay's top
   const rects = [
     { r: [MARKET[0] + 2, MARKET[1] + 2, MARKET[2] - 2, MARKET[3] - 2], weight: 1.6, market: 1.8, kind: 'street' },

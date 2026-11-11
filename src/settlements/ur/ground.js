@@ -27,15 +27,16 @@ function planting(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6 || inHarbour(x, z)) return null;
   if (inRect(HARBOUR.rect, x, z, 3)) return { reeds: 6 };
-  if (inRect(HARBOUR.rect, x, z, 14)) return { date_palm: 1.2, grass_dry: 10 };
-  if (r > RADIUS - 34) return { date_palm: 0.8, grass_dry: 12 };
+  if (inRect(HARBOUR.rect, x, z, 14)) return { date_palm: 1.2, tamarisk: 0.5, grass_dry: 10 };
+  if (inRect(HARBOUR.rect, x, z, 40) && !inHouse(x, z, 1)) return { date_palm: 0.5, tamarisk: 0.25, grass_dry: 8 };      // the groves behind the quay
+  if (r > RADIUS - 34) return { date_palm: 1.4, tamarisk: 0.3, grass_dry: 12 };      // the date groves round the town's edge
   if (inRect(TEMENOS, x, z) || inHouse(x, z, 1) || inRect(MARKET, x, z, 2) || (Math.abs(x + 4) < 10 && z < TEMENOS[1])) return null;   // (nor in the market square and the north street)
   return hash2(x * 0.1, z * 0.1) < 0.04 ? { date_palm: 0.3 } : null;
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   sea: HARBOUR.water,   // the planet's sea is this water, at this level (src/planet/relief.js)
-  maxDensity: { date_palm: 1.2, reeds: 6 },
+  maxDensity: { date_palm: 1.4, reeds: 6, tamarisk: 0.5 },
   climate: {
     sun: { az: 150, el: 48, color: [1.0, 0.94, 0.84], intensity: 3.4, lat: 31, dec: 10, hour: 10 },
     sky: { turbidity: 4.6, rayleigh: 1.1, mie: 0.007, mieG: 0.8, zenith: [0.12, 0.19, 0.34], horizon: [0.7, 0.68, 0.62] },

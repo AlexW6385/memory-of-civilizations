@@ -12,8 +12,9 @@ const flights = [
   { kind: 'swallow', n: 4, loop: { c: [0, -30], a: [60, 50], rot: 0.3 }, y: [8, 30], speed: 9 },
   { kind: 'crow', n: 6, loop: { c: [0, 0], a: [60, 45], rot: 0.5 }, y: [38, 55], speed: 8 },
 ];
+flights.push({ kind: 'swallow', n: 5, lane: { a: [-200, -200], b: [200, -200] }, y: [1.5, 6], speed: 9 }, { kind: 'swallow', n: 4, lane: { a: [60, -300], b: [60, 100] }, y: [1.5, 6], speed: 9 }, { kind: 'crow', n: 4, loop: { c: [-110, -20], a: [30, 25], rot: 0.2 }, y: [20, 32], speed: 8 });   // over the lanes and the temple's workshops
 const perches = [];
-const spots = [[MARKET[0] + 6, MARKET[3] + 2], [MARKET[2] - 6, MARKET[3] + 2], [0, MARKET[1] - 12], [0, -150], [(COURT[0] + COURT[2]) / 2 + 12, -110], [hx1 + 3, -60], [hx1 + 3, 0], [hx1 + 8, 30]];
+const spots = [[-20, -200], [20, -194], [-70, -140], [95, -111], [-100, 70], [-40, 90], [140, -30], [-250, -20], [-265, 40], [MARKET[0] + 6, MARKET[3] + 2], [MARKET[2] - 6, MARKET[3] + 2], [0, MARKET[1] - 12], [0, -150], [(COURT[0] + COURT[2]) / 2 + 12, -110], [hx1 + 3, -60], [hx1 + 3, 0], [hx1 + 8, 30]];
 for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z), rot: (x * 7) % 3, range: [1.8, 1.6] });
 perches.push({ kind: 'egret', x: hx0 + 8, z: hz0 + 60, y: HARBOUR.water, rot: 0, stay: [80, 240], gone: [40, 150], alert: 10 });
 export default { fish, flights, perches };

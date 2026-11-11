@@ -120,3 +120,19 @@ export function roofLife({ bag }, { wings, y, seed }) {
     }
   }
 }
+
+/**
+ * ur_pen: { rect, seed, kind ('pen' | 'orchard') } — an empty lot put to use: a pen of reed mats on palm posts with a trough
+ * and a heap of fodder (the beasts go in as figures), or a little orchard of three date palms in brick-edged pits with a
+ * watering channel between them (the palms are placed by the settlement: `ur_palm`).
+ */
+export function urPen(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, rand = rng((el.seed || 1) * 5 + 1), h = 1.15, m = 0.8;
+  const a0 = x0 + m, a1 = x1 - m, b0 = z0 + m, b1 = z1 - m;
+  const wallx = (a, b, z, gap) => { for (const [p, q] of gap ? [[a, gap[0]], [gap[1], b]] : [[a, b]]) { if (q - p < 0.3) continue; bag.add('reed_mat', box(p, 0, z - 0.04, q, h, z + 0.04)); col.rect([p, z - 0.1, q, z + 0.1], 0, h); } for (let x = a; x <= b + 0.01; x += 1.5) bag.add('palm_trunk', box(x - 0.05, 0, z - 0.07, x + 0.05, h + 0.2, z + 0.07)); };
+  const wallz = (a, b, x) => { bag.add('reed_mat', box(x - 0.04, 0, a, x + 0.04, h, b)); col.rect([x - 0.1, a, x + 0.1, b], 0, h); for (let z = a; z <= b + 0.01; z += 1.5) bag.add('palm_trunk', box(x - 0.07, 0, z - 0.05, x + 0.07, h + 0.2, z + 0.05)); };
+  const g = (a0 + a1) / 2 + (rand() - 0.5) * 2;
+  wallx(a0, a1, b0, null); wallx(a0, a1, b1, [g - 0.7, g + 0.7]); wallz(b0, b1, a0); wallz(b0, b1, a1);
+  bag.add('timber', box(a0 + 0.5, 0, b0 + 0.4, a0 + 2.7, 0.3, b0 + 0.8)); bag.add('bitumen', box(a0 + 0.56, 0.26, b0 + 0.44, a0 + 2.64, 0.3, b0 + 0.76));
+  for (let k = 0; k < 6; k++) { const T = []; beamTris(T, [a1 - 2.2, (k > 3 ? 0.15 : 0), b0 + 0.6 + (k % 4) * 0.14], [a1 - 0.6, (k > 3 ? 0.15 : 0), b0 + 0.6 + (k % 4) * 0.14], 0.06, 0.13); bag.add('reed_mat', fromTriangles(T)); }
+}
