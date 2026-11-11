@@ -22,7 +22,7 @@ E.push({ t: 'graves', list: GRAVES, roses: ROSES, y: TOP });
 E.push({ t: 'carsi', ...CARSI });
 for (const [x, z, face] of CESMES) E.push({ t: 'cesme', at: [x, z], face, y: TOP });
 const [t0, u0, t1, u1] = TERRACE;
-E.push({ t: 'block', rect: [t0, u0 - 2, t1, u0], y0: 0, y1: TOP + 1, mat: 'limestone' });
+E.push({ t: 'block', rect: [t0, u0 - 0.6, t1, u0], y0: 0, y1: TOP + 1, mat: 'limestone' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const hw = MOSQUE.d * 1.1 - 2.6, hd = MOSQUE.d * 1.1 - 2.6;

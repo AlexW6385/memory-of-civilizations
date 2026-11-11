@@ -12,6 +12,7 @@ import { prayerHall } from './prayerhall.js';
 import { kahvehane } from './kahve.js';
 import { carsi } from './bazaar.js';
 import { cesme } from './cesme.js';
+import { ottomanHouse } from './konak.js';
 import * as FN from '../mughal/furnish.js';
 
 const S = 'limestone', L = 'lead';
@@ -392,6 +393,6 @@ function graves(el, { bag, col }) {
 
 registerStyle('ottoman', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ...KULLIYE },
+  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ottoman_house: ottomanHouse, ...KULLIYE },
   objects: {},
 });

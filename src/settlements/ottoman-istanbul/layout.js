@@ -69,21 +69,79 @@ export function height(x, z) {
   return TOP * smooth(240, 0, d) * (1 - smooth(RADIUS - 40, RADIUS - 5, Math.hypot(x, z)));
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-let LOTS = null;
-/** Timber houses on the slopes. */
+/**
+ * The timber quarter (docs/settlements/ottoman-istanbul.md §13): blocks of 39 × 35 m between lanes of 3.4 m, each lined on
+ * its four sides with houses that touch (party walls, fronts 4.5–8.5 m wide, 10 m deep) round a garden or yard of
+ * fig and cypress; the lanes run on the grid and are cobbled (laneAt).
+ */
+export const LANE = 3.4, BX = 42, BZ = 38, OX = 1.6, OZ = 38, DEPTH = 10;
+const nearTerrace = (x, z, m) => inRect(TERRACE, x, z, m);
+let BLOCKS = null, LOTS = null, YARDS = null;
+/** The blocks of the quarter: { rect (inside the lanes), c }. */
+export function blocks() {
+  if (BLOCKS) return BLOCKS;
+  BLOCKS = [];
+  for (let i = Math.floor(-RADIUS / BX) - 1; i <= Math.ceil(RADIUS / BX); i++) for (let j = Math.floor(-RADIUS / BZ) - 1; j <= Math.ceil(RADIUS / BZ); j++) {
+    const x0 = OX + i * BX + LANE, z0 = OZ + j * BZ + LANE, x1 = OX + (i + 1) * BX, z1 = OZ + (j + 1) * BZ, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    if (Math.hypot(cx, cz) > RADIUS - 48) continue;
+    if (x1 > TERRACE[0] - 6 && x0 < TERRACE[2] + 6 && z1 > TERRACE[1] - 6 && z0 < TERRACE[3] + 6) continue;
+    BLOCKS.push({ rect: [x0, z0, x1, z1], c: [cx, cz], i, j });
+  }
+  return BLOCKS;
+}
+/** The lanes (rects) of the grid within the disc, for paving and for the walkers. */
+export function lanes() {
+  const out = [], R = RADIUS - 30;
+  for (let i = Math.floor(-RADIUS / BX) - 1; i <= Math.ceil(RADIUS / BX); i++) { const x = OX + i * BX; if (Math.abs(x) < R) out.push({ r: [x, -R, x + LANE, R], vert: true }); }
+  for (let j = Math.floor(-RADIUS / BZ) - 1; j <= Math.ceil(RADIUS / BZ); j++) { const z = OZ + j * BZ; if (Math.abs(z) < R) out.push({ r: [-R, z, R, z + LANE], vert: false }); }
+  return out;
+}
+/** Is (x, z) on a lane (outside the terrace)? */
+export const laneAt = (x, z, m = 0) => {
+  if (nearTerrace(x, z, -2) || Math.hypot(x, z) > RADIUS - 28) return false;
+  const u = ((x - OX) % BX + BX) % BX, v = ((z - OZ) % BZ + BZ) % BZ;
+  return u < LANE + m || u > BX - m || v < LANE + m || v > BZ - m;
+};
+/** Split a length into widths of 4.5–8.5 m that sum to it (the first may be given). */
+function split(len, rand, first = 0) {
+  const w = []; let rest = len;
+  if (first) { w.push(Math.min(first, len)); rest -= w[0]; }
+  while (rest > 0.01) {
+    if (rest < 9.5) { if (rest >= 4.5 || !w.length) w.push(rest); else w[w.length - 1] += rest; break; }
+    const a = 4.5 + rand() * 4; w.push(a); rest -= a;
+  }
+  return w;
+}
+const slopeY = (r) => { const ys = [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2]].map(([a, b]) => height(a, b)); return [Math.max(...ys), Math.min(...ys)]; };
+/** The target of the coffee house: the lot's block nearest it gives its east column's first lot 10 m. */
+const TRADE_LIST = ['baker', 'grocer', 'cobbler', 'coppersmith', 'weaver', 'barber', 'potter', 'butcher', 'sherbet', 'saddler', 'grocer', 'baker'];
+const COFFEE_AT = [-178, -20];
 export function lots() {
   if (LOTS) return LOTS;
-  LOTS = [];
-  const rand = rng(1560);
-  for (let x = -RADIUS + 20; x < RADIUS - 20; x += 13) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 12) {
-    const w = 8 + rand() * 3, d = 8 + rand() * 2, cx = x + w / 2, cz = z + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 45 || inRect(TERRACE, cx, cz, 10) || rand() < 0.3) continue;
-    const ys = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]].map(([a, b]) => height(a, b));
-    if (Math.max(...ys) - Math.min(...ys) > 3) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.max(...ys), foot: Math.min(...ys), storeys: rand() < 0.6 ? 2 : 3, front: rand() < 0.5 ? 'n' : 's', plaster: rand() < 0.5 });
+  LOTS = []; YARDS = [];
+  const rand = rng(1560), bl = blocks();
+  let cb = null, cd = 1e9; for (const b of bl) { const d = Math.hypot(b.rect[2] + 1.7 - COFFEE_AT[0], b.c[1] - COFFEE_AT[1]); if (b.rect[2] < TERRACE[0] && d < cd) { cd = d; cb = b; } }
+  for (const b of bl) {
+    const [x0, z0, x1, z1] = b.rect, W = x1 - x0, H = z1 - z0, ch = H - 2 * DEPTH;
+    const add = (rect, front, o = {}) => {
+      const [y, foot] = slopeY(rect);
+      if (y - foot > 5) return;
+      const storeys = rand() < 0.55 ? 2 : rand() < 0.7 ? 3 : 1 + (rand() < 0.5 ? 1 : 0);
+      const mx = (rect[0] + rect[2]) / 2, mz = (rect[1] + rect[3]) / 2, dT = Math.max(TERRACE[0] - mx, mx - TERRACE[2], TERRACE[1] - mz, mz - TERRACE[3], 0);
+      const shop = rect[2] - rect[0] >= 4.4 && rect[3] - rect[1] >= 4.4 && rand() < (dT < 60 ? 0.6 : dT < 140 ? 0.25 : 0.07);
+      LOTS.push({ rect, seed: Math.floor(rand() * 1e6), y, foot, storeys, front, plaster: rand() < 0.5, ...(shop ? { shop: true, trade: TRADE_LIST[Math.floor(rand() * TRADE_LIST.length)] } : {}), ...o });
+    };
+    let x = x0; for (const w of split(W, rand)) { add([x, z0, x + w, z0 + DEPTH], 'n'); x += w; }
+    x = x0; for (const w of split(W, rand)) { add([x, z1 - DEPTH, x + w, z1], 's'); x += w; }
+    let z = z0 + DEPTH; for (const w of split(ch, rand)) { add([x0, z, x0 + DEPTH, z + w], 'w'); z += w; }
+    z = z0 + DEPTH; const first = b === cb ? 10 : 0;
+    for (const w of split(ch, rand, first)) { add([x1 - DEPTH, z, x1, z + w], 'e', first && z === z0 + DEPTH ? { coffee: true } : {}); z += w; }
+    YARDS.push({ rect: [x0 + DEPTH, z0 + DEPTH, x1 - DEPTH, z1 - DEPTH], block: b });
   }
   return LOTS;
 }
+export const yards = () => { lots(); return YARDS; };
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
-/** The coffee house (docs/settlements/ottoman-istanbul.md §10): the lot nearest the lane west of the terrace by the shops of the west avenue. */
-export const COFFEE = () => lots().reduce((b, l) => (Math.hypot((l.rect[0] + l.rect[2]) / 2 + 178, (l.rect[1] + l.rect[3]) / 2 + 20) < Math.hypot((b.rect[0] + b.rect[2]) / 2 + 178, (b.rect[1] + b.rect[3]) / 2 + 20) ? l : b));
+export const inYard = (x, z) => yards().some((y) => inRect(y.rect, x, z));
+/** The coffee house (docs/settlements/ottoman-istanbul.md §10): the 10 m lot on the east column of the block nearest the lane west of the terrace. */
+export const COFFEE = () => lots().find((l) => l.coffee) ?? lots()[0];
