@@ -4,6 +4,8 @@
 // of the forecourt, the Siq, the Outer Siq, the yards and the roofs).
 import { STREET, PLAZA, OUTER, SIQ_LINE, GREAT_TEMPLE, GARDEN, QASR, shopUnits, lots, yards, height, pathDist, inRect, THEATRE, TEMENOS, smooth } from './layout.js';
 import { tradeOf } from './shops.js';
+import { CARAVAN } from './people.js';
+import { khazneh } from './plan.js';
 import { houseLayout } from '../../styles/nabataean/house.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -157,7 +159,7 @@ export function life() {
 
   // ── the Outer Siq: camps, stalls at the valley's mouth, loiterers ─────────────────────────────────────────────────────────
   {
-    const P = OUTER.path, caravan = [[118, -110], [110, -96], [102, -84], [94, -74], [86, -64], [78, -55], [74.5, -51.5], [107.5, -93.5], [60, -38], [62.2, -40.6], [70, -46]];
+    const P = OUTER.path, caravan = [...CARAVAN.camels, ...CARAVAN.drivers, ...CARAVAN.donkeys, CARAVAN.dog, [118, -110], [100, -80], [80, -52], [60, -33]];   // (and the walking route's line)
     const ok = (x, z) => okOuter(x, z) && !caravan.some(([a, b]) => Math.hypot(a - x, b - z) < 4.5) && pathDist(x, z, OUTER.path) < OUTER.w / 2 - 3;
     for (let i = 0; i + 1 < P.length; i++) {
       const [ax, az] = P[i], [bx, bz] = P[i + 1], Ln = Math.hypot(bx - ax, bz - az), tx = (bx - ax) / Ln, tz = (bz - az) / Ln, nx = -tz, nz = tx;
@@ -218,5 +220,7 @@ export function life() {
       woman([cx - 1.4, cz + dz * 3.0], y, r() * 6.28, { pose: 'cross' }); child([cx + 1.2, cz + dz * 3.4], y, r() * 6.28, { pose: 'sit_ground' }); beast('dog', [cx + 3, cz + dz * 3.8], y, r() * 6.28); beast('camel', [x1 - 2.2, cz - dz * 2.0], y, 0.6, { gear: false });
     }
   }
-  return L;
+  // the walking route's corridor (plan.js `walks`) is kept clear: a figure or a beast standing on it is an obstacle to the walker
+  const route = khazneh.walks[0];
+  return L.filter((e) => !e.at || e.t === 'shop_sign' || pathDist(e.at[0], e.at[1], route) > 2.6);
 }
