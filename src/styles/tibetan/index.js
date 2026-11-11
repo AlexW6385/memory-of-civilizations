@@ -397,6 +397,23 @@ function twigs(bag, x, y, z, rand) {
     face(bag, FL[i], [-Math.cos(a), -Math.sin(a)], [tx - ux, ty - 0.24, tz - uz], [tx + ux, ty - 0.24, tz + uz], [tx + ux, ty - 0.04, tz + uz], [tx - ux, ty - 0.04, tz - uz]);
   }
 }
+/**
+ * dung_wall: { at: [x, z] (the wall's foot, centre of the patch), n: 's'|'n'|'e'|'w' (the way the face looks), w, h, y, seed } —
+ * yak-dung cakes slapped flat on a whitewashed wall to dry, the fuel of the plateau (Tibet Heritage Fund: fuel dried on the
+ * walls); read as a patch of rough brown courses, each cake a hand's breadth, the top row set on edge, a few fallen at the foot.
+ */
+function dungWall(el, { bag }) {
+  const rand = rng(el.seed || 3), y = el.y ?? 0, w = el.w ?? 3, h = el.h ?? 1.1, [nx, nz] = ({ s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] })[el.n || 's'], ux = -nz, uz = nx;
+  const P = (u, d) => [el.at[0] + ux * u + nx * d, el.at[1] + uz * u + nz * d], R = (u0, u1, d0, d1, y0, y1, m) => { const a = P(u0, d0), b = P(u1, d1); bag.add(m, box(Math.min(a[0], b[0]), y0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y1, Math.max(a[1], b[1]))); };
+  const rows = Math.max(2, Math.round(h / 0.2));
+  for (let r = 0; r < rows; r++) {
+    const y0 = y + 0.5 + r * 0.2, a = -w / 2 + rand() * 0.25, b = w / 2 - rand() * 0.25;                // each course a little ragged at its ends
+    R(a, b, 0, 0.1 + rand() * 0.03, y0, y0 + 0.17, r % 2 ? 'banco_rough' : 'mud_plaster');
+    R(a + 0.1, b - 0.1, 0, 0.14, y0 + 0.165, y0 + 0.2, 'hide_brown');                                    // the joint between courses, darker
+  }
+  for (let i = 0, n = Math.floor(w / 0.3); i < n; i++) if (rand() < 0.8) R(-w / 2 + 0.1 + i * 0.3, -w / 2 + 0.34 + i * 0.3, 0.02, 0.15, y + 0.5 + rows * 0.2, y + 0.5 + rows * 0.2 + 0.23, 'banco_rough');   // the top row on edge
+  for (let i = 0; i < 3; i++) { const u = (rand() - 0.5) * w, d = 0.2 + rand() * 0.5; R(u - 0.12, u + 0.12, d, d + 0.24, y, y + 0.05, 'banco_rough'); }
+}
 /** sang-khun: the urn-shaped whitewashed incense burner on a roof { at, y }: juniper smoulders in it at dawn; its mouth sooted. */
 function sangkhun(bag, x, y, z, dir = [0, 1]) {
   bag.add('limewash_white', box(x - 0.42, y, z - 0.42, x + 0.42, y + 0.3, z + 0.42));
@@ -489,6 +506,13 @@ function house(el, ctx) {
   flagString(bag, [pole[0], y + H + 3.6, pole[1]], [x1 - 0.6, y + H + 0.9, z0 + 0.6]);
   flagString(bag, [pole[0], y + H + 3.6, pole[1]], third ? [x1 - 0.7, y + H + 0.9, z1 - 0.7] : [x0 + 0.7, y + H + 0.9, z1 - 0.7]);
   sangkhun(bag, x1 - dr / 2, y + H, z1 - 2.1, [0, 1]);
+  // the roof is the store: the winter's fodder in a heap of barley straw, dung cakes and juniper brush stacked against the parapet, the odd bundle of firewood
+  if (!third) {
+    const rr = rng((el.seed || 1) * 7 + 3);
+    if (rr() < 0.7) { const fx = x0 + 2.2 + rr() * Math.max(0.5, W - 9), fz = z0 + 0.6, fw = 1.6 + rr() * 1.4; bag.add('thatch', box(fx, y + H, fz, fx + fw, y + H + 0.8 + rr() * 0.4, fz + 1.2)); bag.add('rope_fibre', box(fx + fw * 0.3, y + H + 0.5, fz - 0.01, fx + fw * 0.34, y + H + 0.6, fz + 1.21)); }
+    if (rr() < 0.6) { const dx = x1 - 4.4 - rr() * 2, dz = z0 + 0.6, dh = 0.5 + rr() * 0.4; bag.add('banco_rough', box(dx, y + H, dz, dx + 2, y + H + dh, dz + 0.8)); for (let r = 1; r < 4; r++) bag.add('mud_plaster', box(dx - 0.01, y + H + r * dh / 4 - 0.015, dz - 0.01, dx + 2.01, y + H + r * dh / 4 + 0.015, dz + 0.81)); }
+    if (rr() < 0.5) { const bx = x0 + 1 + rr() * (W - 4), bz = z1 - 2.6 - rr() * 2; for (let q = 0; q < 4; q++) bag.add('bark_pine', box(bx, y + H + 0.07 * q, bz + q * 0.02, bx + 1.4, y + H + 0.07 * q + 0.07, bz + 0.1 + q * 0.02)); }
+  }
   if (third) {
     const r3 = [x0 + 1.3, z0 + 1.0, x0 + 1.3 + Math.min(W - 2.6, 5 + rand() * 3), z0 + dn - 0.3];
     dzong({ rect: r3, y0: y + H - 0.25, y1: y + H + 3, batter: 0.12, mat: 'limewash_white', windows: '', pembe: 0.4, cap: 0.25, seed: 7 }, ctx);
@@ -1102,6 +1126,6 @@ const { teaSeats: _ts, ...SHOPS } = makeShops({ face, doorway, win, thangka, san
 export const teaSeats = _ts;
 registerStyle('tibetan', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dzong, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS },
+  elements: { ...STYLES.qing.elements, dzong, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS },
   objects: {},
 });
