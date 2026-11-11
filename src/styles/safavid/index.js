@@ -1164,12 +1164,76 @@ function aliQapu(el, { bag, col, lights }) {
   }
 }
 
+
+/**
+ * qahveh_khaneh: a coffeehouse { rect } with its door on the west (docs/settlements/isfahan.md §18): a vaulted hall
+ * with a central pool and fountain, arched recesses with raised carpeted platforms along the walls ("raised floors
+ * about 1 m high, carpeted and used as benches" — here 0.5 m so they can be climbed), a painted frieze, lamps hung from
+ * the roof, a counter with the coffee pots on a brazier, cups, water pipes (qalyan), a high chair for the poet or
+ * reciter beside the pool.
+ */
+function qahvehKhaneh(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, h = 6.2, th = 0.8, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  const ix0 = x0 + th / 2, ix1 = x1 - th / 2, iz0 = z0 + th / 2, iz1 = z1 - th / 2;
+  const wins = (L, skip = []) => { const a = [], n = Math.floor(L / 3.4); for (let i = 0; i < n; i++) { const at = (i + 0.5) * L / n; if (!skip.some((k) => Math.abs(k - at) < 1.9)) a.push({ at, w: 1.1, h: 1.7, sill: 3.3, depth: 0.5, back: 'lattice' }); } return a; };
+  arcadeWall(bag, col, [x0, z0], [x1, z0], 0, h, th, B, wins(W), [cx, z0 - 50]);
+  arcadeWall(bag, col, [x0, z1], [x1, z1], 0, h, th, B, wins(W), [cx, z1 + 50]);
+  arcadeWall(bag, col, [x1, z0], [x1, z1], 0, h, th, B, wins(D), [x1 + 50, cz]);
+  arcadeWall(bag, col, [x0, z0], [x0, z1], 0, h, th, B, [{ at: D / 2, w: 2.6, h: 3.4, pass: true }, ...wins(D, [D / 2])], [x0 - 50, cz]);
+  // the roof with its painted ceiling and the dome over the pool
+  bag.add(B, box(x0 - 0.3, h, z0 - 0.3, x1 + 0.3, h + 0.35, z1 + 0.3)); col.rect([x0, z0, x1, z1], h, h + 0.35);
+  bag.add('ceiling_painted', box(ix0, h - 0.2, iz0, ix1, h, iz1));
+  bag.add(Q, lathe([[3.6, 0], [3.4, 0.8], [2.5, 1.9], [1.2, 2.6], [0.001, 2.9]], 20, null, cx, h + 0.35, cz));
+  bag.add('gilt_bronze', lathe([[0.05, 0], [0.05, 0.4], [0.001, 0.6]], 6, null, cx, h + 3.2, cz));
+  // the painted frieze round the walls, the floor
+  for (const r of [[ix0, 4.9, iz0, ix1, 5.9, iz0 + 0.04], [ix0, 4.9, iz1 - 0.04, ix1, 5.9, iz1], [ix1 - 0.04, 4.9, iz0, ix1, 5.9, iz1], [ix0, 4.9, iz0, ix0 + 0.04, 5.9, iz1]]) bag.add('ceiling_painted', box(r[0], r[1], r[2], r[3], r[4], r[5]));
+  bag.add('brick_paving', box(ix0, 0, iz0, ix1, 0.03, iz1));
+  // the pool and its fountain
+  const pr = [cx - 2.2, cz - 1.7, cx + 2.2, cz + 1.7];
+  bag.add('marble', box(pr[0], 0, pr[1], pr[2], 0.12, pr[3])); col.rect(pr, 0, 0.4);
+  for (const r of [[pr[0], pr[1], pr[2], pr[1] + 0.3], [pr[0], pr[3] - 0.3, pr[2], pr[3]], [pr[0], pr[1] + 0.3, pr[0] + 0.3, pr[3] - 0.3], [pr[2] - 0.3, pr[1] + 0.3, pr[2], pr[3] - 0.3]]) bag.add('marble', boxR(r, 0.12, 0.4));
+  bag.add('water', box(pr[0] + 0.3, 0.12, pr[1] + 0.3, pr[2] - 0.3, 0.3, pr[3] - 0.3));
+  bag.add('bronze', lathe([[0.07, 0], [0.04, 0.5], [0.001, 0.62]], 8, null, cx, 0.33, cz));
+  // the platforms (sakku) along the north, south and east walls, carpeted, with cushions and bolsters at the wall
+  const P = [[ix0, iz0, ix1, iz0 + 2.4], [ix0, iz1 - 2.4, ix1, iz1], [ix1 - 2.4, iz0 + 2.4, ix1, iz1 - 2.4]];
+  for (const r of P) { bag.add('timber', boxR(r, 0, 0.5)); col.rect(r, 0, 0.5); }
+  const kinds = ['persian', 'maroon', 'blue'];
+  P.forEach((r, k) => {
+    const horiz = k < 2, L = horiz ? r[2] - r[0] : r[3] - r[1], n = Math.floor(L / 3);
+    for (let i = 0; i < n; i++) {
+      const u = (i + 0.5) * L / n, x = horiz ? r[0] + u : (r[0] + r[2]) / 2, z = horiz ? (r[1] + r[3]) / 2 : r[1] + u, yaw = horiz ? 0 : Math.PI / 2;
+      F.carpet(bag, x, 0.5, z, horiz ? L / n - 0.3 : 2.1, horiz ? 2.1 : L / n - 0.3, 0, kinds[(i + k) % 3]);
+      const wx = k === 0 ? x : k === 1 ? x : r[2] - 0.35, wz = k === 0 ? r[1] + 0.35 : k === 1 ? r[3] - 0.35 : z;
+      F.bolster(bag, wx, 0.55, wz, 1.3, 0.13, yaw, i % 2 ? 'cloth_red' : 'cloth_indigo', 'cloth_ochre');
+      F.trayTable(bag, x + (horiz ? 0 : -0.5), 0.5, z + (horiz ? (k === 0 ? 0.5 : -0.5) : 0), { seed: i + k });
+      if (i % 2 === 0) F.hookah(bag, x + (horiz ? 0.7 : -0.4), 0.5, z + (horiz ? (k === 0 ? 0.6 : -0.6) : 0.5), 0);
+    }
+  });
+  // the counter with the coffee pots on their brazier, cups, pipes
+  const cr = [ix0, cz + 2.2, ix0 + 0.9, iz1 - 0.6];
+  bag.add('wood_dark', boxR(cr, 0, 1.05)); col.rect(cr, 0, 1.05);
+  F.brazier(bag, lights, ix0 + 0.45, 1.05, cz + 3.2);
+  for (let i = 0; i < 3; i++) F.ewer(bag, ix0 + 0.45, 1.05, cz + 4.3 + i * 0.5, 0.7, i, 'bronze');
+  for (let i = 0; i < 6; i++) F.cup(bag, ix0 + 0.3 + (i % 2) * 0.3, 1.05, iz1 - 1.6 - i * 0.12, 'glaze_white', 1);
+  F.hookah(bag, ix0 + 0.45, 1.05, iz1 - 0.9, 0);
+  bag.add('timber', box(ix0, 2.0, cz + 2.2, ix0 + 0.25, 2.04, iz1 - 0.6));
+  for (let i = 0; i < 5; i++) F.cup(bag, ix0 + 0.12, 2.04, cz + 2.7 + i * 0.7, i % 2 ? 'glaze_blue' : 'glaze_white', 1.2);
+  // the poet's high chair beside the pool
+  { const px = cx + 3.4, pz = cz;
+    for (const [dx, dz] of [[-0.25, -0.25], [0.25, -0.25], [-0.25, 0.25], [0.25, 0.25]]) bag.add('wood_dark', box(px + dx - 0.03, 0, pz + dz - 0.03, px + dx + 0.03, 1.1, pz + dz + 0.03));
+    bag.add('wood_dark', box(px - 0.28, 1.1, pz - 0.28, px + 0.28, 1.15, pz + 0.28));
+    bag.add('wood_dark', box(px + 0.24, 1.15, pz - 0.28, px + 0.3, 1.9, pz + 0.28));
+    bag.add('cloth_red', box(px - 0.25, 1.15, pz - 0.25, px + 0.2, 1.19, pz + 0.25));
+    col.rect([px - 0.3, pz - 0.3, px + 0.3, pz + 0.3], 0, 1.15); }
+  for (const [x, z] of [[cx - 3.2, cz - 2.4], [cx + 3.2, cz - 2.4], [cx - 3.2, cz + 2.4], [cx + 3.2, cz + 2.4]]) hangingLamp(bag, lights, x, h - 2.2, z, h - 0.2, 4, 9);
+}
+
 registerStyle('safavid', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.mughal.elements,
     square_arcade: squareArcade, portal, dome_chamber: domeChamber, court_arcade: courtArcade,
-    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, khaneh_open: khanehOpen, ali_qapu: aliQapu, sagittarius,
+    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, khaneh_open: khanehOpen, ali_qapu: aliQapu, sagittarius, qahveh_khaneh: qahvehKhaneh,
   },
   objects: {},
 });
