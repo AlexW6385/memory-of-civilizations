@@ -61,9 +61,31 @@ export function lots() {
   for (let x = -RADIUS + 20; x < RADIUS - 20; x += 26) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 24) {
     const w = 18 + rand() * 5, d = 16 + rand() * 5, cx = x + w / 2, cz = z + d / 2;
     if (Math.hypot(cx, cz) > RADIUS - 45 || [PANTHEON, BATHS, SAEPTA, STADIUM, FORUM, PISTRINUM, LATRINE].some((r) => inRect(r, cx, cz, 18)) || rows().some((r) => overlaps(r.rect, [x, z, x + w, z + d], 3)) || onStreet(cx, cz, 14)) continue;
-    if (Math.abs(cx - riverX(cz)) < TIBER.w / 2 + 22 || rand() < 0.12) continue;
+    if (Math.abs(cx - riverX(cz)) < TIBER.w / 2 + 22) continue;
+    if (rand() < 0.12) { GARDENS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) }); continue; }
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
   }
   return LOTS;
+}
+let GARDENS = [];
+/** The walled gardens (horti) in the blocks left empty by the insulae: planted with trees, laid out with a pool, a pergola and beds. */
+export function gardens() { lots(); return GARDENS; }
+export const inGarden = (x, z, m = 0) => gardens().some((g) => inRect(g.rect, x, z, m));
+/** The inhabited belt: paved alleys between the blocks, no wild planting. */
+export const urban = (x, z) => Math.hypot(x, z) < RADIUS - 45 && Math.abs(x - riverX(z)) > TIBER.w / 2 + 6;
+/** The alleys between the rows of tabernae, closed at the street by a wall with an arched passage, or (at a fountain) by the back of a recess. */
+let FILLS = null;
+export function fills() {
+  if (FILLS) return FILLS;
+  FILLS = [];
+  const fs = fountains(), has = (side, za, zb) => fs.some((f) => (side === 'e' ? f.rot > 0 : f.rot < 0) && f.at[1] > za && f.at[1] < zb && f.kind === 'lacus');
+  const R = rows(), xs = VIA_LATA.x, hw = VIA_LATA.w / 2;
+  for (let z = -160; z + 26 < 140; z += 26) {
+    FILLS.push({ rect: [xs - hw - 8.4, z + 22, xs - hw - 0.4, z + 26], front: 'e', fountain: has('e', z + 22, z + 26), seed: z * 7 + 1 });
+    FILLS.push({ rect: [xs + hw + 0.4, z + 22, xs + hw + 8.4, z + 26], front: 'w', fountain: has('w', z + 22, z + 26), seed: z * 7 + 2 });
+  }
+  const north = R.filter((r) => r.front === 's').sort((a, b) => a.rect[0] - b.rect[0]);
+  for (let i = 0; i + 1 < north.length; i++) if (Math.abs(north[i + 1].rect[0] - north[i].rect[2] - 4) < 0.01) FILLS.push({ rect: [north[i].rect[2], -188.5, north[i + 1].rect[0], -180.5], front: 's', fountain: false, seed: i * 13 + 5 });
+  return FILLS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

@@ -1,0 +1,190 @@
+// The ways of Hadrian's Rome (docs/settlements/rome.md §4.9–§4.10): streets paved with polygonal basalt blocks and
+// marked at the footway by a travertine kerb, with stepping stones across them at the alley mouths; the street's own
+// furniture (the fuller's urine jars at the corners, heaps of sherds, water tubs, bollards, a lararium at a
+// crossing); the alleys between the rows closed at the street by a wall with an arched passage or the back of a
+// fountain's recess; the walled gardens (horti) with their pool, pergola, beds and statue. Registered into `roman`.
+
+import { STYLES } from '../../core/build.js';
+import { box, lathe, fromTriangles } from '../../core/geom.js';
+import '../../objects/index.js';
+import './index.js';
+import { tools, hip } from './street.js';
+import * as D_ from './dress.js';
+
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const lz = (p, n) => lathe(p, n);
+const PUT = (bag, mat, g, x, y, z, yaw = 0) => D_.putAt(bag, mat, g, x, y, z, yaw);
+
+/**
+ * paving: { rect, y } — a street of basalt blocks 0.03 m proud of the ground (a floor to walk on), a travertine kerb
+ * line 1.15 m in from each long edge (where the footway under the awnings ends), and the drain: a darker groove down
+ * the middle of the way. A `cross` list ([[x or z, half-width]]) cuts the kerbs where another street crosses.
+ */
+function paving(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, alongZ = z1 - z0 >= x1 - x0;
+  bag.add('basalt', box(x0, y - 0.3, z0, x1, y + 0.03, z1));
+  col.floor(el.rect, y + 0.03);
+  const cuts = (el.cross ?? []).slice().sort((a, b) => a[0] - b[0]);
+  const run = (a0, a1, fn) => {
+    let s = a0;
+    for (const [c, h] of cuts) { if (c - h > s) fn(s, Math.min(a1, c - h)); s = Math.max(s, c + h); }
+    if (a1 > s) fn(s, a1);
+  };
+  if (alongZ) {
+    for (const x of [x0 + 1.15, x1 - 1.15]) run(z0, z1, (a, b) => { if (b > a) bag.add('travertine', box(x - 0.12, y + 0.03, a, x + 0.12, y + 0.07, b)); });
+    const mx = (x0 + x1) / 2; bag.add('granite_grey', box(mx - 0.09, y + 0.03, z0, mx + 0.09, y + 0.045, z1));
+  } else {
+    for (const z of [z0 + 1.15, z1 - 1.15]) run(x0, x1, (a, b) => { if (b > a) bag.add('travertine', box(a, y + 0.03, z - 0.12, b, y + 0.07, z + 0.12)); });
+    const mz = (z0 + z1) / 2; bag.add('granite_grey', box(x0, y + 0.03, mz - 0.09, x1, y + 0.045, mz + 0.09));
+  }
+}
+/** crossing: { at, along ('x' | 'z': the way the row of stones runs, across the street), w (the street's width) } — the stepping stones of a street, with the gaps for the carts' wheels between them. */
+function crossing(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, ax = el.along !== 'z', w = el.w ?? 10, n = Math.max(3, Math.round(w / 2.1)), sp = w / n;
+  for (let k = 0; k < n; k++) {
+    const o = (k - (n - 1) / 2) * sp, px = ax ? x + o : x, pz = ax ? z : z + o;
+    const r = ax ? [px - 0.45, pz - 0.4, px + 0.45, pz + 0.4] : [px - 0.4, pz - 0.45, px + 0.4, pz + 0.45];
+    bag.add('basalt_ahu', box(r[0], y + 0.03, r[1], r[2], y + 0.22, r[3])); bag.add('travertine', box(r[0] + 0.02, y + 0.22, r[1] + 0.02, r[2] - 0.02, y + 0.25, r[3] - 0.02));
+    col.floor(r, y + 0.25);
+  }
+}
+/**
+ * street_kit: { at, along ('x' | 'z'), len, half (the street's half-width), seed } — the furniture of a stretch of street
+ * on both footways, by seed: the fuller's jars (two amphorae cut short on a stand, at the corners, to which passers-by
+ * brought their urine), heaps of sherds and sweepings, water tubs, bollards, a bench of travertine, and now and then a
+ * lararium (a shrine of the crossroads' guardian spirits: a pier with a painted niche and an altar).
+ */
+function streetKit(el, { bag, col }) {
+  const [cx, cz] = el.at, y = el.y ?? 0, rand = rng(el.seed || 1), zz = el.along !== 'x', len = el.len ?? 50, half = el.half ?? 5;
+  const P = (s, off) => (zz ? [cx + off, cz + s] : [cx + s, cz + off]);
+  for (let s = -len / 2 + 3; s < len / 2 - 2; s += 5 + rand() * 7) {
+    const side = rand() < 0.5 ? -1 : 1, off = side * (half - 0.45 - rand() * 0.25), [x, z] = P(s, off), r = rand();
+    if (r < 0.2) {                                                                  // the fuller's jars
+      for (const k of [0, 1]) PUT(bag, 'terracotta', lz([[0.001, 0], [0.12, 0.0], [0.22, 0.12], [0.25, 0.3], [0.2, 0.5], [0.17, 0.62], [0.2, 0.64], [0.2, 0.68], [0.14, 0.68], [0.14, 0.62]], 10), x + (zz ? 0.5 * side * (k ? 1 : 0) : 0), y, z + (zz ? 0 : 0.5 * side * (k ? 1 : 0)));
+      col.circle(x, z, 0.28, y, y + 0.7);
+    } else if (r < 0.4) {                                                           // sherds and sweepings against the kerb
+      for (let k = 0; k < 7; k++) {
+        const a = rand() * 6.28, d = rand() * 0.55, w = 0.1 + rand() * 0.18, h = 0.03 + rand() * 0.07;
+        bag.add(['terracotta', 'pottery_dark', 'schist_rubble'][k % 3], box(x + Math.cos(a) * d - w / 2, y + 0.03, z + Math.sin(a) * d - w / 2, x + Math.cos(a) * d + w / 2, y + 0.03 + h, z + Math.sin(a) * d + w / 2));
+      }
+    } else if (r < 0.55) {                                                          // a water tub
+      PUT(bag, 'timber', lz([[0.001, 0], [0.4, 0], [0.43, 0.7], [0.4, 0.7], [0.4, 0.62], [0.001, 0.62]], 14), x, y, z);
+      PUT(bag, 'water', lz([[0.001, 0.58], [0.38, 0.58], [0.001, 0.58]], 12), x, y, z);
+      col.circle(x, z, 0.43, y, y + 0.7);
+    } else if (r < 0.7) {                                                           // bollards
+      for (const k of [0, 1]) { const [bx, bz] = P(s + k * 1.3, off); bag.add('travertine', box(bx - 0.14, y + 0.03, bz - 0.14, bx + 0.14, y + 0.62, bz + 0.14)); col.circle(bx, bz, 0.16, y, y + 0.62); }
+    } else if (r < 0.82) {                                                          // a bench
+      const [bx, bz] = P(s, off), w = zz ? [0.25, 0.9] : [0.9, 0.25];
+      bag.add('travertine', box(bx - w[0], y + 0.03, bz - w[1], bx + w[0], y + 0.45, bz + w[1]));
+      col.rect([bx - w[0], bz - w[1], bx + w[0], bz + w[1]], y, y + 0.45);
+    }
+  }
+  if (el.shrine) {
+    const [x, z] = P(el.shrine[0], el.shrine[1] * (half - 0.6)), a = el.shrine[1] > 0 ? Math.PI : 0, M = (g) => { g.rotateY(zz ? (el.shrine[1] > 0 ? -Math.PI / 2 : Math.PI / 2) : a); g.translate(x, y, z); return g; };
+    void a;
+    bag.add('travertine', M(box(-0.4, 0.03, -0.4, 0.4, 0.3, 0.4))); bag.add('stucco_rome', M(box(-0.32, 0.3, -0.32, 0.32, 1.9, 0.32)));
+    bag.add('wall_red', M(box(-0.2, 0.9, 0.325, 0.2, 1.7, 0.335))); bag.add('opening', M(box(-0.15, 1.0, 0.335, 0.15, 1.5, 0.34)));
+    bag.add('travertine', M(box(-0.4, 1.9, -0.4, 0.4, 2.05, 0.4))); bag.add('roof_tile', M(box(-0.5, 2.05, -0.5, 0.5, 2.15, 0.5)));
+    bag.add('stucco_rome', M(box(-0.34, 0.3, 0.32, 0.34, 0.9, 0.5))); bag.add('travertine', M(box(-0.38, 0.9, 0.3, 0.38, 0.96, 0.54)));
+    bag.add('bronze', M(lz([[0.001, 0], [0.06, 0], [0.05, 0.1], [0.001, 0.12]], 8).translate(0, 0.96, 0.42)));
+    bag.add('wall_red', M(box(-0.3, 1.75, 0.325, 0.3, 1.85, 0.332)));
+    col.circle(x, z, 0.5, y, y + 2.1);
+  }
+}
+
+/**
+ * alley_fill: { rect (the gap between two rows), front, fountain } — a wall closing the alley at the street, up to the
+ * rows' height, in plaster over brick, with an arched passage 2.3 m wide (a lamp over it, a notice beside), a window
+ * above in two storeys, the cornice and a tiled roof; or, where a fountain stands in the gap, the back of its recess
+ * 2.8 m behind the front of the rows.
+ */
+function alleyFill(el, ctx) {
+  const T = tools(el, ctx), { W, D, B } = T, rand = rng(el.seed >>> 0), H = 13.0, fountain = !!el.fountain, rec = fountain ? 2.8 : 0.0;
+  B('brick', 0.0, W, rec, D, -0.4, H, true);
+  if (fountain) {
+    B('stucco_rome', 0.0, W, rec - 0.03, rec, 0.0, H - 0.5);
+    B('travertine', 0.1, W - 0.1, rec - 0.05, rec, 0.0, 0.5);
+    B('opening', W / 2 - 0.45, W / 2 + 0.45, rec - 0.04, rec - 0.02, 4.4, 5.6);                       // a window in the back of the recess
+    B('travertine', W / 2 - 0.55, W / 2 + 0.55, rec - 0.07, rec - 0.02, 4.3, 4.4);
+    for (let k = 0; k < 2; k++) { B('opening', W / 2 - 0.45, W / 2 + 0.45, rec - 0.04, rec - 0.02, 7.6 + k * 3.1, 8.8 + k * 3.1); B('travertine', W / 2 - 0.55, W / 2 + 0.55, rec - 0.07, rec - 0.02, 7.5 + k * 3.1, 7.6 + k * 3.1); }
+    T.B('brick', 0.0, 0.4, 0.0, rec, 0.0, 4.0);
+  } else {
+    const u = W / 2;
+    B('stucco_rome', 0.0, W, -0.03, 0.0, 0.0, H - 0.5);
+    B('opening', u - 1.15, u + 1.15, -0.06, 0.0, 0.0, 3.2);
+    B('travertine', u - 1.45, u - 1.15, -0.1, 0.1, 0.0, 3.4); B('travertine', u + 1.15, u + 1.45, -0.1, 0.1, 0.0, 3.4);
+    B('travertine', u - 1.5, u + 1.5, -0.12, 0.1, 3.2, 3.5);
+    B('opening', u - 1.15, u + 1.15, 0.0, D, 0.0, 3.2);
+    for (let k = 0; k < 3; k++) { B('opening', u - 0.5, u + 0.5, -0.06, 0.0, 5.0 + k * 2.9, 6.4 + k * 2.9); B('travertine', u - 0.62, u + 0.62, -0.1, 0.0, 4.9 + k * 2.9, 5.0 + k * 2.9); if (rand() < 0.5) { B('shutter_brown', u - 1.0, u - 0.53, -0.1, -0.06, 5.0 + k * 2.9, 6.4 + k * 2.9); B('shutter_brown', u + 0.53, u + 1.0, -0.1, -0.06, 5.0 + k * 2.9, 6.4 + k * 2.9); } }
+    D_.lampBracket(T, u + 1.7 > W - 0.3 ? W - 0.3 : u + 1.7, 3.0);
+    D_.notice(T, u - 1.7 < 0.4 ? 0.4 : u - 1.7, 1.2, 0.35, 0.9, rand);
+    D_.weather(T, 0.2, W - 0.2, 3.6, H - 1.0, rand, 0.7);
+  }
+  B('brick', -0.05, W + 0.05, -0.06, 0.2, H - 0.34, H - 0.12);
+  B('travertine', -0.1, W + 0.1, -0.1, 0.3, H - 0.12, H);
+  ctx.bag.add('roof_tile', box(...(() => { const r = T.R(-0.2, W + 0.2, -0.3, D + 0.3); return [r[0], T.y + H, r[1], r[2], T.y + H + 0.12, r[3]]; })()));
+  void hip;
+}
+
+/**
+ * hortus: { rect, seed } — a walled garden in a block between the insulae: a wall 2.8 m high of brick under a tiled coping
+ * with an arched gate on one side, gravel paths, beds with hedges of box, a pool with a fountain jet, a pergola of timber
+ * posts with a vine over it, a bench and a statue. (The trees are the planting's, src/settlements/rome/ground.js.)
+ */
+function hortus(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed || 1), t = 0.5, H = 2.8, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  const gate = Math.floor(rand() * 4), gw = 1.6;
+  const wall = (a0, b0, a1, b1, side) => {          // side: 0 n, 1 s, 2 w, 3 e; the gate is cut at the middle of its side
+    const along = side < 2, lo = along ? a0 : b0, hi = along ? a1 : b1, mid = (lo + hi) / 2, cut = gate === side;
+    const seg = (u0, u1, ya, yb) => { const r = along ? [u0, a1 - 0 + 0, u1, a1] : [a1, u0, a1, u1]; void r; };
+    void seg;
+    const put = (u0, u1, ya, yb) => {
+      if (u1 - u0 < 0.01) return;
+      const q = side === 0 ? [u0, z0, u1, z0 + t] : side === 1 ? [u0, z1 - t, u1, z1] : side === 2 ? [x0, u0, x0 + t, u1] : [x1 - t, u0, x1, u1];
+      bag.add('brick', box(q[0], y + ya, q[1], q[2], y + yb, q[3])); if (ya < 0.1) col.rect(q, y, y + yb);
+    };
+    if (cut) { put(lo, mid - gw / 2, -0.4, H); put(mid + gw / 2, hi, -0.4, H); put(mid - gw / 2, mid + gw / 2, 2.4, H); }
+    else put(lo, hi, -0.4, H);
+    const c = (u0, u1) => { const q = side === 0 ? [u0 - 0.1, z0 - 0.1, u1 + 0.1, z0 + t + 0.1] : side === 1 ? [u0 - 0.1, z1 - t - 0.1, u1 + 0.1, z1 + 0.1] : side === 2 ? [x0 - 0.1, u0 - 0.1, x0 + t + 0.1, u1 + 0.1] : [x1 - t - 0.1, u0 - 0.1, x1 + 0.1, u1 + 0.1]; bag.add('roof_tile', box(q[0], y + H, q[1], q[2], y + H + 0.15, q[3])); };
+    c(lo, hi);
+  };
+  wall(x0, z0, x1, z1, 0); wall(x0, z0, x1, z1, 1); wall(x0, z0, x1, z1, 2); wall(x0, z0, x1, z1, 3);
+  // gravel ground, cross paths, the pool
+  bag.add('pebbles', box(x0 + t, y - 0.2, z0 + t, x1 - t, y + 0.02, z1 - t));
+  const pr = Math.min(x1 - x0, z1 - z0) * 0.14;
+  bag.add('travertine', lz([[pr + 0.35, 0], [pr + 0.35, 0.45], [pr + 0.1, 0.45], [pr, 0.45], [pr, 0.05], [0.001, 0.05]], 20).translate(cx, y, cz));
+  bag.add('water', lz([[0.001, 0], [pr, 0], [0.001, 0]], 16).translate(cx, y + 0.38, cz));
+  bag.add('marble', lz([[0.2, 0], [0.1, 0.2], [0.1, 0.9], [0.2, 1.1], [0.001, 1.1]], 10).translate(cx, y + 0.05, cz));
+  bag.add('water', lz([[0.001, 0], [0.025, 0.0], [0.03, 0.7], [0.001, 0.7]], 6).translate(cx, y + 1.1, cz));
+  col.circle(cx, cz, pr + 0.35, y, y + 0.45);
+  // beds with low hedges of box along the paths
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const bx0 = cx + sx * (pr + 1.2) - (sx > 0 ? 0 : 3.2), bz0 = cz + sz * (pr + 1.2) - (sz > 0 ? 0 : 3.2), bx1 = bx0 + 3.2, bz1 = bz0 + 3.2;
+    if (bx0 < x0 + t + 0.6 || bx1 > x1 - t - 0.6 || bz0 < z0 + t + 0.6 || bz1 > z1 - t - 0.6) continue;
+    bag.add('silt', box(bx0, y, bz0, bx1, y + 0.12, bz1));
+    for (const [a, b, c, d] of [[bx0, bz0, bx1, bz0 + 0.3], [bx0, bz1 - 0.3, bx1, bz1], [bx0, bz0, bx0 + 0.3, bz1], [bx1 - 0.3, bz0, bx1, bz1]]) bag.add('palm_leaf', box(a, y + 0.02, b, c, y + 0.55, d));
+    for (let k = 0; k < 5; k++) bag.add(['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_indigo', 'cloth_red'][k], box(bx0 + 0.7 + (k % 3) * 0.8, y + 0.12, bz0 + 0.7 + Math.floor(k / 3) * 1.2, bx0 + 0.9 + (k % 3) * 0.8, y + 0.4 + rand() * 0.2, bz0 + 0.9 + Math.floor(k / 3) * 1.2));
+  }
+  // the pergola along the side opposite the gate: timber posts and rafters, a vine on them
+  const pw = Math.min(x1 - x0, z1 - z0) - 2 * t - 2.0, onx = gate < 2 ? true : false;
+  const pa = gate === 0 ? [x0 + t + 1.0, z1 - t - 2.4, x1 - t - 1.0, z1 - t - 0.6] : gate === 1 ? [x0 + t + 1.0, z0 + t + 0.6, x1 - t - 1.0, z0 + t + 2.4] : gate === 2 ? [x1 - t - 2.4, z0 + t + 1.0, x1 - t - 0.6, z1 - t - 1.0] : [x0 + t + 0.6, z0 + t + 1.0, x0 + t + 2.4, z1 - t - 1.0];
+  void pw; void onx;
+  const pl = gate < 2 ? pa[2] - pa[0] : pa[3] - pa[1];
+  for (let u = 0; u <= pl + 0.01; u += pl / Math.max(1, Math.round(pl / 2.2))) for (const s of [0, 1]) {
+    const px = gate < 2 ? pa[0] + u : pa[0] + s * (pa[2] - pa[0]), pz = gate < 2 ? pa[1] + s * (pa[3] - pa[1]) : pa[1] + u;
+    bag.add('timber', box(px - 0.08, y, pz - 0.08, px + 0.08, y + 2.5, pz + 0.08));
+  }
+  bag.add('timber', box(pa[0] - 0.1, y + 2.5, pa[1] - 0.1, pa[2] + 0.1, y + 2.62, pa[3] + 0.1));
+  bag.add('palm_leaf', box(pa[0], y + 2.62, pa[1], pa[2], y + 2.8, pa[3]));
+  // a bench under it and a statue on a plinth
+  const bm = [(pa[0] + pa[2]) / 2, (pa[1] + pa[3]) / 2];
+  bag.add('travertine', box(bm[0] - (gate < 2 ? 1.0 : 0.25), y, bm[1] - (gate < 2 ? 0.25 : 1.0), bm[0] + (gate < 2 ? 1.0 : 0.25), y + 0.45, bm[1] + (gate < 2 ? 0.25 : 1.0)));
+  const sx = cx + (rand() < 0.5 ? -1 : 1) * (pr + 2.6), sz = cz + (rand() < 0.5 ? -1 : 1) * 0.5;
+  if (sx > x0 + t + 1 && sx < x1 - t - 1) {
+    bag.add('marble', box(sx - 0.35, y, sz - 0.35, sx + 0.35, y + 1.0, sz + 0.35));
+    bag.add('marble', lz([[0.001, 0], [0.22, 0.02], [0.24, 0.4], [0.2, 0.9], [0.1, 1.05], [0.06, 1.1], [0.08, 1.2], [0.08, 1.35], [0.05, 1.42], [0.001, 1.42]], 12).translate(sx, y + 1.0, sz));
+    col.rect([sx - 0.35, sz - 0.35, sx + 0.35, sz + 0.35], y, y + 1.4);
+  }
+}
+Object.assign(STYLES.roman.elements, { paving, crossing, street_kit: streetKit, alley_fill: alleyFill, hortus });
+void fromTriangles;

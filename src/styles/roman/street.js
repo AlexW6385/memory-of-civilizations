@@ -22,7 +22,7 @@ const DOLIUM = (r) => [[r * 0.8, 0], [r, 0.1], [r * 1.05, 0.5], [r * 0.9, 0.85],
  * The frame of a building in rect [x0, z0, x1, z1] with its front on one side: u along the front, d deep into the
  * building, W × D. R(u0, u1, d0, d1) the world rect of a block, P(u, d) a world point.
  */
-function frame(rect, front) {
+export function frame(rect, front) {
   const [x0, z0, x1, z1] = rect, along = front === 'n' || front === 's', W = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
   const R = (u0, u1, d0, d1) => front === 's' ? [x0 + u0, z1 - d1, x0 + u1, z1 - d0] : front === 'n' ? [x0 + u0, z0 + d0, x0 + u1, z0 + d1]
     : front === 'e' ? [x1 - d1, z0 + u0, x1 - d0, z0 + u1] : [x0 + d0, z0 + u0, x0 + d1, z0 + u1];
@@ -30,7 +30,7 @@ function frame(rect, front) {
   return { W, D, R, P, along };
 }
 /** The tools of a building: B(mat, u0, u1, d0, d1, ya, yb, solid) adds a block (and collides when solid), V(mat, geometry at P). */
-function tools(el, ctx, front = el.front ?? 's') {
+export function tools(el, ctx, front = el.front ?? 's') {
   const { bag, col } = ctx, y = el.y ?? 0, F = frame(el.rect, front);
   const B = (mat, u0, u1, d0, d1, ya, yb, solid = false) => { const r = F.R(u0, u1, d0, d1); bag.add(mat, box(r[0], y + ya, r[1], r[2], y + yb, r[3])); if (solid) col.rect(r, y + ya, y + yb); };
   const V = (mat, prof, u, d, ya = 0, n = 12) => { const p = F.P(u, d); bag.add(mat, lz(prof, n, p[0], y + ya, p[1])); };
@@ -59,7 +59,7 @@ function sideWall(T, mat, u, t, d0, d1, H, doors = [], ya = -0.4) {
   if (d1 > d) T.B(mat, u, u + t, d, d1, ya, H, true);
 }
 /** A hipped roof of tiles over the rect of a building, the ridge along its longer side. */
-function hip(ctx, rect, y, rise, ov = 0.5) {
+export function hip(ctx, rect, y, rise, ov = 0.5) {
   const [x0, z0, x1, z1] = rect, w = x1 - x0, d = z1 - z0;
   if (w >= d) ctx.bag.add('roof_tile', frustum([x0 - ov, z0 - ov, x1 + ov, z1 + ov], y, y + rise, d * 0.5, d * 0.5, d / 2 + ov - 0.05, d / 2 + ov - 0.05));
   else ctx.bag.add('roof_tile', frustum([x0 - ov, z0 - ov, x1 + ov, z1 + ov], y, y + rise, w / 2 + ov - 0.05, w / 2 + ov - 0.05, w * 0.5, w * 0.5));
