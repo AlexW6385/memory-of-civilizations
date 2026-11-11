@@ -63,6 +63,7 @@ export const temple = {
   bounds: [x0 - 4, z0 - 4, x1 + 4, z1 + 4],
   bakeBounds: [x0 - 4, z0 - 4, x1 + 4, z1 + 4],
   view: [ax - 20, PAGODA[1] - 20, ax + 20, PAGODA[1] + 20],
+  viewY: 4.2,
   bakeTop: 66,
   elements: E,
   rooms,
