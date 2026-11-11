@@ -126,6 +126,19 @@ Sources added:
 - [Architecture of Lhasa — Wikipedia](https://en.wikipedia.org/wiki/Architecture_of_Lhasa)
 - [Butter lamp — Wikipedia](https://en.wikipedia.org/wiki/Butter_lamp)
 
+## 14. The street of shops, the tea houses, the living town (2026-11 batch pass)
+
+- **Trading houses.** Lhasa's traders' houses were smaller, "usually two stories high", combining residence, shop and storage in one building, "often very well-built"; façades whitewashed with "thick black frames" and "small slate roofs over doors and windows" [stated: Lhasa's Historic Urban Fabric, Tibet Heritage Fund]. Ours (`tibetan_shop`, `src/styles/tibetan/shops.js`): along the street up to the palace (x −3.8…3.8, rows 6 m deep each side, `layout.js shops()`), single-storey whitewashed trading houses whose one room is walkable: a counter with a balance, shelves to the beams with sacks of barley, bricks of tea, butter in skin bags, wool bales, brass and clay pots, bowls; goods hung from the beams; outside the rug rail and stacked sacks. Heights and the single storey are [inferred]; the stock is [inferred] from Lhasa's trade in tea, wool and butter.
+- **Tea houses.** Tibetan teahouses near the Potala and the Barkhor where "acquaintances and strangers sit together, share tables" [stated: tibettravel.org, Tibetan tea culture]; butter tea made in "a large wooden churn, 'mdong-mo'"; each drinker has a wooden bowl, "phorpa" [same]; low Tibetan tables with teacups in the reception rooms [stated: Tibet Heritage Fund]. Ours (`tibetan_shop`, kind `tea`): benches under rugs along the front and back walls, low painted tables before them with bowls and a pot, patrons sitting on the benches, a clay stove with a big kettle and a flue, the iron-banded wooden churn, a water jar, a shelf of bowls, a thangka over the counter with butter lamps before it, two red pillars under a beam, light from butter lamps. The 17th-century existence of such houses is [inferred].
+- **Booths** (`stall`): open stalls between the shops: four posts, a sloped awning in five-colour stripes, a counter on trestles with bowls, sacks, tsampa cakes or pots, a rug hung behind [inferred]. Prayer flags in the five colours strung across the street (`flag_line`) and the juniper incense burner (`sangkhang`) in the street [stated: Prayer wheel / flags, tibettravel.org circuits; the Barkhor's incense burners are [inferred]].
+- **Yaks** tethered in the lane and the street (`animal` kind yak): the yak is the caravan animal of the plateau [stated: Wikipedia, Yak] [inferred for Shöl's lane].
+- **Living systems.** `movers.js`: monks, pilgrims, traders, women with a load in a basket on the back, elders, boys; the street, the lane across Shöl, the open ground below the stairs and the circuit's legs. `fauna.js`: ravens and choughs (drawn as crows) over the palace, swifts, sparrows on the paving. `smoke.js`: juniper urns on the house roofs at dawn and dusk, incense burners all day, kitchen smoke at the morning tea and the evening meal, steam at the tea houses, mist on the pond at dawn [inferred from the practice of the daily juniper offering].
+- **Not built** (outside the 420 m disc, §12): the Jokhang and the Barkhor, 2 km east of the Potala [stated: §11].
+
+Sources added:
+- [Lhasa's Historic Urban Fabric — Tibet Heritage Fund (asianart.com)](https://asianart.com/associations/lhasa_restoration/report98/ch_02.htm)
+- [Tibetan Tea Culture — tibettravel.org](https://www.tibettravel.org/tibetan-local-customs/tibetan-tea-culture.html)
+
 ## Sources
 
 - [Deyangshar — Wikipedia](https://en.wikipedia.org/wiki/Deyangshar)
