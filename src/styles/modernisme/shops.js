@@ -6,6 +6,7 @@
 // trade and width in the shop's own frame (s along the front from the shop's left end, d inward from the street line, y up)
 // and set by instancing; the walls, front and floor are exact for the plot.
 import { box, lathe, rod } from '../../core/geom.js';
+import { Matrix4 } from '../../core/three.js';
 
 const IRON = 'iron';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -59,7 +60,13 @@ export function plotShops(p, nb, bw, on) {
 }
 
 export function makeShops(H) {
-  const { proto, put } = H;
+  // the furnishing is a heap of small pieces (each a fine detail drawn only near): kept as pieces, not merged into one prototype
+  const KITS = new Map();
+  const proto = (key, build) => { let k = KITS.get(key); if (!k) { k = []; build({ add: (m, g) => k.push([m, g.index ? g.toNonIndexed() : g]) }); KITS.set(key, k); } return k; };
+  const put = (bag, fr, pieces, s, y) => {
+    const q = fr.at(s, 0), M = new Matrix4().makeRotationY(Math.atan2(-fr.u[1], fr.u[0])).setPosition(q[0], y, q[1]);
+    for (const [m, g] of pieces) bag.add(m, g.clone().applyMatrix4(M));
+  };
 
   // ── a shop's furnishing in its own frame ──────────────────────────────────────────────────────
   const furnish = (trade, W, dc, flip) => proto(`shop|${trade}|${W.toFixed(1)}|${dc.toFixed(1)}|${flip ? 1 : 0}`, (b) => {
@@ -69,8 +76,8 @@ export function makeShops(H) {
     const lat = (m, prof, s, d, y, seg = 7) => b.add(m, lathe(prof, seg, null, S(s), y, d));
     const rd = (m, p, q, rr, seg = 6) => b.add(m, rod([S(p[0]), p[2], p[1]], [S(q[0]), q[2], q[1]], rr, seg));
     const pick = (a) => a[Math.floor(r() * a.length)];
-    const jar = (m, s, d, y, rr, h) => lat(m, [[0.001, 0], [rr, 0], [rr, h * 0.75], [rr * 0.55, h * 0.9], [rr * 0.6, h], [0.001, h]], s, d, y, 6);
-    const bottle = (m, s, d, y, rr, h) => lat(m, [[0.001, 0], [rr, 0], [rr, h * 0.55], [rr * 0.3, h * 0.78], [rr * 0.3, h], [0.001, h]], s, d, y, 6);
+    const jar = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.004], [rr, 0], [rr, h * 0.75], [rr * 0.55, h * 0.9], [rr * 0.6, h], [0.001, h]], s, d, y, 6);
+    const bottle = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.004], [rr, 0], [rr, h * 0.55], [rr * 0.3, h * 0.78], [rr * 0.3, h], [0.001, h]], s, d, y, 6);
     const barrel = (m, s, d, y, rr, h) => { lat(m, [[0.001, 0], [rr * 0.85, 0], [rr, h * 0.5], [rr * 0.85, h], [0.001, h]], s, d, y, 9); lat(IRON, [[rr * 0.86, h * 0.2], [rr * 0.92, h * 0.2], [rr * 0.92, h * 0.25], [rr * 0.86, h * 0.25]], s, d, y, 9); lat(IRON, [[rr * 0.86, h * 0.75], [rr * 0.92, h * 0.75], [rr * 0.92, h * 0.8], [rr * 0.86, h * 0.8]], s, d, y, 9); };
     const sack = (m, s, d, y) => lat(m, [[0.001, 0], [0.26, 0], [0.3, 0.2], [0.24, 0.5], [0.12, 0.62], [0.001, 0.6]], s, d, y, 7);
     const crateOf = (s, d, y, fruit) => { bx('wood_ochre', s - 0.25, s + 0.25, d - 0.17, d + 0.17, y, y + 0.2); for (let k = 0; k < 6; k++) lat(fruit[k % fruit.length], [[0.001, 0], [0.05, 0.03], [0.065, 0.07], [0.04, 0.115], [0.001, 0.12]], s - 0.16 + (k % 3) * 0.16, d - 0.07 + Math.floor(k / 3) * 0.14, y + 0.2, 6); };
@@ -95,7 +102,7 @@ export function makeShops(H) {
       for (let k = 0; k <= n; k++) { const u = L * k / n; if (along === 'd') bx(wood, s0, s1, d0 + u - 0.025, d0 + u + 0.025, Y0, 2.85); else bx(wood, s0 + u - 0.025, s0 + u + 0.025, d0, d1, Y0, 2.85); }
       TIERS.forEach((ty, t) => {
         if (along === 'd') bx(wood, s0, s1, d0, d1, ty - 0.03 + Y0, ty + Y0); else bx(wood, s0, s1, d0, d1, ty - 0.03 + Y0, ty + Y0);
-        const step = trade === 'draperia' ? 0.42 : 0.2, m = Math.floor(L / step);
+        const step = trade === 'draperia' ? 0.5 : 0.27, m = Math.floor(L / step);
         for (let i = 0; i < m; i++) { const u = 0.15 + (L - 0.3) * i / Math.max(1, m - 1); if (r() < 0.07) continue; if (along === 'd') stock(cs, d0 + u, ty + Y0, i, t); else stock(s0 + u, cd, ty + Y0, i, t); }
       });
       bx(wood, along === 'd' ? s0 : s0, along === 'd' ? s1 : s1, along === 'd' ? d0 : d0, along === 'd' ? d1 : d1, 2.85 + Y0, 2.95 + Y0);
@@ -255,7 +262,7 @@ export function makeShops(H) {
     bag.add(T.floor, F(s0, s1, -DD, -FW, yS - 0.4, FL)); col.floor([...(() => { const p = fr.at(s0, -DD), q = fr.at(s1, 0.15); return [p[0], p[1], q[0], q[1]]; })()], FL);
     const lin = (a0, a1, t0, t1) => bag.add(T.wall, F(a0, a1, t0, t1, yS + 0.12, yS + 4.2));
     lin(s0, s0 + 0.04, -DD, -FW); lin(s1 - 0.04, s1, -DD, -FW); lin(s0, s1, -DD, -DD + 0.04);
-    bag.add('wood_dark', F(s0, s1, -DD, -FW, yS + 0.12, yS + 0.3 + 0.0)); void 0;
+    bag.add('wood_dark', F(s0 + 0.04, s0 + 0.08, -DD, -FW, yS + 0.12, yS + 0.3)); bag.add('wood_dark', F(s1 - 0.08, s1 - 0.04, -DD, -FW, yS + 0.12, yS + 0.3)); bag.add('wood_dark', F(s0 + 0.08, s1 - 0.08, -DD + 0.04, -DD + 0.08, yS + 0.12, yS + 0.3));
     bag.add('plaster_white', F(s0, s1, -DD, -FW, yS + 4.18, top));
     for (let d = 1.6; d < DD - 0.5; d += 2.4) bag.add('wood_dark', F(s0, s1, -d - 0.14, -d + 0.14, yS + 3.95, yS + 4.18));
     // furnishing, dress, light

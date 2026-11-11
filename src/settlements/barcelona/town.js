@@ -38,6 +38,7 @@ function trams(lines, rand) {
     const d = [pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]], l = Math.hypot(...d), o = [-d[1] / l, d[0] / l];
     const px = x + o[0] * side * 1.55, pz = z + o[1] * side * 1.55, dir = side > 0 ? d : [-d[0], -d[1]];
     if (Math.hypot(px, pz) > RADIUS - 40) return;
+    if (Math.abs(px - PITCH * 2.5) < 4 && Math.abs(pz + 90) < 11) return;                       // (none standing across the walk from the Marina to the façade)
     out.push({ t: 'tram', at: [px, pz], y: Y(px, pz) + 0.03, rot: Math.atan2(-dir[0], -dir[1]), kind, wire: 5.87, seed: Math.floor(rand() * 1e9) });
   };
   const len = (pts) => { let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); return L; };
@@ -155,7 +156,9 @@ export async function town() {
   plans.push({ ...base('barcelona-casa-life', casaLife()), style: 'life' });
   // the shops' people, a plan to a few blocks
   shopLife(els).forEach((L, i) => plans.push({ ...base(`barcelona-shop-life-${i}`, L), style: 'life' }));
-  plans.push(base('barcelona-trams', [...lines, ...trams(lines, rand)]));
+  plans.push(base('barcelona-trams', [...lines.map((l) => ({ ...l, wires: false })), ...trams(lines, rand)]));
+  // the wires apart, colliding with nothing
+  plans.push({ ...base('barcelona-wires', lines.map((l) => ({ ...l, wires: 'only' }))), nocollide: true });
   plans.push(base('barcelona-carriages', carriages(rand)));
   // the Mercat de la Concepció on its block, and its life: the stalls in rows down the naves, the sellers and the
   // buyers, the flower sellers outside (§5d)

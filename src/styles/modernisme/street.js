@@ -64,7 +64,9 @@ function fixSides(T, L, R) {
  */
 function tramLine(el, { bag, col }) {
   const pts = el.pts, sep = el.sep ?? 3.1, g = el.gauge ?? 1.435, span = el.span ?? 9.6, every = el.every ?? 32, wire = el.wire ?? 5.9;
-  for (const t of [-sep / 2, sep / 2]) {
+  // el.wires: false — no wires (they are built apart, in a plan that collides with nothing: a thin wire would stand in the height field as a wall); 'only' — only the wires
+  const rest = el.wires !== 'only', wires = el.wires !== false;
+  for (const t of rest ? [-sep / 2, sep / 2] : []) {
     const tr = offset(pts, t);
     bag.add('granite_block', ribbon(tr, g + 1.1, -0.12, 0.012));
     for (const r of [-g / 2, g / 2]) { const rl = offset(tr, r); bag.add(IRON, ribbon(rl, 0.07, -0.02, 0.032)); bag.add(IRON, ribbon(offset(tr, r - Math.sign(r) * 0.06), 0.03, -0.02, 0.022)); }
@@ -83,13 +85,13 @@ function tramLine(el, { bag, col }) {
   stations.forEach((st, k) => {
     if (k === 0 && el.skipFirst) return;
     const sides = [-1, 1].filter((sg) => { const b = at(st, sg * span, 0); return !blocked(b[0], b[2]); });
-    for (const sg of sides) {
+    if (rest) for (const sg of sides) {
       const b = at(st, sg * span, 0);
       bag.add(IRON, lathe([[0.2, -0.3], [0.2, 0.5], [0.16, 0.7], [0.13, 1.2], [0.11, 2.2], [0.1, 6.9], [0.13, 7.0], [0.13, 7.12], [0.06, 7.3], [0.09, 7.45], [0.001, 7.7]], 10, null, b[0], b[1], b[2]));
       bag.add(IRON, lathe([[0.17, 0], [0.17, 0.12], [0.12, 0.2]], 10, null, b[0], b[1] + 2.2, b[2]));
       col.circle(b[0], b[2], 0.25, b[1], b[1] + 7.5);
     }
-    if (!sides.length) return;
+    if (!sides.length || !wires) return;
     if (sides.length === 2) bag.add(IRON, rod(at(st, -span, wire + 0.55), at(st, span, wire + 0.55), 0.012, 4));
     else {
       // a bracket arm from the one pole out over both tracks, with its tie rod
@@ -99,7 +101,7 @@ function tramLine(el, { bag, col }) {
     }
     for (const t of [-sep / 2, sep / 2]) bag.add(IRON, rod(at(st, t, wire), at(st, t, wire + 0.55), 0.015, 4));
   });
-  for (const t of [-sep / 2, sep / 2]) for (let k = 0; k + 1 < stations.length; k++) bag.add(IRON, rod(at(stations[k], t, wire), at(stations[k + 1], t, wire), 0.011, 4));
+  if (wires) for (const t of [-sep / 2, sep / 2]) for (let k = 0; k + 1 < stations.length; k++) bag.add(IRON, rod(at(stations[k], t, wire), at(stations[k + 1], t, wire), 0.011, 4));
 }
 
 /** Set pieces built along a local frame (x across, z along, −z forward) at at/rot/y. */
