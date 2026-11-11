@@ -122,6 +122,7 @@ export const PROFILES = {
   catalhoyuk: T({ sparrow: 0.4, warbler: 0.5, crow: 0.4, dove: 0.2 }, { frogs: 0.6, animals: { dog: 0.4, goat: 0.5, cattle: 0.4 }, roof: 'flat' }),
   shibam: T(NEAR, { animals: { donkey: 0.3, goat: 0.3 }, roof: 'flat' }),
   delphi: T(MED, { cicadas: 0.7, animals: { sheepbell: 0.7, donkey: 0.3, dog: 0.25, rooster: 0.3 }, roof: 'tile' }),
+  mycenae: T(MED, { cicadas: 0.9, animals: { goat: 0.5, sheepbell: 0.5, donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
   giza: T(NEAR, { animals: { donkey: 0.5, cattle: 0.4, dog: 0.3 }, roof: 'flat' }),
   granada: T(MED, { cicadas: 0.7, animals: { donkey: 0.4, rooster: 0.4, horse: 0.2 }, adhan: 1 }),
   'great-zimbabwe': T({ dove: 1, tropic: 0.7, kite: 0.3 }, { cicadas: 0.7, frogs: 0.4, animals: { cattle: 0.8, goat: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'thatch' }),

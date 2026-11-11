@@ -73,4 +73,5 @@ export const ARRIVALS = {
   'mongol-karakorum': [70, 0.1, -12, 0, 0.2],   // Standing in the south gate of Möngke Khan's palace compound: the great hall on its rammed-earth podium across the court, the nine-tailed banners on either hand, the brick wall and the storehouses beyond.
   'shibam': [-6, null, -8, -1.264, 0.3],   // the merchant's tower house across the square: seven storeys of brown mud brick, the top two limewashed, white-framed windows, the parapet against the sky, the street door at its foot
   'delphi': [62, null, 16, 1.25, 0.22],   // on the Temple of Apollo's terrace before the Chians' altar and the Serpent Column: the temple's east front whole, the sacred hill rising behind to the Phaedriades
+  'mycenae': [-136, null, 0, -1.5708, 0.2],   // on the approach road west of the citadel: the Lion Gate in its dressed conglomerate front between the bastion and the wall's end, the Cyclopean circuit rising behind it to the palace on the summit
 };

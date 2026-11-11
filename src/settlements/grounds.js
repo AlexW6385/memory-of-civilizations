@@ -71,6 +71,7 @@ import { ground as mongolKarakorum } from './mongol-karakorum/ground.js';
 import { ground as catalhoyuk } from './catalhoyuk/ground.js';
 import { ground as shibam } from './shibam/ground.js';
 import { ground as delphi } from './delphi/ground.js';
+import { ground as mycenae } from './mycenae/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -139,6 +140,7 @@ export const GROUNDS = {
   catalhoyuk,
   shibam,
   delphi,
+  mycenae,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -212,6 +214,7 @@ const LOADERS = {
   catalhoyuk: () => import('./catalhoyuk/index.js'),
   shibam: () => import('./shibam/index.js'),
   delphi: () => import('./delphi/index.js'),
+  mycenae: () => import('./mycenae/index.js'),
 };
 
 /** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */

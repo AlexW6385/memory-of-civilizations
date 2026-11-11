@@ -822,4 +822,24 @@ export const CARDS = {
       "村落 —— 圣所东西两侧台地上德尔斐人的庭院住宅，大门口售卖供品的摊位，朝圣者与祭司，山坡上的山羊。",
     ],
   },
+  'mycenae': {
+    en: [
+      "Mycenae stands on a rocky ridge between two ravines in the north-east corner of the Argive plain in southern Greece, commanding the roads to the Isthmus of Corinth. The moment shown is about 1250 BC, in the middle of the Late Helladic IIIB period, when the citadel's wall has just been extended on the west slope to take in Grave Circle A and the Lion Gate has been built. The architecture is Mycenaean: Cyclopean walls of huge rough limestone blocks wedged with small stones, dressed conglomerate at the gate, palaces of plastered mudbrick and timber on stone socles, tholos tombs; the Greeks of later centuries thought the Cyclopes must have built it, and in Homer it is Agamemnon's city.",
+      "The Lion Gate — the main entrance in the west wall, reached between a bastion and the end of the main wall; an opening 3.1 m wide under a lintel 4.5 m long, over it a triangular slab with two lionesses standing on either side of a Minoan-type column, the oldest monumental sculpture of Europe.",
+      "Grave Circle A — just inside the gate, a ring 27.5 m across of upright slabs capped with flat ones, enclosing six shaft graves of the 16th century BC with their stelae and the altar built over them when the wall was extended.",
+      "The Cyclopean walls — a circuit of boulders about 6 m thick enclosing the long ridge, rising from the ravines to the summit, with the north gate and the stepped ramp climbing to the palace.",
+      "The palace — on the summit round a Great Court, entered through a propylon; its megaron of porch, vestibule and hall, the hall with a painted floor, a round hearth 3.7 m across between four columns under a raised roof, the throne against the right-hand wall and frescoes of griffins and a procession.",
+      "The Treasury of Atreus — outside the walls, the largest tholos tomb: a dromos 36 m long between walls of conglomerate rising to the façade, a doorway under a lintel of about 120 tons flanked by green half-columns, and a beehive dome of 33 corbelled courses, 14.5 m across and 13.2 m high, under its mound, with a side chamber.",
+      "The lower town — houses of stone and plastered mudbrick with flat roofs on the terraced slopes, with workshops (potters, weavers, oil pressers) and their yards, the lanes, and the people of the town.",
+    ],
+    zh: [
+      "迈锡尼坐落在希腊南部阿尔戈斯平原东北角、两道沟壑之间的岩石山脊上，扼守通往科林斯地峡的道路。画面定格在约公元前1250年，即后期希拉迪克IIIB期中叶：卫城城墙刚向西坡扩建，把A号圆形墓圈围入城内，狮子门也刚刚建成。建筑属于迈锡尼风格：以巨大粗糙的石灰岩块砌成、缝隙塞以碎石的“独眼巨人式”城墙，城门处用加工过的砾岩，石砌基座上的灰泥土坯与木构宫殿，以及圆顶墓。后世希腊人认为只有独眼巨人才造得出这样的城墙，荷马笔下这里是阿伽门农的城市。",
+      "狮子门——西墙上的正门，经由一座凸出的棱堡与主墙尽头之间的通道进入；门洞宽3.1米，上有4.5米长的过梁，梁上三角形石板浮雕着两头母狮立于一根米诺斯式立柱两侧，是欧洲最古老的大型雕刻。",
+      "A号圆形墓圈——紧靠门内，直径27.5米，由直立石板与横盖石板围成，圈内有六座公元前16世纪的竖井墓、墓碑，以及城墙扩建时在其上所建的祭坛。",
+      "独眼巨人式城墙——约6米厚的巨石城墙围住整条山脊，自沟壑一路攀至山顶，设有北门和通往宫殿的石阶坡道。",
+      "宫殿——位于山顶，环绕大庭院，经门楼进入；正殿由门廊、前厅和大厅组成，大厅地面彩绘，中央有直径3.7米的圆形火塘，四根立柱撑起升高的屋顶，王座靠在右侧墙边，墙上绘有狮鹫和行列壁画。",
+      "阿特柔斯宝库——城墙之外规模最大的圆顶墓：36米长的墓道两侧是逐渐升高的砾岩墙，直至立面；门洞上方的过梁重约120吨，两侧有绿色半柱；穹顶由33层叠涩石层砌成，直径14.5米、高13.2米，覆以土丘，旁有一间侧室。",
+      "下城——坡地梯田上的石基灰泥土坯平顶住宅，有陶工、纺织、榨油作坊及其院落、小巷和城中的居民。",
+    ],
+  },
 };
