@@ -70,5 +70,6 @@ export const MOVER_SITES = {
   'delphi': () => import('../settlements/delphi/movers.js'),
   'mycenae': () => import('../settlements/mycenae/movers.js'),
   'qin-xianyang': () => import('../settlements/qin-xianyang/movers.js'),
+  'alexandria': () => import('../settlements/alexandria/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

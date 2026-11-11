@@ -878,4 +878,24 @@ export const CARDS = {
       "制俑工坊与城镇 —— 制作兵俑的作坊院（备泥、盘筑躯干、模制头像、烧窑、彩绘棚与运往俑坑的雪橇），以及一排排夯土民居，有瓦顶或茅顶，也有带院门的宅院、建在高台上的官吏宅第和架空的粮仓。",
     ],
   },
+  'alexandria': {
+    en: [
+      "Alexandria stands on the Mediterranean coast of the Nile delta, shown about 250 BC, in the reign of Ptolemy II, seventy-odd years after Alexander founded it. It is the capital of the Ptolemies, Macedonian Greek kings who rule Egypt as pharaohs, on a strip of land between the sea and Lake Mareotis, laid out on a grid by Dinocrates of Rhodes. Greeks, Egyptians and Jews live in their own quarters. The architecture is Greek, in limestone, marble and painted plaster, with Egyptian forms beside it: the cavetto cornice, the pylon, the sphinx, the mudbrick houses of Rhakotis. The city is compressed here to fit one walk.",
+      "The Pharos — the lighthouse on its island at the harbour's mouth, finished about 280 BC: three tiers of limestone, a square tower about 30 m across and 56 m high, an octagon, a cylinder carrying the fire and a bronze mirror, and on top a statue of Zeus Soter, about 104 m in all.",
+      "The Great Harbour — the harbour between the island and the Lochias cape, with stone quays, merchant ships under square sails, galleys and lighters, and the Heptastadion, the mole to the island with two bridged channels to the Eunostos harbour.",
+      "The Museion and the Library — the scholars' house in the royal quarter: a peristyle garden with a long colonnaded walk, an exedra, a dining hall for the common meal, and reading halls whose walls are pigeonholes of papyrus scrolls, under Ionic colonnades.",
+      "The Canopic Way and the Soma street — the two great streets crossing at the agora, with colonnaded shops of bronze-smiths, perfumers, cloth-sellers and wine merchants, and the Gymnasium.",
+      "The quarters — courtyard houses with painted walls and peristyles in the Greek and Jewish quarters, a prayer house, and the tall mudbrick houses of the old Egyptian town of Rhakotis.",
+      "The Serapeum — Ptolemy III's temple of Serapis on the rock of Rhakotis, behind an Egyptian pylon and a pair of sphinxes.",
+    ],
+    zh: [
+      "亚历山大港位于尼罗河三角洲的地中海岸，画面所示约为公元前250年，托勒密二世在位，距亚历山大大帝建城已七十余年。这里是托勒密王朝的都城，马其顿希腊人的国王以法老身份统治埃及；城建在大海与马雷奥提斯湖之间的狭长地带上，由罗得岛的狄诺克拉底按棋盘格规划。希腊人、埃及人和犹太人各居其区。建筑以希腊式为主，石灰岩、大理石和彩绘灰泥，旁边并有埃及的形式：凹弧檐口、塔门、狮身人面像，以及拉科提斯的土坯房。为一次步行之便，城在此被压缩。",
+      "法罗斯灯塔 —— 港口入口小岛上的灯塔，约公元前280年建成：三层石灰岩，下为约30米见方、56米高的方塔，中为八角形，上为圆柱，托着火焰与青铜镜，顶上立宙斯救主像，通高约104米。",
+      "大港 —— 小岛与洛基亚斯角之间的海港，有石砌码头、挂方帆的商船、桨帆战船和驳船；七斯塔迪翁长堤通向小岛，堤下两条有桥的水道连通欧诺斯托斯港。",
+      "缪斯宫与图书馆 —— 王宫区内学者的居所：列柱围成的庭园和长长的柱廊步道、半圆形座席、共餐的大厅，以及爱奥尼亚柱廊下的阅览厅，墙上满是存放纸莎草卷的格架。",
+      "卡诺普大道与索玛大街 —— 两条大街在市集相交，沿街柱廊后是铜匠、香料商、布商和酒商的店铺，还有体育馆。",
+      "各街区 —— 希腊人和犹太人街区里有绘着壁画、带列柱中庭的院宅，一座祈祷所，以及古老埃及城区拉科提斯的高大土坯房。",
+      "塞拉皮斯神庙 —— 托勒密三世在拉科提斯岩丘上为塞拉皮斯所建的神庙，前有埃及式塔门和一对狮身人面像。",
+    ],
+  },
 };

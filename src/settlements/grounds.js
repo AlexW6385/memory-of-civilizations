@@ -74,6 +74,7 @@ import { ground as delphi } from './delphi/ground.js';
 import { ground as mycenae } from './mycenae/ground.js';
 import { ground as abbasidBaghdad } from './abbasid-baghdad/ground.js';
 import { ground as qinXianyang } from './qin-xianyang/ground.js';
+import { ground as alexandria } from './alexandria/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -145,6 +146,7 @@ export const GROUNDS = {
   mycenae,
   'abbasid-baghdad': abbasidBaghdad,
   'qin-xianyang': qinXianyang,
+  alexandria,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
