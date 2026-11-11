@@ -141,7 +141,7 @@ export async function town() {
   v.houses.slice(1).forEach((h, k) => {
     if (inLake(h.c[0], h.c[1] - 8) || Math.hypot(h.c[0], h.c[1]) > RADIUS - 48) return;
     const d = door(h, 0.25);
-    E.push({ t: 'yard', c: d, y: gy(d), yaw: h.yaw, seed: 100 + k, items: 2 + (k % 3 === 0 ? 1 : 0) });
+    E.push({ t: 'yard', c: d, y: gy(d), yaw: h.yaw, w: h.w, seed: 100 + k, items: 2 + (k % 3 === 0 ? 1 : 0) });
   });
   houses.forEach((h, k) => {
     const rot = h.yaw + Math.PI, at0 = door(h, 3.2);

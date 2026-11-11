@@ -22,10 +22,11 @@ const ITEMS = {
     const L = 2.4 + r() * 0.8;
     for (const sx of [0, L]) add('timber', rod([x + sx, 0, z], [x + sx, 1.75, z], 0.045, 5));
     add('rope_fibre', rod([x, 1.65, z], [x + L, 1.6, z], 0.012, 4));
-    for (let k = 0, u = 0.25; u < L - 0.5 && k < 3; k++, u += 0.75 + r() * 0.35) {
-      const w = 0.55 + r() * 0.2, mat = ['cloth_ochre', 'cloth_brown', 'hide_tan', 'cloth_ochre'][Math.floor(r() * 4)];
-      add(mat, box(x + u, 0.82 + r() * 0.1, z - 0.04, x + u + w, 1.64, z + 0.04));
-      add('cloth_black', box(x + u, 0.82 + r() * 0.1, z - 0.045, x + u + w, 0.9 + r() * 0.1, z + 0.045));   // the taniko border
+    for (let k = 0, u = 0.25; u < L - 0.5 && k < 3; k++, u += 0.95 + r() * 0.3) {
+      const w = 0.5 + r() * 0.2, mat = ['cloth_ochre', 'cloth_brown', 'hide_tan', 'cloth_ochre'][Math.floor(r() * 4)];
+      const by = 0.82 + r() * 0.1;
+      add(mat, box(x + u, by, z - 0.04, x + u + w, 1.64, z + 0.04));
+      { add('cloth_black', box(x + u - 0.03, by - 0.03, z - 0.06, x + u + w + 0.03, by + 0.1, z + 0.06)); }   // the taniko border
     }
   },
   /** kete of kūmara and fern root, a bowl, a gourd or two */
@@ -90,8 +91,9 @@ export function yard(el, { bag }) {
   for (let k = 0; k < n; k++) {
     let name; do { name = KEYS[Math.floor(rand() * KEYS.length)]; } while (used.has(name) && used.size < KEYS.length);
     used.add(name);
-    const x = side * (1.6 + k * 1.5) + (rand() - 0.5) * 0.4, z = -1.2 - rand() * 1.2 - (k % 2) * 0.5;
-    ITEMS[name](add, rand, x * (k % 2 ? -1 : 1) * (name === 'line' || name === 'pakaru' ? 0.5 : 1), z);
+    const wide = name === 'line' || name === 'pakaru', hw = Math.max(0.6, (el.w ?? 3.6) / 2 - 0.3);
+    const x = wide ? -1.45 : Math.max(-hw, Math.min(hw, (k % 2 ? -1 : 1) * side * (0.3 + k * 0.5 + rand() * 0.3))), z = -1.1 - k * 0.75 - rand() * 0.4;
+    ITEMS[name](add, rand, x, z);
   }
 }
 
