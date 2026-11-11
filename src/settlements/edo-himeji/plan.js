@@ -82,7 +82,7 @@ for (const rect of [[-17, -76.5, -9, -62.6], [-39, -86, -19, -78], [-49, -76.5, 
 E.push({ t: 'watari', rect: [-39, -54, -26.6, -46], y: DAI.top, storeys: 2, h: 3.5, gate: { at: -32.4, w: 2.6, h: 3.0, side: 'hi' } });
 
 // ---- the Sannomaru: the lord's residence, its walls and gate
-E.push({ t: 'goten', y: BANK, halls: [[-55, 106, -12, 134], [-4, 100, 42, 128, 4], [12, 138, 56, 166], [-52, 142, -8, 168], [-8, 134, 6, 146, 3]] });
+E.push({ t: 'goten', y: BANK, halls: [[-55, 106, -12, 134], [-4, 100, 42, 128, 4], [12, 138, 56, 166], [-52, 142, -8, 168], [-8, 134, 6, 146, 3]], open: { 1: { face: 's', W: 16, dq: 9 }, 2: { face: 's', W: 12, dq: 7 }, 3: { face: 's', W: 12, dq: 7 } } });
 const [gx0, gz0, gx1, gz1] = GOTEN;
 wall([gx0, gz0], [gx1, gz0], BANK, false); wall([gx0, gz0], [gx0, gz1], BANK, false); wall([gx1, gz0], [gx1, gz1], BANK, false);
 wall([gx0, gz1], [-6, gz1], BANK, false); wall([6, gz1], [gx1, gz1], BANK, false);
@@ -95,6 +95,24 @@ for (const [x0, x1] of [[-RADIUS, -MIDDLE.gap / 2], [MIDDLE.gap / 2, RADIUS]]) {
   strip([xa, MIDDLE.z1, xb, MIDDLE.z1 + 2.5], 'n', LEVEL.bed, 0.3, 1.2);
 }
 E.push({ t: 'yagura_mon', rect: [-12, MIDDLE.z0 - 9, 12, MIDDLE.z0 - 1], y: 0, passage: 6, h: 4.2 });
+
+// ---- the baileys' ground (docs §5.7): pines, wells, lanterns, storehouse rows, flagstone paths; the Sannomaru's storehouses
+{
+  const pine = (x, z, y, h, seed) => E.push({ t: 'niwaki', at: [x, z], y, h, seed });
+  const N = NINO.top, H = HON.top;
+  [[-95, -100, 7.5], [-95, -60, 8.5], [-96, -20, 7], [-96, 12, 6.5], [-62, 8, 7], [-30, 6, 6], [22, 9, 7.5], [44, -100, 8], [44, -50, 7], [44, -10, 8.5], [-40, -132, 6.5]].forEach(([x, z, h], i) => pine(x, z, N, h, 70 + i));
+  [[-70, -60, 8], [-76, -20, 7], [18, -70, 8.5], [22, -20, 7], [-45, -10, 6.5], [-20, -112, 7], [10, -108, 7.5]].forEach(([x, z, h], i) => pine(x, z, H, h, 90 + i));
+  E.push({ t: 'ido', at: [-46, 11], y: N, rot: 0.4 }, { t: 'ido', at: [46, -72], y: N, rot: 1.2 }, { t: 'ido', at: [-72, -14], y: H, rot: 2 });
+  for (const [x, z, y] of [[-12, 14, N], [12, 15, N], [-8, -8, H], [24, -4, H], [-31, -18, H]]) E.push({ t: 'ishidoro', at: [x, z], y, s: 1.2 });
+  for (const x of [-90, -78, -66]) E.push({ t: 'kura', rect: [x, -138, x + 8, -130], y: N });
+  for (const x of [-98, -86]) E.push({ t: 'kura', rect: [x, 2, x + 8, 10], y: N });
+  E.push({ t: 'lane', rect: [-34, -7, 16, -1], y: H + 0.02, mat: 'flagstone' }, { t: 'lane', rect: [-34, -22, -28, -7], y: H + 0.02, mat: 'flagstone' });
+  E.push({ t: 'lane', rect: [-3, 12, 16, 17.5], y: N + 0.02, mat: 'flagstone' });
+  // the Sannomaru: pines along the lane to the gate, storehouses in rows west and east of the lord's residence
+  for (const [x, z] of [[-12, 182], [12, 182], [-14, 194], [14, 194], [-24, 188], [24, 188]]) pine(x, z, BANK, 5 + ((x * 7 + z) % 3), 130 + x);
+  for (const [x, z] of [[-6, 180], [6, 180], [-6, 192], [6, 192]]) E.push({ t: 'ishidoro', at: [x * 1.8, z + 3], y: BANK, s: 1.1 });
+  for (let c = 0; c < 5; c++) for (let r = 0; r < 3; r++) { E.push({ t: 'kura', rect: [-200 + c * 22, 112 + r * 22, -193 + c * 22, 118 + r * 22], y: BANK }); E.push({ t: 'kura', rect: [78 + c * 22, 112 + r * 22, 85 + c * 22, 118 + r * 22], y: BANK }); }
+}
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('main keep', [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], DAI.top, 'hall'), room('inner', INNER, BANK, 'open'), room('honmaru', HON.rect, HON.top, 'open'), room('keep', DAI.rect, DAI.top, 'hall'),

@@ -4,7 +4,7 @@
 // the hill, willows by the moats; the Inland Sea's mild sky.
 
 import { yardFree } from '../../styles/edo/yard.js';
-import { RADIUS, INNER, OUTER, BANK, LEVEL, MIDDLE, STREET, OTEMON, inRect, inMoat, inMiddle, hill, onPlatform, inLot, lots, smooth as sm } from './layout.js';
+import { RADIUS, INNER, OUTER, BANK, LEVEL, MIDDLE, STREET, OTEMON, GOTEN, inRect, inMoat, inMiddle, hill, onPlatform, inLot, lots, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function height(x, z) {
@@ -37,7 +37,8 @@ function planting(x, z) {
     if (onPlatform(x, z, 2)) return null;
     if (hill(x, z) > 2.5) return { red_pine: 0.9, maple: 0.5, sugi: 0.15, grass: 25 };
     if (!inRect(INNER, x, z, -6)) return { red_pine: 0.25, grass: 10 };
-    return hash2(x * 0.1, z * 0.1) < 0.1 ? { red_pine: 0.05 } : null;
+    if (inRect(GOTEN, x, z, 5) || inRect([-206, 106, -68, 188], x, z) || inRect([72, 106, 196, 188], x, z) || Math.abs(x) < 8 || z > INNER[3] - 14) return null;
+    return { red_pine: 0.1 * sm(-0.2, 0.5, vn(x * 0.07, z * 0.07)), maple: 0.06, grass: 5 };
   }
   const nearMoat = inRect(OUTER, x, z, 6) && !inRect(OUTER, x, z, 0.8);
   if (nearMoat) return { willow: 9 * sm(-0.6, 0.2, vn(x * 0.12, z * 0.12)), grass: 14 };

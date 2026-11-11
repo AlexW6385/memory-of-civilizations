@@ -528,7 +528,7 @@ function zashikiIn(bag, col, [x0, z0, x1, z1], y, h, open) {
   const B = (m, u0, u1, v0, v1, q0, q1) => { const p = at(u0, v0, q0), q = at(u1, v1, q1); bag.add(m, box(Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[1], q[1]), Math.max(p[2], q[2]))); };
   const C = (u0, u1, q0, q1, v0, v1) => { const p = at(u0, 0, q0), q = at(u1, 0, q1); col.rect([Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])], v0, v1); };
   const lat = (m, prof, seg, u, v, q) => { const p = at(u, v, q); bag.add(m, lathe(prof, seg, null, p[0], p[1], p[2])); };
-  const W = Math.min(9, L - 2), u0 = ua + (L - W) / 2, u1 = u0 + W, td = 0.75, dq = Math.min(5.4, D - td - 0.6), q1 = dq;
+  const W = Math.min(open.W ?? 9, L - 2), u0 = ua + (L - W) / 2, u1 = u0 + W, td = 0.75, dq = Math.min(open.dq ?? 5.4, D - td - 0.6), q1 = dq;
   zashiki(bag, B, C, lat, at, { u0, u1, q0: 0, q1, fl, h, seed: open.seed });
   // the rest of the house, closed behind its paper doors: filled
   const tw = Math.min(1.8, W * 0.32), tu0 = u0 + W * 0.5 - tw - 0.05, tb = Math.min(tu0 + tw + 0.12 + 1.6, u1 - 0.1) + 0.06;
@@ -541,7 +541,7 @@ function zashikiIn(bag, col, [x0, z0, x1, z1], y, h, open) {
   return (k, c) => { if (k !== fi) return false; const u = f === 'n' || f === 's' ? c[0] : c[1]; return u > u0 + 0.2 && u < u1 - 0.2; };
 }
 function goten(el, { bag, col }) {
-  for (const r of el.halls) shoinHall(bag, col, r, el.y ?? 0, r[4] ?? 3.6);
+  el.halls.forEach((r, i) => shoinHall(bag, col, r, el.y ?? 0, r[4] ?? 3.6, 'xieshan', TL, 1.8, el.open?.[i] ? { seed: 31 + i, ...el.open[i] } : null));
 }
 
 /** kura: a storehouse { rect, y }: thick white walls, a dark plinth, a tiled gable roof. */
