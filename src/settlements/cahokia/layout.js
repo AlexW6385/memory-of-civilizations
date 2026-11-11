@@ -15,6 +15,11 @@ export const ROUNDTOP = [36, 200, 22, 12];                   // centre x, z, rad
 export const PALISADE = [-160, -300, 160, 252];
 export const WOODHENGE = { c: [-290, -40], r: 45 };
 export const MOUNDS = [[150, -150, 24, 6], [-150, 80, 20, 5], [210, 120, 18, 5], [-230, 180, 22, 6], [260, -230, 16, 4], [100, 300, 18, 5]];   // smaller platform mounds: x, z, half-size, height
+// conical mounds (x, z, radius, height) and ridge-top mounds (x0, z0, x1, z1, height): the conical for burials, the ridge-top (as Mound 72, south of the palisade) a long low spine with a rounded crown
+export const CONES = [[-135, 40, 11, 5.5], [140, -80, 10, 5], [-200, -150, 13, 6], [230, 20, 12, 5.5]];
+export const RIDGES = [[-45, 268, 45, 280, 4.5], [170, 170, 215, 182, 3.5]];
+// the neighbourhood plazas: small cleared squares among the houses, 16 m a side, one to a block of 66 m
+export const NPLAZA = 16;
 export const CREEK = { z: -365, w: 26, level: -3, bed: -4.5 };
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -31,9 +36,16 @@ function ramp(x, z) {
   if (z > -148 && z <= -108) return 12 + 18 * smooth(-108, -148, z);
   return 0;
 }
+const CONE = CONES.map(([cx, cz, r, h]) => (x, z) => h * smooth(r, 0, Math.hypot(x - cx, z - cz)));
+const RIDGE = RIDGES.map(([x0, z0, x1, z1, h]) => (x, z) => {
+  const mz = (z0 + z1) / 2, hw = (z1 - z0) / 2 + h * 1.3, across = 1 - Math.min(1, Math.abs(z - mz) / hw) ** 2, along = smooth(0, h * 2.2, Math.min(x - x0 + h * 1.3, x1 + h * 1.3 - x));
+  return h * smooth(0, 0.9, across) * along;
+});
 export function mounds(x, z) {
   let h = Math.max(MAIN(x, z), FIRST(x, z), WEST(x, z), FOXP(x, z), ramp(x, z), ROUNDTOP[3] * smooth(ROUNDTOP[2], 0, Math.hypot(x - ROUNDTOP[0], z - ROUNDTOP[1])));
   for (const f of SMALL) h = Math.max(h, f(x, z));
+  for (const f of CONE) h = Math.max(h, f(x, z));
+  for (const f of RIDGE) h = Math.max(h, f(x, z));
   return h;
 }
 export const onMound = (x, z) => mounds(x, z) > 0.8;
@@ -43,7 +55,24 @@ export function height(x, z) {
   return (mounds(x, z) + plaza + (CREEK.bed - plaza) * smooth(CREEK.w / 2 + 5, CREEK.w / 2 - 4, d)) * fade;
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-let LOTS = null;
+let LOTS = null, NPL = null;
+/** The small plazas of the neighbourhoods: [x0, z0, x1, z1] each, one per block of 66 m where it clears the mounds, the Grand Plaza, the palisade, Woodhenge and the creek. */
+export function smallPlazas() {
+  if (NPL) return NPL;
+  NPL = [];
+  const rand = rng(7731), B = 66;
+  for (let bx = -6; bx <= 5; bx++) for (let bz = -6; bz <= 5; bz++) {
+    const cx = bx * B + 33 + (rand() - 0.5) * 14, cz = bz * B + 33 + (rand() - 0.5) * 14, r = [cx - NPLAZA / 2, cz - NPLAZA / 2, cx + NPLAZA / 2, cz + NPLAZA / 2];
+    if (Math.hypot(cx, cz) > RADIUS - 70 || inRect(PLAZA, cx, cz, 26)) continue;
+    if ([[-12, 0], [12, 0], [0, -12], [0, 12], [12, 12], [-12, -12]].some(([dx, dz]) => mounds(cx + dx, cz + dz) > 0.05)) continue;
+    if (Math.hypot(cx - WOODHENGE.c[0], cz - WOODHENGE.c[1]) < WOODHENGE.r + 24 || inRect([PALISADE[0] - 14, PALISADE[1] - 14, PALISADE[2] + 14, PALISADE[3] + 14], cx, cz) && !inRect([PALISADE[0] + 14, PALISADE[1] + 14, PALISADE[2] - 14, PALISADE[3] - 14], cx, cz)) continue;
+    if (Math.abs(cz - creekZ(cx)) < CREEK.w / 2 + 24) continue;
+    if (inRect(MONKS.main, cx, cz, 24) || inRect(MONKS.west, cx, cz, 24) || inRect([FOX[0], FOX[1], FOX[2] + 80, FOX[3]], cx, cz, 18)) continue;
+    NPL.push({ rect: r, c: [cx, cz], seed: Math.floor(rand() * 1e6) });
+  }
+  return NPL;
+}
+export const inSmallPlaza = (x, z, m = 0) => smallPlazas().some((p) => inRect(p.rect, x, z, m));
 /** Houses round small courtyards, in and beyond the precinct, off the mounds and the plaza. */
 export function lots() {
   if (LOTS) return LOTS;
@@ -54,9 +83,12 @@ export function lots() {
     if (Math.hypot(cx, cz) > RADIUS - 45 || mounds(cx, cz) > 0.1 || mounds(cx + 6, cz) > 0.1 || mounds(cx - 6, cz) > 0.1 || mounds(cx, cz + 6) > 0.1 || mounds(cx, cz - 6) > 0.1
       || inRect(PLAZA, cx, cz, 8) || Math.hypot(cx - WOODHENGE.c[0], cz - WOODHENGE.c[1]) < WOODHENGE.r + 10
       || Math.abs(cx - PALISADE[0]) < 9 || Math.abs(cx - PALISADE[2]) < 9 || Math.abs(cz - PALISADE[1]) < 9 || Math.abs(cz - PALISADE[3]) < 9
-      || Math.abs(cz - creekZ(cx)) < CREEK.w / 2 + 10 || rand() < 0.42) continue;
+      || Math.abs(cz - creekZ(cx)) < CREEK.w / 2 + 10 || inSmallPlaza(cx, cz, 6) || rand() < (Math.hypot(cx, cz) < 260 ? 0.3 : 0.42)) continue;
+    // the door toward the nearest small plaza, if one is near
+    let door = null, bd = 40;
+    for (const p of smallPlazas()) { const d = Math.hypot(cx - p.c[0], cz - p.c[1]); if (d < bd) { bd = d; door = cz > p.c[1] ? 'n' : 's'; } }
     const hw = (rot ? d : w) / 2, hd = (rot ? w : d) / 2, ys = [height(cx - hw, cz - hd), height(cx + hw, cz - hd), height(cx - hw, cz + hd), height(cx + hw, cz + hd)];
-    LOTS.push({ rect: [cx - hw, cz - hd, cx + hw, cz + hd], y: Math.max(...ys), foot: Math.min(...ys) - 0.4, seed: Math.floor(rand() * 1e6) });
+    LOTS.push({ rect: [cx - hw, cz - hd, cx + hw, cz + hd], y: Math.max(...ys), foot: Math.min(...ys) - 0.4, seed: Math.floor(rand() * 1e6), door });
   }
   return LOTS;
 }
