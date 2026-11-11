@@ -44,6 +44,21 @@ function scroll() {
     person(mid, 0, faceTo(F.out), { pose: 'talk', dress: 'robe', cloth: 'cloth_white', hat: 'cap' });
     if (rand() < 0.8) person([mid[0] + F.out[0] * 1.3 + F.out[1] * 0.6, mid[1] + F.out[1] * 1.3 + F.out[0] * 0.6], 0, faceTo([-F.out[0], -F.out[1]]), { pose: 'stand' });
   });
+  // ---- the bridge's approaches: hawkers' stalls along the river edge of the two bank streets (the scroll's market at the bridgehead), a vendor behind each, customers before
+  {
+    const kinds = ['fruit', 'cloth', 'pots', 'cakes'], aw = ['reed_mat', 'cloth_ochre', 'reed_mat', 'cloth_white', 'cloth_indigo'];
+    const row = (xs, zs, rot, dir) => xs.forEach((sx, i) => {
+      const x = sx + (rand() - 0.5) * 1.2, w = 2 + rand() * 0.7;
+      S.push({ t: 'hawker_stall', at: [x, zs], y: 0.04, rot, kind: kinds[i % 4], w, awning: aw[i % 5] });
+      person([x + (rand() - 0.5) * 0.6, zs - dir * 0.15], 0.04, faceTo([0, dir]), { pose: rand() < 0.5 ? 'talk' : 'stand', dress: 'robe', hat: pick(['cap', 'none', 'straw']) });
+      const nc = 1 + (rand() < 0.6 ? 1 : 0);
+      for (let k = 0; k < nc; k++) person([x + (rand() - 0.5) * 1.6, zs + dir * (1.2 + rand() * 0.9)], 0.04, faceTo([(rand() - 0.5) * 0.4, -dir]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' });
+    });
+    row([-56, -49, -42, -35, -28, -21, -14, 14, 21, 28, 35, 42, 49, 56], 95.0, 0, 1);
+    row([-58, -50, -42, -34, 14, 22, 30, 38, 46, 54], 57.0, Math.PI, -1);
+    // a donkey with its panniers waiting by the stalls on each bank, the drover beside it
+    for (const [x, z] of [[-12, 99.5], [12.5, 52.5]]) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0.04, rot: faceTo([1, 0]), seed: Math.floor(rand() * 1e9), gear: true }); person([x - 1.6, z + 0.3], 0.04, faceTo([1, 0]), { dress: 'trousers', cloth: pick(['cloth_brown', 'cloth_grey']), hat: 'straw' }); }
+  }
   // ---- the Rainbow Bridge: the crowd at the west railing watching the boat below, gesturing; vendors under parasols on the east side; people crossing
   const W = BRIDGE.width / 2, [bx, bz] = BRIDGE.at;
   for (let k = 0; k < 11; k++) {

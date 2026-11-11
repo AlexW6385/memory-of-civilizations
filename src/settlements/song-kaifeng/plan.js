@@ -39,9 +39,12 @@ for (const [x, front, kind, axis] of [[PAGODA[0] + 34, 'w', 'bell', 'z'], [PAGOD
 // the court: stone sutra pillars and lamps along the way, two steles on their tortoises, the great censer before the hall
 for (const s of [-1, 1]) {
   E.push({ t: 'sutra_pillar', at: [PAGODA[0] + s * 10, -134], y: 0, h: 4.6 });
-  E.push({ t: 'stele', at: [PAGODA[0] + s * 26, -150], y: 0, face: [-s, 0] });
+  E.push({ t: 'stele_pavilion', at: [PAGODA[0] + s * 26, -150], y: 0, face: [-s, 0] });
   for (const z of [-124, -166]) E.push({ t: 'stone_lamp', at: [PAGODA[0] + s * 5.5, z], y: 0 });
 }
+// the paved axis from the gate hall to the pagoda's apron, the paths to the side halls and the stele pavilions, the beds of pines and cypresses
+E.push({ t: 'song_court', ax: PAGODA[0], c: PAGODA, z1: SHANMEN.c[1] - 5.2, apron: 13, cross: -150, pav: 20.5, halls: [[mx0 + 14 + 6, -185], [mx1 - 14 - 6, -185]] });
+E.push({ t: 'incense_ding', at: [PAGODA[0], -158], y: 0.075, s: 1.5 });
 E.push({ t: 'incense_ding', at: [PAGODA[0], -219], y: 0, s: 1.4 });
 // ---- the river: water, stone landings near the bridge, the Rainbow Bridge, boats
 for (let z0 = RIVER.z0; z0 < RIVER.z1; z0 += 8) { const z1 = Math.min(z0 + 8, RIVER.z1); E.push({ t: 'water_rect', rect: [-half(z1) + 2, z0, half(z1) - 2, z1], y: RIVER.water }); }   // (in strips, out to the disc's edge; under the water gate too)

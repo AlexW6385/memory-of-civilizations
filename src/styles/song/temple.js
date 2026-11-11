@@ -222,7 +222,7 @@ function incenseDing(el, { bag, col }) {
   P.emit(bag, x, el.y ?? 0, z, 0, s); col.circle(x, z, 0.95 * s, el.y ?? 0, (el.y ?? 0) + 3.2 * s);
 }
 /** stele { at, y, face }: an inscribed stone stele on its bixi tortoise, the head toward `face`, a carved cap of twined dragons. */
-function stele(el, { bag, col }) {
+export function stele(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, f = el.face ?? [0, 1], yaw = Math.atan2(f[0], f[1]), c = Math.cos(yaw), s = Math.sin(yaw);
   const P = new Parts(); tortoise(P, 'granite_black', 'granite_block'); P.emit(bag, x, y, z, yaw, 1);
   const L = (u, v) => [x + u * c + v * s, z - u * s + v * c];

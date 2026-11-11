@@ -310,6 +310,59 @@ function caimen(el, { bag, col }) {
     const h0 = P(u, front, 2.7 + 0.65 * 0.35 / (L / 2 - us[1]));
     zhizi(bag, h0[0], h0[1] - 0.05, h0[2]);
   }
+  // ---- the poles' lashings, studs, silk valances, paper flowers and the row of lanterns (the scroll's gates are bound, not nailed)
+  {
+    const cord = [], stud = [], rail2 = [], fringe = { red: [], green: [], white: [], ochre: [] }, fl = { cloth_red: [], cloth_white: [], cloth_ochre: [], cloth_green: [] };
+    for (const lv of [3.4, 4.9, 6.3]) for (const u of us) for (const n of [back, front]) cord.push(rod(P(u, n, lv - 0.07), P(u, n, lv + 0.07), 0.095, 6));
+    for (const lv of [4.15, 5.6]) rail2.push(rod(P(-0.12, front, lv), P(L + 0.12, front, lv), 0.03, 4));
+    // studs between the lowest two rails, the gate's lattice
+    for (let u = 0.45; u < L - 0.2; u += 0.55) if (!us.some((q) => Math.abs(q - u) < 0.2)) stud.push(rod(P(u, front, 3.4), P(u, front, 4.9), 0.018, 4));
+    for (const [lv, hang] of [[4.9, 0.42], [6.3, 0.36]]) {
+      const m = Math.max(4, Math.round(L / 0.45)), cs = ['red', 'green', 'white', 'ochre'];
+      for (let k = 0; k < m; k++) { const a = L * k / m, b = L * (k + 1) / m, mid = (a + b) / 2, q = [];
+        const A = P(a, front + 0.12, lv - 0.02), B = P(b, front + 0.12, lv - 0.02), C = P(mid, front + 0.12, lv - hang);
+        face(q, [A, B, C], [nx, 0, nz]); face(q, [A, B, C], [-nx, 0, -nz]); fringe[cs[(k + (lv > 5 ? 1 : 0)) % 4]].push(...q); }
+    }
+    // silk hangings filling the top band and the band over the door: stripes of red, green and white, the middle bay's in ochre
+    for (const [y0, y1, sw] of [[5.62, 6.3, 0.3], [4.2, 4.9, 0.4]]) for (let u = 0.1; u < L - 0.1; u += sw) {
+      const k = Math.round(u / sw), mid = u > us[1] && u < us[2], cName = mid && y0 > 5 ? 'ochre' : ['red', 'green', 'white', 'red'][k % 4], q = [];
+      const a = P(u, front + 0.07, y0), b = P(Math.min(u + sw - 0.04, L - 0.05), front + 0.07, y0), c = P(Math.min(u + sw - 0.04, L - 0.05), front + 0.07, y1), d = P(u, front + 0.07, y1);
+      face(q, [a, b, c, d], [nx, 0, nz]); face(q, [a, b, c, d], [-nx, 0, -nz]); fringe[cName].push(...q);
+    }
+    for (const [cName, t] of Object.entries(fringe)) if (t.length) bag.add(`cloth_${cName}`, fromTriangles(t));
+    // paper flowers: a boss and a ring of petals, along the top rail and at the posts' heads
+    const flower = (u, lv, i) => {
+      const c = P(u, front + 0.16, lv), cols = ['cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_red'];
+      fl[cols[i % 4]].push(...fromTri(ballG(0.15, c[0], c[1], c[2], 6)));
+      for (let k = 0; k < 5; k++) { const a = k / 5 * 6.283 + i, du = Math.cos(a) * 0.14, dy = Math.sin(a) * 0.14, q = P(u + du, front + 0.16 + 0.02, lv + dy); fl[cols[(i + 2) % 4]].push(...fromTri(ballG(0.1, q[0], q[1], q[2], 5))); }
+    };
+    let fi = 0; for (let u = 0.35; u < L; u += 0.9) flower(u, 6.3 + 0.12, fi++);
+    for (const u of us) flower(u, H + 0.15, fi++);
+    for (let i = 0; i < 3; i++) flower((us[i] + us[i + 1]) / 2, H + 0.78, fi++);
+    for (const [m, t] of Object.entries(fl)) if (t.length) bag.add(m, fromTriangles(t));
+    // lanterns: a row of red paper lamps on cords from the lowest rail, a tassel under each
+    for (let u = 0.6; u < L - 0.3; u += 1.15) {
+      if (Math.abs(u - L / 2) < 0.9) continue;
+      const c = P(u, front + 0.35, 3.4 - 0.1);
+      bag.add('lamp_paper', lathe([[0.001, 0], [0.12, 0.05], [0.19, 0.22], [0.12, 0.42], [0.001, 0.46]], 8, null, c[0], c[1] - 0.62, c[2]));
+      bag.add('lacquer_black', box(c[0] - 0.06, c[1] - 0.16, c[2] - 0.06, c[0] + 0.06, c[1] - 0.12, c[2] + 0.06));
+      bag.add('cloth_red', rod([c[0], c[1] - 0.12, c[2]], [c[0], c[1] - 0.16, c[2]], 0.008, 3)); bag.add('cloth_ochre', rod([c[0], c[1] - 0.62, c[2]], [c[0], c[1] - 0.82, c[2]], 0.012, 4));
+      bag.add('cloth_red', rod([c[0], c[1], c[2]], [c[0], c[1] - 0.16, c[2]], 0.01, 3));
+    }
+    for (const g of cord) bag.add('cloth_red', g);
+    for (const g of stud) bag.add('bamboo_culm', g);
+    for (const g of rail2) bag.add('bamboo_culm', g);
+    // the tall signboard of the house on a pole at the gate's other end: a board of white wood with black characters, a little hood, a red tassel
+    const sp = P(-0.55, front + 0.3, 0), sh = 5.4;
+    bag.add('timber', lathe([[0.07, 0], [0.055, sh], [0.001, sh + 0.05]], 7, null, sp[0], sp[1], sp[2]));
+    col.circle(sp[0], sp[2], 0.12, y, y + sh);
+    const bw = 0.26;
+    const sb = (a0, a1, y0, y1, m, d = 0) => bag.add(m, box(Math.min(sp[0] + ux * a0, sp[0] + ux * a1) - Math.abs(nx) * (0.03 + d), y + y0, Math.min(sp[2] + uz * a0, sp[2] + uz * a1) - Math.abs(nz) * (0.03 + d), Math.max(sp[0] + ux * a0, sp[0] + ux * a1) + Math.abs(nx) * (0.03 + d), y + y1, Math.max(sp[2] + uz * a0, sp[2] + uz * a1) + Math.abs(nz) * (0.03 + d)));
+    sb(-bw, bw, 2.4, 5.0, 'paint_white');
+    for (let k = 0; k < 6; k++) sb(-0.11, 0.11, 2.55 + k * 0.4, 2.55 + k * 0.4 + 0.28, 'lacquer_black', 0.012);
+    sb(-bw - 0.1, bw + 0.1, 5.0, 5.08, 'wood_dark'); sb(-bw - 0.1, bw + 0.1, 2.32, 2.4, 'wood_dark');
+    bag.add('cloth_red', rod([sp[0], y + 2.32, sp[2]], [sp[0], y + 1.85, sp[2]], 0.012, 3));
+  }
   // the lantern boxes before the door: a stand, paper sides, a little roof, characters in black
   const nb = el.boxes ?? 2;
   for (let i = 0; i < nb; i++) {
