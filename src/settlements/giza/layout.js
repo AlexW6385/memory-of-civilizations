@@ -11,7 +11,7 @@ export const TEMPLE = [127, -66, 168, -14];
 export const QUEENS = [[160, 18, 23, 30], [160, 70, 23, 29], [160, 118, 22, 28]];   // [x, z, half-base, height]
 // the causeway runs level on the plateau, goes down its edge with the ground and enters the valley
 // temple by its west door (CAUSEWAY.down: where the descent begins and ends)
-export const CAUSEWAY = { a: [168, -40], b: [312.5, 52], down: [270, 300] };
+export const CAUSEWAY = { a: [186, -40], b: [312.5, 52], down: [270, 300] };
 export const VALLEY_TEMPLE = [312, 34, 346, 70];
 export const HARBOUR = [346, 18, 400, 96];
 export const WEST_FIELD = [-330, -230, -150, 110];

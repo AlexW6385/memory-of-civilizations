@@ -290,10 +290,11 @@ function causeway(el, { bag, col }) {
     const s0 = k / n, s1 = (k + 1) / n, y0 = ya + (yb - ya) * s0, y1 = ya + (yb - ya) * s1;
     const p0 = [ax + (bx - ax) * s0, az + (bz - az) * s0], p1 = [ax + (bx - ax) * s1, az + (bz - az) * s1];
     for (const s of [-1, 1]) {
+      const open = el.gap && s === el.gap.side && k >= el.gap.from && k < el.gap.to;     // a doorway in this side wall: no wall, the roof stays as its lintel
       const t = [];
-      beamTris(t, [p0[0] + nx * (w + 0.7) * s, Math.min(y0, y1) - 1.5, p0[1] + nz * (w + 0.7) * s], [p1[0] + nx * (w + 0.7) * s, Math.min(y0, y1) - 1.5, p1[1] + nz * (w + 0.7) * s], 0.7, h + 1.5 + Math.abs(y1 - y0));
-      bag.add('tura_limestone', fromTriangles(t));
-      col.segment([p0[0] + nx * (w + 0.7) * s, p0[1] + nz * (w + 0.7) * s], [p1[0] + nx * (w + 0.7) * s, p1[1] + nz * (w + 0.7) * s], 1.4, Math.min(y0, y1) - 1.5, Math.max(y0, y1) + h);
+      if (!open) beamTris(t, [p0[0] + nx * (w + 0.7) * s, Math.min(y0, y1) - 1.5, p0[1] + nz * (w + 0.7) * s], [p1[0] + nx * (w + 0.7) * s, Math.min(y0, y1) - 1.5, p1[1] + nz * (w + 0.7) * s], 0.7, h + 1.5 + Math.abs(y1 - y0));
+      if (!open) bag.add('tura_limestone', fromTriangles(t));
+      if (!open) col.segment([p0[0] + nx * (w + 0.7) * s, p0[1] + nz * (w + 0.7) * s], [p1[0] + nx * (w + 0.7) * s, p1[1] + nz * (w + 0.7) * s], 1.4, Math.min(y0, y1) - 1.5, Math.max(y0, y1) + h);
       // the roof slabs, leaving a slit along the middle
       const r = [];
       beamTris(r, [p0[0] + nx * (w * 0.55) * s, Math.max(y0, y1) + h, p0[1] + nz * (w * 0.55) * s], [p1[0] + nx * (w * 0.55) * s, Math.max(y0, y1) + h, p1[1] + nz * (w * 0.55) * s], w * 0.45 + 0.7, 0.6);
