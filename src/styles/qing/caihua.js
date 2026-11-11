@@ -161,7 +161,7 @@ export function hexiRun(T, a, b, ticks, y, h, n, off, r, first = true, kind = 'j
 // last tips; between the sets the boards (gongdian ban), red. The timbers painted green, the blocks
 // blue, as the hexi programme has them [inferred: the colours by alternation from photographs].
 // Each set is one shape per side (instanced).
-import { box as _box, fromTriangles as _fromTriangles } from '../../core/geom.js';
+import { box as _box, frustum as _frustum, fromTriangles as _fromTriangles } from '../../core/geom.js';
 import { beamTris as _beam } from '../ming/index.js';
 
 const AH = 0.15, AW = 0.055;
@@ -174,14 +174,14 @@ function setShape(o, n) {
   if (SETS.has(key)) return SETS.get(key);
   const t = [-n[1], n[0]], P = (s, d) => [t[0] * s + n[0] * d, t[1] * s + n[1] * d];
   const G = [], B = [], tiers = o.tiers ?? 3, step = o.step ?? 0.24;
-  const bx = (arr, s0, d0, s1, d1, y0, y1) => { const p = P(s0, d0), q = P(s1, d1); const g = _box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1])); const A = g.attributes.position.array, I = g.index?.array; if (I) for (const i of I) arr.push(A[i * 3], A[i * 3 + 1], A[i * 3 + 2]); else arr.push(...A); };
-  bx(B, -0.15, -0.15, 0.15, 0.15, 0, 0.18);                                      // the bearing block (zuodou)
+  const bx = (arr, s0, d0, s1, d1, y0, y1, no = {}) => { const p = P(s0, d0), q = P(s1, d1); const g = _frustum([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y0, y1, 0, 0, 0, 0, no); const A = g.attributes.position.array, I = g.index?.array; if (I) for (const i of I) arr.push(A[i * 3], A[i * 3 + 1], A[i * 3 + 2]); else arr.push(...A); };
+  bx(B, -0.15, -0.15, 0.15, 0.15, 0, 0.18, { noBottom: true });                                      // the bearing block (zuodou)
   for (let k = 0; k < tiers; k++) {
     const y = 0.18 + k * AH, lat = 0.3 + k * 0.12, proj = (k + 1) * step;
     _beam(G, [...P(-lat, 0).slice(0, 1), y, P(-lat, 0)[1]], [P(lat, 0)[0], y, P(lat, 0)[1]], AW, AH - 0.04);       // the cross arm (gong)
     _beam(G, [P(0, -0.2)[0], y, P(0, -0.2)[1]], [P(0, proj)[0], y, P(0, proj)[1]], AW, AH - 0.04);                  // the tongue (qiao / ang)
-    for (const s of [-lat, lat]) bx(B, s - 0.065, -0.065, s + 0.065, 0.065, y + AH - 0.04, y + AH);                // the small blocks (sheng)
-    bx(B, -0.075, proj - 0.075, 0.075, proj + 0.075, y + AH - 0.04, y + AH);
+    for (const s of [-lat, lat]) bx(B, s - 0.065, -0.065, s + 0.065, 0.065, y + AH - 0.04, y + AH, { noTop: true, noBottom: true });                // the small blocks (sheng)
+    bx(B, -0.075, proj - 0.075, 0.075, proj + 0.075, y + AH - 0.04, y + AH, { noTop: true, noBottom: true });
   }
   const r = { gilt: null, G, B };
   SETS.set(key, r);

@@ -232,13 +232,16 @@ export function balustradeCarved(bag, col, a, b, y, open, o = {}) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux;
   const Pt = (s) => [a[0] + ux * s, a[1] + uz * s];
   const isOpen = (s) => open.some(([f, t]) => s > f && s < t);
-  const n = Math.max(1, Math.round(L / step)), l = L / n, rot = yawOf(ux, uz) - Math.PI / 2, posts = [];
+  // the posts at an even `step` from the middle of the run, the odd remainder shared between its two end bays: so that the bays
+  // of every run, tier and side are one shape (instanced once: a draw for all of them, not one for each run's own length)
+  const n = Math.max(1, Math.round(L / step)), e = L - n * step, rot = yawOf(ux, uz) - Math.PI / 2, posts = [];
+  const sp = Array.from({ length: n + 1 }, (_, k) => (k === 0 ? 0 : k === n ? L : n === 1 ? L : k * step + e / 2));
   let runStart = null;
   for (let k = 0; k <= n; k++) {
-    const s = k * l, p = Pt(s);
-    if (isOpen(s)) { if (runStart !== null) { col.segment(Pt(runStart), Pt(s - l), 0.3, y, y + 1.1); runStart = null; } continue; }
+    const s = sp[k], p = Pt(s), lPrev = k > 0 ? s - sp[k - 1] : step, lNext = k < n ? sp[k + 1] - s : step, l = lNext;
+    if (isOpen(s)) { if (runStart !== null) { col.segment(Pt(runStart), Pt(sp[k - 1]), 0.3, y, y + 1.1); runStart = null; } continue; }
     if (runStart === null) runStart = s;
-    const end = k === 0 || k === n || isOpen(s + l * 0.5) || isOpen(s - l * 0.5);
+    const end = k === 0 || k === n || isOpen(s + lNext * 0.5) || isOpen(s - lPrev * 0.5);
     const head = joseon ? (o.beasts && end ? 'beast' : 'lotus') : (k % 2 ? 'phoenix' : 'dragon');
     const corner = o.skipEnds && (k === 0 || k === n);              // the corner post is the other side's
     if (!corner) {
@@ -250,15 +253,14 @@ export function balustradeCarved(bag, col, a, b, y, open, o = {}) {
       // the bay, built at the origin along +x, turned onto the run and moved (bays of one run share their shape)
       const t = [], l0 = 0.1, l1 = l - 0.1, at = (u, w) => [u, 0, w], beam = (u0, u1, y0, h, w) => beamTris(t, [u0, y0, 0], [u1, y0, 0], w, h, true);
       beam(l0, l1, 0, 0.1, 0.14);                                // the sill
-      beam(l0, l1, 0.1, 0.4, 0.07);                              // the panel
-      beam(l0, l1, 0.1, 0.06, 0.085); beam(l0, l1, 0.445, 0.05, 0.085);   // its frame (the stiles are hidden by the posts)
+      beam(l0, l1, 0.1, 0.4, 0.075);                             // the panel (its frame's 1.5 cm relief is not worth six triangles a bay)
       beam(l0, l1, 0.5, 0.06, 0.055);                            // the cloud band
       const BP = new Parts(); BP.add(m, fromTriangles(t));
-      if (!joseon) for (const sg of [-1, 1]) BP.add(m, T(ball((l1 - l0) * 0.3, 0.12, 0.025, 8, 2), l / 2, 0.3, sg * 0.07));   // the carved medallion
+      if (!joseon) for (const sg of [-1, 1]) BP.add(m, T(ball((l1 - l0) * 0.3, 0.12, 0.025, 6, 2), l / 2, 0.3, sg * 0.075));   // the carved medallion
       for (const j of [1, 2]) {
         const u = l0 + (l1 - l0) * j / 3;
-        // the vase-shaped baluster and its cloud cap
-        BP.add(m, lathe([[0.055, 0], [0.07, 0.09], [0.03, 0.18], [0.05, 0.2], [0.001, 0.2]].map(([r, yy]) => [r, yy + 0.56]), 6, null, u, 0, 0));
+        // the vase-shaped baluster (its flat top is under the cap) and its cloud cap
+        BP.add(m, lathe([[0.055, 0], [0.07, 0.09], [0.03, 0.18], [0.05, 0.2]].map(([r, yy]) => [r, yy + 0.56]), 6, null, u, 0, 0));
         const c = []; beamTris(c, at(u - 0.12, 0), at(u + 0.12, 0), 0.05, 0.075, true); BP.add(m, T(fromTriangles(c), 0, 0.76, 0));
       }
       BP.add(m, limb([l0 - 0.06, 0.86, 0], [l1 + 0.06, 0.86, 0], 0.045, 0.045, 6));   // the handrail
@@ -271,10 +273,10 @@ export function balustradeCarved(bag, col, a, b, y, open, o = {}) {
 }
 /** A dragon-head spout (chishou) jutting from a terrace's face, facing +z, its throat the drain. */
 export function spout(P, m = 'marble_smooth') {
-  // (about 120 triangles: thousands of them line the terraces)
-  P.add(m, box(-0.12, -0.15, 0, 0.12, 0.1, 0.34));
-  P.add(m, limb([0, -0.02, 0.3], [0, -0.05, 0.7], 0.11, 0.075, 6));
-  P.add(m, T(ball(0.1, 0.05, 0.07, 6, 3), 0, 0.03, 0.68)); P.add(m, T(ball(0.075, 0.035, 0.13, 6, 3), 0, -0.12, 0.6));
+  // (about 110 triangles: a thousand of them line the terraces; the stub's back and top are in the wall and the head, the eyes and horns are the least that read)
+  P.add(m, frustum([-0.12, 0, 0.12, 0.34], -0.15, 0.1, 0, 0, 0, 0, { noZn: true }));
+  P.add(m, limb([0, -0.02, 0.3], [0, -0.05, 0.7], 0.11, 0.075, 5));
+  P.add(m, T(ball(0.1, 0.05, 0.07, 6, 2), 0, 0.03, 0.68)); P.add(m, T(ball(0.075, 0.035, 0.13, 6, 2), 0, -0.12, 0.6));
   for (const sx of [-1, 1]) { P.add(m, T(ball(0.035, 0.035, 0.035, 4, 2), sx * 0.09, 0.06, 0.42)); P.add(m, limb([sx * 0.06, 0.08, 0.3], [sx * 0.09, 0.13, 0.02], 0.035, 0.018, 3)); }
 }
 
@@ -394,7 +396,7 @@ export function gateDoors(el, { bag, col }) {
     const uf = uc - su * th / 2, r = Math.min(0.09, lw / (nN * 2.6)), face = alongX ? [-su, 0] : [0, -su];
     for (let i = 0; i < nN; i++) for (let j = 0; j < nN; j++) {
       const v = v0 + lw * (j + 0.5) / nN, yy = y + h * (0.1 + 0.8 * i / Math.max(1, nN - 1)), q = W(uf, v);
-      const g = lathe([[r, 0], [r * 0.9, r * 0.35], [r * 0.6, r * 0.75], [0.001, r * 0.9]], 8);
+      const g = lathe([[r, 0], [r * 0.8, r * 0.5], [0.001, r * 0.9]], 6);
       g.rotateZ(-Math.PI / 2); g.rotateY(yawOf(face[0], face[1]) - Math.PI / 2);
       bag.add('gilt_bronze', T(g, q[0], yy, q[1]));
     }
