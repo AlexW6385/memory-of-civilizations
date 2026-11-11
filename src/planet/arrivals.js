@@ -58,6 +58,7 @@ export const ARRIVALS = {
   'muscovy':          [40, 0.1, 40, 3.0, 0.22],          // St Basil's and the Kremlin wall across Red Square
   'teotihuacan':      [0, 0.1, 60, 0, 0.1],              // up the Avenue of the Dead
   'chichen-itza':     [30, 0.1, 75, 0.38, 0.17],         // El Castillo
+  'maya-tikal':       [-18, 0.1, 28, -1.2, 0.3],         // Temple I across the Great Plaza
   'tenochtitlan':     [-10, 0.1, 30, -1.293, 0.25],      // the Templo Mayor's twin shrines
   'machu-picchu':     [-17.6, null, 128.6, -0.07, -0.02],    // from the Guardhouse's knoll at the saddle's south end, over the town to Huayna Picchu
   'cahokia':          [-25, 0.1, 20, 0, 0.25],           // Monks Mound across the Grand Plaza
