@@ -4,9 +4,12 @@ import { ARRIVALS } from '../../planet/arrivals.js';
 import { RADIUS, lots, PIAZZA, PIAZZETTA, GROUND } from './layout.js';
 import { molo, doge, iconostasis } from './plan.js';
 import { canalPlans } from './rialto.js';
+import { dressPlans } from './dress.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-120, -5], facing: 'e' } });
 export async function town() {
-  const all = lots(), plans = [molo, doge, iconostasis, ...canalPlans()], open = openLots(all, [ARRIVALS['venice'][0], ARRIVALS['venice'][2]]);
+  const all = lots(), plans = [molo, doge, iconostasis, ...canalPlans()], open = openLots(all, [ARRIVALS['venice'][0], ARRIVALS['venice'][2]], 14);
+  [...open.keys()].forEach((l, i) => open.set(l, i % 4 === 0 ? 'inn' : 'home'));                 // 14 houses to enter: an inn in every fourth
+  plans.push(...dressPlans());
   plans.push(...lodTiles('venice-houses', 'vernacular', all.map((l) => ({ t: 'house_med', variant: 'venetian', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) })), { R: RADIUS }));
   // the piazza and the piazzetta paved in herringbone brick, laid from 1264, in fields between bands of white
   // Istrian stone (relaid in trachyte only from 1723) [stated: Wikipedia "Piazza San Marco"]; the bands every 10 m [inferred]

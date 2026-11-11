@@ -18,12 +18,13 @@ function waterLevel(x, z) { return inWater(x, z) ? SEA : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, height(x, z) - SEA)); }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || height(x, z) < 0.5 || inRect(PIAZZA, x, z, 2) || inRect(PIAZZETTA, x, z, 2) || inLot(x, z, 1) || (NG ??= NOGREEN()).some((r) => inRect(r, x, z)) || inRect(CHURCH, x, z)) return null;
-  return { fig: 0.01, grass: 4 };
+  const out = Math.hypot(x, z) > RADIUS - 150;                                              // the outer islands: orchards, cypresses, reeds
+  return out ? { fig: 0.014, cypress: 0.006, oleander: 0.006, grass: 6 } : { fig: 0.01, cypress: 0.002, grass: 4 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater, rim: RIM,
   sea: SEA,   // the planet's sea is this water, at this level (src/planet/relief.js)
-  maxDensity: { fig: 0.01 },
+  maxDensity: { fig: 0.014, cypress: 0.006, oleander: 0.006 },
   climate: {
     sun: { az: 160, el: 48, color: [1.0, 0.96, 0.9], intensity: 3.4, lat: 45, dec: 12, hour: 11 },
     sky: { turbidity: 3.4, rayleigh: 1.1, mie: 0.007, mieG: 0.8, zenith: [0.08, 0.15, 0.38], horizon: [0.66, 0.7, 0.74] },
