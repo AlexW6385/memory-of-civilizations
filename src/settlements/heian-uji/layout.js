@@ -56,7 +56,7 @@ export const STREETS = [
   { id: 'south', a: [-290, 106], b: [100, 106], hw: 3.8, kind: 'road' },                    // the south road, past the market
   { id: 'south2', a: [-280, 148], b: [-130, 148], hw: 3.2, kind: 'lane' },
   { id: 'far2', a: [-250, 188], b: [110, 188], hw: 3.2, kind: 'lane' },
-  { id: 'landing', a: [86, 40], b: [126, 40], hw: 3.2, kind: 'lane' },                       // down to the ferry landing
+  { id: 'landing', a: [86, 40], b: [138, 40], hw: 3.2, kind: 'lane' },                       // down to the ferry landing
   { id: 'west', a: [-214, -250], b: [-214, 252], hw: 3.6, kind: 'road' },
   { id: 'west2', a: [-262, -200], b: [-262, 200], hw: 3.2, kind: 'lane' },
   { id: 'temple-n', a: [-40, -188], b: [-40, -100], hw: 3.8, kind: 'road' },               // north of the garden
@@ -67,7 +67,7 @@ export const STREETS = [
 ];
 /** The market (ichi) on the south approach, an open ground with its stalls: [x0, z0, x1, z1]. */
 export const MARKET = [-62, 112, -18, 146];
-export const LANDING = { c: [133, 40], steps: [128, 40] };
+export const LANDING = { c: [146, 40], steps: [144, 40] };
 export const streetRect = (s, m = 0) => [Math.min(s.a[0], s.b[0]) - s.hw - m, Math.min(s.a[1], s.b[1]) - s.hw - m, Math.max(s.a[0], s.b[0]) + s.hw + m, Math.max(s.a[1], s.b[1]) + s.hw + m];
 export const onStreet = (x, z, m = 0) => STREETS.some((s) => inRect(streetRect(s), x, z, m));
 const overlap = (a, b, m) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
