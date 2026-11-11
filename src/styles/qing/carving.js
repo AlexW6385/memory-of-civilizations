@@ -400,7 +400,7 @@ export function gateDoors(el, { bag, col }) {
     const uf = uc - su * th / 2, r = Math.min(0.09, lw / (nN * 2.6)), face = alongX ? [-su, 0] : [0, -su];
     for (let i = 0; i < nN; i++) for (let j = 0; j < nN; j++) {
       const v = v0 + lw * (j + 0.5) / nN, yy = y + h * (0.1 + 0.8 * i / Math.max(1, nN - 1)), q = W(uf, v);
-      const g = lathe([[r, 0], [r * 0.8, r * 0.5], [0.001, r * 0.9]], 6);
+      const g = lathe([[r, 0], [0.001, r * 0.85]], 6);                       // a cone: six triangles, a thousand nails on the gates
       g.rotateZ(-Math.PI / 2); g.rotateY(yawOf(face[0], face[1]) - Math.PI / 2);
       bag.add('gilt_bronze', T(g, q[0], yy, q[1]));
     }

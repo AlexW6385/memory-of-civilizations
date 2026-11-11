@@ -13,6 +13,8 @@ export default {
       semantron: { every: 48, level: 0.22 },
       reverb: 0.3,
     },
+    house: { drone: { notes: [0], level: 0.02, timbre: 'voice' }, lead: { timbre: 'voice', density: 0.08, range: [7, 14], level: 0.05 }, reverb: 0.15 },
+    shop: { drone: { notes: [0], level: 0.02, timbre: 'voice' }, reverb: 0.12 },
     hall: {
       drone: { notes: [-12, 0], level: 0.09, timbre: 'voice' },
       lead: { timbre: 'voice', density: 0.42, range: [5, 19], level: 0.16 },

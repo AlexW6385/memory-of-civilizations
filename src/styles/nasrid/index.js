@@ -4,6 +4,7 @@
 // slender paired columns, pavilions and the fountain; tiled roofs; whitewashed houses below.
 
 import { registerStyle, STYLES } from '../../core/build.js';
+import { MEDINA } from './medina.js';
 import { box, lathe, fromTriangles, rod, disc, place } from '../../core/geom.js';
 import '../qing/index.js';
 import { crenels, nColumn, archRun } from './halls.js';
@@ -280,6 +281,6 @@ function lionsCourt(bag, col, rect, y, h) {
 
 registerStyle('nasrid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, nasrid_tower: tower, nasrid_wall: wall, court, comares, lions_halls: lionsHalls, ...PARTAL, ...GENERALIFE, ...ALBAICIN },
+  elements: { ...STYLES.qing.elements, nasrid_tower: tower, nasrid_wall: wall, court, comares, lions_halls: lionsHalls, ...PARTAL, ...GENERALIFE, ...ALBAICIN, ...MEDINA },
   objects: {},
 });

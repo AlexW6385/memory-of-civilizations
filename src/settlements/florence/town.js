@@ -29,5 +29,8 @@ function tiles(id, style, elements) {
 
 export async function houses() {
   const all = lots(), open = openLots(all, [ARRIVALS['florence'][0], ARRIVALS['florence'][2]]);
-  return tiles('florence-houses', 'vernacular', all.map((l) => ({ t: 'house_med', variant: 'tuscan', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) })));
+  // the three houses nearest the arrival can be entered (the vernacular builder's furnished ground storey); the rest are Florence's own
+  const mine = all.filter((l) => !open.has(l)).map((l) => ({ t: 'casa', ...l }));
+  const enter = all.filter((l) => open.has(l)).map((l) => ({ t: 'house_med', variant: 'tuscan', ...l, kind: undefined, open: true, use: open.get(l) }));
+  return [...tiles('florence-houses', 'renaissance', mine), ...(enter.length ? tiles('florence-open', 'vernacular', enter) : [])];
 }

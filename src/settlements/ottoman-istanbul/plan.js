@@ -1,7 +1,7 @@
 // The Süleymaniye about 1560 (docs/settlements/ottoman-istanbul.md §2–§4): the mosque, its outer
 // court's wall, the külliye (medreses, shops, hospital, soup kitchen, bath, dar'ül-hadis), Süleyman's tomb, the terrace's retaining wall to the north.
 
-import { MOSQUE, PRECINCT, MEDRESES, ARASTA, DARUSSIFA, IMARET, HAMAM, DARULHADIS, TERRACE, TOP, TOMB, GRAVES, ROSES } from './layout.js';
+import { MOSQUE, PRECINCT, MEDRESES, ARASTA, DARUSSIFA, IMARET, HAMAM, DARULHADIS, TERRACE, TOP, TOMB, GRAVES, ROSES, CARSI, CESMES } from './layout.js';
 
 const E = [];
 E.push({ t: 'sinan_mosque', c: MOSQUE.c, d: MOSQUE.d, h: MOSQUE.h, y: TOP, court: 38.1 });
@@ -19,12 +19,14 @@ E.push({ t: 'hamam', rect: HAMAM, y: TOP });
 E.push({ t: 'darulhadis', at: DARULHADIS.at, m: DARULHADIS.m, y: TOP });
 E.push({ t: 'turbe', c: TOMB.c, r: TOMB.r, h: 7.6, y: TOP, door: 'n' });
 E.push({ t: 'graves', list: GRAVES, roses: ROSES, y: TOP });
+E.push({ t: 'carsi', ...CARSI });
+for (const [x, z, face] of CESMES) E.push({ t: 'cesme', at: [x, z], face, y: TOP });
 const [t0, u0, t1, u1] = TERRACE;
 E.push({ t: 'block', rect: [t0, u0 - 2, t1, u0], y0: 0, y1: TOP + 1, mat: 'limestone' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const hw = MOSQUE.d * 1.1 - 2.6, hd = MOSQUE.d * 1.1 - 2.6;
-const rooms = [room('prayer hall', [MOSQUE.c[0] - hw, MOSQUE.c[1] - hd, MOSQUE.c[0] + hw, MOSQUE.c[1] + hd], TOP + 0.05, 'hall'), room('outer court', PRECINCT, TOP, 'open'), room('tomb of hurrem sultan', [TOMB.c[0] - TOMB.r, TOMB.c[1] - TOMB.r, TOMB.c[0] + TOMB.r, TOMB.c[1] + TOMB.r], TOP + 0.26, 'hall')];
+const rooms = [room('prayer hall', [MOSQUE.c[0] - hw, MOSQUE.c[1] - hd, MOSQUE.c[0] + hw, MOSQUE.c[1] + hd], TOP + 0.05, 'hall'), room('outer court', PRECINCT, TOP, 'open'), room('tomb of hurrem sultan', [TOMB.c[0] - TOMB.r, TOMB.c[1] - TOMB.r, TOMB.c[0] + TOMB.r, TOMB.c[1] + TOMB.r], TOP + 0.26, 'hall'), room('bedesten', CARSI.bedesten, TOP + 0.05, 'hall')];
 const walks = [[[0, -100], [0, -80], [0, -40]]];
 walks[0].y0 = TOP;
 

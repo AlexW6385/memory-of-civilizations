@@ -5,11 +5,12 @@
 // few officials at the foot of the terrace: no crowds), pigeons in the lanes. Positions come from
 // layout.js; nothing is hard-coded but the buildings' places on the avenue (shops.js).
 import './style.js';
-import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, TEMPLE, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
+import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, TEMPLE, DANBI, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
 import { SHOP_SITES } from './shops.js';
 
 const base = (id, style, elements, center = [0, 0]) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' }, center, near: 230 });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const CLOTH = ['cloth_indigo', 'cloth_ochre', 'cloth_grey', 'cloth_brown', 'cloth_maroon'];
 const face = ([dx, dz]) => Math.atan2(-dx, -dz);
 
 export async function lifePlans() {
@@ -34,6 +35,15 @@ export async function lifePlans() {
   const y0 = TIERS[0].rect[3] + 6;
   for (const [x, z, dir] of [[-16, y0, [1, 0]], [-14, y0 + 1.5, [1, 0]], [18, y0 + 2, [-1, 0]]]) figs.push(man([x, z], face(dir), { pose: 'stand', cloth: 'cloth_indigo', cloth2: 'cloth_red' }));
   void HALLS; void AVENUE;
+  // the visitors of the Danbi way and its plaza (the Temple of Heaven): small parties walking up and standing, an old man with his bird cage, pigeons
+  {
+    const [dx0, dz0, dx1, dz1] = DANBI.rect, xm = (dx0 + dx1) / 2, T = [];
+    const spots = [[xm - 4, dz1 + 7, [0, -1]], [xm - 3.2, dz1 + 7.6, [0, -1]], [xm + 7, dz1 + 3, [-1, -1]], [xm - 12, dz1 + 9, [1, 0]], [xm - 11, dz1 + 10, [1, 0]], [xm + 2, dz1 - 12, [0, -1]],
+      [xm + 3.1, dz1 - 12.4, [0, -1]], [xm - 6.4, dz1 - 30, [0, 1]], [xm - 6.9, dz1 - 29, [0, 1]], [xm + 6.2, dz1 - 41, [0, -1]], [xm + 8.5, dz0 + 12, [-1, 0]], [xm - 8, dz0 + 14, [1, 0]], [xm, dz0 + 6, [0, 1]]];
+    for (const [x, z, dir] of spots) T.push(man([x, z], face(dir), { pose: 'stand', y: z < dz1 - 1 ? DANBI.y : 0.03, cloth: CLOTH[Math.floor(rand() * CLOTH.length)], cloth2: rand() < 0.5 ? 'cloth_black' : 'cloth_indigo', ...(rand() < 0.3 ? { hair: 'bun', hat: undefined } : {}) }));
+    for (const [x, z] of [[xm + 12, dz1 + 6], [xm - 14, dz1 + 4]]) T.push({ t: 'chickens', kind: 'pigeon', at: [x, z], y: 0.04, n: 7, seed: Math.floor(rand() * 1e6) });
+    out.push({ ...base('qing-beijing-temple-life', 'life', T), center: [xm, dz1 - 10] });
+  }
   out.push(...streetPlans(rand));
   out.push(base('qing-beijing-people-life', 'life', [...pig, ...figs], [0, 120]));
   return out;

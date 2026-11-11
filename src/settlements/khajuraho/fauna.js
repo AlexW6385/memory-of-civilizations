@@ -1,0 +1,25 @@
+// Khajuraho about 1050 — the animals (src/engine/fauna.js draws them; docs/settlements/khajuraho.md §12): carp in
+// the Shivsagar tank, swallows over its water, crows about the village, sparrows on the temple terraces,
+// an egret and a heron at the tank's margin.
+import { TANK, TEMPLES, tankD, height } from './layout.js';
+
+const area = [TANK.c[0] - TANK.r[0], TANK.c[1] - TANK.r[1], TANK.c[0] + TANK.r[0], TANK.c[1] + TANK.r[1]];
+const fish = [];
+for (let i = 0; i < 6; i++) fish.push({ n: 3, size: [0.5, 0.75], palette: 'carp', y: TANK.level, area, dist: tankD, margin: 2.5, a: [26, 12], ratio: 0.5, speed: 0.3, rise: 0.15 });
+
+const flights = [
+  { kind: 'swallow', n: 5, loop: { c: [TANK.c[0], TANK.c[1]], a: [48, 22], rot: 0, dist: tankD, margin: 3 }, y: [0.4, 2.2], speed: 8 },
+  { kind: 'swallow', n: 3, loop: { c: [TANK.c[0] + 10, TANK.c[1] - 4], a: [30, 14], rot: 0.4, dist: tankD, margin: 3 }, y: [0.5, 3], speed: 7 },
+  { kind: 'crow', n: 6, loop: { c: [150, 10], a: [70, 50], rot: 0.3 }, y: [28, 10], speed: 9 },
+];
+const perches = [];
+for (const t of TEMPLES) {
+  const T = t.terrace || [t.c[0] - t.w * 0.85, t.c[1] - t.w * 0.95, t.c[0] + t.len + 4, t.c[1] + t.w * 0.95];
+  perches.push({ kind: 'sparrow', x: (T[0] + T[2]) / 2 - 2, z: T[3] - 1.2, y: t.jagati + (t.y ?? 0), rot: 0, range: [2.4, 0], alert: 5 });
+}
+for (const [kind, a] of [['egret', -0.6], ['heron', 2.2]]) {
+  let best = null;
+  for (let d = 1; d < 4 && !best; d += 0.5) { const x = TANK.c[0] + Math.cos(a) * (TANK.r[0] + d), z = TANK.c[1] + Math.sin(a) * (TANK.r[1] + d); if (Math.abs(tankD(x, z) - 0.5) < 3.5) best = [x, z]; }
+  if (best) { const [x, z] = best; perches.push({ kind, x, z, y: height(x, z), rot: Math.atan2(TANK.c[1] - z, TANK.c[0] - x), stay: [80, 240], gone: [40, 150], alert: 10 }); }
+}
+export default { fish, flights, perches };

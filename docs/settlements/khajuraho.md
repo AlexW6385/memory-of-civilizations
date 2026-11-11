@@ -81,6 +81,15 @@ Sources added:
 - [Pūjā: Hindu Pūjā — encyclopedia.com](https://encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/puja-hindu-puja)
 - [How the marigold became a global icon, from Mexico to India — National Geographic](https://www.nationalgeographic.com/history/article/how-the-marigold-became-a-global-icon-from-mexico-to-india)
 
+## 12. Detail added (2026-11 batch pass: the halls and the sanctum as rooms, the living systems)
+
+- **The halls inside.** Kandariya Mahadeva's plan runs porch (ardhamandapa), mandapa, great hall (mahamandapa) with lateral balconied windows, vestibule (antarala), then the sanctum (garbhagriha), each roofed higher than the last [stated: Studio Matrx; Wikipedia "Kandariya Mahadeva Temple"]. Ours (`interior: true` on the temple, style `nagara`): the halls are hollow rooms with 0.7–0.8 m walls, doors cut through each party wall on the axis, the great hall lit by two window slots with stone bars (jali) on each long side and four pillars carrying a ceiling of stepped rings with a lotus pendant, the doorway from the porch left open; the figure bands omitted on faces that abut the next hall [inferred: dimensions from the exterior plan; the pillar count and ceiling].
+- **The garbhagriha.** A small dark cell inside thick walls, reached by a narrow passage through the sanctum's east wall; "the sanctum is dark" and holds the image, here a linga [stated: general Nagara usage; inferred: cell size 4.8 m]. Ours: a round-cornered pedestal, a yoni with its spout to the north, a polished black shaft with a rounded top, a pot hung above it (the dripping vessel), garlands, two bronze lamp stands and a row of clay lamps before it, a plate of flowers, and warm point lights; the great hall and mandapa carry lamp stands and lights [inferred].
+- **Rooms.** `kandariya halls` and `kandariya garbhagriha` (kind hall).
+- **Living systems** (`movers.js`, `fauna.js`, `smoke.js`, derived from `layout.js`): walkers in dhoti, sari and turban by trade (priests, pilgrims, women, villagers, farmers, porters) on the road to the village, the paths along the temple stairs, the tank's north ghat and the village lanes; carp in the tank, swallows over its water, crows over the village, sparrows on the terraces, an egret and a heron at its margin; cooking smoke from half the houses at the morning, noon and evening meals, incense in each porch, dawn mist on the tank [inferred].
+
+Registration needed (coordinator): `'khajuraho': () => import('../settlements/khajuraho/movers.js')` in `src/engine/movers-sites.js`; `import '../settlements/khajuraho/smoke.js'` in `src/engine/systems-list.js`; the fauna data `src/settlements/khajuraho/fauna.js` wherever Suzhou's is registered.
+
 ## Sources
 
 - [Kandariya Mahadeva Temple — Wikipedia](https://en.wikipedia.org/wiki/Kandariya_Mahadeva_Temple)

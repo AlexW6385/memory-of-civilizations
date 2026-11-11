@@ -5,6 +5,7 @@ import '../../styles/gothic/index.js';
 import '../../styles/gothic/town.js';
 import '../../styles/gothic/notre-dame.js';
 import '../../styles/gothic/palace.js';
+import '../../styles/gothic/houses.js';
 import '../../styles/vernacular/index.js';
 import '../../styles/ming/index.js';
 import { chapel, city, bridges, bridgeHouses, boats, river, streetLife } from './plan.js';

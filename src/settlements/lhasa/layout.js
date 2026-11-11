@@ -51,3 +51,32 @@ export function pondDist(x, z) {
   const I = POND.island, ei = Math.hypot((x - I.c[0]) / I.rx, (z - I.c[1]) / I.rz);
   return ei < 1 ? (1 - ei) * Math.min(I.rx, I.rz) : d;
 }
+
+/** The street up to the palace (x −3.8…3.8 between its two rows of shops, from the south gate to the open ground below the stairs) and the lane across it. */
+export const STREET = [-3.8, 70, 3.8, 210];
+export const LANE_Z = [128, 144];
+let SHOPS = null;
+/**
+ * The row of shops on both sides of the street (docs/settlements/lhasa.md §14): trading houses and
+ * tea houses with their one room walkable, open booths between them. { rect, door, kind, seed } ('stall': { at, rot, w }).
+ */
+export function shops() {
+  if (SHOPS) return SHOPS;
+  SHOPS = [];
+  const rand = rng(1695);
+  let teas = 0;
+  for (const side of ['w', 'e']) {
+    const [x0, x1, door] = side === 'w' ? [-10, STREET[0], 'e'] : [STREET[2], 10, 'w'];
+    for (let z = 74; z < 202;) {
+      if (z + 6 > LANE_Z[0] && z < LANE_Z[1]) { z = LANE_Z[1]; continue; }
+      const r = rand();
+      if (r < 0.34) { const len = 2.8 + rand() * 1.0; SHOPS.push({ kind: 'stall', at: [side === 'w' ? STREET[0] - 1.4 : STREET[2] + 1.4, z + len / 2 + 1], rot: door, w: len, seed: Math.floor(rand() * 1e6), goods: Math.floor(rand() * 4) }); z += len + 2.4; continue; }
+      let len = 7.5 + rand() * 2.5; const tea = teas < 3 && r > 0.8; if (tea) len = 10.2 + rand();
+      if (z + len > (z < LANE_Z[0] ? LANE_Z[0] - 1 : 204)) { z += 3; continue; }
+      if (tea) teas++;
+      SHOPS.push({ kind: tea ? 'tea' : 'trade', rect: [x0, z, x1, z + len], door, seed: Math.floor(rand() * 1e6) });
+      z += len + 1.6;
+    }
+  }
+  return SHOPS;
+}

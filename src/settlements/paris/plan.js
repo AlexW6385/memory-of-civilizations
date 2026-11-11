@@ -3,6 +3,8 @@
 // towers; Notre-Dame and its parvis; the bridges; the river.
 
 import { RADIUS, CHAPEL, CATHEDRAL, PALACE, GARDEN, QUAY, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER, PARVIS, height, inLot } from './layout.js';
+import { shopPoint } from '../../styles/gothic/houses.js';
+import { lots as allLots } from './layout.js';
 import chapelPlan from '../../buildings/sainte-chapelle/plan.js';
 
 const g = RIVER.ground;
@@ -63,11 +65,11 @@ export function bridgeHouses() {
       const w = 5 + rnd() * 2, zc = z + w / 2;
       if (side < 0 && mills.some((m) => zc > m - 3.8 && zc < m + 6.8)) { z += 1; continue; }
       const xo = side < 0 ? b.x - BW : b.x + STREET / 2, rect = [xo, z, xo + (BW - STREET / 2), Math.min(z + w, zb) - 0.2];
-      els.push({ t: 'house_timber', rect, y: DECK, foot: DECK, seed: Math.floor(rnd() * 1e6), front: side < 0 ? 'e' : 'w', storeys: 3 + (rnd() < 0.4 ? 1 : 0) });
+      els.push({ t: 'paris_house', rect, y: DECK, foot: DECK, seed: Math.floor(rnd() * 1e6), front: side < 0 ? 'e' : 'w', storeys: 3 + (rnd() < 0.4 ? 1 : 0) });
       z += w;
     }
   }
-  return { id: 'paris-bridge-houses', style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [], elements: els };
+  return { id: 'paris-bridge-houses', style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [], elements: els };
 }
 // the life of the streets (docs/settlements/paris.md §2b): the money-changers' and goldsmiths' boards along the Grand Pont,
 // each with its man on a stool behind it and a customer or two before it; canons of Notre-Dame by the parvis; a water
@@ -91,6 +93,29 @@ export function streetLife() {
   for (const [x, z] of [[132, 43.4], [133.4, 44.1], [118, 43]]) fig([x, z], height(x, z), faceTo([x, z], [132.7, 43.8]) + (x < 125 ? 2 : 0), { dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_black', pose: 'talk', over: 'cape', legs: undefined });
   // a water porter coming up from the river by the Petit Pont, his yoke and buckets
   { const at = [104, 99]; fig(at, height(...at), Math.PI, { carry: 'pole', dress: 'tunic', cloth: 'cloth_brown', hat: 'cap' }); }
+  // the parvis's market (docs/settlements/paris.md §5b): stalls of bread, herring, cloth and pots, each with its seller behind and customers before
+  { const kinds = [['produce'], ['basket', 'produce'], ['cloth'], ['dark_pot', 'water_pot'], ['produce'], ['cloth', 'basket']], aw = ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_white', 'cloth_green', 'cloth_ochre'];
+    [[106, -24, 0], [114, -24, 0], [122, -24, 0], [130, -24, 0], [138, -24, 0], [146, -24, 0], [108, 21, Math.PI], [118, 21, Math.PI], [128, 21, Math.PI], [140, 21, Math.PI]].forEach(([x, z, rot], i) => {
+      L.push({ t: 'stall', at: [x, z], y: height(x, z), rot, goods: kinds[i % 6], awning: aw[i % 6], w: 2.4, d: 1.3, seed: 40 + i });
+      const sg = rot === 0 ? 1 : -1;
+      fig([x, z - sg * 1.0], height(x, z), rot === 0 ? 0 : Math.PI, { pose: 'stand', dress: rand() < 0.4 ? 'robe' : 'tunic', hat: pick(['cap', 'cap', 'none']) });
+      for (let k = 0; k < 1 + (rand() < 0.6 ? 1 : 0); k++) { const at = [x + (rand() - 0.5) * 1.6, z + sg * (1.9 + rand() * 0.8)]; fig(at, height(...at), faceTo(at, [x, z]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : undefined }); }
+    });
+    for (const [x, z, r] of [[112, 0, 0.3], [128, 4, -0.2], [142, -6, 0.5]]) L.push({ t: 'handcart', at: [x, z], y: height(x, z), rot: r, seed: Math.floor(x) });
+    for (const [x, z] of [[122, -12], [134, 10]]) L.push({ t: 'barrel', at: [x, z], y: height(x, z), rot: 0, n: 2, seed: Math.floor(x) });
+  }
+  // customers at the counters of the shops near the parvis and the Grand Pont, and barrels, baskets and fire-wood at the doors
+  { let n = 0;
+    for (const l of allLots()) {
+      const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
+      if (Math.hypot(cx - 70, cz) > 110 || n >= 46 || rand() > 0.3) continue;
+      const sp = shopPoint({ rect: l.rect, y: 1, seed: l.seed, front: l.front });
+      const at = [sp.at[0] + sp.out[1] * (rand() - 0.5) * 0.6, sp.at[1] + sp.out[0] * (rand() - 0.5) * 0.6], rot = 0;
+      fig(at, 1.0, faceTo(at, [at[0] - sp.out[0], at[1] - sp.out[1]]), { pose: rand() < 0.5 ? 'talk' : 'stand' });
+      void rot; n++;
+      if (rand() < 0.5) { const q = [sp.at[0] + sp.out[1] * 1.7 + sp.out[0] * 0.5, sp.at[1] + sp.out[0] * 1.7 + sp.out[1] * 0.5]; L.push({ t: rand() < 0.5 ? 'barrel' : 'basket', at: q, y: 1.0, rot: rand() * 6, n: 2, seed: Math.floor(rand() * 1e6) }); }
+    }
+  }
   // pigs rooting loose on the strands and by the bridges' feet (one tripped a king's son's horse on a quay in 1131); dogs
   let n = 0;
   for (let k = 0; k < 400 && n < 12; k++) {
