@@ -11,6 +11,9 @@ import '../qing/index.js';
 import { urHouseOpen, scribeKit, quayGoods } from './house.js';
 import { giparu, urChapel } from './temple.js';
 import { dressFront, roofLife } from './dress.js';
+import { courtDress } from './court.js';
+import { urHall } from './hall.js';
+import { palm } from '../egyptian/objects.js';
 
 const BB = 'brick_baked', MB = 'mudbrick', MP = 'mud_plaster';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -462,6 +465,6 @@ function reedBoat(el, { bag }) {
 
 registerStyle('sumerian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, giparu, ur_chapel: urChapel, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, quay_goods: quayGoods },
+  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, giparu, ur_chapel: urChapel, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, ur_court: courtDress, ur_hall: urHall, ur_palm: palm, quay_goods: quayGoods },
   objects: {},
 });
