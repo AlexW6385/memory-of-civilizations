@@ -54,6 +54,7 @@ export const SITES = [
   { id: 'ottoman-istanbul', name: { en: 'Ottoman Istanbul', zh: '奥斯曼伊斯坦布尔' }, era: '16th c.', region: 'bosphorus', lat: 41.02, lon: 28.96, nudge: 300, radius: 400 },
   // ── Egypt and Africa ──
   { id: 'giza', name: { en: 'Old Kingdom Egypt', zh: '古王国埃及' }, era: '26th c. BC', region: 'egypt', lat: 29.98, lon: 31.13, radius: 420 },
+  { id: 'abu-simbel', name: { en: 'Abu Simbel', zh: '阿布辛贝' }, era: '13th c. BC', region: 'nubia', lat: 22.34, lon: 31.63, radius: 190 },
   { id: 'mamluk-cairo', name: { en: 'Mamluk Cairo', zh: '马穆鲁克开罗' }, era: '14th c.', region: 'egypt', lat: 30.03, lon: 31.26, radius: 480 },
   { id: 'djenne', name: { en: 'The Sahel', zh: '萨赫勒' }, era: '14th c.', region: 'sahel', lat: 13.90, lon: -4.56, radius: 360 },
   { id: 'lalibela', name: { en: 'Ethiopia', zh: '埃塞俄比亚' }, era: '13th c.', region: 'ethiopia', lat: 12.03, lon: 39.04, radius: 380 },
@@ -135,7 +136,6 @@ export const PLANNED = [
   { id: 'abbasid-baghdad', name: { en: 'Abbasid Baghdad', zh: '阿拔斯巴格达' }, region: 'mesopotamia', lat: 33.31, lon: 44.36, radius: 500 },
   { id: 'shibam', name: { en: 'Shibam', zh: '希巴姆' }, region: 'arabia', lat: 15.93, lon: 48.63, radius: 180 },
   { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, region: 'egypt', lat: 25.70, lon: 32.64, radius: 380 },
-  { id: 'abu-simbel', name: { en: 'Abu Simbel', zh: '阿布辛贝' }, region: 'nubia', lat: 22.34, lon: 31.63, radius: 180 },
   { id: 'alexandria', name: { en: 'Alexandria', zh: '亚历山大港' }, region: 'egypt', lat: 31.20, lon: 29.92, radius: 500 },
   { id: 'fez', name: { en: 'Fez', zh: '非斯' }, region: 'maghreb', lat: 34.06, lon: -4.97, radius: 320 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },

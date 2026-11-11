@@ -1,0 +1,24 @@
+{
+  "site": { "id": "abu-simbel", "name": { "en": "Abu Simbel", "zh": "阿布辛贝" }, "era": "13th c. BC", "region": "nubia", "lat": 22.34, "lon": 31.63, "radius": 190 },
+  "arrival": [4, null, 0, 1.5708, 0.3],
+  "arrivalNote": "the Great Temple's façade whole across the terrace: four seated colossi of Ramesses II cut in the cliff, the baboon frieze above the door, the Nile below",
+  "card": {
+    "en": [
+      "Abu Simbel stands on the west bank of the Nile in Lower Nubia, near today's Egyptian border with Sudan, in lands Egypt held as its southern province of Kush. The moment shown is about 1255 BC, in the reign of Ramesses II, when the two temples have just been cut into the sandstone cliff. The architecture is Ramesside: temples hewn from the living rock, their façades battered like pylons, carved and painted inside, looking east over the river.",
+      "The Great Temple — a façade 33 m wide and about 31 m high cut in the cliff, with four seated colossi of Ramesses II 20 m high, small figures of his family at their feet, a frieze of baboons above and Ra-Horakhty in a niche over the door. Inside, a hall of eight pillars with Osiris figures of the king, walls painted with the battle of Kadesh, and a sanctuary 60 m into the rock where four gods sit.",
+      "The Small Temple — 112 m to the north, a façade of six standing figures, king and queen Nefertari, each 10 m high with children at their feet, a hall of six pillars crowned with Hathor's head, and a sanctuary with the cow of Hathor.",
+      "The terrace and the quay — a paved forecourt between mudbrick walls with a sun altar and a stone gate, a ramp down the bank to the quay where a stone barge and reed skiffs lie moored.",
+      "The priests' houses and the workmen's camp — flat-roofed mudbrick houses in lanes north and south of the terrace, bakeries and round granaries, where priests in white linen, stonecutters and porters live."
+    ],
+    "zh": [
+      "阿布辛贝位于尼罗河西岸的下努比亚，靠近今埃及与苏丹的边界，当时是埃及南方库施行省之地。画面定格在约公元前 1255 年拉美西斯二世在位时，两座神庙刚刚凿成于砂岩崖壁之中。建筑属拉美西斯风格：神庙直接开凿于山岩，正面斜收如塔门，内部雕刻彩绘，朝东面向尼罗河。",
+      "大神庙 —— 崖面上凿出宽 33 米、高约 31 米的正面，四尊拉美西斯二世坐像各高约 20 米，脚边立着家人小像，上方有一排狒狒，门上壁龛中是拉-荷拉赫提；内有八根奥西里斯柱的大厅、绘有卡迭石之战的墙壁，以及深入山岩约 60 米、供着四位神明的圣所。",
+      "小神庙 —— 在大神庙以北 112 米，正面立着六尊高 10 米的立像，是国王与王后奈菲尔塔利，脚边有孩子；内有六根顶着哈托尔头像的柱子，圣所里供着哈托尔神牛。",
+      "平台与码头 —— 两道泥砖墙之间的铺石前庭，有太阳祭坛与石门，一道斜坡沿河岸通向码头，码头上泊着运石驳船与芦苇小船。",
+      "祭司之屋与工匠营地 —— 平台南北两侧的小巷里是平顶泥砖房、面包坊和圆形粮仓，住着身穿白麻衣的祭司、石匠与搬运工。"
+    ]
+  },
+  "soundscape": "T(NEAR, { animals: { donkey: 0.3, dog: 0.3 }, roof: 'flat' })",
+  "lifeRegion": "egypt",
+  "crop": null
+}
