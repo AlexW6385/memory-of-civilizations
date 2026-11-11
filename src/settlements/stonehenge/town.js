@@ -196,6 +196,33 @@ export function village() {
     if (rand() < 0.5) { const c2 = [x + Math.cos(yaw) * 2.2, z + Math.sin(yaw) * 2.2]; person(c2, face(c2, [x, z]), { pose: 'sit_ground', h: 0.62 }); }
     if (rand() < 0.35) L.push({ t: 'animal', kind: 'dog', at: [x - Math.sin(yaw) * 2.6, z + Math.cos(yaw) * 2.6], y: height(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
   });
+  // four-post granaries among the houses
+  for (let n = 0, m = 0; n < 1500 && m < 12; n++) {
+    const a = rand() * 6.28, d = 10 + rand() * 90, x = VILLAGE.c[0] + Math.cos(a) * d, z = VILLAGE.c[1] + Math.sin(a) * d;
+    if (!free(x, z, 3.2) || Math.hypot(x, z) > RADIUS - 58 || C.some((q) => q.c && Math.hypot(q.c[0] - x, q.c[1] - z) < 5)) continue;
+    m++; C.push({ t: 'granary', c: [x, z], y: height(x, z), yaw: rand() * 1.57, s: 2.0 + rand() * 0.5, seed: Math.floor(rand() * 1e6) });
+  }
+  // traders on their hides along the two avenues (goods came from across Britain: pots, polished axes of greenstone, hides, beads), a buyer or two at each
+  {
+    const spotsW = [];
+    for (let s = DURR.r + 10; s < DURR.r + DURR.len - 6; s += 15) for (const sg of [-1, 1]) if (rand() < 0.55) spotsW.push([DURR.c[0] + DURR.dir[0] * s - DURR.dir[1] * sg * (DURR.w / 2 - 3), DURR.c[1] + DURR.dir[1] * s + DURR.dir[0] * sg * (DURR.w / 2 - 3), sg]);
+    for (const [s, t] of [[78, -12.5], [104, 12.5], [150, -12.5], [186, 12.5], [226, -12.5]]) { const [x, z] = P(s, t); spotsW.push([x, z, 1]); }
+    for (const [x, z] of spotsW) {
+      if (Math.hypot(x, z) > RADIUS - 55) continue;
+      const yaw = rand() * 6.28;
+      C.push({ t: 'craft', c: [x, z], y: height(x, z), yaw, kind: 'wares', seed: Math.floor(rand() * 1e6) });
+      const tr = [x + Math.sin(yaw) * 1.7, z - Math.cos(yaw) * 1.7]; person(tr, face(tr, [x, z]), { pose: 'sit_ground' });
+      for (let k = 0, nb = 1 + Math.floor(rand() * 2); k < nb; k++) { const b = [x - Math.sin(yaw) * (1.8 + k * 0.7) + Math.cos(yaw) * (k - 0.5) * 1.3, z + Math.cos(yaw) * (1.8 + k * 0.7) + Math.sin(yaw) * (k - 0.5) * 1.3]; person(b, face(b, [x, z]) + (rand() - 0.5) * 0.5, { pose: rand() < 0.4 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' }); }
+    }
+  }
+  // the Southern Circle: a fire at its heart with people about it at the midwinter sunrise (the way the posts open toward the avenue)
+  {
+    const [cx, cz] = DURR.c;
+    C.push({ t: 'feast_fire', c: [cx, cz], r: 2.4, y: height(cx, cz), yaw: 0.5, pig: false, seed: 909 });
+    for (let k = 0; k < 6; k++) { const t = k / 6 * 6.28 + 0.4, at = [cx + Math.cos(t) * 2.7, cz + Math.sin(t) * 2.7]; person(at, face(at, [cx, cz]), { pose: k % 3 === 0 ? 'sit_ground' : k % 3 === 1 ? 'talk' : 'cross' }); }
+    const posts = timberCircle()[0].posts;
+    for (let k = 0, n = 0; k < 8 && n++ < 200;) { const t = rand() * 6.28, r = 7 + rand() * 4, at = [cx + Math.cos(t) * r, cz + Math.sin(t) * r]; if (posts.some((q) => Math.hypot(q.at[0] - at[0], q.at[1] - at[1]) < q.r + 0.75)) continue; k++; person(at, face(at, [cx, cz]) + (rand() - 0.5), { pose: rand() < 0.4 ? 'talk' : 'stand' }); }
+  }
   // the scrub: gorse in clumps on the chalk, hawthorns alone and in threes (also by the barrows)
   const okScrub = (x, z, m) => { const r = Math.hypot(x, z), [, t] = avenue(x, z), [s0] = avenue(x, z); return r > DITCH.r + 12 && r < RADIUS - 55 && !(s0 > 0 && Math.abs(t) < 14) && free(x, z, m) && BARROWS.every(([bx, bz, br]) => Math.hypot(bx - x, bz - z) > br + 4); };
   for (let c = 0, n = 0; c < 26 && n++ < 600;) {

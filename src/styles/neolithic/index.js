@@ -706,6 +706,15 @@ function craft(el, { bag, col }) {
       bag.add('pottery_dark', lathe(groovedWare(0.16, 0.3), 12, null, ...at(1.05, 0.5)));
       break;
     }
+    case 'wares': {                                          // a trader's hide spread with goods: pots, polished stone axes, baskets, rolled hides, a string of beads
+      bag.add(['hide_brown', 'hide_tan', 'hide_grey'][Math.floor(rand() * 3)], lathe([[1.3, 0], [1.28, 0.012], [0.001, 0.014]], 14, null, ...at(0, 0)));
+      for (let i = 0; i < 5; i++) bag.add(i % 2 ? 'terracotta' : 'pottery_dark', lathe(groovedWare(0.1 + rand() * 0.07, 0.18 + rand() * 0.18), 12, null, ...at(-0.8 + i * 0.3, 0.35 + (i % 2) * 0.18, 0.014)));
+      for (let i = 0; i < 4; i++) { const u = 0.35 + i * 0.2, q = at(u, -0.1 + (i % 2) * 0.12, 0.016), b = rand() * 3; bag.add('serpentine', lathe([[0.001, 0], [0.03, 0.01], [0.055, 0.05], [0.04, 0.2], [0.001, 0.22]], 6, null, ...q).rotateY(0)); void b; }
+      bag.add('wicker', lathe([[0.001, 0], [0.22, 0], [0.27, 0.3], [0.001, 0.04]], 12, null, ...at(-0.55, -0.45, 0.014)));
+      bag.add('hide_white', lathe([[0.001, 0.0], [0.1, 0.0], [0.1, 0.5], [0.001, 0.5]], 8, null, ...at(0.7, -0.5, 0.014)).rotateZ(0));
+      for (let i = 0; i < 12; i++) { const t = i / 12 * 6.28; bag.add('shell_inlay', pebble(0.014, at(0.0 + Math.cos(t) * 0.16, -0.5 + Math.sin(t) * 0.16, 0.016))); }
+      break;
+    }
     case 'hides': {
       bag.add(['hide_tan', 'hide_brown', 'hide_white'][Math.floor(rand() * 3)], obox(fr, -0.8, 0.8, 0.0, 0.025, -0.55, 0.55));
       for (const [u, v] of [[-0.8, -0.55], [0.8, -0.55], [0.8, 0.55], [-0.8, 0.55], [0, -0.55], [0, 0.55]]) bag.add('timber', stick(at(u, v, -0.05), at(u, v, 0.14), 0.022, 5));
@@ -761,8 +770,34 @@ function scrub(el, { bag, col }) {
   }
 }
 
+/**
+ * granary: { c, y, yaw, s, seed } — a four-post store: four oak posts set in pits carrying a raised floor of split planks a metre off the
+ * damp ground, walls of hazel wattle, a small hipped thatch; a log with notches leaning against it for a ladder.
+ */
+function granary(el, { bag, col }) {
+  const rand = rng(el.seed || 31), [x, z] = el.c, y = el.y ?? 0, a = el.yaw ?? 0, s = el.s ?? 2.2, fr = { x, z, y, c: Math.cos(a), s: Math.sin(a) }, hw = s / 2, fh = 0.95, wh = 1.1;
+  for (const u of [-hw, hw]) for (const v of [-hw, hw]) { bag.add('bark_dark', stick(W(fr, u, -0.3, v), W(fr, u, fh + 0.05, v), 0.1, 7)); bag.add('chalk', lathe([[0.3, -0.1], [0.2, 0.06], [0.12, 0.1]], 8, null, ...W(fr, u, 0, v))); }
+  bag.add('timber', obox(fr, -hw - 0.15, hw + 0.15, fh, fh + 0.09, -hw - 0.15, hw + 0.15));
+  for (const [u0, u1, v0, v1] of [[-hw - 0.05, hw + 0.05, -hw - 0.05, -hw + 0.05], [-hw - 0.05, hw + 0.05, hw - 0.05, hw + 0.05], [-hw - 0.05, -hw + 0.05, -hw, hw], [hw - 0.05, hw + 0.05, -hw, hw]]) bag.add('wicker', obox(fr, u0, u1, fh + 0.09, fh + 0.09 + wh, v0, v1));
+  for (let k = 0; k < 8; k++) bag.add('timber', stick(W(fr, -hw + k * s / 7, fh + 0.1, -hw), W(fr, -hw + k * s / 7, fh + 0.1 + wh, -hw), 0.02, 4));
+  // the hipped thatch roof, overhanging
+  const e = hw + 0.55, y0 = fh + 0.09 + wh, ap = y0 + hw * 1.3, C = [[-1, -1], [1, -1], [1, 1], [-1, 1]], T = [];
+  for (let k = 0; k < 4; k++) { const p = C[k], q = C[(k + 1) % 4]; T.push(...W(fr, p[0] * e, y0, p[1] * e), ...W(fr, 0, ap, 0), ...W(fr, q[0] * e, y0, q[1] * e)); }
+  for (let i = 0; i < T.length; i += 9) {
+    const ux = T[i + 3] - T[i], uy = T[i + 4] - T[i + 1], uz = T[i + 5] - T[i + 2], vx = T[i + 6] - T[i], vy = T[i + 7] - T[i + 1], vz = T[i + 8] - T[i + 2];
+    const nx = uy * vz - uz * vy, nz = ux * vy - uy * vx, mx = (T[i] + T[i + 3] + T[i + 6]) / 3 - x, mz = (T[i + 2] + T[i + 5] + T[i + 8]) / 3 - z;
+    if (nx * mx + nz * mz < 0) for (let q = 0; q < 3; q++) { const t = T[i + 3 + q]; T[i + 3 + q] = T[i + 6 + q]; T[i + 6 + q] = t; }
+  }
+  bag.add('thatch', fromTriangles(T));
+  const l0 = W(fr, 0.3, -0.05, hw + 0.9), l1 = W(fr, 0.3, fh + 0.08, hw + 0.1);
+  bag.add('log_pine', stick(l0, l1, 0.07, 6));
+  for (let k = 1; k < 5; k++) bag.add('timber', stick(W(fr, 0.18, fh * k / 5.3, hw + 0.9 - 0.8 * k / 5.3), W(fr, 0.42, fh * k / 5.3, hw + 0.9 - 0.8 * k / 5.3), 0.02, 4));
+  for (const u of [-hw, hw]) for (const v of [-hw, hw]) col.circle(...(() => { const p = W(fr, u, 0, v); return [p[0], p[2]]; })(), 0.12, y, y + fh);
+  void rand;
+}
+
 registerStyle('neolithic', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, camp_shelter: campShelter, hurdle, yard, craft, litter, scrub },
+  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, camp_shelter: campShelter, hurdle, yard, craft, litter, scrub, granary },
   objects: {},
 });
