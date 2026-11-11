@@ -3,7 +3,7 @@
 // the Sacred Cenote's rim all day. The engine part is src/engine/smoke.js; positions come from the layout and the offerings' places.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, lots } from './layout.js';
+import { RADIUS, lots, PLAZA_SHRINES, SWEATBATH } from './layout.js';
 import { ground } from './ground.js';
 
 const ID = 'chichen-itza';
@@ -18,6 +18,8 @@ export function emitters() {
       E.push({ p: [x, ground.height(x, z) + 4.2, z], kind: 'kitchen', thr: 0.25 + 0.5 * r(), seed: h.seed + 1 });
     }
   }
+  for (const [x, z, rot] of PLAZA_SHRINES) E.push({ p: [x - 0.4, ground.height(x, z) + 1.1, z], kind: 'incense', thr: 0, seed: 40 + Math.floor(x + z) });   // the small altars' censers
+  E.push({ p: [SWEATBATH.at[0], ground.height(...SWEATBATH.at) + 1.2, SWEATBATH.at[1] + 3.4], kind: 'kitchen', thr: 0.3, seed: 77 });                  // the sweat bath's fire
   E.push({ p: [-5.6, ground.height(-5.6, -240.2) + 0.5, -240.2], kind: 'incense', thr: 0, seed: 31 });   // the ladle censer at the cenote
   E.push({ p: [0, 24.9, 8.6], kind: 'incense', thr: 0, seed: 32 });                                  // the Castillo's summit
   E.push({ p: [118.0, 14.2, -13.2], kind: 'incense', thr: 0, seed: 33 });                              // the altar of the Atlanteans
