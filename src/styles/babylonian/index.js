@@ -352,20 +352,26 @@ function cityWall(el, { bag, col }) {
  * dark blue ground yellow columns with bright blue capitals, above them a frieze of white double palmettes over a
  * band of yellow, black and white squares) with its three doors.
  */
-function palace(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, h = el.h ?? 11, courts = el.courts || [], gates = el.gates || [];
+function palace(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, h = el.h ?? 11, courts = el.courts || [];
+  // the throne room (§13.3): hollowed behind the facade, its three doors real passages through the 2.4 m wall
+  const hall = el.throne ? (() => {
+    const c = courts[el.throne.court], zf = c[3], X0 = c[0] + 2, X1 = c[2] - 2, wall = 2.4, xc = (c[0] + c[2]) / 2;
+    return { rect: [X0, zf + wall, X1, zf + wall + 14.6], zf, xc, wall, doors: (el.throne.doors || [0]).map((u) => ({ u: xc + u, w: u === 0 ? 4.4 : 3.2, ht: u === 0 ? 7 : 5.4 })) };
+  })() : null;
+  const gates = [...(el.gates || []), ...(hall ? hall.doors.map((d) => ({ rect: [d.u - d.w / 2, hall.zf, d.u + d.w / 2, hall.zf + hall.wall], h: d.ht })) : [])];
   const ins = (r, x, z) => x > r[0] && x < r[2] && z > r[1] && z < r[3];
-  const xs = [...new Set([x0, x1, ...courts.flatMap((r) => [r[0], r[2]]), ...gates.flatMap((g) => [g.rect[0], g.rect[2]])])].sort((a, b) => a - b);
-  const zs = [...new Set([z0, z1, ...courts.flatMap((r) => [r[1], r[3]]), ...gates.flatMap((g) => [g.rect[1], g.rect[3]])])].sort((a, b) => a - b);
+  const xs = [...new Set([x0, x1, ...courts.flatMap((r) => [r[0], r[2]]), ...gates.flatMap((g) => [g.rect[0], g.rect[2]]), ...(hall ? [hall.rect[0], hall.rect[2]] : [])])].sort((a, b) => a - b);
+  const zs = [...new Set([z0, z1, ...courts.flatMap((r) => [r[1], r[3]]), ...gates.flatMap((g) => [g.rect[1], g.rect[3]]), ...(hall ? [hall.rect[1], hall.rect[3]] : [])])].sort((a, b) => a - b);
   // the cells of the grid of all edges, merged greedily into rectangles of one kind (fewer hidden faces)
   const NX = xs.length - 1, NZ = zs.length - 1, kind = [], done = [];
   for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) {
     const mx = (xs[i] + xs[i + 1]) / 2, mz = (zs[j] + zs[j + 1]) / 2, g = gates.find((q) => ins(q.rect, mx, mz));
-    kind[j * NX + i] = courts.some((r) => ins(r, mx, mz)) ? 'court' : g ? 'gate:' + (g.h ?? 4.5) : 'solid';
+    kind[j * NX + i] = courts.some((r) => ins(r, mx, mz)) ? 'court' : hall && ins(hall.rect, mx, mz) ? 'hall' : g ? 'gate:' + (g.h ?? 4.5) : 'solid';
   }
   for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) {
     const k = kind[j * NX + i];
-    if (k === 'court' || done[j * NX + i]) continue;
+    if (k === 'court' || k === 'hall' || done[j * NX + i]) continue;
     let i1 = i; while (i1 + 1 < NX && kind[j * NX + i1 + 1] === k && !done[j * NX + i1 + 1]) i1++;
     let j1 = j; for (;;) { const jj = j1 + 1; if (jj >= NZ) break; let ok = true; for (let ii = i; ii <= i1; ii++) if (kind[jj * NX + ii] !== k || done[jj * NX + ii]) { ok = false; break; } if (!ok) break; j1 = jj; }
     for (let jj = j; jj <= j1; jj++) for (let ii = i; ii <= i1; ii++) done[jj * NX + ii] = true;
@@ -393,10 +399,56 @@ function palace(el, { bag, col }) {
       : [[a0 - 4.5, f === 'n' ? z0 - 2.5 : z1 - 2, a0, f === 'n' ? z0 + 2 : z1 + 2.5], [a1, f === 'n' ? z0 - 2.5 : z1 - 2, a1 + 4.5, f === 'n' ? z0 + 2 : z1 + 2.5]];
     for (const t of tw) { bag.add(B, box(t[0], -0.5, t[1], t[2], H, t[3])); col.rect(t, 0, H); crenels(bag, t, H, B, 1.2); }
   }
-  if (el.throne) throneFacade(bag, courts[el.throne.court], el.throne.doors || [0], h);
+  if (el.throne) { throneFacade(bag, col, courts[el.throne.court], el.throne.doors || [0], h); throneRoom(bag, col, lights, hall, h); }
 }
 /** The enamelled facade of the throne room on the south side of court r (facing north into it). */
-function throneFacade(bag, r, doors, h) {
+/** The throne room: plastered walls with a dado of blue glaze, the dais with the king's throne, lampstands and braziers, long tables laid for a feast along the walls, hangings. */
+function throneRoom(bag, col, lights, hall, h) {
+  const [x0, z0, x1, z1] = hall.rect, xc = (x0 + x1) / 2, yc = h - 1.5;
+  bag.add(B, box(x0, -0.3, z0, x1, 0.08, z1)); col.floor(hall.rect, 0.08);
+  bag.add('cedar', box(x0, yc - 0.06, z0, x1, yc, z1)); bag.add(B, box(x0, yc, z0, x1, h, z1)); col.floor(hall.rect, h);
+  for (let x = x0 + 0.8; x < x1 - 0.4; x += 1.4) bag.add('cedar', box(x - 0.2, yc - 0.55, z0, x + 0.2, yc - 0.06, z1));
+  // the walls: plaster to the ceiling, a dado of blue glaze under a band of yellow, black and white squares
+  const wall = (a, b, ax, at, s) => {   // a wall face x = at (ax 'x') or z = at (ax 'z'), the room on side s of it
+    const t = 0.03, pl = (mat, v0, v1) => bag.add(mat, ax === 'x' ? box(Math.min(at, at + s * t), v0, a, Math.max(at, at + s * t), v1, b) : box(a, v0, Math.min(at, at + s * t), b, v1, Math.max(at, at + s * t)));
+    pl('plaster', 0.08, yc); pl('glaze_lapis', 0.08, 2.0); [['glaze_white', 2.0, 2.08], [K, 2.08, 2.16], [Y, 2.16, 2.24]].forEach(([m, v0, v1]) => bag.add(m, ax === 'x' ? box(Math.min(at, at + s * 0.045), v0, a, Math.max(at, at + s * 0.045), v1, b) : box(a, v0, Math.min(at, at + s * 0.045), b, v1, Math.max(at, at + s * 0.045))));
+  };
+  wall(z0, z1, 'x', x0, 1); wall(z0, z1, 'x', x1, -1); wall(x0, x1, 'z', z1, -1); wall(x0, x1, 'z', z0, 1);
+  // the dais: three steps and the throne, gold on a base of brick; two lampstands and braziers either side; a canopy of red cloth on posts
+  for (let k = 0; k < 3; k++) {
+    const f = z1 - 5.4 + k * 0.9, r = [xc - 4.5 + k * 0.5, f, xc + 4.5 - k * 0.5, z1];
+    bag.add(B, box(r[0], 0.08, r[1], r[2], 0.08 + 0.3 * (k + 1), r[3])); col.floor(r, 0.08 + 0.3 * (k + 1));
+  }
+  const ty = 0.98;
+  bag.add('gold', box(xc - 0.8, ty, z1 - 1.8, xc + 0.8, ty + 0.55, z1 - 0.7)); bag.add('gold', box(xc - 0.8, ty + 0.55, z1 - 0.85, xc + 0.8, ty + 2.2, z1 - 0.7)); bag.add('cloth_red', box(xc - 0.7, ty + 0.55, z1 - 1.75, xc + 0.7, ty + 0.62, z1 - 0.9));
+  for (const sx of [-1, 1]) { bag.add('gold', box(xc + sx * 0.8 - 0.07, ty, z1 - 1.8, xc + sx * 0.8 + 0.07, ty + 1.0, z1 - 0.7)); bag.add('gold', box(xc - 0.7, ty, z1 - 2.5, xc + 0.7, ty + 0.2, z1 - 1.9)); }
+  for (const sx of [-1, 1]) {
+    const px = xc + sx * 3.4;
+    bag.add('timber', box(px - 0.12, 0.98, z1 - 3.2, px + 0.12, 5.2, z1 - 2.96)); col.rect([px - 0.12, z1 - 3.2, px + 0.12, z1 - 2.96], 0.98, 5.2);
+  }
+  bag.add('cloth_red', box(xc - 3.5, 4.9, z1 - 3.2, xc + 3.5, 5.2, z1 - 0.1));
+  col.rect([xc - 0.8, z1 - 2.5, xc + 0.8, z1 - 0.7], ty, ty + 2.2);
+  for (const sx of [-1, 1]) {
+    const lx = xc + sx * 6.2;
+    bag.add(BZc, lathe([[0.4, 0], [0.3, 0.1], [0.06, 0.3], [0.05, 2.6], [0.14, 2.8], [0.3, 3.0], [0.001, 3.0]], 12, null, lx, 0.08, z1 - 2)); col.circle(lx, z1 - 2, 0.4, 0, 3);
+    bag.add('flame', box(lx - 0.04, 3.05, z1 - 2.04, lx + 0.04, 3.2, z1 - 1.96));
+    lights.push({ at: [lx, 3.4, z1 - 2], color: '#ffb46b', intensity: 4, distance: 14 });
+  }
+  lights.push({ at: [xc, 5.5, z1 - 6], color: '#ffc27a', intensity: 6, distance: 22 });
+  // the feast: two long low tables with couches along them, gold and silver vessels, wine in jars of bronze on stands
+  for (const sx of [-1, 1]) for (let k = 0; k < 2; k++) {
+    const tx = xc + sx * (9 + k * 5.5), a = z0 + 1.5, b = z1 - 7;
+    bag.add('cedar', box(tx - 0.5, 0.45, a, tx + 0.5, 0.5, b)); for (let z = a + 0.4; z < b; z += 2.2) for (const dx of [-0.42, 0.42]) bag.add('cedar', box(tx + dx - 0.04, 0.08, z - 0.04, tx + dx + 0.04, 0.45, z + 0.04));
+    col.rect([tx - 0.5, a, tx + 0.5, b], 0, 0.5);
+    for (let z = a + 0.8; z < b - 0.4; z += 1.1) { bag.add(k ? 'silver' : 'gold', lathe([[0.001, 0], [0.04, 0], [0.1, 0.12], [0.001, 0.12]], 8, null, tx + (z % 2 > 1 ? 0.2 : -0.2), 0.5, z)); bag.add('linen', box(tx - 0.3, 0.5, z + 0.2, tx - 0.05, 0.53, z + 0.45)); }
+    for (const s2 of [-1, 1]) { const cx = tx + s2 * 1.5; bag.add('cloth_red', box(cx - 0.4, 0.1, a, cx + 0.4, 0.4, b)); bag.add('linen', box(cx - 0.36, 0.4, a + 0.1, cx + 0.36, 0.5, b - 0.1)); }
+  }
+  // hangings: cloth in panels on the walls above the dado
+  for (let z = z0 + 2; z < z1 - 3; z += 3.4) for (const [x, s] of [[x0, 1], [x1, -1]]) bag.add(Math.floor(z) % 2 ? 'cloth_indigo' : 'cloth_red', box(Math.min(x, x + s * 0.09), 3.2, z, Math.max(x, x + s * 0.09), 6.8, z + 2.0));
+  lights.push({ at: [x0 + 6, 5.5, (z0 + z1) / 2], color: '#ffb46b', intensity: 3.5, distance: 16 }, { at: [x1 - 6, 5.5, (z0 + z1) / 2], color: '#ffb46b', intensity: 3.5, distance: 16 });
+}
+const BZc = 'bronze';
+function throneFacade(bag, col, r, doors, h) {
   const [c0, , c1, zf] = r, xc = (c0 + c1) / 2, F = [c0, zf, c1, zf + 1], P = facePoint(F, 'n');
   const plate = (mat, u0, v0, u1, v1, w0, w1) => { const a = P(u0, v0, w0), b = P(u1, v1, w1); bag.add(mat, box(Math.min(a[0], b[0]), a[1], Math.min(a[2], b[2]), Math.max(a[0], b[0]), b[1], Math.max(a[2], b[2]))); };
   const top = h - 0.9;
@@ -411,9 +463,13 @@ function throneFacade(bag, r, doors, h) {
       pl(m, d.u - d.w / 2 - o, 0.08, d.u - d.w / 2 - o + 0.35, d.ht + o, w); pl(m, d.u + d.w / 2 + o - 0.35, 0.08, d.u + d.w / 2 + o, d.ht + o, w);
       pl(m, d.u - d.w / 2 - o, d.ht + o - 0.35, d.u + d.w / 2 + o, d.ht + o, w);
     });
-    pl('cedar', d.u - d.w / 2, 0.08, d.u + d.w / 2, d.ht, 0.02);
-    for (const v of [0.6, d.ht * 0.5, d.ht - 0.6]) pl('bronze', d.u - d.w / 2, v - 0.08, d.u + d.w / 2, v + 0.08, 0.035);
-    pl(K, d.u - 0.02, 0.08, d.u + 0.02, d.ht, 0.03);                                  // the meeting of the two leaves
+    // the leaves stand open against the sides of the passage
+    for (const sx of [-1, 1]) {
+      const xa = d.u + sx * d.w / 2, xb = xa - sx * 0.18, q = [Math.min(xa, xb), zf + 0.3, Math.max(xa, xb), zf + 0.3 + d.w / 2 - 0.1];
+      bag.add('cedar', box(q[0], 0.08, q[1], q[2], d.ht - 0.05, q[3]));
+      for (const v of [0.6, d.ht * 0.5, d.ht - 0.6]) bag.add('bronze', box(q[0] - 0.02 * sx, v - 0.08, q[1], q[2] + 0.02 * sx, v + 0.08, q[3]));
+      col.rect(q, 0, d.ht);
+    }
   }
   // the columns: a yellow shaft on a base, two tiers of bright blue volutes, an abacus
   const VOL = (rr) => lathe([[rr, 0], [rr, 0.07], [rr * 0.55, 0.1], [0.001, 0.11]], 16);

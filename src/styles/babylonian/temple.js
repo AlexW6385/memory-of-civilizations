@@ -7,6 +7,7 @@
 import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { crenels } from './index.js';
+import { furnishRoom } from './rooms.js';
 
 const B = 'brick_baked', G = 'glaze_lapis', K = 'lacquer_black', AU = 'gold', CE = 'cedar', BZ = 'bronze', PL = 'plaster', BT = 'bitumen';
 
@@ -54,13 +55,46 @@ function sheets(bag, axis, at, s, u0, u1, v0, v1, holes = []) {
  * a ceiling of cedar beams, the dais in a niche of the back wall with the golden throne, footstool and table
  * (Herodotus) — the image itself is placed as a figure by the settlement (esagilaStatue gives where).
  */
+/** The six chambers of Esagila's ranges: [{ kind, r (inside), f (the door's face) }] (as esagila() builds them). */
+export function esagilaChambers([x0, z0, x1, z1]) {
+  const zc = (z0 + z1) / 2, xm = (x0 + x1) / 2, C = [x0 + 32, zc - 18.8, x0 + 32 + 31.3, zc + 18.8], pw = 5, rw = 1.2, out = [];
+  for (const north of [true, false]) {
+    const a = north ? z0 : C[3], b = north ? C[1] : z1, rz0 = north ? b - rw - 8 : a + rw, rz1 = north ? b - rw : a + rw + 8;
+    [[xm + pw / 2 + 1.5, xm + pw / 2 + 10.5], [xm + pw / 2 + 11.5, xm + pw / 2 + 20.5]].forEach(([u0, u1], i) => out.push({ kind: north ? (i ? 'scriptorium' : 'storehouse') : (i ? 'treasury' : 'kitchen'), r: [u0, rz0, u1, rz1], f: north ? 's' : 'n' }));
+  }
+  for (const north of [true, false]) { const a = north ? C[1] : zc + pw / 2, b = north ? zc - pw / 2 : C[3], rx0 = C[2] + rw; out.push({ kind: north ? 'bakehouse' : 'purification', r: [rx0, a + 1.2, rx0 + 10, b - 1.2], f: 'w' }); }
+  return out;
+}
 export function esagila(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, H = el.h ?? 12, zc = (z0 + z1) / 2, xm = (x0 + x1) / 2, T = 6;
   const C = [x0 + 32, zc - 18.8, x0 + 32 + 31.3, zc + 18.8];          // the court
   const pw = 5, ph = 7.5, M = (r, y0 = 0, y1 = H) => massOf(bag, col, r, y0, y1);
   // the north and south ranges with the gate passages through them; the east range likewise
-  for (const [a, b] of [[z0, C[1]], [C[3], z1]]) { M([x0, a, xm - pw / 2, b]); M([xm + pw / 2, a, x1, b]); M([xm - pw / 2, a, xm + pw / 2, b], ph); }
-  M([C[2], C[1], x1, zc - pw / 2]); M([C[2], zc + pw / 2, x1, C[3]]); M([C[2], zc - pw / 2, x1, zc + pw / 2], ph);
+  // (the ranges east of the gate passages hold the temple's chambers, §13.2: each room opens on the court through a door in a wall 1.2 m thick)
+  const rw = 1.2, dw = 1.3, dH = 3.8, yc = 4.6, CH = [];
+  const chamber = (kind, r, f) => { CH.push([kind, r, f]); };
+  const doorWall = (wall, alongX) => { const mid = alongX ? (wall[0] + wall[2]) / 2 : (wall[1] + wall[3]) / 2; if (alongX) { M([wall[0], wall[1], mid - dw, wall[3]]); M([mid + dw, wall[1], wall[2], wall[3]]); M([mid - dw, wall[1], mid + dw, wall[3]], dH); } else { M([wall[0], wall[1], wall[2], mid - dw]); M([wall[0], mid + dw, wall[2], wall[3]]); M([wall[0], mid - dw, wall[2], mid + dw], dH); } };
+  M([x0, z0, xm - pw / 2, C[1]]); M([xm - pw / 2, z0, xm + pw / 2, C[1]], ph);
+  M([x0, C[3], xm - pw / 2, z1]); M([xm - pw / 2, C[3], xm + pw / 2, z1], ph);
+  for (const north of [true, false]) {
+    const a = north ? z0 : C[3], b = north ? C[1] : z1, rz0 = north ? b - rw - 8 : a + rw, rz1 = north ? b - rw : a + rw + 8, wall = north ? [0, rz1, 0, b] : [0, a, 0, rz0];
+    const xr = [[xm + pw / 2 + 1.5, xm + pw / 2 + 10.5], [xm + pw / 2 + 11.5, xm + pw / 2 + 20.5]];
+    M(north ? [xm + pw / 2, a, x1, rz0] : [xm + pw / 2, rz1, x1, b]);
+    M([xm + pw / 2, rz0, xr[0][0], rz1]); M([xr[0][1], rz0, xr[1][0], rz1]); M([xr[1][1], rz0, x1, rz1]);
+    xr.forEach(([u0, u1], i) => {
+      doorWall([u0, wall[1], u1, wall[3]], true); M([u0, rz0, u1, rz1], yc, H);
+      chamber(north ? (i ? 'scriptorium' : 'storehouse') : (i ? 'treasury' : 'kitchen'), [u0, rz0, u1, rz1], north ? 's' : 'n');
+    });
+    for (const [g0, g1] of [[xm + pw / 2, xr[0][0]], [xr[0][1], xr[1][0]], [xr[1][1], x1]]) M([g0, wall[1], g1, wall[3]]);
+  }
+  for (const north of [true, false]) {
+    const a = north ? C[1] : zc + pw / 2, b = north ? zc - pw / 2 : C[3], rx0 = C[2] + rw, rx1 = rx0 + 10, rzA = a + 1.2, rzB = b - 1.2;
+    M([C[2], a, rx0, rzA]); M([C[2], rzB, rx0, b]); doorWall([C[2], rzA, rx0, rzB], false);
+    M([rx1, a, x1, b]); M([rx0, a, rx1, rzA]); M([rx0, rzB, rx1, b]); M([rx0, rzA, rx1, rzB], yc, H);
+    chamber(north ? 'bakehouse' : 'purification', [rx0, rzA, rx1, rzB], 'w');
+  }
+  M([C[2], zc - pw / 2, x1, zc + pw / 2], ph);
+  for (const [kind, r, f] of CH) furnishRoom(kind, r, f, { bag, col, lights }, yc);
   // the west range: Marduk's cella behind its antecella, on the court's axis
   const cz0 = zc - 12, cz1 = zc + 12, xf = C[0] - 3, xa1 = xf, xa0 = xf - 6, xw1 = xa0, xw0 = xa0 - 2.5, xc0 = x0 + T, yR = H - 0.7;
   M([x0, C[1], C[0], cz0]); M([x0, cz1, C[0], C[3]]);
