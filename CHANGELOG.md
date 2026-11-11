@@ -2,7 +2,7 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
-## v10.48 — No neighbours built mid-visit (2026-11-10)
+## v10.50 — No neighbours built mid-visit (2026-11-10)
 
 While you are inside a settlement, the settlements round it are no longer built in the background; they stay as distant views until you step out of its disc. Building them was one cause of the occasional stutter inside a city.
 
