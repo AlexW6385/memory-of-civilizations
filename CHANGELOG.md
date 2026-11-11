@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## Unreleased — a faster start (2026-11-11)
+
+The first start should take a fraction of the time it did: the loading screen compiles the shaders side by side instead of one after another, the merging of a settlement no longer waits at each step, the ground near rivers is built twice as fast, the far views and the open country's plants come in just after arriving instead of during the start, and each material now needs one shader instead of two.
+
 ## v10.59 — B1 third pass (2026-11-11)
 
 Kaifeng's river streets become a paved walk by the shops and a willow-lined earth bank with mooring posts, stalls and landing steps; the upper storeys carry balconies with washing, blinds and boards; the main hall has its stone balustrade. Lin'an's trees are rebuilt from leaves and twigs, its city gates are vaulted in brick with granite voussoirs, the pleasure boats are fitted out, the pagoda's lower storeys detailed. Beijing gains proper Qing galleries with the Xiehe and Xihe gates, a closed forecourt with its gate hall, the Temple of Heaven's raised Danbi way between cypresses, and shrines, benches under pagoda trees and coal carts in the hutongs, while its frame drops under budget (2.9 M triangles, 776 draws at the arrival). Foguang's 35 clay figures are painted Tang figures at Liang Sicheng's heights, its village filled and weathered.
