@@ -23,5 +23,6 @@ export const MOVER_SITES = {
   'jerusalem': () => import('../settlements/jerusalem/movers.js'),
   'baroque-rome': () => import('../settlements/baroque-rome/movers.js'),
   'athens': () => import('../settlements/athens/movers.js'),
+  'mamluk-cairo': () => import('../settlements/mamluk-cairo/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
