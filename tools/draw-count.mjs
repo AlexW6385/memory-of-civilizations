@@ -336,6 +336,7 @@ export async function sceneOf(id) {
       let o = 0, r = 0;
       for (const p of e.chunks) {
         const k = p.matrices.length / 16;
+        p.reach ??= new Float32Array(k).fill(230);
         for (let i = 0; i < k; i++) { pos.set([p.matrices[i * 16 + 12], p.matrices[i * 16 + 13], p.matrices[i * 16 + 14]], (o + i) * 3); }
         reach.set(p.reach, o); o += k;
         if (!p.geometry.boundingSphere) p.geometry.computeBoundingSphere();
@@ -346,9 +347,11 @@ export async function sceneOf(id) {
     } else {
       for (const p of e.chunks) {
         if (!p.geometry.boundingSphere) p.geometry.computeBoundingSphere();
-        for (let i = 0; i < p.reals.length; i++) {
-          const s = rare.get(p.reals[i]) || rare.set(p.reals[i], { mat: p.reals[i], pos: [], reach: [], r: 0 }).get(p.reals[i]);
-          s.pos.push(p.matrices[i * 16 + 12], p.matrices[i * 16 + 13], p.matrices[i * 16 + 14]); s.reach.push(p.reach[i]);
+        const kk = p.matrices.length / 16;
+        for (let i = 0; i < kk; i++) {
+          const real = p.reals?.[i] ?? p.mat;
+          const s = rare.get(real) || rare.set(real, { mat: real, pos: [], reach: [], r: 0 }).get(real);
+          s.pos.push(p.matrices[i * 16 + 12], p.matrices[i * 16 + 13], p.matrices[i * 16 + 14]); s.reach.push(p.reach?.[i] ?? 230);
           s.r = Math.max(s.r, p.geometry.boundingSphere.radius * 2);
         }
       }
