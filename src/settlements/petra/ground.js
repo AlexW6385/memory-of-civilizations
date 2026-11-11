@@ -2,7 +2,7 @@
 // valley's dry slopes with oleander and tamarisk in the wadi bed, junipers and grass on the
 // heights; the desert sky.
 
-import { RADIUS, RIM, STREET, GARDEN, SIQ_LINE, PLAZA, open, height, inLot, behindWalls, sacred, inGarden, gardenLevel, pathDist, siqHalf } from './layout.js';
+import { RADIUS, RIM, STREET, GARDEN, SIQ_LINE, PLAZA, OUTER, open, height, inLot, behindWalls, sacred, inGarden, gardenLevel, pathDist, siqHalf, yardAt, VALLEY } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.5, grass: 0, rock: 0, soil: 0.3, fields: 0, dry: 0.9, warmth: 0.85, red: 0.8, road: 0, snow: 0, forest: 0 };
@@ -29,6 +29,8 @@ function gardenPlants(x, z) {
 function planting(x, z) {
   if (inGarden(x, z)) return gardenPlants(x, z);
   if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || behindWalls(x, z)) return null;
+  // the yards of the empty lots: the orchards are planted (figs, olives, a palm), the other yards bare
+  { const yd = yardAt(x, z, 0.3); if (yd) return yd.kind === 'orchard' && yardAt(x, z, -0.8) ? { fig: 1.8, olive: 1.0, date_palm: 0.8, grass: 20 } : null; }
   const o = open(x, z);
   if (o < 0.2) return { grass_dry: 2, maquis: 0.05 };
   if (o < 0.95) return null;
@@ -36,11 +38,16 @@ function planting(x, z) {
   // (in the Siq the oleanders and tamarisks keep to the foot of its walls: its floor, scoured by the floods and walked, and the
   // Treasury's plaza are clear, so that nothing stands between the Siq's last bend and the Treasury)
   if (pathDist(x, z, SIQ_LINE) < siqHalf(x) - 2 || Math.hypot(x - PLAZA.c[0], z - PLAZA.c[1]) < PLAZA.r) return { grass_dry: 3 };
-  return { oleander: 0.06, tamarisk: 0.04, grass_dry: 6 };
+  // the Outer Siq's floor: the wadi's bushes keep to its sides, an acacia here and there; the valley's slopes between the houses: olives, figs, a carob, gardens' trees
+  if (Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]) > 0.95 && pathDist(x, z, OUTER.path) > OUTER.w / 2 + 2) return { oleander: 0.06, tamarisk: 0.04, grass_dry: 6 };
+  const od = pathDist(x, z, OUTER.path);
+  if (od < OUTER.w / 2 + 2) return od > OUTER.w / 2 - 9 ? { oleander: 0.12, tamarisk: 0.08, acacia: 0.1, grass_dry: 5 } : { grass_dry: 3, tamarisk: 0.02 };
+  if (Math.abs(z - STREET.a[1]) < 30) return { oleander: 0.05, tamarisk: 0.05, date_palm: 0.12, grass_dry: 6 };
+  return { oleander: 0.05, tamarisk: 0.04, olive: 0.28, fig: 0.22, carob: 0.07, acacia: 0.05, grass_dry: 6 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater, rim: RIM,
-  maxDensity: { oleander: 0.06, tamarisk: 0.04, maquis: 0.05, date_palm: 1.1, fig: 0.5, olive: 0.35 },
+  maxDensity: { oleander: 0.12, tamarisk: 0.08, maquis: 0.05, date_palm: 1.1, fig: 1.8, olive: 1.0, acacia: 0.1, carob: 0.07 },
   climate: {
     sun: { az: 130, el: 50, color: [1.0, 0.95, 0.86], intensity: 3.6, lat: 30, dec: 5, hour: 10 },
     sky: { turbidity: 3.2, rayleigh: 1.1, mie: 0.005, mieG: 0.78, zenith: [0.08, 0.15, 0.4], horizon: [0.66, 0.64, 0.62] },

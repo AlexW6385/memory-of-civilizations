@@ -3,7 +3,7 @@
 // incense dealers, a lamp-smoke from the Treasury's hall. The engine part is src/engine/smoke.js (one draw call).
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, QASR, lots, shopUnits } from './layout.js';
+import { RADIUS, QASR, lots, shopUnits, yards } from './layout.js';
 import { houseLayout } from '../../styles/nabataean/house.js';
 
 const ID = 'petra';
@@ -16,6 +16,12 @@ export function emitters() {
     const H = houseLayout(l);
     if (H.court) { const [x, z] = H.P(H.court.cx - 1.2, H.court.cz + 0.8); E.push({ p: [x, l.y + 1.4, z], kind: 'kitchen', thr: 0.2 + 0.5 * r(), seed: l.seed + 1 }); }
     else { const [x, z] = H.P(H.W * (0.3 + 0.4 * r()), H.D * 0.6); E.push({ p: [x, l.y + H.h + 0.9, z], kind: 'kitchen', thr: 0.3 + 0.5 * r(), seed: l.seed + 1 }); }
+  }
+  // the potters' kilns (the yard's dome, its chimney at the top) and the hearths before the tents
+  for (const y of yards()) {
+    const [x0, z0, x1, z1] = y.rect, s = y.gate === 's' ? 1 : -1;
+    if (y.kind === 'potter') E.push({ p: [x1 - 3.2 - 0.6, y.y + 2.5, s > 0 ? z0 + 3.2 + 0.6 : z1 - 3.2 - 0.6], kind: 'kitchen', thr: 0.05, seed: y.seed });
+    else if (y.kind === 'tents') E.push({ p: [(x0 + x1) / 2, y.y + 0.5, (z0 + z1) / 2 + s * 4.3], kind: 'kitchen', thr: 0.15, seed: y.seed + 1 });
   }
   E.push({ p: [QASR.altar[0], 1.9, QASR.altar[1]], kind: 'incense', thr: 0, seed: 7 });
   for (const s of shopUnits()) if ((s.i * 5 + 3) % 8 === 0 || (s.i * 5 + 3) % 8 === 5) E.push({ p: [s.x0 + 1.0, 1.3, s.z0 + 1.0], kind: 'incense', thr: 0.1, seed: 100 + s.i });

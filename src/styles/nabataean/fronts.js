@@ -5,6 +5,7 @@
 
 import { orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { Matrix4 } from '../../core/three.js';
 
 const A = 'sandstone_rose_ashlar', R = 'sandstone_rose', W = 'sandstone_white';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -20,8 +21,6 @@ function frame(at, rot) {
   };
   return { P, B };
 }
-/** A quad (both faces) from four corners. */
-const quad2 = (a, b, c, d) => [...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c];
 
 const STRIPES = { incense: ['cloth_ochre', 'cloth_white'], spice: ['cloth_red', 'cloth_ochre'], potter: ['cloth_brown', 'cloth_ochre'], cloth: ['cloth_indigo', 'cloth_white'], oil: ['cloth_white', 'cloth_brown'], grain: ['cloth_ochre', 'cloth_brown'] };
 /** petra_front: { at (the door's middle on the shop's front wall), rot (facing the street), dw (the door's width), trade, seed, y (the portico floor) }. */
@@ -29,13 +28,12 @@ export function front(el, { bag, col }) {
   const rand = rng(el.seed), { P, B } = frame(el.at, el.rot ?? 0), y = el.y ?? 0.45, dw = el.dw ?? 2.2, W2 = dw / 2 + 0.75, out = 1.45;
   const [c1, c2] = STRIPES[el.trade] ?? STRIPES.cloth;
   // the awning: a cloth sloping from the wall's face (3.55) down to its front edge (2.95), in stripes, a scalloped valance, two poles
-  const ns = 6, yb = y + 3.55, yf = y + 2.95;
+  const ns = 6, yb = y + 3.55, yf = y + 2.95, tilt = Math.atan2(yb - yf, out), M = new Matrix4().makeRotationY(el.rot ?? 0).setPosition(el.at[0], 0, el.at[1]);
   for (let i = 0; i < ns; i++) {
-    const u0 = -W2 + 2 * W2 * i / ns, u1 = -W2 + 2 * W2 * (i + 1) / ns, sag = (u) => 0.07 * Math.sin(Math.PI * (u + W2) / (2 * W2));
-    const a = P(u0, 0.02), b = P(u1, 0.02), cc = P(u1, out), d = P(u0, out);
-    bag.add(i % 2 ? c2 : c1, fromTriangles(quad2([a[0], yb, a[1]], [b[0], yb, b[1]], [cc[0], yf - sag(u1), cc[1]], [d[0], yf - sag(u0), d[1]])));
-    const e = P(u0, out + 0.01), f = P(u1, out + 0.01);
-    bag.add(i % 2 ? c2 : c1, fromTriangles(quad2([e[0], yf - sag(u0), e[1]], [f[0], yf - sag(u1), f[1]], [f[0], yf - sag(u1) - 0.22, f[1]], [e[0], yf - sag(u0) - 0.22, e[1]])));
+    const u0 = -W2 + 2 * W2 * i / ns, u1 = -W2 + 2 * W2 * (i + 1) / ns, m = i % 2 ? c2 : c1;
+    // (a closed slab: the walkers' footing reads an open sheet over the way as a roof's slope)
+    const g = box(u0, -0.025, 0, u1, 0.025, out / Math.cos(tilt)); g.rotateX(tilt); g.translate(0, yb, 0.02); g.applyMatrix4(M); bag.add(m, g);
+    const v = box(u0, yf - 0.24, out - 0.01, u1, yf - 0.02, out + 0.02); v.applyMatrix4(M); bag.add(m, v);
   }
   for (const s of [-1, 1]) { const [px, pz] = P(s * (W2 - 0.1), out - 0.05); bag.add('timber', box(px - 0.05, y, pz - 0.05, px + 0.05, yf + 0.05, pz + 0.05)); col.circle(px, pz, 0.12, y, yf); }
   // the plank shutters taken down and stood against the wall either side of the door, a stone block as a seat
@@ -87,6 +85,24 @@ export function prop(el, { bag, col }) {
     B(bag, col, W, -0.45, -0.1, 0.45, 0.1, y + 0.35, y + 1.7, true); B(bag, col, A, -0.6, -0.25, 0.6, 0.25, y - 0.1, y + 0.35, true);
     for (let i = 0; i < 4; i++) B(bag, col, 'sandstone_red', -0.33, 0.1, 0.33 - rand() * 0.2, 0.115, y + 0.7 + i * 0.22, y + 0.75 + i * 0.22);
     B(bag, col, W, -0.5, -0.12, 0.5, 0.12, y + 1.7, y + 1.78);
+  } else if (k === 'lampstand') {
+    // a bronze stand: a round foot, the shaft with its rings, a dish at the top with the lamp's flame
+    const [x, z] = el.at;
+    bag.add('bronze', lathe([[0.24, 0], [0.22, 0.05], [0.07, 0.12], [0.04, 0.3], [0.05, 0.5], [0.035, 0.7], [0.035, 1.25], [0.07, 1.34], [0.2, 1.42], [0.18, 1.46], [0.001, 1.44]], 12, null, x, y, z));
+    bag.add('lamp_white', lathe([[0.05, 0], [0.03, 0.08], [0.001, 0.12]], 6, null, x, y + 1.45, z));
+    col.circle(x, z, 0.24, y, y + 1.5);
+  } else if (k === 'brazier') {
+    // a bowl of bronze on three legs, the coals and the incense smoking above them
+    const [x, z] = el.at;
+    bag.add('bronze', lathe([[0.001, 0.62], [0.2, 0.64], [0.38, 0.78], [0.4, 0.86], [0.36, 0.86], [0.18, 0.7], [0.001, 0.68]], 14, null, x, y, z));
+    for (let i = 0; i < 3; i++) { const a = i * 2.094 + 0.4; bag.add('bronze', box(x + Math.cos(a) * 0.2 - 0.025, y, z + Math.sin(a) * 0.2 - 0.025, x + Math.cos(a) * 0.2 + 0.025, y + 0.66, z + Math.sin(a) * 0.2 + 0.025)); }
+    bag.add('flame', lathe([[0.22, 0], [0.12, 0.08], [0.001, 0.14]], 8, null, x, y + 0.78, z));
+    col.circle(x, z, 0.42, y, y + 0.9);
+  } else if (k === 'table') {
+    // a stone offering table: a slab on two block legs, a bowl and a cluster of small vessels
+    B(bag, col, A, -0.55, -0.3, 0.55, 0.3, y + 0.82, y + 0.9, true); for (const s2 of [-1, 1]) B(bag, col, A, s2 * 0.4 - 0.1, -0.24, s2 * 0.4 + 0.1, 0.24, y, y + 0.82, true);
+    const [x, z] = P(0.1, 0); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.01], [0.17, 0.08], [0.15, 0.09], [0.1, 0.03], [0.001, 0.025]], 10, null, x, y + 0.9, z));
+    const [x2, z2] = P(-0.3, 0.05); bag.add('pottery_dark', lathe([[0.06, 0], [0.08, 0.07], [0.04, 0.14], [0.001, 0.14]], 8, null, x2, y + 0.9, z2));
   } else if (k === 'niche') {
     // a pilastered frame on the wall with a lintel, crow-steps, a baetyl on a ledge in the dark behind
     const h = el.h ?? 2.4;

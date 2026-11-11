@@ -2,7 +2,7 @@
 // `fronts()` (elements of style nabataean: the shop awnings, the wall niches, the benches, shrines and basins, the Nymphaeum, the
 // yards' walls) and `life()` (elements of style life: the goods before the shops, the north portico's stalls, the beasts and people
 // of the forecourt, the Siq, the Outer Siq, the yards and the roofs).
-import { STREET, PLAZA, OUTER, SIQ_LINE, GREAT_TEMPLE, GARDEN, shopUnits, lots, yards, height, pathDist, inRect, THEATRE, TEMENOS, smooth } from './layout.js';
+import { STREET, PLAZA, OUTER, SIQ_LINE, GREAT_TEMPLE, GARDEN, QASR, shopUnits, lots, yards, height, pathDist, inRect, THEATRE, TEMENOS, smooth } from './layout.js';
 import { tradeOf } from './shops.js';
 import { houseLayout } from '../../styles/nabataean/house.js';
 
@@ -45,6 +45,14 @@ export function fronts() {
       E.push({ t: 'petra_prop', kind, at: [+x.toFixed(2), +z.toFixed(2)], rot: dirRot(nx * sg, nz * sg), y: height(x, z), len: 2.4, back: true, seed: Math.floor(rand() * 1e5) });
     }
   }
+  // the temples: lampstands and braziers in Qasr al-Bint's naos and the Great Temple's, offering tables and braziers round the great altar
+  const [qx0, qz0, qx1] = QASR.rect, qc = (qx0 + qx1) / 2, [ax, az] = QASR.altar, gt = GREAT_TEMPLE;
+  for (const [x, z] of [[qx0 + 3.0, qz0 + 10], [qx0 + 3.0, qz0 + 15.5], [qx1 - 3.0, qz0 + 10], [qx1 - 3.0, qz0 + 15.5]]) E.push({ t: 'petra_prop', kind: 'lampstand', at: [x, z], y: 3.02, seed: 1 });
+  for (const x of [qc - 5.5, qc + 5.5]) { E.push({ t: 'petra_prop', kind: 'brazier', at: [x, qz0 + 11], y: 3.02, seed: 2 }); E.push({ t: 'petra_prop', kind: 'table', at: [x, qz0 + 14.6], rot: 0, y: 3.02, seed: 3 }); }
+  for (const [x, z] of [[gt[0] + 8.4, gt[1] + 53.5], [gt[0] + 8.4, gt[1] + 62], [gt[2] - 8.4, gt[1] + 53.5], [gt[2] - 8.4, gt[1] + 62]]) E.push({ t: 'petra_prop', kind: 'lampstand', at: [x, z], y: 5.92, seed: 4 });
+  for (const x of [(gt[0] + gt[2]) / 2 - 7, (gt[0] + gt[2]) / 2 + 7]) E.push({ t: 'petra_prop', kind: 'brazier', at: [x, gt[1] + 56], y: 5.92, seed: 5 });
+  for (const [x, z, r] of [[ax - 11.5, az - 8, 0], [ax - 11.5, az + 8, Math.PI]]) E.push({ t: 'petra_prop', kind: 'table', at: [x, z], rot: dirRot(1, 0) , y: 0.06, seed: 6 + r });
+  for (const [x, z] of [[ax - 14, az - 3.5], [ax - 14, az + 3.5]]) E.push({ t: 'petra_prop', kind: 'brazier', at: [x, z], y: 0.06, seed: 8 });
   // the yards of the empty lots
   for (const y of yards()) E.push({ t: 'petra_yard', rect: y.rect, kind: y.kind, seed: y.seed, y: y.y, gate: y.gate });
   return E;
@@ -171,6 +179,19 @@ export function life() {
       L.push({ t: 'stall', at: [x, z], y: on(x, z), rot, w: 2.6, d: 1.4, goods, awning: pick(['cloth_white', 'cloth_ochre', 'cloth_red']), seed: Math.floor(x * 3) });
       person([x - Math.sin(rot) * 1.0, z - Math.cos(rot) * 1.0], on(x, z), rot + Math.PI, { pose: 'sit_low', beard: true }); L.push({ t: 'stool', at: [x - Math.sin(rot) * 1.0, z - Math.cos(rot) * 1.0], y: on(x, z), rot: rot + Math.PI, seed: 5 });
     }
+  }
+
+  // ── the temples ───────────────────────────────────────────────────────────────────────────────────────────────────────
+  {
+    const [qx0, qz0, qx1] = QASR.rect, qc = (qx0 + qx1) / 2, [ax, az] = QASR.altar, gt = GREAT_TEMPLE, gc = (gt[0] + gt[2]) / 2;
+    // the priest on the altar's platform at the hearth, worshippers at the foot of its stair, a child holding a dove-basket
+    person([ax + 2.6, az + 0.3], 3.0, Math.PI / 2 + 3.14, { pose: 'stand', hat: 'turban', hatMat: 'cloth_white', cloth: 'cloth_white', over: 'cape', beard: true });
+    person([ax - 7.5, az - 1.1], 0.06, -Math.PI / 2 + 3.14, { pose: 'kneel', arms: 'pray', beard: true }); person([ax - 8.6, az + 1.2], 0.06, -Math.PI / 2 + 3.14, { pose: 'kneel', arms: 'pray', beard: true });
+    woman([ax - 9.6, az - 2.8], 0.06, -Math.PI / 2 + 3.14, { pose: 'stand' }); child([ax - 9.4, az + 3.0], 0.06, 1.57, { pose: 'stand', carry: 'basket' }); person([ax - 12.4, az + 0.2], 0.06, 1.57, { pose: 'talk', beard: true });
+    // Qasr al-Bint's naos: a priest by the platform's stair, a woman at prayer, an attendant
+    person([qc - 3.2, qz0 + 14], 3.02, 0, { pose: 'stand', hat: 'turban', hatMat: 'cloth_white', cloth: 'cloth_white', beard: true }); woman([qc + 3.4, qz0 + 12.4], 3.02, 0.5, { pose: 'kneel', arms: 'pray' });
+    // the Great Temple's naos
+    person([gc - 4, gt[1] + 58], 5.92, 0.3, { pose: 'stand', hat: 'turban', hatMat: 'cloth_white', cloth: 'cloth_white', beard: true }); woman([gc + 5, gt[1] + 60], 5.92, 3.0, { pose: 'stand' }); person([gc + 0.5, gt[1] + 54.5], 5.92, 0, { pose: 'kneel', arms: 'pray', beard: true });
   }
 
   // ── the yards of the empty lots ──────────────────────────────────────────────────────────────────────────────────────────
