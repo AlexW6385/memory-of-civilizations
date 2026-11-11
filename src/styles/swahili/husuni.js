@@ -364,7 +364,7 @@ function southCourt(el, ctx) {
   for (const [b0, b1, f0, f1, outS, inS] of NS) {
     const outH = port(x0, x1, 7).filter((h) => Math.abs((h.u0 + h.u1) / 2 - mx) > 2.5);
     rooms(ctx, { rect: [x0, b0, x1, b1], along: 'x', n: 7, fl, door: inS, roof: 'poles', hs: 2.75, t, parapetOn: [outS, 'w', 'e'], holes: { [outS]: [...outH, gate(mx)], [inS]: [gate(mx)] } });
-    rooms(ctx, { rect: [x0, f0, x1, f1], along: 'x', n: 7, fl, door: inS, roof: 'poles', hs: 2.75, t, skip: [outS], parapetOn: [inS, 'w', 'e'], holes: { [inS]: [gate(mx), ...(outS === 'n' ? [{ u0: sH[0] - 1.2, u1: sH[0], v0: fl + 3.05, v1: fl + 4.2 }] : [])] } });
+    rooms(ctx, { rect: [x0, f0, x1, f1], along: 'x', n: 7, fl, door: inS, roof: 'poles', hs: 2.75, t, skip: [outS], parapetOn: [inS, 'w', 'e'], holes: { [inS]: [gate(mx), ...(outS === 'n' ? [{ u0: sH[0] - 2.2, u1: sH[0], v0: fl + 3.05, v1: fl + 4.2 }] : [])] } });
   }
   const WE = [[x0, x0 + d, x0 + d - t, x0 + ring, 'w', 'e'], [x1 - d, x1, x1 - ring, x1 - d + t, 'e', 'w']];
   const za = z0 + ring - t, zb = z1 - ring + t;
@@ -395,10 +395,10 @@ function southCourt(el, ctx) {
   // [inferred: Archnet gives no stair; the upper rooms open onto the front rows' roofs]
   const sz0 = z0 + ring, sz1 = sz0 + 1.3;
   flight(ctx, [sH[0], sz0, sH[1], sz1], fl, yU, 'w', { base: fl - 0.25 });
-  solid(ctx, C, sH[0] - 1.2, fl - 0.25, sz0 - 0.03, sH[0], yU - 0.02, sz1); slab(ctx, DRESSED, [sH[0] - 1.2, sz0, sH[0], sz1], yU - 0.04, yU);
+  solid(ctx, C, sH[0] - 2.2, fl - 0.25, sz0 - 0.03, sH[0], yU - 0.02, sz1); slab(ctx, DRESSED, [sH[0] - 2.2, sz0, sH[0], sz1], yU - 0.04, yU);
   {
     // the parapet along the flight's open side, its top following the steps, a dressed coping
-    const za = sz1, zb = sz1 + 0.3, xa = sH[0] - 1.2, xb = sH[1], T = [], T2 = [], yb = fl - 0.25, ta = yU + 0.85, tb = fl + 0.85;
+    const za = sz1, zb = sz1 + 0.3, xa = sH[0] - 2.2, xb = sH[1], T = [], T2 = [], yb = fl - 0.25, ta = yU + 0.85, tb = fl + 0.85;
     const V = (x, y, z) => [x, y, z];
     face(T, [0, 0, 1], V(xa, yb, zb), V(xb, yb, zb), V(xb, tb, zb), V(xa, ta, zb));
     face(T, [0, 0, -1], V(xa, yb, za), V(xb, yb, za), V(xb, tb, za), V(xa, ta, za));
@@ -413,7 +413,7 @@ function southCourt(el, ctx) {
     ctx.bag.add(C, fromTriangles(T)); ctx.bag.add(DRESSED, fromTriangles(T2));
     ctx.col.segment([xa, (za + zb) / 2], [xb, (za + zb) / 2], 0.3, yb, fl + 0.85);
   }
-  ctx.col.floor([sH[0] - 1.2, sz0 - t - 0.05, sH[0], sz0], yU);
+  ctx.col.floor([sH[0] - 2.2, sz0 - t - 0.05, sH[0], sz0], yU);
   // the front rows' roofs as a terrace before the upper rooms, a parapet to the court
   for (const r of [[x0 + d - t, z0 + d - t, x1 - d + t, z0 + ring], [x0 + d - t, z0 + ring, x0 + ring, zb]]) ctx.col.floor(r, yU);
   // the manager's house of two storeys in the south-west corner, and the square well beside it (4.6 m a side)
