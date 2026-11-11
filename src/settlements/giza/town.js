@@ -2,7 +2,7 @@
 // valley temple and the harbour with the king's ship, the boat pits, the Wall of the Crow and the
 // workers' town south of it.
 
-import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOAT_PITS, SHIP, mastabas, town as townLots } from './layout.js';
+import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOAT_PITS, SHIP, SPHINX, KHAFRE_VT, KV_Y, KHAFRE_CW, QUARRY, mastabas, town as townLots } from './layout.js';
 import { ground } from './ground.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -54,6 +54,35 @@ function cattle() {
   return L;
 }
 
+/** The quarry (docs/settlements/giza.md §11): blocks marked out on the benches, loose ones, heaps, a roughed-out giant on the floor, the sleeper road out. */
+function quarryWorks() {
+  const rand = rng(2564), blocks = [], toolAt = [], h = (x, z) => ground.height(x, z);
+  const row = (z, x0, x1, kind) => { for (let x = x0; x < x1; x += 1.55) {
+    const r = rand(), zz = z + (rand() - 0.5) * 0.3, y = h(x, zz);
+    if (r < 0.1) continue;                                                      // a block already taken
+    if (r < 0.16) { blocks.push({ kind: 'heap', x, y, z: zz, a: 0.7 + rand() * 0.5, h: 0.4 + rand() * 0.3 }); continue; }
+    blocks.push({ kind: r < 0.22 ? 'loose' : 'cut', x, y, z: zz, a: 0.68, b: 0.52 + rand() * 0.06, h: 0.85 + rand() * 0.1 });
+    if (r > 0.93) toolAt.push([x + 0.9, y, zz + 0.9, 'jar']);
+  } };
+  row(QUARRY[1] + 3.2, 52, 97, 'cut'); row(QUARRY[1] + 8.8, 54, 95, 'cut'); row(QUARRY[3] - 3.3, 52, 97, 'cut'); row(QUARRY[3] - 8.8, 54, 95, 'cut');
+  for (const [x, z, a, b, hh] of [[78, 121, 2.5, 1.7, 2.6], [64, 124, 2.2, 1.5, 2.3], [93, 118, 2.1, 1.5, 2.2]]) blocks.push({ kind: 'rough', x, y: h(x, z), z, a, b, h: hh });
+  for (let k = 0; k < 9; k++) { const x = 58 + rand() * 40, z = 117 + rand() * 11; if (!blocks.some((q) => q.kind === 'rough' && Math.abs(q.x - x) < 4 && Math.abs(q.z - z) < 3.4)) blocks.push({ kind: 'heap', x, y: h(x, z), z, a: 0.9 + rand() * 0.8, h: 0.5 + rand() * 0.5 }); }
+  for (const [x, z] of [[70, 118.5], [86, 126], [97, 123], [60, 112.6]]) toolAt.push([x, h(x, z), z, 'mallet'], [x + 0.9, h(x + 0.9, z + 0.5), z + 0.5, 'pounder']);
+  toolAt.push([83.6, h(83.6, 121.4), 121.4, 'lever']);
+  const pts = []; for (let x = 100; x <= 133; x += 3.3) pts.push([x, h(x, 122) + 0.02, 122]);
+  return { blocks, toolAt, pts, sledgeY: h(116, 122) };
+}
+function quarryLife(Q) {
+  const rand = rng(2565), L = [], hh = (x, z) => ground.height(x, z);
+  const man = (at, rot, o) => L.push({ t: 'figure', at, y: hh(at[0], at[1]), rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', top: 'bare', cloth: 'cloth_white', skin: 'skin_medium', hat: 'none', hair: 'short', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
+  // the gang on the rope, two by two, hauling the sledge up the road to the east, the overseer beside them
+  for (let k = 0; k < 5; k++) for (const dz of [-0.45, 0.45]) { const x = 123.2 + k * 1.25; man([x, 122 + dz], -Math.PI / 2, { pose: 'pull', carry: 'rope', len: 1.4, y: hh(x, 122 + dz) }); }
+  man([121.5, 124.4], -Math.PI / 2, { pose: 'staff', carry: 'staff', over: 'sash', len: 1.7 });
+  // quarrymen kneeling at the marked blocks, the mallet and chisel in their hands; a water-carrier; a scribe counting
+  for (const [x, z] of [[72, 119.8], [88, 125.6], [99, 121.4], [61, 112.4]]) man([x, z], rand() * 6.28, { pose: 'kneel' });
+  man([68, 116.2], 0.5, { pose: 'talk', over: 'sash' }); man([90.6, 129.5], 3.6, { carry: 'pot', y: hh(90.6, 129.5) });
+  return L;
+}
 const base = (id, elements, y = 0) => ({ id, style: 'oldkingdom', origin: [0, 0], base: y, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [200, -40], facing: 'w' } });
 
 export async function town() {
@@ -74,6 +103,20 @@ export async function town() {
   ], VALLEY));
   plans.push({ ...base('giza-harbour-life', harbourLife(), VALLEY), style: 'life' }, { ...base('giza-cattle', cattle()), style: 'life' });
   plans.push(base('giza-hauling', [{ t: 'stone_sledge', at: [350, 52], y: 0.02, rot: Math.PI, w: 1.15, len: 1.7 }, { t: 'stone_sledge', at: [349.5, 30], y: 0.02, rot: Math.PI / 2, w: 1.0, len: 1.5 }], VALLEY));
+  // c. 2500 BC: the Sphinx in its pit, Khafre's valley temple on the valley floor with his causeway going up to the plateau
+  plans.push(base('giza-sphinx', [{ t: 'ok_sphinx', x0: SPHINX.x0, z: SPHINX.z, floor: SPHINX.floor, len: SPHINX.len }]));
+  plans.push(base('giza-khafre-temple', [{ t: 'ok_khafre_temple', rect: KHAFRE_VT, y: KV_Y }]));
+  {
+    const [ax, az] = KHAFRE_CW.a, [d0, d1] = KHAFRE_CW.down, [bx, bz] = KHAFRE_CW.b, w = 4.6;
+    plans.push(base('giza-khafre-causeway', [
+      { t: 'causeway', a: [ax, az], b: [d0, az], w, h: 5, ya: 0, yb: 0 },
+      { t: 'causeway', a: [d0, az], b: [d1, az], w, h: 5, ya: 0, yb: KV_Y },
+      { t: 'causeway', a: [d1, az], b: [bx, bz], w, h: 5, ya: KV_Y, yb: KV_Y },
+    ]));
+  }
+  const Q = quarryWorks();
+  plans.push(base('giza-quarry', [{ t: 'ok_quarry', blocks: Q.blocks }, { t: 'ok_track', pts: Q.pts, w: 3.6 }, { t: 'ok_tools', at: Q.toolAt }, { t: 'stone_sledge', at: [116, 122], y: Q.sledgeY + 0.1, rot: 0, w: 1.15, len: 1.7 }]));
+  plans.push({ ...base('giza-quarry-life', quarryLife(Q)), style: 'life' });
   plans.push(base('giza-boat-pits', BOAT_PITS.map((p) => ({ t: 'boat_pit', ...p }))));
   plans.push(base('giza-wall', [{ t: 'crow_wall', ...CROW_WALL }], -2.5));
   const lots = townLots();
