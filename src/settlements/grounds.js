@@ -151,6 +151,7 @@ export const GROUNDS = {
 for (const [id, G] of Object.entries(GROUNDS)) withCrops(id, G);
 
 const LOADERS = {
+  alexandria: () => import('./alexandria/index.js'),
   'ming-suzhou': () => import('./ming-suzhou/index.js'),
   dunhuang: () => import('./dunhuang/index.js'),
   'qing-beijing': () => import('./qing-beijing/index.js'),

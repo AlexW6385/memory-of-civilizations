@@ -96,6 +96,7 @@ export const SITES = [
   { id: 'rapa-nui', name: { en: 'Rapa Nui', zh: '拉帕努伊' }, era: '15th c.', region: 'polynesia', lat: -27.13, lon: -109.28, water: true, island: true, radius: 320 },
   { id: 'fez', name: { en: 'Marinid Fez', zh: '马林王朝非斯' }, era: '14th c.', region: 'maghreb', lat: 34.06, lon: -4.97, radius: 330 },
   { id: 'maori', name: { en: 'Māori Aotearoa', zh: '毛利' }, era: '18th c.', region: 'aotearoa', lat: -38.14, lon: 176.25, radius: 330 },
+  { id: 'alexandria', name: { en: 'Ptolemaic Alexandria', zh: '托勒密亚历山大' }, era: '3rd c. BC', region: 'egypt', lat: 31.20, lon: 29.92, water: true, island: true, radius: 520 },
   { id: 'sydney', name: { en: 'Modern Sydney', zh: '现代悉尼' }, era: '20th c.', region: 'australia', lat: -33.86, lon: 151.21, radius: 460 },
   { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, era: 'c. 1250 BC', region: 'egypt', lat: 25.7, lon: 32.64, radius: 330 },
   { id: 'delphi', name: { en: 'Delphi', zh: '德尔斐' }, era: 'c. 400 BC', region: 'aegean', lat: 38.48, lon: 22.5, radius: 190 },
