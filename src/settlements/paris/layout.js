@@ -30,22 +30,64 @@ export function height(x, z) {
   return h * (1 - smooth(RADIUS - 40, RADIUS - 5, r)) ;
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-let LOTS = null;
+let LOTS = null, STREET_LIST = null;
+const STREET_W = 4.4, ROW_D = 10.2;       // a rue between the fronts (the narrow streets of the Cité were 3–5 m), the houses' backs nearly against each other
+const LANE_EVERY = 62, LANE_W = 3.4;      // a ruelle cut through the rows between the streets
+const laneAt = (x) => { const k = Math.floor((x + 1000) / LANE_EVERY), c = k * LANE_EVERY - 1000 + 31 + ((k * 37) % 11); return Math.abs(x - c) < LANE_W / 2; };
+/** The rows (z0, z1 of each, which way its fronts face): two rows of houses face each other across a street. */
+function rowList() {
+  const rows = [], blocks = [];
+  for (let z = -380; z < -180; z += 26) blocks.push(z);          // the Right Bank
+  for (let z = 165; z < 380; z += 26) blocks.push(z);            // the Left Bank
+  for (let z = -88; z < 88; z += 26) blocks.push(z);             // the island
+  for (const z of blocks) { rows.push([z, z + ROW_D, 's'], [z + ROW_D + STREET_W, z + 2 * ROW_D + STREET_W, 'n']); }
+  return rows;
+}
+/** The streets between the rows, as rectangles [x0, z0, x1, z1] (for the walkers), the ruelles, and the bridges' streets. */
+export function streets() {
+  if (STREET_LIST) return STREET_LIST;
+  const out = [], rows = rowList();
+  for (let i = 0; i < rows.length; i += 2) {
+    const z0 = rows[i][1], z1 = rows[i + 1][0], zc = (z0 + z1) / 2, island = zc > -95 && zc < 95;
+    if (!island && Math.abs(zc) <= 175) continue;
+    let segs = [island ? [-326, 326] : [-RADIUS + 30, RADIUS - 30]];
+    const cut = (a, b) => { segs = segs.flatMap(([s0, s1]) => (b <= s0 || a >= s1 ? [[s0, s1]] : [[s0, Math.min(s1, a)], [Math.max(s0, b), s1]])).filter(([s0, s1]) => s1 - s0 > 8); };
+    if (zc > PALACE[1] - 3 && zc < PALACE[3] + 3) cut(-340, PALACE[2] + 2);
+    if (zc > CATHEDRAL[1] - 4 && zc < CATHEDRAL[3] + 4) cut(CATHEDRAL[0] - 2, 340);
+    for (const [s0, s1] of segs) out.push([s0, z0, s1, z1]);
+  }
+  // the bridges' streets run on through the rows (the gap left in them) from bank to bank
+  out.push([-3, -300, 3, 88], [BRIDGES[1].x - 3, -88, BRIDGES[1].x + 3, 300]);
+  // the parvis before the cathedral
+  out.push([PARVIS[0] + 2, PARVIS[1] + 3, PARVIS[2] + 2, PARVIS[3] - 3]);
+  STREET_LIST = out;
+  return out;
+}
 /** Timber-framed houses in rows along the streets of the island and the banks, their gables to the street. */
 export function lots() {
   if (LOTS) return LOTS;
   LOTS = [];
   const rand = rng(1248);
-  const rows = [];
-  for (let z = -380; z < -180; z += 26) rows.push([z, z + 11, 's'], [z + 12, z + 23, 'n']);         // the Right Bank
-  for (let z = 165; z < 380; z += 26) rows.push([z, z + 11, 's'], [z + 12, z + 23, 'n']);           // the Left Bank
-  for (let z = -88; z < 88; z += 26) rows.push([z, z + 11, 's'], [z + 12, z + 23, 'n']);            // the island
-  for (const [za, zb, front] of rows) for (let x = -RADIUS + 20; x < RADIUS - 20;) {
-    const w = 6 + rand() * 3, cx = x + w / 2, cz = (za + zb) / 2;
-    if (Math.hypot(cx, cz) < RADIUS - 40 && !inRect(PALACE, cx, cz, 8) && !inRect(CATHEDRAL, cx, cz, 14) && !inRect(PARVIS, cx, cz, 4) && !BRIDGES.some((b) => Math.abs(cx - b.x) < 8) && (inRect(ISLAND, cx, za, -4) && inRect(ISLAND, cx, zb, -4) || Math.abs(cz) > 175) && rand() > 0.08)
-      LOTS.push({ rect: [x, za, x + w - 0.3, zb], seed: Math.floor(rand() * 1e6), front, storeys: 3 + (rand() < 0.4 ? 1 : 0) });
+  for (const [za, zb, front] of rowList()) for (let x = -RADIUS + 20; x < RADIUS - 20;) {
+    const w = 5.2 + rand() * 3.2, cx = x + w / 2, cz = (za + zb) / 2;
+    if (Math.hypot(cx, cz) < RADIUS - 40 && !inRect(PALACE, cx, cz, 8) && !inRect(CATHEDRAL, cx, cz, 14) && !inRect(PARVIS, cx, cz, 4) && !BRIDGES.some((b) => Math.abs(cx - b.x) < 8) && !laneAt(cx) && !laneAt(x) && !laneAt(x + w) && (inRect(ISLAND, cx, za, -4) && inRect(ISLAND, cx, zb, -4) || Math.abs(cz) > 175) && rand() > 0.05)
+    {
+      const lot = { rect: [x, za, x + w - 0.25, zb], seed: Math.floor(rand() * 1e6), front, storeys: 3 + (rand() < 0.35 ? 1 : 0) };
+      // the flanks left open by a ruelle or the end of a row are seen: they are framed too
+      const prev = LOTS[LOTS.length - 1];
+      lot.flank = [true, true];
+      if (prev && prev.front === front && prev.rect[1] === za && x - prev.rect[2] < 0.6) { prev.flank[1] = false; lot.flank[0] = false; }
+      LOTS.push(lot);
+    }
     x += w;
   }
   return LOTS;
+}
+/** Within the bands of the rows and their streets (on the island and the banks, outside the palace, the cathedral and the river). */
+let BANDS = null;
+export function inBlock(x, z, m = 0) {
+  if (!BANDS) { BANDS = []; const r = rowList(); for (let i = 0; i < r.length; i += 2) { const zc = (r[i][0] + r[i + 1][1]) / 2; if (Math.abs(zc) > 175 || (zc > -95 && zc < 95)) BANDS.push([r[i][0], r[i + 1][1]]); } }
+  if (Math.abs(x) > RADIUS - 28 || inRect(PALACE, x, z, 2) || inRect(CATHEDRAL, x, z, 2) || inRect(PARVIS, x, z, 0)) return false;
+  return BANDS.some(([a, b]) => z > a - m && z < b + m);
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

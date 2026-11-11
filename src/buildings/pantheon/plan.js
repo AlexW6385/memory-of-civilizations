@@ -117,6 +117,10 @@ add({ t: 'eagle_wreath', at: [0, FZ - 1.6 + 0.88], y: ET + EH + 2.9, r: 2.0, fac
 // the bronze roof truss under the portico's roof, at five stations between the front and the block (docs/settlements/rome.md §4.3)
 add({ t: 'portico_truss', zs: [-46.1, -43.6, -41.1, -38.6, -36.1], y: ET + EH, yb: ET + 1.6, xs: [-11.05, -6.63, 6.63, 11.05], span: 15.5, rise: 6.7 });
 
+// the floor's pattern of squares and discs, and the light of the oculus
+add({ t: 'rotunda_floor', c: [0, 0], y: F, R: R + 0.5, cell: 3.6 });
+add({ t: 'oculus_light', c: [0, 0], y: SPRING + 21.5 });
+
 // ── rooms and walks ───────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [

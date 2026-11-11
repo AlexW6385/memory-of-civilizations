@@ -58,6 +58,13 @@ export function lots() {
       LOTS.push({ t: 'machiya', rect: r, seed: Math.floor(rand() * 1e6), front });
     }
   }
+  // the trades of the merchants' fronts (docs §5.3): by their own stream so that the lots stay where they were
+  const tr = rng(1688), TR = ['cloth', 'pottery', 'rice', 'dye', 'oil', 'sandals', 'tea', 'medicine'];
+  const M = LOTS.filter((l) => l.t === 'machiya');
+  for (const l of M) l.trade = TR[Math.floor(tr() * TR.length)];
+  // one sake brewer (on the deep north row, near the middle) and two teahouses, each the lot nearest its place
+  const near = (x, front) => M.filter((l) => l.front === front).reduce((a, l) => (Math.abs((l.rect[0] + l.rect[2]) / 2 - x) < Math.abs((a.rect[0] + a.rect[2]) / 2 - x) ? l : a));
+  near(-90, 'n').trade = 'sake'; near(70, 's').trade = 'tea'; near(-150, 's').trade = 'tea';
   return LOTS;
 }
 let GRID = null;
@@ -73,3 +80,29 @@ export function hill(x, z) {
 }
 export const PLATFORMS = [NINO, NISHI, HON, DAI];
 export const onPlatform = (x, z, m = 0) => PLATFORMS.some((p) => inRect(p.rect, x, z, m));
+
+/** The streets and lanes of the town (rectangles [x0, z0, x1, z1]) for the walkers: the avenue from the main gate, the lanes between the samurai blocks, the merchants' street. */
+export function streets() {
+  const R = [], hit = (r) => r[2] > OUTER[0] - 3 && r[0] < OUTER[2] + 3 && r[3] > OUTER[1] - 3 && r[1] < OUTER[3] + 3;
+  const ok = (r) => !hit(r) && Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) < RADIUS - 24;
+  R.push([-4, OUTER[3] - 40, 4, STREET.z0 + 2]);
+  for (let x = -RADIUS; x < RADIUS; x += 44) for (let z = -RADIUS; z < MIDDLE.z0 - 6; z += 34) {
+    const v = [x + 40.6, z, x + 47.4, z + 34], h = [x, z + 31.6, x + 44, z + 36.4];
+    if (ok(v) && v[3] < MIDDLE.z0 - 4) R.push(v);
+    if (ok(h) && h[3] < MIDDLE.z0 - 4) R.push(h);
+  }
+  R.push([-RADIUS + 30, STREET.z0 + 0.5, RADIUS - 30, STREET.z1 - 0.5]);
+  return R.filter((r) => r[2] > r[0] && r[3] > r[1]);
+}
+/** Street furniture: wells in the merchants' street, sake barrels by the brewer, boats and landings on the middle moat. */
+export function furniture() {
+  const F = [], rand = rng(404);
+  for (let x = -270; x < 270; x += 78) { const wx = x + rand() * 20; if (Math.abs(wx) > 10) F.push({ t: 'ido', at: [wx, STREET.z0 + 1.6], rot: 0 }); }
+  const xs = Math.sqrt(RADIUS ** 2 - MIDDLE.z1 ** 2) - 36;
+  for (const sx of [-1, 1]) for (const k of [0.3, 0.62]) {
+    const x = sx * xs * k + sx * MIDDLE.gap / 2 + sx * 6;
+    F.push({ t: 'landing', x, z0: MIDDLE.z0 });
+    F.push({ t: 'moat_boat', at: [x + 6, MIDDLE.z0 + 4.2], dir: [1, 0], len: 6.5 + rand() * 1.5 });
+  }
+  return F;
+}

@@ -16,7 +16,7 @@ function planting(x, z) {
   // the burial garden behind the qibla wall: cypresses among the graves
   if (inCemetery(x, z)) return nearGrave(x, z, 1.2) ? null : { cypress: 0.05, grass: 22 };
   if (Math.hypot(x, z) > RADIUS - 6 || inRect(PRECINCT, x, z, 4) || inLot(x, z, 1) || inKulliye(x, z, 1.5)) return null;
-  if (inRect(TERRACE, x, z)) return z > 95 ? { cypress: 0.06, grass: 20 } : null;
+  if (inRect(TERRACE, x, z)) return z > 95 && z < 104 ? { cypress: 0.06, grass: 20 } : null;
   return { cypress: 0.05, plane_tree: 0.008, grass: 18 };
 }
 export const ground = {

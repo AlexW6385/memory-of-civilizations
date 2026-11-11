@@ -79,6 +79,32 @@ Gagaku as at the eye-opening in 752 (the shō, the hichiriki, the biwa); chantin
 - **The altar's offerings.** On the altar before the Buddha (the red-lacquered table of before) a bronze censer on three feet with a domed lid, two bronze vases with a gilt band each holding a lotus flower, a bud and two leaves, and two oil lamps on slender stands, lit [inferred: the arrangement of incense, flowers and lamps; none of the 752 altar furniture survives in our sources].
 - **Weathering.** The climate's dampness set to 0.65 [inferred: the humid basin].
 
+## 11. The capital and its halls (Suzhou-standard pass)
+
+- **The grid.** Heijō-kyō was laid out as nine blocks north to south by eight east to west, each "about 532 meters on a side" (4.8 km by 4.3 km); the city was modelled on Chang'an but "lacked walls"; Suzaku Avenue ran 3.7 km and was about 74 m wide between the centres of its side gutters; it peaked at 50,000–100,000 people [stated: JLIT "Heijo Capital"; Wikipedia "Heijō-kyō"]. Late Nara house plots were one-sixteenth or one-thirty-second of a block (a chō, about 16,900 m²); lower ranks had smaller parcels; plots held a main hall, a well and a storehouse; minor streets had side ditches; walls dividing blocks were in places replaced by fences [stated: Nara National Research Institute for Cultural Properties, Monograph 46]. Ours, scaled to the 340 m radius [inferred]: avenues every 80 m (the axis avenue south of the Great South Gate 18 m wide, the others 10 m), blocks of about 70 × 70 m, each ringed by an earthen wall (tsuiji) 2.4 m high on a stone footing under a tiled coping with a roofed gate (munamon) in the middle of each side, inside four rows of houses facing two lanes and a garden with a well between the pairs; houses as before (§5).
+- **Tōdai-ji's Great Buddha Hall in Tang timberwork.** The hall is of eleven bays in the 8th century (§1). Ours: a ring of 1.5 m vermilion columns 21 m high on a 2.2 m stone platform; on every column and between the columns of the front a stepped bracket set — the Tang set (four tiers, cantilevers, bearing blocks) of Foguang Hall as built at Wutai [stated: dossier tang-wutai §10–§11], scaled 1.8 times for this hall [inferred]; plaster walls, the five central bays of the front with tall plank doors (13 m) under a lattice transom, windows in the others; rafters fanning round the corners of a hip roof of grey tile; a smaller upper body set in one bay with its own columns, lattice windows, brackets and roof; gilt-bronze owl-tail finials (shibi) 6 m high at the ridge's ends, the ridge about 50 m above the ground [inferred: proportions; the finials after the hall's present shibi, which are replicas of Nara-period ones — not sourced in detail].
+- **The gates.** The Middle Gate and the Great South Gate use the same hall element (five bays by two, bracketed, a passage through the middle, solid end walls) [inferred].
+- **Kōfuku-ji.** Moved in 710 to the east side of the new capital, the Fujiwara clan's temple; the five-storey pagoda ordered by Empress Kōmyō in 730 (the present one, 1426, is 50.1 m high with deep eaves) [stated: Wikipedia "Kōfuku-ji"; MLIT "Five-story Pagoda"]. Ours: a walled precinct west of Tōdai-ji at the grid's edge, its south gate, the Central Golden Hall (two storeys, seven bays by four) and the five-storey pagoda (10.8 m at the base, about 50 m with the spire) south-east of it, white gravel [inferred: arrangement; Kōfuku-ji lay about a kilometre south-west of Tōdai-ji, drawn nearer].
+- **The East Market.** The two markets lay on either side of Suzaku Avenue, the capital's trade and redistribution centres [stated: JLIT; Monograph 46 for the West Market]. Ours: an open square of 66 × 70 m on the axis avenue's east side with two rows of awninged stalls facing a central aisle (baskets of vegetables, cloth, water vats), rows of mats with goods and sellers sitting behind them, handcarts and barrows, shop houses on the north edge [inferred: the goods and the stalls' form].
+
+## 12. Interiors
+
+The Great Buddha Hall (the Buddha, attendants, ceiling, banners, §4) is entered through its open doors; the three houses nearest the arrival are open (§5). Kōfuku-ji's golden hall and the gates are shells.
+
+## 13. The living town
+
+- **People.** Monks (shaven, robes of ochre, brown and grey with the kesa), officials in the robes of their ranks with the black gauze cap, townsmen and farmers in short robes or jackets with topknots and woven hats, women in long robes with the hair in a bun, porters with shoulder poles; 40 near the visitor by day, 4 at night; they walk the avenues, lanes, the market aisle and the temple court [inferred: dress after the figures of the period; Nara dress is only roughly rendered].
+- **Animals.** Swallows over the courts and avenues, crows over the cedar hills, sparrows on the paving and in the market; deer as figures (§6).
+- **Smoke.** Incense at the altar before the Buddha and in Kōfuku-ji; kitchen smoke from a third of the houses at the three meals; steam from the market's cookshops [inferred].
+
+## Sources (this pass)
+
+- [Heijo Capital — JLIT](https://jlit.hcommons.org/heijo-capital/)
+- [Heijō-kyō — Wikipedia](https://en.wikipedia.org/wiki/Heijo-kyo)
+- [Monograph No. 46 — Nara National Research Institute for Cultural Properties](https://www.nabunken.go.jp/english/monograph/46.html)
+- [Kōfuku-ji — Wikipedia](https://en.wikipedia.org/wiki/K%C5%8Dfuku-ji)
+- [Five-story Pagoda — MLIT](https://www.mlit.go.jp/tagengo-db/en/R1-00215.html)
+
 ## Sources
 
 - [The World on Stage: the eye-opening ceremony — University of Bristol](https://www.bristol.ac.uk/arts-law-social-sciences/events/2024/november/the-world-on-stage.html)

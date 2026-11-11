@@ -2,9 +2,13 @@
 // their courtyards; the printing house on Shöl's south-east corner; and the people (§12): monks in
 // their red robes in the Deyang Shar, below the palace and on the frontage roof; pilgrims walking the
 // circuit round the palace clockwise, turning their hand prayer wheels; the printers at their benches.
-import { RADIUS, POND, PRINTERY, BENCHES, CHAPEL, lots, pondDist, inLot, inRect, SHOL } from './layout.js';
+import { RADIUS, POND, STREET, shops, PRINTERY, BENCHES, CHAPEL, lots, pondDist, inLot, inRect, SHOL } from './layout.js';
 import { ground } from './ground.js';
+import { teaSeats } from '../../styles/tibetan/index.js';
 const base = (id, elements, style = 'tibetan') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-4, 60], facing: 'n' } });
+/** The street's incense burner and the tethered yaks (x, z, rot), by the booths and in the lane. */
+export const SANG = [-3.4, 166];
+export const YAKS = [[6.4, 136, 1.2], [-6.5, 136.5, 4.4], [-2.2, 119, 0.3], [1.6, 119.8, 2.9], [-3.4, 190, 5.0]];
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));       // a figure faces −z when rot = 0
 
@@ -79,5 +83,22 @@ export async function town() {
     { t: 'mani_gallery', a: [24, -211.2], b: [150, -211.2], y: gy, side: -1 },
     { t: 'lhakhang', rect: CHAPEL, y: gy((CHAPEL[0] + CHAPEL[2]) / 2, (CHAPEL[1] + CHAPEL[3]) / 2), door: 'w' },
   ]));
+  // the street's shops, booths, the flags across it, the yaks, the pilgrims prostrating
+  const sh = shops(), rand = rng(77), E = [];
+  for (const s of sh) E.push(s.kind === 'stall' ? { t: 'stall', at: s.at, rot: s.rot, w: s.w, y: 0, seed: s.seed, goods: s.goods } : { t: 'tibetan_shop', rect: s.rect, door: s.door, kind: s.kind, y: 0, seed: s.seed });
+  for (const z of [88, 108, 156, 178]) E.push({ t: 'flag_line', a: [STREET[0] - 0.4, z], b: [STREET[2] + 0.4, z + 1.5], y0: 8.2, y1: 8.4, sag: 0.8 });
+  E.push({ t: 'sangkhang', at: SANG, rot: 0 });
+  plans.push(base('lhasa-shops', E));
+  // sangkhang in the street, its smoke (smoke.js)
+  plans.push(base('lhasa-street-life', [
+    ...YAKS.map(([x, z, rot], i) => ({ t: 'animal', kind: 'yak', at: [x, z], y: 0, rot, seed: 40 + i, graze: false })),
+  ], 'life'));
+  // patrons on the tea houses' benches, sharing tables and talking
+  const seated = [];
+  for (const s of sh) if (s.kind === 'tea') for (const q of teaSeats({ rect: s.rect, door: s.door }, rand)) {
+    const woman = rand() < 0.3;
+    seated.push({ t: 'figure', at: q.at, y: 0, rot: q.rot, h: 1.5 + rand() * 0.2, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.2 ? 'cloth_maroon' : ['cloth_brown', 'cloth_black', 'cloth_grey', 'hide_tan'][Math.floor(rand() * 4)], cloth2: ['cloth_red', 'cloth_green', 'cloth_ochre', 'paint_blue'][Math.floor(rand() * 4)], over: woman ? 'apron' : 'sash', skin: rand() < 0.5 ? 'skin_medium' : 'skin_dark', hat: woman ? 'none' : rand() < 0.5 ? 'cap' : 'none', hatMat: 'hide_brown', hair: woman ? 'bun' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'sit' });
+  }
+  plans.push(base('lhasa-patrons', seated, 'life'));
   return [...plans, ...people()];
 }

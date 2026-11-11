@@ -21,6 +21,8 @@ export const AMISAN = { faces: [-204, -212, -220, -228], levels: [0.9, 1.8, 2.7,
 // Jongno: the street east and west from the avenue's end, the shop rows (sijeon) along its south side
 export const JONGNO = [-150, 352, 150, 362];
 export const SHOPS = [[-138, 362, -20, 368], [34, 362, 138, 368]];
+// the yangban house you can walk into (styles/joseon/house.js), east of the ministries
+export const YANGBAN = [148, 252, 171, 274];
 export const BELL = [20, 362.5, 30, 368];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -47,6 +49,7 @@ export function lots() {
     const w = 16 + rand() * 7, d = 15 + rand() * 7, r = [x + 2, z + 2, x + 2 + w, z + 2 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
     if (Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) > RADIUS - 26) continue;
     if (inRect(PALACE, cx, cz, w / 2 + 10) || inRect(AVENUE, cx, cz, w / 2 + 3) || inRect([-160, 346, 160, 376], cx, cz, w / 2 + 2) || MINISTRIES.some((m) => inRect(m, cx, cz, w / 2 + 3))) continue;
+    if (inRect(YANGBAN, cx, cz, w / 2 + 2)) continue;
     if (rand() < 0.08) continue;
     LOTS.push({ rect: r, seed: Math.floor(rand() * 1e6), thatch: Math.hypot(cx, cz) > 300 ? rand() < 0.6 : rand() < 0.2 });
   }
@@ -57,4 +60,16 @@ export function inLot(x, z, m = 0) {
   if (!GRID) { GRID = new Map(); for (const h of lots()) for (let i = Math.floor((h.rect[0] - 3) / 26); i <= Math.floor((h.rect[2] + 3) / 26); i++) for (let j = Math.floor((h.rect[1] - 3) / 26); j <= Math.floor((h.rect[3] + 3) / 26); j++) { const k = i + ',' + j; if (!GRID.has(k)) GRID.set(k, []); GRID.get(k).push(h); } }
   const l = GRID.get(Math.floor(x / 26) + ',' + Math.floor(z / 26));
   return !!l && l.some((h) => inRect(h.rect, x, z, m));
+}
+/** The lanes between the hanok lots (the 3 m gaps of the 26 m grid), cut where the palace, the ministries, Jongno and the yangban house stand: rectangles [x0, z0, x1, z1]. */
+export function lanes() {
+  const out = [], S = 26, blocked = (x, z) => inRect(PALACE, x, z, 6) || MINISTRIES.some((m) => inRect(m, x, z, 4)) || inRect(YANGBAN, x, z, 3) || inRect(AVENUE, x, z, 1) || inRect([-160, 346, 160, 376], x, z, 0) || z < -285 || Math.hypot(x, z) > RADIUS - 10;
+  for (let g = -RADIUS; g < RADIUS; g += S) {
+    for (let t = -RADIUS; t < RADIUS; t += S) {
+      const mv = [g + 26.5, t + 13], mh = [t + 13, g + 26.5];
+      if (!blocked(...mv)) out.push([g + 25.2, t, g + 27.8, t + S]);
+      if (!blocked(...mh)) out.push([t, g + 25.2, t + S, g + 27.8]);
+    }
+  }
+  return out;
 }

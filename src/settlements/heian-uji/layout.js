@@ -13,6 +13,10 @@ export const POND = PONDS.find((p) => p.site === 'byodo-in-phoenix-hall').shapes
 export const GARDEN = [-100, -78, 60, 78];
 export const RIVER = { x: 170, w: 62, level: -3, bed: -6 };
 export const BRIDGE = { z: -190 };
+/** The enclosed compounds (earthen walls): the Fujiwara villa west of the temple garden, a nobleman's house to the north of it. [x0, z0, x1, z1] */
+export const VILLA = [-194, -34, -122, 46];
+export const NOBLE = [-124, -148, -86, -114];
+export const COMPOUNDS = [VILLA, NOBLE];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 const riverX = (z) => RIVER.x + 15 * Math.sin(z / 110);
@@ -48,9 +52,17 @@ export function lots() {
   const rand = rng(1053);
   for (let x = -300; x < 120; x += 15) for (let z = -300; z < 280; z += 14) {
     const w = 9 + rand() * 3, d = 7 + rand() * 2, cx = x + w / 2, cz = z + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 60 || inRect(GARDEN, cx, cz, 18) || Math.abs(cz - BRIDGE.z) < 7 || Math.abs(cx - riverX(cz)) < RIVER.w / 2 + 20 || rand() < 0.45) continue;
+    if (Math.hypot(cx, cz) > RADIUS - 60 || inRect(GARDEN, cx, cz, 18) || COMPOUNDS.some((r) => inRect(r, cx, cz, 14)) || Math.abs(cz - BRIDGE.z) < 7 || Math.abs(cx - riverX(cz)) < RIVER.w / 2 + 20 || rand() < 0.45) continue;
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: rand() < 0.5 ? 's' : 'e' });
   }
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+
+let GRID = null;
+/** True within `m` metres (≤ 6) of a house: the beaten earth of the lanes and yards (a 2 m grid, built once). */
+export function nearLot(x, z, m = 5) {
+  if (!GRID) { GRID = new Set(); for (const l of lots()) for (let i = Math.floor((l.rect[0] - 6) / 2); i <= Math.floor((l.rect[2] + 6) / 2); i++) for (let j = Math.floor((l.rect[1] - 6) / 2); j <= Math.floor((l.rect[3] + 6) / 2); j++) GRID.add(i * 4096 + j); }
+  void m;
+  return GRID.has(Math.floor(x / 2) * 4096 + Math.floor(z / 2));
+}

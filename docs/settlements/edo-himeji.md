@@ -72,6 +72,35 @@ Sources (2026-11-07):
 - [Kago — Wikipedia](https://en.wikipedia.org/wiki/Kago)
 - [Daishō — Wikipedia](https://en.wikipedia.org/wiki/Daish%C5%8D)
 
+### 5.3 The merchants' fronts and the town's detail (batch pass, 2026-11-11; `src/styles/edo/town.js`, `layout.js`)
+
+- **Sake brewer:** a ball of cedar (sugi) leaves, the sugidama or sakabayashi, hung from the eaves to signal that new sake is ready; green when new (February to June), light green in early summer, brown and withered in autumn [stated: Wikipedia "Sugidama"]. Ours: one brewer on the deep north row of the merchants' street, a green ball on a cord before the entrance, komodaru (barrels in straw mats and rope) stacked by the door; the shop open inside with casks on a rack and bottles on a shelf. The brewery's tall chimney is left out as a later feature [inferred].
+- **Teahouses:** two on the street (one on each side of the middle): a bench with red felt cover, the big red parasol, a kettle on a brazier before the front; inside, a raised bench with red felt, a low table, cups on it, the kettle, a menu board [inferred: Edo-period roadside teahouse types as generally known].
+- **Fronts by trade:** closed machiya fronts have a plinth, posts, close-set lattice (kōshi) over a dark recess, the entrance bay with an indigo, brown or black noren swaying, and the trade's sign and goods — dyed cloth hung from a pole, pots, rice bales, oil barrels, straw sandals, a gilt medicine board — a water tub, a paper lantern, a projecting sign board [inferred: types of Edo townsmen's trades; machiya form after JAANUS "machiya", §5.1].
+- **Upper storey:** plastered windows with dark slats set in a thick plaster frame (mushiko-mado) over the pent roof; the ridge with a capped course and end tiles; a dark eave band on the pent roof [inferred: the machiya as it survives].
+- **Storehouses (kura):** thick earthen walls, plastered, fireproof; spread in Edo after the great fires [stated: web-japan "Kura"]; namako-kabe — square tiles set in the wall with raised plaster in the joints [stated: web-japan "Kura"]. Ours: dark tile base with white seams on the lower 1.35 m, white plaster above, small barred windows high on the gables, a capped ridge [inferred: heights].
+- **Samurai gate-house (nagaya-mon):** the front with two posts and a head beam over leaves of planks banded with iron and bossed, a crest on the beam, barred windows either side above a tile-and-plaster base [inferred, from the Hishi gate's vocabulary §4 and the nagaya-mon form].
+- **Gardens:** a pruned pine (niwaki), a stone lantern (ishidōrō) and a well with its tiled roof and bucket in the yard before the main house [inferred: Edo samurai garden furniture].
+- **Wells and moat:** wells at intervals in the merchants' street; stone landing steps down to the middle moat with moored flat-bottomed boats beside them [inferred]. The moats stand in for the town's canals: Himeji's were its moats, which averaged 20 m wide [stated: ermakvagus; §2].
+- **Ramparts:** corners laid in sangi-zumi — more precisely cut stones stacked in an alternating, brickwork-like formation; the uchikomi-hagi wall rises in a gentle fan-like curve [stated: MLIT "Castle Craftsmanship: Stone Walls"]. Ours: long-and-short blocks of lighter granite on every corner, a course to about a metre, the curve in up to 16 courses [inferred: the block sizes].
+
+### 5.4 The moving life (`movers.js`)
+
+Townsmen in kimono and obi with the topknot, samurai in dark robes, women in kimono with a wide obi, pedlars and porters with carrying poles and straw hats, labourers, children; in the rain the straw cape (mino) and hat. The avenue from the main gate, the lanes between the samurai blocks and the merchants' street are the ways; the street is the busiest [inferred; the daishō and the pedlars as in §5.2].
+
+### 5.5 Animals (`fauna.js`)
+
+Carp in the moats, house swallows over the moats and avenue, sparrows on paving and the wall copings, crows over the keep at twilight, a heron on the inner moat's bank and an egret at the middle moat [inferred].
+
+### 5.6 Smoke and steam (`smoke.js`)
+
+Kitchen smoke from a share of the machiya and samurai houses at the meals, steam from the teahouses' kettles, the brewer's steam, mist on the moats at dawn [inferred].
+
+Sources (2026-11-11):
+- [Sugidama — Wikipedia](https://en.wikipedia.org/wiki/Sugidama)
+- [Castle Craftsmanship: Stone Walls — MLIT](https://www.mlit.go.jp/tagengo-db/en/R1-00697.html)
+- [Kura: Traditional Japanese Storehouses — web-japan](https://web-japan.org/trends/11_food/jfd202312_kura.html)
+
 ## 6. Ground and water
 
 The level plain; the hill rising about 35 m above it; the moats holding water about 2.7 m below the banks. (`ground.js`) [stated: depths, ermakvagus; inferred: the rest]
