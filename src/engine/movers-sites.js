@@ -37,5 +37,6 @@ export const MOVER_SITES = {
   'sanchi': () => import('../settlements/sanchi/movers.js'),
   'new-york': () => import('../settlements/new-york/movers.js'),
   'ur': () => import('../settlements/ur/movers.js'),
+  'borobudur': () => import('../settlements/borobudur/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
