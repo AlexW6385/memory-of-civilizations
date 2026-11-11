@@ -183,6 +183,7 @@ export const GROUNDS = {
 for (const [id, G] of Object.entries(GROUNDS)) withCrops(id, G);
 
 const LOADERS = {
+  'benin-city': () => import('./benin-city/index.js'),
   alexandria: () => import('./alexandria/index.js'),
   'wei-ye': () => import('./wei-ye/index.js'),
   'ming-suzhou': () => import('./ming-suzhou/index.js'),
