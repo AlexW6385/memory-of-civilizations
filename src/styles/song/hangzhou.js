@@ -372,7 +372,7 @@ function lakeBoat(el, { bag }) {
   for (let i = 0; i < N; i++) {
     const t0 = -1 + 2 * i / N, t1 = -1 + 2 * (i + 1) / N, s0 = t0 * H, s1 = t1 * H;
     hexa(hull, [Pt(s0, -w(t0) * 0.7, keel(t0)), Pt(s1, -w(t1) * 0.7, keel(t1)), Pt(s1, w(t1) * 0.7, keel(t1)), Pt(s0, w(t0) * 0.7, keel(t0)), Pt(s0, -w(t0), sheer(t0) - 0.06), Pt(s1, -w(t1), sheer(t1) - 0.06), Pt(s1, w(t1), sheer(t1) - 0.06), Pt(s0, w(t0), sheer(t0) - 0.06)]);
-    for (const sg of [-1, 1]) ob(wale, s0, s1, sg * w(t0) - 0.03, sg * w(t0) + 0.05, sheer(t0) - 0.2, sheer(t0) - 0.02);
+    for (const sg of [-1, 1]) hexa(wale, [Pt(s0, sg * w(t0) - 0.03, sheer(t0) - 0.2), Pt(s1, sg * w(t1) - 0.03, sheer(t1) - 0.2), Pt(s1, sg * w(t1) + 0.05, sheer(t1) - 0.2), Pt(s0, sg * w(t0) + 0.05, sheer(t0) - 0.2), Pt(s0, sg * w(t0) - 0.03, sheer(t0) - 0.02), Pt(s1, sg * w(t1) - 0.03, sheer(t1) - 0.02), Pt(s1, sg * w(t1) + 0.05, sheer(t1) - 0.02), Pt(s0, sg * w(t0) + 0.05, sheer(t0) - 0.02)]);
     hexa(deck, [Pt(s0, -w(t0) + 0.08, sheer(t0) - 0.06), Pt(s1, -w(t1) + 0.08, sheer(t1) - 0.06), Pt(s1, w(t1) - 0.08, sheer(t1) - 0.06), Pt(s0, w(t0) - 0.08, sheer(t0) - 0.06), Pt(s0, -w(t0) + 0.08, sheer(t0) - 0.03), Pt(s1, -w(t1) + 0.08, sheer(t1) - 0.03), Pt(s1, w(t1) - 0.08, sheer(t1) - 0.03), Pt(s0, w(t0) - 0.08, sheer(t0) - 0.03)]);
   }
   bag.add('lacquer_red', fromTriangles(hull)); bag.add('paint_ochre', fromTriangles(wale)); bag.add('planks_grey', fromTriangles(deck));
@@ -399,6 +399,94 @@ function lakeBoat(el, { bag }) {
   for (const sg of [-1, 1]) { ob(rail, H * 0.4, H * 0.8, sg * hw - 0.04, sg * hw + 0.04, yd + 0.4, yd + 0.5); for (const f of [0.4, 0.6, 0.8]) ob(rail, H * f - 0.04, H * f + 0.04, sg * hw - 0.04, sg * hw + 0.04, yd, yd + 0.4); }
   bag.add('lacquer_red', fromTriangles(rail));
   bag.add('wood_dark', rod(Pt(-H, 0, yw + 0.8), Pt(-H - 1.2, 0, yw - 0.5), 0.05, 5)); ob(rud, -H - 1.3, -H - 1.0, -0.05, 0.05, yw - 0.9, yw - 0.2); bag.add('wood_dark', fromTriangles(rud));
+  // ── the boat in full: strakes, gunwale, the cabin's doors and blinds, its table and tea, the oars, the stern's gear
+  const dY = (sx) => sheer(sx / H) - 0.03, nrm = (sx) => Math.abs(sx / H);
+  const strak = [], gun = [];
+  for (const sg of [-1, 1]) {
+    for (const f of [0.25, 0.5, 0.75]) for (let i = 0; i < N; i++) {
+      const t0 = -1 + 2 * i / N, t1 = -1 + 2 * (i + 1) / N, q = (t) => Pt(t * H, sg * (w(t) * (0.7 + 0.3 * f) + 0.012), keel(t) + (sheer(t) - 0.06 - keel(t)) * f);
+      strak.push(rod(q(t0), q(t1), 0.012, 4));
+    }
+    // the gunwale: a continuous timber coaming on the sheer, and the knees that carry it
+    for (let i = 0; i < N; i++) { const t0 = -1 + 2 * i / N, t1 = -1 + 2 * (i + 1) / N; hexa(gun, [Pt(t0 * H, sg * w(t0) - 0.07, sheer(t0) - 0.06), Pt(t1 * H, sg * w(t1) - 0.07, sheer(t1) - 0.06), Pt(t1 * H, sg * w(t1) + 0.03, sheer(t1) - 0.06), Pt(t0 * H, sg * w(t0) + 0.03, sheer(t0) - 0.06), Pt(t0 * H, sg * w(t0) - 0.07, sheer(t0) + 0.07), Pt(t1 * H, sg * w(t1) - 0.07, sheer(t1) + 0.07), Pt(t1 * H, sg * w(t1) + 0.03, sheer(t1) + 0.07), Pt(t0 * H, sg * w(t0) + 0.03, sheer(t0) + 0.07)]); }
+  }
+  for (const g of strak) bag.add('wood_dark', g);
+  bag.add('timber', fromTriangles(gun));
+  // the cabin: the floor, a tie beam over each pair of posts, the gilt fascia, the end walls (stern: a pair of lattice doors, one ajar; bow: open under a rolled blind)
+  const flo = []; ob(flo, sA - 0.1, sB + 0.1, -hw, hw, yd - 0.04, yd - 0.01); bag.add('planks_grey', fromTriangles(flo));
+  const bm = [], fas = [], doors = [], dlat = [], blind = [], cord = [];
+  for (let i = 0; i <= ns; i++) { const s0 = sA + (sB - sA) * i / ns; ob(bm, s0 - 0.07, s0 + 0.07, -hw - 0.1, hw + 0.1, yd + ch - 0.22, yd + ch - 0.04); }
+  ob(bm, sA - 0.1, sB + 0.1, -hw - 0.08, -hw + 0.04, yd + ch - 0.04, yd + ch + 0.04); ob(bm, sA - 0.1, sB + 0.1, hw - 0.04, hw + 0.08, yd + ch - 0.04, yd + ch + 0.04);
+  for (const sg of [-1, 1]) ob(fas, sA - 0.15, sB + 0.15, sg * (hw + 0.1) - 0.02, sg * (hw + 0.1) + 0.02, yd + ch - 0.5, yd + ch - 0.22);
+  ob(fas, sA - 0.17, sA - 0.13, -hw - 0.1, hw + 0.1, yd + ch - 0.5, yd + ch - 0.22);
+  bag.add('lacquer_red', fromTriangles(bm)); bag.add('paint_ochre', fromTriangles(fas));
+  // stern doors: two leaves a half-width each, a frame; the left leaf ajar (turned about its hinge post)
+  ob(doors, sA - 0.05, sA + 0.05, -hw, hw, yd, yd + 0.5);
+  for (const [o0, o1, ajar] of [[-hw, 0, 1], [0, hw, 0]]) {
+    if (!ajar) { ob(dlat, sA - 0.03, sA + 0.03, o0 + 0.04, o1 - 0.04, yd + 0.5, yd + ch - 0.22); }
+    else { const a0 = [sA, o0 + 0.04], a1 = [sA - 0.8, o0 + 0.04 + (o1 - o0) * 0.6]; ob(dlat, a0[0] - 0.03, a0[0] + 0.03, o0 + 0.04, o0 + 0.1, yd + 0.5, yd + ch - 0.22); ob(dlat, a1[0] - 0.03, a0[0], a0[1] + 0.04, a1[1], yd + 0.5, yd + ch - 0.22); }
+  }
+  bag.add('lacquer_red', fromTriangles(doors)); bag.add('lattice_red', fromTriangles(dlat));
+  // bamboo blinds on the side windows: rolled at the top, hung half down over two bays; the bow's blind rolled up across the opening
+  for (const sg of [-1, 1]) for (const i of [1, 2]) {
+    const a = sA + (sB - sA) * i / ns + 0.1, b = sA + (sB - sA) * (i + 1) / ns - 0.1, drop = i === 1 ? 0.9 : 0.35;
+    ob(blind, a, b, sg * (hw + 0.07) - 0.01, sg * (hw + 0.07) + 0.01, yd + 1.85 - drop, yd + 1.88);
+    bag.add('reed_mat', rod(Pt(a, sg * (hw + 0.09), yd + 1.92), Pt(b, sg * (hw + 0.09), yd + 1.92), 0.05, 6));
+    for (const u of [a + 0.06, b - 0.06]) cord.push(rod(Pt(u, sg * (hw + 0.1), yd + 1.92), Pt(u, sg * (hw + 0.1), yd + 1.85 - drop), 0.008, 3));
+  }
+  bag.add('reed_mat', fromTriangles(blind)); bag.add('rope_fibre', rod(Pt(sB, -hw + 0.05, yd + ch - 0.32), Pt(sB, hw - 0.05, yd + ch - 0.32), 0.06, 6));
+  for (const g of cord) bag.add('cloth_red', g);
+  // inside: a low table on the boards, two cushioned benches, the tea set, a lamp hung from the beam
+  const tb = [], cush = [], cush2 = [];
+  ob(tb, cs - 0.55, cs + 0.55, -0.33, 0.33, yd + 0.4, yd + 0.45);
+  for (const [a, o] of [[-0.5, -0.28], [0.5, -0.28], [-0.5, 0.28], [0.5, 0.28]]) ob(tb, cs + a - 0.03, cs + a + 0.03, o - 0.03, o + 0.03, yd, yd + 0.4);
+  bag.add('lacquer_chestnut', fromTriangles(tb));
+  for (const sg of [-1, 1]) { ob(cush, cs - 0.7, cs + 0.7, sg * 0.62 - 0.17, sg * 0.62 + 0.17, yd + 0.04, yd + 0.2); ob(cush2, cs - 0.62, cs + 0.62, sg * 0.62 - 0.14, sg * 0.62 + 0.14, yd + 0.2, yd + 0.26); }
+  bag.add('timber', fromTriangles(cush)); bag.add('cloth_indigo', fromTriangles(cush2));
+  bag.add('tile_green', lathe([[0.001, 0], [0.07, 0], [0.09, 0.06], [0.07, 0.12], [0.04, 0.14], [0.001, 0.14]], 8, null, ...Pt(cs - 0.15, 0, yd + 0.45)));
+  bag.add('tile_green', rod(Pt(cs - 0.15, 0.07, yd + 0.55), Pt(cs - 0.15, 0.17, yd + 0.5), 0.012, 4));
+  for (const [a, o] of [[0.1, -0.12], [0.2, 0.05], [0.05, 0.14], [0.22, -0.05]]) bag.add('plaster_white', lathe([[0.001, 0], [0.025, 0], [0.04, 0.05], [0.035, 0.05], [0.001, 0.005]], 7, null, ...Pt(cs + a, o, yd + 0.45)));
+  bag.add('rope_fibre', rod(Pt(cs, 0, yd + ch - 0.22), Pt(cs, 0, yd + ch - 0.5), 0.008, 3));
+  bag.add('lamp_paper', lathe([[0.001, -0.2], [0.11, -0.12], [0.14, 0], [0.11, 0.12], [0.001, 0.18]], 8, null, ...Pt(cs, 0, yd + ch - 0.7)));
+  // the bow: a painted shield board across the stem with a gilt edge, a bollard, an anchor and its coil of rope, mooring line
+  const bs = H - 0.5, bh = dY(bs);
+  ob(rud, bs - 0.04, bs + 0.04, -w(bs / H) + 0.1, w(bs / H) - 0.1, bh, bh + 0.5);
+  bag.add('paint_ochre', fromTriangles(rud.splice(0)));
+  const bol = lathe([[0.001, 0], [0.1, 0], [0.09, 0.2], [0.14, 0.26], [0.001, 0.26]], 8, null, ...Pt(H * 0.9, 0, dY(H * 0.9)));
+  bag.add('timber', bol);
+  const as = H * 0.62, ay = dY(as);
+  bag.add('iron', rod(Pt(as, 0.55, ay + 0.04), Pt(as + 0.7, 0.55, ay + 0.04), 0.03, 5)); bag.add('iron', rod(Pt(as + 0.7 - 0.02, 0.55, ay + 0.04 - 0.22), Pt(as + 0.7 - 0.02, 0.55, ay + 0.04 + 0.22), 0.025, 4));
+  bag.add('iron', rod(Pt(as - 0.02, 0.55 - 0.22, ay + 0.04), Pt(as - 0.02, 0.55 + 0.22, ay + 0.04), 0.022, 4));
+  for (const sg of [-1, 1]) bag.add('iron', rod(Pt(as, 0.55, ay + 0.04), Pt(as - 0.2, 0.55 + sg * 0.28, ay + 0.1), 0.02, 4));
+  bag.add('rope_fibre', lathe([[0.2, 0], [0.34, 0], [0.34, 0.12], [0.2, 0.12]], 10, null, ...Pt(H * 0.72, -0.5, dY(H * 0.72))));
+  // oars: a long oar either side of the fore-deck, resting in a thole post on the gunwale, the blade trailing in the water
+  for (const sg of [-1, 1]) {
+    const os = H * 0.5, wo = w(os / H), top = Pt(os + 0.4, sg * (wo - 0.9), sheer(os / H) + 0.28), thole = Pt(os, sg * (wo + 0.03), sheer(os / H) + 0.2), tip = Pt(os - 1.5, sg * (wo + 2.4), yw - 0.28);
+    bag.add('timber', rod(Pt(os, sg * (wo - 0.01), sheer(os / H) - 0.04), thole, 0.04, 5));
+    bag.add('wood_dark', rod(top, tip, 0.04, 5));
+    const dir = [tip[0] - top[0], tip[2] - top[2]], dl2 = Math.hypot(...dir);
+    bag.add('timber', rod([tip[0] - dir[0] / dl2 * 0.9, tip[1] + 0.15, tip[2] - dir[1] / dl2 * 0.9], [tip[0], tip[1] - 0.2, tip[2]], 0.1, 4));
+  }
+  // the stern: the yuloh (the long sculling oar) pivoting on a post at the stern, a boatman's brazier with a kettle, a bucket, a basket, a straw hat on a peg, a rolled mat, a pole laid along the side, the stern lantern
+  const ss = -H * 0.86, sy = dY(ss);
+  bag.add('timber', rod(Pt(ss, 0, sy), Pt(ss, 0, sy + 0.8), 0.06, 6));
+  bag.add('wood_dark', rod(Pt(ss + 0.9, 0.5, sy + 0.95), Pt(ss - 2.3, -0.2, yw - 0.45), 0.045, 5));
+  bag.add('timber', rod(Pt(ss - 1.7, -0.14, yw - 0.1), Pt(ss - 2.45, -0.22, yw - 0.7), 0.16, 4));
+  bag.add('rope_fibre', rod(Pt(ss + 0.5, 0.45, sy + 0.9), Pt(ss + 0.5, 0.45, sy + 0.4), 0.01, 3));
+  const bx = -H * 0.62, by = dY(bx);
+  bag.add('timber', lathe([[0.001, 0], [0.17, 0], [0.19, 0.08], [0.001, 0.08]], 8, null, ...Pt(bx, 0.55, by)));
+  bag.add('iron', lathe([[0.001, 0.08], [0.15, 0.1], [0.18, 0.2], [0.12, 0.26], [0.001, 0.26]], 8, null, ...Pt(bx, 0.55, by)));
+  bag.add('bronze', lathe([[0.001, 0], [0.1, 0], [0.08, 0.12], [0.04, 0.16], [0.001, 0.17]], 8, null, ...Pt(bx, 0.55, by + 0.26)));
+  bag.add('bronze', rod(Pt(bx, 0.62, by + 0.34), Pt(bx, 0.42, by + 0.36), 0.01, 3));
+  bag.add('timber', lathe([[0.17, 0], [0.2, 0.3], [0.17, 0.3], [0.15, 0.02]], 9, null, ...Pt(-H * 0.7, -0.6, dY(-H * 0.7))));
+  bag.add('iron', rod(Pt(-H * 0.7, -0.6 - 0.18, dY(-H * 0.7) + 0.3), Pt(-H * 0.7, -0.6 + 0.18, dY(-H * 0.7) + 0.3), 0.012, 3));
+  bag.add('reed_mat', lathe([[0.2, 0], [0.26, 0.14], [0.3, 0.3], [0.27, 0.3], [0.23, 0.14], [0.17, 0.02]], 10, null, ...Pt(-H * 0.55, 0.62, dY(-H * 0.55))));
+  bag.add('reed_mat', rod(Pt(-H * 0.8, -0.65, dY(-H * 0.8) + 0.08), Pt(-H * 0.68, -0.65, dY(-H * 0.68) + 0.08), 0.09, 6));
+  bag.add('thatch', lathe([[0.001, 0.14], [0.14, 0.04], [0.28, 0], [0.28, 0.025], [0.001, 0.16]], 10, null, ...Pt(sA - 0.32, hw - 0.1, yd + 1.1)));
+  bag.add('timber', rod(Pt(sA - 0.05, hw - 0.1, yd + 1.05), Pt(sA - 0.38, hw - 0.1, yd + 1.05), 0.012, 3));
+  for (const sg of [-1, 1]) bag.add('bamboo_culm', rod(Pt(-H * 0.95 + 0.4, sg * (w(-0.9) - 0.3), dY(-H * 0.9) + 0.1), Pt(sA + 0.2, sg * (hw + 0.15), yd + 0.12), 0.022, 5));
+  bag.add('wood_dark', rod(Pt(-H + 0.1, 0.0, sheer(-1)), Pt(-H + 0.1, 0.0, sheer(-1) + 1.3), 0.03, 4));
+  bag.add('lamp_paper', lathe([[0.001, -0.17], [0.1, -0.1], [0.13, 0], [0.1, 0.1], [0.001, 0.15]], 8, null, ...Pt(-H + 0.1, 0.0, sheer(-1) + 1.22)));
 }
 
 
