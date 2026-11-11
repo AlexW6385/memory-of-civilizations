@@ -25,6 +25,8 @@ for (const [x, z, a, h] of QUEENS) {
 {
   const [ax, az] = CAUSEWAY.a, [bx, bz] = CAUSEWAY.b, at = (x) => [x, az + (bz - az) * (x - ax) / (bx - ax)];
   const [d0, d1] = CAUSEWAY.down, p = at(d0), q = at(d1);
+  // the straight reach from the temple's east door, with a doorway in its north wall onto the plateau (the way in from the arrival), then the long run down
+  E.push({ t: 'causeway', a: [168, -40], b: CAUSEWAY.a, w: 4.6, h: 5, ya: 0, yb: 0, gap: { side: -1, from: 1, to: 2 } });
   E.push({ t: 'causeway', a: CAUSEWAY.a, b: p, w: 4.6, h: 5, ya: 0, yb: 0 });
   E.push({ t: 'causeway', a: p, b: q, w: 4.6, h: 5, ya: 0, yb: VALLEY });
   E.push({ t: 'causeway', a: q, b: CAUSEWAY.b, w: 4.6, h: 5, ya: VALLEY, yb: VALLEY });
@@ -37,7 +39,7 @@ const rooms = [room('court', ENCLOSURE, 0, 'open'), room('temple', TEMPLE, 0.12,
   const g = pyramidGeometry(PYRAMID.a, PYRAMID.h), [cx, cz] = PYRAMID.c;
   rooms.push(room('kings-chamber', [cx + g.roomX[0] + 0.4, cz + g.room[0] + 0.4, cx + g.roomX[1] - 0.4, cz + g.room[1] - 0.4], g.F, 'hall'));
 }
-const walks = [[[200, -40], [170, -40], [150, -40], [127, -40], [117, -40]]];
+const walks = [[[200, -40], [196, -46], [177, -46.5], [177, -40], [170, -40], [165, -43], [135, -43], [129, -40], [127, -40], [117, -40]]];
 walks[0].y0 = 0;
 
 export const pyramid = {

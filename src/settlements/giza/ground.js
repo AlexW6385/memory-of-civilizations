@@ -50,13 +50,13 @@ function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || inHarbour(x, z)) return null;
   // papyrus and reeds along the harbour's open edges (not the quay on its west side)
   if (inRect(HARBOUR, x, z, 5) && x > HARBOUR[0] + 7) return { papyrus: 10, reeds: 8 };
-  if (x > 320) return { date_palm: 0.5, sycamore_fig: 0.03, halfa: 20 };
-  if (inRect(TOWN, x, z, 10) && hash2(x * 0.2, z * 0.2) < 0.04) return { date_palm: 0.3 };
+  if (x > 320) return { date_palm: 0.55, sycamore_fig: 0.04, tamarisk: 0.25, halfa: 20 };
+  if (inRect(TOWN, x, z, 10) && hash2(x * 0.2, z * 0.2) < 0.08) return { date_palm: 0.3, sycamore_fig: 0.05, tamarisk: 0.2 };
   return null;
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { date_palm: 0.5, sycamore_fig: 0.03 },
+  maxDensity: { date_palm: 0.55, sycamore_fig: 0.05, tamarisk: 0.25 },
   climate: {
     sun: { az: 140, el: 55, color: [1.0, 0.95, 0.85], intensity: 3.6, lat: 30, dec: 5, hour: 10.5 },
     sky: { turbidity: 3.2, rayleigh: 1.05, mie: 0.005, mieG: 0.82, zenith: [0.12, 0.2, 0.38], horizon: [0.66, 0.64, 0.58] },

@@ -12,7 +12,8 @@ import { loft, ring } from '../egyptian/objects.js';
 import { pyramidInterior } from './interior.js';
 import { sphinx } from './sphinx.js';
 import { paintChapel } from './chapel.js';
-import { khafreTemple } from './khafre.js';
+import { khafreTemple, statue } from './khafre.js';
+import { houseFront, houseRoof, mastabaWear, galleryOutside, bakeryShade, yard, lane, cemetery, magazines, quay } from './dress.js';
 import { quarry, track, tools } from './quarry.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -112,6 +113,7 @@ function mastaba(el, { bag, col }) {
   bag.add('limestone_core', box(cx - a + batter + 0.15, h, cz - b + batter + 0.15, cx + a - batter - 0.15, h + 0.12, cz + b - batter - 0.15));
   col.rect([cx - a, cz - b, cx + a, cz + b], 0, h);
   col.floor([cx - a + batter, cz - b + batter, cx + a - batter, cz + b - batter], h + 0.12);
+  mastabaWear(bag, { cx, cz, a, b, h, cased, seed: el.seed ?? Math.floor(cx * 31 + cz * 17) });
   // the slab stela in its emplacement near the south end of the east face, at the height of a kneeling offerer's eyes
   const sz = cz + b - 2.6, sy = 1.05, sw = 0.53, sh = 0.38, fx = cx + a - half(sy + 0.2);
   const S = (y0, z0, y1, z1, d0, d1, mat = 'limestone_carved') => bag.add(mat, box(fx + d0, sy + y0, sz + z0, fx + d1, sy + y1, sz + z1));
@@ -246,6 +248,25 @@ function okTemple(el, { bag, col }) {
       u = Math.max(u, g1);
     }
   });
+  // the king's statues of dark stone against the ambulatory's inner walls, facing the court; in the court an altar with its offerings (docs §13)
+  if (c1 - c0 > 20) {
+    const face = ['s', 'w', 'n', 'e'];
+    walls.forEach(([a, b], i) => {
+      const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux, gaps = i === doorSide || (i === back && el.backDoor) ? [L / 2 - 3.6, L / 2 + 3.6] : null;
+      for (let s = 5; s < L - 4; s += 9) {
+        if (gaps && s > gaps[0] && s < gaps[1]) continue;
+        const px = a[0] + ux * s + nx * (th / 2 + 0.75), pz = a[1] + uz * s + nz * (th / 2 + 0.75);
+        statue(bag, px, 0.12, pz, face[i]);
+        col.rect([px - 0.55, pz - 0.55, px + 0.55, pz + 0.55], 0.12, 1.7);
+      }
+    });
+    const ax = (c0 + c1) / 2, az = (d0 + d1) / 2;
+    bag.add('granite_red', box(ax - 1.2, 0.12, az - 0.8, ax + 1.2, 0.9, az + 0.8)); bag.add('limestone_carved', box(ax - 1.3, 0.9, az - 0.9, ax + 1.3, 1.0, az + 0.9));
+    col.rect([ax - 1.3, az - 0.9, ax + 1.3, az + 0.9], 0.12, 1.0);
+    for (let k = 0; k < 7; k++) bag.add('limewash_yellow', lathe([[0.1, 0], [0.11, 0.05], [0.07, 0.12], [0.001, 0.14]], 8, null, ax - 0.9 + k * 0.3, 1.0, az - 0.3 + (k % 2) * 0.4));
+    bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.22, 0.2], [0.2, 0.4], [0.1, 0.55], [0.11, 0.6], [0.001, 0.6]], 10, null, ax + 1.0, 1.0, az));
+    for (const dx of [-3, 3]) { bag.add('basalt', lathe([[0.4, 0.12], [0.3, 0.5], [0.001, 0.55]], 8, null, ax + dx * 1.5, 0, az + 3)); }
+  }
   // the pillars of red granite round the court, their architraves
   const n = el.pillars ?? 6;
   for (const [a, b] of [[[c0, d0], [c1, d0]], [[c1, d0], [c1, d1]], [[c1, d1], [c0, d1]], [[c0, d1], [c0, d0]]]) {
@@ -269,10 +290,11 @@ function causeway(el, { bag, col }) {
     const s0 = k / n, s1 = (k + 1) / n, y0 = ya + (yb - ya) * s0, y1 = ya + (yb - ya) * s1;
     const p0 = [ax + (bx - ax) * s0, az + (bz - az) * s0], p1 = [ax + (bx - ax) * s1, az + (bz - az) * s1];
     for (const s of [-1, 1]) {
+      const open = el.gap && s === el.gap.side && k >= el.gap.from && k < el.gap.to;     // a doorway in this side wall: no wall, the roof stays as its lintel
       const t = [];
-      beamTris(t, [p0[0] + nx * (w + 0.7) * s, Math.min(y0, y1) - 1.5, p0[1] + nz * (w + 0.7) * s], [p1[0] + nx * (w + 0.7) * s, Math.min(y0, y1) - 1.5, p1[1] + nz * (w + 0.7) * s], 0.7, h + 1.5 + Math.abs(y1 - y0));
-      bag.add('tura_limestone', fromTriangles(t));
-      col.segment([p0[0] + nx * (w + 0.7) * s, p0[1] + nz * (w + 0.7) * s], [p1[0] + nx * (w + 0.7) * s, p1[1] + nz * (w + 0.7) * s], 1.4, Math.min(y0, y1) - 1.5, Math.max(y0, y1) + h);
+      if (!open) beamTris(t, [p0[0] + nx * (w + 0.7) * s, Math.min(y0, y1) - 1.5, p0[1] + nz * (w + 0.7) * s], [p1[0] + nx * (w + 0.7) * s, Math.min(y0, y1) - 1.5, p1[1] + nz * (w + 0.7) * s], 0.7, h + 1.5 + Math.abs(y1 - y0));
+      if (!open) bag.add('tura_limestone', fromTriangles(t));
+      if (!open) col.segment([p0[0] + nx * (w + 0.7) * s, p0[1] + nz * (w + 0.7) * s], [p1[0] + nx * (w + 0.7) * s, p1[1] + nz * (w + 0.7) * s], 1.4, Math.min(y0, y1) - 1.5, Math.max(y0, y1) + h);
       // the roof slabs, leaving a slit along the middle
       const r = [];
       beamTris(r, [p0[0] + nx * (w * 0.55) * s, Math.max(y0, y1) + h, p0[1] + nz * (w * 0.55) * s], [p1[0] + nx * (w * 0.55) * s, Math.max(y0, y1) + h, p1[1] + nz * (w * 0.55) * s], w * 0.45 + 0.7, 0.6);
@@ -313,6 +335,7 @@ function mudHouse(el, { bag, col }) {
   const e = 0.012, o = th / 2;
   [[x0 - o - e, z0 - o - e, x1 + o + e, z0 - o + 0.003, 0.45], [x0 - o - e, z0 - o, x0 - o + 0.003, z1 + o, 0.5], [x1 + o - 0.003, z0 - o, x1 + o + e, z1 + o, 0.55],
     [x0 - o - e, z1 + o - 0.003, xd - dw / 2 - 0.01, z1 + o + e, 0.6], [xd + dw / 2 + 0.01, z1 + o - 0.003, x1 + o + e, z1 + o + e, 0.62]].forEach(([p0, p1, q0, q1, t]) => bag.add('banco_rough', box(p0, -0.05, p1, q0, t, q1)));
+  houseFront(bag, col, { x0, z0, x1, z1, h, th, xd, dw, seed: el.seed });
   if (court) {
     seg([split, z0 + th / 2], [split, z1 - 1.4]);
     if (!F) { bag.add('mudbrick', box(split + 0.6, 0, z0 + 0.6, split + 1.6, 0.9, z0 + 1.6)); bag.add('mud_plaster', box(x1 - 1.4, 0, z0 + 0.6, x1 - 0.6, 1.2, z0 + 1.4)); }
@@ -322,6 +345,7 @@ function mudHouse(el, { bag, col }) {
   bag.add('timber', box(x0 - 0.25, h, z0 - 0.25, rx1 + 0.1, h + 0.12, z1 + 0.25));
   bag.add('mud_plaster', box(x0 - 0.25, h + 0.12, z0 - 0.25, rx1 + 0.1, h + 0.3, z1 + 0.25));
   col.floor([x0, z0, rx1, z1], h + 0.3);
+  houseRoof(bag, { x0, z0, rx1, z1, h, seed: el.seed });
   if (!F) return;
   const ix0 = x0 + th / 2, iz0 = z0 + th / 2, iz1 = z1 - th / 2, ix1 = split - (court ? th / 2 : th / 2), logs = [];
   // the logs seen from beneath, across the short span
@@ -397,6 +421,7 @@ function galleryHall(el, { bag, col }) {
   for (let k = 0; k < 3; k++) { const t = k * 2.1; bag.add('limestone_core', lathe([[0.001, 0], [0.1, 0.01], [0.11, 0.12], [0.001, 0.14]], 6, null, x0 + 1.0 + Math.cos(t) * 0.32, 0, zc - 0.9 + Math.sin(t) * 0.32)); }
   for (const dz of [0.6, 1.2]) bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.02], [0.2, 0.25], [0.18, 0.5], [0.09, 0.62], [0.1, 0.66], [0.001, 0.66]], 10, null, x0 + 0.7, 0, zc + dz));
   col.floor([x0, z0, x1, z1], h + 0.4);
+  galleryOutside(bag, col, { rect: el.rect, h });
 }
 
 /** crow_wall: the Wall of the Crow { a, b, h, th, gate: { at, w, h } }: a wall of great limestone blocks with a corbelled tunnel through it. */
@@ -452,6 +477,7 @@ function bakery(el, { bag, col }) {
     bag.add('terracotta', lathe([[0.04, 0], [0.12, 0.08], [0.17, 0.35], [0.14, 0.62], [0.07, 0.72], [0.08, 0.76], [0.001, 0.76]], 10, null, jx, 0, jz));
     bag.add('mud_plaster', lathe([[0.09, 0], [0.09, 0.03], [0.06, 0.1], [0.001, 0.12]], 8, null, jx, 0.75, jz));
   }
+  bakeryShade(bag, col, { rect: el.rect });
   // the two vats for the dough, sunk in rings of mudbrick
   for (const vx of [mx + 0.9, x1 - th / 2 - 0.8]) {
     const vz = z0 + th / 2 + 1.1;
@@ -633,6 +659,7 @@ registerStyle('oldkingdom', {
     ...STYLES.qing.elements,
     ok_pyramid: okPyramid, mastaba, ok_temple: okTemple, causeway, mud_house: mudHouse, gallery_hall: galleryHall, crow_wall: crowWall,
     boat_pit: boatPit, royal_ship: royalShip, bakery, ok_pyramid_interior: pyramidInterior, stone_sledge: stoneSledge,
+    ok_yard: yard, ok_lane: lane, ok_cemetery: cemetery, ok_magazines: magazines, ok_quay: quay,
     ok_sphinx: sphinx, ok_khafre_temple: khafreTemple, ok_quarry: quarry, ok_track: track, ok_tools: tools,
   },
   objects: {},

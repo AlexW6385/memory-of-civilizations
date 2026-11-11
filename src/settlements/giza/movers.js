@@ -5,7 +5,7 @@
 // cemeteries' avenues and cross streets, the pyramid's court, the workers' town's streets, the harbour quay, the Sphinx's
 // pit and the way down to Khafre's valley temple. No boats on the water (the ships stand moored).
 
-import { RADIUS, ENCLOSURE, WEST_FIELD, EAST_FIELD, HARBOUR, SPHINX_PIT, KHAFRE_VT, TOWN } from './layout.js';
+import { RADIUS, CROW_WALL, ENCLOSURE, WEST_FIELD, EAST_FIELD, HARBOUR, SPHINX_PIT, KHAFRE_VT, TOWN } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -33,6 +33,10 @@ export function walkways() {
   rects.push(way([TOWN[0] + 8, 162], [TOWN[2] - 10, 162], 2.8, 2.2, 1.2));
   for (let b = 0; b < 4; b++) rects.push(way([-94 + b * 52, 160], [-94 + b * 52, 234], 3.6, 2.0, 1.2));
   rects.push(way([TOWN[0] + 8, 234.2], [TOWN[2] - 14, 234.2], 2.8, 2.4, 1.4));
+  // the storerooms' fronts along the court's north and south walls
+  rects.push(way([ENCLOSURE[0] + 16, ENCLOSURE[1] + 10], [ENCLOSURE[2] - 16, ENCLOSURE[1] + 10], 3.0, 0.6, 0.3), way([ENCLOSURE[0] + 16, ENCLOSURE[3] - 10], [ENCLOSURE[2] - 16, ENCLOSURE[3] - 10], 3.0, 0.6, 0.3));
+  // the stretch under the Wall of the Crow's south face
+  rects.push(way([TOWN[0] + 10, 158.6], [CROW_WALL.b[0], 158.6], 2.4, 1.0, 0.8));
   // the harbour: the quay along the temple's front, and the way south of it to Khafre's valley temple
   rects.push(way([HARBOUR[0] + 2.2, HARBOUR[1] + 5], [HARBOUR[0] + 2.2, HARBOUR[3] - 4], 3.2, 1.2, 0.8));
   rects.push(way([KHAFRE_VT[2] + 3, 100], [KHAFRE_VT[2] + 3, KHAFRE_VT[3] + 10], 3.6, 1.0, 0.6));

@@ -11,7 +11,7 @@ export const TEMPLE = [127, -66, 168, -14];
 export const QUEENS = [[160, 18, 23, 30], [160, 70, 23, 29], [160, 118, 22, 28]];   // [x, z, half-base, height]
 // the causeway runs level on the plateau, goes down its edge with the ground and enters the valley
 // temple by its west door (CAUSEWAY.down: where the descent begins and ends)
-export const CAUSEWAY = { a: [168, -40], b: [312.5, 52], down: [270, 300] };
+export const CAUSEWAY = { a: [186, -40], b: [312.5, 52], down: [270, 300] };
 export const VALLEY_TEMPLE = [312, 34, 346, 70];
 export const HARBOUR = [346, 18, 400, 96];
 export const WEST_FIELD = [-330, -230, -150, 110];
@@ -56,24 +56,30 @@ export function plateau(x, z) {
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-let MASTABAS = null;
+let MASTABAS = null, SLOTS = null;
+/** The empty slots of the cemetery's grid (where a tomb is not built, or not yet): { c, a, b, mat }. */
+export function slots() { mastabas(); return SLOTS; }
 /** The mastabas in their streets (docs/settlements/giza.md §4.4): { c, a (half east–west), b (half north–south), h, mat,
  *  seed } — rows along streets running north–south, crossed by east–west streets, the long axis of each tomb north–south
  *  and its chapel on the east face, in the West Field and the East Field. */
 export function mastabas() {
   if (MASTABAS) return MASTABAS;
-  MASTABAS = [];
+  MASTABAS = []; SLOTS = [];
   const rand = rng(2560);
   for (const [F, mat] of [[WEST_FIELD, 'limestone_core'], [EAST_FIELD, 'tura_limestone']]) {
     for (let x = F[0] + 10; x < F[2] - 14; x += 21) for (let z = F[1] + 16; z < F[3] - 14; z += 32) {
       const c = [x + (rand() - 0.5) * 1.2, z + (rand() - 0.5) * 1.5], a = 4.6 + rand() * 1.4, b = 9 + rand() * 4.5;
-      if (Math.hypot(c[0] + a + 3, c[1]) > RADIUS - 30 || Math.hypot(c[0], c[1] + b) > RADIUS - 30 || Math.hypot(c[0], c[1] - b) > RADIUS - 30 || rand() < 0.12) continue;
+      if (Math.hypot(c[0] + a + 3, c[1]) > RADIUS - 30 || Math.hypot(c[0], c[1] + b) > RADIUS - 30 || Math.hypot(c[0], c[1] - b) > RADIUS - 30) continue;
+      if (rand() < 0.12) { SLOTS.push({ c, a, b, mat }); continue; }
       MASTABAS.push({ c, a, b, h: 4.2 + rand() * 2.4, mat, seed: Math.floor(rand() * 1e6) });
     }
   }
   return MASTABAS;
 }
 let TOWNS = null;
+const YARDS = ['pen', 'pen', 'pen', 'brickyard', 'brickyard', 'silo', 'silo', 'midden', 'threshing', 'threshing'];
+/** Is this house furnished (enterable with its room and court fitted out)? Two in three. */
+export const furnished = (l) => l.seed % 3 !== 2;
 /** The workers' town: gallery halls in blocks, houses, bakeries: { kind, rect, seed }. */
 export function town() {
   if (TOWNS) return TOWNS;
@@ -88,12 +94,17 @@ export function town() {
   }
   // houses and bakeries round them
   for (let x = -150; x < 220; x += 11) for (let z = 236; z < 350; z += 11) {
-    if (rand() < 0.25 || Math.hypot(x, z) > RADIUS - 28) continue;
+    const skip = rand() < 0.25;
+    if (Math.hypot(x, z) > RADIUS - 28) continue;
     const w = 7 + rand() * 3, d = 7 + rand() * 3;
+    // (an empty lot is a yard: pen, brickyard, silo, midden or threshing floor)
+    if (skip) { TOWNS.push({ kind: 'yard', yk: YARDS[Math.floor(rand() * YARDS.length)], rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) }); continue; }
     TOWNS.push({ kind: 'house', rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
   }
   for (let x = 80; x < 200; x += 12) for (let z = 172; z < 226; z += 12) {
-    if (rand() < 0.3 || Math.hypot(x, z) > RADIUS - 28) continue;
+    const skip = rand() < 0.3;
+    if (Math.hypot(x, z) > RADIUS - 28) continue;
+    if (skip) { TOWNS.push({ kind: 'yard', yk: YARDS[Math.floor(rand() * YARDS.length)], rect: [x, z, x + 9, z + 9], seed: Math.floor(rand() * 1e6) }); continue; }
     TOWNS.push({ kind: 'house', rect: [x, z, x + 9, z + 9], seed: Math.floor(rand() * 1e6) });
   }
   return TOWNS;
