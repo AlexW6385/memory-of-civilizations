@@ -27,6 +27,7 @@ export const TRENCHES = [
   { rect: [34, -8, 46, 44], axis: 'z', d0: 7, d1: 12 },               // the Jordan to Amanuel
   { rect: [114, -8, 126, 28], axis: 'z', d0: 7, d1: 10 },             // the Jordan to Gabriel-Rufael
 ];
+export const POOL = [-96, -19, -66, -15.4];            // the baptismal pool in the Jordan's floor
 export const PRECINCT = 250;                             // level within this radius; slopes beyond
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };

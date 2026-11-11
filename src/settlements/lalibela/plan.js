@@ -2,7 +2,7 @@
 // on the floor of its pit, the pits' and trenches' rock walls (open where a trench joins), Bete
 // Giyorgis alone to the south-west.
 
-import { PITS, TRENCHES, EDGE, OUTER, HUT, inRect, slope } from './layout.js';
+import { PITS, TRENCHES, EDGE, OUTER, HUT, POOL, inRect, slope } from './layout.js';
 
 const E = [];
 // ---- the walls of the cuts: each pit edge and trench side, broken where another cut opens onto it
@@ -114,6 +114,37 @@ ch('golgotha', 22, 12, 8); ch('amanuel', 18, 12, 11.5); ch('gabriel', 16, 10, 9)
   for (const [c, n, up] of caves) E.push({ t: 'cave', c, n, y: yf + 0.25 + up, floor: yf, w: up ? 0.9 : 1.05, h: up ? 1.4 : 1.75 });
 }
 E.push({ t: 'hut', c: HUT.c, r: HUT.r, y: 0, door: HUT.door, seed: 1220 });
+// ---- steps cut in the floors of the long descents (the masons left treads in the sloping floors: "a descending trench"): 0.9 m runs,
+// each tread level with the ground at its upper end, its riser standing proud of the ramp below it
+for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106], [4, -150, -121], [6, 181, 211]]) {
+  const T = TRENCHES[ti], [x0, z0, x1, z1] = T.rect, ax = T.axis === 'x', a0 = ax ? x0 : z0, a1 = ax ? x1 : z1, run = 0.9;
+  const depth = (u) => T.d0 + (T.d1 - T.d0) * (u - a0) / (a1 - a0), dir = Math.sign(T.d1 - T.d0) || 1;
+  const w0 = (ax ? z0 : x0) + EDGE - 0.1, w1 = (ax ? z1 : x1) - EDGE + 0.1;
+  for (let u = from; u < to - 1e-6; u += run) {
+    const ue = Math.min(to, u + run), hi = Math.min(depth(u), depth(ue)), lo = Math.max(depth(u), depth(ue));
+    if (lo < 0.12) continue;
+    const r = ax ? [u, w0, ue, w1] : [w0, u, w1, ue];
+    E.push({ t: 'block', walk: true, rect: r, y0: -lo - 0.4, y1: -hi + 0.01, mat: 'tuff_hewn' });
+  }
+  void dir;
+}
+// ---- the pool of the Jordan: a basin cut in the river-bed's floor (the Jordan is where the baptisms are done; docs §16), its kerb a
+// hand and a half above the floor, water standing in it
+{
+  const [x0, z0, x1, z1] = POOL, k = 0.35, top = -7 + 0.45;
+  for (const r of [[x0 - k, z0 - k, x1 + k, z0], [x0 - k, z1, x1 + k, z1 + k], [x0 - k, z0, x0, z1], [x1, z0, x1 + k, z1]]) E.push({ t: 'block', walk: true, rect: r, y0: -7.4, y1: top, mat: 'tuff_hewn' });
+  E.push({ t: 'block', walk: true, rect: [x0, z0, x1, z1], y0: -7.4, y1: -6.8, mat: 'tuff_red' });
+  E.push({ t: 'water_rect', rect: [x0, z0, x1, z1], y: -6.66 });
+  // steps down into it at the east end, and the stone beside it where the priest stands
+  for (let i = 0; i < 2; i++) E.push({ t: 'block', walk: true, rect: [x1 + k, (z0 + z1) / 2 - 0.9, x1 + k + 0.5 + (1 - i) * 0.5, (z0 + z1) / 2 + 0.9], y0: -7.4, y1: -7 + 0.15 * (i + 1), mat: 'tuff_hewn' });
+}
+// ---- lamps hung in the great churches' naves
+{
+  const yG = GY + 6.4, yM = -M.depth + 0.95 + 7.4, yP = -PITS.maryam.depth + 0.15 + 0.6 + 6.6;
+  for (const [x, z] of [[gc[0] - 6.8, gc[1]], [gc[0], gc[1] - 6.8], [gc[0], gc[1] + 6.8]]) E.push({ t: 'lamp', at: [x, z], y: yG, drop: 1.7 });
+  for (const dx of [-9, -3, 3]) E.push({ t: 'lamp', at: [mc[0] + dx, mc[1]], y: yM, drop: 2.2 });
+  for (const x of [66.2, 72.4]) E.push({ t: 'lamp', at: [x, -90], y: yP, drop: 2.0 });
+}
 // ---- the courts: sandals at the doors, and at the foot of the rock walls the pilgrims' staffs, bundles, jars and the masons' rock seats
 {
   const foot = { giyorgis: [gc[0] - 12.8, gc[1] - 12.8, gc[0] + 12.8, gc[1] + 12.8], medhane: [mc[0] - 17.25, mc[1] - 12.25, mc[0] + 17.25, mc[1] + 12.25], maryam: [59.3, -97.2, 78.3, -82.8] };

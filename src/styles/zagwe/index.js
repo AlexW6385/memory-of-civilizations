@@ -13,7 +13,7 @@ import { orientBy, piercedSlab } from '../sahel/index.js';
 import { hut } from './hut.js';
 import { umbrella, procCross } from './liturgy.js';
 import { rod } from './hut.js';
-import { yardEl, terraceEl, courtEl } from './compound.js';
+import { yardEl, terraceEl, courtEl, clothPile, lampEl } from './compound.js';
 
 const TU = 'tuff_red', TH = 'tuff_hewn';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -87,6 +87,17 @@ function hewnFace(bag, el) {
   const strip = (out, y0, y1, e) => { const a = Math.max(lo, y0), b = Math.min(hi, y1); if (b - a < 0.03) return; beamTris(out, [A[0], a, A[1]], [B[0], a, B[1]], e, b - a); };
   for (const [y0, y1] of BEDS) strip(beds, y0, y1, 0.014);
   for (let y = -1.1; y > el.y0; y -= 1.1) strip(ledges, y - 0.05, y, 0.035);
+  // weathering: the dark streaks the rain draws down the face from the rim and from each ledge's lip, patches of pale lichen on the
+  // sun's faces, damp at the foot where the floor drains
+  { const sd = Math.round((el.a[0] * 7.3 + el.a[1] * 3.1 + el.b[0] * 1.7) * 100) | 0, rr = rng(Math.abs(sd) + 1), streaks = [], lichen = [], len = Math.hypot(el.b[0] - el.a[0], el.b[1] - el.a[1]) || 1;
+    const at = (f, y, d = 0.0) => [A[0] + (B[0] - A[0]) * f + nx * d, y, A[1] + (B[1] - A[1]) * f + nz * d];
+    for (let k = 0; k < Math.max(1, Math.round(len / 1.2)); k++) {
+      const f = rr(), top = hi - rr() * 0.4, drop = 1.2 + rr() * 4.0, w = 0.05 + rr() * 0.14;
+      beamTris(streaks, at(f - w / len / 2, Math.max(lo, top - drop), 0.012), at(f + w / len / 2, Math.max(lo, top - drop), 0.012), 0.012, Math.min(drop, top - lo));
+    }
+    for (let k = 0; k < 2; k++) { const f = rr(), y = lo + 0.5 + rr() * (hi - lo - 1), r = 0.2 + rr() * 0.35; beamTris(lichen, at(f - r / len, y, 0.014), at(f + r / len, y, 0.014), 0.014, r * 1.2); }
+    if (hi - lo > 1) beamTris(streaks, at(0.0, lo, 0.012), at(1.0, lo, 0.012), 0.012, 0.35);
+    bag.add('bark_dark', fromTriangles(streaks)); if (lichen.length) bag.add('plaster_damp', fromTriangles(lichen)); }
   if (beds.length) bag.add('tuff_hewn', fromTriangles(beds));
   if (ledges.length) bag.add(TU, fromTriangles(ledges));
 }
@@ -494,7 +505,7 @@ function tukul(el, { bag, col }) {
   bag.add(TU, lathe([[r + 0.1, -1.0], [r + 0.1, 0], [r, H], [0.001, H]], 20, (th) => 1 + 0.012 * Math.sin(th * 7 + el.seed), x, y, z));
   // the courses: thin proud bands of flatter stones every 0.6 m or so
   for (let yy = 0.55; yy < H - 0.3; yy += 0.55 + rand() * 0.15) { const rr = r + 0.1 - 0.1 * yy / H + 0.015; bag.add('rubble', lathe([[rr, yy], [rr, yy + 0.07], [0.001, yy + 0.07]], 20, null, x, y, z)); }
-  bag.add('plaster_damp', lathe([[r + 0.112, -0.2], [r + 0.112, 0.0], [r + 0.1, 0.5], [r + 0.0, 0.5], [0.001, 0.5]].slice(0, 3), 20, (th) => 1 + 0.012 * Math.sin(th * 7 + el.seed), x, y, z));
+  bag.add('bark_grey', lathe([[r + 0.112, -0.2], [r + 0.112, 0.0], [r + 0.1, 0.5], [r + 0.0, 0.5], [0.001, 0.5]].slice(0, 3), 20, (th) => 1 + 0.012 * Math.sin(th * 7 + el.seed), x, y, z));
   col.circle(x, z, r + 0.05, y, y + H);
   const a0r = rand() * Math.PI * 2, a = el.door ?? a0r, dx = Math.cos(a), dz = Math.sin(a), ex = -dz, ez = dx;
   const P = (s, d) => [x + dx * (r + d) + ex * s, z + dz * (r + d) + ez * s];
@@ -617,6 +628,6 @@ function curtain(el, { bag, col }) {
 
 registerStyle('zagwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain, yard: yardEl, terrace: terraceEl, court: courtEl },
+  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain, yard: yardEl, terrace: terraceEl, court: courtEl, cloth_pile: clothPile, lamp: lampEl },
   objects: {},
 });

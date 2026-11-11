@@ -1,7 +1,7 @@
 // The village round the churches (docs/settlements/lalibela.md §5): round stone houses with conical thatch;
 // and the people of the churches (§10): pilgrims wrapped in white in the pits, the trenches and on
 // the rims looking down, priests among them holding their hand crosses.
-import { RADIUS, PITS, PRECINCT, TERR, cutDepth, houses, compounds, slope, inRect } from './layout.js';
+import { RADIUS, POOL, PITS, PRECINCT, TERR, cutDepth, houses, compounds, slope, inRect } from './layout.js';
 const base = (id, elements, style = 'zagwe') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-240, 100], facing: 's' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -70,6 +70,12 @@ function people() {
       else { const hx = 0.152 * kk, hz = -0.33 * kk; Z.push({ t: 'sistrum', at: [at[0] + hx * c + hz * s, at[1] - hx * s + hz * c], y: y + 1.09 * kk, rot }); }
     }
     priestAt([71.6, zr + 0.4], y, Math.PI - 0.5); }
+  // at the Jordan's pool: women washing white cloth at its kerb, a priest with his cross at the steps, a pilgrim waiting his turn
+  { const [px0, pz0, px1, pz1] = POOL;
+    for (let k = 0; k < 4; k++) { const p = [px0 + 4 + k * 6.5 + rand(), pz1 + 0.9 + rand() * 0.3]; L.push({ t: 'figure', at: p, y: yAt(...p), rot: 0, seed: Math.floor(rand() * 1e9), dress: 'robe', over: 'shawl', cloth: 'cloth_white', cloth2: 'cloth_ochre', hat: 'veil', hatMat: 'cloth_white', hair: 'bun', skin: 'skin_dark', feet: 'bare', pose: 'squat' }); }
+    priestAt([px1 + 2.8, (pz0 + pz1) / 2 + 1.6], yAt(px1 + 2.8, (pz0 + pz1) / 2 + 1.6), Math.PI / 2);
+    for (let k = 0; k < 2; k++) pilgrim([px1 + 4.2 + k * 0.9, (pz0 + pz1) / 2 + 2.6 + k * 0.4], -Math.PI / 2, 'sit_ground');
+    for (let k = 0; k < 3; k++) { const p = [px0 + 5 + k * 9, pz1 + 0.6]; Z.push({ t: 'cloth_pile', at: p, y: yAt(...p) }); } }
   return [base('lalibela-people', L, 'life'), base('lalibela-crosses', Z)];
 }
 

@@ -42,7 +42,7 @@ export function walkways() {
   R([58.4, -100.4, 78.6, -97.6], 1.0); R([58.4, -82.4, 78.6, -79.6], 0.8); R([57.6, -99.4, 59.6, -80.6], 0.8);
   R([-67, -100.6, -37, -98.6], 0.7);                                 // Golgotha's north gap
   // the trenches (their floors between the rock walls) and the Jordan, joined to the courts, and the paths beyond
-  R([-150, -19, 212, -9], 2.0);                                      // the Jordan with its two ramps
+  R([-150, -14.6, 212, -9], 2.0);                                      // the Jordan with its two ramps
   R([-340, -17, -150, -11], 0.9); R([212, -17, 340, -11], 0.9);       // the paths out west and east
   R([-340, 126, -211, 130], 1.2);                                    // down to Bete Giyorgis and the way to it
   R([7, -252, 13, -106], 1.5);                                       // to Medhane Alem from the north

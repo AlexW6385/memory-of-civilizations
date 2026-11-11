@@ -220,3 +220,16 @@ export function courtEl(el, { bag, col }) {
     }
   }
 }
+/** cloth_pile: washed shawls spread flat on the stones to dry { at, y }. */
+export function clothPile(el, { bag }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = rng(Math.round(x * 13 + z * 7));
+  for (let k = 0; k < 3; k++) { const a = r() * 3, c = [x + (r() - 0.5) * 1.2, z + (r() - 0.5) * 0.6]; bag.add(k === 1 ? 'cloth_ochre' : 'cloth_white', orientedBox([c[0] - Math.cos(a) * 0.6, c[1] - Math.sin(a) * 0.6], [c[0] + Math.cos(a) * 0.6, c[1] + Math.sin(a) * 0.6], 0.8, y + 0.02 + k * 0.012, y + 0.035 + k * 0.012)); }
+}
+/** lamp: a clay-and-brass lamp hung on a cord { at [x, z], y (the ceiling), drop } with a flame and a little warm light. */
+export function lampEl(el, { bag, lights }) {
+  const [x, z] = el.at, y = el.y - el.drop, t = [];
+  rod(t, [x, el.y, z], [x, y + 0.08, z], 0.01, 3); bag.add('rope_fibre', fromTriangles(t));
+  bag.add('bronze', lathe([[0.001, 0], [0.11, 0.02], [0.16, 0.09], [0.12, 0.1], [0.001, 0.07]], 8, null, x, y, z));
+  bag.add('flame', lathe([[0.001, 0.07], [0.03, 0.07], [0.016, 0.17], [0.001, 0.21]], 6, null, x, y, z));
+  if (lights) lights.push({ at: [x, y + 0.25, z], color: '#ffb468', intensity: 2.6, distance: 11 });
+}
