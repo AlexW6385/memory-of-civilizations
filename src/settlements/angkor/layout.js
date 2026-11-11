@@ -154,6 +154,8 @@ export function moatLotus() {
       LOTUS.push({ rect: rc });
     }
   }
+  // beside the causeway's flanks, close to the visitor at the arrival: patches in the water just off the naga rails
+  for (const sg of [-1, 1]) for (const [xa, xb] of [[-186, -174], [-171, -160]]) LOTUS.push({ rect: [xa, Math.min(sg * 6.2, sg * 12.4), xb, Math.max(sg * 6.2, sg * 12.4)] });
   return LOTUS;
 }
 /** The reaches of the moat the boats ply (middle lines, 3 m wide), the corners crossing so that they turn: for movers.js and the moored boats. */

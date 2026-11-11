@@ -46,16 +46,20 @@ function fromWater(x, z) { return Math.max(-5, Math.min(40, wet(x, z) < 0 ? wet(
 /** Plants per 100 m²: grass, a few great trees; none on the temple (the sugar palms are placed by town.js, §14). */
 function planting(x, z, p) {
   const r = Math.hypot(x, z);
-  if (r > RADIUS - 6 || wet(x, z) < 0.6) return null;
+  if (r > RADIUS - 6) return null;
+  const w = wet(x, z);
+  if (w < 0.6) return null;
+  // reeds and sedge along the banks of the moat and the ponds (not on the road, the causeways or the approach)
+  if (w < 2.8 && !onRoad(x, z) && !inRect(CAUSEWAY.outer, x, z, 3) && !inRect(CAUSEWAY.inner, x, z, 3) && !inHouse(x, z, 1) && !inRect(T.base.rect, x, z, 4)) return { grass: 25, reeds: 0.22 };
   if (inRect(T.base.rect, x, z, 4) || inRect(CAUSEWAY.inner, x, z, 2) || inRect(CAUSEWAY.outer, x, z, 2) || onRoad(x, z) || inHouse(x, z, 0.8) || inPond(x, z, 1.5)) return null;
   if (inRect(ENCLOSURE, x, z)) return { grass: 35, banyan: 0.015, teak: 0.03 };
   const near = inHouse(x, z, 18) ? 1 : 0;
   if (r > 340) return { grass: 20 };
-  return { grass: 30, banyan: 0.01, teak: 0.03, neem: 0.03 * near };
+  return { grass: 30, banyan: 0.01, teak: 0.03, neem: 0.03 * near, bamboo: 0.035 * near, fig: 0.012 * near };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { banyan: 0.015, teak: 0.03, neem: 0.03 },
+  maxDensity: { banyan: 0.015, teak: 0.03, neem: 0.03, reeds: 0.22, bamboo: 0.035, fig: 0.012 },
   // the end of the dry season: hot, hazy with smoke and dust, towering clouds in the afternoon
   climate: {
     sun: { az: 120, el: 55, color: [1.0, 0.94, 0.84], intensity: 3.4, lat: 13, dec: 10, hour: 10 },

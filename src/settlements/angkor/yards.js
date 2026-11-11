@@ -201,3 +201,6 @@ export function enclosurePlan() {
 /** The boats standing in the moat, as hulls for the moving boats to keep clear of. */
 export function mooredBoats() { return moatLife().MOORED; }
 void inBasin; void moatLanes;
+
+/** Where the offering tables stand (for the incense smoke): [{ at, y }]. */
+export function offeringSpots() { return templeExtras().K.filter((e) => e.t === 'k_offering'); }

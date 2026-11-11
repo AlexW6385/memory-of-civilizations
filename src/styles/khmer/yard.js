@@ -273,4 +273,16 @@ export function banner(el, { bag, col }) {
   put('sandstone_khmer', A.stone.clone()); put('bamboo_culm', A.pole.clone()); put('clay_gilt', A.gilt.clone()); put(el.cloth ?? 'cloth_red', A.cloth.clone()); put('clay_gilt', A.edge.clone());
   col.circle(el.at[0], el.at[1], 0.3, el.y ?? 0, (el.y ?? 0) + 0.5);
 }
+
+/** k_shade: { at, y, rot, cloth } — a market-woman's sunshade: a bamboo pole planted by her mat with a broad low cone of cloth or palm-leaf matting 1.5 m in radius at about 2 m, its rim fringed, a gilt-less knob. */
+export function shade(el, { bag }) {
+  const A = assembly('k-shade', (a) => {
+    a('pole', tube([[0, 0, 0, 0.04], [0, 1.0, 0, 0.035], [0, 2.15, 0, 0.03]], 5));
+    a('cloth', slathe([[1.55, 1.72], [1.45, 1.78], [0.9, 1.96], [0.4, 2.12], [0.001, 2.2]], 14));
+    a('cloth', slathe([[0.001, 2.19], [0.4, 2.11], [0.9, 1.95], [1.45, 1.77], [1.55, 1.72]], 14));
+    a('rib', slathe([[1.57, 1.62], [1.58, 1.72], [1.52, 1.72], [1.52, 1.62]], 14));
+  });
+  const put = placer({ at: el.at, y: el.y ?? 0, rot: el.rot ?? 0 }, bag);
+  put('bamboo_culm', A.pole.clone()); put(el.cloth ?? 'reed_mat', A.cloth.clone()); put('thatch_palm', A.rib.clone());
+}
 void boxR; void beamTris;

@@ -1,7 +1,7 @@
 // Angkor — the animals (src/engine/fauna.js draws them; docs/settlements/angkor.md §17): carp in the
 // moat and the village ponds, swallows over the moat, the road and the paddies, egrets standing at the
 // pond edges and the moat's bank, crows over the temple's towers at dusk, sparrows on the road.
-import { LEVEL, MOAT, CAUSEWAY, ponds, ROAD } from './layout.js';
+import { LEVEL, MOAT, CAUSEWAY, ponds, ROAD, MARKET, ENC_PATHS, moatLotus } from './layout.js';
 
 const [a0, b0, a1, b1] = MOAT.outer, [c0, d0, c1, d1] = MOAT.inner;
 /** Negative inside the moat's water, positive outside. */
@@ -22,18 +22,32 @@ ponds().forEach((p) => {
   fish.push({ n: 3, size: [0.25, 0.4], palette: 'carp', y: -0.7, area: [x0 + 1.5, z0 + 1.5, x1 - 1.5, z1 - 1.5], dist: (x, z) => -Math.min(x - x0, x1 - x, z - z0, z1 - z), margin: 1.0, a: [(x1 - x0) / 2 - 2, (z1 - z0) / 2 - 2], ratio: 0.7, speed: 0.25, rise: 0.3 });
   void cx; void cz;
 });
+moatLotus().forEach((p, i) => {
+  if (i % 2) return;
+  const [x0, z0, x1, z1] = p.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  fish.push({ n: 3, size: [0.4, 0.7], palette: 'carp', y: LEVEL.moat, area: [x0, z0, x1, z1], dist: moatDistance, margin: 1.2, a: [Math.max(2, (x1 - x0) / 2 - 1), Math.max(1.5, (z1 - z0) / 2 - 1)], ratio: 0.5, speed: 0.3, rise: 0.25 });
+  void cx; void cz;
+});
 const flights = [
   { kind: 'swallow', n: 4, lane: { a: [-200, -8], b: [-200, 8] }, y: [1.5, 8], speed: 9 },
   { kind: 'swallow', n: 3, lane: { a: [-193, -200], b: [-193, 200] }, y: [-0.5, 6], speed: 9 },
   { kind: 'swallow', n: 3, lane: { a: [-190, 203], b: [243, 203] }, y: [-0.5, 6], speed: 9 },
   { kind: 'swallow', n: 3, lane: { a: [-190, -203], b: [243, -203] }, y: [-0.5, 6], speed: 9 },
   { kind: 'crow', n: 8, loop: { c: [25, 0], a: [70, 60], rot: 0.2 }, y: [70, 40], speed: 8 },
+  { kind: 'swallow', n: 5, loop: { c: [25, 0], a: [110, 90], rot: 0.5 }, y: [6, 30], speed: 9 },
+  { kind: 'swallow', n: 4, loop: { c: [-232, 25], a: [30, 22], rot: 0 }, y: [2, 8], speed: 9 },
+  { kind: 'crow', n: 4, loop: { c: [-232, 25], a: [40, 30], rot: 0.3 }, y: [14, 26], speed: 7 },
 ];
 flights[0].a = flights[1].a = flights[2].a = flights[3].a = [30, 4];
 const perches = [];
 // sparrows on the beaten earth of the road
 for (const [x, z] of [[-193, -120], [-193, -60], [-193, 70], [-193, 130], [-100, 203], [60, 203], [-80, -203], [120, -203], [243, 20], [243, -90]]) perches.push({ kind: 'sparrow', x, z, y: 0.03, rot: 0.4 + (x * 7 % 3), range: [1.4, 1.3] });
 // egrets at the edges of the ponds, facing the water
-ponds().forEach((p, i) => { if (i % 2) return; const [x0, z0, x1, z1] = p.rect; perches.push({ kind: 'egret', x: (x0 + x1) / 2, z: z0 - 0.4, y: 0, rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); });
+ponds().forEach((p, i) => { const [x0, z0, x1, z1] = p.rect; perches.push({ kind: i % 3 ? 'egret' : 'heron', x: (x0 + x1) / 2 + (i % 2 ? 2 : -2), z: i % 2 ? z0 - 0.4 : z1 + 0.4, y: 0, rot: i % 2 ? Math.PI / 2 : -Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); });
+// herons and egrets standing in the shallows among the lotus at the moat's banks
+moatLotus().forEach((p, i) => { if (i % 3) return; const [x0, z0, x1, z1] = p.rect; perches.push({ kind: i % 2 ? 'heron' : 'egret', x: (x0 + x1) / 2, z: (z0 + z1) / 2, y: LEVEL.moat, rot: i, stay: [60, 220], gone: [60, 170], alert: 12 }); });
+// sparrows round the market's mats, the enclosure's paths and the road's corners
+for (let k = 0; k < 8; k++) perches.push({ kind: 'sparrow', x: MARKET[0] + 3 + k * 3.6, z: MARKET[1] + 3.2 + (k % 3) * 6.3, y: 0.02, rot: k, range: [1.6, 1.4] });
+for (const [i, p] of ENC_PATHS.entries()) perches.push({ kind: 'sparrow', x: (p[0] + p[2]) / 2 + (i % 3) * 5, z: (p[1] + p[3]) / 2, y: 0.03, rot: i, range: [1.6, 1.2] });
 void ROAD;
 export default { fish, flights, perches };
