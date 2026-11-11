@@ -44,9 +44,9 @@ export async function staticBoats() {
   const { houses } = await import('./town.js');
   const out = [];
   for (const p of await houses()) for (const e of p.elements) {
-    if (e.t !== 'paddle_steamer' && e.t !== 'lighter') continue;
-    const r = e.rot ?? 0, L = e.t === 'lighter' ? e.len ?? 13 : 30;
-    out.push({ c: e.at, u: [Math.sin(r), Math.cos(r)], hl: L / 2 + (e.t === 'lighter' ? 2.5 : 3), hw: e.t === 'lighter' ? 2.4 : 4.5 });
+    if (e.t !== 'paddle_steamer' && e.t !== 'lighter' && e.t !== 'sailing_barge') continue;
+    const r = e.rot ?? 0, L = e.t === 'lighter' ? e.len ?? 13 : e.t === 'sailing_barge' ? e.len ?? 22 : 30;
+    out.push({ c: e.at, u: [Math.sin(r), Math.cos(r)], hl: L / 2 + (e.t === 'paddle_steamer' ? 3 : 2.5), hw: e.t === 'lighter' ? 2.4 : e.t === 'sailing_barge' ? 4.6 : 4.5 });
   }
   return out;
 }

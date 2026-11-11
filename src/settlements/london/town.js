@@ -27,9 +27,27 @@ function traffic() {
   L.push({ t: 'paddle_steamer', at: [188, 40], y: RIVER.level, rot: S + 0.08, seed: 22, ring: 'cloth_green' });
   for (const [z, k] of [[-46, 0], [-30, 1]]) L.push({ t: 'lighter', at: [bank(z)[1] - 6.5 - k * 4.2, z], y: RIVER.level, rot: N, seed: 23 + k, load: k ? 'sacks' : 'coal' });
   L.push({ t: 'lighter', at: [176, -80], y: RIVER.level, rot: N + 0.25, seed: 26 });
+  // the watermen's stairs on both embankments, wherries waiting at their feet; Thames sailing barges, one under way and one moored off Lambeth
+  for (const [z, k] of [[-196, 0], [-130, 1], [40, 1]]) { const bx = bank(z)[k], dir = k ? -1 : 1, x0 = bx + (k ? 0.6 : -0.6), xl = x0 + dir * 5.5;
+    L.push({ t: 'river_stairs', x: x0, z, dir, y: GROUND, water: RIVER.level });
+    L.push({ t: 'wherry', at: [xl + dir * 3.4, z + 0.4], y: RIVER.level, rot: N + 0.1 * dir, seed: 30 + Math.abs(z) % 7 }); if (!k) L.push({ t: 'wherry', at: [xl + dir * 6.5, z - 3.2], y: RIVER.level, rot: S - 0.3, seed: 37 }); }
+  L.push({ t: 'sailing_barge', at: [(bank(-20)[0] + bank(-20)[1]) / 2 - 8, -20], y: RIVER.level, rot: S + 0.06, seed: 41, sail: 'cloth_ochre' });
+  L.push({ t: 'sailing_barge', at: [bank(120)[1] - 7.5, 120], y: RIVER.level, rot: N + 0.04, seed: 42, sail: 'hide_brown' });
   // the horses, drivers, conductors and passengers in a plan of the life style (instanced with the town's figures)
   for (const e of L) e.riders = false;
   return [base('london-traffic', L), base('london-traffic-life', L.flatMap(ridersOf), 'life')];
+}
+/** The river's people (§5d): mudlarks on the landings of the stairs, an angler on the parapet, a waterman waiting at the head of the stairs. */
+function riverFolk() {
+  const L = [], fig = (at, y, rot, o) => L.push({ t: 'figure', at, y, rot, h: 1.6, seed: Math.floor(at[0] * 31 + at[1] * 17), skin: 'skin_light', feet: 'bare', ...o });
+  for (const [z, k] of [[-196, 0], [-130, 1], [40, 1]]) {
+    const bx = bank(z)[k], dir = k ? -1 : 1, x0 = bx + (k ? 0.6 : -0.6), xl = x0 + dir * 5.5, face = dir > 0 ? -Math.PI / 2 : Math.PI / 2, lv = RIVER.level + 0.25;
+    fig([xl + dir * 0.9, z + 0.7], lv, face, { h: 1.15, dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_grey', hat: 'cap', hatMat: 'cloth_grey', pose: 'squat' });
+    fig([xl + dir * 1.3, z - 0.6], lv, face + 0.6, { h: 1.05, dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'none', pose: 'sit_low' });
+    fig([x0 - dir * 1.2, z + 2.4], GROUND, face, { dress: 'trousers', cloth: 'cloth_blue', cloth2: 'cloth_black', hat: 'cap', hatMat: 'cloth_red', over: 'apron', feet: 'shod' });
+    fig([x0 - dir * 0.9, z - 4.5], GROUND, face, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_brown', hat: 'brim', hatMat: 'cloth_brown', carry: 'pole', len: 2.6, feet: 'shod', pose: 'stand' });
+  }
+  return L;
 }
 /** The street sellers and passers-by about 1870 (§5b): costermongers with their barrows and a donkey-cart at the kerbs of
  *  Bridge Street and of the road from the bridge into Lambeth, coster women with the round head-basket, gentlemen and
@@ -118,5 +136,5 @@ export async function houses() {
   const all = lots(), plans = [], open = openSet(all);
   plans.push(...lodTiles('london-terraces', 'victorian', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true } : {}) })), { R: RADIUS }));
   const sq = square();
-  return [...plans, base('london-square', sq), base('london-square-life', sq.flatMap(ridersOf), 'life'), ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life')];
+  return [...plans, base('london-square', sq), base('london-square-life', sq.flatMap(ridersOf), 'life'), ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life'), base('london-river-folk', riverFolk(), 'life')];
 }
