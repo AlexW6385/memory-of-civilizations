@@ -333,7 +333,7 @@ export class GlobeView {
         const [a, b] = [...pinch.values()], d0 = Math.hypot(a[0] - b[0], a[1] - b[1]);
         pinch.set(e.pointerId, [e.clientX, e.clientY]);
         const [c2, d2] = [...pinch.values()], d1 = Math.hypot(c2[0] - d2[0], c2[1] - d2[1]);
-        this.zoom = Math.max(0.9, Math.min(14, this.zoom * d1 / Math.max(1, d0)));
+        this.zoom = Math.max(0.9, Math.min(20, this.zoom * d1 / Math.max(1, d0)));
         moved += 10; this.zoomTo = this.zoom; this.gl?.ready ? this.request() : this.draw(true); return;
       }
       pinch.set(e.pointerId, [e.clientX, e.clientY]);
@@ -364,7 +364,7 @@ export class GlobeView {
     cv.addEventListener('pointercancel', (e) => { pinch.delete(e.pointerId); drag = null; this.draw(); });
     cv.addEventListener('wheel', (e) => {
       e.preventDefault();
-      this.zoomTo = Math.max(0.9, Math.min(14, this.zoomTo * Math.exp(-e.deltaY * 0.0015)));
+      this.zoomTo = Math.max(0.9, Math.min(20, this.zoomTo * Math.exp(-e.deltaY * 0.0015)));
       if (this.gl?.ready) { this.request(); return; }
       this.zoom = this.zoomTo;
       this.draw(true);
