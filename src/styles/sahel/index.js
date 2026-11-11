@@ -9,6 +9,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, frustum } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
+import { shopRow, courtHouse } from './interiors.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const B = 'banco_rough';      // hand-smeared at each year's crépissage: lumpy, runnelled
@@ -327,6 +328,18 @@ function greatMosque(el, { bag, col }) {
     for (let j = 0; j < 10; j++) pointedSpandrel(tris, x, t, piers[j] + (j === 0 ? 0.7 : 0.8), piers[j + 1] - (j === 9 ? 0.7 : 0.8), ys, yT);
     bag.add('banco_smooth', fromTriangles(tris));
   }
+  // the floor of the prayer hall: strips of reed matting laid down the aisles between the rows of piers, and the three mihrabs
+  // (the niche of the qibla, its dark recess in a pointed frame) on the inner face of the qibla wall, in line with the towers
+  for (let i = 0; i < 8; i++) {
+    const xa2 = (rowX(i) + rowX(i + 1)) / 2;
+    for (let z = z0 + 0.8; z < z1 - 3.1; z += 3.2) bag.add((Math.floor(z / 3.2) + i) % 5 === 0 ? 'cloth_ochre' : 'reed_mat', box(xa2 - 0.65, py, z, xa2 + 0.65, py + 0.02, z + 3.0));
+  }
+  { const qx = x1 - 0.45;
+    for (const [zc, w] of [[cz, 1.2], [cz - 13, 0.9], [cz + 13, 0.9]]) {
+      bag.add('lacquer_black', box(qx - 0.03, py, zc - w, qx, py + 2.6, zc + w));
+      for (const sg of [-1, 1]) { const za = sg < 0 ? zc - w - 0.18 : zc + w, zb = sg < 0 ? zc - w : zc + w + 0.18; bag.add('banco_smooth', box(qx - 0.12, py, za, qx, py + 2.6, zb)); }
+      const tris = []; pointedSpandrel(tris, qx - 0.06, 0.06, zc - w - 0.18, zc + w + 0.18, py + 2.6, py + 4.0); bag.add('banco_smooth', fromTriangles(tris));
+    } }
   bag.add('timber', box(xm, py + 9.6, z0, x1, py + 9.9, z1));
   bag.add('banco_smooth', box(xm - 0.5, py + 9.9, z0 - 0.5, x1 + 0.5, py + 10.5, z1 + 0.5));
   col.floor([xm, z0, x1, z1], py + 10.5);
@@ -400,12 +413,23 @@ function greatMosque(el, { bag, col }) {
 function sahelHouse(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, st = el.storeys ?? (rand() < 0.65 ? 2 : 1), H = st * 3.1;
   const kind = el.kind ?? (st > 1 && rand() < 0.55 ? 'moroccan' : 'tukulor');
+  const hollow = !!el.hollow;           // an enterable house: the walls, roofs and furniture are built apart (interiors.js)
+  if (!hollow) {
   bag.add(B, box(x0, 0, z0, x1, H, z1));
   bag.add('banco_smooth', box(x0 - 0.1, H, z0 - 0.1, x1 + 0.1, H + 0.15, z1 + 0.1));
   // the parapet round the roof terrace
   for (const [a, b] of [[[x0, z0], [x1, z0]], [[x1, z0], [x1, z1]], [[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]]]) { const t = []; beamTris(t, [a[0], H + 0.15, a[1]], [b[0], H + 0.15, b[1]], 0.18, 0.75); bag.add(B, fromTriangles(t)); }
   col.rect([x0, z0, x1, z1], 0, H);
-  col.floor([x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3], H + 0.15);
+  col.floor([x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3], H + 0.15);  // the roof terrace: a vent of the kitchen below, capped with an inverted fired bowl as on the mosque's roof, water jars,
+  // sometimes a mat spread to dry and a bundle of palm sticks (the next replastering's toron)
+  { const r2 = rng((el.seed || 1) * 7 + 3), y = H + 0.15, W = x1 - x0, D = z1 - z0;
+    const vx = x0 + W * (0.3 + r2() * 0.4), vz = z0 + D * (0.3 + r2() * 0.4);
+    bag.add('banco_smooth', lathe([[0.3, -0.05], [0.3, 0.16], [0.25, 0.2], [0.001, 0.2]], 8, null, vx, y, vz));
+    bag.add('terracotta', lathe([[0.001, 0.19], [0.33, 0.19], [0.33, 0.24], [0.28, 0.33], [0.18, 0.4], [0.001, 0.42]], 10, null, vx, y, vz));
+    for (let i = 0; i < 1 + Math.floor(r2() * 3); i++) { const jx = x0 + 0.8 + r2() * (W - 1.6), jz = z0 + 0.8 + r2() * (D - 1.6); if (Math.hypot(jx - vx, jz - vz) > 0.9) bag.add(r2() < 0.5 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.12, 0.03], [0.2, 0.2], [0.15, 0.36], [0.09, 0.44], [0.11, 0.5], [0.001, 0.48]], 9, null, jx, y, jz)); }
+    if (r2() < 0.4) { const mx = x0 + 0.9 + r2() * Math.max(0.1, W - 3.4), mz = z0 + 0.9 + r2() * Math.max(0.1, D - 2.6); bag.add(r2() < 0.5 ? 'reed_mat' : 'cloth_indigo', box(mx, y, mz, mx + 1.6, y + 0.02, mz + 1.0)); }
+  }
+  }
   // the facade's frame: s along the front from a to b, d outward from its plane
   const f = el.front || 's';
   const [a, b] = f === 's' ? [[x0, z1], [x1, z1]] : f === 'n' ? [[x1, z0], [x0, z0]] : f === 'e' ? [[x1, z1], [x1, z0]] : [[x0, z0], [x0, z1]];
@@ -432,19 +456,19 @@ function sahelHouse(el, { bag, col }) {
   if (st > 1) { const n = Math.max(3, Math.round((2 * hw - 0.9) / 0.5)); for (let k = 0; k < n; k++) { const s = mid - hw + 0.55 + (2 * hw - 1.1) * (k + 0.5) / n; lbox('banco_smooth', s - 0.12, s + 0.12, 0.14, 0.17, H - 0.55, H - 0.3); } }
   lbox('banco_smooth', mid - hw + 0.3, mid + hw - 0.3, 0.14, 0.26, H - 0.2, H - 0.05);
   // the door: a plank leaf in a banco frame, the frame's timber lintel; an iron ring
-  const dw = 0.55, dh = 2.05;
+  const dw = el.dw ?? 0.55, dh = 2.05;
   lbox('banco_smooth', mid - dw - 0.2, mid - dw, -0.05, 0.2, 0, dh + 0.2); lbox('banco_smooth', mid + dw, mid + dw + 0.2, -0.05, 0.2, 0, dh + 0.2);
   lbox('timber', mid - dw - 0.3, mid + dw + 0.3, -0.05, 0.22, dh, dh + 0.14);
-  lbox('wood_dark', mid - dw, mid + dw, -0.06, 0.015, 0, dh - 0.01);
-  for (let k = 0; k < 5; k++) { const s = mid - dw + k * (2 * dw) / 5; lbox('timber', s + 0.008, s + 2 * dw / 5 - 0.008, -0.06, k % 2 ? 0.035 : 0.045, 0, dh); }
-  for (const y of [0.35, 1.0, 1.7]) lbox('wood_dark', mid - dw, mid + dw, 0.04, 0.07, y, y + 0.09);
+  if (!hollow) lbox('wood_dark', mid - dw, mid + dw, -0.06, 0.015, 0, dh - 0.01);
+  if (!hollow) for (let k = 0; k < 5; k++) { const s = mid - dw + k * (2 * dw) / 5; lbox('timber', s + 0.008, s + 2 * dw / 5 - 0.008, -0.06, k % 2 ? 0.035 : 0.045, 0, dh); }
+  if (!hollow) for (const y of [0.35, 1.0, 1.7]) lbox('wood_dark', mid - dw, mid + dw, 0.04, 0.07, y, y + 0.09);
   // the year's erosion on its four walls (§13): on the front clear of the pilasters, the panel and the door
   for (const [ea, eb] of [[[x0, z1], [x1, z1]], [[x1, z0], [x0, z0]], [[x1, z1], [x1, z0]], [[x0, z0], [x0, z1]]]) {
     const EL = Math.hypot(eb[0] - ea[0], eb[1] - ea[1]), ex = (eb[0] - ea[0]) / EL, ez = (eb[1] - ea[1]) / EL, front = ea[0] === a[0] && ea[1] === a[1] && eb[0] === b[0] && eb[1] === b[1];
     const ok = front ? (q, m) => q > 0.85 + m && q < EL - 0.85 - m && Math.abs(q - mid) > hw + 0.65 + m : (q, m) => q > 0.25 + m && q < EL - 0.25 - m;
     erode(bag, (q, d) => [ea[0] + ex * q - ez * d, ea[1] + ez * q + ex * d], EL, Math.max(1, Math.round(EL / (front ? 1.1 : 1.8))), 0, H, 0, ok, rng((el.seed || 1) * 13 + EL * 7), front ? 0.62 : 0.02);   // (on the front above the benches)
   }
-  { const [rx, rz] = P(mid + dw * 0.55, 0.09); bag.add('iron', lathe([[0.06, -0.06], [0.07, 0], [0.06, 0.06], [0.05, 0], [0.06, -0.06]], 8, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(Math.atan2(nx, nz)).translate(rx, 1.05, rz)); }
+  if (!hollow) { const [rx, rz] = P(mid + dw * 0.55, 0.09); bag.add('iron', lathe([[0.06, -0.06], [0.07, 0], [0.06, 0.06], [0.05, 0], [0.06, -0.06]], 8, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(Math.atan2(nx, nz)).translate(rx, 1.05, rz)); }
   // the facade bench (tintin) along the foot, either side of the entrance
   for (const [s0, s1] of [[0.8, mid - hw - 0.55], [mid + hw + 0.55, L - 0.8]]) if (s1 - s0 > 0.8) lbox('banco_smooth', s0, s1, -0.05, 0.5, 0, 0.45, true);
   if (kind === 'tukulor') {
@@ -657,6 +681,6 @@ function mudPit(el, { bag, col }) {
 
 registerStyle('sahel', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
+  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_shops: shopRow, sahel_court_house: (el, c) => { sahelHouse({ ...el, hollow: true, front: 's', storeys: 2, kind: 'tukulor', dw: 0.65 }, c); courtHouse(el, c); }, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
   objects: {},
 });
