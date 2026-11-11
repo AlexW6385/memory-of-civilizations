@@ -76,5 +76,6 @@ export const MOVER_SITES = {
   'wei-ye': () => import('../settlements/wei-ye/movers.js'),
   'bhaktapur': () => import('../settlements/bhaktapur/movers.js'),
   'nalanda': () => import('../settlements/nalanda/movers.js'),
+  'hakka-tulou': () => import('../settlements/hakka-tulou/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

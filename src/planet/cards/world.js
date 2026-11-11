@@ -984,4 +984,20 @@ export const CARDS = {
       "沿着通道排开的僧院与寺塔，以及环绕它们的水池 —— 长方形的池子以砖砌边，有台阶通向水面，僧人每晨在此沐浴，妇女在此取水；池外是俗人的村落，掩映在楝树、菩提树与枣椰之间。",
     ],
   },
+  'hakka-tulou': {
+    en: [
+      "The Hakka — the 'guest families' who came south from the Yellow River plain in successive migrations — built their villages in the hills of south-west Fujian in great houses of rammed earth, the tulou. A whole clan, often several hundred people, lived inside one: a windowless wall of earth, two metres thick at the foot, round or square, with one main gate, the rooms stacked on four floors round a common court. Walls of clay, sand and lime rammed between boards, bound with bamboo strips, lean inward and rise from a foot of river cobbles; the timber floors, galleries and stairs are fir, the roof tiles of baked clay. The settlement shown is about 1710, in a valley with the mountain behind and water in front.",
+      "Chengqi Lou — the round tulou after the great house at Gaobei, Yongding, begun in 1709: an outer ring about 63 metres across and four storeys high, 72 rooms a floor (kitchens on the ground floor, the grain store above, bedrooms on the two upper floors), each family owning a vertical slice from kitchen to bedroom; wooden galleries on the court side, two stair bays, one main gate with iron-shod doors in a granite frame, and a deep tiled eave all round.",
+      "The inner ring and the ancestral hall — a second ring of two storeys inside the first, and in the middle court the clan's ancestral hall on a granite platform, open at the front, with the altar and the tablets at the back; two stone-curbed wells and a cobbled court.",
+      "The neighbouring tulou — a smaller round house and square ones of three storeys, each with its single gate and court.",
+      "The valley — a stream crossed by stone slab bridges, the drying ground before the gate, farm buildings, paddy fields and, higher up, terraces of paddy and tea, with fir and bamboo on the hills.",
+    ],
+    zh: [
+      "客家人——自黄河流域几次南迁而来的“客”——在闽西南的山间建起一座座夯土大屋，即土楼。一个宗族常有数百人同住一楼：外墙厚实、少窗，墙脚厚达两米，或圆或方，只设一座正门，房间沿庭院分四层环绕。墙以黏土、沙与石灰在木板间夯筑，夹以竹片，微微内倾，下砌河卵石墙基；楼板、走马廊与楼梯用杉木，屋瓦为青瓦。这里表现约1710年的村落：背靠青山，前临溪水。",
+      "承启楼 —— 依永定高北村承启楼（始建于1709年）而建的圆楼：外环直径约63米，高四层，每层72间，底层为厨房，二层储粮，三、四层住人，每户占一条自下而上的开间；庭院一侧是木走廊，有两处楼梯间，一座包铁大门嵌在花岗岩门框中，屋檐深挑，环绕一周。",
+      "内环与祖堂 —— 外环之内还有一圈两层的内环，中央院落是宗族的祖堂，建在花岗岩台基上，前面敞开，后部供着神龛和祖先牌位；院中有两口石砌井台，铺鹅卵石。",
+      "邻近的土楼 —— 一座较小的圆楼与几座三层方楼，各有一座大门和一方天井。",
+      "山谷 —— 溪上架着石板桥，门前是晒谷坪，附近有农舍和水田；更高处是层层梯田和茶园，山上长着杉木与竹林。",
+    ],
+  },
 };
