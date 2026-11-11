@@ -204,6 +204,24 @@ export function streetPlans(base) {
     }
     if (rand() < 0.55 && clear(w.x + 1.4, z - d * 1.6, 1)) person([w.x + 1.4, z - d * 1.6], Y, faceTo([0, d]), { dress: 'robe', carry: rand() < 0.5 ? 'basket' : 'none', pose: 'stand' });
   }
+  // the lanes' mouths and the earth margins of the river streets: what is left in the open between the houses — a stack of firewood, a vat, crates, baskets and a barrow, a
+  // bench with a neighbour, a wash line from the eaves to a pole — every 8 m or so along the lanes within reach of the bridge, at both edges
+  for (const w of LANES) {
+    const horiz = w[2] - w[0] > w[3] - w[1];
+    for (let t = (horiz ? w[0] : w[1]) + 6; t < (horiz ? w[2] : w[3]); t += 7 + rand() * 5) {
+      const mid = horiz ? (w[1] + w[3]) / 2 : (w[0] + w[2]) / 2, side = rand() < 0.5 ? -1 : 1, off = mid + side * 1.35;
+      const x = horiz ? t : off, z = horiz ? off : t;
+      if (dBridge(x, z) > 230 || !spot(x, z, 0.8)) continue;
+      claim(x, z, 1.0);
+      const k = rand(), rot = horiz ? (side < 0 ? 0 : Math.PI) : (side < 0 ? -Math.PI / 2 : Math.PI / 2);
+      if (k < 0.25) L.push({ t: 'firewood', at: [x, z], y: Y, rot: horiz ? 0 : Math.PI / 2, len: 1.6, seed: seed() });
+      else if (k < 0.45) L.push({ t: 'pot', kind: 'vat', at: [x, z], y: Y, rot: rand() * 6.28 });
+      else if (k < 0.62) L.push({ t: 'crates', at: [x, z], y: Y, rot: rot, n: 3, seed: seed() });
+      else if (k < 0.78) { L.push({ t: 'basket', at: [x, z], y: Y, n: 2, seed: seed() }); person([x + (horiz ? 0.9 : -side * 0.9), z + (horiz ? side * -0.9 : 0.9)], Y, faceTo(horiz ? [0, -side] : [-side, 0]), { pose: 'squat', hat: pick(['cap', 'straw']) }); }
+      else if (k < 0.9) { L.push({ t: 'bench', at: [x, z], y: Y, rot: horiz ? 0 : Math.PI / 2, len: 1.6, mat: 'timber' }); person([x, z + (horiz ? -side * 0.1 : 0)], Y, faceTo(horiz ? [0, -side] : [-side, 0]), { pose: 'sit', dress: 'robe', hat: pick(['cap', 'none']) }); }
+      else L.push({ t: 'barrel', at: [x, z], y: Y, rot: 0, n: 3, seed: seed() });
+    }
+  }
   // the walker's route along the main street's axis (x = 0) and over the bridge stays free of standing people
   for (let i = L.length - 1; i >= 0; i--) if (L[i].t === 'figure' && Math.abs(L[i].at[0]) < 0.9 && L[i].at[1] > -84 && L[i].at[1] < 204) L.splice(i, 1);
   return [base('song-kaifeng-street-life', L, 'life'), base('song-kaifeng-street-things', S)];

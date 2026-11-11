@@ -7,6 +7,7 @@
 // hipped for the larger ones; thatch thick and steep. Local frame: a along the front, b from the street (0) back.
 
 import { box, fromTriangles, lathe, addCloth, clothBox } from '../../core/geom.js';
+import { inLot } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (r, a) => a[Math.floor(r() * a.length)];
@@ -421,7 +422,7 @@ export function houseSong(el, { bag, col }) {
         // the side walls: a string course at the floor, a small lattice window upstairs, damp and streaks under the sill
         for (const [sa, sg] of [[0, -1], [L, 1]]) {
           B('timber', sa - (sg < 0 ? 0.05 : 0), 0, sa + (sg > 0 ? 0.05 : 0), D, yF - 0.14, yF - 0.02);
-          if (D > 6 && rand() < 0.7) {
+          if (D > 6 && rand() < 0.95) {
             const bw = Math.min(D - 2, 2.2 + rand() * (D - 4.2)), pr = 0.045 * sg;
             B('timber', sa + (sg < 0 ? -0.05 : 0), bw - 0.55, sa + (sg > 0 ? 0.05 : 0), bw + 0.55, yF + 0.7, yF + 1.9);
             B('lattice', sa + (sg < 0 ? -0.06 : 0), bw - 0.45, sa + (sg > 0 ? 0.06 : 0), bw + 0.45, yF + 0.8, yF + 1.8);
@@ -429,6 +430,47 @@ export function houseSong(el, { bag, col }) {
             void pr;
           }
           B('plaster_damp', sa + (sg < 0 ? -0.034 : 0), 0.02, sa + (sg > 0 ? 0.034 : 0), D - 0.02, yF - 0.7, yF - 0.14);
+          // the ground floor of the side wall (what the lane sees): a side door with its step, a barred window, a patch of fallen plaster, a second upstairs window,
+          // and in the free yard beside it a lean-to shed with firewood and jars against the wall (not where a neighbour or a way's edge is within reach)
+          {
+            const S = (m, b0_, b1_, ya, yb, pr) => B(m, sa + (sg < 0 ? -pr : 0), b0_, sa + (sg > 0 ? pr : 0), b1_, ya, yb);
+            let bd = -9;
+            if (D > 6.5 && rand() < 0.6) {
+              bd = 1.3 + rand() * (D - 3.2);
+              S('timber', bd - 0.58, bd + 0.58, P0, P0 + 2.28, 0.07); S('wood_dark', bd - 0.46, bd + 0.46, P0, P0 + 2.12, 0.1);
+              for (const dd of [-0.23, 0.23]) { S('timber', bd + dd - 0.015, bd + dd + 0.015, P0 + 0.1, P0 + 2.1, 0.115); }
+              S('timber', bd - 0.46, bd + 0.46, P0 + 1.0, P0 + 1.06, 0.115); S('iron', bd - 0.04, bd + 0.04, P0 + 0.95, P0 + 1.1, 0.14);
+              B('granite_block', sa + (sg < 0 ? -0.45 : 0), bd - 0.65, sa + (sg > 0 ? 0.45 : 0), bd + 0.65, 0, P0 + 0.06);
+            }
+            if (D > 5 && rand() < 0.7) {
+              const bw2 = (bd > 0 ? (bd > D / 2 ? bd - 2.4 : bd + 2.4) : 1.6 + rand() * (D - 3.2));
+              if (bw2 > 0.9 && bw2 < D - 0.9) {
+                S('timber', bw2 - 0.45, bw2 + 0.45, P0 + 1.3, P0 + 2.3, 0.07); S('lattice', bw2 - 0.36, bw2 + 0.36, P0 + 1.4, P0 + 2.2, 0.09);
+                S('timber', bw2 - 0.5, bw2 + 0.5, P0 + 1.22, P0 + 1.3, 0.1);
+              }
+            }
+            { const bf = 0.6 + rand() * (D - 1.8); S('brick_grey', bf, bf + 0.6 + rand() * 0.5, P0 + 0.28 + rand() * 0.2, P0 + 1.0, 0.04); }
+            if (D > 8.5 && rand() < 0.65) {
+              const bw3 = D * (0.3 + rand() * 0.4), bw4 = bw3 + (bw3 > D / 2 ? -1 : 1) * (2.6 + rand() * 0.8);
+              if (bw4 > 0.9 && bw4 < D - 0.9 && Math.abs(bw3 - bw4) > 2.2) { S('timber', bw4 - 0.45, bw4 + 0.45, yF + 0.75, yF + 1.85, 0.07); S('lattice', bw4 - 0.36, bw4 + 0.36, yF + 0.85, yF + 1.75, 0.09); }
+            }
+            const q = W(sa + sg * 1.4, D * 0.5, 0);
+            if (D > 7 && rand() < 0.6 && (bd < 0 || Math.abs(bd - D * 0.5) > 3.2) && !inLot(q[0], q[2], 0.35) && !inLot(W(sa + sg * 2.6, D * 0.5, 0)[0], W(sa + sg * 2.6, D * 0.5, 0)[2], 0.2)) {
+              const bl = D * 0.5, l0 = bl - 1.1, l1 = bl + 1.1, dp = 0.95, ya = P0 + 2.55, yb2 = P0 + 2.15;
+              for (const bb of [l0, l1]) { const pc = sa + sg * (dp - 0.08); B('timber', pc - 0.05, bb - 0.05, pc + 0.05, bb + 0.05, 0, yb2 - 0.04); }
+              const T = (aa, bb, y) => W(aa, bb, y);
+              surf(tile, [T(sa, l0 - 0.1, ya), T(sa, l1 + 0.1, ya), T(sa + sg * dp, l1 + 0.1, yb2), T(sa + sg * dp, l0 - 0.1, yb2)], UP);
+              surf(tile, [T(sa, l0 - 0.1, ya - 0.07), T(sa + sg * dp, l0 - 0.1, yb2 - 0.07), T(sa + sg * dp, l1 + 0.1, yb2 - 0.07), T(sa, l1 + 0.1, ya - 0.07)], DN);
+              surf(tile, [T(sa, l0 - 0.1, ya - 0.07), T(sa, l0 - 0.1, ya), T(sa + sg * dp, l0 - 0.1, yb2), T(sa + sg * dp, l0 - 0.1, yb2 - 0.07)], dirV(-1));
+              surf(tile, [T(sa, l1 + 0.1, ya - 0.07), T(sa + sg * dp, l1 + 0.1, yb2 - 0.07), T(sa + sg * dp, l1 + 0.1, yb2), T(sa, l1 + 0.1, ya)], dirV(1));
+              surf(tile, [T(sa + sg * dp, l0 - 0.1, yb2 - 0.07), T(sa + sg * dp, l1 + 0.1, yb2 - 0.07), T(sa + sg * dp, l1 + 0.1, yb2), T(sa + sg * dp, l0 - 0.1, yb2)], dirU(sg));
+              // under it: a stack of split firewood against the wall, two jars, a chopping block
+              for (let r = 0; r < 4; r++) B(r % 2 ? 'timber' : 'wood_dark', sa + (sg < 0 ? -0.5 : 0.02), l0 + 0.05, sa + (sg > 0 ? 0.5 : -0.02), l0 + 0.95, 0.04 + r * 0.17, 0.2 + r * 0.17);
+              for (const [bj, hj] of [[l1 - 0.7, 0.62], [l1 - 0.25, 0.48]]) { const cx = sa + sg * 0.4; B('pottery_dark', cx - 0.2, bj - 0.17, cx + 0.2, bj + 0.17, 0, hj * 0.7); B('pottery_dark', cx - 0.14, bj - 0.12, cx + 0.14, bj + 0.12, hj * 0.7, hj); }
+              B('timber', sa + sg * 0.75 - 0.17, bl - 0.17, sa + sg * 0.75 + 0.17, bl + 0.17, 0, 0.4);
+              cRect(sa, l0 - 0.1, sa + sg * dp, l1 + 0.1, 0, 1.6);
+            }
+          }
         }
       }
       // the wine shops: the dark bay above the door and its curtain of cloth
