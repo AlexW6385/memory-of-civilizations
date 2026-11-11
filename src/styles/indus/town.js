@@ -1,5 +1,5 @@
 // The streets, the market well, the landing and the harbour office of Mohenjo-daro (docs/settlements/mohenjo-daro.md §2, §6).
-import { box, lathe, frustum } from '../../core/geom.js';
+import { box, lathe, frustum, fromTriangles } from '../../core/geom.js';
 import { Fr, rng, wellAt } from './kit.js';
 
 const jar = (bag, mat, x, y, z, s = 1) => bag.add(mat, lathe([[0.07 * s, 0], [0.2 * s, 0.12 * s], [0.24 * s, 0.3 * s], [0.19 * s, 0.5 * s], [0.1 * s, 0.6 * s], [0.12 * s, 0.66 * s], [0.001, 0.66 * s]], 8, null, x, y, z));
@@ -87,4 +87,10 @@ export function office(el, ctx) {
   for (let k = 0; k < 4; k++) jar(bag, k % 2 ? 'terracotta' : 'pottery_dark', x0 + 1.2 + k * 0.7, 0.04, z1 - 1.2, 1.6);
   for (let k = 0; k < 5; k++) bag.add('granite_grey', box(x1 - 4.5 + k * 0.25, 0.04, z1 - 1.3, x1 - 4.35 + k * 0.25, 0.04 + 0.08 + 0.03 * k, z1 - 1.15));
   lights.push({ at: [(x0 + x1) / 2, 2.4, my], color: '#ffd9a0', intensity: 3, distance: 9 });
+}
+
+/** indus_river: { x0, level, bed } — the Indus: its water from x0 eastward over the whole width (the ground hides it where it is dry). */
+export function river(el, ctx) {
+  const R = 380;
+  ctx.bag.add('water', fromTriangles([el.x0, el.level, -R, el.x0, el.level, R, el.x0 + 260, el.level, R, el.x0, el.level, -R, el.x0 + 260, el.level, R, el.x0 + 260, el.level, -R]));
 }

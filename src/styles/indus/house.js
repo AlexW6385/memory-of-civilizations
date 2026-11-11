@@ -5,11 +5,11 @@
 import { lathe } from './kit.js';
 import { rng, pick, lotFrame, wellAt } from './kit.js';
 
-const T = 0.7, H = 3.3, PAR = 0.35;
+const T = 0.7, H0 = 3.3, PAR = 0.35;
 
 /** A room box: walls t thick round the rect (u0, v0, u1, v1) with a doorway on side `door` ('u0'|'u1'|'v0'|'v1') at `at`, a roof slab with a parapet ring. */
 function room(F, r, door, at, o = {}) {
-  const [u0, v0, u1, v1] = r, t = o.t ?? 0.45, h = o.h ?? H, dw = 1.0, dh = 2.0, wm = o.mat ?? 'mudbrick';
+  const [u0, v0, u1, v1] = r, t = o.t ?? 0.45, h = o.h ?? H0, dw = 1.0, dh = 2.0, wm = o.mat ?? 'mudbrick';
   const wall = (a0, b0, a1, b1, isDoor, alongU) => {
     if (!isDoor) { F.b(wm, a0, 0, b0, a1, h, b1); return; }
     const c = at, lo = c - dw / 2, hi = c + dw / 2;
@@ -48,7 +48,8 @@ function trade(F, kind, u0, v0, u1, v1, rand, lights) {
       for (let k = 0; k < 5; k++) F.b('inlay_carnelian', u - 0.7 + k * 0.3, 0.45, v + 0.05, u - 0.62 + k * 0.3, 0.5, v + 0.12, false);
       F.b('granite_grey', u + 0.1, 0.45, v + 0.1, u + 0.5, 0.55, v + 0.3, false);
     }
-    for (let k = 0; k < 6; k++) F.b(k % 2 ? 'inlay_carnelian' : 'cloth_ochre', mu - 1.4 + k * 0.5, 1.5, v0 + 0.5, mu - 1.34 + k * 0.5, 2.2, v0 + 0.54, false);   // strings of beads hung to cure
+    F.b('timber', mu - 1.7, 0, v0 + 0.4, mu - 1.6, 2.3, v0 + 0.5, false); F.b('timber', mu + 1.6, 0, v0 + 0.4, mu + 1.7, 2.3, v0 + 0.5, false); F.b('timber', mu - 1.7, 2.2, v0 + 0.4, mu + 1.7, 2.3, v0 + 0.5, false);
+    for (let k = 0; k < 6; k++) F.b(k % 2 ? 'inlay_carnelian' : 'cloth_ochre', mu - 1.4 + k * 0.55, 1.5, v0 + 0.43, mu - 1.36 + k * 0.55, 2.2, v0 + 0.47, false);   // strings of beads hung to cure
     kiln(F, mu, v1 - 1.6, 0.7, 1.3); jar(F, 'terracotta', u0 + 1.2, v1 - 1.2, 1.2); jar(F, 'pottery_dark', u0 + 2.0, v1 - 1.0, 1);
   } else if (kind === 'seal') {
     for (const [u, v] of [[u0 + 1.8, v0 + 1.4], [u1 - 1.8, v0 + 1.4], [mu, v1 - 1.5]]) {
@@ -89,7 +90,7 @@ function furnish(F, r, rand, lights) {
 
 /** indus_house: { rect, front, kind ('house' | 'small' | trade), seed, open, y } */
 export function house(el, ctx) {
-  const rand = rng(el.seed), F = lotFrame(ctx, el.rect, el.front, el.y ?? 0), W = F.W, D = F.D, kind = el.kind, small = kind === 'small', isTrade = !['house', 'small'].includes(kind);
+  const rand = rng(el.seed), H = 3.0 + rand() * 0.8, F = lotFrame(ctx, el.rect, el.front, el.y ?? 0), W = F.W, D = F.D, kind = el.kind, small = kind === 'small', isTrade = !['house', 'small'].includes(kind);
   const lowH = 2.2;
   // the shell: lower baked brick, above it mud brick; the door on the lane
   const du = Math.max(1.6, Math.min(W - 1.6, W * (0.25 + 0.5 * rand())));
@@ -119,10 +120,10 @@ export function house(el, ctx) {
   const roomsOpen = [];
   for (let i = 0; i < nb; i++) {
     const r = [T + i * bw, D - T - rb, T + (i + 1) * bw, D - T];
-    room(F, r, 'v0', (r[0] + r[2]) / 2, { noRoof: false, t: 0.4, parapet: false }); roomsOpen.push(r);
+    room(F, r, 'v0', (r[0] + r[2]) / 2, { noRoof: false, t: 0.4, parapet: false, h: H }); roomsOpen.push(r);
   }
-  if (ls) { const r = [T, T + 2.6, T + lw, D - T - rb]; if (r[3] - r[1] > 3) { room(F, r, 'u1', (r[1] + r[3]) / 2, { t: 0.4, parapet: false }); roomsOpen.push(r); } }
-  if (rs) { const r = [W - T - lw, T + 2.6, W - T, D - T - rb]; if (r[3] - r[1] > 3) { room(F, r, 'u0', (r[1] + r[3]) / 2, { t: 0.4, parapet: false }); roomsOpen.push(r); } }
+  if (ls) { const r = [T, T + 2.6, T + lw, D - T - rb]; if (r[3] - r[1] > 3) { room(F, r, 'u1', (r[1] + r[3]) / 2, { t: 0.4, parapet: false, h: H }); roomsOpen.push(r); } }
+  if (rs) { const r = [W - T - lw, T + 2.6, W - T, D - T - rb]; if (r[3] - r[1] > 3) { room(F, r, 'u0', (r[1] + r[3]) / 2, { t: 0.4, parapet: false, h: H }); roomsOpen.push(r); } }
   // the stair to the roof, in the court against the back range's front wall
   const sx = W - T - (rs ? lw + 0.1 : 0) - 1.1, sv1 = D - T - rb;
   if (sv1 - (T + 3.2) > 3.6) F.stairs(sx - 0.45, sv1 - 3.8, sx + 0.45, sv1, 0.05, H, 1);

@@ -35,7 +35,7 @@ function people() {
   }
   woman([WELL_BIG[0] + 3.3, WELL_BIG[1] + 0.5], Math.PI / 2, { carry: 'pot', arms: 'head' });
   // the workshops: the master at his bench in the court, seated on the ground
-  for (const l of lots()) if (!['house', 'small'].includes(l.kind)) { const p = P(l, l.rect[3] - l.rect[1] > 0 ? Math.min(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 99) / 2 : 6, 3.3); man(p, facing(l) + Math.PI, { y: l.y, pose: 'cross', cloth: 'cloth_ochre', beard: 1 }); }
+  for (const l of lots()) if (!['house', 'small'].includes(l.kind)) { const p = P(l, l.rect[3] - l.rect[1] > 0 ? Math.min(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 99) / 2 : 6, 6.0); man(p, facing(l) + Math.PI, { y: l.y, pose: 'cross', cloth: 'cloth_ochre', beard: 1 }); }
   // the quay: boatmen and porters at the stairs, the harbour clerk at his office
   for (const z of QUAY.stairs) for (let k = 0; k < 2; k++) man([QUAY.x1 - 2.5, z + (k ? 4 : -4)], Math.PI / 2, { y: QUAY.top + 0.02, arms: k ? 'sack' : undefined, carry: k ? 'sack' : 'none' });
   man([CUSTOMS[0] + 2.4, (CUSTOMS[1] + CUSTOMS[3]) / 2], Math.PI / 2, { y: 0.04, pose: 'cross', cloth: 'cloth_white', beard: 1 });
@@ -83,6 +83,7 @@ export async function town() {
   const plans = [], LT = lots();
   plans.push(base('md-streets', [{ t: 'indus_streets', streets: streets(), lanes: lanes() }]));
   plans.push(base('md-market', [{ t: 'indus_market', rect: PLAZA, well: WELL_BIG }], { rooms: [{ id: 'market place', rect: PLAZA, y: 0, kind: 'open', market: true }] }));
+  plans.push(base('md-river', [{ t: 'indus_river', x0: QUAY.x1, level: RIVER.level }]));
   plans.push(base('md-quay', [{ t: 'indus_quay', ...QUAY, bed: RIVER.bed, level: RIVER.level }, { t: 'indus_office', rect: CUSTOMS }]));
   // the wall on the south with its gate and towers
   {
