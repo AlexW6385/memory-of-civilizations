@@ -3,6 +3,7 @@
 // prytaneis with its kitchen and its roof of lozenge tiles; the Altar of the Twelve Gods in its enclosure; the Herms;
 // the boundary stone; the booths of the market behind their wicker screens. Registered into the `greek` style.
 
+import { furnishShop } from './shops.js';
 import { Matrix4 } from '../../core/three.js';
 import { STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, rod, frustum } from '../../core/geom.js';
@@ -137,6 +138,7 @@ function stoa(el, ctx) {
       if (k > 0) wallR(F.R(u0 - 0.2, vb + 0.5, u0 + 0.2, D - wt), yF - 0.25);
       // seven couches round the walls, a little table before each
       const ia = u0 + (k > 0 ? 0.2 : 0), ib = u1 - (k < n - 1 ? 0.2 : 0), va = vb + 0.5, vbk = D - wt;
+      if (el.rooms.trades) { furnishShop(ctx, F, y, ia + (k > 0 ? 0.2 : 0) - (k > 0 ? 0.2 : 0), ib, va, vbk, el.rooms.trades[k % el.rooms.trades.length], rand); continue; }
       const couch = (cu, cv, alongU) => {
         const r = alongU ? F.R(cu - 0.9, cv - 0.4, cu + 0.9, cv + 0.4) : F.R(cu - 0.4, cv - 0.9, cu + 0.4, cv + 0.9);
         B(bag, 'timber', r, y, y + 0.42); B(bag, ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_indigo'][Math.floor(rand() * 4)], [r[0] + 0.04, r[1] + 0.04, r[2] - 0.04, r[3] - 0.04], y + 0.42, y + 0.52);

@@ -63,7 +63,7 @@ function potterWorks(el, ctx) {
   const U = (u) => (flip ? L - u : u), RU = (a, b) => (flip ? [L - b, L - a] : [a, b]);
   const Y = (a, v0, b, v1, y0, y1, m, solid = true) => { const [p, q] = RU(a, b); R(p, v0, q, v1, y0, y1, m, solid); };
   // the floors: the workroom and the store of beaten lime-earth, the yard of pebbles
-  R(0, 0, L, Dr, -0.3, 0, 'lime_plaster', false); col.floor(F.R(0, 0, L, Dr), y);
+  R(0, 0, L, Dr, -0.3, 0, 'earth_wall', false); col.floor(F.R(0, 0, L, Dr), y);
   R(0, Dr, L, D, -0.3, -0.02, 'pebbles', false); col.floor(F.R(0, Dr, L, D), y - 0.02);
   // the walls: the street front with the wide opening and the store's door, the range's back wall to the yard, the partition, the sides, the yard's back wall
   wall(true, t / 2, 0, L, H, [[1.0, ur - 1.0, 2.45], [ur + 1.2, ur + 2.2]]);
@@ -187,13 +187,13 @@ function fountainHouse(el, ctx) {
   // the spouts: a lion's head of bronze set in the wall, the water falling in a thin stream into the trough
   for (let k = 0; k < 4; k++) {
     const u = L * (1 + 2 * k) / 8, [x, z] = F.P(u, vb - 0.02), [ox, oz] = F.out;
-    const head = lathe([[0.001, 0.0], [0.11, 0.0], [0.13, 0.12], [0.1, 0.2], [0.07, 0.26], [0.001, 0.27]], 10);
+    const head = lathe([[0.001, 0.0], [0.17, 0.0], [0.2, 0.18], [0.15, 0.3], [0.1, 0.38], [0.001, 0.4]], 10);
     head.rotateX(-Math.PI / 2);
     const rotY = Math.atan2(-ox, -oz);
     head.rotateY(rotY).translate(x, y + 1.15, z);
     bag.add('bronze', head);
-    const sx = x + ox * 0.3, sz = z + oz * 0.3;
-    bag.add('water', box(sx - 0.02, y + 0.42, sz - 0.02, sx + 0.02, y + 1.0, sz + 0.02));
+    const sx = x + ox * 0.42, sz = z + oz * 0.42;
+    bag.add('water', box(sx - 0.03, y + 0.42, sz - 0.03, sx + 0.03, y + 1.08, sz + 0.03));
   }
   // the stone ledge before the trough where the women stand their hydriai, and a few waiting there
   R(1.2, vb - 1.9, L - 1.2, vb - 1.55, 0, 0.12, 'limestone', false);

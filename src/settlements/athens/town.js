@@ -1,7 +1,8 @@
 // The town of Athens (docs/settlements/athens.md §5): courtyard houses in blocks round the hills.
 import { RADIUS, lots, pathAt, WAY, RAMP, inRect, SLOPE, AGORA } from './layout.js';
+import { TRADES } from '../../styles/greek/shops.js';
 import { SIMON, lifePlan } from './life.js';
-import { WORKSHOPS, FOUNTAIN, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
+import { WORKSHOPS, FOUNTAIN, SHOPROW, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
 // the houses along the ways, round the Agora and below the theatre are seen close: their herms, altars and wells
 const near = ([x0, z0, x1, z1]) => { const x = (x0 + x1) / 2, z = (z0 + z1) / 2; return pathAt(x, z, WAY)[0] < 40 || pathAt(x, z, RAMP)[0] < 40 || inRect(SLOPE, x, z, 30) || inRect(AGORA, x, z, 40); };
 const base = (id, elements) => ({ id, style: 'greek', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-300, 70], facing: 'e' } });
@@ -17,6 +18,10 @@ export async function town() {
     const [x0, z0, x1, z1] = w.rect, n = w.front === 'n';
     return { id: `workshop ${i + 1}`, rect: n ? [x0 + 0.5, z0 + 0.5, x0 + 9.6, z0 + 5.3] : [x0 + 0.5, z1 - 5.3, x0 + 9.6, z1 - 0.5], y: 0, kind: 'inner', market: false };
   }) });
+  // the workshops under the Agora's south side (§11d): five shops behind a double colonnade, each fitted for its trade
+  { const [x0, z0, x1, z1] = SHOPROW, rw = (x1 - x0 - 1.4) / 5;
+    plans.push({ ...base('athens-shops', [{ t: 'stoa', rect: SHOPROW, front: 'n', y: 0.35, h: 3.6, d: 0.53, sp: 1.745, flutes: 0, inner: { d: 0.5, every: 2 }, rooms: { n: 5, depth: 5.9, trades: TRADES }, mat: 'limestone', wall: 'mud_plaster', seed: 43 }]),
+      rooms: TRADES.map((id, k) => ({ id: `shop: ${id}`, rect: [x0 + 0.7 + k * rw + 0.3, z1 - 5.9 + 0.55, x0 + 0.7 + (k + 1) * rw - 0.1, z1 - 0.8], y: 0.35, kind: 'inner', market: false })) }); }
   plans.push(base('athens-fountain', [{ t: 'fountain_house', rect: FOUNTAIN, front: 'n', y: 0.1 }]));
   // the Academy (§11c): the grove's precinct and its sanctuaries, the palaestra, the covered track
   plans.push({ ...base('athens-academy', [

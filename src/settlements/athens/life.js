@@ -3,7 +3,8 @@
 // workshops round the Agora to talk); the woman of the house at the loom; the slave at the hearth; people in the
 // Agora between the booths and the stoas; a man leading a donkey along the Panathenaic Way.
 
-import { height } from './layout.js';
+import { height, SHOPROW, FOUNTAIN } from './layout.js';
+import { WORKSHOPS, localFrame, EXEDRA, PALAESTRA, PARADROMIS } from './quarters.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 export const SIMON = [-291, -107, -278, -93];
@@ -40,6 +41,50 @@ export function life() {
   // a man leading a donkey with panniers into the Agora along the Way
   L.push({ t: 'animal', kind: 'donkey', at: [-262, -214], y: height(-262, -214), rot: -2.6, seed: 9, gear: true });
   worker([-260.6, -212.4], -2.6, { carry: 'staff' });
+  // ── the fourth wave: the Kerameikos, the shops under the south side, the fountain, the Academy
+  const face = (dx, dz) => Math.atan2(-dx, -dz);
+  const slave = (at, rot, o = {}) => worker(at, rot, { beard: 0.3, ...o });
+  WORKSHOPS.forEach((w) => {
+    const { P } = localFrame(w.rect, w.front), toFront = face(0, w.front === 's' ? 1 : -1), toBack = face(0, w.front === 's' ? -1 : 1);
+    const at = (u, v) => P(u, v), yy = 0;
+    if (w.trade === 'potter') {
+      worker(at(4.2, 3.5), toFront, { y: yy, pose: 'sit', beard: 1, cloth: 'cloth_brown', hat: 'none' });          // at the wheel, on his stool
+      slave(at(5.0, 2.6), face(-1, 0), { y: yy, pose: 'squat', cloth: 'cloth_grey' });                              // the boy who turns it
+      slave(at(8.0, 4.3), toBack, { y: yy, carry: 'basket' });
+    } else if (w.trade === 'painter') {
+      worker(at(4.4, 2.9), toFront, { y: yy, pose: 'sit', beard: 0.8, cloth: 'linen', hat: 'none' });               // the painter at his bench, the krater before him
+      slave(at(7.2, 3.2), toFront, { y: yy, pose: 'sit', cloth: 'cloth_grey' });
+    } else if (w.trade === 'tile') {
+      slave(at(5.0, 2.2), toBack, { y: yy, carry: 'basket', cloth: 'cloth_ochre' });
+      worker(at(7.6, 3.0), toFront, { y: yy, beard: 1, cloth: 'cloth_brown' });
+    } else {
+      worker(at(4.5, 2.7), toFront, { y: yy, pose: 'sit', beard: 0.8, cloth: 'linen' });
+    }
+    // in the yard: a slave at the kiln's mouth with a log, the master by the racks
+    const [kx, kz, kr] = w.kiln, dir = Math.cos(kr) > 0 ? 1 : -1;
+    slave([kx + dir * 3.6, kz - 0.2], face(-dir, 0), { y: 0, carry: 'none', cloth: 'cloth_grey' });
+    const [yx, yz] = w.yardMid; citizen([yx + 0.5, yz - 1.2], rand() * 6.28, { y: 0, pose: 'talk', cloth: 'cloth_white' });
+  });
+  // the shops: the shopkeeper behind his counter, a buyer before it
+  [0, 1, 2, 3, 4].forEach((k) => {
+    const x = SHOPROW[0] + 0.7 + k * 5.32 + 3.6, z = SHOPROW[1] + 11.3;
+    worker([x, z], face(0, -1), { y: 0.35, beard: 0.9, cloth: ['cloth_brown', 'cloth_ochre', 'linen', 'cloth_grey', 'cloth_brown'][k] });
+    if (k < 4) citizen([x + 0.3, z - 2.2], face(0, 1), { y: 0.35, pose: 'talk' });
+  });
+  // the fountain: women with their hydriai at the spouts, one going away with hers on her head
+  for (let k = 0; k < 3; k++) woman([FOUNTAIN[0] + 16 * (1 + 2 * k) / 8, FOUNTAIN[3] - 2.2], face(0, 1), { y: 0.1, carry: k === 1 ? 'pot' : 'none', hat: k === 0 ? 'veil' : 'none' });
+  woman([FOUNTAIN[0] + 12.5, FOUNTAIN[1] - 2.4], face(0, -1), { y: 0, carry: 'pot', arms: 'head', hat: 'none' });
+  // the Academy: the old man in his himation and his companions on the exedra's seats, talking
+  { const [cx, cz] = EXEDRA;
+    L.push({ t: 'figure', at: [cx, cz - 0.4], y: 0, rot: face(0, 1), seed: seed(), skin: 'skin_medium', dress: 'wrap', top: 'bare', cloth: 'cloth_brown', hair: 'short', beard: 1, hat: 'none', feet: 'bare', pose: 'talk' });
+    for (let k = 0; k < 5; k++) { const a = Math.PI * (k * 2 + 1.0) / 10 + 0.15, sx = cx + Math.cos(a) * 3.2, sz = cz + Math.sin(a) * 3.2;
+      citizen([sx, sz], face(cx - sx, cz - sz), { y: 0.0, pose: 'sit', cloth: ['cloth_white', 'linen', 'cloth_ochre'][k % 3] }); }
+    citizen([cx + 2.0, cz - 3.0], face(-1, 0.6), { y: 0, pose: 'talk' }); }
+  // the palaestra: the trainer with his staff, boys at wrestling, a man at the jumping pit, runners on the track
+  { const P0 = [PALAESTRA[0] + 17, PALAESTRA[1] + 14];
+    citizen([P0[0] - 3, P0[1] + 3], face(1, -1), { y: 0, carry: 'staff', cloth: 'cloth_white', pose: 'stand' });
+    for (const [dx, dz, r] of [[0, 0, 0], [0, -1.0, Math.PI]]) L.push({ t: 'figure', at: [P0[0] + 2 + dx, P0[1] - 3 + dz], y: 0, rot: r, seed: seed(), skin: 'skin_medium', dress: 'loincloth', cloth: 'linen', hair: 'short', beard: 0, hat: 'none', feet: 'bare', pose: 'stand' });
+    for (let k = 0; k < 3; k++) L.push({ t: 'figure', at: [PARADROMIS[0] + 12 + k * 3.5, (PARADROMIS[1] + PARADROMIS[3]) / 2 + (k % 2) * 1.2], y: 0, rot: face(1, 0), seed: seed(), skin: 'skin_medium', dress: 'loincloth', cloth: 'linen', hair: 'short', beard: 0, hat: 'none', feet: 'bare', pose: 'stand' }); }
   return L;
 }
 
