@@ -429,7 +429,7 @@ function royalRoad(el, { bag, col }) {
     if (Math.abs(by - ay) < 0.02) col.floor(r, ay + 0.12); else col.ramp(r, Math.min(ay, by) + 0.12, Math.max(ay, by) + 0.12, Math.abs(ux) > 0.5 ? ((by > ay) === (ux > 0) ? 'e' : 'w') : ((by > ay) === (uz > 0) ? 's' : 'n'));
   }
 }
-export { column as minoanColumn, fresco as minoanFresco, pithos as minoanPithos };
+export { column as minoanColumn, fresco as minoanFresco, pithos as minoanPithos, horns as minoanHorns };
 registerStyle('minoan', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: { ...STYLES.qing.elements, wing, portico, steps, minoan_house: house, fresco, bastion, throne_room: throneRoom, lightwell_tiers: lightwellTiers, town_house: townHouse, pithos, magazines, royal_road: royalRoad },
