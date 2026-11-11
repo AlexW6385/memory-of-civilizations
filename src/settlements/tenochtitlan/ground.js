@@ -38,6 +38,8 @@ export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   maxDensity: { poplar: 2.5, willow: 0.4 },
   climate: {
+    waterline: LEVEL.water,        // the canals' and the lake's water: the stain line on the walls that stand in it (src/engine/materials.js)
+    damp: 0.42,                    // a lake city 2,240 m up: dry winters, the summer rains; salts (tequesquite) and moss at the foot of the shaded walls
     sun: { az: 150, el: 55, color: [1.0, 0.96, 0.9], intensity: 3.4, lat: 19, dec: -15, hour: 10 },
     sky: { turbidity: 2.6, rayleigh: 1.0, mie: 0.004, mieG: 0.8, zenith: [0.09, 0.17, 0.38], horizon: [0.62, 0.66, 0.7] },
     fog: { color: [0.76, 0.78, 0.8], density: 0.0004, height: 0.01 },
@@ -46,6 +48,7 @@ export const ground = {
     weather: [
       { id: 'clear', weight: 4, clouds: 0.15, cloudDensity: 0.3, sun: 1.0, fog: 1 },
       { id: 'thunderheads', weight: 1.5, clouds: 0.6, cloudDensity: 0.6, sun: 0.75, fog: 1.2 },
+      { id: 'afternoon-rain', weight: 0.8, clouds: 0.95, cloudDensity: 0.8, sun: 0.35, fog: 2.0, rain: 0.5 },
     ],
   },
 };

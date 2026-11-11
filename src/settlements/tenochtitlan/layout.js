@@ -99,3 +99,15 @@ export function lanes() {
 }
 /** The houses' grid really leaves these strips free (a test): is (x, z) on a lane's line within its width? */
 export const onLaneStrip = (x, z) => [x, z].some((v) => { const m = (((v + 1) % 19) + 19) % 19; return m < 1.6 || m > 17.4; });
+
+/**
+ * Where the hearth's smoke leaves a calli: the middle of its back room's roof (the first two draws of the house's own
+ * sequence in src/styles/aztec/houses.js calli: the gate's side, the back room's depth), { p: [x, y, z] }.
+ */
+export function houseHearth(h) {
+  const [x0, z0, x1, z1] = h.rect, I = [x0 + 0.25, z0 + 0.25, x1 - 0.25, z1 - 0.25];
+  let s = h.seed >>> 0 || 1; const rand = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const gate = ['n', 's', 'w', 'e'][Math.floor(rand() * 4)], back = { n: 's', s: 'n', w: 'e', e: 'w' }[gate], db = 3.9 + rand() * 0.8;
+  const r = back === 'n' ? [I[0], I[1], I[2], I[1] + db] : back === 's' ? [I[0], I[3] - db, I[2], I[3]] : back === 'w' ? [I[0], I[1], I[0] + db, I[3]] : [I[2] - db, I[1], I[2], I[3]];
+  return { p: [(r[0] + r[2]) / 2, 0.42 + 2.9, (r[1] + r[3]) / 2], seed: h.seed };
+}
