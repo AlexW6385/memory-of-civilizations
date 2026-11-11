@@ -1,7 +1,7 @@
 // The blocks' buildings (docs/settlements/new-york.md §5) and the street's life (§5a): the traffic of
 // 1931 on the avenues and cross streets — Checker and Yellow cabs among black, cream and blue
 // motor cars — people on the pavements, lamp posts along the avenues.
-import { RADIUS, AVENUES, STREETS, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity, frontPoint, pavements } from './layout.js';
+import { RADIUS, AVENUES, STREETS, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity, frontPoint, pavements, roomLots } from './layout.js';
 import { entranceOf } from './plan.js';
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
 // settlement's by the style's `turned`, the life of the streets — single placed things — moved and
@@ -162,9 +162,32 @@ function dinerLife() {
     P({ at: [x0 + 9.8, zk1 + 0.95], rot: -0.2, dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_red' }),
   ].map(placed);
 }
+/** The shops' people (life style): the keeper behind the counter, a customer or two across it (on the stools at the fountain and the lunch counter), the barbers at their chairs. */
+function shopLife() {
+  const rand = rng(1934), out = [];
+  const DR = ['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo'], pick = (a) => a[Math.floor(rand() * a.length)];
+  const P = (l, u, d, o) => { const [x, z] = frontPoint(l.rect, l.front, u, -d), F = l.y + 0.06; return { t: 'figure', at: [x, z], y: F + (o.pose === 'sit' ? 0.16 : 0), seed: Math.floor(rand() * 1e9), skin: pick(['skin_light', 'skin_light', 'skin_medium']), ...o, rot: (o.rot ?? 0) + (l.front === 's' ? Math.PI : 0) }; };
+  for (const l of roomLots()) {
+    const L = l.rect[2] - l.rect[0], Dr = l.room.depth, mid = L / 2, k = l.room.kind, dC = Dr - 3.1;
+    const keeper = { dress: 'trousers', cloth: k === 'bakery' || k === 'deli' || k === 'drug' || k === 'lunch' ? 'cloth_white' : pick(DR), cloth2: 'cloth_white', hat: k === 'bakery' || k === 'lunch' ? 'cap' : 'none', hatMat: 'cloth_white', over: k === 'tailor' || k === 'shoe' || k === 'deli' || k === 'bakery' || k === 'lunch' ? 'apron' : 'none' };
+    const cust = (u, d, o = {}) => P(l, u, d, { dress: rand() < 0.35 ? 'robe' : 'trousers', cloth: pick(DR), cloth2: 'cloth_white', hat: 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']), rot: Math.PI, ...o });
+    if (k === 'barber') {
+      const n = Math.max(2, Math.min(3, Math.floor((L - 0.6 - 0.8 - 2) / 1.8)));
+      for (let i = 0; i < n; i++) { const u = 0.7 + 1.2 + i * ((L - 1.4 - 2.4) / Math.max(1, n - 1)); out.push(P(l, u + 0.7, Dr - 1.7, { ...keeper, cloth: 'cloth_white', over: 'apron', hat: 'none', rot: Math.PI / 2 })); if (i < 2) out.push(P(l, u, Dr - 1.7, { dress: 'trousers', cloth: pick(DR), cloth2: 'cloth_white', hat: 'none', pose: 'sit', rot: Math.PI })); }
+    } else {
+      out.push(P(l, mid + (rand() - 0.5) * 2, Dr - 1.5, keeper));
+      if (k === 'drug' || k === 'lunch') { out.push(cust(mid - 1.2, dC - 0.55, { pose: 'sit' })); out.push(cust(mid + 0.6, dC - 0.55, { pose: 'sit', dress: 'trousers' })); }
+      else out.push(cust(mid + (rand() - 0.5) * 3, dC - 0.9));
+      if (rand() < 0.6) out.push(cust(mid + (rand() < 0.5 ? -2.2 : 2.2), 2.4 + rand() * 1.5, { rot: rand() * 6 }));
+    }
+  }
+  const tiles = new Map();
+  for (const e of out) { const k = `${Math.floor(e.at[0] / 150)},${Math.floor(e.at[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-shop-life-${k}`, []), elements: list.map(placed), style: 'life', center: toCity(i * 150 + 75, j * 150 + 75), near: 200 }; });
+}
 export async function buildings() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l) }])));
   const dl = dinerLife(), c = toCity(...DINER_AT);
-  return [...plans, ...streetLife(), ...yards(), ...pavePlans(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
+  return [...plans, ...streetLife(), ...yards(), ...pavePlans(), ...shopLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }

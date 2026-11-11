@@ -14,6 +14,7 @@ import { grandCentral } from './gct.js';
 import { laundry, newsstand } from './street.js';
 import { turned } from './turn.js';
 import { pavement, curb } from './pave.js';
+import { shopRoom } from './shoprooms.js';
 import { rowhouses, castIronFront, chimney, bulkhead, subwayEntrance, face } from './blocks.js';
 import { shopName, shopSign, bladeText, nearEntrance, rng as rng2 } from './dress.js';
 
@@ -130,7 +131,7 @@ function soot(bag, [x0, z0, x1, z1], f, y, h, mat, rand) {
   for (const u of [0.05, L - 0.55]) put(u, u + 0.5, Math.max(low, top - 4 - rand() * 6), Math.max(low, top - 0.6));
 }
 /** skyscraper: { rect, y, h, mat, seed } — a block that steps back as it rises when tall; a cornice or a crown; a tank on lower roofs. */
-function skyscraper(el, { bag, col }) {
+function skyscraper(el, { bag, col, lights }) {
   const rand = rng(el.seed || 1), y = el.y ?? 0, h = el.h ?? 40, mat = el.mat ?? LS;
   let r = el.rect;
   if (el.row && el.front) {
@@ -139,11 +140,12 @@ function skyscraper(el, { bag, col }) {
     rowhouses(bag, col, r, el.front, y, h, el.seed || 1);
     return;
   }
-  col.rect(r, y - 0.5, y + h);
-  storefronts(bag, r, y, rand, el.shops ?? 'nsew');
+  const room = el.room && el.front && h < 70;
+  if (!room) col.rect(r, y - 0.5, y + h);
+  storefronts(bag, r, y, rand, room ? (el.shops ?? '').replace(el.front, '') : (el.shops ?? 'nsew'));
   if (h < 70) {
-    block(bag, mat, r, y - 0.5, y + h);
-    block(bag, 'granite_grey', inset(r, -0.15), y - 0.5, y + 4.5);
+    if (room) shopRoom(bag, col, lights, el, rand);
+    else { block(bag, mat, r, y - 0.5, y + h); block(bag, 'granite_grey', inset(r, -0.15), y - 0.5, y + 4.5); }
     block(bag, mat, inset(r, -0.5), y + h - 0.2, y + h + 0.8);
     block(bag, PLAIN, inset(r, -0.2), y + h - 1.6, y + h - 0.2);                // the frieze under the cornice
     if (h > 20) block(bag, PLAIN, inset(r, -0.25), y + 12.2, y + 12.8);              // a belt course over the base

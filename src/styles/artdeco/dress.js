@@ -59,6 +59,11 @@ export class Quads {
   t(mat) { let a = this.m.get(mat); if (!a) this.m.set(mat, a = []); return a; }
   /** A double-sided quad of four points in order. */
   quad(mat, a, b, c, d) { this.t(mat).push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c); }
+  /** An upward-facing single-sided quad (a floor's tile), whichever way the four points run. */
+  up(mat, a, b, c, d) {
+    const n = (c[2] - b[2]) * (a[0] - b[0]) - (c[0] - b[0]) * (a[2] - b[2]), t = this.t(mat);   // the y of (c−b)×(a−b)
+    if (n > 0) t.push(...a, ...b, ...c, ...a, ...c, ...d); else t.push(...a, ...c, ...b, ...a, ...d, ...c);
+  }
   flush(bag) { for (const [mat, t] of this.m) if (t.length) bag.add(mat, fromTriangles(t)); this.m.clear(); }
 }
 
