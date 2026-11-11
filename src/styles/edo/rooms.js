@@ -58,7 +58,8 @@ export function machiyaShop(el, { bag, col }, { r, H1, H2 }) {
   { const u = x1 - 0.32; B(WD, u - 0.04, u + 0.04, 0, 1.0, -0.42, -0.34); B('wood_painted', u - 0.17, u + 0.17, 0.95, 2.3, -0.42, -0.36); B(WD, u - 0.2, u + 0.2, 2.3, 2.38, -0.44, -0.34);
     for (let k = 0; k < 4; k++) B('lacquer_black', u - 0.09 + (k % 2) * 0.03, u + 0.09 - (k % 2) * 0.05, 2.12 - k * 0.27, 2.2 - k * 0.27, -0.445, -0.4205); C(u - 0.2, u + 0.2, -0.44, -0.34, 0, 2.38); }
   // ---- the trade: cloth on shelves, ceramics on stepped stands, or rice in straw bales
-  const trade = ['cloth', 'pottery', 'rice'].includes(el.trade) || el.trade === 'sake' || el.trade === 'tea' ? el.trade : ['cloth', 'pottery', 'rice'][Math.floor(rand() * 3)];
+  const KNOWN = ['cloth', 'pottery', 'rice', 'sake', 'tea', 'medicine', 'sandals', 'oil', 'bucket', 'paper', 'dye'];
+  const trade = KNOWN.includes(el.trade) ? el.trade : ['cloth', 'pottery', 'rice'][Math.floor(rand() * 3)];
   if (trade === 'sake') {
     // the brewer's shop: great casks (taru) on a rack against the shelf, small barrels and a tasting set on the shop's mats, bottles (tokkuri) on a shelf
     const q0 = qm - 0.7;
@@ -87,6 +88,26 @@ export function machiyaShop(el, { bag, col }, { r, H1, H2 }) {
     for (let k = 0; k < 3; k++) { const q = 0.6 + k * 0.45, v = fl + k * 0.25; B(WD, du + 0.4, ub - 0.4, fl, v + 0.25, q, q + 0.4);
       for (let u = du + 0.6; u < ub - 0.5; u += 0.45) lat(k === 1 ? 'glaze_blue' : k ? 'glaze_white' : 'pottery_dark', k === 0 ? [[0.001, 0], [0.12, 0.02], [0.16, 0.16], [0.1, 0.28], [0.11, 0.31], [0.001, 0.31]] : [[0.001, 0], [0.05, 0.0], [0.12, 0.08], [0.13, 0.1], [0.001, 0.03]], 10, u, v + 0.25, q + 0.2); }
     C(du + 0.4, ub - 0.4, 0.6, 2.0, fl, fl + 1);
+  } else if (trade === 'medicine') {
+    // the apothecary: the tall chest of many small drawers (hyakuyaku-dansu) against the wall, a medicine mill (yagen) and scales on the floor, jars on a shelf
+    const q0 = qm - 0.55, hh = 1.9;
+    B(WD, du + 0.3, ub - 0.3, fl, fl + hh, q0, q0 + 0.5); C(du + 0.3, ub - 0.3, q0, q0 + 0.5, fl, fl + hh);
+    for (let r2 = 0; r2 < 8; r2++) for (let c2 = 0; c2 < Math.floor((ub - du - 0.6) / 0.28); c2++) { const u = du + 0.34 + c2 * 0.28; B('lacquer_black', u, u + 0.24, fl + 0.1 + r2 * 0.22, fl + 0.28 + r2 * 0.22, q0 - 0.02, q0); B('iron', u + 0.1, u + 0.14, fl + 0.17 + r2 * 0.22, fl + 0.21 + r2 * 0.22, q0 - 0.03, q0 - 0.02); }
+    B('iron', du + 1.1, du + 1.7, fl, fl + 0.12, 1.0, 1.2); lat('iron', [[0.001, 0], [0.08, 0], [0.1, 0.1], [0.001, 0.1]], 8, du + 1.4, fl + 0.12, 1.1);
+    for (let k = 0; k < 4; k++) lat('glaze_white', [[0.001, 0], [0.07, 0], [0.09, 0.1], [0.05, 0.2], [0.001, 0.2]], 8, du + 0.6 + k * 0.45, fl + 0.05, 1.7);
+  } else if (trade === 'sandals' || trade === 'paper') {
+    // rows of straw sandals (or washi bundles) on pegs along the back wall and on a stand
+    const q0 = qm - 0.4, goods = trade === 'sandals' ? 'thatch' : 'linen';
+    B(WD, du + 0.3, ub - 0.3, fl + 1.6, fl + 1.66, q0, q0 + 0.1);
+    for (let u = du + 0.4; u < ub - 0.5; u += 0.22) B(goods, u, u + 0.14, fl + 0.9, fl + 1.6, q0 + 0.02, q0 + 0.06);
+    B(WD, du + 0.5, du + 1.7, fl, fl + 0.5, 1.0, 1.6); C(du + 0.5, du + 1.7, 1.0, 1.6, fl, fl + 0.5);
+    for (let k = 0; k < 6; k++) B(goods, du + 0.55 + (k % 3) * 0.38, du + 0.85 + (k % 3) * 0.38, fl + 0.5, fl + 0.58 + (k >> 2) * 0.1, 1.1 + (k >> 1 & 1) * 0.25, 1.4 + (k >> 1 & 1) * 0.25);
+  } else if (trade === 'oil' || trade === 'bucket' || trade === 'dye') {
+    // oil jars and a pressing trough, or coopers' tubs in rows, or indigo vats sunk in the floor of the passage
+    const m = trade === 'dye' ? 'pottery_dark' : 'timber';
+    for (let k = 0; k < 6; k++) lat(m, [[0.001, 0], [0.22, 0], [0.28, 0.25], [0.26, 0.5], [0.2, 0.62], [0.001, 0.62]], 10, du + 0.5 + (k % 3) * 0.7, fl, 0.8 + (k >> 1) * 0.55);
+    C(du + 0.2, ub - 0.2, 0.55, 2.2, fl, fl + 0.65);
+    if (trade === 'dye') for (let k = 0; k < 3; k++) B('cloth_indigo', ub - 0.6 - k * 0.06, ub - 0.55 - k * 0.06, fl + 0.6, fl + 1.9, qm - 1.0, qm - 0.3);
   } else {
     // tawara: rice in straw bales stacked in the passage and on the shop floor, a measure (masu) on the mats
     const bale = (u, v, q, len = 0.75) => { const g = lathe([[0.2, -len / 2], [0.25, -len / 2 + 0.06], [0.27, 0], [0.25, len / 2 - 0.06], [0.2, len / 2], [0.001, len / 2]], 10); g.rotateX(Math.PI / 2); g.translate(u, v, Z(q)); bag.add('thatch', g); };

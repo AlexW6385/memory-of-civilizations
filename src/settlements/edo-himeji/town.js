@@ -1,11 +1,12 @@
 // The castle town (docs/settlements/edo-himeji.md §5): samurai compounds round the inner moat, the merchants' machiya
 // beyond the middle moat; some houses open inside (§5.1); the life of the street and the avenue (§5.2): a palanquin
 // and its bearers, samurai with their two swords, pedlars with their carrying poles, the shopkeepers at their counters.
+import { props } from './props.js';
 import { RADIUS, STREET, OUTER, MIDDLE, LEVEL, lots, furniture } from './layout.js';
 const base = (id, elements, style = 'edo') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** Which houses are open inside: a machiya in three (its shop), a samurai house in six (its reception room). */
-export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 3 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 6 === 0);
+export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 2 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 3 === 0);
 
 function life() {
   const rand = rng(1620), P = [], E = [];
@@ -28,6 +29,9 @@ function life() {
     if (q0 > 1.6) fig([ub - 1.5 + 0.75, Z(q0 + 0.95)], rot, { y: 0.45, pose: 'seiza', cloth: 'cloth_brown', over: 'apron', cloth2: 'cloth_indigo' });
     if (rand() < 0.5) fig([du + 1.4, Z(0.42)], rot, { pose: 'sit', y: 0, cloth: rand() < 0.5 ? 'cloth_maroon' : 'cloth_grey', hair: rand() < 0.5 ? 'bun' : 'topknot' });
   }
+  // the moat's life: a fisherman sitting in every other moored boat, a woman kneeling at each landing washing greens
+  furniture().filter((f) => f.t === 'moat_boat').forEach((f, i) => { if (i % 2 === 0) fig([f.at[0] + 0.4, f.at[1]], Math.PI / 2, { y: LEVEL.water - 0.08 + 0.08, pose: 'sit', hat: 'straw', dress: 'wrap', cloth: 'cloth_indigo', feet: 'bare' }); });
+  furniture().filter((f) => f.t === 'landing').forEach((f, i) => fig([f.x + (i % 2 ? 1 : -1) * 0.6, f.z0 - 0.35], 0, { y: 0.3, pose: 'seiza', hair: 'bun', cloth: i % 2 ? 'cloth_maroon' : 'cloth_indigo', over: 'apron', cloth2: 'cloth_white' }));
   return [base('edo-himeji-street', E), base('edo-himeji-people', P, 'life')];
 }
 
@@ -37,6 +41,6 @@ export async function town() {
   plans.push(base('edo-himeji-furniture', furniture().flatMap((f) => (f.t === 'landing'
     ? [{ t: 'stairs', rect: [f.x - 1.5, f.z0, f.x + 1.5, f.z0 + 1.7], y0: LEVEL.bed, y1: 0.3, dir: 'n', mat: 'ishigaki' }]
     : f.t === 'moat_boat' ? [{ ...f, y: LEVEL.water - 0.08 }] : [f]))));
-  plans.push(...life());
+  plans.push(...life(), ...props());
   return plans;
 }

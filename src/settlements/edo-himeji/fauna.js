@@ -22,14 +22,18 @@ const flights = [
   { kind: 'swallow', n: 4, lane: { a: [-200, -230], b: [200, -230] }, y: [0.2, 3], speed: 9 },
   { kind: 'swallow', n: 4, lane: { a: [-200, 305], b: [200, 305] }, y: [0.2, 3], speed: 9 },
   { kind: 'swallow', n: 3, lane: { a: [0, 200], b: [0, 330] }, y: [2, 7], speed: 9 },
+  { kind: 'swallow', n: 4, lane: { a: [-30, 150], b: [-30, 260] }, y: [1, 5], speed: 9 },
   { kind: 'crow', n: 8, loop: { c: [-13, -50], a: [48, 40], rot: 0.4 }, y: [60, 30], speed: 9 },
 ];
-flights[0].a = flights[1].a = flights[2].a = [26, 4];
+for (const f of flights) if (f.kind === 'swallow') f.a = [26, 4];
 
 const perches = [];
 for (const [x, z] of [[-120, 336], [-60, 337], [30, 336.5], [100, 335.5], [150, 336], [-4, 260], [4, 215], [-20, 250], [-70, 120]]) perches.push({ kind: 'sparrow', x, z, y: x === -70 ? BANK : 0.03, rot: 0.4 + (x * 7 % 3), range: [1.4, 1.3] });
 // ...and on the copings of the walls on the inner rampart (2.3 m of wall and 0.45 of tile over the rampart's top)
 for (const [x, z, rot] of [[-100, INNER[1] + 1, 0], [60, INNER[1] + 1, 0], [INNER[0] + 1, 0, Math.PI / 2], [INNER[2] - 1, 40, Math.PI / 2]]) perches.push({ kind: 'sparrow', x, z, y: BANK + 1.4 + 2.3 + 0.45, rot, range: [2.6, 0], alert: 5 });
+for (const [x, z] of [[-190, 335], [-140, 338], [-90, 336], [-30, 337], [10, 335], [60, 337], [130, 336], [175, 338], [-30, 250], [-20, 215], [25, 262], [-60, 300], [60, 300]]) perches.push({ kind: 'sparrow', x, z, y: 0.03, rot: x * 0.3, range: [1.6, 1.3] });
+for (const [x, z] of [[-200, MIDDLE.z1 + 1.2], [120, MIDDLE.z1 + 1.2], [-150, MIDDLE.z0 - 1.2]]) perches.push({ kind: 'egret', x, z, y: 0.3, rot: 0.5, stay: [60, 200], gone: [60, 160], alert: 10 });
+perches.push({ kind: 'heron', x: OUTER[2] - 1.5, z: 40, y: 0.3, rot: 0, stay: [80, 240], gone: [40, 150], alert: 10 });
 perches.push({ kind: 'heron', x: OUTER[0] + 1.5, z: -60, y: 0.3, rot: Math.PI, stay: [80, 240], gone: [40, 150], alert: 10 });
 perches.push({ kind: 'egret', x: 60, z: MIDDLE.z1 + 1.2, y: 0.3, rot: -Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 });
 export default { fish, flights, perches };
