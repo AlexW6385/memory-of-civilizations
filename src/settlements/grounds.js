@@ -59,6 +59,7 @@ import { ground as muscovy } from './muscovy/ground.js';
 import { ground as cahokia } from './cahokia/ground.js';
 import { ground as newYork } from './new-york/ground.js';
 import { ground as sydney } from './sydney/ground.js';
+import { ground as mongolKarakorum } from './mongol-karakorum/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -117,6 +118,7 @@ export const GROUNDS = {
   cahokia,
   'new-york': newYork,
   sydney,
+  'mongol-karakorum': mongolKarakorum,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -140,6 +142,7 @@ const LOADERS = {
   tenochtitlan: () => import('./tenochtitlan/index.js'),
   teotihuacan: () => import('./teotihuacan/index.js'),
   taos: () => import('./taos/index.js'),
+  'mongol-karakorum': () => import('./mongol-karakorum/index.js'),
   'joseon-seoul': () => import('./joseon-seoul/index.js'),
   'song-kaifeng': () => import('./song-kaifeng/index.js'),
   lhasa: () => import('./lhasa/index.js'),
