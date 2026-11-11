@@ -1,4 +1,4 @@
-// Ming–Qing Beijing — the paving of the palace's courts (docs/settlements/qing-beijing.md §24): the great courts laid
+// Ming–Qing Beijing — the paving of the palace's courts (docs/settlements/qing-beijing.md §27): the great courts laid
 // with square "golden bricks" (jinzhuan) in cells with seams, each cell a few millimetres out of true, patches of
 // repair in another stone; the stone way down the axis in slabs of three widths with open joints, a few slabs of
 // weathered stone; the drain covers (the coin-pattern stone covers of the courts' drains); the aprons of the galleries.

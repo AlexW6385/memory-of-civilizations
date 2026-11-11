@@ -32,6 +32,8 @@ function streets() {
   // the bridges over the moat at the side gates (the axis crosses by the causeway)
   E.push({ t: 'ming_arch_bridge', at: [(a0 + c0) / 2, 65], across: 'x', span: c0 - a0 + 0.6, width: 7, rise: 1.2, landing: 4, y: 0.04, water: LEVEL.moat, bed: LEVEL.moatBed, pal: { base: 'marble' } });
   E.push({ t: 'ming_arch_bridge', at: [(a1 + c1) / 2, 65], across: 'x', span: a1 - c1 + 0.6, width: 7, rise: 1.2, landing: 4, y: 0.04, water: LEVEL.moat, bed: LEVEL.moatBed, pal: { base: 'marble' } });
+  // the causeway's two edges, over the moat's cut ends: a marble balustrade each side, as on the bridges
+  for (const sx of [-1, 1]) E.push({ t: 'rail', a: [sx * (nx - 0.4), d1 + 0.2], b: [sx * (nx - 0.4), b1 - 0.2], y: 0.04, carve: 'qing' });
   // the band between the moat and the palace wall, paved
   for (const r of [[c0, d0, c1, -194], [c0, 179, c1, d1], [c0, -194, -116, 179], [116, -194, c1, 179]]) E.push({ t: 'lane', rect: r, y: 0.03 });
   // the ring street, the avenue, the lanes

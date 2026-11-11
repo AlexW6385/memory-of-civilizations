@@ -3,7 +3,7 @@
 // scholar trees and jujubes in the courtyards, willows along the moat; the sky of a clear Beijing
 // autumn. Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, LEVEL, MOAT, RIVER, RING, AVENUE, SHOP_APRONS, inRect, inMoat, inRiver, inPalace, lanes, inHouse, inShopStrip, treeNear, inTemple, inBelt, smooth as sm } from './layout.js';
+import { RADIUS, LEVEL, MOAT, RIVER, RING, AVENUE, SHOP_APRONS, inRect, inMoat, inRiver, inPalace, lanes, inHouse, inShopStrip, treeNear, inTemple, inBelt, inForecourt, smooth as sm } from './layout.js';
 
 const LANES = lanes();
 const onLane = (x, z, m = 0) => LANES.some((l) => inRect(l, x, z, m)) || inRect(RING, x, z, m) && !inRect(MOAT.outer, x, z) || inRect(AVENUE, x, z, m) || SHOP_APRONS.some((r) => inRect(r, x, z, m));
@@ -35,6 +35,7 @@ function cover(x, z, h, ny) {
   const c = { sand: 0, grass: 0, rock: 0, soil: 0, fields: 0, dry: 0.35, warmth: 0.35, red: 0.08, road: 0, snow: 0, forest: 0 };
   const r = Math.hypot(x, z);
   if (inPalace(x, z, 4)) { c.road = 1; c.soil = 1; return c; }
+  if (inForecourt(x, z, 0.5)) { c.road = 1; c.soil = 1; c.dry = 0.7; return c; }
   if (r > RADIUS - 26) { c.fields = 0.7; c.grass = 0.3; return c; }
   if (inTemple(x, z, 0.5)) { c.road = 1; c.soil = 1; return c; }                       // the altar's court, paved with brick
   if (onLane(x, z)) { c.road = 0.8; c.soil = 1; c.dry = 0.7; return c; }
@@ -61,6 +62,7 @@ const KIND = { pagoda: 'pagoda_tree', jujube: 'jujube', persimmon: 'persimmon', 
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 8) return null;
   if (inPalace(x, z, 6) || channel(x, z) < 0.6) return null;
+  if (inForecourt(x, z, 4)) return null;                                  // the Meridian Gate's forecourt is bare (no willows on its causeway)
   if (inRect(MOAT.outer, x, z, 3) && !inRect(MOAT.outer, x, z, -0.01)) return { willow: 1.6 };
   if (inTemple(x, z, 2.5)) return null;
   if (inBelt(x, z)) return onLane(x, z, 1) || Math.abs(x - 13) < 9 && Math.abs(z - 280) < 4 ? null : { arborvitae: 2.4, grass: 18 };
