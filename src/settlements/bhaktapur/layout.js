@@ -97,7 +97,7 @@ export function lots() {
         if (Math.max(Math.hypot(r[0], r[1]), Math.hypot(r[2], r[1]), Math.hypot(r[0], r[3]), Math.hypot(r[2], r[3])) > HOUSE_R) break;
         if (blocked(r)) continue;
         const d = Math.hypot(cx, cz), n = d < 100 ? (rand() < 0.35 ? 4 : 3) : d < 135 ? (rand() < 0.5 ? 3 : 2) : 2;
-        out.push({ rect: r, front: fr.f, n, detail: d < 75 ? 2 : d < 115 ? 1 : 0, seed: Math.floor(rand() * 1e6), shop: fr.line === SQ[1] || fr.line === SQ[0] || fr.line === SQ[2] || fr.line === SQ[3] || fr.line === POT[1] ? rand() < 0.5 : undefined });
+        out.push({ rect: r, front: fr.f, n, detail: d < 45 ? 2 : d < 90 ? 1 : 0, seed: Math.floor(rand() * 1e6), shop: fr.line === SQ[1] || fr.line === SQ[0] || fr.line === SQ[2] || fr.line === SQ[3] || fr.line === POT[1] ? rand() < 0.5 : undefined });
         placed.push(r); t += W; done = true;
       }
       if (!done) t += 0.25;

@@ -109,7 +109,7 @@ export function houseParts(el, ctx, { hipRoof }) {
     B(lx - t, y - t, -0.11, lx + w + t, y, 0.02, 'wood_dark'); B(lx - t, y + h, -0.11, lx + w + t, y + h + t, 0.02, 'wood_dark');
     B(lx - t, y, -0.11, lx, y + h, 0.02, 'wood_dark'); B(lx + w, y, -0.11, lx + w + t, y + h, 0.02, 'wood_dark');
     if (d === 0) return;
-    const m = d > 1 ? Math.max(3, Math.round(w / 0.11)) : 3;
+    const m = d > 1 ? Math.max(3, Math.round(w / 0.16)) : 3;
     for (let k = 1; k < m; k++) { const x = lx + w * k / m; B(x - 0.015, y, -0.08, x + 0.015, y + h, -0.04, 'wood_dark'); }
     if (d > 1) for (let k = 1; k < 4; k++) B(lx, y + h * k / 4 - 0.015, -0.085, lx + w, y + h * k / 4 + 0.015, -0.045, 'wood_dark');
   }
