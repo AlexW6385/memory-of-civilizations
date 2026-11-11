@@ -20,7 +20,7 @@ function people() {
   fig([-14, 12], 0.04, 0.4, { over: 'sash', carry: 'staff', pose: 'staff', len: 1.7 });
   // inside: a priest at the offering stone in the sanctuary, a lector reading before the pillars
   fig([FX - 58.6 + 1.3, 0], 1.24, Math.PI / 2, { over: 'sash', pose: 'kneel' });
-  fig([FX - 15, 0.0], 0.04, Math.PI / 2, { over: 'sash', pose: 'stand' });
+  fig([FX - 15, 2.2], 0.04, Math.PI / 2, { over: 'sash', pose: 'stand' });
   // along the terrace and the ramp: bearers with bread and beer, a man with a basket, a scribe
   for (let k = 0; k < 6; k++) { const x = FX + 8 + rand() * 40, z = (rand() - 0.5) * 20; if (x > BANK_X - 2) continue; fig([x, z], 0.04, rand() * 6.28, { dress: rand() < 0.5 ? 'wrap' : 'sheath', hair: rand() < 0.5 ? 'short' : 'long', carry: rand() < 0.5 ? 'basket' : 'pot' }); }
   // the quay: porters off the boats, the scribe counting, the overseer

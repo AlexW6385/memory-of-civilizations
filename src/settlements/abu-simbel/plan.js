@@ -51,7 +51,7 @@ const smallRoomsList = [
   room('the small terrace', [FXS + 4, ZS - 17, SMALL_TERRACE[2] - 3, ZS + 17], FLOOR, 'open'),
   ...SR.map((r) => room(r.name, [FXS - r.d1, ZS - r.zh, FXS - r.d0, ZS + r.zh], r.y0, 'hall', r.kind === 'pass' ? {} : { sealed: true })),
 ];
-const swalks = [[[FXS + 24, ZS], [FXS + 4, ZS], [FXS - 6, ZS], [FXS - 18, ZS], [FXS - 24, ZS]]];
+const swalks = [[[FXS + 24, ZS], [FXS + 4, ZS], [FXS - 6, ZS], [FXS - 18, ZS], [FXS - 21, ZS]]];
 swalks[0].y0 = FLOOR;
 export const small = {
   id: 'abu-simbel-small-temple',
