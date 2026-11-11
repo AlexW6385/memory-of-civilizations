@@ -137,7 +137,7 @@ export function openGround(bag, col, el, { wall, y, gh, f, rand, foot, stairs = 
     B(IR, L * 0.25 - 0.1, D * 0.4 + 0.1, L * 0.25, D * 0.4 + 0.3, fy + 0.9, fy + 1.0);
     for (let k = 0; k < 6; k++) B(k % 2 ? TM : 'wood_painted', ub, D - T - 0.9, ub + 2.0, D - T - 0.1, fy + k * 0.09, fy + k * 0.09 + 0.08);
     B('wood_painted', L - T - 1.4, T + 0.3, L - T - 0.2, T + 1.0, fy, fy + 0.6, true); B(TM, L - T - 1.45, T + 0.25, L - T - 0.15, T + 1.05, fy + 0.6, fy + 0.66);
-    for (let k = 0; k < 5; k++) B('straw', L * 0.3 + k * 0.4, D * 0.4 + 0.9 + (k % 2) * 0.2, L * 0.3 + k * 0.4 + 0.25, D * 0.4 + 1.1 + (k % 2) * 0.2, fy + 0.015, fy + 0.04);
+    for (let k = 0; k < 5; k++) B('hide_tan', L * 0.3 + k * 0.4, D * 0.4 + 0.9 + (k % 2) * 0.2, L * 0.3 + k * 0.4 + 0.25, D * 0.4 + 1.1 + (k % 2) * 0.2, fy + 0.015, fy + 0.04);
     for (let k = 0; k < 5; k++) B(TM, ub + 2.3 + k * 0.1, D - T - 1.1, ub + 2.36 + k * 0.1, D - T - 0.05, fy, fy + 1.4 + (k % 2) * 0.2);
   } else if (use === 'candles') {
     // the pot of tallow on its fire, tapers hung to dry on frames, a rack of candles, a table

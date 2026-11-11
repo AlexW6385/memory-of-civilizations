@@ -13,6 +13,7 @@ const quad = (u0, y0, u1, y1, d) => fromTriangles([u0, y0, d, u1, y0, d, u1, y1,
 import { faceFrame, Local, ext, archOutline, voussoirs, wrect, merge } from './face.js';
 import { rusticate, dropFace, bifora } from './signoria.js';
 import { ball, limb, T } from '../qing/carving.js';
+import { mediciRooms } from './palace-rooms.js';
 
 const PF = 'limestone_yellow', SER = 'pietra_serena', M = 'marble_smooth', R = 'roof_tile', W = 'wood_dark', O = 'opening', PL = 'plaster_white', STU = 'stucco', BR = 'bronze';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -102,7 +103,8 @@ export function palazzoMedici(el, { bag, col }) {
   // the mass: below the portico's ceiling all but the court and its portico, the passage and the loggia; then all but the court; the top storey all but the court and its upper loggia
   const layer = (o, holes, ya, yb) => { for (const r of rectsMinus(o, holes)) { bag.add(PF, box(r[0], y + ya, r[1], r[2], y + yb, r[3])); col.rect(r, y + ya, y + yb); } };
   const PS = 5.0, PW0 = [x1 - 1.0, cz - pw / 2 - 1.0, x1, cz + pw / 2 + 1.0];
-  layer(rect, [K, LG, PG, PW0], 0, yP);
+  const RM = mediciRooms(bag, col, { rect, K, yP, y });
+  layer(rect, [K, LG, PG, PW0, ...RM], 0, yP);
   // the loggia's front walls with their arches (east: two; south: one), a metre thick
   const archWall = (pts, holes, f, d0) => { const { M: FM } = faceFrame(rect, f, y); const g = ext(pts, holes, d0, 0); g.applyMatrix4(FM); bag.add(PF, g); };
   const eArch = [[3.0, 3.4], [7.3, 3.4]], sArch = [[37.15, 3.1]], ysL = 4.8, Lf = z1 - z0, Ls = x1 - x0;
