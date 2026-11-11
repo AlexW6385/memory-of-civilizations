@@ -1,7 +1,7 @@
-// West Lake, c. 1200 (docs/settlements/song-hangzhou.md §12), brought into the Lin'an disc: the lake lies north of the pagoda's
-// court (settlement frame z from -496 to -230), with the Su causeway running north-south across it with its six bridges,
-// a lakeside pavilion, a landing with painted pleasure boats moored, Beishan at the north end and Xizhao Hill with Leifeng
-// Pagoda at the south end. Distances are compressed (the real causeway is 2.8 km).
+// West Lake, c. 1200 (docs/settlements/song-hangzhou.md §14), brought into the Lin'an disc: the town's lake north of the city wall, with the Su causeway
+// running north-south across it from the lake gate's shore with its six bridges,
+// two lakeside pavilions, a landing with painted pleasure boats moored, Beishan at the north end and Xizhao Hill with Leifeng
+// Pagoda on the south shore. Distances are compressed (the real causeway is 2.8 km).
 // Plan-local coordinates (m, +x east, +z south), the plan's origin on the Imperial Way's axis in the lake.
 import { LEVEL, LAKE_GATE } from './layout.js';
 
@@ -63,6 +63,6 @@ export const westLake = {
   view: [-30, -100, 30, 100], viewY: TOP, bakeTop: 70,
   elements: E,
   rooms: [room('lake-causeway', [-8, -92, 8, ZS - 2], TOP, 'open')],
-  walks: [Object.assign([[0, 118], [0, 60], [0, 0], [0, -60], [0, -90]], { y0: 0 }), Object.assign([[0, 118], [0, 106], [-14, 106], [-24, 106], [-34, 106], [-40, 96]], { y0: 0 })],   // along the causeway over its bridges to Beishan; up the stairs to the hill and the pagoda's terrace
+  walks: [Object.assign([[2, 118], [2, 60], [2, 0], [2, -60], [2, -90]], { y0: 0 }), Object.assign([[2, 118], [2, 106], [-14, 106], [-24, 106], [-34, 106], [-40, 96]], { y0: 0 })],   // along the causeway over its bridges to Beishan; up the stairs to the hill and the pagoda's terrace
 };
 export default westLake;
