@@ -6,7 +6,7 @@
 // (src/engine/movers.js, read in its worker); the ways come from layout.js. No moving boats (the round boats of
 // plan.js lie at the quay or on the stream).
 
-import { RADIUS, WAY, WALL_Z, PALACE, PRECINCT, ESAGILA, BRIDGE, MARKET, QUAY, riverX } from './layout.js';
+import { laneRects, RADIUS, WAY, WALL_Z, PALACE, PRECINCT, ESAGILA, BRIDGE, MARKET, QUAY, riverX } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -52,6 +52,8 @@ export function walkways() {
   // the Southern Palace: the way in at its east gate and the east court
   links.push({ a: [WAY.x - 8, PALACE[1] + 49], b: [PALACE[2] - 14, PALACE[1] + 49], w: 2.2, kind: 'street', weight: 0.9 });
   rects.push({ r: [PALACE[2] - 42, PALACE[1] + 28, PALACE[2] - 16, PALACE[1] + 72], weight: 0.9, market: 0.1, kind: 'street' });
+  // the lanes of the blocks in the core: people going about their errands between the fronts
+  for (const r of laneRects()) if (Math.hypot((r[0] + r[2]) / 2 + 40, (r[1] + r[3]) / 2 + 90) < 190) rects.push({ r, weight: 0.5, market: 0.25, kind: 'street' });
   return { rects, links, clip: RADIUS - 14 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: RADIUS - 18 }; }

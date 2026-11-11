@@ -99,7 +99,10 @@ export async function houses() {
     tiles.get(key).push(e);
   }
   let n = 0;
-  for (const E of tiles.values()) for (let i = 0; i < E.length; i += 120) plans.push(base(`babylon-houses-${n++}`, E.slice(i, i + 120)));
+  for (const E of tiles.values()) for (let i = 0; i < E.length; i += 120) {
+    const part = E.slice(i, i + 120);
+    plans.push({ ...base(`babylon-houses-${n++}`, part), rooms: part.filter((e) => e.open || e.t === 'babylon_shop').map((e, k) => ({ id: `${e.t === 'babylon_shop' ? e.trade + ' shop' : 'house'} ${n}-${k}`, rect: e.rect, y: 0, kind: 'hall' })) });
+  }
   // the walled yards of the blocks
   plans.push(base('babylon-yards', yards().map((y) => ({ t: 'babylon_yard', rect: y.rect, door: y.door, kind: y.kind, seed: y.seed, front: y.door }))));
   // the paving of the lanes in the core, the alleys' gutters, the street shrines, troughs, benches and water stands

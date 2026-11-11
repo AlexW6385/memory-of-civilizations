@@ -2,8 +2,7 @@
 // the Ishtar Gate in the double wall, the Processional Way between glazed walls, the Southern
 // Palace, the river.
 
-import { esagilaChambers } from '../../styles/babylonian/temple.js';
-import { RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height } from './layout.js';
+import { esagilaChambers, RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height } from './layout.js';
 
 const E = [];
 /** The round boats on the river: z, d (from the river's middle), r, cargo; the boatmen and an ass are placed in town.js. */

@@ -180,3 +180,14 @@ export function laneProps() {
   return PROPS;
 }
 export const LANE_W = LANE;
+
+/** The six chambers of Esagila's ranges: [{ kind, r (inside), f (the door's face) }] — the same as src/styles/babylonian/temple.js builds. */
+export function esagilaChambers([x0, z0, x1, z1] = ESAGILA) {
+  const zc = (z0 + z1) / 2, xm = (x0 + x1) / 2, C = [x0 + 32, zc - 18.8, x0 + 32 + 31.3, zc + 18.8], pw = 5, rw = 1.2, out = [];
+  for (const north of [true, false]) {
+    const a = north ? z0 : C[3], b = north ? C[1] : z1, rz0 = north ? b - rw - 8 : a + rw, rz1 = north ? b - rw : a + rw + 8;
+    [[xm + pw / 2 + 1.5, xm + pw / 2 + 10.5], [xm + pw / 2 + 11.5, xm + pw / 2 + 20.5]].forEach(([u0, u1], i) => out.push({ kind: north ? (i ? 'scriptorium' : 'storehouse') : (i ? 'treasury' : 'kitchen'), r: [u0, rz0, u1, rz1], f: north ? 's' : 'n' }));
+  }
+  for (const north of [true, false]) { const a = north ? C[1] : zc + pw / 2, b = north ? zc - pw / 2 : C[3], rx0 = C[2] + rw; out.push({ kind: north ? 'bakehouse' : 'purification', r: [rx0, a + 1.2, rx0 + 10, b - 1.2], f: 'w' }); }
+  return out;
+}
