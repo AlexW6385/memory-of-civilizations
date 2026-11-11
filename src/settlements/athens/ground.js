@@ -4,13 +4,15 @@
 
 import { KERAMEIKOS, ACADEMY, FOUNTAIN, SHOPROW } from './layout.js';
 import { PALAESTRA, XYSTOS, PARADROMIS, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS, GATE } from './quarters.js';
-import { RADIUS, ACRO, AGORA, height, acroE, onWay, pathAt, RAMP, inRect, inLot, SLOPE, THEATRE, ODEION } from './layout.js';
+import { RADIUS, ACRO, AGORA, height, acroE, onWay, pathAt, RAMP, inRect, inLot, lotAt, SLOPE, THEATRE, ODEION } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.2, grass: 0.25, rock: 0, soil: 0.55, fields: 0, dry: 0.8, warmth: 0.75, red: 0.45, road: 0, snow: 0, forest: 0 };
   if (acroE(x, z) < 1) { c.rock = 0.85; c.sand = 0.15; return c; }
   if (ny < 0.8) { c.rock = 0.8; c.soil = 0.2; return c; }
   if (onWay(x, z) || pathAt(x, z, RAMP)[0] < 6 || inRect(AGORA, x, z)) { c.road = 0.75; return c; }
+  // the lanes between the houses and under their walls: beaten earth and gravel, no grass; the courts and the ground beside them dust
+  if (lotAt(x, z, 4)) { c.road = lotAt(x, z, 0) ? 0.35 : 0.8; c.grass = 0; c.dry = 0.9; c.soil = 0.4; return c; }
   if (Math.hypot(x, z) > RADIUS - 60) { c.fields = 0.4; c.grass = 0.4; return c; }
   return c;
 }
@@ -19,7 +21,7 @@ const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 // South Stoa I, the booths of the market (src/settlements/athens/plan.js)
 const AGORA_BUILT = [[-252, -237.6, -204, -225], [-292, -197, -273, -150], [-262, -124.89, -219, -110], [-242, -199, -178, -140]];
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || acroE(x, z) < 1.05 || onWay(x, z, 1) || pathAt(x, z, RAMP)[0] < 8 || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || acroE(x, z) < 1.05 || onWay(x, z, 1) || pathAt(x, z, RAMP)[0] < 8 || lotAt(x, z, 9)) return null;
   // the plane trees Kimon planted in the Agora (Plutarch, Cimon 13.8): rows along its edges, its middle left open
   if (inRect(AGORA, x, z)) return !inRect(AGORA, x, z, -9) && !AGORA_BUILT.some((r) => inRect(r, x, z, 3)) && Math.hypot(x + 280, z + 133) > 13 && !onWay(x, z, 4) ? { plane_tree: 0.03 } : null;
   if (inRect(KERAMEIKOS, x, z, 3) || inRect(FOUNTAIN, x, z, 3) || inRect(SHOPROW, x, z, 3)) return null;      // the potters' quarter, the fountain house, the shops

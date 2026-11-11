@@ -1,14 +1,22 @@
 // The town of Athens (docs/settlements/athens.md §5): courtyard houses in blocks round the hills.
+import '../../styles/greek/ward.js';
 import { RADIUS, lots, pathAt, WAY, RAMP, inRect, SLOPE, AGORA } from './layout.js';
 import { TRADES } from '../../styles/greek/shops.js';
 import { SIMON, lifePlan } from './life.js';
 import { WORKSHOPS, FOUNTAIN, SHOPROW, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
-// the houses along the ways, round the Agora and below the theatre are seen close: their herms, altars and wells
-const near = ([x0, z0, x1, z1]) => { const x = (x0 + x1) / 2, z = (z0 + z1) / 2; return pathAt(x, z, WAY)[0] < 40 || pathAt(x, z, RAMP)[0] < 40 || inRect(SLOPE, x, z, 30) || inRect(AGORA, x, z, 40); };
 const base = (id, elements) => ({ id, style: 'greek', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-300, 70], facing: 'e' } });
+const OPEN_TRADES = ['bronze', 'shoe', 'cloth', 'wine', 'perfume', 'carpenter'];
 export async function town() {
-  const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) plans.push(base(`athens-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'greek_house', simple: true, near: near(l.rect), ...l }))));
+  const all = lots(), plans = [], closed = all.filter((l) => !l.open), opened = all.filter((l) => l.open);
+  for (let i = 0; i < closed.length; i += 120) plans.push(base(`athens-houses-${i / 120}`, closed.slice(i, i + 120).map((l) => ({ t: 'athens_house', rect: l.rect, front: l.front, seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }))));
+  // the walk-in houses (§5d): the same plan as Simon's, each with another trade in the shop on the street
+  opened.forEach((l, k) => { const [X0, Z0, X1, Z1] = l.rect, t = 0.5, sz = Z1 - t - 3.1, xl = X0 + t + 4.3, xk = xl + 0.4 + 3.4;
+    plans.push({ ...base(`athens-open-${k}`, [{ t: 'athens_open_house', rect: l.rect, y: l.y, seed: l.seed, trade: OPEN_TRADES[k % OPEN_TRADES.length] }]), rooms: [
+      { id: `shop (${OPEN_TRADES[k % OPEN_TRADES.length]})`, rect: [X0 + 0.5, Z0 + 0.5, X0 + 5, Z0 + 5.3], y: l.y, kind: 'inner', market: false },
+      { id: 'andron', rect: [X0 + 7.4, Z0 + 0.5, X1 - 0.5, Z0 + 5.3], y: l.y, kind: 'inner' },
+      { id: 'loom room', rect: [X0 + 0.5, sz, xl, Z1 - 0.5], y: l.y, kind: 'inner' },
+      { id: 'kitchen', rect: [xl + 0.4, sz, xk, Z1 - 0.5], y: l.y, kind: 'inner' },
+      { id: 'store', rect: [xk + 0.4, sz, X1 - 0.5, Z1 - 0.5], y: l.y, kind: 'inner' }] }); });
   // the house and shop by the south-west corner of the Agora that the finds name Simon the shoemaker's (§5b), walked into
   plans.push({ ...base('athens-simon', [{ t: 'simon_house', rect: SIMON, y: 0, seed: 410 }]), rooms: [
     { id: 'shoemaker shop', rect: [SIMON[0] + 0.5, SIMON[1] + 0.5, SIMON[0] + 5, SIMON[1] + 5.3], y: 0, kind: 'inner', market: false },
