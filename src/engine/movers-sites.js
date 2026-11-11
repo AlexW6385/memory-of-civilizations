@@ -54,5 +54,6 @@ export const MOVER_SITES = {
   'great-zimbabwe': () => import('../settlements/great-zimbabwe/movers.js'),
   'cahokia': () => import('../settlements/cahokia/movers.js'),
   'stonehenge': () => import('../settlements/stonehenge/movers.js'),
+  'maori': () => import('../settlements/maori/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
