@@ -11,6 +11,7 @@ import { beamTris, flipTris } from '../ming/index.js';
 import { loft, ring } from '../egyptian/objects.js';
 import { pyramidInterior } from './interior.js';
 import { sphinx } from './sphinx.js';
+import { paintChapel } from './chapel.js';
 import { khafreTemple } from './khafre.js';
 import { quarry, track, tools } from './quarry.js';
 
@@ -143,6 +144,7 @@ function mastaba(el, { bag, col }) {
   W([rx0, z0, x1, z1], H, H + 0.22, 'mud_plaster'); col.floor([rx0, z0, x1, z1], H + 0.22);
   // inside: the offering basin of limestone before the stela, loaves and a jar on it; the floor of beaten mud
   bag.add('mud_plaster', box(x0, -0.02, z0 + th, x1 - th, 0.03, z1 - th));
+  paintChapel(bag, x0 + 0.05, x1 - th - 0.02, z0 + th, z1 - th, H, rand);
   const bx = x0 + 0.55, bw = 0.42, bd = 0.32;
   bag.add('limestone_core', box(bx - bd, 0.03, sz - bw, bx + bd, 0.12, sz + bw));
   for (const [p, q] of [[[bx - bd, sz - bw], [bx + bd, sz - bw + 0.06]], [[bx - bd, sz + bw - 0.06], [bx + bd, sz + bw]], [[bx - bd, sz - bw], [bx - bd + 0.06, sz + bw]], [[bx + bd - 0.06, sz - bw], [bx + bd, sz + bw]]]) bag.add('limestone_core', box(p[0], 0.12, p[1], q[0], 0.2, q[1]));

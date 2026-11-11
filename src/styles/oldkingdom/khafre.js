@@ -71,6 +71,19 @@ export function khafreTemple(el, { bag, col }) {
   bag.add('granite_block', box(X(-0.25), y0, Z(D), X(W + 0.25), y0 + 0.7, Z(D + 0.25)));
   bag.add('granite_block', box(X(-0.25), y0, Z(0), X(0), y0 + 0.7, Z(D)));
   bag.add('granite_block', box(X(W), y0, Z(0), X(W + 0.25), y0 + 0.7, Z(D)));
+  // the joints of the granite casing: horizontal courses 1.3 m high, the vertical joints staggered (blocks of 3–5 m)
+  {
+    const J = (u0, v0, u1, v1, y, hh = 0.05) => bag.add('basalt', box(X(u0), y0 + y, Z(v0), X(u1), y0 + y + hh, Z(v1)));
+    const doorsE = [[9.3, 11.7], [30.3, 32.7]];
+    for (let c = 1; c < 6; c++) {
+      const y = 0.7 + c * 1.25;
+      J(-0.28, -0.28, W + 0.28, -0.22, y); J(-0.28, D + 0.22, W + 0.28, D + 0.28, y); J(-0.28, -0.28, -0.22, D + 0.28, y);
+      for (const [a, b] of [[-0.28, doorsE[0][0]], [doorsE[0][1], doorsE[1][0]], [doorsE[1][1], D + 0.28]]) J(W + 0.22, a, W + 0.28, b, y);
+      const off = (c % 2) * 2.1;
+      for (let u = 2.5 + off; u < W - 1; u += 3.6 + (c % 3) * 0.7) { J(u, -0.28, u + 0.05, -0.22, y - 1.25, 1.25); J(u, D + 0.22, u + 0.05, D + 0.28, y - 1.25, 1.25); }
+      for (let v = 3 + off; v < D - 1; v += 3.8) { J(-0.28, v, -0.22, v + 0.05, y - 1.25, 1.25); if (!doorsE.some(([a, b]) => v > a - 0.3 && v < b + 0.3)) J(W + 0.22, v, W + 0.28, v + 0.05, y - 1.25, 1.25); }
+    }
+  }
   // ── the roof: slabs from the ceiling to the top, slits left open over the hall for the light ─────────────────
   const slitsU = [[31.4, 31.8], [35.2, 35.6]], slitsV = [[16.4, 16.8], [25.2, 25.6]];
   const roof = (u0, v0, u1, v1) => { bag.add('tura_limestone', box(X(u0), y0 + HR, Z(v0), X(u1), y0 + HT, Z(v1))); };
