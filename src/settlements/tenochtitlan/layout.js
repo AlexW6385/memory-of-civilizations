@@ -65,3 +65,37 @@ export function chinampaHouses() {
 }
 /** Is (x, z) on a chinampa house's site (the house, its granary and plants), with margin m? */
 export const inChinampaHouse = (x, z, m = 0) => Math.hypot(x, z) > 300 && chinampaHouses().some((h) => Math.abs(x - h.c[0]) < 5.2 + m && Math.abs(z - h.c[1]) < 4.2 + m);
+
+// ---- the ways on foot (movers.js): lanes between the compounds, the avenues, the bridges' landings -------------
+const LANE_W = 3.2, REACH = 296;
+/** Subtract the intervals `cuts` from [a, b]; pieces of at least `min` metres. */
+function cut1(a, b, cuts, min = 6) {
+  let segs = [[a, b]];
+  for (const [c0, c1] of cuts) segs = segs.flatMap(([s0, s1]) => (c1 <= s0 || c0 >= s1 ? [[s0, s1]] : [[s0, Math.min(s1, c0)], [Math.max(s0, c1), s1]])).filter(([s0, s1]) => s1 - s0 >= min);
+  return segs;
+}
+/**
+ * The lanes between the compounds' blocks (houses(): a 4 m strip at every 19 m, x and z = 19 k − 1, between the
+ * houses' rects), as rectangles [x0, z0, x1, z1]: cut at the canals (the bridges are the avenues'), the precinct, the
+ * palace and the market, clear of the avenues, within r 296.
+ */
+export function lanes() {
+  const out = [];
+  for (const vertical of [true, false]) for (let k = -21; k <= 21; k++) {
+    const t = -400 + 19 * (k + 21) + 19;                                         // the strip between the cells k and k + 1
+    if (Math.abs(t) < 12 || Math.abs(t) > REACH - 6) continue;
+    if (vertical && (Math.abs(t) > 212 && Math.abs(t) < 228)) continue;           // on the x canals
+    if (!vertical && (Math.abs(t) > 192 && Math.abs(t) < 208)) continue;          // on the z canals
+    const ext = Math.sqrt(REACH * REACH - t * t), cuts = [];
+    const canalCuts = vertical ? [[-206, -194], [194, 206]] : [[-226, -214], [214, 226]];
+    cuts.push(...canalCuts);
+    const pr = PRECINCT.map((v, i) => v + (i < 2 ? -8 : 8)), pa = PALACE.map((v, i) => v + (i < 2 ? -2 : 2)), mk = MARKET;
+    const ia = vertical ? 1 : 0, ib = ia + 2;                                       // the rect's interval along the lane
+    for (const r of [pr, pa, mk]) { const across = vertical ? [r[0], r[2]] : [r[1], r[3]]; if (t > across[0] && t < across[1]) cuts.push([r[ia], r[ib]]); }
+    cuts.sort((a, b) => a[0] - b[0]);
+    for (const [s0, s1] of cut1(-ext, ext, cuts)) out.push(vertical ? [t - LANE_W / 2, s0, t + LANE_W / 2, s1] : [s0, t - LANE_W / 2, s1, t + LANE_W / 2]);
+  }
+  return out;
+}
+/** The houses' grid really leaves these strips free (a test): is (x, z) on a lane's line within its width? */
+export const onLaneStrip = (x, z) => [x, z].some((v) => { const m = (((v + 1) % 19) + 19) % 19; return m < 1.6 || m > 17.4; });

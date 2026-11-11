@@ -232,7 +232,7 @@ function acalli(el, { bag }) {
   k.bx('timber', 0.15, 0.3, y0 + D - 0.02, y0 + D + 0.04, hl * 0.25, hl * 0.25 + 0.4);
   // the cargo, laid along the hold
   const cargo = el.cargo ?? ['maize', 'chile', 'pots', 'cloth', 'reeds'][Math.floor(rand() * 5)];
-  for (let i = 0; i < Math.floor(L / 1.6); i++) {
+  for (let i = 0; i < (cargo === 'none' ? 0 : Math.floor(L / 1.6)); i++) {
     const z = -hl + 1.0 + i * 1.5 + rand() * 0.2, yb = y0 + th;
     if (cargo === 'maize' || cargo === 'chile') k.fy(cargo === 'maize' ? 'paint_ochre' : 'stucco_red', [-hb + 0.1, hb - 0.1, z - 0.45, z + 0.45], [-0.08, 0.08, z - 0.1, z + 0.1], yb, yb + 0.55);
     else if (cargo === 'pots') k.geo('terracotta', lathe([[0.1, 0], [0.24, 0.12], [0.26, 0.3], [0.14, 0.44], [0.16, 0.5], [0.001, 0.5]], 10).translate(0, yb, z));
