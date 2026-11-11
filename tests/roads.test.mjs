@@ -7,6 +7,7 @@ import { gunzipSync } from 'node:zlib';
 import { setLand } from '../src/planet/land.js';
 import { initRelief, ROADS, surface, coverAt } from '../src/planet/relief.js';
 import { norm, add, scale } from '../src/planet/geo.js';
+import { PLANET_RADIUS as R } from '../src/planet/sites.js';
 
 const buf = readFileSync(new URL('../data/planet/land.bin', import.meta.url));
 const W = buf.readUInt32LE(8), H = buf.readUInt32LE(12), W2 = buf.readUInt32LE(16), H2 = buf.readUInt32LE(20), sc = buf.readFloatLE(24);
@@ -26,7 +27,7 @@ test('the road shows on the ground somewhere along most links', () => {
     for (let k = 1; k < 20; k++) {
       const t = r.ang * k / 20, u0 = norm(add(scale(r.a, Math.cos(t)), scale(r.t, Math.sin(t))));
       for (let o = -40; o <= 40; o += 1) {
-        const u = norm(add(u0, scale(r.n, o / 8000)));
+        const u = norm(add(u0, scale(r.n, o / R)));
         const g = surface(u);
         if (g.s || g.n.d < 8) continue;
         best = Math.max(best, coverAt(g, 1, u).road);

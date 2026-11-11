@@ -1,6 +1,6 @@
 # The world — the planet
 
-The world is a small planet: a sphere of 8 km radius whose continents, seas and latitudes follow Earth's, with the civilizations of Earth — each a place at a time — standing where they stood, each as a settlement (DESIGN.md §1, §4). This document records how it is laid out and why. Everything here lives in code as data and pure functions under `src/planet/`; the generated parts are made by the tools named below and committed.
+The world is a small planet: a sphere of 12 km radius whose continents, seas and latitudes follow Earth's, with the civilizations of Earth — each a place at a time — standing where they stood, each as a settlement (DESIGN.md §1, §4). This document records how it is laid out and why. Everything here lives in code as data and pure functions under `src/planet/`; the generated parts are made by the tools named below and committed.
 
 Planet coordinates: metres from the centre; +y the north pole, the prime meridian through +z, longitude growing toward +x. A local frame has +x east, +y up, +z south (north is −z).
 
@@ -12,14 +12,14 @@ Planet coordinates: metres from the centre; +y the north pole, the prime meridia
 
 `tools/planet-layout.mjs` → `src/planet/layout.js` (`LENSES`, `PLACED`).
 
-1. **The map of Earth onto the planet** (`src/planet/warp.js`). At the planet's scale (about 1 : 800), Europe and the Near East cannot hold their dozen and a half civilizations: three mild lenses magnify the crowded parts of the world — Europe and the Near East (centre 40° N 18° E, ×1.5 at the centre, radius 26°), India (22° N 79° E, ×1.3, 12°), East Asia (34° N 120° E, ×1.35, 14°). A lens moves each point along the great circle from its centre, θ → θ + (m − 1)·θ·e^(−(θ/r)²): it magnifies by m at the centre, is the identity far away and cannot fold. The oceans give up the room. Stronger lenses were tried and rejected: the Mediterranean became unreadable.
+1. **The map of Earth onto the planet** (`src/planet/warp.js`). At the planet's scale (about 1 : 530), Europe and the Near East cannot hold their dozen and a half civilizations: three mild lenses magnify the crowded parts of the world — Europe and the Near East (centre 40° N 18° E, ×1.5 at the centre, radius 26°), India (22° N 79° E, ×1.3, 12°), East Asia (34° N 120° E, ×1.35, 14°). A lens moves each point along the great circle from its centre, θ → θ + (m − 1)·θ·e^(−(θ/r)²): it magnifies by m at the centre, is the identity far away and cannot fold. The oceans give up the room. Stronger lenses were tried and rejected: the Mediterranean became unreadable.
 2. **Pushed apart, kept on land.** Each settlement starts at its mapped true place (settlements sharing a place start a little off it, `nudge`), then all push each other apart until every two stand at least `radius_a + radius_b + 2·BLEND + GAP` apart (about 640 m), held weakly to their mapped places and, unless marked `water`, climbing the distance to the coast until their disc is on land. The tool reports how far each ended from its mapped true place (the most crowded — Baroque Rome, Petra, Florence, the second of Istanbul — a few hundred metres, i.e. a few degrees).
 
 ## Land
 
 `tools/planet-land.mjs` → `data/planet/land.bin` (about 0.5 MB).
 
-- **Coasts.** Natural Earth land polygons (1:50m, public domain, via the `world-atlas` package) carried through the map, rasterised at 4096 × 2048 and turned into a signed distance to the coast (metres on the planet, ±256 m), kept at 2048 × 1024 (12 m per cell at the equator), sampled bilinearly so that coasts are smooth.
+- **Coasts.** Natural Earth land polygons (1:50m, public domain, via the `world-atlas` package) carried through the map, rasterised at 4096 × 2048 and turned into a signed distance to the coast (metres on the planet, ±256 m), kept at 2048 × 1024 (18 m per cell at the equator), sampled bilinearly so that coasts are smooth.
 - **Climate**, at 1024 × 512, from Earth's large features at the true place of each cell (`tools/lib/geography.mjs`, generalised by hand from atlases): mountain ranges as lines and plateaus as areas with their height on the planet (the Himalaya and the Andes 150 m, the Alps 85 m, Tibet 85 m…); moisture by latitude belt, lowered over the dry lands (the Sahara, Arabia, the Gobi, the Australian interior…) and raised over the rain forests; warmth from the latitude and the height.
 
 ## Ground

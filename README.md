@@ -23,7 +23,7 @@ The name means only that these buildings are the memory of civilizations. This i
 | The Americas | Teotihuacan (c. 400) · Chichén Itzá (c. 1000) · Cahokia (c. 1175) · Machu Picchu (c. 1450–1530) · Taos Pueblo (c. 1500) · Tenochtitlan (1519) · New York (1931) |
 | Oceania | Rapa Nui (c. 1500) · a Māori pā by Lake Rotorua (18th c.) · Sydney (1973) |
 
-They stand on a sphere of 8 km radius with Earth's continents and latitudes, each near its true place (crowded regions gently magnified), with open country, roads, rivers and the sea between them. One sun lights the whole planet, so it can be noon in one city and evening in another. Weather and seasons change by region. Fly up and the ground curves away below. Layout: [docs/world.md](docs/world.md).
+They stand on a sphere of 12 km radius with Earth's continents and latitudes, each near its true place (crowded regions gently magnified), with open country, roads, rivers and the sea between them. One sun lights the whole planet, so it can be noon in one city and evening in another. Weather and seasons change by region. Fly up and the ground curves away below. Layout: [docs/world.md](docs/world.md).
 
 ## Controls
 

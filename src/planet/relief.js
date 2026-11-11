@@ -116,10 +116,11 @@ export function natural(u) {
   const px = u[0] * R, py = u[1] * R, pz = u[2] * R;
   const inland = sm(20, 240, d);
   let land = 0.5 + 0.06 * Math.min(Math.max(d, 0), 30) + 5 * inland;
-  const rough = 0.3 + 0.7 * sm(-0.25, 0.5, noise3(px / 1700 + 7.1, py / 1700, pz / 1700));
-  const hills = fbm3(px / 380, py / 380, pz / 380, 4) * 0.5 + 0.5;
+  // (the features' sizes grew with the planet, 8 → 12 km: the same country, its slopes a third gentler)
+  const rough = 0.3 + 0.7 * sm(-0.25, 0.5, noise3(px / 2550 + 7.1, py / 2550, pz / 2550));
+  const hills = fbm3(px / 570, py / 570, pz / 570, 4) * 0.5 + 0.5;
   land += hills * (2.5 + 11 * rough) * sm(5, 120, d);
-  if (mount > 0.5) land += mount * (0.3 + 0.7 * ridged3(px / 240, py / 240, pz / 240, 5)) * sm(10, 160, d);
+  if (mount > 0.5) land += mount * (0.3 + 0.7 * ridged3(px / 360, py / 360, pz / 360, 5)) * sm(10, 160, d);
   const sea = -(1.2 + 0.09 * Math.min(-d, 300));
   const t = sm(-4, 4, d);
   let h = sea + (land - sea) * t;

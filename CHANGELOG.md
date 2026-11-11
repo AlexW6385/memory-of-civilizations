@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.54 — A larger planet (2026-11-10)
+
+The planet's radius is 12 km instead of 8, and all 94 settlements of the set are placed on it (the 38 not built yet keep their room), so none stands crowded; the open country's hills and ranges grew with it.
+
 ## v10.53 — A detailed globe (2026-11-10)
 
 The map's globe is painted in the shader from the land map itself: forests and grassland, steppe, deserts with ragged edges, tundra and ice, mountains as ridged crests with rock and snow, relief shading, and the great rivers drawn over it; nothing is baked, so it opens at once.

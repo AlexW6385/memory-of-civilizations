@@ -92,11 +92,57 @@ for (const s of SITES) s.radius ??= 190;
 
 /** Metres over which a settlement's ground blends into the open country beyond its disc. */
 export const BLEND = 100;
+/**
+ * The settlements of the set not built yet (DESIGN §7, level L0), with their true places and the disc
+ * their size class gives them (§4.5). Not on the planet until built (then moved into SITES); the
+ * layout keeps room for them, so that building one does not move the others.
+ */
+export const PLANNED = [
+  { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, region: 'china', lat: 36.13, lon: 114.32, radius: 300 },
+  { id: 'lu-qufu', name: { en: 'Qufu', zh: '曲阜' }, region: 'china', lat: 35.60, lon: 116.99, radius: 280 },
+  { id: 'qin-xianyang', name: { en: 'Qin Xianyang', zh: '秦咸阳' }, region: 'china', lat: 34.38, lon: 109.25, nudge: 90, radius: 300 },
+  { id: 'han-changan', name: { en: 'Han Chang\'an', zh: '汉长安' }, region: 'china', lat: 34.30, lon: 108.88, nudge: 300, radius: 500 },
+  { id: 'wei-ye', name: { en: 'Three Kingdoms Ye', zh: '三国邺城' }, region: 'china', lat: 36.33, lon: 114.38, nudge: 0, radius: 300 },
+  { id: 'tang-changan', name: { en: 'Tang Chang\'an', zh: '唐长安' }, region: 'china', lat: 34.22, lon: 108.96, nudge: 200, radius: 550 },
+  { id: 'hakka-tulou', name: { en: 'Hakka tulou', zh: '客家土楼' }, region: 'china', lat: 24.67, lon: 117.05, radius: 180 },
+  { id: 'dunhuang', name: { en: 'Dunhuang', zh: '敦煌' }, region: 'silk-road', lat: 40.04, lon: 94.81, radius: 220 },
+  { id: 'shaolin', name: { en: 'Shaolin and Mount Song', zh: '少林与嵩山' }, region: 'china', lat: 34.51, lon: 112.94, radius: 200 },
+  { id: 'muromachi-kyoto', name: { en: 'Muromachi Kyoto', zh: '室町京都' }, region: 'japan', lat: 35.03, lon: 135.80, radius: 320 },
+  { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, region: 'indus', lat: 27.33, lon: 68.14, radius: 300 },
+  { id: 'ajanta', name: { en: 'Ajanta', zh: '阿旃陀' }, region: 'india', lat: 20.55, lon: 75.70, radius: 200 },
+  { id: 'nalanda', name: { en: 'Nalanda', zh: '那烂陀' }, region: 'india', lat: 25.14, lon: 85.44, radius: 200 },
+  { id: 'bhaktapur', name: { en: 'Bhaktapur', zh: '巴克塔普尔' }, region: 'nepal', lat: 27.67, lon: 85.43, radius: 200 },
+  { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
+  { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, region: 'siam', lat: 14.36, lon: 100.56, radius: 300 },
+  { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, region: 'java', lat: 8.37, lon: 115.45, radius: 180 },
+  { id: 'timurid-samarkand', name: { en: 'Timurid Samarkand', zh: '帖木儿撒马尔罕' }, region: 'silk-road', lat: 39.65, lon: 66.98, radius: 340 },
+  { id: 'mongol-karakorum', name: { en: 'Mongol Karakorum', zh: '蒙古哈拉和林' }, region: 'steppe', lat: 47.20, lon: 102.83, radius: 180 },
+  { id: 'catalhoyuk', name: { en: 'Çatalhöyük', zh: '加泰土丘' }, region: 'anatolia', lat: 37.67, lon: 32.83, radius: 100 },
+  { id: 'abbasid-baghdad', name: { en: 'Abbasid Baghdad', zh: '阿拔斯巴格达' }, region: 'mesopotamia', lat: 33.31, lon: 44.36, radius: 500 },
+  { id: 'shibam', name: { en: 'Shibam', zh: '希巴姆' }, region: 'arabia', lat: 15.93, lon: 48.63, radius: 180 },
+  { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, region: 'egypt', lat: 25.70, lon: 32.64, radius: 380 },
+  { id: 'abu-simbel', name: { en: 'Abu Simbel', zh: '阿布辛贝' }, region: 'nubia', lat: 22.34, lon: 31.63, radius: 180 },
+  { id: 'alexandria', name: { en: 'Alexandria', zh: '亚历山大港' }, region: 'egypt', lat: 31.20, lon: 29.92, radius: 500 },
+  { id: 'fez', name: { en: 'Fez', zh: '非斯' }, region: 'maghreb', lat: 34.06, lon: -4.97, radius: 320 },
+  { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },
+  { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, region: 'guinea', lat: 6.34, lon: 5.62, radius: 320 },
+  { id: 'mycenae', name: { en: 'Mycenae', zh: '迈锡尼' }, region: 'aegean', lat: 37.73, lon: 22.76, radius: 160 },
+  { id: 'delphi', name: { en: 'Delphi', zh: '德尔斐' }, region: 'aegean', lat: 38.48, lon: 22.50, radius: 200 },
+  { id: 'manueline-lisbon', name: { en: 'Manueline Lisbon', zh: '曼努埃尔里斯本' }, region: 'iberia', lat: 38.70, lon: -9.21, radius: 300 },
+  { id: 'vienna', name: { en: 'Vienna', zh: '维也纳' }, region: 'danube', lat: 48.21, lon: 16.37, radius: 340 },
+  { id: 'bauhaus-dessau', name: { en: 'Bauhaus Dessau', zh: '包豪斯德绍' }, region: 'germany', lat: 51.84, lon: 12.23, radius: 170 },
+  { id: 'maya-tikal', name: { en: 'Classic Maya Tikal', zh: '古典玛雅蒂卡尔' }, region: 'yucatan', lat: 17.22, lon: -89.62, radius: 320 },
+  { id: 'sgang-gwaay', name: { en: 'SG̱ang Gwaay', zh: '斯冈瓜伊' }, region: 'northwest-coast', lat: 52.09, lon: -131.22, water: true, island: true, radius: 160 },
+  { id: 'brasilia', name: { en: 'Brasília', zh: '巴西利亚' }, region: 'brazil', lat: -15.80, lon: -47.86, radius: 500 },
+  { id: 'kakadu', name: { en: 'Kakadu', zh: '卡卡杜' }, region: 'australia', lat: -12.41, lon: 132.96, radius: 110 },
+  { id: 'nan-madol', name: { en: 'Nan Madol', zh: '南马都尔' }, region: 'micronesia', lat: 6.84, lon: 158.33, water: true, island: true, radius: 170 },
+];
+
 /** Open country left between two settlements' blended edges, at the least (m). */
 export const GAP = 120;
 /** The least distance between the centres of two settlements (m). */
 export const spacing = (a, b) => a.radius + b.radius + 2 * BLEND + GAP;
 /** The planet's radius (m). */
-export const PLANET_RADIUS = 8000;
+export const PLANET_RADIUS = 12000;
 
 export const SITE = Object.fromEntries(SITES.map((s) => [s.id, s]));

@@ -12,7 +12,9 @@
 // Writes src/planet/layout.js. usage: node tools/planet-layout.mjs
 
 import { writeFile } from 'node:fs/promises';
-import { SITES, spacing, PLANET_RADIUS as R } from '../src/planet/sites.js';
+import { SITES as BUILT_SITES, PLANNED, spacing, PLANET_RADIUS as R } from '../src/planet/sites.js';
+// the settlements not built yet are placed too, so that their room is kept (sites.js PLANNED)
+const SITES = [...BUILT_SITES, ...PLANNED];
 import { unit, latLon, angle, travel, bearing } from '../src/planet/geo.js';
 import { earthRings, mapRings, signedDistance, sampleGrid } from './lib/land.mjs';
 
@@ -84,6 +86,36 @@ for (let it = 0; it < 1500; it++) {
     const gx = coast(travel(x[i], Math.PI / 2, step)) - coast(travel(x[i], -Math.PI / 2, step));
     const gy = coast(travel(x[i], 0, step)) - coast(travel(x[i], Math.PI, step));
     if (Math.hypot(gx, gy) > 1e-9) x[i] = travel(x[i], Math.atan2(gx, gy), Math.min(30 - d, 20) / R * 0.5);
+  }
+}
+// and a few rounds of spacing with no pull at all, so that no pair is left short (Knossos and Athens,
+// each held to its coast across a narrow sea)
+// (a centre pushed off its coast into the sea is brought back onto the land between rounds, judged
+// on the viewer's own land map, data/planet/land.bin, where it exists: the coarse grid above can
+// put a centre on a narrow coast that the finer map has in the sea)
+let fine = coast;
+try {
+  const { readFileSync } = await import('node:fs');
+  const { gunzipSync } = await import('node:zlib');
+  const buf = readFileSync(new URL('../data/planet/land.bin', import.meta.url));
+  const h = new DataView(buf.buffer, buf.byteOffset, 32), W = h.getUint32(8, true), H = h.getUint32(12, true), sc = h.getFloat32(24, true);
+  const sdfB = gunzipSync(buf.subarray(32)).subarray(0, W * H);
+  fine = (u) => { const [la, lo] = latLon(u); const fx = (lo / 180 + 1) / 2 * W - 0.5, fy = (0.5 - la / 180) * H - 0.5; const x0 = Math.floor(fx), y0 = Math.max(0, Math.min(H - 2, Math.floor(fy))), tx = fx - x0, ty = fy - y0; const a = ((x0 % W) + W) % W, b = (a + 1) % W; const v = (sdfB[y0 * W + a] * (1 - tx) + sdfB[y0 * W + b] * tx) * (1 - ty) + (sdfB[(y0 + 1) * W + a] * (1 - tx) + sdfB[(y0 + 1) * W + b] * tx) * ty; return (v - 128) * sc; };
+} catch (e) { /* no land map yet: the coarse grid */ }
+for (let it = 0; it < 400; it++) {
+  for (let i = 0; i < x.length; i++) for (let j = i + 1; j < x.length; j++) {
+    const need = spacing(SITES[i], SITES[j]) / R * 1.01, a = angle(x[i], x[j]);
+    if (a >= need) continue;
+    const push = (need - a) / 2 * 0.5;
+    const bi = bearing(x[i], x[j]), bj = bearing(x[j], x[i]);
+    x[i] = travel(x[i], bi + Math.PI, push);
+    x[j] = travel(x[j], bj + Math.PI, push);
+  }
+  for (let i = 0; i < x.length; i++) {
+    if (SITES[i].water || fine(x[i]) > 30) continue;
+    const gx = fine(travel(x[i], Math.PI / 2, step)) - fine(travel(x[i], -Math.PI / 2, step));
+    const gy = fine(travel(x[i], 0, step)) - fine(travel(x[i], Math.PI, step));
+    if (Math.hypot(gx, gy) > 1e-9) x[i] = travel(x[i], Math.atan2(gx, gy), 6 / R);
   }
 }
 let worst = Infinity, pair = null;
