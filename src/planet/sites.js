@@ -121,6 +121,7 @@ export const SITES = [
   { id: 'maya-tikal', name: { en: 'Classic Maya Tikal', zh: '古典玛雅蒂卡尔' }, era: 'c. 750', region: 'yucatan', lat: 17.22, lon: -89.62, radius: 330 },
   { id: 'vienna', name: { en: 'Vienna, 1902', zh: '1902年的维也纳' }, era: '1902', region: 'danube', lat: 48.21, lon: 16.37, radius: 330 },
   { id: 'brasilia', name: { en: 'Brasília', zh: '巴西利亚' }, era: '1960s', region: 'brazil', lat: -15.8, lon: -47.86, radius: 520 },
+  { id: 'bauhaus-dessau', name: { en: 'Bauhaus Dessau', zh: '包豪斯德绍' }, era: 'c. 1927', region: 'germany', lat: 51.84, lon: 12.23, radius: 190 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -132,7 +133,7 @@ const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan han-changan',
   M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang wei-ye mohenjo-daro lu-qufu shang-yinxu',
-  S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori nalanda bali-village',
+  S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori nalanda bali-village bauhaus-dessau',
   P: 'stonehenge catalhoyuk',
 };
 for (const [c, ids] of Object.entries(CLASS)) for (const id of ids.split(' ')) { const s = SITES.find((x) => x.id === id); if (s) s.size = id === 'ming-suzhou' ? 215 : CLASS_RADIUS[c]; }
@@ -147,7 +148,6 @@ export const BLEND = 100;
  * layout keeps room for them, so that building one does not move the others.
  */
 export const PLANNED = [
-  { id: 'bauhaus-dessau', name: { en: 'Bauhaus Dessau', zh: '包豪斯德绍' }, region: 'germany', lat: 51.84, lon: 12.23, radius: 190 },
   { id: 'sgang-gwaay', name: { en: 'SG̱ang Gwaay', zh: '斯冈瓜伊' }, region: 'northwest-coast', lat: 52.09, lon: -131.22, water: true, island: true, radius: 190 },
   { id: 'nan-madol', name: { en: 'Nan Madol', zh: '南马都尔' }, region: 'micronesia', lat: 6.84, lon: 158.33, water: true, island: true, radius: 190 },
 ];

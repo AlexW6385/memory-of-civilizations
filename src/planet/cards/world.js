@@ -1248,4 +1248,20 @@ export const CARDS = {
       "超级街区 —— 立在开敞底层架空柱上的六层住宅，处在林带之中，山墙贴蓝白瓷砖，另有一条商店街、环路和居住轴线的大道；街上是当时的汽车与公共汽车。",
     ],
   },
+  'bauhaus-dessau': {
+    en: [
+      "Dessau, in Saxony-Anhalt on the Mulde near the Elbe, is shown about 1927, the school's first full year in its new building. The Bauhaus, founded by Walter Gropius in Weimar in 1919, moved here in 1925 at the invitation of the town's young Social-Democratic administration. The architecture is the New Building: reinforced-concrete frames, white rendered walls, flat asphalt roofs, steel windows, set among the rendered tenement blocks of the older town.",
+      "The Bauhaus building — Gropius's school of 1925–26, five parts set round no front: the workshop wing with its three-storey glass curtain wall, the bridge over Kothener Strasse holding the administration and Gropius's office, the north wing of classrooms and library, the Aula with stage and canteen, and the Prellerhaus with 28 studios and balconies. Inside are the carpentry, weaving, metal and wall-painting workshops, the lecture hall, the library and the studios, furnished with Breuer's tubular-steel chairs, Rowac stools, Brandt's lamps and the looms.",
+      "The Masters' Houses — four white cubic villas for Gropius, Moholy-Nagy, Feininger, Muche, Schlemmer, Kandinsky and Klee, standing among Scots pines on Ebertallee.",
+      "The town — Kothener Strasse, Mauerstrasse and Kavalierstrasse lined with four-storey rendered tenements with hipped tile roofs and shops at their feet, lindens along the pavements, parked cars of the 1920s, bicycles at every door; students in plain work dress mix with townspeople and workers of the Junkers works.",
+      "The Törten estate — rows of two-storey flat-roofed terraced houses with ribbon windows and kitchen gardens, built by Gropius's office from 1926.",
+    ],
+    zh: [
+      "德绍位于萨克森-安哈尔特州，在穆尔德河畔、易北河附近，画面所示约为1927年，即学校迁入新校舍后的第一个完整年头。包豪斯由瓦尔特·格罗皮乌斯于1919年创办于魏玛，1925年应德绍年轻的社会民主党市政府之邀迁来。建筑属“新建筑”：钢筋混凝土框架、白色抹灰墙、沥青平屋顶、钢窗，立于老城抹灰的公寓楼之间。",
+      "包豪斯校舍 —— 格罗皮乌斯1925至1926年的设计，五个部分彼此错落、没有正面：三层通高玻璃幕墙的工场翼，跨过科滕街的桥（行政办公室与格罗皮乌斯的事务所），教室与图书馆所在的北翼，带舞台和食堂的礼堂，以及有28间工作室与阳台的普雷勒楼。内有木工、纺织、金工、壁画工场，阶梯教室、图书馆与工作室，陈设有布劳耶的钢管椅、Rowac凳、布兰特的灯和织机。",
+      "大师住宅 —— 为格罗皮乌斯、莫霍利-纳吉、费宁格、穆赫、施莱默、康定斯基和克利建的四组白色立方体住宅，立于埃伯特大道旁的欧洲赤松之间。",
+      "城镇 —— 科滕街、毛尔街与骑士街两侧是四层抹灰公寓楼，坡顶红瓦，底层开店，人行道旁栽椴树，停着20年代的汽车，门前停满自行车；学生穿朴素的工作服，与市民和容克斯工厂的工人往来。",
+      "特尔滕住宅区 —— 格罗皮乌斯事务所自1926年起建造的两层平屋顶联排住宅，带条形窗和菜园。",
+    ],
+  },
 };

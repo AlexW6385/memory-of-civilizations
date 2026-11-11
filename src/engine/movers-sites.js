@@ -91,5 +91,6 @@ export const MOVER_SITES = {
   'maya-tikal': () => import('../settlements/maya-tikal/movers.js'),
   'vienna': () => import('../settlements/vienna/movers.js'),
   'brasilia': () => import('../settlements/brasilia/movers.js'),
+  'bauhaus-dessau': () => import('../settlements/bauhaus-dessau/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
