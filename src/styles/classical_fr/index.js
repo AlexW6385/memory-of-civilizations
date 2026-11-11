@@ -14,6 +14,9 @@ import { canalQuay } from './canal.js';
 import { chapel } from './chapel.js';
 import { ecurie } from './ecuries.js';
 import { orangeTrees } from './garden.js';
+import { broderie, palissades, statues, yews, benches, guerites, bornes } from './gardens.js';
+import { apolloGroup } from './apollo.js';
+import { townHouse } from './townhouse.js';
 import { coach, sedanChair } from '../baroque/street.js';
 
 const S = 'sandstone_dressed';
@@ -29,6 +32,14 @@ function range(el, { bag, col }) {
       for (const [a, b] of [[0.34, 0.36], [0.78, 0.86], [0.985, 1.0]]) bag.add(S, box(r[0], y + h * a, r[1], r[2], y + h * b, r[3]));
     }
     bag.add('lead', box(x0 + 1, y + h, z0 + 1, x1 - 1, y + h + 1.2, z1 - 1));
+    // the weathering of the stone: damp rising at the foot of each front, dark streaks under the string courses and the cornice
+    { let sd = Math.floor(x0 * 31 + z0 * 17) >>> 0 || 5; const rnd = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296);
+      for (const f of el.front ?? 'nsew') {
+        const along = f === 'n' || f === 's', a0 = along ? x0 : z0, L = along ? x1 - x0 : z1 - z0, fz = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
+        const put = (mat, u0, u1, ya, yb, d0, d1) => { const p0 = fz + sg * d0, p1 = fz + sg * d1, q = along ? [a0 + u0, Math.min(p0, p1), a0 + u1, Math.max(p0, p1)] : [Math.min(p0, p1), a0 + u0, Math.max(p0, p1), a0 + u1]; bag.add(mat, box(q[0], y + ya, q[1], q[2], y + yb, q[3])); };
+        for (let u = rnd() * 4; u < L - 2; u += 2 + rnd() * 5) { const w = 1 + rnd() * 3; put('plaster_damp', u, Math.min(L, u + w), 0.0, 0.5 + rnd() * 1.1, 0.04, 0.07); }
+        for (let u = rnd() * 3; u < L - 1; u += 3 + rnd() * 6) put('plaster_streak', u, u + 0.25 + rnd() * 0.3, h * (0.34 - 0.12 - rnd() * 0.1), h * 0.34, 0.04, 0.07);
+      } }
     return;
   }
   bag.add(S, box(x0 - 0.2, y + h * 0.3, z0 - 0.2, x1 + 0.2, y + h * 0.33, z1 + 0.2));
@@ -155,20 +166,7 @@ function fountain(el, ctx) {
       bag.add(M, lathe([[0.001, 0], [0.09, 0.03], [0.1, 0.13], [0.06, 0.2], [0.001, 0.21]], 8, null, x - 0.2, yg + 0.92, z + sd * 0.48));
     }
   } else if (el.kind === 'apollo') {
-    const d = el.dir ?? [1, 0], u = [-d[1], d[0]], P = (a, b) => [x + d[0] * a + u[0] * b, z + d[1] * a + u[1] * b];
-    // the chariot, the god standing in it, four horses plunging forward, tritons blowing at the sides
-    const [cx0, cz0] = P(-1.2, 0);
-    bag.add('gilt_bronze', lathe([[0.001, 0], [1.1, 0.2], [1.2, 0.9], [0.9, 1.3], [0.001, 1.2]], 12, null, cx0, y + 0.1, cz0));
-    bag.add('gilt_bronze', lathe([[0.25, 0], [0.22, 1.2], [0.3, 1.5], [0.18, 1.9], [0.001, 2.25]], 10, null, cx0, y + 1.2, cz0));
-    for (const b of [-1.5, -0.5, 0.5, 1.5]) {
-      const [hx, hz] = P(1.4, b * 0.75);
-      const body = lathe([[0.001, -0.75], [0.32, -0.55], [0.36, 0], [0.3, 0.55], [0.001, 0.7]], 10, null, 0, 0, 0);
-      body.rotateZ(Math.PI / 2 - 0.5); body.rotateY(-Math.atan2(d[1], d[0])); body.translate(hx, y + 0.9, hz);
-      bag.add('gilt_bronze', body);
-      const [nx, nz] = P(2.15, b * 0.75);
-      bag.add('gilt_bronze', lathe([[0.12, 0], [0.16, 0.5], [0.2, 0.75], [0.001, 0.95]], 8, null, nx, y + 1.15, nz));
-    }
-    for (const b of [-3.6, 3.6]) { const [tx, tz] = P(0.6, b); bag.add('gilt_bronze', lathe([[0.4, 0], [0.3, 0.6], [0.22, 1.1], [0.001, 1.35]], 8, null, tx, y + 0.1, tz)); }
+    apolloGroup(bag, x, y + 0.2, z, el.dir ?? [1, 0], r);
   } else {
     bag.add('bronze', lathe([[1.2, 0], [1.1, 0.5], [0.7, 0.9], [0.5, 1.6], [0.3, 1.9], [0.001, 2.2]], 12, null, x, y, z));
   }
@@ -176,6 +174,6 @@ function fountain(el, ctx) {
 }
 registerStyle('classical_fr', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, range, parterre, fountain, court_range: courtRange, marble_court: marbleCourt, grille, grand_corps: grandCorps, ambassadors, canal_quay: canalQuay, chapel, ecurie, orange_trees: orangeTrees, coach, sedan_chair: sedanChair },
+  elements: { ...STYLES.qing.elements, range, parterre, fountain, court_range: courtRange, marble_court: marbleCourt, grille, grand_corps: grandCorps, ambassadors, canal_quay: canalQuay, chapel, ecurie, orange_trees: orangeTrees, coach, sedan_chair: sedanChair, fr_house: townHouse, broderie, palissades, statues, yews, benches, guerites, bornes },
   objects: {},
 });

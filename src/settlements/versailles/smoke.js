@@ -4,7 +4,7 @@
 
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { lots, RADIUS, RISE, CANAL, STABLES } from './layout.js';
+import { lots, houseH, RADIUS, RISE, CANAL, STABLES } from './layout.js';
 
 const ID = 'versailles';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -13,7 +13,7 @@ function emitters() {
   const E = [], rand = rng(1700);
   for (const l of lots()) {
     if (rand() > 0.42) continue;
-    const [x0, z0, x1, z1] = l.rect, ye = RISE + l.storeys * 3.6 + 0.9 + 2.2 + 1.0;      // the stack stands 2.2 m over the steep slate roof
+    const [x0, z0, x1, z1] = l.rect, ye = RISE + houseH(l) + 6.5;      // the stack's top (townhouse.js: 6.4 over the eave)
     E.push({ p: [x0 + (x1 - x0) * (0.2 + 0.6 * rand()), ye + 0.4, z0 + (z1 - z0) * (0.3 + 0.4 * rand())], kind: 'kitchen', seed: l.seed + 1 });
   }
   // the stables' kitchens and forges, one stack each side of each court
