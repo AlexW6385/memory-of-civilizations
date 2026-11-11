@@ -11,7 +11,7 @@ const ID = 'persepolis';
 export function emitters() {
   const E = [];
   for (const l of lots()) {
-    const v = houseVent(l.rect, l.seed, l.front);
+    const v = houseVent(l);
     if (v) E.push({ p: v, kind: 'kitchen', thr: ((l.seed % 100) / 100) * 0.8, seed: l.seed + 1 });
   }
   workshopVents(WORKSHOPS).forEach((p, i) => E.push({ p, kind: 'kitchen', thr: 0, seed: 30 + i }));
