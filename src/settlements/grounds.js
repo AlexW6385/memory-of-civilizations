@@ -76,6 +76,7 @@ import { ground as abbasidBaghdad } from './abbasid-baghdad/ground.js';
 import { ground as qinXianyang } from './qin-xianyang/ground.js';
 import { ground as alexandria } from './alexandria/ground.js';
 import { ground as hanChangan } from './han-changan/ground.js';
+import { ground as sgangGwaay } from './sgang-gwaay/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -145,6 +146,7 @@ export const GROUNDS = {
   shibam,
   delphi,
   mycenae,
+  'sgang-gwaay': sgangGwaay,
   'abbasid-baghdad': abbasidBaghdad,
   'qin-xianyang': qinXianyang,
   alexandria,
@@ -224,6 +226,7 @@ const LOADERS = {
   shibam: () => import('./shibam/index.js'),
   delphi: () => import('./delphi/index.js'),
   mycenae: () => import('./mycenae/index.js'),
+  'sgang-gwaay': () => import('./sgang-gwaay/index.js'),
   'abbasid-baghdad': () => import('./abbasid-baghdad/index.js'),
   'qin-xianyang': () => import('./qin-xianyang/index.js'),
   'han-changan': () => import('./han-changan/index.js'),
