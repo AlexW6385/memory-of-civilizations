@@ -294,6 +294,24 @@ function whare(el, ctx) {
     add('reed_mat', box(-w / 2 + t + 0.15, -0.2, zf + 1.2, w / 2 - t - 0.15, 0.03, l / 2 - t - 0.15));
     for (let k = 0; k < 4; k++) add('pebbles', box(-0.45 + (k % 2) * 0.75, -0.2, zf + 0.35 + Math.floor(k / 2) * 0.55, -0.3 + (k % 2) * 0.75, 0.1, zf + 0.5 + Math.floor(k / 2) * 0.55));
     add('opening', box(-0.3, -0.2, zf + 0.5, 0.3, 0.04, zf + 0.9));
+    // the chief's household things: sleeping places of fern and mats at the back by the walls with folded cloaks, a carved box (waka huia)
+    // on a stand, a dog-skin cloak on a peg, a taiaha and a pair of paddles on pegs against the back wall, kete and a net hung from the rafters
+    const zb = l / 2 - t - 0.15, zm2 = (zf + l / 2) / 2 + 1.0;
+    for (const s of [-1, 1]) {
+      const x0 = s > 0 ? w / 2 - t - 1.25 : -w / 2 + t + 0.35, x1 = x0 + 0.9;
+      add('rope_fibre', box(x0, -0.15, zm2 + 0.3, x1, 0.12, zb));
+      add('reed_mat', box(x0 + 0.03, 0.12, zm2 + 0.35, x1 - 0.03, 0.14, zb - 0.05));
+      for (let k = 0; k < 2; k++) add(k ? 'hide_white' : 'cloth_ochre', box(x0 + 0.08, 0.14, zm2 + 0.6 + k * 0.95, x1 - 0.08, 0.27, zm2 + 1.1 + k * 0.95));
+    }
+    add('wood_dark', box(-0.3, 0.0, zb - 0.55, 0.3, 0.38, zb - 0.2)); add(K, box(-0.34, 0.38, zb - 0.58, 0.34, 0.45, zb - 0.17));
+    fig('slab', 0, 0.45, zb - 0.38, 0.38, Math.PI);
+    for (const [x, kind] of [[-0.9, 'hide_white'], [0.9, 'hide_brown']]) { add('timber', rod([x, 1.1, zb + 0.02], [x, 1.1, zb - 0.1], 0.03, 5)); add(kind, box(x - 0.3, 0.45, zb - 0.06, x + 0.3, 1.1, zb - 0.02)); }
+    add('timber', rod([-0.2, 0.0, zb - 0.04], [-0.2, 1.9, zb - 0.04], 0.03, 5)); add('basalt', box(-0.24, 1.9, zb - 0.07, -0.16, 2.1, zb - 0.01));
+    for (const [x, z] of [[-0.6, zm2 - 0.6], [0.7, zm2 + 0.5]]) {
+      const top = under(Math.abs(x)) - 0.1;
+      add('rope_fibre', rod([x, top, z], [x, top - 0.55, z], 0.012, 4));
+      add('wicker', lathe([[0.001, 0], [0.15, 0.02], [0.19, 0.16], [0.14, 0.3], [0.001, 0.3]], 9, null, x, top - 0.85, z));
+    }
   }
   if (rank <= 1 && !small && el.furnished !== false) commonHouse(add, { w, l, h, t, zf, e, under, rank });
   col.segment(W2(-w / 2, -l / 2 + 0.1), W2(-w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);

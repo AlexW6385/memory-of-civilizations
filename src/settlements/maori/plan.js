@@ -28,7 +28,12 @@ E.push({ t: 'whare', ...v.houses[0] });
 E.push({ t: 'pataka', ...v.pataka[0] });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('tihi', [hx - 20, hz - 20, hx + 20, hz + 20], HILL.top, 'open')];
+const H0 = v.houses[0];
+// the chief's house is a hall (the voices indoors, reverberant); the summit and the terraces open air
+const rooms = [
+  room('chief-house', [H0.c[0] - H0.w / 2 + 0.2, H0.c[1] - H0.l / 2 + 0.3, H0.c[0] + H0.w / 2 - 0.2, H0.c[1] + H0.l / 2 - 1.8], HILL.top, 'hall'),
+  room('tihi', [hx - 20, hz - 20, hx + 20, hz + 20], HILL.top, 'open'),
+];
 const walks = [[[0, 170], [0, hz + HILL.ditch + 10], [0, hz + 60], [0, hz + HILL.tihi - 4]]];
 walks[0].y0 = 0;
 

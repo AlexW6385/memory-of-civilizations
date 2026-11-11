@@ -193,6 +193,30 @@ export async function town() {
   // by the path as one arrives: two boys with a kurī, a man with a kete of kūmara resting
   for (const [px, pz, o] of [[2.6, 156, { pose: 'stand' }], [-2.8, 163, { pose: 'squat' }], [3.1, 172, { pose: 'sit' }]]) { const at = [px, pz]; man(at, gy(at), face(at, [0, 150]) + 0.4, o); }
   P.push({ t: 'animal', kind: 'dog', at: [1.9, 157.5], y: gy([1.9, 157.5]), rot: 1.2, mat: 'hide_white', seed: 990 });
+  // ---- the gardens' corridor (the clear way through the plots, x −11 … 10): the gardeners' huts facing the path, a rack, a store, cabbage trees lining the way ----
+  [[-8.2, 186, -Math.PI / 2], [8.2, 211, Math.PI / 2], [-8.4, 243, -Math.PI / 2], [8.4, 276, Math.PI / 2]].forEach(([x, z, yaw], k) => {
+    E.push({ t: 'whare', carved: false, c: [x, z], yaw, w: 2.9 + (k % 2) * 0.4, l: 4.2, h: 1.1, y: height(x, z), rank: 0 });
+    const d = [x - Math.sin(yaw) * 2.35, z - Math.cos(yaw) * 2.35];
+    E.push({ t: 'yard', c: d, y: gy(d), yaw, w: 3.4, seed: 700 + k, items: 2 });
+    const q = [x - Math.sin(yaw) * 4.2, z - Math.cos(yaw) * 4.2 + 1.0];
+    (k % 2 ? man : woman)(q, gy(q), face(q, [x, z]) + 0.3, { pose: k % 2 ? 'squat' : 'sit', over: 'none' });
+    taken.push([x, z]);
+  });
+  { const a = [-6, 166], b = [-2.6, 166]; E.push({ t: 'whata', a, b, y: gy(a), h: 1.9 }); }
+  { const at = [7.6, 168]; E.push({ t: 'pataka', c: at, y: gy(at), yaw: -Math.PI / 2 }); taken.push(at); }
+  for (let z = 176; z < RADIUS - 52; z += 21 + rand() * 6) for (const sx of [-1, 1]) {
+    const at = [sx * (9.6 + rand() * 0.8), z + rand() * 5];
+    if (Math.hypot(at[0], at[1]) < RADIUS - 52 && clear(at[0], at[1], 3)) { E.push({ t: 'tikouka', at, y: gy(at), h: 3.2 + rand() * 3, seed: Math.floor(rand() * 1e5) }); taken.push(at); }
+  }
+  // tree ferns and flax on the terraces' scarps (the steep banks between the terraces)
+  HILL.rings.slice(1).forEach(([r0], ri) => {
+    for (let k = 0; k < 26; k++) {
+      const a = rand() * 6.28, r = r0 + 0.2 + rand() * 1.8, x = hx + Math.cos(a) * r, z = hz + Math.sin(a) * r;
+      if (Math.abs(x - PATH.x) < PATH.w + 2 && z > hz) continue;
+      E.push(k % 3 ? { t: 'harakeke', at: [x, z], y: height(x, z), h: 1.1 + rand() * 0.6, seed: Math.floor(rand() * 1e5) } : { t: 'ponga', at: [x, z], y: height(x, z), h: 1.6 + rand() * 1.8, seed: Math.floor(rand() * 1e5) });
+    }
+    void ri;
+  });
   // ---- the lake: fishing canoes with their crews, a waka taua paddling in ---------------------------------------------------------
   const seat = (wx, wz, yw, u, w) => [wx + Math.sin(yw) * u + Math.cos(yw) * w, wz + Math.cos(yw) * u - Math.sin(yw) * w];
   [[-70, 26, 0.5, 6.5, 2], [95, 40, -0.4, 6, 2], [-190, 34, 0.2, 5.5, 2], [40, 70, 3.0, 14, 8]].forEach(([x, dz, yw, l, crew], q) => {
