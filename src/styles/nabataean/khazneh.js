@@ -114,8 +114,78 @@ function roundel(c, n, t, r, seg = 16) {
   for (let k = 0; k < seg; k++) T.push(...c, ...at(k / seg * Math.PI * 2), ...at((k + 1) / seg * Math.PI * 2));
   return fromTriangles(T);
 }
+
+/** The Treasury's hollows (u along the façade, v out of it, negative inward), each with its floor and ceiling height: [u0, v0, u1, v1, floor, ceiling]. */
+function treasuryVoids(pu, pv) {
+  const f = 1.05, V = [];
+  const add = (u0, v0, u1, v1, fl, c, id) => V.push({ u0, v0, u1, v1, f: fl, c, id });
+  add(-1.5, pv - 2.4, 1.5, pv, f, f + 7.2, 'passage');
+  add(-5.4, pv - 13.2, 5.4, pv - 2.4, f, f + 9.2, 'hall');
+  add(-2.0, pv - 13.8, 2.0, pv - 13.2, f + 1.1, f + 6.8, 'opening');
+  add(-3.4, pv - 18.1, 3.4, pv - 13.8, f + 1.1, f + 7.4, 'adyton');
+  for (const s of [-1, 1]) {
+    const a = s * pu, b = s * (pu + 1.3), c = s * (pu + 4.6);
+    add(Math.min(a, b), -2.2, Math.max(a, b), -0.6, f, f + 3.6, 'door');
+    add(Math.min(b, c), -3.3, Math.max(b, c), -0.6, f, f + 5.4, 'chamber');
+  }
+  return V;
+}
+/** Cuts boxes of the rock round the hollows: each region [u0, v0, u1, v1] is divided along the hollows' edges, the cells inside a hollow left open below its ceiling. */
+function carve(rock, voids, regions, top) {
+  for (const [U0, V0, U1, V1] of regions) {
+    const us = new Set([U0, U1]), vs = new Set([V0, V1]);
+    for (const q of voids) { for (const u of [q.u0, q.u1]) if (u > U0 && u < U1) us.add(u); for (const v of [q.v0, q.v1]) if (v > V0 && v < V1) vs.add(v); }
+    const U = [...us].sort((a, b) => a - b), V = [...vs].sort((a, b) => a - b);
+    for (let i = 0; i + 1 < U.length; i++) for (let j = 0; j + 1 < V.length; j++) {
+      const cu = (U[i] + U[i + 1]) / 2, cv = (V[j] + V[j + 1]) / 2, q = voids.find((w) => cu > w.u0 && cu < w.u1 && cv > w.v0 && cv < w.v1);
+      rock(U[i], V[j], U[i + 1], V[j + 1], q ? q.c : -2, top);
+    }
+  }
+}
+/** The floors, benches, steps, the doorway's frame, the baetyl in its niche and the lamps inside the Treasury. */
+function interior(bag, C, lights, { P, B, Rc }, voids, pu, pv) {
+  const W = 'sandstone_white', f = 1.05;
+  for (const q of voids) { bag.add(R, B(q.u0, q.v0, q.u1, q.v1, -2, q.f)); C.floor(Rc(q.u0, q.v0, q.u1, q.v1), q.f); }
+  const hall = voids.find((q) => q.id === 'hall'), ady = voids.find((q) => q.id === 'adyton');
+  // benches of the rock along the hall's side walls (0.5 m deep, 0.45 high), broken by the doorway to the rear chamber's end
+  for (const s of [-1, 1]) {
+    const u0 = s > 0 ? hall.u1 - 0.55 : hall.u0, u1 = s > 0 ? hall.u1 : hall.u0 + 0.55;
+    bag.add(R, B(u0, hall.v0 + 0.0, u1, hall.v1 - 0.6, f, f + 0.45)); C.rect(Rc(u0, hall.v0, u1, hall.v1 - 0.6), f, f + 0.45);
+    // a plain cornice band in the white stone along the side walls at two thirds of the hall's height
+    bag.add(W, B(s > 0 ? hall.u1 - 0.12 : hall.u0, hall.v0, s > 0 ? hall.u1 : hall.u0 + 0.12, hall.v1, f + 6.4, f + 6.75));
+  }
+  // the three steps up to the rear chamber's doorway: each 0.37 high and 0.5 deep
+  for (let k = 1; k <= 3; k++) { const v1 = hall.v0 + (4 - k) * 0.5, yk = f + 1.1 * k / 3; bag.add(R, B(-2.4, hall.v0, 2.4, v1, f, yk)); C.floor(Rc(-2.4, hall.v0, 2.4, v1), yk); }
+  // the doorway's frame on the hall side: pilasters, an architrave and a cornice, all in the pale stone
+  const op = voids.find((q) => q.id === 'opening'), vf = hall.v0 + 0.0;
+  for (const s of [-1, 1]) bag.add(W, B(s > 0 ? op.u1 : op.u0 - 0.4, vf, s > 0 ? op.u1 + 0.4 : op.u0, vf + 0.12, f + 1.1, op.c));
+  bag.add(W, B(op.u0 - 0.4, vf, op.u1 + 0.4, vf + 0.14, op.c, op.c + 0.45));
+  bag.add(W, B(op.u0 - 0.6, vf, op.u1 + 0.6, vf + 0.2, op.c + 0.45, op.c + 0.7));
+  // the rear chamber: a bench of the rock along its back, the baetyl (the god, a plain upright stone) on a stepped base in a niche
+  bag.add(R, B(ady.u0, ady.v0, ady.u1, ady.v0 + 0.45, ady.f, ady.f + 0.4)); C.rect(Rc(ady.u0, ady.v0, ady.u1, ady.v0 + 0.45), ady.f, ady.f + 0.4);
+  { const bu = 0, bv = ady.v0 + 0.45;
+    bag.add(W, B(bu - 0.8, bv, bu + 0.8, bv + 0.9, ady.f, ady.f + 0.75)); C.rect(Rc(bu - 0.8, bv, bu + 0.8, bv + 0.9), ady.f, ady.f + 0.75);
+    bag.add(W, B(bu - 0.55, bv + 0.12, bu + 0.55, bv + 0.78, ady.f + 0.75, ady.f + 1.0));
+    bag.add(W, B(bu - 0.26, bv + 0.3, bu + 0.26, bv + 0.62, ady.f + 1.0, ady.f + 2.7));                                 // the baetyl
+    bag.add(W, B(bu - 0.2, bv + 0.34, bu + 0.2, bv + 0.58, ady.f + 2.7, ady.f + 2.95));
+    for (const s of [-1, 1]) bag.add(W, B(bu + s * 1.25 - 0.18, ady.v0, bu + s * 1.25 + 0.18, ady.v0 + 0.14, ady.f + 0.4, ady.f + 3.8));   // pilasters of the niche
+    bag.add(W, B(bu - 1.5, ady.v0, bu + 1.5, ady.v0 + 0.18, ady.f + 3.8, ady.f + 4.15));
+  }
+  // the side chambers: a bench of the rock along each back wall
+  for (const q of voids.filter((w) => w.id === 'chamber')) { const s = q.u0 > 0 ? 1 : -1, u0 = s > 0 ? q.u1 - 0.5 : q.u0, u1 = s > 0 ? q.u1 : q.u0 + 0.5; bag.add(R, B(u0, q.v0, u1, q.v1, f, f + 0.42)); C.rect(Rc(u0, q.v0, u1, q.v1), f, f + 0.42); }
+  // oil lamps in the hall's and the rear chamber's walls: a lit niche each
+  const lamp = (u, v, y) => {
+    const [x, z] = P(u, v);
+    bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.005], [0.06, 0.025], [0.03, 0.04], [0.001, 0.035]], 10, null, x, y, z));
+    bag.add('flame', box(x - 0.01, y + 0.03, z - 0.01, x + 0.01, y + 0.07, z + 0.01));
+    lights.push({ at: [x, y + 0.3, z], color: '#ffb46b', intensity: 2.6, distance: 9 });
+  };
+  lamp(hall.u1 - 0.3, hall.v0 + 3.3, f + 0.45); lamp(hall.u0 + 0.3, hall.v0 + 7.2, f + 0.45);
+  lamp(-1.2, ady.v0 + 0.3, ady.f + 0.4); lamp(1.2, ady.v0 + 0.3, ady.f + 0.4);
+  void pu; void pv;
+}
 /** khazneh: the Treasury { at, dir, w, h, back (depth of rock behind), top }. */
-export function khazneh(el, { bag, col: C }) {
+export function khazneh(el, { bag, col: C, lights }) {
   const [x, z] = el.at, { P, B, Rc } = frame(x, z, el.dir), W = el.w ?? 24.9, H = el.h ?? 38.77, back = el.back ?? 26, top = el.top ?? H + 20;
   const hw = W / 2, pu = 6.6, pv = -3.5;                                                   // the portico's half-width and back wall
   const rock0 = (u0, v0, u1, v1, y0, y1) => { bag.add(R, B(u0, v0, u1, v1, y0, y1)); C.rect(Rc(u0, v0, u1, v1), y0, y1); };
@@ -128,8 +198,11 @@ export function khazneh(el, { bag, col: C }) {
   // the rock the façade is cut from, the portico hollowed in it
   const fl = el.flank ?? 25;                                                  // the rock either side (the cliff itself may be built round it)
   rock(-hw - fl, -back, -hw, 0, -2, top); rock(hw, -back, hw + fl, 0, -2, top);
-  rock(-hw, -back, hw, pv, -2, top);
-  rock(-hw, pv, -pu, 0, -2, top); rock(pu, pv, hw, 0, -2, top);
+  // the rock behind and beside the portico, hollowed: the great door's passage, the hall, the doorway to the rear chamber
+  // (adyton) and the rear chamber, and the two side chambers with their doors from the portico (docs §16)
+  const VOIDS = treasuryVoids(pu, pv);
+  carve(rock, VOIDS, [[-hw, -back, hw, pv], [-hw, pv, -pu, 0], [pu, pv, hw, 0]], top);
+  interior(bag, C, lights, { P, B, Rc }, VOIDS, pu, pv);
   rock(-pu, pv, pu, 0, 13.5, top);
   bag.add(R, B(-pu, pv, pu, 0, -2, 1.05)); C.floor(Rc(-pu, pv, pu, 0), 1.05);
   // the three steps
@@ -205,15 +278,12 @@ export function khazneh(el, { bag, col: C }) {
   floralCapital(bag, R, tx, yt + 5.4, tz, 0.62, 1.2);
   bag.add(R, lathe([[0.55, 0], [0.38, 0.35], [0.85, 1.1], [1.0, 1.9], [0.8, 2.6], [0.42, 2.95], [0.58, 3.2], [0.001, H - (yt + 6.6) ]], 16, null, tx, yt + 6.6, tz));
   // ---- the portico: the great door under its pediment; the side chambers' doors, round windows above
-  bag.add('opening', B(-1.5, pv + 0.01, 1.5, pv + 0.03, yb, yb + 7.2));
   for (const s of [-1, 1]) bag.add(R, B(s * 1.5 - (s > 0 ? 0 : 0.5), pv, s * 1.5 + (s > 0 ? 0.5 : 0), pv + 0.3, yb, yb + 7.5));
   bag.add(R, B(-2.2, pv, 2.2, pv + 0.35, yb + 7.2, yb + 7.8));
   prismUY(bag, P, [[-2.3, yb + 7.8], [2.3, yb + 7.8], [0, yb + 8.9]], pv, pv + 0.4);
   for (const s of [-1, 1]) {
     // the side wall of the portico faces the middle: door and round window cut in it
     const wu = s * pu, dirIn = -s;
-    const door = B(wu + dirIn * 0.01 - (dirIn > 0 ? 0 : 0.02), -2.2, wu + dirIn * 0.01 + (dirIn > 0 ? 0.02 : 0), -0.6, yb, yb + 3.6);
-    bag.add('opening', door);
     { const c = P(wu + dirIn * 0.015, -1.4), o = P(wu + dirIn * 1.015, -1.4), t = P(wu + dirIn * 0.015, -0.4); bag.add('opening', roundel([c[0], yb + 5.0, c[1]], [o[0] - c[0], 0, o[1] - c[1]], [t[0] - c[0], 0, t[1] - c[1]], 0.55)); }
     bag.add(R, B(wu + (dirIn > 0 ? 0 : -0.25), -2.5, wu + (dirIn > 0 ? 0.25 : 0), -0.3, yb + 3.6, yb + 4.0));
   }

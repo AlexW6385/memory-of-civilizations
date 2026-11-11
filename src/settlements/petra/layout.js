@@ -89,25 +89,57 @@ export function height(x, z) {
   if (Math.hypot(x, z) > RADIUS) return RIM;
   const g = gardenLevel(x, z);
   if (g !== null) return g;
+  const lot = lotAt(x, z, 0.5);
+  if (lot) return lot.y;
   if (inRect(TRICLINIUM.rect, x, z)) return Math.min(floorY(x, z), floorY(TRICLINIUM.at[0], TRICLINIUM.at[1]));
   const o = open(x, z), rock = RIM + 3 * Math.sin(x / 17) * Math.sin(z / 13) * smooth(RADIUS, RADIUS - 40, Math.hypot(x, z));
   return floorY(x, z) * o + rock * (1 - o);
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-let LOTS = null;
-/** Houses on the valley's slopes north and south of the street. */
+let LOTS = null, LOT_GRID = null;
+/** Houses on the valley's slopes north and south of the street: each lot with its floor level `y` (the lowest corner of the ground, the pad it stands on is levelled to it) and its `front` toward the street ('n' | 's'). */
 export function lots() {
   if (LOTS) return LOTS;
-  LOTS = [];
+  LOTS = []; LOT_GRID = new Map();
   const rand = rng(50);
   for (let x = -230; x < 60; x += 13) for (let z = -100; z < 120; z += 12) {
     const e = Math.hypot((x - VALLEY.c[0]) / VALLEY.r[0], (z - VALLEY.c[1]) / VALLEY.r[1]);
-    if (e > 0.9 || Math.abs(z - 12) < 22 || rand() < 0.35) continue;
+    if (e > 0.93 || Math.abs(z - 12) < 22 || rand() < 0.12) continue;
     if (sacred(x, z, 6) || sacred(x + 11, z + 10, 6) || sacred(x + 11, z, 6) || sacred(x, z + 10, 6) || x > 20 && z > -40) continue;
     const w = 7 + rand() * 4, d = 7 + rand() * 3, seed = Math.floor(rand() * 1e6);
     if ([[x, z], [x + w, z + d], [x + w, z], [x, z + d]].some(([a, b]) => inGarden(a, b, 2) || inRect(TRICLINIUM.rect, a, b, 3))) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed });
+    // not over the Outer Siq, the theatre or the Royal Tombs' foot (open ground there is levelled by its own rules)
+    if ([[x, z], [x + w, z + d], [x + w, z], [x, z + d]].some(([a, b]) => pathDist(a, b, OUTER.path) < OUTER.w / 2 + 12 || Math.hypot(a - THEATRE.c[0], b - THEATRE.c[1]) < THEATRE.r1 + 14 || a > 40 && b > 20)) continue;
+    const y = Math.min(...[[x, z], [x + w, z + d], [x + w, z], [x, z + d]].map(([a, b]) => floorY(a, b)));
+    const lot = { rect: [x, z, x + w, z + d], seed, y: +y.toFixed(3), front: z < 12 ? 's' : 'n' };
+    LOTS.push(lot); LOT_GRID.set(Math.floor((x + 230) / 13) + ',' + Math.floor((z + 100) / 12), lot);
   }
   return LOTS;
 }
-export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** The lot standing at (x, z) (within `m` of its walls), if any. */
+export function lotAt(x, z, m = 0) {
+  if (!LOTS) lots();
+  const i = Math.floor((x + 230) / 13), j = Math.floor((z + 100) / 12);
+  for (const [a, b] of m > 0 ? [[i, j], [i - 1, j], [i, j - 1], [i - 1, j - 1]] : [[i, j]]) { const l = LOT_GRID.get(a + ',' + b); if (l && inRect(l.rect, x, z, m)) return l; }
+  return null;
+}
+export const inLot = (x, z, m = 0) => !!lotAt(x, z, m);
+
+/**
+ * The shops along the colonnaded street's south side (the same division as the style's colonnade_street: runs between the gaps
+ * of the Great Temple's propylaeum and the garden's stair, a shop to every 4.6 m): { x0, x1, m (the door's middle), dw, z0, z1 (the
+ * room, its front and back), yf (its floor), i }. Pure data, for the goods and the people in them.
+ */
+export function shopUnits() {
+  const gaps = [[GREAT_TEMPLE[0] - 1, GREAT_TEMPLE[2] + 1], [GARDEN.entry[0] - 1, GARDEN.entry[1] + 1]].sort((a, b) => a[0] - b[0]);
+  const xa = Math.min(STREET.a[0], STREET.b[0]), xb = Math.max(STREET.a[0], STREET.b[0]), pd = 5, e = STREET.a[1] + STREET.w / 2;
+  const runs = []; let p = xa;
+  for (const [g0, g1] of gaps) { if (g0 > p) runs.push([p, g0]); p = Math.max(p, g1); }
+  if (xb > p) runs.push([p, xb]);
+  const out = [], z0 = e + 1.5 + pd, z1 = e + 0.9 + pd + 6.4 - 0.6;
+  for (const [r0, r1] of runs) {
+    const ns = Math.max(1, Math.round((r1 - r0) / 4.6)), ws = (r1 - r0) / ns;
+    for (let i = 0; i < ns; i++) { const x0 = r0 + i * ws, m = x0 + ws / 2; out.push({ x0, x1: x0 + ws, m, dw: Math.min(2.2, ws - 1.4), z0, z1, yf: 0.45, i: out.length }); }
+  }
+  return out;
+}

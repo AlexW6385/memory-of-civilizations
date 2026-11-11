@@ -127,6 +127,33 @@ Sources added:
 - [Strabo, Geography 16.4.26 — textbase.scriptorium.ro](https://textbase.scriptorium.ro/strabo/the_geography_of_strabo/book_xvi/chapter_iv/26)
 - [Triclinium of the Roman Soldier Tomb — Visit Petra](https://visitpetra.jo/en/Location/132)
 
+## 15. Detail (2026-11-11, batch pass): houses of the valley
+
+- **Sources.** Strabo: "The houses are sumptuous, and of stone" (see §14) [stated]. The Nabataean mansion on ez-Zantur, early 1st century AD: a central courtyard surrounded by reception rooms and servants' quarters, a vestibule flanked by two large chambers on the south side, stone-paved floors, rooms decorated with ornate stucco and wall paintings imitating multicoloured panelled masonry, in a narrow band on the lower wall [stated: Visit Petra, ez-Zantur]. Painted plaster imitating masonry or architectural settings, heated bathing with furnaces, kitchens and working spaces [stated: ancient-history-sites "Daily Life"]. Freestanding buildings in quarried stone, dressed blocks on the visible faces and less regular material elsewhere, mortar and plaster to finish them, stucco for mouldings; channels and pipes carried spring water, cisterns stored runoff [stated: ancient-history-sites "Architecture and Construction"].
+- **Ours** (`nabataean_house`, src/styles/nabataean/house.js; `lots()`, `lotAt()` in layout.js): 122 houses (was 91) on levelled pads, each facing the colonnaded street. Two kinds by the lot's size: the room house (one room under a timber ceiling with its beams, doorway in a frame of pale stone, window slits, outer stair of 13 risers to the roof, or two storeys with blind windows above) and the court house (walled court with a gate, a cistern's lid and mouth in flagstones, the range of rooms across its back, a stair in the court to the roof). Walls of rose ashlar with frames, sills and lintels of the pale sandstone; a stuccoed cornice band (red on a third: painted stucco), a parapet with two-tier crow-step corners and a stone scupper. The inside is walkable and furnished [inferred: proportions; the red band after the painted stucco of ez-Zantur; the room/court division from the mansion's plan, reduced].
+- **Levelled lots.** The ground is levelled to each house's floor (`lotAt` in `height()`), so that no hillside shows through a floor [inferred].
+
+## 16. Detail (2026-11-11, batch pass): the Treasury's inside, the tombs' chambers, the shops
+
+- **Sources.** The Khazneh's inside is plain: "only the beautiful features of the natural sand stone"; the central chamber has three interior portals leading to antechambers; the front porch is flanked by two portals leading into two chambers whose façades are nearly identical [stated: Madain Project, al-Khazneh]. No dimensions were found in the sources read; the sizes below are ours [inferred].
+- **Ours** (khazneh.js `treasuryVoids`, `carve`, `interior`): the rock behind the portico hollowed, not a solid block: the great door's passage (3 m wide, 2.4 m deep), a hall 10.8 × 10.8 m and 9.2 m high, a doorway framed in the pale stone with three steps up to the rear chamber (adyton, 6.8 × 4.3 m, floor 1.1 m higher) with the baetyl on a stepped base in a niche, benches of the rock along the hall's sides and the adyton's back, two side chambers (4.6 × 2.7 m) entered from the portico's side walls, oil lamps with lights. A room `the Treasury` for the sound. [inferred: layout after the plan's description; baetyl after the Siq's niches, §10]
+- **Tomb chambers** (tombs.js `crowTomb`): behind the door of each crow-step tomb of the Street of Façades a passage and a chamber 3.2–5 m wide and 4 m deep, a flagstone floor, a bench along the back and sides, three framed loculi in the back wall, a lamp [inferred: rock-cut tomb chambers are plain rectangular rooms with burial niches; the Street of Façades is §11].
+- **The shops** (shops.js `shopLife`, `shopUnits` in layout.js): the shops of the colonnaded street's south side, §12, fitted with goods by trade: frankincense and myrrh in sacks and baskets and spices in lidded jars (the incense and spice dealers), pottery, cloth in baskets and bundles, oil and wine in amphorae and pithoi, grain in sacks; the keeper on a stool behind the counter, a customer in some doors [inferred]. Frankincense and myrrh came from South Arabia, Ethiopia and Somalia by camel caravan along the incense route from Shabwah in Hadhramaut to Gaza; spices, gold, ivory, pearls, textiles also travelled it; Strabo compared the desert traffic to an army [stated: Metropolitan Museum, "Trade between Arabia and the Empires of Rome and Asia"]. The Nabataeans grew wealthy by carrying the goods onward [stated: same].
+
+## 17. Detail (2026-11-11, batch pass): living systems
+
+- **Walkers** (movers.js): townsmen in the long tunic with a cloak over a shoulder, bare-headed or with the headcloth; caravan men in dark cloaks with turbans and staffs; women in robes with the shawl over the hair; women and boys with water jars on the head; porters with sacks and baskets in short belted tunics; boys. On the colonnaded street and its porticoes, the Outer Siq, the Khazneh's forecourt (few), the temenos. 52 by day, 4 at night [inferred: dress from the sculpture's long tunics, cloaks and headcloths; counts after Athens].
+- **Smoke** (smoke.js): kitchen smoke from a share of the houses at the three meals (oven in the court of the court houses), the incense of the great altar before Qasr al-Bint all day, incense threads from the dealers' shops [inferred].
+- **Animals** (fauna.js): rock doves and house sparrows on the paving, swallows and swifts over the valley and the Siq, ravens and kites over the massif; no water, so no fish or herons [inferred].
+- **Water.** Not yet done: the channel and pipe along the Outer Siq's west wall and the cisterns on the slopes (the Siq's own channels are §10); the court houses carry a cistern's lid.
+
+Sources added:
+- [Nabataean mansion on ez-Zantur — Visit Petra](https://visitpetra.imagine.com.jo/en/Location/125)
+- [Daily Life in the Nabataean World — ancient-history-sites](https://www.ancient-history-sites.com/?p=155893)
+- [Nabataean Architecture and Construction — ancient-history-sites](https://www.ancient-history-sites.com/?p=155884)
+- [al-Khazneh (The Treasury) — Madain Project](https://madainproject.com/al_khazneh)
+- [Trade between Arabia and the Empires of Rome and Asia — Metropolitan Museum](https://www.metmuseum.org/fr/essays/trade-between-arabia-and-the-empires-of-rome-and-asia)
+
 ## Sources
 
 - [Carved in Stone: The Ancient City of Petra — Live Science](https://www.livescience.com/59707-google-maps-of-petra-photos.html)
