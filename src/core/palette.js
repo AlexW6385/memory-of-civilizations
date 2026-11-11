@@ -143,7 +143,7 @@ const SPECS = {
   plaster_grey:     { color: '#bdb8ad', roughness: 0.92, kind: 'smooth' },
   // Ming–Qing Beijing: yellow glazed tiles, vermilion columns and walls, beams painted blue and
   // green, white marble terraces, grey brick courtyards; the grey-brick courtyard houses
-  tile_yellow:      { color: '#c8932c', roughness: 0.32, kind: 'tiles' },
+  tile_yellow:      { color: '#d9a01e', roughness: 0.24, kind: 'tiles' },
   tile_green:       { color: '#3f6b45', roughness: 0.35, kind: 'tiles' },
   lacquer_red:      { color: '#8e2a1c', roughness: 0.45, kind: 'smooth' },
   lattice_red:      { color: '#8e2a1c', roughness: 0.6, kind: 'lattice', paper: '#e6dcc3', cell: 0.1 },

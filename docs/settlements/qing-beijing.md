@@ -191,6 +191,63 @@ Sources for §16–§17:
 - **Spouts, burners, side halls.** Spouts as clouds on the lowest tier, phoenixes on the middle, dragons on the top [stated: Travel China Guide, §13]; one under each post. The furnaces "由生铁铸造，镂空六足" (cast iron, six open legs) [stated: Sohu]: a pair on the top tier before the hall, ours a bowl on six legs [inferred: form]. The side halls (peidian) are "单檐歇山顶，蓝色琉璃瓦" (single-eaved gable-and-hip, blue glazed tiles) [stated: Sohu]: ours two, five bays, at the north-east and north-west of the court [inferred: positions; the real ones flank the hall's court].
 - Sources: [Meridian Gate — Wikipedia](https://en.wikipedia.org/wiki/Meridian_Gate); [The gold that lies beneath your feet — Shine](https://shine.cn/feature/art-culture/1806236982); [祈年殿 — Sohu](https://m.sohu.com/a/962995008_121124401/); [天坛公园 — visitbeijing](https://www.visitbeijing.com.cn/article/48BMl7OxIpo); [祈年殿 — Beijing News](https://news.bjd.com.cn/2023/08/24/10540919.shtml). Blocked or without the detail sought: Wikipedia "Temple of Heaven" and Travel China Guide's Hall of Prayer page (not fetched); Wikipedia "Hall of Preserving Harmony" (no architectural detail).
 
+## 16. People in the lanes (movers.js, L3)
+
+- **Dress.** Dorgon's order of 21 July 1645 gave Han men ten days to shave the front of the head and braid the rest into the queue; "most Han civilian men voluntarily adopted Manchu clothing" such as the changshan, the gown [stated: Wikipedia, Queue (hairstyle)]. Ours: every man with the shaved crown, the queue down the back (a six-ring braid, its end bound with a red cord and a small tassel), the round skullcap with a red button, the long gown of dark blue, grey or brown with a short black jacket or sash over it; porters and carters in short jacket and trousers [inferred: colours; the button, the jacket from general knowledge of Qing dress]. Women in the long gown (the banners) or jacket and trousers (Han servants) with the hair in a bun; the banner headdress is not made [inferred]. Boys in a gown with a small queue. Bannermen on patrol in gown and sash with a staff [inferred]. In rain: oil-paper umbrellas for the robed, the straw rain cape for porters and carters.
+- **Trades.** The mobile barber carried "a wooden cabinet … with two or three drawers" at one end and "a small stove that heated a brass washbasin" at the other, and rang a steel "Huan Tou" [stated: Beijing government site, Mobile Barber's Carrying Pole]; peddlers' cries were the sound of the lanes [stated: History Workshop, "Noise, nostalgia and the sound of Beijing's peddlers"]. Ours: porters with the pole and two baskets, water carriers with the pole and two pails, a donkey with panniers, a camel with its pack saddle and the coal, a Peking cart behind a horse (§15's cart without spokes, see below) [inferred: shares].
+- **Hours.** The engine thins walkers at night and crowds the market streets by day (the avenue, whose edges are lined with booths, counts as the market); it has no per-trade hours, so the trade mix is fixed [engine limit].
+- **Palace.** No walkers inside the walls: a few still figures only (guards at the three gates, three officials at the foot of the terrace) [inferred].
+- **Limits of the engine's walkers.** Limbs swing about the figure's own origin, so each beast is one shape with its driver standing beside it in a fixed stride; the cart's wheels are solid planks (the shader cannot turn spokes); the camel has one hump (the library's).
+
+Sources for §16:
+- [Queue (hairstyle) — Wikipedia (mirror)](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Queue_(hairstyle))
+- [Mobile Barber's Carrying Pole — Beijing government](https://english.beijing.gov.cn/beijinginfo/culture/beijingdiscovery/ancienttrades/202110/t20211018_2514917.html)
+- [Noise, nostalgia and the sound of Beijing's peddlers — History Workshop](https://www.historyworkshop.org.uk/music-sound/noise-nostalgia-and-the-sound-of-beijings-peddlers)
+
+## 17. The shop street (shops.js, life.js)
+
+- "Many of the shop signs did not have any Chinese characters on them, because most people did not know how to read"; "they came in all conceivable shapes and colours" [stated: Beijing Postcards, The Code Language of the Capital]. Ours: along both edges of the avenue south of the moat, a booth every 9–12 m (posts, a mat roof sloping to the street, a counter) of ten trades in turn — tea, wine, cloth, medicine, pawn, grain, fruit, roast chestnuts, books, pottery — each with its goods (tea pots, wine jars, bolts, medicine jars and a mortar, a pawn counter behind a lattice, sacks and a measure, baskets of persimmons and jujubes, the chestnut pan on its brick stove, books, bowls) and a hanging sign on a pole at the front corner: the red wine flag, streamers of cloth, the red gourd of the medicine shop, the black disc of the pawnshop, the grain measure, the kettle of the tea seller [inferred: the shapes, after the general custom; the source names none].
+- A tea house and a pharmacy stand on the avenue's west edge (§21–§22).
+
+## 18. Animals (fauna.js)
+
+- Pigeons: "geling" or "geshao", light bamboo or gourd whistles fixed by a toggle "between its tail feathers", each tuned differently so that a flock made a chord; used since at least the Qing; keepers common in the city [stated: Wikipedia, Pigeon whistle]. Ours: pigeons on the paving in eight places (a flock of 6–9 each), and high flute notes in the street music standing for the whistles (§20). The engine has no flying pigeon yet.
+- Carp (dark, large) in the moat; house swallows over the avenue and the moat (few: it is early autumn) [inferred]; tree sparrows on the lanes and on the red wall's coping; crows circling the great roofs at dusk [inferred from the brief; no source].
+
+Sources for §18:
+- [Pigeon whistle — Wikipedia](https://en.wikipedia.org/wiki/Pigeon_whistle)
+
+## 19. Smoke (smoke.js)
+
+- Coal was central to northern homes: "Neither the kang nor the brazier can exist without coal" [stated: The World of Chinese, Hearth warming]; the stove under the kang was often in an adjoining kitchen, so cooking also warmed it [stated: ancient-history-sites, Qing homes]. Ours: a chimney on about half the courtyard houses' main roofs and a second on a fifth, smoking at dawn, noon, dusk and into the evening (the kang's fire); steam from the tea booths, roast-chestnut smoke from the chestnut booths; incense from four bronze burners on the terrace before the Hall of Supreme Harmony [inferred: the burners' places]. The engine's smoke is grey; coal's darker smoke is wanted.
+
+Sources for §19:
+- [Hearth warming — The World of Chinese](https://www.theworldofchinese.com/2020/04/hearth-warming/)
+- [Qing homes, furniture and household objects — ancient-history-sites](https://www.ancient-history-sites.com/?p=174187)
+
+## 20. Sound (music.js)
+
+- The court's ritual music, zhonghe shaoyue, of the Ming and Qing, descended from yayue, "mainly made of eight materials": metal, stone, string, bamboo, clay, wood, gourd, leather, with chime bells and chime stones — "the sound of metal and jade" [stated: Tour Beijing, Zhonghe Shaoyue]. Ours, for the palace: the engine's bell and bowl-bell standing for the chimes, a drone of mouth organs and a flute in the halls (zones open, hall, court), no street sound. For the lanes (streetMusic): lute phrases, a clapper's knock, high flute notes for the pigeon whistles; in the courtyard houses (zone house) a lute alone; in the tea house (zone tea) the lute, a voice and the storyteller's block [inferred: the timbres are the engine's stand-ins]. The zones apply where a room of that kind exists (plan rooms' `kind`) and, for streets, `open` of the site's own score (index.js must give the settlement streetMusic and the landmark courtMusic).
+
+Sources for §20:
+- [Zhonghe Shaoyue — Tour Beijing](https://www.tour-beijing.com/blog/?p=9607)
+
+## 21. A courtyard house, furnished (interiors.js: bj_rooms)
+
+- The kang "could occupy roughly a third to half of a room", "often the stove was in an adjoining kitchen"; movable tables "brought to a heated platform for work or meals" [stated: ancient-history-sites]; "a kang makes up half of a house": bed, dining area and living room in one, a low table set on it at mealtimes [stated: The World of Chinese]. The principal house on the north side facing south [stated: ancient-history-sites]. Ours (three houses near the avenue's mouth beside the two of §14): the main house's hall (long table with duster vases and censer, hanging painting and couplet, Eight Immortals table with a chair each side); the east bay a kang under the window with its low table, folded quilts, a clothes cabinet, a chest, a brazier of iron on three legs; the west bay a desk with inkstone, books and brush pot, a chair, a cabinet; further bays kangs and a pair of wardrobes; the east wing a bedroom (kang, chest, washstand); the west wing the kitchen (the range with two iron pots and a chimney, a water vat, firewood, coal balls, a cupboard) [inferred: layout and objects; no one house is documented].
+
+## 22. A tea house (bj_teahouse)
+
+- "Idle Manchu nobles" popularised tea houses; story tea houses had pingshu storytellers telling serials over one to two months; bird keepers favoured the plain tea houses; commoners were given coarse ware [stated: Culture Trip, A Brief History of Tea Houses in Beijing]. Ours: a hall of grey brick with a gable roof on the avenue's west edge; inside, rows of square tables with a bench each side, a covered pot and bowls on each; at the back the counter, a brick stove with two copper kettles and its chimney, a shelf of cups; at one end the storyteller's low platform with his table and the wooden block; round bamboo bird cages hung from the beams, some under blue cloths; red paper lanterns [inferred: the layout and objects].
+
+## 23. A pharmacy (bj_pharmacy)
+
+- A cabinet of a hundred small drawers (baizi gui) with brass pulls and paper labels on the back wall, a counter with scales, a mortar and a hand mill, jars, bundles of herbs hung from the beams [inferred: from the general form of a Chinese pharmacy; no source read for this shop].
+
+Sources for §22:
+- [A Brief History of Tea Houses in Beijing — Culture Trip](https://theculturetrip.com/articles/a-brief-history-of-tea-houses-in-beijing)
+- [The Code Language of the Capital — Beijing Postcards](https://beijing-postcards.com/archival-materials/the-code-language-of-the-capital)
+
 ## Sources
 
 - [Corner Towers of the Forbidden City — Travel China Guide](https://www.travelchinaguide.com/attraction/beijing/forbidden-city/corner-towers.htm)
