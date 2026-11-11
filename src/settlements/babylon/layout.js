@@ -76,14 +76,14 @@ const TRADES = ['potter', 'baker', 'weaver', 'brewer', 'smith', 'grocer', 'carpe
 function build() {
   LOTS = []; ALLEYS = []; YARDS = [];
   const rand = rng(570), xs = XL, zs = ZL;
-  const addRow = (x0, z0, x1, z1, door, kind) => {
+  const addRow = (x0, z0, x1, z1, door, kind, free = false) => {
     const along = door === 'n' || door === 's', L = along ? x1 - x0 : z1 - z0;
     let a = along ? x0 : z0;
     for (const w of split(rand, L)) {
       const r = along ? [a, z0, a + w, z1] : [x0, a, x1, a + w];
       a += w;
       const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
-      if (SKIP(cx, cz) || SKIP(r[0], r[1]) || SKIP(r[2], r[3]) || SKIP(r[0], r[3]) || SKIP(r[2], r[1])) continue;
+      if (!free && (SKIP(cx, cz) || SKIP(r[0], r[1]) || SKIP(r[2], r[3]) || SKIP(r[0], r[3]) || SKIP(r[2], r[1]))) continue;
       const q = rand();
       if (q < 0.045) { YARDS.push({ rect: r, door, kind: ['garden', 'pen', 'brickyard', 'garden', 'kiln'][Math.floor(rand() * 5)], seed: Math.floor(rand() * 1e6) }); continue; }
       LOTS.push({ rect: r, door, seed: seedFor(rand, door), col: kind });
@@ -112,6 +112,12 @@ function build() {
       ALLEYS.push([x0, band0 + 14, x1, band1 - 14]);
     }
   }
+  // the precinct of Etemenanki: priests' houses and storehouses in rows against the inside of its wall (§13.4), doors on the court
+  { const [p0, q0, p1, q1] = PRECINCT, d = 12, wt = 4.5, gx = 14;
+    addRow(p0 + wt, q0 + 10, p0 + wt + d, q1 - 10, 'e', 'precinct', true);
+    addRow(p1 - wt - d, q0 + 10, p1 - wt, q1 - 10, 'w', 'precinct', true);
+    addRow(p0 + wt + d + 3, q0 + wt, WAY.x - gx, q0 + wt + d, 's', 'precinct', true); addRow(WAY.x + gx, q0 + wt, p1 - wt - d - 3, q0 + wt + d, 's', 'precinct', true);
+    addRow(p0 + wt + d + 3, q1 - wt - d, -gx, q1 - wt, 'n', 'precinct', true); addRow(gx, q1 - wt - d, p1 - wt - d - 3, q1 - wt, 'n', 'precinct', true); }
   // which houses are open to the visitor (furnished), and which are shops (§13): in the core, on the lanes beside the Way
   // and on the first lanes east of the river road, a house in every few
   const dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 40, (l.rect[1] + l.rect[3]) / 2 + 100);
@@ -121,6 +127,7 @@ function build() {
   let nOpen = 0, nShop = 0;
   for (const l of near) {
     const way = l.col === 'way', q = rr();
+    if (l.col === 'precinct') { if (q < 0.1 && nOpen < 18) { l.open = true; nOpen++; } else if (q > 0.85) l.shop = null; continue; }
     if (way && dist(l) < 120 && q < 0.42 && nOpen < 8) { l.open = true; nOpen++; if (nOpen === 4) l.school = true; }
     else if (q < (way ? 0.78 : 0.13) && nShop < 26 && (way || dist(l) < 200)) { l.shop = TRADES[nShop++ % TRADES.length]; }
     else if (!way && q > 0.93 && nOpen < 16) { l.open = true; nOpen++; }
