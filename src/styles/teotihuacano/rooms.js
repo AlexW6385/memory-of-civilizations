@@ -10,7 +10,10 @@ import { box, frustum } from '../../core/geom.js';
 import { hearthKit, metateKit, ollaKit, waterJarKit, storeJarKit, bowlsKit, bedKit, soot, put } from '../maya/household.js';
 import { tablero } from './index.js';
 import { theatreCenser } from './palace.js';
+import { Wall, tlalocan, procession } from './mural.js';
+import { workshopRoom } from './market.js';
 
+const el_seed = (j, a) => Math.floor(Math.abs(a) * 7 + j * 13) + 1;
 const S = 'stucco_ochre', RD = 'stucco_red', WH = 'stucco_pale';
 
 /**
@@ -44,7 +47,7 @@ export function porticoRooms(ctx, back, [fx, fz], ph, ceil, roles, rand) {
   const cells = [];
   for (let j = 0; j < n; j++) {
     const a0 = U0 + j * cell + (j ? t / 2 : t), a1 = U0 + (j + 1) * cell - (j < n - 1 ? t / 2 : t), m = (a0 + a1) / 2;
-    if (roles[j] === 'shrine') { W(R(a0, a1, Dm, Dm + t)); cells.push([j, a0, a1, t, Dm, 'shrine', true, false]); continue; }    // the shrine closed behind
+    if (roles[j] === 'shrine' || roles[j] === 'mural') { W(R(a0, a1, Dm, Dm + t)); cells.push([j, a0, a1, t, Dm, roles[j], true, false]); continue; }    // the shrine closed behind
     W(R(a0, m - dw, Dm, Dm + t)); W(R(m + dw, a1, Dm, Dm + t));
     const o = R(m - dw, m + dw, Dm, Dm + t); bag.add(S, box(o[0], ph + dh, o[1], o[2], ceil + 0.02, o[3]));
     cells.push([j, a0, a1, t, Dm, roles[j], true, true], [j, a0, a1, Dm + t, D - t, roles[j] === 'kitchen' ? 'store' : roles[j] === 'store' ? 'sleep' : (rand() < 0.5 ? 'sleep' : 'store'), false, false]);
@@ -60,7 +63,19 @@ export function porticoRooms(ctx, back, [fx, fz], ph, ceil, roles, rand) {
     }
     for (let v = v0 + 0.45; v < v1 - 0.2; v += 0.85) { const q = R(a0 - 0.1, a1 + 0.1, v - 0.1, v + 0.1); bag.add('viga', box(q[0], ceil - 0.18, q[1], q[2], ceil + 0.02, q[3])); }
     const A = (uu, vv) => P(uu, vv), at3 = (uu, vv) => { const [x, z] = P(uu, vv); return [x, f, z]; }, w = a1 - a0, d = v1 - v0;
-    if (role === 'shrine') {
+    if (role === 'mural') {
+      // the Tlalocan on the back wall, a procession of priests on each side wall (mural.js), a red bench along the front
+      const ax = fx ? 'x' : 'z', uax = fx ? 'z' : 'x', fy = f + 0.1, H = ceil - fy - 0.1;
+      const cb = front - s * (v1 - e);
+      tlalocan(new Wall(bag, ax, cb, s, a0 + 0.08, a1 - 0.08, fy), w - 0.16, H, el_seed(j, a0));
+      const along0 = front - s * (v0 + 0.1), along1 = front - s * (v1 - 0.1);
+      procession(new Wall(bag, uax, a0 + e, 1, along0, along1, fy), d - 0.2, H, el_seed(j, a0) + 5);
+      procession(new Wall(bag, uax, a1 - e, -1, along0, along1, fy), d - 0.2, H, el_seed(j, a0) + 9);
+      put(bag, bowlsKit(RD), ...at3(m + 1.2, v0 + 1.0), inward);
+      const mt = R(m - 0.8, m + 0.8, v0 + 1.2, v0 + 2.5); bag.add('reed_mat', box(mt[0], f, mt[1], mt[2], f + 0.02, mt[3]));
+    } else if (role === 'workshop') {
+      workshopRoom(ctx, A, f, a0, a1, v0, v1, inward, rand);
+    } else if (role === 'shrine') {
       // the altar against the back wall: a talud and a framed tablero, the theatre censer on it, offerings and a mat before it
       const [cx, cz] = A(m, v1 - 0.85), h = 0.7;
       bag.add(RD, frustum([cx - 0.7, cz - 0.7, cx + 0.7, cz + 0.7], f, f + h * 0.4, 0.12, 0.12, 0.12, 0.12, { noBottom: true, noTop: true }));

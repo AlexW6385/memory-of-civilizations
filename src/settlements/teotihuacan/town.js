@@ -1,6 +1,6 @@
 // The apartment compounds of Teotihuacan (docs/settlements/teotihuacan.md §5, §12), and the maguey and
 // nopal grown in the open ground between them (§12).
-import { RADIUS, AVENUE, KEEP_CLEAR, PALACE_CLEAR, compounds, inCompound, inRect } from './layout.js';
+import { RADIUS, AVENUE, KEEP_CLEAR, PALACE_CLEAR, MARKET, MARKET_PLATFORM, compounds, inCompound, inRect } from './layout.js';
 import { ground } from './ground.js';
 const base = (id, elements) => ({ id, style: 'teotihuacano', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -80], facing: 'e' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -9,7 +9,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
  * the open ground of the city kept clear of the avenue, the monuments and the streets' middles.
  */
 function plants() {
-  const rand = rng(73), P = [], free = (x, z, m) => Math.hypot(x, z) < RADIUS - 12 && !inRect(AVENUE, x, z, 40) && !KEEP_CLEAR.some((k) => inRect(k, x, z, 4)) && !inRect(PALACE_CLEAR, x, z, 4) && !inCompound(x, z, m);
+  const rand = rng(73), P = [], free = (x, z, m) => Math.hypot(x, z) < RADIUS - 12 && !inRect(AVENUE, x, z, 40) && !KEEP_CLEAR.some((k) => inRect(k, x, z, 4)) && !inRect(PALACE_CLEAR, x, z, 4) && !inRect(MARKET, x, z, 4) && !inCompound(x, z, m);
   // rows a metre and a half off the compounds' walls, on one or two sides each
   for (const c of compounds()) {
     const [x0, z0, x1, z1] = c.rect;
@@ -41,6 +41,9 @@ function plants() {
 export async function town() {
   const all = compounds(), plans = [];
   for (let i = 0; i < all.length; i += 40) plans.push(base(`teotihuacan-compounds-${i / 40}`, all.slice(i, i + 40).map((c) => ({ t: 'compound', ...c }))));
+  // the Great Compound's market and its central platform with a small temple
+  plans.push(base('teotihuacan-market', [{ t: 'tt_market', rect: MARKET, seed: 450, hole: MARKET_PLATFORM },
+    { t: 'tt_pyramid', c: [(MARKET_PLATFORM[0] + MARKET_PLATFORM[2]) / 2, (MARKET_PLATFORM[1] + MARKET_PLATFORM[3]) / 2], y: 0.04, w: 24, d: 24, tw: 14, td: 14, h: 3.6, levels: 2, tablero: 0.5, stair: 'n', stairW: 5, talud: 'stucco_red', temple: { w: 6, d: 6, h: 3 } }]));
   plans.push(base('teotihuacan-plants', [{ t: 'meso_plants', plants: plants() }]));
   return plans;
 }

@@ -18,6 +18,9 @@ export const KEEP_CLEAR = [[-100, -420, 100, -190], [22, -215, 315, 95], [22, 16
 /** The Palace of Quetzalpapalotl at the Moon Plaza's south-west, its floor level with the top of the side platform it opens on; the Jaguars' patio south of it. */
 export const QPP = { rect: [-93, -183, -52, -147], y: 4.2 };
 export const JAGUARS = { rect: [-98, -141, -60, -111], y: 0.6 };
+/** The Great Compound's market plaza west of the avenue, opposite the Ciudadela; its central platform. */
+export const MARKET = [-190, 172, -66, 346];
+export const MARKET_PLATFORM = [-142, 245, -114, 273];
 export const PALACE_CLEAR = [-112, -190, -52, -104];
 /**
  * The avenue rises from plaza to plaza toward the Moon (cookjmex: each plaza "raised a little above the
@@ -45,7 +48,10 @@ export function compounds() {
     if (Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) > RADIUS - 26) continue;
     if (Math.abs(cx) < 34 + w / 2 || [...KEEP_CLEAR, PALACE_CLEAR].some((k) => inRect(k, cx, cz, w / 2 + 4))) continue;
     if (rand() < 0.1) continue;
-    LOTS.push({ rect: r, seed: Math.floor(rand() * 1e6) });
+    if (inRect(MARKET, cx, cz, w / 2 + 6)) continue;
+    const seed = Math.floor(rand() * 1e6), h = (seed * 2654435761 >>> 0) / 4294967296;
+    // the compounds with a painted room (Tepantitla's) and those of the obsidian workers (nearer the Ciudadela and the Moon)
+    LOTS.push({ rect: r, seed, mural: h < 0.2, workshop: h > 0.8 && (cz > 120 || cz < -300 || h > 0.93) });
   }
   return LOTS;
 }

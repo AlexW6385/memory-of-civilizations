@@ -10,6 +10,8 @@ import { carved, Kit } from '../maya/meso.js';
 import { porticoRooms } from './rooms.js';
 import { patch } from '../maya/household.js';
 import { mesoPlants } from '../maya/plants.js';
+import { ttMarket } from './market.js';
+import { midden } from './market.js';
 import { ttPalace, ttJaguars, ttPlazaAltars, ttCrossAltar, ttGoddess, ttTempleInside, ttPeople } from './palace.js';
 
 const S = 'stucco_ochre', RD = 'stucco_red', RF = 'limewash_red', RB = 'rubble_teo', HS = 'andesite';
@@ -240,7 +242,7 @@ function compound(el, ctx) {
       bag.add(RD, ax === 'x' ? box(xm - gw - 0.2, 2.3, r[1] - 0.05, xm + gw + 0.2, 2.6, r[3] + 0.05) : box(r[0] - 0.05, 2.3, zm - gw - 0.2, r[2] + 0.05, 2.6, zm + gw + 0.2));
     }
   });
-  bag.add(RB, frustum([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], 0, 0.9, 0.5, 0.5, 0.5, 0.5, { noBottom: true }));
+  bag.add(RB, frustum([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], 0, 0.9, 0.5, 0.5, 0.5, 0.5, { noBottom: true, noTop: true }));   // (a ring: its top must not roof the courts and floors inside)
   // the outer wall's plaster patched where it was re-laid, here and there fallen away from the rubble core
   for (const [nx, nz, c] of [[0, -1, z0], [0, 1, z1], [-1, 0, x0], [1, 0, x1]]) {
     const L = nx ? z1 - z0 : x1 - x0, a0 = nx ? z0 : x0;
@@ -258,6 +260,7 @@ function compound(el, ctx) {
     const k = i * nz + j, cx0 = x0 + 1 + i * cw, cz0 = z0 + 1 + j * cd;
     if (k === 4 || k === second) {
       bag.add(k === 4 ? 'stucco_pale' : 'stucco', frustum([cx0 + 0.5, cz0 + 0.5, cx0 + cw - 0.5, cz0 + cd - 0.5], -0.2, 0.06, 0, 0, 0, 0, { noBottom: true }));
+      if (k !== 4 && el.workshop) midden(bag, col, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
       if (k === 4) {
         // the altar: a talud and a framed tablero, a little shrine in miniature
         const ax = cx0 + cw / 2, az = cz0 + cd / 2;
@@ -286,6 +289,8 @@ function compound(el, ctx) {
     // the rooms behind it, each with its doorway on the portico, furnished (rooms.js)
     const across = fx ? back[3] - back[1] : back[2] - back[0], nr = across > 11 ? 3 : 2;
     const roles = principal ? (nr === 3 ? ['sleep', 'shrine', 'sleep'] : ['shrine', 'sleep']) : Array.from({ length: nr }, (_, j) => (k === 1 && j === 0 ? 'kitchen' : ['sleep', 'store', 'kitchen', 'sleep'][Math.floor(rand() * 4)]));
+    if (el.mural && principal) roles[nr === 3 ? 0 : 1] = 'mural';
+    if (el.workshop && face === 'e') roles[roles.length - 1] = 'workshop';
     porticoRooms(ctx, back, [fx, fz], ph, rh - 0.45, roles, rand);
     bag.add(S, box(r[0], rh - 0.45, r[1], r[2], rh, r[3])); col.floor(r, rh);
     const L = fx ? r[3] - r[1] : r[2] - r[0];
@@ -302,6 +307,6 @@ function compound(el, ctx) {
 
 registerStyle('teotihuacano', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople, meso_plants: mesoPlants },
+  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople, tt_market: ttMarket, meso_plants: mesoPlants },
   objects: {},
 });
