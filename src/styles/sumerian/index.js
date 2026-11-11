@@ -70,6 +70,7 @@ function ziggurat(el, ctx) {
     col.rect([r[0] + b * 0.4, r[1] + b * 0.4, r[2] - b * 0.4, r[3] - b * 0.4], y, y + s.h);
     col.floor([r[0] + b, r[1] + b, r[2] - b, r[3] - b], y + s.h);
     tops.push({ r, b, y0: y, y1: y + s.h });
+    const y0s = y, stains = [], fx0 = (px, nx, o2) => px - nx * o2, fz0 = (pz, nz, o2) => pz - nz * o2;
     // the weeper holes: rows of small dark drains through the baked-brick skin, midway between the buttresses
     for (const [ax, az, bx, bz, nx, nz] of [[r[0], r[1], r[2], r[1], 0, -1], [r[0], r[3], r[2], r[3], 0, 1], [r[0], r[1], r[0], r[3], -1, 0], [r[2], r[1], r[2], r[3], 1, 0]]) {
       const L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / 3.2);
@@ -80,9 +81,13 @@ function ziggurat(el, ctx) {
         for (let yy = y + 1.4; yy < y + s.h - 1; yy += 1.8) {
           const f = (yy - y) / s.h, o = b * f, fx = px - nx * o, fz = pz - nz * o, hw = 0.13, hd = 0.09;
           bag.add('opening', nx ? box(fx - hd, yy, fz - hw, fx + hd, yy + 0.22, fz + hw) : box(fx - hw, yy, fz - hd, fx + hw, yy + 0.22, fz + hd));
+          // the stain below it: salt and damp running down the face, following its slope
+          { const sp = (y, u) => { const o2 = b * ((y - y0s) / s.h); const px2 = nx ? fx0(px, nx, o2) : px + u, pz2 = nz ? fz0(pz, nz, o2) : pz + u; return nx ? [px2 + nx * 0.03, y, pz + u] : [px2, y, pz2 + nz * 0.03]; };
+            const yb = yy - 0.9, q = [sp(yy, -0.12), sp(yy, 0.12), sp(yb, 0.2), sp(yb, -0.2)]; stains.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3], ...q[0], ...q[2], ...q[1], ...q[0], ...q[3], ...q[2]); }
         }
       }
     }
+    if (stains.length) bag.add('plaster_streak', fromTriangles(stains));
     y += s.h;
   });
   const S0 = tops[0], fz = S0.r[1];                          // the front face (north)
