@@ -1,10 +1,10 @@
 # Batches: every settlement to the Suzhou standard
 
-The plan for bringing all 94 settlements of DESIGN §7 to Ming Suzhou's standard (`docs/suzhou-method.md`): what is done first, which settlements go in which batch, and how many agents each gets. Decided by the coordinator at the author's request (2026-11-10). The coordinator keeps this file current: when a batch is done, mark it done in the table header line and move any settlement that failed the survey into the next batch's fix-up slots. No logs here.
+The plan for bringing all 94 settlements of DESIGN §7 to Ming Suzhou's standard (`docs/suzhou-method.md`): what is done first, which settlements go in which batch, and how many agents each gets. Decided by the coordinator at the author's request and approved by the author (2026-11-10). The coordinator keeps this file current: when a batch is done, mark it done in the table header line and move any settlement that failed the survey into the next batch's fix-up slots. No logs here.
 
 ## Order of the whole
 
-1. **Phase 0 — engine, before any batch** (coordinator, Opus). Nothing below starts until these are merged and green.
+1. **Phase 0 — engine** (coordinator, Opus). Items 2–4 run alongside B1: B1's settlements supply their own living-system data in Suzhou's format, so they do not wait for the defaults.
 2. **B1 — the pilot** (China, closest to Suzhou). After it, stop: survey in the author's Chrome, fix the method and the slot sizes, then go on.
 3. **B2–B9 — the 55 other built settlements**, in priority order.
 4. **B10–B16 — the 38 L0 settlements**, built from nothing to the standard. Their dossiers are written earlier, in the background (below), so that a batch of new settlements starts from finished research.
@@ -15,7 +15,7 @@ Priority, used to order the batches: (a) how much the settlement carries the who
 
 Done in order; each is one push.
 
-1. **Enlarge the planet** to about 12 km (`PLANET_RADIUS`, `src/planet/sites.js`); every site's radius set to its class (DESIGN §4.5); `tools/planet-layout.mjs` re-run, `docs/world.md` updated; arrival views checked; impostors and light bakes redone. First, because every radius and position after it depends on it.
+1. **Enlarge the planet** to about 12 km (`PLANET_RADIUS`, `src/planet/sites.js`); every site's radius set to its class (DESIGN §4.5); `tools/planet-layout.mjs` re-run, `docs/world.md` updated; arrival views checked; impostors and light bakes redone. First, because every radius and position after it depends on it. *Done (v10.54): 12 km, every settlement placed with its class's room, the 38 planned ones included.*
 2. **Living systems by default.** Today walkers, boats, birds, fish, smoke and shops exist only for Suzhou, from its own data files, and `systems-list.js` imports Suzhou's smoke by name. Make each system run on any settlement from what the settlement already has: walkers from its street graph, boats from its canals and quays, birds and animals from its region and climate, smoke from its house types and hearths, shop goods from a per-style table. A settlement's own `movers.js`, `fauna.js`, `smoke.js`, `shops.js` override the defaults (Suzhou keeps its own). Counts by time of day as in Suzhou.
 3. **One check for the standard.** A script (`tools/standard-check.mjs <id>`) that runs surface-check, geo-one, plan-check and the walk route, and reports against suzhou-method §7: which data files exist, enterable rooms and their furnishing count, living systems attached, `damp`/`waterline` set, music zones. Agents and coordinator use the same script.
 4. **Shared styles opened by ownership.** In each batch every shared style its settlements use (`chinese`, `ming`, `roman`, `vernacular`, `src/objects/*`) is assigned to exactly one agent, named in the assignment; only that agent edits it. `docs/agent-brief.md` and `docs/parallel-work.md` say so.
@@ -43,7 +43,7 @@ Agents on one settlement edit disjoint files of its folder (the split above); th
 
 Slots in brackets; S = shared style owned in that batch, by the agent named.
 
-### B1 — Pilot: Chinese capitals (10)
+### B1 — Pilot: Chinese capitals (10) — *in progress*
 
 | Settlement | Class | Slots |
 |---|---|---|
@@ -52,7 +52,7 @@ Slots in brackets; S = shared style owned in that batch, by the agent named.
 | Ming–Qing Beijing (`qing-beijing`) | L ●●● | 3 |
 | Tang Foguang, Wutai (`tang-wutai`) | S ●● | 1 |
 
-S: `song` (Kaifeng, Hangzhou, Wutai) → Kaifeng landmark; `chinese` and `vernacular` → the Wutai agent; `ming` stays untouched (Suzhou, the reference). **Gate:** surveyed in Chrome against Suzhou (≥ 55 fps turning, p95 ≤ 25 ms, ≤ 800 draws; detail looked at from a metre); suzhou-method.md and the slot table revised with what the pilot taught.
+S: `song` (Kaifeng, Hangzhou, Wutai) → Kaifeng landmark, except its per-settlement files `song/hangzhou.js` → Hangzhou landmark and `song/wutai.js` → the Wutai agent; `qing` → Beijing landmark; `chinese` → the Wutai agent (`vernacular` untouched this batch); `ming` stays untouched (Suzhou, the reference). **Gate:** surveyed in Chrome against Suzhou (≥ 55 fps turning, p95 ≤ 25 ms, ≤ 800 draws; detail looked at from a metre); suzhou-method.md and the slot table revised with what the pilot taught.
 
 ### B2 — East Asia and India, the dense ones (10)
 
