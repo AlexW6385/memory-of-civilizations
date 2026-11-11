@@ -6,7 +6,9 @@
 // Physician Zhao's shop with its standing signboards, the fortune tellers' stands and the young men
 // round them, ox carts under their mat covers, a one-wheeled barrow drawn by a donkey, a dray of wine
 // casks, the trackers hauling a boat up the river, the fields to the east with a train of donkeys.
-import { RADIUS, RIVER, BRIDGE, GATE, WALL_X, FIELDS_X, STREETS, inRect, inLot, lots, bridgeDeck } from './layout.js';
+import { RADIUS, RIVER, BRIDGE, GATE, WALL_X, FIELDS_X, STREETS, inRect, inLot, lots, wineLots, teaLots, bridgeDeck } from './layout.js';
+import './style.js';
+import { STONE_BANK, WHARVES, STEPS, LANES, onLane } from './layout.js';
 import { ground } from './ground.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [160, -130], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -14,19 +16,10 @@ const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 const CLOTH = ['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_black', 'cloth_ochre'];
 const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
 
-/** The wine shops: the five largest two-storey shops nearest the bridge (the scroll has five colour gates). */
-function wineShops() {
-  const near = (l) => { const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2; return Math.hypot(cx - BRIDGE.at[0], cz - BRIDGE.at[1]); };
-  return lots().filter((l) => l.shop && l.storeys === 2 && l.rect[2] - l.rect[0] > 0 && near(l) < 140).sort((a, b) => near(a) - near(b)).filter((l, i, all) => all.slice(0, i).every((m) => Math.hypot(m.rect[0] - l.rect[0], m.rect[1] - l.rect[1]) > 18)).slice(0, 5);
-}
-/** The tea houses: the two one-storey shops on the north riverside street nearest the bridge. */
-let TEA = null;
-function teaHouses() {
-  if (TEA) return TEA;
-  const near = (l) => Math.abs((l.rect[0] + l.rect[2]) / 2 - BRIDGE.at[0]);
-  TEA = lots().filter((l) => l.front === 's' && l.shop && l.storeys === 1 && Math.abs(l.rect[3] - (RIVER.z0 - 14)) < 1 && l.rect[2] - l.rect[0] > 8 && l.rect[3] - l.rect[1] > 11).sort((a, b) => near(a) - near(b)).slice(0, 2);
-  return TEA;
-}
+/** The wine shops: the five widest two-storey shops nearest the bridge (the scroll has five colour gates), chosen in layout.js. */
+const wineShops = () => wineLots();
+/** The tea houses: the two on the north riverside street nearest the bridge. */
+const teaHouses = () => teaLots();
 function frontLine(l) {
   const [x0, z0, x1, z1] = l.rect, f = l.front;
   if (f === 's') return { a: [x0 + 0.5, z1], b: [x1 - 0.5, z1], out: FR.s };
@@ -238,9 +231,42 @@ function landing() {
   return [base('song-kaifeng-landing', S), base('song-kaifeng-landing-life', L, 'life')];
 }
 
+/** The river's banks beyond the stone ones, the stone steps by the bridge, the lanes' paving. */
+function waterside() {
+  const E = [], RW = RADIUS - 26, half = (z) => Math.sqrt(Math.max(0, RW * RW - z * z));
+  for (const bank of ['n', 's']) {
+    const e = bank === 'n' ? RIVER.z0 : RIVER.z1, h = half(e) - 4;
+    const gaps = WHARVES.filter((w) => w.bank === bank).map((w) => w.x).sort((a, b) => a - b);
+    for (const [lo, hi] of [[-h, -STONE_BANK], [STONE_BANK, h]]) {
+      let x = lo;
+      for (const g of gaps.filter((g) => g > lo && g < hi)) { if (g - 3.2 > x + 2) E.push({ t: 'bian_revetment', x0: x, x1: g - 3.2, bank }); x = g + 3.2; }
+      if (hi > x + 2) E.push({ t: 'bian_revetment', x0: x, x1: hi, bank });
+    }
+    for (const w of WHARVES) if (w.bank === bank && Math.abs(w.x) < h) E.push({ t: 'wharf', x: w.x, bank });
+  }
+  for (const s of STEPS) {
+    const n = s.bank === 'n', z = n ? RIVER.z0 + 0.4 : RIVER.z1 - 0.4;
+    E.push({ t: 'water_steps', a: [s.x - 2.5, z], b: [s.x + 2.5, z], dir: [0, n ? 1 : -1], y: 0.05, water: RIVER.water, double: false, moor: true });
+  }
+  for (const r of LANES) {
+    const horiz = r[2] - r[0] > r[3] - r[1], q = horiz ? [Math.max(r[0], WALL_X + 8), r[1], Math.min(r[2], FIELDS_X), r[3]] : [r[0], r[1], r[2], r[3]];
+    if (!horiz && (q[0] < WALL_X + 8 || q[2] > FIELDS_X)) continue;
+    const hh = horiz ? half(Math.max(Math.abs(q[1]), Math.abs(q[3]))) : half(Math.max(Math.abs(q[0]), Math.abs(q[2])));
+    const c = horiz ? [Math.max(q[0], -hh), q[1], Math.min(q[2], hh), q[3]] : [q[0], Math.max(q[1], -hh), q[2], Math.min(q[3], hh)];
+    if (c[2] - c[0] > 1 && c[3] - c[1] > 1) E.push({ t: 'paving', rect: c, y: 0.04, th: 0.3 });
+  }
+  return base('song-kaifeng-waterside', E, 'kaifeng-site');
+}
+
 export async function town() {
-  const tea = new Set(teaHouses()), all = lots().filter((l) => !tea.has(l)), plans = [];
-  for (let i = 0; i < all.length; i += 150) plans.push(base(`song-kaifeng-houses-${i / 150}`, all.slice(i, i + 150).map((l) => ({ t: 'house_jiangnan', y: 0, ...l }))));
-  plans.push(...scroll(), ...landing());
+  const plans = [], groups = new Map();
+  for (const l of lots()) {
+    if (l.kind === 'tea') continue;
+    const k = l.det + ':' + (l.rect[0] < 0 ? 'w' : 'e') + (l.rect[1] < 76 ? 'n' : 's');
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(l);
+  }
+  for (const [k, all] of [...groups].sort()) for (let i = 0; i < all.length; i += 120) plans.push(base(`song-kaifeng-houses-${k.replace(':', '-')}-${i / 120}`, all.slice(i, i + 120).map((l) => ({ t: 'house_song', y: 0, ...l })), 'kaifeng-site'));
+  plans.push(waterside(), ...scroll(), ...landing());
   return plans;
 }
