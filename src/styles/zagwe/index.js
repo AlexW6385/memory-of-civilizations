@@ -12,7 +12,8 @@ import '../qing/index.js';
 import { orientBy, piercedSlab } from '../sahel/index.js';
 import { hut } from './hut.js';
 import { umbrella, procCross } from './liturgy.js';
-import { yardEl, terraceEl } from './compound.js';
+import { rod } from './hut.js';
+import { yardEl, terraceEl, courtEl } from './compound.js';
 
 const TU = 'tuff_red', TH = 'tuff_hewn';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -403,25 +404,83 @@ function maryam(el, { bag, col }) {
     bag.add(TH, fromTriangles(t)); }
 }
 
-/** aksumite: a church in the Aksumite manner { rect, y0, h }: walls in recessed and projecting courses with beam ends, windows, a door on the west, a flat roof. */
-function aksumite(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y0 = el.y0, h = el.h, band = 1.3;
-  solid(bag, col, TH, [x0 - 0.6, z0 - 0.6, x1 + 0.6, z1 + 0.6], y0, y0 + 0.9);
-  let y = y0 + 0.9, k = 0;
-  while (y < y0 + h - 0.1) {
-    const y2 = Math.min(y0 + h, y + band), inset = k % 2 ? 0.2 : 0;
-    bag.add(TH, box(x0 + inset, y, z0 + inset, x1 - inset, y2, z1 - inset));
-    if (k % 2 === 0 && y2 < y0 + h - 0.5) for (const [ax, az, bx, bz] of [[x0, z0, x1, z0], [x0, z1, x1, z1], [x0, z0, x0, z1], [x1, z0, x1, z1]]) {
-      const L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / 1.6);
-      for (let i = 1; i < n; i++) { const px = ax + (bx - ax) * i / n, pz = az + (bz - az) * i / n; bag.add(TH, box(px - 0.18, y2 - 0.36, pz - 0.18, px + 0.18, y2, pz + 0.18)); }
+/**
+ * aksumite: a church in the Aksumite manner { rect, y0, h, name } (docs/settlements/lalibela.md §16): the body hollow — walls 1.3 m thick
+ * with courses standing out from them in the Aksumite way (the beam ends, "monkey heads", under each), windows open, a door in the west
+ * wall with steps up to it; inside a nave and aisles on rows of square pillars under a flat ceiling, the sanctuary screened at the east
+ * end by a wall and a curtain, the altar and tabot behind; rush mats, hanging lamps; in Bete Golgotha the saints cut in relief on the
+ * walls (§16: "life-size figures of saints carved in high relief").
+ */
+function aksumite(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, y0 = el.y0, h = el.h, T = 1.3, yf = y0 + 0.9, zc = (z0 + z1) / 2, name = el.name || '';
+  solid(bag, col, TH, [x0 - 0.6, z0 - 0.6, x1 + 0.6, z1 + 0.6], y0, yf);
+  const sill = y0 + Math.max(2.8, h * 0.4), wh = 1.5, ceil = yf + Math.min(5.8, h - 2.6), yTop = y0 + h;
+  const places = windowPlaces([x0, z0, x1, z1], sill, wh, 0.85, 3.4, true).filter((p) => !(p.side === 'w' && Math.abs(p.c[1] - zc) < 1.6));
+  const holes = { n: [], s: [], w: [], e: [] };
+  for (const p of places) holes[p.side].push(holeOf(p));
+  holes.w.push([zc - 0.9, zc + 0.9, yf - 0.01, yf + 3.0]);
+  hollowWalls(bag, col, TH, [x0, z0, x1, z1], yf, yTop, T, holes);
+  for (const p of places) aksWindow(bag, p.c, p.y, p.u, p.n, p.w, p.h, true);
+  openLeaves(bag, 'w', [x0, z0, x1, z1], T, zc - 0.9, zc + 0.9, yf, 2.98);
+  { const bar = (s0, s1, d1, ya, yb) => bag.add(TH, orientedBox([x0 - d1 / 2, s0], [x0 - d1 / 2, s1], d1, ya, yb));
+    bar(zc - 1.15, zc - 0.9, 0.2, yf, yf + 3.0); bar(zc + 0.9, zc + 1.15, 0.2, yf, yf + 3.0); bar(zc - 1.3, zc + 1.3, 0.24, yf + 3.0, yf + 3.3); }
+  doorSteps(bag, col, 'w', [x0 - 0.6, z0 - 0.6, x1 + 0.6, z1 + 0.6], zc, 2.4, y0, yf);
+  // the courses standing out from the walls (proud 0.18 m), a beam end under each every 1.7 m, a cornice at the top
+  const courses = [[y0 + 0.95, y0 + 2.25], [sill + wh + 0.5, sill + wh + 1.8], [yTop - 1.0, yTop]].filter(([a, b]) => b <= yTop + 0.01 && a < b);
+  for (const [ya, yb] of courses) {
+    const q = [x0 - 0.18, z0 - 0.18, x1 + 0.18, z1 + 0.18];
+    const sides = [[q[0], q[1], q[2], q[1], 'z'], [q[0], q[3], q[2], q[3], 'z'], [q[0], q[1], q[0], q[3], 'x'], [q[2], q[1], q[2], q[3], 'x']];
+    for (const [ax, az, bx, bz, kd] of sides) {
+      const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.floor(L / 1.7));
+      // (the west side is cut round the door's frame)
+      if (kd === 'x') {
+        const xa = ax === q[0] ? x0 - 0.18 : x1, xb = ax === q[0] ? x0 : x1 + 0.18;
+        if (ax === q[0] && ya < yf + 3.4) { bag.add(TH, box(xa, ya, q[1], xb, yb, zc - 1.3)); bag.add(TH, box(xa, ya, zc + 1.3, xb, yb, q[3])); }
+        else bag.add(TH, box(xa, ya, az, xb, yb, bz));
+      } else {
+        const za = az === q[1] ? z0 - 0.18 : z1, zb = az === q[1] ? z0 : z1 + 0.18;
+        bag.add(TH, box(ax, ya, za, bx, yb, zb));
+      }
+      if (yb - ya > 1.0 && ya > y0 + 0.5) for (let i = 1; i < n; i++) {
+        const px = ax + (bx - ax) * i / n, pz = az + (bz - az) * i / n;
+        if (kd === 'x' && ax === q[0] && Math.abs(pz - zc) < 1.6 && ya < yf + 3.5) continue;
+        bag.add(TH, box(px - 0.18, ya - 0.36, pz - 0.18, px + 0.18, ya, pz + 0.18).translate(kd === 'x' ? (ax === q[0] ? -0.14 : 0.14) : 0, 0, kd === 'z' ? (az === q[1] ? -0.14 : 0.14) : 0));
+      }
     }
-    y = y2; k++;
   }
-  col.rect([x0, z0, x1, z1], y0, y0 + h); col.floor([x0, z0, x1, z1], y0 + h);
-  openings(bag, [x0, z0, x1, z1], y0 + h * 0.55, 1.4, 0.8, 3.2, true);
-  const t = []; beamTris(t, [x0 - 0.04, y0 + 0.9, (z0 + z1) / 2 - 0.9], [x0 - 0.04, y0 + 0.9, (z0 + z1) / 2 + 0.9], 0.04, 2.6); bag.add('timber', fromTriangles(t));
+  // inside: the ceiling and the solid above it, the pillars, the screen, the altar
+  const ix0 = x0 + T, ix1 = x1 - T, iz0 = z0 + T, iz1 = z1 - T;
+  solid(bag, col, TH, [ix0, iz0, ix1, iz1], ceil, yTop);
+  const P = 0.8, rows = (iz1 - iz0) > 7 ? [zc - (iz1 - iz0) / 6, zc + (iz1 - iz0) / 6] : [zc], span = ix1 - ix0 - 6.2, nc = Math.max(2, Math.round(span / 4.4));
+  for (const z of rows) for (let j = 0; j < nc; j++) {
+    const x = ix0 + 1.8 + span * (j + 0.5) / nc;
+    solid(bag, col, TH, [x - P / 2, z - P / 2, x + P / 2, z + P / 2], yf, ceil);
+    bag.add(TH, box(x - P / 2 - 0.1, ceil - 0.5, z - P / 2 - 0.1, x + P / 2 + 0.1, ceil - 0.22, z + P / 2 + 0.1));
+    bag.add('paint_minoan_red', box(x - 0.04, yf + 2.3, z - P / 2 - 0.012, x + 0.04, yf + 2.9, z - P / 2)); bag.add('paint_minoan_red', box(x - 0.14, yf + 2.52, z - P / 2 - 0.012, x + 0.14, yf + 2.6, z - P / 2));
+  }
+  for (const z of rows) bag.add(TH, box(ix0 + 1.0, ceil - 0.22, z - 0.3, ix1 - 3.4, ceil, z + 0.3));
+  const sx = ix1 - 3.2;                                               // the screen of the sanctuary
+  piercedSlab(bag, col, TH, [sx, iz0, sx + 0.5, iz1], yf, ceil, [[zc - 0.8, zc + 0.8, yf - 0.01, yf + 2.4]]);
+  bag.add('cloth_red', box(sx - 0.05, yf + 0.04, zc - 0.78, sx, yf + 2.35, zc + 0.78));
+  solid(bag, col, TH, [ix1 - 1.9, zc - 0.9, ix1 - 0.7, zc + 0.9], yf, yf + 1.05);
+  bag.add('cloth_white', box(ix1 - 1.98, yf + 1.05, zc - 0.98, ix1 - 0.62, yf + 1.09, zc + 0.98));
+  bag.add('bronze', box(ix1 - 1.55, yf + 1.09, zc - 0.22, ix1 - 1.05, yf + 1.4, zc + 0.22));        // the tabot's casket
+  for (const sg of [-1, 1]) { bag.add('bronze', box(ix1 - 1.3 - 0.01, yf + 1.4, zc + sg * 0.2 - 0.01, ix1 - 1.28, yf + 1.7, zc + sg * 0.2 + 0.01)); }
+  bag.add('reed_mat', box(ix0 + 0.8, yf, zc - 1.4, sx - 0.8, yf + 0.015, zc + 1.4));
+  // the saints of Golgotha in relief on the nave's walls: robed figures with haloes, standing in niches
+  if (/golgotha/.test(name)) for (const [zz, sgn] of [[iz0, 1], [iz1, -1]]) for (let k = 0; k < 4; k++) {
+    const x = ix0 + 2.8 + k * ((sx - ix0 - 5.0) / 3), zf = zz + sgn * 0.0;
+    bag.add(TU, box(x - 0.45, yf + 0.5, Math.min(zf, zf + sgn * 0.08), x + 0.45, yf + 2.4, Math.max(zf, zf + sgn * 0.08)));
+    bag.add(TU, box(x - 0.2, yf + 2.4, Math.min(zf, zf + sgn * 0.1), x + 0.2, yf + 2.82, Math.max(zf, zf + sgn * 0.1)));
+    bag.add(TH, box(x - 0.34, yf + 2.8, Math.min(zf, zf + sgn * 0.05), x + 0.34, yf + 2.9, Math.max(zf, zf + sgn * 0.05)));
+  }
+  // the lamps: clay lamps hung on cords before the screen and at the door, with a little light each
+  if (lights) { for (const [lx, lz] of [[sx - 1.0, zc - 1.2], [sx - 1.0, zc + 1.2], [ix0 + 2.2, zc]]) {
+    const t = []; rod(t, [lx, ceil, lz], [lx, ceil - 1.1, lz], 0.01, 3); bag.add('rope_fibre', fromTriangles(t));
+    bag.add('bronze', lathe([[0.001, 0], [0.1, 0.02], [0.14, 0.08], [0.001, 0.08]], 8, null, lx, ceil - 1.2, lz)); bag.add('flame', lathe([[0.001, 0.08], [0.03, 0.08], [0.015, 0.16], [0.001, 0.2]], 6, null, lx, ceil - 1.2, lz));
+    lights.push({ at: [lx, ceil - 1.0, lz], color: '#ffb468', intensity: 2.4, distance: 8 }); } }
+  col.floor([x0, z0, x1, z1], yTop);
 }
-
 /**
  * tukul: a Lasta round house { c, r, storeys, seed, y } (docs/settlements/lalibela.md §5, §11; UNESCO:
  * "two storey round houses" of "local red stone" with interior staircases and thatched roofs): a
@@ -558,6 +617,6 @@ function curtain(el, { bag, col }) {
 
 registerStyle('zagwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain, yard: yardEl, terrace: terraceEl },
+  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain, yard: yardEl, terrace: terraceEl, court: courtEl },
   objects: {},
 });

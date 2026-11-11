@@ -100,8 +100,9 @@ for (const [ti, z0, z1] of [[8, 4, 16], [7, 12, 24]]) {
 const M = PITS.medhane, mc = [(M.rect[0] + M.rect[2]) / 2, (M.rect[1] + M.rect[3]) / 2];
 E.push({ t: 'basilica', rect: [mc[0] - 16.75, mc[1] - 11.75, mc[0] + 16.75, mc[1] + 11.75], y0: -M.depth + 0.15, h: 11, cols: [12, 7] });
 { const p = PITS.maryam; E.push({ t: 'maryam', c: [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2], y0: -p.depth + 0.15, h: 9 }); }
-const ch = (p, w, d, h) => { const c = [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2]; E.push({ t: 'aksumite', rect: [c[0] - w / 2, c[1] - d / 2, c[0] + w / 2, c[1] + d / 2], y0: -p.depth + 0.15, h }); };
-ch(PITS.golgotha, 22, 12, 8); ch(PITS.amanuel, 18, 12, 11.5); ch(PITS.gabriel, 16, 10, 9);
+const AKS = {};
+const ch = (id, w, d, h) => { const p = PITS[id], c = [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2]; AKS[id] = { rect: [c[0] - w / 2, c[1] - d / 2, c[0] + w / 2, c[1] + d / 2], y: -p.depth + 0.15, h }; E.push({ t: 'aksumite', name: id, rect: AKS[id].rect, y0: AKS[id].y, h }); };
+ch('golgotha', 22, 12, 8); ch('amanuel', 18, 12, 11.5); ch('gabriel', 16, 10, 9);
 
 // cells and tombs cut into the rock faces of Bete Giyorgis' pit (sensesatlas: its walls have "a
 // number of caves", lodgings of priests and burial places), some at the floor, some on a ledge
@@ -113,9 +114,34 @@ ch(PITS.golgotha, 22, 12, 8); ch(PITS.amanuel, 18, 12, 11.5); ch(PITS.gabriel, 1
   for (const [c, n, up] of caves) E.push({ t: 'cave', c, n, y: yf + 0.25 + up, floor: yf, w: up ? 0.9 : 1.05, h: up ? 1.4 : 1.75 });
 }
 E.push({ t: 'hut', c: HUT.c, r: HUT.r, y: 0, door: HUT.door, seed: 1220 });
+// ---- the courts: sandals at the doors, and at the foot of the rock walls the pilgrims' staffs, bundles, jars and the masons' rock seats
+{
+  const foot = { giyorgis: [gc[0] - 12.8, gc[1] - 12.8, gc[0] + 12.8, gc[1] + 12.8], medhane: [mc[0] - 17.25, mc[1] - 12.25, mc[0] + 17.25, mc[1] + 12.25], maryam: [59.3, -97.2, 78.3, -82.8] };
+  for (const [id, a] of Object.entries(AKS)) foot[id] = [a.rect[0] - 0.6, a.rect[1] - 0.6, a.rect[2] + 0.6, a.rect[3] + 0.6];
+  const shoes = { giyorgis: [[gc[0] - 16.6, gc[1] - 2.3, Math.PI / 2, 8], [gc[0] - 16.6, gc[1] + 2.3, Math.PI / 2, 8]], medhane: [[mc[0] - 20.4, mc[1] - 2.7, Math.PI / 2, 10], [mc[0] - 20.4, mc[1] + 2.7, Math.PI / 2, 10]] };
+  for (const id of ['golgotha', 'amanuel', 'gabriel']) { const r = AKS[id].rect, zc = (r[1] + r[3]) / 2; shoes[id] = [[r[0] - 3.2, zc - 1.9, Math.PI / 2, 6], [r[0] - 3.2, zc + 1.9, Math.PI / 2, 6]]; }
+  const KINDS = ['staff', 'bundle', 'jar', 'bench', 'staff', 'bench', 'bundle', 'jar'];
+  let seed = 400;
+  for (const [id, p] of Object.entries(PITS)) {
+    const [x0, z0, x1, z1] = p.rect, I = [x0 + EDGE, z0 + EDGE, x1 - EDGE, z1 - EDGE], F = foot[id], walls = [];
+    const gaps = { n: F[1] - I[1], s: I[3] - F[3], w: F[0] - I[0], e: I[2] - F[2] };
+    let k = 0;
+    for (const [side, g] of Object.entries(gaps)) {
+      if (g < 2.7) continue;
+      const horiz = side === 'n' || side === 's', L = horiz ? I[2] - I[0] : I[3] - I[1];
+      for (let t = 4.5 + (k % 3); t < L - 3; t += 7.5 + (k % 2) * 2) {
+        const pt = horiz ? [I[0] + t, side === 'n' ? I[1] + 0.05 : I[3] - 0.05] : [side === 'w' ? I[0] + 0.05 : I[2] - 0.05, I[1] + t], nn = horiz ? [0, side === 'n' ? 1 : -1] : [side === 'w' ? 1 : -1, 0];
+        if (TRENCHES.some((tr) => inRect(tr.rect, pt[0], pt[1], 1.8)) || inRect([-262, 120, -200, 136], pt[0], pt[1], 1.5)) { k++; continue; }
+        if (id === 'giyorgis' && side === 'n' && pt[0] < gc[0] - 2) { k++; continue; }
+        walls.push([pt[0], pt[1], nn[0], nn[1], KINDS[k++ % KINDS.length]]);
+      }
+    }
+    E.push({ t: 'court', y: -p.depth, seed: seed++, shoes: shoes[id] ?? [], walls });
+  }
+}
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // (the halls first: a position is given to the first room that holds it, and the pits' open rooms hold the halls)
-const rooms = [room('hut', [HUT.c[0] - 3.3, HUT.c[1] - 3.3, HUT.c[0] + 3.3, HUT.c[1] + 3.3], 0, 'hut'), room('giyorgis-in-x', [gc[0] - 10.4, gc[1] - 3, gc[0] + 10.4, gc[1] + 3], GY, 'hall'), room('giyorgis-in-z', [gc[0] - 3, gc[1] - 10.4, gc[0] + 3, gc[1] + 10.4], GY, 'hall'), room('medhane-in', [mc[0] - 13.15, mc[1] - 8.15, mc[0] + 13.15, mc[1] + 8.15], -M.depth + 0.95, 'hall'), room('maryam-in', [62.8, -93.6, 77.2, -86.4], -PITS.maryam.depth + 0.75, 'hall'), room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open')];
+const rooms = [room('hut', [HUT.c[0] - 3.3, HUT.c[1] - 3.3, HUT.c[0] + 3.3, HUT.c[1] + 3.3], 0, 'hut'), room('giyorgis-in-x', [gc[0] - 10.4, gc[1] - 3, gc[0] + 10.4, gc[1] + 3], GY, 'hall'), room('giyorgis-in-z', [gc[0] - 3, gc[1] - 10.4, gc[0] + 3, gc[1] + 10.4], GY, 'hall'), room('medhane-in', [mc[0] - 13.15, mc[1] - 8.15, mc[0] + 13.15, mc[1] + 8.15], -M.depth + 0.95, 'hall'), room('maryam-in', [62.8, -93.6, 77.2, -86.4], -PITS.maryam.depth + 0.75, 'hall'), ...Object.entries(AKS).map(([id, a]) => room(id + '-in', [a.rect[0] + 1.3, a.rect[1] + 1.3, a.rect[2] - 1.3, a.rect[3] - 1.3], a.y + 0.9, 'hall')), room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open')];
 const walks = [[[-280, 128], [-262, 128], [-216, 128], [-210, 130]]];
 walks[0].y0 = 0;
 

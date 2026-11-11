@@ -178,3 +178,45 @@ export function terraceEl(el, { bag, col }) {
   }
 }
 void TERR; void PRECINCT;
+
+// ---- the courts of the churches: what pilgrims and clergy leave there (docs §16)
+/** Sandals left at a door (the pilgrims go in barefoot): rows of pairs, each turned a little. */
+function shoes(bag, x, y, z, rot, n, rand) {
+  const c = Math.cos(rot), s = Math.sin(rot);
+  for (let k = 0; k < n; k++) {
+    const a = (k - n / 2) * 0.36 + (rand() - 0.5) * 0.08, row = (k % 2) * 0.32 + (rand() - 0.5) * 0.06, t = rot + (rand() - 0.5) * 0.7, mat = rand() < 0.6 ? 'hide_brown' : rand() < 0.5 ? 'hide_tan' : 'hide_black';
+    for (const sg of [-1, 1]) {
+      const px = x + c * a - s * row + (-Math.sin(t)) * 0.07 * sg * 0, pz = z + s * a + c * row, ox = Math.cos(t + Math.PI / 2) * 0.07 * sg, oz = Math.sin(t + Math.PI / 2) * 0.07 * sg;
+      bag.add(mat, orientedBox([px + ox - Math.cos(t) * 0.12, pz + oz - Math.sin(t) * 0.12], [px + ox + Math.cos(t) * 0.12, pz + oz + Math.sin(t) * 0.12], 0.075, y, y + 0.025));
+    }
+  }
+}
+/** Staffs of pilgrims leant together against a wall (the walls' foot at [x, z], n the unit into the court). */
+function staffs(bag, x, y, z, nx, nz, rand) {
+  const t = [];
+  for (let k = 0; k < 3; k++) { const o = (k - 1) * 0.16, ux = -nz * o, uz = nx * o; rod(t, [x + nx * (0.55 + k * 0.04) + ux, y, z + nz * (0.55 + k * 0.04) + uz], [x + nx * 0.05 + ux, y + 1.45 + rand() * 0.25, z + nz * 0.05 + uz], 0.022, 4); }
+  bag.add('wood_dark', fromTriangles(t));
+}
+/** A white bundle (a pilgrim's cloth, tied) with its walking stick across it. */
+function bundle(bag, x, y, z, rand) {
+  bag.add('cloth_white', lathe([[0.001, 0], [0.22, 0.01], [0.28, 0.13], [0.2, 0.26], [0.08, 0.32], [0.001, 0.33]], 8, (th) => 1 + 0.08 * Math.sin(th * 3 + x), x, y, z));
+  const t = [], a = rand() * 3; rod(t, [x - Math.cos(a) * 0.5, y + 0.28, z - Math.sin(a) * 0.5], [x + Math.cos(a) * 0.5, y + 0.3, z + Math.sin(a) * 0.5], 0.02, 4); bag.add('wood_dark', fromTriangles(t));
+}
+/**
+ * court: dressing for one pit { y (the floor), seed, shoes: [[x, z, rot, n]], walls: [[x, z, nx, nz, kind]] }: sandals at the doors; at the
+ * foot of the rock walls the pilgrims' staffs, bundles, water jars, and benches cut from the rock itself (the masons left rock seats).
+ */
+export function courtEl(el, { bag, col }) {
+  const rand = rng(el.seed), y = el.y;
+  for (const [x, z, rot, n] of el.shoes ?? []) shoes(bag, x, y + 0.15, z, rot, n, rand);
+  for (const [x, z, nx, nz, kind] of el.walls ?? []) {
+    if (kind === 'staff') staffs(bag, x, y + 0.15, z, nx, nz, rand);
+    else if (kind === 'bundle') { bundle(bag, x + nx * 0.5, y + 0.15, z + nz * 0.5, rand); bundle(bag, x + nx * 0.5 - nz * 0.7, y + 0.15, z + nz * 0.5 + nx * 0.7, rand); }
+    else if (kind === 'jar') { pots(bag, col, x + nx * 0.5, z + nz * 0.5, rand); }
+    else if (kind === 'bench') {
+      const ux = -nz, uz = nx, L = 1.6 + rand() * 1.2, a = [x + nx * 0.35 - ux * L / 2, z + nz * 0.35 - uz * L / 2], b = [x + nx * 0.35 + ux * L / 2, z + nz * 0.35 + uz * L / 2];
+      bag.add('tuff_red', orientedBox(a, b, 0.55, y + 0.1, y + 0.5)); col.segment(a, b, 0.55, y + 0.15, y + 0.5);
+      bag.add('tuff_hewn', orientedBox(a, b, 0.57, y + 0.46, y + 0.52));
+    }
+  }
+}
