@@ -26,6 +26,36 @@ export function Frame(cx, cz, face) {
   return { P, rect, B, u, n, face };
 }
 
+
+/** A tuft of dry weed (grass and thistle of the north, yellowed in the autumn): a few thin blades splayed from a point. */
+export function tuft(bag, x, y, z, k = 1, seed = 1) {
+  const r = rng(seed | 0 || 3), mat = r() < 0.7 ? 'thatch' : 'flax_leaf';
+  for (let i = 0; i < 5; i++) { const a = r() * 6.283, l = (0.22 + r() * 0.22) * k, t = 0.25 + r() * 0.4; bag.add(mat, rod([x, y, z], [x + Math.cos(a) * l * t, y + l, z + Math.sin(a) * l * t], 0.011 * Math.sqrt(k), 3)); }
+}
+const hashAt = (a, b, c = 0) => { let h = Math.imul(Math.floor(a * 7.3) | 0, 374761393) + Math.imul(Math.floor(b * 7.3) | 0, 668265263) + Math.imul(Math.floor(c * 7.3) | 0, 1274126177) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+
+/** A thin patch laid on a wall's face (along t, up y) at the plane c, standing off the wall by `off` toward side (+1 / -1). */
+function facePatch(bag, mat, horiz, t0, t1, c, side, y0, y1, off) {
+  const p0 = side > 0 ? c - 0.05 : c - off, p1 = side > 0 ? c + off : c + 0.05;
+  if (horiz) bag.add(mat, box(t0, y0, p0, t1, y1, p1)); else bag.add(mat, box(p0, y0, t0, p1, y1, t1));
+}
+/**
+ * Dust and age on a brick wall's face (dry north: no moss): a paler dusty foot of wind-blown earth, salt bloom (efflorescence)
+ * a little higher, patches of newer brick and of lime wash where it was mended, and the odd lost brick.
+ */
+function decayWall(bag, r, horiz, t0, t1, c, side, yb, hTop, lod) {
+  const L = t1 - t0;
+  for (let t = t0; t < t1 - 0.3; t += 1.1 + r() * 0.8) { const e = Math.min(t1, t + 0.9 + r() * 1.0), h = 0.22 + r() * 0.42; facePatch(bag, 'earth_wall', horiz, t, e, c, side, yb, yb + h, 0.012); }
+  if (lod > 0) return;
+  for (let i = 0, n = Math.round(L / 4.5); i < n; i++) { const t = t0 + r() * (L - 0.6), w = 0.25 + r() * 0.4, y = yb + 0.3 + r() * 0.8; facePatch(bag, 'chalk', horiz, t, t + w, c, side, y, y + 0.12 + r() * 0.2, 0.014); }
+  for (let i = 0, n = Math.round(L / 7); i < n; i++) {
+    const t = t0 + r() * (L - 1), w = 0.4 + r() * 0.5, h = 0.3 + r() * 0.35, y = yb + 0.8 + r() * Math.max(0.1, hTop - yb - 1.8);
+    facePatch(bag, r() < 0.6 ? 'brick' : 'plaster_grey', horiz, t, t + w, c, side, y, y + h, 0.03);
+    if (r() < 0.5) facePatch(bag, 'brick_grey', horiz, t + 0.06, t + w * 0.7, c, side, y + 0.05, y + 0.12, 0.046);          // a course of the old brick showing through
+  }
+  for (let i = 0, n = Math.round(L / 8); i < n; i++) { const t = t0 + r() * (L - 0.4), y = yb + 0.6 + r() * Math.max(0.1, hTop - yb - 1.4); facePatch(bag, 'tile_dark', horiz, t, t + 0.14, c, side, y, y + 0.09, 0.012); }
+}
+
 /** A quad (four points) as two triangles, turned to face the `want` direction. */
 function quadTo(out, a, b, c, d, want) {
   const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
@@ -80,6 +110,16 @@ export function gableRoof(bag, F, o) {
       quadTo(tri, F.P(s, dd[i], wy), F.P(s, dd[i + 1], wy), F.P(s, dd[i + 1], t1), F.P(s, dd[i], t0), [F.u[0] * sgn, 0, F.u[1] * sgn]);
     }
     if (tri.length) bag.add('brick_grey', fromTriangles(tri));
+  }
+  // weeds on old tiles: tufts along the ridge, in the gutters of the slopes near the eaves, at the gable's foot
+  if (lod === 0) {
+    const ry0 = ey + rise;
+    for (let s = s0 + 0.5; s < s1 - 0.3; s += 1.5) {
+      const q = F.P(s, dm, 0), h = hashAt(q[0], q[2], 1);
+      if (h < 0.3) { const p = F.P(s + (h - 0.15) * 2, dm, ry0 + 0.18); tuft(bag, p[0], p[1], p[2], 0.8 + h, Math.floor(h * 1e6)); }
+      if (h > 0.82) { const d = dF - 0.3 - (h - 0.82) * 3, p = F.P(s, d, yAt(d) - 0.02); tuft(bag, p[0], p[1], p[2], 0.7, Math.floor(h * 9e5)); }
+      if (h > 0.45 && h < 0.52) { const d = dB + 0.3, p = F.P(s, d, yAt(d) - 0.02); tuft(bag, p[0], p[1], p[2], 0.7, Math.floor(h * 8e5)); }
+    }
   }
   // the rolled ridge and its ends turned up
   const ry = ey + rise;
@@ -167,8 +207,20 @@ function wallLine(bag, col, a, b, o = {}) {
     bag.add('brick_grey', box(R[0], 0, R[1], R[2], h - 0.2, R[3]));
     if (lod === 0) {
       bag.add('brick_grey', box(R[0] - (horiz ? 0 : 0.05), h - 0.2, R[1] - (horiz ? 0.05 : 0), R[2] + (horiz ? 0 : 0.05), h - 0.1, R[3] + (horiz ? 0.05 : 0)));    // the corbelled course
-      bag.add('tile_grey', box(R[0] - (horiz ? 0 : 0.1), h - 0.1, R[1] - (horiz ? 0.1 : 0), R[2] + (horiz ? 0 : 0.1), h + 0.1, R[3] + (horiz ? 0.1 : 0)));     // the coping
       if (base) bag.add('granite_grey', box(R[0] - (horiz ? 0 : 0.03), 0, R[1] - (horiz ? 0.03 : 0), R[2] + (horiz ? 0 : 0.03), 0.4, R[3] + (horiz ? 0.03 : 0)));   // the stone foot (jiaodang)
+      // the coping in pieces of 1.6–3.4 m: some sunk, some lost (the brick course shows), tufts of weed on it
+      const cr = rng(Math.floor(p * 13 + (horiz ? a[1] : a[0]) * 31) + 5);
+      for (let t = p; t < q - 0.05;) {
+        const e = Math.min(q, t + 1.6 + cr() * 1.8), k = cr(), dy = k < 0.15 ? -0.05 : 0;
+        const [u0, u1] = [t, e], cx0 = horiz ? u0 : R[0] - 0.1, cx1 = horiz ? u1 : R[2] + 0.1, cz0 = horiz ? R[1] - 0.1 : u0, cz1 = horiz ? R[3] + 0.1 : u1;
+        if (k > 0.88) { bag.add('brick_grey', box(horiz ? u0 : R[0], h - 0.1, horiz ? R[1] : u0, horiz ? u1 : R[2], h - 0.02, horiz ? R[3] : u1)); bag.add('tile_grey', box(cx0 + (horiz ? 0.1 : 0), h - 0.1, cz0 + (horiz ? 0 : 0.1), cx0 + (horiz ? 0.4 : 0.2) + (horiz ? 0 : 0), h + 0.0, cz0 + (horiz ? 0.2 : 0.4))); }
+        else bag.add('tile_grey', box(cx0, h - 0.1 + dy, cz0, cx1, h + 0.1 + dy, cz1));
+        if (cr() < 0.35) { const m = u0 + (u1 - u0) * cr(), tx = horiz ? m : (R[0] + R[2]) / 2, tz = horiz ? (R[1] + R[3]) / 2 : m; tuft(bag, tx, h + 0.08, tz, 0.9, Math.floor(m * 97)); }
+        t = e;
+      }
+      const wr = rng(Math.floor(p * 7 + (horiz ? a[1] : a[0]) * 11) + 2);
+      decayWall(bag, wr, horiz, p + 0.1, q - 0.1, horiz ? R[1] : R[0], -1, base ? 0.4 : 0, h, 0);
+      decayWall(bag, wr, horiz, p + 0.1, q - 0.1, horiz ? R[3] : R[2], 1, base ? 0.4 : 0, h, 0);
     } else bag.add('tile_grey', box(R[0] - (horiz ? 0 : 0.06), h - 0.2, R[1] - (horiz ? 0.06 : 0), R[2] + (horiz ? 0 : 0.06), h, R[3] + (horiz ? 0.06 : 0)));
     col.segment(horiz ? [R[0], a[1]] : [a[0], R[1]], horiz ? [R[2], a[1]] : [a[0], R[3]], th, 0, h);
   }
@@ -311,6 +363,45 @@ function southRow(bag, col, R, g, lod, rand, gxC) {
     // the gate in the wall: a plain lintel and a little hood of two courses of tile
     bag.add('tile_grey', box(jx0 - 0.3, y + hD + 0.4, zS - 0.1, jx1 + 0.3, y + hD + 0.55, zS + 0.2));
   }
+  // ── the gate's dressing, by rank (lod 0): the lane face's dust and mending, couplets, door gods, knockers and studs, the mounting block
+  if (lod === 0) {
+    const gr = rng(Math.floor(gxC * 31 + zS * 17) + 9);
+    // the lane face of the south row west of the gate, and the gate block's returns: dust foot, salt, patches (the back wall rises from the plinth)
+    decayWall(bag, gr, true, x0 + 0.3, gL - 0.1, zS, 1, y, y + 3.05, 0);
+    // couplets (duilian) in red paper with black characters on the wall either side of the gate, and the paper door gods on the open leaves
+    const cw = G.chitou ? Math.min(0.3, (jx0 - (gL + 0.5)) - 0.1) : (g.gate === 'ruyi' ? 0.2 : 0);
+    if (cw > 0.1) {
+      const cz = (G.chitou ? zD + 0.15 : zS + 0.08) + 0.006, cy0 = y + 0.55, cl = 1.55;
+      for (const [xc] of [[jx0 - (G.chitou ? (jx0 - (gL + 0.5)) / 2 : 0.14)], [jx1 + (G.chitou ? (gR - 0.5 - jx1) / 2 : 0.14)]]) {
+        bag.add('cloth_red', box(xc - cw / 2, cy0, cz, xc + cw / 2, cy0 + cl, cz + 0.008));
+        for (let k = 0; k < 5; k++) bag.add('lacquer_black', box(xc - cw * 0.28, cy0 + 0.12 + k * 0.28, cz + 0.008, xc + cw * 0.28, cy0 + 0.12 + k * 0.28 + 0.15, cz + 0.014));
+      }
+      bag.add('cloth_red', box(jx0 - 0.05, y + hD + 0.1, cz, jx1 + 0.05, y + hD + 0.3, cz + 0.008));           // the horizontal scroll over the door
+      for (let k = 0; k < 4; k++) bag.add('lacquer_black', box(jx0 + 0.15 + k * (jx1 - jx0 - 0.4) / 3, y + hD + 0.14, cz + 0.008, jx0 + 0.3 + k * (jx1 - jx0 - 0.4) / 3, y + hD + 0.26, cz + 0.014));
+    }
+    if (g.gate !== 'wall') for (const sx of [-1, 1]) {
+      const xf = sx < 0 ? jx0 + 0.07 : jx1 - 0.07, o = sx < 0 ? 1 : -1, zc = zD - 0.48;     // the leaf's face toward the passage
+      const P = (xa, xb, ya, yb, za, zb, m) => bag.add(m, box(Math.min(xf + o * xa, xf + o * xb), y + ya, zc + za, Math.max(xf + o * xa, xf + o * xb), y + yb, zc + zb));
+      P(-0.03, 0.008, 0.5, 1.9, -0.36, 0.36, 'cloth_red');                                                   // the print (a door god, a general in armour)
+      P(-0.03, 0.024, 0.56, 1.52, -0.2, 0.2, 'paint_ochre'); P(-0.03, 0.024, 1.48, 1.72, -0.1, 0.1, 'lacquer_black');        // his robe and his helmet
+      P(-0.03, 0.04, 1.68, 1.8, -0.06, 0.06, 'gilt_bronze'); P(-0.03, 0.056, 1.0, 1.1, -0.3, 0.3, 'cloth_maroon');      // the plume, the sash
+      P(-0.03, 0.024, 0.5, 0.6, -0.24, 0.24, 'lacquer_black');
+      // the door-knocker (pushou): a boss with its ring, brass
+      const boss = lathe([[0.001, 0.016], [0.07, 0.012], [0.09, 0], [0.09, -0.012], [0.001, -0.012]], 10); boss.rotateZ(sx < 0 ? -Math.PI / 2 : Math.PI / 2);
+      bag.add('gilt_bronze', boss.translate(xf + o * 0.045, y + 1.28, zc + 0.14));
+      const ring = lathe([[0.075, -0.01], [0.095, -0.01], [0.095, 0.01], [0.075, 0.01]], 10); ring.rotateZ(sx < 0 ? -Math.PI / 2 : Math.PI / 2);
+      bag.add('gilt_bronze', ring.translate(xf + o * 0.07, y + 1.1, zc + 0.14));
+      if (G.up > 0) for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) bag.add('gilt_bronze', box(Math.min(xf - o * 0.03, xf + o * 0.05), y + 0.62 + j * 0.14, zc - 0.3 + i * 0.12 - 0.02, Math.max(xf - o * 0.03, xf + o * 0.05), y + 0.62 + j * 0.14 + 0.04, zc - 0.3 + i * 0.12 + 0.02));
+    }
+    // the mounting block (shangmashi): two steps of granite on the lane beside the great gates, a carved face on its end
+    if (g.gate === 'guangliang' || g.gate === 'jinzhu' || (g.gate === 'manzi' && gr() < 0.4)) {
+      const mx = gL - 1.4, mz = zS + 0.02;
+      bag.add('granite_grey', box(mx, 0, mz, mx + 1.0, 0.2, mz + 0.62)); bag.add('granite_grey', box(mx, 0.2, mz, mx + 0.6, 0.42, mz + 0.44));
+      bag.add('granite_black', box(mx + 0.05, 0.42, mz + 0.03, mx + 0.55, 0.45, mz + 0.41));
+      bag.add('granite_black', box(mx + 0.2, 0.08, mz + 0.62, mx + 0.8, 0.14, mz + 0.64));
+      col.rect([mx, mz, mx + 1.0, mz + 0.62], 0, 0.45);
+    }
+  } else if (lod === 1) decayWall(bag, rng(Math.floor(gxC * 31) + 3), true, x0 + 0.3, gL - 0.1, zS, 1, y, y + 3.05, 1);
   // solid parts of the block; the passage itself is left open
   col.rect([gL, zN - 0.1, jx0 - 0.0, zS + 0.05], 0, Hg + 1);
   col.rect([jx1, zN - 0.1, gR, zS + 0.05], 0, Hg + 1);

@@ -14,7 +14,9 @@ export const WALL = { rect: [-112, -190, 112, 175], h: 8.5, th: 3.6 };
 export const MOAT = { outer: [-134, -212, 134, 197], inner: [-120, -198, 120, 183] };
 /** The street round the moat, and the avenue south from the Meridian Gate. */
 export const RING = [-142, -220, 142, 205];
-export const AVENUE = [-12, 205, 12, RADIUS - 10];
+export const AVENUE = [-7.4, 205, 7.4, RADIUS - 10];
+/** The street's carriageway (half width, packed earth with a worn stone strip down its middle) and the raised walks before the shops. */
+export const CARRIAGE = 4.3, WALK_UP = 0.14, STONE_STRIP = 1.5;
 /** The Inner Golden Water River crossing the Meridian Gate's court (a strip of water). */
 export const RIVER = [-78, 139, 78, 146];
 /** The terrace's three tiers: [x0, z0, x1, z1], top height. */
@@ -77,12 +79,12 @@ export function lanes() {
  * shops of the west side from the moat's ring street to the town's edge, and of the east side
  * below the temple's belt of trees, their fronts to the avenue across a paved apron.
  */
-export const SHOP_FRONT = 14.6, SHOP_DEPTH = 11, SHOP_YARD = 36;     // the front's distance from the axis, the shop's depth, the rear yard's depth behind the front
+export const SHOP_FRONT = 8.0, SHOP_DEPTH = 11, SHOP_YARD = 36;     // the front's distance from the axis, the shop's depth, the rear yard's depth behind the front
 export const SHOP_STRIPS = [
   { side: 'w', rect: [-(SHOP_FRONT + SHOP_YARD), 214, -(SHOP_FRONT - 2.6), RADIUS - 20] },
   { side: 'e', rect: [SHOP_FRONT - 2.6, 357, SHOP_FRONT + SHOP_YARD, RADIUS - 20] },
 ];
-export const SHOP_APRONS = [[-SHOP_FRONT, 214, -AVENUE[2] - 0.0, RADIUS - 20], [AVENUE[2], 357, SHOP_FRONT, RADIUS - 20]];
+export const SHOP_APRONS = [[-SHOP_FRONT, 214, -CARRIAGE, RADIUS - 20], [CARRIAGE, 357, SHOP_FRONT, RADIUS - 20]];
 export const inShopStrip = (x, z, m = 0) => SHOP_STRIPS.some((s) => inRect(s.rect, x, z, m));
 
 let HOUSES = null;
@@ -162,6 +164,8 @@ export function vergeTrees() {
       VERGE.push(p);
     }
   }
+  // the old pagoda trees along the avenue's east verge, where no shops stand (before the temple's belt of trees)
+  for (let z = 226; z < 352; z += 15 + rand() * 6) VERGE.push([AVENUE[2] + 2.4 + rand() * 0.6, z, 'pagoda']);
   for (const row of shopRows()) {
     const yc = [(row.yard[0] + row.yard[2]) / 2 + (row.side === 'w' ? -4 : 4), (row.z0 + row.z1) / 2];
     VERGE.push([yc[0], yc[1], rand() < 0.5 ? 'pagoda' : 'jujube']);

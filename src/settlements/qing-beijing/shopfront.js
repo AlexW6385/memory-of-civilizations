@@ -8,7 +8,8 @@
 import { box, lathe, rod, hangFrom, windMat, fromTriangles } from '../../core/geom.js';
 import { Parts, torus } from '../../styles/qing/carving.js';
 import { plaqueBuild } from '../ming-suzhou/props.js';
-import { Frame, gableRoof, rng } from './houses.js';
+import { Frame, gableRoof, rng, tuft } from './houses.js';
+import { WALK_UP } from './layout.js';
 
 /** The hanging trade sign of each trade, in a local frame (hung from y = 0 down; +z out). */
 function sign(P, trade, r) {
@@ -53,6 +54,44 @@ function sign(P, trade, r) {
   }
 }
 
+
+/** The goods on a bay's counter, by trade: [a, b] along the front, in frame F, the counter top at y. */
+function counterGoods(bag, F, trade, r, a, b, dc, y) {
+  const at = (s, d, yy = y) => F.P(s, d, yy), mid = (a + b) / 2, Lb = b - a;
+  const jar = (s, d, h, rad, mat) => { const p = at(s, d); bag.add(mat, lathe([[0.001, 0], [rad * 0.75, 0], [rad, h * 0.4], [rad * 0.9, h * 0.85], [rad * 0.55, h], [0.001, h]], 8).translate(p[0], p[1], p[2])); };
+  switch (trade) {
+    case 'tea': for (let i = 0; i < 3; i++) { jar(a + 0.3 + i * (Lb - 0.6) / 2, dc, 0.34, 0.12, i % 2 ? 'pottery_dark' : 'glaze_green'); } F.B(bag, 'timber', mid - 0.2, dc - 0.12, mid + 0.2, dc + 0.12, y, y + 0.1); break;
+    case 'wine': for (let i = 0; i < 2; i++) { const s = a + 0.4 + i * (Lb - 0.8); jar(s, dc, 0.52, 0.2, 'pottery_dark'); const p = at(s, dc, y + 0.5); bag.add('cloth_red', lathe([[0.001, 0], [0.13, 0], [0.1, 0.12], [0.001, 0.15]], 7).translate(p[0], p[1], p[2])); } break;
+    case 'medicine': for (let i = 0; i < 3; i++) jar(a + 0.28 + i * (Lb - 0.56) / 2, dc, 0.26, 0.09, 'glaze_white'); F.B(bag, 'cloth_white', mid - 0.18, dc + 0.05, mid + 0.18, dc + 0.2, y, y + 0.08); F.B(bag, 'cloth_ochre', mid - 0.12, dc + 0.07, mid + 0.14, dc + 0.17, y + 0.08, y + 0.14); break;
+    case 'cloth': { const cs = ['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_blue']; for (let k = 0; k < 4; k++) F.B(bag, cs[Math.floor(r() * cs.length)], a + 0.12, dc - 0.22, a + 0.12 + Math.min(1.1, Lb - 0.3) * (0.7 + 0.3 * r()), dc + 0.12, y + k * 0.18, y + (k + 1) * 0.18 - 0.01); break; }
+    case 'pawn': F.B(bag, 'lacquer_black', a, dc - 0.2, b, dc - 0.12, y, y + 0.85); F.B(bag, 'lattice_red', a + 0.12, dc - 0.2, b - 0.12, dc - 0.18, y + 0.35, y + 0.78); break;
+    case 'grain': for (let i = 0; i < 2; i++) { const p = at(a + 0.4 + i * (Lb - 0.8), dc); bag.add('wicker', lathe([[0.001, 0], [0.2, 0], [0.26, 0.18], [0.28, 0.3], [0.001, 0.3]], 9).translate(p[0], p[1], p[2])); bag.add('thatch', lathe([[0.001, 0.3], [0.25, 0.3], [0.001, 0.4]], 9).translate(p[0], p[1], p[2])); } break;
+    case 'lantern': for (let i = 0; i < 3; i++) { const p = at(a + 0.3 + i * (Lb - 0.6) / 2, dc); bag.add('lamp_paper', lathe([[0.001, 0], [0.13, 0.05], [0.15, 0.2], [0.13, 0.36], [0.001, 0.4]], 8).translate(p[0], p[1], p[2])); } break;
+    default: for (let i = 0; i < 4; i++) { const s = a + 0.2 + i * (Lb - 0.4) / 3; F.B(bag, 'lacquer_black', s - 0.07, dc - 0.12, s + 0.07, dc + 0.12, y, y + 0.1); F.B(bag, 'cloth_white', s - 0.075, dc - 0.12, s + 0.075, dc + 0.12, y - 0.0, y + 0.02); }
+  }
+}
+
+/**
+ * The fascia board (guayanban) hung under the front eave: red lacquer, a gilt frame, a carved scalloped lower edge with
+ * gilt tips, and cartouches in paint with a gilt ruyi cross every 0.9 m.
+ */
+function fascia(bag, F, s0, s1, d, yTop, h) {
+  const a = s0 + 0.2, b = s1 - 0.2, yb = yTop - h;
+  F.B(bag, 'lacquer_red', a, d, b, d + 0.07, yb, yTop);
+  F.B(bag, 'gilt_bronze', a, d + 0.07, b, d + 0.085, yTop - 0.05, yTop - 0.02); F.B(bag, 'gilt_bronze', a, d + 0.07, b, d + 0.085, yb + 0.05, yb + 0.08);
+  const n = Math.max(2, Math.round((b - a) / 0.9)), step = (b - a) / n;
+  for (let i = 0; i < n; i++) {
+    const c = a + step * (i + 0.5);
+    F.B(bag, 'paint_caihua', c - step * 0.36, d + 0.07, c + step * 0.36, d + 0.078, yb + 0.12, yTop - 0.1);
+    F.B(bag, 'gilt_bronze', c - 0.15, d + 0.078, c + 0.15, d + 0.092, yb + h / 2 - 0.025, yb + h / 2 + 0.025);
+    F.B(bag, 'gilt_bronze', c - 0.025, d + 0.078, c + 0.025, d + 0.092, yb + h / 2 - 0.1, yb + h / 2 + 0.1);
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) F.B(bag, 'gilt_bronze', c + sx * 0.12 - 0.02, d + 0.078, c + sx * 0.12 + 0.02, d + 0.09, yb + h / 2 + sy * 0.07 - 0.02, yb + h / 2 + sy * 0.07 + 0.02);
+  }
+  // the carved lower edge: scalloped teeth hung below the board, tipped with gilt
+  const m = Math.max(4, Math.round((b - a) / 0.3)), q = (b - a) / m;
+  for (let i = 0; i < m; i++) { const c = a + q * (i + 0.5); F.B(bag, 'lacquer_red', c - q * 0.4, d, c + q * 0.4, d + 0.07, yb - 0.1, yb); F.B(bag, 'gilt_bronze', c - q * 0.4, d + 0.07, c + q * 0.4, d + 0.082, yb - 0.1, yb - 0.07); }
+}
+
 /**
  * qing_shop: { side ('w' for a shop west of the avenue, facing east; 'e' the other), front (the front line's x), z0, z1,
  * depth, trade, seed, storeys }.
@@ -80,6 +119,10 @@ export function qingShop(el, ctx) {
     if (enter && i === doorBay) continue;
     F.B(bag, 'lacquer_red', a, dF - 0.55, b, dF - 0.1, y, y + 1.0);                  // the counter
     F.B(bag, 'timber', a - 0.04, dF - 0.62, b + 0.04, dF - 0.05, y + 1.0, y + 1.06);
+    F.B(bag, 'paint_caihua', a + 0.1, dF - 0.1, b - 0.1, dF - 0.085, y + 0.16, y + 0.84);                // the painted panel of the counter's face
+    F.B(bag, 'gilt_bronze', a + 0.1, dF - 0.1, b - 0.1, dF - 0.09, y + 0.12, y + 0.16);               // its gilt rail
+    F.B(bag, 'lattice_red', a, dF - 0.12, b, dF - 0.06, y + 2.15, lintY - 0.02);                       // the lattice transom under the lintel
+    counterGoods(bag, F, el.trade, r, a, b, dF - 0.33, y + 1.06);
     if (!enter) F.B(bag, 'timber', a, dB + 0.5, b, dB + 1.0, y, y + 2.6);                          // the shelves on the back wall
     if (i % 2 === 0 && !enter) { F.B(bag, 'wood_dark', a + 0.02, dF - 0.55, a + 0.32, dF - 0.4, y + 1.06, y + 3.0 - 0.8 - 0.0); }
   }
@@ -105,13 +148,21 @@ export function qingShop(el, ctx) {
   const nameP = new Parts(); plaqueBuild(nameP, { w: Math.min(L - 1.6, 4.2), h: 0.95, n: 3 + Math.floor(r() * 2), seed: el.seed % 997, ink: 'gilt_bronze' });
   const nf = F.P(0, dF + 0.74, fy + 0.2);
   nameP.emit(bag, nf[0], nf[1], nf[2], Math.atan2(F.n[0], F.n[1]));
-  const tall = new Parts(); plaqueBuild(tall, { w: 0.55, h: 2.6, n: 3, vertical: true, seed: (el.seed >> 3) % 991, ink: 'gilt_bronze', field: 'lacquer_red' });
+  const tall = new Parts(); plaqueBuild(tall, { w: 0.55, h: 2.2, n: 3, vertical: true, seed: (el.seed >> 3) % 991, ink: 'gilt_bronze', field: 'lacquer_red' });
   for (const sg of [-1, 1]) {
     if (sg > 0 && r() < 0.4) continue;
     const s = sg * (L / 2 - 0.55), p = F.P(s, dF + 1.35, 0);
-    bag.add('granite_grey', box(p[0] - 0.3, 0, p[2] - 0.3, p[0] + 0.3, 0.45, p[2] + 0.3));
-    tall.emit(bag, p[0], 0.45, p[2], Math.atan2(F.n[0], F.n[1]));
-    col.circle(p[0], p[2], 0.32, 0, 3);
+    bag.add('granite_grey', box(p[0] - 0.38, 0, p[2] - 0.38, p[0] + 0.38, 0.12, p[2] + 0.38));
+    bag.add('granite_grey', box(p[0] - 0.3, 0.12, p[2] - 0.3, p[0] + 0.3, 0.5, p[2] + 0.3));
+    bag.add('granite_black', box(p[0] - 0.32, 0.5, p[2] - 0.32, p[0] + 0.32, 0.54, p[2] + 0.32));
+    tall.emit(bag, p[0], 0.54, p[2], Math.atan2(F.n[0], F.n[1]));
+    // the board's little tile cap, its gilt finial and the red ribbons at its sides
+    const cp = F.P(s, dF + 1.35, 0), cy = 0.54 + 2.2;
+    bag.add('tile_grey', box(cp[0] - 0.42, cy, cp[2] - 0.42, cp[0] + 0.42, cy + 0.1, cp[2] + 0.42));
+    bag.add('tile_grey', box(cp[0] - 0.3, cy + 0.1, cp[2] - 0.3, cp[0] + 0.3, cy + 0.2, cp[2] + 0.3));
+    bag.add('gilt_bronze', lathe([[0.001, cy + 0.2], [0.06, cy + 0.23], [0.04, cy + 0.34], [0.001, cy + 0.42]], 6).translate(cp[0], 0, cp[2]));
+    for (const k of [-1, 1]) { const rp = F.P(s + k * 0.31, dF + 1.35, 0); bag.add(windMat('cloth_red'), hangFrom(box(rp[0] - 0.02, cy - 0.9, rp[2] - 0.02, rp[0] + 0.02, cy, rp[2] + 0.02), cy)); }
+    col.circle(p[0], p[2], 0.4, 0, 3);
   }
   // the trade's hanging sign on a bracket at one post, and the red lanterns under the eave
   const sg = new Parts(); sign(sg, el.trade, r);
@@ -120,17 +171,51 @@ export function qingShop(el, ctx) {
   const bp = F.P(s0 + 0.9, dF + 1.0, lintY - 0.1);
   sg.emit(bag, bp[0], bp[1], bp[2], Math.atan2(F.n[0], F.n[1]));
   void sp;
-  for (let i = 1; i < bays; i += 1) { const p = F.P(s0 + 0.5 + bw * i, dF + 0.2, lintY - 0.2); bag.add('lamp_paper', lathe([[0.001, -0.5], [0.18, -0.58], [0.2, -0.74], [0.18, -0.88], [0.001, -0.94]], 8).translate(p[0], p[1] + 0.52 + 0.0, p[2])); }
+  // the lanterns: each on a timber bracket (an arm and a diagonal brace) from a post, a chain, the paper body between gilt
+  // caps with a red tassel and black hoops
+  for (let i = 1; i < bays; i += 1) {
+    const ps0 = s0 + 0.5 + bw * i, ba = lintY - 0.12;
+    bag.add('wood_dark', rod(F.P(ps0, dF + 0.02, ba), F.P(ps0, dF + 0.4, ba), 0.035, 5));
+    bag.add('wood_dark', rod(F.P(ps0, dF + 0.02, ba - 0.55), F.P(ps0, dF + 0.38, ba - 0.03), 0.028, 5));
+    bag.add('gilt_bronze', rod(F.P(ps0, dF + 0.4, ba), F.P(ps0, dF + 0.4, ba - 0.2), 0.012, 4));
+    const p = F.P(ps0, dF + 0.4, ba - 0.2);
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.07, 0], [0.09, -0.05], [0.001, -0.05]], 7).translate(p[0], p[1], p[2]));
+    bag.add('lamp_paper', lathe([[0.09, -0.05], [0.2, -0.17], [0.23, -0.4], [0.2, -0.63], [0.09, -0.74]], 9).translate(p[0], p[1], p[2]));
+    bag.add('lacquer_black', lathe([[0.22, -0.34], [0.235, -0.34], [0.235, -0.38], [0.22, -0.38]], 9).translate(p[0], p[1], p[2]));
+    bag.add('gilt_bronze', lathe([[0.001, -0.74], [0.09, -0.74], [0.07, -0.79], [0.001, -0.79]], 7).translate(p[0], p[1], p[2]));
+    bag.add(windMat('cloth_red'), hangFrom(box(p[0] - 0.03, p[1] - 1.05, p[2] - 0.03, p[0] + 0.03, p[1] - 0.79, p[2] + 0.03), p[1] - 0.79));
+  }
+  // the fascia board under the eave
+  fascia(bag, F, s0, s1, dF + 0.78, roofY - 0.08, 0.5);
   // a mat awning (pengzi) sloping from the front's eave, on two poles, over the goods on the apron
-  if (r() < 0.55) {
-    const A = [F.P(s0 + 0.7, dF + 0.1, lintY + 0.3), F.P(s1 - 0.7, dF + 0.1, lintY + 0.3), F.P(s1 - 0.7, dF + 2.4, lintY - 0.35), F.P(s0 + 0.7, dF + 2.4, lintY - 0.35)];
+  if (st === 1 && r() < 0.5) {
+    const A = [F.P(s0 + 0.7, dF + 0.95, roofY - 0.2), F.P(s1 - 0.7, dF + 0.95, roofY - 0.2), F.P(s1 - 0.7, dF + 2.5, y + 2.45), F.P(s0 + 0.7, dF + 2.5, y + 2.45)];
     const tri = [];
     for (const [a, b, c] of [[0, 1, 2], [0, 2, 3]]) tri.push(...A[a], ...A[b], ...A[c]);
     for (const [a, b, c] of [[0, 2, 1], [0, 3, 2]]) tri.push(...A[a], ...A[b], ...A[c]);
     bag.add('thatch', fromTriangles(tri));                                                   // the reed mat
-    for (const sg of [-1, 1]) { const p = F.P(sg < 0 ? s0 + 0.7 : s1 - 0.7, dF + 2.4, 0); bag.add('timber', rod([p[0], 0, p[2]], [p[0], lintY - 0.35, p[2]], 0.05, 5)); col.circle(p[0], p[2], 0.1, 0, 2.5); }
+    for (const sg of [-1, 1]) { const p = F.P(sg < 0 ? s0 + 0.7 : s1 - 0.7, dF + 2.5, 0); bag.add('timber', rod([p[0], 0, p[2]], [p[0], y + 2.45, p[2]], 0.05, 5)); col.circle(p[0], p[2], 0.1, 0, 2.5); }
   }
-  // the goods on the apron (a trestle with baskets, a stack of sacks)
+  // furniture on the walk: a long bench against the plinth, pots of plants, a crate or a stack of baskets, a hitching of firewood
+  const wy = 0.04 + WALK_UP;
+  if (!enter && r() < 0.55) {
+    const bs = s0 + 1.0 + r() * (L - 3.2), b0 = F.P(bs, dF + 0.62, 0);
+    F.B(bag, 'timber', bs, dF + 0.52, bs + 1.5, dF + 0.82, wy + 0.4, wy + 0.45);
+    for (const q of [bs + 0.1, bs + 1.3]) F.B(bag, 'wood_dark', q, dF + 0.56, q + 0.08, dF + 0.78, wy, wy + 0.4);
+    col.rect(F.rect(bs, dF + 0.5, bs + 1.5, dF + 0.84), 0, 0.5); void b0;
+  }
+  for (let i = 0, n = 1 + Math.floor(r() * 3); i < n; i++) {
+    const ps0 = s0 + 0.9 + r() * (L - 1.8), p = F.P(ps0, dF + 0.9 + r() * 0.3, wy), h = 0.28 + r() * 0.12, glaze = r() < 0.5 ? 'pottery_dark' : 'glaze_green';
+    bag.add(glaze, lathe([[0.001, 0], [0.15, 0], [0.23, h], [0.25, h], [0.22, h * 0.9], [0.001, h * 0.9]], 8).translate(p[0], p[1], p[2]));
+    bag.add('flax_leaf', lathe([[0.001, h * 0.9], [0.3, h * 1.3], [0.2, h * 2.2], [0.001, h * 2.6]], 7).translate(p[0], p[1], p[2]));
+    col.circle(p[0], p[2], 0.25, 0, 0.8);
+  }
+  if (r() < 0.45) {
+    const ps0 = s0 + 0.9 + r() * (L - 1.8), kind = r();
+    if (kind < 0.5) for (let k = 0; k < 3; k++) { const p = F.P(ps0, dF + 1.0, wy + k * 0.3); bag.add('wicker', lathe([[0.001, 0], [0.26, 0], [0.32, 0.26], [0.001, 0.26]], 9).translate(p[0], p[1], p[2])); }
+    else F.B(bag, 'timber', ps0 - 0.35, dF + 0.85, ps0 + 0.35, dF + 1.35, wy, wy + 0.42);
+    const cc = F.P(ps0, dF + 1.1, 0); col.circle(cc[0], cc[2], 0.38, 0, 1.0);
+  }
   void goods;
   if (!enter) { col.rect(F.rect(s0 - 0.1, dB - 0.1, s1 + 0.1, dF - 0.62), 0, y + H); return; }       // the shop's body and the counter: the visitor stays at the front
   // an interior shop: walls, counters and posts block; the floor is walkable; two stone steps and a ramp at the door bay
@@ -141,9 +226,9 @@ export function qingShop(el, ctx) {
   for (const q of ps.slice(1, -1)) col.rect(F.rect(q - 0.15, dF - 0.3, q + 0.15, dF), 0, T);
   col.floor(F.rect(s0 + 0.5, dB + 0.5, s1 - 0.5, dF - 0.05), y);
   const da = ps[doorBay] + 0.15, db = ps[doorBay + 1] - 0.15;
-  F.B(bag, 'granite_grey', da, dF + 0.5, db, dF + 0.9, 0, 0.17); F.B(bag, 'granite_grey', da, dF + 0.9, db, dF + 1.3, 0, 0.09);
+  F.B(bag, 'granite_grey', da, dF + 0.5, db, dF + 0.9, 0, 0.26); F.B(bag, 'granite_grey', da, dF + 0.9, db, dF + 1.3, 0, 0.22);
   col.floor(F.rect(da, dF - 0.05, db, dF + 0.5), y);
-  col.ramp(F.rect(da, dF + 0.5, db, dF + 1.3), 0.04, y, el.side === 'w' ? 'w' : 'e');
+  col.ramp(F.rect(da, dF + 0.5, db, dF + 1.3), 0.04 + WALK_UP, y, el.side === 'w' ? 'w' : 'e');
 }
 
 /** The yard behind a block of shops: a wall round, a lean-to store, a tree pit, a well sometimes. */
