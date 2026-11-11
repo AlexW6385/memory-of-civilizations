@@ -117,6 +117,27 @@ Sources added:
 - [Joglo — Wikipedia](https://en.wikipedia.org/wiki/Joglo)
 - [Borobudur — Wikipedia](https://en.wikipedia.org/wiki/Borobudur)
 
+## 16. Sixth pass: the way, the village halls, the fields, the monastery filled (2026-11 deepening)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| The ground of the way | The east way from the monument to the fields is carried level (the plain's rolling height had left the paved lane floating up to 1.8 m above or buried in the paddies from x 120 outward); trodden verges of soil and grass on both sides, shade trees (banyan, teak, palms) behind them | [inferred: a pilgrims' way is graded; ours was a defect] |
+| Gate of the precinct | At x 98 two stepped pylons of andesite with moulded feet, a corbelled top, a small stupa on each and a guardian lion on either outer side, facing out along the way | stone lions guard Borobudur's entrances [stated: Rijksmuseum, see §13]; the gate's form [inferred] |
+| Stalls | About twenty along both sides, thicker near the gate: a plank floor 0.4 m on posts, woven back and ends, a counter across the front with goods (food: a hearth with a big pot, bowls, fruit, rice in leaves; offerings: baskets of flowers, clay lamps, incense), a thatched roof sloping to the front, a bamboo bench, a sign cloth on a pole; sellers and buyers at each, hens and dogs | pilgrims came with flowers, lamps and incense (§13) and needed food on the road [inferred]; markets in Old Javanese inscriptions of the period [inferred, not sourced here] |
+| Halls for the weary | Three open halls (pendopo form) with benches, water jars and people resting, set back from the way | [inferred] |
+| Three furnished houses per hamlet | Eighteen village houses and seven monks' houses walkable; variant 0 hearth and bamboo bed, 1 hearth, a standing loom with a half-woven cloth and a rice store (sacks, a wicker bin), 2 bed and a household shrine with a small stone Buddha, flowers and lamps and a rack of palm-leaf books | ethnographic Javanese house [inferred]; Buddhist household devotion [inferred] |
+| House fronts | Some houses of grey sawn planks, the rest plaited bamboo; on the veranda a bamboo bench, a bird cage, a half-lowered blind, strings of corn and chillies under the eaves; moss on the shaded top of the stone footings | [inferred] |
+| Hamlet hearts | A village hall in the first three hamlets with a set of bronze instruments (two keyed metallophones, kettle gongs, a hung gong, a drum) and men sitting at ease; in the others a small stupa shrine with devotees; rice mortars (lesung) with women pounding beside every fourth house; fences of plaited bamboo round the yards (about 430 runs), fronts left open; denser hamlets (up to 36 buildings) | the reliefs of Borobudur show musical instruments and the Sound of Borobudur project rebuilds them [stated in outline: injourneydestination.id, "Ancient Musical Instruments in Sound of Borobudur"]; the later gamelan's exact keys and frames are [inferred], ours is a plausible bronze ensemble |
+| Paddies | Fourteen huts on posts with a clapper line over the rice to scare the birds, thirty-six scarecrows with a pot head and a straw hat, nine buffalo at the plough with a farmer behind | [inferred: ethnographic Java] |
+| Households | Benches and stools with people on them, wash lines, goats, pigs, ducks, dogs, children, straw heaps by the granaries, rain tubs, ladders | [inferred] |
+| Monastery | Fifteen monks' houses (seven furnished) round the yard on all four sides, a gate with pylons and lions at the east gate, three small stupa shrines with lamps, paved ways from the gate to the hall and across the yard, water jars before the cells, monks about them | remains of a monastery noted west of the hill (§2) [stated in outline]; the rest [inferred] |
+| Living systems | Walkers 46 by day (children and basket sellers added), egrets in the paddies by the way, swallows low over it, sparrows on the monastery's roofs, smoke from the food stalls' hearths and the monks' kitchen houses | [inferred] |
+
+Still not built: the volcanoes on the horizon; water (the Progo and the Elo, the paddies' irrigation channels) for lack of a water body in this ground.
+
+Sources added:
+- [Ancient Musical Instruments in Sound of Borobudur — injourneydestination.id](https://injourneydestination.id/ancient-musical-instruments-in-sound-of-borobudur/)
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)
