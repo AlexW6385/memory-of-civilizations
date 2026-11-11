@@ -20,6 +20,7 @@ import { nativity } from './nativity.js';
 import { STREET } from './street.js';
 import { casaCafe } from './interior.js';
 import { FURNITURE } from './furniture.js';
+import { schoolRooms } from './school.js';
 import { makeShops, plotShops, shopPeople } from './shops.js';
 
 const S = 'limestone_yellow', P = 'stucco_cream', IRON = 'iron';
@@ -562,7 +563,7 @@ function derrick(bag, x, y, z, H, tip) {
 }
 /** Gaudí's Schools of 1909: 10 × 20 m, walls of brick in three layers waving in plan, the roof a
  * conoid of tiles waving over a straight central beam. c: the centre; the long side along x. */
-function schools(bag, col, cx, cz, y) {
+function schools(bag, col, lights, cx, cz, y) {
   const L = 20, Wd = 10, A = 0.45, lam = L / 3, Hb = 5.4, Ar = 0.75, N = 48;
   const wz = (x, sg) => cz + sg * (Wd / 2 + A * Math.sin(2 * Math.PI * (x - cx) / lam));
   const roof = (x, f) => y + Hb + Math.abs(f) * Ar * Math.sin(2 * Math.PI * (x - cx) / lam);
@@ -574,10 +575,14 @@ function schools(bag, col, cx, cz, y) {
     if (sg > 0) { quad(B, [oa[0], y - 0.8, oa[1]], [ob[0], y - 0.8, ob[1]], [ob[0], tb, ob[1]], [oa[0], ta, oa[1]]); quad(B, [ib[0], y - 0.8, ib[1]], [ia[0], y - 0.8, ia[1]], [ia[0], ta, ia[1]], [ib[0], tb, ib[1]]); }
     else { quad(B, [ob[0], y - 0.8, ob[1]], [oa[0], y - 0.8, oa[1]], [oa[0], ta, oa[1]], [ob[0], tb, ob[1]]); quad(B, [ia[0], y - 0.8, ia[1]], [ib[0], y - 0.8, ib[1]], [ib[0], tb, ib[1]], [ia[0], ta, ia[1]]); }
   }
-  // the end walls, straight
+  // the end walls, straight, each with a door in its middle (1.6 m wide, 2.6 m high)
   for (const sx of [-1, 1]) {
-    const x = cx + sx * L / 2, z0 = wz(x, -1), z1 = wz(x, 1);
-    bag.add('brick', box(Math.min(x, x - sx * 0.32), y - 0.8, z0, Math.max(x, x - sx * 0.32), Math.min(roof(x, -1), roof(x, 1)) - 0.01, z1));
+    const x = cx + sx * L / 2, z0 = wz(x, -1), z1 = wz(x, 1), xa = Math.min(x, x - sx * 0.32), xb = Math.max(x, x - sx * 0.32), top = Math.min(roof(x, -1), roof(x, 1)) - 0.01;
+    bag.add('brick', box(xa, y - 0.8, z0, xb, top, cz - 0.8)); bag.add('brick', box(xa, y - 0.8, cz + 0.8, xb, top, z1)); bag.add('brick', box(xa, y + 2.6, cz - 0.8, xb, top, cz + 0.8));
+    bag.add('wood_painted', box(xa - 0.04, y, cz - 0.9, xb + 0.04, y + 2.62, cz - 0.8)); bag.add('wood_painted', box(xa - 0.04, y, cz + 0.8, xb + 0.04, y + 2.62, cz + 0.9)); bag.add('wood_painted', box(xa - 0.04, y + 2.6, cz - 0.9, xb + 0.04, y + 2.7, cz + 0.9));
+    bag.add('wood_dark', box(sx > 0 ? xb - 0.0 : xa - 0.0, y, cz - 0.8, sx > 0 ? xb + 0.05 : xa + 0.05, y + 2.6, cz - 0.3));        // the leaf, open against the jamb
+    bag.add('granite_grey', box(Math.min(x, x + sx * 0.7), y - 0.3, cz - 0.9, Math.max(x, x + sx * 0.7), y + 0.1, cz + 0.9));
+    col.rect([xa, z0, xb, cz - 0.8], y - 0.8, y + Hb); col.rect([xa, cz + 0.8, xb, z1], y - 0.8, y + Hb);
   }
   // the roof: rulings from the beam to the walls' heads, an overhang of 0.4 m, tiles on brick
   const M = 12;
@@ -596,9 +601,10 @@ function schools(bag, col, cx, cz, y) {
     const za = wz(x - w, sg) + sg * 0.03, zb = wz(x + w, sg) + sg * 0.03;
     const i0 = O.length; quad(O, [x - w, y + 1.1, za], [x + w, y + 1.1, zb], [x + w, y + 3.6, zb], [x - w, y + 3.6, za]); face(O, i0, 0, 0, sg); void z;
   }
-  bag.add('opening', box(cx - L / 2 - 0.05, y, cz - 0.8, cx - L / 2 + 0.02, y + 2.6, cz + 0.8));
   bag.add('brick', fromTriangles(both(B))); bag.add('terracotta', fromTriangles(both(R))); bag.add('brick_buff', fromTriangles(both(U))); bag.add('opening', fromTriangles(O));
-  col.rect([cx - L / 2, cz - Wd / 2 - A, cx + L / 2, cz + Wd / 2 + A], y - 0.8, y + Hb + Ar);
+  // the waving walls collide along their line, the room inside is walkable (the three classrooms: schoolRooms)
+  for (const sg of [-1, 1]) for (let i = 0; i < N; i++) { const xa = cx - L / 2 + L * i / N, xb = xa + L / N; col.segment([xa, wz(xa, sg) - sg * 0.16], [xb, wz(xb, sg) - sg * 0.16], 0.4, y - 0.8, y + Hb); }
+  schoolRooms({ bag, col, lights }, { cx, cz, y, L, Wd, wz, roofAt: (x) => roof(x, 0), N });
 }
 /** The workshop: a long timber shed under a lean-to roof of tiles; the stone yard's blocks. */
 function workshop(bag, col, [x0, z0, x1, z1], y, rand) {
@@ -617,11 +623,11 @@ function workshop(bag, col, [x0, z0, x1, z1], y, rand) {
   }
 }
 /** sagrada: { c, y } — the temple's site about 1910 (docs/settlements/barcelona.md §1). */
-function sagrada(el, { bag, col }) {
+function sagrada(el, { bag, col, lights }) {
   const [cx, cz] = el.c, y = el.y ?? 0, rand = rng(1910);
   apse(bag, col, [cx, cz - 16], y);
   nativity(bag, col, cx + 22, y, cz);
-  schools(bag, col, cx - 12, cz + 25, y);
+  schools(bag, col, lights, cx - 12, cz + 25, y);
   workshop(bag, col, [cx - 33, cz - 8, cx - 27, cz + 14], y, rand);
   derrick(bag, cx + 12, y, cz + 30, 46, [cx + 23, y + 38, cz + 16]);
 }
