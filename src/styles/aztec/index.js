@@ -14,6 +14,7 @@ import { Kit, carved, serpentHeadKit, chacmoolKit } from '../maya/meso.js';
 import { calli, tecpan, tzompantli, chinampaHouse, mesoPlants } from './houses.js';
 import { shrineInterior, huehuetl } from './shrines.js';
 import { mxPeople } from './life.js';
+import { tianguis } from './market.js';
 import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causewayStakes } from './precinct.js';
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue';
@@ -231,7 +232,7 @@ function acalli(el, { bag }) {
   k.bx('timber', 0.15, 0.3, y0 + D - 0.02, y0 + D + 0.04, hl * 0.25, hl * 0.25 + 0.4);
   // the cargo, laid along the hold
   const cargo = el.cargo ?? ['maize', 'chile', 'pots', 'cloth', 'reeds'][Math.floor(rand() * 5)];
-  for (let i = 0; i < Math.floor(L / 1.6); i++) {
+  for (let i = 0; i < (cargo === 'none' ? 0 : Math.floor(L / 1.6)); i++) {
     const z = -hl + 1.0 + i * 1.5 + rand() * 0.2, yb = y0 + th;
     if (cargo === 'maize' || cargo === 'chile') k.fy(cargo === 'maize' ? 'paint_ochre' : 'stucco_red', [-hb + 0.1, hb - 0.1, z - 0.45, z + 0.45], [-0.08, 0.08, z - 0.1, z + 0.1], yb, yb + 0.55);
     else if (cargo === 'pots') k.geo('terracotta', lathe([[0.1, 0], [0.24, 0.12], [0.26, 0.3], [0.14, 0.44], [0.16, 0.5], [0.001, 0.5]], 10).translate(0, yb, z));
@@ -265,56 +266,6 @@ function canalWallMx(el, { bag }) {
   bag.add('andesite', fromTriangles(t));
   beamTris(c, [el.a[0], top - 0.12, el.a[1]], [el.b[0], top - 0.12, el.b[1]], th / 2 + 0.06, 0.12);
   bag.add('basalt', fromTriangles(c));
-}
-
-/**
- * tianguis: a market { rect, seed, rows (along x) }: the sellers in rows, each kind of goods in its own
- * row (Cortés; Díaz: "each kind of merchandise by itself, and they had their seats marked"): a reed
- * mat on the ground, the seller sitting or squatting by the goods — heaps of maize, chiles and beans,
- * pots, baskets, folded cloth, bundles of reeds and firewood — some under a square awning on poles.
- */
-function tianguis(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, rand = rng(el.seed || 1519), L = STYLES.life.elements, ctx = { bag, col };
-  const kinds = ['maize', 'chile', 'beans', 'pots', 'baskets', 'cloth', 'firewood', 'reeds'];
-  bag.add('stucco', frustum([x0, z0, x1, z1], -0.2, 0.04, 0, 0, 0, 0, { noBottom: true })); col.floor([x0, z0, x1, z1], 0.04);
-  const rowD = 7, nr = Math.floor((z1 - z0 - 2) / rowD);
-  for (let r = 0; r < nr; r++) {
-    const kind = kinds[r % kinds.length];
-    for (const side of [0, 1]) {                                                        // two rows of seats back to back, an aisle between pairs
-      const zr = z0 + 1.5 + r * rowD + side * 2.0;
-      for (let x = x0 + 2; x < x1 - 2.4; x += 2.6) {
-        if (rand() < 0.12) continue;
-        const cxm = x + 1.1, seed = Math.floor(rand() * 1e6), y = 0.04;
-        bag.add('reed_mat', box(x, y, zr, x + 2.2, y + 0.03, zr + 1.6));
-        const gz = zr + (side ? 0.5 : 1.1), fz = side ? zr + 1.35 : zr + 0.25;
-        const heap = (mat, hx) => bag.add(mat, lathe([[0.32, 0], [0.2, 0.16], [0.001, 0.26]], 10, null, hx, y + 0.03, gz));
-        if (kind === 'maize') { heap('paint_ochre', cxm - 0.45); heap('paint_ochre', cxm + 0.35); L.basket({ at: [cxm + 0.95, gz], y: y + 0.03, seed, n: 1 }, ctx); }
-        else if (kind === 'chile') { heap('stucco_red', cxm - 0.45); heap('limewash_red', cxm + 0.35); heap('clay_green', cxm + 0.95); }
-        else if (kind === 'beans') { heap('pottery_dark', cxm - 0.45); heap('wood_dark', cxm + 0.35); L.basket({ at: [cxm + 0.95, gz], y: y + 0.03, seed, n: 1 }, ctx); }
-        else if (kind === 'pots') L.pot({ at: [cxm, gz], y: y + 0.03, seed, kind: rand() < 0.5 ? 'dark_pot' : 'water_pot', n: 4 }, ctx);
-        else if (kind === 'baskets') L.basket({ at: [cxm, gz], y: y + 0.03, seed, n: 3 }, ctx);
-        else if (kind === 'cloth') for (let i = 0; i < 3; i++) { const m = ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_indigo'][Math.floor(rand() * 4)]; bag.add(m, box(cxm - 0.8 + i * 0.6, y + 0.03, gz - 0.25, cxm - 0.35 + i * 0.6, y + 0.13 + i % 2 * 0.06, gz + 0.25)); }
-        else if (kind === 'firewood') for (let i = 0; i < 5; i++) bag.add('timber', box(cxm - 0.7, y + 0.03 + Math.floor(i / 2) * 0.12, gz - 0.3 + (i % 2) * 0.32, cxm + 0.7, y + 0.14 + Math.floor(i / 2) * 0.12, gz - 0.05 + (i % 2) * 0.32));
-        else for (let i = 0; i < 3; i++) bag.add('reed_mat', lathe([[0.16, 0], [0.16, 1.2], [0.001, 1.2]], 8).rotateZ(Math.PI / 2).translate(cxm + 0.6, y + 0.2 + (i === 2 ? 0.26 : 0), gz - 0.2 + (i % 2) * 0.34 + (i === 2 ? 0.17 : 0)));
-        // the seller, on the mat by the goods, facing the aisle
-        L.figure({ at: [x + 0.4 + rand() * 1.4, fz], y: y + 0.03, rot: side ? Math.PI : 0, seed, pose: 'squat', dress: 'wrap', cloth: rand() < 0.6 ? 'cloth_white' : 'cloth_ochre', skin: 'skin_medium' }, ctx);
-        if (rand() < 0.35) {                                                              // an awning of matting on four poles
-          for (const [px, pz] of [[x + 0.1, zr + 0.1], [x + 2.1, zr + 0.1], [x + 0.1, zr + 1.5], [x + 2.1, zr + 1.5]]) bag.add('timber', box(px - 0.04, y, pz - 0.04, px + 0.04, 2.1, pz + 0.04));
-          bag.add(rand() < 0.5 ? 'reed_mat' : 'cloth_white', box(x - 0.1, 2.1, zr - 0.1, x + 2.3, 2.14, zr + 1.7));
-        }
-      }
-    }
-    // in the aisle beyond the pair: buyers looking over the goods, porters (tlameme) under loads on the tumpline
-    const za = z0 + 1.5 + r * rowD + 3.6 + 1.7;
-    if (za > z1 - 1) continue;
-    for (let k = 0; k < 4; k++) {
-      if (rand() < 0.3) continue;
-      const x = x0 + 3 + rand() * (x1 - x0 - 6), w = rand() < 0.5, porter = !w && rand() < 0.35, seed = Math.floor(rand() * 1e6);
-      L.figure({ at: [x, za + (rand() - 0.5) * 1.6], y: 0.04, rot: porter ? (rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2) : (rand() < 0.5 ? 0 : Math.PI) + (rand() - 0.5) * 0.6, seed, h: w ? 1.5 : 1.6,
-        dress: 'wrap', cloth: rand() < 0.7 ? 'cloth_white' : 'cloth_ochre', cloth2: 'cloth_white', skin: 'skin_medium', hair: w ? 'bun' : 'short', hairMat: 'hair_dark', feet: 'bare', legs: 'bare',
-        over: w ? 'none' : rand() < 0.5 ? 'cape' : 'none', carry: porter ? 'bundle' : w ? (rand() < 0.5 ? 'basket' : 'none') : 'none', pose: !porter && rand() < 0.4 ? 'talk' : 'stand' }, ctx);
-    }
-  }
 }
 
 registerStyle('aztec', {
