@@ -1264,4 +1264,22 @@ export const CARDS = {
       "特尔滕住宅区 —— 格罗皮乌斯事务所自1926年起建造的两层平屋顶联排住宅，带条形窗和菜园。",
     ],
   },
+  'sgang-gwaay': {
+    en: [
+      "This is SG̱ang Gwaay Llnagaay, a Haida village (called Ninstints in older books) on SG̱ang Gwaay, a small island at the southern tip of Haida Gwaii off the coast of British Columbia, shown about 1850, some years before the smallpox of 1862 emptied it. It was the home of the Kunghit Haida, some three hundred people at its height. The Haida lived in houses of cedar planks facing the beach in a single row above the high-water mark, fished and hunted from great cedar dugout canoes, and carved the tall poles that mark houses, graves and memories; the carving here is generic, in the black and red of the art, and copies no family's crest. Today the site is a World Heritage Site cared for by the Haida Watchmen.",
+      "The Haida house — a large cedar-plank house dug into the terrace, its frontal pole standing against the front with the door through its foot; inside, a stepped floor round a central hearth, four carved house posts under two great beams, a smoke hole in the roof, sleeping places divided by plank screens, a painted screen with the chief's room behind it, bentwood boxes and dried fish hung from the rafters.",
+      "The row of houses — sixteen more plank houses along the shore, their gable ends and frontal poles to the sea, gaps of a few metres between them.",
+      "The poles — mortuary poles holding the dead in a chest at the top, memorial poles carved their whole length, and the frontal poles of the houses.",
+      "The beach and the street — canoes drawn up on rollers, a log being hollowed, racks of drying fish and stacks of planks and firewood between the houses and the water.",
+      "The forest — the cedar and spruce rain forest rising behind the village, moss and fern underneath.",
+    ],
+    zh: [
+      "这里是斯冈瓜伊（SG̱ang Gwaay Llnagaay）海达人村落，旧书中称宁斯廷斯，位于不列颠哥伦比亚省海岸外海达瓜依群岛南端的斯冈瓜伊小岛上；画面所示约在1850年，即1862年天花使村子空无一人的数年之前。这里是昆吉特海达人的家园，鼎盛时约有三百人。海达人住在朝向海滩、沿高潮线之上排成一列的雪松木板屋里，乘巨大的雪松独木舟捕鱼狩猎，并雕刻标记房屋、墓地和记忆的高大图腾柱；此处的雕刻是概括性的，用海达艺术的黑与红，不复制任何家族的纹章。今天这里是世界遗产，由海达守望者看护。",
+      "海达木屋 —— 一座半掘入台地的大型雪松木板屋，门前立着正面图腾柱，门就开在柱脚；屋内地面分层环绕中央火塘，四根雕花屋柱撑起两根大梁，屋顶有排烟口，睡铺以木板隔开，彩绘屏风后是首领的房间，另有弯木箱和挂在椽上的干鱼。",
+      "屋排 —— 沿岸另有十六座木板屋，山墙和正面柱朝向大海，屋间相隔数米。",
+      "图腾柱 —— 顶端存放逝者箱匣的墓柱、通体雕刻的纪念柱，以及各屋的正面柱。",
+      "海滩与街道 —— 滚木上拖上岸的独木舟、正在掏空的原木、屋与海之间晾鱼的架子以及成堆的木板和柴火。",
+      "森林 —— 村后升起的雪松与云杉雨林，下面是苔藓和蕨类。",
+    ],
+  },
 };

@@ -92,5 +92,6 @@ export const MOVER_SITES = {
   'vienna': () => import('../settlements/vienna/movers.js'),
   'brasilia': () => import('../settlements/brasilia/movers.js'),
   'bauhaus-dessau': () => import('../settlements/bauhaus-dessau/movers.js'),
+  'sgang-gwaay': () => import('../settlements/sgang-gwaay/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

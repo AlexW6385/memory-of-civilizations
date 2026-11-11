@@ -147,6 +147,7 @@ export const PROFILES = {
   vienna: T({ ...EU, sparrow: 1 }, { animals: { horse: 0.5, dog: 0.3 }, roof: 'slate', bells: 'angelus' }),
   brasilia: T({ tropic: 0.7, dove: 0.5, sparrow: 0.6 }, { cicadas: 0.4, animals: {}, roof: 'flat', bells: 'angelus' }),
   'bauhaus-dessau': T(NEAR, { animals: { dog: 0.3, rooster: 0.1 }, roof: 'flat' }),
+  'sgang-gwaay': T({ gull: 1, crow: 0.8, warbler: 0.2 }, { animals: { dog: 0.3 }, roof: 'shingle' }),
   giza: T(NEAR, { animals: { donkey: 0.5, cattle: 0.4, dog: 0.3 }, roof: 'flat' }),
   granada: T(MED, { cicadas: 0.7, animals: { donkey: 0.4, rooster: 0.4, horse: 0.2 }, adhan: 1 }),
   'great-zimbabwe': T({ dove: 1, tropic: 0.7, kite: 0.3 }, { cicadas: 0.7, frogs: 0.4, animals: { cattle: 0.8, goat: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'thatch' }),

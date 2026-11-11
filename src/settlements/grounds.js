@@ -96,6 +96,7 @@ import { ground as mayaTikal } from './maya-tikal/ground.js';
 import { ground as vienna } from './vienna/ground.js';
 import { ground as brasilia } from './brasilia/ground.js';
 import { ground as bauhausDessau } from './bauhaus-dessau/ground.js';
+import { ground as sgangGwaay } from './sgang-gwaay/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
