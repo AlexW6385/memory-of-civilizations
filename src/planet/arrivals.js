@@ -66,6 +66,6 @@ export const ARRIVALS = {
   'maori':            [0, 0.2, 150, 0, 0.2],             // the pā's palisade and carved gateway
   'sydney':           [214.5, null, -112, 1.0, 0.05],    // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
   'dunhuang': [14, 0.1, 0, 1.5708, 0.2],   // On the main street east of the stream, looking west along its axis over the timber bridge: the Mogao cliff with its tiers of caves and galleries, the Nine-Storey building stepping up over the Great Buddha's hall at its middle.
-  'catalhoyuk':       [0.2, null, 30, 0, 0.12],            // the landmark house whole across the ground: its south wall, the ladder up to the roof, the packed roofscape behind
+  'catalhoyuk':       [1.2, 2.6, 19, 1.1, -0.05],            // the landmark house whole across the ground: its south wall, the ladder up to the roof, the packed roofscape behind
   'abu-simbel': [4, null, 0, 1.5708, 0.3],   // the Great Temple's façade whole across the terrace: four seated colossi of Ramesses II cut in the cliff, the baboon frieze above the door, the Nile below
 };

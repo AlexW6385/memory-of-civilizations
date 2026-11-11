@@ -42,7 +42,8 @@ function jar(bag, x, y, z, k = 1, mat = 'terracotta') {
  */
 const frame = (O, A, N) => ({ P: (a, y, d = 0) => [O[0] + A[0] * a + N[0] * d, y, O[1] + A[1] * a + N[1] * d], N, A });
 /** A flat painted polygon on a wall (double-sided, set `d` off it), from (a, y) points, fanned from the centre. */
-function flat(bag, mat, F, pts, d = 0.012) {
+function flat(bag, mat, F, pts, d0 = 0.012) {
+  const d = d0 + 0.03;                       // off the plaster lining (2.5 cm)
   const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length, cy = pts.reduce((s, p) => s + p[1], 0) / pts.length, T = [];
   for (let i = 0; i < pts.length; i++) {
     const p = pts[i], q = pts[(i + 1) % pts.length];
@@ -149,8 +150,8 @@ function quarter(el, { bag, col }) {
     if (k === 'm') { midden(bag, x0, z0, x1, z1, rand); continue; }
     if (k === 'c') { court(bag, col, x0, z0, x1, z1, rand); continue; }
     const top = T[i][j];
-    bag.add(WALL, box(x0, -0.3, z0, x1, top, z1));
-    bag.add(MUD, box(x0 + 0.01, top, z0 + 0.01, x1 - 0.01, top + 0.09, z1 - 0.01));
+    bag.add(rand() < 0.4 ? 'earth_wall' : MUD, box(x0, -0.3, z0, x1, top, z1));
+    bag.add(rand() < 0.55 ? 'banco_smooth' : 'banco', box(x0 + 0.01, top, z0 + 0.01, x1 - 0.01, top + 0.09, z1 - 0.01));
     col.rect([x0, z0, x1, z1], 0, top); col.floor([x0, z0, x1, z1], top + 0.09);
     // the faces that stand free: a low lip on the roof edge, the foot eroded, patches of new plaster, soot above a vent
     for (const [di, dj, a, b, nx, nz] of [[-1, 0, [x0, z0], [x1, z0], 0, -1], [1, 0, [x0, z1], [x1, z1], 0, 1], [0, -1, [x0, z0], [x0, z1], -1, 0], [0, 1, [x1, z0], [x1, z1], 1, 0]]) {
@@ -159,7 +160,7 @@ function quarter(el, { bag, col }) {
       // the lip along an edge with a drop beyond it
       const t = 0.18; onFace(bag, MUD, a, b, -nx, -nz, 0, L, top + 0.05, top + 0.2, t);
       onFace(bag, 'banco_rough', a, b, nx, nz, 0, L, -0.3, 0.3 + rand() * 0.25, 0.05);                       // eroded and re-mudded foot
-      if (rand() < 0.7) { const u0 = rand() * L * 0.6, u1 = Math.min(L, u0 + 0.8 + rand() * 1.6), y0 = 0.5 + rand() * (top - 1.5); onFace(bag, rand() < 0.5 ? 'plaster_grey' : MUD, a, b, nx, nz, u0, u1, y0, Math.min(top - 0.1, y0 + 0.5 + rand() * 0.9), 0.014); }
+      if (rand() < 0.7) { const u0 = rand() * L * 0.6, u1 = Math.min(L, u0 + 0.8 + rand() * 1.6), y0 = 0.5 + rand() * (top - 1.5); onFace(bag, rand() < 0.6 ? WALL : 'earth_wall', a, b, nx, nz, u0, u1, y0, Math.min(top - 0.1, y0 + 0.5 + rand() * 0.9), 0.014); }
       if (rand() < 0.3) { const u0 = rand() * (L - 0.3); onFace(bag, 'pottery_dark', a, b, nx, nz, u0, u0 + 0.25, top - 1.2 - rand() * 0.6, top - 0.02, 0.012); }   // soot streak from a roof vent
       if (m === 0 && rand() < 0.35) {                                                                       // fallen mud brick at the foot
         const u = rand() * (L - 0.6), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
@@ -258,7 +259,7 @@ function house(el, { bag, col, lights }) {
   const lx = (u) => ix0 + u, lz = (v) => iz0 + v;
   const hole = [lx(0.8), lz(3.9), lx(2.4), lz(4.9)], PL = 0.025;
   // the outer walls, a floor of plaster, the partition with its low opening (v 4.2…5.0, 1.85 m high)
-  for (const [a, b, c, d] of [[x0, z0, x1, iz0], [x0, iz1, x1, z1], [x0, iz0, ix0, iz1], [ix1, iz0, x1, iz1]]) { bag.add(WALL, box(a, -0.3, b, c, ST, d)); col.rect([a, b, c, d], 0, ST); }
+  for (const [a, b, c, d] of [[x0, z0, x1, iz0], [x0, iz1, x1, z1], [x0, iz0, ix0, iz1], [ix1, iz0, x1, iz1]]) { bag.add(MUD, box(a, -0.3, b, c, ST, d)); col.rect([a, b, c, d], 0, ST); }
   const part = [[mx1, iz0, sx0, lz(4.2), CH], [mx1, lz(5.0), sx0, iz1, CH], [mx1, lz(4.2), sx0, lz(5.0), 0]];
   for (const [a, b, c, d] of part.slice(0, 2)) { bag.add(WALL, box(a, 0, b, c, ST, d)); col.rect([a, b, c, d], 0, ST); }
   bag.add(WALL, box(mx1, 1.85, lz(4.2), sx0, ST, lz(5.0))); col.rect([mx1, lz(4.2), sx0, lz(5.0)], 1.85, ST);

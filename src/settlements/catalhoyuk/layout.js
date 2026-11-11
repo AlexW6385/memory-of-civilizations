@@ -33,11 +33,11 @@ for (let i = 0; i < ROWS; i++) {
   KIND.push(row);
 }
 KIND[LM.i][LM.j] = 'L';
-/** The roof height of each house cell: about ST, in steps of 0.25 m up or down (a step within one's reach: the roofs are walked). */
+/** The roof height of each house cell: about ST, in steps of 0.2 m up or down (neighbours differ by 0.4 m at most) (a step within one's reach: the roofs are walked). */
 export const TOP = KIND.map((row, i) => row.map((k, j) => {
   if (k === 'L') return ST;
   const r = rng(i * 97 + j * 13 + 5)();
-  return ST + (Math.floor(r * 4) - 1) * 0.25;
+  return ST + (Math.floor(r * 3) - 1) * 0.2;
 }));
 export const cellRect = (i, j) => [colX(j), rowZ(i), colX(j) + CW[j], rowZ(i) + CD[i]];
 export const CLUSTER = [X0, Z0, X0 + W, Z0 + D];
