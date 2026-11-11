@@ -84,6 +84,16 @@ export function height(x, z) {
 export const onHeadland = (x, z, m = 0) => TERRACES.some((T) => T.id !== 'beach' && inRect(T.rect, x, z, m));
 export const inSea = (x, z) => height(x, z) < SEA - 0.2;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+// The streets of the stone town (docs/settlements/kilwa.md §17), kept clear of houses: the market street (soko) along the
+// harbour side of the town, the street before the Great Mosque's north door, the spine between them, and the lanes down to
+// the beach, three of them to the landing places of the trade. Rectangles [x0, z0, x1, z1].
+export const SOKO = [-225, -89.6, 105, -79];
+export const MOSQUE_STREET = [-225, -35, 105, -24.5];
+export const LANES = [-175, -141, -100, -75, -45, 45].map((x) => [x - 2.6, -112, x + 2.6, -24.5]);
+export const SPINE = [-18, -89.6, -11.5, -24.5];
+export const STREETS = [SOKO, MOSQUE_STREET, SPINE, ...LANES];
+/** The open harbour water the sailing boats work in, north of the beach (clear of the dhows at anchor). */
+export const HARBOUR = [-200, -215, 90, -185];
 let LOTS = null;
 export function lots() {
   if (LOTS) return LOTS;
@@ -92,6 +102,7 @@ export function lots() {
   for (let x = -220; x < 120; x += 12) for (let z = -100; z < 160; z += 11) {
     const w = 8 + rand() * 3, d = 8 + rand() * 2, cx = x + w / 2, cz = z + d / 2;
     if (Math.hypot(cx, cz) > RADIUS - 110 || inRect(MOSQUE, cx, cz, 10) || height(cx, cz) < 1.5 || rand() < 0.3 + 0.4 * smooth(100, 220, Math.hypot(cx, cz))) continue;
+    if (STREETS.some((r) => inRect(r, cx, cz, 0) || (cx + w / 2 > r[0] - 0.3 && cx - w / 2 < r[2] + 0.3 && cz + d / 2 > r[1] - 0.3 && cz - d / 2 < r[3] + 0.3))) continue;
     const ys = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]].map(([a, b]) => height(a, b));
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.max(...ys), low: Math.min(...ys) });
   }

@@ -3,11 +3,11 @@
 // the drawn-up mtepe the goods of the monsoon trade — ivory, cloth, beads and pots — the merchants and porters;
 // two ocean dhows riding at anchor in the harbour. Pure data.
 
-import { RADIUS, SEA, MOSQUE, PALACE, height, inSea, inRect, inLot, onHeadland } from './layout.js';
+import { RADIUS, SEA, MOSQUE, PALACE, SOKO, MOSQUE_STREET, STREETS, LANES, height, inSea, inRect, inLot, onHeadland } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const shoreAt = (x) => -120 - 15 * Math.sin(x / 60);
-const free = (x, z, m) => Math.hypot(x, z) < RADIUS - 30 && !inSea(x, z) && height(x, z) > 0.9 && !inRect(MOSQUE, x, z, m + 2) && !inRect(PALACE, x, z, m + 6) && !onHeadland(x, z, m) && !inLot(x, z, m);
+const free = (x, z, m) => Math.hypot(x, z) < RADIUS - 30 && !inSea(x, z) && height(x, z) > 0.9 && !inRect(MOSQUE, x, z, m + 2) && !inRect(PALACE, x, z, m + 6) && !onHeadland(x, z, m) && !inLot(x, z, m) && !STREETS.some((r) => inRect(r, x, z, m));
 
 let TREES = null;
 /** The coconut palms and baobabs: [{ t, at, y, … }] (swahili style). */
@@ -61,5 +61,49 @@ export function shore() {
     while (!inSea(x, z) && z > -300) z -= 4;
     L.push({ t: 'boat', kind: 'dhow', len: 18, at: [x, z - 14], y: SEA, rot, seed: Math.round(x) });
   }
+  L.push(...market());
   return { S, L };
+}
+
+/**
+ * The market (soko) of the stone town (docs/settlements/kilwa.md §17): stalls under mat awnings on both sides of the market street
+ * and before the Great Mosque, the goods of the Indian Ocean — porcelain and glazed jars from China and Persia, bolts of cotton cloth
+ * from Gujarat, beads, spices, baskets; sellers behind their tables, sitters at goods laid on mats, jars stacked at the
+ * corners; people of the town and traders from over the sea. Returns [{ ... }] elements of the life style.
+ */
+let MARKET = null;
+export function market() {
+  if (MARKET) return MARKET;
+  const L = [], rand = rng(1334), pick = (a) => a[Math.floor(rand() * a.length)];
+  const inLane = (x, m = 0) => LANES.some((r) => x > r[0] - m && x < r[2] + m);
+  const person = (at, y, rot, o = {}) => L.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pick(['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_ochre']), cloth2: 'cloth_white', skin: pick(['skin_dark', 'skin_dark', 'skin_medium']), hat: pick(['cap', 'cap', 'turban']), hatMat: 'cloth_white', hair: 'short', hairMat: 'hair_dark', beard: rand() < 0.4, feet: 'bare', over: pick(['sash', 'none']), carry: 'none', pose: 'stand', ...o });
+  // the sides of the market street: north (sellers behind, facing south) and south (rotated)
+  for (const [side, zc, rot] of [[-1, SOKO[1] + 2.0, 0], [1, SOKO[3] - 2.0, Math.PI]]) {
+    for (let x = -150 + (side > 0 ? 4 : 0); x < 70; x += 8.5 + rand() * 3) {
+      if (inLane(x, 3.2)) continue;
+      const y = height(x, zc), kind = rand();
+      if (kind < 0.62) {
+        // a stall under a mat awning
+        const goods = pick([['pottery', 'bolts'], ['bolts', 'baskets'], ['spice', 'pottery'], ['pottery'], ['bolts', 'spice', 'baskets']]);
+        L.push({ t: 'stall', at: [x, zc], y, rot, w: 2.4 + rand() * 0.6, d: 1.3, awning: pick(['reed_mat', 'reed_mat', 'cloth_ochre']), ...(rand() < 0.35 ? { stripe: 'cloth_indigo' } : {}), goods, seed: Math.floor(rand() * 1e6) });
+        person([x + (rand() - 0.5) * 1.2, zc + side * 0.95], y, rot, { pose: rand() < 0.5 ? 'talk' : 'stand' });
+      } else {
+        // goods on a mat on the ground, the seller squatting behind
+        L.push({ t: 'goods_mat', goods: pick([['pottery', 'bolts', 'basket'], ['spice', 'baskets', 'heap'], ['pottery', 'baskets']]), at: [x, zc + (side < 0 ? 0.5 : -0.5)], y, rot, seed: Math.floor(rand() * 1e6) });
+        person([x, zc + (side < 0 ? -0.55 : 0.55)], y, rot, { pose: 'cross', over: 'none' });
+      }
+      // jars at the corner of the pitch: Chinese celadon and blue-and-white, Persian glazed ware
+      if (rand() < 0.6) L.push({ t: 'pot', kind: pick(['glazed_jar', 'blue_jar', 'glazed_jar']), at: [x + 1.9, zc + (side < 0 ? 0.2 : -0.2)], y, seed: Math.floor(rand() * 1e6) });
+      if (rand() < 0.35) L.push({ t: 'pot', kind: 'dark_pot', n: 3, at: [x - 1.9, zc], y, seed: Math.floor(rand() * 1e6) });
+    }
+  }
+  // before the Great Mosque's door: mats of cloth and ivory-workers, and men standing to talk
+  for (let x = -60; x < 40; x += 9 + rand() * 3) {
+    if (inLane(x, 3.2)) continue;
+    const zc = MOSQUE_STREET[3] - 1.4, y = height(x, zc);
+    L.push({ t: 'goods_mat', goods: pick([['bolts', 'basket'], ['pottery', 'spice']]), at: [x, zc], y, rot: Math.PI, seed: Math.floor(rand() * 1e6) });
+    person([x, zc + 0.6], y, Math.PI, { pose: 'cross', over: 'none' });
+    if (rand() < 0.7) { const zt = MOSQUE_STREET[1] + 4.5; person([x + 1, zt], height(x + 1, zt), 0.5, { pose: 'talk' }); person([x + 2.2, zt + 0.3], height(x + 2.2, zt), -2.6, { pose: 'talk', hat: 'turban' }); }
+  }
+  return (MARKET = L);
 }

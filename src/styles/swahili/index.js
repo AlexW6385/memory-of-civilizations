@@ -229,17 +229,31 @@ function mtepe(el, { bag, col }) {
   for (const t of [0.3, 0.45, 0.62]) { const half = Math.pow(Math.sin(Math.PI * t), 0.7) * B / 2 * 0.9, a = W(-L / 2 + L * t, -half, D - 0.15), b = W(-L / 2 + L * t, half, D - 0.15); beamTris(t1, a, b, 0.09, 0.07); }
   bag.add('timber', fromTriangles(t1));
   // the mast forward of amidships, the yard lowered along the boat with the furled mat sail
-  const mb = W(L * 0.12, 0, 0.25), mh = L * 0.62;
+  const af = !!el.afloat, mb = W(L * 0.12, 0, 0.25), mh = L * (af ? 0.78 : 0.62);
   bag.add('timber', lathe([[0.12, 0], [0.08, mh], [0.001, mh + 0.05]], 8, null, mb[0], mb[1], mb[2]));
-  const ya = W(-L * 0.38, 0.15, D + 0.75), yb = W(L * 0.42, 0.15, D + 0.95), ty = [];
-  beamTris(ty, ya, yb, 0.06, 0.1); bag.add('timber', fromTriangles(ty));
-  const sail = []; beamTris(sail, W(-L * 0.33, 0.15, D + 0.55), W(L * 0.36, 0.15, D + 0.75), 0.2, 0.32); bag.add('reed_mat', fromTriangles(sail));
+  if (af) {
+    // under way: the yard hoisted slanting up toward the bow, the square mat sail bellied by the wind below it, the foot spar and the sheet
+    const hy = [D + mh * 0.56, D + mh * 0.97], hf = [D + 1.0, D + 1.5], u0 = -L * 0.3, u1 = L * 0.5, G = 12, H = 8, sg = [], yv = [];
+    const Sp = (i, j) => { const u = i / G, t = j / H, uu = u0 + (u1 - u0) * u, top = hy[0] + (hy[1] - hy[0]) * u, bot = hf[0] + (hf[1] - hf[0]) * u * 0.9; return W(uu, 0.15 + 0.85 * Math.sin(Math.PI * u) * Math.sin(Math.PI * t * 0.9 + 0.15) * 0.7 + 0.05, top + (bot - top) * t); };
+    for (let i = 0; i < G; i++) for (let j = 0; j < H; j++) { const A = Sp(i, j), B = Sp(i + 1, j), C = Sp(i + 1, j + 1), E = Sp(i, j + 1); sg.push(...A, ...B, ...C, ...A, ...C, ...E, ...A, ...C, ...B, ...A, ...E, ...C); }
+    bag.add('reed_mat', fromTriangles(sg));
+    beamTris(yv, W(u0 - 0.5, 0.15, hy[0] - 0.05), W(u1 + 0.4, 0.15, hy[1] + 0.05), 0.06, 0.1);
+    beamTris(yv, W(u0, 0.15, hf[0]), W(u1 * 0.9, 0.15, hf[1]), 0.05, 0.08);
+    beamTris(yv, W(u1 * 0.9, 0.15, hf[1]), W(L * 0.36, 0.8, D + 0.5), 0.012, 0.02);
+    bag.add('timber', fromTriangles(yv));
+  } else {
+    const ya = W(-L * 0.38, 0.15, D + 0.75), yb = W(L * 0.42, 0.15, D + 0.95), ty = [];
+    beamTris(ty, ya, yb, 0.06, 0.1); bag.add('timber', fromTriangles(ty));
+    const sail = []; beamTris(sail, W(-L * 0.33, 0.15, D + 0.55), W(L * 0.36, 0.15, D + 0.75), 0.2, 0.32); bag.add('reed_mat', fromTriangles(sail));
+  }
   // a stay from the masthead to the stem, of coir
   const stay = []; beamTris(stay, [mb[0], mb[1] + mh - 0.3, mb[2]], [bow[0] + fx * 1.4, bow[1] + 0.8, bow[2] + fz * 1.4], 0.012, 0.025); bag.add('hide_brown', fromTriangles(stay));
+  if (!af) {
   // props under the bilges, an anchor stone and a coil of rope on the sand
   for (const t of [0.35, 0.65]) for (const sg of [-1, 1]) { const half = Math.pow(Math.sin(Math.PI * t), 0.7) * B / 2, tp = []; beamTris(tp, W(-L / 2 + L * t, sg * (half + 0.7), -0.1), W(-L / 2 + L * t, sg * half * 0.82, D * 0.55), 0.05, 0.1); bag.add('timber', fromTriangles(tp)); }
   const an = W(L / 2 + 1.2, 0.8, 0); bag.add('rubble', lathe([[0.001, -0.05], [0.28, 0.0], [0.3, 0.14], [0.2, 0.26], [0.001, 0.28]], 8, null, an[0], an[1], an[2]));
   bag.add('hide_brown', lathe([[0.18, 0], [0.3, 0.02], [0.3, 0.08], [0.18, 0.1], [0.18, 0]], 12, null, an[0] - sx * 0.7, an[1], an[2] - sz * 0.7));
+  }
   col.circle(x, z, B / 2, y, y + D + 1);
   void rand;
 }
