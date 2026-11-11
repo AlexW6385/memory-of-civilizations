@@ -10,6 +10,7 @@ import { box, frustum, lathe, fromTriangles, rod, orientOutward } from '../../co
 import { relief, strip, rosette } from './reliefs.js';
 import { jambScene } from './throne.js';
 import { fortification, guardGear, gift } from './fort.js';
+import { house, workshops } from './town.js';
 import '../qing/index.js';
 import { scribeKit } from '../sumerian/house.js';
 import { loft } from '../egyptian/objects.js';
@@ -529,6 +530,9 @@ function apadanaStair(el, { bag, col }) {
     }
   }
   // the wings: three registers of the procession, all walking toward the stair
+  // the robes carried their paint (Egyptian blue, red ochre, green; the background bare): the colour by figure (Nagel et al. 2024)
+  const PAINT = [['stucco_red', 'egyptian_blue', 'cloth_ochre', 'egyptian_blue', 'cloth_green'], ['egyptian_blue', 'stucco_red', 'cloth_green', 'stucco_red', 'cloth_ochre']];
+  const paint = (n, kind) => PAINT[kind === 'mede' ? 1 : 0][((n % 5) + 5) % 5];
   const reg = [0.2, 0.93, 1.66], rh = 0.66;
   for (const [w0, w1, kind] of [[s0, c - W / 2, el.wings?.[0] ?? 'nobles'], [c + W / 2, s1, el.wings?.[1] ?? 'nobles']]) {
     const toward = w1 <= c ? 1 : -1;
@@ -542,19 +546,19 @@ function apadanaStair(el, { bag, col }) {
         if (kind === 'servants') {
           // the palaces' servants carrying up food in covered dishes, a kid or a wineskin; a cypress between groups
           const k = i % 7;
-          if (k === 6) { relief(bag, C, 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.5; }
+          if (k === 6) { relief(bag, 'cloth_green', 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.5; }
           else if (k === 3) { relief(bag, C, 'ram', wall, a - toward * 0.1, v, rh * 0.8, toward, 0.05); a -= toward * 0.62; }
-          else { relief(bag, C, k % 2 ? 'mede' : 'bearer', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.5; }
+          else { relief(bag, paint(i + ri, k % 2 ? 'mede' : 'bearer'), k % 2 ? 'mede' : 'bearer', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.5; }
         } else if (kind === 'tribute') {
           // a delegation: an usher, three bearers and their animal, then a cypress
           const k = i % 6;
-          if (k === 5) { relief(bag, C, 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.55; }
+          if (k === 5) { relief(bag, 'cloth_green', 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.55; }
           else if (k === 4) { relief(bag, C, 'ram', wall, a - toward * 0.1, v, rh * 0.95, toward, 0.05); a -= toward * 0.75; }
-          else { relief(bag, C, k === 0 ? 'persian' : 'bearer', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.52; }
+          else { relief(bag, paint(i + ri, k === 0 ? 'persian' : 'bearer'), k === 0 ? 'persian' : 'bearer', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.52; }
         } else {
           // Persians and Medes by turns, a cypress now and then
-          if (i % 9 === 8) { relief(bag, C, 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.5; }
-          else { relief(bag, C, (i + ri) % 2 ? 'mede' : 'persian', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.5; }
+          if (i % 9 === 8) { relief(bag, 'cloth_green', 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.5; }
+          else { relief(bag, paint(i + ri, (i + ri) % 2 ? 'mede' : 'persian'), (i + ri) % 2 ? 'mede' : 'persian', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.5; }
         }
         i++;
       }
@@ -783,17 +787,8 @@ function audience(el, { bag, col }) {
   for (const b of [-3.6, 3.6]) { const p = P(3.2, b); bag.add('bronze', lathe([[0.3, 0], [0.12, 0.2], [0.07, 1.1], [0.32, 1.25], [0.36, 1.5], [0.12, 1.65], [0.18, 1.9], [0.001, 2.1]], 10, null, p[0], y, p[1])); col.circle(p[0], p[1], 0.3, y, y + 2.1); }
 }
 
-/** persian_house: { rect, seed }: a flat-roofed mudbrick house round a small court, a parapet. */
-function house(el, { bag, col }) {
-  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 3.2 + rand() * 0.8, t = 0.6;
-  const yard = rand() < 0.6, mx = (x0 + x1) / 2;
-  const parts = yard ? [[x0, z0, x1, z0 + (z1 - z0) * 0.5], [x0, z0 + (z1 - z0) * 0.5, x0 + t, z1], [x1 - t, z0 + (z1 - z0) * 0.5, x1, z1], [x0, z1 - t, mx - 0.6, z1], [mx + 0.6, z1 - t, x1, z1]] : [[x0, z0, x1, z1]];
-  parts.forEach((r, i) => { const hh = i === 0 ? h : 2.2; bag.add('mudbrick', box(r[0], -0.3, r[1], r[2], hh, r[3])); col.rect(r, 0, hh); });
-  bag.add('mud_plaster', box(x0 - 0.05, h, z0 - 0.05, x1 + 0.05, h + 0.3, z0 + (yard ? (z1 - z0) * 0.5 : z1 - z0) + 0.05));
-}
-
 registerStyle('achaemenid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift },
+  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, royal_workshops: workshops, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift },
   objects: {},
 });

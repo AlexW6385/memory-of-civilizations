@@ -17,20 +17,41 @@ export function mountain(x, z) {
 export const ROAD = [-400, -146, -150, -134];               // the road from the plain to the stair
 /** The market of Parsa beside the road to the terrace (docs/settlements/persepolis.md §14): no houses on it. */
 export const MARKET = [-300, -128, -238, -92];
+/** The royal workshops of Parsa beside the road below the stair (docs/settlements/persepolis.md §15): masons', carpenters' and smiths' yards in one walled compound. */
+export const WORKSHOPS = [-238, -124, -178, -66];
+/** The streets of Parsa (rectangles; the road to the stair, the cross streets, the market and the workshops' forecourt), 5 m wide. */
+export const STREETS = [
+  ...[-352, -306, -250, -190].map((x) => [x - 2.5, -330, x + 2.5, 340]),
+  ...[-40, 60, 150, 240].map((z) => [-380, z - 2.5, -175, z + 2.5]),
+  [-238, -66, -178, -60],
+];
+const overlaps = (a, b, m = 0) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let LOTS = null;
-/** Houses of Parsa on the plain west and south-west of the terrace. */
+/** Houses of Parsa on the plain west and south-west of the terrace, packed in the blocks between the streets; each with its `front`, the side toward the nearest street. */
 export function lots() {
   if (LOTS) return LOTS;
   LOTS = [];
-  const rand = rng(480);
-  for (let x = -380; x < -175; x += 15) for (let z = -330; z < 340; z += 14) {
-    if (Math.hypot(x, z) > RADIUS - 30 || inRect(ROAD, x, z, 8) || inRect(ROAD, x + 12, z + 11, 8)) continue;
-    if (rand() < 0.3) continue;
-    const w = 9 + rand() * 4, d = 9 + rand() * 3;
-    const seed = Math.floor(rand() * 1e6);
-    if (inRect(MARKET, x + w / 2, z + d / 2, 4)) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed });
+  const rand = rng(480), ways = [ROAD, ...STREETS.slice(0, -1)];
+  const XB = [[-382, -354.5], [-349.5, -308.5], [-303.5, -252.5], [-247.5, -192.5], [-187.5, -176]];
+  const ZB = [[-332, -148.5], [-131.5, -42.5], [-37.5, 57.5], [62.5, 147.5], [152.5, 237.5], [242.5, 336]];
+  for (const [bx0, bx1] of XB) for (const [bz0, bz1] of ZB) {
+    for (let x = bx0 + 0.6; x < bx1 - 8;) {
+      const w = Math.min(10.4 + rand() * 3, bx1 - x);
+      for (let z = bz0 + 0.6; z < bz1 - 8;) {
+        const d = Math.min(11.5 + rand() * 3.5, bz1 - z), seed = Math.floor(rand() * 1e6), r = [x, z, x + w, z + d], skip = rand() < 0.07;
+        z += d + 1.1;
+        if (skip || Math.hypot(r[0], r[1]) > RADIUS - 28 || Math.hypot(r[0], r[3]) > RADIUS - 28 || overlaps(r, ROAD, 1) || overlaps(r, MARKET, 3) || overlaps(r, WORKSHOPS, 3) || overlaps(r, [-170, -200, -100, -80], 0)) continue;
+        const mids = { n: [x + w / 2, r[1]], s: [x + w / 2, r[3]], w: [x, r[1] + d / 2], e: [x + w, r[1] + d / 2] };
+        let front = 'n', best = 1e9;
+        for (const [k, [px, pz]] of Object.entries(mids)) for (const s of ways) {
+          const e = Math.hypot(Math.max(s[0] - px, 0, px - s[2]), Math.max(s[1] - pz, 0, pz - s[3]));
+          if (e < best) { best = e; front = k; }
+        }
+        LOTS.push({ rect: r, seed, front });
+      }
+      x += w + 1.1;
+    }
   }
   return LOTS;
 }
