@@ -13,7 +13,7 @@ function emitters() {
   const E = [], rand = rng(1052);
   // the clay stove's smoke leaves under the eaves of the tiled roof, near the back of the house
   for (const l of lots()) {
-    if (rand() > 0.5) continue;
+    if (rand() > 0.5 || l.kind === 'shed') continue;
     const [x0, z0, x1, z1] = l.rect;
     E.push({ p: [x0 + (x1 - x0) * (0.3 + rand() * 0.4), 3.9, z0 + (z1 - z0) * (0.55 + rand() * 0.2)], kind: 'kitchen', seed: l.seed + 1 });
   }

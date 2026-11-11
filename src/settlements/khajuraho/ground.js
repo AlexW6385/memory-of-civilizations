@@ -1,11 +1,13 @@
 // Khajuraho — the ground: lawns and packed earth round the temples, the red-brown plain of
 // Bundelkhand with fields, mango, neem and palms, the tank with its ghats; the hot, hazy sky.
 
-import { RADIUS, TANK, height, inTank, inTankWater, tankD, nearTemple, inLot } from './layout.js';
+import { RADIUS, TANK, height, inTank, inTankWater, tankD, nearTemple, inLot, onStreet, yards, inRect } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.2, grass: 0.35, rock: 0, soil: 0.45, fields: 0, dry: 0.65, warmth: 0.85, red: 0.5, road: 0, snow: 0, forest: 0 };
   if (nearTemple(x, z, 4)) { c.road = 0.6; return c; }
+  if (onStreet(x, z, 1.2)) { c.road = 0.85; c.grass = 0; c.sand = 0.35; return c; }
+  if (yards().some((y) => inRect(y.rect, x, z, 0))) { c.road = 0.3; c.soil = 0.6; return c; }
   if (h < -0.5) { c.soil = 0.7; c.grass = 0.3; return c; }
   if (Math.hypot(x, z) > 270) { c.fields = 0.7; c.grass = 0.2; return c; }
   return c;
@@ -22,6 +24,9 @@ function inView(x, z) { const a = ang(x, z); return a > A0 && a < A1 && Math.hyp
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inTank(x, z) || nearTemple(x, z, 6) || inLot(x, z, 1)) return null;
   if (inView(x, z)) return { grass: 25 };
+  if (onStreet(x, z, 2)) return null;
+  const yd = yards().find((y) => inRect(y.rect, x, z, 0));
+  if (yd) return { neem: 0.03, banyan: 0.004, grass: 4 };
   if (tankD(x, z) < 8) return { reeds: 10, grass: 20 };
   // oleander (karavira, its flowers offered at the shrines) in clumps round the terraces; a pipal (a fig) or two by the tank
   if (nearTemple(x, z, 16)) return { oleander: 0.5, grass: 22 };
