@@ -2,7 +2,7 @@
 // earth ovens, chicken houses and garden walls with bananas in them, each set on the ground where it
 // stands; and the people (§4b): a gathering on the plaza before the ahu, a statue walked down the
 // road by three rope teams, canoes drawn up on the shore with their fishermen.
-import { RADIUS, ROAD, SEA, RARAKU, BAYS, CHIEF, TUPA, PETRO, village, height, fields } from './layout.js';
+import { RADIUS, ROAD, SEA, PLAZA, RARAKU, BAYS, CHIEF, TUPA, PETRO, village, height, fields } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -50,6 +50,10 @@ export async function town() {
   for (const [tx, tz, r, h, yaw] of TUPA) E.push({ t: 'tupa', c: [tx, tz], y: height(tx, tz), r, h, yaw, seed: Math.floor(tx * 3 + tz) });
   PETRO.forEach(([px, pz, , motifs], k) => E.push({ t: 'carved_rock', c: [px, pz], y: height(px, pz), motifs, seed: 9 + k }));
   BAYS.forEach((b, k) => { if (k % 2 === 0 || k === 5) E.push({ t: 'quarry_camp', at: b.at, facing: b.facing, hw: 0.19 * b.h, ground: height, side: k % 4 === 0 ? 1 : -1, seed: 6 + k }); });
+  // the plaza's feast ovens and offerings, the working shore, reed rafts on the crater lake (§4g)
+  E.push({ t: 'plaza_dress', rect: PLAZA, y: 0.12, seed: 8 });
+  E.push({ t: 'shore_works', c: [80, 150], ground: height, seed: 31 });
+  for (const [dx, dz, ya] of [[10, 8, 0.5], [-14, -12, 2.1]]) E.push({ t: 'pora', c: [RARAKU.c[0] + dx, RARAKU.c[1] + dz], y: RARAKU.lake - 0.04, yaw: ya, seed: 5 });
   // the sweet potato gardens under their mulch of stones
   fields().forEach((r, k) => E.push({ t: 'mulch_garden', rect: r, ground: height, seed: 40 + k }));
   for (const m of v.moa) E.push({ t: 'hare_moa', ...m, y: y(m.c), yaw: (m.c[0] * 0.37) % 1, len: 5 + Math.abs(m.c[1] * 0.13) % 3 });
@@ -84,7 +88,7 @@ export async function town() {
   // the gathering on the plaza, facing the statues; the walk up the middle left clear
   for (let k = 0; k < 44; k++) {
     const x = (rand() < 0.5 ? -1 : 1) * (4 + rand() * 40), z = 64 + rand() * 20, at = [x, z];
-    if (P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 0.9)) continue;
+    if (P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 0.9) || [[-34, 71], [37, 69], [-16, 94], [-37, 71], [34, 69]].some(([a, b]) => Math.hypot(a - x, b - z) < 3.6) || (z > 82.4 && z < 86.6) || Math.abs(Math.abs(x) - 6.5) < 0.7) continue;
     const r = rand();
     fig({ at, y: 0.12, rot: face(at, [x * 0.6, 103]) + (rand() - 0.5) * 0.4, pose: r < 0.3 ? 'squat' : r < 0.45 ? 'talk' : 'stand' });
   }
