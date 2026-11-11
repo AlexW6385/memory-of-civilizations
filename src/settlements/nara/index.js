@@ -5,7 +5,7 @@ import todaiji from './plan.js';
 import music from './music.js';
 import { town as houses } from './town.js';
 import '../../styles/chinese/index.js';
-import { HALL, height } from './layout.js';
+import { HALL, height, KOFUKU } from './layout.js';
 export { music };
 export const landmarks = [{ plan: todaiji, music }];
 // the Great Buddha (Vairocana) in bronze, 15 m seated on his lotus, in the hall; the two attendant
@@ -140,4 +140,24 @@ const deer = { id: 'nara-deer', style: 'nara', origin: [0, 0], base: 0, yaw: 0, 
     }
   }
 }
-export async function town() { return [daibutsu, rushana, deer, ceremonySet, ceremonyPeople, ...(await houses())]; }
+// the insides of Kōfuku-ji's Central Golden Hall and of the Hokke-dō: a dais of stone, the main image with its attendants,
+// the four guardian kings at the corners (the nio figures stand in for the Heavenly Kings), an altar with the offerings (§15)
+const shrineStone = { id: 'nara-shrine-stone', style: 'chinese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 180], facing: 'n' }, elements: [] };
+const shrineFigures = { id: 'nara-shrine-figures', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 180], facing: 'n' }, elements: [] };
+{
+  const [kx0, kz0] = KOFUKU.block;
+  const halls = [
+    { c: [kx0 + 28, kz0 + 20], y: 1.2, w: 7, back: 7.5, main: 5.4, att: 2.6, kings: [[-12.5, -2.6], [12.5, -2.6], [-12.5, 5.2], [12.5, 5.2]], kh: 2.6 },
+    { c: [119, -53], y: 1.0, w: 5.4, back: 7.5, main: 3.8, att: 2.4, kings: [[-11.5, -4], [11.5, -4], [-11.5, 3], [11.5, 3]], kh: 2.8 },
+  ];
+  for (const h of halls) {
+    const [hx, hz] = h.c, bz = hz - h.back, Yd = h.y + 0.5;
+    shrineStone.elements.push({ t: 'block', rect: [hx - h.w - 4.5, bz - 0.5, hx + h.w + 4.5, bz + 6.8], y0: h.y - 0.05, y1: Yd - 0.1, mat: 'granite_block' }, { t: 'block', rect: [hx - h.w - 4.7, bz - 0.7, hx + h.w + 4.7, bz + 7.0], y0: Yd - 0.1, y1: Yd, mat: 'granite_block', collide: false });
+    shrineStone.elements.push({ t: 'block', rect: [hx - 1.4, bz + 7.2, hx + 1.4, bz + 8.0], y0: h.y, y1: h.y + 0.8, mat: 'lacquer_red' }, { t: 'block', rect: [hx - 1.5, bz + 7.1, hx + 1.5, bz + 8.1], y0: h.y + 0.8, y1: h.y + 0.86, mat: 'gilt_bronze', collide: false });
+    shrineFigures.elements.push({ t: 'obj', kind: 'daibutsu', at: [hx, bz + 3.2], y: Yd, h: h.main, dir: [0, 1], mat: 'bronze' });
+    shrineFigures.elements.push({ t: 'obj', kind: 'bosatsu', bodhisattva: 'kokuzo', at: [hx - h.w + 0.5, bz + 3.8], y: Yd, h: h.att, dir: [0, 1] }, { t: 'obj', kind: 'bosatsu', bodhisattva: 'nyoirin', at: [hx + h.w - 0.5, bz + 3.8], y: Yd, h: h.att, dir: [0, 1] });
+    h.kings.forEach(([dx, dz], i) => shrineFigures.elements.push({ t: 'obj', kind: 'nio', form: i % 2 ? 'un' : 'a', at: [hx + dx, bz + 4 + dz], y: h.y, h: h.kh, dir: [dx < 0 ? 1 : -1, 0.3] }));
+    shrineFigures.elements.push({ t: 'nara_altar_set', at: [hx, bz + 7.6], y: h.y + 0.86, w: 3 });
+  }
+}
+export async function town() { return [shrineStone, shrineFigures, daibutsu, rushana, deer, ceremonySet, ceremonyPeople, ...(await houses())]; }

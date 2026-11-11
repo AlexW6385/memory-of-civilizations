@@ -5,7 +5,7 @@
 
 import { box, lathe } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
-import { gableRoofC } from '../chinese/index.js';
+import { gableRoofC, hipRoof } from '../chinese/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -62,7 +62,8 @@ export function naraAzekura(el, { bag, col }) {
   }
   // the roof: tile for the temple's (grey), bark for a house's, deep eaves
   const A = (alongX ? x1 - x0 : z1 - z0) / 2 + 1.0, B = (alongX ? z1 - z0 : x1 - x0) / 2 + 1.0;
-  gableRoofC({ c: [cx, cz], A, B, y: wy + 0.2, rise: Math.min(B * 0.62, 3.6), mat: tile ? 'tile_grey' : 'roof_bark', soffit: 'timber', ridgeMat: tile ? 'tile_grey' : 'roof_bark', noHorns: true, alongZ: !alongX }, { bag, col });
+  if (tile) hipRoof({ c: [cx, cz], A, B, y: wy + 0.2, rise: Math.min(B * 0.7, 4.0), eaveSlope: 0.3, pow: 1.6, lift: 0.3, mat: 'tile_grey', soffit: 'timber', noChiwei: true, ridgeMat: 'tile_grey', alongZ: !alongX }, { bag, col });
+  else gableRoofC({ c: [cx, cz], A, B, y: wy + 0.2, rise: Math.min(B * 0.62, 3.6), mat: 'roof_bark', soffit: 'timber', ridgeMat: 'roof_bark', noHorns: true, alongZ: !alongX }, { bag, col });
   if (simple) return;
   // goods at the door: a sack and a pot or two
   if (!tile) {
@@ -179,8 +180,7 @@ export function naraBelltower(el, ctx) {
     bag.add('timber_red', box(cx - a, top + 1.4, cz + s * a - 0.12, cx + a, top + 1.55, cz + s * a + 0.12));       // the low rails
   }
   // the roof: two gables crossing give the hip's look at this size; the tile roof lifted on a timber frame
-  gableRoofC({ c: [cx, cz], A: a + 1.8, B: a + 1.8, y: top + H, rise: 3.0, mat: 'tile_grey', soffit: 'timber_red', ridgeMat: 'tile_grey', noHorns: true }, ctx);
-  gableRoofC({ c: [cx, cz], A: a + 1.8, B: a + 1.8, y: top + H - 0.04, rise: 2.9, mat: 'tile_grey', soffit: 'timber_red', ridgeMat: 'tile_grey', noHorns: true, alongZ: true }, ctx);
+  hipRoof({ c: [cx, cz], A: a + 1.9, B: a + 1.9, y: top + H, rise: 3.2, eaveSlope: 0.3, pow: 1.6, lift: 0.5, mat: 'tile_grey', soffit: 'timber_red', noChiwei: true, ridgeMat: 'tile_grey' }, ctx);
   if (el.simple) return;
   // the bell: from the cross beam, a waisted cylinder 2.7 m high, studs in a band, a crown with a dragon's loop
   const by = top + H - 0.6 - 2.9;
@@ -213,4 +213,33 @@ export function naraPole(el, { bag, col }) {
   bag.add('gilt_bronze', box(x - 0.9, y + h - 5.7, z - 0.03, x - 0.05, y + h - 5.6, z + 0.03));
 }
 
-export const yardElements = { nara_azekura: naraAzekura, nara_fence: naraFence, nara_garden: naraGarden, nara_belltower: naraBelltower, nara_pole: naraPole };
+/**
+ * nara_rake { rect, y, dir ('x' | 'z'), gap (0.6), seed }
+ * Raked white gravel: ridges 0.1 m wide and 4 cm high along dir, one gap apart, broken by a stone or two.
+ */
+export function naraRake(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, gap = el.gap ?? 0.6, rand = rng(el.seed ?? 11);
+  const alongX = (el.dir ?? 'x') === 'x', n = Math.floor((alongX ? z1 - z0 : x1 - x0) / gap);
+  for (let i = 1; i < n; i++) {
+    const t = (alongX ? z0 : x0) + i * gap;
+    if (alongX) bag.add('pebbles', box(x0, y, t - 0.05, x1, y + 0.045, t + 0.05)); else bag.add('pebbles', box(t - 0.05, y, z0, t + 0.05, y + 0.045, z1));
+  }
+  void rand;
+}
+
+/**
+ * nara_gutter { rect } — a street's side gutters: a channel 0.5 m wide of dark pebbles between two kerbs of granite, 1 m in from
+ * each long edge, ending 5.5 m short of the crossings.
+ */
+export function naraGutter(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, alongX = x1 - x0 >= z1 - z0, e = 5.5;
+  const a0 = (alongX ? x0 : z0) + e, a1 = (alongX ? x1 : z1) - e;
+  if (a1 - a0 < 8) return;
+  for (const t of [(alongX ? z0 : x0) + 1.2, (alongX ? z1 : x1) - 1.2]) {
+    for (const [d0, d1, h, m] of [[-0.3, 0.3, 0.03, 'bluestone'], [-0.38, -0.3, 0.12, 'granite_block'], [0.3, 0.38, 0.12, 'granite_block']]) {
+      if (alongX) bag.add(m, box(a0, y, t + d0, a1, y + h, t + d1)); else bag.add(m, box(t + d0, y, a0, t + d1, y + h, a1));
+    }
+  }
+}
+
+export const yardElements = { nara_rake: naraRake, nara_gutter: naraGutter, nara_azekura: naraAzekura, nara_fence: naraFence, nara_garden: naraGarden, nara_belltower: naraBelltower, nara_pole: naraPole };

@@ -49,8 +49,8 @@ export function naraHouse(el, ctx) {
       const sx = du - side * 1.4;                                        // the signboard on the other side of the door
       Bx('wood_dark', sx - 0.04, -0.9, sx + 0.04, 0, y + 2.55, y + 2.62);
       Bx('lacquer_black', sx - 0.02, -0.92, sx + 0.02, -0.5, y + 1.65, y + 2.55);
-      Bx('gilt_bronze', sx - 0.03, -0.9, sx + 0.03, -0.84, y + 1.75, y + 2.45);
-      Bx('cloth_red', sx - 0.03, -0.62, sx + 0.03, -0.56, y + 1.75, y + 2.45);
+      Bx('gilt_bronze', sx + 0.02, -0.88, sx + 0.035, -0.54, y + 1.75, y + 2.45);
+      Bx('cloth_red', sx - 0.035, -0.88, sx - 0.02, -0.54, y + 1.75, y + 2.45);
     } else {
       // a house: a bench, a water jar, firewood stacked to the eave on the wall, a basket
       Bx('timber', su - 0.7, -0.5, su + 0.7, -0.15, y + 0.38, y + 0.45, true);

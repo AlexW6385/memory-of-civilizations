@@ -18,6 +18,9 @@ E.push({ t: 'nara_hall', rect: SOUTH_GATE, y: 0.8, H: 8, bays: [5, 2], k: 1.3, c
 // the open-mouthed "a" on the west (the visitor's left), the closed-mouthed "un" on the east (§4)
 E.push({ t: 'obj', kind: 'nio', form: 'a', at: [-12, (SOUTH_GATE[1] + SOUTH_GATE[3]) / 2], y: 0.8, h: 5.7, dir: [1, 0] });
 E.push({ t: 'obj', kind: 'nio', form: 'un', at: [12, (SOUTH_GATE[1] + SOUTH_GATE[3]) / 2], y: 0.8, h: 5.7, dir: [-1, 0] });
+// the guardian kings of the Middle Gate too
+E.push({ t: 'obj', kind: 'nio', form: 'a', at: [-12, (cz1 - 7 + cz1 + 7) / 2], y: 1.0, h: 5.2, dir: [1, 0] });
+E.push({ t: 'obj', kind: 'nio', form: 'un', at: [12, (cz1 - 7 + cz1 + 7) / 2], y: 1.0, h: 5.2, dir: [-1, 0] });
 // steps up to both gates' platforms (each 0.9 m out beyond the posts) on the axis, front and back
 for (const [r, y] of [[[-g + 1, cz1 - 7, g - 1, cz1 + 7], 1.0], [SOUTH_GATE, 0.8]]) {
   const run = y * 3.2;
@@ -42,6 +45,8 @@ E.push({ t: 'stairs', rect: [116, -44 + 0.9, 122, -44 + 0.9 + 3.2], y0: 0, y1: 1
 E.push({ t: 'nara_belltower', c: [108, -92], y: 0, half: 3.4 });
 // banner poles along the way up the court
 for (const z of [28, 10, -8]) for (const s of [-1, 1]) E.push({ t: 'nara_pole', at: [s * 5.2, z], y: 0, h: 9.5, cloth: s < 0 ? 'cloth_red' : 'cloth_green' });
+// the gravel of the court raked in long ridges, each panel its own way
+for (const [r, d] of [[[-80, -112, -47, -38], 'z'], [[47, -112, 80, -38], 'z'], [[-80, 6, -9, 36], 'x'], [[9, 6, 80, 36], 'x'], [[-80, -30, -40, 0], 'x'], [[40, -30, 80, 0], 'x']]) E.push({ t: 'nara_rake', rect: r, y: 0, dir: d });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('court', COURT, 0, 'open'), room('great buddha hall', HALL, 2.2, 'hall')];
 // the octagonal gilt-bronze lantern on the axis before the hall's stairs (§4)
