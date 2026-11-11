@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.57 — Ming–Qing Beijing at 520 m (2026-11-11)
+
+Beijing grows to a 520 m city: the Meridian Gate with its full wings over a forecourt, carved imperial ramps and stair balustrades, paved courts with drain covers, the Temple of Heaven's dragon-well caisson, spouts and altar; 368 hutong courtyard houses with their gates by rank, a Qing shop street with booths, a tea house and a pharmacy to walk into, furnished courtyard houses, walkers in Qing dress with carts, donkeys and camels, pigeons, crows and coal smoke.
+
 ## v10.56 — Kaifeng, Lin'an and Foguang, second pass (2026-11-11)
 
 Kaifeng's streets are narrower and its fronts continuous, with boarded doors, shutters, signboards and weathered plaster; earth lanes between paved shop streets; a paved monastery court with beds of pines and stele pavilions; colour gates rebuilt after the scroll; hawkers' stalls at the Rainbow Bridge and goods, carts, beasts and porters along every front. Lin'an builds its own Song shop houses, fills the Imperial Way's frontage, paves the canal streets, gives the Liuhe Pagoda a stone stair with lions, steles and old trees, faces the city wall in brick and plants the Su causeway with willow and peach; its streets carry lanterns, tea stoves, hawkers and boatmen's gear. Foguang's village yards and lanes fill with the goods of a mountain village, its courts with pines in raised beds.
