@@ -204,6 +204,8 @@ export function streetPlans(base) {
     }
     if (rand() < 0.55 && clear(w.x + 1.4, z - d * 1.6, 1)) person([w.x + 1.4, z - d * 1.6], Y, faceTo([0, d]), { dress: 'robe', carry: rand() < 0.5 ? 'basket' : 'none', pose: 'stand' });
   }
+  // the walker's route along the main street's axis (x = 0) and over the bridge stays free of standing people
+  for (let i = L.length - 1; i >= 0; i--) if (L[i].t === 'figure' && Math.abs(L[i].at[0]) < 0.9 && L[i].at[1] > -84 && L[i].at[1] < 204) L.splice(i, 1);
   return [base('song-kaifeng-street-life', L, 'life'), base('song-kaifeng-street-things', S)];
 }
 

@@ -73,7 +73,7 @@ function scroll() {
     for (const dz of [-0.5, 0.15]) L.push({ t: 'basket', at: [x - 0.75, z + dz], y: bridgeDeck(z + dz), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
     person([x - 1.7, z + 0.2], bridgeDeck(z + 0.2), faceTo([1, 0]), { pose: 'stand', carry: rand() < 0.4 ? 'basket' : 'none' });
   }
-  for (let k = 0; k < 6; k++) { const z = bz - 9 + k * 3.4, x = bx + (rand() - 0.5) * 2; person([x, z], bridgeDeck(z), faceTo([0, k % 2 ? 1 : -1]), { carry: pick(['pole', 'none', 'none', 'basket']) }); }
+  for (let k = 0; k < 6; k++) { const z = bz - 9 + k * 3.4, x = bx + (k % 2 ? 1 : -1) * (1.3 + rand() * 0.9); person([x, z], bridgeDeck(z), faceTo([0, k % 2 ? 1 : -1]), { carry: pick(['pole', 'none', 'none', 'basket']) }); }
   // the boat before the bridge: boatmen on the deck at the bow and on the house roof, hands on the mast
   {
     const x0 = -17.5, L0 = 19, yw = RIVER.water, z = 75, deck = (t) => yw + 0.95 + 0.35 * t * t + (t > 0 ? 0.7 : 0.45) * t ** 6 - 0.3;
