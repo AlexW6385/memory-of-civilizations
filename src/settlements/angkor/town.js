@@ -1,7 +1,7 @@
 // The country round Angkor Wat (docs/settlements/angkor.md §6): the moat with its laterite banks,
 // the road round it, and the village of houses on stilts among the palms.
 
-import { RADIUS, LEVEL, MOAT, ROAD, CX, T, CAUSEWAY, ENCLOSURE, houses, inRect, inMoat, inBasin, onRoad, inHouse } from './layout.js';
+import { RADIUS, LEVEL, MOAT, ROAD, CX, T, CAUSEWAY, ENCLOSURE, MARKET, houses, ponds, stores, inRect, inMoat, inBasin, onRoad, inHouse } from './layout.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 
 const base = (id, elements) => ({ id, style: 'khmer', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-206, 0], facing: 'e' } });
@@ -9,7 +9,7 @@ const base = (id, elements) => ({ id, style: 'khmer', origin: [0, 0], base: 0, y
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** Where the market is held, west of the moat road, south of the causeway's foot (§14). */
-export const MARKET = [-238, 10, -206, 40];
+export { MARKET };
 /**
  * The sugar palms (§14): standing singly along the rice-field dykes and among the houses, a few in the
  * enclosure; one in four with the tapper's bamboo ladder tied up it. None on the water, the road, the
@@ -107,8 +107,14 @@ function moat() {
   return base('angkor-moat', E);
 }
 function village() {
-  const all = houses(), plans = [];
+  const all = houses(), plans = [], { granaries, salas } = stores();
   for (let i = 0; i < all.length; i += 45) plans.push(base(`angkor-village-${i / 45}`, all.slice(i, i + 45).map((h) => ({ t: 'stilt_house', ...h }))));
+  const E = [];
+  for (const g of granaries) E.push({ t: 'k_granary', ...g });
+  for (const s of salas) E.push({ t: 'k_sala', ...s });
+  // the ponds: water at the pond level, lotus on it
+  ponds().forEach((p, i) => { E.push({ t: 'water_rect', rect: p.rect, y: -0.55 }, { t: 'k_lotus', rect: p.rect, y: -0.55, seed: 90 + i }); });
+  plans.push(base('angkor-village-stores', E));
   return plans;
 }
 /**
