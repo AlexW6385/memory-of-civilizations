@@ -76,6 +76,7 @@ import { ground as abbasidBaghdad } from './abbasid-baghdad/ground.js';
 import { ground as qinXianyang } from './qin-xianyang/ground.js';
 import { ground as alexandria } from './alexandria/ground.js';
 import { ground as hanChangan } from './han-changan/ground.js';
+import { ground as nalanda } from './nalanda/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -149,6 +150,7 @@ export const GROUNDS = {
   'qin-xianyang': qinXianyang,
   alexandria,
   'han-changan': hanChangan,
+  nalanda,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -227,6 +229,7 @@ const LOADERS = {
   'abbasid-baghdad': () => import('./abbasid-baghdad/index.js'),
   'qin-xianyang': () => import('./qin-xianyang/index.js'),
   'han-changan': () => import('./han-changan/index.js'),
+  nalanda: () => import('./nalanda/index.js'),
 };
 
 /** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */

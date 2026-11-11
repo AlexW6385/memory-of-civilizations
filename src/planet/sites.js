@@ -102,6 +102,7 @@ export const SITES = [
   { id: 'delphi', name: { en: 'Delphi', zh: '德尔斐' }, era: 'c. 400 BC', region: 'aegean', lat: 38.48, lon: 22.5, radius: 190 },
   { id: 'qin-xianyang', name: { en: 'Qin Xianyang', zh: '秦咸阳' }, era: 'c. 210 BC', region: 'china', lat: 34.38, lon: 109.25, radius: 330 },
   { id: 'han-changan', name: { en: 'Han Chang\'an', zh: '汉长安' }, era: 'c. 100 BC', region: 'china', lat: 34.3, lon: 108.88, radius: 520 },
+  { id: 'nalanda', name: { en: 'Nalanda', zh: '那烂陀' }, era: 'c. 640', region: 'india', lat: 25.14, lon: 85.44, radius: 190 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -113,7 +114,7 @@ const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan han-changan',
   M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang',
-  S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
+  S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori nalanda',
   P: 'stonehenge catalhoyuk',
 };
 for (const [c, ids] of Object.entries(CLASS)) for (const id of ids.split(' ')) { const s = SITES.find((x) => x.id === id); if (s) s.size = id === 'ming-suzhou' ? 215 : CLASS_RADIUS[c]; }
@@ -135,7 +136,6 @@ export const PLANNED = [
   { id: 'hakka-tulou', name: { en: 'Hakka tulou', zh: '客家土楼' }, region: 'china', lat: 24.67, lon: 117.05, radius: 180 },
   { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, region: 'indus', lat: 27.33, lon: 68.14, radius: 300 },
   { id: 'ajanta', name: { en: 'Ajanta', zh: '阿旃陀' }, region: 'india', lat: 20.55, lon: 75.70, radius: 200 },
-  { id: 'nalanda', name: { en: 'Nalanda', zh: '那烂陀' }, region: 'india', lat: 25.14, lon: 85.44, radius: 200 },
   { id: 'bhaktapur', name: { en: 'Bhaktapur', zh: '巴克塔普尔' }, region: 'nepal', lat: 27.67, lon: 85.43, radius: 200 },
   { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
   { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, region: 'siam', lat: 14.36, lon: 100.56, radius: 300 },
