@@ -57,5 +57,6 @@ export const MOVER_SITES = {
   'maori': () => import('../settlements/maori/movers.js'),
   'rapa-nui': () => import('../settlements/rapa-nui/movers.js'),
   'shaolin': () => import('../settlements/shaolin/movers.js'),
+  'timurid-samarkand': () => import('../settlements/timurid-samarkand/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
