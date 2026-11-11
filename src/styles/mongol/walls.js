@@ -197,10 +197,10 @@ export function mosque(el, { bag, col }) {
 /** church: the Nestorian church [stated: Rubruck: one church of Christians at the extreme end of the city]: a plastered nave with a gabled roof of tiles, an apse to the east, a cross on the gable, small arched windows. { rect } */
 export function church(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, H = 4.6, T = 0.7;
-  bag.add('brick_grey', box(x0 - 0.1, 0, z0 - 0.1, x1 + 0.1, 0.6, z1 + 0.1));
-  wallRun(bag, col, [x0, z1], [x1, z1], T, 0.55, H, 'plaster_white', [{ at: cx - x0, w: 1.8, h: 2.8 }]);
-  wallRun(bag, col, [x0, z0], [x1, z0], T, 0.55, H, 'plaster_white', [{ at: cx - x0, w: 0.7, h: 1.4, y0: 2.0 }]);
-  for (const X of [x0, x1]) wallRun(bag, col, [X, z0], [X, z1], T, 0.55, H, 'plaster_white', [0.3, 0.7].map((f) => ({ at: (z1 - z0) * f, w: 0.7, h: 1.5, y0: 1.8 })));
+  bag.add('flagstone', box(x0, -0.1, z0, x1, 0.03, z1)); col.floor([x0, z0, x1, z1], 0.03);
+  wallRun(bag, col, [x0, z1], [x1, z1], T, 0.03, H, 'plaster_white', [{ at: cx - x0, w: 1.8, h: 2.8 }]);
+  wallRun(bag, col, [x0, z0], [x1, z0], T, 0.03, H, 'plaster_white', [{ at: cx - x0, w: 0.7, h: 1.4, y0: 2.0 }]);
+  for (const X of [x0, x1]) wallRun(bag, col, [X, z0], [X, z1], T, 0.03, H, 'plaster_white', [0.3, 0.7].map((f) => ({ at: (z1 - z0) * f, w: 0.7, h: 1.5, y0: 1.8 })));
   // the apse on the east end: a half-round, a semi-dome
   bag.add('plaster_white', lathe([[2.0, 0.55], [2.0, H - 0.2], [1.8, H]], 12, null, x1 + 0.5, 0, cz));
   col.circle(x1 + 0.5, cz, 2.0, 0, H);
@@ -208,8 +208,13 @@ export function church(el, { bag, col }) {
   // the cross on the gable ridge and over the apse
   for (const [x, y] of [[x0 - 0.2, H + 2.8], [x1 + 0.5, H + 0.3]]) { bag.add('gilt_bronze', box(x - 0.05, y, cz - 0.05, x + 0.05, y + 1.1, cz + 0.05)); bag.add('gilt_bronze', box(x - 0.05, y + 0.65, cz - 0.4, x + 0.05, y + 0.78, cz + 0.4)); }
   // the semantron hung at the door (a board struck for the hours) and a lamp
-  bag.add('wood_dark', box(cx - 0.3, 3.0, z1 + 0.5, cx + 0.3, 3.9, z1 + 0.55)); bag.add('timber', rod([cx - 0.7, 3.95, z1 + 0.52], [cx + 0.7, 3.95, z1 + 0.52], 0.03, 4));
-  col.rect([cx - 0.3, z1 + 0.45, cx + 0.3, z1 + 0.6], 0, 3.9);
+  { const sx = cx - 2.4; bag.add('wood_dark', box(sx - 0.3, 3.0, z1 + 0.36, sx + 0.3, 3.9, z1 + 0.41)); bag.add('timber', rod([sx - 0.7, 3.95, z1 + 0.4], [sx + 0.7, 3.95, z1 + 0.4], 0.03, 4)); }
+  // inside: the altar at the east end under the apse, a cross, a lamp, benches along the nave
+  bag.add('timber', box(x1 - 2.0, 0.03, cz - 0.9, x1 - 1.2, 1.0, cz + 0.9)); bag.add('cloth_white', box(x1 - 2.04, 0.9, cz - 0.95, x1 - 1.16, 1.03, cz + 0.95));
+  col.rect([x1 - 2.0, cz - 0.9, x1 - 1.2, cz + 0.9], 0.03, 1.0);
+  bag.add('gilt_bronze', box(x1 - 1.62, 1.03, cz - 0.03, x1 - 1.58, 1.6, cz + 0.03)); bag.add('gilt_bronze', box(x1 - 1.62, 1.35, cz - 0.22, x1 - 1.58, 1.4, cz + 0.22));
+  for (const dz of [-0.6, 0.6]) bag.add('bronze', lathe([[0.001, 0], [0.05, 0.02], [0.04, 0.2], [0.001, 0.22]], 6, null, x1 - 1.5, 1.03, cz + dz));
+  for (let k = 0; k < 3; k++) for (const s of [-1, 1]) { bag.add('timber', box(x0 + 2.2 + k * 2.2, 0.03, cz + s * 1.0 - 0.18, x0 + 3.5 + k * 2.2, 0.45, cz + s * 1.0 + 0.18)); col.rect([x0 + 2.2 + k * 2.2, cz + s * 1.0 - 0.18, x0 + 3.5 + k * 2.2, cz + s * 1.0 + 0.18], 0.03, 0.45); }
 }
 /**
  * shop_row: a row of open-fronted shops [inferred] of sun-dried brick with flat roofs: n bays of w m along x from a, depth d, the front to the south (face 's') or north; a

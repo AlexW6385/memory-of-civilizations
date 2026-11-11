@@ -1,6 +1,6 @@
 // Karakorum — the ground (docs/settlements/mongol-karakorum.md §7): the broad floor of the Orkhon valley, short steppe grass on gravelly soil, the street dust of the town,
 // millet fields outside the east gate; willows and poplars at the wells; a continental sky, dry and windy.
-import { RADIUS, WALL, GATES, MAIN, CROSS, inTown, inBuilt, inPalace, height, smooth as sm, inRect, PALACE, GREAT_RECT } from './layout.js';
+import { RADIUS, WALL, GATES, CAMPS, MAIN, CROSS, inTown, inBuilt, inPalace, height, smooth as sm, inRect, PALACE, GREAT_RECT } from './layout.js';
 
 function cover(x, z) {
   const c = { sand: 0.25, grass: 0.35, rock: 0.05, soil: 0.45, fields: 0, dry: 0.75, warmth: 0.6, red: 0.1, road: 0, snow: 0, forest: 0 };
@@ -18,7 +18,8 @@ function cover(x, z) {
 function planting(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6 || inTown(x, z, -1) || inBuilt(x, z, 2) || (x > WALL[2] && x < WALL[2] + 8 && Math.abs(z) < 14) || Math.abs(x) < 10 && r < 140) return null;
-  // the court's ger camps and the markets' pens are kept bare of anything tall
+  // the court's ger camps and the markets' pens are kept bare: no plants among the gers
+  for (const c of [CAMPS.sw, CAMPS.se]) if (x > c[0] - 36 && x < c[0] + 36 && z > c[1] - 28 && z < c[1] + 32) return null;
   if (z > 104 && z < 150 && Math.abs(x) < 110) return { grass_dry: 14 };
   if (x > WALL[2] + 6 && Math.abs(z) < 70) return { wheat: 20, grass_dry: 6 };
   return { grass_dry: 18, maquis: 0.25, grass: 8 };
