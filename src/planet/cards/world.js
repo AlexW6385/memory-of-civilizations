@@ -1018,4 +1018,22 @@ export const CARDS = {
       "峡谷底——通往石阶的小径、朝圣者的凉棚、在未完成龛前凿石的石匠，以及东岸工人的村落：围着水井的泥墙茅顶小屋、山羊和牛车。",
     ],
   },
+  'mohenjo-daro': {
+    en: [
+      "Mohenjo-daro stands on the right bank of the lower Indus in Sindh, shown about 2500 BC at the height of the Indus (Harappan) civilization, the one great river civilization of the ancient world that wrote in a script no one can yet read. A planned city of some forty thousand people, it is built almost entirely of baked brick in a standard ratio of 4:2:1: a Citadel on a high mud-brick platform in the west and a Lower Town in a grid of straight streets and lanes, with covered drains, public wells and flat-roofed courtyard houses that turn blank walls to the street.",
+      "The Citadel and the Great Bath — the mud-brick platform faced in baked brick, with its buttresses and towers, climbed by a broad stair from the town. On it stands the Great Bath: a watertight brick pool 12 m by 7 m and 2.4 m deep, lined with bitumen, with a stair at each end, set in a paved court inside a gallery of stepped brick piers, with a row of cells along the east side (one with a well) and a corbelled drain at the corner.",
+      "The granary and the Pillared Hall — the great timber hall on 27 brick blocks with air channels, loaded by carts up its ramp (whether a granary or a hall is still argued), the hall of twenty brick piers in four rows, and the College of Priests with its court, verandas and stairs.",
+      "The Lower Town — blocks of baked-brick houses between streets nine metres wide and lanes of three, each house a plain street wall with one door on the lane, a court with a well, rooms on two or three sides, a stair to the flat mud roof, and a drain through the wall to the covered brick drain of the street; some are open and furnished.",
+      "The workshops and the market — the beadmakers' bow drills and carnelian, the seal-cutters' steatite squares, the potters' kilns, the coppersmith's crucible and the shell-workers' bangles; the market place with its great well and stalls of grain, pots, beads and cloth; bullock carts on solid wheels drawn by humped zebu.",
+      "The Indus and the landing — the town wall with its tower on the south, the river on the east with its brick landing and stairs, the harbour office where goods were sealed, and flat-bottomed plank-and-reed boats loaded with grain and pots.",
+    ],
+    zh: [
+      "摩亨佐-达罗位于信德省印度河下游右岸，画面所示约为公元前2500年，印度河（哈拉帕）文明的鼎盛期；这是古代唯一一个文字至今无法释读的大河文明。城市经过规划，居民约四万，几乎全部以4:2:1标准比例的烧砖建成：西面是建在高大土坯台基上的卫城，东面是街巷笔直的方格状下城，有加盖的排水沟、公共水井，以及平顶庭院式住宅，临街一面是不开窗的实墙。",
+      "卫城与大浴池 —— 外包烧砖、带扶壁和塔楼的土坯台基，由宽阔的台阶从城区登上。台上是大浴池：长12米、宽7米、深2.4米的防水砖池，内衬沥青，两端各有台阶，位于铺砖庭院中，四周是带阶梯状砖墩的回廊，东侧是一排小间（其中一间有井），角上有叠涩拱的排水口。",
+      "粮仓与柱厅 —— 建在27个砖墩和通风道上的大木构厅堂，大车可沿坡道运货（究竟是粮仓还是大厅仍有争议）；二十根砖墩分四排的柱厅；以及带庭院、回廊和楼梯的僧侣学院。",
+      "下城 —— 烧砖住宅的街区，街宽9米、巷宽3米；每座住宅临街是一道实墙，只在巷里开一扇门，院中有井，两三面是房间，有楼梯上平顶泥屋面，墙脚有排水口通向街上有盖的砖砌排水沟；有的可进入，陈设齐备。",
+      "作坊与市场 —— 串珠工的弓钻与红玉髓，刻印工的皂石方块，陶工的窑，铜匠的坩埚，制贝镯的工匠；市场有大水井，摊上有谷物、陶器、珠子和布匹；实心轮的牛车由瘤牛拉着。",
+      "印度河与码头 —— 南面的城墙与塔楼，东面的印度河与砖砌码头和台阶，封印货物的港务房，以及满载谷物和陶器的平底木板与芦苇船。",
+    ],
+  },
 };

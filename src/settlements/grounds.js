@@ -82,6 +82,7 @@ import { ground as weiYe } from './wei-ye/ground.js';
 import { ground as nalanda } from './nalanda/ground.js';
 import { ground as hakkaTulou } from './hakka-tulou/ground.js';
 import { ground as ajanta } from './ajanta/ground.js';
+import { ground as mohenjoDaro } from './mohenjo-daro/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -161,6 +162,7 @@ export const GROUNDS = {
   nalanda,
   'hakka-tulou': hakkaTulou,
   ajanta,
+  'mohenjo-daro': mohenjoDaro,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -245,6 +247,7 @@ const LOADERS = {
   nalanda: () => import('./nalanda/index.js'),
   'hakka-tulou': () => import('./hakka-tulou/index.js'),
   ajanta: () => import('./ajanta/index.js'),
+  'mohenjo-daro': () => import('./mohenjo-daro/index.js'),
 };
 
 /** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */
