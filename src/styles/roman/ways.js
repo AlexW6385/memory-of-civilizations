@@ -235,5 +235,59 @@ function crane(el, { bag, col }) {
   for (let k = 0; k < 6; k++) bag.add('terracotta', M(lathe([[0.001, 0], [0.1, 0.1], [0.19, 0.4], [0.17, 0.62], [0.07, 0.78], [0.06, 0.95], [0.001, 0.95]], 8).translate(-0.5 + (k % 3) * 0.5, 0.18, 4.95 + Math.floor(k / 3) * 0.5)));
   col.rect([x - 2.2, z - 0.9, x + 2.2, z + 0.9], y, y + 5.2);
 }
-Object.assign(STYLES.roman.elements, { quay, landing, crane, paving, crossing, street_kit: streetKit, alley_fill: alleyFill, hortus });
+/**
+ * forum_kit: { rect (the square), temple ([x0, z0, x1, z1] the podium), seed } — what stands in a Roman square besides its
+ * monuments: two altars of marble before the temple (a block with horns and a bowl), benches under the colonnades, tubs of
+ * laurel and myrtle, the album (a white board on posts with the notices painted on it), steles in pairs, a low rostrum.
+ */
+function forumKit(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed || 5), T = el.temple, my = (z0 + z1) / 2;
+  const blk = (r, ya, yb, m) => { bag.add(m, box(r[0], y + ya, r[1], r[2], y + yb, r[3])); col.rect(r, y + ya, y + yb); };
+  // altars before the temple (it faces east)
+  for (const dz of [-6, 6]) {
+    const ax = T[2] + 7, az = my + dz;
+    blk([ax - 0.9, az - 0.7, ax + 0.9, az + 0.7], 0, 0.3, 'marble'); blk([ax - 0.7, az - 0.5, ax + 0.7, az + 0.5], 0.3, 1.4, 'travertine'); blk([ax - 0.85, az - 0.65, ax + 0.85, az + 0.65], 1.4, 1.6, 'marble');
+    for (const [hx, hz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bag.add('marble', lz([[0.001, 0], [0.1, 0.03], [0.07, 0.2], [0.001, 0.26]], 6).translate(ax + hx * 0.75, y + 1.6, az + hz * 0.55));
+    bag.add('bronze', lz([[0.3, 0], [0.4, 0.05], [0.38, 0.12], [0.001, 0.1]], 10).translate(ax, y + 1.6, az));
+  }
+  // benches in front of the colonnades
+  for (let x = T[2] + 12; x < x1 - 10; x += 12) for (const z of [z0 + 8.8, z1 - 8.8]) blk([x - 1.0, z - 0.3, x + 1.0, z + 0.3], 0, 0.46, 'marble');
+  // tubs with shrubs
+  for (let k = 0; k < 8; k++) {
+    const x = T[2] + 16 + k * 9, z = k % 2 ? z0 + 11.5 : z1 - 11.5;
+    PUT(bag, 'terracotta', lz([[0.001, 0], [0.5, 0.0], [0.6, 0.55], [0.55, 0.6], [0.001, 0.58]], 12), x, y, z); col.circle(x, z, 0.6, y, y + 0.6);
+    for (let j = 0; j < 7; j++) PUT(bag, j % 2 ? 'palm_leaf' : 'papyrus', lz([[0.001, 0], [0.35, 0.3], [0.4, 0.9], [0.2, 1.5], [0.001, 1.7]], 7).scale(0.5 + rand() * 0.3, 0.8 + rand() * 0.3, 0.5 + rand() * 0.3), x + (rand() - 0.5) * 0.7, y + 0.5, z + (rand() - 0.5) * 0.7);
+  }
+  // the album: a white board on two posts with the notices painted on it
+  for (const dz of [-24, 22]) {
+    const ax = x1 - 14, az = my + dz;
+    for (const s of [-1, 1]) blk([ax - 1.4 + (s > 0 ? 2.7 : 0), az - 0.07, ax - 1.3 + (s > 0 ? 2.7 : 0), az + 0.07], 0, 2.7, 'timber');
+    bag.add('plaster_white', box(ax - 1.3, y + 1.0, az - 0.05, ax + 1.3, y + 2.5, az + 0.05));
+    for (let r = 0; r < 7; r++) for (const sd of [-1, 1]) bag.add(r % 3 ? 'lacquer_black' : 'wall_red', box(ax - 1.1 + rand() * 0.2, y + 1.15 + r * 0.19, az + sd * 0.052 - (sd > 0 ? 0 : 0.004), ax + 1.0 - rand() * 0.6, y + 1.25 + r * 0.19, az + sd * 0.058 + (sd > 0 ? 0.004 : 0)));
+    bag.add('timber', box(ax - 1.5, y + 2.5, az - 0.1, ax + 1.5, y + 2.6, az + 0.1)); bag.add('roof_tile', box(ax - 1.6, y + 2.6, az - 0.25, ax + 1.6, y + 2.75, az + 0.25));
+    col.rect([ax - 1.5, az - 0.15, ax + 1.5, az + 0.15], y, y + 2.6);
+  }
+  // pairs of steles with their rounded tops
+  for (let k = 0; k < 6; k++) { const x = T[2] + 20 + k * 10, z = my + (k % 2 ? 13 : -13); blk([x - 0.4, z - 0.12, x + 0.4, z + 0.12], 0, 1.3, 'marble'); bag.add('marble', lz([[0.4, 0], [0.001, 0.25]], 10).scale(1, 1, 0.3).translate(x, y + 1.3, z)); }
+  // the rostrum: a low platform with steps, a ship's beaks of bronze along its front
+  const rx = x1 - 22, rz = my; blk([rx - 4, rz - 6, rx + 4, rz + 6], 0, 1.8, 'travertine'); blk([rx - 4.2, rz - 6.2, rx + 4.2, rz + 6.2], 1.8, 2.0, 'marble');
+  for (let k = 0; k < 4; k++) bag.add('bronze', box(rx - 4.6, y + 1.0, rz - 4.5 + k * 3, rx - 4.0, y + 1.2, rz - 3.5 + k * 3));
+  for (let k = 0; k < 4; k++) blk([rx - 5.6 + k * 0.4, rz - 1.5, rx - 4.2, rz + 1.5], 0, 0.4 * (k + 1) * 0.5, 'travertine');
+}
+/**
+ * arena_kit: { rect (the track), y } — the sand of a stadium: the starting sill of stone with its grooves, the turning posts at
+ * the ends, a row of herms along the edge, the water jars for the runners.
+ */
+function arenaKit(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, mx = (x0 + x1) / 2;
+  bag.add('travertine', box(x0 + 2, y, z1 - 4, x1 - 2, y + 0.08, z1 - 3.4));
+  for (let u = x0 + 3; u < x1 - 2.5; u += 1.2) bag.add('granite_grey', box(u, y + 0.08, z1 - 4, u + 0.06, y + 0.1, z1 - 3.4));
+  for (const z of [z0 + 6, z1 - 4]) for (const s of [-1, 1]) { PUT(bag, 'marble', lz([[0.5, 0], [0.4, 0.1], [0.3, 1.2], [0.001, 1.8]], 10), mx + s * 6, y, z); col.circle(mx + s * 6, z, 0.45, y, y + 1.5); }
+  for (let z = z0 + 20; z < z1 - 14; z += 22) for (const s of [-1, 1]) {
+    const x = mx + s * (x1 - x0) / 2 * 0.97;
+    bag.add('marble', box(x - 0.2, y, z - 0.2, x + 0.2, y + 1.4, z + 0.2)); bag.add('marble', lz([[0.18, 0], [0.16, 0.2], [0.001, 0.3]], 8).translate(x, y + 1.4, z)); col.circle(x, z, 0.25, y, y + 1.7);
+  }
+  for (const s of [-1, 1]) for (const z of [z0 + 40, z0 + 100, z0 + 160]) { PUT(bag, 'terracotta', lz([[0.001, 0], [0.12, 0.1], [0.2, 0.4], [0.17, 0.6], [0.08, 0.76], [0.001, 0.78]], 8), mx + s * ((x1 - x0) / 2 - 1.4), y, z); }
+}
+Object.assign(STYLES.roman.elements, { forum_kit: forumKit, arena_kit: arenaKit, quay, landing, crane, paving, crossing, street_kit: streetKit, alley_fill: alleyFill, hortus });
 void fromTriangles;

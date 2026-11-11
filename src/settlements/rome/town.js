@@ -1,7 +1,7 @@
 // The insulae of the Campus Martius (docs/settlements/rome.md §5): in 100 m tiles, each in full
 // (shops, windows, shutters, balconies, cornices) near and in outline far (src/settlements/lod.js).
 import { lodTiles } from '../lod.js';
-import { RADIUS, VIA_LATA, lots, inRect, rows, INN, FULLER, saeptaRows, quayRows, riverEdge, fountains, fills, gardens, FORUM, TEMPLE, PISTRINUM, LATRINE } from './layout.js';
+import { RADIUS, VIA_LATA, lots, inRect, rows, INN, FULLER, STADIUM, saeptaRows, quayRows, riverEdge, fountains, fills, gardens, FORUM, TEMPLE, PISTRINUM, LATRINE } from './layout.js';
 import '../../styles/roman/ways.js';
 import '../../styles/roman/houses.js';
 import { DOMUS, LITTER, lifePlan } from './life.js';
@@ -24,6 +24,7 @@ export async function town() {
   const [fx0, fz0, fx1, fz1] = FORUM, zm = (fz0 + fz1) / 2, cl = (a, b, side, gaps) => ({ t: 'colonnade', a, b, at: a, y: 0, h: 7.6, step: 3.9, depth: 5, side, gaps });
   const forum = [
     { t: 'forum_floor', rect: FORUM, y: 0 },
+    { t: 'forum_kit', rect: FORUM, temple: TEMPLE, at: [(FORUM[0] + FORUM[2]) / 2, (FORUM[1] + FORUM[3]) / 2], seed: 5 },
     cl([TEMPLE[2] + 2, fz0 + 5], [fx1 - 6, fz0 + 5], -1), cl([TEMPLE[2] + 2, fz1 - 5], [fx1 - 6, fz1 - 5], 1),
     cl([fx1 - 5, fz0 + 5], [fx1 - 5, fz1 - 5], -1, [[zm - fz0 - 5 - 7, zm - fz0 - 5 + 7]]),
     { t: 'temple', rect: TEMPLE, at: [(TEMPLE[0] + TEMPLE[2]) / 2, (TEMPLE[1] + TEMPLE[3]) / 2], front: 'e', y: 0, h: 11.5, nf: 6, podium: 2.6 },
@@ -43,6 +44,7 @@ export async function town() {
   }
   for (const f of fills()) { ways.push({ t: 'alley_fill', ...f }); if (f.front === 'e') ways.push({ t: 'crossing', at: [xs, (f.rect[1] + f.rect[3]) / 2], along: 'x', w: VIA_LATA.w - 2.4 }); }
   for (const g of gardens()) ways.push({ t: 'hortus', ...g });
+  ways.push({ t: 'arena_kit', rect: [STADIUM[0] + 28, STADIUM[1] + 28, STADIUM[2] - 28, STADIUM[3] - 28], y: 0 });
   // the Tiber's east quay: the embankment wall and the paved quay, flights of steps into the water, treadwheel cranes, warehouses
   { const E = riverEdge(1);
     for (let i = 0; i + 8 < E.length; i += 8) ways.push({ t: 'quay', at: E[i + 4], edge: E.slice(i, i + 9), land: 1, level: -5 });

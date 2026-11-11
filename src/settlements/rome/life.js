@@ -3,7 +3,7 @@
 // the Pantheon with an attendant walking before it, citizens in the toga and people in tunics in the street and the
 // forecourt; the keeper behind his counter in the thermopolium of the house by the forecourt, a customer at it.
 
-import { VIA_LATA, INN, FULLER, height, riverEdge, riverX } from './layout.js';
+import { VIA_LATA, INN, FULLER, height, riverEdge, riverX, rows, STADIUM, SAEPTA, BATHS, FORUM } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 export const DOMUS = [-36, -208, -17.9, -189.4];
@@ -52,6 +52,49 @@ export function life() {
   const [X0, , , Z1] = DOMUS;
   tunic([X0 + 0.6 + 1.6, Z1 - 0.6 - 2.3], Math.PI, { y: 0, cloth: 'cloth_brown' });
   tunic([X0 + 0.6 + 2.0, Z1 - 0.6 - 0.7], 0, { y: 0, pose: 'talk' });
+  // before the shops of the rows: keepers and buyers talking on the footway, a dog or a cat on a threshold, children
+  for (const r of rows()) {
+    const [x0, z0, x1, z1] = r.rect, f = r.front, W = f === 'e' || f === 'w' ? z1 - z0 : x1 - x0, nb = Math.max(2, Math.round(W / 4.4)), bw = W / nb;
+    const rot = f === 'e' ? -Math.PI / 2 : f === 'w' ? Math.PI / 2 : f === 's' ? Math.PI : 0;
+    const P = (u, d) => f === 'e' ? [x1 - d, z0 + u] : f === 'w' ? [x0 + d, z0 + u] : f === 's' ? [x0 + u, z1 - d] : [x0 + u, z0 + d];
+    for (let i = 0; i < nb; i++) {
+      const uc = (i + 0.5) * bw, q = rand();
+      if (q < 0.34) { const p = P(uc + (rand() - 0.5) * 1.2, -1.25); tunic(p, rot, { pose: 'stand', cloth: 'cloth_brown' }); const p2 = P(uc + (rand() < 0.5 ? -0.9 : 0.9), -1.9); (rand() < 0.5 ? woman : rand() < 0.5 ? togate : tunic)(p2, rot + Math.PI + (rand() - 0.5) * 0.8, { pose: 'talk' }); }
+      else if (q < 0.5) { const p = P(uc + 1.0, -0.9); L.push({ t: 'animal', kind: rand() < 0.6 ? 'dog' : 'cat', at: p, y: 0, rot: rot + (rand() - 0.5), seed: seed() }); }
+      else if (q < 0.6) { const p = P(uc - 1.0, -1.6); tunic(p, rot + 1.0 + rand(), { h: 1.2, pose: 'stand', cloth: 'linen' }); }
+    }
+  }
+  // the stadium: spectators on the tiers (the games are not on; a few hundred would be too many: forty about the near end), runners on the track
+  {
+    const [x0, z0, x1, z1] = STADIUM, t = 28, rows_ = 14, pod = 2.2, T2 = 18, ax0 = x0 + t, ax1 = x1 - t, sd = t - 5.4, rowTop = (i) => pod + (T2 - pod) * (i + 1) / rows_;
+    for (let k = 0; k < 44; k++) {
+      const i = 2 + Math.floor(rand() * 11), west = rand() < 0.5, oM = sd * (i + 0.5) / rows_, z = z0 + t + 25 + rand() * 120, x = west ? ax0 - oM : ax1 + oM;
+      (rand() < 0.4 ? togate : rand() < 0.5 ? woman : tunic)([x, z], west ? -Math.PI / 2 : Math.PI / 2, { y: rowTop(i), pose: 'sit' });
+    }
+    const mx = (ax0 + ax1) / 2;
+    for (let k = 0; k < 6; k++) tunic([mx - 8 + k * 3.2, z1 - t - 12 - (k % 2) * 3], 0, { y: 0, cloth: 'linen', pose: k % 3 === 0 ? 'talk' : 'stand', arms: 'hang' });
+  }
+  // the Saepta: buyers and sellers in the court, the dealers before the shops under the portico
+  {
+    const mx = (SAEPTA[0] + SAEPTA[2]) / 2;
+    for (let k = 0; k < 26; k++) { const z = SAEPTA[1] + 14 + rand() * 292, x = mx + (rand() - 0.5) * 26; (rand() < 0.45 ? togate : rand() < 0.5 ? woman : tunic)([x, z], rand() * 6.28, { y: 0.03, pose: rand() < 0.4 ? 'talk' : 'stand' }); }
+    for (let z = SAEPTA[1] + 40; z < SAEPTA[3] - 30; z += 52) { L.push({ t: 'stall', at: [mx + 12, z], y: 0.03, rot: Math.PI / 2, seed: seed(), w: 2.4, d: 1.0, awning: ['cloth_white', 'cloth_ochre', 'cloth_red'][Math.floor(rand() * 3)], goods: GOODS[Math.floor(rand() * GOODS.length)] }); tunic([mx + 13.2, z], Math.PI / 2, { y: 0.03, pose: 'sit' }); }
+  }
+  // the baths: bathers (in a wrap of linen) in the palaestrae and on the benches of the frigidarium, a strigil-bearing slave
+  {
+    const cx = (BATHS[0] + BATHS[2]) / 2, mz = (BATHS[1] + BATHS[3]) / 2;
+    for (let k = 0; k < 12; k++) { const west = k % 2, x = cx + (west ? -1 : 1) * (38 + rand() * 24), z = mz + (rand() - 0.5) * 60; tunic([x, z], rand() * 6.28, { y: 0.02, cloth: 'linen', pose: rand() < 0.5 ? 'talk' : 'stand' }); }
+    for (let k = 0; k < 9; k++) { const x = cx + (rand() - 0.5) * 40, z = BATHS[1] + 14 + rand() * 20; tunic([x, z], rand() * 6.28, { y: 0.04, cloth: 'linen', pose: k % 3 ? 'stand' : 'sit' }); }
+    for (let k = 0; k < 5; k++) tunic([cx - 10 + k * 5, BATHS[1] + 80 + rand() * 5], rand() * 6.28, { y: 0.04, cloth: 'linen', pose: 'stand' });
+  }
+  // the forum: citizens in knots before the temple and the rostrum, a boy with a dog, an orator
+  {
+    const [fx0, fz0, fx1, fz1] = FORUM, my = (fz0 + fz1) / 2;
+    for (let k = 0; k < 14; k++) togate([fx1 - 30 + rand() * 20, my + (rand() - 0.5) * 26], Math.PI / 2 + (rand() - 0.5) * 0.8, { pose: rand() < 0.5 ? 'talk' : 'stand' });
+    togate([fx1 - 22, my], Math.PI / 2, { y: 2.0, pose: 'talk', h: 1.78 });
+    for (let k = 0; k < 6; k++) tunic([fx0 + 30 + rand() * 40, fz0 + 12 + rand() * 60], rand() * 6.28, { pose: 'stand' });
+    L.push({ t: 'animal', kind: 'dog', at: [fx0 + 50, my + 5], y: 0, rot: 1.0, seed: seed() });
+  }
   // the inn: the keeper behind the counter, drinkers at the tables, the groom with a donkey in the stable, a guest in the court
   {
     const W = (r, u, d) => [r[0] + u, r[3] - d], A = (r, u, d, rot, o = {}) => ({ at: W(r, u, d), rot, y: 0, ...o });
