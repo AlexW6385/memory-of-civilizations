@@ -56,8 +56,8 @@ const tm = HALLS.taihemen;
 E.push({ t: 'terrace', rect: [-34, 106, 34, 125], y0: 0, y1: tm.y, open: { s: [[18, 50]], n: [[18, 50]] }, carve: 'qing' });
 for (const [z, dir] of [[125, 'n'], [101, 's']]) {
   const r = dir === 'n' ? [0, 125, 0, 125 + 6] : [0, 100, 0, 106];
-  E.push({ t: 'stairs', rect: [-15, r[1], -4, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's' });
-  E.push({ t: 'stairs', rect: [4, r[1], 15, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's' });
+  E.push({ t: 'stairs', rect: [-15, r[1], -4, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', rakes: true });
+  E.push({ t: 'stairs', rect: [4, r[1], 15, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', rakes: true });
   E.push({ t: 'stairs', rect: [-3.5, r[1], 3.5, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', slab: true });
   void z;
 }
@@ -87,7 +87,7 @@ for (const [k, t] of TIERS.entries()) {
   E.push({ t: 'terrace', rect: t.rect, y0, y1: t.y, open: { s: gap, n: gap }, carve: 'qing' });
   for (const [face, dir, zA] of [['s', 'n', z1], ['n', 's', z0]]) {
     const r0 = dir === 'n' ? zA : zA - 5, r1 = dir === 'n' ? zA + 5 : zA;
-    for (const [i, [a, b]] of stairX.entries()) E.push({ t: 'stairs', rect: [a, r0, b, r1], y0, y1: t.y, dir, slab: i === 1 });
+    for (const [i, [a, b]] of stairX.entries()) E.push({ t: 'stairs', rect: [a, r0, b, r1], y0, y1: t.y, dir, slab: i === 1, rakes: i !== 1 });
     void face;
   }
   void W;
@@ -125,7 +125,7 @@ E.push({ t: 'palace_wall', a: [wx0, -172], b: [-22, -172], y: 0, h: 7, th: 2.4, 
 E.push({ t: 'palace_wall', a: [22, -172], b: [wx1, -172], y: 0, h: 7, th: 2.4, gates: gates([[30, 5, 5]]) });
 E.push({ t: 'terrace', rect: [-22, -177, 22, -164], y0: 0, y1: 1.6, open: { s: [[14, 30]] }, carve: 'qing' });
 for (const x of [-52, 52]) E.push({ t: 'gate_doors', at: [x, -172], along: 'x', w: 5, h: 5, y: 0.03, swing: -1, off: 1.2 });
-E.push({ t: 'stairs', rect: [-8, -164, 8, -159], y0: 0.03, y1: 1.6, dir: 'n' });
+E.push({ t: 'stairs', rect: [-8, -164, 8, -159], y0: 0.03, y1: 1.6, dir: 'n', rakes: true });
 E.push({ t: 'qing_hall', rect: [-17, -175, 17, -166], y: 1.6, H: 6.2, roof: 'xieshan', bays: [5, 2], front: 's', four: true, plat: 0.1, orn: { figures: 7 } });
 for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'lion', at: [s * 11, -160], y: 0.03, s: 0.8, face: [0, 1], metal: 'gilt_bronze', paw: s > 0 ? 'ball' : 'cub' });
 

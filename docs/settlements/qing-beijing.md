@@ -144,6 +144,12 @@ Sources for §15:
 - [Chinese Horse Cart from the Qing Dynasty — Art Gallery of Greater Victoria](https://aggv.ca/emuseum/objects/17312/chinese-horse-cart-from-the-qing-dynasty)
 - [Peking cart, camels and poles — Historical Photographs of China](https://www.hpcbristol.sjtu.edu.cn/visual/HR01-133)
 
+## 16. The imperial ramps and the stair balustrades (L3)
+
+- **Ramps.** At the centre of each flight the stair is a single inclined slab of marble (the yu lu or danbi) carved in relief; the great one behind the Hall of Preserving Harmony is 16.57 m long [stated: benjielayug, §4 above]; the Palace Museum's carved ramps show "dragons among clouds" over "sea waves and mountains" (the "river and cliff" pattern) [stated: general; Travel China Guide, Hall of Preserving Harmony]. Ours (`src/styles/qing/ramp.js`): every slab (the three tiers front and back, the Gate of Supreme Harmony, the Temple's altar) carries a raised border, a foot of two rows of breaking waves with three mountain peaks, and above them one dragon (two on slabs wider than 5 m, mirrored), each rising among cloud scrolls with a gilt flaming pearl before its head; built once per size and placed on the slope [inferred: the layout and the number of dragons].
+- **Rakes.** The flights' sides carry inclined balustrades (the xiangdao rails): a stone cheek following the steps' nosings, panel, cloud band, vase balusters and handrail running up the slope between posts every 1.6 m with dragon and phoenix heads by turns, and at the foot a pier carrying a drum stone (baogushi) [inferred: from photographs of the palace's stairs; the drum stones are the usual end of such rails].
+- Sources: [benjielayug](https://benjielayug.com/2010/05/beijing-the-forbidden-city-outer-wall.html); [Hall of Preserving Harmony — Travel China Guide](https://www.travelchinaguide.com/attraction/beijing/forbidden/preserving.htm).
+
 ## Sources
 
 - [Corner Towers of the Forbidden City — Travel China Guide](https://www.travelchinaguide.com/attraction/beijing/forbidden-city/corner-towers.htm)

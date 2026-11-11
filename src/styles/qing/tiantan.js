@@ -117,8 +117,8 @@ export function qinian(el, { bag, col, style }) {
       const hw = half[d], inner = Math.sqrt(r * r - hw * hw) - 0.05, outer = inner + run2, ux = Math.cos(ad), uz = Math.sin(ad);
       const rect = (o0, o1, s0, s1) => { const xs = [c[0] + ux * s0 - uz * o0, c[0] + ux * s1 - uz * o1], zs = [c[1] + uz * s0 + ux * o0, c[1] + uz * s1 + ux * o1]; return [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)]; };
       const up = { s: 'n', n: 's', e: 'w', w: 'e' }[d];
-      const flights = d === 's' ? [[-hw, -2.2, false], [-2.0, 2.0, true], [2.2, hw, false]] : [[-hw, hw, false]];
-      for (const [o0, o1, slab] of flights) style.elements.stairs({ rect: rect(o0, o1, inner, outer), y0: ylo + 0.02, y1: yt + 0.02, dir: up, slab, mat: 'marble' }, { bag, col, style });
+      const flights = d === 's' ? [[-hw, -2.3, false], [-2.0, 2.0, true], [2.3, hw, false]] : [[-hw, hw, false]];
+      for (const [o0, o1, slab] of flights) style.elements.stairs({ rect: rect(o0, o1, inner, outer), y0: ylo + 0.02, y1: yt + 0.02, dir: up, slab, mat: 'marble', rakes: !slab, rakeOff: 0.15 }, { bag, col, style });
     }
   });
   bag.add('marble_smooth', fromTriangles(rails));
