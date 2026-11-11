@@ -1,10 +1,10 @@
-// Ming–Qing Beijing — the shop street (docs/settlements/qing-beijing.md §17): booths and open shop
+// Ming–Qing Beijing — the shop street (docs/settlements/qing-beijing.md §16): booths and open shop
 // fronts along both edges of the avenue south of the moat, each of a trade with its goods and its
 // hanging sign (huangzi: shapes and colours that spoke for the trades when most could not read).
 // Pure data (SHOP_SITES, from layout.js) and one builder, `bj_booth`, an element of the street life
 // (registered by style.js). Local frame of a booth: x along the avenue's edge, z out into the street, y up.
 
-import { AVENUE, SHOP_STRIPS, TEMPLE, lanes } from './layout.js';
+import { AVENUE, TEMPLE, lanes, interiorShops } from './layout.js';
 import { box, lathe } from '../../core/geom.js';
 import { Parts, T, ball, limb } from '../../styles/qing/carving.js';
 
@@ -26,8 +26,8 @@ export const SHOP_SITES = (() => {
     const x = s < 0 ? ax0 + 1.4 : ax1 - 1.4;
     const zz = z + (s > 0 ? 4 : 0), w = 4.2 + rand() * 1.4, trade = TRADES[(k++ + (s > 0 ? 3 : 0)) % TRADES.length], seed = 100 + k * 17;
     const edge = s < 0 ? ax0 : ax1;
-    // a shop strip behind this edge (shop fronts + aprons reach 14.6 m from the axis): no booth
-    if (SHOP_STRIPS.some((p) => zz + w / 2 + 1 > p.rect[1] && zz - w / 2 - 1 < p.rect[3] && (s < 0 ? p.side === 'w' : p.side === 'e'))) continue;
+    // stalls also stand before the shop fronts (Qianmen's street market), but not before a door that opens (the tea house, the pharmacy)
+    if (s < 0 && interiorShops().some((p) => zz + w / 2 + 1.2 > p.z0 && zz - w / 2 - 1.2 < p.z1)) continue;
     // not over a lane's mouth (a hutong meets the avenue every 29 m), nor on the path to the temple
     if (lanes().some((l) => l[2] - l[0] > 40 && zz + w / 2 + 0.6 > l[1] && zz - w / 2 - 0.6 < l[3] && l[0] <= edge + 1 && l[2] >= edge - 1)) continue;
     if (s > 0 && Math.abs(zz - tcz) < 3 + w / 2 + 1) continue;
