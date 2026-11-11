@@ -4,5 +4,6 @@
 export const MOVER_SITES = {
   'ming-suzhou': () => import('../settlements/ming-suzhou/movers.js'),
   'tang-wutai': () => import('../settlements/tang-wutai/movers.js'),
+  'song-hangzhou': () => import('../settlements/song-hangzhou/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

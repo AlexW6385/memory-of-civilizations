@@ -2,6 +2,7 @@
 import '../settlements/ming-suzhou/smoke.js';
 import '../settlements/song-kaifeng/smoke.js';
 import '../settlements/tang-wutai/smoke.js';
+import '../settlements/song-hangzhou/smoke.js';
 import './catkins.js';
 import './fauna.js';
 import './movers.js';

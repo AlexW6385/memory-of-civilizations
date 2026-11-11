@@ -473,7 +473,8 @@ export class SiteMovers {
     for (const n of this.junctions) if (len2(this.water.nodes[n][0] - x, this.water.nodes[n][1] - z) < hl + 16) return;
     let b = null; for (const q of this.B) if (!q.on) { b = q; break; }
     if (!b) return;
-    const kind = rand() < 0.6 ? 'covered' : 'cargo';
+    // the water decides the boat where the settlement marks it (Lin'an: pleasure boats on the lake, cargo on the canals)
+    const kind = e.kind === 'lake' ? 'covered' : e.kind === 'canal' ? 'cargo' : rand() < 0.6 ? 'covered' : 'cargo';
     const cb = b.c, cm = b.cm, cp = b.cp;
     const tone = 0.85 + rand() * 0.25; cb.set([tone, tone * (0.96 + rand() * 0.06), tone * 0.95], 0);
     const mt = 0.7 + rand() * 0.45; cb.set([mt * 0.95, mt * 0.92, mt * 0.85], 3);       // the matting, new and pale or old and dark
