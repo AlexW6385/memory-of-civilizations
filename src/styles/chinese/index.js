@@ -8,6 +8,8 @@ import { BufferGeometry, Float32BufferAttribute, Matrix4, Vector3 } from '../../
 import { registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import { byzantineElements } from '../byzantine/index.js';
+import { villageElements } from './village.js';
+import { hallElements, hallObjects } from './hallwork.js';
 
 export function hexa(out, b, t) {
   const tris = [];
@@ -837,6 +839,6 @@ registerStyle('chinese', {
   column,
   trim: () => {},
   opening: () => {},
-  elements: { ...byzantineElements, bracket_set: bracketSet, tang_bracket_set: tangBracket, tang_fang: tangFang, hip_roof: hipRoof, gable_roof_c: gableRoofC, tang_pingan: tangPingan, tang_lamp: tangLamp },
-  objects: { buddha, figure, statue, mount, dharani_pillar: dharaniPillar, pagoda },
+  elements: { ...byzantineElements, bracket_set: bracketSet, tang_bracket_set: tangBracket, tang_fang: tangFang, hip_roof: hipRoof, gable_roof_c: gableRoofC, tang_pingan: tangPingan, tang_lamp: tangLamp, ...villageElements, ...hallElements },
+  objects: { buddha, figure, statue, mount, dharani_pillar: dharaniPillar, pagoda, ...hallObjects },
 });

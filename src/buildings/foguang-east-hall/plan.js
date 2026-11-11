@@ -28,10 +28,15 @@ add({ t: 'stair', rect: [-74, -4, -62, 4], dir: 'e', y0: 0, y1: 6.5, riser: 0.17
 add({ t: 'stair', rect: [-42, -4, -30, 4], dir: 'e', y0: 6.5, y1: T, riser: 0.171, base: 6.5, mat: 'limestone' });
 // the terrace walls: a footing of dressed stone, the brick face, a stone coping, and along the
 // fronts a low parapet of brick under grey tiles, open where the stairs come up; cheek walls by the stairs
+// the side flights at the ends of the fronts (z ±39…±43, settlement monastery.js) leave the footing, coping and parapet open
+const GAPS = [[-43.6, -38.4], [38.4, 43.6]];
+const cut = (z0, z1) => { let out = [[z0, z1]]; for (const [g0, g1] of GAPS) out = out.flatMap(([a, b]) => (g1 <= a || g0 >= b ? [[a, b]] : [[a, Math.min(b, g0)], [Math.max(a, g1), b]].filter(([p, q]) => q - p > 0.01))); return out; };
 for (const [x, y0, y1] of [[-62, 0, 6.5], [-30, 6.5, T]]) {
-  block([x - 0.25, -48.25, x + 0.6, 48.25], y0 - 0.2, y0 + 0.9, 'limestone', { collide: false });
-  block([x - 0.15, -48.15, x + 0.4, 48.15], y1 - 0.25, y1 + 0.02, 'limestone', { collide: false });
-  for (const [z0, z1] of [[-48, -4.4], [4.4, 48]]) {
+  for (const [z0, z1] of cut(-48.25, 48.25)) {
+    block([x - 0.25, z0, x + 0.6, z1], y0 - 0.2, y0 + 0.9, 'limestone', { collide: false });
+    block([x - 0.15, z0 + (z0 < -48 ? 0.1 : 0), x + 0.4, z1 - (z1 > 48 ? 0.1 : 0)], y1 - 0.25, y1 + 0.02, 'limestone', { collide: false });
+  }
+  for (const [za, zb] of [[-48, -4.4], [4.4, 48]]) for (const [z0, z1] of cut(za, zb)) {
     block([x, z0, x + 0.5, z1], y1, y1 + 0.85, 'brick_grey');
     block([x - 0.08, z0 - 0.08, x + 0.58, z1 + 0.08], y1 + 0.85, y1 + 1.0, 'tile_grey', { collide: false });
   }
@@ -135,15 +140,10 @@ bayWalls(-17.0, XS, 'x');
 bayWalls(17.0, XS, 'x');
 // the front: five plank doors in the central bays; slatted windows over sill walls in the end bays
 bayWalls(-8.83, ZS, 'z', (i, L) => (i >= 1 && i <= 5 ? [{ at: L / 2, w: 3.6, h: 3.9, y0: F }] : [{ at: L / 2, w: 2.6, h: 1.8, y0: F + 1.8 }]));
-for (let i = 1; i <= 5; i++) {
-  const zc = (ZS[i] + ZS[i + 1]) / 2;
-  // the two leaves, standing open against the inner face of the wall
-  for (const s of [-1, 1]) block([-8.4, Math.min(zc + s * 1.8, zc + s * 1.85), -7.0, Math.max(zc + s * 1.8, zc + s * 1.85)], F, F + 3.9, 'timber_red');
-}
-for (const i of [0, 6]) {
-  const zc = (ZS[i] + ZS[i + 1]) / 2;
-  for (let k = -5; k <= 5; k++) block([-8.9, zc + k * 0.22 - 0.035, -8.76, zc + k * 0.22 + 0.035], F + 1.8, F + 3.6, 'timber_red', { collide: false });
-}
+// the doors: jambs and head lining each opening, a threshold, two plank leaves swung open against the inner face
+// with their battens and iron studs; the end bays' straight-lattice windows with diagonal square bars
+for (let i = 1; i <= 5; i++) add({ t: 'tang_door', at: [-8.83, (ZS[i] + ZS[i + 1]) / 2], axis: 'z', y: F, w: 3.6, h: 3.9, th: 0.9, out: -1 });
+for (const i of [0, 6]) add({ t: 'tang_window', at: [-8.83, (ZS[i] + ZS[i + 1]) / 2], axis: 'z', y: F + 1.8, w: 2.6, h: 1.8, th: 0.9 });
 
 // ── the interior: ceilings, the altar and its statues ───────────────────────
 // the ceilings (ping'an): backing boards over a close grid of square strips, lacquered red without pattern; the
@@ -153,6 +153,16 @@ add({ t: 'tang_pingan', rect: [-4.6, -12.8, 4.6, 12.8], y: F + 9.0, pitch: 0.3, 
 // crescent beams linking the rings across the outer aisle
 for (const z of ZS.slice(1, -1)) for (const sx of [-1, 1]) block([Math.min(sx * 4.415, sx * 8.83), z - 0.15, Math.max(sx * 4.415, sx * 8.83), z + 0.15], F + 7.2, F + 7.75, 'timber_red', { collide: false });
 for (const x of XS.slice(1, -1)) for (const sz of [-1, 1]) block([x - 0.15, Math.min(sz * 12.6, sz * 17.0), x + 0.15, Math.max(sz * 12.6, sz * 17.0)], F + 7.2, F + 7.75, 'timber_red', { collide: false });
+// the crescent beams painted: white and green lines along their arrises, banded ends; the ink inscription of 857 on the
+// underside of one of them (the donor's name, the date), in columns of brush strokes
+const BEAMS = [];
+for (const z of ZS.slice(1, -1)) for (const sx of [-1, 1]) BEAMS.push([[sx * 4.415, z], [sx * 8.83, z]]);
+for (const x of XS.slice(1, -1)) for (const sz of [-1, 1]) BEAMS.push([[x, sz * 12.6], [x, sz * 17.0]]);
+for (const [a, b] of BEAMS) {
+  const inscribed = a[0] === -4.415 && a[1] === -7.56;
+  add({ t: 'tang_beam_paint', a: a[0] < b[0] || a[1] < b[1] ? a : b, b: a[0] < b[0] || a[1] < b[1] ? b : a, y0: F + 7.2, y1: F + 7.75, th: 0.3, noCentre: inscribed });
+}
+add({ t: 'tang_inscription', a: [-8.6, -7.56], b: [-4.65, -7.56], y: F + 7.2, w: 0.3, cols: 3, seed: 857 });
 // the altar platform in the inner zone, the statues facing west, as Liang Sicheng and Lin Huiyin recorded them
 // (1944): Śākyamuni in the central bay touching the earth, an alms bowl in his lap; Maitreya seated with the feet
 // down in the bay to his left (north), Amitābha on a hexagonal sumeru seat to the right (south); in the end bays
@@ -178,6 +188,8 @@ for (const z0 of [-10.08, 10.08]) {
   for (const k of [-1, 1]) st('bodhisattva', 0.6, z0 + k * 1.75, 2.6, { robe: 'clay_green', robe2: 'clay_robe' });
   st('groom', -2.1, z0 - Math.sign(z0) * 0.9, 2.1, { robe: 'clay_robe', robe2: 'clay_green', dir: [-0.6, Math.sign(z0) * 0.8] });
 }
+// a rear row of attendants behind the three Buddhas' groups
+for (const [z0, k, r] of [[0, -1, 0], [0, 1, 1], [-5.04, -1, 1], [-5.04, 1, 0], [5.04, -1, 0], [5.04, 1, 1]]) st('bodhisattva', 2.55, z0 + k * 3.45, 2.5, { robe: r ? 'clay_robe' : 'clay_green', robe2: r ? 'clay_green' : 'clay_robe' });
 for (const sz of [-1, 1]) st('king', -2.35, sz * 11.6, 3.2, { robe: 'clay_green', robe2: 'clay_robe' });
 // oil lamps on bronze stands before the three Buddhas, the hall's only light besides the open doors
 for (const z0 of [0, -5.04, 5.04]) for (const k of [-1, 1]) add({ t: 'tang_lamp', at: [-3.55, z0 + k * 1.1], y: F, h: 1.25 });

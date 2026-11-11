@@ -3,7 +3,8 @@
 // the dhāraṇī pillar of 857 before the hall and the founding master's pagoda south of it, rebuilt in
 // detail here (the hall plan's simple stand-ins for them are left out); the monks of the monastery.
 
-import { HALL } from './layout.js';
+import { HALL, RADIUS } from './layout.js';
+import { monasteryElements } from './monastery.js';
 import hallPlan from '../../buildings/foguang-east-hall/plan.js';
 
 const T = 13;                                   // the upper terrace (hall plan, y above the courtyard)
@@ -120,12 +121,16 @@ function monks() {
   // before the monks' quarters: one sitting on the platform's edge, one sweeping-still with a pole, one at a door
   monk([-92.3, -35.0], 0.45, [0, 1], { pose: 'talk' }); monk([-85, -33.2], 0, [0, 1], { carry: 'pole' });
   monk([-80.3, 34.9], 0.45, [0, -1]);
+  // before the Manjusri hall's stair, a monk and a pilgrim; in the bell pavilion's shade one waiting for the hour; at the censer one lighting incense
+  monk([-47.5, -31.5], 6.5, [0, -1]); lay([-45.6, -30.6], 6.5, [0, -1], { carry: 'basket' });
+  monk([-46, 33.2], 6.5, [0, 1], { pose: 'talk' }); monk([-45.2, 33.8], 6.5, [-0.4, -1]);
+  monk([-19.5, 1.9], T, [1, 0]);
   // the portraits in painted clay of the hall's two founders, life size and seated cross-legged (§10): the donor Ning
   // Gongyu at the altar platform's south end beside the heavenly king, hands in her sleeves, a cloak over her robe;
   // the monk Yuancheng under the south end bay's window, facing the platform
   L.push({ t: 'figure', at: at(-2.5, 10.5), y: F + 0.9, rot: faceTo([-1, 0]), seed: 8571, dress: 'robe', cloth: 'clay_robe', cloth2: 'clay_green', over: 'collar', skin: 'stucco_warm', hair: 'bun', hairMat: 'hide_black', hat: 'none', pose: 'cross', arms: 'clasp', h: 1.58, beard: false });
   L.push({ t: 'figure', at: at(-7.7, 14.8), y: F + 0.3, rot: faceTo([1, -0.45]), seed: 8572, dress: 'robe', cloth: 'clay_robe', cloth2: 'clay_robe', over: 'sash', skin: 'stucco_warm', hair: 'shaven', hat: 'none', pose: 'cross', arms: 'clasp', h: 1.66, beard: false });
-  return { id: 'tang-wutai-monks', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-360, -360, 360, 360], entrance: { at: [-80, 0], facing: 'e' } };
+  return { id: 'tang-wutai-monks', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-80, 0], facing: 'e' } };
 }
 export const people = monks();
 
@@ -134,3 +139,6 @@ export const people = monks();
 const rooms = hallPlan.rooms.flatMap((r) => (r.id === 'upper-terrace' ? [{ ...r, id: 'upper-terrace-north', rect: [r.rect[0], r.rect[1], r.rect[2], -3] }, { ...r, id: 'upper-terrace-south', rect: [r.rect[0], 3, r.rect[2], r.rect[3]] }] : [r]));
 export const hall = { ...hallPlan, rooms, elements: hallPlan.elements.filter((e) => !(e.t === 'obj' && (e.kind === 'pagoda' || e.kind === 'dharani_pillar'))), origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 14, -20, HALL.origin[0] + 11, 20], viewY: 13 };
 export default hall;
+
+/** The Hall of Manjusri, the bell pavilion, the incense burners and the side stairs (monastery.js). */
+export const monastery = { id: 'tang-wutai-monastery', style: 'chinese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: monasteryElements(), rooms: [], bounds: [-16, -52, 32, 52], entrance: { at: [-2, 0], facing: 'e' } };
