@@ -53,5 +53,6 @@ export const MOVER_SITES = {
   'norse-borgund': () => import('../settlements/norse-borgund/movers.js'),
   'great-zimbabwe': () => import('../settlements/great-zimbabwe/movers.js'),
   'cahokia': () => import('../settlements/cahokia/movers.js'),
+  'stonehenge': () => import('../settlements/stonehenge/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
