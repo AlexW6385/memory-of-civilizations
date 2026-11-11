@@ -140,7 +140,8 @@ function temple() {
   // in the middle and a brick way on each side, a balustrade along each edge, steps across its south end, cypress rows either side
   const [dx0, dz0, dx1, dz1] = DANBI.rect, dy = DANBI.y, dxm = (dx0 + dx1) / 2;
   E.push({ t: 'block', walk: true, rect: [dx0, dz0, dx1, dz1], y0: 0, y1: dy - 0.1, mat: 'marble' });
-  E.push({ t: 'block', walk: true, rect: [dx0 + 0.45, dz0, dx1 - 0.45, dz1 - 0.45], y0: dy - 0.1, y1: dy, mat: 'brick_paving' });
+  // the brick of the two broad lanes in cells with seams, repairs and the wear of the feet (court_bricks), the Shendao's slabs and the strips between
+  E.push({ t: 'court_bricks', rect: [dx0 + 0.45, dz0, dx1 - 0.45, dz1 - 0.45], y: dy, seed: 31, cell: 3.6, skip: [[dxm - 2.7, dz0 - 1, dxm + 2.7, dz1], [dxm - 7.4, dz0 - 1, dxm - 5.2, dz1], [dxm + 5.2, dz0 - 1, dxm + 7.4, dz1]], wear: [[dxm - 5.2, dxm - 2.7], [dxm + 2.7, dxm + 5.2]] });
   E.push({ t: 'stone_way', rect: [dxm - 2.6, dz0, dxm + 2.6, dz1 - 0.45], y: dy, cols: [1.8, 1.8, 1.8], seed: 7 });
   for (const sx of [-1, 1]) {
     E.push({ t: 'block', walk: true, rect: [sx < 0 ? dxm - 7.3 : dxm + 5.3, dz0, sx < 0 ? dxm - 5.3 : dxm + 7.3, dz1 - 0.45], y0: dy, y1: dy + 0.02, mat: 'bluestone' });   // the Yudao (east) and Wangdao (west), each a brick strip
@@ -149,7 +150,9 @@ function temple() {
   E.push({ t: 'stairs', rect: [dxm - 12, dz1 - 0.45, dxm + 12, dz1 + 4.0], y0: 0.03, y1: dy, dir: 'n' });
   for (const sx of [-1, 1]) E.push({ t: 'bronze', kind: 'vat', at: [dxm + sx * 12.5, dz0 + 4], y: dy, s: 0.9 });
   // the paved plaza at the way's foot, a pair of stone lions at the stairs
-  E.push({ t: 'lane', rect: [dx0 - 5, dz1, dx1 + 5, dz1 + 16], y: 0.03, mat: 'brick_paving' });
+  E.push({ t: 'court_bricks', rect: [dx0 - 5, dz1, dx1 + 5, dz1 + 16], y: 0.03, seed: 32, cell: 4.2, skip: [[dxm - 12.2, dz1 - 1, dxm + 12.2, dz1 + 4.2]], wear: [[dxm - 6, dxm + 6]] });
+  // the censers: great bronze tripods burning incense before the stairs and at the Danbi's head (smoke.js rises from them)
+  for (const sx of [-1, 1]) { E.push({ t: 'bronze', kind: 'tripod', at: [dxm + sx * 5, dz1 + 11], y: 0.03, s: 1.5, face: [0, 1] }); E.push({ t: 'bronze', kind: 'tripod', at: [dxm + sx * 9, dz0 + 10], y: dy, s: 1.4, face: [0, 1] }); }
   for (const sx of [-1, 1]) E.push({ t: 'bronze', kind: 'lion', at: [dxm + sx * 14, dz1 + 8], y: 0.06, s: 0.85, face: [0, 1], metal: 'marble_smooth', paw: sx > 0 ? 'ball' : 'cub' });
   // the path in from the avenue to the west gate
   E.push({ t: 'lane', rect: [AVENUE[2] - 0.5, cz - 3, cx - w - 0.5, cz + 3], y: 0.035, mat: 'bluestone' });

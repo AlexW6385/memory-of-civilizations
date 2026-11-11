@@ -176,7 +176,7 @@ export function qingSideGate(el, { bag, col }) {
   for (const x of xs) beamTris(arch, [x, y + H - 0.75, zs[0] - 0.3], [x, y + H - 0.75, zs[5] + 0.3], 0.2, 0.55);
   for (const z of zs) beamTris(arch, [xs[0] - 0.3, y + H - 0.75, z], [xs[2] + 0.3, y + H - 0.75, z], 0.2, 0.55);
   bag.add('paint_caihua', fromTriangles(arch));
-  const qb = { tiers: 2, pitch: 1.25 }, bk = dougongHeight(qb), fy = y + H;
+  const qb = { tiers: 2, pitch: 1.0 }, bk = dougongHeight(qb), fy = y + H;
   const o1 = el.eave ?? 1.9, A = Wd / 2 + o1, B = hd + o1;
   const r = { c: [xc, zc], A, B, y: fy - 0.25 + bk, rise: B * 0.6, kind: 'xieshan', sweep: 0.8, alongZ: true, mat: 'tile_yellow', soffit: 'paint_caihua', curl: false };
   const under = (d) => r.y + r.rise * Math.pow(Math.max(0, (o1 - d) / r.B), r.p ?? 1.7) - 0.14;

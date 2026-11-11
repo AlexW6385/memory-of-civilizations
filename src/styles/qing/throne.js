@@ -9,7 +9,7 @@
 // facing +z, then placed; the throne room faces south (+z).
 
 import { Matrix4, Vector3 } from '../../core/three.js';
-import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { box, frustum, lathe, fromTriangles, orientOutward, rod } from '../../core/geom.js';
 import { tube } from '../../objects/kit.js';
 import { column } from '../ming/index.js';
 import { Parts, ball, limb, torus, T, merge, seated, crane, tripod } from './carving.js';
@@ -439,7 +439,7 @@ const KINDS = {
  * it, so that the throne is seen from the door), the floor of gold bricks, the dais and all on it,
  * the coffered ceiling and the caisson.
  */
-export function throneHall(el, { bag, col }) {
+export function throneHall(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, H = el.H, [nb, nd] = el.bays, cx = (x0 + x1) / 2;
   const K = KINDS[el.kind ?? (el.screen === 'irworo' ? 'joseon' : 'taihe')], dz = K.dais;
   const bx = (x1 - x0) / nb, bz = (z1 - z0) / nd;
@@ -505,6 +505,21 @@ export function throneHall(el, { bag, col }) {
     }
     P.add('gold', T(ball(0.16, 0.16, 0.16, 10, 6), cx, cy + 0.78, (b + d) / 2));
     P.emit(bag, 0, 0, 0);
+  }
+  // palace lanterns hung in the bays on each side of the throne's axis, lit: the hall's own warm light in the dim of its great depth (the lamps light the room
+  // as point lights, src/engine/air.js); the red lantern of eight panels with its gilt caps and tassel
+  if (lights && !J) {
+    const ys = cy - 1.3;
+    for (const sx of [-2, 2]) for (const j of [1.5, 3.5]) {
+      const lx = cx + sx * bx, lz = z0 + j * bz, P = new Parts();
+      P.add('lacquer_red', lathe([[0.2, 0], [0.3, 0.12], [0.3, 0.56], [0.2, 0.68]], 8));
+      P.add('gilt_bronze', lathe([[0.001, 0.68], [0.22, 0.68], [0.22, 0.74], [0.08, 0.84], [0.001, 0.88]], 8));
+      P.add('gilt_bronze', lathe([[0.001, -0.05], [0.21, -0.05], [0.21, 0.01], [0.001, 0.01]], 8));
+      P.add('cloth_red', box(-0.012, -0.5, -0.012, 0.012, -0.05, 0.012));
+      P.add('rope_fibre', rod([0, 0.88, 0], [0, 1.3, 0], 0.012, 4));
+      P.emit(bag, lx, ys, lz);
+      lights.push({ at: [lx, ys + 0.34, lz], color: '#ffc07a', intensity: 7, distance: 24 });
+    }
   }
   void giltX;
 }

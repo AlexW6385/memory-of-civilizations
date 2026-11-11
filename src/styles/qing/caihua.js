@@ -178,8 +178,8 @@ function setShape(o, n) {
   bx(B, -0.15, -0.15, 0.15, 0.15, 0, 0.18, { noBottom: true });                                      // the bearing block (zuodou)
   for (let k = 0; k < tiers; k++) {
     const y = 0.18 + k * AH, lat = 0.3 + k * 0.12, proj = (k + 1) * step;
-    _beam(G, [...P(-lat, 0).slice(0, 1), y, P(-lat, 0)[1]], [P(lat, 0)[0], y, P(lat, 0)[1]], AW, AH - 0.04);       // the cross arm (gong)
-    _beam(G, [P(0, -0.2)[0], y, P(0, -0.2)[1]], [P(0, proj)[0], y, P(0, proj)[1]], AW, AH - 0.04);                  // the tongue (qiao / ang)
+    _beam(G, [...P(-lat, 0).slice(0, 1), y, P(-lat, 0)[1]], [P(lat, 0)[0], y, P(lat, 0)[1]], AW, AH - 0.04, k > 0);       // the cross arm (gong; above the first tier it rests on the blocks below)
+    _beam(G, [P(0, -0.2)[0], y, P(0, -0.2)[1]], [P(0, proj)[0], y, P(0, proj)[1]], AW, AH - 0.04, k > 0);                  // the tongue (qiao / ang)
     for (const s of [-lat, lat]) bx(B, s - 0.065, -0.065, s + 0.065, 0.065, y + AH - 0.04, y + AH, { noTop: true, noBottom: true });                // the small blocks (sheng)
     bx(B, -0.075, proj - 0.075, 0.075, proj + 0.075, y + AH - 0.04, y + AH, { noTop: true, noBottom: true });
   }
@@ -205,7 +205,7 @@ export function dougong(bag, rect, [xs, zs], yf, o = {}, soffit = null) {
     const yb = soffit ? soffit(0) + 0.06 : yTop + 0.3;
     _beam(R, [P(0, 0)[0], yf + 0.12, P(0, 0)[1]], [P(L, 0)[0], yf + 0.12, P(L, 0)[1]], 0.025, yb - yf - 0.12);
     const shape = setShape({ tiers, step }, n), at = [];
-    for (let i = 0; i < ps.length; i++) { at.push(ps[i]); if (i + 1 < ps.length) { const sp = ps[i + 1] - ps[i], k = Math.max(1, Math.round(sp / (o.pitch ?? 1.25)) - 1); for (let j = 1; j <= k; j++) at.push(ps[i] + sp * j / (k + 1)); } }
+    for (let i = 0; i < ps.length; i++) { at.push(ps[i]); if (i + 1 < ps.length) { const sp = ps[i + 1] - ps[i], k = Math.max(1, Math.round(sp / (o.pitch ?? 1.0)) - 1); for (let j = 1; j <= k; j++) at.push(ps[i] + sp * j / (k + 1)); } }
     for (const s of at) {
       const p = P(s, 0), y = yf + 0.12;
       for (const [m, tris] of [['paint_caihua', shape.G], ['paint_blue', shape.B]]) { const g = _fromTriangles(tris); g.translate(p[0], y, p[1]); bag.add(m, g); }
