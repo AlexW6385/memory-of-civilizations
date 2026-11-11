@@ -148,7 +148,6 @@ export const PLANNED = [
   { id: 'maya-tikal', name: { en: 'Classic Maya Tikal', zh: '古典玛雅蒂卡尔' }, region: 'yucatan', lat: 17.22, lon: -89.62, radius: 320 },
   { id: 'sgang-gwaay', name: { en: 'SG̱ang Gwaay', zh: '斯冈瓜伊' }, region: 'northwest-coast', lat: 52.09, lon: -131.22, water: true, island: true, radius: 160 },
   { id: 'brasilia', name: { en: 'Brasília', zh: '巴西利亚' }, region: 'brazil', lat: -15.80, lon: -47.86, radius: 500 },
-  { id: 'kakadu', name: { en: 'Kakadu', zh: '卡卡杜' }, region: 'australia', lat: -12.41, lon: 132.96, radius: 110 },
   { id: 'nan-madol', name: { en: 'Nan Madol', zh: '南马都尔' }, region: 'micronesia', lat: 6.84, lon: 158.33, water: true, island: true, radius: 170 },
 ];
 
