@@ -3,7 +3,7 @@
 // meadows and stacked, wood cut and stacked by the doors, the sledges of the farm, hens in the yards;
 // cattle, sheep, goats and horses at pasture with their herders; at the church the priest at the
 // altar and a few people in the churchyard and at its gate.
-import { LANDING, RADIUS, CHURCH, BELL, YARD, FARMS, RIVER, height, buildings, doorOf, inBuilding, inRiver, riverZ } from './layout.js';
+import { SETERS, LANDING, RADIUS, CHURCH, BELL, YARD, FARMS, RIVER, height, buildings, doorOf, inBuilding, inRiver, riverZ } from './layout.js';
 
 const face = (dx, dz) => Math.atan2(-dx, -dz);
 const nearBb = (doorB, B0, B1, d) => (doorB === B0 ? B0 + d : B1 - d);
@@ -86,6 +86,14 @@ export function life() {
     p = near([fx, fz], 12); if (p) fig(p, rand() * 6.28, { pose: 'stand', carry: 'pole', dress: 'tunic', hat: 'cap' });
     p = near([fx, fz], 9); if (p) fig(p, rand() * 6.28, { pose: 'talk', h: 1.1, dress: 'tunic', hat: 'none' });
     if (i % 3 === 0) { p = near([fx, fz], 12); if (p) put('well', p); }
+  });
+  // the summer huts: goats and cows round the yard, the milkmaid with her yoke and pails, the cheese-maker at the door
+  SETERS.forEach(([sx, sz], i) => {
+    for (let k = 0; k < 5; k++) { const p = near([sx, sz + 6], 14); if (p) beast(k < 3 ? 'goat' : 'ox', p, rand() * 6.28); }
+    let p = near([sx, sz + 5], 6); if (p) fig(p, rand() * 6.28, { carry: 'yoke', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_red' });
+    p = near([sx, sz + 3], 5); if (p) fig(p, rand() * 6.28, { pose: 'squat', dress: 'robe', hair: 'long', beard: 0 });
+    p = near([sx, sz + 3], 7); if (p) beast('dog', p, rand() * 6.28);
+    p = near([sx, sz + 7], 8); if (p && i % 2 === 0) put('firewood', p, { len: 2 });
   });
   // at the river: women washing linen at the bank, boys fishing with lines, a man mending a net at the landing
   for (const x of [-250, -190, -120, -60, 0, 60, 120, 190, 250]) {

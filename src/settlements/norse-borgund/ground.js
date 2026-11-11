@@ -1,10 +1,17 @@
 // Norse Norway — the ground: the hay meadows and small fields of the valley floor, the river's
 // stony banks with willows and alders, the steep sides of pine and spruce; the cool northern light.
-import { RADIUS, RIM, RIVER, YARD, height, inRiver, inRect, inBuilding, inFarm, riverZ } from './layout.js';
+import { RADIUS, RIM, RIVER, YARD, FARMS, height, inRiver, inRect, inBuilding, inFarm, riverZ } from './layout.js';
+
+// the tracks trodden between the farms and the church's gate, and from the farms down to the river's landing
+const GATE = [0, YARD[3] + 1];
+const TRACKS = FARMS.map(([fx, fz]) => [[fx, fz + 4], GATE]);
+const segD = (x, z, [ax, az], [bx, bz]) => { const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - ax - dx * t, z - az - dz * t); };
+const nearFarmDist = (x, z) => { let d = 1e9; for (const [fx, fz] of FARMS) d = Math.min(d, Math.hypot(x - fx, z - fz)); return d; };
 
 function cover(x, z, h) {
   const c = { sand: 0, grass: 0.7, rock: 0, soil: 0.2, fields: 0, dry: 0.05, warmth: 0.2, red: 0, road: 0, snow: 0, forest: 0 };
   if (inFarm(x, z, 4)) { c.road = 0.4; c.soil = 0.4; return c; }
+  if (h < 3 && Math.abs(z - riverZ(x)) > RIVER.w / 2 + 4) for (const t of TRACKS) if (segD(x, z, t[0], t[1]) < 1.3) { c.road = 0.45; c.soil = 0.35; c.grass = 0.35; return c; }
   if (h > 8) { c.forest = 0.7; c.rock = 0.25 * Math.min(1, (h - 8) / 30); c.grass = 0.3; return c; }
   if (Math.abs(z - riverZ(x)) < RIVER.w / 2 + 4) { c.rock = 0.4; c.soil = 0.4; c.grass = 0.2; return c; }
   if (((Math.floor(x / 40) + Math.floor(z / 30)) & 1) === 0 && !inRect(YARD, x, z, 6)) { c.fields = 0.7; c.grass = 0.3; }
@@ -16,15 +23,16 @@ function fromWater(x, z) { return inRiver(x, z) ? -3 : Math.max(-5, Math.min(40,
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inRect(YARD, x, z, 1) || inBuilding(x, z, 2)) return null;
   const h = height(x, z);
-  if (Math.abs(z - riverZ(x)) < RIVER.w / 2 + 5) return { willow: 0.04, grass: 18 };
+  if (Math.abs(z - riverZ(x)) < RIVER.w / 2 + 5) return { willow: 0.07, boulder: 0.01, grass: 22 };
   if (h > 8) return { spruce: 0.5, red_pine: 0.15, birch: 0.05, boulder: 0.01, grass: 10 };   // spruce, Scots pine (red_pine) and birch on the slopes
-  if (inFarm(x, z)) return { grass: 10 };
+  if (inFarm(x, z)) return { grass: 10, birch: 0.002 };                                   // the birch and rowan by the yards
+  if (nearFarmDist(x, z) < 45) return { birch: 0.007, grass: 26 };                          // a shelter belt round each farm
   return { birch: 0.003, grass: 24 };                                                     // birches in the meadows
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater, rim: RIM,
   sea: RIVER.level,   // the planet's sea is this water, at this level (src/planet/relief.js)
-  maxDensity: { spruce: 0.5, red_pine: 0.15, willow: 0.04, birch: 0.05, boulder: 0.01 },
+  maxDensity: { spruce: 0.5, red_pine: 0.15, willow: 0.07, birch: 0.05, boulder: 0.01 },
   climate: {
     sun: { az: 170, el: 40, color: [1.0, 0.95, 0.88], intensity: 3.2, lat: 61, dec: 18, hour: 12 },
     sky: { turbidity: 2.4, rayleigh: 1.1, mie: 0.004, mieG: 0.78, zenith: [0.08, 0.16, 0.42], horizon: [0.62, 0.68, 0.75] },

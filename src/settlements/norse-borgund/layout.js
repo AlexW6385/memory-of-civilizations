@@ -51,8 +51,18 @@ export function buildings() {
       BUILT.push({ rect, y: Math.max(...ys), foot: Math.min(...ys) - 0.4, kind, front, farm: i, seed: Math.floor(rand() * 1e6) });
     });
   });
+  // the summer farms (seter) on the slopes: a small smoke-room hut, a byre for the milking and a cheese store, round a trodden yard
+  SETERS.forEach(([sx, sz], i) => {
+    const rand = rng(777 + i);
+    for (const [dx, dz, kind, w, d] of [[0, 0, 'stue', 5.2, 4.2], [-7.5, 3, 'barn', 5.6, 4.6], [6.5, 4.5, 'loft', 3.2, 3.2]]) {
+      const cx = sx + dx, cz = sz + dz, rect = [cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2];
+      const ys = [height(rect[0], rect[1]), height(rect[2], rect[1]), height(rect[0], rect[3]), height(rect[2], rect[3])];
+      BUILT.push({ rect, y: Math.max(...ys), foot: Math.min(...ys) - 0.4, kind, front: false, farm: -1 - i, seed: Math.floor(rand() * 1e6) });
+    }
+  });
   return BUILT;
 }
+export const SETERS = [[-75, -122], [112, -124], [-200, -116]];
 /** The door of a building: its place on the wall (x, z) and the way out (nx, nz). */
 export function doorOf(b) {
   const [x0, z0, x1, z1] = b.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, alongX = x1 - x0 >= z1 - z0;
