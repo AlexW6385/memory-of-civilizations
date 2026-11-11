@@ -121,7 +121,30 @@ Sources added:
 
 **Still life added.** Sellers on the benches of the two new covered streets; a scholar on the bench at Qalawun's portal; talkers before the complexes; a water carrier; a donkey with its boy; the shop's merchant and a customer; the sherbet sellers; three kneeling camels with bales and drivers in the khan's court; the bath's attendant and bathers.
 
+## 13. Deepening pass: the blocks, the shop fronts, the roofs, the Rumayla
+
+Brought toward the standard of Ming Suzhou; the earlier houses stood apart, each in a 1–4 m gap on all four sides, with every fifth lot empty.
+
+**The blocks (`layout.js` `lots()`, `lanes()`).** Houses now stand wall to wall in rows, 8.5–13 m wide and 9.5–11 m deep, two rows back to back between the lanes: the lane the fronts look on 4.6–5 m wide (the corbelled upper storeys and mashrabiyas lean out over it, leaving a slit of sky), the gap behind 2 m, a cross alley of 2.4 m every 24–55 m. The rows run out from the east–west street (z −125…−115) as their centre line; beside the Qasaba the end houses turn to face it. Narrow, bent, dead-ending alleys (derb) and fronts that nearly touch across the lane are the type of the quarters of Historic Cairo (al-Darb al-Ahmar) [inferred: widths; the pattern after Wikipedia "Al-Darb al-Ahmar" and the MIT 4.615 handouts].
+
+**The shop fronts (`cairo_shopfront`, `dress.js`).** The commercial building of the period is the rab' (a row of shops under residential storeys) and the shop a cell of 2.4–3 m with the seller sitting on a masonry bench (mastaba) before it, the shutter folded up above it [stated: MIT thesis "The Rab' in Cairo: a window on Mamluk architecture and urbanism"; Lane for the sellers on their benches]. Ours, on about 177 lots along the Qasaba and the street: a row of cells in the stone storey, each opening under a lintel of two stones, the mastaba, the goods of the trade (spice sacks, cloth, brass, pottery, grain, sweets, glass lamps, meat), an awning on poles on every second cell, a door to the stair, the plastered storeys on corbels with a mashrabiya above [inferred: dimensions, the distribution of trades after al-Maqrizi's markets (Belleten)].
+
+**Enterable shops.** Fifteen, one in each stretch of the market streets within 260 m of the crossing, each a trade (`cairo_shop` with `trade`: shelves of jars, bolts, brass or glass, sacks of spice or grain, pots) [inferred].
+
+**Sabats.** A room bridging the lane from house to house over a beam floor was usual in Cairo's lanes [inferred from the quarters' surviving lanes]; about 100 across the front lanes where houses face each other on both sides.
+
+**Roofs and faces.** Dovecotes of plastered brick with rows of holes and perches (pigeons were kept on the roofs; Lane describes pigeon-houses on the tops of the houses [stated: Lane, Manners and Customs, ch. 5]), washing on a line, palm-stick shelters with a reed mat, water jars on the parapets; dust band at the foot of the walls, soot and streaks, plaster fallen to the brick, damp at the floor line; jar stands (a poor man's sabil), hung lanterns, quail cages, the oven (tannur) before the door [inferred]. Date palms (`palm`: ringed trunk, ten arching fronds, hanging dates) in the back gaps, 8–13 m [stated: Lane, of the gardens and courts of Cairo].
+
+**Yards.** Walled yards (hosh) where a house does not stand: mud wall, a gate, a well with a sweep and its jars, a palm-stick shed with a mat, dung cakes stacked for fuel, fodder, palms; a donkey or goat in some [inferred].
+
+**The Rumayla (`cairo_square`).** Stone troughs for the animals, hitching rails, canvas tents, stacks of fodder, palms along the madrasa's side and sycamore figs at the corners; horse-copers talking, camels kneeling in the fodder [inferred].
+
+**Life.** Sellers sitting on the mastabas with an occasional buyer, a merchant in each open shop, neighbours and children in the lanes, donkeys with their boys, porters; yard animals; sparrows on the lanes, flocks over the dovecotes; steam from every sixth shop front [inferred].
+
 ## Sources
+
+- [The Rab' in Cairo: a window on Mamluk architecture and urbanism — MIT](https://dspace.mit.edu/handle/1721.1/75720)
+- [Al-Darb al-Ahmar — Wikipedia](https://wikipedia.com/wiki/Darb_al-Ahmar)
 
 - [Mosque-Madrasa of Sultan Hasan — Wikipedia](https://en.wikipedia.org/wiki/Mosque-Madrasa_of_Sultan_Hasan)
 - [Al-Nasir Muhammad Mosque — Wikipedia](https://en.wikipedia.org/wiki/Al-Nasir_Muhammad_Mosque)
