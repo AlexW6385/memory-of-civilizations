@@ -32,6 +32,14 @@ function range(el, { bag, col }) {
       for (const [a, b] of [[0.34, 0.36], [0.78, 0.86], [0.985, 1.0]]) bag.add(S, box(r[0], y + h * a, r[1], r[2], y + h * b, r[3]));
     }
     bag.add('lead', box(x0 + 1, y + h, z0 + 1, x1 - 1, y + h + 1.2, z1 - 1));
+    // the weathering of the stone: damp rising at the foot of each front, dark streaks under the string courses and the cornice
+    { let sd = Math.floor(x0 * 31 + z0 * 17) >>> 0 || 5; const rnd = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296);
+      for (const f of el.front ?? 'nsew') {
+        const along = f === 'n' || f === 's', a0 = along ? x0 : z0, L = along ? x1 - x0 : z1 - z0, fz = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
+        const put = (mat, u0, u1, ya, yb, d0, d1) => { const p0 = fz + sg * d0, p1 = fz + sg * d1, q = along ? [a0 + u0, Math.min(p0, p1), a0 + u1, Math.max(p0, p1)] : [Math.min(p0, p1), a0 + u0, Math.max(p0, p1), a0 + u1]; bag.add(mat, box(q[0], y + ya, q[1], q[2], y + yb, q[3])); };
+        for (let u = rnd() * 4; u < L - 2; u += 2 + rnd() * 5) { const w = 1 + rnd() * 3; put('plaster_damp', u, Math.min(L, u + w), 0.0, 0.5 + rnd() * 1.1, 0.04, 0.07); }
+        for (let u = rnd() * 3; u < L - 1; u += 3 + rnd() * 6) put('plaster_streak', u, u + 0.25 + rnd() * 0.3, h * (0.34 - 0.12 - rnd() * 0.1), h * 0.34, 0.04, 0.07);
+      } }
     return;
   }
   bag.add(S, box(x0 - 0.2, y + h * 0.3, z0 - 0.2, x1 + 0.2, y + h * 0.33, z1 + 0.2));

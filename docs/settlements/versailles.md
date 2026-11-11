@@ -56,6 +56,14 @@ The Ambassadors' Staircase stands in the court north of the Royal Court, east of
 
 - Added to the French variant only: wrought-iron balconies on consoles at the first-floor windows, long-and-short chain quoins at the corners, and a hanging iron sign with a painted board over some shops [inferred from the tall-windowed brick-and-stone town houses of Versailles' quarters; Louis XIV's town of 1671 onward, with lots sold to courtiers who built to a prescribed façade — stated in the earlier §5].
 
+## 1h. The garden at a walker's size (deepening pass; `src/styles/classical_fr/gardens.js`, `apollo.js`)
+
+- **Parterres de broderie:** north and south of the water parterre, beds of clipped box in scrolls (volutes in mirror pairs) on coloured sands (crushed brick, slate) inside a border; yews clipped to cones at the corners [stated: the French formal garden's parterres de broderie, Le Nôtre; Wikipedia "French formal garden"]. Built: two beds with spiral scrolls drawn in box, sand eyes, cone yews.
+- **Palissades:** the bosquets and walks walled by clipped hornbeam, tall (3 m and more) and flat-topped, with niches and gates of iron between stone piers [stated: Versailles' bosquets were enclosed by hornbeam hedges, chateauversailles.fr "Gardens"; heights and niche spacing inferred]. Built along the Allée Royale (gates every ~70 m) and the Latona walk.
+- **Statues and vases:** the Allée Royale was lined with marble statues and vases on pedestals [stated: chateauversailles.fr "Walks"]; built in turn on both walks, yews between; vases along the terrace before the garden front [inferred]. Stone benches in niches and by the beds [inferred].
+- **The Apollo group** (Tuby, 1668–71, from Le Brun's design) [stated: chateauversailles.fr "Apollo fountain"]: the god in his chariot rising from the water, four plunging horses, tritons blowing conches, sea monsters; of gilt lead. Rebuilt: shell chariot with wheels, god with his rays, four rearing horses with folded forelegs, manes and tails, tritons with curled fish-tails, dolphins, jets from nostrils and conches, a ring of sixteen jets round the basin [number of jets inferred].
+
+
 ## 2. Layout of the settlement (radius 420 m)
 
 | Part | Where (m, +x east, +z south) | Notes |
@@ -79,6 +87,16 @@ Pale stone in three storeys with balustrades and trophies on the garden front; b
 About 450 houses. [inferred]
 
 **Houses that can be entered (L3, built).** The three houses nearest the arrival are open (DESIGN §4.3): an auberge and two homes, with stone-flagged floors; a step up from the street, the door leaf open inside, the ceiling's beams overhead [inferred: the period's furnishing of such rooms].
+
+**The town's fabric (deepening pass; `src/styles/classical_fr/townhouse.js`, `src/settlements/versailles/layout.js`).** Louis XIV had the town laid out in 1671 on the three avenues (Paris, Saint-Cloud, Sceaux) converging on the Place d'Armes, with lots sold or given to courtiers and builders who raised their houses to a set façade [stated: Wikipedia "Versailles, Yvelines"; chateauversailles.fr]. Built: terraced houses that touch, party wall to party wall, on both sides of the three avenues (runs stepping with the diagonals' slope) and in blocks of two rows back to back, 9 m streets and 5 m lanes between; about 360 houses of two to four storeys (a hotel of four, wide, with a carriage gate). Each house: stone ground storey; upper storeys of brick with stone chains, or pale plaster; tall casements with transoms, iron balconies on the piano nobile, stone surrounds and cornice with modillions; a broken (mansard) slate roof with stone-framed dormers and brick stacks at the party walls [inferred from the Versailles town houses of the period: Mansart's broken roof was in fashion; the dossier §1g]. Streets paved (cover road), kerb and gutter stones along the fronts, boundary posts and wheel guards by the doors, hanging lanterns on iron brackets [lanterns inferred; Paris had them from 1667].
+
+**Shops (built).** Each shop's front: a wide opening over a stone stall riser, the board let down as a counter at 0.95 m with the trade's goods on it, the upper shutter raised as a canopy on iron stays; a hanging iron bracket with its painted board and the trade's emblem (the baker's loaves, the ivy bush of the wine seller, the barber's basin, the hatter's hat, the chandler's candles, the apothecary's jar, the butcher's joint, the cobbler's boot, the cutler's knives) [stated: the trades' signs of the ancien régime; Rogers/Roberts for Paris; form inferred]. Twelve trades: baker, tavern, draper, apothecary, cobbler, barber-perruquier, cutler, vintner, bookseller, butcher, hatter, chandler.
+
+**Inside (built; 26 houses open, the nearest to the Place's east edge).** Twelve trade rooms (baker's brick oven, kneading trough and loaves; tavern's tables, bar and casks; draper's bolts of cloth and ell rod; apothecary's jars, mortar, scales, still and dried herbs; cobbler's bench, lasts and hides; the perruquier's wigs on blocks, chair and basin; cutler's knife racks, grinding wheel and anvil; vintner's casks and bottles; bookseller's shelves, reading table, globe; butcher's marble slab, hooks, sausages; hatter's blocks and hats; chandler's dipped candles and tallow vat), the plain home (bed with red curtains, table and stools, hearth, dresser) and two hotels' vestibules (marble floor, long table, hearth with mirror, hung pictures). Sound: the rooms are `chamber` zones (a lute, the street muffled) [inferred].
+
+**The Place d'Armes (built).** Cobbled between its gutters of dressed stone; sentry boxes in the king's blue, white and red at the gate of the Royal Court and the corners [inferred: the gate was guarded by the Cent-Suisses and the Gardes]; stone posts joined by iron chains along its edges; market stalls of the town's purveyors along the north and south sides (bread, greens, fish, cloth, pottery), troughs for the coaches' horses, benches under the stables' wall, coachmen waiting [inferred].
+
+**The quay of the Grand Canal (built).** On the quay behind the landing: barrels, crates, sacks, a hand-cart, a bench, anglers sitting on the head of the steps, a woman with her basket, two more rowing boats at the steps [inferred].
 
 ## 6. Ground and water
 
