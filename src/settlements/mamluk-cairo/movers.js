@@ -5,13 +5,13 @@
 // black or white izar and veiled; porters with baskets, water carriers with the earthen pot on the head, boys in the shirt.
 // Data for the engine's movers (src/engine/movers.js), read in its worker; the ways come from layout.js. No boats.
 
-import { RADIUS, STREETS, SUQ, SUQ2, SUQ3, BAYN, SQUARE } from './layout.js';
+import { RADIUS, lanes, STREETS, SUQ, SUQ2, SUQ3, BAYN, SQUARE } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 46, night: 4, rain: 1, reach: 170, spawnMin: 26, far: 48 },
+  walkers: { day: 62, night: 4, rain: 1, reach: 170, spawnMin: 26, far: 48 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -26,6 +26,8 @@ export function walkways() {
     const rr = suq ? [r[0] + 6.2, r[1] + 1, r[2] - 6.2, r[3] - 1] : r;
     return { r: rr, weight: suq ? 4 : big ? 3 : w > 8 ? 1.6 : 0.8, market: suq ? 3 : big ? 1 : 0.3, kind: suq || w > 8 ? 'street' : 'lane' };
   });
+  // the lanes between the blocks: the front lanes carry the neighbours, the back gaps and alleys few
+  for (const l of lanes()) rects.push({ r: l.r, weight: l.kind === 'lane' ? 0.9 : 0.25, market: 0.1, kind: 'lane' });
   return { rects, links: [], clip: RADIUS - 14 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: RADIUS - 18 }; }

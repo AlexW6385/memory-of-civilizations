@@ -42,14 +42,15 @@ export function cairoShop(el, { bag, col, lights }) {
   // the plastered lining of the room
   bag.add('plaster_white', J(t, L - t, D - t - 0.03, D - t, fy, y + H - 0.1)); for (const [a, b] of [[t, t + 0.03], [L - t - 0.03, L - t]]) bag.add('plaster_white', J(a, b, t, D - t, fy, y + H - 0.1));
   // shelves on the back and side walls: planks at three heights, jars, bottles, boxes
-  const potM = ['pottery_dark', 'terracotta', 'glaze_blue', 'glaze_green', 'glaze_white'];
+  const trade = el.trade || 'spice', potM = trade === 'brass' ? ['bronze', 'bronze', 'gilt_bronze'] : trade === 'lamps' ? ['lamp_glass', 'lamp_glass', 'bronze'] : ['pottery_dark', 'terracotta', 'glaze_blue', 'glaze_green', 'glaze_white'], clothM = ['cloth_indigo', 'cloth_red', 'cloth_green', 'cloth_ochre', 'cloth_white', 'cloth_maroon'];
   const shelf = (u0, u1, d) => {
     for (const yy of [1.0, 1.75, 2.5]) {
       bag.add('timber', J(u0, u1, d - 0.4, d, fy + yy, fy + yy + 0.05));
       const n = Math.floor((u1 - u0) / 0.42);
       for (let i = 0; i < n; i++) {
         const u = u0 + (i + 0.5) * (u1 - u0) / n, m = potM[Math.floor(rand() * potM.length)], [px, pz] = fr.P(u, -(d - 0.22)), hh = 0.2 + rand() * 0.14;
-        if (rand() < 0.25) bag.add('wood_dark', I(u - 0.15, u + 0.15, fy + yy + 0.05, fy + yy + 0.05 + hh, d - 0.38, d - 0.06));
+        if (trade === 'cloth') bag.add(clothM[Math.floor(rand() * 6)], I(u - 0.19, u + 0.19, fy + yy + 0.05, fy + yy + 0.05 + 0.2 + rand() * 0.1, d - 0.38, d - 0.06));
+        else if (rand() < 0.25 && trade === 'spice') bag.add('wood_dark', I(u - 0.15, u + 0.15, fy + yy + 0.05, fy + yy + 0.05 + hh, d - 0.38, d - 0.06));
         else bag.add(m, lathe([[0.001, 0], [0.09, 0.01], [0.14, 0.12 + hh * 0.3], [0.09, hh + 0.12], [0.075, hh + 0.2], [0.095, hh + 0.23]], 8, null, px, fy + yy + 0.05, pz));
       }
     }
@@ -74,7 +75,7 @@ export function cairoShop(el, { bag, col, lights }) {
   { const [bx, bz] = fr.P(uc - 1.2, -(cD + 0.35)); F.cup(bag, bx, fy + 1.06, bz, 'glaze_white', 1.3); F.cup(bag, bx + 0.15, fy + 1.06, bz + 0.05, 'bronze', 1.3); }
   { const [mx, mz] = fr.P(uc - 1.4, -(cD + 1.9)); F.reedMat(bag, mx, fy, mz, 1.6, 1.3, 0); F.cushion(bag, mx, fy + 0.01, mz, 0.8, 0.8, 0.14, 0, 'cloth_red'); }
   // sacks of spices and grain, open at the mouth, before the shelves; a chest; brass trays on the wall
-  for (let k = 0; k < 4; k++) { const [px, pz] = fr.P(1.0 + k * 0.9, -(D - 1.3)); F.spiceSacks(bag, px, fy, pz, k * 0.7, 2); col.circle(px, pz, 0.45, fy, fy + 0.7); }
+  for (let k = 0; k < 4; k++) { const [px, pz] = fr.P(1.0 + k * 0.9, -(D - 1.3)); (trade === 'cloth' ? F.bolts(bag, px, fy, pz, 5, k * 0.7) : trade === 'brass' ? F.copperware(bag, px, fy, pz, k * 0.7, k + 3, 5) : trade === 'pottery' || trade === 'lamps' ? F.pots(bag, px, fy, pz, k * 0.7, 5) : F.spiceSacks(bag, px, fy, pz, k * 0.7, 2)); col.circle(px, pz, 0.45, fy, fy + 0.7); }
   { const [px, pz] = fr.P(L - 1.2, -(D - 1.0)); F.chest(bag, px, fy, pz, 0.9, 0.55, 0.55, 0); col.circle(px, pz, 0.55, fy, fy + 0.55); }
   { const [px, pz] = fr.P(uc + 1.0, -(D * 0.45)); F.oilLamp(bag, lights, px, fy + 2.6, pz, 'bronze', 0); lights.push({ at: [px, fy + 2.9, pz], color: '#ffc27a', intensity: 6.0, distance: 11 }); for (const [uu, dd] of [[1.5, 1.2], [L - 1.5, 1.2], [uc, D - 1.2]]) { const [lx, lz] = fr.P(uu, -dd); lights.push({ at: [lx, fy + 2.8, lz], color: '#ffd9a0', intensity: 4.0, distance: 9 }); } bag.add('iron', rod([px, fy + 2.9, pz], [px, y + H - 0.1, pz], 0.01, 4)); }
   // bunches of herbs and bags hung from the beams
