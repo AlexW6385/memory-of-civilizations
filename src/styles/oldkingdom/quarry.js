@@ -19,7 +19,7 @@ export function quarry(el, { bag, col }) {
       // a block of fifty or a hundred tons roughed out in the bedrock: a trench cut all round, its top still rough
       bag.add('limestone_core', box(x - a, y - 0.4, z - d, x + a, y + h, z + d));
       bag.add('limestone_carved', box(x - a + 0.3, y + h, z - d + 0.3, x + a - 0.4, y + h + 0.22, z + d - 0.5));
-      for (let k = 0; k < 4; k++) bag.add('rock', box(x - a - 0.04, y + 0.3, z - d + 0.5 + k * (d * 2 - 1) / 3.5, x - a + 0.2, y + 0.62, z - d + 0.9 + k * (d * 2 - 1) / 3.5));   // the sockets for the levers
+      for (let k = 0; k < 4; k++) bag.add('limestone_core', box(x - a - 0.04, y + 0.3, z - d + 0.5 + k * (d * 2 - 1) / 3.5, x - a + 0.2, y + 0.62, z - d + 0.9 + k * (d * 2 - 1) / 3.5));   // the sockets for the levers
       col.rect([x - a, z - d, x + a, z + d], y - 0.4, y + h + 0.2);
       continue;
     }
@@ -34,7 +34,7 @@ export function quarry(el, { bag, col }) {
     // a block marked out: a face of cut stone in its trench, the sockets cut along its foot for the levers
     bag.add('limestone_core', box(x - a, y - 0.35, z - d, x + a, y + h, z + d));
     bag.add('limestone_carved', box(x - a + 0.04, y + h, z - d + 0.04, x + a - 0.04, y + h + 0.06, z + d - 0.04));
-    if (b.kind === 'cut') bag.add('rock', box(x - a - 0.03, y + 0.05, z - 0.18, x - a + 0.12, y + 0.3, z + 0.18));
+    if (b.kind === 'cut') bag.add('limestone_core', box(x - a - 0.03, y + 0.05, z - 0.18, x - a + 0.12, y + 0.3, z + 0.18));
     col.rect([x - a, z - d, x + a, z + d], y - 0.35, y + h + 0.06);
   }
 }
