@@ -97,6 +97,18 @@ The Great Buddha Hall (the Buddha, attendants, ceiling, banners, §4) is entered
 - **Animals.** Swallows over the courts and avenues, crows over the cedar hills, sparrows on the paving and in the market; deer as figures (§6).
 - **Smoke.** Incense at the altar before the Buddha and in Kōfuku-ji; kitchen smoke from a third of the houses at the three meals; steam from the market's cookshops [inferred].
 
+## 14. Deepening pass (towards the Suzhou standard)
+
+- **The Shōsōin.** A storehouse with a raised floor at Tōdai-ji, nine bays by three, about 33 m long and 9 m deep; north and south sections of triangular-cut log (azekura-zukuri), the centre closed with thick planks; supported by 40 heavy posts standing about 2.4 m from the base stones to the floor joists; a tiled hipped roof; the treasures were given by Empress Kōmyō in 756 [stated: JAANUS "Shōsōin"]. Ours: one log block 33 × 9.4 m on forty posts over base stones, courses of logs standing out from the wall, a ladder to a plank door, a gabled tile roof (a hip in the original [inferred: simplification]), west of the court; assumed standing by 756 [inferred].
+- **Storehouses of the plots (kura).** The same type at house scale: raised 1.1 m on posts, log walls, a bark roof, a jar at the door [inferred: plots held "a main hall, a well and a storehouse", Monograph 46, §11].
+- **Fences and kitchen gardens.** The capital's walls were in places replaced by fences [stated: Monograph 46, §11]; ours: board fences close the narrow gaps between neighbours so the lane fronts run on, vacant plots get a wattle fence with a gate and a garden; each block's middle has two kitchen gardens either side of the well (raised beds of greens, a bamboo drying rack hung with cloth, a woodpile under a lean-to, jars, a kura) behind a wattle fence [inferred].
+- **Hokke-dō and the bell tower.** The Hokke-dō (Sangatsu-dō) is among Tōdai-ji's oldest halls (its origin in the 730s–740s [inferred from memory; not re-sourced]); a bell tower (shōrō) stands on its hillside: ours, a stone platform, four vermilion posts, a tile roof, a bronze bell 2.8 m with studs and a striking log, north-east of the court [inferred: position and size].
+- **The court.** A flagged way with kerbs from the Middle Gate to the stage; three pairs of banner poles (9.5 m, silk pennants) along it for the ceremonies; sweeping monks, praying pilgrims, gate guards and travellers on the avenue [inferred]. The avenue south of the Great South Gate is flagged 6 m wide with kerbs (Suzaku Avenue's side gutters were about 74 m apart, scaled [stated: Wikipedia "Suzaku Avenue"]).
+- **Willows** line the streets' edges [inferred: the capital's tree-lined streets].
+- **Interiors.** 30 houses near the arrival are open (§12), up from 3.
+
+Sources: [Shōsōin — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/1123); [Suzaku Avenue — Wikipedia](https://en.wikipedia.org/wiki/Suzaku_Avenue).
+
 ## Sources (this pass)
 
 - [Heijo Capital — JLIT](https://jlit.hcommons.org/heijo-capital/)

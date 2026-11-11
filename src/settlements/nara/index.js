@@ -50,6 +50,14 @@ const daibutsu = {
     { t: 'block', rect: [cx - 22.2, cz - 11.2, cx + 22.2, cz + 11.2], y0: Y - 0.12, y1: Y, mat: 'granite_block', collide: false },
     { t: 'block', rect: [cx - 3.2, cz + 8.6, cx + 3.2, cz + 10.0], y0: Y, y1: Y + 0.95, mat: 'lacquer_red' },
     { t: 'block', rect: [cx - 3.35, cz + 8.45, cx + 3.35, cz + 10.15], y0: Y + 0.95, y1: Y + 1.02, mat: 'gilt_bronze', collide: false },
+    // the way up the court: a flagged path of dressed stone from the Middle Gate to the stage's steps, kerbed, a drain's stones either side
+    { t: 'block', rect: [-2.5, -19.6, 2.5, 34], y0: -0.1, y1: 0.05, mat: 'flagstone', collide: false },
+    { t: 'block', rect: [-2.7, -19.6, -2.5, 34], y0: -0.1, y1: 0.1, mat: 'granite_block', collide: false },
+    { t: 'block', rect: [2.5, -19.6, 2.7, 34], y0: -0.1, y1: 0.1, mat: 'granite_block', collide: false },
+    // the avenue from the Great South Gate south: the stone-flagged way 6 m wide and the kerb stones of its gutters
+    { t: 'block', rect: [-3, 152, 3, 183], y0: -0.1, y1: 0.04, mat: 'flagstone', collide: false },
+    { t: 'block', rect: [-3.2, 152, -3, 183], y0: -0.1, y1: 0.12, mat: 'granite_block', collide: false },
+    { t: 'block', rect: [3, 152, 3.2, 183], y0: -0.1, y1: 0.12, mat: 'granite_block', collide: false },
     ...inner, ...ceil, ...banners,
   ],
 };
@@ -104,6 +112,20 @@ const ceremonyPeople = { id: 'nara-ceremony', style: 'life', origin: [0, 0], bas
   fig(STAGE[0] + 1.1, STAGE[1] - 0.3, SH, [-0.4, 1], { pose: 'step', cloth: 'cloth_green', cloth2: 'cloth_ochre', hat: 'cap', hatMat: 'gilt_bronze', over: 'cape' });
   // the court: officials in their ranks' colours standing either side of the hall's stairs, facing the axis
   for (const sd of [-1, 1]) for (let i = 0; i < 5; i++) fig(sd * (9 + (i % 3) * 1.6), -31.5 + Math.floor(i / 3) * 1.8 + (i % 3) * 0.2, 0, [-sd, 0.2], { cloth: ['cloth_maroon', 'cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_red'][i], cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', over: 'collar', beard: r() < 0.5 });
+}
+
+// the court and the gate living: monks sweeping the gravel, pilgrims praying before the hall, guards of the Great South Gate,
+// travellers and an ox-driver on the avenue, officials arriving (§14)
+{
+  const P = ceremonyPeople.elements, faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
+  let seed = 7599;
+  const r = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const fig = (x, z, dir, o) => P.push({ t: 'figure', at: [x, z], y: 0, rot: faceTo(dir) + (r() - 0.5) * 0.3, seed: Math.floor(r() * 1e9), dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'none', ...o });
+  const MC = ['cloth_ochre', 'cloth_brown', 'cloth_grey'];
+  for (const [x, z] of [[-14, 18], [16, 24], [-26, 4], [38, -14], [-40, 30], [46, 28]]) fig(x, z, [r() - 0.5, r() - 0.5], { hair: 'shaven', carry: 'broom', cloth: MC[Math.floor(r() * 3)], cloth2: 'cloth_ochre', over: 'sash' });
+  for (const [x, z] of [[-3.5, 20], [3.5, 12], [-1.5, 3], [2, -4], [-4, -12], [4.5, -14]]) fig(x, z, [0, -1], { pose: 'pray', hair: r() < 0.5 ? 'topknot' : 'bun', cloth: ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_green'][Math.floor(r() * 4)], cloth2: 'cloth_white', over: 'sash' });
+  for (const x of [-7, 7]) fig(x, 146, [-Math.sign(x) * 0.3, 1], { hat: 'cap', hatMat: 'lacquer_black', carry: 'staff', cloth: 'cloth_maroon', cloth2: 'cloth_white', over: 'collar', beard: true });
+  for (const [x, z, d] of [[-1.5, 162, [0, -1]], [2, 172, [0, -1]], [-2, 185, [0, 1]], [1.5, 198, [0, -1]], [-2.5, 210, [0, -1]], [2, 224, [0, 1]]]) fig(x, z, d, { dress: r() < 0.5 ? 'trousers' : 'robe', hair: 'topknot', hat: r() < 0.5 ? 'straw' : 'none', carry: ['bundle', 'basket', 'staff', 'pole'][Math.floor(r() * 4)], cloth: ['cloth_indigo', 'cloth_brown', 'cloth_grey'][Math.floor(r() * 3)], cloth2: 'cloth_indigo', over: 'sash' });
 }
 
 // the deer of the hills: a few small herds on the lawns outside the temple's courts and up the

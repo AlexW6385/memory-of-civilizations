@@ -34,6 +34,14 @@ for (const [px, pz] of PAGODAS) {
 E.push({ t: 'qing_hall', rect: [-36, -165, 36, -140], y: 1.4, H: 10, roof: 'xieshan', bays: [9, 4], front: 's', four: true, plat: 1.4 });
 for (const s of [-1, 1]) for (let k = 0; k < 3; k++) E.push({ t: 'ming_hall', rect: s < 0 ? [-140, -175 + k * 26, -60, -160 + k * 26] : [60, -175 + k * 26, 140, -160 + k * 26], y: 0.6, H: 4.6, roof: 'gable', bays: [12, 2], front: 's', plat: 0.6 });
 
+// the Shōsōin: the treasure house of log, raised on forty posts, nine bays by three, west of the court (§14)
+E.push({ t: 'nara_azekura', rect: [-136, -100, -103, -90.6], y: 0, fl: 2.4, H: 4.8, seed: 41, tile: true, alongX: true });
+// the Hokke-dō (Sangatsu-dō) on the east side of the court and the bell tower north of it (§14)
+E.push({ t: 'nara_hall', rect: [104, -62, 134, -44], y: 1.0, H: 5.2, bays: [7, 4], k: 0.9, colD: 0.6, plat: 1.0, walls: 'full', doors: { s: [3], n: [3] }, windows: true, shibi: 1.6, rise: 4.6 });
+E.push({ t: 'stairs', rect: [116, -44 + 0.9, 122, -44 + 0.9 + 3.2], y0: 0, y1: 1.0, dir: 'n' });
+E.push({ t: 'nara_belltower', c: [108, -92], y: 0, half: 3.4 });
+// banner poles along the way up the court
+for (const z of [28, 10, -8]) for (const s of [-1, 1]) E.push({ t: 'nara_pole', at: [s * 5.2, z], y: 0, h: 9.5, cloth: s < 0 ? 'cloth_red' : 'cloth_green' });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('court', COURT, 0, 'open'), room('great buddha hall', HALL, 2.2, 'hall')];
 // the octagonal gilt-bronze lantern on the axis before the hall's stairs (§4)

@@ -3,7 +3,7 @@
 // pagoda and golden hall; the East Market's square with stalls, mats, carts, sellers and buyers.
 import { lodTiles, openLots } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
-import { RADIUS, lots, walls, yards, blocks, MARKET, KOFUKU, height } from './layout.js';
+import { RADIUS, lots, walls, yards, blocks, fences, gardens, MARKET, KOFUKU, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 180], facing: 'n' } });
@@ -50,10 +50,11 @@ function market() {
 }
 
 export async function town() {
-  const all = lots(), open = openLots(all, [ARRIVALS['nara'][0], ARRIVALS['nara'][2]]);
+  const all = lots(), open = openLots(all, [ARRIVALS['nara'][0], ARRIVALS['nara'][2]], 30);
   const houses = all.map((l) => ({ t: 'house_japan', ...l, ...(open.has(l) ? { open: true } : {}) }));
   const wells = yards().map(([x, z]) => ({ t: 'well', at: [x, z], y: height(x, z) }));
   const plans = [...lodTiles('nara-houses', 'vernacular', [...houses, ...wells], { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } })];
+  plans.push(...lodTiles('nara-plots', 'nara', [...fences().map((f) => ({ t: 'nara_fence', y: 0, ...f, at: f.pts[0] })), ...gardens().map((g) => ({ t: 'nara_garden', y: 0, ...g }))], { R: RADIUS, near: 130, entrance: { at: [0, 180], facing: 'n' } }));
   plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()));
   void blocks;
   return plans;
