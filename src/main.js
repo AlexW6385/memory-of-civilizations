@@ -144,6 +144,7 @@ async function main() {
   mark('renderer');
   progress.set('renderer', 1);
   const world = new World(R);
+  world.starting = true;
   await world.init((step, f) => progress.set(step, f, step === 'plans' ? '' : ''));
   // the scene pass made now, so that what loads from here on is compiled as it comes (renderer.js prime)
   R.prime();
@@ -364,6 +365,8 @@ async function main() {
   frameOnce(0);
   await warmAround((f) => progress.set('shaders', f));
   mark('shaders');
+  // the far views and the open country's plants from now on (World.starting)
+  world.starting = false;
   console.info('[memory of civilizations] start (ms):', JSON.stringify(times));
   started();
   progress.set('shaders', 1);
