@@ -2,7 +2,7 @@
 // gateways, companions, pillar and monasteries (the full building of the previous design,
 // src/buildings/sanchi-great-stupa) on the summit; Stupa 2 on its terrace at the foot of the west slope;
 // Temple 40's pillared hall on the summit; the monks and pilgrims.
-import { TOP, STUPA2, TEMPLE40, height } from './layout.js';
+import { TOP, STUPA2, TEMPLE40, VOTIVE, height } from './layout.js';
 import stupaPlan from '../../buildings/sanchi-great-stupa/plan.js';
 import './style.js';
 export const stupa = { ...stupaPlan, origin: [0, 0], base: TOP, district: undefined, view: [-32, -32, 32, 32], viewY: TOP };
@@ -19,13 +19,14 @@ export const stupa2 = {
 const [t0, z0, t1, z1] = STUPA2.terrace, cx = STUPA2.c[0];
 export const site = {
   id: 'sanchi-site', style: 'sanchi-site', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [],
-  bounds: [t0 - 4, z0 - 6, TEMPLE40.rect[2] + 8, TEMPLE40.rect[3] + 2], entrance: { at: [cx, z0 - 5], facing: 's' },
+  bounds: [t0 - 4, -84, TEMPLE40.rect[2] + 52, TEMPLE40.rect[3] + 2], entrance: { at: [cx, z0 - 5], facing: 's' },
   elements: [
     { t: 'block', rect: [t0, z0, t1, z1], y0: -0.6, y1: STUPA2.y - 0.12, mat: 'rubble' },
     { t: 'block', rect: [t0 - 0.12, z0 - 0.12, t1 + 0.12, z1 + 0.12], y0: STUPA2.y - 0.12, y1: STUPA2.y - 0.04, mat: 'sandstone_dressed', collide: false },
     { t: 'floor', rect: [t0, z0, t1, z1], y: STUPA2.y, mat: 'sandstone_floor', th: 0.06 },
     { t: 'stair', rect: [cx - 2, z0 - 2.6, cx + 2, z0], dir: 's', y0: 0, y1: STUPA2.y, riser: 0.17, base: -0.3, mat: 'sandstone_dressed' },
     { t: 'temple40', c: TEMPLE40.c, y: TOP },
+    ...VOTIVE.map(([x, z, s]) => ({ t: 'stupa', c: [x, z], s, y: TOP, gates: [], stair: false })),
     ...offerings(),
   ],
 };

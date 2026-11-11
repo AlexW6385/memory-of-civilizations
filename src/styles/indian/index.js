@@ -364,25 +364,78 @@ function ashokaPillar(el, { bag, col }) {
   col.circle(x, z, 0.45, y, y + hs);
 }
 
-/** A monastery { rect, y, cell, door }: brick cells round a square court, a verandah of posts, one entrance. */
+/** Orient a triangle so its normal points up (up = 1) or down (up = -1). */
+function triUp(out, a, b, c, up = 1) {
+  const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+  const ny = uz * vx - ux * vz;
+  if (ny * up >= 0) out.push(...a, ...b, ...c); else out.push(...a, ...c, ...b);
+}
+/** A sloping sheet a b c d (quad), facing up (or down for a soffit). */
+function sheet(out, a, b, c, d, up = 1) { triUp(out, a, b, c, up); triUp(out, a, c, d, up); }
+
+/**
+ * A pitched roof round a ring of cells: outer eave rectangle O (height yo), ridge rectangle R (yr), inner eave rectangle I (yi),
+ * each [x0, z0, x1, z1]; the slopes mitre at the corners (a hip); a soffit sheet under each, the ridge capped.
+ */
+function ringRoof(bag, O, R, I, yo, yr, yi, mat) {
+  const T = [], S = [], corners = (r, y) => [[r[0], y, r[1]], [r[2], y, r[1]], [r[2], y, r[3]], [r[0], y, r[3]]];
+  const co = corners(O, yo), cr = corners(R, yr), ci = corners(I, yi);
+  for (let i = 0; i < 4; i++) {
+    const j = (i + 1) % 4;
+    sheet(T, co[i], co[j], cr[j], cr[i]); sheet(T, cr[i], cr[j], ci[j], ci[i]);
+    const dn = (p) => [p[0], p[1] - 0.1, p[2]];
+    sheet(S, dn(co[i]), dn(co[j]), dn(cr[j]), dn(cr[i]), -1); sheet(S, dn(cr[i]), dn(cr[j]), dn(ci[j]), dn(ci[i]), -1);
+    bag.add('roof_ridge', orientedBox([cr[i][0], cr[i][2]], [cr[j][0], cr[j][2]], 0.3, yr, yr + 0.2, 0.15));
+  }
+  bag.add(mat, fromTriangles(T)); bag.add(mat, fromTriangles(S));
+}
+
+/** A verandah post: a round base stone, a square shaft with chamfered middle, a lotus-bell capital under a block with its two brackets. */
+function post(bag, col, x, z, y, h, axis) {
+  bag.add(STONE, lathe([[0.3, 0], [0.3, 0.12], [0.22, 0.2], [0.001, 0.2]], 12, null, x, y, z));
+  bag.add(STONE, box(x - 0.15, y + 0.2, z - 0.15, x + 0.15, y + 0.5, z + 0.15));
+  bag.add(STONE, lathe([[0.17, 0], [0.2, 0.05], [0.2, h - 0.5 - 0.5], [0.17, h - 0.5 - 0.45], [0.001, h - 0.5 - 0.45]], 8, null, x, y + 0.5, z));
+  bag.add(STONE, lathe([[0.17, 0], [0.26, 0.1], [0.3, 0.26], [0.27, 0.42], [0.001, 0.42]], 12, (th, i) => (i === 2 ? 1 + 0.08 * Math.cos(th * 8) : 1), x, y + h - 0.5, z));
+  bag.add(STONE, box(x - 0.3, y + h - 0.08, z - 0.3, x + 0.3, y + h + 0.1, z + 0.3));
+  const [bx, bz] = axis === 'x' ? [0.55, 0.09] : [0.09, 0.55];
+  bag.add('timber', box(x - bx, y + h + 0.1, z - bz, x + bx, y + h + 0.3, z + bz));
+  col.circle(x, z, 0.28, y, y + h);
+}
+
+/**
+ * A monastery { rect, y, cell, door }: a ring of brick cells round a court, each with its doorway under a timber lintel, a stone bed
+ * and a water pot; a verandah of stone posts under a lean-to; a pitched tiled roof hipped round the ring; the walls on a dressed
+ * base with a cornice; a well and a pavilion of the assembly in the court. docs/settlements/sanchi.md §12.
+ */
 function vihara(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y, D = el.cell || 3.4, H = 3.2;
-  const wall = (p, q, th, y0 = y - 0.1, y1 = y + H) => {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, D = el.cell || 3.4, H = 4.0;
+  const wall = (p, q, th, y0 = y - 0.1, y1 = y + H, mat = 'brick') => {
     if (Math.hypot(q[0] - p[0], q[1] - p[1]) < 0.05) return;
-    bag.add('brick', orientedBox(p, q, th, y0, y1, th / 2));
+    bag.add(mat, orientedBox(p, q, th, y0, y1, th / 2));
     col.segment(p, q, th, y0, y1);
   };
-  // a wall a → b with doorways of width w centred at the given distances from a
   const run = (a, b, th, doors, w) => {
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L], P = (d) => [a[0] + u[0] * d, a[1] + u[1] * d];
     let s0 = 0;
-    for (const d of doors) { wall(P(s0), P(d - w / 2), th); bag.add('brick', orientedBox(P(d - w / 2), P(d + w / 2), th, y + 2.3, y + H)); s0 = d + w / 2; }
+    for (const d of doors) {
+      wall(P(s0), P(d - w / 2), th); wall(P(d - w / 2), P(d + w / 2), th, y + 2.3, y + H);
+      // the timber lintel, its ends projecting, and a threshold stone
+      bag.add('timber', orientedBox(P(d - w / 2 - 0.15), P(d + w / 2 + 0.15), th + 0.1, y + 2.15, y + 2.3, (th + 0.1) / 2));
+      bag.add(STONE, orientedBox(P(d - w / 2), P(d + w / 2), th + 0.2, y, y + 0.08, (th + 0.2) / 2));
+      s0 = d + w / 2;
+    }
     wall(P(s0), P(L), th);
   };
   const midz = (z0 + z1) / 2;
-  // the outer walls; the entrance in the middle of the west side
+  // the outer walls on a dressed base, under a cornice; the entrance in the middle of the west side
   run([x0, z0], [x1, z0], 0.6, [], 0); run([x1, z0], [x1, z1], 0.6, [], 0); run([x1, z1], [x0, z1], 0.6, [], 0);
   run([x0, z1], [x0, z0], 0.6, [(z1 - z0) / 2], 2.2);
+  const ring = [[x0, z0], [x1, z0], [x1, z1], [x0, z1]];
+  for (let i = 0; i < 4; i++) {
+    const a = ring[i], b = ring[(i + 1) % 4];
+    bag.add(STONE, orientedBox(a, b, 0.76, y - 0.1, y + 0.55, 0.38)); // the base course, proud of the wall
+    bag.add(STONE, orientedBox(a, b, 0.78, y + H - 0.3, y + H, 0.39)); // the cornice
+  }
   // the cells' inner wall, a doorway into each cell, the passage on the west
   const ix0 = x0 + D, iz0 = z0 + D, ix1 = x1 - D, iz1 = z1 - D;
   const cells = (a, b, skip = null) => {
@@ -390,30 +443,78 @@ function vihara(el, { bag, col }) {
     for (let k = 0; k < n; k++) { const d = (k + 0.5) * L / n; if (skip === null || Math.abs(d - skip) > 1.8) doors.push(d); }
     if (skip !== null) doors.push(skip);
     doors.sort((p, q) => p - q);
-    run(a, b, 0.4, doors, skip !== null ? 1.0 : 1.0);
+    run(a, b, 0.4, doors, 1.0);
   };
   cells([ix0, iz0], [ix1, iz0]); cells([ix1, iz0], [ix1, iz1]); cells([ix1, iz1], [ix0, iz1]);
   cells([ix0, iz1], [ix0, iz0], iz1 - midz);
-  // partitions between the cells, and the passage from the entrance
-  for (const [a, b, n] of [[[ix0, iz0], [ix1, iz0], 'n'], [[ix0, iz1], [ix1, iz1], 's']]) {
+  // partitions between the cells, and the passage from the entrance; in each cell a stone bed and a pot
+  const bed = (cx, cz, nx, nz) => {
+    // against the outer wall, to one side of the door (n = the direction from the door toward the outer wall)
+    const tx = -nz, tz = nx, c0 = [cx + nx * 1.35 - tx * 0.7, cz + nz * 1.35 - tz * 0.7];
+    bag.add(STONE, orientedBox([c0[0] - nx * 0.95, c0[1] - nz * 0.95], [c0[0] + nx * 0.95, c0[1] + nz * 0.95], 0.9, y, y + 0.42));
+    bag.add(STONE, orientedBox([c0[0] - nx * 0.95, c0[1] - nz * 0.95], [c0[0] + nx * 0.95, c0[1] + nz * 0.95], 0.98, y + 0.42, y + 0.5));
+    const p = [cx + nx * 1.5 + tx * 1.0, cz + nz * 1.5 + tz * 1.0];
+    bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.2, 0.14], [0.22, 0.26], [0.15, 0.38], [0.1, 0.42], [0.12, 0.46], [0.001, 0.46]], 12, null, p[0], y, p[1]));
+  };
+  for (const [side, n] of [['n', [0, -1]], ['s', [0, 1]]]) {
     const L = ix1 - ix0, k = Math.max(1, Math.round(L / 3.4));
-    for (let i = 1; i < k; i++) { const x = ix0 + i * L / k; wall([x, n === 'n' ? z0 + 0.3 : iz1 + 0.2], [x, n === 'n' ? iz0 - 0.2 : z1 - 0.3], 0.3); }
-    void a; void b;
+    for (let i = 1; i < k; i++) { const x = ix0 + i * L / k; wall([x, side === 'n' ? z0 + 0.3 : iz1 + 0.2], [x, side === 'n' ? iz0 - 0.2 : z1 - 0.3], 0.3); }
+    for (let i = 0; i < k; i++) bed(ix0 + (i + 0.5) * L / k, side === 'n' ? iz0 : iz1, n[0], n[1]);
   }
+  // the east side's cells (partitions across x), the west side's two runs either side of the passage
+  const sideCells = (za, zb, east) => {
+    const L = zb - za, k = Math.max(1, Math.round(L / 3.4));
+    for (let i = 0; i <= k; i++) { const z = za + i * L / k; if (i > 0 && i < k) wall([east ? ix1 + 0.2 : x0 + 0.3, z], [east ? x1 - 0.3 : ix0 - 0.2, z], 0.3); }
+    for (let i = 0; i < k; i++) bed(east ? ix1 : ix0, za + (i + 0.5) * L / k, east ? 1 : -1, 0);
+  };
+  sideCells(iz0 + 0.2, iz1 - 0.2, true);
   for (const zz of [midz - 1.1, midz + 1.1]) wall([x0 + 0.3, zz], [ix0 - 0.2, zz], 0.3);
-  // the roof over the cells, the verandah's posts and its roof round the court
-  const v = 2.0;
-  for (const r of [[x0, z0, x1, iz0], [x0, iz1, x1, z1], [x0, iz0, ix0, iz1], [ix1, iz0, x1, iz1]]) bag.add('brick', box(r[0], y + H, r[1], r[2], y + H + 0.35, r[3]));
-  const ring = [[ix0 + v, iz0 + v], [ix1 - v, iz0 + v], [ix1 - v, iz1 - v], [ix0 + v, iz1 - v]];
+  sideCells(iz0 + 0.2, midz - 1.1, false); sideCells(midz + 1.1, iz1 - 0.2, false);
+  // the pitched roof over the cells, hipped round the ring, the verandah's lean-to inside it
+  const ov = 0.8, mid = D / 2, yo = y + H + 1.1 - (mid + ov) * 0.45;
+  ringRoof(bag, [x0 - ov, z0 - ov, x1 + ov, z1 + ov], [x0 + mid, z0 + mid, x1 - mid, z1 - mid], [ix0 + ov, iz0 + ov, ix1 - ov, iz1 - ov], yo, y + H + 1.1, yo, 'roof_tile');
+  // the verandah: posts at 3.2 m round the court, a beam on them, the lean-to roof from the cells' inner wall down to the beam
+  const v = 2.0, vh = 2.95, vr = [[ix0 + v, iz0 + v], [ix1 - v, iz0 + v], [ix1 - v, iz1 - v], [ix0 + v, iz1 - v]];
   for (let i = 0; i < 4; i++) {
-    const a = ring[i], b = ring[(i + 1) % 4], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / 3.2));
+    const a = vr[i], b = vr[(i + 1) % 4], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / 3.2)), ax = i % 2 === 0 ? 'x' : 'z';
     for (let k = 0; k < n; k++) {
       const px = a[0] + (b[0] - a[0]) * k / n, pz = a[1] + (b[1] - a[1]) * k / n;
       if (i === 3 && Math.abs(pz - midz) < 1.6) continue;
-      bag.add(STONE, box(px - 0.15, y, pz - 0.15, px + 0.15, y + 2.7, pz + 0.15)); col.circle(px, pz, 0.18, y, y + 2.7);
+      post(bag, col, px, pz, y, vh, ax);
     }
   }
-  for (const r of [[ix0, iz0, ix1, iz0 + v + 0.2], [ix0, iz1 - v - 0.2, ix1, iz1], [ix0, iz0, ix0 + v + 0.2, iz1], [ix1 - v - 0.2, iz0, ix1, iz1]]) bag.add('timber', box(r[0], y + 2.7, r[1], r[2], y + 2.85, r[3]));
+  const lean = [], wl = [ix0, iz0, ix1, iz1], bo = [ix0 + v + 0.35, iz0 + v + 0.35, ix1 - v - 0.35, iz1 - v - 0.35];
+  const cw = (r, yy) => [[r[0], yy, r[1]], [r[2], yy, r[1]], [r[2], yy, r[3]], [r[0], yy, r[3]]];
+  const cA = cw(wl, y + 3.65), cB = cw(bo, y + vh + 0.3);
+  for (let i = 0; i < 4; i++) {
+    const j = (i + 1) % 4;
+    sheet(lean, cA[i], cA[j], cB[j], cB[i]);
+    const dn = (p) => [p[0], p[1] - 0.1, p[2]];
+    sheet(lean, dn(cA[i]), dn(cA[j]), dn(cB[j]), dn(cB[i]), -1);
+  }
+  bag.add('roof_tile', fromTriangles(lean));
+  for (let i = 0; i < 4; i++) { const a = vr[i], b = vr[(i + 1) % 4]; bag.add('timber', orientedBox(a, b, 0.3, y + vh + 0.1, y + vh + 0.3, 0.15)); }
+  // the court: a well with a stone curb, and the assembly's pavilion, open on four sides under a thatched pyramid
+  const cx = (x0 + x1) / 2, cz = midz;
+  const wx = cx - 5.5, wz = cz + 4;
+  bag.add(STONE, lathe([[0.95, 0], [0.95, 0.5], [0.8, 0.55], [0.001, 0.55]], 20, null, wx, y, wz));
+  col.circle(wx, wz, 0.95, y, y + 0.55);
+  const ph = 3.0, hs = 2.8;   // pavilion half-width and post height
+  bag.add(STONE, box(cx - ph - 0.5, y, cz - ph - 0.5, cx + ph + 0.5, y + 0.4, cz + ph + 0.5));
+  col.floor([cx - ph - 0.5, cz - ph - 0.5, cx + ph + 0.5, cz + ph + 0.5], y + 0.4);
+  for (const sx of [-1, 0, 1]) for (const sz of [-1, 0, 1]) {
+    if (sx === 0 && sz === 0) continue;
+    post(bag, col, cx + sx * ph, cz + sz * ph, y + 0.4, hs, 'x');
+  }
+  for (const s of [-1, 1]) { bag.add('timber', box(cx - ph - 0.3, y + 0.4 + hs + 0.3, cz + s * ph - 0.12, cx + ph + 0.3, y + 0.4 + hs + 0.55, cz + s * ph + 0.12)); bag.add('timber', box(cx + s * ph - 0.12, y + 0.4 + hs + 0.55, cz - ph - 0.3, cx + s * ph + 0.12, y + 0.4 + hs + 0.8, cz + ph + 0.3)); }
+  const pyr = [], by = y + 0.4 + hs + 0.8, pe = ph + 1.2, pc = [[cx - pe, by, cz - pe], [cx + pe, by, cz - pe], [cx + pe, by, cz + pe], [cx - pe, by, cz + pe]], apex = [cx, by + 2.0, cz];
+  for (let i = 0; i < 4; i++) triUp(pyr, pc[i], pc[(i + 1) % 4], apex);
+  bag.add('thatch', fromTriangles(pyr));
+  const pyr2 = [];
+  for (let i = 0; i < 4; i++) { const a = pc[i], b = pc[(i + 1) % 4]; triUp(pyr2, [a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], [apex[0], apex[1] - 0.12, apex[2]], -1); }
+  bag.add('thatch', fromTriangles(pyr2));
+  // the teacher's seat, a stone throne facing the door, and a lamp
+  bag.add(STONE, box(cx - 0.6, y + 0.4, cz - ph + 0.1, cx + 0.6, y + 0.8, cz - ph + 0.9));
   bag.add('sandstone_floor', box(x0, y - 0.3, z0, x1, y + 0.02, z1));
   col.floor(el.rect, y + 0.02);
 }
