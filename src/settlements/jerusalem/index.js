@@ -7,6 +7,7 @@ import '../../styles/islamic/index.js';
 import '../../styles/islamic/town.js';
 import '../../styles/islamic/city.js';
 import '../../styles/islamic/haram.js';
+import '../../styles/islamic/furnish.js';
 import { dome, haram } from './plan.js';
 import { city } from './city.js';
 import music from './music.js';
