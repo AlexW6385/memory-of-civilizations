@@ -39,11 +39,8 @@ export const harbour = {
     ...[-36, -18, 0, 18].map((x) => ({ t: 'wharf', rect: [x - 5, -60, x + 5, -8], y: 1.2, gangways: [{ side: -1, z: -50 }, x === 18 ? { side: 1, z: -52.5, down: -0.3 } : { side: 1, z: -50 }] })),
     // the people on the quay's promenade and waiting on the wharves (§1c)
     { t: 'quay_crowd', rect: [-44, -6.4, 39, 1], y: height(0, -3), wharves: [-36, -18, 0, 18].map((x) => ({ x, y: 1.2, a0: -50, a1: -20.3 })), n: 34, seed: 1973 },
-    // the ferries of 1973: a Lady-class ferry at the quay, another crossing, a Manly ferry and a hydrofoil out on the harbour
+    // the ferry of 1973 berthed at the east wharf (the others are the moving ones of movers.js, crossing the harbour)
     { t: 'ferry', kind: 'lady', at: [28.6, -36], y: LEVEL, rot: 0 },
-    { t: 'ferry', kind: 'lady', at: [-20, -185], y: LEVEL, rot: 0.35 },
-    { t: 'ferry', kind: 'manly', at: [-60, -265], y: LEVEL, rot: -0.9 },
-    { t: 'ferry', kind: 'hydrofoil', at: [225, -205], y: LEVEL, rot: 2.6 },
     { t: 'round_tower', c: AUSTRALIA_SQ, r: 21, h: 170, y: height(...AUSTRALIA_SQ) },
     { t: 'skyscraper', rect: [-30, 40, 10, 66], y: height(-10, 53), h: 117, mat: 'facade_glass', seed: 1962 },     // the AMP Building at the quay
   ],

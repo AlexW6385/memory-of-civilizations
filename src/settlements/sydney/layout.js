@@ -125,6 +125,20 @@ export function lots() {
     const [x0, z0, x1, z1] = l.rect, clear = (r) => !LOTS.some((o) => o !== l && o.rect[0] < r[2] && o.rect[2] > r[0] && o.rect[1] < r[3] && o.rect[3] > r[1]);
     l.shops = [['n', [x0, z0 - 3, x1, z0]], ['s', [x0, z1, x1, z1 + 3]], ['w', [x0 - 3, z0, x0, z1]], ['e', [x1, z0, x1 + 3, z1]]].filter(([, r]) => clear(r)).map(([f]) => f).join('');
   }
+  // the two rooms one can walk into (rooms.js, §1f): a tenant's terrace house in the Rocks and an espresso bar near the quay
+  const clearR = (l, r) => !LOTS.some((o) => o !== l && o.rect[0] < r[2] && o.rect[2] > r[0] && o.rect[1] < r[3] && o.rect[3] > r[1]);
+  const strip = (l, f) => { const [x0, z0, x1, z1] = l.rect; return f === 'n' ? [x0, z0 - 3, x1, z0] : [x0, z1, x1, z1 + 3]; };
+  const best = (cands, tx, tz) => cands.sort((a, b) => Math.hypot(a.rect[0] - tx, a.rect[1] - tz) - Math.hypot(b.rect[0] - tx, b.rect[1] - tz))[0];
+  const terr = best(LOTS.filter((l) => l.t === 'rocks_terrace' && l.kind === 'terrace' && clearR(l, strip(l, l.front)) && shore((l.rect[0] + l.rect[2]) / 2, l.front === 'n' ? l.rect[1] - 2 : l.rect[3] + 2) > 8
+    && l.y + 0.5 - height(l.rect[0] + 0.85, l.front === 'n' ? l.rect[1] - 1.2 : l.rect[3] + 1.2) < 1.4), -170, 10);
+  if (terr) { terr.enter = 0; terr.gy = height(terr.rect[0] + 0.85, terr.front === 'n' ? terr.rect[1] - 1.2 : terr.rect[3] + 1.2); }
+  const AMP = [-40, 30, 20, 76];
+  const cafe = best(LOTS.filter((l) => !l.t && !inRect(AMP, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 14) && !LOTS.some((o) => o !== l && o.rect[0] < l.rect[2] + 0.5 && o.rect[2] > l.rect[0] - 0.5 && o.rect[1] < l.rect[3] + 0.5 && o.rect[3] > l.rect[1] - 0.5 && false)
+    && ['n', 's'].some((f) => clearR(l, strip(l, f))) && l.rect[2] - l.rect[0] >= 11), -10, 90);
+  if (cafe) {
+    const f = clearR(cafe, strip(cafe, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = cafe.rect, du = (x1 - x0) * 0.62;
+    Object.assign(cafe, { t: 'espresso_bar', front: f, gy: height(x0 + du, f === 'n' ? z0 - 1.2 : z1 + 1.2), wall: 'brick' });
+  }
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

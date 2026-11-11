@@ -13,6 +13,7 @@ import { rocksTerrace } from './rocks.js';
 import { archBridge } from './bridge.js';
 import { wharf, quayCrowd } from './wharf.js';
 import { seaWall } from './seawall.js';
+import { espressoBar } from './rooms.js';
 
 /** The lowest inner surface of a hall's shells over (xx, zz), above the podium, from their section and profile. */
 function envOf(hall, xx, zz) {
@@ -238,6 +239,6 @@ function ferry(el, { bag, col }) {
 }
 registerStyle('modern', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace, sea_wall: seaWall, quay_crowd: quayCrowd },
+  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace, sea_wall: seaWall, espresso_bar: espressoBar, quay_crowd: quayCrowd },
   objects: {},
 });
