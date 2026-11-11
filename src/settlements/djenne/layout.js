@@ -10,7 +10,7 @@ export const LEVEL = { town: 0, water: -1.6, bed: -3.6, plain: -1.2 };
 export const MOSQUE = { c: [0, 0], a: 37.5, py: 3 };
 export const MARKET = [40, -45, 115, 45];
 // the shop row on the market's north edge (fronts to the south) and the court house at its north-east corner: both enterable
-export const SHOPS = [58, -54, 98, -45.5];
+export const SHOPS = [58, -52, 98, -45.5];
 export const COURT = [100, -62, 121, -45.5];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 /** The island's shore distance (negative on the island). */

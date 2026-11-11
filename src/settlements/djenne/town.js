@@ -1,7 +1,7 @@
 // The town round the mosque (docs/settlements/djenne.md §6, §11): the market square on market day,
 // the houses packed along the streets.
 
-import { RADIUS, MARKET, LEVEL, ISLAND, MOSQUE, houses, shore, inHouse } from './layout.js';
+import { RADIUS, MARKET, LEVEL, ISLAND, MOSQUE, SHOPS, COURT, houses, shore, inHouse } from './layout.js';
 import { ground } from './ground.js';
 import { boatFloat } from '../../objects/index.js';
 
@@ -167,6 +167,7 @@ export async function town() {
   const { E, P } = market(), lnd = landing(), cr = crepissage();
   // (the channel's water is the planet's sea: ground.js, sea)
   const plans = [base('djenne-market', E), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }, base('djenne-crepissage', cr.E), { ...base('djenne-crepissage-life', cr.P), style: 'life' }];
+  plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }]));
   const all = houses();
   for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: 'sahel_house', ...h }))));
   return plans;
