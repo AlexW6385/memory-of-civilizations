@@ -41,6 +41,9 @@ export const LOAD = 350, UNLOAD = 800;
 export const MAX_BUILT = 4;
 /** How long after arriving the next settlement starts being built ahead (ms). */
 const PRELOAD_AFTER = 10000;
+/** Work done ahead (World.calm) runs only with this much idle time left (ms), after the frames
+ *  have been smooth for CALM_FOR ms, none over CALM_FRAME ms. */
+const CALM_IDLE = 6, CALM_FOR = 1500, CALM_FRAME = 24;
 
 /** Beyond the horizon by this much (m: the tallest buildings' own horizon), a built settlement is not drawn. */
 const BEYOND = 1200;
@@ -259,6 +262,8 @@ class Settlement {
       }
       // let go of while it was being built (the visitor moved away): unload() has cleaned up
       if (stale()) return this;
+      if (this.ahead()) await this.world.calm(() => !this.ahead());
+      if (stale()) return this;
       this.buildLife();
       this.done = this.expected;
       this.state = 'ready';
@@ -273,6 +278,8 @@ class Settlement {
   }
 
   async addPart(id, plan, music, gen = this.gen, prebuilt = null) {
+    // built ahead for a later journey: only when the page has time to spare (World.calm)
+    if (this.ahead()) await this.world.calm(() => !this.ahead());
     const built = prebuilt ?? await buildPlanAsync(plan, undefined, { instancing: true, detail: true });
     const rec0 = {};
     let tS = HITCH.mark();
@@ -318,6 +325,7 @@ class Settlement {
     await this.world.r.precompile?.(group, { background: this.ahead });
     // and its buffers sent to the GPU in a frame with room for them
     await this.world.uploadSlot(bytesOf(group));
+    if (this.ahead()) await this.world.calm(() => !this.ahead());
     tS = HITCH.mark();
     if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
     this.group.add(group);
@@ -360,8 +368,9 @@ class Settlement {
     // the shapes drawn by distance (merge.js LodSet), their copies chosen with the street life's
     const lods = this.lods = [];
     const precompile = async (list) => { await this.world.r.precompile?.(list, { background: this.ahead }); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b); };
-    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile }); } catch (e) { console.warn('merging', this.id, e); }
-    try { await mergeDetail(this.parts, buildingMesh, { stale: () => gen !== this.gen, precompile: (list) => this.world.r.precompile?.(list, { background: this.ahead }) }); } catch (e) { console.warn('merging detail', this.id, e); }
+    const gentle = { on: () => this.ahead(), wait: () => this.world.calm(() => !this.ahead()) };
+    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile, gentle }); } catch (e) { console.warn('merging', this.id, e); }
+    try { await mergeDetail(this.parts, buildingMesh, { stale: () => gen !== this.gen, gentle, precompile: (list) => this.world.r.precompile?.(list, { background: this.ahead }) }); } catch (e) { console.warn('merging detail', this.id, e); }
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
 
@@ -452,6 +461,29 @@ export class World {
    * larger than that alone in its frame). Without frames running (the start, behind the loading
    * screen) at once.
    */
+  /**
+   * Resolves when there is time to spare for work done ahead (a settlement built for a later
+   * journey, World.preload): the page idle with at least CALM_IDLE ms left in its idle period, and
+   * the frames smooth for CALM_FOR ms (no frame over CALM_FRAME ms). Work for the present visit
+   * never waits on this; work for later waits as long as it must, or until over() (the settlement
+   * travelled to meanwhile: from then on its work is for the present visit and goes on at once).
+   */
+  calm(over = () => false) {
+    const ric = globalThis.requestIdleCallback;
+    return new Promise((r) => {
+      const ask = () => {
+        if (over()) { r(); return; }
+        if (!ric) { setTimeout(() => (this.smoothSince !== undefined && performance.now() - this.smoothSince > CALM_FOR ? r() : ask()), 250); return; }
+        ric((d) => {
+          const running = performance.now() - (this._updatedAt ?? -1e9) < 150;
+          const smooth = !running || (this.smoothSince !== undefined && performance.now() - this.smoothSince > CALM_FOR);
+          if (over() || (smooth && !d.didTimeout && d.timeRemaining() >= CALM_IDLE)) r(); else setTimeout(ask, 200);
+        }, { timeout: 5000 });
+      };
+      ask();
+    });
+  }
+
   uploadSlot(bytes) {
     if (!(performance.now() - (this._updatedAt ?? -1e9) < 150)) return Promise.resolve();
     return new Promise((r) => (this._uploads ??= []).push([bytes, r]));
@@ -841,7 +873,10 @@ export class World {
   /** Called every frame: load and unload by distance, the ground's detail, the plants, the baked light. */
   update(camera, controls) {
     const now = performance.now();
-    const dtS = Math.min(0.1, (now - (this._lastUpdate ?? now)) / 1000); this._lastUpdate = now;
+    const dtMs = now - (this._lastUpdate ?? now);
+    const dtS = Math.min(0.1, dtMs / 1000); this._lastUpdate = now;
+    // (how long the frames have been smooth: work done ahead waits for it, World.calm)
+    if (dtMs > CALM_FRAME || this.smoothSince === undefined) this.smoothSince = now;
     { const t = HITCH.mark(); for (const Sy of SYSTEMS) Sy.update?.(dtS, camera, this); HITCH.since('systems', t); }
     this.letUploadsIn();
     const u = this.here(controls);
