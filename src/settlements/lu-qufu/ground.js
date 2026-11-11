@@ -34,12 +34,15 @@ function cover(x, z, h) {
 const water = (x, z, y) => inPool(x, z) && y < POOL_Y + 0.3;
 const waterLevel = (x, z) => (inPool(x, z, 0.5) ? POOL_Y : -Infinity);
 const fromWater = (x, z) => (inPool(x, z) ? -3 : Math.max(-5, Math.min(40, Math.hypot(Math.max(POOL[0] - x, 0, x - POOL[2]), Math.max(POOL[1] - z, 0, z - POOL[3])))));
+const OLD = [[-34, -66], [34, -66], [-34, -90], [34, -90], [-36, -112], [36, -112], [-36, -134], [36, -134], [-30, -160], [30, -160], [-16, -158], [16, -158], [-30, -200], [30, -200], [-16, -200], [16, -200], [-54, -214], [54, -214], [-22, 10], [22, 10], [-62, -20], [62, -20], [-62, 50], [62, 50], [-70, 90], [70, 90]];
 /** Plants per 100 m². */
 function planting(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6 || inPool(x, z, 1.2)) return null;
   // the two apricot trees beside the Apricot Altar (apple stands in for them)
   for (const sx of [-1, 1]) if (Math.hypot(x - sx * 10, z - ALTAR.c[1]) < 2.6) return { apple: 2.4 };
+  // the old cypresses of the great court, singly: beside the altar's court, flanking the hall, in the corners and before the Wu
+  for (const [px, pz] of OLD) if (Math.hypot(x - px, z - pz) < 3.2) return { cypress: 3.4 };
   if (inRect(KONG_FOREST, x, z)) return Math.abs(x) < 4 ? null : { cypress: 0.4 * (0.5 + smooth(0, 1, vnoise(x * 0.07, z * 0.07))), chinese_pine: 0.25, arborvitae: 0.12, grass_dry: 6 };
   if (inRect(TEMPLE, x, z, 0.5)) {
     if (rects().some((q) => inRect(q, x, z, 1.4)) || Math.abs(x) < 4.2) return null;
@@ -69,7 +72,7 @@ function planting(x, z) {
 void HALL;
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { cypress: 0.4, chinese_pine: 0.25, arborvitae: 0.12, apple: 2.4, pagoda_tree: 0.5, elm: 0.1, jujube: 0.6, persimmon: 0.4, wheat: 90 },
+  maxDensity: { cypress: 3.6, chinese_pine: 0.25, arborvitae: 0.12, apple: 2.4, pagoda_tree: 0.5, elm: 0.1, jujube: 0.6, persimmon: 0.4, wheat: 90 },
   climate: {
     sun: { az: 160, el: 50, color: [1.0, 0.95, 0.87], intensity: 3.2, lat: 35.6, dec: 8, hour: 10.5 },
     sky: { turbidity: 3.8, rayleigh: 1.1, mie: 0.006, mieG: 0.82, zenith: [0.12, 0.2, 0.37], horizon: [0.7, 0.69, 0.65] },

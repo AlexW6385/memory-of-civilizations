@@ -1,7 +1,7 @@
 {
   "site": { "id": "lu-qufu", "name": { "en": "Qufu", "zh": "曲阜" }, "era": "Qing, c. 1730", "region": "china", "lat": 35.60, "lon": 116.99, "radius": 330 },
   "cls": "M",
-  "arrival": [0, null, -60, 0, 0.2],
+  "arrival": [-26, null, -59, -0.45, 0.18],
   "arrivalNote": "from the court before the Dacheng Hall: the Apricot Altar, then the hall on its stone base and moon terrace, ten dragon columns under yellow double eaves, the Wu corridors and the old cypresses",
   "card": {
     "en": [

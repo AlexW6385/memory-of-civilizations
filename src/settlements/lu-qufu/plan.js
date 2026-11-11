@@ -109,7 +109,7 @@ export const qufu = {
   era: { en: 'Qing, c. 1730', zh: '清，约1730年' },
   style: 'lu',
   origin: [0, 0], base: 0, yaw: 0,
-  entrance: { at: [0, -60], facing: 'n' },
+  entrance: { at: [0, -62], facing: 'n' },
   bounds: [-100, -240, 100, 175],
   bakeBounds: [-60, -150, 60, -90],
   view: [-60, -150, 60, -90],
