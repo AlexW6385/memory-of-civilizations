@@ -2,7 +2,7 @@ import { lodTiles, openLots } from '../lod.js';
 // The terraces of Westminster and Lambeth (docs/settlements/london.md §5); the traffic of about 1870 (§5a): hansom
 // cabs and knifeboard omnibuses on Westminster Bridge, in Bridge Street and Parliament Street, gas lamps along them;
 // on the Thames the penny steamers, one at the floating pier by the bridge, and the coal lighters.
-import { RADIUS, GROUND, RIVER, BRIDGE, SQUARE, lots, bank, inLot, blocked, streetsZ, crossX } from './layout.js';
+import { RADIUS, GROUND, RIVER, BRIDGE, SQUARE, STREET_W, lots, bank, inLot, blocked, streetsZ, crossX } from './layout.js';
 import { ridersOf } from '../../styles/victorian/street.js';
 const base = (id, elements, style = 'victorian') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -180], facing: 'e' } });
 const W = Math.PI / 2, E = -Math.PI / 2, N = 0, S = Math.PI;
@@ -82,15 +82,15 @@ function furniture() {
   const ok = (x, z) => Math.hypot(x, z) < 280 && !blocked(x, z, -1) && !inLot(x, z, 0.7);
   const add = (t, x, z, o = {}) => { if (ok(x, z)) L.push({ t, at: [x, z], y: GROUND, ...o }); };
   for (const zc of streetsZ()) for (const cx of crossX()) {
-    const main = Math.abs(zc - BRIDGE.z) < 1, h = main ? 8 : 3.5;
-    add('gas_lamp', cx - 4.2, zc - h + 1.1); add('gas_lamp', cx + 4.2, zc + h - 1.1);
-    if (rand() < 0.3) add('pillar_box', cx + 4.2, zc - h + 1.2); else if (rand() < 0.25) add('bollard', cx - 4.2, zc + h - 1.2);
+    const main = Math.abs(zc - BRIDGE.z) < 1, h = main ? 8 : STREET_W / 2, pw = main ? 2.6 : 1.9;
+    add('gas_lamp', cx - 5.2, zc - h + pw - 0.35); add('gas_lamp', cx + 5.2, zc + h - pw + 0.35);
+    if (rand() < 0.3) add('pillar_box', cx + 5.2, zc - h + pw - 0.7); else if (rand() < 0.25) add('bollard', cx - 5.2, zc + h - pw + 0.7);
   }
   // along each street between the corners, a lamp every ~42 m on alternate sides
-  for (const zc of streetsZ()) { const main = Math.abs(zc - BRIDGE.z) < 1, h = main ? 8 : 3.5; for (let x = -240, k = 0; x < 240; x += 42, k++) add('gas_lamp', x + (zc * 0.37 % 10), zc + (k % 2 ? h - 1.1 : -h + 1.1)); }
+  for (const zc of streetsZ()) { const main = Math.abs(zc - BRIDGE.z) < 1, h = main ? 8 : STREET_W / 2, pw = main ? 2.6 : 1.9; for (let x = -240, k = 0; x < 240; x += 42, k++) add('gas_lamp', x + (zc * 0.37 % 10), zc + (k % 2 ? h - pw + 0.35 : -h + pw - 0.35)); }
   add('drinking_fountain', 70, BRIDGE.z + 6.6); add('drinking_fountain', -30, -150.5);
   // the coster's trestle stalls along Bridge Street's kerbs and the busy streets nearest it
-  for (const zc of streetsZ()) { if (Math.abs(zc - BRIDGE.z) > 62) continue; for (let x = -200 + rand() * 30; x < 200; x += 55 + rand() * 40) add('trestle_stall', x, zc + (rand() < 0.5 ? -1 : 1) * (Math.abs(zc - BRIDGE.z) < 1 ? 5.8 : 2.4), { rot: rand() < 0.5 ? 0 : Math.PI, goods: rand() < 0.5 ? 'wicker' : 'cloth_red' }); }
+  for (const zc of streetsZ()) { if (Math.abs(zc - BRIDGE.z) > 62) continue; for (let x = -200 + rand() * 30; x < 200; x += 55 + rand() * 40) add('trestle_stall', x, zc + (rand() < 0.5 ? -1 : 1) * (Math.abs(zc - BRIDGE.z) < 1 ? 5.6 : 2.0), { rot: rand() < 0.5 ? 0 : Math.PI, goods: rand() < 0.5 ? 'wicker' : 'cloth_red' }); }
   return [base('london-furniture', L)];
 }
 /** Parliament Square (§5c): lawns, walks, Canning's statue, beds, benches; the cab rank, the barrel organ and Punch and Judy at its edges. */

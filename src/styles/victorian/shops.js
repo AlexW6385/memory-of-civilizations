@@ -60,6 +60,55 @@ function railings(F, uDoor, y) {
   B('iron', uDoor + 1.2, uDoor + 1.7, y + 0.0, y + 0.015, 1.7, 2.2);
 }
 
+
+const DOORS = ['wood_dark', 'wood_dark', 'shutter_green', 'paint_blue', 'wall_red', 'lacquer_black', 'shutter_brown', 'shutter_grey'];
+/** the pavement before a house: flags over the area to the kerb of granite, the gutter's setts beyond it (pw wide) */
+function pavement(F, pw = 1.9) {
+  const { B, C, Wd, y } = F;
+  B('flagstone', 0, Wd, y - 0.05, y + 0.12, 0, pw); B('granite_grey', 0, Wd, y - 0.05, y + 0.16, pw, pw + 0.2);
+  B('granite_block', 0, Wd, y - 0.0, y + 0.03, pw + 0.2, pw + 0.75);
+  C(0, Wd, y, y + 0.12, 0, pw); F.col.floor([...(F.f === 's' ? [F.x0, F.zf, F.x1, F.zf + pw] : [F.x0, F.zf - pw, F.x1, F.zf])], y + 0.12);
+}
+/**
+ * The dressing of a front at eye level and above (dossier §6a): curtains and half-drawn blinds in the sashes, window boxes of
+ * geraniums on some first floors, the cast-iron rainwater pipe on the party wall, the boot scraper and a pot on the step, a gas
+ * bracket lamp over some doors, dormers in the roof of some rows, soot streaked below the sills.
+ * wins: [{ u, y0, hh, fl }]; opts: H (the cornice's height over y), uD (the door's u, or null), door (bool)
+ */
+function dress(F, rand, wins, { H, uD = null, brick = 'brick', dormers = true }) {
+  const { B, L, y, Wd, D } = F, sill = (w) => w.y0;
+  for (const w of wins) {
+    const r = rand(), hw = 0.5, a = w.y0 + 0.04, b = w.y0 + w.hh - 0.04;
+    if (r < 0.42) {
+      const m = pick(rand, ['cloth_maroon', 'linen', 'cloth_green', 'cloth_blue', 'cloth_ochre', 'cloth_white']);
+      B(m, w.u - hw, w.u - hw + 0.25, a, b, 0.08, 0.1); B(m, w.u + hw - 0.25, w.u + hw, a, b, 0.08, 0.1); B(m, w.u - hw, w.u + hw, b - 0.22, b, 0.08, 0.11);
+    } else if (r < 0.66) B('linen', w.u - hw, w.u + hw, w.y0 + w.hh * (0.3 + rand() * 0.4), b, 0.08, 0.095);
+    else if (r < 0.74) B('wood_dark', w.u - hw, w.u + hw, a, b, 0.075, 0.09);                    // shutters closed behind the glass
+    if (w.fl === 1 && rand() < 0.22) {
+      B('wood_dark', w.u - 0.6, w.u + 0.6, sill(w) - 0.3, sill(w) - 0.06, 0.12, 0.42);
+      for (let k = 0; k < 6; k++) { const u = w.u - 0.5 + k * 0.2; B(pick(rand, ['cloth_red', 'cloth_red', 'cloth_white', 'lotus_leaf']), u - 0.07, u + 0.07, sill(w) - 0.06, sill(w) + 0.14 + rand() * 0.1, 0.2 + rand() * 0.1, 0.34); }
+    }
+    if (brick !== 'brick_grey' && rand() < 0.5) B('brick_grey', w.u - 0.28, w.u + 0.28, w.y0 - 0.95, w.y0 - 0.14, 0.0, 0.012);     // the soot's streak under the sill
+  }
+  B('iron', 0.0, 0.11, y, y + H - 0.1, 0.0, 0.11); B('iron', -0.02, 0.13, y + H - 0.4, y + H - 0.1, -0.02, 0.13);                // the rainwater pipe and its hopper head
+  for (let h = 1.6; h < H - 1; h += 3.2) B('iron', -0.02, 0.13, y + h, y + h + 0.05, -0.02, 0.13);
+  if (uD !== null) {
+    B('iron', uD + 0.62, uD + 0.75, y + 0.4, y + 0.44, 0.22, 0.4); B('iron', uD + 0.64, uD + 0.66, y + 0.4, y + 0.55, 0.22, 0.26);     // the boot scraper
+    if (rand() < 0.5) { L('terracotta', [[0.001, 0], [0.12, 0], [0.14, 0.22], [0.11, 0.26]], 8, uD - 0.62, y + 0.4, 0.5); L('lotus_leaf', [[0.11, 0.2], [0.2, 0.3], [0.12, 0.5], [0.001, 0.55]], 7, uD - 0.62, y + 0.4, 0.5); }
+    if (rand() < 0.3) { B('iron', uD - 0.03, uD + 0.03, y + 3.0, y + 3.04, 0.05, 0.5); L('lamp_glass', [[0.05, 0], [0.1, 0.12], [0.1, 0.32], [0.001, 0.38]], 6, uD, y + 3.04, 0.5); }
+  }
+  if (dormers && rand() < 0.4) {
+    const top = y + H, rise = D * 0.32 / (D / 2), v0 = 1.2;
+    for (const u of [Wd * 0.27, Wd * 0.73]) {
+      const base = top + rise * v0 - 0.05;
+      B(brick, u - 0.7, u + 0.7, base, base + 1.4, -v0, -v0 - 0.9);                    // the dormer's cheeks and front
+      B('opening', u - 0.42, u + 0.42, base + 0.25, base + 1.2, -v0 + 0.0, -v0 + 0.05);
+      B('plaster_white', u - 0.5, u + 0.5, base + 0.2, base + 0.25, -v0 + 0.05, -v0 + 0.1); B('plaster_white', u - 0.025, u + 0.025, base + 0.25, base + 1.2, -v0 + 0.05, -v0 + 0.08);
+      B('slate', u - 0.82, u + 0.82, base + 1.4, base + 1.52, -v0 + 0.12, -v0 - 1.0); B('slate', u - 0.78, u + 0.78, base + 1.52, base + 1.6, -v0 - 0.05, -v0 - 0.85);
+    }
+  }
+}
+
 /**
  * terrace_house (the town's ordinary house, a richer version): { rect, seed, front, storeys, y } — London stock brick (sooted
  * grey in places) or red, a stucco cornice and parapet, sash windows with stone sills and lintels, the door with its fanlight
@@ -67,11 +116,13 @@ function railings(F, uDoor, y) {
  * carrying an iron balcony; area railings, a chimney stack on each party wall with its pots.
  */
 export function terraceRich(el, ctx, base) {
+  if (el.open && !el.simple && (el.front === 'n' || el.front === 's')) pavement(frameOf(el, ctx), el.pw ?? 1.9);
   if (el.open || el.simple || (el.front !== 'n' && el.front !== 's')) return base(el, ctx);
   const F = frameOf(el, ctx), rand = rng(el.seed || 1), { B, C, bag, col, Wd, D, y, x0, z0, x1, z1 } = F;
   const n = el.storeys ?? 3, st = 3.2, H = n * st, mat = brickOf(rand), type = rand() < 0.33 ? 'bay' : rand() < 0.3 ? 'stucco' : 'plain';
-  const uD = Wd / 4, uW = 3 * Wd / 4;
+  const uD = Wd / 4, uW = 3 * Wd / 4, doorMat = pick(rand, DOORS), wins = [];
   bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H);
+  pavement(F, el.pw ?? 1.9);
   if (type === 'stucco') {
     // the ground floor rusticated in stucco, a banded plinth
     B('stucco_cream', 0, Wd, y - 0.1, y + st, 0, 0.06);
@@ -81,8 +132,8 @@ export function terraceRich(el, ctx, base) {
   for (let s = 1; s < n; s++) B(type === 'stucco' && s === 1 ? 'stucco_cream' : 'plaster_white', 0, Wd, y + s * st - 0.1, y + s * st + 0.1, 0, 0.07);
   // the door: surround, panelled leaf, the fanlight, a brass knocker; two steps
   B('plaster_white', uD - 0.65, uD + 0.65, y + 0.4, y + 3.15, -0.02, 0.05);
-  B('wood_dark', uD - 0.5, uD + 0.5, y + 0.4, y + 2.45, 0.05, 0.1);
-  for (const [a, b] of [[0.55, 1.2], [1.3, 2.3]]) for (const sd of [-1, 1]) B('wood_dark', sd < 0 ? uD - 0.4 : uD + 0.04, sd < 0 ? uD - 0.04 : uD + 0.4, y + 0.4 + a, y + 0.4 + b, 0.1, 0.13);
+  B(doorMat, uD - 0.5, uD + 0.5, y + 0.4, y + 2.45, 0.05, 0.1);
+  for (const [a, b] of [[0.55, 1.2], [1.3, 2.3]]) for (const sd of [-1, 1]) B(doorMat, sd < 0 ? uD - 0.4 : uD + 0.04, sd < 0 ? uD - 0.04 : uD + 0.4, y + 0.4 + a, y + 0.4 + b, 0.1, 0.13);
   B('opening', uD - 0.5, uD + 0.5, y + 2.5, y + 2.95, 0.05, 0.08); B('plaster_white', uD - 0.025, uD + 0.025, y + 2.5, y + 2.95, 0.08, 0.1);
   B('gold', uD - 0.04, uD + 0.04, y + 1.7, y + 1.82, 0.13, 0.16);
   B('limestone', uD - 0.7, uD + 0.7, y - 0.3, y + 0.2, 0, 0.95); B('limestone', uD - 0.7, uD + 0.7, y - 0.3, y + 0.4, 0, 0.5);
@@ -114,8 +165,10 @@ export function terraceRich(el, ctx, base) {
     }
     const balc = type === 'stucco' && s === 1 && i === 1;
     sash(F, u, y0, balc ? 2.6 : hh, { lintel: type === 'stucco' ? 'plaster_white' : 'limestone' });
+    wins.push({ u, y0, hh: balc ? 2.6 : hh, fl: s });
     if (balc || (s === 1 && rand() < 0.25)) { B('iron', u - 0.8, u + 0.8, y0 + 0.05, y0 + 0.09, 0.25, 0.28); for (let q = u - 0.76; q < u + 0.78; q += 0.17) B('iron', q - 0.01, q + 0.01, y0 - 0.5, y0 + 0.9, 0.25, 0.28); B('iron', u - 0.8, u + 0.8, y0 + 0.9, y0 + 0.94, 0.25, 0.28); }
   }
+  dress(F, rand, wins, { H, uD, brick: mat });
   roofAndStacks(F, mat, H, rand, false);
 }
 
@@ -197,6 +250,32 @@ function hangingSign(F, tr, tname, rand, uS, y) {
   }
 }
 
+/** the pavement before a shop: the sandwich board, crates and sacks of the trade, a barrel, the night shutters leaned against the pilaster */
+function shopFront(F, rand, tn, tr, uDoor, left, y) {
+  const { B, L, Wd } = F, side = left ? 1 : -1;
+  const uA = left ? Wd - 0.6 : 0.6;
+  if (rand() < 0.55) {      // the A-frame board: two leaves and a chalked panel
+    const u = uA, d = 1.15;
+    B('wood_dark', u - 0.3, u + 0.3, y + 0.1, y + 0.95, d - 0.27, d - 0.22); B('wood_dark', u - 0.3, u + 0.3, y + 0.1, y + 0.95, d + 0.22, d + 0.27);
+    B('lacquer_black', u - 0.25, u + 0.25, y + 0.3, y + 0.85, d + 0.27, d + 0.29); B('cloth_white', u - 0.2, u + 0.2, y + 0.4, y + 0.44, d + 0.29, d + 0.3); B('cloth_white', u - 0.14, u + 0.14, y + 0.55, y + 0.58, d + 0.29, d + 0.3);
+    B('iron', u - 0.3, u + 0.3, y + 0.94, y + 0.97, d - 0.1, d + 0.1);
+  }
+  const uC = left ? Wd - 1.4 : 1.4;
+  switch (tn) {
+    case 'grocer': case 'greengrocer':
+      for (let k = 0; k < 3; k++) B('sacking', uC - 0.25 + k * 0.2, uC - 0.02 + k * 0.2, y + 0.12, y + 0.7 - k * 0.12, 0.7, 1.05);
+      L('wood_dark', [[0.3, 0], [0.34, 0.2], [0.34, 0.6], [0.3, 0.8]], 10, uC + 0.6 * side, y + 0.12, 0.9); break;
+    case 'butcher': B('timber', uC - 0.4, uC + 0.4, y + 0.12, y + 0.85, 0.7, 1.2); B('cloth_white', uC - 0.4, uC + 0.4, y + 0.85, y + 0.88, 0.7, 1.2); break;
+    case 'baker': B('wicker', uC - 0.35, uC + 0.35, y + 0.12, y + 0.4, 0.75, 1.15); for (let k = 0; k < 4; k++) L('hide_tan', [[0.001, 0], [0.12, 0.02], [0.13, 0.08], [0.001, 0.16]], 7, uC - 0.25 + k * 0.17, y + 0.4, 0.95); break;
+    case 'draper': L('wood_dark', [[0.2, 0], [0.04, 0.02], [0.04, 1.0], [0.001, 1.05]], 6, uC, y + 0.12, 0.9); B('cloth_red', uC - 0.18, uC + 0.18, y + 0.9, y + 1.55, 0.78, 1.0); break;
+    case 'bootmaker': case 'tobacconist': case 'pawnbroker': B('wood_dark', uC - 0.35, uC + 0.35, y + 0.12, y + 0.5, 0.75, 1.2); break;
+    default: for (let k = 0; k < 2; k++) B('wood_dark', uC - 0.3, uC + 0.3, y + 0.12 + k * 0.3, y + 0.4 + k * 0.3, 0.75, 1.15);
+  }
+  // the night shutters, boards leaned by the pilaster
+  if (rand() < 0.5) { const u = left ? 0.05 : Wd - 0.35; B('shutter_brown', u, u + 0.3, y + 0.12, y + 2.1, 0.5, 0.58); }
+  void tr; void uDoor;
+}
+
 /**
  * shop_house: { rect, seed, front, storeys, y, trade } — a terrace house with a shop on the ground floor: pilasters on plinths with
  * console brackets, the plate-glass window with its mullions and transom lights over a panelled stallriser, the goods of the trade
@@ -248,7 +327,10 @@ export function shopHouse(el, ctx, base) {
   C(0, Wd, y, y + g0, 0, bayD + 0.02);
   // the cornice carrying the first floor's brick, the first-floor string, the upper windows
   B('plaster_white', 0, Wd, y + g0 + 0.1, y + g0 + 0.3, 0, 0.06);
-  for (let s = 1; s < n; s++) for (const u of [Wd * 0.27, Wd * 0.73]) sash(F, u, y + g0 + (s - 1) * st + 0.55, s === 1 ? 2.2 : 1.8);
+  const wins = [];
+  for (let s = 1; s < n; s++) for (const u of [Wd * 0.27, Wd * 0.73]) { sash(F, u, y + g0 + (s - 1) * st + 0.55, s === 1 ? 2.2 : 1.8); wins.push({ u, y0: y + g0 + (s - 1) * st + 0.55, hh: s === 1 ? 2.2 : 1.8, fl: s }); }
+  pavement(F, el.pw ?? 1.9); shopFront(F, rand, tn, tr, uDoor, left, y);
+  dress(F, rand, wins, { H, uD: null, brick: mat });
   for (let s = 2; s < n; s++) B('plaster_white', 0, Wd, y + g0 + (s - 1) * st - 0.1, y + g0 + (s - 1) * st + 0.1, 0, 0.06);
   roofAndStacks(F, mat, H, rand, false);
 }
@@ -312,9 +394,10 @@ export function pub(el, ctx, base) {
   // upper floors: stucco hoods over the first-floor windows, plain sashes above; a string course at each floor
   B('limestone', 0, Wd, y + g0 + 0.1, y + g0 + 0.3, 0, 0.06);
   const nw = Math.max(2, Math.round(Wd / 2.6));
+  const upper = [];
   for (let s = 1; s < n; s++) for (let i = 0; i < nw; i++) {
     const u = (i + 0.5) * Wd / nw, y0 = y + g0 + (s - 1) * st + 0.6, hh = s === 1 ? 2.3 : 1.9;
-    sash(F, u, y0, hh, { w: 0.95, lintel: s === 1 ? 'plaster_white' : 'limestone' });
+    sash(F, u, y0, hh, { w: 0.95, lintel: s === 1 ? 'plaster_white' : 'limestone' }); upper.push({ u, y0, hh, fl: s });
     if (s === 1) { B('plaster_white', u - 0.75, u + 0.75, y0 + hh + 0.3, y0 + hh + 0.42, -0.02, 0.16); B('plaster_white', u - 0.6, u + 0.6, y0 + hh + 0.42, y0 + hh + 0.52, -0.02, 0.12); }
   }
   B('plaster_white', 0, Wd, y + g0 + st - 0.1, y + g0 + st + 0.1, 0, 0.06);
@@ -325,6 +408,11 @@ export function pub(el, ctx, base) {
   for (let v = 0.6; v + 1.9 < D - 0.5; v += 2.8) { SB('lamp_glass', v, v + 1.9, y + 0.9, y + 2.45, 0, 0.03); SB('lamp_glass', v, v + 1.9, y + 2.5, y + 3.0, 0, 0.03); SB('wood_dark', v - 0.05, v, y + 0.9, y + 3.0, 0, 0.06); SB('wood_dark', v + 1.9, v + 1.95, y + 0.9, y + 3.0, 0, 0.06); }
   SB('wood_dark', D / 2 - 0.5, D / 2 + 0.5, y, y + 2.5, 0, 0.04);
   for (let s = 1; s < n; s++) for (let v = 1.0; v < D - 0.8; v += 3.1) SB('opening', v, v + 0.9, y + g0 + (s - 1) * st + 0.6, y + g0 + (s - 1) * st + 0.6 + (s === 1 ? 2.3 : 1.9), 0, 0.05);
+  pavement(F, el.pw ?? 1.9); dress(F, rand, upper, { H, uD: null, brick: mat, dormers: false });
+  // casks stood by the door, a barrel on its chocks, crates of empties
+  { const u = east ? Wd - 3.2 : 3.2;
+    for (let k = 0; k < 3; k++) F.L('wood_dark', [[0.001, 0], [0.26, 0.0], [0.3, 0.2], [0.33, 0.45], [0.3, 0.7], [0.26, 0.9], [0.001, 0.9]], 10, u + k * 0.62 * (east ? -1 : 1), y + 0.12, 1.0);
+    B('timber', u + (east ? -2.4 : 2.4) - 0.3, u + (east ? -2.4 : 2.4) + 0.3, y + 0.12, y + 0.5, 0.7, 1.1); }
   roofAndStacks(F, mat, H, rand, false);
 }
 

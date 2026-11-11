@@ -30,7 +30,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 
 // ── the streets (dossier §6): east–west streets every 30 m on Bridge Street's axis (7 m wide, Bridge Street itself 16 m),
 // north–south cross streets every 84 m (7 m), the terraces in blocks between them, every house's front on a street.
-export const STREET_W = 7, MAIN_W = 16, BLOCK_STEP = 30, CROSS_STEP = 84, CROSS_X0 = 44;
+export const STREET_W = 9, MAIN_W = 16, BLOCK_STEP = 30, CROSS_STEP = 84, CROSS_X0 = 44;
 /** the centres of the east–west streets (z) and of the north–south cross streets (x) */
 export const streetsZ = () => { const o = []; for (let k = -Math.ceil(RADIUS / BLOCK_STEP); k <= Math.ceil(RADIUS / BLOCK_STEP); k++) o.push(BRIDGE.z + k * BLOCK_STEP); return o; };
 export const crossX = () => { const o = []; for (let k = -Math.ceil(RADIUS / CROSS_STEP) - 1; k <= Math.ceil(RADIUS / CROSS_STEP) + 1; k++) o.push(CROSS_X0 + k * CROSS_STEP); return o; };
@@ -68,7 +68,7 @@ export function lots() {
         x += w;
         if (onCross(x0, x1)) { const c = crossX().find((c2) => x1 > c2 - STREET_W / 2 - 0.5 && x0 < c2 + STREET_W / 2 + 0.5); x = Math.max(x, c + STREET_W / 2 + 0.5); continue; }
         if (Math.hypot(cx, cz) > RADIUS - 45 || blocked(cx, cz) || blocked(x0, cz) || blocked(x1, cz)) continue;
-        const e = { rect: [x0, za, x1, za + D], seed: Math.floor(rand() * 1e6), front, storeys: 3 + (rand() < 0.3 ? 1 : 0), y: GROUND };
+        const e = { rect: [x0, za, x1, za + D], seed: Math.floor(rand() * 1e6), front, storeys: 3 + (rand() < 0.3 ? 1 : 0), y: GROUND, pw: onMain ? 2.6 : 1.9 };
         if (pub) { e.pub = true; e.storeys = 3; e.corner = east ? 'e' : 'w'; }
         else if (onMain ? rand() < 0.9 : near ? rand() < 0.45 : rand() < 0.12) { e.shop = true; e.trade = TRADES[Math.floor(rand() * TRADES.length)]; e.storeys = 3 + (rand() < 0.2 ? 1 : 0); }
         LOTS.push(e);
