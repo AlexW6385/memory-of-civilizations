@@ -1,0 +1,65 @@
+# Qufu, c. 1730 — dossier
+
+Settlement id: `lu-qufu` · Styles: `lu` (own; reuses the read-only `qing` and `ming` vocabularies) and `life` · Region: east Asia (the Shandong plain, Qufu) · Code: `src/settlements/lu-qufu/`, `src/styles/lu/`
+Status: built from nothing in this batch: the Temple of Confucius on its axis (Dacheng Hall enterable, with the statue of Confucius, the Apricot Altar, the Thirteen Stele Pavilions, Kuiwen Pavilion, the gates, the Bishui pool), the side temples of the ancestors and of the parents, the Kong Mansion, the Ming city wall with its south gate, the street of the temple, the courtyard houses and shops of the town, the cypress grove at the north edge (the Kong Forest's edge).
+
+Not built (left for later): the full 460 rooms of the temple (the minor courts and the east and west side compounds are single halls), the Kong Mansion's inner residential courts beyond the gate, the great halls and the garden pavilions' interiors, the Yan Temple, the Drum Tower, the north gate and the 1.3 km avenue to the Forest, the Spirit Way of the cemetery.
+
+Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
+
+## 1. The moment and the real place
+
+- **Place:** Qufu in Shandong, "the hometown of Confucius", on the flat alluvial plain by the Si River; the Temple of Confucius with the Kong Family Mansion immediately east of it, inside the Ming city wall. [stated: Wikipedia "Kong Family Mansion"; "Qufu"]
+- **Moment shown:** 1730, the year the restoration of the Dacheng Hall was completed. [stated: "A fire in 1724 largely destroyed the hall and its sculptures, and restoration was completed in 1730" — Wikipedia "Temple of Confucius, Qufu"; Dacheng Hall "rebuilt as a building with nine ridges and double eaves" in the second year of Yongzheng, 1724 — guides.qeeq.com] The temple and the hall as the Yongzheng Emperor rebuilt them are the ones we show. [inferred]
+- **The name "Lu":** Qufu was the capital of the state of Lu, Confucius's home state (the site's id). Nothing of the Lu city of the 5th century BC stands: the Lu city's walls "extended considerably further east and north" than the Ming wall, and the temple began in 478 BC as the house of Confucius, "the original three-room house removed in 611". [stated: Wikipedia "Qufu"; "Temple of Confucius, Qufu"] So the moment shown is the Qing temple, which keeps the Lu house's ground. [inferred]
+- **The city:** the present wall was built under the Jiajing Emperor in 1522, when the county town was moved so as to enclose the Temple and the Mansion; by 1730 it had stood two centuries. [stated: Wikipedia "Qufu": "the present-day wall was built during the reign of the Jiajing Emperor, in 1522"; the Temple, the Mansion and the Yan Temple "occupy large parts of the land inside the wall"; the Drum Tower near the centre; the "due-south gate" and the north gate survive] The south gate is the Wanren Gongqiang ("the Wall of Many Fathoms", from the Analects), which is the gate of the road to the Temple. [inferred: the name and its role are general knowledge, not on the pages fetched]
+- **Climate:** humid continental, bordering humid subtropical; January lows −3.8 °C and highs 5.1 °C; rain mostly in July and August. [stated: Wikipedia "Qufu"] Our sky: warm hazy plain, `damp` moderate.
+
+## 2. Layout (radius 330 m, the M class)
+
+Everything on the axis is at its true size; the distances between courts are shortened (the real axis, from the entrance road to the last hall, is "about 1.3 km long", nine courtyards [stated: Wikipedia]). Coordinates: metres, +x east, +z south, the Temple's axis x = 0.
+
+| Part | Real | Ours |
+|---|---|---|
+| Temple | about 16,000 m² (Wikipedia) or 21.8 ha and 327 m long, 153 m across (other accounts), "460 rooms", "nine courtyards", "a 1331 enclosure wall, modelled on the imperial palace"; "yellow roof tiles, red-painted walls, and dark-green pines" [stated: Wikipedia; ancient-history-sites.com] | precinct x −95…95, z −232…118, red walls under yellow tile, the courts in a row on the axis |
+| Gates in order | Lingxing, Shengshi, Hongdao (built 1377, "formerly the principal entrance"), Dazhong, Kuiwen, the Thirteen Stele Pavilions, Dacheng Gate, Apricot Altar, Dacheng Hall, the Resting Hall (of Confucius's wife) [stated] and the Hall of Sage Traces at the north end [inferred: general knowledge] | Lingxing z 158, Taihe Yuanqi archway 138, Shengshi 118, Bishui bridge 98, Hongdao 76, Dazhong 52, Tongwen 28, Kuiwen 4, stele pavilions −16 and −36, Dacheng Gate −52, Apricot Altar −80, Dacheng Hall −142…−117, Resting Hall −184…−170, Hall of Sage Traces −228…−213 |
+| Kuiwen Pavilion | built 1018, restored 1504 [stated: Wikipedia]; "30 × 17 m, 23.35 m high, three eaves, two storeys" [inferred: general knowledge] | 30 × 17.6 m, two storeys, double eaves in our vocabulary (a mid-roof is not built) |
+| Thirteen Stele Pavilions | "13 pavilions in two rows between Kuiwen and Dacheng Gate"; "northern row: 5 pavilions with large tortoise-borne stelae from the Kangxi, Yongzheng and Qianlong eras, 3.8–4 m tall, turtles up to 4.8 m, up to 65 tons"; "southern row: 8 pavilions with smaller stelae" [stated: Wikipedia] ; "four Ming imperial stelae south of Kuiwen, dated 1371, 1417, 1468 and 1504" [stated: ancient-history-sites.com] | two rows, the axis kept clear (six large and seven small: [inferred] arrangement), each a square pavilion in yellow tile over a tortoise and stele |
+| Dacheng Hall | "about 24.8 m high, 45.69 m long, 24.85 m wide; foundation 2.1 m high"; "nine ridges, double eaves, yellow glazed tiles"; "28 stone columns each about 6 m high and 0.8 m in diameter"; "10 on the front with coiled dragons … covered during imperial visits"; "a plaque in the centre of the double eaves of three raised golden characters, 'Grand Hall' (Dacheng Dian), inscribed by Yongzheng"; "eight bracket-set caissons with golden dragons" [stated: guides.qeeq.com; Wikipedia; ancient-history-sites.com] | 9 bays × 5 bays on a stone base 2.1 m high with the moon terrace (yuetai) before it; double eaves; the 10 front columns carry coiled dragons; inside, the enthroned statue of Confucius (§4) |
+| Apricot Altar | "in the centre of the courtyard in front of Dacheng Hall"; commemorates Confucius teaching under an apricot tree [stated]; a square pavilion with double eaves, yellow tile, cross-ridged [inferred: general knowledge] | on the axis at z −80, two apricot trees beside it |
+| East and West Corridors (Liangwu) | along the court's two sides, 40 rooms each [inferred: general knowledge] | two ranges, the cases of the sages' tablets |
+| Kong Mansion | "east of the Temple"; "152 buildings with 480 rooms, about 12,470 m²"; in front "official quarters in the style of a yamen" with the offices flanking the central court, the Gate of Double Glory (1503), the Great Hall, Second Hall, Third Hall, the Inner Gate, the reception hall, the two-storey main building, the back garden (Tieshan) [stated: Wikipedia "Kong Family Mansion"] | x 105…205, z −170…110: the gate, the court with the offices, the Double Glory Gate, three halls in a row, the inner gate, the residential rows, the garden |
+| City wall | built 1522 [stated]; brick-faced rammed earth, crenellated, gate tower over the passage [inferred: general knowledge of Ming county walls] | the south wall at z 262 (12 m), the Wanren Gongqiang gate with a tower on the axis |
+| Kong Forest | "about 2 km north of the Temple", "more than 10,000 mature trees", "the Beiguan Jie avenue runs 1,266 m north from the city's north gate lined with cypresses and pines"; Confucius's tomb "a cone-shaped hill" [stated: Wikipedia "Cemetery of Confucius"] | a cypress and pine grove at the north edge (z < −255) with a tomb mound and its stele: the Forest's edge, not the Forest |
+
+Population: not on the pages fetched; Qufu was a county town and the seat of the Duke Yansheng. [inferred]
+
+## 3. Ground, climate, planting
+
+Flat plain, brown-grey loess soil; the Bishui pool sunk 1 m below the court. [inferred] "The first three courtyards are planted with tall pines"; "dark-green pines around the buildings"; the cemetery avenue lined with "cypresses and pines". [stated: Wikipedia] So: cypress (Platycladus and Juniperus) and pine in the temple's courts, old and large; pagoda tree (Sophora) and elm in the town; jujube, persimmon and crab-apple in the courtyard houses; wheat and millet outside the wall. [inferred: species by general knowledge of the Shandong plain] The apricots of the altar. [stated: the name]
+
+## 4. The Dacheng Hall (the landmark)
+
+- **Facts:** §2. The hall is the tallest in the temple. [stated: qeeq]
+- **Ours:** the hall's body 45.7 × 24.85 m (nine bays of 5.08 m, five of 4.97 m); the base 2.1 m high with marble kerbs; the moon terrace (yuetai) before it, 3 m high on the front steps, with the carved stair at the middle (the "imperial way" slab) and side flights; the lower eaves on the column line, the upper hall set in by one bay under the second eaves; yellow glazed tiles, ridge ends and the nine ridges' beasts; the 10 front columns of grey stone, each wound by a coiled dragon in relief, the others plain stone; inside, between the stone columns, the floor of dark polished brick, the coffered ceiling painted in gold and blue, in the middle bay a red shrine in which sits the clay-and-gilt statue of Confucius, in a robe and the mianliu crown, behind a lacquered table of offerings with the bronze vessels; on each side the Four Correlates and the Twelve Wise Men (tablets in red shrines); a bianzhong frame of bells and a drum. [inferred: the interior from the Confucian temples' standard arrangement; the statue of the 1730 temple did not survive the cultural revolution]
+
+## 5. Style vocabulary (style `lu`)
+
+- **Yellow-glazed roofs over red walls** for the temple: the Qing imperial rank of the buildings. [stated: Wikipedia] Reused: `qing_hall`, `terrace`, `stairs`, `bronze`, `qing_gallery`, `palace_wall`.
+- **Stone portals:** Lingxing Gate, the "Taihe Yuanqi" and "Jinsheng Yuzhen" archways of stone (four columns, a lintel, little tiled roofs). [inferred]
+- **Stele pavilions:** a square pavilion, double eaves, a stele on a tortoise (bixi). [stated: "tortoise-borne stelae"]
+- **Dragon columns:** the stone column with a coiled dragon in deep relief. [stated]
+- **Houses of the town:** grey brick, grey tile, the Shandong courtyard house; the shops of the street with their timber fronts and signboards. [inferred: Qing north China]
+
+## 6. The town
+
+- The Temple "divides the historic city into eastern and western parts". [stated: ancient-history-sites.com] East: the Mansion; west: the streets of the town; south: the street to the temple's gate, lined with shops that live from the pilgrims and the clan. [inferred]
+- Courtyard houses in rows on lanes, the shop street (Queli Street) from the south gate to the temple's first gate, shops of the pilgrims' goods: incense, paper, ink and brush, rubbings of the steles, books, food (fried cakes, noodles), tea. [inferred]
+
+## 7. People
+
+Qing dress: men in the long gown with the queue (the order of 1645) and the skullcap; scholars in blue gowns; officials of the Duke's household; women in the long gown and the jacket; boys in the gown; porters with the shoulder pole; sacrificial officials in the temple. [stated for the queue: Qing-beijing dossier; the rest inferred]. The sacrifices: "a ceremony marking Confucius' birthday is held each year on September 28". [stated: Wikipedia] Pilgrims and students in the temple's courts. [inferred]
+
+## 8. Sound
+
+Wind in the cypresses and pines, crows and magpies (the temple's trees are "full of crows" [inferred: general knowledge]), cicadas in summer; in the temple the bells and stone chimes (bianzhong, bianqing) and the drum of the sacrifice, solemn pentatonic music (yayue); in the street the hawkers, carts and donkeys.
