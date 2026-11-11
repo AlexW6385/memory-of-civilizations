@@ -99,7 +99,7 @@ function hall(el, ctx) {
   bag.add('tuff_red', box(x0, 0, z0, x1, Y, z1)); col.floor(el.rect, Y);
   clayWall(ctx, [x0, z0 + 0.3], [x1, z0 + 0.3], 0.6, Y, T + 0.3, wm, (el.doors ?? [cx]).map((at) => ({ at: at - x0, w: 3, h: 3.1 })));
   for (const x of [x0 + 0.3, x1 - 0.3]) clayWall(ctx, [x, z0], [x, z1], 0.6, Y, T + 0.3, wm, [{ at: (z1 - z0) / 2, w: 3, h: 3.1 }]);
-  bag.add('timber', box(x0, T, z0, x1, T + 0.1, z1));
+  bag.add('timber', box(x0 - 0.9, T, z0 - 0.9, x1 + 0.9, T + 0.1, z1 + 0.9));
   gable(ctx, el.rect, T + 0.1, 5.2, SHINGLE, 'x', 0.9);
   bag.add(SHINGLE, box(x0 - 0.9, T + 5.2, cx * 0 + (z0 + z1) / 2 - 0.15, x1 + 0.9, T + 5.45, (z0 + z1) / 2 + 0.15));
   // the pillars: the front row and one a third of the way in

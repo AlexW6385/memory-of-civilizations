@@ -17,7 +17,7 @@ E.push({ t: 'benin_wall', a: [X1 - 0.5, Z0 + 0.6], b: [X1 - 0.5, Z1 - 0.6], ...W
 E.push({ t: 'benin_gatehouse', c: [GATE_X, Z1], seed: 7 });
 // the outer court between its galleries (an open earthen court: no impluvium), the great gallery on its north side
 E.push({ t: 'benin_court', rect: OC, sides: { n: false, s: false }, impluvium: false, doors: { w: [14, 46], e: [14, 46] }, seed: 11 });
-E.push({ t: 'benin_hall', rect: HALL, doors: [-95 - HALL[0], -35 - HALL[0]], seed: 12 });
+E.push({ t: 'benin_hall', rect: HALL, doors: [-95, -35], seed: 12 });
 // the inner courts: impluvia, galleries, altars along the north galleries
 COURTS.forEach((r, i) => E.push({ t: 'benin_court', rect: r, noWall: ['n'], altars: { side: 'n', n: i === 1 ? 5 : 3 }, doors: { s: [(r[2] - r[0]) / 2], w: i === 0 ? [20] : false, e: i === 2 ? [20] : false }, seed: 21 + i }));
 // the turrets: the great ones on the two ends of the audience gallery, the others at the corners
