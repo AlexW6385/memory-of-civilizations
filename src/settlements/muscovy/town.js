@@ -1,5 +1,5 @@
 // The log houses (izby) of the boyars' courts and the posad (docs/settlements/muscovy.md §5).
-import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, MOAT, BASIL, lots, height, wallX, gateZ } from './layout.js';
+import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments } from './layout.js';
 const base = (id, elements) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
 // the gable end of each house turned to the nearer street (the streets of layout.js: x = 42 − 420 + 84k, z = 35 − 420 + 70k)
 function front([x0, z0, x1, z1]) {
@@ -11,7 +11,8 @@ function front([x0, z0, x1, z1]) {
 export const openIzba = (l) => (Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20) < 200 ? l.seed % 5 === 0 : l.seed % 31 === 0);
 export async function houses() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 200) plans.push(base(`muscovy-houses-${i / 200}`, all.slice(i, i + 200).map((l) => ({ t: 'izba', ...l, front: front(l.rect), open: openIzba(l) }))));
+  for (let i = 0; i < all.length; i += 200) plans.push(base(`muscovy-houses-${i / 200}`, all.slice(i, i + 200).map((l) => ({ t: 'izba', ...l, front: front(l.rect), open: openIzba(l), yard: Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20) < 240 ? 6.7 : 0, groundY: height }))));
+  plans.push(base('muscovy-streets', streets()), base('muscovy-market', market()), base('muscovy-churches', CHURCHES.map(([x, z, yaw]) => ({ t: 'log_church', c: [x, z], y: height(x, z), yaw }))));
   plans.push({ ...base('muscovy-people', people()), style: 'life' });
   return plans;
 }
@@ -61,5 +62,19 @@ export function people() {
   { const [bx, bz] = BASIL, by = height(bx, bz) + 4.02;
     fig([bx + 1.6, bz], -Math.PI / 2, { y: by, cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cape', hat: 'none', beard: 1, hair: 'long' });
     for (let q = 0; q < 7; q++) { const at = [bx - 0.5 - rand() * 3, bz + (rand() - 0.5) * 4.5]; fig(at, -Math.PI / 2 + (rand() - 0.5) * 0.4, { y: by, pose: 'stand', hat: 'none' }); } }
+  return L;
+}
+
+/** The street paving: half-round logs down the middle of every street of the grid, wherever it is not the Kremlin's open ground, the square, the river or a reserved site. */
+function streets() {
+  return streetSegments().map(({ a, b }, i) => ({ t: 'street_log', a, b, w: 5, y: height, seed: 11 + i }));
+}
+/** The market on Red Square: rows of stalls west of the lane before the trading rows, back to back along the square's east side, a few more on the Nikolsky side. */
+function market() {
+  const L = [], x0 = SQUARE[2] - 20;
+  for (const [z, n] of [[-110, 6], [-62, 6], [-12, 5], [100, 5]]) {
+    L.push({ t: 'stalls', c: [x0 + 2.4, z], n, along: 'z', face: -1, y: height, seed: 40 + z, gap: 0.4 });
+    L.push({ t: 'stalls', c: [x0 + 6.0, z], n, along: 'z', face: 1, y: height, seed: 90 + z, gap: 0.4 });
+  }
   return L;
 }

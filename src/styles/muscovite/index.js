@@ -12,6 +12,7 @@ import { slab, hexa, pitched, pyr, wallShape } from '../norse/index.js';
 import { cathedralInside } from './dormition.js';
 import { izbaInside } from './izba.js';
 import { intercession } from './intercession.js';
+import { nalichnik, yardFence, streetLog, stalls, logChurch } from './posad.js';
 import { ivanTower, archangel, annunciation } from './kremlin.js';
 
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
@@ -291,6 +292,13 @@ function kremlinWall(el, { bag, col }) {
  * of the living room in board frames under small pediments, the steep plank roof with the barge
  * boards (prichelina) and the hanging "towel" board, and the ridge log (okhlupen) ending in a horse's head.
  */
+function fenceEnds([x0, z0, x1, z1], front, r) {
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  if (front === 'x0') return [[cx - r, cz + r], [cx - r, cz - r]];
+  if (front === 'x1') return [[cx + r, cz - r], [cx + r, cz + r]];
+  if (front === 'z0') return [[cx - r, cz - r], [cx + r, cz - r]];
+  return [[cx + r, cz + r], [cx - r, cz + r]];
+}
 function izba(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1);
   const alongX = x1 - x0 >= z1 - z0, front = el.front ?? (alongX ? (rand() < 0.5 ? 'x0' : 'x1') : (rand() < 0.5 ? 'z0' : 'z1'));
@@ -299,6 +307,7 @@ function izba(el, { bag, col }) {
   // a box given in the front's frame: u along the face, v up, w out from the face
   const B = (a0, a1, v0, v1, w0, w1) => { const p = f + sg * w0, q = f + sg * w1; return ex ? box(Math.min(p, q), v0, a0, Math.max(p, q), v1, a1) : box(a0, v0, Math.min(p, q), a1, v1, Math.max(p, q)); };
   const open = !!el.open, D = ex ? x1 - x0 : z1 - z0, fl = y + 0.32, T = 0.28;
+  const P2 = (u, v, w) => (ex ? [f + sg * w, v, u] : [u, v, f + sg * w]);
   const toW = (c) => (c - f) * sg;                                                      // a coordinate along the depth axis → w
   const Cb = (a0, a1, w0, w1, v0, v1) => { const p = f + sg * w0, q = f + sg * w1; col.rect(ex ? [Math.min(p, q), a0, Math.max(p, q), a1] : [a0, Math.min(p, q), a1, Math.max(p, q)], v0, v1); };
   const dLo = ex ? (front === 'x0' ? x1 - 2.2 : x0 + 1.2) : (front === 'z0' ? z1 - 2.2 : z0 + 1.2), dW = [toW(dLo), toW(dLo + 0.95)].sort((a, b) => a - b);
@@ -320,14 +329,20 @@ function izba(el, { bag, col }) {
   }
   // the windows: board frames standing out from the logs, the dark panes, the pediments and sill boards
   const nw = u1 - u0 > 6.5 ? 3 : 2, wy = y + 1.55;
+  const Af = (u, w) => { const p = ex ? [f + sg * w, u] : [u, f + sg * w]; return p; }, nmat = rand() < 0.3 ? 'paint_white' : 'timber';
   for (let k = 0; k < nw; k++) {
     const c = um + (k - (nw - 1) / 2) * 1.35;
-    bag.add('timber', B(c - 0.46, c + 0.46, wy - 0.12, wy + 0.82, 0.12, 0.2));
-    bag.add('opening', B(c - 0.28, c + 0.28, wy + 0.04, wy + 0.66, 0.2, 0.215));
-    bag.add('timber', B(c - 0.56, c + 0.56, wy - 0.24, wy - 0.12, 0.12, 0.26));
-    const p = f + sg * 0.12, q = f + sg * 0.24;
-    bag.add('timber', ex ? frustum([Math.min(p, q), c - 0.56, Math.max(p, q), c + 0.56], wy + 0.82, wy + 1.18, 0, 0, 0.56, 0.56, { noBottom: true }) : frustum([c - 0.56, Math.min(p, q), c + 0.56, Math.max(p, q)], wy + 0.82, wy + 1.18, 0.56, 0.56, 0, 0, { noBottom: true }));
+    bag.add('opening', B(c - 0.35, c + 0.35, wy + 0.04, wy + 0.74, 0.15, 0.165));
+    nalichnik(bag, Af, c, wy - 0.11, nmat, 0.2);
   }
+  // the low porch (kryltso) at the side door of the closed houses: two posts, a plank step, a small pent roof
+  if (!open) {
+    const wa = dW[0] - 0.12, wb = dW[1] + 0.12, pu = u0 - 1.0;
+    bag.add('planks_grey', B(pu, u0, foot, y + 0.14, wa, wb));
+    for (const w of [wa + 0.06, wb - 0.06]) { bag.add('timber', B(pu + 0.02, pu + 0.14, y + 0.14, y + 2.4, w - 0.06, w + 0.06)); Cb(pu + 0.02, pu + 0.14, w - 0.06, w + 0.06, y + 0.14, y + 2.4); }
+    bag.add('planks_grey', hexa([P2(u0, y + 2.62, wa - 0.1), P2(u0, y + 2.62, wb + 0.1), P2(pu - 0.2, y + 2.38, wb + 0.1), P2(pu - 0.2, y + 2.38, wa - 0.1), P2(u0, y + 2.7, wa - 0.1), P2(u0, y + 2.7, wb + 0.1), P2(pu - 0.2, y + 2.46, wb + 0.1), P2(pu - 0.2, y + 2.46, wa - 0.1)]));
+  }
+  if (el.yard) yardFence(bag, col, ...fenceEnds(el.rect, front, el.yard), (x, z) => el.groundY ? el.groundY(x, z) : y);
   // the door in a side wall, under a small lintel
   { const dz = ex ? z0 : z1, ds = ex ? -1 : 1, dx0 = ex ? (front === 'x0' ? x1 - 2.2 : x0 + 1.2) : x0 - 0.05, dc = ex ? dx0 : (front === 'z0' ? z1 - 2.2 : z0 + 1.2);
     if (open) { bag.add('timber', B(u0 + T, u0 + T + 0.9, fl, fl + 1.85, dW[1] - 0.05, dW[1])); bag.add('timber', B(u0 - 0.06, u0 + T, fl + 1.9, fl + 2.05, dW[0] - 0.1, dW[1] + 0.1)); }
@@ -551,6 +566,6 @@ function beamBox(a, b, w, h) {
 }
 registerStyle('muscovite', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
+  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, street_log: streetLog, stalls, log_church: logChurch, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
   objects: {},
 });
