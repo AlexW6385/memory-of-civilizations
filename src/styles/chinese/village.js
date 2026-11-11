@@ -6,6 +6,7 @@
 // `chinese` style, built from axis-aligned boxes and a few sloping slabs; every piece sits on what holds it.
 
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { tube, blob } from './statues.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 function hexa(out, b, t) {
@@ -271,6 +272,164 @@ export function wutaiMill({ at: [x, z], y, rot = 0 }, { bag, col }) {
   col.circle(x, z, 1.4, y, y + 0.4);
 }
 
+
+/** wutai_floor { at, y, r, mat, h }: a round floor of beaten earth or flagstones (a threshing floor, the apron of the well), its skirt buried. */
+export function wutaiFloor({ at: [x, z], y, r = 5, mat = 'mud_plaster', h = 0.05 }, { bag }) {
+  bag.add(mat, lathe([[0.001, -0.7], [r, -0.7], [r, h], [0.001, h]], 24, (th) => 1 + 0.03 * Math.sin(th * 5), x, y, z));
+  bag.add('schist_rubble', lathe([[r * 0.995, -0.7], [r * 1.04, -0.7], [r * 1.04, h * 0.6], [r * 0.995, h * 0.6]], 24, (th) => 1 + 0.03 * Math.sin(th * 5), x, y, z));
+}
+
+/**
+ * wutai_threshing { rect, front, y, seed }: a threshing floor: a round floor of rolled earth, the stone roller lying on it,
+ * heaps of straw and of grain, a wooden fork and a winnowing shovel leaning on a post, a low wattle windbreak on the windward side.
+ */
+export function wutaiThreshing(el, { bag, col }) {
+  const { fr, B } = tools(el, bag, col), { L, D, P } = fr, rand = rng((el.seed || 1) + 3), y = el.y;
+  const r = Math.min(L, D) * 0.36, [cx, cz] = P(L * 0.5, D * 0.5);
+  wutaiFloor({ at: [cx, cz], y, r, h: 0.06 }, { bag });
+  const t = y + 0.06;
+  // the roller: a stone cylinder in a wooden frame, lying on the floor
+  const rl = lathe([[0.001, -0.5], [0.34, -0.5], [0.34, 0.5], [0.001, 0.5]], 14); rl.rotateZ(Math.PI / 2); const a = rand() * 3.14; rl.rotateY(a); rl.translate(cx + Math.cos(a) * 0.4, t + 0.34, cz - Math.sin(a) * 0.4); bag.add('granite_grey', rl);
+  for (const sg of [-1, 1]) { const c = Math.cos(a), sn = Math.sin(a); const px = cx + Math.cos(a) * 0.4 + 0 * c, pz = cz - Math.sin(a) * 0.4; void sn; bag.add('timber', tube([[px + sg * 0 + Math.sin(a) * sg * 0.56, t + 0.34, pz + Math.cos(a) * sg * 0.56, 0.035], [px + Math.sin(a) * sg * 0.56 + Math.cos(a) * 1.6, t + 0.62, pz + Math.cos(a) * sg * 0.56 - Math.sin(a) * 1.6, 0.03]], 6)); }
+  // straw and grain heaps at the edge of the floor
+  for (let i = 0; i < 3; i++) { const u = (0.18 + 0.32 * i + rand() * 0.1) * L, v = D * (0.12 + rand() * 0.06), [hx, hz] = P(u, v), hr = 0.9 + rand() * 0.8;
+    bag.add(i === 1 ? 'paint_ochre' : 'thatch', lathe([[0.001, -0.1], [hr, -0.1], [hr * 0.85, hr * 0.35], [hr * 0.45, hr * 0.62], [0.001, hr * 0.7]], 12, (th) => 1 + 0.07 * Math.sin(th * 3 + i), hx, y, hz)); }
+  // the fork and the shovel leaning on a post by the floor's side
+  const [px, pz] = P(L * 0.9, D * 0.55);
+  B('timber', L * 0.9 - 0.05, D * 0.55 - 0.05, L * 0.9 + 0.05, D * 0.55 + 0.05, y - 0.3, y + 1.9, true);
+  B('timber', L * 0.9 + 0.1, D * 0.55 - 0.02, L * 0.9 + 0.14, D * 0.55 + 0.02, y + 0.0, y + 1.7, false);
+  B('timber', L * 0.9 + 0.2, D * 0.55 - 0.1, L * 0.9 + 0.24, D * 0.55 + 0.1, y + 0.0, y + 0.5, false);
+  // the wattle windbreak: a low screen of sorghum stalks between posts
+  for (let u = L * 0.05; u < L * 0.5; u += 0.8) B('timber', u - 0.04, D * 0.92 - 0.04, u + 0.04, D * 0.92 + 0.04, y - 0.2, y + 1.3, false);
+  B('thatch', L * 0.05, D * 0.92 - 0.07, L * 0.55, D * 0.92 + 0.07, y + 0.1, y + 1.25, false);
+  void px; void pz;
+}
+
+/**
+ * wutai_garden { rect, front, y, seed }: a vegetable plot walled by a wattle fence: raised beds in rows, cabbages and onions,
+ * a bean tent on poles, pumpkins on the ground, a lean-to tool shed and a water vat at the end.
+ */
+export function wutaiGarden(el, { bag, col }) {
+  const { fr, B, S, pot } = tools(el, bag, col), { L, D } = fr, rand = rng((el.seed || 1) + 5), y = el.y;
+  // the fence: posts and a screen of stalks round three sides, the gate side open
+  const fence = (u0, v0, u1, v1) => B('thatch', u0, v0, u1, v1, y + 0.1, y + 1.15, false);
+  fence(0.1, D - 0.4, L - 0.1, D - 0.3); fence(0.1, 0.3, 0.2, D - 0.3); fence(L - 0.2, 0.3, L - 0.1, D - 0.3);
+  for (let u = 0.1; u < L; u += 1.5) B('timber', u - 0.05, D - 0.45, u + 0.05, D - 0.25, y - 0.2, y + 1.3, false);
+  for (let v = 0.5; v < D - 0.4; v += 1.5) { B('timber', 0.05, v - 0.05, 0.25, v + 0.05, y - 0.2, y + 1.3, false); B('timber', L - 0.25, v - 0.05, L - 0.05, v + 0.05, y - 0.2, y + 1.3, false); }
+  // the beds: long mounds of tilled earth in rows, each with its crop
+  const rows = Math.floor((L - 2.0) / 1.5), crops = ['cab', 'onion', 'bean', 'pump', 'cab', 'onion'];
+  for (let i = 0; i < rows; i++) {
+    const u = 1.0 + i * 1.5, v0 = 1.4, v1 = D - 2.6, crop = crops[Math.floor(rand() * crops.length)];
+    B('mud_plaster', u, v0, u + 1.0, v1, y - 0.3, y + 0.22, false);
+    for (let v = v0 + 0.4; v < v1 - 0.2; v += crop === 'bean' ? 1.6 : 0.62) {
+      const [px, pz] = fr.P(u + 0.5, v);
+      if (crop === 'cab') bag.add('flax_leaf', lathe([[0.001, 0], [0.2, 0.06], [0.24, 0.17], [0.16, 0.3], [0.001, 0.32]], 9, (th) => 1 + 0.12 * Math.sin(th * 5), px, y + 0.2, pz));
+      else if (crop === 'onion') for (let k = -1; k <= 1; k++) bag.add('flax_leaf', tube([[px + k * 0.14, y + 0.2, pz, 0.01], [px + k * 0.16, y + 0.55, pz, 0.012], [px + k * 0.14, y + 0.7, pz + 0.04, 0.003]], 4));
+      else if (crop === 'pump') { bag.add('paint_ochre', blob([px, y + 0.4, pz], 0.2, 0.15, 0.2, 8, 4)); bag.add('flax_leaf', lathe([[0.001, 0], [0.4, 0.04], [0.3, 0.15], [0.001, 0.2]], 8, null, px + 0.3, y + 0.23, pz)); }
+      else {                                                                                  // a bean tent: two leaning poles tied at the top, vines up them
+        for (const sg of [-1, 1]) bag.add('timber', tube([[px + sg * 0.45, y + 0.2, pz, 0.018], [px, y + 1.7, pz, 0.014]], 5));
+        for (const sg of [-1, 1]) bag.add('flax_leaf', tube([[px + sg * 0.42, y + 0.25, pz, 0.05], [px + sg * 0.22, y + 0.9, pz, 0.07], [px + sg * 0.05, y + 1.55, pz, 0.04]], 5));
+      }
+    }
+  }
+  // a lean-to tool shed against the back fence, a vat
+  const su = L * 0.5 - 1.2;
+  B('timber', su, D - 2.3, su + 0.1, D - 2.2, y - 0.2, y + 1.9, false); B('timber', su + 2.3, D - 2.3, su + 2.4, D - 2.2, y - 0.2, y + 1.9, false);
+  S('thatch', su - 0.2, D - 2.4, su + 2.6, D - 0.3, y + 2.15, y + 1.55, 0.12);
+  B('mud_plaster', su + 0.2, D - 1.0, su + 2.2, D - 0.5, y, y + 0.35, false);
+  pot('wood_dark', 1.4, D - 1.2, 0.4, 0.8, y); void col;
+}
+
+/**
+ * wutai_oldtree { at, y, h, seed }: the great old pagoda tree (huai) of the village green: a thick trunk flared at the root and
+ * fissured, three limbs, a broad crown of leaf masses; round it a stone seat (a ring of dressed stone) worn smooth, red cloths
+ * tied to a limb. The seat's inner space is trodden earth.
+ */
+export function wutaiOldTree({ at: [x, z], y, h = 11, seed = 1 }, { bag, col }) {
+  const rand = rng(seed + 31), R = 0.85;
+  bag.add('bark_grey', lathe([[0.001, -0.5], [R * 1.5, -0.5], [R * 1.35, 0.2], [R * 1.0, 0.9], [R * 0.92, 2.2], [R * 0.95, 3.0], [R * 0.8, 3.6], [0.001, 3.6]], 14, (th, i) => 1 + (i > 0 && i < 6 ? 0.07 * Math.cos(th * 7 + i) + 0.04 * Math.cos(th * 3) : 0), x, y, z));
+  for (let i = 0; i < 4; i++) { const a = i * 1.57 + rand(); bag.add('bark_grey', tube([[x + Math.cos(a) * R * 1.0, y + 0.1, z + Math.sin(a) * R * 1.0, 0.3], [x + Math.cos(a) * R * 1.9, y - 0.05, z + Math.sin(a) * R * 1.9, 0.1]], 6)); }
+  const limbs = [];
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * 6.28 + rand() * 0.6, up = 5.8 + rand() * 2.8, out = 3.8 + rand() * 2.4;
+    const p = [[x, y + 3.2, z, 0.5], [x + Math.cos(a) * out * 0.3, y + 3.2 + up * 0.35, z + Math.sin(a) * out * 0.3, 0.38], [x + Math.cos(a) * out * 0.7, y + 3.2 + up * 0.75, z + Math.sin(a) * out * 0.7, 0.24], [x + Math.cos(a) * out, y + 3.2 + up, z + Math.sin(a) * out, 0.12]];
+    bag.add('bark_grey', tube(p, 7)); limbs.push(p[3]);
+    // a side branch
+    const m = p[2]; bag.add('bark_grey', tube([[m[0], m[1], m[2], 0.16], [m[0] + Math.cos(a + 0.7) * 2.2, m[1] + 1.3, m[2] + Math.sin(a + 0.7) * 2.2, 0.08], [m[0] + Math.cos(a + 0.7) * 3.4, m[1] + 2.1, m[2] + Math.sin(a + 0.7) * 3.4, 0.05]], 5));
+    limbs.push([m[0] + Math.cos(a + 0.7) * 3.4, m[1] + 2.1, m[2] + Math.sin(a + 0.7) * 3.4]);
+  }
+  // the crown: leaf masses on the limb tips and between, the underside flat
+  for (const [lx, ly, lz] of limbs) for (let k = 0; k < 2; k++) bag.add('flax_leaf', blob([lx + (rand() - 0.5) * 1.6, ly + 0.2 + k * 0.9, lz + (rand() - 0.5) * 1.6], 2.4 + rand() * 1.0, 1.4 + rand() * 0.5, 2.4 + rand() * 1.0, 9, 5));
+  bag.add('flax_leaf', blob([x, y + 3.2 + 8.2, z], 3.4, 1.8, 3.4, 10, 5));
+  // the seat: a ring of dressed stone with a step, the earth inside trodden hard; red cloths on the low limb
+  bag.add('limestone', lathe([[2.0, -0.3], [2.35, -0.3], [2.35, 0.44], [2.0, 0.44]], 18, null, x, y, z));
+  bag.add('mud_plaster', lathe([[0.001, -0.3], [2.0, -0.3], [2.0, 0.03], [0.001, 0.03]], 18, null, x, y, z));
+  for (let i = 0; i < 6; i++) { const a = 0.5 + i * 0.35, q = limbs[0]; void a; bag.add('cloth_red', box(q[0] - 0.9 + i * 0.3, q[1] - 1.1, q[2] + 0.1, q[0] - 0.84 + i * 0.3, q[1] - 0.1, q[2] + 0.13)); }
+  col.circle(x, z, 2.4, y - 0.3, y + 0.5);
+  col.circle(x, z, R, y, y + 5);
+}
+
+
+/**
+ * wutai_temple { rect, front, y, foot, seed }: the village's small temple (a Guandi or Dragon King temple of the kind every
+ * village of the region keeps; here the village's own): a hall of three bays on a stone platform at the back of the yard,
+ * walls of grey brick, a red plank door and two lattice windows, a gable roof of grey tiles with a ridge and small chiwei, a
+ * porch of two red posts on stone bases under the front eave; before it a stone incense burner, a stele on a tortoise-less
+ * base, a pair of old pines. The yard's wall is its own element (wutai_yard).
+ */
+export function wutaiTemple(el, { bag, col }) {
+  const { fr, B, S } = tools(el, bag, col), { L, D, P } = fr, y = el.y, foot = Math.min(el.foot ?? y, y);
+  const Wh = 9.6, Dh = 6.2, u0 = (L - Wh) / 2, v0 = D - 1.1 - Dh, F = y + 0.55, Hw = 3.7;
+  const bay = Wh / 3, dc = u0 + bay * 1.5;
+  B('schist_rubble', u0 - 0.5, v0 - 1.6, u0 + Wh + 0.5, v0 + Dh + 0.3, foot - 0.5, F - 0.04, true);              // the platform of stone
+  B('limestone', u0 - 0.55, v0 - 1.65, u0 + Wh + 0.55, v0 + Dh + 0.35, F - 0.04, F, false);
+  for (let k = 0; k < 3; k++) B('limestone', dc - 1.2 + k * 0.1, v0 - 1.65 - 0.34 * (k + 1), dc + 1.2 - k * 0.1, v0 - 1.65 - 0.34 * k, foot - 0.3, F - 0.04 - 0.17 * k - 0.0, false);
+  // walls and the front: three bays, the middle one a door
+  B('brick_grey', u0, v0, u0 + Wh, v0 + Dh, F, F + Hw, true);
+  B('wood_dark', dc - 0.8, v0 - 0.08, dc, v0, F + 0.05, F + 2.6); B('wood_dark', dc, v0 - 0.08, dc + 0.8, v0, F + 0.05, F + 2.6);
+  B('timber_red', dc - 0.95, v0 - 0.12, dc - 0.8, v0, F, F + 2.75); B('timber_red', dc + 0.8, v0 - 0.12, dc + 0.95, v0, F, F + 2.75); B('timber_red', dc - 0.95, v0 - 0.12, dc + 0.95, v0, F + 2.6, F + 2.75);
+  for (const hy of [0.5, 1.3, 2.1]) B('timber', dc - 0.8, v0 - 0.1, dc + 0.8, v0 - 0.08, F + hy, F + hy + 0.1);
+  for (const c of [u0 + bay * 0.5, u0 + bay * 2.5]) { B('timber_red', c - 0.8, v0 - 0.12, c + 0.8, v0, F + 0.9, F + 2.5); B('lattice_red', c - 0.7, v0 - 0.14, c + 0.7, v0 - 0.12, F + 1.0, F + 2.4); }
+  // the porch: two red posts on stone bases, a beam, the eave over them
+  for (const c of [dc - 1.55, dc + 1.55]) { B('granite_grey', c - 0.25, v0 - 1.35, c + 0.25, v0 - 0.85, F, F + 0.3, true); B('timber_red', c - 0.17, v0 - 1.27, c + 0.17, v0 - 0.93, F + 0.3, F + Hw - 0.25, true); }
+  B('timber_red', dc - 1.8, v0 - 1.3, dc + 1.8, v0 - 0.9, F + Hw - 0.25, F + Hw + 0.1, false);
+  // the roof: two slopes of grey tile from the ridge, the eaves wide, gable ends filled with brick; the ridge capped
+  const rg = F + Hw + 1.55, ey = F + Hw + 0.05, vm = v0 + Dh / 2, vf = v0 - 2.0, vb = v0 + Dh + 0.9;
+  const slopeF = (rg - ey) / (vm - (v0 - 0.0)), eF = rg - slopeF * (vm - vf), eB = rg - slopeF * (vb - vm);
+  S('timber', u0 - 0.6, vf, u0 + Wh + 0.6, vm, eF, rg, 0.12); S('timber', u0 - 0.6, vm, u0 + Wh + 0.6, vb, rg, eB, 0.12);
+  S('tile_grey', u0 - 0.65, vf - 0.05, u0 + Wh + 0.65, vm, eF + 0.14, rg + 0.14, 0.16); S('tile_grey', u0 - 0.65, vm, u0 + Wh + 0.65, vb + 0.05, rg + 0.14, eB + 0.14, 0.16);
+  B('tile_grey', u0 - 0.7, vm - 0.3, u0 + Wh + 0.7, vm + 0.3, rg + 0.1, rg + 0.45, false);
+  for (const e of [u0 - 0.6, u0 + Wh + 0.6 - 0.4]) B('tile_grey', e, vm - 0.2, e + 0.4, vm + 0.2, rg + 0.45, rg + 0.95, false);
+  for (const gu of [u0 - 0.0, u0 + Wh - 0.5]) {
+    const t = [], pt = (u, v, yy) => { const p = P(u, v); return [p[0], yy, p[1]]; };
+    const g0 = gu, g1 = gu + 0.5, hmax = rg;
+    const a = pt(g0, v0, F + Hw), b2 = pt(g0, v0 + Dh, F + Hw), c = pt(g0, vm, hmax), d = pt(g1, v0, F + Hw), e = pt(g1, v0 + Dh, F + Hw), f = pt(g1, vm, hmax);
+    t.push(...a, ...b2, ...c, ...d, ...f, ...e); void d; void e; void f;
+    bag.add('brick_grey', fromTriangles(orientOutward([...a, ...b2, ...c, ...d, ...f, ...e, ...a, ...c, ...f, ...a, ...f, ...d, ...b2, ...e, ...f, ...b2, ...f, ...c])));
+  }
+  // the yard: incense burner, stele, flag stones along the way
+  const [bx, bz] = P(dc, v0 - 4.0);
+  bag.add('bronze', lathe([[0.001, 0], [0.4, 0], [0.42, 0.05], [0.5, 0.15], [0.52, 0.45], [0.42, 0.5], [0.001, 0.5]], 12, null, bx, y + 0.5, bz));
+  B('limestone', dc - 0.45, v0 - 4.45, dc + 0.45, v0 - 3.55, y - 0.2, y + 0.5, true);
+  for (const s of [-1, 1]) B('bronze', dc + s * 0.38 - 0.04, v0 - 4.04, dc + s * 0.38 + 0.04, v0 - 3.96, y + 1.0, y + 1.25);
+  const su = u0 - 1.6; B('limestone', su, v0 - 0.5, su + 0.9, v0 + 0.2, y - 0.2, y + 0.3, false); B('limestone', su + 0.1, v0 - 0.4, su + 0.8, v0 - 0.1, y + 0.3, y + 1.9, true); B('limestone', su + 0.05, v0 - 0.45, su + 0.85, v0 - 0.05, y + 1.9, y + 2.05, false);
+  for (let v = 0.6; v < v0 - 2.0; v += 0.9) B('limestone', dc - 0.5, v, dc + 0.5, v + 0.7, y - 0.2, y + 0.03, false);
+  void col;
+}
+
+/** wutai_shrine { at, y, rot }: a small earth-god shrine (tudi miao) of brick: a niche with a red lining, a tiled gable, a stone offering table. */
+export function wutaiShrine(el, { bag, col }) {
+  const f = { rect: [el.at[0] - 0.7, el.at[1] - 0.6, el.at[0] + 0.7, el.at[1] + 0.6], front: el.front || 'w' };
+  const { fr, B, S } = tools(f, bag, col), y = el.y;
+  B('schist_rubble', -0.1, -0.1, fr.L + 0.1, fr.D + 0.1, y - 0.4, y + 0.2, true);
+  B('brick_grey', 0, 0, fr.L, fr.D, y + 0.2, y + 1.3, true);
+  B('opening', 0.35, -0.03, fr.L - 0.35, 0, y + 0.5, y + 1.1);
+  B('lacquer_red', 0.3, -0.02, fr.L - 0.3, 0.0, y + 0.45, y + 0.5); B('lacquer_red', 0.3, -0.02, 0.35, 0.0, y + 0.5, y + 1.15); B('lacquer_red', fr.L - 0.35, -0.02, fr.L - 0.3, 0.0, y + 0.5, y + 1.15);
+  S('tile_grey', -0.2, -0.3, fr.L + 0.2, fr.D / 2, y + 1.3, y + 1.8, 0.12); S('tile_grey', -0.2, fr.D / 2, fr.L + 0.2, fr.D + 0.2, y + 1.8, y + 1.35, 0.12);
+  B('limestone', 0.3, -0.5, fr.L - 0.3, -0.1, y - 0.1, y + 0.45, true);
+  void col;
+}
+
 /** wutai_rack { rect, y, rot }: a frame of poles with cobs of corn and strings of red chillies hung in rows to dry. */
 export function wutaiRack({ at: [x, z], y, rot = 0, len = 3.6 }, { bag }) {
   const c = Math.cos(rot), s = Math.sin(rot), P = (a, b = 0) => [x + a * c - b * s, z + a * s + b * c];
@@ -297,4 +456,4 @@ export function wutaiPine({ at: [x, z], y, h = 6, seed = 1 }, { bag, col }) {
   col.circle(x, z, 0.4, y, y + h * 0.5);
 }
 
-export const villageElements = { wutai_pine: wutaiPine, wutai_house: wutaiHouse, wutai_yard: wutaiYard, wutai_well: wutaiWell, wutai_mill: wutaiMill, wutai_rack: wutaiRack };
+export const villageElements = { wutai_floor: wutaiFloor, wutai_threshing: wutaiThreshing, wutai_garden: wutaiGarden, wutai_oldtree: wutaiOldTree, wutai_temple: wutaiTemple, wutai_shrine: wutaiShrine, wutai_pine: wutaiPine, wutai_house: wutaiHouse, wutai_yard: wutaiYard, wutai_well: wutaiWell, wutai_mill: wutaiMill, wutai_rack: wutaiRack };

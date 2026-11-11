@@ -3,7 +3,7 @@
 // lane; a well and a stone roller mill on the green; the goods and animals of the yards (plan of the `life` style).
 // Elements of the chinese style (src/styles/chinese/village.js). Pure data from layout.js.
 
-import { lots, height, GREEN, GATE_X } from './layout.js';
+import { lots, voids, height, GREEN, GATE_X } from './layout.js';
 import { frame, dirOf } from '../../styles/chinese/village.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -15,9 +15,28 @@ let BUILT = null;
 export function village() {
   if (BUILT) return BUILT;
   const C = [], Lf = [], smoke = [];
-  const all = lots();
+  // the plots the rows left empty: the village's temple (on the green's north-east side), a threshing floor, vegetable plots,
+  // and now and then another yard
+  const vs = voids(), plots = [], vseed = (v) => v.seed % 3;
+  const vy = (r) => { const h = [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2]].map(([a, b]) => height(a, b)); return [Math.max(...h), Math.min(...h)]; };
+  vs.forEach((v, i) => {
+    const [y, foot] = vy(v.rect), nearGate = v.green && v.rect[0] > -80 && v.front === 's' ? 'temple' : v.green ? (v.rect[0] < -80 && v.front === 's' ? 'threshing' : v.front === 'n' && v.rect[0] < -80 ? 'garden' : 'yard') : ['garden', 'threshing', 'yard'][vseed(v)];
+    plots.push({ ...v, y, foot, kind: nearGate, id: 1000 + i });
+  });
+  const all = [...lots(), ...plots.filter((p) => p.kind === 'yard')];
   // the open houses: the three yards nearest the gate on the main lane's two sides, an inn first
   const near = [...all].filter((l) => (l.rect[2] - l.rect[0]) >= 13).sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 + 76, (a.rect[1] + a.rect[3]) / 2) - Math.hypot((b.rect[0] + b.rect[2]) / 2 + 76, (b.rect[1] + b.rect[3]) / 2)).slice(0, 3);
+  for (const p of plots) {
+    const fr = frame(p.rect, p.front), { L, D } = fr;
+    if (p.kind === 'yard') continue;
+    if (p.kind === 'temple') {
+      C.push({ t: 'wutai_yard', rect: p.rect, front: p.front, hc: g4(p.rect), gate: [L / 2, 2.8], seed: p.seed, wall: 'earth_wall' });
+      C.push({ t: 'wutai_temple', rect: p.rect, front: p.front, y: p.y, foot: p.foot, seed: p.seed });
+      for (const [u, v] of [[1.8, 3.0], [L - 1.8, 3.4]]) { const [x, z] = frame(p.rect, p.front).P(u, v); C.push({ t: 'wutai_pine', at: [x, z], y: gh(x, z), h: 5.5 + (u > L / 2 ? 0.8 : 0), seed: p.seed + (u | 0) }); }
+      smoke.push({ p: [...frame(p.rect, p.front).P(L / 2, D - 1.6)], y: p.y + 6.5, r: p.seed });
+    } else if (p.kind === 'threshing') C.push({ t: 'wutai_threshing', rect: p.rect, front: p.front, y: (p.y + p.foot) / 2, seed: p.seed });
+    else C.push({ t: 'wutai_garden', rect: p.rect, front: p.front, y: (p.y + p.foot) / 2, seed: p.seed });
+  }
   for (const l of all) {
     const rand = rng(l.seed), fr = frame(l.rect, l.front), { L, D, P, R } = fr, open = near.includes(l);
     const dist = Math.hypot((l.rect[0] + l.rect[2]) / 2 + 80, (l.rect[1] + l.rect[3]) / 2);
@@ -96,25 +115,28 @@ export function village() {
     if (rand() < 0.22) { const u = gu + (rand() < 0.5 ? 2.2 : -2.2); put({ t: 'stool', seed: l.seed + 81 }, u, -0.55, { rot: yaw[l.front] });
       const [x, z] = at(u, -0.55); const d = yaw[l.front]; Lf.push({ t: 'figure', at: [x, z], y: gh(x, z) + 0.0, rot: d + Math.PI, seed: l.seed + 83, dress: 'robe', cloth: ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_white'][Math.floor(rand() * 4)], cloth2: 'cloth_white', skin: 'skin_light', hair: rand() < 0.5 ? 'bun' : 'topknot', hat: 'none', pose: 'low', carry: rand() < 0.5 ? 'basket' : 'none' }); }
   }
-  // the green before the gate: the village well, a stone roller mill, a bench
+  // the green: the village's open space on the main lane — beaten earth, the great old tree with its stone seat, the well on
+  // its flagged apron, the roller mill, the earth-god's shrine, the pedlar's mat, a cart and the beasts
   const gx = (GREEN[0] + GREEN[2]) / 2;
-  C.push({ t: 'wutai_well', at: [gx - 6, 7.5], y: gh(gx - 6, 7.5) });
-  C.push({ t: 'wutai_mill', at: [gx + 8, -8.5], y: gh(gx + 8, -8.5) });
-  Lf.push({ t: 'barrel', at: [gx - 4.5, 7.2], y: gh(gx - 4.5, 7.2), n: 2, seed: 4 }, { t: 'basket', at: [gx - 7.2, 8.4], y: gh(gx - 7.2, 8.4), n: 2, seed: 5 });
-  // the green's life: benches under the well's side, a goods mat of a pedlar, stools, baskets, a cart, a donkey, sacks, a stack of firewood, a laundry line
   const pl = (el, x, z, extra = {}) => Lf.push({ ...el, at: [x, z], y: gh(x, z), ...extra });
-  pl({ t: 'bench', len: 1.8, seed: 31 }, gx - 9.5, 6.3, { rot: 0 }); pl({ t: 'bench', len: 1.8, seed: 32 }, gx - 2.4, 8.3, { rot: 0 });
-  pl({ t: 'goods_mat', seed: 33 }, gx - 14, -6.5); pl({ t: 'stool', seed: 34 }, gx - 11.5, -6.8); pl({ t: 'basket', n: 3, seed: 35 }, gx - 14.8, -5.2);
-  pl({ t: 'cart', kind: 'two', load: 'hay', seed: 36 }, gx + 12, 6.6, { rot: 0.6 }); pl({ t: 'animal', kind: 'ox', seed: 37 }, gx + 14.8, 4.4, { rot: 2.2 });
-  pl({ t: 'sacks', n: 5, seed: 38 }, gx + 5.8, -5.2); pl({ t: 'firewood', len: 2, seed: 39 }, gx + 3, -9.0, { rot: 0 });
-  pl({ t: 'handcart', load: 'sacks', seed: 40 }, gx - 5, -7.4, { rot: 1.9 }); pl({ t: 'chickens', n: 4, kind: 'hen', seed: 41 }, gx - 7.8, 4.4);
-  pl({ t: 'laundry', len: 3, seed: 42 }, gx + 1.5, 8.5, { rot: 0 }); pl({ t: 'drying_tray', seed: 43 }, gx + 9, 7.8); pl({ t: 'drying_tray', seed: 44 }, gx + 11, 8.6);
-  // villagers about the green: a pedlar crouched at his mat, two women talking at the well, a woman at the washing line, a boy with the ox, a man with a barrow
+  C.push({ t: 'wutai_floor', at: [gx + 3, -5.4], y: gh(gx + 3, -5.4) - 0.0, r: 5.6, mat: 'mud_plaster', h: 0.03 });
+  C.push({ t: 'wutai_oldtree', at: [gx + 3, -5.4], y: gh(gx + 3, -5.4) + 0.03, h: 11, seed: 7 });
+  C.push({ t: 'wutai_floor', at: [gx - 9, 4.8], y: gh(gx - 9, 4.8), r: 2.5, mat: 'bluestone', h: 0.04 });
+  C.push({ t: 'wutai_well', at: [gx - 9, 4.8], y: gh(gx - 9, 4.8) + 0.04 });
+  C.push({ t: 'wutai_mill', at: [gx + 10, 4.8], y: gh(gx + 10, 4.8) });
+  C.push({ t: 'wutai_shrine', at: [gx + 9.5, -6.0], y: gh(gx + 9.5, -6.0), front: 's' });
+  pl({ t: 'barrel', n: 2, seed: 4 }, gx - 6.6, 5.4); pl({ t: 'basket', n: 2, seed: 5 }, gx - 11.4, 6.0); pl({ t: 'trough', seed: 6 }, gx - 11.2, 3.4, { rot: 0 });
+  pl({ t: 'goods_mat', seed: 33 }, gx - 15, -4.6); pl({ t: 'stool', seed: 34 }, gx - 12.7, -5.0); pl({ t: 'basket', n: 3, seed: 35 }, gx - 15.8, -3.8);
+  pl({ t: 'cart', kind: 'two', load: 'hay', seed: 36 }, gx + 13.6, -4.6, { rot: 0.4 }); pl({ t: 'animal', kind: 'ox', seed: 37 }, gx + 13.4, -6.8, { rot: 2.2 });
+  pl({ t: 'sacks', n: 5, seed: 38 }, gx + 6.8, 5.8); pl({ t: 'firewood', len: 2, seed: 39 }, gx - 4.4, 6.6, { rot: 0 });
+  pl({ t: 'handcart', load: 'sacks', seed: 40 }, gx - 5.6, -5.6, { rot: 1.9 }); pl({ t: 'chickens', n: 4, kind: 'hen', seed: 41 }, gx - 0.6, -3.4);
+  pl({ t: 'laundry', len: 3, seed: 42 }, gx - 2.2, 6.4, { rot: 0 }); pl({ t: 'drying_tray', seed: 43 }, gx + 13.2, 5.6); pl({ t: 'drying_tray', seed: 44 }, gx + 13.4, 3.6);
+  pl({ t: 'haystack', seed: 45 }, gx + 8, 7.0); pl({ t: 'stool', seed: 46 }, gx + 4.2, -2.9); pl({ t: 'stool', seed: 47 }, gx + 1.6, -3.0);
   const vf = (x, z, rot, seed, extra = {}) => Lf.push({ t: 'figure', at: [x, z], y: gh(x, z), rot, seed, dress: 'robe', cloth: ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_white'][seed % 4], cloth2: 'cloth_white', skin: 'skin_light', hair: 'topknot', hat: 'brim', carry: 'none', pose: 'stand', ...extra });
-  vf(gx - 14, -5.6, 0.4, 501, { pose: 'low', hat: 'straw' }); vf(gx - 5.2, 8.1, 2.8, 502, { hair: 'bun', hat: 'none', carry: 'basket' }); vf(gx - 7.2, 8.9, 5.6, 503, { hair: 'bun', hat: 'none', pose: 'talk' });
-  vf(gx + 1.5, 7.6, 3.1, 504, { hair: 'bun', hat: 'none' }); vf(gx + 13.5, 4.9, 1.0, 505, { dress: 'trousers', hat: 'straw' }); vf(gx - 4, -8.1, 4.4, 506, { dress: 'trousers', hat: 'straw', carry: 'pole' });
-  vf(gx + 8.8, -6.8, 2.5, 507, { pose: 'talk' });
-  Lf.push({ t: 'animal', kind: 'donkey', at: [gx + 6.4, -8.4], y: gh(gx + 6.4, -8.4), rot: 1.2, seed: 21 });
+  vf(gx - 15, -4.0, 0.4, 501, { pose: 'low', hat: 'straw' }); vf(gx - 8, 3.2, 2.8, 502, { hair: 'bun', hat: 'none', carry: 'basket' }); vf(gx - 10.2, 3.6, 5.6, 503, { hair: 'bun', hat: 'none', pose: 'talk' });
+  vf(gx - 2.2, 5.4, 3.1, 504, { hair: 'bun', hat: 'none' }); vf(gx + 14.6, -5.6, 1.0, 505, { dress: 'trousers', hat: 'straw' }); vf(gx - 4, -4.2, 4.4, 506, { dress: 'trousers', hat: 'straw', carry: 'pole' });
+  vf(gx + 4.2, -2.9, 1.6, 507, { pose: 'low' }); vf(gx + 1.6, -3.0, 4.7, 508, { pose: 'low', hat: 'none' }); vf(gx + 9.4, 3.4, 2.5, 509, { pose: 'talk' });
+  Lf.push({ t: 'animal', kind: 'donkey', at: [gx + 7.6, 2.9], y: gh(gx + 7.6, 2.9), rot: 1.2, seed: 21 });
   BUILT = { chinese: C, life: Lf, smoke };
   return BUILT;
 }

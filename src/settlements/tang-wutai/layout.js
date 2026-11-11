@@ -23,7 +23,7 @@ export const LANES = [
   ...LANE_X.map((x) => [x - LW / 2, LANE_Z[0] - 14, x + LW / 2, LANE_Z[4] + 14]),
 ];
 /** The village green on the main lane before the gate (a well, the market's pitch). */
-export const GREEN = [-92, -10, -62, 10];
+export const GREEN = [-92, -7.5, -62, 7.5];
 
 /**
  * The ground: the valley floor falling gently west from the monastery's gate, the flanks of the valley rising
@@ -45,10 +45,12 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 // the yards of the village (docs §5): rows hugging each east–west lane, the house at the back of its walled
 // yard, the gate on the lane
 const YARD_D = 17, YARD_GAP = 2;
-let LOTS = null;
+let LOTS = null, VOIDS = null;
+/** The plots the rows left empty (round the green, and now and then one between yards): village.js fills them (a village temple, threshing floors, vegetable plots). */
+export function voids() { lots(); return VOIDS; }
 export function lots() {
   if (LOTS) return LOTS;
-  LOTS = [];
+  LOTS = []; VOIDS = [];
   const rand = rng(857);
   const lanes = LANE_Z;
   // x spans between consecutive cross lanes (from east to west)
@@ -64,8 +66,8 @@ export function lots() {
       const z0 = side > 0 ? lz + off : lz - off - YARD_D, z1 = z0 + YARD_D, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
       // the rows face their lane; none beyond the outer lanes' far side, none on the green, none past the rim
       if (Math.hypot(cx, cz) > RADIUS - 34) continue;
-      if (inRect(GREEN, cx, cz, 6) || Math.abs(cz) < MAIN / 2 + 1) continue;
-      if (rand() < 0.07 && lz !== 0) continue;                       // an empty plot: a garden or threshing floor
+      if (inRect(GREEN, cx, cz, 6) || Math.abs(cz) < MAIN / 2 + 1) { if (lz === 0 && Math.abs(cz) > MAIN / 2 + 1) VOIDS.push({ rect: side > 0 ? [x0, GREEN[3] + 0.5, x1, z1] : [x0, z0, x1, GREEN[1] - 0.5], front: side > 0 ? 'n' : 's', seed: Math.floor(rand() * 1e6), lane: lz, green: true }); continue; }
+      if (rand() < 0.07 && lz !== 0) { VOIDS.push({ rect: [x0, z0, x1, z1], front: side > 0 ? 'n' : 's', seed: Math.floor(rand() * 1e6), lane: lz }); continue; }   // an empty plot: a garden or threshing floor
       const ys = [[x0, z0], [x1, z0], [x0, z1], [x1, z1], [cx, cz]].map(([a, b]) => height(a, b));
       if (Math.max(...ys) - Math.min(...ys) > 1.6) continue;
       LOTS.push({ id: id++, rect: [x0, z0, x1, z1], y: Math.max(...ys), foot: Math.min(...ys), front: side > 0 ? 'n' : 's', seed: Math.floor(rand() * 1e6), lane: lz });
@@ -73,5 +75,5 @@ export function lots() {
   }
   return LOTS;
 }
-export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)) || VOIDS.some((l) => inRect(l.rect, x, z, m));
 export const inLane = (x, z, m = 0) => LANES.some((r) => inRect(r, x, z, m));
