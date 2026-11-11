@@ -367,20 +367,81 @@ export function houseSong(el, { bag, col }) {
           if (open && q < 0.6) { B('wood_dark', a0, fb + 0.4, a1, fb + 0.48, yF, yTop - 0.3); if (det >= 2) B('timber', a0 + 0.2, fb + 0.9, a0 + 0.8, fb + 1.5, yF, yF + 0.78); }
           else if (q < 0.75) {
             B(wall, a0, fb - 0.05, a1, fb + 0.08, yF, yF + 0.85);
+            if (det >= 1) { B('plaster_damp', a0, fb - 0.062, a1, fb - 0.05, yF, yF + 0.22); for (const f of [0.2, 0.75]) if (rand() < 0.8) B('plaster_streak', a0 + (a1 - a0) * f, fb - 0.07, a0 + (a1 - a0) * f + 0.1 + rand() * 0.06, fb - 0.05, yF + 0.2, yF + 0.85); }
             B('lattice', a0 + 0.05, fb - 0.045, a1 - 0.05, fb + 0.02, yF + 0.85, yTop - 0.5); B('timber', a0, fb - 0.06, a1, fb + 0.06, yF + 0.82, yF + 0.88); B('timber', a0, fb - 0.06, a1, fb + 0.06, yTop - 0.52, yTop - 0.46);
             B(wall, a0, fb - 0.05, a1, fb + 0.08, yTop - 0.46, yTop - 0.3);
           } else if (q < 0.88) { B('shutter_brown', a0, fb - 0.05, a1, fb + 0.07, yF, yTop - 0.3); }
-          else { B(wall, a0, fb - 0.05, a1, fb + 0.08, yF, yTop - 0.3); B('lattice_ice', a0 + (a1 - a0) / 2 - 0.4, fb - 0.04, a0 + (a1 - a0) / 2 + 0.4, fb + 0.03, yF + 0.9, yF + 1.9); }
+          else { B(wall, a0, fb - 0.05, a1, fb + 0.08, yF, yTop - 0.3); if (det >= 1) { B('plaster_damp', a0, fb - 0.062, a1, fb - 0.05, yF, yF + 0.3); for (const f of [0.15, 0.5, 0.82]) if (rand() < 0.75) { const sa = a0 + (a1 - a0) * f; B('plaster_streak', sa, fb - 0.062, sa + 0.08 + rand() * 0.07, fb - 0.05, yTop - 0.3 - (0.7 + rand() * 1.1), yTop - 0.3); } } B('lattice_ice', a0 + (a1 - a0) / 2 - 0.4, fb - 0.04, a0 + (a1 - a0) / 2 + 0.4, fb + 0.03, yF + 0.9, yF + 1.9); }
         }
         if (det >= 2) {
           // the eave's brackets: a block over each post and an arm out under the eave
           for (let k = 0; k <= nb; k++) { const a = Math.min(L - 0.13, Math.max(0.13, bayA(k))); B('timber', a - 0.2, fb - 0.2, a + 0.2, fb + 0.2, yTop - 0.3, yTop - 0.16); B('timber', a - 0.07, fb - 0.9, a + 0.07, fb + 0.1, yTop - 0.16, yTop - 0.02); }
         }
       }
+      // ---- what the scroll shows at the upper storey's eye level: goods and plants on the balcony, wash over the rail, hanging blinds of bamboo, the board on the rail's
+      // face, the string course and a window in the side walls, streaks under the eaves
+      if (!inn && det >= 1) {
+        const yb = yF + 0.04, CL = ['cloth_indigo', 'cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_white'];
+        const nItems = Math.min(5, 1 + Math.floor(L / 2.2));
+        let aPrev = -9;
+        for (let k = 0; k < nItems; k++) {
+          const a = 0.5 + rand() * (L - 1.0), kd = rand(); if (Math.abs(a - aPrev) < 0.9) continue; aPrev = a;
+          if (kd < 0.28) { B('terracotta', a - 0.14, b0 + 0.22, a + 0.14, b0 + 0.5, yb, yb + 0.3); B('cloth_green', a - 0.22, b0 + 0.16, a + 0.22, b0 + 0.56, yb + 0.3, yb + 0.66); B('cloth_green', a - 0.12, b0 + 0.24, a + 0.12, b0 + 0.48, yb + 0.66, yb + 0.82); }
+          else if (kd < 0.55) { const cw = 0.35 + rand() * 0.3, cm = pick(rand, CL); B(cm, a - cw, b0 - 0.035, a + cw, b0 + 0.0, yF + 0.5, yF + 1.0); B(cm, a - cw, b0 - 0.03, a + cw, b0 + 0.17, yF + 0.97, yF + 1.0 + 0.04); }
+          else if (kd < 0.72) { B('wicker', a - 0.25, b0 + 0.2, a + 0.25, b0 + 0.62, yb, yb + 0.34); B(pick(rand, ['cloth_white', 'cloth_ochre', 'cloth_brown']), a - 0.2, b0 + 0.24, a + 0.2, b0 + 0.58, yb + 0.34, yb + 0.42); }
+          else if (kd < 0.88) { for (const dd of [-0.17, 0.17]) { B('pottery_dark', a + dd - 0.12, b0 + 0.22, a + dd + 0.12, b0 + 0.46, yb, yb + 0.42); B('terracotta', a + dd - 0.07, b0 + 0.27, a + dd + 0.07, b0 + 0.41, yb + 0.42, yb + 0.48); } }
+          else { B('wood_dark', a - 0.4, b0 + 0.25, a + 0.4, b0 + 0.5, yb, yb + 0.12); for (let j = 0; j < 3; j++) B('paint_white', a - 0.34 + j * 0.24, b0 + 0.27, a - 0.14 + j * 0.24, b0 + 0.47, yb + 0.12, yb + 0.22); }
+        }
+        // blinds of split bamboo (lian) hung from the eave in front of the rail, drawn up to a roll or let half down; a cord at each end
+        for (let k = 0; k < nb; k++) {
+          if (rand() > (kind === 'wine' || kind === 'tea' ? 0.55 : 0.32)) continue;
+          const a0 = bayA(k) + 0.2, a1 = bayA(k + 1) - 0.2, len = 0.7 + rand() * 1.3, yt = yTop - 0.36, bb = b0 - 0.2;
+          if (a1 - a0 < 0.8) continue;
+          B('bamboo_culm', a0 - 0.04, bb - 0.07, a1 + 0.04, bb + 0.05, yt, yt + 0.12);
+          B('reed_mat', a0, bb - 0.012, a1, bb + 0.012, yt - len, yt);
+          for (let y = yt - 0.14; y > yt - len; y -= 0.2) B('wood_dark', a0, bb - 0.019, a1, bb - 0.012, y, y + 0.014);
+          B('wood_dark', a0, bb - 0.03, a1, bb + 0.02, yt - len - 0.03, yt - len);
+          for (const a of [a0 + 0.04, a1 - 0.04]) B('rope_fibre', a - 0.012, bb - 0.03, a + 0.012, bb - 0.012, yt - len, yt);
+        }
+        // the board on the rail's face, a shop's name in painted characters (abstract strokes): black lacquer with a red rim, white strokes
+        if (rand() < (kind === 'wine' || kind === 'tea' ? 0.9 : 0.5) && L > 3.4) {
+          const bw = Math.min(L - 1.2, 1.4 + rand() * 1.6), am = L * (0.3 + rand() * 0.4), ya = yF + 0.12, yb2 = yF + 0.8, bf = b0 - 0.02, a0 = Math.max(0.4, am - bw / 2), a1 = Math.min(L - 0.4, am + bw / 2);
+          B('lacquer_red', a0 - 0.05, bf - 0.045, a1 + 0.05, bf + 0.02, ya - 0.05, yb2 + 0.05);
+          B('lacquer_black', a0, bf - 0.065, a1, bf + 0.02, ya, yb2);
+          const nc = Math.max(2, Math.min(6, Math.floor((a1 - a0 - 0.2) / 0.4)));
+          for (let c = 0; c < nc; c++) {
+            const cx = a0 + (a1 - a0) * (c + 0.5) / nc, h = 0.42;
+            B('paint_white', cx - 0.12, bf - 0.075, cx + 0.12, bf - 0.065, yF + 0.46 - h / 2, yF + 0.46 - h / 2 + 0.05);
+            B('paint_white', cx - 0.02, bf - 0.075, cx + 0.02, bf - 0.065, yF + 0.46 - h / 2, yF + 0.46 + h / 2);
+            if (rand() < 0.6) B('paint_white', cx - 0.12, bf - 0.075, cx + 0.12, bf - 0.065, yF + 0.46 + h / 2 - 0.05, yF + 0.46 + h / 2);
+            if (rand() < 0.5) B('paint_white', cx - 0.1, bf - 0.075, cx - 0.06, bf - 0.065, yF + 0.46 - h / 2, yF + 0.46 + h / 2);
+            if (rand() < 0.5) B('paint_white', cx + 0.06, bf - 0.075, cx + 0.1, bf - 0.065, yF + 0.46 - h / 2, yF + 0.46 + h / 2);
+          }
+        }
+        // the side walls: a string course at the floor, a small lattice window upstairs, damp and streaks under the sill
+        for (const [sa, sg] of [[0, -1], [L, 1]]) {
+          B('timber', sa - (sg < 0 ? 0.05 : 0), 0, sa + (sg > 0 ? 0.05 : 0), D, yF - 0.14, yF - 0.02);
+          if (D > 6 && rand() < 0.7) {
+            const bw = Math.min(D - 2, 2.2 + rand() * (D - 4.2)), pr = 0.045 * sg;
+            B('timber', sa + (sg < 0 ? -0.05 : 0), bw - 0.55, sa + (sg > 0 ? 0.05 : 0), bw + 0.55, yF + 0.7, yF + 1.9);
+            B('lattice', sa + (sg < 0 ? -0.06 : 0), bw - 0.45, sa + (sg > 0 ? 0.06 : 0), bw + 0.45, yF + 0.8, yF + 1.8);
+            for (const f of [-0.35, 0.2]) if (rand() < 0.8) B('plaster_streak', sa + (sg < 0 ? -0.03 : 0), bw + f, sa + (sg > 0 ? 0.03 : 0), bw + f + 0.1, yF + 0.15, yF + 0.7);
+            void pr;
+          }
+          B('plaster_damp', sa + (sg < 0 ? -0.034 : 0), 0.02, sa + (sg > 0 ? 0.034 : 0), D - 0.02, yF - 0.7, yF - 0.14);
+        }
+      }
       // the wine shops: the dark bay above the door and its curtain of cloth
     }
     if (!inn) weather(wallTop, false);
-    if (!inn && det >= 2 && (wide || kind === 'tea' || two) && L > 5) { const yR = yE + rise, tmm = (t0 + t1) / 2; ridgeBox(MA, tile, L / 2 - 0.22, L / 2 + 0.22, tmm - 0.2, tmm + 0.2, yR + 0.24, yR + 0.4); ridgeBox(MA, tile, L / 2 - 0.12, L / 2 + 0.12, tmm - 0.12, tmm + 0.12, yR + 0.4, yR + 0.72); }
+    if (!inn && det >= 2 && (wide || kind === 'tea' || two) && L > 3.2) {
+      // the ridge ornament: a base with a tiered finial (a gourd or a ball on a stem), and on the wide houses a cresting of upright tiles along the ridge
+      const yR = yE + rise, tmm = (t0 + t1) / 2, g = rand() < 0.5;
+      ridgeBox(MA, tile, L / 2 - 0.22, L / 2 + 0.22, tmm - 0.2, tmm + 0.2, yR + 0.24, yR + 0.4); ridgeBox(MA, tile, L / 2 - 0.12, L / 2 + 0.12, tmm - 0.12, tmm + 0.12, yR + 0.4, yR + 0.72);
+      if (g) { ridgeBox(MA, tile, L / 2 - 0.17, L / 2 + 0.17, tmm - 0.17, tmm + 0.17, yR + 0.72, yR + 0.98); ridgeBox(MA, tile, L / 2 - 0.07, L / 2 + 0.07, tmm - 0.07, tmm + 0.07, yR + 0.98, yR + 1.14); }
+      else { ridgeBox(MA, tile, L / 2 - 0.05, L / 2 + 0.05, tmm - 0.05, tmm + 0.05, yR + 0.72, yR + 1.0); ridgeBox(MA, tile, L / 2 - 0.15, L / 2 + 0.15, tmm - 0.15, tmm + 0.15, yR + 1.0, yR + 1.22); }
+      if (wide || kind === 'tea' || L > 6.5) for (let s2 = 0.9; s2 < L - 0.5; s2 += 0.62) if (Math.abs(s2 - L / 2) > 0.9) ridgeBox(MA, tile, s2 - 0.05, s2 + 0.05, tmm - 0.07, tmm + 0.07, yR + 0.24, yR + 0.46 + ((s2 * 10) % 2 < 1 ? 0.0 : 0.06));
+    }
     // ---- the inn: the front range with the gate bay, the court, the rear hall and the wings
     if (inn) innBuild();
     // ---- the roof (the ridge along the front; the inn's front range has its own)

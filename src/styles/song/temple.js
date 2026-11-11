@@ -284,4 +284,94 @@ function hungBell(el, { bag, col }) {
   col.circle(x, z, 0.5, y, y + 1.4);
 }
 
-export const TEMPLE_ELEMENTS = { temple_interior: templeInterior, incense_ding: incenseDing, stele, sutra_pillar: sutraPillar, stone_lamp: stoneLamp, hung_bell: hungBell };
+
+/**
+ * terrace_rail { rect (the platform's outer rect), y (its top), inset, gaps: [[side 's'|'n'|'e'|'w', centre, half-width]…] } — the stone balustrade of a hall's terrace as the Song
+ * built it (Yingzao fashi, the xunzhang lan'gan): posts every ~2.3 m with a lotus-bud cap, a round top rail (xunzhang) on them, a wide lower board (ebo) and a footing,
+ * between them the vase balusters (jingping) every 0.3 m; at the corners and at the ends by the stairs the posts are taller and a drum stone (baogushi) flanks the stairs;
+ * a dragon-head spout (chishou) under each corner post. Gaps (the stairs) have a post at either end. [inferred: the Song form; the proportions after the fashi's norms, not measured]
+ */
+function terraceRail(el, { bag, col }) {
+  const [X0, Z0, X1, Z1] = el.rect, y = el.y, ins = el.inset ?? 0.2, gaps = el.gaps ?? [];
+  const x0 = X0 + ins, z0 = Z0 + ins, x1 = X1 - ins, z1 = Z1 - ins, HP = 1.12;
+  const vase = [[0.001, 0], [0.045, 0.0], [0.055, 0.03], [0.04, 0.09], [0.07, 0.2], [0.075, 0.26], [0.04, 0.33], [0.05, 0.38], [0.001, 0.4]];
+  const post = (x, z, tall) => {
+    bag.add('granite_grey', box(x - 0.11, y, z - 0.11, x + 0.11, y + HP + (tall ? 0.18 : 0), z + 0.11));
+    bag.add('granite_block', lathe([[0.001, 0], [0.15, 0], [0.15, 0.04], [0.1, 0.07], [0.12, 0.14], [0.07, 0.24], [0.001, 0.32]], 8, null, x, y + HP + (tall ? 0.18 : 0), z));
+    col.circle(x, z, 0.14, y, y + HP);
+  };
+  const run = (a, b, ns, c, side) => {            // a straight run from a to b along an axis (ns: along x at z = c)
+    const L = b - a; if (L < 0.3) return;
+    const n = Math.max(1, Math.round(L / 2.3)), seg = L / n;
+    const P = (u, v) => (ns ? [u, v] : [v, u]);
+    const B = (u0, v0, u1, v1, ya, yb, m) => { const p = P(u0, v0), q = P(u1, v1); bag.add(m, box(Math.min(p[0], q[0]), ya, Math.min(p[1], q[1]), Math.max(p[0], q[0]), yb, Math.max(p[1], q[1]))); };
+    B(a, c - 0.09, b, c + 0.09, y, y + 0.16, 'granite_block');                    // the footing
+    B(a, c - 0.06, b, c + 0.06, y + 0.16, y + 0.3, 'granite_grey');               // the lower board (ebo)
+    B(a, c - 0.05, b, c + 0.05, y + HP - 0.2, y + HP - 0.1, 'granite_grey');      // the top rail (xunzhang)
+    for (let k = 0; k < n; k++) {
+      const u0 = a + k * seg, u1 = u0 + seg;
+      const m = Math.max(2, Math.round((seg - 0.3) / 0.3));
+      for (let j = 0; j < m; j++) { const u = u0 + 0.15 + (seg - 0.3) * (j + 0.5) / m, p = P(u, c); bag.add('granite_block', lathe(vase, 6, null, p[0], y + 0.3, p[1])); }
+      void u1;
+    }
+    for (let k = 0; k <= n; k++) { const q = P(a + k * seg, c); post(q[0], q[1], k === 0 || k === n); }
+    col.rect(ns ? [a, c - 0.1, b, c + 0.1] : [c - 0.1, a, c + 0.1, b], y, y + HP);
+    void side;
+  };
+  const sideRuns = (side) => {
+    const ns = side === 's' || side === 'n', a0 = ns ? x0 : z0, a1 = ns ? x1 : z1, c = side === 's' ? z1 : side === 'n' ? z0 : side === 'e' ? x1 : x0;
+    const cuts = gaps.filter((g) => g[0] === side).map((g) => [g[1] - g[2], g[1] + g[2]]).sort((p, q) => p[0] - q[0]);
+    let a = a0;
+    for (const [g0, g1] of cuts) { run(a, g0, ns, c, side); a = g1; }
+    run(a, a1, ns, c, side);
+    // the drum stones either side of a gap
+    for (const [g0, g1] of cuts) for (const e of [g0, g1]) { const p = ns ? [e + (e === g0 ? -0.5 : 0.5), c + (side === 's' ? -0.18 : 0.18)] : [c + (side === 'e' ? -0.18 : 0.18), e + (e === g0 ? -0.5 : 0.5)]; bag.add('granite_block', lathe([[0.001, 0], [0.3, 0], [0.32, 0.08], [0.29, 0.16], [0.32, 0.5], [0.27, 0.58], [0.24, 0.6], [0.001, 0.6]], 12, null, p[0], y, p[1])); col.circle(p[0], p[1], 0.32, y, y + 0.6); }
+  };
+  for (const side of ['s', 'n', 'e', 'w']) sideRuns(side);
+  // the dragon-head spouts under the corner posts, jutting from the platform's face
+  for (const [cx, cz, dx, dz] of [[X0, Z0, -1, -1], [X1, Z0, 1, -1], [X0, Z1, -1, 1], [X1, Z1, 1, 1]]) for (const [ex, ez] of [[dx, 0], [0, dz]]) {
+    const px = ex ? cx - ex * 0.1 : cx - dx * 0.4, pz = ez ? cz - ez * 0.1 : cz - dz * 0.4;
+    bag.add('granite_grey', box(Math.min(px, px + ex * 0.4) - (ex ? 0 : 0.11), y - 0.62, Math.min(pz, pz + ez * 0.4) - (ez ? 0 : 0.11), Math.max(px, px + ex * 0.4) + (ex ? 0 : 0.11), y - 0.4, Math.max(pz, pz + ez * 0.4) + (ez ? 0 : 0.11)));
+  }
+}
+
+
+/**
+ * hall_dress { rect, y, H, front, plaque: { w, chars }, lanterns: n } — the front of a monastery hall as it was dressed: over the middle bay's door the hall's name board (bian'e):
+ * black lacquer in a gilt frame with gilt characters (abstract strokes: no lettering in the world), set into the opening under the frieze; under the eave a hooked
+ * bracket at each bay's middle and a red paper lantern from it; on either side of the door a pair of gilt door studs' rows on the jambs. [inferred: after the Song halls' plaques
+ * and the lanterns of the scroll's temple gates; the board's size by the bay]
+ */
+function hallDress(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, H = el.H ?? 4.6, f = el.front ?? 's', ns = f === 's' || f === 'n';
+  const L = ns ? x1 - x0 : z1 - z0, out = f === 's' || f === 'e' ? 1 : -1;
+  const c = f === 's' ? z1 : f === 'n' ? z0 : f === 'e' ? x1 : x0;
+  const rc = (a0, d0, a1, d1) => { const A = [Math.min(a0, a1), Math.max(a0, a1)], D = [c + out * Math.min(d0, d1), c + out * Math.max(d0, d1)].sort((p, q) => p - q); return ns ? [x0 + A[0], D[0], x0 + A[1], D[1]] : [D[0], z0 + A[0], D[1], z0 + A[1]]; };
+  const B = (m, a0, d0, a1, d1, ya, yb) => { const [p, q, r, t] = rc(a0, d0, a1, d1); bag.add(m, box(p, ya, q, r, yb, t)); };
+  const nb = el.bays ?? Math.max(1, 2 * Math.round((L / 3.6 - 1) / 2) + 1), mid = L / 2, pw = el.plaque?.w ?? Math.min(2.6, L / nb * 0.6);
+  if (el.plaque) {
+    const yb = y + H - 0.62, ya = yb - 0.85;
+    B('lacquer_black', mid - pw / 2, -0.02, mid + pw / 2, 0.2, ya, yb);
+    B('gilt_bronze', mid - pw / 2 - 0.07, 0.17, mid + pw / 2 + 0.07, 0.23, ya - 0.07, ya); B('gilt_bronze', mid - pw / 2 - 0.07, 0.17, mid + pw / 2 + 0.07, 0.23, yb, yb + 0.07);
+    B('gilt_bronze', mid - pw / 2 - 0.07, 0.17, mid - pw / 2, 0.23, ya, yb); B('gilt_bronze', mid + pw / 2, 0.17, mid + pw / 2 + 0.07, 0.23, ya, yb);
+    const n = el.plaque.chars ?? 4, cw = (pw - 0.3) / n;
+    for (let k = 0; k < n; k++) {
+      const cx = mid - pw / 2 + 0.15 + cw * (k + 0.5), h = 0.5, yc = (ya + yb) / 2, w2 = Math.min(0.2, cw * 0.42);
+      B('gilt_bronze', cx - w2, 0.2, cx + w2, 0.215, yc - h / 2, yc - h / 2 + 0.06); B('gilt_bronze', cx - 0.025, 0.2, cx + 0.025, 0.215, yc - h / 2, yc + h / 2);
+      if (k % 2 === 0) B('gilt_bronze', cx - w2, 0.2, cx + w2, 0.215, yc + h / 2 - 0.06, yc + h / 2);
+      B('gilt_bronze', cx - w2, 0.2, cx - w2 + 0.05, 0.215, yc - h / 2 + 0.1, yc + h / 2 - (k % 2 ? 0.2 : 0.1));
+      if (k % 3 !== 1) B('gilt_bronze', cx + w2 - 0.05, 0.2, cx + w2, 0.215, yc - h / 2 + 0.1, yc + h / 2 - 0.1);
+    }
+  }
+  // the lanterns: a bracket arm from the frieze beam at the middle of every bay but the middle one, the lantern hung from its end
+  const bw = L / nb;
+  for (let k = 0; k < nb; k++) {
+    if (k === (nb - 1) / 2 && el.plaque) continue;
+    const a = bw * (k + 0.5), yt = y + H - 0.58;
+    B('wood_dark', a - 0.05, 0.0, a + 0.05, 0.62, yt, yt + 0.09);
+    const [px, pz] = (() => { const [p, q, r, t] = rc(a, 0.58, a, 0.58); return [(p + r) / 2, (q + t) / 2]; })();
+    lantern(bag, px, pz, yt, 0.3, 'lamp_paper');
+  }
+}
+
+export const TEMPLE_ELEMENTS = { hall_dress: hallDress, terrace_rail: terraceRail, temple_interior: templeInterior, incense_ding: incenseDing, stele, sutra_pillar: sutraPillar, stone_lamp: stoneLamp, hung_bell: hungBell };

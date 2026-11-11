@@ -183,10 +183,10 @@ export function streetPlans(base) {
     quay(bank, x + (rand() - 0.5) * 4);
   }
   // the promenade along the water: hawkers' stands under awnings and mats of wares between the quays and the shops, benches facing the river
-  for (const bank of ['n', 's']) for (let x = -300; x < FIELDS_X - 30; x += 9 + rand() * 9) {
+  for (const bank of ['n', 's']) for (let x = -300; x < FIELDS_X - 30; x += (Math.abs(x) < 150 ? 4.5 : 9) + rand() * (Math.abs(x) < 150 ? 5 : 9)) {
     if (Math.abs(x) < 14) continue;
     const n = bank === 'n', d = n ? -1 : 1, z = n ? RIVER.z0 - 4.2 : RIVER.z1 + 4.2, p = [x, z];
-    if (dBridge(x, z) > 240 && rand() < 0.5) continue;
+    if (dBridge(x, z) > 150 && rand() < 0.5) continue;
     if (!spot(x, z, 1.7)) continue;
     claim(x, z, 2);
     const k = rand();
@@ -204,6 +204,8 @@ export function streetPlans(base) {
     }
     if (rand() < 0.55 && clear(w.x + 1.4, z - d * 1.6, 1)) person([w.x + 1.4, z - d * 1.6], Y, faceTo([0, d]), { dress: 'robe', carry: rand() < 0.5 ? 'basket' : 'none', pose: 'stand' });
   }
+  // the walker's route along the main street's axis (x = 0) and over the bridge stays free of standing people
+  for (let i = L.length - 1; i >= 0; i--) if (L[i].t === 'figure' && Math.abs(L[i].at[0]) < 0.9 && L[i].at[1] > -84 && L[i].at[1] < 204) L.splice(i, 1);
   return [base('song-kaifeng-street-life', L, 'life'), base('song-kaifeng-street-things', S)];
 }
 

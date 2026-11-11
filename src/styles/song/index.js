@@ -18,6 +18,7 @@ import { TEMPLE_ELEMENTS } from './temple.js';
 import { COURT_ELEMENTS } from './court.js';
 import { BRIDGEHEAD_ELEMENTS } from './bridgehead.js';
 import { BRIDGE_ELEMENTS } from './bridge.js';
+import { RIVERSIDE_ELEMENTS } from './riverside.js';
 
 const ngon = (cx, cz, r, n = 8, rot = Math.PI / 8) => Array.from({ length: n }, (_, k) => [cx + Math.cos(rot + k / n * Math.PI * 2) * r, cz + Math.sin(rot + k / n * Math.PI * 2) * r]);
 /** A flat-faced frustum from the polygon `bot` at y0 to `top` at y1, capped. */
@@ -330,6 +331,6 @@ function hexaBox(out, x0, y0, z0, x1, y1, z1) { hexa(out, [[x0, y0, z0], [x1, y0
 
 registerStyle('song', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, ...KAIFENG_ELEMENTS, ...WUTAI_ELEMENTS, ...HANGZHOU_ELEMENTS, ...SCROLL_ELEMENTS, ...TEMPLE_ELEMENTS, ...COURT_ELEMENTS, ...BRIDGEHEAD_ELEMENTS, ...BRIDGE_ELEMENTS },
+  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, ...KAIFENG_ELEMENTS, ...WUTAI_ELEMENTS, ...HANGZHOU_ELEMENTS, ...SCROLL_ELEMENTS, ...TEMPLE_ELEMENTS, ...COURT_ELEMENTS, ...BRIDGEHEAD_ELEMENTS, ...BRIDGE_ELEMENTS, ...RIVERSIDE_ELEMENTS },
   objects: {},
 });

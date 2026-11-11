@@ -3,7 +3,7 @@
 // with its stone landings, the Rainbow Bridge and grain boats; the east wall, its water gate and the
 // city gate with its tower; the streets' paving.
 
-import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE, FIELDS_X, STONE_BANK, APPROACH, pavedWay } from './layout.js';
+import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE, FIELDS_X, STONE_BANK, APPROACH, pavedWay, paveRects, RIVER_WALK, BRIDGE_APRON, STEPS } from './layout.js';
 import { interiorRooms } from './interiors.js';
 
 const E = [];
@@ -23,12 +23,16 @@ const SONG_PAL = { roof: 'tile_dark', soffit: 'lacquer_red', wood: 'lacquer_red'
 const MAIN = [PAGODA[0] - 18, mz0 + 10, PAGODA[0] + 18, mz0 + 32];
 E.push({ t: 'qing_hall', rect: MAIN, y: 0.9, H: 6, double: 4.8, roof: 'xieshan', bays: [7, 4], front: 's', four: true, plat: 0.9, pal: SONG_PAL });
 E.push({ t: 'temple_interior', rect: MAIN, y: 0.9, H: 6, front: 's', kind: 'main' });
+E.push({ t: 'hall_dress', rect: MAIN, y: 0.9, H: 6, front: 's', bays: 7, plaque: { w: 3.2, chars: 4 } });
+// the terrace's stone balustrade (vase balusters, lotus-bud posts, drum stones at the stairs, spouts at the corners), open on the axis for the stairs
+E.push({ t: 'terrace_rail', rect: [MAIN[0] - 0.9, MAIN[1] - 0.9, MAIN[2] + 0.9, MAIN[3] + 0.9], y: 0.9, inset: 0.22, gaps: [['s', PAGODA[0], 3.0]] });
 // the steps up the terrace's south face on the axis (0.9 m; the walker's step is 0.5)
 E.push({ t: 'stairs', rect: [PAGODA[0] - 2.6, MAIN[3] + 0.8, PAGODA[0] + 2.6, MAIN[3] + 3.0], y0: 0.04, y1: 0.9, dir: 'n', mat: 'granite_block' });
 for (const x of [mx0 + 14, mx1 - 14]) {
   const west = x < PAGODA[0], rect = [x - 6, -200, x + 6, -170], front = west ? 'e' : 'w';
   E.push({ t: 'qing_hall', rect, y: 0.6, H: 4.6, roof: 'xieshan', front, plat: 0.6, eave: 1.3, sweep: 0.8, pal: SONG_PAL, caihua: false });
   E.push({ t: 'temple_interior', rect, y: 0.6, H: 4.6, front, kind: west ? 'sutra' : 'guanyin' });
+  E.push({ t: 'hall_dress', rect, y: 0.6, H: 4.6, front, plaque: { w: 2.2, chars: 3 } });
 }
 // the bell tower (east) and the drum tower (west) in front of the main hall, the bell and the drum hung in their lower storeys
 for (const [x, front, kind, axis] of [[PAGODA[0] + 34, 'w', 'bell', 'z'], [PAGODA[0] - 34, 'e', 'drum', 'x']]) {
@@ -43,7 +47,7 @@ for (const s of [-1, 1]) {
   for (const z of [-124, -166]) E.push({ t: 'stone_lamp', at: [PAGODA[0] + s * 5.5, z], y: 0 });
 }
 // the paved axis from the gate hall to the pagoda's apron, the paths to the side halls and the stele pavilions, the beds of pines and cypresses
-E.push({ t: 'song_court', ax: PAGODA[0], c: PAGODA, z1: SHANMEN.c[1] - 5.2, apron: 13, cross: -150, pav: 20.5, halls: [[mx0 + 14 + 6, -185], [mx1 - 14 - 6, -185]] });
+E.push({ t: 'song_court', ax: PAGODA[0], c: PAGODA, z1: SHANMEN.c[1] - 5.2, apron: 13, cross: -150, pav: 20.5, north: MAIN[3] + 0.9 + 0.25, halls: [[mx0 + 14 + 6, -185], [mx1 - 14 - 6, -185]] });
 E.push({ t: 'incense_ding', at: [PAGODA[0], -158], y: 0.075, s: 1.5 });
 E.push({ t: 'incense_ding', at: [PAGODA[0], -219], y: 0, s: 1.4 });
 // ---- the river: water, stone landings near the bridge, the Rainbow Bridge, boats
@@ -75,19 +79,21 @@ const pave = (r) => {
     if (pavedWay(wayI, (q[0] + q[2]) / 2, (q[1] + q[3]) / 2)) E.push({ t: 'paving', rect: q, y: 0.04, th: 0.3 });
   }
 };
-STREETS.forEach((s, wi) => {
+STREETS.forEach((st, wi) => {
   wayI = wi;
-  const c = [Math.max(s[0], WALL_X + 8), s[1], Math.min(s[2], FIELDS_X), s[3]], horiz = c[2] - c[0] > c[3] - c[1];
-  const h = horiz ? half(Math.max(Math.abs(c[1]), Math.abs(c[3]))) : half(Math.max(Math.abs(c[0]), Math.abs(c[2])));
-  const r = horiz ? [Math.max(c[0], -h), c[1], Math.min(c[2], h), c[3]] : [c[0], Math.max(c[1], -h), c[2], Math.min(c[3], h)];
-  if (r[2] <= r[0] || r[3] <= r[1]) return;
-  const bankN = r[3] === RIVER.z0, bankS = r[1] === RIVER.z1;
-  if (!horiz || !(bankN || bankS)) { pave(r); return; }
-  const cut = bankN ? [r[0], r[1], r[2], r[3] - 4] : [r[0], r[1] + 4, r[2], r[3]];
-  pave([cut[0], cut[1], Math.min(-STONE_BANK, cut[2]), cut[3]]);
-  pave([Math.max(STONE_BANK, cut[0]), cut[1], cut[2], cut[3]]);
-  pave([Math.max(-STONE_BANK, r[0]), r[1], Math.min(STONE_BANK, r[2]), r[3]]);
+  for (const s of paveRects(wi)) {
+    const c = [Math.max(s[0], WALL_X + 8), s[1], Math.min(s[2], FIELDS_X), s[3]], horiz = c[2] - c[0] > c[3] - c[1];
+    const h = horiz ? half(Math.max(Math.abs(c[1]), Math.abs(c[3]))) : half(Math.max(Math.abs(c[0]), Math.abs(c[2])));
+    const r = horiz ? [Math.max(c[0], -h), c[1], Math.min(c[2], h), c[3]] : [c[0], Math.max(c[1], -h), c[2], Math.min(c[3], h)];
+    if (r[2] <= r[0] || r[3] <= r[1]) continue;
+    pave(r);
+  }
 });
+// the river streets' edges: the kerb between the walk and the earth strip (open at the bridge's approach and the landing paths), the mooring posts along the water
+for (const bank of ['n', 's']) for (const [x0, x1] of [[-STONE_BANK - 40, -BRIDGE_APRON], [BRIDGE_APRON, STONE_BANK + 40]]) {
+  const gaps = STEPS.filter((s) => s.bank === bank && s.x > x0 && s.x < x1).map((s) => [s.x - 1.6, s.x + 1.6]);
+  E.push({ t: 'river_edge', bank, x0, x1, gaps, z0: RIVER.z0, z1: RIVER.z1, walk: RIVER_WALK, rs: 11 });
+}
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // the halls (kind 'hall': the chant zone) come first, the monastery's court 'open' after them; the shops' and houses' rooms (tea, tavern, inn, shop, house) are
