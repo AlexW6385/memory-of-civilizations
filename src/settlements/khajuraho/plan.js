@@ -2,7 +2,7 @@
 // terraces, Lakshmana's and Vishvanatha's corner shrines, the tank's water.
 
 import { RADIUS, TEMPLES, TANK, VARAHA, inTankWater } from './layout.js';
-import { rites, people } from './life.js';
+import { rites, people, porchOf } from './life.js';
 
 const E = [];
 for (const t of TEMPLES) {
@@ -18,6 +18,7 @@ E.push({ t: 'varaha_mandapa', rect: VARAHA, plinth: 2.6, h: 3.6 });
 E.push(...rites());
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const K = TEMPLES[0];
+const KP = porchOf(K), KF = K.jagati + K.h * 0.12 + 0.9;
 export const temples = {
   id: 'khajuraho-temples',
   name: { en: 'The Western Group of Khajuraho', zh: '卡久拉霍西部神庙群' },
@@ -29,7 +30,9 @@ export const temples = {
   view: [K.c[0] - K.w, K.c[1] - K.w, K.c[0] + K.len + 6, K.c[1] + K.w],
   bakeTop: 36,
   elements: E,
-  rooms: [room('kandariya terrace', [K.c[0] - K.w * 0.85, K.c[1] - K.w * 0.95, K.c[0] + K.len + 4, K.c[1] + K.w * 0.95], K.jagati, 'open')],
+  rooms: [room('kandariya terrace', [K.c[0] - K.w * 0.85, K.c[1] - K.w * 0.95, K.c[0] + K.len + 4, K.c[1] + K.w * 0.95], K.jagati, 'open'),
+    room('kandariya halls', [K.c[0] + K.w / 2, K.c[1] - K.w * 0.48, KP.r[0], K.c[1] + K.w * 0.48], KF, 'hall'),
+    room('kandariya garbhagriha', [K.c[0] - 2.4, K.c[1] - 2.4, K.c[0] + 6.5, K.c[1] + 2.4], KF, 'hall')],
   walks: Object.assign([[[K.c[0] + K.len + 30, K.c[1]], [K.c[0] + K.len + 15, K.c[1]]]], {}),
 };
 temples.walks[0].y0 = 0;
