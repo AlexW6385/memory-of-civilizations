@@ -14,6 +14,7 @@ import { westminsterHall } from './hall.js';
 import { stStephens, centralLobby, commons, lords } from './interior.js';
 import { clockDial } from './dial.js';
 import { faceFrame } from '../dutch/facade.js';
+import { terraceRich, shopHouse, pub, pillarBox, drinkingFountain, bollard, trestleStall } from './shops.js';
 import { hansomCab, omnibus, gasLamp, paddleSteamer, lighter, steamboatPier } from './street.js';
 
 const S = 'limestone_yellow', SL = 'slate';
@@ -65,7 +66,7 @@ function gothicTower(el, { bag, col }) {
   else { bag.add(S, box(x - s / 2 - 0.3, y + body, z - s / 2 - 0.3, x + s / 2 + 0.3, y + body + 1, z + s / 2 + 0.3)); bag.add('iron', lathe([[0.1, 0], [0.08, h - body]], 6, null, x, y + body, z)); }
 }
 /** terrace_house: { rect, seed, front, storeys, y } — brick, a slate roof running along the street, chimney stacks, a bay window. */
-function terraceHouse(el, { bag, col }) {
+function terraceHouseBase(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, n = el.storeys ?? 3, st = 3.2, H = n * st, f = el.front ?? 's', along = f === 'n' || f === 's';
   const mat = rand() < 0.3 ? 'brick_buff' : 'brick';
   const open = el.open && !el.simple && along;
@@ -230,6 +231,6 @@ function terraceInterior(el, { bag, col }, mat, st) {
 
 registerStyle('victorian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, st_stephens: stStephens, central_lobby: centralLobby, commons, lords, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, gothic_tower: gothicTower, terrace_house: terraceHouse, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
+  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, st_stephens: stStephens, central_lobby: centralLobby, commons, lords, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, gothic_tower: gothicTower, terrace_house: (el, c) => terraceRich(el, c, terraceHouseBase), shop_house: (el, c) => shopHouse(el, c, terraceHouseBase), pub: (el, c) => pub(el, c, terraceHouseBase), pillar_box: pillarBox, drinking_fountain: drinkingFountain, bollard, trestle_stall: trestleStall, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
   objects: {},
 });
