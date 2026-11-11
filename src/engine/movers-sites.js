@@ -71,5 +71,6 @@ export const MOVER_SITES = {
   'mycenae': () => import('../settlements/mycenae/movers.js'),
   'qin-xianyang': () => import('../settlements/qin-xianyang/movers.js'),
   'alexandria': () => import('../settlements/alexandria/movers.js'),
+  'han-changan': () => import('../settlements/han-changan/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

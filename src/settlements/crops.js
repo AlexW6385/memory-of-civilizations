@@ -4,7 +4,7 @@
 // Americas. Added where a settlement's ground is mostly fields and nothing taller grows there.
 
 const BY = {
-  wheat: ['qin-xianyang', 'mycenae', 'catalhoyuk', 'mongol-karakorum', 'dunhuang', 'timurid-samarkand', 'shaolin', 'athens', 'rome', 'constantinople', 'knossos', 'jerusalem', 'petra', 'ur', 'babylon', 'persepolis', 'isfahan', 'mamluk-cairo', 'ottoman-istanbul', 'granada', 'giza', 'florence', 'baroque-rome', 'paris', 'conques', 'amsterdam', 'versailles', 'muscovy', 'norse-borgund', 'stonehenge', 'london', 'lalibela', 'djenne', 'great-zimbabwe', 'kilwa', 'lhasa', 'mughal-agra', 'sanchi', 'khajuraho'],
+  wheat: ['han-changan', 'qin-xianyang', 'mycenae', 'catalhoyuk', 'mongol-karakorum', 'dunhuang', 'timurid-samarkand', 'shaolin', 'athens', 'rome', 'constantinople', 'knossos', 'jerusalem', 'petra', 'ur', 'babylon', 'persepolis', 'isfahan', 'mamluk-cairo', 'ottoman-istanbul', 'granada', 'giza', 'florence', 'baroque-rome', 'paris', 'conques', 'amsterdam', 'versailles', 'muscovy', 'norse-borgund', 'stonehenge', 'london', 'lalibela', 'djenne', 'great-zimbabwe', 'kilwa', 'lhasa', 'mughal-agra', 'sanchi', 'khajuraho'],
   rice: ['muromachi-kyoto', 'tang-wutai', 'song-kaifeng', 'song-hangzhou', 'ming-suzhou', 'qing-beijing', 'joseon-seoul', 'heian-uji', 'nara', 'edo-himeji', 'madurai', 'angkor', 'borobudur'],
   maize: ['chichen-itza', 'teotihuacan', 'tenochtitlan', 'taos', 'cahokia', 'machu-picchu'],
 };
