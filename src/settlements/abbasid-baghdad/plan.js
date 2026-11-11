@@ -31,7 +31,7 @@ export const baghdad = {
   entrance: { at: [px, pz + 60], facing: 'n' },
   bounds: [MOSQUE[0] - 10, PALACE[1] - 12, LIBRARY[2] + 10, PALACE[3] + 14],
   bakeBounds: [MOSQUE[0] - 4, LIBRARY[1] - 4, LIBRARY[2] + 4, PALACE[3] + 4],
-  view: PALACE,
+  view: [px - 6, pz + 29, px + 6, pz + 39],                // the Golden Gate and its hall (the compound's walls close the rest of the palace to the eye)
   bakeTop: 50,
   elements: E,
   rooms,
