@@ -79,6 +79,10 @@ function finishBuild({ bag, col, lights, plan }) {
   if (bag.weld) for (const p of parts) packNormals(p.geometry);
   // repeated pieces (instancing): their matrices placed with the plan
   const instanced = bag.instanced || [];
+  // and their prototypes' normals too (not the street life's, src/engine/life-instances.js): with
+  // float normals a material's instanced shapes and its parts were two vertex layouts, so two
+  // shaders and pipelines (scene and shadow) for one material — 33 of Suzhou's 73 materials
+  if (bag.weld && plan.style !== 'life') for (const p of instanced) packNormals(p.geometry);
   const A = new Matrix4(), B = new Matrix4();
   for (const p of instanced) {
     const M = p.matrices;
@@ -95,7 +99,7 @@ export function flatParts(built) {
   const M = new Matrix4();
   for (const p of built.instanced || []) {
     const P0 = p.geometry.attributes.position.array, N0 = p.geometry.attributes.normal.array, I = p.geometry.index.array;
-    const k = p.matrices.length / 16, n = I.length;
+    const k = p.matrices.length / 16, n = I.length, q = N0 instanceof Int16Array ? 1 / 32767 : 1;
     const pos = new Float32Array(n * 3 * k), nor = new Float32Array(n * 3 * k);
     const e = M.elements;
     for (let c = 0; c < k; c++) {
@@ -106,7 +110,7 @@ export function flatParts(built) {
         pos[o + 1] = e[1] * x + e[5] * y + e[9] * z + e[13];
         pos[o + 2] = e[2] * x + e[6] * y + e[10] * z + e[14];
         // normals: the matrices are rotations by quarter turns and stretches along the axes
-        const nx = N0[v] / (Math.hypot(e[0], e[1], e[2]) ** 2), ny = N0[v + 1] / (Math.hypot(e[4], e[5], e[6]) ** 2), nz = N0[v + 2] / (Math.hypot(e[8], e[9], e[10]) ** 2);
+        const nx = N0[v] * q / (Math.hypot(e[0], e[1], e[2]) ** 2), ny = N0[v + 1] * q / (Math.hypot(e[4], e[5], e[6]) ** 2), nz = N0[v + 2] * q / (Math.hypot(e[8], e[9], e[10]) ** 2);
         const wx = e[0] * nx + e[4] * ny + e[8] * nz, wy = e[1] * nx + e[5] * ny + e[9] * nz, wz = e[2] * nx + e[6] * ny + e[10] * nz, l = Math.hypot(wx, wy, wz) || 1;
         nor[o] = wx / l; nor[o + 1] = wy / l; nor[o + 2] = wz / l;
       }
