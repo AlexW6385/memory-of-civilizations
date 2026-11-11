@@ -3,13 +3,13 @@
 // worker), in the format of Suzhou's; the ways come from layout.js (the grid's frame turned into the settlement's by
 // toCity). No boats. The cars and cabs stand as placed things (town.js); the movers are people on foot.
 
-import { RADIUS, AVENUES, STREETS, toCity } from './layout.js';
+import { RADIUS, AVENUES, STREETS, toCity, inSpecial } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 46, night: 9, rain: 0.7, reach: 150, spawnMin: 26, far: 42 },
+  walkers: { day: 56, night: 9, rain: 0.7, reach: 150, spawnMin: 26, far: 42 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -23,7 +23,8 @@ const aOff = (a) => a[1] / 2 + (a[2] === '6th' ? 2.0 : SIDE);
 const sOff = 6 + SIDE;
 export function walkways() {
   const links = [], P = (x, z) => toCity(x, z);
-  const L = (a, b, w, weight, kind = 'street', market = 0) => links.push({ a: P(...a), b: P(...b), w, kind, weight, market });
+  // (no pavement through a landmark's lot — the Library, Grand Central, the Empire State and the towers stand at the kerb: a way whose middle or ends lie in one is dropped)
+  const L = (a, b, w, weight, kind = 'street', market = 0) => { if (inSpecial((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 0.3) || inSpecial(a[0], a[1], 0.3) || inSpecial(b[0], b[1], 0.3)) return; links.push({ a: P(...a), b: P(...b), w, kind, weight, market }); };
   const zs = STREETS.map(([z]) => z).sort((a, b) => a - b), X0 = -RADIUS, X1 = RADIUS;
   // along each avenue's sides, block by block; the crossings of the cross streets at each corner
   for (const av of AVENUES) {

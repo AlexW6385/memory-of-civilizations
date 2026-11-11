@@ -43,7 +43,7 @@ export const midtown = {
     { t: 'skyscraper', rect: CHANIN, y: hy(CHANIN), h: 197, mat: 'facade_buff', seed: 1929 },
     { t: 'skyscraper', rect: LINCOLN, y: hy(LINCOLN), h: 205, mat: 'facade_limestone', seed: 1930 },
     { t: 'grand_central', rect: GCT, y: hy(GCT), h: 30, deck: 8.5, viaduct: VIADUCT, yAt: (z) => height(VIADUCT.x, z) },
-    { t: 'beaux_arts', rect: LIBRARY, y: hy(LIBRARY), h: 22, front: 'e', cols: 6, mat: 'marble' },
+    { t: 'library', rect: LIBRARY, y: hy(LIBRARY), h: 24 },
     { t: 'park', rect: BRYANT, y: hy(BRYANT) },
     { t: 'el_track', x: AVENUES[0][0], z0: -400, z1: 400, y: 0, yAt: (z) => height(AVENUES[0][0], z), stations: EL_STATIONS },
     // trains on it: four cars standing at 42nd Street on the uptown track, five running downtown below 35th Street

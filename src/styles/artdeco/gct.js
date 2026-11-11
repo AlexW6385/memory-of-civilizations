@@ -5,6 +5,7 @@
 // to Park Avenue by the viaduct of 1919.
 
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
+import { concourse } from './concourse.js';
 
 const LS = 'limestone', GR = 'granite_grey';
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
@@ -37,17 +38,19 @@ function figure(bag, x, y, z, s, pose, facing = 1) {
   }
 }
 /** grand_central: { rect, y, h (to the cornice), deck (the roadway's height), viaduct: { x, z1, w } } — the front faces +z. */
-export function grandCentral(el, { bag, col }) {
+export function grandCentral(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 30, dk = el.deck ?? 8.5, SB = 8, zf = z1 - SB, cx = (x0 + x1) / 2;
-  // the ground storey under the roadway: granite, with the street doors; the body above it, set back behind the roadway
-  bag.add(GR, box(x0, y - 0.5, z0, x1, y + dk, z1)); col.rect(el.rect, y - 0.5, y + dk);
+  // the ground storey under the roadway: granite, with the street doors, and behind them the concourse (concourse.js); the body above is its shell
+  const D = 1.6, zc = zf - D;                                                           // the façade slab and the core behind
+  const doors = [];
   for (let x = x0 + 4; x < x1 - 3; x += 7) {
     const door = Math.abs(x + 1.5 - cx) < 12;
-    bag.add('opening', box(x, y, z1, x + 3, y + (door ? 4.2 : 3.0), z1 + 0.04));
+    if (door) doors.push(x + 1.5);
+    else bag.add('opening', box(x, y, z1, x + 3, y + 3.0, z1 + 0.04));
     bag.add('granite_block', box(x - 0.3, y + (door ? 4.2 : 3.0), z1, x + 3.3, y + (door ? 4.9 : 3.6), z1 + 0.2));
   }
-  const D = 1.6, zc = zf - D;                                                           // the façade slab and the core behind
-  bag.add(LS, box(x0, y + dk, z0, x1, y + h, zc)); col.rect([x0, z0, x1, zf], y + dk, y + h + 6);
+  concourse(bag, col, lights, { x0, z0, x1, z1, zc, y, dk, h, T: 1.2, doors, seed: 1931 });
+  col.rect([x0, z0, x1, zf], y + dk, y + h + 6);
   // the terrace: the roadway's deck, its balustrade, lamp standards
   bag.add('asphalt', box(x0, y + dk, zf, x1, y + dk + 0.05, z1)); col.floor([x0, zf, x1, z1], y + dk + 0.05);
   const bal = (xa, xb, z, yy) => {
