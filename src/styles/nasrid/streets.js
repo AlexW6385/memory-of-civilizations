@@ -6,6 +6,7 @@
 
 import { box, lathe, rod, clothBox, addCloth } from '../../core/geom.js';
 import { holedWall, archHead, face } from './halls.js';
+import { isShop } from './houses.js';
 
 const LW = 'limewash_white';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -46,13 +47,22 @@ function laneDress(el, { bag, col }) {
     const Z = (d) => zf + n * d, zb = (d0, d1) => [Math.min(Z(d0), Z(d1)), Math.max(Z(d0), Z(d1))];
     const bx = (mat, xa, ya, da, xb, yb, db) => { const [za, zc] = zb(da, db); bag.add(mat, box(xa, ya, za, xb, yb, zc)); };
     const cr = (xa, xb, d1, h) => { const [za, zc] = zb(0, d1); col.rect([xa, za, xb, zc], y, y + h); };
+    const shop = lot.kind === 'med' && lot.enterable && isShop(lot.seed);
+    if (shop) {
+      // the shop's front: a cloth awning on two poles over the door, a counter beside it with the goods (the sign hangs on the other side)
+      const sd = s ? -1 : 1, cxm = dx - sd * 1.7;
+      { const [az0, az1] = zb(0.04, 1.0); addCloth(bag, ['cloth_red', 'cloth_indigo', 'cloth_ochre'][lot.seed % 3], clothBox(dx - 1.15, y + 2.55, az0, dx + 1.15, y + 2.8, az1, 0.25), y + 2.8); }
+      for (const u of [-1.1, 1.1]) bag.add('timber', rod([dx + u, y, Z(0.98)], [dx + u, y + 2.75, Z(0.98)], 0.035, 5));
+      bx(LW, cxm - 0.8, y, 0.05, cxm + 0.8, y + 0.85, 0.55); bx('limestone', cxm - 0.83, y + 0.85, 0.03, cxm + 0.83, y + 0.9, 0.58); cr(cxm - 0.83, cxm + 0.83, 0.58, 0.9);
+      for (let i = 0; i < 4; i++) { const gx = cxm - 0.6 + i * 0.4; if (i % 2) pot(bag, gx, y + 0.9, Z(0.3), 0.09, rand, false); else bx(CLOTHS[(lot.seed + i) % 6], gx - 0.16, y + 0.9, 0.15, gx + 0.16, y + 1.08, 0.45); }
+    }
     // a masonry bench (mastaba) by the door, with a folded rug on it now and then
-    if (rand() < 0.55) {
+    if (!shop && rand() < 0.55) {
       const side = rand() < 0.5 ? -1 : 1, bw = 1.5, xa = dx + side * (0.95 + bw / 2) - bw / 2;
       if (xa > x0 + 0.3 && xa + bw < x1 - 0.3) { bx(LW, xa, y, 0.01, xa + bw, y + 0.46, 0.4); bx('limestone', xa - 0.02, y + 0.46, 0.01, xa + bw + 0.02, y + 0.5, 0.42); cr(xa, xa + bw, 0.42, 0.5); if (rand() < 0.5) bx(CLOTHS[Math.floor(rand() * 4) + 2], xa + 0.2, y + 0.5, 0.06, xa + 0.8, y + 0.56, 0.36); }
     }
     // the iron lamp on its bracket beside the door
-    { const x = dx + (rand() < 0.5 ? -1 : 1) * 0.85, [za] = zb(0.02, 0.4); void za;
+    if (!shop) { const x = dx + (rand() < 0.5 ? -1 : 1) * 0.85, [za] = zb(0.02, 0.4); void za;
       bag.add('iron', rod([x, y + 2.55, Z(0.01)], [x, y + 2.55, Z(0.38)], 0.012, 4)); bag.add('iron', rod([x, y + 2.55, Z(0.38)], [x, y + 2.3, Z(0.38)], 0.01, 4));
       bag.add('lamp_glass', lathe([[0.001, 0], [0.06, 0.02], [0.09, 0.12], [0.06, 0.2], [0.001, 0.22]], 8, null, x, y + 2.1, Z(0.38))); }
     // pots on brackets along the front, at the height of a hand reaching from a window; one row, now and then two

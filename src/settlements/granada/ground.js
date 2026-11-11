@@ -34,11 +34,12 @@ function planting(x, z) {
   if (inEstate(x, z)) { const p = estatePlant(x, z); if (p !== undefined) return p; }
   const e = hillE(x, z);
   if (e < 0.95) return e > 0.6 && x > 90 ? { cypress: 0.04, grass: 15 } : null;          // the gardens of the Partal and toward the Generalife
+  if (e < 1.15) return { elm: 0.1, cypress: 0.02, maquis: 1.2, fig: 0.1, grass: 20 };           // the foot of the red walls: figs, brambles and pomegranates
   if (e < 1.4) return { elm: 0.12, cypress: 0.02, grass: 20 };                              // the wood on the slopes
   if (Math.abs(z + 110) < 14) return { poplar: 0.1, grass: 25 };
   if (x > 222 && x < 250 && z > -100 && z < 70) return laneAt(x, z).d < LANE_W / 2 + 1.2 ? null : { elm: 0.08, poplar: 0.03, grass: 22 };   // the ravine
   if (x > 246) return { holm_oak: 0.3, cypress: 0.05, maquis: 2, grass_dry: 12 };                          // the hillside of the Cerro del Sol
-  return { olive: 0.02, cypress: 0.01, grass_dry: 8 };
+  return { olive: 0.02, cypress: 0.01, fig: 0.06, maquis: 0.4, grass_dry: 8 };   // the cármenes' slopes: figs and scrub between the lanes
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
