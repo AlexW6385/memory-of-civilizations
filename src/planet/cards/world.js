@@ -842,4 +842,22 @@ export const CARDS = {
       "下城——坡地梯田上的石基灰泥土坯平顶住宅，有陶工、纺织、榨油作坊及其院落、小巷和城中的居民。",
     ],
   },
+  'abbasid-baghdad': {
+    en: [
+      "Baghdad lies on the Tigris in Mesopotamia, and the year is about 800, under Harun al-Rashid, in the Abbasid caliphate's capital, the City of Peace founded by al-Mansur in 762 as a round city and grown beyond it into the markets of Karkh. The architecture is of baked and mud brick, with stucco in the Samarra styles, arches, domes and wind towers. The Round City is compressed here to a radius of about 300 m, and the wind towers are inferred.",
+      "The Round City — a ring of double walls and a moat, four gates turned to the compass with iron doors and domed audience halls above them, and a ring road of arcaded lodgings inside.",
+      "The Palace of the Golden Gate and the Great Mosque — at the centre, the caliph's palace under its Green Dome, and beside it the congregational mosque with its court and prayer hall.",
+      "The House of Wisdom — a library hall of bookcases, desks and reading scholars, where books are copied and translated.",
+      "Karkh — the suqs of the paper-sellers, spice merchants, cloth, money-changers, coppersmiths, potters and the fruit and grain market, with a bookseller's shop to enter, courtyard houses with ivans and wind catchers, and the Isa canal.",
+      "The Tigris — a wide river crossed by two bridges of boats, with jetties, round quffa boats and long pitched zawraq, date palms and reeds on the banks.",
+    ],
+    zh: [
+      "巴格达在美索不达米亚的底格里斯河畔，所示约为公元 800 年，哈伦·拉希德在位，这是阿拔斯哈里发国的都城“和平之城”，曼苏尔于 762 年建为圆城，后向外扩展为卡尔赫的市集。建筑为烧砖与土坯，饰以萨迈拉式灰泥，有拱、穹顶和捕风塔。此处圆城压缩为半径约 300 米，捕风塔为推断。",
+      "圆城 —— 双重城墙与护城河环绕，四座正对罗盘方位的铁门，门上是穹顶接见厅，城内是带拱廊的环城道。",
+      "金门宫与大清真寺 —— 中央是绿色穹顶之下的哈里发宫，旁边是主麻清真寺，有庭院和礼拜殿。",
+      "智慧宫 —— 书架、书桌与读书的学者，在此抄写和翻译书籍。",
+      "卡尔赫 —— 造纸、香料、布匹、钱庄、铜匠、陶工的市集与果蔬粮食市场，可进入的书商铺子，带伊旺和捕风塔的院落住宅，以及伊萨运河。",
+      "底格里斯河 —— 宽阔的河面上有两座浮桥，码头、圆形的库法小舟和涂沥青的长船，岸边有枣椰树和芦苇。",
+    ],
+  },
 };
