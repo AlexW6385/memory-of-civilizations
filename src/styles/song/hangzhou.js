@@ -530,6 +530,70 @@ function pagodaNiches(bag, el) {
 }
 
 /**
+ * The lowest two storeys of the Liuhe Pagoda dressed for eye level { c, y (the base's top), tiers, g (gallery offset) }: a brick plinth with a granite cap round the white core, a
+ * pilaster at every corner (stone foot, red timber shaft, capital), on the closed compass faces a window (timber frame, granite sill, lattice over the dark), on the closed diagonal a
+ * pair of studded lacquer doors in a frame with a granite threshold, and the gallery's rail with a baluster at every metre and lattice panels between the rails.
+ * [inferred: the Song pagoda's brick body in timber-style dress, as the Liuhe Pagoda's present form keeps it]
+ */
+function pagodaFront(bag, el) {
+  const [cx, cz] = el.c, ng = (r) => Array.from({ length: 8 }, (_, k) => [cx + Math.cos(Math.PI / 8 + k * Math.PI / 4) * r, cz + Math.sin(Math.PI / 8 + k * Math.PI / 4) * r]);
+  let y = el.y + el.base.h;
+  const OPEN = [2, 4, 6], K = 1 / Math.cos(Math.PI / 8);
+  el.tiers.slice(0, 2).forEach((t, i) => {
+    const r = t.r, h = t.h, F0 = ng(r + 0.03), g = r + 2.4;
+    const slab = (out, d0, d1, ya, yb) => { const A = ng(r + 0.03 + d0 * K), B = ng(r + 0.03 + d1 * K); for (let k = 0; k < 8; k++) { const k2 = (k + 1) % 8; hexa(out, [[A[k][0], ya, A[k][1]], [A[k2][0], ya, A[k2][1]], [B[k2][0], ya, B[k2][1]], [B[k][0], ya, B[k][1]], [A[k][0], yb, A[k][1]], [A[k2][0], yb, A[k2][1]], [B[k2][0], yb, B[k2][1]], [B[k][0], yb, B[k][1]]]); } };
+    const plinth = [], cap = [];
+    slab(plinth, 0, 0.1, y, y + 0.95); slab(cap, 0, 0.17, y + 0.95, y + 1.07);
+    bag.add('brick_grey', fromTriangles(plinth)); bag.add('granite_grey', fromTriangles(cap));
+    // the corner pilasters
+    for (let k = 0; k < 8; k++) {
+      const [px, pz] = ng(r + 0.03 + 0.1)[k];
+      bag.add('granite_block', lathe([[0.26, 0], [0.26, 0.28], [0.2, 0.34], [0.001, 0.34]], 8, null, px, y + 1.07, pz));
+      bag.add('timber_red', lathe([[0.17, 0], [0.15, h - 2.2]], 8, null, px, y + 1.4, pz));
+      bag.add('granite_grey', lathe([[0.15, 0], [0.24, 0.08], [0.24, 0.2], [0.001, 0.2]], 8, null, px, y + h - 0.8 - 0.2 + 0.0, pz));
+    }
+    // the faces
+    for (let k = 0; k < 8; k++) {
+      if (OPEN.includes(k)) continue;
+      const a = F0[k], b = F0[(k + 1) % 8], mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2, L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = mx - cx, nz = mz - cz, nl = Math.hypot(nx, nz), ox = nx / nl, oz = nz / nl;
+      const Q = (u, yy, d) => [mx + ux * u + ox * d, yy, mz + uz * u + oz * d];
+      const bx = (u0, u1, d0, d1, ya, yb, mat) => { const t = []; hexa(t, [Q(u0, ya, d0), Q(u1, ya, d0), Q(u1, ya, d1), Q(u0, ya, d1), Q(u0, yb, d0), Q(u1, yb, d0), Q(u1, yb, d1), Q(u0, yb, d1)]); bag.add(mat, fromTriangles(t)); };
+      if (k % 2 === 0) {
+        // the doors: a frame, two lacquer leaves with rows of bronze studs, a ring each, the threshold
+        const dw = 0.32 * L, dh = Math.min(3, h * 0.45), y0 = y + 0.4, hw = dw / 2;
+        bx(-hw - 0.16, hw + 0.16, 0.02, 0.1, y0 + dh, y0 + dh + 0.2, 'timber_red');
+        for (const sg of [-1, 1]) bx(sg * (hw + 0.02) - 0.08 + 0, sg * (hw + 0.02) + 0.08, 0.02, 0.1, y0, y0 + dh + 0.2, 'timber_red');
+        bx(-hw - 0.3, hw + 0.3, 0.02, 0.2, y + 0.95 - 0.0, y0 + 0.0, 'granite_grey');
+        for (const sg of [-1, 1]) {
+          const u0 = sg < 0 ? -hw : 0.015, u1 = sg < 0 ? -0.015 : hw;
+          bx(u0 + 0.03, u1 - 0.03, 0.03, 0.07, y0, y0 + dh, 'lacquer_red');
+          for (const q of [0.3, dh * 0.5, dh - 0.35]) bx(u0 + 0.03, u1 - 0.03, 0.07, 0.085, y0 + q - 0.06, y0 + q + 0.06, 'iron');
+          const rows = 5, cols = 4;
+          for (let j = 0; j < rows; j++) for (let c2 = 0; c2 < cols; c2++) { const uc = u0 + 0.14 + (u1 - u0 - 0.28) * c2 / (cols - 1), yc = y0 + 0.35 + (dh - 0.7) * j / (rows - 1); bx(uc - 0.035, uc + 0.035, 0.07, 0.115, yc - 0.035, yc + 0.035, 'bronze'); }
+          const ringc = sg * 0.2; bag.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.1, 0.03], [0.001, 0.045]], 8).rotateX(Math.PI / 2).translate(...Q(ringc, y0 + dh * 0.45, 0.095)).rotateY(0));
+        }
+      } else {
+        // a window: a frame and sill, the dark opening, a lattice in front of it
+        const ww = 0.18 * L, wy0 = y + h * 0.35, wh = 1.2, hw = ww / 2;
+        bx(-hw - 0.12, hw + 0.12, 0.02, 0.1, wy0 - 0.12, wy0, 'timber_red'); bx(-hw - 0.12, hw + 0.12, 0.02, 0.1, wy0 + wh, wy0 + wh + 0.12, 'timber_red');
+        for (const sg of [-1, 1]) bx(sg * hw + (sg < 0 ? -0.12 : 0), sg * hw + (sg < 0 ? 0 : 0.12), 0.02, 0.1, wy0, wy0 + wh, 'timber_red');
+        bx(-hw - 0.25, hw + 0.25, 0.02, 0.22, wy0 - 0.22, wy0 - 0.12, 'granite_grey');
+        bx(-hw, hw, 0.055, 0.075, wy0, wy0 + wh, 'lattice_red');
+      }
+    }
+    // the gallery's rail: balusters and lattice panels between the two rails (not at the way in from the south)
+    const Rl = ng(g - 0.15);
+    for (let k = 0; k < 8; k++) {
+      if (i === 0 && k === 1) continue;
+      const a = Rl[k], b = Rl[(k + 1) % 8], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(2, Math.round(L / 1.0)), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, ox = uz, oz = -ux;
+      for (let q = 0; q <= n; q++) { const f = q / n, px = a[0] + (b[0] - a[0]) * f, pz = a[1] + (b[1] - a[1]) * f; bag.add('timber_red', lathe([[0.001, 0], [0.06, 0.02], [0.045, 0.3], [0.07, 0.55], [0.045, 0.8], [0.001, 0.82]], 6, null, px, y + 0.15, pz)); }
+      for (let q = 0; q < n; q++) { const f0 = (q + 0.1) / n, f1 = (q + 0.9) / n, t = []; hexa(t, [[a[0] + (b[0] - a[0]) * f0, y + 0.3, a[1] + (b[1] - a[1]) * f0], [a[0] + (b[0] - a[0]) * f1, y + 0.3, a[1] + (b[1] - a[1]) * f1], [a[0] + (b[0] - a[0]) * f1 + ox * 0.02, y + 0.3, a[1] + (b[1] - a[1]) * f1 + oz * 0.02], [a[0] + (b[0] - a[0]) * f0 + ox * 0.02, y + 0.3, a[1] + (b[1] - a[1]) * f0 + oz * 0.02], [a[0] + (b[0] - a[0]) * f0, y + 0.8, a[1] + (b[1] - a[1]) * f0], [a[0] + (b[0] - a[0]) * f1, y + 0.8, a[1] + (b[1] - a[1]) * f1], [a[0] + (b[0] - a[0]) * f1 + ox * 0.02, y + 0.8, a[1] + (b[1] - a[1]) * f1 + oz * 0.02], [a[0] + (b[0] - a[0]) * f0 + ox * 0.02, y + 0.8, a[1] + (b[1] - a[1]) * f0 + oz * 0.02]]); bag.add('lattice_red', fromTriangles(t)); }
+    }
+    y += h;
+  });
+}
+
+/**
  * liuhe_pagoda: pagoda_oct with the song style's finished spire and the niches (same parameters as pagoda_oct, `interior` and `images` for the walkable inside).
  */
 function liuhePagoda(el, ctx) {
@@ -539,6 +603,7 @@ function liuhePagoda(el, ctx) {
   const top = el.y + el.base.h + el.tiers.reduce((a, t) => a + t.h, 0), rt = el.tiers[el.tiers.length - 1].r, R = rt + 3.6;
   songSpire(ctx.bag, el.c[0], top + 4.2, el.c[1], R, top + 1.0);
   if (el.interior && el.niches !== false) pagodaNiches(ctx.bag, el);
+  if (el.dress !== false) pagodaFront(ctx.bag, el);
 }
 
 /**
