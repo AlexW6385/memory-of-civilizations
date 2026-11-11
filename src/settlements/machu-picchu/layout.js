@@ -62,6 +62,8 @@ export function canal() {
   return pts;
 }
 const nearCanal = (x, z, m) => { if (x > -36 || z < -4 || z > 161) return false; const p = canal(); for (let i = 0; i + 1 < p.length; i++) { const [ax, az] = p[i], [bx, bz] = p[i + 1], dx = bx - ax, dz = bz - az, l2 = dx * dx + dz * dz, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / l2)); if (Math.hypot(x - ax - dx * t, z - az - dz * t) < m) return true; } return false; };
+/** The Temple of the Condor, north-west below the Sacred Plaza: the carved floor, head and wings, its back wall of cells [stated: general; place inferred]. */
+export const CONDOR = { c: [-56, -108], yaw: 0.5, rect: [-66, -118, -46, -98] };
 const TOMB = [-45.5, 12.5, -22.5, 31.5];
 /** Ground built over, where no grass grows: the canal, the fountains' courts, the cave under the Torreón, the Sacred Rock's base and the wayronas' floors. */
 let PAVED = null;
@@ -102,35 +104,51 @@ export function houses() {
   const clear = (r, m) => {
     const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, cs = [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [cx, r[1]], [cx, r[3]], [r[0], cz], [r[2], cz]];
     if (cs.some(([x, z]) => outside(x, z) > -m)) return false;
-    if (cs.some(([x, z]) => inRect(PLAZA, x, z, 6) || inRect([-62, -66, -10, 50], x, z) || inRect(ROCK_COURT, x, z, 1) || inRect(TOMB, x, z, 3) || inRect(KALLANKA, x, z, 4))) return false;
+    if (r[0] < CONDOR.rect[2] + 3 && r[2] > CONDOR.rect[0] - 3 && r[1] < CONDOR.rect[3] + 3 && r[3] > CONDOR.rect[1] - 3) return false;
+    if (cs.some(([x, z]) => inRect(PLAZA, x, z, 6) || inRect([-62, -66, -10, 50], x, z) || inRect(ROCK_COURT, x, z, 1) || inRect(TOMB, x, z, 3) || inRect(CONDOR.rect, x, z, 3) || inRect(KALLANKA, x, z, 4))) return false;
     if (cs.some(([x, z]) => Math.hypot(x - HILL.c[0], z - HILL.c[1]) < HILL.r + 7 || Math.hypot(x - KNOLL.c[0], z - KNOLL.c[1]) < KNOLL.r + 9)) return false;
     if (cs.some(([px, pz]) => nearCanal(px, pz, 1.8) || pz > TOWN_WALL.z - 6)) return false;
     return !taken.some((t) => r[0] < t[2] + 2 && r[2] > t[0] - 2 && r[1] < t[3] + 2 && r[3] > t[1] - 2);
   };
   const th = 0.7;
+  // one kancha in the rectangle r (A across the gate side, D deep), its gate on side `gate` ('e' | 'w')
+  const kancha = (r, gate, A, D) => {
+    taken.push(r);
+    // kancha-local: u across the gate side (along z), v from the gate side (0) to the back (D)
+    const gx = gate === 'e' ? r[2] : r[0], sv = gate === 'e' ? -1 : 1;
+    const P = (u, v) => [gx + sv * v, r[1] + u];
+    const R = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+    const bd = 5.6 + rand() * 1, bu0 = 2 + rand() * 2, bu1 = A - 2 - rand() * 2;
+    const sl0 = 7 + rand() * 2, sd = 5 + rand() * 0.8, sv1 = D - bd - 1 - rand() * 1.5, sv0 = sv1 - Math.min(sl0, sv1 - 1.1);
+    const seed = () => Math.floor(rand() * 1e6);
+    KANCHAS.push({ rect: r, at: P, inward: [sv, 0], A, D, sd, sv0, sv1, bd });
+    HOUSES.push({ rect: R(bu0, D - bd, bu1, D), front: gate, seed: seed() });
+    HOUSES.push({ rect: R(0, sv0, sd, sv1), front: 's', seed: seed() });
+    HOUSES.push({ rect: R(A - sd, sv0, A, sv1), front: 'n', seed: seed() });
+    // the walls: the gate side and the back run past the corners; the sides stop at the corner lines, a little lower
+    const seg = (a, b, y1, door) => KWALLS.push({ a: P(...a), b: P(...b), y1, door });
+    const hth = th / 2;
+    seg([-hth - 0.05, 0], [A + hth + 0.05, 0], 2.4, { at: A / 2 + hth + 0.05, w: 1.15, h: 1.95, jamb: rand() < 0.3 });
+    seg([-hth - 0.05, D], [bu0 - hth + 0.12, D], 2.4);
+    seg([bu1 + hth - 0.12, D], [A + hth + 0.05, D], 2.4);
+    for (const u of [0, A]) { seg([u, 0], [u, sv0 - hth + 0.12], 2.36); seg([u, sv1 + hth - 0.12], [u, D], 2.36); }
+  };
   for (const [X0, X1, gate] of [[-86, -22, 'e'], [26, 88, 'w']]) {
     for (let z = -152; z < 160; z += 27) for (let x = X0; x < X1; x += 22.5) {
       const r = [x, z, x + 20, z + 24];
       if (!clear(r, 3) || rand() < 0.12) continue;
-      taken.push(r);
-      // kancha-local: u across the gate side (along z), v from the gate side (0) to the back (D)
-      const A = 24, D = 20, gx = gate === 'e' ? r[2] : r[0], sv = gate === 'e' ? -1 : 1;
-      const P = (u, v) => [gx + sv * v, r[1] + u];
-      const R = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
-      const bd = 5.6 + rand() * 1, bu0 = 2 + rand() * 2, bu1 = A - 2 - rand() * 2;
-      const sl = 7 + rand() * 2, sd = 5 + rand() * 0.8, sv1 = D - bd - 1 - rand() * 1.5, sv0 = sv1 - sl;
-      const seed = () => Math.floor(rand() * 1e6);
-      KANCHAS.push({ rect: r, at: P, inward: [sv, 0] });
-      HOUSES.push({ rect: R(bu0, D - bd, bu1, D), front: gate, seed: seed() });
-      HOUSES.push({ rect: R(0, sv0, sd, sv1), front: 's', seed: seed() });
-      HOUSES.push({ rect: R(A - sd, sv0, A, sv1), front: 'n', seed: seed() });
-      // the walls: the gate side and the back run past the corners; the sides stop at the corner lines, a little lower
-      const seg = (a, b, y1, door) => KWALLS.push({ a: P(...a), b: P(...b), y1, door });
-      const hth = th / 2;
-      seg([-hth - 0.05, 0], [A + hth + 0.05, 0], 2.4, { at: A / 2 + hth + 0.05, w: 1.15, h: 1.95, jamb: rand() < 0.3 });
-      seg([-hth - 0.05, D], [bu0 - hth + 0.12, D], 2.4);
-      seg([bu1 + hth - 0.12, D], [A + hth + 0.05, D], 2.4);
-      for (const u of [0, A]) { seg([u, 0], [u, sv0 - hth + 0.12], 2.36); seg([u, sv1 + hth - 0.12], [u, D], 2.36); }
+      kancha(r, gate, 24, 20);
+    }
+  }
+  // the town is packed: smaller kanchas (17 × 18.5 m) in every gap the big ones leave, their gates to the nearer lane
+  // [inferred: Machu Picchu's urban sector is a dense mass of buildings — "closely packed buildings" round the plaza, World History Encyclopedia];
+  // the way in from the gate to the plaza and the Sacred Rock's lane stay open
+  {
+    const ov = (r, q) => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1], keep = (r) => ov(r, [-4, 6, 8, TOWN_WALL.z + 6]) || ov(r, [-5, -140, 7, 8]);
+    for (let z = -150; z < 150; z += 3) for (let x = -92; x < 90; x += 3) {
+      const r = [x, z, x + 17, z + 18.5];
+      if (keep(r) || !clear(r, 2.5)) continue;
+      kancha(r, (r[0] + r[2]) / 2 < 0 ? 'e' : 'w', 18.5, 17);
     }
   }
   // the town wall from the canal to the saddle's east edge, its gateway double-jambed, the stone ring over the lintel

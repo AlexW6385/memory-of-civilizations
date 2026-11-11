@@ -10,6 +10,7 @@ import { box, lathe, fromTriangles, frustum, rod, quad, orientOutward } from '..
 import '../qing/index.js';
 import { rectRoof, beamTris } from '../ming/index.js';
 import { houseInterior, hallInterior, INCA_LIFE } from './life.js';
+import { INCA_DRESS } from './dress.js';
 
 import { patch } from '../maya/household.js';
 import { incaPlants } from './plants.js';
@@ -661,6 +662,6 @@ function stoneBlock(el, { bag, col }) {
 
 registerStyle('inca', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock, inca_plants: incaPlants, ...INCA_LIFE },
+  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock, inca_plants: incaPlants, ...INCA_LIFE, ...INCA_DRESS },
   objects: {},
 });

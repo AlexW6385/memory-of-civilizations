@@ -4,7 +4,7 @@
 // on the terraces, cloud forest on the slopes; mist and cloud of the eastern Andes.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, TERRACE, PLAZA, PEAKS, DITCH, FIELDS, STORES, HILL, KNOLL, hillHeight, inRect, outside, terraceAt, inHouse, paved, ploughed, smooth as sm } from './layout.js';
+import { RADIUS, SITE, TERRACE, PLAZA, PEAKS, DITCH, FIELDS, STORES, HILL, KNOLL, hillHeight, inRect, outside, terraceAt, inHouse, paved, ploughed, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -75,7 +75,14 @@ function planting(x, z, p) {
     return plot === 2 ? { grass: 45 } : { maize: 34, grass: 6 };
   }
   if (d < 0) return inHouse(x, z, 0.6) ? null : { grass: 40, tamarisk: hash2(x * 0.2, z * 0.2) < 0.03 ? 0.3 : 0 };
-  if (d < TERRACE.w * TERRACE.n) return ploughed(x, z) ? null : { grass: 50 };
+  if (d < TERRACE.w * TERRACE.n) {
+    if (ploughed(x, z)) return null;
+    // maize on the terraces: whole sectors of a terrace in crop, the next in grass or fallow; the stairs and the fountains' stair kept clear
+    const j = Math.floor(d / TERRACE.w), f = d - TERRACE.w * j, ang = Math.atan2(z / (SITE.b + d), x / (SITE.a + d));
+    const nearStair = (Math.abs(z) < 2.6 && Math.abs(x) > SITE.a * 0.5) || (z > SITE.b * 0.5 && Math.abs(x) < 2.6);
+    if (!nearStair && f > 0.9 && f < TERRACE.w - 0.5 && hash2(Math.floor((ang + 3.2) * 7 + j * 3.1), j) < 0.5) return { maize: 30, grass: 8 };
+    return { grass: 50 };
+  }
   return { grass: 25, teak: 0.25, neem: 0.3, oak: 0.08, reeds: 4 };
 }
 export const ground = {
