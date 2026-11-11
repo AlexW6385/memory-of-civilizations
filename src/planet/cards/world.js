@@ -1108,4 +1108,20 @@ export const CARDS = {
       "新商人街与阿尔法玛 —— 商人街上是临街开店的高大住宅，出售瓷器、丝绸、香料和鹦鹉；阿尔法玛是山坡上的老城区，窄巷层层上升，山脚是主教堂，山顶是圣若热城堡。",
     ],
   },
+  'bali-village': {
+    en: [
+      "A Balinese village stands in the rice-growing foothills of Bali, shown about 1900, before the Dutch conquest of the southern kingdoms and before tourism. It is a Hindu village of a form found only on this island: its life is held by its temples, by the banjar (the neighbourhood association that owns the gamelan) and by the subak (the cooperative that shares the water of the terraces). Everything is laid out on the axis from the mountain (kaja, the north here) to the sea (kelod), the holiest at the mountain end. The buildings are of red brick, carved grey volcanic stone, bamboo and teak, thatched with alang-alang grass and, for temples, with black ijuk fibre.",
+      "The pura — the village temple at the mountain end of the street, in three courts rising toward the mountain. A split gate (candi bentar), two stepped halves of brick and carved stone with a stair between them, opens into the middle court, where stand the large assembly pavilion (bale agung), the gamelan pavilion and the kulkul, the tower with the hollow-log drum that calls the village. A roofed gate (kori agung) with a bhoma face over its passage leads up to the inner court: three meru towers of seven, five and three black-thatched roofs, the padmasana (the stone throne of the supreme god) at the north-east corner, the gedong shrine, and the open pavilions of the priests. Penjors, tall curved bamboo poles hung with palm leaf, line the way for the temple's festival.",
+      "The family compounds — walled house-yards along the village street and the cross lane. Each has a gate of two brick piers under a small thatched roof with guardian stones, and behind it a short screen wall (aling-aling) that turns away spirits; in the north-east corner the family shrine (sanggah) with its three-chambered shrine and padmasana; at the back the sleeping house (bale daja), at the side the open guest pavilion (bale dauh), toward the sea the kitchen (paon) with its hearth and the rice barn (lumbung) on posts; and between them the open yard (natah).",
+      "The crossing and the banjar hall — the village centre where street and lane meet: the banjar's wantilan, a great open hall of twelve columns under a two-stage roof, with the village's gamelan (metallophones on carved red-and-gold frames, a row of kettle gongs, drums and the great hanging gong) and its players; the banyan with its brick seat and shrine; the kulkul tower.",
+      "The terraces and the subak — the land stepping down from the village in paddies, some flooded and mirroring the sky after planting, others green with rice, held by bunds that follow the contours. A stone-lined channel runs down the street's edge and the water is shared by gravity, its masonry boxes and the small unwalled shrine of the water temple standing among the fields; farmers hoe the paddies in straw hats and ducks work the flooded ones.",
+    ],
+    zh: [
+      "这座巴厘村落位于巴厘岛产稻的山麓地带，画面所示约为1900年，那时荷兰人尚未征服南部诸王国，旅游业也尚未出现。这是一座只见于这座岛屿的印度教村落：村民的生活由神庙、班扎（拥有佳美兰乐队的邻里组织）和苏巴克（分配梯田用水的合作社）维系。一切都沿着由山（kaja，此处在北）到海（kelod）的轴线展开，最神圣之处靠山。建筑以红砖、雕刻的灰色火山石、竹和柚木筑成，屋顶覆以茅草，神庙则覆黑色的棕榈纤维（ijuk）。",
+      "神庙 —— 村庄神庙位于村路靠山的尽头，分三进庭院，逐级向山升高。一座裂开的山门（candi bentar）由两半阶梯状的砖石塔体构成，中间是台阶，通向中庭；中庭里有大型的集会亭（bale agung）、佳美兰亭，以及悬挂空心木鼓、召集村民的鼓楼（kulkul）。一座有顶的门（kori agung）门洞上方雕着布玛面像，通过台阶登上内庭：内庭里有七层、五层和三层的黑色茅顶多层塔（meru），东北角有至高神的石座（padmasana），还有祠堂（gedong）和祭司们的开敞亭。节庆时，一排排高高的弯曲竹竿（penjor）挂着棕榈叶，沿路排开。",
+      "家庭院落 —— 沿村路和横巷的围墙宅院。每座院门由两根砖柱撑起小茅顶，旁立守护石像，门后有一道挡灵的短影壁（aling-aling）；东北角是家庙（sanggah），有三室小祠和石座；后部是卧房（bale daja），一侧是开敞的客亭（bale dauh），靠海一侧是带灶的厨房（paon）和高脚的谷仓（lumbung），其间是开阔的内院（natah）。",
+      "路口与班扎会堂 —— 村路与横巷相交处是村中心：班扎的大会堂（wantilan）是一座十二根柱的开敞大厅，覆两重屋顶，里面摆着村里的佳美兰乐队（红金雕花架上的金属琴、一排小锣、鼓和悬挂的大锣）和乐手；还有砖砌坐圈和小祠环绕的榕树，以及鼓楼。",
+      "梯田与苏巴克 —— 土地从村落向下呈阶梯状展开，有的稻田灌了水，映着天空，刚刚插秧，有的长满绿稻，田埂顺着等高线弯曲。一条石砌水渠沿村路边缘流下，水靠重力分配，田间立着砖砌分水箱和水神庙的小型无墙祠；农夫戴草帽在田里锄地，鸭子在灌水的稻田里觅食。",
+    ],
+  },
 };

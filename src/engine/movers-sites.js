@@ -83,5 +83,6 @@ export const MOVER_SITES = {
   'lu-qufu': () => import('../settlements/lu-qufu/movers.js'),
   'shang-yinxu': () => import('../settlements/shang-yinxu/movers.js'),
   'manueline-lisbon': () => import('../settlements/manueline-lisbon/movers.js'),
+  'bali-village': () => import('../settlements/bali-village/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
