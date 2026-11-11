@@ -2,7 +2,7 @@
 // brown water and its muddy banks, the Vatican gardens' umbrella pines and cypresses on the rising
 // ground west; the warm Roman light.
 
-import { RADIUS, RETTA, TIBER, height, inTiber, inOval, inRect, inLot, inBasilica } from './layout.js';
+import { GARDEN, RADIUS, RETTA, TIBER, height, inTiber, inOval, inRect, inLot, inBasilica } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.1, grass: 0.3, rock: 0, soil: 0.4, fields: 0, dry: 0.5, warmth: 0.65, red: 0.25, road: 0.35, snow: 0, forest: 0 };
@@ -15,7 +15,7 @@ function water(x, z, y) { return inTiber(x, z) && y < TIBER.level + 0.3; }
 function waterLevel(x, z) { return inTiber(x, z) ? TIBER.level : -Infinity; }
 function fromWater(x, z) { return inTiber(x, z) ? -3 : Math.max(-5, Math.min(40, height(x, z) - TIBER.level)); }
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inTiber(x, z) || inOval(x, z, 2) || inRect(RETTA, x, z, 2) || inBasilica(x, z, 2) || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inTiber(x, z) || inOval(x, z, 2) || inRect(RETTA, x, z, 2) || inBasilica(x, z, 2) || inLot(x, z, 1) || inRect(GARDEN, x, z, 3)) return null;
   if (height(x, z) < -1) return { reeds: 6, willow: 0.03, grass: 20 };
   if (x < -150) return { stone_pine: 0.02, cypress: 0.015, grass: 18 };                  // the Vatican gardens
   return { stone_pine: 0.006, cypress: 0.006, grass: 8 };

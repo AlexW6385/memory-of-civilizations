@@ -13,6 +13,7 @@ export const OVAL = { c: [40, 0], ax: 70, bz: 95 };
 export const RETTA = [-78, -50, -28, 50];
 export const PALACE = [-150, -175, -70, -112];
 export const SISTINE = [-205, -138, -165, -118];
+export const GARDEN = [-285, 84, -195, 150];                  // the Vatican gardens' parterre, south-west of the church
 export const CASTEL = { c: [172, -60], r: 22 };
 export const TIBER = { x: 268, w: 64, level: -5, bed: -8 };
 export const BORGO = [-14, 14];                              // the Borgo Nuovo and Borgo Vecchio (z)
@@ -31,7 +32,7 @@ let ROWS = null;
 export function rows() {
   if (ROWS) return ROWS;
   ROWS = [];
-  const TRADES = ['grocer', 'baker', 'cloth', 'wine', 'grocer', 'baker'];
+  const TRADES = ['grocer', 'baker', 'cloth', 'wine', 'apothecary', 'osteria', 'cobbler', 'grocer', 'baker', 'cloth', 'wine', 'osteria'];
   let seed = 4000, shops = 0;
   for (const def of ROW_DEFS) {
     const rand = rng(seed += 17), lanes = [...(def.id === 'V' ? def.lanes : LANES)].sort((a, b) => a[0] - b[0]);
@@ -48,18 +49,23 @@ export function rows() {
         const hs = kind === 'palazzo' ? PAL_H : CAS_H;
         // u runs along the face: from the east end for a north face (x falls), from the west for a south face
         const u0 = def.face === 'n' ? def.rect[2] - (cur + w) : cur - def.rect[0];
-        const un = { x0: cur, x1: cur + w, u0, w, kind, storeys, H: hs.slice(0, storeys).reduce((p, q) => p + q, 0), seed: Math.floor(rand() * 1e6), trade: TRADES[shops % TRADES.length], madonna: kind === 'casa' && rand() < 0.4, flip: rand() < 0.5, altana: kind === 'palazzo' && rand() < 0.4, fountain: false };
+        const un = { x0: cur, x1: cur + w, u0, w, kind, storeys, H: hs.slice(0, storeys).reduce((p, q) => p + q, 0), seed: Math.floor(rand() * 1e6), trade: TRADES[shops % TRADES.length], madonna: kind === 'casa' && rand() < 0.4, flip: rand() < 0.5, altana: kind === 'palazzo' && rand() < 0.4, fountain: false, awning: kind === 'casa' && rand() < 0.4, cat: rand() < 0.3, birdcage: rand() < 0.2 };
         if (kind === 'casa') shops++;
         units.push(un); cur += w;
       }
     }
-    // a wall fountain in one house of the north and the south-Vecchio rows; the first house of two rows can be entered
+    // a wall fountain in one house of the north and the south-Vecchio rows; every third house with a shop can be entered
     const casas = units.filter((u) => u.kind === 'casa' && u.w >= 7.2);
     if (def.id !== 'S' && casas[1]) { casas[1].fountain = true; casas[1].madonna = false; }
-    if (def.id !== 'S' && casas[0]) casas[0].open = true;
+    casas.forEach((u, i) => { if (!u.fountain && i % 3 === 0) u.open = true; });
     ROWS.push({ ...def, units });
   }
   return ROWS;
+}
+/** A point in a row's own frame (u along the face as the units' u0, inward metres from the front) in the world, and the yaw of a figure facing out of the front. */
+export function frontPt(row, u, inward) {
+  const r = row.rect;
+  return row.face === 'n' ? { at: [r[2] - u, r[1] + inward], out: 0 } : { at: [r[0] + u, r[3] - inward], out: Math.PI };
 }
 export const inRow = (x, z, m = 0) => ROW_DEFS.some((r) => inRect(r.rect, x, z, m));
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -86,7 +92,7 @@ export function lots() {
       || Math.hypot(cx - CASTEL.c[0], cz - CASTEL.c[1]) < CASTEL.r * 1.5 + 28 || Math.abs(cx - tiberX(cz)) < TIBER.w / 2 + 12
       || BORGO.some((b) => Math.abs(cz - b) < 6 && cx > 100) || Math.abs(cz - CASTEL.c[1]) < 9 && cx > 100 || Math.abs(cz + 158) < 6 && cx > -70 && cx < CASTEL.c[0]
       || Math.abs((cz + 420) % 60 - 30) < 3 || Math.abs((cx + 420) % 72 - 36) < 3 && Math.abs(cz) > 30 || inRow(cx, cz, 5) || rand() < 0.08) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.max(0, height(cx, cz)), foot: -0.3, storeys: 3 + (rand() < 0.5 ? 1 : 0), front: rand() < 0.5 ? 'n' : 's', plaster: rand() < 0.75 });
+    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.max(0, height(cx, cz)), foot: -0.3, storeys: 3 + (rand() < 0.5 ? 1 : 0), front: rand() < 0.5 ? 'n' : 's', plaster: rand() < 0.75, fronted: Math.hypot(cx - 175, cz) < 115 });
   }
   return LOTS;
 }
