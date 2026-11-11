@@ -128,6 +128,14 @@ Sources added:
 - [Daily life in Persepolis during the Achaemenid period](https://dailylifehistory.pages.dev/classical/persepolis)
 - [Persepolis — Wikipedia](https://en.wikipedia.org/wiki/Persepolis)
 
+## 16. Detail (2026-11-11, deepening pass): shops, walkable houses, weathered fronts, street life
+
+- **Kinds of house** (layout.js `lots`; `persian_house`, src/styles/achaemenid/houses.js). Of 192 lots: court-houses, plain houses and shops (54; more of them on the road and near the market, §14), 20 further lots left as walled gardens [inferred: the mix; the Fortification tablets name craft specialists, carriers and storekeepers among the residents, §15]. Shops: the front opened under a timber lintel on two posts, a plastered counter, an awning of reed matting with a valance of dyed cloth and the trade's goods under it — baker (flat loaves, a clay oven), potter, cloth (bolts, hung pieces), grain, fruit, butcher, carpenter, wine, smith, dyer [inferred: trades from the workforce list in §15; no shop signs, as the sources give no writing for trade].
+- **Walkable.** 69 houses within about 210 m of the arrival can be entered: hollow brick walls, the door in the street face, a partition with its doorway, a beamed ceiling of cedar poles under timber, an earth floor; the front room with hearth, mat and cushions, chest and a shelf of jars, the back room a bed platform, a loom, chests and rows of store jars (shops: the shop behind its counter, a store behind) and a lamp [inferred: furnishings from the domestic pattern in §15].
+- **Weathering and dressing.** Plaster lost from the brick (mostly low, some at the parapet), rising damp along the foot, streaks below the roof spouts, paler repairs; wall plaster in five earth tones over brick or buff brick; each door with a stone step, a lamp niche and (half of the plain houses) a brick bench; on the roofs reed shades on posts, goods, washing and ladders [inferred].
+- **Streets.** Stone-lined channels of running water down the middle of the lanes and at both edges of the road (qanat water; the Persians' kariz are attested for the Iranian plateau but their use at Parsa is [inferred]), cut at every crossing; a flagged apron before the workshops' gate and the market's aisle and plaza round its well; wells with windlass and trough at alternate crossings.
+- **Life.** At the doors water jars, firewood, baskets, stools with a woman or an old man on them, hens, dogs, donkeys tied; shopkeepers behind counters and buyers before them; women with jars at the wells; goats and sheep in the lanes; in the market carts, buyers and hens. Movers: shoppers with baskets and a water-carrier with two pails added. Sparrows at the doors, on the parapets and along the workshops' wall top; swallows low over the streets. Gardens are planted with figs, apples and mulberries, the outer ring with wheat and poplars [inferred].
+
 ## Sources
 
 - [Persian column — Wikipedia](https://en.wikipedia.org/wiki/Persian_column)
