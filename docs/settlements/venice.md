@@ -77,6 +77,10 @@ About 1,000 houses on the islands. [inferred]
 
 **House detail (vernacular `house_med`).** Casement frames in the windows; ground-floor windows behind iron gratings over stone sills; balconies as a slab of Istrian stone on stepped brackets with an iron railing of bars; cornices as deep as the eaves [inferred].
 
+## 5b. Dressing at eye level (deepening pass, built: `src/settlements/venice/dress.js`)
+
+Ours [inferred: the type of the street, after Bellini's and Carpaccio's pictures of the 1490s]: on the street and calle walls of the houses painted board signs on iron brackets, iron lanterns, poles of washing out of the second-floor windows, pots flanking the doors, benches, crates, barrels, sacks and firewood, ladders, rain tubs, a few handcarts and people talking, in 100 m tiles shown within 190 m; fourteen houses near the arrival enterable (an inn in every fourth). On the piazza the booths of cloth and spice merchants before the arcades, lanterns before San Marco, some seventy people (patricians, friars, Levantines in turbans, women with baskets), pigeons; on the Piazzetta booths, porters and goods set down at the Molo; barges, rowing boats and a boatman tied along the fondamente. Outer islands planted with fig, cypress and oleander.
+
 ## 6. Ground and water
 
 Paving of trachyte and brick; a few gardens; the canals and the lagoon. [inferred]
