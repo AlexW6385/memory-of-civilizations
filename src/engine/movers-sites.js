@@ -12,5 +12,6 @@ export const MOVER_SITES = {
   'joseon-seoul': () => import('../settlements/joseon-seoul/movers.js'),
   'paris': () => import('../settlements/paris/movers.js'),
   'lhasa': () => import('../settlements/lhasa/movers.js'),
+  'khajuraho': () => import('../settlements/khajuraho/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
