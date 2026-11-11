@@ -2,7 +2,7 @@
 // cypresses, myrtle and orange trees; elms in the wood below the walls; the Darro's poplars; the
 // white Albaicín; the clear sky under the Sierra Nevada.
 
-import { RADIUS, COMARES, GEN, TERRACES, height, hillE, inLot, inRect, laneAt, LANE_W } from './layout.js';
+import { RADIUS, COMARES, GEN, TERRACES, height, hillE, inLot, inReserved, DARRO, inRect, laneAt, LANE_W } from './layout.js';
 
 // the Generalife (§10.7): what grows where on its estate
 const TER = Object.fromEntries(TERRACES.map((t) => [t.id, t.r]));
@@ -21,6 +21,7 @@ const inEstate = (x, z) => x > 238 && x < 346 && z > -62 && z < 60;
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.15, grass: 0.35, rock: 0, soil: 0.5, fields: 0, dry: 0.6, warmth: 0.65, red: 0.6, road: 0, snow: 0, forest: 0 };
+  if (Math.abs(z - DARRO.z) < 8) { c.road = 1; c.grass = 0; c.soil = 0.4; return c; }
   if (hillE(x, z) < 1) { c.road = 0.5; return c; }
   if (x > 205 && laneAt(x, z).d < LANE_W / 2 + 0.2) { c.road = 0.7; c.grass = 0.05; return c; }
   if (x > 246 && x < 281 && z > -45 && z < 36) { c.soil = 0.85; c.grass = 0.25; c.dry = 0.3; return c; }   // the tilled terraces
@@ -29,7 +30,7 @@ function cover(x, z, h, ny) {
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || inRect(COMARES, x, z, 3)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || inReserved(x, z, 4) || Math.abs(z - DARRO.z) < 8.5 || inRect(COMARES, x, z, 3)) return null;
   if (inEstate(x, z)) { const p = estatePlant(x, z); if (p !== undefined) return p; }
   const e = hillE(x, z);
   if (e < 0.95) return e > 0.6 && x > 90 ? { cypress: 0.04, grass: 15 } : null;          // the gardens of the Partal and toward the Generalife
@@ -43,6 +44,7 @@ export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   maxDensity: { elm: 0.12, cypress: 0.3, poplar: 0.1, olive: 0.02, fig: 1.5, apple: 0.14, maquis: 3, oleander: 0.6, holm_oak: 0.3 },
   climate: {
+    waterline: DARRO.wl,
     sun: { az: 150, el: 52, color: [1.0, 0.96, 0.88], intensity: 3.5, lat: 37, dec: 12, hour: 10.5 },
     sky: { turbidity: 2.4, rayleigh: 1.0, mie: 0.004, mieG: 0.78, zenith: [0.07, 0.15, 0.42], horizon: [0.62, 0.66, 0.72] },
     fog: { color: [0.78, 0.8, 0.82], density: 0.00028, height: 0.01 },

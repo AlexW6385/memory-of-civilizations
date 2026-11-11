@@ -1,7 +1,7 @@
 // The canals' quay walls, the Rialto bridge and its market, a traghetto (docs/settlements/venice.md §4 "The
 // Rialto", §6). Pure data: the builders are the venetian style's (rive, rialto) and the shared objects (life).
 
-import { RADIUS, SEA, GROUND, RIALTO, MARKET, rivePieces } from './layout.js';
+import { RADIUS, SEA, GROUND, RIALTO, MARKET, rivePieces, palazzi, bridges, bands, wells, squero } from './layout.js';
 
 const plan = (id, style, elements, bounds, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, 0], facing: 'n' }, bounds, rooms: [], elements, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -50,5 +50,48 @@ export function canalPlans() {
     if (i === 1) T.push({ t: 'figure', at: [sx + s * 1.5, tz - 1.5], y: GROUND, rot: s > 0 ? Math.PI / 2 : -Math.PI / 2, seed: 30 + s, pose: 'stand', dress: 'robe', legs: 'hose', cloth: 'cloth_white', cloth2: 'cloth_black', skin: 'skin_light', hat: 'cap' });
   }
   plans.push(plan('venice-traghetto', 'life', T, [tx - 30, tz - 8, tx + 30, tz + 8], { center: [tx, tz], near: 260 }));
+  plans.push(...cityPlans());
   return plans;
+}
+
+/**
+ * The palazzi on the Grand Canal with their gondolas at the water gates, the bridges over the small canals, the streets' paving and
+ * their wellheads, the squero (docs/settlements/venice.md §4b, §5).
+ */
+function cityPlans() {
+  const out = [], rand = rng(1523), P = palazzi();
+  const halves = [P.filter((p) => p.at[1] < -30), P.filter((p) => p.at[1] >= -30)];
+  halves.forEach((list, i) => {
+    if (!list.length) return;
+    const E = [], boats = [];
+    for (const p of list) {
+      E.push({ t: 'palazzo', at: p.at, w: p.w, width: p.width, depth: p.depth, seed: p.seed, kind: p.kind, y: GROUND, sea: SEA, arcade: p.seed % 3 === 0 });
+      // a gondola tied beside the water gate, along the canal, between the poles
+      const t = [p.w[1], -p.w[0]], u = (p.seed % 2 ? 1 : -1) * 5.2, v = 2.6;
+      boats.push({ t: 'gondola', at: [p.at[0] + t[0] * u + p.w[0] * v, p.at[1] + t[1] * u + p.w[1] * v], yaw: Math.atan2(t[1], t[0]) + (u > 0 ? 0 : Math.PI), y: SEA, felze: p.seed % 4 !== 0 });
+    }
+    const cx = list.reduce((a, p) => a + p.at[0], 0) / list.length, cz = list.reduce((a, p) => a + p.at[1], 0) / list.length;
+    out.push(plan(`venice-palazzi-${i}`, 'venetian', [...E, ...boats], [-RADIUS, -RADIUS, RADIUS, RADIUS], { center: [cx, cz], near: 420 }));
+  });
+  // the bridges: one plan each three, so what is out of view is not drawn
+  const Br = bridges();
+  for (let i = 0; i < Br.length; i += 3) {
+    const list = Br.slice(i, i + 3), cx = list.reduce((a, b) => a + b.c[0], 0) / list.length, cz = list.reduce((a, b) => a + b.c[1], 0) / list.length;
+    out.push(plan(`venice-ponti-${i / 3}`, 'venetian', list.map((b) => ({ t: 'ponte', c: b.c, ax: b.ax, f: b.f, w: b.w, y: GROUND, sea: SEA })), [-RADIUS, -RADIUS, RADIUS, RADIUS], { center: [cx, cz], near: 380 }));
+  }
+  // the streets between the houses paved in brick with a stone gutter along the middle; the wellheads
+  const pave = [];
+  for (const b of bands()) for (const [z0, z1] of b.runs) {
+    pave.push({ t: 'floor', rect: [b.x0, z0, b.x1, z1], y: GROUND + 0.03, th: 0.1, mat: 'brick_paving' });
+    const xm = (b.x0 + b.x1) / 2;
+    pave.push({ t: 'floor', rect: [xm - 0.25, z0, xm + 0.25, z1], y: GROUND + 0.035, th: 0.1, mat: 'bluestone' });
+    for (const x of [b.x0, b.x1]) pave.push({ t: 'floor', rect: [x - 0.0, z0, x + 0.0 + (x === b.x0 ? 0.35 : -0.35), z1], y: GROUND + 0.035, th: 0.1, mat: 'limestone' });
+  }
+  out.push(plan('venice-streets', 'vernacular', pave, [-RADIUS, -RADIUS, RADIUS, RADIUS], { center: [0, 0], near: 300 }));
+  out.push(plan('venice-pozzi', 'venetian', wells().map((w) => ({ t: 'pozzo', at: w.at, y: GROUND + 0.03 })), [-RADIUS, -RADIUS, RADIUS, RADIUS], { center: [0, 0], near: 260 }));
+  // the squero, a gondola in the water before its slip and a boatman
+  const q = squero();
+  const S = [{ t: 'squero', c: q.c, yaw: q.yaw, y: GROUND, sea: SEA, seed: 3 }];
+  out.push(plan('venice-squero', 'venetian', S, [q.clear[0] - 8, q.clear[1] - 12, q.clear[2] + 8, q.clear[3]], { center: q.c, near: 300 }));
+  return out;
 }

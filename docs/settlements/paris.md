@@ -97,11 +97,38 @@ Rayonnant Gothic in limestone with lead and slate roofs; timber-framed houses je
 
 ## 5. The town
 
-About 2,300 houses in rows. [inferred]
+About 2,100 houses in rows facing each other across streets 4.4 m wide, with ruelles between (§5a). [inferred]
 
 **A tavern and a workshop to enter (L3, built).** The two timber houses nearest the arrival are open on the ground floor (DESIGN §4.3): a wide door in the stone front, a floor of flags, the beams of the floor above. The tavern: trestle tables with benches, jugs and cups, the hearth with its jambs, hood and pot, casks on a stand, a shelf of jugs. The joiner's workshop: the bench with its vice and shavings, a half-made chest, a trestle, planks stacked along the wall, tools hung on a rail, a chest of tools, shavings on the floor [inferred: the trades of the Cité's streets as the 13th-century crafts were practised].
 
 **House detail (vernacular `house_timber`).** Each storey's windows on its own jettied face, framed, with a mullion (some shuttered); the jetty 0.3–0.45 m by house; a plank door under a stone lintel in the stone storey; roof slabs with eave and verge boards; a stone chimney stack on some houses [inferred].
+
+## 5a. The streets and the houses (2026-11 batch pass; built: `paris_house` in `src/styles/gothic/houses.js`, rows in `layout.js`)
+
+- **Streets.** Most of medieval Paris was narrow lanes averaging about 13 feet (4 m); the main thoroughfares were paved on Philip II's order about 1186, the side streets stayed unpaved, with an open sewer down the middle [stated: The Collector, "Lost Medieval Streets of Paris"; IU Paris OSS, "Le Chat qui Pêche"]. Built: two rows of houses face each other across a street 4.4 m wide, their backs almost against each other (1.2 m), a ruelle 3.4 m wide cut through the rows about every 62 m, the streets and ruelles given road cover (mud and paving) and no planting [inferred: the widths from the figure above].
+- **Overhanging storeys.** Upper storeys project over the street so far that neighbours across it can nearly touch; little light reaches the passage [stated: The Collector]. Built: each storey jetted 0.30–0.42 m beyond the one below, so a house of four storeys overhangs by up to 1.3 m, on visible joist ends (every 0.55 m), a soffit board and a knee-brace at each corner; the street stays open overhead for 1.8 m or more [inferred: jetty depth].
+- **The house.** A stone ground storey (the shop), two or three upper storeys of framed timber with plaster between (sill beam, plate beam, corner posts and studs between the windows, St Andrew's crosses under the sills, braces), the gable to the street with bargeboards, an attic window and, on most, a hoist beam with its pulley, a steep roof of slate or tile, a stone chimney on the party wall in about half [stated: gables to the street, timber frames, jetties, §4; inferred: the framing's pattern, 13th-century Paris houses being known mostly from later survivors such as rue François-Miron, which are 15th–16th century].
+- **Shop fronts.** Shops had large shutters [stated: IU Paris OSS]; the usual form was a pair of horizontal leaves, the lower let down on chains as the counter, the upper raised as a pent over it [inferred: the medieval boutique as drawn in the 13th–15th-century manuscripts; recorded as inferred]. Built: a wide opening in the stone storey framed by posts and a head beam, the counter board on two iron chains, the raised shutter above it, a plank door beside it under a stone lintel.
+- **Signs.** Hanging signs of cut and painted iron on long poles over the street, made as large as possible; in the 13th century a recognised way of advertising; mostly visual, as literacy was rare, many religious, some plain trade symbols such as the Reaper for a bakery [stated: IU Paris OSS]. Built: an iron bracket from the stone storey and a painted board with an emblem by trade (loaf, cloth, joint of meat, goldsmith's cup, shoe, barrel, candle, quill, fish); for a tavern the bush on a pole [inferred: the emblems; the bush for taverns is the usual medieval sign].
+- **Trades** (chosen by the house's seed): baker, draper, butcher, tavern, goldsmith, shoemaker, cooper, chandler, scribe, fishmonger; the counter carries its goods (loaves, bolts of cloth, joints on hooks, jugs, silver, shoes, casks, candles, parchment, fish) [inferred: the trades of the Cité, cf. §2b; the drapers of the Rue de la Vieille-Draperie in the Cité are stated by Wikipedia "Paris in the Middle Ages"].
+- **Detail levels.** The core (within 250 m of the parvis end of the island, about 900 houses) in the full form near and as a mass beyond 200 m; the outer rows and the two enterable houses stay the vernacular timber house.
+
+## 5b. People (movers, `src/settlements/paris/movers.js`; static figures in `plan.js`)
+
+- **Dress** of the 13th-century town: burghers in long belted tunics and the linen coif or a soft cap, merchants in cloaks and felt hats, craftsmen and labourers in short tunics and hose, women in long gowns with veil or wimple, canons in black copes with the tonsure, porters with sacks and water-carriers with the yoke [stated: water carriers registered in 1292, Wikipedia "Paris in the Middle Ages"; inferred: the dress after the period's manuscripts and statuary, recorded as inferred]. Walkers by hour, thinner in rain (hooded cloaks), most on the parvis and the Grand Pont's street, which are the busiest ways.
+- **The parvis market:** ten stalls (bread, herring and produce, cloth, pots) each with a seller and one or two customers; handcarts and casks [stated: "the main early market was on the parvis in front of Notre-Dame", Wikipedia "Paris in the Middle Ages"].
+- **Customers at the counters** of about forty shops near the parvis and the Grand Pont; casks and baskets at their doors [inferred].
+- **Boats:** the flat-bottomed river boat of the water-merchants under way on the Seine's arms with a boatman at the stern oar, casks or sacks, a passenger on a thwart now and then; six in motion, seventeen moored [inferred: §2a].
+
+## 5c. Smoke and animals (`smoke.js`, `fauna.js`)
+
+- **Smoke:** from about half the houses' own chimney stacks at the three meals (dawn, noon, evening), steam from the bakers' and taverns' hearths from first light, a faint mist on the Seine at first light [inferred].
+- **Birds:** swallows over both arms and the parvis, rooks and jackdaws round the west towers and the palace roofs at twilight, house sparrows on the paving and the parvis, a grey heron on the Left Bank's strand [inferred: the commensal birds of a town on a river].
+
+Sources added in this pass:
+- [Signs, Streets, and the Chat Qui Pêche — IU Paris OSS](https://paris10.sitehost.iu.edu/ParisOSS/Day_1_Early_Paris/Medieval/Le_Chat_Qui_Peche.html)
+- [What Hidden Terrors Lurked Inside the Lost Medieval Streets of Paris? — The Collector](https://www.thecollector.com/hidden-terrors-lost-medieval-streets-paris/)
+- [Medieval houses of rue François-Miron — Sortiraparis](https://www.sortiraparis.com/en/what-to-visit-in-paris/history-heritage/articles/333943-history-architecture-medieval-houses-rue-francois-miron-paris-4)
 
 ## 6. Ground and water
 

@@ -12,6 +12,7 @@ import { rectRoof, withPal, beamTris } from '../ming/index.js';
 import '../qing/index.js';
 import { barredWindows, shachi as shachiFish, karaHafu, samaWall, katomado } from './detail.js';
 import { machiyaShop, zashiki, kago, daisho } from './rooms.js';
+import { machiyaFront, mushikoMado, ridgeCap, eaveBand, kuraWalls, gateFront, ishidoro, niwaki, ido, boat, barrel } from './town.js';
 
 const PL = 'plaster_castle', ST = 'ishigaki', TL = 'tile_grey', WD = 'wood_dark';
 const JPAL = { roof: TL, soffit: PL, plaster: PL, wood: WD, column: WD };
@@ -44,7 +45,7 @@ const faces = ([x0, z0, x1, z1], e = 0.04) => [[[x1, z0 - e], [x0, z0 - e]], [[x
  * earth), walk }: the faces curve — steep at the top, spreading at the foot (ōgi-no-kōbai).
  */
 function ishigaki(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y0 = el.y0 ?? 0, y1 = el.y1, b = el.batter ?? (y1 - y0) * 0.3, N = 6;
+  const [x0, z0, x1, z1] = el.rect, y0 = el.y0 ?? 0, y1 = el.y1, b = el.batter ?? (y1 - y0) * 0.3, N = Math.max(6, Math.min(16, Math.round((y1 - y0) / 0.95)));
   // `rect` is the top; the faces lean out by out(t) at height fraction t: vertical at the top,
   // spreading at the foot
   const out = (t) => b * (1 - t) * (1 - t);
@@ -74,7 +75,29 @@ function ishigaki(el, { bag, col }) {
   } else {
     const sd = el.sides ? Object.fromEntries([...el.sides].map((c) => [c, 1])) : { n: 1, s: 1, e: 1, w: 1 };
     band([x0, z0, x1, z1], sd);
+    quoins([x0, z0, x1, z1], sd, y0, y1, out, N, bag);
     if (el.walk !== false) col.floor([x0, z0, x1, z1], y1);
+  }
+}
+
+/**
+ * The corners of a rampart are laid with long-and-short dressed blocks (sangi-zumi): in every course a long block on one
+ * face and a short one on the other, alternating, in lighter granite standing a hand out of the curved face.
+ */
+function quoins([x0, z0, x1, z1], sd, y0, y1, out, N, bag) {
+  const p = 0.08;
+  for (const [cx, cz, kx, kz, on] of [[x0, z0, -1, -1, sd.w && sd.n], [x1, z0, 1, -1, sd.e && sd.n], [x0, z1, -1, 1, sd.w && sd.s], [x1, z1, 1, 1, sd.e && sd.s]]) {
+    if (!on) continue;
+    for (let k = 0; k < N; k++) {
+      const t0 = k / N, t1 = (k + 1) / N, ya = y0 + (y1 - y0) * t0 + 0.02, yb = y0 + (y1 - y0) * t1 - 0.02, o = out(t0), X = cx + kx * o, Z = cz + kz * o;
+      const lx = k % 2 ? 1.1 : 0.55, lz = k % 2 ? 0.55 : 1.1, bx = (a, b) => [Math.min(a, b), Math.max(a, b)];
+      const [ax0, ax1] = bx(X, X - kx * lx), [az0, az1] = bx(Z + kz * p, Z);
+      bag.add('granite_grey', box(ax0, ya, az0, ax1, yb, az1));
+      const [bx0, bx1] = bx(X + kx * p, X), [bz0, bz1] = bx(Z, Z - kz * lz);
+      bag.add('granite_grey', box(bx0, ya, bz0, bx1, yb, bz1));
+      const [cx0, cx1] = bx(X + kx * p, X), [cz0, cz1] = bx(Z + kz * p, Z);
+      bag.add('granite_grey', box(cx0, ya, cz0, cx1, yb, cz1));
+    }
   }
 }
 
@@ -522,10 +545,11 @@ function goten(el, { bag, col }) {
 /** kura: a storehouse { rect, y }: thick white walls, a dark plinth, a tiled gable roof. */
 function kura(bag, col, rect, y = 0) {
   const [x0, z0, x1, z1] = rect;
-  bag.add('plaster_grey', box(x0, y, z0, x1, y + 1, z1));
-  bag.add(PL, box(x0, y + 1, z0, x1, y + 5.4, z1));
-  col.rect(rect, y, y + 5.4); col.floor(rect, y + 5.4);
+  kuraWalls(bag, col, rect, y, 5.4);
+  col.floor(rect, y + 5.4);
   roof(bag, rect, y + 5.3, 0.5, 'gable', Math.min(x1 - x0, z1 - z0) * 0.35, { sweep: 0 });
+  const alongX = x1 - x0 >= z1 - z0, zc = (z0 + z1) / 2, xc = (x0 + x1) / 2, ry = y + 5.3 + Math.min(x1 - x0, z1 - z0) * 0.35;
+  if (alongX) ridgeCap(bag, x0 - 0.5, x1 + 0.5, ry, zc, true);
 }
 
 /** yashiki: a samurai compound { rect, seed, gate ('n'|'s'|'e'|'w') }: walls with tile copings, the gate-house on the street, the main house, a storehouse, a garden. */
@@ -549,7 +573,9 @@ function yashiki(el, { bag, col }) {
   bag.add('plaster_grey', box(gx0, 0, gz0, gx1, 1.1, gz1));
   bag.add(PL, box(gx0, 1.1, gz0, gx1, 3.6, gz1));
   col.rect(gate, 0, 3.6);
+  gateFront(bag, col, gate, g, el.seed);
   roof(bag, gate, 3.5, 0.7, 'gable', Math.min(gx1 - gx0, gz1 - gz0) * 0.4, { sweep: 0 });
+  if (g === 's' || g === 'n') ridgeCap(bag, gx0 - 0.7, gx1 + 0.7, 3.5 + Math.min(gx1 - gx0, gz1 - gz0) * 0.4, (gz0 + gz1) / 2);
   // the main house in the middle-back, the storehouse in a corner
   const m = 5;
   let house;
@@ -560,6 +586,11 @@ function yashiki(el, { bag, col }) {
   shoinHall(bag, col, house, 0, 3.2, rand() < 0.75 ? 'xieshan' : 'hip', TL, el.simple && !el.open ? 3.6 : 1.8, el.open ? { face: g, seed: el.seed } : null);
   const kr = g === 's' ? [x1 - 9, z0 + 4, x1 - 3, z0 + 11] : g === 'n' ? [x0 + 3, z1 - 11, x0 + 9, z1 - 4] : g === 'e' ? [x1 - 11, z0 + 3, x1 - 4, z0 + 9] : [x0 + 4, z1 - 9, x0 + 11, z1 - 3];
   if (rand() < 0.8) kura(bag, col, kr);
+  // the garden before the house, on the gate's side: a stone lantern, a pruned pine, a well in some
+  const gp = g === 's' ? [x0 + 7, z1 - 10.5] : g === 'n' ? [x0 + 7, z0 + 10.5] : g === 'e' ? [x1 - 8, z1 - 7] : [x0 + 8, z0 + 8];
+  ishidoro(bag, col, gp[0] + 1.6, gp[1] + 1.2, 0, 1.1);
+  niwaki(bag, col, gp[0], gp[1], 0, 4.2 + rand() * 1.6, el.seed);
+  if (rand() < 0.45) ido(bag, col, gp[0] + 4.5, gp[1] - 0.5, 0, rand() * 3);
 }
 
 /** machiya: a merchant's townhouse { rect, seed, front ('n'|'s') }: two storeys at the street — the lattice front below, a pent roof, the low upper storey with its plastered slatted windows — under a tiled roof with the ridge along the street; a storehouse at the back. */
@@ -571,18 +602,20 @@ function machiya(el, { bag, col }) {
   else {
     bag.add(PL, box(r[0], 0, r[1], r[2], H1 + H2, r[3]));
     col.rect(r, 0, H1 + H2);
-    // the front: lattice and an entrance below, the upper windows
-    { const t = []; beamTris(t, [x0 + 0.2, 0.3, fz + s * 0.04], [x1 - 0.2, 0.3, fz + s * 0.04], 0.04, H1 - 0.5); bag.add('koshi', fromTriangles(t)); }
+    // the front: posts, lattice and the entrance with its noren below, the trade's goods and sign (town.js)
+    machiyaFront(bag, col, { x0, x1, fz, s, H1, seed: el.seed, trade: el.trade || 'cloth' });
   }
   bag.add(WD, box(x0, H1 - 0.25, Math.min(fz, fz + s * 0.1), x1, H1, Math.max(fz, fz + s * 0.1)));
-  for (const [u0, u1] of [[0.12, 0.4], [0.6, 0.88]]) { const t = [], xa = x0 + (x1 - x0) * u0, xb = x0 + (x1 - x0) * u1; beamTris(t, [xa, H1 + 0.8, fz + s * 0.05], [xb, H1 + 0.8, fz + s * 0.05], 0.04, Math.max(0.5, H2 - 1.6)); bag.add('koshi', fromTriangles(t)); }
+  mushikoMado(bag, col, { x0, x1, fz, s, v0: H1 + 0.75, v1: H1 + H2 - 0.2, rand });
   // the pent roof over the street, the main roof (ridge along the street)
   const pent = f === 's' ? [x0, fz - 0.2, x1, fz + 1.1] : [x0, fz - 1.1, x1, fz + 0.2];
   const pt = [], ye = H1 + 0.05;
   const o = f === 's' ? [[pent[0], ye + 0.6, pent[1]], [pent[2], ye + 0.6, pent[1]], [pent[2], ye, pent[3]], [pent[0], ye, pent[3]]] : [[pent[0], ye, pent[1]], [pent[2], ye, pent[1]], [pent[2], ye + 0.6, pent[3]], [pent[0], ye + 0.6, pent[3]]];
   pt.push(...o[0], ...o[1], ...o[2], ...o[0], ...o[2], ...o[3]);
   bag.add(TL, fromTriangles(pt.concat([...o[0], ...o[2], ...o[1], ...o[0], ...o[3], ...o[2]])));
+  eaveBand(bag, col, { x0, x1, fz, s, y: H1 + 0.05, q0: -1.1, q1: -1.04 });
   roof(bag, r, H1 + H2 - 0.1, 0.6, 'gable', dep * 0.3, { alongZ: false, sweep: 0 });
+  ridgeCap(bag, x0 - 0.6, x1 + 0.6, H1 + H2 - 0.1 + dep * 0.3, (r[1] + r[3]) / 2);
   col.floor(r, H1 + H2);
   // the storehouse at the back
   if (z1 - z0 > 22 && rand() < 0.6) { const kz = f === 's' ? z0 + 2 : z1 - 9; kura(bag, col, [x0 + 0.6, kz, Math.min(x1 - 0.6, x0 + 6), kz + 7]); }
@@ -593,6 +626,11 @@ registerStyle('edo', {
   elements: {
     ...STYLES.qing.elements,
     ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), goten: J(goten), yashiki: J(yashiki), machiya: J(machiya), kago, daisho,
+    ido: (el, ctx) => ido(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.rot ?? 0),
+    ishidoro: (el, ctx) => ishidoro(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.s ?? 1),
+    niwaki: (el, ctx) => niwaki(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.h ?? 5, el.seed),
+    taru: (el, ctx) => { for (let r = 0; r < (el.rows ?? 3); r++) for (let k = 0; k < (el.rows ?? 3) - r; k++) barrel(ctx.bag, 'timber', el.at[0] + (k + r * 0.5) * 0.56, (el.y ?? 0) + r * 0.55, el.at[1], 0.27, 0.62, 'thatch'); ctx.col.circle(el.at[0] + 0.6, el.at[1], 1.0, el.y ?? 0, (el.y ?? 0) + 1.5); },
+    moat_boat: (el, ctx) => boat(ctx.bag, ctx.col, el.at[0], el.at[1], el.y, el.dir ?? [1, 0], el.len ?? 7.5),
   },
   objects: {},
 });

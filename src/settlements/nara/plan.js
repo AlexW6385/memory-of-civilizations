@@ -6,14 +6,14 @@ import { HALL, COURT, SOUTH_GATE, PAGODAS } from './layout.js';
 
 const E = [];
 // the Great Buddha Hall: eleven bays by seven, two roofs, about 49 m high to the ridge (§1)
-E.push({ t: 'qing_hall', rect: HALL, y: 2.2, H: 21, double: 11, eave: 4.6, roof: 'hip', bays: [11, 7], front: 's', four: true, plat: 2.2, open: true });
+E.push({ t: 'nara_hall', rect: HALL, y: 2.2, H: 21, bays: [11, 7], k: 1.8, colD: 1.5, plat: 2.2, walls: 'full', doors: { s: [3, 4, 5, 6, 7], n: [5], e: [3], w: [3] }, doorH: 13, upper: { H: 6.5, ins: 7.14, k: 1.4 }, rise: 11, top: 50, shibi: 6 });
 E.push({ t: 'stairs', rect: [-6, HALL[3] + 0.9, 6, HALL[3] + 6], y0: 0, y1: 2.2, dir: 'n' });
 // the corridors round the court, the Middle Gate in the south side
 const [cx0, cz0, cx1, cz1] = COURT, g = 16;
 E.push({ t: 'ming_gallery', pts: [[-g, cz1], [cx0, cz1], [cx0, cz0], [cx1, cz0], [cx1, cz1], [g, cz1]], y: 0.5, w: 6, H: 4.6, side: 1 });
-E.push({ t: 'qing_hall', rect: [-g + 1, cz1 - 7, g - 1, cz1 + 7], y: 1.0, H: 7, double: 5, roof: 'xieshan', bays: [5, 2], front: 's', four: true, plat: 1.0, open: true });
+E.push({ t: 'nara_hall', rect: [-g + 1, cz1 - 7, g - 1, cz1 + 7], y: 1.0, H: 6.5, bays: [5, 2], k: 1.1, colD: 0.8, plat: 1.0, walls: 'ends', shibi: 2.4, rise: 4.5 });
 // the Great South Gate
-E.push({ t: 'qing_hall', rect: SOUTH_GATE, y: 0.8, H: 9, double: 7, roof: 'hip', bays: [5, 2], front: 's', four: true, plat: 0.8, open: true });
+E.push({ t: 'nara_hall', rect: SOUTH_GATE, y: 0.8, H: 8, bays: [5, 2], k: 1.3, colD: 0.95, plat: 0.8, walls: 'ends', shibi: 3, rise: 6 });
 // the guardian kings in the Great South Gate's outer bays, facing each other across the passage:
 // the open-mouthed "a" on the west (the visitor's left), the closed-mouthed "un" on the east (§4)
 E.push({ t: 'obj', kind: 'nio', form: 'a', at: [-12, (SOUTH_GATE[1] + SOUTH_GATE[3]) / 2], y: 0.8, h: 5.7, dir: [1, 0] });

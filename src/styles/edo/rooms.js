@@ -58,8 +58,25 @@ export function machiyaShop(el, { bag, col }, { r, H1, H2 }) {
   { const u = x1 - 0.32; B(WD, u - 0.04, u + 0.04, 0, 1.0, -0.42, -0.34); B('wood_painted', u - 0.17, u + 0.17, 0.95, 2.3, -0.42, -0.36); B(WD, u - 0.2, u + 0.2, 2.3, 2.38, -0.44, -0.34);
     for (let k = 0; k < 4; k++) B('lacquer_black', u - 0.09 + (k % 2) * 0.03, u + 0.09 - (k % 2) * 0.05, 2.12 - k * 0.27, 2.2 - k * 0.27, -0.445, -0.4205); C(u - 0.2, u + 0.2, -0.44, -0.34, 0, 2.38); }
   // ---- the trade: cloth on shelves, ceramics on stepped stands, or rice in straw bales
-  const trade = ['cloth', 'pottery', 'rice'][Math.floor(rand() * 3)];
-  if (trade === 'cloth') {
+  const trade = ['cloth', 'pottery', 'rice'].includes(el.trade) || el.trade === 'sake' || el.trade === 'tea' ? el.trade : ['cloth', 'pottery', 'rice'][Math.floor(rand() * 3)];
+  if (trade === 'sake') {
+    // the brewer's shop: great casks (taru) on a rack against the shelf, small barrels and a tasting set on the shop's mats, bottles (tokkuri) on a shelf
+    const q0 = qm - 0.7;
+    B(WD, du + 0.3, ub - 0.3, fl, fl + 0.5, q0, q0 + 0.6); C(du + 0.3, ub - 0.3, q0, q0 + 0.6, fl, fl + 1.6);
+    for (let u = du + 0.7; u < ub - 0.7; u += 0.78) { lat('timber', [[0.001, 0], [0.3, 0], [0.34, 0.25], [0.35, 0.5], [0.34, 0.75], [0.3, 1.0], [0.001, 1.0]], 12, u, fl + 0.5, q0 + 0.3); lat('iron', [[0.31, 0.2], [0.355, 0.2], [0.355, 0.24], [0.31, 0.24]], 12, u, fl + 0.5, q0 + 0.3); lat('iron', [[0.31, 0.78], [0.31, 0.74], [0.355, 0.74], [0.355, 0.78]], 12, u, fl + 0.5, q0 + 0.3); }
+    B(WD, du + 0.1, ub - 0.2, fl + 1.55, fl + 1.6, qm - 1.0, qm - 0.4);
+    for (let k = 0; k < 5; k++) lat('glaze_white', [[0.001, 0], [0.06, 0.0], [0.08, 0.1], [0.04, 0.2], [0.03, 0.26], [0.001, 0.26]], 8, du + 0.5 + k * 0.4, fl + 1.6, qm - 0.7);
+    B('timber', du + 0.9, du + 1.5, fl, fl + 0.25, 1.0, 1.5); lat('pottery_dark', [[0.001, 0], [0.06, 0], [0.08, 0.05], [0.001, 0.05]], 8, du + 1.0, fl + 0.25, 1.1); lat('pottery_dark', [[0.001, 0], [0.06, 0], [0.08, 0.05], [0.001, 0.05]], 8, du + 1.3, fl + 0.25, 1.3);
+  } else if (trade === 'tea') {
+    // the teahouse: a raised bench with red felt along the front, a low table, the kettle on its brazier, cups on a tray, a menu board on the wall
+    B(WD, du + 0.2, ub - 0.2, fl, fl + 0.14, 0.55, 1.25); B('cloth_red', du + 0.22, ub - 0.22, fl + 0.14, fl + 0.18, 0.57, 1.23);
+    B(WD, du + 0.5, du + 1.3, fl, fl + 0.32, qm - 1.6, qm - 0.8);
+    for (let k = 0; k < 3; k++) lat('glaze_white', [[0.001, 0], [0.04, 0], [0.06, 0.05], [0.001, 0.05]], 8, du + 0.7 + k * 0.2, fl + 0.32, qm - 1.2);
+    lat('pottery_dark', [[0.001, 0], [0.2, 0], [0.22, 0.2], [0.001, 0.2]], 10, ub - 0.8, fl, qm - 0.9);
+    lat('iron', [[0.001, 0], [0.1, 0.02], [0.15, 0.12], [0.08, 0.2], [0.001, 0.22]], 10, ub - 0.8, fl + 0.2, qm - 0.9);
+    B('wood_painted', du + 0.3, ub - 0.3, fl + 1.2, fl + 1.85, qm - 0.04, qm - 0.0); for (let k = 0; k < 4; k++) B('lacquer_black', du + 0.5 + k * 0.45, du + 0.62 + k * 0.45, fl + 1.35, fl + 1.7, qm - 0.056, qm - 0.034);
+    C(du + 0.2, ub - 0.2, 0.55, 1.25, fl, fl + 0.5);
+  } else if (trade === 'cloth') {
     const q0 = qm - 0.55;
     B(WD, du + 0.4, ub - 0.3, fl, fl + 1.8, q0, q0 + 0.45); C(du + 0.4, ub - 0.3, q0, q0 + 0.45, fl, fl + 1.8);
     const cols = ['cloth_indigo', 'cloth_red', 'linen', 'cloth_brown', 'cloth_indigo', 'cloth_green', 'cloth_white', 'cloth_ochre'];
