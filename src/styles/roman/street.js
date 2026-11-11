@@ -10,6 +10,7 @@ import { hexa } from '../chinese/index.js';
 import '../../objects/index.js';
 import './index.js';
 import './town.js';
+import * as D_ from './dress.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const lz = (p, n, x, y, z) => lathe(p, n, null, x, y, z);
@@ -99,7 +100,7 @@ function tabernaRow(el, ctx) {
     for (let k = 0; k < 4; k++) B('timber', u0 - 0.2, u1 + 0.2, 0.7 + k * 1.3, 0.9 + k * 1.3, 3.4, 3.7);   // joists of the mezzanine floor
     for (let j = 0; j < 2; j++) B(j ? 'travertine' : 'paint_ochre', uc - 0.45, uc + 0.45, -0.05, 0.02, 3.7 + 0.1, 3.7 + 0.65);   // the mezzanine window
     // by the shop's trade
-    const kind = Math.floor(rand() * 5), sg = rand() < 0.5 ? -1 : 1, ux = sg > 0 ? u1 - 0.1 : u0 + 0.1;
+    const kind = [0, 1, 2, 3, 4, 5, 6, 7, 8, 1, 0, 2, 6][Math.floor(rand() * 13)], sg = rand() < 0.5 ? -1 : 1, ux = sg > 0 ? u1 - 0.1 : u0 + 0.1;
     const cu0 = sg > 0 ? uc - 0.1 : u0 + 0.1, cu1 = sg > 0 ? u1 - 0.1 : uc + 0.1;                // the counter fills half the door, leaving the other half open
     const bz = D - 0.45;
     if (kind === 0 || kind === 1) {
@@ -132,6 +133,33 @@ function tabernaRow(el, ctx) {
       B('bronze', uc - 0.25, uc + 0.25, 1.4, 1.9, 0.5, 0.62);
       B('bronze', uc + 0.2, uc + 0.4, 1.58, 1.72, 0.55, 0.65);
       B('wood_dark', u0 + 0.2, u0 + 0.9, 0.5, 1.0, 0.0, 0.7, true);                              // the workbench
+    } else if (kind === 5) {
+      // a butcher: the block, a beam inside with carcasses on hooks, a marble counter in the door
+      B('brick', cu0, cu1, 0.1, 0.7, 0.0, 0.95, true); B('marble_smooth', cu0 - 0.02, cu1 + 0.02, 0.08, 0.72, 0.95, 1.0);
+      B('timber', u0 + 0.2, u1 - 0.2, 1.3, 1.38, 3.0, 3.1);
+      for (let k = 0; k < 4; k++) { const u = u0 + 0.5 + k * (w - 1.0) / 3; B('iron', u - 0.01, u + 0.01, 1.32, 1.36, 2.4, 3.0); B('hide_tan', u - 0.14, u + 0.14, 1.25, 1.45, 1.5 + (k % 2) * 0.2, 2.4); B('wall_red', u - 0.05, u + 0.05, 1.22, 1.25, 1.7 + (k % 2) * 0.2, 2.2); }
+      V('timber', [[0.001, 0], [0.3, 0.0], [0.3, 0.7], [0.001, 0.7]], uc, 2.4, 0.0, 10);
+      B('wood_dark', u0 + 0.1, u1 - 0.1, bz - 0.4, bz - 0.04, 0.8, 0.85, true);
+    } else if (kind === 6) {
+      // a baker's shop: shelves of loaves on the back wall, the counter with its loaves, a sack of flour
+      for (const sy of [0.6, 1.3, 2.0]) B('timber', u0 + 0.1, u1 - 0.1, bz - 0.4, bz - 0.04, sy, sy + 0.05, true);
+      for (let r = 0; r < 3; r++) for (let k = 0; k < Math.floor(w / 0.34); k++) V('hide_tan', [[0.001, 0], [0.13, 0.0], [0.15, 0.04], [0.1, 0.09], [0.001, 0.1]], u0 + 0.25 + k * 0.34, bz - 0.22, [0.65, 1.35, 2.05][r], 8);
+      B('brick', cu0, cu1, 0.1, 0.8, 0.0, 0.95, true); B('marble_smooth', cu0 - 0.02, cu1 + 0.02, 0.08, 0.82, 0.95, 1.0);
+      for (let k = 0; k < 4; k++) V('terracotta', [[0.001, 0], [0.13, 0.0], [0.15, 0.04], [0.1, 0.09], [0.001, 0.1]], cu0 + 0.2 + k * 0.25, 0.45, 1.0, 8);
+      for (let k = 0; k < 2; k++) V('sacking', [[0.2, 0], [0.26, 0.15], [0.24, 0.5], [0.12, 0.58], [0.001, 0.56]], u1 - 0.35 - k * 0.45, D - 1.3, 0.0, 8);
+    } else if (kind === 7) {
+      // fish and greens: a stone tank with water, baskets on the floor, a drain in the flags
+      B('travertine', u0 + 0.2, u0 + 1.4, bz - 1.0, bz - 0.05, 0.0, 0.8, true); B('water', u0 + 0.3, u0 + 1.3, bz - 0.9, bz - 0.15, 0.7, 0.72);
+      for (let k = 0; k < 4; k++) V('wicker', [[0.2, 0], [0.26, 0.2], [0.001, 0.2]], u1 - 0.5 - (k % 2) * 0.5, bz - 0.4 - Math.floor(k / 2) * 0.5, 0.0, 10);
+      B('basalt', uc - 0.1, uc + 0.1, 0.5, D - 1.5, 0.0, 0.02);
+    } else if (kind === 8) {
+      // a barber's or scribe's booth: a bench along the wall, a stool, a shelf with scrolls, a bronze mirror
+      B('timber', u0 + 0.1, u1 - 0.1, bz - 0.5, bz - 0.05, 0.42, 0.47, true);
+      for (const x of [u0 + 0.2, u1 - 0.2]) B('timber', x - 0.04, x + 0.04, bz - 0.45, bz - 0.1, 0.0, 0.42);
+      V('timber', [[0.001, 0], [0.18, 0.0], [0.18, 0.44], [0.001, 0.44]], uc, 1.6, 0.0, 8);
+      B('timber', u0 + 0.2, u1 - 0.2, bz - 0.3, bz - 0.04, 1.6, 1.65, true);
+      for (let k = 0; k < 5; k++) B('linen', u0 + 0.3 + k * 0.25, u0 + 0.5 + k * 0.25, bz - 0.25, bz - 0.12, 1.65, 1.75);
+      V('bronze', [[0.001, 0], [0.12, 0.0], [0.12, 0.01], [0.001, 0.01]], uc, bz - 0.02, 1.4, 12);
     } else {
       // shut: the boards of the shop set in their groove across the door, a small door in them
       B('shutter_brown', u0, uc - 0.4, 0.08, 0.16, 0.12, 3.3, true);
@@ -140,8 +168,23 @@ function tabernaRow(el, ctx) {
       B('wood_dark', uc - 0.4, uc + 0.4, 0.04, 0.1, 0.12, 2.0);
       B('bronze', uc + 0.25, uc + 0.3, 0.02, 0.06, 0.9, 1.0);
     }
-    // a painted sign on the pier beside the door, now and then
-    if (rand() < 0.35) B(rand() < 0.5 ? 'wall_red' : 'paint_ochre', u1 + 0.1, u1 + 0.28, 0.5, 0.53, 1.7, 2.3);
+    // the dressing at the door: awning, goods by trade, sign, lamp, notices, weathering
+    const dr = { ...T, bag: T.bag };
+    if (kind !== 4 && rand() < 0.5) D_.awning(dr, u0 - 0.15, u1 + 0.15, 3.35, 2.6, 1.7, ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_green', 'linen'][Math.floor(rand() * 6)]);
+    if (kind === 0 || kind === 1) { D_.amphoraRack(dr, sg > 0 ? u0 + 0.05 : u1 - 1.2, 3 + Math.floor(rand() * 4), rand); if (rand() < 0.5) D_.litter(dr, sg > 0 ? u1 - 0.9 : u0 + 0.1, rand, 0); }
+    else if (kind === 2) D_.potStall(dr, sg > 0 ? u0 + 0.1 : uc + 0.1, Math.min(1.6, w / 2 - 0.2), rand);
+    else if (kind === 3) { D_.litter(dr, sg > 0 ? u0 + 0.1 : u1 - 1.2, rand, 0); }
+    else if (kind === 5) D_.carcasses(dr, u0 + 0.3, u1 - 0.3, rand);
+    else if (kind === 6) D_.slab(dr, sg > 0 ? u0 + 1.0 : u1 - 1.0, 1.4, 'bread', rand);
+    else if (kind === 7) D_.slab(dr, sg > 0 ? u0 + 1.0 : u1 - 1.0, 1.6, rand() < 0.6 ? 'fish' : 'greens', rand);
+    else if (kind === 8) D_.stoneBench(dr, u0 + 0.2, 1.3);
+    else if (kind === 4) D_.litter(dr, u0 + 0.2, rand, 1 + Math.floor(rand() * 2));
+    if (kind !== 4 && (kind === 1 || kind === 6 || kind === 7) && rand() < 0.5) D_.hangingGoods(dr, u0 + 0.3, u1 - 0.3, rand, kind === 1);
+    if (rand() < 0.4) D_.signBoard(dr, u1 + 0.28, 2.55, rand);
+    if (rand() < 0.35) D_.lampBracket(dr, u0 - 0.2, 2.2);
+    if (rand() < 0.4) D_.notice(dr, u1 + 0.0, 1.1 + rand() * 0.3, 0.4, 1.0, rand);
+    D_.damp(dr, u0 - 0.5, u0, 0.9, rand);
+    D_.streak(dr, uc + (rand() - 0.5) * w * 0.5, 3.3, 0.8 + rand(), 0.2);
     void C; void ux;
   }
   // the flats: windows on the front and the two long sides, sills, shutters, string courses, a corbelled cornice
@@ -155,6 +198,7 @@ function tabernaRow(el, ctx) {
       if (far) continue;
       B('travertine', uc - 0.62, uc + 0.62, -0.05, 0.14, wy - 0.1, wy);
       const r = rand();
+      if (rand() < 0.14) D_.flowerBox(T, uc, wy - 0.1, rand); else if (rand() < 0.09) D_.washing(T, uc, wy - 0.1, rand);
       if (r < 0.15) B('shutter_brown', uc - 0.5, uc + 0.5, 0.03, 0.08, wy, wy + 1.35);
       else if (r < 0.5) { B('shutter_brown', uc - 1.0, uc - 0.53, -0.05, 0.05, wy, wy + 1.35); B('shutter_brown', uc + 0.53, uc + 1.0, -0.05, 0.05, wy, wy + 1.35); }
     }
@@ -162,6 +206,8 @@ function tabernaRow(el, ctx) {
   if (!far) {
     B('brick', -0.25, W + 0.25, -0.05, 0.26, H - 0.34, H - 0.12);
     B('travertine', -0.4, W + 0.4, -0.05, 0.4, H - 0.12, H);
+    if (rand() < 0.25) D_.maenianum(T, 1.0 + rand() * 0.6, Math.min(W - 1.0, 5.0 + rand() * 6), H0 + sh + 0.1, rand);
+    D_.weather(T, 0.2, W - 0.2, H0 + 0.1, H - 0.8, rand, 1.0);
     if (rand() < 0.6) {                                                                                  // a balcony on corbels with a timber rail along the first floor
       const yb = H0;
       for (let u = 0.8; u < W - 0.6; u += 1.6) B('travertine', u - 0.14, u + 0.14, -0.05, 0.9, yb - 0.5, yb - 0.1);
