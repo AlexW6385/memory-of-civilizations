@@ -4,7 +4,7 @@
 // by the colonnade; a seller of rosaries and medals. Pure data: the coaches are the baroque style's, the rest the
 // shared objects (life).
 
-import { OVAL, FRONT_X, BORGO } from './layout.js';
+import { OVAL, FRONT_X, BORGO, rows } from './layout.js';
 
 const plan = (id, style, elements, bounds, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, 0], facing: 'n' }, bounds, rooms: [], elements, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -44,10 +44,19 @@ export function streetPlans() {
   for (const [x, z] of [[OVAL.c[0] - 30, -78], [OVAL.c[0] + 28, 80], [OVAL.c[0] - 52, 62]]) L.push({ t: 'figure', at: [x, z], y: 0, rot: Math.atan2(OVAL.c[0] - x, OVAL.c[1] - z) + Math.PI, seed: Math.floor(x * 11 + z), pose: 'ground', dress: 'robe', cloth: 'cloth_grey', cloth2: 'cloth_brown', skin: 'skin_medium', hat: 'none', over: 'cape', feet: 'bare' });
   L.push({ t: 'stall', at: [OVAL.c[0] + 40, 46], rot: -2.3, seed: 77, awning: 'cloth_white', goods: ['basket', 'cloth', 'basket'], w: 2.2, d: 1.2 });
   L.push({ t: 'figure', at: at(OVAL.c[0] + 40, 46, -2.3, 0, -1.2), y: 0, rot: -2.3 + Math.PI, seed: 78, pose: 'stand', dress: 'robe', cloth: 'cloth_black', skin: 'skin_light', hat: 'cap', over: 'none' });
+  // the keepers of the botteghe that can be entered, behind their counters, a customer before each; and women at the wall fountains
+  for (const r of rows()) for (const u of r.units) {
+    const wx = (uu) => r.rect[2] - uu, shop = r.rect[1];
+    if (u.open) {
+      L.push({ t: 'figure', at: [wx(u.u0 + 1.3), shop + 4.2], y: 0.05, rot: 0, seed: u.seed, pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_brown', cloth2: 'cloth_white', skin: 'skin_light', hat: 'cap', over: 'apron' });
+      L.push({ t: 'figure', at: [wx(u.u0 + u.w / 2 + 0.5), shop + 1.5], y: 0.05, rot: Math.PI, seed: u.seed + 1, pose: 'talk', dress: 'robe', cloth: 'cloth_maroon', cloth2: 'cloth_white', skin: 'skin_light', hat: 'veil', over: 'shawl' });
+    }
+    if (u.fountain) for (const k of [0, 1]) L.push({ t: 'figure', at: [wx(u.u0 + u.w / 2 + (k ? 0.6 : -0.6)), r.rect[1] - 1.5], y: 0, rot: Math.PI, seed: u.seed + 5 + k, pose: k ? 'talk' : 'stand', dress: 'robe', cloth: k ? 'cloth_green' : 'cloth_ochre', cloth2: 'cloth_white', skin: 'skin_light', hat: 'veil', over: 'shawl' });
+  }
   L.push({ t: 'chickens', kind: 'pigeon', n: 12, at: [OVAL.c[0] + 18, 22], seed: 9 });
   L.push({ t: 'animal', kind: 'dog', at: [OVAL.c[0] + 60, -30], rot: 1.2, seed: 5 });
   return [
     plan('baroque-rome-coaches', 'baroque', C, [-100, -100, 200, 100], { center: [40, 0], near: 300 }),
-    plan('baroque-rome-pilgrims', 'life', L, [-100, -100, 200, 100], { center: [40, 0], near: 300 }),
+    plan('baroque-rome-pilgrims', 'life', L, [-100, -100, 240, 100], { center: [40, 0], near: 300 }),
   ];
 }

@@ -91,3 +91,17 @@ export function lots() {
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+
+/** The ways walked: the oval (less the obelisk and the fountains), the piazza retta, the mouth of the oval, the Borgo's two streets, the alley and the lanes. */
+export function walkRects() {
+  const R = [], [ox, oz] = OVAL.c, holes = [[ox - 7, oz - 7, ox + 7, oz + 7], [ox - 8, oz - 50, ox + 8, oz - 34], [ox - 8, oz + 34, ox + 8, oz + 50]];
+  const cut = (r) => { let list = [r]; for (const h of holes) list = list.flatMap((q) => (q[0] < h[2] && q[2] > h[0] && q[1] < h[3] && q[3] > h[1] ? [[q[0], q[1], q[2], h[1]], [q[0], h[3], q[2], q[3]], [q[0], Math.max(q[1], h[1]), h[0], Math.min(q[3], h[3])], [h[2], Math.max(q[1], h[1]), q[2], Math.min(q[3], h[3])]].filter((a) => a[2] - a[0] > 0.5 && a[3] - a[1] > 0.5) : [q])); return list; };
+  for (let z = -80; z < 80; z += 8) { const e = Math.sqrt(1 - ((z + 4) / 88) ** 2), x0 = Math.max(ox - 64 * e, -54), x1 = ox + 64 * e; for (const q of cut([x0, z, x1, z + 8])) R.push({ r: q, weight: 1.2, market: 0.2, kind: 'street' }); }
+  R.push({ r: [-54, -50, -28, 50], weight: 1, market: 0.1, kind: 'street' });
+  R.push({ r: [100, -26, 134, 24], weight: 1.4, market: 0.6, kind: 'street' });
+  R.push({ r: [134, -26, 226, -12], weight: 1.6, market: 0.7, kind: 'street' }, { r: [134, 10, 226, 24], weight: 1.6, market: 0.7, kind: 'street' });
+  R.push({ r: [134, -1.5, 226, 1.5], weight: 0.4, market: 0.2, kind: 'lane' });
+  for (const [a, b] of LANES) R.push({ r: [a, -12, b, 10], weight: 0.5, market: 0.2, kind: 'lane' });
+  R.push({ r: [180, 24, 183, 38], weight: 0.4, market: 0.2, kind: 'lane' });
+  return R;
+}
