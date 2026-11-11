@@ -6,6 +6,7 @@
 // over another under the hoist beam.
 
 import { box, fromTriangles, rod, lathe } from '../../core/geom.js';
+import { terraceInterior } from './rooms.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
@@ -14,23 +15,31 @@ const WALLS = ['brick', 'brick', 'stucco_cream', 'sandstone_dressed', 'lime_plas
 /**
  * rocks_terrace: { rect, y (floor), y0 (lowest ground under it), front ('n'|'s'|'e'|'w'), kind ('terrace'|'store'), seed }
  */
-export function rocksTerrace(el, { bag, col }) {
+export function rocksTerrace(el, { bag, col, lights }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, y0 = Math.min(y, el.y0 ?? y), f = el.front ?? 'n';
   const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, Dp = along ? z1 - z0 : x1 - x0, a0 = along ? x0 : z0;
   const o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
   // local frame: u along the front (from a0), d inward from the front face (0 … Dp), up y
   const W = (u, d, yy) => { const q = o - sg * d; return along ? [a0 + u, yy, q] : [q, yy, a0 + u]; };
   const B = (u0, u1, d0, d1, ya, yb) => { const p = W(u0, d0, ya), q = W(u1, d1, yb); return box(Math.min(p[0], q[0]), ya, Math.min(p[2], q[2]), Math.max(p[0], q[0]), yb, Math.max(p[2], q[2])); };
+  const R_ = (u0, u1, d0, d1) => { const p = W(u0, d0, 0), q = W(u1, d1, 0); return [Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])]; };
   const T = (m, pts) => bag.add(m, fromTriangles(both(pts.flat())));
   bag.add('sandstone', B(0, L, 0, Dp, y0 - 0.4, y + 0.5));                                    // the sandstone footings
   if (el.kind === 'store') return store(el, { bag, col }, { B, W, T, L, Dp, y, rand });
   const n = Math.max(1, Math.round(L / 4.6)), fw = L / n, wall = WALLS[Math.floor(rand() * WALLS.length)], H1 = 3.5, H2 = 3.2, top = y + 0.5 + H1 + H2;
   const balcony = rand() < 0.55, roofM = 'iron_galv';
-  bag.add(wall, B(0, L, 0.3, Dp, y + 0.5, top)); col.rect(el.rect, y0 - 0.4, top + 3);
+  const enter = el.enter ?? -1, fwE = L / n;
+  if (enter < 0) { bag.add(wall, B(0, L, 0.3, Dp, y + 0.5, top)); col.rect(el.rect, y0 - 0.4, top + 3); }
+  else for (let i = 0; i < n; i++) {
+    // the house `enter` is hollow on its ground floor (rooms.js); its neighbours are solid
+    if (i === enter) continue;
+    bag.add(wall, B(i * fwE, (i + 1) * fwE, 0.3, Dp, y + 0.5, top));
+    const q = [W(i * fwE, 0, 0), W((i + 1) * fwE, Dp, 0)]; col.rect([Math.min(q[0][0], q[1][0]), Math.min(q[0][2], q[1][2]), Math.max(q[0][0], q[1][0]), Math.max(q[0][2], q[1][2])], y0 - 0.4, top + 3);
+  }
   // the front wall, 0.3 m proud of the core: built round the openings
   const PR = 0.3, rise = Math.min(Dp / 2 * 0.58, 3.4);
   for (let i = 0; i < n; i++) {
-    const u0 = i * fw, door = rand() < 0.5 ? 0.35 : fw - 1.35, win = door < 1 ? fw - 1.7 : 0.6;
+    const u0 = i * fw, ent = i === enter, door = ent || rand() < 0.5 ? 0.35 : fw - 1.35, win = door < 1 ? fw - 1.7 : 0.6;
     const dm = DOORS[Math.floor(rand() * DOORS.length)];
     // the front wall: piers and spandrels round the ground floor's door and window and the upper floor's two windows
     const openings = [[u0 + door, u0 + door + 1.0, y + 0.5, y + 2.75], [u0 + win, u0 + win + 1.1, y + 1.3, y + 3.1]];
@@ -49,10 +58,19 @@ export function rocksTerrace(el, { bag, col }) {
     }
     // the door: panelled leaf, a fanlight over it, a sandstone step
     const [da, db] = openings[0];
+    if (ent) {
+      // the open door of the house and its steps from the lane; inside, the rooms
+      const gy = el.gy ?? y0, nn = Math.max(1, Math.ceil((y + 0.5 - gy) / 0.18)), hh = (y + 0.5 - gy) / nn;
+      bag.add('paint_white', B(da, db, PR - 0.12, PR - 0.06, y + 2.25, y + 2.3)); bag.add('glass_outer', B(da, db, PR - 0.12, PR - 0.08, y + 2.3, y + 2.75));
+      for (let k = 0; k < nn; k++) { bag.add('sandstone_dressed', B(da - 0.15, db + 0.15, -0.3 * (k + 1), -0.3 * k, gy - 0.4, gy + hh * (nn - k))); col.floor(R_(da - 0.15, db + 0.15, -0.3 * (k + 1), -0.3 * k), gy + hh * (nn - k)); }
+      col.floor(R_(da, db, 0, PR), y + 0.5);
+      terraceInterior({ bag, col, lights, B, W, R: R_, u0, u1: u0 + fw, PR, Dp, F: y + 0.5, H1, top, wall, door: da, doorMat: dm });
+    } else {
     bag.add(dm, B(da, db, PR - 0.12, PR - 0.08, y + 0.5, y + 2.25)); bag.add('glass_outer', B(da, db, PR - 0.12, PR - 0.08, y + 2.3, y + 2.75));
     bag.add('paint_white', B(da, db, PR - 0.12, PR - 0.06, y + 2.25, y + 2.3));
     for (const [pa, pb] of [[0.55, 1.15], [1.3, 2.1]]) for (const s of [0.15, 0.55]) bag.add(dm, B(da + s, da + s + 0.3, PR - 0.14, PR - 0.12, y + 0.5 + pa, y + 0.5 + pb));
     bag.add('sandstone_dressed', B(da - 0.15, db + 0.15, -0.35, 0, y0 > y - 0.3 ? y + 0.15 : y0, y + 0.5));
+    }
     // the sash windows: glass, the white frame and the meeting rail, the sandstone sill and lintel
     for (const [wa, wb, ya, yb] of [openings[1], ...uw]) {
       const french = balcony && ya > y + 2;
