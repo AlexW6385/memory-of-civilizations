@@ -227,7 +227,8 @@ export function qinian(el, { bag, col, style }) {
   for (const [x, z] of dw) { column(bag, col, x, z, F, 19.0, 1.2, 'lacquer_red'); for (const yy of [2.5, 9, 15.5]) bag.add('gilt_bronze', lathe([[0.61, 0], [0.63, 0.05], [0.63, 0.6], [0.61, 0.65]], 16, null, x, F + yy, z)); }
   for (let i = 0; i < 12; i++) {
     const A = e3[i], B = e3[(i + 1) % 12], t = [];
-    beamTris(t, [A[0], F + 18.4, A[1]], [B[0], F + 18.4, B[1]], 0.14, 3.6); bag.add('palace_wall', fromTriangles(t));
+    // (the drum's wall runs down to the ceiling of the ring below it, F + 15.2, so that no sky shows between that ceiling and the drum)
+    beamTris(t, [A[0], F + 15.2, A[1]], [B[0], F + 15.2, B[1]], 0.14, 7.15); bag.add('palace_wall', fromTriangles(t));
     latticeBay(bag, null, A, B, F + 19.2, 1.5, 'window');
   }
   for (const [x, z] of e3) bag.add('lacquer_red', lathe([[0.2, 0], [0.19, 4.0], [0.001, 4.0]], 10, null, x, F + 18.4, z));
