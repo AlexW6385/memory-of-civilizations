@@ -6,7 +6,7 @@ import { box } from '../../core/geom.js';
 import { rng } from './houses.js';
 import { CARRIAGE, WALK_UP, STONE_STRIP, SHOP_FRONT } from './layout.js';
 
-const EARTH = 'mud_plaster', DUST = 'earth_wall', RUT = 'silt';
+const EARTH = 'mud_plaster', DUST = 'earth_wall', RUT = 'mudbrick';
 
 /** Scatter bands of a given material along z (or x) in a strip: segments of random length and offset. */
 function segs(bag, r, mat, { a0, a1, across, w, jit = 0.0, len = [3, 9], gap = [0, 4], y0, y1, along = 'z' }) {
@@ -28,7 +28,7 @@ export function bjStreet(el, { bag, col }) {
   for (let k = 0; k < 14; k++) { const c = (r() - 0.5) * 2 * (C - 0.6), a = z0 + r() * (z1 - z0 - 10); bag.add(DUST, box(c - 0.5 - r() * 0.6, y, a, c + 0.5 + r() * 0.8, y + 0.008, a + 3 + r() * 7)); }
   for (const cx of [-3.05, -0.0, 3.05]) {
     if (cx === 0) continue;
-    for (const o of [-0.75, 0.75]) segs(bag, r, RUT, { a0: z0, a1: z1, across: cx + o, w: 0.2 + r() * 0.06, jit: 0.12, len: [4, 12], gap: [0.5, 5], y0: y, y1: y + 0.016 });
+    for (const o of [-0.75, 0.75]) segs(bag, r, RUT, { a0: z0, a1: z1, across: cx + o, w: 0.12 + r() * 0.08, jit: 0.2, len: [2, 6], gap: [1.5, 9], y0: y, y1: y + 0.016 });
   }
   // the stone strip: granite slabs 1.5 m broad in a worn run (the old imperial way), lost in places and replaced by earth
   let t = z0;
@@ -60,6 +60,6 @@ export function bjLane(el, { bag, col }) {
   // dust drifts along the walls' feet (pale), ruts down the middle (dark), a few pale patches
   for (const s of [-1, 1]) segs(bag, r, DUST, { a0, a1, across: mid + s * (W / 2 - 0.4), w: 0.7 + r() * 0.3, jit: 0.1, len: [5, 16], gap: [0.5, 6], y0: y, y1: y + 0.01, along });
   const gauge = 0.7 + r() * 0.15;
-  for (const o of [-gauge, gauge]) segs(bag, r, RUT, { a0, a1, across: mid + o, w: 0.17 + r() * 0.07, jit: 0.15, len: [5, 14], gap: [0.8, 8], y0: y + 0.004, y1: y + 0.018, along });
+  for (const o of [-gauge, gauge]) segs(bag, r, RUT, { a0, a1, across: mid + o, w: 0.12 + r() * 0.07, jit: 0.2, len: [2, 6], gap: [1.5, 9], y0: y + 0.004, y1: y + 0.018, along });
   for (let k = 0; k < Math.ceil((a1 - a0) / 18); k++) { const a = a0 + r() * (a1 - a0 - 4), c = mid + (r() - 0.5) * (W - 1.2); const L = 1.5 + r() * 3, w = 0.7 + r() * 0.9; bag.add(DUST, box(horiz ? a : c - w / 2, y + 0.004, horiz ? c - w / 2 : a, horiz ? a + L : c + w / 2, y + 0.012, horiz ? c + w / 2 : a + L)); }
 }
