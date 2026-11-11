@@ -51,5 +51,6 @@ export const MOVER_SITES = {
   'kilwa': () => import('../settlements/kilwa/movers.js'),
   'conques': () => import('../settlements/conques/movers.js'),
   'norse-borgund': () => import('../settlements/norse-borgund/movers.js'),
+  'great-zimbabwe': () => import('../settlements/great-zimbabwe/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
