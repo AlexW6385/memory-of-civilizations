@@ -23,7 +23,7 @@ export function walkways() {
   rects.push({ r: [VILLAGE[0] + 4, 18, VILLAGE[2] - 4, 40], weight: 1.0, market: 0.8, kind: 'street' });
   for (const z of [30]) rects.push({ r: [VILLAGE[0] - 6, z - 1.0, VILLAGE[0] + 6, z + 1.0], weight: 0.8, market: 0.3, kind: 'lane' });
   // the foot of the cliff before the stair, and the pocket's bank
-  rects.push({ r: [XF + 9.5, -56, XF + 13.5, -44.4], weight: 0.9, market: 0.2, kind: 'street' });
+  rects.push({ r: [XF + 9.5, -58, XF + 13.5, -44.4], weight: 0.9, market: 0.2, kind: 'street' });
   return { rects, links, clip: RADIUS - 24 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: RADIUS - 18 }; }

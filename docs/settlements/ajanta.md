@@ -65,3 +65,7 @@ River, the fall's roar, wind in the teak, parakeets and bee-eaters, temple bells
 ## 10. What this dossier does not know
 
 The exact painted programme of Cave 1 as it was at 480 (only nine wall images survive: Smarthistory); the 5th-c. state of the porch (collapsed since); the form of the village (none is known: ours is a composite). Each is a composite, said so above.
+
+## 11. What was built (first pass)
+
+Landmark plan `ajanta-caves`: the squared horseshoe in slabs with strata and overhangs (`aj_cliff`), the ledge at +9 m with its 53-step stair, Cave 1 (porch of six pillars, hall with a ring of 20 pillars and a painted flat ceiling, 14 cells with stone beds, the shrine with a seated teaching Buddha, Padmapani and Vajrapani, Jataka bands, a painters' scaffold), Cave 19 (facade with the horseshoe window, yakshas and a two-pillar porch; nave of 15 pillars under a ribbed barrel vault; the stupa with its standing Buddha), a monk's cell hall, 50 shrine niches on three tiers and the two wings, the Waghora with its ford and the waterfall with its pool, the pilgrims' shelter, a mason's scaffold and chips. Town plans: the workers' huts round a well on the east bank's plateau, with goats, a zebu cart, fowl and women at the well; people at the caves (painters on the scaffold, monks before the Buddha and at the stupa, pilgrims on the ledge). Life: walkers (movers.js), birds and fish (fauna.js), hearth smoke and incense (smoke.js). The arrival stands on the east plateau's crest (+8 m over the gorge floor), looking west across the river at the whole cliff.

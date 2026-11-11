@@ -55,7 +55,7 @@ export const inPool = (x, z, m = 0) => Math.hypot(x - FALL.pool[0], z - FALL.poo
 /** The paths along the gorge floor (polylines): the west bank from the north gap past the stair's foot and the ford to the south gap; the ford's crossing and the way to the village. */
 export const PATHS = [
   [[10, -120], [3, -90], [-4, -70], [-6, -58], [-8, -44], [-48, -44], [-48, -20], [-48, 14], [-48, 40], [-8, 50], [-4, 62], [3, 90], [10, 120]],
-  [[-48, -44], [-48, -54]],
+  [[-48, -44], [-48, -58]],
   [[-48, 14], [-15, 14], [20, 20], [40, 30]],
 ];
 export const PATH_W = 2.2;
