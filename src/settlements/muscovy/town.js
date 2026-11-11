@@ -1,6 +1,6 @@
 // The log houses (izby) of the boyars' courts and the posad (docs/settlements/muscovy.md §5).
 import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, NIKOLSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ } from './layout.js';
-const base = (id, elements) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
+const base = (id, elements, rooms = []) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
 // the gable end of each house turned to the nearer street (the streets of layout.js: x = 42 − 420 + 84k, z = 35 − 420 + 70k)
 function front([x0, z0, x1, z1]) {
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
@@ -16,9 +16,11 @@ export function variantOf(l) {
   const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, d = Math.hypot(cx - 40, cz - 20), h = (l.seed >> 3) % 100;
   return h < (inKremlin(cx, cz) ? 45 : d < 260 ? 13 : 4) ? 'two' : 'one';
 }
+/** The rooms of the furnished izby (kind 'house', for the sound inside): the one room, its floor a little over the ground. */
+const roomsOf = (chunk) => chunk.filter((l) => openIzba(l)).map((l) => ({ id: `izba-${l.seed}`, rect: [l.rect[0] + 0.3, l.rect[1] + 0.3, l.rect[2] - 0.3, l.rect[3] - 0.3], y: l.y + 0.32, kind: 'house' }));
 export async function houses() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 200) plans.push(base(`muscovy-houses-${i / 200}`, all.slice(i, i + 200).map((l) => ({ t: 'izba', ...l, front: front(l.rect), open: openIzba(l), variant: variantOf(l), yard: Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20) < 240 ? 6.7 : 0, groundY: height }))));
+  for (let i = 0; i < all.length; i += 200) plans.push(base(`muscovy-houses-${i / 200}`, all.slice(i, i + 200).map((l) => ({ t: 'izba', ...l, front: front(l.rect), open: openIzba(l), variant: variantOf(l), yard: Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20) < 240 ? 6.7 : 0, groundY: height })), roomsOf(all.slice(i, i + 200))));
   const yb = yards(all); for (let i = 0; i < yb.length; i += 300) plans.push(base(`muscovy-yards-${i / 300}`, yb.slice(i, i + 300)));
   plans.push(base('muscovy-streets', streets()), base('muscovy-market', market()), base('muscovy-churches', CHURCHES.map(([x, z, yaw]) => ({ t: 'log_church', c: [x, z], y: height(x, z), yaw }))));
   plans.push(base('muscovy-stages', stages()), { ...base('muscovy-river-life', riverLife()), style: 'life' });
