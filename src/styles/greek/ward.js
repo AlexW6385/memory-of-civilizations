@@ -63,6 +63,15 @@ function fig(bag, x, y, z, h, rand) {
   void rand;
 }
 
+/** What kind of house this seed is, and where its door and shop opening are (shared with the street props of the town: u along the front). */
+export function kindOf(el, L, D, tier) {
+  const rand = rng(el.seed || 1), plaster = TONES[Math.floor(rand() * TONES.length)];
+  const two = rand() < 0.34, typeA = rand() < 0.68, shop = typeA && tier > 0 && rand() < 0.3 && L > 10.2;
+  const sw = Math.min(3.2, L * 0.28), q = rng((el.seed || 1) + 99), dw = 1.1;
+  const left = q() < 0.5, shopU = shop ? (left ? 0.9 : L - 3.3) : -1, lo = shop && left ? shopU + 3.3 : 1.4, hi = shop && !left ? shopU - 0.9 : L - 1.4;
+  const du = typeA ? lo + q() * Math.max(0, hi - lo) : L / 2 + (q() - 0.5) * Math.max(0, L - 2 * sw - dw - 0.8);
+  return { rand, plaster, two, typeA, shop, sw, du: Math.max(0.3, Math.min(du, L - 0.3)), shopU };
+}
 /**
  * athens_house: { rect, front ('n'|'s'|'e'|'w'), seed, y, tier, fall } — see the header.
  * Type A (two houses in three): a range of rooms along the street, its door in the front wall, the court behind between
@@ -70,10 +79,11 @@ function fig(bag, x, y, z, h, rand) {
  * propped up as an awning. Type B: a coped wall with the door on the street, the wings coming to it. Two storeys in one of three.
  */
 function athensHouse(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed || 1), F = frame(el.rect, el.front || 's'), { L, D } = F, y = el.y ?? 0, tier = el.tier ?? 1;
-  const sd = Math.max(0.6, (el.fall ?? 0) + 0.3), plaster = TONES[Math.floor(rand() * TONES.length)];
-  const two = rand() < 0.34, typeA = rand() < 0.68, shop = typeA && tier > 0 && rand() < 0.3 && L > 10.2;
-  const fr = 3.4, bk = Math.min(4.2, D * 0.36), sw = Math.min(3.2, L * 0.28);
+  const { bag, col } = ctx, F = frame(el.rect, el.front || 's'), { L, D } = F, y = el.y ?? 0, tier = el.tier ?? 1;
+  const K = kindOf(el, L, D, tier), rand = K.rand, { plaster, two, typeA, shop, sw, du, shopU } = K;
+  const sd = Math.max(0.6, (el.fall ?? 0) + 0.3);
+  const fr = 3.4, bk = Math.min(4.2, D * 0.36);
+  const dw = 1.1, dh = 2.15;
   const hF = typeA ? (two ? 5.7 : 3.1 + rand() * 0.3) : 3.0, hB = rand() < 0.28 ? 5.7 : 3.2, hS = 3.0 + rand() * 0.3;
   const wall = (u0, v0, u1, v1, H, solid = true) => {
     const r = F.R(u0, v0, u1, v1);
@@ -88,12 +98,10 @@ function athensHouse(el, ctx) {
   wall(0, cv0, sw, D - bk, hS); wall(L - sw, cv0, L, D - bk, hS);
   ranges.push([F.R(0, cv0, sw, D - bk), hS], [F.R(L - sw, cv0, L, D - bk), hS]);
   // the street door: its place along the front
-  const dw = 1.1, dh = 2.15, du = typeA ? 1.4 + rand() * (L - 2.8 - (shop ? 2.8 : 0)) + (shop && rand() < 0.5 ? 2.8 : 0) : L / 2 + (rand() - 0.5) * (L - 2 * sw - dw - 0.8);
-  const shopU = shop ? (du > L / 2 ? 1.0 + rand() * 0.6 : L - 3.4 - rand() * 0.6) : -1;
   if (typeA) {
     if (shop) {
       // the front range in blocks round the shop's opening (u shopU … shopU + 2.4), a dark cell behind it
-      const s0 = Math.max(0.3, Math.min(shopU, L - 2.9)), s1 = s0 + 2.4;
+      const s0 = shopU, s1 = s0 + 2.4;
       wall(0, 0, s0, fr, hF); wall(s1, 0, L, fr, hF);
       const rr = F.R(s0, 0, s1, fr);
       bag.add('rubble', box(rr[0], y - sd, rr[1], rr[2], y + 0.7, rr[3]));
@@ -125,7 +133,7 @@ function athensHouse(el, ctx) {
     bag.add('roof_tile', frustum(r, y + 2.55, y + 2.78, F.alongX ? 0 : 0.2, F.alongX ? 0 : 0.2, F.alongX ? 0.2 : 0, F.alongX ? 0.2 : 0));
     ranges.push(null);
   }
-  const dL = Math.max(0.3, Math.min(du, L - 0.3));
+  const dL = du;
   // the door: a timber frame proud of the wall, the leaf shut inside it, a stone threshold and a step
   const door = (u) => {
     const P = (a, b, c, d, y0, y1, m) => { const r = F.R(a, b, c, d); bag.add(m, box(r[0], y + y0, r[1], r[2], y + y1, r[3])); };

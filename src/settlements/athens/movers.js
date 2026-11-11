@@ -4,14 +4,14 @@
 // tunic with the felt cap, carrying sacks and baskets, boys. Data for the engine's movers (src/engine/movers.js, read in its
 // worker); the ways come from layout.js and quarters.js. No boats (no water is shown).
 
-import { RADIUS, WAY, RAMP, AGORA } from './layout.js';
+import { RADIUS, WAY, RAMP, AGORA, laneRects } from './layout.js';
 import { KERAMEIKOS, PALAESTRA, PARADROMIS, GATE } from './quarters.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 60, night: 5, rain: 0.6, reach: 170, spawnMin: 24, far: 46 },
+  walkers: { day: 80, night: 6, rain: 0.6, reach: 170, spawnMin: 24, far: 46 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -32,6 +32,8 @@ export function walkways() {
   rects.push({ r: [PALAESTRA[0] + 17 - 1.4, GATE[1] - 1.4, GATE[0] - 2, GATE[1] + 1.4], weight: 1.2, market: 0.3, kind: 'street' });
   rects.push({ r: [PALAESTRA[0] + 3.5, PALAESTRA[1] + 4, PALAESTRA[2] - 3.5, PALAESTRA[1] + 20], weight: 1.4, market: 0.2, kind: 'street' });
   rects.push({ r: [PARADROMIS[0] + 2, PARADROMIS[1] + 1, PARADROMIS[2] - 2, PARADROMIS[3] - 1], weight: 1.0, market: 0.2, kind: 'lane' });
+  // the lanes between the houses: narrow, the people of the wards going about their business
+  for (const r of laneRects()) rects.push({ r, weight: 0.55, market: 0.4, kind: 'lane' });
   // the summit, between the Propylaia and the Promachos
   rects.push({ r: [-116, -3, -90, 3], weight: 1.2, market: 0.3, kind: 'street' });
   return { rects, links, clip: RADIUS - 14 };

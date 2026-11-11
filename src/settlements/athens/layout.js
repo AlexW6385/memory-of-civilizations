@@ -69,6 +69,7 @@ export function height(x, z) {
 export const onWay = (x, z, m = 0) => pathAt(x, z, WAY)[0] < 5 + m;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let LOTS = null, HASH = null;
+const XL = [];
 const CELL = 16;
 const hkey = (cx, cz) => cx * 4096 + cz;
 function hashAdd(l, i) { const [x0, z0, x1, z1] = l.rect; for (let cx = Math.floor(x0 / CELL); cx <= Math.floor(x1 / CELL); cx++) for (let cz = Math.floor(z0 / CELL); cz <= Math.floor(z1 / CELL); cz++) { const k = hkey(cx, cz); (HASH.get(k) || HASH.set(k, []).get(k)).push(i); } }
@@ -158,9 +159,31 @@ export function lots() {
         }
         x += w + 0.12; void cx;
       }
-      x += XLANE;
+      XL.push([x, zb]); x += XLANE;
     }
   }
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => !!lotAt(x, z, m);
+
+/** The lanes the walkers use: the strips before the fronts (merged along each lane) and the cross-lanes between the runs; [x0, z0, x1, z1] each. */
+export function laneRects() {
+  lots();
+  const by = new Map();
+  for (const l of LOTS) {
+    if (l.road || l.tier < 1) continue;
+    const [x0, z0, x1, z1] = l.rect, n = l.front === 'n';
+    if (l.front !== 'n' && l.front !== 's') continue;
+    const z = n ? z0 - 3.0 : z1 + 0.6, k = Math.round(z * 2);
+    (by.get(k) || by.set(k, []).get(k)).push([x0, z, x1, z + 2.4]);
+  }
+  const out = [];
+  for (const arr of by.values()) {
+    arr.sort((a, b) => a[0] - b[0]);
+    let cur = null;
+    for (const r of arr) { if (cur && r[0] - cur[2] < 4.0) cur[2] = Math.max(cur[2], r[2]); else { if (cur) out.push(cur); cur = [...r]; } }
+    if (cur) out.push(cur);
+  }
+  for (const [x, zb] of XL) if (lotAt(x - 1.5, zb + 7) || lotAt(x - 1.5, zb + 20) || lotAt(x + XLANE + 1.5, zb + 7)) out.push([x + 0.5, zb - 3.0, x + XLANE - 0.5, zb + BAND + 3.0]);
+  return out.filter((r) => r[2] - r[0] > 2.5);
+}

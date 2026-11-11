@@ -3,6 +3,7 @@ import '../../styles/greek/ward.js';
 import { RADIUS, lots, pathAt, WAY, RAMP, inRect, SLOPE, AGORA } from './layout.js';
 import { TRADES } from '../../styles/greek/shops.js';
 import { SIMON, lifePlan } from './life.js';
+import { fronts, crossings, openLife } from './fronts.js';
 import { WORKSHOPS, FOUNTAIN, SHOPROW, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
 const base = (id, elements) => ({ id, style: 'greek', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-300, 70], facing: 'e' } });
 const OPEN_TRADES = ['bronze', 'shoe', 'cloth', 'wine', 'perfume', 'carpenter'];
@@ -38,6 +39,10 @@ export async function town() {
     { t: 'stoa', rect: XYSTOS, front: 'n', y: 0, h: 3.4, d: 0.5, sp: 1.9, flutes: 0, mat: 'limestone', wall: 'mud_plaster', arch: 0.4, frieze: 0.4, geison: 0.2, tw: 0.3, triglyphMat: 'egyptian_blue' },
     { t: 'block', rect: PARADROMIS, y0: -0.3, y1: 0.02, mat: 'sandstone_white', walk: true }],
   ), rooms: [{ id: 'palaestra', rect: PALAESTRA, y: 0, kind: 'open' }] });
+  // the street: what stands before the fronts, the herms at the lane crossings, the wells, the people of the fronts and of the walk-in houses
+  { const { herms, wells } = crossings();
+    plans.push(base('athens-herms', herms.map((h) => ({ t: 'herm', ...h }))));
+    plans.push({ ...lifePlan(), id: 'athens-fronts', elements: [...fronts(), ...wells, ...openLife()] }); }
   plans.push(lifePlan());
   return plans;
 }
