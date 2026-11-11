@@ -3,7 +3,7 @@
 // and the north–south streets, and the grey-brick courtyard houses between the lanes, in plans of
 // a few dozen each so that they build in turn.
 
-import { RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, STREET_X, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
+import { RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, DANBI, STREET_X, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
 import './townstyle.js';
 import { lifePlans } from './life.js';
 
@@ -41,6 +41,19 @@ function streets() {
   // the Meridian Gate's forecourt: the causeway across the south moat, paved with brick, with the stone way down its axis to the avenue
   E.push({ t: 'lane', rect: [-nx, d1 - 0.5, nx, RING[3]], y: 0.03, mat: 'brick_paving' });
   E.push({ t: 'lane', rect: [-3.6, d1 - 0.5, 3.6, RING[3] + 2], y: 0.06, mat: 'marble_floor' });
+  // the forecourt's end (§29): a red wall across its south side under a gate hall over three passages (the Duan Gate's place before the avenue),
+  // returning north along the causeway's ends; the paved apron south of the gate between two low walls, with a pair of stone lions
+  const zw = RING[3], pal = { plaster: 'palace_wall', roof: 'tile_yellow', plinth: 'marble' };
+  E.push({ t: 'palace_wall', a: [-nx, zw], b: [nx, zw], y: 0, h: 5.5, th: 2.4, gates: [{ at: nx, w: 7, h: 5.2 }, { at: nx - 14, w: 4.6, h: 4.6 }, { at: nx + 14, w: 4.6, h: 4.6 }] });
+  for (const sx of [-1, 1]) E.push({ t: 'palace_wall', a: [sx * nx, b1], b: [sx * nx, zw - 1.2], y: 0, h: 5.5, th: 2.4 });
+  E.push({ t: 'qing_hall', rect: [-19, zw - 1.7, 19, zw + 1.7], y: 5.5, H: 4.4, double: 3.4, roof: 'xieshan', bays: [7, 2], front: 's', four: true, plat: 0.3, orn: { figures: 7 } });
+  for (const [x, w, h] of [[0, 7, 5.2], [-14, 4.6, 4.6], [14, 4.6, 4.6]]) E.push({ t: 'gate_doors', at: [x, zw], along: 'x', w, h, y: 0.03, swing: -1, off: 1.25, nails: 7 });
+  E.push({ t: 'lane', rect: [-26, zw + 1.2, 26, zw + 12], y: 0.03, mat: 'brick_paving' });
+  E.push({ t: 'lane', rect: [-3.6, zw + 1.2, 3.6, zw + 12], y: 0.06, mat: 'marble_floor' });
+  for (const sx of [-1, 1]) {
+    E.push({ t: 'palace_wall', a: [sx * 26, zw + 1.2], b: [sx * 26, zw + 12], y: 0, h: 3.5, th: 1.4 });
+    E.push({ t: 'bronze', kind: 'lion', at: [sx * 11, zw + 7], y: 0.06, s: 0.85, face: [0, 1], metal: 'marble_smooth', paw: sx > 0 ? 'ball' : 'cub' });
+  }
   for (const l of lanes()) { const r = clip(l); if (r && l[2] - l[0] < 20) E.push({ t: 'lane', rect: r, y: 0.02, mat: 'bluestone' }); }
   return base('qing-beijing-streets', E);
 }
@@ -107,14 +120,33 @@ function temple() {
   E.push({ t: 'lane', rect: [cx - w + 0.6, cz - w + 0.6, cx + w - 0.6, cz + w - 0.6], y: 0.03 });
   E.push({ t: 'qinian', c: [cx, cz], y: 0.03 });
   const wall = (a, b, gates = []) => E.push({ t: 'ming_wall', a, b, y: 0, h: 3.6, th: 1.0, gates, pal });
-  wall([cx - w, cz - w], [cx + w, cz - w]);
-  wall([cx + w, cz - w], [cx + w, cz + w]);
-  wall([cx - w, cz + w], [cx - w, cz - w], [{ at: w, w: 4, h: 3.0 }]);
+  const gp = { wood: 'paint_caihua', column: 'lacquer_red', soffit: 'paint_caihua', base: 'marble', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'palace_wall', plinth: 'marble', roof: 'tile_green' };
+  // the court's walls with a gate in the middle of each side (the inner wall had gates on four sides, §13), each under a gatehouse of three bays
+  wall([cx - w, cz - w], [cx - 4, cz - w]); wall([cx + 4, cz - w], [cx + w, cz - w]);
+  wall([cx + w, cz - w], [cx + w, cz - 4]); wall([cx + w, cz + 4], [cx + w, cz + w]);
+  wall([cx - w, cz + w], [cx - w, cz + 4]); wall([cx - w, cz - 4], [cx - w, cz - w]);
   wall([cx - w, cz + w], [cx - 13, cz + w]); wall([cx + 13, cz + w], [cx + w, cz + w]);
-  E.push({ t: 'gate_doors', at: [cx - w, cz], along: 'z', w: 4, h: 3.0, y: 0.03, swing: 1, off: 0.5 });
+  // (the gates: a passage 4 m wide under a hall on the wall, its leaves open into the court)
+  for (const [x, z, front, rect, along, swing] of [[cx, cz - w, 'n', [cx - 5, cz - w - 1.6, cx + 5, cz - w + 1.6], 'x', 1], [cx + w, cz, 'e', [cx + w - 1.6, cz - 5, cx + w + 1.6, cz + 5], 'z', -1], [cx - w, cz, 'w', [cx - w - 1.6, cz - 5, cx - w + 1.6, cz + 5], 'z', 1]]) {
+    E.push({ t: 'ming_wall', a: along === 'x' ? [x - 4, z] : [x, z - 4], b: along === 'x' ? [x + 4, z] : [x, z + 4], y: 0, h: 3.6, th: 1.0, gates: [{ at: 4, w: 4, h: 3.0 }], pal });
+    E.push({ t: 'qing_hall', rect, y: 3.6, H: 3.0, roof: 'xieshan', bays: [3, 2], front, four: true, plat: 0.2, pal: gp, orn: { figures: 3 } });
+    E.push({ t: 'gate_doors', at: [x, z], along, w: 4, h: 3.0, y: 0.03, swing, off: 0.5, nails: 7 });
+  }
   // the Gate of Prayer for Good Harvests: a hall of five bays on a marble platform, its middle bays open
-  E.push({ t: 'qing_hall', rect: [cx - 12, cz + w - 4, cx + 12, cz + w + 4], y: 1.2, H: 5.4, roof: 'xieshan', bays: [5, 2], front: 'n', four: true, plat: 1.2, open: true, orn: { figures: 7 }, pal: { wood: 'paint_caihua', column: 'lacquer_red', soffit: 'paint_caihua', base: 'marble', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'palace_wall', plinth: 'marble', roof: 'tile_yellow' } });
-  for (const [z0, z1, dir] of [[cz + w - 8.4, cz + w - 4.9, 's'], [cz + w + 4.9, cz + w + 8.4, 'n']]) E.push({ t: 'stairs', rect: [cx - 3, z0, cx + 3, z1], y0: 0.03, y1: 1.2, dir });
+  E.push({ t: 'qing_hall', rect: [cx - 12, cz + w - 4, cx + 12, cz + w + 4], y: 1.2, H: 5.4, roof: 'xieshan', bays: [5, 2], front: 'n', four: true, plat: 1.2, open: true, orn: { figures: 7 }, pal: { wood: 'paint_caihua', column: 'lacquer_red', soffit: 'paint_caihua', base: 'marble', floor: 'brick_paving', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'palace_wall', plinth: 'marble', roof: 'tile_green' } });
+  E.push({ t: 'stairs', rect: [cx - 3, cz + w - 8.4, cx + 3, cz + w - 4.9], y0: 0.03, y1: 1.2, dir: 's' });
+  // the Danbi bridge-way (丹陛桥), §13/§29: the raised way south from the gate, 29 m wide, a marble-edged brick platform with the white stone Shendao
+  // in the middle and a brick way on each side, a balustrade along each edge, steps across its south end, cypress rows either side
+  const [dx0, dz0, dx1, dz1] = DANBI.rect, dy = DANBI.y, dxm = (dx0 + dx1) / 2;
+  E.push({ t: 'block', walk: true, rect: [dx0, dz0, dx1, dz1], y0: 0, y1: dy - 0.1, mat: 'marble' });
+  E.push({ t: 'block', walk: true, rect: [dx0 + 0.45, dz0, dx1 - 0.45, dz1 - 0.45], y0: dy - 0.1, y1: dy, mat: 'brick_paving' });
+  E.push({ t: 'stone_way', rect: [dxm - 2.6, dz0, dxm + 2.6, dz1 - 0.45], y: dy, cols: [1.8, 1.8, 1.8], seed: 7 });
+  for (const sx of [-1, 1]) {
+    E.push({ t: 'block', walk: true, rect: [sx < 0 ? dxm - 7.3 : dxm + 5.3, dz0, sx < 0 ? dxm - 5.3 : dxm + 7.3, dz1 - 0.45], y0: dy, y1: dy + 0.02, mat: 'bluestone' });   // the Yudao (east) and Wangdao (west), each a brick strip
+    E.push({ t: 'rail', a: [sx < 0 ? dx0 + 0.3 : dx1 - 0.3, dz0 + 0.5], b: [sx < 0 ? dx0 + 0.3 : dx1 - 0.3, dz1 - 1.5], y: dy });
+  }
+  E.push({ t: 'stairs', rect: [dxm - 12, dz1 - 0.45, dxm + 12, dz1 + 4.0], y0: 0.03, y1: dy, dir: 'n' });
+  for (const sx of [-1, 1]) E.push({ t: 'bronze', kind: 'vat', at: [dxm + sx * 12.5, dz0 + 4], y: dy, s: 0.9 });
   // the path in from the avenue to the west gate
   E.push({ t: 'lane', rect: [AVENUE[2] - 0.5, cz - 3, cx - w - 0.5, cz + 3], y: 0.035, mat: 'bluestone' });
   return { ...base('qing-beijing-temple', E), center: [cx, cz] };

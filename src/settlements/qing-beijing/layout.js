@@ -39,7 +39,10 @@ export const HALLS = {
  * the altar's centre and tiers, the square wall round it, the belt of old arborvitae round the wall.
  */
 export const TEMPLE = { c: [72, 280], wall: 54, belt: [14, 214, 142, 352] };
+/** The Danbi bridge-way (§13): the raised stone way from the temple court's south gate, 29 m wide, compressed here to 61 m. */
+export const DANBI = { rect: [57.5, 338.9, 86.5, 400], y: 1.2 };
 export const inTemple = (x, z, m = 0) => Math.abs(x - TEMPLE.c[0]) <= TEMPLE.wall + m && Math.abs(z - TEMPLE.c[1]) <= TEMPLE.wall + m;
+export const inDanbi = (x, z, m = 0) => x >= DANBI.rect[0] - m && x <= DANBI.rect[2] + m && z >= DANBI.rect[1] - m && z <= DANBI.rect[3] + m;
 export const inBelt = (x, z, m = 0) => x >= TEMPLE.belt[0] - m && x <= TEMPLE.belt[2] + m && z >= TEMPLE.belt[1] - m && z <= TEMPLE.belt[3] + m;
 
 const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -68,6 +71,7 @@ export function lanes() {
     // the lanes stop at the street round the moat (not under the palace and the moat) and at the temple's belt of trees
     if (z + HUTONG_W > RING[1] && z < RING[3]) { out.push([-RADIUS, z, RING[0], z + HUTONG_W], [RING[2], z, RADIUS, z + HUTONG_W]); continue; }
     if (z + HUTONG_W > bz0 && z < bz1) { out.push([-RADIUS, z, b0, z + HUTONG_W], [b1, z, RADIUS, z + HUTONG_W]); continue; }
+    if (z + HUTONG_W > DANBI.rect[1] - 3 && z < DANBI.rect[3] + 3) { out.push([-RADIUS, z, DANBI.rect[0] - 7, z + HUTONG_W], [DANBI.rect[2] + 7, z, RADIUS, z + HUTONG_W]); continue; }
     out.push([-RADIUS, z, RADIUS, z + HUTONG_W]);
   }
   for (const x of STREET_X) out.push([x - 4, -RADIUS, x + 4, RADIUS]);
@@ -113,7 +117,7 @@ export function houses() {
       const far = Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b)));
       const seed = Math.floor(rand() * 1e6), drop = rand() < 0.05, q = pick(), q2 = pick();
       if (far > RADIUS - 28) continue;
-      if (rectsMeet(r, RING, 2) || rectsMeet(r, AVENUE, 2) || rectsMeet(r, TEMPLE.belt, 1) || SHOP_STRIPS.some((p) => rectsMeet(r, p.rect, 0)) || streets.some((s) => rectsMeet(r, s, 1))) continue;
+      if (rectsMeet(r, RING, 2) || rectsMeet(r, AVENUE, 2) || rectsMeet(r, TEMPLE.belt, 1) || rectsMeet(r, DANBI.rect, 9) || SHOP_STRIPS.some((p) => rectsMeet(r, p.rect, 0)) || streets.some((s) => rectsMeet(r, s, 1))) continue;
       if (drop) continue;
       const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, wealth = Math.min(1, nearness(cx, cz) * 0.95 + (q - 0.5) * 0.5 + (r[2] - r[0] > 31 ? 0.08 : 0));
       const gate = wealth > 0.74 ? 'guangliang' : wealth > 0.6 ? (q2 < 0.6 ? 'jinzhu' : 'ruyi') : wealth > 0.34 ? (q2 < 0.14 ? 'manzi' : q2 < 0.88 ? 'ruyi' : 'wall') : (q2 < 0.55 ? 'wall' : q2 < 0.9 ? 'ruyi' : 'manzi');
