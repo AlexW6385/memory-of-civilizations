@@ -14,6 +14,7 @@ import { Kit, carved, serpentHeadKit, chacmoolKit } from '../maya/meso.js';
 import { calli, tecpan, tzompantli, chinampaHouse, mesoPlants } from './houses.js';
 import { shrineInterior, huehuetl } from './shrines.js';
 import { mxPeople } from './life.js';
+import { calliFront, huerto } from './street.js';
 import { tianguis } from './market.js';
 import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causewayStakes } from './precinct.js';
 
@@ -270,6 +271,6 @@ function canalWallMx(el, { bag }) {
 
 registerStyle('aztec', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes, mx_people: mxPeople, chinampa_house: chinampaHouse, meso_plants: mesoPlants },
+  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes, mx_people: mxPeople, calli_front: calliFront, huerto, chinampa_house: chinampaHouse, meso_plants: mesoPlants },
   objects: {},
 });
