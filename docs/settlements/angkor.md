@@ -153,3 +153,36 @@ Sources added:
 - [Ta Reach — Cambodianess](https://www.cambodianess.com/article/ta-reach-most-famous-sacred-sculpture-at-angkor-wat)
 - [Churning of the Ocean of Milk Gallery Conservation Project — World Monuments Fund](https://wmf.org/node/13852)
 - [The way of life in the Khmer Empire — National Library of Australia](https://www.library.gov.au/learn/digital-classroom/angkorkhmer-empire-802-1431/way-life-khmer-empire)
+
+## 15. The village to the Suzhou standard (2026-11-11)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| The house | On posts of round timber, the floor of planks 2.0–2.5 m up on bearers; three or four rows of posts, the outer ones rising to the eaves, the inner ones carrying the floor; walls of plank or woven bamboo 2.25 m high with a top plate; a door 1 m wide in the front wall (the leaf standing open inside) and, in houses long enough, a shuttered window in each side wall, the shutter propped up on a stick; a deck 0.95 m deep in front of the door with a rail, and a plank stair of 0.3 m risers with stringers and rails; the roof of palm thatch, steep, with a ridge roll and crossed finial boards at the gable ends; three kinds: plain, big (second sleeping place, jars, a carved board over the door), small (no deck) | houses on stilts, reached by ladder or stairs, "stairs usually at the centre", ridge ends with gable finials, commoners' roofs of thatch [stated: Wikipedia, Traditional Khmer housing, citing Zhou Daguan]; wooden roofs on the Bayon and Banteay Chhmar reliefs resemble modern ones [stated: same]; house posts 2–2.5 m (§5, inferred); the door, window, deck and finial forms [inferred from the Khmer house type] |
+| Under the house | Water jars by the stair, a laterite mortar with its pestle (husking rice), a stack of firewood | "workers used a mortar and pestle to loosen rice husks"; husks and broken grains found at Angkor Wat and Ta Prohm [stated: ancient-history-sites, Work, Markets and Recreation in Khmer Life]; the jars and the firewood [inferred] |
+| Interior | Sleeping mats of reed with a rolled pillow, a clay hearth tray with three stones and a pot, a shelf of baskets under the roof, a cloth hung on a pole; floor, door and stair are walkable | "a shelf can be built below the roof for storage" [stated: Wikipedia, Traditional Khmer housing]; the rest [inferred] |
+| Granary | A rice store 3.4 × 2.6 m on posts 1.5 m high with stone rat-guards on the posts, plank or woven walls, a small door, a notched log to it, a thatched gable roof; one beside two in five of the houses | the rice economy; stores raised on posts [inferred] |
+| Sala | An open rest house: a plank floor 0.7 m up on round posts, no walls, a hipped thatch roof well overhanging, a bench and a low rail along the back, steps and a water jar at the front | Jayavarman VII's rest houses along the roads, and "wooden roadside shelters called sala samnak" continuing the tradition [stated: Wikipedia, Traditional Khmer housing]; their form [inferred]. Three stand on the road round the moat |
+| Ponds and lotus | Sixteen rectangular ponds among the clusters, 12–24 × 8–15 m, banks sloping to water 0.55 m below the ground, lotus leaves floating and standing and a few pink flowers; carp in them | the ponds and basins of the Angkorian landscape [stated: Stark et al. 2018, Angkorian city Hariharalaya to Yashodhapura, general]; their sizes and the lotus [inferred] |
+| Density | 290 houses (from about 200): a ribbon along the road's outer edge on all four sides with fronts to the road, 30 clusters in an inner ring and 18 lighter ones in an outer ring to a radius of 440 m; ponds and granaries among them | Angkor's low-density urbanism: dispersed house clusters around ponds and temples, with the dwellings of the non-elite of timber [stated: Stark et al. 2018; sapiens.org, Angkor city mapping]; the ribbon along the road [inferred] |
+| Weather | `damp` 0.9 and the moat's `waterline`: the engine's rising damp, algae and dark streaks on stone and posts | the monsoon [inferred]; lichen and dark stains on the sandstone of Angkor Wat are everywhere in the photographs |
+
+Radius: 460 m (class limit 520); the outer ring stops at 440 m.
+
+Sources added:
+- [Traditional Khmer housing — Wikipedia](https://en.wikipedia.org/wiki/Traditional_Khmer_housing)
+- [Work, Markets and Recreation in Khmer Life — ancient-history-sites](https://www.ancient-history-sites.com/?p=149127)
+- [The Customs of Cambodia (Zhou Daguan, 1296) — Wikipedia](https://en.wikipedia.org/wiki/The_Customs_of_Cambodia)
+- [Angkorian city: Hariharalaya to Yashodhapura — Stark, Carter, Heng, Evans 2018](https://cdn.angkordatabase.asia/libs/docs/Stark-Carter-Heng-Chhay-Evans-2018-Angkorian-City-Hariharalaya-to-Yashodhapura.pdf)
+
+## 16. Movers
+
+Walkers on the moat road and in the market's aisles (30 by day, 4 at night, thinned in rain): women in the wrapped cloth with the breast bare, the hair in a knot, some with a water pot or a basket of goods on the head; men in the wrapped cloth; farmers with the shoulder pole, two baskets and the conical straw hat; a Brahmin in white; children. In the rain the palm-leaf cape and the straw hat. "Men and women alike wrap a cloth round the loins and leave the breast bare" [stated: Zhou Daguan, general; National Library of Australia]. The market's traders are women [stated: Zhou Daguan]. No monks: at c. 1150 the temple is Hindu (§12). Elephants and the ox-cart stand in town.js; none yet walk.
+
+## 17. Animals
+
+Carp in the moat and the ponds, swallows over the moat and the road, egrets at the ponds' edges, sparrows on the road, crows over the towers (`fauna.js`) [inferred].
+
+## 18. Smoke
+
+Kitchen smoke through the thatch of half the houses at the three meals, cooking fires and steam at the market by day, incense in the sanctuary's porch (`smoke.js`) [inferred].

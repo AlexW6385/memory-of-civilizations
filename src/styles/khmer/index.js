@@ -19,6 +19,7 @@ import { rectRoof, beamTris, flipTris } from '../ming/index.js';
 import { assembly, placer, tube, slathe } from '../../objects/kit.js';
 import { panel } from './reliefs.js';
 import { sugarPalm, palanquin, parasol } from './life.js';
+import { stiltHouse as stiltHouse2, granary, sala, lotus } from './village.js';
 
 const S = 'sandstone_khmer', C = 'sandstone_carved';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -746,35 +747,6 @@ function paw(a, p) {
   for (let k = 0; k < 4; k++) { const dx = (k - 1.5) * 0.034; a('stone', tube([[p[0] + dx, 0.03, p[2] - 0.04, 0.02, 0.028], [p[0] + dx * 1.2, 0.025, p[2] - 0.085, 0.017, 0.022], [p[0] + dx * 1.25, 0.012, p[2] - 0.1, 0.006]], 6)); }
 }
 
-/**
- * stilt_house: a village house { rect, front, seed }: posts of timber 2–2.5 m tall, a floor of
- * planks, walls of planks or woven palm leaf, a steep gabled roof of palm thatch, a ladder.
- */
-function stiltHouse(el, { bag, col }) {
-  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, up = 2.0 + rand() * 0.6, wallH = 2.3;
-  const along = x1 - x0 >= z1 - z0;
-  for (let i = 0; i <= 3; i++) for (let j = 0; j <= 2; j++) {
-    const x = x0 + (x1 - x0) * i / 3, z = z0 + (z1 - z0) * j / 2;
-    bag.add('timber', lathe([[0.12, 0], [0.11, up + wallH]], 6, null, x, 0, z));
-    col.circle(x, z, 0.14, 0, up);
-  }
-  bag.add('timber', box(x0 - 0.1, up - 0.15, z0 - 0.1, x1 + 0.1, up, z1 + 0.1));
-  const wall = rand() < 0.5 ? 'reed_mat' : 'timber';
-  for (const [a, b] of [[[x0, z0], [x1, z0]], [[x1, z0], [x1, z1]], [[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]]]) {
-    const t = [];
-    beamTris(t, [a[0], up, a[1]], [b[0], up, b[1]], 0.04, wallH);
-    bag.add(wall, fromTriangles(t));
-  }
-  const dx = el.front === 'e' ? 1 : el.front === 'w' ? -1 : 0, dz = el.front === 's' ? 1 : el.front === 'n' ? -1 : 0;
-  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hx = (x1 - x0) / 2, hz = (z1 - z0) / 2;
-  const lx = cx + dx * (hx + 1.2), lz = cz + dz * (hz + 1.2);
-  const lad = [];
-  beamTris(lad, [lx, 0, lz], [cx + dx * hx, up, cz + dz * hz], 0.45, 0.08);
-  bag.add('timber', fromTriangles(lad));
-  col.rect([x0, z0, x1, z1], up - 0.2, up + wallH + 2);
-  rectRoof({ c: [cx, cz], A: (along ? x1 - x0 : z1 - z0) / 2 + 0.8, B: (along ? z1 - z0 : x1 - x0) / 2 + 0.9, y: up + wallH, rise: (along ? z1 - z0 : x1 - x0) * 0.62, kind: 'gable', sweep: 0, curl: false, p: 1.05, alongZ: !along, mat: 'thatch_palm', soffit: 'thatch_palm' }, bag);
-}
-
 // ---- the cruciform cloister (Preah Poan), the steep stairs of the Bakan ---------------------------
 
 /**
@@ -905,7 +877,7 @@ registerStyle('khmer', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol,
+    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse2, k_granary: granary, k_sala: sala, k_lotus: lotus, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol,
   },
   objects: {},
 });
