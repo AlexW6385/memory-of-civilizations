@@ -42,7 +42,14 @@ export const inBelt = (x, z, m = 0) => x >= TEMPLE.belt[0] - m && x <= TEMPLE.be
 
 const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export { inRect };
-export function inMoat(x, z) { return inRect(MOAT.outer, x, z) && !inRect(MOAT.inner, x, z); }
+/**
+ * The Meridian Gate's forecourt: the south moat is interrupted for |x| < NOTCH.x by a stone causeway, so that the gate's two
+ * arms (the "wild goose wings", 25 m long) can project their real distance from the wall's front; the ring street's south side
+ * stops at the forecourt too. The two side bridges and the water to either side remain.
+ */
+export const NOTCH = { x: 70, z0: MOAT.inner[3], z1: RING[3] };
+export const inForecourt = (x, z, m = 0) => Math.abs(x) <= NOTCH.x + m && z >= NOTCH.z0 - m && z <= NOTCH.z1 + m;
+export function inMoat(x, z) { return inRect(MOAT.outer, x, z) && !inRect(MOAT.inner, x, z) && !inForecourt(x, z); }
 export function inRiver(x, z) { return inRect(RIVER, x, z); }
 export function inPalace(x, z, m = 0) { return inRect(WALL.rect, x, z, m); }
 

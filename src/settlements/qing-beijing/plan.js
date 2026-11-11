@@ -26,22 +26,26 @@ E.push({ t: 'palace_wall', a: [wx0, wz1], b: [-63, wz1], y: 0, h: WH, th: WT });
 E.push({ t: 'palace_wall', a: [63, wz1], b: [wx1, wz1], y: 0, h: WH, th: WT });
 // the Meridian Gate (Wumen), the U-shaped gate (§17): a base of red wall 12 m high, its middle 12 m deep with five
 // passages (the three in the middle close together, the emperor's the middle one; the two others apart), and a wing
-// at each end running forward 6 m further, as the real arms do (the moat limits their reach); on it the Five Phoenix
-// Towers — the great hall of nine bays under double eaves in the middle, a long single-eaved hall of seven bays
-// along each side, a pyramid-roofed pavilion at the end of each wing, and one by the hall
+// at each end running forward to 25 m from the middle block's front, as the real arms do (the south moat is
+// interrupted by the forecourt's causeway, layout.js NOTCH); on it the Five Phoenix Towers — the great hall of
+// nine bays under double eaves in the middle, a long single-eaved hall of seven bays along each side, a
+// pyramid-roofed pavilion at the end of each corridor, and on each arm the wing hall (yanchi lou) of thirteen bays
 const MZ = wz1 - 3;                                                       // the middle block's centre line (166…178)
 const PASS = [[-27, 5, 7.5], [-9, 5, 7.5], [0, 6, 8.5], [9, 5, 7.5], [27, 5, 7.5]];
 E.push({ t: 'palace_wall', a: [-44, MZ], b: [44, MZ], y: 0, h: 12, th: 12, gates: gates(PASS.map(([x, w, h]) => [x + 44, w, h])) });
-for (const s of [-1, 1]) E.push({ t: 'palace_wall', a: [s * 53.5, wz1 - 9], b: [s * 53.5, wz1 + 9], y: 0, h: 12, th: 19 });
-E.push({ t: 'block', walk: true, rect: [-63, wz1 - 9, -43.9, wz1 + 9], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
-E.push({ t: 'block', walk: true, rect: [43.9, wz1 - 9, 63, wz1 + 9], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
+const ARM = MZ + 6 + 25;                                                  // the arms' south ends: 25 m beyond the middle block's front face
+for (const s of [-1, 1]) E.push({ t: 'palace_wall', a: [s * 53.5, wz1 - 9], b: [s * 53.5, ARM], y: 0, h: 12, th: 19 });
+E.push({ t: 'block', walk: true, rect: [-63, wz1 - 9, -43.9, ARM], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
+E.push({ t: 'block', walk: true, rect: [43.9, wz1 - 9, 63, ARM], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
 E.push({ t: 'block', walk: true, rect: [-44, wz1 - 9, 44, MZ + 6], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
 E.push({ t: 'qing_hall', rect: [-30, wz1 - 7.8, 30, wz1 + 1.8], y: 12.6, H: 7.5, double: 6, roof: 'hip', bays: [9, 5], front: 's', four: true, plat: 0.4, orn: { figures: 9 } });
 for (const s of [-1, 1]) {
   const r = (a, b) => (s < 0 ? [-b, 0, -a, 0] : [a, 0, b, 0]);
   const [lx0, , lx1] = r(31, 49.5), [px0, , px1] = r(49.5, 57.5);
   E.push({ t: 'qing_hall', rect: [lx0, wz1 - 6.5, lx1, wz1 + 0.5], y: 12.6, H: 5.2, roof: 'hip', bays: [7, 2], front: 's', four: true, plat: 0.3, orn: { figures: 5 } });
-  for (const [za, zb] of [[wz1 - 8, wz1], [wz1 + 1, wz1 + 8]]) E.push({ t: 'qing_hall', rect: [px0, za, px1, zb], y: 12.6, H: 4.6, double: 3.6, roof: 'hip', bays: [3, 3], front: 's', four: true, plat: 0.3, eave: 1.1, orn: { figures: 7 } });
+  // the pavilion at the corridor's end, and the thirteen-bay wing hall running south along the arm, facing the forecourt
+  E.push({ t: 'qing_hall', rect: [px0, wz1 - 8, px1, wz1], y: 12.6, H: 4.6, double: 3.6, roof: 'hip', bays: [3, 3], front: 's', four: true, plat: 0.3, eave: 1.1, orn: { figures: 7 } });
+  E.push({ t: 'qing_hall', rect: [px0 + 0.3, wz1 + 1.5, px1 - 0.3, ARM - 1.2], y: 12.6, H: 5.0, roof: 'hip', bays: [13, 2], front: s < 0 ? 'e' : 'w', four: true, plat: 0.3, orn: { figures: 5 } });
 }
 // the five passages' leaves standing open, swung back into the passages: 81 gilt nails on each
 for (const [x, w, h] of PASS) E.push({ t: 'gate_doors', at: [x, MZ], along: 'x', w, h, y: 0.03, swing: -1 });
@@ -75,7 +79,7 @@ for (const [z, dir] of [[125, 'n'], [101, 's']]) {
   E.push({ t: 'stairs', rect: [-3.5, r[1], 3.5, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', slab: true });
   void z;
 }
-E.push({ t: 'qing_hall', rect: tm.rect, y: tm.y, H: 7.2, double: 5, roof: 'xieshan', bays: [9, 4], front: 's', four: true, plat: 0.3, open: true, orn: { figures: 9 } });
+E.push({ t: 'qing_hall', rect: tm.rect, y: tm.y, H: 7.2, double: 5, roof: 'xieshan', bays: [9, 4], front: 's', four: true, plat: 0.3, open: true, doors: ['n'], orn: { figures: 9 } });
 // the bronze lions: the male on the east, his right forepaw on the embroidered ball; the female on the west with her cub
 for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'lion', at: [s * 12, 127.5], y: 0.03, s: 1.1, face: [0, 1], paw: s > 0 ? 'ball' : 'cub' });
 E.push({ t: 'palace_wall', a: [wx0, 116], b: [-34, 116], y: 0, h: 6.5, th: 2.2, gates: gates([[38, 5, 4.8]]) });
@@ -161,8 +165,17 @@ const rooms = [
   room('terrace', TIERS[2].rect, top, 'open'),
   room('courtyard', [wx0, wz0, wx1, wz1], 0, 'open'),
 ];
-const walks = [[[0, 215], [0, 190], [0, 165], [0, 130], [-20, 128], [-36, 116], [-20, 100], [0, 70], [0, 38], [0, 31], [0, 26], [0, 20], [0, 14]]];
+// (up the Gate of Supreme Harmony's stair by its side flight: the middle slab is the emperor's carved ramp, not for the feet; then along the platform to the hall's doorway, the middle bay, and down the north side's side flight; the terrace's three tiers by the side flights too)
+const walks = [[[0, 215], [0, 190], [0, 165], [12, 152], [9.5, 134], [9.5, 123.8], [0, 123], [0, 108], [9.5, 107], [9.5, 98], [0, 70], [7.25, 46], [7.25, 36], [7.25, 31], [7.25, 26], [7.25, 20], [0, 14]]];
 walks[0].y0 = 0;
+// The engine's street life scatters standing figures over the landmark's open rooms (src/objects/life.js) by what is free
+// of footprints; two of them once stood on the axis before the stair of the Gate of Supreme Harmony and shut the way. Blocks
+// laid just under the paving along the route (hidden, 3 m squares) keep the way clear of those figures.
+for (let i = 0; i + 1 < walks[0].length; i++) {
+  const [ax, az] = walks[0][i], [bx, bz] = walks[0][i + 1], L = Math.hypot(bx - ax, bz - az);
+  if (az > wz1 + 1 && bz > wz1 + 1) continue;                                 // (outside the walls: the avenue)
+  for (let t = 0; t <= L; t += 3) { const x = ax + (bx - ax) * t / L, z = az + (bz - az) * t / L; E.push({ t: 'block', rect: [x - 1.5, z - 1.5, x + 1.5, z + 1.5], y0: -0.6, y1: -0.3, mat: 'brick_paving' }); }
+}
 
 export const palace = {
   id: 'qing-beijing-palace',

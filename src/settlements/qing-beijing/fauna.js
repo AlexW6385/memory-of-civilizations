@@ -3,11 +3,12 @@
 // the paving of the lanes and the copings of the courtyard walls, crows circling the palace's roofs
 // at dusk. Pigeons (the whistled flocks of the lanes) are wanted by the engine: it has no pigeon yet
 // (see the report); they stand in the sound, music.js.
-import { LEVEL, MOAT, RING, AVENUE, WALL } from './layout.js';
+import { LEVEL, MOAT, RING, AVENUE, WALL, inForecourt, NOTCH } from './layout.js';
 
 const [a0, b0, a1, b1] = MOAT.outer, [c0, d0, c1, d1] = MOAT.inner;
 /** Negative inside the moat's water (its distance from either bank), positive outside. */
 const moatDistance = (x, z) => {
+  if (inForecourt(x, z)) return 8;
   const o = Math.min(x - a0, a1 - x, z - b0, b1 - z);
   const i = Math.max(c0 - x, x - c1, d0 - z, z - d1);
   return -Math.min(o, i);
@@ -15,11 +16,12 @@ const moatDistance = (x, z) => {
 
 const fish = [];
 // dark carp (li) lazing along the four sides of the moat, in the middle of the water
-for (const [x0, z0, x1, z1] of [[a0, b0, a1, d0], [a0, d1, a1, b1], [a0, d0, c0, d1], [c1, d0, a1, d1]]) {
+// (the south side is two reaches, either side of the Meridian Gate's forecourt)
+for (const [x0, z0, x1, z1] of [[a0, b0, a1, d0], [a0, d1, -NOTCH.x - 2, b1], [NOTCH.x + 2, d1, a1, b1], [a0, d0, c0, d1], [c1, d0, a1, d1]]) {
   const alongX = x1 - x0 > z1 - z0, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   for (let i = 0; i < 3; i++) fish.push({
     n: 2, size: [0.6, 0.85], palette: 'carp', y: LEVEL.moat, dist: moatDistance, margin: 1.4, k: 1, rot: alongX ? 0 : Math.PI / 2,
-    area: alongX ? [x0 + 30, cz - 0.5, x1 - 30, cz + 0.5] : [cx - 0.5, z0 + 30, cx + 0.5, z1 - 30], a: [20, 2.6], ratio: 0.15, minA: 1.5, speed: 0.3, rise: 0.1,
+    area: alongX ? [x0 + Math.min(30, (x1 - x0) / 3), cz - 0.5, x1 - Math.min(30, (x1 - x0) / 3), cz + 0.5] : [cx - 0.5, z0 + 30, cx + 0.5, z1 - 30], a: [20, 2.6], ratio: 0.15, minA: 1.5, speed: 0.3, rise: 0.1,
   });
 }
 

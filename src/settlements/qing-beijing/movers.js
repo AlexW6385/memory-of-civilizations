@@ -14,7 +14,7 @@
 // 'step') beside their beasts, whose own legs swing (the leg triangles of the beast, below the
 // belly, tagged as legs). The cart's wheels are solid planks (the shader cannot turn them).
 
-import { RADIUS, MOAT, RING, AVENUE, TEMPLE, SHOP_APRONS, lanes, rectsMeet, inPalace, shopRows } from './layout.js';
+import { RADIUS, MOAT, RING, AVENUE, TEMPLE, NOTCH, SHOP_APRONS, lanes, rectsMeet, inPalace, shopRows } from './layout.js';
 import { SHOP_SITES } from './shops.js';
 import '../../styles/qing/index.js';
 import '../../objects/index.js';
@@ -63,7 +63,7 @@ export function walkways() {
   }
   const [a0, b0, a1, b1] = MOAT.outer;
   // the ring street, its four sides
-  for (const r of [[RING[0], RING[1], RING[2], b0], [RING[0], b1, RING[2], RING[3]], [RING[0], b0, a0, b1], [a1, b0, RING[2], b1]]) push(r, 1.0, 'street');
+  for (const r of [[RING[0], RING[1], RING[2], b0], [RING[0], b1, -NOTCH.x, RING[3]], [NOTCH.x, b1, RING[2], RING[3]], [RING[0], b0, a0, b1], [a1, b0, RING[2], b1]]) push(r, 1.0, 'street');
   push(AVENUE, 1.7, 'street');
   // the paved aprons before the shop fronts (the shoppers stand and walk there)
   for (const r of SHOP_APRONS) push(r, 0.9, 'street');
