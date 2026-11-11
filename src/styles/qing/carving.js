@@ -257,14 +257,18 @@ export function balustradeCarved(bag, col, a, b, y, open, o = {}) {
       beam(l0, l1, 0.5, 0.06, 0.055);                            // the cloud band
       const BP = new Parts(); BP.add(m, fromTriangles(t));
       if (!joseon) for (const sg of [-1, 1]) BP.add(m, T(ball((l1 - l0) * 0.3, 0.12, 0.025, 6, 2), l / 2, 0.3, sg * 0.075));   // the carved medallion
+      BP.emit(bag, p[0], y, p[1], rot);
+      // the openwork above (balusters with their cloud caps, the handrail) as pieces of their own, each under 10 cm across: the engine
+      // draws such thin pieces within 100 m only, so that from afar the bay is the solid panel (which it can coarsen) and not an
+      // openwork it cannot (a vase baluster and a gap beside it keep the whole bay's outline from matching a coarse version)
       for (const j of [1, 2]) {
-        const u = l0 + (l1 - l0) * j / 3;
-        // the vase-shaped baluster (its flat top is under the cap) and its cloud cap
-        BP.add(m, lathe([[0.055, 0], [0.07, 0.09], [0.03, 0.18], [0.05, 0.2]].map(([r, yy]) => [r, yy + 0.56]), 6, null, u, 0, 0));
-        const c = []; beamTris(c, at(u - 0.12, 0), at(u + 0.12, 0), 0.05, 0.075, true); BP.add(m, T(fromTriangles(c), 0, 0.76, 0));
+        const u = l0 + (l1 - l0) * j / 3, VP = new Parts();
+        VP.add(m, lathe([[0.04, 0], [0.047, 0.09], [0.026, 0.18], [0.045, 0.2]].map(([r, yy]) => [r, yy + 0.56]), 6, null, u, 0, 0));
+        const c = []; beamTris(c, [u - 0.12, 0, 0], [u + 0.12, 0, 0], 0.045, 0.075, true); VP.add(m, T(fromTriangles(c), 0, 0.76, 0));
+        VP.emit(bag, p[0], y, p[1], rot);
       }
-      BP.add(m, limb([l0 - 0.06, 0.86, 0], [l1 + 0.06, 0.86, 0], 0.045, 0.045, 6));   // the handrail
-      void at; BP.emit(bag, p[0], y, p[1], rot);
+      const HP = new Parts(); HP.add(m, limb([l0 - 0.06, 0.86, 0], [l1 + 0.06, 0.86, 0], 0.045, 0.045, 6)); HP.emit(bag, p[0], y, p[1], rot);
+      void at;
     }
   }
   if (runStart !== null) col.segment(Pt(runStart), b, 0.3, y, y + 1.1);

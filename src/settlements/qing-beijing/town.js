@@ -71,7 +71,7 @@ function surfaces() {
  */
 function courtyards() {
   const all = [...houses()].sort((a, b) => (a.lod - b.lod) || (Math.atan2(a.rect[1], a.rect[0]) - Math.atan2(b.rect[1], b.rect[0]))), plans = [];
-  const N = 24;
+  const N = 8;
   for (let i = 0; i < all.length; i += N) {
     const part = all.slice(i, i + N);
     plans.push(base(`qing-beijing-houses-${i / N}`, part.map((h) => ({ t: 'hutong_house', rect: h.rect, seed: h.seed, gate: h.gate, courts: h.courts, wealth: h.wealth, lod: h.lod, trees: houseTrees(h).map((t) => [t[0], t[1]]) })), 'beijing-site'));

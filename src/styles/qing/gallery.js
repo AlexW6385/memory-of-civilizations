@@ -116,7 +116,10 @@ export function qingGallery(el, { bag, col }) {
   }
   for (let k = 0; k < n; k++) {
     const A = W(k * bw + 0.1, V0, 0), B = W((k + 1) * bw - 0.1, V0, 0);
-    latticeBay(bag, col, [A[0], A[2]], [B[0], B[2]], y, H - 0.75, k % 3 === 1 ? 'door' : 'window', 0.06, 'lattice_red');
+    // a red sill (a window's 0.9 m, a door's dado 0.55 m) and the lattice panes above it, to the tie beam
+    const door = k % 3 === 1, foot = door ? 0.55 : 0.9;
+    bag.add('lacquer_red', bx(k * bw + 0.1, (k + 1) * bw - 0.1, V0 - 0.06, V0 + 0.06, y, y + foot));
+    latticeBay(bag, col, [A[0], A[2]], [B[0], B[2]], y + foot, H - 0.75 - foot, 'pane', 0.04, 'lattice_red');
     // (the sill wall under a window is the lattice builder's own; the red board above the doors and windows is the tie beam)
   }
   beam(wd, 0, L, V0, y + H - 0.78, 0.1, 0.24);

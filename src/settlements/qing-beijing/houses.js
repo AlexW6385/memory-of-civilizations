@@ -166,7 +166,11 @@ export function house(bag, col, F, o) {
     void inset;
     // posts' faces on the verandah give each leaf its bay; the first and last bays are shortened by the end walls
     const aa = i === 0 ? P2(s0 + 0.5) : a, bb = i === bays - 1 ? P2(s1 - 0.5) : b;
-    if (win || isDoor) latticeBay(bag, lod === 0 ? col : NOCOL, aa, bb, y, fh, isDoor ? 'door' : 'window', 0.06, 'lattice_red');
+    if (win || isDoor) {
+      // beyond ~250 m (lod 2) one flat leaf a bay
+      if (lod >= 2) F.B(bag, isDoor ? 'lacquer_red' : 'lattice_red', Math.min(i === 0 ? s0 + 0.5 : s0 + 0.25 + (L - 0.5) * i / bays, s1), dW - 0.05, Math.min(i === bays - 1 ? s1 - 0.5 : s0 + 0.25 + (L - 0.5) * (i + 1) / bays, s1), dW, y, lintelY);
+      else latticeBay(bag, lod === 0 ? col : NOCOL, aa, bb, y, fh, isDoor ? 'door' : 'window', 0.06, 'lattice_red');
+    }
     else F.B(bag, 'brick_grey', Math.min(i === 0 ? s0 + 0.5 : s0 + 0.25 + (L - 0.5) * i / bays, s1), dW - 0.2, Math.min(i === bays - 1 ? s1 - 0.5 : s0 + 0.25 + (L - 0.5) * (i + 1) / bays, s1), dW, y, lintelY);
   }
   // the verandah's floor (the plinth is its floor) and the steps to the door
