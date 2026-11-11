@@ -95,10 +95,10 @@ export function kori(el, ctx) {
   }
   // the lintel and the mass over the passage: tapering tiers of brick and stone
   let yy = y + ph;
-  const tiers = 9;
+  const tiers = 7;
   const half = w / 2 + PW;
   for (let k = 0; k < tiers; k++) {
-    const hh = 0.62 - k * 0.025, a = half - 0.1 - k * (half - 0.9) / tiers, d = D / 2 - 0.15 - k * (D / 2 - 0.7) / tiers, m = k % 3 === 2 ? 'tuff_hewn' : 'brick';
+    const hh = 0.55 - k * 0.02, a = half - 0.1 - k * (half - 0.9) / tiers, d = D / 2 - 0.15 - k * (D / 2 - 0.7) / tiers, m = k % 3 === 2 ? 'tuff_hewn' : 'brick';
     bx(ctx, m, cx - a, yy, cz - d, cx + a, yy + hh, cz + d, k === 0);
     if (k % 3 === 2) bx(ctx, 'tuff_hewn', cx - a - 0.12, yy + hh - 0.08, cz - d - 0.12, cx + a + 0.12, yy + hh + 0.1, cz + d + 0.12);
     yy += hh + (k % 3 === 2 ? 0.1 : 0);

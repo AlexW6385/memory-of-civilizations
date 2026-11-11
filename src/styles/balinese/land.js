@@ -40,8 +40,8 @@ export function penjor(el, ctx) {
   curvedPole(ctx, 'bamboo_culm', [x, y, z], [x + dx * 0.5, y + h * 1.12, z + dz * 0.5], [x + dx * 3.0, y + h * 0.86, z + dz * 3.0], 0.06, 8);
   const tip = [x + dx * 3.0, y + h * 0.86, z + dz * 3.0];
   // the hanging janur: strips of pale-yellow palm leaf, a spiral and fruit offerings
-  for (let k = 0; k < 6; k++) { const t = k / 6, px = x + dx * (1.4 + 1.6 * t), pz = z + dz * (1.4 + 1.6 * t), py = y + h * (0.97 - 0.12 * t), len = 2.2 + rand() * 1.6; ctx.bag.add('paint_ochre', box(px - 0.04, py - len, pz - 0.04, px + 0.04, py, pz + 0.04)); }
-  ctx.bag.add('paint_ochre', box(tip[0] - 0.12, tip[1] - 3.4, tip[2] - 0.12, tip[0] + 0.12, tip[1] - 0.1, tip[2] + 0.12));
+  for (let k = 0; k < 6; k++) { const t = k / 6, px = x + dx * (1.4 + 1.6 * t), pz = z + dz * (1.4 + 1.6 * t), py = y + h * (0.97 - 0.12 * t), len = Math.min(1.6 + rand() * 1.0, py - 2.2); ctx.bag.add('paint_ochre', box(px - 0.04, py - len, pz - 0.04, px + 0.04, py, pz + 0.04)); }
+  ctx.bag.add('paint_ochre', box(tip[0] - 0.12, tip[1] - Math.min(2.4, tip[1] - 2.2), tip[2] - 0.12, tip[0] + 0.12, tip[1] - 0.1, tip[2] + 0.12));
   ctx.bag.add('cloth_red', box(tip[0] - 0.2, tip[1] - 1.2, tip[2] - 0.2, tip[0] + 0.2, tip[1] - 0.7, tip[2] + 0.2));
   bx(ctx, 'bamboo_culm', x - 0.35, y, z - 0.35, x + 0.35, y + 0.08, z + 0.35);
   for (const [a, b] of [[-0.3, -0.3], [0.3, -0.3], [-0.3, 0.3], [0.3, 0.3]]) bx(ctx, 'bamboo_culm', x + a - 0.02, y, z + b - 0.02, x + a + 0.02, y + 1.0, z + b + 0.02);

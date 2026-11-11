@@ -76,7 +76,7 @@ export function bale(el, ctx) {
   // the tie-beams and the carved fascia under the eave
   bx(ctx, pm, px0 - 0.2, f + H - 0.28, pz0 - 0.1, px1 + 0.2, f + H - 0.06, pz0 + 0.1); bx(ctx, pm, px0 - 0.2, f + H - 0.28, pz1 - 0.1, px1 + 0.2, f + H - 0.06, pz1 + 0.1);
   bx(ctx, pm, px0 - 0.1, f + H - 0.28, pz0, px0 + 0.1, f + H - 0.06, pz1); bx(ctx, pm, px1 - 0.1, f + H - 0.28, pz0, px1 + 0.1, f + H - 0.06, pz1);
-  if (el.gold) for (const [a, b, c, d] of [[px0, pz0 - 0.11, px1, pz0 - 0.09], [px0, pz1 + 0.09, px1, pz1 + 0.11]]) bx(ctx, 'gilt_bronze', a, f + H - 0.2, b, c, f + H - 0.12, d);
+  if (el.gold) for (const [a, b, c, d] of [[px0 + 0.3, pz0 - 0.13, px1 - 0.3, pz0 - 0.08], [px0 + 0.3, pz1 + 0.08, px1 - 0.3, pz1 + 0.13]]) bx(ctx, 'gilt_bronze', a, f + H - 0.2, b, c, f + H - 0.12, d);
   // walls: a low brick wall and woven bamboo over it on the closed sides
   const wl = el.walls ?? 'none';
   const wallRun = (a, b, c, d) => { bx(ctx, 'brick', a, f, b, c, f + 0.9, d, true); bx(ctx, 'wicker', a, f + 0.9, b, c, f + H - 0.3, d, true); };
