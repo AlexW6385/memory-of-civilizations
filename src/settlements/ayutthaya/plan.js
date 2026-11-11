@@ -46,7 +46,7 @@ const rooms = [
 ];
 const walks = [
   Object.assign([[gx, -100], [gx, -118], [gx, -127], [-2, -128]], { y0: 0 }),
-  Object.assign([[gx, -100], [100, -112], [100, -140], [86, -140], [72, -140]], { y0: 0 }),
+  Object.assign([[gx, -100], [gx, -108], [60, -108], [60, -125], [100, -125], [100, -140], [86, -140], [72, -140]], { y0: 0 }),
 ];
 export const wat = {
   id: 'ayutthaya-wat',
