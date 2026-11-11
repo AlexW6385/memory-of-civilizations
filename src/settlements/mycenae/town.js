@@ -45,7 +45,8 @@ function people() {
   for (let k = 0; k < RAMP.length - 1; k++) {
     const [ax, az] = RAMP[k], [bx, bz] = RAMP[k + 1];
     for (const t of [0.3, 0.75]) {
-      const x = ax + (bx - ax) * t + (rand() - 0.5) * 1.6, z = az + (bz - az) * t + (rand() - 0.5) * 1.6, up = rand() < 0.6;
+      const Lk = Math.hypot(bx - ax, bz - az), sd = rand() < 0.5 ? -1 : 1, off = sd * (1.7 + rand() * 0.6);        // to either side of the middle line, which is left free to walk
+      const x = ax + (bx - ax) * t - ((bz - az) / Lk) * off, z = az + (bz - az) * t + ((bx - ax) / Lk) * off, up = rand() < 0.6;
       (rand() < 0.4 ? woman : man)([x, z], h(x, z), up ? -Math.atan2(bz - az, bx - ax) - Math.PI / 2 : -Math.atan2(bz - az, bx - ax) + Math.PI / 2, { carry: rand() < 0.5 ? 'pot' : 'sack' });
     }
   }

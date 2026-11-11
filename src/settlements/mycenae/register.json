@@ -1,6 +1,6 @@
 {
   "site": { "id": "mycenae", "name": { "en": "Mycenae", "zh": "迈锡尼" }, "era": "13th c. BC", "region": "aegean", "lat": 37.73, "lon": 22.76, "radius": 190 },
-  "arrival": [-150, null, 6, -1.5708, 0.12],
+  "arrival": [-136, null, 0, -1.5708, 0.2],
   "arrivalNote": "on the approach road west of the citadel: the Lion Gate in its dressed conglomerate front between the bastion and the wall's end, the Cyclopean circuit rising behind it to the palace on the summit",
   "card": {
     "en": [
