@@ -64,7 +64,8 @@ export function wutaiHouse(el, { bag, col }) {
   const nb = el.nb ?? Math.max(2, Math.round(L / 3.2)), bay = L / nb;
   const kindOfWall = rand(), stone = kindOfWall < 0.38, brick = !stone && kindOfWall < 0.62;
   const wallMat = el.wallMat ?? (stone ? 'schist_rubble' : brick ? 'brick_grey' : (rand() < 0.5 ? 'earth_wall' : 'mud_plaster'));
-  const Hf = kind === 'arch' ? 3.7 : kind === 'shed' ? 3.5 : 3.2, Hk = kind === 'shed' ? Hf - 0.95 : Hf;
+  // the single-pitch roof falls toward the yard ("all the roofs are inclined toward the courtyard": the high wall is the back one)
+  const Hf = kind === 'arch' ? 3.7 : kind === 'shed' ? 2.9 : 3.2, Hk = kind === 'shed' ? Hf + 0.95 : Hf;
   // the footing: a stone plinth up to the floor, a step before the door
   B('schist_rubble', -0.1, -0.1, L + 0.1, D + 0.1, foot - 0.4, F - 0.02, true);
   // the walls: rubble dado (earth houses), the wall above; the open flat house is hollow
@@ -115,10 +116,24 @@ export function wutaiHouse(el, { bag, col }) {
     const yAt = (v) => yf + slope * ov(v);
     S('timber', -0.35, k0, L + 0.35, k1, yAt(k0), yAt(k1), 0.1);
     S('tile_grey', -0.38, k0 - 0.02, L + 0.38, k1 + 0.02, yAt(k0) + 0.14, yAt(k1) + 0.14, 0.14);
-    // the ridge cap on the high edge
-    B('tile_grey', -0.38, -0.08, L + 0.38, 0.25, yAt(0) + 0.1, yAt(0) + 0.3, false);
+    // the ridge cap on the high (back) edge
+    B('tile_grey', -0.38, D - 0.1, L + 0.38, D + 0.3, yAt(D) + 0.1, yAt(D) + 0.3, false);
     const cu = rand() < 0.5 ? 0.7 : L - 0.7;
     B('brick_grey', cu - 0.3, D * 0.62 - 0.3, cu + 0.3, D * 0.62 + 0.3, yAt(D * 0.62) + 0.12, yAt(D * 0.62) + 1.2, false);
+    // the roof's patches (the dry mountain climate: wind lifts the tiles, frost cracks them): replaced tiles darker than the old,
+    // a patch of mud, a patch of straw, a few tiles gone; each kind at its own height over the tiles so that none lies in another's plane
+    const wp = rng((el.seed || 1) + 91);
+    for (let i = 0; i < 6; i++) {
+      const u = 0.3 + wp() * (L - 1.4), v = 0.1 + wp() * (D - 0.9), w = 0.5 + wp() * 0.7, d = 0.4 + wp() * 0.5, kd = i % 3;
+      S(kd === 0 ? 'tile_dark' : kd === 1 ? 'mud_plaster' : 'thatch', u, v, u + w, v + d, yAt(v) + 0.17 + kd * 0.025, yAt(v + d) + 0.17 + kd * 0.025, 0.04);
+    }
+  }
+  weather(el, { B, fr, F, Hf, kind, wallMat, door, nb, bay, stone, wy0, top: F + Hf, dado });
+  if (kind === 'flat' || kind === 'arch') {
+    // earth roofs: patches of repair on the mud, a stone roller left on it (to press the earth after rain), weeds in the parapet's foot
+    const wp = rng((el.seed || 1) + 93), t0 = top + 0.3;
+    for (let i = 0; i < 4; i++) { const u = 0.5 + wp() * (L - 2), v = 0.5 + wp() * (D - 1.5), w = 0.6 + wp() * 0.8, d = 0.5 + wp() * 0.7; B(i % 2 ? 'tile_grey' : 'thatch', u, v, u + w, v + d, t0, t0 + (i % 2 ? 0.03 : 0.05)); }
+    if (wp() < 0.5) { const [x, z] = fr.P(L * (0.3 + wp() * 0.4), D * 0.4); const r = lathe([[0.001, -0.4], [0.2, -0.4], [0.2, 0.4], [0.001, 0.4]], 9); r.rotateZ(Math.PI / 2); r.translate(x, top + 0.3 + 0.2, z); bag.add('granite_grey', r); }
   }
   // ── corn cobs and strings of chillies hung from the front to dry (autumn's goods), a water vat by the door
   if (!el.bare) {
@@ -130,6 +145,39 @@ export function wutaiHouse(el, { bag, col }) {
     }
   }
   void pot;
+}
+
+/**
+ * The weathering of a house's walls (the dry mountain climate: wind-driven rain and frost eat the earth at the foot, the
+ * plaster falls and shows the adobe and the straw in it, the kang's smoke and the hearth's blacken the wall over the door and
+ * the windows): patches proud of the wall by a few centimetres, each kind at its own offset (no two lie in one plane).
+ */
+function weather(el, { B, fr, F, Hf, kind, wallMat, door, nb, bay, stone, wy0, top, dado }) {
+  const { L, D } = fr, wr = rng((el.seed || 1) + 77), earthy = wallMat === 'earth_wall' || wallMat === 'mud_plaster';
+  const hs = kind === 'shed' ? [Hf, Hf + 0.95] : [Hf, Hf];
+  const side = (m, sd, a0, a1, ya, yb, off) => (sd === 0 ? B(m, a0, -off, a1, 0, ya, yb) : sd === 1 ? B(m, L, a0, L + off, a1, ya, yb) : sd === 2 ? B(m, a0, D, a1, D + off, ya, yb) : B(m, -off, a0, 0, a1, ya, yb));
+  const len = (sd) => (sd % 2 ? D : L);
+  const wallTop = (sd) => F + (sd === 0 ? hs[0] : sd === 2 ? hs[1] : (hs[0] + hs[1]) / 2) - 0.25;
+  for (let sd = 0; sd < 4; sd++) {
+    if (kind === 'arch' && sd === 0) continue;
+    const Ls = len(sd), n = earthy ? 2 + Math.floor(wr() * 2) : 1;
+    for (let i = 0; i < n; i++) {
+      const w = 0.6 + wr() * 0.9, h = 0.4 + wr() * 0.6, a = 0.2 + wr() * (Ls - w - 0.4), y0 = wy0 + 0.25 + wr() * Math.max(0.1, wallTop(sd) - wy0 - h - 0.5);
+      if (earthy && sd !== 0 || (earthy && wr() < 0.6)) side('brick_buff', sd, a, a + w, y0, y0 + h, 0.03);                // fallen plaster: the adobe under it
+      if (earthy) { const sa = a + wr() * 1.2 + 0.4, sy = y0 + h + 0.1 + wr() * 0.4; if (sa + 0.9 < Ls && sy + 0.15 < wallTop(sd)) for (let k = 0; k < 3; k++) side('thatch', sd, sa + k * 0.1, sa + 0.5 + k * 0.17 + wr() * 0.2, sy + k * 0.045, sy + k * 0.045 + 0.02, 0.04); }   // straw showing through
+    }
+    // the foot: where the wall has no stone dado the rain splash has eaten it, the stone of the footing showing through
+    if (earthy && !dado) for (let i = 0; i < 3; i++) { const w = 0.5 + wr() * 1.1, a = 0.2 + wr() * (len(sd) - w - 0.4); side('schist_rubble', sd, a, a + w, F + 0.02, F + 0.35 + wr() * 0.3, 0.02); }
+    if (earthy && dado) for (let i = 0; i < 3; i++) { const w = 0.4 + wr() * 0.9, a = 0.2 + wr() * (len(sd) - w - 0.4); side('mud_plaster', sd, a, a + w, wy0 - 0.0, wy0 + 0.12 + wr() * 0.2, 0.01 + 0.0); }
+  }
+  // the smoke's black over the door and over each window of the front, narrowing as it climbs
+  if (kind !== 'arch') for (let k = 0; k < nb; k++) {
+    const uc = (k + 0.5) * bay, isDoor = k === door, y0 = F + (isDoor ? 2.32 : 2.48), y1 = Math.min(top - 0.12, y0 + 0.5 + wr() * 0.35);
+    if (y1 - y0 < 0.2) continue;
+    const w = (isDoor ? 0.95 : 1.2) * (0.8 + wr() * 0.3);
+    B('bark_dark', uc - w / 2, -0.05, uc + w / 2, 0, y0, (y0 + y1) / 2, false);
+    B('bark_dark', uc - w * 0.3, -0.05, uc + w * 0.3, 0, (y0 + y1) / 2 - 0.0, y1, false);
+  }
 }
 function doorLeaf(B, uc, dw, F, h) {
   // the frame and lintel, two leaves of planks (battens across), a threshold stone with its step

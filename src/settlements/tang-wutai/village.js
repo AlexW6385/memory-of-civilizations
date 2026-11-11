@@ -53,7 +53,7 @@ export function village() {
     // the house's front faces the lane, as the yard does
     C.push({ t: 'wutai_house', rect: hr, front: l.front, y: Math.max(...hs), foot: Math.min(...hs), seed: l.seed + 7, kind, nb, ...(open ? { open: true } : {}) });
     const hy = Math.max(...hs), vf = v0, doorU = u0 + (Math.floor(nb / 2) + 0.5) * bay;
-    smoke.push({ p: [...P(u0 + Wh - 0.5, v0 + Dh - 0.6)], y: hy + 0.4 + (kind === 'shed' ? 2.5 : 3.7), r: l.seed });
+    smoke.push({ p: [...P(u0 + Wh - 0.5, v0 + Dh - 0.6)], y: hy + 0.4 + (kind === 'shed' ? 3.4 : 3.7), r: l.seed });
     // the wing: a lean-to of two rooms along the yard's side wall, facing across the yard
     if (wing) {
       const wr = R(0.7, v0 - 0.5, 0.7 + 3.4, v0 - 0.5 + 6.2), ws = [[wr[0], wr[1]], [wr[2], wr[1]], [wr[0], wr[3]], [wr[2], wr[3]]].map(([x, z]) => gh(x, z));
