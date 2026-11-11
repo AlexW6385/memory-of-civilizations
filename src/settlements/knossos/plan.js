@@ -93,7 +93,10 @@ E.push({ t: 'court_dress', y: 0.05, seed: 3,
   stands: [[-66.6, 31.5], [-66.6, 46.5], [-66.6, 10], [-66.6, -22], [-88, 20], [-88, -20], [-95, 37.2]],
   tubs: [[-92, -30], [-92, -10], [-92, 10], [-92, 30], [-93, 37], [-87.5, 37], [-100, 36.5]],
   torches: [[-67.4, 33.4], [-67.4, 44.6], [-92, -47]],
+  niches: [[-64.45, -52], [-64.45, -46], [-65.05, 2.4], [-65.05, 7.6], [-65.05, 11.6]],
   horns: [[-67.0, -49, 1], [-67.8, 5, 1]] });
+// the theatral area: tubs and a torch stand at the corners of its court, jar stands before the steps
+E.push({ t: 'court_dress', y: 0.05, seed: 5, tubs: [[THEATRAL[0] + 4.8, THEATRAL[1] + 15.2]], stands: [[THEATRAL[0] + 7, THEATRAL[1] + 14.8], [THEATRAL[0] + 12, THEATRAL[1] + 14.8]], torches: [[THEATRAL[0] + 4.6, THEATRAL[1] + 10.4]] });
 // the Central Court: tubs at the corners, torch stands under the porticoes, the cult stand with horns before the Tripartite Shrine's portico
 E.push({ t: 'court_dress', y: 0.05, seed: 4,
   benches: [[-12.6, -24.6, -12.15, -22.2], [12.15, 22.2, 12.6, 24.6], [-12.6, 22.2, -12.15, 24.6]],

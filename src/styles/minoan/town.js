@@ -67,7 +67,6 @@ function dwelling(el, ctx) {
     bag.add(PL, box(x0, ceil, z0, x1, y + (n > 1 ? SH : H), z1)); col.rect(el.rect, ceil, y + H); col.floor(el.rect, y + H);
     if (n > 1) bag.add(PL, box(x0, y + SH, z0, x1, y + H, z1));
     // light: through the door, and a lamp
-    const [lx, lz] = FR.P(FR.L / 2, FR.D * 0.55); lights.push({ at: [lx, y + 2.2, lz], color: '#ffb46b', intensity: 3.0, distance: 8 });
     furnish(el, ctx, FR, y + 0.2, rand);
   } else {
     bag.add(PL, box(x0, y + 0.5, z0, x1, stepped ? y + SH : y + H, z1));
@@ -161,6 +160,10 @@ function furnish(el, ctx, FR, fl, rand) {
   const vIn = T + 0.15, vBack = D - T - 0.15, uL = T + 0.1, uR = L - T - 0.1, other = du < L / 2 ? uR : uL;
   const side = (v0, v1, y0, y1, w, mat, solid = true) => (other === uR ? B(mat, uR - w, uR, v0, v1, y0, y1, solid) : B(mat, uL, uL + w, v0, v1, y0, y1, solid));
   const sideU = (w) => (other === uR ? uR - w / 2 : uL + w / 2);
+  // the lamp: a bronze bowl of oil on a bracket on the back wall at the side of the room away from the door, its flame the light of the room
+  { const lu = other === uR ? uR - 0.35 : uL + 0.35, lv = vBack - 0.02, [bx, bz] = P(lu, lv - 0.12);
+    B('timber', lu - 0.04, lu + 0.04, lv - 0.2, lv + 0.04, 1.62, 1.68); bag.add('bronze', lathe([[0.001, 0], [0.07, 0.03], [0.09, 0.07], [0.001, 0.07]], 8).translate(bx, fl + 1.68, bz));
+    lights.push({ at: [bx, fl + 1.8, bz], color: '#ffb46b', intensity: 3.4, distance: 9 }); }
   const shelf = (u0, u1, v, h0) => { B('timber', u0, u1, v, v + 0.28, h0, h0 + 0.04); for (let u = u0 + 0.12; u < u1 - 0.05; u += 0.2) J(rand() < 0.5 ? jarG(0.07, 0.2) : cupG.clone().scale(1.6, 1.6, 1.6), u, v + 0.14, h0 + 0.04); };
   if (kind === 'home') {
     // the hearth at the back: a ring of stones round the ash, the cooking pot, the stone bench along one side, the bed of mats, the shelf of cups
@@ -217,14 +220,12 @@ function furnish(el, ctx, FR, fl, rand) {
     for (let i = 0; i < 3; i++) pit(i % 2 ? uL + 0.6 : uR - 0.6, vIn + 1.2 + i * 1.5 > vBack - 1.5 ? vBack - 1.7 : vIn + 1.2 + i * 1.5, 0.5);
     for (let i = 0; i < 4; i++) B('sacking', uL + 0.2 + (i % 2) * 0.5, uL + 0.65 + (i % 2) * 0.5, vIn + 0.2 + Math.floor(i / 2) * 0.4, vIn + 0.55 + Math.floor(i / 2) * 0.4, 0, 0.3, i === 0);
   }
-  void lights;
 }
 
 /** furnished_room: { rect (the room's floor, as cut in its wing), y, front (the side its doorway is on), kind, seed }: the furniture of an archive, a kitchen, a home or a store in a room of the palace, and its lamp. */
 function furnishedRoom(el, ctx) {
   const [a, b, c, d] = el.rect, e = { rect: [a - T, b - T, c + T, d + T], front: el.front ?? 's', seed: el.seed || 1, kind: el.kind };
   furnish(e, ctx, dwellingFrame(e), (el.y ?? 0) + 0.0, rng(e.seed));
-  ctx.lights.push({ at: [(a + c) / 2, (el.y ?? 0) + 2.5, (b + d) / 2], color: '#ffb46b', intensity: 3.4, distance: 9 });
 }
 
 // ── lanes, yards, pits, court furniture ──────────────────────────────────────────────────────
@@ -283,6 +284,8 @@ function courtDress(el, { bag, col, lights }) {
   for (const [x, z] of el.stands ?? []) { bag.add(G, lathe([[0.001, 0], [0.3, 0], [0.3, 0.1], [0.14, 0.14], [0.1, 0.7], [0.2, 0.74], [0.2, 0.78], [0.001, 0.78]], 10).translate(x, y, z)); bag.add('terracotta', jarG(0.22, 0.5).translate(x, y + 0.78, z)); col.circle(x, z, 0.32, y, y + 1.3); }
   for (const [x, z, rot] of el.horns ?? []) { bag.add(G, box(x - 0.55, y, z - 0.35, x + 0.55, y + 0.5, z + 0.35)); horns(bag, x, y + 0.5, z, 0.7, rot !== 1); col.rect([x - 0.55, z - 0.35, x + 0.55, z + 0.35], y, y + 1.3); }
   for (const [x, z] of el.tubs ?? []) { bag.add('terracotta', lathe([[0.001, 0], [0.3, 0], [0.42, 0.4], [0.4, 0.45], [0.001, 0.45]], 12).translate(x, y, z)); bag.add('earth_wall', lathe([[0.001, 0.4], [0.38, 0.4], [0.001, 0.42]], 10).translate(x, y, z)); for (let i = 0; i < 7; i++) { const a = i * 0.9; bag.add('papyrus', box(x + Math.cos(a) * 0.15 - 0.01, y + 0.42, z + Math.sin(a) * 0.15 - 0.01, x + Math.cos(a) * 0.2 + 0.01, y + 0.9 + (i % 3) * 0.15, z + Math.sin(a) * 0.2 + 0.01)); } col.circle(x, z, 0.42, y, y + 0.9); }
+  // the niches in the storage blocks of the façade, facing the court: a gypsum frame round the dark recess
+  for (const [x, z] of el.niches ?? []) { bag.add(G, box(x - 0.1, y + 0.15, z - 0.8, x, y + 2.35, z + 0.8)); bag.add('opening', box(x - 0.13, y + 0.3, z - 0.6, x - 0.105, y + 2.2, z + 0.6)); }
   for (const [x, z] of el.torches ?? []) { bag.add('timber', box(x - 0.04, y, z - 0.04, x + 0.04, y + 1.7, z + 0.04)); bag.add('bronze', lathe([[0.001, 0], [0.1, 0.08], [0.12, 0.14], [0.001, 0.14]], 8).translate(x, y + 1.7, z)); lights.push({ at: [x, y + 1.9, z], color: '#ffb46b', intensity: 2.6, distance: 8 }); col.circle(x, z, 0.1, y, y + 1.8); }
   void rand;
 }
