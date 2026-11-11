@@ -59,6 +59,7 @@ import { ground as muscovy } from './muscovy/ground.js';
 import { ground as cahokia } from './cahokia/ground.js';
 import { ground as newYork } from './new-york/ground.js';
 import { ground as sydney } from './sydney/ground.js';
+import { ground as alexandria } from './alexandria/ground.js';
 
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
@@ -117,12 +118,14 @@ export const GROUNDS = {
   cahokia,
   'new-york': newYork,
   sydney,
+  alexandria,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
 for (const [id, G] of Object.entries(GROUNDS)) withCrops(id, G);
 
 const LOADERS = {
+  alexandria: () => import('./alexandria/index.js'),
   'ming-suzhou': () => import('./ming-suzhou/index.js'),
   'qing-beijing': () => import('./qing-beijing/index.js'),
   angkor: () => import('./angkor/index.js'),
