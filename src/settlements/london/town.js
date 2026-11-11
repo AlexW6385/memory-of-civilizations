@@ -83,7 +83,7 @@ function streetFolk() {
   for (let i = 0; i < 6; i++) fig([6.2 + i * 0.75 - 2, -172.2 + (i % 2) * 0.7], N, { h: 1.0 + (i % 3) * 0.12, dress: i % 2 ? 'robe' : 'trousers', cloth: ['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green'][i % 4], cloth2: 'cloth_brown', hat: i % 2 ? 'none' : 'cap', hatMat: 'cloth_grey' });
   fig([8, -170.8], N, { dress: 'robe', cloth: 'cloth_grey', cloth2: 'cloth_black', hat: 'cap', hatMat: 'cloth_white', over: 'shawl' });
   fig([-24.6, -175.2], E, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_brown', hat: 'brim', hatMat: 'cloth_black', over: 'collar', carry: 'none', pose: 'stand' });
-  for (const [x, z, rot] of [[-5, -179.2, W], [-14, -180.8, E], [30.5, -184, S], [14, -183.5, N], [-38, -181, E], [3, -188, S]]) {
+  for (const [x, z, rot] of [[-5, -179.2, W], [-14, -180.8, E], [30.5, -186.5, S], [14, -187.5, N], [-38, -181, E], [3, -188, S]]) {
     const lady = rand() < 0.5;
     fig([x, z], rot, lady ? { dress: 'robe', cloth: rand() < 0.5 ? 'cloth_indigo' : 'cloth_maroon', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cape', pose: rand() < 0.4 ? 'talk' : 'stand' } : { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: rand() < 0.4 ? 'talk' : 'stand' });
   }

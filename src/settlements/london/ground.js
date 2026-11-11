@@ -16,7 +16,7 @@ function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || height(x, z) < GROUND - 0.5 || inRect(PALACE, x, z, 4) || inRect(ABBEY, x, z, 4) || inLot(x, z, 0.5)) return null;
   if (inRect(SQUARE, x, z)) {
     // the walks, the plazas, the beds and the clipped privet stay clear; planes stand in the lawns (the 1868 planting, a few years grown)
-    if (Math.abs(z - SQ.walkZ) < 3.4 || Math.abs(x - SQ.walkX) < 3.4 || Math.hypot(x - SQ.statue[0], z - SQ.statue[1]) < 7 || Math.hypot(x - SQ.walkX, z - SQ.walkZ) < 7) return { grass: 6 };
+    if (Math.abs(z - SQ.walkZ) < 5.6 || Math.abs(x - SQ.walkX) < 4.2 || Math.hypot(x - SQ.statue[0], z - SQ.statue[1]) < 7 || Math.hypot(x - SQ.walkX, z - SQ.walkZ) < 7) return { grass: 6 };
     if (x < SQUARE[0] + 3 || x > SQUARE[2] - 3 || z < SQUARE[1] + 3 || z > SQUARE[3] - 3) return { grass: 6 };
     return { plane_tree: 0.16, grass: 30 };
   }

@@ -91,7 +91,7 @@ export function parliamentSquare(el, ctx) {
   for (const [hx0, hz0, hx1, hz1] of [[ix0 + 0.4, iz0 + 0.4, ix0 + 6, iz0 + 1.1], [ix1 - 6, iz0 + 0.4, ix1 - 0.4, iz0 + 1.1], [ix0 + 0.4, iz1 - 1.1, ix0 + 6, iz1 - 0.4], [ix1 - 6, iz1 - 1.1, ix1 - 0.4, iz1 - 0.4]]) { bag.add('flax_leaf', box(hx0, y, hz0, hx1, y + 0.9, hz1)); col.rect([hx0, hz0, hx1, hz1], y, y + 0.9); }
   // the benches along the walks, backs to the lawns
   for (const [bx, bz, rot] of [[wx - 12, wz - 2.0, Math.PI], [wx - 12, wz + 2.0, 0], [wx + 8, wz - 2.0, Math.PI], [wx + 8, wz + 2.0, 0], [wx - 34, wz - 2.0, Math.PI], [wx - 34, wz + 2.0, 0],
-    [wx - 2.0, iz0 + 12, -Math.PI / 2], [wx + 2.0, iz0 + 12, Math.PI / 2], [wx - 2.0, iz1 - 12, -Math.PI / 2], [wx + 2.0, iz1 - 12, Math.PI / 2], [el.statue[0] - 5.2, el.statue[1] - 3, Math.PI], [el.statue[0] - 5.2, el.statue[1] + 3, 0]]) parkBench(bag, col, bx, bz, y, rot);
+    [wx - 2.0, iz0 + 12, -Math.PI / 2], [wx + 2.0, iz0 + 12, Math.PI / 2], [wx - 2.0, iz1 - 12, -Math.PI / 2], [wx + 2.0, iz1 - 12, Math.PI / 2], [el.statue[0] - 5.0, el.statue[1] - 4.8, Math.PI], [el.statue[0] - 5.0, el.statue[1] + 4.8, 0]]) parkBench(bag, col, bx, bz, y, rot);
   // the cab rank on the south side: a horse trough at the kerb
   trough(bag, col, ix0 + 20, iz1 + 0.9 + 1.3, y, 0);
 }
