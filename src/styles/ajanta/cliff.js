@@ -22,7 +22,7 @@ function faceRock(ctx, F, holes, seed) {
     if (sb - sa < 0.02) continue;
     const here = holes.filter((h) => sm > h.s0 && sm < h.s1);
     const top = F.top(sm) + (rand() - 0.5) * 1.4;
-    const off = here.length ? 0 : [0, 0.35, 0.3, 0.8, 0.15][Math.floor(rand() * 5)];
+    const off = here.length || (F.id === 'main' && Math.abs(sm) > ZW - 1) ? 0 : [0, 0.35, 0.3, 0.8, 0.15][Math.floor(rand() * 5)];
     const mat = MATS[Math.floor(Math.abs(Math.sin(sm * 12.9898 + seed)) * 43758) % 4];
     for (const [d0, y0, d1, y1] of subtractRects([-off, -0.6, ROCK, top], here.map((h) => [h.d0, h.y0, h.d1, h.y1]))) {
       const [xa, za] = F.map(d0, sa), [xb, zb] = F.map(d1, sb);
@@ -62,7 +62,7 @@ function recess(ctx, F, c) {
     col.circle(qx, qz, 0.24, y, y + h);
   }
   const [lx0, , lz0] = P(-0.12, c.s - w / 2 - 0.1, 0), [lx1, , lz1] = P(0.2, c.s + w / 2 + 0.1, 0);
-  bag.add(STONE, box(Math.min(lx0, lx1), y + h, Math.min(lz0, lz1), Math.max(lx0, lx1), y + h + 0.35, Math.max(lz0, lz1)));
+  bag.add(STONE, box(Math.min(lx0, lx1), y + h - 0.05, Math.min(lz0, lz1), Math.max(lx0, lx1), y + h + 0.35, Math.max(lz0, lz1)));
   for (let k = 0; k < Math.floor(w / 0.5); k++) { const [ax, , az] = P(-0.1, c.s - w / 2 + 0.25 + k * 0.5, 0), [bx, , bz] = P(-0.18, c.s - w / 2 + 0.45 + k * 0.5, 0); bag.add(k % 2 ? PLASTER : PAL.ground, box(Math.min(ax, bx), y + h + 0.06, Math.min(az, bz), Math.max(ax, bx), y + h + 0.3, Math.max(az, bz))); }
   if (c.tier < 2) { const [fx0, , fz0] = P(0, c.s - w / 2, 0), [fx1, , fz1] = P(dep, c.s + w / 2, 0); col.floor([fx0, fz0, fx1, fz1], y); }
   return lh;
