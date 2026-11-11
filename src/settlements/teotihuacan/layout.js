@@ -51,8 +51,16 @@ export function compounds() {
     if (inRect(MARKET, cx, cz, w / 2 + 6)) continue;
     const seed = Math.floor(rand() * 1e6), h = (seed * 2654435761 >>> 0) / 4294967296;
     // the compounds with a painted room (Tepantitla's) and those of the obsidian workers (nearer the Ciudadela and the Moon)
-    LOTS.push({ rect: r, seed, mural: h < 0.2, workshop: h > 0.8 && (cz > 120 || cz < -300 || h > 0.93) });
+    const h2 = ((seed ^ 0x9e3779b9) >>> 0) / 4294967296, mural = h < 0.2, workshop = h > 0.8 && (cz > 120 || cz < -300 || h > 0.93);
+    // the potters' and the weavers' compounds (the rest are households)
+    LOTS.push({ rect: r, seed, mural, workshop, craft: !mural && !workshop && h2 < 0.32 ? (h2 < 0.17 ? 'potter' : 'weaver') : null });
   }
   return LOTS;
 }
 export const inCompound = (x, z, m = 0) => compounds().some((c) => inRect(c.rect, x, z, m));
+
+/** Is (x, z) in a street of the grid (the gaps between the compounds' lots, along the lines x or z = −RADIUS + 64 k)? */
+export function inStreet(x, z) {
+  const u = (((x + RADIUS) % 64) + 64) % 64, v = (((z + RADIUS) % 64) + 64) % 64;
+  return u < 3 || u > 58.5 || v < 3 || v > 58.5;
+}
