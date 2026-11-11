@@ -119,6 +119,7 @@ export const SITES = [
   { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, era: 'c. 1600', region: 'guinea', lat: 6.34, lon: 5.62, radius: 330 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, era: 'c. 1930', region: 'sahel', lat: 14.35, lon: -3.61, radius: 90 },
   { id: 'maya-tikal', name: { en: 'Classic Maya Tikal', zh: '古典玛雅蒂卡尔' }, era: 'c. 750', region: 'yucatan', lat: 17.22, lon: -89.62, radius: 330 },
+  { id: 'vienna', name: { en: 'Vienna, 1902', zh: '1902年的维也纳' }, era: '1902', region: 'danube', lat: 48.21, lon: 16.37, radius: 330 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -145,7 +146,6 @@ export const BLEND = 100;
  * layout keeps room for them, so that building one does not move the others.
  */
 export const PLANNED = [
-  { id: 'vienna', name: { en: 'Vienna', zh: '维也纳' }, region: 'danube', lat: 48.21, lon: 16.37, radius: 330 },
   { id: 'bauhaus-dessau', name: { en: 'Bauhaus Dessau', zh: '包豪斯德绍' }, region: 'germany', lat: 51.84, lon: 12.23, radius: 190 },
   { id: 'sgang-gwaay', name: { en: 'SG̱ang Gwaay', zh: '斯冈瓜伊' }, region: 'northwest-coast', lat: 52.09, lon: -131.22, water: true, island: true, radius: 190 },
   { id: 'brasilia', name: { en: 'Brasília', zh: '巴西利亚' }, region: 'brazil', lat: -15.80, lon: -47.86, radius: 520 },

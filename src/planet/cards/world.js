@@ -1212,4 +1212,22 @@ export const CARDS = {
       "水库与住宅 —— 储存全城用水的灰泥水库，以及森林中的院落式住宅群，每组东侧有神龛，周围是茅草屋。",
     ],
   },
+  'vienna': {
+    en: [
+      "Vienna is shown in the spring of 1902, the capital of the Austro-Hungarian Empire under Franz Joseph, a city of two million and the centre of the Habsburg lands. The Ringstrasse, laid out from 1857 on the cleared ramparts, carries the historicist public buildings; behind it stand the tenements of the Gründerzeit, five or six storeys of painted stucco over shops, with slate mansards. Around 1900 a younger generation breaks with the historical styles: the Secession, Klimt, Otto Wagner, Adolf Loos, Mahler at the Court Opera. The city is compressed here: places that lie a kilometre apart stand within one walk.",
+      "The Secession building — Joseph Maria Olbrich's exhibition hall of 1897–98 for the artists who left the old association: a white cube with four square pylons, the motto \"To every age its art, to every art its freedom\" over the door, Moser's owls, and a dome of about 2,500 gilded laurel leaves. In April 1902 it holds the Beethoven exhibition: Max Klinger's enthroned Beethoven in the main hall and Gustav Klimt's Beethoven Frieze painted on the walls of the side aisle.",
+      "Café Museum — Adolf Loos's plain coffee house of 1899 on the corner of Friedrichstraße, nicknamed \"Café Nihilismus\": marble tables, Thonet bentwood chairs, newspapers on their holders, a billiard table, green-shaded globe lamps.",
+      "The Ring and the Opera — the boulevard, fifty-seven metres wide, with its tram tracks, rows of planes and chestnuts, and the Fiaker carriages waiting before the Court Opera of 1869.",
+      "The Karlsplatz — the gardens with Otto Wagner's two Stadtbahn pavilions of 1899, steel frames clad in white marble and painted apple green, with their gold sunflowers, and the Karlskirche (1716–37) with its portico, two columns and green dome.",
+      "The Wien and the Naschmarkt — the little river running in its granite walls past the market's stalls with their striped awnings, the Stadtbahn on its ledge, and Wagner's apartment houses on the Wienzeile, one covered in faience flowers, one with gilded medallions.",
+    ],
+    zh: [
+      "画面所示为1902年春天的维也纳，奥匈帝国的首都，弗朗茨·约瑟夫在位，人口二百万，是哈布斯堡诸领地的中心。环城大道自1857年起建于拆除的城墙之上，两侧是历史主义的公共建筑；其后是建立时代的出租公寓，五六层，粉刷的灰泥墙面，底层是商铺，顶上是石板铺的复折屋顶。1900年前后，新一代人与历史风格决裂：分离派、克林姆特、奥托·瓦格纳、阿道夫·路斯、宫廷歌剧院的马勒。城市在此被压缩，相距一公里的地方一次步行即可到达。",
+      "分离派展览馆 —— 约瑟夫·玛丽亚·奥尔布里希1897至1898年为离开旧协会的艺术家所建的展厅：白色立方体，四座方形塔墩，门上的箴言“每个时代有它的艺术，每种艺术有它的自由”，莫泽的猫头鹰，以及由约两千五百片镀金月桂叶组成的穹顶。1902年4月这里举办贝多芬展：主厅中央是马克斯·克林格尔的端坐的贝多芬像，侧廊墙上是古斯塔夫·克林姆特直接绘在墙上的《贝多芬饰带》。",
+      "博物馆咖啡馆 —— 阿道夫·路斯1899年在腓特烈大街转角设计的朴素咖啡馆，被戏称为“虚无主义咖啡馆”：大理石桌、托奈特弯木椅、挂在架上的报纸、台球桌和绿罩球形灯。",
+      "环城大道与歌剧院 —— 宽五十七米的林荫大道，有电车轨道、成排的悬铃木和七叶树，菲亚克马车在1869年建成的宫廷歌剧院前等客。",
+      "卡尔广场 —— 花园里有奥托·瓦格纳1899年建的两座城铁车站亭，钢架外包白色大理石板，漆成苹果绿，饰有金色向日葵；园东是卡尔教堂（1716至1737年），有门廊、两根纪功柱和绿色穹顶。",
+      "维恩河与纳旭市场 —— 小河在花岗岩河墙之间流过市场，摊位撑着条纹遮阳篷；河边的坡台上是城铁线，维恩河街上是瓦格纳的公寓楼，一座满覆彩釉花砖，一座饰有镀金圆章。",
+    ],
+  },
 };
