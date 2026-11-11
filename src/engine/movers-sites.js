@@ -32,5 +32,6 @@ export const MOVER_SITES = {
   'london': () => import('../settlements/london/movers.js'),
   'petra': () => import('../settlements/petra/movers.js'),
   'barcelona': () => import('../settlements/barcelona/movers.js'),
+  'knossos': () => import('../settlements/knossos/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
