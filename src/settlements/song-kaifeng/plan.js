@@ -3,7 +3,7 @@
 // with its stone landings, the Rainbow Bridge and grain boats; the east wall, its water gate and the
 // city gate with its tower; the streets' paving.
 
-import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE, FIELDS_X, STONE_BANK, APPROACH } from './layout.js';
+import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE, FIELDS_X, STONE_BANK, APPROACH, pavedWay } from './layout.js';
 import { interiorRooms } from './interiors.js';
 
 const E = [];
@@ -52,9 +52,9 @@ for (const z of [RIVER.z0, RIVER.z1]) E.push({ t: 'canal_wall', a: [-STONE_BANK,
 E.push({ t: 'rainbow_bridge', at: BRIDGE.at, across: 'z', span: BRIDGE.span, width: BRIDGE.width, spring: BRIDGE.spring, crown: BRIDGE.crown, y0: BRIDGE.y0, abut: (RIVER.z1 - RIVER.z0) / 2 - BRIDGE.span / 2 - 0.35, bed: RIVER.bed });
 // the hawkers' booths on the deck's east side, between railing and walkway (the west railing is the onlookers')
 E.push({ t: 'bridge_stalls', at: BRIDGE.at, span: BRIDGE.span, width: BRIDGE.width, spring: BRIDGE.spring, crown: BRIDGE.crown, y0: BRIDGE.y0, side: 1, stalls: [{ s0: -3.7, s1: -1.7, kind: 'cloth' }, { s0: -1.3, s1: 0.7, kind: 'food' }, { s0: 1.1, s1: 3.1, kind: 'sundry' }] });
-// the grain boats: moored along the banks with their masts laid back on the crutch, two with masts up
+// the grain boats: moored against the banks (hull edge ~0.6 m off the quay) with their masts laid back on the crutch, two with masts up
 // downstream, and the one before the bridge, its crew lowering the mast as it comes up to it
-for (const [x, z, d, L, mast] of [[-200, 67.5, 1, 18, 90], [-120, 84.5, -1, 16, 90], [-17.5, 75, 1, 19, 42], [62, 84.5, -1, 18, 90], [140, 66.5, -1, 16, 0], [220, 84.5, -1, 20, 90], [300, 70, 1, 12, 0]]) E.push({ t: 'song_boat', at: [x, z], dir: [d, 0], len: L, beam: L * 0.25, mast, y: RIVER.water, seed: x + 1000 });
+for (const [x, z, d, L, mast] of [[-200, 63.4, 1, 18, 90], [-120, 89.2, -1, 16, 90], [-17.5, 75, 1, 19, 42], [62, 89.4, -1, 18, 90], [140, 63.0, -1, 16, 0], [220, 88.7, -1, 20, 90], [300, 62.6, 1, 12, 0]]) E.push({ t: 'song_boat', at: [x, z], dir: [d, 0], len: L, beam: L * 0.25, mast, y: RIVER.water, seed: x + 1000 });
 // ---- the city wall east of the city (rammed earth, battered, no battlements) with its water gate and the gate over the road
 const wz = (z0, z1) => E.push({ t: 'block', walk: true, rect: [WALL_X - 8, z0, WALL_X + 8, z1], y0: RIVER.bed, y1: 9, mat: 'earth_wall', batter: [2.2, 2.2, 0, 0] });
 wz(-half(WALL_X) + 4, GATE.rect[1] + 0.5); wz(GATE.rect[3] - 0.5, RIVER.z0 - 1.5); wz(RIVER.z1 + 1.5, half(WALL_X) - 4);
@@ -65,19 +65,29 @@ E.push({ t: 'qing_hall', rect: [WALL_X - 6.5, GATE.z - 13, WALL_X + 6.5, GATE.z 
 E.push({ t: 'paving', rect: APPROACH, y: 0.04, th: 0.3 });
 // ---- the streets' paving: none in the fields; beyond the stone banks the riverside streets stop
 // 4 m short of the water's edge, leaving the earth bank (the towpath on the north side)
-const pave = (r) => { if (r[2] > r[0] + 0.5 && r[3] > r[1] + 0.5) E.push({ t: 'paving', rect: r, y: 0.04, th: 0.3 }); };
-for (const s of STREETS) {
+// only what pavedWay says is paved (the shop streets near the bridge); the rest is earth (ground.js), so each street is cut in 10 m lengths and the paved ones kept
+let wayI = 0;
+const pave = (r) => {
+  if (!(r[2] > r[0] + 0.5 && r[3] > r[1] + 0.5)) return;
+  const horiz = r[2] - r[0] > r[3] - r[1], a0 = horiz ? r[0] : r[1], a1 = horiz ? r[2] : r[3], n = Math.max(1, Math.round((a1 - a0) / 10));
+  for (let k = 0; k < n; k++) {
+    const u0 = a0 + (a1 - a0) * k / n, u1 = a0 + (a1 - a0) * (k + 1) / n, q = horiz ? [u0, r[1], u1, r[3]] : [r[0], u0, r[2], u1];
+    if (pavedWay(wayI, (q[0] + q[2]) / 2, (q[1] + q[3]) / 2)) E.push({ t: 'paving', rect: q, y: 0.04, th: 0.3 });
+  }
+};
+STREETS.forEach((s, wi) => {
+  wayI = wi;
   const c = [Math.max(s[0], WALL_X + 8), s[1], Math.min(s[2], FIELDS_X), s[3]], horiz = c[2] - c[0] > c[3] - c[1];
   const h = horiz ? half(Math.max(Math.abs(c[1]), Math.abs(c[3]))) : half(Math.max(Math.abs(c[0]), Math.abs(c[2])));
   const r = horiz ? [Math.max(c[0], -h), c[1], Math.min(c[2], h), c[3]] : [c[0], Math.max(c[1], -h), c[2], Math.min(c[3], h)];
-  if (r[2] <= r[0] || r[3] <= r[1]) continue;
+  if (r[2] <= r[0] || r[3] <= r[1]) return;
   const bankN = r[3] === RIVER.z0, bankS = r[1] === RIVER.z1;
-  if (!horiz || !(bankN || bankS)) { pave(r); continue; }
+  if (!horiz || !(bankN || bankS)) { pave(r); return; }
   const cut = bankN ? [r[0], r[1], r[2], r[3] - 4] : [r[0], r[1] + 4, r[2], r[3]];
   pave([cut[0], cut[1], Math.min(-STONE_BANK, cut[2]), cut[3]]);
   pave([Math.max(STONE_BANK, cut[0]), cut[1], cut[2], cut[3]]);
   pave([Math.max(-STONE_BANK, r[0]), r[1], Math.min(STONE_BANK, r[2]), r[3]]);
-}
+});
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // the halls (kind 'hall': the chant zone) come first, the monastery's court 'open' after them; the shops' and houses' rooms (tea, tavern, inn, shop, house) are

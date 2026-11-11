@@ -180,7 +180,7 @@ function more(S, L, rand, person, pick) {
   }
   // ---- the trackers on the towpath, hauling the boat up the river toward the bridge; the line from its masthead over their shoulders
   {
-    const yw = RIVER.water, L0 = 16, bx = 140, bz = 66.5, apex = [bx - 0.3 * L0 / 2, yw + 3.52 + 0.62 * L0 - 0.15, bz];
+    const yw = RIVER.water, L0 = 16, bx = 140, bz = 63.0, apex = [bx - 0.3 * L0 / 2, yw + 3.52 + 0.62 * L0 - 0.15, bz];
     const pts = [apex];
     for (let k = 0; k < 5; k++) {
       const x = 117 - k * 2.3, z = 56.5 + (k % 2) * 0.35, y = ground.height(x, z);
@@ -204,8 +204,8 @@ function more(S, L, rand, person, pick) {
  */
 function landing() {
   const S = [], L = [], faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
-  // the boat (plan.js): at (62, 84.5), bow west, 18 m by 4.5; its gunwale's height and its half-breadth along it
-  const BX = 62, BZ = 84.5, H = 9, Bm = 2.25, W = -1.6, t = (x) => (BX - x) / H;
+  // the boat (plan.js): at (62, 89.4), bow west, 18 m by 4.5; its gunwale's height and its half-breadth along it
+  const BX = 62, BZ = 89.4, H = 9, Bm = 2.25, W = -1.6, t = (x) => (BX - x) / H;
   const sheer = (x) => W + 0.95 + 0.35 * t(x) ** 2 + 0.7 * t(x) ** 6, half = (x) => Bm * (1 - 0.5 * Math.abs(t(x)) ** 2.6), deck = (x) => sheer(x) - 0.3;
   const bank = 92, by = 0.04;
   const planks = [57.5, 55.3].map((x) => ({ a: [x, sheer(x) + 0.06, BZ + half(x) - 0.12], b: [x, by + 0.06, bank + 1.0] }));
@@ -266,13 +266,7 @@ function waterside() {
     const n = s.bank === 'n', z = n ? RIVER.z0 + 0.4 : RIVER.z1 - 0.4;
     E.push({ t: 'water_steps', a: [s.x - 2.5, z], b: [s.x + 2.5, z], dir: [0, n ? 1 : -1], y: 0.05, water: RIVER.water, double: false, moor: true });
   }
-  for (const r of LANES) {
-    const horiz = r[2] - r[0] > r[3] - r[1], q = horiz ? [Math.max(r[0], WALL_X + 8), r[1], Math.min(r[2], FIELDS_X), r[3]] : [r[0], r[1], r[2], r[3]];
-    if (!horiz && (q[0] < WALL_X + 8 || q[2] > FIELDS_X)) continue;
-    const hh = horiz ? half(Math.max(Math.abs(q[1]), Math.abs(q[3]))) : half(Math.max(Math.abs(q[0]), Math.abs(q[2])));
-    const c = horiz ? [Math.max(q[0], -hh), q[1], Math.min(q[2], hh), q[3]] : [q[0], Math.max(q[1], -hh), q[2], Math.min(q[3], hh)];
-    if (c[2] - c[0] > 1 && c[3] - c[1] > 1) E.push({ t: 'paving', rect: c, y: 0.04, th: 0.3 });
-  }
+  // (the lanes are earth: ground.js)
   return base('song-kaifeng-waterside', E, 'kaifeng-site');
 }
 
