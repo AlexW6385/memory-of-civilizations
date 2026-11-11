@@ -1,7 +1,7 @@
 // The hamlets round the monument (docs/settlements/borobudur.md §5): houses on posts in their groves;
 // and the pilgrims on the monument (§10): monks and lay people walking the galleries clockwise,
 // the monument on their right, as the reliefs are read, climbing terrace by terrace.
-import { RADIUS, MONUMENT, SQUARES, CIRCLES, MONASTERY, houses } from './layout.js';
+import { RADIUS, MONUMENT, SQUARES, CIRCLES, MONASTERY, HAMLETS, houses, inRect, frontVec } from './layout.js';
 const base = (id, elements) => ({ id, style: 'javanese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [90, 0], facing: 'w' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -72,7 +72,7 @@ function monastery() {
   const monk = (at, y, dir, pose, arms, extra = {}) => L.push({ t: 'figure', at, y, rot: faceTo(dir), seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.8 ? 'cloth_ochre' : 'cloth_red', cloth2: 'cloth_ochre', skin: rand() < 0.5 ? 'skin_medium' : 'skin_dark', hat: 'none', hair: 'shaven', pose, arms, ...extra });
   // the great pavilion (−182…−158, −150…−132, its floor 0.8 up): three rows of monks facing west to the teacher
   for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) monk([-174 + r * 2.4 + 2, -147 + c * 3], 0.8, [-1, 0], 'cross', c % 2 ? 'pray' : undefined);
-  monk([-178.5, -141], 0.8, [1, 0], 'cross', 'talk');
+  monk([-177.8, -141], 0.8, [1, 0], 'cross', 'talk');
   // the small pavilion: two monks with a palm-leaf book between them
   monk([-197.5, -120], 0.8, [1, 0], 'cross', 'talk'); monk([-192.5, -120], 0.8, [-1, 0], 'cross', 'pray');
   // at the gate in the east wall, lay people bringing alms; a monk receiving them
@@ -86,9 +86,37 @@ function monastery() {
   return { ...base('borobudur-monastery-life', L), style: 'life', center: [(mx0 + mx1) / 2, (mz0 + mz1) / 2], near: 260 };
 }
 
+/**
+ * The yards of the hamlets (§14): before each house, beside its stair, the household's things — a water pot and a
+ * basket, a stack of firewood, a tray of rice or chillies drying, hens about; sacks of rice by a granary; now and then a
+ * buffalo tethered at the yard's edge. Placed by the house's front and seed, clear of its neighbours.
+ */
+function yards(hi) {
+  const [hx, hz, hr] = HAMLETS[hi], L = [], rand = rng(900 + hi);
+  for (const h of houses()) {
+    if (h.hamlet !== hi) continue;
+    const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, [fx, fz] = frontVec(h.front), tx = -fz, tz = fx, half = (h.front === 'e' || h.front === 'w' ? x1 - x0 : z1 - z0) / 2;
+    // a point d in front of the house's front edge and u along it
+    const at = (d, u) => [cx + fx * (half + d) + tx * u, cz + fz * (half + d) + tz * u];
+    const ok = ([x, z], m = 0.9) => !others.some((q) => inRect(q.rect, x, z, m));
+    const put = (el, p, m) => { if (ok(p, m)) L.push({ ...el, at: p, y: 0 }); };
+    const sd = h.seed, others = houses().filter((q) => q !== h);
+    if (h.kind === 'lumbung') { put({ t: 'sacks', n: 3, seed: sd, rot: rand() * 6.28 }, at(0.9, 1.7)); continue; }
+    put({ t: 'pot', kind: 'water_pot', n: 2, seed: sd }, at(0.5, 1.9));
+    put({ t: 'basket', n: 2, seed: sd + 1, goods: rand() < 0.5 ? 'cloth_white' : 'cloth_ochre', rot: rand() * 6.28 }, at(1.1, -2.0));
+    put({ t: 'firewood', len: 1.4, seed: sd + 2, rot: (h.front === 'e' || h.front === 'w') ? Math.PI / 2 : 0 }, at(-0.2 - 0.2, -(h.front === 'e' || h.front === 'w' ? h.rect[3] - h.rect[1] : h.rect[2] - h.rect[0]) / 2 - 0.5));
+    if (rand() < 0.55) put({ t: 'drying_tray', seed: sd + 3 }, at(2.6, 2.3));
+    if (rand() < 0.6) put({ t: 'chickens', kind: 'hen', n: 3, seed: sd + 4, rot: rand() * 6.28 }, at(3.0, -1.0));
+    if (rand() < 0.14) put({ t: 'animal', kind: 'buffalo', gear: false, graze: true, seed: sd + 5, rot: Math.atan2(-fx, -fz) + 1.2 }, at(5.2, 3.0), 2.2);
+  }
+  // a well at the middle of each yard, a water pot beside it
+  L.push({ t: 'well', at: [hx, hz], y: 0, kind: 'pulley', mat: 'brick', seed: hi + 11 }, { t: 'pot', at: [hx + 1.6, hz + 0.8], y: 0, kind: 'water_pot', n: 3, seed: hi + 12 });
+  return { ...base(`borobudur-yard-${hi}`, L), style: 'life', center: [hx, hz], near: hr + 150 };
+}
+
 export async function town() {
-  const all = houses(), plans = [];
-  for (let i = 0; i < all.length; i += 120) plans.push(base(`borobudur-hamlets-${i / 120}`, all.slice(i, i + 120).map((h) => ({ t: 'rumah', ...h }))));
+  const plans = [];
+  HAMLETS.forEach((h, hi) => plans.push(base(`borobudur-hamlet-${hi}`, houses().filter((q) => q.hamlet === hi).map((q) => ({ t: 'rumah', ...q }))), yards(hi)));
   plans.push(pilgrims(), monastery());
   return plans;
 }

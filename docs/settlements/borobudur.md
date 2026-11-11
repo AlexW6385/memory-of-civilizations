@@ -97,6 +97,26 @@ Sources added:
 - [Statue in the form of a lion at the foot of a stair at Borobudur — Rijksmuseum](https://www.rijksmuseum.nl/en/collection/object/Beeld-in-de-vorm-van-een-leeuw-aan-de-voet-van-een-trap-bij-de-Borobudur--219d53e3ed7bcf1048f2df797b17ff56)
 - [Pūjā: Hindu Pūjā — encyclopedia.com](https://encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/puja-hindu-puja)
 
+## 14. Fifth pass: the houses, the granaries, the hall, the paddies (2026-11)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Houses on posts | Stone footings (umpak), posts, plank floor 1.25–1.6 m up; a veranda across the front with a bamboo rail and a stair down to the yard; walls of plaited bamboo (gedhek) with horizontal bamboo battens, a door, shuttered windows; a steep thatched saddle roof (palm thatch or black ijuk) with a capped ridge whose ends flare up in horns; houses face their hamlet's yard | the reliefs show 8th-century Javanese vernacular houses [stated: Wikipedia, Borobudur]; raised pile floors, thatch and woven-bamboo walls [inferred from the reliefs and later Javanese practice]; the stone footings, the veranda and the horns [inferred] |
+| Granaries (lumbung) | A small woven body on four posts with a rat-guard disc on each, a hatch, a notched log leaning to it, a deep thatched roof; about one building in five | rice barns on four poles 1.5–2 m high, thatched, sides of woven bamboo; a relief on Borobudur's hidden foot shows an ancient Javanese barn very like the Sundanese leuit [stated: Wikipedia, Rice barn]; the discs (against rats) [inferred] |
+| Furnished interiors | In two village houses and three monks' houses: a hearth (ash box, three firestones, pot, firewood, a rack above), a sleeping platform of split bamboo with a rolled mat, a plaited mat on the floor, water pots and baskets | [inferred: ethnographic Javanese house] |
+| The monastery's great hall | An open hall on a two-step andesite plinth with stairs east and south, posts on stone footings, rails, a hip roof of ijuk in two tiers (four tall inner posts carrying a raised upper roof over the middle, the clerestory open, a stepped ceiling under it); inside, the stone Buddha in dhyana on his lotus before a stone aureole with a gilt disc, bronze lamp stands, offerings, the teacher's dais, reed mats for the monks in rows, a lectern with palm-leaf books, a bronze gong on its frame, a drum on a stand | a Buddhist community at the monument [inferred, §2]; the relief pavilions have steep tiered roofs [inferred]; the two-tier form borrowed from the later joglo (a raised upper roof on four tall central columns over a stepped ceiling) [stated for the joglo: Wikipedia, Joglo; its use c. 825 inferred]; the Buddha's mudra, lotus and aureole as the monument's [§12] |
+| Yards | A well and water pot in each hamlet's yard; before each house a water pot, a basket, firewood, a tray of rice or chillies drying, hens; a buffalo tethered now and then; sacks by a granary | [inferred] |
+| Levelled hamlets, paddies | The ground is levelled where the hamlets and the monastery stand (the houses stand on it); in the fields the rolling plain is taken in steps of 0.55 m, each a level paddy held by a bund, the risers a few metres wide, rice growing on them | the Kedu plain a "fertile volcanic plain" between Sumbing–Sundoro and Merbabu–Merapi, the Progo through it [stated: Wikipedia, Kedu Plain]; irrigated rice, the paddies' form [inferred] |
+| Living systems | Walkers (monks, pilgrims with baskets, women, villagers, farmers, porters), egrets in the paddies, swallows, crows, sparrows on the balustrades, kitchen smoke at dawn and dusk, incense, morning mist | the monument as a pilgrimage place with pilgrims walking round it [stated: skylineaparthistory]; the Kedu plain's morning mist [inferred; Borobudur's own weather, `setpieces.js`] |
+
+Not built, for want of a means: the volcanoes on the horizon (the planet has no terrain beyond the settlement's radius to carry them); lichen and algae on the andesite beyond what `damp` gives (no new material).
+
+Sources added:
+- [Rice barn — Wikipedia](https://en.wikipedia.org/wiki/Rice_barn)
+- [Kedu Plain — Wikipedia](https://en.wikipedia.org/wiki/Kedu_Plain)
+- [Joglo — Wikipedia](https://en.wikipedia.org/wiki/Joglo)
+- [Borobudur — Wikipedia](https://en.wikipedia.org/wiki/Borobudur)
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)
