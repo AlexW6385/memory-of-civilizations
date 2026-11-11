@@ -26,7 +26,7 @@ let CACHE = null;
 export function streets() {
   if (CACHE) return CACHE;
   const L = lots(), rand = rng(1973), { xs, zs } = streetCells();
-  const city = L.filter((l) => !l.t), rocks = L.filter((l) => l.t === 'rocks_terrace');
+  const city = L.filter((l) => !l.t || l.t === 'shop_room'), rocks = L.filter((l) => l.t === 'rocks_terrace');
   const tiles = new Map(), life = new Map();
   const T = (k) => { if (!tiles.has(k)) tiles.set(k, { segs: [], flag: [], curbs: [], items: [], kit: [] }); return tiles.get(k); };
   const LT = (k) => { if (!life.has(k)) life.set(k, []); return life.get(k); };
@@ -44,7 +44,7 @@ export function streets() {
     if (l.t === 'espresso_bar') continue;
     for (const f of 'nsew') {
       if (!clear(strip(l.rect, f, 0, 3), l)) continue;
-      const D = 2.6, P = strip(l.rect, f, 0, D), yp = l.y - 0.04;
+      const D = 2.6, P = strip(l.rect, f, 0, D), yp = (l.t && f === l.front ? l.gy : l.y) - 0.04;
       const t = T(tileOf((P[0] + P[2]) / 2, (P[1] + P[3]) / 2));
       t.segs.push([P[0], P[1], P[2], P[3], yp, yp]);
       const K = strip(l.rect, f, D, D + 0.2); kerbs.push({ t, K, y: yp - 0.02, P });

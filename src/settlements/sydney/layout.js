@@ -150,6 +150,15 @@ export function lots() {
     const f = clearR(cafe, strip(cafe, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = cafe.rect, du = (x1 - x0) * 0.62;
     Object.assign(cafe, { t: 'espresso_bar', front: f, gy: height(x0 + du, f === 'n' ? z0 - 1.2 : z1 + 1.2), wall: 'brick' });
   }
+  // the three more (shops.js, §1g): the public bar of a sandstone hotel at the Rocks' edge, a newsagent and a greengrocer
+  const used = new Set(cafe ? [cafe] : []);
+  for (const [kind, tx, tz, wall, name] of [['pub', -100, 30, 'sandstone_dressed', 'HOTEL'], ['newsagent', -80, 130, null, 'NEWSAGENT'], ['greengrocer', 70, 150, null, 'FRUIT VEG']]) {
+    const c = best(LOTS.filter((l) => !l.t && !used.has(l) && !inRect(AMP, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 14) && ['n', 's'].some((f) => clearR(l, strip(l, f))) && l.rect[2] - l.rect[0] >= 11 && l.rect[3] - l.rect[1] >= 11), tx, tz);
+    if (!c) continue;
+    used.add(c);
+    const f = clearR(c, strip(c, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = c.rect, du = (x1 - x0) * (kind === 'pub' ? 0.5 : 0.3) + 0.3;
+    Object.assign(c, { t: 'shop_room', kind, name, front: f, gy: height(x0 + du, f === 'n' ? z0 - 1.2 : z1 + 1.2), ...(wall ? { wall } : {}) });
+  }
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
