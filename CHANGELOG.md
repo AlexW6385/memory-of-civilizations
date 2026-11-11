@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.56 — Kaifeng, Lin'an and Foguang, second pass (2026-11-11)
+
+Kaifeng's streets are narrower and its fronts continuous, with boarded doors, shutters, signboards and weathered plaster; earth lanes between paved shop streets; a paved monastery court with beds of pines and stele pavilions; colour gates rebuilt after the scroll; hawkers' stalls at the Rainbow Bridge and goods, carts, beasts and porters along every front. Lin'an builds its own Song shop houses, fills the Imperial Way's frontage, paves the canal streets, gives the Liuhe Pagoda a stone stair with lions, steles and old trees, faces the city wall in brick and plants the Su causeway with willow and peach; its streets carry lanterns, tea stoves, hawkers and boatmen's gear. Foguang's village yards and lanes fill with the goods of a mountain village, its courts with pines in raised beds.
+
 ## v10.57 — Films without stutter (2026-11-10)
 
 Recorded films no longer repeat a frame every ten or so (the canvas is now presented before the next frame is drawn). Suzhou's film has a new route in late-afternoon light (roofs, the canal, up over the residence to the garden and the pagoda, the stone boat, the lotus and the hall, the crane up) and an original score (`tools/film/suzhou-score.py`).

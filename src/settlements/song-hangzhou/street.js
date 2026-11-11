@@ -219,7 +219,7 @@ export function streetPlans(base) {
       if (r() < 0.1) person(P(0.3 + r() * 0.4, 1.2), y0, faceTo(out), { pose: 'squat', dress: 'robe', woman: true, hat: 'none' });
     }
     // washing out of an upper window
-    if (l.storeys > 1 && r() < (way ? 0.1 : where === 'canal' ? 0.4 : 0.25)) put({ t: 'laundry_pole', at: P(0.25 + r() * 0.5, -0.5), y: y0 + 4.2, rot, len: 1.6, prop: false, seed: seed() });
+    if (l.storeys > 1 && r() < (way ? 0.1 : where === 'canal' ? 0.4 : 0.25)) put({ t: 'laundry_pole', at: P(0.25 + r() * 0.5, -0.5), y: y0 + 4.95, rot, len: 1.6, prop: false, seed: seed() });
   }
 
   // ---- the streets: lamp posts, hawkers, sedan chairs, stalls ----
