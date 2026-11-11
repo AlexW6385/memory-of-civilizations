@@ -13,7 +13,7 @@ export function pavement(el, { bag }) {
     const A = [x0, ya + 0.04, z0], B = [x1, ya + 0.04, z0], C = [x1, yb + 0.04, z1], D = [x0, yb + 0.04, z1];
     T.push(...A, ...C, ...B, ...A, ...D, ...C);
   }
-  if (T.length) bag.add('bluestone', fromTriangles(T));
+  if (T.length) bag.add(el.mat ?? 'bluestone', fromTriangles(T));
   for (const [x0, z0, x1, z1, y] of el.curbs ?? []) bag.add('granite_grey', box(x0, y, z0, x1, y + 0.13, z1));
 }
 

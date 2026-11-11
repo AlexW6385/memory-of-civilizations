@@ -16,7 +16,7 @@ import { turned } from './turn.js';
 import { pavement, curb } from './pave.js';
 import { shopRoom } from './shoprooms.js';
 import { rowhouses, castIronFront, chimney, bulkhead, subwayEntrance, face } from './blocks.js';
-import { shopName, shopSign, bladeText, nearEntrance, rng as rng2 } from './dress.js';
+import { shopName, shopSign, bladeText, nearEntrance, rng as rng2, Quads, letters, textLen, fitCell, readDir } from './dress.js';
 
 const LS = 'facade_limestone', CH = 'steel_chrome';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -130,6 +130,17 @@ function soot(bag, [x0, z0, x1, z1], f, y, h, mat, rand) {
   for (let i = 0; i < n; i++) put(i * L / n, (i + 1) * L / n, Math.max(low, top - 0.6 - rand() * 0.9), top);
   for (const u of [0.05, L - 0.55]) put(u, u + 0.5, Math.max(low, top - 4 - rand() * 6), Math.max(low, top - 0.6));
 }
+const ADS = [['COCA-COLA', 'car_red', 'paint_white'], ['CAMELS', 'paint_cab_yellow', 'car_black'], ['LUCKY STRIKE', 'shutter_green', 'gold'], ['WRIGLEYS', 'car_blue', 'paint_white'], ['CHESTERFIELD', 'paint_white', 'car_red'], ['PEPSODENT', 'prussian_blue', 'paint_white'], ['ARROW SHIRTS', 'stucco_cream', 'car_blue'], ['CAMPBELLS SOUP', 'cloth_red', 'paint_white']];
+/** A painted sign board on the roof (docs §1i): on an iron frame behind the parapet, facing the street, the brand's name in block letters (about one low roof in five near the arrival). */
+function roofSign(bag, rect, front, yr, r) {
+  if (r() > 0.22) return;
+  const F = face(rect, front), [name, bm, lm] = ADS[Math.floor(r() * ADS.length)], w = Math.min(8.6, F.L - 2.4), u0 = (F.L - w) / 2 + (r() - 0.5) * 0.6, u1 = u0 + w, hh = 3.0, lift = 1.5, dd = 1.3;
+  bag.add(bm, F.R(u0, u1, yr + lift, yr + lift + hh, -dd, -dd + 0.12)); bag.add('iron', F.R(u0 - 0.05, u1 + 0.05, yr + lift + hh, yr + lift + hh + 0.08, -dd - 0.04, -dd + 0.16)); bag.add('iron', F.R(u0 - 0.05, u1 + 0.05, yr + lift - 0.08, yr + lift, -dd - 0.04, -dd + 0.16));
+  for (let k = 0; k <= 3; k++) { const u = u0 + 0.2 + k * (w - 0.5) / 3; bag.add('iron', F.R(u, u + 0.1, yr, yr + lift, -dd - 0.02, -dd + 0.1)); bag.add('iron', F.R(u, u + 0.1, yr + lift, yr + lift + hh - 0.1, -dd - 0.45, -dd - 0.35)); bag.add('iron', F.R(u, u + 0.08, yr + lift, yr + lift + 0.08, -dd - 0.4, -dd)); }
+  const Q = new Quads(), cell = fitCell(name, w - 0.8, 0.14), tl = textLen(name, cell), rs = readDir(front), mid = (u0 + u1) / 2;
+  letters(Q.t(lm), name, cell, (h, v) => F.P(mid - rs * tl / 2 + rs * h, -dd + 0.13, yr + lift + (hh - 5 * cell) / 2 + v), 0, 0);
+  Q.flush(bag);
+}
 /** skyscraper: { rect, y, h, mat, seed } — a block that steps back as it rises when tall; a cornice or a crown; a tank on lower roofs. */
 function skyscraper(el, { bag, col, lights }) {
   const rand = rng(el.seed || 1), y = el.y ?? 0, h = el.h ?? 40, mat = el.mat ?? LS;
@@ -155,6 +166,7 @@ function skyscraper(el, { bag, col, lights }) {
     if (el.chimney) chimney(bag, el.chimney[0], y + h + 0.04, el.chimney[1], rand);
     if (h > 18 && rand() < 0.5) bulkhead(bag, (r[0] + r[2]) / 2 + (rand() - 0.5) * (r[2] - r[0]) * 0.5, y + h + 0.04, (r[1] + r[3]) / 2 + (rand() - 0.5) * 3, rand);
     if (el.tanks !== false && rand() < 0.4) tank(bag, (r[0] + r[2]) / 2 + (rand() - 0.5) * 4, y + h + 0.8, (r[1] + r[3]) / 2 + (rand() - 0.5) * 4);
+    if (el.front && h >= 18 && nearEntrance((r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 260)) roofSign(bag, r, el.front, y + h + 0.8, rng2((el.seed || 1) ^ 0x2468ace));
     return;
   }
   // the setbacks: base, tower, top stage

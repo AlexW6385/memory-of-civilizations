@@ -1,8 +1,9 @@
 // The blocks' buildings (docs/settlements/new-york.md §5) and the street's life (§5a): the traffic of
 // 1931 on the avenues and cross streets — Checker and Yellow cabs among black, cream and blue
 // motor cars — people on the pavements, lamp posts along the avenues.
-import { RADIUS, AVENUES, STREETS, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity, frontPoint, pavements, roomLots } from './layout.js';
+import { RADIUS, AVENUES, STREETS, GCT, BRYANT, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity, frontPoint, pavements, roomLots } from './layout.js';
 import { entranceOf } from './plan.js';
+import { concoursePeople } from '../../styles/artdeco/concourse.js';
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
 // settlement's by the style's `turned`, the life of the streets — single placed things — moved and
 // turned here, and each tile's centre with it)
@@ -137,6 +138,38 @@ function pavePlans() {
   for (const it of items) tile(slot(it.at)).items.push(it);
   return [...tiles].map(([k, t]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-street-${k}`, [{ t: 'pavement', segs: t.segs, curbs: t.curbs }, { t: 'curb', items: t.items }]), center: toCity(i * 150 + 75, j * 150 + 75), near: 320 }; });
 }
+/**
+ * Bryant Park behind the Library (docs §1l): gravel walks round the lawns and across them to a paved plaza at the middle, slatted benches
+ * facing the walks (men in worn coats on many of them: it is 1931), lamp standards between. In grid-frame tiles like the streets.
+ */
+function parkPlans() {
+  const [x0, z0, x1, z1] = BRYANT, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, rand = rng0(1936), segs = [], plaza = [], items = [], seated = [];
+  const strip = (a, b, c, d, out = segs) => { const nx = Math.max(1, Math.ceil((c - a) / 12)), nz = Math.max(1, Math.ceil((d - b) / 12)); for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) { const r = [a + (c - a) * i / nx, b + (d - b) * j / nz, a + (c - a) * (i + 1) / nx, b + (d - b) * (j + 1) / nz]; out.push([...r, height(r[0], r[1]), height(r[0], r[3])]); } };
+  const I = 4.2, w = 3;
+  strip(x0 + I, z0 + I, x1 - I, z0 + I + w); strip(x0 + I, z1 - I - w, x1 - I, z1 - I); strip(x0 + I, z0 + I + w, x0 + I + w, z1 - I - w); strip(x1 - I - w, z0 + I + w, x1 - I, z1 - I - w);
+  strip(x0 + I + w, cz - 2, cx - 7, cz + 2); strip(cx + 7, cz - 2, x1 - I - w, cz + 2); strip(cx - 2, z0 + I + w, cx + 2, cz - 7); strip(cx - 2, cz + 7, cx + 2, z1 - I - w);
+  strip(cx - 7, cz - 7, cx + 7, cz + 7, plaza);
+  // benches facing the walks, a lamp standard between every few
+  const bench = (x, z, rot) => { items.push({ k: 'bench', at: [x, z], y: height(x, z), rot, seed: Math.floor(rand() * 1e6) }); if (rand() < 0.4) seated.push({ at: [x, z], y: height(x, z) + 0.0, rot, men: rand() < 0.7 }); };
+  const lamp = (x, z) => items.push({ k: 'lampost', at: [x, z], y: height(x, z), rot: 0, seed: 1 });
+  const L = [[x0 + I + w / 2, z0 + I + w / 2, x1 - I - w / 2, z0 + I + w / 2], [x0 + I + w / 2, z1 - I - w / 2, x1 - I - w / 2, z1 - I - w / 2], [x0 + I + w / 2, z0 + I + w / 2, x0 + I + w / 2, z1 - I - w / 2], [x1 - I - w / 2, z0 + I + w / 2, x1 - I - w / 2, z1 - I - w / 2]];
+  for (const [a, b, c, d] of L) {
+    const horiz = b === d, len = horiz ? c - a : d - b;
+    for (let t = 7; t < len - 4; t += 13) for (const sd of [-1, 1]) {
+      const x = horiz ? a + t : a + sd * (w / 2 + 0.6), z = horiz ? b + sd * (w / 2 + 0.6) : b + t;
+      if ((horiz ? x : z) % 2 > 2.5 && rand() < 0.3) continue;
+      // facing the walk: the bench's front (+z in its frame) toward the path's middle
+      const toward = horiz ? (sd > 0 ? Math.PI : 0) : (sd > 0 ? -Math.PI / 2 : Math.PI / 2);
+      bench(x, z, toward + Math.PI);   // (the seat's front is −z in its frame)
+    }
+    for (let t = 14; t < len - 6; t += 26) { const x = horiz ? a + t : a + w / 2 + 0.9, z = horiz ? b + w / 2 + 0.9 : b + t; lamp(horiz ? x : a - w / 2 - 0.9, horiz ? z : z); }
+  }
+  for (const sd of [-1, 1]) { bench(cx + sd * 8.5, cz - 9, Math.PI); bench(cx + sd * 8.5, cz + 9, 0); bench(cx - 9, cz + sd * 8.5, -Math.PI / 2); bench(cx + 9, cz + sd * 8.5, Math.PI / 2); lamp(cx + sd * 7.8, cz + sd * 7.8); lamp(cx + sd * 7.8, cz - sd * 7.8); }
+  const tile = base('new-york-park', [{ t: 'pavement', segs, curbs: [], mat: 'pebbles' }, { t: 'pavement', segs: plaza, curbs: [], mat: 'granite_block' }, { t: 'curb', items }]);
+  const DR = ['cloth_grey', 'cloth_brown', 'cloth_black', 'cloth_indigo'], pick = (a) => a[Math.floor(rand() * a.length)];
+  const people = seated.map((p) => placed({ t: 'figure', at: [p.at[0], p.at[1]], y: p.y + 0.0, rot: p.rot, seed: Math.floor(rand() * 1e9), skin: pick(['skin_light', 'skin_light', 'skin_medium']), pose: 'sit', dress: p.men ? 'trousers' : 'robe', cloth: pick(DR), cloth2: 'cloth_white', hat: p.men ? 'brim' : 'cap', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']) }));
+  return [{ ...tile, center: toCity(cx, cz), near: 260 }, { ...base('new-york-park-life', []), elements: people, style: 'life', center: toCity(cx, cz), near: 200 }];
+}
 /** The lot of the diner (on 34th Street east of Fifth) and the walk-up (beside it), §1f. */
 const lotAt = ([x, z]) => lots().find((l) => inRect(l.rect, x, z));
 function special(l) {
@@ -185,9 +218,20 @@ function shopLife() {
   for (const e of out) { const k = `${Math.floor(e.at[0] / 150)},${Math.floor(e.at[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-shop-life-${k}`, []), elements: list.map(placed), style: 'life', center: toCity(i * 150 + 75, j * 150 + 75), near: 200 }; });
 }
+/** The people of Grand Central's Main Concourse (life style): travellers on the benches and waiting at the gates, the queue at the ticket windows, the crowd at the information booth, red-capped porters among them. */
+function gctLife() {
+  const rand = rng(1935), [x0, z0, x1, z1] = GCT, y = height((x0 + x1) / 2, (z0 + z1) / 2);
+  const DR = ['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo', 'cloth_grey'], pick = (a) => a[Math.floor(rand() * a.length)];
+  const list = concoursePeople({ x0, z0, x1, z1, zc: z1 - 8 - 1.6, y, T: 1.2 }).map((p, i) => {
+    const woman = rand() < 0.4, porter = p.role === 'walk' && i % 4 === 0;
+    return placed({ t: 'figure', at: p.at, y: p.y, rot: p.rot, seed: Math.floor(rand() * 1e9), skin: pick(['skin_light', 'skin_light', 'skin_medium', 'skin_dark']), pose: p.role === 'sit' ? 'sit' : 'stand',
+      dress: woman && !porter ? 'robe' : 'trousers', cloth: porter ? 'cloth_black' : pick(DR), cloth2: pick(['cloth_white', 'cloth_grey']), hat: porter ? 'cap' : woman ? pick(['cap', 'none']) : 'brim', hatMat: porter ? 'cloth_red' : pick(['cloth_black', 'cloth_grey', 'cloth_brown']), ...(porter ? { over: 'belt' } : {}) });
+  });
+  return { ...base('new-york-gct-life', []), elements: list, style: 'life', center: toCity((x0 + x1) / 2, (z0 + z1) / 2), near: 160 };
+}
 export async function buildings() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l) }])));
   const dl = dinerLife(), c = toCity(...DINER_AT);
-  return [...plans, ...streetLife(), ...yards(), ...pavePlans(), ...shopLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
+  return [...plans, ...streetLife(), ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }
