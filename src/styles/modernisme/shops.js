@@ -44,7 +44,7 @@ export function layout(W, dc) {
 }
 
 /** The trades of a plot's shops: pure, from the plot's seed (the same for the building and for the life that fills it). */
-export function plotShops(p, nb, bw, on) {
+export function plotShops(p, nb, bw, on, lim = [-1e9, 1e9]) {
   if (!on) return [];
   const door = Math.floor(nb / 2), r = rng((p.seed ^ 0x9e3779b1) >>> 0), out = [];
   const make = (i0, i1, side) => {
@@ -52,6 +52,7 @@ export function plotShops(p, nb, bw, on) {
     // (a trade by weight; none twice on one plot)
     let t, g = 0; do { t = TRADE_LIST[Math.floor(r() * TRADE_LIST.length)]; } while (out.some((o) => o.trade === t) && ++g < 6);
     const s0 = p.a + i0 * bw, s1 = p.a + i1 * bw, nbay = i1 - i0;
+    if (s0 < lim[0] || s1 > lim[1]) return;                                  // (clear of the corner houses' solid chamfers)
     out.push({ trade: t, s0, s1, nbay, bw, door: side === 'R' ? 'L' : 'R', seed: Math.floor(r() * 1e9) });         // the door at the end nearer the portal
   };
   make(0, door, 'L'); make(door + 1, nb, 'R');

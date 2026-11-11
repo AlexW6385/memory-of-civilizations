@@ -84,6 +84,7 @@ function put(bag, fr, pieces, s, y, reach = 420) {
   for (const [m, g] of pieces) { if (bag.addInstance) bag.addInstance(m, g, M.clone(), { reach }); else bag.add(m, g.clone().applyMatrix4(M)); }
 }
 const SHOPS = makeShops({ proto, put });
+const CORNER_CLEAR = 5;
 /** Louvred shutters at a window: folded open against the wall, or closed over it, or one leaf drawn. */
 function shutters(bag, F, ww, y0, y1, state, mat) {
   if (state === 0) { bag.add(mat, F(-ww / 2, ww / 2, 0.03, 0.07, y0, y1)); return; }
@@ -321,7 +322,7 @@ export function blockShops(el) {
   for (const p of plots) {
     const fr = frame(P8[2 * p.k], P8[2 * p.k + 1]); if (!fr.axis) continue;
     const nb = Math.max(1, Math.round((p.b - p.a) / 3.4));
-    for (const sh of plotShops(p, nb, (p.b - p.a) / nb, true)) {
+    for (const sh of plotShops(p, nb, (p.b - p.a) / nb, true, [CORNER_CLEAR, 2 * ((el.s ?? 70) / 2 - (el.ch ?? 12)) - CORNER_CLEAR])) {
       const yS = y + (el.dz ?? 0) * (fr.at((sh.s0 + sh.s1) / 2, 0)[1] - el.c[1]);
       out.push({ ...sh, y: yS, people: shopPeople(sh).map((q) => ({ role: q.role, at: fr.at(q.at[0], q.at[1]), face: [fr.u[0] * q.face[0] + fr.n[0] * q.face[1], fr.u[1] * q.face[0] + fr.n[1] * q.face[1]] })), door: fr.at(sh.door === 'L' ? sh.s0 + sh.bw / 2 : sh.s1 - sh.bw / 2, 0), n: fr.n });
     }
@@ -364,7 +365,7 @@ function block(el, ctx) {
     const fr = frame(P8[2 * k], P8[2 * k + 1]), pr = rng(seed);
     bounds[k].push(a, b);
     const h = pickH(pr), mat = FACADES[Math.floor(pr() * FACADES.length)];
-    const nbp = Math.max(1, Math.round((b - a) / 3.4)), shops = plotShops({ a, b, seed }, nbp, (b - a) / nbp, !!el.shops && fr.axis);
+    const nbp = Math.max(1, Math.round((b - a) / 3.4)), shops = plotShops({ a, b, seed }, nbp, (b - a) / nbp, !!el.shops && fr.axis, [CORNER_CLEAR, 2 * (o - ch) - CORNER_CLEAR]);
     if (shops.length) SHOPS.mass(ctx, fr, a, b, D, y, h, mat, shops, (u) => y + (el.dz ?? 0) * (fr.at(u, 0)[1] - cz));
     else {
       bag.add(mat, fr.F(a, b, -D, 0, y - 1.2, y + h));
