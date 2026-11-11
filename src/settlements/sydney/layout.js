@@ -98,6 +98,16 @@ export const GARDEN = [150, -38, 420, 150];
 export const STREETS_X = [-250, -180, -110, -40, 30, 100];       // George, Pitt and the rest, running south
 export const STREETS_Z = [70, 140, 210, 280, 350];
 const onStreet = (x, z) => STREETS_X.some((s) => Math.abs(x - s) < 9) || STREETS_Z.some((s) => Math.abs(z - s) < 8);
+/**
+ * The streets as the lot grid leaves them: the one 16 m cell each of the streets above takes out of the grid (lots start on the
+ * grid's lines, x = −440 + 16k and z = −120 + 16k), as [from, to, centre] — the cells' real extent, not the nominal axes.
+ */
+export function streetCells() {
+  const xs = [], zs = [];
+  for (let x = -RADIUS + 20; x < RADIUS - 20; x += 16) if (STREETS_X.some((s) => Math.abs(x + 8 - s) < 9)) xs.push([x, x + 16, x + 8]);
+  for (let z = -120; z < RADIUS - 20; z += 16) if (STREETS_Z.some((s) => Math.abs(z + 8 - s) < 8)) zs.push([z, z + 16, z + 8]);
+  return { xs, zs };
+}
 let LOTS = null;
 /** The city's buildings: sandstone terraces in the Rocks, office towers of the 1960s and 70s among older blocks in the city. */
 export function lots() {
@@ -107,7 +117,8 @@ export function lots() {
   for (let x = -RADIUS + 20; x < RADIUS - 20; x += 16) for (let z = -120; z < RADIUS - 20; z += 16) {
     const w = 11 + rand() * 4, d = 11 + rand() * 4, cx = x + 8, cz = z + 8;
     if (Math.hypot(cx, cz) > RADIUS - 45 || shore(cx, cz) < 10 || inRect(GARDEN, cx, cz, 4) || inRect(MACQUARIE, cx, cz, 4) || inRect(QUAY, cx, cz, 10) || inRect(BENNELONG, cx, cz, 4) || onStreet(cx, cz)
-      || Math.abs(cx - BRIDGE.x) < 31 && cz < -30 || Math.hypot(cx - AUSTRALIA_SQ[0], cz - AUSTRALIA_SQ[1]) < 34 || rand() < 0.12) continue;
+      || Math.abs(cx - BRIDGE.x) < 31 && cz < -30 || Math.hypot(cx - AUSTRALIA_SQ[0], cz - AUSTRALIA_SQ[1]) < 34) continue;
+    const gap = rand() < 0.12;      // (a lot the city has not built up: a low shop or a garage, not a bare block)
     const rocks = cx < -100 && cz < 70, ys = [height(cx - w / 2, cz - d / 2), height(cx + w / 2, cz - d / 2), height(cx - w / 2, cz + d / 2), height(cx + w / 2, cz + d / 2)];
     let h, mat;
     if (rocks) {
@@ -116,7 +127,7 @@ export function lots() {
       LOTS.push({ t: 'rocks_terrace', rect: [x, z, x + w, z + d], y: Math.max(...ys), y0: Math.min(...ys), front: Math.floor((z + 1000) / 16) % 2 ? 's' : 'n', kind: store ? 'store' : 'terrace', seed });
       continue;
     }
-    h = 15 + rand() * 30; mat = ['facade_buff', 'facade_grey', 'facade_limestone'][Math.floor(rand() * 3)]; if (rand() < 0.22) { h = 60 + rand() * 90; mat = rand() < 0.6 ? 'facade_glass' : 'facade_grey'; }
+    h = 15 + rand() * 30; mat = ['facade_buff', 'facade_grey', 'facade_limestone'][Math.floor(rand() * 3)]; if (gap) h = 6.5 + rand() * 5; else if (rand() < 0.22) { h = 60 + rand() * 90; mat = rand() < 0.6 ? 'facade_glass' : 'facade_grey'; }
     LOTS.push({ rect: [x, z, x + w, z + d], y: Math.max(...ys), h: Math.round(h), mat, seed: Math.floor(rand() * 1e6), tanks: false });
   }
   // shop fronts only on the faces with a street or a lane of at least 3 m before them
