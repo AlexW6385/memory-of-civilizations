@@ -33,6 +33,7 @@ import { ground as petra } from './petra/ground.js';
 import { ground as knossos } from './knossos/ground.js';
 import { ground as rapaNui } from './rapa-nui/ground.js';
 import { ground as maori } from './maori/ground.js';
+import { ground as nanMadol } from './nan-madol/ground.js';
 import { ground as athens } from './athens/ground.js';
 import { ground as rome } from './rome/ground.js';
 import { ground as constantinople } from './constantinople/ground.js';
@@ -128,6 +129,7 @@ export const GROUNDS = {
   knossos,
   'rapa-nui': rapaNui,
   maori,
+  'nan-madol': nanMadol,
   athens,
   rome,
   constantinople,
@@ -231,6 +233,7 @@ const LOADERS = {
   knossos: () => import('./knossos/index.js'),
   'rapa-nui': () => import('./rapa-nui/index.js'),
   maori: () => import('./maori/index.js'),
+  'nan-madol': () => import('./nan-madol/index.js'),
   athens: () => import('./athens/index.js'),
   rome: () => import('./rome/index.js'),
   constantinople: () => import('./constantinople/index.js'),
