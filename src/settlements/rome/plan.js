@@ -2,13 +2,14 @@
 // building of the previous design, src/buildings/pantheon) with its forecourt; the Baths of
 // Agrippa; the Saepta Julia; the Stadium of Domitian.
 
-import { BATHS, SAEPTA, STADIUM } from './layout.js';
+import { BATHS, SAEPTA, STADIUM, SAEPTA_GATES } from './layout.js';
+import '../../styles/roman/saepta.js';
 import '../../styles/roman/baths.js';
 import pantheonPlan from '../../buildings/pantheon/plan.js';
 
 const E = [];
 E.push({ t: 'baths_agrippa', rect: BATHS });
-E.push({ t: 'porticus', rect: SAEPTA, h: 9, depth: 7 });
+E.push({ t: 'saepta', rect: SAEPTA, depth: 7, gates: SAEPTA_GATES });
 E.push({ t: 'stadium', rect: STADIUM, h: 20, depth: 28, rows: 14 });
 
 export const campus = {

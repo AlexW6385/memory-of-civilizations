@@ -11,6 +11,17 @@ export const SAEPTA = [78, -230, 138, 90];
 export const STADIUM = [-290, -175, -184, 100];
 export const FORUM = [-152, -158, -56, -70];                  // the square west of the Pantheon's forecourt, a temple at its west end
 export const TEMPLE = [-150, -127, -114, -101];               // the podium, facing east onto the square
+export const SAEPTA_GATES = { w: [-150, -70, 10], e: [-150, -70, 10], n: [108], s: [108] };
+/** Shops under the Saepta's portico, set against the long walls with their fronts to the court. */
+export function saeptaRows() {
+  const [x0, z0, x1, z1] = SAEPTA, out = [], t = 1.4, dep = 5, rand = rng(31);
+  for (let z = z0 + 8; z + 13.2 < z1 - 8; z += 13.2) {
+    if (SAEPTA_GATES.w.some((g) => z + 13.2 > g - 6 && z < g + 6)) continue;
+    out.push({ rect: [x0 + t, z, x0 + t + dep, z + 13.2], front: 'e', n: 3, storeys: 1, seed: Math.floor(rand() * 1e6) });
+    out.push({ rect: [x1 - t - dep, z, x1 - t, z + 13.2], front: 'w', n: 3, storeys: 1, seed: Math.floor(rand() * 1e6) });
+  }
+  return out;
+}
 export const PISTRINUM = [80, 149, 94, 160];                  // the mill-bakery on the street at the south
 export const LATRINE = [100, 152, 109, 160];
 export const VIA_LATA = { x: 175, w: 10 };

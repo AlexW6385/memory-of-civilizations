@@ -1,7 +1,7 @@
 // The insulae of the Campus Martius (docs/settlements/rome.md §5): in 100 m tiles, each in full
 // (shops, windows, shutters, balconies, cornices) near and in outline far (src/settlements/lod.js).
 import { lodTiles } from '../lod.js';
-import { RADIUS, VIA_LATA, lots, inRect, rows, fountains, fills, gardens, FORUM, TEMPLE, PISTRINUM, LATRINE } from './layout.js';
+import { RADIUS, VIA_LATA, lots, inRect, rows, saeptaRows, fountains, fills, gardens, FORUM, TEMPLE, PISTRINUM, LATRINE } from './layout.js';
 import '../../styles/roman/ways.js';
 import { DOMUS, LITTER, lifePlan } from './life.js';
 const site = (id, elements, rooms = []) => ({ id, style: 'rome-site', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' } });
@@ -30,7 +30,7 @@ export async function town() {
   }
   for (const f of fills()) { ways.push({ t: 'alley_fill', ...f }); if (f.front === 'e') ways.push({ t: 'crossing', at: [xs, (f.rect[1] + f.rect[3]) / 2], along: 'x', w: VIA_LATA.w - 2.4 }); }
   for (const g of gardens()) ways.push({ t: 'hortus', ...g });
-  const tiles = await lodTiles('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'fountain', ...f })), ...forum], { R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
+  const tiles = await lodTiles('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r })), ...saeptaRows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'fountain', ...f })), ...forum], { R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
   const [x0, z0, x1, z1] = DOMUS;
   return [...tiles,
     site('rome-domus', [{ t: 'domus', rect: DOMUS, y: 0 }, { t: 'litter', at: LITTER.at, y: 0, rot: LITTER.rot }], [
