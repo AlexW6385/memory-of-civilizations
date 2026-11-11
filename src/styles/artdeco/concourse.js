@@ -34,7 +34,7 @@ export function concourse(bag, col, lights, o) {
   for (let u = hx0 + 3; u < hx1 - 2; u += 6) bag.add('limestone', box(u - 0.3, y + dk - 1.0, zc, u + 0.3, y + dk - 0.6, z1 - T));
   for (const px of [hx0 + 10.7 * 1, hx0 + 10.7 * 3, hx0 + 10.7 * 5, hx0 + 10.7 * 7]) for (const pz of [zc + 3.3, zc + 7.2]) { bag.add(TR, box(px - 0.7, y, pz - 0.7, px + 0.7, y + dk - 0.6, pz + 0.7)); bag.add(GB, box(px - 0.76, y + 0.12, pz - 0.76, px + 0.76, y + 0.18, pz + 0.76)); bag.add('limestone', box(px - 0.9, y + dk - 1.0, pz - 0.9, px + 0.9, y + dk - 0.6, pz + 0.9)); col.rect([px - 0.7, pz - 0.7, px + 0.7, pz + 0.7], y, y + dk); }
   // ── the floor: marble, a dark border, a diagonal grid of dark lines ──
-  bag.add('marble_floor', box(hx0, y - 0.5, hz0, hx1, fy, z1 - T)); bag.add(MB, box(hx0 + 0.9, fy, hz0 + 0.9, hx1 - 0.9, fy + 0.004, hz0 + 1.1)); bag.add(MB, box(hx0 + 0.9, fy, zc - 1.1, hx1 - 0.9, fy + 0.004, zc - 0.9));
+  bag.add('marble_pink', box(hx0, y - 0.5, hz0, hx1, fy, z1 - T)); bag.add(MB, box(hx0 + 0.9, fy, hz0 + 0.9, hx1 - 0.9, fy + 0.004, hz0 + 1.1)); bag.add(MB, box(hx0 + 0.9, fy, zc - 1.1, hx1 - 0.9, fy + 0.004, zc - 0.9));
   { const Q = new Quads(); for (let u = hx0 + 1.07; u < hx1 - 1; u += 5.35) Q.up(MB, [u - 0.06, fy + 0.006, hz0 + 1.1], [u + 0.06, fy + 0.006, hz0 + 1.1], [u + 0.06, fy + 0.006, zc - 1.1], [u - 0.06, fy + 0.006, zc - 1.1]); for (let v = hz0 + 1.1 + 4.6; v < zc - 1.1; v += 4.6) Q.up(MB, [hx0 + 0.9, fy + 0.006, v - 0.06], [hx0 + 0.9, fy + 0.006, v + 0.06], [hx1 - 0.9, fy + 0.006, v + 0.06], [hx1 - 0.9, fy + 0.006, v - 0.06]); Q.flush(bag); }
   // ── the walls' lining: a marble base, the pilasters, the cornice at the springing ──
   const lineN = (u0, u1, y0, y1, m = TR) => bag.add(m, box(u0, y0, hz0, u1, y1, hz0 + 0.12));
