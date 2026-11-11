@@ -44,6 +44,7 @@ function planting(x, z) {
   }
   if (inRect(WEST_MARKET, x, z, 1) || inRect(EAST_MARKET, x, z, 1) || inWard(x, z) || inRect(ACADEMY, x, z, 1)) return null;
   for (const q of QUARTERS) if (inRect(q, x, z, 1)) return null;
+  if (inRect([AX - 92, -135, AX + 92, 112], x, z)) return null;
   if (inRect(PALACE, x, z, 0)) return hash2(x * 0.2, z * 0.2) < 0.06 ? { pagoda_tree: 0.5, grass: 4 } : { grass: 5 };
   if (inRect(CHANGLE, x, z, 0)) return hash2(x * 0.2, z * 0.2) < 0.05 ? { pagoda_tree: 0.5, grass: 4 } : { grass: 5 };
   if (!inCity(x, z)) {

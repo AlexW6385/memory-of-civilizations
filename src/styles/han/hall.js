@@ -20,12 +20,13 @@ export function terrace(el, ctx) {
     bag.add('bluestone', box(x0 - 0.15, t.top - 0.3, z0, x0 + 0.5, t.top, z1));
     bag.add('bluestone', box(x1 - 0.5, t.top - 0.3, z0, x1 + 0.15, t.top, z1));
     // the red band at the foot of each tier's face (the vermilion steps)
-    bag.add('palace_wall', box(x0 - 0.06, prev, z1, x1 + 0.06, prev + 0.35, z1 + 0.06));
-    void prev;
+    const gaps = i === el.tiers.length - 1 || !el.ramp ? [] : [];
+    void gaps;
+    for (const [a, b] of el.ramp ? [[x0 - 0.06, el.ramp.x[0] - 0.1], [el.ramp.x[1] + 0.1, x1 + 0.06]] : [[x0 - 0.06, x1 + 0.06]]) if (b > a) bag.add('palace_wall', box(a, prev + 0.01, z1 + 0.01, b, prev + 0.35, z1 + 0.07));
   });
   const crown = el.tiers[el.tiers.length - 1], [cx0, cz0, cx1, cz1] = crown.r;
   const rp = el.ramp, rect = [rp.x[0], rp.z0, rp.x[1], rp.z1];
-  steps(bag, col, rect, 0, crown.top, 'n', 'bluestone', 0.18, -0.4);
+  steps(bag, col, rect, 0, crown.top, 'n', 'brick_paving', 0.18, -0.4);
   // the ramp's balustrade: low rails and posts of red lacquer along both sides
   for (const x of rp.x) for (let z = rp.z1; z > rp.z0; z -= 3) {
     const h = crown.top * (rp.z1 - z) / (rp.z1 - rp.z0);
@@ -48,7 +49,10 @@ const lamp = (bag, x, y, z) => {
   bag.add('bronze', lathe([[0.2, 0], [0.18, 0.05], [0.05, 0.12], [0.04, 1.1], [0.1, 1.15], [0.24, 1.25], [0.2, 1.3]], 10, null, x, y, z));
   bag.add('gilt_bronze', lathe([[0.001, 1.3], [0.12, 1.3], [0.12, 1.34], [0.001, 1.34]], 8, null, x, y, z));
 };
-const censer = (bag, x, y, z) => bag.add('bronze', lathe([[0.1, 0], [0.12, 0.2], [0.2, 0.3], [0.26, 0.45], [0.2, 0.6], [0.08, 0.66], [0.001, 0.7]], 10, null, x, y, z));
+const censer = (bag, x, y, z) => {
+  bag.add('bronze', lathe([[0.001, 0], [0.16, 0], [0.16, 0.05], [0.05, 0.1], [0.05, 0.28], [0.17, 0.34], [0.17, 0.5], [0.12, 0.56], [0.1, 0.62], [0.001, 0.66]], 10, null, x, y, z));
+  bag.add('bronze', lathe([[0.17, 0.5], [0.2, 0.5], [0.2, 0.44], [0.17, 0.44]], 10, null, x, y, z));
+};
 
 /**
  * han_hall: { cx, z1 (the front column line), bays, bayW, depth, depthW, floor (y), h (columns), roof ('hip' | 'gable'), rise, open: [i0, i1] (the open bays of the front),
@@ -63,7 +67,7 @@ export function hall(el, ctx) {
   bag.add('bluestone', box(x0 - ap, gy - 0.4, z0 - ap, x1 + ap, f - 0.02, z1 + ap));
   bag.add('brick_paving', box(x0 - ap, f - 0.03, z0 - ap, x1 + ap, f, z1 + ap));
   col.floor([x0 - ap, z0 - ap, x1 + ap, z1 + ap], f);
-  bag.add('wood_dark', box(x0, f - 0.025, z0, x1, f + 0.02, z1));
+  bag.add('lacquer_chestnut', box(x0, f - 0.025, z0, x1, f + 0.02, z1));
   // the steps up from the crown: the middle flight and one at each end of the front
   const flights = [el.cx]; if (el.bays >= 7) flights.push(el.cx - el.bayW * 3.3, el.cx + el.bayW * 3.3);
   for (const cx of flights) steps(bag, col, [cx - 2.4, z1 + ap, cx + 2.4, z1 + ap + 3.0], gy, f, 'n', 'bluestone', 0.18, gy - 0.4);
@@ -103,9 +107,10 @@ export function hall(el, ctx) {
     const put = (u0, u1, y0, y1, m) => { const p = R(u0, u1, y0, y1); bag.add(m, box(p.r[0], p.y0, p.r[1], p.r[2], p.y1, p.r[3])); };
     if (door) return;
     put(0, L, f, f + 1.0, 'lime_plaster');
-    put(0, L, f + 4.2, f + H - 0.55, 'lime_plaster');
-    if (win) put(0.45, L - 0.45, f + 1.0, f + 4.2, 'lattice');
-    else put(0, L, f + 1.0, f + 4.2, 'lime_plaster');
+    const wt = Math.min(4.2, H - 1.1) + f - f;
+    if (f + wt < f + H - 0.55) put(0, L, f + wt, f + H - 0.55, 'lime_plaster');
+    if (win) put(0.45, L - 0.45, f + 1.0, f + wt, 'lattice');
+    else put(0, L, f + 1.0, f + wt, 'lime_plaster');
     const p = R(0, L, f, f + H - 0.55); col.rect(p.r, f, f + H - 0.55);
   };
   for (let i = 0; i < el.bays; i++) {

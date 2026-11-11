@@ -7,8 +7,13 @@ import { rng, lotFrame, eaveTilesGable, roofs } from './kit.js';
 
 const WALLS = ['earth_wall', 'earth_wall', 'lime_plaster', 'mud_plaster', 'earth_wall'];
 
-function perimeter(F, W, D, h, gateU, gateW, wm) {
+function perimeter(F, W, D, h, gateU, gateW, wm, noFront = false) {
   const t = 0.5;
+  if (noFront) {
+    F.b(wm, 0, 0, D - t, W, h, D); F.b(wm, 0, 0, 0.2, t, h, D - t); F.b(wm, W - t, 0, 0.2, W, h, D - t);
+    F.b('tile_grey', -0.1, h, D - t - 0.1, W + 0.1, h + 0.28, D + 0.1, false); F.b('tile_grey', -0.1, h, 0.2, t + 0.1, h + 0.28, D - t, false); F.b('tile_grey', W - t - 0.1, h, 0.2, W + 0.1, h + 0.28, D - t, false);
+    return;
+  }
   F.b(wm, 0, 0, 0, gateU - gateW / 2, h, t); F.b(wm, gateU + gateW / 2, 0, 0, W, h, t);
   F.b(wm, 0, 0, D - t, W, h, D); F.b(wm, 0, 0, t, t, h, D - t); F.b(wm, W - t, 0, t, W, h, D - t);
   const cap = (u0, v0, u1, v1) => F.b('tile_grey', u0, h, v0, u1, h + 0.28, v1, false);
@@ -17,7 +22,7 @@ function perimeter(F, W, D, h, gateU, gateW, wm) {
   F.b('timber_red', gateU - gateW / 2 - 0.2, 0, -0.1, gateU - gateW / 2 + 0.1, h + 0.7, t + 0.1); F.b('timber_red', gateU + gateW / 2 - 0.1, 0, -0.1, gateU + gateW / 2 + 0.2, h + 0.7, t + 0.1);
   F.b('timber_red', gateU - gateW / 2 - 0.2, h + 0.3, -0.12, gateU + gateW / 2 + 0.2, h + 0.7, t + 0.12, false);
   F.b('lacquer_black', gateU - gateW / 2 + 0.1, 0, -0.25, gateU - gateW / 2 + 0.2, h - 0.25, 0.9, false);
-  F.roof('gable_roof_c', gateU, t / 2, gateW / 2 + 1.1, 1.2, h + 0.72, 0.9, { mat: 'tile_grey', soffit: 'timber_red', noHorns: true });
+  F.roof('gable_roof_c', gateU, t / 2, gateW / 2 + 1.0, 1.7, h + 0.72, 1.5, { mat: 'tile_grey', soffit: 'timber_red', noHorns: true });
 }
 
 /** A hall of three bays: plaster walls on a low platform, a door and lattice windows on the front (v0), a gabled roof with the ridge along u. */
@@ -89,10 +94,10 @@ export function house(el, ctx) {
   const gateU = Math.max(1.6, Math.min(W - 1.6, W * (0.25 + 0.5 * rand()))), kind = el.kind;
   if (kind === 'row') {
     // a single hall on the lane's side with a short yard behind: the poorer house
-    perimeter(F, W, D, 2.3, gateU, 1.7, wm);
-    const hv = 3.0 + rand() * 1.5;
-    const du = hallBlock(F, 1.2, W - 1.2, hv, hv + 6.0, H - 0.2, wm, true, el.open, rand);
-    if (el.open) furnishHall(F, 1.2, W - 1.2, hv, hv + 6.0, rand, ctx.lights);
+    perimeter(F, W, D, 2.3, gateU, 1.7, wm, true);
+    const hv = 1.4;
+    const du = hallBlock(F, 0.5, W - 0.5, hv, hv + 6.4, H - 0.2, wm, true, el.open, rand);
+    if (el.open) furnishHall(F, 0.5, W - 0.5, hv, hv + 6.4, rand, ctx.lights);
     // a granary on posts, a well-curb and a mortar in the yard
     F.b('bluestone', W - 2.6, 0, D - 3.2, W - 0.9, 0.6, D - 1.5);
     F.b('timber', 0.8, 0, D - 2.8, 2.6, 0.5, D - 0.8, false);

@@ -38,7 +38,7 @@ export function ship(el, ctx) {
   bx([-L / 2, L / 2], [-B / 2, B / 2], y - 0.6, y + 0.9, 'timber');
   bx([-L / 2 - 1.5, -L / 2], [-B / 4, B / 4], y + 0.1, y + 1.1, 'timber');
   bx([L / 2, L / 2 + 1.8], [-B / 4, B / 4], y + 0.1, y + 1.6, 'timber');
-  bx([-L / 2, L / 2], [-B / 2 - 0.1, B / 2 + 0.1], y + 0.7, y + 0.85, 'lacquer_red');
+  bx([-L / 2 + 0.3, L / 2 - 0.3], [-B / 2 - 0.1, B / 2 + 0.1], y + 0.6, y + 0.8, 'lacquer_red');
   bx([-L / 2, L / 2], [-B / 2, B / 2], y + 0.9, y + 1.0, 'wood_dark');
   bx([-4, 3], [-1.8, 1.8], y + 1.0, y + 3.0, 'lime_plaster');
   bx([-4.4, 3.4], [-2.2, 2.2], y + 3.0, y + 3.2, 'timber_red');

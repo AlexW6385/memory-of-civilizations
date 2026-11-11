@@ -4,7 +4,7 @@
 // and the caravans of the Silk Road at the west gate.
 
 import { RADIUS, AX, PALACE, PALACE_WALL, HALL, CROWN, EAST_GATE, SOUTH_GATE, CHANGLE, CHANGLE_HALL, WEST_MARKET, EAST_MARKET, MARKET_WALL, LAKE, LAKE_Y, ACADEMY, WARDS, WARD_WALL, GARDEN_POND, POND_Y, JIAOFANG,
-  CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, TIERS } from './layout.js';
+  RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, TIERS } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'han', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [AX, 60], facing: 'n' }, ...o });
@@ -96,6 +96,8 @@ export async function town() {
       E.push({ t: 'han_pavilion', c: [x, z], A: 5.2, B: 5.2, y: 2.6, h: 4.2, tiers: 2, walls: true });
     }
     E.push({ t: 'han_pond', rect: GARDEN_POND, y: POND_Y });
+    // the paved axial way from the south gate to the ramp, and the paved court at its foot
+    E.push({ t: 'floor', rect: [AX - 6, RAMP.z1 - 0.5, AX + 6, PALACE[3] - 2], y: 0.03, mat: 'bluestone', th: 0.3 }, { t: 'floor', rect: [AX - 26, RAMP.z1 - 0.5, AX + 26, RAMP.z1 + 24], y: 0.02, mat: 'brick_paving', th: 0.3 });
     plans.push(base('han-palace', E));
   }
   // ── the Changle palace ──

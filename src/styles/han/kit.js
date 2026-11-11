@@ -71,7 +71,7 @@ export function eaveTiles(bag, cx, cz, A, B, y, lift = 0.5, step = 0.36, r = 0.1
   bag.add('tile_dark', fromTriangles(out));
 }
 /** The eave-tile ends along the two long eaves of a gabled roof (ridge along x). */
-export function eaveTilesGable(bag, cx, cz, A, B, y, step = 0.4, r = 0.11) {
+export function eaveTilesGable(bag, cx, cz, A, B, y, step = 0.52, r = 0.14) {
   const out = [];
   for (const s of [-1, 1]) for (let x = cx - A + step / 2; x < cx + A; x += step) {
     const z = cz + s * (B + 0.04), yy = y - 0.1;
