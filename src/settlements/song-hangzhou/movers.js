@@ -5,6 +5,7 @@
 // layout), who walks and what floats (as figures of src/objects/figures.js with Song extras: the
 // straight-legged futou, flowers and combs in women's hair), and the boats standing in the water.
 
+import { LAKE_BRIDGES, CAUSEWAY, westLake } from './westlake.js';
 import { streetEntries, imperialRects, canals, bridges, lakeLanes, lots, RADIUS, LEVEL } from './ways.js';
 import { STYLES } from '../../core/build.js';
 import '../../objects/index.js';
@@ -50,8 +51,9 @@ export function walkways() {
 
 /** The canals and the lake's boat lanes (rectangles along which boats run) and the bridges over them. */
 export function waterways() {
-  const rects = [...canals().map((r) => ({ r, weight: 1 })), ...lakeLanes().map((r) => ({ r, weight: 1.6 }))];
-  const br = bridges().map((b) => ({ at: b.at, half: (b.span ?? 8) / 2 + 0.5 }));
+  // (`kind` 'canal' | 'lake' on each rectangle: the edge's water, for the engine to choose the boat by: 'cargo' on the canals, 'covered' on the lake)
+  const rects = [...canals().map((r) => ({ r, weight: 1, kind: 'canal' })), ...lakeLanes().map((l) => ({ ...l, weight: 1.6 }))];
+  const br = [...bridges().map((b) => ({ at: b.at, half: (b.span ?? 8) / 2 + 0.5 })), ...LAKE_BRIDGES.filter((b) => b.kind === 'arch').map((b) => ({ at: [CAUSEWAY.x, b.z], half: CAUSEWAY.half + 1 }))];
   return { rects, bridges: br, clip: RADIUS - 18 };
 }
 
@@ -64,6 +66,9 @@ export async function staticBoats() {
     const u = e.dir ?? [Math.sin(e.rot ?? 0), Math.cos(e.rot ?? 0)], L = e.len ?? 7;
     out.push({ c: e.at, u, hl: L / 2 + (e.moor ? 0.2 : 1.6), hw: e.moor ? 1.27 : 0.9 * L / 7 });
   }
+  // the pleasure boats at the causeway's landing (the landmark's, in its own frame)
+  const [ox, oz] = westLake.origin;
+  for (const e of westLake.elements) if (e.t === 'lake_boat') out.push({ c: [ox + e.at[0], oz + e.at[1]], u: e.dir, hl: (e.len ?? 12) / 2 + 1.0, hw: 1.7 });
   return out;
 }
 

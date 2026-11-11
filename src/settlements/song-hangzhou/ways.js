@@ -12,6 +12,7 @@
 // Without them the riverside quarter of layout.js (road, canal streets, lanes) is used.
 
 import * as L from './layout.js';
+import { LAKE_BRIDGES, CAUSEWAY } from './westlake.js';
 
 export const RADIUS = L.RADIUS;
 export const LEVEL = { street: 0, canal: -1.4, lake: -0.6, river: -2.2, ...(L.LEVEL || {}) };
@@ -32,6 +33,8 @@ export function streetEntries() {
   }
   if (L.ROAD) out.push({ r: [-L.RADIUS + 20, L.ROAD.z0, L.RADIUS - 20, L.ROAD.z1], kind: 'road' });
   for (const c of L.CANAL_STREETS || []) out.push({ r: c, kind: 'canal' });
+  // the Su Causeway's paved walk, from the Imperial Way's north end to Beishan, over its bridges
+  out.push({ r: [CAUSEWAY.x - 2.6, CAUSEWAY.z0, CAUSEWAY.x + 2.6, CAUSEWAY.z1 - 14], kind: 'lane' });
   return out;
 }
 /** The street rectangles. */
@@ -88,25 +91,30 @@ export function inLake(x, z) {
   return x > k.rect[0] && x < k.rect[2] && z > k.rect[1] && z < k.rect[3];
 }
 /**
- * Straight boat lanes across the lake, as long thin rectangles (the engine's boat graph is made of
- * rectangles): a few east–west and north–south tracks kept `margin` m from the shore, in the lake's
- * middle part, crossing so that boats turn at the junctions.
+ * Straight boat lanes on the lake (the engine's boat graph is made of rectangles), kept `margin` m from the shore: an east–west
+ * lane through each arched bridge of the Su Causeway (the water channel under it is 10–12 m wide, the lane 6), running out on both
+ * sides to the shore's margin; north–south lanes in the west basin and the east basin, clear of the causeway, its landing and
+ * the shore. (No lane through the flat-slab bridge, which no pleasure boat passes.)
  */
-export function lakeLanes(margin = 22, width = 14) {
+export function lakeLanes(margin = 16, width = 6) {
   const k = lake();
   if (!k) return [];
-  const [x0, z0, x1, z1] = k.rect, out = [];
-  const ok = (x, z) => inLake(x, z) && [[margin, 0], [-margin, 0], [0, margin], [0, -margin]].every(([dx, dz]) => inLake(x + dx, z + dz));
-  const run = (alongX, c) => {
-    let a = null, b = null;
-    for (let t = alongX ? x0 : z0; t <= (alongX ? x1 : z1); t += 4) {
-      const good = alongX ? ok(t, c) : ok(c, t);
-      if (good) { if (a === null) a = t; b = t; } else if (a !== null) { if (b - a > 60) out.push(alongX ? [a, c - width / 2, b, c + width / 2] : [c - width / 2, a, c + width / 2, b]); a = null; }
-    }
-    if (a !== null && b - a > 60) out.push(alongX ? [a, c - width / 2, b, c + width / 2] : [c - width / 2, a, c + width / 2, b]);
-  };
-  const w = x1 - x0, h = z1 - z0;
-  for (const f of [0.3, 0.5, 0.7]) { run(true, z0 + h * f); run(false, x0 + w * f); }
+  const out = [], cx = CAUSEWAY.x, hb = CAUSEWAY.half;
+  const free = (x, z) => inLake(x, z) && [[margin, 0], [-margin, 0], [0, margin], [0, -margin]].every(([dx, dz]) => inLake(x + dx, z + dz));
+  for (const b of LAKE_BRIDGES) {
+    if (b.kind !== 'arch') continue;
+    let a = cx - hb, c = cx + hb;
+    while (free(a - 3, b.z)) a -= 3;
+    while (free(c + 3, b.z)) c += 3;
+    if (c - a > 60) out.push({ r: [a, b.z - width / 2, c, b.z + width / 2], kind: 'lake' });
+  }
+  return out;   // (north–south lanes would make junctions where two boats can hold each other: none)
+  const zA = LAKE_BRIDGES[0].z - 14, zB = LAKE_BRIDGES[LAKE_BRIDGES.length - 1].z + 14;
+  for (const x of [cx - hb - 40, cx - hb - 120, cx + hb + 36]) {
+    let a = null, c = null;
+    for (let z = zA; z <= zB; z += 3) if (free(x, z)) { if (a === null) a = z; c = z; }
+    if (a !== null && c - a > 40) out.push({ r: [x - width / 2, a, x + width / 2, c], kind: 'lake' });
+  }
   return out;
 }
 

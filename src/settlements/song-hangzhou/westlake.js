@@ -30,6 +30,7 @@ for (const [z, kind, sp, rise] of BR) {
   if (kind === 'arch') E.push({ t: 'ming_arch_bridge', at: [0, z], across: 'z', span: sp + 0.4, width: 5.2, rise, landing: 4.2, y: TOP + 0.04, water: LAKE, bed: BED });
   else E.push({ t: 'ming_slab_bridge', pts: [[0, z - sp / 2 - 1.5], [0, z + sp / 2 + 1.5]], w: 5.2, y: TOP + 0.04, bed: BED });
 }
+export const LAKE_BRIDGES = BR.map(([z, kind, sp]) => ({ z: WL.origin[1] + z, kind, span: sp }));   // world z, kind and the water channel's width, for the boats' lanes
 // lakeside pavilions on the east edge of the bank, between the third and fourth bridges and between the fifth and the sixth
 E.push({ t: 'ming_pavilion', c: [7.2, -9], shape: 'hex', r: 3.0, y: TOP + 0.5, H: 3.6, plat: 0.5, open: [0, 1, 2, 3, 4, 5] });
 E.push({ t: 'ming_pavilion', c: [-7.2, 43], shape: 'square', w: 5, y: TOP + 0.5, H: 3.4, plat: 0.5, open: [0, 1, 2, 3] });
@@ -49,6 +50,7 @@ const tiers = [{ r: 8.2, h: 11 }]; for (let i = 1; i < 5; i++) tiers.push({ r: 8
 E.push({ t: 'liuhe_pagoda', c: WL.leifeng, y: 6, base: { r: 13, h: 1.6 }, tiers, bells: 'iron', interior: true, images: true });
 export const leifengTop = 6 + 1.6 + tiers.reduce((a, t) => a + t.h, 0);
 
+export const CAUSEWAY = { x: WL.origin[0], z0: WL.origin[1] - 100, z1: WL.origin[1] + 126, half: 11 };   // the bank's axis and ends (world)
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 export const westLake = {
   id: 'song-hangzhou-westlake',
