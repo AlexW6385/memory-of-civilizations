@@ -108,7 +108,7 @@ for (const [r, open] of SACRED_ROCK.wayronas) E.push({ t: 'inca_temple', rect: r
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('sacred-plaza', [-52, -62, -18, -24], 0.6, 'open'), room('town', [-95, -175, 95, 175], 0, 'open')];
-const walks = [[[2, 110], [-6, 60], [-14, 30], [-21, 15.5]]];
+const walks = [[[2, 110], [2, 80], [2, 14], [-12, 12], [-21, 15.5]]];
 walks[0].y0 = 0;
 
 export const town = {
