@@ -10,6 +10,7 @@ import { box, frustum, lathe, fromTriangles, orientOutward, rod } from '../../co
 import { sculpt, rows, smooth, bump, blob } from './sculpt.js';
 import { merge, tube } from '../../objects/kit.js';
 import { SCENES, rope } from './scenes.js';
+import { WORKS } from './works.js';
 import '../qing/index.js';
 
 const T = 'tuff_moai', B = 'basalt_ahu';
@@ -500,7 +501,7 @@ function mulchGarden(el, { bag }) {
 
 registerStyle('rapanui', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, moai, quarry_bay: quarryBay, ahu, hare_paenga: harePaenga, hare_moa: hareMoa, manavai, moai_walk: moaiWalk, mulch_garden: mulchGarden, ...SCENES },
+  elements: { ...STYLES.qing.elements, moai, quarry_bay: quarryBay, ahu, hare_paenga: harePaenga, hare_moa: hareMoa, manavai, moai_walk: moaiWalk, mulch_garden: mulchGarden, ...SCENES, ...WORKS },
   objects: {},
 });
 export { sculpt, moaiGeometry };

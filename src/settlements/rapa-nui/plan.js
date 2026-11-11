@@ -2,7 +2,7 @@
 // fifteen moai facing inland, some with pukao; the plaza; the quarry's moai on the cone's slopes,
 // half-cut and lying, or standing buried to the shoulders; the crater lake.
 
-import { AHU, PLAZA, RARAKU, BAYS, height } from './layout.js';
+import { AHU, PLAZA, RARAKU, BAYS, CHIEF, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const E = [], rand = rng(15);
@@ -26,7 +26,7 @@ for (const b of BAYS) E.push({ t: 'quarry_bay', at: b.at, y: b.y, h: b.h, facing
 E.push({ t: 'moai', at: [-36, -15], y: height(-36, -15) - 0.3, h: 6.5, facing: 0.64, lie: true, kind: 'quarry' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('plaza', PLAZA, 0.12, 'open')];
+const rooms = [room('plaza', PLAZA, 0.12, 'open'), room('long-house', [CHIEF.c[0] - CHIEF.len / 2, CHIEF.c[1] - CHIEF.w / 2, CHIEF.c[0] + CHIEF.len / 2, CHIEF.c[1] + CHIEF.w / 2], height(CHIEF.c[0], CHIEF.c[1]) + 0.07, 'hall')];
 const walks = [[[0, 20], [0, 60], [0, 84]]];
 walks[0].y0 = height(0, 20);
 

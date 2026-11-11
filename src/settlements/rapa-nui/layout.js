@@ -73,13 +73,23 @@ export function roadDist(x, z) {
   }
   return d;
 }
+/**
+ * The chief's long house on the plain before the plaza (docs/settlements/rapa-nui.md §4d): a hare paenga
+ * of the great kind (some reached about 45 m), here 26 m, its door to the plaza, a house to walk into.
+ */
+export const CHIEF = { c: [-52, 36], len: 26, w: 4.4, h: 3.6, yaw: Math.PI, seed: 4242, chief: true };
+/** Stone towers (tupa) near the coast: [x, z, radius, height, yaw]. */
+export const TUPA = [[74, 124, 2.7, 3.2, 0.4], [-78, 128, 2.5, 3.0, 1.1], [118, 116, 2.4, 2.9, 2.0]];
+/** Slabs of basalt with carvings (docs/settlements/rapa-nui.md §4d): [x, z, yaw, motifs]. */
+export const PETRO = [[104, 118, 0.2, ['canoe', 'hook', 'tuna']], [92, 134, -0.4, ['turtle', 'octopus', 'hook']], [-96, 118, 0.7, ['tuna', 'canoe']]];
 let HOUSES = null;
 /** The village: boat-shaped houses (long axis roughly east–west), chicken houses and garden walls among them. */
 export function village() {
   if (HOUSES) return HOUSES;
-  const rand = rng(1500), out = { houses: [], moa: [], gardens: [] };
+  const rand = rng(1500), out = { houses: [CHIEF], moa: [], gardens: [] };
   const free = (x, z, m) => !inRect(PLAZA, x, z, m + 6) && !inRect(AHU.rect, x, z, m + 16) && Math.hypot(x - RARAKU.c[0], z - RARAKU.c[1]) > RARAKU.r + m && z < coastZ(x) - 20 && Math.hypot(x, z) < RADIUS - 30 && roadDist(x, z) > m + ROAD_W / 2 + 4
-    && ![...out.houses, ...out.moa, ...out.gardens].some((o) => Math.hypot(o.c[0] - x, o.c[1] - z) < m + 7);
+    && ![...out.houses, ...out.moa, ...out.gardens].some((o) => Math.hypot(o.c[0] - x, o.c[1] - z) < m + 7 + (o.chief ? 16 : 0))
+    && !TUPA.concat(PETRO).some((o) => Math.hypot(o[0] - x, o[1] - z) < m + 6);
   for (let k = 0; k < 2500 && out.houses.length < 40; k++) {
     const x = -260 + rand() * 520, z = -60 + rand() * 180;
     if (free(x, z, 6)) out.houses.push({ c: [x, z], len: 10 + rand() * 7, w: 1.9 + rand() * 0.5, h: 2.2 + rand() * 0.5, yaw: (rand() - 0.5) * 0.5, seed: Math.floor(rand() * 1e6) });
