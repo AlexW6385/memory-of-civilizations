@@ -638,6 +638,20 @@ function machiya(el, { bag, col }) {
   roof(bag, r, H1 + H2 - 0.1, 0.6, 'gable', dep * 0.3, { alongZ: false, sweep: 0 });
   ridgeCap(bag, x0 - 0.6, x1 + 0.6, H1 + H2 - 0.1 + dep * 0.3, (r[1] + r[3]) / 2);
   col.floor(r, H1 + H2);
+  // the fire wall (udatsu) on the party wall: plastered, standing a hand over the roof, capped with tiles; it fills the joint between the houses
+  { const yt = H1 + H2 + dep * 0.3 + 0.5; bag.add(PL, box(x1, 0, r[1], x1 + 0.32, H1 + H2 + 0.35, r[3])); bag.add(PL, box(x1, H1 + H2 + 0.35, r[1] + (r[3] - r[1]) * 0.1, x1 + 0.32, yt, r[3] - (r[3] - r[1]) * 0.1)); bag.add('tile_dark', box(x1 - 0.04, yt, r[1] + (r[3] - r[1]) * 0.1 - 0.04, x1 + 0.36, yt + 0.12, r[3] - (r[3] - r[1]) * 0.1 + 0.04)); col.rect([x1, r[1], x1 + 0.32, r[3]], 0, yt); }
+  // the back: a wing behind a narrow garden court (tsuboniwa) with a pine, a lantern and a well; a single storey under a low gable
+  { const rem = (z1 - z0) - dep;
+    if (rem >= 4) {
+      const wd = rem >= 16 ? 6.5 : Math.min(3.8, rem - 1.2), gap = rem >= 16 ? 2.2 : 1.0, wz0 = f === 's' ? r[1] - gap - wd : r[3] + gap, wz1 = wz0 + wd, wr = [x0 + 0.6, wz0, x1 - 0.6, wz1];
+      bag.add('plaster_grey', box(wr[0], 0, wr[1], wr[2], 0.5, wr[3])); bag.add(PL, box(wr[0], 0.5, wr[1], wr[2], 3.0, wr[3])); col.rect(wr, 0, 3.0);
+      roof(bag, wr, 2.9, 0.4, 'gable', wd * 0.38, { alongZ: false, sweep: 0 });
+      ridgeCap(bag, wr[0] - 0.4, wr[2] + 0.4, 2.9 + wd * 0.38, (wr[1] + wr[3]) / 2);
+      const side = f === 's' ? r[1] - gap / 2 : r[3] + gap / 2;
+      if (rem >= 16) { const px = (x0 + x1) / 2, pz = f === 's' ? r[1] - gap - 0.4 : r[3] + gap + 0.4; void pz; niwaki(bag, col, x0 + 1.4, side, 0, 3.4, el.seed); ishidoro(bag, col, x1 - 1.2, side, 0, 0.9); void px; }
+      bag.add('timber', box(x0 + 0.1, 0, side - 0.03, x1 - 0.1, 1.1, side + 0.03));
+    }
+  }
   // the storehouse at the back
   if (z1 - z0 > 22 && rand() < 0.6) { const kz = f === 's' ? z0 + 2 : z1 - 9; kura(bag, col, [x0 + 0.6, kz, Math.min(x1 - 0.6, x0 + 6), kz + 7]); }
 }

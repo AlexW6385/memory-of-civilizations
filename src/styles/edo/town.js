@@ -9,7 +9,7 @@ import { beamTris } from '../ming/index.js';
 import { barredWindows } from './detail.js';
 
 const PL = 'plaster_castle', WD = 'wood_dark', TL = 'tile_grey';
-export const TRADES = ['cloth', 'pottery', 'rice', 'dye', 'oil', 'sandals', 'sake', 'tea', 'medicine'];
+export const TRADES = ['cloth', 'pottery', 'rice', 'dye', 'oil', 'sandals', 'sake', 'tea', 'medicine', 'paper', 'fish', 'tofu', 'bucket'];
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** A frame for a front facing north or south: B(m, u0, u1, v0, v1, q0, q1), Z(q), at the front line fz. */
@@ -142,6 +142,32 @@ export function machiyaFront(bag, col, { x0, x1, fz, s, H1, seed, trade }) {
     const a = left ? e1 + 0.3 : x0 + 0.3, b = left ? x1 - 0.3 : e0 - 0.3;
     B(WD, a, b, 1.95, 2.0, -0.2, -0.12);
     for (let u = a + 0.1; u < b - 0.1; u += 0.22) B('thatch', u, u + 0.12, 1.5, 1.95, -0.18, -0.14);
+  } else if (trade === 'paper') {
+    // washi: bundles of sheets on a rack and rolls leaned at the post, a hanging lamp-paper sample
+    B(WD, tx - 0.2, tx + 1.6, 0.0, 0.9, -0.7, -0.35); C(tx - 0.2, tx + 1.6, -0.75, -0.3, 0, 0.9);
+    for (let k = 0; k < 4; k++) for (let r = 0; r < 2; r++) B(r ? 'linen' : 'paint_white', tx - 0.1 + k * 0.4, tx + 0.25 + k * 0.4, 0.9 + r * 0.18, 1.08 + r * 0.18, -0.65, -0.4);
+    for (let k = 0; k < 3; k++) bag.add('linen', lathe([[0.001, 0], [0.06, 0], [0.06, 0.9], [0.001, 0.9]], 8, null, tx + 1.75 + k * 0.14, 0.0, Z(-0.3 - k * 0.05)));
+  } else if (trade === 'fish') {
+    // shallow tubs of fish on trestles, strings of dried fish hung from a pole under the eave
+    for (let k = 0; k < 2; k++) { const u = tx + k * 1.0; B(WD, u, u + 0.85, 0.0, 0.5, -0.9, -0.35); B('timber', u - 0.03, u + 0.88, 0.5, 0.6, -0.95, -0.3); B('opening', u + 0.04, u + 0.81, 0.595, 0.605, -0.9, -0.35);
+      for (let f = 0; f < 5; f++) B(f % 2 ? 'hide_grey' : 'hide_white', u + 0.1 + (f % 3) * 0.22, u + 0.28 + (f % 3) * 0.22, 0.6, 0.64, -0.8 + (f >> 1) * 0.2, -0.66 + (f >> 1) * 0.2); }
+    C(tx - 0.1, tx + 2.0, -1.0, -0.3, 0, 0.7);
+    const pu0 = left ? e1 + 0.3 : x0 + 0.3, pu1 = left ? x1 - 0.3 : e0 - 0.3;
+    bag.add(WD, rod([pu0, H1 - 0.6, Z(-0.55)], [pu1, H1 - 0.6, Z(-0.55)], 0.022, 6));
+    for (let u = pu0 + 0.2; u < pu1 - 0.1; u += 0.28) { bag.add('rope_fibre', rod([u, H1 - 0.6, Z(-0.55)], [u, H1 - 1.05, Z(-0.55)], 0.006, 4)); B('hide_grey', u - 0.05, u + 0.05, H1 - 1.4, H1 - 1.05, -0.57, -0.53); }
+  } else if (trade === 'tofu') {
+    // a water tank with cakes of tofu cut in it, yoke buckets beside, a lantern board
+    B('timber', tx, tx + 1.3, 0.0, 0.8, -0.9, -0.3); B('opening', tx + 0.06, tx + 1.24, 0.79, 0.801, -0.84, -0.36);
+    for (let k = 0; k < 6; k++) B('linen', tx + 0.1 + (k % 3) * 0.38, tx + 0.42 + (k % 3) * 0.38, 0.7, 0.8, -0.8 + (k >> 2) * 0.22, -0.62 + (k >> 2) * 0.22);
+    C(tx - 0.1, tx + 1.4, -1.0, -0.2, 0, 0.8);
+    barrel(bag, 'timber', tx + 1.75, 0, Z(-0.5), 0.2, 0.42); barrel(bag, 'timber', tx + 2.1, 0, Z(-0.55), 0.2, 0.42);
+    bag.add(WD, rod([tx + 1.6, 0.9, Z(-0.5)], [tx + 2.25, 0.9, Z(-0.55)], 0.02, 5));
+  } else if (trade === 'bucket') {
+    // coopers' work: tubs and pails in stacks, a big tub leaned on the wall, hoops on a peg
+    for (let k = 0; k < 5; k++) barrel(bag, 'timber', tx + (k % 3) * 0.55, (k > 2 ? 0.45 : 0), Z(-0.5 - (k > 2 ? 0.15 : 0)), 0.24 - (k > 2 ? 0.04 : 0), 0.45);
+    C(tx - 0.3, tx + 1.4, -1.0, -0.2, 0, 0.9);
+    bag.add('timber', lathe([[0.001, 0], [0.55, 0], [0.6, 0.55], [0.57, 0.6], [0.001, 0.58]], 12, null, tx + 2.0, 0.0, Z(-0.45)));
+    for (let k = 0; k < 4; k++) bag.add('bamboo_culm', lathe([[0.19, 0], [0.19, 0.03], [0.17, 0.03], [0.17, 0]], 10, null, left ? x1 - 0.4 : x0 + 0.4, 1.5 + k * 0.1, Z(-0.2)));
   } else {
     // medicine: a gilt-lettered board hung on its bracket, a mortar and a drawer chest at the door
     B(WD, e1 + 0.0, e1 + 0.05, 1.0, 1.9, -0.9, -0.85);
@@ -157,6 +183,12 @@ export function machiyaFront(bag, col, { x0, x1, fz, s, H1, seed, trade }) {
   B('wood_painted', ku - 0.03, ku + 0.03, H1 - 1.55, H1 - 0.7, -0.62, -0.36);
   B('lacquer_black', ku, ku + 0.04, H1 - 1.4, H1 - 0.85, -0.58, -0.4);
   void kz;
+  // the bamboo fender (inu-yarai) before the lattice on most fronts, a reed blind (sudare) half down over a lattice bay on some
+  if (rand() < 0.6) {
+    const fa = left ? e1 + 0.15 : x0 + 0.15, fb = left ? x1 - 0.15 : e0 - 0.15;
+    if (fb - fa > 1.0) { for (const v of [0.12, 0.95]) bag.add('bamboo_culm', rod([fa, v, Z(-0.38)], [fb, v, Z(-0.38)], 0.025, 5)); for (let u = fa; u <= fb + 0.01; u += 0.22) bag.add('bamboo_culm', rod([u, 0.0, Z(-0.38)], [u, 1.0, Z(-0.38)], 0.02, 4)); }
+  }
+  if (rand() < 0.4) { const sa = left ? e1 + 0.25 : x0 + 0.25, sb = Math.min(sa + 1.5, left ? x1 - 0.25 : e0 - 0.25); if (sb - sa > 0.6) { B('reed_mat', sa, sb, H1 - 1.55, H1 - 0.5, -0.2, -0.16); B(WD, sa - 0.02, sb + 0.02, H1 - 0.55, H1 - 0.5, -0.24, -0.14); } }
   return { e0, e1, left };
 }
 

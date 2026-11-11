@@ -5,7 +5,7 @@ import { RADIUS, STREET, OUTER, MIDDLE, LEVEL, lots, furniture } from './layout.
 const base = (id, elements, style = 'edo') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** Which houses are open inside: a machiya in three (its shop), a samurai house in six (its reception room). */
-export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 3 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 6 === 0);
+export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 2 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 3 === 0);
 
 function life() {
   const rand = rng(1620), P = [], E = [];
