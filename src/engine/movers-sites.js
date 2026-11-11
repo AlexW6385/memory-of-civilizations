@@ -59,5 +59,6 @@ export const MOVER_SITES = {
   'shaolin': () => import('../settlements/shaolin/movers.js'),
   'timurid-samarkand': () => import('../settlements/timurid-samarkand/movers.js'),
   'dunhuang': () => import('../settlements/dunhuang/movers.js'),
+  'muromachi-kyoto': () => import('../settlements/muromachi-kyoto/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

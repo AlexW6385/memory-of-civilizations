@@ -688,4 +688,18 @@ export const CARDS = {
       "绿洲城镇——主街两侧杨树下的夯土院落、东门、搭着凉棚的集市，以及粟特商人和骆驼歇脚的客栈；南面沙丘中是月牙泉。",
     ],
   },
+  'muromachi-kyoto': {
+    en: [
+      "Kyoto about 1490, the capital of the Ashikaga shoguns, half rebuilt after the Ōnin War. This is the age of the Higashiyama culture: Zen temples and their gardens, the shoin room, the tea of Murata Jukō, Noh. Houses are of boards and posts under plank roofs held down with stones; the streets are of earth.",
+      "Ginkaku-ji (Jishō-ji) — the Kannon-den, a two-storey pavilion of bare dark timber with a pent roof, cusped windows on the upper floor and a bronze phoenix on its roof, stands over its pond; its silver foil was planned and never laid. The Tōgu-dō beside it holds the Dōjinsai, a 4½-mat room with a writing bay and staggered shelves.",
+      "Ryōan-ji — the abbot's quarters (hōjō) look from their veranda on a rock garden of fifteen stones in five groups on raked white gravel, inside a clay wall.",
+      "The town — machiya with shop fronts and noren, a stream in its stone channel, a tea hut of four and a half mats with its stepping stones and stone basin, and a shrine with its torii and a Noh stage with its bridge and three pines.",
+    ],
+    zh: [
+      "约1490年的京都，足利将军的都城，应仁之乱后半废半兴。这是东山文化的时代：禅寺与庭园、书院造、村田珠光的茶道、能乐。民居以木板与立柱建成，板屋顶压着石块，街道为泥土路。",
+      "银阁寺（慈照寺）——观音殿是一座两层的素木楼阁，下层四周有腰檐，上层开花头窗，屋顶立有青铜凤凰，临水池而立；原计划贴银箔，终未实施。旁边的东求堂有同仁斋，四叠半的房间，设付书院与错棚。",
+      "龙安寺——方丈的檐廊面对枯山水石庭：十五块石头分五组，立于耙过的白砂之上，围以泥墙。",
+      "町——有店面与暖帘的町家，石砌河道中的溪流，四叠半的茶室连同踏脚石与石水钵，以及有鸟居的神社与带桥廊和三棵松的能舞台。",
+    ],
+  },
 };

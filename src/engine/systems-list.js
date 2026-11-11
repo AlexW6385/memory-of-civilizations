@@ -5,6 +5,7 @@ import '../settlements/tang-wutai/smoke.js';
 import '../settlements/song-hangzhou/smoke.js';
 import '../settlements/qing-beijing/smoke.js';
 import '../settlements/florence/smoke.js';
+import '../settlements/muromachi-kyoto/smoke.js';
 import '../settlements/dunhuang/smoke.js';
 import '../settlements/timurid-samarkand/smoke.js';
 import '../settlements/shaolin/smoke.js';
