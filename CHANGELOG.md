@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.52 — A quicker start, a truer loading bar (2026-11-10)
+
+Instanced meshes of one material now share one shader build (three.js built one per mesh: some 650 needless builds, about five seconds at the start); the ground is built while the town is, not after it; three build workers on an eight-core machine. The loading bar moves through the shader stage as the look round goes on instead of standing still for seconds.
+
 ## v10.51 — Building ahead only in spare time (2026-11-10)
 
 The next journey's settlement is still built ahead, but now only when the page has time to spare and the frames have been smooth for a while, in small slices; it no longer competes with the city you are in.

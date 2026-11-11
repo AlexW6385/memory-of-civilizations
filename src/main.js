@@ -81,11 +81,6 @@ class Progress {
     if (stage === 'shaders' && !this.shaderT0) this.shaderT0 = performance.now();
   }
   value() {
-    if (this.shaderT0 && (this.f.shaders || 0) < 1) {
-      const exp = Math.max(2, this.d.shaders || 9), el = (performance.now() - this.shaderT0) / 1000;
-      // follow last time's duration, slowing toward 97% if it takes longer
-      this.f.shaders = el < exp ? 0.9 * el / exp : 0.9 + 0.07 * (1 - Math.exp(-(el - exp) / exp));
-    }
     let v = 0; for (const k of this.order) v += this.w[k] * (this.f[k] || 0); return v;
   }
   paint() {
@@ -231,7 +226,12 @@ async function main() {
     const [x, y, z, yaw] = world.entrance(rec.plan);
     controls.feet = { x, y, z }; controls.yaw = yaw; controls.pitch = 0.04;
     world.tilt.identity();
-    await loadSite(site, report);
+    // the ground round the entrance is built by its workers while the settlement is built by its
+    // own (the two waited one after the other before: the ground only began once the town was done)
+    controls.setPose(x, y, z, yaw, 0.04);
+    world.place(R.camera);
+    const ground = world.terrain.readyAt(camPlanet, (f) => report?.('land', f, `${Math.round(f * 100)}%`));
+    await Promise.all([loadSite(site, report), ground]);
     controls.setPose(x, y, z, yaw, 0.04);
     world.place(R.camera);
     await arrive(report);
@@ -325,7 +325,7 @@ async function main() {
   progress.set('shaders', 0);
   progress.shaderT0 = performance.now();
   frameOnce(0);
-  await warmAround();
+  await warmAround((f) => progress.set('shaders', f));
   mark('shaders');
   console.info('[memory of civilizations] start (ms):', JSON.stringify(times));
   started();
@@ -532,16 +532,24 @@ async function main() {
    * every shadow cascade drawn), so that what three still builds on first sight — the shadow pass's
    * shaders, the far versions — is built now, not in the first turn round (a hundred builds, ~1 s).
    */
-  async function warmAround() {
+  // onStep(f): how far it has come (0…1), for the loading bar. Between the eight directions the
+  // page waits for a frame, so the bar is painted (a plain timeout let the whole look round, seconds
+  // of shader building, pass with the bar standing still)
+  async function warmAround(onStep = null) {
     const yaw = controls.yaw;
+    const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
     for (let k = 0; k < 8; k++) {
       controls.yaw = yaw + k * Math.PI / 4;
       for (let j = 0; j < 3; j++) frameOnce(0);
-      await new Promise((r) => setTimeout(r, 0));
+      onStep?.(0.85 * (k + 1) / 9);
+      await nextFrame();
     }
     controls.yaw = yaw;
     frameOnce(0);
+    onStep?.(0.85 * 8.5 / 9);
+    await nextFrame();
     await R.warmup();
+    onStep?.(1);
   }
 
   function frameOnce(dt) {

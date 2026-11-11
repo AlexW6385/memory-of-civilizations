@@ -12600,6 +12600,24 @@ class AttributeNode extends Node {
  */
 const attribute = ( name, nodeType = null ) => new AttributeNode( name, nodeType );
 
+// [memory-of-civilizations patch] an attribute supplied by the object, not its geometry (the
+// instanced mesh's matrices and colours: RenderObject.getAttributes finds them by name)
+class ObjectAttributeNode extends AttributeNode {
+
+	generate( builder ) {
+
+		const attributeName = this.getAttributeName( builder );
+		const nodeType = this.getNodeType( builder );
+		const nodeAttribute = builder.getAttribute( attributeName, nodeType );
+		if ( builder.shaderStage === 'vertex' ) return builder.format( nodeAttribute.name, nodeType, nodeType );
+		return varying( this ).build( builder, nodeType );
+
+	}
+
+}
+
+const objectAttribute = ( name, nodeType ) => new ObjectAttributeNode( name, nodeType );
+
 /**
  * TSL function for creating an uv attribute node with the given index.
  *
@@ -18839,6 +18857,79 @@ const storage = ( value, type = null, count = 0 ) => new StorageBufferNode( valu
 
 const _matrixBuffers = /*@__PURE__*/ new WeakMap();
 const _colorBuffers = /*@__PURE__*/ new WeakMap();
+
+// [memory-of-civilizations patch] Instanced meshes read their matrices (and colours) as vertex
+// attributes looked up by name on the object (RenderObject.getAttributes), not as nodes bound to
+// each mesh's own buffers, so that every instanced mesh of one material and geometry layout shares
+// one node build (the render object's cache key no longer holds the mesh's uuid). Upstream keys an
+// instanced mesh's build by the mesh (TODO in getMaterialCacheKey): hundreds of identical builds.
+const _instAttrs = /*@__PURE__*/ new WeakMap();
+
+function sharedInstancing( object ) {
+
+	if ( object.isInstancedMesh !== true || ! object.instanceMatrix || object.instanceMatrix.isStorageInstancedBufferAttribute === true ) return false;
+	if ( object.instanceColor && object.instanceColor.isStorageInstancedBufferAttribute === true ) return false;
+	// WebGPU allows 8 vertex buffers: the geometry's own and one or two more
+	const buffers = new Set();
+	for ( const a of Object.values( object.geometry.attributes ) ) buffers.add( a.isInterleavedBufferAttribute ? a.data : a );
+	return buffers.size + ( object.instanceColor ? 2 : 1 ) <= 8 && Object.keys( object.geometry.attributes ).length + ( object.instanceColor ? 5 : 4 ) <= 16;
+
+}
+
+function instanceAttributes( object ) {
+
+	let a = _instAttrs.get( object );
+	const m = object.instanceMatrix, c = object.instanceColor;
+	if ( a === undefined || a.m !== m || a.mArray !== m.array || a.c !== c || ( c && a.cArray !== c.array ) ) {
+
+		const data = new InstancedInterleavedBuffer( m.array, 16, 1 );
+		data.usage = m.usage;
+		a = { m, mArray: m.array, c, cArray: c ? c.array : null, data, color: null, names: {} };
+		for ( let k = 0; k < 4; k ++ ) a.names[ 'instanceMatrix' + k ] = new InterleavedBufferAttribute( data, 4, k * 4 );
+		if ( c ) {
+
+			a.color = new InstancedBufferAttribute( c.array, 3 );
+			a.color.usage = c.usage;
+			a.names.instanceColorRGB = a.color;
+
+		}
+
+		_instAttrs.set( object, a );
+
+	}
+
+	return a;
+
+}
+
+/** Before an instanced mesh is drawn: its attributes follow its matrices' and colours' updates. */
+function syncInstanceAttributes( object ) {
+
+	const a = _instAttrs.get( object );
+	if ( a === undefined ) return false;
+	const m = object.instanceMatrix, c = object.instanceColor;
+	if ( a.m !== m || a.mArray !== m.array || a.c !== c || ( c && a.cArray !== c.array ) ) return true;      // rebuilt by getAttributes
+	if ( a.data.version !== m.version ) {
+
+		a.data.clearUpdateRanges();
+		a.data.updateRanges.push( ...m.updateRanges );
+		m.clearUpdateRanges();
+		a.data.version = m.version;
+
+	}
+
+	if ( c && a.color.version !== c.version ) {
+
+		a.color.clearUpdateRanges();
+		a.color.updateRanges.push( ...c.updateRanges );
+		c.clearUpdateRanges();
+		a.color.version = c.version;
+
+	}
+
+	return false;
+
+}
 const _previousInstanceMatrices = /*@__PURE__*/ new WeakMap();
 
 /**
@@ -18945,6 +19036,17 @@ const instanceColor = /*@__PURE__*/ varyingProperty( 'vec3', 'vInstanceColor' );
  * @param {?InstancedBufferAttribute|StorageInstancedBufferAttribute} [colors=null] - The optional instanced colors.
  */
 const instance = /*@__PURE__*/ Fn( ( [ matrices, colors = null ], builder ) => {
+
+	if ( builder.object && builder.object.instanceMatrix === matrices && sharedInstancing( builder.object ) ) {
+
+		// [memory-of-civilizations patch] by name, from the object (see sharedInstancing)
+		const im = mat4( objectAttribute( 'instanceMatrix0', 'vec4' ), objectAttribute( 'instanceMatrix1', 'vec4' ), objectAttribute( 'instanceMatrix2', 'vec4' ), objectAttribute( 'instanceMatrix3', 'vec4' ) );
+		positionLocal.assign( im.mul( positionLocal ).xyz );
+		if ( builder.hasGeometryAttribute( 'normal' ) ) normalLocal.assign( transformNormal( normalLocal, im ) );
+		if ( colors ) instanceColor.assign( objectAttribute( 'instanceColorRGB', 'vec3' ) );
+		return;
+
+	}
 
 	const isStorageMatrix = matrices.isStorageInstancedBufferAttribute === true;
 	const isStorageColor = colors && colors.isStorageInstancedBufferAttribute === true;
@@ -31006,7 +31108,12 @@ class RenderObject {
 				// geometry attribute
 				attribute = geometry.getAttribute( nodeAttribute.name );
 
-				if ( attribute !== undefined ) {
+				// [memory-of-civilizations patch] an instanced mesh's matrices and colours, by name
+				if ( attribute === undefined && this.object.isInstancedMesh === true && sharedInstancing( this.object ) ) {
+
+					attribute = instanceAttributes( this.object ).names[ nodeAttribute.name ];
+
+				} else if ( attribute !== undefined ) {
 
 					if ( attribute.isInterleavedBufferAttribute ) {
 
@@ -31300,7 +31407,12 @@ class RenderObject {
 
 		}
 
-		if ( object.isInstancedMesh || object.count > 1 ) {
+		if ( object.isInstancedMesh && sharedInstancing( object ) ) {
+
+			// [memory-of-civilizations patch] shared builds (see sharedInstancing)
+			cacheKey += 'inst' + ( object.instanceColor ? 'c' : '' ) + ',';
+
+		} else if ( object.isInstancedMesh || object.count > 1 ) {
 
 			// TODO: https://github.com/mrdoob/three.js/pull/29066#issuecomment-2269400850
 
@@ -65513,7 +65625,11 @@ class Renderer {
 	 */
 	_renderObjectDirect( object, material, scene, camera, lightsNode, group, clippingContext, passId ) {
 
+		// [memory-of-civilizations patch] the instance attributes follow the mesh's buffers
+		const instRebuild = object.isInstancedMesh === true && syncInstanceAttributes( object );
+
 		const renderObject = this._objects.get( object, material, scene, camera, lightsNode, this._currentRenderContext, clippingContext, passId );
+		if ( instRebuild ) renderObject.attributes = null;
 		renderObject.drawRange = object.geometry.drawRange;
 		renderObject.group = group;
 

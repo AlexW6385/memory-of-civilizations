@@ -502,7 +502,8 @@ export class World {
 
   /** onStep(label, fraction): the loading bar's detail (src/main.js Progress). */
   async init(onStep = () => {}) {
-    this.builder = new Builder(2);
+    // build workers: three on an eight-core machine (the ground has its own four)
+    this.builder = new Builder(Math.min(3, Math.max(2, ((navigator.hardwareConcurrency || 4) >> 1) - 1)));
     onStep('map', 0);
     const land = await loadLand('data/planet/land.bin');
     onStep('map', 1);
