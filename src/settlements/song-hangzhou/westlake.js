@@ -63,6 +63,6 @@ export const westLake = {
   view: [-30, -100, 30, 100], viewY: TOP, bakeTop: 70,
   elements: E,
   rooms: [room('lake-causeway', [-8, -92, 8, ZS - 2], TOP, 'open')],
-  walks: [],
+  walks: [Object.assign([[0, 118], [0, 60], [0, 0], [0, -60], [0, -90]], { y0: 0 }), Object.assign([[0, 118], [0, 106], [-14, 106], [-24, 106], [-34, 106], [-40, 96]], { y0: 0 })],   // along the causeway over its bridges to Beishan; up the stairs to the hill and the pagoda's terrace
 };
 export default westLake;
