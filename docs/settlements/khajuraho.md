@@ -102,3 +102,12 @@ Registration needed (coordinator): `'khajuraho': () => import('../settlements/kh
 - [Amalaka — Wikipedia](https://en.wikipedia.org/wiki/Amalaka)
 - [Kandariya Mahadeva Temple — Studio Matrx Architecture Canon](https://www.studiomatrx.org/architecture-canon/kandariya-mahadeva-temple-khajuraho)
 - [Details of the Latina Nagara Shikhara of the Neelkanth Mahadev Temple — Jio Institute](https://exhibits.jioinstitute.edu.in/spotlight/neelkanth-mahadev-group-of-temples/catalog/e859a462fda66a43f63382d79d6a249c)
+
+## 13. Detail added (2026-11 deepening pass: the village on streets)
+
+- **Layout.** The earlier random grid of lots is replaced by streets (`layout.js` STREETS): the pilgrims' road (8 m) from the temples east through the bazaar, a lane to the tank, five north-south and four east-west lanes 48 m apart, rows of buildings on both sides with their fronts a verandah's width back; density thins from the core outward, a few farmsteads on the plain, walled yards between the rows [inferred: a Bundelkhand market village; the plan is ours].
+- **Buildings** (`src/styles/nagara/village.js`, element `bazaar_house`): shop-houses and homes with a raised platform (otla) on timber posts under a tiled lean-to, flat-roofed mud houses with parapets, two-storey merchants' houses with bracketed sandstone balconies, thatched huts, cattle sheds; walls of plaster, earth, limewash; damp at the foot, streaks under the eaves, rangoli at the door [inferred: village architecture of central India; the verandah, tiled roof and mud walls follow the existing `house_india` note in §5].
+- **Enterable.** About 65 shops and houses near the temples are hollow and furnished by trade: grain, potter, cloth, oil press, sweets, smith, flowers; homes with clay stove, pots, string beds [inferred].
+- **Eye level.** Every front dressed (`town.js`, `dressing()`): sacks, water pots, goods mats, benches, firewood, drying trays, hens, laundry, cows, haystacks, sellers sitting on platforms, wells at the lane crossings, flower mats along the temples' end of the road.
+- **Ghat and rest house.** Steps down the tank's north bank with a kiosk (chhatri) at each side and a small shrine; a pillared pilgrims' rest house at the temples' end of the road [inferred].
+- **Life.** Walkers' ways derived from the streets; sparrows and crows on the roofs of the road; kitchen smoke from the houses.

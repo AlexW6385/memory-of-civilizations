@@ -8,6 +8,7 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles, rod, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
+import { villageElements } from './village.js';
 import { rite, diya, lampStand, garland, kalasha, flowerPlate } from '../indian/rites.js';
 
 const S = 'sandstone_dressed', RELIEF = 'sandstone_relief';
@@ -495,6 +496,6 @@ function shrineCore(el, { bag, col }) {
 }
 registerStyle('nagara', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, nagara_temple: temple, sub_shrine: shrine, varaha_mandapa: varaha, rite },
+  elements: { ...STYLES.qing.elements, nagara_temple: temple, sub_shrine: shrine, varaha_mandapa: varaha, rite, ...villageElements },
   objects: {},
 });

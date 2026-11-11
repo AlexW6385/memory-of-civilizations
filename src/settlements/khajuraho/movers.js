@@ -3,7 +3,7 @@
 // in its worker: the ways (derived from layout.js), who walks. The tank's water is not floated on: the boats' parts are empty.
 // Format as Suzhou's (src/settlements/ming-suzhou/movers.js).
 
-import { TEMPLES, TANK, RADIUS } from './layout.js';
+import { TEMPLES, TANK, RADIUS, STREETS, streetRect } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -22,16 +22,18 @@ export const PARAMS = {
 export function walkways() {
   const rects = [];
   const R = (r, weight, kind = 'lane', market = 0) => rects.push({ r, weight, market, kind });
-  const K = TEMPLES[0], Kx = K.c[0] + K.len + 4 + K.jagati * 2.2 + 2;     // before the stair of Kandariya's terrace
-  R([Kx - 2, 8, 330, 12], 2.2, 'street', 0.5);                            // the main road east, through the village
+  for (const s of STREETS) {
+    const r = streetRect(s), main = s.kind === 'main';
+    // walkers keep to the middle of the road (the verandahs' platforms flank it)
+    R(s.axis === 'x' ? [r[0], s.c - s.w / 2 + 0.6, r[2], s.c + s.w / 2 - 0.6] : [s.c - s.w / 2 + 0.4, r[1], s.c + s.w / 2 - 0.4, r[3]], main ? 2.4 : 0.7, main ? 'street' : 'lane', main ? 0.7 : 0.2);
+  }
+  const K = TEMPLES[0], Kx = K.c[0] + K.len + 4 + K.jagati * 2.2 + 2;
   R([-31.5, -75, -28.5, 12], 1.6, 'street', 0.2);                         // along the stairs of the western temples
-  R([-45, 8, -28, 12], 1.2);                                              // …to the road
-  R([84, -100, 87, 112], 1.4, 'street', 0.2);                             // down to the tank, up to Lakshmana and the Varaha
+  R([-45, 8, -28, 12], 1.2);
+  R([84, -100, 87, 6], 1.2, 'street', 0.2);                               // up to Lakshmana and the Varaha
   R([50, -84.5, 87, -81.5], 1.0);                                         // to Lakshmana's platform
   R([TANK.c[0] - 30, TANK.c[1] - TANK.r[1] - 9, TANK.c[0] + 30, TANK.c[1] - TANK.r[1] - 6], 1.0);   // the ghat on the tank's north margin
-  R([TANK.c[0] - 3, 12, TANK.c[0] + 3, TANK.c[1] - TANK.r[1] - 6], 0.8);                              // from the road to the tank
-  for (let j = 14; j <= 30; j += 4) R([96, -300 + 12 * j + 8.6, 322, -300 + 12 * j + 11.6], 0.5);     // village lanes between the rows of houses
-  for (let k = 0; k < 15; k += 3) R([111 + 13 * k, -250, 112.8 + 13 * k, 250], 0.4);                  // …and the gaps between the columns
+  void Kx;
   return { rects, links: [], clip: RADIUS - 14 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: 0 }; }

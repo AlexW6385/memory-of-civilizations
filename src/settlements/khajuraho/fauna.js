@@ -1,7 +1,7 @@
 // Khajuraho about 1050 — the animals (src/engine/fauna.js draws them; docs/settlements/khajuraho.md §12): carp in
 // the Shivsagar tank, swallows over its water, crows about the village, sparrows on the temple terraces,
 // an egret and a heron at the tank's margin.
-import { TANK, TEMPLES, tankD, height } from './layout.js';
+import { TANK, TEMPLES, tankD, height, lots } from './layout.js';
 
 const area = [TANK.c[0] - TANK.r[0], TANK.c[1] - TANK.r[1], TANK.c[0] + TANK.r[0], TANK.c[1] + TANK.r[1]];
 const fish = [];
@@ -16,6 +16,16 @@ const perches = [];
 for (const t of TEMPLES) {
   const T = t.terrace || [t.c[0] - t.w * 0.85, t.c[1] - t.w * 0.95, t.c[0] + t.len + 4, t.c[1] + t.w * 0.95];
   perches.push({ kind: 'sparrow', x: (T[0] + T[2]) / 2 - 2, z: T[3] - 1.2, y: t.jagati + (t.y ?? 0), rot: 0, range: [2.4, 0], alert: 5 });
+}
+// sparrows and crows on the ridges and parapets along the bazaar road, a share of the houses
+{
+  let n = 0;
+  for (const l of lots()) {
+    if (!l.main || n > 26 || (l.seed % 3)) continue;
+    const [x0, z0, x1, z1] = l.rect, flat = l.kind === 'mud' || l.kind === 'haveli';
+    perches.push({ kind: n % 4 === 3 ? 'crow' : 'sparrow', x: (x0 + x1) / 2, z: (z0 + z1) / 2, y: flat ? (l.kind === 'haveli' ? 6.9 : 3.95) : 4.7, rot: l.seed % 6, range: [2.4, 0], alert: 6 });
+    n++;
+  }
 }
 for (const [kind, a] of [['egret', -0.6], ['heron', 2.2]]) {
   let best = null;
