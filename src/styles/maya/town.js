@@ -341,9 +341,9 @@ function mayaWeather(el, { bag }) {
   for (let t = 0; t < n; t++) {
     const a0 = A0 - (A0 - A1) * t / n, a1 = A0 - (A0 - A1) * (t + 1) / n, y0 = t * th, step = a0 - a1, ap = a0 - step * 0.42, d = ap - step * 0.04 + 0.03;
     for (const [fx, fz] of [[0, -1], [0, 1], [1, 0], [-1, 0]]) for (let i = 0; i < 6; i++) {
-      const u = (rand() * 2 - 1) * (ap - 0.8); if (Math.abs(u) < sw) continue;
-      const w = 0.12 + rand() * 0.35, len = th * (0.2 + rand() * 0.28), top = y0 + th * 0.9 - rand() * th * 0.05;
-      const [x0, x1, z0, z1] = fz ? [u - w, u + w, fz * d - 0.0, fz * d + fz * 0.02] : [fx * d, fx * d + fx * 0.02, u - w, u + w];
+      const cellw = (2 * ap - 1.6) / 6, u = -ap + 0.8 + (i + 0.2 + rand() * 0.6) * cellw; if (Math.abs(u) < sw) continue;
+      const w = 0.1 + rand() * Math.min(0.3, cellw * 0.25), len = th * (0.2 + rand() * 0.28), top = y0 + th * 0.9 - rand() * th * 0.05;
+      const o = rand() * 0.04, [x0, x1, z0, z1] = fz ? [u - w, u + w, fz * (d + o), fz * (d + o + 0.012)] : [fx * (d + o), fx * (d + o + 0.012), u - w, u + w];
       k.bx(rand() < 0.65 ? 'plaster_damp' : 'bark_grey', Math.min(x0, x1), Math.max(x0, x1), top - len, top, Math.min(z0, z1), Math.max(z0, z1));
     }
     for (let i = 0; i < 6; i++) {                                                                           // grass and weeds on the ledge
