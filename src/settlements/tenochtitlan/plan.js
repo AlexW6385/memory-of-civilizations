@@ -6,6 +6,7 @@
 
 import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI, GAP, inChinampaHouse } from './layout.js';
 import { ground } from './ground.js';
+import { stalls, aisles, GEOM, JUDGES, LANDINGS } from './market.js';
 
 const E = [];
 const [px0, pz0, px1, pz1] = PRECINCT;
@@ -55,8 +56,13 @@ for (const c of CANALS) {
   }
 }
 // ---- the market by the west canal: the sellers' rows, a landing stair down to the water, canoes unloading
-E.push({ t: 'tianguis', rect: MARKET, seed: 1519 });
-for (const z of [34, 62]) E.push({ t: 'stairs', rect: [-219.6, z, -215.6, z + 6], y0: LEVEL.water - 0.3, y1: 0.05, dir: 'e', mat: 'andesite' });
+{
+  const rp = ((q) => () => ((q = (q * 1664525 + 1013904223) >>> 0) / 4294967296))(3);
+  const spots = [];
+  for (const [ax0, az0, ax1, az1] of aisles().slice(0, GEOM.rows + 1)) for (let i = 0; i < 5; i++) spots.push([ax0 + 3 + rp() * (ax1 - ax0 - 6), (az0 + az1) / 2 + (rp() - 0.5) * 1.6]);
+  E.push({ t: 'tianguis', rect: MARKET, seed: 1519, stalls: stalls(), judges: JUDGES, aisleX: [GEOM.xWest, GEOM.xCross, GEOM.xEast], aisleSpots: spots });
+}
+for (const z of LANDINGS.map((v) => v - 3)) E.push({ t: 'stairs', rect: [-219.6, z, -215.6, z + 6], y0: LEVEL.water - 0.3, y1: 0.05, dir: 'e', mat: 'andesite' });
 for (const [z, cargo] of [[30, 'maize'], [44, 'pots'], [56, 'chile'], [74, 'reeds'], [84, 'cloth']]) E.push({ t: 'acalli', at: [-218.6, z], dir: [0, 1], len: 6, y: LEVEL.water, seed: seed++, cargo });
 // ---- people: priests climbing Huitzilopochtli's and Tlaloc's stairs with censers, the drummer and priests at the summit,
 // worshippers kneeling about the Coyolxauhqui stone, people crossing the precinct; farmers with the coa on the chinampas
