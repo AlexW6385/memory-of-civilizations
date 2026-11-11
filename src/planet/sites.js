@@ -137,7 +137,6 @@ export const PLANNED = [
   { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, region: 'china', lat: 36.13, lon: 114.32, radius: 300 },
   { id: 'lu-qufu', name: { en: 'Qufu', zh: '曲阜' }, region: 'china', lat: 35.60, lon: 116.99, radius: 280 },
   { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, region: 'indus', lat: 27.33, lon: 68.14, radius: 300 },
-  { id: 'ajanta', name: { en: 'Ajanta', zh: '阿旃陀' }, region: 'india', lat: 20.55, lon: 75.70, radius: 200 },
   { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
   { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, region: 'siam', lat: 14.36, lon: 100.56, radius: 300 },
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, region: 'java', lat: 8.37, lon: 115.45, radius: 180 },

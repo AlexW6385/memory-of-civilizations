@@ -83,4 +83,5 @@ export const ARRIVALS = {
   'mycenae': [-136, null, 0, -1.5708, 0.2],   // on the approach road west of the citadel: the Lion Gate in its dressed conglomerate front between the bastion and the wall's end, the Cyclopean circuit rising behind it to the palace on the summit
   'qin-xianyang': [175, null, -121, 1.5708, 0.12],   // from the head of the middle ramp, down into the front gallery of Pit 1: the three ranks of archers across the gallery and the first corridors of painted soldiers behind them
   'wei-ye': [-112, null, -88, 1.5708, 0.1],   // from the Tongque Garden east of the terraces, west up the Bronze Sparrow's stair to the tower on its crown, the Golden Tiger and the Ice Well on either hand
+  'ajanta': [17, null, 19.5, 1.32, 0.2],   // On the east bank's path, looking west over the Waghora at the horseshoe cliff: the rock-cut ledge with the pillared porch of the painted vihara and the great horseshoe window of the chaitya hall, tiers of shrine niches above, the waterfall down the north wing.
 };

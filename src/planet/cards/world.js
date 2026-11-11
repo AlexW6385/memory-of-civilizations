@@ -1000,4 +1000,22 @@ export const CARDS = {
       "山谷 —— 溪上架着石板桥，门前是晒谷坪，附近有农舍和水田；更高处是层层梯田和茶园，山上长着杉木与竹林。",
     ],
   },
+  'ajanta': {
+    en: [
+      "Ajanta, in the Deccan plateau of western India, is a monastery of rock-cut Buddhist caves in the horseshoe-shaped gorge of the Waghora river, about thirty caves cut over six centuries. About 480 the Vakataka king Harishena (reigned 460–477) and his ministers have been its patrons for a generation; the viharas and chaitya halls of the last great phase are cut, plastered and painted by workshops of masons and painters, the summit of Indian Buddhist painting.",
+      "The horseshoe cliff — a grey-brown basalt wall about thirty metres high round a pocket of the gorge, in tiers of caves and shrine niches reached by a rock-cut stair to a ledge, the Waghora below, the waterfall down the north wing, a ford of stepping stones and the paths along the gorge floor.",
+      "The painted vihara (Cave 1) — a pillared porch of six columns, a square hall with a ring of twenty pillars, fourteen small cells with stone beds, and at the rear the shrine of a seated Buddha teaching; walls and ceiling painted with Jataka tales, flying geese and lotus, and the great bodhisattvas Padmapani and Vajrapani at the shrine door, a painters' scaffold at work.",
+      "The chaitya hall (Cave 19) — a carved facade with a porch of two fluted pillars, yakshas and a great horseshoe window; inside, a nave of fifteen octagonal pillars under a barrel vault ribbed in rock, and at the apse the stupa with a standing Buddha before it.",
+      "A monk's cell hall and the niches — a small vihara with its stone beds and raised pillows, and shrine niches with painted Buddhas on every face.",
+      "The gorge floor — the path to the stair, a pilgrims' shelter, a mason at work on an unfinished niche, and the village of the workers on the east bank: mud-walled huts under thatch round a well, goats and a zebu cart.",
+    ],
+    zh: [
+      "阿旃陀位于印度西部德干高原，是沃格拉河马蹄形峡谷中的佛教石窟寺院，约三十个洞窟，开凿历时六个世纪。约480年，伐卡塔卡国王诃利色那（在位460–477年）及其大臣已资助此地一代人之久；最后一个鼎盛期的精舍窟和支提窟由石匠与画师工坊开凿、抹灰并彩绘，是印度佛教绘画的巅峰。",
+      "马蹄形崖壁——环绕峡谷一隅的灰褐色玄武岩崖壁，高约三十米，分层开凿洞窟与龛，沿岩凿石阶登上平台；脚下是沃格拉河，北翼有瀑布，另有踏石渡口和峡谷底的小径。",
+      "彩绘精舍窟（第1窟）——六柱门廊，方形大厅环以二十根柱子，十四间带石床的小僧房，后部是说法坐佛的佛堂；墙壁与顶棚绘满本生故事、飞鹅与莲花，佛堂门两侧是莲花手菩萨与金刚手菩萨巨像，还有画师的脚手架。",
+      "支提窟（第19窟）——雕饰的正面有双柱凹槽门廊、药叉像和巨大的马蹄形窗；内部是十五根八角柱列、岩凿肋拱的筒形窟顶，后殿是窣堵坡，前立佛像。",
+      "僧人禅房与佛龛——带石床和高石枕的小型精舍，以及各崖面上绘有佛像的小龛。",
+      "峡谷底——通往石阶的小径、朝圣者的凉棚、在未完成龛前凿石的石匠，以及东岸工人的村落：围着水井的泥墙茅顶小屋、山羊和牛车。",
+    ],
+  },
 };

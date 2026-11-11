@@ -77,5 +77,6 @@ export const MOVER_SITES = {
   'bhaktapur': () => import('../settlements/bhaktapur/movers.js'),
   'nalanda': () => import('../settlements/nalanda/movers.js'),
   'hakka-tulou': () => import('../settlements/hakka-tulou/movers.js'),
+  'ajanta': () => import('../settlements/ajanta/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
