@@ -9,7 +9,7 @@ import { box } from '../../core/geom.js';
 const W = 46, D = 42, HR = 6.7, HT = 8.0;           // the building's width (east–west) and depth, the ceilings' and the roof's height
 
 /** A seated statue of the king on a low base, facing +x (east), at (x, z) on the floor y. */
-function statue(bag, x, y, z, face) {
+export function statue(bag, x, y, z, face) {
   // (local f forward, l left; the figure faces `face`: 'e' | 'w' | 'n' | 's')
   const R = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] }[face], f = R, l = [-R[1], R[0]];
   const B = (f0, l0, y0, f1, l1, y1, mat = 'granite_black') => {

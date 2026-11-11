@@ -2,7 +2,7 @@
 // valley temple and the harbour with the king's ship, the boat pits, the Wall of the Crow and the
 // workers' town south of it.
 
-import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOAT_PITS, SHIP, SPHINX, KHAFRE_VT, KV_Y, KHAFRE_CW, QUARRY, mastabas, town as townLots } from './layout.js';
+import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOAT_PITS, SHIP, SPHINX, KHAFRE_VT, KV_Y, KHAFRE_CW, QUARRY, ENCLOSURE, mastabas, slots, furnished, town as townLots } from './layout.js';
 import { ground } from './ground.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -27,7 +27,7 @@ function people() {
     if (rand() < 0.6) { const vx = rand() < 0.5 ? mx + 0.9 : x1 - 0.25 - 0.8; fig(T, [vx, z0 + 0.25 + 1.95], 0, { dress: 'wrap', top: 'bare', hair: 'short', pose: 'kneel' }); }
   }
   // the women grinding grain at the querns in the courts of the furnished houses
-  for (const l of townLots()) if (l.kind === 'house' && l.seed % 3 === 0 && rand() < 0.35) {
+  for (const l of townLots()) if (l.kind === 'house' && furnished(l) && rand() < 0.3) {
     const [x0, z0, x1, z1] = l.rect, r2 = rng(l.seed || 1); r2(); const court = r2() < 0.7, split = court ? x0 + (x1 - x0) * (0.45 + r2() * 0.2) : x1;
     const qz = Math.min(z1 - 1.6, z0 + 0.225 + 1.9), qx = split + 0.225 + 0.45;
     if (court && qz > z0 + 0.225 + 0.65 + 0.9) fig(T, [qx, qz - 0.75], Math.PI, { dress: 'sheath', hair: 'long', pose: 'kneel', h: 1.52 });
@@ -83,6 +83,74 @@ function quarryLife(Q) {
   man([68, 116.2], 0.5, { pose: 'talk', over: 'sash' }); man([90.6, 129.5], 3.6, { carry: 'pot', y: hh(90.6, 129.5) });
   return L;
 }
+/** Is the box (x, z, r) clear of every building of the town (walls with 0.45 m of thickness and the eaves)? */
+function clearOf(lots, x, z, r) {
+  for (const l of lots) { const [a, b, c, d] = l.rect; if (x > a - 0.9 - r && x < c + 0.9 + r && z > b - 0.9 - r && z < d + 0.9 + r) return false; }
+  return true;
+}
+const KINDS_LANE = [['stand', 1], ['ash', 2], ['sherds', 2], ['bench', 1.5], ['pots', 1.5], ['wood', 1.5], ['basket', 1]];
+function laneItems(lots) {
+  const rand = rng(2566), items = [], pick = () => { let r = rand() * KINDS_LANE.reduce((q, k) => q + k[1], 0); for (const [k, w] of KINDS_LANE) { r -= w; if (r <= 0) return k; } return 'ash'; };
+  const solid = lots.filter((l) => l.kind !== 'yard');
+  // beside the houses: on one of their sides, where the lane is wide enough
+  for (const l of lots) if (l.kind === 'house' && rand() < 0.7) {
+    const [x0, z0, x1, z1] = l.rect, side = Math.floor(rand() * 4), t = 0.15 + rand() * 0.7, kind = pick();
+    const off = kind === 'stand' ? 1.2 : 0.75, [x, z, rot] = side === 0 ? [x0 + (x1 - x0) * t, z0 - off, 0] : side === 1 ? [x1 + off, z0 + (z1 - z0) * t, Math.PI / 2] : side === 2 ? [x0 + (x1 - x0) * t, z1 + off, 0] : [x0 - off, z0 + (z1 - z0) * t, Math.PI / 2];
+    const others = solid.filter((q) => q !== l);
+    if (clearOf(others, x, z, kind === 'stand' ? 0.9 : 0.55) && Math.hypot(x, z) < RADIUS - 30) items.push([x, z, kind, rot, Math.floor(rand() * 1e6)]);
+  }
+  // the broad streets between the gallery blocks: along the blocks' east walls, in the open porch's lee; the stretch under the Wall of the Crow
+  for (let b = 0; b < 4; b++) {
+    const xe = -140 + b * 52 + 40.3 + 0.9;
+    for (let z = 176; z < 224; z += 4.2 + rand() * 2.5) { const kind = pick(); if (kind !== 'wood') items.push([xe + (kind === 'stand' ? 0.4 : 0), z, kind, Math.PI / 2, Math.floor(rand() * 1e6)]); }
+  }
+  const wall = [];
+  for (let x = CROW_WALL.a[0] + 6; x < CROW_WALL.b[0]; x += 5 + rand() * 4) wall.push([x, CROW_WALL.a[1] + CROW_WALL.th / 2 + 0.9, pick(), 0, Math.floor(rand() * 1e6)]);
+  return { items, wall };
+}
+/** The tombs in the building, the work in the gaps between them, the masons' shades and tool caches. */
+function cemeteryItems() {
+  const rand = rng(2567), items = [], M = mastabas();
+  for (const sl of slots()) items.push({ kind: 'unfinished', x: sl.c[0], z: sl.c[1], a: sl.a, b: sl.b, seed: Math.floor(rand() * 1e6) });
+  for (const m of M) for (const s of [-1, 1]) {
+    if (rand() > 0.55) continue;
+    const z = m.c[1] + s * (m.b + 1.3);
+    const next = M.find((q) => Math.abs(q.c[0] - m.c[0]) < 4 && s * (q.c[1] - m.c[1]) > 0 && s * (q.c[1] - m.c[1]) < 45);
+    const gap = next ? Math.abs(next.c[1] - m.c[1]) - m.b - next.b : 99;
+    if (gap < 8) continue;
+    const kind = ['blocks', 'shade', 'cache', 'offering'][Math.floor(rand() * 4)];
+    items.push({ kind, x: m.c[0] - m.a * 0.5 + rand() * m.a, z: z + (kind === 'shade' ? s * 1.0 : 0), rot: 0, seed: Math.floor(rand() * 1e6) });
+  }
+  return items;
+}
+function extras(lots) {
+  const E = [];
+  const LI = laneItems(lots);
+  E.push(base('giza-lane', [{ t: 'ok_lane', items: LI.items }], TOWN_Y), base('giza-lane-wall', [{ t: 'ok_lane', items: LI.wall }], ground.height(0, CROW_WALL.a[1] + CROW_WALL.th / 2 + 0.9)));
+  E.push(base('giza-cemetery-dress', [{ t: 'ok_cemetery', items: cemeteryItems() }]));
+  // the storerooms along the court's inner wall, north and south of the pyramid (doors to the court)
+  const [ex0, ez0, ex1, ez1] = ENCLOSURE;
+  E.push(base('giza-magazines', [
+    { t: 'ok_magazines', rect: [ex0 + 17, ez0 + 2.5, -30, ez0 + 7.5], n: 13, side: 's', seed: 1 }, { t: 'ok_magazines', rect: [30, ez0 + 2.5, ex1 - 17, ez0 + 7.5], n: 13, side: 's', seed: 2 },
+    { t: 'ok_magazines', rect: [ex0 + 17, ez1 - 7.5, -30, ez1 - 2.5], n: 13, side: 'n', seed: 3 }, { t: 'ok_magazines', rect: [30, ez1 - 7.5, ex1 - 17, ez1 - 2.5], n: 13, side: 'n', seed: 4 },
+  ]));
+  E.push(base('giza-quay', [{ t: 'ok_quay', rect: [HARBOUR[0] + 1.2, 19, HARBOUR[0] + 5, 45], y: 0.02, seed: 3 }, { t: 'ok_quay', rect: [HARBOUR[0] + 1.2, 60, HARBOUR[0] + 5, 95], y: 0.02, seed: 4 }], VALLEY));
+  // life in the yards: beasts in the pens, a man at the brick pit, the herdsman at the threshing floor
+  const rand = rng(2568), L = [];
+  const man = (at, rot, o) => L.push({ t: 'figure', at, y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', top: 'bare', cloth: 'cloth_white', skin: 'skin_medium', hat: 'none', hair: 'short', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
+  for (const l of lots) if (l.kind === 'yard') {
+    const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    if (l.yk === 'pen') for (let k = 0, n = 2 + Math.floor(rand() * 4); k < n; k++) L.push({ t: 'animal', kind: ['goat', 'goat', 'sheep', 'donkey'][Math.floor(rand() * 4)], at: [x0 + 1.5 + rand() * (x1 - x0 - 3), z0 + 1.4 + rand() * (z1 - z0 - 3)], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+    else if (l.yk === 'brickyard') { man([x0 + 2.2, z0 + 2.6], Math.PI, { pose: 'kneel' }); if (rand() < 0.6) man([x1 - 2, z0 + 1.4], 0.6, { pose: 'squat' }); }
+    else if (l.yk === 'threshing') { if (rand() < 0.7) man([cx + 1.5, cz], rand() * 6, { pose: 'kneel' }); if (rand() < 0.5) L.push({ t: 'animal', kind: 'ox', at: [cx - 1.6, cz + 1.2], y: 0, rot: rand() * 6, seed: Math.floor(rand() * 1e9), mat: 'hide_brown' }); }
+    else if (l.yk === 'silo' && rand() < 0.6) man([cx, (z0 + z1) / 2 + 1.5], rand() * 6, { carry: 'basket' });
+  }
+  // the masons at the tombs in the building: on the ramp, at the blocks
+  const M = [], man0 = (at, rot, o) => M.push({ t: 'figure', at, y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', top: 'bare', cloth: 'cloth_white', skin: 'skin_medium', hat: 'none', hair: 'short', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
+  for (const sl of slots()) { const [x, z] = sl.c; man0([x, z + sl.b + 2.5], Math.PI, { pose: 'pull', carry: 'rope', len: 1.4 }); man0([x + 1.0, z + sl.b + 2.8], 3.4, { pose: 'staff', carry: 'staff', over: 'sash', len: 1.7 }); man0([x + sl.a + 2.4, z + 2], 1.0, { pose: 'kneel' }); }
+  E.push({ ...base('giza-yard-life', L, TOWN_Y), style: 'life' }, { ...base('giza-mason-life', M), style: 'life' });
+  return E;
+}
 const base = (id, elements, y = 0) => ({ id, style: 'oldkingdom', origin: [0, 0], base: y, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [200, -40], facing: 'w' } });
 
 export async function town() {
@@ -120,6 +188,7 @@ export async function town() {
   plans.push(base('giza-boat-pits', BOAT_PITS.map((p) => ({ t: 'boat_pit', ...p }))));
   plans.push(base('giza-wall', [{ t: 'crow_wall', ...CROW_WALL }], -2.5));
   const lots = townLots();
-  for (let i = 0; i < lots.length; i += 80) plans.push(base(`giza-town-${i / 80}`, lots.slice(i, i + 80).map((l) => (l.kind === 'gallery' ? { t: 'gallery_hall', rect: l.rect } : l.kind === 'bakery' ? { t: 'bakery', rect: l.rect, seed: l.seed } : { t: 'mud_house', rect: l.rect, seed: l.seed, furnish: l.seed % 3 === 0 })), TOWN_Y));
+  for (let i = 0; i < lots.length; i += 80) plans.push(base(`giza-town-${i / 80}`, lots.slice(i, i + 80).map((l) => (l.kind === 'gallery' ? { t: 'gallery_hall', rect: l.rect } : l.kind === 'bakery' ? { t: 'bakery', rect: l.rect, seed: l.seed } : l.kind === 'yard' ? { t: 'ok_yard', rect: l.rect, kind: l.yk, seed: l.seed } : { t: 'mud_house', rect: l.rect, seed: l.seed, furnish: furnished(l) })), TOWN_Y));
+  plans.push(...extras(lots));
   return plans;
 }
