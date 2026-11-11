@@ -256,6 +256,26 @@ function templeGate(el, { bag, col }) {
     bag.add('tile_dark', box(Math.min(x, x + o * 0.35) - 0.1, hy + rise + 0.5, cz - 0.1, Math.max(x, x + o * 0.35) + 0.1, hy + rise + 0.7, cz + 0.1));
   }
   bag.add('tile_dark', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.2], [0.001, 0.3]], 8, null, cx, hy + rise - 0.05, cz));
+  // the piers dressed: a panel with a raised border on each face, a lotus roundel in it; the drum stones (baogu shi) before the piers; steps up to the threshold on both sides
+  for (const sx of [-1, 1]) {
+    const px = cx + sx * (w + pw);
+    for (const f of [-1, 1]) {
+      const zf = cz + f * (hd / 2 + 0.015), z2 = cz + f * (hd / 2 + 0.045), a = Math.min(zf, z2), b = Math.max(zf, z2);
+      const yl = y + 0.95, yh = y + H - 1.0, bd = 0.1;
+      bag.add('granite_grey', box(px - pw + 0.12, yl, a, px + pw - 0.12, yl + bd, b)); bag.add('granite_grey', box(px - pw + 0.12, yh - bd, a, px + pw - 0.12, yh, b));
+      bag.add('granite_grey', box(px - pw + 0.12, yl, a, px - pw + 0.12 + bd, yh, b)); bag.add('granite_grey', box(px + pw - 0.12 - bd, yl, a, px + pw - 0.12, yh, b));
+      bag.add('granite_grey', lathe([[0.001, 0], [0.2, 0], [0.19, 0.02], [0.001, 0.035]], 12).rotateX(f * Math.PI / 2).translate(px, (yl + yh) / 2, f * (hd / 2 + 0.015) + cz));
+      for (let k = 0; k < 8; k++) { const an = k * Math.PI / 4; bag.add('granite_grey', lathe([[0.001, 0], [0.045, 0], [0.04, 0.02], [0.001, 0.03]], 6).rotateX(f * Math.PI / 2).translate(px + Math.cos(an) * 0.13, (yl + yh) / 2 + Math.sin(an) * 0.13, f * (hd / 2 + 0.015) + cz)); }
+    }
+    for (const f of [-1, 1]) {
+      const zc = cz + f * (hd / 2 + 0.5), xd = px;
+      bag.add('granite_block', lathe([[0.001, 0], [0.42, 0], [0.44, 0.1], [0.4, 0.14], [0.4, 0.84], [0.44, 0.9], [0.001, 0.9]], 14, null, xd, y, zc));
+      bag.add('granite_grey', lathe([[0.44, 0.9], [0.38, 0.9], [0.3, 0.95], [0.001, 0.95]], 14, null, xd, y, zc));
+      for (let k = 0; k < 14; k++) { const an = k * Math.PI * 2 / 14; bag.add('granite_grey', lathe([[0.001, 0], [0.04, 0], [0.036, 0.04], [0.001, 0.05]], 5, null, xd + Math.cos(an) * 0.41, y + 0.2, zc + Math.sin(an) * 0.41).rotateZ(0)); }
+      col.circle(xd, zc, 0.44, y, y + 0.95);
+    }
+  }
+  for (const f of [-1, 1]) { const a = cz + f * 0.7, b = cz + f * 1.05; bag.add('granite_grey', box(cx - w, y, Math.min(a, b), cx + w, y + 0.09, Math.max(a, b))); }
 }
 
 /**
