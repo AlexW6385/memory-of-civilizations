@@ -63,6 +63,14 @@ export class Renderer {
       // ?gputime: GPU timestamps per pass (renderer.resolveTimestampsAsync), for profiling only
       trackTimestamp: qp.has('gputime') });
     await r.init();
+    // ?trace: time every shader module and pipeline the GPU compiles (window.__gpuTrace), to find where the start goes
+    if (new URLSearchParams(location.search).has('trace') && r.backend?.device) {
+      const d = r.backend.device, T = window.__gpuTrace = { shaders: [], pipes: [], async: [] };
+      const sm = d.createShaderModule.bind(d), rp = d.createRenderPipeline.bind(d), rpa = d.createRenderPipelineAsync?.bind(d);
+      d.createShaderModule = (desc) => { const t = performance.now(), m = sm(desc); T.shaders.push([performance.now() - t, desc.code?.length || 0, t]); return m; };
+      d.createRenderPipeline = (desc) => { const t = performance.now(), p = rp(desc); T.pipes.push([performance.now() - t, t]); return p; };
+      if (rpa) d.createRenderPipelineAsync = (desc) => { const t = performance.now(); return rpa(desc).then((p) => { T.async.push([performance.now() - t, t]); return p; }); };
+    }
     SKY_FAR.value = r.reversedDepthBuffer ? 0 : 1;
     // instance matrices always as vertex attributes: below 64 kB three.js puts them in a uniform
     // array whose length is written into the shader, so every instance count was a new shader and
