@@ -89,6 +89,7 @@ export const SITES = [
   { id: 'new-york', name: { en: 'Modern New York', zh: '现代纽约' }, era: '20th c.', region: 'northeast', lat: 40.75, lon: -73.99, radius: 460 },
   // ── Oceania ──
   { id: 'rapa-nui', name: { en: 'Rapa Nui', zh: '拉帕努伊' }, era: '15th c.', region: 'polynesia', lat: -27.13, lon: -109.28, water: true, island: true, radius: 320 },
+  { id: 'fez', name: { en: 'Marinid Fez', zh: '马林王朝非斯' }, era: '14th c.', region: 'maghreb', lat: 34.06, lon: -4.97, radius: 330 },
   { id: 'maori', name: { en: 'Māori Aotearoa', zh: '毛利' }, era: '18th c.', region: 'aotearoa', lat: -38.14, lon: 176.25, radius: 330 },
   { id: 'sydney', name: { en: 'Modern Sydney', zh: '现代悉尼' }, era: '20th c.', region: 'australia', lat: -33.86, lon: 151.21, radius: 460 },
   { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, era: 'c. 1250 BC', region: 'egypt', lat: 25.7, lon: 32.64, radius: 330 },
@@ -137,7 +138,6 @@ export const PLANNED = [
   { id: 'abbasid-baghdad', name: { en: 'Abbasid Baghdad', zh: '阿拔斯巴格达' }, region: 'mesopotamia', lat: 33.31, lon: 44.36, radius: 500 },
   { id: 'shibam', name: { en: 'Shibam', zh: '希巴姆' }, region: 'arabia', lat: 15.93, lon: 48.63, radius: 180 },
   { id: 'alexandria', name: { en: 'Alexandria', zh: '亚历山大港' }, region: 'egypt', lat: 31.20, lon: 29.92, radius: 500 },
-  { id: 'fez', name: { en: 'Fez', zh: '非斯' }, region: 'maghreb', lat: 34.06, lon: -4.97, radius: 320 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },
   { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, region: 'guinea', lat: 6.34, lon: 5.62, radius: 320 },
   { id: 'mycenae', name: { en: 'Mycenae', zh: '迈锡尼' }, region: 'aegean', lat: 37.73, lon: 22.76, radius: 160 },

@@ -63,6 +63,7 @@ export const ARRIVALS = {
   'taos':             [0, 0.1, 25, 0.3, 0.12],           // the north house across the plaza
   'new-york':         [-14.15, 0.1, 37.89, 2.282, 0.55], // the Empire State whole over Fifth Avenue's towers (the grid turned 29°: Fifth at 38th, looking down the avenue)
   'rapa-nui':         [0, 0.3, 46, 3.1416, 0.12],        // the row of moai on their platform, whole
+  'fez':              [-132.5, null, -7.2, 3.1416, 0.1],   // the Bou Inania's court from its north gallery: the basin, the prayer hall beyond
   'maori':            [0, 0.2, 150, 0, 0.2],             // the pā's palisade and carved gateway
   'sydney':           [214.5, null, -112, 1.0, 0.05],    // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
   'dunhuang': [14, 0.1, 0, 1.5708, 0.2],   // On the main street east of the stream, looking west along its axis over the timber bridge: the Mogao cliff with its tiers of caves and galleries, the Nine-Storey building stepping up over the Great Buddha's hall at its middle.

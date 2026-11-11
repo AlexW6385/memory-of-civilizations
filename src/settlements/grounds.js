@@ -50,6 +50,7 @@ import { ground as kilwa } from './kilwa/ground.js';
 import { ground as greatZimbabwe } from './great-zimbabwe/ground.js';
 import { ground as stonehenge } from './stonehenge/ground.js';
 import { ground as granada } from './granada/ground.js';
+import { ground as fez } from './fez/ground.js';
 import { ground as florence } from './florence/ground.js';
 import { ground as venice } from './venice/ground.js';
 import { ground as amsterdam } from './amsterdam/ground.js';
@@ -114,6 +115,7 @@ export const GROUNDS = {
   'great-zimbabwe': greatZimbabwe,
   stonehenge,
   granada,
+  fez,
   florence,
   venice,
   amsterdam,
@@ -183,6 +185,7 @@ const LOADERS = {
   'great-zimbabwe': () => import('./great-zimbabwe/index.js'),
   stonehenge: () => import('./stonehenge/index.js'),
   granada: () => import('./granada/index.js'),
+  fez: () => import('./fez/index.js'),
   florence: () => import('./florence/index.js'),
   venice: () => import('./venice/index.js'),
   amsterdam: () => import('./amsterdam/index.js'),
