@@ -74,6 +74,7 @@ import { ground as delphi } from './delphi/ground.js';
 import { ground as mycenae } from './mycenae/ground.js';
 import { ground as abbasidBaghdad } from './abbasid-baghdad/ground.js';
 import { ground as qinXianyang } from './qin-xianyang/ground.js';
+import { ground as shangYinxu } from './shang-yinxu/ground.js';
 import { ground as alexandria } from './alexandria/ground.js';
 import { ground as hanChangan } from './han-changan/ground.js';
 export const GROUNDS = {
@@ -147,6 +148,7 @@ export const GROUNDS = {
   mycenae,
   'abbasid-baghdad': abbasidBaghdad,
   'qin-xianyang': qinXianyang,
+  'shang-yinxu': shangYinxu,
   alexandria,
   'han-changan': hanChangan,
 };
@@ -226,6 +228,7 @@ const LOADERS = {
   mycenae: () => import('./mycenae/index.js'),
   'abbasid-baghdad': () => import('./abbasid-baghdad/index.js'),
   'qin-xianyang': () => import('./qin-xianyang/index.js'),
+  'shang-yinxu': () => import('./shang-yinxu/index.js'),
   'han-changan': () => import('./han-changan/index.js'),
 };
 
