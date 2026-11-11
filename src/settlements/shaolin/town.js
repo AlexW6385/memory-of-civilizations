@@ -33,7 +33,7 @@ export async function town() {
   // the Mahavira Hall: monks kneeling on the cushions before the altar at the hour of the recitation, the abbot's attendant at the drum
   {
     const r = AXIS.mahavira, y = 0.02 + PLAT.mahavira + 0.05, cx = 0;
-    for (let rr = 0; rr < 2; rr++) for (let k = 0; k < 7; k++) if (rand() < 0.75) robeMonk([cx - 4.5 + k * 1.5, r[1] + 8.6 + rr * 1.1 + 0.1], y + 0.12, 0, { pose: 'kneel', arms: 'pray', over: 'cloak', cloth2: 'cloth_ochre' });
+    for (let rr = 0; rr < 2; rr++) for (let k = 0; k < 3; k++) if (rand() < 0.95) robeMonk([cx - 4.5 + k * 1.5, r[1] + 8.6 + rr * 1.1 + 0.1], y + 0.12, 0, { pose: 'kneel', arms: 'pray', over: 'cloak', cloth2: 'cloth_ochre' });
   }
   // the Dharma Hall: two monks at the reading tables
   { const r = AXIS.fatang, y = 0.02 + PLAT.fatang + 0.05; for (const s of [-1, 1]) robeMonk([s * 4.2 + 0.0, r[1] + 5.6 - 1.4], y, 0, { pose: 'stand', arms: 'hang' }); }
@@ -42,9 +42,9 @@ export async function town() {
   // the courts: monks sweeping, carrying water and wood, drilling with the staff in the court before the training hall; pilgrims at the censers
   for (let k = 0; k < 7; k++) robeMonk([-8 + k * 2.6, -66 + (k % 2) * 2.2], 0.02, (k % 3 - 1) * 0.5, { carry: 'staff', len: 2.0, arms: 'staff', over: 'none', legs: 'hose' });
   for (const [x, z] of [[-12, 70], [14, 52], [9, 24], [-9, 12], [-20, -38], [18, -42]]) robeMonk([x, z], 0.02, rand() * 6.28, { carry: 'broom', arms: 'sweep' });
-  for (const [x, z] of [[-7, 100], [10, 66], [-14, 26], [6, -16]]) robeMonk([x, z], 0.02, rand() * 6.28, { carry: 'pole', arms: 'pole' });
-  for (let k = 0; k < 4; k++) robeMonk([-3 + k * 2, 94 + 0.1], 0.02 + PLAT.tianwang + 0.05 - 0.02, Math.PI * (k % 2), { pose: 'talk' });
-  for (const [x, z, face] of [[0, 107, 0], [1.4, 106.2, 0.4], [-1.2, 63.6, 0.2], [0.6, 23.6, 0]]) { const w = rand() < 0.5; (w ? woman : man)([x, z], 0.04, face, { pose: 'pray', arms: 'pray' }); }
+  for (const [x, z] of [[-7, 100], [10, 66], [-27, 26], [6, -16]]) robeMonk([x, z], 0.02, rand() * 6.28, { carry: 'pole', arms: 'pole' });
+  for (const [k, px] of [-9, -6.2, 6.2, 9].entries()) robeMonk([px, 93.6], 0.02 + PLAT.tianwang + 0.05 - 0.02, Math.PI * (k % 2), { pose: 'talk' });
+  for (const [x, z, face] of [[5.9, 105.2, Math.PI / 2], [5.9, 106.4, Math.PI / 2], [5.9, 62.4, Math.PI / 2], [5.9, 22.4, Math.PI / 2]]) { const w = rand() < 0.5; (w ? woman : man)([x, z], 0.04, face, { pose: 'pray', arms: 'pray' }); }
   for (let k = 0; k < 22; k++) {
     const side = rand() < 0.5 ? -1 : 1, x = side * (6 + rand() * 40), z = 70 + rand() * 50;
     const r = rand(), at = [x, z];

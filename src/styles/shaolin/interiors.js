@@ -63,8 +63,8 @@ function tianwang(el, ctx) {
   const f = frame(el, ctx), { x0, z0, x1, cx, y } = f, rand = rng(11);
   brickFloor(f.S, x0 + 0.5, z0 + 0.5, x1 - 0.5, f.z1 - 0.4, 5);
   // Maitreya on the axis facing the gate, Weituo behind him facing the other way
-  pedestal(f, cx - 1.7, z0 + 2.0, cx + 1.7, z0 + 5.0, 0.85);
-  buddha({ at: [cx, z0 + 3.5], y: y + 0.85, h: 2.9, dir: [0, 1], robe: 'clay_robe' }, ctx);
+  pedestal(f, cx - 1.7, z0 + 1.8, cx + 1.7, z0 + 4.5, 0.85);
+  buddha({ at: [cx, z0 + 3.15], y: y + 0.85, h: 2.9, dir: [0, 1], robe: 'clay_robe' }, ctx);
   // the four kings, two to a side, in the side bays, each on his stone base (their colours: green, blue, red, white-ish)
   const robes = ['clay_green', 'paint_blue', 'lacquer_red', 'clay_robe'];
   [-8.2, -4.6, 4.6, 8.2].forEach((dx, i) => {
@@ -73,10 +73,10 @@ function tianwang(el, ctx) {
     statue({ at: [px, z0 + 2.55], y: y + 0.6, h: 3.6, dir: [0, 1], type: 'king', robe: robes[i], robe2: robes[(i + 1) % 4], seed: 20 + i }, ctx);
   });
   // an offering table and a censer before Maitreya's base; cushions
-  { const P = new Parts(), h = 0.95; longTable(P, 1.8, 0.5, h); const C = new Parts(); censer(C, 0.9); C.emit(P, 0, h, 0); f.put(P, cx, z0 + 5.8); f.col.rect([cx - 1, z0 + 5.5, cx + 1, z0 + 6.1], y, y + 1); }
-  for (const dx of [-0.9, 0.9]) { const P = new Parts(); cushion(P); f.put(P, cx + dx, z0 + 6.6); }
-  for (const s of [-1, 1]) { const P = new Parts(); candleStand(P, 1.2); f.put(P, cx + s * 2.6, z0 + 5.8); }
-  f.light(cx, 1.4, z0 + 5.8, '#ffb46b', 1.4, 7); f.light(cx - 8, 1.6, z0 + 4.6, '#ffc07a', 1.0, 6);
+  { const P = new Parts(), h = 0.95; longTable(P, 1.3, 0.5, h); const C = new Parts(); censer(C, 0.9); C.emit(P, 0, h, 0); f.put(P, cx, z0 + 5.1); f.col.rect([cx - 0.7, z0 + 4.85, cx + 0.7, z0 + 5.35], y, y + 1); }
+  for (const dx of [-0.9, 0.9]) { const P = new Parts(); cushion(P); f.put(P, cx + dx, z0 + 6.2); }
+  for (const s of [-1, 1]) { const P = new Parts(); candleStand(P, 1.2); f.put(P, cx + s * 2.6, z0 + 5.4); }
+  f.light(cx, 1.4, z0 + 5.4, '#ffb46b', 1.4, 7); f.light(cx - 8, 1.6, z0 + 4.6, '#ffc07a', 1.0, 6);
   lanterns(f, [-8, -4, 4, 8].map((d) => cx + d), z0 + 5.3);
   void rand; f.done();
 }
@@ -133,7 +133,7 @@ function fatang(el, ctx) {
     f.put(P, x, z, yaw);
   };
   for (let k = 0; k < 7; k++) { const x = x0 + 1.6 + k * (x1 - x0 - 3.2) / 6; cab(x, z0 + 0.7, 0, 2.2); f.col.rect([x - 1.1, z0 + 0.4, x + 1.1, z0 + 1.0], y, y + 2.4); }
-  for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { const z = z0 + 3 + k * 2.6; const x = s < 0 ? x0 + 0.7 : x1 - 0.7; cab(x, z, s < 0 ? -Math.PI / 2 : Math.PI / 2, 2.2); f.col.rect([x - 0.4, z - 1.1, x + 0.4, z + 1.1], y, y + 2.4); }
+  for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { const z = z0 + 2.6 + k * 1.9; const x = s < 0 ? x0 + 0.7 : x1 - 0.7; cab(x, z, s < 0 ? Math.PI / 2 : -Math.PI / 2, 1.7); f.col.rect([x - 0.4, z - 0.85, x + 0.4, z + 0.85], y, y + 2.4); }
   // the master's seat on a dais at the middle of the back; two long reading tables with benches
   { const P = new Parts(); P.add('lacquer_black', box(-1.6, 0, -0.9, 1.6, 0.25, 0.9)); const A = new Parts(); armchair(A); A.emit(P, 0, 0.25, 0.2, Math.PI); f.put(P, cx, z0 + 2.2); f.col.rect([cx - 1.6, z0 + 1.3, cx + 1.6, z0 + 3.1], y, y + 0.25); }
   for (const s of [-1, 1]) {

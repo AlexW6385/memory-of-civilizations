@@ -8,9 +8,9 @@ const ID = 'shaolin';
 export function emitters() {
   const E = [], r = rng(1600);
   // incense: the great censers (plan.js: court_censer at the processional way, 2.3 m high) and the halls' altars
-  for (const z of [105, 62, 22]) E.push({ p: [0, 2.4, z], kind: 'incense', thr: 0, seed: Math.round(z) });
+  for (const z of [105, 62, 22]) E.push({ p: [3.6, 2.4, z], kind: 'incense', thr: 0, seed: Math.round(z) });
   { const q = AXIS.mahavira, y = 0.02 + PLAT.mahavira; for (const s of [-1, 1]) E.push({ p: [s * 6.2, y + 2.6, q[3] + 0.8 + 3.3], kind: 'incense', thr: 0, seed: 31 + s }); E.push({ p: [0, y + 2.1, q[1] + 7.0], kind: 'incense', thr: 0, seed: 5 }); }
-  { const q = AXIS.tianwang, y = 0.02 + PLAT.tianwang; E.push({ p: [0, y + 1.9, q[1] + 5.8], kind: 'incense', thr: 0, seed: 6 }); }
+  { const q = AXIS.tianwang, y = 0.02 + PLAT.tianwang; E.push({ p: [0, y + 1.9, q[1] + 5.1], kind: 'incense', thr: 0, seed: 6 }); }
   // the kitchen (a range) and refectory: stove smoke through a roof vent, steam
   for (const q of RANGES) if (q.kind === 'kitchen' || q.kind === 'refectory') {
     const cx = (q.rect[0] + q.rect[2]) / 2, cz = (q.rect[1] + q.rect[3]) / 2;

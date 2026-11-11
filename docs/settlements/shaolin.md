@@ -48,7 +48,7 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 
 ## 6. Interiors we build
 
-- **Tianwang Hall:** Maitreya (laughing, cross-legged) facing the gate with Weituo behind him, the four kings (two a side) on stone-and-timber pedestals, a censer, floor of square bricks [inferred: the standard arrangement of a Chinese monastery gate hall].
+- **Tianwang Hall:** Maitreya facing the gate (Weituo behind him is left out so that the hall's back door stays free), the four kings (two a side) on stone-and-timber pedestals, a censer, floor of square bricks [inferred: the standard arrangement of a Chinese monastery gate hall].
 - **Mahavira Hall:** the Three Buddhas (Sakyamuni centre, Medicine Buddha and Amitabha beside), Guanyin behind, the Eighteen Arhats nine a side, the long altar with a censer, candlesticks and offerings, hanging banners, prayer cushions, a drum and a wooden fish at the side [stated: the Three Buddhas, Guanyin and the Eighteen Arhats; the rest inferred].
 - **Qianfo Hall:** a big gilt Vairocana on a lotus throne, the walls painted (the "Five Hundred Arhats Paying Homage to Vairocana" mural; our wall bands carry painted panels), the floor with 48 pits and monks drilling [stated: murals and bronze Vairocana; the subject of the murals and the pits [inferred]].
 - **A monk's cell:** a wooden platform bed with a quilt, a rush cushion, a low table with sutras, a wooden fish and a bowl, a lamp, a water basin, a shelf, a hanging scroll [inferred: common to Chinese Chan monasteries].
@@ -81,3 +81,12 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 
 - The Bodhidharma cave and Chuzu Temple (1.5 km away), Songyue pagoda, Zhongyue temple: outside the disc [DESIGN §7 names them for later].
 - The exact Ming plans of the halls: the present buildings are mostly 20th-century reconstructions [stated: bell tower rebuilt 1994, drum tower 1996, Mahavira 1985, Dharma hall 1993].
+
+## 10. What is built (L2)
+
+- **Style `shaolin`** (`src/styles/shaolin/`): `ming_hall`/`ming_wall`/`ming_pavilion` of the Ming style in the monastery palette (red timber and plaster, grey tile, grey stone plinth); new elements `shaolin_stupa` (brick tiered, stone vase, bell types on 4/6/8-sided plans with tablet niche, corbelled eaves, lotus-and-ball finial), `shaolin_stele` (tortoise base with dragon head, or plain), `practice_floor` (48 real recesses through a brick floor), `shaolin_interior` (Tianwang, Mahavira, Dharma, Qianfo halls, monk's cell), `court_censer`, `stone_lion`, `bell_hung`, `path_earth`. Furnishing of the abbot's hall and the Lixue pavilion reuses Suzhou's `hall_furniture` (imported read-only).
+- **Compound** 124 × 240 m on the axis: Shanmen, Tianwang, Mahavira (30 × 11.5 m on a 1.2 m platform with terrace and censers), Dharma, abbot's, Lixue, Qianfo (on 1.4 m); cross walls with side gates; bell and drum towers (brick podium, open pavilion, bell and drum); ten side ranges; steles in rows, Taizong stele pavilions, a corridor of steles along the west wall; bluestone courts and a granite processional way.
+- **Pagoda Forest:** 92 stupas (7 tall brick ones of 5–7 eaves, the rest low brick, stone vase and bell stupas) on a gentle slope with a path of beaten earth.
+- **Village:** ~40 grey-brick courtyard houses along the approach road.
+- **Life:** monks in the pits of the training hall, kneeling in the Mahavira Hall, reading, in a cell, sweeping and carrying; pilgrims and villagers; walkers (monks, staff-bearers, scholars, townsmen, women, farmers, porters); swallows, sparrows, crows; incense and kitchen smoke.
+- **Left out:** Weituo behind Maitreya, the two-storey Dharma Hall, the Bodhidharma cave, Chuzu Temple, Songyue and Zhongyue, a ginkgo species (stand-in `pagoda_tree`).

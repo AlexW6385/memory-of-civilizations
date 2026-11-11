@@ -70,19 +70,19 @@ export const STUPAS = [];
   const big = [[-150, 48, 14, 7, 8], [-132, 92, 13, 7, 8], [-158, 100, 12, 7, 6], [-121, 54, 11, 5, 4], [-145, 78, 10.5, 5, 6], [-166, 62, 11, 7, 8], [-118, 108, 9.5, 5, 6]];
   for (const [x, z, h, tiers, shape] of big) STUPAS.push({ c: [x, z], kind: 'brick', tiers, shape, h, yaw: (x * 0.13) % 1, seed: Math.round(x * z), rad: h * 0.22 + 2 });
   let tries = 0;
-  while (STUPAS.length < 62 && tries++ < 4000) {
+  while (STUPAS.length < 92 && tries++ < 8000) {
     const x = x0 + 6 + r() * (x1 - x0 - 12), z = z0 + 6 + r() * (z1 - z0 - 12);
     const k = r(), kind = k < 0.35 ? 'stone' : k < 0.55 ? 'bell' : 'brick';
     const tiers = kind === 'brick' ? (r() < 0.35 ? 1 : 3 + 2 * Math.floor(r() * 2)) : 1;
     const shape = kind === 'brick' ? [4, 6, 8][Math.floor(r() * 3)] : 8;
     const h = kind === 'brick' ? (tiers === 1 ? 3.2 + r() * 1.6 : tiers === 3 ? 5 + r() * 2.5 : 7 + r() * 2.5) : 2.2 + r() * 1.6;
     const rad = h * 0.2 + 1.3;
-    if (near(x, z, rad + 0.6)) continue;
+    if (near(x, z, rad + 0.25)) continue;
     STUPAS.push({ c: [x, z], kind, tiers, shape, h, yaw: Math.floor(r() * 4) * Math.PI / 8 + (r() - 0.5) * 0.15, seed: Math.floor(r() * 1e6), rad });
   }
 }
 /** Mount Song: rises north of the compound; the ridge of Shaoshi in the north-west. */
 export const MOUNT = (x, z) => {
-  const n = Math.max(0, -125 - z), ridge = 1 + 0.45 * Math.sin(x / 38) + 0.25 * Math.sin(x / 15 + z / 23);
-  return Math.pow(n, 1.25) * 0.16 * ridge * (1 - 0.25 * smooth(-60, 60, Math.abs(x)) * 0);
+  const n = Math.max(0, -125 - z), ridge = 1 + 0.2 * Math.sin(x / 38) + 0.1 * Math.sin(x / 15 + z / 23);
+  return 0.35 * Math.pow(n, 1.05) * ridge;
 };
