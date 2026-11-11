@@ -29,6 +29,7 @@ export const SITES = [
   // ── Japan and Korea ──
   { id: 'nara', name: { en: 'Nara Japan', zh: '奈良' }, era: '8th c.', region: 'japan', lat: 34.69, lon: 135.84, water: true, island: true, radius: 340 },
   { id: 'heian-uji', name: { en: 'Heian Japan', zh: '平安日本' }, era: '11th c.', region: 'japan', lat: 34.89, lon: 135.81, radius: 360 },
+  { id: 'muromachi-kyoto', name: { en: 'Muromachi Kyoto', zh: '室町京都' }, era: '15th c.', region: 'japan', lat: 35.03, lon: 135.80, radius: 330 },
   { id: 'edo-himeji', name: { en: 'Edo Japan', zh: '江户日本' }, era: '17th c.', region: 'japan', lat: 34.8, lon: 133.6, radius: 400 },
   { id: 'joseon-seoul', name: { en: 'Joseon Korea', zh: '朝鲜王朝' }, era: '19th c.', region: 'korea', lat: 37.58, lon: 126.98, radius: 400 },
   // ── India and South-East Asia ──
@@ -96,7 +97,7 @@ for (const s of SITES) s.radius ??= 190;
 const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan',
-  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney',
+  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara muromachi-kyoto edo-himeji chichen-itza ur petra persepolis giza cahokia sydney',
   S: 'heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
   P: 'stonehenge',
 };
@@ -121,7 +122,6 @@ export const PLANNED = [
   { id: 'hakka-tulou', name: { en: 'Hakka tulou', zh: '客家土楼' }, region: 'china', lat: 24.67, lon: 117.05, radius: 180 },
   { id: 'dunhuang', name: { en: 'Dunhuang', zh: '敦煌' }, region: 'silk-road', lat: 40.04, lon: 94.81, radius: 220 },
   { id: 'shaolin', name: { en: 'Shaolin and Mount Song', zh: '少林与嵩山' }, region: 'china', lat: 34.51, lon: 112.94, radius: 200 },
-  { id: 'muromachi-kyoto', name: { en: 'Muromachi Kyoto', zh: '室町京都' }, region: 'japan', lat: 35.03, lon: 135.80, radius: 320 },
   { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, region: 'indus', lat: 27.33, lon: 68.14, radius: 300 },
   { id: 'ajanta', name: { en: 'Ajanta', zh: '阿旃陀' }, region: 'india', lat: 20.55, lon: 75.70, radius: 200 },
   { id: 'nalanda', name: { en: 'Nalanda', zh: '那烂陀' }, region: 'india', lat: 25.14, lon: 85.44, radius: 200 },
