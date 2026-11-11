@@ -104,7 +104,7 @@ function monastery(el, ctx) {
     const nc = si % 2 === 0 ? 15 : 11, pitch = L / nc, gate = si === 3 ? (nc - 1) / 2 : -1;
     const cellX = (k) => (k + 0.5) * pitch;
     // the walls' tops all along: the cornice
-    wallGaps(ctx, P(0, 0.5), P(L, 0.5), 1.0, -0.1, 0.55, [], BRB);
+    wallGaps({ bag, col: { segment() {} } }, P(0, 0.5), P(L, 0.5), 1.0, -0.1, 0.55, gate >= 0 ? [{ s0: cellX(gate) - 1.6, s1: cellX(gate) + 1.6, y0: -0.3, y1: 0.7 }] : [], BRB);
     // does a cell's doorway open on the stair's well? (north side)
     const inWell = (k) => si === 0 && enter && (A[0] + u[0] * (k + 1) * pitch > stair.x0 - 0.3) && (A[0] + u[0] * k * pitch < stair.x1 + 0.3);
     if (!enter) {
