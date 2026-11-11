@@ -255,12 +255,17 @@ function southRow(bag, col, R, g, lod, rand, gxC) {
   }
   // the front of the gate: the lintel with the door pins; the door's frame and leaves (open); the porch before them
   const zD = zS - doorD, jx0 = gxC - G.open / 2, jx1 = gxC + G.open / 2, hD = 2.3 + (up > 0 ? 0.2 : 0);
+  // what the visitor stands on: the passage's floor, the steps up from the lane and down to the yard
+  col.floor([jx0, zN - 0.15, jx1, zS + 0.05], y);
+  col.ramp([jx0 - 0.35, zS + 0.05, jx1 + 0.35, zS + 0.05 + 0.3 * nst], 0.03, y, 'n');
+  col.ramp([jx0 - 0.35, zN - 0.15 - 0.3 * nst, jx1 + 0.35, zN - 0.15], 0.03, y, 's');
   // the closing of the passage at the lane face: brick returns to the open width at the leaf's plane, and the lintel/transom
   bag.add('brick_grey', box(gL + 0.5, y, zD - 0.15, jx0, y + hD + 0.5, zD + 0.15));
   bag.add('brick_grey', box(jx1, y, zD - 0.15, gR - 0.5, y + hD + 0.5, zD + 0.15));
   bag.add('lacquer_black', box(jx0 - 0.02, y + hD, zD - 0.17, jx1 + 0.02, y + hD + 0.22, zD + 0.17));                // the lintel beam above the leaves
   bag.add('brick_grey', box(jx0, y + hD + 0.22, zD - 0.15, jx1, y + hD + 0.5, zD + 0.15));
-  // the passage's ceiling lies under the roof (the rafters show from the lane)
+  // the passage's ceiling (boards under the rafters)
+  bag.add('timber', box(gL + 0.5, y + Hg - 0.62, zN - 0.15, gR - 0.5, y + Hg - 0.56, zS));
   // door frame and the two leaves standing open into the yard side
   for (const sx of [-1, 1]) {
     const xj = sx < 0 ? jx0 : jx1;
@@ -268,7 +273,6 @@ function southRow(bag, col, R, g, lod, rand, gxC) {
     const xl = sx < 0 ? xj + 0.01 : xj - 0.07;
     bag.add(G.door, box(xl, y + 0.12, zD - 0.9, xl + 0.06, y + hD - 0.04, zD - 0.06));                                // the leaf swung back against the passage wall
   }
-  bag.add('timber', box(jx0, y, zD - 0.09, jx1, y + 0.2, zD + 0.09));                                                 // the threshold
   // door pins on the lintel (men zan): round pegs standing out of the lintel, red
   const pins = G.pins;
   for (let i = 0; i < pins; i++) {

@@ -5,7 +5,7 @@
 // stone feet, the hanging trade signs (huangzi) of each trade, a mat awning, red lanterns; behind the
 // shops a walled yard with a lean-to store and a tree.
 
-import { box, lathe, rod, hangFrom, windMat } from '../../core/geom.js';
+import { box, lathe, rod, hangFrom, windMat, fromTriangles } from '../../core/geom.js';
 import { Parts, torus } from '../../styles/qing/carving.js';
 import { plaqueBuild } from '../ming-suzhou/props.js';
 import { Frame, gableRoof, rng } from './houses.js';
@@ -121,17 +121,12 @@ export function qingShop(el, ctx) {
   for (let i = 1; i < bays; i += 1) { const p = F.P(s0 + 0.5 + bw * i, dF + 0.2, lintY - 0.2); bag.add('lamp_paper', lathe([[0.001, -0.5], [0.18, -0.58], [0.2, -0.74], [0.18, -0.88], [0.001, -0.94]], 8).translate(p[0], p[1] + 0.52 + 0.0, p[2])); }
   // a mat awning (pengzi) sloping from the front's eave, on two poles, over the goods on the apron
   if (r() < 0.55) {
-    const A = [F.P(s0 + 0.7, dF + 0.1, lintY + 0.3), F.P(s1 - 0.7, dF + 0.1, lintY + 0.3), F.P(s1 - 0.7, dF + 2.4, lintY - 0.5), F.P(s0 + 0.7, dF + 2.4, lintY - 0.5)];
-    const tri = []; for (const [a, b, c] of [[0, 1, 2], [0, 2, 3]]) tri.push(...A[a], ...A[b], ...A[c]);
-    // two sides up and down (a thin sheet seen from both sides)
-    const both = tri.concat(tri.slice().reverse().reduce((o, v, i, a2) => o, []));
-    void both;
-    const g = box(Math.min(...A.map((a) => a[0])), 0, Math.min(...A.map((a) => a[2])), Math.max(...A.map((a) => a[0])), 0.01, Math.max(...A.map((a) => a[2])));
-    void g;
-    for (const k of [0.5, 1.5]) {
-      const [px, , pz] = F.P(s0 + 0.7 + (L - 1.4) * (k < 1 ? 0.0 : 1.0), dF + 2.4, 0);
-      bag.add('timber', rod([px, 0, pz], [px, lintY - 0.5, pz], 0.05, 5));
-    }
+    const A = [F.P(s0 + 0.7, dF + 0.1, lintY + 0.3), F.P(s1 - 0.7, dF + 0.1, lintY + 0.3), F.P(s1 - 0.7, dF + 2.4, lintY - 0.35), F.P(s0 + 0.7, dF + 2.4, lintY - 0.35)];
+    const tri = [];
+    for (const [a, b, c] of [[0, 1, 2], [0, 2, 3]]) tri.push(...A[a], ...A[b], ...A[c]);
+    for (const [a, b, c] of [[0, 2, 1], [0, 3, 2]]) tri.push(...A[a], ...A[b], ...A[c]);
+    bag.add('thatch', fromTriangles(tri));                                                   // the reed mat
+    for (const sg of [-1, 1]) { const p = F.P(sg < 0 ? s0 + 0.7 : s1 - 0.7, dF + 2.4, 0); bag.add('timber', rod([p[0], 0, p[2]], [p[0], lintY - 0.35, p[2]], 0.05, 5)); col.circle(p[0], p[2], 0.1, 0, 2.5); }
   }
   // the goods on the apron (a trestle with baskets, a stack of sacks)
   void goods;

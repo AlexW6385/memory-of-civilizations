@@ -136,9 +136,32 @@ let TREES = null;
 function treeIndex() {
   if (TREES) return TREES;
   TREES = new Map();
+  const add = (t) => { const k = Math.floor(t[0] / 8) + ',' + Math.floor(t[1] / 8); if (!TREES.has(k)) TREES.set(k, []); TREES.get(k).push(t); };
+  for (const t of vergeTrees()) add(t);
   for (const h of houses()) for (const t of houseTrees(h)) { const k = Math.floor(t[0] / 8) + ',' + Math.floor(t[1] / 8); if (!TREES.has(k)) TREES.set(k, []); TREES.get(k).push(t); }
   return TREES;
 }
+/** The old pagoda trees (Sophora japonica) of the lanes' edges and the trees of the shops' yards: [x, z, kind]. */
+export function vergeTrees() {
+  if (VERGE) return VERGE;
+  VERGE = [];
+  const rand = rng(1553), [b0, bz0, b1, bz1] = TEMPLE.belt;
+  for (let z = Z_START; z <= RADIUS; z += HUTONG_PERIOD) {
+    for (let x = -RADIUS + 30; x < RADIUS - 30; x += 46 + rand() * 40) {
+      const p = [x, z + 0.55, 'pagoda'];
+      if (Math.hypot(p[0], p[1]) > RADIUS - 36 || inRect(RING, p[0], p[1], 10) || inRect(AVENUE, p[0], p[1], 14) || inRect(TEMPLE.belt, p[0], p[1], 6) || inShopStrip(p[0], p[1], 4)) continue;
+      if (STREET_X.some((sx) => Math.abs(x - sx) < 9) || (z + HUTONG_W > RING[1] && z < RING[3] && x > RING[0] - 30 && x < RING[2] + 30)) continue;
+      if (rand() < 0.3) continue;
+      VERGE.push(p);
+    }
+  }
+  for (const row of shopRows()) {
+    const yc = [(row.yard[0] + row.yard[2]) / 2 + (row.side === 'w' ? -4 : 4), (row.z0 + row.z1) / 2];
+    VERGE.push([yc[0], yc[1], rand() < 0.5 ? 'pagoda' : 'jujube']);
+  }
+  return VERGE;
+}
+let VERGE = null;
 /** The tree (its [x, z, kind]) within r of the point, or null. */
 export function treeNear(x, z, r = 1.5) {
   const m = treeIndex(), gx = Math.floor(x / 8), gz = Math.floor(z / 8);
@@ -186,12 +209,15 @@ export function wells() {
   WELLS = [];
   const rand = rng(1771), [b0, bz0, b1, bz1] = TEMPLE.belt;
   for (let z = Z_START; z <= RADIUS; z += HUTONG_PERIOD) {
+   for (let tries = 0; tries < 3; tries++) {
     if (rand() < 0.45) continue;
     const x = -RADIUS + 60 + rand() * (2 * RADIUS - 120), p = [x, z + 1.1];
     if (Math.hypot(...p) > RADIUS - 40 || inRect(RING, p[0], p[1], 8) || inRect(AVENUE, p[0], p[1], 12) || inRect(TEMPLE.belt, p[0], p[1], 8) || inShopStrip(p[0], p[1], 6)) continue;
     if (STREET_X.some((sx) => Math.abs(x - sx) < 8)) continue;
     if (z + HUTONG_W > RING[1] && z < RING[3] && x > RING[0] - 30 && x < RING[2] + 30) continue;
+    if (WELLS.some((w) => Math.hypot(w[0] - x, w[1] - p[1]) < 60)) continue;
     WELLS.push(p);
+   }
   }
   return WELLS;
 }
