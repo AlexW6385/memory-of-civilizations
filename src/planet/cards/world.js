@@ -1036,4 +1036,22 @@ export const CARDS = {
       "印度河与码头 —— 南面的城墙与塔楼，东面的印度河与砖砌码头和台阶，封印货物的港务房，以及满载谷物和陶器的平底木板与芦苇船。",
     ],
   },
+  'ayutthaya': {
+    en: [
+      "Ayutthaya, the capital of Siam, stands on an island in the loop of the Chao Phraya's rivers in the central plain, shown about 1687 in the last year of King Narai's reign, when the French embassy of Simon de La Loubère came and compared its canal-laced streets to Venice. The court traded with the Dutch, French, English, Persians, Chinese and Japanese; the city lived on the water, its houses raised on posts against the yearly floods, its streets canals crossed by small bridges of bamboo hurdles and some tall brick ones. The architecture is Siamese: whitewashed brick and stucco temples under stepped roofs of terracotta tile with gilded gables, timber stilt houses under thatch.",
+      "Wat Phra Si Sanphet — the royal temple in the old palace grounds: three bell-shaped chedis in a row on a platform inside a cloister, each on tiers of square pedestals with a porch on each side crowned by a small chedi, a ringed spire and a gilded finial; between them small square mandapa; at the cloister's corners four little chedis; west of the platform the cross-shaped prasat of Narai's reign, east the royal wihan with its colonnaded aisles, stepped roofs and the great gilded Buddha on its long dais, then the ordination hall and the bell tower, all inside a high white wall with chapels for the royal ashes.",
+      "The palace — west of the wat, a walled compound of throne halls on plinths under stepped tiled roofs, with their gilded gables and horns at the ridge ends.",
+      "The canals — a grid of brick-faced canals across the island, with arched brick bridges and hurdle bridges of bamboo, landing stages, and boats of every size moored and moving along them.",
+      "The stilt houses — timber houses on posts under steep thatched roofs along the banks, with their stairs, verandas, rice barns and sugar palms.",
+      "The river and the floating market — the great river on the island's west and south, with rows of floating houses on bamboo rafts, and below the palace the floating market, where women sit in boats under mat awnings selling fruit, pots, rice and fish.",
+    ],
+    zh: [
+      "大城（阿瑜陀耶）是暹罗的都城，位于湄南河诸水环抱的中部平原的一座岛上，画面所示约为1687年，那莱王在位的最后一年，法国使节西蒙·德·拉卢贝尔来访，把这座水巷纵横的城比作威尼斯。宫廷与荷兰、法国、英国、波斯、中国和日本通商；城市生活在水上，房屋架在柱子上以避每年的洪水，街道就是运河，其上有竹排小桥，也有高高的砖桥。建筑属暹罗式：白灰粉刷的砖和灰泥寺庙，覆多层陶瓦屋顶、山墙贴金；民居是茅草顶的高脚木屋。",
+      "帕西桑碧寺 —— 旧王宫旧址上的王家寺院：回廊围合的平台上，三座钟形佛塔一字排开，各立于数层方形基座上，四面各有一座小佛塔压顶的龛廊，塔身之上是层环叠起的塔刹和镀金的尖顶；塔间有小方亭；回廊四角各立一座小塔；平台以西是那莱王时代的十字形殿堂，以东是王家大殿，列柱环廊，多层屋顶，殿内长台上供着镀金大佛，再往东是戒堂和钟楼；高高的白墙内侧排着供奉王室骨灰的小塔。",
+      "王宫 —— 寺西围墙环绕的宫院，台基上的朝殿覆多层瓦顶，山墙金红相间，屋脊两端翘起“朝花”。",
+      "运河 —— 岛上砖砌堤岸的运河纵横成网，有拱形砖桥和竹排小桥、木码头，大大小小的船只或泊或行。",
+      "高脚屋 —— 沿岸的木屋立在柱子上，陡坡茅草顶，有梯、廊、谷仓和糖棕树。",
+      "河与水上市场 —— 大河环绕岛的西侧和南侧，竹筏上排着一行行浮屋；王宫下游是水上市场，妇人坐在席棚小船里，卖水果、陶罐、稻米和鱼。",
+    ],
+  },
 };

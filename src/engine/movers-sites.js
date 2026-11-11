@@ -79,5 +79,6 @@ export const MOVER_SITES = {
   'hakka-tulou': () => import('../settlements/hakka-tulou/movers.js'),
   'ajanta': () => import('../settlements/ajanta/movers.js'),
   'mohenjo-daro': () => import('../settlements/mohenjo-daro/movers.js'),
+  'ayutthaya': () => import('../settlements/ayutthaya/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

@@ -164,6 +164,7 @@ export const GROUNDS = {
   'hakka-tulou': hakkaTulou,
   ajanta,
   'mohenjo-daro': mohenjoDaro,
+  ayutthaya,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -249,6 +250,7 @@ const LOADERS = {
   'hakka-tulou': () => import('./hakka-tulou/index.js'),
   ajanta: () => import('./ajanta/index.js'),
   'mohenjo-daro': () => import('./mohenjo-daro/index.js'),
+  ayutthaya: () => import('./ayutthaya/index.js'),
 };
 
 /** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */
