@@ -32,6 +32,13 @@ for (const [z, d] of CANAL_BOATS) E.push({ t: 'boat', at: [(CANAL.x0 + CANAL.x1)
 // ---- the pagoda on its terrace, the temple's halls, the stairs from the road
 E.push({ t: 'block', walk: true, rect: T1.rect, y0: 0, y1: T1.y, mat: 'granite_block' });
 E.push({ t: 'block', walk: true, rect: T2.rect, y0: 0, y1: T2.y, mat: 'granite_block' });
+// the terraces' walls dressed in granite: plinth, pilasters, string course, coping, and a dragon-head spout (chitou) between each pair of pilasters
+{
+  const gc = PAGODA.c[0], [wx0, wz0, wx1, wz1] = T1.rect, [vx0, vz0, vx1, vz1] = T2.rect;
+  E.push({ t: 'hz_revetment', a: [wx0, wz1], b: [gc - 7.4, wz1], n: 1, off: wz1, y0: 0, y1: T1.y, seed: 41 }, { t: 'hz_revetment', a: [gc + 7.4, wz1], b: [wx1, wz1], n: 1, off: wz1, y0: 0, y1: T1.y, seed: 42 });
+  E.push({ t: 'hz_revetment', a: [wx0, wz0], b: [wx0, wz1], n: -1, off: wx0, y0: 0, y1: T1.y, seed: 43 }, { t: 'hz_revetment', a: [wx1, wz0], b: [wx1, wz1], n: 1, off: wx1, y0: 0, y1: T1.y, seed: 44 });
+  E.push({ t: 'hz_revetment', a: [vx0, vz1], b: [gc - 5.4, vz1], n: 1, off: vz1, y0: 0, y1: T2.y, seed: 45 }, { t: 'hz_revetment', a: [gc + 5.4, vz1], b: [vx1, vz1], n: 1, off: vz1, y0: 0, y1: T2.y, seed: 46 });
+}
 // the processional stair from the river road: three flights with landings (lions on the first, steles on the second), balustrades, worn slabs; stone lamps at its foot, old camphors and a ginkgo on either side
 E.push({ t: 'hz_stair', x0: PAGODA.c[0] - 6, x1: PAGODA.c[0] + 6, zTop: T1.rect[3], zBot: ROAD.z0, y0: 0, y1: T1.y, flights: 3, landing: 2.4, seed: 17 });
 for (const dx of [-10.5, 10.5]) E.push({ t: 'stone_lamp', at: [PAGODA.c[0] + dx, ROAD.z0 - 1.5], y: 0 });
