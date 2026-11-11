@@ -1,0 +1,84 @@
+# A Balinese temple village, c. 1900 — dossier
+
+Settlement id: `bali-village` · Style: `balinese` · Region: Bali (the rice-growing foothills, the planet's `java` group) · Code: `src/settlements/bali-village/`, `src/styles/balinese/`
+Class S, radius 190 m. Position: 8.37° S, 115.45° E (the PLANNED entry gave +8.37, a lost sign: Bali lies south of the equator).
+
+Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
+
+## 1. The real example and the moment
+
+- **What it is:** not one named village but the type: a Hindu-Balinese *desa adat* of the rice plain, a village whose life is held by its three temples, its *banjar* (neighbourhood association) and its *subak* (irrigation cooperative). "Each village has at least three" temples: the *pura puseh*, the *pura desa* and the *pura dalem*, the temple of the dead [stated: factsanddetails.com, "Balinese architecture"]; King Udayana (late 10th–early 11th century) and Mpu Kuturan required every village to have the three [stated: Wikipedia "Balinese temple"].
+- **Moment shown:** about 1900, before the Dutch conquest of the southern kingdoms (1906–08) and before tourism: Hinduism in its Balinese form, timber, thatch and red brick, no concrete, no tin. Chosen because the dated sources (the *Asta Kosala Kosali* rules, the subak, the compound, the temple's courts) are older than this and unchanged by it [inferred: the moment is ours; the DESIGN row left it "to be fixed"].
+- **Landmark:** a village *pura* (the pura desa/puseh as one precinct) with its split gate, three courts, meru towers, open *bale* pavilions and the *kulkul* tower. **Town:** the walled family compounds along the village street and a cross lane, the *banjar* hall (a *wantilan*), the crossroads with its banyan, the rice terraces with their subak channels, offerings and the gamelan.
+
+## 2. Layout of the settlement (radius 190 m)
+
+Orientation: the *kaja–kelod* axis runs from the mountain (*kaja*, abode of the gods) to the sea (*kelod*) [stated: Wikipedia "Balinese architecture"; "Balinese temple"]; the holiest zone of a temple is kaja [stated: Wikipedia "Balinese temple"]. Here kaja is north (−z) and *kangin* (sunrise) east (+x).
+
+| Part | Where (m; +x east, +z south) | Notes |
+|---|---|---|
+| Pura | x −38…38, z −152…−70, north end of the street | three courts rising toward kaja: forecourt (jaba sisi, the street's end), middle court (jaba tengah) behind the split gate, inner court (jeroan) behind the roofed gate |
+| Village street | x −3.5…3.5, z −70…132 | the kaja–kelod street, from the temple's gate south to the terraces |
+| Cross lane | z 6.5…12.5, x −104…104 | east–west |
+| Crossroads (catus patha) | x −13…13, z −3…22 | the banyan, the banjar's wantilan, the banjar's kulkul, the shrine at the crossing |
+| Compounds | both sides of the street and the lane | about 30 walled lots |
+| Terraces | from the village edge outward and down, to the disc's edge | stepped paddies, subak channels, the weir shrine |
+
+- The sacred axis and the village temples: pura puseh to the kaja, pura desa at the village's middle, pura dalem to the kelod [stated: Wikipedia "Balinese temple"]. One precinct shown for the landmark (the *pura desa*, with the *bale agung*); the pura dalem is a small walled shrine at the south end [inferred].
+- A *catus patha* (four-way crossroads) is the village's centre with the banyan and the banjar hall, the place where the village meets [inferred: Balinese village planning in general; not in a fetched source].
+
+## 3. The temple (pura) — what is built
+
+- **Three courts (mandala).** The innermost, *utama mandala* (jeroan), is the holiest, nearest kaja, holding the *padmasana* shrine for Sang Hyang Widhi Wasa, the *meru* tower-shrines and the pavilions *bale pawedan*, *bale piyasan*, *bale pepelik* (offerings); the middle court, *madya mandala* (jaba tengah), holds the *bale kulkul*, the *bale gong* (gamelan pavilion), the *wantilan*, the *bale perantenan* (temple kitchen); the outer, *nista mandala* (jaba sisi), toward kelod, is open ground for performances and festival preparation [stated: Wikipedia "Balinese temple"].
+- **Gates.** The *candi bentar* (split gate) at the entrance of the outer zone; the *kori agung* or *paduraksa*, a roofed tower gate, between the middle and inner courts [stated: Wikipedia "Balinese temple"]. A split gate is "a tower that has been cut in half and separated", as in ancient Hindu temples of Java [stated: factsanddetails.com]. Gates are the place of the richest carving: kala heads, floral ornaments, vajra or ratna pinnacles [stated: Wikipedia "Balinese architecture"]. Built: the candi bentar as two mirrored stepped halves of brick and carved volcanic stone, their inner faces upright and their outer faces stepping in, a stair rising through the gap, a step-pyramid cap with a ratna finial; the kori agung as a stepped tower of three bands (foot, body with the passage, tapering tiers) with a bhoma face over the lintel and a small tiered roof of black fibre on top, its stair [inferred: forms, dimensions].
+- **Meru.** Tiered shrines named after Mount Meru; the number of roofs "almost always an odd number", 11 the holiest; thatched in black sugar-palm fibre (*ijuk*), "used only for temples" [stated: factsanddetails.com]. Built: a 7-tier meru (centre), a 5-tier and a 3-tier, each on a square brick-and-stone base with a stair, the tiers diminishing upward with a gap of posts between roofs, a finial of stone or gilt bronze; ijuk (`ijuk`) on the roofs [stated: roof count and material; inferred: dimensions, proportions].
+- **Padmasana.** The stone throne for Sang Hyang Widhi, at the kaja-kangin (north-east) corner of the inner court [stated: Wikipedia "Balinese temple": padmasana in the utama mandala; inferred: the corner, as for the family shrine below]. Built: a tall stone shrine of stepped bases (the turtle and serpents' base abbreviated), a waist, a seat, a high back, in carved `tuff_hewn` and `sandstone_carved`.
+- **Bale.** "Pavilions are balé, thatched structures with or without walls" [stated: Wikipedia "Balinese architecture"]; the basic building is "an open-air structure with a steeply pitched palm-thatch roof" [stated: factsanddetails.com]. Built: bales on a plinth of brick with a stone coping, timber posts (teak and coconut, `timber`), a raised floor, a hip roof of alang-alang (`thatch_palm`); some walled on three sides.
+- **Kulkul.** "An elevated tower holding a *kulkul* (slit drum). It sounds an alarm in an emergency or calls villagers together" [stated: Wikipedia "Balinese architecture"]. Built: a brick-and-stone square base with a stair, a timber tower of open frame carrying a thatched hip roof, the hollow log drum hung under it [inferred: heights].
+- **Walls.** Red brick and stone for foundations and walls; sandstone and andesite carved for ornament [stated: Wikipedia "Balinese architecture"]; "red brick, often coated with cement" (later) and "volcanic stone framing gates" [stated: factsanddetails.com]. Built: temple walls of `brick` with stone footing and a coping of `tuff_hewn` stepped at the corners, 2.4 m; guardian statues beside the gates [stated: guardian statues, Wikipedia "Balinese architecture"].
+
+## 4. The town — what is built
+
+### 4.1 The family compound
+
+- "A traditional house is a group of structures within walled enclosures, each with a special function": a front open pavilion for guests, bedrooms, living areas, a kitchen, a family shrine [stated: Wikipedia "Balinese architecture"]; the walls are "meant to keep out evil spirits" [stated: same]. The kitchen and daily life are kept separate from the family shrine [stated: same]. The *natah* is the central courtyard that orients the compound, connects the buildings and hosts daily activities and ceremony preparation; the *sanggah* or *merajan* is the family's spiritual centre in the kaja–kangin (north-east) zone; the *bale daja* / *bale meten* is the sleeping house of the head, the *bale dauh* receives guests, the *bale dangin* serves ceremonies and family rites; the *paon* (kitchen) is in the low zone [stated: budayabali.com, "Traces of traditional life…"].
+- The gate (*angkul-angkul*) "is a pair of red brick blocks with a wooden door between them and a pyramid roof of dry grass. Guardian statues flank it"; the *aling-aling* is "a small wall behind the entrance" that blocks the line of sight and keeps spirits, "believed to travel in straight lines", from entering [stated: factsanddetails.com]. "The northeast corner holds the family temple (sanggah), which is the most auspicious spot"; "kitchens, toilets, pig pens, and rubbish areas are placed toward kelod"; "people sleep with their heads facing kaja, and the household head occupies the most kaja building" [stated: factsanddetails.com].
+- Roofs of *ijuk*, of dried coconut or *rumbia* leaves, or of *sirap* hardwood shingles; elephant-grass roofs "should be renewed about every five years" [stated: Wikipedia "Balinese architecture"; factsanddetails.com]. Bamboo beams, coconut-trunk posts, low masonry bases, tiled floors [stated: factsanddetails.com].
+- The *balé gede* is a 12-column pavilion where the eldest male sleeps [stated: Wikipedia "Balinese architecture"].
+- Built (`bali_compound`): a lot walled in `brick` (the richer) or `earth_wall` with a thatch cap (the poorer), 2.1–2.4 m, a gate of two brick piers under a small thatch roof with a pair of guardian stones, the aling-aling behind it; the natah open and swept; in the kaja-kangin corner a walled sanggah yard with a three-chambered shrine (*rong tiga*, `ijuk` roof), a small padmasana and an offering shelf; the bale daja along the kaja side (closed, brick, door to the yard), the bale dauh and bale dangin (open, on plinths), the paon with its hearth toward kelod, the *lumbung* (rice barn on posts) beside it; a frangipani or coconut in the yard [inferred: the arrangement from the stated rules; sizes ours]. One compound in three is walkable through its gate and furnished (bale with mats, a sleeping platform, a loom or a tray of offerings, the kitchen's hearth and pots).
+
+### 4.2 The banjar hall and the crossroads
+
+- "The *bale banjar* is a communal building in villages where villagers gather. The *wantilan* is a rectangular, wall-less public hall used for gatherings and cockfighting" [stated: Wikipedia "Balinese architecture"]. Gamelan owned by a banjar "are kept together in a community space, and people believe they belong to the community as a whole" [stated: Wikipedia "Gamelan"]. Built (`bali_wantilan`): a big open hall on a low plinth, 12 columns under a high hip roof of two stages (thatch), the gamelan set at one end on its carved frames: *gangsa* and *jegogan* metallophone rows, a *reyong*, the *kendang* drums, the *gong ageng* hanging on its frame; the players sit cross-legged (`cross`, `drum`) [stated: instruments, Wikipedia "Gamelan"; inferred: the arrangement and the frames' carved look].
+- The banyan (*waringin*) at the crossing, with a shrine at its foot [inferred: the usual centre of a village; the tree is the species `banyan`].
+
+### 4.3 The rice terraces and the subak
+
+- "Subak is the irrigation system for paddy fields on Bali … developed in the 9th century"; a 10th-century inscription mentions the Batukaru terraces [stated: Wikipedia "Subak"]. Components: forests that protect and channel the water, terraced fields, "canals, tunnels, and weirs", temples "that mark either the water source or its passage downhill" [stated: Wikipedia "Subak"]. A network of "canals, aqueducts, tunnels, bamboo pipes, and barriers carries water downhill and branches across the terraces … like veins", by gravity alone [stated: baliholidaysecrets.com]. Each subak group is tied to a water temple, "both a spiritual center and an administrative office" [stated: baliholidaysecrets.com]. Synchronised planting, with brief fallow periods, breaks the pests' cycle [stated: Wikipedia "Subak"]. Rice in the rainy season (*kerta masa*), in the dry season (*gadon*) [stated: Wikipedia "Subak"]. Simple shrines stand in the rice fields "and beside sacred trees … no surrounding wall" [stated: factsanddetails.com].
+- Built (ground.js, `bali_land`): the ground itself stepped in paddies (each tread flat, risers curving with the contour, a bund at the foot of each riser); some paddies flooded and reflecting the sky (freshly planted), the rest green with rice; stone-and-clay lined subak channels (a low brick lip, a thread of water) from a source box at the temple, along the street's west side and down the terraces, with a *tektek* split-box (an intake weir that divides the water between two channels) and a small unwalled shrine (*pelinggih* of the water temple, thatched) among the paddies; bamboo spouts at the terrace edges [inferred: forms; sources give the system, not its masonry].
+- Planting: `rice` in the paddies, the village's own trees (the coconut stood for by `date_palm`, `banyan`, `bamboo`, `teak`, `fig`; no coconut species exists in the engine) [inferred].
+
+## 5. Style: materials and measures
+
+Materials: red brick (`brick`, `brick_baked`), grey-black volcanic stone *paras* (`tuff_hewn`, `sandstone_carved`, `andesite`), black *ijuk* (`ijuk`), alang-alang thatch (`thatch`, `thatch_palm`), bamboo (`bamboo_culm`), teak and coconut timber (`timber`, `wood_dark`, `wood_painted`), gilt (`gilt_bronze`, `gold`), cloth (`cloth_*`) for the temple's wrappings: the yellow-and-white and the black-and-white check (*poleng*) cloths tied round shrines and statues [inferred: *poleng* is the usual wrapping]. Measures: proportions follow the owner's body (*Asta Kosala Kosali* "governs the shapes of shrine symbols, measurement units, dimensions, and decoration" [stated: Wikipedia "Balinese architecture"]); ours are plain metres [inferred].
+
+## 6. Ground, planting, sky
+
+- Level core under the village and the temple; the terraces fall away on the flanks and toward kelod, rise toward kaja behind the temple [inferred: a village on a spur].
+- Planting: coconut (as `date_palm`), banyan, bamboo, frangipani as `fig`; rice in the paddies [inferred].
+- Climate: wet tropics, 8° S: high sun, damp ground (`damp` 0.75), morning mist and showers [inferred: as Borobudur].
+
+## 7. People and life
+
+- Dress of c. 1900: men in the *kain* (sarong) with a headcloth (*udeng*) and a waist-sash, bare to the waist at work; women in the *kain* with a breast-cloth or a bare chest at work, a sash, hair in a bun with flowers; in the temple, white and yellow sashes [inferred: general knowledge; a source for dress was not fetched]. The farmers in conical straw hats; porters with the carrying pole; women with offerings on their heads (*banten*) [inferred].
+- Offerings: the *canang sari*, "the simplest daily household offering", a palm-leaf tray with flowers, "white, pointing east: Iswara; red, pointing south: Brahma; yellow, pointing west: Mahadeva; blue or green, pointing north: Vishnu", set in temples, on household shrines and "on the ground" [stated: Wikipedia "Canang sari"]. Built: small trays on shrine steps, the gate's foot and the street (`obj` pieces in the plan's style).
+- The *penjor*, "a tall, decorated bamboo pole" with yellow coconut leaves, 5–10 m, curved near the top, a small shrine at its foot, erected at Galungan and at temple anniversaries [stated: Wikipedia "Penjor"]. Built: a row of penjors along the street before the temple, as at a temple anniversary (*odalan*) [inferred: the festival shown].
+- Gamelan: players in the banjar's wantilan; a complete Balinese set has gangsa, jegogan, reyong, kendang drums, ceng-ceng cymbals and the *gong gedé*, "usually used for temple ceremonies" [stated: Wikipedia "Gamelan"].
+
+## 8. Sound
+
+Gamelan, in the pelog-like scale (the engine has only plucked strings, bells, a drum, a flute and a drone: the music is a slow bronze-like pluck with bells and a drum, five-note, on E). Roosters, ducks in the paddies, frogs, cicadas, the temple's kulkul (a hollow-log knock; the woodfish stands in) [inferred].
+
+## 9. Smoke
+
+Kitchen hearths of the compounds at the morning and evening meals, incense at the shrines and the temple [inferred].
