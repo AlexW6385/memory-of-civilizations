@@ -86,7 +86,7 @@ function people() {
   const face = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
   // the sacrifice in the Dacheng Hall: officials in blue and red robes before the table, two kneeling, the master of ceremonies
   const [hx0, hz0, hx1] = HALL.rect, cx = (hx0 + hx1) / 2, y = HALL.y;
-  for (const [dx, dz, o] of [[-1.6, 12.8, { pose: 'kneel', cloth: 'cloth_blue' }], [1.6, 12.8, { pose: 'kneel', cloth: 'cloth_blue' }], [-3.6, 14.6, { cloth: 'cloth_red' }], [3.6, 14.6, { cloth: 'cloth_red' }], [0, 16.2, { cloth: 'cloth_blue', pose: 'staff', carry: 'staff', len: 1.8 }], [-12, 12, {}], [12, 12, {}]])
+  for (const [dx, dz, o] of [[-1.6, 12.8, { pose: 'kneel', cloth: 'cloth_blue' }], [1.6, 12.8, { pose: 'kneel', cloth: 'cloth_blue' }], [-3.6, 14.6, { cloth: 'cloth_red' }], [3.6, 14.6, { cloth: 'cloth_red' }], [6.5, 15.4, { cloth: 'cloth_blue', pose: 'staff', carry: 'staff', len: 1.8 }], [-12, 12, {}], [12, 12, {}]])
     fig([cx + dx, hz0 + 1 + dz], 0, { y, ...o });
   // the guards (bannermen) at the gates
   for (const g of GATE_HALLS) for (const s of [-1, 1]) fig([s * (g.w / 2 + 2.2), g.z + 4.6], Math.PI, { y: 0, pose: 'staff', carry: 'staff', len: 2.0, cloth: 'cloth_red', over: 'sash' });
