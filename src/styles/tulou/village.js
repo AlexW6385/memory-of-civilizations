@@ -20,7 +20,7 @@ function squareRoof(bag, cx, cz, hO, yO, hR, yR, hI, yI, t) {
 }
 
 /**
- * tulou_square: { c, half, floors, gate: 's' } — a square tulou, simpler than the landmark (docs §4.2): rammed-earth walls on a
+ * tulou_enclosure: { c, half, floors, gate: 's' } — a square tulou, simpler than the landmark (docs §4.2): rammed-earth walls on a
  * cobble plinth leaning in, dark window slits on the upper storeys, a gate in the south wall, a skin of boards on the court
  * with its galleries, a ring roof of tiles, a well in the cobbled court.
  */

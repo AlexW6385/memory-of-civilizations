@@ -162,7 +162,7 @@ export function tulouRound(el, ctx) {
       if (bay) continue;
       // the front wall on the gallery, with a door in it; over the top room a fascia up to the roof, and the ceiling
       const q0 = P(c, front, a0), q1 = P(c, front, a1), L = Math.hypot(q1[0] - q0[0], q1[1] - q0[1]), ux = (q1[0] - q0[0]) / L, uz = (q1[1] - q0[1]) / L;
-      const d0 = L / 2 - 0.5, d1 = L / 2 + 0.5, at = (d) => [q0[0] + ux * d, q0[1] + uz * d];
+      const d0 = L / 2 - 0.62, d1 = L / 2 + 0.62, at = (d) => [q0[0] + ux * d, q0[1] + uz * d];
       bag.add(TIMBER, plank(q0, at(d0), y, hTop, 0.08)); bag.add(TIMBER, plank(at(d1), q1, y, hTop, 0.08)); bag.add(TIMBER, plank(at(d0), at(d1), y + 2.1, hTop, 0.08));
       col.segment(q0, at(d0), 0.08, y, hTop); col.segment(at(d1), q1, 0.08, y, hTop);
       for (const q of [at(d0), at(d1)]) bag.add('wood_dark', box(q[0] - 0.045, y, q[1] - 0.045, q[0] + 0.045, y + 2.1, q[1] + 0.045));
@@ -245,7 +245,7 @@ function ring2(el, ctx) {
       bag.add('ground', prism(wedge(a0, a1, g.r0, ri), 0, 0.025));
       // the room's front on the court, a door in it; above, the lattice
       const f0 = P(c, g.r0, a0), f1p = P(c, g.r0, a1), L = Math.hypot(f1p[0] - f0[0], f1p[1] - f0[1]), ux = (f1p[0] - f0[0]) / L, uz = (f1p[1] - f0[1]) / L, at = (d) => [f0[0] + ux * d, f0[1] + uz * d];
-      const d0 = L / 2 - 0.5, d1 = L / 2 + 0.5;
+      const d0 = L / 2 - 0.62, d1 = L / 2 + 0.62;
       bag.add(TIMBER, plank(f0, at(d0), 0, f1, 0.08)); bag.add(TIMBER, plank(at(d1), f1p, 0, f1, 0.08)); bag.add(TIMBER, plank(at(d0), at(d1), 2.1, f1, 0.08));
       col.segment(f0, at(d0), 0.08, 0, f1); col.segment(at(d1), f1p, 0.08, 0, f1);
       for (const q of [at(d0), at(d1)]) bag.add('wood_dark', box(q[0] - 0.045, 0, q[1] - 0.045, q[0] + 0.045, 2.1, q[1] + 0.045));
