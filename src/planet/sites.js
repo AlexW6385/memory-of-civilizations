@@ -103,6 +103,7 @@ export const SITES = [
   { id: 'delphi', name: { en: 'Delphi', zh: '德尔斐' }, era: 'c. 400 BC', region: 'aegean', lat: 38.48, lon: 22.5, radius: 190 },
   { id: 'qin-xianyang', name: { en: 'Qin Xianyang', zh: '秦咸阳' }, era: 'c. 210 BC', region: 'china', lat: 34.38, lon: 109.25, radius: 330 },
   { id: 'han-changan', name: { en: 'Han Chang\'an', zh: '汉长安' }, era: 'c. 100 BC', region: 'china', lat: 34.3, lon: 108.88, radius: 520 },
+  { id: 'wei-ye', name: { en: 'Three Kingdoms Ye', zh: '三国邺城' }, era: 'c. AD 215', region: 'china', lat: 36.33, lon: 114.38, radius: 330 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -113,7 +114,7 @@ for (const s of SITES) s.radius ??= 190;
 const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan han-changan',
-  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang',
+  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang wei-ye',
   S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
   P: 'stonehenge catalhoyuk',
 };

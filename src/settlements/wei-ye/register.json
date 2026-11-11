@@ -1,0 +1,25 @@
+{
+  "site": { "id": "wei-ye", "name": { "en": "Three Kingdoms Ye", "zh": "三国邺城" }, "era": "c. AD 215", "region": "china", "lat": 36.33, "lon": 114.38, "radius": 330 },
+  "cls": "M",
+  "arrival": [-112, null, -88, 1.5708, 0.1],
+  "arrivalNote": "from the Tongque Garden, west up the stair of the Bronze Sparrow Terrace: the tiered tower on its crown with the gilded bird, the Golden Tiger and the Ice Well terraces on either hand, linked by covered skyways",
+  "card": {
+    "en": [
+      "Ye, on the Zhang River in Hebei, is shown about AD 215, when Cao Cao, Chancellor of Han and soon King of Wei, rules from it. Having taken the city in 204 he rebuilt it on the model of an imperial capital: a walled rectangle with a central east–west avenue, the palace to the north and the walled wards and the market to the south, the first capital in China laid out on one axis. It is the city of the Jian'an poets. The architecture is late Eastern Han: rammed-earth walls and terraces, red-columned timber halls under grey-tile hipped roofs, plastered walls with lattice windows.",
+      "The Bronze Sparrow Terrace — built in 210 in the north-west of the city, originally some 10 zhang (about 23 m) high, a battered platform of rammed earth with a broad stair, storerooms beneath and a tower of several storeys on its crown topped by a bronze bird. Here the ground storey is furnished with mats, low tables, lamps and a screen, where Cao Cao's sons and the poets sit; Cao Zhi's rhapsody on ascending the terrace was written here.",
+      "The Golden Tiger and the Ice Well — the two lower terraces to the south and north, each with a hall of many rooms on its crown, linked to the Sparrow by covered skyways at crown height; beneath them lay stores of grain, salt, fuel and ice.",
+      "The Wenchang Hall — the Hall of Civil Splendour, the centre of the palace: nine bays of red columns on a low terrace under a hipped roof with round eave tiles, with the throne dais and the ranked mats of the court.",
+      "The city and the Tongque Garden — the rammed-earth wall with its gates of three passages, the avenue and the Zhongyang road on the axis, the offices of the court, the walled wards and the market with its tower; in the garden the Xuanwu pond, dug for training the navy, and the Zhang River beyond the north wall."
+    ],
+    "zh": [
+      "邺城位于河北漳水之畔，画面所示约为公元215年，曹操以汉丞相、将为魏王的身份在此执政。204年攻下邺城后，他仿帝都规制重建：城为方整的矩形，东西向大街横贯其中，北为宫城，南为有墙的里坊和市；这是中国第一座以一条中轴线布局的都城，也是建安诗人的城。建筑属东汉晚期：夯土城墙与高台，红柱木构殿堂，灰瓦四阿顶，抹灰墙配直棂窗。",
+      "铜雀台 —— 建于210年，位于城西北，原高约十丈（约23米），夯土收分的高台，正面有宽阔的台阶，台下有仓库，台顶立多层楼阁，顶上有铜雀。这里的底层陈设席、矮案、灯和屏风，曹氏父子与诗人在此宴坐；曹植的《登台赋》即作于此。",
+      "金虎台与冰井台 —— 南北两座较低的高台，台顶各有多间的殿阁，与铜雀台以高处的阁道相连；台下储存粮食、盐、燃料，冰井台下藏冰。",
+      "文昌殿 —— 宫城的中心大殿，面阔九间，红柱，立于低矮的夯土台上，庑殿顶，檐口缀圆瓦当；殿内有御座高台和依序排列的席位。",
+      "城与铜雀园 —— 夯土城墙与三门道的城门，中轴的中阳大道与东西大街，官署、有墙的里坊和立有市楼的市；园中有为练水军而挖的玄武池，北城墙外是漳水。"
+    ]
+  },
+  "soundscape": "T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' })",
+  "lifeRegion": "east_asia",
+  "crop": "wheat"
+}

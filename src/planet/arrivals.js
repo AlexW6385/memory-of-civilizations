@@ -79,4 +79,5 @@ export const ARRIVALS = {
   'delphi': [62, null, 16, 1.25, 0.22],   // on the Temple of Apollo's terrace before the Chians' altar and the Serpent Column: the temple's east front whole, the sacred hill rising behind to the Phaedriades
   'mycenae': [-136, null, 0, -1.5708, 0.2],   // on the approach road west of the citadel: the Lion Gate in its dressed conglomerate front between the bastion and the wall's end, the Cyclopean circuit rising behind it to the palace on the summit
   'qin-xianyang': [175, null, -121, 1.5708, 0.12],   // from the head of the middle ramp, down into the front gallery of Pit 1: the three ranks of archers across the gallery and the first corridors of painted soldiers behind them
+  'wei-ye': [-112, null, -88, 1.5708, 0.1],   // from the Tongque Garden east of the terraces, west up the Bronze Sparrow's stair to the tower on its crown, the Golden Tiger and the Ice Well on either hand
 };
