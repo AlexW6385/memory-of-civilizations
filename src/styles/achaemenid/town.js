@@ -146,8 +146,8 @@ function wall2(bag, R, col, a0, a1, b0, b1, y0, y1) {
 
 /** Where the workshops smoke: the kiln's flue and the smiths' furnace hood. */
 export function workshopVents(rect) {
-  const [x0, , , z1] = rect;
-  return [[x0 + 8, 5.4, z1 - 38 + 0], [x0 + 28.5, 5.5, z1 - 6]];
+  const [x0, , x1, z1] = rect, bay = (x1 - x0 - 4.4) / 3, hz0 = z1 - 0.9 - 0.2 - 22;
+  return [[x0 + 0.9 + 8, 4.6, hz0 - 7], [x0 + 2.2 + bay + 0.3 + 4.2, 6.5, z1 - 0.9 - 0.2 - 4.2]];
 }
 
 /**
@@ -251,7 +251,7 @@ export function workshops(el, { bag, col, lights }) {
     bag.add('opening', box(fx - 0.35, fl + 0.2, fz - 1.12, fx + 0.35, fl + 0.7, fz - 0.95));
     bag.add('flame', lathe([[0.28, 0], [0.14, 0.14], [0.001, 0.3]], 8, null, fx, fl + 0.22, fz - 0.9));
     bag.add('mud_plaster', lathe([[0.8, 0], [0.5, 1.2], [0.36, 2.4]], 12, null, fx, fl + 1.2, fz));
-    bag.add('mudbrick', lathe([[0.36, 0], [0.34, 1.1]], 10, null, fx, fl + 3.6, fz));
+    bag.add('mudbrick', lathe([[0.36, 0], [0.34, 2.7]], 10, null, fx, fl + 3.6, fz));
     lights.push({ at: [fx, fl + 0.9, fz - 1.6], color: '#ff8a3c', intensity: 3.2, distance: 9 });
     for (const s of [-1, 1]) {
       const bz = fz - 1.6; bag.add('hide_tan', lathe([[0.001, 0], [0.3, 0.2], [0.32, 0.55], [0.18, 0.85], [0.001, 0.9]], 10, null, fx + s * 0.9, fl, bz));
