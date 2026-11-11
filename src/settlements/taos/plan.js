@@ -2,7 +2,7 @@
 // South House (to four), the plaza and the creek with its log bridges, six kivas, the racks on the
 // plaza's north side, the perimeter wall.
 
-import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, ROOMS, YARDS, bankY, creekZ, inCreek, roomsOf, isRoom, nearRoom } from './layout.js';
+import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, ROOMS, YARDS, bankY, creekZ, inCreek, roomsOf, isRoom, nearRoom, KEEP_ROUTE } from './layout.js';
 import { dressItems, woodpiles } from './dress.js';
 
 const E = [];
@@ -44,7 +44,8 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('plaza', [-70, -45, 70, 40], 0, 'open')];
 // each furnished room of the plaza faces is a hall of its own (the music and the ambience change at its door)
 for (const B of [NORTH, SOUTH]) for (const r of roomsOf(B)) { const x0 = B.x0 + r.j * CELL, z0 = B.z0 + r.i * CELL; rooms.push(room(`room-${B === NORTH ? 'n' : 's'}${r.j}`, [x0 + 0.5, z0 + 0.5, x0 + CELL - 0.5, z0 + CELL - 0.5], 0, 'hall')); }
-const walks = [[[0, 200], [0, 141], [0, 30], [-35, 10], [-35, -40]]];
+// from the gap in the south wall round by the South House's alley (x 10…15) to the plaza, to the log bridge and the North House
+const walks = [KEEP_ROUTE];
 walks[0].y0 = 0;
 
 export const pueblo = {

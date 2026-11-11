@@ -78,6 +78,7 @@ export const PLAZA = [-70, -45, 70, 40];
 /** The racks' footprints (x0, x1 at z −44: poles and bins), kept clear of the plaza's scatter. */
 export const RACKS = [[-62, -34], [-27, -1], [8, 36]];
 /** The ways kept open for the visitor: the arrival and the route to the log bridge and the north house, the road out of the south gap. */
-export const KEEP = [[[0, 200], [0, 141]], [[0, 141], [0, 30]], [[0, 30], [-35, 10]], [[-35, 10], [-35, -40]]];
+export const KEEP_ROUTE = [[0, 200], [0, 141], [0, 92], [12.5, 92], [12.5, 40], [0, 30], [-35, 10], [-35, -40]];
+export const KEEP = KEEP_ROUTE.slice(1).map((p, k) => [KEEP_ROUTE[k], p]);
 export const distSeg = (x, z, [[ax, az], [bx, bz]]) => { const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - ax - dx * t, z - az - dz * t); };
 export const onKeep = (x, z, m = 0) => KEEP.some((s) => distSeg(x, z, s) < m);
