@@ -4,13 +4,13 @@
 // with the head-cloth, porters and market women with baskets, boys. Data for the engine's movers
 // (src/engine/movers.js), read in its worker; the ways come from layout.js. No boats (the sea is not shown).
 
-import { RADIUS, MESE, AUGUSTAION, FORUM } from './layout.js';
+import { RADIUS, MESE, AUGUSTAION, FORUM, lots, xl, zl, PX, PZ, LANE } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 40, night: 4, rain: 0.6, reach: 170, spawnMin: 26, far: 48 },
+  walkers: { day: 56, night: 5, rain: 0.6, reach: 170, spawnMin: 24, far: 48 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -28,6 +28,16 @@ export function walkways() {
   rects.push({ r: [-100, 104, -60, 118], weight: 2, market: 2, kind: 'street' });
   rects.push({ r: [FORUM.c[0] - 26, FORUM.c[1] - 26, FORUM.c[0] + 26, FORUM.c[1] + 26], weight: 1.5, market: 1.5, kind: 'street' });
   rects.push({ r: [-60, 40, -50, 108], weight: 0.8, market: 0.5, kind: 'street' });
+  // the lanes between the rows of houses (only where houses stand on them), the quieter ways
+  const seen = new Set();
+  for (const l of lots()) {
+    if (Math.hypot(l.rect[0], l.rect[1]) > 300) continue;
+    for (const r of [[xl(l.k) - 2, zl(l.j) + 2.5, xl(l.k) + 2, zl(l.j) + 32.5], [xl(l.k + 1) - 2, zl(l.j) + 2.5, xl(l.k + 1) + 2, zl(l.j) + 32.5], [xl(l.k) + 2.5, zl(l.j) - 1.8, xl(l.k + 1) - 2.5, zl(l.j) + 1.8], [xl(l.k) + 2.5, zl(l.j + 1) - 1.8, xl(l.k + 1) - 2.5, zl(l.j + 1) + 1.8]]) {
+      const key = r.map(Math.round).join(',');
+      if (!seen.has(key)) { seen.add(key); rects.push({ r, weight: 0.45, market: 0.2, kind: 'street' }); }
+    }
+  }
+  void PX; void PZ; void LANE;
   return { rects, links: [], clip: RADIUS - 14 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: RADIUS - 18 }; }
