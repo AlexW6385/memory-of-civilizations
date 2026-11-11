@@ -55,6 +55,31 @@ for (const c of CANALS) {
     if (Math.abs(at[0]) > 12 && Math.abs(at[1]) > 12) E.push({ t: 'acalli', at, dir: horiz ? [k % 3 ? 1 : -1, 0] : [0, k % 3 ? 1 : -1], len: 5 + (k % 3), y: LEVEL.water, seed: seed++ });
   }
 }
+// ---- the washing-stairs on the canals, with the women at their washing, canoes moored and fished from
+{
+  const rp = ((q) => () => ((q = (q * 1664525 + 1013904223) >>> 0) / 4294967296))(1521);
+  const W = LEVEL.water, cut = [-224, -216, 216, 224].map((v) => v);
+  for (const c of CANALS) {
+    const r = clip(c), horiz = r[2] - r[0] > r[3] - r[1], t0 = horiz ? r[0] : r[1], t1 = horiz ? r[2] : r[3];
+    let k = 0;
+    for (let t = t0 + 24 + rp() * 12; t < t1 - 24; t += 26 + rp() * 14, k++) {
+      if (Math.abs(t) < 18 || cut.some((v) => Math.abs(t - v) < 16)) continue;
+      const bankA = k % 2 === 0;
+      if (!horiz && bankA === (c[0] < 0) && t > 14 && t < 100 && c[0] < 0) continue;                                // the market's own quay and landings
+      let rect, dir;
+      if (horiz) { rect = bankA ? [t - 1.5, r[1], t + 1.5, r[1] + 3.6] : [t - 1.5, r[3] - 3.6, t + 1.5, r[3]]; dir = bankA ? 'n' : 's'; }
+      else { rect = bankA ? [r[0], t - 1.5, r[0] + 3.6, t + 1.5] : [r[2] - 3.6, t - 1.5, r[2], t + 1.5]; dir = bankA ? 'w' : 'e'; }
+      if (!horiz && c[0] < 0 && !bankA && t > 18 && t < 98) continue;
+      E.push({ t: 'landing', rect, dir, y0: W - 0.3, y1: 0.05, seed: Math.floor(rp() * 1e6) });
+      // a canoe at the landing, now and then with its fisher
+      if (rp() < 0.6) {
+        const mid = horiz ? (r[1] + r[3]) / 2 : (r[0] + r[2]) / 2, off = (bankA ? -1 : 1) * 2.0, d = horiz ? [1, 0] : [0, 1];
+        const at = horiz ? [t + 4.5, mid + off] : [mid + off, t + 4.5];
+        if (Math.abs(at[0]) > 14 && Math.abs(at[1]) > 14) E.push({ t: 'fisher_canoe', at, dir: d, len: 5.4 + rp() * 1.2, y: W, seed: Math.floor(rp() * 1e6), fisher: rp() < 0.65 ? 'fisher' : 'seller', cargo: rp() < 0.4 ? 'reeds' : undefined });
+      }
+    }
+  }
+}
 // ---- the market by the west canal: the sellers' rows, a landing stair down to the water, canoes unloading
 {
   const rp = ((q) => () => ((q = (q * 1664525 + 1013904223) >>> 0) / 4294967296))(3);
@@ -95,8 +120,30 @@ for (const [z, cargo] of [[30, 'maize'], [44, 'pots'], [56, 'chile'], [74, 'reed
   }
   E.push({ t: 'mx_people', people: F });
 }
+// ---- the plaza's fixtures and people: standards at the gates, the temalacatl, the cuauhxicalli, momoztli at the crossings, guards and sweepers
+{
+  const pieces = [], people = [], rp = ((q) => () => ((q = (q * 1664525 + 1013904223) >>> 0) / 4294967296))(1522);
+  for (const s of [-1, 1]) {
+    for (const z of [pz0 + 4, pz1 - 4]) pieces.push(['standard', s * 11, z, 0]);
+    pieces.push(['standard', px0 + 4, s * 11, Math.PI / 2]);
+    pieces.push(['jar', s * 9, pz0 + 3, 0], ['jar', s * 9, pz1 - 3, 0]);
+  }
+  pieces.push(['temalacatl', 112, -84], ['cuauhxicalli', -6, 62], ['cuauhxicalli', 70, 78]);
+  for (const [x, z] of [[-100, -35], [-100, 38], [-18, -118], [-18, 128], [100, 125], [150 - 12, 80]]) pieces.push(['momoztli', x, z, 0]);
+  // the guards at the three gates, sweepers of the courtyards, priests between the temples, pilgrims and children about
+  for (const s of [-1, 1]) {
+    people.push([s * 5.5, pz0 + 3, 0, Math.PI, 'guard', 300 + s], [s * 5.5, pz1 - 3, 0, 0, 'guard', 310 + s], [px0 + 3, s * 5.5, 0, -Math.PI / 2, 'guard', 320 + s]);
+  }
+  const spots = [[-60, -30], [-60, 35], [-110, 5], [-40, -110], [50, -100], [10, 110], [80, 120], [-110, -80], [-20, 90], [120, -90], [100, 80], [60, -70], [-90, 70], [0, -70]];
+  spots.forEach(([x, z], i) => {
+    const who = ['sweeper', 'priest', 'man', 'woman', 'child', 'priest_censer', 'bearer', 'noble'][i % 8];
+    people.push([x + rp() * 4, z + rp() * 4, 0.03, rp() * 6.28, who, 340 + i]);
+    if (i % 3 === 0) people.push([x + 1.4, z + 1.0, 0.03, rp() * 6.28, i % 2 ? 'woman' : 'man', 380 + i]);
+  });
+  E.push({ t: 'plaza_dress', pieces, people });
+}
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open'), room('palace', PALACE, 1.0, 'open')];
+const rooms = [room('eagle-house', [88, -136, 134, -106], 1.4, 'hall'), room('calmecac', [-138, -138, -86, -106], 1.2, 'hall'), room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open'), room('palace', PALACE, 1.0, 'open')];
 const walks = [[[-260, 0], [-150, 0], [-60, 0], [-20, 8], [20, 8], [34, 0]]];
 walks[0].y0 = 0;
 

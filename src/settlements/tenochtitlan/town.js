@@ -12,6 +12,27 @@ export async function town() {
   plans.push(base('tenochtitlan-yards', yards().map((y) => ({ t: 'huerto', ...y }))));
   // the farmers' houses on the chinampas, with their granaries, maguey and nopal
   plans.push(base('tenochtitlan-chinampa-houses', chinampaHouses().map((h) => ({ t: 'chinampa_house', ...h, y: ground.height(h.c[0], h.c[1]) }))));
+  // the channels of the chinampas: tule in the water, canoes tied at the plots with the farmers' loads, fishers, the plots' own people
+  {
+    const rp = ((q) => () => ((q = (q * 1664525 + 1013904223) >>> 0) / 4294967296))(1523), E = [], tule = [], W = LEVEL.water;
+    for (let i = 0; i < 260; i++) {
+      const a = rp() * Math.PI * 2, r = ISLAND + 1 + rp() * 16, x = Math.cos(a) * r, z = Math.sin(a) * r;
+      if (!inLake(x, z) || Math.hypot(x, z) > RADIUS - 40 || (x < 0 && Math.abs(z) < 14)) continue;
+      tule.push([x, z, 0.8 + rp() * 0.6, W]);
+    }
+    for (let i = 0; i < 170; i++) {                                                                // in the ditches between the plots (x = 14 k)
+      const k = Math.floor(rp() * 48) - 24, x = k * 14, z = (rp() - 0.5) * 2 * 320;
+      if (Math.hypot(x, z) < 303 || Math.hypot(x, z) > 330 || ground.height(x, z) > W - 0.2 || (x < 0 && Math.abs(z) < 16)) continue;
+      tule.push([x + (rp() - 0.5) * 0.5, z, 0.5 + rp() * 0.4, W]);
+    }
+    E.push({ t: 'tule_beds', at: tule });
+    for (let i = 0; i < 26; i++) {
+      const k = Math.floor(rp() * 48) - 24, x = k * 14, z = (rp() - 0.5) * 2 * 300, r = Math.hypot(x, z);
+      if (r < 306 || r > 328 || ground.height(x, z) > W - 0.3 || (x < 0 && Math.abs(z) < 18)) continue;
+      E.push({ t: 'fisher_canoe', at: [x, z], dir: [0, 1], len: 4.6 + rp() * 0.8, y: W, seed: Math.floor(rp() * 1e6), fisher: i % 3 ? 'fisher' : 'farmer', cargo: i % 2 ? 'maize' : undefined });
+    }
+    plans.push(base('tenochtitlan-waters', E));
+  }
   // the lake round the island out to its shore by the disc's edge, the channels between the chinampas, the
   // canals' mouths (the canals within the island are the precinct's: plan.js)
   const lake = (x, z) => inLake(x, z) && inLakeWater(x, z, ground.height(x, z));

@@ -4,8 +4,9 @@
 // the chinampa houses, and the mist on the lake at dawn. Registered by one line in src/engine/systems-list.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { houses, chinampaHouses, houseHearth, RADIUS, TM, LEVEL, PALACE, inLake, ISLAND } from './layout.js';
+import { houses, chinampaHouses, houseHearth, houseGate, houseTrade, RADIUS, TM, LEVEL, PALACE, inLake, ISLAND } from './layout.js';
 import { comals } from './market.js';
+import { tradeFrame } from '../../styles/aztec/street.js';
 import { ground } from './ground.js';
 
 const ID = 'tenochtitlan';
@@ -15,6 +16,15 @@ function emitters() {
   const E = [], rand = rng(1519);
   // the hearths: about half the calli burn at a meal (the others cooked earlier or cold)
   for (const h of houses()) if (rand() < 0.55) E.push({ ...houseHearth(h), kind: 'kitchen', thr: rand() * 0.6, seed: h.seed + 1 });
+  // the potters' kilns and the cooks' comals before the compounds of the lanes (near the visitor's core only)
+  for (const h of houses()) {
+    const t = houseTrade(h);
+    if (t !== 'potter' && t !== 'cook') continue;
+    const [x0, z0, x1, z1] = h.rect; if (Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) > 200) continue;
+    const f = tradeFrame({ rect: h.rect, seed: h.seed, gate: houseGate(h) });
+    if (t === 'potter') { const [x, z] = f.at(-1.2, 1.7); E.push({ p: [x, 1.35, z], kind: 'kitchen', thr: 0.1, seed: h.seed + 5 }); }
+    else { const [x, z] = f.at(0, 0.9); E.push({ p: [x, 0.5, z], kind: 'steam', thr: 0.1, seed: h.seed + 6 }, { p: [x, 0.8, z], kind: 'kitchen', thr: 0.2, seed: h.seed + 7 }); }
+  }
   // the farmers' houses on the chinampas: through the thatch
   for (const h of chinampaHouses()) if (rand() < 0.5) E.push({ p: [h.c[0], ground.height(h.c[0], h.c[1]) + 3.1, h.c[1]], kind: 'kitchen', thr: rand() * 0.6, seed: h.seed + 3 });
   // the comals of the cooked-food stalls, and the pulque and tamale pots beside them

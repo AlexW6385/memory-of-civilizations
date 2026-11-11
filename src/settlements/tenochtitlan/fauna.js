@@ -29,14 +29,19 @@ const flights = [
   { kind: 'swallow', n: 3, lane: { a: [-150, 0], b: [150, 0] }, y: [2, 14], speed: 9 },
   { kind: 'swallow', n: 3, lane: { a: [-300, 200], b: [300, 200] }, y: [-0.2, 5], speed: 8 },
   { kind: 'swallow', n: 2, lane: { a: [220, -300], b: [220, 300] }, y: [-0.2, 5], speed: 8 },
+  { kind: 'swallow', n: 2, lane: { a: [-220, -300], b: [-220, 300] }, y: [-0.2, 5], speed: 8 },
+  { kind: 'swallow', n: 2, lane: { a: [-300, -200], b: [300, -200] }, y: [-0.2, 5], speed: 8 },
   // the black birds over the temple at dusk
   { kind: 'crow', n: 8, loop: { c: [TM.c[0] - 10, 0], a: [60, 45], rot: 0.2 }, y: [60, 28], speed: 8 },
 ];
-for (const f of flights.slice(0, 3)) f.a = [30, 4];
+for (const f of flights.slice(0, 5)) f.a = [30, 4];
 const perches = [];
 // egrets and herons in the shallows between the chinampas, and on the shore of the lake
 for (const [x, z, kind] of [[-306, 60, 'egret'], [-310, -90, 'heron'], [-250, 235, 'egret'], [310, 40, 'egret'], [305, -120, 'heron'], [150, 280, 'egret'], [-120, -285, 'heron'], [40, 312, 'egret'], [-60, 308, 'egret']])
   perches.push({ kind, x, z, y: LEVEL.water + 0.1, rot: Math.atan2(z, x), range: [0.5, 0.3], alert: 12 });
+// egrets and herons at the canals' banks and the washing-stairs, and a swallow flight along every canal
+for (const [x, z, kind] of [[-100, 197, 'egret'], [120, -197, 'heron'], [-80, -203, 'egret'], [90, 203, 'egret'], [217, -120, 'egret'], [-221, 150, 'heron'], [223, 120, 'egret'], [-217, -170, 'egret']])
+  perches.push({ kind, x, z, y: LEVEL.water + 0.1, rot: 0.5, range: [0.5, 0.3], alert: 9 });
 // sparrows on the plaza's paving, the lanes and the market's floor
 for (const [x, z] of [[10, 60], [-20, 30], [-10, -40], [30, -28], [-100, 3], [-180, 55], [-190, 78], [-176, 30], [-80, 80], [60, 140], [100, 160], [-60, 210], [180, 60], [-150, -200], [140, -190], [-18, 140], [0, -150]])
   perches.push({ kind: 'sparrow', x, z, y: 0.04, rot: 0.3 + (x * 7 % 3), range: [1.3, 1.2] });

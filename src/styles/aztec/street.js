@@ -59,7 +59,7 @@ const kilnKit = () => carved('mx-kiln', (k) => {
   k.bx('paint_minoan_black', -0.28, 0.28, 0.1, 0.62, 0.78, 0.96);
   k.bx('stucco_pale', -0.38, 0.38, 0.0, 0.1, 0.7, 1.05);
   k.geo('plaster_damp', lathe([[0.16, 0], [0.14, 0.04], [0.001, 0.05]], 8).translate(0, 1.2, 0));
-  for (let i = 0; i < 6; i++) { const a = i * 1.05; k.bx('terracotta', Math.cos(a) * 1.35 - 0.11, 0, Math.sin(a) * 0.7 + 0.15 - 0.1, Math.cos(a) * 1.35 + 0.11, 0.22, Math.sin(a) * 0.7 + 0.15 + 0.1); }  // the shards and unfired pots about
+  for (let i = 0; i < 6; i++) { const a = i * 1.05; { const cx = Math.cos(a) * 1.35, cz = Math.sin(a) * 0.7 + 0.15; k.bx('terracotta', cx - 0.11, cx + 0.11, 0, 0.22, cz - 0.1, cz + 0.1); } }  // the shards and unfired pots about
 });
 /** A stack of pots on a mat: three rows of bowls and jars. */
 export const potsKit = () => carved('mx-potstack', (k) => {
@@ -189,12 +189,17 @@ export function calliFront(el, ctx) {
     }
   }
   // the trade, before the house on a side that is not the gate's
-  if (el.trade && lod >= 2) trade(el, ctx, rand, sides);
+  if (el.trade && lod >= 2) trade(el, ctx);
 }
 
-function trade(el, ctx, rand, sides) {
-  const { bag } = ctx, r = el.rect, P = 0.42, f = sides[Math.floor(rand() * sides.length)], F = frame(r, f), who = [];
-  const u = F.L * (0.3 + rand() * 0.4), p = (du, v) => F.at(u + du, v), face = F.yaw;
+/** The frame of a compound's trade (its own sequence): the point at du along, v out. Used by smoke.js for the kilns and comals. */
+export function tradeFrame(el) {
+  const rand = rng((el.seed || 1) * 11 + 5), sides = SIDES.filter((f) => f !== el.gate), f = sides[Math.floor(rand() * sides.length)], F = frame(el.rect, f);
+  const u = F.L * (0.3 + rand() * 0.4);
+  return { at: (du, v) => F.at(u + du, v), face: F.yaw };
+}
+function trade(el, ctx) {
+  const { bag } = ctx, who = [], { at: p, face } = tradeFrame(el);
   const put = (kit, du, v, yaw = face, s = 1) => { const q = p(du, v); inst(bag, kit, q[0], 0, q[1], yaw, s, 80); };
   const person = (who2, du, v, rot = face + Math.PI, extra) => { const q = p(du, v); who.push([q[0], q[1], 0, rot, who2, el.seed + who.length * 5 + 1, extra]); };
   switch (el.trade) {
