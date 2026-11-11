@@ -104,5 +104,13 @@ export function furniture() {
     F.push({ t: 'landing', x, z0: MIDDLE.z0 });
     F.push({ t: 'moat_boat', at: [x + 6, MIDDLE.z0 + 4.2], dir: [1, 0], len: 6.5 + rand() * 1.5 });
   }
+  // the civic furniture (docs §5.7): neighbourhood gates across the street, the fire-watch tower, notice boards, Jizō and Inari
+  const sw = STREET.z1 - STREET.z0, zc = (STREET.z0 + STREET.z1) / 2;
+  for (const x of [-160, -75, 75, 160]) F.push({ t: 'kido', at: [x, zc], w: sw });
+  F.push({ t: 'hinomi_yagura', at: [-122, STREET.z0 + 1.7], h: 9 }, { t: 'hinomi_yagura', at: [112, STREET.z1 - 1.7], h: 9 });
+  F.push({ t: 'kosatsu', at: [18, STREET.z1 - 0.8], rot: 0 }, { t: 'kosatsu', at: [-8.5, 262], rot: Math.PI / 2 });
+  F.push({ t: 'inari', at: [14, 262], rot: Math.PI / 2 });
+  const Y = lots().filter((l) => l.t === 'yashiki' && l.rect[3] > 200 && l.rect[3] < 295 && Math.abs((l.rect[0] + l.rect[2]) / 2) > 50 && Math.abs((l.rect[0] + l.rect[2]) / 2) < 150);
+  for (let i = 0; i < Y.length; i += 3) F.push({ t: 'jizo', at: [Y[i].rect[2] + 1.8, Y[i].rect[3] + 1.8], rot: i % 2 ? 0 : Math.PI / 2 });
   return F;
 }

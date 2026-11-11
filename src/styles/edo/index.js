@@ -13,6 +13,7 @@ import '../qing/index.js';
 import { barredWindows, shachi as shachiFish, karaHafu, samaWall, katomado } from './detail.js';
 import { machiyaShop, zashiki, kago, daisho } from './rooms.js';
 import { yashikiParts } from './yard.js';
+import { kido, hinomiYagura, kosatsu, jizo, inari } from './street.js';
 import { machiyaFront, mushikoMado, ridgeCap, eaveBand, kuraWalls, gateFront, ishidoro, niwaki, ido, boat, barrel } from './town.js';
 
 const PL = 'plaster_castle', ST = 'ishigaki', TL = 'tile_grey', WD = 'wood_dark';
@@ -665,6 +666,8 @@ registerStyle('edo', {
     ishidoro: (el, ctx) => ishidoro(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.s ?? 1),
     niwaki: (el, ctx) => niwaki(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.h ?? 5, el.seed),
     taru: (el, ctx) => { for (let r = 0; r < (el.rows ?? 3); r++) for (let k = 0; k < (el.rows ?? 3) - r; k++) barrel(ctx.bag, 'timber', el.at[0] + (k + r * 0.5) * 0.56, (el.y ?? 0) + r * 0.55, el.at[1], 0.27, 0.62, 'thatch'); ctx.col.circle(el.at[0] + 0.6, el.at[1], 1.0, el.y ?? 0, (el.y ?? 0) + 1.5); },
+    kido, hinomi_yagura: hinomiYagura, kosatsu, jizo, inari,
+    kura: (el, ctx) => kura(ctx.bag, ctx.col, el.rect, el.y ?? 0),
     moat_boat: (el, ctx) => boat(ctx.bag, ctx.col, el.at[0], el.at[1], el.y, el.dir ?? [1, 0], el.len ?? 7.5),
   },
   objects: {},
