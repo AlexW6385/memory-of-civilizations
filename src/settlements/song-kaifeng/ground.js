@@ -41,7 +41,7 @@ function cover(x, z) {
   const c = { sand: 0.3, grass: 0.2, rock: 0, soil: 0.5, fields: 0, dry: 0.35, warmth: 0.5, red: 0, road: 0, snow: 0, forest: 0 };
   if (wet(x, z)) { c.soil = 0.7; c.sand = 0.3; return c; }
   if (Math.hypot(x, z) > RADIUS - 28) { c.fields = 0.8; c.grass = 0.2; return c; }
-  if (isMargin(x, z)) { const w = x > -STONE_BANK && x < STONE_BANK && (Math.abs(z - RIVER.z0 + 5.5) < 5.5 || Math.abs(z - RIVER.z1 - 5.5) < 5.5); c.road = 0.8; c.soil = 0.55; c.grass = w ? 0.34 : 0.07; c.sand = w ? 0.05 : 0.12; c.dry = 0.3; return c; }
+  if (isMargin(x, z)) { const w = x > -STONE_BANK && x < STONE_BANK && (Math.abs(z - RIVER.z0 + 5.5) < 5.5 || Math.abs(z - RIVER.z1 - 5.5) < 5.5); c.road = 0.8; c.soil = 0.55; c.grass = w ? 0.34 : 0.16; c.sand = w ? 0.05 : 0.12; c.dry = 0.3; return c; }
   const street = STREETS.some((s) => inRect(s, x, z)), lane = LANES.some((s) => inRect(s, x, z));
   if (earthWay(x, z) > 0) { c.road = 1; c.soil = 0.5; c.grass = 0.04; c.sand = 0.1; c.dry = 0.3; return c; }     // beaten earth, ruts and hollows
   if (lane && x < FIELDS_X) { c.road = 0.8; c.grass = 0.1; return c; }
@@ -72,7 +72,9 @@ function planting(x, z) {
     const dw = z < RIVER.z0 ? RIVER.z0 - z : z - RIVER.z1;
     return dw < 2.2 ? { willow: 2.2, grass: 14 } : { grass: 12 };
   }
-  if (isMargin(x, z) || isPaved(x, z)) return null;
+  // the beaten margins by the house walls on the main street and the cross shop streets: weeds and tufts along the wall's foot, thinning out toward the paving
+  if (isMargin(x, z) && !isPaved(x, z)) return lotAt(x, z, 1.6) ? { grass: 9 } : { grass: 2.5 };
+  if (isPaved(x, z)) return null;
   // willows along the earth banks: thick on the south bank, a few on the north one, where the towpath runs at their feet
   if (bank(x, z)) return z > RIVER.z1 ? { willow: 1.2 } : (z < RIVER.z0 - 3 ? { willow: 0.25 } : null);
   if (STREETS.some((s) => inRect(s, x, z, 0.5)) || LANES.some((s) => inRect(s, x, z, 0.5)) || inLot(x, z, 0.5)) return null;

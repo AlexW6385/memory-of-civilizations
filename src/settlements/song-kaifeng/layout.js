@@ -46,14 +46,20 @@ export const PAVE_R = 190;
  * water is an earth strip (willows, mooring posts, stalls, loading) crossed by paved landing paths at the stone steps and by the bridge's approach; on the main
  * street and the two cross shop streets only the middle is paved, the margins by the fronts are beaten earth with the shops' goods standing on them.
  */
-export const RIVER_WALK = 5;
-export const BRIDGE_APRON = 5.5;
+export const RIVER_WALK = 4;
+export const BRIDGE_APRON = 4.3;
 export const PAVED_HALF = { 0: 3.8, 1: 3.8, 4: 2.6, 5: 2.6 };
+/** The bridge's apron between the walk and the water, tapering from BRIDGE_APRON at the water's edge to a narrow tongue where it meets the walk (dir: -1 north bank, the water at z1; 1 south bank, the water at z0). */
+function apron(za, zb, dir) {
+  const n = 3, h = (zb - za) / n, out = [];
+  for (let k = 0; k < n; k++) { const ws = BRIDGE_APRON * [1, 0.82, 0.64][dir < 0 ? n - 1 - k : k]; out.push([-ws, za + k * h, ws, za + (k + 1) * h]); }
+  return out;
+}
 /** The paved parts of street i (a list of [x0, z0, x1, z1]); the whole rectangle for the streets not narrowed. */
 export function paveRects(i) {
   const s = STREETS[i];
-  if (i === 2) { const r = [[s[0], s[1], s[2], s[1] + RIVER_WALK], [-BRIDGE_APRON, s[1] + RIVER_WALK, BRIDGE_APRON, s[3]]]; for (const st of STEPS) if (st.bank === 'n') r.push([st.x - 1.6, s[1] + RIVER_WALK, st.x + 1.6, s[3]]); return r; }
-  if (i === 3) { const r = [[s[0], s[3] - RIVER_WALK, s[2], s[3]], [-BRIDGE_APRON, s[1], BRIDGE_APRON, s[3] - RIVER_WALK]]; for (const st of STEPS) if (st.bank === 's') r.push([st.x - 1.6, s[1], st.x + 1.6, s[3] - RIVER_WALK]); return r; }
+  if (i === 2) { const r = [[s[0], s[1], s[2], s[1] + RIVER_WALK], ...apron(s[1] + RIVER_WALK, s[3], -1)]; for (const st of STEPS) if (st.bank === 'n') r.push([st.x - 1.3, s[1] + RIVER_WALK, st.x + 1.3, s[3]]); return r; }
+  if (i === 3) { const r = [[s[0], s[3] - RIVER_WALK, s[2], s[3]], ...apron(s[1], s[3] - RIVER_WALK, 1)]; for (const st of STEPS) if (st.bank === 's') r.push([st.x - 1.3, s[1], st.x + 1.3, s[3] - RIVER_WALK]); return r; }
   if (PAVED_HALF[i] !== undefined) {
     const h = PAVED_HALF[i], horiz = s[2] - s[0] > s[3] - s[1];
     return [horiz ? [s[0], (s[1] + s[3]) / 2 - h, s[2], (s[1] + s[3]) / 2 + h] : [(s[0] + s[2]) / 2 - h, s[1], (s[0] + s[2]) / 2 + h, s[3]]];

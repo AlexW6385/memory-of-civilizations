@@ -44,6 +44,21 @@ function scroll() {
     person(mid, 0, faceTo(F.out), { pose: 'talk', dress: 'robe', cloth: 'cloth_white', hat: 'cap' });
     if (rand() < 0.8) person([mid[0] + F.out[0] * 1.3 + F.out[1] * 0.6, mid[1] + F.out[1] * 1.3 + F.out[0] * 0.6], 0, faceTo([-F.out[0], -F.out[1]]), { pose: 'stand' });
   });
+  // ---- the upper balconies: on the two-storey shops near the bridge a man or woman stands or leans at the rail, looking at the street (the scroll shows the balconies full of onlookers)
+  for (const l of lots()) {
+    if (l.zone !== 'city' || !l.shop || l.storeys !== 2 || l.kind === 'inn' || l.kind === 'tea' || l.kind === 'warehouse') continue;
+    const d = Math.hypot((l.foot[0] + l.foot[2]) / 2, (l.foot[1] + l.foot[3]) / 2 - 76);
+    if (d > 280) continue;
+    const [x0, z0, x1, z1] = l.foot, f = l.front, Ln = (f === 'n' || f === 's') ? x1 - x0 : z1 - z0;
+    if (Ln < 4.2) continue;
+    const r2 = rng(l.seed * 7 + 3), n = (r2() < (d < 160 ? 0.85 : 0.5) ? 1 : 0) + (Ln > 7 && r2() < 0.5 ? 1 : 0);
+    const yF = 0.28 + (l.kind === 'wine' ? 3.5 : 3.25) + 0.04;
+    for (let k = 0; k < n; k++) {
+      const t = 0.9 + r2() * (Ln - 1.8), o = 0.28, at = f === 's' ? [x0 + t, z1 + o] : f === 'n' ? [x1 - t, z0 - o] : f === 'e' ? [x1 + o, z0 + t] : [x0 - o, z1 - t];
+      const out = FR[f], ang = (r2() - 0.5) * 0.9, dir = [out[0] * Math.cos(ang) - out[1] * Math.sin(ang), out[0] * Math.sin(ang) + out[1] * Math.cos(ang)];
+      person(at, yF, faceTo(dir), { pose: r2() < 0.5 ? 'talk' : 'stand', dress: 'robe', hat: r2() < 0.5 ? 'none' : 'cap' });
+    }
+  }
   // ---- the bridge's approaches: hawkers' stalls along the river edge of the two bank streets (the scroll's market at the bridgehead), a vendor behind each, customers before
   {
     const kinds = ['fruit', 'cloth', 'pots', 'cakes'], aw = ['reed_mat', 'cloth_ochre', 'reed_mat', 'cloth_white', 'cloth_indigo'];
@@ -54,8 +69,8 @@ function scroll() {
       const nc = 1 + (rand() < 0.6 ? 1 : 0);
       for (let k = 0; k < nc; k++) person([x + (rand() - 0.5) * 1.6, zs + dir * (1.2 + rand() * 0.9)], 0.04, faceTo([(rand() - 0.5) * 0.4, -dir]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' });
     });
-    row([-56, -49, -42, -35, -28, -21, -14, 14, 21, 28, 35, 42, 49, 56], 95.0, 0, 1);
-    row([-58, -50, -42, -34, 14, 22, 30, 38, 46, 54], 57.0, Math.PI, -1);
+    row([-56, -49, -42, -35, -28, -21, -14, 14, 21, 28, 42, 49, 56], 95.0, 0, 1);
+    row([-58, -50, -42, -29, 14, 22, 30, 44, 51, 58], 57.0, Math.PI, -1);
     // a donkey with its panniers waiting by the stalls on each bank, the drover beside it
     for (const [x, z] of [[-12, 99.5], [12.5, 52.5]]) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0.04, rot: faceTo([1, 0]), seed: Math.floor(rand() * 1e9), gear: true }); person([x - 1.6, z + 0.3], 0.04, faceTo([1, 0]), { dress: 'trousers', cloth: pick(['cloth_brown', 'cloth_grey']), hat: 'straw' }); }
   }
