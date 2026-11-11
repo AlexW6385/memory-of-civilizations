@@ -20,6 +20,7 @@
 
 export const SITES = [
   // ── China ──
+  { id: 'tang-changan', name: { en: 'Tang Chang\'an', zh: '唐长安' }, era: '8th c.', region: 'china', lat: 34.22, lon: 108.96, nudge: 200, radius: 520 },
   { id: 'tang-wutai', name: { en: 'Tang China', zh: '唐' }, era: '9th c.', region: 'china', lat: 38.95, lon: 113.38, radius: 250 },
   { id: 'song-kaifeng', name: { en: 'Northern Song Kaifeng', zh: '北宋汴京' }, era: '12th c.', region: 'china', lat: 34.80, lon: 114.31, radius: 520 },
   { id: 'song-hangzhou', name: { en: 'Southern Song Lin\'an', zh: '南宋临安' }, era: '13th c.', region: 'china', lat: 30.20, lon: 120.13, radius: 520 },
@@ -131,7 +132,6 @@ export const PLANNED = [
   { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, region: 'china', lat: 36.13, lon: 114.32, radius: 300 },
   { id: 'lu-qufu', name: { en: 'Qufu', zh: '曲阜' }, region: 'china', lat: 35.60, lon: 116.99, radius: 280 },
   { id: 'wei-ye', name: { en: 'Three Kingdoms Ye', zh: '三国邺城' }, region: 'china', lat: 36.33, lon: 114.38, nudge: 0, radius: 300 },
-  { id: 'tang-changan', name: { en: 'Tang Chang\'an', zh: '唐长安' }, region: 'china', lat: 34.22, lon: 108.96, nudge: 200, radius: 550 },
   { id: 'hakka-tulou', name: { en: 'Hakka tulou', zh: '客家土楼' }, region: 'china', lat: 24.67, lon: 117.05, radius: 180 },
   { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, region: 'indus', lat: 27.33, lon: 68.14, radius: 300 },
   { id: 'ajanta', name: { en: 'Ajanta', zh: '阿旃陀' }, region: 'india', lat: 20.55, lon: 75.70, radius: 200 },
