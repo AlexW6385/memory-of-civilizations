@@ -86,3 +86,20 @@ export function lakeLanes(margin = 22, width = 14) {
   for (const f of [0.3, 0.5, 0.7]) { run(true, z0 + h * f); run(false, x0 + w * f); }
   return out;
 }
+
+/** Signed distance to the lake's shore (negative inside), by sampling rings when the layout gives no function. */
+export function lakeDist(x, z) {
+  const k = lake();
+  if (!k) return 1e3;
+  if (k.dist) return k.dist(x, z);
+  const inside = inLake(x, z);
+  for (let r = 1.5; r <= 60; r += 1.5) for (let a = 0; a < 16; a++) { const th = a / 16 * Math.PI * 2; if (inLake(x + Math.cos(th) * r, z + Math.sin(th) * r) !== inside) return inside ? -r : r; }
+  return inside ? -60 : 60;
+}
+/** Signed distance to a rectangle's edge (negative inside). */
+export function rectDist(r, x, z) {
+  const dx = Math.max(r[0] - x, x - r[2]), dz = Math.max(r[1] - z, z - r[3]);
+  return dx > 0 || dz > 0 ? Math.hypot(Math.max(dx, 0), Math.max(dz, 0)) : Math.max(dx, dz);
+}
+/** Signed distance to the nearest canal. */
+export function canalDist(x, z) { let d = 1e3; for (const r of canals()) d = Math.min(d, rectDist(r, x, z)); return d; }
