@@ -9,6 +9,7 @@ import '../settlements/catalhoyuk/smoke.js';
 import '../settlements/fez/smoke.js';
 import '../settlements/thebes/smoke.js';
 import '../settlements/abu-simbel/smoke.js';
+import '../settlements/shibam/smoke.js';
 import '../settlements/muromachi-kyoto/smoke.js';
 import '../settlements/dunhuang/smoke.js';
 import '../settlements/timurid-samarkand/smoke.js';

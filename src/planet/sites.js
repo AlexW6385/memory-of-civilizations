@@ -56,6 +56,7 @@ export const SITES = [
   { id: 'giza', name: { en: 'Old Kingdom Egypt', zh: '古王国埃及' }, era: '26th c. BC', region: 'egypt', lat: 29.98, lon: 31.13, radius: 420 },
   { id: 'catalhoyuk', name: { en: 'Çatalhöyük', zh: '加泰土丘' }, era: 'c. 6500 BC', region: 'anatolia', lat: 37.67, lon: 32.83, radius: 90 },
   { id: 'abu-simbel', name: { en: 'Abu Simbel', zh: '阿布辛贝' }, era: '13th c. BC', region: 'nubia', lat: 22.34, lon: 31.63, radius: 190 },
+  { id: 'shibam', name: { en: 'Shibam', zh: '希巴姆' }, era: 'from the 16th c.', region: 'arabia', lat: 15.93, lon: 48.63, radius: 190 },
   { id: 'mamluk-cairo', name: { en: 'Mamluk Cairo', zh: '马穆鲁克开罗' }, era: '14th c.', region: 'egypt', lat: 30.03, lon: 31.26, radius: 480 },
   { id: 'djenne', name: { en: 'The Sahel', zh: '萨赫勒' }, era: '14th c.', region: 'sahel', lat: 13.90, lon: -4.56, radius: 360 },
   { id: 'lalibela', name: { en: 'Ethiopia', zh: '埃塞俄比亚' }, era: '13th c.', region: 'ethiopia', lat: 12.03, lon: 39.04, radius: 380 },
