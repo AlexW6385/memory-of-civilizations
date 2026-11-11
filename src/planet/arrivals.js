@@ -67,6 +67,7 @@ export const ARRIVALS = {
   'maori':            [0, 0.2, 150, 0, 0.2],             // the pā's palisade and carved gateway
   'sydney':           [214.5, null, -112, 1.0, 0.05],    // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
   'dunhuang': [14, 0.1, 0, 1.5708, 0.2],   // On the main street east of the stream, looking west along its axis over the timber bridge: the Mogao cliff with its tiers of caves and galleries, the Nine-Storey building stepping up over the Great Buddha's hall at its middle.
+  'catalhoyuk':       [1.2, 2.6, 19, 1.1, -0.05],            // the landmark house whole across the ground: its south wall, the ladder up to the roof, the packed roofscape behind
   'abu-simbel': [4, null, 0, 1.5708, 0.3],   // the Great Temple's façade whole across the terrace: four seated colossi of Ramesses II cut in the cliff, the baboon frieze above the door, the Nile below
   'thebes': [-243, null, 0, -1.5708, 0.1],   // from the Nile quay at the avenue's end, down the double row of ram sphinxes to the gateway in the great mudbrick wall, the second pylon of Karnak and its flagstaffs standing over it
   'mongol-karakorum': [70, 0.1, -12, 0, 0.2],   // Standing in the south gate of Möngke Khan's palace compound: the great hall on its rammed-earth podium across the court, the nine-tailed banners on either hand, the brick wall and the storehouses beyond.
