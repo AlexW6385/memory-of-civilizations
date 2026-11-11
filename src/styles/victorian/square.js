@@ -51,12 +51,12 @@ function roundBed(bag, col, x, z, y, r, rings) {
 function canning(ctx, x, z, y, rot) {
   const { bag, col } = ctx;
   for (const [h, w] of [[0.3, 4.4], [0.3, 3.9], [0.3, 3.4]]) { bag.add('granite_block', box(x - w / 2, y, z - w / 2, x + w / 2, y + h, z + w / 2)); y += h; }
-  bag.add('granite_block', box(x - 1.3, y, z - 1.3, x + 1.3, y + 2.6, z + 1.3));
-  bag.add('granite_grey', box(x - 1.5, y + 2.6, z - 1.5, x + 1.5, y + 2.85, z + 1.5)); bag.add('granite_grey', box(x - 1.4, y + 2.85, z - 1.4, x + 1.4, y + 3.0, z + 1.4));
+  bag.add('granite_block', box(x - 1.3, y, z - 1.3, x + 1.3, y + 3.1, z + 1.3));
+  bag.add('granite_grey', box(x - 1.5, y + 3.1, z - 1.5, x + 1.5, y + 3.35, z + 1.5)); bag.add('granite_grey', box(x - 1.4, y + 3.35, z - 1.4, x + 1.4, y + 3.5, z + 1.4));
   bag.add('granite_grey', box(x - 1.45, y, z - 1.45, x + 1.45, y + 0.25, z + 1.45));
   for (const [dx, dz] of [[0, 1.31], [0, -1.31], [1.31, 0], [-1.31, 0]]) bag.add('bronze', dx ? box(x + dx - 0.02 + (dx > 0 ? 0.02 : -0.02), y + 0.9, z - 0.5, x + dx + 0.02 + (dx > 0 ? 0.02 : -0.02), y + 1.9, z + 0.5) : box(x - 0.5, y + 0.9, z + dz - 0.02 + (dz > 0 ? 0.02 : -0.02), x + 0.5, y + 1.9, z + dz + 0.02 + (dz > 0 ? 0.02 : -0.02)));
-  col.rect([x - 2.2, z - 2.2, x + 2.2, z + 2.2], ctx.y0 ?? y - 0.9, y + 3.2);
-  statue(ctx, x, z, y + 3.0, rot, 1827, { m: 'bronze', h: 2.9, over: 'cloak', hair: 'short' });
+  col.rect([x - 2.2, z - 2.2, x + 2.2, z + 2.2], ctx.y0 ?? y - 0.9, y + 3.7);
+  statue(ctx, x, z, y + 3.5, rot, 1832, { m: 'bronze', h: 3.4, over: 'cloak', hair: 'short' });
 }
 /** a horse trough of granite for the cab rank (the Metropolitan Free Drinking Fountain and Cattle Trough Association's pattern), a water-filled top */
 function trough(bag, col, x, z, y, rot) {

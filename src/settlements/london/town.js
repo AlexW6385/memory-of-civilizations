@@ -53,7 +53,7 @@ function riverFolk() {
  *  Bridge Street and of the road from the bridge into Lambeth, coster women with the round head-basket, gentlemen and
  *  ladies, a crossing sweeper, a policeman. */
 function streetFolk() {
-  let sd = 1871; const rand = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296), L = [];
+  let sd = 1871; const rand = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296), L = [], pick = (a) => a[Math.floor(rand() * a.length)];
   const fig = (at, rot, o) => { if (!inLot(at[0], at[1], 0.6)) L.push({ t: 'figure', at, y: GROUND, rot, h: 1.6 + rand() * 0.15, seed: Math.floor(rand() * 1e9), skin: 'skin_light', feet: 'shod', ...o }); };
   const coster = (at, rot) => fig(at, rot, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_brown', hat: 'cap', hatMat: rand() < 0.5 ? 'cloth_red' : 'cloth_brown', over: 'collar', pose: rand() < 0.5 ? 'talk' : 'stand' });
   const kerbs = [[62, BRIDGE.z - 5.6, W], [92, BRIDGE.z + 5.6, E], [280, BRIDGE.z - 5.6, W], [300, BRIDGE.z + 5.6, E], [318, BRIDGE.z - 5.6, W]];
@@ -88,6 +88,20 @@ function streetFolk() {
     fig([x, z], rot, lady ? { dress: 'robe', cloth: rand() < 0.5 ? 'cloth_indigo' : 'cloth_maroon', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cape', pose: rand() < 0.4 ? 'talk' : 'stand' } : { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: rand() < 0.4 ? 'talk' : 'stand' });
   }
   for (const [x, z, rot] of [[-18, -177.4, E], [-18.9, -177.4, E]]) fig([x, z], rot, { dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'cap', hatMat: 'cloth_brown', carry: 'staff', pose: 'staff', len: 1.9, over: 'apron', staffMat: 'timber' });
+  // the pavements of the streets about the square: clerks, labourers, women with baskets, children, a dog at heel
+  for (const zc of streetsZ()) {
+    const main = Math.abs(zc - BRIDGE.z) < 1, h = main ? 8 : STREET_W / 2, pw = main ? 2.6 : 1.9;
+    for (let x = -240 + rand() * 12; x < 240; x += 11 + rand() * 13) {
+      const side = rand() < 0.5 ? -1 : 1, z = zc + side * (h - pw * 0.55), k = rand();
+      if (Math.hypot(x, z + 180) > 175 || blocked(x, z, -1) || inLot(x, z, 0.4) || crossX().some((c) => Math.abs(c - x) < STREET_W / 2 + 0.8)) continue;
+      const rot = rand() < 0.5 ? E : W;
+      if (k < 0.26) fig([x, z], rot, { dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'collar', pose: rand() < 0.3 ? 'talk' : 'stand' });
+      else if (k < 0.5) fig([x, z], rot, { dress: 'trousers', cloth: rand() < 0.5 ? 'cloth_brown' : 'cloth_indigo', cloth2: 'cloth_brown', hat: 'cap', hatMat: 'cloth_brown', over: 'belt', carry: rand() < 0.3 ? 'sack' : 'none' });
+      else if (k < 0.72) fig([x, z], rot, { dress: 'robe', cloth: pick(['cloth_grey', 'cloth_brown', 'cloth_maroon', 'cloth_green']), cloth2: 'cloth_black', hat: rand() < 0.5 ? 'brim' : 'none', hatMat: 'cloth_black', over: 'shawl', carry: rand() < 0.6 ? 'basket' : 'none' });
+      else if (k < 0.86) { fig([x, z], rot, { h: 1.0 + rand() * 0.25, dress: rand() < 0.5 ? 'robe' : 'trousers', cloth: pick(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_grey']), cloth2: 'cloth_brown', hat: 'cap', hatMat: 'cloth_grey' }); fig([x + 0.8, z], rot, { h: 0.95 + rand() * 0.25, dress: 'robe', cloth: pick(['cloth_green', 'cloth_red']), cloth2: 'cloth_brown', hat: 'none' }); }
+      else L.push({ t: 'animal', kind: 'dog', at: [x, z], y: GROUND, rot: rot + 1.57, seed: Math.floor(rand() * 1e6) });
+    }
+  }
   // the cabmen of the rank, each by his cab's horse
   for (const x of [-48, -41, -34, -27]) fig([x + 0.4, -149.4], S, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: rand() < 0.5 ? 'talk' : 'stand' });
   return L;

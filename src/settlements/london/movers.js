@@ -10,7 +10,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 40, night: 8, rain: 0.6, reach: 150, spawnMin: 26, far: 42 },
+  walkers: { day: 54, night: 10, rain: 0.6, reach: 150, spawnMin: 26, far: 42 },
   boats: { count: 5, reach: 280, spawnMin: 70, far: 110, speed: [0.7, 1.1], bridgeSpeed: 0.7 },
   water: RIVER.level,
 };
@@ -72,6 +72,16 @@ export const WALKERS = [
     c1: [CL.brown, CL.grey, CL.ochre], c2: [CL.brown, CL.grey], c3: [CL.grey, CL.brown, CL.red], speed: [1.3, 1.8], stride: 1.0, h: [0.62, 0.72], swing: 1.1 },
   { id: 'policeman', weight: 0.4, market: 0.8, el: { dress: 'trousers', hair: 'short', hat: 'brim', over: 'belt', arms: 'hang', beard: 0.5 }, wet: 'cloak',
     c1: ['prussian_blue'], c2: ['prussian_blue'], c3: ['prussian_blue'], speed: [0.95, 1.15], stride: 1.55 },
+  { id: 'guardsman', weight: 0.35, market: 0.9, el: { dress: 'trousers', hair: 'short', hat: 'cap', over: 'belt', arms: 'hang', beard: 0.5 }, wet: 'cloak',
+    c1: [CL.red], c2: ['prussian_blue'], c3: [CL.red], speed: [1.1, 1.3], stride: 1.6 },
+  { id: 'clergyman', weight: 0.4, market: 0.8, el: { dress: 'robe', hair: 'short', hat: 'brim', over: 'cloak', arms: 'hang', beard: 0.3 }, wet: 'cloak',
+    c1: [CL.black], c2: [CL.black], c3: [CL.black], speed: [0.95, 1.2], stride: 1.3 },
+  { id: 'nursemaid', weight: 0.5, market: 1.2, el: { dress: 'robe', hair: 'bun', hat: 'brim', over: 'cape', carry: 'child', arms: 'child' }, wet: 'cloak', swing: 0.4,
+    c1: [CL.grey, CL.indigo, CL.brown], c2: [CL.white, CL.black], c3: [CL.black, CL.grey], speed: [0.85, 1.05], stride: 1.15, h: [0.9, 0.95] },
+  { id: 'sweep', weight: 0.35, market: 1.0, el: { dress: 'trousers', hair: 'short', hat: 'cap', over: 'belt', carry: 'staff', arms: 'staff', beard: 0.2 },
+    c1: [CL.black, CL.grey], c2: [CL.black], c3: [CL.black], speed: [1.0, 1.25], stride: 1.4 },
+  { id: 'schoolboy', weight: 0.5, market: 1.0, el: { dress: 'trousers', hair: 'short', hat: 'cap', arms: 'hang' },
+    c1: [CL.grey, CL.blue, CL.brown], c2: [CL.grey, CL.black], c3: [CL.grey], speed: [1.3, 1.7], stride: 1.0, h: [0.66, 0.78], swing: 1.0 },
   { id: 'porter', weight: 0.8, market: 1.1, el: { dress: 'trousers', hair: 'short', hat: 'cap', carry: 'sack', arms: 'sack', beard: 0.3 },
     c1: [CL.brown, CL.grey, CL.ochre, CL.white], c2: [CL.brown, CL.black], c3: [CL.brown, CL.grey], speed: [1.0, 1.25], stride: 1.15 },
 ];

@@ -68,7 +68,7 @@ export function lots() {
         x += w;
         if (onCross(x0, x1)) { const c = crossX().find((c2) => x1 > c2 - STREET_W / 2 - 0.5 && x0 < c2 + STREET_W / 2 + 0.5); x = Math.max(x, c + STREET_W / 2 + 0.5); continue; }
         if (Math.hypot(cx, cz) > RADIUS - 45 || blocked(cx, cz) || blocked(x0, cz) || blocked(x1, cz)) continue;
-        const e = { rect: [x0, za, x1, za + D], seed: Math.floor(rand() * 1e6), front, storeys: 3 + (rand() < 0.3 ? 1 : 0), y: GROUND, pw: onMain ? 2.6 : 1.9 };
+        const e = { rect: [x0, za, x1, za + D], seed: Math.floor(rand() * 1e6), front, storeys: Math.hypot(cx, cz) > 290 && rand() < 0.55 ? 2 : 3 + (rand() < 0.3 ? 1 : 0), y: GROUND, pw: onMain ? 2.6 : 1.9 };
         if (pub) { e.pub = true; e.storeys = 3; e.corner = east ? 'e' : 'w'; }
         else if (onMain ? rand() < 0.9 : near ? rand() < 0.45 : rand() < 0.12) { e.shop = true; e.trade = TRADES[Math.floor(rand() * TRADES.length)]; e.storeys = 3 + (rand() < 0.2 ? 1 : 0); }
         LOTS.push(e);

@@ -226,11 +226,13 @@ function ladyChapel(ctx, G0, lc) {
     const zWall = s < 0 ? R[1] : R[3], zin = s < 0 ? 1 : -1;
     for (let k = 0; k < Math.floor((R[2] - R[0] - 5) / 1.0); k++) {
       const x = R[0] + 2.5 + k * 1.0, zb = zWall + zin * 0.45;
+      if (s < 0 && Math.abs(x - (R[0] + dc)) < 1.9) continue;                                // the doorway's clear
       bag.add(OAK, box(x - 0.45, y + 0.05, zb - 0.3, x + 0.45, y + 0.55, zb + 0.3)); bag.add(OAK, box(x - 0.45, y + 0.55, zb + zin * 0.28 - 0.04, x + 0.45, y + 3.0, zb + zin * 0.28 + 0.04));
       bag.add(OAK, box(x - 0.47, y + 3.0, zb - 0.3 - 0.05 * zin, x + 0.47, y + 3.15, zb + 0.3)); bag.add(OAK, lathe([[0.09, 0], [0.03, 0.5], [0.001, 0.9]], 4, null, x, y + 3.15, zb));
       bag.add(pick(['cloth_red', 'cloth_blue', 'cloth_maroon', 'cloth_ochre'], k), box(x - 0.2, y + 3.9, zb + zin * 0.28 - 0.015, x + 0.2, y + 5.4, zb + zin * 0.28 + 0.015)); bag.add(G, box(x - 0.2, y + 3.88, zb + zin * 0.28 - 0.02, x + 0.2, y + 3.92, zb + zin * 0.28 + 0.02));
     }
-    col.rect([R[0] + 2, Math.min(zWall, zWall + zin * 1.2), R[2] - 2.5, Math.max(zWall, zWall + zin * 1.2)], y, y + 3.2);
+    const zr = [Math.min(zWall, zWall + zin * 1.2), Math.max(zWall, zWall + zin * 1.2)];
+    if (s < 0) { col.rect([R[0] + 2, zr[0], R[0] + dc - 1.9, zr[1]], y, y + 3.2); col.rect([R[0] + dc + 1.9, zr[0], R[2] - 2.5, zr[1]], y, y + 3.2); } else col.rect([R[0] + 2, zr[0], R[2] - 2.5, zr[1]], y, y + 3.2);
   }
   // the tomb of Henry VII and Elizabeth of York behind its bronze grille: a black marble tomb chest with the gilt effigies, the screen of gilt bronze round it
   { const tx = (R[0] + R[2]) / 2 + 2, tz = (R[1] + R[3]) / 2;
