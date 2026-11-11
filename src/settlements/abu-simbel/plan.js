@@ -35,6 +35,7 @@ export const great = {
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [FX + 44, 0], facing: 'w' },
   bounds: [FX - 112, -40, FX + 60, 40],
+  view: [FX - 6, -19, FX + 2, 19],   // the façade of the four colossi
   bakeTop: 60,
   elements: E,
   rooms,
