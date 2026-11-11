@@ -90,6 +90,20 @@ export const SITES = [
 
 for (const s of SITES) s.radius ??= 190;
 
+// ── size classes of the built settlements (DESIGN §4.5) ──
+// The disc each will have once rebuilt to the Suzhou standard (docs/batches.md); the layout keeps
+// room for the larger of this and today's `radius`, so growing to its class moves no neighbour.
+const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
+const CLASS = {
+  L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan',
+  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney',
+  S: 'heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
+  P: 'stonehenge',
+};
+for (const [c, ids] of Object.entries(CLASS)) for (const id of ids.split(' ')) { const s = SITES.find((x) => x.id === id); if (s) s.size = id === 'ming-suzhou' ? 215 : CLASS_RADIUS[c]; }
+/** The room a settlement takes on the planet: its class's disc, or today's if larger. */
+export const room = (s) => Math.max(s.radius, s.size ?? s.radius);
+
 /** Metres over which a settlement's ground blends into the open country beyond its disc. */
 export const BLEND = 100;
 /**
@@ -141,7 +155,7 @@ export const PLANNED = [
 /** Open country left between two settlements' blended edges, at the least (m). */
 export const GAP = 120;
 /** The least distance between the centres of two settlements (m). */
-export const spacing = (a, b) => a.radius + b.radius + 2 * BLEND + GAP;
+export const spacing = (a, b) => room(a) + room(b) + 2 * BLEND + GAP;
 /** The planet's radius (m). */
 export const PLANET_RADIUS = 12000;
 

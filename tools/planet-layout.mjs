@@ -12,7 +12,7 @@
 // Writes src/planet/layout.js. usage: node tools/planet-layout.mjs
 
 import { writeFile } from 'node:fs/promises';
-import { SITES as BUILT_SITES, PLANNED, spacing, PLANET_RADIUS as R } from '../src/planet/sites.js';
+import { SITES as BUILT_SITES, PLANNED, spacing, room, PLANET_RADIUS as R } from '../src/planet/sites.js';
 // the settlements not built yet are placed too, so that their room is kept (sites.js PLANNED)
 const SITES = [...BUILT_SITES, ...PLANNED];
 import { unit, latLon, angle, travel, bearing } from '../src/planet/geo.js';
@@ -60,7 +60,7 @@ for (let it = 0; it < 7000; it++) {
     const a = angle(x[i], t[i]);
     if (a > 1e-9) x[i] = travel(x[i], bearing(x[i], t[i]), a * 0.004);
     // onto the land: climb the distance to the coast while the disc is mostly over water
-    const want = SITES[i].radius * 1.0, d = coast(x[i]);
+    const want = room(SITES[i]), d = coast(x[i]);
     if (landPull && !SITES[i].water && d < want) {
       const gx = coast(travel(x[i], Math.PI / 2, step)) - coast(travel(x[i], -Math.PI / 2, step));
       const gy = coast(travel(x[i], 0, step)) - coast(travel(x[i], Math.PI, step));

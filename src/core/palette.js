@@ -276,6 +276,7 @@ const SPECS = {
   sacking:          { color: '#8f7a5a', roughness: 1.0, kind: 'smooth' },
   cloth_white:      { color: '#d9d3c4', roughness: 0.95, kind: 'smooth' },
   cloth_indigo:     { color: '#2e3b5c', roughness: 0.95, kind: 'smooth' },
+  cloth_blue:       { color: '#4a6188', roughness: 0.93, kind: 'smooth' },
   cloth_red:        { color: '#8c2f24', roughness: 0.95, kind: 'smooth' },
   cloth_ochre:      { color: '#b58a3c', roughness: 0.95, kind: 'smooth' },
   cloth_brown:      { color: '#6a4d36', roughness: 0.95, kind: 'smooth' },
