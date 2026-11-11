@@ -1,0 +1,26 @@
+{
+  "site": { "id": "shaolin", "name": { "en": "Shaolin and Mount Song", "zh": "少林与嵩山" }, "era": "17th c.", "region": "china", "lat": 34.51, "lon": 112.94, "radius": 190 },
+  "arrival": [0, 0.1, 160, 0, 0.07],
+  "arrivalNote": "from the village road before the forecourt, north up the axis to the Shanmen gate hall between its lions, the red wall and grey roofs on either side, Mount Song rising behind",
+  "card": {
+    "en": [
+      "Shaolin Monastery stands on the south slope of Shaoshi Mountain, western peak of Mount Song in Henan, the cradle of Chan Buddhism and of the monks' martial arts. Shown as in the late Ming, about 1600, after the rebuilding that followed the monks' service against the coastal pirates: a red-walled compound on one north-south axis, grey-tiled halls on stone platforms, courts of bluestone with steles, lions and bronze censers, ancient cypresses and a village of grey-brick houses before the gate.",
+      "The gate hall and the Hall of the Four Heavenly Kings — Maitreya facing the gate, the four kings on their bases, a floor of square brick.",
+      "The Mahavira Hall — seven bays on a high platform, the Three Buddhas, Guanyin and the Eighteen Arhats, the altar and the drum and bell; and the Dharma Hall with its sutra cabinets.",
+      "The Hall of a Thousand Buddhas, the training hall — a bronze-gilt Vairocana, walls painted with five hundred arhats, and a floor of brick worn into rows of pits by the feet of drilling monks.",
+      "The Pagoda Forest — over fifty memorial stupas of brick and stone west of the walls, from low stone vases to tall brick pagodas of seven close eaves, each with its tablet.",
+      "Steles on tortoise bases, the Standing in Snow Pavilion, the bell and drum towers, a monk's cell, and Mount Song's slopes of pine and rock behind."
+    ],
+    "zh": [
+      "少林寺位于河南嵩山西峰少室山南麓，是禅宗祖庭与少林武术的发源地。此处呈现明末约1600年的面貌：嘉靖年间僧兵抗倭之后大规模重修，红墙围合的寺院沿南北中轴展开，石台基上的灰瓦殿堂，青石院落中立着碑碣、石狮与铜香炉，古柏参天，山门外是灰砖土墙的村落。",
+      "山门与天王殿——弥勒面向山门，四大天王各踞其台，方砖铺地。",
+      "大雄宝殿——七开间，立于高台基上，供三世佛、观音与十八罗汉，设供案、鼓与钟；法堂内有成排的藏经柜。",
+      "千佛殿（练功殿）——鎏金毗卢遮那佛，墙上绘五百罗汉朝毗卢，砖地被习武僧人的脚踩出一排排深坑。",
+      "塔林——寺西五十余座砖石墓塔，从矮小的石质瓶式塔到七层密檐的高大砖塔，各有塔铭。",
+      "龟趺碑、立雪亭、钟鼓楼、僧寮，以及殿后嵩山的松岩山坡。"
+    ]
+  },
+  "soundscape": "T({ warbler: 0.5, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.2 }, roof: 'tile', bells: 'monastery' })",
+  "lifeRegion": "east_asia",
+  "crop": "wheat"
+}
