@@ -2,6 +2,7 @@
 import '../../styles/chinese/index.js';
 import '../../styles/indian/index.js';
 import '../../styles/vernacular/index.js';
+import '../../objects/index.js';
 import { stupa, stupa2, site, pilgrims } from './plan.js';
 import music from './music.js';
 import { town as houses } from './town.js';

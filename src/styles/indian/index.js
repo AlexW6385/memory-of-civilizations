@@ -7,6 +7,7 @@
 // capital; a monastery of cells round a court.
 
 import { registerStyle, orientedBox } from '../../core/build.js';
+import { villageElements } from './village.js';
 import { box, lathe, fromTriangles, rod, orientOutward, place } from '../../core/geom.js';
 import { hexa, obox } from '../chinese/index.js';
 
@@ -523,6 +524,6 @@ registerStyle('indian', {
   column: () => {},
   trim: () => {},
   opening: () => {},
-  elements: { stupa },
+  elements: { stupa, ...villageElements },
   objects: { ashoka_pillar: ashokaPillar, vihara },
 });
