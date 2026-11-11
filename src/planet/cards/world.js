@@ -756,4 +756,22 @@ export const CARDS = {
       "庭院住宅 —— 外观朴素，内里铺瓷砖、饰雕刻，围着带水盘的庭院。",
     ],
   },
+  'mongol-karakorum': {
+    en: [
+      "Karakorum stood on the grass plain of the Orkhon valley in central Mongolia, the capital of the Mongol Empire, founded by Chinggis Khan's camp and built up by his son Ögedei from 1235. The moment shown is 1254, when the Flemish Franciscan William of Rubruck was at the court of Möngke Khan; the town is rebuilt from his account and from the German-Mongolian excavations, since almost nothing stands today. A walled town of rammed earth and sun-dried brick, with Chinese-type tiled halls, Muslim and Chinese quarters, and the gers of the court camped on the plain round it.",
+      "The palace of Möngke — a timber hall on a rammed-earth podium inside a brick-walled compound, laid out like a church with a nave and two aisles between two rows of pillars and three doors to the south, the khan's dais at the north end; inside the middle door stands the silver tree.",
+      "The silver tree — made on the spot by the Parisian goldsmith Guillaume Boucher: a silver trunk wrapped in silver serpents with branches, leaves and fruit, an angel with a trumpet above it, four silver lions at the roots and four pipes pouring wine, fermented mare's milk, rice wine and mead.",
+      "The Great Hall — a Chinese-type tiled hall 38 metres square on a rammed-earth podium, 64 granite column bases, a stupa at its centre and four Buddhas on lotus thrones: a temple of the Chinese quarter.",
+      "The walled town — a rammed-earth wall with four gates, each with its market (grain to the east, sheep and goats to the west, oxen and carts to the south, horses to the north); the Saracen quarter with the bazaar and two mosques; the Chinese quarter of craftsmen with kilns and forges; temples of many faiths, and a Nestorian church at the far end of the town.",
+      "The gers — felt tents on a lattice frame with a crown ring, the door to the south, set on the ground and on great wagons; the camps of the court outside the wall, with the herds of horses and camels.",
+    ],
+    zh: [
+      "哈拉和林位于蒙古国中部鄂尔浑河谷的草原平地上，是蒙古帝国的都城：由成吉思汗的营地发展而来，自1235年起由窝阔台大兴土木。画面定格在1254年，佛兰德方济各会士鲁布鲁克来到蒙哥汗的宫廷之时；今天地上几乎一无所存，故城市依他的记述和德蒙联合考古重建。城为夯土与土坯所筑，有汉式瓦顶殿堂、穆斯林与汉人两个街区，城外平原上扎着汗庭的毡帐。",
+      "蒙哥汗的宫殿 —— 砖墙围合的宫院内，夯土台基上的木构大殿，布局如教堂：两排柱子隔出中堂与两侧廊，南面三门，北端为汗的御座台；中门内立着银树。",
+      "银树 —— 巴黎金匠纪尧姆·布歇就地造成：银质树干缠绕银蛇，有枝、叶、果，顶上一位吹号的天使，树根处四只银狮，四根管子分别流出葡萄酒、马奶酒、米酒和蜂蜜酒。",
+      "大殿 —— 边长约38米的汉式瓦顶殿堂，建在夯土台基上，有64个花岗岩柱础，殿心有一座佛塔，四尊佛像坐在莲台上：汉人街区的一座寺院。",
+      "城垣与街区 —— 夯土城墙，四座城门，各有集市（东门粮食、西门羊、南门牛与车、北门马）；有集市和两座清真寺的穆斯林区，有窑和铁匠铺的汉人工匠区，各教的寺庙，城的尽头还有一座聂斯脱利教堂。",
+      "毡帐 —— 以木格栅为骨、顶有天窗圈的毡帐，门朝南，有的立在地上，有的架在大车上；城外是汗庭的营地，以及成群的马和骆驼。",
+    ],
+  },
 };
