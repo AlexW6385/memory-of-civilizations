@@ -45,13 +45,13 @@ function mansion() {
   wall([x0, z1], [x0, z0]); wall([x1, z1], [x1, z0]); wall([x0, z0], [x1, z0]);
   for (const h of [cg, nz]) { const z = zc(h); wall([x0, z], [MX - hw(h), z]); wall([MX + hw(h), z], [x1, z]); }
   wall([x0, -146], [MX - 4, -146]); wall([MX + 4, -146], [x1, -146]);
-  for (const h of MANSION_HALLS) E.push({ t: 'qing_hall', rect: h.rect, y: 0.7, H: h.H, ...(h.double ? { double: h.double } : {}), roof: 'xieshan', bays: h.bays, front: 's', doors: h.doors, four: false, plat: 0.7, platMargin: 1.2, pal: HOUSE });
+  for (const h of MANSION_HALLS) E.push({ t: 'qing_hall', rect: h.rect, y: 0.45, H: h.H, ...(h.double ? { double: h.double } : {}), roof: 'xieshan', bays: h.bays, front: 's', doors: h.doors, four: false, plat: 0.45, platMargin: 1.2, pal: HOUSE });
   for (const r of MANSION_RANGES) E.push({ t: 'qing_hall', rect: r.rect, y: 0.4, H: 4.0, roof: 'gable', bays: [11, 2], front: r.front, four: false, plat: 0.4, pal: HOUSE });
   E.push({ t: 'lane', rect: [MX - 3.5, -146, MX + 3.5, 112], y: 0.04, mat: 'bluestone' });
   E.push({ t: 'lane', rect: [x0 + 2, 36, x1 - 2, 108], y: 0.03, mat: 'brick_paving' });
   // the back garden (Tieshan): a pavilion and a rock or two under old trees
-  E.push({ t: 'ming_pavilion', c: [MX - 26, -158], shape: 'square', w: 4.4, y: 0.7, H: 3.8, plat: 0.7, pal: HOUSE });
-  E.push({ t: 'ming_pavilion', c: [MX + 26, -158], shape: 'oct', r: 2.6, y: 0.7, H: 3.8, plat: 0.7, pal: HOUSE });
+  E.push({ t: 'ming_pavilion', c: [MX - 26, -158], shape: 'square', w: 4.4, y: 0.45, H: 3.8, plat: 0.45, pal: HOUSE });
+  E.push({ t: 'ming_pavilion', c: [MX + 26, -158], shape: 'oct', r: 2.6, y: 0.45, H: 3.8, plat: 0.45, pal: HOUSE });
   for (const [dx, dz] of [[-10, -152], [12, -160], [0, -164]]) E.push({ t: 'taihu', c: [MX + dx, dz], y: 0.1, h: 2.2, seed: Math.abs(Math.round(dx)) + 7, lod: 1 });
   return base('qufu-mansion', E);
 }
