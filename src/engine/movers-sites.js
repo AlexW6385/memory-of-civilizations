@@ -49,5 +49,6 @@ export const MOVER_SITES = {
   'sydney': () => import('../settlements/sydney/movers.js'),
   'lalibela': () => import('../settlements/lalibela/movers.js'),
   'kilwa': () => import('../settlements/kilwa/movers.js'),
+  'conques': () => import('../settlements/conques/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
