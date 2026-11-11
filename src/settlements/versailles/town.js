@@ -43,6 +43,16 @@ function canal() {
   L.push({ t: 'boat', kind: 'rowboat', len: 5, at: [CANAL.end + 7.0, -1.5], y, rot: Math.PI / 2 + 0.05 });
   L.push({ t: 'boat', kind: 'gondola', at: [CANAL.end + 9.0, 5.5], y, rot: -Math.PI / 2 - 0.04 });
   L.push({ t: 'figure', at: [CANAL.end - 1.6, -4.5], y: 0.12, rot: -Math.PI / 2, h: 1.72, seed: 1684, dress: 'tunic', cloth: 'cloth_indigo', cloth2: 'cloth_white', skin: 'skin_light', hat: 'brim', hatMat: 'cloth_black', pose: 'stand' });
+  // on the quay behind the landing (§5c): the boatmen's barrels and crates, sacks and a hand-cart, a bench, anglers on the steps' head with their lines, a woman with her basket
+  const qx = CANAL.end - 4.2, f = (o) => L.push({ t: 'figure', y: 0.12, legs: 'hose', skin: 'skin_light', dress: 'tunic', cloth2: 'cloth_white', hat: 'brim', hatMat: 'thatch', ...o });
+  L.push({ t: 'barrel', at: [qx - 1.5, -9.5], y: 0.12, rot: 0.3, seed: 1 }, { t: 'barrel', at: [qx - 2.4, -9.0], y: 0.12, rot: 1.1, seed: 2 }, { t: 'barrel', at: [qx - 1.2, 10.2], y: 0.12, rot: 0.2, seed: 3 },
+    { t: 'crates', at: [qx - 2.6, 8.4], y: 0.12, rot: 0.2, seed: 4 }, { t: 'crates', at: [qx - 3.4, 9.2], y: 0.12, rot: 0.9, seed: 5 }, { t: 'sacks', at: [qx - 2.0, -6.2], y: 0.12, rot: 0.5, seed: 6 },
+    { t: 'handcart', at: [qx - 4.5, 3.6], y: 0.12, rot: 1.9, seed: 7 }, { t: 'bench', at: [qx - 7.2, -3.6], y: 0.12, rot: Math.PI / 2, len: 2.0 });
+  f({ at: [CANAL.end - 0.9, -11.6], rot: -Math.PI / 2, seed: 41, h: 1.68, cloth: 'cloth_brown', pose: 'sit_low' }); f({ at: [CANAL.end - 0.9, 12.4], rot: -Math.PI / 2, seed: 42, h: 1.72, cloth: 'cloth_grey', pose: 'sit_low' });
+  f({ at: [CANAL.end - 0.9, -14.4], rot: -Math.PI / 2, seed: 43, h: 1.4, cloth: 'cloth_green', pose: 'sit_low' });
+  f({ at: [qx - 3.0, 5.2], rot: 2.4, seed: 44, h: 1.7, cloth: 'cloth_indigo', pose: 'stand', carry: 'sack' });
+  L.push({ t: 'figure', at: [qx - 6.0, -1.2], y: 0.12, rot: 1.2, h: 1.55, seed: 45, dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_white', skin: 'skin_light', hat: 'veil', carry: 'basket', pose: 'stand' });
+  for (const [x, z, r] of [[CANAL.end + 7.6, -12.5, Math.PI / 2 - 0.1], [CANAL.end + 11, 12.8, -Math.PI / 2 + 0.15]]) L.push({ t: 'boat', kind: 'rowboat', len: 5, at: [x, z], y, rot: r });
   return base('versailles-canal-boats', L, 'life');
 }
 

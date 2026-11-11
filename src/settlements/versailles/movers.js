@@ -3,13 +3,13 @@
 // porters on the Place d'Armes and the avenues. Data for the engine's movers (src/engine/movers.js), read in its worker.
 // No boats: the Grand Canal's reach inside the settlement is a landing only (its boats are placed in town.js).
 
-import { RADIUS, PLACE, AVE0, STABLES } from './layout.js';
+import { RADIUS, PLACE, AVE0, STABLES, PITCH, STREET } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 36, night: 4, rain: 0.5, reach: 150, spawnMin: 28, far: 42 },
+  walkers: { day: 58, night: 6, rain: 0.5, reach: 150, spawnMin: 24, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -1,
 };
@@ -28,6 +28,11 @@ export function walkways() {
   for (const s of [-1, 1]) for (let x = PLACE[2]; x < RADIUS - 60; x += 22) {
     const zc = s * (AVE0 + (x + 11 - PLACE[2]) * 0.35);
     rects.push({ r: [x, zc - 8, x + 22, zc + 8], weight: 1.0, market: 1.0, kind: 'street' });
+  }
+  // the cross streets between the blocks of houses: a lane of walkers on each (the shops' customers, errand-boys, maids)
+  for (let b = -Math.ceil(RADIUS / PITCH); b <= Math.ceil(RADIUS / PITCH); b++) {
+    const zb = b * PITCH + 4;
+    if (Math.abs(zb) < RADIUS - 70) rects.push({ r: [PLACE[2] + 12, zb - STREET + 1, RADIUS - 70, zb - 1], weight: 0.7, market: 0.8, kind: 'lane' });
   }
   void STABLES;
   return { rects, links: [], clip: RADIUS - 14 };
@@ -56,6 +61,10 @@ export const WALKERS = [
     c1: [CL.brown, CL.indigo, CL.grey, CL.maroon], c2: [CL.white], c3: [CL.white], speed: [0.9, 1.15], stride: 1.25, h: [0.9, 0.97] },
   { id: 'abbe', weight: 0.4, market: 0.5, el: { dress: 'robe', hair: 'short', hat: 'brim', over: 'cape', arms: 'hang' }, wet: 'cloak',
     c1: [CL.black], c2: [CL.white], c3: [CL.black], speed: [0.9, 1.15], stride: 1.45 },
+  { id: 'maid', weight: 0.8, market: 1.5, el: { dress: 'robe', hair: 'bun', hat: 'veil', carry: 'basket' }, wet: 'cloak', swing: 0.5,
+    c1: [CL.indigo, CL.brown, CL.green, CL.grey], c2: [CL.white], c3: [CL.white], speed: [1.0, 1.25], stride: 1.2, h: [0.88, 0.95] },
+  { id: 'water-carrier', weight: 0.4, market: 1.2, el: { dress: 'trousers', hair: 'short', hat: 'cap', carry: 'pails', arms: 'pole' }, wet: 'cloak', swing: 0.7,
+    c1: [CL.brown, CL.grey, CL.blue], c2: [CL.white, CL.brown], c3: [CL.brown], speed: [0.9, 1.1], stride: 1.1, pole: true },
   { id: 'porter', weight: 0.7, market: 1.4, el: { dress: 'trousers', hair: 'short', hat: 'cap', carry: 'pole', arms: 'pole' }, wet: 'cloak', swing: 0.75,
     c1: [CL.grey, CL.brown, CL.ochre], c2: [CL.brown, CL.grey], c3: [CL.brown], speed: [1.0, 1.25], stride: 1.1, pole: true },
 ];
