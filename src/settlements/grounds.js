@@ -236,6 +236,7 @@ const LOADERS = {
   'abbasid-baghdad': () => import('./abbasid-baghdad/index.js'),
   'qin-xianyang': () => import('./qin-xianyang/index.js'),
   'han-changan': () => import('./han-changan/index.js'),
+  nalanda: () => import('./nalanda/index.js'),
 };
 
 /** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */
