@@ -9,11 +9,11 @@ E.push({ t: 'indus_mound', rect: MOUND, y: PLAT, batter: MOUND_BATTER, gaps: [EA
 // the east stair, 12 m wide, from the town up to the platform; the south ramp for the carts
 {
   const [x0, z0, x1, z1] = EAST_STAIR.rect;
-  E.push({ t: 'stair', rect: EAST_STAIR.rect, y0: 0, y1: PLAT, dir: 'w', riser: 0.17, mat: 'brick_baked', base: -0.3 });
-  for (const z of [z0 - 0.5, z1 + 0.2]) E.push({ t: 'block', rect: [x0, z - 0.3 + 0.3, x1, z + 0.3], y0: -0.3, y1: PLAT * 0.62, mat: 'brick_baked', batter: [0, 0, 0, 0], collide: false });
+  E.push({ t: 'stair', rect: EAST_STAIR.rect, y0: 0, y1: PLAT, dir: 'w', riser: 0.17, mat: 'brick', base: -0.3 });
+  for (const z of [z0 - 0.5, z1 + 0.2]) E.push({ t: 'block', rect: [x0, z - 0.3 + 0.3, x1, z + 0.3], y0: -0.3, y1: PLAT * 0.62, mat: 'brick', batter: [0, 0, 0, 0], collide: false });
   const [a0, b0, a1, b1] = SOUTH_RAMP.rect;
-  E.push({ t: 'stair', rect: SOUTH_RAMP.rect, y0: 0, y1: PLAT, dir: 'n', riser: 0.2, mat: 'brick_baked', base: -0.3 });
-  for (const x of [a0 - 0.6, a1]) E.push({ t: 'block', rect: [x, b0, x + 0.6, b1], y0: -0.3, y1: PLAT * 0.55, mat: 'brick_baked', batter: [0, 0, 0, 0] });
+  E.push({ t: 'stair', rect: SOUTH_RAMP.rect, y0: 0, y1: PLAT, dir: 'n', riser: 0.2, mat: 'brick', base: -0.3 });
+  for (const x of [a0 - 0.6, a1]) E.push({ t: 'block', rect: [x, b0, x + 0.6, b1], y0: -0.3, y1: PLAT * 0.55, mat: 'brick', batter: [0, 0, 0, 0] });
 }
 E.push({ t: 'indus_bath', B: BATH, y: PLAT });
 E.push({ t: 'indus_granary', rect: GRANARY, y: PLAT });

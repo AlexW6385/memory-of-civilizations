@@ -62,7 +62,7 @@ function trade(F, kind, u0, v0, u1, v1, rand, lights) {
     kiln(F, u1 - 1.8, v1 - 1.8, 1.1, 2.0); kiln(F, u1 - 1.4, v0 + 1.8, 0.9, 1.6);
     for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) jar(F, (i + j) % 2 ? 'terracotta' : 'pottery_dark', u0 + 1.2 + i * 0.8, v1 - 1.0 - j * 0.8, 1.1 + (j % 2) * 0.3);
   } else if (kind === 'bronze') {
-    F.b('brick_baked', mu - 0.9, 0, v0 + 1.2, mu + 0.9, 0.7, v0 + 2.4); F.b('bitumen', mu - 0.5, 0.7, v0 + 1.5, mu + 0.5, 0.74, v0 + 2.1, false); F.lathe('bronze', [[0.12, 0], [0.18, 0.1], [0.2, 0.22], [0.001, 0.22]], mu, 0.74, v0 + 1.8, 8);
+    F.b('brick', mu - 0.9, 0, v0 + 1.2, mu + 0.9, 0.7, v0 + 2.4); F.b('bitumen', mu - 0.5, 0.7, v0 + 1.5, mu + 0.5, 0.74, v0 + 2.1, false); F.lathe('bronze', [[0.12, 0], [0.18, 0.1], [0.2, 0.22], [0.001, 0.22]], mu, 0.74, v0 + 1.8, 8);
     F.b('granite_grey', u0 + 1.0, 0, v0 + 1.3, u0 + 1.6, 0.5, v0 + 1.9); F.b('hide_brown', mu + 1.1, 0.3, v0 + 1.6, mu + 1.9, 0.7, v0 + 2.0, false);
     for (let k = 0; k < 6; k++) F.b('bronze', u1 - 2.4 + (k % 3) * 0.5, 0, v1 - 1.6 + Math.floor(k / 3) * 0.5, u1 - 2.0 + (k % 3) * 0.5, 0.12 + (k % 2) * 0.1, v1 - 1.3 + Math.floor(k / 3) * 0.5, false);
     kiln(F, u0 + 1.4, v1 - 1.5, 0.8, 1.4);
@@ -82,7 +82,7 @@ function furnish(F, r, rand, lights) {
   F.b('rope_fibre', u1 - 1.95, 0.34, v1 - 1.25, u1 - 0.75, 0.37, v1 - 0.65, false);
   F.b('granite_grey', u0 + 0.6, 0, v1 - 1.2, u0 + 1.5, 0.22, v1 - 0.6, false); F.b('granite_grey', u0 + 0.85, 0.22, v1 - 1.05, u0 + 1.25, 0.34, v1 - 0.75, false);   // the saddle quern
   jar(F, 'terracotta', mu, v1 - 0.8, 1.6); jar(F, 'pottery_dark', mu + 0.6, v1 - 0.8, 1.2); jar(F, 'terracotta', u0 + 0.6, mv, 1.3);
-  F.b('brick_baked', mu - 0.95, 0.02, mv - 0.2, mu - 0.05, 0.2, mv + 0.4, false); F.b('bitumen', mu - 0.8, 0.2, mv - 0.05, mu - 0.2, 0.24, mv + 0.25, false);
+  F.b('brick', mu - 0.95, 0.02, mv - 0.2, mu - 0.05, 0.2, mv + 0.4, false); F.b('bitumen', mu - 0.8, 0.2, mv - 0.05, mu - 0.2, 0.24, mv + 0.25, false);
   const p = F.pt(mu - 0.5, mv - 0.5); lights.push({ at: [p[0], F.y + 1.6, p[1]], color: '#ffc98a', intensity: 3, distance: 8 });
   void rand;
 }
@@ -94,22 +94,22 @@ export function house(el, ctx) {
   // the shell: lower baked brick, above it mud brick; the door on the lane
   const du = Math.max(1.6, Math.min(W - 1.6, W * (0.25 + 0.5 * rand())));
   const lane = (s0, s1, y0, y1, m) => F.b(m, s0, y0, 0, s1, y1, T);
-  lane(0, du - 0.55, 0, lowH, 'brick_baked'); lane(du + 0.55, W, 0, lowH, 'brick_baked');
+  lane(0, du - 0.55, 0, lowH, 'brick'); lane(du + 0.55, W, 0, lowH, 'brick');
   lane(0, du - 0.55, lowH, H, 'mudbrick'); lane(du + 0.55, W, lowH, H, 'mudbrick'); lane(du - 0.55, du + 0.55, 2.2, H, 'mudbrick');
   F.b('timber', du - 0.62, 1.95, -0.05, du + 0.62, 2.15, T + 0.05, false);
-  F.b('brick_baked', du - 0.6, 0, -0.3, du + 0.6, 0.12, 0, false);                                   // the threshold
+  F.b('brick', du - 0.6, 0, -0.3, du + 0.6, 0.12, 0, false);                                   // the threshold
   const back = (m, y0, y1) => F.b(m, 0, y0, D - T, W, y1, D);
-  back('brick_baked', 0, lowH); back('mudbrick', lowH, H);
-  for (const [u0, u1] of [[0, T], [W - T, W]]) { F.b('brick_baked', u0, 0, T, u1, lowH, D - T); F.b('mudbrick', u0, lowH, T, u1, H, D - T); }
+  back('brick', 0, lowH); back('mudbrick', lowH, H);
+  for (const [u0, u1] of [[0, T], [W - T, W]]) { F.b('brick', u0, 0, T, u1, lowH, D - T); F.b('mudbrick', u0, lowH, T, u1, H, D - T); }
   F.b('mudbrick', 0, H, 0, W, H + PAR, 0.25); F.b('mudbrick', 0, H, D - 0.25, W, H + PAR, D); F.b('mudbrick', 0, H, 0.25, 0.25, H + PAR, D - 0.25); F.b('mudbrick', W - 0.25, H, 0.25, W, H + PAR, D - 0.25);
   // waterspouts along the roof edge, the drain mouth through the wall at the foot
-  for (const u of [W * 0.3, W * 0.72]) F.b('brick_baked', u - 0.12, H - 0.5, -0.35, u + 0.12, H - 0.38, 0.2, false);
+  for (const u of [W * 0.3, W * 0.72]) F.b('brick', u - 0.12, H - 0.5, -0.35, u + 0.12, H - 0.38, 0.2, false);
   const dm = (du < W / 2 ? W - 1.4 : 1.4);
-  F.b('brick_baked', dm - 0.16, 0.2, -0.45, dm + 0.16, 0.34, 0.1, false); F.b('bitumen', dm - 0.08, 0.2, -0.46, dm + 0.08, 0.3, -0.3, false);
+  F.b('brick', dm - 0.16, 0.2, -0.45, dm + 0.16, 0.34, 0.1, false); F.b('bitumen', dm - 0.08, 0.2, -0.46, dm + 0.08, 0.3, -0.3, false);
   // a small high window of brick lattice
-  if (rand() < 0.6) { const wu = du < W / 2 ? W * 0.72 : W * 0.28; F.b('brick_baked', wu - 0.3, 2.45, -0.05, wu + 0.3, 2.85, T + 0.05, false); F.b('wood_dark', wu - 0.22, 2.5, -0.06, wu + 0.22, 2.8, 0.06, false); }
+  if (rand() < 0.6) { const wu = du < W / 2 ? W * 0.72 : W * 0.28; F.b('brick', wu - 0.3, 2.45, -0.05, wu + 0.3, 2.85, T + 0.05, false); F.b('wood_dark', wu - 0.22, 2.5, -0.06, wu + 0.22, 2.8, 0.06, false); }
   // the court floor
-  F.b('brick_paving', T, 0.04, T, W - T, 0.08, D - T, false);
+  F.b('brick_buff', T, 0.04, T, W - T, 0.08, D - T, false);
   // the baffle behind the door, the court's rooms
   F.b('mudbrick', du + 0.9, 0, T + 1.4, du + 2.9, 2.4, T + 1.85);
   const rb = small ? 3.6 : 4.4, ls = (!small && W > 12 && rand() < 0.7), rs = (!small && W > 15 && rand() < 0.5);

@@ -7,7 +7,7 @@ import { Fr, rng, wellAt } from './kit.js';
 const quadY = (r, y) => fromTriangles([r[0], y, r[1], r[0], y, r[3], r[2], y, r[3], r[0], y, r[1], r[2], y, r[3], r[2], y, r[1]]);
 const jar = (bag, mat, x, y, z, s = 1) => bag.add(mat, lathe([[0.07 * s, 0], [0.2 * s, 0.12 * s], [0.24 * s, 0.3 * s], [0.19 * s, 0.5 * s], [0.1 * s, 0.6 * s], [0.12 * s, 0.66 * s], [0.001, 0.66 * s]], 8, null, x, y, z));
 /** A wall along x or z (rect), openings: [{ at (centre along), w, h }]; full height y0..y1, `mat` below `split` and `mat2` above. */
-function wallRect(ctx, rect, y0, y1, openings = [], mat = 'brick_baked', lintel = true) {
+function wallRect(ctx, rect, y0, y1, openings = [], mat = 'brick', lintel = true) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = rect, alongX = x1 - x0 >= z1 - z0, a = alongX ? x0 : z0, b = alongX ? x1 : z1;
   const piece = (s0, s1, ya, yb, m = mat) => {
     if (s1 - s0 < 0.02 || yb - ya < 0.02) return;
@@ -30,7 +30,7 @@ export function mound(el, ctx) {
   bag.add('mudbrick', frustum(el.rect, -0.3, y, b[0], b[1], b[2], b[3], { noBottom: true, noTop: true }));
   col.rect(el.rect, -0.3, y);
   const top = [x0 + b[0], z0 + b[2], x1 - b[1], z1 - b[3]];
-  bag.add('brick_paving', box(top[0], y - 0.06, top[1], top[2], y, top[3]));
+  bag.add('brick_buff', box(top[0], y - 0.06, top[1], top[2], y, top[3]));
   col.floor(top, y);
   const inGap = (px, pz, m) => gaps.some((g) => px > g[0] - m && px < g[2] + m && pz > g[1] - m && pz < g[3] + m);
   // the baked-brick facing of the foot, in courses, and the buttresses along each face
@@ -42,11 +42,11 @@ export function mound(el, ctx) {
       const px = alongX ? mid : fixed, pz = alongX ? fixed : mid;
       if (inGap(px, pz, 3)) continue;
       const r = alongX ? [s, sg < 0 ? fixed - 0.35 : fixed, e, sg < 0 ? fixed : fixed + 0.35] : [sg < 0 ? fixed - 0.35 : fixed, s, sg < 0 ? fixed : fixed + 0.35, e];
-      bag.add('brick_baked', box(r[0], -0.3, r[1], r[2], y * 0.5, r[3]));
+      bag.add('brick', box(r[0], -0.3, r[1], r[2], y * 0.5, r[3]));
       col.rect(r, -0.3, y * 0.5);
       // the buttress at the middle of each bay
       const bw = 1.3, q = alongX ? [mid - bw, sg < 0 ? fixed - 1.1 : fixed, mid + bw, sg < 0 ? fixed : fixed + 1.1] : [sg < 0 ? fixed - 1.1 : fixed, mid - bw, sg < 0 ? fixed : fixed + 1.1, mid + bw];
-      bag.add('brick_baked', box(q[0], -0.3, q[1], q[2], y - 0.5, q[3])); col.rect(q, -0.3, y - 0.5);
+      bag.add('brick', box(q[0], -0.3, q[1], q[2], y - 0.5, q[3])); col.rect(q, -0.3, y - 0.5);
       bag.add('mudbrick', box(q[0] - 0.05, y - 0.5, q[1] - 0.05, q[2] + 0.05, y - 0.3, q[3] + 0.05), false);
     }
   }
@@ -66,9 +66,9 @@ export function mound(el, ctx) {
 /** indus_tower: { c, a, y, h } — a square tower of baked brick under mud brick with a crenellated flat top. */
 export function tower(el, ctx) {
   const { bag, col } = ctx, [x, z] = el.c, a = el.a, y = el.y ?? 0, h = el.h;
-  bag.add('brick_baked', box(x - a, y, z - a, x + a, y + h * 0.6, z + a)); bag.add('mudbrick', box(x - a + 0.1, y + h * 0.6, z - a + 0.1, x + a - 0.1, y + h, z + a - 0.1));
+  bag.add('brick', box(x - a, y, z - a, x + a, y + h * 0.6, z + a)); bag.add('mudbrick', box(x - a + 0.1, y + h * 0.6, z - a + 0.1, x + a - 0.1, y + h, z + a - 0.1));
   col.rect([x - a, z - a, x + a, z + a], y, y + h);
-  bag.add('brick_baked', box(x - a - 0.15, y + h, z - a - 0.15, x + a + 0.15, y + h + 0.25, z + a + 0.15));
+  bag.add('brick', box(x - a - 0.15, y + h, z - a - 0.15, x + a + 0.15, y + h + 0.25, z + a + 0.15));
   for (const s of [-1, 1]) for (let k = -1; k <= 1; k += 2) { bag.add('mudbrick', box(x + k * a * 0.55 - 0.3, y + h + 0.25, z + s * a - 0.3, x + k * a * 0.55 + 0.3, y + h + 0.95, z + s * a + 0.3)); bag.add('mudbrick', box(x + s * a - 0.3, y + h + 0.25, z + k * a * 0.55 - 0.3, x + s * a + 0.3, y + h + 0.95, z + k * a * 0.55 + 0.3)); }
 }
 
@@ -79,8 +79,8 @@ export function wall(el, ctx) {
   const piece = (s0, s1) => {
     if (s1 - s0 < 0.05) return;
     const r = alongX ? [ax + s0, az - th / 2, ax + s1, az + th / 2] : [ax - th / 2, az + s0, ax + th / 2, az + s1];
-    bag.add('brick_baked', box(r[0], y - 0.3, r[1], r[2], y + h * 0.55, r[3])); bag.add('mudbrick', box(r[0] + 0.12, y + h * 0.55, r[1] + 0.12, r[2] - 0.12, y + h, r[3] - 0.12));
-    bag.add('brick_baked', box(r[0] - 0.06, y + h, r[1] - 0.06, r[2] + 0.06, y + h + 0.22, r[3] + 0.06)); col.rect(r, y - 0.3, y + h + 0.22);
+    bag.add('brick', box(r[0], y - 0.3, r[1], r[2], y + h * 0.55, r[3])); bag.add('mudbrick', box(r[0] + 0.12, y + h * 0.55, r[1] + 0.12, r[2] - 0.12, y + h, r[3] - 0.12));
+    bag.add('brick', box(r[0] - 0.06, y + h, r[1] - 0.06, r[2] + 0.06, y + h + 0.22, r[3] + 0.06)); col.rect(r, y - 0.3, y + h + 0.22);
   };
   let s = 0; for (const [g0, g1] of gaps) { piece(s, g0); s = g1; } piece(s, L);
 }
@@ -90,24 +90,24 @@ export function bath(el, ctx) {
   const { bag, col, lights } = ctx, B = el.B, y = el.y, [cx0, cz0, cx1, cz1] = B.court, [px0, pz0, px1, pz1] = B.pool, h = B.h, W = new Fr(ctx, [0, 0], [1, 0], [0, 1], 0);
   const yb = y - B.depth, [ox0, oz0, ox1, oz1] = B.outer, wt = B.wall;
   // the paving of the court round the pool, and of the gallery
-  for (const r of [[cx0, cz0, cx1, pz0], [cx0, pz1, cx1, cz1], [cx0, pz0, px0, pz1], [px1, pz0, cx1, pz1]]) { bag.add('brick_paving', box(r[0], y - 0.4, r[1], r[2], y, r[3])); col.floor(r, y); }
-  for (const r of [[ox0 + wt, oz0 + wt, ox1 - 7.2 - 0.45, cz0], [ox0 + wt, cz1, ox1 - 7.2 - 0.45, oz1 - wt], [cx1, cz0, ox1 - 7.2 - 0.45, cz1]]) { bag.add('brick_paving', box(r[0], y - 0.4, r[1], r[2], y, r[3])); col.floor(r, y); }
-  bag.add('brick_paving', box(ox0 + wt, y - 0.4, cz0, cx0, y, cz1)); col.floor([ox0 + wt, cz0, cx0, cz1], y);
+  for (const r of [[cx0, cz0, cx1, pz0], [cx0, pz1, cx1, cz1], [cx0, pz0, px0, pz1], [px1, pz0, cx1, pz1]]) { bag.add('brick_buff', box(r[0], y - 0.4, r[1], r[2], y, r[3])); col.floor(r, y); }
+  for (const r of [[ox0 + wt, oz0 + wt, ox1 - 7.2 - 0.45, cz0], [ox0 + wt, cz1, ox1 - 7.2 - 0.45, oz1 - wt], [cx1, cz0, ox1 - 7.2 - 0.45, cz1]]) { bag.add('brick_buff', box(r[0], y - 0.4, r[1], r[2], y, r[3])); col.floor(r, y); }
+  bag.add('brick_buff', box(ox0 + wt, y - 0.4, cz0, cx0, y, cz1)); col.floor([ox0 + wt, cz0, cx0, cz1], y);
   // the pool: the brick bed, the bitumen skin, the lining of the long sides, the coping, the water
-  bag.add('brick_baked', box(px0, yb - 0.4, pz0, px1, yb, pz1)); bag.add('bitumen', box(px0, yb, pz0, px1, yb + 0.05, pz1)); col.floor(B.pool, yb);
+  bag.add('brick', box(px0, yb - 0.4, pz0, px1, yb, pz1)); bag.add('bitumen', box(px0, yb, pz0, px1, yb + 0.05, pz1)); col.floor(B.pool, yb);
   bag.add('bitumen', box(px0, yb, pz0, px0 + 0.06, y - 0.05, pz1)); bag.add('bitumen', box(px1 - 0.06, yb, pz0, px1, y - 0.05, pz1));
-  bag.add('brick_baked', box(px0 - 0.35, y, pz0 - 0.35, px1 + 0.35, y + 0.14, pz0), false); bag.add('brick_baked', box(px0 - 0.35, y, pz1, px1 + 0.35, y + 0.14, pz1 + 0.35), false);
-  bag.add('brick_baked', box(px0 - 0.35, y, pz0, px0, y + 0.14, pz1), false); bag.add('brick_baked', box(px1, y, pz0, px1 + 0.35, y + 0.14, pz1), false);
+  bag.add('brick', box(px0 - 0.35, y, pz0 - 0.35, px1 + 0.35, y + 0.14, pz0), false); bag.add('brick', box(px0 - 0.35, y, pz1, px1 + 0.35, y + 0.14, pz1 + 0.35), false);
+  bag.add('brick', box(px0 - 0.35, y, pz0, px0, y + 0.14, pz1), false); bag.add('brick', box(px1, y, pz0, px1 + 0.35, y + 0.14, pz1), false);
   bag.add('water', quadY([px0 + 0.06, pz0, px1 - 0.06, pz1], y - 0.35));
   // the stairs at both short ends, 3.4 m long, down to the bed
-  W.stairs(px0 + 0.06, pz0, px1 - 0.06, pz0 + 3.4, yb, y, -1, 'brick_baked', 0.2);
-  W.stairs(px0 + 0.06, pz1 - 3.4, px1 - 0.06, pz1, yb, y, 1, 'brick_baked', 0.2);
+  W.stairs(px0 + 0.06, pz0, px1 - 0.06, pz0 + 3.4, yb, y, -1, 'brick', 0.2);
+  W.stairs(px0 + 0.06, pz1 - 3.4, px1 - 0.06, pz1, yb, y, 1, 'brick', 0.2);
   // the outlet at the south-west corner, the drain across the court under its cover to the west wall and the corbelled mouth outside
   bag.add('bitumen', box(ox0 + wt, y + 0.004, pz1 - 0.55, px0, y + 0.02, pz1 - 0.15), false);
-  for (let k = 0; k < 3; k++) { const w = 0.9 - k * 0.25; bag.add('brick_baked', box(ox0 - 0.5 - 0.0, y + 0.2 + k * 0.28, pz1 - 0.35 - w / 2 - 0.1, ox0 + wt * 0.5, y + 0.48 + k * 0.28, pz1 - 0.35 + w / 2 + 0.1), false); }
+  for (let k = 0; k < 3; k++) { const w = 0.9 - k * 0.25; bag.add('brick', box(ox0 - 0.5 - 0.0, y + 0.2 + k * 0.28, pz1 - 0.35 - w / 2 - 0.1, ox0 + wt * 0.5, y + 0.48 + k * 0.28, pz1 - 0.35 + w / 2 + 0.1), false); }
   bag.add('bitumen', box(ox0 - 0.45, y + 0.2, pz1 - 0.6, ox0, y + 0.75, pz1 - 0.1), false);
   // the gallery: stepped piers (a cross in plan) round the court on the north, east and south; beams and the flat roof
-  const GH = 3.3, pier = (x, z) => { bag.add('brick_baked', box(x - 0.5, y, z - 0.3, x + 0.5, y + GH, z + 0.3)); bag.add('brick_baked', box(x - 0.3, y, z - 0.5, x + 0.3, y + GH, z + 0.5)); bag.add('brick_baked', box(x - 0.55, y, z - 0.55, x + 0.55, y + 0.3, z + 0.55)); col.rect([x - 0.55, z - 0.55, x + 0.55, z + 0.55], y, y + GH); };
+  const GH = 3.3, pier = (x, z) => { bag.add('brick', box(x - 0.5, y, z - 0.3, x + 0.5, y + GH, z + 0.3)); bag.add('brick', box(x - 0.3, y, z - 0.5, x + 0.3, y + GH, z + 0.5)); bag.add('brick', box(x - 0.55, y, z - 0.55, x + 0.55, y + 0.3, z + 0.55)); col.rect([x - 0.55, z - 0.55, x + 0.55, z + 0.55], y, y + GH); };
   const xs = Array.from({ length: 9 }, (_, i) => cx0 + 0.55 + (cx1 - cx0 - 1.1) * i / 8), zs = Array.from({ length: 10 }, (_, i) => cz0 - 0.55 + (cz1 - cz0 + 1.1) * i / 9);
   for (const x of xs) { pier(x, cz0 - 0.55); pier(x, cz1 + 0.55); }
   for (const z of zs.slice(1, -1)) pier(cx1 + 0.55, z);
@@ -122,8 +122,8 @@ export function bath(el, ctx) {
   wallRect(ctx, [ox1 - wt * 0.4, oz0 + wt, ox1, oz1 - wt], y, y + h);
   const cl = oz0 + wt, ch = oz1 - wt, n = 8, cw = (ch - cl) / n, doors = Array.from({ length: n }, (_, i) => ({ at: cl + cw * (i + 0.5), w: 1.0, h: 2.0 }));
   wallRect(ctx, [ex, oz0 + wt, ex + wt * 0.5, oz1 - wt], y, y + h, doors);
-  for (let i = 1; i < n; i++) { const z = cl + cw * i; bag.add('brick_baked', box(ex + 0.6, y, z - 0.2, ox1 - 0.5, y + h, z + 0.2)); col.rect([ex + 0.6, z - 0.2, ox1 - 0.5, z + 0.2], y, y + h); }
-  bag.add('brick_paving', box(ex + 0.6, y - 0.4, cl, ox1, y, ch)); col.floor([ex + 0.6, cl, ox1, ch], y);
+  for (let i = 1; i < n; i++) { const z = cl + cw * i; bag.add('brick', box(ex + 0.6, y, z - 0.2, ox1 - 0.5, y + h, z + 0.2)); col.rect([ex + 0.6, z - 0.2, ox1 - 0.5, z + 0.2], y, y + h); }
+  bag.add('brick_buff', box(ex + 0.6, y - 0.4, cl, ox1, y, ch)); col.floor([ex + 0.6, cl, ox1, ch], y);
   roof([ex, oz0 + wt, ox1, oz1 - wt], y + h - 0.4); col.floor([ex, oz0 + wt, ox1, oz1 - wt], y + h);
   wellAt(bag, col, (ex + ox1) / 2 + 0.3, y, cl + cw * 2.5, 0.55);
   for (let i = 0; i < n; i++) if (i !== 2) { const zc = cl + cw * (i + 0.5); jar(bag, 'terracotta', ox1 - 1.2, y, zc - 0.6, 1.4); if (i % 2) jar(bag, 'pottery_dark', ox1 - 1.2, y, zc + 0.9, 1.1); bag.add('reed_mat', box(ex + 1.2, y, zc - 0.4, ex + 2.8, y + 0.04, zc + 0.8)); }
@@ -139,9 +139,9 @@ export function granary(el, ctx) {
   bag.add('mudbrick', box(x0, y - 0.3, z0, x1, y + 0.05, z1));
   for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
     const r = [x0 + m + i * (bw + ch), z0 + m + j * (bd + ch), x0 + m + i * (bw + ch) + bw, z0 + m + j * (bd + ch) + bd];
-    bag.add('brick_baked', box(r[0], y, r[1], r[2], y + PH, r[3])); col.rect(r, y, y + PH);
+    bag.add('brick', box(r[0], y, r[1], r[2], y + PH, r[3])); col.rect(r, y, y + PH);
   }
-  for (const r of [[x0, z0, x1, z0 + m], [x0, z1 - m, x1, z1], [x0, z0, x0 + m, z1], [x1 - m, z0, x1, z1]]) { bag.add('brick_baked', box(r[0], y, r[1], r[2], y + PH, r[3])); col.rect(r, y, y + PH); }
+  for (const r of [[x0, z0, x1, z0 + m], [x0, z1 - m, x1, z1], [x0, z0, x0 + m, z1], [x1 - m, z0, x1, z1]]) { bag.add('brick', box(r[0], y, r[1], r[2], y + PH, r[3])); col.rect(r, y, y + PH); }
   const dy = y + PH;
   bag.add('timber', box(x0, dy, z0, x1, dy + 0.18, z1)); col.floor([x0, z0, x1, z1], dy + 0.18); const fy = dy + 0.18;
   // the hall on the deck: walls on three sides, the south open on a verandah of posts, the flat roof
@@ -155,18 +155,18 @@ export function granary(el, ctx) {
   for (let i = 0; i < 9; i++) { const x = x0 + t + 2 + i * 4.6; for (let k = 0; k < 3; k++) bag.add('sacking', box(x - 1 + (k % 2) * 0.3, fy, z0 + t + 0.2 + k * 0.6, x + 0.5 + (k % 2) * 0.3, fy + 0.5 + (i % 3) * 0.25, z0 + t + 0.75 + k * 0.6)); for (let k = 0; k < 3; k++) jar(bag, i % 2 ? 'terracotta' : 'pottery_dark', x + 1.2 + k * 0.7, fy, z0 + t + 1.2 + rand() * 0.6, 2); }
   lights.push({ at: [x0 + 12, fy + 2.8, z0 + 6], color: '#ffc98a', intensity: 3, distance: 11 }, { at: [x0 + 36, fy + 2.8, z0 + 6], color: '#ffc98a', intensity: 3, distance: 11 });
   // the cart ramp from the platform up to the deck on the south, and the loading platform in front
-  F.stairs(x0 + 23.6, z1, x0 + 27.4, z1 + 9, y, fy, -1, 'brick_baked', 0.12);
+  F.stairs(x0 + 23.6, z1, x0 + 27.4, z1 + 9, y, fy, -1, 'brick', 0.12);
 }
 
 /** indus_pillared: { rect, y } — twenty piers in four rows of five on a low platform under a flat roof. */
 export function pillared(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, F = new Fr(ctx, [0, 0], [1, 0], [0, 1], 0), PH = 0.45, GH = 3.8;
-  bag.add('brick_baked', box(x0, y - 0.3, z0, x1, y + PH, z1)); col.floor(el.rect, y + PH);
-  F.stairs(x0 + 11, z1, x0 + 19, z1 + 2.4, y, y + PH, -1, 'brick_baked', 0.15); F.stairs(x0 + 11, z0 - 2.4, x0 + 19, z0, y, y + PH, 1, 'brick_baked', 0.15);
+  bag.add('brick', box(x0, y - 0.3, z0, x1, y + PH, z1)); col.floor(el.rect, y + PH);
+  F.stairs(x0 + 11, z1, x0 + 19, z1 + 2.4, y, y + PH, -1, 'brick', 0.15); F.stairs(x0 + 11, z0 - 2.4, x0 + 19, z0, y, y + PH, 1, 'brick', 0.15);
   const gx = (x1 - x0 - 6) / 4, gz = (z1 - z0 - 6) / 3;
   for (let i = 0; i < 5; i++) for (let j = 0; j < 4; j++) {
     const x = x0 + 3 + gx * i, z = z0 + 3 + gz * j;
-    bag.add('brick_baked', box(x - 0.6, y + PH, z - 0.6, x + 0.6, y + PH + GH, z + 0.6)); bag.add('brick_baked', box(x - 0.75, y + PH, z - 0.75, x + 0.75, y + PH + 0.35, z + 0.75)); col.rect([x - 0.75, z - 0.75, x + 0.75, z + 0.75], y + PH, y + PH + GH);
+    bag.add('brick', box(x - 0.6, y + PH, z - 0.6, x + 0.6, y + PH + GH, z + 0.6)); bag.add('brick', box(x - 0.75, y + PH, z - 0.75, x + 0.75, y + PH + 0.35, z + 0.75)); col.rect([x - 0.75, z - 0.75, x + 0.75, z + 0.75], y + PH, y + PH + GH);
   }
   const ry = y + PH + GH;
   for (let j = 0; j < 4; j++) bag.add('timber', box(x0 - 0.8, ry, z0 + 3 + gz * j - 0.3, x1 + 0.8, ry + 0.4, z0 + 3 + gz * j + 0.3), false);
@@ -178,7 +178,7 @@ export function pillared(el, ctx) {
 export function college(el, ctx) {
   const { bag, col, lights } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, F = new Fr(ctx, [0, 0], [1, 0], [0, 1], 0), RD = 6.4, RH = 4.2, t = 0.5, VW = 2.6;
   const court = [x0 + RD, z0 + RD, x1 - RD, z1 - RD], mx = (x0 + x1) / 2;
-  bag.add('brick_paving', box(x0, y - 0.4, z0, x1, y, z1)); col.floor(el.rect, y);
+  bag.add('brick_buff', box(x0, y - 0.4, z0, x1, y, z1)); col.floor(el.rect, y);
   // the outer walls: north with the gate, the rest plain with two high windows
   wallRect(ctx, [x0, z0, x1, z0 + 0.9], y, y + RH, [{ at: mx, w: 3.0, h: 3.0 }]); wallRect(ctx, [x0, z1 - 0.9, x1, z1], y, y + RH); wallRect(ctx, [x0, z0 + 0.9, x0 + 0.9, z1 - 0.9], y, y + RH); wallRect(ctx, [x1 - 0.9, z0 + 0.9, x1, z1 - 0.9], y, y + RH);
   // the rooms: the inner wall of each range with a doorway per room, partitions every 7 m
@@ -202,11 +202,11 @@ export function college(el, ctx) {
   const VH = 3.2;
   const veranda = (r) => { bag.add('mud_plaster', box(r[0], y + VH, r[1], r[2], y + VH + 0.35, r[3])); };
   veranda([court[0], court[1], court[2], court[1] + VW]); veranda([court[0], court[1] + VW, court[0] + VW, court[3] - 7]); veranda([court[2] - VW, court[1] + VW, court[2], court[3] - 7]);
-  for (let x = court[0] + 1; x < court[2]; x += 4.4) { bag.add('brick_baked', box(x - 0.4, y, court[1] + VW - 0.4, x + 0.4, y + VH, court[1] + VW + 0.4)); col.rect([x - 0.4, court[1] + VW - 0.4, x + 0.4, court[1] + VW + 0.4], y, y + VH); }
-  for (let z = court[1] + VW + 4; z < court[3] - 7; z += 4.4) for (const x of [court[0] + VW, court[2] - VW]) { bag.add('brick_baked', box(x - 0.4, y, z - 0.4, x + 0.4, y + VH, z + 0.4)); col.rect([x - 0.4, z - 0.4, x + 0.4, z + 0.4], y, y + VH); }
+  for (let x = court[0] + 1; x < court[2]; x += 4.4) { bag.add('brick', box(x - 0.4, y, court[1] + VW - 0.4, x + 0.4, y + VH, court[1] + VW + 0.4)); col.rect([x - 0.4, court[1] + VW - 0.4, x + 0.4, court[1] + VW + 0.4], y, y + VH); }
+  for (let z = court[1] + VW + 4; z < court[3] - 7; z += 4.4) for (const x of [court[0] + VW, court[2] - VW]) { bag.add('brick', box(x - 0.4, y, z - 0.4, x + 0.4, y + VH, z + 0.4)); col.rect([x - 0.4, z - 0.4, x + 0.4, z + 0.4], y, y + VH); }
   // the two stairs to the roof, at the south corners of the court
-  F.stairs(court[0] + 0.3, court[3] - 6.5, court[0] + 1.5, court[3], y, y + RH, 1, 'brick_baked', 0.2);
-  F.stairs(court[2] - 1.5, court[3] - 6.5, court[2] - 0.3, court[3], y, y + RH, 1, 'brick_baked', 0.2);
+  F.stairs(court[0] + 0.3, court[3] - 6.5, court[0] + 1.5, court[3], y, y + RH, 1, 'brick', 0.2);
+  F.stairs(court[2] - 1.5, court[3] - 6.5, court[2] - 0.3, court[3], y, y + RH, 1, 'brick', 0.2);
   // the court: a well, a platform, jars, the rooms' mats
   wellAt(bag, col, mx, y, (court[1] + court[3]) / 2 + 2, 0.62);
   for (let i = 0; i < 6; i++) bag.add('reed_mat', box(court[0] + 6 + i * 8, y, court[1] + 4.5, court[0] + 8.4 + i * 8, y + 0.04, court[1] + 6.3));

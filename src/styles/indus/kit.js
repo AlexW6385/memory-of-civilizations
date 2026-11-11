@@ -21,7 +21,7 @@ export class Fr {
   lathe(mat, prof, u, y, v, seg = 10) { const p = this.pt(u, v); this.bag.add(mat, lathe(prof, seg, null, p[0], this.y + y, p[1])); }
   circ(u, v, r, y0, y1) { const p = this.pt(u, v); this.col.circle(p[0], p[1], r, this.y + y0, this.y + y1); }
   /** Steps rising along +v (dv = 1) or −v from (u0..u1) between v0 and v1, from y0 to y1. */
-  stairs(u0, v0, u1, v1, y0, y1, dv = 1, mat = 'brick_baked', riser = 0.22) {
+  stairs(u0, v0, u1, v1, y0, y1, dv = 1, mat = 'brick', riser = 0.22) {
     const n = Math.max(1, Math.round((y1 - y0) / riser)), vs = v1 - v0;
     for (let i = 0; i < n; i++) {
       const f0 = i / n, f1 = (i + 1) / n, top = y0 + (y1 - y0) * f1;
@@ -47,8 +47,8 @@ export function lotFrame(ctx, rect, front, y = 0) {
 }
 /** A round brick well: the curb with its mouth, the water below. */
 export function wellAt(bag, col, x, y, z, r = 0.62) {
-  bag.add('brick_baked', lathe([[r + 0.16, 0], [r + 0.16, 0.5], [r + 0.08, 0.58], [r - 0.12, 0.58], [r - 0.12, 0.2], [0.001, 0.2]], 18, null, x, y, z));
-  bag.add('brick_paving', lathe([[r + 1.1, 0], [r + 1.1, 0.04], [r + 0.16, 0.06], [r + 0.16, 0]], 18, null, x, y, z));
+  bag.add('brick', lathe([[r + 0.16, 0], [r + 0.16, 0.5], [r + 0.08, 0.58], [r - 0.12, 0.58], [r - 0.12, 0.2], [0.001, 0.2]], 18, null, x, y, z));
+  bag.add('brick_buff', lathe([[r + 1.1, 0], [r + 1.1, 0.04], [r + 0.16, 0.06], [r + 0.16, 0]], 18, null, x, y, z));
   col.circle(x, z, r + 0.2, y, y + 0.55);
 }
 export { box, lathe, fromTriangles };
