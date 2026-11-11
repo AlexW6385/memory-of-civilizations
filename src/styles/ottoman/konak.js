@@ -161,7 +161,7 @@ function house(el, { bag, col }) {
           put('wood_dark', u - w / 2, u + w / 2, 2.55, 2.62, 0.0, 0.9, gz);                       // the propped upper leaf
           put('timber', u - w / 2, u + w / 2, 0.88, 0.94, 0.0, 0.7, gz);                           // the let-down lower leaf (counter)
           for (const s2 of [-1, 1]) put('wood_dark', u + s2 * (w / 2 - 0.03) - 0.03, u + s2 * (w / 2 - 0.03) + 0.03, 0.9, 2.6, 0.7, 0.76, gz);
-          put(pick(rand, CLOTH), u - w / 2 - 0.05, u + w / 2 + 0.05, 2.1, 2.55, 0.9, 0.93, gz);   // an awning cloth
+          put(pick(rand, CLOTH), u - w / 2 - 0.05, u + w / 2 + 0.05, 2.1, 2.5, 0.9, 0.93, gz);   // an awning cloth
           // goods on the counter and at the door
           for (let q = 0; q < 4; q++) { const gu = u - w / 2 + 0.25 + q * (w - 0.5) / 3; put(pick(rand, ['terracotta', 'cloth_ochre', 'cloth_red', 'wicker', 'glaze_blue', 'cloth_green']), gu - 0.14, gu + 0.14, 0.94, 1.18 + rand() * 0.12, 0.2, 0.5, gz); }
           // the hanging sign on its iron bracket
@@ -230,10 +230,10 @@ function house(el, { bag, col }) {
     for (let s = 1; s < n; s++) put('timber', 0, L, s * st - 0.02, s * st + 0.1, -0.02, 0.05);
     if (jet) for (let u = 0.5; u < L - 0.3; u += 1.0) for (let k = 0; k < 2; k++) put('wood_dark', u - 0.06, u + 0.06, st - 0.5 + k * 0.22, st - 0.28 + k * 0.22, -jet * (1 - k * 0.5), 0);
     // weathering: a water-stain under the eaves and the sills, a patch of plaster come away, a drain pipe at a corner
-    for (let s = 1; s < n; s++) if (rand() < 0.5) { const u = 0.3 + rand() * (L - 1.4); put('plaster_streak', u, u + 0.5 + rand() * 0.4, s * st + 0.3, s * st + 1.1 + rand() * 0.6, 0.0, 0.015); }
-    if (rand() < 0.4) { const u = 0.3 + rand() * (L - 1.2); put('timber', u, u + 0.7, st * Math.min(n - 1, 1) + 0.4, st * Math.min(n - 1, 1) + 1.2, 0.0, 0.012); }
+    for (let s = 1; s < n; s++) if (rand() < 0.5 && !cumAt.length) { const u = 0.3 + rand() * (L - 1.4); put("plaster_streak", u, u + 0.5 + rand() * 0.4, s * st + 0.37, s * st + 1.1 + rand() * 0.6, 0.004, 0.02); }
+    if (rand() < 0.4) { const u = 0.3 + rand() * (L - 1.2); put('timber', u, u + 0.7, st * Math.min(n - 1, 1) + 0.4, st * Math.min(n - 1, 1) + 1.2, 0.004, 0.016); }
     // washing on a pole out of an upper window, a vine on the ground storey's wall, pots by the door
-    if (n > 1 && rand() < 0.22) { const u = 0.8 + rand() * (L - 1.6); put('wood_dark', u - 0.02, u + 0.02, st + 1.6, st + 1.64, 0, 1.3); for (let k = 0; k < 3; k++) put(pick(rand, CLOTH), u + 0.1 + k * 0.28, u + 0.34 + k * 0.28, st + 0.7 + rand() * 0.2, st + 1.6, 1.0 + k * 0.1, 1.03 + k * 0.1); }
+    if (n > 1 && !cumAt.length && rand() < 0.22) { const u = 0.8 + rand() * (L - 1.6); put('wood_dark', u - 0.02, u + 0.02, st + 1.6, st + 1.64, 0, 1.3); for (let k = 0; k < 3; k++) put(pick(rand, CLOTH), u + 0.1 + k * 0.28, u + 0.34 + k * 0.28, st + 0.7 + rand() * 0.2, st + 1.6, 1.0 + k * 0.1, 1.03 + k * 0.1); }
     if (rand() < 0.3) { const u = 0.5 + rand() * (L - 1.0); put('fresco_green', u, u + 0.9, 0.6, 2.6, 0.0, 0.06, gz); }
   }
   // the top: the eaves' boards, the hip of tiles, a chimney with its conical cap
