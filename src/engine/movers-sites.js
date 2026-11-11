@@ -43,5 +43,6 @@ export const MOVER_SITES = {
   'tenochtitlan': () => import('../settlements/tenochtitlan/movers.js'),
   'persepolis': () => import('../settlements/persepolis/movers.js'),
   'teotihuacan': () => import('../settlements/teotihuacan/movers.js'),
+  'machu-picchu': () => import('../settlements/machu-picchu/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
