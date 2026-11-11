@@ -32,8 +32,12 @@ E.push({ t: 'wing', rect: [-19, -62, -3, -28], storeys: 2, windows: 'n', seed: 2
 // the East Wing of four storeys: the light well of the Grand Staircase, its colonnades storey above storey; the
 // Queen's Megaron opening off it with the dolphins on its wall; a passage in from the court's portico
 const LW = [23, -2, 29, 6], QM = [23, 6, 31, 13];
+// the residential hall (the Hall of the Double Axes' kind) and the lapidary's workshop, each with its pier-and-door partition on a light well (§4d)
+const HALL = [23, 14, 41, 24], HALLW = [41, 14, 46, 24], WS = [23, 27, 41, 37], WSW = [41, 27, 46, 37];
 E.push({ t: 'wing', rect: [19, -28, 62, 58], storeys: 4, windows: 'es', seed: 4,
-  holes: [{ rect: LW, h: 99 }, { rect: QM, h: 3.6 }, { rect: [19, 0, 23, 2], h: 2.6, lintel: true }] });
+  holes: [{ rect: LW, h: 99 }, { rect: QM, h: 3.6 }, { rect: [19, 0, 23, 2], h: 2.6, lintel: true },
+    { rect: HALL, h: 3.4 }, { rect: HALLW, h: 99 }, { rect: [19, 18.5, 23, 21], h: 2.6, lintel: true }, { rect: [30.5, 24, 32.5, 27], h: 2.6, lintel: true }, { rect: WS, h: 3.4 }, { rect: WSW, h: 99 }] });
+E.push({ t: 'double_axe_hall', rect: HALL, well: HALLW, y: 0, seed: 5, door: [18.5, 21] }, { t: 'lapidary_workshop', rect: WS, well: WSW, y: 0, seed: 9, door: [30.5, 32.5] });
 E.push({ t: 'lightwell_tiers', rect: LW, y: 0, storeys: 4, sh: 3.6 });
 E.push({ t: 'fresco', kind: 'dolphins', at: [27, 13], face: 'n', y0: 1.4, w: 3.6, h: 1.3, bg: 'plaster_white' });
 // the Queen's Megaron furnished (§4c): the bathroom at its east end behind the low partition and its column, the
@@ -75,8 +79,11 @@ E.push({ t: 'portico', a: [T0 + 16.2, T1 + 15.4], b: [T0 + 16.2, T1 + 10.6], n: 
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('central court', COURT, 0.05, 'open'), room('west court', [-120, -50, -64, 50], 0.05, 'open'), room('throne room antechamber', [-19, -20, -14, -8], 0, 'hall'),
-  room('throne room', TR, 0, 'inner'), room('long corridor', CORR, 0, 'inner'), room('grand staircase light well', LW, 0, 'open'), room("queen's megaron", QM, 0, 'inner'), room('south propylaeum', [-3, 28, 3, 63], 0, 'hall')];
+  room('throne room', TR, 0, 'inner'), room('long corridor', CORR, 0, 'inner'), room('grand staircase light well', LW, 0, 'open'), room("queen's megaron", QM, 0, 'inner'), room('south propylaeum', [-3, 28, 3, 63], 0, 'hall'),
+  room('hall of the double axes', HALL, 0, 'hall'), room('lapidary workshop', WS, 0, 'inner')];
 const walks = [[[-100, 0], [-90, -60], [-92, -87], [-92, -95], [-70, -95], [-60, -89], [0, -89], [0, -60], [0, 0]], [[-39, -66], [-39, -54], [-39, 0], [-46, 0.5]]];
+walks.push([[0, 20], [19, 19.75], [30, 19.75], [31.5, 25], [31.5, 31]]);
+walks[2].y0 = 0;
 walks[1].y0 = 0;
 walks[0].y0 = 0;
 
