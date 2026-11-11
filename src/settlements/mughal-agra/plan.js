@@ -39,7 +39,8 @@ for (const r of [[-3.6, gz0 + 2, -3, gz1 - 2], [3, gz0 + 2, 3.6, gz1 - 2], [gx0 
     raised([s * c - GW, lo, s * c + GW, hi]);                       // north–south, in the quarter on side s
     raised([lo, s * c - GW, hi, s * c + GW]);                       // east–west
   }
-  raised([-GRIM - 2, R1, GRIM + 2, GRIM + 2]); raised([-GRIM - 2, -GRIM - 2, GRIM + 2, -R1]);
+  // (the walk along the south wall stops either side of the great gate, whose passage runs on the garden's floor)
+  raised([-GRIM - 2, R1, -GATE.w / 2 - 1, GRIM + 2]); raised([GATE.w / 2 + 1, R1, GRIM + 2, GRIM + 2]); raised([-GRIM - 2, -GRIM - 2, GRIM + 2, -R1]);
   raised([R1, -R1, GRIM + 2, R1]); raised([-GRIM - 2, -R1, -R1, R1]);
 }
 // the riverfront: the terrace's face to the Yamuna, an arcade of blind arches with a parapet over it, between the towers
@@ -76,7 +77,8 @@ const hallRooms = [
   room('forecourt', [fx0 + 2, fz0 + 2, fx1 - 2, fz1 - 2], 0, 'market'),
 ];
 const rooms = [...hallRooms, room('tomb chamber', [-11, -214, 11, -192], PLINTH.y, 'hall'), room('plinth', [-47.5, -250.5, 47.5, -155.5], PLINTH.y, 'open'), room('garden', GARDEN, 0, 'open')];
-const walks = [[[0, 240], [0, 200], [0, 172], [0, 140], [0, 18], [0, -18], [0, -146], [0, -152], [0, -158]]];
+// the visitor's way: the axis street, the forecourt, the gate's passage, then the east lane beside the channel (the channel and the tank hold water), the stairs to the terrace and the plinth
+const walks = [[[0, 240], [0, 200], [0, 172], [0, 152], [4.8, 149], [4.8, 136], [7.8, 130], [7.8, -143], [4.5, -149], [0, -152], [0, -158]]];
 walks[0].y0 = 0;
 
 export const taj = {

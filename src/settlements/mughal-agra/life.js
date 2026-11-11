@@ -153,10 +153,10 @@ export function life() {
   // beds, the sweepers and the readers of the Qur'an on the plinth, guards at the gate
   { const lane = 0.35;
     for (const [z, sx] of [[118, -1], [96, 1], [74, -1], [48, 1], [30, -1], [-34, 1], [-58, -1], [-84, 1], [-108, -1], [-124, 1], [22, 1]]) {
-      const x = sx * (6 + rand() * 3);
+      const x = sx > 0 ? 10 + rand() * 1.1 : -(6 + rand() * 3);                // (the east lane's middle is the visitor's way)
       // a gentleman with an attendant behind him (one with a fly-whisk's staff), or a veiled woman with a maid
-      if (rand() < 0.55) { person([x, z], lane, Math.PI * (rand() < 0.5 ? 0 : 1) + (rand() - 0.5) * 0.4, { man: true, cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_blue']), cloth2: pick(['cloth_green', 'cloth_maroon', 'cloth_red']), hatMat: pick(['cloth_red', 'cloth_ochre', 'cloth_white']), pose: 'stand' }); person([x + sx * 1.1, z + 1.2], lane, Math.PI, { man: true, pose: 'staff', cloth: 'cloth_white' }); }
-      else { person([x, z], lane, rand() * 6.28, { cloth: pick(['cloth_red', 'cloth_maroon', 'cloth_green']), cloth2: 'cloth_white', hat: 'veil', hair: 'long', pose: 'stand' }); person([x + 1.0, z + 0.6], lane, rand() * 6.28, { cloth: 'cloth_ochre', cloth2: 'cloth_white', hat: 'veil', hair: 'long', carry: 'child' }); }
+      if (rand() < 0.55) { person([x, z], lane, Math.PI * (rand() < 0.5 ? 0 : 1) + (rand() - 0.5) * 0.4, { man: true, cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_blue']), cloth2: pick(['cloth_green', 'cloth_maroon', 'cloth_red']), hatMat: pick(['cloth_red', 'cloth_ochre', 'cloth_white']), pose: 'stand' }); person([x, z + 1.5], lane, Math.PI, { man: true, pose: 'staff', cloth: 'cloth_white' }); }
+      else { person([x, z], lane, rand() * 6.28, { cloth: pick(['cloth_red', 'cloth_maroon', 'cloth_green']), cloth2: 'cloth_white', hat: 'veil', hair: 'long', pose: 'stand' }); person([x, z + 1.2], lane, rand() * 6.28, { cloth: 'cloth_ochre', cloth2: 'cloth_white', hat: 'veil', hair: 'long', carry: 'child' }); }
     }
     // pilgrims and children sitting on the edge of the great tank and the lotus tanks' marble rim
     for (let k = 0; k < 6; k++) { const a = k * 1.05 + 0.3, r = POOL.a + 3.6; person([Math.cos(a) * r, Math.sin(a) * r], lane + 0.02, a + Math.PI, { pose: k % 2 ? 'sit_ground' : 'stand', man: k % 3 !== 0 }); }
