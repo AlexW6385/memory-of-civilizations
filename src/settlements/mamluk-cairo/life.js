@@ -4,7 +4,7 @@
 // donkeys saddled for hire with their boys at the market street's north end and on the Rumayla; a string of camels
 // with bales coming down the road from the Citadel; in the open house, the merchant on his iwan and a servant.
 
-import { RADIUS, SUQ, SQUARE, QAA, height } from './layout.js';
+import { RADIUS, SUQ, SUQ2, SUQ3, SQUARE, QAA, SHOP, STALLS, KHAN, HAMMAM, BAYN, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -19,15 +19,18 @@ export function life() {
         : { cloth: pick(['cloth_white', 'cloth_indigo', 'cloth_brown', 'cloth_ochre', 'cloth_white', 'cloth_green']), cloth2: pick(['cloth_white', 'cloth_ochre']), over: 'sash', hat: 'turban', hatMat: pick(['cloth_white', 'cloth_white', 'cloth_indigo']), hair: 'short', beard: true }),
       pose: rand() < 0.3 ? 'talk' : 'stand', ...o });
   };
-  // the covered market street (mamluk index.js suq_covered: the shops' fronts at x = SUQ[0] + 5 and SUQ[2] − 5)
-  const D = (SUQ[2] - SUQ[0] - 5) / 2, n = Math.floor((SUQ[3] - SUQ[1]) / 3), w = (SUQ[3] - SUQ[1]) / n;
-  for (const side of [-1, 1]) for (let i = 0; i < n; i++) {
-    const zc = SUQ[1] + (i + 0.5) * w, xf = side < 0 ? SUQ[0] + D : SUQ[2] - D, out = side < 0 ? 1 : -1;
-    if (rand() < 0.7) person([xf + out * 0.4, zc + 0.6], out > 0 ? -Math.PI / 2 : Math.PI / 2, { man: true, pose: 'cross', y: 0.7 });
-    if (rand() < 0.3) person([xf + out * 1.4, zc], out > 0 ? Math.PI / 2 : -Math.PI / 2);
+  // the covered market streets (mamluk index.js suq_covered: the shops' fronts at x = S[0] + 5 and S[2] − 5): the khan's two as well
+  for (const S of [SUQ, SUQ2, SUQ3]) {
+    const D = (S[2] - S[0] - 5) / 2, n = Math.floor((S[3] - S[1]) / 3), w = (S[3] - S[1]) / n;
+    for (const side of [-1, 1]) for (let i = 0; i < n; i++) {
+      const zc = S[1] + (i + 0.5) * w, xf = side < 0 ? S[0] + D : S[2] - D, out = side < 0 ? 1 : -1;
+      if (rand() < 0.7) person([xf + out * 0.4, zc + 0.6], out > 0 ? -Math.PI / 2 : Math.PI / 2, { man: true, pose: 'cross', y: 0.7 });
+      if (rand() < 0.3) person([xf + out * 1.4, zc], out > 0 ? Math.PI / 2 : -Math.PI / 2);
+    }
+    const sx = (S[0] + S[2]) / 2;
+    for (let k = 0; k < 3; k++) person([sx + (rand() - 0.5) * 2, S[1] + 10 + rand() * (S[3] - S[1] - 20)], rand() < 0.5 ? 0 : Math.PI, { man: true, carry: 'sack', cloth: 'cloth_brown', cloth2: 'cloth_white' });
   }
   const sx = (SUQ[0] + SUQ[2]) / 2;
-  for (let k = 0; k < 3; k++) person([sx + (rand() - 0.5) * 2, SUQ[1] + 10 + rand() * (SUQ[3] - SUQ[1] - 20)], rand() < 0.5 ? 0 : Math.PI, { man: true, carry: 'sack', cloth: 'cloth_brown', cloth2: 'cloth_white' });
   // water carriers with the goatskin on the back (Lane: "in an earthen vessel, or a goat's skin, on the back")
   for (const [x, z] of [[sx + 1.2, SUQ[1] + 30], [sx - 1, SUQ[3] - 25], [SQUARE[0] + 6, -40], [-60, QAA[3] + 3.5]]) person([x, z], rand() * 6.28, { man: true, carry: 'bundle', loadCloth: 'hide_brown', cloth: 'cloth_brown', cloth2: 'cloth_white' });
   // a camel loaded with water skins, its driver, on the square
@@ -39,6 +42,29 @@ export function life() {
   person([SQUARE[2] - 9.5, SQUARE[3] - 17], -Math.PI / 2 + 0.4, { man: true, pose: 'staff', cloth: 'cloth_brown' });
   // the open house: the merchant seated on the west iwan's bench, his servant in the court by the well
   { const [x0, z0, x1] = QAA; person([x0 + 4.3, z0 + 3.4], -Math.PI / 2, { man: true, pose: 'cross', y: 0.6 + 0.32 + 0.1, cloth: 'cloth_green', cloth2: 'cloth_white' }); person([x0 + 6.5, z0 + 9.5], 0, { man: true, cloth: 'cloth_white' }); void x1; }
+  // the Bayn al-Qasrayn (docs §12): a scholar seated on the bench at Qalawun's portal, talk before the complexes, a water
+  // carrier, a donkey with its boy, porters crossing, a mamluk in his tall cap with a staff
+  const faceTo = (dx, dz) => -Math.atan2(dx, dz);
+  person([-173.55, -216.5 - 3.4], faceTo(1, 0), { man: true, pose: 'cross', y: 0.55, cloth: 'cloth_white', cloth2: 'cloth_white', hatMat: 'cloth_white' });
+  person([-172.8, -216.5 + 3.4], faceTo(1, 0), { man: true, pose: 'cross', y: 0.55 });
+  for (const [x, z, r] of [[-168, -222, 1.6], [-167.2, -220.8, -1.4], [-163, -260, 0.3], [-161.7, -258.6, 3.4], [-150, -250, 1.0], [-148.8, -251.3, 4.2]]) person([x, z], r, { man: true, pose: 'talk' });
+  person([-160, -205], 0.2, { man: true, carry: 'bundle', loadCloth: 'hide_brown', cloth: 'cloth_brown', cloth2: 'cloth_white' });
+  person([-157, -300], Math.PI, { man: true, pose: 'staff', cloth: 'cloth_red', cloth2: 'cloth_ochre', hatMat: 'cloth_red' });
+  { const x = -149, z = -196; L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: Y(x, z), rot: 1.1, seed: 77, gear: true }); person([x + 0.8, z + 0.6], 1.1, { man: true, child: true, cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white' }); }
+  // the sherbet and fuqqa' sellers behind their counters, a customer drinking
+  for (const s2 of STALLS) { const [x, z] = s2.at, dx = s2.face === 'e' ? 1 : s2.face === 'w' ? -1 : 0, dz = s2.face === 's' ? 1 : s2.face === 'n' ? -1 : 0; person([x - dx * 0.3 + (dz ? 0.4 : 0), z - dz * 0.3 + (dx ? 0.4 : 0)], faceTo(dx, dz), { man: true, cloth: 'cloth_white', cloth2: 'cloth_red', over: 'sash' }); person([x + dx * 1.3, z + dz * 1.3 + (dx ? -0.3 : 0)], faceTo(-dx, -dz), { man: true }); }
+  // the khan's court: kneeling camels with their bales, the merchants, the camel-driver, a donkey
+  { const c = [KHAN[0] + 22, (KHAN[1] + KHAN[3]) / 2];
+    for (const [dx, dz, r] of [[-6, 0, 0.3], [6, 1, 2.9], [0, 8, 1.6]]) { const x = c[0] + dx, z = c[1] + dz; L.push({ t: 'animal', kind: 'camel', at: [x, z], y: Y(x, z), rot: r, seed: Math.floor(rand() * 1e9), gear: true }); }
+    L.push({ t: 'animal', kind: 'donkey', at: [c[0] - 7, c[1] + 6], y: Y(c[0] - 7, c[1] + 6), rot: 0.8, seed: 79, gear: true });
+    person([c[0] - 3, c[1] + 3], 2.4, { man: true, pose: 'talk', cloth: 'cloth_green', cloth2: 'cloth_white' }); person([c[0] - 4.2, c[1] + 2.4], -0.7, { man: true, cloth: 'cloth_indigo' });
+    person([c[0] + 4, c[1] - 3], 0.3, { man: true, pose: 'staff', cloth: 'cloth_brown' }); person([c[0] + 2, c[1] + 6], 1.0, { man: true, carry: 'sack', cloth: 'cloth_brown', cloth2: 'cloth_white' }); }
+  // the shop: the merchant on his mat behind the counter, a customer before it
+  { const x1 = SHOP[2], z0 = SHOP[1], Ls = SHOP[3] - SHOP[1]; person([x1 - 4.5, z0 + Ls / 2 - 1.4], faceTo(1, 0), { man: true, pose: 'cross', y: 0.2 + 0.01 + 0.12, cloth: 'cloth_ochre', cloth2: 'cloth_white' }); person([x1 - 1.3, z0 + Ls / 2 + 1.9], faceTo(-1, 0), { man: true, cloth: 'cloth_indigo' }); }
+  // the bath: the attendant on the maslakh's platform, a bather wrapped in towels by the fountain, the masseur in the hot room
+  { const [X0, Z0] = HAMMAM; person([X0 + 1.5, Z0 + 6], faceTo(1, 0), { man: true, pose: 'cross', y: 0.55, cloth: 'cloth_white', cloth2: 'cloth_blue' }); person([X0 + 6.5, Z0 + 11], faceTo(0, -1), { man: true, cloth: 'cloth_blue', cloth2: 'cloth_white', hat: 'turban', hatMat: 'cloth_blue' });
+    person([X0 + 18, Z0 + 12.4], faceTo(1, 0), { man: true, cloth: 'cloth_white', cloth2: 'cloth_blue', hat: 'turban', hatMat: 'cloth_white' }); }
+  void BAYN;
   return L;
 }
 export const lifePlan = () => ({ id: 'mamluk-cairo-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: life(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-37, -30], facing: 's' } });

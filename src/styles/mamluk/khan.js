@@ -28,8 +28,8 @@ function windows(bag, fr, u0, u1, y, d0, rows, rand, lattice = true) {
       // a projecting mashrabiya: the hood, the front and sides of turned lattice on corbels
       const D = 0.5, w = 0.62;
       bag.add('wood_dark', fr.B(u - w - 0.08, u + w + 0.08, yy - 0.28, yy - 0.12, d0, d0 + D));
-      bag.add('lattice', fr.B(u - w, u + w, yy - 0.12, yy + hh + 0.1, d0 + D - 0.06, d0 + D));
-      for (const s of [-1, 1]) bag.add('lattice', fr.B(s < 0 ? u - w - 0.02 : u + w - 0.04, s < 0 ? u - w + 0.04 : u + w + 0.02, yy - 0.12, yy + hh + 0.1, d0, d0 + D - 0.06));
+      bag.add('koshi', fr.B(u - w, u + w, yy - 0.12, yy + hh + 0.1, d0 + D - 0.06, d0 + D));
+      for (const s of [-1, 1]) bag.add('koshi', fr.B(s < 0 ? u - w - 0.02 : u + w - 0.04, s < 0 ? u - w + 0.04 : u + w + 0.02, yy - 0.12, yy + hh + 0.1, d0, d0 + D - 0.06));
       bag.add('wood_dark', fr.B(u - w - 0.1, u + w + 0.1, yy + hh + 0.1, yy + hh + 0.24, d0, d0 + D + 0.1));
       for (const s of [-1, 1]) bag.add('wood_dark', fr.B(u + s * w * 0.55 - 0.05, u + s * w * 0.55 + 0.05, yy - 0.5, yy - 0.28, d0, d0 + D * 0.7));
     } else if (kind === 'grille') {
@@ -71,7 +71,7 @@ export function cairoWikala(el, { bag, col, lights }) {
   for (const [px, pz] of [[ct[0], ct[1]], [ct[2], ct[1]], [ct[0], ct[3]], [ct[2], ct[3]]]) { bag.add(S, box(px - 0.6, y, pz - 0.6, px + 0.6, y + ST[0], pz + 0.6)); col.rect([px - 0.6, pz - 0.6, px + 0.6, pz + 0.6], y, y + ST[0]); }
   // the ceiling slabs over the portico (the gallery's floor) and the court walls above
   const ring = [[pr[0], pr[1], pr[2], ct[1]], [pr[0], ct[3], pr[2], pr[3]], [pr[0], ct[1], ct[0], ct[3]], [ct[2], ct[1], pr[2], ct[3]]];
-  for (const r of ring) { bag.add('wood_dark', box(r[0], yP - 0.1, r[1], r[2], yP + 0.3, r[3])); col.rect(r, yP - 0.1, y + WH); }
+  for (const r of ring) { bag.add('wood_dark', box(r[0], yP - 0.1, r[1], r[2], yP + 0.3, r[3])); bag.add(S, box(r[0], yP + 0.3, r[1], r[2], y + WH, r[3])); col.rect(r, yP - 0.1, y + WH); }
   // the court's four faces above the arcade: the galleries' windows, lattice on the third floor
   const cfr = { n: frame(ct, 'n'), s: frame(ct, 's'), w: frame(ct, 'w'), e: frame(ct, 'e') };
   const rows = [[yP + 0.9, 1.7, 'grille'], [yP + ST[1] + 0.9, 1.7, 'lattice'], [yP + ST[1] + ST[2] + 0.9, 1.7, 'lattice']];
@@ -167,6 +167,18 @@ export function cairoHammam(el, { bag, col, lights }) {
   bag.add('marble_floor', box(H[0], y - 0.3, H[1], H[2], y + 0.04, H[3])); col.floor(H, y + 0.04);
   for (const r of [M, H]) { // a lining of plaster to dado height, darker marble dado
     bag.add('marble_dark', box(r[0], y, r[1], r[2], y + 0.05, r[1] + 0.03)); }
+  // the rooms' lining: a dado of white marble with a dark course, plaster above, left open at the doors
+  const lineWall = (alongX, at, inward, a, b, gaps, top = y + 4.95) => {
+    const cuts = [a, ...gaps.flat(), b], segs = [];
+    for (let i = 0; i < cuts.length; i += 2) if (cuts[i + 1] - cuts[i] > 0.02) segs.push([cuts[i], cuts[i + 1]]);
+    const T = (u0, u1, y0, y1, m, d0, d1) => bag.add(m, alongX ? box(u0, y0, inward > 0 ? at + d0 : at - d1, u1, y1, inward > 0 ? at + d1 : at - d0) : box(inward > 0 ? at + d0 : at - d1, y0, u0, inward > 0 ? at + d1 : at - d0, y1, u1));
+    for (const [u0, u1] of segs) { T(u0, u1, y, y + 1.6, 'marble_smooth', 0, 0.04); T(u0, u1, y + 1.6, y + 1.72, 'marble_dark', 0, 0.05); T(u0, u1, y + 1.72, top, 'stucco_warm', 0, 0.03); }
+    for (const [g0, g1] of gaps) { T(g0, g1, y + 2.6, top, 'stucco_warm', 0, 0.03); }
+  };
+  const dM = [X0 + 2.1, X0 + 3.7], dH = [Z0 + 8.8, Z0 + 10.4];
+  lineWall(false, M[0], 1, M[1], M[3], []); lineWall(true, M[1], 1, M[0], M[2], []); lineWall(true, M[3], -1, M[0], M[2], [dM]); lineWall(false, M[2], -1, M[1], M[3], [dH]);
+  lineWall(false, H[0], 1, H[1], H[3], [dH]); lineWall(true, H[1], 1, H[0], H[2], []); lineWall(true, H[3], -1, H[0], H[2], []); lineWall(false, H[2], -1, H[1], H[3], []);
+  lineWall(false, V[0], 1, V[1], V[3], [[zD - dw / 2, zD + dw / 2]], y + 3.3); lineWall(true, V[3], -1, V[0], V[2], [], y + 3.3);
   // the ceilings: slabs with a square hole under each dome; the domes
   const ceil = (r, hw) => {
     const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, yc = y + 5.0, yt = y + HW;

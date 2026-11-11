@@ -33,7 +33,7 @@ function section(bag, col, fr, r, y, sec, kind, rand) {
   bag.add(mat, fr.B(u0, u1, y + 0.45, y + 0.55, proj - th, proj + 0.18));
   // each panel's furnishing: the pointed ring of ablaq voussoirs at its head, the windows within
   for (const c of panels) {
-    const u = u0 + c, top = sill + ph, pu = u - pw / 2, d1 = proj + 0.04, dback = proj - th - 0.12;
+    const u = u0 + c, top = sill + ph, pu = u - pw / 2, d1 = proj + 0.04, dback = proj - th - 0.02;
     voussoirs(bag, fr, pu, y + sill, pw, ph, 0.38, proj - 0.02, d1 + 0.06, kind === 'nasir' ? ['marble_smooth', 'plaster'] : ['marble_dark', 'marble_smooth']);
     // the lower window: a grille in a marble frame, the sill
     const wy = y + sill + 1.7, ww = Math.min(1.2, pw * 0.38);
