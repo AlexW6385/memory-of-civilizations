@@ -20,6 +20,7 @@ import { ground as lalibela } from './lalibela/ground.js';
 import { ground as tenochtitlan } from './tenochtitlan/ground.js';
 import { ground as teotihuacan } from './teotihuacan/ground.js';
 import { ground as taos } from './taos/ground.js';
+import { ground as abuSimbel } from './abu-simbel/ground.js';
 import { ground as joseonSeoul } from './joseon-seoul/ground.js';
 import { ground as songKaifeng } from './song-kaifeng/ground.js';
 import { ground as lhasa } from './lhasa/ground.js';
@@ -78,6 +79,7 @@ export const GROUNDS = {
   tenochtitlan,
   teotihuacan,
   taos,
+  'abu-simbel': abuSimbel,
   'joseon-seoul': joseonSeoul,
   'song-kaifeng': songKaifeng,
   lhasa,
@@ -140,6 +142,7 @@ const LOADERS = {
   tenochtitlan: () => import('./tenochtitlan/index.js'),
   teotihuacan: () => import('./teotihuacan/index.js'),
   taos: () => import('./taos/index.js'),
+  'abu-simbel': () => import('./abu-simbel/index.js'),
   'joseon-seoul': () => import('./joseon-seoul/index.js'),
   'song-kaifeng': () => import('./song-kaifeng/index.js'),
   lhasa: () => import('./lhasa/index.js'),
