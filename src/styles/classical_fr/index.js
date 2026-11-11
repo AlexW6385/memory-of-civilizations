@@ -15,6 +15,7 @@ import { chapel } from './chapel.js';
 import { ecurie } from './ecuries.js';
 import { orangeTrees } from './garden.js';
 import { broderie, palissades, statues, yews, benches, guerites, bornes } from './gardens.js';
+import { apolloGroup } from './apollo.js';
 import { townHouse } from './townhouse.js';
 import { coach, sedanChair } from '../baroque/street.js';
 
@@ -157,20 +158,7 @@ function fountain(el, ctx) {
       bag.add(M, lathe([[0.001, 0], [0.09, 0.03], [0.1, 0.13], [0.06, 0.2], [0.001, 0.21]], 8, null, x - 0.2, yg + 0.92, z + sd * 0.48));
     }
   } else if (el.kind === 'apollo') {
-    const d = el.dir ?? [1, 0], u = [-d[1], d[0]], P = (a, b) => [x + d[0] * a + u[0] * b, z + d[1] * a + u[1] * b];
-    // the chariot, the god standing in it, four horses plunging forward, tritons blowing at the sides
-    const [cx0, cz0] = P(-1.2, 0);
-    bag.add('gilt_bronze', lathe([[0.001, 0], [1.1, 0.2], [1.2, 0.9], [0.9, 1.3], [0.001, 1.2]], 12, null, cx0, y + 0.1, cz0));
-    bag.add('gilt_bronze', lathe([[0.25, 0], [0.22, 1.2], [0.3, 1.5], [0.18, 1.9], [0.001, 2.25]], 10, null, cx0, y + 1.2, cz0));
-    for (const b of [-1.5, -0.5, 0.5, 1.5]) {
-      const [hx, hz] = P(1.4, b * 0.75);
-      const body = lathe([[0.001, -0.75], [0.32, -0.55], [0.36, 0], [0.3, 0.55], [0.001, 0.7]], 10, null, 0, 0, 0);
-      body.rotateZ(Math.PI / 2 - 0.5); body.rotateY(-Math.atan2(d[1], d[0])); body.translate(hx, y + 0.9, hz);
-      bag.add('gilt_bronze', body);
-      const [nx, nz] = P(2.15, b * 0.75);
-      bag.add('gilt_bronze', lathe([[0.12, 0], [0.16, 0.5], [0.2, 0.75], [0.001, 0.95]], 8, null, nx, y + 1.15, nz));
-    }
-    for (const b of [-3.6, 3.6]) { const [tx, tz] = P(0.6, b); bag.add('gilt_bronze', lathe([[0.4, 0], [0.3, 0.6], [0.22, 1.1], [0.001, 1.35]], 8, null, tx, y + 0.1, tz)); }
+    apolloGroup(bag, x, y + 0.2, z, el.dir ?? [1, 0], r);
   } else {
     bag.add('bronze', lathe([[1.2, 0], [1.1, 0.5], [0.7, 0.9], [0.5, 1.6], [0.3, 1.9], [0.001, 2.2]], 12, null, x, y, z));
   }
