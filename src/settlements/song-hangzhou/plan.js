@@ -3,7 +3,8 @@
 // the river road, Kaihua Temple's halls beside it and on the terrace behind; the flood wall, the road
 // on the bank, the river with its boats; the canal and its lock, bridges and boats.
 
-import { RADIUS, LEVEL, WALL, ROAD, PAGODA, T1, T2, CANAL, CANAL_STREETS, WAREHOUSES } from './layout.js';
+import { RADIUS, LEVEL, WALL, ROAD, PAGODA, T1, T2, CANAL, CANAL_STREETS, CANAL_BRIDGES, WAREHOUSES } from './layout.js';
+import { interiorRooms } from './life.js';
 
 /** The river boats [x, z, heading (±1 along x), length − 4] (moored by the wall when z < 165, under sail beyond), and the canal boats [z, heading]. */
 export const RIVER_BOATS = [[-240, 160, 1, 12], [-60, 158, -1, 9], [20, 172, 1, 14], [100, 160, 1, 8], [190, 158, -1, 10], [250, 190, -1, 16], [-150, 215, 1, 18], [60, 240, -1, 11]];
@@ -24,8 +25,8 @@ for (const [x, z, d, L] of RIVER_BOATS) E.push({ t: 'song_boat', at: [x, z], dir
 // ---- the canal: water, walls, streets, bridges, boats
 E.push({ t: 'water_rect', rect: [CANAL.x0, CANAL.z0, CANAL.x1, WALL.z0 + 3], y: LEVEL.canal });
 for (const x of [CANAL.x0, CANAL.x1]) E.push({ t: 'canal_wall', a: [x, CANAL.z0], b: [x, ROAD.z0], y: LEVEL.street + 0.05, bed: LEVEL.canalBed, th: 0.7 });
-for (const r of CANAL_STREETS) E.push({ t: 'paving', rect: [r[0], -half(r[0]) + 6, r[2], r[3]], y: LEVEL.street + 0.04, th: 0.3 });
-for (const z of [-230, -120, -10, 90, 136]) E.push({ t: 'ming_arch_bridge', at: [(CANAL.x0 + CANAL.x1) / 2, z], across: 'x', span: CANAL.x1 - CANAL.x0 + 0.4, width: 4, rise: 2.4, landing: 4.6, y: LEVEL.street + 0.04, water: LEVEL.canal, bed: LEVEL.canalBed });
+for (const r of CANAL_STREETS) E.push({ t: 'paving', rect: [r[0], Math.max(r[1], -half(r[0]) + 6), r[2], r[3]], y: LEVEL.street + 0.04, th: 0.3 });
+for (const z of CANAL_BRIDGES) E.push({ t: 'ming_arch_bridge', at: [(CANAL.x0 + CANAL.x1) / 2, z], across: 'x', span: CANAL.x1 - CANAL.x0 + 0.4, width: 4, rise: 2.4, landing: 4.6, y: LEVEL.street + 0.04, water: LEVEL.canal, bed: LEVEL.canalBed });
 for (const [z, d] of CANAL_BOATS) E.push({ t: 'boat', at: [(CANAL.x0 + CANAL.x1) / 2 + (d > 0 ? -2 : 2), z], dir: [0, d], len: 7, y: LEVEL.canal });
 
 // ---- the pagoda on its terrace, the temple's halls, the stairs from the road
@@ -70,7 +71,7 @@ for (const dx of [-8.5, 8.5]) E.push({ t: 'sutra_pillar', at: [PAGODA.c[0] + dx,
 for (const r of WAREHOUSES) E.push({ t: 'house_jiangnan', rect: r, y: LEVEL.street, front: 's', storeys: 2, shop: false, seed: r[0] });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('terrace', T1.rect, T1.y, 'open'), room('hall', [-129, -4, -91, 24], T2.y, 'hall')];
+const rooms = [room('terrace', T1.rect, T1.y, 'open'), room('hall', [-129, -4, -91, 24], T2.y, 'hall'), ...interiorRooms()];   // the music zones of the furnished houses (life.js)
 // each storey inside the pagoda, in the corridor's north-west corner (the stair arrives in the south-west one)
 {
   const [px, pz] = PAGODA.c, aw = (tiers[6].r * Math.cos(Math.PI / 8)) * 0.78, sw = aw * Math.tan(Math.PI / 8);

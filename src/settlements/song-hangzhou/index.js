@@ -3,6 +3,7 @@ import '../../styles/song/index.js';
 import pagoda from './plan.js';
 import westLake from './westlake.js';
 import music from './music.js';
+import './life.js';   // registers the life's elements (shops, interiors)
 export { town } from './town.js';
 export { music };
 export const landmarks = [{ plan: pagoda, music }, { plan: westLake, music }];

@@ -5,6 +5,7 @@ import { rod, box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, column, beamTris } from '../ming/index.js';
 import { hexa } from './kaifeng.js';
 import { STYLES } from '../../core/build.js';
+import { Matrix4 } from '../../core/three.js';
 
 /**
  * view_tent: a stand for watching the bore { at, y, w (along x), d (along z), h, cloth, trim, open ('s' |
@@ -506,7 +507,63 @@ function courtPaving(el, { bag }) {
   for (const g of tufts) bag.add('bark_olive', g);
 }
 
+/**
+ * hz_shell: the walls and roof of a furnished lot of Lin'an { rect, front ('n'|'s'|'e'|'w'), y (the street), kind ('teahouse' | 'winehouse' | 'shop' | 'house'), seed, roof ('gable' | 'hip') }:
+ * a granite plinth and a brick-paved floor 0.45 m over the street; white walls on a grey dado; the front of a tea house, wine
+ * house or shop open between red-brown posts under a beam with a lattice valance (a wine house of two storeys, its upper front a
+ * plaster wall with lattice windows behind bamboo blinds, a gallery over the rear), the front of a house a plaster wall with its
+ * door under a tiled hood and two lattice windows; a roof of dark tiles. The inside is left to the life's furnishing (interiors.js).
+ * Built in the room's own frame (front toward +z) and turned into place.
+ */
+function hzShell(el, ctx) {
+  const [x0, z0, x1, z1] = el.rect, f = el.front || 's', along = f === 'n' || f === 's';
+  const L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0, yaw = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[f];
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, M = new Matrix4().makeRotationY(yaw).setPosition(cx, 0, cz);
+  const rect = ([a, b, c, d]) => { const p = [[a, b], [c, d]].map(([u, v]) => [cx + u * Math.cos(yaw) + v * Math.sin(yaw), cz - u * Math.sin(yaw) + v * Math.cos(yaw)]); return [Math.min(p[0][0], p[1][0]), Math.min(p[0][1], p[1][1]), Math.max(p[0][0], p[1][0]), Math.max(p[0][1], p[1][1])]; };
+  const bag = { add: (m, g) => ctx.bag.add(m, g.applyMatrix4(M)) };
+  const col = { floor: (r, y, t) => ctx.col.floor(rect(r), y, t), rect: (r, a, b) => ctx.col.rect(rect(r), a, b), circle: (x, z, r, a, b) => ctx.col.circle(cx + x * Math.cos(yaw) + z * Math.sin(yaw), cz - x * Math.sin(yaw) + z * Math.cos(yaw), r, a, b) };
+  const kind = el.kind || 'shop', two = kind === 'winehouse', y = el.y ?? 0, Y = y + 0.45, H = two ? 6.4 : 3.6, H1 = 3.6, rand = rnd(el.seed ?? 1);
+  const a0 = -L / 2, a1 = L / 2, b0 = -D / 2, b1 = D / 2, fz = b1 - 0.6, th = 0.25;
+  bag.add('granite_block', box(a0, y - 0.4, b0, a1, Y - 0.04, b1));
+  bag.add('brick_paving', box(a0 + 0.02, Y - 0.04, b0 + 0.02, a1 - 0.02, Y, b1 - 0.02));
+  col.floor([a0, b0, a1, b1], Y);
+  const wall = (r, h = H) => { bag.add('plaster_white', box(r[0], Y, r[1], r[2], Y + h, r[3])); bag.add('plaster_grey', box(r[0] - 0.01, Y, r[1] - 0.01, r[2] + 0.01, Y + 0.35, r[3] + 0.01)); col.rect(r, Y, Y + h); };
+  const fl = kind === 'house' ? b1 - th : fz;
+  wall([a0, b0, a0 + th, fl]); wall([a1 - th, b0, a1, fl]); wall([a0 + th, b0, a1 - th, b0 + th]);
+  const lat = (u0, u1, yy0, yy1, zz) => { const t = []; for (let u = u0 + 0.05; u < u1 - 0.03; u += 0.14) beamTris(t, [u, yy0, zz], [u, yy1, zz], 0.02, 0.02); for (let k = 0; k <= 3; k++) { const yy = yy0 + (yy1 - yy0) * (k + 0.5) / 4; beamTris(t, [u0, yy, zz], [u1, yy, zz], 0.02, 0.02); } bag.add('lattice_red', fromTriangles(t)); };
+  if (kind === 'house') {
+    // the front wall: the door in the middle (1.3 m, a lintel and a tiled hood over it), a lattice window either side
+    const dw = 0.7, wy0 = Y + 1.0, wy1 = Y + 2.3;
+    wall([a0, fl, -dw, b1], H); wall([dw, fl, a1, b1], H);
+    bag.add('lacquer_chestnut', box(-dw - 0.05, Y + 2.35, fl - 0.04, dw + 0.05, Y + 2.5, b1 + 0.04));
+    for (const s of [-1, 1]) bag.add('lacquer_chestnut', box(s * dw - (s > 0 ? 0.04 : 0.1), Y, fl - 0.04, s * dw + (s > 0 ? 0.1 : 0.04), Y + 2.4, b1 + 0.04));
+    bag.add('tile_dark', box(-dw - 0.45, Y + 2.5, b1 - 0.02, dw + 0.45, Y + 2.58, b1 + 0.5));   // the hood over the door
+    for (const sx of [-1, 1]) { const wc = sx * (dw + (L / 2 - dw) / 2); if (Math.abs(wc) < dw + 1.1) continue; bag.add('lacquer_chestnut', box(wc - 0.5, wy0 - 0.05, b1 - 0.02, wc + 0.5, wy1 + 0.05, b1 + 0.03)); lat(wc - 0.45, wc + 0.45, wy0, wy1, b1 + 0.03); }
+  } else {
+    // the open front: posts, the beam, the lattice valance in each bay
+    const nb = L > 8 ? 3 : 2, xs = Array.from({ length: nb + 1 }, (_, i) => a0 + 0.13 + (L - 0.26) * i / nb);
+    for (const x of xs) column(bag, col, x, fz, Y, H1 - 0.35, 0.26, 'lacquer_chestnut', true);
+    bag.add('lacquer_chestnut', box(a0, Y + H1 - 0.4, fz - 0.12, a1, Y + H1, fz + 0.12));
+    for (let i = 0; i < nb; i++) { const a = xs[i] + 0.14, b = xs[i + 1] - 0.14; bag.add('lacquer_chestnut', box(a, Y + H1 - 0.78, fz - 0.03, b, Y + H1 - 0.73, fz + 0.03)); lat(a, b, Y + H1 - 0.73, Y + H1 - 0.4, fz); }
+    if (kind === 'shop') for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) { const u = sx * (L / 2 - 0.55 - k * 0.2); bag.add('timber', box(u - 0.09, Y + 0.05, fz + 0.14, u + 0.09, Y + H1 - 0.8, fz + 0.18)); }   // the shutters of the front, stacked at the ends
+  }
+  if (two) {
+    // the upper storey: a plaster wall over the front beam with lattice windows behind blinds; a gallery over the rear, its rail toward the hall
+    bag.add('plaster_white', box(a0 + th, Y + H1, fz - 0.1, a1 - th, Y + H, fz + 0.1)); col.rect([a0 + th, fz - 0.1, a1 - th, fz + 0.1], Y + H1, Y + H);
+    const nw = Math.max(2, Math.floor((L - 1.2) / 2.2));
+    for (let i = 0; i < nw; i++) { const c = a0 + 0.6 + (L - 1.2) * (i + 0.5) / nw; bag.add('lacquer_chestnut', box(c - 0.8, Y + H1 + 0.55, fz + 0.09, c + 0.8, Y + H1 + 2.05, fz + 0.13)); lat(c - 0.74, c + 0.74, Y + H1 + 0.6, Y + H1 + 2.0, fz + 0.14); bag.add('reed_mat', box(c - 0.72, Y + H1 + 1.2, fz + 0.15, c + 0.72, Y + H1 + 2.0, fz + 0.17)); }
+    bag.add('lacquer_chestnut', box(a0 + th, Y + H1 - 0.1, b0 + th, a1 - th, Y + H1, b0 + 3.4));
+    for (let u = a0 + th + 0.1; u < a1 - th; u += 0.7) bag.add('wood_dark', box(u - 0.05, Y + H1 - 0.3, b0 + th, u + 0.05, Y + H1 - 0.1, b0 + 3.4));
+    bag.add('lacquer_chestnut', box(a0 + th, Y + H1 + 0.9, b0 + 3.35, a1 - th, Y + H1 + 1.0, b0 + 3.45));
+  }
+  // the roof: a gable (or hipped) roof, its ridge along the front; white gable boards over the side walls
+  const rise = Math.min(D * 0.3, 3.6) + (two ? 0.4 : 0), hip = el.roof === 'hip' && kind !== 'winehouse';
+  rectRoof({ c: [0, 0], A: L / 2 + 0.25, B: D / 2 + 0.55, y: Y + H - 0.05, rise, kind: hip ? 'hip' : 'gable', sweep: 0.15, mat: 'tile_dark', soffit: 'timber', p: 1.4 }, bag);
+  if (!hip) for (const x of [a0, a1 - th]) { const t = [], top = Y + H + rise - 0.25, e0 = b0 + th, e1 = kind === 'house' ? b1 - th : fz; t.push(x, Y + H, e0, x, Y + H, e1, x, top, 0, x + th, Y + H, e0, x + th, top, 0, x + th, Y + H, e1); bag.add('plaster_white', fromTriangles(t.concat([x, Y + H, e0, x + th, Y + H, e0, x + th, top, 0, x, Y + H, e0, x + th, top, 0, x, top, 0, x, Y + H, e1, x, top, 0, x + th, top, 0, x, Y + H, e1, x + th, top, 0, x + th, Y + H, e1]))); }
+  void rand;
+}
+
 /** sutra_pillar: a stone sutra pillar of the court { at, y } (the hexagonal shaft on its lotus base, as the chinese style's dharani pillar). */
 function sutraPillar(el, ctx) { STYLES.chinese.objects.dharani_pillar(el, ctx); }
 
-export const HANGZHOU_ELEMENTS = { view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving };
+export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving };

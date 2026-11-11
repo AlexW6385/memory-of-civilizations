@@ -160,6 +160,12 @@ export function lots() {
   strips(outside, CANAL_STREETS[1][2] + 13.3, RADIUS, 0.2, false);
   return LOTS;
 }
+let TEA = null;
+/** The tea houses on the road below the pagoda: three of the wide shop lots nearest its stair (built with the old tea_house element, furnished by the town). */
+export function riverTeaHouses() {
+  if (!TEA) TEA = lots().filter((l) => l.front === 's' && l.shop && l.rect[3] > ROAD.z0 - 1 && l.rect[0] < -30 && l.rect[2] - l.rect[0] > 8).slice(0, 3);
+  return TEA;
+}
 let GRID = null;
 export function inLot(x, z, m = 0) {
   if (!GRID) { GRID = new Map(); for (const h of lots()) for (let i = Math.floor((h.rect[0] - 3) / 20); i <= Math.floor((h.rect[2] + 3) / 20); i++) for (let j = Math.floor((h.rect[1] - 3) / 20); j <= Math.floor((h.rect[3] + 3) / 20); j++) { const k = i + ',' + j; if (!GRID.has(k)) GRID.set(k, []); GRID.get(k).push(h); } }

@@ -11,6 +11,7 @@
 import './shops.js';
 import './interiors.js';
 import { lots, onImperial, LEVEL, RADIUS } from './ways.js';
+import { riverTeaHouses } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -33,7 +34,7 @@ let CHOSEN = null;
 /** The lots whose insides are furnished: { teahouse: [], winehouse: [], shop: [], house: [] } (lots' own seed/rect). */
 export function interiorLots() {
   if (CHOSEN) return CHOSEN;
-  const all = lots(), rand = rng(1200), used = new Set();
+  const river = new Set(riverTeaHouses()), all = lots().filter((l) => !river.has(l)), rand = rng(1200), used = new Set();
   const inDisc = (l) => { const p = frontOf(l).P(0.5, 0); return Math.hypot(p[0], p[1]) < RADIUS - 40; };
   const take = (pred, n, sort) => { const c = all.filter((l) => !used.has(l) && inDisc(l) && pred(l)); c.sort(sort); const out = c.slice(0, n); out.forEach((l) => used.add(l)); return out; };
   const w = (l) => frontOf(l).L, d = (l) => frontOf(l).D;

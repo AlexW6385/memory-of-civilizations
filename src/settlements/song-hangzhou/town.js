@@ -3,7 +3,8 @@
 // wall below the pagoda, the crowd on the wall looking out for the bore, tea tables on the road; the
 // peddlers come to the riverbank for the crowd: stalls along the foot of the flood wall, hawkers with
 // their shoulder poles, a fruit seller under a parasol.
-import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells } from './layout.js';
+import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells, riverTeaHouses } from './layout.js';
+import { lifePlans, interiorLots } from './life.js';
 import './townscape.js';
 import { RIVER_BOATS, CANAL_BOATS } from './plan.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 136], facing: 'n' } });
@@ -56,7 +57,7 @@ function tideDay() {
   }
   teaInside(S, L, rand, person);
   // the shops' name boards over their fronts, on the beam over the opening; the tea houses' on their front beam
-  const tea = new Set(teaHouses()), F = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
+  const tea = new Set([...teaHouses(), ...Object.entries(interiorLots()).filter(([k]) => k !== 'house').flatMap(([, v]) => v)]), F = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
   for (const l of lots()) {
     if (!l.shop) continue;
     const [x0, z0, x1, z1] = l.rect, o = F[l.front], len = o[0] ? z1 - z0 : x1 - x0, edge = [o[0] > 0 ? x1 : o[0] < 0 ? x0 : (x0 + x1) / 2, o[1] > 0 ? z1 : o[1] < 0 ? z0 : (z0 + z1) / 2];
@@ -67,13 +68,8 @@ function tideDay() {
   return [base('song-hangzhou-stands', S), base('song-hangzhou-tide-crowd', L, 'life')];
 }
 
-/** The tea houses on the road below the pagoda: three of the wide shop lots nearest its stair. */
-let TEA = null;
-export function teaHouses() {
-  if (TEA) return TEA;
-  TEA = lots().filter((l) => l.front === 's' && l.rect[3] > ROAD.z0 - 1 && l.rect[0] < -30 && l.rect[2] - l.rect[0] > 8).slice(0, 3);
-  return TEA;
-}
+/** The tea houses on the road below the pagoda (layout.js). */
+export const teaHouses = riverTeaHouses;
 /** Inside each tea house: tea tables with their benches, customers seated round them, the host at the counter. */
 function teaInside(S, L, rand, person) {
   for (const l of teaHouses()) {
@@ -186,10 +182,15 @@ function fabric() {
 }
 
 export async function town() {
-  const tea = new Set(teaHouses()), all = lots().filter((l) => !tea.has(l)), plans = [];
+  const chosen = interiorLots(), tea = new Set(teaHouses()), inter = new Set(Object.values(chosen).flat());
+  const all = lots().filter((l) => !tea.has(l) && !inter.has(l)), plans = [];
   const order = [...all].sort((a, b) => b.detail - a.detail);
   const N = 120;
   for (let i = 0; i < order.length; i += N) plans.push(base(`song-hangzhou-houses-${i / N}`, order.slice(i, i + N).map((l) => ({ t: 'house_jiangnan', y: LEVEL.street, ...l, simple: l.detail === 0 ? true : undefined }))));
-  plans.push(fabric(), ...tideDay(), boatPeople());
+  // the lots the life furnishes (life.js): their shells raised here, the floor 0.45 m over the street; the furniture is the life's
+  const shells = [];
+  for (const [kind, list] of Object.entries(chosen)) for (const l of list) shells.push({ t: 'hz_shell', rect: l.rect, front: l.front, y: LEVEL.street, kind, seed: l.seed, roof: l.roof });
+  plans.push(base('song-hangzhou-shells', shells));
+  plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base));
   return plans;
 }
