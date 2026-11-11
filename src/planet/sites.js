@@ -91,6 +91,7 @@ export const SITES = [
   { id: 'machu-picchu', name: { en: 'The Inca', zh: '印加' }, era: '15th c.', region: 'andes', lat: -13.16, lon: -72.55, radius: 330 },
   { id: 'cahokia', name: { en: 'Mississippian Cahokia', zh: '密西西比卡霍基亚' }, era: '12th c.', region: 'mississippi', lat: 38.66, lon: -90.06, radius: 420 },
   { id: 'taos', name: { en: 'The Pueblo', zh: '普韦布洛' }, era: '15th c.', region: 'southwest', lat: 36.44, lon: -105.55, radius: 320 },
+  { id: 'bhaktapur', name: { en: 'Bhaktapur', zh: '巴克塔普尔' }, era: 'c. 1710', region: 'nepal', lat: 27.67, lon: 85.43, radius: 190 },
   { id: 'new-york', name: { en: 'Modern New York', zh: '现代纽约' }, era: '20th c.', region: 'northeast', lat: 40.75, lon: -73.99, radius: 460 },
   { id: 'mongol-karakorum', name: { en: 'Mongol Karakorum', zh: '蒙古哈拉和林' }, era: '13th c.', region: 'steppe', lat: 47.20, lon: 102.83, radius: 190 },
   // ── Oceania ──
@@ -136,7 +137,6 @@ export const PLANNED = [
   { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, region: 'indus', lat: 27.33, lon: 68.14, radius: 300 },
   { id: 'ajanta', name: { en: 'Ajanta', zh: '阿旃陀' }, region: 'india', lat: 20.55, lon: 75.70, radius: 200 },
   { id: 'nalanda', name: { en: 'Nalanda', zh: '那烂陀' }, region: 'india', lat: 25.14, lon: 85.44, radius: 200 },
-  { id: 'bhaktapur', name: { en: 'Bhaktapur', zh: '巴克塔普尔' }, region: 'nepal', lat: 27.67, lon: 85.43, radius: 200 },
   { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
   { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, region: 'siam', lat: 14.36, lon: 100.56, radius: 300 },
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, region: 'java', lat: 8.37, lon: 115.45, radius: 180 },
