@@ -788,4 +788,20 @@ export const CARDS = {
       "畜栏、沼泽与平原 —— 镇边用柴篱围成的羊栏和牛栏，古河道留下的芦苇沼泽水塘，草原和小块的麦田、大麦田。",
     ],
   },
+  'shibam': {
+    en: [
+      "Shibam stands on a low spur in the Wadi Hadhramaut, in southern Yemen, a walled town of mudbrick tower houses rebuilt after a great flood in the early 16th century. The moment shown is about 1700, when merchants and emigrants of the Hadhramaut have grown rich in the Indian Ocean trade and built upward inside the wall to save land and to display it. The architecture is Hadhrami: sun-dried brick plastered with brown earth, battered walls that thin as they rise, lime on the upper storeys and parapets, carved wooden doors and windows.",
+      "A merchant's tower house — seven storeys of mud brick, about 21 m high, which can be entered. A carved street door opens on a lobby and a stair of two flights to each floor; the ground storey holds grain jars and stabled beasts, the middle floors are the women's and family rooms, the majlis on the fifth floor has seats round the walls, carpets and carved windows, and a stair leads out to the roof terrace.",
+      "The towers — about 450 houses of five to eleven storeys stand shoulder to shoulder in rows along narrow streets, their faces forming a cliff 20 to 30 m high, brown below and whitewashed above, windows small near the ground and larger and framed in white higher up.",
+      "The Friday mosque and the sultan's palace — a whitewashed mosque with a court, a hall of piers and palm-trunk beams and a tall square minaret, west of the square; the palace, a great fortified house with corner turrets, to its north.",
+      "The wall, the gate and the wadi — a mud wall with corner towers closes the town, its one gate opening south on the road to the palm gardens and fields of the wadi floor and the dry channel of the wadi.",
+    ],
+    zh: [
+      "希巴姆位于也门南部哈德拉毛河谷的一处低矮山脊上，是一座由泥砖塔楼住宅组成的城墙围合的城镇，16世纪初大洪水后重建。画面定格在约1700年，哈德拉毛的商人和移民靠印度洋贸易致富，在城墙内向上盖楼，既为节省土地，也为炫耀财富。建筑属哈德拉毛风格：晒干的泥砖外抹棕色泥灰，墙体向上渐收，上层与女儿墙刷石灰，门窗雕刻木作。",
+      "商人的塔楼住宅 —— 七层泥砖，高约21米，可以进入。雕花街门通向门厅，楼梯每层两跑；底层存放谷物罐并拴养牲畜，中间几层是女眷与家人的房间，五层的客厅沿墙设坐席、铺地毯、开雕花窗，楼梯一直通向屋顶平台。",
+      "塔楼群 —— 约450座五至十一层的住宅沿狭窄街巷并肩而立，立面连成20至30米高的崖壁，下部棕色、上部刷白，低处窗小，高处窗大并有白色窗框。",
+      "主麻清真寺与苏丹宫 —— 广场西侧是刷白的清真寺，有庭院、棕榈木梁与方墩的礼拜殿和高大的方形宣礼塔；北侧是带角楼的宏大城堡式宫邸。",
+      "城墙、城门与河谷 —— 带角塔的泥墙围住全城，唯一的城门朝南，通向河谷底的椰枣园、农田和干涸的河道。",
+    ],
+  },
 };

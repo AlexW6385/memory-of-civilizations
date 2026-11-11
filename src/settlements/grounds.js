@@ -69,6 +69,7 @@ import { ground as abuSimbel } from './abu-simbel/ground.js';
 import { ground as thebes } from './thebes/ground.js';
 import { ground as mongolKarakorum } from './mongol-karakorum/ground.js';
 import { ground as catalhoyuk } from './catalhoyuk/ground.js';
+import { ground as shibam } from './shibam/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -135,6 +136,7 @@ export const GROUNDS = {
   thebes,
   'mongol-karakorum': mongolKarakorum,
   catalhoyuk,
+  shibam,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -206,6 +208,7 @@ const LOADERS = {
   thebes: () => import('./thebes/index.js'),
   'mongol-karakorum': () => import('./mongol-karakorum/index.js'),
   catalhoyuk: () => import('./catalhoyuk/index.js'),
+  shibam: () => import('./shibam/index.js'),
 };
 
 /** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */
