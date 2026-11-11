@@ -150,7 +150,6 @@ export const BLEND = 100;
  * layout keeps room for them, so that building one does not move the others.
  */
 export const PLANNED = [
-  { id: 'nan-madol', name: { en: 'Nan Madol', zh: '南马都尔' }, region: 'micronesia', lat: 6.84, lon: 158.33, water: true, island: true, radius: 190 },
 ];
 
 /** Open country left between two settlements' blended edges, at the least (m). */
