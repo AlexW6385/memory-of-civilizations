@@ -127,8 +127,8 @@ export function height(x, z) {
   // the ravine's walls to the east (the Phaedriades' flank) and the cliffs of the north
   h += 46 * smooth(143, 175, x) * smooth(58, 6, Math.abs(z - 4));
   h += 0.9 * Math.sin(x * 0.21 + 1.3) * Math.sin(z * 0.17 + 0.4) * smooth(20, 80, Math.abs(x - 20) + Math.abs(z - 20) * 0.5);
-  const north = smooth(-118, -150, z);
-  h += 22 * north * (0.5 + 0.5 * Math.sin(x * 0.11));
+  const north = smooth(-120, -142, z);
+  h += 30 * north * (0.55 + 0.45 * Math.sin(x * 0.13 + 0.7) * Math.sin(z * 0.09 + 1.1));
   if (!CACHE) CACHE = PAD_BOX();
   // lots: each house on its own terrace
   for (const [q, y] of CACHE) { if (x > q[0] - 3 && x < q[2] + 3 && z > q[1] - 3 && z < q[3] + 3) { const d = Math.max(q[0] - x, x - q[2], q[1] - z, z - q[3]); h = h + (y - h) * smooth(2.6, 0, d); } }

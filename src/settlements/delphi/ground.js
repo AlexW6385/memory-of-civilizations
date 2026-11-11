@@ -7,13 +7,13 @@ import { RADIUS, height, built, onWay, inRect, TT, SPRING, STADIUM, smooth as sm
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function cover(x, z, h, ny) {
-  const c = { sand: 0.2, grass: 0.12, rock: 0.35, soil: 0.35, fields: 0, dry: 0.85, warmth: 0.75, red: 0.3, road: 0, snow: 0, forest: 0 };
+  const c = { sand: 0.05, grass: 0.1, rock: 0.6, soil: 0.2, fields: 0, dry: 0.85, warmth: 0.6, red: 0.12, road: 0, snow: 0, forest: 0 };
   if (inRect(TT, x, z) || onWay(x, z)) { c.road = 0.85; c.rock = 0.4; c.soil = 0; return c; }
   if (inRect(STADIUM, x, z)) { c.sand = 0.8; c.road = 0.2; c.rock = 0; return c; }
   if (z < -115 || x > 150 || ny < 0.72) { c.rock = 0.9; c.soil = 0.05; c.dry = 0.9; c.grass = 0; return c; }
   if (built(x, z)) { c.road = 0.45; c.soil = 0.3; return c; }
   if (z > 118 || Math.hypot(x, z) > RADIUS - 40) { c.fields = 0.3; c.grass = 0.3; c.rock = 0.15; return c; }
-  const n = hash2(x * 0.08, z * 0.08); c.rock = 0.25 + 0.3 * n; c.red = 0.2 + 0.25 * n; return c;
+  const n = hash2(x * 0.08, z * 0.08); c.rock = 0.5 + 0.3 * n; c.red = 0.08 + 0.15 * n; c.soil = 0.2; return c;
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 /** Plants per 100 m²: nothing on built ground; the sanctuary's cypresses, bay and holm oaks; olives below and by the village; pines and maquis up the slope; a plane tree by the spring. */
