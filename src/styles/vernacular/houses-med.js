@@ -178,6 +178,15 @@ function houseMed(el, { bag, col }) {
         // the casement's frame: a mullion and a transom
         if (!closed) { put('wood_dark', u - 0.03, u + 0.03, v0, v0 + wh, 0.08, 0.1); put('wood_dark', u - ww / 2, u + ww / 2, v0 + wh * 0.66 - 0.03, v0 + wh * 0.66 + 0.03, 0.08, 0.1); }
         if (!closed && shut && el.variant !== 'moorish' && el.variant !== 'ottoman') for (const sd of [-1, 1]) put(shut, sd < 0 ? u - ww - 0.12 : u + ww / 2 + 0.12, sd < 0 ? u - ww / 2 - 0.12 : u + ww + 0.12, v0, v0 + wh, 0.03, 0.08);
+        if (el.variant === 'french' && s === 1 && !closed && (b % 2 === 0 || bays < 3)) {
+          // a balcony of wrought iron on two stone consoles: bars between rails, scrolled ends
+          const bw = ww * 0.62, bd = 0.42;
+          put(O.trim, u - bw, u + bw, v0 - 0.1, v0 + 0.0, 0.05, bd + 0.05);
+          for (const sx of [-1, 1]) put(O.trim, u + sx * (bw - 0.15) - 0.06, u + sx * (bw - 0.15) + 0.06, v0 - 0.4, v0 - 0.1, 0.05, 0.3);
+          put('iron', u - bw, u + bw, v0 + 0.9, v0 + 0.95, bd, bd + 0.04); put('iron', u - bw, u + bw, v0 + 0.02, v0 + 0.06, bd, bd + 0.03);
+          for (let x = u - bw + 0.04; x <= u + bw - 0.03; x += 0.13) put('iron', x - 0.012, x + 0.012, v0 + 0.06, v0 + 0.9, bd, bd + 0.025);
+          for (const sx of [-1, 1]) put('iron', sx < 0 ? u - bw : u + bw - 0.04, sx < 0 ? u - bw + 0.04 : u + bw, v0 + 0.06, v0 + 0.95, 0.06, bd);
+        }
         if (O.pointed && rand() < O.pointed) put(O.trim, u - 0.08, u + 0.08, v0 + wh, v0 + wh + 0.4, 0.0, 0.08);
         if (el.variant === 'venetian' && s === 1 && b === Math.floor(bays / 2) && rand() < 0.35) {
           // a balcony: a slab of Istrian stone on two brackets, an iron railing of bars between rails
@@ -209,6 +218,19 @@ function houseMed(el, { bag, col }) {
       }
       put('timber', a + 0.1, b - 0.1, wa - 0.1, wa - 0.02, D, D + 0.08); put('timber', a + 0.1, b - 0.1, wb, wb + 0.08, D, D + 0.06);
       put('timber', a - 0.15, b + 0.15, yb, yb + 0.12, -0.02, D + 0.15);
+    }
+  }
+  if (el.variant === 'french' && !simple) {
+    // chain quoins of cut stone at the corners (long and short in turn), and a hanging iron sign with its painted board over a shop door
+    for (const [cx0, cz0] of [[R[0], R[1]], [R[2], R[1]], [R[0], R[3]], [R[2], R[3]]]) for (let k = 0, v = 0.6; v < H - 0.3; k++, v += 0.55) {
+      const q = k % 2 ? 0.5 : 0.85, sx = cx0 === R[0] ? 1 : -1, sz = cz0 === R[1] ? 1 : -1;
+      bag.add(O.trim, box(Math.min(cx0 - sx * 0.04, cx0 + sx * q), y + v, Math.min(cz0 - sz * 0.04, cz0 + sz * 0.04), Math.max(cx0 - sx * 0.04, cx0 + sx * q), y + v + 0.5, Math.max(cz0 - sz * 0.04, cz0 + sz * 0.04)));
+    }
+    if (!OPEN && rand() < 0.45) {
+      const along = f === 'n' || f === 's', sg = f === 'n' || f === 'w' ? -1 : 1, fz = f === 'n' ? R[1] : f === 's' ? R[3] : f === 'w' ? R[0] : R[2], u0 = along ? R[0] + (R[2] - R[0]) * 0.8 : R[1] + (R[3] - R[1]) * 0.8;
+      const B = (mat, a0, a1, v0, v1, d0, d1) => { const p0 = fz + sg * d0, p1 = fz + sg * d1, q = along ? [u0 + a0, Math.min(p0, p1), u0 + a1, Math.max(p0, p1)] : [Math.min(p0, p1), u0 + a0, Math.max(p0, p1), u0 + a1]; bag.add(mat, box(q[0], y + v0, q[1], q[2], y + v1, q[3])); };
+      B('iron', -0.02, 0.02, 3.0, 3.04, 0.05, 1.05); B('iron', -0.02, 0.02, 3.04, 3.5, 0.05, 0.09);
+      B(rand() < 0.5 ? 'paint_blue' : 'cloth_red', -0.03, 0.03, 2.15, 2.95, 0.35, 0.95); B('gilt_bronze', -0.04, 0.04, 2.12, 2.15, 0.33, 0.97);
     }
   }
   // the top: a cornice and a roof (low tiled, steep slate, or flat behind a parapet)

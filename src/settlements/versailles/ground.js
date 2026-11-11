@@ -2,9 +2,9 @@
 // bosquets' dense woods of hornbeam, lime and elm, the Grand Canal; the soft light of the
 // Île-de-France.
 
-import { RADIUS, CHATEAU, LOGIS, WINGS, PARTERRE, TAPIS, PLACE, height, inCanal, onAvenue, inRect, inLot } from './layout.js';
+import { RADIUS, CHATEAU, LOGIS, CHAPEL, WINGS, PARTERRE, TAPIS, PLACE, STABLES, height, inCanal, onAvenue, inRect, inLot } from './layout.js';
 
-const BUILT = [CHATEAU, LOGIS, ...WINGS];
+const BUILT = [CHATEAU, LOGIS, CHAPEL, ...WINGS];
 function cover(x, z, h) {
   const c = { sand: 0.2, grass: 0.6, rock: 0, soil: 0.2, fields: 0, dry: 0.2, warmth: 0.45, red: 0.05, road: 0, snow: 0, forest: 0 };
   if (inRect(PARTERRE, x, z) || inRect(PLACE, x, z) || onAvenue(x, z) || (Math.abs(z) < 34 && x < -60 && !inRect(TAPIS, x, z))) { c.road = 0.6; c.sand = 0.4; return c; }
@@ -15,7 +15,7 @@ function water(x, z, y) { return inCanal(x, z) && y < -0.7; }
 function waterLevel(x, z) { return inCanal(x, z) ? -1 : -Infinity; }
 function fromWater(x, z) { return inCanal(x, z) ? -2 : 20; }
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inCanal(x, z) || BUILT.some((r) => inRect(r, x, z, 6)) || inRect(PARTERRE, x, z, 3) || inRect(TAPIS, x, z, 4) || inRect(PLACE, x, z, 3) || onAvenue(x, z, -4) || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inCanal(x, z) || BUILT.some((r) => inRect(r, x, z, 6)) || inRect(PARTERRE, x, z, 3) || inRect(TAPIS, x, z, 4) || inRect(PLACE, x, z, 3) || onAvenue(x, z, -4) || inLot(x, z, 1) || STABLES.some((s) => inRect([s.x - 16, s.z - 30, s.x + 62, s.z + 30], x, z))) return null;
   if (x < -60 && Math.abs(z) < 34) return null;                                     // the axis's walks
   if (x < 0 && x > -360 && Math.abs(z) < 260) return { elm: 0.35, oak: 0.1 };      // the bosquets
   if (onAvenue(x, z, 4)) return { elm: 0.2 };                                        // the avenues' rows

@@ -16,6 +16,7 @@ export const TAPIS = [-300, -22, -140, 22];
 export const APOLLO = [-320, 0];
 // the canal's eastern reach; it is cut by the settlement's edge at a landing (end), its cross-arm lying beyond
 export const CANAL = { x0: -340, w: 40, cross: -390, crossW: 24, end: -362 };
+export const CHAPEL = [50, -106, 74, -64];
 export const PLACE = [100, -70, 210, 70];
 export const RISE = 6;
 // the first floor (§1c): the Hall of Mirrors along the garden front (bays 4–20 of its 25), the Salons of War and Peace,
@@ -41,7 +42,10 @@ export function height(x, z) {
   if (inCanal(x, z)) h = -2.2;
   return h * (1 - smooth(RADIUS - 40, RADIUS - 5, Math.hypot(x, z)));
 }
-export const onAvenue = (x, z, m = 0) => x > PLACE[2] - 5 && [0, 0.35, -0.35].some((s) => Math.abs(z - (x - PLACE[2]) * s) < 12 + m);
+// the three avenues: Paris on the axis, Saint-Cloud and Sceaux leaving the Place's corners, the stables in the wedges between
+export const AVE0 = 75;
+export const STABLES = [{ x: 214, z: -40, side: -1 }, { x: 214, z: 40, side: 1 }];
+export const onAvenue = (x, z, m = 0) => x > PLACE[2] - 5 && [[0, 0], [AVE0, 0.35], [-AVE0, -0.35]].some(([o, s]) => Math.abs(z - (o + (x - PLACE[2]) * s)) < 12 + m);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let LOTS = null;
 /** The town's houses east of the Place d'Armes, between the avenues. */
@@ -51,7 +55,7 @@ export function lots() {
   const rand = rng(1690);
   for (let x = 120; x < RADIUS - 20; x += 14) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 13) {
     const w = 10 + rand() * 3, d = 9 + rand() * 3, cx = x + w / 2, cz = z + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 45 || inRect(PLACE, cx, cz, 10) || onAvenue(cx, cz, 8) || (cx < 160 && Math.abs(cz) < 230) || rand() < 0.2) continue;
+    if (Math.hypot(cx, cz) > RADIUS - 45 || inRect(PLACE, cx, cz, 10) || STABLES.some((s) => inRect([s.x - 16, s.z - 30, s.x + 62, s.z + 30], cx, cz, 4)) || onAvenue(cx, cz, 8) || (cx < 160 && Math.abs(cz) < 230) || rand() < 0.2) continue;
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: RISE, foot: RISE - 0.4, storeys: 3, front: rand() < 0.5 ? 'n' : 's', plaster: true });
   }
   return LOTS;

@@ -11,6 +11,8 @@ import { courtRange, marbleCourt, grille } from './court.js';
 import { grandCorps } from './grand.js';
 import { ambassadors } from './stair.js';
 import { canalQuay } from './canal.js';
+import { chapel } from './chapel.js';
+import { ecurie } from './ecuries.js';
 import { orangeTrees } from './garden.js';
 import { coach, sedanChair } from '../baroque/street.js';
 
@@ -174,6 +176,6 @@ function fountain(el, ctx) {
 }
 registerStyle('classical_fr', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, range, parterre, fountain, court_range: courtRange, marble_court: marbleCourt, grille, grand_corps: grandCorps, ambassadors, canal_quay: canalQuay, orange_trees: orangeTrees, coach, sedan_chair: sedanChair },
+  elements: { ...STYLES.qing.elements, range, parterre, fountain, court_range: courtRange, marble_court: marbleCourt, grille, grand_corps: grandCorps, ambassadors, canal_quay: canalQuay, chapel, ecurie, orange_trees: orangeTrees, coach, sedan_chair: sedanChair },
   objects: {},
 });

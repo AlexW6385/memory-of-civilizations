@@ -1,5 +1,5 @@
 // Versailles about 1690 (docs/settlements/versailles.md §2–§4).
-import { RADIUS, CHATEAU, LOGIS, WINGS, PARTERRE, LATONA, LATONA_Y, APOLLO, CANAL, RISE, MARBLE, MARBLE_RISE, EXT, STAIR, FY, STATE_ROOMS } from './layout.js';
+import { RADIUS, CHATEAU, LOGIS, WINGS, PARTERRE, LATONA, LATONA_Y, APOLLO, CANAL, RISE, MARBLE, MARBLE_RISE, CHAPEL, STABLES, EXT, STAIR, FY, STATE_ROOMS } from './layout.js';
 
 const y = RISE;
 export const chateau = {
@@ -17,6 +17,7 @@ export const chateau = {
     // Salons of War and Peace, the King's Grand Apartment; the Ambassadors' Staircase in the court north of the Royal Court
     { t: 'grand_corps', rect: CHATEAU, ext: EXT, y, h: 22, fy: FY },
     { t: 'ambassadors', rect: STAIR, y, h: 22, fy: FY, py: 10.4 },
+    { t: 'chapel', rect: CHAPEL, y, fy: FY },
     ...WINGS.map((r) => ({ t: 'range', rect: r, h: 20, y, front: 'we' })),
     // the court side (§1b): Louis XIII's brick-and-stone château round the raised Marble Court — the corps de logis with
     // its avant-corps, columns, balcony and clock, its two wings — the ranges of the Royal Court before it, the ministers'
@@ -40,6 +41,7 @@ export const chateau = {
     { t: 'fountain', c: APOLLO, r: 18, y: 0, kind: 'apollo', dir: [1, 0] },
   ],
   rooms: [{ id: 'parterre', rect: PARTERRE, y, kind: 'open' }, { id: 'marble court', rect: [MARBLE[0] + 1, MARBLE[1] + 1, MARBLE[2] - 1, MARBLE[3] - 1], y: y + MARBLE_RISE, kind: 'open' },
+    { id: 'royal chapel', rect: [CHAPEL[0] + 1.6, CHAPEL[1] + 1.6, CHAPEL[2] - 1.6, CHAPEL[3] - 1.6], y, kind: 'hall' }, { id: 'royal chapel tribune', rect: [CHAPEL[0] + 1.6, CHAPEL[1] + 1.6, CHAPEL[2] - 1.6, CHAPEL[3] - 1.6], y: FY, kind: 'hall' },
     ...STATE_ROOMS.map(([id, rect, ry]) => ({ id, rect, y: ry, kind: 'hall' }))],
   walks: [Object.assign([[180, 0], [80, 0]], { y0: y })],
 };
