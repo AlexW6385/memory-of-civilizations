@@ -27,7 +27,8 @@ export const square = {
 };
 export const kremlin = {
   id: 'muscovy-kremlin', style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true,
-  entrance: { at: [40, 20], facing: 'w' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
+  entrance: { at: [40, 20], facing: 'w' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS],
+  rooms: [{ id: 'facets-hall', rect: [C.facets[0] + 1.6, C.facets[1] + 1.6, C.facets[2] - 1.6, C.facets[3] - 1.6], y: hy(C.facets) + 5.5, kind: 'hall' }],
   elements: [
     { t: 'kremlin_wall', pts: KREMLIN, h: 12, th: 4.5, y: height, every: 55, round: [0, 1, 2], gates: [SPASSKY, NIKOLSKY, [2, 0.5]] },
     { t: 'kitai_wall', pts: KITAI, h: 6.5, th: 3.5, y: height, every: 60, gates: KITAI_GATES },
@@ -35,7 +36,7 @@ export const kremlin = {
     { t: 'archangel', rect: C.archangel, h: 18, y: hy(C.archangel) },
     { t: 'annunciation', rect: C.annunciation, y: hy(C.annunciation) },
     { t: 'ivan_tower', c: C.ivan, y: height(...C.ivan) },
-    { t: 'russian_church', rect: C.facets, h: 13, y: hy(C.facets), domes: [], apses: 0 },
+    { t: 'facets_palace', rect: C.facets, y: hy(C.facets) },
   ],
 };
 // the Dormition, with its inside: its own plan, so that its nave is a room (with its music) and its door is reached on foot

@@ -15,6 +15,8 @@ import { intercession } from './intercession.js';
 import { nalichnik, yardFence, streetLog, stalls, logChurch } from './posad.js';
 import { ivanTower, archangel, annunciation } from './kremlin.js';
 import { kitaiWall } from './kitai.js';
+import { facetsPalace } from './palace.js';
+import { landing, raft } from './river.js';
 import { dressHouse, yardbuild, garden } from './yard.js';
 
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
@@ -589,6 +591,6 @@ function beamBox(a, b, w, h) {
 }
 registerStyle('muscovite', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, street_log: streetLog, kitai_wall: kitaiWall, yardbuild, garden, stalls, log_church: logChurch, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
+  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, street_log: streetLog, kitai_wall: kitaiWall, facets_palace: facetsPalace, landing, raft, yardbuild, garden, stalls, log_church: logChurch, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
   objects: {},
 });

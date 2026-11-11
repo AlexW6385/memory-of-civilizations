@@ -1,5 +1,5 @@
 // The log houses (izby) of the boyars' courts and the posad (docs/settlements/muscovy.md §5).
-import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin } from './layout.js';
+import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ } from './layout.js';
 const base = (id, elements) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
 // the gable end of each house turned to the nearer street (the streets of layout.js: x = 42 − 420 + 84k, z = 35 − 420 + 70k)
 function front([x0, z0, x1, z1]) {
@@ -21,6 +21,7 @@ export async function houses() {
   for (let i = 0; i < all.length; i += 200) plans.push(base(`muscovy-houses-${i / 200}`, all.slice(i, i + 200).map((l) => ({ t: 'izba', ...l, front: front(l.rect), open: openIzba(l), variant: variantOf(l), yard: Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20) < 240 ? 6.7 : 0, groundY: height }))));
   const yb = yards(all); for (let i = 0; i < yb.length; i += 300) plans.push(base(`muscovy-yards-${i / 300}`, yb.slice(i, i + 300)));
   plans.push(base('muscovy-streets', streets()), base('muscovy-market', market()), base('muscovy-churches', CHURCHES.map(([x, z, yaw]) => ({ t: 'log_church', c: [x, z], y: height(x, z), yaw }))));
+  plans.push(base('muscovy-stages', stages()), { ...base('muscovy-river-life', riverLife()), style: 'life' });
   plans.push({ ...base('muscovy-people', people()), style: 'life' });
   return plans;
 }
@@ -66,6 +67,10 @@ export function people() {
   for (const [k, z] of [-62, 16, 84].entries()) { const y = height(lx, z); L.push({ t: 'cart', kind: 'two', beast: 'horse', load: ['sacks', 'barrels', 'hay'][k], at: [lx, z], y, rot: Math.PI, seed: 320 + k }); fig([lx + 1.1, z + 1.8], Math.PI, { carry: 'staff', len: 1.6 }); }
   for (let k = 0; k < 7; k++) { const at = [SQUARE[2] - 1 - rand() * 3, -120 + k * 30 + rand() * 10]; fig(at, rand() * 6.28, { carry: k % 3 === 0 ? 'basket' : 'bundle', pose: 'stand' }); }
   { const at = [SQUARE[2] - 2, 30]; L.push({ t: 'barrel', at, y: height(...at), rot: 0, seed: 330, n: 1 }); fig([at[0] + 0.7, at[1] + 0.2], -Math.PI / 2, { over: 'apron', cloth2: 'linen' }); fig([at[0] - 0.9, at[1] - 0.3], Math.PI / 2, { pose: 'talk' }); }
+  // in the Palace of Facets: the tsar on his throne, boyars standing along the benches and a few sitting, in their tall coats
+  { const F = CATHEDRALS.facets, fy = height((F[0] + F[2]) / 2, (F[1] + F[3]) / 2) + 5.5 + 0.05, tx = F[0] + 1.6 + 0.8, tz = (F[1] + F[3]) / 2;
+    fig([tx + 0.4, tz], -Math.PI / 2, { y: fy + 0.6, pose: 'sit', cloth: 'cloth_red', cloth2: 'cloth_ochre', over: 'cape', hat: 'cap', hatMat: 'gilt_bronze', beard: 1, hair: 'long' });
+    for (let q = 0; q < 9; q++) { const side = q % 3, at = side === 0 ? [F[0] + 3.4 + rand() * 18, F[1] + 3.1 + rand() * 0.5] : side === 1 ? [F[0] + 3.4 + rand() * 18, F[3] - 3.1 - rand() * 0.5] : [F[0] + 3.2 + rand() * 1.5, F[1] + 4 + rand() * 16]; fig(at, face(at, [(F[0] + F[2]) / 2, tz]) + (rand() - 0.5) * 0.4, { y: fy, pose: q % 4 === 0 ? 'sit' : 'stand', hat: 'cap', hatMat: 'hide_brown', beard: 1, hair: 'long', over: 'sash' }); } }
   // in St Basil's central church: a priest before the royal doors, a few of the faithful standing (docs §10)
   { const [bx, bz] = BASIL, by = height(bx, bz) + 4.02;
     fig([bx + 1.6, bz], -Math.PI / 2, { y: by, cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cape', hat: 'none', beard: 1, hair: 'long' });
@@ -117,4 +122,31 @@ function yards(all) {
     }
   }
   return E;
+}
+
+// the landing stages along both banks of the Moskva: x of each, on the north bank (the posad's side) and the south (Zamoskvorechye)
+const STAGES = [[-250, 1], [-190, 1], [-120, 1], [-45, 1], [30, 1], [100, 1], [170, 1], [240, 1], [-200, -1], [-80, -1], [60, -1], [180, -1]];
+const stageAt = ([x, side]) => { const z = riverZ(x) - side * 52; return { x, z, side, y: height(x, z) + 0.15 }; };
+/** The stages (mostki) on their piles, and the log rafts moored in the river. */
+function stages() {
+  const L = [];
+  STAGES.forEach((s, i) => { const g = stageAt(s); L.push({ t: 'landing', c: [g.x, g.z], y: g.y, dir: g.side, level: RIVER.level, bed: RIVER.bed, len: 11, seed: i + 1 }); });
+  [[-150, 14, 0.05], [110, -6, -0.04], [-20, 20, 0.02]].forEach(([x, dz, yaw], i) => L.push({ t: 'raft', c: [x, riverZ(x) + dz], y: RIVER.level + 0.05, yaw, seed: 20 + i, n: 9 }));
+  return L;
+}
+/** The people and boats at the water: washerwomen on the platforms, a fisher on the deck, boats at the stages, barges on the river, geese on the bank. */
+function riverLife() {
+  const L = [], rand = rng(1601), face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));
+  const fig = (at, rot, o = {}) => L.push({ t: 'figure', at, y: o.y ?? height(at[0], at[1]), rot, seed: Math.floor(rand() * 1e9), dress: o.dress ?? 'robe', cloth: ['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_ochre', 'linen'][Math.floor(rand() * 5)], cloth2: 'linen', skin: 'skin_light', ...o });
+  STAGES.forEach((s, i) => {
+    const g = stageAt(s), Z = (d) => g.z + g.side * d, wl = RIVER.level + 0.5, water = [g.x, Z(30)];
+    // washing: women kneeling on the lower platform, a basket of linen by each
+    if (i % 3 !== 2) for (const dx of [-0.6, 0.9]) if (rand() < 0.8) fig([g.x + dx, Z(12.4)], face([g.x, Z(12.4)], water), { y: wl, pose: 'squat', hair: 'bun', over: 'shawl', arms: 'hang', hat: 'none', dress: 'robe' });
+    L.push({ t: 'basket', at: [g.x + 1.7, Z(12.4)], y: wl, rot: 0, seed: 50 + i, n: 1 });
+    if (i % 2 === 0) fig([g.x, Z(8.5)], face([g.x, Z(8.5)], water), { y: g.y, pose: 'stand', carry: 'staff', hair: 'short', beard: 1, hat: 'cap', hatMat: 'hide_brown', over: 'sash' });          // a fisher on the deck with his rod
+    L.push({ t: 'boat', kind: i % 4 === 0 ? 'canoe' : 'rowboat', at: [g.x + 3.1, Z(12.5)], y: RIVER.level - 0.05, rot: (rand() - 0.5) * 0.2, seed: 70 + i });
+    if (i % 4 === 1) L.push({ t: 'chickens', kind: 'goose', at: [g.x - 4, Z(-3)], y: height(g.x - 4, Z(-3)), rot: rand() * 6, n: 6, seed: 90 + i });
+  });
+  [-215, -95, 25, 150].forEach((x, i) => L.push({ t: 'boat', kind: 'barge', at: [x, riverZ(x) - 24 + i * 6], y: RIVER.level - 0.05, rot: Math.PI / 2 + (rand() - 0.5) * 0.08, seed: 120 + i }));
+  return L;
 }
