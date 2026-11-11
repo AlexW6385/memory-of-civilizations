@@ -8,6 +8,7 @@
 
 import { box, lathe, rod } from '../../core/geom.js';
 import { hexa } from './street.js';
+import { shopInterior, pubInterior } from './inside.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (rand, a) => a[Math.floor(rand() * a.length)];
@@ -195,7 +196,7 @@ function lettering(F, rand, u0, u1, ya, yb, d, m = 'gold') {
 function goods(F, tr, rand, u0, u1, dBack, dFront, y) {
   const { B, L } = F, G = tr.goods, tiers = [0.78, 1.42, 2.0];
   for (const ty of tiers) B('timber', u0, u1, y + ty - 0.04, y + ty, dBack, dFront - 0.04);
-  B('wood_dark', u0, u1, y + 0.7, y + 2.6, dBack - 0.01, dBack + 0.02);                    // the dark back of the window
+  if (!F.open) B('wood_dark', u0, u1, y + 0.7, y + 2.6, dBack - 0.01, dBack + 0.02);                    // the dark back of the window (an open shop is seen into)
   for (const [ti, ty] of tiers.entries()) {
     if (ti === 2 && tr.kind !== 'bolts' && tr.kind !== 'jars' && tr.kind !== 'boxes') continue;
     for (let u = u0 + 0.2; u < u1 - 0.2; u += 0.3 + rand() * 0.25) {
@@ -285,10 +286,13 @@ function shopFront(F, rand, tn, tr, uDoor, left, y) {
 export function shopHouse(el, ctx, base) {
   if (el.simple || (el.front !== 'n' && el.front !== 's')) return base(el, ctx);
   const F = frameOf(el, ctx), rand = rng(el.seed || 1), { B, C, bag, col, Wd, y, x0, z0, x1, z1 } = F;
+  F.open = !!(el.open && !el.simple);
   const tn = el.trade ?? 'grocer', tr = TRADE[tn], g0 = 3.8, n = el.storeys ?? 3, st = 3.2, H = g0 + (n - 1) * st, mat = brickOf(rand);
   const left = rand() < 0.5, dw = 1.0, uDoor = left ? 0.42 + dw / 2 + 0.05 : Wd - 0.42 - dw / 2 - 0.05;
   const wu0 = left ? 0.42 + dw + 0.2 : 0.5, wu1 = left ? Wd - 0.5 : Wd - 0.42 - dw - 0.2;
-  bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H);
+  const isOpen = el.open && !el.simple;
+  if (isOpen) { bag.add(mat, box(x0, y + g0, z0, x1, y + H, z1)); col.rect(el.rect, y + g0, y + H); shopInterior(F, rand, tn, tr, ctx, { g0, mat, uDoor, dw, wu0, wu1, left }); }
+  else { bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); }
   const bayD = 0.42;
   // pilasters on plinths, the console brackets carrying the cornice
   for (const [a, b] of [[0.0, 0.42], [Wd - 0.42, Wd]]) {
@@ -315,8 +319,14 @@ export function shopHouse(el, ctx, base) {
     for (const u of [wu0, wu1]) B('plaster_white', u - 0.04, u + 0.04, y + 0.7, y + g0 - 1.0, bayD - 0.06, bayD);
   }
   // the door: a leaf with a glazed upper panel and a panelled lower, the fanlight, the brass plate; a worn step
-  B('wood_dark', uDoor - dw / 2 - 0.04, uDoor + dw / 2 + 0.04, y, y + g0 - 1.0, 0, bayD - 0.1);
-  B('wood_dark', uDoor - dw / 2, uDoor + dw / 2, y, y + 2.45, bayD - 0.1, bayD - 0.05); B('glass_outer', uDoor - dw / 2 + 0.1, uDoor + dw / 2 - 0.1, y + 0.95, y + 2.35, bayD - 0.05, bayD - 0.035);
+  if (isOpen) {
+    B('wood_dark', uDoor - dw / 2 - 0.04, uDoor + dw / 2 + 0.04, y + 2.55, y + g0 - 1.0, 0, bayD - 0.1);
+    B('wood_dark', uDoor - dw / 2 - 0.04, uDoor - dw / 2, y, y + 2.55, 0, bayD - 0.1); B('wood_dark', uDoor + dw / 2, uDoor + dw / 2 + 0.04, y, y + 2.55, 0, bayD - 0.1);
+    B('wood_dark', left ? uDoor + dw / 2 - 0.02 : uDoor - dw / 2 - 0.06, left ? uDoor + dw / 2 + 0.02 : uDoor - dw / 2 - 0.02, y, y + 2.45, -0.02, -0.9);           // the leaf, open against the inner wall
+  } else {
+    B('wood_dark', uDoor - dw / 2 - 0.04, uDoor + dw / 2 + 0.04, y, y + g0 - 1.0, 0, bayD - 0.1);
+    B('wood_dark', uDoor - dw / 2, uDoor + dw / 2, y, y + 2.45, bayD - 0.1, bayD - 0.05); B('glass_outer', uDoor - dw / 2 + 0.1, uDoor + dw / 2 - 0.1, y + 0.95, y + 2.35, bayD - 0.05, bayD - 0.035);
+  }
   B('glass_outer', uDoor - dw / 2, uDoor + dw / 2, y + 2.55, y + g0 - 1.05, bayD - 0.09, bayD - 0.075); B('gold', uDoor + dw / 2 - 0.2, uDoor + dw / 2 - 0.12, y + 1.0, y + 1.2, bayD - 0.04, bayD - 0.02);
   B('limestone', uDoor - dw / 2, uDoor + dw / 2, y - 0.1, y + 0.03, 0, bayD + 0.25);
   if (tn === 'chemist') for (const [i, m] of ['lamp_glass', 'lamp_glass'].entries()) F.L(m, [[0.001, 0], [0.1, 0.02], [0.17, 0.18], [0.19, 0.3], [0.14, 0.44], [0.06, 0.52], [0.05, 0.62]], 10, wu0 + (wu1 - wu0) * (0.3 + 0.4 * i), y + 0.78 + 0.0, 0.2);
@@ -324,7 +334,7 @@ export function shopHouse(el, ctx, base) {
   if (tr.awn && rand() < 0.7) awning(F, tr, 0.0, Wd, y + g0 + 0.05, 1.45, rand);
   else if (tn === 'greengrocer' || tn === 'grocer') pavementGoods(F, tr, rand, wu0 + 0.2, Math.min(wu1, wu0 + 3.2), y);
   if (['pawnbroker', 'barber', 'bootmaker'].includes(tn) || rand() < 0.5) hangingSign(F, tr, tn, rand, uDoor + (left ? -0.5 : 0.5), y);
-  C(0, Wd, y, y + g0, 0, bayD + 0.02);
+  if (isOpen) { C(0, uDoor - dw / 2 - 0.05, y, y + g0, 0, bayD + 0.02); C(uDoor + dw / 2 + 0.05, Wd, y, y + g0, 0, bayD + 0.02); } else C(0, Wd, y, y + g0, 0, bayD + 0.02);
   // the cornice carrying the first floor's brick, the first-floor string, the upper windows
   B('plaster_white', 0, Wd, y + g0 + 0.1, y + g0 + 0.3, 0, 0.06);
   const wins = [];
@@ -347,7 +357,8 @@ export function pub(el, ctx, base) {
   if (el.simple || (el.front !== 'n' && el.front !== 's')) return base(el, ctx);
   const F = frameOf(el, ctx), rand = rng(el.seed || 1), { B, C, bag, col, Wd, y, x0, z0, x1, z1, L } = F;
   const g0 = 4.0, n = 3, st = 3.3, H = g0 + (n - 1) * st, mat = brickOf(rand), bayD = 0.3;
-  bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H);
+  const isOpen = el.open && !el.simple;
+  if (isOpen) { bag.add(mat, box(x0, y + g0, z0, x1, y + H, z1)); col.rect(el.rect, y + g0, y + H); } else { bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); }
   const east = el.corner === 'e', uDoor = east ? Wd - 1.3 : 1.3;
   // granite pilasters on plinths: at the ends, the corner and between the windows
   const bays = Math.max(2, Math.round((Wd - 2.6) / 2.4)), cuts = [];
@@ -366,12 +377,14 @@ export function pub(el, ctx, base) {
   // the windows between the pilasters: a granite stallriser, mahogany frames, etched glass above clear glass; the double doors at the corner
   const wins = [], edges = [...cuts.map((a) => [a, a + 0.4])];
   for (let i = 0; i + 1 < edges.length; i++) { const a = edges[i][1], b = edges[i + 1][0]; if (b - a > 0.8) wins.push([a, b]); }
+  if (isOpen) pubInterior(F, rand, ctx, { g0, mat, uDoor, east, wins });
   for (const [a, b] of wins) {
     const door = uDoor > a && uDoor < b;
     B('granite_red', a, b, y, y + 0.8, 0, bayD - 0.06);
     if (door) {
-      B('wood_dark', uDoor - 0.8, uDoor + 0.8, y, y + g0 - 1.0, 0, bayD - 0.08);
-      for (const sd of [-1, 1]) { B('wood_dark', sd < 0 ? uDoor - 0.78 : uDoor + 0.02, sd < 0 ? uDoor - 0.02 : uDoor + 0.78, y, y + 2.5, bayD - 0.08, bayD - 0.03); B('lamp_glass', sd < 0 ? uDoor - 0.62 : uDoor + 0.18, sd < 0 ? uDoor - 0.18 : uDoor + 0.62, y + 0.9, y + 2.3, bayD - 0.03, bayD - 0.015); B('gold', sd < 0 ? uDoor - 0.14 : uDoor + 0.1, sd < 0 ? uDoor - 0.1 : uDoor + 0.14, y + 1.0, y + 1.3, bayD - 0.03, bayD - 0.0); }
+      B('wood_dark', uDoor - 0.8, uDoor + 0.8, isOpen ? y + 2.6 : y, y + g0 - 1.0, 0, bayD - 0.08);
+      if (isOpen) for (const sd of [-1, 1]) B('wood_dark', sd < 0 ? uDoor - 0.84 : uDoor + 0.8, sd < 0 ? uDoor - 0.8 : uDoor + 0.84, y, y + 2.6, 0, bayD - 0.08);
+      if (!isOpen) for (const sd of [-1, 1]) { B('wood_dark', sd < 0 ? uDoor - 0.78 : uDoor + 0.02, sd < 0 ? uDoor - 0.02 : uDoor + 0.78, y, y + 2.5, bayD - 0.08, bayD - 0.03); B('lamp_glass', sd < 0 ? uDoor - 0.62 : uDoor + 0.18, sd < 0 ? uDoor - 0.18 : uDoor + 0.62, y + 0.9, y + 2.3, bayD - 0.03, bayD - 0.015); B('gold', sd < 0 ? uDoor - 0.14 : uDoor + 0.1, sd < 0 ? uDoor - 0.1 : uDoor + 0.14, y + 1.0, y + 1.3, bayD - 0.03, bayD - 0.0); }
       B('lamp_glass', uDoor - 0.78, uDoor + 0.78, y + 2.55, y + g0 - 1.05, bayD - 0.1, bayD - 0.085);
       B('limestone', uDoor - 0.9, uDoor + 0.9, y - 0.1, y + 0.03, 0, bayD + 0.35);
       // the great gas lamp over the door on its iron bracket: a lantern of glass in a cast frame under a crown
@@ -385,7 +398,7 @@ export function pub(el, ctx, base) {
     B('wood_dark', a, b, y + 0.8, y + 0.9, bayD - 0.1, bayD - 0.03); B('wood_dark', a, b, y + 2.45, y + 2.55, bayD - 0.1, bayD - 0.03); B('wood_dark', a, b, y + g0 - 1.1, y + g0 - 1.0, bayD - 0.1, bayD - 0.03);
     const nm = Math.max(1, Math.round((b - a) / 1.2)); for (let i = 1; i < nm; i++) { const u = a + (b - a) * i / nm; B('wood_dark', u - 0.04, u + 0.04, y + 0.8, y + g0 - 1.0, bayD - 0.1, bayD - 0.03); }
   }
-  C(0, Wd, y, y + g0, 0, bayD + 0.02);
+  if (isOpen) { C(0, uDoor - 0.85, y, y + g0, 0, bayD + 0.02); C(uDoor + 0.85, Wd, y, y + g0, 0, bayD + 0.02); } else C(0, Wd, y, y + g0, 0, bayD + 0.02);
   // the board hanging on an iron bracket from the corner's first floor: a painted sign with gilt lettering
   const uS = east ? Wd - 0.2 : 0.2, ys = y + g0 + 0.6;
   B('iron', uS - 0.02, uS + 0.02, ys + 1.2, ys + 1.25, 0.0, 1.4); B('iron', uS - 0.02, uS + 0.02, ys - 0.05, ys + 1.25, 1.0, 1.04);

@@ -1,4 +1,4 @@
-import { lodTiles, openLots } from '../lod.js';
+import { lodTiles } from '../lod.js';
 // The terraces of Westminster and Lambeth (docs/settlements/london.md §5); the traffic of about 1870 (§5a): hansom
 // cabs and knifeboard omnibuses on Westminster Bridge, in Bridge Street and Parliament Street, gas lamps along them;
 // on the Thames the penny steamers, one at the floating pier by the bridge, and the coal lighters.
@@ -103,9 +103,19 @@ function square() {
   for (const [x, z] of [[-45, -190], [-45, -172], [30, -196], [30, -164], [-10, -199], [-10, -161], [8, -174], [-30, -186]]) L.push({ t: 'gas_lamp', at: [x, z], y: GROUND });
   return L;
 }
+/** Which buildings stand open (DESIGN §4.3): two pubs, ten shops of different trades and five houses, nearest the arrival and along Bridge Street
+ *  toward the bridge, and two houses at the Lambeth end of the bridge (§5a). */
+function openSet(all) {
+  const out = new Set(), cx = (l) => (l.rect[0] + l.rect[2]) / 2, cz = (l) => (l.rect[1] + l.rect[3]) / 2;
+  const d = (l, p) => Math.hypot(cx(l) - p[0], cz(l) - p[1]), ok = (l) => l.rect[3] - l.rect[1] >= 8 && l.rect[2] - l.rect[0] >= 5;
+  const near = (p, f, n, per = 99) => { const seen = {}; for (const l of all.filter((q) => ok(q) && f(q) && !out.has(q)).sort((a, b) => d(a, p) - d(b, p))) { const k = l.trade ?? 'x'; if ((seen[k] = (seen[k] ?? 0) + 1) > per) continue; out.add(l); if (--n === 0) break; } };
+  const A = [60, BRIDGE.z];
+  near(A, (l) => l.pub, 2); near(A, (l) => l.shop, 10, 2);
+  near([30, BRIDGE.z - 40], (l) => !l.shop && !l.pub, 3); near([272, BRIDGE.z + 14], (l) => !l.shop && !l.pub, 2);
+  return out;
+}
 export async function houses() {
-  // the two houses nearest the Lambeth end of the bridge stand open: hall, front parlour and back room (§5a)
-  const all = lots(), plans = [], open = openLots(all, [272, BRIDGE.z + 14], 2);
+  const all = lots(), plans = [], open = openSet(all);
   plans.push(...lodTiles('london-terraces', 'victorian', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true } : {}) })), { R: RADIUS }));
   const sq = square();
   return [...plans, base('london-square', sq), base('london-square-life', sq.flatMap(ridersOf), 'life'), ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life')];
