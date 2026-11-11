@@ -1,7 +1,7 @@
 // Heian Uji — the animals (src/engine/fauna.js; docs/settlements/heian-uji.md §13): carp and a few red carp in the Aji pond,
 // dark carp in the Uji River, swallows over the pond and the river, crows over the village at dusk, sparrows on the
 // gravel of the courts and the lanes, a grey heron on the pond's shore and a little egret on the river's bank.
-import { POND, POND_LEVEL, RIVER, GARDEN, VILLA, height, pondDistance, inRiver } from './layout.js';
+import { MARKET, lots, POND, POND_LEVEL, RIVER, GARDEN, VILLA, height, pondDistance, inRiver } from './layout.js';
 
 const riverX = (z) => RIVER.x + 15 * Math.sin(z / 110);
 const fish = [];
@@ -15,6 +15,9 @@ const flights = [
 ];
 const perches = [];
 for (const [x, z] of [[-175, 38], [-150, 30], [-158, -8], [-40, 74], [50, -20], [-60, 90], [-110, 60], [-90, 140]]) perches.push({ kind: 'sparrow', x, z, y: height(x, z) + (z === -8 ? 1.0 : 0), rot: x * 0.07, range: [1.4, 1.3] });
+// the market's sparrows pecking at the spilt grain, and a few at the lanes' fronts (positions from the layout)
+for (let i = 0; i < 6; i++) { const x = MARKET[0] + 4 + (i * 7.3) % (MARKET[2] - MARKET[0] - 8), z = MARKET[1] + 4 + (i * 11.1) % (MARKET[3] - MARKET[1] - 8); perches.push({ kind: 'sparrow', x, z, y: 0.04, rot: i, range: [1.6, 1.4] }); }
+lots().forEach((l, i) => { if (i % 14) return; const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, f = l.front; perches.push({ kind: 'sparrow', x: f === 'e' ? x1 + 1.8 : f === 'w' ? x0 - 1.8 : cx, z: f === 's' ? z1 + 1.8 : f === 'n' ? z0 - 1.8 : cz, y: 0.04, rot: i, range: [1.2, 1.2] }); });
 void VILLA;
 // the heron at the pond's north shore, the egret on its south arm's shore: a dry spot at the water's edge, clear of the island bridges, facing the water
 function shore(hint) {
