@@ -8,6 +8,9 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, rod, disc, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import '../qing/index.js';
 import { cairoQaa } from './qaa.js';
+import { baynFront, baynBed } from './bayn.js';
+import { cairoWikala, cairoHammam } from './khan.js';
+import { cairoShop, sharbatStall } from './shops.js';
 import * as FN from '../mughal/furnish.js';
 
 const S = 'limestone_yellow';
@@ -433,7 +436,7 @@ function nasirMinaret(el, { bag, col }) {
 function suqCovered(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, st = el.street ?? 5, D = (x1 - x0 - st) / 2, L = z1 - z0, sw = 3.0, n = Math.floor(L / sw), w = L / n;
   const H1 = 3.6, H2 = 3.0, yr = y + H1 + H2 + 0.6, rng2 = rng(el.seed || 7);
-  const goods = [['pottery_dark', 'pot'], ['cloth_indigo', 'bolt'], ['cloth_red', 'bolt'], ['bronze', 'tray'], ['iron', 'blade'], ['wicker', 'basket'], ['cloth_ochre', 'bolt'], ['glaze_green', 'pot']];
+  const goods = el.goods ?? [['pottery_dark', 'pot'], ['cloth_indigo', 'bolt'], ['cloth_red', 'bolt'], ['bronze', 'tray'], ['iron', 'blade'], ['wicker', 'basket'], ['cloth_ochre', 'bolt'], ['glaze_green', 'pot']];
   for (const side of [-1, 1]) {
     const xs = side < 0 ? x0 : x1 - D, xf = side < 0 ? x0 + D : x1 - D, out = side < 0 ? 1 : -1;   // the shops' fronts at xf, facing the street (out)
     const X = (d) => xf + out * d, xr = (a, b) => [Math.min(X(a), X(b)), Math.max(X(a), X(b))];
@@ -455,7 +458,7 @@ function suqCovered(el, { bag, col }) {
       { const [f0, f1] = xr(-D + 0.6, 0); bag.add('wood_dark', box(f0, y + 0.05, za + 0.4, f1, y + 0.7, zb)); }
       const [g, kind] = goods[Math.floor(rng2() * goods.length)];
       for (const hy of [1.5, 2.4]) { const [h0, h1] = xr(-D + 0.6, -D + 1.0); bag.add('timber', box(h0, y + hy, za + 0.5, h1, y + hy + 0.05, zb - 0.1));
-        for (let k = 0; k < 3; k++) { const zz = za + 0.9 + k * (w - 1.2) / 3, xx = X(-D + 0.8); if (kind === 'pot') bag.add(g, lathe([[0.001, 0], [0.12, 0.03], [0.16, 0.18], [0.08, 0.32], [0.09, 0.38]], 8, null, xx, y + hy + 0.05, zz)); else if (kind === 'bolt') bag.add(g, box(xx - 0.18, y + hy + 0.05, zz - 0.25, xx + 0.18, y + hy + 0.3, zz + 0.25)); else if (kind === 'blade') bag.add(g, box(xx - 0.02, y + hy + 0.05, zz - 0.04, xx + 0.02, y + hy + 0.85, zz + 0.04)); else if (kind === 'tray') bag.add(g, lathe([[0.001, 0], [0.3, 0.01], [0.32, 0.05]], 12, null, xx, y + hy + 0.05, zz)); else bag.add(g, lathe([[0.001, 0], [0.2, 0.02], [0.24, 0.3]], 8, null, xx, y + hy + 0.05, zz)); } }
+        for (let k = 0; k < 3; k++) { const zz = za + 0.9 + k * (w - 1.2) / 3, xx = X(-D + 0.8); if (kind === 'pot') bag.add(g, lathe([[0.001, 0], [0.12, 0.03], [0.16, 0.18], [0.08, 0.32], [0.09, 0.38]], 8, null, xx, y + hy + 0.05, zz)); else if (kind === 'lamp') bag.add(g, lathe([[0.001, 0], [0.09, 0.02], [0.17, 0.18], [0.17, 0.26], [0.1, 0.4], [0.17, 0.55], [0.001, 0.55]], 10, null, xx, y + hy + 0.05, zz)); else if (kind === 'spice') bag.add(g, lathe([[0.17, 0], [0.15, 0.04], [0.001, 0.26]], 8, null, xx, y + hy + 0.05, zz)); else if (kind === 'bolt') bag.add(g, box(xx - 0.18, y + hy + 0.05, zz - 0.25, xx + 0.18, y + hy + 0.3, zz + 0.25)); else if (kind === 'blade') bag.add(g, box(xx - 0.02, y + hy + 0.05, zz - 0.04, xx + 0.02, y + hy + 0.85, zz + 0.04)); else if (kind === 'tray') bag.add(g, lathe([[0.001, 0], [0.3, 0.01], [0.32, 0.05]], 12, null, xx, y + hy + 0.05, zz)); else bag.add(g, lathe([[0.001, 0], [0.2, 0.02], [0.24, 0.3]], 8, null, xx, y + hy + 0.05, zz)); } }
       { const xx = X(0.4); for (let k = 0; k < 2; k++) { const zz = za + 0.9 + k * (w - 1.0) / 2; if (kind === 'bolt') bag.add(g, box(xx - 0.2, y + 0.7, zz - 0.3, xx + 0.2, y + 0.95, zz + 0.3)); else bag.add(g === 'iron' ? 'wicker' : g, lathe([[0.001, 0], [0.16, 0.03], [0.2, 0.22], [0.1, 0.4], [0.11, 0.46]], 8, null, xx, y + 0.7, zz)); } }
       // the upper storey's window: a small projecting lattice on brackets
       { const [l0, l1] = xr(0, 0.5); bag.add('lattice', box(l0, y + H1 + 1.0, zc - 0.55, l1, y + H1 + 2.2, zc + 0.55)); const [k0, k1] = xr(0, 0.6); bag.add('wood_dark', box(k0, y + H1 + 0.85, zc - 0.65, k1, y + H1 + 1.0, zc + 0.65)); bag.add('wood_dark', box(k0, y + H1 + 2.2, zc - 0.65, k1, y + H1 + 2.35, zc + 0.65)); }
@@ -585,6 +588,6 @@ function sabilKuttab(el, { bag, col }) {
 
 registerStyle('mamluk', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, road_wall: roadWall, nasir_minaret: nasirMinaret, suq_covered: suqCovered, cairo_front: cairoFront, sabil_kuttab: sabilKuttab, cairo_qaa: cairoQaa },
+  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, road_wall: roadWall, nasir_minaret: nasirMinaret, suq_covered: suqCovered, cairo_front: cairoFront, sabil_kuttab: sabilKuttab, cairo_qaa: cairoQaa, bayn_front: baynFront, bayn_bed: baynBed, cairo_wikala: cairoWikala, cairo_hammam: cairoHammam, cairo_shop: cairoShop, sharbat_stall: sharbatStall },
   objects: {},
 });

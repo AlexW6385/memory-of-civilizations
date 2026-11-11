@@ -3,7 +3,7 @@
 // Muqattam to the east, walled with round towers, the Mosque of al-Nasir Muhammad inside; the
 // dense city of mud-brick and stone houses round about. Pure data. +x east, +z south.
 
-export const RADIUS = 400;
+export const RADIUS = 480;
 export const HASAN = { rect: [-75, 6, 75, 74], court: [-17, 24, 17, 56], tomb: [-16, 74, 16, 106] };
 export const SQUARE = [80, -80, 170, 120];
 export const CITADEL = { c: [280, 0], r: 105, top: 36 };
@@ -23,10 +23,26 @@ export function onRoad(x, z, m = 0) { const q = roadAt(angleOf(x, z)); return !!
 // the covered market street north from the madrasa's portal (its axis at x = −37.5)
 export const SUQ = [-45, -116, -30, -14];
 // sabil-kuttabs on street corners: the crossing of the two lanes west of the madrasa, and the square's north-west corner
-export const SABILS = [[-155.5, -115.5], [-165, -130], [74, -86]];
+export const SABILS = [[-155.5, -115.5], [-165, -130], [74, -86], [-147, -222]];
 // the merchant's house with its qa'a, open and furnished (docs/settlements/mamluk-cairo.md §10): west of the covered
 // market street, its door on the lane beside it
 export const QAA = [-69, -70, -47, -48];
+// The Bayn al-Qasrayn (docs/settlements/mamluk-cairo.md §11): the widened stretch of the Qasaba (al-Mu'izz street, the lane
+// at x = −160) with the complexes of Qalawun, al-Nasir Muhammad and Barquq on its west side, the Khan of al-Khalili on its east.
+export const BAYN = [-174, -330, -146, -176];
+export const QALAWUN = [-200, -245, -174, -178];
+export const NASIR = [-198, -284, -174, -245];
+export const BARQUQ = [-200, -326, -174, -284];
+export const KHAN = [-146, -308, -104, -264];
+// the khan's lanes: two covered market streets north–south behind it, a cross lane, the bath on the Qasaba south of the Bayn, the shop you can enter
+export const SUQ2 = [-96, -312, -81, -190];
+export const SUQ3 = [-74, -300, -59, -190];
+export const CROSS = [-150, -195, -50, -185];
+export const HAMMAM = [-155.5, -166, -131.5, -142];
+export const SHOP = [-173, -165, -164, -156.5];
+export const STALLS = [{ at: [-143.6, -240], face: 'w' }, { at: [92, 30], face: 'n' }];
+export const STREETS = [[-164, -440, -156, 440], [-440, -125, 170, -115], [-45, -16, 100, -6], BAYN, SUQ, SUQ2, SUQ3, CROSS, SQUARE];
+const KEEP = [BAYN, QALAWUN, NASIR, BARQUQ, KHAN, SUQ2, SUQ3, CROSS, HAMMAM, SHOP];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export function height(x, z) {
@@ -48,6 +64,7 @@ export function lots() {
     if (Math.hypot(cx, cz) > RADIUS - 45 || inRect([-90, -10, 90, 120], cx, cz, 8) || inRect(SQUARE, cx, cz, 6) || Math.hypot(cx - CITADEL.c[0], cz - CITADEL.c[1]) < CITADEL.r + 45 || rand() < 0.15) continue;
     if (Math.abs(cz + 120) < 5 || Math.abs(cx + 160) < 4) continue;
     if (x < SUQ[2] + 1 && x + w > SUQ[0] - 1 && z < SUQ[3] + 6 && z + d > SUQ[1] - 1) continue;   // the market street
+    if (KEEP.some((k) => x < k[2] + 2 && x + w > k[0] - 2 && z < k[3] + 2 && z + d > k[1] - 2)) continue;
     if (x < QAA[2] + 1.5 && x + w > QAA[0] - 1.5 && z < QAA[3] + 1.5 && z + d > QAA[1] - 1.5) continue;   // the open house
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, storeys: 2 + (rand() < 0.4 ? 1 : 0), court: null, front: rand() < 0.5 ? 'n' : 's', plaster: rand() });
   }
