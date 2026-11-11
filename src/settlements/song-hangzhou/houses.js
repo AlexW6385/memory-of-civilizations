@@ -339,6 +339,7 @@ export function streetsideElements(L) {
   }
   // the canal streets' own paving (the lanes' ends abut it)
   for (const r of L.CANAL_STREETS) for (const [za, zb] of spans) E.push({ t: 'paving', rect: [r[0], za - 6, r[2], zb + 6 > L.ROAD.z0 ? L.ROAD.z0 : zb + 6], y: street, th: 0.3 });
+  for (const r of L.CANAL_STREETS) for (const [za, zb] of spans) E.push({ t: 'hz_slabs', rect: [r[0], za - 6, r[2], Math.min(zb + 6, L.ROAD.z0 - 6)], y: street + 0.02, seed: Math.round(r[0] + za), side: r[0] < L.CANAL.x0 ? 'w' : 'e' });
   // the mooring stones, on the street side of the canal's edge, between the landings
   for (const [x, dir] of [[L.CANAL.x0 - 0.9, -1], [L.CANAL.x1 + 0.9, 1]]) for (const [za, zb] of spans) {
     for (let z = za + 6 + rand() * 6; z < zb - 6; z += 11 + rand() * 9) {

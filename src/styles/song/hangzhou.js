@@ -798,6 +798,25 @@ function imperialWay(el, ctx) {
   }
 }
 
+/**
+ * hz_slabs { rect, y (the slabs' foot; their top is 3 cm above), seed }: a street laid in worn stone slabs (as the courts' and the Imperial Way's bands: bluestone, granite and darker worn
+ * slabs along the middle, joints open, staggered rows), with a grating of granite and its slots every 18 m near the canal's edge and now and then a slab lifted and relaid in brick.
+ * [inferred: the canal streets, paved "with stone or brick" (Marco Polo, in the dossier §15)]
+ */
+function hzSlabs(el, ctx) {
+  const { bag } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, rand = rnd(el.seed ?? 9);
+  courtPaving({ y, seed: el.seed ?? 9, rects: [el.rect] }, ctx);
+  for (let z = z0 + 5 + rand() * 9, k = 0; z < z1 - 4; z += 18 + rand() * 6, k++) {
+    const cx = el.side === 'w' ? x1 - 1.0 : x0 + 1.0;
+    bag.add('granite_grey', box(cx - 0.4, y + 0.03, z - 0.3, cx + 0.4, y + 0.075, z + 0.3));
+    for (let i = -2; i <= 2; i++) bag.add('lacquer_black', box(cx - 0.3, y + 0.075, z + i * 0.1 - 0.025, cx + 0.3, y + 0.08, z + i * 0.1 + 0.025));
+  }
+  for (let z = z0 + 3 + rand() * 6; z < z1 - 3; z += 7 + rand() * 9) {
+    const x = x0 + 0.8 + rand() * (x1 - x0 - 1.6), w = 0.9 + rand() * 1.2, d = 0.7 + rand() * 0.8;
+    for (let a = 0; a < w; a += 0.22) for (let b = 0; b < d; b += 0.11) bag.add(((a * 5 + b * 9) | 0) % 3 ? 'brick_grey' : 'slate', box(x + a + 0.006, y + 0.03, z + b + 0.006, x + a + 0.21, y + 0.045, z + b + 0.1));
+  }
+}
+
 /** sutra_pillar: a stone sutra pillar of the court { at, y } (the hexagonal shaft on its lotus base, as the chinese style's dharani pillar). */
 function sutraPillar(el, ctx) { STYLES.chinese.objects.dharani_pillar(el, ctx); }
 
@@ -1260,4 +1279,4 @@ function hzLanding(el, { bag, col }) {
   void t;
 }
 
-export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_wutou: hzWutou, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_landing: hzLanding };
+export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_wutou: hzWutou, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_slabs: hzSlabs, hz_landing: hzLanding };
