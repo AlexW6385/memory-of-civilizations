@@ -3,11 +3,11 @@
 // workshops round the Agora to talk); the woman of the house at the loom; the slave at the hearth; people in the
 // Agora between the booths and the stoas; a man leading a donkey along the Panathenaic Way.
 
-import { height, SHOPROW, FOUNTAIN } from './layout.js';
+import { height, SHOPROW, FOUNTAIN, SIMON } from './layout.js';
 import { WORKSHOPS, localFrame, EXEDRA, PALAESTRA, PARADROMIS } from './quarters.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-export const SIMON = [-291, -107, -278, -93];
+export { SIMON };
 
 export function life() {
   const rand = rng(410), L = [], seed = () => Math.floor(rand() * 1e9);

@@ -15,6 +15,8 @@ export function emitters() {
   for (const l of lots()) {
     if (r() < 0.38) { const [x0, z0, x1, z1] = l.rect; E.push({ p: [x0 + (x1 - x0) * (0.25 + 0.5 * r()), l.y + 4.6, z0 + (z1 - z0) * (0.2 + 0.3 * r())], kind: 'kitchen', thr: 0.3 + 0.5 * r(), seed: l.seed + 1 }); }
   }
+  // the walk-in houses: the kitchen's hearth smoking through the roof tiles, the bronze-smith's shop's forge
+  lots().filter((l) => l.open).forEach((l, k) => { const [X0, , , Z1] = l.rect; E.push({ p: [X0 + 6.9, l.y + 3.9, Z1 - 2.0], kind: 'kitchen', thr: 0.12 + 0.1 * (k % 3), seed: 700 + k }); });
   // the kilns: the vent over the dome (2.1 m); the ones being fired burn through the day
   WORKSHOPS.forEach((w, i) => E.push({ p: [w.kiln[0], 2.3, w.kiln[1]], kind: 'kitchen', thr: i % 4 === 1 ? 0 : 0.14 + 0.1 * (i % 3), seed: 900 + i }));
   // the bronze-smith's hearth (the first shop of the south side)

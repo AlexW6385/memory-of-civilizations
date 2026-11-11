@@ -7,6 +7,7 @@
 import { STYLES } from '../../core/build.js';
 import { box, lathe, frustum } from '../../core/geom.js';
 import { gables } from './town.js';
+import { furnishShop } from './shops.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -134,6 +135,12 @@ function simonHouse(el, ctx) {
   bag.add('wood_dark', box(dx, y + 0.04, Z0 + t, dx + 0.06, y + 2.05, Z0 + t + 0.95));
   STYLES.greek.elements.herm({ at: [dx + 1.6, Z0 - 0.5], y, rot: Math.PI }, ctx);
 
+  const trade = el.trade ?? 'shoe';
+  if (trade !== 'shoe') {
+    // another trade's shop in the same room (the Agora's shop fittings): u from X0, v from Z0 on the north street
+    const F = { R: (u0, v0, u1, v1) => [X0 + u0, Z0 + v0, X0 + u1, Z0 + v1], P: (u, v) => [X0 + u, Z0 + v], out: [0, -1] };
+    furnishShop(ctx, F, y, t, t + 4.5, t, nz - ti / 2 - Z0, trade, rand);
+  } else {
   // ── the shop: the bench, the lasts, leather, the boots and sandals on pegs, the whetstone
   const sx0 = X0 + t, sx1 = xs;
   bag.add('timber', box(sx0 + 0.2, y, Z0 + t + 1.6, sx0 + 1.6, y + 0.72, Z0 + t + 2.3)); col.rect([sx0 + 0.2, Z0 + t + 1.6, sx0 + 1.6, Z0 + t + 2.3], y, y + 0.72);
@@ -152,6 +159,7 @@ function simonHouse(el, ctx) {
   }
   for (const z of [Z0 + t + 3.2, Z0 + t + 3.9]) { bag.add('timber', box(sx1 - 0.12, y + 1.75, z - 0.02, sx1, y + 1.8, z + 0.02)); bag.add('hide_tan', box(sx1 - 0.05, y + 0.9, z - 0.3, sx1 - 0.02, y + 1.78, z + 0.3)); }
   bag.add('wicker', lathe([[0.001, 0], [0.18, 0], [0.22, 0.25], [0.2, 0.26], [0.16, 0.03], [0.001, 0.03]], 10, null, sx1 - 0.5, y, Z0 + t + 0.6));
+  }
 
   // ── the andron: the raised border, the pebble floor, the red dado, seven couches with their tables, the krater, the lamp
   const A = [xa, Z0 + t, X1 - t, nz - ti / 2], bw = 0.9, bh = 0.12;
