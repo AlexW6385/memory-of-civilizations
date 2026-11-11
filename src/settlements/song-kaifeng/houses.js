@@ -194,6 +194,34 @@ export function houseSong(el, { bag, col }) {
   // ---------------------------------------------------------------- the kinds
   const P0 = kind === 'thatch' || kind === 'farm' ? 0.14 : 0.28;     // the plinth's height
   const topY = [0];
+  /**
+   * Weathering of the plastered walls (docs/settlements/song-kaifeng.md §12): the darker foot of the wall where the rain splashes and the damp rises,
+   * rain streaks hanging from the eaves, and a patch or two where the plaster has fallen to show the brick. Thin boxes 1-2 cm proud of the wall.
+   * withFront: the front wall is plastered too (houses; the shops' fronts are open timber); avoid: [a0, a1] ranges of the front taken by door and window.
+   */
+  const weather = (yw, withFront, avoid = []) => {
+    if (det < 1) return;
+    const e = 0.012, dado = 0.5 + rand() * 0.45, dm = 'plaster_damp', st = 'plaster_streak';
+    const ok = (a0, a1) => !avoid.some(([q0, q1]) => a1 > q0 && a0 < q1);
+    B(dm, -e, 0.02, 0, D - 0.02, P0, P0 + dado); B(dm, L, 0.02, L + e, D - 0.02, P0, P0 + dado); B(dm, 0, D, L, D + e, P0, P0 + dado);
+    if (withFront) for (const [a0, a1] of [[0.0, L]]) { const cuts = [...avoid].sort((p, q) => p[0] - q[0]); let c = a0; for (const [q0, q1] of cuts) { if (q0 - c > 0.2) B(dm, c, -e, q0, 0, P0, P0 + Math.min(dado, 0.9)); c = Math.max(c, q1); } if (a1 - c > 0.2) B(dm, c, -e, a1, 0, P0, P0 + Math.min(dado, 0.9)); }
+    // rain streaks from the eave: the sides and the back always, the front where free
+    const ns = 2 + Math.floor(rand() * 3);
+    for (let k = 0; k < ns; k++) {
+      const len = 0.8 + rand() * 1.5, w = 0.08 + rand() * 0.1, a = 0.3 + rand() * (L - 0.6), side = rand();
+      if (side < 0.5 || !withFront) { if (ok(a - w, a + w) || !withFront) B(st, a - w, D - 0.02, a + w, D + 0.026, Math.max(P0 + 1.0, yw - 0.1 - len), yw - 0.1); }
+      else if (ok(a - w - 0.1, a + w + 0.1)) B(st, a - w, -0.026, a + w, 0.02, Math.max(P0 + 1.05, yw - 0.1 - len), yw - 0.1);
+    }
+    for (const sa of [0, L]) if (rand() < 0.7) { const b = 0.6 + rand() * (D - 1.2), len = 0.8 + rand() * 1.4, w = 0.1 + rand() * 0.1; B(st, sa === 0 ? -0.026 : sa - 0.02, b - w, sa === 0 ? 0.02 : sa + 0.026, b + w, Math.max(P0 + 1.0, yw - 0.1 - len), yw - 0.1); }
+    // a patch where the plaster has come off: brick under a rim of damp
+    const np = rand() < 0.65 ? 1 + (rand() < 0.4 ? 1 : 0) : 0;
+    for (let k = 0; k < np; k++) {
+      const pw = 0.35 + rand() * 0.45, ph = 0.3 + rand() * 0.4, y0 = P0 + 0.3 + rand() * 0.8;
+      const onFront = withFront && rand() < 0.4, a = 0.5 + rand() * (L - 1.0 - pw);
+      if (onFront) { if (!ok(a - 0.1, a + pw + 0.1)) continue; B(dm, a - 0.06, -e, a + pw + 0.06, 0, y0 - 0.06, y0 + ph + 0.06); B('brick_grey', a, -0.04, a + pw, -e, y0, y0 + ph); }
+      else { const b = 0.5 + rand() * (D - 1.0 - pw); const sa = rand() < 0.5 ? 0 : L; B(dm, sa === 0 ? -e : sa, b - 0.06, sa === 0 ? 0 : sa + e, b + pw + 0.06, y0 - 0.06, y0 + ph + 0.06); B('brick_grey', sa === 0 ? -0.04 : sa + e, b, sa === 0 ? -e : sa + 0.04, b + pw, y0, y0 + ph); }
+    }
+  };
   const fascia = (mat, a0, a1, y0, y1, b) => B(mat, a0, b - 0.05, a1, b + 0.05, y0, y1);
   /** The gable end's wall up to the roof and its hanging fish: gables = the roof is along the front (ridge on u) so the ends are at a = 0 and a = L. */
   const gableInfill = (mat, M, sw0, sw1, tw0, tw1, yWall, prof, yRoof) => { void M; void sw0; void sw1; void tw0; void tw1; void yWall; void prof; void yRoof; };
@@ -283,6 +311,21 @@ export function houseSong(el, { bag, col }) {
           B(m, a, bk - 0.46, a + 0.38, bk - 0.42 + 0.02, P0 + 0.12 + r * 0.66, P0 + 0.5 + r * 0.66);
         }
       }
+      // the front's variety: some bays boarded up (the shutters, men ban, in their grooves), a hanging board on a bracket at the post opposite the sign pole
+      if (det >= 2) {
+        for (let k = 0; k < nb; k++) if (k !== doorBay && nb > 2 && rand() < 0.18) {
+          const a0 = bayA(k) + 0.14, a1 = bayA(k + 1) - 0.14;
+          B('wood_dark', a0, fb - 0.09, a1, fb - 0.02, P0 + 0.95, yF - 0.32);
+          for (const y of [P0 + 1.25, P0 + 2.0]) B('timber', a0, fb - 0.115, a1, fb - 0.09, y, y + 0.1);
+        }
+        const sa2 = poleA(el.seed || 1, L) < L / 2 ? L - 0.13 : 0.13, bm = pick(rand, ['wood_dark', 'lacquer_chestnut', 'timber_red']);
+        B('timber', sa2 - 0.03, -0.62, sa2 + 0.03, fb - 0.12, yF - 0.66, yF - 0.58);
+        B('iron', sa2 - 0.015, -0.62, sa2 + 0.015, -0.56, yF - 0.58, yF - 0.5);
+        B(bm, sa2 - 0.21, -0.6, sa2 + 0.21, -0.54, yF - 1.18, yF - 0.58); B('paint_ochre', sa2 - 0.06, -0.615, sa2 + 0.06, -0.6, yF - 1.1, yF - 0.7);
+        // the rafters' ends under the front eave
+        const ne = Math.round((L + 2 * soh) / 0.42);
+        for (let k = 0; k <= ne; k++) { const a = -soh + 0.1 + (L + 2 * soh - 0.2) * k / ne; B('timber', a - 0.04, t0 - 0.1, a + 0.04, t0 + 0.45, yE - th - 0.1, yE - th - 0.005); }
+      }
       // (the trade's sign — the wine flag, the gourd, the measure — stands on its pole in the street: shops.js)
       // the mat awning over the street in front of the door bays
       const pa0 = poleA(el.seed || 1, L);
@@ -336,6 +379,8 @@ export function houseSong(el, { bag, col }) {
       }
       // the wine shops: the dark bay above the door and its curtain of cloth
     }
+    if (!inn) weather(wallTop, false);
+    if (!inn && det >= 2 && (wide || kind === 'tea' || two) && L > 5) { const yR = yE + rise, tmm = (t0 + t1) / 2; ridgeBox(MA, tile, L / 2 - 0.22, L / 2 + 0.22, tmm - 0.2, tmm + 0.2, yR + 0.24, yR + 0.4); ridgeBox(MA, tile, L / 2 - 0.12, L / 2 + 0.12, tmm - 0.12, tmm + 0.12, yR + 0.4, yR + 0.72); }
     // ---- the inn: the front range with the gate bay, the court, the rear hall and the wings
     if (inn) innBuild();
     // ---- the roof (the ridge along the front; the inn's front range has its own)
@@ -441,12 +486,21 @@ export function houseSong(el, { bag, col }) {
     B('wood_dark', dc - dw / 2 + 0.06, 0.1, dc + dw / 2 - 0.06, 0.2, P0, P0 + dh - 0.04);     // the door leaf, a little back
     B('timber', dc - dw / 2, 0.0, dc - dw / 2 + 0.09, 0.32, P0, P0 + dh + 0.08); B('timber', dc + dw / 2 - 0.09, 0.0, dc + dw / 2, 0.32, P0, P0 + dh + 0.08); B('timber', dc - dw / 2, 0.0, dc + dw / 2, 0.32, P0 + dh, P0 + dh + 0.1);
     B('granite_block', dc - dw / 2 - 0.1, -0.5, dc + dw / 2 + 0.1, 0.3, P0 - 0.05, P0 + 0.05);          // the step
+    // the door of boards (banmen): battens across the leaf, an iron ring on each side of the meeting stile, the stile a dark line
+    for (const y of [0.35, 1.0, 1.75]) B('timber', dc - dw / 2 + 0.07, 0.07, dc + dw / 2 - 0.07, 0.1, P0 + y, P0 + y + 0.13);
+    B('iron', dc - 0.01, 0.07, dc + 0.01, 0.1, P0 + 0.05, P0 + dh - 0.1);
+    for (const a of [dc - 0.12, dc + 0.12]) B('iron', a - 0.035, 0.05, a + 0.035, 0.1, P0 + 1.0, P0 + 1.07);
+    B('granite_grey', dc - dw / 2 + 0.02, -0.14, dc + dw / 2 - 0.02, 0.3, P0 + 0.05, P0 + 0.09);          // the worn threshold, a grey slab
     // windows: lattice in a frame, either side of the door, in the front of the better houses
     if (!thatch || det >= 1) for (const a of [dc < L / 2 ? dc + dw / 2 + (L - dc - dw / 2) / 2 : dc / 2 - dw / 4]) if (a > 0.6 && a < L - 0.6) {
       const wv = thatch ? 0.5 : 0.85, wy = P0 + (thatch ? 1.0 : 1.05);
       B(thatch ? 'wood_dark' : 'lattice', a - wv / 2, -0.04, a + wv / 2, 0.02, wy, wy + (thatch ? 0.5 : 0.8));
       if (!thatch) { B('timber', a - wv / 2 - 0.06, -0.05, a + wv / 2 + 0.06, 0.03, wy - 0.06, wy); B('timber', a - wv / 2 - 0.06, -0.05, a + wv / 2 + 0.06, 0.03, wy + 0.8, wy + 0.86); }
     }
+    // open shutter leaves hooked back against the wall beside the lattice window
+    const wa = dc < L / 2 ? dc + dw / 2 + (L - dc - dw / 2) / 2 : dc / 2 - dw / 4, wvv = thatch ? 0.5 : 0.85;
+    if (!thatch && wa > 0.6 && wa < L - 0.6 && rand() < 0.7) for (const sg of [-1, 1]) { const a0 = wa + sg * (wvv / 2 + 0.07) + (sg < 0 ? -0.36 : 0), a1 = a0 + 0.36; if (a0 > 0.1 && a1 < L - 0.1 && (a1 < dc - dw / 2 - 0.05 || a0 > dc + dw / 2 + 0.05)) B('shutter_brown', a0, -0.075, a1, -0.04, P0 + 0.98, P0 + 1.9); }
+    weather(P0 + Hw, !thatch, [[dc - dw / 2 - 0.1, dc + dw / 2 + 0.1], [wa - wvv / 2 - 0.5, wa + wvv / 2 + 0.5]]);
     if (det >= 2 && !thatch) {
       // a door hood (menzhao): a little pent of tile over the door on two brackets
       const hw = dw + 0.6;

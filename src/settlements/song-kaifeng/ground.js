@@ -2,12 +2,30 @@
 // low banks; willows along the water, pagoda trees (huai) and jujubes among the houses; to the east the open
 // country — green winter wheat in strips, willows along the field roads; the hazy spring sky.
 
-import { RADIUS, RIVER, MONASTERY, STREETS, LANES, FIELDS_X, WALL_X, STONE_BANK, inRect, inRiver, inLot, lotAt, zoneOf, smooth as sm } from './layout.js';
+import { PAVE_R, MAJOR, RADIUS, RIVER, MONASTERY, STREETS, LANES, FIELDS_X, WALL_X, STONE_BANK, inRect, inRiver, inLot, lotAt, zoneOf, smooth as sm } from './layout.js';
 
+/** The earth streets and lanes (not the paved shop streets near the bridge): the distance in m to the nearest edge of the way's rectangle, or 0. */
+function earthWay(x, z) {
+  if (x < WALL_X + 8 || x > FIELDS_X || wet(x, z)) return 0;
+  let e = 0;
+  const edge = (r) => Math.min(x - r[0], r[2] - x, z - r[1], r[3] - z);
+  for (let i = 0; i < STREETS.length; i++) if (inRect(STREETS[i], x, z) && !((i < MAJOR || i === 14) && Math.hypot(x, z - 76) < PAVE_R)) e = Math.max(e, edge(STREETS[i]));
+  for (const r of LANES) if (inRect(r, x, z)) e = Math.max(e, edge(r));
+  return e;
+}
+/** Hollows in the beaten earth where the rain stands: a shallow dish every 25-40 m along the way, deeper in the wheel tracks (two grooves 1.5 m apart). */
+function hollow(x, z) {
+  const a = Math.sin(x * 0.19 + Math.sin(z * 0.11) * 2.0) * Math.sin(z * 0.17 + Math.sin(x * 0.07) * 2.3);
+  const dish = sm(0.35, 0.9, a);
+  const rut = 0.4 * (sm(0.75, 0.95, Math.sin(x * 4.19)) + sm(0.75, 0.95, Math.sin(z * 4.19)));
+  return dish * 0.09 + rut * 0.02;
+}
 function height(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS) return 0;
   let h = 0;
+  const ew = earthWay(x, z);
+  if (ew > 0) h -= hollow(x, z) * sm(0, 1.0, ew);
   if (z > RIVER.z0 - 4 && z < RIVER.z1 + 4) h = RIVER.bed * sm(0, 8, Math.min(z - RIVER.z0 + 4, RIVER.z1 + 4 - z));
   return h * (1 - sm(RADIUS - 30, RADIUS, r));
 }
@@ -22,6 +40,7 @@ function cover(x, z) {
   if (wet(x, z)) { c.soil = 0.7; c.sand = 0.3; return c; }
   if (Math.hypot(x, z) > RADIUS - 28) { c.fields = 0.8; c.grass = 0.2; return c; }
   const street = STREETS.some((s) => inRect(s, x, z)), lane = LANES.some((s) => inRect(s, x, z));
+  if (earthWay(x, z) > 0) { c.road = 1; c.soil = 0.5; c.grass = 0.04; c.sand = 0.1; c.dry = 0.3; return c; }     // beaten earth, ruts and hollows
   if (lane && x < FIELDS_X) { c.road = 0.8; c.grass = 0.1; return c; }
   if (x > FIELDS_X) {
     // the country: the roads of beaten earth, the field strips (wheat, and some lying fallow), the banks in grass
@@ -48,6 +67,8 @@ function planting(x, z) {
   // willows along the earth banks: thick on the south bank, a few on the north one, where the towpath runs at their feet
   if (bank(x, z)) return z > RIVER.z1 ? { willow: 1.2 } : (z < RIVER.z0 - 3 ? { willow: 0.25 } : null);
   if (STREETS.some((s) => inRect(s, x, z, 0.5)) || LANES.some((s) => inRect(s, x, z, 0.5)) || inLot(x, z, 0.5)) return null;
+  // street trees: pagoda trees (huai) in the free gaps at the shop streets' corners and crossings (about one every 40 m of frontage), none in front of the shops
+  if (!lotAt(x, z, 0.8) && x > WALL_X + 12 && x < FIELDS_X && STREETS.some((st, i) => (i < MAJOR || i === 14) && inRect(st, x, z, 4))) return { pagoda_tree: 3, grass: 3 };
   const yard = lotAt(x, z);
   if (yard && x < FIELDS_X) return { jujube: 0.55, pagoda_tree: 0.12, mulberry: 0.2, grass: 6 };      // trees in the yards behind the houses
   if (yard) return { jujube: 0.5, pagoda_tree: 0.2, mulberry: 0.3, poplar: 0.1, grass: 6 };
@@ -68,7 +89,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 2.4, pagoda_tree: 0.2, jujube: 0.55, mulberry: 0.3, poplar: 0.1, wheat: 100 },
+  maxDensity: { willow: 2.4, pagoda_tree: 3, jujube: 0.55, mulberry: 0.3, poplar: 0.1, wheat: 100 },
   climate: {
     sun: { az: 160, el: 45, color: [1.0, 0.95, 0.87], intensity: 3.0, lat: 35, dec: 5, hour: 10.5 },
     sky: { turbidity: 4.5, rayleigh: 1.2, mie: 0.007, mieG: 0.82, zenith: [0.12, 0.19, 0.33], horizon: [0.68, 0.68, 0.66] },
