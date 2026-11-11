@@ -19,36 +19,36 @@ const SIDES = ['n', 's', 'w', 'e'];
 const OUT = { n: [0, -1], s: [0, 1], w: [-1, 0], e: [1, 0] };
 
 /** A carving laid as instances (small ornaments: seen within `reach`). */
-function inst(bag, kit, x, y, z, yaw = 0, s = 1, reach = 70) {
+export function inst(bag, kit, x, y, z, yaw = 0, s = 1, reach = 70) {
   const m = new Matrix4().makeRotationY(yaw).scale(new Vector3(s, s, s)).setPosition(x, y, z);
   for (const [mat, list] of kit.m) for (const g of list) { if (bag.addInstance) bag.addInstance(mat, g.clone(), m, { reach }); else bag.add(mat, place(g.clone(), x, y, z, yaw, s)); }
 }
 
 // ---- the kits (their own frame: x across, y up, z out from the wall) -----------------------------------------
 /** A string of red chiles (or of maize cobs, `mat`) hung from a peg on the wall, 0.7 m long. */
-const stringKit = (mat) => carved('mx-string:' + mat, (k) => {
+export const stringKit = (mat) => carved('mx-string:' + mat, (k) => {
   k.bx('timber', -0.03, 0.03, 1.15, 1.2, -0.01, 0.16);                                      // the peg
   k.bx('rope_fibre', -0.008, 0.008, 0.45, 1.17, 0.12, 0.14);
   for (let i = 0; i < 7; i++) { const y = 1.08 - i * 0.095, sw = i % 2 ? 0.05 : -0.05; k.seg(mat, [sw, y, 0.13], [sw * 1.6, y - 0.1, 0.17], 0.028, 0.026, 0.02, 0.018); }
 });
 /** Gourds hung in a net from a peg. */
-const gourdsKit = () => carved('mx-gourds', (k) => {
+export const gourdsKit = () => carved('mx-gourds', (k) => {
   k.bx('timber', -0.03, 0.03, 1.2, 1.25, -0.01, 0.16);
   for (const [x, y, z, r] of [[-0.12, 0.95, 0.15, 0.14], [0.1, 0.9, 0.17, 0.16], [0, 0.62, 0.16, 0.13]]) k.geo('paint_ochre', lathe([[0.001, -r], [r, -r * 0.3], [r * 0.8, r * 0.5], [r * 0.3, r], [0.001, r * 1.1]], 8).translate(x, y, z));
   k.bx('rope_fibre', -0.008, 0.008, 0.95, 1.22, 0.14, 0.16);
 });
 /** A feather fan or standard hung on a wall peg: a disc of plumes on a handle. */
-const fanKit = () => carved('mx-fan', (k) => {
+export const fanKit = () => carved('mx-fan', (k) => {
   k.bx('timber', -0.03, 0.03, 1.5, 1.55, -0.01, 0.14);
   k.seg('timber', [0, 1.52, 0.12], [0, 1.0, 0.14], 0.012, 0.012);
   for (let i = 0; i < 9; i++) { const a = -1.1 + i * 0.275; k.seg(i % 3 ? 'maya_blue' : i % 2 ? 'stucco_red' : 'stucco_saffron', [0, 1.02, 0.14], [Math.sin(a) * 0.3, 1.02 + Math.cos(a) * 0.34, 0.16], 0.018, 0.01, 0.045, 0.01); }
 });
 /** A rolled reed mat leaned against the wall (a petate, 1.7 m). */
-const matLean = () => carved('mx-matlean', (k) => { k.geo('reed_mat', lathe([[0.09, 0], [0.09, 1.7], [0.001, 1.7]], 8).rotateX(0.12).translate(0, 0, 0.1)); k.geo('reed_mat', lathe([[0.09, 0], [0.09, 1.55], [0.001, 1.55]], 8).rotateX(0.14).translate(0.17, 0, 0.12)); k.bx('rope_fibre', -0.1, 0.1, 0.9, 0.93, 0.05, 0.28); });
+export const matLean = () => carved('mx-matlean', (k) => { k.geo('reed_mat', lathe([[0.09, 0], [0.09, 1.7], [0.001, 1.7]], 8).rotateX(0.12).translate(0, 0, 0.1)); k.geo('reed_mat', lathe([[0.09, 0], [0.09, 1.55], [0.001, 1.55]], 8).rotateX(0.14).translate(0.17, 0, 0.12)); k.bx('rope_fibre', -0.1, 0.1, 0.9, 0.93, 0.05, 0.28); });
 /** A stone bench at the gate (tlapechtli): a block of stuccoed rubble with a worn top. */
-const benchKit = () => carved('mx-lanebench', (k) => { k.bx('stucco_pale', -0.65, 0.65, 0, 0.42, 0, 0.42); k.bx('andesite', -0.7, 0.7, 0.42, 0.47, -0.02, 0.45); });
+export const benchKit = () => carved('mx-lanebench', (k) => { k.bx('stucco_pale', -0.65, 0.65, 0, 0.42, 0, 0.42); k.bx('andesite', -0.7, 0.7, 0.42, 0.47, -0.02, 0.45); });
 /** A tall water jar (apaxtli) on a ring of rushes, its lid a bowl. */
-const bigJarKit = () => carved('mx-bigjar', (k) => {
+export const bigJarKit = () => carved('mx-bigjar', (k) => {
   k.geo('rope_fibre', lathe([[0.25, 0], [0.27, 0.05], [0.2, 0.09], [0.001, 0.09]], 10));
   k.geo('terracotta', lathe([[0.2, 0.06], [0.34, 0.3], [0.38, 0.55], [0.3, 0.8], [0.19, 0.92], [0.2, 1.0], [0.16, 1.0], [0.001, 0.94]], 12));
   k.geo('pottery_dark', lathe([[0.2, 0.98], [0.17, 1.04], [0.001, 1.06]], 10));
@@ -62,7 +62,7 @@ const kilnKit = () => carved('mx-kiln', (k) => {
   for (let i = 0; i < 6; i++) { const a = i * 1.05; k.bx('terracotta', Math.cos(a) * 1.35 - 0.11, 0, Math.sin(a) * 0.7 + 0.15 - 0.1, Math.cos(a) * 1.35 + 0.11, 0.22, Math.sin(a) * 0.7 + 0.15 + 0.1); }  // the shards and unfired pots about
 });
 /** A stack of pots on a mat: three rows of bowls and jars. */
-const potsKit = () => carved('mx-potstack', (k) => {
+export const potsKit = () => carved('mx-potstack', (k) => {
   k.bx('reed_mat', -0.9, 0.9, 0, 0.02, -0.5, 0.5);
   for (let i = 0; i < 5; i++) for (let j = 0; j < 2; j++) { const x = -0.7 + i * 0.35, z = -0.25 + j * 0.5, v = (i + j) % 3; k.geo(v === 1 ? 'pottery_dark' : 'terracotta', lathe(v === 0 ? [[0.001, 0], [0.12, 0.02], [0.17, 0.12], [0.1, 0.2], [0.001, 0.2]] : v === 1 ? [[0.001, 0], [0.1, 0.02], [0.2, 0.14], [0.16, 0.3], [0.1, 0.34], [0.001, 0.3]] : [[0.001, 0], [0.14, 0.01], [0.2, 0.1], [0.22, 0.14], [0.001, 0.14]], 9).translate(x, 0.02, z)); }
   k.geo('terracotta', lathe([[0.18, 0], [0.26, 0.2], [0.25, 0.4], [0.001, 0.4]], 9).translate(0.55, 0.02, 0.62));
@@ -96,7 +96,7 @@ const reedsKit = () => carved('mx-reeds', (k) => {
   for (const [x, z, r, h] of [[0, 0, 0.26, 1.7], [0.42, 0.1, 0.22, 1.5], [-0.38, 0.12, 0.2, 1.6]]) { k.geo('raupo', lathe([[r, 0], [r * 0.9, h * 0.5], [r * 0.5, h * 0.95], [0.001, h]], 9).translate(x, 0, z)); k.geo('rope_fibre', lathe([[r * 0.92, h * 0.38], [r * 0.93, h * 0.42], [r * 0.9, h * 0.42], [r * 0.9, h * 0.38]], 9).translate(x, 0, z)); }
 });
 /** The featherworker's frame: a board on a stand set with plumes in rows, a basket of plumes by it. */
-const featherKit = () => carved('mx-featherwork', (k) => {
+export const featherKit = () => carved('mx-featherwork', (k) => {
   k.bx('timber', -0.5, -0.44, 0, 0.8, -0.04, 0.04); k.bx('timber', 0.44, 0.5, 0, 0.8, -0.04, 0.04);
   k.bx('wood_ochre', -0.5, 0.5, 0.5, 1.15, -0.02, 0.0);
   for (let r = 0; r < 4; r++) for (let i = 0; i < 12; i++) { const x = -0.45 + i * 0.082, y = 0.56 + r * 0.15; k.seg([ 'clay_green', 'maya_blue', 'stucco_saffron', 'stucco_red' ][(r + (i % 2)) % 4], [x, y, 0.0], [x, y + 0.13, 0.02], 0.022, 0.006, 0.03, 0.004); }
@@ -104,14 +104,14 @@ const featherKit = () => carved('mx-featherwork', (k) => {
   for (let i = 0; i < 6; i++) k.seg(i % 2 ? 'clay_green' : 'stucco_saffron', [0.85 + i * 0.02, 0.2, 0.3], [0.8 + i * 0.07, 0.5, 0.3 + (i % 3) * 0.04], 0.02, 0.005, 0.03, 0.004);
 });
 /** The lapidary's bench: a plank, lumps of jade and obsidian, a polishing slab and a bowl of sand. */
-const lapidaryKit = () => carved('mx-lapidary', (k) => {
+export const lapidaryKit = () => carved('mx-lapidary', (k) => {
   k.bx('timber', -0.8, 0.8, 0.42, 0.47, -0.3, 0.3); for (const x of [-0.7, 0.7]) for (const z of [-0.22, 0.22]) k.bx('timber', x - 0.04, x + 0.04, 0, 0.42, z - 0.04, z + 0.04);
   k.bx('basalt', -0.2, 0.2, 0.47, 0.53, -0.18, 0.18);
   for (const [x, z, m] of [[-0.55, 0.05, 'inlay_jade'], [-0.35, -0.12, 'obsidian'], [0.4, 0.1, 'inlay_jade'], [0.55, -0.1, 'obsidian'], [0.3, 0.2, 'inlay_carnelian']]) k.bx(m, x - 0.06, x + 0.06, 0.47, 0.55, z - 0.05, z + 0.05);
   k.geo('pottery_dark', lathe([[0.001, 0], [0.1, 0.02], [0.12, 0.08], [0.001, 0.07]], 8).translate(-0.05, 0.47, 0.2));
 });
 /** The mason's block-pile: dressed andesite blocks, a half-cut one with its mallet. */
-const masonKit = () => carved('mx-mason', (k) => {
+export const masonKit = () => carved('mx-mason', (k) => {
   k.bx('andesite', -0.7, 0.2, 0, 0.4, -0.35, 0.35); k.bx('andesite', -0.55, 0.05, 0.4, 0.75, -0.3, 0.25); k.bx('andesite', 0.5, 1.2, 0, 0.3, -0.3, 0.3);
   k.bx('basalt', 0.2, 0.62, 0.0, 0.26, 0.5, 1.0);
   k.seg('timber', [0.0, 0.3, 0.9], [0.18, 0.3, 0.85], 0.025, 0.025); k.bx('basalt', 0.14, 0.26, 0.26, 0.38, 0.8, 0.9);

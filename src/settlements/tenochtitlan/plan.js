@@ -21,8 +21,8 @@ E.push({ t: 'lane', rect: [px0 + 2, pz0 + 2, px1 - 2, pz1 - 2], y: 0.03, mat: 's
 // ---- the temples
 E.push({ t: 'templo_mayor', c: TM.c, w: TM.w, d: TM.d, h: TM.h, terraces: 4, top: TM.top });
 E.push({ t: 'ehecatl_temple', c: [-4, -10], r: 9, h: 8, front: 24 });
-E.push({ t: 'm_pyramid', c: [-55, 75], base: 17, top: 8, h: 15, tiers: 4, stairs: 'e', steps: 60, stairW: 7, serpents: 'e', temple: { w: 10, d: 10, h: 5, doors: 'e' } });
-E.push({ t: 'm_pyramid', c: [25, -95], base: 15, top: 7, h: 13, tiers: 3, stairs: 's', steps: 50, stairW: 6, serpents: 's', temple: { w: 9, d: 9, h: 5, doors: 's' } });
+E.push({ t: 'mx_pyramid', c: [-55, 75], base: 17, top: 8, h: 15, tiers: 4, stairs: 'e', steps: 60, stairW: 7, serpents: 'e', shrine: { w: 10, d: 10, h: 5, door: 'e', god: 'sun' } });
+E.push({ t: 'mx_pyramid', c: [25, -95], base: 15, top: 7, h: 13, tiers: 3, stairs: 's', steps: 50, stairW: 6, serpents: 's', shrine: { w: 9, d: 9, h: 5, door: 's', god: 'earth' } });
 E.push({ t: 'mx_temple', c: [42, 102], base: 26, top: 10, h: 17.6, tiers: 4, stairW: 8, god: 'tezcatlipoca' });
 E.push({ t: 'ballcourt', c: [-50, -65], len: 60, w: 9, h: 4 });
 // the Huey Tzompantli before Huitzilopochtli's side of the temple: its platform north–south, the tower of skulls at its north end

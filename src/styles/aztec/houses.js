@@ -13,6 +13,7 @@ import { Kit, carved } from '../maya/meso.js';
 import { Matrix4 } from '../../core/three.js';
 import { hearthKit, ollaKit, storeJarKit, bowlsKit, bedKit, metateKit, waterJarKit, soot, put } from '../maya/household.js';
 import { maguey, nopal, mesoPlants } from '../maya/plants.js';
+import { hollow, pierMids } from './palace.js';
 export { mesoPlants };
 
 const W = 'plaster_white', R = 'stucco_red', ST = 'andesite', FL = 'stucco';
@@ -297,17 +298,20 @@ export function tecpan(el, ctx) {
   for (const s of [-1, 1]) B(bag, W, [x0 - nst * 0.55 - 0.1, doorA + s * 4 + (s < 0 ? -0.7 : 0), x0, doorA + s * 4 + (s < 0 ? 0 : 0.7)], -0.3, Y + 0.45);
   // the ranges of rooms: solid, their passages left open
   const passW = 3.4, passH = 3.6, y1 = Y + H1;
-  const block = (r) => { B(bag, W, r, Y, y1); col.rect(r, Y, y1); col.floor(r, y1); };
+  const pdd = 3.2, hctx = { bag, col }, stairZ = [doorA - passW / 2 - 1.0 - Math.round(H1 / 0.25) * 0.3 - 0.4, doorA - passW / 2 - 0.6];
+  // the ranges are hollow: two rows of rooms, doorways on the porticoes (palace.js)
+  const block = (r, rows) => hollow(hctx, r, rows, { Y, y1, seed: Math.floor(r[0] * 7 + r[1] * 13) });
+  const R1 = ['hall', 'sleep', 'hall', 'kitchen', 'store'], R2 = ['kitchen', 'store', 'store', 'workshop'], R3 = ['armoury', 'treasury', 'store', 'sleep'], R4 = ['hall', 'aviary', 'workshop', 'sleep'];
   // the red dado round the outer faces (broken at the passage from the plaza)
   B(bag, R, [x0 - 0.03, z0 - 0.03, x1 + 0.03, z0], Y, Y + 0.5); B(bag, R, [x0 - 0.03, z1, x1 + 0.03, z1 + 0.03], Y, Y + 0.5); B(bag, R, [x1, z0, x1 + 0.03, z1], Y, Y + 0.5);
   B(bag, R, [x0 - 0.03, z0, x0, doorA - 1.7], Y, Y + 0.5); B(bag, R, [x0 - 0.03, doorA + 1.7, x0, z1], Y, Y + 0.5);
   const passage = (r, alongX) => { B(bag, W, r, Y + passH, y1); col.floor(r, y1); B(bag, red, alongX ? [r[0] - 0.08, r[1] - 0.3, r[2] + 0.08, r[1] + 0.3] : [r[0] - 0.3, r[1] - 0.08, r[0] + 0.3, r[3] + 0.08], Y + passH - 0.3, Y + passH); B(bag, red, alongX ? [r[0] - 0.08, r[3] - 0.3, r[2] + 0.08, r[3] + 0.3] : [r[2] - 0.3, r[1] - 0.08, r[2] + 0.3, r[3] + 0.08], Y + passH - 0.3, Y + passH); };
   // west range, the passage from the plaza into the first court
-  block([x0, z0, x0 + wr, doorA - passW / 2]); block([x0, doorA + passW / 2, x0 + wr, z1]); passage([x0, doorA - passW / 2, x0 + wr, doorA + passW / 2], false);
+  block([x0, z0, x0 + wr, doorA - passW / 2], [{ f: 'e', doors: null, avoid: [stairZ], roles: R1, back: R4 }]); block([x0, doorA + passW / 2, x0 + wr, z1], [{ f: 'e', doors: pierMids(cB, 'w', pdd), roles: R1, back: R4 }]); passage([x0, doorA - passW / 2, x0 + wr, doorA + passW / 2], false);
   for (const s of [-1, 1]) for (const xx of [x0, x0 + wr]) B(bag, red, [xx - 0.08, doorA + s * passW / 2 - (s < 0 ? 0.3 : 0), xx + 0.08, doorA + s * passW / 2 + (s < 0 ? 0 : 0.3)], Y, Y + passH);
-  block([x1 - er, z0, x1, z1]);
-  block([x0 + wr, z0, x1 - er, z0 + nr]); block([x0 + wr, z1 - sr, x1 - er, z1]);
-  block([x0 + wr, mid[0], xm - passW / 2, mid[1]]); block([xm + passW / 2, mid[0], x1 - er, mid[1]]); passage([xm - passW / 2, mid[0], xm + passW / 2, mid[1]], true);
+  block([x1 - er, z0, x1, z1], [{ f: 'w', doors: [...pierMids(cA, 'e', pdd), ...pierMids(cB, 'e', pdd)], roles: R4, back: R2 }]);
+  block([x0 + wr, z0, x1 - er, z0 + nr], [{ f: 's', doors: pierMids(cA, 'n', pdd), roles: R2, back: R1 }]); block([x0 + wr, z1 - sr, x1 - er, z1], [{ f: 'n', doors: pierMids(cB, 's', pdd), roles: R3, back: R2 }]);
+  block([x0 + wr, mid[0], xm - passW / 2, mid[1]], [{ f: 'n', doors: pierMids(cA, 's', pdd, xm), roles: R4 }, { f: 's', doors: pierMids(cB, 'n', pdd, xm), roles: R1 }]); block([xm + passW / 2, mid[0], x1 - er, mid[1]], [{ f: 'n', doors: pierMids(cA, 's', pdd, xm), roles: R4 }, { f: 's', doors: pierMids(cB, 'n', pdd, xm), roles: R3 }]); passage([xm - passW / 2, mid[0], xm + passW / 2, mid[1]], true);
   for (const s of [-1, 1]) for (const zz of mid) B(bag, red, [xm + s * passW / 2 - (s < 0 ? 0.3 : 0), zz - 0.08, xm + s * passW / 2 + (s < 0 ? 0 : 0.3), zz + 0.08], Y, Y + passH);
   // the courts: the first paved in squares of dark and pale stone, the second a garden round a pool
   for (let i = 0; i < Math.floor((cA[2] - cA[0]) / 1.2); i++) for (let j = 0; j < Math.floor((cA[3] - cA[1]) / 1.2); j++) {
@@ -344,10 +348,6 @@ export function tecpan(el, ctx) {
       if (skip && Math.abs(u - skip) < 2.4) continue;
       if (i % 2) continue;
       const dw = 1.5, dh = 2.6, P2 = (v0, v1, b0, b1) => band(c, f, v0, v1, b0, b1);
-      B(bag, 'opening', P2(-0.01, 0.03, u - dw / 2, u + dw / 2), Y, Y + dh);
-      B(bag, red, P2(-0.02, 0.16, u - dw / 2 - 0.28, u - dw / 2), Y, Y + dh); B(bag, red, P2(-0.02, 0.16, u + dw / 2, u + dw / 2 + 0.28), Y, Y + dh);
-      B(bag, red, P2(-0.02, 0.16, u - dw / 2 - 0.4, u + dw / 2 + 0.4), Y + dh, Y + dh + 0.3);
-      B(bag, 'reed_mat', P2(0.16, 1.5, u - dw / 2 - 0.1, u + dw / 2 + 0.1), Y + 0.025, Y + 0.05);
     }
   };
   for (const c of [cA, cB]) for (const f of ['n', 's', 'e']) portico(c, f, c === cA && f === 's' ? xm : c === cB && f === 'n' ? xm : null);

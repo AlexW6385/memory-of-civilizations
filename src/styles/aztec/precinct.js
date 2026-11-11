@@ -419,6 +419,7 @@ export function ehecatl(el, { bag, col }) {
  * the top, the shrine — red walls, a cotton curtain in the door, the roof stage painted black and set with
  * white stars (Tezcatlipoca's night) under a crest of merlons [inferred: the shrine's painting].
  */
+import { shrineChamber } from './palace.js';
 export function mxTemple(el, { bag, col }) {
   const [cx, cz] = el.c, n = el.tiers ?? 4, H = el.h, b = el.base / 2, t = el.top / 2;
   for (let k = 0; k < n; k++) {
@@ -441,9 +442,7 @@ export function mxTemple(el, { bag, col }) {
   k.emit(bag, 0, 0, 0, 0, 1);
   // the shrine
   const y = H, sw2 = t * 0.7, sh = 4.2, x0 = cx - sw2 + 0.6, x1 = cx + sw2, z0 = cz - sw2, z1 = cz + sw2;
-  bag.add(R, box(x0, y, z0, x1, y + sh, z1)); col.rect([x0, z0, x1, z1], y, y + sh);
-  bag.add('opening', box(x0 - 0.06, y, cz - 0.9, x0 + 0.05, y + 2.6, cz + 0.9));
-  bag.add('cloth_white', box(x0 - 0.12, y + 1.6, cz - 1.0, x0 - 0.06, y + 2.6, cz + 1.0));         // the curtain, drawn up
+  shrineChamber({ bag, col }, [x0, z0, x1, z1], y, sh, 'w', 'tezcatlipoca', R);
   bag.add(W, box(x0 - 0.35, y + sh, z0 - 0.35, x1 + 0.35, y + sh + 0.35, z1 + 0.35));
   bag.add(BK, box(x0 - 0.15, y + sh + 0.35, z0 - 0.15, x1 + 0.15, y + sh + 2.6, z1 + 0.15));
   const star = carved('tez-star', (kk) => { kk.disc(W, 0, 0, 0, 0.16, 0.05, 10); for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; strip(kk, W, [Math.cos(a) * 0.12, Math.sin(a) * 0.12], [Math.cos(a) * 0.3, Math.sin(a) * 0.3], 0.05, 0, 0.05, 0.01); } });
