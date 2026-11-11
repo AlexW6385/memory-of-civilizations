@@ -57,7 +57,7 @@ export const inFoot = (x, z, m = 0) => FOOT.some((r) => inRect(r, x, z, m));
 
 /** The hill's raw height: the valley floor flat, the hills rising north, east and west. */
 export function hill(x, z) {
-  const n = Math.max(0, -z - 100) * 0.30 + Math.max(0, Math.abs(x) - 120) * 0.26 + Math.max(0, z - 150) * 0.12;
+  const n = Math.max(0, -z - 88) * 0.42 + Math.max(0, Math.abs(x) - 122) * 0.38 + Math.max(0, z - 150) * 0.12;
   return n + 2.4 * sm(0, 1, n / 6) * Math.sin(x / 23) * Math.cos(z / 29);
 }
 export const STEP = 0.75;

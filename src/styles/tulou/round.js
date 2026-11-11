@@ -75,6 +75,11 @@ export function tulouRound(el, ctx) {
       y = s1;
     }
     bag.add(EARTH, sector(c, ro(y), wallIn, ro(yTopO), wallIn, y, [yTopO, yTopI], a0, a1));
+    // the tamped lifts, faint darker courses every 0.7 m (not across the windows)
+    if (full || el.windows) for (let yy = 1.3 + 0.7; yy < yTopO - 0.5; yy += 0.7) {
+      if (sills.some(([s0, s1]) => yy + 0.1 > s0 - 0.02 && yy < s1 + 0.02)) continue;
+      bag.add('banco_rough', sector(c, ro(yy) + 0.03, ro(yy) - 0.05, ro(yy + 0.09) + 0.03, ro(yy + 0.09) - 0.05, yy, yy + 0.09, a0, a1));
+    }
     // the wall as an obstacle (the chord of its middle line)
     const rm = (ro(0) + wallIn) / 2, [p0, p1] = [P(c, rm, a0), P(c, rm, a1)];
     col.segment(p0, p1, ro(0) - wallIn + 0.1, 0, topFl + 4);
