@@ -1,6 +1,6 @@
 # Parallel work
 
-How work on this repository is run with many agents at once. The coordinating session follows this; each implementing agent gets `docs/agent-brief.md` plus its assignment.
+How work on this repository is run with many agents at once. The coordinating session follows this; each implementing agent gets `docs/agent-brief.md` plus its assignment. Which settlements go in which batch, and how many agents each gets, is in `docs/batches.md`.
 
 ## Roles
 
@@ -12,13 +12,13 @@ How work on this repository is run with many agents at once. The coordinating se
 
 - **Set the model on every agent call** (`model: "sonnet"` for implementers, `"opus"` only for hard engine work): an agent started without one runs on the coordinator's model. Set the effort the roles above give.
 
-- One agent per group of settlements of one style family, or one engine topic. Groups must not share files: the rule is that an agent edits only its settlements' folders, its own style directories under `src/styles/`, its dossiers, and new tests of its own.
-- Shared code is off-limits to settlement agents: `src/styles/vernacular`, `ming`, `chinese`, `roman`, `src/objects/*`, `src/engine/*`, `src/planet/*`, `src/core/palette.js`, `src/planet/arrivals.js` (unless the assignment names a line in it). An agent that needs a change there says so in its report; the coordinator gives it to the agent that owns that file in the next wave, or does it.
+- Assignments follow `docs/batches.md`: a settlement gets the slots its class and density give, split by files of its folder (landmark / townscape / life); agents never share a file. An agent edits only the files its assignment names, its settlements' style directories under `src/styles/`, their dossiers, and new tests of its own.
+- Shared styles (`src/styles/vernacular`, `ming`, `chinese`, `roman`, `song`, `greek`, `islamic`, `byzantine`) and `src/objects/*` are edited, in a batch, only by the one agent the assignment names as their owner; it keeps every other user of them working (surface-check those too). `src/engine/*`, `src/planet/*`, `src/core/palette.js`, `src/planet/arrivals.js` stay with the coordinator (unless the assignment names a line). An agent that needs a change it does not own says so in its report.
 - New civilizations, when the owner asks for them, go one per agent: dossier first, then the settlement.
 
 ## How many at once
 
-- Start a wave at about **15** agents. Raise or lower by what the last wave showed: renders killed for memory, merge conflicts, how long merging took.
+- A batch is about **10** agents (the author's number), plus two research-only dossier agents from B3 on. Raise or lower by what the last batch showed: renders killed for memory, merge conflicts, how long merging took.
 - The machine is shared (8 GB). Agents run their checks one at a time and never several renders in parallel.
 
 ## Checks: light for agents, heavy for the coordinator

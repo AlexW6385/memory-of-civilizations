@@ -27,7 +27,9 @@ FINAL REPORT (your last message): the branch name and commit hashes, a short Eng
 
 EXTRA RULES (learned from earlier waves; see also docs/parallel-work.md):
 - NEVER run `git stash` (the stash list is shared by all worktrees and another process may pop yours). Commit WIP instead.
-- Shared styles are OFF-LIMITS even if your settlement uses them: src/styles/vernacular, ming, chinese, roman, and anything under src/objects. Improve those settlements through their own style dir and their settlement folder only.
+- Shared styles are OFF-LIMITS even if your settlement uses them (src/styles/vernacular, ming, chinese, roman, song, greek, islamic, byzantine, and anything under src/objects) — unless your assignment names you as that style's owner for this batch; then you alone edit it, and you run surface-check on every other settlement that imports it.
+- Several agents may share one settlement, each owning named files of its folder (landmark: plan.js, index.js and the style; townscape: layout.js, town.js, ground.js; life: movers/fauna/smoke/shops data, interiors, music.js). Touch only yours.
+- The bar is docs/suzhou-method.md §7: work through its order (§1) for your part, and run `node tools/standard-check.mjs <id>` once it exists.
 - The machine (8 GB) is shared by ~15 agents: run surface-check/showroom one at a time, never several in parallel. If a run is OOM-killed, retry later.
 - tools/showroom.mjs: --inplace (keeps positions), --ground <y>|off, --timeout, game lighting by default (--light simple for 3 s renders), 68° FOV, any list size, and --site <id> --arrival | --at x,y,z,yaw,pitch for real in-game views (2–4 min). surface-check is fast now and reports elements that fail to build. tools/plan-check.mjs <id> checks walkability from the arrival point.
 - If you add or change rooms or music zones, run `node --test tests/planet.test.mjs` once before finishing with `timeout 1800` (it takes ~15 min on this loaded machine; a timeout is not a failure).

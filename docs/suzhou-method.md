@@ -1,6 +1,6 @@
 # The Suzhou method
 
-Ming Suzhou is the reference settlement: full detail, walkable everywhere, 55–60 fps on the author's M2. This is how it was made and what to watch for, so that every other settlement can be brought to the same standard. Read it with DESIGN.md (§5 detail, §8 budgets); where they differ, DESIGN.md wins.
+Ming Suzhou is the reference settlement: full detail, walkable everywhere, 55–60 fps on the author's M2. This is how it was made and what to watch for, so that every other settlement can be brought to the same standard. Read it with DESIGN.md (§5 detail, §8 budgets); where they differ, DESIGN.md wins. The order in which the other settlements are brought to this standard is `docs/batches.md`.
 
 ## 1. Order of work
 
