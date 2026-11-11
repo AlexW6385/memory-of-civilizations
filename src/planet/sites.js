@@ -114,6 +114,7 @@ export const SITES = [
   { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, era: 'c. 1200 BC', region: 'china', lat: 36.13, lon: 114.32, radius: 330 },
   { id: 'manueline-lisbon', name: { en: 'Manueline Lisbon', zh: '曼努埃尔里斯本' }, era: 'c. 1520', region: 'iberia', lat: 38.7, lon: -9.21, water: true, radius: 330 },
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, era: 'c. 1900', region: 'java', lat: -8.37, lon: 115.45, radius: 190 },
+  { id: 'bagan', name: { en: 'Pagan (Bagan)', zh: '蒲甘' }, era: 'c. 1200', region: 'burma', lat: 21.17, lon: 94.86, radius: 330 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -140,7 +141,6 @@ export const BLEND = 100;
  * layout keeps room for them, so that building one does not move the others.
  */
 export const PLANNED = [
-  { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },
   { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, region: 'guinea', lat: 6.34, lon: 5.62, radius: 320 },
   { id: 'vienna', name: { en: 'Vienna', zh: '维也纳' }, region: 'danube', lat: 48.21, lon: 16.37, radius: 340 },

@@ -90,4 +90,5 @@ export const ARRIVALS = {
   'shang-yinxu': [20, 0.1, -34, 0, 0.1],   // from the court, up the axis: the ancestral hall of the kings whole on its rammed-earth platform, the stair in the middle bay, the flanking halls either side, the rows of covered sacrificial pits across the court
   'manueline-lisbon': [-206, null, 117, 0.0, 0.3],   // The Jerónimos' south portal whole across the plaza, the Belém Tower in the river to the left.
   'bali-village': [0, 0.1, -26, 0, 0.1],   // up the village street under the festival's penjors to the split gate of the pura at its end: the two stepped halves of brick and carved stone with the stair between them, the roofed gate beyond and the black-thatched merus rising behind the walls
+  'bagan': [30, null, 0, -1.5708, 0.12],   // inside the Ananda precinct's west gate, looking east along the cross passage's axis to the temple: porch, terraces and gilded spire
 };
