@@ -72,7 +72,7 @@ function people() {
 
 export async function houses() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) plans.push(base(`babylon-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'ur_house', ...l }))));
+  for (let i = 0; i < all.length; i += 160) plans.push(base(`babylon-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'babylon_house', ...l }))));
   // the market (a market room: the generic life pass adds to it) and the scribes' mats on the quay
   const z = 103, x = riverX(z) + QUAY.d0 + 6.5;
   plans.push({ ...base('babylon-market', [{ t: 'scribe_kit', at: [x, z - 0.8], y: QUAY.y, rot: Math.PI / 2 }, { t: 'scribe_kit', at: [x, z + 0.8], y: QUAY.y, rot: Math.PI / 2, scroll: true }]), rooms: [{ id: 'market', rect: MARKET, y: 0, kind: 'open', market: true }] });
