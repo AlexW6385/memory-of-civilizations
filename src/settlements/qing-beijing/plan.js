@@ -13,9 +13,23 @@ const E = [];
 const [wx0, wz0, wx1, wz1] = WALL.rect, WH = WALL.h, WT = WALL.th;
 
 // ── the paving: grey brick everywhere inside, the imperial way of marble on the axis ──
-E.push({ t: 'lane', rect: [wx0 + 2, RIVER[3], wx1 - 2, wz1 - 2], y: 0.03 });
-E.push({ t: 'lane', rect: [wx0 + 2, wz0 + 2, wx1 - 2, RIVER[1]], y: 0.03 });
-for (const [z0, z1] of [[RIVER[3], wz1 - 10], [124, RIVER[1]], [TIERS[0].rect[3], 108]]) E.push({ t: 'lane', rect: [-3.6, z0, 3.6, z1], y: 0.06, mat: 'marble_floor' });
+E.push({ t: 'lane', rect: [wx0 + 2, RIVER[3], wx1 - 2, wz1 - 2], y: 0.019 });
+E.push({ t: 'lane', rect: [wx0 + 2, wz0 + 2, wx1 - 2, RIVER[1]], y: 0.019 });
+// the great courts' brick in cells with seams and repairs (court_bricks), the stone way down the axis in slabs (stone_way), the drain covers
+const WAY = [[RIVER[3], wz1 - 10], [124, RIVER[1]], [TIERS[0].rect[3], 108]];
+{
+  const skipC = [[-3.7, 0, 3.7, 400], [-36, 98, 36, 133], [-112, 114.5, 112, 117.5], [93, 40, 111, 106], [-111, 40, -93, 106], [-12, 33, 12, 40]];       // the way, the gate's terrace and its stairs, the wall across, the galleries and pavilions
+  E.push({ t: 'court_bricks', rect: [-110, 40, 110, 114], y: 0.03, seed: 11, skip: skipC, wear: [[-14, 14]] });
+  E.push({ t: 'court_bricks', rect: [-110, 118, 110, 164], y: 0.03, seed: 12, skip: [[-3.7, 0, 3.7, 400], [-36, 124, 36, 133], [-60, 138, 60, 148]], wear: [[-14, 14]] });
+  E.push({ t: 'court_bricks', rect: [-110, -186, 110, -158], y: 0.03, seed: 13, skip: [[-3.7, -400, 3.7, 400], [-112, -173.5, 112, -170.5], [-20, -178, 20, -164]], wear: [[-14, 14]] });
+  for (const [z0, z1] of WAY) E.push({ t: 'stone_way', rect: [-3.6, z0, 3.6, z1], y: 0.06, cols: [2.2, 2.8, 2.2], seed: Math.round(z0) });
+  // the drain covers: in a line down each side of the great court, and before the gates' stairs
+  for (const s of [-1, 1]) {
+    for (let z = 52; z <= 96; z += 22) E.push({ t: 'drain_cover', at: [s * 80, z], y: 0.03 });
+    for (const z of [152, 160]) E.push({ t: 'drain_cover', at: [s * 40, z], y: 0.03 });
+    E.push({ t: 'drain_cover', at: [s * 14, 112], y: 0.03 }); E.push({ t: 'drain_cover', at: [s * 24, 134], y: 0.03 });
+  }
+}
 
 // ── the wall, its corner towers, the Meridian Gate ──
 const gates = (list) => list.map(([at, w, h]) => ({ at, w, h }));
@@ -103,6 +117,8 @@ for (const s of [-1, 1]) {
   E.push({ t: 'ming_gallery', pts: [[x, 104], [x, 66]], y: 0.6, w: 4.5, H: 4.4, side: s, pal: IMPERIAL });
   E.push({ t: 'qing_hall', rect: s < 0 ? [-108, 46, -88, 64] : [88, 46, 108, 64], y: 1.2, H: 6, double: 4.5, roof: 'xieshan', bays: [5, 3], front: s < 0 ? 'e' : 'w', four: true, plat: 1.2, orn: { figures: 7 } });
   E.push({ t: 'ming_gallery', pts: [[x, 44], [x, -40]], y: 0.6, w: 4.5, H: 4.4, side: s, pal: IMPERIAL });
+  // the stone aprons before the galleries' platforms, with a step down to the court
+  for (const [za, zb] of [[66, 104], [-40, 44]]) E.push({ t: 'gallery_apron', rect: s < 0 ? [x + 2.25, za, x + 3.75, zb] : [x - 3.75, za, x - 2.25, zb], y: 0.15 });
 }
 
 // ── the terrace in three tiers, its stairs, the bronzes on it ──

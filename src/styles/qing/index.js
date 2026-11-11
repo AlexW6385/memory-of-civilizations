@@ -17,6 +17,7 @@ import { throneHall } from './throne.js';
 import { rampRelief, stairRakes } from './ramp.js';
 import { hexiRun, dougong, dougongHeight } from './caihua.js';
 import { qinian } from './tiantan.js';
+import { courtBricks, stoneWay, drainCover, galleryApron } from './paving.js';
 import { pekingCart, camelString } from './street.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { Parts, ball, limb, T, sumeru, post, limb as limbG, seated, crouching, vat, tripod, tortoise, crane, sundial, jialiang, balustradeCarved, spout, roofOrnaments, gateDoors } from './carving.js';
@@ -590,7 +591,7 @@ registerStyle('qing', {
     terrace: withPal(terrace), stairs: withPal(stairs), bronze: withPal(bronze), lane: withPal(lane),
     qing_hall: (el, ctx) => withPal(qingHall)({ ...el, pal: el.pal || IMPERIAL }, ctx),
     palace_wall: (el, ctx) => withPal(palaceWall)({ ...el, pal: { plaster: 'palace_wall', roof: 'tile_yellow', plinth: 'marble' } }, ctx),
-    ming_arch_bridge: archBridgeRailed, gate_doors: gateDoors,
+    ming_arch_bridge: archBridgeRailed, gate_doors: gateDoors, court_bricks: courtBricks, stone_way: stoneWay, drain_cover: drainCover, gallery_apron: galleryApron,
     corner_tower: withPal(cornerTower), low_wall: withPal(lowWall), throne_hall: (el, ctx) => withPal(throneHall)({ ...el, pal: el.pal || IMPERIAL }, ctx), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail), qinian: (el, ctx) => withPal(qinian)({ ...el, pal: el.pal || IMPERIAL }, ctx), peking_cart: pekingCart, camel_string: camelString,
   },
   objects: {},
