@@ -32,7 +32,7 @@ function tiles(id, style, elements) {
  * Returns a map from lot to its use ('inn', 'home' or the trade).
  */
 function enterable(all) {
-  const ok = all.filter((l) => l.kind !== 'torre' && l.kind !== 'palazzo' && l.rect[2] - l.rect[0] >= 5.2 && l.rect[3] - l.rect[1] >= 7 && l.storeys >= 2);
+  const ok = all.filter((l) => l.kind !== 'torre' && l.kind !== 'palazzo' && (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] >= 5.2 && l.rect[3] - l.rect[1] >= 8 : l.rect[3] - l.rect[1] >= 5.2 && l.rect[2] - l.rect[0] >= 8) && l.storeys >= 2);
   const out = new Map(), A = ARRIVALS['florence'];
   const dist = (l, x, z) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
   const take = (list, n, use) => { let k = 0; for (const l of list) { if (k >= n) break; if (out.has(l)) continue; out.set(l, typeof use === 'function' ? use(l, k) : use); k++; } };
