@@ -16,8 +16,8 @@ E.push({ t: 'stairs', rect: [-10, tz1, 10, tz1 + 4], y0: 0, y1: ty, dir: 'n', ma
 E.push({ t: 'mausoleum', c: PLINTH.c, y: PLINTH.y, a: 28.3, chamfer: 8.5, h: 33, dome: { r: 17.7, h: 28, drum: 7 }, interior: true });
 for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) E.push({ t: 'minaret', c: [PLINTH.c[0] + sx * (PLINTH.a - 3), PLINTH.c[1] + sz * (PLINTH.a - 3)], y: PLINTH.y, h: 40, r: 2.6 });
 // the mosque (west, facing east) and its twin (east, facing west), on the terrace
-E.push({ t: 'red_hall', rect: [-138, -232, -115, -174], y: ty, h: 12, front: 'e', decor: 'calligraphy' });
-E.push({ t: 'red_hall', rect: [115, -232, 138, -174], y: ty, h: 12, front: 'w', decor: 'flowers' });
+E.push({ t: 'red_hall', rect: [-138, -232, -115, -174], y: ty, h: 12, front: 'e', decor: 'calligraphy', interior: 'mosque' });
+E.push({ t: 'red_hall', rect: [115, -232, 138, -174], y: ty, h: 12, front: 'w', decor: 'flowers', interior: 'jawab' });
 // the garden: walks of red sandstone along the axes and round the quarters, raised channels of
 // marble along the axes, the central pool on its platform
 const [gx0, gz0, gx1, gz1] = GARDEN;
@@ -49,8 +49,8 @@ const wall = (a, b) => E.push({ t: 'mughal_wall', a, b, h: 7 });
 wall([gx0, gz0], [gx0, gz1]); wall([gx1, gz0], [gx1, gz1]);
 wall([gx0, gz1], [-GATE.w / 2, gz1]); wall([GATE.w / 2, gz1], [gx1, gz1]);
 for (const [x, z] of [[gx0, gz1], [gx1, gz1], [tx0, tz0], [tx1, tz0]]) E.push({ t: 'octa_tower', c: [x, z], h: 12, r: 4 });
-for (const s of [-1, 1]) E.push({ t: 'red_hall', rect: s < 0 ? [gx0 - 10, -14, gx0 + 2, 14] : [gx1 - 2, -14, gx1 + 10, 14], y: 0.2, h: 9, front: s < 0 ? 'e' : 'w' });
-E.push({ t: 'great_gate', c: GATE.c, y: 0, w: GATE.w, d: GATE.d, h: GATE.h });
+for (const s of [-1, 1]) E.push({ t: 'red_hall', rect: s < 0 ? [gx0 - 10, -14, gx0 + 2, 14] : [gx1 - 2, -14, gx1 + 10, 14], y: 0.2, h: 9, front: s < 0 ? 'e' : 'w', interior: 'pavilion' });
+E.push({ t: 'great_gate', c: GATE.c, y: 0, w: GATE.w, d: GATE.d, h: GATE.h, rooms: true });
 const [fx0, fz0, fx1, fz1] = FORECOURT;
 E.push({ t: 'lane', rect: FORECOURT, y: 0.05, mat: 'sandstone_red' });
 // the forecourt's three gates and the two bazaar streets from the east and west gates toward its middle, each lined on

@@ -2,7 +2,7 @@
 // the forecourt's bazaar cells with their keepers sitting by them and buyers in the street; horses held by grooms in
 // the forecourt, where visitors dismounted; boats on the Yamuna below the riverfront terrace.
 
-import { RADIUS, STREETS, FORECOURT, KATRAS, HAVELI_OPEN, WORKSHOP, PLINTH, GATE, POOL, GWALKS, RIVER_Z, houses } from './layout.js';
+import { RADIUS, STREETS, FORECOURT, KATRAS, HAVELI_OPEN, WORKSHOP, PLINTH, GATE, TERRACE, GARDEN, POOL, GWALKS, RIVER_Z, houses } from './layout.js';
 import { ground } from './ground.js';
 import { frameOf } from '../../styles/mughal/townhouse.js';
 import { boatFloat } from '../../objects/index.js';
@@ -85,6 +85,28 @@ export function life() {
   for (let k = 0; k < 5; k++) { const x = 182 + k * 9 + rand() * 3; person([x, -253.2], 0.0, Math.PI / 2 * 0 + 0.2, { man: true, pose: 'stand', cloth: 'cloth_white', hat: undefined, hatMat: 'cloth_white' }); }
 
 
+
+  // ── inside the Taj's halls (§15): the faithful at prayer in the mosque, a reader in the jawab and the pavilions, the guards in the gate's rooms ──
+  { const ty = TERRACE.y + 0.05, X0 = -138 + 1.6, mz0 = -232 + 1.4, mw = 0.91, ml = 1.95;
+    // the mosque's rows: men kneeling on their rugs facing the qibla (west), the front rows fuller; the imam before the mihrab
+    for (let row = 0; row < 3; row++) for (let c = 0; c < 56; c++) {
+      if (rand() > (row === 0 ? 0.28 : row === 1 ? 0.18 : 0.08)) continue;
+      const x = X0 + 0.9 + row * ml + ml * 0.55, z = mz0 + 0.5 + c * mw + mw / 2;
+      person([x, z], ty, Math.PI / 2, { man: true, pose: 'kneel', arms: 'pray', cloth: 'cloth_white', cloth2: 'cloth_white', hatMat: pick(['cloth_white', 'cloth_white', 'cloth_ochre']) });
+    }
+    person([X0 + 1.4, -203 - 4.6 + 4.6], ty, Math.PI / 2, { man: true, pose: 'kneel', arms: 'pray', cloth: 'cloth_white', cloth2: 'cloth_green', hatMat: 'cloth_white', beard: true });
+    person([-120, -203 + 6], ty, Math.PI / 2, { man: true, pose: 'cross', cloth: 'cloth_white', hatMat: 'cloth_white', beard: true });
+    person([123, -203 - 7], ty, 0, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_ochre', hatMat: 'cloth_red', beard: true });
+    // the garden's pavilions: a keeper dozing on the divan and a visitor
+    for (const sx of [-1, 1]) person([sx < 0 ? GARDEN[0] - 3.5 : GARDEN[2] + 2.5, 4], 0.65, sx < 0 ? Math.PI / 2 : -Math.PI / 2, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_ochre', hatMat: 'cloth_white' });
+    // the guards of the gate: one on each middle charpoy, one standing at the door within
+    for (const sg of [-1, 1]) {
+      const cx = GATE.c[0], cz = GATE.c[1], w = GATE.w / 2, d = GATE.d / 2, ow = sg < 0 ? cx - w + 2.4 : cx + w - 2.4, zc = cz, ox2 = sg < 0 ? 1 : -1;
+      person([ow + ox2 * 1.0, zc], 0.04 + 0.45, sg < 0 ? Math.PI / 2 : -Math.PI / 2, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'sash', hatMat: 'cloth_red', beard: true });
+      person([ow + ox2 * 5.2, zc + 2.2], 0.04, sg < 0 ? Math.PI / 2 : -Math.PI / 2, { man: true, pose: 'staff', cloth: 'cloth_white', cloth2: 'cloth_red', hatMat: 'cloth_red' });
+      void d;
+    }
+  }
   // ── the streets of the town (§14): tea stalls with their stools, water stands (pyau), hawkers with their mats, handcarts,
   // zebu resting at the frontage, wells at the crossings, a goat tied at a post — spread along each street from the layout ──
   { const lim = RADIUS - 34, ok = (x, z) => Math.hypot(x, z) < lim && z > -214, bay = (s) => (s.bazaar ? 15 : 24);
