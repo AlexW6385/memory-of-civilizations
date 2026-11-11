@@ -227,8 +227,7 @@ export function shopHouse(el, ctx, base) {
   const open = !(tn === 'butcher');
   goods(F, tr, rand, wu0, wu1, 0.04, bayD - 0.05, y);
   if (open) {
-    B('glass_outer', wu0, wu1, y + 0.7, y + 2.55, bayD - 0.03, bayD - 0.015);
-    B('glass_outer', wu0, wu1, y + 2.62, y + g0 - 1.05, bayD - 0.03, bayD - 0.015);
+    B('opening', wu0, wu1, y + 2.62, y + g0 - 1.05, bayD - 0.03, bayD - 0.02);                 // the plate glass itself is not drawn: the goods stand in plain view
     B('plaster_white', wu0 - 0.04, wu1 + 0.04, y + 2.55, y + 2.62, bayD - 0.04, bayD);                       // the transom
     const nm = Math.max(1, Math.round((wu1 - wu0) / 1.6)); for (let i = 0; i <= nm; i++) { const u = wu0 + (wu1 - wu0) * i / nm; B('plaster_white', u - 0.035, u + 0.035, y + 0.7, y + g0 - 1.05, bayD - 0.04, bayD); }
     B('plaster_white', wu0 - 0.04, wu1 + 0.04, y + g0 - 1.1, y + g0 - 1.0, bayD - 0.04, bayD);
@@ -299,7 +298,7 @@ export function pub(el, ctx, base) {
       L('lamp_glass', [[0.26, 0], [0.34, 0.1], [0.34, 0.6], [0.26, 0.68]], 8, uDoor, y + g0 + 0.3, 1.0); L('iron', [[0.4, 0], [0.3, 0.1], [0.12, 0.28], [0.001, 0.34]], 8, uDoor, y + g0 + 0.95, 1.0);
       continue;
     }
-    B('glass_outer', a + 0.05, b - 0.05, y + 0.8, y + 2.45, bayD - 0.08, bayD - 0.06);
+    B('lamp_glass', a + 0.05, b - 0.05, y + 0.9, y + 2.4, bayD - 0.08, bayD - 0.06);
     B('lamp_glass', a + 0.05, b - 0.05, y + 2.5, y + g0 - 1.05, bayD - 0.08, bayD - 0.06);                    // the etched upper lights, lit at night
     B('wood_dark', a, b, y + 0.8, y + 0.9, bayD - 0.1, bayD - 0.03); B('wood_dark', a, b, y + 2.45, y + 2.55, bayD - 0.1, bayD - 0.03); B('wood_dark', a, b, y + g0 - 1.1, y + g0 - 1.0, bayD - 0.1, bayD - 0.03);
     const nm = Math.max(1, Math.round((b - a) / 1.2)); for (let i = 1; i < nm; i++) { const u = a + (b - a) * i / nm; B('wood_dark', u - 0.04, u + 0.04, y + 0.8, y + g0 - 1.0, bayD - 0.1, bayD - 0.03); }
@@ -323,7 +322,7 @@ export function pub(el, ctx, base) {
   const sx = east ? x1 : x0, so = east ? 1 : -1, SB = (m, v0, v1, ya, yb, d0, d1) => { const a = sx + so * d0, b = sx + so * d1, za = F.f === 's' ? z1 - v1 : z0 + v0, zb = F.f === 's' ? z1 - v0 : z0 + v1; bag.add(m, box(Math.min(a, b), ya, za, Math.max(a, b), yb, zb)); };
   const D = F.D;
   SB('granite_red', 0.2, D - 0.5, y, y + 0.8, 0, 0.22); SB('wood_dark', 0.2, D - 0.5, y + 0.8, y + 0.9, 0, 0.24);
-  for (let v = 0.6; v + 1.9 < D - 0.5; v += 2.8) { SB('glass_outer', v, v + 1.9, y + 0.9, y + 2.45, 0, 0.03); SB('lamp_glass', v, v + 1.9, y + 2.5, y + 3.0, 0, 0.03); SB('wood_dark', v - 0.05, v, y + 0.9, y + 3.0, 0, 0.06); SB('wood_dark', v + 1.9, v + 1.95, y + 0.9, y + 3.0, 0, 0.06); }
+  for (let v = 0.6; v + 1.9 < D - 0.5; v += 2.8) { SB('lamp_glass', v, v + 1.9, y + 0.9, y + 2.45, 0, 0.03); SB('lamp_glass', v, v + 1.9, y + 2.5, y + 3.0, 0, 0.03); SB('wood_dark', v - 0.05, v, y + 0.9, y + 3.0, 0, 0.06); SB('wood_dark', v + 1.9, v + 1.95, y + 0.9, y + 3.0, 0, 0.06); }
   SB('wood_dark', D / 2 - 0.5, D / 2 + 0.5, y, y + 2.5, 0, 0.04);
   for (let s = 1; s < n; s++) for (let v = 1.0; v < D - 0.8; v += 3.1) SB('opening', v, v + 0.9, y + g0 + (s - 1) * st + 0.6, y + g0 + (s - 1) * st + 0.6 + (s === 1 ? 2.3 : 1.9), 0, 0.05);
   roofAndStacks(F, mat, H, rand, false);
@@ -358,7 +357,7 @@ export function trestleStall(el, { bag, col }) {
   put('timber', -0.8, 0.8, 0.85, 0.9, -0.5, 0.5);
   for (let k = 0; k < 6; k++) put(k % 2 ? 'cloth_white' : 'cloth_red', -0.8 + k * 0.267, -0.533 + k * 0.267, 0.9, 0.92, -0.5, 0.5);
   for (let k = 0; k < 5; k++) put(el.goods ?? 'wicker', -0.6 + k * 0.3, -0.4 + k * 0.3, 0.92, 1.08, -0.2, 0.2);
-  put('iron', -0.8, -0.74, 0.9, 1.9, -0.5, -0.44); put('iron', 0.74, 0.8, 0.9, 1.9, -0.5, -0.44);
+  put('iron', -0.8, -0.74, 0.92, 1.9, -0.5, -0.44); put('iron', 0.74, 0.8, 0.92, 1.9, -0.5, -0.44);
   put('cloth_white', -0.82, 0.82, 1.9, 1.94, -0.55, 0.15);
   col.rect([x - 0.9, z - 0.6, x + 0.9, z + 0.6], y, y + 1.1); void P;
 }

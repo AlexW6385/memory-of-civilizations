@@ -32,6 +32,7 @@ export const ground = {
     weather: [
       { id: 'overcast', weight: 3, clouds: 0.8, cloudDensity: 0.7, sun: 0.6, fog: 1.3 },
       { id: 'smoke', weight: 2, clouds: 0.6, cloudDensity: 0.6, sun: 0.5, fog: 2.2 },
+      { id: 'fog', weight: 1.5, clouds: 0.9, cloudDensity: 0.8, sun: 0.25, fog: 5.5, fogColor: [0.66, 0.6, 0.45] },    // the yellow "London particular": coal smoke in the damp
       { id: 'rain', weight: 1.5, clouds: 0.95, cloudDensity: 0.9, sun: 0.3, fog: 1.8, rain: 0.8 },
     ],
   },
