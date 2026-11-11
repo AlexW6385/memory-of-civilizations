@@ -118,6 +118,12 @@ Bright sun between clouds, mist rising from the canyon; latitude 13° S. [inferr
 
 Panpipes and the quena flute, drums, the conch (a flute, a reed and a struck sound stand in). [inferred]
 
+## 10. Fourth pass: the kallanka and the living systems (as built)
+
+- **The kallanka.** "Kallankas were the largest Inca buildings"; the entrance is "normally on one of the long sides, with equally spaced doors", the opposite side "niches or windows but no doors"; gabled thatched roofs, steep (about 45 to 80 degrees), stone "nails" on the gables; a single undivided hall; those on a main square usually opened onto it; at Machu Picchu "the largest building, a kallanka, measured 47.5 by 6.5 m" [stated: Wikipedia, "Kallanka"]. **Built** (`inca_house` with `doors: 7`, `KALLANKA` in layout.js): 47.5 x 6.5 m on the Main Plaza's east side, seven equally spaced doors to the plaza, windows and niches alternating in the back wall, pegged gables and an ichu roof; the kancha grid keeps clear of it [inferred: its place, the wall height 3.3 m]. Inside (`hallInterior`): a row of tall urpu along the back wall with bowls, mats with folded blankets at the doors' lines, a ring of stones for a fire mid-hall, the floor before each door clear [inferred: after feast furnishings].
+- **People.** Walkers by kind (men in unku and mantle, women in wrap and shawl, porters with loads on the back, mothers with a child, nobles in red with the cap, priests and aclla in white) on the plaza, the lanes between kanchas and the road through the gate; about 26 by day, 3 at night [inferred: numbers]. Dress as 5.2.
+- **Smoke and birds.** The houses' hearths smoke through the thatch at the three meals, the kallanka's too, mist rises from the cloud forest at dawn; swallows over the terraces, condors (the crow form stands in) high over the peaks, sparrows on the plaza and the kallanka's wall-head [inferred].
+
 ## Sources
 
 - [Machu Picchu — Wikipedia (IPFS snapshot)](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Machu_Picchu)
@@ -137,6 +143,7 @@ Panpipes and the quena flute, drums, the conch (a flute, a reed and a struck sou
 - [Main Temple — The Only Peru Guide](https://theonlyperuguide.com/?p=5989)
 - [The Temple of the 3 Windows — imachupicchu](https://imachupicchu.com/?p=209)
 - [Temple of the Three Windows — michaelstephenwills](https://michaelstephenwills.com/tag/temple-of-the-three-windows/)
+- [Kallanka — Wikipedia](https://en.wikipedia.org/wiki/Kallanka)
 - [Machu Picchu — peru-explorer](https://www.peru-explorer.com/machu.htm)
 - [The guardian's house — imachupicchu](https://imachupicchu.com/?p=188)
 - [Views from the Quarry — michaelstephenwills](https://michaelstephenwills.com/2023/08/28/views-from-the-quarry)

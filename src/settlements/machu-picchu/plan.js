@@ -3,7 +3,7 @@
 // Temple of the Three Windows, the Intihuatana on its terraced hill, the Main Plaza; the terraces'
 // walls round the saddle, with stairs down them.
 
-import { SITE, TERRACE, HILL, KNOLL, hillRing, PLAZA, TOWN_WALL, DITCH, STORES, SACRED_ROCK, waterworks } from './layout.js';
+import { SITE, TERRACE, HILL, KNOLL, hillRing, PLAZA, TOWN_WALL, DITCH, STORES, KALLANKA, SACRED_ROCK, waterworks } from './layout.js';
 import { ground } from './ground.js';
 
 const E = [];
@@ -93,6 +93,9 @@ E.push({ t: 'stair', rect: [-46, -43, -38, -41.8], y0: 0, y1: 0.6, dir: 'n', ris
 E.push({ t: 'stair', rect: [-32.2, -53, -31, -45], y0: 0, y1: 0.6, dir: 'e', riser: 0.15, mat: 'granite_inca' });
 // the house of the priest closing the plaza on the south
 E.push({ t: 'inca_house', rect: [-46, -34, -36, -26], y: 0.2, h: 2.8, front: 'n', mat: 'granite_inca', roof: 'thatch', seed: 11 });
+// the kallanka on the plaza's east side: a long undivided hall of rough granite, seven equally spaced doors on the long side
+// to the plaza, windows and niches on the back wall, gables with their pegs, a steep ichu roof [stated: Wikipedia, "Kallanka"]
+E.push({ t: 'inca_house', rect: KALLANKA, y: 0, h: 3.3, th: 0.8, front: 'w', doors: 7, roof: 'thatch', mat: 'granite_rough', seed: 61 });
 // the Main Plaza's edge: a low wall with stairs down into it
 E.push({ t: 'lane', rect: [PLAZA[0] - 4, PLAZA[1] - 4, PLAZA[0] - 1, PLAZA[3] + 4], y: 0.02, mat: 'granite_rough' });
 

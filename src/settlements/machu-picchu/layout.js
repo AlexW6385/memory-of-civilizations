@@ -23,6 +23,8 @@ export function hillHeight(H, x, z) { const d = Math.hypot(x - H.c[0], z - H.c[1
 export const TOWN_WALL = { z: 84, gate: 2 }, DITCH = { z: 89, top: 3, bottom: 1, depth: 2, x0: -80 };
 export const FIELDS = [-90, 93, 90, 116];
 export const STORES = Array.from({ length: 5 }, (_, i) => [16 + i * 7.6, 96, 21.4 + i * 7.6, 100.2]);
+/** The kallanka on the Main Plaza's east side, 47.5 × 6.5 m, its seven doors to the plaza [stated: 47.5 × 6.5 m, the largest building of Machu Picchu — Wikipedia, "Kallanka"; inferred: the place]. */
+export const KALLANKA = [24.5, -49, 31, -1.5];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 
 /** Distance (m) outside the saddle's ellipse, measured as the growth s of the half-axes that brings (x, z) on to it (negative inside). */
@@ -100,7 +102,7 @@ export function houses() {
   const clear = (r, m) => {
     const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, cs = [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [cx, r[1]], [cx, r[3]], [r[0], cz], [r[2], cz]];
     if (cs.some(([x, z]) => outside(x, z) > -m)) return false;
-    if (cs.some(([x, z]) => inRect(PLAZA, x, z, 6) || inRect([-62, -66, -10, 50], x, z) || inRect(ROCK_COURT, x, z, 1) || inRect(TOMB, x, z, 3))) return false;
+    if (cs.some(([x, z]) => inRect(PLAZA, x, z, 6) || inRect([-62, -66, -10, 50], x, z) || inRect(ROCK_COURT, x, z, 1) || inRect(TOMB, x, z, 3) || inRect(KALLANKA, x, z, 4))) return false;
     if (cs.some(([x, z]) => Math.hypot(x - HILL.c[0], z - HILL.c[1]) < HILL.r + 7 || Math.hypot(x - KNOLL.c[0], z - KNOLL.c[1]) < KNOLL.r + 9)) return false;
     if (cs.some(([px, pz]) => nearCanal(px, pz, 1.8) || pz > TOWN_WALL.z - 6)) return false;
     return !taken.some((t) => r[0] < t[2] + 2 && r[2] > t[0] - 2 && r[1] < t[3] + 2 && r[3] > t[1] - 2);

@@ -9,7 +9,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, frustum, rod, quad, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { rectRoof, beamTris } from '../ming/index.js';
-import { houseInterior, INCA_LIFE } from './life.js';
+import { houseInterior, hallInterior, INCA_LIFE } from './life.js';
 
 import { patch } from '../maya/household.js';
 import { incaPlants } from './plants.js';
@@ -226,12 +226,15 @@ function incaHouse(el, { bag, col }) {
   const along = x1 - x0 >= z1 - z0, f = el.front || 's', ops = {};
   for (const k of ['n', 'e', 's', 'w']) {
     const L = k === 'n' || k === 's' ? x1 - x0 : z1 - z0, list = (ops[k] = []);
-    if (k === f) list.push({ kind: 'door', at: L / 2, w: 1.0, h: 1.95, jamb: !!el.jamb });
+    // a kallanka (el.doors: n): "the entrance normally on one of the long sides, with equally spaced doors; the opposite side niches or windows but no doors" [stated: Wikipedia, "Kallanka"]
+    const doors = k === f && el.doors > 1 ? Array.from({ length: el.doors }, (_, i) => (i + 0.5) * L / el.doors) : k === f ? [L / 2] : [];
+    for (const d of doors) list.push({ kind: 'door', at: d, w: 1.0, h: 1.95, jamb: !!el.jamb });
     // a row of niches inside, at chest height; a small window now and then on a long wall
     const n = Math.floor((L - 1.2) / 1.35), gable = along ? k === 'e' || k === 'w' : k === 'n' || k === 's';
     for (let i = 0; i < n; i++) {
       const at = 0.6 + (i + 0.5) * (L - 1.2) / n;
-      if (k === f && Math.abs(at - L / 2) < 1.2) continue;
+      if (doors.some((d) => Math.abs(at - d) < 1.2)) continue;
+      if (el.doors > 1 && !gable && k !== f) { if (i % 2 === 0) list.push({ kind: 'window', at, w: 0.42, h: 0.55, sill: 1.5 }); else list.push({ kind: 'niche', at, w: 0.48, h: 0.68, sill: 1.05, depth: 0.26 }); continue; }
       if (!gable && k !== f && rand() < 0.12) list.push({ kind: 'window', at, w: 0.42, h: 0.55, sill: 1.25 });
       else if (rand() < 0.8) list.push({ kind: 'niche', at, w: 0.48, h: 0.68, sill: 1.05, depth: 0.26 });
     }
@@ -240,7 +243,8 @@ function incaHouse(el, { bag, col }) {
   bag.add('granite_inca', box(x0 - th / 2 - 0.12, y - 0.3, z0 - th / 2 - 0.12, x1 + th / 2 + 0.12, y + 0.04, z1 + th / 2 + 0.12));
   col.floor([x0, z0, x1, z1], y + 0.04);
   // the things of the house: the stove, the grinding stone, the mats, the urpu, pots in the niches
-  if (!el.empty) houseInterior(bag, col, el, walls, ops, f);
+  if (el.doors > 1) hallInterior(bag, col, el, f);
+  else if (!el.empty) houseInterior(bag, col, el, walls, ops, f);
   // pegs inside under the wall-head, for hangings and the roof's poles [stated: World History Encyclopedia]
   for (const k of ['n', 'e', 's', 'w']) {
     const { F, off } = walls[k], list = [];

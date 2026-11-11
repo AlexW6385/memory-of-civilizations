@@ -97,6 +97,46 @@ export function houseInterior(bag, col, el, walls, niches, f) {
 }
 
 /**
+ * A kallanka's furnishing (el.doors > 1): a single undivided hall [stated: Wikipedia, "Kallanka"] used for gatherings
+ * and shelter in bad weather; for the feasts of maize beer (aqha, chicha) a row of tall jars (urpu) stands along the back
+ * wall under the windows [inferred: after the urpu of the Inca state's feasts], between them bundles of mats and folded
+ * blankets where the guests sleep, a ring of stones for a fire in the middle of the floor, bowls by the jars. The
+ * floor before every door is left clear.
+ */
+export function hallInterior(bag, col, el, f) {
+  const rand = rng((el.seed || 1) * 17 + 3), [x0, z0, x1, z1] = el.rect, y = (el.y ?? 0) + 0.04, m = (el.th ?? 0.7) / 2 + 0.08;
+  const I = [x0 + m, z0 + m, x1 - m, z1 - m];
+  const inV = { n: [0, 1], s: [0, -1], e: [-1, 0], w: [1, 0] }[f], sideV = [-inV[1], inV[0]];
+  const cx = (I[0] + I[2]) / 2, cz = (I[1] + I[3]) / 2, depth = Math.abs(inV[0]) ? I[2] - I[0] : I[3] - I[1], length = Math.abs(inV[0]) ? I[3] - I[1] : I[2] - I[0];
+  const at = (a, b) => [cx + inV[0] * a + sideV[0] * b, cz + inV[1] * a + sideV[1] * b];
+  const rectAt = (a, b, da, db) => { const p = at(a, b), hx = Math.abs(inV[0]) * da + Math.abs(sideV[0]) * db, hz = Math.abs(inV[1]) * da + Math.abs(sideV[1]) * db; return [p[0] - hx, p[1] - hz, p[0] + hx, p[1] + hz]; };
+  const n = el.doors, door = (i) => -length / 2 + (i + 0.5) * length / n + (sideV[0] + sideV[1] < 0 ? 0 : 0);
+  const cloths = ['cloth_brown', 'cloth_red', 'cloth_ochre', 'cloth_black', 'cloth_white'];
+  const back = depth / 2 - 0.45;
+  // the jars along the back wall: one or two between each pair of doors' lines, clear of the doors' own lines
+  for (let i = 0; i < n; i++) {
+    const b0 = door(i);
+    for (const d of [-1.55, 1.55]) {
+      if (Math.abs(b0 + d) > length / 2 - 0.9 || rand() < 0.2) continue;
+      const p = at(back, b0 + d + (rand() - 0.5) * 0.3);
+      urpu(bag, p[0], y - 0.05, p[1], 0.75 + rand() * 0.2, rand() * 6.28); col.circle(p[0], p[1], 0.22, y, y + 0.8);
+      if (rand() < 0.55) { const q = at(back - 0.55, b0 + d + (rand() - 0.5) * 0.4); bowl(bag, q[0], y, q[1], 0.12, rand() < 0.5 ? 'terracotta' : 'pottery_dark'); }
+    }
+    // a mat with its blankets, along the back wall at the door's line
+    if (rand() < 0.6) {
+      const R = rectAt(back - 0.1, b0 + (rand() - 0.5) * 0.4, 0.45, 0.95);
+      bag.add('reed_mat', box(R[0], y, R[1], R[2], y + 0.025, R[3]));
+      for (let k = 0; k < 2; k++) { const B = rectAt(back - 0.1, b0 - 0.5 + k * 0.85, 0.3, 0.3); bag.add(cloths[Math.floor(rand() * 5)], frustum(B, y + 0.025, y + 0.11, 0.015, 0.015, 0.015, 0.015)); }
+    }
+  }
+  // the hearth in the middle of the hall: a ring of stones round the ashes, between two doors' lines
+  const hb = (door(Math.floor(n / 2)) + door(Math.floor(n / 2) - 1)) / 2, hc = at(0.1, hb);
+  bag.add('granite_rough', lathe([[0.42, 0.005], [0.5, 0.005], [0.5, 0.1], [0.42, 0.1], [0.42, 0.005]], 14, null, hc[0], y, hc[1]));
+  bag.add('pottery_dark', lathe([[0.001, 0.012], [0.4, 0.012], [0.4, 0.02], [0.001, 0.025]], 12, null, hc[0], y, hc[1]));
+  for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + rand(), p = [hc[0] + Math.cos(a) * 0.1, hc[1] + Math.sin(a) * 0.1], q = [hc[0] + Math.cos(a + 0.5) * 0.3, hc[1] + Math.sin(a + 0.5) * 0.3]; bag.add('timber', rod([p[0], y + 0.04, p[1]], [q[0], y + 0.03, q[1]], 0.02, 5)); }
+}
+
+/**
  * chakitaqlla: the foot plough { at: [x, z] (where the blade bites), y, yaw (the way the plough leans,
  * from the blade up to the handle), lean (radians from upright) }: a shaft about 1.45 m long and 6 cm
  * thick; a footrest of two short pegs lashed on about 45 cm up; a handle lashed on near the top; the
