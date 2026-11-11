@@ -137,6 +137,39 @@ function shopLife(els) {
   });
   return out;
 }
+/** Street sellers on the pavements of the arrival's streets and the Passeig's house (not on the tram streets, where the poles stand): a fruiterer's stall under an awning, flower and bread sellers on mats, with their buyers. */
+function vendors(els) {
+  const L = [], rand = rng(1911), pick = (a) => a[Math.floor(rand() * a.length)];
+  const half = BLOCK / 2 + 2.6, tramX = [GRACIA_X, PITCH * 2.5], tramZ = [PITCH / 2];
+  els.forEach((el) => {
+    if (!el.shops) return;
+    const [cx, cz] = el.c, sides = [];
+    for (const sg of [-1, 1]) {
+      if (!tramX.some((t) => Math.abs(cx + sg * (BLOCK / 2 + 11) - t) < 1)) sides.push({ f: [sg, 0], p: [cx + sg * half, cz] });
+      if (!tramZ.some((t) => Math.abs(cz + sg * (BLOCK / 2 + 11) - t) < 1)) sides.push({ f: [0, sg], p: [cx, cz + sg * half] });
+    }
+    for (let n = 0; n < 2; n++) {
+      if (!sides.length || rand() < 0.2) continue;
+      const sd = sides.splice(Math.floor(rand() * sides.length), 1)[0], al = (rand() - 0.5) * 36;
+      const x = sd.p[0] + (sd.f[0] ? 0 : al), z = sd.p[1] + (sd.f[1] ? 0 : al), y = height(x, z) + 0.05, fx = sd.f[0] * 0 + 0;
+      // the stall's front is toward the house wall (the buyers on the pavement's inner side), its seller by the kerb
+      const wx = -sd.f[0], wz = -sd.f[1], rot = Math.atan2(wx, wz), ax = x + sd.f[0] * 0.2, az = z + sd.f[1] * 0.2;
+      void fx;
+      if (Math.hypot(x, z) > RADIUS - 60 || onDiagonal(x, z, 8)) continue;
+      const kind = rand();
+      const cust = () => L.push({ t: 'figure', at: [ax + wx * 1.9 + (rand() - 0.5) * 0.8 * Math.abs(wz), az + wz * 1.9 + (rand() - 0.5) * 0.8 * Math.abs(wx)], y, rot, seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: 'stand', hair: 'bun', dress: 'robe', cloth: pick(['cloth_maroon', 'cloth_indigo', 'cloth_grey']), cloth2: 'cloth_white', over: 'shawl', hat: 'none', carry: 'basket' });
+      if (kind < 0.5) {
+        L.push({ t: 'stall', at: [ax, az], y, rot, w: 2.4, d: 1.1, goods: pick([['melons', 'greens'], ['greens', 'heap'], ['bread', 'baskets'], ['fish', 'heap']]), awning: pick(['cloth_red', 'cloth_green', 'cloth_ochre', 'cloth_white']), seed: Math.floor(rand() * 1e6) });
+        L.push({ t: 'figure', at: [ax - wx * 1.2, az - wz * 1.2], y, rot: rot + Math.PI, seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: 'stand', hair: 'short', dress: 'trousers', cloth: pick(['cloth_brown', 'cloth_grey']), cloth2: 'cloth_black', over: 'apron', hat: 'cap', hatMat: 'cloth_brown', beard: 0.8 });
+      } else {
+        L.push({ t: 'goods_mat', at: [ax, az], y, rot, goods: kind < 0.75 ? ['baskets', 'greens'] : ['bread', 'baskets'], seed: Math.floor(rand() * 1e9) });
+        L.push({ t: 'figure', at: [ax - wx * 0.95, az - wz * 0.95], y, rot: rot + Math.PI, seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: 'sit_ground', hair: 'bun', dress: 'robe', cloth: pick(['cloth_maroon', 'cloth_green', 'cloth_grey']), cloth2: 'cloth_white', over: 'shawl', hat: 'none' });
+      }
+      if (rand() < 0.7) cust();
+    }
+  });
+  return L;
+}
 /** The Eixample's block elements (the smoke finds the chimneys from the same plan). */
 export function blockElements() {
   return blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
@@ -156,6 +189,7 @@ export async function town() {
   plans.push({ ...base('barcelona-casa-life', casaLife()), style: 'life' });
   // the shops' people, a plan to a few blocks
   shopLife(els).forEach((L, i) => plans.push({ ...base(`barcelona-shop-life-${i}`, L), style: 'life' }));
+  plans.push({ ...base('barcelona-vendors', vendors(els)), style: 'life' });
   plans.push(base('barcelona-trams', [...lines.map((l) => ({ ...l, wires: false })), ...trams(lines, rand)]));
   // the wires apart, colliding with nothing
   plans.push({ ...base('barcelona-wires', lines.map((l) => ({ ...l, wires: 'only' }))), nocollide: true });
