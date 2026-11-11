@@ -27,22 +27,26 @@ function waterLevel(x, z) { return inRiver(x, z) ? LEVEL.water : -Infinity; }
 function fromWater(x, z) { return z - RIVER_Z; }
 /** Plants per 100 m²: in the garden's quarters a line of cypresses along every raised walk and fruit trees in the sunken beds, grass; neem in the town; none on the paths and terraces. */
 function planting(x, z, p) {
-  if (Math.hypot(x, z) > RADIUS - 6 || z < RIVER_Z + 6) return null;
+  if (Math.hypot(x, z) > RADIUS - 6) return null;
+  // the Yamuna's banks east and west of the terrace: tamarisk in the sand, date palms on the rise
+  if (z < RIVER_Z + 6) return Math.abs(x) > 158 && z > RIVER_Z - 8 && Math.hypot(x, z) < RADIUS - 24 ? { tamarisk: 0.3, date_palm: 0.05, grass: 6 } : null;
   if (inRect(GARDEN, x, z)) {
     // the sixteen sunken beds of each quarter: cypresses (death) in a line along the edge of every raised walk, fruit
     // trees (life) in the beds behind them, grass and flowers; nothing on the walks, the channels or the terrace's foot
     const ax = Math.abs(x), az = Math.abs(z), d = walkDist(x, z);
     if (ax < 12 || az < 12 || inRect([-150, -148, 150, -138], x, z) || d < 0.3) return null;
     if (d < 1.6) return { cypress: 14, grass: 40 };
-    if (d > 4) return { apple: 0.6, grass: 45 };
-    return { grass: 45 };
+    // fruit trees of the beds (mango, lemon, pomegranate, plantain by the sources; carob stands for the dark mango, jujube
+    // and fig for the lemon and the pomegranate), flowering shrubs and grass between; none within the reach of the axes' view
+    if (d > 4) return { carob: 0.22, jujube: 0.2, fig: 0.1, oleander: 0.45, grass: 45 };
+    return { oleander: 0.25, grass: 45 };
   }
   if (inHouse(x, z, 0.6) || onStreet(x, z, 1.5) || inRect([-172, -262, 172, 232], x, z, 2) || inRect(HAVELI_OPEN, x, z, 1) || inRect(WORKSHOP.rect, x, z, 1) || KATRAS.some((k) => inRect(k.rect, x, z, 5))) return null;
-  return { neem: 0.06, banyan: 0.01, grass: 15 };
+  return { neem: 0.09, banyan: 0.014, carob: 0.02, date_palm: 0.015, grass: 15 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { cypress: 14, apple: 0.6, neem: 0.06, banyan: 0.01 },
+  maxDensity: { cypress: 14, carob: 0.22, jujube: 0.2, fig: 0.1, oleander: 0.45, neem: 0.09, banyan: 0.014, tamarisk: 0.3, date_palm: 0.05 },
   climate: {
     sun: { az: 160, el: 40, color: [1.0, 0.93, 0.82], intensity: 3.1, lat: 27, dec: -15, hour: 10.5 },
     sky: { turbidity: 5, rayleigh: 1.2, mie: 0.007, mieG: 0.82, zenith: [0.13, 0.19, 0.32], horizon: [0.64, 0.62, 0.58] },

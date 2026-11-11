@@ -2,7 +2,8 @@
 // the forecourt's bazaar cells with their keepers sitting by them and buyers in the street; horses held by grooms in
 // the forecourt, where visitors dismounted; boats on the Yamuna below the riverfront terrace.
 
-import { RADIUS, FORECOURT, KATRAS, HAVELI_OPEN, WORKSHOP, houses } from './layout.js';
+import { RADIUS, FORECOURT, KATRAS, HAVELI_OPEN, WORKSHOP, PLINTH, GATE, POOL, GWALKS, RIVER_Z, houses } from './layout.js';
+import { ground } from './ground.js';
 import { frameOf } from '../../styles/mughal/townhouse.js';
 import { boatFloat } from '../../objects/index.js';
 
@@ -82,10 +83,56 @@ export function life() {
     const [mx, mz] = f.pt(4.3, -4.0); person([mx, mz], FY, Math.PI + f.yaw - 0.3, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_indigo', beard: true, hatMat: 'cloth_red' }); }
   // washermen (dhobi) on the Yamuna's bank east of the terrace: standing at their stones, cloth spread on the sand
   for (let k = 0; k < 5; k++) { const x = 182 + k * 9 + rand() * 3; person([x, -253.2], 0.0, Math.PI / 2 * 0 + 0.2, { man: true, pose: 'stand', cloth: 'cloth_white', hat: undefined, hatMat: 'cloth_white' }); }
+
+  // ── the Taj's garden and the plinth (docs/settlements/mughal-agra.md §13): the visitors, gardeners and servants ──
+  // strolling groups on the axial walks (the marble-edged lanes either side of the channel), a gardener watering the
+  // beds, the sweepers and the readers of the Qur'an on the plinth, guards at the gate
+  { const lane = 0.35;
+    for (const [z, sx] of [[118, -1], [96, 1], [74, -1], [48, 1], [30, -1], [-34, 1], [-58, -1], [-84, 1], [-108, -1], [-124, 1], [22, 1]]) {
+      const x = sx * (6 + rand() * 3);
+      // a gentleman with an attendant behind him (one with a fly-whisk's staff), or a veiled woman with a maid
+      if (rand() < 0.55) { person([x, z], lane, Math.PI * (rand() < 0.5 ? 0 : 1) + (rand() - 0.5) * 0.4, { man: true, cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_blue']), cloth2: pick(['cloth_green', 'cloth_maroon', 'cloth_red']), hatMat: pick(['cloth_red', 'cloth_ochre', 'cloth_white']), pose: 'stand' }); person([x + sx * 1.1, z + 1.2], lane, Math.PI, { man: true, pose: 'staff', cloth: 'cloth_white' }); }
+      else { person([x, z], lane, rand() * 6.28, { cloth: pick(['cloth_red', 'cloth_maroon', 'cloth_green']), cloth2: 'cloth_white', hat: 'veil', hair: 'long', pose: 'stand' }); person([x + 1.0, z + 0.6], lane, rand() * 6.28, { cloth: 'cloth_ochre', cloth2: 'cloth_white', hat: 'veil', hair: 'long', carry: 'child' }); }
+    }
+    // pilgrims and children sitting on the edge of the great tank and the lotus tanks' marble rim
+    for (let k = 0; k < 6; k++) { const a = k * 1.05 + 0.3, r = POOL.a + 3.6; person([Math.cos(a) * r, Math.sin(a) * r], lane + 0.02, a + Math.PI, { pose: k % 2 ? 'sit_ground' : 'stand', man: k % 3 !== 0 }); }
+    // the gardeners (mali): one with a pot on his head carrying water to the beds, two at work in the beds with hoes
+    for (const [x, z, o] of [[-30, 60, { carry: 'pot' }], [34, -66, { carry: 'hoe' }], [-64, -102, { carry: 'hoe', pose: 'squat' }], [66, 100, { carry: 'pot' }], [-98, 40, { carry: 'broom' }]]) person([x, z], 0, rand() * 6.28, { man: true, cloth: 'cloth_white', cloth2: 'cloth_brown', hat: 'turban', hatMat: 'cloth_white', beard: false, ...o });
+    // the plinth: sweepers at the tomb's marble, mourners and readers of the Qur'an before the south door, their carpets
+    const py = PLINTH.y, pz = PLINTH.c[1];
+    for (const [x, z, o] of [[-14, pz + 36, { carry: 'broom' }], [20, pz + 38, { carry: 'broom' }]]) person([x, z], py, rand() * 6.28, { man: true, cloth: 'cloth_white', cloth2: 'cloth_brown', hat: 'turban', ...o });
+    for (const [x, z, p] of [[-9, pz + 33.5, 'cross'], [-6.2, pz + 34.2, 'pray'], [7, pz + 33.8, 'cross'], [10.5, pz + 34.6, 'kneel'], [-12, pz + 32.5, 'cross']]) person([x, z], py, Math.PI + (rand() - 0.5) * 0.3, { man: true, pose: p, cloth: 'cloth_white', cloth2: 'cloth_white', hatMat: 'cloth_white' });
+    for (const [x, z] of [[-9.6, pz + 33.2], [8.4, pz + 33.4]]) L.push({ t: 'goods_mat', at: [x, z], y: py, rot: 0, seed: Math.floor(rand() * 1e9), goods: [] });
+    // by the gate: the guards on duty under the arch, spears and shields at the posts
+    for (const [x, z, rot] of [[-5, GATE.c[1] - 8.5, 0], [5, GATE.c[1] - 8.5, 0], [-4, GATE.c[1] + 9.2, Math.PI], [4, GATE.c[1] + 9.2, Math.PI]]) person([x, z], 0.04, rot, { man: true, pose: 'staff', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'sash', hatMat: 'cloth_red', beard: true });
+    // pigeon feeders and a fakir at the south door of the forecourt
+    L.push({ t: 'chickens', kind: 'pigeon', n: 9, at: [-22, 186], y: 0.05, seed: 77 }); L.push({ t: 'chickens', kind: 'pigeon', n: 7, at: [24, 210], y: 0.05, seed: 78 });
+    person([-3, 208], 0.05, 0, { man: true, pose: 'cross', cloth: 'cloth_ochre', cloth2: 'cloth_ochre', hat: 'turban', hatMat: 'cloth_ochre', beard: true, over: 'none' });
+    L.push({ t: 'goods_mat', at: [-3, 207.2], y: 0.05, rot: 0, seed: 5, goods: [] });
+  }
+  // ── the Yamuna: people and cattle at the water, boatmen in the boats, nets on the sand (§13) ──
+  { const wy = (x, z) => ground.height(x, z);
+    // the buffaloes of the washermen's side, standing in the shallows with a herdsman on the bank
+    for (const [x, z, rot] of [[-176, RIVER_Z + 2.3, 1.5], [-168, RIVER_Z + 1.6, 1.8], [-183, RIVER_Z + 2.8, 1.2]]) L.push({ t: 'animal', kind: 'buffalo', at: [x, z], y: wy(x, z), rot, seed: Math.floor(rand() * 1e9) });
+    person([-172, RIVER_Z + 8.5], wy(-172, RIVER_Z + 8.5), 0.4, { man: true, pose: 'staff', cloth: 'cloth_brown', cloth2: 'cloth_white', hatMat: 'cloth_ochre' });
+    // bathers' clothes and washing laid out by the dhobi, a line of sheets
+    L.push({ t: 'laundry', at: [190, -246.2], y: 0, rot: 0, len: 9, seed: 41 }); L.push({ t: 'laundry', at: [212, -245.6], y: 0, rot: 0.06, len: 7, seed: 42 });
+    for (let k = 0; k < 3; k++) L.push({ t: 'pot', kind: 'water_pot', n: 2, at: [181 + k * 17, -255.6], y: 0, seed: Math.floor(rand() * 1e9) });
+    // two women filling pots at the water's edge, a boy fishing from the rocks
+    for (const x of [-132, 128]) { const z = RIVER_Z + 5.4; person([x, z], wy(x, z), 0.1, { cloth: pick(WOMEN), cloth2: 'cloth_white', hat: 'veil', hair: 'long', pose: 'squat' }); }
+    person([14, -259.4], wy(14, -259.4), 0, { man: true, child: true, pose: 'sit_ground', cloth: 'cloth_white' });
+    // fishing nets spread to dry on the sand, a drying rack of poles
+    for (let k = 0; k < 3; k++) L.push({ t: 'block', rect: [-70 + k * 4.4, -255.0, -67 + k * 4.4, -252.6], y0: 0, y1: 0.025, mat: 'rope_fibre', collide: false });
+  }
   // boats on the Yamuna: thatch-roofed barges and rowing boats along the river, below the terrace
-  for (const [x, z, kind, len] of [[-95, -276, 'barge', 12], [-40, -292, 'rowboat', 5], [10, -281, 'barge', 11], [70, -296, 'rowboat', 4.5], [118, -277, 'barge', 12.5], [160, -300, 'rowboat', 5], [-150, -290, 'rowboat', 4.8]]) {
+  for (const [x, z, kind, len] of [[-95, -268.6, 'barge', 12], [-40, -270, 'rowboat', 5], [10, -269, 'barge', 11], [70, -270.2, 'rowboat', 4.5], [118, -268.6, 'barge', 12.5], [160, -271, 'rowboat', 5], [-150, -270, 'rowboat', 4.8], [-122, -307, 'rowboat', 4.5], [98, -310, 'rowboat', 4.8]]) {
     if (Math.hypot(x, z) > RADIUS - 40) continue;
-    L.push({ t: 'boat', kind, len, at: [x, z], y: WATER + boatFloat(kind), rot: Math.PI / 2 + (rand() - 0.5) * 0.3, seed: Math.floor(rand() * 1e9) });
+    const rot = Math.PI / 2 + (rand() - 0.5) * 0.3, by = WATER + boatFloat(kind), c = Math.cos(rot), sn = Math.sin(rot), at = (lx, lz) => [x + lx * c + lz * sn, z - lx * sn + lz * c];
+    L.push({ t: 'boat', kind, len, at: [x, z], y: by, rot, seed: Math.floor(rand() * 1e9) });
+    // the boatman at the stern poling or at the oars, a passenger or a fisherman amidships (the boats stand: their men pole in place)
+    person(at(0, -len * 0.34), by + 0.12, rot + Math.PI, { man: true, pose: kind === 'barge' ? 'punt' : 'row', carry: kind === 'barge' ? 'punt' : 'oars', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'turban', hatMat: 'cloth_white', over: 'none' });
+    if (kind === 'barge') { for (const [lz, g] of [[len * 0.12, 'cloth_white'], [len * 0.2, 'cloth_ochre']]) L.push({ t: 'sacks', n: 3, at: at(0.2, lz), y: by + 0.1, rot, seed: Math.floor(rand() * 1e9), mat: g === 'cloth_white' ? 'linen' : 'sacking' }); }
+    else person(at(0, len * 0.1), by + 0.12, rot, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_green', hatMat: 'cloth_red' });
   }
   return L;
 }
