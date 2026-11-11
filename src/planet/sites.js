@@ -28,6 +28,7 @@ export const SITES = [
   { id: 'qing-beijing', name: { en: 'Ming–Qing Beijing', zh: '明清北京' }, era: '17th c.', region: 'china', lat: 39.92, lon: 116.39, radius: 520 },
   { id: 'lhasa', name: { en: 'Tibet', zh: '西藏' }, era: '17th c.', region: 'tibet', lat: 29.3, lon: 91.0, radius: 420 },
   { id: 'dunhuang', name: { en: 'Dunhuang', zh: '敦煌' }, era: '9th c.', region: 'silk-road', lat: 40.04, lon: 94.81, radius: 190 },
+  { id: 'hakka-tulou', name: { en: 'Hakka tulou', zh: '客家土楼' }, era: 'c. 1710', region: 'china', lat: 24.67, lon: 117.05, radius: 190 },
   // ── Japan and Korea ──
   { id: 'nara', name: { en: 'Nara Japan', zh: '奈良' }, era: '8th c.', region: 'japan', lat: 34.69, lon: 135.84, water: true, island: true, radius: 340 },
   { id: 'heian-uji', name: { en: 'Heian Japan', zh: '平安日本' }, era: '11th c.', region: 'japan', lat: 34.89, lon: 135.81, radius: 360 },
@@ -113,7 +114,7 @@ const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan han-changan',
   M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang',
-  S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
+  S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori hakka-tulou',
   P: 'stonehenge catalhoyuk',
 };
 for (const [c, ids] of Object.entries(CLASS)) for (const id of ids.split(' ')) { const s = SITES.find((x) => x.id === id); if (s) s.size = id === 'ming-suzhou' ? 215 : CLASS_RADIUS[c]; }
@@ -132,7 +133,6 @@ export const PLANNED = [
   { id: 'lu-qufu', name: { en: 'Qufu', zh: '曲阜' }, region: 'china', lat: 35.60, lon: 116.99, radius: 280 },
   { id: 'wei-ye', name: { en: 'Three Kingdoms Ye', zh: '三国邺城' }, region: 'china', lat: 36.33, lon: 114.38, nudge: 0, radius: 300 },
   { id: 'tang-changan', name: { en: 'Tang Chang\'an', zh: '唐长安' }, region: 'china', lat: 34.22, lon: 108.96, nudge: 200, radius: 550 },
-  { id: 'hakka-tulou', name: { en: 'Hakka tulou', zh: '客家土楼' }, region: 'china', lat: 24.67, lon: 117.05, radius: 180 },
   { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, region: 'indus', lat: 27.33, lon: 68.14, radius: 300 },
   { id: 'ajanta', name: { en: 'Ajanta', zh: '阿旃陀' }, region: 'india', lat: 20.55, lon: 75.70, radius: 200 },
   { id: 'nalanda', name: { en: 'Nalanda', zh: '那烂陀' }, region: 'india', lat: 25.14, lon: 85.44, radius: 200 },
