@@ -14,7 +14,7 @@ import { canalQuay } from './canal.js';
 import { chapel } from './chapel.js';
 import { ecurie } from './ecuries.js';
 import { orangeTrees } from './garden.js';
-import { broderie, palissades, statues, yews, benches } from './gardens.js';
+import { broderie, palissades, statues, yews, benches, guerites, bornes } from './gardens.js';
 import { townHouse } from './townhouse.js';
 import { coach, sedanChair } from '../baroque/street.js';
 
@@ -178,6 +178,6 @@ function fountain(el, ctx) {
 }
 registerStyle('classical_fr', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, range, parterre, fountain, court_range: courtRange, marble_court: marbleCourt, grille, grand_corps: grandCorps, ambassadors, canal_quay: canalQuay, chapel, ecurie, orange_trees: orangeTrees, coach, sedan_chair: sedanChair, fr_house: townHouse, broderie, palissades, statues, yews, benches },
+  elements: { ...STYLES.qing.elements, range, parterre, fountain, court_range: courtRange, marble_court: marbleCourt, grille, grand_corps: grandCorps, ambassadors, canal_quay: canalQuay, chapel, ecurie, orange_trees: orangeTrees, coach, sedan_chair: sedanChair, fr_house: townHouse, broderie, palissades, statues, yews, benches, guerites, bornes },
   objects: {},
 });

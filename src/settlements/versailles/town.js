@@ -2,7 +2,7 @@ import { lodTiles } from '../lod.js';
 // The town (docs/settlements/versailles.md §5); the court in the gardens (§5a): courtiers walking and talking on
 // the terrace before the garden front and down the walk between the basins of the water parterre, others at the
 // Latona basin; on the Grand Canal the gondolas sent by Venice (1674) with their gondoliers, and the King's rowing boats.
-import { RADIUS, RISE, LATONA, LATONA_Y, CANAL, STABLES, lots } from './layout.js';
+import { RADIUS, RISE, LATONA, LATONA_Y, CANAL, STABLES, PLACE, lots } from './layout.js';
 const base = (id, elements, style = 'vernacular') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [180, 0], facing: 'w' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));       // a figure faces −z when rot = 0
@@ -46,10 +46,41 @@ function canal() {
   return base('versailles-canal-boats', L, 'life');
 }
 
+/** The Place d'Armes (§5b): its cobbles, the sentry boxes at the gate and the corners, the posts and chains along its edges; the market stalls of the town's purveyors, troughs for the coaches' horses, benches, the people about them. */
+function place() {
+  const rand = rng(1671), [x0, z0, x1, z1] = PLACE, gx = 152;
+  const E = [{ t: 'floor', rect: [gx, z0, x1, z1], y: RISE + 0.03, th: 0.3, mat: 'pebbles' }];
+  for (const z of [-34, 34, 0]) E.push({ t: 'floor', rect: [gx, z - 0.4, x1 - 6, z + 0.4], y: RISE + 0.05, th: 0.3, mat: 'flagstone' });          // the gutters of dressed stone
+  E.push({ t: 'guerites', y: RISE, at: [[gx + 2.5, -9.5, -Math.PI / 2], [gx + 2.5, 9.5, -Math.PI / 2], [gx + 4, z0 + 4, Math.PI], [gx + 4, z1 - 4, 0], [x1 - 14, z0 + 3, Math.PI], [x1 - 14, z1 - 3, 0]] });
+  const post = [];
+  for (const sz of [-1, 1]) for (let x = gx + 8; x < x1 - 4; x += 4.5) post.push([x, sz * (z1 - 1.0)]);
+  for (const sz of [-1, 1]) for (let z = 14; z < z1 - 8; z += 4.5) post.push([gx + 1.2, sz * z]);
+  E.push({ t: 'bornes', h: () => RISE, at: post });
+  const L = [], fig = (o) => L.push({ t: 'figure', y: RISE, dress: 'tunic', legs: 'hose', skin: 'skin_light', hat: 'brim', hatMat: 'cloth_black', ...o });
+  const aw = ['cloth_white', 'cloth_red', 'cloth_green', 'cloth_ochre'], goods = [['bread'], ['greens', 'heap'], ['fish'], ['bolts'], ['melons', 'greens'], ['pottery'], ['bread', 'bolts']];
+  let k = 0;
+  for (const sz of [-1, 1]) for (let x = gx + 12; x < x1 - 24; x += 7.5, k++) {
+    const z = sz * (z1 - 7), rot = sz < 0 ? 0 : Math.PI;
+    L.push({ t: 'stall', at: [x, z], y: RISE, rot, seed: 400 + k, awning: aw[k % 4], goods: goods[k % goods.length], w: 2.6 });
+    fig({ at: [x + 0.2, z - sz * 1.2], rot: rot + Math.PI, seed: 500 + k, h: 1.62 + rand() * 0.1, cloth: ['cloth_brown', 'cloth_grey', 'cloth_indigo'][k % 3], cloth2: 'cloth_white', pose: 'stand', over: 'apron' });
+    if (rand() < 0.7) fig({ at: [x - 0.3 + rand() * 0.6, z + sz * 2.5], rot, seed: 600 + k, h: 1.6, dress: k % 2 ? 'robe' : 'tunic', cloth: ['cloth_red', 'cloth_green', 'cloth_brown'][k % 3], cloth2: 'cloth_white', pose: rand() < 0.4 ? 'talk' : 'stand', carry: k % 3 === 0 ? 'basket' : 'none' });
+  }
+  // troughs and a bench or two by the stables' wall, the coachmen waiting with their horses
+  for (const sz of [-1, 1]) { L.push({ t: 'trough', at: [x1 - 20, sz * 12], y: RISE, rot: 0, mat: 'limestone' }); L.push({ t: 'bench', at: [x1 - 3, sz * 4], y: RISE, rot: Math.PI / 2, len: 2.2, back: true }); }
+  for (const [x, z, r] of [[x1 - 26, -4, 0.5], [x1 - 32, 5, 2.2], [x1 - 14, 8, 4]]) fig({ at: [x, z], rot: r, seed: Math.floor(x * 5 + z), h: 1.7, cloth: 'cloth_brown', cloth2: 'cloth_grey', pose: 'talk', over: 'cape' });
+  for (const [x, z, r, s] of [[x1 - 22, -9, 1.2, 7], [x1 - 18, 14, -0.4, 8]]) L.push({ t: 'animal', kind: 'horse', at: [x, z], y: RISE, rot: r, seed: s, mat: 'hide_brown', graze: false, gear: true });
+  L.push({ t: 'animal', kind: 'dog', at: [gx + 30, -8], y: RISE, rot: 1, seed: 3 }, { t: 'animal', kind: 'dog', at: [gx + 60, 20], y: RISE, rot: 3, seed: 4 });
+  return [{ id: 'versailles-place', style: 'classical_fr', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [180, 0], facing: 'w' }, bounds: [gx - 10, z0 - 5, x1 + 10, z1 + 5], rooms: [], elements: E, center: [180, 0], near: 300 },
+    { id: 'versailles-place-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [180, 0], facing: 'w' }, bounds: [gx - 10, z0 - 5, x1 + 10, z1 + 5], rooms: [], elements: L, center: [180, 0], near: 300 }];
+}
+
 export async function houses() {
   const all = lots(), plans = [];
-  plans.push(...lodTiles('versailles-houses', 'classical_fr', all.map((l) => ({ t: 'fr_house', ...l, shop: false })), { R: RADIUS }));
+  const tiles = lodTiles('versailles-houses', 'classical_fr', all.map((l) => ({ t: 'fr_house', ...l, shop: false })), { R: RADIUS });
+  // the open houses' rooms (their sound is the chamber's: a lute, the street muffled)
+  for (const p of tiles) if (!p.far) p.rooms = p.elements.filter((e) => e.open).map((e) => ({ id: `${e.use} ${Math.round(e.rect[0])},${Math.round(e.rect[1])}`, rect: [e.rect[0] + 0.4, e.rect[1] + 0.4, e.rect[2] - 0.4, e.rect[3] - 0.4], y: e.y + 0.14, kind: e.use === 'hotel' ? 'hall' : 'chamber' }));
+  plans.push(...tiles);
   plans.push({ id: 'versailles-stables', style: 'classical_fr', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [180, 0], facing: 'w' }, bounds: [150, -100, 300, 100], rooms: [], center: [240, 0], near: 320,
     elements: STABLES.map((s) => ({ t: 'ecurie', ...s, y: RISE })) });
-  return [...plans, court(), canal()];
+  return [...plans, ...place(), court(), canal()];
 }

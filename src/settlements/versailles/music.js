@@ -6,6 +6,7 @@ export default {
   tempo: 64,
   zones: {
     open: { drone: { notes: [-12, -5, 0], level: 0.03, timbre: 'sho' }, harp: { density: 0.3, range: [5, 19], level: 0.15, timbre: 'oud' }, reverb: 0.35 },
+    chamber: { drone: { notes: [-12, -5], level: 0.02, timbre: 'sho' }, harp: { density: 0.35, range: [0, 14], level: 0.12, timbre: 'oud' }, reverb: 0.3 },       // a shop or a house of the town: a lute, the street muffled
     hall: { drone: { notes: [-24, -12, -5, 0], level: 0.06, timbre: 'voice' }, lead: { timbre: 'voice', density: 0.25, range: [0, 12], level: 0.06 }, reverb: 0.95 },
   },
 };

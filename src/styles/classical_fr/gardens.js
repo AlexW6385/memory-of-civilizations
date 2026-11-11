@@ -133,3 +133,27 @@ export function benches(el, { bag, col }) {
     B(-0.85, -0.25, 0.85, 0.25, 0.42, 0.5); for (const u of [-0.7, 0.7]) B(u - 0.12, -0.22, u + 0.12, 0.22, 0, 0.42); B(-0.85, 0.2, 0.85, 0.27, 0.5, 0.95);
   }
 }
+
+/** guerites: { at: [[x, z, yaw]], y } — sentry boxes of painted boards (the king's colours in stripes), a pitched roof, the door open. */
+export function guerites(el, { bag, col }) {
+  for (const [x, z, yaw] of el.at) {
+    const y = el.y, c = Math.cos(yaw), s = Math.sin(yaw);
+    const B = (mat, u0, v0, u1, v1, ya, yb, cc = false) => { const p = [x + c * u0 + s * v0, z - s * u0 + c * v0], q = [x + c * u1 + s * v1, z - s * u1 + c * v1]; const r = [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; bag.add(mat, box(r[0], y + ya, r[1], r[2], y + yb, r[3])); if (cc) col.rect(r, y + ya, y + yb); };
+    B('timber', -0.55, -0.55, 0.55, 0.55, 0.0, 0.12, true);
+    for (let k = 0; k < 6; k++) { const m = ['paint_blue', 'paint_white', 'cloth_red'][k % 3]; B(m, -0.5 + k * (1 / 6), -0.5, -0.5 + (k + 1) / 6, -0.45, 0.12, 2.3); B(m, -0.5 + k * (1 / 6), 0.45, -0.5 + (k + 1) / 6, 0.5, 0.12, 2.3); }
+    B('wood_painted', -0.5, -0.5, -0.45, 0.5, 0.12, 2.3, true); B('wood_painted', 0.45, -0.5, 0.5, 0.5, 0.12, 2.3, true);
+    B('wood_painted', -0.5, 0.45, 0.5, 0.5, 0.12, 2.3, true); B('opening', -0.35, -0.5, 0.35, -0.44, 0.12, 2.0);
+    B('slate', -0.7, -0.7, 0.7, 0.7, 2.3, 2.4); B('slate', -0.55, -0.55, 0.55, 0.55, 2.4, 2.6); B('slate', -0.35, -0.35, 0.35, 0.35, 2.6, 2.75);
+    bag.add('iron', lathe([[0.001, 0], [0.03, 0.01], [0.025, 0.3]], 5, null, x, y + 2.75, z));
+  }
+}
+/** bornes: { at: [[x, z]], h } — stone posts joined by iron chains along the Place's edge. */
+export function bornes(el, { bag, col }) {
+  const pts = el.at;
+  pts.forEach(([x, z], i) => {
+    const y = el.h(x, z);
+    bag.add(S, lathe([[0.2, 0], [0.24, 0.1], [0.19, 0.4], [0.2, 0.75], [0.14, 0.85], [0.001, 0.92]], 8, null, x, y, z)); col.circle(x, z, 0.24, y, y + 0.9);
+    const n = pts[i + 1];
+    if (n && !n[2] && Math.hypot(n[0] - x, n[1] - z) < 7) bag.add('iron', rod([x, y + 0.7, z], [(x + n[0]) / 2, y + 0.55, (z + n[1]) / 2], 0.012, 4)), bag.add('iron', rod([(x + n[0]) / 2, y + 0.55, (z + n[1]) / 2], [n[0], el.h(n[0], n[1]) + 0.7, n[1]], 0.012, 4));
+  });
+}
