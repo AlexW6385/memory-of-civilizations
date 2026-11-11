@@ -73,6 +73,12 @@ function frame(L, bag, axis, c, dir, h, sill) {
   if (sill) g(a0 - 0.12, a1 + 0.12, y0 - 0.12, y0, 0.13);
 }
 
+
+/** The stoop: two more steps going down from the doorstep (0.22 each, 0.5 deep), for ground that falls away in front. */
+function stoop(L, bag, C, u, w) {
+  for (let k = 1; k <= 3; k++) { const r = L.Rc(u - w / 2 - 0.1 - 0.05 * k, -0.5 - 0.5 * k, u + w / 2 + 0.1 + 0.05 * k, -0.5 * k); bag.add(A, box(r[0], L.y - 1.6, r[1], r[2], L.y + 0.08 - 0.22 * k, r[3])); C.floor(r, L.y + 0.08 - 0.22 * k); }
+}
+
 /** The roof: its floor, the cornice band, the parapet with crow-step corners and a scupper, over rect r (local), at y. */
 function roof(L, bag, C, r, y, opts = {}) {
   const [u0, v0, u1, v1] = r, rc = L.Rc(u0, v0, u1, v1);
@@ -199,6 +205,7 @@ export function house(el, { bag, col: C }) {
     for (const h of fw) frame(L, bag, 'u', 0, -1, h, true);
     // (the step before the door and the door's sill)
     { const r = L.Rc(d.u - d.w / 2 - 0.1, -0.5, d.u + d.w / 2 + 0.1, T); bag.add(A, box(r[0], y - 0.6, r[1], r[2], y + 0.08, r[3])); C.floor(r, y + 0.08); }
+    stoop(L, bag, C, d.u, d.w);
     // the interior: floor, timber ceiling with its beams, the roof block above
     const ri = L.room.rect, rc = L.Rc(...ri);
     bag.add(FL, box(rc[0], y - 0.3, rc[1], rc[2], y + 0.03, rc[3])); C.floor(rc, y + 0.03);
@@ -234,6 +241,7 @@ export function house(el, { bag, col: C }) {
   run(L, bag, C, A, 'v', T, R0, Wd - T, Wd, y0, y + hw);
   frame(L, bag, 'u', 0, -1, gate, false);
   { const r = L.Rc(g.u - g.w / 2 - 0.1, -0.5, g.u + g.w / 2 + 0.1, T); bag.add(A, box(r[0], y - 0.6, r[1], r[2], y + 0.08, r[3])); C.floor(r, y + 0.08); }
+  stoop(L, bag, C, g.u, g.w);
   // the court's floor of flagstones, the cistern's lid and mouth, the oven by the side wall
   { const r = L.Rc(T, T, Wd - T, R0); bag.add(FL, box(r[0], y - 0.3, r[1], r[2], y + 0.03, r[3])); C.floor(r, y + 0.03); }
   { const [cx, cz] = L.P(L.court.cx, L.court.cz);

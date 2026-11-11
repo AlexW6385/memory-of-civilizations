@@ -105,7 +105,7 @@ function addYard(x, z) {
   if (sacred(x, z, 6) || sacred(x + 11, z + 10, 6) || sacred(x + 11, z, 6) || sacred(x, z + 10, 6) || x > 20 && z > -40) return;
   if (c.some(([a, b]) => inGarden(a, b, 2) || inRect(TRICLINIUM.rect, a, b, 3) || pathDist(a, b, OUTER.path) < OUTER.w / 2 + 12 || Math.hypot(a - THEATRE.c[0], b - THEATRE.c[1]) < THEATRE.r1 + 14 || a > 40 && b > 20)) return;
   const h = hash2(x * 3.1, z * 1.7), KINDS = ['orchard', 'pen', 'threshing', 'potter', 'cistern', 'tents', 'orchard', 'pen'];
-  const y = Math.min(...c.map(([a, b]) => floorY(a, b))), kind = KINDS[Math.floor(h * KINDS.length)];
+  const zg = z < 12 ? z + d : z, y = (floorY(x, zg) + floorY(x + w, zg) + floorY(x + w / 2, zg)) / 3, kind = KINDS[Math.floor(h * KINDS.length)];
   // the gate toward the street (north of it the yard's south side opens, south of it the north)
   const yd = { rect: [x + 0.6, z + 0.6, x + w - 0.6, z + d - 0.6], kind, seed: Math.floor(h * 1e6), y: +y.toFixed(3), gate: z < 12 ? 's' : 'n', yard: true };
   YARDS.push(yd); YARD_GRID.set(Math.floor((x + 230) / 13) + ',' + Math.floor((z + 100) / 12), yd);
@@ -133,8 +133,9 @@ export function lots() {
     if ([[x, z], [x + w, z + d], [x + w, z], [x, z + d]].some(([a, b]) => inGarden(a, b, 2) || inRect(TRICLINIUM.rect, a, b, 3))) continue;
     // not over the Outer Siq, the theatre or the Royal Tombs' foot (open ground there is levelled by its own rules)
     if ([[x, z], [x + w, z + d], [x + w, z], [x, z + d]].some(([a, b]) => pathDist(a, b, OUTER.path) < OUTER.w / 2 + 12 || Math.hypot(a - THEATRE.c[0], b - THEATRE.c[1]) < THEATRE.r1 + 14 || a > 40 && b > 20)) continue;
-    const y = Math.min(...[[x, z], [x + w, z + d], [x + w, z], [x, z + d]].map(([a, b]) => floorY(a, b)));
-    const lot = { rect: [x, z, x + w, z + d], seed, y: +y.toFixed(3), front: z < 12 ? 's' : 'n' };
+    // the floor is the ground at the middle of the front (the door's level, so that the way in is level, a stoop's steps taking up the rest), the rest cut into the slope
+    const front = z < 12 ? 's' : 'n', zf = front === 's' ? z + d : z, y = (floorY(x, zf) + floorY(x + w, zf) + floorY(x + w / 2, zf)) / 3;
+    const lot = { rect: [x, z, x + w, z + d], seed, y: +y.toFixed(3), front };
     LOTS.push(lot); LOT_GRID.set(Math.floor((x + 230) / 13) + ',' + Math.floor((z + 100) / 12), lot);
   }
   return LOTS;
