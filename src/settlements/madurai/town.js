@@ -4,8 +4,14 @@ import { RADIUS, TANK, WALL, GATES, PUDHU, SUNDARA, MEENAKSHI, HALL, lots } from
 import { pudhuMandapam } from './plan.js';
 const base = (id, elements) => ({ id, style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } });
 export async function town() {
-  const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) plans.push(base(`madurai-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'tamil_house', simple: true, ...l }))));
+  const plans = [], tiles = new Map();
+  for (const l of lots()) {
+    if (l.kind === 'yard') continue;
+    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, k = `${Math.floor(cx / 100)},${Math.floor(cz / 100)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push({ t: 'tamil_house', ...l });
+  }
+  for (const [k, list] of tiles) plans.push({ ...base(`madurai-houses-${k}`, list) });
   plans.push(festival(), pudhuMandapam, { ...street(), style: 'life', center: [0, 60], near: 260 });
   return plans;
 }
