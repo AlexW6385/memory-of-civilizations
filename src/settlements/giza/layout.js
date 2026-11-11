@@ -18,6 +18,18 @@ export const WEST_FIELD = [-330, -230, -150, 110];
 export const EAST_FIELD = [200, -250, 300, -80];
 export const CROW_WALL = { a: [-140, 150], b: [80, 150], h: 10, th: 10, gate: { at: 150, w: 4, h: 7 } };
 export const TOWN = [-160, 165, 230, 360];
+// c. 2500 BC, a generation later (docs/settlements/giza.md §10): the Great Sphinx lying in its quarry pit south-east of
+// the plateau's edge, looking east, with Khafre's valley temple on the valley floor before it. Khafre's own pyramid and
+// its upper temple lie beyond the settlement's edge, south-west; his causeway comes down to the valley temple from there.
+export const SPHINX = { x0: 212, x1: 285, z: 166, len: 73, floor: -12.5 };
+export const SPHINX_PIT = [205, 142, 296, 190];
+export const KHAFRE_VT = [304, 112, 350, 154];
+export const KV_Y = -12.3;
+// Khafre's causeway: level on the plateau, down its edge, into the valley temple's west door (it goes on, beyond the settlement, to his pyramid)
+export const KHAFRE_CW = { a: [212, 133], down: [270, 301], b: [304, 133] };
+// the working quarry south of the boat pits, north of the Wall of the Crow: three benches cut down from the plateau
+export const QUARRY = [46, 104, 134, 141];
+export const QUARRY_DEPTH = 7.2;
 // the five boat pits (docs/settlements/giza.md §4.2): two rectangular ones south of the pyramid,
 // sealed with beams of limestone; three boat-shaped ones east of it — north and south of the
 // mortuary temple and beside the causeway — sealed the same way. { c, len, w, ang, shape }

@@ -10,6 +10,10 @@ import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
 import { loft, ring } from '../egyptian/objects.js';
 import { pyramidInterior } from './interior.js';
+import { sphinx } from './sphinx.js';
+import { paintChapel } from './chapel.js';
+import { khafreTemple } from './khafre.js';
+import { quarry, track, tools } from './quarry.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A frustum over a rectangle centred at (cx, cz): half-sizes (a0, b0) at y0 to (a1, b1) at y1. */
@@ -140,6 +144,7 @@ function mastaba(el, { bag, col }) {
   W([rx0, z0, x1, z1], H, H + 0.22, 'mud_plaster'); col.floor([rx0, z0, x1, z1], H + 0.22);
   // inside: the offering basin of limestone before the stela, loaves and a jar on it; the floor of beaten mud
   bag.add('mud_plaster', box(x0, -0.02, z0 + th, x1 - th, 0.03, z1 - th));
+  paintChapel(bag, x0 + 0.05, x1 - th - 0.02, z0 + th, z1 - th, H, rand);
   const bx = x0 + 0.55, bw = 0.42, bd = 0.32;
   bag.add('limestone_core', box(bx - bd, 0.03, sz - bw, bx + bd, 0.12, sz + bw));
   for (const [p, q] of [[[bx - bd, sz - bw], [bx + bd, sz - bw + 0.06]], [[bx - bd, sz + bw - 0.06], [bx + bd, sz + bw]], [[bx - bd, sz - bw], [bx - bd + 0.06, sz + bw]], [[bx + bd - 0.06, sz - bw], [bx + bd, sz + bw]]]) bag.add('limestone_core', box(p[0], 0.12, p[1], q[0], 0.2, q[1]));
@@ -628,6 +633,7 @@ registerStyle('oldkingdom', {
     ...STYLES.qing.elements,
     ok_pyramid: okPyramid, mastaba, ok_temple: okTemple, causeway, mud_house: mudHouse, gallery_hall: galleryHall, crow_wall: crowWall,
     boat_pit: boatPit, royal_ship: royalShip, bakery, ok_pyramid_interior: pyramidInterior, stone_sledge: stoneSledge,
+    ok_sphinx: sphinx, ok_khafre_temple: khafreTemple, ok_quarry: quarry, ok_track: track, ok_tools: tools,
   },
   objects: {},
 });
