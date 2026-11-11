@@ -93,7 +93,7 @@ export function lots() {
     return true;
   };
   const place = (rect, front, row) => {
-    if (!keep(rect)) return;
+    if (!keep(rect) || (row && rand() < 0.5)) return;
     if (LOTS.some((l) => l.rect[0] < rect[2] + 1.2 && l.rect[2] > rect[0] - 1.2 && l.rect[1] < rect[3] + 1.2 && l.rect[3] > rect[1] - 1.2)) return;
     const w = rect[2] - rect[0], d = rect[3] - rect[1];
     LOTS.push({ rect, front, seed: Math.floor(rand() * 1e6), kind: w * d > 60 ? 'big' : w * d < 36 ? 'small' : 'plain', row });

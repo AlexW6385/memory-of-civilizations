@@ -24,16 +24,18 @@ function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || wet(x, z) < 1.8 || inLot(x, z, 1.4) || onPath(x, z, 0.4) || onBridge(x, z, 3)) return null;
   if (inRect(PALACE.wall, x, z, 1)) return { grass: 14, banyan: 0.01 };
   if (inRect(WAT.wall, x, z, 1)) {
-    if (inRect([-36, -160, 56, -120], x, z, 1) || inRect([55, -150, 100, -128], x, z, 2) || inRect([104, -146, 120, -132], x, z, 2) || inRect([-66, -152, -42, -128], x, z, 2) || inRect(WAT.wall, x, z, -1) === false) return null;
-    return { grass: 10, banyan: 0.012 };
+    // banyans and bodhi trees only along the compound's walls and in its far corners, keeping the axis and the buildings clear
+    const [x0, z0, x1, z1] = WAT.wall, edge = Math.min(x - x0, x1 - x, z - z0, z1 - z);
+    if (edge < 2 || edge > 9 || Math.abs(x - WAT.axisX) < 14 || inRect([-66, -170, 120, -118], x, z, 6)) return null;
+    return { grass: 10, banyan: 0.01 };
   }
   if (!inRect(ISLAND, x, z, 6)) return { grass: 26, neem: 0.012 };
   const near = wet(x, z) < 9 ? 1 : 0;
-  return { grass: 22, bamboo: 0.04 + 0.05 * near, neem: 0.05, teak: 0.012 };
+  return { grass: 22, bamboo: 0.015 + 0.03 * near, neem: 0.03, teak: 0.008 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { banyan: 0.012, bamboo: 0.09, neem: 0.05, teak: 0.012 },
+  maxDensity: { banyan: 0.012, bamboo: 0.045, neem: 0.03, teak: 0.008 },
   climate: {
     sun: { az: 150, el: 62, color: [1.0, 0.94, 0.84], intensity: 3.4, lat: 14, dec: 12, hour: 10 },
     sky: { turbidity: 5.2, rayleigh: 1.35, mie: 0.007, mieG: 0.8, zenith: [0.12, 0.19, 0.32], horizon: [0.6, 0.58, 0.54] },

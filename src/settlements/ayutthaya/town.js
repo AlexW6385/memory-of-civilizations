@@ -2,7 +2,7 @@
 // them and the river; the floating houses moored on the river and the floating market on its reach below the palace (boats with fruit,
 // pots, rice and fish, the vendors sitting in them); sugar palms and the granaries; the monks and the people of the banks.
 import { lodTiles } from '../lod.js';
-import { RADIUS, WATER, CANALS, BRIDGES, MARKET, RIVER_W, ISLAND, inRect, wet, lots, onBridge, onPath, inLot, WAT, PALACE, UBOSOT, wetRiver } from './layout.js';
+import { RADIUS, WATER, CANALS, BRIDGES, MARKET, RIVER_W, ISLAND, inRect, wet, lots, onBridge, onPath, paths, inLot, WAT, PALACE, UBOSOT, wetRiver } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [10, -90], facing: 'n' }, ...extra });
@@ -61,7 +61,7 @@ function water() {
 /** The palms (sugar and coconut stand-ins), granaries and rest houses scattered where the ground is free. */
 function garden() {
   const E = [], rand = rng(168);
-  for (let k = 0; k < 330; k++) {
+  for (let k = 0; k < 210; k++) {
     const x = -228 + rand() * 520, z = -240 + rand() * 462;
     if (!inRect(ISLAND, x, z, -6) || Math.hypot(x, z) > RADIUS - 40 || wet(x, z) < 3.5 || inLot(x, z, 2.2) || onPath(x, z, 0.8) || onBridge(x, z, 4) || inRect(WAT.wall, x, z, 4) || inRect(PALACE.wall, x, z, 4) || wetRiver(x, z) < 8) continue;
     E.push({ t: 'sugar_palm', at: [x, z], y: 0, s: 0.75 + rand() * 0.5, rot: rand() * 6.28 });
@@ -93,13 +93,22 @@ function people() {
     const sx = e.at[0] - s * L * 0.32 * -1, sz = e.at[1] + c * L * 0.32;
     fig([sx, sz], WATER + (e.kind === 'vendor' ? 0.45 : 0.4), (e.rot ?? 0) + Math.PI, { pose: 'sit_ground', hat: rand() < 0.7 ? 'straw' : 'none', hair: 'bun', over: 'none' });
   }
+  // the banks: women with baskets and pots, men fishing at the landings, a boy with a buffalo's rope, people talking
+  const strips = paths().filter((q) => (q.r[2] - q.r[0]) * (q.r[3] - q.r[1]) > 120);
+  for (let k = 0; k < 70; k++) {
+    const q = strips[Math.floor(rand() * strips.length)].r, x = q[0] + rand() * (q[2] - q[0]), z = q[1] + rand() * (q[3] - q[1]);
+    if (Math.hypot(x, z) > RADIUS - 50 || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 3)) continue;
+    const r = rand(), rot = (q[2] - q[0] > q[3] - q[1] ? 0 : Math.PI / 2) + (rand() < 0.5 ? 0 : Math.PI);
+    if (r < 0.25) fig([x, z], 0, rot, { carry: 'basket' }); else if (r < 0.45) fig([x, z], 0, rot, { carry: 'pot' }); else if (r < 0.6) fig([x, z], 0, rot, { pose: 'sit_ground', legs: 'cross', hat: 'straw' });
+    else if (r < 0.7) fig([x, z], 0, rot, { child: true, h: 0.7 }); else if (r < 0.8) { fig([x, z], 0, rot, { pose: 'talk' }); const b = [x + Math.sin(rot) * -1.1, z + Math.cos(rot) * -1.1]; fig(b, 0, face(b, [x, z])); } else fig([x, z], 0, rot, { hat: 'straw', carry: 'pole' });
+  }
   void face;
   return plan('ayutthaya-people', 'life', P);
 }
 export async function town() {
   const plans = [water(), garden(), people()];
   const els = lots().map((l) => ({ t: 'thai_house', rect: l.rect, front: l.front, seed: l.seed, kind: l.kind }));
-  plans.push(...lodTiles('ayutthaya-houses', 'siamese', els, { R: RADIUS, near: 200 }));
+  plans.push(...lodTiles('ayutthaya-houses', 'siamese', els, { R: RADIUS, near: 150 }));
   void UBOSOT;
   return plans;
 }

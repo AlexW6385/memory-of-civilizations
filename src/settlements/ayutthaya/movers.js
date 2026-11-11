@@ -99,7 +99,7 @@ export function boatShapes(sb) {
   for (const kind of ['covered', 'cargo']) for (const far of [false, true]) {
     const v = sb.variant(`${kind}|${far ? 'far' : 'near'}`);
     const parts = boatParts(kind === 'covered' ? { kind: 'sampan', len: 6, awning: 'atap', load: 'empty', seed: 3 } : { kind: 'sampan', len: 6, load: 'fruit', seed: 5 });
-    for (const [m, g] of parts) { const grp = fibre.test(m) ? 'fibre' : 'wood'; sb.addPiece(v, grp, g, { slot: SLOT.none, col: factor(grp, m === 'wood_dark' ? 'wood_dark' : m) }); }
+    for (const [m, g] of parts) { const grp = fibre.test(m) ? 'fibre' : 'wood'; sb.addPiece(v, grp, g, { slot: SLOT.none, col: factor(grp, m) }); }
   }
   // the paddle: held at the stern, the shaft down and aft to a leaf-shaped blade in the water
   const v = sb.variant('oar'), w = [], bl = [];

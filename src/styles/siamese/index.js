@@ -95,24 +95,24 @@ function chedi(el, { bag, col }) {
   const y0 = y + 4.5 * v, r0 = a * 0.62;
   // the round tiers and the bell
   const prof = [[r0, 0], [r0, 0.25], [r0 * 0.93, 0.3], [r0 * 0.93, 0.62], [r0 * 0.84, 0.7], [r0 * 0.84, 1.0], [r0 * 0.74, 1.08], [r0 * 0.74, 1.35]].map(([r, h]) => [r, h * v]);
-  bag.add(M, lathe(prof, 20, null, cx, y0, cz));
+  bag.add(M, lathe(prof, el.mini || w < 5 ? 10 : 20, null, cx, y0, cz));
   const bb = y0 + 1.35 * v, br = r0 * 0.74;
   const bell = [], N = 14;
   for (let i = 0; i <= N; i++) { const t = i / N; bell.push([br * (1.02 + 0.2 * Math.sin(Math.min(1, t * 2.2) * Math.PI / 2) - 0.78 * Math.pow(t, 1.55)) , t * 8.6 * v]); }
-  bag.add(M, lathe(bell, 24, null, cx, bb, cz));
+  bag.add(M, lathe(bell, el.mini || w < 5 ? 12 : 24, null, cx, bb, cz));
   // the ring mouldings round the bell's shoulder and neck
-  for (const t of [0.34, 0.5, 0.78]) { const r = bell[Math.round(t * N)][0], hh = t * 8.6 * v; bag.add('lime_plaster', lathe([[r * 0.98, -0.12 * v], [r * 1.07, -0.04 * v], [r * 1.07, 0.1 * v], [r * 0.98, 0.16 * v]], 24, null, cx, bb + hh, cz)); }
+  for (const t of [0.34, 0.5, 0.78]) { const r = bell[Math.round(t * N)][0], hh = t * 8.6 * v; bag.add('lime_plaster', lathe([[r * 0.98, -0.12 * v], [r * 1.07, -0.04 * v], [r * 1.07, 0.1 * v], [r * 0.98, 0.16 * v]], el.mini || w < 5 ? 12 : 24, null, cx, bb + hh, cz)); }
   const topR = bell[N][0], yh = bb + 8.6 * v;
   // the harmika: a square box with pillars (sao han) round the neck, its gilded cornice
   bag.add(M, box(cx - topR * 1.15, yh, cz - topR * 1.15, cx + topR * 1.15, yh + 1.7 * v, cz + topR * 1.15));
   bag.add('gold', box(cx - topR * 1.25, yh + 1.7 * v, cz - topR * 1.25, cx + topR * 1.25, yh + 1.95 * v, cz + topR * 1.25));
   // the spire: rings of diminishing size, the lotus bud, the finial
-  const sp = [], rings = 22, sh = H - (yh + 1.95 * v - y) - 3.2 * v, s0 = yh + 1.95 * v;
+  const sp = [], rings = el.mini ? 7 : w < 5 ? 11 : 22, sh = H - (yh + 1.95 * v - y) - 3.2 * v, s0 = yh + 1.95 * v;
   for (let i = 0; i <= rings; i++) {
     const t = i / rings, r = topR * 0.78 * Math.pow(1 - t, 0.9) + 0.07 * k, yy = t * sh;
     sp.push([r * 1.0, yy], [r * 1.0, yy + sh / rings * 0.35], [r * 1.18, yy + sh / rings * 0.45], [r * 1.18, yy + sh / rings * 0.7], [r * 0.9, yy + sh / rings * 0.82]);
   }
-  bag.add(M, lathe(sp, 12, null, cx, s0, cz));
+  bag.add(M, lathe(sp, el.mini || w < 5 ? 8 : 12, null, cx, s0, cz));
   const sb = s0 + sh;
   bag.add('gold', lathe([[0.001, 0], [0.38 * k, 0.1 * v], [0.5 * k, 0.5 * v], [0.38 * k, 1.1 * v], [0.2 * k, 1.8 * v], [0.1 * k, 2.4 * v], [0.07 * k, 2.9 * v], [0.001, 3.2 * v]], 10, null, cx, sb, cz));
 }
@@ -128,8 +128,8 @@ function buddha(el, { bag, col }) {
   L(lathe([[0.001, 1.9], [0.95, 2.0], [0.85, 2.7], [0.72, 3.6], [0.6, 4.2], [0.001, 4.2]], 14).scale(1, 1, 0.62));
   L(lathe([[0.001, 3.7], [0.82, 3.85], [0.9, 4.1], [0.5, 4.35], [0.001, 4.4]], 12).scale(1.4, 1, 0.62));
   L(lathe([[0.22, 4.3], [0.2, 4.75]], 8));
-  L(lathe([[0.001, 4.7], [0.4, 4.75], [0.46, 5.05], [0.4, 5.3], [0.2, 5.5], [0.001, 5.55]], 14).scale(1, 1, 1.0));
-  L(lathe([[0.2, 5.5], [0.17, 5.75], [0.1, 6.0], [0.045, 6.0 + 0.45], [0.001, 6.0 + 0.55]], 8));       // the ushnisha and its flame
+  L(lathe([[0.001, 4.65], [0.5, 4.72], [0.58, 5.1], [0.5, 5.42], [0.26, 5.65], [0.001, 5.7]], 14));
+  L(lathe([[0.26, 5.6], [0.2, 5.85], [0.12, 6.1], [0.05, 6.1 + 0.45], [0.001, 6.1 + 0.55]], 8));       // the ushnisha and its flame
   // the arms: the left hand in the lap, the right over the right knee reaching to the earth
   L(rod([-0.78, 3.7, 0.05], [-0.95, 2.55, -0.2], 0.17, 6)); L(rod([-0.95, 2.55, -0.2], [-0.35, 2.0, -0.62], 0.15, 6));
   L(rod([0.78, 3.7, 0.05], [1.05, 2.7, -0.35], 0.17, 6)); L(rod([1.05, 2.7, -0.35], [1.3, 1.75, -0.95], 0.14, 6));
@@ -226,7 +226,7 @@ function mandapa(el, { bag, col }) {
   bag.add('plaster_white', box(cx - a * 0.72, y + 1.05, cz - a * 0.72, cx + a * 0.72, y + 4.6, cz + a * 0.72));
   bag.add('opening', box(cx - 0.6, y + 1.05, cz - a * 0.72 - 0.02, cx + 0.6, y + 3.2, cz - a * 0.72 + 0.03)); bag.add('opening', box(cx - 0.6, y + 1.05, cz + a * 0.72 - 0.03, cx + 0.6, y + 3.2, cz + a * 0.72 + 0.02));
   let r = a * 0.78, yy = y + 4.6;
-  for (let i = 0; i < 5; i++) { const h = 1.1 * (1 - i * 0.1); bag.add(i % 2 ? 'lime_plaster' : 'plaster_white', lathe([[r * 1.15, 0], [r * 1.15, 0.2], [r, 0.25], [r * 0.9, h]].map(([q, hh]) => [q, hh]), 4, (t) => 1.414, cx, yy, cz).rotateY(Math.PI / 4)); yy += h; r *= 0.78; }
+  for (let i = 0; i < 5; i++) { const h = 1.0 - i * 0.08; bag.add(i % 2 ? 'lime_plaster' : 'plaster_white', box(cx - r * 1.12, yy, cz - r * 1.12, cx + r * 1.12, yy + 0.22, cz + r * 1.12)); bag.add('plaster_white', box(cx - r, yy + 0.22, cz - r, cx + r, yy + h, cz + r)); yy += h; r *= 0.78; }
   bag.add('gold', lathe([[0.2, 0], [0.12, 0.8], [0.001, 1.6]], 8, null, cx, yy, cz));
   col.rect([cx - a - 0.1, cz - a - 0.1, cx + a + 0.1, cz + a + 0.1], y, y + 7);
 }
@@ -341,7 +341,7 @@ export function boatParts(el) {
   const [L0, B0, dr, D, bow, stern] = BOATS[el.kind ?? 'sampan'], L = el.len ?? L0, k = L / L0, out = [], rand = rng(el.seed ?? 1);
   const add = (m, g) => out.push([m, g]);
   const H = hull(L, B0, dr, D, { bowRise: bow, sternRise: stern, sharp: 0.95 });
-  add('wood_dark', fromTriangles(H.hull)); add('timber', fromTriangles(H.deck));
+  add('wood_ochre', fromTriangles(H.hull)); add('timber', fromTriangles(H.deck));
   // the gunwale's strake and the thwarts
   const zs = (f) => -L / 2 + L * f;
   for (const f of [0.3, 0.45, 0.6, 0.75]) add('timber', box(-B0 * 0.45, D - 0.14, zs(f) - 0.05, B0 * 0.45, D - 0.08, zs(f) + 0.05));
