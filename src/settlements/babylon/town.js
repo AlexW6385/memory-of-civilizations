@@ -25,11 +25,12 @@ function people() {
   for (const [dx, dz, pose] of [[4.5, -1.6, 'pray'], [4.5, 1.5, 'pray'], [14, -2.6, 'stand'], [19.5, 2.8, 'talk']]) man([cx + dx, zc + dz], 0.06, face([cx + dx, zc + dz], dx < 10 ? [cx, zc] : [cx + 17, zc]), { pose, cloth: 'linen', cloth2: 'cloth_white', over: 'sash', carry: 'none' });
   // on the Processional Way, in twos and threes, going to and from the gate
   for (let k = 0; k < 9; k++) {
-    const z = WALL_Z + 45 + rand() * 180, x = WAY.x + (rand() - 0.5) * 12, north = rand() < 0.5, rot = north ? Math.PI + (rand() - 0.5) * 0.3 : (rand() - 0.5) * 0.3;
+    const z = WALL_Z + 45 + rand() * 180, x0 = WAY.x + (rand() - 0.5) * 12, x = Math.abs(x0 - WAY.x) < 3.2 ? x0 + (x0 >= WAY.x ? 3.4 : -3.4 - 1.6) : x0,   // (clear of the walking line down the middle)
+    north = rand() < 0.5, rot = north ? Math.PI + (rand() - 0.5) * 0.3 : (rand() - 0.5) * 0.3;
     const n = 1 + Math.floor(rand() * 3);
     for (let i = 0; i < n; i++) (rand() < 0.7 ? man : woman)([x + i * 0.75, z + (rand() - 0.5) * 0.6], 0.12, rot + Math.PI, {});
   }
-  for (let k = 0; k < 6; k++) { const z = WALL_Z - 60 - rand() * 50, x = WAY.x + (rand() - 0.5) * 12; man([x, z], 0.12, Math.PI + (rand() - 0.5) * 0.4); }
+  for (let k = 0; k < 6; k++) { const z = WALL_Z - 60 - rand() * 50, x0 = WAY.x + (rand() - 0.5) * 12, x = Math.abs(x0 - WAY.x) < 2 ? x0 + (x0 >= WAY.x ? 2.2 : -2.2) : x0; man([x, z], 0.12, Math.PI + (rand() - 0.5) * 0.4); }
   // on the bridge and its bridgeheads; a donkey with its driver
   const xr = riverX(BRIDGE.z);
   for (const [dx, dz, east] of [[-20, -2.5, 1], [-17, -1.8, 1], [6, 2.2, 0], [26, -2.6, 0], [38, 1.5, 1]]) (rand() < 0.75 ? man : woman)([xr + dx, BRIDGE.z + dz], BRIDGE.y, east ? -Math.PI / 2 : Math.PI / 2);

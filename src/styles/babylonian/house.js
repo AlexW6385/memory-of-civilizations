@@ -138,8 +138,23 @@ function babylonHouse(el, ctx) {
     }
   }
   if (!full || open) return;
+  // a third storey on some two-storey houses (Herodotus 1.180: houses of three and four storeys): a set-back room over the
+  // wing on the lane, its walls plastered, a parapet of the same, two lattice windows on the lane
+  let third = false;
+  if (two && rand() < 0.4) {
+    const wing = { n: [x0, z0, x1, z0 + d], s: [x0, z1 - d, x1, z1], w: [x0, z0 + d, x0 + d, z1 - d], e: [x1 - d, z0 + d, x1, z1 - d] }[f];
+    const ins = { n: [0.7, 0.7, 0.7, 0.15], s: [0.7, 0.15, 0.7, 0.7], w: [0.7, 0.7, 0.15, 0.7], e: [0.15, 0.7, 0.7, 0.7] }[f];
+    const r = [wing[0] + ins[0], wing[1] + ins[1], wing[2] - ins[2], wing[3] - ins[3]];
+    if (r[2] - r[0] > 3 && r[3] - r[1] > 1.8) {
+      bag.add('mud_plaster', box(r[0], H, r[1], r[2], H + 2.8, r[3])); bag.add('mud_plaster', box(r[0] - 0.12, H + 2.8, r[1] - 0.12, r[2] + 0.12, H + 3.0, r[3] + 0.12));
+      ctx.col.rect(r, H, H + 3.0); third = true;
+      const o = f === 'n' ? z0 - r[1] : f === 's' ? r[3] - z1 : f === 'w' ? x0 - r[0] : r[2] - x1;     // the room's front face stands this far out of the lot's (negative: inside)
+      const along = f === 'n' || f === 's' ? [r[0], r[2]] : [r[1], r[3]];
+      for (const k of [0.3, 0.7]) { const u = along[0] + k * (along[1] - along[0]); bag.add('lattice', lbox(u - 0.3, o, u + 0.3, o + 0.05, H + 1.0, H + 1.8)); bag.add('cedar', lbox(u - 0.38, o, u + 0.38, o + 0.08, H + 0.9, H + 1.0)); }
+    }
+  }
   // on the roof: a reed shelter on palm posts for sleeping in the hot nights, on a wing of the house
-  if (rand() < 0.4) {
+  if (rand() < 0.4 && !third) {
     const alongX = rand() < 0.5, wing = alongX ? [x0, z0, x1, z0 + d] : [x0, z0 + d, x0 + d, z1 - d];
     const L = alongX ? W : D - 2 * d, cl = (alongX ? wing[0] + wing[2] : wing[1] + wing[3]) / 2 + (rand() - 0.5) * (L - 5), cz = alongX ? (wing[1] + wing[3]) / 2 : (wing[0] + wing[2]) / 2;
     if (L > 5.5 && d >= 2.4) {
