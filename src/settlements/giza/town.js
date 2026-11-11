@@ -45,6 +45,12 @@ function harbourLife() {
   for (let k = 0; k < 4; k++) for (const dz of [-0.45, 0.45]) man([343.8 - k * 1.25, 52 + dz + (k % 2) * 0.1], 0, Math.PI / 2, { pose: 'pull', carry: 'rope', len: 1.4 });
   man([345, 54.6], 0, Math.PI * 0.7, { pose: 'staff', carry: 'staff', over: 'sash', len: 1.7 });
   man([348.2, 31.6], 0, Math.PI, { pose: 'talk' }); man([346.6, 40], 0.02, -0.2, { carry: 'basket' }); man([347.2, 63], 0.02, 3.0, { carry: 'pot' });
+  // women washing linen at the quay's edge (kneeling, facing the water), a scribe tallying the jars, porters on the south quay, men mending a net
+  const woman = (at, rot, o) => L.push({ t: 'figure', at, y: 0.02, rot, seed: Math.floor(rand() * 1e9), dress: 'sheath', cloth: 'cloth_white', skin: 'skin_medium', hat: 'none', hair: 'long', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
+  for (const z of [21.5, 23.8, 36]) woman([350.3, z], -Math.PI / 2, { pose: 'kneel' });
+  man([347.6, 79], 0.02, Math.PI / 2, { pose: 'kneel', over: 'sash' }); man([348.6, 90], 0.02, -1.2, { pose: 'staff', carry: 'staff', over: 'sash', len: 1.7 });
+  man([348.4, 67], 0.02, 3.0, { carry: 'pot' }); man([349.4, 76], 0.02, 0.2, { carry: 'basket' }); man([349.4, 84.5], 0.02, 3.3, { carry: 'pot' });
+  man([348.2, 30], 0.02, 0.1, { pose: 'squat' }); man([348.2, 36.5], 0.02, 3.2, { pose: 'squat' });
   return L;
 }
 function cattle() {
