@@ -2,7 +2,8 @@
 // the forecourt's bazaar cells with their keepers sitting by them and buyers in the street; horses held by grooms in
 // the forecourt, where visitors dismounted; boats on the Yamuna below the riverfront terrace.
 
-import { RADIUS, FORECOURT, KATRAS, HAVELI_OPEN } from './layout.js';
+import { RADIUS, FORECOURT, KATRAS, HAVELI_OPEN, WORKSHOP, houses } from './layout.js';
+import { frameOf } from '../../styles/mughal/townhouse.js';
 import { boatFloat } from '../../objects/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -67,6 +68,20 @@ export function life() {
   }
   // the open house: the master on his takht with the hookah, a woman by the water pots in the court
   { const [x0, z0, x1, z1] = HAVELI_OPEN, tx = (x0 + 3.4 + x1 - 3.8) / 2; person([tx - 0.3, z0 + 1.3], 0.45 + 0.4 + 0.02, Math.PI, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_green' }); person([x0 + 3.4 + 1.6, z1 - 3.4 - 1.3], 0.04, -Math.PI / 2, { cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'veil', hair: 'long', beard: false, over: 'none' }); }
+  // the shops of the town's streets: the keeper sits cross-legged on his platform among his goods, a customer stands in the street at some
+  for (const h of houses()) {
+    if (!h.shop || rand() < 0.3) continue;
+    const f = frameOf(h.rect, h.front), n = Math.max(1, Math.round((f.W - 0.8) / 2.7)), bw = (f.W - 0.8) / n, i = Math.floor(rand() * n);
+    const lx = -f.W / 2 + 0.4 + (i + 0.5) * bw + 0.5, [x, z] = f.pt(lx, -1.15);
+    person([x, z], 0.37, Math.PI + f.yaw, { man: true, pose: 'cross', cloth: 'cloth_white', hatMat: pick(['cloth_white', 'cloth_red', 'cloth_ochre']) });
+    if (rand() < 0.3) { const [cx, cz] = f.pt(lx + 0.4, 1.8); person([cx, cz], 0.04, f.yaw, rand() < 0.5 ? { man: true, pose: 'talk' } : { pose: 'stand' }); }
+  }
+  // the inlay workshop (§12): two stone-cutters at their wheels, three inlayers at their benches, the master on his cushion
+  { const f = frameOf(WORKSHOP.rect, WORKSHOP.front), FY = 0.38;
+    for (const [lx, lz] of [[-4.0, -3.75], [-1.6, -3.75], [-3.8, -7.45], [-1.2, -7.45], [3.0, -8.25]]) { const [x, z] = f.pt(lx, lz); person([x, z], FY, f.yaw, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: pick(['cloth_ochre', 'cloth_green']), hatMat: 'cloth_white' }); }
+    const [mx, mz] = f.pt(4.3, -4.0); person([mx, mz], FY, Math.PI + f.yaw - 0.3, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_indigo', beard: true, hatMat: 'cloth_red' }); }
+  // washermen (dhobi) on the Yamuna's bank east of the terrace: standing at their stones, cloth spread on the sand
+  for (let k = 0; k < 5; k++) { const x = 182 + k * 9 + rand() * 3; person([x, -253.2], 0.0, Math.PI / 2 * 0 + 0.2, { man: true, pose: 'stand', cloth: 'cloth_white', hat: undefined, hatMat: 'cloth_white' }); }
   // boats on the Yamuna: thatch-roofed barges and rowing boats along the river, below the terrace
   for (const [x, z, kind, len] of [[-95, -276, 'barge', 12], [-40, -292, 'rowboat', 5], [10, -281, 'barge', 11], [70, -296, 'rowboat', 4.5], [118, -277, 'barge', 12.5], [160, -300, 'rowboat', 5], [-150, -290, 'rowboat', 4.8]]) {
     if (Math.hypot(x, z) > RADIUS - 40) continue;

@@ -27,6 +27,8 @@ export function walkDist(x, z) {
 // and an open, furnished house on the street south of them
 export const KATRAS = [{ id: 'omar-khan', rect: [-58, 235, -14, 266], gate: 'e' }, { id: 'fulel', rect: [14, 235, 58, 266], gate: 'w' }];
 export const HAVELI_OPEN = [8, 277, 30, 299];
+// the pietra dura workshop on the axis street's west side, its front on the street (§12)
+export const WORKSHOP = { rect: [-20, 281, -8, 293], front: 'e' };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -54,7 +56,7 @@ let HOUSES = null;
 export function houses() {
   if (HOUSES) return HOUSES;
   HOUSES = [];
-  const rand = rng(1632), KEEP = [[-176, -262, 176, 232], ...KATRAS.map((k) => k.rect), HAVELI_OPEN];
+  const rand = rng(1632), KEEP = [[-176, -262, 176, 232], ...KATRAS.map((k) => k.rect), HAVELI_OPEN, WORKSHOP.rect];
   const far = (r) => Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b)));
   const free = (r, m) => far(r) <= RADIUS - 24 && r[3] > RIVER_Z + 30 && !KEEP.some((q) => r[0] < q[2] + m && r[2] > q[0] - m && r[1] < q[3] + m && r[3] > q[1] - m)
     && !STREETS.some((s) => r[0] < s.rect[2] + 0.2 && r[2] > s.rect[0] - 0.2 && r[1] < s.rect[3] + 0.2 && r[3] > s.rect[1] - 0.2)
