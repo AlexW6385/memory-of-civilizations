@@ -284,7 +284,7 @@ export function wutaiYard(el, { bag, col }) {
         const f = sd < 0 ? r[(alongU ? 1 : 0)] : (alongU ? r[3] : r[2]), o = sd < 0 ? -1 : 1;
         const g0 = o > 0 ? -0.03 : 0.03, face = (m, m0, m1, ya, yb, off) => { const c0 = f + g0 + (o > 0 ? 0 : -off), c1 = f + g0 + (o > 0 ? off : 0); return alongU ? B(m, m0, c0, m1, c1, ya, yb) : B(m, c0, m0, c1, m1, ya, yb); };
         if (wr() < 0.7) { const m = a + 0.2 + wr() * (b - a - 1.0), py = yy + rub + 0.3 + wr() * (wh - rub - 0.9); for (let k = 0; k < 4; k++) face('thatch', m + k * 0.07, m + 0.35 + k * 0.1 + wr() * 0.3, py + k * 0.05, py + k * 0.05 + 0.02, 0.035); }
-        if (wr() < 0.55) { const m = a + 0.3 + wr() * (b - a - 0.6), py = yy + rub + 0.1 + wr() * (wh - rub - 1.0); face('iron', m, m + 0.03, py, py + 0.6 + wr() * 0.7, 0.047); }
+        if (wr() < 0.55) { const m = a + 0.3 + wr() * (b - a - 0.6), py = yy + rub + 0.1 + wr() * (wh - rub - 1.0); face('wood_dark', m, m + 0.022, py, py + 0.5 + wr() * 0.6, 0.047); }
         if (wr() < 0.6) { const m = a + 0.1 + wr() * (b - a - 1.0), w2 = 0.6 + wr() * 0.9; face('mud_plaster', m, m + w2, yy + rub, yy + rub + 0.1 + wr() * 0.15, 0.053); }
       }
       // a pier of rubble at the run's joint on the outer side, hiding the seam and holding the wall
