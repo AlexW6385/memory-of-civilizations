@@ -45,6 +45,7 @@ export const MOVER_SITES = {
   'teotihuacan': () => import('../settlements/teotihuacan/movers.js'),
   'machu-picchu': () => import('../settlements/machu-picchu/movers.js'),
   'taos': () => import('../settlements/taos/movers.js'),
+  'mongol-karakorum': () => import('../settlements/mongol-karakorum/movers.js'),
   'djenne': () => import('../settlements/djenne/movers.js'),
   'sydney': () => import('../settlements/sydney/movers.js'),
   'lalibela': () => import('../settlements/lalibela/movers.js'),

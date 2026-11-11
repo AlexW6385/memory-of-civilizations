@@ -16,6 +16,7 @@ import '../settlements/lalibela/smoke.js';
 import '../settlements/sydney/smoke.js';
 import '../settlements/djenne/smoke.js';
 import '../settlements/taos/smoke.js';
+import '../settlements/mongol-karakorum/smoke.js';
 import '../settlements/machu-picchu/smoke.js';
 import '../settlements/teotihuacan/smoke.js';
 import '../settlements/persepolis/smoke.js';

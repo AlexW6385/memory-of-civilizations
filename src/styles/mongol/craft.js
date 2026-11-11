@@ -18,15 +18,15 @@ export function silverTree(el, { bag, col }) {
   const Y = y + 0.2;
   col.floor([cx - 1.55, cz - 1.55, cx + 1.55, cz + 1.55], Y);
   // the trunk, rising from a flared root
-  bag.add(S, lathe([[0.62, 0], [0.4, 0.3], [0.32, 0.9], [0.27, h * 0.7], [0.22, h * 0.86], [0.001, h * 0.9]], 14, null, cx, Y, cz));
+  bag.add(S, lathe([[0.5, 0], [0.32, 0.3], [0.24, 0.9], [0.2, h * 0.7], [0.16, h * 0.86], [0.001, h * 0.9]], 14, null, cx, Y, cz));
   col.circle(cx, cz, 0.45, Y, Y + h);
   // four serpents spiralling up the trunk to the crown, heads at the top
   for (let k = 0; k < 4; k++) {
     const ph = k * TAU / 4, N = 26;
     let prev = null;
     for (let i = 0; i <= N; i++) {
-      const t = i / N, a = ph + t * TAU * 2.1, rho = 0.34 - t * 0.1, p = [cx + Math.cos(a) * rho, Y + 0.4 + t * (h * 0.78), cz + Math.sin(a) * rho];
-      if (prev) bag.add(S, rod(prev, p, 0.065 - t * 0.02, 6)); prev = p;
+      const t = i / N, a = ph + t * TAU * 2.1, rho = 0.27 - t * 0.07, p = [cx + Math.cos(a) * rho, Y + 0.4 + t * (h * 0.78), cz + Math.sin(a) * rho];
+      if (prev) bag.add(S, rod(prev, p, 0.05 - t * 0.015, 6)); prev = p;
     }
     bag.add(S, lathe([[0.001, 0], [0.07, 0.05], [0.09, 0.14], [0.001, 0.22]], 8, null, prev[0], prev[1], prev[2]));
   }

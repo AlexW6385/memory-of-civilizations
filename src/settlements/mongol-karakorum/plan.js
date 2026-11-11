@@ -14,7 +14,7 @@ E.push({ t: 'brick_wall', a: [px0, pz1], b: [gx - gate, pz1] }, { t: 'brick_wall
 E.push({ t: 'gate_hall', c: PALACE_GATE.c, y: PALACE_GATE.y });
 // Möngke's hall and the silver tree before the middle door, inside
 E.push({ t: 'palace_hall', c: HALL.c, y: HALL.y });
-E.push({ t: 'silver_tree', c: TREE, y: HALL.y + 0.04, seed: 3 });
+E.push({ t: 'silver_tree', c: TREE, y: HALL.y + 0.04, seed: 3, h: 4.5 });
 // the court
 E.push({ t: 'ger', c: COURT_GER.c, r: COURT_GER.r, open: true, rich: true, seed: 11 });
 E.push({ t: 'ger', c: COURT_CART.c, r: COURT_CART.r, cart: true, rich: true, seed: 12, door: Math.PI / 2 });
