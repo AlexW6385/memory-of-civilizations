@@ -3,6 +3,8 @@
 
 import { RADIUS, LEVEL, MOAT, ROAD, CX, T, CAUSEWAY, ENCLOSURE, MARKET, houses, ponds, stores, inRect, inMoat, inBasin, onRoad, inHouse } from './layout.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
+import { yardPlans, enclosurePlan } from './yards.js';
+import { ENC_PATHS, inShop } from './layout.js';
 
 const base = (id, elements) => ({ id, style: 'khmer', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-206, 0], facing: 'e' } });
 
@@ -22,6 +24,7 @@ function palms() {
     if (r > RADIUS - 12 || inMoat(x, z) || inBasin(x, z) || onRoad(x, z) || inHouse(x, z, 2.5)) return false;
     if (inRect(T.base.rect, x, z, 8) || inRect(CAUSEWAY.inner, x, z, 6) || inRect(CAUSEWAY.outer, x, z, 6) || inRect(MARKET, x, z, 4) || inRect(MOAT.outer, x, z, 3) && !inRect(MOAT.inner, x, z, -3)) return false;
     if (Math.abs(z) < 8 && x < -150) return false;                                  // the approach
+    if (inShop(x, z, 3) || ENC_PATHS.some((p) => inRect(p, x, z, 2))) return false;
     return !E.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < 7);
   };
   const add = (x, z) => { if (ok(x, z)) E.push({ t: 'sugar_palm', at: [x, z], c: [x, z], r: 0.4, y: 0, s: 0.8 + rand() * 0.35, rot: rand() * 6.28, ladder: rand() < 0.25 }); };
@@ -54,14 +57,20 @@ function market() {
     if (rand() < 0.18) continue;
     const at = [x + (rand() - 0.5) * 0.4, z];
     L.push({ t: 'goods_mat', at, y: 0.01, rot: face, seed: Math.floor(rand() * 1e9), goods: pick(GOODS), mat: 'reed_mat', produce: ['glaze_yellow', 'cloth_green', 'cloth_red', 'cloth_ochre'], pottery: 'pottery_dark' });
+    if (rand() < 0.4) K.push({ t: 'k_shade', at: [at[0] + Math.sin(face) * 0.0, at[1] - Math.cos(face) * 1.25], y: 0, rot: rand() * 6.28, cloth: pick(['reed_mat', 'cloth_ochre', 'cloth_white', 'cloth_red']) });
     if (rand() < 0.88) woman([at[0] - Math.sin(face) * 0.95, at[1] - Math.cos(face) * 0.95], face + Math.PI + (rand() - 0.5) * 0.3, { pose: rand() < 0.6 ? 'cross' : 'squat' });
   }
   // buyers in the aisles, some with a basket on the head
-  for (let k = 0; k < 30; k++) {
+  for (let k = 0; k < 52; k++) {
     const z = pick([z0 + 6.2, z0 + 18.2, z0 + 12.3, z0 + 24.3]) + (rand() - 0.5) * 1.2, x = x0 + 1.5 + rand() * (x1 - x0 - 3), at = [x, z];
     if (L.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < 1.0)) continue;
     (rand() < 0.65 ? woman : man)(at, rand() * 6.28, { pose: rand() < 0.35 ? 'talk' : 'stand', carry: rand() < 0.3 ? pick(['basket', 'pot']) : 'none' });
   }
+  // baskets and pots stacked at the heads of the rows, a dog among the mats, hens, a water-seller's jars, children
+  for (let k = 0; k < 12; k++) { const z = pick([z0 + 6.2, z0 + 18.2, z0 + 12.3, z0 + 24.3]) + (rand() < 0.5 ? 1.5 : -1.5), x = x0 + 1.5 + rand() * (x1 - x0 - 3); if (L.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < 1.2)) continue; L.push(rand() < 0.5 ? { t: 'basket', at: [x, z], y: 0, rot: rand() * 6.28, n: 3, seed: Math.floor(rand() * 1e9) } : { t: 'pot', kind: pick(['water_pot', 'dark_pot']), at: [x, z], y: 0, rot: rand() * 6.28, n: 3, seed: Math.floor(rand() * 1e9) }); }
+  for (let k = 0; k < 5; k++) L.push({ t: 'animal', kind: 'dog', at: [x0 + 3 + rand() * (x1 - x0 - 6), z0 + 6.2 + (k % 4) * 6], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+  L.push({ t: 'chickens', at: [x0 + 8, z1 + 2], y: 0, rot: 1, n: 5, seed: 1301 }, { t: 'chickens', kind: 'duck', at: [x0 + 24, z1 + 2.5], y: 0, rot: 2, n: 5, seed: 1302 });
+  for (let k = 0; k < 6; k++) { const at = [x0 + 3 + rand() * (x1 - x0 - 6), z0 + 3 + rand() * 28]; if (!L.some((e) => Math.hypot(e.at[0] - at[0], e.at[1] - at[1]) < 1)) fig(at, rand() * 6.28, { h: 1.05 + rand() * 0.25, child: true, hair: 'short', pose: 'stand' }); }
   // on the moat road west of the moat, north of the causeway (clear of the arrival): the minister's elephant,
   // its mahout on the neck, the parasol-bearer walking at its side
   const roadX = (ROAD[0] + MOAT.outer[0]) / 2;
@@ -149,11 +158,22 @@ function templeLife() {
   // devotees on the causeway, walking in to the temple with their offerings
   const carries = ['basket', 'pot', 'pole', 'basket', 'none', 'pot', 'basket'];
   carries.forEach((carry, i) => fig([CAUSEWAY.outer[0] + 6 + i * 6.1, (i % 2 ? 1 : -1) * 1.6], 1.0, [1, 0], { dress: 'wrap', top: i % 3 ? 'bare' : '', cloth: ['cloth_red', 'cloth_ochre', 'cloth_brown', 'cloth_white'][i % 4], cloth2: 'cloth_white', hair: i % 2 ? 'bun' : 'short', feet: 'bare', carry }));
+  // teaching in the court of the third gallery: a Brahmin teacher seated on his mat before four pupils in a half circle
+  const by = T.base.y;
+  for (const [tx, tz, d] of [[CX + 12, -84, 1], [CX + 62, 84, -1], [CX - 22, 84, -1], [CX + 70, -84, 1]]) {
+    fig([tx, tz], by, [0, d], { ...brahmin, pose: 'cross', hair: 'bun' });
+    for (let k = 0; k < 4; k++) { const a = (k - 1.5) * 0.55, px = tx + Math.sin(a) * 2.6, pz = tz + d * Math.cos(a) * 2.6; fig([px, pz], by, [tx - px, tz - pz], { dress: 'wrap', top: 'bare', cloth: ['cloth_white', 'cloth_ochre', 'cloth_red'][k % 3], cloth2: 'cloth_white', hair: 'short', feet: 'bare', pose: 'cross', child: k % 2 === 0 }); }
+  }
+  // pilgrims kneeling in worship and walking round in the court; readers by the libraries
+  for (const [px, pz] of [[CX - 30, -96], [CX + 40, -96], [CX - 10, 96], [CX + 90, 20], [CX + 90, -20]]) fig([px, pz], by, [px - CX, pz], { dress: 'wrap', top: 'bare', cloth: 'cloth_ochre', cloth2: 'cloth_white', hair: 'bun', feet: 'bare', pose: 'kneel', arms: 'pray' });
+  for (const [px, pz, dz] of [[-120, -24.2, 1], [-120, 24.2, -1]]) { fig([px, pz], 0, [0, -dz], { ...brahmin, pose: 'cross' }); fig([px + 1.2, pz + dz * 0.3], 0, [0, -dz], { ...brahmin, pose: 'cross', hair: 'short' }); }
+  // priests on the Bakan: at the corner towers, in worship and going about
+  for (const [px, pz, pose] of [[CX - 18, -12, 'stand'], [CX + 18, 12, 'stand'], [CX + 14, -20, 'kneel'], [CX - 14, 20, 'kneel']]) fig([px, pz], T.bakan.y, [CX - px, -pz], { ...brahmin, pose, arms: pose === 'kneel' ? 'pray' : 'hang' });
   return { ...base('angkor-temple-life', L), style: 'life', center: [CX - 60, 0], near: 300 };
 }
 export async function town() {
   const P = palms(), { L, K } = market(), plans = [];
   for (let i = 0; i < P.length; i += 120) plans.push(base(`angkor-palms-${i / 120}`, P.slice(i, i + 120)));
   plans.push(base('angkor-road', K), { ...base('angkor-market', L), style: 'life', center: [-222, 10], near: 260 });
-  return [moat(), ...village(), templeLife(), ...plans];
+  return [moat(), enclosurePlan(), ...village(), templeLife(), ...plans, ...yardPlans()];
 }

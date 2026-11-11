@@ -3,7 +3,8 @@
 // the central sanctuary's porch. Registered by one line in src/engine/systems-list.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { houses, stores, RADIUS, CX, T, MARKET } from './layout.js';
+import { houses, stores, shops, RADIUS, CX, T, MARKET, MOAT, moatLotus } from './layout.js';
+import { offeringSpots } from './yards.js';
 
 const ID = 'angkor';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -21,7 +22,18 @@ function emitters() {
   for (let k = 0; k < 4; k++) E.push({ p: [x0 + 4 + k * 7.5, 1.3, z1 + 1.2], kind: k % 2 ? 'steam' : 'kitchen', thr: rand() * 0.3, seed: 300 + k });
   // incense before the image in the sanctuary (the western porch)
   E.push({ p: [CX - 3.2, T.bakan.y + 1.2, 0], kind: 'incense', thr: 0, seed: 7 });
-  void stores;
+  // the workshops: the smith's forge and the potter's kiln, the sugar boiler's pans (steam), at their working hours
+  for (const sh of shops()) {
+    const [x0, z0, x1, z1] = sh.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, f = FRONT[sh.front], hF = Math.abs(f[0]) ? (x1 - x0) / 2 : (z1 - z0) / 2;
+    if (sh.trade === 'potter') E.push({ p: [cx - f[0] * (hF + 2.4), 2.4, cz - f[1] * (hF + 2.4)], kind: 'kitchen', thr: 0.5, seed: sh.seed });
+    else if (sh.trade === 'smith') E.push({ p: [cx - f[0] * (hF - 0.9), 1.4, cz - f[1] * (hF - 0.9)], kind: 'kitchen', thr: 0.55, seed: sh.seed });
+    else if (sh.trade === 'sugar') { E.push({ p: [cx - f[0] * (hF - 1.15), 1.5, cz - f[1] * (hF - 1.15)], kind: 'steam', thr: 0.05, seed: sh.seed }, { p: [cx - f[0] * (hF - 1.15) + 0.8, 1.4, cz - f[1] * (hF - 1.15)], kind: 'steam', thr: 0.2, seed: sh.seed + 1 }); }
+  }
+  // incense at the offering tables
+  for (const o of offeringSpots()) E.push({ p: [o.at[0] + 0.2, (o.y ?? 0) + 1.05, o.at[1]], kind: 'incense', thr: 0.1, seed: Math.floor(o.at[0] * 3 + o.at[1]) });
+  // the morning mist over the moat's lotus and the ponds
+  moatLotus().forEach((q, i) => { if (i % 2) return; E.push({ p: [(q.rect[0] + q.rect[2]) / 2, -1.0, (q.rect[1] + q.rect[3]) / 2], kind: 'mist', thr: (i % 5) / 8, seed: 900 + i }); });
+  void stores; void MOAT;
   return E;
 }
 const ATT = [];
@@ -51,7 +63,8 @@ registerSystem({
       const kitchen = Math.max(bump(h, 6.0, 0.9, 0.8), bump(h, 11.2, 0.8, 0.6), bump(h, 17.3, 1.0, 0.9));
       const steam = Math.min(1, Math.max(0, (h - 5.8) / 1.2)) * Math.min(1, Math.max(0, (12.5 - h) / 1.0)) * 0.9;
       r.meal = h < 9 ? 0 : h < 14.5 ? 1 : 2;
-      smoke.setLevels(kitchen, 1, steam, 0, r.meal);
+      const work = Math.min(1, Math.max(0, (h - 6.5) / 1.5)) * Math.min(1, Math.max(0, (17.5 - h) / 1.5));
+      smoke.setLevels(kitchen, 1, Math.max(steam, work * 0.7), bump(h, 6.2, 1.0, 0.9) * 0.85, r.meal);
     }
   },
 });

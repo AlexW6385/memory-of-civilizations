@@ -17,9 +17,10 @@ E.push({ t: 'ming_wall', a: [ex0, ez1], b: [ex1, ez1], y: 0, h: 4.5, th: 1.2, pa
 E.push({ t: 'ming_wall', a: [ex1, ez0], b: [ex1, ez1], y: 0, h: 4.5, th: 1.2, gates: [{ at: ez1 - ez0 >> 1, w: 6, h: 3.5 }], pal: wallPal });
 E.push({ t: 'ming_wall', a: [ex0, ez0], b: [ex0, -22], y: 0, h: 4.5, th: 1.2, pal: wallPal });
 E.push({ t: 'ming_wall', a: [ex0, 22], b: [ex0, ez1], y: 0, h: 4.5, th: 1.2, pal: wallPal });
-E.push({ t: 'k_gallery', rect: [ex0 - 3, -22, ex0 + 3, 22], y: 1.0, w: 4, h: 3.6, solid: 'out', gates: true, gate: 5, gateSides: 'w' });
+E.push({ t: 'k_gallery', rect: [ex0 - 3, -22, ex0 + 3, 22], y: 1.0, w: 4, h: 3.6, solid: 'out', gates: true, gate: 5, gateSides: 'we', gatePass: true });
 for (const z of [-14, 14]) E.push({ t: 'k_tower', c: [ex0, z], y: 1.0, w: 7, h: 16, tiers: 3, porches: false });
-E.push({ t: 'k_tower', c: [ex0, 0], y: 1.0, w: 9, h: 21, tiers: 4 });
+// (hollow, a passage on each axis, so that the way in along the causeway runs through the gate into the enclosure)
+E.push({ t: 'k_tower', c: [ex0, 0], y: 1.0, w: 9, h: 21, tiers: 4, cella: { half: 2.2, dw: 1.0, dh: 3.0 } });
 
 // ── the causeways ──
 E.push({ t: 'k_terrace', rect: CAUSEWAY.outer, y0: LEVEL.moatBed, y1: 1.0 });
@@ -58,11 +59,11 @@ const CL = { rect: [T.third.line[0] + T.third.w / 2 + 0.46, -19, T.second.terrac
 }
 for (const r of carve(T.base.rect, CL.basins)) E.push({ t: 'k_terrace', rect: r, y0: 0, y1: T.base.y });
 E.push({ t: 'k_cloister', rect: CL.rect, y: T.base.y, w: 4, h: 3.4, west: CL.west, stair: CL.stair, basins: CL.basins });
-E.push({ t: 'k_gallery', rect: T.third.line, y: T.base.y, w: T.third.w, h: T.third.h, solid: 'in', half: true, gates: true, gate: 22, gateH: 12,
+E.push({ t: 'k_gallery', rect: T.third.line, y: T.base.y, w: T.third.w, h: T.third.h, solid: 'in', half: true, gates: true, gatePass: true, gate: 22, gateH: 12,
   // the eight panels of the bas-relief, two to a side (docs/settlements/angkor.md §13); the north-east pair not yet carved c. 1150
   relief: { w: { s: 'kurukshetra', n: 'lanka' }, s: { w: 'procession', e: 'heavens' }, e: { s: 'churning', n: 'uncarved' }, n: { e: 'uncarved', w: 'gods' } } });
 E.push({ t: 'k_terrace', rect: T.second.terrace, y0: T.base.y, y1: T.second.y });
-E.push({ t: 'k_gallery', rect: T.second.line, y: T.second.y, w: T.second.w, h: T.second.h, solid: 'out', gates: true, gate: 12, gateH: 13, corner: 12, devatas: true });
+E.push({ t: 'k_gallery', rect: T.second.line, y: T.second.y, w: T.second.w, h: T.second.h, solid: 'out', gates: true, gatePass: true, gate: 12, gateH: 13, corner: 12, devatas: true });
 E.push({ t: 'k_terrace', rect: T.bakan.terrace, y0: T.second.y, y1: T.bakan.y });
 E.push({ t: 'k_gallery', rect: T.bakan.line, y: T.bakan.y, w: T.bakan.w, h: T.bakan.h, solid: 'out', gates: true, gate: 8, gateH: 10, windows: true });
 for (const [x, z] of [[CX - 28, -28], [CX + 28, -28], [CX - 28, 28], [CX + 28, 28]]) E.push({ t: 'k_tower', c: [x, z], y: T.bakan.y + T.bakan.h * 0.2, w: 9, h: 32, tiers: 5, gilt: true });
