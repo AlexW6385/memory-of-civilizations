@@ -64,7 +64,7 @@ export function village() {
   const house = (x, z, yaw, w, l, y, extra = {}, gap = 1.0) => {
     const f = foot([x, z], yaw, w, l);
     if (boxes.some((b) => overlap(f, b, gap)) || !clearOf([x, z], l / 2)) return false;
-    boxes.push(f); out.houses.push({ c: [x, z], yaw, w, l, y, ...extra }); return true;
+    boxes.push(f); out.houses.push({ c: [x, z], yaw, w, l, y, ...(extra.rank === 1 ? { h: 1.5 } : {}), ...extra }); return true;
   };
   const solid = (list, x, z, y, r, extra = {}) => {
     if (boxes.some((b) => { const d = Math.hypot(b.c[0] - x, b.c[1] - z); return d < Math.max(b.hw, b.hl) + r && overlap(b, { c: [x, z], ax: [1, 0], az: [0, 1], hw: r, hl: r }, 0.6); })) return false;

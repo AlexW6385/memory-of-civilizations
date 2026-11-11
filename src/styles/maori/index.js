@@ -16,6 +16,7 @@ import { Matrix4 } from '../../core/three.js';
 import { sculpt, rows, smooth, bump, blob } from '../rapanui/sculpt.js';
 import '../qing/index.js';
 import { SCENES } from './scenes.js';
+import { YARDS } from './yards.js';
 
 const K = 'kokowai', P = 'palisade', TH = 'raupo', PAUA = 'shell_inlay';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -294,7 +295,7 @@ function whare(el, ctx) {
     for (let k = 0; k < 4; k++) add('pebbles', box(-0.45 + (k % 2) * 0.75, -0.2, zf + 0.35 + Math.floor(k / 2) * 0.55, -0.3 + (k % 2) * 0.75, 0.1, zf + 0.5 + Math.floor(k / 2) * 0.55));
     add('opening', box(-0.3, -0.2, zf + 0.5, 0.3, 0.04, zf + 0.9));
   }
-  if (rank === 0 && !small && el.furnished !== false) commonHouse(add, { w, l, h, t, zf, e, under, rank });
+  if (rank <= 1 && !small && el.furnished !== false) commonHouse(add, { w, l, h, t, zf, e, under, rank });
   col.segment(W2(-w / 2, -l / 2 + 0.1), W2(-w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(w / 2, -l / 2 + 0.1), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(-w / 2, l / 2), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise);
@@ -420,6 +421,14 @@ function waka(el, { bag, col }) {
   col.segment([x - sa * L / 2, z - ca * L / 2], [x + sa * L / 2, z + ca * L / 2], B, y0, y0 + D);
 }
 
+/** pou: a carved post standing alone { at, y, h, yaw } — a figure on a shaft, red ochre (boundary and ancestor posts on the marae ātea and by the paths). */
+function pou(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 2.4;
+  post(bag, x, y - 0.4, z, 0.14, h, K);
+  figure(bag, 'post', x, y + h - 0.1, z, 1.2, el.yaw ?? 0, 260);
+  col.circle(x, z, 0.2, y, y + h + 1);
+}
+
 // ---- gardens -------------------------------------------------------------------------------
 /** The fence's stakes, three heights. */
 const STAKES = [1.25, 1.4, 1.55].map((hh) => lathe([[0.04, 0], [0.03, hh], [0.001, hh + 0.03]], 5));
@@ -457,6 +466,6 @@ function mara(el, { bag }) {
 
 registerStyle('maori', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, ...SCENES },
+  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, pou, ...SCENES, ...YARDS },
   objects: {},
 });
