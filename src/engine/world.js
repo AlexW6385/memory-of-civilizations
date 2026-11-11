@@ -89,6 +89,10 @@ const GAP = 5;
 /** New geometry let into the scene per frame (bytes): its upload to the GPU happens in the frame
  *  that first draws it, so a settlement's parts and merged meshes come in spread over frames. */
 const UPLOAD_BUDGET = 8 << 20;
+/** The far views' one material (Settlement.loadImpostor). */
+let IMPOSTOR_MAT = null;
+/** A merge slice (ms) behind the loading screen or a travel's fade (renderer hold). */
+const HELD_SLICE = 30;
 /** The bytes a group's meshes will send to the GPU. */
 export function bytesOf(root) {
   let n = 0;
@@ -321,10 +325,11 @@ class Settlement {
       group.add(inst);
     }
     HITCH.since('stream meshes', tS);
-    // its shaders compiled before it shows, not in the frame that first draws it (a hitch)
-    await this.world.r.precompile?.(group, { background: this.ahead });
+    // its shaders compiled before it shows, not in the frame that first draws it (a hitch); behind
+    // the loading screen (renderer hold) not waited for here: all of them at once before the view shows
+    await this.world.compile(group, this);
     // and its buffers sent to the GPU in a frame with room for them
-    await this.world.uploadSlot(bytesOf(group));
+    await this.world.uploadSlot(bytesOf(group), this);
     if (this.ahead()) await this.world.calm(() => !this.ahead());
     tS = HITCH.mark();
     if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
@@ -367,10 +372,13 @@ class Settlement {
     this.group.add(into);
     // the shapes drawn by distance (merge.js LodSet), their copies chosen with the street life's
     const lods = this.lods = [];
-    const precompile = async (list) => { await this.world.r.precompile?.(list, { background: this.ahead }); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b); };
+    const precompile = async (list) => { await this.world.compile(list, this); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b, this); };
     const gentle = { on: () => this.ahead(), wait: () => this.world.calm(() => !this.ahead()) };
-    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile, gentle }); } catch (e) { console.warn('merging', this.id, e); }
-    try { await mergeDetail(this.parts, buildingMesh, { stale: () => gen !== this.gen, gentle, precompile: (list) => this.world.r.precompile?.(list, { background: this.ahead }) }); } catch (e) { console.warn('merging detail', this.id, e); }
+    // (behind the loading screen or a travel's fade, renderer hold: long slices — no frame is
+    // shown, and Suzhou's ~2 s of merging gave the page back ~500 times, each at least a 4 ms timer)
+    const slice = () => (this.world.r.held && !this.ahead() ? HELD_SLICE : undefined);
+    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile, gentle, slice }); } catch (e) { console.warn('merging', this.id, e); }
+    try { await mergeDetail(this.parts, buildingMesh, { stale: () => gen !== this.gen, gentle, slice, precompile: (list) => this.world.compile(list, this) }); } catch (e) { console.warn('merging detail', this.id, e); }
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
 
@@ -413,15 +421,20 @@ class Settlement {
       g.setAttribute('color', new THREE.BufferAttribute(col, 3));
       g.setIndex(new THREE.BufferAttribute(I, 1));
       g.computeBoundingSphere();
-      const m = new THREE.MeshStandardNodeMaterial({ vertexColors: true, flatShading: true, roughness: 0.85, side: THREE.DoubleSide });
+      // (one material for all far views: one node build, one shader, one pipeline — a material
+      // each was a node build each, made in the frame that first drew it)
+      const m = IMPOSTOR_MAT ??= new THREE.MeshStandardNodeMaterial({ vertexColors: true, flatShading: true, roughness: 0.85, side: THREE.DoubleSide });
       const mesh = new THREE.Mesh(g, m);
       mesh.name = 'impostor:' + this.id;
       // a far view lies beyond the shadow cascades' reach (it is shown only until the settlement is built)
       mesh.castShadow = false; mesh.receiveShadow = true;
       releaseAfterUpload(mesh);
-      this.impostor = new THREE.Group();
-      this.impostor.matrixAutoUpdate = false;
-      this.impostor.add(mesh);
+      const group = new THREE.Group();
+      group.matrixAutoUpdate = false;
+      group.add(mesh);
+      // its shader compiled off the frame before it shows (once for all far views)
+      await this.world.r.precompile?.(group);
+      this.impostor = group;
       this.world.scene.add(this.impostor);
     } catch (e) { console.warn('no far view for', this.id, e); }
   }
@@ -449,6 +462,9 @@ export class World {
   constructor(renderer) {
     this.r = renderer;
     this.scene = renderer.scene;
+    // the first start is on (set and cleared by src/main.js): no far views loaded and no
+    // open-country plants scattered meanwhile — only what the first view needs
+    this.starting = false;
     this.plans = new Map();               // building id → { id, entry, plan, music, site }
     this.anchor = null;                   // { frame, site (a Settlement or null) }
     this.tilt = new THREE.Quaternion();
@@ -484,8 +500,23 @@ export class World {
     });
   }
 
-  uploadSlot(bytes) {
+  /**
+   * Compile what is under `roots` for settlement `site` off the frame (renderer.js precompile).
+   * Awaited, except behind the loading screen or a travel's fade (renderer hold) for the settlement
+   * being entered: there the compiles go on side by side and the arrival awaits them all at once
+   * (renderer settle). Awaited one by one, each ~0.4 s of Metal latency, they made Suzhou's building
+   * and merging take minutes (84 merge groups, ~150 pipelines in a row).
+   */
+  compile(roots, site) {
+    const p = this.r.precompile?.(roots, { background: site.ahead });
+    return this.r.held && !site.ahead() ? undefined : p;
+  }
+
+  /** (for settlement `site`: at once behind the loading screen or a travel's fade, renderer hold —
+   *  no frame shown waits on it; Suzhou's 105 merge groups each waited for a 40 ms pump there) */
+  uploadSlot(bytes, site = null) {
     if (!(performance.now() - (this._updatedAt ?? -1e9) < 150)) return Promise.resolve();
+    if (this.r.held && site && !site.ahead()) return Promise.resolve();
     return new Promise((r) => (this._uploads ??= []).push([bytes, r]));
   }
 
@@ -857,7 +888,8 @@ export class World {
     near.forEach(([d, s], i) => {
       if (d < radius + lift && (i < MAX_BUILT || s === this.anchor?.site) && (!inside || d === 0)) wanted.push(s.load());
       else if (d > UNLOAD + lift || i > MAX_BUILT) { if (s !== this.anchor?.site && s !== this.kept) s.unload(); }
-      if (d < 6000) s.loadImpostor();
+      // (not during the start, World.starting: the far views come once the arrival is shown)
+      if (d < 6000 && !this.starting) s.loadImpostor();
     });
     await Promise.all(wanted);
   }
@@ -885,7 +917,9 @@ export class World {
     let t0 = HITCH.mark();
     if (!this._next || now > this._next) { this._next = now + 400; this.ensureNear(u); HITCH.since('ensureNear', t0); t0 = HITCH.mark(); }
     if (!this._nextT || now > this._nextT) { this._nextT = now + 120; this.terrain.update(camP); HITCH.since('terrain', t0); t0 = HITCH.mark(); }
-    if (!this._nextF || now > this._nextF) { this._nextF = now + 300; this.openFlora.update(camP, Math.hypot(camP[0], camP[1], camP[2]) - R); HITCH.since('open flora', t0); }
+    // (the open country's plants not scattered during the start, World.starting: its two workers
+    // took cores from the settlement's and the ground's, its meshes compiles from the arrival's)
+    if (!this.starting && (!this._nextF || now > this._nextF)) { this._nextF = now + 300; this.openFlora.update(camP, Math.hypot(camP[0], camP[1], camP[2]) - R); HITCH.since('open flora', t0); }
     this.camAlt = Math.hypot(camP[0], camP[1], camP[2]) - R;
     ENV.camAlt.value = this.camAlt;
     // the plants: of the settlement whose zone the visitor is in, or the nearest within reach

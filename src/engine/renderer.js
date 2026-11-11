@@ -12,6 +12,8 @@ import { SkyMesh, SKY_FAR } from './sky.js';
 import { PLANET_RADIUS } from '../planet/sites.js';
 import { ENV, cloudShadow, fogFactor, fogColor, nightFillNode } from './env.js';
 import { GIVolume } from './gi.js';
+/** ?nohold: the start's pipelines made as before (synchronously in the frames that meet them), to compare. */
+const NO_HOLD = typeof location !== 'undefined' && new URLSearchParams(location.search).has('nohold');
 import { useGI } from './materials.js';
 import { CAMERA_MASK, cascadeMask } from './layers.js';
 import { AIR, airNode, airComposite, LampPool, LampLight, LampLightNode } from './air.js';
@@ -64,12 +66,27 @@ export class Renderer {
       trackTimestamp: qp.has('gputime') });
     await r.init();
     // ?trace: time every shader module and pipeline the GPU compiles (window.__gpuTrace), to find where the start goes
-    if (new URLSearchParams(location.search).has('trace') && r.backend?.device) {
-      const d = r.backend.device, T = window.__gpuTrace = { shaders: [], pipes: [], async: [] };
-      const sm = d.createShaderModule.bind(d), rp = d.createRenderPipeline.bind(d), rpa = d.createRenderPipelineAsync?.bind(d);
-      d.createShaderModule = (desc) => { const t = performance.now(), m = sm(desc); T.shaders.push([performance.now() - t, desc.code?.length || 0, t]); return m; };
-      d.createRenderPipeline = (desc) => { const t = performance.now(), p = rp(desc); T.pipes.push([performance.now() - t, t]); return p; };
-      if (rpa) d.createRenderPipelineAsync = (desc) => { const t = performance.now(); return rpa(desc).then((p) => { T.async.push([performance.now() - t, t]); return p; }); };
+    if (new URLSearchParams(location.search).has('trace')) {
+      const T = window.__gpuTrace = { shaders: [], pipes: [], async: [], three: [], marks: {} };
+      const d = r.backend?.device;
+      if (d) {
+        const sm = d.createShaderModule.bind(d), rp = d.createRenderPipeline.bind(d), rpa = d.createRenderPipelineAsync?.bind(d);
+        d.createShaderModule = (desc) => { const t = performance.now(), m = sm(desc); T.shaders.push([performance.now() - t, desc.code?.length || 0, t]); return m; };
+        d.createRenderPipeline = (desc) => { const t = performance.now(), p = rp(desc); T.pipes.push([performance.now() - t, t]); return p; };
+        if (rpa) d.createRenderPipelineAsync = (desc) => { const t = performance.now(); return rpa(desc).then((p) => { T.async.push([performance.now() - t, t]); return p; }); };
+      }
+      // every pipeline three asks the backend for (either backend): when, async or in a frame, the
+      // material, and whether for a shadow map (an orthographic camera) — T.summary() groups them
+      const b = r.backend, crp = b.createRenderPipeline.bind(b);
+      b.createRenderPipeline = (ro, promises) => {
+        T.three.push({ t: Math.round(performance.now()), async: !!promises, mat: ro.material?.name || ro.material?.type || '', shadow: !!ro.camera?.isOrthographicCamera, inst: !!ro.object?.isInstancedMesh });
+        return crp(ro, promises);
+      };
+      T.summary = (from = 0, to = Infinity) => {
+        const L = T.three.filter((e) => e.t >= from && e.t < to), by = {};
+        for (const e of L) { const k = `${e.async ? 'async' : 'frame'}${e.shadow ? ' shadow' : ''}`; by[k] = (by[k] || 0) + 1; }
+        return { pipelines: L.length, ...by };
+      };
     }
     SKY_FAR.value = r.reversedDepthBuffer ? 0 : 1;
     // instance matrices always as vertex attributes: below 64 kB three.js puts them in a uniform
@@ -78,6 +95,21 @@ export class Renderer {
     const caps = r.backend.capabilities;
     if (caps?.getUniformBufferLimit) caps.getUniformBufferLimit = () => 0;
     this.webgpu = r.backend.isWebGPUBackend === true;
+    // Behind the loading screen or a travel's fade (hold): a pipeline that a frame meets for the
+    // first time is made asynchronously, the object not drawn until it is there, instead of in the
+    // frame (createRenderPipeline: on Metal the GPU process compiles each in turn, ~0.4 s each — the
+    // start's look round built ~100 so, ~90 s). The pending ones (and every precompile) are awaited
+    // together by settle(), many compiled at once.
+    this.pending = new Set();
+    {
+      const P = r._pipelines, get = P.getForRender.bind(P);
+      P.getForRender = (ro, promises = null) => {
+        if (promises !== null || !this.held) return get(ro, promises);
+        const L = [], out = get(ro, L);
+        if (L.length) this.track(Promise.all(L));
+        return out;
+      };
+    }
     // the lamps' lights: shaded only while lit (src/engine/air.js)
     r.library.addLight(LampLightNode, LampLight);
     r.toneMapping = THREE.AgXToneMapping;
@@ -313,6 +345,7 @@ export class Renderer {
       // path, and left to the arrival's look round they cost ~30 s of frames)
       if (!kinds.has(kind) || opts.background?.()) { kinds.add(kind); reps.push(o); } else later.push(o);
     });
+    if (window.__gpuTrace) { const C = window.__gpuTrace.pre ??= { calls: 0, reps: 0, later: 0 }; C.calls++; C.reps += reps.length; C.later += later.length; }
     if (!reps.length && !later.length) return Promise.resolve();
     // set up as the scene pass does. three's compileAsync gathers what to compile synchronously,
     // but builds each object's shader only in turn, awaiting between them: the second object on
@@ -371,9 +404,12 @@ export class Renderer {
     if (!reps.length) return Promise.resolve();
     const bg = opts.background || (() => false);
     const quiet = async () => { while (bg()) { const d = await idle(); if (!d || d.didTimeout || d.timeRemaining() > 8) return; } };
-    const CHAINS = bg() ? 1 : 3, chains = [];
+    // (behind the loading screen, hold: more side by side — the GPU process compiles asynchronous
+    // pipelines in parallel, and nothing else waits for this thread)
+    const CHAINS = bg() ? 1 : this.held ? 6 : 3, chains = [];
     for (let c = 0; c < CHAINS; c++) chains.push(reps.filter((_, i) => i % CHAINS === c).reduce((p, o) => p.then(quiet).then(() => one(o)), Promise.resolve()));
-    return Promise.all(chains).catch((e) => console.warn('precompile:', e.message));
+    const all = Promise.all(chains).catch((e) => console.warn('precompile:', e.message));
+    return bg() ? all : this.track(all);
   }
 
   /** A depth-aware 5×5 average of the half-resolution occlusion, one of its texels apart: its
@@ -524,6 +560,38 @@ export class Renderer {
    * precompile of the start returned at once ("before the first frame") and all the start's shaders
    * and pipelines (~200) were built one after another in the look round's first frame.
    */
+  /**
+   * Hold the picture (on: the loading screen or a travel's fade is up): the frames' new pipelines
+   * are made asynchronously (see init), the present visit's precompiles are not waited for one by
+   * one (src/engine/world.js), and all of it is waited for at once by settle(). Off: as before.
+   */
+  hold(on) { this.held = !!on && !NO_HOLD; }
+
+  /** A compile in flight, for settle(). */
+  track(p) {
+    const q = Promise.resolve(p).catch(() => {}).finally(() => this.pending.delete(q));
+    this.pending.add(q);
+    return p;
+  }
+
+  /** Resolves once every compile in flight (and any begun meanwhile) is done; onStep(n left). */
+  async settle(onStep = null) {
+    let most = 0;
+    while (this.pending.size) {
+      most = Math.max(most, this.pending.size);
+      onStep?.(this.pending.size, most);
+      await Promise.race([Promise.all([...this.pending]), new Promise((r) => setTimeout(r, 250))]);
+    }
+    onStep?.(0, most);
+  }
+
+  /** Every shadow cascade drawn whole again at its next turn (its cached static casters drawn
+   *  while some of their pipelines were still being made). */
+  invalidateShadows() {
+    const csm = this.sun?.shadow?.shadowNode;
+    for (const node of csm?._shadowNodes || []) if (node._cascade) node._cascade.dirty = true;
+  }
+
   prime() {
     try { this.render(); } catch (e) { console.warn('prime:', e.message); }
   }

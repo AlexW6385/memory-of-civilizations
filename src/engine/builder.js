@@ -151,7 +151,7 @@ function rebuild(b) {
   const instanced = b.instanced.map(({ mat, key, detail, big, first, lod, pos, nor, hang, index, matrices, colors, reach, reals }) => {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(nor, 3, nor instanceof Int16Array));
     if (hang) g.setAttribute('hang', new THREE.BufferAttribute(hang, 1));
     g.setIndex(new THREE.BufferAttribute(index, 1, index instanceof Uint16Array));
     g.computeBoundingBox(); g.computeBoundingSphere();

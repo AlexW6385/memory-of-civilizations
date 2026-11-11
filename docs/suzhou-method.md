@@ -76,6 +76,7 @@ Target (DESIGN §8): 60 fps in a settlement, no frame over 50 ms, ≤ 800 draw c
 - For a pose: `palace.pose(id, x, y, z, yaw, pitch)`, wait for building and merging to finish (draws stop falling), then turn (hold Q) for 12 s and record frame times: mean fps, p95, frames over 34 ms. A fresh load needs a minute or more before numbers mean anything.
 - To find what costs the GPU, time isolated frames (render once, `await device.queue.onSubmittedWorkDone()`, median of ~10) at pixel ratio 1, then hide one group (by mesh name: `merged:`, `flora:`, `life:`, `movers`, `smoke`, the garden) or swap all opaque materials for one plain material, and compare. The absolute numbers are inflated; the differences are what count.
 - To find what costs the CPU: draw calls (`renderer.info.render.drawCalls`) and the JavaScript time in the perf panel; ~20 µs a draw.
+- The start: the console's `[memory of civilizations] start (ms)` (cumulative per stage) and `compiles awaited (ms)`; with `?trace`, `__gpuTrace.summary()` counts the pipelines (async or in a frame, shadow or not), `.merge` the merge groups and their waits, `.tiles` the ground's tiles, `.marks` the stages; `?nohold` gives the old start for comparison. Load the page twice: the second (warm) start has the browser's compiled pipelines.
 
 **Measured shares at the Suzhou pond turn** (GPU, after the fixes): foliage ~5 ms, street life ~4 ms, merged buildings ~3 ms, materials' remaining cost small, smoke and street-life instances negligible.
 

@@ -81,13 +81,34 @@ for (const [name, w, pts] of LINES) {
   }
 }
 
+// The segments by cell of a grid over the unit cube (CELL wide): each listed in every cell its cap
+// (dot(u, mid) ≥ cosCap) can reach, in order — riverAt tests only those of u's cell, the same
+// segments in the same order that passed the cap test before. (It tested all ~1100 at each ground
+// vertex: a fifth of the time of building the ground's tiles.)
+const CELL = 0.02, GRID = new Map();
+const cellOf = (x) => Math.floor((x + 1) / CELL);
+const gkey = (i, j, k) => (i * 128 + j) * 128 + k;
+for (const s of RIVERS) {
+  // |u − mid| ≤ the cap's angle on each axis for every u in the cap (a chord is no longer than its arc)
+  const c = Math.acos(Math.max(-1, Math.min(1, s.cosCap))) + 1e-6, m = s.mid;
+  for (let i = cellOf(m[0] - c); i <= cellOf(m[0] + c); i++)
+    for (let j = cellOf(m[1] - c); j <= cellOf(m[1] + c); j++)
+      for (let k = cellOf(m[2] - c); k <= cellOf(m[2] + c); k++) {
+        const g = gkey(i, j, k);
+        let L = GRID.get(g);
+        if (!L) GRID.set(g, (L = []));
+        L.push(s);
+      }
+}
+const NONE = [];
+
 /**
  * The nearest river to direction u: { d (m from its middle line), half, bank, name } or null when
  * none is within its bank. Segments meet at joints; distance past a segment's end is to the end.
  */
 export function riverAt(u) {
   let best = null;
-  for (const s of RIVERS) {
+  for (const s of GRID.get(gkey(cellOf(u[0]), cellOf(u[1]), cellOf(u[2]))) || NONE) {
     if (dot(u, s.mid) < s.cosCap) continue;
     const along = Math.atan2(dot(u, s.t), dot(u, s.a));
     let d;
