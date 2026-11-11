@@ -151,6 +151,8 @@ function fabric() {
   for (const [g, zc] of [[GATE, zs], [LAKE_GATE, zn]]) E.push({ t: 'paving', rect: [g.x - g.w / 2, zc - th / 2 - 0.2, g.x + g.w / 2, zc + th / 2 + 0.2], y: LEVEL.street + 0.04, th: 0.3 });
   // ---- the streets' paving
   for (const s of streets()) E.push({ t: 'paving', rect: s.r, y: LEVEL.street + 0.04, th: 0.3 });
+  // the Imperial Way's own surface: slabs at the sides, the gravel between, the ruts and the drain covers
+  streets().filter((s) => s.kind === 'imperial').forEach((s, i) => { if (s.r[3] - s.r[1] > 8) E.push({ t: 'hz_imperial_way', rect: s.r, y: LEVEL.street + 0.04, seed: 31 + i }); });
   // ---- wells in the lanes
   for (const p of wells()) E.push({ t: 'town_well', at: p, y: LEVEL.street + 0.04, rot: rand() * 6.28 });
   // ---- the fire-watch towers (wang huo lou): a brick base, a timber room under a hipped roof, on the Imperial Way's corners

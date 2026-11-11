@@ -115,13 +115,23 @@ export function lots() {
     if (!fits(r, 24) || hill((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) > 1.5) return false;
     if (fixed.some((o) => hit(r, o, -0.05)) || taken.some((o) => hit(r, o, 0.25))) return false;
     const d = (r[1] + r[3]) / 2 < -440 ? 0 : detailAt(r);
-    LOTS.push({ rect: r, front, storeys, shop, seed: Math.floor(rand() * 1e6), kind: 'row', detail: d, roof: rand() < 0.8 ? 'gable' : 'hip', ...extra });
+    LOTS.push({ rect: r, front, storeys, shop, seed: Math.floor(rand() * 1e6), kind: 'row', detail: d, roof: rand() < 0.8 ? 'gable' : 'hip', ...weather(front, storeys, shop, extra), ...extra });
     taken.push(r);
     return true;
   };
+  // the houses' weathering and variety (its own stream, so that the plots stay as they are): the lime wash fresh, streaked by the rain, greened by the damp
+  // (more by the canal), or dull grey where it was not renewed; old tiles weathered paler; the upper floor jutting over the street in some of the shops
+  const rw = rng(7741);
+  const weather = (front, storeys, shop, extra) => {
+    const r = rw(), q = rw(), o = rw(), damp = extra.where === 'canal' ? 2.2 : 1, a = 5, b = 3, c = 1.2 * damp, d = 0.8;
+    const t = r * (a + b + c + d), pal = {};
+    if (t > a + b + c) { pal.plaster = 'plaster_grey'; pal.plinth = 'brick_grey'; } else if (t > a + b) pal.plaster = 'plaster_damp'; else if (t > a) pal.plaster = 'plaster_streak';
+    if (q < 0.18) pal.roof = 'tile_grey';
+    return { pal: Object.keys(pal).length ? pal : undefined, overhang: storeys > 1 && shop && o < (extra.where === 'imperial' ? 0.55 : 0.3) };
+  };
   const w = (a = 6, b = 4) => a + rand() * b;
-  const row = (x0, x1, z0, z1, front, shopP, st2 = 0.6, extra) => { for (let x = x0; x < x1 - 5;) { const ww = w(); add([x, z0, Math.min(x + ww, x1) - 0.3, z1], front, rand() < st2 ? 2 : 1, rand() < shopP, extra?.()); x += ww; } };
-  const col = (z0, z1, x0, x1, front, shopP, st2 = 0.6, extra) => { for (let z = z0; z < z1 - 5;) { const ww = w(); add([x0, z, x1, Math.min(z + ww, z1) - 0.3], front, rand() < st2 ? 2 : 1, rand() < shopP, extra?.()); z += ww; } };
+  const row = (x0, x1, z0, z1, front, shopP, st2 = 0.6, extra) => { for (let x = x0; x < x1 - 5;) { const ww = w(); add([x, z0, Math.min(x + ww, x1) - 0.3, z1], front, rand() < st2 ? 2 : 1, rand() < shopP, { ...extra?.(), ...(x === x0 || x + ww >= x1 - 5 ? { roof: 'hip' } : {}) }); x += ww; } };
+  const col = (z0, z1, x0, x1, front, shopP, st2 = 0.6, extra) => { for (let z = z0; z < z1 - 5;) { const ww = w(); add([x0, z, x1, Math.min(z + ww, z1) - 0.3], front, rand() < st2 ? 2 : 1, rand() < shopP, { ...extra?.(), ...(z === z0 || z + ww >= z1 - 5 ? { roof: 'hip' } : {}) }); z += ww; } };
   // 1. the Imperial Way: both sides, in deep lots (their courts behind), shops nearly all, two storeys
   const iw = () => ({ kind: rand() < 0.3 ? 'court' : 'row', detail: 2, where: 'imperial' });
   const gate0 = CITY.zs - CITY.th / 2 - 6, gate1 = CITY.zs + CITY.th / 2 + 6, ng = CITY.zn + CITY.th / 2 + 6;

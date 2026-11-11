@@ -563,7 +563,28 @@ function hzShell(el, ctx) {
   void rand;
 }
 
+/**
+ * hz_imperial_way: the surface of the Imperial Way's stretch { rect [x0, z0, x1, z1] (running north–south), y (the paving's top), seed }: "paved with stone and brick, the
+ * middle filled with gravel, round pipes under it draining the rain into the canals" — a band of worn bluestone and granite slabs along each side (as the courts'), a
+ * granite kerb between the bands and the gravel, the gravel bed of the middle with the cart wheels' two dark ruts, and a drain cover of granite with its slots in the
+ * slabs beside the kerb every 16 m, alternating from side to side.
+ */
+function imperialWay(el, ctx) {
+  const { bag } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0.04, rand = rnd(el.seed ?? 3), band = 3.3, kb = 0.22, xc = (x0 + x1) / 2;
+  const bands = [[x0 + 0.1, z0, x0 + band, z1], [x1 - band, z0, x1 - 0.1, z1]];
+  courtPaving({ y, seed: el.seed ?? 3, rects: bands.filter((r) => r[3] - r[1] > 1) }, ctx);
+  const gx0 = x0 + band + kb, gx1 = x1 - band - kb;
+  bag.add('pebbles', box(gx0, y, z0, gx1, y + 0.03, z1));
+  for (const [a, b] of [[x0 + band, gx0], [gx1, x1 - band]]) { bag.add('granite_grey', box(a, y, z0, b, y + 0.09, z1)); ctx.col?.floor([a, z0, b, z1], y + 0.09); }   // (the kerb a step to walk over)
+  for (const s of [-1, 1]) bag.add('slate', box(xc + s * 2.6 - 0.14, y, z0, xc + s * 2.6 + 0.14, y + 0.05, z1));   // the wheel ruts
+  for (let z = z0 + 6 + rand() * 6, k = 0; z < z1 - 4; z += 16, k++) {
+    const side = k % 2 ? 1 : -1, cx = side < 0 ? x0 + band - 0.55 : x1 - band + 0.55;
+    bag.add('granite_grey', box(cx - 0.4, y, z - 0.3, cx + 0.4, y + 0.05, z + 0.3));
+    for (let i = -2; i <= 2; i++) bag.add('lacquer_black', box(cx - 0.3, y + 0.05, z + i * 0.1 - 0.025, cx + 0.3, y + 0.055, z + i * 0.1 + 0.025));
+  }
+}
+
 /** sutra_pillar: a stone sutra pillar of the court { at, y } (the hexagonal shaft on its lotus base, as the chinese style's dharani pillar). */
 function sutraPillar(el, ctx) { STYLES.chinese.objects.dharani_pillar(el, ctx); }
 
-export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving };
+export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving };
