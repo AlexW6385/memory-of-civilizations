@@ -1,6 +1,7 @@
 // Nasrid Granada — the animals (src/engine/fauna.js draws them; docs/settlements/granada.md §13): swifts and house martins
 // screaming round the Alhambra's towers and over the Darro, jackdaws and choughs over the Albaicín's roofs, house sparrows
 // on the paving of the lanes, the courts and the souk. (No fish: the Darro's water is drawn but not swum in.)
+import { gardens } from './layout.js';
 import { HILL, MYRTLES, LIONS, COMARES, SOUK, GREAT_MOSQUE, SITES, DARRO, height } from './layout.js';
 
 const fish = [];
@@ -19,5 +20,7 @@ for (const [x, z] of [[mx0 + 3, mz0 + 20], [mx0 + 18, mz0 + 8], [(lx0 + lx1) / 2
 for (const x of [-120, -60, 0, 60, 120, 200]) { sparrow(x, DARRO.z - 5.5); sparrow(x + 20, DARRO.z + 5.5); }
 for (const [x, z] of [[-90, 125.8], [-70, 133.2], [-60, 125.8], [-50, 133.4], [-20, 118], [-20, 150], [-30, 100], [0, 105]]) sparrow(x, z, 0.04);
 for (const [x, z] of [[-30, -150], [20, -176], [60, -210], [-60, -240], [90, -160], [-100, -200], [140, -190]]) sparrow(x, z);
+for (const g of gardens().slice(0, 8)) sparrow((g.rect[0] + g.rect[2]) / 2 + 1.5, (g.rect[1] + g.rect[3]) / 2, g.y + 0.08);   // in the huertas
+for (const x of [-60, -20, 20, 60, 100, 140]) for (const z of [-23.75, 1.25, 26.25]) sparrow(x + z / 10, z, HILL.top + 0.1);   // on the medina's lanes
 void COMARES; void GREAT_MOSQUE; void SITES;
 export default { fish, flights, perches };
