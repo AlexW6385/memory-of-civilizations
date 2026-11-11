@@ -4,7 +4,7 @@
 // crossing); the alleys between the rows closed at the street by a wall with an arched passage or the back of a
 // fountain's recess; the walled gardens (horti) with their pool, pergola, beds and statue. Registered into `roman`.
 
-import { STYLES } from '../../core/build.js';
+import { STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import '../../objects/index.js';
 import './index.js';
@@ -186,5 +186,54 @@ function hortus(el, { bag, col }) {
     col.rect([sx - 0.35, sz - 0.35, sx + 0.35, sz + 0.35], y, y + 1.4);
   }
 }
-Object.assign(STYLES.roman.elements, { paving, crossing, street_kit: streetKit, alley_fill: alleyFill, hortus });
+/**
+ * quay: { edge: [[x, z]…] (the water's edge, running along z), land (+1 if the land lies at +x, else −1), level (the water), top }
+ * — the embankment of the Tiber: a wall of travertine ashlar from the bed to the quay, a coping, a paved quay 10 m wide
+ * behind it (over the slope of the bank), mooring stones along the edge with rings of bronze.
+ */
+function quay(el, { bag, col }) {
+  const E = el.edge, L = el.land ?? 1, top = el.top ?? 0.06, lev = el.level ?? -5, bed = lev - 3.4, W = 10;
+  const at = (p, d) => [p[0] + L * d, p[1]];
+  for (let i = 0; i + 1 < E.length; i++) {
+    const a = E[i], b = E[i + 1];
+    bag.add('travertine', orientedBox(at(a, 0.5), at(b, 0.5), 1.0, bed, top, 0.5));
+    bag.add('limestone', orientedBox(at(a, 0.35), at(b, 0.35), 1.3, top - 0.0, top + 0.16, 0.5));
+    bag.add('flagstone', orientedBox(at(a, 1.0 + W / 2), at(b, 1.0 + W / 2), W, bed, top, 0.6));
+    col.floor([Math.min(a[0], b[0], a[0] + L * (1 + W), b[0] + L * (1 + W)), Math.min(a[1], b[1]), Math.max(a[0], b[0], a[0] + L * (1 + W), b[0] + L * (1 + W)), Math.max(a[1], b[1])].map((v) => v), top);
+  }
+  // mooring stones every 14 m with a ring
+  for (let i = 1; i + 1 < E.length; i += 2) {
+    const p = at(E[i], 1.5);
+    bag.add('limestone', box(p[0] - 0.2, top + 0.0, p[1] - 0.2, p[0] + 0.2, top + 0.55, p[1] + 0.2)); col.circle(p[0], p[1], 0.22, top, top + 0.55);
+    bag.add('bronze', box(p[0] - L * 0.22 - 0.02, top + 0.3, p[1] - 0.08, p[0] - L * 0.22 + 0.02, top + 0.5, p[1] + 0.08));
+  }
+}
+/** landing: { at: [x, z] (on the edge), land (+1 | −1), level, top, w } — a flight of steps down into the water, 0.3 high and 0.45 deep, with a low wall each side. */
+function landing(el, { bag, col }) {
+  const [x, z] = el.at, L = el.land ?? 1, lev = el.level ?? -5, top = el.top ?? 0.06, w = el.w ?? 4, n = Math.ceil((top - (lev - 1.0)) / 0.3);
+  for (let k = 0; k < n; k++) {
+    const yt = top - 0.3 * (k + 1) + 0.3, xa = x - L * (0.45 * k), xb = x - L * (0.45 * (k + 1));
+    bag.add('travertine', box(Math.min(xa, xb), lev - 3.4, z - w / 2, Math.max(xa, xb), yt, z + w / 2));
+    col.floor([Math.min(xa, xb), z - w / 2, Math.max(xa, xb), z + w / 2], yt);
+  }
+  for (const s of [-1, 1]) bag.add('limestone', box(x - L * 0.45 * n, lev - 3.4, z + s * (w / 2 + 0.2) - 0.2, x, top + 0.35, z + s * (w / 2 + 0.2) + 0.2));
+}
+/** crane: { at, rot, y } — a treadwheel crane of the harbour: a mast with a jib, the great wheel, a rope and a hook, a pallet of amphorae under it. */
+function crane(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, M = (g) => { g.rotateY(el.rot ?? 0); g.translate(x, y, z); return g; };
+  bag.add('timber', M(box(-0.3, 0, -0.3, 0.3, 9.0, 0.3)));
+  for (const s of [-1, 1]) { bag.add('timber', M(box(s * 1.6 - 0.12, 0, -0.9, s * 1.6 + 0.12, 5.2, -0.66))); bag.add('timber', M(box(s * 1.6 - 0.12, 0, 0.66, s * 1.6 + 0.12, 5.2, 0.9))); }
+  bag.add('timber', M(box(-1.8, 2.0, -0.12, 1.8, 2.2, 0.12)));
+  bag.add('timber', M(box(-0.15, 8.2, -0.12, 0.15, 8.4, 5.5)));                       // the jib
+  bag.add('timber', M(box(-0.15, 6.5, 0.0, 0.15, 6.6, 0.6)));
+  bag.add('timber', M(lathe([[2.4, -0.18], [2.4, 0.18], [2.2, 0.18], [2.2, -0.18]], 18).rotateZ(Math.PI / 2).translate(0, 3.0, 0.0)));
+  for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6; bag.add('timber', M(box(-0.06, 3.0 + Math.sin(a) * 1.15 - 0.05, Math.cos(a) * 1.15 - 0.05 - 0.0, 0.06, 3.0 + Math.sin(a) * 1.15 + 0.05, Math.cos(a) * 1.15 + 0.05)));
+    bag.add('timber', M(box(-0.2, 3.0 + Math.sin(a) * 2.2 - 0.04, Math.cos(a) * 2.2 - 0.04, -0.1, 3.0 + Math.sin(a) * 2.2 + 0.04, Math.cos(a) * 2.2 + 0.04))); }
+  bag.add('rope_fibre', M(box(-0.02, 3.0, 5.35, 0.02, 8.2, 5.39)));
+  bag.add('iron', M(box(-0.08, 2.0, 5.3, 0.08, 2.1, 5.44)));
+  bag.add('timber', M(box(-0.9, 0, 4.6, 0.9, 0.18, 6.0)));
+  for (let k = 0; k < 6; k++) bag.add('terracotta', M(lathe([[0.001, 0], [0.1, 0.1], [0.19, 0.4], [0.17, 0.62], [0.07, 0.78], [0.06, 0.95], [0.001, 0.95]], 8).translate(-0.5 + (k % 3) * 0.5, 0.18, 4.95 + Math.floor(k / 3) * 0.5)));
+  col.rect([x - 2.2, z - 0.9, x + 2.2, z + 0.9], y, y + 5.2);
+}
+Object.assign(STYLES.roman.elements, { quay, landing, crane, paving, crossing, street_kit: streetKit, alley_fill: alleyFill, hortus });
 void fromTriangles;

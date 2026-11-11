@@ -24,6 +24,7 @@ export function saeptaRows() {
 }
 export const PISTRINUM = [80, 149, 94, 160];                  // the mill-bakery on the street at the south
 export const LATRINE = [100, 152, 109, 160];
+export const INN = [-10, -232, 12, -214], FULLER = [16, -232, 35, -216];     // the lots behind the arrival's clearing: an inn and a fuller's, walked into
 export const VIA_LATA = { x: 175, w: 10 };
 export const TIBER = { x: -370, w: 46, level: -5 };
 /** Rows of tabernae under flats: both sides of the Via Lata and the north side of the street before the Pantheon. */
@@ -53,7 +54,7 @@ export function fountains() {
 }
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
-const riverX = (z) => TIBER.x + 28 * Math.sin(z / 120);
+export const riverX = (z) => TIBER.x + 28 * Math.sin(z / 120);
 export const inRiver = (x, z) => Math.abs(x - riverX(z)) < TIBER.w / 2 - 3 && Math.hypot(x, z) < RADIUS - 30;
 export function height(x, z) {
   const d = Math.abs(x - riverX(z)), edge = smooth(RADIUS - 70, RADIUS - 25, Math.hypot(x, z));
@@ -72,7 +73,7 @@ export function lots() {
   for (let x = -RADIUS + 20; x < RADIUS - 20; x += 26) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 24) {
     const w = 18 + rand() * 5, d = 16 + rand() * 5, cx = x + w / 2, cz = z + d / 2;
     if (Math.hypot(cx, cz) > RADIUS - 45 || [PANTHEON, BATHS, SAEPTA, STADIUM, FORUM, PISTRINUM, LATRINE].some((r) => inRect(r, cx, cz, 18)) || rows().some((r) => overlaps(r.rect, [x, z, x + w, z + d], 3)) || onStreet(cx, cz, 14)) continue;
-    if (Math.abs(cx - riverX(cz)) < TIBER.w / 2 + 22) continue;
+    if (Math.abs(cx - riverX(cz)) < TIBER.w / 2 + 34) continue;
     if (rand() < 0.12) { GARDENS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) }); continue; }
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
   }
@@ -100,3 +101,21 @@ export function fills() {
   return FILLS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+
+/** The water's edge on one side of the Tiber (side −1 the west bank, +1 the east): points every 6 m where the river is drawn. */
+export function riverEdge(side, off = 21.6) {
+  const out = [];
+  for (let z = -140; z <= 140; z += 6) { const x = riverX(z) + side * off; if (Math.hypot(x, z) < RADIUS - 40 && inRiver(riverX(z), z)) out.push([x, z]); }
+  return out;
+}
+
+/** Warehouses and shops along the east quay of the Tiber, their fronts to the water. */
+export function quayRows() {
+  const out = [], rand = rng(9);
+  for (let z = -48; z < 130; z += 24) {
+    const xr = riverX(z + 11) + 21.6 + 11.5 + 1.0 + 0.4;
+    if (!inRiver(riverX(z + 11), z + 11) || Math.hypot(xr + 8, z) > RADIUS - 44) continue;
+    out.push({ rect: [xr, z, xr + 8, z + 22], front: 'w', n: 4, storeys: 1, seed: Math.floor(rand() * 1e6) });
+  }
+  return out;
+}
