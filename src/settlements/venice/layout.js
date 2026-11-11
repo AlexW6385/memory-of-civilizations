@@ -37,10 +37,11 @@ export function height(x, z) {
 }
 export const inWater = (x, z) => wet(x, z) < -0.5;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-let LOTS = null;
-export function lots() {
-  if (LOTS) return LOTS;
-  LOTS = [];
+let LOTS0 = null, LOTS = null;
+/** The houses as first drawn, before the palazzi, the bridges and the squero clear their ground (the bands are found from these). */
+function baseLots() {
+  if (LOTS0) return LOTS0;
+  let LOTS = [];
   const rand = rng(1500);
   for (let x = -RADIUS + 40; x < RADIUS - 40; x += 11) for (let z = -RADIUS + 40; z < BASIN_Z; z += 11) {
     const w = 8 + rand() * 2, d = 8 + rand() * 2;
@@ -51,7 +52,13 @@ export function lots() {
   }
   LOTS = LOTS.filter((l) => !inRect(MERCERIA, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 4)
     && !RIALTO_CLEAR.some((r) => l.rect[2] > r[0] && l.rect[0] < r[2] && l.rect[3] > r[1] && l.rect[1] < r[3]));   // after the draw: the other lots stay as they were
-  return LOTS;
+  return (LOTS0 = LOTS);
+}
+const hits = (a, r, m = 0) => a[2] + m > r[0] && a[0] - m < r[2] && a[3] + m > r[1] && a[1] - m < r[3];
+export function lots() {
+  if (LOTS) return LOTS;
+  const clear = [...palazzi().map((p) => p.box), ...bridges().map((b) => b.corridor), squero().clear];
+  return (LOTS = baseLots().filter((l) => !clear.some((r) => hits(l.rect, r, 0.4))));
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 
@@ -69,7 +76,7 @@ export function rivePieces() {
     const e = 0.3, gx = (wet(x + e, z) - wet(x - e, z)) / (2 * e), gz = (wet(x, z + e) - wet(x, z - e)) / (2 * e), g = Math.hypot(gx, gz);
     if (g < 0.6) return;                                                       // a ridge between two waters, or flat
     const wx = -gx / g, wz = -gz / g, px = x + wx * (w - TW), pz = z + wz * (w - TW);
-    if (inRect(PIAZZA, px, pz, 1) || RIALTO.x - RIALTO.span / 2 - 1 < px && px < RIALTO.x + RIALTO.span / 2 + 1 && Math.abs(pz - RIALTO.z) < 4.6) return;
+    if (inRect(PIAZZA, px, pz, 1) || inRect(squero().slip, px, pz, 0) || RIALTO.x - RIALTO.span / 2 - 1 < px && px < RIALTO.x + RIALTO.span / 2 + 1 && Math.abs(pz - RIALTO.z) < 4.6) return;
     const k = `${Math.round(px / 2.4)},${Math.round(pz / 2.4)}`;
     if (seen.has(k)) return;
     seen.add(k); out.push([+px.toFixed(2), +pz.toFixed(2), +wx.toFixed(4), +wz.toFixed(4), L]);
@@ -87,4 +94,115 @@ export function rivePieces() {
   const rr = RADIUS - 60 - TW;
   for (let a = 0; a < Math.PI * 2; a += L / rr) tryAt(Math.cos(a) * rr, Math.sin(a) * rr);
   return out;
+}
+
+// ── the palazzi, the streets, the bridges, the wells, the squero (docs/settlements/venice.md §4b–§5) ───────────────────────────────────
+/** Ground the new things keep clear of: the piazza and the buildings round it, the palace, the market, the Rialto's feet. */
+const FORBID = [[PIAZZA[0] - 20, PIAZZA[1] - 20, PIAZZA[2] + 4, PIAZZA[3] + 18], [PIAZZETTA[0] - 4, PIAZZETTA[1], PIAZZETTA[2] + 4, PIAZZETTA[3] + 6], [PALACE[0] - 3, PALACE[1] - 3, PALACE[2] + 3, PALACE[3] + 3],
+  [BASILICA.c[0] - 50, BASILICA.c[1] - 40, BASILICA.c[0] + 45, BASILICA.c[1] + 40], MARKET, [RIALTO.x + RIALTO.span / 2 - 4, RIALTO.z - 24, RIALTO.x + RIALTO.span / 2 + 36, RIALTO.z + 14],
+  [RIALTO.x - RIALTO.span / 2 - 5, RIALTO.z - 40, RIALTO.x - RIALTO.span / 2 + 3, RIALTO.z + 30], MERCERIA, CLOCK];
+const forbidden = (x, z, m = 0) => FORBID.some((r) => inRect(r, x, z, m));
+const grandD = (x, z) => pathD(x, z, GRAND);
+let PAL = null;
+/**
+ * The palazzi of the Grand Canal: along both banks of its straight stretches, each with its front a hand's breadth behind the quay's
+ * coping, the water gate in the middle: { at (the front's middle), w (the unit vector toward the water), width, depth, seed, kind, box }.
+ */
+export function palazzi() {
+  if (PAL) return PAL;
+  PAL = [];
+  const rand = rng(1497), FRONT = 20.0;
+  for (let i = 0; i + 1 < GRAND.length; i++) {
+    const [ax, az] = GRAND[i], [bx, bz] = GRAND[i + 1], len = Math.hypot(bx - ax, bz - az), tx = (bx - ax) / len, tz = (bz - az) / len;
+    for (const s of [-1, 1]) {
+      const nx = -tz * s, nz = tx * s;                               // away from the canal
+      let u = 12 + rand() * 3;
+      while (u < len - 14) {
+        const W = 16 + Math.floor(rand() * 11), D = 19 + Math.floor(rand() * 5), kind = ['gothic', 'gothic', 'gothic', 'veneto', 'lombardo'][Math.floor(rand() * 5)], seed = Math.floor(rand() * 1e6), gap = rand() < 0.3 ? 0 : 1.2 + rand() * 2.5;
+        const cu = u + W / 2, fx = ax + tx * cu + nx * FRONT, fz = az + tz * cu + nz * FRONT;
+        const P = (a, d) => [fx + tx * a + nx * d, fz + tz * a + nz * d];
+        const corners = [P(-W / 2, 0), P(W / 2, 0), P(W / 2, D), P(-W / 2, D)], xs = corners.map((c) => c[0]), zs = corners.map((c) => c[1]);
+        const box = [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)];
+        const ok = !FORBID.some((r) => hits(box, r, 2)) && [[-W / 2, 0], [W / 2, 0], [0, 0], [-W / 2, D], [W / 2, D], [0, D], [-W / 2, D / 2], [W / 2, D / 2]].every(([a, d]) => { const [x, z] = P(a, d); return wet(x, z) > (d < 0.5 ? -0.3 : 1.8) && Math.hypot(x, z) < RADIUS - 70; });
+        if (ok && rand() > 0.08) PAL.push({ at: [+fx.toFixed(2), +fz.toFixed(2)], w: [-nx, -nz], width: W, depth: D, seed, kind, box });
+        u += W + gap;
+      }
+    }
+  }
+  return PAL;
+}
+/** The distance along an axis from a point to where the water's quay faces stand (wet = −0.6) each way. */
+function faces(x, z, ax) {
+  const at = (d) => (ax === 'z' ? wet(x, z + d) : wet(x + d, z));
+  let a = 0, b = 0;
+  while (at(-a) < -0.6 && a < 30) a += 0.2;
+  while (at(b) < -0.6 && b < 30) b += 0.2;
+  return [a, b];
+}
+let BANDS = null;
+/** The streets that run through the houses (every 44 m the grid's column is left out): [x0, x1, [[z0, z1], …]] where it is dry and clear. */
+export function bands() {
+  if (BANDS) return BANDS;
+  BANDS = [];
+  const L0 = baseLots();
+  for (let k = 1; k <= 14; k++) {
+    const xc = 44 * k - 334.8;
+    let left = -Infinity, right = Infinity;
+    for (const l of L0) { const cx = (l.rect[0] + l.rect[2]) / 2; if (cx > xc - 16 && cx < xc) left = Math.max(left, l.rect[2]); if (cx < xc + 16 && cx > xc) right = Math.min(right, l.rect[0]); }
+    if (!isFinite(left) || !isFinite(right)) continue;
+    const x0 = left + 0.4, x1 = right - 0.4, xm = (x0 + x1) / 2, runs = [];
+    let z0 = null;
+    for (let z = -330; z <= BASIN_Z - 3; z += 1) {
+      const dry = !forbidden(xm, z, 6) && !forbidden(x0, z, 1) && !forbidden(x1, z, 1) && wet(x0, z) >= 2 && wet(x1, z) >= 2 && wet(xm, z) >= 2 && Math.hypot(xm, z) < RADIUS - 75;
+      if (dry && z0 === null) z0 = z;
+      if ((!dry || z >= BASIN_Z - 3) && z0 !== null) { if (z - z0 >= 10) runs.push([z0, z - 1]); z0 = null; }
+    }
+    if (runs.length) BANDS.push({ x0, x1, runs });
+  }
+  return BANDS;
+}
+let BR = null;
+/**
+ * The bridges over the small canals: a single stone arch, no parapet (the bridges of Venice had none until the 18th century), steps up and down;
+ * { c, ax ('x' | 'z', the way across), f: [−, +] (to the quay faces from c), w, corridor (the ground it clears) }. Where a street's two stretches meet
+ * across a canal; and about every 46 m along each canal, across.
+ */
+export function bridges() {
+  if (BR) return BR;
+  BR = [];
+  const add = (c, ax, via) => {
+    const f = faces(c[0], c[1], ax), W = 4.4, R = f[0] + f[1] > 6 && f[0] + f[1] < 24;
+    if (!R) return false;
+    const e = 3.6, a0 = ax === 'z' ? [c[0] - W / 2 - 0.4, c[1] - f[0] - e - 0.4, c[0] + W / 2 + 0.4, c[1] + f[1] + e + 0.4] : [c[0] - f[0] - e - 0.4, c[1] - W / 2 - 0.4, c[0] + f[1] + e + 0.4, c[1] + W / 2 + 0.4];
+    const ends = ax === 'z' ? [[c[0], c[1] - f[0] - e - 1], [c[0], c[1] + f[1] + e + 1]] : [[c[0] - f[0] - e - 1, c[1]], [c[0] + f[1] + e + 1, c[1]]];
+    if (ends.some(([x, z]) => wet(x, z) < 1.8 || forbidden(x, z, 3) || Math.hypot(x, z) > RADIUS - 72)) return false;
+    if (BR.some((b) => Math.hypot(b.c[0] - c[0], b.c[1] - c[1]) < 16)) return false;
+    BR.push({ c: [+c[0].toFixed(2), +c[1].toFixed(2)], ax, f: f.map((v) => +v.toFixed(2)), w: W, corridor: a0, via });
+    return true;
+  };
+  // where a band's runs are parted by water
+  for (const b of bands()) for (let i = 0; i + 1 < b.runs.length; i++) {
+    const za = b.runs[i][1], zb = b.runs[i + 1][0], xm = (b.x0 + b.x1) / 2;
+    if (zb - za < 26 && wet(xm, (za + zb) / 2) < 0) add([xm, (za + zb) / 2], 'z', 'band');
+  }
+  // across each small canal, along its length
+  for (const p of CANALS) for (let i = 0; i + 1 < p.length; i++) {
+    const [ax, az] = p[i], [bx, bz] = p[i + 1], len = Math.hypot(bx - ax, bz - az), tx = (bx - ax) / len, tz = (bz - az) / len, axis = Math.abs(tx) > Math.abs(tz) ? 'z' : 'x';
+    for (let t = 30; t < len - 20; t += 46) add([ax + tx * t, az + tz * t], axis, 'canal');
+  }
+  return BR;
+}
+let WL = null;
+/** The wellheads (vere da pozzo) in the streets and on the piazza: { at, paving }. */
+export function wells() {
+  if (WL) return WL;
+  WL = [{ at: [-96, -33.5] }, { at: [-52, -33.5] }, { at: [-122, 23] }];
+  for (const b of bands()) for (const [z0, z1] of b.runs) for (let z = z0 + 14; z < z1 - 8; z += 52) WL.push({ at: [+(b.x0 + 1.6).toFixed(2), z] });
+  return WL;
+}
+/** The squero (boatyard) on the south bank of the eastern canal: its yard, the slipway's ground. */
+export function squero() {
+  const [ax, az] = CANALS[4][0], [bx, bz] = CANALS[4][1], len = Math.hypot(bx - ax, bz - az), tx = (bx - ax) / len, tz = (bz - az) / len;
+  const t = 70, cx = ax + tx * t, cz = az + tz * t + 5.2;                // the canal's middle there, the quay's edge 5.2 m south
+  return { c: [+cx.toFixed(1), +cz.toFixed(1)], yaw: Math.atan2(tz, tx), clear: [cx - 13, cz + 0.5, cx + 13, cz + 17], slip: [cx - 7, cz - 1.5, cx + 3, cz + 0.3] };
 }
