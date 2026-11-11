@@ -18,10 +18,10 @@ export const dam = {
   elements: [
     { t: 'town_hall', rect: HALL, h: 33, front: 'e', y: GROUND, interior: true },
     // the Nieuwe Kerk: Gothic, rebuilt after the fire of 1645; its great tower was begun and never finished, so a ridge turret
-    { t: 'dutch_church', rect: NIEUWE_KERK, h: 16, transepts: [[DAM[1] + 9, DAM[1] + 23]], tw: 5, gothic: true, turret: true, gables: ['n', 's'], door: 's', y: GROUND },
+    { t: 'dutch_church', rect: NIEUWE_KERK, h: 16, transepts: [[DAM[1] + 9, DAM[1] + 23]], tw: 5, gothic: true, turret: true, gables: ['n', 's'], door: 's', y: GROUND, interior: true, seed: 1645 },
     // the Westerkerk: the Westertoren by the Prinsengracht, the nave with its two transepts behind it
     { t: 'wester_tower', c: wk, s: 9, h: 87, y: GROUND },
-    { t: 'dutch_church', rect: [wn[0], wk[1] + 4.5, wn[2], wn[3]], h: 15, transepts: [[wn[1] + 9, wn[1] + 22], [wn[1] + 30, wn[1] + 43]], tw: 3.5, gables: ['n', 's'], door: 's', y: GROUND },
+    { t: 'dutch_church', rect: [wn[0], wk[1] + 4.5, wn[2], wn[3]], h: 15, transepts: [[wn[1] + 9, wn[1] + 22], [wn[1] + 30, wn[1] + 43]], tw: 3.5, gables: ['n', 's'], door: 's', y: GROUND, interior: true, seed: 1631 },
     // the Weigh House before the Town Hall's north wing; the square paved, its gutters; the fish benches at the Damrak's head; sledges
     { t: 'waag', rect: WAAG, y: GROUND },
     { t: 'dam_paving', y: GROUND, gz: [-231, -208.2, -259], gx: [5], fields: [
@@ -44,6 +44,12 @@ export const dam = {
     { id: 'vestibule', rect: [HALL[2] - 6.6, -246.8, HALL[2] + 1.4, -220.2], y: GROUND + 0.15, kind: 'hall' },
     { id: 'stair', rect: [HALL[2] - 15, -250.8, HALL[2] - 5, -246.8], y: GROUND + 0.15, kind: 'hall' },
     { id: 'burgerzaal', rect: [HALL[0] + 4, -245, HALL[2] - 4, -222], y: GROUND + 15.9, kind: 'hall' },
+    // the churches (src/styles/dutch/church.js): the nave and its transepts
+    { id: 'nieuwe-kerk', rect: [NIEUWE_KERK[0] + 0.9, NIEUWE_KERK[1] + 0.9, NIEUWE_KERK[2] - 0.9, NIEUWE_KERK[3] - 0.9], y: GROUND + 0.06, kind: 'hall' },
+    { id: 'nieuwe-kerk-transept', rect: [NIEUWE_KERK[0] - 4.1, DAM[1] + 9.9, NIEUWE_KERK[2] + 4.1, DAM[1] + 22.1], y: GROUND + 0.06, kind: 'hall' },
+    { id: 'westerkerk', rect: [wn[0] + 0.9, wk[1] + 5.4, wn[2] - 0.9, wn[3] - 0.9], y: GROUND + 0.06, kind: 'hall' },
+    { id: 'westerkerk-transept-1', rect: [wn[0] - 2.6, wn[1] + 9.9, wn[2] + 2.6, wn[1] + 21.1], y: GROUND + 0.06, kind: 'hall' },
+    { id: 'westerkerk-transept-2', rect: [wn[0] - 2.6, wn[1] + 30.9, wn[2] + 2.6, wn[1] + 42.1], y: GROUND + 0.06, kind: 'hall' },
     { id: 'dam', rect: DAM, y: GROUND, kind: 'open' },
   ],
   walks: [Object.assign([[20, -207], [20, -230]], { y0: GROUND })],
