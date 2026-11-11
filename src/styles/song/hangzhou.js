@@ -381,7 +381,132 @@ function lakeBoat(el, { bag }) {
   bag.add('wood_dark', rod(Pt(-H, 0, yw + 0.8), Pt(-H - 1.2, 0, yw - 0.5), 0.05, 5)); ob(rud, -H - 1.3, -H - 1.0, -0.05, 0.05, yw - 0.9, yw - 0.2); bag.add('wood_dark', fromTriangles(rud));
 }
 
+
+/** The spire of a Song brick pagoda { c, y (the crowning roof's apex), R (the roof's corner radius) }: a sumeru base, the bowl (fuyue), seven rings of the finial (xianglun) on an iron pole, the water flame and the pearl; chains to the eight corners of the roof. */
+function songSpire(bag, cx, y, cz, R, ycorner) {
+  bag.add('bronze', lathe([[0.001, 0], [1.0, 0], [1.0, 0.14], [0.8, 0.26], [0.8, 0.5], [0.95, 0.62], [0.95, 0.72], [0.001, 0.72]], 8, null, cx, y, cz));
+  bag.add('gilt_bronze', lathe([[0.001, 0], [0.55, 0], [0.8, 0.2], [0.88, 0.5], [0.8, 0.8], [0.55, 1.0], [0.4, 1.02], [0.001, 1.04]], 14, null, cx, y + 0.72, cz));
+  bag.add('iron', rod([cx, y + 0.6, cz], [cx, y + 6.2, cz], 0.09, 6));
+  for (let k = 0; k < 7; k++) { const r = 0.74 - k * 0.07, yy = y + 1.9 + k * 0.5; bag.add('gilt_bronze', lathe([[0.001, 0], [r, 0], [r + 0.04, 0.06], [r, 0.12], [0.001, 0.12]], 12, null, cx, yy, cz)); }
+  bag.add('gilt_bronze', lathe([[0.001, 0], [0.34, 0.05], [0.4, 0.3], [0.2, 0.7], [0.12, 1.1], [0.001, 1.35]], 10, null, cx, y + 5.4, cz));
+  bag.add('gilt_bronze', lathe([[0.001, -0.16], [0.14, -0.08], [0.17, 0.02], [0.12, 0.12], [0.001, 0.17]], 10, null, cx, y + 7.0, cz));
+  for (let k = 0; k < 8; k++) {
+    const a = Math.PI / 8 + k * Math.PI / 4, ex = cx + Math.cos(a) * (R - 0.4), ez = cz + Math.sin(a) * (R - 0.4), p0 = [cx, y + 4.6, cz];
+    let prev = p0;
+    for (let q = 1; q <= 7; q++) { const t = q / 7, pt = [cx + (ex - cx) * t, y + 4.6 + (ycorner - (y + 4.6)) * t - Math.sin(t * Math.PI) * 0.35, cz + (ez - cz) * t]; bag.add('iron', rod(prev, pt, 0.025, 4)); prev = pt; }
+  }
+}
+
+/**
+ * The niches of a walkable pagoda's corridor { c, y, base, tiers }: on the inner wall of every storey, on the four faces the stair leaves free, a niche with a
+ * red frame, a sill and a small hood, in it a small seated Buddha on a lotus.
+ */
+function pagodaNiches(bag, el) {
+  const [cx, cz] = el.c, C8 = Math.cos(Math.PI / 8), T8 = Math.tan(Math.PI / 8), rt = el.tiers[el.tiers.length - 1].r * C8, aw = rt - Math.max(1.4, rt * 0.22), ac = aw - 2.0;
+  let y = el.y + el.base.h;
+  const fr = [], B = STYLES.chinese.objects.buddha;
+  for (const t of el.tiers) {
+    for (const k of [2, 3, 4, 6]) {
+      const th = (k + 1) * Math.PI / 4, mx = Math.cos(th), mz = Math.sin(th), tx = -mz, tz = mx, Q = (a, u, yy) => [cx + mx * a + tx * u, yy, cz + mz * a + tz * u];
+      const bx = (a0, a1, u0, u1, y0, y1) => hexa(fr, [Q(a0, u0, y0), Q(a0, u1, y0), Q(a1, u1, y0), Q(a1, u0, y0), Q(a0, u0, y1), Q(a0, u1, y1), Q(a1, u1, y1), Q(a1, u0, y1)]);
+      const y0 = y + 1.0, y1 = y + 2.3;
+      for (const sg of [-1, 1]) bx(ac, ac + 0.42, sg * 0.5, sg * 0.64, y0, y1);
+      bx(ac, ac + 0.42, -0.64, 0.64, y1, y1 + 0.14); bx(ac, ac + 0.5, -0.7, 0.7, y1 + 0.14, y1 + 0.22); bx(ac, ac + 0.4, -0.7, 0.7, y0 - 0.08, y0);
+      bx(ac, ac + 0.05, -0.5, 0.5, y0, y1);
+      const [px, , pz] = Q(ac + 0.22, 0, 0);
+      B({ at: [px, pz], y: y0, h: 0.95, dir: [mx, mz], robe: 'clay_robe', gilt: 'clay_gilt', noHalo: true }, { bag });
+    }
+    y += t.h;
+  }
+  bag.add('timber_red', fromTriangles(fr));
+}
+
+/**
+ * liuhe_pagoda: pagoda_oct with the song style's finished spire and the niches (same parameters as pagoda_oct, `interior` and `images` for the walkable inside).
+ */
+function liuhePagoda(el, ctx) {
+  // pagoda_oct's own spire is the only 'gilt_bronze' it adds: hold it back and put ours on
+  const bag2 = new Proxy(ctx.bag, { get: (t, k) => (k === 'add' ? (m, g) => (m === 'gilt_bronze' ? undefined : t.add(m, g)) : typeof t[k] === 'function' ? t[k].bind(t) : t[k]) });
+  STYLES.song.elements.pagoda_oct({ ...el, spire: 0.5 }, { ...ctx, bag: bag2 });
+  const top = el.y + el.base.h + el.tiers.reduce((a, t) => a + t.h, 0), rt = el.tiers[el.tiers.length - 1].r, R = rt + 3.6;
+  songSpire(ctx.bag, el.c[0], top + 4.2, el.c[1], R, top + 1.0);
+  if (el.interior && el.niches !== false) pagodaNiches(ctx.bag, el);
+}
+
+/**
+ * hall_offerings: what is set out in the main hall { rect, y }: a plate of fruit (a pile of peaches and oranges) and a vase of lotus on each altar table beside the
+ * censer, two rows of kneeling cushions with a mat before each, a wooden fish (muyu) on a stand and a bowl gong on its cushion at the head of the monks' row, and the
+ * red lanterns hung in two rows down the hall.
+ */
+function hallOfferings(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, cx = (x0 + x1) / 2, tz = z0 + 1.0 + 5.2 + 0.35 + 0.38, ty = y + 0.92, rand = rnd(z0 + 11);
+  for (const [dx, sx] of [[0, -1], [0, 1], [-8.5, -1], [-8.5, 1], [8.5, -1], [8.5, 1]]) {
+    const px = cx + dx + sx * (dx ? 0.8 : 0.95);
+    bag.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.14, 0.03], [0.17, 0.06], [0.001, 0.06]], 12, null, px, ty, tz));
+    for (let k = 0; k < 7; k++) {
+      const a = k * 2.4, r = k < 4 ? 0.09 : 0.04, lv = k < 4 ? 0 : 1;
+      bag.add(k % 2 ? 'cloth_ochre' : 'cloth_red', lathe([[0.001, -0.04], [0.045, 0], [0.05, 0.04], [0.001, 0.07]], 7, null, px + Math.cos(a) * r, ty + 0.06 + lv * 0.07, tz + Math.sin(a) * r));
+    }
+  }
+  // cushions in two rows either side of the aisle, a mat before each
+  for (const sx of [-1, 1]) for (let k = 0; k < 4; k++) {
+    const px = cx + sx * 2.4, pz = z0 + 14 + k * 1.5;
+    bag.add('cloth_ochre', box(px - 0.48, y + 0.005, pz - 0.36, px + 0.48, y + 0.045, pz + 0.36));
+    bag.add('cloth_red', lathe([[0.001, 0], [0.26, 0], [0.28, 0.07], [0.22, 0.14], [0.001, 0.15]], 10, null, px, y + 0.045, pz));
+  }
+  // the wooden fish and the bowl gong at the head of the east row
+  {
+    const fx = cx + 2.4 + 1.1, fz = z0 + 13;
+    for (const [a, b] of [[-0.18, -0.12], [0.18, -0.12], [-0.18, 0.12], [0.18, 0.12]]) bag.add('wood_dark', box(fx + a - 0.02, y, fz + b - 0.02, fx + a + 0.02, y + 0.5, fz + b + 0.02));
+    bag.add('wood_dark', box(fx - 0.22, y + 0.5, fz - 0.16, fx + 0.22, y + 0.54, fz + 0.16));
+    bag.add('lacquer_red', lathe([[0.001, -0.14], [0.12, -0.12], [0.18, 0], [0.16, 0.1], [0.001, 0.12]], 10, null, fx, y + 0.68, fz).scale(1.1, 1, 1.4));
+    bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.16, 0.08], [0.15, 0.13], [0.001, 0.13]], 12, null, fx - 0.9, y + 0.15, fz - 0.4));
+    bag.add('cloth_ochre', lathe([[0.001, 0], [0.2, 0], [0.21, 0.07], [0.16, 0.14], [0.001, 0.15]], 10, null, fx - 0.9, y, fz - 0.4));
+    col.rect([fx - 0.24, fz - 0.2, fx + 0.24, fz + 0.2], y, y + 0.7);
+  }
+  // red lanterns hung from the beams, two rows
+  for (const sx of [-1, 1]) for (let k = 0; k < 5; k++) {
+    const lx = cx + sx * 5.2, lz = z0 + 5 + k * 3.8, ly = y + (el.H ?? 6) - 0.21 - 0.4;
+    bag.add('iron', rod([lx, ly + 0.45, lz], [lx, ly + 0.2, lz], 0.008, 4));
+    bag.add('lamp_paper', lathe([[0.001, -0.3], [0.12, -0.26], [0.23, -0.1], [0.25, 0.04], [0.2, 0.18], [0.001, 0.2]], 10, null, lx, ly, lz));
+    bag.add('lacquer_black', lathe([[0.1, 0.2], [0.1, 0.24]], 6, null, lx, ly, lz));
+    bag.add('cloth_red', rod([lx, ly - 0.3, lz], [lx, ly - 0.62, lz], 0.012, 4));
+  }
+}
+
+/**
+ * court_paving: the worn flagstones and the green of the courts { rects: [[x0, z0, x1, z1], …] (the paths), y (the terrace's top), seed, moss: [[x0, z0, x1, z1]…] (the strips
+ * at wall feet where moss grows) }: slabs of bluestone and grey granite 1.2 by 0.9 m laid in running bond with open joints, some of them sunk a little and
+ * darkened by feet, cracked ones; patches of moss and grass tufts in the joints and along the foot of the walls.
+ */
+function courtPaving(el, { bag }) {
+  const y = el.y, rand = rnd(el.seed ?? 5);
+  for (const [x0, z0, x1, z1] of el.rects) {
+    const along = (z1 - z0) >= (x1 - x0);
+    const [u0, u1, v0, v1] = along ? [z0, z1, x0, x1] : [x0, x1, z0, z1];
+    let row = 0;
+    for (let v = v0; v < v1 - 0.05; v += 0.9, row++) {
+      const vb = Math.min(v + 0.9, v1);
+      for (let u = u0 - (row % 2) * 0.6; u < u1; u += 1.2) {
+        const ua = Math.max(u, u0), ub = Math.min(u + 1.2, u1); if (ub - ua < 0.2) continue;
+        const wear = Math.abs((v + vb) / 2 - (v0 + v1) / 2) < (v1 - v0) * 0.22, sink = rand() < 0.2 ? 0.012 : 0, r = rand();
+        const m = r < 0.25 ? 'granite_grey' : wear && r < 0.6 ? 'slate' : 'bluestone';
+        const [a, b, c, d] = along ? [vb > v ? v + 0.02 : v, ua + 0.02, Math.min(vb, v1) - 0.02, ub - 0.02] : [ua + 0.02, v + 0.02, ub - 0.02, Math.min(vb, v1) - 0.02];
+        bag.add(m, box(a, y, b, c, y + 0.03 - sink, d));
+      }
+    }
+  }
+  const tufts = [], pat = [];
+  for (const [x0, z0, x1, z1] of el.moss ?? []) for (let k = 0; k < Math.ceil((x1 - x0) * (z1 - z0) / 2.5); k++) {
+    const px = x0 + rand() * (x1 - x0), pz = z0 + rand() * (z1 - z0), r = 0.2 + rand() * 0.45;
+    pat.push(lathe([[0.001, 0.018], [r, 0.01], [r * 1.05, 0.002]], 8, null, px, y, pz).scale(1, 1, 0.8 + rand() * 0.5));
+    for (let q = 0; q < 3; q++) tufts.push(rod([px + (rand() - 0.5) * r, y, pz + (rand() - 0.5) * r], [px + (rand() - 0.5) * r * 1.2, y + 0.12 + rand() * 0.14, pz + (rand() - 0.5) * r * 1.2], 0.006, 3));
+  }
+  for (const g of pat) bag.add('lotus_leaf', g);
+  for (const g of tufts) bag.add('bark_olive', g);
+}
+
 /** sutra_pillar: a stone sutra pillar of the court { at, y } (the hexagonal shaft on its lotus base, as the chinese style's dharani pillar). */
 function sutraPillar(el, ctx) { STYLES.chinese.objects.dharani_pillar(el, ctx); }
 
-export const HANGZHOU_ELEMENTS = { view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar };
+export const HANGZHOU_ELEMENTS = { view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving };

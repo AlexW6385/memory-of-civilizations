@@ -35,7 +35,7 @@ E.push({ t: 'stairs', rect: [PAGODA.c[0] - 6, T1.rect[3], PAGODA.c[0] + 6, ROAD.
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 4, T2.rect[3], PAGODA.c[0] + 4, T1.rect[1]], y0: T1.y, y1: T2.y, dir: 'n', mat: 'granite_block' });
 const tiers = [{ r: 10.5, h: 9.5 }];
 for (let i = 1; i < 7; i++) tiers.push({ r: 10.5 - 0.6 * i, h: 6.7 });
-E.push({ t: 'pagoda_oct', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, spire: 4.4, bells: 'iron', interior: true, images: true });
+E.push({ t: 'liuhe_pagoda', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, bells: 'iron', interior: true, images: true });
 // the steps up the base on the south, to the way onto the lowest gallery and the doors into the pagoda
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 3, PAGODA.c[1] + 15.3, PAGODA.c[0] + 3, PAGODA.c[1] + 19.3], y0: T1.y, y1: PAGODA.y + 2, dir: 'n', mat: 'granite_block' });
 E.push({ t: 'ming_hall', rect: [-129, -4, -91, 24], y: T2.y, H: 6, front: 's', four: true, roof: 'xieshan', plat: 0.8, eave: 1.8, sweep: 0.9 });
@@ -60,6 +60,12 @@ E.push({ t: 'ming_hall', rect: [-89, 58, -79.5, 94], y: T1.y, H: 4.4, front: 'w'
 E.push({ t: 'luohan_hall', rect: [-140.5, 58, -131, 94], y: T1.y, side: 'w', n: 16 });
 E.push({ t: 'luohan_hall', rect: [-89, 58, -79.5, 94], y: T1.y, side: 'e', n: 16 });
 E.push({ t: 'hall_ceiling', rect: [-129, -4, -91, 24], y: T2.y, H: 6 });
+E.push({ t: 'hall_offerings', rect: [-129, -4, -91, 24], y: T2.y, H: 6 });
+// the courts' flagstones, worn along their middle, and the moss at the feet of walls and halls
+E.push({ t: 'court_paving', y: T1.y, seed: 3, rects: [[PAGODA.c[0] - 3, 95.4, PAGODA.c[0] + 3, T1.rect[3] - 1.3], [PAGODA.c[0] - 3, T1.rect[1] + 1.2, PAGODA.c[0] + 3, 58.0], [-130.2, 74.4, -127.7, 77.6], [-92.3, 74.4, -89.9, 77.6]],
+  moss: [[T1.rect[0] + 0.8, T1.rect[1] + 1.2, T1.rect[2] - 0.8, T1.rect[1] + 2.4], [T1.rect[0] + 0.8, T1.rect[3] - 3, T1.rect[2] - 0.8, T1.rect[3] - 1.9], [-141.2, 58, -140.7, 94], [-79.2, 58, -78.8, 94]] });
+E.push({ t: 'court_paving', y: T2.y, seed: 8, rects: [[PAGODA.c[0] - 3, 26, PAGODA.c[0] + 3, T2.rect[3] - 0.6]], moss: [[T2.rect[0] + 0.8, 26, T2.rect[2] - 0.8, 27.5], [T2.rect[0] + 0.8, T2.rect[1] + 0.6, T2.rect[2] - 0.8, T2.rect[1] + 2]] });
+for (const dx of [-8.5, 8.5]) E.push({ t: 'sutra_pillar', at: [PAGODA.c[0] + dx, 30.5], y: T2.y });
 // ---- the warehouses by the lock
 for (const r of WAREHOUSES) E.push({ t: 'house_jiangnan', rect: r, y: LEVEL.street, front: 's', storeys: 2, shop: false, seed: r[0] });
 
