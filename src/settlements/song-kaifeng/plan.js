@@ -17,12 +17,35 @@ const [mx0, mz0, mx1, mz1] = MONASTERY, w = (a, b) => E.push({ t: 'ming_wall', a
 const SHANMEN = { c: [PAGODA[0], mz1], bays: [4.4, 6.1, 4.4] }, smW = 14.9;
 w([mx0, mz0], [mx1, mz0]); w([mx0, mz1], [PAGODA[0] - smW / 2, mz1]); w([PAGODA[0] + smW / 2, mz1], [mx1, mz1]); w([mx0, mz0], [mx0, mz1]); w([mx1, mz0], [mx1, mz1]);
 E.push({ t: 'shanmen', c: SHANMEN.c, bays: SHANMEN.bays, depth: 8.8, y: 0, plat: 0.42, H: 4.4, door: 3.4, doorH: 3.6, guardians: { h: 4.6 } });
-E.push({ t: 'qing_hall', rect: [PAGODA[0] - 18, mz0 + 10, PAGODA[0] + 18, mz0 + 32], y: 0, H: 6, double: 4.8, roof: 'xieshan', bays: [7, 4], front: 's', four: true, plat: 1, pal: { roof: 'tile_dark', soffit: 'lacquer_red', wood: 'lacquer_red', column: 'lacquer_red', plaster: 'plaster_white', plinth: 'granite_block', base: 'granite_block' } });
-for (const x of [mx0 + 14, mx1 - 14]) E.push({ t: 'ming_hall', rect: [x - 6, -200, x + 6, -170], y: 0, H: 4.2, front: x < PAGODA[0] ? 'e' : 'w', roof: 'xieshan', plat: 0.6, eave: 1.3, sweep: 0.8 });
+const SONG_PAL = { roof: 'tile_dark', soffit: 'lacquer_red', wood: 'lacquer_red', column: 'lacquer_red', plaster: 'plaster_white', plinth: 'granite_block', base: 'granite_block' };
+// the main hall (Buddha hall) on its terrace, furnished; the sutra hall (west) and the Guanyin hall (east) flank the pagoda's court
+const MAIN = [PAGODA[0] - 18, mz0 + 10, PAGODA[0] + 18, mz0 + 32];
+E.push({ t: 'qing_hall', rect: MAIN, y: 0.9, H: 6, double: 4.8, roof: 'xieshan', bays: [7, 4], front: 's', four: true, plat: 0.9, pal: SONG_PAL });
+E.push({ t: 'temple_interior', rect: MAIN, y: 0.9, H: 6, front: 's', kind: 'main' });
+for (const x of [mx0 + 14, mx1 - 14]) {
+  const west = x < PAGODA[0], rect = [x - 6, -200, x + 6, -170], front = west ? 'e' : 'w';
+  E.push({ t: 'qing_hall', rect, y: 0.6, H: 4.6, roof: 'xieshan', front, plat: 0.6, eave: 1.3, sweep: 0.8, pal: SONG_PAL, caihua: false });
+  E.push({ t: 'temple_interior', rect, y: 0.6, H: 4.6, front, kind: west ? 'sutra' : 'guanyin' });
+}
+// the bell tower (east) and the drum tower (west) in front of the main hall, the bell and the drum hung in their lower storeys
+for (const [x, front, kind, axis] of [[PAGODA[0] + 34, 'w', 'bell', 'z'], [PAGODA[0] - 34, 'e', 'drum', 'x']]) {
+  const rect = [x - 4.5, -224, x + 4.5, -215];
+  E.push({ t: 'qing_hall', rect, y: 1.2, H: 4.4, double: 3.4, roof: 'hip', bays: [3, 3], front, four: true, plat: 1.2, pal: SONG_PAL });
+  E.push({ t: 'hung_bell', at: [x, -219.5], y: 1.2, H: 4.4, kind, axis });
+}
+// the court: stone sutra pillars and lamps along the way, two steles on their tortoises, the great censer before the hall
+for (const s of [-1, 1]) {
+  E.push({ t: 'sutra_pillar', at: [PAGODA[0] + s * 10, -134], y: 0, h: 4.6 });
+  E.push({ t: 'stele', at: [PAGODA[0] + s * 26, -150], y: 0, face: [-s, 0] });
+  for (const z of [-124, -166]) E.push({ t: 'stone_lamp', at: [PAGODA[0] + s * 5.5, z], y: 0 });
+}
+E.push({ t: 'incense_ding', at: [PAGODA[0], -219], y: 0, s: 1.4 });
 // ---- the river: water, stone landings near the bridge, the Rainbow Bridge, boats
 for (let z0 = RIVER.z0; z0 < RIVER.z1; z0 += 8) { const z1 = Math.min(z0 + 8, RIVER.z1); E.push({ t: 'water_rect', rect: [-half(z1) + 2, z0, half(z1) - 2, z1], y: RIVER.water }); }   // (in strips, out to the disc's edge; under the water gate too)
 for (const z of [RIVER.z0, RIVER.z1]) E.push({ t: 'canal_wall', a: [-STONE_BANK, z], b: [STONE_BANK, z], y: 0.05, bed: RIVER.bed, th: 0.8 });
 E.push({ t: 'rainbow_bridge', at: BRIDGE.at, across: 'z', span: BRIDGE.span, width: BRIDGE.width, spring: BRIDGE.spring, crown: BRIDGE.crown, y0: BRIDGE.y0, abut: (RIVER.z1 - RIVER.z0) / 2 - BRIDGE.span / 2 - 0.35, bed: RIVER.bed });
+// the hawkers' booths on the deck's east side, between railing and walkway (the west railing is the onlookers')
+E.push({ t: 'bridge_stalls', at: BRIDGE.at, span: BRIDGE.span, width: BRIDGE.width, spring: BRIDGE.spring, crown: BRIDGE.crown, y0: BRIDGE.y0, side: 1, stalls: [{ s0: -3.7, s1: -1.7, kind: 'cloth' }, { s0: -1.3, s1: 0.7, kind: 'food' }, { s0: 1.1, s1: 3.1, kind: 'sundry' }] });
 // the grain boats: moored along the banks with their masts laid back on the crutch, two with masts up
 // downstream, and the one before the bridge, its crew lowering the mast as it comes up to it
 for (const [x, z, d, L, mast] of [[-200, 67.5, 1, 18, 90], [-120, 84.5, -1, 16, 90], [-17.5, 75, 1, 19, 42], [62, 84.5, -1, 18, 90], [140, 66.5, -1, 16, 0], [220, 84.5, -1, 20, 90], [300, 70, 1, 12, 0]]) E.push({ t: 'song_boat', at: [x, z], dir: [d, 0], len: L, beam: L * 0.25, mast, y: RIVER.water, seed: x + 1000 });
