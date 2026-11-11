@@ -7,6 +7,7 @@
 // and mapped to the world by the lot's facing.
 
 import { box, lathe, fromTriangles, disc, clothBox, addCloth } from '../../core/geom.js';
+import * as IN from './interiors.js';
 
 const G = 'granite_tamil';
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -181,7 +182,10 @@ export function tamilHouse(el, ctx) {
   B(G, 0, -0.3, 0, W, py, ver); Fl(0, 0, W, ver, py);
   if (!shop) { B(G, uc - 0.85, -0.3, -0.38, uc + 0.85, py - 0.27, 0); Fl(uc - 0.85, -0.38, uc + 0.85, 0, py - 0.27); }
   else { B(G, 0.3, -0.3, -0.34, W - 0.3, 0.3, 0); Fl(0.3, -0.34, W - 0.3, 0, 0.3); }
-  B(wash, 0, -0.3, ver, W, h, D); C(0, ver, W, D, 0, h + 0.1);
+  const rich = !!el.rich && !hut, pl = rich ? IN.plan(el, W, D, ver, rand) : null;
+  let room = null;
+  if (rich) room = IN.shell(F, { wash, h, ver, py, ...pl });
+  else { B(wash, 0, -0.3, ver, W, h, D); C(0, ver, W, D, 0, h + 0.1); }
   if (!hut) { B('limewash_red', 0.02, py, ver - 0.03, W - 0.02, py + 0.45, ver); B('stucco_cream', 0, h - 0.16, ver - 0.06, W, h, ver); }
   // the lean-to over the platform on its posts
   const yb = shop ? 2.5 : 2.42, yEdge = shop ? 2.62 : 2.74, vf = shop ? -1.1 : -0.5;
@@ -196,7 +200,7 @@ export function tamilHouse(el, ctx) {
     if (hut) { B('timber', u - 0.07, py, vp - 0.07, u + 0.07, yb, vp + 0.07); C(u - 0.07, vp - 0.07, u + 0.07, vp + 0.07, py, yb); }
     else { post(F, u, vp, shop ? 0 : py, yb); C(u - 0.14, vp - 0.14, u + 0.14, vp + 0.14, 0, yb + 0.3); }
   }
-  if (!hut) B('timber', 0, yb - 0.02, vp - 0.1, W, yb + 0.22, vp + 0.1);
+  if (!hut) B('timber', 0.015, yb - 0.02, vp - 0.1, W - 0.015, yb + 0.22, vp + 0.1);
   // the roof
   const yF = (v) => h + 0.1 + (v - ver) * t * (v <= vm ? 1 : -1) + (v > vm ? 2 * (vm - ver) * t : 0);
   const ry = h + 0.1 + (vm - ver) * t, yFe = h + 0.1 - 0.45 * t;
@@ -212,18 +216,24 @@ export function tamilHouse(el, ctx) {
   void yF;
   // the front
   if (!shop) {
-    door(F, uc, ver);
+    if (rich) IN.openDoor(F, uc, ver); else door(F, uc, ver);
     if (W > 5.6) for (const u of [uc - Math.min(2.3, (uc - 0.4) * 0.62 + 0.5), uc + Math.min(2.3, (W - uc - 0.4) * 0.62 + 0.5)]) if (u > 0.7 && u < W - 0.7) window(F, u, ver);
     if (!hut && rand() < 0.5) kolam(F, uc, -1.05, rand);
     if (!hut) { const [lx, , lz] = F.P(uc + 1.0, 0, ver - 0.12); B('wood_dark', uc + 0.95, 1.5, ver - 0.12, uc + 1.2, 1.78, ver - 0.05); bag.add('lamp_glass', lathe([[0.001, 0], [0.03, 0.02], [0.001, 0.07]], 5, null, lx + (F.dv[0] * 0.0), 1.5, lz)); }
   } else {
     // the shop: the open front on the platform, shelves along the back wall with their goods, the shutter planks above
-    B('wood_dark', 0.2, py, ver - 0.5, W - 0.2, 2.2, ver - 0.04);
-    for (const y of [0.95, 1.4, 1.85]) B('timber', 0.2, y, ver - 0.55, W - 0.2, y + 0.04, ver - 0.04);
-    for (let i = 0; i < Math.round(W * 1.5); i++) { const [x, , z] = F.P(0.5 + i * (W - 1) / Math.max(1, Math.round(W * 1.5) - 1), 0, ver - 0.3); vessel(bag, x, [py + 0.35, py + 0.82, py + 1.27][i % 3] + 0.04, z, 0.45, ['bronze', 'terracotta', 'bronze'][(i + el.seed) % 3]); }
+    const gs = rich ? [[0.2, pl.g0 - 0.1], [pl.g1 + 0.1, W - 0.2]] : [[0.2, W - 0.2]], inGap = (u) => rich && u > pl.g0 - 0.25 && u < pl.g1 + 0.25;
+    for (const [a, b] of gs) { B('wood_dark', a, py, ver - 0.5, b, 2.2, ver - 0.04); for (const y of [0.95, 1.4, 1.85]) B('timber', a, y, ver - 0.55, b, y + 0.04, ver - 0.04); }
+    if (rich) { B('stucco_cream', pl.g0 - 0.16, py, ver - 0.5, pl.g0 - 0.1, 2.2, ver - 0.04); B('stucco_cream', pl.g1 + 0.1, py, ver - 0.5, pl.g1 + 0.16, 2.2, ver - 0.04); B('wood_dark', pl.g0 - 0.1, 2.2, ver - 0.5, pl.g1 + 0.1, 2.35, ver - 0.04); }
+    for (let i = 0; i < Math.round(W * 1.5); i++) { if (inGap(0.5 + i * (W - 1) / Math.max(1, Math.round(W * 1.5) - 1))) continue; const [x, , z] = F.P(0.5 + i * (W - 1) / Math.max(1, Math.round(W * 1.5) - 1), 0, ver - 0.3); vessel(bag, x, [py + 0.35, py + 0.82, py + 1.27][i % 3] + 0.04, z, 0.45, ['bronze', 'terracotta', 'bronze'][(i + el.seed) % 3]); }
     B('wood_dark', 0.2, 2.35, ver - 0.12, W - 0.2, 2.62, ver - 0.04);
     goods(F, el.trade ?? 'cloth', py, W, ver, rand, { ay: yb - 0.04 });
     if (!(shop && ['cloth', 'flowers'].includes(el.trade))) void 0;
+  }
+  if (rich) {
+    const o = { W, py, ver, uc, yb, h, yEdge, vf, hut, shop, trade: el.trade, g0: pl.g0, g1: pl.g1 };
+    IN.weather(F, o, rand); IN.thinnai(F, o, rand); if (shop) IN.nameBoard(F, o, rand);
+    IN.furnish(F, { ...o, ...room, el, ctx }, rand, el.seed % 3 === 0);
   }
   F.flush();
   // the people stand in the street-life plans

@@ -1,15 +1,17 @@
 // The city round the temple (docs/settlements/madurai.md §5): single-storey houses with verandahs
 // and tiled roofs in the blocks between the ring streets.
-import { RADIUS, TANK, WALL, GATES, PUDHU, SUNDARA, MEENAKSHI, HALL, lots, lotMap } from './layout.js';
+import { RADIUS, TANK, WALL, GATES, PUDHU, SUNDARA, MEENAKSHI, HALL, lots, lotMap, outside } from './layout.js';
 import { pudhuMandapam } from './plan.js';
 const base = (id, elements) => ({ id, style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } });
+/** How far from the temple wall the houses and shops are hollow and furnished (the first four streets' rows). */
+export const RICH = 125;
 export async function town() {
   const plans = [], tiles = new Map();
   for (const l of lots()) {
     if (l.kind === 'yard') continue;
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, k = `${Math.floor(cx / 100)},${Math.floor(cz / 100)}`;
     if (!tiles.has(k)) tiles.set(k, []);
-    tiles.get(k).push({ t: l.kind === 'court' ? 'court_house' : 'tamil_house', ...l });
+    tiles.get(k).push({ t: l.kind === 'court' ? 'court_house' : 'tamil_house', ...l, rich: l.kind !== 'court' && outside(cx, cz) < RICH });
   }
   for (const [k, list] of tiles) plans.push({ ...base(`madurai-houses-${k}`, list) });
   plans.push(...shopLife());
@@ -98,10 +100,16 @@ function shopLife() {
     if (l.kind === 'yard' || l.kind === 'hut' || l.kind === 'court') continue;
     const { W, map } = lotMap(l), a = map(0, 0), b = map(0, -1), out = [b[0] - a[0], b[1] - a[1]], r = (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
     const shop = l.kind === 'shop';
-    if (!shop && r > 0.17) continue;
+    const cx0 = (l.rect[0] + l.rect[2]) / 2, cz0 = (l.rect[1] + l.rect[3]) / 2, home = outside(cx0, cz0) < RICH && (shop ? r > 0.55 : seed % 4 === 0);
+    if (!shop && r > 0.17 && !home) continue;
     const ver = shop ? 2.3 : 1.9, py = shop ? 0.62 : 0.55, [x, z] = map(W * (shop ? 0.5 : 0.28 + r * 0.4), shop ? ver - 0.95 : 1.1);
     const woman = shop ? ['flowers', 'sweets', 'coconut'].includes(l.trade) && r > 0.45 : r > 0.55;
+    if (home) {          // someone at home or in the shop's back room
+      const [ix, iz] = map(W * (shop ? (l.trade === 'sweets' ? 0.64 : 0.36) : 0.66), ver + 0.32 + (shop ? 4.4 : 2.2)), s2 = (seed * 31) % 1000003;
+      put(ix, iz, { t: 'figure', at: [ix, iz], y: py + (shop ? 0.26 : 0), rot: faceTo(out), seed: s2, feet: 'bare', carry: 'none', pose: 'sit_ground', skin: s2 % 3 ? 'skin_dark' : 'skin_medium', dress: 'wrap', cloth: SARI[s2 % SARI.length], cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', hat: 'none', h: 1.48 });
+    }
     const base = { t: 'figure', at: [x, z], y: py, rot: faceTo(out), seed: seed % 1000003, feet: 'bare', carry: 'none', pose: 'sit_ground', skin: seed % 3 ? 'skin_dark' : 'skin_medium' };
+    if (!shop && r > 0.17) continue;
     if (woman) put(x, z, { ...base, dress: 'wrap', cloth: SARI[seed % SARI.length], cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', hat: 'none', h: 1.48 });
     else put(x, z, { ...base, dress: 'wrap', top: seed % 2 ? 'bare' : '', cloth: 'cloth_white', cloth2: 'cloth_white', over: shop && l.trade !== 'sweets' ? 'sash' : 'none', hair: 'short', hat: seed % 5 === 0 ? 'turban' : 'none' });
   }
