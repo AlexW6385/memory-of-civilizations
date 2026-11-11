@@ -10,6 +10,7 @@ import { box, lathe, fromTriangles, frustum } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
 import { shopRow, courtHouse } from './interiors.js';
+import { home } from './homes.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const B = 'banco_rough';      // hand-smeared at each year's crépissage: lumpy, runnelled
@@ -466,7 +467,7 @@ function sahelHouse(el, { bag, col }) {
   for (const [ea, eb] of [[[x0, z1], [x1, z1]], [[x1, z0], [x0, z0]], [[x1, z1], [x1, z0]], [[x0, z0], [x0, z1]]]) {
     const EL = Math.hypot(eb[0] - ea[0], eb[1] - ea[1]), ex = (eb[0] - ea[0]) / EL, ez = (eb[1] - ea[1]) / EL, front = ea[0] === a[0] && ea[1] === a[1] && eb[0] === b[0] && eb[1] === b[1];
     const ok = front ? (q, m) => q > 0.85 + m && q < EL - 0.85 - m && Math.abs(q - mid) > hw + 0.65 + m : (q, m) => q > 0.25 + m && q < EL - 0.25 - m;
-    erode(bag, (q, d) => [ea[0] + ex * q - ez * d, ea[1] + ez * q + ex * d], EL, Math.max(1, Math.round(EL / (front ? 1.1 : 1.8))), 0, H, 0, ok, rng((el.seed || 1) * 13 + EL * 7), front ? 0.62 : 0.02);   // (on the front above the benches)
+    erode(bag, (q, d) => [ea[0] + ex * q - ez * d, ea[1] + ez * q + ex * d], EL, Math.max(1, Math.round(EL / (front ? 1.1 : 1.8))), 0, hollow && !front ? Math.min(H, 3.1) : H, 0, ok, rng((el.seed || 1) * 13 + EL * 7), front ? 0.62 : 0.02);   // (on the front above the benches)
   }
   if (!hollow) { const [rx, rz] = P(mid + dw * 0.55, 0.09); bag.add('iron', lathe([[0.06, -0.06], [0.07, 0], [0.06, 0.06], [0.05, 0], [0.06, -0.06]], 8, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(Math.atan2(nx, nz)).translate(rx, 1.05, rz)); }
   // the facade bench (tintin) along the foot, either side of the entrance
@@ -681,6 +682,6 @@ function mudPit(el, { bag, col }) {
 
 registerStyle('sahel', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_shops: shopRow, sahel_court_house: (el, c) => { sahelHouse({ ...el, hollow: true, front: 's', storeys: 2, kind: 'tukulor', dw: 0.65 }, c); courtHouse(el, c); }, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
+  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_shops: shopRow, sahel_court_house: (el, c) => { sahelHouse({ ...el, hollow: true, front: 's', storeys: 2, kind: 'tukulor', dw: 0.65 }, c); courtHouse(el, c); }, sahel_home: (el, c) => { sahelHouse({ ...el, hollow: true, dw: 0.62 }, c); home(el, c); }, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
   objects: {},
 });

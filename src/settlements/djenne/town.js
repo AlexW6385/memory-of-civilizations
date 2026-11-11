@@ -163,12 +163,36 @@ function crepissage() {
   return { E, P };
 }
 
+
+/** The houses nearest the market and the mosque are enterable (docs §16): deep enough for the vestibule, court and back block. */
+function enterable(all) {
+  const ok = all.filter((h) => h.rect[2] - h.rect[0] >= 7 && h.rect[3] - h.rect[1] >= 10);
+  const d = (h) => Math.hypot((h.rect[0] + h.rect[2]) / 2 - 30, (h.rect[1] + h.rect[3]) / 2);
+  return new Set(ok.sort((a, b) => d(a) - d(b)).slice(0, 64));
+}
+/** An elder on the vestibule's bench in half of the enterable houses, a woman on a mat in the court of some. */
+function homeLife(homes) {
+  const rand = rng(404), P = [], W = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_brown'];
+  const pick = (a) => a[Math.floor(rand() * a.length)];
+  for (const h of homes) {
+    const [x0, z0, x1, z1] = h.rect, south = h.front === 's', Wd = x1 - x0, mid = Wd / 2;
+    const pt = (u, v) => (south ? [x0 + u, z1 - v] : [x1 - u, z0 + v]);
+    if (mid - 1.8 - 0.45 < 1.65) continue;
+    if (rand() < 0.5) {
+      const at = pt(mid - 1.2, 2.0), to = pt(mid + 1, 2.0);
+      P.push({ t: 'figure', at, y: 0.45, rot: face(at, to), seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pick(['cloth_white', 'cloth_indigo']), cloth2: pick(W), skin: 'skin_dark', hat: 'cap', hatMat: 'cloth_white', feet: 'shod', pose: 'sit', beard: rand() < 0.6 });
+    }
+  }
+  return P;
+}
+
 export async function town() {
   const { E, P } = market(), lnd = landing(), cr = crepissage();
   // (the channel's water is the planet's sea: ground.js, sea)
   const plans = [base('djenne-market', E), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }, base('djenne-crepissage', cr.E), { ...base('djenne-crepissage-life', cr.P), style: 'life' }];
   plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }]));
-  const all = houses();
-  for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: 'sahel_house', ...h }))));
+  const all = houses(), homes = enterable(all);
+  for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: homes.has(h) ? 'sahel_home' : 'sahel_house', ...h }))));
+  plans.push({ ...base('djenne-home-life', homeLife(homes)), style: 'life' });
   return plans;
 }

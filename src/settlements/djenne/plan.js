@@ -9,7 +9,7 @@ E.push({ t: 'great_mosque', c: MOSQUE.c, a: MOSQUE.a, py: MOSQUE.py });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('hall', [2, -29.5, 33.5, 29.5], 3, 'hall'), room('platform', [-37.5, -37.5, 37.5, 37.5], 3, 'open'), room('roof', [4, -27, 31, 27], 13.5, 'open')];
-const walks = [[[70, 0], [48, 0], [42, 0], [37, 0]]];
+const walks = [[[70, 0], [48, 0], [38, -48], [0, -48], [0, -39]]];
 walks[0].y0 = 0;
 
 export const mosque = {
