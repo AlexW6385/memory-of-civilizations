@@ -23,7 +23,7 @@ export function river(el, ctx) {
 /** bgn_ghat: { at: [x, z] (the top of the steps, on the bank), y (the water level), w } — brick steps down the bank (toward −x) to a timber landing over the water, mooring posts. */
 export function ghat(el, ctx) {
   const { bag } = ctx, [x, z] = el.at, F = new Fr(ctx, [x, z], [0, 1], [-1, 0]), w = el.w ?? 7, n = 9, run = 0.46, yL = (el.y ?? -2.4) + 0.45;
-  for (let i = 0; i < n; i++) F.b('brick', -w / 2, -6, i * run, w / 2, yL * (i + 1) / n * 1.0 + 0.0 * i, n * run + 0.0 * i, false);
+  for (let i = 0; i < n; i++) F.b('brick', -w / 2, -6, i * run, w / 2, yL * (i + 1) / n, (i + 1) * run + 0.01, false);
   F.ramp(-w / 2, 0, w / 2, n * run, yL, 0, -1);
   // a landing: planks on posts out over the water
   const L0 = n * run, L1 = L0 + 4.5;
