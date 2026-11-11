@@ -147,6 +147,24 @@ Sources added:
 - [Fountains — Turkish Culture Foundation](https://turkishculture.org/architecture/fountains-30.htm)
 - [Ottoman clothing — Cavac mirror of Wikipedia](https://cavac.at/cavacopedia/Ottoman%20Clothing)
 
+## 13. The timber quarter and the mescit (deepening pass)
+
+**The quarter.** Ottoman Istanbul's housing was of timber on a stone or rubble ground storey, the upper floors jettied over narrow, winding lanes, with bays (cumba) on brackets, lattice (kafes) and hipped tile roofs; the houses stood wall to wall along the lane and held a small garden or yard behind [stated for the type: §5 and the sources of §5; the 16th-century fabric did not survive the fires, so the form is inferred from the later houses and the views of the period]. Ours: blocks of 39 × 35 m between cobbled lanes of 3.4 m, each lined on its four sides with touching houses of 4.5–8.5 m front and 10 m depth, round a yard planted with fig, cypress and stone pine; the lanes on a grid, running to the rim (`layout.js`) [inferred: the grid, which real lanes did not follow; the density].
+
+**The house** (`src/styles/ottoman/konak.js`): rubble ground storey; upper storeys boarded and painted in ten wall colours or plastered in six whites and creams; jetty 0.8 m on rows of brackets; one or two cumbas on the front of two-storey and taller houses, sash windows behind lattice; windows with sills, open shutters against the wall, mullion and transom; corner posts and floor rails showing; a damp band at the foot, water stains and a patch of bare timber where the plaster has come away; washing on a pole out of an upper window; a lamp by the door; chimneys with conical tile caps; hipped roof on deep eaves with brackets [inferred].
+
+**Shops and trades.** The lanes nearest the külliye are lined with shops (60% of the fronts within 60 m of the terrace, 25% to 140 m, 7% beyond): the opening in a timber frame, the upper shutter leaf propped as an awning with a cloth over it, the lower let down as the counter, goods on it, a hanging sign on an iron bracket. Ten trades: baker, grocer, cobbler, coppersmith, weaver, barber, potter, butcher, sherbet seller, saddler [inferred: the trades of the city, §12]. The shoemaker's wares in the sumptuary colours red, yellow, black and blue [stated: §11].
+
+**Interiors.** About 60 houses and shops can be entered, the nearest to six points round the terrace: the shops with the furnishing of their trade (the baker's oven with its glowing mouth and loaves on boards; the coppersmith's stump anvil, hearth and hammered pans; the weaver's loom with its warp and cloth; the cobbler's bench, lasts and shoes; the barber's stool and basin; potter's, butcher's, sherbet seller's, saddler's, grocer's), the homes with the divan round three walls, rug, brass tray on its stand, painted chest and a hanging lamp; a step up from the lane [inferred].
+
+**The mescit.** A neighbourhood mosque (mahalle mescidi) in the south-east block's yard: a square prayer room 12 × 12 m under one dome on an octagonal drum, a portico of four granite columns under three small domes, ablution basins at its ends, the mihrab in the south wall, a carpet, prayer rugs, two Qur'an stands and a hanging mosque lamp, a single-balcony minaret [inferred: the type, sizes; the Friday prayer was said in the great mosque, so no minbar].
+
+**The outer court.** Plane trees and cypresses in the side yards and the forecourt (the central way, the arrival and the mosque left clear), marble benches on stone feet along the way before the mosque with men seated on them, standing water jars on stone shelves with a cup, mounting stones with hitching rings and iron lamp posts at the gates [inferred: the custom of a mosque's outer court].
+
+**Life.** Stray cats, dogs, donkeys with loads and their drivers, neighbours talking and standing in the lanes; swallows over the lanes, sparrows on the cobbles and the mescit's portico; sixty walkers by day on the lanes, busier toward the terrace [inferred].
+
+**Not built.** The Golden Horn and its quays lie beyond the class radius (about 800 m); the han and the sıbyan mektebi are recorded for later.
+
 ## Sources
 
 - [Strolling through Istanbul — Freely and Sumner-Boyd, the Süleymaniye](https://erenow.org/common/strolling-through-istanbul-classic-guide-to-the-city/11.php) (the interior's piers, arcades, mihrab, minbar, glass, tiles)
