@@ -3,7 +3,7 @@
 // sticks; women grinding and carrying water in the courts of the Valley Ruins; a trader with the goods of the
 // coast; a few people in the Great Enclosure. Kept few and quiet. Pure data.
 
-import { ENCLOSURE, VALLEY, WEST, RADIUS, height, huts, inWalled, inEnclosure } from './layout.js';
+import { ENCLOSURE, VALLEY, WEST, RADIUS, KRAAL_AT, height, huts, compounds, inWalled, inEnclosure } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -14,7 +14,7 @@ let KRAALS = null;
 export function kraals() {
   if (KRAALS) return KRAALS;
   KRAALS = [];
-  for (const [x, z, r, gap] of [[150, -40, 6.5, Math.PI], [-170, 120, 5.5, 0.3], [110, 230, 6, -1.6]]) if (clear(x, z, r + 2)) KRAALS.push({ c: [x, z], r, gap, y: height(x, z), seed: Math.round(x * 7 + z) });
+  for (const [[x, z, r], gap] of KRAAL_AT.map((k, i) => [k, [Math.PI, 0.3, -1.6][i]])) if (clear(x, z, r + 2)) KRAALS.push({ c: [x, z], r, gap, y: height(x, z), seed: Math.round(x * 7 + z) });
   return KRAALS;
 }
 
