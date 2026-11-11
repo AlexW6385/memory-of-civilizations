@@ -308,9 +308,9 @@ function stupa(el, { bag, col }) {
       const x0 = Math.min(cx + k * xl, cx + k * xr), x1 = Math.max(cx + k * xl, cx + k * xr);
       const n = Math.round(HM / 0.18), dir = k > 0 ? 'w' : 'e';
       for (let i = 0; i < n; i++) {
-        const t1 = (i + 1) / n, yTop = y + HM * t1;
-        const xa = k > 0 ? cx + xr - (xr - xl) * t1 : x0, xb = k > 0 ? x1 : cx - xr + (xr - xl) * t1;
-        bag.add(STONE, box(xa, y - 0.01, zs0 + 0.1 * s, xb, yTop, zs1));
+        // step i: its top at (i + 1)/n of the rise, reaching from the landing out to where the next step up begins
+        const t1 = (i + 1) / n, yTop = y + HM * t1, outer = cx + k * (xl + (xr - xl) * (1 - i / n));
+        bag.add(STONE, box(Math.min(cx + k * xl, outer), y - 0.01, zs0 + 0.1 * s, Math.max(cx + k * xl, outer), yTop, zs1));
       }
       col.ramp([x0, zs0 + 0.1 * s, x1, zs1], y, y + HM, dir);
       // the balustrade on the outer side

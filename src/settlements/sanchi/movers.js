@@ -2,13 +2,13 @@
 // with the dome on their right (pradakshina), lay pilgrims in white with turbans and women in red carrying offerings up the north
 // path, donors, bearers, boys and herders in the village below. Data for the engine's movers (src/engine/movers.js, read in its
 // worker); the ways come from layout.js. No boats.
-import { RADIUS, PATH, SUMMIT, STUPA2, TEMPLE40, lots } from './layout.js';
+import { RADIUS, PATH, SUMMIT, STAIR, STUPA2, TEMPLE40, STREETS, PLAZA, TANK } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 32, night: 3, rain: 0.5, reach: 170, spawnMin: 26, far: 44 },
+  walkers: { day: 46, night: 4, rain: 0.5, reach: 190, spawnMin: 26, far: 48 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -31,10 +31,16 @@ export function walkways() {
   L([STUPA2.c[0], -62], [STUPA2.c[0], z0 - 2], 2.0, 0.8);                               // the way to Stupa 2 and its terrace
   rects.push({ r: [STUPA2.terrace[0] + 2, STUPA2.terrace[1] + 2, STUPA2.terrace[2] - 2, STUPA2.terrace[3] - 2], weight: 0.8, market: 0, kind: 'street' });
   void t0;
-  // the village: the lanes between the rows of houses (layout.js lots(): rows every 13 m, houses at most 8 m deep) and the lane on the west
-  const rows = new Set(lots().map((l) => Math.round((l.rect[1] - 120) / 13)));
-  for (const j of rows) L([-104, 130.5 + j * 13], [210, 130.5 + j * 13], 1.2, 1.0);
-  L([-104, 126], [-104, 222], 1.4, 1.0);
+  // the summit's south approach and the pilgrims' stair down to the village (the stalls on both sides of the way)
+  L([0, 44], [0, STAIR.z0], 2.6, 3.0); L([0, STAIR.z0], [0, STAIR.z1], 2.2, 2.6);
+  // the plaza at the stair's foot, the pilgrims' road, the bazaar street and the lanes, the way to the tank's ghat
+  rects.push({ r: PLAZA, weight: 1.6, market: 1.5, kind: 'street' });
+  for (const s of STREETS) {
+    const w = Math.max(1.0, s.w / 2 - 0.8), wt = s.kind === 'main' ? 2.2 : 1.0, a = s.a + (s.from ? Math.max(0, s.from - s.a) : 0);
+    if (s.axis === 'x') L([s.a, s.c], [s.b, s.c], w, wt); else L([s.c, a], [s.c, s.b], w, wt);
+  }
+  L([0, STAIR.z1], [0, 137], 2.2, 2.6);
+  L([TANK.c[0], 190], [TANK.c[0], TANK.c[1] - TANK.r[1] - 3], 1.2, 0.8);
   return { rects, links, clip: RADIUS - 14 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: RADIUS - 18 }; }
@@ -56,6 +62,9 @@ export const WALKERS = [
     c1: [CL.red, CL.indigo, CL.brown], c2: [CL.white], c3: [CL.white], speed: [0.75, 0.95], stride: 1.15, h: [0.9, 0.97] },
   // the carrier: a pole across the shoulder with its two loads
   { id: 'porter', weight: 1.2, market: 1.4, el: { dress: 'wrap', top: 'bare', hat: 'none', over: 'none', carry: 'pole', arms: 'sack', feet: 'bare' },
+    c1: [CL.white, CL.brown], c2: [CL.brown], c3: [CL.brown], speed: [0.8, 1.05], stride: 1.3 },
+  // the farmer coming in from the fields with his hoe
+  { id: 'farmer', weight: 0.9, market: 0.3, el: { dress: 'wrap', top: 'bare', hat: 'turban', over: 'none', carry: 'hoe', arms: 'sack', feet: 'bare' },
     c1: [CL.white, CL.brown], c2: [CL.brown], c3: [CL.brown], speed: [0.8, 1.05], stride: 1.3 },
   { id: 'boy', weight: 0.6, market: 0.7, el: { dress: 'wrap', top: 'bare', hat: 'none', over: 'none', arms: 'hang', feet: 'bare' },
     c1: [CL.white, CL.ochre], c2: [CL.brown], c3: [CL.brown], speed: [1.1, 1.5], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
