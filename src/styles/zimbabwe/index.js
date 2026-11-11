@@ -71,6 +71,17 @@ function dryWall(el, { bag, col }) {
     col.segment(path[i], path[(i + 1) % n], th, yOf(path[i]) - 1, yOf(path[i]) + h);
   }
   bag.add(G, fromTriangles(tri));
+  // fallen and tumbled blocks along the foot of both faces: slabs that have come off the courses, lying where they fell
+  if (el.rubble !== false && h >= 3) {
+    const Nb = Math.floor(len[n - 1] / 2.3);
+    for (let j = 0; j < Nb; j++) {
+      const i = Math.min(n - 2, Math.max(0, len.findIndex((l) => l >= hash(j, 31) * len[n - 1]))), a = path[i], b = path[i + 1], L0 = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+      const tx = (b[0] - a[0]) / L0, tz = (b[1] - a[1]) / L0, nx = tz, nz = -tx, side = hash(j, 32) > 0.5 ? 1 : -1, u = side * (th / 2 + 0.15 + hash(j, 33) * 0.7);
+      const cx = a[0] + nx * u, cz = a[1] + nz * u, w = 0.35 + hash(j, 34) * 0.55, d = 0.3 + hash(j, 35) * 0.3, tw = (hash(j, 36) - 0.5) * 1.2, ca = Math.cos(tw), sa = Math.sin(tw);
+      const ux = tx * ca - tz * sa, uz = tx * sa + tz * ca, y = yOf(a);
+      bag.add(hash(j, 37) < 0.25 ? 'granite_rough' : G, orientedBox([cx - ux * w / 2, cz - uz * w / 2], [cx + ux * w / 2, cz + uz * w / 2], d, y - 0.08, y + 0.14 + hash(j, 38) * 0.26, 0.04));
+    }
+  }
   // the rounded ends of an open wall
   if (!closed) for (const i of [0, n - 1]) {
     const [x, z] = path[i], y = yOf(path[i]);
@@ -272,6 +283,16 @@ function hut(el, ctx) {
   if (el.open) hutInside(el, ctx, { x, z, r, y, h, a, seed });
   else {
     bag.add('mud_plaster', lathe([[r + 0.06, 0], [r - 0.06, h], [0.001, h]], 16, null, x, y + 0.2, z));
+    if (seed % 3 === 0) {
+      // a band painted in ochre and white round the wall, hanging triangles under it (the patterns painted and cut into Shona daga walls; inferred)
+      const rb = r + 0.06 - 0.12 * (1.45 / h) + 0.012, T = [], W2 = [], N = 18;
+      bag.add('paint_ochre', lathe([[rb, 0], [rb, 0.1], [rb - 0.004, 0.1]], 18, null, x, y + 0.2 + 1.45, z));
+      for (let k = 0; k < N; k++) {
+        const t0 = a + 0.5 + (Math.PI * 2 - 1.0) * k / N, t1 = a + 0.5 + (Math.PI * 2 - 1.0) * (k + 1) / N, tm = (t0 + t1) / 2, ro = rb - 0.012, yy = y + 0.2 + 1.45;
+        putN(k % 2 ? W2 : T, [Math.cos(tm), 0, Math.sin(tm)], [x + Math.cos(t0) * ro, yy, z + Math.sin(t0) * ro], [x + Math.cos(t1) * ro, yy, z + Math.sin(t1) * ro], [x + Math.cos(tm) * ro, yy - 0.2, z + Math.sin(tm) * ro]);
+      }
+      bag.add('paint_ochre', fromTriangles(T)); bag.add('paint_white', fromTriangles(W2));
+    }
     bag.add('opening', orientedBox([x + ux * (r + 0.02) - tx * 0.42, z + uz * (r + 0.02) - tz * 0.42], [x + ux * (r + 0.02) + tx * 0.42, z + uz * (r + 0.02) + tz * 0.42], 0.06, y + 0.38, y + 1.85));
   }
   bag.add('mud_plaster', orientedBox([x + ux * (r + 0.05) - tx * 0.5, z + uz * (r + 0.05) - tz * 0.5], [x + ux * (r + 0.05) + tx * 0.5, z + uz * (r + 0.05) + tz * 0.5], 0.22, y + 0.2, y + 0.4));
@@ -519,8 +540,103 @@ function compound(el, { bag, col }) {
   bag.add('bark_grey', fromTriangles(T));
   for (const [u, v] of [[-2.2, -0.4], [-1.8, 0.7]]) { const sx = x + Math.cos(wa) * (r - 3.6) + tx * v * 2 + Math.cos(wa) * u * 0.2, sz = z + Math.sin(wa) * (r - 3.6) + tz * v * 2 + Math.sin(wa) * u * 0.2; bag.add('granite_rough', lathe([[0.001, -0.1], [0.27, -0.1], [0.3, 0.1], [0.22, 0.26], [0.001, 0.28]], 8, (th) => 1 + 0.12 * Math.sin(th * 3 + u), sx, el.yAt ? el.yAt(sx, sz) : el.y ?? 0, sz)); }
 }
+
+/**
+ * homestead_goods: the yard of a homestead dressed at eye level { c, r, gap, seed } — an open hearth of three stones with a
+ * pot and sticks, a wooden mortar with its pestle (duri), a drying rack of poles with gourds and grain on it (dara), a group of
+ * pots, a basket of grain, hoe and axe leaning to the house wall, a mat with grain spread to dry [forms inferred from Shona
+ * homesteads of later times; the pots, hearth stones and grinding gear are stated for the houses, Herald].
+ */
+function homesteadGoods(el, { bag, col }) {
+  const [x, z] = el.c, y = (el.yAt ? el.yAt(x, z) : el.y ?? 0) + 0.06, a = ((el.seed ?? 3) % 628) / 100, c = Math.cos(a), s = Math.sin(a), T = [];
+  const W = (u, v) => [x + c * u - s * v, z + s * u + c * v], at = (u, v) => { const [px, pz] = W(u, v); return [px, pz]; };
+  // the open hearth
+  { const [hx, hz] = at(-1.3, 1.0);
+    bag.add('plaster_grey', lathe([[0.4, 0], [0.4, 0.015], [0.001, 0.015]], 12, null, hx, y, hz));
+    for (let k = 0; k < 3; k++) { const t = k * 2.1 + a; bag.add('granite_grey', lathe([[0.001, 0], [0.09, 0.01], [0.1, 0.09], [0.06, 0.17], [0.001, 0.18]], 7, null, hx + Math.cos(t) * 0.2, y, hz + Math.sin(t) * 0.2)); }
+    bag.add('pottery_dark', lathe([[0.001, 0.14], [0.13, 0.15], [0.23, 0.27], [0.22, 0.4], [0.17, 0.46], [0.18, 0.48], [0.001, 0.48]], 12, null, hx, y, hz));
+    for (let k = 0; k < 4; k++) { const t = a + 0.7 + k * 1.5; beamTris(T, [hx + Math.cos(t) * 0.1, y + 0.03, hz + Math.sin(t) * 0.1], [hx + Math.cos(t) * 0.7, y + 0.02, hz + Math.sin(t) * 0.7], 0.022, 0.04); } }
+  // the wooden mortar and its pestle
+  { const [mx, mz] = at(1.5, -0.8);
+    bag.add('timber', lathe([[0.001, 0], [0.2, 0], [0.21, 0.05], [0.14, 0.3], [0.2, 0.62], [0.22, 0.66], [0.15, 0.62], [0.001, 0.5]], 10, null, mx, y, mz));
+    beamTris(T, [mx + 0.05, y + 0.45, mz], [mx + 0.45, y + 1.65, mz + 0.1], 0.05, 0.05); col.circle(mx, mz, 0.24, y, y + 0.66); }
+  // the drying rack: four posts, a floor of poles at breast height, gourds and cobs of grain on it
+  { const P = [[-0.6, -0.45], [0.6, -0.45], [0.6, 0.45], [-0.6, 0.45]].map(([u, v]) => at(0.3 + u, 1.5 + v));
+    for (const [px, pz] of P) bag.add('timber', lathe([[0.05, -0.2], [0.045, 1.5], [0.001, 1.53]], 5, null, px, y, pz));
+    for (let k = 0; k < 6; k++) { const v = -0.4 + k * 0.16, [p0x, p0z] = at(-0.4, 1.5 + v), [p1x, p1z] = at(1.0, 1.5 + v); beamTris(T, [p0x, y + 1.42, p0z], [p1x, y + 1.42, p1z], 0.03, 0.05); }
+    for (const [u, v, m] of [[0.1, -0.2, 'terracotta'], [0.45, 0.1, 'terracotta'], [0.8, -0.1, 'reed_mat'], [0.3, 0.2, 'reed_mat']]) { const [gx, gz] = at(u, 1.5 + v); bag.add(m, lathe([[0.001, 0], [0.12, 0.02], [0.14, 0.1], [0.08, 0.18], [0.001, 0.2]], 8, null, gx, y + 1.46, gz)); } }
+  // the pots, the basket, the hoe and the axe
+  for (const [u, v, sc, m] of [[-0.5, -1.5, 1.8, 'terracotta'], [-0.05, -1.35, 1.3, 'pottery_dark'], [-0.8, -1.2, 1.1, 'terracotta']]) { const [px, pz] = at(u, v); bag.add('thatch', lathe([[0.001, 0], [0.12 * sc, 0.0], [0.1 * sc, 0.04], [0.001, 0.04]], 8, null, px, y, pz)); bag.add(m, lathe(potProf(sc), 11, null, px, y + 0.03, pz)); }
+  { const [bx, bz] = at(1.7, 0.8); bag.add('wicker', lathe([[0.001, 0], [0.22, 0], [0.3, 0.2], [0.33, 0.3], [0.3, 0.31], [0.2, 0.22], [0.001, 0.22]], 10, null, bx, y, bz)); bag.add('reed_mat', lathe([[0.001, 0.26], [0.27, 0.27], [0.15, 0.34], [0.001, 0.37]], 8, null, bx, y, bz)); }
+  { const [hx, hz] = at(-1.9, -0.7), [h2x, h2z] = at(-2.1, -0.4);
+    beamTris(T, [hx, y, hz], [hx + c * -0.35, y + 1.2, hz + s * -0.35], 0.03, 0.04); bag.add('iron', orientedBox([hx + c * -0.35 - s * 0.1, hz + s * -0.35 + c * 0.1], [hx + c * -0.35 + s * 0.1, hz + s * -0.35 - c * 0.1], 0.12, y + 1.14, y + 1.24));
+    beamTris(T, [h2x, y, h2z], [h2x + c * -0.3, y + 1.1, h2z + s * -0.3], 0.03, 0.04); bag.add('iron', orientedBox([h2x + c * -0.3 - s * 0.09, h2z + s * -0.3 + c * 0.09], [h2x + c * -0.3 + s * 0.09, h2z + s * -0.3 - c * 0.09], 0.05, y + 1.0, y + 1.16)); }
+  { const [p0, p1] = [at(0.2, -0.2), at(1.0, -0.2)]; bag.add('reed_mat', orientedBox(p0, p1, 0.9, y, y + 0.015)); const [gx, gz] = at(0.6, -0.2); bag.add('reed_mat', lathe([[0.3, 0], [0.26, 0.03], [0.001, 0.05]], 9, null, gx, y + 0.01, gz)); }
+  bag.add('timber', fromTriangles(T));
+}
+/**
+ * millet_plot: standing millet (the staple grain; inferred for the plateau) in rows { rect, yAt, seed }, the stalks 2 m, the
+ * heads nodding.
+ */
+function milletPlot(el, { bag }) {
+  const rand = ((sd) => () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296))(el.seed ?? 4), [x0, z0, x1, z1] = el.rect, yAt = el.yAt ?? (() => el.y ?? 0), T = [];
+  for (let x = x0 + 0.5; x < x1; x += 1.0) for (let z = z0 + 0.5; z < z1; z += 1.0) {
+    if (rand() < 0.2) continue;
+    const px = x + (rand() - 0.5) * 0.4, pz = z + (rand() - 0.5) * 0.4, y = yAt(px, pz), hh = 1.8 + rand() * 0.6, lx = (rand() - 0.5) * 0.3;
+    beamTris(T, [px, y, pz], [px + lx, y + hh, pz], 0.012, 0.012);
+    bag.add('reed_mat', lathe([[0.001, 0], [0.04, 0.04], [0.045, 0.2], [0.001, 0.34]], 4, null, px + lx, y + hh - 0.08, pz));
+  }
+  bag.add('reed_mat', fromTriangles(T));
+}
+/**
+ * smithy: an iron-and-gold worker's yard under a pole shed { at, rot, y } (Met: crucibles "to melt gold, copper, bronze, and brass";
+ * Smarthistory: copper ingots): a clay forge with its tuyere, two bellows (a goatskin on a clay pot each), an anvil stone and
+ * hammer stones, a heap of charcoal, hoes and bars of iron, crucibles with their tongs; the roof of thatch on four poles [forms inferred].
+ */
+function smithy(el, { bag, col }) {
+  const [x, z] = el.at, y = (el.y ?? 0) + 0.02, rot = el.rot ?? 0, c = Math.cos(rot), s = Math.sin(rot), T = [];
+  const W = (u, v) => [x + c * u - s * v, z + s * u + c * v];
+  // the shed
+  const P = [[-2.2, -1.9], [2.2, -1.9], [2.2, 1.9], [-2.2, 1.9]].map(([u, v]) => W(u, v));
+  for (const [px, pz] of P) { bag.add('timber', lathe([[0.1, -0.3], [0.09, 2.3], [0.001, 2.34]], 6, null, px, y, pz)); col.circle(px, pz, 0.12, y, y + 2.3); }
+  bag.add('thatch', lathe([[3.4, 2.15], [3.3, 2.3], [1.6, 3.0], [0.001, 3.7]], 12, null, x, y, z));
+  bag.add('thatch', lathe([[0.001, 3.55], [1.5, 2.85], [3.3, 2.12]], 12, null, x, y, z));
+  // the forge: a low clay mound, a hollow with charcoal, the tuyere pipes from the bellows
+  { const [fx, fz] = W(0, 0.2);
+    bag.add('mud_plaster', lathe([[0.8, 0], [0.7, 0.2], [0.5, 0.42], [0.3, 0.42], [0.001, 0.4]], 12, null, fx, y, fz));
+    bag.add('tar_wood', lathe([[0.3, 0.38], [0.22, 0.46], [0.001, 0.5]], 9, null, fx, y, fz));
+    col.circle(fx, fz, 0.8, y, y + 0.45);
+    for (const v of [-0.38, 0.38]) { const [bx, bz] = W(-1.3, 0.2 + v), [tx, tz] = W(-0.3, 0.2 + v * 0.3);
+      bag.add('terracotta', lathe(potProf(1.6), 10, null, bx, y, bz));
+      bag.add('hide_brown', lathe([[0.001, 0], [0.18, 0.02], [0.2, 0.2], [0.12, 0.34], [0.001, 0.36]], 9, null, bx, y + 0.46, bz));
+      beamTris(T, [bx, y + 0.25, bz], [tx, y + 0.3, tz], 0.03, 0.03); } }
+  // the anvil stone, hammer stones, charcoal, iron, crucibles
+  { const [ax, az] = W(1.2, 0.5); bag.add('granite_grey', lathe([[0.001, -0.1], [0.28, -0.1], [0.3, 0.1], [0.2, 0.28], [0.001, 0.3]], 8, (th) => 1 + 0.1 * Math.sin(th * 3), ax, y, az)); col.circle(ax, az, 0.32, y, y + 0.3);
+    for (const [u, v] of [[1.55, 0.1], [1.0, 1.0]]) { const [hx, hz] = W(u, v); bag.add('granite_grey', lathe([[0.001, 0], [0.09, 0.01], [0.1, 0.07], [0.001, 0.12]], 6, null, hx, y, hz)); }
+    const [cx, cz] = W(0.2, -1.3); bag.add('tar_wood', lathe([[0.001, 0], [0.5, 0], [0.38, 0.28], [0.15, 0.45], [0.001, 0.48]], 9, (th) => 1 + 0.12 * Math.sin(th * 4), cx, y, cz));
+    for (let k = 0; k < 3; k++) { const [px, pz] = W(1.0 + k * 0.28, -1.2); beamTris(T, [px - c * 0.3, y + 0.04, pz - s * 0.3], [px + c * 0.3, y + 0.04, pz + s * 0.3], 0.025, 0.03); }
+    for (const [u, v] of [[-0.9, -1.3], [-0.65, -1.45]]) { const [px, pz] = W(u, v); bag.add('pottery_dark', lathe([[0.001, 0], [0.06, 0.01], [0.09, 0.09], [0.07, 0.11], [0.05, 0.04], [0.001, 0.04]], 9, null, px, y, pz)); }
+    const [t0, t1] = [W(-0.5, -1.35), W(-0.5, -1.0)]; bag.add('iron', orientedBox(t0, t1, 0.03, y + 0.01, y + 0.04));
+    const [h0, h1] = [W(1.9, -0.6), W(1.9, -0.1)]; bag.add('iron', orientedBox(h0, h1, 0.2, y, y + 0.02)); }
+  bag.add('timber', fromTriangles(T));
+}
+/**
+ * stone_carver: a soapstone carver's corner { at, rot, y } (Wikipedia, Zimbabwe Bird: the birds are carved "from a micaceous schist
+ * (soapstone)"): a rough block, a column half carved with a bird's head just blocked out, a mat with chisels, a litter of chips and a
+ * water pot [the working place inferred].
+ */
+function stoneCarver(el, { bag, col }) {
+  const [x, z] = el.at, y = (el.y ?? 0) + 0.02, rot = el.rot ?? 0, c = Math.cos(rot), s = Math.sin(rot);
+  const W = (u, v) => [x + c * u - s * v, z + s * u + c * v];
+  bag.add('reed_mat', orientedBox(W(-1.2, 0), W(1.2, 0), 1.6, y - 0.02, y + 0.005));
+  { const [bx, bz] = W(-0.7, -0.2); bag.add('soapstone', orientedBox(W(-0.95, -0.2), W(-0.45, -0.2), 0.45, y, y + 0.4, 0.2)); col.circle(bx, bz, 0.35, y, y + 0.4); }
+  { const [p0, p1] = [W(0.0, 0.15), W(0.9, 0.15)]; bag.add('soapstone', orientedBox(p0, p1, 0.22, y + 0.02, y + 0.24)); const [h0, h1] = [W(0.9, 0.15), W(1.12, 0.15)]; bag.add('soapstone', orientedBox(h0, h1, 0.16, y + 0.08, y + 0.4, 0.2)); const [nx, nz] = W(1.1, 0.15); bag.add('soapstone', lathe([[0.001, 0], [0.07, 0.01], [0.06, 0.12], [0.001, 0.16]], 7, null, nx, y + 0.4, nz)); }
+  for (let k = 0; k < 14; k++) { const u = -1.1 + ((k * 37) % 23) / 10, v = -0.7 + ((k * 53) % 17) / 12, [px, pz] = W(u, v); bag.add('soapstone', lathe([[0.001, 0], [0.04, 0], [0.001, 0.025]], 4, null, px, y, pz)); }
+  for (const v of [0.6, 0.72]) { const [p0, p1] = [W(-0.3, v), W(-0.05, v)]; bag.add('iron', orientedBox(p0, p1, 0.02, y + 0.005, y + 0.03)); }
+  { const [wx, wz] = W(-1.5, 0.7); bag.add('terracotta', lathe(potProf(1.4), 12, null, wx, y, wz)); }
+}
 registerStyle('zimbabwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound },
+  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver },
   objects: {},
 });

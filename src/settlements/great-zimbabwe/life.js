@@ -44,6 +44,40 @@ export function people() {
     else woman([cx + 1.5, cz - 1.2], y, face([cx + 1.5, cz - 1.2], [cx, cz]), { pose: 'kneel' });
     woman([g[0] + Math.cos(gm) * 2.5, g[1] + Math.sin(gm) * 2.5], y, face(g, [cx, cz]), { carry: 'pot' });
   });
+  // the smith at his forge, the carver at his column, a woman with water between the courts
+  { const a = courtAt(1), b = courtAt(2), c0 = Math.cos(a.gm), s0 = Math.sin(a.gm);
+    man([a.at[0] + c0 * 0.3 - s0 * 1.5, a.at[1] + s0 * 0.3 + c0 * 1.5], a.y, face([a.at[0] - s0 * 1.5, a.at[1] + c0 * 1.5], a.at) , { pose: 'cross' });
+    man([b.at[0] + Math.cos(b.gm) * 0.1 + Math.sin(b.gm) * 0.1, b.at[1] + Math.sin(b.gm) * 0.1 - Math.cos(b.gm) * 0.1], b.y, face([b.at[0] + Math.cos(b.gm) * 0.1 + Math.sin(b.gm) * 0.1, b.at[1] + Math.sin(b.gm) * 0.1 - Math.cos(b.gm) * 0.1], b.at) + Math.PI, { pose: 'cross', cloth: 'cloth_white', dress: 'wrap' }); }
+  // the homesteads nearest the arrival: a woman kneeling at the mortar, a goat or two, a dog, a child; those inside the Great Enclosure too
+  {
+    const arr = [46, 60], dist = (k) => Math.hypot(k.c[0] - arr[0], k.c[1] - arr[1]);
+    const near = [...compounds()].sort((p, q) => dist(p) - dist(q)).slice(0, 16);
+    near.forEach((k, i) => {
+      const a = ((k.seed ?? 3) % 628) / 100, c = Math.cos(a), sn = Math.sin(a), W = (u, v) => [k.c[0] + c * u - sn * v, k.c[1] + sn * u + c * v], y = k.y + 0.06;
+      if (i % 2 === 0) { const p = W(1.5, -1.5); woman(p, y, face(p, W(1.5, -0.8)), { pose: 'kneel' }); }
+      if (i % 3 === 0) { const p = W(-0.4, -2.1); L.push({ t: 'animal', kind: 'goat', at: p, y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: rand() < 0.5 }); }
+      if (i % 4 === 1) { const p = W(0.2, 0.3); L.push({ t: 'animal', kind: 'dog', at: p, y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
+      if (i % 5 === 2) { const p = W(-2.2, 0.2); man(p, y, face(p, k.c), { h: 0.95, pose: 'stand' }); }
+    });
+  }
+  // by the path to the Great Enclosure's north entrance, in sight of the arrival: women with pots, a man in his cape, a herd boy with four beasts
+  {
+    const at = (x, z) => [x, z];
+    const walkers = [[at(39, 70), 'jar'], [at(53, 72), 'man'], [at(44, 76), 'basket']];
+    for (const [p, kind] of walkers) {
+      const y = height(p[0], p[1]), r = face(p, [46, 82]) + (rand() - 0.5) * 0.6;
+      if (kind === 'jar') woman(p, y, r, { carry: 'pot' }); else if (kind === 'basket') woman(p, y, r, { carry: 'basket' }); else man(p, y, r, { over: 'cape', cloth: 'hide_tan' });
+    }
+    const hx = 72, hz = 66;
+    let k = 0;
+    for (let t = 0; t < 40 && k < 4; t++) {
+      const x = hx + (rand() - 0.5) * 14, z = hz + (rand() - 0.5) * 10;
+      if (!clear(x, z, 2) || compounds().some((c) => Math.hypot(c.c[0] - x, c.c[1] - z) < c.r + 3) || L.some((o) => o.t === 'animal' && Math.hypot(o.at[0] - x, o.at[1] - z) < 3.2)) continue;
+      cow(x, z, rand() * 6.28, { graze: true }); k++;
+    }
+    const bx = hx - 7, bz = hz + 6;
+    if (clear(bx, bz, 1)) man([bx, bz], height(bx, bz), face([bx, bz], [hx, hz]), { carry: 'staff', len: 1.5, pose: 'staff', h: 1.4 });
+  }
   // in the Western Enclosure on the hill and in the Great Enclosure
   man([WEST.c[0] + 2, WEST.c[1] + 9], WEST.y, 0.4, { over: 'cape', cloth: 'hide_brown' });
   woman([WEST.c[0] - 4, WEST.c[1] + 8], WEST.y, -0.6, { carry: 'basket' });
@@ -51,8 +85,9 @@ export function people() {
   man([ENCLOSURE.c[0] + 20, ENCLOSURE.c[1] - 0.6], 0, -1.2);
   return L;
 }
-/** Where the goods of the coast are laid out: the first Valley Ruin's court, between its entrance and its houses. */
-export function goodsAt() {
-  const V = VALLEY[0], gm = (V.a1 + V.a0 + Math.PI * 2) / 2;
-  return { at: [V.c[0] + Math.cos(gm) * V.r[0] * 0.3, V.c[1] + Math.sin(gm) * V.r[1] * 0.3], y: height(V.c[0], V.c[1]) + 0.06, rot: gm + Math.PI / 2 };
+/** The working place of Valley court i: between the court's entrance and its houses (the goods of the coast in court 0, the smithy in 1, the stone carver in 2). */
+export function courtAt(i) {
+  const V = VALLEY[i], gm = (V.a1 + V.a0 + Math.PI * 2) / 2;
+  return { at: [V.c[0] + Math.cos(gm) * V.r[0] * 0.3, V.c[1] + Math.sin(gm) * V.r[1] * 0.3], y: height(V.c[0], V.c[1]) + 0.06, rot: gm + Math.PI / 2, gm };
 }
+export function goodsAt() { const { at, y, rot } = courtAt(0); return { at, y, rot }; }

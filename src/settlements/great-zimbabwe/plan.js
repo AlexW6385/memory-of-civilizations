@@ -3,7 +3,7 @@
 // Valley Ruins' enclosures.
 
 import { ENCLOSURE, HILL, WEST, RECESS, ASCENT, VALLEY, height, inWalled, onAscent } from './layout.js';
-import { goodsAt, kraals } from './life.js';
+import { goodsAt, courtAt, kraals } from './life.js';
 
 const E = [];
 const ellipse = (c, r, n, a0 = 0, a1 = Math.PI * 2) => Array.from({ length: n + 1 }, (_, k) => { const a = a0 + (a1 - a0) * k / n; return [c[0] + Math.cos(a) * r[0], c[1] + Math.sin(a) * r[1]]; });
@@ -62,6 +62,23 @@ for (const V of VALLEY) {
 // the goods of the coast in the first court of the Valley Ruins; the cattle kraals by the homesteads (life.js)
 E.push({ t: 'trade_goods', ...goodsAt() });
 for (const K of kraals()) E.push({ t: 'kraal', ...K });
+// the smith's yard in the second court, the soapstone carver's corner in the third (the houses stand opposite the entrance, the goods between)
+{ const a = courtAt(1), b = courtAt(2);
+  E.push({ t: 'smithy', at: a.at, y: a.y, rot: a.gm });
+  E.push({ t: 'stone_carver', at: b.at, y: b.y, rot: b.gm + Math.PI / 2 }); }
+// the Hill Complex's small enclosures between the ridge wall and the Western Enclosure (zimfieldguide: "narrow passages among the
+// small enclosures"): short curved walls with narrow entrances, a covered passage between two walls under stone lintels, and the
+// Balcony — three walls on a great boulder [positions inferred]
+for (const [cx, cz, ra, rb, a0, a1] of [[8, -176, 6, 5, 0.5, 5.6], [20, -190, 5, 4, 3.4, 9.0], [-8, -203, 7, 5, 1.0, 6.2], [-32, -170, 5, 4, 2.2, 7.6], [24, -180, 4.5, 3.5, 4.0, 9.4]])
+  E.push({ t: 'dry_wall', pts: ellipse([cx, cz], [ra, rb], 10, a0, a1), h: 2.8, th: 1.3, yAt: yh });
+{
+  const z0 = -192, x0 = -6, x1 = 5, ym = yh(0, z0);
+  for (const dz of [-1, 1]) E.push({ t: 'dry_wall', pts: [[x0, z0 + dz * 1.0], [x1, z0 + dz * 1.0]], h: 2.6, th: 1.1, yAt: yh, rubble: false });
+  for (let x = x0 + 0.4; x < x1 - 0.5; x += 1.55) E.push({ t: 'block', rect: [x, z0 - 1.55, x + 1.7, z0 + 1.55], y0: ym + 2.1, y1: ym + 2.55, mat: 'granite_block' });
+  const bx = 40, bz = -170, by = Math.min(...[[bx, bz], [bx + 4, bz], [bx - 4, bz], [bx, bz + 4], [bx, bz - 4]].map(([p, q]) => yh(p, q))) - 0.3, top = by + 5.2;
+  E.push({ t: 'boulder', c: [bx, bz], r: 5.2, h: 5.2, y: by, seed: 59 });
+  E.push({ t: 'dry_wall', pts: [[bx - 2.0, bz + 1.6], [bx - 2.2, bz - 0.4], [bx - 1.2, bz - 1.9], [bx + 0.9, bz - 2.3], [bx + 2.2, bz - 1.2], [bx + 2.2, bz + 1.2]], h: 1.7, th: 0.9, y: top - 0.55, rubble: false });
+}
 
 // the Eastern Enclosure at the hill's east end: a curved wall, the stone platform with the soapstone
 // birds on their columns in a row and tall monoliths behind them (Wikipedia, Zimbabwe Bird: eight
