@@ -3,4 +3,5 @@
 // what floats; see the Suzhou one) and a line here.
 export const MOVER_SITES = {
   'ming-suzhou': () => import('../settlements/ming-suzhou/movers.js'),
+  'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

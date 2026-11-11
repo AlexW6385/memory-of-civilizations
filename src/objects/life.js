@@ -255,6 +255,7 @@ const FACES = {
   house_med: (f, h) => (h.variant === 'ottoman' ? [0, 1.5] : [0, f === 'front' ? 0.9 : 0.1]),
   house_mamluk: (f) => [0, f === 'front' ? 1.6 : 0.1],
   house_jiangnan: (f) => (f === 'front' ? [0.9, 0.25] : f === 'back' ? [0.25, 0.1] : [0, 0.1]),
+  house_song: (f) => (f === 'front' ? [0.9, 0.25] : [0, 0.1]),
 };
 
 /** The settlement's footprints on a half-metre grid, in settlement coordinates. */
