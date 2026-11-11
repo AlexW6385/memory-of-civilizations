@@ -6,6 +6,7 @@
 import { STYLES } from '../../core/build.js';
 import { box, lathe, frustum } from '../../core/geom.js';
 import './index.js';
+import { shopUnit } from './shops.js';
 
 /** A box in a frame: origin o [x, z], along u [ux, uz] (s0…s1), across n = (−uz, ux) (t0…t1), y0…y1. */
 function fbox(o, u, s0, s1, t0, t1, y0, y1) {
@@ -117,14 +118,16 @@ function colonnade(el, ctx) {
     const f0 = D, f1 = D + 0.6, bk = D + Sd;
     const wf = (s0, s1, y0, y1) => { const [p, q] = T(f0, f1); bag.add('limestone', fbox(o, u, s0, s1, p, q, y0, y1)); };
     const ns = Math.max(1, Math.round(L / 4.5)), sw = L / ns;
+    let sd = Math.floor(Math.abs(ax * 7.3 + az * 13.1)) + 17;
+    const rnd = () => ((sd = (Math.imul(sd, 1664525) + 1013904223) >>> 0) / 4294967296);
     for (let k = 0; k < ns; k++) {
-      const s0 = k * sw, s1 = s0 + sw, d0 = s0 + 0.55, d1 = s1 - 0.55;
+      const s0 = k * sw, s1 = s0 + sw, d0 = s0 + 1.0, d1 = s1 - 1.0;
       wf(s0, d0, y - 0.4, y + H + 1.6); wf(d1, s1, y - 0.4, y + H + 1.6); wf(d0, d1, y + 2.9, y + H + 1.6);
       bag.add('timber', (() => { const [p, q] = T(f0 - 0.05, f1 + 0.05); return fbox(o, u, d0 - 0.1, d1 + 0.1, p, q, y + 2.75, y + 2.9); })());
-      { const [p, q] = T(f1, bk); bag.add('limestone', fbox(o, u, s1 - 0.3, s1 + 0.3 > L ? L : s1 + 0.3, p, q, y - 0.4, y + H + 1.6)); }
-      // a dark interior: the floor, and the vault seen through the door
-      { const [p, q] = T(f1, bk - 0.6); bag.add('plaster', fbox(o, u, s0 + 0.3, s1 - 0.3, p, q, y + 3.4, y + 3.6)); bag.add('flagstone', fbox(o, u, s0, s1, p, q, y - 0.4, y + 0.12)); }
+      { const [p, q] = T(f1, bk); bag.add('limestone', fbox(o, u, s1 - 0.3, s1 + 0.3 > L ? L : s1 + 0.3, p, q, y - 0.4, y + H + 1.6)); seg(col, o, u, s1 - 0.3, Math.min(L, s1 + 0.3), p, q, y, y + H + 1.6); }
+      { const [p, q] = T(f1, bk - 0.6); bag.add('flagstone', fbox(o, u, s0, s1, p, q, y - 0.4, y + 0.12)); }
       { const [p, q] = T(f0, f1); seg(col, o, u, s0, d0, p, q, y, y + H); seg(col, o, u, d1, s1, p, q, y, y + H); }
+      shopUnit({ bag, col, o, u, side, y, H, D, Sd }, s0, s1, rnd);
     }
     bag.add('limestone', fbox(o, u, 0, 0.3, ...T(f1, bk), y - 0.4, y + H + 1.6));
     { const [p, q] = T(bk - 0.6, bk); bag.add('limestone', fbox(o, u, 0, L, p, q, y - 0.4, y + H + 1.6)); seg(col, o, u, 0, L, p, q, y, y + H + 1.6); }

@@ -67,7 +67,7 @@ function cardo() {
       const L = g0 - z, n = Math.max(1, Math.round(L / 48));
       for (let k = 0; k < n; k++) {
         const za = z + L * k / n, zb = z + L * (k + 1) / n;
-        if (zb - za > 3) E.push({ t: 'colonnade', a: [x, za], b: [x, zb], y: height(x, (za + zb) / 2), side, depth: CARDO.portico, shops: CARDO.shops, h: 5, spacing: 4.0 });
+        if (zb - za > 3) E.push({ t: 'colonnade', a: [x, za], b: [x, zb], y: height(x, (za + zb) / 2), side, depth: CARDO.portico, shops: CARDO.shops, h: 5, spacing: 5.77 });
       }
       z = g1;
     }
