@@ -1,7 +1,7 @@
 {
   "site": { "id": "wei-ye", "name": { "en": "Three Kingdoms Ye", "zh": "三国邺城" }, "era": "c. AD 215", "region": "china", "lat": 36.33, "lon": 114.38, "radius": 330 },
   "cls": "M",
-  "arrival": [-110, null, -88, 1.5708, 0.3],
+  "arrival": [-112, null, -88, 1.5708, 0.1],
   "arrivalNote": "from the Tongque Garden, west up the stair of the Bronze Sparrow Terrace: the tiered tower on its crown with the gilded bird, the Golden Tiger and the Ice Well terraces on either hand, linked by covered skyways",
   "card": {
     "en": [

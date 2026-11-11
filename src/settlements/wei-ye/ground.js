@@ -44,7 +44,7 @@ function planting(x, z) {
     return null;
   }
   if (inRect(MARKET, x, z, 1) || inWard(x, z)) return null;
-  if (inRect(GARDEN, x, z)) { if (inRect([-160, -112, -100, -64], x, z)) return null; return hash2(x * 0.2, z * 0.2) < 0.22 ? { elm: 0.6, pagoda_tree: 0.5, willow: 0.3, grass: 6 } : { grass: 8 }; }
+  if (inRect(GARDEN, x, z)) { if (inRect([-160, -112, -100, -64], x, z)) return null; return hash2(x * 0.2, z * 0.2) < 0.1 ? { elm: 0.3, pagoda_tree: 0.25, willow: 0.15, grass: 6 } : { grass: 8 }; }
   if (inRect(PALACE, x, z)) return hash2(x * 0.2, z * 0.2) < 0.06 ? { pagoda_tree: 0.5, grass: 2 } : { grass: 2 };
   if (!inCity(x, z)) {
     const e = (x + 1000) % 22;

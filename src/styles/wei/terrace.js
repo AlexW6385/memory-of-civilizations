@@ -94,6 +94,7 @@ export function tower(el, ctx) {
   const nx = Math.round(a * 2 / 4), P = [];
   for (let i = 0; i <= nx; i++) for (let j = 0; j <= nx; j++) if (i === 0 || j === 0 || i === nx || j === nx) P.push([cx - a + 2 * a * i / nx, cz - a + 2 * a * j / nx]);
   for (const [x, z] of P) {
+    if (Math.abs(x - cx) > a - 0.1 && Math.abs(z - cz) < door + 0.8) continue;      // the doors' ways stay clear
     bag.add('bluestone', lathe([[0.55, 0], [0.55, 0.1], [0.44, 0.2], [0.4, 0.3]], 10, null, x, f, z));
     bag.add('timber_red', lathe([[0.34, 0.3], [0.3, H]], 10, null, x, f, z));
     bag.add('timber_red', box(x - 0.42, f + H, z - 0.42, x + 0.42, f + H + 0.3, z + 0.42));
@@ -141,9 +142,10 @@ export function tower(el, ctx) {
     bag.add('lacquer_red', box(x - 0.45, y + 0.36, z - 0.55, x + 0.45, y + 0.39, z - 0.05));
     if (rand() < 0.6) bag.add('bronze', lathe([[0.001, 0], [0.07, 0.01], [0.1, 0.09], [0.001, 0.09]], 8, null, x + 0.1, y + 0.39, z - 0.3));
   }
-  bag.add('lacquer_black', box(cx - 0.1, f + 0.05, cz - 3.2, cx + 0.1, f + 2.6, cz + 3.2));
-  bag.add('paint_caihua', box(cx + 0.1, f + 0.4, cz - 3.0, cx + 0.14, f + 2.4, cz + 3.0));
-  col.rect([cx - 0.12, cz - 3.2, cx + 0.12, cz + 3.2], f, f + 2.6);
+  const sx = cx - a + 2.2;
+  bag.add('lacquer_black', box(sx - 0.1, f + 0.05, cz - 3.2, sx + 0.1, f + 2.6, cz + 3.2));
+  bag.add('paint_caihua', box(sx + 0.1, f + 0.4, cz - 3.0, sx + 0.14, f + 2.4, cz + 3.0));
+  col.rect([sx - 0.12, cz - 3.2, sx + 0.12, cz + 3.2], f, f + 2.6);
   for (const [dx, dz] of [[-5, -5], [5, 5], [-5, 5], [5, -5]]) {
     bag.add('bronze', lathe([[0.2, 0], [0.18, 0.05], [0.05, 0.12], [0.04, 1.1], [0.1, 1.15], [0.24, 1.25], [0.2, 1.3]], 10, null, cx + dx * a / 8 * 1.2, y, cz + dz * a / 8 * 1.2));
   }
