@@ -28,5 +28,6 @@ export const MOVER_SITES = {
   'babylon': () => import('../settlements/babylon/movers.js'),
   'angkor': () => import('../settlements/angkor/movers.js'),
   'amsterdam': () => import('../settlements/amsterdam/movers.js'),
+  'versailles': () => import('../settlements/versailles/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
