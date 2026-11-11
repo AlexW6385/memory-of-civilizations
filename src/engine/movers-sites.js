@@ -50,5 +50,6 @@ export const MOVER_SITES = {
   'lalibela': () => import('../settlements/lalibela/movers.js'),
   'kilwa': () => import('../settlements/kilwa/movers.js'),
   'conques': () => import('../settlements/conques/movers.js'),
+  'norse-borgund': () => import('../settlements/norse-borgund/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
