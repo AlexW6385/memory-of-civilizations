@@ -194,7 +194,7 @@ const WELL_OF = { muscovy: { kind: 'shaduf', mat: 'log_pine', square: true, buck
 const KIT_OF = {
   athens: 'mediterranean', rome: 'mediterranean', constantinople: 'mediterranean', knossos: 'mediterranean', florence: 'europe_early_modern', venice: 'venice', 'baroque-rome': 'europe_early_modern',
   jerusalem: 'near_east', petra: 'near_east', ur: 'near_east', babylon: 'near_east', persepolis: 'near_east', isfahan: 'near_east', 'mamluk-cairo': 'near_east', 'ottoman-istanbul': 'near_east', granada: 'near_east',
-  giza: 'egypt', dunhuang: 'east_asia', 'timurid-samarkand': 'persia', shaolin: 'east_asia',
+  giza: 'egypt', dunhuang: 'east_asia', 'timurid-samarkand': 'near_east', shaolin: 'east_asia',
   'tang-wutai': 'east_asia', 'song-kaifeng': 'east_asia', 'song-hangzhou': 'east_asia', 'ming-suzhou': 'east_asia', 'qing-beijing': 'east_asia', 'joseon-seoul': 'east_asia', lhasa: 'tibet',
   'heian-uji': 'japan', nara: 'japan', 'edo-himeji': 'japan',
   sanchi: 'south_asia', madurai: 'south_asia', khajuraho: 'south_asia', 'mughal-agra': 'south_asia',
