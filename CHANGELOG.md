@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.55 — Kaifeng and Foguang, the first of batch B1 (2026-11-10)
+
+Northern Song Kaifeng grows to a 520 m city of the Qingming scroll: eighteen streets and lanes of varied Song shop houses, wine shops, inns, warehouses and thatched suburbs, wharves and revetments on the Bian, a furnished monastery with bell and drum towers, stalls on the Rainbow Bridge, walkers in Song dress, grain and passenger boats, birds, fish and kitchen smoke. Foguang on Mount Wutai is redrawn at 250 m: the East Hall's doors, windows, painted beams and all 35 statues, a Manjusri hall and bell pavilion, a terraced Shanxi village with furnished houses, monks and villagers on the paths.
+
 ## v10.54 — A larger planet (2026-11-10)
 
 The planet's radius is 12 km instead of 8, and all 94 settlements of the set are placed on it (the 38 not built yet keep their room), so none stands crowded; the open country's hills and ranges grew with it.
