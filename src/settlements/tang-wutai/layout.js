@@ -65,7 +65,7 @@ export function lots() {
       // the rows face their lane; none beyond the outer lanes' far side, none on the green, none past the rim
       if (Math.hypot(cx, cz) > RADIUS - 34) continue;
       if (inRect(GREEN, cx, cz, 6) || Math.abs(cz) < MAIN / 2 + 1) continue;
-      if (rand() < 0.07) continue;                       // an empty plot: a garden or threshing floor
+      if (rand() < 0.07 && lz !== 0) continue;                       // an empty plot: a garden or threshing floor
       const ys = [[x0, z0], [x1, z0], [x0, z1], [x1, z1], [cx, cz]].map(([a, b]) => height(a, b));
       if (Math.max(...ys) - Math.min(...ys) > 1.6) continue;
       LOTS.push({ id: id++, rect: [x0, z0, x1, z1], y: Math.max(...ys), foot: Math.min(...ys), front: side > 0 ? 'n' : 's', seed: Math.floor(rand() * 1e6), lane: lz });
