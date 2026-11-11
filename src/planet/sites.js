@@ -87,6 +87,7 @@ export const SITES = [
   { id: 'cahokia', name: { en: 'Mississippian Cahokia', zh: '密西西比卡霍基亚' }, era: '12th c.', region: 'mississippi', lat: 38.66, lon: -90.06, radius: 420 },
   { id: 'taos', name: { en: 'The Pueblo', zh: '普韦布洛' }, era: '15th c.', region: 'southwest', lat: 36.44, lon: -105.55, radius: 320 },
   { id: 'new-york', name: { en: 'Modern New York', zh: '现代纽约' }, era: '20th c.', region: 'northeast', lat: 40.75, lon: -73.99, radius: 460 },
+  { id: 'mongol-karakorum', name: { en: 'Mongol Karakorum', zh: '蒙古哈拉和林' }, era: '13th c.', region: 'steppe', lat: 47.20, lon: 102.83, radius: 190 },
   // ── Oceania ──
   { id: 'rapa-nui', name: { en: 'Rapa Nui', zh: '拉帕努伊' }, era: '15th c.', region: 'polynesia', lat: -27.13, lon: -109.28, water: true, island: true, radius: 320 },
   { id: 'fez', name: { en: 'Marinid Fez', zh: '马林王朝非斯' }, era: '14th c.', region: 'maghreb', lat: 34.06, lon: -4.97, radius: 330 },
