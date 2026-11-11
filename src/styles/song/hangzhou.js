@@ -953,6 +953,92 @@ function hzWallSkin(el, { bag }) {
 }
 
 /**
+ * hz_gate { rect [x0, z0, x1, z1] (the gate block, the way through along z), w (the passage), spring (its jambs' height), rise (the segmental arch's rise), H (the platform's top),
+ * y, seed }: a city gate of Lin'an faced in brick — a segmental brick vault (courses of mortar rings across the soffit), jambs with a granite plinth and coursed brick, a ring of
+ * granite voussoirs on each portal with a keystone and impost blocks, the facade faced as the wall, a string course under the platform's edge, the passage paved in granite slabs worn
+ * into two wheel tracks, and the two door leaves swung back against the jambs at the outer portal (timber boards, iron straps, rows of iron studs, a ring handle). [inferred: Song
+ * city gates were timber-lined passages or brick vaults; Lin'an's walls were brick-faced from the Southern Song (docs/settlements/song-hangzhou.md §12)]
+ */
+function hzGate(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, w = el.w ?? 10, sp = el.spring ?? 4.4, rise = el.rise ?? 3.0, Hh = el.H ?? 9.6, rand = rnd(el.seed ?? 3);
+  const c = (x0 + x1) / 2, hw = w / 2, R = (hw * hw + rise * rise) / (2 * rise), cy = y + sp + rise - R;
+  const Y = (o) => cy + Math.sqrt(Math.max(0, R * R - o * o));
+  const outer = el.outer === 'n' ? z0 : z1;                       // the outer portal's z (the doors stand here); default: the north face... see below
+  const outerIsZ0 = el.outer !== 's';
+  void outer;
+  // ── the masses either side, and the vault's spandrels as stepped columns above the arch
+  const sideL = [x0, z0, c - hw, z1], sideR = [c + hw, z0, x1, z1];
+  for (const r of [sideL, sideR]) { bag.add('brick_grey', box(r[0], y - 0.3, r[1], r[2], y + Hh, r[3])); col.rect(r, y - 0.3, y + Hh); }
+  const N = 28, os = Array.from({ length: N + 1 }, (_, i) => -hw + w * i / N);
+  for (let i = 0; i < N; i++) {
+    const ya = Math.max(Y(os[i]), Y(os[i + 1]));
+    bag.add('brick_grey', box(c + os[i], ya, z0, c + os[i + 1], y + Hh, z1));
+  }
+  col.rect([c - hw, z0, c + hw, z1], y + sp + 0.3, y + Hh); col.floor([x0, z0, x1, z1], y + Hh);
+  // the soffit: strips of brick (thick, into the vault) and the mortar rings of the courses
+  const soff = [], ring = [];
+  for (let i = 0; i < N; i++) {
+    const a = [c + os[i], Y(os[i])], b = [c + os[i + 1], Y(os[i + 1])];
+    hexa(soff, [[a[0], a[1], z0], [b[0], b[1], z0], [b[0], b[1], z1], [a[0], a[1], z1], [a[0], a[1] + 0.3, z0], [b[0], b[1] + 0.3, z0], [b[0], b[1] + 0.3, z1], [a[0], a[1] + 0.3, z1]]);
+  }
+  for (let z = z0 + 0.35; z < z1 - 0.2; z += 0.46) for (let i = 0; i < N; i++) {
+    const a = [c + os[i], Y(os[i]) - 0.014], b = [c + os[i + 1], Y(os[i + 1]) - 0.014];
+    hexa(ring, [[a[0], a[1], z], [b[0], b[1], z], [b[0], b[1], z + 0.03], [a[0], a[1], z + 0.03], [a[0], a[1] + 0.02, z], [b[0], b[1] + 0.02, z], [b[0], b[1] + 0.02, z + 0.03], [a[0], a[1] + 0.02, z + 0.03]]);
+  }
+  bag.add('brick_grey', fromTriangles(soff)); bag.add('slate', fromTriangles(ring));
+  // ── the jambs: a granite plinth with a cap, brick between, mortar courses, an impost block at the springing
+  const mort = [];
+  for (const s of [-1, 1]) {
+    const xi = c + s * hw, xo = (d) => xi - s * d;
+    bag.add('granite_block', box(Math.min(xo(0), xo(0.07)), y - 0.05, z0, Math.max(xo(0), xo(0.07)), y + 0.95, z1));
+    bag.add('granite_grey', box(Math.min(xo(0), xo(0.14)), y + 0.95, z0, Math.max(xo(0), xo(0.14)), y + 1.05, z1));
+    bag.add('granite_grey', box(Math.min(xo(0), xo(0.16)), y + sp - 0.3, z0, Math.max(xo(0), xo(0.16)), y + sp, z1));
+    for (let yy = y + 1.3; yy < y + sp - 0.4; yy += 0.3) hexa(mort, [[xo(0), yy, z0], [xo(0.012), yy, z0], [xo(0.012), yy, z1], [xo(0), yy, z1], [xo(0), yy + 0.022, z0], [xo(0.012), yy + 0.022, z0], [xo(0.012), yy + 0.022, z1], [xo(0), yy + 0.022, z1]]);
+  }
+  bag.add('slate', fromTriangles(mort));
+  // ── the portals: a ring of voussoirs round the arch on each face, a keystone, the facade's brick either side, a string course under the platform's edge
+  const th0 = Math.asin(hw / R), NV = 19;
+  for (const [zf, n] of [[z0, -1], [z1, 1]]) {
+    const vs = [];
+    for (let k = 0; k < NV; k++) {
+      const a0 = -th0 + 2 * th0 * k / NV + 0.006, a1 = -th0 + 2 * th0 * (k + 1) / NV - 0.006, key = k === (NV - 1) / 2, ro = R + (key ? 1.0 : 0.72), d = key ? 0.24 : k % 2 ? 0.16 : 0.12;
+      const pt = (ang, r, dd) => [c + Math.sin(ang) * r, cy + Math.cos(ang) * r, zf + n * dd];
+      hexa(vs, [pt(a0, R - 0.02, 0), pt(a1, R - 0.02, 0), pt(a1, ro, 0), pt(a0, ro, 0), pt(a0, R - 0.02, d), pt(a1, R - 0.02, d), pt(a1, ro, d), pt(a0, ro, d)]);
+    }
+    bag.add('granite_block', fromTriangles(vs));
+    // impost blocks at the springing, each side
+    for (const s of [-1, 1]) bag.add('granite_block', box(Math.min(c + s * hw - 0.2 * s, c + s * (hw + 0.8)), y + sp - 0.55, n < 0 ? zf - 0.2 : zf, Math.max(c + s * hw - 0.2 * s, c + s * (hw + 0.8)), y + sp + 0.05, n < 0 ? zf : zf + 0.2));
+    // the string course under the platform's edge, and the brick facing of the two sides
+    bag.add('granite_grey', box(x0, y + Hh - 1.2, n < 0 ? zf - 0.22 : zf, x1, y + Hh - 0.95, n < 0 ? zf : zf + 0.22));
+    bag.add('granite_grey', box(x0, y + Hh - 0.1, n < 0 ? zf - 0.28 : zf, x1, y + Hh + 0.02, n < 0 ? zf : zf + 0.28));
+    for (const [p, q] of [[x0, c - hw - 1.4], [c + hw + 1.4, x1]]) hzWallSkin({ a: [p, zf], b: [q, zf], n, off: zf, batter: 0, yBase: y - 0.3, y0: y, y1: y + Hh - 1.2, seed: Math.round(p + zf) }, { bag });
+  }
+  // ── the paving: granite slabs on a bed, laid in rows, the two wheel tracks worn down and darker; the kerb stones at the foot of the jambs
+  const bedT = [], slabsOk = [], slabsTrack = [];
+  bag.add('slate', box(c - hw, y - 0.14, z0, c + hw, y - 0.02, z1));
+  const trackAt = (xm) => Math.abs(Math.abs(xm - c) - 1.5) < 0.42;
+  for (let z = z0, row = 0; z < z1 - 0.01; z += 1.25, row++) for (let k = -1; k < 8; k++) {
+    const xa = c - hw + w * k / 8 + (row % 2 ? 0.45 : 0), xa2 = Math.max(c - hw, xa), xb = Math.min(c + hw, xa + w / 8);
+    if (xb - xa2 < 0.08) continue;
+    const zb = Math.min(z1, z + 1.25), tr = trackAt((xa2 + xb) / 2);
+    (tr ? slabsTrack : slabsOk).push([xa2 + 0.012, zb - 0.012, xb - 0.012, z + 0.012, tr ? y - 0.05 : y + 0.02 - rand() * 0.012]);
+  }
+  for (const [a, b, c2, d, t] of slabsOk) bag.add('granite_block', box(a, y - 0.1, d, c2, t, b));
+  for (const [a, b, c2, d, t] of slabsTrack) bag.add('granite_grey', box(a, y - 0.1, d, c2, t, b));
+  // ── the door leaves swung back against the jambs at the outer portal: boards, iron straps and studs, a ring
+  const zd = outerIsZ0 ? z0 + 0.15 : z1 - 5.15, lw = 5.0, lh = sp - 0.15, tD = 0.2;
+  for (const s of [-1, 1]) {
+    const g0 = 0.19, xa = s > 0 ? c + hw - g0 - tD : c - hw + g0, xb = xa + tD;
+    for (let b = 0; b < 20; b++) bag.add(b % 3 === 0 ? 'wood_dark' : 'timber', box(xa, y, zd + b * (lw / 20) + 0.004, xb, y + lh, zd + (b + 1) * (lw / 20) - 0.004));
+    const face = s < 0 ? xb : xa, sgn = s < 0 ? 1 : -1;
+    for (const hy of [0.7, lh * 0.5, lh - 0.7]) bag.add('iron', box(Math.min(face, face + sgn * 0.03), y + hy - 0.09, zd, Math.max(face, face + sgn * 0.03), y + hy + 0.09, zd + lw));
+    for (const hy of [0.7, lh * 0.5, lh - 0.7]) for (let k = 0; k < 11; k++) for (const dy of [-0.05, 0.05]) { const zz = zd + 0.25 + k * 0.45; bag.add('iron', box(Math.min(face + sgn * 0.03, face + sgn * 0.07), y + hy + dy - 0.035 + (dy > 0 ? 0.04 : -0.04), zz - 0.035, Math.max(face + sgn * 0.03, face + sgn * 0.07), y + hy + dy + 0.035 + (dy > 0 ? 0.04 : -0.04), zz + 0.035)); }
+    bag.add('iron', lathe([[0.001, 0], [0.12, 0], [0.13, 0.03], [0.001, 0.05]], 8, null, 0, 0, 0).rotateZ(s < 0 ? -Math.PI / 2 : Math.PI / 2).translate(face + sgn * 0.07, y + 1.5, zd + lw * 0.5 + 0.02));
+    col.rect([Math.min(xa, xb) - 0.02, zd, Math.max(xa, xb) + 0.08, zd + lw], y, y + lh);
+  }
+}
+
+/**
  * hz_landing { rect [x0, z0, x1, z1] (the jetty reaching west from the bank), y (its deck's top = the bank), bed, seed }: planks laid across with their gaps and nails' darker
  * ends, a timber kerb, piles each side every 2.2 m with iron rings and a cap, a bollard at the end, a stone step at the bank, and on the deck the boatmen's gear: a punting pole
  * laid along the rail, a basket, a coil of rope and a lantern post. [inferred]
@@ -979,4 +1065,4 @@ function hzLanding(el, { bag, col }) {
   void t;
 }
 
-export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_wutou: hzWutou, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_landing: hzLanding };
+export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_wutou: hzWutou, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_landing: hzLanding };
