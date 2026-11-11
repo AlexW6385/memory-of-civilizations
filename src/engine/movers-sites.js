@@ -74,5 +74,6 @@ export const MOVER_SITES = {
   'han-changan': () => import('../settlements/han-changan/movers.js'),
   'tang-changan': () => import('../settlements/tang-changan/movers.js'),
   'wei-ye': () => import('../settlements/wei-ye/movers.js'),
+  'bhaktapur': () => import('../settlements/bhaktapur/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

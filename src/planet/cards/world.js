@@ -950,4 +950,22 @@ export const CARDS = {
       "城与铜雀园 —— 夯土城墙与三门道的城门，中轴的中阳大道与东西大街，官署、有墙的里坊和立有市楼的市；园中有为练水军而挖的玄武池，北城墙外是漳水。",
     ],
   },
+  'bhaktapur': {
+    en: [
+      "Bhaktapur lies in the Kathmandu Valley in Nepal, and the year is about 1710, under the Malla kings, a few years after King Bhupatindra Malla raised the Nyatapola. It is a Newar city of brick, carved timber and clay, famed for its woodcarving and its potters. The architecture is Newar: houses of three or four storeys of red brick with carved lattice windows under deep tiled eaves, and pagoda temples of tiered roofs on carved struts.",
+      "The Nyatapola — a five-roofed pagoda about 30 m high, built in 1701–1702 on a five-stage plinth, a pair of stone guardians on each stage, each said to be ten times stronger than the one below: wrestlers, elephants, lions, griffins and the goddesses Simhini and Vyaghrini; bells hang from its eaves and a gilt pinnacle crowns it.",
+      "Taumadhi square — the brick-paved square of the town, with the three-roofed Bhairabnath temple, the stone Siddhi Lakshmi shrine, a dabali platform, a rest-house, a stone spout, a small stupa, pipal trees and the market's stalls.",
+      "A Newar house — a brick house on the square's south side, its ground storey open as a shop-front room with jars, grain and a shrine.",
+      "Pottery Square — the open earth where potters throw pots on wheels, dry them in rows in the sun and fire them in straw-covered kilns.",
+      "The town — brick-paved lanes with continuous fronts of houses, small stupas at the crossings, terraced rice fields beyond.",
+    ],
+    zh: [
+      "巴克塔普尔位于尼泊尔加德满都谷地，所示约为1710年，正值马拉王朝，国王布帕廷德拉·马拉修建尼亚塔波拉塔数年之后。这是一座纽瓦尔人的砖、雕花木与陶土之城，以木雕和制陶闻名。建筑是纽瓦尔式：三四层的红砖房，带雕花格窗，屋檐深出、覆红瓦；还有层层屋檐由雕花斜撑托起的塔式庙宇。",
+      "尼亚塔波拉塔 —— 五层屋檐的塔，高约30米，建于1701至1702年，立在五级台基上，每级有一对石守护神，据说每一对都比下一级强十倍：力士、大象、狮子、格里芬和女神辛希尼与维亚格赫尼；檐下挂着风铃，顶上是镀金塔刹。",
+      "陶玛迪广场 —— 城中铺砖的广场，有三层屋檐的拜拉布纳特庙、石砌的悉地拉克希米小庙、表演用的高台、凉亭、石水口、小佛塔、菩提树和集市的摊位。",
+      "纽瓦尔民居 —— 广场南侧的一座砖房，底层敞开作铺面，摆着陶罐、粮食和神龛。",
+      "陶器广场 —— 一片开阔的泥地，陶工在这里拉坯，把陶器成行晒干，再入稻草覆盖的窑里烧制。",
+      "城区 —— 铺砖的小巷，两侧房屋连成一片，路口有小佛塔，城外是层层梯田。",
+    ],
+  },
 };
