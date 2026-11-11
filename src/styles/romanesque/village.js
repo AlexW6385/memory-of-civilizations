@@ -422,11 +422,20 @@ function furnish(c, kind, o) {
 
 // ── the village's works ──────────────────────────────────────────────────────
 
-/** calade: a cobbled lane { x0, x1, z, y, w } — a slab of schist cobbles a little proud of the shelf. */
+/** calade: a cobbled lane { x0, x1, z, y, w } — a slab of schist cobbles a little proud of the shelf, a gutter of dressed stone along its middle, weeds at the feet of the walls. */
 function calade(el, { bag }) {
   const hw = (el.w ?? 3) / 2;
   bag.add(el.mat || 'pebbles', box(el.x0, el.y - 0.1, el.z - hw, el.x1, el.y + 0.035, el.z + hw));
-  if (!el.simple) { bag.add('flagstone', box(el.x0, el.y - 0.1, el.z - hw - 0.12, el.x1, el.y + 0.03, el.z - hw)); bag.add('flagstone', box(el.x0, el.y - 0.1, el.z + hw, el.x1, el.y + 0.03, el.z + hw + 0.12)); }
+  if (!el.simple) {
+    bag.add('flagstone', box(el.x0, el.y - 0.1, el.z - hw - 0.12, el.x1, el.y + 0.03, el.z - hw)); bag.add('flagstone', box(el.x0, el.y - 0.1, el.z + hw, el.x1, el.y + 0.03, el.z + hw + 0.12));
+    // the gutter: two dressed kerbs with the cobbles sunk between (the water of the roofs runs down the lane)
+    for (const dz of [-0.17, 0.17]) bag.add('flagstone', box(el.x0, el.y, el.z + dz - 0.05, el.x1, el.y + 0.06, el.z + dz + 0.05));
+    const rand = rng(Math.floor(el.x0 * 7 + el.z * 13) >>> 0 || 3);
+    for (let x = el.x0 + 1 + rand() * 4; x < el.x1 - 1; x += 5 + rand() * 7) {
+      const s = rand() < 0.5 ? -1 : 1, len = 0.8 + rand() * 1.8;
+      bag.add('sod', box(x, el.y + 0.02, s < 0 ? el.z - hw : el.z + hw - 0.22, x + len, el.y + 0.06 + rand() * 0.04, s < 0 ? el.z - hw + 0.22 : el.z + hw));
+    }
+  }
 }
 
 /**
@@ -479,7 +488,11 @@ function strip(el, { bag }) {
   bag.add(el.mat || 'pebbles', fromTriangles(out));
 }
 
-/** jardin: a walled yard with its beds { rect, y, seed }: low rubble walls with a coping, ridged beds. */
+/**
+ * jardin: a walled yard { rect, y, seed }: low rubble walls with a coping, and by the seed one of four: ridged vegetable beds with
+ * cabbages; vines on posts and wires (the terraces of the Rouergue were planted with vines); an orchard yard with straw skeps on a
+ * stone bench and a hut of stone; or a pen with straw, a trough and a hay rick.
+ */
 function jardin(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, rand = rng(el.seed || 1), t = 0.4, h = 1.05;
   const wall4 = [[x0, z0, x1, z0 + t], [x0, z1 - t, x1, z1], [x0, z0 + t, x0 + t, z1 - t], [x1 - t, z0 + t, x1, z1 - t]];
@@ -489,7 +502,46 @@ function jardin(el, { bag, col }) {
   });
   bag.add('limestone_yellow', box(x0 - 0.03, y + h, z0 - 0.03, x1 + 0.03, y + h + 0.08, z0 + t + 0.03));
   if (el.simple) return;
-  for (let x = x0 + t + 0.7; x < x1 - t - 0.5; x += 1.1) bag.add('sod', box(x, y, z0 + t + 0.6, x + 0.7, y + 0.16 + rand() * 0.1, z1 - t - 0.6));
+  const kind = (el.seed >>> 3) % 4, ix0 = x0 + t, ix1 = x1 - t, iz0 = z0 + t, iz1 = z1 - t, cx = (ix0 + ix1) / 2, cz = (iz0 + iz1) / 2;
+  if (kind === 0) {
+    for (let x = ix0 + 0.7; x < ix1 - 0.5; x += 1.1) {
+      bag.add('sod', box(x, y, iz0 + 0.6, x + 0.7, y + 0.16 + rand() * 0.1, iz1 - 0.6));
+      for (let z = iz0 + 0.9; z < iz1 - 0.7; z += 0.55) bag.add('palm_leaf', lathe([[0.04, 0], [0.17, 0.08], [0.15, 0.2], [0.001, 0.22]], 7, null, x + 0.35, y + 0.2, z));
+    }
+  } else if (kind === 1) {
+    // vines: rows of posts with two wires, the vines low and leafy between them
+    for (let x = ix0 + 0.8; x < ix1 - 0.5; x += 1.3) {
+      for (let z = iz0 + 0.5; z < iz1 - 0.4; z += 2.2) bag.add('wood_dark', box(x - 0.03, y, z - 0.03, x + 0.03, y + 1.3, z + 0.03));
+      for (const hy of [0.55, 1.2]) bag.add('iron', box(x - 0.006, y + hy, iz0 + 0.5, x + 0.006, y + hy + 0.012, iz1 - 0.5));
+      for (let z = iz0 + 0.7; z < iz1 - 0.6; z += 0.5) bag.add('palm_leaf', lathe([[0.1, 0], [0.22, 0.25], [0.2, 0.6], [0.001, 0.75]], 6, null, x, y + 0.1 + rand() * 0.1, z));
+      bag.add('sod', box(x - 0.25, y, iz0 + 0.5, x + 0.25, y + 0.08, iz1 - 0.5));
+    }
+  } else if (kind === 2) {
+    // straw skeps on a bench of stone, a hut of stone with a roof of lauze, the beds beside
+    const bx = ix0 + 0.6, bz = iz0 + 0.8;
+    bag.add('limestone_yellow', box(bx, y, bz, bx + 2.0, y + 0.5, bz + 0.45));
+    for (let k = 0; k < 3; k++) bag.add('thatch', lathe([[0.2, 0], [0.19, 0.12], [0.14, 0.24], [0.06, 0.32], [0.001, 0.36]], 9, null, bx + 0.35 + k * 0.65, y + 0.5, bz + 0.22));
+    const hx = Math.max(ix0 + 0.3, ix1 - 2.6), hz = Math.max(iz0 + 0.3, iz1 - 2.3);
+    if (hx + 2.2 < ix1 && hz + 2.0 < iz1) { bag.add('schist_rubble', box(hx, y - 0.3, hz, hx + 2.2, y + 1.9, hz + 2.0)); bag.add('opening', box(hx + 0.8, y, hz - 0.02, hx + 1.5, y + 1.5, hz + 0.02)); bag.add('lauze', box(hx - 0.2, y + 1.9, hz - 0.2, hx + 2.4, y + 2.08, hz + 2.2)); bag.add('lauze', box(hx + 0.2, y + 2.08, hz, hx + 2.0, y + 2.22, hz + 2.0)); col.rect([hx, hz, hx + 2.2, hz + 2.0], y - 0.3, y + 2.3); }
+    for (let x = ix0 + 0.8; x < ix1 - 3.2; x += 1.2) bag.add('sod', box(x, y, cz - 0.2, x + 0.7, y + 0.14, iz1 - 0.6));
+  } else {
+    // a pen: straw on the ground, a trough of stone, a rick of hay against the wall
+    bag.add('thatch', box(ix0 + 0.4, y, iz0 + 0.4, ix1 - 0.4, y + 0.1, iz1 - 0.4));
+    bag.add('limestone_yellow', box(cx - 0.8, y, iz1 - 0.9, cx + 0.8, y + 0.45, iz1 - 0.45)); bag.add('water', box(cx - 0.7, y + 0.4, iz1 - 0.85, cx + 0.7, y + 0.42, iz1 - 0.5));
+    const rx = ix0 + 1.0, rz = iz0 + 1.0;
+    bag.add('thatch', lathe([[1.0, 0], [1.1, 0.5], [0.9, 1.2], [0.5, 1.8], [0.001, 2.1]], 10, null, rx, y, rz)); col.circle(rx, rz, 1.0, y, y + 2);
+  }
+}
+
+/** croix: a stone cross on its steps { at, y, h } (the calvary of a pilgrims' square): three steps, a plinth, a shaft, the arms. */
+function croix(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, H = el.h ?? 3.4;
+  for (let k = 0; k < 3; k++) bag.add('limestone_yellow', box(x - 1.3 + k * 0.3, y - 0.4, z - 1.3 + k * 0.3, x + 1.3 - k * 0.3, y + 0.17 * (k + 1), z + 1.3 - k * 0.3));
+  bag.add('limestone_yellow', box(x - 0.45, y + 0.51, z - 0.45, x + 0.45, y + 1.1, z + 0.45));
+  bag.add('limestone_yellow', box(x - 0.13, y + 1.1, z - 0.13, x + 0.13, y + H, z + 0.13));
+  bag.add('limestone_yellow', box(x - 0.55, y + H - 1.0, z - 0.1, x + 0.55, y + H - 0.76, z + 0.1));
+  bag.add('limestone_yellow', box(x - 0.18, y + H, z - 0.18, x + 0.18, y + H + 0.08, z + 0.18));
+  col.rect([x - 1.3, z - 1.3, x + 1.3, z + 1.3], y - 0.4, y + 0.51); col.circle(x, z, 0.5, y, y + H);
 }
 
 /**
@@ -541,4 +593,4 @@ function porte(el, { bag, col }) {
   void rod; void lathe;
 }
 
-export const villageElements = { maison, calade, stairs, retain, strip, jardin, fontaine, porte };
+export const villageElements = { maison, calade, stairs, retain, strip, jardin, croix, fontaine, porte };
