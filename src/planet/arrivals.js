@@ -88,4 +88,5 @@ export const ARRIVALS = {
   'ajanta': [17, null, 19.5, 1.32, 0.2],   // On the east bank's path, looking west over the Waghora at the horseshoe cliff: the rock-cut ledge with the pillared porch of the painted vihara and the great horseshoe window of the chaitya hall, tiers of shrine niches above, the waterfall down the north wing.
   'mohenjo-daro': [-155, 7.0, -72.5, 0, -0.12],   // from the south edge of the Great Bath's court on the Citadel, north across the paved court to the brick pool with its stairs at both ends, the gallery of stepped piers behind it
   'shang-yinxu': [20, 0.1, -34, 0, 0.1],   // from the court, up the axis: the ancestral hall of the kings whole on its rammed-earth platform, the stair in the middle bay, the flanking halls either side, the rows of covered sacrificial pits across the court
+  'manueline-lisbon': [-206, null, 117, 0.0, 0.3],   // The Jerónimos' south portal whole across the plaza, the Belém Tower in the river to the left.
 };

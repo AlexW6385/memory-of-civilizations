@@ -112,6 +112,7 @@ export const SITES = [
   { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, era: 'c. 2500 BC', region: 'indus', lat: 27.33, lon: 68.14, radius: 330 },
   { id: 'lu-qufu', name: { en: 'Qufu', zh: '曲阜' }, era: 'Qing, c. 1730', region: 'china', lat: 35.6, lon: 116.99, radius: 330 },
   { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, era: 'c. 1200 BC', region: 'china', lat: 36.13, lon: 114.32, radius: 330 },
+  { id: 'manueline-lisbon', name: { en: 'Manueline Lisbon', zh: '曼努埃尔里斯本' }, era: 'c. 1520', region: 'iberia', lat: 38.7, lon: -9.21, water: true, radius: 330 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
