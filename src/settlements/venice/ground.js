@@ -28,6 +28,8 @@ export const ground = {
     fog: { color: [0.8, 0.82, 0.84], density: 0.0005, height: 0.012 },
     exposure: 0.5,
     wind: [0.4, 0.2],
+    waterline: SEA,       // the canals' still water: the stain line on the walls and quays (src/engine/materials.js)
+    damp: 0.9,            // the lagoon's damp and salt: rising damp, algae at the foot of the walls, streaks on the plaster
     weather: [
       { id: 'hazy', weight: 3, clouds: 0.3, cloudDensity: 0.4, sun: 0.95, fog: 1.3 },
       { id: 'clear', weight: 2, clouds: 0.15, cloudDensity: 0.3, sun: 1.0, fog: 1 },
