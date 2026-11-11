@@ -3,7 +3,7 @@
 // meadows and stacked, wood cut and stacked by the doors, the sledges of the farm, hens in the yards;
 // cattle, sheep, goats and horses at pasture with their herders; at the church the priest at the
 // altar and a few people in the churchyard and at its gate.
-import { RADIUS, CHURCH, YARD, FARMS, RIVER, height, buildings, inBuilding, inRiver, riverZ } from './layout.js';
+import { LANDING, RADIUS, CHURCH, YARD, FARMS, RIVER, height, buildings, inBuilding, inRiver, riverZ } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' }, elements });
@@ -57,9 +57,31 @@ export function life() {
   return L;
 }
 
+/** The landing: the quay, the boathouse with a boat drawn up, boats afloat at the quay, and the hay racks of the meadows. */
+export function shore() {
+  const L = LANDING, E = [], rand = rng(1252), w = RIVER.level;
+  E.push({ t: 'quay', at: [L.x, L.top], y: L.y0, yd: L.yd, ramp: 4.6, deck: 11, w: 2.4, bed: height });
+  E.push({ t: 'naust', c: L.naust, y: height(...L.naust) + 0.1, w: 5.2, d: 9.5, rot: 0, seed: 7 });
+  const ze = L.top + 4.6 + 11;
+  E.push({ t: 'nboat', at: [L.x + 2.3, ze - 3.2], y: w + 0.05, rot: Math.PI, len: 8.5, kind: 'sexaering', seed: 3 });
+  E.push({ t: 'nboat', at: [L.x - 2.1, ze - 4.2], y: w + 0.05, rot: Math.PI + 0.06, len: 5.6, kind: 'faering', seed: 4 });
+  E.push({ t: 'nboat', at: [L.naust[0] + 0.2, L.naust[1] + 9.5 / 2 + 6.5], y: height(L.naust[0], L.naust[1] + 13) + 0.05, rot: 0.08, len: 5.6, kind: 'beached', seed: 5 });
+  // hay racks (hesje) in the meadows by the farms, in rows across the slope
+  FARMS.forEach(([fx, fz], i) => {
+    if (i % 2 === 0) return;
+    const sg = fx < 0 ? 1 : -1, cx = fx + sg * 30, cz = fz - 14;
+    for (let r = 0; r < 2; r++) {
+      const a = [cx, cz + r * 9], b = [cx + 14, cz + r * 9 + (rand() - 0.5) * 3];
+      if ([a, b].every((p) => free(p[0], p[1], 1.5))) E.push({ t: 'hay_rack', pts: [a, b], y: height, h: 2.3, seed: 40 + i * 3 + r });
+    }
+  });
+  return E;
+}
+
 export function farms() {
   return [
     base('norse-borgund-farms', 'norse', buildings().map((b) => ({ t: 'log_house', ...b, open: b.kind === 'stue' && (b.rect[2] - b.rect[0]) * (b.rect[3] - b.rect[1]) > 40 }))),
+    base('norse-borgund-shore', 'norse', shore()),
     base('norse-borgund-life', 'life', life()),
   ];
 }
