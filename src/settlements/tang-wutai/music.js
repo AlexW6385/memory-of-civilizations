@@ -10,7 +10,9 @@ export default {
     open: {
       harp: { density: 0.35, range: [7, 24], level: 0.2, timbre: 'pipa' },
       lead: { timbre: 'ney', density: 0.3, range: [12, 26], level: 0.09 },
-      reverb: 0.3,
+      drone: { notes: [-24], level: 0.03, timbre: 'voice' },      // the mountain wind's low breath under the pipa
+      qing: { every: 64, level: 0.07 },                           // a bowl-bell from the monastery now and then
+      reverb: 0.35,
     },
     hall: {
       drone: { notes: [-12, 0], level: 0.06, timbre: 'voice' },
