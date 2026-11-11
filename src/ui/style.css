@@ -158,3 +158,6 @@ body.panel-open #btn-mute, body.panel-open #btn-lang, body.panel-open #corner, b
 @media (max-width: 700px) {
   .site-card { left: 0 !important; right: 0; top: auto !important; bottom: 0; width: auto; max-height: 46dvh !important; border-radius: 16px 16px 0 0; padding: 16px 16px max(14px, env(safe-area-inset-bottom)); }
 }
+
+/* ?film: only the picture (and the recorder's line) while a film is made */
+body.filming > :not(#view):not(#film-status) { display: none !important; }

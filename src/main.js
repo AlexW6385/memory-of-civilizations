@@ -26,6 +26,7 @@ import { REGION } from './world/regions.js';
 import { openClimate } from './planet/climates.js';
 import { ARRIVALS } from './planet/arrivals.js';
 import { Tour } from './ui/tour.js';
+import { runFilm } from './ui/film.js';
 import { nearest, peek, take } from './ui/order.js';
 
 const $ = (id) => document.getElementById(id);
@@ -685,7 +686,7 @@ async function main() {
     // (the frames of a view held still are drawn at 24 fps on purpose: not counted)
     const full = !!(perf.panel || perf.record) || now - (R.movedAt ?? -1e9) < 900;
     if (measuring) measuring(now, dt * 1000);
-    else dynres.update(now, dt * 1000, full && fullWas);
+    else if (!CAPTURE) dynres.update(now, dt * 1000, full && fullWas);   // (a recording keeps one size)
     fullWas = full;
   };
   R.renderer.setAnimationLoop(frame);
@@ -753,6 +754,10 @@ async function main() {
   setTimeout(() => world.prefetch(world.here(controls)), 2000);
   // (once the start is over: a pose in the middle of it waited for ever)
   if (params.has('bench')) startedP.then(() => runBench(window.palace));
+  // ?film=<settlement>: a scripted flight recorded into an MP4 (src/ui/film.js; with &capture and &quality=cinema)
+  if (params.has('film')) startedP.then(() => runFilm(params.get('film'), window.palace, (n) => new Promise((r) => {
+    const f0 = stats.frames, wait = () => (stats.frames >= f0 + n ? r() : requestAnimationFrame(wait)); wait();
+  }), params)).catch((e) => { console.error('[film]', e); window.FILM_DONE = { error: String(e.message || e) }; });
 }
 
 main().catch((e) => {

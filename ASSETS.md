@@ -5,6 +5,7 @@ Only CC0 or MIT assets, loaded from a CDN; nothing large is committed to the rep
 | Asset | Licence | Source | Used for |
 |---|---|---|---|
 | three.js r186 (`three@0.186.1`), including addons: GTAONode, BloomNode, SMAANode, CSMShadowNode | MIT | npm `three@0.186.1`, served from `src/vendor/three/` (licence there) so the page and the build workers share one copy | renderer, post-processing, shadows |
+| mp4-muxer 5.2.2 | MIT | npm `mp4-muxer@5.2.2`, served from `src/vendor/mp4-muxer/` (licence there) | writing recorded films (`?film=`) into MP4 |
 | three.js `SkyMesh`, forked as `src/engine/sky.js` (adds the horizon's dip) | MIT | three.js examples | sky |
 | Natural Earth land polygons, 1:50m and 1:110m, via the `world-atlas` package (ISC) | public domain | https://www.naturalearthdata.com, https://github.com/topojson/world-atlas | the planet's continents, baked into `data/planet/land.bin` by `tools/planet-land.mjs` |
 
