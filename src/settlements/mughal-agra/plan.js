@@ -16,8 +16,8 @@ E.push({ t: 'stairs', rect: [-10, tz1, 10, tz1 + 4], y0: 0, y1: ty, dir: 'n', ma
 E.push({ t: 'mausoleum', c: PLINTH.c, y: PLINTH.y, a: 28.3, chamfer: 8.5, h: 33, dome: { r: 17.7, h: 28, drum: 7 }, interior: true });
 for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) E.push({ t: 'minaret', c: [PLINTH.c[0] + sx * (PLINTH.a - 3), PLINTH.c[1] + sz * (PLINTH.a - 3)], y: PLINTH.y, h: 40, r: 2.6 });
 // the mosque (west, facing east) and its twin (east, facing west), on the terrace
-E.push({ t: 'red_hall', rect: [-138, -232, -115, -174], y: ty, h: 12, front: 'e', decor: 'calligraphy' });
-E.push({ t: 'red_hall', rect: [115, -232, 138, -174], y: ty, h: 12, front: 'w', decor: 'flowers' });
+E.push({ t: 'red_hall', rect: [-138, -232, -115, -174], y: ty, h: 12, front: 'e', decor: 'calligraphy', interior: 'mosque' });
+E.push({ t: 'red_hall', rect: [115, -232, 138, -174], y: ty, h: 12, front: 'w', decor: 'flowers', interior: 'jawab' });
 // the garden: walks of red sandstone along the axes and round the quarters, raised channels of
 // marble along the axes, the central pool on its platform
 const [gx0, gz0, gx1, gz1] = GARDEN;
@@ -39,18 +39,20 @@ for (const r of [[-3.6, gz0 + 2, -3, gz1 - 2], [3, gz0 + 2, 3.6, gz1 - 2], [gx0 
     raised([s * c - GW, lo, s * c + GW, hi]);                       // north–south, in the quarter on side s
     raised([lo, s * c - GW, hi, s * c + GW]);                       // east–west
   }
-  raised([-GRIM - 2, R1, GRIM + 2, GRIM + 2]); raised([-GRIM - 2, -GRIM - 2, GRIM + 2, -R1]);
+  // (the walk along the south wall stops either side of the great gate, whose passage runs on the garden's floor)
+  raised([-GRIM - 2, R1, -GATE.w / 2 - 1, GRIM + 2]); raised([GATE.w / 2 + 1, R1, GRIM + 2, GRIM + 2]); raised([-GRIM - 2, -GRIM - 2, GRIM + 2, -R1]);
   raised([R1, -R1, GRIM + 2, R1]); raised([-GRIM - 2, -R1, -R1, R1]);
 }
 // the riverfront: the terrace's face to the Yamuna, an arcade of blind arches with a parapet over it, between the towers
 for (const [xa, xb] of [[tx0 + 4.2, tx1 - 4.2]]) E.push({ t: 'mughal_wall', a: [xa, tz0], b: [xb, tz0], y: -4.6, h: 7.1, inside: [0, 0] });
 // the walls round the garden and the forecourt, their octagonal towers, the pavilions on the east and west walls
 const wall = (a, b) => E.push({ t: 'mughal_wall', a, b, h: 7 });
-wall([gx0, gz0], [gx0, gz1]); wall([gx1, gz0], [gx1, gz1]);
+// (the pavilions stand on the middle of the east and west walls: the walls stop at them)
+for (const gx of [gx0, gx1]) { wall([gx, gz0], [gx, -15]); wall([gx, 15], [gx, gz1]); }
 wall([gx0, gz1], [-GATE.w / 2, gz1]); wall([GATE.w / 2, gz1], [gx1, gz1]);
 for (const [x, z] of [[gx0, gz1], [gx1, gz1], [tx0, tz0], [tx1, tz0]]) E.push({ t: 'octa_tower', c: [x, z], h: 12, r: 4 });
-for (const s of [-1, 1]) E.push({ t: 'red_hall', rect: s < 0 ? [gx0 - 10, -14, gx0 + 2, 14] : [gx1 - 2, -14, gx1 + 10, 14], y: 0.2, h: 9, front: s < 0 ? 'e' : 'w' });
-E.push({ t: 'great_gate', c: GATE.c, y: 0, w: GATE.w, d: GATE.d, h: GATE.h });
+for (const s of [-1, 1]) E.push({ t: 'red_hall', rect: s < 0 ? [gx0 - 10, -14, gx0 + 2, 14] : [gx1 - 2, -14, gx1 + 10, 14], y: 0.2, h: 9, front: s < 0 ? 'e' : 'w', interior: 'pavilion' });
+E.push({ t: 'great_gate', c: GATE.c, y: 0, w: GATE.w, d: GATE.d, h: GATE.h, rooms: true });
 const [fx0, fz0, fx1, fz1] = FORECOURT;
 E.push({ t: 'lane', rect: FORECOURT, y: 0.05, mat: 'sandstone_red' });
 // the forecourt's three gates and the two bazaar streets from the east and west gates toward its middle, each lined on
@@ -66,8 +68,17 @@ for (const sx of [-1, 1]) {
 E.push({ t: 'bazaar_gate', c: [0, fz1], axis: 'z', w: GTW, d: 8, h: 11 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('tomb chamber', [-11, -214, 11, -192], PLINTH.y, 'hall'), room('plinth', [-47.5, -250.5, 47.5, -155.5], PLINTH.y, 'open'), room('garden', GARDEN, 0, 'open')];
-const walks = [[[0, 240], [0, 200], [0, 172], [0, 140], [0, 18], [0, -18], [0, -146], [0, -152], [0, -158]]];
+// the halls opened in §15 (their floors, as built in styles/mughal): the mosque and jawab on the terrace, the garden's two pavilions,
+// the gate's guard rooms; the forecourt's bazaar (the market's music)
+const hallRooms = [
+  room('mosque', [-138 + 1.6, -232 + 1.4, -115 - 0.55, -174 - 1.4], ty + 0.05, 'hall'), room('jawab', [115 + 0.55, -232 + 1.4, 138 - 1.6, -174 - 1.4], ty + 0.05, 'hall'),
+  room('west pavilion', [gx0 - 10 + 0.55, -14 + 1.4, gx0 + 2 - 1.6, 14 - 1.4], 0.25, 'hall'), room('east pavilion', [gx1 - 2 + 0.55, -14 + 1.4, gx1 + 10 - 1.6, 14 - 1.4], 0.25, 'hall'),
+  ...[-1, 1].map((sg) => { const bx0 = sg < 0 ? GATE.c[0] - GATE.w / 2 : GATE.c[0] + GATE.w * 0.15, bx1 = sg < 0 ? GATE.c[0] - GATE.w * 0.15 : GATE.c[0] + GATE.w / 2; return room(sg < 0 ? 'west guard room' : 'east guard room', [bx0 + 1.2, GATE.c[1] - GATE.d / 2 + 2.4, bx1 - 1.2, GATE.c[1] + GATE.d / 2 - 2.4], 0.04, 'hall'); }),
+  room('forecourt', [fx0 + 2, fz0 + 2, fx1 - 2, fz1 - 2], 0, 'market'),
+];
+const rooms = [...hallRooms, room('tomb chamber', [-11, -214, 11, -192], PLINTH.y, 'hall'), room('plinth', [-47.5, -250.5, 47.5, -155.5], PLINTH.y, 'open'), room('garden', GARDEN, 0, 'open')];
+// the visitor's way: the axis street, the forecourt, the gate's passage, then the east lane beside the channel (the channel and the tank hold water), the stairs to the terrace and the plinth
+const walks = [[[0, 240], [0, 200], [0, 172], [0, 152], [4.8, 149], [4.8, 136], [7.8, 130], [7.8, -143], [4.5, -149], [0, -152], [0, -158]]];
 walks[0].y0 = 0;
 
 export const taj = {

@@ -12,6 +12,7 @@ import * as F from './furnish.js';
 import { courtHouse } from './courthouse.js';
 import { townHouse } from './townhouse.js';
 import { inlayWorkshop } from './workshop.js';
+import './fronts.js';
 import { box, lathe, fromTriangles, frustum, disc, rod, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
@@ -119,8 +120,13 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
   for (const sg of [-1, 1]) {
     const A = per[sg < 0 ? 0 : 3], Bk = per[sg < 0 ? 1 : 2], off = oct ? 0 : sg * sideT / 2;
     const pa = Q(A[0] + off, oct ? A[1] : th / 2), pb = Q(Bk[0] + off, Bk[1] + (ar.pass ? 0.2 : 0));
-    bag.add(SM, orientedBox(pa, pb, sideT, y0, ys + 0.05, oct ? 0.12 : 0));         // a rect recess's sides meet the wall's back face, flush with the opening
-    if (col && sill < 0.5) col.segment(pa, pb, sideT, y0, ys);
+    // (`gap`: a door through each side, [t0, t1] along it from the opening: the gate's guard rooms open into the iwan)
+    const lerp = (t) => [pa[0] + (pb[0] - pa[0]) * t, pa[1] + (pb[1] - pa[1]) * t], runs = ar.gap ? [[pa, lerp(ar.gap[0])], [lerp(ar.gap[1]), pb]] : [[pa, pb]];
+    for (const [ra, rb] of runs) {
+      bag.add(SM, orientedBox(ra, rb, sideT, y0, ys + 0.05, oct ? 0.12 : 0));         // a rect recess's sides meet the wall's back face, flush with the opening
+      if (col && sill < 0.5) col.segment(ra, rb, sideT, y0, ys);
+    }
+    if (ar.gap) { const g0 = lerp(ar.gap[0]), g1 = lerp(ar.gap[1]); bag.add(SM, orientedBox(g0, g1, sideT, y0 + 3.7, ys + 0.05, oct ? 0.12 : 0)); if (col && sill < 0.5) col.segment(g0, g1, sideT, y0 + 3.7, ys); }
   }
   if (!ar.pass) bag.add(ar.backMat ?? SM, orientedBox(Q(-wb / 2 - 0.1, n1 + 0.15), Q(wb / 2 + 0.1, n1 + 0.15), 0.3, y0, ys + 0.05));
   // the floor of a raised niche, from the wall's back face to the back wall (the wall's own sill fills the opening)
@@ -208,7 +214,7 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
  */
 function pishtaqFace(bag, col, a, b, y, h, iw, mat, niches = true, inside = null, trim = 'marble_dark') {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
-  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass, alcove: iw.alcove && (iw.pass ? 'rect' : iw.alcove) }];
+  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass, alcove: iw.alcove && (iw.pass ? 'rect' : iw.alcove), gap: iw.gap }];
   if (niches) for (const s of [-1, 1]) {
     const c = L / 2 + s * (iw.w / 2 + (L - iw.w) / 4);
     const nw = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45);
@@ -576,7 +582,9 @@ function tombChamber(bag, col, cx, cz, y, A) {
 }
 
 /** red_hall: the mosque or its twin (the jawab) { rect, y, h, front, domes: 3 }: a hall of red sandstone with arched openings, three white domes. */
-function redHall(el, { bag, col }) {
+function redHall(el, ctx) {
+  const { bag, col } = ctx;
+  if (el.interior) return hollowHall(el, ctx);
   const [x0, z0, x1, z1] = el.rect, y = el.y, h = el.h ?? 12, f = el.front || 'e';
   // the hall's mass stands back behind the arcade so the arches open into their bays (dark doors at the back);
   // the roof and the end walls close the gap
@@ -613,14 +621,132 @@ function redHall(el, { bag, col }) {
   for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) chhatri(bag, null, x, y + h, z, 1.6, 2.6, 8, R, W);
 }
 
+
+/**
+ * A hall of the red sandstone, opened (docs/settlements/mughal-agra.md §14): the arcade's arches pass through into a hall
+ * under a ceiling; the mosque (`interior: 'mosque'`, qibla on the back, west, wall) with its mihrab and minbar, the
+ * floor of white marble set with the outlines of the prayer rugs, three inner domes over the bays, lamps on chains,
+ * Qur'an stands; the jawab (`'jawab'`) the same without the mihrab; the garden's pavilions (`'pavilion'`) a flat
+ * painted ceiling, a divan along the back, a carpet.
+ */
+function hollowHall(el, ctx) {
+  const { bag, col, lights } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, h = el.h ?? 12, f = el.front || 'e', kind = el.interior, east = f === 'e';
+  const TB = 1.6, TE = 1.4, ox = east ? 1 : -1;
+  const X0 = east ? x0 + TB : x0 + 0.55, X1 = east ? x1 - 0.55 : x1 - TB, xa = east ? x1 + 0.05 : x0 - 0.05, Z0 = z0 + TE, Z1 = z1 - TE, L = z1 - z0, xm = (X0 + X1) / 2, zm = (z0 + z1) / 2;
+  const mosque = kind === 'mosque' || kind === 'jawab';
+  // the walls: back, the two ends; the roof slab over the ceiling's voids
+  const back = east ? [x0, z0, x0 + TB, z1] : [x1 - TB, z0, x1, z1];
+  bag.add(R, box(back[0], y, back[1], back[2], y + h, back[3])); col.rect(back, y, y + h);
+  for (const [a, b] of [[z0, Z0], [Z1, z1]]) { bag.add(R, box(x0, y, a, x1 - (east ? 0.55 : 0), y + h, b)); col.rect([x0, a, x1, b], y, y + h); }
+  bag.add(R, box(x0, y + h - 0.3, z0, x1, y + h, z1)); col.floor([x0, z0, x1, z1], y + h);
+  // the arcade: five arches, all open
+  const a = east ? [xa, z0] : [xa, z1], b = east ? [xa, z1] : [xa, z0];
+  const arches = []; for (let i = 0; i < 5; i++) { const c = L * (i + 0.5) / 5, big = i === 2; arches.push({ at: c, w: big ? 7 : 4.2, h: big ? h * 0.85 : h * 0.55, pass: true }); }
+  arcadeWall(bag, col, a, b, y, h, 1.2, R, arches, [xm, zm]);
+  if (el.decor) {
+    const [fa, fb] = east ? [[x1 + 0.05, z0], [x1 + 0.05, z1]] : [[x0 - 0.05, z1], [x0 - 0.05, z0]];
+    faceDecor(bag, fa, fb, y, h, { w: 7, h: h * 0.85 }, R, false, [xm, zm], { F: 0.6, flowers: el.decor === 'flowers', holes: arches.filter((q) => q.w < 7).map((q) => [q.at - q.w / 2 - 0.35, q.at + q.w / 2 + 0.35]) });
+  }
+  // the outer domes, kiosks as before (the domes stand on the roof)
+  const nd = mosque ? 3 : 0;
+  for (let i = 0; i < nd; i++) { const z = z0 + L * (i + 0.5) / 3, r = i === 1 ? 6.2 : 4.6; bag.add(R, lathe([[r * 1.04, 0], [r * 1.04, 2]], 24, null, (x0 + x1) / 2, y + h, z)); dome(bag, W, (x0 + x1) / 2, y + h + 2, z, r, r * 1.5); }
+  if (!mosque) for (let i = 0; i < 2; i++) { const z = z0 + L * (i + 0.5) / 2, r = 3.2; bag.add(R, lathe([[r * 1.04, 0], [r * 1.04, 1.5]], 20, null, (x0 + x1) / 2, y + h, z)); dome(bag, W, (x0 + x1) / 2, y + h + 1.5, z, r, r * 1.5); }
+  for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) chhatri(bag, null, x, y + h, z, 1.6, 2.6, 8, R, W);
+  // the inside: plaster on the walls above a dado of red stone, the ceiling
+  const ci = (east ? back[2] : back[0]);
+  bag.add('lime_plaster', box(Math.min(ci, ci + ox * 0.03), y + 1.4, Z0, Math.max(ci, ci + ox * 0.03), y + h - 1.0, Z1));
+  for (const [zq, sg] of [[Z0, 1], [Z1, -1]]) bag.add('lime_plaster', box(X0, y + 1.4, Math.min(zq, zq + sg * 0.03), X1, y + h - 1.0, Math.max(zq, zq + sg * 0.03)));
+  // the floor: white marble with a border of black
+  const fl = y + 0.05;
+  bag.add('marble_dark', box(X0, y, Z0, X1, y + 0.03, Z1)); bag.add('marble_floor', box(X0 + 0.35, y, Z0 + 0.35, X1 - 0.35, fl, Z1 - 0.35));
+  if (mosque) {
+    const hc = 5.3 * 0.62, yc = y + h - 0.4 - hc - 0.1;              // the ceiling's level, the dome springing from it
+    const holes = [0, 1, 2].map((i) => [z0 + L * (i + 0.5) / 3, i === 1 ? 5.3 : 3.9]);
+    const sh = new Shape(); sh.moveTo(X0, Z0); sh.lineTo(X1, Z0); sh.lineTo(X1, Z1); sh.lineTo(X0, Z1); sh.lineTo(X0, Z0);
+    for (const [zc, r] of holes) { const hp = new Path(); for (let k = 0; k <= 24; k++) { const t = k / 24 * Math.PI * 2; const px = xm + Math.cos(t) * r * 0.995, pz = zc + Math.sin(t) * r * 0.995; if (k) hp.lineTo(px, pz); else hp.moveTo(px, pz); } sh.holes.push(hp); }
+    const g = new ExtrudeGeometry(sh, { depth: 0.3, bevelEnabled: false, curveSegments: 4 }); g.rotateX(Math.PI / 2); g.translate(0, yc + 0.3, 0);
+    bag.add('ceiling_painted', g);
+    for (const [zc, r] of holes) {
+      const k = r, inner = [[0.001, k * 0.62], [k * 0.45, k * 0.56], [k * 0.75, k * 0.4], [k * 0.92, k * 0.2], [k * 0.995, 0]];
+      bag.add(W, lathe(inner, 28, null, xm, yc, zc));
+      bag.add('gilt_bronze', disc(0.6, yc + k * 0.62 - 0.03, 16, xm, zc, false));
+      for (let q = 0; q < 12; q++) { const t = q / 12 * Math.PI * 2; bag.add('marble_dark', box(xm + Math.cos(t) * k * 0.995 - 0.05, yc - 0.5, zc + Math.sin(t) * k * 0.995 - 0.05, xm + Math.cos(t) * k * 0.995 + 0.05, yc, zc + Math.sin(t) * k * 0.995 + 0.05)); }
+    }
+    // the rugs' outlines on the floor, each a pointed arch of black marble toward the qibla (mosque), rows across the hall
+    if (kind === 'mosque') {
+      const mw = 0.86, ml = 1.9, rows = Math.floor((X1 - X0 - 1.5) / (ml + 0.05)), cols = Math.floor((Z1 - Z0 - 1.0) / (mw + 0.05));
+      for (let r = 0; r < Math.min(rows, 9); r++) for (let c = 0; c < cols; c++) {
+        const mx = X0 + 0.9 + r * (ml + 0.05), mz = Z0 + 0.5 + c * (mw + 0.05), t = 0.025, H2 = fl + 0.022;
+        bag.add('marble_dark', box(mx, fl, mz, mx + ml - 0.12, H2, mz + t)); bag.add('marble_dark', box(mx, fl, mz + mw - t, mx + ml - 0.12, H2, mz + mw)); bag.add('marble_dark', box(mx + ml - 0.12, fl, mz, mx + ml, H2, mz + mw));
+      }
+    }
+    // lamps on chains from the ceiling, the Qur'an stands in a row along the back
+    for (const [zc] of holes) for (const dxl of [-2.4, 2.4]) F.mosqueLamp(bag, lights, xm + dxl * 1.2, yc - 3.0, zc, yc + 0.2, { k: 1.2, glow: 1.5, reach: 9 });
+    for (let i = 0; i < 6; i++) F.rahle(bag, ci + ox * 1.6, fl, Z0 + 3 + i * ((Z1 - Z0 - 6) / 5), east ? Math.PI / 2 : -Math.PI / 2);
+    if (kind === 'mosque') {
+      // the mihrab on the qibla wall: an arched niche of marble inlaid with black, and the minbar of three steps at its right
+      const archSlab = (w, hh, d0, d1, mat) => {
+        const p = new Path(); archPath(p, -w / 2, w, hh); const sp = new Shape(); const pts = p.getPoints(); sp.moveTo(pts[0].x, pts[0].y); for (const q of pts.slice(1)) sp.lineTo(q.x, q.y);
+        const gg = new ExtrudeGeometry(sp, { depth: d1 - d0, bevelEnabled: false, curveSegments: 4 });
+        gg.translate(0, 0, d0); gg.rotateY(east ? Math.PI / 2 : -Math.PI / 2);
+        gg.translate(ci, y + 0.05, zm); bag.add(mat, gg);
+      };
+      archSlab(5.2, 9.0, 0.0, 0.14, W); archSlab(4.2, 8.0, 0.14, 0.2, 'marble_dark'); archSlab(3.4, 7.2, 0.2, 0.26, W);
+      for (const dz of [-1.5, 1.5]) bag.add(W, lathe([[0.2, 0], [0.14, 0.2], [0.12, 5.6], [0.17, 5.9]], 10, null, ci + ox * 0.5, y + 0.05, zm + dz));
+      const mz = zm - 4.6;
+      for (let i = 0; i < 3; i++) { const e0 = ci + ox * 0.3, e1 = ci + ox * (0.3 + 1.8 - i * 0.5); bag.add(W, box(Math.min(e0, e1), fl, mz - 0.55, Math.max(e0, e1), fl + 0.4 * (i + 1), mz + 0.55)); }
+      col.rect([Math.min(ci, ci + ox * 2.1), mz - 0.55, Math.max(ci, ci + ox * 2.1), mz + 0.55], y, y + 1.3);
+      bag.add(W, box(ci + ox * 0.3 - 0.0, fl + 1.2, mz - 0.45, ci + ox * 0.3 + ox * 0.5, fl + 1.3, mz + 0.45));
+    }
+  } else {
+    // the pavilion: a flat ceiling of painted beams, a divan along the back, a carpet in the middle
+    bag.add('ceiling_painted', box(X0, y + h - 1.0, Z0, X1, y + h - 0.7, Z1));
+    for (let z = Z0 + 1.5; z < Z1; z += 3) bag.add('wood_dark', box(X0, y + h - 1.25, z - 0.12, X1, y + h - 1.0, z + 0.12));
+    F.divan(bag, col, [ci + ox * 0.6, Z0 + 1.0], [ci + ox * 0.6, Z1 - 1.0], fl, [xm, zm], { h: 0.38, depth: 1.0 });
+    F.carpet(bag, xm, fl + 0.015, zm, Math.min(6.0, X1 - X0 - 2.5), 12, 0, 'persian');
+  }
+}
+
+/** One of the gate's side blocks hollowed to a guard room (chowki, docs/settlements/mughal-agra.md §14): the door on the passage, a charpoy for each watchman, spears racked and shields on the walls, water jars, a hookah, the ceiling of painted beams. sg: −1 west, +1 east. */
+function guardRoom(bag, col, cx, cz, y, w, d, h, sg) {
+  const bx0 = sg < 0 ? cx - w : cx + w * 0.3, bx1 = sg < 0 ? cx - w * 0.3 : cx + w, bz0 = cz - d + 1.2, bz1 = cz + d - 1.2, T = 1.2, CH = 5.4;
+  const ix0 = bx0 + T, ix1 = bx1 - T, iz0 = bz0 + T, iz1 = bz1 - T, door = sg < 0 ? ix1 : ix0, pass = sg < 0 ? bx1 : bx0;   // the passage side wall at [ix1, bx1] (west block) or [bx0, ix0]
+  const wall = (r, y0, y1) => { bag.add(R, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
+  wall([bx0, bz0, bx1, iz0], y, y + h); wall([bx0, iz1, bx1, bz1], y, y + h);                   // the walls toward the faces
+  wall(sg < 0 ? [bx0, iz0, ix0, iz1] : [ix1, iz0, bx1, iz1], y, y + h);                         // the outer wall
+  const pw = sg < 0 ? [ix1, iz0, bx1, iz1] : [bx0, iz0, ix0, iz1], zc = cz + d - (1.18 + 1.2 + d - 1.5) / 2, dw = 1.3;   // the door opposite the gap in the iwan's side wall (half-way along it)
+  wall([pw[0], pw[1], pw[2], zc - dw], y, y + CH); wall([pw[0], zc + dw, pw[2], pw[3]], y, y + CH);   // the passage wall with the door gap
+  bag.add(R, box(pw[0], y + 3.7, zc - dw, pw[2], y + CH, zc + dw)); col.rect([pw[0], zc - dw, pw[2], zc + dw], y + 3.7, y + CH);
+  // door frame: marble jambs, a lintel, an arch-shaped dark panel above
+  const jx = sg < 0 ? pw[2] + 0.02 : pw[0] - 0.02;
+  for (const s2 of [-1, 1]) bag.add('marble_smooth', box(Math.min(jx, jx + sg * 0.08), y, zc + s2 * dw - (s2 > 0 ? 0 : 0.18), Math.max(jx, jx + sg * 0.08), 3.7 + y, zc + s2 * dw + (s2 > 0 ? 0.18 : 0)));
+  bag.add('wood_dark', box(Math.min(jx, jx + sg * 0.05), y + 3.7, zc - dw, Math.max(jx, jx + sg * 0.05), y + CH - 0.4, zc + dw));
+  // the ceiling and the solid mass over it
+  bag.add('ceiling_painted', box(ix0, y + CH - 0.25, iz0, ix1, y + CH, iz1));
+  for (let z = iz0 + 1.2; z < iz1; z += 2.4) bag.add('wood_dark', box(ix0, y + CH - 0.5, z - 0.12, ix1, y + CH - 0.25, z + 0.12));
+  bag.add(R, box(bx0, y + CH, bz0, bx1, y + h, bz1)); col.rect([bx0, bz0, bx1, bz1], y + CH, y + h);
+  bag.add('sandstone_floor', box(ix0, y, iz0, ix1, y + 0.04, iz1));
+  // the furnishing: three charpoys along the outer wall, jars and the hookah by the door, spears and shields on the walls
+  const ow = sg < 0 ? ix0 : ix1, ox2 = sg < 0 ? 1 : -1;
+  for (let k = 0; k < 3; k++) F.charpoy(bag, col, ow + ox2 * 1.0, y + 0.04, iz0 + 1.7 + k * ((iz1 - iz0 - 3.4) / 2), Math.PI / 2, { quilt: ['cloth_red', 'cloth_indigo', 'cloth_green'][k] });
+  F.kilim(bag, (ix0 + ix1) / 2 + ox2 * 0.8, y + 0.06, zc, 3.6, 3.0, 0, ['cloth_red', 'cloth_white', 'cloth_indigo', 'cloth_ochre']);
+  F.hookah(bag, (ix0 + ix1) / 2 + ox2 * 0.8, y + 0.07, zc + 0.3, 0.4);
+  F.waterJar(bag, door - ox2 * 0.5, y + 0.04, iz0 + 0.6, 0.9, 'terracotta'); F.waterJar(bag, door - ox2 * 0.5, y + 0.04, iz1 - 0.6, 0.9, 'terracotta');
+  for (const zz of [iz0 + 0.5, iz1 - 0.5]) for (let i = 0; i < 4; i++) bag.add('wood_dark', rod([ow + ox2 * (0.3 + i * 0.12), y + 0.04, zz], [ow + ox2 * (0.3 + i * 0.12), y + 2.3, zz], 0.018, 5));
+  for (const zz of [iz0 + 4.2, iz1 - 4.2]) bag.add('hide_brown', lathe([[0.4, 0], [0.38, 0.03], [0.05, 0.1], [0.001, 0.12]], 14, null, 0, 0, 0).rotateZ(Math.PI / 2 * (sg < 0 ? -1 : 1)).translate(ow + ox2 * 0.06, y + 1.7, zz));
+}
+
 /** great_gate: the gate { c, y, w, d, h, front ('n'|'s') }: a block of red sandstone, its faces with great iwans, a row of small chhatris along the top, towers with kiosks at its corners. */
 function greatGate(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y ?? 0, w = el.w / 2, d = el.d / 2, h = el.h;
-  for (const s of [-1, 1]) pishtaqFace(bag, col, [cx + w * s, cz + d * s], [cx - w * s, cz + d * s], y, h, { w: w * 0.6, h: h * 0.75, depth: d - 1.5, alcove: 'oct' }, R, true, [cx, cz]);
-  bag.add(R, box(cx - w, y, cz - d + 1.2, cx - w * 0.3, y + h, cz + d - 1.2));
-  bag.add(R, box(cx + w * 0.3, y, cz - d + 1.2, cx + w, y + h, cz + d - 1.2));
+  for (const s of [-1, 1]) pishtaqFace(bag, col, [cx + w * s, cz + d * s], [cx - w * s, cz + d * s], y, h, { w: w * 0.6, h: h * 0.75, depth: d - 1.5, alcove: 'oct', pass: !!el.rooms, gap: el.rooms && s > 0 ? [0.38, 0.62] : undefined }, R, true, [cx, cz]);
+  if (el.rooms) for (const sg of [-1, 1]) guardRoom(bag, col, cx, cz, y, w, d, h, sg);
+  else {
+    bag.add(R, box(cx - w, y, cz - d + 1.2, cx - w * 0.3, y + h, cz + d - 1.2));
+    bag.add(R, box(cx + w * 0.3, y, cz - d + 1.2, cx + w, y + h, cz + d - 1.2));
+    col.rect([cx - w, cz - d, cx - w * 0.3, cz + d], y, y + h); col.rect([cx + w * 0.3, cz - d, cx + w, cz + d], y, y + h);
+  }
   bag.add(R, box(cx - w * 0.3, y + h * 0.78, cz - d + 1.2, cx + w * 0.3, y + h, cz + d - 1.2));
-  col.rect([cx - w, cz - d, cx - w * 0.3, cz + d], y, y + h); col.rect([cx + w * 0.3, cz - d, cx + w, cz + d], y, y + h);
   for (let i = 0; i < 11; i++) chhatri(bag, null, cx - w * 0.75 + i * w * 1.5 / 10, y + h, cz + d - 1.2, 0.9, 1.6, 6, W, W);
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     bag.add(R, lathe([[2.2, 0], [2, h + 2]], 8, null, cx + sx * w, y, cz + sz * d));

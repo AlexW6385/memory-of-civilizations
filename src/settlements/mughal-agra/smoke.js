@@ -5,7 +5,7 @@
 
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { houses, RADIUS, PLINTH } from './layout.js';
+import { houses, RADIUS, PLINTH, KATRAS, TERRACE } from './layout.js';
 import { frameOf } from '../../styles/mughal/townhouse.js';
 
 const ID = 'mughal-agra';
@@ -24,6 +24,9 @@ function emitters() {
     const [x, z] = f.pt((rand() - 0.5) * (f.W - 2), -f.D + 0.9);
     E.push({ p: [x, (h.storeys && h.storeys < 3 ? H : 3.5 + 2 * 3.1) + 1.2, z], kind: 'kitchen', seed: h.seed + 1 });
   }
+  // the cooks' fires in the katras' courts, a pot of milk on each; incense at the mosque's door
+  for (const k of KATRAS) { const cx = (k.rect[0] + k.rect[2]) / 2, cz = (k.rect[1] + k.rect[3]) / 2, g = k.gate === 'e' ? 1 : -1; E.push({ p: [cx + g * 7.5, 1.3, cz - 4.8], kind: 'kitchen', seed: 31 + Math.round(cx) }); E.push({ p: [cx - g * 9, 1.1, cz + 4.5], kind: 'steam', thr: 0.1, seed: 37 + Math.round(cx) }); }
+  E.push({ p: [-115 + 1.2, TERRACE.y + 0.9, -203], kind: 'incense', thr: 0, seed: 13 });
   // incense burning at the tomb's door (on the plinth)
   E.push({ p: [-3.5, PLINTH.y + 0.9, PLINTH.c[1] + 30.5], kind: 'incense', thr: 0, seed: 11 });
   return E;

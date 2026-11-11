@@ -2,7 +2,7 @@
 // the town's roofs, blue rock pigeons about the Taj's domes and the gate, swifts and swallows low over the Yamuna and the
 // garden's channels, house sparrows on the paving of the forecourt and the streets, a little egret and a grey heron
 // on the river's sandy bank (the Yamuna's bank is the Taj's north edge).
-import { RIVER_Z, FORECOURT } from './layout.js';
+import { RIVER_Z, FORECOURT, STREETS, KATRAS } from './layout.js';
 
 const fish = [];
 const flights = [
@@ -18,5 +18,22 @@ for (const [x, z] of [[-30, 185], [-12, 200], [25, 190], [40, 215], [-50, 218], 
 // the bank of the Yamuna below the terrace's face
 perches.push({ kind: 'egret', x: -60, z: RIVER_Z + 6, y: -2.2, rot: -1.57, stay: [80, 240], gone: [40, 150], alert: 10 });
 perches.push({ kind: 'heron', x: 110, z: RIVER_Z + 7, y: -2.3, rot: -1.57, stay: [80, 240], gone: [40, 150], alert: 11 });
+// sparrows and house crows on the lanes of the town: along each street, spread by the layout, never in a fixed list
+{
+  let k = 0;
+  for (const s of STREETS) {
+    const [x0, z0, x1, z1] = s.rect, alongZ = z1 - z0 > x1 - x0, len = alongZ ? z1 - z0 : x1 - x0, step = s.bazaar ? 22 : 34;
+    for (let t = 12; t < Math.min(len, 600) - 8; t += step + (k++ % 3) * 5) {
+      const u = (alongZ ? z0 : x0) + t, v = alongZ ? (x0 + x1) / 2 + ((k % 3) - 1) * 2.6 : (z0 + z1) / 2 + ((k % 3) - 1) * 2.6;
+      const x = alongZ ? v : u, z = alongZ ? u : v;
+      if (Math.hypot(x, z) > 320) continue;
+      if (k % 4 === 0) perches.push({ kind: 'crow', x, z, y: 0.04, rot: 1 + (k % 5), range: [2.2, 2.0] }); else spar(x, z);
+    }
+  }
+  // the katras' courts: sparrows among the bales, crows on the well's rim
+  for (const q of KATRAS) { const cx = (q.rect[0] + q.rect[2]) / 2, cz = (q.rect[1] + q.rect[3]) / 2; spar(cx - 3, cz + 1.2); spar(cx + 4, cz - 1.5); perches.push({ kind: 'crow', x: cx + 1, z: cz + 3, y: 0.04, rot: 2, range: [2, 2] }); }
+}
+// more of the river's birds: egrets and herons along the sand and the shallows on both sides of the terrace
+for (const [x, z, k] of [[-120, RIVER_Z + 4, 'egret'], [-20, RIVER_Z + 7, 'egret'], [45, RIVER_Z + 5, 'heron'], [150, RIVER_Z + 6, 'egret'], [-170, RIVER_Z + 3, 'heron'], [196, RIVER_Z + 9, 'egret']]) perches.push({ kind: k, x, z, y: -2.25, rot: -1.57, stay: [80, 240], gone: [40, 150], alert: k === 'heron' ? 11 : 10 });
 void FORECOURT;
 export default { fish, flights, perches };

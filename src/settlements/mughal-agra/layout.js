@@ -23,9 +23,10 @@ export function walkDist(x, z) {
   return d;
 }
 // the Taj Ganj's two northern caravanserais either side of the bazaar street on the axis (docs/settlements/mughal-agra.md
-// §11): Katra Omar Khan on the north-west, Katra Fulel (the perfume market) on the north-east, their gates on the street;
+// §11, §14): Katra Omar Khan on the north-west, Katra Fulel (the perfume market) on the north-east, Katra Resham (silk) on the south-west and Katra Jogidas on the south-east, their gates on the street;
 // and an open, furnished house on the street south of them
-export const KATRAS = [{ id: 'omar-khan', rect: [-58, 235, -14, 266], gate: 'e' }, { id: 'fulel', rect: [14, 235, 58, 266], gate: 'w' }];
+export const KATRAS = [{ id: 'omar-khan', rect: [-58, 235, -14, 266], gate: 'e' }, { id: 'fulel', rect: [14, 235, 58, 266], gate: 'w' },
+  { id: 'resham', rect: [-58, 308, -14, 339], gate: 'e' }, { id: 'jogidas', rect: [14, 308, 58, 339], gate: 'w' }];
 export const HAVELI_OPEN = [8, 277, 30, 299];
 // the pietra dura workshop on the axis street's west side, its front on the street (§12)
 export const WORKSHOP = { rect: [-20, 281, -8, 293], front: 'e' };
@@ -62,7 +63,7 @@ export function houses() {
     && !STREETS.some((s) => r[0] < s.rect[2] + 0.2 && r[2] > s.rect[0] - 0.2 && r[1] < s.rect[3] + 0.2 && r[3] > s.rect[1] - 0.2)
     && !HOUSES.some((h) => r[0] < h.rect[2] + 0.1 && r[2] > h.rect[0] - 0.1 && r[1] < h.rect[3] + 0.1 && r[3] > h.rect[1] - 0.1);
   const add = (rect, front, bazaar) => {
-    const shop = bazaar ? rand() < 0.78 : rand() < 0.1;
+    const shop = bazaar ? rand() < 0.9 : rand() < 0.3;
     HOUSES.push({ rect, front, shop, storeys: shop && rand() < 0.5 ? 2 : undefined, seed: Math.floor(rand() * 1e6) });
   };
   // along each street, on both sides, lot after lot
@@ -82,7 +83,7 @@ export function houses() {
   // behind them and round the garden: houses on a loose grid, facing the nearest street
   for (let x = -330; x < 330; x += 14) for (let z = -230; z < 340; z += 14) {
     const r = [x + 1, z + 1, x + 1 + 9 + rand() * 3, z + 1 + 9 + rand() * 3];
-    if (rand() < 0.15 || !free(r, 4)) continue;
+    if (rand() < 0.05 || !free(r, 4)) continue;
     const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
     let best = null, bd = 1e9;
     for (const s of STREETS) { const d = rectDist(s.rect, cx, cz); if (d < bd) { bd = d; best = s; } }
