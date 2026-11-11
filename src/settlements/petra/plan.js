@@ -158,6 +158,7 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // the little square before the Khazneh is no market (and no street life spills into the Siq): its room is named so that the
 // life pass reads it as a forecourt (a few people about), and stops short of the Siq's mouth
 const rooms = [room('the forecourt of the Khazneh', [PLAZA.c[0] - PLAZA.r + 6, PLAZA.c[1] - PLAZA.r + 4, PLAZA.c[0] + PLAZA.r - 12, PLAZA.c[1] + PLAZA.r - 4], 0, 'open'), room('the city', [-200, -80, 60, 100], 0, 'open'),
+  room('the Treasury', [PLAZA.c[0] - PLAZA.r + 2 - 21.2, PLAZA.c[1] - 5.2, PLAZA.c[0] - PLAZA.r + 2 - 5.9, PLAZA.c[1] + 5.2], 1.05, 'hall'),
   room('the Great Temple', [GREAT_TEMPLE[0] + 7, GREAT_TEMPLE[1] + 52, GREAT_TEMPLE[2] - 7, GREAT_TEMPLE[1] + 64], 5.92, 'hall'),
   room('the garden', [GARDEN.rect[0] + 2, GARDEN.rect[1] + 3, GARDEN.rect[2] - 2, GARDEN.split - 1], GARDEN.gy, 'open'),
   room('the triclinium', [TRICLINIUM.at[0] - TRICLINIUM.w / 2 + 2, TRICLINIUM.at[1] - 1.6 - TRICLINIUM.d + 2, TRICLINIUM.at[0] + TRICLINIUM.w / 2 - 2, TRICLINIUM.at[1] - 2.6], +floorY(...TRICLINIUM.at).toFixed(3), 'hall'),
