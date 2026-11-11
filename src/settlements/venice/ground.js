@@ -2,7 +2,9 @@
 // campi, a few gardens with fig and pomegranate, the green water of the canals and the lagoon; the
 // soft, hazy, watery light.
 
-import { RADIUS, SEA, RIM, PIAZZA, PIAZZETTA, BASILICA, height, inWater, inRect, inLot } from './layout.js';
+import { RADIUS, SEA, RIM, PIAZZA, PIAZZETTA, BASILICA, height, inWater, inRect, inLot, bands, palazzi, bridges, squero } from './layout.js';
+const NOGREEN = () => [...bands().map((b) => [b.x0 - 0.5, -400, b.x1 + 0.5, 200]), ...palazzi().map((p) => p.box), ...bridges().map((b) => b.corridor), squero().clear];
+let NG = null;
 const CHURCH = [BASILICA.c[0] - BASILICA.s - 13, BASILICA.c[1] - BASILICA.s * 0.85, BASILICA.c[0] + BASILICA.s + 4, BASILICA.c[1] + BASILICA.s * 0.85];
 
 function cover(x, z, h) {
@@ -15,7 +17,7 @@ function water(x, z, y) { return inWater(x, z) && y < SEA + 0.3; }
 function waterLevel(x, z) { return inWater(x, z) ? SEA : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, height(x, z) - SEA)); }
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || height(x, z) < 0.5 || inRect(PIAZZA, x, z, 2) || inRect(PIAZZETTA, x, z, 2) || inLot(x, z, 1) || inRect(CHURCH, x, z)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || height(x, z) < 0.5 || inRect(PIAZZA, x, z, 2) || inRect(PIAZZETTA, x, z, 2) || inLot(x, z, 1) || (NG ??= NOGREEN()).some((r) => inRect(r, x, z)) || inRect(CHURCH, x, z)) return null;
   return { fig: 0.01, grass: 4 };
 }
 export const ground = {
@@ -28,6 +30,8 @@ export const ground = {
     fog: { color: [0.8, 0.82, 0.84], density: 0.0005, height: 0.012 },
     exposure: 0.5,
     wind: [0.4, 0.2],
+    waterline: SEA,       // the canals' still water: the stain line on the walls and quays (src/engine/materials.js)
+    damp: 0.9,            // the lagoon's damp and salt: rising damp, algae at the foot of the walls, streaks on the plaster
     weather: [
       { id: 'hazy', weight: 3, clouds: 0.3, cloudDensity: 0.4, sun: 0.95, fog: 1.3 },
       { id: 'clear', weight: 2, clouds: 0.15, cloudDensity: 0.3, sun: 1.0, fog: 1 },
