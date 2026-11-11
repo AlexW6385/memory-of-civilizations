@@ -143,6 +143,8 @@ async function main() {
   progress.set('renderer', 1);
   const world = new World(R);
   await world.init((step, f) => progress.set(step, f, step === 'plans' ? '' : ''));
+  // the scene pass made now, so that what loads from here on is compiled as it comes (renderer.js prime)
+  R.prime();
   // frame costs (`?perf` shows the panel; tools/perf.mjs uses window.palace.perf)
   const perf = new Perf(world, R);
   if (params.has('perf')) perf.show();
@@ -184,7 +186,7 @@ async function main() {
     const poll = site && report ? setInterval(() => report('build', site.fraction, `${Math.min(site.done | 0, site.expected | 0)}/${site.expected | 0}`), 150) : null;
     try {
       await Promise.all([
-        (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 1); mark('buildings'); }),
+        (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 0.99, 'merging'); return merged(site); }).then(() => { report?.('build', 1); mark('buildings'); }),
         world.terrain.readyAt(camPlanet, (f) => report?.('land', f, `${Math.round(f * 100)}%`)).then(() => mark('land')),
       ]);
     } finally { clearInterval(poll); }
@@ -194,6 +196,15 @@ async function main() {
     if (site) { const F = controls.feet; const L = [F.x, F.z]; await world.flora.ready(L[0], L[1], (f) => report?.('plants', f), 140, alive); }
     report?.('plants', 1); mark('plants');
   };
+  // the settlement's static meshes merged (and their shaders compiled, their buffers sent) before the
+  // arrival is shown: merging went on for a minute or more after arriving, the parts drawn unmerged
+  // meanwhile and each merged mesh's upload and shaders falling into the walk's frames. The frame
+  // loop is not running during a start, so the merge's uploads are let in here; at most 90 s
+  function merged(site) {
+    if (!site?.merging) return Promise.resolve();
+    const pump = setInterval(() => world.letUploadsIn(), 40);
+    return Promise.race([site.merging, new Promise((r) => setTimeout(r, 90000))]).finally(() => clearInterval(pump));
+  }
   const boot = (stage, f, detail) => progress.set(stage, f, detail);
   // a settlement built before its arrival view is set (goTo, goNear): its progress shown from the
   // start of the build, not only once arrive() is reached
