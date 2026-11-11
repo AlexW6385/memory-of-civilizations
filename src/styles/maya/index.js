@@ -16,6 +16,8 @@ import { beamTris, flipTris } from '../ming/index.js';
 import { serpentHeadKit, chaacKit, chacmoolKit, warriorPanelKit, Kit } from './meso.js';
 import { emitFrame, ballPanelKit, ringKit, jaguarThroneKit } from './ballcourt.js';
 import { warriorsInterior, mOffering } from './sanctuary.js';
+import { mayaTownElements } from './town.js';
+import { castilloInterior } from './interior.js';
 
 const L = 'limestone_maya';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -171,6 +173,7 @@ function mTemple(el, { bag, col }) {
       col.rect([px - 0.45, pz - 0.45, px + 0.45, pz + 0.45], y1, y1 + wallH);
     }
   }
+  if (el.furnish === 'castillo') castilloInterior(bag, col, { cx, cz, w, d, y: y1, H: wallH, wt });
   if (el.inner === 'warriors' && el.doors === 'w') warriorsInterior(bag, col, { cx, cz, w, d, y: y1, H: wallH, wt }, warriorPillar);
   // the lintels, the frieze (painted plaster, or stone carved with masks), the roof and its crest
   const fy0 = y1 + wallH, fy1 = y1 + h * 0.9;
@@ -509,6 +512,7 @@ registerStyle('maya', {
   elements: {
     ...STYLES.qing.elements,
     m_pyramid: mPyramid, m_temple: mTemple, m_ballcourt: mBallcourt, m_colonnade: mColonnade, m_platform: mPlatform, m_caracol: mCaracol, sacbe, maya_house: mayaHouse, albarrada, petate, m_offering: mOffering, meso_plants: mesoPlants, m_ball: mBall,
+    ...mayaTownElements,
   },
   objects: {},
 });
