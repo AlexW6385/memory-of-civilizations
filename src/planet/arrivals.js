@@ -77,6 +77,7 @@ export const ARRIVALS = {
   'abu-simbel': [4, null, 0, 1.5708, 0.3],   // the Great Temple's façade whole across the terrace: four seated colossi of Ramesses II cut in the cliff, the baboon frieze above the door, the Nile below
   'nalanda': [-2, null, 70, 0.2, 0.28],   // the Great Temple's stepped east face and its stair, and Monastery 1's gate and turrets across the sacred way
   'han-changan': [-110, null, 10, 0, 0.1],   // from the Weiyang forecourt up the ramp-stair to the Front Hall on its terrace
+  'lu-qufu': [-26, null, -59, -0.45, 0.18],   // across the court before the Dacheng Hall: the Apricot Altar and the double-eaved hall on its terrace
   'thebes': [-243, null, 0, -1.5708, 0.1],   // from the Nile quay at the avenue's end, down the double row of ram sphinxes to the gateway in the great mudbrick wall, the second pylon of Karnak and its flagstaffs standing over it
   'mongol-karakorum': [70, 0.1, -12, 0, 0.2],   // Standing in the south gate of Möngke Khan's palace compound: the great hall on its rammed-earth podium across the court, the nine-tailed banners on either hand, the brick wall and the storehouses beyond.
   'shibam': [-6, null, -8, -1.264, 0.3],   // the merchant's tower house across the square: seven storeys of brown mud brick, the top two limewashed, white-framed windows, the parapet against the sky, the street door at its foot
