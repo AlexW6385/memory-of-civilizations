@@ -15,6 +15,7 @@
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { faceFrame, Local, ext, archOutline, archRise, voussoirs, wrect } from './face.js';
 import { rusticate } from './signoria.js';
+import { openGround, openUpper, doorAt } from './casa-open.js';
 
 const PF = 'limestone_yellow', SER = 'pietra_serena', W = 'wood_dark', O = 'opening', IR = 'iron', TM = 'timber', ROOF = 'roof_tile';
 const WALLS = ['stucco_pale', 'stucco_siena', 'stucco_ochre', 'stucco_cream', 'stucco_warm', 'stucco_rome'];
@@ -83,15 +84,36 @@ function sign(Lc, u, ys, trade, rand) {
   Lc.box(IR, u - 0.02, ys + 0.5, 0.0, u + 0.02, ys + 0.54, 0.95);
   Lc.box(IR, u - 0.015, ys + 0.1, 0.9, u + 0.015, ys + 0.5, 0.93);
   Lc.box(col, u - 0.03, ys - 0.45, 0.85, u + 0.03, ys + 0.1, 1.12);
+  // the emblem painted on both faces: the trade's tool or ware in a contrasting colour
+  for (const sg of [-1, 1]) {
+    const a = sg < 0 ? u - 0.045 : u + 0.03, b = sg < 0 ? u - 0.03 : u + 0.045, e = (m, y0, y1, d0, d1) => Lc.box(m, a, ys - 0.45 + y0, 0.85 + d0, b, ys - 0.45 + y1, 0.85 + d1);
+    if (trade === 'cloth') { e('cloth_white', 0.12, 0.45, 0.1, 0.12); e('cloth_white', 0.12, 0.45, 0.15, 0.17); e('cloth_white', 0.25, 0.3, 0.04, 0.23); }
+    else if (trade === 'wine') { e('cloth_green', 0.15, 0.45, 0.07, 0.2); e('cloth_white', 0.45, 0.5, 0.12, 0.16); }
+    else if (trade === 'bread') { e('hide_tan', 0.2, 0.34, 0.05, 0.22); e('hide_tan', 0.3, 0.4, 0.08, 0.19); }
+    else if (trade === 'spice') { e('terracotta', 0.12, 0.3, 0.08, 0.19); e('plaster_white', 0.3, 0.46, 0.05, 0.22); }
+    else if (trade === 'leather') { e('hide_black', 0.1, 0.46, 0.06, 0.21); e('hide_tan', 0.15, 0.4, 0.09, 0.18); }
+    else if (trade === 'smith') { e('cloth_black', 0.12, 0.3, 0.04, 0.23); e('cloth_black', 0.3, 0.38, 0.0, 0.27); e('cloth_black', 0.38, 0.46, 0.04, 0.12); }
+    else if (trade === 'goldsmith') { e('gilt_bronze', 0.1, 0.16, 0.08, 0.2); e('gilt_bronze', 0.16, 0.3, 0.12, 0.16); e('gilt_bronze', 0.3, 0.46, 0.05, 0.23); }
+    else if (trade === 'woodwork') { e('plaster_white', 0.25, 0.32, 0.02, 0.26); for (let k = 0; k < 5; k++) e('plaster_white', 0.18, 0.25, 0.03 + k * 0.05, 0.045 + k * 0.05); }
+    else { e('plaster_white', 0.1, 0.42, 0.11, 0.15); e('cloth_ochre', 0.42, 0.5, 0.11, 0.15); }
+  }
   void rand;
 }
 
 /** A window under a round arch: its dark, the stone ring round it, the sill, the shutters open on either side (or shut). */
-function win(Lc, uc, s, w, hs, rand, shut, lite) {
+function win(Lc, uc, s, w, hs, rand, shut, lite, shape = 'round') {
   const ys = s + hs, n = lite ? 3 : 4;
-  Lc.box(O, uc - w / 2, s, -0.03, uc + w / 2, ys, 0.02);
-  Lc.add(SER, ext(archOutline(uc, s - 0.12, w + 0.34, ys, 'round', 2), [archOutline(uc, s - 0.12 + 0.0, w, ys, 'round', 2)], -0.03, 0.1));
-  Lc.box(SER, uc - w / 2 - 0.22, s - 0.2, -0.03, uc + w / 2 + 0.22, s - 0.1, 0.2);
+  if (shape === 'rect') {
+    // a plain rectangular window in a stone architrave under a flat lintel (the later quattrocento houses)
+    Lc.box(O, uc - w / 2, s, -0.03, uc + w / 2, ys, 0.02);
+    for (const sg of [-1, 1]) Lc.box(SER, uc + sg * (w / 2 + 0.09) - 0.09, s - 0.1, -0.03, uc + sg * (w / 2 + 0.09) + 0.09, ys + 0.12, 0.1);
+    Lc.box(SER, uc - w / 2 - 0.2, ys, -0.03, uc + w / 2 + 0.2, ys + 0.2, 0.14); Lc.box(SER, uc - w / 2 - 0.2, s - 0.2, -0.03, uc + w / 2 + 0.2, s - 0.1, 0.2);
+  } else {
+    // a round arch or, in the older Gothic houses, a pointed one
+    Lc.box(O, uc - w / 2, s, -0.03, uc + w / 2, ys, 0.02);
+    Lc.add(SER, ext(archOutline(uc, s - 0.12, w + 0.34, ys, shape, 2), [archOutline(uc, s - 0.12 + 0.0, w, ys, shape, 2)], -0.03, 0.1));
+  }
+  if (shape !== 'rect') Lc.box(SER, uc - w / 2 - 0.22, s - 0.2, -0.03, uc + w / 2 + 0.22, s - 0.1, 0.2);
   if (rand() < 0.28) { Lc.box(shut, uc - w / 2, s, 0.03, uc + w / 2, ys, 0.07); return; }               // the shutters closed
   if (!lite) {
     Lc.box(W, uc - 0.025, s, 0.03, uc + 0.025, ys + 0.1, 0.06); Lc.box(W, uc - w / 2, s + hs * 0.62, 0.03, uc + w / 2, s + hs * 0.62 + 0.05, 0.06);      // the casement's mullion and transom
@@ -112,23 +134,36 @@ function bif(Lc, uc, s, w, hs, lite) {
 export function casa(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.3;
   const kind = el.kind ?? 'casa', simple = !!el.simple, f = el.front || 's', n = Math.max(2, el.storeys ?? 3);
-  const pal = kind === 'palazzo', tow = kind === 'torre', shop = kind === 'bottega';
+  const pal = kind === 'palazzo', tow = kind === 'torre', open = !!el.open && !simple && !pal && !tow, shop = kind === 'bottega' && !open;
   // the storeys' heights
   const hs = [];
   for (let i = 0; i < n; i++) hs.push(pal ? [6.4, 5.4, 4.5][Math.min(i, 2)] : tow ? (i === 0 ? 4.6 : 3.3 + rand() * 0.3) : i === 0 ? (shop ? 4.5 : 4.1) : 3.5 + rand() * 0.4);
   const ys = [0]; for (const h of hs) ys.push(ys[ys.length - 1] + h);
   const H = ys[n], wall = pal || tow || !el.plaster ? PF : pick(rand, WALLS), shut = pick(rand, SHUT);
-  const jet = !pal && !tow && n >= 3 && rand() < 0.28 ? 0.7 : 0;
+  const jet = !pal && !tow && !el.open && n >= 3 && rand() < 0.28 ? 0.7 : 0;
+  // the house's manner: old Gothic (pointed windows), quattrocento (round, a bifora on the piano nobile), plain (rectangular architraves);
+  // quoins at the corners and a painted frieze under the eave on some
+  const wr = rand(), manner = wr < 0.3 ? 'gothic' : wr < 0.62 ? 'quatt' : wr < 0.85 ? 'round' : 'rect', quoins = el.plaster && rand() < 0.4, frieze = !pal && !tow && rand() < 0.16;
   const R = [x0, z0, x1, z1];                                                      // the upper floors' rectangle
   if (jet) { if (f === 's') R[3] += jet; else if (f === 'n') R[1] -= jet; else if (f === 'e') R[2] += jet; else R[0] -= jet; }
   const top = tow ? n - 1 : n;                                                     // a tower's last floor juts out on corbels
   const TJ = tow ? 0.55 : 0, RT = [x0 - TJ, z0 - TJ, x1 + TJ, z1 + TJ];
   // the body: the stone ground storey and the wall above
   const gh = ys[1];
-  if (pal || tow || !el.plaster) bag.add(PF, box(x0, foot - 0.6, z0, x1, y + (tow ? ys[top] : H), z1));
+  if (open) {
+    const stairs = n >= 2 && !jet;
+    openGround(bag, col, { ...el, use: el.use ?? (kind === 'bottega' ? el.trade : 'home') }, { wall: PF, y, gh, f, rand, foot, stairs });
+    if (stairs) {
+      openUpper(bag, col, el, { y, gh, top2: ys[2], f, rand });
+      if (el.plaster) { const t = 0.4, [a0, b0, a1, b1] = R, m = wall; for (const r of [[a0, b0, a1, b0 + t], [a0, b1 - t, a1, b1], [a0, b0, a0 + t, b1], [a1 - t, b0, a1, b1]]) bag.add(m, box(r[0] - 0.01, y + gh, r[1] - 0.01, r[2] + 0.01, y + ys[2], r[3] + 0.01)); }
+      if (n > 2) bag.add(el.plaster ? wall : PF, box(R[0], y + ys[2] - 0.02, R[1], R[2], y + H, R[3]));
+      else bag.add(el.plaster ? wall : PF, box(R[0], y + H - 0.02, R[1], R[2], y + H, R[3]));
+    } else bag.add(el.plaster ? wall : PF, box(R[0], y + gh - 0.02, R[1], R[2], y + H, R[3]));
+  } else if (pal || tow || !el.plaster) bag.add(PF, box(x0, foot - 0.6, z0, x1, y + (tow ? ys[top] : H), z1));
   else { bag.add(PF, box(x0 - 0.04, foot - 0.6, z0 - 0.04, x1 + 0.04, y + gh, z1 + 0.04)); bag.add(wall, box(R[0], y + (jet ? gh : gh - 0.02), R[1], R[2], y + H, R[3])); }
   if (tow) bag.add(PF, box(RT[0], y + ys[top], RT[1], RT[2], y + H, RT[3]));
-  col.rect(el.rect, foot - 0.6, y + H);
+  if (!open) col.rect(el.rect, foot - 0.6, y + H);
+  else col.rect(R, y + gh, y + H);
   const wallTop = y + H;
 
   // ── the faces
@@ -149,11 +184,14 @@ export function casa(el, { bag, col }) {
         if (tow) { if (rand() < 0.45) continue; const u = bu(i); Lu2.add(O, ext(archOutline(u, ys[s] + 1.2, 0.34, ys[s] + 2.3, 'round', 3), [], -0.03, 0.02)); Lu2.box(PF, u - 0.3, ys[s] + 1.1, -0.03, u + 0.3, ys[s] + 1.2, 0.12); continue; }
         if (pal) { bif(Lu2, bu(i), ys[s] + 1.0, 2.0, s === 1 ? 2.4 : 1.9, simple); continue; }
         const wdt = s === 1 ? 1.05 : 0.95, sill = ys[s] + (s === 1 ? 0.95 : 0.9), hsw = s === 1 ? 1.55 : 1.35;
-        win(Lu2, bu(i), sill, wdt, hsw, rand, shut, false);
+        if (manner === 'quatt' && s === 1 && Lu > 4.5 && !simple) { bif(Lu2, bu(i), ys[s] + 0.9, 1.75, 1.95, false); continue; }
+        win(Lu2, bu(i), sill, wdt, hsw, rand, shut, false, manner === 'gothic' ? 'pointed' : manner === 'rect' ? 'rect' : 'round');
       }
     }
     // the tower's top floor: windows (shuttered) between the corbels
     if (tow) { for (let i = 0; i < nbU; i++) { const u = bu(i); Lu2.box('wood_dark', u - 0.4, ys[top] + 0.9, -0.03 - TJ, u + 0.4, ys[top] + 2.2, 0.02 - TJ); } }
+    if (quoins) for (let s = 1; s < top; s++) for (let k = 0, yy = ys[s]; yy < ys[s + 1] - 0.4; k++, yy += 0.5) { const wq = k % 2 ? 0.7 : 0.45; Lu2.box(SER, 0, yy, -0.03, wq, yy + 0.44, 0.07); Lu2.box(SER, Lu - (k % 2 ? 0.45 : 0.7), yy, -0.03, Lu, yy + 0.44, 0.07); }
+    if (frieze) { Lu2.box('plaster_ochre', 0, H - 1.05, -0.03, Lu, H - 0.62, 0.03); for (let u = 0.4; u < Lu - 0.3; u += 0.8) Lu2.box(wall, u, H - 1.0, 0.03, u + 0.4, H - 0.67, 0.045); }
     // string courses at the floors, the plinth, the eave
     if (!pal) for (let s = 1; s < top; s++) Lu2.box(SER, -0.05, ys[s] - 0.1, -0.03, Lu + 0.05, ys[s] + 0.06, 0.12);
     if (main && jet) { for (let u = 0.4; u < Lg - 0.2; u += 0.9) { Lc.box(W, u - 0.09, gh - 0.55, -0.02, u + 0.09, gh, 0.5 + 0.0); Lc.box(TM, u - 0.1, gh - 0.55 + 0.45, -0.02, u + 0.1, gh, jet); } }
@@ -214,15 +252,15 @@ export function casa(el, { bag, col }) {
           const aw2 = box(c - aw / 2 + 0.06, -0.03, 0, c + aw / 2 - 0.06, 0.03, 1.0); aw2.rotateX(-0.45); aw2.translate(0, ysp - 0.3, 0.1); Lc.add(W, aw2);
           Lc.box(IR, c - aw / 2 + 0.06, ysp - 0.34, 0.08, c - aw / 2 + 0.08, ysp - 0.3, 0.1);
           if (!simple) goods(Lc, el.trade, c - aw / 2 + 0.05, c + aw / 2 - 0.05, ysp, rand, pt);
-          if (!simple && it === 'arch' && rand() < 0.5) sign(Lc, c + aw / 2 + pier * 0.4, ysp, el.trade, rand);
+          if (!simple && it === 'arch' && (nb === 1 || rand() < 0.8)) sign(Lc, c + aw / 2 + pier * 0.4, ysp, el.trade, rand);
           u += aw + pier;
         }
       } else {
         // a house: the door, a small barred window or two, sometimes the stone bench
-        const doorW = 1.35, du = L * (0.2 + rand() * 0.6), dh = 2.25;
-        Lc.add(O, ext(archOutline(du, 0.15, doorW, dh, 'round', 4), [], -0.03, 0.01));
+        const doorW = 1.35, du0 = L * (0.2 + rand() * 0.6), du = open ? doorAt(L) : du0, dh = 2.25;
+        if (!open) Lc.add(O, ext(archOutline(du, 0.15, doorW, dh, 'round', 4), [], -0.03, 0.01));
         Lc.add(SER, ext(archOutline(du, 0.0, doorW + 0.4, dh, 'round', 4), [archOutline(du, 0.15, doorW, dh, 'round', 4)], -0.03, 0.12));
-        Lc.box(W, du - doorW / 2, 0.15, 0.0, du - doorW / 2 + 0.06, dh, 0.7 * doorW); Lc.box(SER, du - doorW / 2 - 0.3, -0.08, 0.1, du + doorW / 2 + 0.3, 0.1, 0.7);
+        if (!open) Lc.box(W, du - doorW / 2, 0.15, 0.0, du - doorW / 2 + 0.06, dh, 0.7 * doorW); Lc.box(SER, du - doorW / 2 - 0.3, -0.08, 0.1, du + doorW / 2 + 0.3, 0.1, 0.7);
         const nw = Math.max(0, Math.round((L - 3) / 3.1));
         for (let i = 0; i < nw; i++) {
           const u = (i + 0.5) * L / nw; if (Math.abs(u - du) < 1.6) continue;
@@ -230,7 +268,28 @@ export function casa(el, { bag, col }) {
           for (let k = -1; k <= 1; k++) Lc.box(IR, u + k * 0.22 - 0.015, 1.6, 0.02, u + k * 0.22 + 0.015, 2.5, 0.05);
           if (rand() < 0.35) { Lc.box(PF, u - 1.0 > 0 ? u - 1.0 : 0.1, -0.2, 0.3, Math.min(L - 0.1, u + 1.0), 0.45, 0.75); col.rect(wrect(FMg, Math.max(0.1, u - 1.0), 0.3, Math.min(L - 0.1, u + 1.0), 0.75), y, y + 0.45); }
         }
-        if (tow) { /* the tower: a door and one slit above it */ }
+        if (open && kind === 'bottega' && !simple) {
+          // the trade shows at the door: a trestle board with its goods and the painted sign
+          const ua = Math.min(L - 0.3, du + 1.0), ub2 = Math.min(L - 0.1, ua + 2.0);
+          if (ub2 - ua > 1.0) { Lc.box(W, ua, 0.0, 0.3, ub2, 1.0, 0.9); goods(Lc, el.trade, ua, ub2, 2.3, rand); }
+          sign(Lc, Math.max(0.4, du - 1.2), 2.6, el.trade, rand);
+        }
+      }
+    }
+    // eye-level dressing and weathering of the street front: the family's arms over the door, an iron lantern bracket at
+    // the corner, a street-corner shrine of the Madonna, damp rising from the pavement, rain streaks under the eave
+    if (main && !simple) {
+      const L = Lg, wet = !pal && !tow;
+      if (wet) {
+        for (let k = 0, n = 2 + Math.floor(L / 3); k < n; k++) { const u = rand() * (L - 1.5), w = 0.8 + rand() * 1.6; Lc.box(el.plaster ? 'plaster_damp' : 'plaster_damp', u, 0.0, 0.0, Math.min(L, u + w), 0.5 + rand() * 0.7, 0.025); }
+        if (el.plaster) for (let k = 0, n = 1 + Math.floor(L / 2.5); k < n; k++) { const u = 0.3 + rand() * (L - 0.9), h0 = ys[Math.min(top, 2)] - rand() * 2.5; Lu2.box('plaster_streak', u, h0 - 1.2 - rand() * 1.5, 0.0, u + 0.2 + rand() * 0.3, h0, 0.022); }
+      }
+      if (!pal && !tow && rand() < 0.38) { const u = Math.min(L - 0.5, Math.max(0.5, L / 2 + (rand() < 0.5 ? -1 : 1) * (0.2 + rand()))); Lc.box(SER, u - 0.28, gh - 0.95, 0.0, u + 0.28, gh - 0.35, 0.09); Lc.box(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green'][Math.floor(rand() * 4)], u - 0.2, gh - 0.88, 0.09, u + 0.2, gh - 0.5, 0.11); Lc.box('cloth_white', u - 0.2, gh - 0.73, 0.1, u + 0.2, gh - 0.65, 0.12); }
+      if (!tow && rand() < 0.3) { const u = rand() < 0.5 ? 0.35 : L - 0.35; Lc.box(IR, u - 0.02, 3.3, 0.0, u + 0.02, 3.5, 0.75); Lc.box(IR, u - 0.015, 3.5, 0.7, u + 0.015, 4.0, 0.74); Lc.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.12, 0.2], [0.001, 0.28]], 6, null, u, 3.1, 0.72)); }
+      if (!pal && !tow && !shop && rand() < 0.12) {
+        // the tabernacolo: a niche with a gabled stone frame, a blue-robed Madonna, a lamp below
+        const u = L - 0.9; Lu2.box(PF, u - 0.5, ys[1] + 0.9, 0.0, u + 0.5, ys[1] + 2.6, 0.18); Lu2.box(O, u - 0.3, ys[1] + 1.1, 0.18, u + 0.3, ys[1] + 2.2, 0.2); Lu2.box('cloth_blue', u - 0.12, ys[1] + 1.15, 0.14, u + 0.12, ys[1] + 1.8, 0.2); Lu2.box('gilt_bronze', u - 0.07, ys[1] + 1.8, 0.14, u + 0.07, ys[1] + 1.98, 0.2);
+        Lu2.box(SER, u - 0.6, ys[1] + 2.6, 0.0, u + 0.6, ys[1] + 2.72, 0.26); Lu2.box(IR, u - 0.01, ys[1] + 0.95, 0.15, u + 0.01, ys[1] + 1.1, 0.3); Lu2.add('lamp_glass', lathe([[0.001, 0], [0.07, 0.04], [0.08, 0.14], [0.001, 0.2]], 6, null, u, ys[1] + 0.75, 0.3));
       }
     }
     // the cornice / eave: on the upper rectangle (its brackets along the front and sides)

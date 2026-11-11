@@ -15,6 +15,8 @@ import { box, lathe, frustum, rod } from '../../core/geom.js';
 import { Float32BufferAttribute } from '../../core/three.js';
 import { faceFrame, Local, ext, archOutline, headPts, voussoirs, wrect, sheet } from './face.js';
 import { ball, limb, T } from '../qing/carving.js';
+import { rectsMinus } from './medici.js';
+import { signoriaCourt } from './palace-rooms.js';
 
 const PF = 'limestone_yellow', M = 'marble', PINK = 'marble_pink', SER = 'pietra_serena', R = 'roof_tile', GB = 'gilt_bronze', W = 'wood_dark', O = 'opening';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -104,7 +106,13 @@ export function marzocco(Lc, mat) {
 export function palazzo(el, { bag, col }) {
   const rect = el.rect, [x0, z0, x1, z1] = rect, h = el.h ?? 30, y = el.y ?? 0, front = el.front ?? 'w', rand = rng(1299);
   const P = 1.5, yc = h - 0.5, yc0 = yc - 2.1, cs = 2.4, sills = [12.0, 21.4];
-  bag.add(PF, box(x0, y - 0.5, z0, x1, y + h + 6.2, z1)); col.rect(rect, y, y + h + 6.2); col.floor(rect, y + h + 6.2);
+  // the block: solid, but for Michelozzo's court (open to the sky) and the passage from the great door to it on the ground storey
+  const hg = 11.9, doorZ = z0 + (el.tower ? el.tower.u ?? 13 : 13) + 0.5;
+  if (front === 'w') {
+    const { court, pass } = signoriaCourt(bag, col, { rect, y, door: doorZ, hg });
+    for (const r of rectsMinus(rect, [court, pass])) { bag.add(PF, box(r[0], y - 0.5, r[1], r[2], y + hg, r[3])); col.rect(r, y, y + hg); }
+    for (const r of rectsMinus(rect, [court])) { bag.add(PF, box(r[0], y + hg, r[1], r[2], y + h + 6.2, r[3])); col.rect(r, y + hg, y + h + 6.2); col.floor(r, y + h + 6.2); }
+  } else { bag.add(PF, box(x0, y - 0.5, z0, x1, y + h + 6.2, z1)); col.rect(rect, y, y + h + 6.2); col.floor(rect, y + h + 6.2); }
   const RU = new Local(), tw = el.tower ? el.tower.s ?? 7 : 0, tu = el.tower ? el.tower.u ?? 13 : -99;
   for (const f of 'nsew') {
     const { M: FM, L } = faceFrame(rect, f, y), Lc = new Local(), isFront = f === front;
@@ -123,8 +131,7 @@ export function palazzo(el, { bag, col }) {
     const door = isFront ? tu + 0.5 : -99, dw = 3.4, dys = 5.4;
     if (isFront) {
       holes.push({ u0: door - dw / 2 - 0.9, u1: door + dw / 2 + 0.9, y0: 0.4, y1: dys + dw / 2 + 0.95, hw: (yy) => (yy <= dys ? dw / 2 + 0.06 : Math.sqrt(Math.max(0, (dw / 2 + 0.9) ** 2 - (yy - dys) ** 2)) + 0.02) });
-      Lc.add(O, ext(archOutline(door, 0.45, dw, dys, 'round', 8), [], -0.03, 0.01));
-      for (const sg of [-1, 1]) Lc.box(W, door + sg * 0.02, 0.45, 0.0, door + sg * dw / 2, dys - 0.05, 0.12);       // the two leaves, shut
+      for (const sg of [-1, 1]) Lc.box(W, door + sg * (dw / 2 - 0.06) - 0.06, 0.45, 0.0, door + sg * (dw / 2 - 0.06) + 0.06, dys - 0.05, dw / 2 - 0.1);       // the two leaves, thrown open against the jambs
       voussoirs(Lc, PF, door, dys, dw / 2, dw / 2 + 0.9, -0.04, 0.4, 13, 0.06);
     }
     for (let i = 0; i < nWin; i++) { const uc = wu(i); if (Math.abs(uc - door) < 4) continue; holes.push({ u0: uc - 0.55, u1: uc + 0.55, y0: 6.5, y1: 8.4 }); Lc.add(O, ext([[uc - 0.5, 6.55], [uc + 0.5, 6.55], [uc + 0.5, 8.35], [uc - 0.5, 8.35]], [], -0.03, 0.01)); Lc.box(PF, uc - 0.62, 6.35, -0.04, uc + 0.62, 6.55, 0.3); }

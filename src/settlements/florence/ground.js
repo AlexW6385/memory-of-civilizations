@@ -1,7 +1,7 @@
 // Florence — the ground: the stone paving of the piazzas and streets, the Arno's green water and
 // its banks, cypresses and umbrella pines in the gardens; the clear Tuscan light.
 
-import { RADIUS, PIAZZA_DUOMO, SIGNORIA, ORSAN, ARNO, MERCATO, MEDICI, NOVELLA_PIAZZA, BOTTEGA, TINTORI, height, inArno, inRect, inLot, inStreet } from './layout.js';
+import { RADIUS, PIAZZA_DUOMO, SIGNORIA, ORSAN, ARNO, MERCATO, MEDICI, NOVELLA_PIAZZA, BOTTEGA, TINTORI, arnoZ, height, inArno, inRect, inLot, inStreet } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.1, grass: 0.3, rock: 0, soil: 0.4, fields: 0, dry: 0.45, warmth: 0.6, red: 0.25, road: 0.3, snow: 0, forest: 0 };
@@ -18,12 +18,16 @@ function waterLevel(x, z) { return inArno(x, z) ? ARNO.level : -Infinity; }
 function fromWater(x, z) { return inArno(x, z) ? -3 : Math.max(-5, Math.min(40, height(x, z) - ARNO.level)); }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inArno(x, z) || inRect(PIAZZA_DUOMO, x, z, 2) || inRect(SIGNORIA, x, z, 2) || inRect(ORSAN, x, z, 7) || inRect(MERCATO, x, z, 2) || inRect(MEDICI, x, z, 9) || inRect(NOVELLA_PIAZZA, x, z, 3) || inLot(x, z, 1) || inStreet(x, z, 1) || inRect(BOTTEGA, x, z, 2) || inRect(TINTORI, x, z, 1)) return null;
-  if (height(x, z) < -1) return { reeds: 6, willow: 0.03, grass: 20 };
-  return { cypress: 0.02, stone_pine: 0.008, grass: 10 };
+  // the Arno's banks: reeds, white willows and the poplars the river towns planted; garden walls' fig and olive trees
+  // inside the town, the cypress and umbrella pine of the villas and the olive groves and vineyards of the hills round it
+  if (height(x, z) < -1) return { reeds: 6, willow: 0.03, poplar: 0.012, grass: 20 };
+  if (Math.abs(z - arnoZ(x)) < ARNO.w / 2 + 16) return { poplar: 0.012, willow: 0.01, fig: 0.012, grass: 10 };
+  if (Math.hypot(x, z) > RADIUS - 110) return { olive: 0.03, cypress: 0.025, stone_pine: 0.006, holm_oak: 0.006, grass: 10 };
+  return { cypress: 0.012, fig: 0.012, olive: 0.01, stone_pine: 0.005, grass: 10 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { cypress: 0.02, stone_pine: 0.008, willow: 0.03 },
+  maxDensity: { cypress: 0.025, stone_pine: 0.008, willow: 0.03, poplar: 0.012, fig: 0.012, olive: 0.03, holm_oak: 0.006 },
   climate: {
     sun: { az: 150, el: 52, color: [1.0, 0.96, 0.88], intensity: 3.5, lat: 44, dec: 12, hour: 10.5 },
     sky: { turbidity: 2.6, rayleigh: 1.05, mie: 0.005, mieG: 0.78, zenith: [0.07, 0.15, 0.4], horizon: [0.62, 0.66, 0.72] },
