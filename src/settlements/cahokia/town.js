@@ -1,7 +1,7 @@
 // The town's houses (docs/settlements/cahokia.md §5), four of them opened and furnished (§5.1), and the
 // life of the plaza and the yards (§5.2): chunkey played on the plaza's yards with the crowd along
 // their banks, people on the ramp up Monks Mound, women at work at the house doors, dogs.
-import { RADIUS, PLAZA, SUMMIT, CREEK, lots, gaps, height, onMound, inLot, inRect, inPond, inCreek, creekZ, smallPlazas, inSmallPlaza } from './layout.js';
+import { RADIUS, PLAZA, PALISADE, SUMMIT, CREEK, lots, gaps, height, onMound, inLot, inRect, inPond, inCreek, creekZ, smallPlazas, inSmallPlaza } from './layout.js';
 import { HOUSE_KINDS } from '../../styles/mississippian/dress.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -168,6 +168,11 @@ function life() {
     if (kind === 'cook' && rand() < 0.5) { const a2 = [cx + 1.1, cz - 0.4]; woman(a2, F, face(a2, [cx, cz]), { pose: 'squat', over: 'none' }); }
     const d = [cx - 1.6, z1 + 1.4]; (rand() < 0.5 ? woman : man)(d, dd(d[0], d[1]), face(d, [cx + 3, z1 + 6]), { pose: rand() < 0.5 ? 'squat' : 'stand' });
   }
+  // sentries on the palisade's bastions, every third one: a man with a staff on the fighting platform
+  { const [x0, z0, x1, z1] = PALISADE, sides = [[[x0, z0], [x1, z0]], [[x1, z0], [x1, z1]], [[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]]];
+    sides.forEach(([a, b], si) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, n = Math.round(L / 26);
+      for (let k = 0; k < n; k += 3) { const s1 = (k + 1) * L / n, px = a[0] + ux * s1 + uz * 1.8, pz = a[1] + uz * s1 - ux * 1.8, y = Math.min(height(px, pz), height(a[0] + ux * s1, a[1] + uz * s1)) + 4.5 + 0.22;
+        man([px, pz], y, face([px, pz], [px + uz * 5, pz - ux * 5]), { carry: 'staff', len: 1.9, pose: 'stand', over: si % 2 ? 'cape' : 'none' }); } }); }
   // the chief on his seat on the summit, his attendants either side; the people of the small plazas: the bead maker and the potter at their mats, others at the fire and the racks
   { const hx = (SUMMIT[0] + SUMMIT[2]) / 2, hz = SUMMIT[1] + 20 + 0.5 + 1.6, F = height(hx, hz + 6) + 0.04;
     man([hx, hz], F + 0.6, Math.PI, { pose: 'sit', over: 'cape', cloth: 'cloth_white', cloth2: 'hide_white', hair: 'topknot', carry: 'staff', len: 1.4 });
