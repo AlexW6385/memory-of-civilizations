@@ -1,6 +1,6 @@
 // The city round the temple (docs/settlements/madurai.md §5): single-storey houses with verandahs
 // and tiled roofs in the blocks between the ring streets.
-import { RADIUS, TANK, WALL, GATES, PUDHU, SUNDARA, MEENAKSHI, HALL, lots } from './layout.js';
+import { RADIUS, TANK, WALL, GATES, PUDHU, SUNDARA, MEENAKSHI, HALL, lots, lotMap } from './layout.js';
 import { pudhuMandapam } from './plan.js';
 const base = (id, elements) => ({ id, style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } });
 export async function town() {
@@ -12,6 +12,7 @@ export async function town() {
     tiles.get(k).push({ t: l.kind === 'court' ? 'court_house' : 'tamil_house', ...l });
   }
   for (const [k, list] of tiles) plans.push({ ...base(`madurai-houses-${k}`, list) });
+  plans.push(...shopLife());
   plans.push(festival(), pudhuMandapam, { ...street(), style: 'life', center: [0, 60], near: 260 });
   return plans;
 }
@@ -80,4 +81,42 @@ function street() {
   // cows in the streets
   for (const [x, z, rot] of [[60, WALL[3] + 19, 0.6], [-90, WALL[3] + 17, 2.4], [WALL[2] + 18, 60, 4.2], [WALL[0] - 19, -70, 1.9], [-20, WALL[3] + 80, 3.1]]) E.push({ t: 'animal', kind: 'zebu', at: [x, z], y: 0, rot, seed: seed++, mat: pick(['hide_white', 'hide_grey', 'hide_white']) });
   return { id: 'madurai-street-life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: E, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } };
+}
+
+/**
+ * The life of the shop fronts and thinnais (docs/settlements/madurai.md §12), in tiles of 100 m: the
+ * seller seated on every shop's platform (the flower and sweet sellers women and men by trade), an
+ * elder or a woman on the thinnai of one house in six, cows and bullock carts in the streets.
+ */
+function shopLife() {
+  const tiles = new Map();
+  const put = (x, z, e) => { const k = `${Math.floor(x / 100)},${Math.floor(z / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); };
+  let seed = 7700;
+  const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
+  const SARI = ['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_ochre', 'cloth_maroon', 'cloth_blue'];
+  for (const l of lots()) {
+    if (l.kind === 'yard' || l.kind === 'hut' || l.kind === 'court') continue;
+    const { W, map } = lotMap(l), a = map(0, 0), b = map(0, -1), out = [b[0] - a[0], b[1] - a[1]], r = (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+    const shop = l.kind === 'shop';
+    if (!shop && r > 0.17) continue;
+    const ver = shop ? 2.3 : 1.9, py = shop ? 0.62 : 0.55, [x, z] = map(W * (shop ? 0.5 : 0.28 + r * 0.4), shop ? ver - 0.95 : 1.1);
+    const woman = shop ? ['flowers', 'sweets', 'coconut'].includes(l.trade) && r > 0.45 : r > 0.55;
+    const base = { t: 'figure', at: [x, z], y: py, rot: faceTo(out), seed: seed % 1000003, feet: 'bare', carry: 'none', pose: 'sit_ground', skin: seed % 3 ? 'skin_dark' : 'skin_medium' };
+    if (woman) put(x, z, { ...base, dress: 'wrap', cloth: SARI[seed % SARI.length], cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', hat: 'none', h: 1.48 });
+    else put(x, z, { ...base, dress: 'wrap', top: seed % 2 ? 'bare' : '', cloth: 'cloth_white', cloth2: 'cloth_white', over: shop && l.trade !== 'sweets' ? 'sash' : 'none', hair: 'short', hat: seed % 5 === 0 ? 'turban' : 'none' });
+  }
+  // cows lying and standing in the streets, bullock carts on the ring streets
+  const streetPts = [];
+  for (const s of [{ off: 12, w: 14 }, { off: 70, w: 10 }, { off: 150, w: 14 }]) for (let k = 0; k < 14; k++) {
+    const t = (k + 0.5) / 14 * 4, side = Math.floor(t) % 4, f = t % 1, o = s.off + s.w * (0.25 + 0.5 * ((k * 7) % 5) / 4);
+    const [wx0, wz0, wx1, wz1] = WALL, L = (side % 2 ? wz1 - wz0 + 2 * o : wx1 - wx0 + 2 * o), p = -L / 2 + f * L;
+    streetPts.push(side === 0 ? [wx0 + (wx1 - wx0) / 2 + p, wz0 - o] : side === 1 ? [wx1 + o, wz0 + (wz1 - wz0) / 2 + p] : side === 2 ? [wx0 + (wx1 - wx0) / 2 + p, wz1 + o] : [wx0 - o, wz0 + (wz1 - wz0) / 2 + p]);
+  }
+  streetPts.forEach(([x, z], i) => {
+    if (Math.hypot(x, z) > RADIUS - 30) return;
+    if (i % 3 === 0) put(x, z, { t: 'animal', kind: i % 2 ? 'zebu' : 'buffalo', at: [x, z], y: 0, rot: i * 1.7, seed: 900 + i, mat: i % 2 ? 'hide_white' : undefined, graze: false });
+    else if (i % 7 === 1) put(x, z, { t: 'cart', kind: 'two', load: i % 2 ? 'sacks' : 'empty', beast: 'zebu', at: [x, z], rot: (i % 4) * Math.PI / 2, seed: 300 + i });
+    else if (i % 5 === 2) put(x, z, { t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: i, seed: 500 + i });
+  });
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`madurai-shoplife-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
 }

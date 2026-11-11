@@ -139,3 +139,9 @@ export function lots() {
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => l.kind !== 'yard' && inRect(l.rect, x, z, m));
+/** A lot's frame: its width along the street W, depth D, and map(u, v) (v from the street front inwards) to the world. */
+export function lotMap(l) {
+  const [x0, z0, x1, z1] = l.rect, f = l.facing, NS = f === 'n' || f === 's';
+  const map = f === 'n' ? (u, v) => [x0 + u, z0 + v] : f === 's' ? (u, v) => [x0 + u, z1 - v] : f === 'w' ? (u, v) => [x0 + v, z0 + u] : (u, v) => [x1 - v, z0 + u];
+  return { W: NS ? x1 - x0 : z1 - z0, D: NS ? z1 - z0 : x1 - x0, map };
+}
