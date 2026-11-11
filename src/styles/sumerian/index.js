@@ -10,6 +10,10 @@ import { loft, ring } from '../egyptian/objects.js';
 import '../qing/index.js';
 import { urHouseOpen, scribeKit, quayGoods } from './house.js';
 import { giparu, urChapel } from './temple.js';
+import { dressFront, roofLife, urPen } from './dress.js';
+import { courtDress } from './court.js';
+import { urHall } from './hall.js';
+import { palm } from '../egyptian/objects.js';
 
 const BB = 'brick_baked', MB = 'mudbrick', MP = 'mud_plaster';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -66,6 +70,7 @@ function ziggurat(el, ctx) {
     col.rect([r[0] + b * 0.4, r[1] + b * 0.4, r[2] - b * 0.4, r[3] - b * 0.4], y, y + s.h);
     col.floor([r[0] + b, r[1] + b, r[2] - b, r[3] - b], y + s.h);
     tops.push({ r, b, y0: y, y1: y + s.h });
+    const y0s = y, stains = [], fx0 = (px, nx, o2) => px - nx * o2, fz0 = (pz, nz, o2) => pz - nz * o2;
     // the weeper holes: rows of small dark drains through the baked-brick skin, midway between the buttresses
     for (const [ax, az, bx, bz, nx, nz] of [[r[0], r[1], r[2], r[1], 0, -1], [r[0], r[3], r[2], r[3], 0, 1], [r[0], r[1], r[0], r[3], -1, 0], [r[2], r[1], r[2], r[3], 1, 0]]) {
       const L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / 3.2);
@@ -76,9 +81,13 @@ function ziggurat(el, ctx) {
         for (let yy = y + 1.4; yy < y + s.h - 1; yy += 1.8) {
           const f = (yy - y) / s.h, o = b * f, fx = px - nx * o, fz = pz - nz * o, hw = 0.13, hd = 0.09;
           bag.add('opening', nx ? box(fx - hd, yy, fz - hw, fx + hd, yy + 0.22, fz + hw) : box(fx - hw, yy, fz - hd, fx + hw, yy + 0.22, fz + hd));
+          // the stain below it: salt and damp running down the face, following its slope
+          { const sp = (y, u) => { const o2 = b * ((y - y0s) / s.h); const px2 = nx ? fx0(px, nx, o2) : px + u, pz2 = nz ? fz0(pz, nz, o2) : pz + u; return nx ? [px2 + nx * 0.03, y, pz + u] : [px2, y, pz2 + nz * 0.03]; };
+            const yb = yy - 0.9, q = [sp(yy, -0.12), sp(yy, 0.12), sp(yb, 0.2), sp(yb, -0.2)]; stains.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3], ...q[0], ...q[2], ...q[1], ...q[0], ...q[3], ...q[2]); }
         }
       }
     }
+    if (stains.length) bag.add('plaster_streak', fromTriangles(stains));
     y += s.h;
   });
   const S0 = tops[0], fz = S0.r[1];                          // the front face (north)
@@ -272,6 +281,13 @@ function niched(bag, r, h, face, niches, low, up, base) {
   add(slab(u, Bn, 0, T), -0.3, h);
 }
 
+/** The door of an ordinary house { rect, seed } as urHouse lays it out: the face that has it and the door's middle along it (world), by the same stream of random numbers. */
+export function doorOf(el) {
+  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, d = Math.min(3.8, Math.min(W, D) * 0.3);
+  rand(); rand(); rand();
+  const side = Math.floor(rand() * 4), f = ['n', 's', 'w', 'e'][side], [s0, s1] = f === 'n' || f === 's' ? [x0 + 0.8, x1 - 0.8] : [z0 + d + 0.8, z1 - d - 0.8];
+  return { face: f, dc: s0 + (rand() < 0.5 ? 0.25 : 0.75) * (s1 - s0) };
+}
 /**
  * ur_house: a courtyard house { rect, seed } (Woolley's houses at Ur): rooms round a court paved in brick, one or
  * two storeys; the walls of baked brick in their lower courses and plastered mud brick above, some whitewashed;
@@ -310,6 +326,10 @@ function urHouse(el, ctx) {
     }
   }
   for (const [a, b] of [[[x0, z0], [x1, z0]], [[x0, z1], [x1, z1]], [[x0, z0], [x0, z1]], [[x1, z0], [x1, z1]]]) { const t = []; beamTris(t, [a[0], H, a[1]], [b[0], H, b[1]], 0.15, 0.5); bag.add(up, fromTriangles(t)); }
+  // eye-level dress and weather, and the life of the roof (docs/settlements/ur.md §5.6): full near the core, the door's and a patch far out
+  const lod = el.lod ?? 1;
+  if (lod > 0) dressFront(ctx, { rect: el.rect, face: faces[side], dc: du, trade: el.trade, seed: el.seed, foot: base, H, near: lod > 1 });
+  if (lod > 1) roofLife(ctx, { wings: Object.values(wings), y: H, seed: el.seed });
   // gutters: short clay spouts through the parapet on to the lane
   for (const f of faces) {
     if (rand() < 0.35) continue;
@@ -457,6 +477,6 @@ function reedBoat(el, { bag }) {
 
 registerStyle('sumerian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, giparu, ur_chapel: urChapel, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, quay_goods: quayGoods },
+  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, giparu, ur_chapel: urChapel, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, ur_court: courtDress, ur_pen: urPen, ur_hall: urHall, ur_palm: palm, quay_goods: quayGoods },
   objects: {},
 });

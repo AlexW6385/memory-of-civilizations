@@ -1,0 +1,87 @@
+// The Court of Nanna furnished (docs/settlements/ur.md §4.4): the court before the ziggurat's terrace was not a bare
+// pavement — benches of baked brick along its walls for the people who waited, the great altar of burnt offering and
+// the table of offerings, basins of bitumen-lined brick for the washing of hands, stelae of the king on plinths,
+// tripod braziers of bronze, a shaded pavilion of reed mats for the musicians and the scribes, a pen of reed
+// for the beasts of the offering, stacks of fuel, jars of water on their stands, date palms in brick-edged pits.
+// el.rect = the court. All small things are detail; the colliders are for the large ones.
+
+import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { beamTris } from '../ming/index.js';
+import { palm } from '../egyptian/objects.js';
+
+const BB = 'brick_baked', MP = 'mud_plaster';
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const jarP = (s) => [[0.001, 0], [0.1 * s, 0], [0.13 * s, 0.03], [0.24 * s, 0.25 * s], [0.25 * s, 0.42 * s], [0.18 * s, 0.6 * s], [0.09 * s, 0.68 * s], [0.11 * s, 0.74 * s], [0.08 * s, 0.75 * s], [0.07 * s, 0.7 * s], [0.001, 0.68 * s]];
+
+export function courtDress(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, rand = rng(4711), y = el.y ?? 0;
+  const B = (mat, a, b, c, d, e, f) => bag.add(mat, box(a, b, c, d, e, f));
+  const L = (mat, prof, x, yy, z, seg = 12) => bag.add(mat, lathe(prof, seg, null, x, yy, z));
+  const beam = (mat, a, b, w, h) => { const T = []; beamTris(T, a, b, w, h); bag.add(mat, fromTriangles(T)); };
+  const jar = (x, yy, z, s) => L('terracotta', jarP(s), x, yy, z);
+  const bowl = (x, yy, z, r, mat = 'terracotta') => L(mat, [[0.001, 0], [r * 0.45, 0.005], [r, r * 0.45], [r * 0.93, r * 0.47], [r * 0.4, r * 0.12], [0.001, r * 0.1]], x, yy, z);
+  // ---- benches along the inner faces of the walls (the wall's face stands 1.25 m in from the rect's edge)
+  const bench = (a0, b0, a1, b1) => { B(BB, a0, y, b0, a1, y + 0.43, b1); B(MP, a0 - 0.01, y + 0.43, b0 - 0.01, a1 + 0.01, y + 0.47, b1 + 0.01); col.rect([a0, b0, a1, b1], y, y + 0.47); };
+  for (const s of [-1, 1]) {
+    const fx = s < 0 ? x0 + 1.25 : x1 - 1.25;
+    for (let z = z0 + 9; z < z1 - 12; z += 8.5) bench(s < 0 ? fx : fx - 0.55, z, s < 0 ? fx + 0.55 : fx, z + 6.5);
+  }
+  for (const s of [-1, 1]) for (let x = 14; x < 44; x += 8.5) bench(s < 0 ? -x - 6.5 : x, z0 + 1.25, s < 0 ? -x : x + 6.5, z0 + 1.8);
+  // ---- the great altar of burnt offering: a stepped block of baked brick, its top blackened by the fire, horns of brick at the corners
+  { const ax = -17, az = z0 + 40;
+    for (let k = 0; k < 3; k++) B(BB, ax - 1.2, y, az + 1.2 + (2 - k) * 0.4, ax + 1.2, y + (k + 1) * 0.3, az + 1.2 + (3 - k) * 0.4);
+    B(BB, ax - 1.7, y, az - 1.2, ax + 1.7, y + 1.15, az + 1.2); col.rect([ax - 1.9, az - 1.4, ax + 1.9, az + 2.6], y, y + 1.2);
+    B('pottery_dark', ax - 1.5, y + 1.15, az - 1.0, ax + 1.5, y + 1.18, az + 1.0);
+    for (const [dx, dz] of [[-1.55, -1.05], [1.55, -1.05], [-1.55, 1.05], [1.55, 1.05]]) B(BB, ax + dx - 0.15, y + 1.18, az + dz - 0.15, ax + dx + 0.15, y + 1.5, az + dz + 0.15);
+    B('flame', ax - 0.3, y + 1.18, az - 0.3, ax + 0.3, y + 1.9, az + 0.3);
+    lights.push({ at: [ax, y + 2.2, az], color: '#ff9a4a', intensity: 7, distance: 16 });
+  }
+  // ---- the table of offerings: a long brick table with bowls, loaves, a jar of beer, a lamb's carcass on a tray
+  { const tx = 17, tz = z0 + 40; B(BB, tx - 1.6, y, tz - 0.6, tx + 1.6, y + 0.85, tz + 0.6); B(MP, tx - 1.7, y + 0.85, tz - 0.7, tx + 1.7, y + 0.92, tz + 0.7); col.rect([tx - 1.7, tz - 0.7, tx + 1.7, tz + 0.7], y, y + 0.92);
+    for (let k = 0; k < 6; k++) bowl(tx - 1.3 + k * 0.5, y + 0.92, tz - 0.25 + (k % 2) * 0.45, 0.14);
+    for (let k = 0; k < 5; k++) L('cloth_ochre', [[0.001, 0], [0.12, 0.0], [0.13, 0.025], [0.001, 0.035]], tx - 1.0 + k * 0.4, y + 0.92, tz + 0.05, 10);
+    jar(tx + 1.3, y + 0.92, tz - 0.1, 0.85); }
+  // ---- the basins for washing the hands: bitumen-lined troughs on brick plinths either side of the way in
+  for (const s of [-1, 1]) { const bx = s * 12, bz = z0 + 14;
+    B(BB, bx - 1.4, y, bz - 0.6, bx + 1.4, y + 0.7, bz + 0.6); B('bitumen', bx - 1.2, y + 0.68, bz - 0.4, bx + 1.2, y + 0.72, bz + 0.4); B(BB, bx - 1.4, y + 0.7, bz - 0.6, bx + 1.4, y + 0.78, bz - 0.4); B(BB, bx - 1.4, y + 0.7, bz + 0.4, bx + 1.4, y + 0.78, bz + 0.6);
+    col.rect([bx - 1.4, bz - 0.6, bx + 1.4, bz + 0.6], y, y + 0.78); jar(bx + s * 1.9, y, bz, 1.2); jar(bx + s * 2.3, y, bz + 0.3, 1.0); }
+  // ---- stelae of the king on plinths: a slab of limestone with a rounded top and bands of relief in registers (the Ur-Nammu stela's)
+  for (const s of [-1, 1]) { const sx = s * 31, sz = z0 + 28;
+    B(BB, sx - 1.0, y, sz - 0.8, sx + 1.0, y + 0.55, sz + 0.8); col.rect([sx - 1.0, sz - 0.8, sx + 1.0, sz + 0.8], y, y + 0.6);
+    B('limestone', sx - 0.5, y + 0.55, sz - 0.14, sx + 0.5, y + 3.0, sz + 0.14);
+    bag.add('limestone', lathe([[0.001, 0], [0.5, 0], [0.5, 0.28], [0.001, 0.28]], 16).rotateX(Math.PI / 2).translate(sx, y + 3.0, sz - 0.14));
+    for (let k = 0; k < 4; k++) { const yy = y + 0.8 + k * 0.52; B('limestone_carved', sx - 0.42, yy, sz - 0.152, sx + 0.42, yy + 0.4, sz - 0.14); for (let j = 0; j < 3; j++) B('limestone', sx - 0.3 + j * 0.27, yy + 0.08, sz - 0.158, sx - 0.12 + j * 0.27, yy + 0.32, sz - 0.152); }
+    col.rect([sx - 0.5, sz - 0.2, sx + 0.5, sz + 0.2], y, y + 3.2); }
+  // ---- tripod braziers of bronze, lit, along the axis
+  for (const [bx, bz, lit] of [[-7, z0 + 20, true], [7, z0 + 20, false], [-7, z0 + 44, false], [7, z0 + 44, true]]) {
+    L('bronze', [[0.001, 0.85], [0.3, 0.9], [0.34, 1.05], [0.3, 1.07], [0.001, 0.95]], bx, y, bz, 12);
+    for (let k = 0; k < 3; k++) { const a = k * 2.094 + 0.5; beam('bronze', [bx + Math.cos(a) * 0.3, y + 0.9, bz + Math.sin(a) * 0.3], [bx + Math.cos(a) * 0.1, y + 0.0, bz + Math.sin(a) * 0.1], 0.025, 0.03); beam('bronze', [bx + Math.cos(a) * 0.3, y + 0.9, bz + Math.sin(a) * 0.3], [bx + Math.cos(a) * 0.46, y + 0.0, bz + Math.sin(a) * 0.46], 0.025, 0.03); }
+    L('pottery_dark', [[0.001, 1.0], [0.26, 1.04], [0.001, 1.04]], bx, y, bz, 10);
+    if (lit) { B('flame', bx - 0.12, y + 1.04, bz - 0.12, bx + 0.12, y + 1.4, bz + 0.12); lights.push({ at: [bx, y + 1.6, bz], color: '#ff9a4a', intensity: 4, distance: 10 }); }
+    col.circle(bx, bz, 0.4, y, y + 1.1);
+  }
+  // ---- the pavilion of reed mats on palm posts: shade for the musicians and the scribes (east side)
+  { const px = 33, pz = z0 + 52, w = 8, d = 5;
+    for (const dx of [-w / 2, 0, w / 2]) for (const dz of [-d / 2, d / 2]) { B('palm_trunk', px + dx - 0.1, y, pz + dz - 0.1, px + dx + 0.1, y + 3.3, pz + dz + 0.1); col.circle(px + dx, pz + dz, 0.12, y, y + 3.3); }
+    for (const dz of [-d / 2, d / 2]) beam('palm_trunk', [px - w / 2 - 0.2, y + 3.2, pz + dz], [px + w / 2 + 0.2, y + 3.2, pz + dz], 0.08, 0.14);
+    for (let x = px - w / 2; x <= px + w / 2; x += 0.9) beam('palm_trunk', [x, y + 3.34, pz - d / 2 - 0.3], [x, y + 3.34, pz + d / 2 + 0.3], 0.05, 0.08);
+    B('reed_mat', px - w / 2 - 0.3, y + 3.42, pz - d / 2 - 0.4, px + w / 2 + 0.3, y + 3.47, pz + d / 2 + 0.4);
+    B('reed_mat', px - w / 2 + 0.3, y + 0.0, pz - d / 2 + 0.3, px + w / 2 - 0.3, y + 0.012, pz + d / 2 - 0.3);
+    bench(px - 3.4, pz + d / 2 - 0.7, px + 3.4, pz + d / 2 - 0.2); }
+  // ---- the pen of reed mats for the beasts of the offering (west side): a fence of mats on posts, a gate gap, a trough and a heap of fodder
+  { const qx = -33, qz = z0 + 52, w = 9, d = 6, h = 1.15;
+    const wallx = (a, b, z) => { B('reed_mat', a, y, z - 0.04, b, y + h, z + 0.04); col.rect([a, z - 0.1, b, z + 0.1], y, y + h); for (let x = a; x <= b + 0.01; x += 1.5) B('palm_trunk', x - 0.05, y, z - 0.07, x + 0.05, y + h + 0.2, z + 0.07); };
+    const wallz = (a, b, x) => { B('reed_mat', x - 0.04, y, a, x + 0.04, y + h, b); col.rect([x - 0.1, a, x + 0.1, b], y, y + h); for (let z = a; z <= b + 0.01; z += 1.5) B('palm_trunk', x - 0.07, y, z - 0.05, x + 0.07, y + h + 0.2, z + 0.05); };
+    wallx(qx - w / 2, qx + w / 2, qz - d / 2); wallx(qx - w / 2, qx - 1.3, qz + d / 2); wallx(qx + 1.3, qx + w / 2, qz + d / 2); wallz(qz - d / 2, qz + d / 2, qx - w / 2); wallz(qz - d / 2, qz + d / 2, qx + w / 2);
+    B('timber', qx - 3.5, y, qz - d / 2 + 0.3, qx - 0.5, y + 0.3, qz - d / 2 + 0.7); B('bitumen', qx - 3.4, y + 0.26, qz - d / 2 + 0.36, qx - 0.6, y + 0.3, qz - d / 2 + 0.64);
+    for (let k = 0; k < 7; k++) beam('reed_mat', [qx + 1.5, y + 0.0 + (k > 4 ? 0.15 : 0), qz - d / 2 + 0.5 + (k % 5) * 0.14], [qx + 3.3, y + 0.0 + (k > 4 ? 0.15 : 0), qz - d / 2 + 0.5 + (k % 5) * 0.14], 0.06, 0.13); }
+  // ---- stacks of fuel (split palm trunks) by the altar, water jars on ring stands by the entrance
+  for (const [fx, fz] of [[-24, z0 + 33], [-24, z0 + 36.5]]) for (let r = 0; r < 4; r++) for (let k = 0; k < 4 - (r >> 1); k++) beam('palm_trunk', [fx - 1.0, y + 0.1 + r * 0.2, fz + (k - 2 + (r & 1) * 0.5) * 0.0], [fx + 1.0, y + 0.1 + r * 0.2, fz], 0.1, 0.18);
+  for (let k = 0; k < 5; k++) { const jx = (k < 3 ? -9 - k * 1.8 : 9 + (k - 3) * 1.8), jz = z0 + 7; L(BB, [[0.28, 0], [0.28, 0.12], [0.18, 0.12]], jx, y, jz, 10); L('terracotta', jarP(1.25), jx, y + 0.12, jz, 12); col.circle(jx, jz, 0.3, y, y + 1.1); }
+  // ---- date palms in brick-edged pits (the temple's grove)
+  const palms = [[-40, z0 + 14], [40, z0 + 14], [-42, z0 + 40], [42, z0 + 38], [-24, z0 + 58], [24, z0 + 58]];
+  palms.forEach(([px, pz], i) => {
+    bag.add(BB, lathe([[1.05, 0], [1.05, 0.2], [0.85, 0.2], [0.85, 0]], 16, null, px, y, pz)); bag.add('silt', lathe([[0.001, 0.12], [0.85, 0.12], [0.85, 0.15], [0.001, 0.15]], 14, null, px, y, pz));
+    palm({ at: [px, pz], y, h: 8 + rand() * 3, lean: (rand() - 0.5) * 0.012, seed: 100 + i }, { bag, col }); col.circle(px, pz, 0.5, y, y + 6);
+  });
+}

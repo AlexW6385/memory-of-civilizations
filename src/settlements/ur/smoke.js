@@ -3,7 +3,7 @@
 // and at the Giparu's altar. The engine part is src/engine/smoke.js (one draw call); positions come from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, GIPARU, houses } from './layout.js';
+import { RADIUS, GIPARU, COURT, houses } from './layout.js';
 
 const ID = 'ur';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -18,6 +18,13 @@ export function emitters() {
     }
     if (h.chapel) continue;
   }
+  // the trades' fires: the baker's ovens and the brewer's pan all day, the potter's kiln and the smith's hearth
+  for (const h of houses()) {
+    if (!h.trade || !h.open) continue;
+    const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    E.push({ p: [cx, 3.9, cz], kind: 'kitchen', thr: h.trade === 'baker' || h.trade === 'brewer' ? 0 : h.trade === 'granary' || h.trade === 'weaver' ? 9 : 0.15, seed: h.seed + 3 });
+  }
+  E.push({ p: [-17, 3.1, COURT[1] + 40], kind: 'incense', thr: 0, seed: 41 }, { p: [-7, 2.5, COURT[1] + 20], kind: 'incense', thr: 0, seed: 42 }, { p: [7, 2.5, COURT[1] + 44], kind: 'incense', thr: 0, seed: 43 });   // the altar and the braziers of the Court of Nanna
   const [gx, gz] = [GIPARU[0], GIPARU[1]];
   E.push({ p: [gx + 13.2, 1.5, gz + 60.9], kind: 'kitchen', thr: 0, seed: 11 });               // the Giparu's cooking range (its kitchen court)
   E.push({ p: [gx + 42.6, 1.3, gz + 51.9], kind: 'incense', thr: 0, seed: 21 });              // before the altar in the great court

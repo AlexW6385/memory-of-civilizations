@@ -3,7 +3,7 @@
 // terrace's walls, the Court of Nanna, the Giparu, the palace E-hursag, storehouses, the precinct
 // wall; the harbour's quay and boats.
 
-import { TEMENOS, TERRACE, COURT, GIPARU, PALACE, STORES, HARBOUR, RADIUS } from './layout.js';
+import { TEMENOS, TERRACE, COURT, GIPARU, PALACE, STORES, HARBOUR, RADIUS, BOATS } from './layout.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
@@ -20,8 +20,11 @@ E.push({ t: 'gate_tower', rect: [-10, -176, 10, -164], door: 'n', w: 4, h: 10, d
 const [cx0, cz0, cx1, cz1] = COURT;
 w([cx0, cz0], [-5, cz0], 5, 2.5); w([5, cz0], [cx1, cz0], 5, 2.5); w([cx0, cz0], [cx0, cz1], 5, 2.5); w([cx1, cz0], [cx1, cz1], 5, 2.5);
 E.push({ t: 'giparu', rect: GIPARU, door: 'w' });
-E.push({ t: 'courtyard_block', rect: PALACE, h: 7, ring: 12, door: 'w' });
-E.push({ t: 'courtyard_block', rect: STORES, h: 5, ring: 9, door: 'e' });
+E.push({ t: 'ur_hall', rect: PALACE, h: 5.4, ring: 12, door: 'w', kind: 'palace', seed: 31 });
+E.push({ t: 'ur_hall', rect: STORES, h: 4.4, ring: 9, door: 'e', kind: 'stores', seed: 32 });
+E.push({ t: 'ur_court', rect: COURT });
+// palms flanking the avenue between the north gate and the Edublalmah
+for (const [px, pz, s] of [[-15, -163, 1], [15, -163, 2], [-15, -147, 3], [15, -147, 4]]) E.push({ t: 'ur_palm', at: [px, pz], y: 0, h: 8.5 + (s % 3), seed: 200 + s });
 const [px0, pz0, px1, pz1] = TEMENOS;
 w([px0, pz0], [-7, pz0], 7, 4); w([7, pz0], [px1, pz0], 7, 4); w([px0, pz1], [px1, pz1], 7, 4); w([px0, pz0], [px0, pz1], 7, 4);
 w([px1, pz0], [px1, -26], 7, 4); w([px1, -14], [px1, pz1], 7, 4);
@@ -30,14 +33,17 @@ const [hx0, hz0, hx1, hz1] = HARBOUR.rect;
 E.push({ t: 'block', walk: true, rect: [hx1 - 1.5, hz0 + 6, hx1 + 1.5, hz1 - 6], y0: HARBOUR.bed, y1: 0.6, mat: 'brick_baked' });
 // boats moored along the quay and out in the basin (§6.1); flights of brick steps down from the quay to the water;
 // mooring posts along its edge
-for (const [x, z, d, len] of [[-285.3, -96, 1, 8], [-285.3, -60, -1, 9], [-285.3, -8, 1, 7.5], [-286.8, 28, -1, 8.5], [-300, -90, 1, 8], [-310, -30, -1, 7], [-302, 20, 1, 8], [-330, -60, -1, 9], [-318, 45, 1, 7]]) E.push({ t: 'reed_boat', at: [x, z], dir: [0, d], len, y: HARBOUR.water, seed: Math.round(x * 7 + z * 3) });
+for (const [x, z, d, len] of BOATS) E.push({ t: 'reed_boat', at: [x, z], dir: [0, d], len, y: HARBOUR.water, seed: Math.round(x * 7 + z * 3) });
 for (const z of [-80, -30, 12]) E.push({ t: 'stairs', rect: [hx1 - 4.6, z, hx1 - 1.5, z + 2.4], y0: HARBOUR.water - 0.5, y1: 0.6, dir: 'e', mat: 'brick_baked' });
 for (let z = hz0 + 10; z < hz1 - 8; z += 9) if (![-80, -30, 12].some((s) => z > s - 1.5 && z < s + 4)) E.push({ t: 'block', rect: [hx1 - 1.35, z - 0.14, hx1 - 1.07, z + 0.14], y0: 0.6, y1: 1.45, mat: 'palm_trunk' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('terrace', TERRACE.rect, ty, 'open'), room('court', COURT, 0, 'open'), room('shrine', [-5.7, 4.8, 5.7, 13.2], ty + 27, 'hall')];
+const rooms = [room('terrace', TERRACE.rect, ty, 'open'), room('court', COURT, 0, 'open'), room('shrine', [-5.7, 4.8, 5.7, 13.2], ty + 27, 'hall'), room('audience hall of the palace', [110.8, -139, 121, -83], 0, 'hall')];
 const walks = [[[-3, -232], [0, -170], [0, -110], [0, -78], [0, -60], [0, -40]]];
 walks[0].y0 = 0;
+// into the palace by its west gate and across its court to the audience hall's door
+walks.push([[0, -155], [60, -155], [60, -111], [76, -111], [88, -111], [88, -106], [106, -106], [106, -111], [116, -111]]);
+walks[1].y0 = 0;
 
 export const precinct = {
   id: 'ur-ziggurat',

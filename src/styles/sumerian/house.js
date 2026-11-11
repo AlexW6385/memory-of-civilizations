@@ -7,6 +7,8 @@
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import { stairs } from './index.js';
+import { dressFront, roofLife } from './dress.js';
+import { furnishTrade, tradeCourt } from './trades.js';
 
 const BB = 'brick_baked', MP = 'mud_plaster';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -134,7 +136,7 @@ export function urHouseOpen(el, { bag, col, lights }) {
     for (let k = 0; k < 4; k++) { const a = W(ua + 0.9 + k * 0.08, vC0 + 0.12), b = W(ua + 0.98 + k * 0.08, vC0 + 1.1), T = []; beamTris(T, [a[0], h0, a[1]], [b[0], h0 + 0.05, b[1]], 0.025, 0.04); bag.add('palm_trunk', fromTriangles(T)); }
     lights.push({ at: LP(ub - 0.4, vk, 0.45), color: '#ff9a4a', intensity: 3, distance: 5 }); }
   // ---- the reception room: reed mats, the couch, stools, a low table with a jug and cups, a lamp in a niche
-  if (!el.school) { const ra = recep[0], rb = recep[1], va = V - t - dB, vb = V - t, h0 = 0.06;
+  if (!el.school && !el.trade) { const ra = recep[0], rb = recep[1], va = V - t - dB, vb = V - t, h0 = 0.06;
     B('reed_mat', ra + 0.25, va + 0.25, rb - 0.25, vb - 0.25, h0, h0 + 0.012);
     // the couch: a timber frame on four legs, a webbing of cord, a linen mattress and a red coverlet, along the back wall
     const cu0 = ra + 0.4, cu1 = cu0 + 1.9, cv1 = vb - 0.08, cv0 = cv1 - 0.85, ch = 0.45;
@@ -179,6 +181,14 @@ export function urHouseOpen(el, { bag, col, lights }) {
     for (const du of [0, 1.2]) { B(MP, bu + du, bv, bu + du + 0.95, bv + 0.7, 0.06, 0.4); B('bitumen', bu + du + 0.1, bv + 0.1, bu + du + 0.85, bv + 0.6, 0.38, 0.41); col.rect(R(bu + du, bv, bu + du + 0.95, bv + 0.7), 0, 0.4); }
     L('terracotta', [[0.001, 0], [0.2, 0.0], [0.34, 0.14], [0.36, 0.2], [0.3, 0.21], [0.001, 0.15]], bu + 3.0, bv + 0.35, 0.06, 14);
   }
+  // ---- a trade in place of the reception room (el.trade; trades.js) ---------------------------------------------------
+  if (el.trade && !el.school) {
+    const beam = (mat, a, b, w, h) => { const T = []; beamTris(T, a, b, w, h); bag.add(mat, fromTriangles(T)); };
+    const lamp = (ra, nv, y) => { soot(ra + 0.012, nv, 0.14, 0.05, y, y + 0.65); L('terracotta', [[0.001, 0], [0.05, 0.005], [0.06, 0.03], [0.03, 0.045], [0.001, 0.04]], ra + 0.12, nv, y - 0.05, 10); B(MP, ra, nv - 0.15, ra + 0.24, nv + 0.15, y - 0.18, y - 0.05); B('flame', ra + 0.17, nv - 0.012, ra + 0.19, nv + 0.012, y - 0.01, y + 0.03); lights.push({ at: LP(ra + 0.35, nv, y + 0.2), color: '#ffb46b', intensity: 2.5, distance: 6 }); };
+    const fuel = (u, v) => { for (let k = 0; k < 5; k++) L('pottery_dark', [[0.001, 0], [0.13, 0.005], [0.14, 0.035], [0.001, 0.04]], u, v, 0.06 + k * 0.04, 10); for (let k = 0; k < 4; k++) beam('palm_trunk', LP(u + 0.3 + k * 0.08, v - 0.1, 0.06), LP(u + 0.38 + k * 0.08, v + 0.9, 0.11), 0.025, 0.04); };
+    const H2 = { B, L, W, LP, R, col, lights, bag, rand, soot, jar, bowl, beam, lamp, fuel, ra: recep[0], rb: Math.min(recep[1], uC1), va: V - t - dB, vb: V - t, uC0, uC1, vC0, vC1 };
+    furnishTrade(el.trade, H2); tradeCourt(el.trade, H2);
+  }
   // ---- the chapel: the niche in the end wall and the altar of brickwork before it, offering bowls, a clay
   // figurine, a lamp; the family's dead lie under its pavement ---------------------------------------------
   if (chapel[1] - chapel[0] > 1.4) {
@@ -195,6 +205,10 @@ export function urHouseOpen(el, { bag, col, lights }) {
     // the vaulted tomb under the floor shows as a patch of relaid bricks
     B(BB, ua + 0.3, va + 0.6, ub - 1.3, vb - 0.6, 0.06, 0.075);
   }
+  // the front's dress and weather, the roof's life
+  { const [rx0, rz0, rx1, rz1] = el.rect, dcw = f === 'n' ? rx0 + t + 0.725 : f === 's' ? rx1 - t - 0.725 : f === 'w' ? rz1 - t - 0.725 : rz0 + t + 0.725;
+    dressFront({ bag, col }, { rect: el.rect, face: f, dc: dcw, trade: el.trade, seed: el.seed, foot, H, near: true });
+    roofLife({ bag }, { wings: [R(t, 0, U - t, t + dF), R(t, V - t - dB, U - t, V - t), R(uC1 + ti, vC0, U - t, vC1)], y: H, seed: el.seed }); }
 }
 
 /** A local frame at `at` turned by rot (as a figure is: rot 0 faces −z): P(lx, y, lz) → world. */
@@ -257,4 +271,21 @@ export function quayGoods(el, { bag, col }) {
     bag.add('rope_fibre', tbox(P, -0.5, 0, -0.6, 0.25, 0.02, 0.4));
     for (let k = 0; k < 6; k++) bag.add('palm_trunk', at(P, lathe([[0.03, 0], [0.03, 0.05], [0.001, 0.05]], 6), -0.45 + k * 0.14, 0.02, -0.6));   // the floats
   }
+}
+
+/** World (x, z) of the local point (u along the front, v in from it) of an open house { rect, door }. */
+export function lotPoint(el, u, v) {
+  const [x0, z0, x1, z1] = el.rect, f = el.door ?? 's';
+  return f === 'n' ? [x0 + u, z0 + v] : f === 's' ? [x1 - u, z1 - v] : f === 'w' ? [x0 + v, z1 - u] : [x1 - v, z0 + u];
+}
+/** The figure's rot facing local direction (du, dv) of an open house. */
+export function lotRot(el, du, dv) {
+  const a = lotPoint(el, 0, 0), b = lotPoint(el, du, dv), dx = b[0] - a[0], dz = b[1] - a[1];
+  return Math.atan2(-dx, -dz);
+}
+/** The room of a trade in an open house { rect, door }: { ra, rb, va, vb } in the house's frame (as urHouseOpen lays it out). */
+export function tradeRoom(el) {
+  const [x0, z0, x1, z1] = el.rect, f = el.door ?? 's', U = f === 'n' || f === 's' ? x1 - x0 : z1 - z0, V = f === 'n' || f === 's' ? z1 - z0 : x1 - x0;
+  const t = 0.55, ti = 0.4, cl = (a, lo, hi) => Math.max(lo, Math.min(hi, a)), dB = cl(V * 0.26, 2.7, 3.4), uC1 = U - t - 2.6 - ti;
+  return { ra: t, rb: Math.min(Math.min(Math.max(t + 3.2, (U - t) * 0.6), uC1 - 1.4), uC1), va: V - t - dB, vb: V - t };
 }

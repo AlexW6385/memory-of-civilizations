@@ -4,7 +4,10 @@
 // not camels); a shepherd with sheep and goats; porters carrying jars up from the moored boats on the quay;
 // a fisherman mending his net. Figures and beasts are a 'life' plan; the scribe's mat and tablets, the
 // net and the stacked jars are the 'sumerian' style's (`scribe_kit`, `quay_goods`).
-import { MARKET, HARBOUR } from './layout.js';
+import { MARKET, HARBOUR, houses, usedLots, BOATS, YARD } from './layout.js';
+import { doorOf } from '../../styles/sumerian/index.js';
+import { lotPoint, lotRot, tradeRoom } from '../../styles/sumerian/house.js';
+import { TRADE_SPOT } from '../../styles/sumerian/trades.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const N = 0, S = Math.PI, E = -Math.PI / 2, W = Math.PI / 2;             // a figure's rot to face north, south, east, west
@@ -55,5 +58,73 @@ export function urLife() {
   figures.push({ t: 'figure', at: [6, -196], y: 0, rot: E + 0.3, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', carry: 'pot', h: 1.52 });
   figures.push({ t: 'figure', at: [7.1, -195.2], y: 0, rot: E + 0.2, seed: seed(), dress: 'robe', cloth: 'linen', cloth2: 'cloth_brown', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', h: 1.5 });
   figures.push({ t: 'figure', at: [-20.5, -219.2], y: 0, rot: S, seed: seed(), child: true, dress: 'wrap', top: 'bare', cloth: 'linen', hair: 'shaven', feet: 'bare' });
+  tradeWorkers(figures, man, rand);
+  harbourLife(figures, gear, man, rand, seed);
+  doorLife(figures, man, rand, seed);
+  // the beasts in the pens of the empty lots: sheep and goats, a pair of oxen, or a donkey and a shepherd boy
+  for (const { rect: r, k, kind } of usedLots()) {
+    if (kind !== 'pen') continue;
+    const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, n = 4 + (k % 4);
+    for (let i = 0; i < n; i++) figures.push({ t: 'animal', kind: k % 5 === 0 ? 'ox' : k % 3 === 0 ? 'goat' : 'sheep', at: [cx + (rand() - 0.5) * (r[2] - r[0] - 3.2), cz + 0.5 + (rand() - 0.5) * (r[3] - r[1] - 3.6)], y: 0, rot: rand() * 6.28, seed: seed() });
+    if (k % 4 === 1) man([r[2] + 0.9, cz], 0, W, { carry: 'staff', len: 1.6, pose: 'staff', child: true });
+  }
   return { figures, gear };
+}
+
+/** The worker of each trade house that can be entered, at his place in the trade's room (trades.js TRADE_SPOT). */
+function tradeWorkers(figures, man, rand) {
+  for (const h of houses()) {
+    if (!h.open || !h.trade) continue;
+    const sp = TRADE_SPOT[h.trade]?.(tradeRoom(h));
+    if (!sp) continue;
+    const [x, z] = lotPoint(h, ...sp.at), rot = lotRot(h, ...sp.face);
+    if (sp.women) figures.push({ t: 'figure', at: [x, z], y: sp.pose === 'sit_low' ? 0.06 : 0.06, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', pose: sp.pose, h: 1.5 });
+    else man([x, z], 0.06, rot, { pose: sp.pose });
+  }
+}
+
+/** The life of the harbour (§6.2): a punter at the stern of each boat, women washing at the steps, fishermen, reed-cutters, oxen watering, a boat being built on the yard. */
+function harbourLife(figures, gear, man, rand, seed) {
+  const water = HARBOUR.water, qx = HARBOUR.rect[2];
+  BOATS.forEach(([x, z, d, len], i) => {
+    if (i % 3 === 2) return;                                           // some lie empty
+    man([x, z - d * len * 0.38], water + 0.1, d > 0 ? S : N, { carry: 'punt', pose: 'punt', len: 3.2, poleMat: 'palm_trunk', over: 'belt' });
+    if (i % 2 === 0) man([x + 0.05, z + d * len * 0.05], water + 0.1, d > 0 ? S : N, { pose: 'sit_ground', over: 'none' });
+  });
+  // the steps at z -80, -30, 12: women kneeling to wash, their baskets by them
+  for (const z of [-80, -30, 12]) {
+    const sx = qx - 4.6 + 10.5 * (3.1 / 14);
+    for (const [dz, k] of [[0.5, 0], [1.7, 1]]) figures.push({ t: 'figure', at: [sx - k * 0.22, z + dz], y: -1.7 + (11 - k * 2) * 0.1643, rot: W, seed: seed(), dress: 'robe', cloth: k ? 'cloth_ochre' : 'cloth_white', cloth2: 'cloth_brown', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', pose: 'kneel', h: 1.5 });
+    figures.push({ t: 'goods_mat', at: [qx - 1.2, z + 1.2], y: 0.6, rot: W, seed: seed(), goods: ['baskets', 'heap'], mat: 'reed_mat' });
+  }
+  // fishermen at the quay's edge with their spears and a boy with a line
+  for (const [z, kind] of [[-44, 'spear'], [-20, 'spear'], [36, 'line']]) man([qx - 0.4, z], 0.6, W, { carry: 'staff', len: kind === 'spear' ? 2.6 : 2.0, pose: 'staff', staffMat: 'palm_trunk', child: kind === 'line' });
+  // reed-cutters coming up from the marsh with bundles on their shoulders, a donkey with a load of reeds
+  for (const z of [-75, -52, 0, 40]) man([qx + 5 + rand() * 4, z], 0, E, { carry: 'bundle' });
+  figures.push({ t: 'animal', kind: 'donkey', at: [qx + 9, -66], y: 0, rot: E, seed: seed(), gear: true });
+  // oxen watering at the steps, a herd boy by them
+  for (const dz of [0, 2.4, 4.6]) figures.push({ t: 'animal', kind: 'ox', at: [qx + 3.6, 20 + dz], y: 0, rot: W + (rand() - 0.5) * 0.5, seed: seed() });
+  man([qx + 5.4, 24], 0, W, { carry: 'staff', len: 1.6, pose: 'staff', child: true });
+  // the yard: a boat on trestles, three men binding the bundles, a pot of bitumen over a fire, fish drying on a rack
+  const [yx, yz] = YARD.at;
+  man([yx + 1.4, yz - 1.5], 0, W, { pose: 'squat' }); man([yx - 1.4, yz + 0.8], 0, E, { pose: 'kneel' }); man([yx + 1.5, yz + 2.8], 0, W, { pose: 'stand', carry: 'bundle' });
+  gear.push({ t: 'quay_goods', at: [yx + 3.5, yz + 3], y: 0, rot: W, kind: 'reeds' }, { t: 'quay_goods', at: [yx - 4, yz - 3], y: 0, rot: E, kind: 'net' });
+  man([yx - 4, yz - 1.6], 0, N, { pose: 'sit_ground' });
+}
+
+/** The people at the doors of the houses near the core: a woman grinding at her door, an old man on his bench, children at play, a dog, a donkey tied up. */
+function doorLife(figures, man, rand, seed) {
+  const sx = { n: [0, -1], s: [0, 1], w: [-1, 0], e: [1, 0] };
+  for (const h of houses()) {
+    if (h.lod !== 2 || h.chapel || rand() > 0.34) continue;
+    const { face, dc } = h.open ? { face: h.door, dc: null } : doorOf(h);
+    if (dc === null) continue;
+    const [x0, z0, x1, z1] = h.rect, [nx, nz] = sx[face], P = (u, v) => (nx ? [(nx > 0 ? x1 : x0) + nx * v, u] : [u, (nz > 0 ? z1 : z0) + nz * v]);
+    const rot = Math.atan2(nx, nz) + Math.PI, k = rand(), side = rand() < 0.5 ? -1 : 1, [x, z] = P(dc + side * 1.9, 0.75);
+    if (k < 0.3) figures.push({ t: 'figure', at: [x, z], y: 0, rot, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', pose: 'kneel', h: 1.5 });
+    else if (k < 0.55) man([x, z], 0, rot, { pose: 'sit_ground', beard: true });
+    else if (k < 0.75) man([x, z], 0, rot + (rand() - 0.5), { child: true, pose: 'squat' });
+    else if (k < 0.9) figures.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: seed() });
+    else figures.push({ t: 'animal', kind: 'donkey', at: P(dc + side * 2.0, 0.9), y: 0, rot: rot + 1.57, seed: seed(), gear: true });
+  }
 }
