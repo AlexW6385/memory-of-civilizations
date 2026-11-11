@@ -49,6 +49,9 @@ function planting(x, z) {
   if (onWall(x, z, 1) || onStreet(x, z, 0.5)) {
     // willows on the canal streets' edges, over the water
     if (CANAL_STREETS.some((r) => inRect(r, x, z, 0)) && (x < 138 ? x > 136.4 : x < 151.6 && x > 150)) return { willow: 0.9 };
+    // street trees: willows and camphors at the Imperial Way's kerbs (inferred from the shaded streets of Lin'an's accounts)
+    if (x > 20.4 && x < 21.6 && z < -20 && z > -215 && !onWall(x, z, 14)) return { willow: 0.45 };
+    if (x > 34.4 && x < 35.6 && z < -20 && z > -215 && !onWall(x, z, 14)) return { camphor: 0.3 };
     return null;
   }
   if (inLot(x, z, 0.5) || z > ROAD.z0 - 0.5) return null;
@@ -66,7 +69,7 @@ function planting(x, z) {
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   sea: LEVEL.river,   // the planet's sea is this water, at this level (src/planet/relief.js)
-  maxDensity: { masson_pine: 0.5, chinese_fir: 0.35, chinese_pine: 0.3, camphor: 0.25, bamboo: 1.2, tea: 0.6, maple: 0.3, willow: 1.1, apple: 0.7, reeds: 3, mulberry: 0.1, grass: 25 },
+  maxDensity: { masson_pine: 0.5, chinese_fir: 0.35, chinese_pine: 0.3, camphor: 0.4, bamboo: 1.2, tea: 0.6, maple: 0.3, willow: 1.1, apple: 0.7, reeds: 3, mulberry: 0.1, grass: 25 },
   climate: {
     waterline: LEVEL.canal,   // the canals' still water: the stain line on their walls (src/engine/materials.js)
     sun: { az: 160, el: 42, color: [1.0, 0.94, 0.86], intensity: 2.9, lat: 30, dec: 0, hour: 10.5 },
