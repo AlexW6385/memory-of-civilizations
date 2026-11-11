@@ -860,4 +860,22 @@ export const CARDS = {
       "底格里斯河 —— 宽阔的河面上有两座浮桥，码头、圆形的库法小舟和涂沥青的长船，岸边有枣椰树和芦苇。",
     ],
   },
+  'qin-xianyang': {
+    en: [
+      "Qin Xianyang stands on the loess plain of Guanzhong in Shaanxi, shown in the autumn of 210 BC, weeks after the death of Qin Shi Huang, the First Emperor of a unified China. The plain draws two places together: the mausoleum on the slope of Mount Li, where the emperor's army of clay is being roofed in its pits, and Xianyang, the capital on the Wei river, with its palace terraces, market and imperial road. The architecture is the Qin's: rammed earth beaten in layers, timber halls on high terraces under grey tile, painted black and vermilion.",
+      "Pit 1 of the terracotta army — a trench 230 by 62 m and 5 m deep, entered by three ramps at its east end, where the army stands facing east: three ranks of archers across the front gallery, behind them eleven corridors between rammed-earth partitions, each holding two files of painted infantry in lacquered armour, with four-horse chariots at intervals. The corridors are roofed with logs laid across the partitions; the earth is heaped over the western part of the roof and not yet over the east.",
+      "The Xianyang palace hall — a hall of 54 by 34 m under a hipped roof of grey tile, vermilion walls and red columns with black and ochre architraves, on a two-tier rammed-earth terrace 7 m high reached by a great brick stair, with twin gate towers (que) at its foot; inside, the throne dais with its screen, bronze lamp trees and a frame of bronze bells.",
+      "The imperial road — a straight road 40 m wide across the plain with the emperor's lane along its middle, the ruts of every cart one gauge apart, low banks of beaten earth and pines every three zhang; road-station pavilions and ox carts.",
+      "The market — a walled square with four gates and a tower, where the standard weights and measures of the empire stand on their table: stone weights, bronze sheng measures, the chi rod and the edict; balances at the stalls under awnings.",
+      "The figure-makers' quarter and the town — the yards where the soldiers are made (clay, coiled bodies, moulded heads, the kiln, the painting shed, the sledges for the pit) and rows of rammed-earth houses with tile or thatch roofs, courtyard houses, officials' houses on raised platforms and granaries on posts.",
+    ],
+    zh: [
+      "秦咸阳位于陕西关中黄土平原，画面所示为公元前210年秋，统一中国的始皇帝刚刚去世数周。这片平原把两处地方放到一起：骊山脚下的陵园，陶俑大军正在坑中封顶；以及渭水边的都城咸阳，有宫殿高台、市场与驰道。建筑属秦：夯土层层夯筑，高台上的木构殿堂覆灰瓦，施以黑色与朱红。",
+      "一号兵马俑坑 —— 长230米、宽62米、深约5米的大坑，东端有三条斜坡通入，大军面东而立：前廊横列三排弩手，其后是十一条被夯土隔墙分开的过洞，每条过洞里站着两列披漆甲、彩绘的步兵，间有四马战车。过洞顶部以圆木横架在隔墙上；西段已覆土堆起，东段尚未覆土。",
+      "咸阳宫大殿 —— 长54米、宽34米，庑殿顶覆灰瓦，朱红墙与红柱，黑色和赭色的额枋，立于七米高的两层夯土台上，南面有砖砌大台阶，阶前两座阙楼；殿内有带屏风的御座台、青铜灯树与一架编钟。",
+      "驰道 —— 横贯平原的笔直大道，宽40米，中央是天子专用的一道，车辙一律同轨，两侧夯土矮堤，每三丈植一棵松；路边有亭驿和牛车。",
+      "市场 —— 四门环墙的方形市场，中有市楼，楼前陈列全国统一的度量衡：石权、铜升、尺和诏书；摊位上的布棚下摆着天平。",
+      "制俑工坊与城镇 —— 制作兵俑的作坊院（备泥、盘筑躯干、模制头像、烧窑、彩绘棚与运往俑坑的雪橇），以及一排排夯土民居，有瓦顶或茅顶，也有带院门的宅院、建在高台上的官吏宅第和架空的粮仓。",
+    ],
+  },
 };

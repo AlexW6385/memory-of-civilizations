@@ -99,6 +99,7 @@ export const SITES = [
   { id: 'sydney', name: { en: 'Modern Sydney', zh: '现代悉尼' }, era: '20th c.', region: 'australia', lat: -33.86, lon: 151.21, radius: 460 },
   { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, era: 'c. 1250 BC', region: 'egypt', lat: 25.7, lon: 32.64, radius: 330 },
   { id: 'delphi', name: { en: 'Delphi', zh: '德尔斐' }, era: 'c. 400 BC', region: 'aegean', lat: 38.48, lon: 22.5, radius: 190 },
+  { id: 'qin-xianyang', name: { en: 'Qin Xianyang', zh: '秦咸阳' }, era: 'c. 210 BC', region: 'china', lat: 34.38, lon: 109.25, radius: 330 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
