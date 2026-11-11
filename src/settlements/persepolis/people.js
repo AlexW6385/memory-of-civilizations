@@ -46,6 +46,14 @@ export function people() {
     figures.push({ t: 'figure', at: [ax + 0.2, z - 0.1], y: T, rot: E, h: 1.68, seed: seed(), dress: d.dress, top: d.top, cloth: d.cloth[1], cloth2: d.cloth[0], hat: d.hat, hatMat: d.cloth[0], beard: true, skin: d.skin ?? 'skin_medium', feet: d.dress === 'wrap' ? 'bare' : 'shod', pose: 'staff', len: 1.3, staffMat: 'wood_dark' });
     x -= 10.5;
   }
+  // servants and courtiers of the terrace: courtiers in groups on the Hundred Columns' platform and before the Hadish, cup-bearers and food-bearers crossing the courts
+  const GROUPS = [[75, -95], [60, -75], [90, -110], [-10, 100], [20, 95], [-45, 20], [-52, 40], [90, 130], [70, 160]];
+  GROUPS.forEach(([gx, gz], gi) => {
+    for (let k = 0; k < 3; k++) {
+      const at = [gx + (k - 1) * 1.1 + (rand() - 0.5) * 0.4, gz + (k % 2) * 0.9], bearer = gi % 3 === 2 && k === 0;
+      figures.push({ t: 'figure', at, y: T, rot: rand() * 6.28, h: 1.7 + rand() * 0.08, seed: seed(), dress: 'robe', cloth: ['cloth_white', 'cloth_ochre', 'cloth_indigo', 'cloth_maroon'][(gi + k) % 4], cloth2: 'cloth_red', over: 'sash', hat: 'cap', hatMat: 'cloth_white', beard: true, skin: 'skin_medium', feet: 'shod', pose: k === 1 ? 'talk' : 'stand', ...(bearer ? { carry: 'pot', arms: 'head' } : {}) });
+    }
+  });
   // the archivist in the Treasury's hall, cross-legged at his mat by the benches of tablets (his mat in plan.js: the treasury)
   figures.push({ t: 'figure', at: [123.6, 115.8], y: T + 0.09, rot: S, h: 1.7, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'sash', hair: 'short', beard: true, hat: 'cap', hatMat: 'cloth_white', skin: 'skin_medium', feet: 'shod', pose: 'cross' });
   // on the road across the plain: a caravan of camels bound for the terrace with their drivers, donkeys loaded with
