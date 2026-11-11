@@ -15,6 +15,7 @@ import { stStephens, centralLobby, commons, lords } from './interior.js';
 import { clockDial } from './dial.js';
 import { faceFrame } from '../dutch/facade.js';
 import { terraceRich, shopHouse, pub, pillarBox, drinkingFountain, bollard, trestleStall } from './shops.js';
+import { parliamentSquare, barrelOrgan, punchBooth } from './square.js';
 import { hansomCab, omnibus, gasLamp, paddleSteamer, lighter, steamboatPier } from './street.js';
 
 const S = 'limestone_yellow', SL = 'slate';
@@ -231,6 +232,6 @@ function terraceInterior(el, { bag, col }, mat, st) {
 
 registerStyle('victorian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, st_stephens: stStephens, central_lobby: centralLobby, commons, lords, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, gothic_tower: gothicTower, terrace_house: (el, c) => terraceRich(el, c, terraceHouseBase), shop_house: (el, c) => shopHouse(el, c, terraceHouseBase), pub: (el, c) => pub(el, c, terraceHouseBase), pillar_box: pillarBox, drinking_fountain: drinkingFountain, bollard, trestle_stall: trestleStall, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
+  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, st_stephens: stStephens, central_lobby: centralLobby, commons, lords, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, gothic_tower: gothicTower, terrace_house: (el, c) => terraceRich(el, c, terraceHouseBase), shop_house: (el, c) => shopHouse(el, c, terraceHouseBase), pub: (el, c) => pub(el, c, terraceHouseBase), parliament_square: parliamentSquare, barrel_organ: barrelOrgan, punch_booth: punchBooth, pillar_box: pillarBox, drinking_fountain: drinkingFountain, bollard, trestle_stall: trestleStall, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
   objects: {},
 });

@@ -2,7 +2,7 @@ import { lodTiles, openLots } from '../lod.js';
 // The terraces of Westminster and Lambeth (docs/settlements/london.md §5); the traffic of about 1870 (§5a): hansom
 // cabs and knifeboard omnibuses on Westminster Bridge, in Bridge Street and Parliament Street, gas lamps along them;
 // on the Thames the penny steamers, one at the floating pier by the bridge, and the coal lighters.
-import { RADIUS, GROUND, RIVER, BRIDGE, lots, bank, inLot, blocked, streetsZ, crossX } from './layout.js';
+import { RADIUS, GROUND, RIVER, BRIDGE, SQUARE, lots, bank, inLot, blocked, streetsZ, crossX } from './layout.js';
 import { ridersOf } from '../../styles/victorian/street.js';
 const base = (id, elements, style = 'victorian') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -180], facing: 'e' } });
 const W = Math.PI / 2, E = -Math.PI / 2, N = 0, S = Math.PI;
@@ -58,6 +58,20 @@ function streetFolk() {
   // the crossing sweeper with his broom at the corner of Parliament Street, the policeman on his beat
   fig([46, BRIDGE.z - 5.2], E, { dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'cap', hatMat: 'cloth_grey', carry: 'staff', pose: 'staff', len: 1.5, h: 1.45 });
   fig([108, BRIDGE.z + 5.6], W, { dress: 'trousers', cloth: 'prussian_blue', cloth2: 'prussian_blue', hat: 'brim', hatMat: 'prussian_blue', over: 'belt' });
+  // Parliament Square: readers on the benches, nursemaids with prams' children, children round Punch and Judy's booth, the organ-grinder, sandwich-board men, loungers by the statue
+  const suit = (at, rot, o = {}) => fig(at, rot, { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', beard: rand() < 0.5, ...o });
+  suit([-22.3, -178.0], S, { pose: 'sit' }); suit([-2, -182.0], N, { pose: 'sit' });
+  fig([-21.6, -182.0], N, { dress: 'robe', cloth: 'cloth_maroon', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cape', pose: 'sit' });
+  for (let i = 0; i < 6; i++) fig([6.2 + i * 0.75 - 2, -172.2 + (i % 2) * 0.7], N, { h: 1.0 + (i % 3) * 0.12, dress: i % 2 ? 'robe' : 'trousers', cloth: ['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green'][i % 4], cloth2: 'cloth_brown', hat: i % 2 ? 'none' : 'cap', hatMat: 'cloth_grey' });
+  fig([8, -170.8], N, { dress: 'robe', cloth: 'cloth_grey', cloth2: 'cloth_black', hat: 'cap', hatMat: 'cloth_white', over: 'shawl' });
+  fig([-24.6, -175.2], E, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_brown', hat: 'brim', hatMat: 'cloth_black', over: 'collar', carry: 'none', pose: 'stand' });
+  for (const [x, z, rot] of [[-5, -179.2, W], [-14, -180.8, E], [30.5, -184, S], [14, -183.5, N], [-38, -181, E], [3, -188, S]]) {
+    const lady = rand() < 0.5;
+    fig([x, z], rot, lady ? { dress: 'robe', cloth: rand() < 0.5 ? 'cloth_indigo' : 'cloth_maroon', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cape', pose: rand() < 0.4 ? 'talk' : 'stand' } : { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: rand() < 0.4 ? 'talk' : 'stand' });
+  }
+  for (const [x, z, rot] of [[-18, -177.4, E], [-18.9, -177.4, E]]) fig([x, z], rot, { dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'cap', hatMat: 'cloth_brown', carry: 'staff', pose: 'staff', len: 1.9, over: 'apron', staffMat: 'timber' });
+  // the cabmen of the rank, each by his cab's horse
+  for (const x of [-48, -41, -34, -27]) fig([x + 0.4, -149.4], S, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: rand() < 0.5 ? 'talk' : 'stand' });
   return L;
 }
 
@@ -79,9 +93,20 @@ function furniture() {
   for (const zc of streetsZ()) { if (Math.abs(zc - BRIDGE.z) > 62) continue; for (let x = -200 + rand() * 30; x < 200; x += 55 + rand() * 40) add('trestle_stall', x, zc + (rand() < 0.5 ? -1 : 1) * (Math.abs(zc - BRIDGE.z) < 1 ? 5.8 : 2.4), { rot: rand() < 0.5 ? 0 : Math.PI, goods: rand() < 0.5 ? 'wicker' : 'cloth_red' }); }
   return [base('london-furniture', L)];
 }
+/** Parliament Square (§5c): lawns, walks, Canning's statue, beds, benches; the cab rank, the barrel organ and Punch and Judy at its edges. */
+function square() {
+  const wz = -180, wx = -10, st = [22, wz], L = [];
+  L.push({ t: 'parliament_square', rect: SQUARE, y: GROUND, statue: st, walkZ: wz, walkX: wx });
+  L.push({ t: 'barrel_organ', at: [-26, wz + 3.4], y: GROUND, rot: 0.4 });
+  L.push({ t: 'punch_booth', at: [8, wz + 4.2], y: GROUND, rot: Math.PI });
+  for (const [i, x] of [-48, -41, -34, -27].entries()) L.push({ t: 'hansom_cab', at: [x, -148.2], y: GROUND, rot: W, seed: 60 + i, riders: false });
+  for (const [x, z] of [[-45, -190], [-45, -172], [30, -196], [30, -164], [-10, -199], [-10, -161], [8, -174], [-30, -186]]) L.push({ t: 'gas_lamp', at: [x, z], y: GROUND });
+  return L;
+}
 export async function houses() {
   // the two houses nearest the Lambeth end of the bridge stand open: hall, front parlour and back room (§5a)
   const all = lots(), plans = [], open = openLots(all, [272, BRIDGE.z + 14], 2);
   plans.push(...lodTiles('london-terraces', 'victorian', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true } : {}) })), { R: RADIUS }));
-  return [...plans, ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life')];
+  const sq = square();
+  return [...plans, base('london-square', sq), base('london-square-life', sq.flatMap(ridersOf), 'life'), ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life')];
 }

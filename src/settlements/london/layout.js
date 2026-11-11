@@ -15,6 +15,7 @@ export const LOBBY = [69.7, -46];                                   // the Centr
 export const VICTORIA = [80, 140];
 export const ABBEY = [-200, 20, -70, 62];
 export const SQUARE = [-60, -215, 40, -150];
+export const SQ = { walkZ: -180, walkX: -10, statue: [22, -180] };            // Parliament Square's walks and Canning's plaza
 export const BRIDGE = { z: -170, w: 16 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };

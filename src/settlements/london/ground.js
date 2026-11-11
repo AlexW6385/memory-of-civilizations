@@ -1,7 +1,7 @@
 // London — the ground: granite setts and pavements, Parliament Square's lawn and plane trees, the
 // grey-brown Thames at mid tide with its mud, the Abbey's green; the smoky, overcast Victorian sky.
 
-import { RADIUS, GROUND, RIVER, SQUARE, ABBEY, PALACE, height, inRiver, inRect, inLot } from './layout.js';
+import { RADIUS, GROUND, RIVER, SQUARE, ABBEY, PALACE, SQ, BRIDGE, bank, height, inRiver, inRect, inLot } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0, grass: 0.15, rock: 0, soil: 0.25, fields: 0, dry: 0.2, warmth: 0.3, red: 0.05, road: 0.65, snow: 0, forest: 0 };
@@ -14,14 +14,21 @@ function waterLevel(x, z) { return inRiver(x, z) ? RIVER.level : -Infinity; }
 function fromWater(x, z) { return inRiver(x, z) ? -3 : Math.max(-5, Math.min(40, height(x, z) - RIVER.level)); }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || height(x, z) < GROUND - 0.5 || inRect(PALACE, x, z, 4) || inRect(ABBEY, x, z, 4) || inLot(x, z, 0.5)) return null;
-  if (inRect(SQUARE, x, z)) return { plane_tree: 0.02, grass: 30 };
-  if (inRect([ABBEY[0] - 30, ABBEY[1] - 30, ABBEY[2] + 30, ABBEY[3] + 30], x, z)) return { plane_tree: 0.01, grass: 25 };
+  if (inRect(SQUARE, x, z)) {
+    // the walks, the plazas, the beds and the clipped privet stay clear; planes stand in the lawns (the 1868 planting, a few years grown)
+    if (Math.abs(z - SQ.walkZ) < 3.4 || Math.abs(x - SQ.walkX) < 3.4 || Math.hypot(x - SQ.statue[0], z - SQ.statue[1]) < 7 || Math.hypot(x - SQ.walkX, z - SQ.walkZ) < 7) return { grass: 6 };
+    if (x < SQUARE[0] + 3 || x > SQUARE[2] - 3 || z < SQUARE[1] + 3 || z > SQUARE[3] - 3) return { grass: 6 };
+    return { plane_tree: 0.16, grass: 30 };
+  }
+  // the embankments' promenades: a row of young planes along the parapet (the Victoria Embankment's, planted 1870)
+  { const [a, b] = bank(z), d = Math.min(Math.abs(x - (a - 3.6)), Math.abs(x - (b + 3.6))); if (d < 1.1 && Math.abs(z - BRIDGE.z) > 14 && Math.hypot(x, z) < RADIUS - 70) return { plane_tree: 0.03 * Math.max(0, 1 - d / 1.1) }; }
+  if (inRect([ABBEY[0] - 30, ABBEY[1] - 30, ABBEY[2] + 30, ABBEY[3] + 30], x, z)) return { plane_tree: 0.05, grass: 25 };
   return null;
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   sea: RIVER.level,   // the planet's sea is this water, at this level (src/planet/relief.js)
-  maxDensity: { plane_tree: 0.02 },
+  maxDensity: { plane_tree: 0.16 },
   climate: {
     sun: { az: 180, el: 35, color: [1.0, 0.94, 0.84], intensity: 2.8, lat: 51.5, dec: 5, hour: 12 },
     sky: { turbidity: 6.0, rayleigh: 1.3, mie: 0.012, mieG: 0.82, zenith: [0.12, 0.15, 0.24], horizon: [0.6, 0.6, 0.58] },
