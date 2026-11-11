@@ -6,6 +6,12 @@ import { TRICLINIUM, floorY } from './layout.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
 
+/** The caravan's places: kept off the line of the way down the Outer Siq (the walking route's), a few metres to its west. */
+const SH = [-5.8, -3.3], sh = ([x, z]) => [+(x + SH[0]).toFixed(1), +(z + SH[1]).toFixed(1)];
+export const CARAVAN = {
+  camels: [[118, -110], [110, -96], [102, -84], [94, -74], [86, -64], [78, -55]].map(sh), drivers: [[74.5, -51.5], [107.5, -93.5]].map(sh),
+  donkeys: [[60, -38], [62.2, -40.6]].map(sh), dog: sh([70, -46]),
+};
 export function people() {
   const rand = rng(51), L = [], seed = () => Math.floor(rand() * 1e9);
   const robe = () => ({ dress: 'robe', cloth: ['cloth_white', 'linen', 'cloth_ochre', 'cloth_indigo', 'cloth_red'][Math.floor(rand() * 5)], cloth2: 'cloth_white', over: rand() < 0.5 ? 'cape' : 'sash', hair: 'short', beard: true, skin: 'skin_medium', feet: 'shod', hat: 'none' });
@@ -20,10 +26,10 @@ export function people() {
   L.push({ t: 'figure', at: [cx + 1.6, z1 - 1.6], y, rot: face([cx + 1.6, z1 - 1.6], table), seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_indigo', over: 'shawl', hair: 'long', beard: false, skin: 'skin_medium', feet: 'bare', pose: 'flute', h: 1.55 });
   L.push({ t: 'figure', at: [cx + 0.9, tz + 0.9], y, rot: face([cx + 0.9, tz + 0.9], table), seed: seed(), dress: 'tunic', cloth: 'linen', over: 'belt', hair: 'short', skin: 'skin_medium', feet: 'bare', carry: 'pot' });
   // the caravan coming down the Outer Siq toward the city (the street's east end), its camels loaded, two drivers
-  const path = [[118, -110], [110, -96], [102, -84], [94, -74], [86, -64], [78, -55]];
+  const path = CARAVAN.camels;
   path.forEach(([x, z], k) => { const n = path[Math.min(path.length - 1, k + 1)], p = path[Math.max(0, k - 1)], rot = Math.atan2(-(n[0] - p[0]), -(n[1] - p[1])); L.push({ t: 'animal', kind: 'camel', at: [x, z], y: floorY(x, z), rot, seed: seed(), gear: true }); });
-  for (const [x, z] of [[74.5, -51.5], [107.5, -93.5]]) L.push({ t: 'figure', at: [x, z], y: floorY(x, z), rot: Math.atan2(40, -55), seed: seed(), dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_white', over: 'cape', hat: 'turban', hatMat: 'cloth_white', beard: true, skin: 'skin_medium', feet: 'shod', pose: 'staff', carry: 'staff', len: 1.8, staffMat: 'wood_dark' });
-  for (const [x, z] of [[60, -38], [62.2, -40.6]]) L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: floorY(x, z), rot: Math.atan2(40, -55), seed: seed(), gear: true });
-  L.push({ t: 'animal', kind: 'dog', at: [70, -46], y: floorY(70, -46), rot: 0.9, seed: seed() });
+  for (const [x, z] of CARAVAN.drivers) L.push({ t: 'figure', at: [x, z], y: floorY(x, z), rot: Math.atan2(40, -55), seed: seed(), dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_white', over: 'cape', hat: 'turban', hatMat: 'cloth_white', beard: true, skin: 'skin_medium', feet: 'shod', pose: 'staff', carry: 'staff', len: 1.8, staffMat: 'wood_dark' });
+  for (const [x, z] of CARAVAN.donkeys) L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: floorY(x, z), rot: Math.atan2(40, -55), seed: seed(), gear: true });
+  L.push({ t: 'animal', kind: 'dog', at: CARAVAN.dog, y: floorY(...CARAVAN.dog), rot: 0.9, seed: seed() });
   return L;
 }

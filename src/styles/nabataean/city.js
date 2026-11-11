@@ -127,6 +127,7 @@ export function colonnadeStreet(el, { bag, col: C }) {
         bag.add(A, box(m - dw / 2, yf + 2.9, w0, m + dw / 2, top, w1));
         bag.add(A, box(m - dw / 2 - 0.25, yf + 2.9, w0 - 0.08, m + dw / 2 + 0.25, yf + 3.25, w1 + 0.08));            // the lintel
         bag.add('flagstone', box(m - dw / 2, yf - 0.02, w0, m + dw / 2, yf + 0.04, w1));                          // the threshold
+        C.floor([m - dw / 2, w0, m + dw / 2, w1], yf + 0.02);                                                    // (and the way in: the doorway's floor joins the portico's to the shop's)
         const ck = s > 0 ? [i0 + 0.6, i0 + 1.2] : [i1 - 1.2, i1 - 0.6];
         bag.add(A, box(sx0 + 0.9, yf, ck[0], m - dw / 2 + 0.2, yf + 0.95, ck[1])); C.rect([sx0 + 0.9, ck[0], m - dw / 2 + 0.2, ck[1]], yf, yf + 0.95);
         if (i > 0) { bag.add(A, box(sx0 - 0.3, yf, i0, sx0 + 0.3, h + 0.15, i1)); C.rect([sx0 - 0.3, i0, sx0 + 0.3, i1], yf, h + 0.15); }

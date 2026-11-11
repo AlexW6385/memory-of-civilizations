@@ -2,7 +2,7 @@
 // mouth, the Street of Façades, the theatre, the Royal Tombs in the east cliff, the colonnaded
 // street, the Great Temple and Qasr al-Bint.
 
-import { PLAZA, OUTER, SIQ, STREET, GREAT_TEMPLE, TEMENOS, QASR, GARDEN, TRICLINIUM, floorY, RIM, VALLEY, SIQ_LINE, SIQ_WALL, KHAZNEH_ROCK, THEATRE, height, pathDist } from './layout.js';
+import { PLAZA, OUTER, SIQ, STREET, GREAT_TEMPLE, TEMENOS, QASR, GARDEN, TRICLINIUM, floorY, RIM, VALLEY, SIQ_LINE, SIQ_WALL, KHAZNEH_ROCK, THEATRE, height, pathDist, shopUnits } from './layout.js';
 
 const E = [];
 let SIQ_EL = null;
@@ -163,7 +163,9 @@ const rooms = [room('the forecourt of the Khazneh', [PLAZA.c[0] - PLAZA.r + 6, P
   room('the garden', [GARDEN.rect[0] + 2, GARDEN.rect[1] + 3, GARDEN.rect[2] - 2, GARDEN.split - 1], GARDEN.gy, 'open'),
   room('the triclinium', [TRICLINIUM.at[0] - TRICLINIUM.w / 2 + 2, TRICLINIUM.at[1] - 1.6 - TRICLINIUM.d + 2, TRICLINIUM.at[0] + TRICLINIUM.w / 2 - 2, TRICLINIUM.at[1] - 2.6], +floorY(...TRICLINIUM.at).toFixed(3), 'hall'),
   room('Qasr al-Bint', [QASR.rect[0] + 3, QASR.rect[1] + 9, QASR.rect[2] - 3, QASR.rect[1] + 18], 3.02, 'hall')];
-const walks = [[[180, -152], [150, -161], [132, -160], [126, -125], [100, -80], [40, -10], [0, 12]]];
+for (const u of shopUnits()) rooms.push(room(`shop ${u.i}`, [u.x0 + 0.4, u.z0, u.x1 - 0.4, u.z1 - 0.2], 0.45, 'shop'));
+// (the way down the Outer Siq follows its own line, OUTER.path, round the theatre's cliff)
+const walks = [[[180, -152], [150, -161], [132, -160], OUTER.path[1], OUTER.path[2], [86, -72], OUTER.path[3], OUTER.path[4], [63, -6], [63, 12], [48, 12], [0, 12]]];
 walks[0].y0 = 0;
 
 export const khazneh = {

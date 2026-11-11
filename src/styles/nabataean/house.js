@@ -73,6 +73,12 @@ function frame(L, bag, axis, c, dir, h, sill) {
   if (sill) g(a0 - 0.12, a1 + 0.12, y0 - 0.12, y0, 0.13);
 }
 
+
+/** The stoop: two more steps going down from the doorstep (0.22 each, 0.5 deep), for ground that falls away in front. */
+function stoop(L, bag, C, u, w) {
+  for (let k = 1; k <= 3; k++) { const r = L.Rc(u - w / 2 - 0.1 - 0.05 * k, -0.5 - 0.5 * k, u + w / 2 + 0.1 + 0.05 * k, -0.5 * k); bag.add(A, box(r[0], L.y - 1.6, r[1], r[2], L.y + 0.08 - 0.22 * k, r[3])); C.floor(r, L.y + 0.08 - 0.22 * k); }
+}
+
 /** The roof: its floor, the cornice band, the parapet with crow-step corners and a scupper, over rect r (local), at y. */
 function roof(L, bag, C, r, y, opts = {}) {
   const [u0, v0, u1, v1] = r, rc = L.Rc(u0, v0, u1, v1);
@@ -117,6 +123,69 @@ function stair(L, bag, C, u0, u1, v0, dir, y0) {
   }
 }
 
+
+const MUD = 'mud_plaster', STAIN = 'plaster_streak', SOOT = 'bitumen';
+/**
+ * The dress of one wall face (docs/settlements/petra.md §18): `f` = { v (the face's plane), dir (+1 when outside is toward larger v),
+ * u0, u1 (its run), top (the wall's head above the floor), door, wins, bench, scupper }. Patches of mud plaster where the stucco has
+ * gone and of fresh lime where it was mended, runnels of damp under the windows and the scupper, soot over the door, timber beam
+ * ends under the parapet, the open shutters beside every window, a curtain in the doorway, a stone bench along the wall, a
+ * lamp's shelf by the door, stones at the foot. Merged boxes, a few dozen to a face.
+ */
+function faceDress(L, bag, C, rand, f) {
+  const { v, dir, u0, u1, top } = f, y = L.y;
+  const R = (a0, d0, a1, d1) => L.Rc(a0, v + dir * d0, a1, v + dir * d1);
+  const slab = (mat, a0, a1, d0, d1, y0, y1) => { const r = R(a0, d0, a1, d1); bag.add(mat, box(r[0], y + y0, r[1], r[2], y + y1, r[3])); };
+  const door = f.door, wins = f.wins ?? [], Lw = u1 - u0;
+  if (f.beams !== false) for (let u = u0 + 0.5; u < u1 - 0.4; u += 0.9) slab(TI, u - 0.06, u + 0.06, -0.01, 0.2, top - 0.72, top - 0.6);
+  const clear = (a0, a1, y0, y1) => ![door, ...wins].some((h) => h && a0 < h.a1 + 0.3 && a1 > h.a0 - 0.3 && y + y0 < h.y1 + 0.3 && y + y1 > h.y0 - 0.3);
+  const np = Math.min(7, 2 + Math.floor(Lw / 2.4));
+  for (let i = 0; i < np; i++) {
+    const w = 0.5 + rand() * 1.1, h = 0.4 + rand() * 0.9, a0 = u0 + 0.2 + rand() * Math.max(0.1, Lw - w - 0.4), y0 = 0.2 + rand() * Math.max(0.1, top - h - 1.2), m = rand() < 0.6;
+    if (!clear(a0, a0 + w, y0, y0 + h)) continue;
+    slab(m ? MUD : 'sandstone_white', a0, a0 + w, 0.0, 0.025, y0, y0 + h);
+  }
+  for (const h of wins) { const c = (h.a0 + h.a1) / 2; slab(STAIN, c - 0.1, c + 0.1, 0.0, 0.012, Math.max(0, h.y0 - y - 1.1 - rand() * 0.6), h.y0 - y - 0.1); }
+  if (f.scupper != null) slab(STAIN, f.scupper - 0.14, f.scupper + 0.14, 0.0, 0.012, top - 1.9 - rand() * 0.7, top - 0.4);
+  slab(STAIN, u0 + 0.1, u1 - 0.1, 0.0, 0.01, 0, 0.3 + rand() * 0.15);
+  if (door) {
+    const dm = (door.a0 + door.a1) / 2, dwid = door.a1 - door.a0;
+    slab(SOOT, dm - 0.15, dm + 0.15, 0.0, 0.01, door.y1 - y + 0.3, door.y1 - y + 0.9);
+    const cur = ['cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_brown'][Math.floor(rand() * 4)];
+    if (rand() < 0.7) slab(cur, door.a0 + 0.04, door.a0 + dwid * (0.4 + rand() * 0.3), -0.2, -0.17, door.y1 - y - 1.15, door.y1 - y - 0.02);
+    const lu = rand() < 0.5 ? door.a0 - 0.55 : door.a1 + 0.55;
+    if (lu > u0 + 0.3 && lu < u1 - 0.3) { slab(A, lu - 0.14, lu + 0.14, 0, 0.26, 1.55, 1.63); const [lx, lz] = L.P(lu, v + dir * 0.13); bag.add('lamp_white', lathe([[0.001, 0], [0.07, 0.01], [0.06, 0.07], [0.001, 0.09]], 8, null, lx, y + 1.63, lz)); }
+    if (f.bench) {
+      const bw = 1.6 + rand() * 1.4, left = door.a0 - 0.45 - u0, right = u1 - door.a1 - 0.45;
+      const sd = right >= left && right > 1.2 ? 1 : left > 1.2 ? -1 : 0;
+      if (sd) { const a0 = sd < 0 ? Math.max(u0 + 0.2, door.a0 - 0.35 - bw) : door.a1 + 0.35, a1 = sd < 0 ? door.a0 - 0.35 : Math.min(u1 - 0.2, door.a1 + 0.35 + bw); if (a1 - a0 > 0.9) { const r = R(a0, 0, a1, 0.5); bag.add(A, box(r[0], y - 0.1, r[1], r[2], y + 0.44, r[3])); C.rect(r, y, y + 0.44); } }
+    }
+  }
+  for (const h of wins) { const w2 = (h.a1 - h.a0) / 2; slab(TI, h.a1 + 0.2, h.a1 + 0.2 + w2, 0.0, 0.05, h.y0 - y, h.y1 - y); slab(TI, h.a0 - 0.2 - w2, h.a0 - 0.2, 0.0, 0.05, h.y0 - y, h.y1 - y); }
+  for (let i = 0; i < 3; i++) { const a = u0 + rand() * Lw, w = 0.2 + rand() * 0.3; slab(rand() < 0.5 ? 'rubble' : 'sandstone_yellow', a, a + w, 0.03, 0.25 + rand() * 0.3, -0.1, 0.1 + rand() * 0.14); }
+}
+
+/** A small room on a roof (a roof chamber): plastered walls, a doorway in the wall toward `side` (-1: low v), a timber roof; over rect [u0, v0, u1, v1] at height yr. */
+function roofRoom(L, bag, C, yr, u0, v0, u1, v1, side) {
+  const T2 = 0.3, hr = 2.2, cu = (u0 + u1) / 2, door = { a0: cu - 0.5, a1: cu + 0.5, y0: yr, y1: yr + 1.85 };
+  run(L, bag, C, PL, 'u', u0, u1, side < 0 ? v0 : v1 - T2, side < 0 ? v0 + T2 : v1, yr, yr + hr, [door]);
+  run(L, bag, C, PL, 'u', u0, u1, side < 0 ? v1 - T2 : v0, side < 0 ? v1 : v0 + T2, yr, yr + hr);
+  run(L, bag, C, PL, 'v', v0 + T2, v1 - T2, u0, u0 + T2, yr, yr + hr);
+  run(L, bag, C, PL, 'v', v0 + T2, v1 - T2, u1 - T2, u1, yr, yr + hr);
+  const rc = L.Rc(u0 - 0.15, v0 - 0.15, u1 + 0.15, v1 + 0.15);
+  bag.add(TI, box(rc[0], yr + hr, rc[1], rc[2], yr + hr + 0.14, rc[3])); C.floor(rc, yr + hr + 0.14);
+  bag.add(A, box(rc[0] + 0.05, yr + hr + 0.14, rc[1] + 0.05, rc[2] - 0.05, yr + hr + 0.2, rc[3] - 0.05));
+  const fr = L.Rc(u0, v0, u1, v1); bag.add(FL, box(fr[0], yr - 0.005, fr[1], fr[2], yr + 0.02, fr[3])); C.floor(fr, yr + 0.02);
+}
+
+/** crow-step merlons along a parapet's face: one every 1.4 m, two tiers. */
+function merlons(L, bag, u0, u1, v, dirIn, yr) {
+  for (let u = u0 + 0.9; u < u1 - 0.6; u += 1.4) {
+    const a = L.Rc(u - 0.17, v, u + 0.17, v + dirIn * 0.3), b = L.Rc(u - 0.11, v + dirIn * 0.04, u + 0.11, v + dirIn * 0.26);
+    bag.add(A, box(a[0], yr + 0.45, a[1], a[2], yr + 0.7, a[3])); bag.add(A, box(b[0], yr + 0.7, b[1], b[2], yr + 0.9, b[3]));
+  }
+}
+
 /** nabataean_house: { rect, seed, y, front }. */
 export function house(el, { bag, col: C }) {
   const L = houseLayout(el), { W: Wd, D, y, tall, rand } = L, y0 = y - 2.2;
@@ -136,6 +205,7 @@ export function house(el, { bag, col: C }) {
     for (const h of fw) frame(L, bag, 'u', 0, -1, h, true);
     // (the step before the door and the door's sill)
     { const r = L.Rc(d.u - d.w / 2 - 0.1, -0.5, d.u + d.w / 2 + 0.1, T); bag.add(A, box(r[0], y - 0.6, r[1], r[2], y + 0.08, r[3])); C.floor(r, y + 0.08); }
+    stoop(L, bag, C, d.u, d.w);
     // the interior: floor, timber ceiling with its beams, the roof block above
     const ri = L.room.rect, rc = L.Rc(...ri);
     bag.add(FL, box(rc[0], y - 0.3, rc[1], rc[2], y + 0.03, rc[3])); C.floor(rc, y + 0.03);
@@ -152,6 +222,14 @@ export function house(el, { bag, col: C }) {
       const sv = D * 0.4 + 1.0, vs = sv - 13 * TREAD;
       if (vs >= 0) stair(L, bag, C, Wd, Wd + 0.9, vs, 1, y);
     }
+    // the dress of the walls, the merlons, the roof chamber of some
+    { const r2 = rng(L.seed * 13 + 5), dr = L.door;
+      faceDress(L, bag, C, r2, { v: 0, dir: -1, u0: 0, u1: Wd, top: L.h, door: { a0: dr.u - dr.w / 2, a1: dr.u + dr.w / 2, y0: y, y1: y + DOOR_H }, wins: fw, bench: true, scupper: Wd / 2 });
+      faceDress(L, bag, C, r2, { v: L.D, dir: 1, u0: 0, u1: Wd, top: L.h, wins: [], beams: false });
+      for (const [u0s, u1s] of L.stair ? [[-0.02, 0]] : [[-0.02, 0], [Wd, Wd + 0.02]]) for (let q = 0; q < 3; q++) { const a = T + r2() * (L.D - 2 * T - 1.2), w = 0.5 + r2(), y0 = 0.4 + r2() * (L.h - 1.8), rr = L.Rc(u0s, a, u1s, a + w); bag.add(r2() < 0.6 ? MUD : 'sandstone_white', box(rr[0], y + y0, rr[1], rr[2], y + y0 + 0.4 + r2() * 0.5, rr[3])); }
+      if (r2() < 0.5) merlons(L, bag, 0, Wd, 0.0, 1, y + L.h);
+      if (!tall && r2() < 0.3) roofRoom(L, bag, C, y + L.h + 0.02, 0.8, D - 3.2, 3.0, D - 0.7, -1);
+    }
     return;
   }
   // ---------- court house
@@ -163,6 +241,7 @@ export function house(el, { bag, col: C }) {
   run(L, bag, C, A, 'v', T, R0, Wd - T, Wd, y0, y + hw);
   frame(L, bag, 'u', 0, -1, gate, false);
   { const r = L.Rc(g.u - g.w / 2 - 0.1, -0.5, g.u + g.w / 2 + 0.1, T); bag.add(A, box(r[0], y - 0.6, r[1], r[2], y + 0.08, r[3])); C.floor(r, y + 0.08); }
+  stoop(L, bag, C, g.u, g.w);
   // the court's floor of flagstones, the cistern's lid and mouth, the oven by the side wall
   { const r = L.Rc(T, T, Wd - T, R0); bag.add(FL, box(r[0], y - 0.3, r[1], r[2], y + 0.03, r[3])); C.floor(r, y + 0.03); }
   { const [cx, cz] = L.P(L.court.cx, L.court.cz);
@@ -187,6 +266,14 @@ export function house(el, { bag, col: C }) {
   roof(L, bag, C, [0, R0, Wd, D], y + hr, { red, gap: L.stair && !tall ? { ax: 'u', c: R0, a0: L.stair.u0, a1: L.stair.u1 } : null, scupper: false });
   // the court walls' coping: a cap on top of the walls (a roof-less parapet)
   for (const [ax, a0, a1, c0, c1] of [['u', 0, Wd, 0, T], ['v', T, R0, 0, T], ['v', T, R0, Wd - T, Wd]]) run(L, bag, C, W, ax, a0, a1, c0, c1, y + hw, y + hw + 0.16, [], false);
+  { // the dress: the street wall with its gate, the range's court front, the court walls' inner faces, the merlons, a roof chamber
+    const r2 = rng(L.seed * 13 + 5);
+    faceDress(L, bag, C, r2, { v: 0, dir: -1, u0: 0, u1: Wd, top: hw, door: gate, wins: [], bench: true, scupper: null, curtain: false });
+    faceDress(L, bag, C, r2, { v: R0, dir: -1, u0: T, u1: Wd - T, top: hr, door, wins, bench: true, scupper: Wd * 0.5 });
+    faceDress(L, bag, C, r2, { v: D, dir: 1, u0: 0, u1: Wd, top: hr, wins: [], beams: false });
+    if (r2() < 0.5) merlons(L, bag, 0, Wd, D - 0.3, 1, y + hr);
+    if (!tall && r2() < 0.3) roofRoom(L, bag, C, y + hr + 0.02, Wd - 3.4, R0 + 0.9, Wd - 0.7, R0 + 3.6, -1);
+  }
   if (!tall) stair(L, bag, C, L.stair.u0, L.stair.u1, L.stair.v0, 1, y);
   else { // a stair of the same kind up the other wall serves the tall range's roof: here a stone block with the water jar instead
     const r = L.Rc(Wd - T - 1.4, R0 - 1.1, Wd - T - 0.2, R0 - 0.2); bag.add(TC, lathe([[0.001, 0], [0.18, 0.06], [0.28, 0.3], [0.2, 0.5], [0.12, 0.58], [0.001, 0.58]], 10, null, (r[0] + r[2]) / 2, y + 0.03, (r[1] + r[3]) / 2));
