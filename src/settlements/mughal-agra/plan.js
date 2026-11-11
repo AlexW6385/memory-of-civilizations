@@ -66,7 +66,15 @@ for (const sx of [-1, 1]) {
 E.push({ t: 'bazaar_gate', c: [0, fz1], axis: 'z', w: GTW, d: 8, h: 11 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('tomb chamber', [-11, -214, 11, -192], PLINTH.y, 'hall'), room('plinth', [-47.5, -250.5, 47.5, -155.5], PLINTH.y, 'open'), room('garden', GARDEN, 0, 'open')];
+// the halls opened in §15 (their floors, as built in styles/mughal): the mosque and jawab on the terrace, the garden's two pavilions,
+// the gate's guard rooms; the forecourt's bazaar (the market's music)
+const hallRooms = [
+  room('mosque', [-138 + 1.6, -232 + 1.4, -115 - 0.55, -174 - 1.4], ty + 0.05, 'hall'), room('jawab', [115 + 0.55, -232 + 1.4, 138 - 1.6, -174 - 1.4], ty + 0.05, 'hall'),
+  room('west pavilion', [gx0 - 10 + 0.55, -14 + 1.4, gx0 + 2 - 1.6, 14 - 1.4], 0.25, 'hall'), room('east pavilion', [gx1 - 2 + 0.55, -14 + 1.4, gx1 + 10 - 1.6, 14 - 1.4], 0.25, 'hall'),
+  ...[-1, 1].map((sg) => { const bx0 = sg < 0 ? GATE.c[0] - GATE.w / 2 : GATE.c[0] + GATE.w * 0.15, bx1 = sg < 0 ? GATE.c[0] - GATE.w * 0.15 : GATE.c[0] + GATE.w / 2; return room(sg < 0 ? 'west guard room' : 'east guard room', [bx0 + 1.2, GATE.c[1] - GATE.d / 2 + 2.4, bx1 - 1.2, GATE.c[1] + GATE.d / 2 - 2.4], 0.04, 'hall'); }),
+  room('forecourt', [fx0 + 2, fz0 + 2, fx1 - 2, fz1 - 2], 0, 'market'),
+];
+const rooms = [...hallRooms, room('tomb chamber', [-11, -214, 11, -192], PLINTH.y, 'hall'), room('plinth', [-47.5, -250.5, 47.5, -155.5], PLINTH.y, 'open'), room('garden', GARDEN, 0, 'open')];
 const walks = [[[0, 240], [0, 200], [0, 172], [0, 140], [0, 18], [0, -18], [0, -146], [0, -152], [0, -158]]];
 walks[0].y0 = 0;
 

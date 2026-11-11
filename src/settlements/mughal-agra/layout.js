@@ -23,9 +23,10 @@ export function walkDist(x, z) {
   return d;
 }
 // the Taj Ganj's two northern caravanserais either side of the bazaar street on the axis (docs/settlements/mughal-agra.md
-// §11): Katra Omar Khan on the north-west, Katra Fulel (the perfume market) on the north-east, their gates on the street;
+// §11, §14): Katra Omar Khan on the north-west, Katra Fulel (the perfume market) on the north-east, Katra Resham (silk) on the south-west and Katra Jogidas on the south-east, their gates on the street;
 // and an open, furnished house on the street south of them
-export const KATRAS = [{ id: 'omar-khan', rect: [-58, 235, -14, 266], gate: 'e' }, { id: 'fulel', rect: [14, 235, 58, 266], gate: 'w' }];
+export const KATRAS = [{ id: 'omar-khan', rect: [-58, 235, -14, 266], gate: 'e' }, { id: 'fulel', rect: [14, 235, 58, 266], gate: 'w' },
+  { id: 'resham', rect: [-58, 308, -14, 339], gate: 'e' }, { id: 'jogidas', rect: [14, 308, 58, 339], gate: 'w' }];
 export const HAVELI_OPEN = [8, 277, 30, 299];
 // the pietra dura workshop on the axis street's west side, its front on the street (§12)
 export const WORKSHOP = { rect: [-20, 281, -8, 293], front: 'e' };
