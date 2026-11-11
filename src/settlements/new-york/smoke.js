@@ -6,20 +6,21 @@
 
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, AVENUES, STREETS, lots, height, toCity, inSpecial } from './layout.js';
+import { RADIUS, AVENUES, STREETS, lots, height, toCity, inSpecial, chimneyAt, inRect, DINER_AT, WALKUP_AT } from './layout.js';
+import { rowStacks } from '../../styles/artdeco/blocks.js';
 
 const ID = 'new-york';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 export function emitters() {
   const E = [], rand = rng(1931);
   const put = (x, y, z, kind, thr, seed) => { const [X, Z] = toCity(x, z); E.push({ p: [X, y, Z], kind, thr, seed }); };
-  // the chimneys: a stack at the party wall of about a third of the low buildings (the towers burn their coal below, and
-  // their stacks stand too high to read), the roof's top and 1.5 m
+  // the chimneys (the stacks of town.js: rows' own at the party walls, a third of the other low buildings): coal smoke above each
   for (const l of lots()) {
-    const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-    if (Math.hypot(cx, cz) > 330 || l.h > 60 || rand() > 0.38) continue;
-    const x = x0 + (x1 - x0) * (0.2 + 0.6 * rand()), z = z0 + (z1 - z0) * (0.3 + 0.4 * rand());
-    put(x, l.y + l.h + 1.6, z, 'kitchen', 0.15 + 0.8 * rand(), l.seed + 1);
+    const [x0, z0, x1, z1] = l.rect;
+    if (Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) > 330 || inRect(l.rect, ...DINER_AT) || inRect(l.rect, ...WALKUP_AT)) continue;
+    if (l.row) { for (const st of rowStacks(l.rect, l.front, l.h, l.seed)) put(st.x, l.y + st.y1 + 0.25, st.z, 'kitchen', 0.1 + 0.85 * rand(), l.seed + Math.round(st.x)); continue; }
+    const c = chimneyAt(l);
+    if (c) put(c[0], l.y + l.h + 4.0, c[1], 'kitchen', 0.15 + 0.8 * rand(), l.seed + 1);
   }
   // the steam manholes: in the avenues' roadways and at the cross streets' middles, a few at each block
   for (const [ax, w] of AVENUES) for (let k = 0; k < STREETS.length - 1; k++) {

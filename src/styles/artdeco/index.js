@@ -13,6 +13,7 @@ import { elTrack, elTrain } from './el.js';
 import { grandCentral } from './gct.js';
 import { laundry, newsstand } from './street.js';
 import { turned } from './turn.js';
+import { rowhouses, castIronFront, chimney, bulkhead, subwayEntrance } from './blocks.js';
 
 const LS = 'facade_limestone', CH = 'steel_chrome';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -127,6 +128,12 @@ function soot(bag, [x0, z0, x1, z1], f, y, h, mat, rand) {
 function skyscraper(el, { bag, col }) {
   const rand = rng(el.seed || 1), y = el.y ?? 0, h = el.h ?? 40, mat = el.mat ?? LS;
   let r = el.rect;
+  if (el.row && el.front) {
+    // a row of brownstones and brick houses (blocks.js); the corner's side faces keep their shops
+    storefronts(bag, r, y, rand, (el.shops ?? '').replace(el.front, ''));
+    rowhouses(bag, col, r, el.front, y, h, el.seed || 1);
+    return;
+  }
   col.rect(r, y - 0.5, y + h);
   storefronts(bag, r, y, rand, el.shops ?? 'nsew');
   if (h < 70) {
@@ -136,7 +143,10 @@ function skyscraper(el, { bag, col }) {
     block(bag, PLAIN, inset(r, -0.2), y + h - 1.6, y + h - 0.2);                // the frieze under the cornice
     if (h > 20) block(bag, PLAIN, inset(r, -0.25), y + 12.2, y + 12.8);              // a belt course over the base
     if (el.front) soot(bag, r, el.front, y, h, mat, rand);
-    if (el.front && h > 14 && rand() < 0.55) { const r = el.rect, f = el.front, along = f === 'n' || f === 's', L = along ? r[2] - r[0] : r[3] - r[1], a0 = along ? r[0] : r[1], w = Math.min(7, L - 2), u0 = a0 + (L - w) / 2 + (rand() - 0.5) * (L - w - 1); fireEscape(bag, along, f === 'n' ? r[1] : f === 's' ? r[3] : f === 'w' ? r[0] : r[2], f === 'n' || f === 'w' ? -1 : 1, u0, u0 + w, y + 7.6, y + h); }
+    if (el.front && !el.iron && h > 14 && rand() < 0.55) { const r = el.rect, f = el.front, along = f === 'n' || f === 's', L = along ? r[2] - r[0] : r[3] - r[1], a0 = along ? r[0] : r[1], w = Math.min(7, L - 2), u0 = a0 + (L - w) / 2 + (rand() - 0.5) * (L - w - 1); fireEscape(bag, along, f === 'n' ? r[1] : f === 's' ? r[3] : f === 'w' ? r[0] : r[2], f === 'n' || f === 'w' ? -1 : 1, u0, u0 + w, y + 7.6, y + h); }
+    if (el.iron && el.front && h > 14) castIronFront(bag, r, el.front, y, h - 1.2, rand);
+    if (el.chimney) chimney(bag, el.chimney[0], y + h + 0.04, el.chimney[1], rand);
+    if (h > 18 && rand() < 0.5) bulkhead(bag, (r[0] + r[2]) / 2 + (rand() - 0.5) * (r[2] - r[0]) * 0.5, y + h + 0.04, (r[1] + r[3]) / 2 + (rand() - 0.5) * 3, rand);
     if (el.tanks !== false && rand() < 0.4) tank(bag, (r[0] + r[2]) / 2 + (rand() - 0.5) * 4, y + h + 0.8, (r[1] + r[3]) / 2 + (rand() - 0.5) * 4);
     return;
   }
@@ -243,6 +253,6 @@ function beauxArts(el, { bag, col }) {
 function park(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('granite_grey', box(x0, y - 0.3, z0, x1, y + 0.25, z0 + 1.5)); bag.add('granite_grey', box(x0, y - 0.3, z1 - 1.5, x1, y + 0.25, z1)); }
 registerStyle('artdeco', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, diner, walkup, skyscraper, empire_state: empireState, grand_central: grandCentral, laundry, newsstand, chrysler, beaux_arts: beauxArts, el_track: elTrack, el_train: elTrain, park, turned },
+  elements: { ...STYLES.qing.elements, diner, walkup, skyscraper, empire_state: empireState, grand_central: grandCentral, laundry, newsstand, subway_entrance: subwayEntrance, chrysler, beaux_arts: beauxArts, el_track: elTrack, el_train: elTrain, park, turned },
   objects: {},
 });
