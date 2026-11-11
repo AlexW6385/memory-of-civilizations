@@ -2,7 +2,7 @@
 // earth ovens, chicken houses and garden walls with bananas in them, each set on the ground where it
 // stands; and the people (§4b): a gathering on the plaza before the ahu, a statue walked down the
 // road by three rope teams, canoes drawn up on the shore with their fishermen.
-import { RADIUS, ROAD, SEA, RARAKU, village, height, fields } from './layout.js';
+import { RADIUS, ROAD, SEA, RARAKU, BAYS, CHIEF, TUPA, PETRO, village, height, fields } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -39,8 +39,13 @@ function walking(rand) {
 export async function town() {
   const v = village(), E = [], P = [], rand = rng(1722), y = (c) => height(c[0], c[1]);
   // the house nearest the plaza being thatched anew (docs/settlements/rapa-nui.md §4c)
-  const strip = v.houses.reduce((b, h) => (Math.hypot(h.c[0], h.c[1] - 40) < Math.hypot(b.c[0], b.c[1] - 40) ? h : b), v.houses[0]);
-  for (const h of v.houses) E.push({ t: 'hare_paenga', ...h, y: y(h.c), strip: h === strip });
+  const plain = v.houses.filter((h) => !h.chief);
+  const strip = plain.reduce((b, h) => (Math.hypot(h.c[0], h.c[1] - 40) < Math.hypot(b.c[0], b.c[1] - 40) ? h : b), plain[0]);
+  for (const h of plain) E.push({ t: 'hare_paenga', ...h, y: y(h.c), strip: h === strip });
+  E.push({ t: 'hare_paenga_long', ...CHIEF, y: y(CHIEF.c) });
+  for (const [tx, tz, r, h, yaw] of TUPA) E.push({ t: 'tupa', c: [tx, tz], y: height(tx, tz), r, h, yaw, seed: Math.floor(tx * 3 + tz) });
+  PETRO.forEach(([px, pz, , motifs], k) => E.push({ t: 'carved_rock', c: [px, pz], y: height(px, pz), motifs, seed: 9 + k }));
+  BAYS.forEach((b, k) => { if (k % 2 === 0 || k === 5) E.push({ t: 'quarry_camp', at: b.at, facing: b.facing, hw: 0.19 * b.h, ground: height, side: k % 4 === 0 ? 1 : -1, seed: 6 + k }); });
   // the sweet potato gardens under their mulch of stones
   fields().forEach((r, k) => E.push({ t: 'mulch_garden', rect: r, ground: height, seed: 40 + k }));
   for (const m of v.moa) E.push({ t: 'hare_moa', ...m, y: y(m.c), yaw: (m.c[0] * 0.37) % 1, len: 5 + Math.abs(m.c[1] * 0.13) % 3 });
@@ -62,7 +67,7 @@ export async function town() {
     const at = L2W(strip, u, v2); fig({ at, y: y(at), rot: face(at, strip.c), pose, man: true });
   }
   v.houses.forEach((h, k) => {
-    if (h === strip || k % 3) return;
+    if (h.chief || h === strip || k % 3) return;
     const dv = -h.w / 2 - 1.9;
     const a = L2W(h, (rand() - 0.5) * 1.5, dv - 0.8); fig({ at: a, y: y(a), rot: face(a, L2W(h, 0, 0)) + Math.PI, pose: rand() < 0.6 ? 'squat' : 'sit_ground' });
     if (rand() < 0.5) { const ou = h.len * 0.3 * (h.seed % 2 ? -1 : 1), b = L2W(h, ou + 0.95, -h.w / 2 - 2.4); fig({ at: b, y: y(b), rot: face(b, L2W(h, ou, -h.w / 2 - 2.4)), pose: 'squat', man: false }); }
@@ -79,6 +84,15 @@ export async function town() {
     const r = rand();
     fig({ at, y: 0.12, rot: face(at, [x * 0.6, 103]) + (rand() - 0.5) * 0.4, pose: r < 0.3 ? 'squat' : r < 0.45 ? 'talk' : 'stand' });
   }
+  // carvers resting and sharpening at the camps of the quarry's bays, one by the long house's door
+  BAYS.forEach((b, k) => {
+    if (!(k % 2 === 0 || k === 5)) return;
+    const side = k % 4 === 0 ? 1 : -1, hw = 0.19 * b.h, sf = Math.sin(b.facing), cf = Math.cos(b.facing), Wd = (u, vv) => [b.at[0] + u * cf + vv * sf, b.at[1] - u * sf + vv * cf];
+    for (const [u, vv, pose] of [[side * (hw + 5.6), 1.4, 'squat'], [side * (hw + 7.2), 2.6, 'sit_ground'], [side * (hw + 6.2), 3.6, 'squat'], [side * (hw + 4.2), -0.4, 'stand']]) {
+      const at = Wd(u, vv); fig({ at, y: y(at), rot: face(at, Wd(side * (hw + 6.4), 1.6)) + (rand() - 0.5) * 0.8, pose, man: true });
+    }
+  });
+  { const at = [CHIEF.c[0] + 6, CHIEF.c[1] + 4.5]; fig({ at, y: y(at), rot: face(at, [CHIEF.c[0] + 6, CHIEF.c[1] + 2]), pose: 'stand', man: true }); }
   // canoes drawn up above the shore east of the ahu, bow to the sea; a fisherman or two by each
   for (const [x, z] of [[66, 150], [74, 151], [86, 152]]) {
     const yaw = Math.PI + (rand() - 0.5) * 0.3;

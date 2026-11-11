@@ -2,7 +2,7 @@
 // (totora) in its crater lake, boulders of basalt, the dark rocky shore and the Pacific; few trees
 // left — a palm or two by the lake, banana and sugar cane in the garden walls; trade-wind cloud.
 
-import { RADIUS, SEA, RIM, RARAKU, PLAZA, AHU, ROAD_W, height, inLake, inSea, inRect, village, roadDist, fields } from './layout.js';
+import { TUPA, PETRO, RADIUS, SEA, RIM, RARAKU, PLAZA, AHU, ROAD_W, height, inLake, inSea, inRect, village, roadDist, fields } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0, grass: 0.75, rock: 0, soil: 0.25, fields: 0, dry: 0.35, warmth: 0.55, red: 0.45, road: 0, snow: 0, forest: 0 };
@@ -20,6 +20,7 @@ function fromWater(x, z) { return inLake(x, z) ? -2 : Math.max(-5, Math.min(40, 
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRect(PLAZA, x, z, 2) || inRect(AHU.rect, x, z, 16) || inSea(x, z) || height(x, z) < 0.5) return null;
   if (inLake(x, z)) return null;
+  if (TUPA.concat(PETRO).some((o) => Math.hypot(o[0] - x, o[1] - z) < 6)) return null;
   const v = village();
   if (v.houses.some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.len / 2 + 2) || v.moa.some((m) => Math.hypot(m.c[0] - x, m.c[1] - z) < 4)) return null;
   if (roadDist(x, z) < ROAD_W / 2 + 0.5) return null;
