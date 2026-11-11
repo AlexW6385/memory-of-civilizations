@@ -261,6 +261,31 @@ function eagleWreath(el, { bag }) {
 
 const base = STYLES.roman;
 /**
+ * rotunda_floor: { c, y, R, cell } — the floor's pattern of Hadrian's time (dossier docs/buildings/pantheon.md; the floor is
+ * "alternating squares and circles" of coloured stone, now much restored): a grid of squares of pavonazzetto framed in
+ * white marble, in each a disc, porphyry and giallo antico alternating, a ring of grey granite about the disc.
+ */
+function rotundaFloor(el, { bag }) {
+  const [cx, cz] = el.c, y = el.y, cell = el.cell ?? 3.6, n = Math.floor(el.R / cell);
+  for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) {
+    const x = cx + i * cell, z = cz + j * cell;
+    if (Math.hypot(i * cell, j * cell) > el.R - cell * 0.95) continue;
+    const alt = (i + j) % 2 === 0;
+    bag.add('marble', box(x - cell / 2 + 0.03, y + 0.004, z - cell / 2 + 0.03, x + cell / 2 - 0.03, y + 0.009, z + cell / 2 - 0.03));
+    bag.add('pavonazzetto', box(x - cell / 2 + 0.17, y + 0.009, z - cell / 2 + 0.17, x + cell / 2 - 0.17, y + 0.014, z + cell / 2 - 0.17));
+    bag.add('granite_grey', lathe([[cell * 0.34, 0], [cell * 0.34, 0.004], [0.001, 0.004]], 28, null, x, y + 0.014, z));
+    bag.add(alt ? 'porphyry' : 'giallo', lathe([[cell * 0.3, 0], [cell * 0.3, 0.004], [0.001, 0.004]], 28, null, x, y + 0.018, z));
+  }
+}
+/**
+ * oculus_light: { c, y (the oculus' height), r } — the light of the eye of the dome: a warm pool of light hung under the
+ * oculus (the sky's light falling through the 8.9 m opening) and a softer one at the floor.
+ */
+function oculusLight(el, { lights }) {
+  lights.push({ at: [el.c[0], el.y - 3, el.c[1]], color: '#fff3dc', intensity: 3.2, distance: 46 });
+  lights.push({ at: [el.c[0], el.y - 30, el.c[1]], color: '#ffeccc', intensity: 1.6, distance: 28 });
+}
+/**
  * The bronze roof truss of the portico (docs/settlements/rome.md §4.3): the roof "made entirely from bronze", standing
  * until 1625/26 when Urban VIII took its bronze for cannon. At each station z: a tie beam of bronze plates on the side
  * entablatures, carried over the inner beams by short posts; two rafters under the roof's slopes meeting at the
@@ -287,6 +312,6 @@ function porticoTruss(el, { bag }) {
 
 registerStyle('roman-pantheon', {
   ...base,
-  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath, portico_truss: porticoTruss },
+  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath, rotunda_floor: rotundaFloor, oculus_light: oculusLight, portico_truss: porticoTruss },
   objects: { ...base.objects, pantheon_door: pantheonDoor },
 });
