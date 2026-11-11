@@ -363,6 +363,28 @@ function hallDress(el, { bag }) {
       if (k % 3 !== 1) B('gilt_bronze', cx + w2 - 0.05, 0.2, cx + w2, 0.215, yc - h / 2 + 0.1, yc + h / 2 - 0.1);
     }
   }
+  // the doors of the middle bay: two pairs of leaves, each pair folded open against its jamb (the outer leaf in the opening's plane, the inner leaf folded out over it); each leaf is
+  // framed, its upper third a lattice, its lower field panelled with a gilt medallion in a frame and rows of gilt studs, an iron ring on the leading stile [inferred: Song temple
+  // doors, the lattice-and-panel leaves of the Yingzao fashi's door types and the studded leaves of Song temple depictions]
+  {
+    const bw0 = L / nb, mb = (nb - 1) / 2, a0 = bw0 * mb + 0.3, a1 = bw0 * (mb + 1) - 0.3, lw = Math.min(1.25, (a1 - a0) / 2.05), yf = y + 0.14;
+    const yt = el.plaque ? y + H - 0.62 - 0.85 - 0.06 : y + Math.min(H - 1.0, 3.6), dh = yt - yf, ysp = yf + dh * 0.62;
+    for (const sd of [-1, 1]) for (const layer of [0, 1]) {
+      const h0 = sd < 0 ? a0 : a1 - lw, h1 = h0 + lw, d0 = layer ? 0.03 : -0.07, d1 = d0 + 0.07, um = (h0 + h1) / 2;
+      B('lacquer_red', h0, d0, h1, d1, yf, yt);
+      for (const [u0, u1] of [[h0, h0 + 0.1], [h1 - 0.1, h1], [um - 0.04, um + 0.04]]) B('lacquer_red', u0, d1, u1, d1 + 0.02, yf, yt);
+      for (const [v0, v1] of [[yf, yf + 0.14], [ysp - 0.07, ysp + 0.07], [yt - 0.12, yt]]) B('lacquer_red', h0, d1, h1, d1 + 0.025, v0, v1);
+      B('wood_dark', h0 + 0.1, d1, h1 - 0.1, d1 + 0.012, ysp + 0.07, yt - 0.12);
+      for (let k = 1; k < 5; k++) { const u = h0 + 0.1 + (lw - 0.2) * k / 5; B('lacquer_red', u - 0.012, d1, u + 0.012, d1 + 0.03, ysp + 0.07, yt - 0.12); }
+      for (let k = 1; k < 4; k++) { const v = ysp + 0.07 + (yt - 0.12 - ysp - 0.07) * k / 4; B('lacquer_red', h0 + 0.1, d1, h1 - 0.1, d1 + 0.03, v - 0.012, v + 0.012); }
+      B('wood_dark', h0 + 0.14, d1, h1 - 0.14, d1 + 0.012, yf + 0.18, ysp - 0.11);
+      const vm = (yf + 0.18 + ysp - 0.11) / 2;
+      for (const [a, b, c, e] of [[-0.17, -0.17, 0.17, -0.14], [-0.17, 0.14, 0.17, 0.17], [-0.17, -0.14, -0.14, 0.14], [0.14, -0.14, 0.17, 0.14]]) B('gilt_bronze', um + a, d1, um + c, d1 + 0.03, vm + b, vm + e);
+      B('lacquer_red', um - 0.12, d1, um + 0.12, d1 + 0.022, vm - 0.12, vm + 0.12); B('gilt_bronze', um - 0.045, d1, um + 0.045, d1 + 0.04, vm - 0.045, vm + 0.045);
+      for (const dv of [-0.42, 0.42]) for (const u of [h0 + 0.3, um, h1 - 0.3]) B('gilt_bronze', u - 0.03, d1, u + 0.03, d1 + 0.035, vm + dv - 0.03, vm + dv + 0.03);
+      const edge = sd < 0 ? h1 - 0.17 : h0 + 0.17; B('iron', edge - 0.05, d1 + 0.01, edge + 0.05, d1 + 0.04, ysp - 0.5 - 0.05, ysp - 0.5 + 0.05);
+    }
+  }
   // the lanterns: a bracket arm from the frieze beam at the middle of every bay but the middle one, the lantern hung from its end
   const bw = L / nb;
   for (let k = 0; k < nb; k++) {
