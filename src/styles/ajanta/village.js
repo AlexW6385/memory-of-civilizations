@@ -17,9 +17,9 @@ function river(el, { bag }) {
 }
 /** Stepping stones across the river at the ford: flat stones whose tops stand just over the water. */
 function ford(el, { bag, col }) {
-  const z = FORD.z, xr = riverX(z), n = 11;
+  const z = FORD.z, xr = riverX(z), n = 13;
   for (let i = 0; i < n; i++) {
-    const x = xr - 5.2 + i * 1.04, dz = Math.sin(i * 2.1) * 0.25;
+    const x = xr - 6.2 + i * 1.04, dz = Math.sin(i * 2.1) * 0.25;
     bag.add('rubble', box(x - 0.6, RIVER.bed, z - 0.55 + dz, x + 0.6, -0.02, z + 0.55 + dz));
     col.floor([x - 0.6, z - 0.55 + dz, x + 0.6, z + 0.55 + dz], -0.02);
   }

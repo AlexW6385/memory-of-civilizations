@@ -2,7 +2,7 @@
 // in the sanctum of Cave 1 and at the stupa of Cave 19. The engine part is src/engine/smoke.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, XF, FLOOR, C1, C19, rng } from './layout.js';
+import { RADIUS, EAST, XF, FLOOR, C1, C19, rng } from './layout.js';
 import { lots } from './town.js';
 
 const ID = 'ajanta';
@@ -11,7 +11,7 @@ export function emitters() {
   for (const l of lots()) {
     if (r() > 0.5) continue;
     const [x0, z0, x1, z1] = l.rect, u = 0.3 + 0.4 * r(), v = 0.3 + 0.4 * r();
-    E.push({ p: [x0 + (x1 - x0) * u, 3.7, z0 + (z1 - z0) * v], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: Math.round(x0 * 3 + z0) });
+    E.push({ p: [x0 + (x1 - x0) * u, EAST + 3.7, z0 + (z1 - z0) * v], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: Math.round(x0 * 3 + z0) });
   }
   E.push({ p: [XF - 27.1, FLOOR[1] + 1.2, C1.z], kind: 'incense', thr: 0.0, seed: 31 });
   E.push({ p: [XF - 12.6, FLOOR[1] + 0.6, C19.z + 0.5], kind: 'incense', thr: 0.2, seed: 32 });

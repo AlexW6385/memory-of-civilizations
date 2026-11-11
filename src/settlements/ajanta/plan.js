@@ -1,7 +1,7 @@
 // The Ajanta cliff (docs/settlements/ajanta.md §2–§5): the horseshoe of rock-cut caves, the ledge and its stair, the
 // painted vihara (Cave 1), the chaitya hall (Cave 19), a monk's cell hall, the shrine niches, the Waghora with its ford and
 // waterfall, the painters' scaffold in Cave 1 and a mason's at a niche of the north wing.
-import { XF, ZW, ZOUT, WX1, ROCK, FLOOR, C1, C19, C12, FALL } from './layout.js';
+import { XF, ZW, ZOUT, WX1, ROCK, FLOOR, C1, C19, C12, FALL, SHELTER } from './layout.js';
 import { viharaGeo, chaityaGeo } from '../../styles/ajanta/caves.js';
 
 const E = [];
@@ -9,6 +9,7 @@ E.push({ t: 'aj_cliff' });
 E.push({ t: 'aj_river' });
 E.push({ t: 'aj_ford' });
 E.push({ t: 'aj_fall' });
+E.push({ t: 'aj_shelter', rect: SHELTER });
 const y1 = FLOOR[1], v = viharaGeo(XF, C1.z, y1), ch = chaityaGeo(XF, C19.z, y1);
 // the painters' scaffold at Vajrapani on the rear wall of Cave 1's hall; a mason's at a niche on the north wing
 E.push({ t: 'aj_scaffold', at: [v.xh0, C1.z - 3.9], w: 2.2, h: 3.2, levels: 2, side: 1, y: y1, axis: 'z' });

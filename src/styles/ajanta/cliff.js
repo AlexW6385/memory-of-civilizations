@@ -23,11 +23,15 @@ function faceRock(ctx, F, holes, seed) {
     const here = holes.filter((h) => sm > h.s0 && sm < h.s1);
     const top = F.top(sm) + (rand() - 0.5) * 1.4;
     const off = here.length || (F.id === 'main' && Math.abs(sm) > ZW - 1) ? 0 : [0, 0.35, 0.3, 0.8, 0.15][Math.floor(rand() * 5)];
-    const mat = MATS[Math.floor(Math.abs(Math.sin(sm * 12.9898 + seed)) * 43758) % 4];
-    for (const [d0, y0, d1, y1] of subtractRects([-off, -0.6, ROCK, top], here.map((h) => [h.d0, h.y0, h.d1, h.y1]))) {
+    const matAt = (k) => MATS[Math.floor(Math.abs(Math.sin(sm * 12.9898 + seed + k * 3.1)) * 43758) % 4];
+    // a slice without a cave is laid in strata of the basalt flows: layers of differing hardness, each standing a little out or in
+    const layers = [], lo = F.id === 'main' && Math.abs(sm) > ZW - 1 ? 0 : 1;
+    if (!here.length) { const ys = [-0.6, 6 + rand() * 3, 12 + rand() * 3, 19 + rand() * 3, 25 + rand() * 2, top]; for (let k = 0; k < ys.length - 1; k++) if (ys[k + 1] < top + 0.01 && ys[k + 1] > ys[k]) layers.push([ys[k], Math.min(ys[k + 1], top), lo * ([0, 0.35, -0.2, 0.5, 0.1][Math.floor(rand() * 5)] + (ys[k] > 11 && rand() < 0.35 ? 0.8 + rand() * 2.2 : 0)) + off]); if (ys[4] < top) layers.push([ys[4], top, off + lo * rand() * 0.3]); }
+    const pieces = layers.length ? layers.map(([ya, yb, o]) => [-o, ya, ROCK, yb]) : subtractRects([-off, -0.6, ROCK, top], here.map((h) => [h.d0, h.y0, h.d1, h.y1]));
+    for (const [d0, y0, d1, y1] of pieces) {
       const [xa, za] = F.map(d0, sa), [xb, zb] = F.map(d1, sb);
       const x0 = Math.min(xa, xb), x1 = Math.max(xa, xb), z0 = Math.min(za, zb), z1 = Math.max(za, zb);
-      bag.add(mat, box(x0, y0, z0, x1, y1, z1));
+      bag.add(matAt(Math.round(y0)), box(x0, y0, z0, x1, y1, z1));
       col.rect([x0, z0, x1, z1], y0, y1);
     }
     if (!here.length && rand() < 0.35) { const w = Math.min(sb - sa, 1.5 + rand() * 2), [xa, za] = F.map(ROCK * (0.3 + rand() * 0.5), sa), [xb, zb] = F.map(1 + rand() * 5, sa + w); bag.add('rubble', box(Math.min(xa, xb), top, Math.min(za, zb), Math.max(xa, xb), top + 0.8 + rand() * 1.6, Math.max(za, zb))); }

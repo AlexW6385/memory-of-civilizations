@@ -14,6 +14,7 @@ export const FLOOR = [0.0, 9.0, 20.0];               // gorge floor, the ledge, 
 export const LEDGE = { x0: XF, x1: XF + 6, z0: -57, z1: 57 };
 export const STAIR = { x0: XF + 6, x1: XF + 8.4, z0: -57, z1: -42 };   // rises to the south from the path to the ledge
 export const PLATEAU = 30;
+export const EAST = 6;                               // the east bank's plateau, over the gorge floor
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 
@@ -41,7 +42,7 @@ export const CAVES = [];
 }
 
 /** The river: from the north-east bend, round under the main face, out to the south-east. */
-export const RIVER = { w: 8, bed: -0.9, water: -0.35 };
+export const RIVER = { w: 10, bed: -0.9, water: -0.35 };
 export const riverX = (z) => XF + 30 + 0.0105 * z * z + 4 * Math.sin(z / 19);
 export const inRiver = (x, z, m = 0) => Math.abs(x - riverX(z)) < RIVER.w / 2 + m && Math.hypot(x, z) < RADIUS - 30;
 export const bankY = (d) => (d < RIVER.w / 2 + 2 ? RIVER.bed * smooth(RIVER.w / 2 + 2, RIVER.w / 2 - 0.4, d) : 0);
@@ -71,3 +72,4 @@ export function onPath(x, z, m = 0) {
 }
 /** The footprint of the rock (the main block and both wings) for the terrain. */
 export const inRock = (x, z, m = 0) => (x > XF - ROCK - m && x < XF + m && Math.abs(z) < ZOUT + m) || (x >= XF - m && x < WX1 + m && Math.abs(z) > ZW - m && Math.abs(z) < ZOUT + m);
+export const SHELTER = [XF + 14, -52, XF + 19, -47];   // the pilgrims' shelter at the stair's foot

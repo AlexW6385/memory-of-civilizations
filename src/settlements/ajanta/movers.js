@@ -18,7 +18,7 @@ export function walkways() {
   const rects = [], links = [], L = (a, b, w, weight, kind = 'street') => links.push({ a, b, w, kind, weight });
   PATHS.forEach((P, k) => { for (let i = 0; i < P.length - 1; i++) L(P[i], P[i + 1], k === 1 ? 1.4 : 1.7, k === 0 ? 1.4 : k === 2 ? 1.6 : 1.0); });
   const xr = riverX(FORD.z);
-  links.push({ a: [xr - 5.6, FORD.z], b: [xr + 5.6, FORD.z], w: 1.2, kind: 'bridge', weight: 1.0 });
+  links.push({ a: [xr - 6.8, FORD.z], b: [xr + 6.8, FORD.z], w: 1.2, kind: 'bridge', weight: 1.0 });
   // the village yard, round the well, and the lanes between the rows of huts
   rects.push({ r: [VILLAGE[0] + 4, 18, VILLAGE[2] - 4, 40], weight: 1.0, market: 0.8, kind: 'street' });
   for (const z of [30]) rects.push({ r: [VILLAGE[0] - 6, z - 1.0, VILLAGE[0] + 6, z + 1.0], weight: 0.8, market: 0.3, kind: 'lane' });

@@ -1,7 +1,7 @@
 // Ajanta — the ground: the plateau behind the cliff (dry teak forest), the gorge floor with the Waghora in its gravel
 // bed and the waterfall's pool, the worn paths, the village's earth on the east bank. Climate: the Deccan, hot and
 // hazy, dry for most of the year, the monsoon darkening the rock (docs/settlements/ajanta.md §2).
-import { RADIUS, XF, ROCK, ZOUT, WX1, PLATEAU, RIVER, riverX, inRiver, bankY, inPool, FALL, onPath, VILLAGE, inRect, inRock, smooth as sm } from './layout.js';
+import { RADIUS, EAST, XF, ROCK, ZOUT, WX1, PLATEAU, RIVER, riverX, inRiver, bankY, inPool, FALL, onPath, VILLAGE, inRect, inRock, smooth as sm } from './layout.js';
 
 function height(x, z) {
   const r = Math.hypot(x, z);
@@ -13,6 +13,8 @@ function height(x, z) {
   // the hills beside the wings' outer faces (west of the wings' ends; the river gap stays low)
   const side = sm(ZOUT, ZOUT + 6, az) * (1 - sm(ZOUT + 10, ZOUT + 70, az)) * (1 - sm(WX1 - 6, WX1 + 4, x));
   h = PLATEAU * Math.max(back, side);
+  // the east bank: the land rises from the gorge floor to a plateau from which the whole cliff is seen
+  h = Math.max(h, EAST * sm(-8, 14, x) * sm(5, 20, Math.abs(x - riverX(z))) * (1 - sm(RADIUS - 60, RADIUS - 30, r)));
   if (inRiver(x, z, 2.4)) h = Math.min(h, bankY(Math.abs(x - riverX(z))));
   if (inPool(x, z, 0)) h = Math.min(h, -0.8);
   else if (inPool(x, z, 1.5)) h = Math.min(h, -0.3);
