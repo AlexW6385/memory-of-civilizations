@@ -161,7 +161,7 @@ function house(el, { bag, col }) {
           put('wood_dark', u - w / 2, u + w / 2, 2.55, 2.62, 0.0, 0.9, gz);                       // the propped upper leaf
           put('timber', u - w / 2, u + w / 2, 0.88, 0.94, 0.0, 0.7, gz);                           // the let-down lower leaf (counter)
           for (const s2 of [-1, 1]) put('wood_dark', u + s2 * (w / 2 - 0.03) - 0.03, u + s2 * (w / 2 - 0.03) + 0.03, 0.9, 2.6, 0.7, 0.76, gz);
-          put(pick(rand, CLOTH), u - w / 2 - 0.05, u + w / 2 + 0.05, 2.1, 2.5, 0.9, 0.93, gz);   // an awning cloth
+          put(pick(rand, CLOTH), Math.max(0.03, u - w / 2 - 0.05), Math.min(L - 0.03, u + w / 2 + 0.05), 2.1, 2.5, 0.9, 0.93, gz);   // an awning cloth
           // goods on the counter and at the door
           for (let q = 0; q < 4; q++) { const gu = u - w / 2 + 0.25 + q * (w - 0.5) / 3; put(pick(rand, ['terracotta', 'cloth_ochre', 'cloth_red', 'wicker', 'glaze_blue', 'cloth_green']), gu - 0.14, gu + 0.14, 0.94, 1.18 + rand() * 0.12, 0.2, 0.5, gz); }
           // the hanging sign on its iron bracket
