@@ -32,7 +32,7 @@ export function greatCave(ctx, c) {
   buddha({ at: [cx, 0], y, h: 33.0, dir: [1, 0], robe: 'clay_robe' }, ctx);
   col.rect([cx - 9, -9.6, cx + 9, 9.6], y, H);
   // the front wall of the rock hall: plastered round the great doorway and the high window
-  for (const [zA, zB, yA, yB] of [[-11.5, -7, y, H], [7, 11.5, y, H], [-7, 7, 20, 27], [-7, -3.2, 27, H], [3.2, 7, 27, H], [-7, 7, 37, H]]) bag.add('lime_plaster', box(XF - 1.0, yA, zA, XF - 1.0 + t, yB, zB));
+  for (const [zA, zB, yA, yB] of [[-11.5, -7, y, H], [7, 11.5, y, H], [-7, 7, 20, 27], [-7, -3.2, 27, H], [3.2, 7, 27, H], [-7, 7, 37, H]]) bag.add('lime_plaster', box(XF - 1.0 - t, yA, zA, XF - 1.0, yB, zB));
   // lamps in the lobby between the doorway and the throne: a row of stands, and a few hanging high
   for (const z of [-5.5, -2.8, 0, 2.8, 5.5]) oilLamp(ctx, XF - 3.2, y, z, 1.1, 3.0, 11);
   for (const [x, yy, z] of [[XF - 6, 10, -6], [XF - 6, 10, 6], [XF - 7, 22, 0], [XF - 8, 31, 0], [XF - 6, 30, -4], [XF - 6, 30, 4]]) ctx.lights?.push({ at: [x, yy, z], color: '#ffd2a0', intensity: 5, distance: 18 });

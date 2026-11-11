@@ -60,8 +60,9 @@ function door(ctx, f, u, w, h, y, v = 0) {
 function window(ctx, f, u, w, h, y0, v = 0) {
   const { bag } = ctx;
   const R = (u0, u1, y0_, y1_, m, a = -0.03, b = 0.2) => bag.add(m, box(...(([p, q, r, s]) => [p, y0_, q, r, y1_, s])(f.rc(u0, v + a, u1, v + b))));
-  R(u - w / 2 - 0.08, u + w / 2 + 0.08, y0 - 0.08, y0 + h + 0.08, 'timber_red', -0.03, 0.04);
-  R(u - w / 2, u + w / 2, y0, y0 + h, 'lattice', 0.04, 0.12);
+  R(u - w / 2 - 0.08, u + w / 2 + 0.08, y0 - 0.08, y0, 'timber_red', -0.03, 0.06); R(u - w / 2 - 0.08, u + w / 2 + 0.08, y0 + h, y0 + h + 0.08, 'timber_red', -0.03, 0.06);
+  R(u - w / 2 - 0.08, u - w / 2, y0, y0 + h, 'timber_red', -0.03, 0.06); R(u + w / 2, u + w / 2 + 0.08, y0, y0 + h, 'timber_red', -0.03, 0.06);
+  R(u - w / 2, u + w / 2, y0, y0 + h, 'lattice', 0.0, 0.05);
 }
 
 /**
@@ -74,7 +75,7 @@ function house(el, ctx) {
   const U = (u0, v0, u1, v1, y0, y1, m = WALL, solid = true) => slab(ctx, m, f.rc(u0, v0, u1, v1), y0, y1, solid);
   // the plinth and the walls: the rammed earth with its layers (a horizontal groove every 0.8 m, drawn as thin darker bands)
   U(0, 0, W, Dh, -0.05, 0.55, FOOT); U(0.03, 0.03, W - 0.03, Dh - 0.03, 0.55, H);
-  for (let y = 1.25; y < H; y += 0.8) bag.add('banco_rough', box(...(([a, b, c, d]) => [a, y, b, c, y + 0.05, d])(f.rc(0.0, -0.012, W, 0.03))));          // the layers of ramming, seen on the front
+  for (let y = 1.5; y < H; y += 0.8) bag.add('banco_rough', box(...(([a, b, c, d]) => [a, y, b, c, y + 0.05, d])(f.rc(0.0, -0.012, W, 0.03))));          // the layers of ramming, seen on the front
   // the roof
   if (tiled) { slab(ctx, WALL, f.rc(0, 0, W, Dh), H, H + 0.12, false); gable(ctx, f.rc(0.0, 0.0, W, Dh), H + 0.12, 1.3 + W * 0.08); }
   else {

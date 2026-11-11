@@ -12,7 +12,7 @@ const PLASTER = 'lime_plaster', FLOORM = 'brick_grey';
 export function oilLamp(ctx, x, y, z, h = 0.9, intensity = 2.4, distance = 8) {
   const { bag, lights } = ctx;
   bag.add('bronze', lathe([[0.16, 0], [0.16, 0.03], [0.1, 0.08], [0.04, 0.14], [0.03, h - 0.1], [0.12, h - 0.03], [0.13, h], [0.001, h]], 10, null, x, y, z));
-  bag.add('flame', lathe([[0.012, 0], [0.02, 0.03], [0.001, 0.09]], 6, null, x, y + h + 0.01, z));
+  bag.add('flame', lathe([[0.01, 0], [0.016, 0.025], [0.001, 0.06]], 6, null, x, y + h + 0.01, z));
   lights?.push({ at: [x, y + h + 0.1, z], color: '#ffb46b', intensity, distance });
   ctx.col.circle(x, z, 0.17, y, y + h);
 }

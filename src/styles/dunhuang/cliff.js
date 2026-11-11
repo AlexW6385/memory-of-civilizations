@@ -10,6 +10,7 @@ import { greatCave, nineStorey } from './nine.js';
 import { Panel, wallPanel, PAL, tableauM, buddhaM, apsaraM, lotusM } from './paint.js';
 
 const ROCKM = 'rubble';
+const MATS = ['rubble', 'sandstone_relief', 'sandstone_carved'];
 /** The chamber and passage boxes of a cave: { x0, x1, z0, z1, y0, y1 }. */
 function holes(c) {
   const y = FLOOR[c.tier], z = c.z;
@@ -89,10 +90,10 @@ export function cliff(el, ctx) {
     if (zb - za < 0.02) continue;
     const here = H.filter((h) => zm > h.z0 && zm < h.z1);
     const top = cliffTop(zm) + (rand() - 0.5) * 1.6;
-    const off = here.length ? 0 : [0, 0, 0.35, 0.7, 0.2][Math.floor(rand() * 5)];
+    const off = here.length ? 0 : [0, 0.4, 0.35, 0.9, 0.2][Math.floor(rand() * 5)];
     const rects = subtractRects([XF - ROCK, 0, XF + off, top], here.map((h) => [h.x0, h.y0, h.x1, h.y1]));
     for (const [x0, y0, x1, y1] of rects) {
-      bag.add(ROCKM, box(x0, y0, za, x1, y1, zb));
+      bag.add(MATS[Math.floor(Math.abs(Math.sin(zm * 12.9898)) * 43758) % 3], box(x0, y0, za, x1, y1, zb));
       col.rect([x0, za, x1, zb], y0, y1);
     }
     // a stepped, broken crest: boulders on the top of the cliff in the slabs without a hole

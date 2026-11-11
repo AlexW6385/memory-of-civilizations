@@ -48,14 +48,14 @@ export const BRIDGE = { z: 0, w: 4.4 };            // the timber bridge on the s
 export const bankY = (d) => (d < RIVER.w / 2 + 2 ? RIVER.bed * smooth(RIVER.w / 2 + 2, RIVER.w / 2 - 0.4, d) : 0);
 
 /** The street and the town. */
-export const STREET = { z0: -4.5, z1: 4.5, x0: -34, x1: 150 };
+export const STREET = { z0: -6, z1: 6, x0: -66, x1: 150 };
 export const GATE = { x: 150, z: 0 };
 export const CROSS = [24, 72, 118];                                // lanes across the main street (x), width 4.4
 export const LANE_W = 4.4;
 export const TOWN = [-30, -62, 146, 62];
-export const SERAI = { x0: 84, z0: 9, x1: 124, z1: 47 };           // the caravanserai, entered from the main street
+export const SERAI = { x0: 84, z0: 12, x1: 124, z1: 50 };           // the caravanserai, entered from the main street
 export const SPRING = { c: [42, 146], r: 15 };                    // the Crescent Spring's pool
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
-export const onStreet = (x, z, m = 0) => (Math.abs(z) < 4.5 + m && x > STREET.x0 - m && x < STREET.x1 + m) || CROSS.some((cx) => Math.abs(x - cx) < LANE_W / 2 + m && Math.abs(z) < 62);
+export const onStreet = (x, z, m = 0) => (Math.abs(z) < 6 + m && x > STREET.x0 - m && x < STREET.x1 + m) || CROSS.some((cx) => Math.abs(x - cx) < LANE_W / 2 + m && Math.abs(z) < 62);
 /** A crescent: the disc of radius r minus a disc of the same radius moved 6 m to the north-east. */
 export function crescent(x, z, m = 0) { const [cx, cz] = SPRING.c; return Math.hypot(x - cx, z - cz) < SPRING.r - 6 + m + 4 && Math.hypot(x - cx - 6, z - cz + 5) > SPRING.r - 6 - m; }

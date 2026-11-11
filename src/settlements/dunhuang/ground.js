@@ -40,7 +40,7 @@ function planting(x, z) {
   if (r > RADIUS - 6 || x < XF + 8 && x > XF - 1 || inRiver(x, z) || onStreet(x, z, 1) || crescent(x, z, 0.5)) return null;
   if (x < XF - 8) return Math.hypot(x, z) < RADIUS - 20 && x > XF - ROCK - 5 ? null : { tamarisk: 0.03, grass_dry: 4 };
   const dr = Math.abs(x - riverX(z));
-  if (dr < 14 && Math.abs(z) < ZEND) return { poplar: 1.0, willow: 0.5, tamarisk: 0.2, grass: 24 };
+  if (dr < 14 && Math.abs(z) < ZEND) return { poplar: dr < 7 ? 0.35 : 0.12, willow: 0.14, tamarisk: 0.2, grass: 24 };
   if (crescent(x, z, 5)) return { reeds: 1.2, tamarisk: 0.4, poplar: 0.3, grass: 20 };
   if (z > 112) return { tamarisk: 0.08, grass_dry: 6 };
   if (inRect(TOWN, x, z)) return { poplar: 0.12, willow: 0.05, grass: 14 };
