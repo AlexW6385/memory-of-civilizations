@@ -85,5 +85,6 @@ export const MOVER_SITES = {
   'manueline-lisbon': () => import('../settlements/manueline-lisbon/movers.js'),
   'bali-village': () => import('../settlements/bali-village/movers.js'),
   'bagan': () => import('../settlements/bagan/movers.js'),
+  'kakadu': () => import('../settlements/kakadu/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

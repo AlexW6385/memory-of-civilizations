@@ -1142,4 +1142,20 @@ export const CARDS = {
       "平原 —— 竹木茅草的高脚屋和院落、僧院与凉亭、砖窑和村中水塘，还有散布在糖棕与荆棘之间大大小小的寺与塔。",
     ],
   },
+  'kakadu': {
+    en: [
+      "Ubirr, on the edge of the Nadab floodplain in Kakadu, Northern Territory, about AD 1000: the late Freshwater period, when billabongs and paperbark swamps had replaced the old saltwater country and the Bininj and Mungguy people camped in the cool rock shelters at the end of the wet.",
+      "The Main Gallery — an overhanging sandstone slab over a long painted back wall, layered with paintings in the X-ray manner: barramundi and catfish, long-necked turtles, wallabies, goannas, magpie geese and hunters, faded old red under newer white and yellow, with hand stencils in the smaller shelter to the west.",
+      "The outlier and its lookout — jointed sandstone blocks in warm pink and buff tiers, with rock steps climbing in three flights to a summit over the plain.",
+      "The floodplain — a shrunken billabong with water lilies and crowded magpie geese, paperbark and pandanus on its banks, termite mounds on the dry edge.",
+      "The family camp — a bark hut and a lean-to of stringybark sheets, fires with a roasting turtle, a folded bark trough and a grindstone, geese and a goanna on a drying rack.",
+    ],
+    zh: [
+      "乌比尔位于北领地卡卡杜纳达布泛滥平原边缘，约公元1000年：淡水期晚期，湖沼与白千层沼泽取代了旧日咸水地带，比宁吉与蒙贡人在雨季末期栖身于凉爽的岩棚。",
+      "主画廊——悬挑的砂岩顶板覆盖着长长的彩绘后墙，画面以X光风格层层叠压：尖吻鲈与鲶鱼、长颈龟、小袋鼠、巨蜥、鹊雁与猎人，褪色的旧红色之上叠着新的白色与黄色；西侧较小的岩棚里有手印。",
+      "孤岩与瞭望处——粉色与米黄色的节理砂岩层层叠起，岩石台阶分三段登上俯瞰平原的山顶。",
+      "泛滥平原——缩小的湖沼里睡莲盛开、鹊雁成群，岸边是白千层与露兜树，干燥的边缘立着白蚁丘。",
+      "家族营地——树皮棚屋与树皮板搭成的斜棚，火堆上烤着长颈龟，旁边有折叠的树皮槽与磨石，晾架上挂着鹅与巨蜥。",
+    ],
+  },
 };

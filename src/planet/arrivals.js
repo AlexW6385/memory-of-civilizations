@@ -91,4 +91,5 @@ export const ARRIVALS = {
   'manueline-lisbon': [-206, null, 117, 0.0, 0.3],   // The Jerónimos' south portal whole across the plaza, the Belém Tower in the river to the left.
   'bali-village': [0, 0.1, -26, 0, 0.1],   // up the village street under the festival's penjors to the split gate of the pura at its end: the two stepped halves of brick and carved stone with the stair between them, the roofed gate beyond and the black-thatched merus rising behind the walls
   'bagan': [30, null, 0, -1.5708, 0.12],   // inside the Ananda precinct's west gate, looking east along the cross passage's axis to the temple: porch, terraces and gilded spire
+  'kakadu': [-4, null, -2, 0, 0.18],   // from the floodplain's edge, the Main Gallery's overhang whole under the sandstone outlier, its painted back wall in the shade, the family's camp and fire at its west end, the billabong and paperbark behind
 };

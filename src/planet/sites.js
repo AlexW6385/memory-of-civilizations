@@ -115,6 +115,7 @@ export const SITES = [
   { id: 'manueline-lisbon', name: { en: 'Manueline Lisbon', zh: '曼努埃尔里斯本' }, era: 'c. 1520', region: 'iberia', lat: 38.7, lon: -9.21, water: true, radius: 330 },
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, era: 'c. 1900', region: 'java', lat: -8.37, lon: 115.45, radius: 190 },
   { id: 'bagan', name: { en: 'Pagan (Bagan)', zh: '蒲甘' }, era: 'c. 1200', region: 'burma', lat: 21.17, lon: 94.86, radius: 330 },
+  { id: 'kakadu', name: { en: 'Kakadu — Ubirr', zh: '卡卡杜·乌比尔' }, era: 'c. AD 1000', region: 'australia', lat: -12.41, lon: 132.96, radius: 90 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
