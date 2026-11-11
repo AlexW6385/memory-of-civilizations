@@ -2,7 +2,7 @@
 // on the floor of its pit, the pits' and trenches' rock walls (open where a trench joins), Bete
 // Giyorgis alone to the south-west.
 
-import { PITS, TRENCHES, EDGE, OUTER, inRect, slope } from './layout.js';
+import { PITS, TRENCHES, EDGE, OUTER, HUT, inRect, slope } from './layout.js';
 
 const E = [];
 // ---- the walls of the cuts: each pit edge and trench side, broken where another cut opens onto it
@@ -74,6 +74,10 @@ function carve(r, holes) {
 const G = PITS.giyorgis, gc = [(G.rect[0] + G.rect[2]) / 2, (G.rect[1] + G.rect[3]) / 2];
 // its roof level with the ground round the pit: the body stops 0.42 m below it, the three stepped crosses carved up to it
 E.push({ t: 'giyorgis', c: gc, y0: -G.depth + 0.15, h: G.depth - 0.15 - 0.42, a: 12, w: 4.6 });
+// inside (docs §13): the sanctuary's curtain across the east arm before the altar, rush mats down the west arm
+const GY = -G.depth + 0.15 + 1.8;
+E.push({ t: 'curtain', a: [gc[0] + 6.6, gc[1] - 2.95], b: [gc[0] + 6.6, gc[1] + 2.95], y: GY, h: 4.2, mat: 'cloth_red' });
+for (const [a, b] of [[-10.0, -5.6], [-5.2, -1.0]]) E.push({ t: 'floor_mat', rect: [gc[0] + a, gc[1] - 1.4, gc[0] + b, gc[1] + 1.4], y: GY });
 // the way in: the trench from the west narrows into a tunnel through the last eight metres of rock and
 // opens into the court beside the church's west arm (Wikipedia: "a very narrow man-made canyon ...
 // which becomes a tunnel close to the church"; Senses Atlas: "a descending trench and a tunnel")
@@ -84,6 +88,14 @@ E.push({ t: 'giyorgis', c: gc, y0: -G.depth + 0.15, h: G.depth - 0.15 - 0.42, a:
   E.push({ t: 'block', walk: true, rect: [x1 - 8, tz0 + EDGE, x1, tz1 - EDGE], y0: -0.3, y1: 0, mat: 'tuff_red', collide: false });
   // the tunnel's mouths, each under a hewn band standing a little proud of the rock face
   for (const x of [x1 - 8 - 0.06, x1 + 0.06]) E.push({ t: 'rock_cut', a: [x, tz0 + EDGE - 0.2], b: [x, tz1 - EDGE + 0.2], y0: -7.75, th: 0.12, top: -7.1 });
+}
+
+// tunnels: stretches of the trenches from the Jordan to Bete Gabriel-Rufael and to Bete Amanuel left roofed, the rock
+// kept over them (docs §14: Gabriel and Amanuel are joined by tunnels "long, narrow and pitch-black")
+for (const [ti, z0, z1] of [[8, 4, 16], [7, 12, 24]]) {
+  const [tx0, , tx1] = TRENCHES[ti].rect, xc = (tx0 + tx1) / 2, wT = tx1 - tx0 - 2 * EDGE;
+  E.push({ t: 'rock_cut', a: [xc, z0], b: [xc, z1], y0: -5.3, th: wT, top: 0.12 });
+  for (const z of [z0 - 0.06, z1 + 0.06]) E.push({ t: 'rock_cut', a: [tx0 + EDGE - 0.2, z], b: [tx1 - EDGE + 0.2, z], y0: -5.65, th: 0.12, top: -5.0 });
 }
 const M = PITS.medhane, mc = [(M.rect[0] + M.rect[2]) / 2, (M.rect[1] + M.rect[3]) / 2];
 E.push({ t: 'basilica', rect: [mc[0] - 16.75, mc[1] - 11.75, mc[0] + 16.75, mc[1] + 11.75], y0: -M.depth + 0.15, h: 11, cols: [12, 7] });
@@ -100,8 +112,10 @@ ch(PITS.golgotha, 22, 12, 8); ch(PITS.amanuel, 18, 12, 11.5); ch(PITS.gabriel, 1
   const caves = [[[x1 - EDGE, mz(120)], [-1, 0], 0], [[mx(-208), z1 - EDGE], [0, -1], 1.8], [[x1 - EDGE, mz(139)], [-1, 0], 0], [[mx(-206), z0 + EDGE], [0, 1], 0], [[mx(-193), z0 + EDGE], [0, 1], 2.6], [[mx(-193.5), z1 - EDGE], [0, -1], 0], [[mx(-189), z1 - EDGE], [0, -1], 3.4], [[x0 + EDGE, mz(118.5)], [1, 0], 0], [[x0 + EDGE, mz(140)], [1, 0], 2.2]];
   for (const [c, n, up] of caves) E.push({ t: 'cave', c, n, y: yf + 0.25 + up, floor: yf, w: up ? 0.9 : 1.05, h: up ? 1.4 : 1.75 });
 }
+E.push({ t: 'hut', c: HUT.c, r: HUT.r, y: 0, door: HUT.door, seed: 1220 });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open'), room('medhane-in', [mc[0] - 13.15, mc[1] - 8.15, mc[0] + 13.15, mc[1] + 8.15], -M.depth + 0.95, 'hall'), room('maryam-in', [62.8, -93.6, 77.2, -86.4], -PITS.maryam.depth + 0.75, 'hall')];
+// (the halls first: a position is given to the first room that holds it, and the pits' open rooms hold the halls)
+const rooms = [room('hut', [HUT.c[0] - 3.3, HUT.c[1] - 3.3, HUT.c[0] + 3.3, HUT.c[1] + 3.3], 0, 'hut'), room('giyorgis-in-x', [gc[0] - 10.4, gc[1] - 3, gc[0] + 10.4, gc[1] + 3], GY, 'hall'), room('giyorgis-in-z', [gc[0] - 3, gc[1] - 10.4, gc[0] + 3, gc[1] + 10.4], GY, 'hall'), room('medhane-in', [mc[0] - 13.15, mc[1] - 8.15, mc[0] + 13.15, mc[1] + 8.15], -M.depth + 0.95, 'hall'), room('maryam-in', [62.8, -93.6, 77.2, -86.4], -PITS.maryam.depth + 0.75, 'hall'), room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open')];
 const walks = [[[-280, 128], [-262, 128], [-216, 128], [-210, 130]]];
 walks[0].y0 = 0;
 

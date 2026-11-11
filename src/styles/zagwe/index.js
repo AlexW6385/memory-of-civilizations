@@ -10,6 +10,8 @@ import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import '../qing/index.js';
 import { orientBy, piercedSlab } from '../sahel/index.js';
+import { hut } from './hut.js';
+import { umbrella, procCross } from './liturgy.js';
 
 const TU = 'tuff_red', TH = 'tuff_hewn';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -91,21 +93,67 @@ function hewnFace(bag, el) {
 function cross(bag, col, mat, cx, cz, a, w, y0, y1) {
   for (const r of [[cx - w, cz - w, cx + w, cz + w], [cx - a, cz - w, cx - w, cz + w], [cx + w, cz - w, cx + a, cz + w], [cx - w, cz - a, cx + w, cz - w], [cx - w, cz + w, cx + w, cz + a]]) solid(bag, col, mat, r, y0, y1);
 }
-/** giyorgis: Bete Giyorgis { c, y0 (the pit floor), h, a, w }: three receding cross-shaped tiers, windows, doors, the roof's nested crosses. */
+/**
+ * giyorgis: Bete Giyorgis { c, y0 (the pit floor), h, a, w } (docs/settlements/lalibela.md §13): two
+ * receding plinth tiers, then the hollow cross-shaped body — walls 1.6 m thick, the arms' lower
+ * Aksumite windows open, the upper ogee ones blind, doors in the west, north and south arms with
+ * steps up; inside, the arms' flat ceilings, a round arch at each arm's mouth, the crossing roofed by
+ * a stepped dome (Sauter: "its flat ceilings and its dome"; "each arm of the cross is cut by a
+ * semicircular arch" on the pilasters at the four corners of the central space), the sanctuary in the
+ * east arm with its altar and the crosses cut in relief on its wall; on the roof the three nested crosses.
+ */
 function giyorgis(el, { bag, col }) {
-  const [cx, cz] = el.c, y0 = el.y0, a = el.a, w = el.w, top = y0 + el.h;
+  const [cx, cz] = el.c, y0 = el.y0, a = el.a, w = el.w, top = y0 + el.h, yf = y0 + 1.8;
+  const T = 1.6, wi = w - T, wc = w - 0.8, ai = a - T, yT = yf + 6.4, ARMS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const quad = (r) => [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([sx, sz]) => { const x0 = cx + sx * r[0], x1 = cx + sx * r[2], z0 = cz + sz * r[1], z1 = cz + sz * r[3]; return [Math.min(x0, x1), Math.min(z0, z1), Math.max(x0, x1), Math.max(z0, z1)]; });
   cross(bag, col, TH, cx, cz, a + 0.8, w + 0.8, y0, y0 + 0.9);
-  cross(bag, col, TH, cx, cz, a + 0.4, w + 0.4, y0 + 0.9, y0 + 1.8);
-  cross(bag, col, TH, cx, cz, a, w, y0 + 1.8, top);
-  // the arms' faces: a lower and an upper row of windows; doors on the west, north and south arms
-  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-    const r = dx ? [cx + dx * a - (dx > 0 ? 0 : 0), cz - w, cx + dx * a, cz + w] : [cx - w, cz + dz * a, cx + w, cz + dz * a];
-    const n = [dx, dz], face = dx ? [[cx + dx * (a + 0.03), cz - w * 0.55], [cx + dx * (a + 0.03), cz + w * 0.55]] : [[cx - w * 0.55, cz + dz * (a + 0.03)], [cx + w * 0.55, cz + dz * (a + 0.03)]];
-    void r; void n;
-    const u = dx ? [0, 1] : [1, 0], nn = [dx, dz];
-    for (const p of face) { const c = dx ? [cx + dx * a, p[1]] : [p[0], cz + dz * a]; aksWindow(bag, c, y0 + 4.5, u, nn, 0.9, 1.7); ogeeWindow(bag, c, y0 + 8.0, u, nn, 0.8, 1.1); }
-    if (dx !== 1) { const t = []; if (dx) beamTris(t, [cx + dx * (a + 0.03), y0 + 1.8, cz - 1], [cx + dx * (a + 0.03), y0 + 1.8, cz + 1], 0.04, 2.8); else beamTris(t, [cx - 1, y0 + 1.8, cz + dz * (a + 0.03)], [cx + 1, y0 + 1.8, cz + dz * (a + 0.03)], 0.04, 2.8); bag.add('timber', fromTriangles(t)); }
+  cross(bag, col, TH, cx, cz, a + 0.4, w + 0.4, y0 + 0.9, yf);
+  // the walls round the crossing and the arms, to the roof (the four corners of the crossing stand as pilasters)
+  for (const r of [[wc, wi, a, w], [wi, wc, wc, w], [wi, w, w, a]]) for (const q of quad(r)) solid(bag, col, TH, q, yf, top);
+  // the arms: the end wall pierced by its windows and its door, the flat ceiling over the nave of the arm, the arch at its mouth
+  const faces = [], sof = [];
+  for (const [dx, dz] of ARMS) {
+    const n = [dx, dz], u = dx ? [0, 1] : [1, 0], uc = dx ? cz : cx, F = [cx + dx * a, cz + dz * a], side = dx ? (dx > 0 ? 'e' : 'w') : (dz > 0 ? 's' : 'n');
+    const endR = dx ? [Math.min(cx + dx * ai, cx + dx * a), cz - wi, Math.max(cx + dx * ai, cx + dx * a), cz + wi] : [cx - wi, Math.min(cz + dz * ai, cz + dz * a), cx + wi, Math.max(cz + dz * ai, cz + dz * a)];
+    const holes = [], door = !(dx === 1);
+    for (const s of [-0.42, 0.42]) holes.push([uc + s * w - 0.45, uc + s * w + 0.45, yf + 2.7, yf + 4.4]);
+    if (door) holes.push([uc - 0.9, uc + 0.9, yf - 0.01, yf + 3.2]);
+    piercedSlab(bag, col, TH, endR, yf, top, holes);
+    for (const s of [-0.42, 0.42]) {
+      const c = [F[0] + u[0] * s * w, F[1] + u[1] * s * w];
+      aksWindow(bag, c, yf + 2.7, u, n, 0.9, 1.7, true); ogeeWindow(bag, c, yf + 6.2, u, n, 0.8, 1.1);
+    }
+    if (door) {
+      const Pf = (s, d) => [F[0] + u[0] * s + n[0] * d, F[1] + u[1] * s + n[1] * d];
+      const bar = (s0, s1, d1, y1, y2) => bag.add(TH, orientedBox(Pf(s0, d1 / 2), Pf(s1, d1 / 2), d1, y1, y2));
+      bar(-1.15, -0.9, 0.2, yf, yf + 3.2); bar(0.9, 1.15, 0.2, yf, yf + 3.2); bar(-1.3, 1.3, 0.24, yf + 3.2, yf + 3.5);
+      openLeaves(bag, side, [cx - a, cz - a, cx + a, cz + a], T, uc - 0.9, uc + 0.9, yf, 3.18);
+      doorSteps(bag, col, side, [cx - (a + 0.4), cz - (a + 0.4), cx + (a + 0.4), cz + (a + 0.4)], uc, 2.4, y0, yf);
+    }
+    // the ceiling of the arm and the arch at its mouth
+    const slab = dx ? [Math.min(cx + dx * wc, cx + dx * ai), cz - wi, Math.max(cx + dx * wc, cx + dx * ai), cz + wi] : [cx - wi, Math.min(cz + dz * wc, cz + dz * ai), cx + wi, Math.max(cz + dz * wc, cz + dz * ai)];
+    solid(bag, col, TH, slab, yT, top);
+    const ys = yf + 3.0, ca = (dx ? cx : cz) + (dx ? dx : dz) * (wc + 0.3);
+    if (dx) { roundArch(faces, sof, ca, 0.3, cz - wi, cz + wi, ys, yT, false); col.rect([ca - 0.3, cz - wi, ca + 0.3, cz + wi], ys + wi - 0.3, yT); }
+    else { roundArch(faces, sof, ca, 0.3, cx - wi, cx + wi, ys, yT, true); col.rect([cx - wi, ca - 0.3, cx + wi, ca + 0.3], ys + wi - 0.3, yT); }
   }
+  bag.add(TH, fromTriangles(faces)); bag.add(TH, fromTriangles(sof));
+  // the crossing's stepped dome: square rings, each opening narrower than the one below, a cap over the last
+  { let y = yT;
+    for (const h of [3.2, 2.5, 1.8, 1.1]) {
+      for (const r of [[cx - wc, cz - wc, cx + wc, cz - h], [cx - wc, cz + h, cx + wc, cz + wc], [cx - wc, cz - h, cx - h, cz + h], [cx + h, cz - h, cx + wc, cz + h]]) bag.add(TH, box(r[0], y, r[1], r[2], y + 0.55, r[3]));
+      y += 0.55;
+    }
+    bag.add(TH, box(cx - wc, y, cz - wc, cx + wc, top, cz + wc)); }
+  // the sanctuary in the east arm: its wall carved with crosses in relief, the altar with its cloth
+  { const x = cx + ai;
+    for (const zz of [-1.9, 0, 1.9]) for (const yy of [yf + 2.0, yf + 4.0]) {
+      bag.add(TU, box(x - 0.07, yy, cz + zz - 0.07, x, yy + 0.9, cz + zz + 0.07));
+      bag.add(TU, box(x - 0.07, yy + 0.5, cz + zz - 0.3, x, yy + 0.62, cz + zz - 0.07)); bag.add(TU, box(x - 0.07, yy + 0.5, cz + zz + 0.07, x, yy + 0.62, cz + zz + 0.3));
+    }
+    solid(bag, col, TH, [x - 2.6, cz - 0.9, x - 1.1, cz + 0.9], yf, yf + 1.05);
+    bag.add('cloth_white', box(x - 2.68, yf + 1.05, cz - 0.98, x - 1.02, yf + 1.09, cz + 0.98));
+    bag.add('bronze', box(x - 1.9, yf + 1.09, cz - 0.02, x - 1.82, yf + 1.5, cz + 0.02)); bag.add('bronze', box(x - 1.96, yf + 1.34, cz - 0.14, x - 1.76, yf + 1.4, cz + 0.14)); }
   // the roof, level with the ground round the pit: three Greek crosses nested one within another,
   // each stepped up from the last (the triple cross carved on the roof)
   let yr = top;
@@ -115,7 +163,6 @@ function giyorgis(el, { bag, col }) {
     yr += hgt;
   }
 }
-
 /**
  * A round-headed arch in a wall: the solid between the arch (springing at ys, a semicircle over the
  * span uA..uB) and yT, in a wall of half-thickness t on the line c (x = c, or z = c when alongX).
@@ -509,6 +556,6 @@ function curtain(el, { bag, col }) {
 
 registerStyle('zagwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, cave, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain },
+  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain },
   objects: {},
 });
