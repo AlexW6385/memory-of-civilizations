@@ -2,7 +2,7 @@
 // Column, the Naxian sphinx and the offerings), and the sanctuary below and above it: the Sacred Way with its treasuries (the Athenian
 // among them) and the Athenian Stoa under the polygonal wall, the theatre and the stadium above, the Castalian spring, the gate and
 // the forecourt. Elements; the heights come from layout.js.
-import { TT, TT_Y, TREASURIES, STOA, THEATRE, STADIUM, STADIUM_Y, SPRING, SPRING_Y, WAY, WAY2, wayY, way2Y, wayPoints, FC, FC_Y, height, WALL_S } from './layout.js';
+import { STAIR, TT, TT_Y, TREASURIES, STOA, THEATRE, STADIUM, STADIUM_Y, SPRING, SPRING_Y, WAY, WAY2, wayY, way2Y, wayPoints, FC, FC_Y, height, WALL_S } from './layout.js';
 import { temple, treasury, stoa, terraceMonuments, terraceWalls, retain } from './buildings.js';
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -36,7 +36,8 @@ export const temple_plan = {
 // ── the sanctuary
 const S = [];
 terraceWalls(S);
-S.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] >= 24), { w: 3.6, mat: 'flagstone', kerb: true, lift: 0.04 }));
+S.push({ t: 'stair', rect: STAIR, dir: 'n', y0: 13.1, y1: TT_Y, riser: 0.17, base: 11, mat: 'limestone' });
+S.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] >= 24 && !(p[0] > 85.9 && p[0] < 86.1 && p[2] < 43.9)), { w: 3.6, mat: 'flagstone', kerb: true, lift: 0.04 }));
 S.push(rib(wayPoints(WAY2, way2Y), { w: 2.4, mat: 'flagstone', kerb: false, lift: 0.04 }));
 const sanctRooms = [];
 for (const t of TREASURIES) sanctRooms.push(treasury(S, t));

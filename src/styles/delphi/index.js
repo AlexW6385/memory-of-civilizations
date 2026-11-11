@@ -48,14 +48,17 @@ function polygonalWall(el, { bag, col }) {
   const stones = [];
   let y = y0;
   while (y < y1 - 0.05) {
-    const hgt = Math.min(y1 - y, 0.5 + rand() * 0.55);
+    const hgt = Math.min(y1 - y, 0.55 + rand() * 0.6);
     let s = -rand() * 0.8;
     while (s < L) {
-      const w = 0.7 + rand() * 1.1, s0 = Math.max(0, s + 0.03), s1 = Math.min(L, s + w - 0.03);
+      const w = 0.6 + rand() * 1.4, s0 = Math.max(0, s + 0.03), s1 = Math.min(L, s + w - 0.03);
       if (s1 - s0 > 0.1) {
-        const o = th / 2 + 0.02 + rand() * 0.05, tilt = (rand() - 0.5) * 0.3;
+        const o = th / 2 + 0.02 + rand() * 0.07, tilt = (rand() - 0.5) * 0.3;
         const p0 = [ax + ux * s0 + nx * (o - 0.1), az + uz * s0 + nz * (o - 0.1)], p1 = [ax + ux * s1 + nx * (o - 0.1), az + uz * s1 + nz * (o - 0.1)];
-        const st = orientedBox(p0, p1, 0.2, y + 0.02, y + hgt - 0.02);
+        // each stone fitted to its neighbours: its own height, its top and bottom edges slipped a little (the polygonal joints are not courses)
+        const yb = Math.max(y0, y + (rand() - 0.5) * 0.28), yt = Math.min(y1, y + hgt * (0.8 + rand() * 0.45));
+        if (yt - yb < 0.12) { s += w; continue; }
+        const st = orientedBox(p0, p1, 0.2, yb + 0.02, yt - 0.02);
         stones.push(st); void tilt;
       }
       s += w;

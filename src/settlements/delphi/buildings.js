@@ -1,7 +1,7 @@
 // The buildings of the sanctuary as plan elements (docs/settlements/delphi.md §4): the Temple of Apollo, the treasuries, the
 // Athenian Stoa, the Chians' altar, the terrace's walls. Pure data; each pushes onto the list it is given.
 import { subtractRects } from '../../core/build.js';
-import { TT, TT_Y, TEMPLE, ALTAR, STOA, SPHINX, SERPENT, height, WALL_S, WALL_E, GATE, inRect } from './layout.js';
+import { STAIR, TT, TT_Y, TEMPLE, ALTAR, STOA, SPHINX, SERPENT, height, WALL_S, WALL_E, GATE, inRect } from './layout.js';
 
 const PI = Math.PI;
 /** A retaining wall along a→b on the downhill side: the polygonal masonry, segment by segment from below the ground to `top`. */
@@ -20,7 +20,8 @@ export function retain(E, a, b, top, face, seed, o = {}) {
 /** The terrace's walls: the polygonal wall on its south side, plainer walls east and west; the precinct's south and east walls. */
 export function terraceWalls(E) {
   const [x0, z0, x1, z1] = TT;
-  retain(E, [x0, z1], [x1, z1], TT_Y, -1, 100);
+  retain(E, [x0, z1], [STAIR[0] - 0.6, z1], TT_Y, -1, 100);
+  retain(E, [STAIR[2] + 0.6, z1], [x1, z1], TT_Y, -1, 150);
   retain(E, [x1, z1], [x1, z0], TT_Y, -1, 200, { rough: true, th: 1.4, cap: 0 });
   retain(E, [x0, z1], [x0, z0], TT_Y, 1, 300, { rough: true, th: 1.4 });
   // the precinct's south wall (with the gate) and east wall: a rubble wall 3 m high on its stone footing
@@ -53,7 +54,7 @@ export function temple(E) {
   for (const z of Z.slice(1, -1)) for (const x of [X[0], X[14]]) E.push({ t: 'column', at: [x, z], y: ST, h: COL_H, d: COL_D, mat: x === X[14] ? 'marble_column' : 'limestone' });
   const DE = { axes: { x: X, z: Z }, y: ENT, face: FACE, arch: ARCH, frieze: FR, geison: GE, tw: 0.6, overhang: 0.6 };
   E.push({ t: 'doric_entablature', ...DE, mat: 'marble', triglyphMat: 'egyptian_blue' });
-  E.push({ t: 'metopes', ...DE, programme: { e: 'gigantomachy', w: 'amazonomachy', n: 'centauromachy', s: 'centauromachy' }, bg: 'wall_red', band: 'egyptian_blue' });
+  E.push({ t: 'metopes', ...DE, programme: { e: 'gigantomachy', w: 'amazonomachy' }, bg: 'wall_red', band: 'egyptian_blue' });
   const PR = [X[0] - FACE - 0.6, Z[0] - FACE - 0.6, X[14] + FACE + 0.6, Z[5] + FACE + 0.6];
   E.push({ t: 'pediment_roof', rect: PR, y: TOP, rise: 2.7, tympanumInset: 0.8, rakingGeison: 0.5, mat: 'marble', tileMat: 'roof_tile' });
   for (const s of [-1, 1]) E.push({ t: 'acroterion', at: [s * (PR[2] - 0.7), cz], y: TOP + 2.7 + 0.8, h: 2.2, yaw: PI / 2 });

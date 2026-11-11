@@ -52,10 +52,12 @@ export function pathAt(x, z, P, Ls = P === WAY ? L1 : L2) {
   for (let i = 0; i + 1 < P.length; i++) { const [d, t] = segDist(x, z, P[i], P[i + 1]); if (d < best[0]) best = [d, acc + t * Ls.L[i]]; acc += Ls.L[i]; }
   return best;
 }
-// the arclength at which the Way meets the terrace's edge (86, 26)
-const S_TT = L1.L.slice(0, 10).reduce((a, b) => a + b, 0);
-const Y_GATE = 1.4;
-export const wayY = (s) => (s >= S_TT ? TT_Y : Y_GATE + (TT_Y - Y_GATE) * smooth(0, 1, s / S_TT) * 0.15 + (TT_Y - Y_GATE) * (s / S_TT) * 0.85);
+// the Way's height at each of its points: its legs follow the contours (the hill's own height at their z), the switchbacks between them climb,
+// and the last flight, up through the terrace's wall at x = 86, is a stair
+const WAY_Y = [1.4, 1.7, 3.2, 3.7, 7.3, 7.8, 10.7, 11.2, 12.4, 13.1, 20, 20, 20];
+const WAY_S = L1.L.reduce((a, L) => (a.push(a[a.length - 1] + L), a), [0]);
+export const wayY = (s) => { for (let i = 0; i + 1 < WAY_S.length; i++) if (s <= WAY_S[i + 1]) return WAY_Y[i] + (WAY_Y[i + 1] - WAY_Y[i]) * (s - WAY_S[i]) / (WAY_S[i + 1] - WAY_S[i]); return TT_Y; };
+export const STAIR = [84.2, 26, 87.8, 44];                            // the flight up through the terrace's wall: its foot at z = 44, y 13.1
 export const way2Y = (s) => TT_Y + (STADIUM_Y - TT_Y) * Math.min(1, s / L2.tot);
 export const WAY_LEN = L1.tot;
 /** Points of a way every `step` m with their heights: [[x, y, z], …] */
@@ -124,7 +126,7 @@ export function height(x, z) {
   let h = slopeY(z);
   // the ravine's walls to the east (the Phaedriades' flank) and the cliffs of the north
   h += 46 * smooth(143, 175, x) * smooth(58, 6, Math.abs(z - 4));
-  h += 8 * Math.sin(x * 0.045 + 1.3) * Math.sin(z * 0.06) * smooth(20, 80, Math.abs(x - 20) + Math.abs(z - 20) * 0.5);
+  h += 0.9 * Math.sin(x * 0.21 + 1.3) * Math.sin(z * 0.17 + 0.4) * smooth(20, 80, Math.abs(x - 20) + Math.abs(z - 20) * 0.5);
   const north = smooth(-118, -150, z);
   h += 22 * north * (0.5 + 0.5 * Math.sin(x * 0.11));
   if (!CACHE) CACHE = PAD_BOX();
