@@ -76,6 +76,7 @@ import { ground as abbasidBaghdad } from './abbasid-baghdad/ground.js';
 import { ground as qinXianyang } from './qin-xianyang/ground.js';
 import { ground as alexandria } from './alexandria/ground.js';
 import { ground as hanChangan } from './han-changan/ground.js';
+import { ground as weiYe } from './wei-ye/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -149,6 +150,7 @@ export const GROUNDS = {
   'qin-xianyang': qinXianyang,
   alexandria,
   'han-changan': hanChangan,
+  'wei-ye': weiYe,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -156,6 +158,7 @@ for (const [id, G] of Object.entries(GROUNDS)) withCrops(id, G);
 
 const LOADERS = {
   alexandria: () => import('./alexandria/index.js'),
+  'wei-ye': () => import('./wei-ye/index.js'),
   'ming-suzhou': () => import('./ming-suzhou/index.js'),
   dunhuang: () => import('./dunhuang/index.js'),
   'qing-beijing': () => import('./qing-beijing/index.js'),
