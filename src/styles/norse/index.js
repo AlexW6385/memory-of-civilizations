@@ -11,6 +11,7 @@ import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import '../qing/index.js';
 import { dragonHead, ridgeCrest, westPortal, staveMask } from './carving.js';
 import { stueInside } from './stue.js';
+import { makeShore } from './shore.js';
 
 const W = 'tar_wood', SH = 'tar_shingle', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -714,8 +715,9 @@ function lychgate(el, { bag, col }) {
     for (const yy of [y + 0.3, y + 1.05]) bag.add(W, box(xx - sx * 0.03 - 0.03, yy, z0, xx - sx * 0.03 + 0.03, yy + 0.1, z0 + hw - 0.35));
   }
 }
+const SHORE = makeShore({ hexa, logRod, beam, pitched, logWalls, logGables, roofTrim, door });
 registerStyle('norse', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, stave_church: staveChurch, bell_house: bellHouse, log_house: logHouse, fence, stone_wall: stoneWall, lychgate },
+  elements: { ...STYLES.qing.elements, stave_church: staveChurch, bell_house: bellHouse, log_house: logHouse, fence, stone_wall: stoneWall, lychgate, ...SHORE },
   objects: {},
 });

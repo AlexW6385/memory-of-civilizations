@@ -46,3 +46,10 @@ export function buildings() {
 }
 export const inBuilding = (x, z, m = 0) => buildings().some((b) => inRect(b.rect, x, z, m));
 export const inFarm = (x, z, m = 0) => FARMS.some(([fx, fz]) => Math.hypot(x - fx, z - fz) < 22 + m);
+
+// the river landing: a timber quay down the north bank where the river bends south-most-west (its bank runs east-west there,
+// so the quay runs straight south into the water), a boathouse (naust) beside it
+export const LANDING = (() => {
+  const x = -133.5, rz = riverZ(x), top = rz - 19.5;
+  return { x, top, y0: height(x, top), yd: RIVER.level + 0.75, rz, naust: [x - 11, rz - 20.5], naustRot: 0 };
+})();
