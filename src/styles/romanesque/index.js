@@ -475,10 +475,13 @@ function pont(el, { bag, col }) {
   }
 }
 
+/** blocker: a collider with no body { rect, y0, y1 } — stops the walker where the carved work above is open (a tribune's breast). */
+function blocker(el, { col }) { col.rect(el.rect, el.y0, el.y1); }
+
 registerStyle('romanesque', {
   column,
   trim: () => {},
   opening: () => {},
-  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille, west_gable: westGable, bourdon, pont, ...villageElements },
+  elements: { ...byzantineElements, barrel, pier, gable_roof: gableRoof, lean_roof: leanRoof, cone_roof: coneRoof, pyramid_roof: pyramidRoof, tympanum, grille, west_gable: westGable, bourdon, pont, blocker, ...villageElements },
   objects: { doors, reliquary, basin },
 });
