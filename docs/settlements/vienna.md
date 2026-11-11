@@ -59,3 +59,11 @@ Hoofbeats on the paving, tram bells, the Fiaker's call, the market's cries, chur
 ## 9. Planting and weather
 
 Chestnuts and planes along the Ring (Rosskastanie, Platane), lindens in the squares; lawns and shrubs in the Karlsplatz gardens. Continental climate, bright spring light, thin clouds. [inferred]
+
+## 10. What the town adds (built in `src/settlements/vienna/`)
+
+- Streets (layout.js `paving`): granite setts for the carriageways, asphalt on the Ring (the Ring's 7 m promenades paved in flagstone and planted with plane rows), flagstone pavements at kerbs of 0.08 m; pebble paths in the Karlsplatz and the garden behind the Secession [inferred from period photographs; the paving materials are general knowledge, not checked against a source].
+- Street furniture: cast-iron gas lamps on the older streets, advertising columns and newspaper kiosks at corners, slatted benches, two electric trams on the Ring's double track, four Fiakers with their pairs at the rank before the Opera and one in Friedrichstraße [stated: general knowledge for the Fiaker and the Litfaßsäule; the Ring's electric tram is 1897–1903, §5].
+- The Naschmarkt: two rows of stalls under striped awnings round an aisle between the Wienzeile and the Wien's north wall, crates of vegetables and fruit on counter and ground, cross-passages every few stalls [stated: Wikipedia, Naschmarkt, §1; the awnings and goods are inferred].
+- The Wien: granite walls, the Stadtbahn's ledge on the south side, seven road bridges [inferred; the river was vaulted over from 1898 to 1910 and the Stadtbahn ran along it, so 1902 is a moment when both states stood side by side; compressed here to an open channel].
+- Not built: the Stadtbahn's trains, the interiors of the tenements, people inside the Secession and the café (the movers keep to the streets and open ground).
