@@ -1,0 +1,75 @@
+# Bauhaus Dessau, c. 1927 — dossier
+
+Settlement id: `bauhaus-dessau` · Style: `bauhaus` (own) · Region: Germany (Saxony-Anhalt, Dessau on the Mulde near the Elbe) · Code: `src/settlements/bauhaus-dessau/`
+Size class S, radius 190 m. Status: L2 (the school building with its interiors, the Masters' Houses in the pine grove, the streets of 1920s Dessau, the Törten rows).
+
+Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
+
+## 1. The real example
+
+- **Landmark:** the Bauhaus building, Dessau, by Walter Gropius: construction began September 1925, topping-out 21 March 1926, inaugurated 4 December 1926 [stated: [Wikipedia, Bauhaus Dessau](https://en.wikipedia.org/wiki/Bauhaus_Dessau)]. Reinforced-concrete frame, brick partitions, hollow-tile ceilings, asphalt flat roofs, cement-plaster façades painted with mineral paint; site about 26 000 m², about 32 000 m³ built [stated: [Teige, 1927](https://www.archiweb.cz/en/news/karel-teige-novostavby-bauhausu-v-dessave)].
+- **Plan:** five functional parts set additively in wings round no front, understood only by walking round them [stated: [Wikipedia](https://en.wikipedia.org/wiki/Bauhaus_Dessau); [Bauhaus Kooperation / archilovers](https://archilovers.com/projects/243557/bauhaus-building.html)]: the north wing (School of Arts and Crafts, later the technical school), the workshop wing with the glass curtain wall, a two-storey bridge joining them over the street (administration and Gropius's building office), a flat one-storey block between the workshop wing and the studio house holding the auditorium, the stage and the canteen, and the Prellerhaus, the protruding five-storey studio house with 28 studios [stated: Wikipedia]. The workshop wing and the school wing have three storeys, the studio house five, the festive block one [stated: archilovers].
+- **Moment shown:** 1927, the school in its first full year in the new building, Gropius director (until 1928), the masters in their houses.
+
+## 2. The building (what is built, `bauhaus_building` in `src/styles/bauhaus/`)
+
+| Part | Facts | Source |
+|---|---|---|
+| Workshop wing | three storeys, glass curtain wall over all three floors and the whole length, supports and slabs set back behind it so the glass runs unbroken; steel frame, crystal glass reflecting more than modern glass; louvred sashes opened by mechanism; curtains needed against summer sun | [stated: Wikipedia] |
+| Its floors | basement: stage workshop, print shop, dye works, sculpture workshops, caretaker's flat; ground floor: carpentry workshops, exhibition halls, the vestibule to the auditorium; first floor: textile workshops, teaching rooms, a large lecture hall; second floor: wall-painting and metal workshops, two lecture halls that fold into one exhibition hall | [stated: Teige 1927] |
+| Bridge | two storeys on four pillars over the street; the administration on the lower level, the architecture department (Gropius's office) above | [stated: Teige; Wikipedia] |
+| North wing | basement, mezzanine and two floors: classrooms, offices, the library and a reading room; ribbon windows | [stated: Teige] |
+| Festive block | a flat building between the workshop wing and the studio house: the auditorium, the stage, the canteen; the stage walls open so that dining room, stage, auditorium and vestibule become one hall (the Aula) on festive occasions | [stated: Wikipedia; Teige] |
+| Prellerhaus | five storeys, 28 studio flats of about 20 m² each, balconies on each floor, a lift for food from the kitchen; baths, gymnasium and laundry in the basement; a terrace toward the sports field | [stated: Teige; archilovers] |
+| Colour | predominantly white façades against dark glass; inside, load-bearing and non-load-bearing elements picked out in different colours; the whole scheme by the mural-painting workshop | [stated: archilovers; Wikipedia] |
+| Furniture, lamps, signs | furniture from the house workshops: the assembly-hall seating by Marcel Breuer, Rowac stools in the school wing's classrooms and workshops; the lamps by the metal workshop (Marianne Brandt), the assembly-hall lamps by Max Krajewski; curtain and furniture fabrics from Gunta Stölzl's weaving workshop; lettering by the advertising (print) workshop; tubular-steel furniture for the Aula, the dining room and the studios after Breuer | [stated: Wikipedia; Teige] |
+| Floors | experimental floor coverings (stone-wood screed, triolin) | [stated: Wikipedia] |
+
+**Our measures** (the sources give none; chosen to the described proportions, all [inferred]): storey 4.1 m in the wings (floors at 0.3, 4.4, 8.5 m; parapet at 12.6 m), 3.15 m in the Prellerhaus (floors at 0.3, 3.45, 6.6, 9.75, 12.9; parapet at 16.0 m); workshop wing 18 × 30 m; bridge 16 × 14 m over a 14 m street, its underside 4 m clear; studios 3.3 × 5.8 m (≈ 19 m²); the Aula 14 × 20 m, the stage 7 m deep, the canteen 13 × 20 m. The wing's columns stand 1.4 m inside the glass wall, a 5 m grid. The vertical BAUHAUS lettering stands on the plastered pier at the wing's north-west corner by the bridge [inferred from the well-known photographs].
+
+## 3. The Masters' Houses
+
+- Three identical semi-detached houses and one detached house (the director's), built 1925/26 in a pine grove near the school, Ebertallee 59–71, for the city of Dessau after Gropius's modular, industrially prefabricated principle [stated: [Bauhaus Dessau Foundation](https://www.bauhaus-dessau.de/en/venues/masters-houses/)]. Cube-shaped volumes of different heights pushed into one another; one half of each pair turned through 90° and with a third floor of two rooms [stated: same].
+- Stamped-concrete foundations, a shell of Jurko bricks, painted white; window soffits, balcony undersides and downpipes in colour; glass-fronted studios toward the street, vertical glass strips along the stairs toward the pines; large terraces and balconies [stated: same].
+- Built-in cupboards, central heating, hot water, modern appliances; Junkers gas bath stoves; Gropius and Moholy-Nagy furnished with Breuer pieces, Klee and Kandinsky made their own colour schemes [stated: same]. Residents of 1927: Gropius (the single house); Moholy-Nagy and Feininger; Muche and Schlemmer; Kandinsky and Klee [stated: same, with Gropius's house destroyed in 1945].
+- Each double house had a north-facing studio and south-facing living rooms; the Gropius villa a ground-floor living area and a roof-terrace garden [stated: Teige].
+- Our layout (compressed, **[inferred]**): the four on the north side of Ebertallee in a row, the Gropius house at the west end, the doubles turned alternately.
+
+## 4. The town: Dessau in the 1920s
+
+- Dessau, seat of the Junkers aircraft and engine works (Junkers moved the Bauhaus invitation's city into prominence) and of a young Social-Democratic city administration that invited the Bauhaus in 1925 [stated: [Wikipedia](https://en.wikipedia.org/wiki/Bauhaus_Dessau): "The Bauhaus moved to Dessau in 1925"; the Junkers fact is **[inferred]** from general history].
+- The streets: Kothener Straße (now Gropiusallee) runs between the school's two wings under the bridge **[inferred]**; Mauerstraße beside the workshop wing's glass wall **[inferred]**. The surrounding fabric is that of a Prussian-Anhalt town of 1870–1914: four-storey rendered tenement blocks (Mietshäuser) with plaster ornament and hipped roofs of red tile, shops with signs at the corners **[inferred]**.
+- **Törten estate:** 314 terraced and semi-detached two-storey houses by Gropius's office in three phases from 1926 (types SieTö I, II, IV), on sandy ground; reinforced-concrete frames, hollow slag-concrete blocks made on site, ribbon casements, flat roofs, plastered pale; each house on 350–400 m² of kitchen garden [stated: [Bauhaus Dessau Foundation](https://bauhaus-dessau.de/en/venues/dessau-toerten-housing-estate/); [modernism-in-architecture.org](https://modernism-in-architecture.org/buildings/torten/)]. We show rows of them at the south-west edge (really 2 km away; compressed) **[inferred]**.
+- **People:** students of both sexes in the Bauhaus's casual work dress: women with bobbed hair in knee-length dresses or smocks, men in jackets and trousers, work coats in the workshops (the school's colour-coded "Bauhaus clothes" are legend; plain dress is **[inferred]**); townspeople in hats, caps and coats; workers of the Junkers works on bicycles **[inferred]**.
+- **Vehicles:** bicycles in numbers, the odd 1920s motor car (Opel, Dixi) **[inferred]**; the 1920s Dessau tram is not drawn.
+
+## 5. Materials and surfaces
+
+White painted cement plaster (`plaster_white`, a little cream), dark glass (`glass_outer`), steel frames (`steel_grey`, `aluminium_dull` for the later aluminium), raw concrete floors and slabs (`concrete_light`), asphalt roofs and streets, red brick plinths (`brick`), tiled hip roofs for the town (`roof_tile`), coloured soffits and doors (`paint_cab_yellow`, `car_red`, `car_blue`, `cloth_*`), wooden Breuer seats (`wood_painted`), tubular steel (`steel_chrome`). Climate: damp 0.5 — grime and rain streaks on the white plaster, moss on the north feet of walls.
+
+## 6. Interiors (furnished, walkable)
+
+- **Workshop wing, ground floor:** the carpentry workshop (benches with vices, a circular saw and a lathe, stacked boards, Rowac stools), the vestibule with an exhibition of Bauhaus goods. **First floor:** the weaving workshop (floor looms with warps, yarn racks, cloth on the tables) and the lecture hall (rows of benches, a blackboard). **Second floor:** the metal workshop (benches, anvil, lathes; Brandt's lamps hung in a row) and the wall-painting workshop (easels, colour charts) [stated rooms: Teige 1927; the fittings **[inferred]**].
+- **Bridge:** the administration (desks, filing cabinets, typewriters) below; above, Gropius's building office (drafting tables, a long plan table) **[inferred fittings]**.
+- **North wing:** the library and reading room (first floor), a drawing classroom (second floor) **[inferred fittings]**.
+- **Aula, stage, canteen:** rows of Breuer's tubular-steel and wood chairs, the folded stage curtains, a raised stage; the canteen's tables with tubular chairs and the serving hatch **[stated: Breuer furniture, Max Krajewski's lamps; layout inferred]**.
+- **Prellerhaus:** a stair with a corridor on each floor and the 28 studios, each with a built-in cupboard, a bed, a table, a Breuer chair or stool **[stated: studios and Breuer furniture; fittings inferred]**.
+
+## 7. People and life
+
+- Students on the stairs and in the workshops (weavers at the looms, carpenters at the benches), masters in conversation; bicycles in the racks by the entrance and along the streets; a postman, a baker's boy, women with shopping baskets, children on Mauerstraße **[inferred]**. By hour: classes 8–18 (the school ran from morning), meals at 12 and 18 in the canteen, quiet at night with a light in the studios.
+- Animals: house sparrows on the paving, swifts and house martins over the streets in summer, jackdaws and crows on the roofs, a dog or two **[inferred: central Germany]**.
+
+## 8. Smoke and weather
+
+Coal smoke from tenement chimneys at the morning and evening fires (the Bauhaus itself was heated centrally; its boiler chimney draws a plume) **[inferred]**. Sky: northern Germany, 51.8°N, temperate maritime-continental, overcast often, light rain; in the pine grove sandy ground with grass, heather and birch.
+
+## 9. Sound
+
+Bicycle bells and the hum of a town; church bells of St Johannis and St Marien from the old town; in the workshops the saw and the loom's beat; in the Aula a piano (the school's parties, the Bauhaus band played jazz [stated: general history; Bauhaus Kapelle of 1926–29]) **[inferred]**. Music: a brisk 1920s foxtrot-like melody over a major scale (see `music.js`); the studios quieter.
+
+## 10. The Masters' Houses and the built layout (additions)
+
+- **Masters' Houses:** four white cubic houses on the former pine grove of Ebertallee, built 1925–26: a single house for Gropius and three doubles for Moholy-Nagy/Feininger, Muche/Schlemmer and Kandinsky/Klee; flat roofs, white render, tall studio windows on the garden side, mirrored plans in the doubles **[inferred from general knowledge; see the [Bauhaus Dessau Foundation page](https://www.bauhaus-dessau.de/en/venues/masters-houses/), listed by search but not read in full]**. Built as four rectangles on Ebertallee's north side, the grove of Scots pines (`red_pine`) and birch between them **[inferred]**. The houses are solid (not enterable) in the model.
+- **Layout used in code** (`layout.js`): the school at the origin; Kothener Strasse east–west under the bridge; Mauerstrasse north–south beside the glass wall; Kavalierstrasse and two cross streets in the west; Ebertallee in the south; ~80 tenement lots on the street fronts (a fifth with shops), 4 Masters' Houses, 3 Törten rows at the south-west edge (really ~2 km away; compressed) **[inferred]**.
+- **Moment of the arrival view:** from Mauerstrasse at the south-west corner, the position from which the glass wall is read along its length **[inferred]**.
