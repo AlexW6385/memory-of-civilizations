@@ -104,6 +104,7 @@ export const SITES = [
   { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, era: 'c. 1250 BC', region: 'egypt', lat: 25.7, lon: 32.64, radius: 330 },
   { id: 'delphi', name: { en: 'Delphi', zh: '德尔斐' }, era: 'c. 400 BC', region: 'aegean', lat: 38.48, lon: 22.5, radius: 190 },
   { id: 'qin-xianyang', name: { en: 'Qin Xianyang', zh: '秦咸阳' }, era: 'c. 210 BC', region: 'china', lat: 34.38, lon: 109.25, radius: 330 },
+  { id: 'ajanta', name: { en: 'Ajanta', zh: '阿旃陀' }, era: 'c. 480', region: 'india', lat: 20.55, lon: 75.70, radius: 190 },
   { id: 'han-changan', name: { en: 'Han Chang\'an', zh: '汉长安' }, era: 'c. 100 BC', region: 'china', lat: 34.3, lon: 108.88, radius: 520 },
   { id: 'wei-ye', name: { en: 'Three Kingdoms Ye', zh: '三国邺城' }, era: 'c. AD 215', region: 'china', lat: 36.33, lon: 114.38, radius: 330 },
   { id: 'nalanda', name: { en: 'Nalanda', zh: '那烂陀' }, era: 'c. 640', region: 'india', lat: 25.14, lon: 85.44, radius: 190 },
