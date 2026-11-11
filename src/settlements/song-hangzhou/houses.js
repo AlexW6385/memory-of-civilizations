@@ -64,7 +64,7 @@ function houseSong(el, { bag, col }) {
   const wallMat = pal.plaster || 'plaster_white', bandMat = pal.plinth === 'brick_grey' ? 'brick_grey' : 'plaster_damp', roofMat = pal.roof || 'tile_dark';
   const y0 = y + 0.45;
   const h1 = (shop ? 3.4 : 3.0) + rand() * 0.35, h2 = 2.55 + rand() * 0.35, yf = y0 + h1, yE = st > 1 ? yf + h2 : yf;
-  const wall = (a0, b0, a1, b1, ya, yb) => { const m = Math.min(yb, ya + 0.95); B(a0, b0, a1, b1, ya, yb, wallMat); B(a0 - 0.03, b0 - 0.03, a1 + 0.03, b1 + 0.03, ya - 0.04, m, bandMat); };
+  const wall = (a0, b0, a1, b1, ya, yb) => { const m = Math.min(yb - 0.03, ya + 0.95); B(a0, b0, a1, b1, ya, yb, wallMat); B(a0 <= 0 ? 0.02 : a0 - 0.03, b0 - 0.03, a1 >= L ? L - 0.02 : a1 + 0.03, b1 + 0.03, ya - 0.04, m, bandMat); };
 
   // ── the plan: the main hall on the street; behind it, on deep lots, a court and a rear hall, else a walled yard ──
   const v0 = ovh ? 1.1 : 0.75, uf = st > 1 ? (ovh ? v0 - 0.5 : v0 + 0.2) : v0;
@@ -339,6 +339,7 @@ export function streetsideElements(L) {
   }
   // the canal streets' own paving (the lanes' ends abut it)
   for (const r of L.CANAL_STREETS) for (const [za, zb] of spans) E.push({ t: 'paving', rect: [r[0], za - 6, r[2], zb + 6 > L.ROAD.z0 ? L.ROAD.z0 : zb + 6], y: street, th: 0.3 });
+  for (const r of L.CANAL_STREETS) for (const [za, zb] of spans) E.push({ t: 'hz_slabs', rect: [r[0], za - 6, r[2], Math.min(zb + 6, L.ROAD.z0 - 6)], y: street + 0.02, seed: Math.round(r[0] + za), side: r[0] < L.CANAL.x0 ? 'w' : 'e' });
   // the mooring stones, on the street side of the canal's edge, between the landings
   for (const [x, dir] of [[L.CANAL.x0 - 0.9, -1], [L.CANAL.x1 + 0.9, 1]]) for (const [za, zb] of spans) {
     for (let z = za + 6 + rand() * 6; z < zb - 6; z += 11 + rand() * 9) {

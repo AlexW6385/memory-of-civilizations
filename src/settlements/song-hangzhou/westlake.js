@@ -58,8 +58,8 @@ E.push({ t: 'ming_pavilion', c: [-7.2, 43], shape: 'square', w: 5, y: TOP + 0.5,
 for (const z of [12, 22]) E.push({ t: 'block', walk: true, rect: [-24, z, -11, z + 2.4], y0: -1.8, y1: TOP, mat: 'timber' });
 // the landing's mooring: piles with their iron rings, plank decks with the boatmen's gear (a pole, a basket, a coil of rope), a stone landing step on the bank
 for (const z of [12, 22]) E.push({ t: 'hz_landing', rect: [-24, z, -11, z + 2.4], y: TOP, bed: -1.8, seed: z });
-E.push({ t: 'lake_boat', at: [-18, 17.6], dir: [1, 0], len: 15, y: LAKE });
-E.push({ t: 'lake_boat', at: [-17, 28.6], dir: [-1, 0], len: 11, y: LAKE });
+E.push({ t: 'lake_boat', at: [-19.2, 17.6], dir: [1, 0], len: 15, y: LAKE });
+E.push({ t: 'lake_boat', at: [-17.35, 28.6], dir: [-1, 0], len: 11, y: LAKE });
 E.push({ t: 'lake_boat', at: [-20, 7.6], dir: [1, 0], len: 9, y: LAKE });
 E.push({ t: 'lake_boat', at: [-40, 40], dir: [1, 0.2], len: 12, y: LAKE, moored: false });
 // Xizhao Hill and Leifeng Pagoda on the south shore west of the causeway: five storeys, a brick body with timber galleries and

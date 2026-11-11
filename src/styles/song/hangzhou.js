@@ -5,7 +5,7 @@ import { rod, box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, column, beamTris } from '../ming/index.js';
 import { hexa } from './kaifeng.js';
 import { STYLES } from '../../core/build.js';
-import { Matrix4 } from '../../core/three.js';
+import { Matrix4, Float32BufferAttribute } from '../../core/three.js';
 
 /**
  * view_tent: a stand for watching the bore { at, y, w (along x), d (along z), h, cloth, trim, open ('s' |
@@ -256,6 +256,26 @@ function templeGate(el, { bag, col }) {
     bag.add('tile_dark', box(Math.min(x, x + o * 0.35) - 0.1, hy + rise + 0.5, cz - 0.1, Math.max(x, x + o * 0.35) + 0.1, hy + rise + 0.7, cz + 0.1));
   }
   bag.add('tile_dark', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.2], [0.001, 0.3]], 8, null, cx, hy + rise - 0.05, cz));
+  // the piers dressed: a panel with a raised border on each face, a lotus roundel in it; the drum stones (baogu shi) before the piers; steps up to the threshold on both sides
+  for (const sx of [-1, 1]) {
+    const px = cx + sx * (w + pw);
+    for (const f of [-1, 1]) {
+      const zf = cz + f * (hd / 2 + 0.015), z2 = cz + f * (hd / 2 + 0.045), a = Math.min(zf, z2), b = Math.max(zf, z2);
+      const yl = y + 0.95, yh = y + H - 1.0, bd = 0.1;
+      bag.add('granite_grey', box(px - pw + 0.12, yl, a, px + pw - 0.12, yl + bd, b)); bag.add('granite_grey', box(px - pw + 0.12, yh - bd, a, px + pw - 0.12, yh, b));
+      bag.add('granite_grey', box(px - pw + 0.12, yl, a, px - pw + 0.12 + bd, yh, b)); bag.add('granite_grey', box(px + pw - 0.12 - bd, yl, a, px + pw - 0.12, yh, b));
+      bag.add('granite_grey', lathe([[0.001, 0], [0.2, 0], [0.19, 0.02], [0.001, 0.035]], 12).rotateX(f * Math.PI / 2).translate(px, (yl + yh) / 2, f * (hd / 2 + 0.015) + cz));
+      for (let k = 0; k < 8; k++) { const an = k * Math.PI / 4; bag.add('granite_grey', lathe([[0.001, 0], [0.045, 0], [0.04, 0.02], [0.001, 0.03]], 6).rotateX(f * Math.PI / 2).translate(px + Math.cos(an) * 0.13, (yl + yh) / 2 + Math.sin(an) * 0.13, f * (hd / 2 + 0.015) + cz)); }
+    }
+    for (const f of [sd]) {
+      const zc = cz + f * (hd / 2 + 0.5), xd = cx + sx * (w + 2 * pw + 0.55);
+      bag.add('granite_block', lathe([[0.001, 0], [0.42, 0], [0.44, 0.1], [0.4, 0.14], [0.4, 0.84], [0.44, 0.9], [0.001, 0.9]], 14, null, xd, y, zc));
+      bag.add('granite_grey', lathe([[0.44, 0.9], [0.38, 0.9], [0.3, 0.95], [0.001, 0.95]], 14, null, xd, y, zc));
+      for (let k = 0; k < 14; k++) { const an = k * Math.PI * 2 / 14; bag.add('granite_grey', lathe([[0.001, 0], [0.04, 0], [0.036, 0.04], [0.001, 0.05]], 5, null, xd + Math.cos(an) * 0.41, y + 0.2, zc + Math.sin(an) * 0.41).rotateZ(0)); }
+      col.circle(xd, zc, 0.44, y, y + 0.95);
+    }
+  }
+  for (const f of [-1, 1]) { const a = cz + f * 0.7, b = cz + f * 1.05; bag.add('granite_grey', box(cx - w, y, Math.min(a, b), cx + w, y + 0.09, Math.max(a, b))); }
 }
 
 /**
@@ -372,7 +392,7 @@ function lakeBoat(el, { bag }) {
   for (let i = 0; i < N; i++) {
     const t0 = -1 + 2 * i / N, t1 = -1 + 2 * (i + 1) / N, s0 = t0 * H, s1 = t1 * H;
     hexa(hull, [Pt(s0, -w(t0) * 0.7, keel(t0)), Pt(s1, -w(t1) * 0.7, keel(t1)), Pt(s1, w(t1) * 0.7, keel(t1)), Pt(s0, w(t0) * 0.7, keel(t0)), Pt(s0, -w(t0), sheer(t0) - 0.06), Pt(s1, -w(t1), sheer(t1) - 0.06), Pt(s1, w(t1), sheer(t1) - 0.06), Pt(s0, w(t0), sheer(t0) - 0.06)]);
-    for (const sg of [-1, 1]) ob(wale, s0, s1, sg * w(t0) - 0.03, sg * w(t0) + 0.05, sheer(t0) - 0.2, sheer(t0) - 0.02);
+    for (const sg of [-1, 1]) hexa(wale, [Pt(s0, sg * w(t0) - 0.03, sheer(t0) - 0.2), Pt(s1, sg * w(t1) - 0.03, sheer(t1) - 0.2), Pt(s1, sg * w(t1) + 0.05, sheer(t1) - 0.2), Pt(s0, sg * w(t0) + 0.05, sheer(t0) - 0.2), Pt(s0, sg * w(t0) - 0.03, sheer(t0) - 0.02), Pt(s1, sg * w(t1) - 0.03, sheer(t1) - 0.02), Pt(s1, sg * w(t1) + 0.05, sheer(t1) - 0.02), Pt(s0, sg * w(t0) + 0.05, sheer(t0) - 0.02)]);
     hexa(deck, [Pt(s0, -w(t0) + 0.08, sheer(t0) - 0.06), Pt(s1, -w(t1) + 0.08, sheer(t1) - 0.06), Pt(s1, w(t1) - 0.08, sheer(t1) - 0.06), Pt(s0, w(t0) - 0.08, sheer(t0) - 0.06), Pt(s0, -w(t0) + 0.08, sheer(t0) - 0.03), Pt(s1, -w(t1) + 0.08, sheer(t1) - 0.03), Pt(s1, w(t1) - 0.08, sheer(t1) - 0.03), Pt(s0, w(t0) - 0.08, sheer(t0) - 0.03)]);
   }
   bag.add('lacquer_red', fromTriangles(hull)); bag.add('paint_ochre', fromTriangles(wale)); bag.add('planks_grey', fromTriangles(deck));
@@ -399,6 +419,94 @@ function lakeBoat(el, { bag }) {
   for (const sg of [-1, 1]) { ob(rail, H * 0.4, H * 0.8, sg * hw - 0.04, sg * hw + 0.04, yd + 0.4, yd + 0.5); for (const f of [0.4, 0.6, 0.8]) ob(rail, H * f - 0.04, H * f + 0.04, sg * hw - 0.04, sg * hw + 0.04, yd, yd + 0.4); }
   bag.add('lacquer_red', fromTriangles(rail));
   bag.add('wood_dark', rod(Pt(-H, 0, yw + 0.8), Pt(-H - 1.2, 0, yw - 0.5), 0.05, 5)); ob(rud, -H - 1.3, -H - 1.0, -0.05, 0.05, yw - 0.9, yw - 0.2); bag.add('wood_dark', fromTriangles(rud));
+  // ── the boat in full: strakes, gunwale, the cabin's doors and blinds, its table and tea, the oars, the stern's gear
+  const dY = (sx) => sheer(sx / H) - 0.03, nrm = (sx) => Math.abs(sx / H);
+  const strak = [], gun = [];
+  for (const sg of [-1, 1]) {
+    for (const f of [0.25, 0.5, 0.75]) for (let i = 0; i < N; i++) {
+      const t0 = -1 + 2 * i / N, t1 = -1 + 2 * (i + 1) / N, q = (t) => Pt(t * H, sg * (w(t) * (0.7 + 0.3 * f) + 0.012), keel(t) + (sheer(t) - 0.06 - keel(t)) * f);
+      strak.push(rod(q(t0), q(t1), 0.012, 4));
+    }
+    // the gunwale: a continuous timber coaming on the sheer, and the knees that carry it
+    for (let i = 0; i < N; i++) { const t0 = -1 + 2 * i / N, t1 = -1 + 2 * (i + 1) / N; hexa(gun, [Pt(t0 * H, sg * w(t0) - 0.07, sheer(t0) - 0.06), Pt(t1 * H, sg * w(t1) - 0.07, sheer(t1) - 0.06), Pt(t1 * H, sg * w(t1) + 0.03, sheer(t1) - 0.06), Pt(t0 * H, sg * w(t0) + 0.03, sheer(t0) - 0.06), Pt(t0 * H, sg * w(t0) - 0.07, sheer(t0) + 0.07), Pt(t1 * H, sg * w(t1) - 0.07, sheer(t1) + 0.07), Pt(t1 * H, sg * w(t1) + 0.03, sheer(t1) + 0.07), Pt(t0 * H, sg * w(t0) + 0.03, sheer(t0) + 0.07)]); }
+  }
+  for (const g of strak) bag.add('wood_dark', g);
+  bag.add('timber', fromTriangles(gun));
+  // the cabin: the floor, a tie beam over each pair of posts, the gilt fascia, the end walls (stern: a pair of lattice doors, one ajar; bow: open under a rolled blind)
+  const flo = []; ob(flo, sA - 0.1, sB + 0.1, -hw, hw, yd - 0.04, yd - 0.01); bag.add('planks_grey', fromTriangles(flo));
+  const bm = [], fas = [], doors = [], dlat = [], blind = [], cord = [];
+  for (let i = 0; i <= ns; i++) { const s0 = sA + (sB - sA) * i / ns; ob(bm, s0 - 0.07, s0 + 0.07, -hw - 0.1, hw + 0.1, yd + ch - 0.22, yd + ch - 0.04); }
+  ob(bm, sA - 0.1, sB + 0.1, -hw - 0.08, -hw + 0.04, yd + ch - 0.04, yd + ch + 0.04); ob(bm, sA - 0.1, sB + 0.1, hw - 0.04, hw + 0.08, yd + ch - 0.04, yd + ch + 0.04);
+  for (const sg of [-1, 1]) ob(fas, sA - 0.15, sB + 0.15, sg * (hw + 0.1) - 0.02, sg * (hw + 0.1) + 0.02, yd + ch - 0.5, yd + ch - 0.22);
+  ob(fas, sA - 0.17, sA - 0.13, -hw - 0.1, hw + 0.1, yd + ch - 0.5, yd + ch - 0.22);
+  bag.add('lacquer_red', fromTriangles(bm)); bag.add('paint_ochre', fromTriangles(fas));
+  // stern doors: two leaves a half-width each, a frame; the left leaf ajar (turned about its hinge post)
+  ob(doors, sA - 0.05, sA + 0.05, -hw, hw, yd, yd + 0.5);
+  for (const [o0, o1, ajar] of [[-hw, 0, 1], [0, hw, 0]]) {
+    if (!ajar) { ob(dlat, sA - 0.03, sA + 0.03, o0 + 0.04, o1 - 0.04, yd + 0.5, yd + ch - 0.22); }
+    else { const a0 = [sA, o0 + 0.04], a1 = [sA - 0.8, o0 + 0.04 + (o1 - o0) * 0.6]; ob(dlat, a0[0] - 0.03, a0[0] + 0.03, o0 + 0.04, o0 + 0.1, yd + 0.5, yd + ch - 0.22); ob(dlat, a1[0] - 0.03, a0[0], a0[1] + 0.04, a1[1], yd + 0.5, yd + ch - 0.22); }
+  }
+  bag.add('lacquer_red', fromTriangles(doors)); bag.add('lattice_red', fromTriangles(dlat));
+  // bamboo blinds on the side windows: rolled at the top, hung half down over two bays; the bow's blind rolled up across the opening
+  for (const sg of [-1, 1]) for (const i of [1, 2]) {
+    const a = sA + (sB - sA) * i / ns + 0.1, b = sA + (sB - sA) * (i + 1) / ns - 0.1, drop = i === 1 ? 0.9 : 0.35;
+    ob(blind, a, b, sg * (hw + 0.07) - 0.01, sg * (hw + 0.07) + 0.01, yd + 1.85 - drop, yd + 1.88);
+    bag.add('reed_mat', rod(Pt(a, sg * (hw + 0.09), yd + 1.92), Pt(b, sg * (hw + 0.09), yd + 1.92), 0.05, 6));
+    for (const u of [a + 0.06, b - 0.06]) cord.push(rod(Pt(u, sg * (hw + 0.1), yd + 1.92), Pt(u, sg * (hw + 0.1), yd + 1.85 - drop), 0.008, 3));
+  }
+  bag.add('reed_mat', fromTriangles(blind)); bag.add('rope_fibre', rod(Pt(sB, -hw + 0.05, yd + ch - 0.32), Pt(sB, hw - 0.05, yd + ch - 0.32), 0.06, 6));
+  for (const g of cord) bag.add('cloth_red', g);
+  // inside: a low table on the boards, two cushioned benches, the tea set, a lamp hung from the beam
+  const tb = [], cush = [], cush2 = [];
+  ob(tb, cs - 0.55, cs + 0.55, -0.33, 0.33, yd + 0.4, yd + 0.45);
+  for (const [a, o] of [[-0.5, -0.28], [0.5, -0.28], [-0.5, 0.28], [0.5, 0.28]]) ob(tb, cs + a - 0.03, cs + a + 0.03, o - 0.03, o + 0.03, yd, yd + 0.4);
+  bag.add('lacquer_chestnut', fromTriangles(tb));
+  for (const sg of [-1, 1]) { ob(cush, cs - 0.7, cs + 0.7, sg * 0.62 - 0.17, sg * 0.62 + 0.17, yd + 0.04, yd + 0.2); ob(cush2, cs - 0.62, cs + 0.62, sg * 0.62 - 0.14, sg * 0.62 + 0.14, yd + 0.2, yd + 0.26); }
+  bag.add('timber', fromTriangles(cush)); bag.add('cloth_indigo', fromTriangles(cush2));
+  bag.add('tile_green', lathe([[0.001, 0], [0.07, 0], [0.09, 0.06], [0.07, 0.12], [0.04, 0.14], [0.001, 0.14]], 8, null, ...Pt(cs - 0.15, 0, yd + 0.45)));
+  bag.add('tile_green', rod(Pt(cs - 0.15, 0.07, yd + 0.55), Pt(cs - 0.15, 0.17, yd + 0.5), 0.012, 4));
+  for (const [a, o] of [[0.1, -0.12], [0.2, 0.05], [0.05, 0.14], [0.22, -0.05]]) bag.add('plaster_white', lathe([[0.001, 0], [0.025, 0], [0.04, 0.05], [0.035, 0.05], [0.001, 0.005]], 7, null, ...Pt(cs + a, o, yd + 0.45)));
+  bag.add('rope_fibre', rod(Pt(cs, 0, yd + ch - 0.22), Pt(cs, 0, yd + ch - 0.5), 0.008, 3));
+  bag.add('lamp_paper', lathe([[0.001, -0.2], [0.11, -0.12], [0.14, 0], [0.11, 0.12], [0.001, 0.18]], 8, null, ...Pt(cs, 0, yd + ch - 0.7)));
+  // the bow: a painted shield board across the stem with a gilt edge, a bollard, an anchor and its coil of rope, mooring line
+  const bs = H - 0.5, bh = dY(bs);
+  ob(rud, bs - 0.04, bs + 0.04, -w(bs / H) + 0.1, w(bs / H) - 0.1, bh, bh + 0.5);
+  bag.add('paint_ochre', fromTriangles(rud.splice(0)));
+  const bol = lathe([[0.001, 0], [0.1, 0], [0.09, 0.2], [0.14, 0.26], [0.001, 0.26]], 8, null, ...Pt(H * 0.9, 0, dY(H * 0.9)));
+  bag.add('timber', bol);
+  const as = H * 0.62, ay = dY(as);
+  bag.add('iron', rod(Pt(as, 0.55, ay + 0.04), Pt(as + 0.7, 0.55, ay + 0.04), 0.03, 5)); bag.add('iron', rod(Pt(as + 0.7 - 0.02, 0.55, ay + 0.04 - 0.22), Pt(as + 0.7 - 0.02, 0.55, ay + 0.04 + 0.22), 0.025, 4));
+  bag.add('iron', rod(Pt(as - 0.02, 0.55 - 0.22, ay + 0.04), Pt(as - 0.02, 0.55 + 0.22, ay + 0.04), 0.022, 4));
+  for (const sg of [-1, 1]) bag.add('iron', rod(Pt(as, 0.55, ay + 0.04), Pt(as - 0.2, 0.55 + sg * 0.28, ay + 0.1), 0.02, 4));
+  bag.add('rope_fibre', lathe([[0.2, 0], [0.34, 0], [0.34, 0.12], [0.2, 0.12]], 10, null, ...Pt(H * 0.72, -0.5, dY(H * 0.72))));
+  // oars: a long oar either side of the fore-deck, resting in a thole post on the gunwale, the blade trailing in the water
+  for (const sg of [-1, 1]) {
+    const os = H * 0.5, wo = w(os / H), top = Pt(os + 0.4, sg * (wo - 0.9), sheer(os / H) + 0.28), thole = Pt(os, sg * (wo + 0.03), sheer(os / H) + 0.2), tip = Pt(os - 1.5, sg * (wo + 2.4), yw - 0.28);
+    bag.add('timber', rod(Pt(os, sg * (wo - 0.01), sheer(os / H) - 0.04), thole, 0.04, 5));
+    bag.add('wood_dark', rod(top, tip, 0.04, 5));
+    const dir = [tip[0] - top[0], tip[2] - top[2]], dl2 = Math.hypot(...dir);
+    bag.add('timber', rod([tip[0] - dir[0] / dl2 * 0.9, tip[1] + 0.15, tip[2] - dir[1] / dl2 * 0.9], [tip[0], tip[1] - 0.2, tip[2]], 0.1, 4));
+  }
+  // the stern: the yuloh (the long sculling oar) pivoting on a post at the stern, a boatman's brazier with a kettle, a bucket, a basket, a straw hat on a peg, a rolled mat, a pole laid along the side, the stern lantern
+  const ss = -H * 0.86, sy = dY(ss);
+  bag.add('timber', rod(Pt(ss, 0, sy), Pt(ss, 0, sy + 0.8), 0.06, 6));
+  bag.add('wood_dark', rod(Pt(ss + 0.9, 0.5, sy + 0.95), Pt(ss - 2.3, -0.2, yw - 0.45), 0.045, 5));
+  bag.add('timber', rod(Pt(ss - 1.7, -0.14, yw - 0.1), Pt(ss - 2.45, -0.22, yw - 0.7), 0.16, 4));
+  bag.add('rope_fibre', rod(Pt(ss + 0.5, 0.45, sy + 0.9), Pt(ss + 0.5, 0.45, sy + 0.4), 0.01, 3));
+  const bx = -H * 0.62, by = dY(bx);
+  bag.add('timber', lathe([[0.001, 0], [0.17, 0], [0.19, 0.08], [0.001, 0.08]], 8, null, ...Pt(bx, 0.55, by)));
+  bag.add('iron', lathe([[0.001, 0.08], [0.15, 0.1], [0.18, 0.2], [0.12, 0.26], [0.001, 0.26]], 8, null, ...Pt(bx, 0.55, by)));
+  bag.add('bronze', lathe([[0.001, 0], [0.1, 0], [0.08, 0.12], [0.04, 0.16], [0.001, 0.17]], 8, null, ...Pt(bx, 0.55, by + 0.26)));
+  bag.add('bronze', rod(Pt(bx, 0.62, by + 0.34), Pt(bx, 0.42, by + 0.36), 0.01, 3));
+  bag.add('timber', lathe([[0.17, 0], [0.2, 0.3], [0.17, 0.3], [0.15, 0.02]], 9, null, ...Pt(-H * 0.7, -0.6, dY(-H * 0.7))));
+  bag.add('iron', rod(Pt(-H * 0.7, -0.6 - 0.18, dY(-H * 0.7) + 0.3), Pt(-H * 0.7, -0.6 + 0.18, dY(-H * 0.7) + 0.3), 0.012, 3));
+  bag.add('reed_mat', lathe([[0.2, 0], [0.26, 0.14], [0.3, 0.3], [0.27, 0.3], [0.23, 0.14], [0.17, 0.02]], 10, null, ...Pt(-H * 0.55, 0.62, dY(-H * 0.55))));
+  bag.add('reed_mat', rod(Pt(-H * 0.8, -0.65, dY(-H * 0.8) + 0.08), Pt(-H * 0.68, -0.65, dY(-H * 0.68) + 0.08), 0.09, 6));
+  bag.add('thatch', lathe([[0.001, 0.14], [0.14, 0.04], [0.28, 0], [0.28, 0.025], [0.001, 0.16]], 10, null, ...Pt(sA - 0.32, hw - 0.1, yd + 1.1)));
+  bag.add('timber', rod(Pt(sA - 0.05, hw - 0.1, yd + 1.05), Pt(sA - 0.38, hw - 0.1, yd + 1.05), 0.012, 3));
+  for (const sg of [-1, 1]) bag.add('bamboo_culm', rod(Pt(-H * 0.95 + 0.4, sg * (w(-0.9) - 0.3), dY(-H * 0.9) + 0.1), Pt(sA + 0.2, sg * (hw + 0.15), yd + 0.12), 0.022, 5));
+  bag.add('wood_dark', rod(Pt(-H + 0.1, 0.0, sheer(-1)), Pt(-H + 0.1, 0.0, sheer(-1) + 1.3), 0.03, 4));
+  bag.add('lamp_paper', lathe([[0.001, -0.17], [0.1, -0.1], [0.13, 0], [0.1, 0.1], [0.001, 0.15]], 8, null, ...Pt(-H + 0.1, 0.0, sheer(-1) + 1.22)));
 }
 
 
@@ -442,6 +550,70 @@ function pagodaNiches(bag, el) {
 }
 
 /**
+ * The lowest two storeys of the Liuhe Pagoda dressed for eye level { c, y (the base's top), tiers, g (gallery offset) }: a brick plinth with a granite cap round the white core, a
+ * pilaster at every corner (stone foot, red timber shaft, capital), on the closed compass faces a window (timber frame, granite sill, lattice over the dark), on the closed diagonal a
+ * pair of studded lacquer doors in a frame with a granite threshold, and the gallery's rail with a baluster at every metre and lattice panels between the rails.
+ * [inferred: the Song pagoda's brick body in timber-style dress, as the Liuhe Pagoda's present form keeps it]
+ */
+function pagodaFront(bag, el) {
+  const [cx, cz] = el.c, ng = (r) => Array.from({ length: 8 }, (_, k) => [cx + Math.cos(Math.PI / 8 + k * Math.PI / 4) * r, cz + Math.sin(Math.PI / 8 + k * Math.PI / 4) * r]);
+  let y = el.y + el.base.h;
+  const OPEN = [2, 4, 6], K = 1 / Math.cos(Math.PI / 8);
+  el.tiers.slice(0, 2).forEach((t, i) => {
+    const r = t.r, h = t.h, F0 = ng(r + 0.03), g = r + 2.4;
+    const slab = (out, d0, d1, ya, yb) => { const A = ng(r + 0.03 + d0 * K), B = ng(r + 0.03 + d1 * K); for (let k = 0; k < 8; k++) { const k2 = (k + 1) % 8; hexa(out, [[A[k][0], ya, A[k][1]], [A[k2][0], ya, A[k2][1]], [B[k2][0], ya, B[k2][1]], [B[k][0], ya, B[k][1]], [A[k][0], yb, A[k][1]], [A[k2][0], yb, A[k2][1]], [B[k2][0], yb, B[k2][1]], [B[k][0], yb, B[k][1]]]); } };
+    const plinth = [], cap = [];
+    slab(plinth, 0, 0.1, y, y + 0.95); slab(cap, 0, 0.17, y + 0.95, y + 1.07);
+    bag.add('brick_grey', fromTriangles(plinth)); bag.add('granite_grey', fromTriangles(cap));
+    // the corner pilasters
+    for (let k = 0; k < 8; k++) {
+      const [px, pz] = ng(r + 0.03 + 0.1)[k];
+      bag.add('granite_block', lathe([[0.26, 0], [0.26, 0.28], [0.2, 0.34], [0.001, 0.34]], 8, null, px, y + 1.07, pz));
+      bag.add('timber_red', lathe([[0.17, 0], [0.15, h - 2.2]], 8, null, px, y + 1.4, pz));
+      bag.add('granite_grey', lathe([[0.15, 0], [0.24, 0.08], [0.24, 0.2], [0.001, 0.2]], 8, null, px, y + h - 0.8 - 0.2 + 0.0, pz));
+    }
+    // the faces
+    for (let k = 0; k < 8; k++) {
+      if (OPEN.includes(k)) continue;
+      const a = F0[k], b = F0[(k + 1) % 8], mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2, L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = mx - cx, nz = mz - cz, nl = Math.hypot(nx, nz), ox = nx / nl, oz = nz / nl;
+      const Q = (u, yy, d) => [mx + ux * u + ox * d, yy, mz + uz * u + oz * d];
+      const bx = (u0, u1, d0, d1, ya, yb, mat) => { const t = []; hexa(t, [Q(u0, ya, d0), Q(u1, ya, d0), Q(u1, ya, d1), Q(u0, ya, d1), Q(u0, yb, d0), Q(u1, yb, d0), Q(u1, yb, d1), Q(u0, yb, d1)]); bag.add(mat, fromTriangles(t)); };
+      if (k % 2 === 0) {
+        // the doors: a frame, two lacquer leaves with rows of bronze studs, a ring each, the threshold
+        const dw = 0.32 * L, dh = Math.min(3, h * 0.45), y0 = y + 0.4, hw = dw / 2;
+        bx(-hw - 0.16, hw + 0.16, 0.02, 0.1, y0 + dh, y0 + dh + 0.2, 'timber_red');
+        for (const sg of [-1, 1]) bx(sg * (hw + 0.02) - 0.08 + 0, sg * (hw + 0.02) + 0.08, 0.02, 0.1, y0, y0 + dh + 0.2, 'timber_red');
+        bx(-hw - 0.3, hw + 0.3, 0.02, 0.2, y + 0.95 - 0.0, y0 + 0.0, 'granite_grey');
+        for (const sg of [-1, 1]) {
+          const u0 = sg < 0 ? -hw : 0.015, u1 = sg < 0 ? -0.015 : hw;
+          bx(u0 + 0.03, u1 - 0.03, 0.03, 0.07, y0, y0 + dh, 'lacquer_red');
+          for (const q of [0.3, dh * 0.5, dh - 0.35]) bx(u0 + 0.03, u1 - 0.03, 0.07, 0.085, y0 + q - 0.06, y0 + q + 0.06, 'iron');
+          const rows = 5, cols = 4;
+          for (let j = 0; j < rows; j++) for (let c2 = 0; c2 < cols; c2++) { const uc = u0 + 0.14 + (u1 - u0 - 0.28) * c2 / (cols - 1), yc = y0 + 0.35 + (dh - 0.7) * j / (rows - 1); bx(uc - 0.035, uc + 0.035, 0.07, 0.115, yc - 0.035, yc + 0.035, 'bronze'); }
+          const ringc = sg * 0.2; bag.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.1, 0.03], [0.001, 0.045]], 8).rotateX(Math.PI / 2).translate(...Q(ringc, y0 + dh * 0.45, 0.095)).rotateY(0));
+        }
+      } else {
+        // a window: a frame and sill, the dark opening, a lattice in front of it
+        const ww = 0.18 * L, wy0 = y + h * 0.35, wh = 1.2, hw = ww / 2;
+        bx(-hw - 0.12, hw + 0.12, 0.02, 0.1, wy0 - 0.12, wy0, 'timber_red'); bx(-hw - 0.12, hw + 0.12, 0.02, 0.1, wy0 + wh, wy0 + wh + 0.12, 'timber_red');
+        for (const sg of [-1, 1]) bx(sg * hw + (sg < 0 ? -0.12 : 0), sg * hw + (sg < 0 ? 0 : 0.12), 0.02, 0.1, wy0, wy0 + wh, 'timber_red');
+        bx(-hw - 0.25, hw + 0.25, 0.02, 0.22, wy0 - 0.22, wy0 - 0.12, 'granite_grey');
+        bx(-hw, hw, 0.055, 0.075, wy0, wy0 + wh, 'lattice_red');
+      }
+    }
+    // the gallery's rail: balusters and lattice panels between the two rails (not at the way in from the south)
+    const Rl = ng(g - 0.15);
+    for (let k = 0; k < 8; k++) {
+      if (i === 0 && k === 1) continue;
+      const a = Rl[k], b = Rl[(k + 1) % 8], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(2, Math.round(L / 1.0)), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, ox = uz, oz = -ux;
+      for (let q = 0; q <= n; q++) { const f = q / n, px = a[0] + (b[0] - a[0]) * f, pz = a[1] + (b[1] - a[1]) * f; bag.add('timber_red', lathe([[0.001, 0], [0.06, 0.02], [0.045, 0.3], [0.07, 0.55], [0.045, 0.8], [0.001, 0.82]], 6, null, px, y + 0.15, pz)); }
+      for (let q = 0; q < n; q++) { const f0 = (q + 0.1) / n, f1 = (q + 0.9) / n, t = []; hexa(t, [[a[0] + (b[0] - a[0]) * f0, y + 0.3, a[1] + (b[1] - a[1]) * f0], [a[0] + (b[0] - a[0]) * f1, y + 0.3, a[1] + (b[1] - a[1]) * f1], [a[0] + (b[0] - a[0]) * f1 + ox * 0.02, y + 0.3, a[1] + (b[1] - a[1]) * f1 + oz * 0.02], [a[0] + (b[0] - a[0]) * f0 + ox * 0.02, y + 0.3, a[1] + (b[1] - a[1]) * f0 + oz * 0.02], [a[0] + (b[0] - a[0]) * f0, y + 0.8, a[1] + (b[1] - a[1]) * f0], [a[0] + (b[0] - a[0]) * f1, y + 0.8, a[1] + (b[1] - a[1]) * f1], [a[0] + (b[0] - a[0]) * f1 + ox * 0.02, y + 0.8, a[1] + (b[1] - a[1]) * f1 + oz * 0.02], [a[0] + (b[0] - a[0]) * f0 + ox * 0.02, y + 0.8, a[1] + (b[1] - a[1]) * f0 + oz * 0.02]]); bag.add('lattice_red', fromTriangles(t)); }
+    }
+    y += h;
+  });
+}
+
+/**
  * liuhe_pagoda: pagoda_oct with the song style's finished spire and the niches (same parameters as pagoda_oct, `interior` and `images` for the walkable inside).
  */
 function liuhePagoda(el, ctx) {
@@ -451,6 +623,7 @@ function liuhePagoda(el, ctx) {
   const top = el.y + el.base.h + el.tiers.reduce((a, t) => a + t.h, 0), rt = el.tiers[el.tiers.length - 1].r, R = rt + 3.6;
   songSpire(ctx.bag, el.c[0], top + 4.2, el.c[1], R, top + 1.0);
   if (el.interior && el.niches !== false) pagodaNiches(ctx.bag, el);
+  if (el.dress !== false) pagodaFront(ctx.bag, el);
 }
 
 /**
@@ -596,10 +769,51 @@ function imperialWay(el, ctx) {
   bag.add('pebbles', box(gx0, y, z0, gx1, y + 0.03, z1));
   for (const [a, b] of [[x0 + band, gx0], [gx1, x1 - band]]) { bag.add('granite_grey', box(a, y, z0, b, y + 0.09, z1)); ctx.col?.floor([a, z0, b, z1], y + 0.09); }   // (the kerb a step to walk over)
   for (const s of [-1, 1]) bag.add('slate', box(xc + s * 2.6 - 0.14, y, z0, xc + s * 2.6 + 0.14, y + 0.05, z1));   // the wheel ruts
+  // the gravel's wear: patches of beaten earth and mud where the carts turn, cobbles and flints worked up through it, horse dung, straw and the sweepings of the stalls, ruts' edges broken
+  const gw = gx1 - gx0, patch = [], cob = [], dung = [], strw = [], cob2 = [];
+  for (let z = z0 + 0.5; z < z1 - 0.5; z += 1.1 + rand() * 1.6) {
+    const px = gx0 + 0.4 + rand() * (gw - 0.8), rx = 0.25 + rand() * 0.6, rz = 0.2 + rand() * 0.5;
+    patch.push(lathe([[1.02, 0], [1, 0.006], [0.001, 0.008]], 9).scale(rx, 1, rz).translate(px, y + 0.03, z));
+  }
+  for (let z = z0 + 0.3; z < z1 - 0.3; z += 0.3 + rand() * 0.5) for (let q = 0; q < 3; q++) {
+    const px = gx0 + 0.2 + rand() * (gw - 0.4), r = 0.04 + rand() * 0.09, h = r * (0.3 + rand() * 0.3);
+    (rand() < 0.6 ? cob : cob2).push(lathe([[r * 1.05, 0], [r, h * 0.3], [r * 0.8, h * 0.85], [0.001, h]], 6).scale(1, 1, 0.7 + rand() * 0.4).rotateY(rand() * 6.28).translate(px, y + 0.03, z + rand() * 0.4));
+  }
+  for (let z = z0 + 5 + rand() * 9; z < z1 - 3; z += 8 + rand() * 12) {
+    const px = gx0 + 0.6 + rand() * (gw - 1.2);
+    for (let q = 0, n = 1 + Math.floor(rand() * 3); q < n; q++) dung.push(lathe([[0.14, 0], [0.13, 0.02], [0.09, 0.055], [0.001, 0.07]], 7).scale(1, 1, 0.8).translate(px + (rand() - 0.5) * 0.6, y + 0.03, z + (rand() - 0.5) * 0.6));
+  }
+  for (let z = z0 + 1; z < z1 - 1; z += 2.5 + rand() * 4) {
+    const px = gx0 + 0.3 + rand() * (gw - 0.6), cxs = rand() * 6.28;
+    for (let q = 0; q < 6; q++) { const a = cxs + (rand() - 0.5) * 1.2, l = 0.12 + rand() * 0.22, ox = px + (rand() - 0.5) * 0.5, oz = z + (rand() - 0.5) * 0.5; strw.push(rod([ox, y + 0.035, oz], [ox + Math.cos(a) * l, y + 0.04, oz + Math.sin(a) * l], 0.004, 3)); }
+  }
+  for (const g of patch) bag.add('slate', g); for (const g of cob) bag.add('granite_grey', g); for (const g of cob2) bag.add('bluestone', g);
+  for (const g of dung) bag.add('cloth_brown', g); for (const g of strw) bag.add('reed_mat', g);
+  // the slab bands' edges: the gutter between each band and its shop fronts is not drawn here (the fronts' aprons begin at the plot line); here: short broken places where a slab has been lifted and refilled with gravel
+  for (let z = z0 + 4 + rand() * 7, k = 0; z < z1 - 3; z += 9 + rand() * 11, k++) { const sd = k % 2 ? 1 : -1, xx = sd < 0 ? x0 + 0.6 + rand() * (band - 1.4) : x1 - band + 0.8 + rand() * (band - 1.4), w2 = 0.5 + rand() * 0.6, d2 = 0.4 + rand() * 0.6; bag.add('pebbles', box(xx, y + 0.028, z, xx + w2, y + 0.036, z + d2)); }
   for (let z = z0 + 6 + rand() * 6, k = 0; z < z1 - 4; z += 16, k++) {
     const side = k % 2 ? 1 : -1, cx = side < 0 ? x0 + band - 0.55 : x1 - band + 0.55;
     bag.add('granite_grey', box(cx - 0.4, y, z - 0.3, cx + 0.4, y + 0.05, z + 0.3));
     for (let i = -2; i <= 2; i++) bag.add('lacquer_black', box(cx - 0.3, y + 0.05, z + i * 0.1 - 0.025, cx + 0.3, y + 0.055, z + i * 0.1 + 0.025));
+  }
+}
+
+/**
+ * hz_slabs { rect, y (the slabs' foot; their top is 3 cm above), seed }: a street laid in worn stone slabs (as the courts' and the Imperial Way's bands: bluestone, granite and darker worn
+ * slabs along the middle, joints open, staggered rows), with a grating of granite and its slots every 18 m near the canal's edge and now and then a slab lifted and relaid in brick.
+ * [inferred: the canal streets, paved "with stone or brick" (Marco Polo, in the dossier §15)]
+ */
+function hzSlabs(el, ctx) {
+  const { bag } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, rand = rnd(el.seed ?? 9);
+  courtPaving({ y, seed: el.seed ?? 9, rects: [el.rect] }, ctx);
+  for (let z = z0 + 5 + rand() * 9, k = 0; z < z1 - 4; z += 18 + rand() * 6, k++) {
+    const cx = el.side === 'w' ? x1 - 1.0 : x0 + 1.0;
+    bag.add('granite_grey', box(cx - 0.4, y + 0.03, z - 0.3, cx + 0.4, y + 0.075, z + 0.3));
+    for (let i = -2; i <= 2; i++) bag.add('lacquer_black', box(cx - 0.3, y + 0.075, z + i * 0.1 - 0.025, cx + 0.3, y + 0.08, z + i * 0.1 + 0.025));
+  }
+  for (let z = z0 + 3 + rand() * 6; z < z1 - 3; z += 7 + rand() * 9) {
+    const x = x0 + 0.8 + rand() * (x1 - x0 - 1.6), w = 0.9 + rand() * 1.2, d = 0.7 + rand() * 0.8;
+    for (let a = 0; a < w; a += 0.22) for (let b = 0; b < d; b += 0.11) bag.add(((a * 5 + b * 9) | 0) % 3 ? 'brick_grey' : 'slate', box(x + a + 0.006, y + 0.03, z + b + 0.006, x + a + 0.21, y + 0.045, z + b + 0.1));
   }
 }
 
@@ -743,75 +957,116 @@ function hzLionPair(el, { bag, col }) {
 }
 
 /**
- * hz_wutou: a black-capped gate (wutou men) of the temple's approach, across the foot of the stair { c [x, z], y, half (half the way between the posts), h, dir }: two
- * square posts of red-painted timber on granite bases with drum-stone buttresses and black caps, two tie beams, a plaque board between them. [inferred: the Song 乌头门]
+ * Leaves as small pointed cards (a six-point outline, two-sided material) bent in their normals toward
+ * the outside of the crown, so a crown shades as one rounded mass as the engine's flora does; one
+ * geometry per material (cards: [[cx, cy, cz, ux, uy, uz, vx, vy, vz, hw, hl]...]).
  */
-function hzWutou(el, { bag, col }) {
-  const [cx, cz] = el.c, y = el.y ?? 0, hw = el.half ?? 7.4, h = el.h ?? 5.2, pw = 0.3;
-  for (const sx of [-1, 1]) {
-    const px = cx + sx * hw;
-    bag.add('granite_grey', box(px - 0.55, y, cz - 0.55, px + 0.55, y + 0.5, cz + 0.55));
-    bag.add('granite_block', box(px - 0.45, y + 0.5, cz - 0.45, px + 0.45, y + 0.62, cz + 0.45));
-    bag.add('lacquer_red', box(px - pw, y + 0.62, cz - pw, px + pw, y + h, cz + pw));
-    bag.add('lacquer_black', box(px - pw - 0.05, y + h, cz - pw - 0.05, px + pw + 0.05, y + h + 0.5, cz + pw + 0.05));
-    bag.add('lacquer_black', box(px - 0.18, y + h + 0.5, cz - 0.18, px + 0.18, y + h + 0.66, cz + 0.18));
-    bag.add('bronze', lathe([[0.001, 0], [0.11, 0.02], [0.13, 0.12], [0.001, 0.2]], 8, null, px, y + h + 0.66, cz));
-    // the drum stones either side across the way's line
-    for (const dz of [-1, 1]) {
-      const zz = cz + dz * 0.85;
-      bag.add('granite_grey', box(px - 0.16, y, zz - 0.3, px + 0.16, y + 0.3, zz + 0.3));
-      bag.add('granite_grey', rod([px - 0.17, y + 0.62, zz], [px + 0.17, y + 0.62, zz], 0.34, 14));
-      bag.add('slate', rod([px - 0.19, y + 0.62, zz], [px + 0.19, y + 0.62, zz], 0.2, 12));
+function leafCards(list, centre, bend = 0.7) {
+  const pos = [], nor = [];
+  for (const c of list) {
+    const [cx, cy, cz, ux, uy, uz, vx, vy, vz, hw, hl] = c;
+    // the outline in the card's plane: base, two shoulders, tip (u across, v along)
+    const P = [[0, -hl], [-hw, -hl * 0.1], [hw, -hl * 0.1], [-hw * 0.55, hl * 0.55], [hw * 0.55, hl * 0.55], [0, hl]];
+    const W = P.map(([a, b]) => [cx + ux * a + vx * b, cy + uy * a + vy * b, cz + uz * a + vz * b]);
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const nl = Math.hypot(nx, ny, nz) || 1; nx /= nl; ny /= nl; nz /= nl;
+    // wound so that the front face looks out of the crown (the two-sided material would otherwise turn the bent normal in)
+    const wox = cx - centre[0], woy = cy - centre[1], woz = cz - centre[2], fl = -(nx * wox + ny * woy + nz * woz) < 0;
+    for (const [a, b, d] of [[0, 1, 2], [1, 3, 2], [2, 3, 4], [3, 5, 4]]) for (const k of (fl ? [a, d, b] : [a, b, d])) {
+      pos.push(...W[k]);
+      let ox = W[k][0] - centre[0], oy = W[k][1] - centre[1], oz = W[k][2] - centre[2]; const ol = Math.hypot(ox, oy, oz) || 1; ox /= ol; oy /= ol; oz /= ol;
+      let sx = nx * (1 - bend) + ox * bend, sy = ny * (1 - bend) + oy * bend, sz = nz * (1 - bend) + oz * bend;
+      if (sx * ox + sy * oy + sz * oz < 0) { sx = -sx; sy = -sy; sz = -sz; }
+      const sl = Math.hypot(sx, sy, sz) || 1; nor.push(sx / sl, sy / sl, sz / sl);
     }
-    col.rect([px - 0.55, cz - 0.55, px + 0.55, cz + 0.55], y, y + h);
   }
-  const a = cx - hw, b = cx + hw;
-  bag.add('lacquer_red', box(a - 0.3, y + h - 0.6, cz - 0.16, b + 0.3, y + h - 0.2, cz + 0.16));
-  bag.add('lacquer_red', box(a - 0.3, y + h - 1.9, cz - 0.1, b + 0.3, y + h - 1.65, cz + 0.1));
-  // the board between the beams: dark, gilt-edged, carried by short posts
-  const bw = Math.min(2.8, hw * 0.4), sd = el.dir === 'n' ? -1 : 1;
-  for (const sx of [-1, 1]) bag.add('lacquer_red', box(cx + sx * bw - 0.07, y + h - 1.65, cz - 0.07, cx + sx * bw + 0.07, y + h - 0.6, cz + 0.07));
-  bag.add('paint_ochre', box(cx - bw, y + h - 1.62, cz + sd * 0.05, cx + bw, y + h - 0.62, cz + sd * 0.12));
-  bag.add('lacquer_black', box(cx - bw + 0.1, y + h - 1.52, cz + sd * 0.12, cx + bw - 0.1, y + h - 0.72, cz + sd * 0.14));
-  // tie-beam ends, little hoods over the posts' heads aside
+  const g = fromTriangles(pos);
+  g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  return g;
 }
 
 /**
- * hz_tree { at [x, z], y, kind ('camphor' | 'ginkgo' | 'willow' | 'peach'), h, seed }: an old tree of the temple court or the causeway — a leaning trunk with forks and
- * limbs, the crown in clumps; the willow's long hanging threads, the peach's pink blossom among its leaves.
+ * hz_tree { at [x, z], y, kind ('camphor' | 'ginkgo' | 'willow' | 'peach'), h, seed }: an old tree of the temple court or the causeway — a buttressed, leaning trunk
+ * that forks into curving limbs and twigs; the crown of leaf cards in tufts (broad dark camphor leaves, the ginkgo's fans, the peach's narrow leaves among five-petalled
+ * blossom) over a dark core; the willow's drooping withes hung with narrow leaves.
  */
 function hzTree(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, rand = rnd(el.seed ?? 1), kind = el.kind ?? 'camphor', h = el.h ?? (kind === 'willow' ? 8 : kind === 'peach' ? 4.2 : 12);
   const trunkR = kind === 'peach' ? 0.13 : kind === 'willow' ? 0.3 : 0.5, lean = (rand() - 0.5) * 0.5, la = rand() * 6.28;
+  const forkAt = kind === 'peach' ? 0.42 : kind === 'willow' ? 0.3 : 0.38;
   const tx = (t) => x + Math.cos(la) * lean * t * h * 0.3, tz = (t) => z + Math.sin(la) * lean * t * h * 0.3;
-  const forkAt = kind === 'peach' ? 0.45 : 0.4;
-  const g = [];
-  g.push(lathe([[trunkR * 1.5, -0.2], [trunkR * 1.25, 0.25], [trunkR, h * forkAt * 0.5], [trunkR * 0.75, h * forkAt], [0.001, h * forkAt + 0.05]], 8, null, x, y, z));
-  bag.add('bark_grey', g[0]);
-  const limbs = kind === 'peach' ? 3 : 4 + Math.floor(rand() * 2), mats = { camphor: ['broad', 'doum_leaf'], ginkgo: ['palm_leaf', 'doum_leaf'], willow: ['papyrus', 'flax_leaf'], peach: ['doum_leaf', 'stucco_rose'] }[kind];
-  const blobs = [], threads = [], pink = [];
+  // the trunk: a flared foot (roots), a slight twist up to the fork, bark furrows by a second thinner shell
+  const prof = [[trunkR * 1.9, -0.25], [trunkR * 1.5, 0.12], [trunkR * 1.15, 0.5], [trunkR, h * forkAt * 0.4], [trunkR * 0.85, h * forkAt * 0.75], [trunkR * 0.7, h * forkAt]];
+  const tg = lathe(prof, 9, null, 0, 0, 0);
+  const tp = tg.attributes.position;
+  for (let i = 0; i < tp.count; i++) { const t = Math.max(0, tp.getY(i) / (h * forkAt)); tp.setX(i, tp.getX(i) + (tx(t) - x) + Math.sin(tp.getY(i) * 2.1 + el.seed) * trunkR * 0.08); tp.setZ(i, tp.getZ(i) + (tz(t) - z)); tp.setY(i, tp.getY(i) + y); tp.setX(i, tp.getX(i) + x); tp.setZ(i, tp.getZ(i) + z); }
+  tg.computeVertexNormals();
+  bag.add('bark_grey', tg);
+  for (let r = 0; r < 3 && kind !== 'peach'; r++) { const a = la + 1 + r * 2.1; bag.add('bark_grey', rod([x + Math.cos(a) * trunkR * 1.2, y - 0.1, z + Math.sin(a) * trunkR * 1.2], [x + Math.cos(a) * trunkR * 2.4, y - 0.18, z + Math.sin(a) * trunkR * 2.4], trunkR * 0.3, 5)); }
   const fx = tx(forkAt), fz = tz(forkAt), fy = y + h * forkAt;
-  for (let i = 0; i < limbs; i++) {
-    const a = i * 6.28 / limbs + rand() * 0.8, out = (kind === 'willow' ? 0.35 : kind === 'peach' ? 0.28 : 0.3) * h, up = h * (0.82 - forkAt) * (0.7 + rand() * 0.3);
+  const spec = {
+    camphor: { w: 0.19, l: 0.34, tuft: 6, mats: ['doum_leaf', 'palm_leaf', 'doum_leaf'], limbs: 5, out: 0.34, rise: 0.9, cr: 0.27, n: 20 },
+    ginkgo: { w: 0.2, l: 0.2, tuft: 6, mats: ['palm_leaf', 'doum_leaf', 'palm_leaf'], limbs: 5, out: 0.2, rise: 1.05, cr: 0.2, n: 20 },
+    willow: { w: 0.07, l: 0.3, tuft: 5, mats: ['papyrus', 'doum_leaf', 'papyrus'], limbs: 6, out: 0.4, rise: 0.75, cr: 0.17, n: 12 },
+    peach: { w: 0.06, l: 0.2, tuft: 5, mats: ['doum_leaf', 'palm_leaf', 'doum_leaf'], limbs: 4, out: 0.34, rise: 0.8, cr: 0.26, n: 22 },
+  }[kind];
+  const cards = [[], [], []], pink = [], threads = [], twig = [];
+  const ends = [];
+  for (let i = 0; i < spec.limbs; i++) {
+    const a = i * 6.28 / spec.limbs + rand() * 0.8, out = spec.out * h * (0.8 + rand() * 0.4), up = h * (0.86 - forkAt) * spec.rise * (0.75 + rand() * 0.3);
+    const mx = fx + Math.cos(a) * out * 0.35, mz = fz + Math.sin(a) * out * 0.35, my = fy + up * 0.55;
     const ex = fx + Math.cos(a) * out, ez = fz + Math.sin(a) * out, ey = fy + up;
-    bag.add('bark_grey', rod([fx, fy, fz], [ex, ey, ez], trunkR * 0.42, 5));
-    const cr = (kind === 'willow' ? 0.2 : kind === 'peach' ? 0.22 : 0.2) * h;
-    for (let q = 0; q < 3; q++) {
-      const bx = ex + (rand() - 0.5) * cr * 0.8, bz = ez + (rand() - 0.5) * cr * 0.8, by = ey + (q ? 0.55 * q : -0.2) * cr, r = cr * (0.6 + rand() * 0.35);
-      blobs.push(ell(r, r * (kind === 'willow' ? 0.85 : 0.8), r, bx, by, bz, 8));
-      if (kind === 'peach' && rand() < 0.8) pink.push(ell(r * 0.8, r * 0.5, r * 0.8, bx, by + r * 0.25, bz, 7));
-      if (kind === 'willow') for (let t = 0; t < 14; t++) {
-        const a2 = rand() * 6.28, rr = r * (0.7 + rand() * 0.5), px = bx + Math.cos(a2) * rr, pz = bz + Math.sin(a2) * rr, len = h * (0.35 + rand() * 0.25);
-        threads.push(rod([px, by - r * 0.2, pz], [px + (rand() - 0.5) * 0.3, by - r * 0.2 - len * 0.5, pz], 0.012, 3), rod([px + (rand() - 0.5) * 0.2, by - r * 0.2 - len * 0.5, pz], [px + (rand() - 0.5) * 0.4, by - r * 0.2 - len, pz + 0.1], 0.008, 3));
+    bag.add('bark_grey', rod([fx, fy - 0.15, fz], [mx, my, mz], trunkR * 0.5, 6));
+    bag.add('bark_grey', rod([mx, my, mz], [ex, ey, ez], trunkR * 0.3, 5));
+    ends.push([ex, ey, ez, a]);
+    // twigs from the end of the limb to the leaf tufts' hearts
+    for (let q = 0; q < 3; q++) { const a2 = a + (rand() - 0.5) * 1.6; ends.push([ex + Math.cos(a2) * out * 0.3, ey + (rand() - 0.2) * h * 0.1, ez + Math.sin(a2) * out * 0.3, a2]); bag.add('bark_grey', rod([ex, ey, ez], ends[ends.length - 1].slice(0, 3), trunkR * 0.14, 4)); }
+  }
+  // the crown's lobes: one on each limb's end and one over the fork, each a smooth dark core under leaf cards laid on its shell like scales
+  const limbEnds = ends.filter((_, k) => k % 4 === 0);
+  let cx = 0, cy = 0, cz = 0; for (const e of limbEnds) { cx += e[0]; cy += e[1]; cz += e[2]; } cx /= limbEnds.length; cy /= limbEnds.length; cz /= limbEnds.length;
+  const cr = spec.cr * h, centre = [cx, cy + cr * 0.1, cz];
+  const lobes = [...limbEnds.map((e) => [e[0], e[1], e[2]]), ...limbEnds.map((e) => [fx + (e[0] - fx) * 0.5, fy + (e[1] - fy) * 0.62, fz + (e[2] - fz) * 0.5]), [cx, cy + cr * 0.6, cz]];
+  const coreMat = kind === 'ginkgo' ? 'palm_leaf' : 'flax_leaf';
+  const R = cr * (kind === 'willow' ? 0.75 : 0.9), per = Math.round(kind === 'peach' ? 60 : kind === 'willow' ? 90 : 200 * (R / 3) ** 2 + 60);
+  for (const [lx, ly, lz] of lobes) {
+    const ry = R * (kind === 'willow' ? 0.8 : 0.85);
+    if (kind !== 'willow') bag.add(coreMat, lathe(Array.from({ length: 9 }, (_, q) => { const t = q / 8 * Math.PI; return [Math.max(0.001, Math.sin(t)), -Math.cos(t)]; }), 14).scale(R * 0.8, ry * 0.8, R * 0.8).translate(lx, ly, lz));
+    for (let t = 0; t < per; t++) {
+      const th = rand() * 6.28, ph = Math.acos(rand() * 1.7 - 0.7);                    // not much of the underside
+      let nx = Math.cos(th) * Math.sin(ph), ny = Math.cos(ph), nz = Math.sin(th) * Math.sin(ph);
+      const px = lx + nx * R, py = ly + ny * ry, pz = lz + nz * R;
+      // the card lies along the shell (v a random tangent), tilted out a little at the tip
+      let vx = rand() - 0.5, vy = rand() - 0.5, vz = rand() - 0.5; const dd = vx * nx + vy * ny + vz * nz; vx -= nx * dd; vy -= ny * dd; vz -= nz * dd;
+      const vl = Math.hypot(vx, vy, vz) || 1; vx = vx / vl + nx * 0.35; vy = vy / vl + ny * 0.35 - (kind === 'willow' ? 0.3 : 0); vz = vz / vl + nz * 0.35;
+      const vl2 = Math.hypot(vx, vy, vz); vx /= vl2; vy /= vl2; vz /= vl2;
+      let ux = vy * nz - vz * ny, uy = vz * nx - vx * nz, uz = vx * ny - vy * nx; const ul = Math.hypot(ux, uy, uz) || 1; ux /= ul; uy /= ul; uz /= ul;
+      const sz = 0.85 + rand() * 0.5;
+      cards[t % 3].push([px, py, pz, ux, uy, uz, vx, vy, vz, spec.w * sz * 1.15, spec.l * sz * 1.15]);
+      if (kind === 'peach' && rand() < 0.45) {
+        const ax = Math.abs(ny) > 0.9 ? [1, 0, 0] : [0, 1, 0];
+        const bx = ax[1] * nz - ax[2] * ny, by = ax[2] * nx - ax[0] * nz, bz = ax[0] * ny - ax[1] * nx, bl = Math.hypot(bx, by, bz) || 1;
+        const e1 = [bx / bl, by / bl, bz / bl], e2 = [ny * e1[2] - nz * e1[1], nz * e1[0] - nx * e1[2], nx * e1[1] - ny * e1[0]], rb = 0.1 + rand() * 0.04;
+        const q0 = [px + nx * 0.06, py + ny * 0.06, pz + nz * 0.06], ring = (an, k) => [0, 1, 2].map((c) => q0[c] + (e1[c] * Math.cos(an) + e2[c] * Math.sin(an)) * rb * k + (k > 1 ? [nx, ny, nz][c] * 0.015 : 0));
+        for (let p = 0; p < 5; p++) { const a1 = p * 1.2566; pink.push(...q0, ...ring(a1, 0.75), ...ring(a1 + 0.6283, 1.25), ...q0, ...ring(a1 + 0.6283, 1.25), ...ring(a1 + 1.2566, 0.75)); }
+      }
+    }
+    if (kind === 'willow') for (let t = 0; t < 14; t++) {
+      // a withe hanging from the lobe's rim: a curved thread with narrow leaves along it, down to near the ground
+      const th = rand() * 6.28, sx = lx + Math.cos(th) * R * 0.95, sz2 = lz + Math.sin(th) * R * 0.95, top = ly - ry * 0.1 - rand() * ry * 0.5;
+      const len = Math.min(top - y - 0.9, h * (0.42 + rand() * 0.3)), nseg = 6, drift = [(rand() - 0.5) * 0.7, (rand() - 0.5) * 0.7];
+      let px = sx, py = top, pz = sz2;
+      for (let s = 1; s <= nseg; s++) {
+        const f = s / nseg, qx = sx + drift[0] * f * f + Math.cos(th) * 0.3 * Math.sin(f * 3), qy = top - len * f, qz = sz2 + drift[1] * f * f + Math.sin(th) * 0.3 * Math.sin(f * 3);
+        threads.push(rod([px, py, pz], [qx, qy, qz], 0.011, 3));
+        for (const sd of [-1, 1]) cards[(s + (sd > 0 ? 1 : 0)) % 3].push([qx, qy + 0.1, qz, Math.cos(th + 1.57 * sd), 0.15, Math.sin(th + 1.57 * sd), 0.12 * sd, -1, 0.1, spec.w * 1.3, spec.l * (0.9 + rand() * 0.3)]);
+        px = qx; py = qy; pz = qz;
       }
     }
   }
-  const leaf = kind === 'willow' ? 'tile_green' : kind === 'ginkgo' ? 'tile_yellow' : 'doum_leaf';
-  void mats;
-  for (const b of blobs) bag.add(kind === 'ginkgo' ? 'palm_leaf' : kind === 'willow' ? 'papyrus' : 'doum_leaf', b);
-  for (const b of pink) bag.add('stucco_rose', b);
-  for (const b of threads) bag.add('papyrus', b);
-  void leaf;
+  cards.forEach((c, i) => c.length && bag.add(spec.mats[i], leafCards(c, centre)));
+  if (pink.length) bag.add('stucco_rose', fromTriangles(pink));
+  for (const g of threads) bag.add('bark_grey', g);
   col.circle(x, z, trunkR * 1.3, y, y + 3);
 }
 
@@ -878,6 +1133,92 @@ function hzWallSkin(el, { bag }) {
 }
 
 /**
+ * hz_gate { rect [x0, z0, x1, z1] (the gate block, the way through along z), w (the passage), spring (its jambs' height), rise (the segmental arch's rise), H (the platform's top),
+ * y, seed }: a city gate of Lin'an faced in brick — a segmental brick vault (courses of mortar rings across the soffit), jambs with a granite plinth and coursed brick, a ring of
+ * granite voussoirs on each portal with a keystone and impost blocks, the facade faced as the wall, a string course under the platform's edge, the passage paved in granite slabs worn
+ * into two wheel tracks, and the two door leaves swung back against the jambs at the outer portal (timber boards, iron straps, rows of iron studs, a ring handle). [inferred: Song
+ * city gates were timber-lined passages or brick vaults; Lin'an's walls were brick-faced from the Southern Song (docs/settlements/song-hangzhou.md §12)]
+ */
+function hzGate(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, w = el.w ?? 10, sp = el.spring ?? 4.4, rise = el.rise ?? 3.0, Hh = el.H ?? 9.6, rand = rnd(el.seed ?? 3);
+  const c = (x0 + x1) / 2, hw = w / 2, R = (hw * hw + rise * rise) / (2 * rise), cy = y + sp + rise - R;
+  const Y = (o) => cy + Math.sqrt(Math.max(0, R * R - o * o));
+  const outer = el.outer === 'n' ? z0 : z1;                       // the outer portal's z (the doors stand here); default: the north face... see below
+  const outerIsZ0 = el.outer !== 's';
+  void outer;
+  // ── the masses either side, and the vault's spandrels as stepped columns above the arch
+  const sideL = [x0, z0, c - hw, z1], sideR = [c + hw, z0, x1, z1];
+  for (const r of [sideL, sideR]) { bag.add('brick_grey', box(r[0], y - 0.3, r[1], r[2], y + Hh, r[3])); col.rect(r, y - 0.3, y + Hh); }
+  const N = 28, os = Array.from({ length: N + 1 }, (_, i) => -hw + w * i / N);
+  for (let i = 0; i < N; i++) {
+    const ya = Math.max(Y(os[i]), Y(os[i + 1]));
+    bag.add('brick_grey', box(c + os[i], ya, z0, c + os[i + 1], y + Hh, z1));
+  }
+  col.rect([c - hw, z0, c + hw, z1], y + sp + 0.3, y + Hh); col.floor([x0, z0, x1, z1], y + Hh);
+  // the soffit: strips of brick (thick, into the vault) and the mortar rings of the courses
+  const soff = [], ring = [];
+  for (let i = 0; i < N; i++) {
+    const a = [c + os[i], Y(os[i])], b = [c + os[i + 1], Y(os[i + 1])];
+    hexa(soff, [[a[0], a[1], z0], [b[0], b[1], z0], [b[0], b[1], z1], [a[0], a[1], z1], [a[0], a[1] + 0.3, z0], [b[0], b[1] + 0.3, z0], [b[0], b[1] + 0.3, z1], [a[0], a[1] + 0.3, z1]]);
+  }
+  for (let z = z0 + 0.35; z < z1 - 0.2; z += 0.46) for (let i = 0; i < N; i++) {
+    const a = [c + os[i], Y(os[i]) - 0.014], b = [c + os[i + 1], Y(os[i + 1]) - 0.014];
+    hexa(ring, [[a[0], a[1], z], [b[0], b[1], z], [b[0], b[1], z + 0.03], [a[0], a[1], z + 0.03], [a[0], a[1] + 0.02, z], [b[0], b[1] + 0.02, z], [b[0], b[1] + 0.02, z + 0.03], [a[0], a[1] + 0.02, z + 0.03]]);
+  }
+  bag.add('brick_grey', fromTriangles(soff)); bag.add('slate', fromTriangles(ring));
+  // ── the jambs: a granite plinth with a cap, brick between, mortar courses, an impost block at the springing
+  const mort = [];
+  for (const s of [-1, 1]) {
+    const xi = c + s * hw, xo = (d) => xi - s * d;
+    bag.add('granite_block', box(Math.min(xo(0), xo(0.07)), y - 0.05, z0, Math.max(xo(0), xo(0.07)), y + 0.95, z1));
+    bag.add('granite_grey', box(Math.min(xo(0), xo(0.14)), y + 0.95, z0, Math.max(xo(0), xo(0.14)), y + 1.05, z1));
+    bag.add('granite_grey', box(Math.min(xo(0), xo(0.16)), y + sp - 0.3, z0, Math.max(xo(0), xo(0.16)), y + sp, z1));
+    for (let yy = y + 1.3; yy < y + sp - 0.4; yy += 0.3) hexa(mort, [[xo(0), yy, z0], [xo(0.012), yy, z0], [xo(0.012), yy, z1], [xo(0), yy, z1], [xo(0), yy + 0.022, z0], [xo(0.012), yy + 0.022, z0], [xo(0.012), yy + 0.022, z1], [xo(0), yy + 0.022, z1]]);
+  }
+  bag.add('slate', fromTriangles(mort));
+  // ── the portals: a ring of voussoirs round the arch on each face, a keystone, the facade's brick either side, a string course under the platform's edge
+  const th0 = Math.asin(hw / R), NV = 19;
+  for (const [zf, n] of [[z0, -1], [z1, 1]]) {
+    const vs = [];
+    for (let k = 0; k < NV; k++) {
+      const a0 = -th0 + 2 * th0 * k / NV + 0.006, a1 = -th0 + 2 * th0 * (k + 1) / NV - 0.006, key = k === (NV - 1) / 2, ro = R + (key ? 1.0 : 0.72), d = key ? 0.24 : k % 2 ? 0.16 : 0.12;
+      const pt = (ang, r, dd) => [c + Math.sin(ang) * r, cy + Math.cos(ang) * r, zf + n * dd];
+      hexa(vs, [pt(a0, R - 0.02, 0), pt(a1, R - 0.02, 0), pt(a1, ro, 0), pt(a0, ro, 0), pt(a0, R - 0.02, d), pt(a1, R - 0.02, d), pt(a1, ro, d), pt(a0, ro, d)]);
+    }
+    bag.add('granite_block', fromTriangles(vs));
+    // impost blocks at the springing, each side
+    for (const s of [-1, 1]) bag.add('granite_block', box(Math.min(c + s * hw - 0.2 * s, c + s * (hw + 0.8)), y + sp - 0.55, n < 0 ? zf - 0.2 : zf, Math.max(c + s * hw - 0.2 * s, c + s * (hw + 0.8)), y + sp + 0.05, n < 0 ? zf : zf + 0.2));
+    // the string course under the platform's edge, and the brick facing of the two sides
+    bag.add('granite_grey', box(x0, y + Hh - 1.2, n < 0 ? zf - 0.22 : zf, x1, y + Hh - 0.95, n < 0 ? zf : zf + 0.22));
+    bag.add('granite_grey', box(x0, y + Hh - 0.1, n < 0 ? zf - 0.28 : zf, x1, y + Hh + 0.02, n < 0 ? zf : zf + 0.28));
+    for (const [p, q] of [[x0, c - hw - 1.4], [c + hw + 1.4, x1]]) hzWallSkin({ a: [p, zf], b: [q, zf], n, off: zf, batter: 0, yBase: y - 0.3, y0: y, y1: y + Hh - 1.2, seed: Math.round(p + zf) }, { bag });
+  }
+  // ── the paving: granite slabs on a bed, laid in rows, the two wheel tracks worn down and darker; the kerb stones at the foot of the jambs
+  const bedT = [], slabsOk = [], slabsTrack = [];
+  bag.add('slate', box(c - hw, y - 0.14, z0, c + hw, y - 0.02, z1));
+  const trackAt = (xm) => Math.abs(Math.abs(xm - c) - 1.5) < 0.42;
+  for (let z = z0, row = 0; z < z1 - 0.01; z += 1.25, row++) for (let k = -1; k < 8; k++) {
+    const xa = c - hw + w * k / 8 + (row % 2 ? 0.45 : 0), xa2 = Math.max(c - hw, xa), xb = Math.min(c + hw, xa + w / 8);
+    if (xb - xa2 < 0.08) continue;
+    const zb = Math.min(z1, z + 1.25), tr = trackAt((xa2 + xb) / 2);
+    (tr ? slabsTrack : slabsOk).push([xa2 + 0.012, zb - 0.012, xb - 0.012, z + 0.012, tr ? y - 0.05 : y + 0.02 - rand() * 0.012]);
+  }
+  for (const [a, b, c2, d, t] of slabsOk) bag.add('granite_block', box(a, y - 0.1, d, c2, t, b));
+  for (const [a, b, c2, d, t] of slabsTrack) bag.add('granite_grey', box(a, y - 0.1, d, c2, t, b));
+  // ── the door leaves swung back against the jambs at the outer portal: boards, iron straps and studs, a ring
+  const zd = outerIsZ0 ? z0 + 0.15 : z1 - 5.15, lw = 5.0, lh = sp - 0.15, tD = 0.2;
+  for (const s of [-1, 1]) {
+    const g0 = 0.19, xa = s > 0 ? c + hw - g0 - tD : c - hw + g0, xb = xa + tD;
+    for (let b = 0; b < 20; b++) bag.add(b % 3 === 0 ? 'wood_dark' : 'timber', box(xa, y, zd + b * (lw / 20) + 0.004, xb, y + lh, zd + (b + 1) * (lw / 20) - 0.004));
+    const face = s < 0 ? xb : xa, sgn = s < 0 ? 1 : -1;
+    for (const hy of [0.7, lh * 0.5, lh - 0.7]) bag.add('iron', box(Math.min(face, face + sgn * 0.03), y + hy - 0.09, zd, Math.max(face, face + sgn * 0.03), y + hy + 0.09, zd + lw));
+    for (const hy of [0.7, lh * 0.5, lh - 0.7]) for (let k = 0; k < 11; k++) for (const dy of [-0.05, 0.05]) { const zz = zd + 0.25 + k * 0.45; bag.add('iron', box(Math.min(face + sgn * 0.03, face + sgn * 0.07), y + hy + dy - 0.035 + (dy > 0 ? 0.04 : -0.04), zz - 0.035, Math.max(face + sgn * 0.03, face + sgn * 0.07), y + hy + dy + 0.035 + (dy > 0 ? 0.04 : -0.04), zz + 0.035)); }
+    bag.add('iron', lathe([[0.001, 0], [0.12, 0], [0.13, 0.03], [0.001, 0.05]], 8, null, 0, 0, 0).rotateZ(s < 0 ? -Math.PI / 2 : Math.PI / 2).translate(face + sgn * 0.07, y + 1.5, zd + lw * 0.5 + 0.02));
+    col.rect([Math.min(xa, xb) - 0.02, zd, Math.max(xa, xb) + 0.08, zd + lw], y, y + lh);
+  }
+}
+
+/**
  * hz_landing { rect [x0, z0, x1, z1] (the jetty reaching west from the bank), y (its deck's top = the bank), bed, seed }: planks laid across with their gaps and nails' darker
  * ends, a timber kerb, piles each side every 2.2 m with iron rings and a cap, a bollard at the end, a stone step at the bank, and on the deck the boatmen's gear: a punting pole
  * laid along the rail, a basket, a coil of rope and a lantern post. [inferred]
@@ -904,4 +1245,4 @@ function hzLanding(el, { bag, col }) {
   void t;
 }
 
-export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_wutou: hzWutou, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_landing: hzLanding };
+export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_slabs: hzSlabs, hz_landing: hzLanding };

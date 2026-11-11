@@ -84,8 +84,8 @@ const rooms = [room('terrace', T1.rect, T1.y, 'open'), room('hall', [-129, -4, -
 // the road to the upper terrace, round the pagoda's base by its east side (the great censer stands on the axis before the stair up the base, the pagoda on it);
 // and up the base's stair, round the gallery to the south-west doorway and into the first storey's corridor
 const walks = [
-  [[-110, 136], [-110, 104], [-106, 99], [-92, 97], [-91.5, 76], [-91.5, 62], [-110, 55], [-110, 36]],
-  [[-110, 136], [-110, 104], [-106, 99], [-108, 95.5], [-108, 90], [-113, 88], [-117, 84], [-114, 80]],
+  [[-110, 136], [-110, 104], [-108, 98.4], [-107, 96.6], [-92, 97], [-91.5, 76], [-91.5, 62], [-110, 55], [-110, 36]],
+  [[-110, 136], [-110, 104], [-108, 98.4], [-108, 95.5], [-108, 90], [-113, 88], [-117, 84], [-114, 80]],
 ];
 walks.forEach((w) => { w.y0 = 0; });
 

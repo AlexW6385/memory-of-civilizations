@@ -130,7 +130,7 @@ function fabric() {
     const z0 = zc - th / 2, z1 = zc + th / 2, pieces = [[xw, gate.rect[0]], [gate.rect[2], WATER_GATE[0]], [WATER_GATE[1], X1]];
     for (const [a, c] of pieces) wallBlock([a, z0, c, z1], [0, 0, b, b]);
     E.push({ t: 'block', walk: true, rect: [WATER_GATE[0], z0, WATER_GATE[1], z1], y0: 4.6, y1: top, mat: 'brick_grey', batter: [0, 0, b, b] });
-    E.push({ t: 'song_gate', rect: gate.rect, along: 'z', w: gate.w, h: 5, top: 7.4, tw: 5, H: gate.H, mat: 'brick_grey' });
+    E.push({ t: 'hz_gate', rect: gate.rect, w: gate.w, spring: 4.4, rise: 3.0, H: gate.H, outer: outSign > 0 ? 's' : 'n', seed: Math.round(zc) });
     E.push({ t: 'ming_hall', rect: [gate.rect[0] + 3, zc - 6, gate.rect[2] - 3, zc + 6], y: gate.H, H: 5.4, front: towerFront, four: true, roof: 'xieshan', plat: 0.3, eave: 1.7, sweep: 0.9 });
     // bastions (mamian) on the outer face, with their parapets; the main parapets cut where they stand
     const zOutFace = outSign > 0 ? z1 : z0, zOutLine = zOutFace - outSign * (b + 0.05), zInLine = (outSign > 0 ? z0 : z1) + outSign * (b + 0.05);
