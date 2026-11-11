@@ -736,4 +736,24 @@ export const CARDS = {
       "城镇 —— 一排排土坯排屋和带庭院的宅第，平屋顶晒台以苇席遮阳，沿着尘土飞扬的街巷分布；还有作坊街，陶工、织工、木匠、石匠、面包师、铁匠和皮匠各在自家院里干活。",
     ],
   },
+  'fez': {
+    en: [
+      "Fez el-Bali lies in the valley of the Oued Fes in northern Morocco, the capital of the Marinid sultans since 1276 and the foremost city of learning in the Maghreb. The moment shown is about 1350, under Abu Inan, when the Bou Inania madrasa is being built. The medina is a dense maze of narrow lanes and dead-end derbs between tall blank walls; behind them stand courtyard houses (riads) with a fountain, zellij tile dados, carved stucco and carved cedar, and green-tiled roofs. The main streets, the Talaa Kebira and the Talaa Seghira, climb from the river and the markets past the madrasas to the Qarawiyyin.",
+      "The Bou Inania Madrasa — a college of the Marinid sultan: a marble court with a basin and a channel, galleries with carved cedar screens, zellij dados and carved stucco, a prayer hall, students' cells above, and a brick minaret tiled in zellij.",
+      "The Qarawiyyin Mosque — the great mosque and university: a court with a fountain, a forest of horseshoe arches over many aisles and a tall white minaret.",
+      "The Attarine souk and the Kissaria — covered lanes of shops with cedar-slatted roofs, selling spices, perfume, cloth and slippers.",
+      "The Chouara tannery — rows of stone vats of lime and dye, with workers standing waist-deep, hides drying on the roofs.",
+      "The funduq and the Place Seffarine — a caravanserai round its court, and the square of the coppersmiths.",
+      "The courtyard houses — plain outside, tiled and carved within, round a court with a basin.",
+    ],
+    zh: [
+      "非斯老城（Fez el-Bali）位于摩洛哥北部非斯河谷，自 1276 年起为马林王朝苏丹的都城，是马格里布首屈一指的学术中心。画面定格在约 1350 年，阿布·伊南在位，布伊纳尼亚经学院正在兴建。老城是由狭窄小巷和死胡同（derb）织成的密集迷宫，高墙无窗；墙后是围着庭院和喷泉的庭院住宅（里亚德），内有彩色瓷砖（zellij）墙裙、雕花灰泥与雕花雪松木，屋顶覆绿色琉璃瓦。主街大坡道（Talaa Kebira）与小坡道（Talaa Seghira）从河边和市场一路爬升，经过各经学院，通向卡拉维因。",
+      "布伊纳尼亚经学院 —— 马林苏丹所建的学府：大理石庭院中有水盘和水渠，回廊有雪松木雕屏，墙面有瓷砖墙裙和雕花灰泥，南面是礼拜厅，楼上是学生的小室，砖砌宣礼塔镶嵌瓷砖。",
+      "卡拉维因清真寺 —— 大清真寺兼大学：有喷泉的庭院、众多殿廊中林立的马蹄形拱，以及白色的高大宣礼塔。",
+      "阿塔林市场与凯萨里亚 —— 以雪松木条覆顶的带顶商巷，售香料、香水、布匹和拖鞋。",
+      "舒阿拉制革场 —— 成排的石砌染池，盛着石灰和染料，工人站在齐腰深的池中，皮革铺在屋顶晾晒。",
+      "商栈（funduq）与铜匠广场 —— 围着庭院的商旅客栈，以及铜匠聚集的广场。",
+      "庭院住宅 —— 外观朴素，内里铺瓷砖、饰雕刻，围着带水盘的庭院。",
+    ],
+  },
 };
