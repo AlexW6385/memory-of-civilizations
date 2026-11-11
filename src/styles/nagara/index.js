@@ -101,10 +101,11 @@ function shikhara(bag, cx, cz, y, w, h, mat = S, courses = 14, mesh = true) {
   crown(bag, cx, y + h, cz, s * f(1), mat, courses > 6);
 }
 /** A band of figures in high relief round a wall rect r, standing on yb, h tall — gods, attendants, couples, set in niches between pilasters. */
-function figureBand(bag, r, yb, h, gap = 0) {
+function figureBand(bag, r, yb, h, gap = 0, hide = '') {
   const [x0, z0, x1, z1] = r, k = h / 1.15, zc = (z0 + z1) / 2;
   const prof = [[0.2 * k, 0], [0.16 * k, 0.45 * k], [0.12 * k, 0.72 * k], [0.07 * k, 0.78 * k], [0.1 * k, 0.86 * k], [0.085 * k, 1.0 * k], [0.001, 1.12 * k]];
   for (const [a, b, fx, fz] of [[[x0, z0], [x1, z0], 0, -1], [[x1, z1], [x0, z1], 0, 1], [[x0, z1], [x0, z0], -1, 0], [[x1, z0], [x1, z1], 1, 0]]) {
+    if ((fx === -1 && hide.includes('w')) || (fx === 1 && hide.includes('e'))) continue;   // the faces against the next hall
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.floor(L / (h * 0.62)));
     for (let i = 0; i < n; i++) {
       const t = (i + 0.5) / n, x = a[0] + (b[0] - a[0]) * t + fx * 0.12, z = a[1] + (b[1] - a[1]) * t + fz * 0.12;
@@ -308,7 +309,7 @@ function temple(el, ctx) {
     else if (el.interior) interiorHall(ctx, i, r, y + plinth, wh);
     else { bag.add(S, box(r[0], y + plinth, r[1], r[2], y + plinth + wh, r[3])); col.rect(r, y, y + plinth + wh); }
     if (i === 4) { /* the open porch */ } else if (el.simple) for (const k of [0.3, 0.62]) bag.add('sandstone', box(r[0] - 0.05, y + plinth + wh * k, r[1] - 0.05, r[2] + 0.05, y + plinth + wh * k + wh * 0.22, r[3] + 0.05));
-    else { for (const k of [0.2, 0.47, 0.74]) figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62), !!el.interior); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.25, r[2] - len * 0.25, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
+    else { for (const k of [0.2, 0.47, 0.74]) figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0, (i > 0 ? 'w' : '') + (i < 3 ? 'e' : '')); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62), !!el.interior); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.25, r[2] - len * 0.25, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
     if (i > 0) stepped(bag, [r[0] - 0.4, r[1] - 0.6, r[2] + 0.4, r[3] + 0.6], y + plinth + wh, H * roofH * 0.45);
   });
   // the steep flight from the terrace up the plinth to the porch's floor
