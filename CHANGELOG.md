@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.57 — Films without stutter (2026-11-10)
+
+Recorded films no longer repeat a frame every ten or so (the canvas is now presented before the next frame is drawn). Suzhou's film has a new route in late-afternoon light (roofs, the canal, up over the residence to the garden and the pagoda, the stone boat, the lotus and the hall, the crane up) and an original score (`tools/film/suzhou-score.py`).
+
 ## v10.56 — Films (2026-11-10)
 
 `?film=ming-suzhou&quality=cinema&capture` flies a scripted 30-second camera route through Suzhou (roofs, the south canal, the stone boat broadside, the pond and the Hall of Distant Fragrance, a crane up over the garden) and records it frame by frame into a 1920×1080 MP4 with fades and a title, downloaded at the end; the shots are in `src/ui/film.js`.

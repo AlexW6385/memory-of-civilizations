@@ -5,7 +5,9 @@
 // With ?capture every drawn frame advances the world by exactly 1/30 s, so however slowly a machine
 // draws, the recording plays back smooth (an M2 records the 900 frames in about a minute). Each frame is copied into a 1920×1080 canvas (with the
 // fades and the title drawn over it), encoded as H.264 with WebCodecs and written into an MP4
-// (src/vendor/mp4-muxer), which is downloaded at the end. The sound is not recorded.
+// (src/vendor/mp4-muxer), which is downloaded at the end. The sound is not recorded here: the
+// film's music is composed offline (tools/film/suzhou-score.py) and mixed with a real-time recording
+// of the place's own sound along the same route.
 // Options: &hour=16.5 (local hour, held), &size=1920x1080, &mbps=24.
 //
 // A film is a list of shots; a shot is a duration and two or more camera keys in the settlement's
@@ -20,18 +22,20 @@ export const FILMS = {
   'ming-suzhou': {
     title: ['Suzhou, c. 1530', '苏州 · 明 · 约 1530 年'],
     sub: 'Memory of Civilizations · 文明的记忆',
-    hour: 16,
+    hour: 17.1,                                    // late afternoon: the sun about 11° up, warm and raking
     shots: [
-      // over the canal quarter's roofs toward the garden
-      { t: 7, keys: [P(-120, 110, 230, -0.43, -0.38), P(-80, 92, 185, -0.33, -0.38), P(-40, 70, 140, -0.23, -0.38)] },
+      // over the canal quarter's roofs from the south-east, the garden and the Bao'en pagoda ahead
+      { t: 6, keys: [P(-150, 120, 250, -0.45, -0.36), P(-105, 95, 200, -0.36, -0.38), P(-60, 70, 150, -0.25, -0.40)] },
       // low along the south canal, east toward the bridge on the garden's axis
-      { t: 6, keys: [P(-54, 2.4, 70.5, -1.50, 0.02), P(-36, 2.4, 70.6, -1.56, 0.02), P(-18, 2.4, 70.7, -1.62, 0.02)] },
-      // across the water to the Fragrant Isle, the stone boat, broadside, the Mountain-in-View Tower and the pagoda beyond
-      { t: 6, keys: [P(-35, 2.4, -28, 0.9, -0.04), P(-39.5, 2.3, -26.5, 0.67, -0.04), P(-44, 2.2, -25, 0.45, -0.04)] },
-      // across the lotus pond to the Hall of Distant Fragrance
-      { t: 6, keys: [P(3, 2.8, -44, 3.10, 0.02), P(2, 2.4, -38, 3.13, 0.03), P(1, 2.0, -32, 3.14, 0.04)] },
+      { t: 4.5, keys: [P(-56, 3.0, 70.5, -1.52, 0.0), P(-40, 2.9, 70.6, -1.56, 0.01), P(-24, 2.8, 70.7, -1.60, 0.02)] },
+      // up from the residence's first court, over the hall roofs: the garden and the pagoda beyond
+      { t: 4.5, keys: [P(0, 1.7, 55, 0, 0.06), P(0, 14, 54.5, 0.04, -0.14), P(0, 26, 50, 0.08, -0.30)] },
+      // across the water to the Fragrant Isle, the stone boat, broadside, the tower and the pagoda beyond
+      { t: 4.5, keys: [P(-35, 2.4, -28, 0.9, -0.04), P(-39.5, 2.3, -26.5, 0.67, -0.04), P(-44, 2.2, -25, 0.45, -0.04)] },
+      // just over the lotus, toward the Hall of Distant Fragrance
+      { t: 4.5, keys: [P(2.5, 1.7, -43, 3.11, 0.04), P(1.8, 1.6, -38, 3.13, 0.045), P(1, 1.5, -33, 3.14, 0.05)] },
       // rising back over the islands: the garden whole, the town round it
-      { t: 5, keys: [P(0, 9, -38, 3.1416, -0.26), P(0, 40, -90, 3.1416, -0.42), P(0, 72, -145, 3.1416, -0.5)] },
+      { t: 6, keys: [P(0, 9, -38, 3.1416, -0.26), P(0, 40, -90, 3.1416, -0.42), P(0, 72, -145, 3.1416, -0.5)] },
     ],
   },
 };
@@ -127,23 +131,24 @@ export async function runFilm(id, palace, frames, params) {
   const started = performance.now();
   let shot = 0;
   try {
+    await new Promise((r) => requestAnimationFrame(r));
     for (let n = 0; n < N; n++) {
       const next = poseAt(film, n / FPS);
       if (next.i !== shot) { shot = next.i; palace.settle(); }       // a cut: the eye's adaptation jumps with it
       put(next.pose);
       loop(performance.now());
-      cover(g, src, W, H);
+      cover(g, src, W, H);                                            // (read in the task that drew it)
       overlay(g, film, n / FPS, total, W, H);
       const vf = new VideoFrame(out, { timestamp: Math.round(n * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
       enc.encode(vf, { keyFrame: n % (FPS * 2) === 0 });
       vf.close();
-      while (enc.encodeQueueSize > 3) await new Promise((r) => setTimeout(r, 4));
+      while (enc.encodeQueueSize > 3) await new Promise((r) => setTimeout(r, 2));
       if (failed) throw failed;
-      if (n % 5 === 0) {
-        await new Promise((r) => setTimeout(r, 0));
-        const el = (performance.now() - started) / 1000;
-        status(`recording ${n + 1}/${N} · ${(el / (n + 1)).toFixed(2)} s a frame`);
-      }
+      // the canvas must be presented before the next frame is drawn: a WebGPU canvas drawn twice in
+      // one task, or read after the frame it was drawn in, gives back the picture before (the first
+      // films repeated a frame every ten or so, which read as a stutter)
+      await new Promise((r) => requestAnimationFrame(r));
+      if (n % 15 === 0) { const el = (performance.now() - started) / 1000; status(`recording ${n + 1}/${N} · ${(el / (n + 1)).toFixed(2)} s a frame`); }
     }
   } finally { R.renderer.setAnimationLoop(loop); }
   await enc.flush();
@@ -167,8 +172,8 @@ function cover(g, src, W, H) {
 
 // fade in from black, the title over the last shot, fade out to black
 function overlay(g, film, t, total, W, H) {
-  const fadeIn = 1 - ease(t / 1.0), fadeOut = ease((t - (total - 1.0)) / 1.0);
-  const tt = total - 3.6, a = ease((t - tt) / 0.8) * (1 - fadeOut);
+  const fadeIn = 1 - ease(t / 1.2), fadeOut = ease((t - (total - 1.2)) / 1.2);
+  const tt = total - 4.0, a = ease((t - tt) / 1.0) * (1 - fadeOut);
   if (a > 0) {
     g.save();
     const grad = g.createLinearGradient(0, H * 0.55, 0, H);
