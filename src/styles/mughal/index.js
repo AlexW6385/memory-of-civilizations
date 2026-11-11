@@ -10,6 +10,7 @@ import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import * as F from './furnish.js';
 import { courtHouse } from './courthouse.js';
+import { townHouse } from './townhouse.js';
 import { box, lathe, fromTriangles, frustum, disc, rod, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
@@ -643,37 +644,6 @@ function octaTower(el, { bag, col }) {
   col.circle(x, z, el.r, el.y ?? 0, (el.y ?? 0) + el.h);
 }
 
-/** haveli: a town house { rect, storeys, seed }: plastered brick, flat roof with a parapet, a jharokha (a balcony on brackets with a little roof) over the door. */
-function haveli(el, { bag, col }) {
-  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, st = el.storeys ?? (rand() < 0.5 ? 2 : 3), H = st * 3.3;
-  const mat = rand() < 0.5 ? 'stucco_warm' : (rand() < 0.5 ? 'lime_plaster' : 'sandstone_red');
-  bag.add(mat, box(x0, 0, z0, x1, H, z1));
-  bag.add(mat, box(x0 - 0.15, H, z0 - 0.15, x1 + 0.15, H + 0.9, z0 + 0.15)); bag.add(mat, box(x0 - 0.15, H, z1 - 0.15, x1 + 0.15, H + 0.9, z1 + 0.15));
-  col.rect([x0, z0, x1, z1], 0, H); col.floor([x0, z0, x1, z1], H);
-  const zf = z1 + 0.02, xc = (x0 + x1) / 2;
-  // the door: a frame of red sandstone, two leaves of dark planks with iron studs, a step; the foot of the walls darkened
-  // by the lane's dust; small latticed windows high in the front (docs/settlements/mughal-agra.md §11)
-  bag.add('sandstone_red', box(xc - 0.95, 0, z1, xc - 0.75, 2.6, z1 + 0.1)); bag.add('sandstone_red', box(xc + 0.75, 0, z1, xc + 0.95, 2.6, z1 + 0.1)); bag.add('sandstone_red', box(xc - 0.95, 2.4, z1, xc + 0.95, 2.75, z1 + 0.12));
-  bag.add('wood_dark', box(xc - 0.75, 0.15, z1, xc - 0.01, 2.4, z1 + 0.05)); bag.add('wood_dark', box(xc + 0.01, 0.15, z1, xc + 0.75, 2.4, z1 + 0.05));
-  for (let i = 0; i < 4; i++) for (const u of [-0.5, -0.2, 0.2, 0.5]) bag.add('iron', box(xc + u - 0.02, 0.5 + i * 0.5, z1 + 0.05, xc + u + 0.02, 0.54 + i * 0.5, z1 + 0.07));
-  bag.add('sandstone_red', box(xc - 1.0, 0, z1, xc + 1.0, 0.15, z1 + 0.45));
-  for (const [ax, az, bx, bz, nx, nz] of [[x0, z1, x1, z1, 0, 1], [x0, z0, x1, z0, 0, -1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
-    const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
-    for (let k = 0; k < 3; k++) {
-      const s0 = k * L / 3, s1 = (k + 1) * L / 3, hh = 0.6 + rand() * 0.5;
-      const pieces = nz === 1 ? [[s0, Math.min(s1, xc - 1.0 - x0)], [Math.max(s0, xc + 1.0 - x0), s1]] : [[s0, s1]];
-      for (const [p0, p1] of pieces) { if (p1 - p0 < 0.05) continue; const a = [ax + ux * p0, az + uz * p0], b = [ax + ux * p1 + nx * 0.016, az + uz * p1 + nz * 0.016]; bag.add('earth_wall', box(Math.min(a[0], b[0]), 0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), hh, Math.max(a[1], b[1]))); }
-    }
-  }
-  if (st > 1) for (const u of [-1, 1]) { const wx = xc + u * Math.min(2.6, (x1 - x0) / 2 - 0.9); if (Math.abs(wx - xc) < 1.6) continue; bag.add('lattice', box(wx - 0.4, 4.0, z1, wx + 0.4, 5.0, z1 + 0.03)); bag.add('sandstone_red', box(wx - 0.5, 3.9, z1, wx + 0.5, 4.0, z1 + 0.12)); bag.add('sandstone_red', box(wx - 0.5, 5.0, z1, wx + 0.5, 5.12, z1 + 0.12)); }
-  if (st > 1) {
-    bag.add('sandstone_red', box(xc - 1.4, 3.6, zf, xc + 1.4, 3.8, zf + 1.0));
-    for (const s of [-1, 1]) bag.add('sandstone_red', box(xc + s * 1.3 - 0.1, 3.8, zf + 0.85, xc + s * 1.3 + 0.1, 5.6, zf + 1.0));
-    bag.add('lacquer_black', box(xc - 1.1, 3.8, zf - 0.02, xc + 1.1, 5.4, zf));
-    bag.add('sandstone_red', lathe([[1.6, 0], [1.2, 0.5], [0.001, 0.9]], 4, null, xc, 5.6, zf + 0.5));
-  }
-}
-
 /** The intrados of a multi-cusped (engrailed) pointed arch from (s0, ys) to (s1, ys): n lobes bulging out between cusps, as points [s, y] (the ends excluded). */
 function cuspedArc(s0, s1, ys, n = 7, depth = 0.09) {
   const w = s1 - s0, r = w * 0.62, rise = Math.sqrt(r * r - (r - w / 2) ** 2), cL = s0 + r, cR = s1 - r, cs = (s0 + s1) / 2, cy = ys + rise * 0.35;
@@ -901,7 +871,7 @@ registerStyle('mughal', {
     minaret: (el, { bag, col }) => minaret(bag, col, el.c[0], el.y, el.c[1], el.h, el.r),
     chhatri: (el, { bag, col }) => chhatri(bag, col, el.c[0], el.y, el.c[1], el.r, el.h, el.n ?? 8, el.mat ?? W, el.domeMat ?? W),
     fountains: (el, { bag }) => { for (const [x, z] of el.pts) fountain(bag, x, z, el.y0 ?? 0, el.y, el.h ?? 1.6); },
-    red_hall: redHall, great_gate: greatGate, bazaar_row: bazaarRow, bazaar_gate: bazaarGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli, katra, haveli_open: haveliOpen,
+    red_hall: redHall, great_gate: greatGate, bazaar_row: bazaarRow, bazaar_gate: bazaarGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli: townHouse, katra, haveli_open: haveliOpen,
   },
   objects: {},
 });
