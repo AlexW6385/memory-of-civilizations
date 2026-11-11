@@ -8,5 +8,6 @@ export const MOVER_SITES = {
   'qing-beijing': () => import('../settlements/qing-beijing/movers.js'),
   'florence': () => import('../settlements/florence/movers.js'),
   'granada': () => import('../settlements/granada/movers.js'),
+  'venice': () => import('../settlements/venice/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
