@@ -1,5 +1,5 @@
 // Muscovy about 1600 (docs/settlements/muscovy.md §2–§4).
-import { RADIUS, KREMLIN, SPASSKY, NIKOLSKY, SQUARE, BASIL, LOBNOYE, ROWS, MOAT, CATHEDRALS as C, height, wallX, gateZ } from './layout.js';
+import { KITAI, KITAI_GATES, RADIUS, KREMLIN, SPASSKY, NIKOLSKY, SQUARE, BASIL, LOBNOYE, ROWS, MOAT, CATHEDRALS as C, height, wallX, gateZ } from './layout.js';
 
 const hy = (r) => height((r[0] + r[2]) / 2, (r[1] + r[3]) / 2);
 const five = (r, k = 1) => { const [x0, z0, x1, z1] = r, mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, dx = (x1 - x0) * 0.27, dz = (z1 - z0) * 0.27; return [[mx, mz, 3.4 * k, 6 * k], [mx - dx, mz - dz, 2.2 * k, 4 * k], [mx + dx, mz - dz, 2.2 * k, 4 * k], [mx - dx, mz + dz, 2.2 * k, 4 * k], [mx + dx, mz + dz, 2.2 * k, 4 * k]]; };
@@ -30,6 +30,7 @@ export const kremlin = {
   entrance: { at: [40, 20], facing: 'w' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [
     { t: 'kremlin_wall', pts: KREMLIN, h: 12, th: 4.5, y: height, every: 55, round: [0, 1, 2], gates: [SPASSKY, NIKOLSKY, [2, 0.5]] },
+    { t: 'kitai_wall', pts: KITAI, h: 6.5, th: 3.5, y: height, every: 60, gates: KITAI_GATES },
     { t: 'moat', wallX, ...MOAT, y: height, bridges: [gateZ(SPASSKY[1]), gateZ(NIKOLSKY[1])], bw: 3.2 },
     { t: 'archangel', rect: C.archangel, h: 18, y: hy(C.archangel) },
     { t: 'annunciation', rect: C.annunciation, y: hy(C.annunciation) },

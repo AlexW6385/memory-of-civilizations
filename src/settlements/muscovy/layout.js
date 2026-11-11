@@ -18,6 +18,10 @@ export const CATHEDRALS = { dormition: [-190, -10, -158, 18], archangel: [-150, 
 export const MOAT = { d0: 10, d1: 24, z0: -168, z1: 166, level: -4.5, bed: -7 };
 // the tented log churches of the posad parishes (Kitai-gorod, Zamoskvorechye): [x, z, yaw]
 export const CHURCHES = [[168, -92, 0], [-96, 336, 0], [196, 96, Math.PI], [-165, -228, Math.PI / 2], [270, -20, 0], [24, 330, 0]];
+// the wall of Kitai-gorod (1535–38): from the Kremlin's north corner out and round the trading posad to the river
+export const KITAI = [[-76, -192], [-40, -266], [252, -266], [252, 214]];
+export const KITAI_GATES = [[1, 0.28], [2, 0.335], [2, 0.627], [2, 0.773]];
+export const nearKitai = (x, z, m) => { for (let i = 0; i + 1 < KITAI.length; i++) { const a = KITAI[i], b = KITAI[i + 1], L2 = (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2, t = Math.max(0, Math.min(1, ((x - a[0]) * (b[0] - a[0]) + (z - a[1]) * (b[1] - a[1])) / L2)); if (Math.hypot(x - a[0] - t * (b[0] - a[0]), z - a[1] - t * (b[1] - a[1])) < m) return true; } return false; };
 export const NIKOLSKY = [0, 0.12];
 export const wallX = (z) => KREMLIN[0][0] + (KREMLIN[1][0] - KREMLIN[0][0]) * (z - KREMLIN[0][1]) / (KREMLIN[1][1] - KREMLIN[0][1]);
 export const gateZ = (t) => KREMLIN[0][1] + (KREMLIN[1][1] - KREMLIN[0][1]) * t;
@@ -47,7 +51,7 @@ export function height(x, z) {
   return h + (MOAT.bed - h) * carve;
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-export const reserved = (cx, cz) => CHURCHES.some((c) => Math.hypot(cx - c[0], cz - c[1]) < 17) || inRect(SQUARE, cx, cz, 6) || Math.hypot(cx - BASIL[0], cz - BASIL[1]) < 34 || inRect(ROWS, cx, cz, 6)
+export const reserved = (cx, cz) => nearKitai(cx, cz, 10) || CHURCHES.some((c) => Math.hypot(cx - c[0], cz - c[1]) < 17) || inRect(SQUARE, cx, cz, 6) || Math.hypot(cx - BASIL[0], cz - BASIL[1]) < 34 || inRect(ROWS, cx, cz, 6)
   || Object.values(CATHEDRALS).some((r) => r.length === 4 ? inRect(r, cx, cz, 14) : Math.hypot(cx - r[0], cz - r[1]) < 22)
   || (inKremlin(cx, cz, -14) && !inKremlin(cx, cz, 12)) || Math.abs(cz - riverZ(cx)) < RIVER.w / 2 + 8
   || (cz > KREMLIN[0][1] - 10 && cz < KREMLIN[1][1] + 10 && cx > wallX(cz) && cx < SQUARE[0] + 6);      // the open field cleared before the wall (1493–95), the moat in it

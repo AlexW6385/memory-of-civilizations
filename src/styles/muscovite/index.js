@@ -14,6 +14,7 @@ import { izbaInside } from './izba.js';
 import { intercession } from './intercession.js';
 import { nalichnik, yardFence, streetLog, stalls, logChurch } from './posad.js';
 import { ivanTower, archangel, annunciation } from './kremlin.js';
+import { kitaiWall } from './kitai.js';
 import { dressHouse, yardbuild, garden } from './yard.js';
 
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
@@ -385,7 +386,7 @@ function izba(el, { bag, col }) {
     sh.moveTo(0, 0); sh.lineTo(L, 0); sh.lineTo(L, ye - y - H); sh.lineTo(L - 0.25, yt - 0.02 - y - H); sh.lineTo(0.25, yt - 0.02 - y - H); sh.lineTo(0, ye - y - H); sh.lineTo(0, 0);
     bag.add(LOG, slab(sh, 0.2, ex ? [f + sg * wg, u0] : [u0, f + sg * wg], ex ? [f + sg * wg, u1] : [u1, f + sg * wg], y + H - 0.02, 1));
   }
-  if (open) izbaInside(bag, { B, at: (u, v, w) => (ex ? [f + sg * w, v, u] : [u, v, f + sg * w]), u0, u1, D, fl, top: y + H, yr: yr - 0.12, door: dW, dh: 1.85, wins: Array.from({ length: nw }, (_, k) => um + (k - (nw - 1) / 2) * 1.35), wy, C: Cb });
+  if (open) izbaInside(bag, { B, at: (u, v, w) => (ex ? [f + sg * w, v, u] : [u, v, f + sg * w]), u0, u1, D, fl, top: y + H, yr: yr - 0.12, door: dW, dh: 1.85, wins: Array.from({ length: nw }, (_, k) => um + (k - (nw - 1) / 2) * 1.35), wy, C: Cb, seed: el.seed ?? 0 });
 }
 /**
  * lobnoye: { c, r, y } — the Lobnoye Mesto as rebuilt in stone in 1599: the round platform (13 m across,
@@ -588,6 +589,6 @@ function beamBox(a, b, w, h) {
 }
 registerStyle('muscovite', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, street_log: streetLog, yardbuild, garden, stalls, log_church: logChurch, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
+  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, street_log: streetLog, kitai_wall: kitaiWall, yardbuild, garden, stalls, log_church: logChurch, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
   objects: {},
 });
