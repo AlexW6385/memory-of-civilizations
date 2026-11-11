@@ -124,3 +124,22 @@ export function lotAt(x, z, m = 0) {
   return null;
 }
 export const inLot = (x, z, m = 0) => !!lotAt(x, z, m);
+
+/**
+ * The shops along the colonnaded street's south side (the same division as the style's colonnade_street: runs between the gaps
+ * of the Great Temple's propylaeum and the garden's stair, a shop to every 4.6 m): { x0, x1, m (the door's middle), dw, z0, z1 (the
+ * room, its front and back), yf (its floor), i }. Pure data, for the goods and the people in them.
+ */
+export function shopUnits() {
+  const gaps = [[GREAT_TEMPLE[0] - 1, GREAT_TEMPLE[2] + 1], [GARDEN.entry[0] - 1, GARDEN.entry[1] + 1]].sort((a, b) => a[0] - b[0]);
+  const xa = Math.min(STREET.a[0], STREET.b[0]), xb = Math.max(STREET.a[0], STREET.b[0]), pd = 5, e = STREET.a[1] + STREET.w / 2;
+  const runs = []; let p = xa;
+  for (const [g0, g1] of gaps) { if (g0 > p) runs.push([p, g0]); p = Math.max(p, g1); }
+  if (xb > p) runs.push([p, xb]);
+  const out = [], z0 = e + 1.5 + pd, z1 = e + 0.9 + pd + 6.4 - 0.6;
+  for (const [r0, r1] of runs) {
+    const ns = Math.max(1, Math.round((r1 - r0) / 4.6)), ws = (r1 - r0) / ns;
+    for (let i = 0; i < ns; i++) { const x0 = r0 + i * ws, m = x0 + ws / 2; out.push({ x0, x1: x0 + ws, m, dw: Math.min(2.2, ws - 1.4), z0, z1, yf: 0.45, i: out.length }); }
+  }
+  return out;
+}
