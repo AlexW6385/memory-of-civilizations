@@ -235,4 +235,33 @@ function hinaki(el, { bag, col }) {
   col.circle(x, z, 0.25, y, y + 0.4);
 }
 
-export const SCENES = { hinaki, paepae, hangi, harakeke, weaving, whata, waka_build: wakaBuild, taiaha, rakau };
+
+/**
+ * ngawha: a hot pool on the geothermal ground of the lake's south shore { c, y, r, seed } — a hollow in the
+ * ground rimmed with pale sinter and stones, the clear water in it; beside it a steam box (a wooden chest with a
+ * lid ajar over a vent, stones round it) and a kete of food lowered into the pool on a flax cord from a stick laid
+ * across it. Food was cooked in the hot pools and the steam of the vents [stated: Whakarewarewa village, "Geothermal
+ * meals": food in a flax basket lowered into the boiling pool; steam boxes; "hundreds of years" of use].
+ */
+function ngawha(el, { bag, col }) {
+  const [x, z] = el.c, y = el.y ?? 0, r = el.r ?? 1.5, rand = rng(el.seed ?? 5);
+  bag.add('chalk', lathe([[r + 0.7, -0.15], [r + 0.5, 0.05], [r + 0.15, 0.1], [r * 0.95, 0.03], [r * 0.9, -0.08]], 18, (th) => 1 + 0.12 * Math.sin(th * 3 + 1) + 0.06 * Math.sin(th * 7), x, y, z));
+  bag.add('water', lathe([[r * 0.93, -0.04], [0.001, -0.04]], 18, null, x, y, z));
+  for (let k = 0; k < 11; k++) { const a = k / 11 * 6.28 + rand() * 0.3; stone(bag, 'basalt', x + Math.cos(a) * (r + 0.55), y + 0.04, z + Math.sin(a) * (r + 0.55), 0.14 + rand() * 0.1, rand() * 9); }
+  col.circle(x, z, r * 0.9, y - 0.3, y + 0.1);
+  // the stick across and the cord with its kete in the water
+  const a0 = el.yaw ?? 0.6, ux = Math.cos(a0), uz = Math.sin(a0);
+  bag.add('timber', tube([[x - ux * (r + 0.6), y + 0.16, z - uz * (r + 0.6), 0.028], [x + ux * (r + 0.6), y + 0.16, z + uz * (r + 0.6), 0.028]], 5));
+  bag.add('rope_fibre', tube([[x + ux * 0.3, y + 0.16, z + uz * 0.3, 0.008], [x + ux * 0.3, y - 0.12, z + uz * 0.3, 0.008]], 4));
+  basket(bag, x + ux * 0.3, y - 0.22, z + uz * 0.3, 0.16, 'hide_brown');
+  // the steam box over a vent beside it
+  const bx = x - uz * (r + 2.4), bz = z + ux * (r + 2.4);
+  bag.add('banco', lathe([[1.0, -0.1], [0.85, 0.06], [0.6, 0.1]], 12, null, bx, y, bz));
+  const m = new Matrix4().makeRotationY(-a0).setPosition(bx, y, bz), put = (mat, g) => { g.applyMatrix4(m); bag.add(mat, g); };
+  put('timber', box(-0.45, 0.05, -0.3, 0.45, 0.6, 0.3));
+  put('wood_dark', box(-0.5, 0.6, -0.34, 0.5, 0.66, 0.34).translate(0.18, 0.03, 0).rotateZ(0.04));   // the lid, ajar
+  put('opening', box(-0.4, 0.58, -0.25, 0.1, 0.6, 0.25));
+  col.circle(bx, bz, 0.7, y, y + 0.7);
+}
+
+export const SCENES = { ngawha, hinaki, paepae, hangi, harakeke, weaving, whata, waka_build: wakaBuild, taiaha, rakau };
