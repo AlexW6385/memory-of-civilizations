@@ -527,7 +527,7 @@ function thatch(bag, F, mat, W, D, yw, rise, { ov = 0.6, th = 0.3, horns = true 
 /** The woven-bamboo wall (gedhek) pieces: a plaited panel in a frame, with bamboo battens on its outer face. */
 function gedhek(bag, col, F, u0, v0, u1, v1, y0, y1, outer) {
   const r = F.R(u0, v0, u1, v1);
-  bag.add('reed_mat', box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1);
+  bag.add(F.plank ? 'planks_grey' : 'reed_mat', box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1);
   const L = Math.max(u1 - u0, v1 - v0), alongU = u1 - u0 > v1 - v0;
   for (let k = 1; k <= 3; k++) {
     const y = y0 + (y1 - y0) * k / 4, e = 0.03, rr = alongU ? F.R(u0, outer > 0 ? v1 : v0 - e, u1, outer > 0 ? v1 + e : v0) : F.R(outer > 0 ? u1 : u0 - e, v0, outer > 0 ? u1 + e : u0, v1);
@@ -543,12 +543,14 @@ function gedhek(bag, col, F, u0, v0, u1, v1, y0, y1, outer) {
 function rumah(el, ctx) {
   const { bag, col } = ctx;
   if (el.kind === 'lumbung') return lumbung(el, ctx);
-  const rand = rng(el.seed || 1), F = frame(el), { W, D, R, P } = F, fl = 1.25 + rand() * 0.35, H = 2.25, ve = 1.45, vw = D / 2 - ve, wt = 0.12, e = W / 2 - 0.16;
+  const rand = rng(el.seed || 1), wr = rng((el.seed || 1) + 7), F = frame(el), { W, D, R, P } = F, fl = 1.25 + rand() * 0.35, H = 2.25, ve = 1.45, vw = D / 2 - ve, wt = 0.12, e = W / 2 - 0.16;
   const bx = (mat, u0, v0, u1, v1, y0, y1) => { const r = R(u0, v0, u1, v1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); return r; };
+  F.plank = wr() < 0.28;                                   // some houses of grey sawn planks, the rest plaited bamboo
   // footings, posts, the floor
   const us = [-W / 2 + 0.2, -W / 6, W / 6, W / 2 - 0.2].slice(0, W > 6 ? 4 : 3), vs = [-D / 2 + 0.2, vw, D / 2 - 0.2];
   for (const u of W > 6 ? us : [-W / 2 + 0.2, 0, W / 2 - 0.2]) for (const v of vs) {
     bx(A, u - 0.26, v - 0.26, u + 0.26, v + 0.26, 0, 0.2);
+    if (wr() < 0.55) bx('sod', u - 0.2, v - 0.2, u + 0.2, v + 0.2, 0.2, 0.235);                               // moss on the footing's shaded top
     bx('timber', u - 0.11, v - 0.11, u + 0.11, v + 0.11, 0.2, fl - 0.2);
     const [x, z] = P(u, v); col.circle(x, z, 0.28, 0, fl);
   }
@@ -582,28 +584,90 @@ function rumah(el, ctx) {
   const sr = R(su - 0.55, D / 2 + 0.0, su + 0.55, D / 2 + fl * 1.05);
   STYLES.qing.elements.stairs({ rect: sr, y0: 0, y1: fl, dir: F.up, mat: 'timber' }, ctx);
   thatch(bag, F, rand() < 0.5 ? 'thatch_palm' : 'ijuk', W, D, fl + H, 0.9);
+  dressFront(el, ctx, F, { fl, vw, H, su, wr });
   if (el.interior) houseFit(el, ctx, F, { fl, vw, e, wt, rand });
 }
-/** The inside of a house: the hearth in the back corner with its firestones and pot, a sleeping platform of bamboo, mats, jars, baskets. */
+/** What hangs and stands on a house's veranda: a bamboo bench against the wall, a bird cage, a half-lowered blind, strings of corn and chillies drying under the eaves. */
+function dressFront(el, ctx, F, { fl, vw, H, su, wr }) {
+  const { bag, col } = ctx, { W, D, R, P } = F, bx = (mat, u0, v0, u1, v1, y0, y1) => { const r = R(u0, v0, u1, v1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); return r; };
+  const side = su > 0 ? -1 : 1, top = fl + H - 0.1;
+  if (W > 5.2 && wr() < 0.7) {
+    const bu = side * (W / 2 - 1.15), v0 = vw + 0.12, v1 = vw + 0.72;
+    bx('bamboo_culm', bu - 0.7, v0, bu + 0.7, v1, fl + 0.4, fl + 0.45);
+    for (const u of [bu - 0.62, bu + 0.62]) for (const v of [v0 + 0.06, v1 - 0.06]) bx('timber', u - 0.03, v - 0.03, u + 0.03, v + 0.03, fl, fl + 0.4);
+    col.rect(R(bu - 0.7, v0, bu + 0.7, v1), fl, fl + 0.45);
+    if (wr() < 0.5) bx('cloth_brown', bu - 0.4, v0 + 0.1, bu + 0.1, v1 - 0.1, fl + 0.45, fl + 0.5);           // a folded sarong on it
+  }
+  if (wr() < 0.4) {                                              // the bird cage on its cord from the front beam
+    const [x, z] = P(-side * (W / 2 - 1.2), D / 2 - 0.5);
+    bx('bamboo_culm', -side * (W / 2 - 1.2) - 0.01, D / 2 - 0.51, -side * (W / 2 - 1.2) + 0.01, D / 2 - 0.49, top - 0.6, top);
+    bag.add('bamboo_culm', lathe([[0.001, 0], [0.12, 0.03], [0.13, 0.26], [0.07, 0.38], [0.001, 0.42]], 10, null, x, top - 1.02, z));
+  }
+  if (wr() < 0.4) { const bu = side * (W / 2 - 1.3); bx('reed_mat', bu - 0.75, D / 2 - 0.3, bu + 0.75, D / 2 - 0.26, top - 1.0, top - 0.05); bx('timber', bu - 0.77, D / 2 - 0.32, bu + 0.77, D / 2 - 0.24, top - 0.08, top); }   // the blind (tirai)
+  if (wr() < 0.5) for (let k = 0; k < 5; k++) {                   // corn and chillies in strings under the front beam
+    const u = -side * (W / 2 - 0.9) + (k - 2) * 0.22 * -side, hang = 0.3 + wr() * 0.25;
+    bx(wr() < 0.6 ? 'cloth_ochre' : 'cloth_red', u - 0.04, D / 2 - 0.2, u + 0.04, D / 2 - 0.12, top - hang, top);
+  }
+}
+/**
+ * The inside of a house, in one of three ways (el.variant): 0 the hearth in the back corner with its firestones and pot, a sleeping
+ * platform of bamboo, mats, jars and baskets; 1 the hearth, a standing loom with its half-woven cloth and a store of rice (sacks and a
+ * great wicker bin); 2 the sleeping platform and a household shrine on a shelf in the corner, a small stone Buddha with flowers and
+ * lamps before it, a rack of palm-leaf books.
+ */
 function houseFit(el, ctx, F, { fl, vw, e, wt, rand }) {
-  const { bag } = ctx, { W, D, R, P } = F, life = STYLES.life.elements, bx = (mat, u0, v0, u1, v1, y0, y1) => { const r = R(u0, v0, u1, v1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); return r; };
-  const at = (u, v) => P(u, v), y0 = fl;
-  // the mat on the floor, the sleeping platform (balai-balai) of split bamboo on legs along one end, a rolled mat on it
-  bx('reed_mat', -e + 0.5, -D / 2 + 0.9, e - 0.5, vw - 0.5, y0, y0 + 0.025);
-  const sx = e - 0.2 - 1.0;
-  bx('bamboo_culm', sx - 0.9, -D / 2 + 0.35, sx + 0.9, -D / 2 + 1.55, y0 + 0.3, y0 + 0.37);
-  for (const [u, v] of [[sx - 0.85, -D / 2 + 0.4], [sx + 0.85, -D / 2 + 0.4], [sx - 0.85, -D / 2 + 1.5], [sx + 0.85, -D / 2 + 1.5]]) bx('timber', u - 0.04, v - 0.04, u + 0.04, v + 0.04, y0, y0 + 0.3);
-  for (let k = 0; k < 10; k++) bx('reed_mat', sx - 0.88 + k * 0.176, -D / 2 + 0.36, sx - 0.88 + k * 0.176 + 0.12, -D / 2 + 1.54, y0 + 0.37, y0 + 0.39);
-  bx('cloth_ochre', sx - 0.5, -D / 2 + 0.55, sx + 0.6, -D / 2 + 1.1, y0 + 0.39, y0 + 0.5);
-  // the hearth (a clay-lined box of ash with three firestones) in the other back corner, a pot on it, firewood beside it, a smoke-blackened rack above
-  const hu = -e + 0.9, hv = -D / 2 + 0.85;
-  bx('mudbrick', hu - 0.5, hv - 0.5, hu + 0.5, hv + 0.5, y0, y0 + 0.14);
-  for (const a of [0, 2.1, 4.2]) bx(A, hu + Math.cos(a) * 0.2 - 0.07, hv + Math.sin(a) * 0.2 - 0.07, hu + Math.cos(a) * 0.2 + 0.07, hv + Math.sin(a) * 0.2 + 0.07, y0 + 0.14, y0 + 0.3);
-  life.pot({ t: 'pot', kind: 'dark_pot', n: 1, at: at(hu, hv), y: y0 + 0.3, seed: el.seed }, ctx);
-  life.firewood({ t: 'firewood', at: at(hu + 0.1, -D / 2 + 0.3), y: y0, rot: 0, len: 0.9, seed: el.seed + 1 }, ctx);
-  for (const u of [hu - 0.55, hu + 0.55]) bx('bamboo_culm', u - 0.03, hv - 0.03, u + 0.03, hv + 0.03, y0 + 1.5, y0 + 2.2);
-  bx('bamboo_culm', hu - 0.6, hv - 0.45, hu + 0.6, hv - 0.4, y0 + 1.5, y0 + 1.55); bx('bamboo_culm', hu - 0.6, hv + 0.4, hu + 0.6, hv + 0.45, y0 + 1.5, y0 + 1.55);
-  for (let k = 0; k < 7; k++) bx('bamboo_culm', hu - 0.6 + k * 0.2, hv - 0.45, hu - 0.56 + k * 0.2, hv + 0.45, y0 + 1.55, y0 + 1.6);
+  const { bag, col } = ctx, { W, D, R, P } = F, life = STYLES.life.elements, bx = (mat, u0, v0, u1, v1, y0, y1) => { const r = R(u0, v0, u1, v1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); return r; };
+  const at = (u, v) => P(u, v), y0 = fl, variant = el.variant > 0 ? el.variant : 0, sx = e - 0.2 - 1.0, hu = -e + 0.9, hv = -D / 2 + 0.85;
+  bx('reed_mat', -e + 0.5, -D / 2 + 0.9, e - 0.5, vw - 0.5, y0, y0 + 0.025);        // the plaited mat on the floor
+  const platform = () => {
+    bx('bamboo_culm', sx - 0.9, -D / 2 + 0.35, sx + 0.9, -D / 2 + 1.55, y0 + 0.3, y0 + 0.37);
+    for (const [u, v] of [[sx - 0.85, -D / 2 + 0.4], [sx + 0.85, -D / 2 + 0.4], [sx - 0.85, -D / 2 + 1.5], [sx + 0.85, -D / 2 + 1.5]]) bx('timber', u - 0.04, v - 0.04, u + 0.04, v + 0.04, y0, y0 + 0.3);
+    for (let k = 0; k < 10; k++) bx('reed_mat', sx - 0.88 + k * 0.176, -D / 2 + 0.36, sx - 0.88 + k * 0.176 + 0.12, -D / 2 + 1.54, y0 + 0.37, y0 + 0.39);
+    bx('cloth_ochre', sx - 0.5, -D / 2 + 0.55, sx + 0.6, -D / 2 + 1.1, y0 + 0.39, y0 + 0.5);                   // a rolled mat on it
+    bx('cloth_white', sx + 0.1, -D / 2 + 1.15, sx + 0.8, -D / 2 + 1.5, y0 + 0.39, y0 + 0.43);                   // a folded sheet
+  };
+  const hearth = () => {
+    bx('mudbrick', hu - 0.5, hv - 0.5, hu + 0.5, hv + 0.5, y0, y0 + 0.14);
+    for (const a of [0, 2.1, 4.2]) bx(A, hu + Math.cos(a) * 0.2 - 0.07, hv + Math.sin(a) * 0.2 - 0.07, hu + Math.cos(a) * 0.2 + 0.07, hv + Math.sin(a) * 0.2 + 0.07, y0 + 0.14, y0 + 0.3);
+    life.pot({ t: 'pot', kind: 'dark_pot', n: 1, at: at(hu, hv), y: y0 + 0.3, seed: el.seed }, ctx);
+    life.firewood({ t: 'firewood', at: at(hu + 0.1, -D / 2 + 0.3), y: y0, rot: 0, len: 0.9, seed: el.seed + 1 }, ctx);
+    for (const u of [hu - 0.55, hu + 0.55]) bx('bamboo_culm', u - 0.03, hv - 0.03, u + 0.03, hv + 0.03, y0 + 1.5, y0 + 2.2);
+    bx('bamboo_culm', hu - 0.6, hv - 0.45, hu + 0.6, hv - 0.4, y0 + 1.5, y0 + 1.55); bx('bamboo_culm', hu - 0.6, hv + 0.4, hu + 0.6, hv + 0.45, y0 + 1.5, y0 + 1.55);
+    for (let k = 0; k < 7; k++) bx('bamboo_culm', hu - 0.6 + k * 0.2, hv - 0.45, hu - 0.56 + k * 0.2, hv + 0.45, y0 + 1.55, y0 + 1.6);
+    bx('ijuk', hu - 0.6, hv - 0.45, hu + 0.6, hv + 0.45, y0 + 1.6, y0 + 1.63);                                   // the soot-black underside above the fire
+    for (let k = 0; k < 3; k++) bx('cloth_red', hu - 0.4 + k * 0.4 - 0.04, hv - 0.04, hu - 0.4 + k * 0.4 + 0.04, hv + 0.04, y0 + 1.15, y0 + 1.5);   // chillies strung from the rack
+  };
+  if (variant === 0) { platform(); hearth(); }
+  if (variant === 1) {
+    hearth();
+    // the standing loom against the back wall: two uprights, the beams, the warp, the cloth woven below it, a seat board in front
+    const lu = sx - 0.2, lv = -D / 2 + 0.38;
+    for (const s of [-1, 1]) bx('timber', lu + s * 0.8 - 0.05, lv - 0.05, lu + s * 0.8 + 0.05, lv + 0.05, y0, y0 + 1.75);
+    bx('timber', lu - 0.85, lv - 0.05, lu + 0.85, lv + 0.05, y0 + 1.65, y0 + 1.75); bx('timber', lu - 0.85, lv - 0.05, lu + 0.85, lv + 0.05, y0 + 0.25, y0 + 0.33);
+    bx('cloth_white', lu - 0.72, lv - 0.012, lu + 0.72, lv + 0.012, y0 + 0.9, y0 + 1.65);
+    for (let k = 0; k < 6; k++) bx(k % 2 ? 'cloth_red' : 'cloth_indigo', lu - 0.72 + k * 0.24, lv - 0.016, lu - 0.72 + k * 0.24 + 0.2, lv + 0.016, y0 + 0.33, y0 + 0.9);
+    bx('timber', lu - 0.3, lv + 0.55, lu + 0.3, lv + 0.85, y0 + 0.2, y0 + 0.24);
+    for (const [u, v] of [[lu - 0.25, lv + 0.6], [lu + 0.25, lv + 0.6], [lu - 0.25, lv + 0.8], [lu + 0.25, lv + 0.8]]) bx('timber', u - 0.02, v - 0.02, u + 0.02, v + 0.02, y0, y0 + 0.2);
+    // the rice store along the end wall: sacks, and the wicker bin with its lid
+    life.sacks({ t: 'sacks', n: 4, at: at(e - 0.6, vw - 1.4), y: y0, seed: el.seed + 5, rot: 0.3 }, ctx);
+    const [bxx, bzz] = at(-e + 0.6, vw - 1.0);
+    bag.add('wicker', lathe([[0.001, 0], [0.42, 0], [0.5, 0.45], [0.44, 0.95], [0.001, 0.95]], 14, null, bxx, y0, bzz)); bag.add('timber', lathe([[0.001, 0.97], [0.46, 0.95], [0.4, 1.04], [0.001, 1.08]], 14, null, bxx, y0, bzz)); col.circle(bxx, bzz, 0.5, y0, y0 + 1.05);
+  }
+  if (variant === 2) {
+    platform();
+    // the shrine on a shelf in the back corner: a bracketed board, the Buddha in stone, flowers and lamps, incense in a pot
+    const su = -e + 0.9, sv = -D / 2 + 0.3, sy = y0 + 1.15;
+    bx('timber', su - 0.6, sv - 0.2, su + 0.6, sv + 0.2, sy - 0.04, sy); for (const s of [-1, 1]) bx('timber', su + s * 0.5 - 0.03, sv - 0.2, su + s * 0.5 + 0.03, sv + 0.05, sy - 0.4, sy - 0.04);
+    const [sxw, szw] = at(su, sv), n0 = P(0, 0), n1 = P(0, 1);
+    buddha(bag, 'meditation', sxw, sy, szw, [n1[0] - n0[0], n1[1] - n0[1]], 0.3);
+    rite({ kind: 'plate', at: at(su - 0.35, sv + 0.1), y: sy, s: 0.6, mats: ['cloth_white', 'cloth_red'] }, { bag });
+    rite({ kind: 'lamps', at: at(su + 0.3, sv + 0.12), to: at(su + 0.5, sv + 0.12), y: sy, count: 2, s: 0.8 }, { bag });
+    life.pot({ t: 'pot', kind: 'dark_pot', n: 1, at: at(su + 0.1, sv + 0.15), y: y0, seed: el.seed + 6 }, ctx);
+    // the rack of palm-leaf books on the wall by the door end
+    const ru = e - 1.4; bx('timber', ru - 0.5, -D / 2 + 0.2, ru + 0.5, -D / 2 + 0.5, y0 + 1.3, y0 + 1.34);
+    for (let k = 0; k < 4; k++) bx('reed_mat', ru - 0.45 + k * 0.23, -D / 2 + 0.24, ru - 0.45 + k * 0.23 + 0.18, -D / 2 + 0.46, y0 + 1.34, y0 + 1.38 + k * 0.01);
+    bx('mudbrick', hu + 0.55, hv - 0.2, hu + 1.05, hv + 0.3, y0, y0 + 0.1);                                      // a small cooking-pit by the shrine's side
+  }
   // storage: jars and baskets along the front wall inside, a water pot by the door
   life.pot({ t: 'pot', kind: 'water_pot', n: 3, at: at(-0.4, vw - 0.5), y: y0, seed: el.seed + 2 }, ctx);
   life.basket({ t: 'basket', at: at(0.9, -D / 2 + 0.4), y: y0, n: 2, seed: el.seed + 3, goods: 'cloth_white' }, ctx);
@@ -725,8 +789,157 @@ function hallfit(el, { bag, col }) {
 /** pagar: a low wall a→b { h } of brick with a coping. */
 function pagar(el, { bag, col }) { slab(bag, 'brick', el.a, el.b, 0, 0.6, el.h ?? 2); slab(bag, A, el.a, el.b, el.h ?? 2, 0.8, 0.25); col.segment(el.a, el.b, 0.6, 0, (el.h ?? 2) + 0.25); }
 
+// ---- the way, the fields, the yards: stalls, gates, fences, huts ---------------------------------------
+
+/** A frame for a small building from a centre, a width along the ridge and a depth, its front toward `face` ('n' | 's' | 'e' | 'w'). */
+const smallFrame = (c, W, D, face) => { const ew = face === 'e' || face === 'w', hx = (ew ? D : W) / 2, hz = (ew ? W : D) / 2; return frame({ rect: [c[0] - hx, c[1] - hz, c[0] + hx, c[1] + hz], front: face }); };
+/**
+ * warung: a stall of the pilgrims' way { at, face (the side toward the way), w, kind: 'warung' (food and drink) | 'pasar' (offerings), seed }:
+ * a plank floor 0.4 m up on posts, a woven back and ends, a counter of bamboo across the front with the goods on it (flowers in baskets,
+ * clay lamps, bundles of incense; or a big pot on a hearth with cups, rice in leaves, fruit), a thatched roof sloping to the front,
+ * a bamboo bench for the buyers, a cloth sign pole.
+ */
+function warung(el, ctx) {
+  const { bag, col } = ctx, rand = rng(el.seed || 1), W = el.w ?? 4, D = 3.0, F = smallFrame(el.at, W, D, el.face), { R, P } = F, life = STYLES.life.elements;
+  const bx = (mat, u0, v0, u1, v1, y0, y1) => { const r = R(u0, v0, u1, v1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); return r; };
+  const fl = 0.4, H = 2.1, food = el.kind === 'warung';
+  col.floor(bx('timber', -W / 2, -D / 2, W / 2, D / 2 - 0.3, fl - 0.12, fl), fl);
+  for (const u of [-W / 2 + 0.1, 0, W / 2 - 0.1]) for (const v of [-D / 2 + 0.1, D / 2 - 0.4]) { bx(A, u - 0.17, v - 0.17, u + 0.17, v + 0.17, 0, 0.1); bx('timber', u - 0.07, v - 0.07, u + 0.07, v + 0.07, 0.1, fl - 0.12); }
+  // back wall and ends (the ends half-height), the corner posts to the roof
+  const F2 = { ...F, plank: false };
+  gedhek(bag, col, F2, -W / 2 + 0.1, -D / 2 + 0.1, W / 2 - 0.1, -D / 2 + 0.22, fl, fl + H, -1);
+  for (const s of [-1, 1]) gedhek(bag, col, F2, s * (W / 2 - 0.22) - 0.06, -D / 2 + 0.22, s * (W / 2 - 0.22) + 0.06, D / 2 - 0.3, fl, fl + 1.1, s);
+  for (const [u, v] of [[-W / 2 + 0.1, -D / 2 + 0.1], [W / 2 - 0.1, -D / 2 + 0.1], [-W / 2 + 0.1, D / 2 - 0.4], [W / 2 - 0.1, D / 2 - 0.4]]) { bx('bamboo_culm', u - 0.06, v - 0.06, u + 0.06, v + 0.06, fl, fl + H + 0.1); const [x, z] = P(u, v); col.circle(x, z, 0.1, fl, fl + H); }
+  bx('timber', -W / 2, -D / 2 + 0.05, W / 2, D / 2 - 0.3, fl + H, fl + H + 0.12);
+  // the counter across the front, the shelf behind it, the goods
+  const cv = D / 2 - 0.62;
+  col.rect(bx('timber', -W / 2 + 0.3, cv, W / 2 - 0.3, cv + 0.36, fl, fl + 0.9), fl, fl + 0.95);
+  bx('bamboo_culm', -W / 2 + 0.25, cv - 0.04, W / 2 - 0.25, cv + 0.4, fl + 0.9, fl + 0.95);
+  bx('timber', -W / 2 + 0.2, -D / 2 + 0.22, W / 2 - 0.2, -D / 2 + 0.55, fl + 1.2, fl + 1.25);
+  const n = Math.max(3, Math.floor((W - 1) / 0.75));
+  for (let k = 0; k < n; k++) {
+    const u = -W / 2 + 0.55 + (k + 0.5) * (W - 1.1) / n, [x, z] = P(u, cv + 0.18);
+    if (food) {
+      const j = (k + (el.seed | 0)) % 4;
+      if (j === 0) life.pot({ t: 'pot', kind: 'water_pot', n: 1, at: [x, z], y: fl + 0.95, seed: el.seed + k }, ctx);
+      else if (j === 1) life.basket({ t: 'basket', at: [x, z], y: fl + 0.95, n: 1, seed: el.seed + k, goods: 'cloth_white' }, ctx);          // rice in leaves
+      else if (j === 2) bag.add('pottery_dark', lathe([[0.001, 0], [0.09, 0], [0.11, 0.1], [0.08, 0.14], [0.001, 0.14]], 8, null, x, fl + 0.95, z));      // a bowl
+      else bag.add('terracotta', ellipsoid([x, fl + 1.05, z], 0.1, 0.09, 0.1, 8));                                                              // a fruit
+    } else {
+      const j = k % 3;
+      if (j === 0) life.basket({ t: 'basket', at: [x, z], y: fl + 0.95, n: 1, seed: el.seed + k, goods: rand() < 0.5 ? 'cloth_red' : 'cloth_white' }, ctx);   // flowers
+      else if (j === 1) rite({ kind: 'lamps', at: [x - 0.12, z], to: [x + 0.12, z], y: fl + 0.95, count: 3, s: 0.8 }, { bag });
+      else bx('bamboo_culm', u - 0.1, cv + 0.12, u + 0.1, cv + 0.26, fl + 0.95, fl + 1.2);                                                       // a bundle of incense
+    }
+  }
+  if (food) {
+    const [x, z] = P(-W / 2 + 0.9, -D / 2 + 0.8);                       // the hearth in the back corner, a big pot on it
+    bx('mudbrick', -W / 2 + 0.5, -D / 2 + 0.45, -W / 2 + 1.3, -D / 2 + 1.15, fl, fl + 0.3);
+    life.pot({ t: 'pot', kind: 'dark_pot', n: 1, at: [x, z], y: fl + 0.3, seed: el.seed + 9 }, ctx);
+  } else bx('cloth_red', -W / 2 + 0.35, -D / 2 + 0.25, -W / 2 + 0.95, -D / 2 + 0.7, fl, fl + 0.4);                                              // the stock of cloth
+  // the bench in front for the buyers
+  { const [x, z] = P(W / 2 - 1.1, D / 2 + 0.25); life.bench({ t: 'bench', at: [x, z], y: 0, rot: ({ n: Math.PI, s: 0, e: -Math.PI / 2, w: Math.PI / 2 })[el.face] ?? 0, len: 1.6, mat: 'bamboo_culm', seed: el.seed }, ctx); }
+  thatch(bag, F, rand() < 0.6 ? 'thatch_palm' : 'ijuk', W - 0.3, D - 0.2, fl + H, 0.75, { ov: 0.65, th: 0.26, horns: false });
+  // a sign: a pole with a hanging cloth (red for the food, white for the offerings)
+  { const u = -W / 2 - 0.15, v = D / 2 - 0.4; bx('bamboo_culm', u - 0.03, v - 0.03, u + 0.03, v + 0.03, 0, 3.0); bx('cloth_ochre', u - 0.02, v - 0.5, u + 0.02, v, 1.9, 2.7); }
+}
+/** A pyramidal gate of the precinct { at, axis ('z': pylons at ±z of `at`, the way along x | 'x': the way along z), half (to the passage), h }: two stepped pylons of andesite with moulded feet and caps, a small stupa on each, lions and flowers at the foot. */
+function gapura(el, ctx) {
+  const { bag, col } = ctx, [cx, cz] = el.at, half = el.half ?? 2.6, h = el.h ?? 5.6, ax = el.axis !== 'x';
+  for (const s of [-1, 1]) {
+    const px = ax ? cx : cx + s * (half + 1.55), pz = ax ? cz + s * (half + 1.55) : cz;
+    const T = (hw, y0, y1) => { bag.add(A, box(px - hw, y0, pz - hw, px + hw, y1, pz + hw)); };
+    T(1.55, 0, 0.35); T(1.38, 0.35, 0.55); T(1.25, 0.55, h * 0.45);
+    T(1.3, h * 0.45, h * 0.45 + 0.14);                                                            // the moulding at the middle
+    for (let k = 0; k < 4; k++) T(1.1 - k * 0.2, h * 0.45 + 0.14 + k * (h * 0.55 - 0.9) / 4, h * 0.45 + 0.14 + (k + 1) * (h * 0.55 - 0.9) / 4);   // the corbelled top, stepping in
+    T(0.95, h - 0.76, h - 0.62); stupa(bag, px, h - 0.62, pz, 0.62);
+    col.rect([px - 1.55, pz - 1.55, px + 1.55, pz + 1.55], 0, h);
+    for (const t of [-1, 1]) {                                                                    // a lion on each outer side of the pylon, facing out along the way
+      const lx = ax ? px + t * 2.3 : px, lz = ax ? pz : pz + t * 2.3;
+      bag.add(A, box(lx - 0.45, 0, lz - 0.45, lx + 0.45, 0.22, lz + 0.45));
+      lion(bag, lx, 0.22, lz, ax ? [t, 0] : [0, t], 0.7); col.circle(lx, lz, 0.5, 0, 1.2);
+    }
+  }
+}
+/** cetiya: a small stupa shrine { at, y, r } on a square andesite plinth in two steps, a row of lamps before it. */
+function cetiya(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = el.r ?? 0.95, a = r * 2.3;
+  bag.add(A, box(x - a, y, z - a, x + a, y + 0.3, z + a)); bag.add(A, box(x - a + 0.3, y + 0.3, z - a + 0.3, x + a - 0.3, y + 0.55, z + a - 0.3));
+  stupa(bag, x, y + 0.55, z, r);
+  col.rect([x - a, z - a, x + a, z + a], y, y + 0.55); col.circle(x, z, r * 1.2, y + 0.55, y + 0.55 + r * 2.4);
+  rite({ kind: 'lamps', at: [x - 0.8, z + a + 0.4], to: [x + 0.8, z + a + 0.4], y, count: 4 }, { bag });
+}
+/** lesung: a rice mortar { at, rot, seed } — a hollowed log, two pestles leaning in it, a winnowing tray beside it. */
+function lesung(el, ctx) {
+  const { bag, col } = ctx, [x, z] = el.at, c = Math.cos(el.rot ?? 0), sn = Math.sin(el.rot ?? 0), P = (u, v) => [x + c * u + sn * v, z - sn * u + c * v];
+  const a = P(-0.9, 0), b = P(0.9, 0), t = [];
+  beamTris(t, [a[0], 0, a[1]], [b[0], 0, b[1]], 0.3, 0.44); bag.add('timber', fromTriangles(t));
+  const a2 = P(-0.65, 0), b2 = P(0.65, 0), t2 = []; beamTris(t2, [a2[0], 0.43, a2[1]], [b2[0], 0.43, b2[1]], 0.2, 0.02); bag.add('bark_dark', fromTriangles(t2));
+  const t3 = [];
+  for (const [u, dv] of [[-0.25, -0.12], [0.3, 0.1]]) { const p = P(u, dv), q = P(u + 0.15, dv + 0.55); beamTris(t3, [p[0], 0.4, p[1]], [q[0], 1.4, q[1]], 0.04, 0.05); }
+  bag.add('timber', fromTriangles(t3));
+  const k0 = P(-0.9, -0.3), k1 = P(0.9, 0.3); col.rect([Math.min(k0[0], k1[0]), Math.min(k0[1], k1[1]), Math.max(k0[0], k1[0]), Math.max(k0[1], k1[1])], 0, 0.45);
+  const w = P(0.3, 1.2); bag.add('wicker', lathe([[0.001, 0], [0.4, 0.02], [0.45, 0.07], [0.001, 0.07]], 12, null, w[0], 0.0, w[1])); bag.add('cloth_white', lathe([[0.001, 0.075], [0.32, 0.075], [0.32, 0.09], [0.001, 0.09]], 10, null, w[0], 0.0, w[1]));
+}
+/** gubuk: a hut in the paddies { at, rot, seed } — a platform on four bamboo posts 1.5 m up, a small steep thatched roof, a ladder, a drum of tin... a rattle line of bamboo clappers to scare the birds. */
+function gubuk(el, ctx) {
+  const { bag, col } = ctx, rand = rng(el.seed || 1), F = smallFrame(el.at, 2.4, 2.4, 's'), { R, P } = F, fl = 1.5;
+  const rot = el.rot ?? 0, Rr = (u, v) => { const [x, z] = P(u, v), c = Math.cos(rot), s = Math.sin(rot), dx = x - el.at[0], dz = z - el.at[1]; return [el.at[0] + c * dx + s * dz, el.at[1] - s * dx + c * dz]; };
+  const bxr = (mat, u0, v0, u1, v1, y0, y1) => { const a = Rr(u0, v0), b = Rr(u1, v1); bag.add(mat, box(Math.min(a[0], b[0]), y0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y1, Math.max(a[1], b[1]))); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+  for (const u of [-1, 1]) for (const v of [-1, 1]) { const r = bxr('bamboo_culm', u * 1.0 - 0.06, v * 1.0 - 0.06, u * 1.0 + 0.06, v * 1.0 + 0.06, 0, 2.9); col.rect(r, 0, 2.9); }
+  col.floor(bxr('bamboo_culm', -1.15, -1.15, 1.15, 1.15, fl - 0.1, fl), fl);
+  for (let k = 0; k < 9; k++) bxr('timber', -1.1 + k * 0.25, -1.1, -1.1 + k * 0.25 + 0.03, 1.1, fl, fl + 0.02);
+  bxr('reed_mat', -1.0, -1.0, 1.0, -0.96, fl, fl + 0.9);                                         // the screen at the back
+  bxr('timber', -1.0, 0.9, 1.0, 0.94, fl + 0.85, fl + 0.9);
+  // the roof: a pyramid of thatch on a hip frame, from the posts' heads
+  const t = [], apex = Rr(0, 0), c = [[-1.5, -1.5], [1.5, -1.5], [1.5, 1.5], [-1.5, 1.5]].map(([u, v]) => Rr(u, v));
+  for (let i = 0; i < 4; i++) { const a = c[i], b = c[(i + 1) % 4]; t.push(a[0], 2.75, a[1], b[0], 2.75, b[1], apex[0], 3.7, apex[1], a[0], 2.69, a[1], apex[0], 3.64, apex[1], b[0], 2.69, b[1]); }
+  bag.add('thatch_palm', fromTriangles(t));
+  const l = []; const a = Rr(0.4, 1.9), b = Rr(0.4, 1.0); beamTris(l, [a[0], 0, a[1]], [b[0], fl, b[1]], 0.07, 0.05); bag.add('timber', fromTriangles(l));    // the ladder pole
+  // the clapper line: a cord from the hut's corner out over the paddy with bamboo clappers hanging
+  const e0 = Rr(1.0, 1.0), e1 = Rr(1.0, 9.0), cl = []; beamTris(cl, [e0[0], 2.4, e0[1]], [e1[0], 1.4, e1[1]], 0.008, 0.008); bag.add('rope_fibre', fromTriangles(cl));
+  for (let k = 1; k <= 4; k++) { const p = Rr(1.0, 1.0 + k * 2), y = 2.4 - k * 0.25; bag.add('bamboo_culm', box(p[0] - 0.03, y - 0.5, p[1] - 0.03, p[0] + 0.03, y, p[1] + 0.03)); }
+  void rand;
+}
+/** orang: a scarecrow { at, rot, seed } — a pole with a cross bar, a rag shirt, a straw hat, a clay pot for a head. */
+function orang(el, { bag }) {
+  const [x, z] = el.at, rand = rng(el.seed || 1), c = Math.cos(el.rot ?? 0), s = Math.sin(el.rot ?? 0), P = (u) => [x + c * u, z - s * u];
+  bag.add('bamboo_culm', box(x - 0.035, 0, z - 0.035, x + 0.035, 1.85, z + 0.035)); const t = [], a = P(-0.6), b = P(0.6); beamTris(t, [a[0], 1.4, a[1]], [b[0], 1.4, b[1]], 0.025, 0.04); bag.add('bamboo_culm', fromTriangles(t));
+  bag.add(rand() < 0.5 ? 'cloth_brown' : 'cloth_indigo', lathe([[0.001, 0.75], [0.3, 0.78], [0.2, 1.35], [0.001, 1.4]], 8, null, 0, 0, 0).scale(1, 1, 0.5).translate(x, 0, z));
+  const sl = P(-0.55), sr = P(0.55); bag.add('cloth_ochre', box(sl[0] - 0.04, 1.05, sl[1] - 0.04, sl[0] + 0.04, 1.4, sl[1] + 0.04)); bag.add('cloth_ochre', box(sr[0] - 0.04, 1.0, sr[1] - 0.04, sr[0] + 0.04, 1.4, sr[1] + 0.04));
+  bag.add('pottery_dark', ellipsoid([x, 1.7, z], 0.14, 0.17, 0.14, 8));
+  bag.add('thatch_palm', lathe([[0.001, 1.95], [0.4, 1.8], [0.38, 1.78], [0.001, 1.84]], 12, null, x, 0, z));
+}
+/** pagarbambu: a fence of plaited bamboo palings between posts a→b { h }, a rail over it. */
+function pagarbambu(el, { bag, col }) {
+  const h = el.h ?? 1.05, [ax, az] = el.a, [bx2, bz] = el.b, L = Math.hypot(bx2 - ax, bz - az), n = Math.max(1, Math.round(L / 1.6));
+  slab(bag, 'reed_mat', el.a, el.b, 0.12, 0.05, h - 0.2);
+  slab(bag, 'bamboo_culm', el.a, el.b, h - 0.1, 0.07, 0.07); slab(bag, 'bamboo_culm', el.a, el.b, 0.3, 0.06, 0.05);
+  for (let i = 0; i <= n; i++) { const x = ax + (bx2 - ax) * i / n, z = az + (bz - az) * i / n; bag.add('timber', box(x - 0.045, 0, z - 0.045, x + 0.045, h + 0.08, z + 0.045)); }
+  col.segment(el.a, el.b, 0.12, 0, h);
+}
+/** gamelan: a set of bronze instruments { at, y, rot } — two keyed metallophones on carved frames, a big hung gong and two kettle gongs, a drum — for the village hall. */
+function gamelan(el, ctx) {
+  const { bag, col } = ctx, [x, z] = el.at, y = el.y ?? 0, c = Math.cos(el.rot ?? 0), s = Math.sin(el.rot ?? 0), P = (u, v) => [x + c * u + s * v, z - s * u + c * v];
+  const rb = (mat, u0, v0, u1, v1, y0, y1) => { const a = P(u0, v0), b = P(u1, v1); bag.add(mat, box(Math.min(a[0], b[0]), y0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y1, Math.max(a[1], b[1]))); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+  for (const [u, n] of [[-1.3, 7], [0.2, 6]]) {                                      // metallophones: a trough frame, the keys laid on cords
+    col.rect(rb('timber_red', u - 0.45, -0.4, u + 0.45, 0.4, y + 0.0, y + 0.3), y, y + 0.35);
+    rb('timber', u - 0.5, -0.45, u + 0.5, -0.38, y, y + 0.34); rb('timber', u - 0.5, 0.38, u + 0.5, 0.45, y, y + 0.34);
+    for (let k = 0; k < n; k++) { const w = 0.1 - k * 0.004, v0 = -0.34 + k * (0.68 / n); rb('bronze', u - 0.34, v0, u + 0.34, v0 + w, y + 0.34, y + 0.37); }
+  }
+  for (const [u, v, r] of [[1.4, -0.5, 0.2], [1.4, 0.5, 0.2]]) {                      // kettle gongs on cords across a low frame
+    const p = P(u, v); bag.add('bronze', lathe([[0.001, 0.0], [r, 0.0], [r * 1.05, 0.08], [r * 0.4, 0.12], [0.001, 0.14]], 12, null, p[0], y + 0.25, p[1]));
+    const f = rb('timber', u - 0.3, v - 0.28, u + 0.3, v + 0.28, y + 0.05, y + 0.25); col.rect(f, y, y + 0.3);
+  }
+  const gp = P(-0.2, 1.7);                                                          // the great gong on its frame
+  for (const t of [-1, 1]) { const q = P(-0.2 + t * 0.95, 1.7); bag.add('timber_red', box(q[0] - 0.06, y, q[1] - 0.06, q[0] + 0.06, y + 1.7, q[1] + 0.06)); col.circle(q[0], q[1], 0.1, y, y + 1.7); }
+  rb('timber_red', -1.2, 1.64, 0.8, 1.76, y + 1.6, y + 1.72);
+  { const t = []; prism(t, RND(0, 0.95, 0.5, 22), [gp[0], y, gp[1]], [c, -s], [s, c], 0.07); bag.add('bronze', fromTriangles(t)); const t2 = []; prism(t2, RND(0, 0.95, 0.15, 12), [gp[0] + s * 0.05, y, gp[1] + c * 0.05], [c, -s], [s, c], 0.07); bag.add('gold', fromTriangles(t2)); }
+  const dr = P(1.0, 1.7); bag.add('timber_red', ellipsoid([dr[0], y + 0.5, dr[1]], 0.26, 0.26, 0.42, 12)); col.circle(dr[0], dr[1], 0.4, y, y + 0.8);
+}
+
 registerStyle('javanese', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, borobudur, rumah, pendopo, hallfit, pagar, rite },
+  elements: { ...STYLES.qing.elements, borobudur, rumah, pendopo, hallfit, pagar, rite, warung, gapura, cetiya, lesung, gubuk, orang, pagarbambu, gamelan },
   objects: {},
 });

@@ -2,7 +2,7 @@
 // the monument's ground, fields between the hamlets; palms, bamboo, banyan and teak in the groves;
 // the tropical sky of central Java.
 
-import { RADIUS, MONASTERY, HAMLETS, inRect, inHouse, nearHamlet, smooth as sm } from './layout.js';
+import { RADIUS, MONASTERY, HAMLETS, WAY, inRect, inHouse, nearHamlet, nearWay, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 /** How far (0…1) x, z is from the hamlets' yards and the monastery: the ground is levelled (at 0, where the houses stand) near them. */
@@ -11,6 +11,8 @@ function away(x, z) {
   for (const [hx, hz, hr] of HAMLETS) d = Math.min(d, Math.hypot(x - hx, z - hz) - hr - 14);
   const m = MONASTERY, dx = Math.max(m[0] - x, 0, x - m[2]), dz = Math.max(m[1] - z, 0, z - m[3]);
   d = Math.min(d, Math.hypot(dx, dz) - 10);
+  // the pilgrims' way from the east is carried level across the rolling plain, its verges with it (the lane is laid at 0.03 m)
+  d = Math.min(d, Math.hypot(Math.max(40 - x, 0, x - (WAY.x1 + 40)), Math.max(Math.abs(z) - 12, 0)));
   return sm(0, 30, d);
 }
 /**
@@ -31,6 +33,7 @@ function cover(x, z) {
   const r = Math.hypot(x, z);
   const c = { sand: 0, grass: 0.6, rock: 0, soil: 0.3, fields: 0, dry: 0.05, warmth: 0.55, red: 0.15, road: 0, snow: 0, forest: 0 };
   if (r < 95) { c.grass = 0.75; c.soil = 0.25; return c; }
+  if (nearWay(x, z) && Math.abs(z) < 9) { c.soil = 0.5; c.grass = 0.45; return c; }      // the trodden verges of the way
   if (nearHamlet(x, z) || inRect(MONASTERY, x, z, 4)) { c.soil = 0.6; c.grass = 0.4; return c; }
   c.fields = 0.75; c.grass = 0.25; return c;
 }
@@ -41,6 +44,7 @@ function fromWater() { return 1e4; }
 function planting(x, z) {
   const r = Math.hypot(x, z);
   if (x > 60 && Math.abs(z) < 3.5) return null;      // the paved way from the east
+  if (nearWay(x, z) && x < WAY.x1 + 6) return Math.abs(z) < 9 ? { grass: 14 } : { banyan: 0.14, teak: 0.3, date_palm: 0.7, bamboo: 0.3, grass: 20 };   // bare verges, then shade trees along the way
   if (r > RADIUS - 6 || r < 100) return r < 100 && r > 75 ? { grass: 30 } : null;
   if (inHouse(x, z, 1.5) || inRect(MONASTERY, x, z, 1)) return null;
   if (nearHamlet(x, z)) return { date_palm: 1.0, bamboo: 0.8, banyan: 0.08, teak: 0.25, grass: 25 };

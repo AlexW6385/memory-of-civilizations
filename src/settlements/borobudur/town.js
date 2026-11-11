@@ -1,7 +1,8 @@
 // The hamlets round the monument (docs/settlements/borobudur.md §5): houses on posts in their groves;
 // and the pilgrims on the monument (§10): monks and lay people walking the galleries clockwise,
 // the monument on their right, as the reliefs are read, climbing terrace by terrace.
-import { RADIUS, MONUMENT, SQUARES, CIRCLES, MONASTERY, HAMLETS, houses, inRect, frontVec } from './layout.js';
+import { RADIUS, MONUMENT, SQUARES, CIRCLES, MONASTERY, HAMLETS, houses, inRect, frontVec, wellAt } from './layout.js';
+import { villagePlans } from './village.js';
 const base = (id, elements) => ({ id, style: 'javanese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [90, 0], facing: 'w' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -110,13 +111,14 @@ function yards(hi) {
     if (rand() < 0.14) put({ t: 'animal', kind: 'buffalo', gear: false, graze: true, seed: sd + 5, rot: Math.atan2(-fx, -fz) + 1.2 }, at(5.2, 3.0), 2.2);
   }
   // a well at the middle of each yard, a water pot beside it
-  L.push({ t: 'well', at: [hx, hz], y: 0, kind: 'pulley', mat: 'brick', seed: hi + 11 }, { t: 'pot', at: [hx + 1.6, hz + 0.8], y: 0, kind: 'water_pot', n: 3, seed: hi + 12 });
+  const [wx, wz] = wellAt(hi);
+  L.push({ t: 'well', at: [wx, wz], y: 0, kind: 'pulley', mat: 'brick', seed: hi + 11 }, { t: 'pot', at: [wx + 1.6, wz + 0.8], y: 0, kind: 'water_pot', n: 3, seed: hi + 12 });
   return { ...base(`borobudur-yard-${hi}`, L), style: 'life', center: [hx, hz], near: hr + 150 };
 }
 
 export async function town() {
   const plans = [];
   HAMLETS.forEach((h, hi) => plans.push(base(`borobudur-hamlet-${hi}`, houses().filter((q) => q.hamlet === hi).map((q) => ({ t: 'rumah', ...q }))), yards(hi)));
-  plans.push(pilgrims(), monastery());
+  plans.push(pilgrims(), monastery(), ...villagePlans());
   return plans;
 }
