@@ -64,6 +64,7 @@ import { ground as newYork } from './new-york/ground.js';
 import { ground as sydney } from './sydney/ground.js';
 import { ground as dunhuang } from './dunhuang/ground.js';
 
+import { ground as abuSimbel } from './abu-simbel/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -125,6 +126,7 @@ export const GROUNDS = {
   'new-york': newYork,
   sydney,
   dunhuang,
+  'abu-simbel': abuSimbel,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -191,6 +193,7 @@ const LOADERS = {
   cahokia: () => import('./cahokia/index.js'),
   'new-york': () => import('./new-york/index.js'),
   sydney: () => import('./sydney/index.js'),
+  'abu-simbel': () => import('./abu-simbel/index.js'),
 };
 
 /** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */

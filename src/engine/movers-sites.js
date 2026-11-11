@@ -60,5 +60,6 @@ export const MOVER_SITES = {
   'timurid-samarkand': () => import('../settlements/timurid-samarkand/movers.js'),
   'dunhuang': () => import('../settlements/dunhuang/movers.js'),
   'muromachi-kyoto': () => import('../settlements/muromachi-kyoto/movers.js'),
+  'abu-simbel': () => import('../settlements/abu-simbel/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
