@@ -3,7 +3,7 @@
 import { STYLES } from '../../core/build.js';
 import '../../objects/index.js';
 import { bjBooth } from './shops.js';
-import { bjShopgoods, bjBarber, bjTeastall, bjWatercart, bjSedan, bjLane, bjPet } from './streetlife.js';
+import { bjShopgoods, bjBarber, bjTeastall, bjWatercart, bjSedan, bjLane, bjPet, bjShrine, bjBenchtree, bjCoalcart } from './streetlife.js';
 import { pekingCart, camelString } from '../../styles/qing/street.js';
 import { bjRooms, bjTeahouse, bjPharmacy } from './interiors.js';
 
@@ -18,5 +18,8 @@ STYLES.life.elements.bj_watercart = bjWatercart;
 STYLES.life.elements.bj_sedan = bjSedan;
 STYLES.life.elements.bj_lane = bjLane;
 STYLES.life.elements.bj_pet = bjPet;
+STYLES.life.elements.bj_shrine = bjShrine;
+STYLES.life.elements.bj_benchtree = bjBenchtree;
+STYLES.life.elements.bj_coalcart = bjCoalcart;
 STYLES.life.elements.peking_cart = pekingCart;
 STYLES.life.elements.camel_string = camelString;

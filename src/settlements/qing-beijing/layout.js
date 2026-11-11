@@ -39,7 +39,10 @@ export const HALLS = {
  * the altar's centre and tiers, the square wall round it, the belt of old arborvitae round the wall.
  */
 export const TEMPLE = { c: [72, 280], wall: 54, belt: [14, 214, 142, 352] };
+/** The Danbi bridge-way (§13): the raised stone way from the temple court's south gate, 29 m wide, compressed here to 61 m. */
+export const DANBI = { rect: [57.5, 338.9, 86.5, 400], y: 1.2 };
 export const inTemple = (x, z, m = 0) => Math.abs(x - TEMPLE.c[0]) <= TEMPLE.wall + m && Math.abs(z - TEMPLE.c[1]) <= TEMPLE.wall + m;
+export const inDanbi = (x, z, m = 0) => x >= DANBI.rect[0] - m && x <= DANBI.rect[2] + m && z >= DANBI.rect[1] - m && z <= DANBI.rect[3] + m;
 export const inBelt = (x, z, m = 0) => x >= TEMPLE.belt[0] - m && x <= TEMPLE.belt[2] + m && z >= TEMPLE.belt[1] - m && z <= TEMPLE.belt[3] + m;
 
 const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -68,6 +71,7 @@ export function lanes() {
     // the lanes stop at the street round the moat (not under the palace and the moat) and at the temple's belt of trees
     if (z + HUTONG_W > RING[1] && z < RING[3]) { out.push([-RADIUS, z, RING[0], z + HUTONG_W], [RING[2], z, RADIUS, z + HUTONG_W]); continue; }
     if (z + HUTONG_W > bz0 && z < bz1) { out.push([-RADIUS, z, b0, z + HUTONG_W], [b1, z, RADIUS, z + HUTONG_W]); continue; }
+    if (z + HUTONG_W > DANBI.rect[1] - 3 && z < DANBI.rect[3] + 3) { out.push([-RADIUS, z, DANBI.rect[0] - 7, z + HUTONG_W], [DANBI.rect[2] + 7, z, RADIUS, z + HUTONG_W]); continue; }
     out.push([-RADIUS, z, RADIUS, z + HUTONG_W]);
   }
   for (const x of STREET_X) out.push([x - 4, -RADIUS, x + 4, RADIUS]);
@@ -113,17 +117,38 @@ export function houses() {
       const far = Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b)));
       const seed = Math.floor(rand() * 1e6), drop = rand() < 0.05, q = pick(), q2 = pick();
       if (far > RADIUS - 28) continue;
-      if (rectsMeet(r, RING, 2) || rectsMeet(r, AVENUE, 2) || rectsMeet(r, TEMPLE.belt, 1) || SHOP_STRIPS.some((p) => rectsMeet(r, p.rect, 0)) || streets.some((s) => rectsMeet(r, s, 1))) continue;
+      if (rectsMeet(r, RING, 2) || rectsMeet(r, AVENUE, 2) || rectsMeet(r, TEMPLE.belt, 1) || rectsMeet(r, DANBI.rect, 9) || SHOP_STRIPS.some((p) => rectsMeet(r, p.rect, 0)) || streets.some((s) => rectsMeet(r, s, 1))) continue;
       if (drop) continue;
       const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, wealth = Math.min(1, nearness(cx, cz) * 0.95 + (q - 0.5) * 0.5 + (r[2] - r[0] > 31 ? 0.08 : 0));
       const gate = wealth > 0.74 ? 'guangliang' : wealth > 0.6 ? (q2 < 0.6 ? 'jinzhu' : 'ruyi') : wealth > 0.34 ? (q2 < 0.14 ? 'manzi' : q2 < 0.88 ? 'ruyi' : 'wall') : (q2 < 0.55 ? 'wall' : q2 < 0.9 ? 'ruyi' : 'manzi');
       const courts = wealth > 0.52 && q2 > 0.25 || gate === 'guangliang' ? 2 : 1;
-      const d = Math.hypot(cx, cz), lod = d < 320 ? 0 : d < 430 ? 1 : 2;
+      // full detail only near the avenue's mouth, where the visitor walks in (115 m), the middle ring to 220 m, the rest light
+      const d = Math.hypot(cx + 30, cz - 225), lod = d < 115 ? 0 : d < 190 ? 1 : d < 290 ? 2 : 3;
       HOUSES.push({ rect: r, seed, gate, courts, wealth, lod });
     }
   }
   return HOUSES;
 }
+let BETWEEN = null;
+/**
+ * What lies between the gates of the lanes (§29): on the lane's north edge, at the west end of the wider houses' frontage (clear of the
+ * gate's own clutter, which spreads west from each gate), a street shrine to the earth god, a pagoda tree with a stone bench round it,
+ * a coal seller's cart with its donkey. [{ kind: 'shrine' | 'benchtree' | 'coalcart', at: [x, z], seed }], z on the lane's edge.
+ */
+export function betweenGates() {
+  if (BETWEEN) return BETWEEN;
+  BETWEEN = [];
+  const rand = rng(4207), kinds = ['benchtree', 'coalcart', 'shrine', 'coalcart', 'benchtree', 'benchtree', 'shrine'];
+  let n = 0;
+  for (const h of houses()) {
+    if (h.rect[2] - h.rect[0] < 27 || rand() < (h.lod >= 2 ? 0.7 : 0.4)) continue;
+    const x = h.rect[0] + 4 + rand() * 3, z = h.rect[3] + 0.8;
+    if (inRect(RING, x, z, 6) || inRect(AVENUE, x, z, 10) || inShopStrip(x, z, 4) || STREET_X.some((sx) => Math.abs(x - sx) < 8) || wellNear(x, z)) continue;
+    BETWEEN.push({ kind: kinds[n++ % kinds.length], at: [x, z], seed: Math.floor(rand() * 1e9) });
+  }
+  return BETWEEN;
+}
+const wellNear = (x, z) => wells().some((w) => Math.hypot(w[0] - x, w[1] - z) < 8);
 export function rectsMeet(a, b, m = 0) { return a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m; }
 export function inHouse(x, z, m = 0) { return houses().some((h) => inRect(h.rect, x, z, m)); }
 /** Where a house's trees stand: [x, z, kind] in its inner court (the pagoda tree, jujube or persimmon of the yard, §17). */
@@ -147,6 +172,7 @@ function treeIndex() {
   TREES = new Map();
   const add = (t) => { const k = Math.floor(t[0] / 8) + ',' + Math.floor(t[1] / 8); if (!TREES.has(k)) TREES.set(k, []); TREES.get(k).push(t); };
   for (const t of vergeTrees()) add(t);
+  for (const b of betweenGates()) if (b.kind === 'benchtree') add([b.at[0] + 1.6, b.at[1] + 0.7, 'pagoda']);
   for (const h of houses()) for (const t of houseTrees(h)) { const k = Math.floor(t[0] / 8) + ',' + Math.floor(t[1] / 8); if (!TREES.has(k)) TREES.set(k, []); TREES.get(k).push(t); }
   return TREES;
 }

@@ -5,7 +5,7 @@
 // few officials at the foot of the terrace: no crowds), pigeons in the lanes. Positions come from
 // layout.js; nothing is hard-coded but the buildings' places on the avenue (shops.js).
 import './style.js';
-import { RADIUS, AVENUE, HALLS, TIERS, RING, TEMPLE, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
+import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, TEMPLE, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
 import { SHOP_SITES } from './shops.js';
 
 const base = (id, style, elements, center = [0, 0]) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' }, center, near: 230 });
@@ -104,6 +104,19 @@ function streetPlans(rand) {
     if (h.lod === 0 && rand() < 0.22) H.push({ t: 'laundry', at: [gx - 6 - rand() * 6, z1 + 1.1], y: 0.03, rot: 0, len: 3, seed: seed() });
     if (h.lod === 0 && rand() < 0.35) H.push({ t: 'figure', at: [gx - 4 - rand() * 8, z1 + 1.6 + rand() * 2], y: 0.03, rot: rand() * 6.28, seed: seed(), ...FIG, cloth: 'cloth_red', child: true, pose: 'squat', dress: 'trousers', hat: 'none' });
     void x0;
+  }
+  // between the gates: a street shrine, a tree with a bench and a tea table (a couple of old men at it), the coal seller's cart and his donkey
+  for (const b of betweenGates()) {
+    const [x, z] = b.at;
+    if (b.kind === 'shrine') { H.push({ t: 'bj_shrine', at: [x, z], seed: b.seed }); if (rand() < 0.5) H.push({ t: 'figure', at: [x + 0.2, z + 2.0], y: 0.03, rot: Math.PI, seed: seed(), ...FIG, cloth: 'cloth_grey', pose: 'stand' }); }
+    else if (b.kind === 'benchtree') {
+      H.push({ t: 'bj_benchtree', at: [x, z], seed: b.seed });
+      for (const dx of [0.2, 1.2]) if (rand() < 0.75) H.push({ t: 'figure', at: [x + 1.6 + dx - 0.7, z + 2.0], y: 0.03 + 0.0, rot: Math.PI, seed: seed(), ...FIG, cloth: CL[Math.floor(rand() * CL.length)], pose: 'sit' });
+    } else {
+      H.push({ t: 'bj_coalcart', at: [x, z], seed: b.seed });
+      H.push({ t: 'animal', kind: 'donkey', at: [x + 3.4, z + 1.5], y: 0.03, rot: Math.PI / 2, gear: true, graze: false, seed: seed() });
+      H.push({ t: 'figure', at: [x - 1.5, z + 2.9], y: 0.03, rot: 0, seed: seed(), ...FIG, dress: 'trousers', cloth: 'cloth_brown', hat: 'brim', carry: 'pole' });
+    }
   }
   plans.push(...tiled('qing-beijing-hutong-life', H, 200));
   void RING; void SHOP_APRONS;

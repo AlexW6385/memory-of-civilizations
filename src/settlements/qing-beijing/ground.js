@@ -3,7 +3,7 @@
 // scholar trees and jujubes in the courtyards, willows along the moat; the sky of a clear Beijing
 // autumn. Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, LEVEL, MOAT, RIVER, RING, AVENUE, SHOP_APRONS, inRect, inMoat, inRiver, inPalace, lanes, inHouse, inShopStrip, treeNear, inTemple, inBelt, inForecourt, smooth as sm } from './layout.js';
+import { RADIUS, LEVEL, MOAT, RIVER, RING, AVENUE, SHOP_APRONS, inRect, inMoat, inRiver, inPalace, lanes, inHouse, inShopStrip, treeNear, inTemple, inBelt, inDanbi, inForecourt, smooth as sm } from './layout.js';
 
 const LANES = lanes();
 const onLane = (x, z, m = 0) => LANES.some((l) => inRect(l, x, z, m)) || inRect(RING, x, z, m) && !inRect(MOAT.outer, x, z) || inRect(AVENUE, x, z, m) || SHOP_APRONS.some((r) => inRect(r, x, z, m));
@@ -65,7 +65,9 @@ function planting(x, z, p) {
   if (inForecourt(x, z, 4)) return null;                                  // the Meridian Gate's forecourt is bare (no willows on its causeway)
   if (inRect(MOAT.outer, x, z, 3) && !inRect(MOAT.outer, x, z, -0.01)) return { willow: 1.6 };
   if (inTemple(x, z, 2.5)) return null;
-  if (inBelt(x, z)) return onLane(x, z, 1) || Math.abs(x - 13) < 9 && Math.abs(z - 280) < 4 ? null : { arborvitae: 2.4, grass: 18 };
+  if (inDanbi(x, z) || (x > 52 && x < 92 && z > 399 && z < 417)) return null;
+  if (inDanbi(x, 339, 9) && inDanbi(80, z, 0)) return onLane(x, z, 1) ? null : { arborvitae: 5, grass: 14 };                   // the cypress rows either side of the way
+  if (inBelt(x, z)) return onLane(x, z, 1) || Math.abs(x - 13) < 9 && Math.abs(z - 280) < 4 ? null : { arborvitae: 3.2, grass: 18 };
   const t = treeNear(x, z, 1.5);
   if (t) return { [KIND[t[2]]]: 22 };
   if (onLane(x, z) || inHouse(x, z, 0.4) || inShopStrip(x, z)) return null;
@@ -76,7 +78,7 @@ function planting(x, z, p) {
 
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 1.6, pagoda_tree: 22, persimmon: 22, jujube: 22, apple: 22, arborvitae: 2.4, grass: 30 },
+  maxDensity: { willow: 1.6, pagoda_tree: 22, persimmon: 22, jujube: 22, apple: 22, arborvitae: 5, grass: 30 },
   // a clear autumn day in Beijing: a high blue sky, dry air, a cool wind from the north-west
   climate: {
     sun: { az: 160, el: 38, color: [1.0, 0.95, 0.86], intensity: 3.3, lat: 40, dec: -5, hour: 11 },

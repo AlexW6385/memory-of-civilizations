@@ -251,3 +251,60 @@ export function bjLane(el, { bag, col }) {
 
 /** bj_lane_cat: a cat sitting on the wall's coping, or a dog by the gate, for lane gates; drawn by the engine's animal. */
 export function bjPet(el, ctx) { animal({ t: 'animal', kind: el.kind ?? 'dog', at: el.at, y: el.y ?? 0.03, rot: el.rot ?? 0, seed: el.seed, graze: false }, ctx); }
+
+// ── between the gates (§29) ───────────────────────────────────────────────────────────────────────
+/** bj_shrine: a street shrine to the earth god (tudi miao) at the lane's edge: a brick niche under a small grey-tiled roof, a red cloth and couplets, the incense bowl before it. */
+export function bjShrine(el, { bag, col }) {
+  const r = rng(el.seed || 1), P = new Parts();
+  P.add('granite_grey', box(-0.55, 0, 0.1, 0.55, 0.2, 0.95));
+  P.add('brick_grey', box(-0.46, 0.2, 0.18, 0.46, 1.12, 0.78));
+  P.add('lacquer_black', box(-0.27, 0.34, 0.76, 0.27, 1.0, 0.805));                             // the niche
+  P.add('cloth_red', box(-0.3, 0.3, 0.8, 0.3, 0.34, 0.835));
+  P.add('paint_ochre', box(-0.14, 0.42, 0.806, 0.14, 0.9, 0.826));                               // the little tablet
+  for (const sx of [-1, 1]) P.add('cloth_red', box(sx * 0.37 - 0.035, 0.45, 0.78, sx * 0.37 + 0.035, 1.0, 0.8));   // the couplet
+  // the roof: two eaves of grey tile and a ridge, the front eave swept out
+  P.add('tile_grey', box(-0.6, 1.12, 0.08, 0.6, 1.2, 0.98)); P.add('tile_grey', box(-0.5, 1.2, 0.16, 0.5, 1.28, 0.9)); P.add('tile_grey', box(-0.52, 1.28, 0.4, 0.52, 1.36, 0.66));
+  P.add('tile_grey', box(-0.58, 1.36, 0.46, 0.58, 1.42, 0.6));
+  // the incense bowl on its flat stone, the sticks burning down, an offering of three apples
+  P.add('granite_grey', box(-0.3, 0, 0.95, 0.3, 0.1, 1.35));
+  P.add('pottery_dark', lathe([[0.09, 0], [0.12, 0.06], [0.14, 0.12], [0.001, 0.12]], 8, null, 0, 0.1, 1.15));
+  for (let k = 0; k < 5; k++) P.add('timber', limb([-0.06 + k * 0.03, 0.2, 1.15 + (r() - 0.5) * 0.04], [-0.06 + k * 0.03 + (r() - 0.5) * 0.03, 0.42, 1.15], 0.004, 0.004, 3));
+  for (let k = 0; k < 3; k++) P.add('cloth_red', ball(0.04, 0.04, 0.04, 5, 3).translate(0.12 + k * 0.1, 0.14, 1.2));
+  col?.rect?.([el.at[0] - 0.6, el.at[1] + 0.08, el.at[0] + 0.6, el.at[1] + 1.0], 0, 1.4);
+  P.emit(bag, el.at[0], 0.03, el.at[1], 0);
+}
+/** bj_benchtree: the tree's pit (a ring of brick) with a long stone bench round its south side, a low table with a pot of tea and two stools. The tree is the planting's. */
+export function bjBenchtree(el, { bag, col }) {
+  const r = rng(el.seed || 1), P = new Parts(), cx = 1.6, cz = 0.7;
+  P.add('brick_grey', lathe([[1.05, 0], [1.05, 0.2], [0.93, 0.2], [0.93, 0.0]], 16, null, cx, 0, cz));
+  // the bench: a granite slab on two blocks
+  for (const sx of [-1, 1]) P.add('granite_grey', box(cx + sx * 1.15 - 0.12, 0, cz + 1.3, cx + sx * 1.15 + 0.12, 0.42, cz + 1.7));
+  P.add('granite_grey', box(cx - 1.5, 0.42, cz + 1.25, cx + 1.5, 0.5, cz + 1.75));
+  // the table, its pot and cups, two stools
+  P.add('wood_dark', box(cx + 2.2, 0.38, cz + 0.3, cx + 3.0, 0.43, cz + 0.9));
+  for (const [sx, sz] of [[2.25, 0.35], [2.95, 0.35], [2.25, 0.85], [2.95, 0.85]]) P.add('wood_dark', box(cx + sx - 0.025, 0, cz + sz - 0.025, cx + sx + 0.025, 0.38, cz + sz + 0.025));
+  P.add('pottery_dark', lathe([[0.001, 0], [0.07, 0.02], [0.08, 0.1], [0.05, 0.13], [0.001, 0.14]], 8, null, cx + 2.5, 0.43, cz + 0.6));
+  for (let k = 0; k < 3; k++) P.add('glaze_white', lathe([[0.001, 0], [0.025, 0.01], [0.035, 0.05], [0.001, 0.05]], 6, null, cx + 2.7 + k * 0.1, 0.43, cz + 0.7));
+  for (const [sx, sz] of [[2.6, 1.2], [2.6, -0.1]]) { P.add('timber', box(cx + sx - 0.17, 0.3, cz + sz - 0.17, cx + sx + 0.17, 0.34, cz + sz + 0.17)); for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) P.add('timber', box(cx + sx + a * 0.14 - 0.02, 0, cz + sz + b * 0.14 - 0.02, cx + sx + a * 0.14 + 0.02, 0.3, cz + sz + b * 0.14 + 0.02)); }
+  col?.rect?.([el.at[0] + cx - 1.5, el.at[1] + cz + 1.25, el.at[0] + cx + 1.5, el.at[1] + cz + 1.75], 0, 0.5);
+  void r;
+  P.emit(bag, el.at[0], 0.03, el.at[1], 0);
+}
+/** bj_coalcart: the coal seller's cart: a two-wheeled flatbed loaded with sacks and coal balls, its shafts to the left for the donkey (set by the life plan at +x). */
+export function bjCoalcart(el, { bag, col }) {
+  const r = rng(el.seed || 1), P = new Parts(), zc = 1.5, y = 0.62;
+  P.add('timber', box(-0.95, y, zc - 0.5, 0.95, y + 0.07, zc + 0.5));
+  for (const sz of [-1, 1]) P.add('timber', box(-0.95, y + 0.07, zc + sz * 0.5 - 0.02, 0.95, y + 0.3, zc + sz * 0.5 + 0.02));
+  P.add('timber', box(-0.95, y - 0.1, zc - 0.05, 0.95, y, zc + 0.05));                                      // the axle beam
+  P.add('timber', limb([0.95, y + 0.1, zc - 0.3], [2.6, y - 0.05, zc - 0.3], 0.035, 0.03, 5)); P.add('timber', limb([0.95, y + 0.1, zc + 0.3], [2.6, y - 0.05, zc + 0.3], 0.035, 0.03, 5));
+  for (const sz of [-1, 1]) {
+    const w = new Parts(); wheelY(w, 'timber', 0.5, 0, 0.5, 12); w.emit(bag, el.at[0] + 0.0 + 0, 0.03, el.at[1] + zc + sz * 0.62, Math.PI / 2);
+  }
+  // the load: sacks of coal dust and a pile of coal balls
+  for (let k = 0; k < 6; k++) { const x = -0.7 + (k % 3) * 0.55, z = zc + (k < 3 ? -0.22 : 0.22); P.add('hide_black', ball(0.26, 0.15, 0.2, 7, 4).translate(x, y + 0.2, z)); }
+  for (let k = 0; k < 3; k++) P.add('hide_black', ball(0.24, 0.14, 0.19, 7, 4).translate(-0.5 + k * 0.5, y + 0.36, zc + (r() - 0.5) * 0.1));
+  // coal balls stacked on the ground beside it
+  const Q = new Parts(); coalStack(Q, 0, 0, 0.9, r); Q.emit(bag, el.at[0] - 1.9, 0.03, el.at[1] + 0.9, 0);
+  col?.rect?.([el.at[0] - 1.0, el.at[1] + zc - 0.6, el.at[0] + 2.6, el.at[1] + zc + 0.6], 0, 0.8);
+  P.emit(bag, el.at[0], 0.03, el.at[1], 0);
+}
