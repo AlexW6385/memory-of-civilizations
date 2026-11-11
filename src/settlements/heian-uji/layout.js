@@ -30,7 +30,7 @@ export const ISLAND = { c: [-55, -53], r: [6, 3.8], top: 0.3 };
 /** Distance (m, negative inside) from the small island's outline at the ground's level. */
 export function islandDistance(x, z) { const dx = (x - ISLAND.c[0]) / ISLAND.r[0], dz = (z - ISLAND.c[1]) / ISLAND.r[1]; return (Math.hypot(dx, dz) - 1) * Math.min(...ISLAND.r); }
 export const inPond = (x, z) => pondDistance(x, z) < 0 && islandDistance(x, z) > -0.6;
-export const inRiver = (x, z) => Math.abs(x - riverX(z)) < RIVER.w / 2 - 3 && Math.hypot(x, z) < RADIUS - 70;
+export const inRiver = (x, z, m = 0) => Math.abs(x - riverX(z)) < RIVER.w / 2 - 3 + m && Math.hypot(x, z) < RADIUS - 70;
 export function height(x, z) {
   const r = Math.hypot(x, z), edge = smooth(RADIUS - 80, RADIUS - 40, r);
   let h = 0;
