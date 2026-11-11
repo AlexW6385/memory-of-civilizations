@@ -12,6 +12,7 @@ import { comares, lionsHalls } from './palaces.js';
 import { PARTAL } from './partal.js';
 import { GENERALIFE } from './generalife.js';
 import { ALBAICIN } from './albaicin.js';
+import { STREETS } from './streets.js';
 
 const W = 'tuff_red', P = 'plaster_white';
 /** nasrid_tower: { rect, h, y } — a square tower of red rammed earth and brick, crenellated. */
@@ -281,6 +282,6 @@ function lionsCourt(bag, col, rect, y, h) {
 
 registerStyle('nasrid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, nasrid_tower: tower, nasrid_wall: wall, court, comares, lions_halls: lionsHalls, ...PARTAL, ...GENERALIFE, ...ALBAICIN, ...MEDINA },
+  elements: { ...STYLES.qing.elements, nasrid_tower: tower, nasrid_wall: wall, court, comares, lions_halls: lionsHalls, ...PARTAL, ...GENERALIFE, ...ALBAICIN, ...MEDINA, ...STREETS },
   objects: {},
 });

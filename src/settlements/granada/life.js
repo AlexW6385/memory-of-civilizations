@@ -2,7 +2,8 @@
 // sultans' private retreat — gardeners in the beds and the huerta, men of the household talking and
 // seated, women walking in the Sultana's garden, a man at prayer, horses and grooms in the Dismount court.
 
-import { RADIUS, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y, HILL, LIONS, COMARES, MYRTLES, PARTAL } from './layout.js';
+import { darroSlots } from '../../styles/nasrid/streets.js';
+import { RADIUS, gardens, DARRO, DARRO_BRIDGES, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y, HILL, LIONS, COMARES, MYRTLES, PARTAL } from './layout.js';
 
 export function life() {
   const L = [], T = Object.fromEntries(TERRACES.map((t) => [t.id, t]));
@@ -36,6 +37,7 @@ export function life() {
   gardener([T.orchard1.r[0] + 1.4 + 0.9 * 3, -1.0], T.orchard1.y + 0.02, 'w', { pose: 'squat' });
   P([T.orchard1.r[0] + 11.9, 13.2], T.orchard1.y + 0.02, 'w', { dress: 'robe', cloth: 'cloth_red', cloth2: 'cloth_white', hat: 'veil', hair: 'long', carry: 'basket', h: 1.55 });
   alhambra(P, man, woman);
+  streets(P, man, woman, L);
   return L;
 }
 /**
@@ -73,3 +75,26 @@ export function aljibeLife(list) {
   return L;
 }
 export const lifePlan = () => ({ id: 'granada-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: life(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 's' } });
+
+/**
+ * The streets' people (§14): washerwomen kneeling at the wash-stones of the Darro's quays, men mending nets, an old man on a
+ * bench by the water, women with baskets; in the medina's huertas a gardener among the orange trees, a woman at the well, a
+ * cat on the wall — the gardens nearest the way in only.
+ */
+function streets(P, man, woman, L) {
+  let k = 0;
+  for (const { x, sg, kind } of darroSlots({ x0: -140, x1: 230, seed: 7, gaps: DARRO_BRIDGES })) {
+    if (x < -110 || x > 170) continue;
+    const face = sg < 0 ? 0 : Math.PI, Z = (d) => DARRO.z + sg * d, y = DARRO.y + 0.02, w = DARRO.w;
+    k++;
+    if (kind === 0) { woman([x + 1.7, Z(w + 1.5)], y, face, { pose: 'squat', cloth: k % 2 ? 'cloth_ochre' : 'cloth_white' }); if (k % 3 === 0) woman([x + 2.9, Z(w + 1.6)], y, face + 0.5, { cloth: 'cloth_red', carry: 'basket' }); }
+    else if (kind === 1) man([x + 1.3, Z(w + 2.2)], y, sg < 0 ? Math.PI : 0, { pose: 'squat', cloth: 'cloth_brown', hat: 'cap' });
+    else if (kind === 2 && k % 2 === 0) man([x + 0.9, Z(7.3)], y + 0.48, face, { pose: 'sit', cloth: 'cloth_grey', hat: 'turban' });
+  }
+  const at = [20, 30];
+  for (const g of gardens().sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - at[0], (a.rect[1] + a.rect[3]) / 2 - at[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - at[0], (b.rect[1] + b.rect[3]) / 2 - at[1])).slice(0, 6)) {
+    const [x0, z0, x1, z1] = g.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, y = g.y + 0.08;
+    P([cx + 0.2, cz + 0.4], y, 0.8, { dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_ochre', over: 'belt', hat: 'cap', hatMat: 'cloth_white', hair: 'short', beard: true, legs: 'bare', pose: 'squat' });
+    L.push({ t: 'animal', kind: 'cat', at: [x0 + 0.17, z0 + (g.front === 's' ? 3 : (z1 - z0) - 3)], y: g.y + 2.3, rot: 1.2, seed: 40 + Math.floor(x0) });
+  }
+}
