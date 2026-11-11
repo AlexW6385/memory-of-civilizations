@@ -19,7 +19,7 @@ const STREETS = LY.STREETS, lots = LY.lots;
 
 // ── how many, how fast ───────────────────────────────────────────────────────
 export const PARAMS = {
-  walkers: { day: 46, night: 7, rain: 0.7, reach: 150, spawnMin: 28, far: 42 },
+  walkers: { day: 80, night: 9, rain: 0.7, reach: 130, spawnMin: 20, far: 42 },
   boats: { count: 9, reach: 260, spawnMin: 60, far: 100, speed: [0.85, 1.3], bridgeSpeed: 0.7 },
   water: RIVER.water,
 };
