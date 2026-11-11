@@ -98,6 +98,18 @@ Sources: Zimbabwe Field Guide, "The Great Enclosure in photographs" (zimfieldgui
 - **Life.** Women with pots and baskets, men in hide capes, herd boys, traders on paths from every gate to the Great Enclosure's entrance, the Valley courts and the Ascent; swallows, crows over the hill, sparrows on the compounds; hearth smoke from a share of the houses at the morning and evening meals [inferred].
 - Not built: the Balcony, the covered stairway, the cave; no new materials were needed (lichen uses plaster_damp and paint_ochre).
 
+## 16. Deepening pass: the yards, the workshops and the hill's small enclosures (2026-11-11)
+
+Sources as §14–§15 (Herald kitchens, Met, Smarthistory, Zimbabwe Field Guide, Ebsco).
+- **Inside the Great Enclosure.** Hall's work destroyed "store huts and grain bins" in the enclosure (zimfieldguide) [stated]. Ours: four walled homesteads (houses, granary, yard) in its open western and southern parts, clear of the passage, the tower's court and the entrance path; two have furnished houses; the seven loose houses of the earlier pass are gone [placement inferred].
+- **The yard at eye level.** Each homestead's yard now holds an open hearth of three stones with a pot and sticks, a wooden mortar with its pestle, a drying rack of poles (gourds and grain on it), a group of pots on grass rings, a basket of grain, a hoe and an axe leaning to the wall, a mat with grain drying [forms inferred from later Shona homesteads; hearth stones and pots stated for the houses, Herald]. Standing millet in plots beside every second homestead [the staple; inferred].
+- **Painted walls.** A third of the closed houses carry a band of ochre with white triangles hanging from it round the wall [Shona painted and incised daga walls; inferred].
+- **Fallen blocks.** Slabs lie tumbled along the foot of both faces of the dry walls, a few of coarse granite [inferred: loss of courses by weathering, zimfieldguide].
+- **Workshops.** The Valley courts held crucibles "to melt gold, copper, bronze, and brass" (Met) and copper ingots (Smarthistory) [stated]. Ours: a smith's yard under a pole shed in the second court (clay forge glowing, two bellows of goatskin on clay pots, anvil stone, charcoal, iron hoes, crucibles with tongs, smoke from the shed), a soapstone carver's corner in the third (a rough block, a column half carved with the bird's head blocked out, chisels, chips) [forms and placing inferred]; a smith and a carver at work.
+- **The Hill Complex's small enclosures.** "Narrow passages among the small enclosures" (zimfieldguide) [stated]. Ours: five short curved walls with narrow entrances between the ridge wall and the Western Enclosure; a covered passage (two walls 1 m apart under stone lintels); the Balcony, three walls on a great boulder at the hill's south-east [positions inferred].
+- **Life.** Women kneeling at the mortars, goats and dogs in the homesteads nearest the arrival, women with pots and a man in his cape on the path to the north entrance, four beasts and a herd boy within sight of the arrival; more swallows over the entrance path, crows over the enclosure, sparrows on the Valley walls; a rhythmic voice line in the music (clapping and mbira patterns) [inferred].
+- Not built: the covered stairway with its twist, the cave.
+
 ## Sources
 
 - [Great Zimbabwe — Wikipedia](https://en.wikipedia.org/wiki/Great_Zimbabwe)

@@ -60,6 +60,13 @@ export function people() {
       if (i % 5 === 2) { const p = W(-2.2, 0.2); man(p, y, face(p, k.c), { h: 0.95, pose: 'stand' }); }
     });
   }
+  // inside the Great Enclosure's homesteads: women at the mortars and a man at the granary
+  compounds().filter((k) => k.inner).forEach((k, i) => {
+    const a = ((k.seed ?? 3) % 628) / 100, c = Math.cos(a), sn = Math.sin(a), W = (u, v) => [k.c[0] + c * u - sn * v, k.c[1] + sn * u + c * v];
+    const p = W(1.5, -1.5); woman(p, 0.06, face(p, W(1.5, -0.8)), { pose: 'kneel' });
+    if (i % 2 === 0) { const q = W(-1.0, 1.9); woman(q, 0.06, face(q, k.c), { carry: 'pot' }); }
+    else { const q = W(-2.2, -0.2); L.push({ t: 'animal', kind: 'goat', at: q, y: 0.06, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: true }); }
+  });
   // by the path to the Great Enclosure's north entrance, in sight of the arrival: women with pots, a man in his cape, a herd boy with four beasts
   {
     const at = (x, z) => [x, z];

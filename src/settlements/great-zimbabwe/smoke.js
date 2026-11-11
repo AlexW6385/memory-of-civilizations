@@ -4,6 +4,7 @@
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { RADIUS, compounds } from './layout.js';
+import { courtAt } from './life.js';
 
 const ID = 'great-zimbabwe';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -15,6 +16,8 @@ export function emitters() {
     // the thatch's apex: the wall 0.2 + h 2.1 − 0.15, then 1.3 r of cone
     E.push({ p: [h.c[0], h.y + 2.15 + h.r * 1.3 + 0.1, h.c[1]], kind: 'kitchen', thr: 0.15 + 0.8 * r(), seed: k.seed + 1 });
   }
+  // the smith's forge in the second Valley court (the pole shed's thatch apex 3.7 m up), lit at every hour of work
+  { const f = courtAt(1); E.push({ p: [f.at[0], f.y + 3.9, f.at[1]], kind: 'kitchen', thr: 0.02, seed: 777 }); }
   return E;
 }
 

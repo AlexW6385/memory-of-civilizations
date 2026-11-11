@@ -593,7 +593,7 @@ function milletPlot(el, { bag }) {
  * Smarthistory: copper ingots): a clay forge with its tuyere, two bellows (a goatskin on a clay pot each), an anvil stone and
  * hammer stones, a heap of charcoal, hoes and bars of iron, crucibles with their tongs; the roof of thatch on four poles [forms inferred].
  */
-function smithy(el, { bag, col }) {
+function smithy(el, { bag, col, lights }) {
   const [x, z] = el.at, y = (el.y ?? 0) + 0.02, rot = el.rot ?? 0, c = Math.cos(rot), s = Math.sin(rot), T = [];
   const W = (u, v) => [x + c * u - s * v, z + s * u + c * v];
   // the shed
@@ -606,6 +606,7 @@ function smithy(el, { bag, col }) {
     bag.add('mud_plaster', lathe([[0.8, 0], [0.7, 0.2], [0.5, 0.42], [0.3, 0.42], [0.001, 0.4]], 12, null, fx, y, fz));
     bag.add('tar_wood', lathe([[0.3, 0.38], [0.22, 0.46], [0.001, 0.5]], 9, null, fx, y, fz));
     col.circle(fx, fz, 0.8, y, y + 0.45);
+    if (lights) lights.push({ at: [fx, y + 0.55, fz], color: '#ff8a3a', intensity: 2.2, distance: 6 });
     for (const v of [-0.38, 0.38]) { const [bx, bz] = W(-1.3, 0.2 + v), [tx, tz] = W(-0.3, 0.2 + v * 0.3);
       bag.add('terracotta', lathe(potProf(1.6), 10, null, bx, y, bz));
       bag.add('hide_brown', lathe([[0.001, 0], [0.18, 0.02], [0.2, 0.2], [0.12, 0.34], [0.001, 0.36]], 9, null, bx, y + 0.46, bz));
