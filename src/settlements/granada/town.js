@@ -1,7 +1,7 @@
 import { lodTiles, openLots } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 // The Albaicín and the town (docs/settlements/granada.md §5): whitewashed houses under tiled roofs.
-import { RADIUS, lots, height, hillE } from './layout.js';
+import { RADIUS, lots, height, hillE, DARRO, DARRO_BRIDGES, SITES, siteY, SOUK, GREAT_MOSQUE } from './layout.js';
 import { lifePlan, aljibeLife } from './life.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, 30], facing: 'n' } });
 export async function town() {
@@ -11,6 +11,16 @@ export async function town() {
   // the Albaicín's houses round their patios and its cisterns (§5.1), in the Nasrid style
   const cis = aljibes(all);
   plans.push({ ...base('granada-albaicin', [...[...patio].map((l) => ({ t: 'patio_house', rect: l.rect, y: l.y, foot: l.foot, front: l.front, seed: l.seed })), ...cis]), style: 'nasrid' });
+  // the Darro, the hammam on its bank, the mosques and the Alcaicería (§11, §12)
+  const dz = DARRO.z, mq = SITES.albaicinMosque.rect, hm = SITES.hammam.rect;
+  plans.push({ ...base('granada-medina', [
+    { t: 'darro', z: dz, w: DARRO.w, wl: DARRO.wl, bed: DARRO.bed, y: DARRO.y, x0: -330, x1: 330, gaps: DARRO_BRIDGES },
+    ...DARRO_BRIDGES.map((b) => ({ t: 'darro_bridge', x: b.x, z: dz, width: b.width, w: DARRO.w, y: DARRO.y, wl: DARRO.wl })),
+    { t: 'hammam', rect: hm, y: siteY('hammam') },
+    { t: 'mosque', rect: mq, y: siteY('albaicinMosque'), aisles: 5, hall: 15, seed: 5 },
+    { t: 'mosque', rect: GREAT_MOSQUE, y: 0, aisles: 7, hall: 20, seed: 9, riwaq: 3, minH: 18 },
+    { t: 'alcaiceria', rect: SOUK, y: 0, seed: 3 },
+  ]), style: 'nasrid' });
   plans.push({ ...base('granada-aljibe-life', aljibeLife(cis)), style: 'life' });
   return [...plans, lifePlan()];
 }
