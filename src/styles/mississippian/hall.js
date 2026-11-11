@@ -78,7 +78,14 @@ export function chiefHall(el, { bag, col, lights }) {
     bag.add('paint_white', box(r[0], F + 2.5, r[1], r[2], F + 2.6, r[3]));
   }
   // the roof over it, the lining and the rafters under it
-  const { a, b } = thatchHip(bag, el.rect, top - 0.1, rise, Math.min(1.1, 0.06 * (L + D)), Math.max(4, Math.round(rise / 1.6)));
+  const ov = Math.min(1.1, 0.06 * (L + D));
+  const { a, b } = thatchHip(bag, el.rect, top - 0.1, rise, ov, Math.max(4, Math.round(rise / 1.6)));
+  // the soffit: the eaves closed underneath, back to the wall plate (a walker is not under a bare shell)
+  { const E = [], e = [x0 - ov, z0 - ov, x1 + ov, z1 + ov], w = [x0 - 0.12, z0 - 0.12, x1 + 0.12, z1 + 0.12], yy = top - 0.22, P = (px, pz) => [px, yy, pz], dn = [0, -1, 0];
+    for (const [q0, q1, q2, q3] of [[[e[0], e[1]], [e[2], e[1]], [w[2], w[1]], [w[0], w[1]]], [[e[2], e[1]], [e[2], e[3]], [w[2], w[3]], [w[2], w[1]]], [[e[2], e[3]], [e[0], e[3]], [w[0], w[3]], [w[2], w[3]]], [[e[0], e[3]], [e[0], e[1]], [w[0], w[1]], [w[0], w[3]]]]) {
+      tri(E, P(...q0), P(...q1), P(...q2), dn); tri(E, P(...q0), P(...q2), P(...q3), dn);
+    }
+    bag.add(TH, fromTriangles(E)); }
   for (const p of [a, b]) {
     bag.add('timber_red', rod([p[0], p[1] - 1.2, p[2]], [p[0], p[1] + 2.0, p[2]], 0.16, 8));
     bag.add('timber_red', lathe([[0.001, 0], [0.26, 0.08], [0.3, 0.3], [0.2, 0.5], [0.001, 0.62]], 8, null, p[0], p[1] + 2.0, p[2]));

@@ -9,6 +9,7 @@
 export const RADIUS = 420;
 export const MONKS = { main: [-80, -265, 80, -120, 30], first: [-70, -120, 70, -62, 12], west: [-110, -230, -80, -140, 18] };
 export const SUMMIT = [-20, -235, 22, -170];                 // the main summit's top, for the great house
+export const HALLS = [[SUMMIT[0], SUMMIT[1] + 20, SUMMIT[2], SUMMIT[1] + 40], [-14, -100, 8, -86]];   // the two opened great houses, summit and first terrace
 export const PLAZA = [-115, -40, 115, 150];
 export const FOX = [-62, 178, -18, 222, 9];
 export const ROUNDTOP = [36, 200, 22, 12];                   // centre x, z, radius, height (conical)
@@ -51,7 +52,7 @@ export function mounds(x, z) {
 export const onMound = (x, z) => mounds(x, z) > 0.8;
 export function height(x, z) {
   const d = Math.abs(z - creekZ(x)), fade = 1 - smooth(RADIUS - 60, RADIUS - 30, Math.hypot(x, z));
-  const plaza = inRect(PLAZA, x, z) ? 0 : 0.6 * Math.sin(x / 37) * Math.sin(z / 29);                 // the plaza levelled, the rest gently uneven
+  const plaza = inRect(PLAZA, x, z) ? 0 : 0.6 * Math.sin(x / 37) * Math.sin(z / 29) * (1 - smooth(0.05, 1.5, mounds(x, z)));                 // the plaza levelled, the rest gently uneven
   return (mounds(x, z) + plaza + (CREEK.bed - plaza) * smooth(CREEK.w / 2 + 5, CREEK.w / 2 - 4, d)) * fade;
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }

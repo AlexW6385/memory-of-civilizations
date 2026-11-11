@@ -1,5 +1,5 @@
 // Mississippian Cahokia about 1175 (docs/settlements/cahokia.md §2–§4).
-import { RADIUS, SUMMIT, PLAZA, PALISADE, WOODHENGE, MOUNDS, FOX, CONES, RIDGES, height, smallPlazas } from './layout.js';
+import { RADIUS, SUMMIT, PLAZA, PALISADE, WOODHENGE, MOUNDS, FOX, CONES, RIDGES, HALLS, height, smallPlazas } from './layout.js';
 
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
 export const monks = {
@@ -13,8 +13,8 @@ export const monks = {
   view: [-82, -240, 82, -50],
   bakeTop: 60,
   elements: [
-    { t: 'chief_hall', rect: [SUMMIT[0], SUMMIT[1] + 20, SUMMIT[2], SUMMIT[1] + 40], y: height(...mid(SUMMIT)), h: 4.5, rise: 11, post: [-6, SUMMIT[1] + 50], seed: 11 },
-    { t: 'chief_hall', rect: [-14, -100, 8, -86], y: height(-4, -93), h: 3.5, rise: 7, seed: 12 },
+    { t: 'chief_hall', rect: HALLS[0], y: height(...mid(SUMMIT)), h: 4.5, rise: 11, post: [-6, SUMMIT[1] + 50], seed: 11 },
+    { t: 'chief_hall', rect: HALLS[1], y: height(-4, -93), h: 3.5, rise: 7, seed: 12 },
     // the log stairs up the ramp, the first stretch to the terrace, the second to the summit
     { t: 'log_stair', from: [-25, -36], to: [-25, -76], width: 7, y: height, step: 1.5 },
     { t: 'log_stair', from: [-25, -106], to: [-25, -150], width: 7, y: height, step: 1.5 },

@@ -1,7 +1,7 @@
 // Cahokia — the ground: the grassed slopes of the mounds, the plaza's packed clay, the courtyards
 // and paths of bare earth, fields of maize, squash and sunflower beyond the town, the creek's
 // willows and the bottomland woods; the hot, humid light of an American Bottom summer.
-import { RADIUS, PLAZA, CREEK, height, inCreek, inRect, inLot, onMound, mounds, creekZ, inSmallPlaza } from './layout.js';
+import { RADIUS, PLAZA, CREEK, height, inCreek, inRect, inLot, onMound, mounds, creekZ, inSmallPlaza, HALLS } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.05, grass: 0.5, rock: 0, soil: 0.4, fields: 0, dry: 0.15, warmth: 0.5, red: 0.05, road: 0, snow: 0, forest: 0 };
@@ -16,7 +16,7 @@ function water(x, z, y) { return inCreek(x, z) && y < CREEK.level + 0.3; }
 function waterLevel(x, z) { return inCreek(x, z) ? CREEK.level : -Infinity; }
 function fromWater(x, z) { return inCreek(x, z) ? -3 : Math.max(-5, Math.min(40, height(x, z) - CREEK.level)); }
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inCreek(x, z) || inRect(PLAZA, x, z, 3) || inLot(x, z, 1) || inSmallPlaza(x, z, 2)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inCreek(x, z) || inRect(PLAZA, x, z, 3) || inLot(x, z, 1) || inSmallPlaza(x, z, 2) || HALLS.some((r) => inRect(r, x, z, 1.5))) return null;
   if (mounds(x, z) > 0.3) return { grass: 22 };
   if (Math.abs(z - creekZ(x)) < CREEK.w / 2 + 6) return { willow: 0.05, reeds: 6, grass: 18 };
   if (z < -330) return { oak: 0.01, elm: 0.006, grass: 16 };                                  // the bottomland woods by the creek
