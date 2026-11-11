@@ -37,6 +37,7 @@ import '../settlements/mughal-agra/smoke.js';
 import '../settlements/giza/smoke.js';
 import '../settlements/borobudur/smoke.js';
 import '../settlements/ur/smoke.js';
+import '../settlements/abbasid-baghdad/smoke.js';
 import '../settlements/new-york/smoke.js';
 import '../settlements/sanchi/smoke.js';
 import '../settlements/chichen-itza/smoke.js';
