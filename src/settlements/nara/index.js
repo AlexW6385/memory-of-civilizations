@@ -5,7 +5,7 @@ import todaiji from './plan.js';
 import music from './music.js';
 import { town as houses } from './town.js';
 import '../../styles/chinese/index.js';
-import { HALL, height } from './layout.js';
+import { HALL, height, KOFUKU } from './layout.js';
 export { music };
 export const landmarks = [{ plan: todaiji, music }];
 // the Great Buddha (Vairocana) in bronze, 15 m seated on his lotus, in the hall; the two attendant
@@ -50,6 +50,14 @@ const daibutsu = {
     { t: 'block', rect: [cx - 22.2, cz - 11.2, cx + 22.2, cz + 11.2], y0: Y - 0.12, y1: Y, mat: 'granite_block', collide: false },
     { t: 'block', rect: [cx - 3.2, cz + 8.6, cx + 3.2, cz + 10.0], y0: Y, y1: Y + 0.95, mat: 'lacquer_red' },
     { t: 'block', rect: [cx - 3.35, cz + 8.45, cx + 3.35, cz + 10.15], y0: Y + 0.95, y1: Y + 1.02, mat: 'gilt_bronze', collide: false },
+    // the way up the court: a flagged path of dressed stone from the Middle Gate to the stage's steps, kerbed, a drain's stones either side
+    { t: 'block', rect: [-2.5, -19.6, 2.5, 34], y0: -0.1, y1: 0.05, mat: 'flagstone', collide: false },
+    { t: 'block', rect: [-2.7, -19.6, -2.5, 34], y0: -0.1, y1: 0.1, mat: 'granite_block', collide: false },
+    { t: 'block', rect: [2.5, -19.6, 2.7, 34], y0: -0.1, y1: 0.1, mat: 'granite_block', collide: false },
+    // the avenue from the Great South Gate south: the stone-flagged way 6 m wide and the kerb stones of its gutters
+    { t: 'block', rect: [-3, 152, 3, 183], y0: -0.1, y1: 0.04, mat: 'flagstone', collide: false },
+    { t: 'block', rect: [-3.2, 152, -3, 183], y0: -0.1, y1: 0.12, mat: 'granite_block', collide: false },
+    { t: 'block', rect: [3, 152, 3.2, 183], y0: -0.1, y1: 0.12, mat: 'granite_block', collide: false },
     ...inner, ...ceil, ...banners,
   ],
 };
@@ -69,13 +77,28 @@ const rushana = {
 // side of the way, the musicians on mats beside the stage, two dancers on it, the court at the foot of the hall's stairs
 const STAGE = [0, -24.5], SA = 2.8, SH = 0.8;
 const ceremonySet = {
-  id: 'nara-ceremony-set', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-60, -40, 60, 14], entrance: { at: [0, 20], facing: 'n' },
+  id: 'nara-ceremony-set', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-60, -90, 60, 14], entrance: { at: [0, 20], facing: 'n' },
   elements: [
     { t: 'bugaku_stage', c: STAGE, half: SA, y: 0, h: SH },
     { t: 'stair', rect: [STAGE[0] - 0.9, STAGE[1] + SA + 0.04, STAGE[0] + 0.9, STAGE[1] + SA + 1.24], dir: 'n', y0: 0, y1: SH, riser: 0.16, base: 0, mat: 'lacquer_red' },
     { t: 'stair', rect: [STAGE[0] - 0.9, STAGE[1] - SA - 1.24, STAGE[0] + 0.9, STAGE[1] - SA - 0.04], dir: 's', y0: 0, y1: SH, riser: 0.16, base: 0, mat: 'lacquer_red' },
   ],
 };
+// the upper gallery (§15): a flight up the west wall to a timber gallery at 13 m beside the Buddha's face, round behind the figure and down the east side
+{
+  const GY = 13, bzz = (hz1 - hz0) / 7, bxx = (hx1 - hx0) / 11;
+  const holes = (sx) => [1, 2, 3, 4].map((j) => { const z = hz0 + j * bzz, x = hx0 + (sx < 0 ? 1 : 10) * bxx; return [x - 0.75, z - 0.75, x + 0.75, z + 0.75]; });
+  for (const sx of [-1, 1]) {
+    const xa = sx < 0 ? -42 : 34, xb = sx < 0 ? -34 : 42, sa = sx < 0 ? -41.5 : 38.5;
+    ceremonySet.elements.push({ t: 'stair', rect: [sa, -56, sa + 3, -38], dir: 'n', y0: FLOOR, y1: GY, riser: 0.2, base: FLOOR, mat: 'timber' });
+    ceremonySet.elements.push({ t: 'slab', rect: [xa, hz0 + 0.6, xb, -56], y0: GY - 0.4, y1: GY, mat: 'timber', walk: true, holes: holes(sx) });
+    for (const z of [-64.5, -72, -80]) ceremonySet.elements.push({ t: 'block', rect: [sx < 0 ? -41.6 : 40.8, z - 0.4, sx < 0 ? -40.8 : 41.6, z + 0.4], y0: FLOOR, y1: GY - 0.4, mat: 'timber_red' });
+    ceremonySet.elements.push({ t: 'beam', a: [sx < 0 ? -34.1 : 34.1, -78.8], b: [sx < 0 ? -34.1 : 34.1, -56.5], w: 0.12, y: GY, h: 1.0, mat: 'lacquer_red' });
+  }
+  ceremonySet.elements.push({ t: 'slab', rect: [-34, hz0 + 0.6, 34, hz0 + 5.6], y0: GY - 0.4, y1: GY, mat: 'timber', walk: true });
+  ceremonySet.elements.push({ t: 'beam', a: [-34, hz0 + 5.7], b: [34, hz0 + 5.7], w: 0.12, y: GY, h: 1.0, mat: 'lacquer_red' });
+  for (const x of [-20, 0, 20]) ceremonySet.elements.push({ t: 'block', rect: [x - 0.4, hz0 + 2.6, x + 0.4, hz0 + 3.4], y0: FLOOR, y1: GY - 0.4, mat: 'timber_red' });
+}
 const ceremonyPeople = { id: 'nara-ceremony', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 20], facing: 'n' }, elements: [] };
 {
   const P = ceremonyPeople.elements, faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
@@ -106,6 +129,20 @@ const ceremonyPeople = { id: 'nara-ceremony', style: 'life', origin: [0, 0], bas
   for (const sd of [-1, 1]) for (let i = 0; i < 5; i++) fig(sd * (9 + (i % 3) * 1.6), -31.5 + Math.floor(i / 3) * 1.8 + (i % 3) * 0.2, 0, [-sd, 0.2], { cloth: ['cloth_maroon', 'cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_red'][i], cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', over: 'collar', beard: r() < 0.5 });
 }
 
+// the court and the gate living: monks sweeping the gravel, pilgrims praying before the hall, guards of the Great South Gate,
+// travellers and an ox-driver on the avenue, officials arriving (§14)
+{
+  const P = ceremonyPeople.elements, faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
+  let seed = 7599;
+  const r = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const fig = (x, z, dir, o) => P.push({ t: 'figure', at: [x, z], y: 0, rot: faceTo(dir) + (r() - 0.5) * 0.3, seed: Math.floor(r() * 1e9), dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'none', ...o });
+  const MC = ['cloth_ochre', 'cloth_brown', 'cloth_grey'];
+  for (const [x, z] of [[-14, 18], [16, 24], [-26, 4], [38, -14], [-40, 30], [46, 28]]) fig(x, z, [r() - 0.5, r() - 0.5], { hair: 'shaven', carry: 'broom', cloth: MC[Math.floor(r() * 3)], cloth2: 'cloth_ochre', over: 'sash' });
+  for (const [x, z] of [[-3.5, 20], [3.5, 12], [-1.5, 3], [2, -4], [-4, -12], [4.5, -14]]) fig(x, z, [0, -1], { pose: 'pray', hair: r() < 0.5 ? 'topknot' : 'bun', cloth: ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_green'][Math.floor(r() * 4)], cloth2: 'cloth_white', over: 'sash' });
+  for (const x of [-7, 7]) fig(x, 146, [-Math.sign(x) * 0.3, 1], { hat: 'cap', hatMat: 'lacquer_black', carry: 'staff', cloth: 'cloth_maroon', cloth2: 'cloth_white', over: 'collar', beard: true });
+  for (const [x, z, d] of [[-1.5, 162, [0, -1]], [2, 172, [0, -1]], [-2, 185, [0, 1]], [1.5, 198, [0, -1]], [-2.5, 210, [0, -1]], [2, 224, [0, 1]]]) fig(x, z, d, { dress: r() < 0.5 ? 'trousers' : 'robe', hair: 'topknot', hat: r() < 0.5 ? 'straw' : 'none', carry: ['bundle', 'basket', 'staff', 'pole'][Math.floor(r() * 4)], cloth: ['cloth_indigo', 'cloth_brown', 'cloth_grey'][Math.floor(r() * 3)], cloth2: 'cloth_indigo', over: 'sash' });
+}
+
 // the deer of the hills: a few small herds on the lawns outside the temple's courts and up the
 // grassy slope of Wakakusa, standing, grazing or lying folded (§6)
 const deer = { id: 'nara-deer', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 180], facing: 'n' }, elements: [] };
@@ -118,4 +155,24 @@ const deer = { id: 'nara-deer', style: 'nara', origin: [0, 0], base: 0, yaw: 0, 
     }
   }
 }
-export async function town() { return [daibutsu, rushana, deer, ceremonySet, ceremonyPeople, ...(await houses())]; }
+// the insides of Kōfuku-ji's Central Golden Hall and of the Hokke-dō: a dais of stone, the main image with its attendants,
+// the four guardian kings at the corners (the nio figures stand in for the Heavenly Kings), an altar with the offerings (§15)
+const shrineStone = { id: 'nara-shrine-stone', style: 'chinese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 180], facing: 'n' }, elements: [] };
+const shrineFigures = { id: 'nara-shrine-figures', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 180], facing: 'n' }, elements: [] };
+{
+  const [kx0, kz0] = KOFUKU.block;
+  const halls = [
+    { c: [kx0 + 28, kz0 + 20], y: 1.2, w: 7, back: 7.5, main: 5.4, att: 2.6, kings: [[-12.5, -2.6], [12.5, -2.6], [-12.5, 5.2], [12.5, 5.2]], kh: 2.6 },
+    { c: [119, -53], y: 1.0, w: 5.4, back: 7.5, main: 3.8, att: 2.4, kings: [[-11.5, -4], [11.5, -4], [-11.5, 3], [11.5, 3]], kh: 2.8 },
+  ];
+  for (const h of halls) {
+    const [hx, hz] = h.c, bz = hz - h.back, Yd = h.y + 0.5;
+    shrineStone.elements.push({ t: 'block', rect: [hx - h.w - 4.5, bz - 0.5, hx + h.w + 4.5, bz + 6.8], y0: h.y - 0.05, y1: Yd - 0.1, mat: 'granite_block' }, { t: 'block', rect: [hx - h.w - 4.7, bz - 0.7, hx + h.w + 4.7, bz + 7.0], y0: Yd - 0.1, y1: Yd, mat: 'granite_block', collide: false });
+    shrineStone.elements.push({ t: 'block', rect: [hx - 1.4, bz + 7.2, hx + 1.4, bz + 8.0], y0: h.y, y1: h.y + 0.8, mat: 'lacquer_red' }, { t: 'block', rect: [hx - 1.5, bz + 7.1, hx + 1.5, bz + 8.1], y0: h.y + 0.8, y1: h.y + 0.86, mat: 'gilt_bronze', collide: false });
+    shrineFigures.elements.push({ t: 'obj', kind: 'daibutsu', at: [hx, bz + 3.2], y: Yd, h: h.main, dir: [0, 1], mat: 'bronze' });
+    shrineFigures.elements.push({ t: 'obj', kind: 'bosatsu', bodhisattva: 'kokuzo', at: [hx - h.w + 0.5, bz + 3.8], y: Yd, h: h.att, dir: [0, 1] }, { t: 'obj', kind: 'bosatsu', bodhisattva: 'nyoirin', at: [hx + h.w - 0.5, bz + 3.8], y: Yd, h: h.att, dir: [0, 1] });
+    h.kings.forEach(([dx, dz], i) => shrineFigures.elements.push({ t: 'obj', kind: 'nio', form: i % 2 ? 'un' : 'a', at: [hx + dx, bz + 4 + dz], y: h.y, h: h.kh, dir: [dx < 0 ? 1 : -1, 0.3] }));
+    shrineFigures.elements.push({ t: 'nara_altar_set', at: [hx, bz + 7.6], y: h.y + 0.86, w: 3 });
+  }
+}
+export async function town() { return [shrineStone, shrineFigures, daibutsu, rushana, deer, ceremonySet, ceremonyPeople, ...(await houses())]; }

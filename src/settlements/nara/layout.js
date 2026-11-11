@@ -56,9 +56,9 @@ export function streets() {
 export const inStreet = (x, z, m = 0) => streets().some((r) => inRect(r, x, z, m));
 export const inBlock = (x, z, m = 0) => blocks().some((b) => inRect(b.rect, x, z, m));
 
-let LOTS = null, WALLS = null, YARDS = null;
+let LOTS = null, WALLS = null, YARDS = null, FENCES = null, GARDENS = null;
 function build() {
-  LOTS = []; WALLS = []; YARDS = [];
+  LOTS = []; WALLS = []; YARDS = []; FENCES = []; GARDENS = [];
   const rand = rng(752);
   for (const { rect: [bx0, bz0, bx1, bz1], kind } of blocks()) {
     const cx = (bx0 + bx1) / 2, cz = (bz0 + bz1) / 2;
@@ -70,23 +70,47 @@ function build() {
     // houses in four rows on two lanes (the rows face the lanes), a garden with a well between the pairs
     const rows = [[3, 's'], [17, 'n'], [44, 's'], [58, 'n']];
     for (const [off, front] of rows) {
-      let x = bx0 + 3 + rand() * 2;
+      let x = bx0 + 3 + rand() * 2, prev = null;
       while (x < bx1 - 12) {
         const w = 8.6 + rand() * 2.6, d = 8 + rand() * 1.4, z0 = front === 's' ? bz0 + off : bz0 + off + 9 - d;
         if (x + w > bx1 - 3) break;
-        if (rand() > 0.22) LOTS.push({ rect: [x, z0, x + w, z0 + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front });
+        if (rand() > 0.22) {
+          const lot = { rect: [x, z0, x + w, z0 + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front };
+          LOTS.push(lot);
+          // a board fence closes the narrow gap to the neighbour (front line to the back)
+          if (prev && x - prev.rect[2] < 2.6) { const gx = (x + prev.rect[2]) / 2, a = Math.min(z0, prev.rect[1]), b = Math.max(z0 + d, prev.rect[3]); FENCES.push({ pts: [[gx, a], [gx, b]], kind: 'board', h: 1.5 }); }
+          prev = lot;
+        } else {
+          // a vacant plot: a wattle fence across the front with a gap for the gate, a garden inside
+          const fz = front === 's' ? z0 + d : z0, gx = x + w / 2;
+          FENCES.push({ pts: [[x, fz], [x + w, fz]], kind: 'wattle', h: 1.15, gaps: [[w / 2 - 1.1, w / 2 + 1.1]] });
+          FENCES.push({ pts: [[x, z0], [x, z0 + d]], kind: 'wattle', h: 1.15 }, { pts: [[x + w, z0], [x + w, z0 + d]], kind: 'wattle', h: 1.15 });
+          GARDENS.push({ rect: [x + 0.4, z0 + 0.4, x + w - 0.4, z0 + d - 0.4], seed: Math.floor(gx * 13 + z0 * 7), kura: false });
+          prev = null;
+        }
         x += w + 1.0 + rand() * 1.2;
       }
     }
-    YARDS.push([cx + (rand() - 0.5) * 20, bz0 + 35]);
+    const wx = cx + (rand() - 0.5) * 20;
+    YARDS.push([wx, bz0 + 35]);
+    // the kitchen gardens either side of the well, a wattle fence along each back line (gaps at the ends and by the well)
+    GARDENS.push({ rect: [bx0 + 4, bz0 + 28, wx - 3, bz0 + 43], seed: Math.floor(wx * 31 + bz0), kura: wx - 3 - bx0 - 4 >= 19 }, { rect: [wx + 3, bz0 + 28, bx1 - 4, bz0 + 43], seed: Math.floor(wx * 17 + bz0 + 5), kura: bx1 - 4 - wx - 3 >= 19 });
+    for (const fz of [bz0 + 27.4, bz0 + 43.6]) FENCES.push({ pts: [[bx0 + 3, fz], [bx1 - 3, fz]], kind: 'wattle', h: 1.1, gaps: [[2, 5], [wx - bx0 - 3.5, wx - bx0 - 2.5], [wx - bx0 + 2.5, wx - bx0 + 3.5], [bx1 - bx0 - 8, bx1 - bx0 - 5]] });
   }
   // the East Market's rim: a few shop houses on the square's north and west edges (the square is left open)
   const [mx0, mz0, mx1] = MARKET.block;
   for (let x = mx0 + 2; x < mx1 - 10; x += 10.5 + rand() * 1.5) LOTS.push({ rect: [x, mz0 + 1, x + 9.5, mz0 + 9.5], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 's', shop: true });
+  // and its south edge: a second row of shop houses facing north over the mat-sellers' row
+  const mz1 = MARKET.block[3], r2 = rng(7533);
+  for (let x = mx0 + 2; x < mx1 - 10; x += 10.5 + r2() * 1.5) LOTS.push({ rect: [x, mz1 - 6.8, x + 9.5, mz1 - 0.6], seed: Math.floor(r2() * 1e6), y: 0, foot: -0.2, front: 'n', shop: true });
 }
 /** Houses of the capital on the grid's blocks. */
 export function lots() { if (!LOTS) build(); return LOTS; }
 /** The walls round the blocks: { a, b, gate: [x, z] }. */
 export function walls() { if (!WALLS) build(); return WALLS; }
+/** Fences of the plots (board between houses, wattle round vacant plots and kitchen gardens): { pts, kind, h, gaps }. */
+export function fences() { if (!FENCES) build(); return FENCES; }
+/** Kitchen gardens: { rect, seed, kura }. */
+export function gardens() { if (!GARDENS) build(); return GARDENS; }
 export function yards() { if (!YARDS) build(); return YARDS; }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

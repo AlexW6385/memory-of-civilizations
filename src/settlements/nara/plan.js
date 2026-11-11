@@ -18,6 +18,9 @@ E.push({ t: 'nara_hall', rect: SOUTH_GATE, y: 0.8, H: 8, bays: [5, 2], k: 1.3, c
 // the open-mouthed "a" on the west (the visitor's left), the closed-mouthed "un" on the east (§4)
 E.push({ t: 'obj', kind: 'nio', form: 'a', at: [-12, (SOUTH_GATE[1] + SOUTH_GATE[3]) / 2], y: 0.8, h: 5.7, dir: [1, 0] });
 E.push({ t: 'obj', kind: 'nio', form: 'un', at: [12, (SOUTH_GATE[1] + SOUTH_GATE[3]) / 2], y: 0.8, h: 5.7, dir: [-1, 0] });
+// the guardian kings of the Middle Gate too
+E.push({ t: 'obj', kind: 'nio', form: 'a', at: [-12, (cz1 - 7 + cz1 + 7) / 2], y: 1.0, h: 5.2, dir: [1, 0] });
+E.push({ t: 'obj', kind: 'nio', form: 'un', at: [12, (cz1 - 7 + cz1 + 7) / 2], y: 1.0, h: 5.2, dir: [-1, 0] });
 // steps up to both gates' platforms (each 0.9 m out beyond the posts) on the axis, front and back
 for (const [r, y] of [[[-g + 1, cz1 - 7, g - 1, cz1 + 7], 1.0], [SOUTH_GATE, 0.8]]) {
   const run = y * 3.2;
@@ -34,6 +37,16 @@ for (const [px, pz] of PAGODAS) {
 E.push({ t: 'qing_hall', rect: [-36, -165, 36, -140], y: 1.4, H: 10, roof: 'xieshan', bays: [9, 4], front: 's', four: true, plat: 1.4 });
 for (const s of [-1, 1]) for (let k = 0; k < 3; k++) E.push({ t: 'ming_hall', rect: s < 0 ? [-140, -175 + k * 26, -60, -160 + k * 26] : [60, -175 + k * 26, 140, -160 + k * 26], y: 0.6, H: 4.6, roof: 'gable', bays: [12, 2], front: 's', plat: 0.6 });
 
+// the Shōsōin: the treasure house of log, raised on forty posts, nine bays by three, west of the court (§14)
+E.push({ t: 'nara_azekura', rect: [-136, -100, -103, -90.6], y: 0, fl: 2.4, H: 4.8, seed: 41, tile: true, alongX: true });
+// the Hokke-dō (Sangatsu-dō) on the east side of the court and the bell tower north of it (§14)
+E.push({ t: 'nara_hall', rect: [104, -62, 134, -44], y: 1.0, H: 5.2, bays: [7, 4], k: 0.9, colD: 0.6, plat: 1.0, walls: 'full', doors: { s: [3], n: [3] }, windows: true, shibi: 1.6, rise: 4.6 });
+E.push({ t: 'stairs', rect: [116, -44 + 0.9, 122, -44 + 0.9 + 3.2], y0: 0, y1: 1.0, dir: 'n' });
+E.push({ t: 'nara_belltower', c: [108, -92], y: 0, half: 3.4 });
+// banner poles along the way up the court
+for (const z of [28, 10, -8]) for (const s of [-1, 1]) E.push({ t: 'nara_pole', at: [s * 5.2, z], y: 0, h: 9.5, cloth: s < 0 ? 'cloth_red' : 'cloth_green' });
+// the gravel of the court raked in long ridges, each panel its own way
+for (const [r, d] of [[[-80, -112, -47, -38], 'z'], [[47, -112, 80, -38], 'z'], [[-80, 6, -9, 36], 'x'], [[9, 6, 80, 36], 'x'], [[-80, -30, -40, 0], 'x'], [[40, -30, 80, 0], 'x']]) E.push({ t: 'nara_rake', rect: r, y: 0, dir: d });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('court', COURT, 0, 'open'), room('great buddha hall', HALL, 2.2, 'hall')];
 // the octagonal gilt-bronze lantern on the axis before the hall's stairs (§4)

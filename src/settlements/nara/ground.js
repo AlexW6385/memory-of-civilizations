@@ -3,6 +3,7 @@
 
 import { RADIUS, TEMPLE, COURT, height, inRect, inLot, inStreet, inBlock, blocks, KOFUKU } from './layout.js';
 
+const MKT = [9, 165, 75, 235];
 function cover(x, z, h, ny) {
   const c = { sand: 0.1, grass: 0.7, rock: 0, soil: 0.2, fields: 0, dry: 0.15, warmth: 0.5, red: 0.05, road: 0, snow: 0, forest: 0 };
   if (inRect(COURT, x, z)) { c.sand = 0.8; c.grass = 0.2; return c; }
@@ -15,6 +16,8 @@ function cover(x, z, h, ny) {
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
+  // willows along the avenues' edges (the capital's streets were lined with them [inferred]), clear of the road's middle
+  if (Math.hypot(x, z) < RADIUS - 8 && !inRect(TEMPLE, x, z, 4) && inStreet(x, z, 0.6) && !inStreet(x, z, -1.4) && !inRect(MKT, x, z, 3)) return { willow: 0.045, grass: 3 };
   if (Math.hypot(x, z) > RADIUS - 6 || inRect(COURT, x, z, 6) || inLot(x, z, 1) || inStreet(x, z, 2) || blocks().some((b) => b.kind !== 'ward' && inRect(b.rect, x, z, 4)) || (Math.abs(x) < 8 && z > 30 && z < 165)) return null;
   if (inBlock(x, z)) return { grass: 6, maple: 0.003, sugi: 0.001 };
   if (inRect(TEMPLE, x, z)) return { grass: 25, red_pine: 0.006 };
@@ -24,7 +27,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { sugi: 0.15, maple: 0.05, red_pine: 0.01 },
+  maxDensity: { sugi: 0.15, maple: 0.05, red_pine: 0.01, willow: 0.06 },
   climate: {
     sun: { az: 150, el: 45, color: [1.0, 0.96, 0.9], intensity: 3.3, lat: 35, dec: 5, hour: 10.5 },
     sky: { turbidity: 3.0, rayleigh: 1.1, mie: 0.006, mieG: 0.78, zenith: [0.08, 0.15, 0.38], horizon: [0.64, 0.68, 0.72] },

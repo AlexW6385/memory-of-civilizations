@@ -97,6 +97,27 @@ The Great Buddha Hall (the Buddha, attendants, ceiling, banners, §4) is entered
 - **Animals.** Swallows over the courts and avenues, crows over the cedar hills, sparrows on the paving and in the market; deer as figures (§6).
 - **Smoke.** Incense at the altar before the Buddha and in Kōfuku-ji; kitchen smoke from a third of the houses at the three meals; steam from the market's cookshops [inferred].
 
+## 14. Deepening pass (towards the Suzhou standard)
+
+- **The Shōsōin.** A storehouse with a raised floor at Tōdai-ji, nine bays by three, about 33 m long and 9 m deep; north and south sections of triangular-cut log (azekura-zukuri), the centre closed with thick planks; supported by 40 heavy posts standing about 2.4 m from the base stones to the floor joists; a tiled hipped roof; the treasures were given by Empress Kōmyō in 756 [stated: JAANUS "Shōsōin"]. Ours: one log block 33 × 9.4 m on forty posts over base stones, courses of logs standing out from the wall, a ladder to a plank door, a gabled tile roof (a hip in the original [inferred: simplification]), west of the court; assumed standing by 756 [inferred].
+- **Storehouses of the plots (kura).** The same type at house scale: raised 1.1 m on posts, log walls, a bark roof, a jar at the door [inferred: plots held "a main hall, a well and a storehouse", Monograph 46, §11].
+- **Fences and kitchen gardens.** The capital's walls were in places replaced by fences [stated: Monograph 46, §11]; ours: board fences close the narrow gaps between neighbours so the lane fronts run on, vacant plots get a wattle fence with a gate and a garden; each block's middle has two kitchen gardens either side of the well (raised beds of greens, a bamboo drying rack hung with cloth, a woodpile under a lean-to, jars, a kura) behind a wattle fence [inferred].
+- **Hokke-dō and the bell tower.** The Hokke-dō (Sangatsu-dō) is among Tōdai-ji's oldest halls (its origin in the 730s–740s [inferred from memory; not re-sourced]); a bell tower (shōrō) stands on its hillside: ours, a stone platform, four vermilion posts, a tile roof, a bronze bell 2.8 m with studs and a striking log, north-east of the court [inferred: position and size].
+- **The court.** A flagged way with kerbs from the Middle Gate to the stage; three pairs of banner poles (9.5 m, silk pennants) along it for the ceremonies; sweeping monks, praying pilgrims, gate guards and travellers on the avenue [inferred]. The avenue south of the Great South Gate is flagged 6 m wide with kerbs (Suzaku Avenue's side gutters were about 74 m apart, scaled [stated: Wikipedia "Suzaku Avenue"]).
+- **Willows** line the streets' edges [inferred: the capital's tree-lined streets].
+- **Interiors.** 30 houses near the arrival are open (§12), up from 3.
+
+Sources: [Shōsōin — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/1123); [Suzaku Avenue — Wikipedia](https://en.wikipedia.org/wiki/Suzaku_Avenue).
+
+## 15. Deepening pass 2
+
+- **Houses.** The `nara_house` element wraps the shared house and dresses the front: a noren curtain in the door, a bench with a water jar, firewood stacked to the eave and a basket at a house; at a shop (a quarter of the houses and every market house) a trestle of the trade's goods (rice sacks, cloth bolts, pottery, firewood, greens, sake casks, dried fish), a hung signboard on an arm; in an open shop a counter across the raised floor with goods, baskets on the earth floor [inferred]. 30 houses near the arrival are open.
+- **Market.** A second row of shop houses on the square's south edge facing north [inferred].
+- **Hokke-dō and Kōfuku-ji interiors.** The Hokke-dō is an 8th-century National Treasure [stated: Wikipedia "Tōdai-ji"]; its main object of worship is the Fukūkenjaku Kannon [stated: nippon.com "Tōdaiji"]; the present Shōrō is a National Treasure, its date not given in our sources (the 752 bell tower is not shown as it was) [inferred]. Ours: a dais, a main image (the Buddha figure and bodhisattvas stand in), four guardians at the corners standing in for the Heavenly Kings, an altar with incense, flowers and lamps. The Middle Gate has guardian kings like the Great South Gate's.
+- **The Great Buddha Hall's upper gallery.** A flight up each side wall to a timber gallery at 13 m that runs behind the figure, with a red rail on its inner edge [inferred: the 8th-century hall's upper storey was not open as a floor; a viewing gallery is our device].
+- **Raked gravel** in six panels of the court; **side gutters** of kerbed dark pebbles 1.2 m in from each street edge (the minor streets had side ditches [stated: Monograph 46, §11]); **hip roofs** on the Shōsōin and the bell tower (the Shōsōin's is a hip [stated: JAANUS]).
+- **Animals and people.** Oxcarts with oxen on the avenue, oxen grazing, dogs in the lanes; day walkers 56.
+
 ## Sources (this pass)
 
 - [Heijo Capital — JLIT](https://jlit.hcommons.org/heijo-capital/)

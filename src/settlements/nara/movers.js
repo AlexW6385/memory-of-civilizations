@@ -9,7 +9,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 40, night: 4, rain: 0.6, reach: 150, spawnMin: 24, far: 42 },
+  walkers: { day: 56, night: 5, rain: 0.6, reach: 160, spawnMin: 22, far: 46 },
   boats: { count: 0, reach: 250, spawnMin: 60, far: 95, speed: [1.0, 1.45], bridgeSpeed: 0.7 },
   water: -100,
 };

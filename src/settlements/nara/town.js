@@ -3,7 +3,7 @@
 // pagoda and golden hall; the East Market's square with stalls, mats, carts, sellers and buyers.
 import { lodTiles, openLots } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
-import { RADIUS, lots, walls, yards, blocks, MARKET, KOFUKU, height } from './layout.js';
+import { RADIUS, streets, lots, walls, yards, blocks, fences, gardens, MARKET, KOFUKU, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 180], facing: 'n' } });
@@ -49,12 +49,29 @@ function market() {
   return L;
 }
 
+/** Oxcarts on the axis avenue and in the market, dogs in the lanes, oxen grazing at the foot of Wakakusa, hens in the gardens. */
+function beasts() {
+  const L = [], rand = rng(7544), seed = () => Math.floor(rand() * 1e9);
+  for (const [x, z, rot, load] of [[5.5, 118, 0, 'sacks'], [-5.5, 196, Math.PI, 'baskets'], [5, 250, 0.1, 'sacks']]) {
+    L.push({ t: 'cart', kind: 'two', beast: 'ox', load, at: [x, z], y: 0, rot, seed: seed() });
+  }
+  for (const [x, z] of [[4, 126], [-4, 190], [24, 206], [-24, 260]]) L.push({ t: 'animal', kind: 'ox', at: [x, z], y: 0, rot: rand() * 6.28, seed: seed(), graze: true });
+  const st = streets().filter((r) => Math.hypot((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) < 260);
+  for (let i = 0; i < 16 && st.length; i++) {
+    const r = st[Math.floor(rand() * st.length)], x = r[0] + 1.5 + rand() * (r[2] - r[0] - 3), z = r[1] + 1.5 + rand() * (r[3] - r[1] - 3);
+    L.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: seed() });
+  }
+  for (const [x, z] of [[170, -20], [186, 40], [178, 100]]) L.push({ t: 'animal', kind: 'ox', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: seed(), graze: true });
+  return L;
+}
+
 export async function town() {
-  const all = lots(), open = openLots(all, [ARRIVALS['nara'][0], ARRIVALS['nara'][2]]);
-  const houses = all.map((l) => ({ t: 'house_japan', ...l, ...(open.has(l) ? { open: true } : {}) }));
+  const all = lots(), open = openLots(all, [ARRIVALS['nara'][0], ARRIVALS['nara'][2]], 30);
+  const houses = all.map((l) => ({ t: 'nara_house', ...l, shop: l.shop || l.seed % 4 === 0, ...(open.has(l) ? { open: true } : {}) }));
   const wells = yards().map(([x, z]) => ({ t: 'well', at: [x, z], y: height(x, z) }));
-  const plans = [...lodTiles('nara-houses', 'vernacular', [...houses, ...wells], { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } })];
-  plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()));
+  const plans = [...lodTiles('nara-houses', 'nara', houses, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } }), ...lodTiles('nara-wells', 'vernacular', wells, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } })];
+  plans.push(...lodTiles('nara-plots', 'nara', [...fences().map((f) => ({ t: 'nara_fence', y: 0, ...f, at: f.pts[0] })), ...gardens().map((g) => ({ t: 'nara_garden', y: 0, ...g })), ...streets().map((r) => ({ t: 'nara_gutter', rect: r, y: 0 }))], { R: RADIUS, near: 130, entrance: { at: [0, 180], facing: 'n' } }));
+  plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()), base('nara-beasts', 'life', beasts()));
   void blocks;
   return plans;
 }
