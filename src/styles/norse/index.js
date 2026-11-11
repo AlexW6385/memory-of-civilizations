@@ -12,6 +12,7 @@ import '../qing/index.js';
 import { dragonHead, ridgeCrest, westPortal, staveMask } from './carving.js';
 import { stueInside } from './stue.js';
 import { makeShore } from './shore.js';
+import { makeFarm } from './farm.js';
 
 const W = 'tar_wood', SH = 'tar_shingle', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -566,7 +567,9 @@ function door(bag, mx, f, sg, y, w, h, out, open = false) {
   bag.add(W, box(mx - w / 2 - 0.14, y + h, Math.min(z, z + sg * 0.1), mx + w / 2 + 0.14, y + h + 0.14, Math.max(z, z + sg * 0.1)));
 }
 /** log_house: { rect, y, foot, kind ('stue' | 'barn' | 'loft'), roof (material, optional), seed } — round-log walls notched at the corners; sod roofs on dwellings, shingles or boards on the rest; the loft on posts. */
-function logHouse(el, { bag, col }) {
+function logHouse(el, ctx) {
+  const { bag, col } = ctx;
+  if (el.kind === 'shed') return FARM.elements.shed(el, ctx);
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1), kind = el.kind ?? 'stue', d = 0.26, r = d * 0.54;
   if (kind === 'loft') {
     // the loft: a two-storey storehouse lifted on posts over stones; the upper storey overhangs on
@@ -577,7 +580,7 @@ function logHouse(el, { bag, col }) {
       bag.add(LOG, box(px - 0.16, y + 0.2, pz - 0.16, px + 0.16, yb - 0.08, pz + 0.16));
       bag.add(W, box(px - 0.26, yb - 0.08, pz - 0.26, px + 0.26, yb, pz + 0.26));    // the flat cap that turns the rats
     }
-    col.rect(el.rect, foot, y + 5.2);
+    col.rect([lx0, lz0, lx1, lz1], foot, yb + 1.85);
     logWalls(bag, [lx0, lz0, lx1, lz1], yb, 1.85, d, 0.22);
     door(bag, (lx0 + lx1) / 2 - 0.3, lz1, 1, yb, 0.7, 1.35, r + 0.01);
     // the corbels: the top logs of the lower storey reaching out under the overhang and the gallery
@@ -587,28 +590,37 @@ function logHouse(el, { bag, col }) {
     bag.add(W, box(ux0, yc + r - 0.02, uz1, ux1 + 0.9, yc + r + 0.08, gz));            // and of the gallery, with the stair's landing at its end
     bag.add(LOG, box(ux1 + 0.72, foot, gz - 0.24, ux1 + 0.88, yc + r - 0.02, gz - 0.08));
     const yu = yc + r + 0.08;
-    logWalls(bag, [ux0, uz0, ux1, uz1], yu, 1.6, d, 0.25);
+    const HU = 2.25, dc = (ux0 + ux1) / 2, hole = { face: 'z1', c: dc, w: 0.9, h: 1.85 };
+    logWalls(bag, [ux0, uz0, ux1, uz1], yu, HU, d, 0.25, hole);
+    { const t = r + 0.05, zz = uz1 - t / 2, lo = dc - 0.45, hi = dc + 0.45;
+      col.segment([ux0, uz0 + t / 2], [ux1, uz0 + t / 2], t, yu, yu + HU); col.segment([ux0 + t / 2, uz0], [ux0 + t / 2, uz1], t, yu, yu + HU); col.segment([ux1 - t / 2, uz0], [ux1 - t / 2, uz1], t, yu, yu + HU);
+      col.segment([ux0, zz], [lo, zz], t, yu, yu + HU); col.segment([hi, zz], [ux1, zz], t, yu, yu + HU); col.segment([lo, zz], [hi, zz], t, yu + 1.9, yu + HU);
+      col.floor([ux0, uz1, ux1 + 0.9, gz], yu); col.segment([ux0, gz - 0.04], [ux1 + 0.9, gz - 0.04], 0.1, yu, yu + 1.2); col.segment([ux1 + 0.86, uz1], [ux1 + 0.86, gz], 0.1, yu, yu + 1.2);
+      col.ramp([ux1 + 0.15, z0 - 0.6, ux1 + 0.85, uz1], foot + 0.45, yu, 's'); }
+    FARM.interiors.loft(bag, col, { rect: [ux0, uz0, ux1, uz1], fl: yu + 0.06, top: yu + HU, ridge: yu + HU + 0.5, alongX: true, wt: r + 0.05, door: hole, seed: el.seed });
     // the gallery: a plank parapet with a row of little arched openings, posts up to the roof
     const gy = yu + 0.85;
     bag.add(W, box(ux0, yu, gz - 0.08, ux1 + 0.9, gy, gz));
     bag.add(W, box(ux1 + 0.82, yu, uz1 + 0.15, ux1 + 0.9, gy, gz));
     bag.add(W, slab(arcadeShape(ux1 - ux0, 0.32, 5, 0.05), 0.06, [ux0, gz - 0.04], [ux1, gz - 0.04], gy + 0.35, 6));
     for (let k = 0; k <= 5; k++) { const px = ux0 + k * (ux1 - ux0) / 5; bag.add(W, box(px - 0.05, gy, gz - 0.09, px + 0.05, gy + 0.35, gz + 0.01)); }
-    bag.add(W, box(ux0, gy + 0.67, gz - 0.1, ux1, yu + 1.6, gz + 0.02));
-    door(bag, (ux0 + ux1) / 2, uz1, 1, yu, 0.65, 1.3, r + 0.01);
+    bag.add(W, box(ux0, gy + 0.67, gz - 0.1, ux1, yu + HU, gz + 0.02));
+    door(bag, dc, uz1, 1, yu + 0.02, 0.9, 1.85, r + 0.01, true);
+    bag.add(W, box(dc + 0.45 - 0.03, yu + 0.04, uz1 + 0.12, dc + 0.45 + 0.03, yu + 1.85, uz1 + 0.12 + 0.82));
     // the stair up the side to the gallery's end
     const sx0 = ux1 + 0.15, sx1 = ux1 + 0.85, steps = 11, sz0 = z0 - 0.6;
     for (let k = 0; k < steps; k++) { const t = (k + 1) / steps, zz = sz0 + (uz1 - sz0) * (k / steps); bag.add(W, box(sx0, foot + (yu - foot) * t - 0.06, zz, sx1, foot + (yu - foot) * t, zz + (uz1 - sz0) / steps + 0.04)); }
     for (const sx of [sx0 - 0.08, sx1]) bag.add(W, hexa([[sx, foot, sz0], [sx + 0.08, foot, sz0], [sx + 0.08, yu - 0.3, uz1], [sx, yu - 0.3, uz1], [sx, foot + 0.3, sz0], [sx + 0.08, foot + 0.3, sz0], [sx + 0.08, yu + 0.04, uz1], [sx, yu + 0.04, uz1]]));
-    const rr = [ux0, uz0, ux1, gz], ry = yu + 1.6;
+    const rr = [ux0, uz0, ux1, gz], ry = yu + HU;
     pitched(bag, SH, W, rr, ry, 0.95, 0.35, true);
     roofTrim(bag, rr, ry, 0.95, 0.35, true, false);
     return;
   }
   const H = kind === 'barn' ? 3.9 : 3.1;
   bag.add('rubble', box(x0 - 0.15, foot, z0 - 0.15, x1 + 0.15, y + 0.15, z1 + 0.15));
-  const alongX = x1 - x0 >= z1 - z0, front = rand() < 0.5, open = kind === 'stue' && !!el.open;
-  const hole = open ? (alongX ? { face: front ? 'z0' : 'z1', c: (x0 + x1) / 2 - 0.8, w: 0.85, h: 1.7 + 0.12 - r } : { face: front ? 'x0' : 'x1', c: (z0 + z1) / 2, w: 0.85, h: 1.7 + 0.12 - r }) : null;
+  const alongX = x1 - x0 >= z1 - z0, front0 = rand() < 0.5, front = el.front ?? front0, open = (kind === 'stue' || kind === 'barn' || kind === 'smithy') && !!el.open;
+  const dw = kind === 'barn' ? 2.2 : 0.85, dh = kind === 'barn' ? 2.3 : 1.7, dm = kind === 'stue' || kind === 'smithy' ? -0.8 : 0;
+  const hole = open ? (alongX ? { face: front ? 'z0' : 'z1', c: (x0 + x1) / 2 + dm, w: dw, h: dh + 0.12 - r } : { face: front ? 'x0' : 'x1', c: (z0 + z1) / 2, w: dw, h: dh + 0.12 - r }) : null;
   logWalls(bag, el.rect, y + 0.15 + r, H - r, d, 0.3, hole);
   if (!open) col.rect(el.rect, foot, y + H);
   else {
@@ -622,30 +634,34 @@ function logHouse(el, { bag, col }) {
   }
   // the door (and the stue's small window) in a long wall; a barn's wide double doors
   if (alongX) {
-    const f = front ? z0 : z1, sg = front ? -1 : 1, mx = (x0 + x1) / 2 + (kind === 'stue' ? -0.8 : 0);
+    const f = front ? z0 : z1, sg = front ? -1 : 1, mx = (x0 + x1) / 2 + (dm);
     door(bag, mx, f, sg, y + 0.15, kind === 'barn' ? 2.2 : 0.85, kind === 'barn' ? 2.3 : 1.7, r + 0.01, open);
-    if (open) { const zi = f - sg * (r + 0.03); bag.add(W, box(mx + 0.425 - 0.05, y + 0.19, Math.min(zi, zi - sg * 0.8), mx + 0.425, y + 1.82, Math.max(zi, zi - sg * 0.8))); }
-    if (kind === 'stue') { const wx = mx + 1.7, z = f + sg * (r + 0.01); bag.add('opening', box(wx - 0.3, y + 1.4, Math.min(z, z + sg * 0.03), wx + 0.3, y + 1.85, Math.max(z, z + sg * 0.03))); for (const [a, b, c, e] of [[-0.38, -0.3, 1.32, 1.93], [0.3, 0.38, 1.32, 1.93], [-0.38, 0.38, 1.32, 1.4], [-0.38, 0.38, 1.85, 1.93]]) bag.add(W, box(wx + a, y + c, Math.min(z, z + sg * 0.06), wx + b, y + e, Math.max(z, z + sg * 0.06))); }
+    if (open && kind !== 'barn') { const zi = f - sg * (r + 0.03); bag.add(W, box(mx + 0.425 - 0.05, y + 0.19, Math.min(zi, zi - sg * 0.8), mx + 0.425, y + 1.82, Math.max(zi, zi - sg * 0.8))); }
+    if (open && kind === 'barn') for (const e of [-1, 1]) { const zo = f + sg * (r + 0.06); bag.add(W, box(mx + e * 1.1 - 0.04, y + 0.2, Math.min(zo, zo + sg * 1.05), mx + e * 1.1 + 0.04, y + 2.3, Math.max(zo, zo + sg * 1.05))); }
+    if (kind === 'stue' || kind === 'smithy') { const wx = mx + 1.7, z = f + sg * (r + 0.01); bag.add('opening', box(wx - 0.3, y + 1.4, Math.min(z, z + sg * 0.03), wx + 0.3, y + 1.85, Math.max(z, z + sg * 0.03))); for (const [a, b, c, e] of [[-0.38, -0.3, 1.32, 1.93], [0.3, 0.38, 1.32, 1.93], [-0.38, 0.38, 1.32, 1.4], [-0.38, 0.38, 1.85, 1.93]]) bag.add(W, box(wx + a, y + c, Math.min(z, z + sg * 0.06), wx + b, y + e, Math.max(z, z + sg * 0.06))); }
   } else {
     const f = front ? x0 : x1, sg = front ? -1 : 1, mz = (z0 + z1) / 2, X0 = f + sg * (r + 0.01), X1 = X0 + sg * 0.06;
     const w = kind === 'barn' ? 2.2 : 0.85, h = kind === 'barn' ? 2.3 : 1.7;
     if (!open) bag.add(W, box(Math.min(X0, X1), y + 0.15, mz - w / 2, Math.max(X0, X1), y + 0.15 + h, mz + w / 2));
-    else { const xi = f - sg * (r + 0.03); bag.add(W, box(Math.min(xi, xi - sg * 0.8), y + 0.19, mz + w / 2 - 0.05, Math.max(xi, xi - sg * 0.8), y + 1.82, mz + w / 2)); for (const e of [-1, 1]) bag.add(W, box(Math.min(X0, X1 + sg * 0.04), y + 0.15, mz + e * (w / 2 + 0.06) - 0.06, Math.max(X0, X1 + sg * 0.04), y + 0.15 + h + 0.14, mz + e * (w / 2 + 0.06) + 0.06)); }
+    else { const xi = f - sg * (r + 0.03); if (kind !== 'barn') bag.add(W, box(Math.min(xi, xi - sg * 0.8), y + 0.19, mz + w / 2 - 0.05, Math.max(xi, xi - sg * 0.8), y + 1.82, mz + w / 2)); else for (const e of [-1, 1]) { const xo = f + sg * (r + 0.06); bag.add(W, box(Math.min(xo, xo + sg * 1.05), y + 0.2, mz + e * 1.1 - 0.04, Math.max(xo, xo + sg * 1.05), y + 2.3, mz + e * 1.1 + 0.04)); } for (const e of [-1, 1]) bag.add(W, box(Math.min(X0, X1 + sg * 0.04), y + 0.15, mz + e * (w / 2 + 0.06) - 0.06, Math.max(X0, X1 + sg * 0.04), y + 0.15 + h + 0.14, mz + e * (w / 2 + 0.06) + 0.06)); }
     bag.add(W, box(Math.min(X0, X1 + sg * 0.04), y + 0.15 + h, mz - w / 2 - 0.14, Math.max(X0, X1 + sg * 0.04), y + 0.29 + h, mz + w / 2 + 0.14));
   }
-  const roof = el.roof ?? (kind === 'stue' ? 'sod' : rand() < 0.5 ? 'sod' : SH), pitch = kind === 'stue' ? 0.5 : 0.7, o = 0.45, yt = y + H + o * pitch;
+  const roof = el.roof ?? (kind === 'stue' || kind === 'smithy' ? 'sod' : rand() < 0.5 ? 'sod' : SH), pitch = kind === 'stue' || kind === 'smithy' ? 0.5 : 0.7, o = 0.45, yt = y + H + o * pitch;
   const span = alongX ? z1 - z0 : x1 - x0;
   const top = pitched(bag, roof, LOG, el.rect, yt, pitch, o, alongX, roof === 'sod' ? 0.28 : 0.16);
   logGables(bag, el.rect, y + H, span / 2 * pitch + o * pitch - 0.28, alongX, d);
   roofTrim(bag, el.rect, yt, pitch, o, alongX, roof === 'sod');
   // the stue's smoke-hole (ljore) on the ridge: a little boarded hood with its own roof — no chimney yet
-  if (kind === 'stue') {
+  if (kind === 'stue' || kind === 'smithy') {
     const mx = (x0 + x1) / 2 - (alongX ? 0.6 : 0), mz = (z0 + z1) / 2 - (alongX ? 0 : 0.6);
     bag.add(W, box(mx - 0.35, top - 0.35, mz - 0.35, mx + 0.35, top + 0.35, mz + 0.35));
     bag.add('opening', box(mx - 0.25, top + 0.05, mz - 0.36, mx + 0.25, top + 0.3, mz + 0.36));
     pitched(bag, W, W, [mx - 0.35, mz - 0.35, mx + 0.35, mz + 0.35], top + 0.35, 0.8, 0.12, alongX, 0.05);
   }
-  if (open) stueInside(bag, col, { rect: el.rect, fl: y + 0.17, top: y + H, ridge: top - (roof === 'sod' ? 0.28 : 0.16), alongX, wt: r + 0.05, door: hole });
+  if (open) {
+    const io = { rect: el.rect, fl: y + 0.17, top: y + H, ridge: top - (roof === 'sod' ? 0.28 : 0.16), alongX, wt: r + 0.05, door: hole, seed: el.seed };
+    (kind === 'barn' ? FARM.interiors.barn : kind === 'smithy' ? FARM.interiors.smithy : stueInside)(bag, col, io);
+  }
 }
 /** fence: { pts, y, h } — a fence of split staves along a polyline. */
 function fence(el, { bag, col }) {
@@ -715,9 +731,10 @@ function lychgate(el, { bag, col }) {
     for (const yy of [y + 0.3, y + 1.05]) bag.add(W, box(xx - sx * 0.03 - 0.03, yy, z0, xx - sx * 0.03 + 0.03, yy + 0.1, z0 + hw - 0.35));
   }
 }
+const FARM = makeFarm({ hexa, logRod });
 const SHORE = makeShore({ hexa, logRod, beam, pitched, logWalls, logGables, roofTrim, door });
 registerStyle('norse', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, stave_church: staveChurch, bell_house: bellHouse, log_house: logHouse, fence, stone_wall: stoneWall, lychgate, ...SHORE },
+  elements: { ...STYLES.qing.elements, stave_church: staveChurch, bell_house: bellHouse, log_house: logHouse, fence, stone_wall: stoneWall, lychgate, ...FARM.elements, ...SHORE },
   objects: {},
 });

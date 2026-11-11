@@ -25,27 +25,43 @@ export function height(x, z) {
   return h + (RIVER.bed - h) * carve;
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-// the farms: their yards' centres; each a dwelling, a loft, a barn and byre, a smaller house or two
-export const FARMS = [[-150, -60], [-95, 40], [80, -70], [150, 30], [-210, 70], [220, -40], [40, 70], [-40, 95]];
+// the farms: their yards' centres; each a dwelling, two lofts, a barn and a byre, a wood shed and a second house (or the smith's)
+export const FARMS = [[-150, -60], [-95, 40], [80, -70], [150, 30], [-210, 70], [220, -40], [40, 70], [-40, 95],
+  [60, -24], [-62, -18], [-30, 40], [130, 100], [-215, -22], [268, 35], [-272, 36]];
+export const SMITH_FARM = 8;      // the smith works at the farm nearest the church on the east (the priest's farm)
+// one farm's plan about its yard (dx, dz from the yard's centre; w along x, d along z): the dwelling on the far side of the yard,
+// the lofts either side of it, the barn and the byre across the ends, the shed and a second house on the near side
+const TUN = [[0, -10, 'stue', 9, 5.5], [-9.5, -9, 'loft', 3.6, 3.6], [9.5, -9, 'loft', 3.4, 3.4], [-16, 2, 'barn', 6.5, 11], [16, 2, 'barn', 6.5, 10], [3.5, 13, 'shed', 7, 3.5], [-6, 12.5, 'stue', 6, 4.5]];
 let BUILT = null;
 export function buildings() {
   if (BUILT) return BUILT;
   BUILT = [];
   FARMS.forEach(([fx, fz], i) => {
-    const rand = rng(1250 + i * 17);
-    const spots = [[0, -10, 'stue', 9, 5.5], [11, -2, 'loft', 3.6, 3.6], [-12, 2, 'barn', 11, 6.5], [2, 10, 'barn', 8, 5], [-4, -1, 'stue', 6, 4.5], [12, 10, 'loft', 3.2, 3.2]];
-    const n = 4 + Math.floor(rand() * 3);
-    for (let k = 0; k < n; k++) {
-      const [dx, dz, kind, w, d] = spots[k], rot = rand() < 0.5;
-      const cx = fx + dx + (rand() - 0.5) * 2, cz = fz + dz + (rand() - 0.5) * 2, hw = (rot ? d : w) / 2, hd = (rot ? w : d) / 2;
-      const ys = [height(cx - hw, cz - hd), height(cx + hw, cz - hd), height(cx - hw, cz + hd), height(cx + hw, cz + hd)];
-      BUILT.push({ rect: [cx - hw, cz - hd, cx + hw, cz + hd], y: Math.max(...ys), foot: Math.min(...ys) - 0.4, kind, seed: Math.floor(rand() * 1e6) });
-    }
+    const rand = rng(1250 + i * 17), mir = i % 2 === 1 ? -1 : 1;
+    TUN.forEach(([dx0, dz0, kind0, w0, d0], k) => {
+      let kind = kind0;
+      if (k === 6 && i === SMITH_FARM) kind = 'smithy';
+      if ((k === 2 || k === 6) && kind !== 'smithy' && rand() < 0.25) return;       // not every farm has all
+      const dx = dx0 * mir, cx = fx + dx + (rand() - 0.5) * 1.6, cz = fz + dz0 + (rand() - 0.5) * 1.6;
+      const hw = w0 / 2, hd = d0 / 2, rect = [cx - hw, cz - hd, cx + hw, cz + hd];
+      const ys = [height(rect[0], rect[1]), height(rect[2], rect[1]), height(rect[0], rect[3]), height(rect[2], rect[3])];
+      const corners = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]];
+      if (corners.some(([x, z]) => inRiver(x, z) || Math.abs(z - riverZ(x)) < RIVER.w / 2 + 3) || Math.max(...ys) > 5 || Math.hypot(cx, cz) > RADIUS - 70) return;
+      const alongX = w0 >= d0, front = alongX ? fz < cz : fx < cx;
+      BUILT.push({ rect, y: Math.max(...ys), foot: Math.min(...ys) - 0.4, kind, front, farm: i, seed: Math.floor(rand() * 1e6) });
+    });
   });
   return BUILT;
 }
+/** The door of a building: its place on the wall (x, z) and the way out (nx, nz). */
+export function doorOf(b) {
+  const [x0, z0, x1, z1] = b.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, alongX = x1 - x0 >= z1 - z0;
+  if (b.kind === 'loft') return { at: [cx, z1 + 0.95], n: [0, 1] };
+  if (alongX) { const m = b.kind === 'barn' || b.kind === 'shed' ? 0 : -0.8; return b.front ? { at: [cx + m, z0], n: [0, -1] } : { at: [cx + m, z1], n: [0, 1] }; }
+  return b.front ? { at: [x0, cz], n: [-1, 0] } : { at: [x1, cz], n: [1, 0] };
+}
 export const inBuilding = (x, z, m = 0) => buildings().some((b) => inRect(b.rect, x, z, m));
-export const inFarm = (x, z, m = 0) => FARMS.some(([fx, fz]) => Math.hypot(x - fx, z - fz) < 22 + m);
+export const inFarm = (x, z, m = 0) => FARMS.some(([fx, fz]) => Math.hypot(x - fx, z - fz) < 26 + m);
 
 // the river landing: a timber quay down the north bank where the river bends south-most-west (its bank runs east-west there,
 // so the quay runs straight south into the water), a boathouse (naust) beside it
