@@ -3,7 +3,8 @@
 // the Passeig for it (both built with the landmark). The street life of 1910 (§5a): the trams on the
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
-import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, blocks, height, onDiagonal, bancsFanals } from './layout.js';
+import { blockShops } from '../../styles/modernisme/index.js';
+import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements) => ({ id, style: 'modernisme', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 46], facing: 'n' } });
@@ -111,10 +112,34 @@ function mercatLife() {
   L.push({ t: 'cart', kind: 'two', load: 'sacks', beast: 'horse', at: [cx + 33, cz + 4], y, rot: 0, seed: 1888 });
   return L;
 }
+/** The people of the shops (§9): the shopkeeper behind the counter in the dress of the trade, a customer in some, a few keepers on their doorsteps. */
+function shopLife(els) {
+  const out = [];
+  els.forEach((el, bi) => {
+    const rand = rng(7000 + bi * 13), L = [], pick = (a) => a[Math.floor(rand() * a.length)];
+    for (const sh of blockShops(el)) {
+      const white = sh.trade === 'farmacia' || sh.trade === 'perruqueria' || sh.trade === 'forn';
+      const rot = (f) => Math.atan2(-f[0], -f[1]);
+      const o = { skin: 'skin_light', pose: 'stand', seed: 0 };
+      for (const q of sh.people) {
+        if (q.role === 'customer' && rand() > 0.38) continue;
+        const keeper = q.role === 'keeper', lady = !keeper && rand() < 0.55;
+        if (keeper && rand() < 0.07) continue;
+        L.push({ t: 'figure', at: q.at, y: sh.y + 0.12, rot: rot(q.face), ...o, seed: Math.floor(rand() * 1e9), hair: lady ? 'bun' : 'short',
+          ...(lady ? { dress: 'robe', cloth: pick(['cloth_maroon', 'cloth_indigo', 'cloth_grey', 'cloth_green']), cloth2: 'cloth_white', over: 'shawl', hat: 'none' }
+            : keeper ? { dress: 'trousers', cloth: white ? 'cloth_white' : pick(['cloth_brown', 'cloth_grey', 'cloth_black']), cloth2: 'cloth_black', over: white ? 'none' : 'apron', hat: sh.trade === 'forn' ? 'cap' : 'none', hatMat: 'cloth_white', beard: rand() < 0.4 ? 0.8 : 0 }
+              : { dress: 'trousers', cloth: pick(['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo']), cloth2: 'cloth_black', hat: pick(['brim', 'cap']), hatMat: pick(['cloth_black', 'cloth_grey']), beard: rand() < 0.4 ? 0.8 : 0 }) });
+      }
+      if (rand() < 0.22) { const d = sh.door, nx = sh.n[0], nz = sh.n[1]; L.push({ t: 'figure', at: [d[0] + nx * 1.1 + nz * 0.9, d[1] + nz * 1.1 - nx * 0.9], y: sh.y + 0.04, rot: rot([nx, nz]), ...o, seed: Math.floor(rand() * 1e9), hair: 'short', dress: 'trousers', cloth: white ? 'cloth_white' : 'cloth_brown', cloth2: 'cloth_black', over: white ? 'none' : 'apron', hat: 'none', beard: 0.8, pose: rand() < 0.5 ? 'talk' : 'stand' }); }
+    }
+    if (L.length) out.push(L);
+  });
+  return out;
+}
 /** The Eixample's block elements (the smoke finds the chimneys from the same plan). */
 export function blockElements() {
   return blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
-    t: 'eixample_block', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
+    t: 'eixample_block', shops: shopCore(b.c), pave: Math.abs(b.c[0] - GRACIA_X) < 60 ? 'tile_grey' : 'flagstone', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
     ...(b.special === 'pedrera' ? { cut: { corner: 3, a: 22, b: 22 } } : {}),
     ...(Math.hypot(b.c[0] - CASA.block[0], b.c[1] - CASA.block[1]) < 1 ? { gaps: [{ side: CASA.side, s0: CASA.s0, s1: CASA.s1 }] } : {}),
     ...(b.special === 'batllo' ? { gaps: [{ side: 1, s0: BATLLO.s0, s1: BATLLO.s1 }] } : {}),
@@ -128,6 +153,8 @@ export async function town() {
   const rand = rng(1910), lines = tramLines();
   plans.push(base('barcelona-casa', [{ t: 'casa_cafe', fx: CASA.fx, z0: CASA.z0, y: height(CASA.fx - 9, CASA.z0 + 8), h: CASA.h, seed: 1910 }]));
   plans.push({ ...base('barcelona-casa-life', casaLife()), style: 'life' });
+  // the shops' people, a plan to a few blocks
+  shopLife(els).forEach((L, i) => plans.push({ ...base(`barcelona-shop-life-${i}`, L), style: 'life' }));
   plans.push(base('barcelona-trams', [...lines, ...trams(lines, rand)]));
   plans.push(base('barcelona-carriages', carriages(rand)));
   // the Mercat de la Concepció on its block, and its life: the stalls in rows down the naves, the sellers and the
