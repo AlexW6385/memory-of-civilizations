@@ -69,6 +69,16 @@ for (const v of [-3.2, 2.4]) { const at = P(47 + (v > 0 ? 0.4 : 0), v); stone(at
 // the Station Stones: small undressed sarsens, two on their mounds
 for (const s of STATIONS) stone(s.at, AXIS + rand() * 0.5, { h: s.n === 91 ? 2.7 : s.n === 93 ? 1.3 : 1.6, w0: s.n === 91 ? 1.6 : 1.1, w1: 0.8, d0: 0.8, d1: 0.6, rough: 0.1, bury: 0.8, cap: 'round', natural: true, mat: 'rock_boulder', tool: { faces: 'none', lichen: 30 } });
 
+// ── the 56 Aubrey Holes on a ring 86 m across, about 5 m inside the bank: pits 1.06 m wide refilled with the white chalk dug from them (§1d) ──
+{
+  const holes = [];
+  for (let i = 0; i < 56; i++) {
+    const a = AXIS + (i + 0.3) / 56 * Math.PI * 2, r = 43.2 + (rand() - 0.5) * 0.7, at = [Math.cos(a) * r, Math.sin(a) * r];
+    holes.push({ at, y: height(at[0], at[1]) + 0.01, r: 0.5 + rand() * 0.1, seed: Math.floor(rand() * 1e9) });
+  }
+  E.push({ t: 'aubrey_holes', holes });
+}
+
 export const henge = {
   id: 'stonehenge-henge',
   name: { en: 'Stonehenge', zh: '巨石阵' },
