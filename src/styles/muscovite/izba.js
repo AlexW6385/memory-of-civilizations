@@ -76,7 +76,7 @@ export function izbaInside(bag, o) {
     ic(cu, cw - 0.5, cw - 0.12, v + 0.06, v + 0.42);
     A('timber', cu + 0.14, cu + 0.48, v + 0.06, v + 0.42, cw - 0.035, cw); A('mosaic_gold', cu + 0.16, cu + 0.46, v + 0.08, v + 0.4, cw - 0.045, cw - 0.035);
     A('paint_robe', cu + 0.26, cu + 0.36, v + 0.12, v + 0.28, cw - 0.05, cw - 0.045);
-    A('linen', cu + 0.5, cu + 0.56, v - 0.55, v + 0.5, cw - 0.022, cw - 0.015); A('cloth_red', cu + 0.495, cu + 0.565, v - 0.5, v - 0.42, cw - 0.034, cw - 0.03);
+    A('linen', cu + 0.5, cu + 0.56, v - 0.55, v + 0.5, cw - 0.022, cw - 0.015); A('cloth_red', cu + 0.495, cu + 0.565, v - 0.5, v - 0.42, cw - 0.052, cw - 0.04);
     const lp = at(cu + 0.3, v + 0.75, cw - 0.3);
     bag.add('bronze', rod([lp[0], lp[1] + 0.25, lp[2]], lp, 0.004, 4));
     bag.add('glass_topaz', lathe([[0.001, -0.08], [0.04, -0.07], [0.05, -0.02], [0.045, 0], [0.001, 0]], 10, null, lp[0], lp[1], lp[2]));
@@ -91,5 +91,19 @@ export function izbaInside(bag, o) {
   // a water tub and its dipper by the door, a spinning distaff (pryalka) by the bench
   { const w = door[0] - 0.4; lat('timber', [[0.001, 0], [0.24, 0.0], [0.27, 0.45], [0.25, 0.46], [0.001, 0.4]], 12, iu0 + 0.4, fl, w); C(iu0 + 0.15, iu0 + 0.65, w - 0.25, w + 0.25, fl, fl + 0.46); }
   { const pu = iu0 + 0.9, pw = iwF - bd - 0.9; A('timber', pu - 0.12, pu + 0.12, fl, fl + 0.05, pw - 0.35, pw + 0.05); A('wood_painted', pu - 0.06, pu + 0.06, fl + 0.05, fl + 0.85, pw - 0.03, pw); A('wood_painted', pu - 0.12, pu + 0.12, fl + 0.85, fl + 1.05, pw - 0.03, pw); }
+  // by the seed, what else the house kept on the free wall between the front bench and the stove (the u1 side): a chest, a loom, a cradle on its pole
+  { const k = (o.seed ?? 0) % 4, wa = sf + 0.55, wz = iwF - bd - 0.25, ua = iu1 - lin;
+    if (wz - wa > 1.0 && k === 0) {          // the painted chest (sunduk) with iron bands, a folded cloth on it
+      A('wood_painted', ua - 0.55, ua, fl, fl + 0.6, wa, wa + 1.1); A('iron', ua - 0.56, ua + 0.001, fl + 0.18, fl + 0.22, wa, wa + 1.1); A('iron', ua - 0.56, ua + 0.001, fl + 0.42, fl + 0.46, wa, wa + 1.1); A('cloth_red', ua - 0.45, ua - 0.1, fl + 0.6, fl + 0.66, wa + 0.2, wa + 0.9); C(ua - 0.56, ua, wa, wa + 1.1, fl, fl + 0.66);
+    } else if (wz - wa > 1.3 && k === 1) {   // the upright loom (stan): two posts, beams, the warp strung, a half-woven cloth, the weaver's bench
+      A('timber', ua - 0.8, ua - 0.7, fl, fl + 1.5, wa + 0.1, wa + 0.18); A('timber', ua - 0.8, ua - 0.7, fl, fl + 1.5, wa + 1.0, wa + 1.08); A('timber', ua - 0.82, ua - 0.68, fl + 1.38, fl + 1.46, wa + 0.1, wa + 1.08); A('timber', ua - 0.82, ua - 0.68, fl + 0.3, fl + 0.38, wa + 0.1, wa + 1.08);
+      A('linen', ua - 0.77, ua - 0.74, fl + 0.38, fl + 1.38, wa + 0.2, wa + 0.98); A('cloth_indigo', ua - 0.775, ua - 0.735, fl + 0.38, fl + 0.7, wa + 0.2, wa + 0.98); A('timber', ua - 0.5, ua - 0.1, fl + 0.4, fl + 0.46, wa + 0.2, wa + 0.9); C(ua - 0.85, ua, wa + 0.05, wa + 1.1, fl, fl + 1.5);
+    } else if (wz - wa > 0.9 && k === 2) {   // the cradle (ochep): a wicker basket hung by cords from a springy pole run through the ceiling beam
+      const cwm = wa + 0.55, h0 = fl + 0.55; A('timber', ua - 0.04, ua, fl + 0.05, top - 0.1, cwm - 0.04, cwm + 0.04);
+      A('wicker', ua - 0.7, ua - 0.2, h0, h0 + 0.28, cwm - 0.35, cwm + 0.35); A('linen', ua - 0.65, ua - 0.25, h0 + 0.18, h0 + 0.3, cwm - 0.3, cwm + 0.3);
+      for (const du of [-0.7, -0.2]) for (const dw of [-0.35, 0.35]) A('rope_fibre', ua + du - 0.006, ua + du + 0.006, h0 + 0.28, top - 0.4, cwm + dw - 0.006, cwm + dw + 0.006);
+      A('timber', ua - 0.72, ua - 0.18, top - 0.42, top - 0.38, cwm - 0.37, cwm + 0.37);
+    }
+  }
   void dh; void box;
 }

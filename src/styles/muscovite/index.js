@@ -14,6 +14,10 @@ import { izbaInside } from './izba.js';
 import { intercession } from './intercession.js';
 import { nalichnik, yardFence, streetLog, stalls, logChurch } from './posad.js';
 import { ivanTower, archangel, annunciation } from './kremlin.js';
+import { kitaiWall } from './kitai.js';
+import { facetsPalace } from './palace.js';
+import { landing, raft } from './river.js';
+import { dressHouse, yardbuild, garden } from './yard.js';
 
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -302,7 +306,8 @@ function fenceEnds([x0, z0, x1, z1], front, r) {
 function izba(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1);
   const alongX = x1 - x0 >= z1 - z0, front = el.front ?? (alongX ? (rand() < 0.5 ? 'x0' : 'x1') : (rand() < 0.5 ? 'z0' : 'z1'));
-  const H = 3.3 + rand() * 0.5, ex = front[0] === 'x', f = el.rect[{ x0: 0, z0: 1, x1: 2, z1: 3 }[front]], sg = front.endsWith('0') ? -1 : 1;
+  const variant = el.variant ?? (el.kind === 'barn' ? 'barn' : 'one'), two = variant === 'two', barn = variant === 'barn';
+  const H = two ? 6.4 : 3.3 + rand() * 0.5, ex = front[0] === 'x', f = el.rect[{ x0: 0, z0: 1, x1: 2, z1: 3 }[front]], sg = front.endsWith('0') ? -1 : 1;
   const u0 = ex ? z0 : x0, u1 = ex ? z1 : x1, um = (u0 + u1) / 2;
   // a box given in the front's frame: u along the face, v up, w out from the face
   const B = (a0, a1, v0, v1, w0, w1) => { const p = f + sg * w0, q = f + sg * w1; return ex ? box(Math.min(p, q), v0, a0, Math.max(p, q), v1, a1) : box(a0, v0, Math.min(p, q), a1, v1, Math.max(p, q)); };
@@ -328,20 +333,40 @@ function izba(el, { bag, col }) {
     bag.add(LOG, lathe([[0.145, 0], [0.145, u1 - u0 + 0.56]], 5).rotateZ(ex ? 0 : -Math.PI / 2).rotateX(ex ? Math.PI / 2 : 0).translate(a[0], a[1], a[2]));
   }
   // the windows: board frames standing out from the logs, the dark panes, the pediments and sill boards
-  const nw = u1 - u0 > 6.5 ? 3 : 2, wy = y + 1.55;
+  const nw = u1 - u0 > 6.5 ? 3 : 2, wy = two ? y + 4.15 : y + 1.55;
   const Af = (u, w) => { const p = ex ? [f + sg * w, u] : [u, f + sg * w]; return p; }, nmat = rand() < 0.3 ? 'paint_white' : 'timber';
-  for (let k = 0; k < nw; k++) {
+  for (let k = 0; k < (barn ? 0 : nw); k++) {
     const c = um + (k - (nw - 1) / 2) * 1.35;
     bag.add('opening', B(c - 0.35, c + 0.35, wy + 0.04, wy + 0.74, 0.15, 0.165));
     nalichnik(bag, Af, c, wy - 0.11, nmat, 0.2);
+    if (two) bag.add('opening', B(c - 0.2, c + 0.2, y + 1.1, y + 1.45, 0.15, 0.165));        // the little lights of the storage storey below
+  }
+  if (two) {
+    // the gallery (krylets) across the front at the upper floor: planks on projecting log ends, posts, a railing of turned balusters, a plank stair up at one end
+    const gy = y + 3.35;
+    bag.add('planks_grey', B(u0 - 0.5, u1 + 0.5, gy - 0.12, gy, 0.1, 1.3));
+    for (let u = u0 - 0.3; u < u1 + 0.4; u += 1.4) bag.add(LOG, B(u - 0.1, u + 0.1, gy - 0.4, gy - 0.12, 0.1, 1.5));
+    for (const u of [u0 - 0.4, u1 + 0.4, um]) { bag.add('timber', B(u - 0.1, u + 0.1, y, gy + 1.0, 1.2, 1.4)); Cb(u - 0.1, u + 0.1, 1.2, 1.4, y, gy + 1.0); }
+    bag.add('timber', B(u0 - 0.5, u1 + 0.5, gy + 0.95, gy + 1.05, 1.18, 1.34));
+    for (let u = u0 - 0.35; u < u1 + 0.45; u += 0.32) bag.add('wood_painted', B(u - 0.03, u + 0.03, gy, gy + 0.95, 1.22, 1.3));
+    for (let k = 0; k < 9; k++) { bag.add('planks_grey', B(u1 + 0.5, u1 + 1.9, y + k * 0.37, y + k * 0.37 + 0.06, 0.1 + k * 0.1, 1.3)); }
+    Cb(u1 + 0.5, u1 + 1.9, 0.1, 1.3, y, y + 1.2);
+  }
+  if (barn) {
+    // the storehouse: no windows; wide double gate of planks with iron straps, a plank ramp
+    bag.add('planks_grey', B(um - 1.3, um + 1.3, y + 0.3, y + 2.7, 0.15, 0.24));
+    bag.add('timber', B(um - 0.03, um + 0.03, y + 0.3, y + 2.7, 0.24, 0.27));
+    for (const hh of [0.8, 1.9]) bag.add('iron', B(um - 1.3, um + 1.3, y + hh, y + hh + 0.1, 0.24, 0.26));
+    bag.add('planks_grey', B(um - 1.5, um + 1.5, foot, y + 0.28, 0.24, 1.6));
   }
   // the low porch (kryltso) at the side door of the closed houses: two posts, a plank step, a small pent roof
-  if (!open) {
+  if (!open && !barn) {
     const wa = dW[0] - 0.12, wb = dW[1] + 0.12, pu = u0 - 1.0;
     bag.add('planks_grey', B(pu, u0, foot, y + 0.14, wa, wb));
     for (const w of [wa + 0.06, wb - 0.06]) { bag.add('timber', B(pu + 0.02, pu + 0.14, y + 0.14, y + 2.4, w - 0.06, w + 0.06)); Cb(pu + 0.02, pu + 0.14, w - 0.06, w + 0.06, y + 0.14, y + 2.4); }
     bag.add('planks_grey', hexa([P2(u0, y + 2.62, wa - 0.1), P2(u0, y + 2.62, wb + 0.1), P2(pu - 0.2, y + 2.38, wb + 0.1), P2(pu - 0.2, y + 2.38, wa - 0.1), P2(u0, y + 2.7, wa - 0.1), P2(u0, y + 2.7, wb + 0.1), P2(pu - 0.2, y + 2.46, wb + 0.1), P2(pu - 0.2, y + 2.46, wa - 0.1)]));
   }
+  dressHouse({ bag, B, Cb, P2, u0, u1, D, foot, y, rand, open });
   if (el.yard) yardFence(bag, col, ...fenceEnds(el.rect, front, el.yard), (x, z) => el.groundY ? el.groundY(x, z) : y);
   // the door in a side wall, under a small lintel
   { const dz = ex ? z0 : z1, ds = ex ? -1 : 1, dx0 = ex ? (front === 'x0' ? x1 - 2.2 : x0 + 1.2) : x0 - 0.05, dc = ex ? dx0 : (front === 'z0' ? z1 - 2.2 : z0 + 1.2);
@@ -349,7 +374,7 @@ function izba(el, { bag, col }) {
     else if (ex) bag.add('timber', box(dc, y + 0.3, Math.min(dz, dz + ds * 0.08), dc + 0.95, y + 2.2, Math.max(dz, dz + ds * 0.08)));
     else bag.add('timber', box(Math.min(x0, x0 - 0.08), y + 0.3, dc, Math.max(x0, x0 - 0.08), y + 2.2, dc + 0.95)); }
   // the roof: steep planks, the gable in logs, the barge boards and the towel board, the ridge log and its horse's head
-  const pitch = 1.05, o = 0.5, yt = y + H + o * pitch, half = (u1 - u0) / 2, yr = pitched(bag, 'planks_grey', LOG, el.rect, yt, pitch, o, ex, 0.12);
+  const pitch = barn ? 0.85 : 1.05, o = 0.5, yt = y + H + o * pitch, half = (u1 - u0) / 2, roofM = barn || rand() < 0.15 ? 'thatch' : rand() < 0.3 ? 'roof_bark' : 'planks_grey', yr = pitched(bag, roofM, LOG, el.rect, yt, pitch, o, ex, 0.12);
   const P = (u, v, w) => ex ? [f + sg * w, v, u] : [u, v, f + sg * w], wb = o + 0.03;
   for (const [ua, ub] of [[u0 - o, um + 0.1], [u1 + o, um - 0.1]]) bag.add('timber', hexa([P(ua, yt - o * pitch - 0.3, wb), P(ub, yr - 0.3, wb), P(ub, yr - 0.3, wb + 0.07), P(ua, yt - o * pitch - 0.3, wb + 0.07), P(ua, yt - o * pitch + 0.04, wb), P(ub, yr + 0.04, wb), P(ub, yr + 0.04, wb + 0.07), P(ua, yt - o * pitch + 0.04, wb + 0.07)]));
   bag.add('timber', B(um - 0.13, um + 0.13, yr - 1.3, yr - 0.25, wb + 0.07, wb + 0.13));
@@ -363,7 +388,7 @@ function izba(el, { bag, col }) {
     sh.moveTo(0, 0); sh.lineTo(L, 0); sh.lineTo(L, ye - y - H); sh.lineTo(L - 0.25, yt - 0.02 - y - H); sh.lineTo(0.25, yt - 0.02 - y - H); sh.lineTo(0, ye - y - H); sh.lineTo(0, 0);
     bag.add(LOG, slab(sh, 0.2, ex ? [f + sg * wg, u0] : [u0, f + sg * wg], ex ? [f + sg * wg, u1] : [u1, f + sg * wg], y + H - 0.02, 1));
   }
-  if (open) izbaInside(bag, { B, at: (u, v, w) => (ex ? [f + sg * w, v, u] : [u, v, f + sg * w]), u0, u1, D, fl, top: y + H, yr: yr - 0.12, door: dW, dh: 1.85, wins: Array.from({ length: nw }, (_, k) => um + (k - (nw - 1) / 2) * 1.35), wy, C: Cb });
+  if (open) izbaInside(bag, { B, at: (u, v, w) => (ex ? [f + sg * w, v, u] : [u, v, f + sg * w]), u0, u1, D, fl, top: y + H, yr: yr - 0.12, door: dW, dh: 1.85, wins: Array.from({ length: nw }, (_, k) => um + (k - (nw - 1) / 2) * 1.35), wy, C: Cb, seed: el.seed ?? 0 });
 }
 /**
  * lobnoye: { c, r, y } — the Lobnoye Mesto as rebuilt in stone in 1599: the round platform (13 m across,
@@ -566,6 +591,6 @@ function beamBox(a, b, w, h) {
 }
 registerStyle('muscovite', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, street_log: streetLog, stalls, log_church: logChurch, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
+  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, street_log: streetLog, kitai_wall: kitaiWall, facets_palace: facetsPalace, landing, raft, yardbuild, garden, stalls, log_church: logChurch, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
   objects: {},
 });

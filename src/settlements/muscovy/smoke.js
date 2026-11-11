@@ -3,6 +3,7 @@
 // hours; the kvass and sbiten sellers' steam in Red Square's market by day; a faint river mist at dawn over the Moskva.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
+import { yards } from './town.js';
 import { lots, RIVER, riverZ, RADIUS, SQUARE, height } from './layout.js';
 
 const ID = 'muscovy';
@@ -15,6 +16,8 @@ function emitters() {
     const [x0, z0, x1, z1] = l.rect, x = (x0 + x1) / 2, z = (z0 + z1) / 2;
     E.push({ p: [x, l.y + 3.3 + 0.5 + (Math.min(x1 - x0, z1 - z0) / 2) * 1.05 - 0.4, z], kind: 'kitchen', seed: l.seed + 1 });
   }
+  // the bathhouses (a black bania: its smoke leaves by the door and the hole in the roof) smoke on bathing days
+  for (const y of yards(lots())) if (y.t === 'yardbuild' && y.kind === 'bania' && rand() < 0.4) E.push({ p: [(y.rect[0] + y.rect[2]) / 2, y.y + 2.4 + 0.55, (y.rect[1] + y.rect[3]) / 2], kind: 'kitchen', seed: y.seed });
   // the kvass and sbiten sellers in the market: steam from the urn
   for (let z = -120; z < 100; z += 34) E.push({ p: [SQUARE[2] - 2.4, height(SQUARE[2] - 2.4, z) + 1.3, z], kind: 'steam', thr: rand() * 0.3, seed: z + 7 });
   for (let x = -RADIUS + 100; x < RADIUS - 100; x += 26) {

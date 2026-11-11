@@ -1,6 +1,6 @@
 // Muscovy — the ground: the square's beaten earth and log paving, the streets of timber, the
 // gardens and orchards behind the courts, the Moskva's low banks with willows; the northern light.
-import { RADIUS, SQUARE, BASIL, RIVER, MOAT, height, inRiver, inRect, inLot, inKremlin, inMoat, riverZ } from './layout.js';
+import { CATHEDRALS, nearKitai, RADIUS, SQUARE, BASIL, RIVER, MOAT, height, inRiver, inRect, inLot, inKremlin, inMoat, riverZ } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.05, grass: 0.4, rock: 0, soil: 0.4, fields: 0, dry: 0.15, warmth: 0.3, red: 0, road: 0.3, snow: 0, forest: 0 };
@@ -16,13 +16,17 @@ function fromWater(x, z) { return inRiver(x, z) || inMoat(x, z) ? -3 : Math.max(
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inMoat(x, z, 3) || inRect(SQUARE, x, z, 3) || Math.hypot(x - BASIL[0], z - BASIL[1]) < 32 || inLot(x, z, 1)) return null;
   if (inKremlin(x, z, -14) && !inKremlin(x, z, 10)) return null;                     // the wall's zone
-  if (Math.abs(z - riverZ(x)) < RIVER.w / 2 + 8) return { willow: 0.04, reeds: 4, grass: 20 };
-  return { birch: 0.004, apple: 0.01, elm: 0.003, grass: 14 };                          // birches, orchards, limes (elm stands in)
+  if (Math.abs(z - riverZ(x)) < RIVER.w / 2 + 8) return { willow: 0.04, reeds: 6, grass: 20 };
+  if (nearKitai(x, z, 8) || Object.values(CATHEDRALS).some((q) => (q.length === 4 ? inRect(q, x, z, 10) : Math.hypot(x - q[0], z - q[1]) < 26))) return null;
+  const r = Math.hypot(x, z), n = Math.sin(x * 0.043) * Math.cos(z * 0.051);             // a slow noise: groves and clearings
+  if (inKremlin(x, z, 6)) return { apple: 0.004, birch: 0.0015, grass: 12 };           // the boyars' gardens within the walls
+  if (r > 290) return { spruce: n > 0 ? 0.012 : 0.003, birch: 0.006, red_pine: n > 0.2 ? 0.004 : 0, apple: 0.002, grass: 14 };   // the forest round the posad
+  return { birch: n > 0.3 ? 0.012 : 0.003, apple: 0.012, elm: 0.003, spruce: n < -0.5 ? 0.003 : 0, grass: 14 };    // birch groves, the orchards of the yards, limes (elm stands in)
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   sea: RIVER.level,   // the planet's sea is this water, at this level (src/planet/relief.js)
-  maxDensity: { birch: 0.004, apple: 0.01, elm: 0.003, willow: 0.04 },
+  maxDensity: { birch: 0.012, apple: 0.012, elm: 0.003, willow: 0.04, spruce: 0.012, red_pine: 0.004 },
   climate: {
     sun: { az: 165, el: 42, color: [1.0, 0.95, 0.86], intensity: 3.3, lat: 56, dec: 15, hour: 11.5 },
     sky: { turbidity: 2.6, rayleigh: 1.1, mie: 0.005, mieG: 0.78, zenith: [0.08, 0.16, 0.42], horizon: [0.64, 0.68, 0.74] },
