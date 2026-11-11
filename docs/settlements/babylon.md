@@ -122,6 +122,13 @@ As for Ur (lyres, harps, drums, voices — `docs/settlements/ur.md` §9).
 
 The Southern Palace's north range had the inner city wall (Imgur-Enlil, ours at z ≈ −282) running through it. The palace was built in the angle between the inner wall and the Processional Way, its north side against the wall west of the Ishtar Gate [inferred: after Koldewey's plan of the Kasr]. Ours: the palace moved 9 m south (z −281…−161), its north side set into the wall's south face with no stepped face or battlements of its own there (`abut: 'n'`); the wall's towers rise over its north range.
 
+## 12. Living town and house details (batch pass)
+
+- **People on the move** (`movers.js`) [stated: Herodotus 1.195 for the dress: a linen tunic to the feet, a woollen one over it, a white mantle, long hair, a carved staff; Koldewey/Herodotus for priests in linen]: citizens, elders with staffs, priests in white linen with shaven heads [inferred: shaving after Herodotus on Egyptian and Near Eastern priests' custom; not verified for Esagila], scribes, veiled women, women with jars on the head, workmen and porters in the short belted tunic, boys. Ways: the Processional Way and the gate passage, the precinct, the street to Esagila and its court, the market, the bridge, the quay walk, the south road, the palace's east court. By day 52 within reach, 4 by night. No moving boats (the quffas stay at the quay or on the stream) [inferred: needs a round-hull boat kit].
+- **Animals** (`fauna.js`): carp along the river, swallows over the river and the Way, crows over the tower, sparrows on paving and quay, a heron and an egret at the quay wall [inferred: species of the Mesopotamian marshes and river].
+- **Smoke** (`smoke.js`): kitchen smoke at the three meals, incense at Esagila's altar and cella and at the tower's stair, river mist at dawn [inferred].
+- **House details** (`babylonian/house.js`, element `babylon_house` over the Sumerian courtyard house) [inferred, after Woolley's Ur houses and the Neo-Babylonian houses of Merkes/Babil as generally described; palm-trunk roof beams and reed matting are the standard materials of Mesopotamian roofs]: palm-beam ends under the parapet, a brick bench and a storage jar at the door, on 36 % of houses a reed shade on palm posts with a counter of wares (pots, baskets or cloth), on 40 % a reed shelter on the roof for sleeping on hot nights, a clay-capped oven vent on one-storey houses.
+
 ## Sources
 
 - [Etemenanki — Wikipedia](https://en.wikipedia.org/wiki/Etemenanki)
