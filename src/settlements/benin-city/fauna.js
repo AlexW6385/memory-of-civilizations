@@ -1,0 +1,15 @@
+// Benin City about 1600 — the animals (src/engine/fauna.js; docs/settlements/benin-city.md §8): swallows and swifts over the great
+// street and the market, dark kites (the engine's dark birds) circling over the palace and the Iya, small birds on the red earth and
+// the thatch (sparrow stand-ins for weaverbirds), an egret at the ditch.
+import { PALACE, MARKET, GATES, crest } from './layout.js';
+
+const flights = [
+  { kind: 'swallow', n: 6, lane: { a: [-240, 57], b: [240, 57] }, y: [3, 20], speed: 9, half: 30 },
+  { kind: 'swallow', n: 5, loop: { c: [(MARKET[0] + MARKET[2]) / 2, (MARKET[1] + MARKET[3]) / 2], a: [60, 40], rot: 0.2 }, y: [4, 16], speed: 8 },
+  { kind: 'crow', n: 4, loop: { c: [(PALACE[0] + PALACE[2]) / 2, (PALACE[1] + PALACE[3]) / 2], a: [80, 60], rot: 0.1 }, y: [45, 28], speed: 8 },
+  { kind: 'crow', n: 3, loop: { c: [0, 0], a: [250, 230], rot: 0.5 }, y: [60, 35], speed: 8 },
+];
+const perches = [];
+for (const [x, z] of [[-65, 20], [-30, 52], [40, 60], [98, 20], [98, -60], [160, 20], [150, -50], [-200, 57], [-90, 100], [60, 110], [20, 20], [-120, 28]]) perches.push({ kind: 'sparrow', x, z, y: 0.05, rot: x * 0.07, range: [1.5, 1.3] });
+{ const g = GATES[2], th = Math.atan2(g.at[1], g.at[0]), r = crest(th) + 16; perches.push({ kind: 'egret', x: Math.cos(th) * r + 12, z: Math.sin(th) * r, y: -3.4, rot: 0, stay: [60, 200], gone: [60, 160], alert: 10 }); }
+export default { fish: [], flights, perches };
