@@ -3,10 +3,11 @@
 // and the north–south streets, and the grey-brick courtyard houses between the lanes, in plans of
 // a few dozen each so that they build in turn.
 
-import { RADIUS, LEVEL, MOAT, RING, AVENUE, TEMPLE, lanes, houses } from './layout.js';
+import { RADIUS, LEVEL, MOAT, RING, AVENUE, TEMPLE, SHOP_APRONS, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
+import './townstyle.js';
 
 const R = RADIUS - 26;
-const base = (id, elements) => ({ id, style: 'qing', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' } });
+const base = (id, elements, style = 'qing') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' } });
 function clip([x0, z0, x1, z1]) {
   const horiz = x1 - x0 > z1 - z0;
   if (horiz) { const z = Math.min(Math.abs(z0), Math.abs(z1)); if (z >= R) return null; const h = Math.sqrt(R * R - z * z); return [Math.max(x0, -h), z0, Math.min(x1, h), z1]; }
@@ -38,11 +39,38 @@ function streets() {
 }
 
 const d2 = (h) => ((h.rect[0] + h.rect[2]) / 2 + 30) ** 2 + ((h.rect[1] + h.rect[3]) / 2 - 225) ** 2;
+/**
+ * The courtyard houses (§5, §17): each with the gate of its rank; plans of 24 houses so that they build
+ * in turn, near ones (full detail) apart from the far ones. The two nearest the avenue's mouth keep the
+ * furnished house (§14).
+ */
 function courtyards() {
-  // the two houses nearest the avenue's mouth below the moat are furnished inside (§14)
   const near = [...houses()].sort((a, b) => d2(a) - d2(b)).slice(0, 2);
-  const all = houses().map((h) => (near.includes(h) ? { ...h, furnish: true } : h)), plans = [];
-  for (let i = 0; i < all.length; i += 40) plans.push(base(`qing-beijing-houses-${i / 40}`, all.slice(i, i + 40).map((h) => ({ t: 'siheyuan', rect: h.rect, seed: h.seed, furnish: h.furnish }))));
+  const all = [...houses()].sort((a, b) => (a.lod - b.lod) || (Math.atan2(a.rect[1], a.rect[0]) - Math.atan2(b.rect[1], b.rect[0]))), plans = [];
+  const N = 24;
+  for (let i = 0; i < all.length; i += N) {
+    const part = all.slice(i, i + N);
+    plans.push(base(`qing-beijing-houses-${i / N}`, part.map((h) => (near.includes(h) ? { t: 'siheyuan', rect: h.rect, seed: h.seed, furnish: true } : { t: 'hutong_house', rect: h.rect, seed: h.seed, gate: h.gate, courts: h.courts, wealth: h.wealth, lod: h.lod, trees: houseTrees(h).map((t) => [t[0], t[1]]) })), 'beijing-site'));
+  }
+  return plans;
+}
+
+/** The shop street (§16): the shops on the avenue's two sides, their yards, the wells of the lanes. */
+function shopStreet() {
+  const plans = [], rows = shopRows(), E = [];
+  const apron = SHOP_APRONS.map((r) => ({ t: 'lane', rect: r, y: 0.04, mat: 'bluestone' }));
+  const mk = (id, els) => plans.push(base(id, els, 'beijing-site'));
+  mk('qing-beijing-shop-aprons', apron);
+  for (let i = 0; i < rows.length; i += 4) {
+    const els = [];
+    for (const row of rows.slice(i, i + 4)) {
+      for (const s of row.shops) els.push({ t: 'qing_shop', side: row.side, front: row.front, z0: s.z0, z1: s.z1, depth: 8.4, trade: s.trade, seed: s.seed, storeys: s.storeys });
+      els.push({ t: 'shop_yard', side: row.side, rect: [Math.min(row.yard[0], row.yard[2]), row.yard[1], Math.max(row.yard[0], row.yard[2]), row.yard[3]], seed: row.shops[0].seed });
+    }
+    mk(`qing-beijing-shops-${i / 4}`, els);
+  }
+  for (const w of wells()) E.push({ t: 'qing_well', at: w });
+  if (E.length) mk('qing-beijing-wells', E);
   return plans;
 }
 
@@ -95,4 +123,4 @@ function traffic() {
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-export async function town() { return [streets(), temple(), ...traffic(), ...courtyards()]; }
+export async function town() { return [streets(), temple(), ...traffic(), ...courtyards(), ...shopStreet()]; }
