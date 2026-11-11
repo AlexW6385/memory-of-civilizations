@@ -54,6 +54,14 @@ export function quayLife() {
       const [px, pz] = at(w * (0.2 + rand() * 0.6), 3.2); P('worker', px, pz, rand() * 6.28, { child: true });
     }
   }
+  // the Dam: its lanterns, a lute-player with his listeners, a water-carrier, children and a dog
+  for (const [x, z] of [[-26, -209.2], [-4, -209.2], [24.5, -209.2], [38.5, -232], [38.5, -214], [-28.5, -250], [-28.5, -228]]) put({ t: 'street_lamp', at: [x, z], y: GROUND, h: 4.3 });
+  { const x = -17, z = -225; P('burgher', x, z, 0, { pose: 'lute', hat: 'brim' });
+    for (const [dx, dz] of [[-1.3, 1.2], [0, 1.8], [1.4, 1.1], [2.3, 0.2]]) P(rand() < 0.5 ? 'wife' : rand() < 0.5 ? 'worker' : 'lady', x + dx, z + dz, Math.atan2(-(-dx), -(-dz)) + Math.PI, { pose: 'stand' }); }
+  P('wife', 29, -236, 1.0, { carry: 'pails' }); P('worker', 4.5, -222, 0.4, { carry: 'sack' });
+  for (const [x, z] of [[7, -219], [15, -231], [-8, -214]]) P('worker', x, z, rand() * 6.28, { child: true });
+  put({ t: 'animal', kind: 'dog', at: [18, -212], y: Y, rot: 2.1, seed: 78 }); put({ t: 'animal', kind: 'dog', at: [-12, -240], y: Y, rot: 0.3, seed: 79 });
+  for (const [x, z] of [[12, -214], [-20, -214.5], [33, -243]]) put({ t: 'handcart', at: [x, z], y: Y, rot: rand() * 3, seed: Math.floor(rand() * 1e6) });
   // rowing boats mid-canal near the centre, a rower in each
   let k = 0;
   for (const R of RINGS.slice(0, 3)) for (const a of [0.55, 1.0, 1.5, 1.95, 2.4]) {
