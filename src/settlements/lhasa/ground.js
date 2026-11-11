@@ -25,6 +25,8 @@ const fromWater = (x, z) => Math.max(-5, Math.min(99, pondDist(x, z)));
 /** Plants per 100 m²: willows and poplars in rows on the valley floor, grass on the hills, none in Shöl. */
 function planting(x, z) {
   const r = Math.hypot(x, z);
+  // the open ground below the palace stairs: willows and poplars of the village's north edge, clear of the street and the stairs' foot
+  if (z > 35 && z < 46 && Math.abs(x) > 20 && Math.abs(x) < 196 && hill(x, z) < 1.5) return { willow: 0.28, poplar: 0.12, grass: 18 };
   if (r > RADIUS - 6 || inRect(SHOL, x, z, 3) || inLot(x, z, 2) || inRect(CHAPEL, x, z, 1.5)) return null;
   const pd = pondDist(x, z);
   if (pd < 0.5) return null;

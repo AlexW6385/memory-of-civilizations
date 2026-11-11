@@ -3,13 +3,13 @@
 // and across the lane. Data for the engine's movers (src/engine/movers.js), read in its worker: the ways (from
 // layout.js), who walks (figures of src/objects/figures.js). No boats.
 
-import { STREET, SHOL, LANE_Z, RADIUS } from './layout.js';
+import { STREET, SHOL, LANE, RADIUS } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 30, night: 3, rain: 0.7, reach: 150, spawnMin: 26, far: 42 },
+  walkers: { day: 44, night: 3, rain: 0.7, reach: 150, spawnMin: 26, far: 42 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -19,7 +19,7 @@ export function walkways() {
   const [sx0, , sx1, sz1] = SHOL, S = STREET;
   const rects = [
     { r: [S[0], 60, S[2], sz1 + 22], weight: 4, market: 3, kind: 'street' },
-    { r: [sx0 + 8, LANE_Z[0] + 8, sx1 - 8, LANE_Z[1] - 6], weight: 1.5, market: 1.5, kind: 'street' },
+    { r: [sx0 + 8, LANE[0] + 0.3, sx1 - 8, LANE[1] - 0.3], weight: 1.5, market: 1.5, kind: 'street' },
     { r: [sx0 + 8, 46, sx1 - 8, 60], weight: 1.5, market: 1, kind: 'street' },
     // the circuit: south leg outside the gate, west leg, east leg (the north leg is the walkers' in the hills)
     { r: [-190, 220, 150, 224], weight: 1.5, market: 0.3, kind: 'street' },

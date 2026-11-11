@@ -139,6 +139,22 @@ Sources added:
 - [Lhasa's Historic Urban Fabric — Tibet Heritage Fund (asianart.com)](https://asianart.com/associations/lhasa_restoration/report98/ch_02.htm)
 - [Tibetan Tea Culture — tibettravel.org](https://www.tibettravel.org/tibetan-local-customs/tibetan-tea-culture.html)
 
+## 15. Deepening pass (2026-11, Suzhou standard)
+
+Gaps found against Ming Suzhou: Shöl read as detached houses on a grid with 3–7 m of bare ground between them and an empty 20 m band across the middle; the houses' outer walls bare; no goods at the shop fronts; the lanes without life; roofs bare.
+
+- **Shöl's blocks.** Houses stand shoulder to shoulder in rows with lanes of 2.6–3.3 m between them, the one wide lane (7 m, z 138.5–145.5) between the east and west gates, where the gates already stood; rows cut to fit the street's shops and the printing house; about 4.5% of plots left as yards [inferred from the closeness of Lhasa's built fabric: "adjacent buildings of one, two and three storeys", the Tibet Heritage Fund text quoted in §12; the lane widths are ours]. Houses within the farmsteads' ring unchanged (about 90 scattered farmsteads, spacing 26 m).
+- **Dung cakes on the walls.** Cakes of yak dung are slapped on whitewashed walls to dry and stacked as fuel [inferred: familiar plateau practice; the plateau has no timber to burn — our reading, not a cited source]: ours a patch of rough brown courses 2.4–4.2 m wide and 0.8–1.4 m high on one outer wall of 80% of the houses, the top row set on edge, a few fallen at the foot.
+- **The roof as store.** Fodder, dung cakes and firewood are kept on the flat roofs [inferred]: ours a heap of barley straw tied with rope, a stack of dung cakes against the parapet, a bundle of firewood on the roofs of the houses without a third storey.
+- **Foot-of-wall goods.** Firewood stacks, water jars, baskets, sacks and churn barrels at the houses' feet; a second item further along on four in ten fronts [inferred].
+- **Flags over the lanes.** The five-colour prayer flags (§12) now also strung across the lanes from roof corner to roof corner between neighbouring houses (half the gaps) [inferred: the flags' practice; heights 6.35 m = the roofs' raised corners].
+- **Life in the lanes.** A dog asleep, a goat or a donkey tethered at a wall, an old woman on her stool at the gate in the sun [inferred].
+- **The street's fronts.** Each trading house and tea house: two paper lanterns hung at the door, sacks, baskets and a blue-glazed jar before it, a goods mat; the tea houses a stack of fuel and the kettles' pots [inferred].
+- **Planting.** Willows and poplars on the open ground below the palace (z 35–46) at the village's north edge [inferred: the valley's willow and poplar, §8].
+- **Sparrows** moved from the lots to the wide lane and the lane's end.
+
+Still below Suzhou: the houses' fronts are one design in many sizes (no merchant house with a painted gate or noble residence with a carved porch); the Red Palace's chapels are not furnished; the lanes have no steps, drains or paving detail; walkers fewer than Suzhou's near the visitor.
+
 ## Sources
 
 - [Deyangshar — Wikipedia](https://en.wikipedia.org/wiki/Deyangshar)

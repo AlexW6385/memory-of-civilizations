@@ -5,6 +5,7 @@
 import { RADIUS, POND, STREET, shops, PRINTERY, BENCHES, CHAPEL, lots, pondDist, inLot, inRect, SHOL } from './layout.js';
 import { ground } from './ground.js';
 import { teaSeats } from '../../styles/tibetan/index.js';
+import { dressing } from './dress.js';
 const base = (id, elements, style = 'tibetan') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-4, 60], facing: 'n' } });
 /** The street's incense burner and the tethered yaks (x, z, rot), by the booths and in the lane. */
 export const SANG = [-3.4, 166];
@@ -86,7 +87,7 @@ export async function town() {
   // the street's shops, booths, the flags across it, the yaks, the pilgrims prostrating
   const sh = shops(), rand = rng(77), E = [];
   for (const s of sh) E.push(s.kind === 'stall' ? { t: 'stall', at: s.at, rot: s.rot, w: s.w, y: 0, seed: s.seed, goods: s.goods } : { t: 'tibetan_shop', rect: s.rect, door: s.door, kind: s.kind, y: 0, seed: s.seed });
-  for (const z of [88, 108, 156, 178]) E.push({ t: 'flag_line', a: [STREET[0] - 0.4, z], b: [STREET[2] + 0.4, z + 1.5], y0: 8.2, y1: 8.4, sag: 0.8 });
+  for (const z of [78, 88, 98, 108, 118, 156, 167, 178, 190, 199]) E.push({ t: 'flag_line', a: [STREET[0] - 0.4, z], b: [STREET[2] + 0.4, z + 1.5], y0: 8.2, y1: 8.4, sag: 0.8 });
   E.push({ t: 'sangkhang', at: SANG, rot: 0 });
   plans.push(base('lhasa-shops', E));
   // sangkhang in the street, its smoke (smoke.js)
@@ -100,5 +101,12 @@ export async function town() {
     seated.push({ t: 'figure', at: q.at, y: 0, rot: q.rot, h: 1.5 + rand() * 0.2, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.2 ? 'cloth_maroon' : ['cloth_brown', 'cloth_black', 'cloth_grey', 'hide_tan'][Math.floor(rand() * 4)], cloth2: ['cloth_red', 'cloth_green', 'cloth_ochre', 'paint_blue'][Math.floor(rand() * 4)], over: woman ? 'apron' : 'sash', skin: rand() < 0.5 ? 'skin_medium' : 'skin_dark', hat: woman ? 'none' : rand() < 0.5 ? 'cap' : 'none', hatMat: 'hide_brown', hair: woman ? 'bun' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'sit' });
   }
   plans.push(base('lhasa-patrons', seated, 'life'));
+  // eye-level dressing of the lanes and the street's fronts, tiled 100 m with the plans drawn near (as Suzhou's life)
+  const dr = dressing(), tile = (list, style, name) => {
+    const tiles = new Map();
+    for (const e of list) { const p = e.at ?? e.a, k = `${Math.floor(p[0] / 100)},${Math.floor(p[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+    return [...tiles].map(([k, els]) => { const [i, j] = k.split(',').map(Number); return { ...base(`lhasa-${name}-${k}`, els, style), center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
+  };
+  plans.push(...tile(dr.dung, 'tibetan', 'dung'), ...tile(dr.flags, 'tibetan', 'lane-flags'), ...tile(dr.life, 'life', 'lane-life'));
   return [...plans, ...people()];
 }

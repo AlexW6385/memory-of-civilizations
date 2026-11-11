@@ -4,6 +4,8 @@
 
 export const RADIUS = 420;
 export const SHOL = [-200, 62, 200, 210];
+/** The wide lane across Shöl between its east and west gates (z). */
+export const LANE = [138.5, 145.5];
 export const CHOKPORI = { c: [-280, 230], r: 75, h: 35 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -26,18 +28,29 @@ export function lots() {
   if (LOTS) return LOTS;
   LOTS = [];
   const rand = rng(1694);
-  for (let x = SHOL[0] + 6; x < SHOL[2] - 14; x += 17) for (let z = SHOL[1] + 6; z < SHOL[3] - 14; z += 17) {
-    if (Math.abs(x + 4) < 10) continue;                                    // the street up to the palace
-    if (Math.abs(z - 136) < 1) continue;                                   // the lane between the east and west gates
-    if (rand() < 0.12) continue;
-    const w = 10 + rand() * 4, d = 9 + rand() * 4;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
+  // Shöl's house blocks: rows of courtyard houses shoulder to shoulder, separated by lanes of about 3 m, the one wide lane
+  // (LANE) running between the east and west gates (docs/settlements/lhasa.md §15); the street's shops take the middle.
+  const rows = [];
+  { const a = 64.5, b = 135.5, n = 5, pitch = (b - a + 3) / n; for (let i = 0; i < n; i++) rows.push([a + i * pitch, pitch - 3]); }
+  { const a = LANE[1], b = SHOL[3] - 2.5, n = 4, pitch = (b - a + 3) / n; for (let i = 0; i < n; i++) rows.push([a + i * pitch, pitch - 3]); }
+  for (const [z0, dd] of rows) {
+    let x = SHOL[0] + 3.4;
+    while (x < SHOL[2] - 12) {
+      let w = 11.5 + rand() * 2.4;
+      if (x < 10 && x + w > -13) { x = 10; continue; }                       // the street between its shops
+      if (x < -10 && x + w > -22) w = -10.4 - x;                              // the last house before the street takes the rest
+      if (w < 7) { x += w + 2.8; continue; }
+      const d = dd - rand() * 0.9;
+      if (rand() > 0.045) LOTS.push({ rect: [x, z0, x + w, z0 + d], seed: Math.floor(rand() * 1e6) });
+      x += w + 2.6 + rand() * 0.7;
+    }
   }
   LOTS = LOTS.filter((l) => !(l.rect[2] > PRINTERY[0] - 4 && l.rect[0] < PRINTERY[2] + 4 && l.rect[3] > PRINTERY[1] - 4 && l.rect[1] < SHOL[3]));
-  for (let k = 0; k < 400 && LOTS.length < 260; k++) {
+  const nShol = LOTS.length;
+  for (let k = 0; k < 2500 && LOTS.length < nShol + 90; k++) {
     const a = rand() * Math.PI * 2, d = 230 + rand() * 160, x = Math.cos(a) * d, z = Math.sin(a) * d;
     if (z < 40 || hill(x, z) > 1 || Math.hypot(x, z) > RADIUS - 30) continue;
-    if (LOTS.some((l) => Math.abs(l.rect[0] - x) < 30 && Math.abs(l.rect[1] - z) < 30)) continue;
+    if (LOTS.some((l) => Math.abs(l.rect[0] - x) < 26 && Math.abs(l.rect[1] - z) < 26)) continue;
     LOTS.push({ rect: [x, z, x + 12 + rand() * 4, z + 10 + rand() * 4], seed: Math.floor(rand() * 1e6) });
   }
   return LOTS;
