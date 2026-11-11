@@ -672,7 +672,7 @@ function pendopo(el, { bag, col }) {
   // the tall posts and the two-tier roof: the lower hip with a hole over the middle, the upper hip raised over it
   const iu = W / 6, iv = D / 6, hole = [cx - iu - 0.4, cz - iv - 0.4, cx + iu + 0.4, cz + iv + 0.4];
   const B = Math.min(W, D) / 2 + 1.4, near = (W > D ? iv : iu) + 0.4, ts = Math.max(0, Math.min(1, (B - near) / B)), yh = top + R1 * Math.pow(ts, p);
-  const yUp = yh + 0.8;
+  const yUp = yh + 2.2;
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) post(cx + sx * iu, cz + sz * iv, yUp + 0.1, 0.19);
   const rr = [cx - iu, cz - iv, cx + iu, cz + iv];
   for (const [a, b, c, d2] of [[rr[0] - 0.2, rr[1] - 0.2, rr[2] + 0.2, rr[1] + 0.2], [rr[0] - 0.2, rr[3] - 0.2, rr[2] + 0.2, rr[3] + 0.2], [rr[0] - 0.2, rr[1] - 0.2, rr[0] + 0.2, rr[3] + 0.2], [rr[2] - 0.2, rr[1] - 0.2, rr[2] + 0.2, rr[3] + 0.2]]) { bag.add('timber', box(a, yUp - 0.3, b, c, yUp, d2)); bag.add('timber', box(a, top - 0.3, b, c, top - 0.02, d2)); }
