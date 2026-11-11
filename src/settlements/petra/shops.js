@@ -7,6 +7,8 @@ import { houseLayout } from '../../styles/nabataean/house.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const CL = ['cloth_white', 'linen', 'cloth_ochre', 'cloth_indigo', 'cloth_red', 'cloth_brown'];
 const TRADES = ['incense', 'potter', 'cloth', 'oil', 'grain', 'incense', 'potter', 'spice'];
+/** The trade of a shop unit (layout.js `shopUnits`). */
+export const tradeOf = (s) => TRADES[(s.i * 5 + 3) % TRADES.length];
 
 export function shopLife() {
   const L = [], rand = rng(5150), pick = (a) => a[Math.floor(rand() * a.length)];

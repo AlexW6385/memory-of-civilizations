@@ -14,6 +14,8 @@ import { colonnadeStreet as street, greatTemple, qasr } from './city.js';
 import { poolGarden } from './garden.js';
 import { triclinium } from './triclinium.js';
 import { house } from './house.js';
+import { yard } from './yard.js';
+import { front, prop, nymph } from './fronts.js';
 
 const R = 'sandstone_rose', A = 'sandstone_rose_ashlar';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -128,6 +130,6 @@ function theatre(el, { bag, col: C }) {
 
 registerStyle('nabataean', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, khazneh, siq_walls: siqWalls, rock_tomb: (el, ctx) => (['pylon', 'step', 'hegr', 'crowstep'].includes(el.kind ?? 'crowstep') ? crowTomb : ['urn', 'corinthian', 'palace'].includes(el.kind) ? royalTomb : rockTomb)(el, ctx), theatre, colonnade_street: street, great_temple: greatTemple, qasr, nabataean_house: house, pool_garden: poolGarden, triclinium },
+  elements: { ...STYLES.qing.elements, khazneh, siq_walls: siqWalls, rock_tomb: (el, ctx) => (['pylon', 'step', 'hegr', 'crowstep'].includes(el.kind ?? 'crowstep') ? crowTomb : ['urn', 'corinthian', 'palace'].includes(el.kind) ? royalTomb : rockTomb)(el, ctx), theatre, colonnade_street: street, great_temple: greatTemple, qasr, nabataean_house: house, petra_yard: yard, petra_front: front, petra_prop: prop, petra_nymph: nymph, pool_garden: poolGarden, triclinium },
   objects: {},
 });
