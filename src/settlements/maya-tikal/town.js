@@ -91,7 +91,7 @@ function people() {
   // before the North Acropolis: the rulers' retinue by the stelae
   for (const x of [-24, 24]) L.push(priest(rand, x, -34.4, 0.04, 0, { pose: 'talk' }));
   // the palaces: a noble on the bench of the south range's middle room, a scribe in the stepped palace's lowest room
-  { const F = frame('n', ...SOUTH_RANGE.c), p = F.P(3.4, 0); L.push(person(rand, p[0], p[1], CA.H + 0.5, face(0, -1), { woman: false, pose: 'sit', over: 'cape', cloth2: 'cloth_blue' })); }
+  { const F = frame('n', ...SOUTH_RANGE.c), p = F.P(2.6, 1.5); L.push(person(rand, p[0], p[1], CA.H + 0.5, face(0, -1), { woman: false, pose: 'sit', over: 'cape', cloth2: 'cloth_blue' })); }
   { const F = frame('w', ...STEP_PALACE[0].c), p = F.P(3.4, 2.65); L.push(person(rand, p[0], p[1], CA.H + 0.5, face(-1, 0), { woman: false, pose: 'sit', hat: 'cap', hatMat: 'stucco_leaf' })); }
   // the game: two teams in the alley, hip guards and a cap; the ball between them; watchers on the two mounds (3.2 m)
   const [ax0, az0, ax1, az1] = BALL.alley, zc = (az0 + az1) / 2;

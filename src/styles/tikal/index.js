@@ -153,6 +153,7 @@ function range(el, { bag, col }) {
   if (el.furn) {
     const rand = rng(el.seed ?? 7);
     for (const [ua, ub] of uRow) for (let i = 0; i < n; i++) {
+      if (rows === 2 && ua === uRow[0][0]) { const ph = F.P(ua + 0.4, vc(i) + rw / 2 - 0.45); put(bag, storeJarKit(), ph[0], y, ph[1], 0); continue; }   // the passage row keeps its way through free
       const bench = F.R(ub - 1.0, ub, vc(i) - rw / 2 + 0.2, vc(i) + rw / 2 - 0.2); slab(bag, L, bench, y, y + 0.5, col);
       const m = F.R(ub - 0.9, ub - 0.1, vc(i) - 0.7, vc(i) + 0.7); bag.add('reed_mat', box(m[0], y + 0.5, m[1], m[2], y + 0.52, m[3]));
       const ph = F.P(ua + 0.4, vc(i) + rw / 2 - 0.45);
