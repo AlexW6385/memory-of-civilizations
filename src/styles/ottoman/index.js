@@ -12,6 +12,8 @@ import { prayerHall } from './prayerhall.js';
 import { kahvehane } from './kahve.js';
 import { carsi } from './bazaar.js';
 import { cesme } from './cesme.js';
+import { ottomanHouse } from './konak.js';
+import { mescit, courtDress } from './quarter.js';
 import * as FN from '../mughal/furnish.js';
 
 const S = 'limestone', L = 'lead';
@@ -155,14 +157,14 @@ function courtyard(bag, col, C, y, nx, nz) {
   // the outer walls (north, west, east) outside the rect: two rows of windows per bay, doors in the middle bays, the portal north
   const doorN = cx, doorEW = Z0 + (Math.floor(nz / 2) + 0.5) * bz;
   const wallRun = (r, alongX, door) => {
-    const [a0, a1] = alongX ? [r[0], r[2]] : [r[1], r[3]], cut = door ? [door - 1.6, door + 1.6] : null;
+    const [a0, a1] = alongX ? [r[0], r[2]] : [r[1], r[3]], cut = door != null ? [door - 1.6, door + 1.6] : null;
     const seg = (u0, u1, ya, yb) => { const q = alongX ? [u0, r[1], u1, r[3]] : [r[0], u0, r[2], u1]; bag.add(S, box(q[0], ya, q[1], q[2], yb, q[3])); if (ya <= y) col.rect(q, y, yb); };
     if (cut) { seg(a0, cut[0], y - 0.5, y + wallTop); seg(cut[1], a1, y - 0.5, y + wallTop); seg(cut[0], cut[1], y + 5.2, y + wallTop); } else seg(a0, a1, y - 0.5, y + wallTop);
     bag.add(S, alongX ? box(r[0] - 0.25, y + wallTop, r[1] - 0.25, r[2] + 0.25, y + wallTop + 0.35, r[3] + 0.25) : box(r[0] - 0.25, y + wallTop, r[1] - 0.25, r[2] + 0.25, y + wallTop + 0.35, r[3] + 0.25));
     const n = alongX ? nx : nz, b = alongX ? bx : bz;
     for (let i = 0; i < n; i++) {
       const u = (alongX ? X0 : Z0) + (i + 0.5) * b;
-      if (door && Math.abs(u - door) < 1) continue;
+      if (door != null && Math.abs(u - door) < 1) continue;
       for (const face of [0, 1]) {
         const f = face ? (alongX ? r[3] : r[2]) : (alongX ? r[1] : r[0]), sg = face ? 1 : -1;
         const W = (u0, u1, ya, yb, d0, d1, m) => { const p = [f + sg * d0, f + sg * d1]; const q = alongX ? [u0, Math.min(...p), u1, Math.max(...p)] : [Math.min(...p), u0, Math.max(...p), u1]; bag.add(m, box(q[0], ya, q[1], q[2], yb, q[3])); };
@@ -392,6 +394,6 @@ function graves(el, { bag, col }) {
 
 registerStyle('ottoman', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ...KULLIYE },
+  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ottoman_house: ottomanHouse, mescit, court_dress: courtDress, ...KULLIYE },
   objects: {},
 });

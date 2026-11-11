@@ -4,13 +4,13 @@
 // of the market and in the lanes of the timber quarter. Data for the engine's movers (src/engine/movers.js), read in its
 // worker; no boats (the Golden Horn lies beyond the settlement). Format as Suzhou's / Khajuraho's.
 
-import { RADIUS, TERRACE, PRECINCT, ARASTA, CARSI, lots } from './layout.js';
+import { RADIUS, TERRACE, PRECINCT, ARASTA, CARSI, lots, lanes } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 36, night: 4, rain: 0.6, reach: 150, spawnMin: 26, far: 42 },
+  walkers: { day: 60, night: 6, rain: 0.6, reach: 150, spawnMin: 24, far: 42 },
   boats: { count: 0, reach: 250, spawnMin: 60, far: 95, speed: [1.0, 1.45], bridgeSpeed: 0.7 },
   water: -100,
 };
@@ -41,10 +41,15 @@ export function walkways() {
   R([-170, -118, 170, -112], 0.9, 'street', 0); R([-170, 158, 170, 164], 0.9, 'street', 0);          // the ring road round the terrace's foot
   R([-169, -118, -163, 164], 0.9, 'street', 0); R([163, -118, 169, 164], 0.9, 'street', 0);
   R([-170, 129, -150, 133], 1.0, 'street', 0.6);                                                      // from the market's west gate to the ring road
-  // the lanes of the timber quarter beyond the terrace
-  const lim = RADIUS - 30, [t0, u0, t1, u1] = TERRACE;
-  for (let x = -RADIUS + 20 + 11.2; x < lim; x += 13) { if (x > t0 - 12 && x < t1 + 12) { R([x, -lim, x + 1.6, u0 - 12], 0.35); R([x, u1 + 12, x + 1.6, lim], 0.35); } else R([x, -lim, x + 1.6, lim], 0.35); }
-  for (let z = -RADIUS + 20 + 10.2; z < lim; z += 12) { if (z > u0 - 12 && z < u1 + 12) { R([-lim, z, t0 - 12, z + 1.6], 0.35); R([t1 + 12, z, lim, z + 1.6], 0.35); } else R([-lim, z, lim, z + 1.6], 0.35); }
+  // the lanes of the timber quarter: the grid of cobbled lanes (layout.js lanes), the ones nearer the terrace busier
+  for (const { r, vert } of lanes()) {
+    const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, pieces = vert ? [[r[1], Math.max(r[1], u0 - 3)], [Math.min(r[3], u1 + 3), r[3]]] : [[r[0], Math.max(r[0], t0 - 3)], [Math.min(r[2], t1 + 3), r[2]]];
+    const inT = vert ? cx > t0 - 4 && cx < t1 + 4 : cz > u0 - 4 && cz < u1 + 4;
+    for (const [p, q] of inT ? pieces : [vert ? [r[1], r[3]] : [r[0], r[2]]]) if (q - p > 4) {
+      const near = Math.max(0, 1 - Math.hypot(Math.max(0, Math.abs(cx) - 150), Math.max(0, Math.abs(cz) - 130)) / 250);
+      R(vert ? [r[0], p, r[2], q] : [p, r[1], q, r[3]], 0.35 + near * 0.6, 'lane', near * 0.3);
+    }
+  }
   void lots;
   return { rects, links: [], clip: RADIUS - 14 };
 }
