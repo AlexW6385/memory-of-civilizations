@@ -93,14 +93,14 @@ export function columnDragon(P, m, cr, y0, y1, r, turns = 2.2, a0 = 0) {
   dragon(P, m, pts, r, { up: [0, 1, 0] });
 }
 /** A dragon in relief in the xy plane (facing +z), rising in an S from below to its head at the top. */
-function reliefDragon(P, m, w, h, r, o = {}) {
+export function reliefDragon(P, m, w, h, r, o = {}) {
   const N = 30, pts = [];
   for (let k = 0; k <= N; k++) { const t = k / N; pts.push([Math.sin(t * Math.PI * 2.2 + (o.phase ?? 0)) * w * 0.32 * (1 - t * 0.3), h * (0.88 - t * 0.8), 0]); }
   pts[0] = [pts[1][0] + w * 0.12 * (o.dir ?? 1), h * 0.86, 0];
   dragon(P, m, pts, r, { up: [0, 0, 1], flat: 0.55, lite: o.lite, pearl: o.pearl, pearlMat: o.pearlMat });
 }
 /** A cloud scroll (ruyi) in relief: three lobes and a curling tail, w wide, in the xy plane. */
-function cloud(P, m, x, y, w, z = 0) {
+export function cloud(P, m, x, y, w, z = 0) {
   for (const [dx, dy, k] of [[0, 0, 0.5], [-0.35, -0.12, 0.36], [0.35, -0.12, 0.36], [0.62, -0.32, 0.22]]) P.add(m, T(ball(w * k, w * k * 0.7, w * 0.12, 8, 4), x + dx * w, y + dy * w, z));
 }
 

@@ -3,10 +3,12 @@
 // and the north–south streets, and the grey-brick courtyard houses between the lanes, in plans of
 // a few dozen each so that they build in turn.
 
-import { RADIUS, LEVEL, MOAT, RING, AVENUE, TEMPLE, lanes, houses } from './layout.js';
+import { RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, SHOP_APRONS, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
+import './townstyle.js';
+import { lifePlans } from './life.js';
 
 const R = RADIUS - 26;
-const base = (id, elements) => ({ id, style: 'qing', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' } });
+const base = (id, elements, style = 'qing') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' } });
 function clip([x0, z0, x1, z1]) {
   const horiz = x1 - x0 > z1 - z0;
   if (horiz) { const z = Math.min(Math.abs(z0), Math.abs(z1)); if (z >= R) return null; const h = Math.sqrt(R * R - z * z); return [Math.max(x0, -h), z0, Math.min(x1, h), z1]; }
@@ -17,32 +19,63 @@ function streets() {
   const E = [];
   // the moat: water, its walls, the street round it
   const [a0, b0, a1, b1] = MOAT.outer, [c0, d0, c1, d1] = MOAT.inner;
-  for (const r of [[a0, b0, a1, d0], [a0, d1, a1, b1], [a0, d0, c0, d1], [c1, d0, a1, d1]]) E.push({ t: 'water_rect', rect: r, y: LEVEL.moat });
-  for (const [p, q] of [[[a0, b0], [a1, b0]], [[a0, b1], [a1, b1]], [[a0, b0], [a0, b1]], [[a1, b0], [a1, b1]], [[c0, d0], [c1, d0]], [[c0, d1], [c1, d1]], [[c0, d0], [c0, d1]], [[c1, d0], [c1, d1]]]) {
+  const nx = NOTCH.x;
+  for (const r of [[a0, b0, a1, d0], [a0, d1, -nx, b1], [nx, d1, a1, b1], [a0, d0, c0, d1], [c1, d0, a1, d1]]) E.push({ t: 'water_rect', rect: r, y: LEVEL.moat });
+  // the walls of the water: the south side stops at the Meridian Gate's forecourt, where a stone causeway crosses the moat and its ends are walled
+  const walls = [[[a0, b0], [a1, b0]], [[a0, b1], [-nx, b1]], [[nx, b1], [a1, b1]], [[a0, b0], [a0, b1]], [[a1, b0], [a1, b1]], [[c0, d0], [c1, d0]], [[c0, d1], [-nx, d1]], [[nx, d1], [c1, d1]], [[c0, d0], [c0, d1]], [[c1, d0], [c1, d1]], [[-nx, d1], [-nx, b1]], [[nx, d1], [nx, b1]]];
+  for (const [p, q] of walls) {
     E.push({ t: 'canal_wall', a: p, b: q, y: 0.05, bed: LEVEL.moatBed, th: 0.8 });
-    // a low wall of grey brick under a stone coping along each bank, open at the bridges' landings
-    const open = p[1] === q[1] ? (p[1] > 0 ? [[-6 - p[0], 6 - p[0]]] : []) : [[65 - 4.6 - p[1], 65 + 4.6 - p[1]]];
-    E.push({ t: 'low_wall', a: p, b: q, y: 0.05, h: 1.05, th: 0.5, open });
+    // a low wall of grey brick under a stone coping along each bank, open at the side bridges' landings (the notch's end walls have none)
+    const vert = p[0] === q[0], side = vert && Math.abs(p[0]) !== nx;
+    E.push({ t: 'low_wall', a: p, b: q, y: 0.05, h: 1.05, th: 0.5, open: side ? [[65 - 4.6 - p[1], 65 + 4.6 - p[1]]] : [] });
   }
-  // the bridge over the moat on the axis, before the Meridian Gate, and at the side gates
-  E.push({ t: 'ming_arch_bridge', at: [0, (b1 + d1) / 2], across: 'z', span: b1 - d1 + 0.6, width: 10, rise: 1.4, landing: 4, y: 0.04, water: LEVEL.moat, bed: LEVEL.moatBed, pal: { base: 'marble' } });
+  // the bridges over the moat at the side gates (the axis crosses by the causeway)
   E.push({ t: 'ming_arch_bridge', at: [(a0 + c0) / 2, 65], across: 'x', span: c0 - a0 + 0.6, width: 7, rise: 1.2, landing: 4, y: 0.04, water: LEVEL.moat, bed: LEVEL.moatBed, pal: { base: 'marble' } });
   E.push({ t: 'ming_arch_bridge', at: [(a1 + c1) / 2, 65], across: 'x', span: a1 - c1 + 0.6, width: 7, rise: 1.2, landing: 4, y: 0.04, water: LEVEL.moat, bed: LEVEL.moatBed, pal: { base: 'marble' } });
+  // the causeway's two edges, over the moat's cut ends: a marble balustrade each side, as on the bridges
+  for (const sx of [-1, 1]) E.push({ t: 'rail', a: [sx * (nx - 0.4), d1 + 0.2], b: [sx * (nx - 0.4), b1 - 0.2], y: 0.04, carve: 'qing' });
   // the band between the moat and the palace wall, paved
   for (const r of [[c0, d0, c1, -194], [c0, 179, c1, d1], [c0, -194, -116, 179], [116, -194, c1, 179]]) E.push({ t: 'lane', rect: r, y: 0.03 });
   // the ring street, the avenue, the lanes
-  for (const r of [[RING[0], RING[1], RING[2], b0], [RING[0], b1, RING[2], RING[3]], [RING[0], b0, a0, b1], [a1, b0, RING[2], b1]]) E.push({ t: 'lane', rect: r, y: 0.03, mat: 'bluestone' });
+  for (const r of [[RING[0], RING[1], RING[2], b0], [RING[0], b1, -nx, RING[3]], [nx, b1, RING[2], RING[3]], [RING[0], b0, a0, b1], [a1, b0, RING[2], b1]]) E.push({ t: 'lane', rect: r, y: 0.03, mat: 'bluestone' });
+  // the Meridian Gate's forecourt: the causeway across the south moat, paved with brick, with the stone way down its axis to the avenue
+  E.push({ t: 'lane', rect: [-nx, d1 - 0.5, nx, RING[3]], y: 0.03, mat: 'brick_paving' });
+  E.push({ t: 'lane', rect: [-3.6, d1 - 0.5, 3.6, RING[3] + 2], y: 0.06, mat: 'marble_floor' });
   E.push({ t: 'lane', rect: clip(AVENUE), y: 0.04, mat: 'bluestone' });
   for (const l of lanes()) { const r = clip(l); if (r) E.push({ t: 'lane', rect: r, y: 0.02, mat: l[2] - l[0] < 20 ? 'bluestone' : 'brick_paving' }); }
   return base('qing-beijing-streets', E);
 }
 
-const d2 = (h) => ((h.rect[0] + h.rect[2]) / 2 + 30) ** 2 + ((h.rect[1] + h.rect[3]) / 2 - 225) ** 2;
+/**
+ * The courtyard houses (§5, §17): each with the gate of its rank; plans of 24 houses so that they build
+ * in turn, near ones (full detail) apart from the far ones. The furnished ones (life.js) are chosen by layout.js furnishedHouses().
+ */
 function courtyards() {
-  // the two houses nearest the avenue's mouth below the moat are furnished inside (§14)
-  const near = [...houses()].sort((a, b) => d2(a) - d2(b)).slice(0, 2);
-  const all = houses().map((h) => (near.includes(h) ? { ...h, furnish: true } : h)), plans = [];
-  for (let i = 0; i < all.length; i += 40) plans.push(base(`qing-beijing-houses-${i / 40}`, all.slice(i, i + 40).map((h) => ({ t: 'siheyuan', rect: h.rect, seed: h.seed, furnish: h.furnish }))));
+  const all = [...houses()].sort((a, b) => (a.lod - b.lod) || (Math.atan2(a.rect[1], a.rect[0]) - Math.atan2(b.rect[1], b.rect[0]))), plans = [];
+  const N = 24;
+  for (let i = 0; i < all.length; i += N) {
+    const part = all.slice(i, i + N);
+    plans.push(base(`qing-beijing-houses-${i / N}`, part.map((h) => ({ t: 'hutong_house', rect: h.rect, seed: h.seed, gate: h.gate, courts: h.courts, wealth: h.wealth, lod: h.lod, trees: houseTrees(h).map((t) => [t[0], t[1]]) })), 'beijing-site'));
+  }
+  return plans;
+}
+
+/** The shop street (§16): the shops on the avenue's two sides, their yards, the wells of the lanes. */
+function shopStreet() {
+  const plans = [], rows = shopRows(), E = [];
+  const apron = SHOP_APRONS.map((r) => ({ t: 'lane', rect: r, y: 0.04, mat: 'bluestone' }));
+  const mk = (id, els) => plans.push(base(id, els, 'beijing-site'));
+  mk('qing-beijing-shop-aprons', apron);
+  for (let i = 0; i < rows.length; i += 4) {
+    const els = [];
+    for (const row of rows.slice(i, i + 4)) {
+      for (const s of row.shops) els.push({ t: 'qing_shop', side: row.side, front: row.front, z0: s.z0, z1: s.z1, depth: 8.4, trade: s.trade, seed: s.seed, storeys: s.storeys, enter: !!s.interior });
+      els.push({ t: 'shop_yard', side: row.side, rect: [Math.min(row.yard[0], row.yard[2]), row.yard[1], Math.max(row.yard[0], row.yard[2]), row.yard[3]], seed: row.shops[0].seed });
+    }
+    mk(`qing-beijing-shops-${i / 4}`, els);
+  }
+  for (const w of wells()) E.push({ t: 'qing_well', at: w });
+  if (E.length) mk('qing-beijing-wells', E);
   return plans;
 }
 
@@ -79,13 +112,13 @@ function traffic() {
   const T = [], L = [], rand = rng(1697);
   const man = (at, rot, extra = {}) => L.push({ t: 'figure', at, y: 0.03, rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.6 ? 'robe' : 'trousers', cloth: ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_black'][Math.floor(rand() * 4)], cloth2: ['cloth_black', 'cloth_grey', 'cloth_indigo'][Math.floor(rand() * 3)], skin: 'skin_light', hat: rand() < 0.6 ? 'cap' : 'none', hair: 'short', ...extra });
   const face = ([dx, dz]) => Math.atan2(-dx, -dz);
-  for (const [at, dir, n] of [[[6, 300], [0, -1], 6], [[-60, 201.5], [1, 0], 5], [[-200, 173.5], [-1, 0], 5], [[138, 20], [0, 1], 6], [[-6, 352], [0, -1], 5]]) {
+  for (const [at, dir, n] of [[[6, 300], [0, -1], 6], [[-130, 201.5], [1, 0], 5], [[-200, 173.5], [-1, 0], 5], [[138, 20], [0, 1], 6], [[-6, 352], [0, -1], 5]]) {
     T.push({ t: 'camel_string', at, dir, n, y: 0.03, seed: Math.floor(rand() * 1e6) });
     // the drover walking at the head of the string, the lead rope in his hand; his mate at the tail
     man([at[0] + dir[0] * 2.3 + dir[1] * 0.6, at[1] + dir[1] * 2.3 - dir[0] * 0.6], face(dir), { dress: 'trousers', hat: rand() < 0.5 ? 'cap' : 'brim', carry: 'staff', pose: 'staff', len: 1.4, staffMat: 'timber', cloth: 'cloth_brown' });
     if (rand() < 0.6) man([at[0] - dir[0] * (2.9 * n + 0.4) + dir[1] * 0.7, at[1] - dir[1] * (2.9 * n + 0.4) - dir[0] * 0.7], face(dir), { dress: 'trousers', cloth: 'cloth_grey' });
   }
-  for (const [at, dir] of [[[-5, 262], [0, -1]], [[6, 236], [0, 1]], [[40, 201.5], [1, 0]], [[-170, 115.5], [1, 0]], [[230, -58.5], [-1, 0]], [[-260, 231.5], [1, 0]], [[138, -60], [0, -1]]]) {
+  for (const [at, dir] of [[[-5, 262], [0, -1]], [[6, 236], [0, 1]], [[100, 201.5], [1, 0]], [[-170, 115.5], [1, 0]], [[230, -58.5], [-1, 0]], [[-260, 231.5], [1, 0]], [[138, -60], [0, -1]]]) {
     const rot = face(dir);
     T.push({ t: 'peking_cart', at, rot, y: 0.03, seed: Math.floor(rand() * 1e6), beast: 'horse', coat: ['hide_black', 'hide_brown', 'hide_grey'][Math.floor(rand() * 3)] });
     // the carter standing at the beast's head, the whip in hand
@@ -95,4 +128,4 @@ function traffic() {
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-export async function town() { return [streets(), temple(), ...traffic(), ...courtyards()]; }
+export async function town() { return [streets(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }

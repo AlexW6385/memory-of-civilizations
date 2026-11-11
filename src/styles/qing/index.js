@@ -14,8 +14,10 @@ import '../ming/index.js';
 import { rectRoof, pyramidRoof, column, beamTris, flipTris, latticeBay, mingHall, mingPavilion, mingWall, withPal } from '../ming/index.js';
 import { dapo as dapoJ, dapoHeight, meoricho, postLines } from '../joseon/dancheong.js';
 import { throneHall } from './throne.js';
+import { rampRelief, stairRakes } from './ramp.js';
 import { hexiRun, dougong, dougongHeight } from './caihua.js';
 import { qinian } from './tiantan.js';
+import { courtBricks, stoneWay, drainCover, galleryApron } from './paving.js';
 import { pekingCart, camelString } from './street.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { Parts, ball, limb, T, sumeru, post, limb as limbG, seated, crouching, vat, tripod, tortoise, crane, sundial, jialiang, balustradeCarved, spout, roofOrnaments, gateDoors } from './carving.js';
@@ -112,6 +114,7 @@ function stairs(el, { bag, col }) {
     if (alongZ) { t.push(x0, y0, a, x1, y0, a, x1, y1, bb, x0, y0, a, x1, y1, bb, x0, y1, bb); }
     else { t.push(a, y0, z0, a, y0, z1, bb, y1, z1, a, y0, z0, bb, y1, z1, bb, y1, z0); }
     bag.add('marble_smooth', fromTriangles(t.concat(flipTris(t))));
+    if (el.carve !== false) rampRelief(bag, el);
     col.rect([x0, z0, x1, z1], y0, (y0 + y1) / 2);
     return;
   }
@@ -125,6 +128,7 @@ function stairs(el, { bag, col }) {
     bag.add(el.mat || 'marble', box(r[0], y0 - 0.2, r[1], r[2], yy, r[3]));
   }
   col.ramp([x0, z0, x1, z1], y0, y1, dir);
+  if (el.rakes) stairRakes(bag, col, el);
 }
 
 /**
@@ -587,7 +591,7 @@ registerStyle('qing', {
     terrace: withPal(terrace), stairs: withPal(stairs), bronze: withPal(bronze), lane: withPal(lane),
     qing_hall: (el, ctx) => withPal(qingHall)({ ...el, pal: el.pal || IMPERIAL }, ctx),
     palace_wall: (el, ctx) => withPal(palaceWall)({ ...el, pal: { plaster: 'palace_wall', roof: 'tile_yellow', plinth: 'marble' } }, ctx),
-    ming_arch_bridge: archBridgeRailed, gate_doors: gateDoors,
+    ming_arch_bridge: archBridgeRailed, gate_doors: gateDoors, court_bricks: courtBricks, stone_way: stoneWay, drain_cover: drainCover, gallery_apron: galleryApron,
     corner_tower: withPal(cornerTower), low_wall: withPal(lowWall), throne_hall: (el, ctx) => withPal(throneHall)({ ...el, pal: el.pal || IMPERIAL }, ctx), siheyuan: (el, ctx) => withPal(siheyuan)({ ...el, simple: true }, ctx), pyramid: withPal(pyramid), rail: withPal(rail), qinian: (el, ctx) => withPal(qinian)({ ...el, pal: el.pal || IMPERIAL }, ctx), peking_cart: pekingCart, camel_string: camelString,
   },
   objects: {},
