@@ -18,7 +18,7 @@ const GOODS = {
   tea: { items: ['pottery_dark', 'glaze_green', 'pottery_dark'], shape: 'jars' },
   medicine: { items: ['wood_dark', 'lacquer_red', 'wood_dark'], shape: 'drawers' },
   pawn: { items: ['wood_dark', 'cloth_brown', 'cloth_grey'], shape: 'bolts' },
-  books: { items: ['paint_white', 'cloth_blue', 'paint_white'], shape: 'books' },
+  books: { items: ['paint_white', 'cloth_indigo', 'paint_white'], shape: 'books' },
   incense: { items: ['wicker', 'cloth_red', 'reed_mat'], shape: 'sacks' },
   sweets: { items: ['wicker', 'glaze_white', 'terracotta'], shape: 'jars' },
   noodles: { items: ['iron', 'pottery_dark', 'wicker'], shape: 'jars' },
