@@ -4,7 +4,7 @@
 // ochre — lying in the pit its own quarrying made, looking east to the valley temple.
 // Element: ok_sphinx { x0 (the tail's end), z (the axis), floor (the pit's floor, y), len }; built along +x, the face to the east.
 
-import { box, fromTriangles } from '../../core/geom.js';
+import { box } from '../../core/geom.js';
 import { loft } from '../egyptian/objects.js';
 
 /** A smooth piecewise-linear profile through [s, v] pairs. */
@@ -38,9 +38,6 @@ export function sphinx(el, { bag, col }) {
     }, 4, 18, 8);
     bag.add('paint_ochre', loft(thigh));
   }
-  const tail = [];
-  for (let i = 0; i <= 10; i++) { const t = i / 10, s = 4 + 14 * t; tail.push([[S(s), F + 6.2 + 4.5 * t - 0.5, zc + 8.4 + 1.2 * Math.sin(t * 3)], [S(s), F + 6.2 + 4.5 * t + 0.4, zc + 8.4 + 1.2 * Math.sin(t * 3)], [S(s) + 0.3, F + 6.2 + 4.5 * t, zc + 9.2 + 1.2 * Math.sin(t * 3)], [S(s) - 0.3, F + 6.2 + 4.5 * t, zc + 7.7 + 1.2 * Math.sin(t * 3)]].map((p) => p)); }
-  void tail;
   // ── the forelegs and paws, laid forward from the chest ─────────────────────────────────────────────────────────
   for (const sg of [-1, 1]) {
     const lz = zc + sg * 2.5;
@@ -79,8 +76,6 @@ export function sphinx(el, { bag, col }) {
     bag.add('paint_robe', box(Hx - 0.2, F + 17.2, zc + sg * 2.1, Hx + 0.4, F + 18.5, zc + sg * 2.3 + sg * 0.15));
   }
   // the face's features, from the front (east): the brows and eyes' paint, the nose, the lips, the chin, the beard
-  const fx = Hx + 1.0 + 2.35 - 0.9;                                    // the face's front (the broad middle of the oval)
-  void fx;
   const FX = Hx + 3.25;
   for (const sg of [-1, 1]) {
     bag.add('egyptian_blue', box(FX - 0.55, F + 18.0, zc + sg * 0.55 - 0.45, FX - 0.1, F + 18.18, zc + sg * 1.45 + 0.45));        // the painted brow, a long line to the temple
@@ -97,10 +92,8 @@ export function sphinx(el, { bag, col }) {
   // the uraeus rearing on the brow, gilded
   bag.add('gilt_bronze', box(FX - 0.8, F + 18.9, zc - 0.17, FX - 0.45, F + 19.9, zc + 0.17));
   bag.add('gilt_bronze', box(FX - 1.1, F + 19.55, zc - 0.22, FX - 0.45, F + 19.85, zc + 0.22));
-  // the quarry's face behind the body is the pit's wall (the ground); the knoll's rough edges: unquarried blocks along the flanks
   // ── walking: the body's mass, in slices, and the paws ─────────────────────────────────────────────────────────
   for (let s = 0; s < 58; s += 4) col.rect([S(s), zc - half(s + 2), S(s + 4), zc + half(s + 2)], F - 0.5, F + top(s + 2) - 0.2);
   col.rect([S(55.5) - 3.2, zc - 3.2, S(55.5) + 3.2, zc + 3.2], F, F + 20);
   for (const sg of [-1, 1]) col.rect([S(58), zc + sg * 2.5 - 1.9, S(72.6), zc + sg * 2.5 + 1.9], F - 0.5, F + 3.2);
 }
-void fromTriangles;
