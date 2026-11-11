@@ -3,9 +3,11 @@
 // people in the West Court and the Central Court — the men in kilt or loincloth, bare above the belt, long-haired;
 // the women in the long flounced skirt; a priestess before the Tripartite Shrine.
 
-import { ROAD, height } from './layout.js';
+import { ROAD, LANE, STREAM, STREAM_LEVEL, WESTCOURT, lanes, lots, openHouses, height, inRect, onStream } from './layout.js';
+import { dwellingFrame } from '../../styles/minoan/town.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const T0 = 0.5;
 export const YARD = [-212, -86.4, -204, -81.0];
 
 export function life() {
@@ -30,14 +32,15 @@ export function life() {
     else man([x, z], toward ? -Math.PI / 2 : Math.PI / 2, { y: height(x, z) + 0.12, carry: rand() < 0.6 ? 'pot' : 'sack' });
   }
   // the West Court: people crossing it and talking by the façade
-  for (let k = 0; k < 12; k++) {
+  for (let k = 0; k < 26; k++) {
     const x = -116 + rand() * 46, z = -46 + rand() * 90;
+    if (Math.hypot(x + 111, z + 32.5) < 12 || (x > -119 && x < -64 && z > 37 && z < 41) || (x > -92 && x < -88)) continue;
     (rand() < 0.45 ? woman : man)([x, z], rand() * 6.28, { y: 0.05, pose: rand() < 0.4 ? 'talk' : 'stand' });
   }
   // the Central Court: a few people under the porticoes and crossing; the priestess before the shrine with her offering
   for (let k = 0; k < 10; k++) {
     const x = -11 + rand() * 22, z = -23 + rand() * 46;
-    if (Math.abs(x) > 9.5 || (x < -8 && z > -2 && z < 13)) continue;
+    if (Math.abs(x) > 9.5 || (x < -8 && z > -2 && z < 13) || Math.abs(x) < 1.6 || (z > 18 && z < 22.5)) continue;
     (rand() < 0.5 ? woman : man)([x, z], rand() * 6.28, { y: 0.05, pose: rand() < 0.3 ? 'talk' : 'stand' });
   }
   woman([-11.6, 6], -Math.PI / 2, { y: 0.05, cloth: 'cloth_indigo', cloth2: 'cloth_ochre', pose: 'pray' });
@@ -49,6 +52,48 @@ export function life() {
   man([29.2, 29.9], Math.PI, { y: 0.03, pose: 'stand', dress: 'loincloth', cloth: 'cloth_white' });
   man([33, 32.4], Math.PI, { y: 0.03, pose: 'stand', dress: 'loincloth', cloth: 'cloth_ochre' });
   man([26.5, 28.6], 0, { y: 0.03, pose: 'stand', dress: 'shendyt', cloth: 'cloth_red' });
+
+  // ── the town (§10a): those at home in the open houses, people in the lanes, the washing at the Kairatos, the flock on the slope ──
+  const faceTo = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));            // a figure faces −z at rot 0, and by rot looks along (−sin, −cos)
+  const R2 = rand, openKinds = openHouses();
+  for (const [l, kind] of openKinds) {
+    const el = { rect: l.rect, front: l.front, seed: l.seed }, F = dwellingFrame(el), y0 = Math.min(height(l.rect[0], l.rect[1]), height(l.rect[2], l.rect[1]), height(l.rect[0], l.rect[3]), height(l.rect[2], l.rect[3])) + 0.22;
+    const at = (u, v) => F.P(u, v), look = (a, u, v) => faceTo(a, at(u, v));
+    if (kind === 'home') { const a = at(F.L / 2 - 1.1, F.D - 2.1); woman(a, look(a, F.L / 2, F.D - 1.2), { y: y0, pose: 'squat' }); if (R2() < 0.6) { const b = at(F.L / 2 + 1.0, 1.5 + T0); man(b, look(b, F.L / 2, 6), { y: y0, pose: 'sit_ground', child: true, h: 1.1 }); } }
+    else if (kind === 'weaver') { const a = at(F.L / 2, F.D - 1.5); woman(a, look(a, F.L / 2, F.D), { y: y0, pose: 'stand', cloth: 'cloth_red' }); }
+    else if (kind === 'shop') { const a = at(F.L / 2 + 0.4, 2.0 + T0 - 0.2 + 1.2 + 0.7); man(a, look(a, F.L / 2, 1), { y: y0, pose: 'stand', dress: 'shendyt', cloth: 'cloth_white' }); if (R2() < 0.5) { const b = at(F.L / 2 - 1.2, 1.4); woman(b, look(b, F.L / 2 - 1.2, 4), { y: y0, pose: 'talk' }); } }
+    else { const a = at(F.L / 2, F.D / 2); man(a, look(a, F.L / 2, F.D - 1), { y: y0, pose: 'stand', dress: 'loincloth', cloth: 'cloth_brown', carry: 'sack' }); }
+  }
+  // the lanes: people by the doors and on the way, a donkey with its driver, children at play, dogs and cats
+  let n = 0;
+  for (const Ln of lanes()) {
+    if (Math.hypot((Ln.x0 + Ln.x1) / 2, Ln.z) > 230) continue;
+    for (let x = Ln.x0 + 4 + rand() * 10; x < Ln.x1 - 2; x += 14 + rand() * 20) {
+      const near = Math.hypot(x, Ln.z) < 170, p = rand();
+      if (!near && (p < 0.8 || Math.hypot(x, Ln.z) > 220)) continue;
+      const z = Ln.z + (rand() - 0.5) * 1.8, y = height(x, z) + 0.08, dir = rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2;
+      if (p < 0.15) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y, rot: dir, seed: seed(), gear: true }); man([x + (dir < 0 ? 1.7 : -1.7), z + 0.5], dir, { y, carry: 'staff' }); }
+      else if (p < 0.3) { for (let k = 0; k < 2; k++) man([x + k * 0.8, z + (k ? 0.5 : 0)], k ? 2.4 : 0.8, { y, pose: 'sit_ground', child: true, h: 1.05 - 0.06 * k }); }
+      else if (p < 0.55) woman([x, z], dir, { y, carry: rand() < 0.6 ? 'pot' : 'sack' });
+      else if (p < 0.72) { woman([x, z], rand() * 6.28, { y, pose: 'talk' }); woman([x + 1.1, z + 0.2], rand() * 6.28, { y, pose: 'talk' }); }
+      else if (p < 0.88) man([x, z], rand() * 6.28, { y, pose: rand() < 0.5 ? 'talk' : 'stand' });
+      else L.push({ t: 'animal', kind: rand() < 0.5 ? 'dog' : 'cat', at: [x, z], y, rot: rand() * 6.28, seed: seed() });
+      n++;
+    }
+  }
+  // the washing at the stream: women kneeling at the bank, a boy fishing, the cloth spread on the stones
+  const bank = (zz, side) => { const cx = STREAM.x - 3 * Math.sin(-zz / 55) * 0 + 3 * Math.sin(zz / 55); return [cx + side * (STREAM.w / 2 + 1.2), zz]; };
+  void onStream; void STREAM_LEVEL; void inRect; void WESTCOURT; void lots; void LANE;
+  for (const [zz, side] of [[-60, -1], [-56, -1], [-52.5, -1], [20, 1], [24, 1]]) {
+    const b = bank(zz, side), w = [STREAM.x + 3 * Math.sin(zz / 55), zz], y = height(b[0], b[1]);
+    woman(b, faceTo(b, w), { y, pose: 'kneel', cloth: 'cloth_red', cloth2: 'cloth_white' });
+    L.push({ t: 'laundry', at: [b[0] + side * 1.4, b[1] + 1.2], y, rot: faceTo(b, w), seed: seed() });
+  }
+  { const b = bank(-8, -1), w = [STREAM.x + 3 * Math.sin(-8 / 55), -8]; man(b, faceTo(b, w), { y: height(b[0], b[1]), pose: 'sit_low', child: true, h: 1.2, carry: 'staff' }); }
+  // the shepherd's boy with goats on the slope beyond the town, and a few sheep
+  for (let k = 0; k < 6; k++) { const x = 118 + rand() * 20, z = 40 + rand() * 18; L.push({ t: 'animal', kind: k < 4 ? 'goat' : 'sheep', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: seed() }); }
+  man([128, 36], 0.6, { y: height(128, 36), pose: 'staff', child: true, h: 1.3, carry: 'staff' });
+  void n;
   return L;
 }
 

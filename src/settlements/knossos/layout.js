@@ -30,9 +30,11 @@ export const onRoad = (x, z, m = 0) => Math.abs(z - ROAD.z) < ROAD.w / 2 + m && 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 // the lanes: east–west, 3.4 m wide, 26 m apart (a row of houses 11.3 m deep on each side, back to back); the first along the Royal Road's line
-export const LANE = { w: 3.4, pitch: 26, z0: ROAD.z, depth: 11.3, alley: 2.6 };
+export const LANE = { w: 3.4, pitch: 26, z0: ROAD.z, depth: 11.3, alley: 2.6, cross: 3.2 };
 const laneZ = (k) => LANE.z0 + k * LANE.pitch;
-let LOTS = null, ALLEYS = null, LANES = null, YARDS = null;
+// the cross streets: north–south, 3.2 m wide, every 78 m, through the rows
+const CROSS = Array.from({ length: 9 }, (_, i) => -300 + 78 * i);
+let LOTS = null, ALLEYS = null, LANES = null, YARDS = null, STREETS = null;
 function build() {
   LOTS = []; ALLEYS = []; YARDS = []; const spans = new Map();
   const xmin = -RADIUS + 22, xmax = 170;
@@ -42,7 +44,9 @@ function build() {
       const rand = rng(1600 + k * 31 + (side > 0 ? 7 : 0));
       let x = xmin + rand() * 4, since = 0, prev = null;
       while (x < xmax) {
-        const w = 5.4 + rand() * 3.6, d = rand() < 0.68 ? LANE.depth : 8.2 + rand() * 2.6;
+        const w = 5.4 + rand() * 3.6, hit = CROSS.find((c) => x + w > c - 1.6 && x < c + 1.6);
+        if (hit !== undefined) { if (prev) prev.alE = true; x = hit + 1.6; since = 0; prev = null; continue; }
+        const d = rand() < 0.68 ? LANE.depth : 8.2 + rand() * 2.6;
         const alley = since >= 3 && rand() < 0.3;
         if (alley) { x += LANE.alley; since = 0; if (prev) prev.alE = true; prev = null; }
         const z0 = side < 0 ? zc - LANE.w / 2 - d : zc + LANE.w / 2, z1 = z0 + d, cx = x + w / 2, cz = (z0 + z1) / 2, r = Math.hypot(cx, cz);
@@ -69,9 +73,21 @@ function build() {
   for (let k = -14; k <= 14; k++) {
     const zc = laneZ(k), xs = LOTS.filter((l) => l.k === k).map((l) => l.rect).sort((a, b) => a[0] - b[0]);
     let run = null;
-    for (const r of xs) { if (run && r[0] - run[1] < 3.2) run[1] = Math.max(run[1], r[2]); else { if (run) LANES.push({ z: zc, x0: run[0], x1: run[1], k }); run = [r[0], r[2]]; } }
+    for (const r of xs) { if (run && r[0] - run[1] < 3.4) run[1] = Math.max(run[1], r[2]); else { if (run) LANES.push({ z: zc, x0: run[0], x1: run[1], k }); run = [r[0], r[2]]; } }
     if (run) LANES.push({ z: zc, x0: run[0], x1: run[1], k });
   }
+}
+/** The cross streets between neighbouring lanes: { x, z0, z1 } (north–south). */
+export function streets() {
+  if (!LOTS) build();
+  if (STREETS) return STREETS;
+  STREETS = [];
+  const ok = (x, z) => Math.hypot(x, z) < RADIUS - 50 && !inRect(PALACE, x, z, 12) && !inRect(WESTCOURT, x, z, 6) && !inRect(THEATRAL, x, z, 14) && !onRoad(x, z, 9) && !onStream(x, z, 14) && x < 168;
+  for (const x of CROSS) for (let k = -14; k < 14; k++) {
+    const za = laneZ(k), zb = laneZ(k + 1);
+    if (ok(x, za) && ok(x, zb) && ok(x, (za + zb) / 2) && lots().some((l) => Math.abs(l.rect[0] - (x + 1.6)) < 0.05 || Math.abs(l.rect[2] - (x - 1.6)) < 0.05) && Math.hypot(x, (za + zb) / 2) < 250) STREETS.push({ x, z0: za, z1: zb });
+  }
+  return STREETS;
 }
 /** Houses of the town round the palace, in rows with party walls along lanes, thinning out toward the edge. */
 export function lots() { if (!LOTS) build(); return LOTS; }
@@ -83,4 +99,12 @@ export function alleys() { if (!LOTS) build(); return ALLEYS; }
 export function yards() { if (!LOTS) build(); return YARDS; }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 export const inYard = (x, z, m = 0) => yards().some((y) => inRect(y.rect, x, z, m));
-export const onLane = (x, z, m = 0) => lanes().some((l) => Math.abs(z - l.z) < LANE.w / 2 + m && x > l.x0 - m && x < l.x1 + m) || alleys().some((a) => inRect(a, x, z, m));
+export const onLane = (x, z, m = 0) => lanes().some((l) => Math.abs(z - l.z) < LANE.w / 2 + m && x > l.x0 - m && x < l.x1 + m) || alleys().some((a) => inRect(a, x, z, m)) || streets().some((c) => Math.abs(x - c.x) < LANE.cross / 2 + m && z > c.z0 && z < c.z1);
+
+/** The houses that can be entered: near the palace on the flat ground, wide and deep enough; their kinds by the lot's seed. */
+export function openHouses() {
+  const m = new Map(), kinds = ['home', 'home', 'weaver', 'shop', 'shop', 'store', 'home', 'weaver'];
+  const ok = lots().filter((l) => l.rect[0] > -150 && l.rect[2] < 62 && l.r < 135 && l.rect[2] - l.rect[0] >= 6.3 && l.rect[3] - l.rect[1] >= 10.5 && l.seed % 3 === 0);
+  for (const l of ok.slice(0, 44)) m.set(l, kinds[l.seed % kinds.length]);
+  return m;
+}

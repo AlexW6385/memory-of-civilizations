@@ -16,6 +16,9 @@ const SH = 2.9, T = 0.5;
 const bigJars = new Map();
 const bigJar = (s) => { const k = Math.round(s * 20); if (!bigJars.has(k)) bigJars.set(k, lathe([[0.001, 0], [0.24 * s, 0], [0.4 * s, 0.4 * s], [0.47 * s, 0.8 * s], [0.5 * s, 0.82 * s], [0.47 * s, 0.86 * s], [0.46 * s, 1.05 * s], [0.34 * s, 1.47 * s], [0.38 * s, 1.52 * s], [0.3 * s, 1.55 * s], [0.001, 1.5 * s]], 10)); return bigJars.get(k).clone(); };
 
+/** The storeys of the dwelling of this seed (when the plan does not say). */
+export const dwellingStoreys = (seed) => { const r = rng(seed || 1); return r() < 0.12 ? 1 : r() < 0.7 ? 2 : 3; };
+
 /** The frame of a dwelling's ground floor: P(u, v) the point u along the front and v in from its outer face; L, D the width and depth. */
 export function dwellingFrame(el) {
   const [x0, z0, x1, z1] = el.rect, f = el.front ?? 's', alongX = f === 'n' || f === 's';
@@ -27,7 +30,7 @@ export function dwellingFrame(el) {
 
 function dwelling(el, ctx) {
   const { bag, col, lights } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, far = !!el.simple, rand = rng(el.seed || 1);
-  const n = el.storeys ?? (rand() < 0.12 ? 1 : rand() < 0.7 ? 2 : 3), H = n * SH, f = el.front ?? 's', enter = !!el.enter && !far;
+  const n = el.storeys ?? dwellingStoreys(el.seed), H = n * SH, f = el.front ?? 's', enter = !!el.enter && !far;
   const PL = rand() < 0.55 ? 'plaster_ochre' : rand() < 0.55 ? 'plaster_white' : 'lime_plaster', base = rand() < 0.4 ? G : 'rubble';
   const FR = dwellingFrame(el), du = FR.du, depth = FR.D;
   const stepped = !far && !enter && n >= 2 && depth >= 9.5 && rand() < 0.3, TER = 2.8;
@@ -125,7 +128,7 @@ function dwelling(el, ctx) {
   // ── eye level: bench, shade, balcony, hung goods ──
   if (rand() < 0.5) { const u0 = du + 0.95, w = Math.min(1.8, F.L - u0 - 0.4); if (w > 0.8) { const q = F.at(G, u0, u0 + w, y, y + 0.46, 0.0, 0.5); const r = F.alongX ? [q[0], q[1], q[2], q[3]] : q; col.rect(r, y, y + 0.46); } }
   if (rand() < 0.35 && n >= 1) {
-    const w = Math.min(F.L - 0.6, 2.6 + rand() * 1.4), u0 = Math.max(0.3, du - w / 2), out = 1.5;
+    const w = Math.min(F.L - 0.6, 2.6 + rand() * 1.4), u0 = Math.max(0.3, du - w / 2), out = 1.0;
     F.at('cloth_ochre', u0, u0 + w, y + 2.62, y + 2.66, 0.06, out); F.at('timber', u0, u0 + w, y + 2.5, y + 2.62, 0.05, 0.1);
     for (const u of [u0 + 0.1, u0 + w - 0.1]) { const q = F.at('timber', u - 0.05, u + 0.05, y - 0.2, y + 2.62, out - 0.1, out); col.rect(q, y, y + 2.62); }
   }
@@ -189,6 +192,25 @@ function furnish(el, ctx, FR, fl, rand) {
     for (const h of [0.7, 1.3]) shelf(uL + 0.2, uR - 0.2, vBack - 0.3, h);
     for (let i = 0; i < 3; i++) pit(uL + 0.55 + i * 1.0, vBack - 0.6, 0.55);
     B('hide_tan', uR - 1.1, uR - 0.2, cv + 0.7, cv + 1.4, 0, 0.45, true);
+  } else if (kind === 'archive') {
+    // the archive: shelves of baskets and boxes of clay tablets along three walls, a table with a tablet and the stylus, the scribe's stool, a brazier
+    const box1 = (u, v, y0) => { B('wicker', u - 0.28, u + 0.28, v - 0.16, v + 0.16, y0, y0 + 0.2); for (let i = 0; i < 4; i++) B('terracotta', u - 0.24 + i * 0.12, u - 0.15 + i * 0.12, v - 0.12, v + 0.12, y0 + 0.2, y0 + 0.24); };
+    for (const h of [0.35, 0.85, 1.35]) { B('timber', uL, uR, vBack - 0.4, vBack - 0.02, h, h + 0.04); for (let u = uL + 0.4; u < uR - 0.3; u += 0.66) box1(u, vBack - 0.21, h + 0.04); }
+    for (const [u0, u1] of [[uL, uL + 0.38], [uR - 0.38, uR]]) for (const h of [0.5, 1.1]) { B('timber', u0, u1, vIn + 1.2, vBack - 0.5, h, h + 0.04); for (let v = vIn + 1.5; v < vBack - 0.7; v += 0.68) box1((u0 + u1) / 2, v, h + 0.04); }
+    B('timber', L / 2 - 0.6, L / 2 + 0.6, vIn + 1.2, vIn + 2.0, 0.7, 0.76, false); for (const [a, b] of [[-0.55, 1.25], [0.55, 1.25], [-0.55, 1.95], [0.55, 1.95]]) B('timber', L / 2 + a - 0.03, L / 2 + a + 0.03, vIn + b - 0.03, vIn + b + 0.03, 0, 0.7);
+    B('terracotta', L / 2 - 0.25, L / 2 + 0.15, vIn + 1.4, vIn + 1.7, 0.76, 0.8); B('bronze', L / 2 + 0.3, L / 2 + 0.34, vIn + 1.5, vIn + 1.75, 0.76, 0.78);
+    B('wood_dark', L / 2 - 0.2, L / 2 + 0.2, vIn + 2.15, vIn + 2.55, 0, 0.42);
+    J(lathe([[0.001, 0], [0.22, 0], [0.28, 0.12], [0.001, 0.14]], 10), uL + 0.7, vIn + 1.0, 0); C(uL + 0.7, vIn + 1.0, 0.3, 0.3);
+  } else if (kind === 'kitchen') {
+    // the kitchen: a long hearth with the cooking pots on stones, the beehive oven, the saddle quern on its bench, the pithoi of grain, a table of cups
+    const hu = L / 2, hv = vBack - 1.2;
+    B('rubble', hu - 1.2, hu + 1.2, hv - 0.5, hv + 0.5, 0, 0.18); B('lacquer_black', hu - 1.05, hu + 1.05, hv - 0.36, hv + 0.36, 0.18, 0.195); C(hu, hv, 1.3, 0.2);
+    for (const du2 of [-0.6, 0.6]) J(lathe([[0.001, 0], [0.16, 0], [0.26, 0.16], [0.21, 0.32], [0.24, 0.35], [0.001, 0.35]], 10), hu + du2, hv, 0.2);
+    { const [x, z] = P(uR - 0.9, vBack - 0.9); bag.add('mud_plaster', lathe([[0.001, 0], [0.8, 0], [0.7, 0.4], [0.45, 0.7], [0.001, 0.85]], 10).translate(x, fl, z)); col.circle(x, z, 0.8, fl, fl + 0.85); }
+    B(G, uL, uL + 0.6, vIn + 0.5, vIn + 1.9, 0, 0.5, true); B('limestone', uL + 0.05, uL + 0.5, vIn + 0.6, vIn + 1.6, 0.5, 0.58);
+    pit(uL + 0.55, vBack - 0.55, 0.62); pit(uL + 0.55, vBack - 1.6, 0.55);
+    B('timber', L / 2 - 0.9, L / 2 + 0.9, vIn + 2.0, vIn + 2.7, 0.7, 0.76, false); for (const [a, b] of [[-0.85, 2.05], [0.85, 2.05], [-0.85, 2.65], [0.85, 2.65]]) B('timber', L / 2 + a - 0.03, L / 2 + a + 0.03, vIn + b - 0.03, vIn + b + 0.03, 0, 0.7);
+    for (let i = 0; i < 5; i++) J(cupG.clone().scale(1.8, 1.8, 1.8), L / 2 - 0.7 + i * 0.35, vIn + 2.35, 0.76);
   } else {
     // a store: the pithoi in a row with a walkway, a stack of jars, sacks of grain, a lamp
     for (let i = 0; i < 4; i++) { pit(uL + 0.6 + i * 1.05 > uR - 0.5 ? uR - 0.55 : uL + 0.6 + i * 1.05, vBack - 0.6, 0.58 + (i % 2) * 0.06); }
@@ -198,12 +220,19 @@ function furnish(el, ctx, FR, fl, rand) {
   void lights;
 }
 
+/** furnished_room: { rect (the room's floor, as cut in its wing), y, front (the side its doorway is on), kind, seed }: the furniture of an archive, a kitchen, a home or a store in a room of the palace, and its lamp. */
+function furnishedRoom(el, ctx) {
+  const [a, b, c, d] = el.rect, e = { rect: [a - T, b - T, c + T, d + T], front: el.front ?? 's', seed: el.seed || 1, kind: el.kind };
+  furnish(e, ctx, dwellingFrame(e), (el.y ?? 0) + 0.0, rng(e.seed));
+  ctx.lights.push({ at: [(a + c) / 2, (el.y ?? 0) + 2.5, (b + d) / 2], color: '#ffb46b', intensity: 3.4, distance: 9 });
+}
+
 // ── lanes, yards, pits, court furniture ──────────────────────────────────────────────────────
 /** lane_paving: { pts: [[x, y, z]…] (centre line), w } — packed earth between kerbs with a drain stone down the middle, in segments following the ground. */
 function lanePaving(el, { bag, col }) {
   const w = (el.w ?? 3.4) / 2 + 0.08, pts = el.pts;
   for (let i = 0; i + 1 < pts.length; i++) {
-    const [ax, ay, az] = pts[i], [bx, by, bz] = pts[i + 1], L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
+    const [ax, ay, az] = pts[i], [bx, by, bz] = pts[i + 1], L = Math.hypot(bx - ax, bz - az); if (L < 0.3) continue; const ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
     const slab = (mat, o0, o1, top, bot) => {
       const Q = (t, o, dy) => [ax + ux * L * t + nx * o, ay + (by - ay) * t + dy, az + uz * L * t + nz * o], v = [Q(0, o0, bot), Q(1, o0, bot), Q(1, o1, bot), Q(0, o1, bot), Q(0, o0, top), Q(1, o0, top), Q(1, o1, top), Q(0, o1, top)];
       const t = []; const q = (p, r, s2, u) => t.push(...v[p], ...v[r], ...v[s2], ...v[p], ...v[s2], ...v[u]);
@@ -243,7 +272,7 @@ function ringPit(el, { bag, col }) {
   for (const prof of [[[r + 0.35, 0], [r + 0.35, 0.55], [r - 0.05, 0.58], [r - 0.05, 0.1]], [[r - 0.05, 0.1], [r - 0.05, 0.58], [r + 0.35, 0.55], [r + 0.35, 0]]]) void prof;
   bag.add(G, lathe([[r + 0.35, 0], [r + 0.35, 0.52], [r + 0.3, 0.57], [r - 0.05, 0.57], [r - 0.05, 0.0]], 32).translate(cx, y, cz));
   bag.add('limestone', lathe([[r - 0.05, 0.0], [r - 0.05, 0.55]], 32).translate(cx, y, cz));
-  bag.add('earth_wall', lathe([[0.001, 0.09], [r - 0.04, 0.09], [r - 0.04, 0.0], [0.001, 0.0]], 28).translate(cx, y, cz));
+  bag.add('earth_wall', lathe([[0.001, 0.1], [r - 0.04, 0.1], [r - 0.04, 0.03], [0.001, 0.03]], 28).translate(cx, y, cz));
   col.circle(cx, cz, r + 0.35, y - 0.1, y + 0.57);
 }
 
@@ -258,4 +287,4 @@ function courtDress(el, { bag, col, lights }) {
   void rand;
 }
 
-Object.assign(STYLES.minoan.elements, { dwelling, lane_paving: lanePaving, yard_garden: yardGarden, ring_pit: ringPit, court_dress: courtDress });
+Object.assign(STYLES.minoan.elements, { dwelling, furnished_room: furnishedRoom, lane_paving: lanePaving, yard_garden: yardGarden, ring_pit: ringPit, court_dress: courtDress });
