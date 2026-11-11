@@ -3,7 +3,7 @@ import { ARRIVALS } from '../../planet/arrivals.js';
 // The town (docs/settlements/versailles.md §5); the court in the gardens (§5a): courtiers walking and talking on
 // the terrace before the garden front and down the walk between the basins of the water parterre, others at the
 // Latona basin; on the Grand Canal the gondolas sent by Venice (1674) with their gondoliers, and the King's rowing boats.
-import { RADIUS, RISE, LATONA, LATONA_Y, CANAL, lots } from './layout.js';
+import { RADIUS, RISE, LATONA, LATONA_Y, CANAL, STABLES, lots } from './layout.js';
 const base = (id, elements, style = 'vernacular') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [180, 0], facing: 'w' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));       // a figure faces −z when rot = 0
@@ -50,5 +50,7 @@ function canal() {
 export async function houses() {
   const all = lots(), plans = [], open = openLots(all, [ARRIVALS['versailles'][0], ARRIVALS['versailles'][2]]);
   plans.push(...lodTiles('versailles-houses', 'vernacular', all.map((l) => ({ t: 'house_med', variant: 'french', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) })), { R: RADIUS }));
+  plans.push({ id: 'versailles-stables', style: 'classical_fr', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [180, 0], facing: 'w' }, bounds: [150, -100, 300, 100], rooms: [], center: [240, 0], near: 320,
+    elements: STABLES.map((s) => ({ t: 'ecurie', ...s, y: RISE })) });
   return [...plans, court(), canal()];
 }
