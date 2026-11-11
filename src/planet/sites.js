@@ -19,6 +19,7 @@
 //            region id, the centre of the disc in the old city's coordinates, and the buildings
 
 export const SITES = [
+  { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, era: '17th c.', region: 'siam', lat: 14.36, lon: 100.56, radius: 330 },
   // ── China ──
   { id: 'tang-changan', name: { en: 'Tang Chang\'an', zh: '唐长安' }, era: '8th c.', region: 'china', lat: 34.22, lon: 108.96, nudge: 200, radius: 520 },
   { id: 'tang-wutai', name: { en: 'Tang China', zh: '唐' }, era: '9th c.', region: 'china', lat: 38.95, lon: 113.38, radius: 250 },
@@ -138,7 +139,6 @@ export const PLANNED = [
   { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, region: 'china', lat: 36.13, lon: 114.32, radius: 300 },
   { id: 'lu-qufu', name: { en: 'Qufu', zh: '曲阜' }, region: 'china', lat: 35.60, lon: 116.99, radius: 280 },
   { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
-  { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, region: 'siam', lat: 14.36, lon: 100.56, radius: 300 },
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, region: 'java', lat: 8.37, lon: 115.45, radius: 180 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },
   { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, region: 'guinea', lat: 6.34, lon: 5.62, radius: 320 },

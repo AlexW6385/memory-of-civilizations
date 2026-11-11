@@ -77,6 +77,7 @@ import { ground as mycenae } from './mycenae/ground.js';
 import { ground as abbasidBaghdad } from './abbasid-baghdad/ground.js';
 import { ground as qinXianyang } from './qin-xianyang/ground.js';
 import { ground as alexandria } from './alexandria/ground.js';
+import { ground as ayutthaya } from './ayutthaya/ground.js';
 import { ground as hanChangan } from './han-changan/ground.js';
 import { ground as weiYe } from './wei-ye/ground.js';
 import { ground as nalanda } from './nalanda/ground.js';
