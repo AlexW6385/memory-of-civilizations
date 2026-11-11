@@ -11,6 +11,21 @@ import { take } from './order.js';
 import { SettlementCard } from './card.js';
 import { unit, latLon, eastNorth, dot, norm, cross } from '../planet/geo.js';
 import { GlobeGL } from './globe-gl.js';
+import { RIVERS } from '../planet/rivers.js';
+
+// the great rivers as lines of planet directions, mouth to source (from their segments)
+let RIVER_LINES = null;
+function riverLines() {
+  if (RIVER_LINES) return RIVER_LINES;
+  const by = new Map();
+  for (const r of RIVERS) {
+    let L = by.get(r.name);
+    if (!L) by.set(r.name, (L = { half: r.half, pts: [] }));
+    L.pts.push(r.a);
+    L.end = r.a.map((x, i) => x * Math.cos(r.ang) + r.t[i] * Math.sin(r.ang));
+  }
+  return (RIVER_LINES = [...by.values()].map((L) => ({ half: L.half, pts: [...L.pts, L.end] })));
+}
 
 const sm = (e0, e1, x) => { const q = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); };
 
@@ -170,6 +185,7 @@ export class GlobeView {
       this.gl.draw(W, H, Math.min(W, H) * 0.46 * this.zoom, this.basis(), this.sun?.());
       const g = cv.getContext('2d');
       g.clearRect(0, 0, W, H);
+      this.drawRivers(g, W, H);
       this.drawFaint(g);
       this.paintMarks();
       this.card.place(this.marks.find((m) => m.S === this.sel));
@@ -198,6 +214,32 @@ export class GlobeView {
     this.drawFaint(g);
     this.paintMarks();
     this.card.place(this.marks.find((m) => m.S === this.sel));
+  }
+
+  /** The great rivers: lines as wide as the river (at least a fine line), dimmed on the night side. */
+  drawRivers(g, W, H) {
+    const rad = Math.min(W, H) * 0.46 * this.zoom, dpr = devicePixelRatio || 1, sun = this.sun?.();
+    const { c, r, u: up } = this.basis(), cx = W / 2, cy = H / 2;
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    for (const L of riverLines()) {
+      const w = Math.max(1.1 * dpr, Math.min(6 * dpr, (2 * L.half / PLANET_RADIUS) * rad));
+      g.lineWidth = w;
+      // one path a river (points closer than a pixel and a half skipped), coloured by the daylight
+      // where it is seen
+      let prev = null, lit = -1;
+      g.beginPath();
+      for (const u of L.pts) {
+        const p = dot(u, c) > 0.02 ? [cx + dot(u, r) * rad, cy - dot(u, up) * rad] : null;
+        if (!p) { prev = null; continue; }
+        if (prev && Math.abs(p[0] - prev[0]) + Math.abs(p[1] - prev[1]) < 1.5 * dpr) continue;
+        if (lit < 0) lit = sun ? sm(-0.1, 0.08, dot(u, sun)) : 1;
+        if (prev) g.lineTo(p[0], p[1]); else g.moveTo(p[0], p[1]);
+        prev = p;
+      }
+      if (lit < 0) continue;
+      g.strokeStyle = `rgba(${Math.round(40 + 30 * lit)}, ${Math.round(70 + 55 * lit)}, ${Math.round(95 + 75 * lit)}, ${0.6 + 0.3 * lit})`;
+      g.stroke();
+    }
   }
 
   drawFaint(g) {

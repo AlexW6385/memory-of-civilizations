@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v10.53 — A detailed globe (2026-11-10)
+
+The map's globe is painted in the shader from the land map itself: forests and grassland, steppe, deserts with ragged edges, tundra and ice, mountains as ridged crests with rock and snow, relief shading, and the great rivers drawn over it; nothing is baked, so it opens at once.
+
 ## v10.52 — A quicker start, a truer loading bar (2026-11-10)
 
 Instanced meshes of one material now share one shader build (three.js built one per mesh: some 650 needless builds, about five seconds at the start); the ground is built while the town is, not after it; three build workers on an eight-core machine. The loading bar moves through the shader stage as the look round goes on instead of standing still for seconds.
@@ -9,7 +13,6 @@ Instanced meshes of one material now share one shader build (three.js built one 
 ## v10.51 — Building ahead only in spare time (2026-11-10)
 
 The next journey's settlement is still built ahead, but now only when the page has time to spare and the frames have been smooth for a while, in small slices; it no longer competes with the city you are in.
-
 ## v10.50 — No neighbours built mid-visit (2026-11-10)
 
 While you are inside a settlement, the settlements round it are no longer built in the background; they stay as distant views until you step out of its disc. Building them was one cause of the occasional stutter inside a city.
