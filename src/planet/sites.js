@@ -29,6 +29,7 @@ export const SITES = [
   { id: 'qing-beijing', name: { en: 'Ming–Qing Beijing', zh: '明清北京' }, era: '17th c.', region: 'china', lat: 39.92, lon: 116.39, radius: 520 },
   { id: 'lhasa', name: { en: 'Tibet', zh: '西藏' }, era: '17th c.', region: 'tibet', lat: 29.3, lon: 91.0, radius: 420 },
   { id: 'dunhuang', name: { en: 'Dunhuang', zh: '敦煌' }, era: '9th c.', region: 'silk-road', lat: 40.04, lon: 94.81, radius: 190 },
+  { id: 'hakka-tulou', name: { en: 'Hakka tulou', zh: '客家土楼' }, era: 'c. 1710', region: 'china', lat: 24.67, lon: 117.05, radius: 190 },
   // ── Japan and Korea ──
   { id: 'nara', name: { en: 'Nara Japan', zh: '奈良' }, era: '8th c.', region: 'japan', lat: 34.69, lon: 135.84, water: true, island: true, radius: 340 },
   { id: 'heian-uji', name: { en: 'Heian Japan', zh: '平安日本' }, era: '11th c.', region: 'japan', lat: 34.89, lon: 135.81, radius: 360 },
