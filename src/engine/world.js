@@ -818,8 +818,11 @@ export class World {
     // nearest first: only the MAX_BUILT nearest are built; one more is kept if already built
     // (so a settlement at the edge of the count does not flicker), the rest let go
     const near = this.settlements.map((s) => [World.rimDistance(s, u), s]).sort((a, b) => a[0] - b[0]);
+    // inside a settlement (within its disc) nothing else is built: the neighbours stand as their
+    // impostors until one leaves it, so that a visit is never interrupted by another's building
+    const inside = near[0] && near[0][0] === 0;
     near.forEach(([d, s], i) => {
-      if (d < radius + lift && (i < MAX_BUILT || s === this.anchor?.site)) wanted.push(s.load());
+      if (d < radius + lift && (i < MAX_BUILT || s === this.anchor?.site) && (!inside || d === 0)) wanted.push(s.load());
       else if (d > UNLOAD + lift || i > MAX_BUILT) { if (s !== this.anchor?.site && s !== this.kept) s.unload(); }
       if (d < 6000) s.loadImpostor();
     });
