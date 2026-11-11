@@ -80,5 +80,6 @@ export const MOVER_SITES = {
   'ajanta': () => import('../settlements/ajanta/movers.js'),
   'mohenjo-daro': () => import('../settlements/mohenjo-daro/movers.js'),
   'ayutthaya': () => import('../settlements/ayutthaya/movers.js'),
+  'lu-qufu': () => import('../settlements/lu-qufu/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

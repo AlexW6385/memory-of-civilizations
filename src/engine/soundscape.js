@@ -135,6 +135,7 @@ export const PROFILES = {
   ajanta: T(IND, { cicadas: 0.4, frogs: 0.3, animals: { goat: 0.4, cattle: 0.3, dog: 0.3 }, roof: 'thatch', bells: 'monastery' }),
   'mohenjo-daro': T(NEAR, { cicadas: 0.5, frogs: 0.3, animals: { zebu: 0.5, goat: 0.4, dog: 0.4, rooster: 0.2 }, roof: 'flat' }),
   ayutthaya: T(TROP, { cicadas: 0.7, frogs: 0.9, animals: { rooster: 1, dog: 0.5, duck: 0.4 }, roof: 'thatch' }),
+  'lu-qufu': T(EAS, { cicadas: 0.5, frogs: 0.2, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
   giza: T(NEAR, { animals: { donkey: 0.5, cattle: 0.4, dog: 0.3 }, roof: 'flat' }),
   granada: T(MED, { cicadas: 0.7, animals: { donkey: 0.4, rooster: 0.4, horse: 0.2 }, adhan: 1 }),
   'great-zimbabwe': T({ dove: 1, tropic: 0.7, kite: 0.3 }, { cicadas: 0.7, frogs: 0.4, animals: { cattle: 0.8, goat: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'thatch' }),
