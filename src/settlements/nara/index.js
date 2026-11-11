@@ -77,13 +77,28 @@ const rushana = {
 // side of the way, the musicians on mats beside the stage, two dancers on it, the court at the foot of the hall's stairs
 const STAGE = [0, -24.5], SA = 2.8, SH = 0.8;
 const ceremonySet = {
-  id: 'nara-ceremony-set', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-60, -40, 60, 14], entrance: { at: [0, 20], facing: 'n' },
+  id: 'nara-ceremony-set', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-60, -90, 60, 14], entrance: { at: [0, 20], facing: 'n' },
   elements: [
     { t: 'bugaku_stage', c: STAGE, half: SA, y: 0, h: SH },
     { t: 'stair', rect: [STAGE[0] - 0.9, STAGE[1] + SA + 0.04, STAGE[0] + 0.9, STAGE[1] + SA + 1.24], dir: 'n', y0: 0, y1: SH, riser: 0.16, base: 0, mat: 'lacquer_red' },
     { t: 'stair', rect: [STAGE[0] - 0.9, STAGE[1] - SA - 1.24, STAGE[0] + 0.9, STAGE[1] - SA - 0.04], dir: 's', y0: 0, y1: SH, riser: 0.16, base: 0, mat: 'lacquer_red' },
   ],
 };
+// the upper gallery (§15): a flight up the west wall to a timber gallery at 13 m beside the Buddha's face, round behind the figure and down the east side
+{
+  const GY = 13, bzz = (hz1 - hz0) / 7, bxx = (hx1 - hx0) / 11;
+  const holes = (sx) => [1, 2, 3, 4].map((j) => { const z = hz0 + j * bzz, x = hx0 + (sx < 0 ? 1 : 10) * bxx; return [x - 0.75, z - 0.75, x + 0.75, z + 0.75]; });
+  for (const sx of [-1, 1]) {
+    const xa = sx < 0 ? -42 : 34, xb = sx < 0 ? -34 : 42, sa = sx < 0 ? -41.5 : 38.5;
+    ceremonySet.elements.push({ t: 'stair', rect: [sa, -56, sa + 3, -38], dir: 'n', y0: FLOOR, y1: GY, riser: 0.2, base: FLOOR, mat: 'timber' });
+    ceremonySet.elements.push({ t: 'slab', rect: [xa, hz0 + 0.6, xb, -56], y0: GY - 0.4, y1: GY, mat: 'timber', walk: true, holes: holes(sx) });
+    for (const z of [-64.5, -72, -80]) ceremonySet.elements.push({ t: 'block', rect: [sx < 0 ? -41.6 : 40.8, z - 0.4, sx < 0 ? -40.8 : 41.6, z + 0.4], y0: FLOOR, y1: GY - 0.4, mat: 'timber_red' });
+    ceremonySet.elements.push({ t: 'beam', a: [sx < 0 ? -34.1 : 34.1, -78.8], b: [sx < 0 ? -34.1 : 34.1, -56.5], w: 0.12, y: GY, h: 1.0, mat: 'lacquer_red' });
+  }
+  ceremonySet.elements.push({ t: 'slab', rect: [-34, hz0 + 0.6, 34, hz0 + 5.6], y0: GY - 0.4, y1: GY, mat: 'timber', walk: true });
+  ceremonySet.elements.push({ t: 'beam', a: [-34, hz0 + 5.7], b: [34, hz0 + 5.7], w: 0.12, y: GY, h: 1.0, mat: 'lacquer_red' });
+  for (const x of [-20, 0, 20]) ceremonySet.elements.push({ t: 'block', rect: [x - 0.4, hz0 + 2.6, x + 0.4, hz0 + 3.4], y0: FLOOR, y1: GY - 0.4, mat: 'timber_red' });
+}
 const ceremonyPeople = { id: 'nara-ceremony', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 20], facing: 'n' }, elements: [] };
 {
   const P = ceremonyPeople.elements, faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);

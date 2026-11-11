@@ -109,6 +109,15 @@ The Great Buddha Hall (the Buddha, attendants, ceiling, banners, §4) is entered
 
 Sources: [Shōsōin — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/1123); [Suzaku Avenue — Wikipedia](https://en.wikipedia.org/wiki/Suzaku_Avenue).
 
+## 15. Deepening pass 2
+
+- **Houses.** The `nara_house` element wraps the shared house and dresses the front: a noren curtain in the door, a bench with a water jar, firewood stacked to the eave and a basket at a house; at a shop (a quarter of the houses and every market house) a trestle of the trade's goods (rice sacks, cloth bolts, pottery, firewood, greens, sake casks, dried fish), a hung signboard on an arm; in an open shop a counter across the raised floor with goods, baskets on the earth floor [inferred]. 30 houses near the arrival are open.
+- **Market.** A second row of shop houses on the square's south edge facing north [inferred].
+- **Hokke-dō and Kōfuku-ji interiors.** The Hokke-dō is an 8th-century National Treasure [stated: Wikipedia "Tōdai-ji"]; its main object of worship is the Fukūkenjaku Kannon [stated: nippon.com "Tōdaiji"]; the present Shōrō is a National Treasure, its date not given in our sources (the 752 bell tower is not shown as it was) [inferred]. Ours: a dais, a main image (the Buddha figure and bodhisattvas stand in), four guardians at the corners standing in for the Heavenly Kings, an altar with incense, flowers and lamps. The Middle Gate has guardian kings like the Great South Gate's.
+- **The Great Buddha Hall's upper gallery.** A flight up each side wall to a timber gallery at 13 m that runs behind the figure, with a red rail on its inner edge [inferred: the 8th-century hall's upper storey was not open as a floor; a viewing gallery is our device].
+- **Raked gravel** in six panels of the court; **side gutters** of kerbed dark pebbles 1.2 m in from each street edge (the minor streets had side ditches [stated: Monograph 46, §11]); **hip roofs** on the Shōsōin and the bell tower (the Shōsōin's is a hip [stated: JAANUS]).
+- **Animals and people.** Oxcarts with oxen on the avenue, oxen grazing, dogs in the lanes; day walkers 56.
+
 ## Sources (this pass)
 
 - [Heijo Capital — JLIT](https://jlit.hcommons.org/heijo-capital/)
