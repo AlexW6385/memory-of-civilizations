@@ -90,5 +90,6 @@ export const MOVER_SITES = {
   'dogon': () => import('../settlements/dogon/movers.js'),
   'maya-tikal': () => import('../settlements/maya-tikal/movers.js'),
   'vienna': () => import('../settlements/vienna/movers.js'),
+  'brasilia': () => import('../settlements/brasilia/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

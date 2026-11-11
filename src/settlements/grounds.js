@@ -94,6 +94,7 @@ import { ground as beninCity } from './benin-city/ground.js';
 import { ground as dogon } from './dogon/ground.js';
 import { ground as mayaTikal } from './maya-tikal/ground.js';
 import { ground as vienna } from './vienna/ground.js';
+import { ground as brasilia } from './brasilia/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -185,6 +186,7 @@ export const GROUNDS = {
   dogon,
   'maya-tikal': mayaTikal,
   vienna,
+  brasilia,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
@@ -281,6 +283,7 @@ const LOADERS = {
   dogon: () => import('./dogon/index.js'),
   'maya-tikal': () => import('./maya-tikal/index.js'),
   vienna: () => import('./vienna/index.js'),
+  brasilia: () => import('./brasilia/index.js'),
 };
 
 /** Each settlement's module, with the life of its streets added to its townscape (src/objects/life.js). */

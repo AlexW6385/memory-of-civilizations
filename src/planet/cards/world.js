@@ -1230,4 +1230,22 @@ export const CARDS = {
       "维恩河与纳旭市场 —— 小河在花岗岩河墙之间流过市场，摊位撑着条纹遮阳篷；河边的坡台上是城铁线，维恩河街上是瓦格纳的公寓楼，一座满覆彩釉花砖，一座饰有镀金圆章。",
     ],
   },
+  'brasilia': {
+    en: [
+      "Brasília lies on the central plateau of Brazil, about 1,100 m above the sea, the federal capital built from nothing between 1956 and 1960 and inaugurated on 21 April 1960; shown about 1970, when the city is ten years old, the trees are young and the red earth shows at the edges. The city is Lúcio Costa's Pilot Plan, a cross of two axes, and its public buildings are Oscar Niemeyer's modernism: white reinforced concrete in plain sculptural shapes, glass curtain walls, reflecting pools and marble.",
+      "The National Congress — a two-storey platform with a marble roof deck reached by a long ramp from the lawn, the twin 28-storey office towers joined by a bridge, the Senate under its convex dome and the Chamber of Deputies under its inverted bowl, each a hemicycle of tiered seats round a presiding table.",
+      "The Three Powers Square — a paved square with black bands, the national flag on its tall mast, the pillory column, Bruno Giorgi's bronze Candangos and Ceschiatti's seated Justice, between the Planalto Palace and the Supreme Federal Court, both behind files of the slender Alvorada columns.",
+      "The Metropolitan Cathedral — sixteen concrete columns leaning together into a hyperboloid of glass 70 m across, in a reflecting pool; one enters by a ramp and a tunnel under the water into the sunken nave where three angels hang on cables; the bell tower, the baptistery and four bronze Evangelists stand outside.",
+      "The Esplanade of the Ministries — a long lawn between two eight-lane carriageways, with the identical green-glass ministry slabs in two files, the Itamaraty in its pool under tall arches and the Palace of Justice with its water curtains at the Congress end.",
+      "The superquadra — six-storey flats on open pilotis in a belt of trees, their end walls tiled in blue and white, with a strip of shops, a ring road and the avenue of the Residential Axis; the cars and buses of the period.",
+    ],
+    zh: [
+      "巴西利亚位于巴西中央高原，海拔约 1100 米，是 1956 至 1960 年从无到有建成的联邦首都，1960 年 4 月 21 日落成；画面定格在约 1970 年，城市十岁，树木尚幼，边缘仍露出红土。城市是卢西奥·科斯塔的“飞机”总体规划，两条轴线交叉；公共建筑出自奥斯卡·尼迈耶的现代主义：白色钢筋混凝土的简洁雕塑形体、玻璃幕墙、倒影池与大理石。",
+      "国会大厦 —— 两层的平台，大理石屋面平台由草坪上的长坡道登上，两座 28 层办公塔楼以天桥相连，参议院是凸起的圆穹，众议院是倒扣的碗形，各是一座围绕主席台的阶梯式半圆会场。",
+      "三权广场 —— 铺石广场嵌黑色条带，立有高高的国旗旗杆、耻辱柱、布鲁诺·乔尔吉的青铜《建设者》与切夏蒂坐像《正义》，位于总统府与联邦最高法院之间，两者皆立于成排纤细的黎明宫式柱廊之后。",
+      "大都会主教座堂 —— 十六根混凝土柱向内倾斜合成直径 70 米的玻璃双曲面，立于倒影池中；人们经坡道和池下隧道进入下沉的中堂，三座天使像悬于钢索；钟塔、洗礼堂和四尊青铜福音书作者像立在外面。",
+      "部委大道 —— 两条八车道大道之间的长草坪，两列相同的绿玻璃部委大楼，国会一端是立于水池中、环以高拱的外交部和流瀑如帘的司法部。",
+      "超级街区 —— 立在开敞底层架空柱上的六层住宅，处在林带之中，山墙贴蓝白瓷砖，另有一条商店街、环路和居住轴线的大道；街上是当时的汽车与公共汽车。",
+    ],
+  },
 };

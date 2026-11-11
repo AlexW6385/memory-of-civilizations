@@ -96,4 +96,5 @@ export const ARRIVALS = {
   'benin-city': [-65, null, 80, 0, 0.12],   // from the great street across the king's square to the palace gate and its turrets
   'dogon': [3, null, 29, 0, 0.18],   // From the village place: the toguna with its low eight-layer roof at the left, the terraced rows of mud compounds with their niched ginna facades and granaries rising up the slope, the sandstone cliff with the Tellem dwellings on its ledges closing the sky
   'vienna': [0, null, -66, 3.1416, 0.22],   // from Friedrichstraße across the Secession's forecourt: Olbrich's white building with its four pylons, the motto and the three gorgons over the door, and the golden laurel dome rising behind
+  'brasilia': [-120, 0.1, 0, -1.5708, 0.2],   // From the apron at the foot of the Congress ramp on the Monumental Axis, looking east: the two chambers (the Senate's dome and the Chamber's bowl) on the marble roof deck between the twin 28-storey towers, the two pools at the ramp's sides, the Esplanade's lawn and the ministries behind.
 };
