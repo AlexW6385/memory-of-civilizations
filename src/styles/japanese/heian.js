@@ -367,9 +367,9 @@ function ryuto(el, { bag }) {
   bag.add('timber', fromTriangles(dk));
   for (const sd of [-1, 1]) for (let i = 1; i < N - 1; i++) { const a = sec(i / N), b = sec((i + 1) / N), A = T(sd * a.hb, a.sheer, a.z), Bq = T(sd * b.hb, b.sheer, b.z); bag.add('gilt_bronze', rod([A[0], A[1] + 0.02, A[2]], [Bq[0], Bq[1] + 0.02, Bq[2]], 0.04, 5)); }
   const base = y - 0.12 + 0.2;
-  bag.add('reed_mat', box(...(() => { const p = T(-0.7, 0, -1.6), q = T(0.7, 0, 1.6); return [Math.min(p[0], q[0]), base - 0.0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), base + 0.04, Math.max(p[1], q[1])]; })()));
-  for (const [lx, lz] of [[-0.7, -1.6], [0.7, -1.6], [-0.7, 1.6], [0.7, 1.6]]) { const p = T(lx, 0, lz); bag.add('lacquer_red', box(p[0] - 0.05, base, p[1] - 0.05, p[0] + 0.05, base + 2.2, p[1] + 0.05)); }
-  { const p = T(0, 0, 0), h = 2.0; bag.add('roof_bark', lathe([[2.3, 0], [1.6, 0.35], [0.1, 0.95], [0.001, 1.0]], 4, null, p[0], base + 2.2, p[1]).rotateY(Math.PI / 4 + rot)); void h; }
+  bag.add('reed_mat', box(...(() => { const p = T(-0.7, 0, -1.6), q = T(0.7, 0, 1.6); return [Math.min(p[0], q[0]), base - 0.0, Math.min(p[2], q[2]), Math.max(p[0], q[0]), base + 0.04, Math.max(p[2], q[2])]; })()));
+  for (const [lx, lz] of [[-0.7, -1.6], [0.7, -1.6], [-0.7, 1.6], [0.7, 1.6]]) { const p = T(lx, 0, lz); bag.add('lacquer_red', box(p[0] - 0.05, base, p[2] - 0.05, p[0] + 0.05, base + 2.2, p[2] + 0.05)); }
+  { const p = T(0, 0, 0), h = 2.0; bag.add('roof_bark', lathe([[1.9, 0], [1.4, 0.3], [0.1, 0.95], [0.001, 1.0]], 4, null, 0, 0, 0).rotateY(Math.PI / 4).scale(1.0, 1, 1.35).rotateY(rot).translate(p[0], base + 2.2, p[2])); void h; }
   // the prow: a curved post rising to the carved head
   const tail = (pts, rad, m, d) => { const o = []; tube(o, T(0, 0, 0 + 0), [-s, -c], pts, rad, 8); bag.add(m, fromTriangles(o)); void d; };
   void tail;
