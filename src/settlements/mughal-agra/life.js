@@ -2,7 +2,7 @@
 // the forecourt's bazaar cells with their keepers sitting by them and buyers in the street; horses held by grooms in
 // the forecourt, where visitors dismounted; boats on the Yamuna below the riverfront terrace.
 
-import { RADIUS, FORECOURT, KATRAS, HAVELI_OPEN, WORKSHOP, PLINTH, GATE, POOL, GWALKS, RIVER_Z, houses } from './layout.js';
+import { RADIUS, STREETS, FORECOURT, KATRAS, HAVELI_OPEN, WORKSHOP, PLINTH, GATE, POOL, GWALKS, RIVER_Z, houses } from './layout.js';
 import { ground } from './ground.js';
 import { frameOf } from '../../styles/mughal/townhouse.js';
 import { boatFloat } from '../../objects/index.js';
@@ -84,6 +84,47 @@ export function life() {
   // washermen (dhobi) on the Yamuna's bank east of the terrace: standing at their stones, cloth spread on the sand
   for (let k = 0; k < 5; k++) { const x = 182 + k * 9 + rand() * 3; person([x, -253.2], 0.0, Math.PI / 2 * 0 + 0.2, { man: true, pose: 'stand', cloth: 'cloth_white', hat: undefined, hatMat: 'cloth_white' }); }
 
+
+  // ── the streets of the town (§14): tea stalls with their stools, water stands (pyau), hawkers with their mats, handcarts,
+  // zebu resting at the frontage, wells at the crossings, a goat tied at a post — spread along each street from the layout ──
+  { const lim = RADIUS - 34, ok = (x, z) => Math.hypot(x, z) < lim && z > -214, bay = (s) => (s.bazaar ? 15 : 24);
+    let n = 0;
+    for (const s of STREETS) {
+      const [x0, z0, x1, z1] = s.rect, alongZ = z1 - z0 > x1 - x0, mid = alongZ ? (x0 + x1) / 2 : (z0 + z1) / 2, half = (alongZ ? x1 - x0 : z1 - z0) / 2;
+      const a0 = (alongZ ? z0 : x0) + 6, a1 = (alongZ ? z1 : x1) - 6;
+      for (let t = a0 + rand() * 6; t < a1; t += bay(s) * (0.8 + rand() * 0.5)) {
+        const side = rand() < 0.5 ? -1 : 1, off = Math.max(half - 2.3 - rand() * 1.0, 0.8), v = mid + side * off;
+        const x = alongZ ? v : t, z = alongZ ? t : v;
+        if (!ok(x, z)) continue;
+        const th = alongZ ? -side * Math.PI / 2 : (side < 0 ? 0 : Math.PI), sd = Math.floor(rand() * 1e9), k = n++ % 7, q = rand();
+        const along = (d) => (alongZ ? [x, z + d] : [x + d, z]);      // a point d metres along the street from the item
+        if (k === 0 || (k === 4 && s.bazaar)) {
+          // the tea stall: a low table, a stool each side with a man sitting, the stall-keeper squatting by the fire-pot
+          L.push({ t: 'tea_table', at: [x, z], y: 0.04, rot: th, seed: sd });
+          for (const d of [-0.85, 0.85]) { const [px, pz] = along(d); L.push({ t: 'stool', at: [px, pz], y: 0.04, rot: th + (alongZ ? (d < 0 ? Math.PI / 2 : -Math.PI / 2) : (d < 0 ? Math.PI / 2 : -Math.PI / 2)), seed: sd }); person([px, pz], 0.04, th + (d < 0 ? -Math.PI / 2 : Math.PI / 2) + (alongZ ? 0 : 0), { man: true, pose: 'sit_low', cloth: pick(MEN), hatMat: pick(['cloth_white', 'cloth_red', 'cloth_ochre']) }); }
+          const [kx, kz] = along(-2.2); person([kx, kz], 0.04, th, { man: true, pose: 'squat', cloth: 'cloth_white', cloth2: 'cloth_brown', hatMat: 'cloth_white' });
+        } else if (k === 1) {
+          // the water stand: jars on a bench under a cloth, a woman or a boy giving drink
+          L.push({ t: 'pot', kind: 'matka', n: 1, at: [x, z], y: 0.04, seed: sd }); { const [px, pz] = along(0.55); L.push({ t: 'pot', kind: 'matka', n: 1, at: [px, pz], y: 0.04, seed: sd + 1 }); const [ox, oz] = along(1.1); L.push({ t: 'pot', kind: 'matka', n: 1, at: [ox, oz], y: 0.04, seed: sd + 2 }); }
+          const [wx, wz] = along(-0.9); person([wx, wz], 0.04, th, { cloth: pick(WOMEN), cloth2: 'cloth_white', hat: 'veil', hair: 'long', pose: 'cross' });
+        } else if (k === 2 || k === 5) {
+          // the hawker on his mat with fruit, pottery or spice, sitting behind it
+          L.push({ t: 'goods_mat', at: [x, z], y: 0.04, rot: th, goods: pick([['melons', 'greens'], ['pottery', 'baskets'], ['spice', 'heap'], ['bread', 'baskets'], ['greens', 'melons']]), seed: sd });
+          const bx = x - Math.sin(th) * 0.95, bz = z - Math.cos(th) * 0.95; person([bx, bz], 0.04, th + Math.PI, { man: q < 0.7, pose: 'cross', cloth: pick(MEN), hatMat: pick(['cloth_white', 'cloth_ochre']) });
+        } else if (k === 3) {
+          // a handcart at rest with its load, a zebu lying near it
+          L.push({ t: 'handcart', at: [x, z], y: 0.04, rot: th, load: pick(['sacks', 'baskets', 'crates']), seed: sd });
+        } else if (k === 6) {
+          // a zebu cow at the frontage, a dog asleep
+          L.push({ t: 'animal', kind: q < 0.55 ? 'zebu' : 'buffalo', at: [x, z], y: 0.04, rot: th + Math.PI / 2 + (rand() - 0.5), seed: sd });
+          const [dx2, dz2] = along(2.4); L.push({ t: 'animal', kind: q < 0.5 ? 'dog' : 'goat', at: [dx2, dz2], y: 0.04, rot: rand() * 6.28, seed: sd + 3 });
+        }
+      }
+    }
+    // wells with their troughs where the streets cross
+    const wells = []; for (const v of STREETS.filter((q) => q.rect[3] - q.rect[1] > q.rect[2] - q.rect[0])) for (const h of STREETS.filter((q) => q.rect[2] - q.rect[0] > q.rect[3] - q.rect[1])) if (v.rect[0] < h.rect[2] && v.rect[2] > h.rect[0] && v.rect[1] < h.rect[3] && v.rect[3] > h.rect[1]) wells.push([v.rect[2] - 1.8, h.rect[1] + 1.8]);
+    for (const [x, z] of wells) if (ok(x, z)) { L.push({ t: 'well', at: [x, z], y: 0, rot: 0, seed: Math.floor(rand() * 1e9) }); person([x + 1.6, z + 1.0], 0, 0.3, { cloth: pick(WOMEN), cloth2: 'cloth_white', hat: 'veil', hair: 'long', carry: 'pot' }); }
+  }
   // ── the Taj's garden and the plinth (docs/settlements/mughal-agra.md §13): the visitors, gardeners and servants ──
   // strolling groups on the axial walks (the marble-edged lanes either side of the channel), a gardener watering the
   // beds, the sweepers and the readers of the Qur'an on the plinth, guards at the gate

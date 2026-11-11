@@ -12,6 +12,7 @@ import * as F from './furnish.js';
 import { courtHouse } from './courthouse.js';
 import { townHouse } from './townhouse.js';
 import { inlayWorkshop } from './workshop.js';
+import './fronts.js';
 import { box, lathe, fromTriangles, frustum, disc, rod, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
