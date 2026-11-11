@@ -1,18 +1,22 @@
 // Nara — the ground: the temple's white gravel courts, lawns cropped by deer, the grassy dome of
 // Wakakusa, cedars and maples on the hills, the capital's earth streets; the soft light of Yamato.
 
-import { RADIUS, TEMPLE, COURT, height, inRect, inLot } from './layout.js';
+import { RADIUS, TEMPLE, COURT, height, inRect, inLot, inStreet, inBlock, blocks, KOFUKU } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.1, grass: 0.7, rock: 0, soil: 0.2, fields: 0, dry: 0.15, warmth: 0.5, red: 0.05, road: 0, snow: 0, forest: 0 };
   if (inRect(COURT, x, z)) { c.sand = 0.8; c.grass = 0.2; return c; }
   if (Math.abs(x) < 6 && z > 40 && z < 160) { c.road = 0.8; return c; }
-  if (x < -170 && (Math.abs(z - 146) < 6)) { c.road = 0.7; return c; }
+  if (inStreet(x, z)) { c.road = 0.8; c.grass = 0.05; return c; }
+  if (inRect(KOFUKU.block, x, z)) { c.sand = 0.8; c.grass = 0.15; return c; }
+  if (blocks().some((b) => b.kind === 'market' && inRect(b.rect, x, z))) { c.road = 0.6; c.soil = 0.5; c.grass = 0.05; return c; }
+  if (inBlock(x, z)) { c.soil = 0.35; c.grass = 0.5; return c; }
   return c;
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inRect(COURT, x, z, 6) || inLot(x, z, 1) || (Math.abs(x) < 8 && z > 30 && z < 165)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inRect(COURT, x, z, 6) || inLot(x, z, 1) || inStreet(x, z, 2) || blocks().some((b) => b.kind !== 'ward' && inRect(b.rect, x, z, 4)) || (Math.abs(x) < 8 && z > 30 && z < 165)) return null;
+  if (inBlock(x, z)) return { grass: 6, maple: 0.003, sugi: 0.001 };
   if (inRect(TEMPLE, x, z)) return { grass: 25, red_pine: 0.006 };
   if (height(x, z) > 25) return { grass: 30 };                       // Wakakusa's open grass
   if (height(x, z) > 4) return { sugi: 0.15, maple: 0.05, grass: 15 };

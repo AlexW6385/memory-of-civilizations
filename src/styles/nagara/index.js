@@ -8,7 +8,7 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles, rod, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
-import { rite } from '../indian/rites.js';
+import { rite, diya, lampStand, garland, kalasha, flowerPlate } from '../indian/rites.js';
 
 const S = 'sandstone_dressed', RELIEF = 'sandstone_relief';
 
@@ -101,10 +101,11 @@ function shikhara(bag, cx, cz, y, w, h, mat = S, courses = 14, mesh = true) {
   crown(bag, cx, y + h, cz, s * f(1), mat, courses > 6);
 }
 /** A band of figures in high relief round a wall rect r, standing on yb, h tall — gods, attendants, couples, set in niches between pilasters. */
-function figureBand(bag, r, yb, h, gap = 0) {
+function figureBand(bag, r, yb, h, gap = 0, hide = '') {
   const [x0, z0, x1, z1] = r, k = h / 1.15, zc = (z0 + z1) / 2;
   const prof = [[0.2 * k, 0], [0.16 * k, 0.45 * k], [0.12 * k, 0.72 * k], [0.07 * k, 0.78 * k], [0.1 * k, 0.86 * k], [0.085 * k, 1.0 * k], [0.001, 1.12 * k]];
   for (const [a, b, fx, fz] of [[[x0, z0], [x1, z0], 0, -1], [[x1, z1], [x0, z1], 0, 1], [[x0, z1], [x0, z0], -1, 0], [[x1, z0], [x1, z1], 1, 0]]) {
+    if ((fx === -1 && hide.includes('w')) || (fx === 1 && hide.includes('e'))) continue;   // the faces against the next hall
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.floor(L / (h * 0.62)));
     for (let i = 0; i < n; i++) {
       const t = (i + 0.5) / n, x = a[0] + (b[0] - a[0]) * t + fx * 0.12, z = a[1] + (b[1] - a[1]) * t + fz * 0.12;
@@ -125,13 +126,57 @@ function figureBand(bag, r, yb, h, gap = 0) {
 }
 /** The doorway from the porch into the halls on the face x = x (facing +x): the dark opening, the jambs in
  *  three bands (śākhās), the lintel with a small figure at its middle, the moonstone step. */
-function doorway(bag, x, cz, y, h) {
+function doorway(bag, x, cz, y, h, open = false) {
   const w = 0.75;
-  bag.add('opening', box(x, y, cz - w, x + 0.02, y + h, cz + w));
+  if (!open) bag.add('opening', box(x, y, cz - w, x + 0.02, y + h, cz + w));
   for (const [k, o] of [[0, 0.1], [1, 0.16], [2, 0.22]]) for (const sz of [-1, 1]) { const z0 = cz + sz * (w + k * 0.22), z1 = z0 + sz * 0.22; bag.add(k === 1 ? RELIEF : S, box(x, y, Math.min(z0, z1), x + o, y + h + k * 0.2, Math.max(z0, z1))); }
   for (const [k, o] of [[0, 0.1], [1, 0.16], [2, 0.22]]) bag.add(k === 1 ? RELIEF : S, box(x, y + h + k * 0.2, cz - w - k * 0.22, x + o, y + h + (k + 1) * 0.2, cz + w + k * 0.22));
   bag.add(RELIEF, lathe([[0.001, 0], [0.09, 0.03], [0.07, 0.3], [0.05, 0.38], [0.001, 0.48]], 6, null, x + 0.3, y + h + 0.6, cz));
   bag.add(S, lathe([[w + 0.3, 0], [w + 0.3, 0.05], [0.001, 0.05]], 16, null, x + 0.02, y, cz).scale(1, 1, 1));
+}
+
+/** The walls of a hollow room r (x0, z0, x1, z1) of thickness T from y0 to y1, with openings: doors[side] = [{ c, hw, h, sill }]
+ *  (side e/w/n/s; c the centre along the wall, hw its half width, h the lintel's height above y0, sill a sill's height).
+ *  An opening with a sill is a window (a stone lattice of bars fills it; solid to the walker), without one a door. */
+function ring(bag, col, r, T, y0, y1, doors = {}, mat = S) {
+  const [x0, z0, x1, z1] = r;
+  const sides = { e: [x1 - T, z0, x1, z1, 1], w: [x0, z0, x0 + T, z1, 1], n: [x0 + T, z0, x1 - T, z0 + T, 0], s: [x0 + T, z1 - T, x1 - T, z1, 0] };
+  for (const [k, [a0, b0, a1, b1, ax]] of Object.entries(sides)) {
+    const lo = ax ? b0 : a0, hi = ax ? b1 : a1, quad4 = (u0, u1) => (ax ? [a0, u0, a1, u1] : [u0, b0, u1, b1]);
+    const blk = (u0, u1, ya, yb) => { if (u1 - u0 < 0.02 || yb - ya < 0.02) return null; const q = quad4(u0, u1); bag.add(mat, box(q[0], ya, q[1], q[2], yb, q[3])); return q; };
+    let cur = lo;
+    for (const d of [...(doors[k] || [])].sort((p, q) => p.c - q.c)) {
+      const u0 = d.c - d.hw, u1 = d.c + d.hw, q = blk(cur, u0, y0, y1); if (q) col.rect(q, y0, y1);
+      blk(u0, u1, y0 + d.h, y1);
+      if (d.sill) {
+        blk(u0, u1, y0, y0 + d.sill); col.rect(quad4(u0, u1), y0, y1);
+        const mid = ax ? (a0 + a1) / 2 : (b0 + b1) / 2;
+        for (let t = 0; t <= 4; t++) { const u = u0 + 0.08 + (u1 - u0 - 0.16) * t / 4, c = ax ? [mid - 0.04, u - 0.05, mid + 0.04, u + 0.05] : [u - 0.05, mid - 0.04, u + 0.05, mid + 0.04]; bag.add(RELIEF, box(c[0], y0 + d.sill, c[1], c[2], y0 + d.h, c[3])); }
+        for (const yy of [d.sill, d.h - 0.1]) { const c = ax ? [mid - 0.05, u0, mid + 0.05, u1] : [u0, mid - 0.05, u1, mid + 0.05]; bag.add(RELIEF, box(c[0], y0 + yy, c[1], c[2], y0 + yy + 0.1, c[3])); }
+      }
+      cur = u1;
+    }
+    const q = blk(cur, hi, y0, y1); if (q) col.rect(q, y0, y1);
+  }
+}
+/** The linga on its yoni in the sanctum's dark cell, centred (x, z) on floor fy: the pedestal, the yoni with its spout
+ *  to the north, the polished shaft with a rounded top, the pot hanging over it, garlands, the lamp stands and the lamps before it. */
+function lingaShrine(bag, lights, x, fy, z) {
+  bag.add(S, box(x - 0.95, fy, z - 0.95, x + 0.95, fy + 0.22, z + 0.95));
+  bag.add(S, box(x - 0.8, fy + 0.22, z - 0.8, x + 0.8, fy + 0.32, z + 0.8));
+  bag.add('sandstone', lathe([[0.001, 0], [0.66, 0], [0.66, 0.1], [0.58, 0.14], [0.5, 0.2], [0.001, 0.2]], 20, null, x, fy + 0.32, z));
+  bag.add('sandstone', box(x - 0.16, fy + 0.4, z - 1.05, x + 0.16, fy + 0.5, z - 0.4));
+  bag.add('sandstone', box(x - 0.24, fy + 0.34, z - 0.95, x + 0.24, fy + 0.4, z - 0.45));
+  bag.add('granite_black', lathe([[0.3, 0], [0.28, 0.5], [0.27, 0.85], [0.22, 1.1], [0.12, 1.22], [0.001, 1.26]], 18, null, x, fy + 0.52, z));
+  garland(bag, [x - 0.3, fy + 1.0, z], [x + 0.3, fy + 1.0, z], 0.12, ['cloth_white', 'cloth_red']);
+  garland(bag, [x, fy + 1.05, z - 0.3], [x, fy + 1.05, z + 0.3], 0.1, ['cloth_white']);
+  bag.add('iron', rod([x, fy + 3.6, z], [x, fy + 2.35, z], 0.012, 4));
+  kalasha(bag, x, fy + 2.0, z, 0.9);
+  for (const sz of [-1, 1]) lampStand(bag, x + 1.55, fy, z + sz * 1.0, 1.1);
+  for (let k = 0; k < 5; k++) diya(bag, x + 1.5, fy, z - 0.5 + k * 0.25, 1);
+  flowerPlate(bag, x + 1.05, fy, z + 0.2, 1, ['cloth_white', 'cloth_red']);
+  lights.push({ at: [x + 1.3, fy + 1.1, z], color: '#ffb46b', intensity: 3.2, distance: 7 });
+  lights.push({ at: [x + 1.2, fy + 1.1, z - 1.0], color: '#ff9d4d', intensity: 1.6, distance: 5 });
 }
 /** A balconied window on a hall's side (kakshasana): the seat-back balustrade, the pillars, the sloping eave. */
 function balcony(bag, x0, x1, z, side, y, h) {
@@ -202,7 +247,8 @@ function bell(bag, x, y, z, r, h) {
  * nagara_temple: { c (the sanctum's centre), len (west–east, the porch at the east), w, h (the
  * tower's top above the terrace), jagati (terrace height), y } — the temple faces east.
  */
-function temple(el, { bag, col }) {
+function temple(el, ctx) {
+  const { bag, col } = ctx;
   const [cx, cz] = el.c, L = el.len, W = el.w, H = el.h, J = el.jagati ?? 4, y0 = el.y ?? 0, y = y0 + J, plinth = H * 0.12;
   // the terrace with a stair on the east (el.terrace: a larger platform, as Lakshmana's with its corner shrines)
   const T = el.terrace || [cx - W * 0.85, cz - W * 0.95, cx + L + 4, cz + W * 0.95];
@@ -222,12 +268,48 @@ function temple(el, { bag, col }) {
   // (the halls fill the plinth from the sanctum's east wall to its east end)
   const Lh = (L - W / 2) / 0.84;
   const halls = [[cx - W / 2, W, H * 0.3, null], [cx + W / 2, Lh * 0.16, H * 0.27, 0.55], [cx + W / 2 + Lh * 0.16, Lh * 0.3, H * 0.27, 0.62], [cx + W / 2 + Lh * 0.46, Lh * 0.2, H * 0.24, 0.48], [cx + W / 2 + Lh * 0.66, Lh * 0.18, H * 0.2, 0.34]];
+  // the halls as rooms (el.interior): thick walls round a floor and a ceiling, doors through the party walls, the sanctum's cell dark
+  const fl = y + plinth + 0.9, WT = 0.8;
+  const interiorHall = (c2, i, r, yb, wh) => {
+    const top = yb + wh;
+    bag.add('sandstone_floor', box(r[0], yb, r[1], r[2], fl, r[3])); col.rect(r, y, fl);
+    if (i === 0) {
+      const C = 2.4, cell = [cx - C, cz - C, cx + C, cz + C], cor = 0.9, ch = 3.4, cellTop = fl + 5.2;
+      const Bk = (a, b, c, d, ya, yb2) => { bag.add(S, box(a, ya, b, c, yb2, d)); col.rect([a, b, c, d], y, yb2); };
+      Bk(r[0], r[1], cx - C, r[3], fl, top); Bk(cx - C, r[1], r[2], cz - C, fl, top); Bk(cx - C, cz + C, r[2], r[3], fl, top);
+      Bk(cx + C, cz - C, r[2], cz - cor, fl, top); Bk(cx + C, cz + cor, r[2], cz + C, fl, top);
+      bag.add(S, box(cx - C, cellTop, cz - C, cx + C, top, cz + C)); bag.add(S, box(cx + C, fl + ch, cz - cor, r[2], top, cz + cor));
+      col.floor(cell, fl); col.floor([cx + C, cz - cor, r[2], cz + cor], fl);
+      bag.add(RELIEF, box(cx + C - 0.3, fl + ch - 0.4, cz - cor - 0.15, cx + C, fl + ch, cz + cor + 0.15));
+      lingaShrine(bag, c2.lights, cx, fl, cz);
+      return;
+    }
+    const dw = { 3: 1.1, 2: 1.1, 1: 1.0 }[i], dh = Math.min(3.3, wh * 0.55);
+    const doors = { e: [{ c: cz, hw: i === 3 ? 0.75 : dw, h: i === 3 ? Math.min(3.2, wh * 0.62) : dh }], w: [{ c: cz, hw: i === 1 ? 0.9 : dw, h: i === 1 ? 3.4 : dh }] };
+    if (i === 2) { const wx = (r[0] + r[2]) / 2, ww = (r[2] - r[0]) * 0.2; doors.n = [{ c: wx, hw: ww, h: 3.6, sill: 1.05 }]; doors.s = [{ c: wx, hw: ww, h: 3.6, sill: 1.05 }]; }
+    const t = i === 1 ? 0.7 : WT;
+    ring(bag, col, r, t, fl, top, doors);
+    col.floor([r[0] - 0.05, r[1] + t, r[2] + 0.05, r[3] - t], fl);
+    const cy = top - 0.55, xm = (r[0] + r[2]) / 2;
+    bag.add(S, box(r[0] + t, cy, r[1] + t, r[2] - t, top, r[3] - t));
+    if (i === 2) {
+      for (let k = 1; k <= 3; k++) { const o = k * 0.38; bag.add(k === 2 ? RELIEF : S, box(r[0] + t + o, cy - 0.16 * k, r[1] + t + o, r[2] - t - o, cy - 0.16 * (k - 1), r[3] - t - o)); }
+      bag.add(RELIEF, lathe([[0.001, 0], [0.34, 0.04], [0.4, 0.14], [0.3, 0.3], [0.12, 0.42], [0.04, 0.5], [0.001, 0.62]], 12, null, xm, cy - 0.5 - 0.62, cz));
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const px = xm + sx * 1.5, pz = cz + sz * 2.8; pillar(bag, px, pz, fl, cy - 0.05, 0.4); col.rect([px - 0.4, pz - 0.4, px + 0.4, pz + 0.4], fl, cy); }
+      for (const sz of [-1, 1]) lampStand(bag, r[2] - t - 0.7, fl, cz + sz * 1.9, 1.1);
+      c2.lights.push({ at: [xm, fl + 3.4, cz - 3.5], color: '#ffb46b', intensity: 2.4, distance: 10 }, { at: [xm, fl + 3.4, cz + 3.5], color: '#ffb46b', intensity: 2.4, distance: 10 });
+    } else if (i === 3) {
+      c2.lights.push({ at: [xm, fl + 2.6, cz], color: '#ffb46b', intensity: 1.8, distance: 8 });
+      for (const sz of [-1, 1]) diya(bag, r[0] + t + 0.1, fl, cz + sz * 1.25, 1.3);
+    } else c2.lights.push({ at: [xm, fl + 2.4, cz], color: '#ffb46b', intensity: 1.4, distance: 6 });
+  };
   halls.forEach(([x, len, wh, roofH], i) => {
     const hw = i === 0 ? W / 2 : W * (i === 2 ? 0.48 : 0.36), r = [x, cz - hw, x + len, cz + hw];
     if (i === 4) porch(bag, col, r, y + plinth, wh, el.simple);
+    else if (el.interior) interiorHall(ctx, i, r, y + plinth, wh);
     else { bag.add(S, box(r[0], y + plinth, r[1], r[2], y + plinth + wh, r[3])); col.rect(r, y, y + plinth + wh); }
     if (i === 4) { /* the open porch */ } else if (el.simple) for (const k of [0.3, 0.62]) bag.add('sandstone', box(r[0] - 0.05, y + plinth + wh * k, r[1] - 0.05, r[2] + 0.05, y + plinth + wh * k + wh * 0.22, r[3] + 0.05));
-    else { for (const k of [0.2, 0.47, 0.74]) figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62)); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.25, r[2] - len * 0.25, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
+    else { for (const k of [0.2, 0.47, 0.74]) figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0, (i > 0 ? 'w' : '') + (i < 3 ? 'e' : '')); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62), !!el.interior); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.25, r[2] - len * 0.25, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
     if (i > 0) stepped(bag, [r[0] - 0.4, r[1] - 0.6, r[2] + 0.4, r[3] + 0.6], y + plinth + wh, H * roofH * 0.45);
   });
   // the steep flight from the terrace up the plinth to the porch's floor

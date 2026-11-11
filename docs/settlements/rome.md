@@ -86,6 +86,29 @@ From the north across the forecourt to the Pantheon's portico. [inferred]
 
 As for the Pantheon (`docs/buildings/pantheon.md` §9).
 
+## 4.5 Streets: rows of tabernae (batch pass)
+
+- Ground-floor shops (tabernae) opened wide under travertine lintels between brick piers, shut at night with boards set in a groove in the threshold; flats of brick-faced concrete above [stated: Wikipedia "Insula (building)"; ostia-antica.org, House of the Balcony with Corbels]. **Built** (`taberna_row`): rows of 3-5 shops 4.4 m wide on both sides of the Via Lata and on the north side of the street before the Pantheon, each walked into: a masonry counter with dolia sunk in it and amphorae along the wall (wine, oil, hot food), a shop of pots and cloth, a smith's forge with anvil, or shut with its boards; joists of the mezzanine overhead; three storeys of flats above with a corbelled cornice and, on some, a balcony [inferred: the trade mix, the sizes].
+- Fountains: street fountains of the Pompeian type (a trough with a pier carrying a spout) in the alleys between rows; the Aqua Virgo ended in the middle of the Campus Martius before the Saepta Julia and fed Agrippa's baths [stated: Wikipedia "Aqua Virgo"]. **Built** (`fountain`): eight troughs with a carved head and a bronze spout, one round basin in the forum [inferred: positions].
+
+## 4.6 The forum west of the Pantheon and a podium temple
+
+- Hadrian built a temple to his deified mother-in-law Matidia (died 119, deified at once) in the Campus Martius near the Pantheon and the Saepta Julia; its form is not recorded [stated: Wikipedia "Temple of Matidia"]. **Built** (`temple`, `colonnade`, `forum_floor`, `statue`): a square of travertine flags 96 x 88 m with a colonnade of 7.6 m travertine columns on three sides (a gap on the axis), a Corinthian hexastyle temple on a 2.6 m podium at the west end (marble stair across the front, pronaos two bays deep, cella with bronze door and a gilt cult statue, entablature all round, pediment and tiled roof), and six statues on plinths [inferred: the whole form, after the temples of the Campus Martius and of the Hadrianic type].
+- The Pantheon's floor: squares of pavonazzetto framed in white marble with discs of porphyry and giallo antico alternating [stated in part: `docs/buildings/pantheon.md`; inferred: the grid]; a light hung under the oculus [inferred].
+
+## 4.7 The public latrine
+
+- At Ostia (by the Forum baths, Hadrianic shops): twenty marble seats with a hole in each along three sides of a room, a channel under them for water, a wash basin on a pillar between two entrances with revolving doors [stated: Parco archeologico di Ostia antica, "Latrina presso le Terme del Foro", ostiaantica.cultura.gov.it]. **Built** (`latrine`) at the street south of the baths: that plan, with the channel before the bench, painted walls and a Fortuna shrine [inferred: the shrine, the colours; the entrances here are plain doors].
+
+## 4.8 The mill-bakery (pistrinum)
+
+- A mill-bakery: on average about nine mills, each a fixed cone-shaped meta and an hourglass catillus turned by mules or horses through a wooden frame; large ovens with a cupola 3.5 to 5 m across; floors of basalt blocks; basins for water; kneading machines of volcanic stone [stated: ostia-antica.org, "The mills-bakeries of Ostia"]. **Built** (`pistrinum`): a bread shop with counter and shelves of loaves on the street; three mills on basalt floor with their bars; a water basin, sacks, the domed oven with arched mouth and chimney, a stack of wood, the kneading bench [inferred: three mills for the plot, the sizes].
+
+## 11. Life, batch pass
+
+- Walkers (`movers.js`): citizens in the white toga, workmen and slaves in belted tunics, porters with baskets and sacks, matrons in veiled stola and palla, soldiers in red with a staff, boys; Via Lata, the two cross streets, the forum and the forecourt. Fauna: swifts and swallows, pigeons on the forum paving, crows over the stadium, egrets on the Tiber. Smoke: the bakery's chimney from before dawn, kitchen smoke at breakfast and the noon meal, steam from cookshops, incense at the temple [inferred].
+- Sources added: [Temple of Matidia](https://en.wikipedia.org/wiki/Temple_of_Matidia); [Aqua Virgo](https://en.wikipedia.org/wiki/Aqua_Virgo); [Latrina presso le Terme del Foro](https://ostiaantica.cultura.gov.it/en/educational-panels-and-maps/the-central-area-and-the-official-complexes/latrina-presso-le-terme-del-foro/); [The mills-bakeries of Ostia](https://ostia-antica.org/dict/topics/bakeries/bakart.htm).
+
 ## Sources
 
 - [The Bronze Roof Truss of the Vestibule of the Pantheon in Rome — University of Cologne](https://archaeologie.phil-fak.uni-koeln.de/en/research/research-projects/the-bronze-roof-truss-of-the-vestibule-of-the-pantheon-in-rome)

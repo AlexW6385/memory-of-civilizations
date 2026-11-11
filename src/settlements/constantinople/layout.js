@@ -47,4 +47,11 @@ export function lots() {
   }
   return LOTS;
 }
+/** The lots given over to a house you can enter, a chapel and a bath: the lots nearest these points (docs §12). */
+export const SPECIAL = { home: [-140, 70], chapel: [-135, 20], bath: [-150, -30] };
+export function special() {
+  const out = {};
+  for (const [k, t] of Object.entries(SPECIAL)) { const L = lots().filter((l) => !Object.values(out).includes(l)); out[k] = L.map((l) => [Math.hypot((l.rect[0] + l.rect[2]) / 2 - t[0], (l.rect[1] + l.rect[3]) / 2 - t[1]), l]).sort((a, b) => a[0] - b[0])[0][1]; }
+  return out;
+}
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

@@ -6,7 +6,7 @@
 // src/engine/systems-list.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { houses, RADIUS, TIERS } from './layout.js';
+import { houses, RADIUS, TIERS, DANBI } from './layout.js';
 import { SHOP_SITES } from './shops.js';
 
 const ID = 'qing-beijing';
@@ -28,6 +28,12 @@ function emitters() {
   // the bronze burners on the upper terrace before the Hall of Supreme Harmony
   const top = TIERS[2].y;
   for (const x of [-22, 22, -9, 9]) E.push({ p: [x, top + 2.2, 17], kind: 'incense', thr: 0, seed: 40 + Math.floor(x) });
+  // the censers of the Danbi way and its plaza (town.js temple())
+  const dxm = (DANBI.rect[0] + DANBI.rect[2]) / 2;
+  for (const sx of [-1, 1]) {
+    E.push({ p: [dxm + sx * 5, 0.03 + 2.3, DANBI.rect[3] + 11], kind: 'incense', thr: 0, seed: 70 + sx });
+    E.push({ p: [dxm + sx * 9, DANBI.y + 2.2, DANBI.rect[1] + 10], kind: 'incense', thr: 0, seed: 72 + sx });
+  }
   return E;
 }
 

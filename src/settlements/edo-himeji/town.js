@@ -1,11 +1,11 @@
 // The castle town (docs/settlements/edo-himeji.md §5): samurai compounds round the inner moat, the merchants' machiya
 // beyond the middle moat; some houses open inside (§5.1); the life of the street and the avenue (§5.2): a palanquin
 // and its bearers, samurai with their two swords, pedlars with their carrying poles, the shopkeepers at their counters.
-import { RADIUS, STREET, OUTER, lots } from './layout.js';
+import { RADIUS, STREET, OUTER, MIDDLE, LEVEL, lots, furniture } from './layout.js';
 const base = (id, elements, style = 'edo') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** Which houses are open inside: a machiya in three (its shop), a samurai house in six (its reception room). */
-export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 3 === 0 : l.seed % 6 === 0);
+export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 3 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 6 === 0);
 
 function life() {
   const rand = rng(1620), P = [], E = [];
@@ -34,6 +34,9 @@ function life() {
 export async function town() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 60) plans.push(base(`edo-himeji-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ ...l, simple: true, open: isOpen(l) }))));
+  plans.push(base('edo-himeji-furniture', furniture().flatMap((f) => (f.t === 'landing'
+    ? [{ t: 'stairs', rect: [f.x - 1.5, f.z0, f.x + 1.5, f.z0 + 1.7], y0: LEVEL.bed, y1: 0.3, dir: 'n', mat: 'ishigaki' }]
+    : f.t === 'moat_boat' ? [{ ...f, y: LEVEL.water - 0.08 }] : [f]))));
   plans.push(...life());
   return plans;
 }

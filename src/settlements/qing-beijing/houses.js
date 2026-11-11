@@ -45,7 +45,17 @@ function facePatch(bag, mat, horiz, t0, t1, c, side, y0, y1, off) {
  */
 function decayWall(bag, r, horiz, t0, t1, c, side, yb, hTop, lod) {
   const L = t1 - t0;
-  for (let t = t0; t < t1 - 0.3; t += 1.1 + r() * 0.8) { const e = Math.min(t1, t + 0.9 + r() * 1.0), h = 0.22 + r() * 0.42; facePatch(bag, 'earth_wall', horiz, t, e, c, side, yb, yb + h, 0.012); }
+  // the wind-blown dust at the foot: a continuous low band and, over it, tapering plumes of different height (no hard-edged rectangles)
+  facePatch(bag, 'earth_wall', horiz, t0, t1, c, side, yb, yb + 0.13, 0.012);
+  for (let t = t0; t < t1 - 0.6; t += 0.9 + r() * 1.6) {
+    const w = Math.min(t1 - t, 1.6 + r() * 2.2), h = 0.1 + r() * 0.22, off = 0.014, pl = side > 0 ? c + off : c - off, y0 = yb + 0.1;
+    const P = (u, v) => (horiz ? [t + u, y0 + v, pl] : [pl, y0 + v, t + u]);
+    const a = P(0, 0), b = P(w, 0), m = P(w * (0.3 + r() * 0.4), h), n = horiz ? [0, 0, side] : [side, 0, 0], T = [];
+    const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = m[0] - a[0], vy = m[1] - a[1], vz = m[2] - a[2];
+    const dot = (uy * vz - uz * vy) * n[0] + (uz * vx - ux * vz) * n[1] + (ux * vy - uy * vx) * n[2];
+    T.push(...a, ...(dot >= 0 ? b : m), ...(dot >= 0 ? m : b));
+    bag.add('earth_wall', fromTriangles(T));
+  }
   if (lod > 0) return;
   for (let i = 0, n = Math.round(L / 4.5); i < n; i++) { const t = t0 + r() * (L - 0.6), w = 0.25 + r() * 0.4, y = yb + 0.3 + r() * 0.8; facePatch(bag, 'chalk', horiz, t, t + w, c, side, y, y + 0.12 + r() * 0.2, 0.014); }
   for (let i = 0, n = Math.round(L / 7); i < n; i++) {

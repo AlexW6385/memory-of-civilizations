@@ -57,7 +57,7 @@ const pointedPts = (uc, r, s, f, n = 10) => {
  * folds, the shoulders, the head; `crown` (the kings), `book`, `wings` (an angel: two blades
  * behind the shoulders, turned to face along f), `seat` (enthroned: the knees forward along f).
  */
-function figure(bag, x, y, z, h, o = {}) {
+function figureBase(bag, x, y, z, h, o = {}) {
   const rb = 0.13 * h, m = o.mat || CARVE, f = o.face || [-1, 0];
   const folds = (th, i) => (i > 0 && i < 4 ? 1 + 0.07 * Math.cos(9 * th) : 1);
   if (o.seat) {
@@ -66,11 +66,11 @@ function figure(bag, x, y, z, h, o = {}) {
     bag.add(m, box(x - 0.2 * h * Math.abs(f[1]) - 0.16 * h * Math.abs(f[0]), y, z - 0.2 * h * Math.abs(f[0]) - 0.16 * h * Math.abs(f[1]), x + 0.2 * h * Math.abs(f[1]) + 0.16 * h * Math.abs(f[0]), y + s * 0.5, z + 0.2 * h * Math.abs(f[0]) + 0.16 * h * Math.abs(f[1])));
     bag.add(m, lathe([[rb * 1.25, 0], [rb * 1.2, 0.08 * h], [rb * 0.95, 0.34 * h], [rb * 0.85, 0.42 * h], [rb * 0.45, 0.47 * h], [0.001, 0.48 * h]], 10, folds, x + f[0] * 0.08 * h, y + s * 0.46, z + f[1] * 0.08 * h));
     bag.add(m, lathe([[rb * 1.05, 0], [rb * 1.2, s * 0.48], [0.001, s * 0.5]], 10, folds, x + f[0] * 0.14 * h, y, z + f[1] * 0.14 * h));
-    bag.add(m, lathe([[0.001, 0], [0.065 * h, 0.03 * h], [0.068 * h, 0.1 * h], [0.04 * h, 0.14 * h], [0.001, 0.145 * h]], 8, null, x + f[0] * 0.08 * h, y + s * 0.46 + 0.47 * h, z + f[1] * 0.08 * h));
+    bag.add(o.mat ? 'ivory' : m, lathe([[0.001, 0], [0.065 * h, 0.03 * h], [0.068 * h, 0.1 * h], [0.04 * h, 0.14 * h], [0.001, 0.145 * h]], 8, null, x + f[0] * 0.08 * h, y + s * 0.46 + 0.47 * h, z + f[1] * 0.08 * h));
     return;
   }
   bag.add(m, lathe([[rb * 1.08, 0], [rb, 0.06 * h], [rb * 0.86, 0.42 * h], [rb * 0.8, 0.62 * h], [rb * 0.92, 0.74 * h], [rb * 0.55, 0.81 * h], [0.001, 0.815 * h]], 10, folds, x, y, z));
-  bag.add(m, lathe([[0.001, 0], [0.05 * h, 0.02 * h], [0.058 * h, 0.08 * h], [0.045 * h, 0.13 * h], [0.001, 0.14 * h]], 8, null, x, y + 0.8 * h, z));
+  bag.add(o.mat ? 'ivory' : m, lathe([[0.001, 0], [0.05 * h, 0.02 * h], [0.058 * h, 0.08 * h], [0.045 * h, 0.13 * h], [0.001, 0.14 * h]], 8, null, x, y + 0.8 * h, z));
   if (o.crown) bag.add(o.crownMat || 'paint_ochre', lathe([[0.056 * h, 0], [0.06 * h, 0.05 * h], [0.045 * h, 0.05 * h], [0.045 * h, 0.01 * h]], 8, (th, i) => (i === 1 ? 1 + 0.25 * Math.max(0, Math.cos(4 * th)) : 1), x, y + 0.9 * h, z));
   if (o.book) bag.add(m, box(x + f[0] * rb - 0.05 * h, y + 0.5 * h, z + f[1] * rb - 0.05 * h, x + f[0] * rb + 0.05 * h, y + 0.6 * h, z + f[1] * rb + 0.05 * h));
   if (o.wings) {
@@ -171,7 +171,11 @@ function roseND(bag, o, u, uc, yc, r, inSide, depth = 0.42) {
  * the lintels and the tympanum with their figures; the doors with their ironwork. The slices run back
  * to xBack, where the core of the front stands.
  */
-function portal(bag, col, p) {
+const figure = figureBase;
+// the 13th-century portals were painted: the figures' robes in reds, blues, ochres and greens, the tympanum's ground blue
+const PAINT = ['paint_robe', 'paint_blue', 'paint_ochre', 'cloth_red', 'paint_white', 'cloth_green'];
+function portal(bag, col, p0) {
+  const p = p0, figure = (b, x, y, z, h, o = {}) => figureBase(b, x, y, z, h, { mat: PAINT[Math.abs(Math.floor(z * 7.3 + y * 3.1 + h * 11)) % PAINT.length], ...o });
   const { x, z0, z1, y, W0, N, dw, dd, spring: S, xBack, top, f = 0.75 } = p;
   const zc = (z0 + z1) / 2, wN = W0 - N * dw, xEnd = x + N * dd;
   const o = [x, z0], u = [0, 1], uc = zc - z0;
@@ -181,7 +185,7 @@ function portal(bag, col, p) {
   }
   // the back slice: the tympanum's field over the door
   const doorTop = y + p.door;
-  bag.add(L, planarWall({ o: [(xEnd + xBack) / 2, z0], u, th: xBack - xEnd, u0: 0, u1: z1 - z0, y0: y, y1: y + top, holes: [{ u0: uc - wN, u1: uc + wN, y0: y, y1: doorTop }] }));
+  bag.add('paint_blue', planarWall({ o: [(xEnd + xBack) / 2, z0], u, th: xBack - xEnd, u0: 0, u1: z1 - z0, y0: y, y1: y + top, holes: [{ u0: uc - wN, u1: uc + wN, y0: y, y1: doorTop }] }));
   // the socle: a moulded base and a shelf at the statues' feet along the steps
   for (const s of [-1, 1]) for (let k = 0; k < N; k++) {
     const za = zc + s * (W0 - k * dw), zb = zc + s * (W0 - (k + 1) * dw), xa = x + (k + 1) * dd;

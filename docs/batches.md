@@ -6,7 +6,7 @@ The plan for bringing all 94 settlements of DESIGN §7 to Ming Suzhou's standard
 
 1. **Phase 0 — engine** (coordinator, Opus). Items 2–4 run alongside B1: B1's settlements supply their own living-system data in Suzhou's format, so they do not wait for the defaults.
 2. **B1 — the pilot** (China, closest to Suzhou). After it, stop: survey in the author's Chrome, fix the method and the slot sizes, then go on.
-3. **B2–B9 — the 55 other built settlements**, in priority order.
+3. **B2–B9 — the 55 other built settlements**, in priority order (B2 and B3 swapped at the author's request, 2026-11-11: the medieval and Renaissance West before East Asia).
 4. **B10–B16 — the 38 L0 settlements**, built from nothing to the standard. Their dossiers are written earlier, in the background (below), so that a batch of new settlements starts from finished research.
 
 Priority, used to order the batches: (a) how much the settlement carries the whole — fame, a ●●● density, a large class; (b) closeness to what is already proven (the pilot reuses Suzhou's Chinese vocabulary); (c) one style family per batch, so a shared style is rebuilt once, by one agent, for all who use it; (d) the region stands together on the planet and is surveyed together.
@@ -37,7 +37,7 @@ A **slot** is one implementing agent (Sonnet). A batch is about **10 slots** (th
 
 Agents on one settlement edit disjoint files of its folder (the split above); the landmark agent owns `index.js`.
 
-**Dossiers for L0**, two extra Sonnet agents (low effort, research only, no code) run beside each batch from B3 on, writing `docs/settlements/<id>.md` for the next L0 settlements in the order of B10–B16. They touch no code, so they never conflict.
+**Dossiers for L0**, two extra Sonnet agents (low effort, research only, no code) run beside each batch from B2 on, writing `docs/settlements/<id>.md` for the next L0 settlements in the order of B10–B16. They touch no code, so they never conflict.
 
 ## The batches
 
@@ -54,7 +54,18 @@ Slots in brackets; S = shared style owned in that batch, by the agent named.
 
 S: `song` (Kaifeng, Hangzhou, Wutai) → Kaifeng landmark, except its per-settlement files `song/hangzhou.js` → Hangzhou landmark and `song/wutai.js` → the Wutai agent; `qing` → Beijing landmark; `chinese` → the Wutai agent (`vernacular` untouched this batch); `ming` stays untouched (Suzhou, the reference). **Gate:** surveyed in Chrome against Suzhou (≥ 55 fps turning, p95 ≤ 25 ms, ≤ 800 draws; detail looked at from a metre); suzhou-method.md and the slot table revised with what the pilot taught.
 
-### B2 — East Asia and India, the dense ones (10)
+### B2 — Medieval and Renaissance West (10)
+
+| Settlement | Class | Slots |
+|---|---|---|
+| Gothic Paris (`paris`) | L ●●● | 3 |
+| Venice (`venice`) | L ●●● | 3 |
+| Renaissance Florence (`florence`) | M ●●● | 2 |
+| Nasrid Granada (`granada`) | M ●●● | 2 |
+
+S: `vernacular` (incl. `houses-med.js`) → Florence townscape.
+
+### B3 — East Asia and India, the dense ones (10)
 
 | Settlement | Class | Slots |
 |---|---|---|
@@ -67,17 +78,6 @@ S: `song` (Kaifeng, Hangzhou, Wutai) → Kaifeng landmark, except its per-settle
 | Khajuraho (`khajuraho`) | S ●●● | 1 |
 
 S: `chinese` → Nara (used by Nara, Uji).
-
-### B3 — Medieval and Renaissance West (10)
-
-| Settlement | Class | Slots |
-|---|---|---|
-| Gothic Paris (`paris`) | L ●●● | 3 |
-| Venice (`venice`) | L ●●● | 3 |
-| Renaissance Florence (`florence`) | M ●●● | 2 |
-| Nasrid Granada (`granada`) | M ●●● | 2 |
-
-S: `vernacular` (incl. `houses-med.js`) → Florence townscape.
 
 ### B4 — The Bosphorus and Islamic cities (11)
 

@@ -13,6 +13,8 @@ import { clockTower, procuratieOld, columnStatue } from './piazza.js';
 import { horse, limb } from '../greek/sculpture.js';
 import { basilicaInterior, vestibule } from './interior.js';
 import { rive, rialto } from './rive.js';
+import { palazzo } from './palazzo.js';
+import { ponte, pozzo, squero } from './ponte.js';
 
 const M = 'marble', B = 'brick', L = 'lead', I = 'limestone';
 /** basilica: { c, s (arm length), w (arm width), h, y } — the Greek cross with its five domes, the west front. */
@@ -110,6 +112,6 @@ function bellTower(el, { bag, col }) {
 }
 registerStyle('venetian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, rive, rialto },
+  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, rive, rialto, palazzo, ponte, pozzo, squero },
   objects: {},
 });
