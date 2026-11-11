@@ -8,6 +8,8 @@ import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import '../sumerian/index.js';
 import { esagila, etemenanki, bridge, quay, quffa } from './temple.js';
 import { babylonianHouses } from './house.js';
+import { babylonShop, babylonYard } from './shop.js';
+import { babylonianLanes } from './lanes.js';
 
 // K: black glaze (the outlines and enamelled lines; no black glaze in the palette, the black lacquer stands in);
 // R: the opaque red enamel of the manes (Koldewey: since decomposed to green)
@@ -440,6 +442,6 @@ function throneFacade(bag, r, doors, h) {
 }
 registerStyle('babylonian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.sumerian.elements, gate_inscription: gateInscription, ishtar_gate: ishtarGate, glazed_wall: glazedWall, city_wall: cityWall, way_paving: wayPaving, palace, esagila, etemenanki, bridge, quay, quffa, ...babylonianHouses() },
+  elements: { ...STYLES.sumerian.elements, gate_inscription: gateInscription, ishtar_gate: ishtarGate, glazed_wall: glazedWall, city_wall: cityWall, way_paving: wayPaving, palace, esagila, etemenanki, bridge, quay, quffa, ...babylonianHouses(), ...babylonianLanes(), babylon_shop: babylonShop, babylon_yard: babylonYard },
   objects: {},
 });

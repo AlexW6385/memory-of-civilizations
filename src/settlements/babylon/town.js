@@ -2,7 +2,8 @@
 // seated in his cella; priests in Esagila's court; Babylonians on the Processional Way and the bridge in the dress
 // Herodotus gives them (1.195: a linen tunic to the feet, a woollen one over it, a white mantle; long hair bound
 // with fillets; a carved staff); boatmen standing in the round boats, a live ass in the largest (1.194).
-import { RADIUS, WAY, WALL_Z, ESAGILA, RIVER, BRIDGE, QUAY, MARKET, riverX, lots } from './layout.js';
+import { RADIUS, WAY, WALL_Z, ESAGILA, RIVER, BRIDGE, QUAY, MARKET, riverX, lots, yards, alleys, laneRects, laneProps } from './layout.js';
+import { frameOf } from '../../styles/babylonian/shop.js';
 import { QUFFAS } from './plan.js';
 import { esagilaStatue } from '../../styles/babylonian/temple.js';
 
@@ -70,9 +71,25 @@ function people() {
   return { id: 'babylon-people', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, -370], facing: 's' }, center: [-60, 0], near: 420 };
 }
 
+const storeysOf = (seed) => (rng(seed || 1)() < 0.45 ? 2 : 1);
+const CORE_C = [-40, -100];
 export async function houses() {
-  const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) plans.push(base(`babylon-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'babylon_house', ...l }))));
+  const all = lots(), plans = [], tiles = new Map();
+  // the houses in plans by tile of 150 m (each culls apart), the open ones and the shops of the core in plans of their own
+  for (const l of all) {
+    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, key = `${Math.floor(cx / 150)},${Math.floor(cz / 150)}`;
+    const lite = Math.hypot(cx - CORE_C[0], cz - CORE_C[1]) > 240;
+    const e = l.shop ? { t: 'babylon_shop', rect: l.rect, door: l.door, seed: l.seed, trade: l.shop, shop: true, storeys: 1, front: l.door }
+      : { t: 'babylon_house', rect: l.rect, seed: l.seed, door: l.door, open: !!l.open, school: !!l.school, white: l.open && l.seed % 3 === 0, storeys: l.open ? 1 : storeysOf(l.seed), front: l.door, lite };
+    if (!tiles.has(key)) tiles.set(key, []);
+    tiles.get(key).push(e);
+  }
+  let n = 0;
+  for (const E of tiles.values()) for (let i = 0; i < E.length; i += 120) plans.push(base(`babylon-houses-${n++}`, E.slice(i, i + 120)));
+  // the walled yards of the blocks
+  plans.push(base('babylon-yards', yards().map((y) => ({ t: 'babylon_yard', rect: y.rect, door: y.door, kind: y.kind, seed: y.seed, front: y.door }))));
+  // the paving of the lanes in the core, the alleys' gutters, the street shrines, troughs, benches and water stands
+  plans.push(base('babylon-lanes', [{ t: 'babylon_lanes', rects: laneRects(), alleys: alleys().filter((r) => Math.hypot((r[0] + r[2]) / 2 + 40, (r[1] + r[3]) / 2 + 60) < 250), props: laneProps() }]));
   // the market (a market room: the generic life pass adds to it) and the scribes' mats on the quay
   const z = 103, x = riverX(z) + QUAY.d0 + 6.5;
   plans.push({ ...base('babylon-market', [{ t: 'scribe_kit', at: [x, z - 0.8], y: QUAY.y, rot: Math.PI / 2 }, { t: 'scribe_kit', at: [x, z + 0.8], y: QUAY.y, rot: Math.PI / 2, scroll: true }]), rooms: [{ id: 'market', rect: MARKET, y: 0, kind: 'open', market: true }] });
