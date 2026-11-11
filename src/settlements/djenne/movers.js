@@ -13,7 +13,7 @@ import { boatFloat } from '../../objects/index.js';
 
 // ── how many, how fast ───────────────────────────────────────────────────────
 export const PARAMS = {
-  walkers: { day: 56, night: 4, rain: 0.5, reach: 150, spawnMin: 24, far: 42 },
+  walkers: { day: 72, night: 4, rain: 0.5, reach: 150, spawnMin: 24, far: 42 },
   boats: { count: 8, reach: 260, spawnMin: 60, far: 95, speed: [0.7, 1.1], bridgeSpeed: 0.6 },
   water: LEVEL.water,
 };
@@ -35,6 +35,7 @@ export function walkways() {
   for (const x of [46.5, 55.5, 69.5, 83.5, 97.5]) rects.push(rect(x - 1, MARKET[1] + 2.5, x + 1, MARKET[3] - 2.5, { weight: 3, market: 1 }));
   rects.push(rect(40, -43.5, 112, -41.5, { weight: 2.4, market: 1 }), rect(40, 42.5, 112, 44.5, { weight: 2.4, market: 1 }));
   rects.push(rect(MARKET[2] - 1, -43.5, MARKET[2] + 18, -41.5, { weight: 1 }));
+  rects.push(rect(MARKET[2] + 0.5, -40, MARKET[2] + 3.5, 40, { weight: 1.6, market: 0.6 }));          // the strip between the market and the east row of houses
   // the landing: the path along the bank (south, toward the Bani) and the lane that meets it
   const zb = ringR(Math.PI / 2) - 4.4;
   rects.push(rect(-36, zb - 1.2, 36, zb + 1.2, { weight: 1.6, kind: 'lane' }), rect(-7.25, zb - 22, -5.25, zb, { weight: 1.6, kind: 'lane' }));

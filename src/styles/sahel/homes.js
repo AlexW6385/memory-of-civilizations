@@ -194,3 +194,34 @@ export function home(el, ctx) {
     for (let i = 0; i < 4; i++) k.bowl('hide_tan', mid - 1.2 + i * 0.8, H1 + 1.36, fv - 0.17, 0.2);
   }
 }
+
+/**
+ * Fittings of the Great Mosque (docs §16) { c, a, py }: the sandals left in rows at the north door, the water jars for the
+ * ablutions on banco stands beside it, Qur'an stands (rehal, an X of two boards with the book open on it) in the aisles of
+ * the hall with rolled prayer mats leaning on the piers.
+ */
+export function mosqueFittings(el, { bag, col }) {
+  const [cx, cz] = el.c, A = el.a, py = el.py ?? 3, rand = rng(55);
+  const x0 = cx - A + 4, x1 = cx + A - 4, z0 = cz - A + 8, z1 = cz + A - 8, xm = cx + 2;
+  const rowX = (i) => xm + 0.45 + (x1 - xm - 0.9) * (i + 0.5) / 9, aisle = (i) => (rowX(i) + rowX(i + 1)) / 2, mainX = (rowX(2) + rowX(3)) / 2;
+  void x0; void z1;
+  // sandals, in pairs, on the platform before the door and inside it
+  for (const [zr, n] of [[z0 - 1.6, 10], [z0 - 2.1, 8], [z0 + 1.6, 6]]) for (let k = 0; k < n; k++) {
+    const x = mainX - 2.6 + k * 0.52 + (rand() - 0.5) * 0.12, a = (rand() - 0.5) * 0.5;
+    for (const dx of [-0.08, 0.08]) { const t = []; beamTris(t, [x + dx - Math.sin(a) * 0.12, py + 0.01, zr - Math.cos(a) * 0.12], [x + dx + Math.sin(a) * 0.12, py + 0.01, zr + Math.cos(a) * 0.12], 0.045, 0.02); bag.add(rand() < 0.5 ? 'hide_tan' : 'hide_brown', fromTriangles(t)); }
+  }
+  // the ablution jars on their stand, east of the door under the north wall, a basin before them
+  for (const sx of [1, -1]) {
+    const bx0 = mainX + sx * 6.4;
+    bag.add('banco_smooth', box(bx0 - 0.9, py, z0 - 1.5, bx0 + 0.9, py + 0.4, z0 - 0.7)); col.rect([bx0 - 0.9, z0 - 1.5, bx0 + 0.9, z0 - 0.7], py, py + 0.4);
+    for (let i = 0; i < 3; i++) bag.add('terracotta', lathe([[0.001, 0], [0.14 * 1.5, 0.045], [0.24 * 1.5, 0.33], [0.2 * 1.5, 0.6], [0.12 * 1.5, 0.75], [0.14 * 1.5, 0.84], [0.001, 0.81]], 10, null, bx0 - 0.5 + i * 0.5, py + 0.4, z0 - 1.1));
+  }
+  // Qur'an stands and rolled mats in the aisles
+  for (const i of [3, 5, 6]) for (const z of [-17, -6, 8, 19]) {
+    if (rand() < 0.3) continue;
+    const x = aisle(i) + (rand() - 0.5) * 0.3, t = [];
+    beamTris(t, [x - 0.22, py, z - 0.2], [x + 0.22, py + 0.55, z + 0.2], 0.018, 0.04); beamTris(t, [x + 0.22, py, z - 0.2], [x - 0.22, py + 0.55, z + 0.2], 0.018, 0.04);
+    bag.add('wood_dark', fromTriangles(t)); bag.add('timber', box(x - 0.24, py + 0.53, z - 0.22, x + 0.24, py + 0.56, z + 0.22)); bag.add('paint_white', box(x - 0.2, py + 0.56, z - 0.17, x + 0.2, py + 0.585, z + 0.17));
+  }
+  for (const i of [0, 1, 2]) for (let k = 0; k < 4; k++) { const x = rowX(i) + 0.6 + k * 0.17; bag.add(k % 2 ? 'cloth_green' : 'reed_mat', lathe([[0.001, 0], [0.07, 0], [0.07, 0.9], [0.001, 0.9]], 7, null, x, py, cz - 11.5 + i * 6.5)); }
+}

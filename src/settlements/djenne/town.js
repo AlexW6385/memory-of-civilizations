@@ -132,6 +132,10 @@ function landing() {
     else if (k < 0.8) P.push({ t: 'sacks', at: p, y: 0, rot: rand() * 6, seed: Math.floor(rand() * 1e6) });
     else P.push({ t: 'pot', at: p, y: 0, seed: Math.floor(rand() * 1e6) });
   }
+  // washing: cloths spread on lines along the bank's top, women squatting at the water's edge beating and rinsing, children wading
+  for (let a = A0 + 0.02; a < A1 - 0.02; a += 0.085) { const p = at(a, -9 - rand() * 2); if (!inHouse(p[0], p[1], 2)) P.push({ t: 'laundry', at: p, y: 0, rot: -a + Math.PI / 2, len: 3 + rand() * 1.5, seed: Math.floor(rand() * 1e6) }); }
+  for (let k = 0; k < 9; k++) { const a = A0 + 0.01 + rand() * (A1 - A0 - 0.02), p = at(a, 1.2 + rand() * 2.5); fig(p, ground.height(p[0], p[1]), -a - Math.PI / 2 + (rand() - 0.5) * 0.6, { dress: 'wrap', feet: 'bare', hat: 'turban', pose: 'squat' }); if (rand() < 0.6) P.push({ t: 'basket', at: [p[0] - Math.cos(a) * 0.7, p[1] - Math.sin(a) * 0.7], y: 0, seed: k }); }
+  for (let k = 0; k < 4; k++) { const a = A0 + rand() * (A1 - A0), p = at(a, 3.5 + rand()); fig(p, ground.height(p[0], p[1]), rand() * 6, { dress: 'tunic', legs: 'bare', feet: 'bare', hat: 'none', pose: 'stand', h: 1.1 }); }
   // people: porters carrying loads up, women come for fish and water, boatmen talking
   for (let k = 0; k < 18; k++) {
     const a = A0 + rand() * (A1 - A0), s = -1 - rand() * 6, p = at(a, s), rot = rand() * 6.28;
@@ -252,6 +256,11 @@ export async function town() {
   const { E, P } = market(), lnd = landing(), cr = crepissage();
   // (the channel's water is the planet's sea: ground.js, sea)
   const plans = [base('djenne-market', E), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }, base('djenne-crepissage', cr.E), { ...base('djenne-crepissage-life', cr.P), style: 'life' }];
+  // the masons' yards on the open ground round the platform, with their masons and a donkey with clay
+  { const Y = [[-48, -48, 0.1], [-30, 48.5, 3.2], [-50, 18, 1.6], [20, -49, 0], [-50, -22, 1.5]].map(([x, z, r], i) => ({ t: 'brick_yard', c: [x, z], rot: r, n: 5, seed: i + 3 }));
+    plans.push(base('djenne-yards', Y)); const rr = rng(77); const Pm = [];
+    for (const y of Y) { Pm.push({ t: 'figure', at: [y.c[0] + 1, y.c[1] - 2], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), dress: 'tunic', legs: 'bare', top: 'bare', skin: 'skin_dark', hat: 'none', feet: 'bare', carry: 'hoe' }); Pm.push({ t: 'animal', kind: 'donkey', at: [y.c[0] + 4, y.c[1] + 3], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), gear: true }); }
+    plans.push({ ...base('djenne-yards-life', Pm), style: 'life' }); }
   plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }]));
   const all = houses(), homes = enterable(all);
   for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: homes.has(h) ? 'sahel_home' : 'sahel_house', ...h }))));

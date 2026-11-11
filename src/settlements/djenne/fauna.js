@@ -29,5 +29,7 @@ for (const [a, kind] of [[0.4, 'egret'], [1.1, 'heron'], [2.0, 'egret'], [2.9, '
 // sparrows on the market's ground and the lanes
 for (const [x, z] of [[60, -20], [75, 10], [90, -30], [105, 25], [50, 30], [-6.25, 60], [-6.25, -90], [20.5, 120], [-100, -6.5], [100, 19.5], [-30, 150], [40, -150]])
   perches.push({ kind: 'sparrow', x, z, y: 0.04, rot: 0.3 + (x * 7 % 3), range: [1.3, 1.2] });
+// egrets walking with the zebu herds on the floodplain (town.js plain(): the same three places)
+for (const a0 of [-Math.PI / 2 + 0.2, -Math.PI / 2 - 0.5, Math.PI + 0.3]) { const r = ringR(a0) + 62; for (const d of [-5, 4]) perches.push({ kind: 'egret', x: Math.cos(a0) * r + d, z: Math.sin(a0) * r + d * 0.6, y: -1.2, rot: a0, range: [4, 4], alert: 10 }); }
 void RADIUS; void MARKET;
 export default { fish, flights, perches };
