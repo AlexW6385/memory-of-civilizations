@@ -39,3 +39,5 @@ export function bancsFanals() {
   }
   return out;
 }
+/** The house with the café, the shop and the flat (docs/settlements/barcelona.md §6): 16 m of the Passeig's west side, in the gap of the block north-west of Casa Milà's. */
+export const CASA = { block: [-184, -92], side: 1, s0: 14, s1: 30, fx: -149, z0: -101, w: 16, d: 18, h: 21.1 };

@@ -3,7 +3,7 @@
 // the Passeig for it (both built with the landmark). The street life of 1910 (§5a): the trams on the
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
-import { RADIUS, PITCH, BLOCK, BATLLO, GRACIA_X, MERCAT, blocks, height, onDiagonal, bancsFanals } from './layout.js';
+import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements) => ({ id, style: 'modernisme', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 46], facing: 'n' } });
@@ -64,6 +64,36 @@ function carriages(rand) {
   return out;
 }
 
+/** The people of the house with the café (layout.js CASA): customers, the waiter and the barman, the confectioner's assistant, the flat's piano and kitchen. */
+function casaLife() {
+  const L = [], rand = rng(1909), { fx, z0 } = CASA, y0 = height(fx - 9, z0 + 8), F0 = y0 + 0.12, PF = y0 + 7.4;
+  const W3 = (a, b) => [fx - b, z0 + a], pick = (a) => a[Math.floor(rand() * a.length)];
+  // facing from (a, b) toward (ta, tb): the figure's front is −z, a runs to +z and b to −x
+  const face = (a, b, ta, tb) => Math.atan2(-(-(tb - b)), -(ta - a));
+  const put = (a, b, ta, tb, y, o) => L.push({ t: 'figure', at: W3(a, b), y, rot: face(a, b, ta, tb), seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: 'stand', hair: 'short', ...o });
+  const man = (o = {}) => ({ dress: 'trousers', cloth: pick(['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo']), cloth2: pick(['cloth_black', 'cloth_grey']), hat: pick(['brim', 'brim', 'cap', 'none']), hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']), beard: rand() < 0.5 ? 0.8 : 0, ...o });
+  const lady = (o = {}) => ({ dress: 'robe', cloth: pick(['cloth_white', 'cloth_maroon', 'cloth_indigo', 'cloth_grey', 'cloth_green']), cloth2: 'cloth_white', hat: 'brim', hatMat: pick(['cloth_white', 'cloth_black', 'cloth_maroon']), hair: 'bun', over: 'shawl', ...o });
+  // the café: the customers on the chairs of the tables (the chair is 0.62 m from the table's centre on the side given)
+  const seat = (ta, tb, fa, fb, o) => put(ta + fa * 0.62, tb + fb * 0.62, ta, tb, F0, { pose: 'sit', ...o });
+  seat(1.5, 2.0, 1, 0, man()); seat(1.5, 2.0, 0, 1, man({ pose: 'talk' })); seat(7.4, 4.7, -1, 0, lady()); seat(7.4, 4.7, 0, -1, man()); seat(7.4, 9.5, 0, 1, man()); seat(4.6, 9.4, 1, 0, man()); seat(4.6, 9.4, -1, 0, lady({ pose: 'talk' }));
+  seat(7.4, 12.0, 0, -1, man());
+  put(1.1, 12.2, 2.0, 12.2, F0, man({ dress: 'trousers', cloth: 'cloth_white', cloth2: 'cloth_black', over: 'apron', hat: 'none' }));           // the barman behind the counter
+  put(5.0, 6.0, 7.4, 7.1, F0, man({ cloth: 'cloth_black', cloth2: 'cloth_black', over: 'apron', hat: 'none', pose: 'stand' }));               // the waiter
+  put(3.4, 13.6, 4.5, 14.8, F0, man({ pose: 'stand', hat: 'none' })); put(5.7, 15.6, 4.6, 15.2, F0, man({ pose: 'stand', hat: 'cap' }));      // two at the billiard table
+  // the terrace on the pavement: a gentleman with his paper and a lady (the chairs sit north and south of each table)
+  for (const [zt, who] of [[-99.3, 'm'], [-92.7, 'l']]) {
+    const gx = fx + 1.7, y = height(gx, zt);
+    L.push({ t: 'figure', at: [gx, zt - 0.55], y, rot: Math.PI, seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: 'sit', hair: 'short', ...(who === 'm' ? man() : lady()) });
+  }
+  // the confectioner's: the assistant behind the counter, a lady buying
+  put(15.4, 4.2, 14.5, 4.2, F0, lady({ dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'apron', hat: 'none', hair: 'bun' }));
+  put(13.8, 3.6, 14.7, 3.6, F0, lady({ pose: 'stand' }));
+  // the flat: a lady at the piano, a man in the armchair with his paper, the cook at the range
+  put(1.4, 2.6, 0.6, 2.6, PF, lady({ pose: 'sit', hat: 'none' }));
+  put(6.6, 4.1, 5.0, 5.0, PF, man({ pose: 'sit', hat: 'none', cloth: 'cloth_grey' }));
+  put(13.9, 15.4, 13.9, 16.6, PF, lady({ cloth: 'cloth_grey', cloth2: 'cloth_white', over: 'apron', hat: 'none', hair: 'bun' }));
+  return L;
+}
 function mercatLife() {
   const L = [], rand = rng(1888), [cx, cz] = MERCAT, y = Math.max(Y(cx, cz - 27), Y(cx, cz + 27)) + 0.07, pick = (a) => a[Math.floor(rand() * a.length)];
   const GOODS = [['fish', 'fish', 'heap'], ['greens', 'melons', 'heap'], ['bread', 'baskets'], ['heap', 'greens'], ['fish', 'heap'], ['melons', 'greens', 'baskets']];
@@ -81,22 +111,37 @@ function mercatLife() {
   L.push({ t: 'cart', kind: 'two', load: 'sacks', beast: 'horse', at: [cx + 33, cz + 4], y, rot: 0, seed: 1888 });
   return L;
 }
-export async function town() {
-  const els = blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
+/** The Eixample's block elements (the smoke finds the chimneys from the same plan). */
+export function blockElements() {
+  return blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
     t: 'eixample_block', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
     ...(b.special === 'pedrera' ? { cut: { corner: 3, a: 22, b: 22 } } : {}),
+    ...(Math.hypot(b.c[0] - CASA.block[0], b.c[1] - CASA.block[1]) < 1 ? { gaps: [{ side: CASA.side, s0: CASA.s0, s1: CASA.s1 }] } : {}),
     ...(b.special === 'batllo' ? { gaps: [{ side: 1, s0: BATLLO.s0, s1: BATLLO.s1 }] } : {}),
   }));
+}
+export async function town() {
+  const els = blockElements();
   // in plans of a few blocks each, so that the town streams in pieces
   const plans = [];
   for (let i = 0; i < els.length; i += 6) plans.push(base(`barcelona-eixample-${i / 6}`, els.slice(i, i + 6)));
   const rand = rng(1910), lines = tramLines();
+  plans.push(base('barcelona-casa', [{ t: 'casa_cafe', fx: CASA.fx, z0: CASA.z0, y: height(CASA.fx - 9, CASA.z0 + 8), h: CASA.h, seed: 1910 }]));
+  plans.push({ ...base('barcelona-casa-life', casaLife()), style: 'life' });
   plans.push(base('barcelona-trams', [...lines, ...trams(lines, rand)]));
   plans.push(base('barcelona-carriages', carriages(rand)));
   // the Mercat de la Concepció on its block, and its life: the stalls in rows down the naves, the sellers and the
   // buyers, the flower sellers outside (§5d)
   plans.push(base('barcelona-mercat', [{ t: 'mercat', c: MERCAT, y: Math.max(Y(MERCAT[0], MERCAT[1] - 27), Y(MERCAT[0], MERCAT[1] + 27)) + 0.02, L: 60, W: 44 }]));
   plans.push({ ...base('barcelona-mercat-life', mercatLife()), style: 'life' });
+  // the café's terrace on the pavement before it (clear of the tram pole at z −90) and the newspaper kiosks of the Passeig
+  const ty = (x, z) => height(x, z);
+  plans.push(base('barcelona-street-furniture', [
+    ...[-99.3, -92.7].map((z) => ({ t: 'terrace_set', at: [CASA.fx + 1.7, z], y: ty(CASA.fx + 1.7, z), seed: 3 })),
+    { t: 'kiosk', at: [GRACIA_X - 9.2, -114], y: ty(GRACIA_X - 9.2, -114), rot: 0.1, seed: 1 },
+    { t: 'kiosk', at: [GRACIA_X + 9.5, -45], y: ty(GRACIA_X + 9.5, -45), rot: 0.2, seed: 2 },
+    { t: 'kiosk', at: [GRACIA_X - 9.2, 160], y: ty(GRACIA_X - 9.2, 160), rot: 0, seed: 3 },
+  ]));
   plans.push(base('barcelona-passeig', bancsFanals().map(([x, z], i) => ({ t: 'banc_fanal', at: [x, z], y: Y(x, z), rect: [x - 0.9, z - 2.3, x + 0.9, z + 2.3], seed: 1906 + i }))));
   return plans;
 }
