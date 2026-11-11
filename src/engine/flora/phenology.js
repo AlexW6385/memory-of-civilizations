@@ -35,6 +35,8 @@ export const PHEN = {
   oak: { out: [94, 122], drop: [326, 356], turn: [300, 326], autumn: ['#a9742c', '#8f5a24'], fresh: [1.25, 1.25, 0.8], jitter: 10 },
   poplar: { out: [88, 114], drop: [318, 348], turn: [292, 318], autumn: ['#e2c13a', '#d4a82e'], fresh: [1.3, 1.35, 0.8], jitter: 8 },
   birch: { out: [92, 118], drop: [312, 344], turn: [286, 312], autumn: ['#e0c23c', '#d9a62e'], fresh: [1.3, 1.35, 0.8], jitter: 8 },
+  pagoda_tree: { out: [100, 125], drop: [310, 345], turn: [290, 318], autumn: ['#c9b43c', '#b39a2e'], fresh: [1.2, 1.3, 0.8], jitter: 9 },
+  persimmon: { out: [95, 120], drop: [305, 335], turn: [280, 305], autumn: ['#d0602a', '#b8431f'], fresh: [1.25, 1.3, 0.8], jitter: 10 },
   jujube: { out: [108, 132], drop: [306, 336], turn: [288, 312], autumn: ['#d2b13a', '#c49a30'], fresh: [1.2, 1.3, 0.8], jitter: 8 },
 };
 
