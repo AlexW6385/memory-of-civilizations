@@ -24,6 +24,7 @@ export default {
       drone: { notes: [-24, -12, -5, 0], level: 0.06, timbre: 'sho' },
       harp: { density: 0.12, range: [-5, 12], level: 0.12, timbre: 'koto' },
       lead: { timbre: 'voice', density: 0.1, range: [0, 9], level: 0.04 },                      // a monk's chant
+      bells: { every: 8, level: 0.05 },                                                          // the temple bell
       reverb: 0.85,
     },
     teahouse: {
