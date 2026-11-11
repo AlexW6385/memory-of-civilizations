@@ -89,6 +89,8 @@ const GAP = 5;
 /** New geometry let into the scene per frame (bytes): its upload to the GPU happens in the frame
  *  that first draws it, so a settlement's parts and merged meshes come in spread over frames. */
 const UPLOAD_BUDGET = 8 << 20;
+/** A merge slice (ms) behind the loading screen or a travel's fade (renderer hold). */
+const HELD_SLICE = 30;
 /** The bytes a group's meshes will send to the GPU. */
 export function bytesOf(root) {
   let n = 0;
@@ -325,7 +327,7 @@ class Settlement {
     // the loading screen (renderer hold) not waited for here: all of them at once before the view shows
     await this.world.compile(group, this);
     // and its buffers sent to the GPU in a frame with room for them
-    await this.world.uploadSlot(bytesOf(group));
+    await this.world.uploadSlot(bytesOf(group), this);
     if (this.ahead()) await this.world.calm(() => !this.ahead());
     tS = HITCH.mark();
     if (gen !== this.gen) { for (const { geometry } of [...built.parts, ...built.instanced]) geometry.dispose(); return null; }
@@ -368,10 +370,13 @@ class Settlement {
     this.group.add(into);
     // the shapes drawn by distance (merge.js LodSet), their copies chosen with the street life's
     const lods = this.lods = [];
-    const precompile = async (list) => { await this.world.compile(list, this); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b); };
+    const precompile = async (list) => { await this.world.compile(list, this); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b, this); };
     const gentle = { on: () => this.ahead(), wait: () => this.world.calm(() => !this.ahead()) };
-    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile, gentle }); } catch (e) { console.warn('merging', this.id, e); }
-    try { await mergeDetail(this.parts, buildingMesh, { stale: () => gen !== this.gen, gentle, precompile: (list) => this.world.compile(list, this) }); } catch (e) { console.warn('merging detail', this.id, e); }
+    // (behind the loading screen or a travel's fade, renderer hold: long slices — no frame is
+    // shown, and Suzhou's ~2 s of merging gave the page back ~500 times, each at least a 4 ms timer)
+    const slice = () => (this.world.r.held && !this.ahead() ? HELD_SLICE : undefined);
+    try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile, gentle, slice }); } catch (e) { console.warn('merging', this.id, e); }
+    try { await mergeDetail(this.parts, buildingMesh, { stale: () => gen !== this.gen, gentle, slice, precompile: (list) => this.world.compile(list, this) }); } catch (e) { console.warn('merging detail', this.id, e); }
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
 
@@ -497,8 +502,11 @@ export class World {
     return this.r.held && !site.ahead() ? undefined : p;
   }
 
-  uploadSlot(bytes) {
+  /** (for settlement `site`: at once behind the loading screen or a travel's fade, renderer hold —
+   *  no frame shown waits on it; Suzhou's 105 merge groups each waited for a 40 ms pump there) */
+  uploadSlot(bytes, site = null) {
     if (!(performance.now() - (this._updatedAt ?? -1e9) < 150)) return Promise.resolve();
+    if (this.r.held && site && !site.ahead()) return Promise.resolve();
     return new Promise((r) => (this._uploads ??= []).push([bytes, r]));
   }
 

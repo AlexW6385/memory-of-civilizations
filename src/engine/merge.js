@@ -79,7 +79,7 @@ function hashGeometry(g) {
  * the settlement was let go of meanwhile. Returns the merged meshes, each with userData.recs (the
  * parts it holds).
  */
-export async function mergeParts(recs, into, make, { castsShadow, stale = () => false, lods = [], precompile = null, gentle = null } = {}) {
+export async function mergeParts(recs, into, make, { castsShadow, stale = () => false, lods = [], precompile = null, gentle = null, slice = () => undefined } = {}) {
   const groups = new Map();
   for (const rec of recs) {
     for (const o of rec.group.children) {
@@ -122,7 +122,8 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
   out.baked = baked;                     // (the copies baked into parts, for tests/cells.test.mjs)
   let t = performance.now();
   // (work done ahead, gentle.on(): smaller slices, each after the page has time to spare, gentle.wait())
-  const breathe = async () => { const g = gentle?.on(); if (performance.now() - t > (g ? GENTLE_SLICE : SLICE)) { HITCH.add('merge', performance.now() - t); await (g ? gentle.wait() : new Promise((r) => setTimeout(r, 0))); t = performance.now(); } };
+  // (slice(): a longer slice when no frame is shown, src/engine/world.js mergeStatic)
+  const breathe = async () => { const g = gentle?.on(); if (performance.now() - t > (g ? GENTLE_SLICE : slice() ?? SLICE)) { HITCH.add('merge', performance.now() - t); await (g ? gentle.wait() : new Promise((r) => setTimeout(r, 0))); t = performance.now(); } };
   // a member left as it is (a shape or material of one plan only, not worth cutting or choosing)
   // the merged meshes' shaders compiled off the frame before they are swapped in (a coarse version
   // has other attributes than its prototype: a new pipeline, compiled in the frame that first drew it)
@@ -377,7 +378,7 @@ function lowGeometry(proto, low) {
  * take the originals' place in their first plan's detail list (shown and hidden by distance as
  * they were). Pieces marked userData.detailMerge (world.js addPart) keep their arrays until then.
  */
-export async function mergeDetail(recs, make, { stale = () => false, precompile = null, cell = 128, gentle = null } = {}) {
+export async function mergeDetail(recs, make, { stale = () => false, precompile = null, cell = 128, gentle = null, slice = () => undefined } = {}) {
   const groups = new Map();
   const add = (key, mat, e) => { let G = groups.get(key); if (!G) groups.set(key, (G = { mat, list: [] })); G.list.push(e); };
   const M = new THREE.Matrix4(), P = new THREE.Vector3();
@@ -396,7 +397,7 @@ export async function mergeDetail(recs, make, { stale = () => false, precompile 
     }
   }
   let t = performance.now();
-  const breathe = async () => { const g = gentle?.on(); if (performance.now() - t > (g ? GENTLE_SLICE : SLICE)) { await (g ? gentle.wait() : new Promise((r) => setTimeout(r, 0))); t = performance.now(); } };
+  const breathe = async () => { const g = gentle?.on(); if (performance.now() - t > (g ? GENTLE_SLICE : slice() ?? SLICE)) { await (g ? gentle.wait() : new Promise((r) => setTimeout(r, 0))); t = performance.now(); } };
   let n = 0;
   for (const G of groups.values()) {
     if (G.list.length < 2 && !G.list[0].copy) { for (const { o } of G.list) { delete o.userData.detailMerge; releaseAfterUpload(o); } continue; }

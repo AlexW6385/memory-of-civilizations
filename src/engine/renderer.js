@@ -12,6 +12,8 @@ import { SkyMesh, SKY_FAR } from './sky.js';
 import { PLANET_RADIUS } from '../planet/sites.js';
 import { ENV, cloudShadow, fogFactor, fogColor, nightFillNode } from './env.js';
 import { GIVolume } from './gi.js';
+/** ?nohold: the start's pipelines made as before (synchronously in the frames that meet them), to compare. */
+const NO_HOLD = typeof location !== 'undefined' && new URLSearchParams(location.search).has('nohold');
 import { useGI } from './materials.js';
 import { CAMERA_MASK, cascadeMask } from './layers.js';
 import { AIR, airNode, airComposite, LampPool, LampLight, LampLightNode } from './air.js';
@@ -563,7 +565,7 @@ export class Renderer {
    * are made asynchronously (see init), the present visit's precompiles are not waited for one by
    * one (src/engine/world.js), and all of it is waited for at once by settle(). Off: as before.
    */
-  hold(on) { this.held = !!on; }
+  hold(on) { this.held = !!on && !NO_HOLD; }
 
   /** A compile in flight, for settle(). */
   track(p) {
