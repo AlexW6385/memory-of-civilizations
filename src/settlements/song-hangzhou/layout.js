@@ -129,9 +129,43 @@ export function lots() {
     if (q < 0.18) pal.roof = 'tile_grey';
     return { pal: Object.keys(pal).length ? pal : undefined, overhang: storeys > 1 && shop && o < (extra.where === 'imperial' ? 0.55 : 0.3) };
   };
-  const w = (a = 6, b = 4) => a + rand() * b;
-  const row = (x0, x1, z0, z1, front, shopP, st2 = 0.6, extra) => { for (let x = x0; x < x1 - 5;) { const ww = w(); add([x, z0, Math.min(x + ww, x1) - 0.3, z1], front, rand() < st2 ? 2 : 1, rand() < shopP, { ...extra?.(), ...(x === x0 || x + ww >= x1 - 5 ? { roof: 'hip' } : {}) }); x += ww; } };
-  const col = (z0, z1, x0, x1, front, shopP, st2 = 0.6, extra) => { for (let z = z0; z < z1 - 5;) { const ww = w(); add([x0, z, x1, Math.min(z + ww, z1) - 0.3], front, rand() < st2 ? 2 : 1, rand() < shopP, { ...extra?.(), ...(z === z0 || z + ww >= z1 - 5 ? { roof: 'hip' } : {}) }); z += ww; } };
+  // The fronts run on without gaps (Suzhou's density): a strip is walked along its length, the free stretches between what is fixed or already taken are
+  // divided into houses that abut (shared party walls), the depth drawn in (to 70 %, 55 %, 7 m) where a tower or a lane's end bites into it; now and then a
+  // fire lane (huo xiang) of 1.5 m is left between two houses. A run shorter than 4.2 m is left to the lane.
+  const MINW = 4.2;
+  const run = (horiz, a0, a1, c0, c1, front, shopP, st2, extra) => {
+    const sgn = front === 's' || front === 'e' ? 1 : -1, dep0 = c1 - c0;
+    const R = (s0, s1, dep) => { const cf = sgn > 0 ? c1 : c0, cb = sgn > 0 ? c1 - dep : c0 + dep, lo = Math.min(cf, cb), hi = Math.max(cf, cb); return horiz ? [s0, lo, s1, hi] : [lo, s0, hi, s1]; };
+    const obst = () => [...fixed, ...taken];
+    let s = a0;
+    while (s < a1 - MINW) {
+      let dep = 0;
+      for (const f of [1, 0.75, 0.55, 7 / dep0]) { const d = dep0 * f; if (d >= 7 && !obst().some((o) => hit(R(s, s + MINW, d), o, -0.02))) { dep = d; break; } }
+      if (!dep) { const b = obst().filter((o) => hit(R(s, s + MINW, 7), o, -0.02)).map((o) => (horiz ? o[2] : o[3])); s = Math.max(s + 0.5, ...b); continue; }
+      let e = a1;
+      for (const o of obst()) if (hit(R(s, a1, dep), o, -0.02)) { const os = horiz ? o[0] : o[1]; if (os > s && os < e) e = os; }
+      const len = e - s;
+      if (len < MINW) { s = e + 0.1; continue; }
+      const n = Math.max(1, Math.round(len / 8.2)), ws = []; let tot = 0;
+      for (let i = 0; i < n; i++) { const q = 0.78 + rand() * 0.44; ws.push(q); tot += q; }
+      let acc = s;
+      const made = [];
+      for (let i = 0; i < n; i++) {
+        const wi = i === n - 1 ? e - acc : len * ws[i] / tot, r = R(acc, acc + wi, dep);
+        acc += wi;
+        if (!fits(r, 24) || hill((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) > 1.5) continue;
+        const d = (r[1] + r[3]) / 2 < -440 ? 0 : detailAt(r), end = i === 0 || i === n - 1;
+        const ex = extra?.() || {};
+        LOTS.push({ rect: r, front, storeys: rand() < st2 ? 2 : 1, shop: rand() < shopP, seed: Math.floor(rand() * 1e6), kind: 'row', detail: d, roof: end && rand() < 0.7 ? 'hip' : (rand() < 0.85 ? 'gable' : 'hip'), ...ex });
+        const l = LOTS[LOTS.length - 1]; Object.assign(l, weather(front, l.storeys, l.shop, l), ex);
+        made.push(r);
+      }
+      taken.push(...made);
+      s = e + (rand() < 0.07 ? 1.5 : 0);
+    }
+  };
+  const row = (x0, x1, z0, z1, front, shopP, st2 = 0.6, extra) => run(true, x0, x1, z0, z1, front, shopP, st2, extra);
+  const col = (z0, z1, x0, x1, front, shopP, st2 = 0.6, extra) => run(false, z0, z1, x0, x1, front, shopP, st2, extra);
   // 1. the Imperial Way: both sides, in deep lots (their courts behind), shops nearly all, two storeys
   const iw = () => ({ kind: rand() < 0.3 ? 'court' : 'row', detail: 2, where: 'imperial' });
   const gate0 = CITY.zs - CITY.th / 2 - 6, gate1 = CITY.zs + CITY.th / 2 + 6, ng = CITY.zn + CITY.th / 2 + 6;

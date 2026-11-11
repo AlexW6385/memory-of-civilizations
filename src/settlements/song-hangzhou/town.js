@@ -6,6 +6,9 @@
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells, riverTeaHouses } from './layout.js';
 import { lifePlans, interiorLots } from './life.js';
 import './townscape.js';
+import './houses.js';
+import { streetsideElements } from './houses.js';
+import * as LAYOUT from './layout.js';
 import { RIVER_BOATS, CANAL_BOATS } from './plan.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 136], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -190,7 +193,8 @@ export async function town() {
   const all = lots().filter((l) => !tea.has(l) && !inter.has(l)), plans = [];
   const order = [...all].sort((a, b) => b.detail - a.detail);
   const N = 120;
-  for (let i = 0; i < order.length; i += N) plans.push(base(`song-hangzhou-houses-${i / N}`, order.slice(i, i + N).map((l) => ({ t: 'house_jiangnan', y: LEVEL.street, ...l, simple: l.detail === 0 ? true : undefined }))));
+  for (let i = 0; i < order.length; i += N) plans.push(base(`song-hangzhou-houses-${i / N}`, order.slice(i, i + N).map((l) => ({ t: 'hz_house', y: LEVEL.street, ...l, simple: l.detail === 0 ? true : undefined }))));
+  plans.push(base('song-hangzhou-streetside', streetsideElements(LAYOUT)));
   // the lots the life furnishes (life.js): their shells raised here, the floor 0.45 m over the street; the furniture is the life's
   const shells = [];
   for (const [kind, list] of Object.entries(chosen)) for (const l of list) shells.push({ t: 'hz_shell', rect: l.rect, front: l.front, y: LEVEL.street, kind, seed: l.seed, roof: l.roof });

@@ -68,7 +68,7 @@ E.push({ t: 'court_paving', y: T1.y, seed: 3, rects: [[PAGODA.c[0] - 3, 95.4, PA
 E.push({ t: 'court_paving', y: T2.y, seed: 8, rects: [[PAGODA.c[0] - 3, 26, PAGODA.c[0] + 3, T2.rect[3] - 0.6]], moss: [[T2.rect[0] + 0.8, 26, T2.rect[2] - 0.8, 27.5], [T2.rect[0] + 0.8, T2.rect[1] + 0.6, T2.rect[2] - 0.8, T2.rect[1] + 2]] });
 for (const dx of [-8.5, 8.5]) E.push({ t: 'sutra_pillar', at: [PAGODA.c[0] + dx, 30.5], y: T2.y });
 // ---- the warehouses by the lock
-for (const r of WAREHOUSES) E.push({ t: 'house_jiangnan', rect: r, y: LEVEL.street, front: 's', storeys: 2, shop: false, seed: r[0] });
+for (const r of WAREHOUSES) E.push({ t: 'hz_house', rect: r, y: LEVEL.street, front: 's', storeys: 2, shop: false, seed: r[0] });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('terrace', T1.rect, T1.y, 'open'), room('hall', [-129, -4, -91, 24], T2.y, 'hall'), ...interiorRooms()];   // the music zones of the furnished houses (life.js)
