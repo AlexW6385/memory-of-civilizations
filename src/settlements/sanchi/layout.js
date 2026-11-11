@@ -11,6 +11,8 @@ export const PATH = { x: 0, w: 5 };                         // up the north slop
 export const STUPA2 = { c: [-140, 0], terrace: [-156, -16, -124, 16], y: 1.5 };
 /** Temple 40 on the summit, south-east of the Great Stupa (its platform 41.76 × 27.74 m). */
 export const TEMPLE40 = { c: [40, 62], rect: [40 - 21.2, 62 - 14.2, 40 + 21.2, 62 + 14.2] };
+/** Small votive stupas on the summit (the hill is crowded with them), clear of the monuments and the ways: [x, z, scale]. */
+export const VOTIVE = [[-48, -34, 0.13], [-58, 8, 0.11], [-40, 52, 0.12], [24, -56, 0.1], [74, 6, 0.12], [-72, -66, 0.1], [66, -70, 0.11], [-24, 62, 0.09]];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 /** Outside distance from the summit's rounded square (0 on it). */
