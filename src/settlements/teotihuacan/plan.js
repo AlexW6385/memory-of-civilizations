@@ -121,7 +121,7 @@ const rooms = [room('avenue', AVENUE, 0, 'open'), room('plaza', PLAZA, MOON.rise
   room('palace', QPP.rect, QPP.y, 'hall'), room('jaguars', JAGUARS.rect, JAGUARS.y, 'hall'), room('sun-temple', [SUN.c[0] - 6, SUN.c[1] - 6, SUN.c[0] + 6, SUN.c[1] + 6], SUN.h, 'hall'),
   // the households: the compounds' courts and rooms
   ...compounds().map((c, i) => room(`compound-${i}`, c.rect, 0, 'house'))];
-const walks = [[[8, 300], [8, 100], [8, -80], [0, -160], [0, -205], [12, -232]]];
+const walks = [[[0, 300], [0, 100], [0, -80], [0, -160], [0, -194], [-18, -200], [-30, -236]]];
 walks[0].y0 = 0;
 
 export const city = {
