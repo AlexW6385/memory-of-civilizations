@@ -25,6 +25,7 @@ export function qinPit(el, { bag, col, lights }) {
   for (const [ga, gb] of gaps) { W([x1 - wall, z, x1, ga]); z = gb; }
   W([x1 - wall, z, x1, z1 - wall]);
   // lintels of logs over the openings
+  for (const [ga, gb] of gaps) bag.add('brick_grey', box(x1 - wall, FL - 0.12, ga, x1, FL + 0.02, gb));
   for (const [ga, gb] of gaps) bag.add('log_pine', box(x1 - wall + 0.03, -0.7, ga - 0.3, x1 - 0.03, -0.3, gb + 0.3));
   // the partitions with a sleeper along the top, and the timber posts on both faces
   for (let k = 0; k < CORR.n - 1; k++) {
@@ -38,6 +39,8 @@ export function qinPit(el, { bag, col, lights }) {
   bag.add('timber', box(GALLERY[0] - 0.2, PT - 0.5, z0 + wall, GALLERY[0] + 0.2, PT, z1 - wall));
   // the roof: one log for each corridor and each 0.42 m, laid across the partitions (a log 5.46 m, from partition middle to middle)
   const span = CORR.w + CORR.part;
+  // (a solid core inside the logs, so that the roof reads as one slab to the walker and the earth heaped over it is no shell)
+  bag.add('log_pine', box(x0 + wall, ROOF.beamY0 + 0.1, z0 + wall, x1 - wall, ROOF.beamY1 - 0.1, z1 - wall));
   for (let k = 0; k < CORR.n; k++) {
     const zc = corrZ(k);
     for (let x = x0 + 0.21; x < x1 - 0.1; x += 0.42) bag.add('log_pine', box(x - 0.19, ROOF.beamY0, zc - span / 2, x + 0.19, ROOF.beamY1, zc + span / 2));
@@ -54,7 +57,7 @@ export function qinPit(el, { bag, col, lights }) {
   RAMP.zs.forEach((_, i) => {
     const zc = rampZ(i), n = Math.round(RAMP.len / 0.5), yAt = (x) => FL * (1 - (x - x1) / RAMP.len);
     for (let s = 0; s < n; s++) { const xa = x1 + s * 0.5; bag.add('mud_plaster', box(xa, FL - 0.3, zc - RAMP.w / 2, xa + 0.5, yAt(xa + 0.25), zc + RAMP.w / 2)); }
-    col.ramp([x1, zc - RAMP.w / 2, x1 + RAMP.len, zc + RAMP.w / 2], FL, 0, 'e');
+    col.ramp([x1, zc - RAMP.w / 2, x1 + RAMP.len, zc + RAMP.w / 2], FL, 0, 'e'); col.floor([x1 - wall, zc - RAMP.w / 2, x1, zc + RAMP.w / 2], FL + 0.02);
     for (const s of [-1, 1]) { const a = zc + s * RAMP.w / 2, b = zc + s * (RAMP.w / 2 + 1.1); W([x1, Math.min(a, b), x1 + RAMP.len, Math.max(a, b)], FL - 0.3, 0); }
     for (let x = x1 + 3; x < x1 + RAMP.len; x += 3.3) bag.add('timber', box(x, yAt(x) + 0.1, zc - RAMP.w / 2, x + 0.14, yAt(x) + 0.3, zc + RAMP.w / 2));  // the cleats
   });

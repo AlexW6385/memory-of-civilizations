@@ -103,7 +103,7 @@ export function qinHall(el, { bag, col, lights }) {
   // the eave's round tile-ends: a row of small discs under the edge
   for (let x = cx - A + 1; x < cx + A - 0.5; x += 1.0) for (const z of [cz - B, cz + B]) bag.add('terracotta', rod([x, ay + 0.9, z], [x, ay + 1.15, z], 0.17, 8));
   // the great bronze tripod (ding) before the stair
-  { const dx = STAIR.x, dz = TERRACE.z1 + STAIR.run + 6;
+  { const dx = STAIR.x + 5, dz = TERRACE.z1 + STAIR.run + 6;
     bag.add('bronze', lathe([[0.001, 0.6], [0.6, 0.7], [0.9, 1.2], [0.85, 1.6], [0.001, 1.6]], 14, null, dx, 0, dz));
     for (const a of [0.3, 2.4, 4.5]) bag.add('bronze', rod([dx + Math.cos(a) * 0.55, 0, dz + Math.sin(a) * 0.55], [dx + Math.cos(a) * 0.55, 0.9, dz + Math.sin(a) * 0.55], 0.14, 6));
     col.circle(dx, dz, 1.0, 0, 1.7); }

@@ -61,7 +61,7 @@ export function height(x, z) {
   let h = 0;
   const d = pitDist(x, z);
   if (d < 0.5) h = Math.min(h, PIT.floor * (1 - smooth(-2.0, 0, d)));
-  if (x > PIT.x1 - 1 && x < PIT.x1 + RAMP.len) {
+  if (x > PIT.x1 - 3 && x < PIT.x1 + RAMP.len) {
     for (let i = 0; i < RAMP.zs.length; i++) {
       const dz = Math.abs(z - rampZ(i));
       if (dz < RAMP.w / 2 + 1) h = Math.min(h, Math.min(0, rampY(Math.max(x, PIT.x1))) * (1 - smooth(RAMP.w / 2 - 0.2, RAMP.w / 2 + 1, dz)));

@@ -33,7 +33,7 @@ function people() {
   for (const [x, z, r] of [[-232, -78, 1], [-205, -78, 4], [-219, -70, 3], [-250, -100, 1.5]]) official([x, z], r, { pose: rand() < 0.5 ? 'talk' : 'stand' }, TERRACE.h);
   const cx = (HALL.x0 + HALL.x1) / 2, dz1 = HALL.z0 + 3.4 + 8.0;
   for (let i = 0; i < 6; i++) for (const s of [-1, 1]) if (rand() < 0.75) official([cx + s * 13, dz1 + 3 + i * 2.6], s < 0 ? -Math.PI / 2 : Math.PI / 2, { pose: 'seiza' }, TERRACE.h + 0.11);
-  for (const [x, z] of [[-228, -100], [-210, -96], [-219, -92]]) official([x, z], rand() * 6, { pose: 'talk' }, TERRACE.h + 0.08);
+  for (const [x, z] of [[-228, -100], [-210, -96], [-226, -91]]) official([x, z], rand() * 6, { pose: 'talk' }, TERRACE.h + 0.08);
   // the forecourt: officials and petitioners, a clerk with tablets
   for (let k = 0; k < 14; k++) { const x = -270 + rand() * 110, z = -62 + rand() * 36; (rand() < 0.5 ? official : fig)([x, z], rand() * 6.28, rand() < 0.3 ? { pose: 'talk' } : {}); }
   // the pit's bare roof: labourers with baskets of earth and shovels, an overseer, women with water; the ramps' tops
