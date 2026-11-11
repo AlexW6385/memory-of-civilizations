@@ -52,7 +52,7 @@ function water(x, z, y) {
 function waterLevel(x, z) { const c = channel(x, z); return c < -0.3 ? (inMoat(x, z) ? LEVEL.moat : LEVEL.river) : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(99, channel(x, z) < 0 ? channel(x, z) : (inPalace(x, z) ? 99 : 20))); }
 
-const KIND = { pagoda: 'elm', jujube: 'jujube', persimmon: 'apple', crabapple: 'apple' };      // the species at hand stand in for the pagoda tree (elm), the persimmon and the crab-apple (apple)
+const KIND = { pagoda: 'pagoda_tree', jujube: 'jujube', persimmon: 'persimmon', crabapple: 'apple' };      // the pagoda tree (Sophora japonica) and the persimmon have their own species; the crab-apple is an apple
 /**
  * Plants per 100 m²: none in the palace (its courts were kept bare); the trees of the courtyards and
  * the lanes' edges each at its place (a pagoda tree, a jujube, a persimmon or a crab-apple, §17);
@@ -74,7 +74,7 @@ function planting(x, z, p) {
 
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 1.6, elm: 22, jujube: 22, apple: 22, arborvitae: 2.4, grass: 30 },
+  maxDensity: { willow: 1.6, pagoda_tree: 22, persimmon: 22, jujube: 22, apple: 22, arborvitae: 2.4, grass: 30 },
   // a clear autumn day in Beijing: a high blue sky, dry air, a cool wind from the north-west
   climate: {
     sun: { az: 160, el: 38, color: [1.0, 0.95, 0.86], intensity: 3.3, lat: 40, dec: -5, hour: 11 },
