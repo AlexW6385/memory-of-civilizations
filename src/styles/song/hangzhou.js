@@ -5,7 +5,7 @@ import { rod, box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, column, beamTris } from '../ming/index.js';
 import { hexa } from './kaifeng.js';
 import { STYLES } from '../../core/build.js';
-import { Matrix4 } from '../../core/three.js';
+import { Matrix4, Float32BufferAttribute } from '../../core/three.js';
 
 /**
  * view_tent: a stand for watching the bore { at, y, w (along x), d (along z), h, cloth, trim, open ('s' |
@@ -777,41 +777,116 @@ function hzWutou(el, { bag, col }) {
 }
 
 /**
- * hz_tree { at [x, z], y, kind ('camphor' | 'ginkgo' | 'willow' | 'peach'), h, seed }: an old tree of the temple court or the causeway — a leaning trunk with forks and
- * limbs, the crown in clumps; the willow's long hanging threads, the peach's pink blossom among its leaves.
+ * Leaves as small pointed cards (a six-point outline, two-sided material) bent in their normals toward
+ * the outside of the crown, so a crown shades as one rounded mass as the engine's flora does; one
+ * geometry per material (cards: [[cx, cy, cz, ux, uy, uz, vx, vy, vz, hw, hl]...]).
+ */
+function leafCards(list, centre, bend = 0.7) {
+  const pos = [], nor = [];
+  for (const c of list) {
+    const [cx, cy, cz, ux, uy, uz, vx, vy, vz, hw, hl] = c;
+    // the outline in the card's plane: base, two shoulders, tip (u across, v along)
+    const P = [[0, -hl], [-hw, -hl * 0.1], [hw, -hl * 0.1], [-hw * 0.55, hl * 0.55], [hw * 0.55, hl * 0.55], [0, hl]];
+    const W = P.map(([a, b]) => [cx + ux * a + vx * b, cy + uy * a + vy * b, cz + uz * a + vz * b]);
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const nl = Math.hypot(nx, ny, nz) || 1; nx /= nl; ny /= nl; nz /= nl;
+    // wound so that the front face looks out of the crown (the two-sided material would otherwise turn the bent normal in)
+    const wox = cx - centre[0], woy = cy - centre[1], woz = cz - centre[2], fl = -(nx * wox + ny * woy + nz * woz) < 0;
+    for (const [a, b, d] of [[0, 1, 2], [1, 3, 2], [2, 3, 4], [3, 5, 4]]) for (const k of (fl ? [a, d, b] : [a, b, d])) {
+      pos.push(...W[k]);
+      let ox = W[k][0] - centre[0], oy = W[k][1] - centre[1], oz = W[k][2] - centre[2]; const ol = Math.hypot(ox, oy, oz) || 1; ox /= ol; oy /= ol; oz /= ol;
+      let sx = nx * (1 - bend) + ox * bend, sy = ny * (1 - bend) + oy * bend, sz = nz * (1 - bend) + oz * bend;
+      if (sx * ox + sy * oy + sz * oz < 0) { sx = -sx; sy = -sy; sz = -sz; }
+      const sl = Math.hypot(sx, sy, sz) || 1; nor.push(sx / sl, sy / sl, sz / sl);
+    }
+  }
+  const g = fromTriangles(pos);
+  g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  return g;
+}
+
+/**
+ * hz_tree { at [x, z], y, kind ('camphor' | 'ginkgo' | 'willow' | 'peach'), h, seed }: an old tree of the temple court or the causeway — a buttressed, leaning trunk
+ * that forks into curving limbs and twigs; the crown of leaf cards in tufts (broad dark camphor leaves, the ginkgo's fans, the peach's narrow leaves among five-petalled
+ * blossom) over a dark core; the willow's drooping withes hung with narrow leaves.
  */
 function hzTree(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, rand = rnd(el.seed ?? 1), kind = el.kind ?? 'camphor', h = el.h ?? (kind === 'willow' ? 8 : kind === 'peach' ? 4.2 : 12);
   const trunkR = kind === 'peach' ? 0.13 : kind === 'willow' ? 0.3 : 0.5, lean = (rand() - 0.5) * 0.5, la = rand() * 6.28;
+  const forkAt = kind === 'peach' ? 0.42 : kind === 'willow' ? 0.3 : 0.38;
   const tx = (t) => x + Math.cos(la) * lean * t * h * 0.3, tz = (t) => z + Math.sin(la) * lean * t * h * 0.3;
-  const forkAt = kind === 'peach' ? 0.45 : 0.4;
-  const g = [];
-  g.push(lathe([[trunkR * 1.5, -0.2], [trunkR * 1.25, 0.25], [trunkR, h * forkAt * 0.5], [trunkR * 0.75, h * forkAt], [0.001, h * forkAt + 0.05]], 8, null, x, y, z));
-  bag.add('bark_grey', g[0]);
-  const limbs = kind === 'peach' ? 3 : 4 + Math.floor(rand() * 2), mats = { camphor: ['broad', 'doum_leaf'], ginkgo: ['palm_leaf', 'doum_leaf'], willow: ['papyrus', 'flax_leaf'], peach: ['doum_leaf', 'stucco_rose'] }[kind];
-  const blobs = [], threads = [], pink = [];
+  // the trunk: a flared foot (roots), a slight twist up to the fork, bark furrows by a second thinner shell
+  const prof = [[trunkR * 1.9, -0.25], [trunkR * 1.5, 0.12], [trunkR * 1.15, 0.5], [trunkR, h * forkAt * 0.4], [trunkR * 0.85, h * forkAt * 0.75], [trunkR * 0.7, h * forkAt]];
+  const tg = lathe(prof, 9, null, 0, 0, 0);
+  const tp = tg.attributes.position;
+  for (let i = 0; i < tp.count; i++) { const t = Math.max(0, tp.getY(i) / (h * forkAt)); tp.setX(i, tp.getX(i) + (tx(t) - x) + Math.sin(tp.getY(i) * 2.1 + el.seed) * trunkR * 0.08); tp.setZ(i, tp.getZ(i) + (tz(t) - z)); tp.setY(i, tp.getY(i) + y); tp.setX(i, tp.getX(i) + x); tp.setZ(i, tp.getZ(i) + z); }
+  tg.computeVertexNormals();
+  bag.add('bark_grey', tg);
+  for (let r = 0; r < 3 && kind !== 'peach'; r++) { const a = la + 1 + r * 2.1; bag.add('bark_grey', rod([x + Math.cos(a) * trunkR * 1.2, y - 0.1, z + Math.sin(a) * trunkR * 1.2], [x + Math.cos(a) * trunkR * 2.4, y - 0.18, z + Math.sin(a) * trunkR * 2.4], trunkR * 0.3, 5)); }
   const fx = tx(forkAt), fz = tz(forkAt), fy = y + h * forkAt;
-  for (let i = 0; i < limbs; i++) {
-    const a = i * 6.28 / limbs + rand() * 0.8, out = (kind === 'willow' ? 0.35 : kind === 'peach' ? 0.28 : 0.3) * h, up = h * (0.82 - forkAt) * (0.7 + rand() * 0.3);
+  const spec = {
+    camphor: { w: 0.19, l: 0.34, tuft: 6, mats: ['doum_leaf', 'palm_leaf', 'doum_leaf'], limbs: 5, out: 0.34, rise: 0.9, cr: 0.27, n: 20 },
+    ginkgo: { w: 0.2, l: 0.2, tuft: 6, mats: ['palm_leaf', 'doum_leaf', 'palm_leaf'], limbs: 5, out: 0.2, rise: 1.05, cr: 0.2, n: 20 },
+    willow: { w: 0.07, l: 0.3, tuft: 5, mats: ['papyrus', 'doum_leaf', 'papyrus'], limbs: 6, out: 0.4, rise: 0.75, cr: 0.17, n: 12 },
+    peach: { w: 0.06, l: 0.2, tuft: 5, mats: ['doum_leaf', 'palm_leaf', 'doum_leaf'], limbs: 4, out: 0.34, rise: 0.8, cr: 0.26, n: 22 },
+  }[kind];
+  const cards = [[], [], []], pink = [], threads = [], twig = [];
+  const ends = [];
+  for (let i = 0; i < spec.limbs; i++) {
+    const a = i * 6.28 / spec.limbs + rand() * 0.8, out = spec.out * h * (0.8 + rand() * 0.4), up = h * (0.86 - forkAt) * spec.rise * (0.75 + rand() * 0.3);
+    const mx = fx + Math.cos(a) * out * 0.35, mz = fz + Math.sin(a) * out * 0.35, my = fy + up * 0.55;
     const ex = fx + Math.cos(a) * out, ez = fz + Math.sin(a) * out, ey = fy + up;
-    bag.add('bark_grey', rod([fx, fy, fz], [ex, ey, ez], trunkR * 0.42, 5));
-    const cr = (kind === 'willow' ? 0.2 : kind === 'peach' ? 0.22 : 0.2) * h;
-    for (let q = 0; q < 3; q++) {
-      const bx = ex + (rand() - 0.5) * cr * 0.8, bz = ez + (rand() - 0.5) * cr * 0.8, by = ey + (q ? 0.55 * q : -0.2) * cr, r = cr * (0.6 + rand() * 0.35);
-      blobs.push(ell(r, r * (kind === 'willow' ? 0.85 : 0.8), r, bx, by, bz, 8));
-      if (kind === 'peach' && rand() < 0.8) pink.push(ell(r * 0.8, r * 0.5, r * 0.8, bx, by + r * 0.25, bz, 7));
-      if (kind === 'willow') for (let t = 0; t < 14; t++) {
-        const a2 = rand() * 6.28, rr = r * (0.7 + rand() * 0.5), px = bx + Math.cos(a2) * rr, pz = bz + Math.sin(a2) * rr, len = h * (0.35 + rand() * 0.25);
-        threads.push(rod([px, by - r * 0.2, pz], [px + (rand() - 0.5) * 0.3, by - r * 0.2 - len * 0.5, pz], 0.012, 3), rod([px + (rand() - 0.5) * 0.2, by - r * 0.2 - len * 0.5, pz], [px + (rand() - 0.5) * 0.4, by - r * 0.2 - len, pz + 0.1], 0.008, 3));
+    bag.add('bark_grey', rod([fx, fy - 0.15, fz], [mx, my, mz], trunkR * 0.5, 6));
+    bag.add('bark_grey', rod([mx, my, mz], [ex, ey, ez], trunkR * 0.3, 5));
+    ends.push([ex, ey, ez, a]);
+    // twigs from the end of the limb to the leaf tufts' hearts
+    for (let q = 0; q < 3; q++) { const a2 = a + (rand() - 0.5) * 1.6; ends.push([ex + Math.cos(a2) * out * 0.3, ey + (rand() - 0.2) * h * 0.1, ez + Math.sin(a2) * out * 0.3, a2]); bag.add('bark_grey', rod([ex, ey, ez], ends[ends.length - 1].slice(0, 3), trunkR * 0.14, 4)); }
+  }
+  // the crown's lobes: one on each limb's end and one over the fork, each a smooth dark core under leaf cards laid on its shell like scales
+  const limbEnds = ends.filter((_, k) => k % 4 === 0);
+  let cx = 0, cy = 0, cz = 0; for (const e of limbEnds) { cx += e[0]; cy += e[1]; cz += e[2]; } cx /= limbEnds.length; cy /= limbEnds.length; cz /= limbEnds.length;
+  const cr = spec.cr * h, centre = [cx, cy + cr * 0.1, cz];
+  const lobes = [...limbEnds.map((e) => [e[0], e[1], e[2]]), ...limbEnds.map((e) => [fx + (e[0] - fx) * 0.5, fy + (e[1] - fy) * 0.62, fz + (e[2] - fz) * 0.5]), [cx, cy + cr * 0.6, cz]];
+  const coreMat = kind === 'ginkgo' ? 'palm_leaf' : 'flax_leaf';
+  const R = cr * (kind === 'willow' ? 0.75 : 0.9), per = Math.round(kind === 'peach' ? 60 : kind === 'willow' ? 90 : 200 * (R / 3) ** 2 + 60);
+  for (const [lx, ly, lz] of lobes) {
+    const ry = R * (kind === 'willow' ? 0.8 : 0.85);
+    if (kind !== 'willow') bag.add(coreMat, lathe(Array.from({ length: 9 }, (_, q) => { const t = q / 8 * Math.PI; return [Math.max(0.001, Math.sin(t)), -Math.cos(t)]; }), 14).scale(R * 0.8, ry * 0.8, R * 0.8).translate(lx, ly, lz));
+    for (let t = 0; t < per; t++) {
+      const th = rand() * 6.28, ph = Math.acos(rand() * 1.7 - 0.7);                    // not much of the underside
+      let nx = Math.cos(th) * Math.sin(ph), ny = Math.cos(ph), nz = Math.sin(th) * Math.sin(ph);
+      const px = lx + nx * R, py = ly + ny * ry, pz = lz + nz * R;
+      // the card lies along the shell (v a random tangent), tilted out a little at the tip
+      let vx = rand() - 0.5, vy = rand() - 0.5, vz = rand() - 0.5; const dd = vx * nx + vy * ny + vz * nz; vx -= nx * dd; vy -= ny * dd; vz -= nz * dd;
+      const vl = Math.hypot(vx, vy, vz) || 1; vx = vx / vl + nx * 0.35; vy = vy / vl + ny * 0.35 - (kind === 'willow' ? 0.3 : 0); vz = vz / vl + nz * 0.35;
+      const vl2 = Math.hypot(vx, vy, vz); vx /= vl2; vy /= vl2; vz /= vl2;
+      let ux = vy * nz - vz * ny, uy = vz * nx - vx * nz, uz = vx * ny - vy * nx; const ul = Math.hypot(ux, uy, uz) || 1; ux /= ul; uy /= ul; uz /= ul;
+      const sz = 0.85 + rand() * 0.5;
+      cards[t % 3].push([px, py, pz, ux, uy, uz, vx, vy, vz, spec.w * sz * 1.15, spec.l * sz * 1.15]);
+      if (kind === 'peach' && rand() < 0.45) {
+        const ax = Math.abs(ny) > 0.9 ? [1, 0, 0] : [0, 1, 0];
+        const bx = ax[1] * nz - ax[2] * ny, by = ax[2] * nx - ax[0] * nz, bz = ax[0] * ny - ax[1] * nx, bl = Math.hypot(bx, by, bz) || 1;
+        const e1 = [bx / bl, by / bl, bz / bl], e2 = [ny * e1[2] - nz * e1[1], nz * e1[0] - nx * e1[2], nx * e1[1] - ny * e1[0]], rb = 0.1 + rand() * 0.04;
+        const q0 = [px + nx * 0.06, py + ny * 0.06, pz + nz * 0.06], ring = (an, k) => [0, 1, 2].map((c) => q0[c] + (e1[c] * Math.cos(an) + e2[c] * Math.sin(an)) * rb * k + (k > 1 ? [nx, ny, nz][c] * 0.015 : 0));
+        for (let p = 0; p < 5; p++) { const a1 = p * 1.2566; pink.push(...q0, ...ring(a1, 0.75), ...ring(a1 + 0.6283, 1.25), ...q0, ...ring(a1 + 0.6283, 1.25), ...ring(a1 + 1.2566, 0.75)); }
+      }
+    }
+    if (kind === 'willow') for (let t = 0; t < 14; t++) {
+      // a withe hanging from the lobe's rim: a curved thread with narrow leaves along it, down to near the ground
+      const th = rand() * 6.28, sx = lx + Math.cos(th) * R * 0.95, sz2 = lz + Math.sin(th) * R * 0.95, top = ly - ry * 0.1 - rand() * ry * 0.5;
+      const len = Math.min(top - y - 0.9, h * (0.42 + rand() * 0.3)), nseg = 6, drift = [(rand() - 0.5) * 0.7, (rand() - 0.5) * 0.7];
+      let px = sx, py = top, pz = sz2;
+      for (let s = 1; s <= nseg; s++) {
+        const f = s / nseg, qx = sx + drift[0] * f * f + Math.cos(th) * 0.3 * Math.sin(f * 3), qy = top - len * f, qz = sz2 + drift[1] * f * f + Math.sin(th) * 0.3 * Math.sin(f * 3);
+        threads.push(rod([px, py, pz], [qx, qy, qz], 0.011, 3));
+        for (const sd of [-1, 1]) cards[(s + (sd > 0 ? 1 : 0)) % 3].push([qx, qy + 0.1, qz, Math.cos(th + 1.57 * sd), 0.15, Math.sin(th + 1.57 * sd), 0.12 * sd, -1, 0.1, spec.w * 1.3, spec.l * (0.9 + rand() * 0.3)]);
+        px = qx; py = qy; pz = qz;
       }
     }
   }
-  const leaf = kind === 'willow' ? 'tile_green' : kind === 'ginkgo' ? 'tile_yellow' : 'doum_leaf';
-  void mats;
-  for (const b of blobs) bag.add(kind === 'ginkgo' ? 'palm_leaf' : kind === 'willow' ? 'papyrus' : 'doum_leaf', b);
-  for (const b of pink) bag.add('stucco_rose', b);
-  for (const b of threads) bag.add('papyrus', b);
-  void leaf;
+  cards.forEach((c, i) => c.length && bag.add(spec.mats[i], leafCards(c, centre)));
+  if (pink.length) bag.add('stucco_rose', fromTriangles(pink));
+  for (const g of threads) bag.add('bark_grey', g);
   col.circle(x, z, trunkR * 1.3, y, y + 3);
 }
 
