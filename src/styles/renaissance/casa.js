@@ -84,6 +84,19 @@ function sign(Lc, u, ys, trade, rand) {
   Lc.box(IR, u - 0.02, ys + 0.5, 0.0, u + 0.02, ys + 0.54, 0.95);
   Lc.box(IR, u - 0.015, ys + 0.1, 0.9, u + 0.015, ys + 0.5, 0.93);
   Lc.box(col, u - 0.03, ys - 0.45, 0.85, u + 0.03, ys + 0.1, 1.12);
+  // the emblem painted on both faces: the trade's tool or ware in a contrasting colour
+  for (const sg of [-1, 1]) {
+    const a = sg < 0 ? u - 0.045 : u + 0.03, b = sg < 0 ? u - 0.03 : u + 0.045, e = (m, y0, y1, d0, d1) => Lc.box(m, a, ys - 0.45 + y0, 0.85 + d0, b, ys - 0.45 + y1, 0.85 + d1);
+    if (trade === 'cloth') { e('cloth_white', 0.12, 0.45, 0.1, 0.12); e('cloth_white', 0.12, 0.45, 0.15, 0.17); e('cloth_white', 0.25, 0.3, 0.04, 0.23); }
+    else if (trade === 'wine') { e('cloth_green', 0.15, 0.45, 0.07, 0.2); e('cloth_white', 0.45, 0.5, 0.12, 0.16); }
+    else if (trade === 'bread') { e('hide_tan', 0.2, 0.34, 0.05, 0.22); e('hide_tan', 0.3, 0.4, 0.08, 0.19); }
+    else if (trade === 'spice') { e('terracotta', 0.12, 0.3, 0.08, 0.19); e('plaster_white', 0.3, 0.46, 0.05, 0.22); }
+    else if (trade === 'leather') { e('hide_black', 0.1, 0.46, 0.06, 0.21); e('hide_tan', 0.15, 0.4, 0.09, 0.18); }
+    else if (trade === 'smith') { e('cloth_black', 0.12, 0.3, 0.04, 0.23); e('cloth_black', 0.3, 0.38, 0.0, 0.27); e('cloth_black', 0.38, 0.46, 0.04, 0.12); }
+    else if (trade === 'goldsmith') { e('gilt_bronze', 0.1, 0.16, 0.08, 0.2); e('gilt_bronze', 0.16, 0.3, 0.12, 0.16); e('gilt_bronze', 0.3, 0.46, 0.05, 0.23); }
+    else if (trade === 'woodwork') { e('plaster_white', 0.25, 0.32, 0.02, 0.26); for (let k = 0; k < 5; k++) e('plaster_white', 0.18, 0.25, 0.03 + k * 0.05, 0.045 + k * 0.05); }
+    else { e('plaster_white', 0.1, 0.42, 0.11, 0.15); e('cloth_ochre', 0.42, 0.5, 0.11, 0.15); }
+  }
   void rand;
 }
 
@@ -219,7 +232,7 @@ export function casa(el, { bag, col }) {
           const aw2 = box(c - aw / 2 + 0.06, -0.03, 0, c + aw / 2 - 0.06, 0.03, 1.0); aw2.rotateX(-0.45); aw2.translate(0, ysp - 0.3, 0.1); Lc.add(W, aw2);
           Lc.box(IR, c - aw / 2 + 0.06, ysp - 0.34, 0.08, c - aw / 2 + 0.08, ysp - 0.3, 0.1);
           if (!simple) goods(Lc, el.trade, c - aw / 2 + 0.05, c + aw / 2 - 0.05, ysp, rand, pt);
-          if (!simple && it === 'arch' && rand() < 0.5) sign(Lc, c + aw / 2 + pier * 0.4, ysp, el.trade, rand);
+          if (!simple && it === 'arch' && (nb === 1 || rand() < 0.8)) sign(Lc, c + aw / 2 + pier * 0.4, ysp, el.trade, rand);
           u += aw + pier;
         }
       } else {
