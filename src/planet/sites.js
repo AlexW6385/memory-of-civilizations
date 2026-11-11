@@ -40,6 +40,7 @@ export const SITES = [
   { id: 'borobudur', name: { en: 'Java', zh: '爪哇' }, era: '9th c.', region: 'java', lat: -7.61, lon: 110.20, radius: 380 },
   // ── Mesopotamia and Persia ──
   { id: 'ur', name: { en: 'Sumer', zh: '苏美尔' }, era: '21st c. BC', region: 'mesopotamia', lat: 30.96, lon: 46.10, radius: 380 },
+  { id: 'abbasid-baghdad', name: { en: 'Abbasid Baghdad', zh: '阿拔斯巴格达' }, era: 'c. 800', region: 'mesopotamia', lat: 33.31, lon: 44.36, radius: 520 },
   { id: 'babylon', name: { en: 'Babylon', zh: '巴比伦' }, era: '6th c. BC', region: 'mesopotamia', lat: 32.54, lon: 44.42, radius: 420 },
   { id: 'persepolis', name: { en: 'Achaemenid Persia', zh: '阿契美尼德波斯' }, era: '5th c. BC', region: 'persia', lat: 29.93, lon: 52.89, radius: 360 },
   { id: 'isfahan', name: { en: 'Safavid Persia', zh: '萨法维波斯' }, era: '17th c.', region: 'persia', lat: 32.66, lon: 51.68, radius: 420 },
@@ -95,7 +96,7 @@ for (const s of SITES) s.radius ??= 190;
 // room for the larger of this and today's `radius`, so growing to its class moves no neighbour.
 const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
-  L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan',
+  L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon abbasid-baghdad tenochtitlan new-york angkor teotihuacan',
   M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney',
   S: 'heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
   P: 'stonehenge',
@@ -132,7 +133,6 @@ export const PLANNED = [
   { id: 'timurid-samarkand', name: { en: 'Timurid Samarkand', zh: '帖木儿撒马尔罕' }, region: 'silk-road', lat: 39.65, lon: 66.98, radius: 340 },
   { id: 'mongol-karakorum', name: { en: 'Mongol Karakorum', zh: '蒙古哈拉和林' }, region: 'steppe', lat: 47.20, lon: 102.83, radius: 180 },
   { id: 'catalhoyuk', name: { en: 'Çatalhöyük', zh: '加泰土丘' }, region: 'anatolia', lat: 37.67, lon: 32.83, radius: 100 },
-  { id: 'abbasid-baghdad', name: { en: 'Abbasid Baghdad', zh: '阿拔斯巴格达' }, region: 'mesopotamia', lat: 33.31, lon: 44.36, radius: 500 },
   { id: 'shibam', name: { en: 'Shibam', zh: '希巴姆' }, region: 'arabia', lat: 15.93, lon: 48.63, radius: 180 },
   { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, region: 'egypt', lat: 25.70, lon: 32.64, radius: 380 },
   { id: 'abu-simbel', name: { en: 'Abu Simbel', zh: '阿布辛贝' }, region: 'nubia', lat: 22.34, lon: 31.63, radius: 180 },

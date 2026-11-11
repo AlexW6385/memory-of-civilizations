@@ -1,0 +1,68 @@
+// Abbasid Baghdad — the townscape (docs/settlements/abbasid-baghdad.md §2–§9): the three round walls with their gates and the moat, the
+// houses (courtyard houses by rule, in 100 m tiles near and far), the esplanade's service courts, the markets of Karkh as suq rows with the
+// bookseller's shop to enter, the Isa canal with its bridges and barges, the Tigris with its bridges of boats, jetties and boats,
+// and the people and goods of the streets (a life plan).
+import { lodTiles } from '../lod.js';
+import '../../styles/abbasid/index.js';
+import '../../objects/index.js';
+import { suqKeepers } from '../../styles/abbasid/market.js';
+import { RADIUS, RC, GATE, C, PALACE, MOSQUE, LIBRARY, SUQS, SHOP, RIVER, CANAL, CANAL_BRIDGES, BRIDGES, WATER, JETTIES, lots, moored, jettyAt, riverX, canalEnd, inRect } from './layout.js';
+import { lifePlan } from './life.js';
+
+const base = (id, elements, style = 'abbasid') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [C[0], C[1] + 60], facing: 'n' } });
+const YAW = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
+/** A local point of a house (its rect's middle, turned by its face) in the world. */
+export function houseToWorld(l, x, z) {
+  const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, a = YAW[l.face], c = Math.round(Math.cos(a)), s = Math.round(Math.sin(a));
+  return [cx + x * c + z * s, cz - x * s + z * c];
+}
+const norm = (a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
+
+/** The house kept open: a ring house on the south avenue's east side, its north range hollow (§10). */
+export function openHouse() {
+  const want = [C[0] + 24, C[1] + 232];
+  return lots().filter((l) => l.plot >= 0 && l.rect[2] - l.rect[0] >= 12 && l.rect[3] - l.rect[1] >= 15 && l.face === 'n').sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - want[0], (a.rect[1] + a.rect[3]) / 2 - want[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - want[0], (b.rect[1] + b.rect[3]) / 2 - want[1]))[0];
+}
+
+export async function town() {
+  const plans = [], all = lots(), open = openHouse();
+  // ── the walls, gates and moat ──
+  const walls = [];
+  const gates = RC.gates;
+  walls.push({ t: 'ring_wall', c: C, r: RC.outer, th: RC.outerTh, h: RC.outerH, mat: 'mudbrick', gap: 13, gates, n: 24, crenel: true, towers: { every: 3, r: 2.8, out: 3.2, h: 2 }, seed: 11 });
+  walls.push({ t: 'ring_wall', c: C, r: RC.main, th: RC.mainTh, h: RC.mainH, mat: 'brick_baked', gap: GATE.W, gates, n: 24, crenel: true, loops: 6, band: true, towers: { every: 2, r: 4.4, out: 8.6, h: 3 }, seed: 12 });
+  walls.push({ t: 'ring_wall', c: C, r: RC.inner, th: RC.innerTh, h: RC.innerH, mat: 'brick_baked', gap: 14, gates, n: 16, crenel: true, towers: { every: 2, r: 3.2, out: 4.2, h: 2 }, seed: 13 });
+  walls.push({ t: 'moat', c: C, r0: RC.moat0, r1: RC.moat1, y: RC.moatY, gap: 24, gaps: gates, n: 20 });
+  for (const f of gates) {
+    const at = (r) => [C[0] + Math.cos(f * Math.PI / 180) * r, C[1] + Math.sin(f * Math.PI / 180) * r];
+    walls.push({ t: 'round_gate', at: at(RC.main), face: f, ...GATE, kiosk: true, mat: 'brick_baked' });
+    walls.push({ t: 'round_gate', at: at(RC.outer), face: f, D: 6, w: 5, hh: 6, H: 8.5, W: 13, kiosk: false, bast: 0, mat: 'mudbrick' });
+    walls.push({ t: 'round_gate', at: at(RC.inner), face: f, D: 7, w: 5.5, hh: 6.5, H: 11, W: 14, kiosk: false, bast: 0, mat: 'brick_baked' });
+  }
+  plans.push({ ...base('abbasid-baghdad-walls', walls), bounds: [C[0] - 330, C[1] - 330, C[0] + 330, C[1] + 330] });
+  // ── the houses, near and far ──
+  const houses = all.filter((l) => l !== open).map((l) => ({ t: 'abbasid_house', ...l }));
+  plans.push(...lodTiles('abbasid-baghdad-houses', 'abbasid', houses, { R: RADIUS, entrance: { at: [C[0], C[1] + 60], facing: 'n' } }));
+  // the open house: its court and the hollow north range, furnished
+  if (open) {
+    const w = (a, b) => houseToWorld(open, a, b), sw = open.face === 's' || open.face === 'n' ? open.rect[2] - open.rect[0] : open.rect[3] - open.rect[1], sd = open.face === 's' || open.face === 'n' ? open.rect[3] - open.rect[1] : open.rect[2] - open.rect[0];
+    const hw = sw / 2, hd = sd / 2, bd = Math.min(4.8, sd * 0.3), sdp = Math.min(3.4, sw * 0.22), fd = Math.min(3.6, sd * 0.25);
+    const court = norm(w(-hw + sdp, -hd + bd), w(hw - sdp, hd - fd)), north = norm(w(-hw + 0.6, -hd + 0.6), w(hw - 0.6, -hd + bd));
+    plans.push({ ...base('abbasid-baghdad-open-house', [{ t: 'abbasid_house', ...open, open: true, storeys: 2, tower: true }]), bounds: [open.rect[0] - 3, open.rect[1] - 3, open.rect[2] + 3, open.rect[3] + 3],
+      rooms: [{ id: 'house court', rect: court, y: 0, kind: 'open' }, { id: 'court room', rect: north, y: 0, kind: 'hall' }] });
+  }
+  // ── the markets: the suq rows, the bookseller's shop ──
+  SUQS.forEach((s, i) => plans.push({ ...base(`abbasid-baghdad-suq${i}`, [{ t: 'suq_row', rect: s.rect, trades: s.trades, seed: 773 + i * 17, axis: s.rect[2] - s.rect[0] > s.rect[3] - s.rect[1] ? 'x' : 'z' }]), bounds: [s.rect[0] - 3, s.rect[1] - 3, s.rect[2] + 3, s.rect[3] + 3] }));
+  plans.push({ ...base('abbasid-baghdad-shop', [{ t: 'abbasid_shop', rect: SHOP, face: 'e', y: 0, seed: 799 }]), bounds: [SHOP[0] - 3, SHOP[1] - 3, SHOP[2] + 3, SHOP[3] + 3], rooms: [{ id: 'bookshop', rect: [SHOP[0] + 0.6, SHOP[1] + 0.6, SHOP[2] - 0.6, SHOP[3] - 0.6], y: 0.02, kind: 'hall' }] });
+  // ── the water: the river, the canal, the bridges, the jetties and the boats ──
+  const pts = []; for (let z = -540; z <= 540; z += 30) pts.push([riverX(z), z]);
+  const river = [{ t: 'tigris', pts, w: RIVER.w + 3, y: WATER }, { t: 'canal', rect: [CANAL.x0, CANAL.z - CANAL.w / 2, canalEnd() + 2, CANAL.z + CANAL.w / 2], y: CANAL.water, bed: CANAL.bed, along: 'x' }];
+  for (const x of CANAL_BRIDGES) river.push({ t: 'canal_bridge', at: [x, CANAL.z], span: CANAL.w, deck: 2.5, y: CANAL.water, rot: Math.PI / 2, width: 7 });
+  for (const b of BRIDGES) river.push({ t: 'boat_bridge', a: [riverX(b.z) - RIVER.w / 2, b.z], b: [riverX(b.z) + RIVER.w / 2, b.z], w: 4.4, y: -0.1, water: WATER, bed: RIVER.bed, seed: b.z });
+  for (const j of JETTIES) { const J = jettyAt(j); river.push({ t: 'jetty', a: J.a, len: J.len, dir: J.dir, y: -0.2, bed: RIVER.bed, w: 2.4 }); }
+  for (const m of moored()) river.push({ t: 'moored_boat', ...m, y: WATER });
+  plans.push({ ...base('abbasid-baghdad-water', river), bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS] });
+  plans.push(...(await lifePlan()));
+  return plans;
+}
+void inRect; void MOSQUE; void PALACE; void LIBRARY; void suqKeepers;
