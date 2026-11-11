@@ -420,7 +420,7 @@ function maryam(el, { bag, col }) {
  * with courses standing out from them in the Aksumite way (the beam ends, "monkey heads", under each), windows open, a door in the west
  * wall with steps up to it; inside a nave and aisles on rows of square pillars under a flat ceiling, the sanctuary screened at the east
  * end by a wall and a curtain, the altar and tabot behind; rush mats, hanging lamps; in Bete Golgotha the saints cut in relief on the
- * walls (§16: "life-size figures of saints carved in high relief").
+ * walls (§16: a widely reported feature, [inferred]).
  */
 function aksumite(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, y0 = el.y0, h = el.h, T = 1.3, yf = y0 + 0.9, zc = (z0 + z1) / 2, name = el.name || '';
