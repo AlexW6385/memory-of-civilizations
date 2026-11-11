@@ -76,7 +76,7 @@ export function izbaInside(bag, o) {
     ic(cu, cw - 0.5, cw - 0.12, v + 0.06, v + 0.42);
     A('timber', cu + 0.14, cu + 0.48, v + 0.06, v + 0.42, cw - 0.035, cw); A('mosaic_gold', cu + 0.16, cu + 0.46, v + 0.08, v + 0.4, cw - 0.045, cw - 0.035);
     A('paint_robe', cu + 0.26, cu + 0.36, v + 0.12, v + 0.28, cw - 0.05, cw - 0.045);
-    A('linen', cu + 0.5, cu + 0.56, v - 0.55, v + 0.5, cw - 0.022, cw - 0.015); A('cloth_red', cu + 0.495, cu + 0.565, v - 0.5, v - 0.42, cw - 0.034, cw - 0.03);
+    A('linen', cu + 0.5, cu + 0.56, v - 0.55, v + 0.5, cw - 0.022, cw - 0.015); A('cloth_red', cu + 0.495, cu + 0.565, v - 0.5, v - 0.42, cw - 0.052, cw - 0.04);
     const lp = at(cu + 0.3, v + 0.75, cw - 0.3);
     bag.add('bronze', rod([lp[0], lp[1] + 0.25, lp[2]], lp, 0.004, 4));
     bag.add('glass_topaz', lathe([[0.001, -0.08], [0.04, -0.07], [0.05, -0.02], [0.045, 0], [0.001, 0]], 10, null, lp[0], lp[1], lp[2]));
