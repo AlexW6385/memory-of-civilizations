@@ -112,6 +112,7 @@ export const SITES = [
   { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, era: 'c. 2500 BC', region: 'indus', lat: 27.33, lon: 68.14, radius: 330 },
   { id: 'lu-qufu', name: { en: 'Qufu', zh: '曲阜' }, era: 'Qing, c. 1730', region: 'china', lat: 35.6, lon: 116.99, radius: 330 },
   { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, era: 'c. 1200 BC', region: 'china', lat: 36.13, lon: 114.32, radius: 330 },
+  { id: 'kakadu', name: { en: 'Kakadu — Ubirr', zh: '卡卡杜·乌比尔' }, era: 'c. AD 1000', region: 'australia', lat: -12.41, lon: 132.96, radius: 90 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -124,7 +125,7 @@ const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan han-changan',
   M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang wei-ye mohenjo-daro lu-qufu shang-yinxu',
   S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori nalanda',
-  P: 'stonehenge catalhoyuk',
+  P: 'stonehenge catalhoyuk kakadu',
 };
 for (const [c, ids] of Object.entries(CLASS)) for (const id of ids.split(' ')) { const s = SITES.find((x) => x.id === id); if (s) s.size = id === 'ming-suzhou' ? 215 : CLASS_RADIUS[c]; }
 /** The room a settlement takes on the planet: its class's disc, or today's if larger. */
@@ -148,7 +149,6 @@ export const PLANNED = [
   { id: 'maya-tikal', name: { en: 'Classic Maya Tikal', zh: '古典玛雅蒂卡尔' }, region: 'yucatan', lat: 17.22, lon: -89.62, radius: 320 },
   { id: 'sgang-gwaay', name: { en: 'SG̱ang Gwaay', zh: '斯冈瓜伊' }, region: 'northwest-coast', lat: 52.09, lon: -131.22, water: true, island: true, radius: 160 },
   { id: 'brasilia', name: { en: 'Brasília', zh: '巴西利亚' }, region: 'brazil', lat: -15.80, lon: -47.86, radius: 500 },
-  { id: 'kakadu', name: { en: 'Kakadu', zh: '卡卡杜' }, region: 'australia', lat: -12.41, lon: 132.96, radius: 110 },
   { id: 'nan-madol', name: { en: 'Nan Madol', zh: '南马都尔' }, region: 'micronesia', lat: 6.84, lon: 158.33, water: true, island: true, radius: 170 },
 ];
 
