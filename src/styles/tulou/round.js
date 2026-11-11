@@ -41,7 +41,7 @@ export function tulouRound(el, ctx) {
   const c = el.c, R = el.R, n = el.n, da = 2 * Math.PI / n, fl = el.floors, K = fl.length, full = !!el.full;
   const wallIn = el.wallIn ?? R - 1.5, front = el.front ?? wallIn - 4.0, rail = el.rail ?? front - 1.7, lean = el.lean ?? 0.38;
   const topFl = fl[K - 1], ceil = topFl + 3.0;
-  const rf = { ro: R + 1.9, ye: topFl + 2.6, rr: (front + wallIn) / 2 + 0.3, yr: el.ridge ?? topFl + 5.3, ri: rail - 2.0, yi: topFl + 3.0 };
+  const rf = { ro: R + 1.9, ye: topFl + 2.6, rr: (front + wallIn) / 2 + 0.3, yr: el.ridge ?? topFl + 5.3, ri: rail - 0.9, yi: topFl + 3.2 };
   const roofY = roofer(R, rf);
   const H0 = ceil + 0.6;
   const ro = (y) => R - lean * Math.min(y, H0) / H0;
@@ -181,13 +181,13 @@ export function tulouRound(el, ctx) {
   // the gallery posts: one to each room, ground to roof, red-brown; beams along each floor's rim
   for (let i = 0; i < n; i++) {
     const a = (i + 0.5) * da, p = P(c, rail - 0.02, a), top = roofY(rail - 0.02) - 0.12;
-    bag.add('timber_red', box(p[0] - 0.1, 0, p[1] - 0.1, p[0] + 0.1, top, p[1] + 0.1));
+    bag.add('timber', box(p[0] - 0.08, 0, p[1] - 0.08, p[0] + 0.08, top, p[1] + 0.08));
     col.circle(p[0], p[1], 0.12, 0, topFl + 3);
   }
   for (let k = 1; k < K; k++) for (let i = 0; i < n; i++) {
     if (isBay(i) && full) continue;
     const a0 = (i - 0.5) * da, a1 = (i + 0.5) * da, q0 = P(c, rail - 0.02, a0), q1 = P(c, rail - 0.02, a1);
-    bag.add('timber_red', rod([q0[0], fl[k] - 0.22, q0[1]], [q1[0], fl[k] - 0.22, q1[1]], 0.08, 5));
+    bag.add('timber', rod([q0[0], fl[k] - 0.22, q0[1]], [q1[0], fl[k] - 0.22, q1[1]], 0.08, 5));
   }
 
   // ── the stair bays: three straight flights, alternating, in the bay against the wall ──
@@ -230,7 +230,7 @@ export function tulouRound(el, ctx) {
 /** The second ring: rooms of two storeys between r0 and r1: the ground floor walkable, the upper closed behind a lattice front. */
 function ring2(el, ctx) {
   const { bag, col } = ctx, g = el.ring2, c = el.c, n = g.n, da = 2 * Math.PI / n, [, f1] = g.floors, top = g.eave;
-  const o = { ro: g.r1 + 1.4, ye: top - 0.15, rr: (g.r0 + g.r1) / 2 + 0.2, yr: g.ridge, ri: g.r0 - 1.4, yi: top + 0.15 };
+  const o = { ro: g.r1 + 1.0, ye: top - 0.15, rr: (g.r0 + g.r1) / 2 + 0.2, yr: g.ridge, ri: g.r0 - 1.1, yi: top + 0.15 };
   const roofY = roofer(g.r1, o);
   const pass = (i) => i % (n / 4) === 0, ri = g.r1 - 0.7;
   const wedge = (a0, a1, rA, rB) => [P(c, rA, a0), P(c, rA, a1), P(c, rB, a1), P(c, rB, a0)];
@@ -238,7 +238,7 @@ function ring2(el, ctx) {
     const a0 = (i - 0.5) * da, a1 = (i + 0.5) * da, ytO = roofY(g.r1) - 0.16, ytI = roofY(ri) - 0.16;
     // the upper floor, on a balcony projecting 0.9 m into the court
     bag.add(TIMBER, prism(wedge(a0, a1, g.r0 - 0.9, ri), f1 - 0.26, f1));
-    for (let b = 0; b < 3; b++) { const p = P(c, g.r0 - 0.9, a0 + (a1 - a0) * (b + 0.5) / 3); bag.add('timber_red', box(p[0] - 0.04, f1, p[1] - 0.04, p[0] + 0.04, f1 + 1.0, p[1] + 0.04)); }
+    for (let b = 0; b < 3; b++) { const p = P(c, g.r0 - 0.9, a0 + (a1 - a0) * (b + 0.5) / 3); bag.add('timber', box(p[0] - 0.04, f1, p[1] - 0.04, p[0] + 0.04, f1 + 1.0, p[1] + 0.04)); }
     const m0 = P(c, g.r0 - 0.9, a0), m1 = P(c, g.r0 - 0.9, a1);
     bag.add(TIMBER, rod([m0[0], f1 + 1.0, m0[1]], [m1[0], f1 + 1.0, m1[1]], 0.035, 5));
     // the outer wall: granite foot, rammed earth; over a passage only the lintel course
@@ -263,7 +263,7 @@ function ring2(el, ctx) {
     if (!(pass(i) && pass(i + 1))) { const q0 = P(c, g.r0, a1), q1 = P(c, ri, a1); bag.add(TIMBER, plank(q0, q1, 0, f1, 0.1)); col.segment(q0, q1, 0.1, 0, f1); }
   }
   // the posts under the balcony, up to the roof
-  for (let i = 0; i < n; i++) { const p = P(c, g.r0 - 0.9, (i + 0.5) * da); bag.add('timber_red', box(p[0] - 0.09, 0, p[1] - 0.09, p[0] + 0.09, roofY(g.r0 - 0.9) - 0.14, p[1] + 0.09)); col.circle(p[0], p[1], 0.11, 0, top); }
+  for (let i = 0; i < n; i++) { const p = P(c, g.r0 - 0.9, (i + 0.5) * da); bag.add('timber', box(p[0] - 0.09, 0, p[1] - 0.09, p[0] + 0.09, roofY(g.r0 - 0.9) - 0.14, p[1] + 0.09)); col.circle(p[0], p[1], 0.11, 0, top); }
   ringRoof(bag, c, n, o);
 }
 export { lathe, STYLES };
