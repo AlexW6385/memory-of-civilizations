@@ -18,7 +18,9 @@ function height(x, z) {
   if (inRiver(x, z, 2.4)) h = Math.min(h, bankY(Math.abs(x - riverX(z))));
   if (inPool(x, z, 0)) h = Math.min(h, -0.8);
   else if (inPool(x, z, 1.5)) h = Math.min(h, -0.3);
-  return h * (1 - sm(RADIUS - 30, RADIUS, r));
+  // the rim meets the open country at no more than 1 m in 1 m (tests/planet.test.mjs: no step)
+  const lim = Math.max(0, RADIUS - 1 - r) * 0.9;
+  return Math.max(-lim, Math.min(lim, h * (1 - sm(RADIUS - 30, RADIUS, r))));
 }
 function cover(x, z, h) {
   const c = { sand: 0.1, grass: 0.35, rock: 0, soil: 0.45, fields: 0, dry: 0.7, warmth: 0.8, red: 0.25, road: 0, snow: 0, forest: 0 };

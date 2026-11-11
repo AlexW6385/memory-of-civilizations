@@ -43,13 +43,15 @@ export function height(x, z) {
     // the cliff: steep, ribbed by vertical joints, topped by the plateau
     const rib = 1 + 0.05 * Math.sin(x * 0.8 + 2) + 0.04 * Math.sin(x * 1.9);
     const base = terraceY(cliffFoot(x)) * wT + natY(cliffFoot(x)) * (1 - wT);
-    const face = CLIFF_H * Math.pow(smooth(-0.5, 11, d), 0.85) * rib;
+    const face = CLIFF_H * Math.pow(smooth(-0.5, 11, d), 0.85) * rib * (1 - smooth(44, 60, r));   // the cliff sinks before the rim
     // boulder fall at the foot
     const scree = 1.2 * Math.max(0, vnoise(x * 0.35, z * 0.35)) * smooth(-6, 0, d);
     h = Math.max(h, base + face + scree + (d > 11 ? 0.06 * (d - 11) : 0));
     if (d > 0) h += 0.5 * vnoise(x * 0.5, z * 0.5) * smooth(0, 4, d) * (1 - smooth(8, 11, d));
   }
-  return h * (1 - smooth(70, RADIUS, r));
+  // the rim meets the open country at no more than 1 m in 1 m (tests/planet.test.mjs: no step)
+  const lim = Math.max(0, RADIUS - 1 - r) * 0.9;
+  return Math.max(-lim, Math.min(lim, h * (1 - smooth(70, RADIUS, r))));
 }
 /** z on the cliff's face (x) at height y (m), found by search from the foot inward. */
 export function faceZ(x, y) {

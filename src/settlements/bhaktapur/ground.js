@@ -24,7 +24,7 @@ function planting(x, z) {
   return { bamboo: 0.12, fig: 0.025, grass: 22 };
 }
 void lots;
-export const ground = {
+export const ground = { lift: 15,   // the disc stands 15 m above the valley floor at its centre, so the rim meets the rising country without a step
   height, cover, water, waterLevel, planting, fromWater,
   maxDensity: { bamboo: 0.12, fig: 0.025, pine: 0.05 },
   climate: {

@@ -20,7 +20,7 @@ function height(x, z) {
   if (d < RIVER.w / 2 + 2 && z > -ZEND && z < ZEND) h = Math.min(h, bankY(d));
   // the spring's basin
   if (crescent(x, z, 0.5)) h = Math.min(h, -0.7);
-  return h * (1 - sm(RADIUS - 30, RADIUS, r));
+  return h * (1 - sm(RADIUS - 85, RADIUS - 4, r));   // a long fade: the plateau and dunes stand 30–45 m, and the rim must meet the open country without a step
 }
 function cover(x, z) {
   const c = { sand: 0.5, grass: 0.1, rock: 0, soil: 0.3, fields: 0, dry: 0.9, warmth: 0.6, red: 0.1, road: 0, snow: 0, forest: 0 };

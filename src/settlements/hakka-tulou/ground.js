@@ -19,7 +19,9 @@ function height(x, z) {
   h = h * (1 - t) + terrace(h) * t;
   const dz = Math.abs(z - streamZ(x));
   if (dz < STREAM.w / 2 + 2) h = Math.min(h, STREAM.bed * sm(STREAM.w / 2 + 2, STREAM.w / 2 - 0.5, dz));
-  return h * (1 - sm(RADIUS - 30, RADIUS, r));
+  // the rim meets the open country at no more than 1 m in 1 m (tests/planet.test.mjs: no step)
+  const lim = Math.max(0, RADIUS - 1 - r) * 0.9;
+  return Math.max(-lim, Math.min(lim, h * (1 - sm(RADIUS - 30, RADIUS, r))));
 }
 /** The height of the slope at a place (for the terraces' use). */
 const slopeH = (x, z) => hill(x, z);

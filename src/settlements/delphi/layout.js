@@ -147,7 +147,9 @@ export function height(x, z) {
     if (d < 7.5) h = h + (yf(s) - h) * smooth(7.5, 2.8, d);
   }
   // the precinct's walls hold the ground (south side falls away)
-  return h * (1 - smooth(RADIUS - 18, RADIUS, r));
+  // the rim meets the open country at no more than 1 m in 1 m (tests/planet.test.mjs: no step)
+  const lim = Math.max(0, RADIUS - 1 - r) * 0.9;
+  return Math.max(-lim, Math.min(lim, h * (1 - smooth(RADIUS - 18, RADIUS, r))));
 }
 export const onWay = (x, z, m = 0) => pathAt(x, z, WAY)[0] < 3 + m || pathAt(x, z, WAY2)[0] < 2.6 + m;
 /** Where nothing grows: built ground. */

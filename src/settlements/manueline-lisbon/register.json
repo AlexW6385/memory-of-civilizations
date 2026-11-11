@@ -1,5 +1,5 @@
 {
-  "site": { "id": "manueline-lisbon", "name": { "en": "Manueline Lisbon", "zh": "曼努埃尔里斯本" }, "era": "c. 1520", "region": "iberia", "lat": 38.70, "lon": -9.21, "water": true, "radius": 330 },
+  "site": { "id": "manueline-lisbon", "name": { "en": "Manueline Lisbon", "zh": "曼努埃尔里斯本" }, "era": "c. 1520", "region": "iberia", "lat": 38.70, "lon": -9.21, "water": true, "island": true, "radius": 330 },
   "arrival": [-206, null, 117, 0.0, 0.3],
   "arrivalNote": "The Jerónimos' south portal whole across the plaza, the Belém Tower in the river to the left.",
   "card": {
