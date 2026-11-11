@@ -9,8 +9,8 @@ import { box, frustum } from '../../core/geom.js';
 import { inFrame, YAW, wallRun, tangRoof } from './kit.js';
 
 /** A bracket set on top of the column at (x, z) facing out along u = [ux, uz] (a unit axis), four tiers: arms stepping out, cross arms, blocks. */
-function bracketSet(bag, x, z, y, u, bh, mat, big) {
-  const t = [-u[1], u[0]], n = 4, th = bh / n, out = (k, s) => [x + u[0] * s + t[0] * k, z + u[1] * s + t[1] * k];
+function bracketSet(bag, x, z, y, u, bh, mat, big, q = 'fine') {
+  const t = [-u[1], u[0]], n = q === 'fine' ? 4 : q === 'med' ? 3 : 2, th = bh / n, out = (k, s) => [x + u[0] * s + t[0] * k, z + u[1] * s + t[1] * k];
   const B = (c, hl, hw, y0, y1) => { // an axis box centred on c, half-length hl along u, hw across
     const ax = Math.abs(u[0]) > 0.5;
     bag.add(mat, ax ? box(c[0] - hl, y0, c[1] - hw, c[0] + hl, y1, c[1] + hw) : box(c[0] - hw, y0, c[1] - hl, c[0] + hw, y1, c[1] + hl));
@@ -24,7 +24,7 @@ function bracketSet(bag, x, z, y, u, bh, mat, big) {
     // the cross arm (the guazi), longer on the upper tiers
     bag.add(mat, Math.abs(u[0]) > 0.5 ? box(x - 0.1, y0, z - (0.35 + k * 0.2), x + 0.1, y1, z + (0.35 + k * 0.2)) : box(x - (0.35 + k * 0.2), y0, z - 0.1, x + (0.35 + k * 0.2), y1, z + 0.1));
     void th; void out;
-    if (k < n - 1) B([x, z], 0.14, 0.14, y1, y0 + (bh - 0.2) / n + 0.0);         // the block between tiers
+    if (q === 'fine' && k < n - 1) B([x, z], 0.14, 0.14, y1, y0 + (bh - 0.2) / n + 0.0);         // the block between tiers
   }
 }
 
@@ -32,6 +32,7 @@ export function buildHall(L, p) {
   const { w, d, y = 0, H = 3.6, nb = 3, kind = 'hall', over = 1.9, det = 2, interior = false } = p;
   const plat = p.plat ?? 0.45, F = y + plat, bh = p.bh ?? 0.9, pal = p.pal || {};
   const gable = p.roof ? p.roof === 'gable' : w < d + 0.5, bag = L.bag, col = L.col;
+  const bq = p.bq ?? (p.big ? 'fine' : det >= 2 ? 'med' : 'low');
   const colMat = pal.column || 'timber_red', wallMat = pal.wall || 'plaster_white', brk = pal.bracket || 'timber_red';
   const xs = Array.from({ length: nb + 1 }, (_, k) => -w / 2 + (w * k) / nb);
   const rows = p.rows === 3 ? [-d / 2, 0, d / 2] : [-d / 2, d / 2];
@@ -49,7 +50,7 @@ export function buildHall(L, p) {
   if (det >= 1) for (const z of rows) for (const x of xs) {
     if (z === 0 && (x === xs[0] || x === xs[nb])) { /* the side wall's middle post */ }
     bag.add('granite_block', box(x - 0.3, F, z - 0.3, x + 0.3, F + 0.16, z + 0.3));
-    if (det >= 2 && L.style.column) L.style.column({ at: [x, z], y: F + 0.16, h: H - 0.16, d: 0.42 }, L);
+    if (det >= 2 && p.big && L.style.column) L.style.column({ at: [x, z], y: F + 0.16, h: H - 0.16, d: 0.42 }, L);
     else bag.add(colMat, box(x - 0.2, F + 0.16, z - 0.2, x + 0.2, top, z + 0.2));
     col.circle(x, z, 0.24, F, top);
   }
@@ -59,10 +60,10 @@ export function buildHall(L, p) {
     // the frieze panels between the brackets, in plaster
     for (const z of [-d / 2, d / 2]) bag.add(wallMat, box(-w / 2 - 0.1, top, z - 0.13, w / 2 + 0.1, top + bh - 0.03, z + 0.13));
     for (const x of [-w / 2, w / 2]) bag.add(wallMat, box(x - 0.13, top, -d / 2 - 0.1, x + 0.13, top + bh - 0.03, d / 2 + 0.1));
-    for (const x of xs) for (const [z, uz] of [[-d / 2, -1], [d / 2, 1]]) bracketSet(bag, x, z, top, [0, uz], bh, brk, !!p.big);
-    for (const z of [-d / 2, d / 2]) for (const [x, ux] of [[-w / 2, -1], [w / 2, 1]]) if (x === -w / 2 || x === w / 2) bracketSet(bag, x, z, top, [ux, 0], bh, brk, !!p.big);
+    for (const x of xs) for (const [z, uz] of [[-d / 2, -1], [d / 2, 1]]) bracketSet(bag, x, z, top, [0, uz], bh, brk, !!p.big, bq);
+    for (const z of [-d / 2, d / 2]) for (const [x, ux] of [[-w / 2, -1], [w / 2, 1]]) if (x === -w / 2 || x === w / 2) bracketSet(bag, x, z, top, [ux, 0], bh, brk, !!p.big, bq);
     for (const x of [-w / 2, w / 2]) for (let k = 1; k < rows.length * 0 + 1; k++) void k;
-    if (p.big) for (let k = 0; k < nb; k++) { const x = (xs[k] + xs[k + 1]) / 2; for (const [z, uz] of [[-d / 2, -1], [d / 2, 1]]) bracketSet(bag, x, z, top + 0.1, [0, uz], bh - 0.2, brk, false); }
+    if (p.big) for (let k = 0; k < nb; k++) { const x = (xs[k] + xs[k + 1]) / 2; for (const [z, uz] of [[-d / 2, -1], [d / 2, 1]]) bracketSet(bag, x, z, top + 0.1, [0, uz], bh - 0.2, brk, false, bq); }
   }
   // the walls
   const wh = top - 0.4, bay = w / nb, e = 0.0;

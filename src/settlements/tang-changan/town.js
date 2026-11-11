@@ -118,6 +118,12 @@ function life() {
     if (Math.abs(x + 8) < 6 && z > 60) continue;
     const r = rand(); if (r < 0.4) official(at, rand() * 6.28, { pose: rand() < 0.3 ? 'talk' : 'stand' }); else if (r < 0.7) lady(at, rand() * 6.28); else commoner(at, rand() * 6.28);
   }
+  // along the avenue: walkers at rest and in knots, riders' grooms, porters; the city's traffic
+  for (let k = 0; k < 70; k++) {
+    const x = (rand() - 0.5) * 78, z = -300 + rand() * 600, at = [x, z];
+    if (Math.abs(x + 8) < 4 && z > 60 && z < 100) continue;
+    const r = rand(); if (r < 0.28) official(at, rand() * 6.28, { pose: rand() < 0.25 ? 'talk' : 'stand' }); else if (r < 0.5) lady(at, rand() * 6.28); else if (r < 0.7) sogdian(at, rand() * 6.28); else commoner(at, rand() * 6.28, { carry: pick(['pole', 'none', 'basket']) });
+  }
   for (const [x, z] of [[-30, 118], [24, 180], [-20, -60]]) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0, rot: 1.2, seed: x + z, gear: true }); commoner([x - 1.6, z + 0.2], 1.2, { hat: 'straw' }); }
   // Daci'en: monks, pilgrims and the crowd before the main hall and at the pagoda
   const ax = DACI_AX;

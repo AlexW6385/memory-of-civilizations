@@ -54,7 +54,7 @@ export function tangHouse(el, ctx) {
     const hw = Math.min(W - 5.5, kind === 'mansion' ? 17.5 : 11.5), hd = kind === 'mansion' ? 7.4 : 5.8, nb = hw > 15 ? 5 : 3, hz = -D / 2 + hd / 2 + 2.0;
     inFrame(L, [0, hz], 0, (H) => {
       const plat = kind === 'mansion' ? 0.55 : 0.4;
-      buildHall(H, { w: hw, d: hd, y: 0, plat, H: kind === 'mansion' ? 4.0 : 3.3, nb, kind: 'hall', det, bh: kind === 'mansion' ? 1.2 : 0.9, over: kind === 'mansion' ? 2.2 : 1.8, roof: 'hip', doorW: 2.4, steps: true, big: kind === 'mansion', interior: !!el.furnished });
+      buildHall(H, { w: hw, d: hd, y: 0, plat, H: kind === 'mansion' ? 4.0 : 3.3, nb, kind: 'hall', det, bh: kind === 'mansion' ? 1.2 : 0.9, over: kind === 'mansion' ? 2.2 : 1.8, roof: 'hip', doorW: 2.4, steps: true, bq: det >= 2 ? 'med' : 'low', interior: !!el.furnished });
       if (el.furnished) furnishHouse(H, { w: hw, d: hd, y: plat });
     });
     if (D > 24 && W > 20) for (const s of [-1, 1]) {
@@ -78,11 +78,11 @@ const GOODS = {
 export const TRADE_LIST = Object.keys(GOODS);
 
 function jar(bag, x, y, z, r, h, mat) {
-  bag.add(mat, lathe([[0.001, 0], [r * 0.7, 0], [r, h * 0.35], [r * 0.92, h * 0.7], [r * 0.5, h * 0.92], [r * 0.55, h], [0.001, h]], 10, null, x, y, z));
+  bag.add(mat, lathe([[0.001, 0], [r * 0.7, 0], [r, h * 0.4], [r * 0.5, h * 0.92], [0.001, h]], 7, null, x, y, z));
 }
 /** The goods on a counter between x0 and x1 at depth z (top y): by trade. */
 function goods(bag, trade, x0, x1, z, y, rand) {
-  const mats = GOODS[trade] || GOODS.cloth, step = trade === 'wine' ? 0.5 : 0.34;
+  const mats = GOODS[trade] || GOODS.cloth, step = trade === 'wine' ? 0.62 : 0.4;
   for (let x = x0 + 0.25; x < x1 - 0.2; x += step) {
     const m = mats[Math.floor(rand() * mats.length)];
     if (trade === 'wine' || trade === 'pottery' || trade === 'spice') jar(bag, x, y, z, 0.16, 0.3 + rand() * 0.12, m);
@@ -100,7 +100,7 @@ export function tangShopRow(el, ctx) {
   const hw = W - 1.6, hd = D - 1.6, bay = hw / nbT;
   inFrame(ctx, mid(el.foot), YAW[f], (L) => {
     const { bag, col } = L;
-    buildHall(L, { w: hw, d: hd, y: 0, plat: 0.3, H: 3.5, nb: nbT, kind: 'open', det: el.det ?? 1, bh: 0.8, over: 1.5, steps: false, roof: el.roof || 'gable', counter: false, pal: { plinth: 'brick_grey' } });
+    buildHall(L, { w: hw, d: hd, y: 0, plat: 0.3, H: 3.5, nb: nbT, kind: 'open', det: el.det ?? 1, bq: 'low', bh: 0.8, over: 1.5, steps: false, roof: el.roof || 'gable', counter: false, pal: { plinth: 'brick_grey' } });
     let k = 0;
     units.forEach((u, ui) => {
       const x0 = -hw / 2 + k * bay, x1 = x0 + u.nb * bay;
