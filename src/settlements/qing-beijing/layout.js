@@ -198,7 +198,26 @@ export function shopRows() {
       SHOPS.push(row);
     }
   }
+  // the two shops with a furnished interior (§21): the tea house and the pharmacy, the first wide-enough shops of the west side
+  // from the avenue's mouth (a rule that follows the layout: it picks from whatever shops there are)
+  const west = SHOPS.filter((r) => r.side === 'w').sort((a, b) => a.z0 - b.z0), all = west.flatMap((r) => r.shops.map((s) => ({ s, r })));
+  const tea = all.find(({ s }) => s.z1 - s.z0 >= 7.0 && s.trade === 'tea') || all.find(({ s }) => s.z1 - s.z0 >= 7.0);
+  if (tea) { tea.s.trade = 'tea'; tea.s.storeys = 1; tea.s.interior = 'teahouse'; }
+  const med = all.find(({ s, r }) => s !== tea?.s && s.z1 - s.z0 >= 5.6 && r !== tea?.r && s.z0 > (tea?.s.z1 ?? 0) + 6 && s.trade === 'medicine') || all.find(({ s, r }) => s !== tea?.s && s.z1 - s.z0 >= 5.6 && r !== tea?.r && s.z0 > (tea?.s.z1 ?? 0) + 6);
+  if (med) { med.s.trade = 'medicine'; med.s.storeys = 1; med.s.interior = 'pharmacy'; }
   return SHOPS;
+}
+/** The shops with a furnished interior: { kind, side, front, z0, z1, depth }. */
+export const SHOP_DEPTH_BUILT = 8.4;
+export function interiorShops() {
+  const out = [];
+  for (const r of shopRows()) for (const s of r.shops) if (s.interior) out.push({ kind: s.interior, side: r.side, front: r.front, z0: s.z0, z1: s.z1, depth: SHOP_DEPTH_BUILT, seed: s.seed });
+  return out;
+}
+/** The courtyard houses furnished inside (§21): the n lod-0 houses nearest the avenue's mouth, whatever the layout. */
+export function furnishedHouses(n = 5) {
+  const d2 = (h) => ((h.rect[0] + h.rect[2]) / 2 + 30) ** 2 + ((h.rect[1] + h.rect[3]) / 2 - 225) ** 2;
+  return [...houses()].filter((h) => h.lod === 0 && h.rect[2] - h.rect[0] >= 24).sort((a, b) => d2(a) - d2(b)).slice(0, n);
 }
 export function inShopRow(x, z, m = 0) { return shopRows().some((r) => inRect([Math.min(r.front, r.back, r.yard[0], r.yard[2]), r.z0, Math.max(r.front, r.back, r.yard[0], r.yard[2]), r.z1], x, z, m)); }
 

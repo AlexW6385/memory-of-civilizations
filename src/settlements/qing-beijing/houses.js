@@ -351,6 +351,24 @@ function chuihua(bag, col, cx, z, lod) {
 }
 
 /** One courtyard house, as an element: { rect, seed, gate, courts, wealth, lod, trees }. */
+/**
+ * The parts of a hutong house, from its lot alone (rect, courts, gate rank, lod): the main house's
+ * footprint, its bays and the wings' footprints — used by the builder and by the furnishing (interiors.js)
+ * so that the rooms always fit the shells.
+ */
+export function houseParts(el) {
+  const lod = el.lod ?? 0, [x0, z0, x1, z1] = el.rect, W = x1 - x0, courts = el.courts || 1, G = GATE[el.gate || 'ruyi'];
+  const dS = 4.6, dN = 6.45, dE = Math.min(3.8, W * 0.14), zN = z1 - 0.2 - dS;
+  const sideM = lod === 2 ? 1.0 : dE * 0.5;
+  const main = [x0 + 0.44 + sideM, z0 + 0.3, x1 - 0.44 - sideM, z0 + 0.3 + dN], mb = W > 27 ? 5 : 3;
+  const yardTop = z0 + 0.3 + dN + 0.9, zWall = courts === 2 ? z0 + 12.95 : null;
+  const wingZ1 = (zWall ?? zN) - (courts === 2 ? 0.6 : 2.2), wingZ0 = yardTop + 0.2, ww = Math.min(3.4, W * 0.13);
+  const wings = [];
+  if (wingZ1 - wingZ0 > 3.5) for (const [side, xa] of [['e', x0 + 0.44], ['w', x1 - 0.44 - ww]]) wings.push({ side, rect: [xa, wingZ0, xa + ww, wingZ1], ww, L: wingZ1 - wingZ0 });
+  void G;
+  return { main, mb, mainY: 0.55, dN, wings, wingY: 0.35, zN, zWall };
+}
+
 export function hutongHouse(el, ctx0) {
   const { bag, col } = ctx0, lod = el.lod ?? 0, rand = rng(el.seed || 1);
   const [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, cx = (x0 + x1) / 2;

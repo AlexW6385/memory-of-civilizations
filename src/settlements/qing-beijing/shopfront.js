@@ -74,12 +74,14 @@ export function qingShop(el, ctx) {
   F.B(bag, 'lacquer_red', s0 + 0.5, dF - 0.34, s1 - 0.5, dF, lintY, lintY + 0.36);
   F.B(bag, 'paint_caihua', s0 + 0.7, dF + 0.005, s1 - 0.7, dF + 0.02, lintY + 0.05, lintY + 0.3);
   const goods = new Parts();
+  const enter = !!el.enter, doorBay = Math.floor(bays / 2);        // an interior shop (tea house, pharmacy): the middle bay is its open door
   for (let i = 0; i < bays; i++) {
     const a = ps[i] + 0.15, b = ps[i + 1] - 0.15;
+    if (enter && i === doorBay) continue;
     F.B(bag, 'lacquer_red', a, dF - 0.55, b, dF - 0.1, y, y + 1.0);                  // the counter
     F.B(bag, 'timber', a - 0.04, dF - 0.62, b + 0.04, dF - 0.05, y + 1.0, y + 1.06);
-    F.B(bag, 'timber', a, dB + 0.5, b, dB + 1.0, y, y + 2.6);                          // the shelves on the back wall
-    if (i % 2 === 0) { F.B(bag, 'wood_dark', a + 0.02, dF - 0.55, a + 0.32, dF - 0.4, y + 1.06, y + 3.0 - 0.8 - 0.0); }
+    if (!enter) F.B(bag, 'timber', a, dB + 0.5, b, dB + 1.0, y, y + 2.6);                          // the shelves on the back wall
+    if (i % 2 === 0 && !enter) { F.B(bag, 'wood_dark', a + 0.02, dF - 0.55, a + 0.32, dF - 0.4, y + 1.06, y + 3.0 - 0.8 - 0.0); }
   }
   // plank shutters stacked against the end posts
   for (const sg of [-1, 1]) F.B(bag, 'wood_dark', sg < 0 ? s0 + 0.5 : s1 - 0.5 - 0.16, dF - 0.2, sg < 0 ? s0 + 0.5 + 0.16 : s1 - 0.5, dF, y, lintY);
@@ -130,7 +132,18 @@ export function qingShop(el, ctx) {
   }
   // the goods on the apron (a trestle with baskets, a stack of sacks)
   void goods;
-  col.rect(F.rect(s0 - 0.1, dB - 0.1, s1 + 0.1, dF - 0.62), 0, y + H);       // the shop's body and the counter: the visitor stays at the front
+  if (!enter) { col.rect(F.rect(s0 - 0.1, dB - 0.1, s1 + 0.1, dF - 0.62), 0, y + H); return; }       // the shop's body and the counter: the visitor stays at the front
+  // an interior shop: walls, counters and posts block; the floor is walkable; two stone steps and a ramp at the door bay
+  const T = y + H;
+  col.rect(F.rect(s0 - 0.1, dB - 0.1, s1 + 0.1, dB + 0.5), 0, T);
+  col.rect(F.rect(s0 - 0.1, dB, s0 + 0.5, dF), 0, T); col.rect(F.rect(s1 - 0.5, dB, s1 + 0.1, dF), 0, T);
+  for (let i = 0; i < bays; i++) if (i !== doorBay) col.rect(F.rect(ps[i] + 0.15, dF - 0.62, ps[i + 1] - 0.15, dF - 0.05), 0, T);
+  for (const q of ps.slice(1, -1)) col.rect(F.rect(q - 0.15, dF - 0.3, q + 0.15, dF), 0, T);
+  col.floor(F.rect(s0 + 0.5, dB + 0.5, s1 - 0.5, dF - 0.05), y);
+  const da = ps[doorBay] + 0.15, db = ps[doorBay + 1] - 0.15;
+  F.B(bag, 'granite_grey', da, dF + 0.5, db, dF + 0.9, 0, 0.17); F.B(bag, 'granite_grey', da, dF + 0.9, db, dF + 1.3, 0, 0.09);
+  col.floor(F.rect(da, dF - 0.05, db, dF + 0.5), y);
+  col.ramp(F.rect(da, dF + 0.5, db, dF + 1.3), 0.04, y, el.side === 'w' ? 'w' : 'e');
 }
 
 /** The yard behind a block of shops: a wall round, a lean-to store, a tree pit, a well sometimes. */

@@ -14,7 +14,7 @@
 // 'step') beside their beasts, whose own legs swing (the leg triangles of the beast, below the
 // belly, tagged as legs). The cart's wheels are solid planks (the shader cannot turn them).
 
-import { RADIUS, MOAT, RING, AVENUE, TEMPLE, lanes, rectsMeet, inPalace } from './layout.js';
+import { RADIUS, MOAT, RING, AVENUE, TEMPLE, SHOP_APRONS, lanes, rectsMeet, inPalace, shopRows } from './layout.js';
 import { SHOP_SITES } from './shops.js';
 import '../../styles/qing/index.js';
 import '../../objects/index.js';
@@ -40,6 +40,7 @@ export const PARAMS = {
 function shopShare(r) {
   let n = 0;
   for (const s of SHOP_SITES) if (s.at[0] >= r[0] - 2 && s.at[0] <= r[2] + 2 && s.at[1] >= r[1] - 2 && s.at[1] <= r[3] + 2) n++;
+  for (const row of shopRows()) for (const sh of row.shops) if (Math.abs(row.front) >= r[0] - 4 && row.front >= r[0] - 4 && row.front <= r[2] + 4 && (sh.z0 + sh.z1) / 2 >= r[1] && (sh.z0 + sh.z1) / 2 <= r[3]) n += 1.4;
   const L = Math.max(r[2] - r[0], r[3] - r[1]);
   return Math.min(1, n * 7 / L);
 }
@@ -64,6 +65,8 @@ export function walkways() {
   // the ring street, its four sides
   for (const r of [[RING[0], RING[1], RING[2], b0], [RING[0], b1, RING[2], RING[3]], [RING[0], b0, a0, b1], [a1, b0, RING[2], b1]]) push(r, 1.0, 'street');
   push(AVENUE, 1.7, 'street');
+  // the paved aprons before the shop fronts (the shoppers stand and walk there)
+  for (const r of SHOP_APRONS) push(r, 0.9, 'street');
   return { rects, links: [], clip: RADIUS - 14 };
 }
 /** No canals: the moat carries no boats. */

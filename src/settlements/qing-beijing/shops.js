@@ -4,25 +4,34 @@
 // Pure data (SHOP_SITES, from layout.js) and one builder, `bj_booth`, an element of the street life
 // (registered by style.js). Local frame of a booth: x along the avenue's edge, z out into the street, y up.
 
-import { AVENUE } from './layout.js';
+import { AVENUE, SHOP_STRIPS, TEMPLE, lanes } from './layout.js';
 import { box, lathe } from '../../core/geom.js';
 import { Parts, T, ball, limb } from '../../styles/qing/carving.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-/** The buildings on the avenue's west edge (rectangles: the tea house, the pharmacy), the booths keeping clear of them. */
-export const SHOP_BUILDINGS = { teahouse: [AVENUE[0] + 0.3, 293, AVENUE[0] + 8.3, 307], pharmacy: [AVENUE[0] + 0.3, 316, AVENUE[0] + 8.3, 326] };
 export const TRADES = ['tea', 'wine', 'cloth', 'medicine', 'pawn', 'grain', 'fruit', 'chestnut', 'books', 'pottery'];
-/** The booths: { at: [x, z] (the booth's back middle), rot (facing out into the street), trade, seed, w }. Both edges of the avenue, every 9–11 m. */
+/**
+ * The booths: { at: [x, z] (the booth's back middle), rot (facing out into the street), trade, seed, w }.
+ * They stand only where the street has room and where no shop front stands: along an edge of the avenue
+ * that has no shop strip behind it (the shop street's fronts carry their own trade signs, goods and
+ * awnings: a booth before them would double the shop), clear of the lanes' mouths and the path to the temple's gate.
+ */
 export const SHOP_SITES = (() => {
   const out = [], rand = rng(1644), [ax0, az0, ax1, az1] = AVENUE;
   let k = 0;
+  const [tcx, tcz] = TEMPLE.c;
   for (let z = az0 + 16; z < az1 - 14; z += 9 + rand() * 2.5) for (const s of [-1, 1]) {
     // (the west edge faces east: out = +x; rot turns local +z into the world)
     const x = s < 0 ? ax0 + 1.4 : ax1 - 1.4;
-    const zz = z + (s > 0 ? 4 : 0);
-    if (s < 0 && Object.values(SHOP_BUILDINGS).some((b) => zz > b[1] - 5 && zz < b[3] + 5)) continue;
-    out.push({ at: [x, zz], rot: s < 0 ? Math.PI / 2 : -Math.PI / 2, trade: TRADES[(k++ + (s > 0 ? 3 : 0)) % TRADES.length], seed: 100 + k * 17, w: 4.2 + rand() * 1.4 });
+    const zz = z + (s > 0 ? 4 : 0), w = 4.2 + rand() * 1.4, trade = TRADES[(k++ + (s > 0 ? 3 : 0)) % TRADES.length], seed = 100 + k * 17;
+    const edge = s < 0 ? ax0 : ax1;
+    // a shop strip behind this edge (shop fronts + aprons reach 14.6 m from the axis): no booth
+    if (SHOP_STRIPS.some((p) => zz + w / 2 + 1 > p.rect[1] && zz - w / 2 - 1 < p.rect[3] && (s < 0 ? p.side === 'w' : p.side === 'e'))) continue;
+    // not over a lane's mouth (a hutong meets the avenue every 29 m), nor on the path to the temple
+    if (lanes().some((l) => l[2] - l[0] > 40 && zz + w / 2 + 0.6 > l[1] && zz - w / 2 - 0.6 < l[3] && l[0] <= edge + 1 && l[2] >= edge - 1)) continue;
+    if (s > 0 && Math.abs(zz - tcz) < 3 + w / 2 + 1) continue;
+    out.push({ at: [x, zz], rot: s < 0 ? Math.PI / 2 : -Math.PI / 2, trade, seed, w });
   }
   return out;
 })();

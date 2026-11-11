@@ -29,3 +29,21 @@ test('ways: connected, none in the palace, the moat or the temple court', () => 
   const seen = new Set([0]), q = [0]; while (q.length) { const n = q.pop(); for (const m of adj[n]) if (!seen.has(m)) { seen.add(m); q.push(m); } }
   assert.ok(seen.size > G.nodes.length * 0.9, `${seen.size}/${G.nodes.length} connected`);
 });
+
+test('ways keep out of the houses and the shop rows; booths stand clear of shop fronts', async () => {
+  const ww = D.walkways(), G = graphFromRects(ww.rects, ww.links, ww.clip);
+  for (const [x, z] of G.nodes) { assert.ok(!L.inHouse(x, z, 0), `node in a house ${x},${z}`); assert.ok(!L.inShopRow(x, z, 0), `node in a shop ${x},${z}`); }
+  const S = await import('../src/settlements/qing-beijing/shops.js');
+  assert.ok(S.SHOP_SITES.length > 3);
+  for (const s of S.SHOP_SITES) { assert.ok(!L.inShopStrip(s.at[0], s.at[1], 0), `booth in the shop strip ${s.at}`); assert.ok(!L.inHouse(s.at[0], s.at[1], 0)); }
+});
+
+test('the tea house and pharmacy lie inside real shops; furnished houses are lod-0 lots with their parts', async () => {
+  const ins = L.interiorShops();
+  assert.deepEqual(ins.map((s) => s.kind).sort(), ['pharmacy', 'teahouse']);
+  for (const s of ins) assert.ok(s.z1 - s.z0 >= 5.6 && s.side === 'w');
+  const H = await import('../src/settlements/qing-beijing/houses.js');
+  const f = L.furnishedHouses(5);
+  assert.equal(f.length, 5);
+  for (const h of f) { const P = H.houseParts(h); assert.ok(P.main[2] > P.main[0] && P.wings.length === 2, 'two wings'); for (const w of P.wings) assert.ok(w.rect[1] >= P.main[3], 'wing south of the main house'); }
+});
