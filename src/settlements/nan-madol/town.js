@@ -90,9 +90,9 @@ export async function town() {
     const head = W(2.9, 0); man(head, 0, face(head, W(0, 0)), { pose: 'cross', cloth: 'cloth_white', beard: true, hair: 'bun' });
   }
   // priests in the outer court, at the gate and about the inner court and the tomb's stair
-  const standing = [[-10, -14], [-6, -12], [-14, -12], [6, -30], [10, -48], [-27, -56], [-20, -14], [11, -20], [3.5, -15]];
+  const standing = [[-15, -13], [-5, -11], [-17, -11], [6, -30], [10, -48], [-27, -56], [-20, -14], [11, -20], [5.5, -12]];
   for (const at of standing) man(at, 0, face(at, [-10, -38]), { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', pose: rand() < 0.3 ? 'talk' : 'stand' });
-  for (const at of [[-12.5, -26], [-7.5, -26.2], [-10, -24.6], [-18.5, -38], [1, -38], [-10, -52]]) man(at, 0, face(at, [-10, -38]), { cloth: 'cloth_white', pose: rand() < 0.5 ? 'cross' : 'kneel', beard: rand() < 0.4 });
+  for (const at of [[-14.5, -24.2], [-5.5, -24.2], [-10, -23.8], [-18.5, -38], [1, -38], [-10, -52]]) man(at, 0, face(at, [-10, -38]), { cloth: 'cloth_white', pose: rand() < 0.5 ? 'cross' : 'kneel', beard: rand() < 0.4 });
   // the household at every nah: someone sitting on the platform, work before it, baskets, firewood, pigs and fowls about
   const hrand = rng(404);
   v.houses.forEach((h, k) => {
