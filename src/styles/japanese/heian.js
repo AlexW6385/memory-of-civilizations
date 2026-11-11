@@ -9,6 +9,7 @@
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { hexa } from '../chinese/index.js';
 import { tube } from './shape.js';
+import { dressHouse, furnishTrade, wattle } from './village.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const pot = (bag, m, x, y, z, r, h) => bag.add(m, lathe([[r * 0.6, 0], [r, h * 0.45], [r * 0.75, h * 0.85], [r * 0.55, h], [0.001, h]], 10, null, x, y, z));
@@ -89,6 +90,7 @@ function heianHouse(el, { bag, col }) {
     { const p = P(L - T - 0.55, T + 0.52); pot(bag, 'iron', p[0], fy + 0.8, p[1], 0.3, 0.24); }
     { const p = P(T + 0.5, T + 0.6); pot(bag, 'pottery_dark', p[0], fy, p[1], 0.32, 0.8); }
     B('timber', T, T, L - T, D - T, y + H - 0.06, y + H - 0.02);
+    furnishTrade(el, { bag, col }, { P, B, ry, T, L, D, g0 });
   } else {
     B(wallMat, 0, 0, L, D, fy, y + H, true);
   }
@@ -154,6 +156,7 @@ function heianHouse(el, { bag, col }) {
     bag.add('timber', box(g[0], y + 0.9, g[1], g[2], y + 2.0, g[3]));
     gabled(bag, { x0: g[0], z0: g[1], x1: g[2], z1: g[3], y: y + 2.0, rise: 0.9, o: 0.4, ov: 0.3, th: 0.25, alongX: along, mat: 'thatch', gable: 'timber', chigi: true, ridge: 'thatch' });
   }
+  dressHouse(el, { bag, col }, { P, B, rc, L, D, y, fy, H, door, dw, wallMat, kind, gabled });
 }
 
 /**
@@ -385,4 +388,4 @@ function ryuto(el, { bag }) {
   const st = T(0, 0, L / 2 - 0.2); bag.add('lacquer_red', rod([st[0], y + 0.2, st[2]], [st[0], y + 2.6, st[2]], 0.04, 6)); const pe = T(0.4, 0, L / 2 - 0.2); bag.add('cloth_red', box(Math.min(st[0], pe[0]), y + 2.0, Math.min(st[2], pe[2]) - 0.01, Math.max(st[0], pe[0]) + 0.02, y + 2.5, Math.max(st[2], pe[2]) + 0.01));
 }
 
-export const heianElements = { heian_house: heianHouse, heian_hall: heianHall, corridor, tsuijibei, yakumon, pier, ryuto_boat: ryuto };
+export const heianElements = { wattle, heian_house: heianHouse, heian_hall: heianHall, corridor, tsuijibei, yakumon, pier, ryuto_boat: ryuto };
