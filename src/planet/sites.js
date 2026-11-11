@@ -62,6 +62,7 @@ export const SITES = [
   { id: 'great-zimbabwe', name: { en: 'Zimbabwe', zh: '大津巴布韦' }, era: '14th c.', region: 'zimbabwe', lat: -20.27, lon: 30.93, radius: 380 },
   // ── Greece and Rome ──
   { id: 'knossos', name: { en: 'Minoan Crete', zh: '米诺斯克里特' }, era: '16th c. BC', region: 'aegean', lat: 35.30, lon: 25.16, radius: 350 },
+  { id: 'mycenae', name: { en: 'Mycenae', zh: '迈锡尼' }, era: '13th c. BC', region: 'aegean', lat: 37.73, lon: 22.76, radius: 190 },
   { id: 'athens', name: { en: 'Classical Athens', zh: '古典雅典' }, era: '5th c. BC', region: 'aegean', lat: 37.97, lon: 23.73, radius: 420 },
   { id: 'rome', name: { en: 'Imperial Rome', zh: '罗马帝国' }, era: '2nd c.', region: 'latium', lat: 41.90, lon: 12.48, radius: 420 },
   { id: 'baroque-rome', name: { en: 'Baroque Rome', zh: '巴洛克罗马' }, era: '17th c.', region: 'latium', lat: 41.90, lon: 12.46, nudge: 60, radius: 380 },
@@ -102,7 +103,7 @@ const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan',
   M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney',
-  S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
+  S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori mycenae',
   P: 'stonehenge',
 };
 for (const [c, ids] of Object.entries(CLASS)) for (const id of ids.split(' ')) { const s = SITES.find((x) => x.id === id); if (s) s.size = id === 'ming-suzhou' ? 215 : CLASS_RADIUS[c]; }
@@ -140,7 +141,6 @@ export const PLANNED = [
   { id: 'fez', name: { en: 'Fez', zh: '非斯' }, region: 'maghreb', lat: 34.06, lon: -4.97, radius: 320 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },
   { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, region: 'guinea', lat: 6.34, lon: 5.62, radius: 320 },
-  { id: 'mycenae', name: { en: 'Mycenae', zh: '迈锡尼' }, region: 'aegean', lat: 37.73, lon: 22.76, radius: 160 },
   { id: 'delphi', name: { en: 'Delphi', zh: '德尔斐' }, region: 'aegean', lat: 38.48, lon: 22.50, radius: 200 },
   { id: 'manueline-lisbon', name: { en: 'Manueline Lisbon', zh: '曼努埃尔里斯本' }, region: 'iberia', lat: 38.70, lon: -9.21, radius: 300 },
   { id: 'vienna', name: { en: 'Vienna', zh: '维也纳' }, region: 'danube', lat: 48.21, lon: 16.37, radius: 340 },
