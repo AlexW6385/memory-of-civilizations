@@ -20,6 +20,8 @@ export function frame(rect, front, bag, col) {
 export function thatch(bag, r, y, rise, o = 0.6, hip = true, mat = 'thatch') {
   const x0 = r[0] - o, z0 = r[1] - o, x1 = r[2] + o, z1 = r[3] + o;
   const hx = (x1 - x0) / 2, hz = (z1 - z0) / 2;
+  // a thick edge to the eave (the walker's roof-shell test needs an underside there)
+  if (y > 1.5) bag.add(mat, frustum([x0, z0, x1, z1], y - 0.3, y + 0.02, 0, 0, 0, 0, { noTop: true }));
   if (hip) {
     const m = Math.min(hx, hz), f = 0.3 * m;
     bag.add(mat, frustum([x0, z0, x1, z1], y, y + rise * 0.55, f, f, f, f, { noTop: true }));

@@ -44,7 +44,7 @@ The alluvial plain of the Huan river at the foot of the Taihang: flat, loess-sil
 - **Compounds:** a main house of rammed foundation (0.4–0.6 m) with wattle walls and a thatched gable roof; beside it semi-subterranean pit houses (floor 0.6–1.0 m down, steps, a gabled thatch roof reaching nearly to the ground), storage pits, a well, a drying rack for hemp and millet, a pen for pigs. [inferred from the excavated house foundations; "rectangular" and rammed, chiculture.org.hk]
 - **Foundry:** a yard of open sheds on posts under thatch; rows of piece-mould sections drying; clay-lined furnaces (crucible furnaces) with bellows; a pouring pit; charcoal; finished vessels cooling; the casters in short coats and bare arms [inferred; the section-mould method — Wikipedia: "The Houmuwu ding was cast using a section-mold process"].
 - **Oracle-bone workshop and archive:** a shed where plastrons are sawn, scraped and drilled, stacks of shells and scapulae, bone saws and bronze drills; the covered archive pit with its stair [inferred].
-- **Pit houses** — see Compounds. **Chariot pits** beside Fu Hao's tomb: six, each a chariot and two horses [stated].
+- **Pit houses** — see Compounds; modelled bermed (floor at ground level, earth banked 0.75 m round three sides, the door in a low front wall, a gabled thatch roof reaching nearly to the ground) because the ground mesh is too coarse to sink a 4 m floor [inferred: a modelling choice]. **Chariot pits** beside Fu Hao's tomb: six, each a chariot and two horses [stated].
 
 ## 6. People
 

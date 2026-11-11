@@ -62,7 +62,10 @@ export function shangTomb(el, { bag, col, lights }) {
 /** shang_archive: {} — the oracle-bone archive: a long low store of rammed earth under thatch, the shells and scapulae on shelves; before it the diviners' shed. */
 export function shangArchive(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = ARCHIVE.rect, y = ARCHIVE.h, wh = 2.6, tw = 0.6, cx = (x0 + x1) / 2;
-  platform(bag, col, [x0 - 0.6, z0 - 0.6, x1 + 0.6, z1 + 0.6], y, 0.25);
+  { const r = [x0 - 0.6, z0 - 0.6, x1 + 0.6, z1 + 0.6];
+    bag.add('earth_wall', frustum(r, 0, y, 0.25, 0.25, 0.25, 0, { noBottom: true }));
+    col.rect([r[0], r[1], r[2], z1 - 0.3], 0, y); col.rect([r[0], z1 - 0.3, cx - 1.3, r[3]], 0, y); col.rect([cx + 1.3, z1 - 0.3, r[2], r[3]], 0, y);
+    col.floor([r[0] + 0.25, r[1] + 0.25, r[2] - 0.25, r[3]], y); }
   // walls: the door in the south wall in the middle
   const W = (r, yy = y + wh) => { bag.add('earth_wall', box(r[0], y, r[1], r[2], yy, r[3])); col.rect(r, y, yy); };
   W([x0, z0, x1, z0 + tw]); W([x0, z0, x0 + tw, z1]); W([x1 - tw, z0, x1, z1]);
@@ -71,7 +74,7 @@ export function shangArchive(el, { bag, col, lights }) {
   bag.add('timber', box(cx - 1.4, y + 2.1, z1 - tw - 0.08, cx + 1.4, y + 2.3, z1 + 0.08));
   col.floor([x0 + tw, z0 + tw, x1 - tw, z1 - tw], y);
   thatch(bag, [x0, z0, x1, z1], y + wh, 2.6, 0.9, false);
-  steps(bag, col, [cx - 1.3, z1 + 0.01, cx + 1.3, z1 + 1.0], 0, y, 'n');
+  steps(bag, col, [cx - 1.3, z1 + 0.6, cx + 1.3, z1 + 2.4], 0, y, "n");
   bag.add('earth_wall', box(x0 + tw, y, z0 + tw, x1 - tw, y + 0.04, z1 - tw));
   // shelves along the back and the ends: rows of shells (plastrons) laid flat, each row a slab of bone-coloured stacks
   const shelf = (a, b, c, d, rows) => { for (let r = 0; r < rows; r++) { const yy = y + 0.2 + r * 0.55; bag.add('timber', box(a, yy, b, c, yy + 0.05, d)); col.rect([a, b, c, d], y, y + 0.3); }

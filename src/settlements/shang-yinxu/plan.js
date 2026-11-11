@@ -7,7 +7,7 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const walk = (pts, y0 = 0) => { const w = [pts]; w[0].y0 = y0; return w; };
 
 const E = [
-  { t: 'shang_hall', plat: HALL.plat, h: HALL.h, rot: 0, bays: 9, bw: 4, deep: 3, porch: 3.6, over: 2.8, rise: 4.6, rich: true },
+  { t: 'shang_hall', plat: HALL.plat, h: HALL.h, rot: 0, bays: 9, bw: 4, deep: 3, porch: 3.6, over: 2.8, rise: 6.0, rich: true },
   ...FLANKS.map((f, i) => ({ t: 'shang_hall', plat: f.plat, h: f.h, rot: 1, flip: i === 1, bays: 5, bw: 4, deep: 2, porch: 3.2, over: 2.2, rise: 3.6, rich: false })),
   { t: 'shang_pits' },
   { t: 'shang_gate', plat: GATE.plat, axis: GATE.axis, h: GATE.h },
@@ -65,6 +65,6 @@ export const archive = {
   bakeTop: 8,
   elements: AE,
   rooms: [room('archive', ARCHIVE.rect, ARCHIVE.h, 'hall'), room('shed', ARCHIVE.shed, 0, 'open')],
-  walks: walk([[ax, -56], [ax, ARCHIVE.rect[3] + 1.5], [ax, ARCHIVE.rect[3] - 1.2], [ax, ARCHIVE.rect[1] + 8]]),
+  walks: walk([[ax, -56], [ax, ARCHIVE.rect[3] + 2.6], [ax, ARCHIVE.rect[3] - 1.2], [ax, ARCHIVE.rect[1] + 8]]),
 };
 export default hall;
