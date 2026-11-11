@@ -14,6 +14,7 @@ import '../ming/index.js';
 import { rectRoof, pyramidRoof, column, beamTris, flipTris, latticeBay, mingHall, mingPavilion, mingWall, withPal } from '../ming/index.js';
 import { dapo as dapoJ, dapoHeight, meoricho, postLines } from '../joseon/dancheong.js';
 import { throneHall } from './throne.js';
+import { rampRelief, stairRakes } from './ramp.js';
 import { hexiRun, dougong, dougongHeight } from './caihua.js';
 import { qinian } from './tiantan.js';
 import { pekingCart, camelString } from './street.js';
@@ -112,6 +113,7 @@ function stairs(el, { bag, col }) {
     if (alongZ) { t.push(x0, y0, a, x1, y0, a, x1, y1, bb, x0, y0, a, x1, y1, bb, x0, y1, bb); }
     else { t.push(a, y0, z0, a, y0, z1, bb, y1, z1, a, y0, z0, bb, y1, z1, bb, y1, z0); }
     bag.add('marble_smooth', fromTriangles(t.concat(flipTris(t))));
+    if (el.carve !== false) rampRelief(bag, el);
     col.rect([x0, z0, x1, z1], y0, (y0 + y1) / 2);
     return;
   }
@@ -125,6 +127,7 @@ function stairs(el, { bag, col }) {
     bag.add(el.mat || 'marble', box(r[0], y0 - 0.2, r[1], r[2], yy, r[3]));
   }
   col.ramp([x0, z0, x1, z1], y0, y1, dir);
+  if (el.rakes) stairRakes(bag, col, el);
 }
 
 /**
