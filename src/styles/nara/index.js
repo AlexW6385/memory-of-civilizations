@@ -15,6 +15,7 @@ import { shika } from './shika.js';
 import { naraAltarSet } from './altar.js';
 import { bugakuStage } from './stage.js';
 import { naraHall } from './hall.js';
+import { naraTsuiji } from './tsuiji.js';
 
 export const NPAL = { wood: 'timber_red', column: 'timber_red', soffit: 'plaster_white', base: 'granite_block', floor: 'granite_block', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_block', roof: 'tile_grey', doors: 'plank' };
 const withN = (fn) => (el, ctx) => fn({ ...el, pal: { ...NPAL, ...(el.pal || {}) } }, ctx);
@@ -29,6 +30,7 @@ registerStyle('nara', {
     nara_altar_set: naraAltarSet,
     bugaku_stage: bugakuStage,
     nara_hall: naraHall,
+    nara_tsuiji: naraTsuiji,
   },
   objects: { hakkaku_toro: hakkakuToro, daibutsu, bosatsu, nio, shika },
 });
