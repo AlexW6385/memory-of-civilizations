@@ -46,5 +46,6 @@ export const MOVER_SITES = {
   'machu-picchu': () => import('../settlements/machu-picchu/movers.js'),
   'taos': () => import('../settlements/taos/movers.js'),
   'djenne': () => import('../settlements/djenne/movers.js'),
+  'sydney': () => import('../settlements/sydney/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
