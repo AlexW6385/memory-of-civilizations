@@ -13,6 +13,7 @@ export const stpeter = {
   bakeTop: 132,
   elements: [
     { t: 'st_peter', c: CROSSING, s: 110, nave: FRONT_X - 4 - (CROSSING[0] + 55), w: 56, h: 48, d: 42, y: FLOOR, interior: true },
+    { t: 'nave_dress', c: CROSSING, y: FLOOR, b: 13.75 },
     { t: 'colonnade', c: OVAL.c, ax: OVAL.ax, bz: OVAL.bz, rows: 4, depth: 14, h: 13 },
     { t: 'paving', rect: RETTA },
     { t: 'piazza_lines', c: OVAL.c, ax: OVAL.ax, bz: OVAL.bz, rect: RETTA },

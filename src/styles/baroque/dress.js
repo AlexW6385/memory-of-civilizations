@@ -167,3 +167,41 @@ export function castel(el, { bag, col }) {
   angel(bag, x, ay + ah + 4.6, z, 1.3);
   void rand;
 }
+
+/**
+ * nave_dress: { c (the crossing), y (the floor), b (the arms' half-width) } — what stood inside in use: the
+ * Confessio before the papal altar with its balustrade and the ninety-five gilt lamps that burn day and night
+ * [stated: the lamps, Wikipedia "Papal Tomb of St. Peter" / stpetersbasilica.info]; wooden confessionals against
+ * the sides of the arms with their curtains; stands of votive candles; kneeling benches before the altars.
+ */
+export function naveDress(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y, b = el.b ?? 13.75;
+  // the Confessio: a rail round a sunk floor of dark marble, the lamps on the rail's top
+  const r = [cx + 5.8, cz - 4.2, cx + 13, cz + 4.2];
+  bag.add('marble_dark', box(r[0], y + 0.05, r[1], r[2], y + 0.07, r[3]));
+  const sides = [[[r[0], r[1]], [r[2], r[1]]], [[r[2], r[1]], [r[2], r[3]]], [[r[2], r[3]], [r[0], r[3]]], [[r[0], r[3]], [r[0], r[1]]]];
+  for (const [p, q] of sides) { bag.add('marble_pink', orientedBox(p, q, 0.5, y, y + 0.85, 0.25)); bag.add('marble', orientedBox(p, q, 0.62, y + 0.85, y + 0.95, 0.31)); col.segment(p, q, 0.6, y, y + 1.0); }
+  let n = 0; const per = 2 * ((r[2] - r[0]) + (r[3] - r[1]));
+  for (let k = 0; k < 95; k++) {
+    let d = k / 95 * per, px, pz;
+    if (d < r[2] - r[0]) { px = r[0] + d; pz = r[1]; } else if ((d -= r[2] - r[0]) < r[3] - r[1]) { px = r[2]; pz = r[1] + d; } else if ((d -= r[3] - r[1]) < r[2] - r[0]) { px = r[2] - d; pz = r[3]; } else { d -= r[2] - r[0]; px = r[0]; pz = r[3] - d; }
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.07, 0.02], [0.03, 0.12], [0.05, 0.3], [0.09, 0.38], [0.001, 0.4]], 7, null, px, y + 0.95, pz));
+    bag.add('flame', box(px - 0.02, y + 1.36, pz - 0.02, px + 0.02, y + 1.46, pz + 0.02)); n++;
+  }
+  // the confessionals: a booth with a pedimented top, the priest's seat in the middle behind a curtain, a grille at each side, a kneeling board on each side
+  const booth = (x, z, face) => {
+    const dx = face, W = 2.6, D = 1.1;
+    bag.add('wood_dark', box(x - D / 2, y, z - W / 2, x + D / 2, y + 2.6, z + W / 2)); col.rect([x - D / 2, z - W / 2, x + D / 2, z + W / 2], y, y + 2.6);
+    bag.add('wood_dark', box(x - D / 2 - 0.08, y + 2.6, z - W / 2 - 0.08, x + D / 2 + 0.08, y + 2.72, z + W / 2 + 0.08));
+    bag.add('wood_painted', box(x + dx * (D / 2) - (dx > 0 ? 0 : 0.02), y + 0.2, z - 0.4, x + dx * (D / 2) + (dx > 0 ? 0.02 : 0), y + 2.2, z + 0.4));
+    bag.add('cloth_maroon', box(x + dx * (D / 2) + (dx > 0 ? 0.02 : -0.05), y + 0.2, z - 0.38, x + dx * (D / 2) + (dx > 0 ? 0.05 : -0.02), y + 2.1, z + 0.38));
+    for (const s of [-1, 1]) { bag.add('opening', box(x + dx * (D / 2) + (dx > 0 ? 0.0 : -0.03), y + 1.3, z + s * 0.95 - 0.2, x + dx * (D / 2) + (dx > 0 ? 0.03 : 0), y + 1.8, z + s * 0.95 + 0.2)); bag.add('wood_dark', box(x + dx * (D / 2 + 0.45) - 0.25, y, z + s * 1.0 - 0.3, x + dx * (D / 2 + 0.45) + 0.25, y + 0.28, z + s * 1.0 + 0.3)); }
+    bag.add('gilt_bronze', box(x - 0.02 + dx * 0.0, y + 2.72, z - 0.03, x + 0.02, y + 3.1, z + 0.03));
+  };
+  for (const s of [-1, 1]) for (const [z, face] of [[-41, 1], [-34, 1], [-27, 1], [27, 1], [34, 1], [41, 1]]) booth(cx + s * (b - 0.7), cz + z, s > 0 ? -1 : 1);
+  // stands of votive candles with their drip-pans, and kneeling benches before the altars of the arms' ends
+  const stand = (x, z) => { bag.add('iron', box(x - 0.45, y, z - 0.3, x + 0.45, y + 0.05, z + 0.3)); bag.add('iron', box(x - 0.45, y + 0.05, z - 0.3, x - 0.4, y + 0.9, z - 0.25)); bag.add('iron', box(x + 0.4, y + 0.05, z - 0.3, x + 0.45, y + 0.9, z - 0.25)); bag.add('iron', box(x - 0.45, y + 0.85, z - 0.3, x + 0.45, y + 0.9, z + 0.3)); for (let k = 0; k < 9; k++) { const cx2 = x - 0.36 + (k % 5) * 0.18, cz2 = z - 0.18 + Math.floor(k / 5) * 0.3; bag.add('paint_white', box(cx2 - 0.02, y + 0.9, cz2 - 0.02, cx2 + 0.02, y + 1.05, cz2 + 0.02)); if (k % 3 !== 2) bag.add('flame', box(cx2 - 0.015, y + 1.05, cz2 - 0.015, cx2 + 0.015, y + 1.1, cz2 + 0.015)); } col.rect([x - 0.45, z - 0.3, x + 0.45, z + 0.3], y, y + 0.9); };
+  for (const s of [-1, 1]) for (const [dx, dz] of [[-4, 24], [4, 24], [-3, 46]]) stand(cx + s * dx, cz + s * dz);
+  for (const s of [-1, 1]) for (const dx of [-4, 0, 4]) { const x = cx + dx, z = cz + s * 50.5; bag.add('wood_dark', box(x - 0.6, y, z - 0.35, x + 0.6, y + 0.32, z + 0.35)); bag.add('cloth_red', box(x - 0.58, y + 0.32, z - 0.33, x + 0.58, y + 0.38, z + 0.33)); bag.add('wood_dark', box(x - 0.6, y + 0.32, z + (s > 0 ? 0.35 : -0.5), x + 0.6, y + 0.95, z + (s > 0 ? 0.5 : -0.35))); }
+  void n;
+}
