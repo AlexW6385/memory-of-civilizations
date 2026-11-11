@@ -267,8 +267,8 @@ function templeGate(el, { bag, col }) {
       bag.add('granite_grey', lathe([[0.001, 0], [0.2, 0], [0.19, 0.02], [0.001, 0.035]], 12).rotateX(f * Math.PI / 2).translate(px, (yl + yh) / 2, f * (hd / 2 + 0.015) + cz));
       for (let k = 0; k < 8; k++) { const an = k * Math.PI / 4; bag.add('granite_grey', lathe([[0.001, 0], [0.045, 0], [0.04, 0.02], [0.001, 0.03]], 6).rotateX(f * Math.PI / 2).translate(px + Math.cos(an) * 0.13, (yl + yh) / 2 + Math.sin(an) * 0.13, f * (hd / 2 + 0.015) + cz)); }
     }
-    for (const f of [-1, 1]) {
-      const zc = cz + f * (hd / 2 + 0.5), xd = px;
+    for (const f of [sd]) {
+      const zc = cz + f * (hd / 2 + 0.5), xd = cx + sx * (w + 2 * pw + 0.55);
       bag.add('granite_block', lathe([[0.001, 0], [0.42, 0], [0.44, 0.1], [0.4, 0.14], [0.4, 0.84], [0.44, 0.9], [0.001, 0.9]], 14, null, xd, y, zc));
       bag.add('granite_grey', lathe([[0.44, 0.9], [0.38, 0.9], [0.3, 0.95], [0.001, 0.95]], 14, null, xd, y, zc));
       for (let k = 0; k < 14; k++) { const an = k * Math.PI * 2 / 14; bag.add('granite_grey', lathe([[0.001, 0], [0.04, 0], [0.036, 0.04], [0.001, 0.05]], 5, null, xd + Math.cos(an) * 0.41, y + 0.2, zc + Math.sin(an) * 0.41).rotateZ(0)); }
@@ -957,40 +957,6 @@ function hzLionPair(el, { bag, col }) {
 }
 
 /**
- * hz_wutou: a black-capped gate (wutou men) of the temple's approach, across the foot of the stair { c [x, z], y, half (half the way between the posts), h, dir }: two
- * square posts of red-painted timber on granite bases with drum-stone buttresses and black caps, two tie beams, a plaque board between them. [inferred: the Song 乌头门]
- */
-function hzWutou(el, { bag, col }) {
-  const [cx, cz] = el.c, y = el.y ?? 0, hw = el.half ?? 7.4, h = el.h ?? 5.2, pw = 0.3;
-  for (const sx of [-1, 1]) {
-    const px = cx + sx * hw;
-    bag.add('granite_grey', box(px - 0.55, y, cz - 0.55, px + 0.55, y + 0.5, cz + 0.55));
-    bag.add('granite_block', box(px - 0.45, y + 0.5, cz - 0.45, px + 0.45, y + 0.62, cz + 0.45));
-    bag.add('lacquer_red', box(px - pw, y + 0.62, cz - pw, px + pw, y + h, cz + pw));
-    bag.add('lacquer_black', box(px - pw - 0.05, y + h, cz - pw - 0.05, px + pw + 0.05, y + h + 0.5, cz + pw + 0.05));
-    bag.add('lacquer_black', box(px - 0.18, y + h + 0.5, cz - 0.18, px + 0.18, y + h + 0.66, cz + 0.18));
-    bag.add('bronze', lathe([[0.001, 0], [0.11, 0.02], [0.13, 0.12], [0.001, 0.2]], 8, null, px, y + h + 0.66, cz));
-    // the drum stones either side across the way's line
-    for (const dz of [-1, 1]) {
-      const zz = cz + dz * 0.85;
-      bag.add('granite_grey', box(px - 0.16, y, zz - 0.3, px + 0.16, y + 0.3, zz + 0.3));
-      bag.add('granite_grey', rod([px - 0.17, y + 0.62, zz], [px + 0.17, y + 0.62, zz], 0.34, 14));
-      bag.add('slate', rod([px - 0.19, y + 0.62, zz], [px + 0.19, y + 0.62, zz], 0.2, 12));
-    }
-    col.rect([px - 0.55, cz - 0.55, px + 0.55, cz + 0.55], y, y + h);
-  }
-  const a = cx - hw, b = cx + hw;
-  bag.add('lacquer_red', box(a - 0.3, y + h - 0.6, cz - 0.16, b + 0.3, y + h - 0.2, cz + 0.16));
-  bag.add('lacquer_red', box(a - 0.3, y + h - 1.9, cz - 0.1, b + 0.3, y + h - 1.65, cz + 0.1));
-  // the board between the beams: dark, gilt-edged, carried by short posts
-  const bw = Math.min(2.8, hw * 0.4), sd = el.dir === 'n' ? -1 : 1;
-  for (const sx of [-1, 1]) bag.add('lacquer_red', box(cx + sx * bw - 0.07, y + h - 1.65, cz - 0.07, cx + sx * bw + 0.07, y + h - 0.6, cz + 0.07));
-  bag.add('paint_ochre', box(cx - bw, y + h - 1.62, cz + sd * 0.05, cx + bw, y + h - 0.62, cz + sd * 0.12));
-  bag.add('lacquer_black', box(cx - bw + 0.1, y + h - 1.52, cz + sd * 0.12, cx + bw - 0.1, y + h - 0.72, cz + sd * 0.14));
-  // tie-beam ends, little hoods over the posts' heads aside
-}
-
-/**
  * Leaves as small pointed cards (a six-point outline, two-sided material) bent in their normals toward
  * the outside of the crown, so a crown shades as one rounded mass as the engine's flora does; one
  * geometry per material (cards: [[cx, cy, cz, ux, uy, uz, vx, vy, vz, hw, hl]...]).
@@ -1279,4 +1245,4 @@ function hzLanding(el, { bag, col }) {
   void t;
 }
 
-export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_wutou: hzWutou, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_slabs: hzSlabs, hz_landing: hzLanding };
+export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_slabs: hzSlabs, hz_landing: hzLanding };
