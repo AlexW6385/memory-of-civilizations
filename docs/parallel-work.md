@@ -26,7 +26,7 @@ How work on this repository is run with many agents at once. The coordinating se
 | Check | Who | When |
 |---|---|---|
 | `node tools/surface-check.mjs <id>` ("surfaces ok") | agent | every settlement touched |
-| `node tools/geo-one.mjs <id>` (≤ 45 MB, ≤ 1500 meshes) | agent | every settlement touched |
+| `node tools/geo-one.mjs <id>` (guard: 150 MB, 3000 meshes) | agent | every settlement touched |
 | `node tools/plan-check.mjs <id>` (walkable from the arrival) | agent | every settlement touched |
 | `node --test tests/worker.test.mjs` | agent | before finishing |
 | `tools/showroom.mjs` renders | agent, sparingly (one or two per task); coordinator for doubtful reports | |

@@ -58,7 +58,7 @@ They are sampled at level 0, so they work inside `If` branches and in vertex sha
 
 ## 6. Speed
 
-Target (DESIGN §8): 60 fps in a settlement, no frame over 50 ms, ≤ 800 draw calls, ≤ 3 M visible triangles. Suzhou's history shows the limit moves between CPU (draw calls) and GPU (pixels); measure before changing anything.
+Target (DESIGN §8): 60 fps in a settlement, no frame over 50 ms, ≤ 800 draw calls, ≤ 3 M visible triangles. Geometry size is not a target in itself (the guard is 150 MB): more is fine while the frame and the build time hold. Suzhou's history shows the limit moves between CPU (draw calls) and GPU (pixels); measure before changing anything.
 
 **What brought Suzhou from ~20 to ~60 fps:**
 
@@ -87,7 +87,7 @@ Target (DESIGN §8): 60 fps in a settlement, no frame over 50 ms, ≤ 800 draw c
 - [ ] Living systems attached, counts by time of day, nothing clipping.
 - [ ] Weathering, waterline and wet surfaces look right for the climate (`damp`, `waterline` set in `ground.js`).
 - [ ] Main routes walked; gates, bridges' underpasses, doors and garden routes all pass.
-- [ ] Budget (`tools/geo-one.mjs`): ≤ 45 MB, ≤ 1500 meshes.
+- [ ] Budget (`tools/geo-one.mjs`): under the guard of 150 MB and 3000 meshes; the frame measured in the browser decides.
 - [ ] Measured in Chrome at the densest views: ≥ 55 fps turning, p95 ≤ 25 ms, ≤ 800 draws.
 - [ ] No per-pixel procedural noise added; no dynamic buffers.
 

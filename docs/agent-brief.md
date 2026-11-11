@@ -16,7 +16,7 @@ STRICT FILE RULES (to avoid merge conflicts with the other agents):
 
 TOOLS:
 - `node tools/surface-check.mjs <id>` must print "surfaces ok" for each of your settlements.
-- `node tools/geo-one.mjs <id>` prints the geometry budget; it must stay under 45 MB and 1500 meshes (each distinct material per plan is a mesh; reuse materials).
+- `node tools/geo-one.mjs <id>` prints the geometry budget; it must stay under the guard of 150 MB and 3000 meshes (each distinct material per plan is a mesh; reuse materials); the real test is the frame in the browser.
 - `node --test tests/worker.test.mjs` must pass.
 - To look at an element: `node tools/showroom.mjs '<json array of elements>' --style <style> --imports <style> --cam x,y,z --look x,y,z --out shots/<name>.png` then Read the png (renders in ~1–3 min). Elements need their params (see the plan files). Full-scene shots (tools/shot.mjs) take 20+ minutes here; avoid them.
 - Long commands: run with a timeout (e.g. `timeout 900 ...`).

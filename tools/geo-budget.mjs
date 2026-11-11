@@ -16,8 +16,10 @@ import { MODULES } from '../src/settlements/grounds.js';
 import { buildPlan } from '../src/core/build.js';
 import { LIFE_MIN } from '../src/engine/life-instances.js';
 
-/** Per settlement, everything resident (near and far tiles both). */
-export const LIMITS = { gpuMB: 45, meshes: 1500 };
+/** Per settlement, everything resident (near and far tiles both). A guard against a runaway build,
+ *  not a target: the real limits are the frame and the build time, measured in the browser
+ *  (decision 2026-11-10; was 45 MB and 1500 meshes). */
+export const LIMITS = { gpuMB: 150, meshes: 3000 };
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
