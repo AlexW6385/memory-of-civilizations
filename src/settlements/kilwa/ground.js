@@ -2,7 +2,7 @@
 // baobabs are built: life.js) on the island, the beach and the reef flat, the Indian Ocean; the
 // warm, bright, humid sky of the monsoon coast.
 
-import { RADIUS, SEA, RIM, MOSQUE, PALACE, height, inSea, inRect, inLot, STREETS, onHeadland, STAIR, BEACH_MOSQUE, GATE_STAIRS } from './layout.js';
+import { RADIUS, SEA, RIM, MOSQUE, PALACE, height, inSea, inRect, inLot, STREETS, smooth, onHeadland, STAIR, BEACH_MOSQUE, GATE_STAIRS } from './layout.js';
 import { inTree } from './life.js';
 
 function cover(x, z, h) {
@@ -11,6 +11,8 @@ function cover(x, z, h) {
   if (inRect(MOSQUE, x, z, 2) || inRect(PALACE, x, z, 2)) { c.road = 0.45; c.grass = 0.1; return c; }
   // the streets of the town: trodden coral earth between the houses
   if (h > 1.5 && STREETS.some((r) => inRect(r, x, z, -0.4))) { c.road = 0.5; c.grass = 0.02; c.sand = 0.4; c.soil = 0.4; return c; }
+  // the alleys between the houses and the open ground of the town's heart: trodden coral earth
+  if (h > 1.5 && Math.hypot(x + 45, z - 10) < 175 && !onHeadland(x, z) && x < 130) { const k = 1 - smooth(120, 175, Math.hypot(x + 45, z - 10)); c.road = 0.3 + 0.2 * k; c.grass = 0.02 + 0.2 * (1 - k); c.sand = 0.4; c.soil = 0.4; return c; }
   // the headland: bare sandstone on its cliffs, trodden ground on its terraces
   const s = Math.max(Math.abs(height(x + 1, z) - height(x - 1, z)), Math.abs(height(x, z + 1) - height(x, z - 1))) / 2;
   if (s > 0.7 && h > -1) { c.rock = 0.85; c.red = 0.35; c.grass = 0.05; c.sand = 0.2; c.soil = 0.1; return c; }
