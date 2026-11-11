@@ -124,7 +124,7 @@ export function wutaiHouse(el, { bag, col }) {
     const hang = rand() < 0.7, cols = ['paint_ochre', 'paint_ochre', 'lacquer_red'];
     if (hang) for (let k = 0; k < nb; k++) if (k !== door && rand() < 0.7) {
       const uc = (k + 0.5) * bay, m = cols[Math.floor(rand() * cols.length)], w = m === 'lacquer_red' ? 0.05 : 0.16, n = m === 'lacquer_red' ? 9 : 5;
-      for (const e of [-0.45, 0, 0.45]) for (let j = 0; j < n; j++) B(m, uc + e - w / 2, -0.38, uc + e + w / 2, -0.38 + w, top - 0.5 - j * (m === 'lacquer_red' ? 0.13 : 0.3), top - 0.5 - j * (m === 'lacquer_red' ? 0.13 : 0.3) + (m === 'lacquer_red' ? 0.18 : 0.34), false);
+      for (const e of [-0.45, 0, 0.45]) for (let j = 0; j < n; j++) { const red = m === 'lacquer_red', yb = top - 0.47 - j * (red ? 0.13 : 0.3), v0 = red ? -0.37 : -0.38; B(m, uc + e - w / 2, v0, uc + e + w / 2, v0 + w, yb - (red ? 0.18 : 0.34), yb, false); }
       B('timber', uc - 0.6, -0.4, uc + 0.6, -0.34, top - 0.5, top - 0.44, false);
     }
   }
