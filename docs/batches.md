@@ -43,7 +43,7 @@ Agents on one settlement edit disjoint files of its folder (the split above); th
 
 Slots in brackets; S = shared style owned in that batch, by the agent named.
 
-### B1 — Pilot: Chinese capitals (10) — *in progress*
+### B1 — Pilot: Chinese capitals (10) — *built in three passes (v10.55–v10.59); browser survey against Suzhou pending*
 
 | Settlement | Class | Slots |
 |---|---|---|
