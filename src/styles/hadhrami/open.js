@@ -5,6 +5,8 @@
 import { box, rod, lathe } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 import { GH, SH, K, T, SW, PT, RUN, F0, ys, fl, topOf, houseDims } from './dims.js';
+import { windowPieces } from './parts.js';
+import { Matrix4 } from '../../core/three.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 /** Boxes for a wall along one axis with openings cut: { along, u0, u1, t0, t1, y0, y1, holes: [{ a, b, lo, hi }] }. */
@@ -42,7 +44,13 @@ function towerOpen(el, ctx) {
     for (const p of wallBoxes({ along: 'x', u0: X0 + i, u1: X1 - i, t0: Z0 + i, t1: I1, y0, y1, holes: nh })) piece(p);
     for (const p of wallBoxes({ along: 'x', u0: X0 + i, u1: X1 - i, t0: I3, t1: Z1 - i, y0, y1 })) piece(p);
     for (const p of wallBoxes({ along: 'z', u0: Z0 + i, u1: Z1 - i, t0: I2, t1: X1 - i, y0, y1 })) piece(p);
-    const wh = s === 0 ? [doorHole, { a: D.doorZ + 1.7 - 0.1, b: D.doorZ + 1.7 + 0.1, lo: 2.3, hi: 2.8 }] : [{ a: D.doorZ - 0.15, b: D.doorZ + 0.15, lo: fy + 1.6, hi: fy + 2.3 }];
+    const wk = s <= 2 ? [0.5, 1.35, 0.8] : [0.8, 0.95, 1.25], wzs = [I1 + 2.4, D.doorZ + 0.2];
+    const wh = s === 0 ? [doorHole, { a: I1 + 2.4 - 0.1, b: I1 + 2.4 + 0.1, lo: 2.3, hi: 2.8 }] : wzs.map((z) => ({ a: z - wk[0] / 2, b: z + wk[0] / 2, lo: fy + wk[1], hi: fy + wk[1] + wk[2] }));
+    // the same windows' fittings on the outside of the west face (the shared window parts, instanced)
+    for (const z of s === 0 ? [I1 + 2.4] : wzs) {
+      const kind = s === 0 ? 'slit' : s <= 2 ? 'small' : s >= n - 2 ? 'white' : 'big', sy = s === 0 ? 2.3 : fy + wk[1], m = new Matrix4().makeRotationY(-Math.PI / 2).setPosition(X0 + K * sy, sy, z);
+      for (const [mt, g] of windowPieces(kind)) bag.addInstance(mt, g, m.clone(), { reach: 130 });
+    }
     for (const p of wallBoxes({ along: 'z', u0: Z0 + i, u1: Z1 - i, t0: X0 + i, t1: I0, y0, y1, holes: wh })) piece(p);
     // the fittings of the north windows: a frame, the lower part shuttered with carved leaves, bars above
     for (const [c, w, lo, h] of NW(s)) {

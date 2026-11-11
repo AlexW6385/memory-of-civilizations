@@ -1,21 +1,23 @@
 // Windows, doors and the bay of the Hadhrami tower house, built once at the origin facing +z (the wall's face at z = 0) and
 // placed by matrix (instanced in the viewer). Each is a list of [material, geometry].
-import { box } from '../../core/geom.js';
+import { box, quad, fromTriangles } from '../../core/geom.js';
+/** A flat rectangle facing +z at depth z, from (xa, ya) to (xb, yb): two triangles. */
+const fq = (xa, ya, xb, yb, z) => { const o = []; quad(o, [xb, ya, z], [xb, yb, z], [xa, yb, z], [xa, ya, z]); return fromTriangles(o); };
 
 const CACHE = {};
 const W = { slit: [0.2, 0.5], small: [0.5, 0.8], big: [0.8, 1.25], white: [0.85, 1.3] };
-/** A window: the dark opening, the two shutter leaves (the upper part left open), and for the larger a white lime frame and sill. */
+/** A window: the dark opening, the two shutter leaves (the upper part left open), and for the larger a white lime frame and sill — flat quads at slightly different depths (14 triangles). */
 export function windowPieces(kind) {
   if (CACHE[kind]) return CACHE[kind];
-  const [w, h] = W[kind], hw = w / 2, out = [['opening', box(-hw, 0, 0, hw, h, 0.03)]];
+  const [w, h] = W[kind], hw = w / 2, out = [['opening', fq(-hw, 0, hw, h, 0.03)]];
   if (kind !== 'slit') {
     const lh = h * 0.74, g = 0.02;
-    out.push(['timber', box(-hw + 0.02, 0.02, 0, -g, lh, 0.05)], ['timber', box(g, 0.02, 0, hw - 0.02, lh, 0.05)]);
+    out.push(['timber', fq(-hw + 0.02, 0.02, -g, lh, 0.05)], ['timber', fq(g, 0.02, hw - 0.02, lh, 0.05)]);
   }
   if (kind === 'big' || kind === 'white') {
     const f = 0.1;
-    out.push(['lime_plaster', box(-hw - f, h, 0, hw + f, h + f, 0.07)], ['lime_plaster', box(-hw - f, 0, 0, -hw, h, 0.06)], ['lime_plaster', box(hw, 0, 0, hw + f, h, 0.06)], ['lime_plaster', box(-hw - f, -0.1, 0, hw + f, 0, 0.1)]);
-  } else if (kind === 'small') out.push(['timber', box(-hw - 0.05, h, 0, hw + 0.05, h + 0.07, 0.06)]);
+    out.push(['lime_plaster', fq(-hw - f, h, hw + f, h + f, 0.07)], ['lime_plaster', fq(-hw - f, 0, -hw, h, 0.06)], ['lime_plaster', fq(hw, 0, hw + f, h, 0.06)], ['lime_plaster', fq(-hw - f, -0.1, hw + f, 0, 0.1)]);
+  } else if (kind === 'small') out.push(['timber', fq(-hw - 0.05, h, hw + 0.05, h + 0.07, 0.06)]);
   return (CACHE[kind] = out);
 }
 /** The street door: a carved leaf of cedar between lime jambs under a timber lintel, a stone step. */
