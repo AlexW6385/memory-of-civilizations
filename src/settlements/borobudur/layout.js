@@ -13,20 +13,35 @@ export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 let HOUSES = null;
-/** Houses on posts, 5–9 m, scattered in each hamlet round its open yard, a granary or two among them. */
+const FRONT_OF = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+/**
+ * The hamlets' buildings (docs/settlements/borobudur.md §14), 4–9 m, scattered round each hamlet's open yard and
+ * facing it: { rect, seed, kind: 'house' | 'lumbung' (a granary), front ('n' | 's' | 'e' | 'w': the side with the veranda
+ * and the stair), hamlet, interior (furnished and walkable) }. The first house of the first two hamlets is furnished.
+ */
 export function houses() {
   if (HOUSES) return HOUSES;
   HOUSES = [];
-  const rand = rng(825);
-  for (const [hx, hz, hr] of HAMLETS) {
-    for (let k = 0; k < 60 && HOUSES.length < 400; k++) {
+  const rand = rng(825), furnished = new Set();
+  HAMLETS.forEach(([hx, hz, hr], hi) => {
+    let n = 0;
+    for (let k = 0; k < 90 && n < 30; k++) {
       const a = rand() * Math.PI * 2, d = 10 + rand() * hr, x = hx + Math.cos(a) * d, z = hz + Math.sin(a) * d;
-      const w = 5 + rand() * 4, dd = 4 + rand() * 3, r = [x - w / 2, z - dd / 2, x + w / 2, z + dd / 2];
-      if (Math.hypot(x, z) > RADIUS - 30 || HOUSES.some((h) => inRect(h.rect, x, z, w / 2 + dd / 2 + 2))) continue;
-      HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6) });
+      const granary = rand() < 0.2, W = granary ? 2.6 + rand() * 0.6 : 5 + rand() * 3.2, D = granary ? W : 4.6 + rand() * 2;
+      const front = Math.abs(hx - x) > Math.abs(hz - z) ? (hx > x ? 'e' : 'w') : (hz > z ? 's' : 'n');
+      const ew = front === 'e' || front === 'w', hx2 = (ew ? D : W) / 2, hz2 = (ew ? W : D) / 2;
+      const r = [x - hx2, z - hz2, x + hx2, z + hz2];
+      if (Math.hypot(x, z) > RADIUS - 30 || Math.hypot(x - hx, z - hz) < 7 || HOUSES.some((h) => inRect(h.rect, x, z, hx2 + hz2 + 2.2))) continue;
+      const interior = !granary && !furnished.has(hi) && hi < 2;
+      if (interior) furnished.add(hi);
+      HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6), kind: granary ? 'lumbung' : 'house', front, W, D, hamlet: hi, interior });
+      n++;
     }
-  }
+  });
   return HOUSES;
 }
+/** The floor height of a house (the style draws it from the seed's first number). */
+export const floorOf = (seed) => 1.25 + rng(seed || 1)() * 0.35;
+export const frontVec = (f) => FRONT_OF[f];
 export const inHouse = (x, z, m = 0) => houses().some((h) => inRect(h.rect, x, z, m));
 export const nearHamlet = (x, z) => HAMLETS.some(([hx, hz, hr]) => Math.hypot(x - hx, z - hz) < hr + 22);

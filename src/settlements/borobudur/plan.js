@@ -3,7 +3,7 @@
 // the four sides, three circular terraces of 72 latticed stupas, the crowning stupa 35 m above the
 // ground; the monastery to the north-west.
 
-import { MONUMENT, SQUARES, CIRCLES, MONASTERY } from './layout.js';
+import { MONUMENT, SQUARES, CIRCLES, MONASTERY, houses, floorOf } from './layout.js';
 
 const E = [];
 E.push({ t: 'borobudur', c: MONUMENT.c, base: MONUMENT.base, squares: SQUARES, circles: CIRCLES, crown: { r: 5 } });
@@ -36,12 +36,28 @@ E.push({ t: 'lane', rect: [64, -2, 300, 2], y: 0.03, mat: 'andesite' });
 const [mx0, mz0, mx1, mz1] = MONASTERY, wall = (a, b) => E.push({ t: 'pagar', a, b, h: 2.2 });
 wall([mx0, mz0], [mx1, mz0]); wall([mx0, mz1], [mx1, mz1]); wall([mx0, mz0], [mx0, mz1]);
 wall([mx1, mz0], [mx1, (mz0 + mz1) / 2 - 3]); wall([mx1, (mz0 + mz1) / 2 + 3], [mx1, mz1]);
-E.push({ t: 'pendopo', rect: [-182, -150, -158, -132] });
-E.push({ t: 'pendopo', rect: [-202, -126, -188, -114], h: 3 });
-for (const [x, z] of [[-204, -164], [-196, -164], [-150, -164], [-142, -164], [-150, -116], [-142, -116]]) E.push({ t: 'rumah', rect: [x - 3, z - 2.4, x + 3, z + 2.4], seed: x * 7 + z });
+// the great hall (a plinth, two-tier roof, the stone Buddha at its west end, the teacher's dais, the monks' mats) and the
+// small pavilion; the monks' houses on posts round the yard (three furnished, with their doors on the yard)
+const HALL = [-182, -150, -158, -132], CELLS = [[-204, -164, 's', 0], [-196, -164, 's', 1], [-150, -164, 's', 1], [-142, -164, 's', 0], [-150, -116, 'n', 1], [-142, -116, 'n', 0]];
+E.push({ t: 'pendopo', rect: HALL, tiers: true, steps: ['e', 's'], h: 3.6 });
+E.push({ t: 'hallfit', rect: HALL, y: 0.8 });
+{
+  const zc = (HALL[1] + HALL[3]) / 2, y = 0.8 + 0.5;
+  E.push({ t: 'rite', kind: 'lamps', at: [HALL[0] + 2.42, zc - 0.9], to: [HALL[0] + 2.42, zc + 0.9], y, count: 5 });
+  E.push({ t: 'rite', kind: 'plate', at: [HALL[0] + 2.4, zc - 1.1], y, mats: ['cloth_white', 'cloth_red'] }, { t: 'rite', kind: 'plate', at: [HALL[0] + 2.4, zc + 1.1], y, mats: ['cloth_white'] });
+}
+E.push({ t: 'pendopo', rect: [-202, -126, -188, -114], h: 3, steps: ['e', 's'] });
+for (const [x, z, front, interior] of CELLS) E.push({ t: 'rumah', rect: [x - 3, z - 2.4, x + 3, z + 2.4], seed: x * 7 + z, front, interior: !!interior });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('summit', [-34, -34, 34, 34], CIRCLES[2].y, 'open'), room('monastery', MONASTERY, 0, 'open')];
+const inset = (r, m) => [r[0] + m, r[1] + m, r[2] - m, r[3] - m];
+const rooms = [
+  room('summit', [-34, -34, 34, 34], CIRCLES[2].y, 'open'),
+  room('great-hall', HALL, 0.8, 'hall'),
+  ...CELLS.filter((c) => c[3]).map(([x, z, f], i) => room(`monks-house-${i}`, f === 's' ? [x - 2.7, z - 2.1, x + 2.7, z + 1.1] : [x - 2.7, z - 1.1, x + 2.7, z + 2.1], floorOf(x * 7 + z), 'hall')),
+  ...houses().filter((h) => h.interior).map((h, i) => room(`house-${i}`, inset(h.rect, 0.5), floorOf(h.seed), 'hall')),
+  room('monastery', MONASTERY, 0, 'open'),
+];
 const walks = [[[150, 0], [66, 0], [40, 0], [0, 0]]];
 walks[0].y0 = 0;
 

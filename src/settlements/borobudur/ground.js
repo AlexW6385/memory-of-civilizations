@@ -2,14 +2,30 @@
 // the monument's ground, fields between the hamlets; palms, bamboo, banyan and teak in the groves;
 // the tropical sky of central Java.
 
-import { RADIUS, MONASTERY, inRect, inHouse, nearHamlet, smooth as sm } from './layout.js';
+import { RADIUS, MONASTERY, HAMLETS, inRect, inHouse, nearHamlet, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+/** How far (0…1) x, z is from the hamlets' yards and the monastery: the ground is levelled (at 0, where the houses stand) near them. */
+function away(x, z) {
+  let d = 1e9;
+  for (const [hx, hz, hr] of HAMLETS) d = Math.min(d, Math.hypot(x - hx, z - hz) - hr - 14);
+  const m = MONASTERY, dx = Math.max(m[0] - x, 0, x - m[2]), dz = Math.max(m[1] - z, 0, z - m[3]);
+  d = Math.min(d, Math.hypot(dx, dz) - 10);
+  return sm(0, 30, d);
+}
+/**
+ * The Kedu plain gently rolling, level round the monument, the hamlets and the monastery; between them the fields
+ * are laid out in paddies (sawah): the rolling ground taken in steps of 0.55 m, each a level paddy held by a bund,
+ * the risers a few metres wide (docs/settlements/borobudur.md §14).
+ */
 function height(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS) return 0;
   const roll = 1.6 * Math.sin(x * 0.013 + 1) * Math.cos(z * 0.011) + 0.8 * Math.sin((x + z) * 0.021);
-  return roll * sm(110, 170, r) * (1 - sm(RADIUS - 40, RADIUS, r));
+  const k = roll / 0.55, n = Math.floor(k), f = k - n, step = (n + sm(0.62, 1, f)) * 0.55;
+  const paddy = 0.15 + 0.85 * sm(140, 200, r);
+  const h = roll + (step - roll) * paddy;
+  return h * sm(110, 170, r) * (1 - sm(RADIUS - 40, RADIUS, r)) * away(x, z);
 }
 function cover(x, z) {
   const r = Math.hypot(x, z);
