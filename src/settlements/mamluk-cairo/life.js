@@ -4,7 +4,7 @@
 // donkeys saddled for hire with their boys at the market street's north end and on the Rumayla; a string of camels
 // with bales coming down the road from the Citadel; in the open house, the merchant on his iwan and a servant.
 
-import { RADIUS, SUQ, SUQ2, SUQ3, SQUARE, QAA, SHOP, STALLS, KHAN, HAMMAM, BAYN, height } from './layout.js';
+import { RADIUS, SUQ, SUQ2, SUQ3, SQUARE, QAA, SHOP, STALLS, KHAN, HAMMAM, BAYN, height, shops, lanes, yards, lots } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -64,7 +64,36 @@ export function life() {
   // the bath: the attendant on the maslakh's platform, a bather wrapped in towels by the fountain, the masseur in the hot room
   { const [X0, Z0] = HAMMAM; person([X0 + 1.5, Z0 + 6], faceTo(1, 0), { man: true, pose: 'cross', y: 0.55, cloth: 'cloth_white', cloth2: 'cloth_blue' }); person([X0 + 6.5, Z0 + 11], faceTo(0, -1), { man: true, cloth: 'cloth_blue', cloth2: 'cloth_white', hat: 'turban', hatMat: 'cloth_blue' });
     person([X0 + 18, Z0 + 12.4], faceTo(1, 0), { man: true, cloth: 'cloth_white', cloth2: 'cloth_blue', hat: 'turban', hatMat: 'cloth_white' }); }
-  void BAYN;
+  // the market streets' shop fronts (cairo_shopfront): the seller cross-legged on a mastaba, now and then a buyer before him
+  { const dirs = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }, { fronts, open } = shops(), pr = rng(4242);
+    const at = (l, u, d) => { const [x0, z0, x1, z1] = l.rect, f = l.front, v = -d; return f === 's' ? [x1 - u, z1 - v] : f === 'n' ? [x0 + u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]; };
+    for (const l of fronts) {
+      if (open.includes(l) || pr() < 0.25) continue;
+      const Lw = l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], c0 = Lw > 7 ? 1.6 : 0.3, N = Math.max(2, Math.floor((Lw - c0 - 0.3) / 2.8)), cw = (Lw - c0 - 0.3) / N, [dx, dz] = dirs[l.front];
+      const i = Math.floor(pr() * N), u = c0 + (i + 0.5) * cw, [x, z] = at(l, u, 0.1);
+      person([x, z], faceTo(dx, dz), { man: true, pose: 'cross', y: 0.58 + 0.01, cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_green']) });
+      if (pr() < 0.35) { const j = (i + 1) % N, [bx, bz] = at(l, c0 + (j + 0.5) * cw, -1.4); person([bx, bz], faceTo(-dx, -dz), pr() < 0.3 ? { pose: 'talk' } : {}); }
+    }
+    for (const l of open) { const [x, z] = at(l, (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1]) / 2 - 1.4, -4.2); person([x, z], faceTo(dx0(l), dz0(l)), { man: true, pose: 'cross', y: 0.2 + 0.01 + 0.12, cloth: pick(['cloth_ochre', 'cloth_white', 'cloth_green']) }); const [bx, bz] = at(l, (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1]) / 2 + 1.0, -1.4); person([bx, bz], faceTo(-dx0(l), -dz0(l)), {}); }
+    function dx0(l) { return dirs[l.front][0]; } function dz0(l) { return dirs[l.front][1]; }
+  }
+  // the lanes: neighbours talking at the doors, children at play, a donkey with its boy, a woman with a jar on her head, a porter
+  { const ln = lanes().filter((l) => l.kind === 'lane'), lr = rng(777);
+    for (const l of ln) for (let x = l.r[0] + 10; x < l.r[2] - 10; x += 22 + lr() * 26) {
+      const z = (l.r[1] + l.r[3]) / 2 + (lr() - 0.5) * 1.6, k = lr();
+      if (Math.hypot(x, z) > 330) continue;
+      if (k < 0.35) { person([x, z], lr() * 6.28, { pose: 'talk' }); person([x + 0.9, z + 0.4], lr() * 6.28, { pose: 'talk' }); }
+      else if (k < 0.6) { for (let c = 0; c < 2; c++) person([x + c * 1.1, z + (c ? 0.5 : -0.3)], lr() * 6.28, { man: true, child: true, cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_brown']), cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white' }); }
+      else if (k < 0.8) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: Y(x, z), rot: lr() * 6.28, seed: Math.floor(lr() * 1e9), gear: true }); person([x + 0.8, z + 0.5], 0.5, { man: true, child: lr() < 0.5, cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white' }); }
+      else person([x, z], lr() * 6.28, { man: true, carry: 'sack', cloth: 'cloth_brown', cloth2: 'cloth_white' });
+    }
+    // the yards: a donkey under the shed, the keeper by the well
+    let n = 0; for (const r of yards()) { if (n++ % 3 || Math.hypot(r[0], r[1]) > 300) continue; const x = r[0] + (r[2] - r[0]) * 0.72, z = r[1] + (r[3] - r[1]) * 0.6; L.push({ t: 'animal', kind: n % 2 ? 'donkey' : 'goat', at: [x, z], y: Y(x, z), rot: lr() * 6.28, seed: Math.floor(lr() * 1e9) }); }
+  }
+  // the Rumayla: horse-copers and buyers, a man with a hawk, children at the trough, more camels kneeling in the fodder
+  for (const [x, z] of [[128, -50], [132, -54], [148, 70], [152, 74], [104, -60]]) person([x, z], rand() * 6.28, { man: true, pose: 'talk' });
+  for (const [x, z, r] of [[160, -58, 0.5], [163, -26, 2.5], [101, 94, 4]]) L.push({ t: 'animal', kind: 'camel', at: [x - 3, z + 2], y: Y(x, z), rot: r, seed: Math.floor(rand() * 1e9), gear: true });
+  void BAYN; void lots;
   return L;
 }
 export const lifePlan = () => ({ id: 'mamluk-cairo-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: life(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-37, -30], facing: 's' } });

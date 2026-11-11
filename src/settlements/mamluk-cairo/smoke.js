@@ -3,7 +3,7 @@
 // mosques at the hours of prayer, cook-shop smoke in the covered market streets. Engine part: src/engine/smoke.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, lots, SUQ, SUQ2, SUQ3, HAMMAM, KHAN, height } from './layout.js';
+import { RADIUS, lots, shops, SUQ, SUQ2, SUQ3, HAMMAM, KHAN, height } from './layout.js';
 
 const ID = 'mamluk-cairo';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -12,8 +12,10 @@ export function emitters() {
   const E = [];
   for (const l of lots()) {
     const r = rng((l.seed || 1) + 5);
-    if (r() < 0.28) { const [x0, z0, x1, z1] = l.rect; E.push({ p: [x0 + (x1 - x0) * (0.3 + 0.4 * r()), l.y + l.storeys * 3.1 + 0.8, z0 + (z1 - z0) * 0.5], kind: 'kitchen', seed: l.seed + 1 }); }
+    if (r() < 0.17) { const [x0, z0, x1, z1] = l.rect; E.push({ p: [x0 + (x1 - x0) * (0.3 + 0.4 * r()), l.y + l.storeys * 3.1 + 0.8, z0 + (z1 - z0) * 0.5], kind: 'kitchen', seed: l.seed + 1 }); }
   }
+  // the bakeries and cook-shops of the market streets' fronts: every sixth shop, steam at the mastaba
+  { const rr = rng(88); for (const l of shops().fronts) if (rr() < 0.16) E.push({ p: [(l.rect[0] + l.rect[2]) / 2, 3.6, (l.rect[1] + l.rect[3]) / 2], kind: 'steam', thr: 0.1, seed: Math.floor(rr() * 1e6) }); }
   // the bath: the furnace chimney (always), steam from the domes of the maslakh and hot room
   const [X0, Z0, X1, Z1] = HAMMAM;
   E.push({ p: [X1 - 5, 6.4 + 9.8, Z1 - 3.5], kind: 'kitchen', seed: 31 });
