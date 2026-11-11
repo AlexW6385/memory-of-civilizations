@@ -263,3 +263,9 @@ Sources for §25:
 - [The Forbidden City – Outer Court — benjielayug](https://benjielayug.com/2010/05/beijing-the-forbidden-city-outer-wall.html)
 - [Siheyuan — Wikipedia](https://en.wikipedia.org/wiki/Siheyuan)
 - [Beijing siheyuan — Wikipedia](https://en.wikipedia.org/wiki/Beijing_siheyuan)
+
+## 28. Terrace bronzes, weathering and the galleries (B1 deepening)
+
+- **Terrace furnishings.** "月台上陈设日晷、嘉量各一，铜龟、铜鹤各一对，铜鼎18座" (one sundial and one grain measure, a pair of bronze tortoises and a pair of bronze cranes, 18 bronze tripods) [stated: [visitbeijing](https://www.visitbeijing.com.cn/article/47QljOWEqtu)]; the tortoises and cranes are hollow, for burning sandalwood at great ceremonies [stated: [zh.wikipedia, 太和殿](https://zh.wikipedia.org/wiki/%E5%A4%AA%E5%92%8C%E6%AE%BF)]. Ours: sundial east, grain measure west, a tortoise and a crane together each side of the stair's opening, nine tripods in a 3 x 3 block beyond them on each side [inferred: positions].
+- **Marble weathering.** Dark water streaks run down the faces of the tiers below each dragon spout (a grey kite-shaped film, lengths varied); the dry north greys the marble but does not green it [inferred].
+- **Galleries (not yet rebuilt).** Xiehe Gate: five bays by two, single-eaved yellow-tiled hip-and-gable roof, on a 2.62 m base with 17.75 m ramps and marble balustrades; its three middle bays each hung with two red doors with gilt nails; 11 bays of gallery either side, yellow glazed roof, a verandah in front and a fire-wall eave behind [stated: [Palace Museum, 协和门](https://www.dpm.org.cn/explore/building/236540.html)]. Ours still uses the Suzhou covered-walk builder with leaky windows in the palace galleries; replacing it with this form (and adding Xiehe and Xihe gates) is the next step.
