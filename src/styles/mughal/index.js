@@ -739,7 +739,7 @@ function guardRoom(bag, col, cx, cz, y, w, d, h, sg) {
 /** great_gate: the gate { c, y, w, d, h, front ('n'|'s') }: a block of red sandstone, its faces with great iwans, a row of small chhatris along the top, towers with kiosks at its corners. */
 function greatGate(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y ?? 0, w = el.w / 2, d = el.d / 2, h = el.h;
-  for (const s of [-1, 1]) pishtaqFace(bag, col, [cx + w * s, cz + d * s], [cx - w * s, cz + d * s], y, h, { w: w * 0.6, h: h * 0.75, depth: d - 1.5, alcove: 'oct', gap: el.rooms && s > 0 ? [0.38, 0.62] : undefined }, R, true, [cx, cz]);
+  for (const s of [-1, 1]) pishtaqFace(bag, col, [cx + w * s, cz + d * s], [cx - w * s, cz + d * s], y, h, { w: w * 0.6, h: h * 0.75, depth: d - 1.5, alcove: 'oct', pass: !!el.rooms, gap: el.rooms && s > 0 ? [0.38, 0.62] : undefined }, R, true, [cx, cz]);
   if (el.rooms) for (const sg of [-1, 1]) guardRoom(bag, col, cx, cz, y, w, d, h, sg);
   else {
     bag.add(R, box(cx - w, y, cz - d + 1.2, cx - w * 0.3, y + h, cz + d - 1.2));
