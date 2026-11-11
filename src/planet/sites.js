@@ -43,6 +43,7 @@ export const SITES = [
   { id: 'babylon', name: { en: 'Babylon', zh: '巴比伦' }, era: '6th c. BC', region: 'mesopotamia', lat: 32.54, lon: 44.42, radius: 420 },
   { id: 'persepolis', name: { en: 'Achaemenid Persia', zh: '阿契美尼德波斯' }, era: '5th c. BC', region: 'persia', lat: 29.93, lon: 52.89, radius: 360 },
   { id: 'isfahan', name: { en: 'Safavid Persia', zh: '萨法维波斯' }, era: '17th c.', region: 'persia', lat: 32.66, lon: 51.68, radius: 420 },
+  { id: 'timurid-samarkand', name: { en: 'Timurid Samarkand', zh: '帖木儿撒马尔罕' }, era: '15th c.', region: 'silk-road', lat: 39.65, lon: 66.98, radius: 330 },
   // ── the Levant and Anatolia ──
   { id: 'petra', name: { en: 'Nabataea', zh: '纳巴泰' }, era: '1st c.', region: 'levant', lat: 30.33, lon: 35.44, radius: 330 },
   { id: 'jerusalem', name: { en: 'Umayyad Jerusalem', zh: '倭马亚耶路撒冷' }, era: '7th c.', region: 'levant', lat: 31.78, lon: 35.24, radius: 420 },
@@ -96,7 +97,7 @@ for (const s of SITES) s.radius ??= 190;
 const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan',
-  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney',
+  M: 'ming-suzhou florence isfahan timurid-samarkand granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney',
   S: 'heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
   P: 'stonehenge',
 };
@@ -129,7 +130,6 @@ export const PLANNED = [
   { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
   { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, region: 'siam', lat: 14.36, lon: 100.56, radius: 300 },
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, region: 'java', lat: 8.37, lon: 115.45, radius: 180 },
-  { id: 'timurid-samarkand', name: { en: 'Timurid Samarkand', zh: '帖木儿撒马尔罕' }, region: 'silk-road', lat: 39.65, lon: 66.98, radius: 340 },
   { id: 'mongol-karakorum', name: { en: 'Mongol Karakorum', zh: '蒙古哈拉和林' }, region: 'steppe', lat: 47.20, lon: 102.83, radius: 180 },
   { id: 'catalhoyuk', name: { en: 'Çatalhöyük', zh: '加泰土丘' }, region: 'anatolia', lat: 37.67, lon: 32.83, radius: 100 },
   { id: 'abbasid-baghdad', name: { en: 'Abbasid Baghdad', zh: '阿拔斯巴格达' }, region: 'mesopotamia', lat: 33.31, lon: 44.36, radius: 500 },

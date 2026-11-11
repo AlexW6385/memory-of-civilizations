@@ -1,0 +1,29 @@
+{
+  "site": { "id": "timurid-samarkand", "name": { "en": "Timurid Samarkand", "zh": "帖木儿撒马尔罕" }, "era": "15th c.", "region": "silk-road", "lat": 39.65, "lon": 66.98, "radius": 330 },
+  "arrival": [14, 0.1, 0, 1.5708, 0.32],
+  "arrivalNote": "On the Registan, looking west across the open square at Ulugh Beg's madrasa: the great pishtaq with its tiled frame, the four corner minarets and the turquoise ribbed domes of the corner halls.",
+  "card": {
+    "en": [
+      "Samarkand stands in the Zeravshan valley of Transoxiana, a city of the Silk Road that Timur made his capital in the 1370s and filled with the work of the craftsmen he brought from the lands he conquered. About 1420 his grandson Ulugh Beg governs it as a city of scholars: he has just finished the madrasa on the Registan, where he teaches mathematics and astronomy, and has begun an observatory. Buildings are of fired brick, their faces covered in glazed-brick patterns (banna'i) and tile, under turquoise ribbed domes on tall drums.",
+      "The Registan — the open square where the city's trade streets meet, a place of markets and proclamations, with Ulugh Beg's madrasa on its west side and his khanqah on the east.",
+      "The Ulugh Beg Madrasa — two storeys of student cells round a court, a pishtaq twice the height of the building on the square, four corner minarets, domed lecture halls at the corners and a mosque at the west; the north-east hall is a classroom.",
+      "The Bibi-Khanym Mosque — one of the largest mosques of its day, 167 by 109 metres, with a court 78 by 64 metres, a portal 35 metres high, a great dome and two lesser ones, galleries on marble columns and four minarets.",
+      "Gur-e Amir — Timur's mausoleum under a ribbed turquoise dome, with a madrasa and a khanqah round its court.",
+      "The observatory — a brick drum of three storeys on a hill, 46 metres across, where the great sextant of 40 metres radius was set.",
+      "The bazaar — vaulted streets of shops meeting at the chorsu, a domed crossing, and round them courtyard houses on lanes with irrigation channels, and orchards."
+    ],
+    "zh": [
+      "撒马尔罕位于河中地区的泽拉夫尚河谷，是丝绸之路上的城市。十四世纪七十年代起，帖木儿以它为都，集中了从各征服地带来的工匠。约1420年，其孙兀鲁伯治理此城，使之成为学者之城：他刚建成雷吉斯坦的经学院，亲自在其中讲授数学和天文，并已开始修建天文台。建筑用烧砖，墙面覆满釉砖拼花（班纳伊）和琉璃，绿松石色的瓣状穹顶立在高高的鼓座上。",
+      "雷吉斯坦 —— 城中商道交汇的开阔广场，是集市和宣告之地，西侧是兀鲁伯经学院，东侧是他的苏菲道堂。",
+      "兀鲁伯经学院 —— 两层学生小室环绕庭院；面向广场的皮什塔克高达建筑本身的两倍，四角有琉璃宣礼塔，各角有穹顶讲堂，西端为礼拜殿；东北角的讲堂是一间教室。",
+      "比比哈努姆清真寺 —— 当时最大的清真寺之一，长167米、宽109米，庭院78米乘64米，门楼高35米，一座大穹顶和两座较小的穹顶，大理石柱廊和四座宣礼塔。",
+      "古尔·埃米尔 —— 帖木儿的陵墓，绿松石色的瓣状穹顶，庭院周围有经学院和道堂。",
+      "天文台 —— 山冈上三层的砖砌圆楼，直径46米，其中安放着半径40米的大六分仪。",
+      "巴扎 —— 带拱顶的店铺街交汇于穹顶的十字街口（恰尔苏），四周是带院的民居、小巷里的灌渠和果园。"
+    ]
+  },
+  "soundscape": "T(NEAR, { animals: { donkey: 0.5, horse: 0.3, dog: 0.2 }, roof: 'flat', adhan: 1 })",
+  "lifeRegion": "persia",
+  "crop": "wheat",
+  "systems": "movers: add 'timurid-samarkand': () => import('../settlements/timurid-samarkand/movers.js') to src/engine/movers-sites.js; smoke: import '../settlements/timurid-samarkand/smoke.js' in src/engine/systems-list.js; fauna: register ./fauna.js where the other settlements' fauna.js are registered (see src/engine/fauna.js); acoustics: rooms 'classroom', 'pishtaq passage' and 'madrasa court' in samarkand-registan may want entries in src/engine/acoustics.js"
+}
