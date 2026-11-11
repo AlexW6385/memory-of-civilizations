@@ -51,9 +51,9 @@ function market() {
 
 export async function town() {
   const all = lots(), open = openLots(all, [ARRIVALS['nara'][0], ARRIVALS['nara'][2]], 30);
-  const houses = all.map((l) => ({ t: 'house_japan', ...l, ...(open.has(l) ? { open: true } : {}) }));
+  const houses = all.map((l) => ({ t: 'nara_house', ...l, shop: l.shop || l.seed % 4 === 0, ...(open.has(l) ? { open: true } : {}) }));
   const wells = yards().map(([x, z]) => ({ t: 'well', at: [x, z], y: height(x, z) }));
-  const plans = [...lodTiles('nara-houses', 'vernacular', [...houses, ...wells], { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } })];
+  const plans = [...lodTiles('nara-houses', 'nara', houses, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } }), ...lodTiles('nara-wells', 'vernacular', wells, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } })];
   plans.push(...lodTiles('nara-plots', 'nara', [...fences().map((f) => ({ t: 'nara_fence', y: 0, ...f, at: f.pts[0] })), ...gardens().map((g) => ({ t: 'nara_garden', y: 0, ...g }))], { R: RADIUS, near: 130, entrance: { at: [0, 180], facing: 'n' } }));
   plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()));
   void blocks;

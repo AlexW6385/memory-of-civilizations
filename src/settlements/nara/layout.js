@@ -100,6 +100,9 @@ function build() {
   // the East Market's rim: a few shop houses on the square's north and west edges (the square is left open)
   const [mx0, mz0, mx1] = MARKET.block;
   for (let x = mx0 + 2; x < mx1 - 10; x += 10.5 + rand() * 1.5) LOTS.push({ rect: [x, mz0 + 1, x + 9.5, mz0 + 9.5], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 's', shop: true });
+  // and its south edge: a second row of shop houses facing north over the mat-sellers' row
+  const mz1 = MARKET.block[3], r2 = rng(7533);
+  for (let x = mx0 + 2; x < mx1 - 10; x += 10.5 + r2() * 1.5) LOTS.push({ rect: [x, mz1 - 6.8, x + 9.5, mz1 - 0.6], seed: Math.floor(r2() * 1e6), y: 0, foot: -0.2, front: 'n', shop: true });
 }
 /** Houses of the capital on the grid's blocks. */
 export function lots() { if (!LOTS) build(); return LOTS; }
