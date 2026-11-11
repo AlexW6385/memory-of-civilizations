@@ -59,7 +59,7 @@ export function lots() {
     }
   }
   // the trades of the merchants' fronts (docs §5.3): by their own stream so that the lots stay where they were
-  const tr = rng(1688), TR = ['cloth', 'pottery', 'rice', 'dye', 'oil', 'sandals', 'tea', 'medicine'];
+  const tr = rng(1688), TR = ['cloth', 'pottery', 'rice', 'dye', 'oil', 'sandals', 'tea', 'medicine', 'paper', 'fish', 'tofu', 'bucket'];
   const M = LOTS.filter((l) => l.t === 'machiya');
   for (const l of M) l.trade = TR[Math.floor(tr() * TR.length)];
   // one sake brewer (on the deep north row, near the middle) and two teahouses, each the lot nearest its place

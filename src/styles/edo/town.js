@@ -204,14 +204,13 @@ export function gateFront(bag, col, gate, g, seed) {
   Bx('tile_dark', cu - L / 2, cu + L / 2, 0.3, 1.1, 0.0, 0.03);
   for (let v = 0.45; v < 1.05; v += 0.3) Bx(PL, cu - L / 2, cu + L / 2, v, v + 0.035, 0.03, 0.045);
   // the gate: recess, posts, head beam, doors
-  Bx('opening', cu - gw, cu + gw, 0, 2.75, 0.0, 0.04);
   for (const u of [cu - gw - 0.12, cu + gw + 0.12]) Bx(WD, u - 0.16, u + 0.16, 0, 3.05, 0.0, 0.24);
   Bx(WD, cu - gw - 0.3, cu + gw + 0.3, 2.75, 3.05, 0.0, 0.3); Bx(WD, cu - gw - 0.3, cu + gw + 0.3, 3.05, 3.2, 0.04, 0.22);
+  // the leaves stand open, swung inward against the passage's sides (the yard is entered here)
   for (const sd of [-1, 1]) {
-    const a = sd < 0 ? cu - gw : cu + 0.02, b = sd < 0 ? cu - 0.02 : cu + gw;
-    Bx(WD, a, b, 0.0, 2.7, 0.06, 0.14);
-    for (let v = 0.35; v < 2.6; v += 0.62) Bx('iron', a, b, v, v + 0.07, 0.14, 0.16);
-    for (let u = a + 0.2; u < b - 0.1; u += 0.34) Bx('iron', u - 0.025, u + 0.025, 0.5, 2.45, 0.14, 0.17);
+    const u = cu + sd * (gw - 0.02), a = Math.min(u, u - sd * 0.1), b2 = Math.max(u, u - sd * 0.1);
+    Bx(WD, a, b2, 0.0, 2.7, -0.3, -gw - 0.1);
+    for (let v = 0.35; v < 2.6; v += 0.62) Bx('iron', a - 0.012, b2 + 0.012, v, v + 0.07, -0.3, -gw - 0.1);
   }
   // the crest on the head beam's face
   Bx('gilt_bronze', cu - 0.14, cu + 0.14, 2.82, 3.0, 0.3, 0.32);

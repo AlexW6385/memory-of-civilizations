@@ -12,6 +12,7 @@ import { rectRoof, withPal, beamTris } from '../ming/index.js';
 import '../qing/index.js';
 import { barredWindows, shachi as shachiFish, karaHafu, samaWall, katomado } from './detail.js';
 import { machiyaShop, zashiki, kago, daisho } from './rooms.js';
+import { yashikiParts } from './yard.js';
 import { machiyaFront, mushikoMado, ridgeCap, eaveBand, kuraWalls, gateFront, ishidoro, niwaki, ido, boat, barrel } from './town.js';
 
 const PL = 'plaster_castle', ST = 'ishigaki', TL = 'tile_grey', WD = 'wood_dark';
@@ -552,45 +553,65 @@ function kura(bag, col, rect, y = 0) {
   if (alongX) ridgeCap(bag, x0 - 0.5, x1 + 0.5, ry, zc, true);
 }
 
-/** yashiki: a samurai compound { rect, seed, gate ('n'|'s'|'e'|'w') }: walls with tile copings, the gate-house on the street, the main house, a storehouse, a garden. */
+/** nagaya: the retainers' row house { rect } along a wall of the yard: plastered, a dark base, doors and barred windows on the yard side, a long tiled gable roof. */
+function nagaya(bag, col, rect, g) {
+  const [x0, z0, x1, z1] = rect, H = 3.0, alongZ = z1 - z0 > x1 - x0;
+  bag.add('plaster_grey', box(x0, 0, z0, x1, 0.5, z1));
+  bag.add(PL, box(x0, 0.5, z0, x1, H, z1));
+  col.rect(rect, 0, H);
+  // the yard side: the face toward the compound's middle
+  const sx = alongZ ? (g === 's' || g === 'n' ? -1 : -1) : 1, a = alongZ ? [x0 - 0.02, z0 + 0.6] : [x0 + 0.6, z0 - 0.02], b = alongZ ? [x0 - 0.02, z1 - 0.6] : [x1 - 0.6, z0 - 0.02];
+  void sx;
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(2, Math.round(L / 3.2)), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+  for (let i = 0; i < n; i++) { const c = [a[0] + ux * (i + 0.5) * L / n, a[1] + uz * (i + 0.5) * L / n], t = []; beamTris(t, [c[0] - ux * 0.5, 0.5, c[1] - uz * 0.5], [c[0] + ux * 0.5, 0.5, c[1] + uz * 0.5], 0.04, 1.9); bag.add('shoji', fromTriangles(t)); }
+  roof(bag, rect, H - 0.1, 0.5, 'gable', Math.min(x1 - x0, z1 - z0) * 0.5, { alongZ, sweep: 0 });
+}
+
+/** A small side door (kuguri) with its little roof in a wall: at (x, z), the wall running along x when alongX; out = the street side's sign. */
+function sideDoor(bag, col, x, z, alongX, out) {
+  const w = 0.9, T = (a, b, c, d, e, f) => bag.add(WD, box(a, b, c, d, e, f));
+  if (alongX) { T(x - w / 2 - 0.1, 0, z - 0.2, x - w / 2, 1.9, z + 0.2); T(x + w / 2, 0, z - 0.2, x + w / 2 + 0.1, 1.9, z + 0.2); T(x - w / 2 - 0.1, 1.9, z - 0.22, x + w / 2 + 0.1, 2.05, z + 0.22); bag.add('wood_dark', box(x - w / 2, 0.05, z - 0.06, x + w / 2, 1.9, z + 0.06)); bag.add('iron', box(x - w / 2, 0.9, z + out * 0.07, x + w / 2, 0.96, z + out * 0.09)); bag.add(TL, box(x - 0.8, 2.05, z - 0.45, x + 0.8, 2.2, z + 0.45)); }
+  else { T(x - 0.2, 0, z - w / 2 - 0.1, x + 0.2, 1.9, z - w / 2); T(x - 0.2, 0, z + w / 2, x + 0.2, 1.9, z + w / 2 + 0.1); T(x - 0.22, 1.9, z - w / 2 - 0.1, x + 0.22, 2.05, z + w / 2 + 0.1); bag.add('wood_dark', box(x - 0.06, 0.05, z - w / 2, x + 0.06, 1.9, z + w / 2)); bag.add('iron', box(x + out * 0.07, 0.9, z - w / 2, x + out * 0.09, 0.96, z + w / 2)); bag.add(TL, box(x - 0.45, 2.05, z - 0.8, x + 0.45, 2.2, z + 0.8)); }
+  void col;
+}
+
+/** yashiki: a samurai compound { rect, seed, gate ('n'|'s'|'e'|'w') }: walls with tile copings, the gate-house on the street (its passage open, so that the yard is entered), the main house, a storehouse, the retainers' row, a garden, a stone gutter along the street wall. */
 function yashiki(el, { bag, col }) {
-  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, g = el.gate || 's';
-  const W = x1 - x0, D = z1 - z0;
-  // the gate-house (nagaya-mon) along the street side, the walls round the rest
-  const gl = Math.min(18, (g === 'n' || g === 's' ? W : D) * 0.55), gd = 4.5;
-  let gate;
-  if (g === 's') gate = [(x0 + x1) / 2 - gl / 2, z1 - gd, (x0 + x1) / 2 + gl / 2, z1];
-  else if (g === 'n') gate = [(x0 + x1) / 2 - gl / 2, z0, (x0 + x1) / 2 + gl / 2, z0 + gd];
-  else if (g === 'e') gate = [x1 - gd, (z0 + z1) / 2 - gl / 2, x1, (z0 + z1) / 2 + gl / 2];
-  else gate = [x0, (z0 + z1) / 2 - gl / 2, x0 + gd, (z0 + z1) / 2 + gl / 2];
+  const rand = rng((el.seed || 1) + 5), [x0, z0, x1, z1] = el.rect, P = yashikiParts(el), g = P.g, gate = P.gate;
   const wall = (a, b) => dobei({ a, b, h: 2.3 }, { bag, col });
   const sides = { n: [[x0, z0], [x1, z0]], s: [[x0, z1], [x1, z1]], w: [[x0, z0], [x0, z1]], e: [[x1, z0], [x1, z1]] };
   for (const [k, [a, b]] of Object.entries(sides)) {
     if (k !== g) { wall(a, b); continue; }
     if (k === 'n' || k === 's') { wall(a, [gate[0], a[1]]); wall([gate[2], a[1]], b); } else { wall(a, [a[0], gate[1]]); wall([a[0], gate[3]], b); }
   }
-  const [gx0, gz0, gx1, gz1] = gate;
-  bag.add('plaster_grey', box(gx0, 0, gz0, gx1, 1.1, gz1));
-  bag.add(PL, box(gx0, 1.1, gz0, gx1, 3.6, gz1));
-  col.rect(gate, 0, 3.6);
+  const [gx0, gz0, gx1, gz1] = gate, along = g === 'n' || g === 's', gc = along ? (gx0 + gx1) / 2 : (gz0 + gz1) / 2, pw = P.gw + 0.12;
+  // the gate-house: two blocks either side of the passage, the storey over it; the passage is open
+  const blk = (u0, u1, y0, y1, m) => { const r = along ? [u0, gz0, u1, gz1] : [gx0, u0, gx1, u1]; if (m) bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); return r; };
+  const lo = along ? gx0 : gz0, hi = along ? gx1 : gz1;
+  for (const [u0, u1] of [[lo, gc - pw], [gc + pw, hi]]) { blk(u0, u1, 0, 1.1, 'plaster_grey'); blk(u0, u1, 1.1, 3.6, PL); col.rect(blk(u0, u1, 0, 0, null), 0, 3.6); }
+  blk(gc - pw, gc + pw, 3.0, 3.6, PL); col.rect(blk(gc - pw, gc + pw, 0, 0, null), 3.05, 3.6);
   gateFront(bag, col, gate, g, el.seed);
   roof(bag, gate, 3.5, 0.7, 'gable', Math.min(gx1 - gx0, gz1 - gz0) * 0.4, { sweep: 0 });
   if (g === 's' || g === 'n') ridgeCap(bag, gx0 - 0.7, gx1 + 0.7, 3.5 + Math.min(gx1 - gx0, gz1 - gz0) * 0.4, (gz0 + gz1) / 2);
-  // the main house in the middle-back, the storehouse in a corner
-  const m = 5;
-  let house;
-  if (g === 's') house = [x0 + m, z0 + m, x1 - m - (W > 30 ? 8 : 0), z0 + m + D * 0.42];
-  else if (g === 'n') house = [x0 + m + (W > 30 ? 8 : 0), z1 - m - D * 0.42, x1 - m, z1 - m];
-  else if (g === 'e') house = [x0 + m, z0 + m, x0 + m + W * 0.45, z1 - m - 6];
-  else house = [x1 - m - W * 0.45, z0 + m + 6, x1 - m, z1 - m];
-  shoinHall(bag, col, house, 0, 3.2, rand() < 0.75 ? 'xieshan' : 'hip', TL, el.simple && !el.open ? 3.6 : 1.8, el.open ? { face: g, seed: el.seed } : null);
-  const kr = g === 's' ? [x1 - 9, z0 + 4, x1 - 3, z0 + 11] : g === 'n' ? [x0 + 3, z1 - 11, x0 + 9, z1 - 4] : g === 'e' ? [x1 - 11, z0 + 3, x1 - 4, z0 + 9] : [x0 + 4, z1 - 9, x0 + 11, z1 - 3];
-  if (rand() < 0.8) kura(bag, col, kr);
-  // the garden before the house, on the gate's side: a stone lantern, a pruned pine, a well in some
-  const gp = g === 's' ? [x0 + 7, z1 - 10.5] : g === 'n' ? [x0 + 7, z0 + 10.5] : g === 'e' ? [x1 - 8, z1 - 7] : [x0 + 8, z0 + 8];
+  // the main house, the storehouse and the retainers' row
+  shoinHall(bag, col, P.house, 0, 3.2, P.roof, TL, el.simple && !el.open ? 3.6 : 1.8, el.open ? { face: g, seed: el.seed } : null);
+  if (P.kura) kura(bag, col, P.kura);
+  nagaya(bag, col, P.nagaya, g);
+  // the garden before the house: a stone lantern, a pruned pine, a well in some
+  const gp = P.garden;
   ishidoro(bag, col, gp[0] + 1.6, gp[1] + 1.2, 0, 1.1);
   niwaki(bag, col, gp[0], gp[1], 0, 4.2 + rand() * 1.6, el.seed);
   if (rand() < 0.45) ido(bag, col, gp[0] + 4.5, gp[1] - 0.5, 0, rand() * 3);
+  // a stone gutter along the foot of each wall outside, a small side door in the wall opposite the gate on some
+  const gut = (a0, a1, b0, b1) => bag.add('granite_grey', box(a0, 0, b0, a1, 0.06, b1));
+  for (const [k, [a, b]] of Object.entries(sides)) {
+    if (k === 'n') gut(a[0] - 0.4, b[0] + 0.4, a[1] - 0.75, a[1] - 0.45);
+    else if (k === 's') gut(a[0] - 0.4, b[0] + 0.4, a[1] + 0.45, a[1] + 0.75);
+    else if (k === 'w') gut(a[0] - 0.75, a[0] - 0.45, a[1] - 0.4, b[1] + 0.4);
+    else gut(a[0] + 0.45, a[0] + 0.75, a[1] - 0.4, b[1] + 0.4);
+  }
+  const opp = { n: 's', s: 'n', e: 'w', w: 'e' }[g];
+  if (rand() < 0.6) { if (opp === 'n') sideDoor(bag, col, x0 + 8 + rand() * 20, z0, true, -1); else if (opp === 's') sideDoor(bag, col, x0 + 8 + rand() * 20, z1, true, 1); else if (opp === 'w') sideDoor(bag, col, x0, z0 + 6 + rand() * 16, false, -1); else sideDoor(bag, col, x1, z0 + 6 + rand() * 16, false, 1); }
 }
 
 /** machiya: a merchant's townhouse { rect, seed, front ('n'|'s') }: two storeys at the street — the lattice front below, a pent roof, the low upper storey with its plastered slatted windows — under a tiled roof with the ridge along the street; a storehouse at the back. */
