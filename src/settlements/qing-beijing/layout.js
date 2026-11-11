@@ -129,6 +129,26 @@ export function houses() {
   }
   return HOUSES;
 }
+let BETWEEN = null;
+/**
+ * What lies between the gates of the lanes (§29): on the lane's north edge, at the west end of the wider houses' frontage (clear of the
+ * gate's own clutter, which spreads west from each gate), a street shrine to the earth god, a pagoda tree with a stone bench round it,
+ * a coal seller's cart with its donkey. [{ kind: 'shrine' | 'benchtree' | 'coalcart', at: [x, z], seed }], z on the lane's edge.
+ */
+export function betweenGates() {
+  if (BETWEEN) return BETWEEN;
+  BETWEEN = [];
+  const rand = rng(4207), kinds = ['benchtree', 'coalcart', 'shrine', 'coalcart', 'benchtree', 'benchtree', 'shrine'];
+  let n = 0;
+  for (const h of houses()) {
+    if (h.rect[2] - h.rect[0] < 27 || rand() < (h.lod >= 2 ? 0.7 : 0.4)) continue;
+    const x = h.rect[0] + 4 + rand() * 3, z = h.rect[3] + 0.8;
+    if (inRect(RING, x, z, 6) || inRect(AVENUE, x, z, 10) || inShopStrip(x, z, 4) || STREET_X.some((sx) => Math.abs(x - sx) < 8) || wellNear(x, z)) continue;
+    BETWEEN.push({ kind: kinds[n++ % kinds.length], at: [x, z], seed: Math.floor(rand() * 1e9) });
+  }
+  return BETWEEN;
+}
+const wellNear = (x, z) => wells().some((w) => Math.hypot(w[0] - x, w[1] - z) < 8);
 export function rectsMeet(a, b, m = 0) { return a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m; }
 export function inHouse(x, z, m = 0) { return houses().some((h) => inRect(h.rect, x, z, m)); }
 /** Where a house's trees stand: [x, z, kind] in its inner court (the pagoda tree, jujube or persimmon of the yard, §17). */
@@ -152,6 +172,7 @@ function treeIndex() {
   TREES = new Map();
   const add = (t) => { const k = Math.floor(t[0] / 8) + ',' + Math.floor(t[1] / 8); if (!TREES.has(k)) TREES.set(k, []); TREES.get(k).push(t); };
   for (const t of vergeTrees()) add(t);
+  for (const b of betweenGates()) if (b.kind === 'benchtree') add([b.at[0] + 1.6, b.at[1] + 0.7, 'pagoda']);
   for (const h of houses()) for (const t of houseTrees(h)) { const k = Math.floor(t[0] / 8) + ',' + Math.floor(t[1] / 8); if (!TREES.has(k)) TREES.set(k, []); TREES.get(k).push(t); }
   return TREES;
 }

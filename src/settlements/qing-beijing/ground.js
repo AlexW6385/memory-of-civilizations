@@ -65,8 +65,8 @@ function planting(x, z, p) {
   if (inForecourt(x, z, 4)) return null;                                  // the Meridian Gate's forecourt is bare (no willows on its causeway)
   if (inRect(MOAT.outer, x, z, 3) && !inRect(MOAT.outer, x, z, -0.01)) return { willow: 1.6 };
   if (inTemple(x, z, 2.5)) return null;
-  if (inDanbi(x, z)) return null;
-  if (inDanbi(x, z, 9)) return onLane(x, z, 1) ? null : { arborvitae: 5, grass: 14 };                   // the cypress rows either side of the way
+  if (inDanbi(x, z) || (x > 52 && x < 92 && z > 399 && z < 417)) return null;
+  if (inDanbi(x, 339, 9) && inDanbi(80, z, 0)) return onLane(x, z, 1) ? null : { arborvitae: 5, grass: 14 };                   // the cypress rows either side of the way
   if (inBelt(x, z)) return onLane(x, z, 1) || Math.abs(x - 13) < 9 && Math.abs(z - 280) < 4 ? null : { arborvitae: 3.2, grass: 18 };
   const t = treeNear(x, z, 1.5);
   if (t) return { [KIND[t[2]]]: 22 };

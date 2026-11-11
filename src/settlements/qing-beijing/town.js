@@ -147,6 +147,9 @@ function temple() {
   }
   E.push({ t: 'stairs', rect: [dxm - 12, dz1 - 0.45, dxm + 12, dz1 + 4.0], y0: 0.03, y1: dy, dir: 'n' });
   for (const sx of [-1, 1]) E.push({ t: 'bronze', kind: 'vat', at: [dxm + sx * 12.5, dz0 + 4], y: dy, s: 0.9 });
+  // the paved plaza at the way's foot, a pair of stone lions at the stairs
+  E.push({ t: 'lane', rect: [dx0 - 5, dz1, dx1 + 5, dz1 + 16], y: 0.03, mat: 'brick_paving' });
+  for (const sx of [-1, 1]) E.push({ t: 'bronze', kind: 'lion', at: [dxm + sx * 14, dz1 + 8], y: 0.06, s: 0.85, face: [0, 1], metal: 'marble_smooth', paw: sx > 0 ? 'ball' : 'cub' });
   // the path in from the avenue to the west gate
   E.push({ t: 'lane', rect: [AVENUE[2] - 0.5, cz - 3, cx - w - 0.5, cz + 3], y: 0.035, mat: 'bluestone' });
   return { ...base('qing-beijing-temple', E), center: [cx, cz] };
