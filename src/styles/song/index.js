@@ -14,6 +14,8 @@ import { ironSkin, relief, RELIEF_PITCH } from './iron.js';
 import '../chinese/index.js';
 import { HANGZHOU_ELEMENTS } from './hangzhou.js';
 import { SCROLL_ELEMENTS } from './scroll.js';
+import { TEMPLE_ELEMENTS } from './temple.js';
+import { BRIDGE_ELEMENTS } from './bridge.js';
 
 const ngon = (cx, cz, r, n = 8, rot = Math.PI / 8) => Array.from({ length: n }, (_, k) => [cx + Math.cos(rot + k / n * Math.PI * 2) * r, cz + Math.sin(rot + k / n * Math.PI * 2) * r]);
 /** A flat-faced frustum from the polygon `bot` at y0 to `top` at y1, capped. */
@@ -326,6 +328,6 @@ function hexaBox(out, x0, y0, z0, x1, y1, z1) { hexa(out, [[x0, y0, z0], [x1, y0
 
 registerStyle('song', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, ...KAIFENG_ELEMENTS, ...WUTAI_ELEMENTS, ...HANGZHOU_ELEMENTS, ...SCROLL_ELEMENTS },
+  elements: { ...STYLES.qing.elements, pagoda_oct: pagodaOct, ...KAIFENG_ELEMENTS, ...WUTAI_ELEMENTS, ...HANGZHOU_ELEMENTS, ...SCROLL_ELEMENTS, ...TEMPLE_ELEMENTS, ...BRIDGE_ELEMENTS },
   objects: {},
 });
