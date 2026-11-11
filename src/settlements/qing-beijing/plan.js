@@ -135,16 +135,17 @@ for (const [k, t] of TIERS.entries()) {
   void W;
 }
 const top = TIERS[2].y;
-// the terrace before the hall: tripod burners, the bronze tortoises and cranes (long rule and long
-// life), the marble sundial on the east and the grain measure in its shrine on the west; gilt vats
-// beside the halls and along the courts (water against fire)
-E.push({ t: 'bronze', kind: 'sundial', at: [46, 18], y: top, lat: 40 });
-E.push({ t: 'bronze', kind: 'jialiang', at: [-46, 18], y: top });
+// the terrace (yuetai) before the hall: one sundial and one grain measure, a pair of bronze tortoises and a pair of
+// bronze cranes (hollow, for burning sandalwood at great ceremonies), eighteen bronze tripods [stated: Beijing Tourism
+// Group / Wikipedia zh, docs §10]; the sundial on the east and the grain measure on the west, the tortoise and the
+// crane of each side together flanking the stair's opening, the tripods in a block of nine on each side of them [inferred: positions].
+// Gilt vats beside the halls and along the courts (water against fire).
+E.push({ t: 'bronze', kind: 'sundial', at: [45, 18], y: top, lat: 40 });
+E.push({ t: 'bronze', kind: 'jialiang', at: [-45, 18], y: top });
 for (const s of [-1, 1]) {
-  E.push({ t: 'bronze', kind: 'tripod', at: [s * 16, 18], y: top });
-  E.push({ t: 'bronze', kind: 'tripod', at: [s * 24, 18], y: top });
-  E.push({ t: 'bronze', kind: 'tortoise', at: [s * 31, 18], y: top, face: [0, 1] });
-  E.push({ t: 'bronze', kind: 'crane', at: [s * 37.5, 18], y: top, face: [0, 1], s: 1.3 });
+  E.push({ t: 'bronze', kind: 'tortoise', at: [s * 13.5, 19.6], y: top, face: [0, 1], s: 0.95 });
+  E.push({ t: 'bronze', kind: 'crane', at: [s * 13.5, 15.6], y: top, face: [0, 1], s: 1.3 });
+  for (const x of [19.5, 25.5, 31.5]) for (const z of [15.6, 18.6, 21.1]) E.push({ t: 'bronze', kind: 'tripod', at: [s * x, z], y: top, s: 0.8, face: [0, 1] });
   E.push({ t: 'bronze', kind: 'vat', at: [s * 44, 2], y: top });
   E.push({ t: 'bronze', kind: 'vat', at: [s * 44, -40], y: top });
   E.push({ t: 'bronze', kind: 'vat', at: [s * 44, -100], y: top });

@@ -9,7 +9,7 @@
 // facing +z, then placed; the throne room faces south (+z).
 
 import { Matrix4, Vector3 } from '../../core/three.js';
-import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { tube } from '../../objects/kit.js';
 import { column } from '../ming/index.js';
 import { Parts, ball, limb, torus, T, merge, seated, crane, tripod } from './carving.js';
@@ -334,9 +334,9 @@ function ceiling(bag, rect, cy, well, rib = 'paint_caihua', board = 'paint_caihu
   for (const r of parts) if (r[2] - r[0] > 0.05 && r[3] - r[1] > 0.05) bag.add(board, box(r[0], cy, r[1], r[2], cy + 0.08, r[3]));
   const inWell = (x, z) => well && x > well[0] - 0.05 && x < well[2] + 0.05 && z > well[1] - 0.05 && z < well[3] + 0.05;
   const nx = Math.round((x1 - x0) / 1.6), nz = Math.round((z1 - z0) / 1.6);
-  for (let i = 1; i < nx; i++) { const x = x0 + i * (x1 - x0) / nx; for (let j = 0; j < nz; j++) { const za = z0 + j * (z1 - z0) / nz, zb = z0 + (j + 1) * (z1 - z0) / nz; if (!inWell(x, (za + zb) / 2)) bag.add(rib, box(x - 0.07, cy - 0.16, za, x + 0.07, cy, zb)); } }
-  for (let j = 1; j < nz; j++) { const z = z0 + j * (z1 - z0) / nz; for (let i = 0; i < nx; i++) { const xa = x0 + i * (x1 - x0) / nx, xb = x0 + (i + 1) * (x1 - x0) / nx; if (!inWell((xa + xb) / 2, z)) bag.add(rib, box(xa, cy - 0.15, z - 0.07, xb, cy, z + 0.07)); } }
-  for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) { const x = x0 + (i + 0.5) * (x1 - x0) / nx, z = z0 + (j + 0.5) * (z1 - z0) / nz; if (!inWell(x, z)) bag.add(boss, lathe([[0.001, -0.08], [0.07, -0.07], [0.17, -0.04], [0.22, -0.005], [0.001, -0.005]], 10, null, x, cy, z)); }
+  for (let i = 1; i < nx; i++) { const x = x0 + i * (x1 - x0) / nx; for (let j = 0; j < nz; j++) { const za = z0 + j * (z1 - z0) / nz, zb = z0 + (j + 1) * (z1 - z0) / nz; if (!inWell(x, (za + zb) / 2)) bag.add(rib, frustum([x - 0.07, za, x + 0.07, zb], cy - 0.16, cy, 0, 0, 0, 0, { noTop: true, noZn: true, noZp: true })); } }
+  for (let j = 1; j < nz; j++) { const z = z0 + j * (z1 - z0) / nz; for (let i = 0; i < nx; i++) { const xa = x0 + i * (x1 - x0) / nx, xb = x0 + (i + 1) * (x1 - x0) / nx; if (!inWell((xa + xb) / 2, z)) bag.add(rib, frustum([xa, z - 0.07, xb, z + 0.07], cy - 0.15, cy, 0, 0, 0, 0, { noTop: true, noXn: true, noXp: true })); } }
+  for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) { const x = x0 + (i + 0.5) * (x1 - x0) / nx, z = z0 + (j + 0.5) * (z1 - z0) / nz; if (!inWell(x, z)) bag.add(boss, lathe([[0.001, -0.08], [0.12, -0.06], [0.22, -0.005]], 6, null, x, cy, z)); }
 }
 /**
  * The caisson over the throne (zaojing) at (cx, cz), its mouth at height cy: the square well with a
@@ -447,7 +447,15 @@ export function throneHall(el, { bag, col }) {
   const front = tz + dz.hd;
   // the floor: dark polished bricks with fine joints
   bag.add(K.joseon ? 'granite_korea' : 'marble_dark', box(x0 + 0.3, y - 0.05, z0 + 0.3, x1 - 0.3, y + 0.01, z1 - 0.3));
-  if (!K.joseon) { const n = 0.64; for (let i = 0; (i + 1) * n <= x1 - x0 - 0.6; i++) for (let j = 0; (j + 1) * n <= z1 - z0 - 0.6; j++) { const xa = x0 + 0.3 + i * n, za = z0 + 0.3 + j * n; bag.add('marble_dark', box(xa + 0.004, y + 0.01, za + 0.004, xa + n - 0.004, y + 0.025, za + n - 0.004)); } }
+  if (!K.joseon) {
+    // the bricks' faces alone, one quad each in one piece (the edges are a few millimetres; the seams are the base showing between them)
+    const n = 0.64, t = [], yt = y + 0.025;
+    for (let i = 0; (i + 1) * n <= x1 - x0 - 0.6; i++) for (let j = 0; (j + 1) * n <= z1 - z0 - 0.6; j++) {
+      const xa = x0 + 0.3 + i * n + 0.004, za = z0 + 0.3 + j * n + 0.004, xb = xa + n - 0.008, zb = za + n - 0.008;
+      t.push(xa, yt, za, xa, yt, zb, xb, yt, zb, xa, yt, za, xb, yt, zb, xb, yt, za);
+    }
+    bag.add('marble_dark', fromTriangles(t));
+  }
   // the inner columns
   const D = el.d ?? 1.0, giltX = [];
   for (let i = 1; i < nb; i++) for (let j = 1; j < nd; j++) {

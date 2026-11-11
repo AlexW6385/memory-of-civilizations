@@ -59,6 +59,28 @@ function balustrade(bag, col, a, b, y, open = [], step = 1.6) {
   bag.add('marble_smooth', fromTriangles(rails));
 }
 
+
+const hash01 = (v) => { const t = Math.sin(v * 12.9898) * 43758.5453; return t - Math.floor(t); };
+/**
+ * The dark stain of the water that runs from a dragon spout down the marble face (the dry north does not green it, it only
+ * greys it): a kite-shaped film 6 mm off the face at (x, z) facing f, from y down `len` metres, its width swelling to a third
+ * of the way down and thinning to a point; `k` (0–1) varies width and a little drift. Triangles pushed into `out`.
+ */
+function streak(out, x, z, f, y, len, k) {
+  const ox = f[0] * 0.006, oz = f[1] * 0.006, tx = f[1] ? 1 : 0, tz = f[0] ? 1 : 0;         // t: along the face
+  const w = 0.06 + 0.05 * k, drift = (k - 0.5) * 0.06;
+  const P = (u, v) => [x + ox + tx * u, y - v * len, z + oz + tz * u];
+  const pts = [P(-w, 0), P(w, 0), P(w * 1.9 + drift, 0.3), P(w * 0.8 + drift * 2, 0.75), P(drift * 3, 1), P(-w * 0.8 + drift * 2, 0.75), P(-w * 1.9 + drift, 0.3)];
+  // a fan from the top's middle, turned to face out of the wall
+  const c = P(0, 0.2), ring = pts;
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i], b = ring[(i + 1) % ring.length];
+    const ax = a[0] - c[0], ay = a[1] - c[1], az = a[2] - c[2], bx = b[0] - c[0], by = b[1] - c[1], bz = b[2] - c[2];
+    const nx = ay * bz - az * by, nz = ax * by - ay * bx;
+    if (nx * f[0] + nz * f[1] >= 0) out.push(...c, ...a, ...b); else out.push(...c, ...b, ...a);
+  }
+}
+
 /**
  * terrace: a tier of a marble terrace { rect, y0, y1, open: { n|s|e|w: [[from, to], …] } (gaps in
  * the balustrade, measured along the side from its west or north end) }.
@@ -85,6 +107,7 @@ function terrace(el, { bag, col }) {
   // dragon-head spout juts from the face below the coping, and a great one from each corner
   const stone = el.carve === 'joseon' ? (el.pal?.base || 'granite_korea') : 'marble_smooth', bo = { carve: el.carve, mat: stone, beasts: el.beasts };
   const sides = [['n', [x0 + i, z0 + i], [x1 - i, z0 + i], [0, -1]], ['s', [x0 + i, z1 - i], [x1 - i, z1 - i], [0, 1]], ['w', [x0 + i, z0 + i], [x0 + i, z1 - i], [-1, 0]], ['e', [x1 - i, z0 + i], [x1 - i, z1 - i], [1, 0]]];
+  const streaks = [];
   for (const [k, a, b, f] of sides) {
     const posts = balustradeCarved(bag, col, a, b, y1, o[k] || [], { ...bo, skipEnds: k === 'w' || k === 'e' });
     if (el.carve !== 'qing' || el.spouts === false) continue;
@@ -93,9 +116,12 @@ function terrace(el, { bag, col }) {
       if (s < 0.5 || s > L - 0.5) continue;
       const u = s / L, px = a[0] + (b[0] - a[0]) * u, pz = a[1] + (b[1] - a[1]) * u;
       const P = new Parts(); spout(P, stone);
-      P.emit(bag, f[0] ? (f[0] < 0 ? x0 : x1) : px, y1 - 0.42, f[1] ? (f[1] < 0 ? z0 : z1) : pz, yaw);
+      const sx = f[0] ? (f[0] < 0 ? x0 : x1) : px, sz = f[1] ? (f[1] < 0 ? z0 : z1) : pz;
+      P.emit(bag, sx, y1 - 0.42, sz, yaw);
+      streak(streaks, sx, sz, f, y1 - 0.62, Math.min(y1 - y0 - 0.95, 0.9 + 1.0 * hash01(sx * 7.3 + sz * 3.1 + y1)), hash01(sx * 1.7 + sz * 5.9));
     }
   }
+  if (streaks.length) bag.add('granite_elba', fromTriangles(streaks));
   if (el.carve === 'qing' && el.spouts !== false) for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const P = new Parts(); spout(P, stone);
     P.emit(bag, sx < 0 ? x0 + 0.05 : x1 - 0.05, y1 - 0.62, sz < 0 ? z0 + 0.05 : z1 - 0.05, Math.atan2(sx, sz), 1.7);
