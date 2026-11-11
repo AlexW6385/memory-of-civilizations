@@ -58,7 +58,7 @@ const rooms = [
   ...houses().filter((h) => h.interior).map((h, i) => room(`house-${i}`, inset(h.rect, 0.5), floorOf(h.seed), 'hall')),
   room('monastery', MONASTERY, 0, 'open'),
 ];
-const walks = [[[150, 0], [66, 0], [40, 0], [0, 0]]];
+const walks = [[[150, 0], [66, 0], [40, 0], [8, 0]]];
 walks[0].y0 = 0;
 
 export const monument = {
