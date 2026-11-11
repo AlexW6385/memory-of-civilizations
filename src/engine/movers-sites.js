@@ -17,5 +17,6 @@ export const MOVER_SITES = {
   'heian-uji': () => import('../settlements/heian-uji/movers.js'),
   'constantinople': () => import('../settlements/constantinople/movers.js'),
   'nara': () => import('../settlements/nara/movers.js'),
+  'madurai': () => import('../settlements/madurai/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
