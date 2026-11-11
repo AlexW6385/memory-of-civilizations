@@ -173,9 +173,9 @@ add({ t: 'tang_inscription', a: [-8.6, -7.56], b: [-4.65, -7.56], y: F + 7.2, w:
 // attendant bodhisattvas 3.7, the kneeling ones with their lotuses 1.95, the kings 4.1)
 const A = F + 0.9, W = [-1, 0];
 block([-3.0, -12.2, 3.8, 12.2], F, A, 'limestone', { walk: false });
-obj('buddha', 0.8, 0, A, { h: 5.2, dir: W, mudra: 'earth' });
+obj('buddha', 0.8, 0, A, { h: 5.2, dir: W, mudra: 'earth', robe: 'paint_ochre' });
 obj('buddha', 0.8, -5.04, A, { h: 5.2, dir: W, pendant: true });
-obj('buddha', 0.8, 5.04, A, { h: 5.2, dir: W, hexSeat: true });
+obj('buddha', 0.8, 5.04, A, { h: 5.2, dir: W, hexSeat: true, robe: 'paint_ochre' });
 const st = (type, x, z, h, extra = {}) => obj('statue', x, z, A, { type, h, dir: W, ...extra });
 st('disciple', 0.4, -1.9, 3.3, { robe: 'clay_robe', robe2: 'clay_green' });
 st('disciple', 0.4, 1.9, 3.3, { robe: 'clay_robe', robe2: 'clay_robe' });
@@ -202,8 +202,8 @@ block([-3.5, -12.2, -3.0, 12.2], F, F + 0.4, 'limestone', { collide: false });
 // the floor worn into a path from the middle door to the altar, slab by slab; the kneeling mats before the three Buddhas
 for (let x = -8.7; x < -3.55; x += 1.25) for (const r of [-1, 0, 1]) block([x + 0.03, r * 0.9 - 0.42, x + 1.2, r * 0.9 + 0.42], F, F + 0.015 + ((Math.round(x * 7) + r + 9) % 3) * 0.006, 'bluestone', { collide: false });
 for (const z0 of [0, -5.04, 5.04]) block([-4.25, z0 - 0.45, -3.65, z0 + 0.45], F, F + 0.05, 'cloth_ochre', { collide: false });
-// hanging banners (fan) of silk from the inner ring's beams, one at each of its middle bays, and over the front bays' ends
-for (const z of [-10.08, -5.04, 0, 5.04, 10.08]) for (const x of [-4.2, 4.2]) block([x - 0.01, z - 0.28, x + 0.01, z + 0.28], F + H0 - 3.1, F + H0 - 0.45, z === 0 ? 'cloth_red' : 'cloth_ochre', { collide: false });
+// hanging banners (fan) of silk from the inner ring's rear beams, one at each bay: none before the Buddhas, whom they would hide from the door
+for (const z of [-10.08, -5.04, 0, 5.04, 10.08]) for (const x of [4.2]) block([x - 0.01, z - 0.28, x + 0.01, z + 0.28], F + H0 - 3.1, F + H0 - 0.45, z === 0 ? 'cloth_red' : 'cloth_ochre', { collide: false });
 // ── the roof ─────────────────────────────────────────────────────────────────
 // eaves 4.0 m past the column line on rafters and flying rafters; the lowest slope about 0.3, steeper toward the ridge
 add({ t: 'hip_roof', c: [0, 0], A: 17.0 + 4.0, B: 8.83 + 4.0, alongZ: true, y: F + 7.5, rise: 5.0, eaveSlope: 0.3, pow: 1.6, lift: 0.6, mat: 'tile_grey', soffit: 'timber_red', rafters: { out: 4.0, sp: 0.32 }, tangChiwei: 2.3 });
@@ -231,7 +231,7 @@ const rooms = [
   room('rear-aisle', [5.5, -14, 8, 14], F, 'hall'),
 ];
 const walks = [
-  [[-124, 0], [-111, 0], [-80, 0], [-75, 0], [-61, 0], [-44, 0], [-29, 0], [-17, 0], [-13, 0], [-7.6, 0], [-6.2, 0], [-6.2, 14.8], [6.6, 14.8], [6.6, 0], [6.6, -14.8], [-6.2, -14.8], [-6.2, 0]],
+  [[-124, 0], [-111, 0], [-80, 0], [-75, 0], [-61, 0], [-44, 0], [-29, 0], [-24, -2.6], [-17, -2.6], [-14.7, 0], [-13, 0], [-7.6, 0], [-6.2, 0], [-6.2, 14.8], [6.6, 14.8], [6.6, 0], [6.6, -14.8], [-6.2, -14.8], [-6.2, 0]],
 ];
 walks[0].y0 = 0;
 

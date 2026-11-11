@@ -37,5 +37,13 @@ export function courtElements() {
     add({ t: 'block', rect: [x - 1.5, z - 1.5, x + 1.5, z + 1.5], y0: y + 0.4, y1: y + 0.52, mat: 'sod', collide: false });
     add({ t: 'wutai_pine', at: [x + (rand() - 0.5) * 0.6, z + (rand() - 0.5) * 0.6], y: y + 0.5, h: 5.2 + rand() * 2.4, seed: i * 17 + 3 });
   });
+  // the litter of the old pines on the paving round each bed: fallen needles and bark, and a few cones [inferred: what pines do over a paved court]
+  BEDS.forEach(([x, z, y]) => {
+    for (let i = 0; i < 26; i++) {
+      const th = rand() * 6.283, r = 1.95 + Math.pow(rand(), 1.6) * 2.2, w = 0.25 + rand() * 0.7, d = 0.15 + rand() * 0.4;
+      add({ t: 'block', rect: [x + Math.cos(th) * r - w / 2, z + Math.sin(th) * r - d / 2, x + Math.cos(th) * r + w / 2, z + Math.sin(th) * r + d / 2], y0: y - 0.01, y1: y + 0.012 + rand() * 0.01, mat: 'roof_bark', collide: false });
+    }
+    for (let i = 0; i < 5; i++) { const th = rand() * 6.283, r = 2.0 + rand() * 1.6; add({ t: 'block', rect: [x + Math.cos(th) * r - 0.04, z + Math.sin(th) * r - 0.04, x + Math.cos(th) * r + 0.04, z + Math.sin(th) * r + 0.04], y0: y, y1: y + 0.08, mat: 'bark_dark', collide: false }); }
+  });
   return E;
 }
