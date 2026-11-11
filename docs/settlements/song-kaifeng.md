@@ -15,13 +15,16 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 
 | Part | Where (m, +x east, +z south) | Notes |
 |---|---|---|
-| Bian River | east–west across the disc | [stated: the scroll] |
-| Rainbow Bridge | over the river, the street on its axis | a timber arch of bundled logs [stated: slideshare; inferred: span ours 26 m] |
-| Iron Pagoda and monastery | north-east | the pagoda in the city's north-east [stated: slideshare (Chinese text)] |
-| East wall and water gate | west edge of our disc, the river through it | [inferred from the scroll's city gate] |
-| Town | shops, inns and houses along the river and the streets | [stated: the scroll] |
+| Bian River | east–west, z 60 to 92 (32 m wide), through the whole disc and under the wall | stone-faced banks within 150 m of the bridge, earth banks with a timber revetment beyond (the towpath on the north one), eleven wharves on piles and nine stone landing steps [stated: the scroll] |
+| Rainbow Bridge | at (0, 76), across the river, the main street on its axis | 20 m between stone abutments, 8.6 m wide, the arch rising 4 m; a timber arch of bundled logs [stated: slideshare; inferred: our span], with the hawkers' booths on its east side |
+| Streets | the main street 14 m wide north and south of the bridge; shop streets (14 m) along both banks, at z = −80 and z = 200; quarter streets 6–8 m; lanes 4 m through the blocks | the shop streets carry the shops, the lanes the houses [inferred from the scroll] |
+| Iron Pagoda and Kaibao monastery | north-east: the monastery walled at x 80–240, z −260 to −110, the pagoda at (160, −190) | gate hall in the south wall, a 14 m approach from the shop street at z = −80 to it, main hall, sutra and Guanyin halls, bell and drum towers [stated: slideshare (Chinese text); the plan inferred] |
+| East wall and gate | the wall at x = −300 (rammed earth, 16 m through the base), the gate hall over the road at z = −80, the water gate where the river passes | [inferred from the scroll's city gate] |
+| City (inside the wall) | x −300 to 262 | two-storey shops, wine shops and inns on the shop streets near the bridge, one-storey shops further out, tiled houses behind, thatched houses toward the edge, warehouses at the grain wharves |
+| Suburb | x < −308, outside the gate | shops by the gate road, thatched and tiled houses [stated: the scroll's end] |
+| Open country | x > 262 | wheat strips, unpaved roads, a farmstead now and then [§10] |
 
-Added: the **open country** east of x = 262 m (§10, Suburbs) — no houses, unpaved roads, wheat strips; the riverside streets' paving stops 4 m short of the water beyond the stone banks (|x| > 90 m), leaving earth banks (the towpath on the north one).
+The riverside streets' paving stops 4 m short of the water beyond the stone banks (|x| > 150 m), leaving earth banks. The disc is 520 m in radius; the landmark plan's bounds cover the gate, the monastery, the bridge and the two river streets, the town beyond them being the townscape's.
 
 ## 3. Orientation
 
@@ -33,7 +36,7 @@ Northern Song timber building — tiled hip-and-gable halls, shops open to the s
 
 ## 5. The town
 
-Two-storey shops and restaurants on the bridge's approaches and along the river, single-storey houses behind, warehouses at the landings. [inferred from the scroll]
+Built from `layout.js`: lots along the streets and lanes by rule, each a `house_song` (`houses.js`). Two-storey shops with a balcony and lattice windows, wine shops (the five widest by the bridge, with their colour gates), inns round a court behind a gate bay, tea houses (the style's `tea_house`, two on the north river street), single-storey open-fronted shops, warehouses with wide doors by the grain wharves, tiled houses, thatched houses and farmsteads. The shop's counters, goods on them, mat awnings and balconies are the house's; its trade's sign (flag, gourd, measure, pan, lantern box) stands on a bamboo pole on a stone foot in the street beyond the eaves, with the goods on the apron and trestles (`shops.js`, `kaifeng_shop`); one trade vocabulary (`trades.js`) serves the fronts, the shelves, the interiors and the smoke. [inferred from the scroll and the Dongjing meng hua lu]
 
 ## 6. Ground and water
 
@@ -41,7 +44,7 @@ The flat Yellow River plain; the river's banks low and lined with stone near the
 
 ## 7. Planting
 
-Willows along the river, elms and jujubes among the houses. [inferred from the scroll]
+Willows along the river and by the wall's foot, pagoda trees (huai, *Sophora japonica*, the street tree of the Song capitals) and poplars along the lanes and in the monastery's court, jujubes and mulberries in the yards behind the houses. [inferred from the scroll]
 
 ## 8. Sky and weather
 
@@ -104,7 +107,7 @@ Code: `layout.js` (streets, lanes, lots by rule), `houses.js` (the house builder
 - **Roofs.** Grey and dark tile on a shallow concave profile (pitch about 1 : 3), the eaves deep, the underside of the eave boarded; thatch 0.36 m thick and steep. [stated: Song roofs were gentler than the Tang's and curved, Wikipedia]
 - **Variation by rule.** Per lot: kind by zone, street and distance from the bridge; number of bays (2–5), bay width, storeys, roof pitch, ridge direction, wall tone (white, grey, lime, damp), tile colour, balcony or none, the window pattern of every upper bay (lattice, shuttered, open, ice-crack), awning and its span, flag or board and its side, the door bay's place, lean-to, well. No two houses draw alike.
 - **River banks.** Stone-faced (canal_wall) within 150 m of the bridge with stone steps (he bu tou) at nine places; beyond, earth banks with a revetment of driven piles, a wale and woven wattle, and eleven timber wharves on piles stepping down to a low landing with mooring posts. [stated: stone-faced banks near the bridge, §6; inferred: timber revetment of the earth banks, common practice on the Bian]
-- **Planting.** Willows thick along the earth banks and on the wall's foot; elms and jujubes in the gaps, jujubes, elms and mulberries in the yards, poplars in the suburb; winter wheat (not rice) in the strips of the country. The locust (huai), common in Kaifeng's streets, has no species in the flora yet; elm stands in. [inferred]
+- **Planting.** Willows thick along the earth banks and on the wall's foot; pagoda trees (huai, common in Kaifeng's streets) and jujubes in the gaps, jujubes, pagoda trees and mulberries in the yards, poplars in the suburb; winter wheat (not rice) in the strips of the country. [inferred]
 - **Weathering.** `damp` 0.4 (spring rains) and a `waterline` at the river's level for the stone banks and piles.
 - **Known limits.** The shops' interiors are not walkable beyond the porch; the engine's street life (src/objects/life.js) knows no front of `house_song` and sets its props by the lot rectangle.
 
@@ -123,7 +126,8 @@ Code: `src/settlements/song-kaifeng/` movers.js, fauna.js, smoke.js, trades.js, 
 ### Interiors (`interiors.js`, `props.js`)
 
 - **Furniture.** Chairs, benches, stools and higher tables had become common, though mats and low seating remained; the folding chair with crossed legs; plain polished wood widely used, lacquer for the wealthy; raised beds and platforms; ceramic pillows; ewers pouring hot water into bowls for tea; dark conical Jian bowls [stated: ancient-history-sites 174077]; the canopy bed and screens [inferred: forms after Song paintings and tombs; not checked against a museum object]. Ours: plain tables with set-in legs and stretchers, long benches with splayed legs, stools, the back chair with its top rail turned out beyond the posts, the couch/platform, the canopy bed with a white curtain, chests with iron fittings, open shelves, the three-panel screen with an ink landscape, hanging scrolls, a plum vase with a blossoming branch, lamp stands with oil dishes, red paper lanterns.
-- **Shop** (41 of the lots within 110 m of the bridge): the counter behind the open front with a gap for the door, a ledger and a steelyard on it, shelves along the back stocked by trade (jars, bolts, volumes, boxes, packets, pans, bridles), a chest, a stool, a lantern, a scroll. **Tea house** (the tea lots within 160 m; the two by the bridge keep the style's `tea_house`): tables with benches and a tea set, the counter with brazier and kettle, three scrolls, a plum vase, a stepped rack of potted pines [stated: the tea house's flowers, paintings and pines, §10; inferred: the arrangement]. **Tavern** (the wine shops): the counter with jars, bowls and a dipper, shelves of jars, four or six tables with stools and a wine pot, a screen, red lanterns. **Inn**: a long table with benches, the keeper's desk, beds with canopy behind plank partitions, chests and lamps. **House**: the main room's table between two armchairs under a hanging scroll, a side table, the bed, chest, lamp, screen; the kitchen's brick stove with an iron pot and chimney, a water vat and firewood [inferred]. 93 lots in all; their keepers, customers and hosts as figures (`interiorLife`).
+- **Which lots.** Only what can be seen is furnished: the shops within 110 m of the bridge, the wine shops and the tea shops show their rooms through the open front; the tiled houses are closed and the inns' front range is solid, so they have a room (a music zone) and no furniture. The furniture stands in the building's footprint on its floor (0.28 m, the plinth's top), inside its 0.3 m walls and behind the front counters (0.8–1.3 m in); each room's rect is the footprint with the street's apron before it (2.5 m, 1.5 m for a house), since the buildings are not walked into. The monastery's halls (gate hall, main hall, sutra and Guanyin halls) are `hall` rooms; the main hall's terrace has steps on the axis.
+- **Shop**: the front counters and the goods on them are the house's; inside, shelves along the back wall stocked by trade (jars, bolts, volumes, boxes, packets, pans, bridles), a chest, a stool, a lantern, a scroll, the keeper behind the counter. **Tea house** (the tea lots within 160 m; the two by the bridge keep the style's `tea_house`): tables with benches and a tea set, the counter with brazier and kettle, three scrolls, a plum vase, a stepped rack of potted pines [stated: the tea house's flowers, paintings and pines, §10; inferred: the arrangement]. **Tavern** (the wine shops): the counter with jars, bowls and a dipper, shelves of jars, four or six tables with stools and a wine pot, a screen, red lanterns. The furniture for the inn (a long table with benches, the keeper's desk, canopy beds behind plank partitions) and the house (the main room's table between two armchairs under a hanging scroll, the bed, the kitchen's brick stove, water vat and firewood) is built in `interiors.js` but not placed, being out of sight [inferred]. The keepers, customers and hosts of the furnished rooms are figures (`interiorLife`).
 
 ### Sound (`music.js`)
 
