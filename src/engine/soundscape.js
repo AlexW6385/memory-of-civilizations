@@ -141,6 +141,7 @@ export const PROFILES = {
   'bali-village': T(TROP, { cicadas: 0.6, frogs: 0.9, animals: { rooster: 1, dog: 0.4 }, roof: 'thatch' }),
   bagan: T(NEAR, { animals: { buffalo: 1, dog: 1, goat: 1 }, roof: 'thatch' }),
   kakadu: T({ tropic: 0.8, warbler: 0.3, crow: 0.4 }, { cicadas: 0.4, frogs: 0.5, animals: { dog: 0.3 }, roof: 'thatch' }),
+  'benin-city': T(NEAR, { animals: { goat: 0.4, rooster: 0.5, dog: 0.3 }, cicadas: 0.4, roof: 'flat' }),
   giza: T(NEAR, { animals: { donkey: 0.5, cattle: 0.4, dog: 0.3 }, roof: 'flat' }),
   granada: T(MED, { cicadas: 0.7, animals: { donkey: 0.4, rooster: 0.4, horse: 0.2 }, adhan: 1 }),
   'great-zimbabwe': T({ dove: 1, tropic: 0.7, kite: 0.3 }, { cicadas: 0.7, frogs: 0.4, animals: { cattle: 0.8, goat: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'thatch' }),

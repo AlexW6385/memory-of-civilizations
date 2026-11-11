@@ -92,4 +92,5 @@ export const ARRIVALS = {
   'bali-village': [0, 0.1, -26, 0, 0.1],   // up the village street under the festival's penjors to the split gate of the pura at its end: the two stepped halves of brick and carved stone with the stair between them, the roofed gate beyond and the black-thatched merus rising behind the walls
   'bagan': [30, null, 0, -1.5708, 0.12],   // inside the Ananda precinct's west gate, looking east along the cross passage's axis to the temple: porch, terraces and gilded spire
   'kakadu': [-4, null, -2, 0, 0.18],   // from the floodplain's edge, the Main Gallery's overhang whole under the sandstone outlier, its painted back wall in the shade, the family's camp and fire at its west end, the billabong and paperbark behind
+  'benin-city': [-65, null, 80, 0, 0.12],   // from the great street across the king's square to the palace gate and its turrets
 };

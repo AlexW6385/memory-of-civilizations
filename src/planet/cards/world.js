@@ -1158,4 +1158,22 @@ export const CARDS = {
       "家族营地——树皮棚屋与树皮板搭成的斜棚，火堆上烤着长颈龟，旁边有折叠的树皮槽与磨石，晾架上挂着鹅与巨蜥。",
     ],
   },
+  'benin-city': {
+    en: [
+      "Benin City is the capital of the Edo kingdom of Benin, in the rain forest of southern Nigeria, shown about 1600 in the reign of Oba Ehengbuda, a century after the first Portuguese ships arrived and the city grew rich on pepper, ivory and brass. Its Oba, the divine king, rules from a great palace; the city is laid out on very broad, straight streets between red clay compounds, inside the Iya, a bank and ditch with a double palisade and its gates. Buildings are of red clay polished smooth and ridged in bands, under roofs of palm thatch and shingle, round courts with a rain pool. The city was burned in 1897 and nothing of the old palace stands; the picture rests on the accounts of Dapper and Pinto, the brass plaques and the old photographs, and the city is compressed here to fit one walk.",
+      "The Oba's palace — a walled compound on the king's square: a gatehouse, the outer court of audience between long galleries on pillars sheathed in cast brass and hung with plaques of kings and warriors, the Oba's great gallery with its dais, and behind it three courts with rain pools (impluvia) and the clay altars of the ancestors set with bronze heads and carved tusks. Turrets rise over it with spires, brass snakes down their faces and cast birds on their points.",
+      "The great street and the king's square — a red-earth street about 34 m wide running straight across the city, with the open square before the palace gate where pages with staffs and chiefs in coral beads stand.",
+      "The guild quarter — beside the palace, a lane of yards where the brass casters work by lost-wax casting at clay furnaces and bellows, with moulds drying in rows, and the wood and ivory carvers and weavers at their trades.",
+      "The Oba market — an open square of red earth east of the cross street, with rows of mat-roofed stalls selling yams, palm oil, pepper, cloth, brass wares and kola, among women in wrappers and porters with loads on the head.",
+      "The compounds and the Iya — rows of clay houses with gabled fronts and open doors on the streets, chiefs' houses with an upper storey, and round all the bank and ditch, with timber gates cut from one piece.",
+    ],
+    zh: [
+      "贝宁城是尼日利亚南部雨林中埃多人贝宁王国的都城，画面所示约为1600年，奥巴埃亨布达在位；距葡萄牙人首次来航已有百年，城因胡椒、象牙与黄铜贸易而富庶。神圣的国王奥巴居于巨大的王宫；城中是极宽极直的大街，两旁是红土院宅，外围是伊亚——一道土堤与壕沟，设双重木栅和城门。建筑用磨光的红色黏土，墙面起水平凸棱，屋顶覆棕榈叶或木瓦，围合着带雨水池的庭院。1897年城被焚毁，旧王宫荡然无存；此景依据达珀和平托的记述、黄铜浮雕牌与旧照片，并为一次步行之便而压缩。",
+      "奥巴王宫 —— 国王广场上的围墙院落：门楼，两道长廊之间的觐见外院，廊柱包铸铜、挂满国王与武士的浮雕牌，奥巴的大厅及其高台，其后三进带雨水池的内院，以及祖先的黏土祭坛，上置青铜头像和雕花象牙。尖顶塔楼高耸，塔身上铜蛇蜿蜒，塔尖立铸铜鸟。",
+      "大街与国王广场 —— 约34米宽的红土大街笔直横贯全城，宫门前是开阔的广场，持杖的侍从和戴珊瑚珠的酋长立于其间。",
+      "工匠区 —— 王宫旁的一条小巷，两侧是院坊：铜匠在黏土炉和风箱旁用失蜡法铸造，泥范成排晾着，另有木雕、象牙雕匠和织工。",
+      "奥巴市场 —— 十字街东侧的红土广场，成排的席棚摊位卖山药、棕榈油、胡椒、布匹、铜器和可乐果，往来的有裹布的妇女和头顶重物的搬运工。",
+      "院宅与伊亚 —— 沿街一排排山墙朝街、门户敞开的黏土房，酋长之宅带二层，四周是土堤与壕沟，城门以整块木材制成。",
+    ],
+  },
 };

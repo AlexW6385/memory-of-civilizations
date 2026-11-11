@@ -90,6 +90,7 @@ import { ground as manuelineLisbon } from './manueline-lisbon/ground.js';
 import { ground as baliVillage } from './bali-village/ground.js';
 import { ground as bagan } from './bagan/ground.js';
 import { ground as kakadu } from './kakadu/ground.js';
+import { ground as beninCity } from './benin-city/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -177,6 +178,7 @@ export const GROUNDS = {
   'bali-village': baliVillage,
   bagan,
   kakadu,
+  'benin-city': beninCity,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)

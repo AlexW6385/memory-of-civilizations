@@ -116,6 +116,7 @@ export const SITES = [
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, era: 'c. 1900', region: 'java', lat: -8.37, lon: 115.45, radius: 190 },
   { id: 'bagan', name: { en: 'Pagan (Bagan)', zh: '蒲甘' }, era: 'c. 1200', region: 'burma', lat: 21.17, lon: 94.86, radius: 330 },
   { id: 'kakadu', name: { en: 'Kakadu — Ubirr', zh: '卡卡杜·乌比尔' }, era: 'c. AD 1000', region: 'australia', lat: -12.41, lon: 132.96, radius: 90 },
+  { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, era: 'c. 1600', region: 'guinea', lat: 6.34, lon: 5.62, radius: 330 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -143,7 +144,6 @@ export const BLEND = 100;
  */
 export const PLANNED = [
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },
-  { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, region: 'guinea', lat: 6.34, lon: 5.62, radius: 320 },
   { id: 'vienna', name: { en: 'Vienna', zh: '维也纳' }, region: 'danube', lat: 48.21, lon: 16.37, radius: 340 },
   { id: 'bauhaus-dessau', name: { en: 'Bauhaus Dessau', zh: '包豪斯德绍' }, region: 'germany', lat: 51.84, lon: 12.23, radius: 170 },
   { id: 'maya-tikal', name: { en: 'Classic Maya Tikal', zh: '古典玛雅蒂卡尔' }, region: 'yucatan', lat: 17.22, lon: -89.62, radius: 320 },
