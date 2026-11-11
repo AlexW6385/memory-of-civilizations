@@ -16,14 +16,14 @@ const RED = 'stucco_red', FRAME = 'limewash_red', WHITE = 'stucco_pale', BLUE = 
 export class Wall {
   constructor(bag, axis, c, ns, a0, a1, y0) { Object.assign(this, { bag, axis, c, ns, a0, a1, y0, sy: 1, dir: Math.sign(a1 - a0) || 1 }); }
   rect(mat, x0, x1, y0, y1, L = 0) {
-    const o0 = this.c + this.ns * (0.003 + L * 0.005), o1 = o0 + this.ns * 0.005, lo = Math.min(o0, o1), hi = Math.max(o0, o1);
+    const o0 = this.c + this.ns * (0.003 + L * 0.014), o1 = o0 + this.ns * 0.006, lo = Math.min(o0, o1), hi = Math.max(o0, o1);
     const p0 = this.a0 + this.dir * x0, p1 = this.a0 + this.dir * x1, a = Math.min(p0, p1), b = Math.max(p0, p1);
     this.bag.add(mat, this.axis === 'x' ? box(lo, this.y0 + y0 * this.sy, a, hi, this.y0 + y1 * this.sy, b) : box(a, this.y0 + y0 * this.sy, lo, b, this.y0 + y1 * this.sy, hi));
   }
   /** An irregular painted blob (a head, a flower, a ball, a fish) w × h centred at (x, y). */
   blob(mat, x, y, w, h, L = 1, seed = 1) {
     const o = this.c, p = this.a0 + this.dir * x, c = this.axis === 'x' ? [o, this.y0 + y * this.sy, p] : [p, this.y0 + y * this.sy, o];
-    patch(this.bag, mat, c, this.axis === 'x' ? [this.ns, 0, 0] : [0, 0, this.ns], w, h * this.sy, seed, 0.003 + L * 0.005 + 0.005);
+    patch(this.bag, mat, c, this.axis === 'x' ? [this.ns, 0, 0] : [0, 0, this.ns], w, h * this.sy, seed, 0.003 + L * 0.014 + 0.008);
   }
 }
 

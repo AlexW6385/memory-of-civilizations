@@ -111,14 +111,14 @@ export function ttMarket(el, ctx) {
     for (let u = 1; u < len - 1; u += 1.8) { const p = (along ? a : c) + u, g = along ? Math.abs(p - cx) < gw + 0.6 : Math.abs(p - cz) < gw + 0.6; if (g) continue; bag.add(S, along ? box(p - 0.3, H, c + 0.4, p + 0.3, H + 0.7, d - 0.4) : box(a + 0.4, H, p - 0.3, b - 0.4, H + 0.7, p + 0.3)); }
   }
   // the stalls: in the four quadrants cut by the lanes through the gates, rows in pairs back to back, a lane between pairs
-  const lane = 4.2, SW = 5.2, SD = 3.0, pitch = 2 * SD + 4.2, hole = el.hole ?? [cx - 15, cz - 15, cx + 15, cz + 15];
+  const lane = 4.2, SW = 6.6, SD = 3.0, pitch = 2 * SD + 7.0, hole = el.hole ?? [cx - 15, cz - 15, cx + 15, cz + 15];
   const inHole = (x, z) => x > hole[0] - 2 && x < hole[2] + 2 && z > hole[1] - 2 && z < hole[3] + 2;
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
     const qx0 = sx < 0 ? x0 + 4 : cx + lane, qx1 = sx < 0 ? cx - lane : x1 - 4, qz0 = sz < 0 ? z0 + 4 : cz + lane, qz1 = sz < 0 ? cz - lane : z1 - 4;
-    const np = Math.max(1, Math.floor((qz1 - qz0 + 4.2) / pitch)), ns = Math.floor((qx1 - qx0) / SW);
+    const np = Math.max(1, Math.floor((qz1 - qz0 + 7.0) / pitch)), ns = Math.floor((qx1 - qx0) / SW);
     for (let p = 0; p < np; p++) for (let row = 0; row < 2; row++) for (let i = 0; i < ns; i++) {
       const x = qx0 + (i + 0.5) * (qx1 - qx0) / ns, z = qz0 + p * pitch + SD / 2 + row * SD, face = row ? 1 : -1;      // the front toward the lane: the north row faces north
-      if (inHole(x, z) || r() < 0.18) continue;
+      if (inHole(x, z) || r() < 0.3) continue;
       stall(ctx, x, z, face, KINDS[Math.floor(r() * KINDS.length)], r, SW - 0.6, SD, L);
     }
   }
