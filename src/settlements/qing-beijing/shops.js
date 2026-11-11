@@ -41,7 +41,7 @@ const SIGN = {
   grain: ['cloth_ochre', 'dou'], fruit: ['cloth_green', 'flag'], chestnut: ['cloth_brown', 'flag'], books: ['cloth_indigo', 'flag'], pottery: ['cloth_ochre', 'flag'],
 };
 
-function goods(P, trade, w, rand) {
+export function goods(P, trade, w, rand) {
   const x0 = -w / 2 + 0.5, n = Math.floor((w - 1) / 0.75);
   const top = 0.92;
   switch (trade) {
