@@ -101,6 +101,26 @@ Sources (2026-11-07):
 - [Gable stone — Wikipedia](https://en.wikipedia.org/wiki/Gable_stone)
 - [Amsterdam in the Seventeenth Century — MarineLives](https://www.marinelives.org/wiki/Amsterdam_in_the_Seventeenth_Century)
 
+### 5.11 The VOC's warehouses and the ships on the IJ (L3, 2026-11-11; `src/styles/dutch/warehouse.js`, `boats.js` `ship`)
+
+- **The VOC and its stores:** the Amsterdam chamber of the Dutch East India Company bought the island of Oostenburg, reclaimed from the IJ, in 1661, for its shipyard and East Indian warehouses [stated: Wikipedia, "Oostenburgervaart"]; the company's wharf and warehouse are shown in Mulder's print of 1725 [stated: World History Encyclopedia, "The VOC Wharf and Warehouse in Amsterdam"]. Amsterdam as "warehouse of the world" kept grain, spices and wares in tall brick pakhuizen with hoisting gables and loading hatches on every floor [stated: Hollandroute, "Amsterdam: pakhuis van de wereld"; Museum of the Canals on spout gables, §5.1].
+- **Ours** (`voc_warehouse`, six along the IJ's quay in `VOC`, layout.js; two with the ground floor open to the visitor): 28 × 12 m, brick on a bluestone plinth, three floors (ground 4.0 m, upper 3.1 m: 10.2 m to the eaves) under a steep tiled roof, the long front to the quay [inferred: sizes from the surviving 17th–18th-century pakhuizen]. Bays about 4.3 m: on every second bay a double-leaf hatch one over another through all floors (the hoist axis), between them small barred (ground) or shuttered windows; sandstone quoins, string courses at the floors, lintels with a brick relieving course, iron wall anchors at each floor; the timber cornice; on the roof the hoist gables (hijsgevels) with the loading hatch, a projecting beam from the apex with its pulley, rope and hook [stated: hoist beams, §5.1; inferred: the beam on the roof gable]; brick gable ends with a stone coping. No chimney: a warehouse kept no fire [inferred].
+- **Inside** (the two open ones): floor of planks on sleepers, ceiling of boards on joists and summer beams carried by timber posts on stone pads, casks, sacks, corded bales and iron-bound chests along the walls, a counting table with the ledger by the first door [inferred].
+- **The ships:** the harbour on the IJ was full of masts; the fluyt had a pear-shaped hull seen from the bow or stern, shallow draft, square-rigged on two or three masts, the mizzen often with a lateen sail, a small crew and about twice the cargo of rival ships [stated: Wikipedia, "Fluyt"]. Ours (`ship`, ten in the IJ): a three-masted merchantman of 28–40 m, beamy, with tumblehome, a high stern with a gallery, lantern and the Prince's flag (orange-white-blue, usual in the 1660s [inferred]), a bowsprit, three masts with topmasts, yards and shrouds; one ship in three with sails set in loose bellies, the others furled on their yards [inferred, after the harbour views of the van de Veldes].
+
+### 5.12 Density, ways and life (L3, 2026-11-11; `layout.js`, `movers.js`, `smoke.js`, `fauna.js`)
+
+- **The blocks:** the land between two canals is 33 m wide; ours holds a quay street of 5 m on each bank and two rows of houses 10 m deep back to back (the earlier layout built only the outer bank of each ring: 163 houses, now 250 with the Dam's), with a street through at every bridge [inferred from the plan of the canal belt: Museum of the Canals, §5.1].
+- **Walkers:** burghers in black with collar and broad hat, merchants in a short cloak, ladies with collars and caps, housewives and maids in brown and red with white caps, the Weigh House's porters with sacks, milk-women with a yoke of pails, sailors, servants (the dress of Ruisdael's and Berckheyde's views of the Dam, §5.6); on the Dam's open ground and along the quay streets, over the bridges. [inferred]
+- **Boats:** praams poled and sculled on the IJ and the Damrak, laden with casks or covered with a canvas tilt (the canal rings keep their moored lighters: their arcs do not suit the movers' axis-aligned water graph). [inferred]
+- **Smoke:** hearth smoke from two houses in five all day, peaking at the meals (the cold damp climate); mist on the canals, the IJ and the Damrak at dawn. **Animals:** carp in the canals and the harbour, swallows over the water, rooks at the Westerkerk's tower at dusk, sparrows on the Dam and the quays, a heron on the IJ's quay. [inferred]
+
+Sources (2026-11-11):
+- [Oostenburgervaart — Wikipedia](https://en.wikipedia.org/wiki/Oostenburgervaart)
+- [The VOC Wharf and Warehouse in Amsterdam — World History Encyclopedia](https://www.worldhistory.org/image/18022)
+- [Amsterdam: pakhuis van de wereld — Hollandroute](https://www.hollandroute.nl/?p=964)
+- [Fluyt — Wikipedia](https://en.wikipedia.org/wiki/Fluyt)
+
 ## 6. Ground and water
 
 Brick quays and streets; rows of elms on the quays; canals; the IJ. [stated: elms along canals — inferred from paintings]

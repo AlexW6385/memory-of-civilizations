@@ -26,7 +26,7 @@ export function crossWindow(bag, F, y, u, v0, ww, hh, o) {
   // the leading of the upper lights: thin bars in a lattice
   for (const [a, c] of [[u0 + b, u - b / 2], [u + b / 2, u1 - b]]) { const m = (a + c) / 2; A('lead', m - 0.012, m + 0.012, vt + b / 2, v0 + hh - b, 0.04, 0.06); A('lead', a, c, (vt + v0 + hh) / 2 - 0.012, (vt + v0 + hh) / 2 + 0.012, 0.04, 0.06); }
   if (o.shut === 'closed') for (const [a, c] of [[u0 + b, u - b / 2], [u + b / 2, u1 - b]]) { A(o.shutter, a + 0.01, c - 0.01, v0 + b + 0.01, vt - b / 2 - 0.01, 0.04, 0.08); A(o.shutter, (a + c) / 2 - 0.12, (a + c) / 2 + 0.12, (v0 + vt) / 2 - 0.2, (v0 + vt) / 2 + 0.2, 0.08, 0.1); }
-  else if (o.shut === 'open') for (const s of [-1, 1]) { const e = s < 0 ? u0 - 0.04 : u1 + 0.04, f = e + s * (ww / 2 - 0.05); A(o.shutter, Math.min(e, f), Math.max(e, f), v0 + 0.02, vt - 0.02, 0, 0.04); }
+  else if (o.shut === 'open') for (const s of [-1, 1]) { const e = s < 0 ? u0 - 0.04 : u1 + 0.04, f = e + s * (ww / 2 - 0.05); A(o.shutter, Math.min(e, f), Math.max(e, f), v0 + 0.02, vt - 0.02, 0.002, 0.043); }
 }
 
 /**
@@ -119,7 +119,7 @@ export function canalHouse(el, { bag, col }) {
   for (let i = 0; i < bays; i++) {
     const u = (i + 0.5) * bw;
     if (warehouse && i === Math.floor(bays / 2)) {
-      for (let k = 0; k < n; k++) { const v0 = k ? floors[k] + 0.25 : 0.2, hh = k ? st - 0.6 : g + base - 0.6; A(ST, u - 0.75, u + 0.75, v0 + hh, v0 + hh + 0.2, 0, 0.05); for (const s of [-1, 1]) { A(shutter, Math.min(u, u + s * 0.68), Math.max(u, u + s * 0.68), v0, v0 + hh, 0, 0.06); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.3, v0 + hh * 0.3 + 0.05, 0.06, 0.08); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.75, v0 + hh * 0.75 + 0.05, 0.06, 0.08); } A('wood_dark', u - 0.02, u + 0.02, v0, v0 + hh, 0.06, 0.08); }
+      for (let k = 0; k < n; k++) { const v0 = k ? floors[k] + 0.25 : 0.2, hh = k ? st - 0.6 : g + base - 0.6; A(ST, u - 0.75, u + 0.75, v0 + hh, v0 + hh + 0.2, 0, 0.05); for (const s of [-1, 1]) { A(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, Math.min(u, u + s * 0.68), Math.max(u, u + s * 0.68), v0, v0 + hh, 0, 0.06); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.3, v0 + hh * 0.3 + 0.05, 0.06, 0.08); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.75, v0 + hh * 0.75 + 0.05, 0.06, 0.08); } A('wood_dark', u - 0.02, u + 0.02, v0, v0 + hh, 0.06, 0.08); }
       continue;
     }
     if (i === door && !warehouse) {

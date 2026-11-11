@@ -10,7 +10,8 @@ import { canalHouse } from './house.js';
 import { townHall, dutchChurch, westerTower } from './landmarks.js';
 import { quayWall, canalBridge } from './canal.js';
 import { waag, damPaving, fishBench, sledge } from './dam.js';
-import { praam } from './boats.js';
+import { praam, ship } from './boats.js';
+import { vocWarehouse } from './warehouse.js';
 
 const B = 'brick', W = 'plaster_white';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -22,14 +23,8 @@ function stackedTower(el, { bag, col }) {
   for (const [r, hh] of [[s * 0.42, h * 0.14], [s * 0.36, h * 0.12], [s * 0.3, h * 0.1]]) { bag.add('sandstone_dressed', lathe([[r, 0], [r, hh], [r * 1.12, hh + 0.4]], 8, null, x, yy, z)); yy += hh + 0.4; }
   bag.add('lead', lathe([[s * 0.32, 0], [s * 0.2, h * 0.06], [0.4, h * 0.12], [0.001, h * 0.16]], 8, null, x, yy, z));
 }
-/** ship: a three-masted ship at anchor { at, dir, len, y }. */
-function ship(el, ctx) {
-  const { bag } = ctx, [x, z] = el.at, L = el.len ?? 30, y = el.y ?? 0, [dx, dz] = el.dir ?? [1, 0];
-  STYLES.qing.elements.boat({ at: el.at, dir: el.dir ?? [1, 0], len: L, y }, ctx);
-  for (const k of [-0.3, 0, 0.3]) bag.add('timber', lathe([[0.25, 0], [0.15, L * 0.8]], 6, null, x + dx * k * L, y + 1, z + dz * k * L));
-}
 registerStyle('dutch', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, canal_house: canalHouse, town_hall: townHall, dutch_church: dutchChurch, wester_tower: westerTower, quay_wall: quayWall, canal_bridge: canalBridge, stacked_tower: stackedTower, ship, waag, dam_paving: damPaving, fish_bench: fishBench, sledge, praam },
+  elements: { ...STYLES.qing.elements, canal_house: canalHouse, town_hall: townHall, dutch_church: dutchChurch, wester_tower: westerTower, quay_wall: quayWall, canal_bridge: canalBridge, stacked_tower: stackedTower, ship, waag, dam_paving: damPaving, fish_bench: fishBench, sledge, praam, voc_warehouse: vocWarehouse },
   objects: {},
 });

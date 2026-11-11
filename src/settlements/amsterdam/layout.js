@@ -19,6 +19,8 @@ export const WAAG = [-20, -253, -2, -241];
 export const FISH = [13, -255, 39, -247];
 /** The Nieuwe Kerk, east of the Dam. */
 export const NIEUWE_KERK = [48, -261, 70, -215];
+/** The VOC's warehouses on the IJ's quay (docs §5.11): [x0, z0, x1, z1, open], their long fronts to the north (the quay). */
+export const VOC = [[-110, -282, -82, -270, true], [-78, -282, -50, -270], [52, -282, 80, -270], [84, -282, 112, -270, true], [144, -283, 168, -271], [-168, -283, -144, -271]];
 export const WATER = -1.0, GROUND = 1.0;
 export const QUAY = 1.0;                                    // the quay walls' line: this far beyond the canals' nominal edge
 export const BRIDGE_ANGLES = [0.35, 0.8, 1.25, 1.7, 2.15, 2.6];
@@ -66,19 +68,23 @@ export function lots() {
   LOTS = [];
   const rand = rng(1670), wk = westerkerk();
   LOTS.push(...damLots(rng(1665)));
-  const bands = [[RINGS[0] - CANAL_W / 2 - 18, -1], ...RINGS.flatMap((R) => [[R - CANAL_W / 2 - 8 - 6, -1], [R + CANAL_W / 2 + 8, 1]])];
+  // a row of houses on each bank of every canal (docs §5.12): 10 m deep, their fronts 5 m behind the quay's edge (the quay street), so that
+  // the land between two canals (33 m) holds the two quay streets and two rows of houses back to back; [the row's radius, the bank]
+  const DEP = 10, ROW = CANAL_W / 2 + QUAY + 5 + DEP / 2;
+  const bands = RINGS.flatMap((R) => [[R - ROW, -1], [R + ROW, 1]]);
   for (const [R, side] of bands) {
     for (let a = 0.05; a < Math.PI - 0.05;) {
-      const w = 6 + rand() * 2.5, x = C[0] + Math.cos(a) * (R + 7), z = C[1] + Math.sin(a) * (R + 7);
-      a += w / (R + 7);
-      if (Math.hypot(x, z) > RADIUS - 70 || z < C[1] + 26 || inRect([DAM[0] - 50, DAM[1] - 10, DAM[2] + 10, DAM[3] + 10], x, z) || Math.hypot(x - wk[0], z - wk[1]) < 16 || inRect(westerNave(), x, z, 12) || inRect(NIEUWE_KERK, x, z, 8) || BRIDGE_ANGLES.some((b) => Math.abs(b - a) * (R + 7) < 7 + w / 2) || rand() < 0.06) continue;
+      const w = 6 + rand() * 2.5, x = C[0] + Math.cos(a) * R, z = C[1] + Math.sin(a) * R;
+      a += w / R;
+      if (Math.hypot(x, z) > RADIUS - 70 || z < C[1] + 26 || inRect([DAM[0] - 50, DAM[1] - 10, DAM[2] + 10, DAM[3] + 10], x, z) || Math.hypot(x - wk[0], z - wk[1]) < 16 || inRect(westerNave(), x, z, 12) || inRect(NIEUWE_KERK, x, z, 8) || BRIDGE_ANGLES.some((b) => Math.abs(b - a) * R < 7 + w / 2) || rand() < 0.04) continue;
       const nx = Math.cos(a), nz = Math.sin(a), alongX = Math.abs(nz) > Math.abs(nx);
       let front = alongX ? (nz * side > 0 ? 'n' : 's') : (nx * side > 0 ? 'w' : 'e');
-      const rect = alongX ? [x - w / 2, z - 6, x + w / 2, z + 6] : [x - 6, z - w / 2, x + 6, z + w / 2];
+      const rect = alongX ? [x - w / 2, z - DEP / 2, x + w / 2, z + DEP / 2] : [x - DEP / 2, z - w / 2, x + DEP / 2, z + w / 2];
       // a house whose back would be to the Dam turns its front to the square (its back is then to the quay)
       { const back = { n: [x, rect[3] + 3], s: [x, rect[1] - 3], e: [rect[0] - 3, z], w: [rect[2] + 3, z] }[front]; if (inRect(DAM, back[0], back[1], 8)) front = { n: 's', s: 'n', e: 'w', w: 'e' }[front]; }
+      if (VOC.some((r) => !(rect[2] <= r[0] - 2 || rect[0] >= r[2] + 2 || rect[3] <= r[1] - 2 || rect[1] >= r[3] + 2))) continue;
       if (LOTS.some((l) => !(rect[2] <= l.rect[0] || rect[0] >= l.rect[2] || rect[3] <= l.rect[1] || rect[1] >= l.rect[3]))) continue;
-      if ([[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]].some(([p, q]) => wet(p, q) < 3)) continue;
+      if ([[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]].some(([p, q]) => wet(p, q) < 3.5)) continue;
       LOTS.push({ rect, front, storeys: 4 + (rand() < 0.4 ? 1 : 0), seed: Math.floor(rand() * 1e6), y: GROUND });
     }
   }

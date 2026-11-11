@@ -1,13 +1,18 @@
 // The canal houses (docs/settlements/amsterdam.md §5); the life of the Dam (§5.6): greengrocers' stalls, the
 // porters at the Weigh House among the bales and casks, the fishwives at their benches, the carters walking
 // beside their horses and sledges, burghers in conversation, boats at the Damrak's head.
-import { RADIUS, GROUND, WATER, WAAG, DAMRAK, lots } from './layout.js';
+import { RADIUS, GROUND, WATER, WAAG, DAMRAK, VOC, lots } from './layout.js';
 import { SLEDGES, BOATS } from './plan.js';
 const base = (id, elements) => ({ id, style: 'dutch', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' } });
 export async function houses() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l, open: (l.front === 'n' && l.rect[1] === -203) || l.seed % 11 === 0 }))));
   return plans;
+}
+
+/** The VOC's warehouses along the IJ's quay (docs §5.11). */
+export function warehouses() {
+  return [base('amsterdam-voc', VOC.map((r, k) => ({ t: 'voc_warehouse', rect: [r[0], r[1], r[2], r[3]], front: 'n', y: GROUND, seed: 300 + k, open: !!r[4] })))];
 }
 
 const Y = GROUND + 0.05;

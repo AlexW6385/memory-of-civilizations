@@ -1,10 +1,10 @@
 // Amsterdam — the ground: the brick-paved quays and streets, rows of elms along the canals, the
 // canals' dark water, the IJ; the soft grey light and big clouds of Holland.
 
-import { RADIUS, DAM, HALL, WAAG, WATER, height, inWater, wet, inRect, inLot } from './layout.js';
+import { RADIUS, DAM, HALL, WAAG, WATER, height, inWater, wet, inRect, inLot, VOC } from './layout.js';
 
 function cover(x, z, h) {
-  const c = { sand: 0, grass: 0.2, rock: 0, soil: 0.2, fields: 0, dry: 0.15, warmth: 0.35, red: 0.25, road: 0.7, snow: 0, forest: 0 };
+  const c = { sand: 0, grass: 0.04, rock: 0, soil: 0.12, fields: 0, dry: 0.15, warmth: 0.35, red: 0.25, road: 0.95, snow: 0, forest: 0 };
   if (inRect(DAM, x, z)) { c.road = 0.95; return c; }
   if (h < 0) { c.soil = 0.8; c.road = 0; return c; }
   return c;
@@ -13,10 +13,10 @@ function water(x, z, y) { return inWater(x, z) && y < WATER + 0.3; }
 function waterLevel(x, z) { return inWater(x, z) ? WATER : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, height(x, z) - WATER)); }
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || inRect(DAM, x, z, 2) || inRect(HALL, x, z, 1) || inRect(WAAG, x, z, 0.5) || inLot(x, z, 0.5)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || inRect(DAM, x, z, 2) || inRect(HALL, x, z, 1) || inRect(WAAG, x, z, 0.5) || inLot(x, z, 0.5) || VOC.some((r) => inRect(r, x, z, 3))) return null;
   const w = wet(x, z);
-  if (w > 1.5 && w < 5) return { elm: 0.25 };                                    // the rows of elms along the quays
-  return { grass: 6 };
+  if (w > 1.4 && w < 3) return { elm: 0.25 };                                    // the rows of elms along the quays
+  return { grass: 1.2 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,

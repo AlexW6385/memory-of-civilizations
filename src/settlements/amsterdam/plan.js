@@ -36,7 +36,7 @@ export const dam = {
     ...SLEDGES.map(([x, z, rot, load], k) => ({ t: 'sledge', at: [x, z], rot, load, seed: 7 + k, y: GROUND + 0.053 })),
     // ships on the IJ
     // (all on the open water, clear of the shore at the disc's edge and of the Damrak's mouth)
-    ...[[-120, -303], [-70, -317], [-15, -306], [45, -318], [95, -304], [135, -299]].map((at, k) => ({ t: 'ship', at, dir: [1, 0.1], len: 28 + (k % 3) * 4, y: WATER })),
+    ...[[-120, -303], [-70, -317], [-15, -306], [45, -318], [95, -304], [135, -299], [-175, -322], [-25, -334], [70, -336], [170, -318]].map((at, k) => ({ t: 'ship', at, dir: [1, 0.1 * ((k % 3) - 1) + 0.05], len: 28 + (k % 4) * 4, y: WATER, seed: 90 + k, sails: k % 3 === 0 ? 'set' : 'furled' })),
   ],
   // the Town Hall's rooms first (a point in them is not on the Dam): the vestibule, the stair, the Burgerzaal and its galleries
   // (the Vierschaar is not a room: as in life it is seen from the vestibule through its bronze grilles, not entered)
