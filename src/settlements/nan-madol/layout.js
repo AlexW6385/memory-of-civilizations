@@ -7,7 +7,8 @@
 export const RADIUS = 190;
 export const WATER = -1.3;          // the lagoon's level (ground.sea): the islet tops stand 1.3 m over it
 export const TOP = 0;
-export const BED = -2.4;            // the canals' silt
+export const BED = -2.4;
+export const RIM = -4.6;            // the ground's level at the disc's edge (the open lagoon and sea)            // the canals' silt
 export const FORD_Y = -1.0;         // a causeway's crown, 0.3 m over the water
 export const WALL_FACE = 0.12;      // how far outside the islet's edge the face of its retaining wall stands
 const OX = -10, OZ = -8;            // the whole block set to the middle of the disc
@@ -104,8 +105,6 @@ export function height(x, z) {
   let h = BED + 0.14 * vnoise(x * 0.31, z * 0.31) + 0.1 * vnoise(x * 0.07 + 9, z * 0.07);
   let top = false;
   // the reef flat east and south of the sea wall, its edge falling to the open sea
-  const reef = Math.max(smooth(112, 124, x - OX * 0 - 0), 0);
-  void reef;
   const out = Math.max((x - (122 + OX)) / 1, (z - (136 + OZ)) / 1);
   if (out > 0) h = Math.max(h, -1.25 + 0.1 * vnoise(x * 0.2, z * 0.2) - 2.6 * smooth(26, 40, out));
   for (const s of ISLETS) {
@@ -125,7 +124,7 @@ export function height(x, z) {
     const hs = BED + (flat - BED) * s;
     h = Math.max(h, hs + (land - hs) * l);
   }
-  if (r > RADIUS - 36 && q < 0) h = h + (-4.6 - h) * smooth(RADIUS - 36, RADIUS - 6, r) * (top ? 0 : 1);
+  if (r > RADIUS - 36) h = h + (RIM - h) * smooth(RADIUS - 36, RADIUS - 6, r) * (top ? 0 : 1);
   return h;
 }
 export const waterAt = (x, z) => height(x, z) < WATER - 0.3;
@@ -222,3 +221,27 @@ export function walkPaths() {
   }
   return { rects, links };
 }
+
+/** Cook-houses and their earth ovens (umu): beside every fifth house, on its back side; [{ c, yaw, islet, seed }]. */
+let CK = null;
+export function cooks() {
+  if (CK) return CK;
+  CK = [];
+  village().houses.forEach((h, k) => {
+    if (k % 5 !== 2 && !(ISLET[h.islet].kind === 'kitchen' && k % 2 === 0)) return;
+    const ca = Math.cos(h.yaw), sa = Math.sin(h.yaw), u = h.w / 2 + 2.3, v = h.l / 2 - 0.4;
+    const c = [h.c[0] + u * ca + v * sa, h.c[1] - u * sa + v * ca];
+    if (!inRect(ISLET[h.islet].rect, c[0], c[1], -2.2)) return;
+    CK.push({ c, yaw: h.yaw, islet: h.islet, seed: h.seed });
+  });
+  return CK;
+}
+
+// ── Nandauwas (docs/settlements/nan-madol.md §4): the outer wall 50 × 60 on its islet, the inner enclosure, the tomb ──
+export const OUTER = [-35, -68, 15, -8];                     // the wall's centre lines
+export const OUTER_GATE = [-11.6, -8.4];                      // the gap in the south side (x)
+export const INNER = [-23, -54, 3, -22];
+export const INNER_GATE = [-0.8, 2.4];                        // the gap at the east end of its south side (x)
+export const TOMB = { rect: [-17, -48, -3, -30], h: 2.4, pit: [-12.2, -43, -7.8, -35.6], roofZ: -40.4, ramp: [-12.2, -39, -7.8, -35.6], stair: [-11, -30, -9, -26.6] };
+export const SAKAU = [[-28.5, -38, Math.PI / 2], [8.5, -15.5, 0]];
+export const inNandauwas = (x, z, m = 0) => inRect(ISLET.nan.rect, x, z, m);
