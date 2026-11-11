@@ -71,7 +71,14 @@ export function lots() {
   for (const [za, zb, front] of rowList()) for (let x = -RADIUS + 20; x < RADIUS - 20;) {
     const w = 5.2 + rand() * 3.2, cx = x + w / 2, cz = (za + zb) / 2;
     if (Math.hypot(cx, cz) < RADIUS - 40 && !inRect(PALACE, cx, cz, 8) && !inRect(CATHEDRAL, cx, cz, 14) && !inRect(PARVIS, cx, cz, 4) && !BRIDGES.some((b) => Math.abs(cx - b.x) < 8) && !laneAt(cx) && !laneAt(x) && !laneAt(x + w) && (inRect(ISLAND, cx, za, -4) && inRect(ISLAND, cx, zb, -4) || Math.abs(cz) > 175) && rand() > 0.05)
-      LOTS.push({ rect: [x, za, x + w - 0.25, zb], seed: Math.floor(rand() * 1e6), front, storeys: 3 + (rand() < 0.35 ? 1 : 0) });
+    {
+      const lot = { rect: [x, za, x + w - 0.25, zb], seed: Math.floor(rand() * 1e6), front, storeys: 3 + (rand() < 0.35 ? 1 : 0) };
+      // the flanks left open by a ruelle or the end of a row are seen: they are framed too
+      const prev = LOTS[LOTS.length - 1];
+      lot.flank = [true, true];
+      if (prev && prev.front === front && prev.rect[1] === za && x - prev.rect[2] < 0.6) { prev.flank[1] = false; lot.flank[0] = false; }
+      LOTS.push(lot);
+    }
     x += w;
   }
   return LOTS;

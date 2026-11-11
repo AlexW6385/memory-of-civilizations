@@ -155,6 +155,22 @@ function paris_house(el, { bag, col }) {
     }
     yb += ST;
   }
+  // the flanks that a ruelle or the row's end leaves in view: the same frame (sill and plate beams, posts, a window and a brace)
+  for (const [side, ex] of [[0, el.flank?.[0] ?? false], [1, el.flank?.[1] ?? false]]) {
+    if (!ex) continue;
+    const ua = side ? L : -0.07, ub = side ? L + 0.07 : 0.0, sg = side ? 1 : -1;
+    let yy = ST0;
+    for (let s = 1; s < n; s++) {
+      const d0 = s === 1 ? -jet(s) : -jet(s);
+      B('timber', ua, ub, yy, yy + 0.24, d0 - 0.0, D); B('timber', ua, ub, yy + ST - 0.16, yy + ST, d0, D);
+      for (const dd of [d0, D * 0.34, D * 0.67, D - 0.14]) B('timber', ua, ub, yy + 0.24, yy + ST - 0.16, dd, dd + 0.14);
+      const dw = D * 0.5 - 0.45, ya = yy + 0.8;
+      B('timber', sg > 0 ? L : -0.09, sg > 0 ? L + 0.09 : 0, ya - 0.1, ya + 1.28, dw - 0.1, dw + 1.0);
+      B('opening', sg > 0 ? L : -0.11, sg > 0 ? L + 0.11 : 0, ya, ya + 1.1, dw, dw + 0.8);
+      R('timber', [sg > 0 ? L + 0.035 : -0.035, yy + 0.24, d0 + 0.14], [sg > 0 ? L + 0.035 : -0.035, ya - 0.1, dw - 0.3], 0.04, 4);
+      yy += ST;
+    }
+  }
   // the gable's frame and its attic window, the hoist beam with its pulley
   const gd = -jt - 0.06, gw = Math.min(0.9, L * 0.2);
   B('timber', 0, L, ye, ye + 0.16, gd, -jt + 0.02);
