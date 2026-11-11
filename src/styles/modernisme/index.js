@@ -19,6 +19,7 @@ import '../qing/index.js';
 import { nativity } from './nativity.js';
 import { STREET } from './street.js';
 import { casaCafe } from './interior.js';
+import { FURNITURE } from './furniture.js';
 
 const S = 'limestone_yellow', P = 'stucco_cream', IRON = 'iron';
 const FACADES = [S, P, 'stucco_ochre', 'stucco_pale', P, 'stucco_rose'];
@@ -753,6 +754,6 @@ function batllo(el, { bag, col }) {
 }
 registerStyle('modernisme', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mercat, casa_cafe: (el, ctx) => casaCafe(el, ctx, { frame, streetFront, courtFront, roofTop, rng }), eixample_block: block, sagrada, pedrera, batllo, ...STREET, banc_fanal: bancFanal },
+  elements: { ...STYLES.qing.elements, mercat, casa_cafe: (el, ctx) => casaCafe(el, ctx, { frame, streetFront, courtFront, roofTop, rng }), eixample_block: block, sagrada, pedrera, batllo, ...STREET, ...FURNITURE, banc_fanal: bancFanal },
   objects: {},
 });

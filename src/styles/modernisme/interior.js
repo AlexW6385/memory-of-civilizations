@@ -160,6 +160,9 @@ export function casaCafe(el, ctx, H) {
   ob(11.04, WELL.b0, 11.1, WELL.b1 - 2.2, F0, PF + 1.0);
   ob(9.55, WELL.b0 - 0.05, 11.1, WELL.b0 + 0.05, PF, PF + 1.0);
 
+  // the kitchen range's stack on the roof terrace
+  bx('brick', 13.7, 16.3, 14.3, 16.9, y + hh, y + hh + 1.7); bx('limestone_yellow', 13.62, 16.22, 14.38, 16.98, y + hh + 1.7, y + hh + 1.82);
+
   // ── the street front: upper floors, cornice and parapet as the other houses'; the windows' frames and glass ─────────
   H.streetFront(bag, fr, 0, W, y, hh, mat, H.rng(el.seed ?? 5), false, { own: true });
   H.courtFront(bag, fr, 0, W, y, hh, D, H.rng((el.seed ?? 5) + 3), 3);
@@ -217,7 +220,7 @@ export function casaCafe(el, ctx, H) {
   // the floor: a chequer of cream and dark-red tile with a border of blue, on the marble slab
   {
     const Tq = [], u = 0.6, y1 = F0 + 0.006;
-    const sq = (a0, b0, a1, b1) => quad(Tq, [X(b0), y1, Z(a0)], [X(b0), y1, Z(a1)], [X(b1), y1, Z(a1)], [X(b1), y1, Z(a0)]);
+    const sq = (a0, b0, a1, b1) => quad(Tq, [X(b0), y1, Z(a0)], [X(b1), y1, Z(a0)], [X(b1), y1, Z(a1)], [X(b0), y1, Z(a1)]);
     for (let i = 0; i < Math.floor((cA1 - cA0 - 0.4) / u); i++) for (let j = 0; j < Math.floor((cB1 - cB0 - 0.4) / u); j++) if ((i + j) % 2) sq(cA0 + 0.2 + i * u, cB0 + 0.2 + j * u, cA0 + 0.2 + (i + 1) * u, cB0 + 0.2 + (j + 1) * u);
     bag.add('cotto_floor', fromTriangles(Tq));
     const gb = (a0, b0, a1, b1) => bx('glaze_blue', a0, b0, a1, b1, F0 - 0.1, F0 + 0.012);
@@ -316,8 +319,8 @@ export function casaCafe(el, ctx, H) {
   // ── the stair hall (the portal) ─────────────────────────────────────────────────────────────────
   const hA0 = A1 + T / 2, hA1 = A2 - T / 2;
   {
-    const Tq = [], u = 0.5, y1 = F0 + 0.006;
-    for (let i = 0; i < 6; i++) for (let j = 0; j < 9; j++) if ((i + j) % 2) { const a0 = hA0 + 0.02 + i * u, b0 = 0.5 + j * u; quad(Tq, [X(b0), y1, Z(a0)], [X(b0), y1, Z(a0 + u)], [X(b0 + u), y1, Z(a0 + u)], [X(b0 + u), y1, Z(a0)]); }
+    const Tq = [], u = 0.5, y1 = F0 + 0.02;
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 9; j++) if ((i + j) % 2) { const a0 = hA0 + 0.02 + i * u, b0 = 0.5 + j * u; quad(Tq, [X(b0), y1, Z(a0)], [X(b0 + u), y1, Z(a0)], [X(b0 + u), y1, Z(a0 + u)], [X(b0), y1, Z(a0 + u)]); }
     bag.add('glaze_blue', fromTriangles(Tq));
   }
   bx('wood_dark', hA0, 0.5, hA0 + 0.04, WELL.b0, F0, F0 + 1.5); bx('wood_dark', hA1 - 0.04, 0.5, hA1, WELL.b0, F0, F0 + 1.5);
@@ -334,7 +337,7 @@ export function casaCafe(el, ctx, H) {
   const sA0 = A2 + T / 2, sA1 = W - 0.05, sB1 = 7.5;
   {
     const Tq = [], u = 0.45, y1 = F0 + 0.02;
-    for (let i = 0; i < 6; i++) for (let j = 0; j < 14; j++) if ((i + j) % 2) { const a0 = sA0 + 0.0 + i * u, b0 = 0.55 + j * u; if (a0 + u <= sA1 && b0 + u <= sB1) quad(Tq, [X(b0), y1, Z(a0)], [X(b0), y1, Z(a0 + u)], [X(b0 + u), y1, Z(a0 + u)], [X(b0 + u), y1, Z(a0)]); }
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 14; j++) if ((i + j) % 2) { const a0 = sA0 + 0.0 + i * u, b0 = 0.55 + j * u; if (a0 + u <= sA1 && b0 + u <= sB1) quad(Tq, [X(b0), y1, Z(a0)], [X(b0 + u), y1, Z(a0)], [X(b0 + u), y1, Z(a0 + u)], [X(b0), y1, Z(a0 + u)]); }
     bag.add('cotto_floor', fromTriangles(Tq));
   }
   wall('stucco_cream', 'a', sB1, sA0, sA1, 0.2, y, y + 4.45);                                           // the back of the shop (the workroom beyond)
