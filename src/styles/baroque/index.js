@@ -14,6 +14,7 @@ import { merge, ext } from '../renaissance/face.js';
 import { stPeterFacade, entrances } from './facade.js';
 import { stPeterInterior } from './interior.js';
 import { socle, sagrato } from './sagrato.js';
+import { borgoRow } from './borgo.js';
 
 const T = 'travertine', L = 'lead', ST = 'stucco_ochre';
 /** st_peter: { c (the crossing), s (side of the central block), nave (length east), w, h, d (dome diameter), y } — the church faces east. */
@@ -140,6 +141,6 @@ function castel(el, { bag, col }) {
 function paving(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('flagstone', box(x0, y - 0.4, z0, x1, y + 0.02, z1)); }
 registerStyle('baroque', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel, paving, ponte_angeli: ponteAngeli, palace_roman: palaceRoman, coach, sedan_chair: sedanChair },
+  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel, paving, ponte_angeli: ponteAngeli, palace_roman: palaceRoman, coach, sedan_chair: sedanChair, borgo_row: borgoRow },
   objects: {},
 });
