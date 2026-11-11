@@ -205,7 +205,7 @@ export function dougong(bag, rect, [xs, zs], yf, o = {}, soffit = null) {
     const yb = soffit ? soffit(0) + 0.06 : yTop + 0.3;
     _beam(R, [P(0, 0)[0], yf + 0.12, P(0, 0)[1]], [P(L, 0)[0], yf + 0.12, P(L, 0)[1]], 0.025, yb - yf - 0.12);
     const shape = setShape({ tiers, step }, n), at = [];
-    for (let i = 0; i < ps.length; i++) { at.push(ps[i]); if (i + 1 < ps.length) { const sp = ps[i + 1] - ps[i], k = Math.max(1, Math.round(sp / (o.pitch ?? 1.0)) - 1); for (let j = 1; j <= k; j++) at.push(ps[i] + sp * j / (k + 1)); } }
+    for (let i = 0; i < ps.length; i++) { at.push(ps[i]); if (i + 1 < ps.length) { const sp = ps[i + 1] - ps[i], k = Math.max(1, Math.round(sp / (o.pitch ?? 1.25)) - 1); for (let j = 1; j <= k; j++) at.push(ps[i] + sp * j / (k + 1)); } }
     for (const s of at) {
       const p = P(s, 0), y = yf + 0.12;
       for (const [m, tris] of [['paint_caihua', shape.G], ['paint_blue', shape.B]]) { const g = _fromTriangles(tris); g.translate(p[0], y, p[1]); bag.add(m, g); }

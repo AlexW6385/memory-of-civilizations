@@ -206,6 +206,13 @@ for (let i = 0; i + 1 < walks[0].length; i++) {
   for (let t = 0; t <= L; t += 3) { const x = ax + (bx - ax) * t / L, z = az + (bz - az) * t / L; E.push({ t: 'block', rect: [x - 1.5, z - 1.5, x + 1.5, z + 1.5], y0: -0.6, y1: -0.3, mat: 'brick_paving' }); }
 }
 
+// The throne rooms' fittings (the dragons, thrones, screens, ceilings: ~220 000 triangles) are a plan of their own, drawn only
+// within 100 m of the middle hall (the engine's `near`, as the town's tiles): from the Meridian Gate's forecourt they lie behind
+// walls and doors that show nothing of them, and were a tenth of that view's frame.
+const interiors = E.filter((e) => e.t === 'throne_hall');
+E.splice(0, E.length, ...E.filter((e) => e.t !== 'throne_hall'));
+export const thrones = { id: 'qing-beijing-thrones', style: 'qing', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: interiors, rooms: [], bounds: [-70, -120, 70, 30], entrance: { at: [0, 215], facing: 'n' }, center: [0, -45], near: 100 };
+
 export const palace = {
   id: 'qing-beijing-palace',
   name: { en: 'The Forbidden City: the Outer Court', zh: '紫禁城外朝' },

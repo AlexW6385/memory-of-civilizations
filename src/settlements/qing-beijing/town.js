@@ -6,6 +6,7 @@
 import { RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, DANBI, STREET_X, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
 import './townstyle.js';
 import { lifePlans } from './life.js';
+import { thrones } from './plan.js';
 
 const R = RADIUS - 26;
 const base = (id, elements, style = 'qing') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' } });
@@ -180,4 +181,4 @@ function traffic() {
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-export async function town() { return [streets(), ...surfaces(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }
+export async function town() { return [thrones, streets(), ...surfaces(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }

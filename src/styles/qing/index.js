@@ -174,7 +174,7 @@ function qingHall(el, ctx) {
   // Joseon: moru dancheong at the beams' ends, dapo bracket sets under the eaves (raising them by bk)
   const jo = !!orn?.joseon, fy = el.y + (el.H ?? 4.2);
   // the Qing bracket sets under the eaves of the palace's halls (caihua.js), where no Joseon dapo is asked for
-  const qb = !jo && !el.dapo && el.dougong !== false && (orn || el.double) && omat === 'tile_yellow' ? { tiers: el.dougong?.tiers ?? ((el.H ?? 4.2) > 8 ? 3 : 2), pitch: el.dougong?.pitch ?? 1.0 } : null;
+  const qb = !jo && !el.dapo && el.dougong !== false && (orn || el.double) && omat === 'tile_yellow' ? { tiers: el.dougong?.tiers ?? ((el.H ?? 4.2) > 8 ? 3 : 2), pitch: el.dougong?.pitch ?? 1.25 } : null;
   const bk = el.dapo ? dapoHeight(el.dapo) : qb ? dougongHeight(qb) : 0;
   const dapo = (bag_, rect, posts, yf, o, soffit) => (qb ? dougong(bag_, rect, posts, yf, qb, soffit) : dapoJ(bag_, rect, posts, yf, o, soffit));
   if (jo) meoricho(bag, el.rect, postLines(el), fy - 0.55, fy - 0.17, 0.14);
