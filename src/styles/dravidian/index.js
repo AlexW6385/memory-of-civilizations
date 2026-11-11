@@ -12,6 +12,7 @@ import '../qing/index.js';
 import '../../objects/index.js';
 import { rite } from '../indian/rites.js';
 import { tamilHouse } from './houses.js';
+import { courtHouse } from './courthouse.js';
 
 const G = 'granite_tamil';
 const PAINT = ['stucco_sky', 'stucco_rose', 'stucco_saffron', 'stucco_leaf', 'stucco_cream'];
@@ -673,6 +674,6 @@ function house(el, { bag, col }) {
 
 registerStyle('dravidian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: tamilHouse, ashta_shakti: ashtaShakti, elephant, ther, pudhu_mandapa: pudhu, rite },
+  elements: { ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: tamilHouse, court_house: courtHouse, ashta_shakti: ashtaShakti, elephant, ther, pudhu_mandapa: pudhu, rite },
   objects: {},
 });

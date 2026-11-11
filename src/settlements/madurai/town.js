@@ -9,7 +9,7 @@ export async function town() {
     if (l.kind === 'yard') continue;
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, k = `${Math.floor(cx / 100)},${Math.floor(cz / 100)}`;
     if (!tiles.has(k)) tiles.set(k, []);
-    tiles.get(k).push({ t: 'tamil_house', ...l });
+    tiles.get(k).push({ t: l.kind === 'court' ? 'court_house' : 'tamil_house', ...l });
   }
   for (const [k, list] of tiles) plans.push({ ...base(`madurai-houses-${k}`, list) });
   plans.push(festival(), pudhuMandapam, { ...street(), style: 'life', center: [0, 60], near: 260 });
