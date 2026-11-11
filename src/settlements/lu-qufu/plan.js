@@ -66,8 +66,8 @@ for (const p of STELE_PAV) E.push({ t: 'lu_stele_pavilion', c: p.c, w: p.w, y: 0
   const gapS = [[-18 - bx0, 18 - bx0]], gapN = [[-3.6 - bx0, 3.6 - bx0]];
   E.push({ t: 'terrace', rect: BASE, y0: 0, y1: y, open: { s: gapS, n: gapN }, carve: 'qing' });
   E.push({ t: 'terrace', rect: MOON, y0: 0, y1: y, open: { n: [[-1, mx1 - mx0 + 1]], s: [[-10.8 - mx0, 10.8 - mx0]] }, carve: 'qing' });
-  for (const [a, b, slab] of [[-10.5, -4.0, false], [-3.6, 3.6, true], [4.0, 10.5, false]]) E.push({ t: 'stairs', rect: [a, mz1, b, mz1 + 5], y0: 0.03, y1: y, dir: 'n', slab, rakes: !slab });
-  for (const [a, b, slab] of [[-3.4, 3.4, true]]) E.push({ t: 'stairs', rect: [a, bz0 - 5, b, bz0], y0: 0.03, y1: y, dir: 's', slab, rakes: !slab });
+  for (const [a, b, slab] of [[-10.5, -4.0, false], [-3.6, 3.6, false], [4.0, 10.5, false]]) E.push({ t: 'stairs', rect: [a, mz1, b, mz1 + 5], y0: 0.03, y1: y, dir: 'n', slab, rakes: !slab });
+  for (const [a, b, slab] of [[-3.4, 3.4, false]]) E.push({ t: 'stairs', rect: [a, bz0 - 5, b, bz0], y0: 0.03, y1: y, dir: 's', slab, rakes: !slab });
   E.push({ t: 'lu_dacheng', rect: HALL.rect, y, H: HALL.H, double: HALL.double, seed: 5 });
   // the bronze burners on the terrace before the hall, the stone lions at the foot of the stairs
   for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'tripod', at: [s * 12.5, mz0 + 5], y, s: 0.9, face: [0, 1] });

@@ -24,7 +24,7 @@ export function emitters() {
   for (const dz of [-80, -112, 20]) E.push({ p: [MX + 22, 5.4, dz], kind: 'kitchen', thr: 0.1, seed: dz + 400 });
   // incense: before the shrine of Confucius, at the bronze burners of the hall, the Apricot Altar, the Resting Hall, the Kuiwen gate
   const zb = HALL.rect[1] + 1;
-  for (const [x, y, z, thr] of [[-1.8, HALL.y + 2.4, zb + 9.2, 0], [1.8, HALL.y + 2.4, zb + 9.2, 0], [-5.4, HALL.y + 1.1, zb + 12.2, 0], [5.4, HALL.y + 1.1, zb + 12.2, 0], [ALTAR.c[0], 1.1, ALTAR.c[1] + 2.8, 0.05], [-12.5, HALL.y + 3.3, -106, 0.1], [12.5, HALL.y + 3.3, -106, 0.1], [0, 1.4, -170, 0.2], [0, 1.4, 20, 0.3]]) E.push({ p: [x, y, z], kind: 'incense', thr, seed: Math.round(x * 3 + z) });
+  for (const [x, y, z, thr] of [[-1.8, HALL.y + 2.4, zb + 9.2, 0], [1.8, HALL.y + 2.4, zb + 9.2, 0], [-5.4, HALL.y + 1.1, zb + 12.2, 0], [5.4, HALL.y + 1.1, zb + 12.2, 0], [ALTAR.c[0] + 2.4, 1.2, ALTAR.c[1] + 2.6, 0.05], [-12.5, HALL.y + 3.3, -106, 0.1], [12.5, HALL.y + 3.3, -106, 0.1], [0, 1.4, -170, 0.2], [0, 1.4, 20, 0.3]]) E.push({ p: [x, y, z], kind: 'incense', thr, seed: Math.round(x * 3 + z) });
   return E;
 }
 

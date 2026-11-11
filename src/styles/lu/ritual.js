@@ -81,10 +81,10 @@ export function altar(el, { bag, col }) {
   pyramidRoof(sq(4.0), y + H + 2.9, 2.6, 0.7, bag, TILE, 'paint_caihua');
   bag.add('gilt_bronze', lathe([[0.2, 0], [0.12, 0.3], [0.2, 0.6], [0.001, 1.2]], 8, null, cx, y + H + 5.5, cz));
   // the stele inside, a plaque "Apricot Altar" over the lower eave's centre, an incense burner before it
-  bag.add('marble', box(cx - 0.8, y, cz - 0.2, cx + 0.8, y + 2.6, cz + 0.2)); col.rect([cx - 0.85, cz - 0.25, cx + 0.85, cz + 0.25], y, y + 2.6);
+  bag.add('marble', box(cx - 3.2, y, cz - 0.2, cx - 1.6, y + 2.6, cz + 0.2)); col.rect([cx - 3.25, cz - 0.25, cx - 1.55, cz + 0.25], y, y + 2.6);
   for (const [dx, dz, r] of [[0, 4.6, 0], [0, -4.6, 0], [4.6, 0, 1], [-4.6, 0, 1]]) bag.add('lacquer_black', box(cx + dx - (r ? 0.04 : 0.6), y + H - 1.8, cz + dz - (r ? 0.6 : 0.04), cx + dx + (r ? 0.04 : 0.6), y + H - 0.8, cz + dz + (r ? 0.6 : 0.04)));
-  bag.add('bronze', lathe([[0.001, 0], [0.5, 0.05], [0.55, 0.45], [0.001, 0.5]], 10, null, cx, y, cz + 2.8));
-  col.circle(cx, cz + 2.8, 0.55, y, y + 0.5);
+  bag.add('bronze', lathe([[0.001, 0], [0.5, 0.05], [0.55, 0.45], [0.001, 0.5]], 10, null, cx + 2.4, y, cz + 2.6));
+  col.circle(cx + 2.4, cz + 2.6, 0.55, y, y + 0.5);
 }
 
 /** lu_tomb: a conical mound with a stele before it and a stone table { c, r, h, face: [fx, fz] } — the Forest's edge. */

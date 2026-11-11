@@ -96,7 +96,7 @@ function people() {
     const a = k / 9 * Math.PI * 2, r = 9.4 + rand() * 4, at = [ax + Math.cos(a) * r * 1.5, az + Math.sin(a) * r];
     fig(at, face(at, [ax, az]), { cloth: pick(['cloth_blue', 'cloth_indigo', 'cloth_white', 'cloth_grey']), pose: k % 3 === 0 ? 'talk' : 'stand' });
   }
-  fig([ax, az + 1.4], Math.PI, { y: 0.6, cloth: 'cloth_indigo', cloth2: 'cloth_white', beard: 1, pose: 'sit' });
+  fig([ax + 2.8, az - 1.4], Math.PI / 2, { y: 0.6, cloth: 'cloth_indigo', cloth2: 'cloth_white', beard: 1, pose: 'sit' });
   // pilgrims in the first courts
   for (let k = 0; k < 14; k++) { const at = [-34 + rand() * 68, 33 + rand() * 80]; if (Math.abs(at[0]) < 3 && at[1] > 85 && at[1] < 112) continue; fig(at, rand() * 6.28, { cloth: pick(['cloth_indigo', 'cloth_brown', 'cloth_grey', 'cloth_ochre']), pose: rand() < 0.3 ? 'talk' : 'stand' }); }
   // the shopkeepers at their counters
