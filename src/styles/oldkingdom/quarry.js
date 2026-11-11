@@ -65,7 +65,7 @@ export function tools(el, { bag }) {
   for (const [x, y, z, k] of el.at) {
     if (k === 'jar') bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.27, 0.3], [0.2, 0.55], [0.1, 0.68], [0.13, 0.74], [0.001, 0.74]], 10, null, x, y, z));
     else if (k === 'pounder') { bag.add('granite_black', lathe([[0.001, 0], [0.12, 0.04], [0.15, 0.13], [0.1, 0.24], [0.001, 0.26]], 8, null, x, y - 0.02, z)); bag.add('granite_black', lathe([[0.001, 0], [0.1, 0.03], [0.12, 0.1], [0.08, 0.19], [0.001, 0.2]], 8, null, x + 0.3, y - 0.02, z + 0.2)); }
-    else if (k === 'mallet') { bag.add('timber', box(x - 0.14, y, z - 0.07, x + 0.14, y + 0.12, z + 0.07)); bag.add('timber', box(x + 0.14, y + 0.03, z - 0.02, x + 0.55, y + 0.08, z + 0.03)); bag.add('copper', box(x - 0.5, y, z + 0.25, x - 0.2, y + 0.025, z + 0.3)); bag.add('copper', box(x - 0.45, y, z + 0.36, x - 0.17, y + 0.025, z + 0.41)); }
+    else if (k === 'mallet') { bag.add('timber', box(x - 0.14, y, z - 0.07, x + 0.14, y + 0.12, z + 0.07)); bag.add('timber', box(x + 0.14, y + 0.03, z - 0.02, x + 0.55, y + 0.08, z + 0.03)); bag.add('bronze', box(x - 0.5, y, z + 0.25, x - 0.2, y + 0.025, z + 0.3)); bag.add('bronze', box(x - 0.45, y, z + 0.36, x - 0.17, y + 0.025, z + 0.41)); }
     else if (k === 'lever') bag.add('timber', box(x, y, z - 0.07, x + 2.6, y + 0.14, z + 0.07));
   }
 }
