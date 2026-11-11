@@ -3,7 +3,7 @@
 // and the north–south streets, and the grey-brick courtyard houses between the lanes, in plans of
 // a few dozen each so that they build in turn.
 
-import { RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, SHOP_APRONS, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
+import { RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, STREET_X, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
 import './townstyle.js';
 import { lifePlans } from './life.js';
 
@@ -41,9 +41,28 @@ function streets() {
   // the Meridian Gate's forecourt: the causeway across the south moat, paved with brick, with the stone way down its axis to the avenue
   E.push({ t: 'lane', rect: [-nx, d1 - 0.5, nx, RING[3]], y: 0.03, mat: 'brick_paving' });
   E.push({ t: 'lane', rect: [-3.6, d1 - 0.5, 3.6, RING[3] + 2], y: 0.06, mat: 'marble_floor' });
-  E.push({ t: 'lane', rect: clip(AVENUE), y: 0.04, mat: 'bluestone' });
-  for (const l of lanes()) { const r = clip(l); if (r) E.push({ t: 'lane', rect: r, y: 0.02, mat: l[2] - l[0] < 20 ? 'bluestone' : 'brick_paving' }); }
+  for (const l of lanes()) { const r = clip(l); if (r && l[2] - l[0] < 20) E.push({ t: 'lane', rect: r, y: 0.02, mat: 'bluestone' }); }
   return base('qing-beijing-streets', E);
+}
+
+/** The avenue as a commercial street and the hutong as packed-earth lanes (street.js). */
+function surfaces() {
+  const av = clip(AVENUE), plans = [], E = [];
+  let k = 0;
+  // the hutong, cut where the avenue and the north–south streets cross them (those keep their own surface)
+  for (const l of lanes()) {
+    if (l[2] - l[0] < 20) continue;
+    const r = clip(l); if (!r) continue;
+    let parts = [[r[0], r[2]]];
+    const cuts = STREET_X.map((x) => [x - 4, x + 4]);
+    if (r[1] + 5 > av[1] - 1) cuts.push([av[0] - 8.6, av[2] + 8.6]);
+    for (const [c0, c1] of cuts) parts = parts.flatMap(([p, q]) => (c1 <= p || c0 >= q ? [[p, q]] : [[p, c0], [c1, q]].filter(([m, n]) => n - m > 2)));
+    for (const [p, q] of parts) E.push({ t: 'bj_lane', rect: [p, r[1], q, r[3]], seed: 100 + k++ });
+  }
+  const per = 8;
+  for (let i = 0; i < E.length; i += per) plans.push({ ...base(`qing-beijing-lanes-${i / per}`, E.slice(i, i + per), 'beijing-site') });
+  plans.push(base('qing-beijing-avenue', [{ t: 'bj_street', z0: av[1], z1: av[3], seed: 5 }], 'beijing-site'));
+  return plans;
 }
 
 /**
@@ -63,9 +82,7 @@ function courtyards() {
 /** The shop street (§16): the shops on the avenue's two sides, their yards, the wells of the lanes. */
 function shopStreet() {
   const plans = [], rows = shopRows(), E = [];
-  const apron = SHOP_APRONS.map((r) => ({ t: 'lane', rect: r, y: 0.04, mat: 'bluestone' }));
   const mk = (id, els) => plans.push(base(id, els, 'beijing-site'));
-  mk('qing-beijing-shop-aprons', apron);
   for (let i = 0; i < rows.length; i += 4) {
     const els = [];
     for (const row of rows.slice(i, i + 4)) {
@@ -128,4 +145,4 @@ function traffic() {
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-export async function town() { return [streets(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }
+export async function town() { return [streets(), ...surfaces(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }
