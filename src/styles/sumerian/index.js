@@ -10,6 +10,7 @@ import { loft, ring } from '../egyptian/objects.js';
 import '../qing/index.js';
 import { urHouseOpen, scribeKit, quayGoods } from './house.js';
 import { giparu, urChapel } from './temple.js';
+import { dressFront, roofLife } from './dress.js';
 
 const BB = 'brick_baked', MB = 'mudbrick', MP = 'mud_plaster';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -310,6 +311,10 @@ function urHouse(el, ctx) {
     }
   }
   for (const [a, b] of [[[x0, z0], [x1, z0]], [[x0, z1], [x1, z1]], [[x0, z0], [x0, z1]], [[x1, z0], [x1, z1]]]) { const t = []; beamTris(t, [a[0], H, a[1]], [b[0], H, b[1]], 0.15, 0.5); bag.add(up, fromTriangles(t)); }
+  // eye-level dress and weather, and the life of the roof (docs/settlements/ur.md §5.6): full near the core, the door's and a patch far out
+  const lod = el.lod ?? 1;
+  if (lod > 0) dressFront(ctx, { rect: el.rect, face: faces[side], dc: du, trade: el.trade, seed: el.seed, foot: base, H, near: lod > 1 });
+  if (lod > 1) roofLife(ctx, { wings: Object.values(wings), y: H, seed: el.seed });
   // gutters: short clay spouts through the parapet on to the lane
   for (const f of faces) {
     if (rand() < 0.35) continue;

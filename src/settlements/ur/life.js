@@ -4,7 +4,9 @@
 // not camels); a shepherd with sheep and goats; porters carrying jars up from the moored boats on the quay;
 // a fisherman mending his net. Figures and beasts are a 'life' plan; the scribe's mat and tablets, the
 // net and the stacked jars are the 'sumerian' style's (`scribe_kit`, `quay_goods`).
-import { MARKET, HARBOUR } from './layout.js';
+import { MARKET, HARBOUR, houses } from './layout.js';
+import { lotPoint, lotRot, tradeRoom } from '../../styles/sumerian/house.js';
+import { TRADE_SPOT } from '../../styles/sumerian/trades.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const N = 0, S = Math.PI, E = -Math.PI / 2, W = Math.PI / 2;             // a figure's rot to face north, south, east, west
@@ -55,5 +57,18 @@ export function urLife() {
   figures.push({ t: 'figure', at: [6, -196], y: 0, rot: E + 0.3, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', carry: 'pot', h: 1.52 });
   figures.push({ t: 'figure', at: [7.1, -195.2], y: 0, rot: E + 0.2, seed: seed(), dress: 'robe', cloth: 'linen', cloth2: 'cloth_brown', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', h: 1.5 });
   figures.push({ t: 'figure', at: [-20.5, -219.2], y: 0, rot: S, seed: seed(), child: true, dress: 'wrap', top: 'bare', cloth: 'linen', hair: 'shaven', feet: 'bare' });
+  tradeWorkers(figures, man, rand);
   return { figures, gear };
+}
+
+/** The worker of each trade house that can be entered, at his place in the trade's room (trades.js TRADE_SPOT). */
+function tradeWorkers(figures, man, rand) {
+  for (const h of houses()) {
+    if (!h.open || !h.trade) continue;
+    const sp = TRADE_SPOT[h.trade]?.(tradeRoom(h));
+    if (!sp) continue;
+    const [x, z] = lotPoint(h, ...sp.at), rot = lotRot(h, ...sp.face);
+    if (sp.women) figures.push({ t: 'figure', at: [x, z], y: sp.pose === 'sit_low' ? 0.06 : 0.06, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', pose: sp.pose, h: 1.5 });
+    else man([x, z], 0.06, rot, { pose: sp.pose });
+  }
 }
