@@ -26,7 +26,9 @@ const rooms = [
   room('west-chamber', [AX - 55, HALL.z1 - 14, AX - 37, HALL.z1], CROWN + 0.6, 'hall'),
   room('east-chamber', [AX + 37, HALL.z1 - 14, AX + 55, HALL.z1], CROWN + 0.6, 'hall'),
   room('changle-hall', [CH.cx - 21, CH.z1 - 18, CH.cx + 21, CH.z1], 3.1, 'hall'),
-  room('forecourt', [AX - 80, RAMP.z1, AX + 80, 100], 0, 'open'),
+  // the forecourt either side of the paved axis (the axis itself is kept clear for the way up)
+  room('west-court', [AX - 76, RAMP.z1 - 10, AX - 9, 100], 0, 'open'),
+  room('east-court', [AX + 9, RAMP.z1 - 10, AX + 76, 100], 0, 'open'),
 ];
 // the way in: the forecourt, up the ramp-stair to the crown, across the apron and the steps, into the hall, up the aisle to the dais
 const walks = [[[AX, 60], [AX, -60], [AX, -90], [AX, -110], [AX, -127], [AX, -140], [AX, -160], [AX, -166], [AX, -172], [AX, -184]]];
