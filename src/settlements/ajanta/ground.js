@@ -38,13 +38,13 @@ function planting(x, z) {
   if (r > RADIUS - 6 || inRock(x, z, 2) || onPath(x, z, 1) || inRiver(x, z, 1) || inPool(x, z, 1.5)) return null;
   if (x < XF + 14 && az < ZOUT) return null;                         // the foot of the cliff
   if (x < WX1 + 14 && az >= 56 && az < ZOUT + 12 && x > XF - 6) return null;                // the wings' feet
-  if (inRect(VILLAGE, x, z, 1)) return { neem: 0.12, date_palm: 0.06, grass_dry: 8 };
-  if (x < XF - ROCK - 4 || (az > ZOUT + 4 && x < WX1)) return { teak: 0.16, neem: 0.03, acacia: 0.05, grass_dry: 14 };
+  if (inRect(VILLAGE, x, z, 1)) return { neem: 0.08, date_palm: 0.04, grass_dry: 4 };
+  if (x < XF - ROCK - 4 || (az > ZOUT + 4 && x < WX1)) return { teak: 0.08, neem: 0.02, acacia: 0.03, grass_dry: 5 };
   const dr = Math.abs(x - riverX(z));
-  if (dr < 16 && az > 48) return { bamboo: 0.12, fig: 0.04, banyan: 0.012, grass: 14 };
-  if (dr < 10) return { grass: 20, reeds: 0.4 };
-  if (x > XF + 16 && az > 44 || x > 30) return { teak: 0.04, neem: 0.02, grass_dry: 14 };
-  return { grass_dry: 14, grass: 6 };
+  if (dr < 16 && az > 48) return { bamboo: 0.08, fig: 0.03, banyan: 0.01, grass: 6 };
+  if (dr < 10) return { grass: 8, reeds: 0.3 };
+  if (x > XF + 16 && az > 44 || x > 30) return { teak: 0.025, neem: 0.015, grass_dry: 5 };
+  return { grass_dry: 5, grass: 2 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,

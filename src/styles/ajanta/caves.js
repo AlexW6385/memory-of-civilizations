@@ -6,7 +6,7 @@ import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 import { Panel, PAL, wall, figM, bodhiM, lotusBand, jatakaM, ceilingM, buddhaM, rngOf } from './paint.js';
 
-const FLOORM = 'polished_sandstone', PLASTER = 'plaster_ochre', STONE = 'sandstone_carved', WHITE = 'lime_plaster';
+const FLOORM = 'sandstone_floor', PLASTER = 'plaster_ochre', STONE = 'sandstone_carved', WHITE = 'lime_plaster';
 const hole = (x0, x1, z0, z1, y0, y1) => ({ x0, x1, z0, z1, y0, y1 });
 
 export function lamp(ctx, x, y, z, h = 1.0, intensity = 2.2, distance = 9) {
@@ -221,8 +221,8 @@ export function chaitya(ctx, xf, zc, y) {
   for (let i = 0; i < 9; i++) { const z = zc - 4.0 + i; bag.add(WHITE, lathe([[0.001, 0], [0.18, 0.02], [0.2, 0.2], [0.12, 0.34], [0.001, 0.36]], 8, null, xf + 0.05, y + 7.0, z)); }
   // the interior: aisle ceilings, the vault with its ribs, the colonnade
   const ax = (xn1 + xn0) / 2;
-  plane(ctx, 'z', zc - hw, 1, xn0, xn1, y, y + 3.8); plane(ctx, 'z', zc + hw, -1, xn0, xn1, y, y + 3.8);
-  for (const s of [-1, 1]) slab(ctx, PLASTER, xn0, y + 3.78, zc + s * 2.55 - (s > 0 ? 0 : 1.05), xn1, y + 3.82, zc + s * 2.55 + (s > 0 ? 1.05 : 0));
+  plane(ctx, 'z', zc - hw, 1, xn0, xn1, y, y + 4.3); plane(ctx, 'z', zc + hw, -1, xn0, xn1, y, y + 4.3);
+  for (const s of [-1, 1]) slab(ctx, PLASTER, xn0, y + 4.28, zc + s * 2.55 - (s > 0 ? 0 : 1.05), xn1, y + 4.32, zc + s * 2.55 + (s > 0 ? 1.05 : 0));
   // the barrel vault over the nave: half-width 2.6, springing at y+4.3, the crown at y+7.2
   const prof = []; for (let i = 0; i <= 14; i++) { const a = Math.PI * i / 14; prof.push([-Math.cos(a) * 2.6, 4.3 + Math.sin(a) * 2.9]); }
   const ref = [ax, y + 3, zc], tri = [], rib = [];

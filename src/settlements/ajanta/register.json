@@ -1,6 +1,6 @@
 {
   "site": { "id": "ajanta", "name": { "en": "Ajanta", "zh": "阿旃陀" }, "era": "c. 480", "region": "india", "lat": 20.55, "lon": 75.70, "radius": 190 },
-  "arrival": [30, null, 22, 1.31, 0.16],
+  "arrival": [17, null, 19.5, 1.32, 0.2],
   "arrivalNote": "On the east bank's path, looking west over the Waghora at the horseshoe cliff: the rock-cut ledge with the pillared porch of the painted vihara and the great horseshoe window of the chaitya hall, tiers of shrine niches above, the waterfall down the north wing.",
   "card": {
     "en": [

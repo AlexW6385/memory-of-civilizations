@@ -14,7 +14,7 @@ export const FLOOR = [0.0, 9.0, 20.0];               // gorge floor, the ledge, 
 export const LEDGE = { x0: XF, x1: XF + 6, z0: -57, z1: 57 };
 export const STAIR = { x0: XF + 6, x1: XF + 8.4, z0: -57, z1: -42 };   // rises to the south from the path to the ledge
 export const PLATEAU = 30;
-export const EAST = 6;                               // the east bank's plateau, over the gorge floor
+export const EAST = 8;                               // the east bank's plateau, over the gorge floor
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 
