@@ -142,7 +142,10 @@ export function lots() {
   const best = (cands, tx, tz) => cands.sort((a, b) => Math.hypot(a.rect[0] - tx, a.rect[1] - tz) - Math.hypot(b.rect[0] - tx, b.rect[1] - tz))[0];
   const terr = best(LOTS.filter((l) => l.t === 'rocks_terrace' && l.kind === 'terrace' && clearR(l, strip(l, l.front)) && shore((l.rect[0] + l.rect[2]) / 2, l.front === 'n' ? l.rect[1] - 2 : l.rect[3] + 2) > 8
     && l.y + 0.5 - height(l.rect[0] + 0.85, l.front === 'n' ? l.rect[1] - 1.2 : l.rect[3] + 1.2) < 1.4), -170, 10);
-  if (terr) { terr.enter = 0; terr.gy = height(terr.rect[0] + 0.85, terr.front === 'n' ? terr.rect[1] - 1.2 : terr.rect[3] + 1.2); }
+  const okT = (l) => l.t === 'rocks_terrace' && l.kind === 'terrace' && clearR(l, strip(l, l.front)) && shore((l.rect[0] + l.rect[2]) / 2, l.front === 'n' ? l.rect[1] - 2 : l.rect[3] + 2) > 8 && l.y + 0.5 - height(l.rect[0] + 0.85, l.front === 'n' ? l.rect[1] - 1.2 : l.rect[3] + 1.2) < 1.4;
+  const terrs = [terr];
+  for (const [tx, tz] of [[-250, -40], [-150, -80], [-220, 50]]) { const t2 = best(LOTS.filter((l) => okT(l) && !terrs.includes(l)), tx, tz); if (t2) terrs.push(t2); }
+  for (const t of terrs) if (t) { t.enter = 0; t.gy = height(t.rect[0] + 0.85, t.front === 'n' ? t.rect[1] - 1.2 : t.rect[3] + 1.2); }
   const AMP = [-40, 30, 20, 76];
   const cafe = best(LOTS.filter((l) => !l.t && !inRect(AMP, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 14) && !LOTS.some((o) => o !== l && o.rect[0] < l.rect[2] + 0.5 && o.rect[2] > l.rect[0] - 0.5 && o.rect[1] < l.rect[3] + 0.5 && o.rect[3] > l.rect[1] - 0.5 && false)
     && ['n', 's'].some((f) => clearR(l, strip(l, f))) && l.rect[2] - l.rect[0] >= 11), -10, 90);

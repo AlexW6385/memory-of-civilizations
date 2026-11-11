@@ -1,7 +1,7 @@
 // The city's buildings (docs/settlements/sydney.md §5).
 import { RADIUS, LEVEL, lots } from './layout.js';
 import { streetPlans } from './street.js';
-import { craft, sceneLife, pointElements } from './scene.js';
+import { craft, sceneLife, pointElements, roomPeople } from './scene.js';
 const base = (id, elements) => ({ id, style: 'modern', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [100, -96], facing: 'n' } });
 export async function buildings() {
   const all = lots(), plans = [];
@@ -9,6 +9,7 @@ export async function buildings() {
   plans.push(...streetPlans(base));
   plans.push(base('sydney-craft', [...craft(), ...pointElements()]));
   plans.push({ ...base('sydney-scene-life', sceneLife()), style: 'life' });
+  plans.push({ ...base('sydney-room-people', roomPeople()), style: 'life' });
   plans.push({ ...base('sydney-ferry-life', ferryLife()), style: 'life' });
   return plans;
 }

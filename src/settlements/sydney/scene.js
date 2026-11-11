@@ -2,7 +2,8 @@
 // yachts at their moorings in Farm Cove and under sail in the harbour, launches and a tug; Mrs Macquarie's Point with its chair,
 // benches, lamps, strollers and anglers on the sea wall; the Garden's paths with their benches; the Opera House's great stair with
 // people sitting on it; the traffic on the Harbour Bridge's deck and the Cahill Expressway. Everything derives from layout.js.
-import { LEVEL, OPERA, BRIDGE, QUAY, FARM, COVE, MACQUARIE, GARDEN, BENNELONG, RADIUS, shore, height, inRect } from './layout.js';
+import { frame } from '../../styles/modern/rooms.js';
+import { LEVEL, OPERA, BRIDGE, QUAY, FARM, COVE, MACQUARIE, GARDEN, BENNELONG, RADIUS, shore, height, inRect, lots } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FERRY_LANES = [[-24, -334, 36, -70], [-174, -340, 204, -300]];
@@ -96,3 +97,42 @@ export function pointElements() {
   return z == null ? [] : [{ t: 'macquarie_chair', at: [x, z + 1.6], y: height(x, z + 1.6), rot: -Math.PI / 4 }];
 }
 void COVE; void BENNELONG; void FARM;
+
+/**
+ * The people inside the rooms one can walk into: the men at the public bar, the newsagent and greengrocer behind their counters with
+ * a customer or two, the espresso bar's tables (the layouts of the style's shops.js and rooms.js).
+ */
+export function roomPeople() {
+  const rand = rng(1974), L = [], pick = (a) => a[Math.floor(rand() * a.length)];
+  const MEN = [['cloth_white', 'cloth_grey'], ['cloth_blue', 'cloth_brown'], ['cloth_ochre', 'cloth_indigo'], ['cloth_grey', 'cloth_black'], ['cloth_green', 'cloth_brown']], FROCK = ['cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_blue', 'cloth_maroon'];
+  for (const l of lots()) {
+    if (l.t !== 'shop_room' && l.t !== 'espresso_bar') continue;
+    const fr = frame(l.rect, l.front), F = l.y + 0.12, T = 0.3, { L: Wd, Dp } = fr;
+    // a person at local (u, d) facing local direction (a, b)
+    const at = (u, d, a, b, o = {}, woman = rand() < 0.35) => {
+      const p = fr.W(u, d, F), q = fr.W(u + a, d + b, F), rot = Math.atan2(-(q[0] - p[0]), -(q[2] - p[2])), [c1, c2] = pick(MEN);
+      L.push(woman
+        ? { t: 'figure', at: [p[0], p[2]], y: F, rot, seed: Math.floor(rand() * 1e9), dress: 'tunic', hair: rand() < 0.5 ? 'long' : 'bun', cloth: pick(FROCK), cloth2: 'cloth_white', skin: 'skin_light', hat: 'none', ...o }
+        : { t: 'figure', at: [p[0], p[2]], y: F, rot, seed: Math.floor(rand() * 1e9), dress: 'trousers', hair: 'short', over: 'collar', cloth: c1, cloth2: c2, skin: rand() < 0.92 ? 'skin_light' : 'skin_medium', hat: 'none', ...o });
+    };
+    if (l.kind === 'pub') {
+      const cu0 = Wd - T - 1.6, c0 = T + 1.2, c1 = Dp - T - 1.2;
+      for (let d = c0 + 0.6; d < c1 - 0.4; d += 1.0 + rand() * 0.9) at(cu0 - 1.0 - rand() * 0.2, d, 1, 0, rand() < 0.4 ? { pose: 'talk' } : {}, false);
+      at(Wd - T - 1.25, (c0 + c1) / 2 + 0.5, -1, 0, {}, false);                                  // the barman, behind the counter
+      for (const [u, d] of [[T + 1.4, T + 1.8], [T + 1.4, T + 4.2], [T + 3.4, T + 3.0]]) if (d < Dp - T - 1.5) at(u + 0.62, d + 0.0, -1, 0, { pose: 'talk' }, false);
+    } else if (l.kind === 'newsagent' || l.kind === 'greengrocer') {
+      at(Wd / 2 + 0.6, Dp - T - 2.9, 0, -1, {}, rand() < 0.5);                                   // a customer at the counter
+      if (rand() < 0.7) at(Wd / 2 - 1.2, Dp - T - 3.0, 0, -1, {}, true);
+      at(Wd / 2 + 0.2, Dp - T - 1.1, 0, -1, {}, false);                                          // the shopkeeper behind it
+      if (l.kind === 'newsagent') at(Wd * 0.3 + 0.3, T + 1.6, 0, 1, {}, rand() < 0.4);           // browsing the rack
+    } else {
+      const cu0 = Wd - T - 1.55, c0 = T + 3.0, c1 = Dp - T - 1.0;
+      for (const u of [T + 1.1, T + 3.2]) for (let d = T + 1.3; d < Dp - T - 1.0; d += 1.5) if (u + 0.9 < cu0 - 0.6 && rand() < 0.55) {
+        at(u - 0.5, d, 1, 0, { pose: 'sit' }, rand() < 0.5); if (rand() < 0.7) at(u + 0.5, d, -1, 0, { pose: 'sit' }, rand() < 0.5);
+      }
+      at(Wd - T - 1.2, c0 + 1.5, -1, 0, {}, false);                                              // the man at the machine
+      for (let d = c0 + 0.6; d < c1 - 1.0; d += 1.4) if (rand() < 0.6) at(cu0 - 1.25, d, 1, 0, {}, rand() < 0.5);
+    }
+  }
+  return L;
+}
