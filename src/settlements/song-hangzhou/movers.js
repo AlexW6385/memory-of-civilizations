@@ -1,4 +1,4 @@
-// Southern Song Lin'an — the moving life (docs/settlements/song-hangzhou.md §12): people in the
+// Southern Song Lin'an — the moving life (docs/settlements/song-hangzhou.md §15): people in the
 // dress of the Song walking the Imperial Way, the lanes and the bridges; the pleasure boats of West
 // Lake and the cargo boats of the canals, sculled along their water. Data for the engine's movers
 // (src/engine/movers.js, read in its worker): the ways (from ways.js, which reads the town's

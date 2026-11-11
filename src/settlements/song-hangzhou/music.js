@@ -1,4 +1,4 @@
-// Music of Southern Song Lin'an (docs/settlements/song-hangzhou.md §9, §17), by place: out of doors the
+// Music of Southern Song Lin'an (docs/settlements/song-hangzhou.md §9, §20), by place: out of doors the
 // guqin's slow phrases (a plucked string) with a bamboo dizi over the water — the scholar's lake; in the
 // temple hall the low drone of the sheng (the reed organ) and sparse bell-like strokes; in a tea house
 // the pipa under a storyteller's voice (Lin'an's tea houses hired singers and storytellers); in a wine

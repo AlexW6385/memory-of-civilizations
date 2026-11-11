@@ -1,4 +1,4 @@
-// Southern Song Lin'an — smoke, steam and mist (docs/settlements/song-hangzhou.md §14): kitchen smoke
+// Southern Song Lin'an — smoke, steam and mist (docs/settlements/song-hangzhou.md §17): kitchen smoke
 // from a scattered share of the houses at the three meals, steam from the tea houses, wine houses and
 // noodle and bun shops (Lin'an's streets fed the town through the night), incense at the temples'
 // censers all day, mist over the canals at dawn and over West Lake — the lake's morning mist, thick

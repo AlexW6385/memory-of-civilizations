@@ -1,4 +1,4 @@
-// Southern Song Lin'an — the animals (src/engine/fauna.js draws them; docs/settlements/song-hangzhou.md §13):
+// Southern Song Lin'an — the animals (src/engine/fauna.js draws them; docs/settlements/song-hangzhou.md §16):
 // the carp of West Lake (five-coloured giant carp as in the release ponds, goldfish as in Gaozong's pond at
 // the Deshenggong and the eunuch Lu's garden) in loose schools along the shore, dark carp in the canals,
 // house swallows over lake and canals, tree sparrows on the paving, little egrets and a grey heron on

@@ -1,4 +1,4 @@
-// Southern Song Lin'an — the life's plans for the town (docs/settlements/song-hangzhou.md §15–16):
+// Southern Song Lin'an — the life's plans for the town (docs/settlements/song-hangzhou.md §18–19):
 // the signs and goods of every shop front (shops.js), and the furnished interiors (interiors.js)
 // of the lots chosen to be entered: tea houses, wine houses, shops of the Imperial Way, houses.
 //

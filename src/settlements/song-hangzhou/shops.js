@@ -1,4 +1,4 @@
-// Southern Song Lin'an's shop fronts (docs/settlements/song-hangzhou.md §15): what the town's
+// Southern Song Lin'an's shop fronts (docs/settlements/song-hangzhou.md §18): what the town's
 // shophouses lack — the coloured-silk gate frames (cailou huanmen) before the wine houses, the wine
 // flags of blue-and-white cloth strips, the standing lantern signs, the signboards hung from the
 // posts, and the goods of each trade out on the apron and on trestles: silk bolts and hung lengths

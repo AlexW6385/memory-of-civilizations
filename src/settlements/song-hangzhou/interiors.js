@@ -1,4 +1,4 @@
-// Southern Song Lin'an — the furnished interiors (docs/settlements/song-hangzhou.md §16): a tea house,
+// Southern Song Lin'an — the furnished interiors (docs/settlements/song-hangzhou.md §19): a tea house,
 // a wine house (restaurant), the shops of the Imperial Way, a townsman's house. Each is an element of
 // the street life that furnishes a building the town has raised over `rect` (its floor at `floor`,
 // its front open or doored on the side `front`): tables, lantern-back chairs and benches, counters
