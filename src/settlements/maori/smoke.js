@@ -20,10 +20,17 @@ export function emitters() {
   E.push({ p: [hx + 14.6, HILL.top + 1.3, hz + 9.2], kind: 'kitchen', thr: 0.1, seed: 23 });
   // the houses: a share of them have the fire lit; the smoke leaves by the door and through the thatch at the ridge
   for (const h of v.houses.slice(1)) {
-    if (r() > 0.4) continue;
+    if (r() > 0.32) continue;
     const rise = (h.w ?? 4) * 0.55, hh = h.h ?? 1.2;
     E.push({ p: [h.c[0], (h.y ?? 0) + hh + rise + 0.2, h.c[1]], kind: 'kitchen', thr: 0.15 + 0.8 * r(), seed: Math.floor(r() * 1e6) });
   }
+  // the whānau yards' cooking places: the fire's smoke and the oven's steam, lit at the meals
+  v.compounds.forEach((c, k) => {
+    if (Math.hypot(c.c[0], c.c[1]) > RADIUS - 56) return;
+    const y = height(c.c[0], c.c[1]) + 0.5, off = k % 3 === 0 ? 0 : 1;
+    E.push({ p: [c.c[0] - 1.4, y, c.c[1]], kind: 'kitchen', thr: 0.05 + 0.5 * r(), seed: 800 + k });
+    if (off === 0) E.push({ p: [c.c[0] + 1.5, y, c.c[1] + 0.2], kind: 'steam', thr: 0.15 + 0.4 * r(), seed: 850 + k });
+  });
   // the hot ground
   VENTS.forEach(([x, z], k) => { if (!inLake(x, z)) E.push({ p: [x, height(x, z) + 0.4, z], kind: 'steam', thr: 0, seed: 600 + k }); });
   // the lake's morning mist

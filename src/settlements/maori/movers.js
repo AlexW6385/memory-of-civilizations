@@ -3,13 +3,13 @@
 // down to the lake shore: women with kete (flax baskets), men with fish and nets on a pole, children,
 // old men in dog-skin cloaks, men of the pā with the taiaha. Data for the engine's movers
 // (src/engine/movers.js); the ways come from layout.js. No moving boats: the waka stand drawn up on the shore.
-import { RADIUS, HILL, PATH, LAKE, shoreZ, village } from './layout.js';
+import { RADIUS, HILL, PATH, LAKE, LANES, shoreZ, village, inLake } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 26, night: 3, rain: 0.5, reach: 170, spawnMin: 26, far: 42 },
+  walkers: { day: 48, night: 4, rain: 0.5, reach: 190, spawnMin: 26, far: 42 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: LAKE.level,
 };
@@ -31,9 +31,9 @@ export function walkways() {
       L([hx + Math.cos(a0) * r, hz + Math.sin(a0) * r], [hx + Math.cos(a1) * r, hz + Math.sin(a1) * r], 1.2, weight);
     }
   };
-  ring(40, 1.0); ring(68, 1.0); ring(95, 1.0);
+  for (const r of LANES) ring(r, 1.0);       // along each terrace behind the stages (the houses keep this lane clear)
   // each ring joins the path where the path crosses it
-  for (const r of [40, 68, 95]) { L([PATH.x - 3.2, hz + r], [PATH.x, hz + r], 1.2, 1.0); L([PATH.x, hz + r], [PATH.x + 3.2, hz + r], 1.2, 1.0); }
+  for (const r of LANES) { L([PATH.x - 3.2, hz + r], [PATH.x, hz + r], 1.2, 1.0); L([PATH.x, hz + r], [PATH.x + 3.2, hz + r], 1.2, 1.0); }
   // the summit: the marae ātea before the chief's house, the cooking place, the weavers
   L([PATH.x, hz + HILL.tihi - 3], [-5, 28], 1.6, 2.0); L([-5, 28], [-5, 14], 1.6, 1.8); L([-5, 28], [hx + 13, hz + 12], 1.4, 1.2); L([-5, 28], [hx - 15, hz + 10], 1.4, 1.2);
   // the way round the foot of the hill (outside the ditch) and across the kāinga, east and west
@@ -55,6 +55,24 @@ export function walkways() {
     if (Math.hypot(h.c[0] - hx, h.c[1] - hz) < HILL.ditch + 10) continue;
     const r = Math.hypot(h.c[0] - hx, h.c[1] - hz), k = rf / r, t = [hx + (h.c[0] - hx) * k, hz + (h.c[1] - hz) * k];
     if (r > rf + 5 && r < rf + 60 && Math.hypot(t[0], t[1]) < RADIUS - 55) L([h.c[0] + Math.sin(h.yaw) * -(h.l / 2 + 2.3), h.c[1] + Math.cos(h.yaw) * -(h.l / 2 + 2.3)], t, 1.0, 0.45);
+  }
+  // the whānau yards: from each yard's rim, through a gap between its houses, out to the way round the hill or the shore path, and the doors to the yard
+  const Hs = v.houses;
+  for (const c of v.compounds) {
+    const [cx, cz] = c.c, hs = c.houses.map((i) => Hs[i]);
+    let best = 0, bd = -1;
+    for (let k = 0; k < 24; k++) {
+      const a = k / 24 * 6.283, p = [cx + Math.cos(a) * (c.r + 3.5), cz + Math.sin(a) * (c.r + 3.5)];
+      const d = Math.min(...hs.map((h) => Math.hypot(h.c[0] - p[0], h.c[1] - p[1])), 99) + (inLake(p[0], p[1] - 6) ? -50 : 0);
+      if (d > bd) { bd = d; best = a; }
+    }
+    const rim = [cx + Math.cos(best) * (c.r + 3.5), cz + Math.sin(best) * (c.r + 3.5)], far = [cx + Math.cos(best) * (c.r + 14), cz + Math.sin(best) * (c.r + 14)];
+    L([cx, cz], rim, 1.2, 0.8); L(rim, far, 1.1, 0.6);
+    const toHill = Math.hypot(far[0] - hx, far[1] - hz);
+    let tgt = null, bdist = 1e9;
+    for (const t of [[hx + (far[0] - hx) * rf / toHill, hz + (far[1] - hz) * rf / toHill], sh(far[0])]) { const d = Math.hypot(t[0] - far[0], t[1] - far[1]); if (d < bdist && Math.hypot(t[0], t[1]) < RADIUS - 52) { bdist = d; tgt = t; } }
+    if (tgt && bdist < 130) L(far, tgt, 1.1, 0.6);
+    for (const h of hs) L([h.c[0] - Math.sin(h.yaw) * (h.l / 2 + 2.4), h.c[1] - Math.cos(h.yaw) * (h.l / 2 + 2.4)], [cx, cz], 1.0, 0.5);
   }
   // paths between the garden plots (the gaps of 3 m between the columns of plots, x = −96.5 + 21 k)
   for (const x of [-96.5, -54.5, -12.5 - 21, 29.5, 71.5]) L([x, 155], [x, 300], 0.9, 0.5);

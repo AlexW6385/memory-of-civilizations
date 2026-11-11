@@ -6,6 +6,7 @@
 
 export const RADIUS = 330;
 export const HILL = { c: [0, 10], tihi: 26, rings: [[26, 54, 30], [54, 82, 20], [82, 110, 10]], top: 40, foot: 116, ditch: 124 };
+export const LANES = HILL.rings.map(([, r1]) => r1 - 7);   // the walk along each terrace, behind the fighting stages (kept clear of houses)
 export const LAKE = { z: -175, level: -1.5 };                 // the shore runs along z ≈ −175 (the lake to the north)
 export const PATH = { x: 0, w: 3.2 };                         // up the south face
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -58,15 +59,22 @@ function overlap(p, q, m) {
 export function village() {
   if (V) return V;
   const rand = rng(1769), out = { houses: [], pataka: [], pits: [], gardens: [], waka: [], compounds: [] };
-  const boxes = [], circles = [];
+  const boxes = [], circles = [], hx0 = HILL.c[0], hz0 = HILL.c[1];
   const clearOf = (c, m) => !circles.some(([a, b, q]) => Math.hypot(a - c[0], b - c[1]) < q + m);
   const pathOk = (x, z, m) => Math.abs(x - PATH.x) > PATH.w / 2 + m;
+  const laneHit = (f) => {
+    const rs = [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([a, b]) => Math.hypot(f.c[0] + a * f.hw * f.ax[0] + b * f.hl * f.az[0] - hx0, f.c[1] + a * f.hw * f.ax[1] + b * f.hl * f.az[1] - hz0));
+    const lo = Math.min(...rs), hi = Math.max(...rs);
+    return LANES.some((q) => lo < q + 1.0 && hi > q - 1.0);
+  };
   const house = (x, z, yaw, w, l, y, extra = {}, gap = 1.0) => {
     const f = foot([x, z], yaw, w, l);
+    if (laneHit(f)) return false;
     if (boxes.some((b) => overlap(f, b, gap)) || !clearOf([x, z], l / 2)) return false;
     boxes.push(f); out.houses.push({ c: [x, z], yaw, w, l, y, ...(extra.rank === 1 ? { h: 1.5 } : {}), ...extra }); return true;
   };
   const solid = (list, x, z, y, r, extra = {}) => {
+    if (laneHit({ c: [x, z], ax: [1, 0], az: [0, 1], hw: r, hl: r })) return false;
     if (boxes.some((b) => { const d = Math.hypot(b.c[0] - x, b.c[1] - z); return d < Math.max(b.hw, b.hl) + r && overlap(b, { c: [x, z], ax: [1, 0], az: [0, 1], hw: r, hl: r }, 0.6); })) return false;
     if (!clearOf([x, z], r)) return false;
     list.push({ c: [x, z], y, ...extra }); circles.push([x, z, r]); return true;
@@ -78,7 +86,7 @@ export function village() {
   out.pataka.push({ c: [hx + 8, hz - 2], yaw: Math.PI, y: HILL.top }); circles.push([hx + 8, hz - 2, 3]);
   // the terraces: rows along each ring, doors toward the summit, pits and pātaka between
   HILL.rings.forEach(([r0, r1, y], ri) => {
-    for (const rr of (r1 - r0 < 15 ? [(r0 + r1) / 2] : [r0 + 11, r1 - 9])) {
+    for (const rr of (r1 - r0 < 15 ? [(r0 + r1) / 2] : [r0 + 10.5, r1 - 12])) {
       const step = 5.6 / rr, a0 = rand() * 6.28;
       for (let a = a0; a < a0 + Math.PI * 2; a += step * (1 + rand() * 0.5)) {
         const x = hx + Math.cos(a) * rr, z = hz + Math.sin(a) * rr, yaw = Math.atan2(-(x - hx), -(z - hz)) + Math.PI;
