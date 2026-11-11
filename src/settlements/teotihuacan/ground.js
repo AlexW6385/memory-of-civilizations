@@ -1,7 +1,7 @@
 // Teotihuacan — the ground: the valley floor, level, with the built terrace of the Moon Plaza at the
 // north end; dry soil and grass, maguey and nopal stand-ins between the compounds; the high valley's sky.
 
-import { RADIUS, MOON, AVENUE, PLAZA, STEP, PALACE_CLEAR, inRect, inCompound, KEEP_CLEAR, avenueLevel, smooth as sm } from './layout.js';
+import { RADIUS, MOON, AVENUE, PLAZA, STEP, PALACE_CLEAR, MARKET, inRect, inCompound, KEEP_CLEAR, avenueLevel, smooth as sm } from './layout.js';
 
 // the Moon Plaza and the Moon stand on a level terrace MOON.rise up, built out to STEP at its south
 // edge (the platform across the avenue hides the drop) and falling away gently to the west and east
@@ -18,6 +18,7 @@ function height(x, z) {
 function cover(x, z) {
   const c = { sand: 0.25, grass: 0.25, rock: 0, soil: 0.5, fields: 0, dry: 0.6, warmth: 0.6, red: 0.15, road: 0, snow: 0, forest: 0 };
   if (inRect(AVENUE, x, z) || inRect(PLAZA, x, z)) { c.road = 0.8; return c; }
+  if (inRect(MARKET, x, z, 2)) { c.road = 0.7; c.grass = 0; c.dry = 0.7; return c; }
   if (Math.hypot(x, z) > RADIUS - 34) { c.fields = 0.6; c.grass = 0.4; return c; }
   return c;
 }
@@ -25,7 +26,7 @@ const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 /** Plants per 100 m²: grass, scattered junipers and pepper-tree stand-ins between the compounds; none on the avenue or the monuments. */
 function planting(x, z) {
   const r = Math.hypot(x, z);
-  if (r > RADIUS - 6 || inRect(AVENUE, x, z, 2) || KEEP_CLEAR.some((k) => inRect(k, x, z)) || inRect(PALACE_CLEAR, x, z) || inCompound(x, z, 1)) return null;
+  if (r > RADIUS - 6 || inRect(AVENUE, x, z, 2) || KEEP_CLEAR.some((k) => inRect(k, x, z)) || inRect(PALACE_CLEAR, x, z) || inRect(MARKET, x, z, 3) || inCompound(x, z, 1)) return null;
   return { cypress: 0.03, acacia: 0.04, grass_dry: 16 };
 }
 export const ground = {
