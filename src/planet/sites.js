@@ -92,6 +92,7 @@ export const SITES = [
   { id: 'maori', name: { en: 'Māori Aotearoa', zh: '毛利' }, era: '18th c.', region: 'aotearoa', lat: -38.14, lon: 176.25, radius: 330 },
   { id: 'sydney', name: { en: 'Modern Sydney', zh: '现代悉尼' }, era: '20th c.', region: 'australia', lat: -33.86, lon: 151.21, radius: 460 },
   { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, era: 'c. 1250 BC', region: 'egypt', lat: 25.7, lon: 32.64, radius: 330 },
+  { id: 'han-changan', name: { en: 'Han Chang\'an', zh: '汉长安' }, era: 'c. 100 BC', region: 'china', lat: 34.30, lon: 108.88, nudge: 300, radius: 520 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -101,7 +102,7 @@ for (const s of SITES) s.radius ??= 190;
 // room for the larger of this and today's `radius`, so growing to its class moves no neighbour.
 const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
-  L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan',
+  L: 'han-changan song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan',
   M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes',
   S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
   P: 'stonehenge',
@@ -121,7 +122,6 @@ export const PLANNED = [
   { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, region: 'china', lat: 36.13, lon: 114.32, radius: 300 },
   { id: 'lu-qufu', name: { en: 'Qufu', zh: '曲阜' }, region: 'china', lat: 35.60, lon: 116.99, radius: 280 },
   { id: 'qin-xianyang', name: { en: 'Qin Xianyang', zh: '秦咸阳' }, region: 'china', lat: 34.38, lon: 109.25, nudge: 90, radius: 300 },
-  { id: 'han-changan', name: { en: 'Han Chang\'an', zh: '汉长安' }, region: 'china', lat: 34.30, lon: 108.88, nudge: 300, radius: 500 },
   { id: 'wei-ye', name: { en: 'Three Kingdoms Ye', zh: '三国邺城' }, region: 'china', lat: 36.33, lon: 114.38, nudge: 0, radius: 300 },
   { id: 'tang-changan', name: { en: 'Tang Chang\'an', zh: '唐长安' }, region: 'china', lat: 34.22, lon: 108.96, nudge: 200, radius: 550 },
   { id: 'hakka-tulou', name: { en: 'Hakka tulou', zh: '客家土楼' }, region: 'china', lat: 24.67, lon: 117.05, radius: 180 },
