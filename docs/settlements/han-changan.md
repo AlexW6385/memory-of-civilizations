@@ -3,6 +3,8 @@
 Settlement id: `han-changan` · Styles: `han` (own) and `life` · Region: east Asia (the Wei River plain, Shaanxi) · Code: `src/settlements/han-changan/`, `src/styles/han/`
 Status: built from nothing in this batch: the Weiyang Palace front hall on its stepped rammed-earth terrace (enterable, with the throne dais), the palace walls and the que gate towers, a city gate with three passageways, the walled lǐ wards with their houses, the West and East Markets with their market towers, the Changle Palace, the Kunming Lake, the Imperial Academy, people in Han dress, Silk Road caravans, sound.
 
+Not built (left for later): the moat outside the wall, the city's east and north gates (outside or at the edge of the disc), the interiors of the Changle Palace's side halls beyond the furnished halls, the Stone Ditch and Heavenly Fortune pavilions' interiors, wooden bracket-arm cascades (the Han dougong is shown as a cap block and a straight arm).
+
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
 ## 1. The moment and the real place

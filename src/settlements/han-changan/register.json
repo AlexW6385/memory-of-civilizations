@@ -1,7 +1,7 @@
 {
   "site": { "id": "han-changan", "name": { "en": "Han Chang'an", "zh": "汉长安" }, "era": "c. 100 BC", "region": "china", "lat": 34.30, "lon": 108.88, "radius": 520 },
   "cls": "L",
-  "arrival": [-110, null, -42, 0, 0.22],
+  "arrival": [-110, null, 10, 0, 0.1],
   "arrivalNote": "from the Weiyang Palace's forecourt, up the central ramp-stair to the Front Hall on its three-tiered rammed-earth terrace: nine bays of red columns under a hipped grey-tile roof, the palace's walls and the city beyond",
   "card": {
     "en": [

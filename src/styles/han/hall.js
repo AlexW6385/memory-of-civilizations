@@ -26,7 +26,7 @@ export function terrace(el, ctx) {
   });
   const crown = el.tiers[el.tiers.length - 1], [cx0, cz0, cx1, cz1] = crown.r;
   const rp = el.ramp, rect = [rp.x[0], rp.z0, rp.x[1], rp.z1];
-  steps(bag, col, rect, 0, crown.top, 'n', 'brick_paving', 0.18, -0.4);
+  steps(bag, col, rect, 0, crown.top, 'n', 'palace_wall', 0.18, -0.4, 'brick_paving');
   // the ramp's balustrade: low rails and posts of red lacquer along both sides
   for (const x of rp.x) for (let z = rp.z1; z > rp.z0; z -= 3) {
     const h = crown.top * (rp.z1 - z) / (rp.z1 - rp.z0);

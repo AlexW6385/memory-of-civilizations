@@ -137,7 +137,7 @@ export async function town() {
       const alongX = Math.abs(b[0] - a[0]) > Math.abs(b[1] - a[1]), gaps = [];
       if (alongX && Math.abs(a[1] - WALL_S) < 1 && GATE_S.x > a[0] && GATE_S.x < b[0]) gaps.push({ at: GATE_S.x - a[0], w: 28.8 });
       if (!alongX && Math.abs(a[0] - WALL_W) < 1 && GATE_W.z > a[1] && GATE_W.z < b[1]) gaps.push({ at: GATE_W.z - a[1], w: 28.8 });
-      E.push({ t: 'han_wall', a, b, th, h, mat: 'earth_wall', walk: true, gaps });
+      E.push({ t: 'han_wall', a, b, th, h, mat: 'earth_wall', walk: true, layers: true, gaps });
     }
     E.push({ t: 'han_gate', c: [WALL_W, GATE_W.z], axis: 'z', th, h, n: 3, pw: 6, pier: 2.4, ph: 5.4 });
     E.push({ t: 'han_gate', c: [GATE_S.x, WALL_S], axis: 'x', th, h, n: 3, pw: 6, pier: 2.4, ph: 5.4 });

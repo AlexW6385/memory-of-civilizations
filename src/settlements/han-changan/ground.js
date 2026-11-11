@@ -45,14 +45,14 @@ function planting(x, z) {
   if (inRect(WEST_MARKET, x, z, 1) || inRect(EAST_MARKET, x, z, 1) || inWard(x, z) || inRect(ACADEMY, x, z, 1)) return null;
   for (const q of QUARTERS) if (inRect(q, x, z, 1)) return null;
   if (inRect([AX - 92, -135, AX + 92, 112], x, z)) return null;
-  if (inRect(PALACE, x, z, 0)) return hash2(x * 0.2, z * 0.2) < 0.06 ? { pagoda_tree: 0.5, grass: 4 } : { grass: 5 };
-  if (inRect(CHANGLE, x, z, 0)) return hash2(x * 0.2, z * 0.2) < 0.05 ? { pagoda_tree: 0.5, grass: 4 } : { grass: 5 };
+  if (inRect(PALACE, x, z, 0)) return hash2(x * 0.2, z * 0.2) < 0.06 ? { pagoda_tree: 0.5, grass: 2 } : { grass: 2 };
+  if (inRect(CHANGLE, x, z, 0)) return hash2(x * 0.2, z * 0.2) < 0.05 ? { pagoda_tree: 0.5, grass: 2 } : { grass: 2 };
   if (!inCity(x, z)) {
     const e = (x + 1000) % 22;
     if (hash2(x * 0.3, z * 0.3) < 0.04) return { willow: 0.2, elm: 0.1, grass: 6 };
     return e < 1 ? { grass: 14 } : { wheat: 90, grass: 4 };
   }
-  return { pagoda_tree: 0.15, elm: 0.12, jujube: 0.1, grass: 8 };
+  return { pagoda_tree: 0.15, elm: 0.12, jujube: 0.1, grass: 4 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,

@@ -17,6 +17,13 @@ export function wall(el, ctx) {
     if (s1 - s0 < 0.05) return;
     const r = R(s0, s1);
     bag.add(mat, box(r[0], -0.3, r[1], r[2], h, r[3])); col.rect(r, -0.3, h);
+    if (el.layers) {
+      // the lifts of the rammed earth: a band of the next earth every 1.3 m on both faces
+      for (let y = 0.9; y < h - 0.3; y += 1.3) {
+        const q = alongX ? [r[0], r[1] - 0.03, r[2], r[1]] : [r[0] - 0.03, r[1], r[0], r[3]], q2 = alongX ? [r[0], r[3], r[2], r[3] + 0.03] : [r[2], r[1], r[2] + 0.03, r[3]];
+        bag.add('mud_plaster', box(q[0], y, q[1], q[2], y + 0.16, q[3])); bag.add('mud_plaster', box(q2[0], y, q2[1], q2[2], y + 0.16, q2[3]));
+      }
+    }
     if (el.walk) {
       const p = 0.7, c = 0.6, rr = alongX ? [r[0], r[1] + c, r[2], r[3] - c] : [r[0] + c, r[1], r[2] - c, r[3]];
       void p;
@@ -130,8 +137,6 @@ export function gate(el, ctx) {
     const la = total / 2 - 1, sh = Math.max(1.6, th / 2 - 0.8);
     pavilion({ c: tc, A: ax ? la : sh, B: ax ? sh : la, y: h, h: 3.0, tiers: 1, walls: true }, ctx);
   }
-  // the passages' doors, open: two leaves of dark timber swung back against the piers
-  for (const [a, b] of edges) for (const s of [a + 0.25, b - 0.25]) { const r = R(s - 0.1, -th / 2 - 0.4, s + 0.1, -th / 2 + 0.1); bag.add('lacquer_black', box(r[0], 0, r[1], r[2], ph - 0.6, r[3])); }
   if (ax === false) void 0;
 }
 

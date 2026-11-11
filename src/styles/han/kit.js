@@ -41,7 +41,7 @@ export function lotFrame(ctx, rect, front) {
 }
 
 /** A straight flight of steps over rect, rising from y0 to y1 toward dir ('n' = −z, 's', 'e', 'w'); solid down to `base`. */
-export function steps(bag, col, rect, y0, y1, dir, mat = 'bluestone', riser = 0.18, base = null) {
+export function steps(bag, col, rect, y0, y1, dir, mat = 'bluestone', riser = 0.18, base = null, mat2 = null) {
   const [x0, z0, x1, z1] = rect, rise = y1 - y0, n = Math.max(1, Math.round(Math.abs(rise) / riser)), b0 = (base ?? y0) - 0.02;
   for (let i = 0; i < n; i++) {
     const f1 = (i + 1) / n, f0 = i / n, yT = y0 + rise * f1;
@@ -51,7 +51,7 @@ export function steps(bag, col, rect, y0, y1, dir, mat = 'bluestone', riser = 0.
     else if (dir === 'e') r = [x0, z0, x0 + (x1 - x0) * f1, z1];
     else r = [x1 - (x1 - x0) * f1, z0, x1, z1];
     void f0;
-    bag.add(mat, box(r[0], b0, r[1], r[2], yT, r[3]));
+    bag.add(mat2 && i % 2 ? mat2 : mat, box(r[0], b0, r[1], r[2], yT, r[3]));
   }
   col.ramp(rect, y0, y1, dir);
 }

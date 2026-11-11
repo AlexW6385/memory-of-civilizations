@@ -139,8 +139,8 @@ export function streets() {
   out.push([-274, 240, 440, 262]);                                  // the ring road inside the south wall
   out.push([-274, -430, -250, 262]);                                // the ring road inside the west wall
   out.push([-274, -272, 135, -254]);                                // the street north of the palace
-  out.push([-274, -34, -252, 6]);                                   // the road from the west gate
-  out.push([-252, -34, -250, 6]);
+  out.push([-440, -26, -274, -14]);                                 // the road out of the west gate
+  out.push([-274, -26, -250, -14]);
   out.push([-30, -110, 135, -88]);                                  // from the palace's east gate to the avenue
   out.push([165, -110, 190, -90]);                                  // and on to the Changle's gate
   out.push([135, -270, 340, -254]);                                 // toward the East Market
