@@ -427,6 +427,24 @@ function house(el, { bag, col }) {
     const p = W(fr, -hw - th - 0.12 - (k % 2) * 0.1, 0.05 + Math.floor(k / 2) * 0.09 + (low - y), -0.8 + k * 0.05);
     g.translate(...p); bag.add('log_pine', g);
   }
+  // weathering of the daub: hairline cracks running down from the wall-plate, a few patches of fresh chalk wash where it has been
+  // mended, the mud-splash higher on the weather side
+  for (let k = 0; k < 7; k++) {
+    const side = Math.floor(rand() * 3), u = (rand() - 0.5) * (s - 0.8), h0 = 0.5 + rand() * 1.0, L = 0.25 + rand() * 0.5;
+    const [uu, vv, nu, nv] = side === 0 ? [u, -hw - th - 0.025, 0, -1] : side === 1 ? [-hw - th - 0.025, u, -1, 0] : [hw + th + 0.025, u, 1, 0];
+    if (k < 4) bag.add('pottery_dark', obox(fr, uu - (nu ? 0.003 : 0.012), uu + (nu ? 0.003 : 0.012), h0, h0 + L, vv - (nv ? 0.003 : 0.012), vv + (nv ? 0.003 : 0.012)));
+    else bag.add('limewash_white', obox(fr, uu - (nu ? 0.006 : 0.3), uu + (nu ? 0.006 : 0.3), h0, h0 + 0.4, vv - (nv ? 0.006 : 0.3), vv + (nv ? 0.006 : 0.3)));
+  }
+  // within: strings of hazelnuts and bundles of herbs and a smoked flitch hung from the rafters, a hide spread by the hearth,
+  // two log seats, a stack of firewood against the wall, an antler hung on a peg
+  {
+    const ei = e - ti * 1.2, hang = (u, v, drop, mat, r, len) => { const top = ye + (1 - Math.max(Math.abs(u), Math.abs(v)) / ei) * (apex - ye) - 0.28; bag.add('rope_fibre', stick(W(fr, u, top, v), W(fr, u, top - drop, v), 0.006, 4)); bag.add(mat, lathe([[0.001, 0], [r, len * 0.2], [r * 0.9, len * 0.8], [0.001, len]], 7, null, ...W(fr, u, top - drop - len, v))); };
+    hang(0.9, -0.9, 0.35, 'thatch', 0.08, 0.3); hang(-1.0, -0.4, 0.45, 'ichu', 0.07, 0.25); hang(0.5, 0.9, 0.3, 'hide_brown', 0.09, 0.4);
+    for (let k = 0; k < 6; k++) bag.add('wood_ochre', pebble(0.025, W(fr, -0.85 + k * 0.03, 1.55 - k * 0.04, 0.6 + k * 0.02)));
+    bag.add(['hide_tan', 'hide_brown', 'hide_white'][Math.floor(rand() * 3)], lathe([[0.7, 0], [0.68, 0.014], [0.001, 0.016]], 10, null, ...W(fr, 0.25, 0.01, 1.2)));
+    for (const [u, v] of [[-0.95, -0.2], [0.85, 0.15]]) bag.add('log_pine', lathe([[0.17, 0], [0.16, 0.26], [0.001, 0.27]], 8, null, ...W(fr, u, 0, v)));
+    for (let k = 0; k < 6; k++) { const uu = -hw + 0.28 + (k % 3) * 0.1, yy = 0.05 + Math.floor(k / 3) * 0.1; bag.add('log_pine', stick(W(fr, uu, yy, hw - 1.9), W(fr, uu, yy, hw - 0.7), 0.05, 6)); }
+  }
 }
 
 /**
@@ -581,8 +599,170 @@ function hurdle(el, { bag, col }) {
   col.segment([ax, az], [bx, bz], 0.12, y - 0.2, y + h);
 }
 
+
+// ── the yards, the crafts, the litter of the work, the scrub ─────────────────────────────────────────
+const LEAF_MATS = ['flax_leaf', 'lotus_leaf'];
+/** A small rounded stone (a flint nodule, a hammerstone, a chalk lump) of radius r at p. */
+const pebble = (r, p, sq = 0.7) => lathe([[0.001, 0], [r, r * 0.25], [r * 0.9, r * 0.7], [0.001, r * sq * 1.4]], 6, null, p[0], p[1], p[2]);
+/** A flat flake of stone: a thin tilted plate. */
+const flake = (sz, p, rand) => box(-sz, 0, -sz * 0.6, sz, 0.012, sz * 0.6).rotateY(rand() * 6.28).rotateZ((rand() - 0.5) * 0.5).translate(p[0], p[1], p[2]);
+/** An antler pick: a tine's length of beam with the brow tine, pale. */
+function antlerPick(bag, p, ang, rand, y0 = 0.03) {
+  const c = Math.cos(ang), s = Math.sin(ang), L = 0.55 + rand() * 0.15;
+  const a = [p[0], y0, p[2]], b = [p[0] + c * L, y0 + 0.03, p[2] + s * L];
+  bag.add('linen', stick(a, b, 0.022, 5));
+  bag.add('linen', stick([a[0] + c * L * 0.3, y0 + 0.02, a[2] + s * L * 0.3], [a[0] + c * L * 0.3 - s * 0.2, y0 + 0.12, a[2] + s * L * 0.3 + c * 0.2], 0.016, 4));
+  bag.add('linen', stick(b, [b[0] + c * 0.12 + s * 0.1, y0 + 0.12, b[2] + s * 0.12 - c * 0.1], 0.015, 4));
+}
+
+/**
+ * yard: { c (the house), s, yaw, seed, k } — what lies about a house door: a woven hazel hurdle screening a yard beside the
+ * door (some), a storage pit lidded with a hurdle disc weighted with stones and a basket by it, a hide stretched on a frame, a ring
+ * of log seats, a stack of thatching straw bundles against the wall, bundles of hazel rods leaning, a quern outdoors, a pot of water.
+ * k picks the set (0..3); the house frame as in `house`: +v toward the door.
+ */
+function yard(el, { bag, col }) {
+  const rand = rng(el.seed || 5), [x, z] = el.c, y = el.y ?? 0, a = el.yaw ?? 0, s = el.s ?? 5, hw = s / 2;
+  const fr = { x, z, y, c: Math.cos(a), s: Math.sin(a) }, k = el.k ?? 0;
+  const at = (u, v, yy = 0) => { const p = W(fr, u, 0, v); return [p[0], y + yy, p[2]]; };
+  const front = hw + 0.16 + 0.9;
+  // the way up to the door trodden: a scatter of chalk lumps and flints
+  for (let i = 0; i < 9; i++) bag.add(i % 3 ? 'chalk' : 'granite_black', pebble(0.04 + rand() * 0.04, at((rand() - 0.5) * 2.6, front + rand() * 2.4, 0)));
+  if (k === 0 || k === 2) {                                  // a hurdle screen forming a yard on one side of the door, a log seat
+    const sg = rand() < 0.5 ? -1 : 1, u0 = sg * 1.3, u1 = sg * 3.4, v = front + 0.2;
+    const p = W(fr, u0, 0, v), q = W(fr, u1, 0, v), p2 = W(fr, u1, 0, v + 2.2);
+    const gy = () => y;
+    hurdle({ a: [p[0], p[2]], b: [q[0], q[2]], y: gy(p), h: 1.1, seed: el.seed }, { bag, col });
+    hurdle({ a: [q[0], q[2]], b: [p2[0], p2[2]], y: gy(q), h: 1.1, seed: el.seed + 1 }, { bag, col });
+    const lg = at(sg * 2.2, v + 1.1, 0.14); bag.add('log_pine', stick([lg[0] - fr.c * 0.5, lg[1], lg[2] - fr.s * 0.5], [lg[0] + fr.c * 0.5, lg[1], lg[2] + fr.s * 0.5], 0.14, 7));
+    col.circle(lg[0], lg[2], 0.3, y, y + 0.3);
+  }
+  if (k === 1 || k === 3) {                                  // a storage pit lidded with a weighted hurdle disc, a basket by it
+    const sg = k === 1 ? 1 : -1, p = at(sg * 2.6, front + 1.2, 0.0);
+    bag.add('plaster_damp', lathe([[0.62, -0.02], [0.55, 0.04], [0.0, 0.05]], 14, null, p[0], p[1], p[2]));
+    bag.add('wicker', lathe([[0.001, 0.05], [0.5, 0.07], [0.52, 0.1], [0.001, 0.1]], 14, null, p[0], p[1], p[2]));
+    for (let i = 0; i < 4; i++) bag.add('granite_rough', pebble(0.09 + rand() * 0.05, [p[0] + Math.cos(i * 1.6) * 0.3, p[1] + 0.1, p[2] + Math.sin(i * 1.6) * 0.3]));
+    const b = at(sg * 2.6 + 0.9, front + 0.9, 0); bag.add('wicker', lathe([[0.001, 0], [0.22, 0], [0.27, 0.34], [0.24, 0.35], [0.001, 0.05]], 12, null, b[0], b[1], b[2]));
+    col.circle(p[0], p[2], 0.55, y - 0.05, y + 0.12);
+  }
+  if (k === 1 || k === 2) {                                  // a hide stretched to dry on a frame of hazel poles, leaning at the wall
+    const sg = k === 1 ? -1 : 1, u = sg * (hw - 0.2), v = hw + 0.16 + 0.55, a0 = at(u - 0.5, v, 0), a1 = at(u + 0.5, v, 0), top = 1.35;
+    for (const p of [a0, a1]) bag.add('timber', stick(p, [p[0] + fr.s * 0.0, p[1] + top, p[2]], 0.025, 5));
+    bag.add('timber', stick([a0[0], a0[1] + top, a0[2]], [a1[0], a1[1] + top, a1[2]], 0.02, 5));
+    bag.add('timber', stick([a0[0], a0[1] + 0.35, a0[2]], [a1[0], a1[1] + 0.35, a1[2]], 0.02, 5));
+    bag.add(['hide_tan', 'hide_brown', 'hide_white'][Math.floor(rand() * 3)], obox(fr, Math.min(u - 0.45, u + 0.45), Math.max(u - 0.45, u + 0.45), 0.4, top - 0.03, v - 0.015, v + 0.015));
+  }
+  if (k === 0 || k === 3) {                                  // bundles of thatching straw leaning against the wall, hazel rods in a sheaf
+    const sg = rand() < 0.5 ? -1 : 1;
+    for (let i = 0; i < 4; i++) { const p = at(sg * (hw - 0.4 - i * 0.18), hw + 0.16 + 0.22, 0), q = at(sg * (hw - 0.4 - i * 0.18), hw + 0.16 + 0.02, 1.2); bag.add('thatch', stick(p, q, 0.11, 7)); }
+    for (let i = 0; i < 6; i++) { const p = at(-sg * (hw - 0.3) - i * 0.015 * sg, hw + 0.16 + 0.3 + i * 0.02, 0), q = at(-sg * (hw - 0.3) + (i - 3) * 0.02, hw + 0.16 + 0.03, 1.9); bag.add('wicker', stick(p, q, 0.012, 4)); }
+  }
+  // a pot of water by the door
+  { const p = at((rand() < 0.5 ? -1 : 1) * 0.9, hw + 0.16 + 0.35, 0); bag.add('terracotta', lathe(groovedWare(0.2, 0.42), 12, null, p[0], p[1], p[2])); }
+}
+
+/**
+ * craft: { c, y, yaw, kind, seed } — a place of work in the open, the tools and stuff laid out where its worker squats:
+ * 'knap' (a flint knapper: a flat stone for an anvil, nodules in a heap, a drift of grey flakes round it, axe blanks on a hide, an antler hammer),
+ * 'pots' (a potter: a heap of grey clay, pots standing to dry, a bone paddle, a firing pit with flints and firewood),
+ * 'basket' (a basket-maker: sheaves of hazel and willow rods, a half-woven basket on the ground, a bone awl),
+ * 'grind' (grain milling: two saddle querns on a hide, a heap of grain, a basket, a pot of flour), 'hides' (scraping a hide pegged out on the ground, a flint scraper).
+ */
+function craft(el, { bag, col }) {
+  const rand = rng(el.seed || 7), [x, z] = el.c, y = el.y ?? 0, a = el.yaw ?? 0, fr = { x, z, y, c: Math.cos(a), s: Math.sin(a) };
+  const at = (u, v, yy = 0) => W(fr, u, yy, v);
+  switch (el.kind) {
+    case 'knap': {
+      bag.add('hide_tan', lathe([[1.0, 0], [0.98, 0.012], [0.001, 0.014]], 12, null, ...at(0, 0.1)));
+      bag.add('granite_rough', lathe([[0.001, 0], [0.34, 0], [0.3, 0.16], [0.001, 0.19]], 8, null, ...at(0.2, 0.55)));
+      for (let i = 0; i < 9; i++) bag.add('granite_black', pebble(0.07 + rand() * 0.05, at(-0.9 + rand() * 0.4, -0.3 + rand() * 0.7, 0.02)));
+      for (let i = 0; i < 70; i++) { const t = rand() * 6.28, r = 0.25 + Math.sqrt(rand()) * 0.9; bag.add(i % 4 ? 'granite_black' : 'chalk', flake(0.012 + rand() * 0.02, at(Math.cos(t) * r + 0.1, Math.sin(t) * r * 0.8 + 0.1, 0.012), rand)); }
+      for (let i = 0; i < 3; i++) bag.add('granite_black', lathe([[0.001, 0], [0.045, 0.01], [0.05, 0.14], [0.001, 0.26]], 5, null, ...at(0.45 + i * 0.12, -0.2 - i * 0.05, 0.016)));
+      antlerPick(bag, at(-0.2, 0.9, 0.0), a + 0.7, rand, y + 0.03 - y);
+      break;
+    }
+    case 'pots': {
+      bag.add('mud_plaster', lathe([[0.55, 0], [0.45, 0.14], [0.2, 0.24], [0.001, 0.26]], 10, null, ...at(-0.9, 0.2)));
+      for (let i = 0; i < 6; i++) { const t = i * 1.05 + rand() * 0.4, r = 0.5 + rand() * 0.45; bag.add(rand() < 0.5 ? 'terracotta' : 'pottery_dark', lathe(groovedWare(0.1 + rand() * 0.08, 0.2 + rand() * 0.2), 12, null, ...at(0.5 + Math.cos(t) * r, 0.1 + Math.sin(t) * r * 0.9, 0))); }
+      bag.add('pottery_dark', lathe([[1.1, -0.02], [0.95, 0.02], [0.001, 0.0]], 14, null, ...at(1.7, -0.6)));
+      for (let i = 0; i < 8; i++) { const t = i / 8 * 6.28; bag.add('granite_black', pebble(0.07, at(1.7 + Math.cos(t) * 0.95, -0.6 + Math.sin(t) * 0.95, 0))); }
+      for (let i = 0; i < 5; i++) bag.add('log_pine', stick(at(1.4 + i * 0.07, -0.5 + i * 0.1, 0.05), at(2.0 + i * 0.05, -0.9 + i * 0.16, 0.12), 0.04, 6));
+      bag.add('linen', stick(at(-0.1, 0.9, 0.02), at(0.25, 0.97, 0.03), 0.02, 5));
+      break;
+    }
+    case 'basket': {
+      for (let i = 0; i < 12; i++) bag.add(i % 3 ? 'wicker' : 'timber', stick(at(-1.0 + i * 0.015, -0.2 + i * 0.03, 0.03), at(-0.95 + i * 0.01, -0.2 + i * 0.03 + 0.2, 0.9 + rand() * 0.15), 0.011, 4));
+      const bk = at(0.4, 0.3, 0);
+      bag.add('wicker', lathe([[0.001, 0.02], [0.24, 0.02], [0.3, 0.16], [0.28, 0.3], [0.001, 0.3]], 12, null, ...bk));
+      for (let i = 0; i < 14; i++) { const t = i / 14 * 6.28, b = at(0.4 + Math.cos(t) * 0.28, 0.3 + Math.sin(t) * 0.28, 0.3); bag.add('wicker', stick([b[0], b[1], b[2]], [b[0] + Math.cos(t) * 0.04, b[1] + 0.32, b[2] + Math.sin(t) * 0.04], 0.01, 4)); }
+      bag.add('wicker', lathe([[0.001, 0.0], [0.2, 0.0], [0.24, 0.14], [0.001, 0.14]], 12, null, ...at(1.0, -0.2)));
+      break;
+    }
+    case 'grind': {
+      bag.add('hide_brown', lathe([[1.1, 0], [1.08, 0.012], [0.001, 0.014]], 12, null, ...at(0, 0)));
+      for (const sg of [-1, 1]) { bag.add('granite_rough', lathe([[0.001, 0.01], [0.3, 0.01], [0.33, 0.07], [0.22, 0.12], [0.001, 0.12]], 10, null, ...at(sg * 0.45, 0.15))); bag.add('granite_rough', lathe([[0.001, 0.1], [0.1, 0.12], [0.11, 0.17], [0.001, 0.18]], 8, null, ...at(sg * 0.45 + 0.04, 0.12))); }
+      bag.add('ichu', lathe([[0.4, 0], [0.3, 0.1], [0.12, 0.17], [0.001, 0.18]], 10, null, ...at(-0.2, -0.65)));
+      bag.add('wicker', lathe([[0.001, 0], [0.2, 0], [0.25, 0.3], [0.001, 0.04]], 12, null, ...at(0.9, -0.5)));
+      bag.add('pottery_dark', lathe(groovedWare(0.16, 0.3), 12, null, ...at(1.05, 0.5)));
+      break;
+    }
+    case 'hides': {
+      bag.add(['hide_tan', 'hide_brown', 'hide_white'][Math.floor(rand() * 3)], obox(fr, -0.8, 0.8, 0.0, 0.025, -0.55, 0.55));
+      for (const [u, v] of [[-0.8, -0.55], [0.8, -0.55], [0.8, 0.55], [-0.8, 0.55], [0, -0.55], [0, 0.55]]) bag.add('timber', stick(at(u, v, -0.05), at(u, v, 0.14), 0.022, 5));
+      bag.add('granite_black', lathe([[0.001, 0], [0.06, 0.01], [0.07, 0.04], [0.001, 0.05]], 6, null, ...at(0.9, 0.2, 0.01)));
+      bag.add('linen', stick(at(0.55, 0.2, 0.03), at(0.9, 0.25, 0.05), 0.02, 5));
+      break;
+    }
+  }
+}
+
+/**
+ * litter: { c, r, n, kind, seed } — what the work of the monument leaves on the chalk: kind 'dressing' (chips and flakes of grey and
+ * white sarsen, sarsen mauls of the size of a head, antler picks, a coil of rope of twisted lime-bast, rollers of oak), 'path' (chalk lumps
+ * and flints trodden into the track), 'offering' (a Grooved Ware pot with the bones of a pig, an antler, a flint axe laid at a stone's foot).
+ */
+function litter(el, { bag }) {
+  const rand = rng(el.seed || 3), [x, z] = el.c, R = el.r ?? 3, y = el.y ?? 0, n = el.n ?? 30, gy = () => y;
+  const spot = (r = R) => { const t = rand() * 6.28, d = Math.sqrt(rand()) * r, px = x + Math.cos(t) * d, pz = z + Math.sin(t) * d; return [px, gy(px, pz), pz]; };
+  if (el.kind === 'path') {
+    for (let i = 0; i < n; i++) { const p = spot(); bag.add(i % 3 ? 'chalk' : i % 2 ? 'granite_black' : 'granite_rough', pebble(0.025 + rand() * 0.05, p)); }
+  } else if (el.kind === 'offering') {
+    const p = [x, gy(x, z), z];
+    bag.add('terracotta', lathe(groovedWare(0.14, 0.26), 12, null, ...p));
+    for (let i = 0; i < 5; i++) { const q = spot(0.5), b = rand() * 6.28; bag.add('linen', stick([q[0], q[1] + 0.02, q[2]], [q[0] + Math.cos(b) * 0.22, q[1] + 0.03, q[2] + Math.sin(b) * 0.22], 0.016, 5)); }
+    antlerPick(bag, spot(0.7), rand() * 6.28, rand, p[1] + 0.02);
+    bag.add('granite_black', lathe([[0.001, 0], [0.06, 0.01], [0.09, 0.14], [0.001, 0.22]], 5, null, ...spot(0.6)));
+  } else {
+    for (let i = 0; i < n; i++) { const q = spot(); const r = rand(); if (r < 0.6) bag.add(i % 3 ? 'sandstone_white' : 'granite_rough', flake(0.02 + rand() * 0.05, [q[0], q[1] + 0.01, q[2]], rand)); else bag.add('granite_rough', pebble(0.04 + rand() * 0.06, q)); }
+    for (let i = 0; i < 3; i++) { const q = spot(R * 0.8); bag.add('granite_rough', lathe([[0.001, 0], [0.13, 0.03], [0.17, 0.12], [0.1, 0.2], [0.001, 0.22]], 8, null, ...q)); }
+    for (let i = 0; i < 2; i++) antlerPick(bag, spot(R * 0.8), rand() * 6.28, rand, gy(x, z) + 0.02);
+    { const q = spot(R * 0.5); for (let i = 0; i < 4; i++) bag.add('rope_fibre', lathe([[0.3 - i * 0.015, 0], [0.31 - i * 0.015, 0.045], [0.001, 0.06]], 12, null, q[0], q[1] + i * 0.04, q[2])); }
+    { const q = spot(R * 0.7), b = rand() * 6.28; for (let i = 0; i < 3; i++) bag.add('bark_dark', stick([q[0] + i * 0.2, q[1] + 0.12, q[2] + i * 0.12], [q[0] + i * 0.2 + Math.cos(b) * 1.3, q[1] + 0.12, q[2] + i * 0.12 + Math.sin(b) * 1.3], 0.12, 7)); }
+  }
+}
+
+/**
+ * scrub: { c, y, r, h, kind, seed } — 'gorse' (a dense dark-green dome of spines, a few yellow flowers; the down's commonest scrub) or
+ * 'hawthorn' (a low thorn-tree, a gnarled trunk bent by the wind, a rounded crown of leaf with the white of the blossom) — overlapping domes of leaf.
+ */
+function scrub(el, { bag, col }) {
+  const rand = rng(el.seed || 17), [x, z] = el.c, y = el.y ?? 0, R = el.r ?? 1.2, H = el.h ?? 1.0;
+  if (el.kind === 'hawthorn') {
+    const lean = (rand() - 0.5) * 0.5, tr = 0.09 * R;
+    bag.add('bark_dark', stick([x, y - 0.1, z], [x + lean * 0.6, y + H * 0.6, z + lean * 0.2], tr, 6));
+    for (let i = 0; i < 3; i++) { const t = rand() * 6.28; bag.add('bark_dark', stick([x + lean * 0.4, y + H * 0.4, z], [x + Math.cos(t) * R * 0.6, y + H * 0.95, z + Math.sin(t) * R * 0.6], tr * 0.5, 5)); }
+    for (let i = 0; i < 5; i++) { const t = rand() * 6.28, d = rand() * R * 0.5, q = lathe([[0.001, -0.5], [0.8, -0.2], [1, 0.1], [0.7, 0.4], [0.001, 0.5]], 9); q.scale(R * (0.55 + rand() * 0.25), H * 0.35, R * (0.55 + rand() * 0.25)); q.translate(x + Math.cos(t) * d, y + H * 0.8 + rand() * H * 0.15, z + Math.sin(t) * d); bag.add(LEAF_MATS[i % 2], q); }
+    for (let i = 0; i < 14; i++) { const t = rand() * 6.28, d = R * (0.4 + rand() * 0.55); bag.add('cloth_white', pebble(0.045, [x + Math.cos(t) * d, y + H * (0.75 + rand() * 0.45), z + Math.sin(t) * d])); }
+    col.circle(x, z, tr * 1.5, y, y + H);
+  } else {
+    for (let i = 0; i < 4; i++) { const t = rand() * 6.28, d = rand() * R * 0.5, q = lathe([[0.001, 0], [1, 0.0], [0.95, 0.35], [0.6, 0.8], [0.001, 1]], 9); q.scale(R * (0.5 + rand() * 0.4), H * (0.7 + rand() * 0.3), R * (0.5 + rand() * 0.4)); q.translate(x + Math.cos(t) * d, y - 0.05, z + Math.sin(t) * d); bag.add('flax_leaf', q); }
+    for (let i = 0; i < 16; i++) { const t = rand() * 6.28, d = R * (0.3 + rand() * 0.6), hh = H * (0.5 + rand() * 0.4) * (1 - d / R * 0.5); bag.add('cloth_ochre', pebble(0.04, [x + Math.cos(t) * d, y + hh, z + Math.sin(t) * d])); }
+    col.circle(x, z, R * 0.7, y, y + H * 0.8);
+  }
+}
+
 registerStyle('neolithic', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, camp_shelter: campShelter, hurdle },
+  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, camp_shelter: campShelter, hurdle, yard, craft, litter, scrub },
   objects: {},
 });

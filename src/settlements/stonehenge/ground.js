@@ -11,11 +11,13 @@ function cover(x, z, h, ny) {
   const [s, t] = avenue(x, z);
   if ((s > DITCH.r && s < RADIUS - 40 && Math.abs(Math.abs(t) - 9.6) < 1.1) || Math.abs(Math.hypot(s - HEEL.d, t) - HEEL.ditch) < 0.7) { c.sand = 0.5; c.grass = 0.5; return c; }   // chalk in the fresh ditches
   if (r < 20) { c.soil = 0.5; c.grass = 0.5; return c; }
+  if (s > 16 && s < RADIUS - 40 && Math.abs(t) < 2.4 + 0.6 * Math.sin(s * 0.21)) { c.sand = 0.32 + 0.1 * Math.sin(s * 0.7); c.soil = 0.25; c.grass = 0.4; return c; }   // the track up the Avenue, trodden to the chalk
   // the Durrington avenue: rammed flint over chalk, trodden bare; inside the timber circle the turf worn
   const [ds, dt] = durr(x, z), dc = Math.hypot(x - DURR.c[0], z - DURR.c[1]);
   if (ds > DURR.r - 1 && ds < DURR.r + DURR.len + 30 && Math.abs(dt) < DURR.w / 2) { c.grass = 0.08; c.soil = 0.2; c.road = 0.7; c.rock = 0.35; c.sand = 0.25; return c; }
   if (ds > DURR.r && Math.abs(Math.abs(dt) - DURR.w / 2 - 0.5) < 0.8) { c.sand = 0.5; c.grass = 0.5; return c; }   // chalk in the gullies
   if (dc < DURR.r + 2) { c.soil = 0.45; c.grass = 0.55; return c; }
+  if (Math.hypot(x - VILLAGE.c[0], z - VILLAGE.c[1]) < VILLAGE.r + 8) for (const h of houses()) if (Math.hypot(h.c[0] - x, h.c[1] - z) < h.s * 0.5 + 2.6) { c.soil = 0.5; c.sand = 0.25; c.grass = 0.3; return c; }   // the ground about each door, trodden bare
   return c;
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
