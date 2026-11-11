@@ -85,15 +85,15 @@ E.push({ t: 'portico', a: [T0 + 16.2, T1 + 15.4], b: [T0 + 16.2, T1 + 10.6], n: 
 // the West Court furnished (docs/settlements/knossos.md §4e): the raised causeways of limestone slabs that cross it (the way from the west entrance
 // out to the Royal Road and the theatral area), the three stone-lined pits (kouloures) at its north-west, benches of gypsum along the façade between
 // the setbacks, tubs of plants and jar stands along the causeways, torch stands either side of the west entrance, a cult stand with horns
-E.push({ t: 'floor', rect: [-118, 37.6, -66, 40.6], y: 0.2, th: 0.2, mat: 'limestone' }, { t: 'floor', rect: [-91.5, -49, -88.5, 40.6], y: 0.2, th: 0.2, mat: 'limestone' });
-E.push({ t: 'floor', rect: [-88.5, -46, -66, -43], y: 0.2, th: 0.2, mat: 'limestone' });
-for (const z of [-40, -32.5, -25]) E.push({ t: 'ring_pit', c: [-111, z], r: 1.9, y: 0.05 });
+E.push({ t: 'floor', rect: [-118, 38.3, -66, 39.7], y: 0.2, th: 0.2, mat: 'limestone' }, { t: 'floor', rect: [-90.7, -49, -89.3, 39.7], y: 0.2, th: 0.2, mat: 'limestone' });
+E.push({ t: 'floor', rect: [-89.3, -44.7, -66, -43.3], y: 0.2, th: 0.2, mat: 'limestone' });
+for (const z of [-43, -35.5, -28]) E.push({ t: 'ring_pit', c: [-110, z], r: 2.7, y: 0.05 });
 E.push({ t: 'court_dress', y: 0.05, seed: 3,
   benches: [[-62.6, -37.4, -62.0, -30.6], [-62.6, -11.6, -62.0, -4.6], [-62.6, 14.6, -62.0, 21.6], [-62.6, 30.4, -62.0, 31.0]],
-  stands: [[-66.6, 31.5], [-66.6, 46.5], [-66.6, 10], [-66.6, -22], [-88, 20], [-88, -20], [-94, 38.5]],
-  tubs: [[-90, -30], [-90, -10], [-90, 10], [-90, 30], [-92.5, 38.5], [-87.5, 38.5], [-100, 36]],
-  torches: [[-67.4, 33.4], [-67.4, 44.6], [-90, -48]],
-  horns: [[-104, 4, 0], [-80.5, -44.5, 0]] });
+  stands: [[-66.6, 31.5], [-66.6, 46.5], [-66.6, 10], [-66.6, -22], [-88, 20], [-88, -20], [-95, 37.2]],
+  tubs: [[-92, -30], [-92, -10], [-92, 10], [-92, 30], [-93, 37], [-87.5, 37], [-100, 36.5]],
+  torches: [[-67.4, 33.4], [-67.4, 44.6], [-92, -47]],
+  horns: [[-67.0, -49, 1], [-67.8, 5, 1]] });
 // the Central Court: tubs at the corners, torch stands under the porticoes, the cult stand with horns before the Tripartite Shrine's portico
 E.push({ t: 'court_dress', y: 0.05, seed: 4,
   benches: [[-12.6, -24.6, -12.15, -22.2], [12.15, 22.2, 12.6, 24.6], [-12.6, 22.2, -12.15, 24.6]],

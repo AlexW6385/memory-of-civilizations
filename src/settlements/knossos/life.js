@@ -34,7 +34,7 @@ export function life() {
   // the West Court: people crossing it and talking by the façade
   for (let k = 0; k < 26; k++) {
     const x = -116 + rand() * 46, z = -46 + rand() * 90;
-    if (Math.hypot(x + 111, z + 32.5) < 12 || (x > -119 && x < -64 && z > 37 && z < 41) || (x > -92 && x < -88)) continue;
+    if (Math.hypot(x + 110, z + 35.5) < 11 || (x > -119 && x < -64 && z > 36.8 && z < 41.2) || (x > -92.2 && x < -87.8)) continue;
     (rand() < 0.45 ? woman : man)([x, z], rand() * 6.28, { y: 0.05, pose: rand() < 0.4 ? 'talk' : 'stand' });
   }
   // the Central Court: a few people under the porticoes and crossing; the priestess before the shrine with her offering

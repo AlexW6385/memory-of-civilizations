@@ -17,7 +17,7 @@ const low = (r) => Math.min(height(r[0], r[1]), height(r[2], r[1]), height(r[0],
 export const laneEls = () => {
   const E = [];
   for (const L of lanes()) {
-    if (Math.abs(L.z) > RADIUS - 40) continue;
+    if (Math.abs(L.z) > RADIUS - 40 || L.k === 0) continue;              // (the Royal Road is the first lane)
     for (let a = L.x0 - 0.8; a < L.x1 + 0.8; a += 40) {
       const b = Math.min(L.x1 + 0.8, a + 40), pts = [];
       for (let x = a; x < b + 0.01; x += 5) pts.push([x, height(x, L.z), L.z]);

@@ -39,7 +39,7 @@ function build() {
   LOTS = []; ALLEYS = []; YARDS = []; const spans = new Map();
   const xmin = -RADIUS + 22, xmax = 170;
   for (let k = -14; k <= 14; k++) {
-    const zc = laneZ(k);
+    const zc = laneZ(k), hw = (k === 0 ? ROAD.w : LANE.w) / 2;
     for (const side of [-1, 1]) {
       const rand = rng(1600 + k * 31 + (side > 0 ? 7 : 0));
       let x = xmin + rand() * 4, since = 0, prev = null;
@@ -49,10 +49,10 @@ function build() {
         const d = rand() < 0.68 ? LANE.depth : 8.2 + rand() * 2.6;
         const alley = since >= 3 && rand() < 0.3;
         if (alley) { x += LANE.alley; since = 0; if (prev) prev.alE = true; prev = null; }
-        const z0 = side < 0 ? zc - LANE.w / 2 - d : zc + LANE.w / 2, z1 = z0 + d, cx = x + w / 2, cz = (z0 + z1) / 2, r = Math.hypot(cx, cz);
+        const z0 = side < 0 ? zc - hw - d : zc + hw, z1 = z0 + d, cx = x + w / 2, cz = (z0 + z1) / 2, r = Math.hypot(cx, cz);
         x += w; since++;
         if (r > RADIUS - 35 || x > xmax + 4) { prev = null; continue; }
-        if (inRect(PALACE, cx, cz, 12) || inRect(THEATRAL, cx, cz, 14) || onRoad(cx, cz, 9) || inRect(WESTCOURT, cx, cz, 6) || onStream(cx, cz, 14)) { prev = null; continue; }
+        if (inRect(PALACE, cx, cz, 12) || inRect(THEATRAL, cx, cz, 14) || onRoad(cx, cz, 3) || inRect(WESTCOURT, cx, cz, 6) || onStream(cx, cz, 14)) { prev = null; continue; }
         if (rand() < 0.03 * smooth(100, 170, r) + 0.6 * smooth(160, 300, r)) { prev = null; continue; }
         const lot = { rect: [x - w, z0, x, z1], seed: Math.floor(rand() * 1e6), front: side < 0 ? 's' : 'n', k, side, alW: !prev, alE: false, yardD: LANE.depth - d, r };
         if (prev) prev.alE = false;
@@ -104,7 +104,8 @@ export const onLane = (x, z, m = 0) => lanes().some((l) => Math.abs(z - l.z) < L
 /** The houses that can be entered: near the palace on the flat ground, wide and deep enough; their kinds by the lot's seed. */
 export function openHouses() {
   const m = new Map(), kinds = ['home', 'home', 'weaver', 'shop', 'shop', 'store', 'home', 'weaver'];
-  const ok = lots().filter((l) => l.rect[0] > -150 && l.rect[2] < 62 && l.r < 135 && l.rect[2] - l.rect[0] >= 6.3 && l.rect[3] - l.rect[1] >= 10.5 && l.seed % 3 === 0);
-  for (const l of ok.slice(0, 44)) m.set(l, kinds[l.seed % kinds.length]);
+  const ok = lots().filter((l) => l.rect[0] > -165 && l.rect[2] < 62 && l.r < 150 && l.rect[2] - l.rect[0] >= 6.3 && l.rect[3] - l.rect[1] >= 10.5 && l.seed % 2 === 0);
+  const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 100, (l.rect[1] + l.rect[3]) / 2);
+  for (const l of ok.sort((a, b) => d(a) - d(b)).slice(0, 56)) m.set(l, kinds[Math.floor(l.seed / 8) % kinds.length]);
   return m;
 }
