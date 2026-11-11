@@ -16,6 +16,8 @@ export function bridgeDeck(z) {
 export const GATE = { z: -80, rect: [-309, -96, -291, -64] };   // the city gate's platform over the road
 export const MONASTERY = [80, -260, 240, -110];
 export const PAGODA = [160, -190];
+// the approach to the Kaibao monastery: a 14 m way from the Imperial-street-side shop street (z = -80) north to the gate hall, kept clear of houses
+export const APPROACH = [153, -112, 167, -84];
 export const WALL_X = -300;
 // the open country east of the city: wheat fields, the road and the towpath running on into them, the farmsteads along the roads
 export const FIELDS_X = 262;
@@ -76,7 +78,7 @@ export function lots() {
   const rw = (r) => ways.some((w) => rectsMeet(w.r, r, 0.1));
   const fits = (r) => Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) <= RADIUS - 24;
   const dBridge = (r) => Math.hypot((r[0] + r[2]) / 2, (r[1] + r[3]) / 2 - 76);
-  const clearOfPlaces = (r) => !rectsMeet(MONASTERY, r, 6) && !(r[1] < RIVER.z1 + 2 && r[3] > RIVER.z0 - 2) && !(r[0] < WALL_X + 10 && r[2] > WALL_X - 10) && !(r[0] < GATE.rect[2] + 2 && r[2] > GATE.rect[0] - 2 && r[1] < GATE.rect[3] && r[3] > GATE.rect[1]);
+  const clearOfPlaces = (r) => !rectsMeet(MONASTERY, r, 6) && !rectsMeet(APPROACH, r, 1.5) && !(r[1] < RIVER.z1 + 2 && r[3] > RIVER.z0 - 2) && !(r[0] < WALL_X + 10 && r[2] > WALL_X - 10) && !(r[0] < GATE.rect[2] + 2 && r[2] > GATE.rect[0] - 2 && r[1] < GATE.rect[3] && r[3] > GATE.rect[1]);
   const inZone = (r) => { const a = zoneOf(r[0]), b = zoneOf(r[2]); return a === b ? a : null; };
   const pickTrade = (d) => { const L = d < 220 ? TRADES_NEAR : TRADES; return L[Math.floor(rand() * L.length)]; };
 

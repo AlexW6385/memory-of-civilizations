@@ -15,6 +15,7 @@ import '../../objects/index.js';
 import { placer, assembly } from '../../objects/kit.js';
 import { box, rod, ly, drum, bowl, jar, prismX, rng, limb } from './props.js';
 import { lots } from './layout.js';
+import { poleA } from './houses.js';
 import { tradeOf, wineShops, teaHouses } from './trades.js';
 
 // ── the writing: strokes [kind, x0, y0, x1, y1] on a 100 grid (as the other brush-stroke signs) ──
@@ -202,17 +203,17 @@ function kaifengShop(el, { bag, col }) {
     for (const [role, g] of Object.entries(U[name])) { let m = mats[role] ?? DEF[name][role]; if (WINDY.has(`${name}.${role}`)) m = windMat(m); P(m, g.clone()); }
   };
   const tc = TRADE_CHAR[trade];
-  const side = rand() < 0.5 ? -1 : 1, bn = BANNER[trade];
-  // the pole with the trade's sign at one end of the front
-  { const x = -side * (L / 2 - 0.25), zp = 0.25; put('pole', { x, z: zp });
+  const bn = BANNER[trade], x = el.poleX ?? (rand() < 0.5 ? -1 : 1) * (L / 2 - 0.25), side = x > 0 ? -1 : 1, zp = el.poleZ ?? 1.8;
+  // the pole with the trade's sign at one end of the front (the end houses.js's poleA gives, out beyond the eaves)
+  { put('pole', { x, z: zp });
     const hang = { x, z: zp, y: 4.28 };
     if (bn === 'flag') { const blue = rand() < 0.7; put('flag', { mats: { c: blue ? 'cloth_indigo' : 'cloth_white', e: blue ? 'cloth_white' : 'cloth_indigo' }, ...hang }); for (const ry of [Math.PI / 2, -Math.PI / 2]) put(`f${tc}`, { mats: { g: blue ? 'cloth_white' : 'cloth_indigo' }, x: x + Math.sin(ry) * 0.012, z: zp + 0.5, y: 4.28 - 0.62, ry, k: 0.5 }); }
     else if (bn) put(bn, bn === 'hbook' ? { mats: { c: pick(['cloth_white', 'cloth_indigo', 'cloth_brown']) }, ...hang } : hang);
     col?.circle(...loc(x, zp), 0.22, y0, y0 + 4.6); }
   // the standing signboard on stone feet at the other end (the physician's, the inn's, the tea house's, some wine shops'), by the front's end
-  if ((trade === 'medicine' || trade === 'inn' || trade === 'tea' || trade === 'wine' || rand() < 0.1) && L > 4.2 && !el.water) { const x = side * (L / 2 - 0.5), zp = 0.7; put('sboard', { x, z: zp, ry: Math.PI / 2 }); col?.circle(...loc(x, zp), 0.4, y0, y0 + 2.1); }
+  if ((trade === 'medicine' || trade === 'inn' || trade === 'tea' || trade === 'wine' || rand() < 0.1) && L > 4.2 && !el.water && !el.signOnly && !el.noBoard) { const xb = side * (L / 2 - 0.5), zb = 0.7; put('sboard', { x: xb, z: zb, ry: Math.PI / 2 }); col?.circle(...loc(xb, zb), 0.4, y0, y0 + 2.1); }
   // the goods on the apron and on trestles, between the sign pole and the board
-  if (!el.water) {
+  if (!el.water && !el.signOnly) {
     const list = GOODS[trade] || GOODS.cloth, free0 = -L / 2 + 0.75, free1 = L / 2 - 0.75;
     let x = side > 0 ? free0 : free1; const dir = side > 0 ? 1 : -1; let first = true;
     for (const [name, m, top] of list) {
@@ -230,16 +231,32 @@ function kaifengShop(el, { bag, col }) {
 STYLES.life.elements.kaifeng_shop = kaifengShop;
 
 const FR = { s: [0, 1, 0], n: [0, -1, Math.PI], e: [1, 0, Math.PI / 2], w: [-1, 0, -Math.PI / 2] };
-/** The shop elements of layout.js's lots (style life), one per shop; the wine shops' and tea houses' fronts are as the others'. */
+/** The street's side of the lot's building: where the house's front stands, and its width. */
+function frontOf(l) {
+  const [x0, z0, x1, z1] = l.foot, f = l.front, [, , rot] = FR[f], along = f === 'n' || f === 's';
+  const at = f === 's' ? [(x0 + x1) / 2, z1] : f === 'n' ? [(x0 + x1) / 2, z0] : f === 'e' ? [x1, (z0 + z1) / 2] : [x0, (z0 + z1) / 2];
+  return { at, rot, w: along ? x1 - x0 : z1 - z0 };
+}
+const frontPhysician = (l) => l.rect[3] > -85 && l.rect[3] < -83 && l.rect[0] > -275 && l.rect[0] < -262;
+/**
+ * The shop elements of layout.js's lots (style life), one per shop, for the houses (houses.js: house_song, which draws the
+ * counters, the goods on them, the shelves, the awnings and the balconies; this adds what stands in the street before them).
+ * The sign pole stands at the end of the front houses.js's poleA gives, beyond the eaves and the balcony (z out 1.35 for two
+ * storeys, 1.8 for one); the tea houses (the style's tea_house is complete) get the pole only; the wine shops' and the physician's
+ * boards are town.js's (colour gates, signboards).
+ */
 export function shopElements() {
   const out = [];
   for (const l of lots()) {
     const trade = tradeOf(l);
-    if (!l.shop || !trade) continue;
-    const [x0, z0, x1, z1] = l.rect, f = l.front, [, , rot] = FR[f], along = f === 'n' || f === 's';
-    const at = f === 's' ? [(x0 + x1) / 2, z1] : f === 'n' ? [(x0 + x1) / 2, z0] : f === 'e' ? [x1, (z0 + z1) / 2] : [x0, (z0 + z1) / 2];
-    const w = along ? x1 - x0 : z1 - z0;
-    out.push({ t: 'kaifeng_shop', at, y: 0.04, rot, L: w, trade, seed: l.seed + 7 });
+    if (!l.shop || !trade || l.kind === 'warehouse') continue;
+    const { at, rot, w } = frontOf(l), c = Math.cos(rot), s = Math.sin(rot);
+    const a = poleA(l.seed, w), pole = [[a, 0]];                    // house frame: a along u from its origin
+    const f = l.front, [x0, z0, x1, z1] = l.foot, o = f === 's' ? [x1, z1] : f === 'n' ? [x0, z0] : f === 'e' ? [x1, z0] : [x0, z1], u = f === 's' ? [-1, 0] : f === 'n' ? [1, 0] : f === 'e' ? [0, 1] : [0, -1];
+    const wx = o[0] + u[0] * a, wz = o[1] + u[1] * a, lx = (wx - at[0]) * c - (wz - at[1]) * s;
+    const two = l.storeys === 2 || l.kind === 'wine' || l.kind === 'inn';
+    out.push({ t: 'kaifeng_shop', at, y: 0.04, rot, L: w, trade, seed: l.seed + 7, poleX: lx, poleZ: two ? (l.kind === 'wine' || l.kind === 'inn' ? 1.7 : 1.35) : 1.8, signOnly: l.kind === 'tea', noBoard: l.kind === 'wine' || frontPhysician(l) });
+    void pole;
   }
   return out;
 }

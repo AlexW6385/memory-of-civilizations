@@ -1,5 +1,5 @@
 // Northern Song Bianjing — the ground: the flat Yellow River plain, the Bian River sunk between
-// low banks; willows along the water, elms and jujubes among the houses; to the east the open
+// low banks; willows along the water, pagoda trees (huai) and jujubes among the houses; to the east the open
 // country — green winter wheat in strips, willows along the field roads; the hazy spring sky.
 
 import { RADIUS, RIVER, MONASTERY, STREETS, LANES, FIELDS_X, WALL_X, STONE_BANK, inRect, inRiver, inLot, lotAt, zoneOf, smooth as sm } from './layout.js';
@@ -42,15 +42,15 @@ function cover(x, z) {
 function water(x, z, y) { return wet(x, z) && y < RIVER.water + 0.3; }
 function waterLevel(x, z) { return wet(x, z) ? RIVER.water : -Infinity; }
 function fromWater(x, z) { return wet(x, z) ? 0 : Math.min(Math.abs(z - RIVER.z0), Math.abs(z - RIVER.z1)); }
-/** Plants per 100 m²: willows on the riverbanks, elms and jujubes in the gaps between the houses and in the monastery's court. */
+/** Plants per 100 m²: willows on the riverbanks, pagoda trees (huai) and jujubes in the gaps between the houses and in the monastery's court. */
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || wet(x, z)) return null;
   // willows along the earth banks: thick on the south bank, a few on the north one, where the towpath runs at their feet
   if (bank(x, z)) return z > RIVER.z1 ? { willow: 1.2 } : (z < RIVER.z0 - 3 ? { willow: 0.25 } : null);
   if (STREETS.some((s) => inRect(s, x, z, 0.5)) || LANES.some((s) => inRect(s, x, z, 0.5)) || inLot(x, z, 0.5)) return null;
   const yard = lotAt(x, z);
-  if (yard && x < FIELDS_X) return { jujube: 0.55, elm: 0.12, mulberry: 0.2, grass: 6 };      // trees in the yards behind the houses
-  if (yard) return { jujube: 0.5, elm: 0.2, mulberry: 0.3, poplar: 0.1, grass: 6 };
+  if (yard && x < FIELDS_X) return { jujube: 0.55, pagoda_tree: 0.12, mulberry: 0.2, grass: 6 };      // trees in the yards behind the houses
+  if (yard) return { jujube: 0.5, pagoda_tree: 0.2, mulberry: 0.3, poplar: 0.1, grass: 6 };
   if (x > FIELDS_X) {
     if (z > RIVER.z0 - 6 && z < RIVER.z1 + 6) return { grass: 14 };
     // the field strips' edges: a balk of grass between strips, a willow here and there along it
@@ -60,15 +60,15 @@ function planting(x, z) {
     return { wheat: 100, grass: 6 };
   }
   if ((z > RIVER.z0 - 4 && z < RIVER.z0) || (z > RIVER.z1 && z < RIVER.z1 + 4)) return Math.abs(x) > 24 ? { willow: 2.4 } : null;
-  if (inRect(MONASTERY, x, z)) return Math.abs(x - 160) < 26 ? { grass: 8 } : { elm: 0.08, grass: 12 };
-  // the streets' own trees: elms and poplars along the lanes, willows by the wall's foot; the gaps between the blocks
-  if (Math.abs(x - WALL_X) < 14) return { willow: 0.3, elm: 0.1, grass: 10 };
-  if (zoneOf(x) === 'suburb') return { elm: 0.12, willow: 0.12, poplar: 0.06, jujube: 0.1, grass: 12 };
-  return { elm: 0.1, jujube: 0.1, mulberry: 0.06, poplar: 0.04, grass: 12 };
+  if (inRect(MONASTERY, x, z)) return Math.abs(x - 160) < 26 ? { grass: 8 } : { pagoda_tree: 0.08, grass: 12 };
+  // the streets' own trees: pagoda trees (huai) and poplars along the lanes, willows by the wall's foot; the gaps between the blocks
+  if (Math.abs(x - WALL_X) < 14) return { willow: 0.3, pagoda_tree: 0.1, grass: 10 };
+  if (zoneOf(x) === 'suburb') return { pagoda_tree: 0.12, willow: 0.12, poplar: 0.06, jujube: 0.1, grass: 12 };
+  return { pagoda_tree: 0.1, jujube: 0.1, mulberry: 0.06, poplar: 0.04, grass: 12 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 2.4, elm: 0.2, jujube: 0.55, mulberry: 0.3, poplar: 0.1, wheat: 100 },
+  maxDensity: { willow: 2.4, pagoda_tree: 0.2, jujube: 0.55, mulberry: 0.3, poplar: 0.1, wheat: 100 },
   climate: {
     sun: { az: 160, el: 45, color: [1.0, 0.95, 0.87], intensity: 3.0, lat: 35, dec: 5, hour: 10.5 },
     sky: { turbidity: 4.5, rayleigh: 1.2, mie: 0.007, mieG: 0.82, zenith: [0.12, 0.19, 0.33], horizon: [0.68, 0.68, 0.66] },
