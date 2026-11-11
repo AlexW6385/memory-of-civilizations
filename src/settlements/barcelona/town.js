@@ -80,6 +80,11 @@ function casaLife() {
   put(1.1, 12.2, 2.0, 12.2, F0, man({ dress: 'trousers', cloth: 'cloth_white', cloth2: 'cloth_black', over: 'apron', hat: 'none' }));           // the barman behind the counter
   put(5.0, 6.0, 7.4, 7.1, F0, man({ cloth: 'cloth_black', cloth2: 'cloth_black', over: 'apron', hat: 'none', pose: 'stand' }));               // the waiter
   put(3.4, 13.6, 4.5, 14.8, F0, man({ pose: 'stand', hat: 'none' })); put(5.7, 15.6, 4.6, 15.2, F0, man({ pose: 'stand', hat: 'cap' }));      // two at the billiard table
+  // the terrace on the pavement: a gentleman with his paper and a lady (the chairs sit north and south of each table)
+  for (const [zt, who] of [[-99.3, 'm'], [-92.7, 'l']]) {
+    const gx = fx + 1.7, y = height(gx, zt);
+    L.push({ t: 'figure', at: [gx, zt - 0.55], y, rot: Math.PI, seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: 'sit', hair: 'short', ...(who === 'm' ? man() : lady()) });
+  }
   // the confectioner's: the assistant behind the counter, a lady buying
   put(15.4, 4.2, 14.5, 4.2, F0, lady({ dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'apron', hat: 'none', hair: 'bun' }));
   put(13.8, 3.6, 14.7, 3.6, F0, lady({ pose: 'stand' }));
