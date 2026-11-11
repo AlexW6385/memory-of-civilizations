@@ -2,7 +2,7 @@
 // the north; the garden's beds, the town's dusty lanes; cypresses and fruit trees in the garden,
 // neem and peepal in the town; the hazy sky of the north Indian winter.
 
-import { RADIUS, RIVER_Z, TERRACE, GARDEN, KATRAS, HAVELI_OPEN, inRect, inHouse, walkDist, smooth as sm } from './layout.js';
+import { RADIUS, RIVER_Z, TERRACE, GARDEN, KATRAS, HAVELI_OPEN, WORKSHOP, inRect, inHouse, onStreet, walkDist, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 export const LEVEL = { water: -2.4, bed: -5 };
@@ -20,7 +20,7 @@ function cover(x, z, h, ny) {
   if (z < RIVER_Z + 10) { c.sand = 0.8; c.soil = 0.2; return c; }
   if (inRect(GARDEN, x, z)) { c.grass = 0.85; c.soil = 0.15; c.dry = 0.2; return c; }
   if (Math.hypot(x, z) > RADIUS - 28) { c.fields = 0.7; c.grass = 0.3; return c; }
-  c.soil = 0.65; c.sand = 0.25; c.grass = 0.1; c.road = inHouse(x, z, 0.5) ? 0 : 0.4; return c;
+  c.soil = 0.65; c.sand = 0.25; c.grass = 0.1; c.road = inHouse(x, z, 0.5) ? 0 : onStreet(x, z, 0.5) ? 0.95 : 0.4; return c;
 }
 function water(x, z, y) { return inRiver(x, z) && y < LEVEL.water + 0.3; }
 function waterLevel(x, z) { return inRiver(x, z) ? LEVEL.water : -Infinity; }
@@ -37,7 +37,7 @@ function planting(x, z, p) {
     if (d > 4) return { apple: 0.6, grass: 45 };
     return { grass: 45 };
   }
-  if (inHouse(x, z, 0.6) || inRect([-172, -262, 172, 232], x, z, 2) || inRect(HAVELI_OPEN, x, z, 1) || KATRAS.some((k) => inRect(k.rect, x, z, 5))) return null;
+  if (inHouse(x, z, 0.6) || onStreet(x, z, 1.5) || inRect([-172, -262, 172, 232], x, z, 2) || inRect(HAVELI_OPEN, x, z, 1) || inRect(WORKSHOP.rect, x, z, 1) || KATRAS.some((k) => inRect(k.rect, x, z, 5))) return null;
   return { neem: 0.06, banyan: 0.01, grass: 15 };
 }
 export const ground = {
