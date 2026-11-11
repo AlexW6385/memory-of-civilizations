@@ -114,7 +114,7 @@ export function bath(el, ctx) {
   const ex = ox1 - 7.2 - 0.45;                                     // the gallery's east wall (the cells' west wall)
   const roof = (r, yy) => { bag.add('mud_plaster', box(r[0], yy, r[1], r[2], yy + 0.4, r[3])); };
   roof([cx0 - 0.5, oz0 + wt, ex, cz0 + 0.05], y + GH); roof([cx0 - 0.5, cz1 - 0.05, ex, oz1 - wt], y + GH); roof([cx1 - 0.05, cz0, ex, cz1], y + GH);
-  for (const x of xs) { bag.add('timber', box(x - 0.15, y + GH - 0.28, oz0 + wt, x + 0.15, y + GH, cz0 + 0.1), false); bag.add('timber', box(x - 0.15, y + GH - 0.28, cz1 - 0.1, x + 0.15, y + GH, oz1 - wt), false); }
+  for (const x of xs) { bag.add('timber', box(x - 0.15, y + GH - 0.3, oz0 + wt, x + 0.15, y + GH - 0.03, cz0 + 0.1), false); bag.add('timber', box(x - 0.15, y + GH - 0.3, cz1 - 0.1, x + 0.15, y + GH - 0.03, oz1 - wt), false); }
   // the walls: north (a door), south (two great doors), west (a door), east (the cells' doorways); the cells and the well
   wallRect(ctx, [ox0, oz0, ox1, oz0 + wt], y, y + h, [{ at: (cx0 + cx1) / 2, w: 2.4, h: 2.7 }]);
   wallRect(ctx, [ox0, oz1 - wt, ox1, oz1], y, y + h, [{ at: cx0 + 6, w: 3.0, h: 2.9 }, { at: cx0 + 18, w: 3.0, h: 2.9 }]);
