@@ -64,7 +64,7 @@ function houseSong(el, { bag, col }) {
   const wallMat = pal.plaster || 'plaster_white', bandMat = pal.plinth === 'brick_grey' ? 'brick_grey' : 'plaster_damp', roofMat = pal.roof || 'tile_dark';
   const y0 = y + 0.45;
   const h1 = (shop ? 3.4 : 3.0) + rand() * 0.35, h2 = 2.55 + rand() * 0.35, yf = y0 + h1, yE = st > 1 ? yf + h2 : yf;
-  const wall = (a0, b0, a1, b1, ya, yb) => { const m = Math.min(yb, ya + 0.95); B(a0, b0, a1, b1, ya, yb, wallMat); B(a0 - 0.03, b0 - 0.03, a1 + 0.03, b1 + 0.03, ya - 0.04, m, bandMat); };
+  const wall = (a0, b0, a1, b1, ya, yb) => { const m = Math.min(yb - 0.03, ya + 0.95); B(a0, b0, a1, b1, ya, yb, wallMat); B(a0 <= 0 ? 0.02 : a0 - 0.03, b0 - 0.03, a1 >= L ? L - 0.02 : a1 + 0.03, b1 + 0.03, ya - 0.04, m, bandMat); };
 
   // ── the plan: the main hall on the street; behind it, on deep lots, a court and a rear hall, else a walled yard ──
   const v0 = ovh ? 1.1 : 0.75, uf = st > 1 ? (ovh ? v0 - 0.5 : v0 + 0.2) : v0;
