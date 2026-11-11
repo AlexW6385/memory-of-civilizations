@@ -19,23 +19,33 @@ export const PAGODA = [160, -190];
 // the approach to the Kaibao monastery: a 14 m way from the Imperial-street-side shop street (z = -80) north to the gate hall, kept clear of houses
 export const APPROACH = [153, -112, 167, -84];
 export const WALL_X = -300;
+// the riverside streets' width (m) and the main street's half-width: narrower than the Imperial Way, as the scroll's shop streets crowd in on the traffic
+const RS = 11, MH = 5.5;
 // the open country east of the city: wheat fields, the road and the towpath running on into them, the farmsteads along the roads
 export const FIELDS_X = 262;
 // the stone-faced banks by the bridge (canal_wall); beyond them the banks are of earth, faced with a timber revetment, and the towpath runs on the north one
 export const STONE_BANK = 150;
-// the streets (main streets 14 m wide, the others 6–8 m): [x0, z0, x1, z1]; the first six are the shop streets
+// the streets (the main street 11 m wide, the river streets 11 m, the gate and south streets 8 m, the quarters 4–6 m): [x0, z0, x1, z1]; the first six are the shop streets
 export const STREETS = [
-  [-7, -RADIUS, 7, RIVER.z0], [-7, RIVER.z1, 7, RADIUS], [-RADIUS, RIVER.z0 - 14, RADIUS, RIVER.z0], [-RADIUS, RIVER.z1, RADIUS, RIVER.z1 + 14], [-RADIUS, -84, RADIUS, -76], [-RADIUS, 196, RADIUS, 204],
-  [-156, -RADIUS, -148, RIVER.z0 - 14], [146, RIVER.z1 + 14, 154, RADIUS],
+  [-MH, -RADIUS, MH, RIVER.z0], [-MH, RIVER.z1, MH, RADIUS], [-RADIUS, RIVER.z0 - RS, RADIUS, RIVER.z0], [-RADIUS, RIVER.z1, RADIUS, RIVER.z1 + RS], [-RADIUS, -84, RADIUS, -76], [-RADIUS, 197, RADIUS, 203],
+  [-155, -RADIUS, -149, RIVER.z0 - RS], [147, RIVER.z1 + RS, 153, RADIUS],
   // the cross streets of the quarters
-  [-232, -RADIUS, -226, RIVER.z0 - 14], [-82, -RADIUS, -76, RIVER.z0 - 14], [-232, RIVER.z1 + 14, -226, RADIUS], [-82, RIVER.z1 + 14, -76, RADIUS], [78, RIVER.z1 + 14, 84, RADIUS], [226, RIVER.z1 + 14, 232, RADIUS],
-  [-RADIUS, -170, 70, -164], [-RADIUS, -300, RADIUS, -294], [-RADIUS, 280, RADIUS, 286], [-RADIUS, 370, RADIUS, 376],
+  [-231, -RADIUS, -227, RIVER.z0 - RS], [-81, -RADIUS, -77, RIVER.z0 - RS], [-231, RIVER.z1 + RS, -227, RADIUS], [-81, RIVER.z1 + RS, -77, RADIUS], [79, RIVER.z1 + RS, 83, RADIUS], [227, RIVER.z1 + RS, 231, RADIUS],
+  [-RADIUS, -170, 70, -164], [-RADIUS, -299, RADIUS, -295], [-RADIUS, 281, RADIUS, 285], [-RADIUS, 371, RADIUS, 375],
 ];
-export const MAJOR = 6;     // the first MAJOR streets (and the one at z = -167) carry the shops
+export const MAJOR = 6;
+/**
+ * Where the street is laid with brick or stone slabs and where it is beaten earth (docs/settlements/song-kaifeng.md §12):
+ * the shop streets (and the Yu street) within PAVE_R of the bridge, the approach to the monastery; everything else
+ * (the quarters' cross streets, the lanes, the outer reaches of the shop streets) is earth with wheel ruts and hollows.
+ * plan.js and town.js read this to pave only what is sourced.
+ */
+export const PAVE_R = 190;
+export const pavedWay = (i, x, z) => (i < MAJOR || i === 14) && Math.hypot(x, z - 76) < PAVE_R;     // the first MAJOR streets (and the one at z = -167) carry the shops
 // the lanes (4 m) through the blocks, to open their middles to houses
 export const LANES = [
   [-RADIUS, -42, RADIUS, -38], [-RADIUS, 8, RADIUS, 12], [-RADIUS, -127, 70, -123], [-RADIUS, 148, RADIUS, 152], [-RADIUS, 240, RADIUS, 244], [-RADIUS, 326, RADIUS, 330], [-RADIUS, -234, RADIUS, -230],
-  [-44, -RADIUS, -40, RIVER.z0 - 14], [40, -RADIUS, 44, -112], [-192, -RADIUS, -188, RIVER.z0 - 14], [-44, RIVER.z1 + 14, -40, RADIUS], [-122, RIVER.z1 + 14, -118, RADIUS], [112, RIVER.z1 + 14, 116, RADIUS], [186, RIVER.z1 + 14, 190, RADIUS],
+  [-44, -RADIUS, -40, RIVER.z0 - RS], [40, -RADIUS, 44, -112], [-192, -RADIUS, -188, RIVER.z0 - RS], [-44, RIVER.z1 + RS, -40, RADIUS], [-122, RIVER.z1 + RS, -118, RADIUS], [112, RIVER.z1 + RS, 116, RADIUS], [186, RIVER.z1 + RS, 190, RADIUS],
 ];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -107,24 +117,36 @@ export function lots() {
           else { kind = 'shop'; storeys = rand() < (d < 150 ? 0.62 : d < 240 ? 0.4 : 0.2) ? 2 : 1; nb = d < 150 && rand() < 0.3 ? 4 : 2 + (rand() < 0.55 ? 1 : 0); dep = 8.4 + rand() * 2.2 + (storeys === 2 ? 0.6 : 0); depLot = dep + 2.5 + rand() * 4; }
         } else {
           const thatchP = d < 160 ? 0.08 : d < 260 ? 0.3 : d < 360 ? 0.55 : 0.8;
-          if (rand() < (d < 330 ? 0.04 : 0.32 + (d - 330) / 500)) { t += 8 + rand() * 24; continue; }
+          if (rand() < (d < 330 ? 0 : 0.32 + (d - 330) / 500)) { t += 8 + rand() * 24; continue; }
           if (!w.lane && d < 220 && q < 0.3) { kind = 'shop'; nb = 2; dep = 8 + rand() * 1.5; depLot = dep + 3 + rand() * 3; }
           else if (rand() < thatchP) { kind = 'thatch'; nb = 2 + (rand() < 0.35 ? 1 : 0); bay = 2.8 + rand() * 0.4; dep = 5.2 + rand() * 1.4; depLot = 11 + rand() * 4; ins = 1.1; }
           else { kind = 'house'; nb = 2 + (rand() < 0.45 ? 1 : 0); dep = 7 + rand() * 1.8; depLot = 11.5 + rand() * 4; ins = 1.0; }
         }
-        let wdt = nb * bay + ins * 2;
-        if (kind === 'farm') wdt = 16 + rand() * 6;
-        const r = horiz
-          ? (side < 0 ? [t, s[1] - depLot, t + wdt - 0.3, s[1] - 0.2] : [t, s[3] + 0.2, t + wdt - 0.3, s[3] + depLot])
-          : (side < 0 ? [s[0] - depLot, t, s[0] - 0.2, t + wdt - 0.3] : [s[2] + 0.2, t, s[2] + depLot, t + wdt - 0.3]);
+        // fronts run on without gaps: where the lot would meet a way or a neighbour, take fewer bays (down to one) so that it ends at the obstacle
         const front = horiz ? (side < 0 ? 's' : 'n') : (side < 0 ? 'e' : 'w');
-        if (fits(r) && inZone(r) && clearOfPlaces(r) && !rw(r) && free(r)) {
+        if (kind === 'house' && zone === 'city' && d < 330) ins = 0.35;
+        if (kind === 'thatch' && zone === 'city') ins = 0.6;
+        const rectFor = (n2) => {
+          let wdt = n2 * bay + ins * 2;
+          if (kind === 'farm') wdt = 16 + rand() * 6;
+          const rr = horiz
+            ? (side < 0 ? [t, s[1] - depLot, t + wdt - 0.3, s[1] - 0.2] : [t, s[3] + 0.2, t + wdt - 0.3, s[3] + depLot])
+            : (side < 0 ? [s[0] - depLot, t, s[0] - 0.2, t + wdt - 0.3] : [s[2] + 0.2, t, s[2] + depLot, t + wdt - 0.3]);
+          return [rr, wdt];
+        };
+        const minN = kind === 'inn' || kind === 'farm' ? nb : 1;
+        let placedLot = false;
+        for (let n2 = nb; n2 >= minN; n2--) {
+          const [r, wdt] = rectFor(n2);
+          if (!(fits(r) && inZone(r) && clearOfPlaces(r) && !rw(r) && free(r))) continue;
           take(r);
           const det = zone === 'city' ? (d < 170 ? 2 : d < 300 ? 1 : 0) : (zone === 'suburb' ? (Math.hypot(px - WALL_X, pz + 80) < 90 ? 1 : 0) : 0);
           const along = horiz ? r[2] - r[0] : r[3] - r[1];
-          LOTS.push({ rect: r, foot: footOf(r, front, kind === 'inn' ? depLot - 0.5 : dep, kind === 'farm' ? 0.5 : ins), front, kind, storeys: kind === 'inn' ? 2 : storeys, shop: kind === 'shop' || kind === 'inn' || kind === 'warehouse', seed: Math.floor(rand() * 1e6), bays: nb, bay: kind === 'farm' ? 3.2 : (along - 0.3 - ins * 2) / nb, ins, det, trade: kind === 'shop' ? pickTrade(d) : null, street: w.i, riverside: riverS || riverN, zone });
-          t += wdt;
-        } else t += 3;
+          LOTS.push({ rect: r, foot: footOf(r, front, kind === 'inn' ? depLot - 0.5 : dep, kind === 'farm' ? 0.5 : ins), front, kind, storeys: kind === 'inn' ? 2 : storeys, shop: kind === 'shop' || kind === 'inn' || kind === 'warehouse', seed: Math.floor(rand() * 1e6), bays: n2, bay: kind === 'farm' ? 3.2 : (along - 0.3 - ins * 2) / n2, ins, det, trade: kind === 'shop' ? pickTrade(d) : null, street: w.i, riverside: riverS || riverN, zone });
+          t += wdt; placedLot = true;
+          break;
+        }
+        if (!placedLot) t += 1.2;
       }
     }
   }
@@ -135,7 +157,7 @@ export function lots() {
   for (const l of cand) { if (wine.length < 5 && wine.every((m) => Math.hypot(m.rect[0] - l.rect[0], m.rect[1] - l.rect[1]) > 24)) wine.push(l); }
   wine.forEach((l, i) => { l.kind = 'wine'; l.storeys = 2; l.trade = 'wine'; l.main = i === 0; });
   // the two tea houses on the north river street by the bridge (their front to the water)
-  const tea = LOTS.filter((l) => l.front === 's' && l.street === 2 && l.kind === 'shop' && l.storeys === 1 && width(l) > 8 && l.rect[3] - l.rect[1] > 11 && Math.abs(l.rect[3] - (RIVER.z0 - 14)) < 1).sort((a, b) => Math.abs((a.rect[0] + a.rect[2]) / 2) - Math.abs((b.rect[0] + b.rect[2]) / 2)).slice(0, 2);
+  const tea = LOTS.filter((l) => l.front === 's' && l.street === 2 && l.kind === 'shop' && l.storeys === 1 && width(l) > 8 && l.rect[3] - l.rect[1] > 11 && Math.abs(l.rect[3] - (RIVER.z0 - RS)) < 1).sort((a, b) => Math.abs((a.rect[0] + a.rect[2]) / 2) - Math.abs((b.rect[0] + b.rect[2]) / 2)).slice(0, 2);
   for (const l of tea) { l.kind = 'tea'; l.trade = 'tea'; }
   // wells in the yards of some houses, a little way behind
   for (const l of LOTS) if ((l.kind === 'house' || l.kind === 'farm' || l.kind === 'thatch') && ((l.seed >> 3) % 5 === 0)) {
