@@ -61,5 +61,6 @@ export const MOVER_SITES = {
   'dunhuang': () => import('../settlements/dunhuang/movers.js'),
   'muromachi-kyoto': () => import('../settlements/muromachi-kyoto/movers.js'),
   'abu-simbel': () => import('../settlements/abu-simbel/movers.js'),
+  'thebes': () => import('../settlements/thebes/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };

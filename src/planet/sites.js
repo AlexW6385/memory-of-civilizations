@@ -91,6 +91,7 @@ export const SITES = [
   { id: 'rapa-nui', name: { en: 'Rapa Nui', zh: '拉帕努伊' }, era: '15th c.', region: 'polynesia', lat: -27.13, lon: -109.28, water: true, island: true, radius: 320 },
   { id: 'maori', name: { en: 'Māori Aotearoa', zh: '毛利' }, era: '18th c.', region: 'aotearoa', lat: -38.14, lon: 176.25, radius: 330 },
   { id: 'sydney', name: { en: 'Modern Sydney', zh: '现代悉尼' }, era: '20th c.', region: 'australia', lat: -33.86, lon: 151.21, radius: 460 },
+  { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, era: 'c. 1250 BC', region: 'egypt', lat: 25.7, lon: 32.64, radius: 330 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -101,7 +102,7 @@ for (const s of SITES) s.radius ??= 190;
 const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan',
-  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney',
+  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes',
   S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
   P: 'stonehenge',
 };
@@ -135,7 +136,6 @@ export const PLANNED = [
   { id: 'catalhoyuk', name: { en: 'Çatalhöyük', zh: '加泰土丘' }, region: 'anatolia', lat: 37.67, lon: 32.83, radius: 100 },
   { id: 'abbasid-baghdad', name: { en: 'Abbasid Baghdad', zh: '阿拔斯巴格达' }, region: 'mesopotamia', lat: 33.31, lon: 44.36, radius: 500 },
   { id: 'shibam', name: { en: 'Shibam', zh: '希巴姆' }, region: 'arabia', lat: 15.93, lon: 48.63, radius: 180 },
-  { id: 'thebes', name: { en: 'New Kingdom Thebes', zh: '新王国底比斯' }, region: 'egypt', lat: 25.70, lon: 32.64, radius: 380 },
   { id: 'alexandria', name: { en: 'Alexandria', zh: '亚历山大港' }, region: 'egypt', lat: 31.20, lon: 29.92, radius: 500 },
   { id: 'fez', name: { en: 'Fez', zh: '非斯' }, region: 'maghreb', lat: 34.06, lon: -4.97, radius: 320 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },

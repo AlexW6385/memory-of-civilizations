@@ -718,4 +718,22 @@ export const CARDS = {
       "祭司之屋与工匠营地 —— 平台南北两侧的小巷里是平顶泥砖房、面包坊和圆形粮仓，住着身穿白麻衣的祭司、石匠与搬运工。",
     ],
   },
+  'thebes': {
+    en: [
+      "Thebes (Waset) stands on the east bank of the Nile in Upper Egypt, shown about 1250 BC, in the long reign of Ramesses II (19th dynasty). It is the great city of Amun, the god of the empire, whose temple at Karnak the pharaohs have enlarged for five centuries; here the river, the temple and the town are drawn close together, so that the quay, the avenue, the walled precinct and the houses can be seen at once. The architecture is the New Kingdom's: stone temples painted in colour, and mudbrick for everything else.",
+      "The Great Hypostyle Hall — Seti I and Ramesses II's hall between the second and third pylons, 102 by 53 m, with 134 stone columns in sixteen rows: the twelve of the nave, 21 m high, with open papyrus capitals, and 122 in the aisles, 14 m, with closed buds. The raised nave has a clerestory of stone grilles that lets in light; the columns, walls and ceilings are covered in painted reliefs and the roof with stars.",
+      "The pylons and obelisks — the gateway towers of the temple's axis, battered and crowned with a cavetto cornice, with niches for cedar flagstaffs carrying banners, colossal seated kings at the second pylon's gate; beyond the hall the obelisks of Thutmose I and of Hatshepsut in the narrow courts between the pylons.",
+      "The avenue of sphinxes and the quay — the paved way of ram-headed sphinxes from the Nile's stone landing to the temple, with stairs into the river, cargo barges under square sails, papyrus skiffs, porters, and the market stalls on the quay.",
+      "The sacred lake and the precinct — a stone-lined basin 128 by 83 m south-east of the hall where the priests purify themselves; the great mudbrick enclosure wall with its gateways, the barrel-vaulted storerooms, the sanctuary of the barque and the festival hall of Thutmose III.",
+      "The town — rows of mudbrick houses and courtyard villas with flat roof terraces, shaded with reed mats, along dusty streets and lanes; and the workshop street of potters, weavers, carpenters, stonemasons, bakers, smiths and tanners, each trade at work in its yard.",
+    ],
+    zh: [
+      "底比斯（瓦塞特）位于上埃及尼罗河东岸，画面所示约为公元前1250年，第十九王朝拉美西斯二世的漫长在位期。这是帝国之神阿蒙的大城，法老们五百年来不断扩建卡纳克的阿蒙神庙；这里把河、神庙与城镇拉得很近，码头、大道、围墙内的神庙区与民宅可一并看到。建筑属新王国：神庙用石头建造并施彩，其余一概用土坯。",
+      "大柱厅 —— 塞提一世与拉美西斯二世在第二、第三塔门之间所建的大厅，长约102米、宽53米，共134根石柱，分十六排：中堂十二根，高21米，柱头为盛开的纸莎草花；两侧侧廊122根，高14米，柱头为含苞的纸莎草。中堂抬高，开有石格窗，光线由此射入；柱子、墙壁和天花板满布彩绘浮雕，屋顶绘有星空。",
+      "塔门与方尖碑 —— 神庙中轴上的门楼，墙面微向内收，顶部为凹弧檐，嵌槽中立着挂旗的雪松旗杆；第二塔门前是巨大的坐像国王。大柱厅之后，在塔门之间的窄院里立着图特摩斯一世和哈特谢普苏特的方尖碑。",
+      "狮身羊首像大道与码头 —— 从尼罗河石砌码头通向神庙的石铺大道，两侧排列羊首狮身像；河边有通向水里的石阶、挂方帆的货驳船、纸莎草小船、搬运工，以及码头上的集市摊位。",
+      "圣湖与神庙区 —— 大厅东南一座石砌水池，长128米、宽83米，祭司在此净身；还有带门楼的巨大土坯围墙、筒拱顶的仓库、圣船圣殿，以及图特摩斯三世的节庆厅。",
+      "城镇 —— 一排排土坯排屋和带庭院的宅第，平屋顶晒台以苇席遮阳，沿着尘土飞扬的街巷分布；还有作坊街，陶工、织工、木匠、石匠、面包师、铁匠和皮匠各在自家院里干活。",
+    ],
+  },
 };
