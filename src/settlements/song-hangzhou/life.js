@@ -10,7 +10,7 @@
 // front open on its side): the town's shells for exactly these lots must leave the room free.
 import './shops.js';
 import './interiors.js';
-import { lots, imperialWay, LEVEL, RADIUS } from './ways.js';
+import { lots, onImperial, LEVEL, RADIUS } from './ways.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -20,12 +20,7 @@ export function frontOf(l) {
   const P = (t, off) => (along ? [x0 + (x1 - x0) * t, (f === 'n' ? z0 : z1) + n[1] * off] : [(f === 'e' ? x1 : x0) + n[0] * off, z0 + (z1 - z0) * t]);
   return { P, n, L: along ? x1 - x0 : z1 - z0, D: along ? z1 - z0 : x1 - x0, rot: Math.atan2(n[0], n[1]) };
 }
-const nearIW = (l) => {
-  const iw = imperialWay();
-  if (!iw) return false;
-  const p = frontOf(l).P(0.5, 3);
-  return p[0] > iw[0] - 2 && p[0] < iw[2] + 2 && p[1] > iw[1] - 2 && p[1] < iw[3] + 2;
-};
+const nearIW = (l) => onImperial(l, frontOf(l).P(0.5, 3));
 /** The trade of a shop lot: the layout's own (`l.trade`), else by seed — the Imperial Way's richer mix (silk, tea, books, wine, medicine, lacquer, fans), the lanes' plainer one. */
 export function tradeOf(l) {
   if (l.trade) return l.trade;

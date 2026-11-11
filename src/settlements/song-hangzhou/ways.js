@@ -18,20 +18,34 @@ export const LEVEL = { street: 0, canal: -1.4, lake: -0.6, river: -2.2, ...(L.LE
 const lotsFn = L.lots || (() => []);
 export const lots = lotsFn;
 
-/** The street rectangles. */
-export function streets() {
-  if (L.STREETS) return L.STREETS;
-  const S = [];
-  if (L.ROAD) S.push([-L.RADIUS + 20, L.ROAD.z0, L.RADIUS - 20, L.ROAD.z1]);
-  for (const c of L.CANAL_STREETS || []) S.push(c);
-  // the lanes the old layout leaves between its rows (z + 26 … z + 36)
-  if (L.ROAD) for (let z = -320; z < L.ROAD.z0 - 40; z += 36) {
-    S.push([-60, z + 26, (L.CANAL_STREETS?.[0]?.[0] ?? 126) - 16, z + 36]);
-    S.push([(L.CANAL_STREETS?.[1]?.[2] ?? 162) + 16, z + 26, L.RADIUS - 20, z + 36]);
+/** The street entries: { r: [x0, z0, x1, z1], kind } — the layout's `streets()` (objects with `r`) or `STREETS` (rectangles), the canal streets and the river road added. */
+export function streetEntries() {
+  const out = [];
+  const src = typeof L.streets === 'function' ? L.streets() : L.STREETS;
+  if (src) for (const e of src) out.push(Array.isArray(e) ? { r: e, kind: 'lane' } : { kind: 'lane', ...e });
+  else if (L.ROAD) {
+    // the old layout: the lanes between its rows (z + 26 … z + 36)
+    for (let z = -320; z < L.ROAD.z0 - 40; z += 36) {
+      out.push({ r: [-60, z + 26, (L.CANAL_STREETS?.[0]?.[0] ?? 126) - 16, z + 36], kind: 'lane' });
+      out.push({ r: [(L.CANAL_STREETS?.[1]?.[2] ?? 162) + 16, z + 26, L.RADIUS - 20, z + 36], kind: 'lane' });
+    }
   }
-  return S;
+  if (L.ROAD) out.push({ r: [-L.RADIUS + 20, L.ROAD.z0, L.RADIUS - 20, L.ROAD.z1], kind: 'road' });
+  for (const c of L.CANAL_STREETS || []) out.push({ r: c, kind: 'canal' });
+  return out;
 }
+/** The street rectangles. */
+export const streets = () => streetEntries().map((e) => e.r);
+/** The Imperial Way's rectangles (the layout's `IMPERIAL`, or its streets of kind 'imperial'). */
+export function imperialRects() { const k = streetEntries().filter((e) => e.kind === 'imperial').map((e) => e.r); return k.length ? k : L.IMPERIAL ? [L.IMPERIAL] : []; }
 export const imperialWay = () => L.IMPERIAL || null;
+/** Is a lot on the Imperial Way? (the layout's `where`, else its front within 2 m of the way's rectangle) */
+export function onImperial(l, front) {
+  if (l.where) return l.where === 'imperial';
+  const iw = imperialWay();
+  if (!iw || !front) return false;
+  return front[0] > iw[0] - 2 && front[0] < iw[2] + 2 && front[1] > iw[1] - 2 && front[1] < iw[3] + 2;
+}
 
 /** The canal rectangles. */
 export function canals() {
@@ -39,11 +53,20 @@ export function canals() {
   if (L.CANAL) return [[L.CANAL.x0, L.CANAL.z0, L.CANAL.x1, L.CANAL.z1]];
   return [];
 }
-export function bridges() { return L.BRIDGES || []; }
+/** The bridges over the canals: { at: [x, z], span (along the canal), width, link: { a, b } (the walkers' crossing) }. */
+export function bridges() {
+  if (L.BRIDGES) return L.BRIDGES;
+  if (L.CANAL_BRIDGES && L.CANAL) {
+    const xm = (L.CANAL.x0 + L.CANAL.x1) / 2, cs = L.CANAL_STREETS || [];
+    return L.CANAL_BRIDGES.map((z) => ({ at: [xm, z], span: 8, width: 5, link: cs.length ? { a: [(cs[0][0] + cs[0][2]) / 2, z], b: [(cs[1][0] + cs[1][2]) / 2, z] } : null }));
+  }
+  return [];
+}
 
 /** West Lake: { rect, y } or null (a polygon is reduced to its bounds; boats use `laneRects`). */
 export function lake() {
-  const k = L.LAKE;
+  let k = L.LAKE;
+  if (!k && L.WEST_LAKE) { const r = L.WEST_LAKE.rect; k = { rect: [Math.max(r[0], -L.RADIUS), Math.max(r[1], -L.RADIUS), Math.min(r[2], L.RADIUS), Math.min(r[3], L.RADIUS)], y: L.WEST_LAKE.level }; }
   if (!k) return null;
   const y = k.y ?? LEVEL.lake;
   if (k.rect) return { rect: k.rect, y, dist: k.dist };

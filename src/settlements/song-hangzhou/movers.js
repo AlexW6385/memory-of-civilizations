@@ -5,7 +5,7 @@
 // layout), who walks and what floats (as figures of src/objects/figures.js with Song extras: the
 // straight-legged futou, flowers and combs in women's hair), and the boats standing in the water.
 
-import { streets, imperialWay, canals, bridges, lakeLanes, lots, RADIUS, LEVEL } from './ways.js';
+import { streetEntries, imperialRects, canals, bridges, lakeLanes, lots, RADIUS, LEVEL } from './ways.js';
 import { STYLES } from '../../core/build.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
@@ -33,20 +33,16 @@ const shopsBy = (() => {
     return n ? s / n : 0;
   };
 })();
-const same = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 0.01);
-
-/** The streets (rectangles), the bridges as links over the canals: { rects, links, clip }. */
 export function walkways() {
-  const iw = imperialWay();
-  const rects = streets().map((r) => {
-    const w = Math.min(r[2] - r[0], r[3] - r[1]), shops = shopsBy(r);
+  const iw = imperialRects(), isIw = (r) => iw.some((q) => q[0] === r[0] && q[1] === r[1] && q[2] === r[2] && q[3] === r[3]);
+  const rects = streetEntries().map(({ r, kind }) => {
+    const w = Math.min(r[2] - r[0], r[3] - r[1]), shops = shopsBy(r), main = isIw(r) ? 3 : kind === 'canal' ? 1.3 : 1;
     // the Imperial Way and the market streets carry the crowd by day, the back lanes few
-    const main = same(r, iw) ? 3 : 1;
-    return { r, weight: (w > 4 ? 1.6 : 0.5) * (1 + 5 * shops) * main, market: same(r, iw) ? 1 : shops, kind: w > 4 ? 'street' : 'lane' };
+    return { r, weight: (w > 4 ? 1.6 : 0.5) * (1 + 5 * shops) * main, market: isIw(r) ? 1 : shops, kind: w > 4 ? 'street' : 'lane' };
   });
   const links = [];
   for (const b of bridges()) {
-    if (!b.link) continue;                          // the layout may give the landings itself: { link: { a, b } }
+    if (!b.link) continue;
     links.push({ a: b.link.a, b: b.link.b, w: (b.width ?? 3) / 2, kind: 'bridge', weight: 1.2 });
   }
   return { rects, links, clip: RADIUS - 12 };
