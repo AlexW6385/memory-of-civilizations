@@ -5,6 +5,7 @@ import '../../styles/roman/town.js';
 import '../../styles/byzantine/city.js';
 import '../../styles/byzantine/augustaion.js';
 import '../../styles/byzantine/houses.js';
+import '../../styles/byzantine/lanes.js';
 import { sophia, city } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';

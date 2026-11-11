@@ -77,10 +77,10 @@ const AWN = ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_g
 function byzHouse(el, { bag, col }) {
   const rand = rng(el.seed || 1), far = !!el.simple, y = el.y ?? 0;
   let [x0, z0, x1, z1] = el.rect;
-  const yard = el.court ?? (rand() < 0.22 && Math.min(x1 - x0, z1 - z0) > 12);
+  const yard = el.court ?? (rand() < 0.22 && Math.min(x1 - x0, z1 - z0) > 12 && (!el.front || el.front === 'n'));
   const full = el.rect, W0 = x1 - x0, D0 = z1 - z0, yardAlongZ = D0 >= W0;
   if (yard) { if (yardAlongZ) z1 = z0 + D0 * 0.62; else x1 = x0 + W0 * 0.62; }
-  const n = 2 + (rand() < 0.62 ? 1 : 0), g0 = 3.9, sh = 3.15, H = g0 + (n - 1) * sh;
+  const n = el.storeys ?? (2 + (rand() < 0.62 ? 1 : 0)), g0 = 3.9, sh = 3.15, H = g0 + (n - 1) * sh;
   const wall = WALLS[Math.floor(rand() * WALLS.length)], upper = rand() < 0.4 ? ['plaster', 'stucco_warm', 'lime_plaster'][Math.floor(rand() * 3)] : wall;
   const banded = (wall === 'brick' || upper === 'brick') && rand() < 0.75;
   const rect = [x0, z0, x1, z1];
@@ -88,12 +88,16 @@ function byzHouse(el, { bag, col }) {
   bag.add(upper, box(x0, y + g0, z0, x1, y + H, z1));
   col.rect(rect, y - 0.5, y + H);
   const fl = faces(rect);
-  const long = fl[0].L >= fl[2].L ? (rand() < 0.5 ? 0 : 1) : (rand() < 0.5 ? 2 : 3);
+  const longR = fl[0].L >= fl[2].L ? (rand() < 0.5 ? 0 : 1) : (rand() < 0.5 ? 2 : 3);
+  const long = el.front ? { n: 0, s: 1, w: 2, e: 3 }[el.front] ?? longR : longR;
+  const party = new Set([el.abut?.w && 2, el.abut?.e && 3].filter((v) => v !== undefined && v !== false && v !== null));   // faces built against a neighbour: plain
+  const wr = rng((el.seed || 1) ^ 0x5bd1e995);
   const flat = rand() < 0.28, sunroom = flat && rand() < 0.6;
   const mType = rand() < 0.45 ? 'open' : rand() < 0.65 ? 'closed' : 'corbel', balcony = !far && n > 2 !== undefined && rand() < (el.balcony ?? 0.6);
   const shut = SHUT[Math.floor(rand() * SHUT.length)];
   fl.forEach((F, fi) => {
     const { fb, arch } = onFace(bag, F), isLong = fi === long;
+    if (party.has(fi)) return;
     // ground floor: tabernae on the long faces, a door and a window or two on the short ones
     const nb = isLong ? Math.max(1, Math.floor((F.L - 1.2) / 4.2)) : Math.max(1, Math.floor((F.L - 1.2) / 5.5)), bw = (F.L - 1.2) / nb, stair = isLong ? Math.floor(nb / 2) : 0;
     for (let i = 0; i < nb; i++) {
@@ -118,11 +122,19 @@ function byzHouse(el, { bag, col }) {
         else if (r < 0.7) {                                                                                      // a counter in the door, an awning over it
           fb(uc - w / 2 + 0.05, uc + w / 2 - 0.05, y + 0.1, y + 0.95, 0.03, 0.55, 'limestone');
           fb(uc - w / 2 + 0.05, uc + w / 2 - 0.05, y + 0.95, y + 1.0, 0.0, 0.6, 'marble');
+          for (let g = uc - w / 2 + 0.25; g < uc + w / 2 - 0.2; g += 0.42 + wr() * 0.2) {                             // goods set out on the counter
+            const kind = wr();
+            if (kind < 0.4) fb(g - 0.12, g + 0.12, y + 1.0, y + 1.34, 0.12, 0.36, 'terracotta');
+            else if (kind < 0.7) fb(g - 0.2, g + 0.2, y + 1.0, y + 1.14, 0.1, 0.42, ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green'][Math.floor(wr() * 4)]);
+            else fb(g - 0.15, g + 0.15, y + 1.0, y + 1.1, 0.14, 0.4, 'wicker');
+          }
           const m = AWN[Math.floor(rand() * AWN.length)], aw = (w + 0.6) / 2, Q = onFace(bag, F).P;
           const c = [Q(uc - aw, 0.02), Q(uc + aw, 0.02), Q(uc + aw, 1.45), Q(uc - aw, 1.45)];
           bag.add(m, solid8([[c[0][0], y + 3.45, c[0][1]], [c[1][0], y + 3.45, c[1][1]], [c[2][0], y + 2.7, c[2][1]], [c[3][0], y + 2.7, c[3][1]], [c[0][0], y + 3.5, c[0][1]], [c[1][0], y + 3.5, c[1][1]], [c[2][0], y + 2.75, c[2][1]], [c[3][0], y + 2.75, c[3][1]]]));
         }
         fb(uc - 0.45, uc + 0.45, y + 3.35, y + 3.8, -0.05, 0.02, 'opening');                                       // the mezzanine's little window
+        if (wr() < 0.55) { fb(uc + w / 2 + 0.3, uc + w / 2 + 0.34, y + 2.9, y + 3.1, 0.0, 0.5, 'iron'); fb(uc + w / 2 + 0.25, uc + w / 2 + 0.4, y + 2.55, y + 2.9, 0.38, 0.5, 'glass_lamp'); }   // an oil lamp on its bracket
+        if (wr() < 0.4) fb(uc - 0.6, uc + 0.6, y + 3.28, y + 3.34, 0.12, 0.2, ['paint_blue', 'timber_red', 'wood_ochre'][Math.floor(wr() * 3)]);   // the painted board over the door
       } else {
         fb(uc - 0.55, uc + 0.55, y + 0.9, y + 2.2, -0.05, 0.02, 'opening'); arch(uc, y + 2.2, 0.55, 0.02, 'opening');
         if (far) continue;
@@ -151,6 +163,8 @@ function byzHouse(el, { bag, col }) {
           if (far) continue;
           arch(uc, wy + wh, 0.5, 0.0, 'limestone', 6); fb(uc - 0.5, uc - 0.36, wy - 0.1, wy + wh, -0.05, 0.08, 'limestone'); fb(uc + 0.36, uc + 0.5, wy - 0.1, wy + wh, -0.05, 0.08, 'limestone');
           fb(uc - 0.58, uc + 0.58, wy - 0.16, wy - 0.02, -0.05, 0.18, 'limestone');
+          if (wr() < 0.55) fb(uc - 0.18, uc - 0.06, wy - 1.6, wy - 0.16, -0.05, 0.03, 'plaster_streak');            // rain streak below the sill
+          if (wr() < 0.12) fb(uc + 0.5, uc + 1.1, wy + 0.1, wy + 0.5, 0.0, 0.035, 'brick');                           // plaster fallen away
           const r = rand();
           if (r < 0.35) for (const s of [-1, 1]) fb(s < 0 ? uc - 0.76 : uc + 0.5, s < 0 ? uc - 0.5 : uc + 0.76, wy, wy + wh + 0.1, -0.05, 0.05, shut);   // the shutters, folded back
           else if (r < 0.5) fb(uc - 0.36, uc + 0.36, wy, wy + wh * 0.7, 0.03, 0.06, shut);
@@ -160,6 +174,8 @@ function byzHouse(el, { bag, col }) {
     if (far) return;
     // the bands of the cloisonné courses (stone between the brick), a plinth, the cornice
     fb(-0.05, F.L + 0.05, y, y + 0.4, -0.05, 0.08, 'limestone');
+    if (wall !== 'brick') fb(0, F.L, y + 0.4, y + 0.4 + 0.5 + wr() * 0.6, -0.05, 0.03, 'plaster_damp');                 // rising damp
+    if (isLong) for (let u = 0.8; u < F.L - 1.5; u += 2.5 + wr() * 3) if (wr() < 0.4) fb(u, u + 0.9 + wr() * 1.2, y + 0.5 + wr() * 1.6, y + 1.2 + wr() * 1.8, -0.05, 0.035, wall === 'brick' ? 'plaster' : 'brick');   // patches of the other skin showing
     if (banded) for (let k = 0; k < n; k++) for (const yb of k ? [0.55, 1.6, 2.5] : [1.2, 2.5, 3.5]) {
       const yy = y + (k ? g0 + (k - 1) * sh : 0) + yb;
       if (yy < y + H - 0.4) fb(0, F.L, yy, yy + 0.12, -0.05, 0.03, 'travertine');
@@ -216,7 +232,7 @@ function byzHouse(el, { bag, col }) {
   } else {
     const ov = far ? 0.3 : 0.6, W = x1 - x0, Dp = z1 - z0, rise = Math.min(W, Dp) * 0.2, alongX = W >= Dp;
     const ins = alongX ? [W * 0.12, W * 0.12, Dp / 2 + ov - 0.05, Dp / 2 + ov - 0.05] : [W / 2 + ov - 0.05, W / 2 + ov - 0.05, Dp * 0.12, Dp * 0.12];
-    bag.add('roof_tile', frustum([x0 - ov, z0 - ov, x1 + ov, z1 + ov], y + H, y + H + rise, ...ins));
+    bag.add('roof_tile', frustum([x0 - (el.abut?.w ? 0.05 : ov), z0 - ov, x1 + (el.abut?.e ? 0.05 : ov), z1 + ov], y + H + (el.abut ? 0.03 : 0), y + H + rise, ...ins));
     if (!far) {
       // the rafter ends under the eaves, the ridge's cap
       const ry = y + H + 0.02;

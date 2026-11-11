@@ -17,20 +17,19 @@ const shopsOf = () => {
   }
   return out;
 };
-const specials = () => { const S = special(), r = (l) => l.rect, c = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
-  const fit = (l, w, d) => { const [cx, cz] = c(l); return [cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2]; };
-  return { home: { rect: fit(S.home, Math.min(18, r(S.home)[2] - r(S.home)[0]), 13), y: S.home.y }, chapel: { rect: fit(S.chapel, 19, 17), y: S.chapel.y }, bath: { rect: fit(S.bath, 15, 17), y: S.bath.y } }; };
+const specials = () => special();
+const HOUSES = ['home', 'tavern', 'bakery', 'weaver', 'home2', 'home3'];
 
 export function interiorPlan() {
   const S = specials(), shops = shopsOf();
   const elements = [
-    { t: 'byz_home', rect: S.home.rect, y: S.home.y, seed: 1 },
+    ...HOUSES.filter((k) => S[k]).map((k, i) => ({ t: 'byz_home', rect: S[k].rect, y: S[k].y, seed: i + 1, variant: k === 'home2' || k === 'home3' ? 'home' : k })),
     { t: 'byz_chapel', rect: S.chapel.rect, y: S.chapel.y },
     { t: 'byz_bath', rect: S.bath.rect, y: S.bath.y },
     ...shops.map((s) => ({ t: 'byz_shopfit', ...s })),
   ];
   const rooms = [
-    { id: 'house', rect: S.home.rect, y: S.home.y + 0.2, kind: 'house' },
+    ...HOUSES.filter((k) => S[k]).map((k) => ({ id: k === 'home' ? 'house' : k, rect: S[k].rect, y: S[k].y + 0.2, kind: 'house' })),
     { id: 'chapel', rect: S.chapel.rect, y: S.chapel.y + 0.25, kind: 'hall' },
     { id: 'bath', rect: S.bath.rect, y: S.bath.y + 0.2, kind: 'hall' },
   ];
@@ -58,6 +57,12 @@ export function interiorLife() {
   fig([tc[0] - 2.1, tc[1]], Y0, face([tc[0] - 2.1, tc[1]], tc), { dress: 'robe', over: 'collar', cloth: 'cloth_green', cloth2: 'cloth_white', pose: 'sit' });
   fig([tc[0] + 2.1, tc[1]], Y0, face([tc[0] + 2.1, tc[1]], tc), { dress: 'robe', hat: 'veil', cloth: 'cloth_red', pose: 'sit' });
   fig([hx0 + 10.5, hz1 - 3.4], Y0, Math.PI, { dress: 'robe', hat: 'veil', cloth: 'cloth_ochre' });
+  for (const k of ['home2', 'home3']) if (S[k]) { const [a0, b0, , b1] = S[k].rect, Yh = S[k].y + 0.2, zz = (b0 + b1) / 2; fig([a0 + 7.5, zz + 0.2], Yh, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: 'talk' }); fig([a0 + 8.6, zz + 0.4], Yh, Math.PI + 0.5, { dress: 'tunic', cloth: pick(CL), pose: 'talk' }); }
+  if (S.tavern) { const [a0, b0, , b1] = S.tavern.rect, Yt = S.tavern.y + 0.2;
+    fig([a0 + 6.6, b1 - 2.8], Yt, Math.PI, { cloth: 'cloth_white', cloth2: 'cloth_brown', pose: 'stand' });
+    for (const [dx, dz, r] of [[2.8, 2.5, 0], [2.9, 4.2, Math.PI], [6.2, 6.6, 1.6], [6.0, 8.2, -1.6], [2.8, 6.6, 0.4]]) fig([a0 + dx, b0 + dz], Yt, r, { pose: 'sit', dress: rand() < 0.3 ? 'robe' : 'tunic', hat: 'none' }); }
+  if (S.bakery) { const [a0, b0] = S.bakery.rect, Yb = S.bakery.y + 0.2; fig([a0 + 4.7, b0 + 3.0], Yb, 0, { dress: 'tunic', legs: 'hose', cloth: 'cloth_white', cloth2: 'cloth_white' }); fig([a0 + 4.0, b0 + 6.4], Yb, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL) }); }
+  if (S.weaver) { const [a0, b0] = S.weaver.rect, Yw = S.weaver.y + 0.2; for (const dx of [2.6, 6.2]) fig([a0 + dx, b0 + 3.2], Yw, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: 'sit' }); fig([a0 + 4.4, b0 + 8.0], Yw, Math.PI, { dress: 'tunic', cloth: pick(CL) }); }
   const [cx0, cz0, cx1, cz1] = S.chapel.rect, Yc = S.chapel.y + 0.25, ccz = (cz0 + cz1) / 2;
   fig([cx1 - 5.2, ccz], Yc, Math.PI / 2, { dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_black', over: 'none' });
   for (let k = 0; k < 6; k++) { const x = cx0 + 3 + rand() * 6, z = ccz + (rand() - 0.5) * 7, woman = rand() < 0.5; fig([x, z], Yc, Math.PI / 2 + (rand() - 0.5) * 0.4, woman ? { dress: 'robe', hat: 'veil', cloth: pick(CL) } : { pose: rand() < 0.5 ? 'pray' : 'stand' }); }

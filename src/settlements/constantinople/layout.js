@@ -33,25 +33,75 @@ export function height(x, z) {
 const segDist = (x, z, [ax, az], [bx, bz]) => { const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - ax - dx * t, z - az - dz * t); };
 export const onMese = (x, z, m = 0) => MESE.path.slice(1).some((b, i) => segDist(x, z, MESE.path[i], b) < MESE.w / 2 + m);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-let LOTS = null;
+// The city's grid of lanes (docs §2, §14): north-south lanes every 41 m (one slot of 36 m is the Mese's own corridor at
+// x = -180), east-west lanes every 35 m (those at z = 40 and z = 110 are the Mese's). Between two east-west lanes two
+// rows of houses stand back to back, 15 m deep: the north row facing the lane at its north, the south row the one at
+// its south; the houses of a row share their side walls, so a lane is a continuous front on both sides.
+export const LANE = 5, PX = 41, PZ = 35, X0 = -159.5, Z0 = 40, ROW = 15;
+export const xl = (k) => X0 + PX * k;
+export const zl = (j) => Z0 + PZ * j;
+const mod = (a, n) => ((a % n) + n) % n;
+/** Whether (x, z) is on a lane (within m of its edge) of the grid, inside the built area. */
+export function onLane(x, z, m = 0) {
+  if (Math.hypot(x, z) > RADIUS - 40) return false;
+  const dx = Math.min(mod(x - X0, PX), PX - mod(x - X0, PX)), dz = Math.min(mod(z - Z0, PZ), PZ - mod(z - Z0, PZ));
+  return dx < LANE / 2 + m || dz < LANE / 2 + m;
+}
+const EXCL = () => [SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, ...KEEP];
+const excluded = (r) => EXCL().some((e) => r[0] < e[2] + 3 && r[2] > e[0] - 3 && r[1] < e[3] + 3 && r[3] > e[1] - 3)
+  || [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2]].some(([x, z]) => onMese(x, z, 11) || Math.hypot(x - FORUM.c[0], z - FORUM.c[1]) < FORUM.r + 9);
+const TEMPLATES = [[12, 12, 12], [18, 18], [9, 13, 14], [10, 16, 10], [14, 8, 14], [18, 9, 9], [9, 9, 18], [13, 10, 13], [18, 18], [20, 16], [21, 15]];
+/** The special rects (enterable buildings): chapel and bath, taking a little more depth than a row. */
+export const SPECIAL = { home: [-148, 65, 'home'], tavern: [-122, 65, 'tavern'], chapel: [-147, 29, 'chapel'], bath: [-150, -6, 'bath'], bakery: [-148, 100, 'bakery'], weaver: [-235, 0, 'weaver'], home2: [-100, 28, 'home'], home3: [-200, 160, 'home'] };
+let LOTS = null, BLOCKS = null, SPEC = null;
+const KINDS = { chapel: [19, 17], bath: [15, 17] };
 export function lots() {
   if (LOTS) return LOTS;
-  LOTS = [];
-  const rand = rng(562);
-  for (let x = -RADIUS + 20; x < RADIUS - 20; x += 22) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 20) {
-    const w = 15 + rand() * 5, d = 13 + rand() * 5, cx = x + w / 2, cz = z + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 45 || [SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, ...KEEP].some((r) => inRect(r, cx, cz, 16)) || onMese(cx, cz, 21) || Math.hypot(cx - FORUM.c[0], cz - FORUM.c[1]) < FORUM.r + 23) continue;
-    if (rand() < 0.15) continue;
-    const ys = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]].map(([a, b]) => height(a, b));
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.min(...ys) });
+  LOTS = []; BLOCKS = []; SPEC = {};
+  const rand = rng(562), all = [];
+  const kmin = Math.floor((-RADIUS + 40 - X0) / PX), kmax = Math.ceil((RADIUS - 40 - X0) / PX), jmin = Math.floor((-RADIUS + 40 - Z0) / PZ), jmax = Math.ceil((RADIUS - 40 - Z0) / PZ);
+  for (let k = kmin; k <= kmax; k++) for (let j = jmin; j <= jmax; j++) {
+    const bx = xl(k) + LANE / 2, bz = zl(j) + LANE / 2, br = [bx, bz, bx + PX - LANE, bz + 2 * ROW], mid = [bx + 18, bz + ROW];
+    if (Math.hypot(mid[0], mid[1]) > RADIUS - 44) continue;
+    const gr = rand(), garden = gr < (Math.hypot(...mid) < 230 ? 0.1 : 0.34) && !Object.values(SPECIAL).some(([tx, tz]) => Math.hypot(tx - mid[0], tz - mid[1]) < 45);
+    if (garden && !excluded(br)) { BLOCKS.push({ rect: br, k, j, seed: Math.floor(rand() * 1e6) }); continue; }
+    for (const row of [0, 1]) {
+      const z0 = bz + row * ROW, z1 = z0 + ROW; let tpl = TEMPLATES[Math.floor(rand() * TEMPLATES.length)];
+      if (row && Object.values(SPECIAL).some(([tx, tz]) => Math.abs(tx - mid[0]) < 20 && Math.abs(tz - (z0 + ROW / 2)) < 14)) { const near = Object.values(SPECIAL).filter(([tx, tz]) => Math.abs(tx - mid[0]) < 20 && Math.abs(tz - (z0 + ROW / 2)) < 14); tpl = near.some((q) => KINDS[q[2]]) ? [21, 15] : [18, 18]; }
+      let x = bx;
+      tpl.forEach((w, i) => {
+        const x0 = x, x1 = x + w; x += w;
+        const rect = [x0, z0, x1, z1], seed = Math.floor(rand() * 1e6);
+        if (excluded(rect)) return;
+        const ys = [[x0, z0], [x1, z0], [x0, z1], [x1, z1]].map(([a, b]) => height(a, b));
+        all.push({ rect, seed, y: Math.min(...ys), front: row ? 's' : 'n', abut: { w: i > 0, e: i < tpl.length - 1 }, row, k, j });
+      });
+    }
   }
+  // the special buildings: the nearest south-row lots wide enough (houses of 18 × 14), the chapel and the bath cut out of a block
+  const taken = new Set();
+  for (const [key, [tx, tz, kind]] of Object.entries(SPECIAL)) {
+    const need = KINDS[kind];
+    const cand = all.filter((l) => !taken.has(l) && l.row === 1 && l.rect[2] - l.rect[0] >= (need ? need[0] : 18) - 0.01).map((l) => [Math.hypot((l.rect[0] + l.rect[2]) / 2 - tx, (l.rect[1] + l.rect[3]) / 2 - tz), l]).sort((a, b) => a[0] - b[0]);
+    if (!cand.length) continue;
+    const l = cand[0][1]; taken.add(l);
+    const [x0, , x1, z1] = l.rect, d = need ? need[1] : 14, w = need ? need[0] : 18;
+    SPEC[key] = { rect: [x0, z1 - d, x0 + w, z1], y: l.y, kind, front: 's', lot: l };
+  }
+  for (const l of all) {
+    if (taken.has(l)) continue;
+    let r = l.rect;
+    for (const s of Object.values(SPEC)) if (r[0] < s.rect[2] + 0.2 && r[2] > s.rect[0] - 0.2 && r[1] < s.rect[3] && r[3] > s.rect[1]) {
+      if (s.rect[1] > r[1] + 7 && s.rect[1] < r[3]) r = [r[0], r[1], r[2], s.rect[1] - 0.3]; else r = null;
+      if (!r) break;
+    }
+    if (r) LOTS.push({ ...l, rect: r });
+  }
+  // the rest of a special lot's row (when the special is narrower than its lot) stays a house
+  for (const s of Object.values(SPEC)) { const l = s.lot, x1 = s.rect[2]; if (l.rect[2] - x1 > 5) LOTS.push({ ...l, rect: [x1, l.rect[1], l.rect[2], l.rect[3]], abut: { w: true, e: l.abut.e } }); }
   return LOTS;
 }
-/** The lots given over to a house you can enter, a chapel and a bath: the lots nearest these points (docs §12). */
-export const SPECIAL = { home: [-140, 70], chapel: [-135, 20], bath: [-150, -30] };
-export function special() {
-  const out = {};
-  for (const [k, t] of Object.entries(SPECIAL)) { const L = lots().filter((l) => !Object.values(out).includes(l)); out[k] = L.map((l) => [Math.hypot((l.rect[0] + l.rect[2]) / 2 - t[0], (l.rect[1] + l.rect[3]) / 2 - t[1]), l]).sort((a, b) => a[0] - b[0])[0][1]; }
-  return out;
-}
-export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** The walled gardens that fill some blocks (a whole block: vines, fruit trees, a well). */
+export function gardens() { lots(); return BLOCKS; }
+export function special() { lots(); return SPEC; }
+export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)) || Object.values(special()).some((s) => inRect(s.rect, x, z, m));

@@ -117,6 +117,45 @@ function shopFit(el, ctx) {
   at(lampstand, 0, bd - 0.25, 0, 0, 1.9);
 }
 
+/** The ground floor's west half of a working house by its trade (the east half, the store and the stair, stay): a cook-shop (popina) with
+ * benches, a counter, a hearth and wine jars; a bakery with its dome oven, kneading trough and bread racks; a weaver's with two looms. */
+function trade(ctx, V, { x0, z0, x1, z1, Y0, zc, th }) {
+  const { bag, col } = ctx, bk = (r, h) => col.rect(r, Y0, Y0 + h);
+  const rand = rng(x0 * 31 + z0);
+  if (V === 'tavern') {
+    for (const [dx, dz] of [[2.3, 3.3], [2.3, 7.4], [5.6, 3.3], [5.6, 7.4]]) {
+      put(bag, (Q) => table(Q, 1.6, 0.8, 0.78), x0 + dx + 0.5, Y0, z0 + dz); bk([x0 + dx - 0.4, z0 + dz - 0.5, x0 + dx + 1.4, z0 + dz + 0.5], 0.8);
+      put(bag, bench, x0 + dx + 0.5, Y0, z0 + dz - 0.75, 0, 1.6); put(bag, bench, x0 + dx + 0.5, Y0, z0 + dz + 0.75, 0, 1.6);
+      put(bag, (Q) => { bowlP(Q, 'glaze_white'); }, x0 + dx + 0.2, Y0 + 0.78, z0 + dz); put(bag, (Q) => bowlP(Q, 'glaze_green'), x0 + dx + 0.9, Y0 + 0.78, z0 + dz + 0.1);
+    }
+    put(bag, (Q) => { Q.add('wood_painted', box(-1.6, 0, -0.35, 1.6, 1.0, 0.35)); Q.add('marble', box(-1.65, 1.0, -0.4, 1.65, 1.05, 0.4)); for (let a = -1.3; a < 1.4; a += 0.5) Q.add(a < 0 ? 'terracotta' : 'glaze_green', ly([[0.04, 1.05], [0.1, 1.15], [0.1, 1.3], [0.001, 1.38]], 8).translate(a, 0, 0)); }, x0 + 6.0, Y0, z1 - 1.6);
+    bk([x0 + 4.3, z1 - 2.05, x0 + 7.7, z1 - 1.15], 1.1);
+    for (const a of [0.6, 1.4, 2.2]) { put(bag, pithos, x0 + a + 0.6, Y0, z0 + th + 0.55); bk([x0 + a + 0.15, z0 + th + 0.1, x0 + a + 1.05, z0 + th + 1.0], 1.2); }
+    put(bag, (Q) => { Q.add('brick', box(-0.8, 0, -0.5, 0.8, 0.8, 0.5)); Q.add('iron', box(-0.5, 0.8, -0.3, 0.5, 0.86, 0.3)); Q.add('flame', box(-0.3, 0.86, -0.15, 0.3, 0.92, 0.15)); }, x0 + 1.6, Y0, zc + 3.0); bk([x0 + 0.8, zc + 2.5, x0 + 2.4, zc + 3.5], 0.9);
+    put(bag, lampstand, x0 + 4.0, Y0, zc - 0.4, 0, 1.8); pushLight(ctx, [x0 + 4.0, Y0 + 2.0, zc - 0.4], 4, 9);
+    put(bag, icon, x0 + 4.2, Y0 + 1.5, z0 + th + 0.04, Math.PI, 0.6, 0.8);
+  } else if (V === 'bakery') {
+    put(bag, (Q) => { Q.add('brick', box(-1.1, 0, -1.0, 1.1, 0.95, 1.0)); Q.add('brick', ly([[1.0, 0.95], [0.9, 1.5], [0.5, 1.95], [0.001, 2.1]], 12)); Q.add('opening', box(-0.35, 1.05, -1.05, 0.35, 1.5, -0.9)); Q.add('flame', box(-0.3, 1.05, -0.95, 0.3, 1.2, -0.85)); }, x0 + 2.6, Y0, z0 + th + 1.3, 0.0); bk([x0 + 1.5, z0 + th + 0.3, x0 + 3.7, z0 + th + 2.3], 2.1);
+    put(bag, (Q) => { Q.add('wood_dark', box(-0.9, 0.55, -0.4, 0.9, 0.62, 0.4)); Q.add('wood_dark', box(-0.95, 0.5, -0.45, -0.88, 0.95, 0.45)); Q.add('wood_dark', box(0.88, 0.5, -0.45, 0.95, 0.95, 0.45)); for (const s of [-1, 1]) for (const t of [-1, 1]) Q.add('wood_dark', box(s * 0.8 - 0.05, 0, t * 0.3 - 0.05, s * 0.8 + 0.05, 0.55, t * 0.3 + 0.05)); Q.add('linen', box(-0.7, 0.62, -0.3, 0.1, 0.7, 0.3)); }, x0 + 6.2, Y0, z0 + th + 1.2); bk([x0 + 5.2, z0 + th + 0.6, x0 + 7.2, z0 + th + 1.8], 0.95);
+    put(bag, (Q) => table(Q, 2.2, 0.9, 0.85), x0 + 4.6, Y0, zc + 0.4); bk([x0 + 3.4, zc - 0.1, x0 + 5.8, zc + 0.9], 0.9);
+    for (let i = 0; i < 6; i++) put(bag, (Q) => { Q.add('wicker', ly([[0.001, 0], [0.17, 0.02], [0.2, 0.08], [0.001, 0.12]], 10)); }, x0 + 3.8 + (i % 3) * 0.7, Y0 + 0.85, zc + 0.2 + Math.floor(i / 3) * 0.4);
+    put(bag, (Q) => { const ys = shelves(Q, 2.0, 2.0, 4); for (const yy of ys) for (let a = -0.8; a < 0.9; a += 0.3) Q.add('wicker', ly([[0.001, 0], [0.12, 0.02], [0.14, 0.07], [0.001, 0.1]], 8).translate(a, yy, 0)); }, x0 + 2.2, Y0, z1 - th - 0.25, Math.PI); bk([x0 + 1.1, z1 - th - 0.5, x0 + 3.3, z1 - th], 2.0);
+    for (const a of [-0.3, 0.3, 0.9]) put(bag, (Q) => Q.add('sacking', box(-0.3, 0, -0.2, 0.3, 0.7, 0.2)), x0 + 0.9 + a, Y0, zc + 3.3 + a * 0.3);
+    put(bag, lampstand, x0 + 4.0, Y0, z1 - 1.2, 0, 1.6); pushLight(ctx, [x0 + 4.0, Y0 + 1.9, z1 - 1.2], 3.5, 8);
+  } else {   // weaver
+    for (const [dx, dz] of [[2.6, 2.2], [6.2, 2.2]]) {
+      put(bag, (Q) => { for (const s of [-1, 1]) Q.add('timber', box(s * 0.8 - 0.06, 0, -0.06, s * 0.8 + 0.06, 1.9, 0.06)); Q.add('timber', box(-0.86, 1.8, -0.08, 0.86, 1.9, 0.08)); Q.add('timber', box(-0.86, 0.9, -0.08, 0.86, 0.96, 0.08)); for (let a = -0.7; a < 0.75; a += 0.07) Q.add('cloth_white', box(a - 0.008, 0.96, -0.02, a + 0.008, 1.8, 0.02)); Q.add(rand() < 0.5 ? 'cloth_red' : 'cloth_indigo', box(-0.7, 0.96, -0.03, 0.7, 1.15, 0.03)); }, x0 + dx, Y0, z0 + dz);
+      bk([x0 + dx - 0.9, z0 + dz - 0.2, x0 + dx + 0.9, z0 + dz + 0.2], 1.9); put(bag, stool, x0 + dx, Y0, z0 + dz + 0.9);
+    }
+    put(bag, (Q) => { for (const [i, c] of ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_maroon', 'cloth_white'].entries()) Q.add(c, box(-0.4 + (i % 3) * 0.5 - 0.2, Math.floor(i / 3) * 0.3, -0.35, -0.4 + (i % 3) * 0.5 + 0.2, Math.floor(i / 3) * 0.3 + 0.28, 0.35)); }, x0 + 4.4, Y0, zc + 3.2); bk([x0 + 3.5, zc + 2.7, x0 + 5.3, zc + 3.8], 0.6);
+    put(bag, (Q) => table(Q, 2.4, 1.0, 0.85), x0 + 4.2, Y0, zc + 0.9); bk([x0 + 3.0, zc + 0.4, x0 + 5.4, zc + 1.4], 0.9);
+    for (const [i, a] of [0, 0.5, 1.0, 1.5].entries()) put(bag, (Q) => Q.add(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green'][i], ly([[0.001, 0.85], [0.07, 0.86], [0.1, 0.95], [0.001, 1.0]], 8)), x0 + 3.4 + a, Y0, zc + 0.9);
+    put(bag, (Q) => { for (let i = 0; i < 3; i++) Q.add('terracotta', ly([[0.2, i * 0.5], [0.34, i * 0.5 + 0.25], [0.3, i * 0.5 + 0.5]], 10).translate(0, 0, 0)); }, x0 + 1.1, Y0, z1 - 1.2);   // the dye jars
+    put(bag, (Q) => { Q.add('pottery_dark', ly([[0.3, 0], [0.5, 0.4], [0.5, 0.75], [0.001, 0.75]], 12)); Q.add('cloth_indigo', ly([[0.001, 0.7], [0.45, 0.7]], 12)); }, x0 + 1.2, Y0, z1 - 2.6); bk([x0 + 0.6, z1 - 3.2, x0 + 1.8, z1 - 2.0], 0.8);
+    put(bag, lampstand, x0 + 4.0, Y0, z1 - 1.0, 0, 1.7); pushLight(ctx, [x0 + 4.0, Y0 + 2.0, z1 - 1.0], 3.5, 8);
+  }
+}
+
 // ── the house you can enter ───────────────────────────────────────────────────
 /**
  * byz_home: { rect (about 18 × 13), y, seed } — an enterable two-storey house: the door in the south wall under a
@@ -161,6 +200,8 @@ function home(el, ctx) {
   }
   // furnishing: the dining room (west), the store (east), upstairs
   const zc = (z0 + z1) / 2;
+  const V = el.variant || 'home';
+  if (V === 'home') {
   put(bag, (Q) => { Q.add('marble_smooth', lathe([[0.001, 0.72], [1.15, 0.72], [1.15, 0.78], [0.001, 0.78]], 24)); Q.add('wood_dark', ly([[0.2, 0], [0.12, 0.3], [0.14, 0.7], [0.001, 0.7]], 10)); bowlP(Q); }, x0 + 5.5, Y0, zc + 0.2);
   for (const [a, r] of [[-0.9, 0], [0.9, 0.0], [Math.PI, 0]]) {
     void r; const cx = x0 + 5.5 + Math.cos(a - Math.PI / 2) * 2.1, cz = zc + 0.2 + Math.sin(a - Math.PI / 2) * 2.1;
@@ -171,6 +212,7 @@ function home(el, ctx) {
   put(bag, lampstand, x0 + 1.4, Y0, zc + 3.4, 0, 1.6); put(bag, icon, x0 + 4.2, Y0 + 1.4, z0 + th + 0.04, Math.PI, 0.7, 0.9);
   put(bag, (Q) => Q.add('cloth_maroon', box(-1.1, 0, -0.03, 1.1, 2.4, 0.03)), x0 + 5.5, Y0 + 0.0, z0 + th + 0.06);
   pushLight(ctx, [x0 + 1.4, Y0 + 1.9, zc + 3.4], 4, 9);
+  } else trade(ctx, V, { x0, z0, x1, z1, Y0, zc, th, y });
   for (const [dx, dz] of [[1.2, 1.4], [2.4, 1.0], [3.5, 2.0]]) { put(bag, pithos, xp + dx, Y0, z0 + th + 0.7 + dz * 0.8); col.circle(xp + dx, z0 + th + 0.7 + dz * 0.8, 0.45, Y0, Y0 + 1.2); }
   put(bag, (Q) => { const ys = shelves(Q, 1.8, 2.0, 4); for (const yy of ys.slice(0, 3)) for (let a = -0.7; a < 0.8; a += 0.45) amphora(Q, 0.5), void a; }, xp + 2.0, Y0, z1 - th - 0.3, Math.PI);
   put(bag, amphora, xp + 1.0, Y0, z1 - 1.0, 0, 1.2);
