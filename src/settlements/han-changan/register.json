@@ -1,0 +1,27 @@
+{
+  "site": { "id": "han-changan", "name": { "en": "Han Chang'an", "zh": "汉长安" }, "era": "c. 100 BC", "region": "china", "lat": 34.30, "lon": 108.88, "radius": 520 },
+  "cls": "L",
+  "arrival": [-110, null, 10, 0, 0.1],
+  "arrivalNote": "from the Weiyang Palace's forecourt, up the central ramp-stair to the Front Hall on its three-tiered rammed-earth terrace: nine bays of red columns under a hipped grey-tile roof, the palace's walls and the city beyond",
+  "card": {
+    "en": [
+      "Chang'an, the capital of the Western Han dynasty, stands in the Wei River plain in Shaanxi, shown about 100 BC in the reign of Emperor Wu. It is the greatest city of its age in China and the eastern end of the Silk Road: a walled capital of palaces, walled wards and two enclosed markets, home to some quarter of a million people. The architecture is Han: walls and platforms of rammed earth, timber halls on stone plinths under hipped roofs of grey tile whose eaves end in round tiles, and tall gate towers (que).",
+      "Weiyang Palace's Front Hall — the audience hall of the emperor on the largest rammed-earth terrace of the Han, three tiers high and climbed by a central ramp-stair. The hall has nine bays of red columns, plastered walls with lattice windows, a coffered ceiling and a hipped roof with round eave tiles; inside stand the throne dais with its lacquered screen, the ministers' mats and low tables, and bronze lamps and censers.",
+      "The que and the palace gates — the walls of the palace compound with their gates, the east gate guarded by a pair of que: earthen towers crowned with a tiled pavilion, each with a lower subsidiary tower beside it, the great ceremonial gateway of the Han.",
+      "The city wall and the west gate — the rammed-earth wall, 12 m thick, with its parapet and walkable top, and the gates of three passages under their towers; through the west gate come the Silk Road caravans with their camels, bales and merchants from the Western Regions.",
+      "The wards and the markets — walled neighbourhoods (li) of courtyard houses with gatehouses and tiled roofs, the offices along the great avenue; the walled West and East Markets with the market tower, the drum and the flag, and long rows of shops selling silk, lacquer, bronze, pottery and grain.",
+      "The Changle Palace, the Kunming Lake and the Imperial Academy — the second great palace on its terrace east of the avenue; the lake dug to train the navy, with its pavilion and a tower-ship at anchor; the academy where the scholars of the classics are taught."
+    ],
+    "zh": [
+      "长安是西汉的都城，位于陕西渭河平原，画面所示约为公元前100年，汉武帝在位时。它是当时中国最大的城市，也是丝绸之路的东方起点：城墙环绕，内有宫殿、闾里和两座围合的市场，居民约二十余万。建筑属汉代：夯土的城墙与台基，石础上的木构殿堂，灰瓦四阿顶，檐口以圆瓦当收束，门前立高大的阙。",
+      "未央宫前殿 —— 皇帝朝会的大殿，建在汉代最大的夯土台基上，台分三层，中央有坡道式台阶登临。殿面阔九间，红柱，抹灰墙配直棂窗，天花作藻井，庑殿顶，檐口缀圆瓦当；殿内有御座高台与漆屏风、群臣的席与矮案，以及铜灯和香炉。",
+      "阙与宫门 —— 宫城的围墙与宫门；东门外立一对阙：夯土的高台之上是瓦顶的小殿，主阙旁连着较低的子阙，是汉代最隆重的门前标志。",
+      "城墙与西门 —— 夯土城墙厚12米，顶上可行走，有女墙；城门各有三个门道，上建门楼；丝绸之路的驼队从西门入城，带来骆驼、货包和西域的商人。",
+      "闾里与市 —— 有墙有门的里坊，里面是带门屋、瓦顶的院落式住宅，大街两侧是官署；设有围墙的西市和东市，市中立市楼、鼓与旗，成排的店铺出售丝绸、漆器、铜器、陶器和粮食。",
+      "长乐宫、昆明池与太学 —— 大街以东、立于台基上的第二座大宫；为训练水军而开凿的昆明池，岸上有亭，水中泊着一艘楼船；还有传授五经的太学。"
+    ]
+  },
+  "soundscape": "T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3, camel: 0.2 }, roof: 'tile' })",
+  "lifeRegion": "east_asia",
+  "crop": "wheat"
+}
