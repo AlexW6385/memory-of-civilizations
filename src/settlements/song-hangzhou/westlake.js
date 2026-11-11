@@ -18,6 +18,26 @@ const E = [];
 // to the shore before the lake gate
 E.push({ t: 'block', walk: true, rect: [-11, -100, 11, 108], y0: BED, y1: TOP, mat: 'ground' });
 E.push({ t: 'paving', rect: [-2.6, -100, 2.6, ZS], y: TOP + 0.04, th: 0.2 });
+// its edges: granite revetment with coping and mooring bollards, kerbs, slabs worn in the middle (the stretches between the bridges), tufts of sedge on the earth
+{
+  const gaps = [];   // the bridges' approaches (each span and its landings) are cut from the bank's dressing
+  const BR0 = [[-74, 10], [-48, 12], [-22, 12], [4, 10], [30, 12], [56, 10]];
+  let z = -100;
+  for (const [bz, sp] of BR0) { const a = bz - sp / 2 - 4.4; if (a > z + 3) gaps.push([z, a]); z = bz + sp / 2 + 4.4; }
+  gaps.push([z, ZS]);
+  gaps.forEach(([a, b], i) => E.push({ t: 'hz_bank', x: 0, z0: a, z1: b, y: TOP, half: 11, path: 2.6, seed: 4 + i }));
+  // the causeway's planting: willow and peach in alternation, a tree every 9 m along each edge, the two rows staggered by half a step (Su Shi's causeway, §14)
+  const spans = BR0.map(([bz, sp]) => [bz - sp / 2 - 5, bz + sp / 2 + 5]);
+  let k = 0;
+  for (let zz = -94; zz < 104; zz += 6.5, k++) {
+    if (spans.some(([a, b]) => zz > a && zz < b)) continue;
+    for (const side of [-1, 1]) {
+      const zt = zz + (side > 0 ? 3.25 : 0), idx = k + (side > 0 ? 1 : 0);
+      if (spans.some(([a, b]) => zt > a && zt < b) || zt > 100 || (side > 0 && Math.abs(zt + 9) < 5) || (side < 0 && Math.abs(zt - 43) < 5) || (side < 0 && zt > 4 && zt < 32)) continue;
+      E.push({ t: 'hz_tree', at: [side * 8.6, zt], y: TOP, kind: idx % 2 ? 'peach' : 'willow', seed: Math.floor(zt * 3 + side * 7 + 100) });
+    }
+  }
+}
 // Beishan at the north end
 E.push({ t: 'block', walk: true, rect: [-36, -112, 36, -96], y0: BED, y1: 3, mat: 'ground' });
 E.push({ t: 'block', walk: true, rect: [-30, -106, 30, -96], y0: 3, y1: 3.4, mat: 'granite_block' });
@@ -36,6 +56,8 @@ E.push({ t: 'ming_pavilion', c: [7.2, -9], shape: 'hex', r: 3.0, y: TOP + 0.5, H
 E.push({ t: 'ming_pavilion', c: [-7.2, 43], shape: 'square', w: 5, y: TOP + 0.5, H: 3.4, plat: 0.5, open: [0, 1, 2, 3] });
 // the landing on the west side of the bank: timber jetties with the painted boats moored along them
 for (const z of [12, 22]) E.push({ t: 'block', walk: true, rect: [-24, z, -11, z + 2.4], y0: -1.8, y1: TOP, mat: 'timber' });
+// the landing's mooring: piles with their iron rings, plank decks with the boatmen's gear (a pole, a basket, a coil of rope), a stone landing step on the bank
+for (const z of [12, 22]) E.push({ t: 'hz_landing', rect: [-24, z, -11, z + 2.4], y: TOP, bed: -1.8, seed: z });
 E.push({ t: 'lake_boat', at: [-18, 17.6], dir: [1, 0], len: 15, y: LAKE });
 E.push({ t: 'lake_boat', at: [-17, 28.6], dir: [-1, 0], len: 11, y: LAKE });
 E.push({ t: 'lake_boat', at: [-20, 7.6], dir: [1, 0], len: 9, y: LAKE });
@@ -50,6 +72,13 @@ const tiers = [{ r: 8.2, h: 11 }]; for (let i = 1; i < 5; i++) tiers.push({ r: 8
 E.push({ t: 'liuhe_pagoda', c: WL.leifeng, y: 6, base: { r: 13, h: 1.6 }, tiers, bells: 'iron', interior: true, images: true });
 export const leifengTop = 6 + 1.6 + tiers.reduce((a, t) => a + t.h, 0);
 
+// lotus in the shallows either side of the causeway (the lake's own, the town's patches being further off)
+for (const [cx, cz, r, n] of [[-16, -60, 6, 36], [-17, -34, 5.5, 32], [17, -62, 6, 36], [18, 0, 5, 26], [17, 18, 5, 26], [-18, 50, 6, 32], [18, 72, 6, 32]]) E.push({ t: 'lotus', c: [cx, cz], r, n, y: LAKE, seed: Math.abs(cx * 7 + cz) | 0, inside: (x, z) => Math.abs(x) > 12.4 });
+// Leifeng's terrace: the way up from the stair worn into the court, stone lamps and a stele at the stair's head, old camphors behind
+E.push({ t: 'court_paving', y: 6, seed: 12, rects: [[-39, 106.6, -30.5, 109.4]], moss: [[-75, 91, -40, 92.5], [-75, 124, -40, 125.5]] });
+for (const dz of [-3.5, 3.5]) E.push({ t: 'stone_lamp', at: [-31.5, 106 + dz], y: 6 });
+E.push({ t: 'stele', at: [-45, 121], y: 6, face: [0, -1] });
+for (const [x, z, h, sd] of [[-68, 96, 13, 21], [-70, 122, 14, 22], [-36, 94, 12, 23]]) E.push({ t: 'hz_tree', at: [x, z], y: 6, kind: 'camphor', h, seed: sd });
 export const CAUSEWAY = { x: WL.origin[0], z0: WL.origin[1] - 100, z1: WL.origin[1] + 126, half: 11 };   // the bank's axis and ends (world)
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 export const westLake = {

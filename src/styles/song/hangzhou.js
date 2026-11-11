@@ -237,6 +237,25 @@ function templeGate(el, { bag, col }) {
   bag.add('wood_dark', box(cx - bw, by - 0.5, cz + sd * 0.3, cx + bw, by, cz + sd * 0.38));
   bag.add('paint_ochre', box(cx - bw + 0.05, by - 0.45, cz + sd * 0.38, cx + bw - 0.05, by - 0.05, cz + sd * 0.4));
   bag.add('lacquer_black', box(cx - bw + 0.12, by - 0.38, cz + sd * 0.4, cx + bw - 0.12, by - 0.12, cz + sd * 0.42));
+  // the threshold; the door leaves standing open against the piers on the court's side, with iron straps and bronze studs
+  bag.add('granite_grey', box(cx - w, y, cz - 0.7, cx + w, y + 0.16, cz + 0.7));
+  const studs = [];
+  for (const sx of [-1, 1]) {
+    const lx = cx + sx * (w - 0.06), z0 = cz - sd * 0.35, z1 = z0 - sd * 3.0, za = Math.min(z0, z1), zb = Math.max(z0, z1);
+    bag.add('lacquer_red', box(lx - 0.05, y + 0.16, za, lx + 0.05, y + H - 0.55, zb));
+    for (const yy of [0.5, H * 0.5, H - 1.1]) bag.add('iron', box(lx - 0.065, y + yy, za, lx + 0.065, y + yy + 0.1, zb));
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 7; j++) studs.push(lathe([[0.001, 0], [0.045, 0], [0.04, 0.025], [0.001, 0.045]], 5).rotateZ(-sx * Math.PI / 2).translate(lx - sx * 0.05, y + 0.45 + j * 0.45, za + 0.3 + i * 0.48));
+    col.rect([lx - 0.06, za, lx + 0.06, zb], y, y + H - 0.5);
+  }
+  for (const g of studs) bag.add('bronze', g);
+  for (const sx of [-1, 1]) bag.add('lamp_paper', lathe([[0.001, -0.22], [0.14, -0.14], [0.18, 0], [0.14, 0.14], [0.001, 0.22]], 8, null, cx + sx * (w * 0.62), y + H - 0.62, cz + sd * 0.55));
+  // ridge ornaments: a chiwen at each end of the ridge, a ball at its middle
+  for (const x of [x0 - 0.1, x1 + 0.1]) {
+    const o = x < cx ? 1 : -1;
+    bag.add('tile_dark', box(x - 0.14, hy + rise - 0.1, cz - 0.16, x + 0.14, hy + rise + 0.5, cz + 0.16));
+    bag.add('tile_dark', box(Math.min(x, x + o * 0.35) - 0.1, hy + rise + 0.5, cz - 0.1, Math.max(x, x + o * 0.35) + 0.1, hy + rise + 0.7, cz + 0.1));
+  }
+  bag.add('tile_dark', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.2], [0.001, 0.3]], 8, null, cx, hy + rise - 0.05, cz));
 }
 
 /**
@@ -587,4 +606,302 @@ function imperialWay(el, ctx) {
 /** sutra_pillar: a stone sutra pillar of the court { at, y } (the hexagonal shaft on its lotus base, as the chinese style's dharani pillar). */
 function sutraPillar(el, ctx) { STYLES.chinese.objects.dharani_pillar(el, ctx); }
 
-export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving };
+// ---- the approach of the Liuhe Pagoda and West Lake's set pieces (round 2) -----------------------------------------------------------
+const ell = (rx, ry, rz, x, y, z, n = 8) => lathe(Array.from({ length: 7 }, (_, i) => { const t = i / 6 * Math.PI; return [Math.max(0.001, Math.sin(t)), -Math.cos(t)]; }), n).scale(rx, ry, rz).translate(x, y, z);
+
+/** A prism between two z (a stair's slope): x [xa, xb], z from zA (low) to zB, bottom/top heights as functions of z. */
+function slopePrism(out, xa, xb, zA, zB, b, t) {
+  hexa(out, [[xa, b(zA), zA], [xb, b(zA), zA], [xb, b(zB), zB], [xa, b(zB), zB], [xa, t(zA), zA], [xb, t(zA), zA], [xb, t(zB), zB], [xa, t(zB), zB]]);
+}
+
+/**
+ * hz_stair: the processional stair from the river road up to the temple terrace { x0, x1, zTop, zBot, y0, y1, flights (3), landing (m) }, ascending north: flights of
+ * granite steps, each tread of three or four slabs with open joints (the middle of the way worn dark and dished by feet, moss and grass in the joints at the sides),
+ * the landings between the flights; balustrades of posts with lotus caps, panels and rails following the flights; drum stones at the foot; steles and stone lamps
+ * on the landings. [inferred: the forms, from Song temple stairs]
+ */
+function hzStair(el, { bag, col }) {
+  const { x0, x1, zTop, zBot, y0, y1 } = el, rand = rnd(el.seed ?? 11), nF = el.flights ?? 3, land = el.landing ?? 2.4, rise = 0.16;
+  const N = Math.round((y1 - y0) / rise), run = (zBot - zTop - land * (nF - 1)) / N, xc = (x0 + x1) / 2, W = x1 - x0;
+  const per = [], base = Math.floor(N / nF); for (let i = 0; i < nF; i++) per.push(base + (i < N - base * nF ? 1 : 0));
+  const moss = [], tufts = [], fl = [];
+  let z = zBot, k = 0, yb = y0;
+  const treadSlabs = (zf, zb, top, thick = 0.03) => {
+    // slabs across the way: cuts at jittered thirds, staggered from step to step
+    const n = 3 + (rand() < 0.5 ? 1 : 0), cuts = [x0]; for (let i = 1; i < n; i++) cuts.push(x0 + W * (i + (rand() - 0.5) * 0.4) / n); cuts.push(x1);
+    for (let i = 0; i < n; i++) {
+      const a = cuts[i] + 0.012, b = cuts[i + 1] - 0.012, mid = (a + b) / 2, worn = Math.abs(mid - xc) < 2.4, r = rand();
+      const m = worn ? (r < 0.65 ? 'slate' : 'bluestone') : r < 0.45 ? 'granite_grey' : r < 0.8 ? 'bluestone' : 'granite_block';
+      const dish = worn && rand() < 0.5 ? 0.012 : 0;
+      bag.add(m, box(a, top - thick - dish * 0, zb + 0.012, b, top - dish, zf - 0.012));
+    }
+  };
+  for (let f = 0; f < nF; f++) {
+    const zf0 = z, ns = per[f];
+    for (let j = 0; j < ns; j++, k++) {
+      const top = y0 + (k + 1) * rise, zf = z, zb = z - run;
+      bag.add('granite_block', box(x0, y0 - 0.3, zb, x1, top - 0.03, zf));
+      treadSlabs(zf, zb, top);
+      // the nosing: a darker lip along the front edge, the riser's carved band
+      bag.add('granite_grey', box(x0, top - rise + 0.02, zf - 0.012, x1, top - rise + 0.07, zf + 0.012));
+      // moss and grass at the foot of the balustrades and in the damp of the lower flights
+      const damp = 1 - k / N * 0.6;
+      for (const sx of [x0 + 0.5, x1 - 0.5]) if (rand() < 0.5 * damp + 0.1) {
+        const r = 0.15 + rand() * 0.3, px = sx + (rand() - 0.5) * 1.0, pz = zf - rand() * run;
+        moss.push(lathe([[0.001, 0.012], [r, 0.006], [r * 1.05, 0.0]], 7, null, px, top, pz).scale(1, 1, 0.6));
+        for (let q = 0; q < 2; q++) tufts.push(rod([px + (rand() - 0.5) * r, top, pz], [px + (rand() - 0.5) * r * 1.4, top + 0.09 + rand() * 0.1, pz + (rand() - 0.5) * 0.1], 0.005, 3));
+      }
+      if (rand() < 0.25) { const px = x0 + rand() * W; moss.push(lathe([[0.001, 0.01], [0.12, 0.005], [0.13, 0]], 6, null, px, top, zf - run * 0.9).scale(1.8, 1, 0.4)); }
+    }
+    fl.push({ zf: zf0, zb: z - ns * run, yb: y0 + (k - ns) * rise, ns });
+    col.ramp([x0 + 0.34, z - ns * run, x1 - 0.34, zf0], y0 + (k - ns) * rise, y0 + k * rise, 'n');
+    z -= ns * run;
+    if (f < nF - 1) {
+      const top = y0 + k * rise;
+      bag.add('granite_block', box(x0, y0 - 0.3, z - land, x1, top - 0.03, z));
+      for (let zz = z; zz > z - land - 0.01; zz -= 1.2) { const zb2 = Math.max(zz - 1.2, z - land); treadSlabs(zz, zb2, top + 0.0); }
+      col.floor([x0 + 0.34, z - land, x1 - 0.34, z], top);
+      fl[fl.length - 1].landTop = top; fl[fl.length - 1].landZ = [z, z - land];
+      z -= land;
+    }
+  }
+  for (const g of moss) bag.add('lotus_leaf', g);
+  for (const g of tufts) bag.add('bark_olive', g);
+  // balustrades
+  const out = [], rail = [], caps = [], post = (x, zz, yy, h) => {
+    bag.add('granite_grey', box(x - 0.17, yy - 0.4, zz - 0.17, x + 0.17, yy + h, zz + 0.17));
+    bag.add('granite_block', box(x - 0.21, yy + h, zz - 0.21, x + 0.21, yy + h + 0.07, zz + 0.21));
+    caps.push(lathe([[0.001, 0], [0.17, 0.02], [0.2, 0.12], [0.15, 0.22], [0.09, 0.3], [0.1, 0.34], [0.07, 0.42], [0.001, 0.5]], 8, null, x, yy + h + 0.07, zz));
+  };
+  for (const side of [-1, 1]) {
+    const xa = side < 0 ? x0 : x1 - 0.34, xb = xa + 0.34, xm = (xa + xb) / 2;
+    // drum stone (baogushi) at the foot, either side of the first post
+    const zd = zBot + 0.55, yd = y0;
+    bag.add('granite_grey', box(xa - 0.02, yd, zd - 0.5, xb + 0.02, yd + 0.3, zd + 0.5));
+    bag.add('granite_grey', rod([xa - 0.02, yd + 0.78, zd], [xb + 0.02, yd + 0.78, zd], 0.46, 16));
+    bag.add('slate', rod([xa - 0.04, yd + 0.78, zd], [xb + 0.04, yd + 0.78, zd], 0.3, 14));
+    bag.add('granite_grey', rod([xa - 0.05, yd + 0.78, zd], [xb + 0.05, yd + 0.78, zd], 0.12, 10));
+    bag.add('granite_grey', box(xa - 0.02, yd + 0.3, zd - 0.2, xb + 0.02, yd + 0.48, zd + 0.2));
+    col.rect([xa, zd - 0.5, xb, zd + 0.5], yd, yd + 1.3);
+    for (const F of fl) {
+      const slope = rise / run, yl = (zz) => F.yb + rise + (F.zf - zz) * slope;
+      slopePrism(out, xa, xb, F.zf + 0.0, F.zb, (zz) => yl(zz) - 0.5, (zz) => yl(zz) + 0.28);
+      slopePrism(rail, xa + 0.07, xb - 0.07, F.zf, F.zb, (zz) => yl(zz) + 0.28, (zz) => yl(zz) + 0.78);
+      slopePrism(out, xa, xb, F.zf, F.zb, (zz) => yl(zz) + 0.78, (zz) => yl(zz) + 0.98);
+      const n = Math.max(1, Math.round((F.zf - F.zb) / 3.6));
+      for (let i = 0; i <= n; i++) { const zz = F.zf - (F.zf - F.zb) * i / n; post(xm, zz, yl(zz) - 0.1, 1.15); }
+      col.segment([xm, F.zf], [xm, F.zb], 0.34, F.yb - 0.4, F.yb + ((F.zf - F.zb) * slope) + 1.5);
+      if (F.landZ) {
+        const [la, lb] = F.landZ, yL = F.landTop;
+        hexa(out, [[xa, yL - 0.5, la], [xb, yL - 0.5, la], [xb, yL - 0.5, lb], [xa, yL - 0.5, lb], [xa, yL + 0.28, la], [xb, yL + 0.28, la], [xb, yL + 0.28, lb], [xa, yL + 0.28, lb]]);
+        hexa(rail, [[xa + 0.07, yL + 0.28, la], [xb - 0.07, yL + 0.28, la], [xb - 0.07, yL + 0.28, lb], [xa + 0.07, yL + 0.28, lb], [xa + 0.07, yL + 0.78, la], [xb - 0.07, yL + 0.78, la], [xb - 0.07, yL + 0.78, lb], [xa + 0.07, yL + 0.78, lb]]);
+        hexa(out, [[xa, yL + 0.78, la], [xb, yL + 0.78, la], [xb, yL + 0.78, lb], [xa, yL + 0.78, lb], [xa, yL + 0.98, la], [xb, yL + 0.98, la], [xb, yL + 0.98, lb], [xa, yL + 0.98, lb]]);
+        post(xm, (la + lb) / 2, yL - 0.1, 1.15); post(xm, lb, yL - 0.1, 1.15);
+        col.segment([xm, la], [xm, lb], 0.34, yL - 0.4, yL + 1.5);
+      }
+    }
+    // the top post
+    const Fl = fl[fl.length - 1]; void Fl;
+  }
+  bag.add('granite_grey', fromTriangles(out)); bag.add('bluestone', fromTriangles(rail));
+  for (const g of caps) bag.add('granite_block', g);
+  // on the landings: a stele on its tortoise and a stone lamp either side of the way
+  fl.forEach((F, i) => {
+    if (!F.landZ) return;
+    const zm = (F.landZ[0] + F.landZ[1]) / 2;
+    for (const sx of [-1, 1]) {
+      const X = xc + sx * 3.9;
+      if (i === 0) stoneLion(bag, col, [X, zm], F.landTop, 0, sx);
+      else STYLES.song.elements.stele({ at: [X, zm], y: F.landTop, face: [0, 1] }, { bag, col });
+    }
+  });
+}
+
+/** One stone lion (shi) of a gate { at [x, z], y, yaw (0 faces +z, the way a lion at a gate looks out), side (−1 | 1: which paw plays with the ball) } on a plinth, ~1.5 m with it. */
+function stoneLion(bag, col, [x, z], y, yaw, side) {
+  const gs = [], P = (g) => { g.rotateY(yaw); g.translate(x, y, z); return g; };
+  bag.add('granite_grey', box(x - 0.55, y, z - 0.75, x + 0.55, y + 0.5, z + 0.75));
+  bag.add('granite_block', box(x - 0.62, y, z - 0.82, x + 0.62, y + 0.09, z + 0.82));
+  bag.add('granite_block', box(x - 0.6, y + 0.5, z - 0.8, x + 0.6, y + 0.58, z + 0.8));
+  col.rect([x - 0.62, z - 0.82, x + 0.62, z + 0.82], y, y + 1.7);
+  const yy = 0.58, add = (rx, ry, rz, px, py, pz, n = 8) => gs.push(P(ell(rx, ry, rz, px, yy + py, pz, n)));
+  add(0.3, 0.3, 0.46, 0, 0.55, -0.1);          // body
+  add(0.28, 0.27, 0.28, 0, 0.35, -0.38);       // haunch
+  add(0.27, 0.3, 0.26, 0, 0.7, 0.25);          // chest
+  add(0.22, 0.22, 0.2, 0, 1.0, 0.36);          // head
+  add(0.14, 0.1, 0.12, 0, 0.92, 0.55);         // muzzle
+  add(0.34, 0.3, 0.14, 0, 0.98, 0.2);          // mane
+  for (const sx of [-1, 1]) { add(0.06, 0.07, 0.05, sx * 0.19, 1.14, 0.3, 6); add(0.05, 0.04, 0.05, sx * 0.07, 0.99, 0.62, 6); add(0.1, 0.3, 0.1, sx * 0.16, 0.3, 0.3, 6); add(0.1, 0.12, 0.2, sx * 0.17, 0.12, -0.55, 6); }
+  add(0.09, 0.09, 0.2, 0, 0.62, -0.62, 6);     // tail
+  add(0.16, 0.16, 0.16, side * 0.18, 0.16, 0.5, 8);   // the ball
+  for (const g of gs) bag.add('granite_grey', g);
+}
+/** hz_lion_pair { c [x, z] (the way's axis), y, gap (half the distance between), yaw (0: the lions look +z) }. */
+function hzLionPair(el, { bag, col }) {
+  const [cx, cz] = el.c, g = el.gap ?? 3.8, yaw = el.yaw ?? 0, s = Math.sin(yaw), c = Math.cos(yaw);
+  for (const sx of [-1, 1]) stoneLion(bag, col, [cx + sx * g * c, cz - sx * g * s], el.y ?? 0, yaw, sx);
+}
+
+/**
+ * hz_wutou: a black-capped gate (wutou men) of the temple's approach, across the foot of the stair { c [x, z], y, half (half the way between the posts), h, dir }: two
+ * square posts of red-painted timber on granite bases with drum-stone buttresses and black caps, two tie beams, a plaque board between them. [inferred: the Song 乌头门]
+ */
+function hzWutou(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y ?? 0, hw = el.half ?? 7.4, h = el.h ?? 5.2, pw = 0.3;
+  for (const sx of [-1, 1]) {
+    const px = cx + sx * hw;
+    bag.add('granite_grey', box(px - 0.55, y, cz - 0.55, px + 0.55, y + 0.5, cz + 0.55));
+    bag.add('granite_block', box(px - 0.45, y + 0.5, cz - 0.45, px + 0.45, y + 0.62, cz + 0.45));
+    bag.add('lacquer_red', box(px - pw, y + 0.62, cz - pw, px + pw, y + h, cz + pw));
+    bag.add('lacquer_black', box(px - pw - 0.05, y + h, cz - pw - 0.05, px + pw + 0.05, y + h + 0.5, cz + pw + 0.05));
+    bag.add('lacquer_black', box(px - 0.18, y + h + 0.5, cz - 0.18, px + 0.18, y + h + 0.66, cz + 0.18));
+    bag.add('bronze', lathe([[0.001, 0], [0.11, 0.02], [0.13, 0.12], [0.001, 0.2]], 8, null, px, y + h + 0.66, cz));
+    // the drum stones either side across the way's line
+    for (const dz of [-1, 1]) {
+      const zz = cz + dz * 0.85;
+      bag.add('granite_grey', box(px - 0.16, y, zz - 0.3, px + 0.16, y + 0.3, zz + 0.3));
+      bag.add('granite_grey', rod([px - 0.17, y + 0.62, zz], [px + 0.17, y + 0.62, zz], 0.34, 14));
+      bag.add('slate', rod([px - 0.19, y + 0.62, zz], [px + 0.19, y + 0.62, zz], 0.2, 12));
+    }
+    col.rect([px - 0.55, cz - 0.55, px + 0.55, cz + 0.55], y, y + h);
+  }
+  const a = cx - hw, b = cx + hw;
+  bag.add('lacquer_red', box(a - 0.3, y + h - 0.6, cz - 0.16, b + 0.3, y + h - 0.2, cz + 0.16));
+  bag.add('lacquer_red', box(a - 0.3, y + h - 1.9, cz - 0.1, b + 0.3, y + h - 1.65, cz + 0.1));
+  // the board between the beams: dark, gilt-edged, carried by short posts
+  const bw = Math.min(2.8, hw * 0.4), sd = el.dir === 'n' ? -1 : 1;
+  for (const sx of [-1, 1]) bag.add('lacquer_red', box(cx + sx * bw - 0.07, y + h - 1.65, cz - 0.07, cx + sx * bw + 0.07, y + h - 0.6, cz + 0.07));
+  bag.add('paint_ochre', box(cx - bw, y + h - 1.62, cz + sd * 0.05, cx + bw, y + h - 0.62, cz + sd * 0.12));
+  bag.add('lacquer_black', box(cx - bw + 0.1, y + h - 1.52, cz + sd * 0.12, cx + bw - 0.1, y + h - 0.72, cz + sd * 0.14));
+  // tie-beam ends, little hoods over the posts' heads aside
+}
+
+/**
+ * hz_tree { at [x, z], y, kind ('camphor' | 'ginkgo' | 'willow' | 'peach'), h, seed }: an old tree of the temple court or the causeway — a leaning trunk with forks and
+ * limbs, the crown in clumps; the willow's long hanging threads, the peach's pink blossom among its leaves.
+ */
+function hzTree(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, rand = rnd(el.seed ?? 1), kind = el.kind ?? 'camphor', h = el.h ?? (kind === 'willow' ? 8 : kind === 'peach' ? 4.2 : 12);
+  const trunkR = kind === 'peach' ? 0.13 : kind === 'willow' ? 0.3 : 0.5, lean = (rand() - 0.5) * 0.5, la = rand() * 6.28;
+  const tx = (t) => x + Math.cos(la) * lean * t * h * 0.3, tz = (t) => z + Math.sin(la) * lean * t * h * 0.3;
+  const forkAt = kind === 'peach' ? 0.45 : 0.4;
+  const g = [];
+  g.push(lathe([[trunkR * 1.5, -0.2], [trunkR * 1.25, 0.25], [trunkR, h * forkAt * 0.5], [trunkR * 0.75, h * forkAt], [0.001, h * forkAt + 0.05]], 8, null, x, y, z));
+  bag.add('bark_grey', g[0]);
+  const limbs = kind === 'peach' ? 3 : 4 + Math.floor(rand() * 2), mats = { camphor: ['broad', 'doum_leaf'], ginkgo: ['palm_leaf', 'doum_leaf'], willow: ['papyrus', 'flax_leaf'], peach: ['doum_leaf', 'stucco_rose'] }[kind];
+  const blobs = [], threads = [], pink = [];
+  const fx = tx(forkAt), fz = tz(forkAt), fy = y + h * forkAt;
+  for (let i = 0; i < limbs; i++) {
+    const a = i * 6.28 / limbs + rand() * 0.8, out = (kind === 'willow' ? 0.35 : kind === 'peach' ? 0.28 : 0.3) * h, up = h * (0.82 - forkAt) * (0.7 + rand() * 0.3);
+    const ex = fx + Math.cos(a) * out, ez = fz + Math.sin(a) * out, ey = fy + up;
+    bag.add('bark_grey', rod([fx, fy, fz], [ex, ey, ez], trunkR * 0.42, 5));
+    const cr = (kind === 'willow' ? 0.2 : kind === 'peach' ? 0.22 : 0.2) * h;
+    for (let q = 0; q < 3; q++) {
+      const bx = ex + (rand() - 0.5) * cr * 0.8, bz = ez + (rand() - 0.5) * cr * 0.8, by = ey + (q ? 0.55 * q : -0.2) * cr, r = cr * (0.6 + rand() * 0.35);
+      blobs.push(ell(r, r * (kind === 'willow' ? 0.85 : 0.8), r, bx, by, bz, 8));
+      if (kind === 'peach' && rand() < 0.8) pink.push(ell(r * 0.8, r * 0.5, r * 0.8, bx, by + r * 0.25, bz, 7));
+      if (kind === 'willow') for (let t = 0; t < 14; t++) {
+        const a2 = rand() * 6.28, rr = r * (0.7 + rand() * 0.5), px = bx + Math.cos(a2) * rr, pz = bz + Math.sin(a2) * rr, len = h * (0.35 + rand() * 0.25);
+        threads.push(rod([px, by - r * 0.2, pz], [px + (rand() - 0.5) * 0.3, by - r * 0.2 - len * 0.5, pz], 0.012, 3), rod([px + (rand() - 0.5) * 0.2, by - r * 0.2 - len * 0.5, pz], [px + (rand() - 0.5) * 0.4, by - r * 0.2 - len, pz + 0.1], 0.008, 3));
+      }
+    }
+  }
+  const leaf = kind === 'willow' ? 'tile_green' : kind === 'ginkgo' ? 'tile_yellow' : 'doum_leaf';
+  void mats;
+  for (const b of blobs) bag.add(kind === 'ginkgo' ? 'palm_leaf' : kind === 'willow' ? 'papyrus' : 'doum_leaf', b);
+  for (const b of pink) bag.add('stucco_rose', b);
+  for (const b of threads) bag.add('papyrus', b);
+  void leaf;
+  col.circle(x, z, trunkR * 1.3, y, y + 3);
+}
+
+/**
+ * hz_bank { x, z0, z1, y (the causeway's top), half (the bank's half width), path (half width of the path) }: the causeway's edge: a revetment of granite blocks along the
+ * water with a coping, bollards every 6 m for mooring, the path edged by kerbs of granite and the earth between kept green with tufts of grass; the path's slabs laid
+ * (as the courts') with the middle worn.
+ */
+function hzBank(el, ctx) {
+  const { bag } = ctx, { x, z0, z1 } = el, y = el.y ?? 0, hw = el.half ?? 11, pw = el.path ?? 2.6, rand = rnd(el.seed ?? 4);
+  for (const s of [-1, 1]) {
+    const xe = x + s * hw;
+    const [a, b] = s < 0 ? [xe - 0.05, xe + 0.45] : [xe - 0.45, xe + 0.05];
+    bag.add('granite_block', box(a, y - 1.2, z0, b, y - 0.05, z1));     // the coping and the face below it over the water
+    bag.add('granite_grey', box(a - 0.03 * s, y - 0.05, z0, b + 0.03 * -s, y + 0.08, z1));
+    // blocks on the face, seams: vertical joints in a dark thin band every 1.4 m
+    for (let zz = z0; zz < z1; zz += 1.4) bag.add('slate', box(s < 0 ? a - 0.012 : b - 0.0, y - 1.2, zz, s < 0 ? a : b + 0.012, y - 0.1, zz + 0.04));
+    for (let zz = z0 + 3; zz < z1 - 2; zz += 6) {
+      bag.add('granite_grey', lathe([[0.001, 0], [0.2, 0], [0.18, 0.4], [0.24, 0.5], [0.12, 0.62], [0.001, 0.62]], 8, null, xe - s * 0.3, y + 0.08, zz));
+    }
+    // the kerb along the path
+    bag.add('granite_grey', box(x + s * pw - 0.1, y + 0.0, z0, x + s * pw + 0.1, y + 0.14, z1));
+  }
+  // a path of slabs with worn middle
+  courtPaving({ y: y + 0.04, seed: el.seed ?? 4, rects: [[x - pw + 0.1, z0, x + pw - 0.1, z1]] }, ctx);
+  // grass tufts and sedge on the earth either side of the path
+  const tufts = [];
+  for (const s of [-1, 1]) bag.add('sod', box(x + s * (pw + 0.12) - (s < 0 ? hw - pw - 0.5 : 0), y, z0, x + s * (pw + 0.12) + (s > 0 ? hw - pw - 0.5 : 0), y + 0.03, z1));
+  for (let n = 0; n < (z1 - z0) * 3; n++) {
+    const s = rand() < 0.5 ? -1 : 1, px = x + s * (pw + 0.4 + rand() * (hw - pw - 1.2)), pz = z0 + rand() * (z1 - z0);
+    for (let q = 0; q < 3; q++) tufts.push(rod([px, y, pz], [px + (rand() - 0.5) * 0.3, y + 0.16 + rand() * 0.22, pz + (rand() - 0.5) * 0.3], 0.008, 3));
+  }
+  for (const g of tufts) bag.add('bark_olive', g);
+}
+
+/**
+ * hz_wall_skin: the brick facing of the city wall { a [x, z], b [x, z] (one run, along x or z), n (±1: the side the face looks toward, in z for a run along x, in x for a run
+ * along z), off (the face's coordinate at yBase), batter (how far the face leans in over the height), yBase, y0, y1, seed }: a granite plinth, the grey brick in courses (the mortar
+ * lines a hair proud and dark), a pilaster every 7 m, a corbelled string course under the parapet, and patches where the facing was repaired in lighter plaster. [inferred: the Song
+ * city wall, rammed earth faced with brick at its foot and in repairs (docs/settlements/song-hangzhou.md §12)]
+ */
+function hzWallSkin(el, { bag }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, n = el.n ?? 1, rand = rnd(el.seed ?? 5), yb = el.yBase ?? -0.5, y0 = el.y0 ?? -0.1, y1 = el.y1, H = y1 - yb, bat = el.batter ?? 0, off = el.off;
+  const alongX = Math.abs(bz - az) < 1e-6, u0 = alongX ? Math.min(ax, bx) : Math.min(az, bz), u1 = alongX ? Math.max(ax, bx) : Math.max(az, bz);
+  const f = (y) => off - n * bat * (y - yb) / H;
+  const P = (u, y, d) => (alongX ? [u, y, f(y) + n * d] : [f(y) + n * d, y, u]);
+  const layer = (out, p, q, ya, yc, d0, d1) => hexa(out, [P(p, ya, d0), P(q, ya, d0), P(q, ya, d1), P(p, ya, d1), P(p, yc, d0), P(q, yc, d0), P(q, yc, d1), P(p, yc, d1)]);
+  const plinth = [], brick = [], mortar = [], pil = [], str = [], patch = [], cap = [];
+  const yp = Math.min(y0 + 1.7, y1);
+  layer(plinth, u0, u1, y0, yp, 0, 0.12);
+  layer(cap, u0, u1, yp, yp + 0.1, 0, 0.17);
+  layer(brick, u0, u1, yp + 0.1, y1 - 0.3, 0, 0.05);
+  for (let y = yp + 0.4; y < y1 - 0.5; y += 0.34) layer(mortar, u0, u1, y, y + 0.022, 0.05, 0.062);
+  if (u1 - u0 > 2) layer(str, u0 + 0.02, u1 - 0.02, y1 - 2.3, y1 - 2.05, 0, 0.2);
+  for (let u = u0 + 3 + rand() * 2; u < u1 - 1.5; u += 6.5 + rand() * 1.5) {
+    layer(pil, u - 0.32, u + 0.32, yp + 0.1, y1 - 2.3, 0.05, 0.2); layer(plinth, u - 0.4, u + 0.4, y0, yp + 0.1, 0.1, 0.24);
+  }
+  for (let k = 0; k < Math.ceil((u1 - u0) / 9); k++) {
+    const w = 0.9 + rand() * 1.6, u = u0 + rand() * Math.max(0.1, u1 - u0 - w), ya = yp + 0.5 + rand() * (y1 - yp - 5), h = 0.7 + rand() * 1.6;
+    layer(patch, u, u + w, ya, Math.min(ya + h, y1 - 2.5), 0.05, 0.068);
+  }
+  bag.add('granite_block', fromTriangles([...plinth])); bag.add('granite_grey', fromTriangles([...cap, ...str]));
+  bag.add('brick_grey', fromTriangles([...brick, ...pil])); bag.add('slate', fromTriangles(mortar)); bag.add('plaster_damp', fromTriangles(patch));
+}
+
+/**
+ * hz_landing { rect [x0, z0, x1, z1] (the jetty reaching west from the bank), y (its deck's top = the bank), bed, seed }: planks laid across with their gaps and nails' darker
+ * ends, a timber kerb, piles each side every 2.2 m with iron rings and a cap, a bollard at the end, a stone step at the bank, and on the deck the boatmen's gear: a punting pole
+ * laid along the rail, a basket, a coil of rope and a lantern post. [inferred]
+ */
+function hzLanding(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, rand = rnd(el.seed ?? 2), xe = x0, t = [];
+  for (let x = x0; x < x1 - 0.01; x += 0.32) bag.add(rand() < 0.3 ? 'wood_dark' : 'planks_grey', box(x + 0.012, y - 0.01, z0 + 0.1, Math.min(x + 0.32, x1) - 0.012, y + 0.05, z1 - 0.1));
+  for (const z of [z0, z1 - 0.12]) bag.add('timber', box(x0, y - 0.12, z, x1, y + 0.1, z + 0.12));
+  for (let x = x0 + 0.3; x < x1; x += 2.2) for (const z of [z0 - 0.02, z1 + 0.02]) {
+    bag.add('timber', rod([x, el.bed, z], [x, y + 0.5, z], 0.09, 6));
+    bag.add('timber', lathe([[0.001, 0], [0.1, 0], [0.11, 0.05], [0.001, 0.07]], 6, null, x, y + 0.5, z));
+    bag.add('iron', rod([x, y - 0.1, z + (z < (z0 + z1) / 2 ? -0.1 : 0.1)], [x, y + 0.18, z + (z < (z0 + z1) / 2 ? -0.1 : 0.1)], 0.015, 4));
+    col.circle(x, z, 0.1, y, y + 0.6);
+  }
+  bag.add('wood_dark', lathe([[0.001, 0], [0.13, 0], [0.1, 0.35], [0.16, 0.42], [0.001, 0.42]], 7, null, xe + 0.3, y + 0.05, (z0 + z1) / 2));
+  for (let i = 0; i < 3; i++) bag.add('granite_block', box(x1 - 0.1 * (i + 1) - 0.5 * i, y - 0.1 - 0.12 * i - 0.12, z0 + 0.3, x1 + 0.6 - 0.5 * i, y - 0.1 - 0.12 * i, z1 - 0.3));
+  // the gear
+  const zm = (z0 + z1) / 2;
+  bag.add('bamboo_culm', rod([x0 + 1.5, y + 0.12, z0 + 0.35], [x1 - 1.0, y + 0.16, z0 + 0.38], 0.022, 5));
+  bag.add('wicker', lathe([[0.001, 0], [0.2, 0], [0.26, 0.25], [0.28, 0.32], [0.001, 0.32]], 8, null, x0 + 4.5, y + 0.05, zm + 0.3));
+  for (let k = 0; k < 4; k++) bag.add('rope_fibre', lathe([[0.16, 0], [0.2, 0.02], [0.2, 0.05], [0.16, 0.06]], 10, null, x0 + 7.5, y + 0.05 + k * 0.05, zm - 0.3));
+  bag.add('wood_dark', rod([x1 - 2.2, y, z1 - 0.2], [x1 - 2.2, y + 1.7, z1 - 0.2], 0.04, 5));
+  bag.add('lamp_paper', lathe([[0.001, -0.14], [0.1, -0.08], [0.12, 0], [0.1, 0.08], [0.001, 0.14]], 8, null, x1 - 2.2, y + 1.5, z1 - 0.2));
+  void t;
+}
+
+export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_wutou: hzWutou, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_landing: hzLanding };
