@@ -3,7 +3,7 @@ import '../../styles/dutch/index.js';
 import '../../styles/ming/index.js';
 import { dam, canals } from './plan.js';
 import music from './music.js';
-import { houses, damLife } from './town.js';
+import { houses, damLife, warehouses } from './town.js';
 export { music };
 export const landmarks = [{ plan: dam, music }];
-export async function town() { return [canals, ...(await houses()), ...damLife()]; }
+export async function town() { return [canals, ...(await houses()), ...warehouses(), ...damLife()]; }
