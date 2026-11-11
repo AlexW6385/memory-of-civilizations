@@ -210,4 +210,4 @@ export function steamboatPier(el, { bag, col }) {
   // the mooring posts
   for (const zz of [z0 + 1, z1 - 1]) bag.add('iron', lathe([[0.16, 0], [0.13, 0.5], [0.18, 0.6], [0.001, 0.65]], 8, null, x1 - 0.3, y, zz));
 }
-void hexa; void tri;
+export { hexa, tri };
