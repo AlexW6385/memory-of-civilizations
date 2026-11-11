@@ -7,6 +7,7 @@
 // was good, otherwise composed on the spot. Change one only after looking at it again.
 export const ARRIVALS = {
   'tang-wutai':       [35, 13.1, 6, -1.40, 0.36],        // on the upper terrace, the Great East Hall's front, eaves and Buddhas
+  'tang-changan':     [28, 0.1, 20, -1.95, 0.3],         // from the avenue's crossing, the Big Wild Goose Pagoda rising over Daci'en's wall
   'song-kaifeng':     [160, 0.1, -140, 0, 0.38],         // the Iron Pagoda, whole, in its enclosure
   'song-hangzhou':    [-110, 0.1, 138, 0, 0.32],         // the stair up to the pagoda
   'ming-suzhou':      [4, 0.3, -49.5, 3.027, 0.08],      // from the zigzag bridge between the two islands, south across the lotus pond to the Hall of Distant Fragrance, whole on its terrace

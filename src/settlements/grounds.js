@@ -22,6 +22,7 @@ import { ground as teotihuacan } from './teotihuacan/ground.js';
 import { ground as taos } from './taos/ground.js';
 import { ground as joseonSeoul } from './joseon-seoul/ground.js';
 import { ground as songKaifeng } from './song-kaifeng/ground.js';
+import { ground as tangChangan } from './tang-changan/ground.js';
 import { ground as lhasa } from './lhasa/ground.js';
 import { ground as madurai } from './madurai/ground.js';
 import { ground as persepolis } from './persepolis/ground.js';
@@ -80,6 +81,7 @@ export const GROUNDS = {
   taos,
   'joseon-seoul': joseonSeoul,
   'song-kaifeng': songKaifeng,
+  'tang-changan': tangChangan,
   lhasa,
   madurai,
   persepolis,
@@ -142,6 +144,7 @@ const LOADERS = {
   taos: () => import('./taos/index.js'),
   'joseon-seoul': () => import('./joseon-seoul/index.js'),
   'song-kaifeng': () => import('./song-kaifeng/index.js'),
+  'tang-changan': () => import('./tang-changan/index.js'),
   lhasa: () => import('./lhasa/index.js'),
   madurai: () => import('./madurai/index.js'),
   persepolis: () => import('./persepolis/index.js'),

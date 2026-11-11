@@ -1,0 +1,81 @@
+// Furnished rooms of Tang Chang'an, in the hall's own frame (facing +z, the door in the front wall): the Hu wine shop (jiusi) and the
+// official's hall. Tang rooms mixed the old way of sitting (mats on a raised wooden dais, low tables) with the new (the folding
+// stool of the Hu, hu chuang; tables and benches): both are here. { c, face, w, d (the hall's column grid), y (the floor), kind }.
+
+import { box, lathe } from '../../core/geom.js';
+import { inFrame, YAW, rng } from './kit.js';
+
+const jar = (bag, x, y, z, r, h, mat) => bag.add(mat, lathe([[0.001, 0], [r * 0.7, 0], [r, h * 0.35], [r * 0.92, h * 0.7], [r * 0.5, h * 0.92], [r * 0.55, h], [0.001, h]], 10, null, x, y, z));
+const stool = (L, x, z, y) => {   // a hu chuang: the folding stool, a cord seat on crossed legs
+  const { bag, col } = L;
+  bag.add('wood_dark', box(x - 0.24, y + 0.41, z - 0.2, x + 0.24, y + 0.45, z + 0.2)); bag.add('hide_tan', box(x - 0.2, y + 0.45, z - 0.16, x + 0.2, y + 0.47, z + 0.16));
+  for (const s of [-1, 1]) bag.add('wood_dark', box(x + s * 0.2 - 0.02, y, z - 0.18, x + s * 0.2 + 0.02, y + 0.41, z + 0.18));
+  col.circle(x, z, 0.28, y, y + 0.47);
+};
+const table = (L, x, z, y, w, d, h, mat = 'lacquer_red') => {
+  const { bag, col } = L;
+  bag.add(mat, box(x - w / 2, y + h - 0.05, z - d / 2, x + w / 2, y + h, z + d / 2));
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) bag.add('wood_dark', box(x + sx * (w / 2 - 0.08) - 0.03, y, z + sz * (d / 2 - 0.08) - 0.03, x + sx * (w / 2 - 0.08) + 0.03, y + h - 0.05, z + sz * (d / 2 - 0.08) + 0.03));
+  col.rect([x - w / 2, z - d / 2, x + w / 2, z + d / 2], y, y + h);
+};
+const cup = (bag, x, y, z, m = 'glaze_white') => bag.add(m, lathe([[0.001, 0], [0.035, 0], [0.05, 0.06], [0.045, 0.06], [0.001, 0.01]], 8, null, x, y, z));
+/** A raised wooden dais with a mat on it. */
+const dais = (L, x0, z0, x1, z1, y, h) => {
+  const { bag, col } = L;
+  bag.add('wood_dark', box(x0, y, z0, x1, y + h, z1)); bag.add('reed_mat', box(x0 + 0.12, y + h, z0 + 0.12, x1 - 0.12, y + h + 0.025, z1 - 0.12));
+  col.rect([x0, z0, x1, z1], y, y + h); col.floor([x0, z0, x1, z1], y + h + 0.025);
+};
+
+function wine(L, el) {
+  const { bag, col, lights } = L, { w, d, y } = el, rand = rng(el.seed || 7), hx = w / 2 - 0.4, bz = -d / 2 + 0.4;
+  // the earthen counter (lu) along the back right, wine jars set in its top, the dippers and cups
+  const cx0 = 0.5, cx1 = hx;
+  bag.add('mud_plaster', box(cx0, y, bz, cx1, y + 1.0, bz + 1.1)); bag.add('timber', box(cx0 - 0.05, y + 1.0, bz - 0.05, cx1 + 0.05, y + 1.06, bz + 1.15)); col.rect([cx0, bz, cx1, bz + 1.1], y, y + 1.06);
+  for (let x = cx0 + 0.45; x < cx1 - 0.3; x += 0.62) { jar(bag, x, y + 1.06, bz + 0.55, 0.2 + rand() * 0.04, 0.5, 'pottery_dark'); bag.add('cloth_red', box(x - 0.07, y + 1.56, bz + 0.48, x + 0.07, y + 1.6, bz + 0.62)); }
+  for (let k = 0; k < 6; k++) cup(bag, cx0 + 0.3 + k * 0.17, y + 1.06, bz + 1.0);
+  // shelves of wine jars along the back wall left of the counter, a screen between
+  bag.add('wood_dark', box(-hx, y, bz - 0.0, -1.0, y + 2.1, bz + 0.35)); col.rect([-hx, bz, -1.0, bz + 0.35], y, y + 2.1);
+  for (let x = -hx + 0.3; x < -1.2; x += 0.45) for (const yy of [0.5, 1.15, 1.8]) jar(bag, x, y + yy, bz + 0.45, 0.15, 0.3, 'pottery_dark');
+  // the dais on the left with its mats and low tables, the guests' cushions
+  dais(L, -hx, bz + 1.2, -hx + 4.6, bz + 5.2, y, 0.32);
+  for (const z of [bz + 2.3, bz + 4.1]) { table(L, -hx + 2.3, z, y + 0.35, 1.2, 0.6, 0.38); for (let k = 0; k < 3; k++) cup(bag, -hx + 1.9 + k * 0.3, y + 0.35 + 0.38, z); for (const s of [-1, 1]) bag.add(s < 0 ? 'cloth_ochre' : 'cloth_indigo', box(-hx + 2.3 + s * 1.2 - 0.3, y + 0.35, z - 0.3, -hx + 2.3 + s * 1.2 + 0.3, y + 0.43, z + 0.3)); }
+  // tables with folding stools on the floor on the right
+  for (const [x, z] of [[hx - 1.6, bz + 3.4], [hx - 1.6, bz + 5.6], [hx - 4.2, bz + 5.0]]) {
+    table(L, x, z, y, 1.1, 0.8, 0.76);
+    for (const [dx, dz] of [[-0.85, 0], [0.85, 0], [0, 0.7]]) stool(L, x + dx, z + dz, y);
+    for (let k = 0; k < 3; k++) cup(bag, x - 0.3 + k * 0.28, y + 0.76, z);
+    jar(bag, x, y + 0.76, z - 0.15, 0.1, 0.22, 'glaze_white');
+  }
+  // the round carpet where the Hu girl dances, in the middle of the room (carpet of red and indigo rings)
+  const dx = -0.2, dz = bz + 4.4;
+  bag.add('cloth_red', lathe([[0.001, 0.03], [1.55, 0.03], [1.55, 0.04], [0.001, 0.04]], 24, null, dx, y, dz)); bag.add('cloth_indigo', lathe([[0.001, 0.045], [1.1, 0.045], [1.1, 0.055], [0.001, 0.055]], 24, null, dx, y, dz)); bag.add('cloth_ochre', lathe([[0.001, 0.06], [0.55, 0.06], [0.55, 0.07], [0.001, 0.07]], 20, null, dx, y, dz));
+  // the screen at the dais's end, the lamp stands, the hanging wine flag inside, lanterns
+  bag.add('lacquer_red', box(-hx + 4.7, y, bz + 1.4, -hx + 4.78, y + 1.7, bz + 3.4)); bag.add('paint_white', box(-hx + 4.78, y + 0.15, bz + 1.5, -hx + 4.8, y + 1.6, bz + 3.3));
+  for (const [x, z] of [[-hx + 0.3, bz + 5.4], [hx - 0.3, bz + 1.4]]) { bag.add('wood_dark', box(x - 0.03, y, z - 0.03, x + 0.03, y + 1.4, z + 0.03)); bag.add('lamp_paper', box(x - 0.12, y + 1.4, z - 0.12, x + 0.12, y + 1.68, z + 0.12)); lights.push({ at: [x, y + 1.5, z], color: '#ffb46b', intensity: 2.4, distance: 8 }); }
+  for (const [x, z] of [[-1.5, bz + 2.2], [2.0, bz + 3.0]]) { bag.add('cloth_red', box(x - 0.2, y + 2.6, z - 0.2, x + 0.2, y + 3.05, z + 0.2)); bag.add('wood_dark', box(x - 0.01, y + 3.05, z - 0.01, x + 0.01, y + 3.4, z + 0.01)); }
+}
+
+function house(L, el) {
+  const { bag, col, lights } = L, { w, d, y } = el, bz = -d / 2 + 0.4;
+  // the dais at the back (ta): the master's seat on a mat, a low table before him, a great screen behind
+  dais(L, -3.2, bz + 0.5, 3.2, bz + 3.6, y, 0.34);
+  bag.add('lacquer_red', box(-3.0, y + 0.34, bz, 3.0, y + 2.3, bz + 0.12)); bag.add('paint_ochre', box(-2.85, y + 0.5, bz + 0.12, 2.85, y + 2.15, bz + 0.14));
+  bag.add('paint_white', box(-2.4, y + 0.7, bz + 0.14, 2.4, y + 1.95, bz + 0.15));
+  table(L, 0, bz + 2.2, y + 0.34, 1.5, 0.6, 0.4); for (let k = 0; k < 2; k++) cup(bag, -0.3 + k * 0.5, y + 0.74, bz + 2.2, 'glaze_green');
+  bag.add('cloth_maroon', box(-0.6, y + 0.36, bz + 3.0, 0.6, y + 0.44, bz + 3.7));
+  // the zither (qin) on its own low table at the dais's side, the incense burner, a lamp stand
+  table(L, 2.3, bz + 2.8, y + 0.34, 1.3, 0.4, 0.3, 'wood_dark'); bag.add('lacquer_black', box(1.8, y + 0.64, bz + 2.7, 2.8, y + 0.7, bz + 2.9));
+  bag.add('bronze', lathe([[0.001, 0], [0.1, 0], [0.14, 0.1], [0.12, 0.16], [0.001, 0.16]], 10, null, -2.3, y + 0.34, bz + 2.5));
+  bag.add('wood_dark', box(-2.9, y + 0.34, bz + 1.0, -2.85, y + 1.7, bz + 1.05)); bag.add('lamp_paper', box(-3.0, y + 1.7, bz + 0.95, -2.75, y + 1.98, bz + 1.2)); lights.push({ at: [-2.9, y + 1.8, bz + 1.1], color: '#ffb46b', intensity: 2.2, distance: 8 });
+  // the guests' side: two benches and a low table, a chest, a hanging scroll on the side wall, the hu chuang for the guest of honour
+  for (const sx of [-1, 1]) { table(L, sx * (w / 2 - 1.0), 0.3, y, 0.7, 1.5, 0.42, 'lacquer_red'); stool(L, sx * (w / 2 - 1.9), 0.3, y); stool(L, sx * (w / 2 - 1.9), 1.3, y); }
+  bag.add('lacquer_black', box(w / 2 - 1.1, y, bz + 0.2, w / 2 - 0.4, y + 0.55, bz + 1.4)); col.rect([w / 2 - 1.1, bz + 0.2, w / 2 - 0.4, bz + 1.4], y, y + 0.55);
+  bag.add('paint_white', box(-w / 2 + 0.2, y + 1.2, -1.0, -w / 2 + 0.23, y + 2.5, 0.2)); bag.add('cloth_black', box(-w / 2 + 0.2, y + 1.15, -1.05, -w / 2 + 0.235, y + 1.2, 0.25));
+  void col;
+}
+
+export { wine as furnishWine, house as furnishHouse };
+export function tangInterior(el, ctx) {
+  inFrame(ctx, el.c, YAW[el.face || 's'], (L) => (el.kind === 'wine' ? wine(L, el) : house(L, el)));
+}
+export const INTERIOR_ELEMENTS = { tang_interior: tangInterior };
