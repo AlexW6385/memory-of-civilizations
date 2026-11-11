@@ -220,7 +220,8 @@ export class GlobeView {
     this.marks = [];
     for (const S of BUILT) {
       const p = this.project(S.u);
-      if (p) this.marks.push({ S, p });
+      // (only those in the view: names of settlements off the canvas were piled along its edges)
+      if (p && p[0] > -8 && p[0] < W + 8 && p[1] > -8 && p[1] < H + 8) this.marks.push({ S, p });
     }
     const order = [...this.marks].sort((a, b) => (a.S === this.hover) - (b.S === this.hover) || (a.S === cur) - (b.S === cur));
     const px = Math.round(11 * dpr), m = 3 * dpr;
