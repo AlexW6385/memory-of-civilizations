@@ -39,7 +39,7 @@ export function interiorLots() {
   const w = (l) => frontOf(l).L, d = (l) => frontOf(l).D;
   const iw = (a, b) => (nearIW(b) ? 1 : 0) - (nearIW(a) ? 1 : 0) || w(b) - w(a);
   CHOSEN = {
-    winehouse: take((l) => l.shop && w(l) >= 11 && d(l) >= 11 && nearIW(l), 2, iw),
+    winehouse: take((l) => l.shop && w(l) >= 8.5 && d(l) >= 14 && nearIW(l), 2, iw),
     teahouse: take((l) => l.shop && w(l) >= 8 && d(l) >= 8, 4, iw),
     shop: take((l) => l.shop && w(l) >= 6 && d(l) >= 6.5 && nearIW(l), 6, iw),
     house: take((l) => !l.shop && w(l) >= 6.5 && d(l) >= 7, 3, (a, b) => (b.storeys || 1) - (a.storeys || 1)),

@@ -1,6 +1,6 @@
 globalThis.self = globalThis;
 let msg = null; globalThis.postMessage = (d) => { msg = d; };
-const root = '/home/claude/wt/hangzhou-life/src/';
+const root = new URL('../src/', import.meta.url).pathname;
 const { MOVER_SITES } = await import(root + 'engine/movers-sites.js');
 MOVER_SITES['song-hangzhou'] = () => import(root + 'settlements/song-hangzhou/movers.js');
 await import(root + 'engine/movers-worker.js');
