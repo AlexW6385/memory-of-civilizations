@@ -5,7 +5,7 @@
 
 const BY = {
   wheat: ['wei-ye', 'tang-changan', 'han-changan', 'qin-xianyang', 'mycenae', 'catalhoyuk', 'mongol-karakorum', 'dunhuang', 'timurid-samarkand', 'shaolin', 'athens', 'rome', 'constantinople', 'knossos', 'jerusalem', 'petra', 'ur', 'babylon', 'persepolis', 'isfahan', 'mamluk-cairo', 'ottoman-istanbul', 'granada', 'giza', 'florence', 'baroque-rome', 'paris', 'conques', 'amsterdam', 'versailles', 'muscovy', 'norse-borgund', 'stonehenge', 'london', 'lalibela', 'djenne', 'great-zimbabwe', 'kilwa', 'lhasa', 'mughal-agra', 'sanchi', 'khajuraho'],
-  rice: ['bhaktapur', 'muromachi-kyoto', 'tang-wutai', 'song-kaifeng', 'song-hangzhou', 'ming-suzhou', 'qing-beijing', 'joseon-seoul', 'heian-uji', 'nara', 'edo-himeji', 'madurai', 'angkor', 'borobudur'],
+  rice: ['nalanda', 'bhaktapur', 'muromachi-kyoto', 'tang-wutai', 'song-kaifeng', 'song-hangzhou', 'ming-suzhou', 'qing-beijing', 'joseon-seoul', 'heian-uji', 'nara', 'edo-himeji', 'madurai', 'angkor', 'borobudur'],
   maize: ['chichen-itza', 'teotihuacan', 'tenochtitlan', 'taos', 'cahokia', 'machu-picchu'],
 };
 export const CROP_OF = Object.fromEntries(Object.entries(BY).flatMap(([crop, ids]) => ids.map((id) => [id, crop])));

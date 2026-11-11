@@ -79,6 +79,7 @@ import { ground as qinXianyang } from './qin-xianyang/ground.js';
 import { ground as alexandria } from './alexandria/ground.js';
 import { ground as hanChangan } from './han-changan/ground.js';
 import { ground as weiYe } from './wei-ye/ground.js';
+import { ground as nalanda } from './nalanda/ground.js';
 export const GROUNDS = {
   'ming-suzhou': mingSuzhou,
   'qing-beijing': qingBeijing,
@@ -155,6 +156,7 @@ export const GROUNDS = {
   alexandria,
   'han-changan': hanChangan,
   'wei-ye': weiYe,
+  nalanda,
 };
 
 // every settlement's fields carry their crop (src/settlements/crops.js)
