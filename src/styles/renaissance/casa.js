@@ -103,7 +103,7 @@ function bif(Lc, uc, s, w, hs, lite) {
   const ys = s + hs, n = lite ? 4 : 6, lw = (w - 0.3) / 2;
   Lc.add(O, ext(archOutline(uc, s, w, ys, 'round', n), [], -0.03, 0.02));
   Lc.add(SER, ext(archOutline(uc, s - 0.12, w + 0.44, ys + 0.12, 'round', n), [archOutline(uc, s - 0.12, w, ys, 'round', n)], -0.03, 0.14));
-  for (const sg of [-1, 1]) Lc.add(SER, ext(archOutline(uc + sg * (lw / 2 + 0.075), s + 0.1, lw, ys - 0.7, 'round', 3), [], 0.0, 0.08));
+  void lw;
   Lc.box(SER, uc - 0.06, s, 0.0, uc + 0.06, ys - 0.45, 0.14);
   Lc.box(SER, uc - w / 2 - 0.25, s - 0.2, -0.03, uc + w / 2 + 0.25, s - 0.1, 0.3);
   if (!lite) { Lc.box(W, uc - 0.02, s, 0.0, uc + 0.02, ys - 0.5, 0.04); }

@@ -23,7 +23,7 @@ export const ARNO = { z: 275, w: 60, level: -4, bed: -7 };
 export const BRIDGE = { x: 40 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
-const arnoZ = (x) => ARNO.z + 12 * Math.sin(x / 130);
+export const arnoZ = (x) => ARNO.z + 12 * Math.sin(x / 130);
 export const inArno = (x, z) => Math.abs(z - arnoZ(x)) < ARNO.w / 2 - 3 && Math.hypot(x, z) < RADIUS - 55;
 export function height(x, z) {
   const d = Math.abs(z - arnoZ(x)), edge = smooth(RADIUS - 70, RADIUS - 40, Math.hypot(x, z));
