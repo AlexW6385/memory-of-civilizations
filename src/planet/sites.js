@@ -19,6 +19,7 @@
 //            region id, the centre of the disc in the old city's coordinates, and the buildings
 
 export const SITES = [
+  { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, era: '17th c.', region: 'siam', lat: 14.36, lon: 100.56, radius: 330 },
   // ── China ──
   { id: 'tang-wutai', name: { en: 'Tang China', zh: '唐' }, era: '9th c.', region: 'china', lat: 38.95, lon: 113.38, radius: 250 },
   { id: 'song-kaifeng', name: { en: 'Northern Song Kaifeng', zh: '北宋汴京' }, era: '12th c.', region: 'china', lat: 34.80, lon: 114.31, radius: 520 },
@@ -112,7 +113,7 @@ for (const s of SITES) s.radius ??= 190;
 const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan han-changan',
-  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang',
+  M: 'ayutthaya ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang',
   S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori',
   P: 'stonehenge catalhoyuk',
 };
@@ -138,7 +139,6 @@ export const PLANNED = [
   { id: 'nalanda', name: { en: 'Nalanda', zh: '那烂陀' }, region: 'india', lat: 25.14, lon: 85.44, radius: 200 },
   { id: 'bhaktapur', name: { en: 'Bhaktapur', zh: '巴克塔普尔' }, region: 'nepal', lat: 27.67, lon: 85.43, radius: 200 },
   { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
-  { id: 'ayutthaya', name: { en: 'Ayutthaya', zh: '大城' }, region: 'siam', lat: 14.36, lon: 100.56, radius: 300 },
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, region: 'java', lat: 8.37, lon: 115.45, radius: 180 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },
   { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, region: 'guinea', lat: 6.34, lon: 5.62, radius: 320 },

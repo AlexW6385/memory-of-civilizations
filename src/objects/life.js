@@ -198,7 +198,7 @@ const KIT_OF = {
   'tang-wutai': 'east_asia', 'song-kaifeng': 'east_asia', 'song-hangzhou': 'east_asia', 'ming-suzhou': 'east_asia', 'qing-beijing': 'east_asia', 'joseon-seoul': 'east_asia', lhasa: 'tibet',
   'heian-uji': 'japan', nara: 'japan', 'edo-himeji': 'japan',
   sanchi: 'south_asia', madurai: 'south_asia', khajuraho: 'south_asia', 'mughal-agra': 'south_asia',
-  angkor: 'southeast_asia', borobudur: 'southeast_asia',
+  angkor: 'southeast_asia', ayutthaya: 'southeast_asia', borobudur: 'southeast_asia',
   paris: 'europe_medieval', conques: 'europe_medieval', amsterdam: 'europe_early_modern', versailles: 'europe_early_modern', muscovy: 'north', 'norse-borgund': 'north', stonehenge: 'north',
   'chichen-itza': 'americas', teotihuacan: 'americas', tenochtitlan: 'americas', taos: 'americas', cahokia: 'americas', 'machu-picchu': 'andes',
   djenne: 'africa', lalibela: 'africa', 'great-zimbabwe': 'africa', kilwa: 'africa',
