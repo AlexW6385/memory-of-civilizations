@@ -2,6 +2,8 @@
 // dry grass and thyme; olives and cypresses in the gardens, a plane tree or two in the Agora; the
 // paved Panathenaic Way; the clear Attic light.
 
+import { KERAMEIKOS, ACADEMY, FOUNTAIN, SHOPROW } from './layout.js';
+import { PALAESTRA, XYSTOS, PARADROMIS, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS, GATE } from './quarters.js';
 import { RADIUS, ACRO, AGORA, height, acroE, onWay, pathAt, RAMP, inRect, inLot, SLOPE, THEATRE, ODEION } from './layout.js';
 
 function cover(x, z, h, ny) {
@@ -20,6 +22,15 @@ function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || acroE(x, z) < 1.05 || onWay(x, z, 1) || pathAt(x, z, RAMP)[0] < 8 || inLot(x, z, 1)) return null;
   // the plane trees Kimon planted in the Agora (Plutarch, Cimon 13.8): rows along its edges, its middle left open
   if (inRect(AGORA, x, z)) return !inRect(AGORA, x, z, -9) && !AGORA_BUILT.some((r) => inRect(r, x, z, 3)) && Math.hypot(x + 280, z + 133) > 13 && !onWay(x, z, 4) ? { plane_tree: 0.03 } : null;
+  if (inRect(KERAMEIKOS, x, z, 3) || inRect(FOUNTAIN, x, z, 3) || inRect(SHOPROW, x, z, 3)) return null;      // the potters' quarter, the fountain house, the shops
+  // the Academy's grove: the sacred olives and the plane trees Kimon planted (§11c), clear of the gymnasium, the track, the paths and the sanctuaries
+  if (inRect(ACADEMY, x, z, 0)) {
+    const near = (p, r) => Math.hypot(x - p[0], z - p[1]) < r;
+    if (inRect(PALAESTRA, x, z, 4) || inRect(XYSTOS, x, z, 3) || inRect(PARADROMIS, x, z, 2) || near(ALTAR_PROMETHEUS, 6) || near(HEROON, 6) || near(EXEDRA, 6) || near(GATE, 8)) return null;
+    if (ACADEMY_PATHS.some(([a, b, c, d]) => (a === c ? Math.abs(x - a) < 3 && z > Math.min(b, d) - 3 && z < Math.max(b, d) + 3 : Math.abs(z - b) < 3 && x > Math.min(a, c) - 3 && x < Math.max(a, c) + 3))) return null;
+    if (x < ACADEMY[0] + 1.5 || x > ACADEMY[2] - 1.5 || z < ACADEMY[1] + 1.5 || z > ACADEMY[3] - 1.5) return null;
+    return { olive: 0.12, plane_tree: 0.04, grass_dry: 3 };
+  }
   if (inRect([-291, -107, -278, -93], x, z, 2)) return null;                        // Simon's house
   // the south slope: nothing in the theatre, the Odeion or the sanctuary's buildings; dry grass between
   if (inRect(SLOPE, x, z, 4)) return Math.hypot(x - THEATRE.c[0], z - THEATRE.c[1]) < 48 || inRect(ODEION.rect, x, z, 3) || inRect([40, 145, 105, 185], x, z) ? null : { grass_dry: 4 };
@@ -28,7 +39,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { olive: 0.06, cypress: 0.02, plane_tree: 0.03, maquis: 0.1 },
+  maxDensity: { olive: 0.12, cypress: 0.02, plane_tree: 0.04, maquis: 0.1 },
   climate: {
     sun: { az: 140, el: 55, color: [1.0, 0.96, 0.88], intensity: 3.6, lat: 38, dec: 12, hour: 10 },
     sky: { turbidity: 2.4, rayleigh: 1.0, mie: 0.004, mieG: 0.78, zenith: [0.07, 0.16, 0.42], horizon: [0.6, 0.66, 0.72] },

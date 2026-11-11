@@ -3,6 +3,7 @@
 // prytaneis with its kitchen and its roof of lozenge tiles; the Altar of the Twelve Gods in its enclosure; the Herms;
 // the boundary stone; the booths of the market behind their wicker screens. Registered into the `greek` style.
 
+import { furnishShop } from './shops.js';
 import { Matrix4 } from '../../core/three.js';
 import { STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, rod, frustum } from '../../core/geom.js';
@@ -14,7 +15,7 @@ import './index.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** A local frame on a rectangle whose front faces `front`: u runs along the front (0…L), v from the front back (0…D). */
-function frame(rect, front) {
+export function frame(rect, front) {
   const [x0, z0, x1, z1] = rect, alongX = front === 's' || front === 'n';
   const L = alongX ? x1 - x0 : z1 - z0, D = alongX ? z1 - z0 : x1 - x0;
   const P = (u, v) => (front === 's' ? [x0 + u, z1 - v] : front === 'n' ? [x0 + u, z0 + v] : front === 'e' ? [x1 - v, z0 + u] : [x0 + v, z0 + u]);
@@ -25,7 +26,7 @@ function frame(rect, front) {
   const yaw = front === 's' ? 0 : front === 'n' ? Math.PI : front === 'e' ? Math.PI / 2 : -Math.PI / 2;
   return { L, D, P, R, out, along, alongX, yaw };
 }
-const B = (bag, mat, r, y0, y1) => bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3]));
+export const B = (bag, mat, r, y0, y1) => bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3]));
 
 /** A short Doric entablature over a straight run of columns: local axis from (ua, va) to (ub, vb) (along u or v), its
  *  outer side toward `side` (±1 on the other coordinate); triglyphs over the columns `cols` and between them. */
@@ -137,6 +138,7 @@ function stoa(el, ctx) {
       if (k > 0) wallR(F.R(u0 - 0.2, vb + 0.5, u0 + 0.2, D - wt), yF - 0.25);
       // seven couches round the walls, a little table before each
       const ia = u0 + (k > 0 ? 0.2 : 0), ib = u1 - (k < n - 1 ? 0.2 : 0), va = vb + 0.5, vbk = D - wt;
+      if (el.rooms.trades) { furnishShop(ctx, F, y, ia + (k > 0 ? 0.2 : 0) - (k > 0 ? 0.2 : 0), ib, va, vbk, el.rooms.trades[k % el.rooms.trades.length], rand); continue; }
       const couch = (cu, cv, alongU) => {
         const r = alongU ? F.R(cu - 0.9, cv - 0.4, cu + 0.9, cv + 0.4) : F.R(cu - 0.4, cv - 0.9, cu + 0.4, cv + 0.9);
         B(bag, 'timber', r, y, y + 0.42); B(bag, ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_indigo'][Math.floor(rand() * 4)], [r[0] + 0.04, r[1] + 0.04, r[2] - 0.04, r[3] - 0.04], y + 0.42, y + 0.52);

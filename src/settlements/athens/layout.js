@@ -20,7 +20,14 @@ export const WAY = [[-390, -330], [-260, -220], [-180, -60], [-210, 55], [-310, 
 // Pericles east of it (62.4 × 68.6 m); the sanctuary of Dionysos below the stage building. +x east, +z south.
 export const THEATRE = { c: [72, 134], y: 1.0, r: 13, d0: 14.5, rows: 20, tread: 0.8, rise: 0.42, facets: [-40, 0, 40], end: 55 };
 export const ODEION = { rect: [110, 108, 172.4, 176.6], y: 1.5 };
-export const SLOPE = [35, 92, 182, 200];                                   // the south slope's buildings: no houses here
+export const SLOPE = [35, 92, 182, 200];
+// the quarters added in the fourth wave (docs/settlements/athens.md §11): the potters' quarter of the Kerameikos north of the
+// Painted Stoa, the Academy's grove and gymnasium on the west edge, the South-East Fountain House and a row of workshops
+// on the Agora's south side. +x east, +z south.
+export const KERAMEIKOS = [-215, -300, -140, -248];
+export const ACADEMY = [-380, -152, -312, -78];
+export const FOUNTAIN = [-182, -132, -166, -124];
+export const SHOPROW = [-216, -124.9, -188, -110];                                   // the south slope's buildings: no houses here
 const RAD = Math.PI / 180;
 /** The theatron's polygonal distance from the orchestra's centre (its rows are the lines of equal distance). */
 export function theatreD(x, z, T = THEATRE) { const px = x - T.c[0], pz = z - T.c[1]; let D = -Infinity; for (const f of T.facets) D = Math.max(D, px * Math.sin(f * RAD) - pz * Math.cos(f * RAD)); return D; }
@@ -71,6 +78,7 @@ export function lots() {
     const w = 11 + rand() * 3, d = 10 + rand() * 3, cx = x + w / 2, cz = z + d / 2;
     if (Math.hypot(cx, cz) > RADIUS - 40 || acroE(cx, cz) < 1.75 || inRect(AGORA, cx, cz, 12) || inRect(SLOPE, cx, cz, 6) || onWay(cx, cz, 9) || pathAt(cx, cz, RAMP)[0] < 18) continue;
     if (Math.hypot(cx - AREO.c[0], cz - AREO.c[1]) < AREO.r + 6 || Math.hypot(cx - KOLONOS.c[0], cz - KOLONOS.c[1]) < KOLONOS.r * 0.8) continue;
+    if (inRect(KERAMEIKOS, cx, cz, 10) || inRect(ACADEMY, cx, cz, 8) || inRect(FOUNTAIN, cx, cz, 6) || inRect(SHOPROW, cx, cz, 6)) continue;
     if (rand() < 0.2) continue;
     const ys = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]].map(([a, b]) => height(a, b));
     if (Math.max(...ys) - Math.min(...ys) > 2.5) continue;
