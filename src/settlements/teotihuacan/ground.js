@@ -1,7 +1,7 @@
 // Teotihuacan — the ground: the valley floor, level, with the built terrace of the Moon Plaza at the
 // north end; dry soil and grass, maguey and nopal stand-ins between the compounds; the high valley's sky.
 
-import { RADIUS, MOON, AVENUE, PLAZA, STEP, PALACE_CLEAR, MARKET, inRect, inCompound, KEEP_CLEAR, avenueLevel, smooth as sm } from './layout.js';
+import { RADIUS, MOON, AVENUE, PLAZA, STEP, PALACE_CLEAR, MARKET, inRect, inCompound, KEEP_CLEAR, avenueLevel, smooth as sm, inStreet } from './layout.js';
 
 // the Moon Plaza and the Moon stand on a level terrace MOON.rise up, built out to STEP at its south
 // edge (the platform across the avenue hides the drop) and falling away gently to the west and east
@@ -20,6 +20,8 @@ function cover(x, z) {
   if (inRect(AVENUE, x, z) || inRect(PLAZA, x, z)) { c.road = 0.8; return c; }
   if (inRect(MARKET, x, z, 2)) { c.road = 0.7; c.grass = 0; c.dry = 0.7; return c; }
   if (Math.hypot(x, z) > RADIUS - 34) { c.fields = 0.6; c.grass = 0.4; return c; }
+  // the streets of the grid: beaten earth, no grass
+  if (inStreet(x, z) && !KEEP_CLEAR.some((k) => inRect(k, x, z))) { c.road = 0.55; c.grass = 0; c.dry = 0.7; c.soil = 0.4; return c; }
   return c;
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
@@ -27,11 +29,14 @@ const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6 || inRect(AVENUE, x, z, 2) || KEEP_CLEAR.some((k) => inRect(k, x, z)) || inRect(PALACE_CLEAR, x, z) || inRect(MARKET, x, z, 3) || inCompound(x, z, 1)) return null;
-  return { cypress: 0.03, acacia: 0.04, grass_dry: 16 };
+  if (inStreet(x, z)) return null;                                           // the streets are bare
+  // the milpa at the city's edge in plots (maize and fallow), the huizache and the oak about the outer lots, tejocote (apple) by some
+  if (r > RADIUS - 70) return (Math.floor(x / 36) + Math.floor(z / 36)) % 2 ? { maize: 30, grass_dry: 4, acacia: 0.05 } : { grass_dry: 22, oak: 0.04, apple: 0.05, acacia: 0.06 };
+  return { cypress: 0.02, acacia: 0.05, oak: 0.02, apple: 0.05, grass_dry: 16 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { cypress: 0.03, acacia: 0.04 },
+  maxDensity: { cypress: 0.03, acacia: 0.06, oak: 0.04, apple: 0.05, maize: 30 },
   climate: {
     sun: { az: 145, el: 55, color: [1.0, 0.96, 0.9], intensity: 3.4, lat: 20, dec: -10, hour: 10 },
     sky: { turbidity: 2.6, rayleigh: 1.0, mie: 0.004, mieG: 0.8, zenith: [0.09, 0.17, 0.38], horizon: [0.62, 0.66, 0.7] },

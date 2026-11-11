@@ -6,7 +6,8 @@
 import { STYLES } from '../../core/build.js';
 import { box, frustum, lathe } from '../../core/geom.js';
 import { carved } from '../maya/meso.js';
-import { ollaKit, storeJarKit, bowlsKit, put } from '../maya/household.js';
+import { ollaKit, storeJarKit, bowlsKit, hearthKit, put } from '../maya/household.js';
+import { inst, fig } from './street.js';
 
 const S = 'stucco_ochre', RD = 'stucco_red';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -79,6 +80,8 @@ function wares(bag, kind, put3, rand, W) {
     else if (kind === 'obsidian') { put3(bladesKit(7), u, 0.15, 1.57, 1); if (i % 3 === 0) put3(coresKit(), u, 0.4, rand() * 6, 0.9); }
     else if (kind === 'baskets') put3(basketOf(['paint_ochre', 'cloth_brown', 'cloth_red', 'cloth_green'][i % 4]), u, 0.2, rand() * 6, 1);
     else if (kind === 'cloth') for (let q = 0; q < 2 + (i % 2); q++) put3(clothStack(['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_brown', 'cloth_indigo'][(i + q) % 5], q), u, 0.2, 0, 1);
+    else if (kind === 'food') { if (i === 0) put3(hearthKit('rubble'), u, 0.05, 0, 1.15); else if (i === 1) put3(tortillas(), u, 0.2, 0, 1); else put3(i % 2 ? ollaKit() : storeJarKit(), u, 0.1 + rand() * 0.15, rand() * 6, 0.85); }
+    else if (kind === 'feathers') { if (i % 2 === 0) put3(featherJar(), u, 0.15, rand() * 6, 1); else put3(basketOf('cloth_white'), u, 0.2, rand() * 6, 0.9); }
     else if (kind === 'fibre') put3(clothStack('cloth_ochre', i % 2), u, 0.1, 0.3, 0.9);
     else put3(basketOf(['cloth_red', 'paint_cab_yellow', 'cloth_green', 'cloth_ochre', 'cloth_brown'][i % 5]), u, 0.2, rand() * 6, 1);     // produce: chilies, squash, maize, beans, nopal
   }
@@ -90,7 +93,9 @@ const basketOf = (goods) => carved(`mk-basket:${goods}`, (k) => {
 });
 const clothStack = (c, q) => carved(`mk-cloth:${c}:${q}`, (k) => { for (let i = 0; i < 3 + q; i++) k.bx(i % 2 ? 'cloth_white' : c, -0.28, 0.28, i * 0.05, i * 0.05 + 0.048, -0.2 + (i % 2) * 0.02, 0.2); k.bx('cloth_red', -0.28, 0.28, 0.02, 0.028, -0.202, 0.202); });
 
-const KINDS = ['pots', 'produce', 'obsidian', 'baskets', 'cloth', 'bowls', 'produce', 'fibre', 'pots', 'produce'];
+const tortillas = () => carved('mk-tortillas', (k) => { for (let i = 0; i < 9; i++) k.geo('cloth_white', lathe([[0.001, i * 0.012], [0.11, i * 0.012], [0.11, i * 0.012 + 0.01], [0.001, i * 0.012 + 0.01]], 10).translate((i % 3) * 0.01, 0, 0)); k.geo('cloth_white', lathe([[0.001, 0.108], [0.2, 0.1], [0.2, 0.108], [0.001, 0.114]], 10).translate(0.0, 0, 0)); });
+const featherJar = () => carved('mk-feathers', (k) => { k.geo('terracotta', lathe([[0.001, 0], [0.1, 0.01], [0.14, 0.14], [0.1, 0.3], [0.001, 0.3]], 10)); for (let i = 0; i < 9; i++) { const a = i * 0.7; k.seg(i % 3 ? 'stucco_leaf' : 'cloth_red', [Math.cos(a) * 0.04, 0.28, Math.sin(a) * 0.04], [Math.cos(a) * 0.14, 0.75 + (i % 3) * 0.08, Math.sin(a) * 0.14], 0.012, 0.004, 0.02, 0.004); } });
+const KINDS = ['pots', 'produce', 'obsidian', 'baskets', 'cloth', 'bowls', 'produce', 'fibre', 'pots', 'produce', 'food', 'food', 'feathers', 'cloth', 'baskets'];
 
 /**
  * tt_market: the Great Compound's market { rect, seed, hole: [x0, z0, x1, z1] (the central platform, kept clear) }:
@@ -123,15 +128,31 @@ export function ttMarket(el, ctx) {
     }
   }
   // people: bargainers and bearers in the lanes
-  for (let i = 0; i < 26; i++) {
+  for (let i = 0; i < 46; i++) {
     const lx = r() < 0.5, u = lx ? x0 + 6 + r() * (x1 - x0 - 12) : z0 + 6 + r() * (z1 - z0 - 12), off = (r() - 0.5) * 5, [x, z] = lx ? [u, cz + off] : [cx + off, u];
     if (inHole(x, z)) continue;
     const man = r() < 0.55, car = ['basket', 'pot', 'none', 'bundle'][Math.floor(r() * 4)];
+    if (i % 7 === 3) { fig(ctx, { who: 'child', at: [x, z], y: 0.04, rot: r() * 6.28, seed: Math.floor(r() * 1e9), pose: 'stand' }); continue; }
+    if (i % 11 === 5) { L.chickens({ t: 'chickens', kind: 'turkey', n: 3, at: [x, z], y: 0.04, rot: r() * 6, seed: i }, ctx); continue; }
+    if (i % 13 === 7) { L.animal({ t: 'animal', kind: 'dog', at: [x, z], y: 0.04, rot: r() * 6.28, seed: i, mat: 'hide_tan' }, ctx); continue; }
     L.figure(man ? { at: [x, z], y: 0.04, rot: r() * 6.28, seed: Math.floor(r() * 1e9), dress: 'tunic', legs: 'bare', over: r() < 0.5 ? 'cape' : 'none', cloth: ['cloth_white', 'cloth_ochre', 'cloth_brown'][Math.floor(r() * 3)], cloth2: 'cloth_white', skin: 'skin_medium', hair: 'long', hairMat: 'hide_black', feet: 'bare', carry: car, pose: r() < 0.4 ? 'talk' : 'stand' }
       : { at: [x, z], y: 0.04, rot: r() * 6.28, seed: Math.floor(r() * 1e9), dress: 'wrap', over: 'shawl', cloth: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_indigo'][Math.floor(r() * 4)], cloth2: 'cloth_white', skin: 'skin_dark', hair: 'bun', hairMat: 'hide_black', feet: 'bare', carry: car, pose: 'stand' }, ctx);
   }
+  // the gates: two watchers inside each, a pair of braziers at the lane's heads, a water-jar seller by the south gate
+  for (const [gx, gz, fx, fz] of [[cx, z0, 0, 1], [cx, z1, 0, -1], [x0, cz, 1, 0], [x1, cz, -1, 0]]) {
+    for (const sd of [-1, 1]) {
+      const px = gx + fx * 2.2 + (fz ? sd * (gw + 0.2) : 0), pz = gz + fz * 2.2 + (fx ? sd * (gw + 0.2) : 0);
+      fig(ctx, { who: 'man', at: [px, pz], y: 0.04, rot: Math.atan2(-fx, -fz), seed: Math.floor(r() * 1e9), pose: 'stand' });
+      inst(bag, brazierK(), gx + fx * 5 + (fz ? sd * 3.4 : 0), 0.04, gz + fz * 5 + (fx ? sd * 3.4 : 0), 0, 1, 120);
+    }
+  }
+  for (let i = 0; i < 30; i++) { const u = x0 + 5 + r() * (x1 - x0 - 10), v = cz + (r() - 0.5) * 6; if (!inHole(u, v)) inst(bag, huskK(), u, 0.045, v, r() * 6, 1, 45); }
+  for (let i = 0; i < 30; i++) { const u = cx + (r() - 0.5) * 6, v = z0 + 5 + r() * (z1 - z0 - 10); if (!inHole(u, v)) inst(bag, huskK(), u, 0.045, v, r() * 6, 1, 45); }
 }
+const brazierK = () => carved('mk-brazier', (k) => { for (let i = 0; i < 3; i++) { const a = i * 2.094; k.seg('andesite', [Math.cos(a) * 0.2, 0, Math.sin(a) * 0.2], [Math.cos(a) * 0.12, 0.42, Math.sin(a) * 0.12], 0.05, 0.05, 0.04, 0.04); } k.geo('andesite', lathe([[0.001, 0.4], [0.2, 0.42], [0.3, 0.6], [0.29, 0.66], [0.24, 0.62], [0.001, 0.5]], 14)); k.geo('plaster_grey', lathe([[0.001, 0.6], [0.24, 0.6], [0.001, 0.63]], 12)); });
+const huskK = () => carved('mk-husk', (k) => { k.bx('cloth_ochre', -0.1, 0.1, 0, 0.008, -0.05, 0.05); });
 
+/** (the gates' watchers and the market's lane litter are laid by ttMarket's tail; see below) */
 /** One stall at (x, z), its front toward `face` (±1 along z): the mat, the goods, a reed-mat shade on four poles, the seller sitting behind. */
 function stall(ctx, x, z, face, kind, r, W, D, L) {
   const { bag, col } = ctx, y = 0.04, hi = 2.3, lo = 1.9;
@@ -149,9 +170,11 @@ function stall(ctx, x, z, face, kind, r, W, D, L) {
   const t = [], P = sheet.map((p) => p), Q = P.map((p) => [p[0], p[1] + 0.07, p[2]]), tri = (a, b, c) => t.push(...a, ...b, ...c);
   tri(Q[0], Q[1], Q[2]); tri(Q[0], Q[2], Q[3]); tri(P[0], P[2], P[1]); tri(P[0], P[3], P[2]);
   for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; tri(P[i], P[j], Q[j]); tri(P[i], Q[j], Q[i]); }
-  const g = trisToGeo(t); bag.add('reed_mat', g);
+  const g = trisToGeo(t); bag.add(r() < 0.3 ? ['cloth_ochre', 'cloth_red', 'cloth_white'][Math.floor(r() * 3)] : 'reed_mat', g);
+  // strings of chilies and gourds hung from the shade's front edge
+  if (r() < 0.5) for (let q = 0; q < 4; q++) { const hx = m[0] + 0.5 + q * (m[2] - m[0] - 1) / 3, hz = zf - face * 0.05; bag.add(q % 2 ? 'cloth_red' : 'paint_cab_yellow', box(hx - 0.04, lo - 0.55, hz - 0.03, hx + 0.04, lo - 0.05, hz + 0.03)); }
   // the seller sitting at the back of the mat
-  if (r() < 0.45) {
+  if (r() < 0.88) {
     const woman = r() < 0.6, base = { at: [x + (r() - 0.5) * 1.6, z - face * (D / 2 - 0.5)], y: y + 0.025, rot: face > 0 ? Math.PI : 0, seed: Math.floor(r() * 1e9), pose: woman ? 'kneel' : 'squat', skin: 'skin_medium', hair: woman ? 'bun' : 'long', hairMat: 'hide_black', feet: 'bare', over: 'none' };
     L.figure(woman ? { ...base, dress: 'wrap', cloth: ['cloth_red', 'cloth_ochre', 'cloth_white'][Math.floor(r() * 3)], cloth2: 'cloth_white' } : { ...base, dress: 'tunic', legs: 'bare', cloth: 'cloth_white', cloth2: 'cloth_brown', pose: 'squat' }, ctx);
   }

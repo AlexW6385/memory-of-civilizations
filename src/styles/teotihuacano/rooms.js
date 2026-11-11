@@ -12,6 +12,7 @@ import { tablero } from './index.js';
 import { theatreCenser } from './palace.js';
 import { Wall, tlalocan, procession } from './mural.js';
 import { workshopRoom } from './market.js';
+import { weaverRoom, potterRoom } from './craft.js';
 
 const el_seed = (j, a) => Math.floor(Math.abs(a) * 7 + j * 13) + 1;
 const S = 'stucco_ochre', RD = 'stucco_red', WH = 'stucco_pale';
@@ -73,6 +74,10 @@ export function porticoRooms(ctx, back, [fx, fz], ph, ceil, roles, rand) {
       procession(new Wall(bag, uax, a1 - e, -1, along0, along1, fy), d - 0.2, H, el_seed(j, a0) + 9);
       put(bag, bowlsKit(RD), ...at3(m + 1.2, v0 + 1.0), inward);
       const mt = R(m - 0.8, m + 0.8, v0 + 1.2, v0 + 2.5); bag.add('reed_mat', box(mt[0], f, mt[1], mt[2], f + 0.02, mt[3]));
+    } else if (role === 'weaver') {
+      weaverRoom(ctx, A, f, a0, a1, v0, v1, inward, rand, ceil);
+    } else if (role === 'potter') {
+      potterRoom(ctx, A, f, a0, a1, v0, v1, inward, rand);
     } else if (role === 'workshop') {
       workshopRoom(ctx, A, f, a0, a1, v0, v1, inward, rand);
     } else if (role === 'shrine') {

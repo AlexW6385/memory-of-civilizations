@@ -1,6 +1,6 @@
 // The apartment compounds of Teotihuacan (docs/settlements/teotihuacan.md §5, §12), and the maguey and
 // nopal grown in the open ground between them (§12).
-import { RADIUS, AVENUE, KEEP_CLEAR, PALACE_CLEAR, MARKET, MARKET_PLATFORM, compounds, inCompound, inRect } from './layout.js';
+import { RADIUS, AVENUE, KEEP_CLEAR, PALACE_CLEAR, MARKET, MARKET_PLATFORM, compounds, emptyLots, inCompound, inRect } from './layout.js';
 import { ground } from './ground.js';
 const base = (id, elements) => ({ id, style: 'teotihuacano', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -80], facing: 'e' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -36,6 +36,13 @@ function plants() {
       P.push([rand() < 0.1 ? 'nopal' : 'maguey', x, z, ground.height(x, z), 0.55 + rand() * 0.6, yaw0 + rand() * 6.28, Math.floor(rand() * 3)]);
     }
   }
+  // the lots without a compound: a hedge of nopal along two sides, rows of maguey with a path between
+  for (const [x0, z0, x1, z1] of emptyLots()) {
+    if (!free((x0 + x1) / 2, (z0 + z1) / 2, 0)) continue;
+    for (let x = x0 + 1; x < x1 - 1; x += 2.6) for (const z of [z0 + 0.6, z1 - 0.6]) if (rand() < 0.8) P.push(['nopal', x + (rand() - 0.5) * 0.4, z, 0, 0.7 + rand() * 0.4, rand() * 6.28, Math.floor(rand() * 3)]);
+    for (let z = z0 + 4; z < z1 - 3; z += 3.2) { if (Math.abs(z - (z0 + z1) / 2) < 2) continue; for (let x = x0 + 3; x < x1 - 2; x += 3) if (rand() < 0.85) P.push(['maguey', x + (rand() - 0.5) * 0.5, z + (rand() - 0.5) * 0.4, 0, 0.8 + rand() * 0.55, rand() * 6.28, Math.floor(rand() * 3)]); }
+  }
+  for (const p of P) if (p[3] === 0) p[3] = ground.height(p[1], p[2]);
   return P;
 }
 export async function town() {

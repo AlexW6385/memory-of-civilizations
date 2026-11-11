@@ -2,13 +2,15 @@
 // with its Adosada, the Pyramid of the Moon on its terrace and the plaza's platform temples, the avenue
 // stepped into sunken plazas by talud-tablero platforms, the Ciudadela's banks with the Feathered Serpent Pyramid and its Adosada.
 
+import { avenueItems } from './dress.js';
+import { compounds, MARKET } from './layout.js';
 import { AVENUE, MOON, PLAZA, SUN, CIUD, KEEP_CLEAR, RADIUS, CROSS, STEP, BANK, LEVELS, QPP, JAGUARS } from './layout.js';
 
 const E = [], LP = MOON.rise;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const rand = rng(4000);
 // the Sun "finished … with lime plaster" (Wikipedia), its temple's chamber within thick walls
-E.push({ t: 'tt_pyramid', c: SUN.c, w: SUN.w, d: SUN.d, tw: SUN.tw, td: SUN.td, h: SUN.h, levels: 5, tablero: 0, stair: 'w', stairW: 14, talud: 'lime_plaster_rough', temple: { w: 16, d: 16, h: 5, inner: true, wall: 3, seed: 65 } });
+E.push({ t: 'tt_pyramid', c: SUN.c, w: SUN.w, d: SUN.d, tw: SUN.tw, td: SUN.td, h: SUN.h, levels: 5, tablero: 0, stair: 'w', stairW: 14, weather: 1.4, talud: 'lime_plaster_rough', temple: { w: 16, d: 16, h: 5, inner: true, wall: 3, seed: 65 } });
 // pilgrims and priests on the Sun's stair, going up and coming down; priests and a censer-bearer before the temple
 {
   const run = SUN.h * 1.05 - 0.15 * (SUN.w - SUN.tw) / 10, x0 = SUN.c[0] - SUN.tw / 2 - SUN.h * 1.05, n = Math.round(SUN.h / 0.2), up = -Math.PI / 2, down = Math.PI / 2, zc = SUN.c[1];
@@ -17,13 +19,13 @@ E.push({ t: 'tt_pyramid', c: SUN.c, w: SUN.w, d: SUN.d, tw: SUN.tw, td: SUN.td, 
     at(120, -3.5, up, 'bearer', 6), at(126, 2.8, down, 'pilgrim', 7), at(190, 0.5, up, 'pilgrim', 8), at(196, -1.8, up, 'pilgrim', 9), at(250, 3, down, 'priest', 10), at(300, -2, up, 'bearer', 11),
     [SUN.c[0] - 12, zc - 3, SUN.h, down, 'priest', 12], [SUN.c[0] - 11.5, zc + 3.4, SUN.h, Math.PI * 0.75, 'pilgrim', 13], [SUN.c[0] - 13.5, zc + 1, SUN.h, up, 'kneel', 14]] });
 }
-E.push({ t: 'tt_pyramid', c: [SUN.c[0] - SUN.w / 2 - 22, SUN.c[1]], w: 44, d: 70, tw: 32, td: 58, h: 12, levels: 2, tablero: 0.4, stair: 'w', stairW: 12, stairFoot: LEVELS[1] + 0.03, talud: 'lime_plaster_rough' });
+E.push({ t: 'tt_pyramid', c: [SUN.c[0] - SUN.w / 2 - 22, SUN.c[1]], w: 44, d: 70, tw: 32, td: 58, h: 12, levels: 2, tablero: 0.4, stair: 'w', stairW: 12, stairFoot: LEVELS[1] + 0.03, weather: 1, talud: 'lime_plaster_rough' });
 // the Moon and its front platform on the plaza's terrace
-E.push({ t: 'tt_pyramid', c: MOON.c, y: LP, w: MOON.w, d: MOON.d, tw: MOON.tw, td: MOON.td, h: MOON.h, levels: 4, tablero: 0.3, stair: 's', stairW: 12, talud: 'lime_plaster_rough', temple: { w: 14, d: 12, h: 4.5 } });
+E.push({ t: 'tt_pyramid', c: MOON.c, y: LP, w: MOON.w, d: MOON.d, tw: MOON.tw, td: MOON.td, h: MOON.h, levels: 4, tablero: 0.3, stair: 's', stairW: 12, weather: 1.2, talud: 'lime_plaster_rough', temple: { w: 14, d: 12, h: 4.5 } });
 E.push({ t: 'tt_pyramid', c: [0, MOON.c[1] + MOON.d / 2 + 14], y: LP, w: 46, d: 30, tw: 36, td: 22, h: 10, levels: 3, tablero: 0.45, stair: 's', stairW: 10 });
 // the Moon Plaza's platform temples round its sides, its central altar
 const [qx0, qz0, qx1, qz1] = PLAZA;
-for (const [x, z, f] of [[qx0, qz0 + 14, 'e'], [qx0, qz0 + 44, 'e'], [qx1, qz0 + 14, 'w'], [qx1, qz0 + 44, 'w'], [-34, qz1 - 12, 'n'], [34, qz1 - 12, 'n']]) E.push({ t: 'tt_pyramid', c: [x + (f === 'e' ? -8 : f === 'w' ? 8 : 0), z], y: LP, w: 20, d: 20, tw: 12, td: 12, h: 9, levels: 3, tablero: 0.45, stair: f, stairW: 6, talud: 'stucco_red', temple: { w: 7, d: 7, h: 3 } });
+for (const [x, z, f] of [[qx0, qz0 + 14, 'e'], [qx0, qz0 + 44, 'e'], [qx1, qz0 + 14, 'w'], [qx1, qz0 + 44, 'w'], [-34, qz1 - 12, 'n'], [34, qz1 - 12, 'n']]) E.push({ t: 'tt_pyramid', c: [x + (f === 'e' ? -8 : f === 'w' ? 8 : 0), z], y: LP, w: 20, d: 20, tw: 12, td: 12, h: 9, levels: 3, tablero: 0.45, stair: f, stairW: 6, talud: 'stucco_red', temple: f === 'n' ? { w: 7, d: 7, h: 3 } : { w: 11, d: 10, h: 3.8, inner: true, wall: 2, seed: Math.floor(x + z) } });
 E.push({ t: 'tt_pyramid', c: [0, -226], y: LP, w: 12, d: 12, tw: 10, td: 10, h: 2.2, levels: 1, tablero: 0.55, stair: 's', stairW: 4, talud: 'stucco_red' });
 E.push({ t: 'tt_floor', rect: [qx0, qz0, qx1, qz1], y: LP + 0.03, mat: 'stucco_pale' });
 // "an original construction with internal divisions … four rectangular and diagonal bodies that formed what is
@@ -67,12 +69,13 @@ for (let i = 0; i < ends.length; i += 2) {
     for (const [a, b] of runs) {
       const zz0 = Math.max(a, -RADIUS), zz1 = Math.min(b, Math.sqrt((RADIUS - 30) ** 2 - BANK * BANK));
       if (zz1 - zz0 < 12) continue;
-      E.push({ t: 'tt_wall', rect: sd < 0 ? [-BANK, zz0, AVENUE[0], zz1] : [AVENUE[2], zz0, BANK, zz1], y: lv, h: AH, foot: lv - Math.min(lv, 0) + 0.3 });
+      E.push({ t: 'tt_wall', rect: sd < 0 ? [-BANK, zz0, AVENUE[0], zz1] : [AVENUE[2], zz0, BANK, zz1], y: lv, h: AH, foot: lv - Math.min(lv, 0) + 0.3, discs: !(sd > 0 && i === 0) });
+      if (sd > 0 && i === 0) E.push({ t: 'tt_puma', x: AVENUE[2] + 0.7 - 0.03, y: lv + AH * 0.4 + 0.3, face: -1, runs: [[zz0 + 1.5, zz0 + 20], [zz1 - 22, zz1 - 1.5]] });
       // the platform temples on it, each with a stair up from the plaza
       const n = Math.max(1, Math.floor((zz1 - zz0 - 8) / 30));
       for (let j = 0; j < n; j++) {
         const z = zz0 + (zz1 - zz0) * (j + 0.5) / n, big = n > 2 && j === Math.floor(n / 2), xc = sd * (AVENUE[2] + 16);
-        E.push({ t: 'tt_pyramid', c: [xc, z], y: lv + AH, w: big ? 22 : 18, d: big ? 24 : 18, tw: big ? 14 : 10, td: big ? 16 : 10, h: big ? 8 : 5.5, levels: big ? 3 : 2, tablero: 0.5, stair: sd < 0 ? 'e' : 'w', stairW: 5, talud: 'stucco_red', temple: { w: big ? 8 : 6, d: big ? 8 : 6, h: 3 } });
+        E.push({ t: 'tt_pyramid', c: [xc, z], y: lv + AH, w: big ? 22 : 18, d: big ? 24 : 18, tw: big ? 14 : 10, td: big ? 16 : 10, h: big ? 8 : 5.5, levels: big ? 3 : 2, tablero: 0.5, stair: sd < 0 ? 'e' : 'w', stairW: 5, talud: 'stucco_red', temple: big ? { w: 11, d: 10, h: 3.8, inner: true, wall: 2.1, seed: Math.floor(z) } : { w: 6, d: 6, h: 3 } });
         E.push({ t: 'tt_stair', rect: sd < 0 ? [AVENUE[0], z - 2.5, AVENUE[0] + SR, z + 2.5] : [AVENUE[2] - SR, z - 2.5, AVENUE[2], z + 2.5], y0: lv, y1: lv + AH, dir: sd < 0 ? 'w' : 'e', mat: 'stucco_ochre' });
       }
     }
@@ -97,20 +100,28 @@ E.push({ t: 'tt_stair', rect: [JAGUARS.rect[2], -116, JAGUARS.rect[2] + 1.2, -11
 // and three on the east facing in (Met essay) — the Feathered Serpent Pyramid, its three open
 // faces carrying the heads, its west front buried behind the Adosada
 const [cx0, cz0, cx1, cz1] = CIUD, bw = 22, CH = 7;
+// the court's floor of lime plaster, re-laid in patches
+E.push({ t: 'tt_floor', rect: [cx0 + bw, cz0 + bw, cx1 - bw, cz1 - bw], y: 0.03, mat: 'stucco_pale' });
+for (let k = 0; k < 26; k++) { const w = 5 + rand() * 10, d = 4 + rand() * 9, x = cx0 + bw + 1 + rand() * (cx1 - cx0 - 2 * bw - 2 - w), z = cz0 + bw + 1 + rand() * (cz1 - cz0 - 2 * bw - 2 - d); E.push({ t: 'tt_floor', rect: [x, z, x + w, z + d], y: 0.045, mat: rand() < 0.6 ? 'plaster' : 'lime_plaster' }); }
 for (const r of [[cx0, cz0, cx1, cz0 + bw], [cx0, cz1 - bw, cx1, cz1], [cx1 - bw, cz0 + bw, cx1, cz1 - bw], [cx0, cz0 + bw, cx0 + bw, cz1 - bw]]) E.push({ t: 'tt_wall', rect: r, h: CH });
 const cm = (cz0 + cz1) / 2;
 E.push({ t: 'tt_stair', rect: [AVENUE[2], cm - 14, cx0 + 0.3, cm + 14], y0: LEVELS[4], y1: CH, dir: 'e', mat: 'stucco_ochre' });
 E.push({ t: 'tt_stair', rect: [cx0 + bw - 0.3, cm - 14, cx0 + bw + 9, cm + 14], y0: 0, y1: CH, dir: 'w', mat: 'stucco_ochre' });
-const ct = (x, z, f) => E.push({ t: 'tt_pyramid', c: [x, z], y: CH, w: 16, d: 16, tw: 9, td: 9, h: 5, levels: 2, tablero: 0.5, stair: f, stairW: 5, talud: 'stucco_red', temple: { w: 6, d: 6, h: 2.6 } });
+const ct = (x, z, f) => E.push({ t: 'tt_pyramid', c: [x, z], y: CH, w: 16, d: 16, tw: 9, td: 9, h: 5, levels: 2, tablero: 0.5, stair: f, stairW: 5, talud: 'stucco_red', temple: f === 'w' || f === 'e' ? { w: 8.4, d: 8.4, h: 3.4, inner: true, wall: 1.6, seed: Math.floor(x + z) } : { w: 6, d: 6, h: 2.6 } });
 for (const z of [cz0 + 40, cz0 + 68, cz1 - 68, cz1 - 40]) ct(cx0 + bw / 2, z, 'w');
 for (const x of [cx0 + 52, cx0 + 82, cx0 + 112, cx0 + 142]) { ct(x, cz0 + bw / 2, 's'); ct(x, cz1 - bw / 2, 'n'); }
 for (const z of [cz0 + 48, cm, cz1 - 48]) ct(cx1 - bw / 2, z, 'w');
-E.push({ t: 'tt_pyramid', c: [150, 260], w: 65, d: 65, tw: 36, td: 36, h: 20, levels: 6, tablero: 0.58, stair: 'w', stairW: 10, heads: 'nse', temple: { w: 14, d: 14, h: 4 } });
-E.push({ t: 'tt_pyramid', c: [104, 260], w: 30, d: 46, tw: 22, td: 36, h: 9, levels: 3, tablero: 0.5, stair: 'w', stairW: 8 });
+E.push({ t: 'tt_pyramid', c: [150, 260], w: 65, d: 65, tw: 36, td: 36, h: 20, levels: 6, tablero: 0.58, stair: 'w', stairW: 10, heads: 'nse', weather: 0.8, temple: { w: 14, d: 14, h: 4.2, inner: true, wall: 3, seed: 91 } });
+E.push({ t: 'tt_pyramid', c: [104, 260], w: 30, d: 46, tw: 22, td: 36, h: 9, levels: 3, tablero: 0.5, stair: 'w', stairW: 8, weather: 1 });
+
+E.push({ t: 'tt_avenue', items: avenueItems() });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('avenue', AVENUE, 0, 'open'), room('plaza', PLAZA, MOON.rise, 'open')];
-const walks = [[[8, 300], [8, 100], [8, -80], [0, -160], [0, -205], [12, -232]]];
+const rooms = [room('avenue', AVENUE, 0, 'open'), room('plaza', PLAZA, MOON.rise, 'open'), room('market', MARKET, 0, 'market'),
+  room('palace', QPP.rect, QPP.y, 'hall'), room('jaguars', JAGUARS.rect, JAGUARS.y, 'hall'), room('sun-temple', [SUN.c[0] - 6, SUN.c[1] - 6, SUN.c[0] + 6, SUN.c[1] + 6], SUN.h, 'hall'),
+  // the households: the compounds' courts and rooms
+  ...compounds().map((c, i) => room(`compound-${i}`, c.rect, 0, 'house'))];
+const walks = [[[0, 300], [0, 100], [0, -80], [0, -160], [0, -194], [-18, -200], [-30, -236]]];
 walks[0].y0 = 0;
 
 export const city = {

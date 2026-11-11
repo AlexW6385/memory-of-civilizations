@@ -12,6 +12,9 @@ import { patch } from '../maya/household.js';
 import { mesoPlants } from '../maya/plants.js';
 import { ttMarket } from './market.js';
 import { midden } from './market.js';
+import { kiln, dyeYard } from './craft.js';
+import { streetFront } from './street.js';
+import { ttAvenue, ttPuma, weatherPyramid } from './avenue.js';
 import { ttPalace, ttJaguars, ttPlazaAltars, ttCrossAltar, ttGoddess, ttTempleInside, ttPeople } from './palace.js';
 
 const S = 'stucco_ochre', RD = 'stucco_red', RF = 'limewash_red', RB = 'rubble_teo', HS = 'andesite';
@@ -163,6 +166,7 @@ export function ttPyramid(el, ctx) {
     if (tb === 0 && last) col.floor([cx - a[0] + sx * 0.85, cz - a[1] + sz * 0.85, cx + a[0] - sx * 0.85, cz + a[1] - sz * 0.85], yb);   // the whole of the top, out to its edge
     col.rect([cx - a[0] + sx * 0.4, cz - a[1] + sz * 0.4, cx + a[0] - sx * 0.4, cz + a[1] - sz * 0.4], ya, ya + ht * 0.5);
   }
+  if (el.weather) weatherPyramid(bag, el);
   // the stair up the chosen face, the whole height
   // (`stairFoot`: the stair starts higher than the pyramid's base, on a plaza laid above it)
   const sw = (el.stairW ?? 12) / 2, sy0 = el.stairFoot ?? y0b, run = (y0b + H - sy0) * 1.05, f = el.stair || 'w', ov = tb === 0 && el.talud ? -0.15 * (el.w - el.tw) / 2 / n : 0.5;   // the stair's head laid over the top's edge (on a plastered top, ending at its edge)
@@ -253,6 +257,7 @@ function compound(el, ctx) {
       patch(bag, spall ? RB : rand() < 0.5 ? 'lime_plaster' : 'stucco_pale', nx ? [c, y, u] : [u, y, c], [nx, 0, nz], w, hh, Math.floor(rand() * 1e6), spall ? 0.004 : 0.01);
     }
   }
+  streetFront(ctx, el.rect, gate, h, el.seed || 1, el.rich ?? 0.6);
   // rooms: a grid of blocks, the middle cell the main patio, another the second patio
   const nx = 3, nz = 3, cw = (x1 - x0 - 2) / nx, cd = (z1 - z0 - 2) / nz, second = [0, 2, 6, 8][Math.floor(rand() * 4)];
   const P = [x0 + 1 + cw, z0 + 1 + cd, x0 + 1 + 2 * cw, z0 + 1 + 2 * cd];            // the main patio
@@ -261,6 +266,8 @@ function compound(el, ctx) {
     if (k === 4 || k === second) {
       bag.add(k === 4 ? 'stucco_pale' : 'stucco', frustum([cx0 + 0.5, cz0 + 0.5, cx0 + cw - 0.5, cz0 + cd - 0.5], -0.2, 0.06, 0, 0, 0, 0, { noBottom: true }));
       if (k !== 4 && el.workshop) midden(bag, col, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
+      if (k !== 4 && el.craft === 'potter') kiln(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
+      if (k !== 4 && el.craft === 'weaver') dyeYard(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
       if (k === 4) {
         // the altar: a talud and a framed tablero, a little shrine in miniature
         const ax = cx0 + cw / 2, az = cz0 + cd / 2;
@@ -291,6 +298,7 @@ function compound(el, ctx) {
     const roles = principal ? (nr === 3 ? ['sleep', 'shrine', 'sleep'] : ['shrine', 'sleep']) : Array.from({ length: nr }, (_, j) => (k === 1 && j === 0 ? 'kitchen' : ['sleep', 'store', 'kitchen', 'sleep'][Math.floor(rand() * 4)]));
     if (el.mural && principal) roles[nr === 3 ? 0 : 1] = 'mural';
     if (el.workshop && face === 'e') roles[roles.length - 1] = 'workshop';
+    if (el.craft && face === 'n') roles[roles.length - 1] = el.craft;
     porticoRooms(ctx, back, [fx, fz], ph, rh - 0.45, roles, rand);
     bag.add(S, box(r[0], rh - 0.45, r[1], r[2], rh, r[3])); col.floor(r, rh);
     const L = fx ? r[3] - r[1] : r[2] - r[0];
@@ -307,6 +315,6 @@ function compound(el, ctx) {
 
 registerStyle('teotihuacano', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople, tt_market: ttMarket, meso_plants: mesoPlants },
+  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople, tt_market: ttMarket, meso_plants: mesoPlants, tt_avenue: ttAvenue, tt_puma: ttPuma },
   objects: {},
 });
