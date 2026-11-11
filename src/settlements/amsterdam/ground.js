@@ -15,12 +15,12 @@ function fromWater(x, z) { return Math.max(-5, Math.min(40, height(x, z) - WATER
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || inRect(DAM, x, z, 2) || inRect(HALL, x, z, 1) || inRect(WAAG, x, z, 0.5) || inLot(x, z, 0.5) || VOC.some((r) => inRect(r, x, z, 3))) return null;
   const w = wet(x, z);
-  if (w > 1.4 && w < 3) return { elm: 0.25 };                                    // the rows of elms along the quays
+  if (w > 1.2 && w < 3.4) return { elm: 0.5 };                                    // the rows of elms along the quays
   return { grass: 1.2 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { elm: 0.25 },
+  maxDensity: { elm: 0.5 },
   climate: {
     sun: { az: 170, el: 42, color: [1.0, 0.96, 0.9], intensity: 3.1, lat: 52, dec: 12, hour: 12 },
     sky: { turbidity: 3.0, rayleigh: 1.1, mie: 0.006, mieG: 0.78, zenith: [0.09, 0.16, 0.36], horizon: [0.66, 0.7, 0.74] },

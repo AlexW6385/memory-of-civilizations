@@ -8,6 +8,7 @@
 import { box, frustum } from '../../core/geom.js';
 import { faceFrame, prism, fbox, outline, ngon, slab4, sideprism } from './facade.js';
 import { canalInterior } from './interior.js';
+import { frontDress } from './dress.js';
 
 const ST = 'sandstone_dressed';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -161,6 +162,7 @@ export function canalHouse(el, { bag, col }) {
     const top = s === n - 1, hh = top ? st - 1.05 : st - 0.85;
     crossWindow(bag, F, y, (i + 0.5) * bw, floors[s] + 0.5, ww * (warehouse ? 0.8 : 1), hh, { frame, shutter, shut: warehouse ? 'closed' : shutMode() });
   }
+  frontDress(bag, F, y, { w, base, bays, bw, door, warehouse, open, seed: el.seed || 1 });
   // the gable stone in the pier of the first floor beside the door's bay (gable stones stood about 4 m up: docs §5.9)
   if (stoneAt >= 0 && n > 1) { const pu = (stoneAt === 0 ? 1 : stoneAt) * bw; gableStone(bag, F, y, pu, floors[1] + 0.5 + (st - 0.85) * 0.62 + 0.14, Math.min(0.56, bw - ww - 0.36), rng((el.seed || 1) * 31 + 3)); }
   if (open && doorU !== null) canalInterior(bag, col, F, y, { w, Dm, base, g, H, mat, du: doorU, dw: 0.75, dh: 2.45, wins: hallWins, ww, leaf: doorLeaf });

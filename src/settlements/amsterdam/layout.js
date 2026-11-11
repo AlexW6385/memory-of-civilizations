@@ -20,7 +20,7 @@ export const FISH = [13, -255, 39, -247];
 /** The Nieuwe Kerk, east of the Dam. */
 export const NIEUWE_KERK = [48, -261, 70, -215];
 /** The VOC's warehouses on the IJ's quay (docs §5.11): [x0, z0, x1, z1, open], their long fronts to the north (the quay). */
-export const VOC = [[-110, -282, -82, -270, true], [-78, -282, -50, -270], [52, -282, 80, -270], [84, -282, 112, -270, true], [144, -283, 168, -271], [-168, -283, -144, -271]];
+export const VOC = [[-110, -282, -82, -270, true], [-78, -282, -50, -270, true], [52, -282, 80, -270, true], [84, -282, 112, -270, true], [144, -283, 168, -271], [-168, -283, -144, -271]];
 export const WATER = -1.0, GROUND = 1.0;
 export const QUAY = 1.0;                                    // the quay walls' line: this far beyond the canals' nominal edge
 export const BRIDGE_ANGLES = [0.35, 0.8, 1.25, 1.7, 2.15, 2.6];

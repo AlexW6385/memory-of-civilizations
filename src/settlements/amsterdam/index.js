@@ -4,6 +4,7 @@ import '../../styles/ming/index.js';
 import { dam, canals } from './plan.js';
 import music from './music.js';
 import { houses, damLife, warehouses } from './town.js';
+import { quayLife } from './quay.js';
 export { music };
 export const landmarks = [{ plan: dam, music }];
-export async function town() { return [canals, ...(await houses()), ...warehouses(), ...damLife()]; }
+export async function town() { return [canals, ...(await houses()), ...warehouses(), ...damLife(), ...quayLife()]; }

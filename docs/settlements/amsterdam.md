@@ -121,6 +121,27 @@ Sources (2026-11-11):
 - [Amsterdam: pakhuis van de wereld — Hollandroute](https://www.hollandroute.nl/?p=964)
 - [Fluyt — Wikipedia](https://en.wikipedia.org/wiki/Fluyt)
 
+### 5.13 Inside the churches (L3, 2026-11-11; `src/styles/dutch/church.js`)
+
+- **What is documented:** the Nieuwe Kerk has a pulpit by Albert Jansz Vinckenbrinck and a transept organ by Van Hagerbeer of 1645, and is the burial place of naval heroes (de Ruyter, van Galen) and of Vondel [stated: Wikipedia "Nieuwe Kerk, Amsterdam"; de Ruyter's tomb is of 1681, after our date, so not built]. The Reformed church of the Golden Age was whitewashed, with gravestones in the floor, benches and chairs round the pulpit, brass chandeliers and funeral hatchments (rouwborden) on the columns, as in Saenredam's and De Witte's interiors [inferred from those paintings, not from a measured source].
+- **Ours** (both churches, `interior: true` in plan.js; walls 0.9 m thick, a door 3 m wide in the nave's south end standing open; rooms `nieuwe-kerk*`, `westerkerk*`): whitewashed inner walls; two rows of round stone columns 9.2 m apart; an elliptic plastered barrel vault over the nave (8.5 m to the spring, 12.1 m to the crown) with the groins where the transepts cross it (a heightfield of the higher of the two vaults), flat aisle ceilings on oak beams; the floor of bluestone with about a hundred grey and black gravestones, some with a lead inlay; arched windows lit from the aisles; an octagonal oak pulpit with its stair and sounding board against the east column of the nave; arcs of benches round it; eight-armed brass chandeliers (lit); black hatchments in gilt frames on columns; the Commandments boards by the door; a poor box; the organ on a gallery at the north end with its three towers of gilt pipes [inferred: the real Nieuwe Kerk organ stood in the transept, so ours differs in place]. The space over the vault is solid.
+
+### 5.14 Fronts, quays and shops (L3, 2026-11-11; `src/styles/dutch/dress.js`, `src/settlements/amsterdam/quay.js`)
+
+- **Lamps:** Jan van der Heyden's street lighting scheme for Amsterdam "remained in operation from 1669 until 1840" [stated: Wikipedia "Jan van der Heyden"]; ours: a lantern on a post every 24 m along the water's edge of every quay street (the fuel is not stated; lit at night by the engine's lamp glass).
+- **Shop fronts** (three houses in ten that are not open): the lower shutter folded down into the counter on two brackets, the upper propped as an awning on two poles, the wares of a baker, draper, grocer or apothecary on the counter, and a painted board on an iron bracket with a gilt device (pretzel, ell, cheese, mortar) [inferred from Vermeer's *The Little Street* and De Hooch's street scenes]. Also: damp rising in the brick at the foot, a cellar hatch (kelderluik) of two slanting leaves with iron straps in the pavement (four houses in ten), a bay tree in a tub by the stoop, a bench against the front.
+- **Open houses:** one in four within 190 m of the Dam and one in nine beyond (60 of 249; before, 30), and four of the six VOC warehouses.
+- **Quay life:** benches, barrels, firewood and peat stacked, sacks and crates, handcarts before the houses; neighbours in talk, a maid sweeping her step, an angler on a stool at the quay's edge, a child at play; rowing boats with a rower in the middle of the canals; on the Dam a lute-player with his listeners, a water-carrier, children, dogs, handcarts. [inferred from the street scenes of Berckheyde and van der Heyden]
+
+### 5.15 The mills on the rampart (L3, 2026-11-11; `src/styles/dutch/mill.js`)
+
+- As part of the 17th-century fortifications (completed around 1663) "windmills were placed on top of most of the bastions" [stated: Wikipedia "Walls of Amsterdam"]. Ours: seven smock mills (an eight-sided tarred timber tower on a brick base, a stage round it, a thatched cap, four lattice sails turned to the south-west wind) on a ring at 350 m from the origin, beyond the last canal's houses. [inferred: type, size and number]
+
+Sources (2026-11-11, §5.13–5.15):
+- [Nieuwe Kerk, Amsterdam — Wikipedia](https://en.wikipedia.org/wiki/Nieuwe_Kerk,_Amsterdam)
+- [Jan van der Heyden — Wikipedia](https://en.wikipedia.org/wiki/Jan_van_der_Heyden)
+- [Walls of Amsterdam — Wikipedia](https://en.wikipedia.org/wiki/Walls_of_Amsterdam)
+
 ## 6. Ground and water
 
 Brick quays and streets; rows of elms on the quays; canals; the IJ. [stated: elms along canals — inferred from paintings]

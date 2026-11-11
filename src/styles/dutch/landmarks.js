@@ -4,6 +4,7 @@
 import { box, frustum, lathe } from '../../core/geom.js';
 import { faceFrame, prism, fbox, outline, ngon, arch } from './facade.js';
 import { townHallInterior } from './townhall.js';
+import { churchInterior } from './church.js';
 import { relief } from '../norse/carving.js';
 import { Shape, Path } from '../../core/three.js';
 
@@ -56,14 +57,17 @@ function churchGable(bag, F, y, uc, hw0, gh, mat, gothic) {
  * dutch_church: { rect (the nave, long along z), h (walls), transepts: [[z0, z1]…], tw (how far they stand
  * out each side), gothic, turret, gables: faces of the nave that end in a gable, roof }.
  */
-export function dutchChurch(el, { bag, col }) {
+export function dutchChurch(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 15, tw = el.tw ?? 4, gothic = !!el.gothic, roof = el.roof ?? 'slate', mat = el.mat ?? 'brick';
   const W = x1 - x0, cx = (x0 + x1) / 2, rh = W / 2 * (gothic ? 1.25 : 1.0);
-  bag.add(mat, box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y - 0.5, y + h + rh);
-  const tr = (el.transepts ?? []).map(([a, b]) => [x0 - tw, a, x1 + tw, b]);
-  for (const r of tr) { bag.add(mat, box(r[0], y - 0.5, r[1], r[2], y + h, r[3])); col.rect(r, y - 0.5, y + h); }
+  const tr = (el.transepts ?? []).map(([a, b]) => [x0 - tw, a, x1 + tw, b]), inside = !!el.interior;
+  if (inside) churchInterior(el, tr, { bag, col, lights });
+  else {
+    bag.add(mat, box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y - 0.5, y + h + rh);
+    for (const r of tr) { bag.add(mat, box(r[0], y - 0.5, r[1], r[2], y + h, r[3])); col.rect(r, y - 0.5, y + h); }
+  }
   // plinth and eaves cornice round everything
-  for (const r of [el.rect, ...tr]) { bag.add(ST, box(r[0] - 0.25, y - 0.5, r[1] - 0.25, r[2] + 0.25, y + 1.2, r[3] + 0.25)); bag.add(ST, box(r[0] - 0.35, y + h - 0.5, r[1] - 0.35, r[2] + 0.35, y + h, r[3] + 0.35)); }
+  for (const r of [el.rect, ...tr]) { if (!inside) bag.add(ST, box(r[0] - 0.25, y - 0.5, r[1] - 0.25, r[2] + 0.25, y + 1.2, r[3] + 0.25)); bag.add(ST, box(r[0] - 0.35, y + h - 0.5, r[1] - 0.35, r[2] + 0.35, y + h, r[3] + 0.35)); }
   // the long walls in bays: buttresses (Gothic) or stone pilasters (Renaissance), a tall window in each bay
   for (const f of ['e', 'w']) {
     const F = faceFrame(el.rect, f), bays = Math.max(1, Math.round((z1 - z0) / 5.6)), bw = (z1 - z0) / bays;
@@ -90,7 +94,8 @@ export function dutchChurch(el, { bag, col }) {
   for (const f of el.gables ?? ['n', 's']) {
     const F = faceFrame(el.rect, f);
     churchGable(bag, F, y + h, W / 2, W / 2, rh, mat, gothic);
-    if (f === (el.door ?? 's')) { for (const q of arch(W / 2, 1.2, 2.4, 4.4, gothic, 0.35)) bag.add(ST, prism(F, y, q, 0, 0.2)); for (const q of arch(W / 2, 1.2, 2.4, 4.4, gothic)) bag.add('wood_dark', prism(F, y, q, 0.2, 0.26)); archWindow(bag, F, y, W / 2, 7.4, Math.min(5, W * 0.3), h - 8.4, gothic, gothic ? 4 : 3); }
+    if (inside && f === (el.door ?? 's')) { const u = W / 2, DW = 1.5, DH = 4.6; bag.add(ST, fbox(F, y, u - DW - 0.35, u - DW, 0, DH + 0.45, 0, 0.25)); bag.add(ST, fbox(F, y, u + DW, u + DW + 0.35, 0, DH + 0.45, 0, 0.25)); bag.add(ST, fbox(F, y, u - DW - 0.35, u + DW + 0.35, DH, DH + 0.45, 0, 0.3)); archWindow(bag, F, y, u, 7.4, Math.min(5, W * 0.3), h - 8.4, gothic, gothic ? 4 : 3); }
+    else if (f === (el.door ?? 's')) { for (const q of arch(W / 2, 1.2, 2.4, 4.4, gothic, 0.35)) bag.add(ST, prism(F, y, q, 0, 0.2)); for (const q of arch(W / 2, 1.2, 2.4, 4.4, gothic)) bag.add('wood_dark', prism(F, y, q, 0.2, 0.26)); archWindow(bag, F, y, W / 2, 7.4, Math.min(5, W * 0.3), h - 8.4, gothic, gothic ? 4 : 3); }
     else archWindow(bag, F, y, W / 2, 3.0, Math.min(5, W * 0.3), h - 4.4, gothic, gothic ? 4 : 3);
   }
   bag.add(roof, frustum([x0 - 0.3, z0 + 0.2, x1 + 0.3, z1 - 0.2], y + h, y + h + rh, W / 2 + 0.25, W / 2 + 0.25, 0, 0));
