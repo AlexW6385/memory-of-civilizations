@@ -13,7 +13,9 @@ import { elTrack, elTrain } from './el.js';
 import { grandCentral } from './gct.js';
 import { laundry, newsstand } from './street.js';
 import { turned } from './turn.js';
-import { rowhouses, castIronFront, chimney, bulkhead, subwayEntrance } from './blocks.js';
+import { pavement, curb } from './pave.js';
+import { rowhouses, castIronFront, chimney, bulkhead, subwayEntrance, face } from './blocks.js';
+import { shopName, shopSign, bladeText, nearEntrance, rng as rng2 } from './dress.js';
 
 const LS = 'facade_limestone', CH = 'steel_chrome';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -69,7 +71,7 @@ function storefronts(bag, [x0, z0, x1, z1], y, rand, faces = 'nsew') {
     const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, a0 = along ? x0 : z0, o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
     const R = (u0, u1, y0, y1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? box(a0 + u0, y0, Math.min(a, b), a0 + u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, a0 + u0, Math.max(a, b), y1, a0 + u1); };
     const Pt = (u, d, yy) => along ? [a0 + u, yy, o + sg * d] : [o + sg * d, yy, a0 + u];
-    const n = Math.max(1, Math.floor(L / 6));
+    const n = Math.max(1, Math.floor(L / 6)), FF = face([x0, z0, x1, z1], f), full = nearEntrance((x0 + x1) / 2, (z0 + z1) / 2);
     for (let i = 0; i < n; i++) {
       const u0 = i * L / n + 0.6, u1 = (i + 1) * L / n - 0.6, dl = rand() < 0.5, du0 = dl ? u0 : u1 - 1.1, du1 = du0 + 1.1;
       const g0 = dl ? u0 + 1.25 : u0, g1 = dl ? u1 : u1 - 1.25;
@@ -80,6 +82,8 @@ function storefronts(bag, [x0, z0, x1, z1], y, rand, faces = 'nsew') {
       bag.add('glass_outer', R(du0, du1, y + 2.55, y + 3.2, 0.15, 0.18));                       // its transom
       bag.add('wood_painted', R(du0 - 0.08, du1 + 0.08, y + 2.4, y + 2.55, 0.15, 0.22));
       bag.add('opening', R(u0, u1, y + 3.3, y + 3.6, 0.15, 0.17));
+      const sr = rng2(Math.floor(x0 * 131 + z0 * 71 + i * 17) + f.charCodeAt(0)), shop = shopName(x0, z0, sr);
+      shopSign(bag, FF, u0, u1, y, shop, g0, g1, full, sr);
       if (rand() < 0.35) {                                                                       // the awning
         const T = [], m = AWN[Math.floor(rand() * AWN.length)], dO = 1.7, yi = y + 3.55, yo = y + 2.95, yv = y + 2.65;
         const q = (A, B, C, D) => T.push(...A, ...B, ...C, ...A, ...C, ...D, ...A, ...C, ...B, ...A, ...D, ...C);
@@ -93,7 +97,8 @@ function storefronts(bag, [x0, z0, x1, z1], y, rand, faces = 'nsew') {
       if (rand() < 0.18) {                                                                       // the blade sign
         const u = rand() < 0.5 ? u0 + 0.3 : u1 - 0.3, m = SIGN[Math.floor(rand() * SIGN.length)], yb = y + 4.6 + rand() * 1.2, hh = 1.4 + rand() * 1.4;
         bag.add(m, along ? box(a0 + u - 0.06, yb, Math.min(o + sg * 0.5, o + sg * 1.6), a0 + u + 0.06, yb + hh, Math.max(o + sg * 0.5, o + sg * 1.6)) : box(Math.min(o + sg * 0.5, o + sg * 1.6), yb, a0 + u - 0.06, Math.max(o + sg * 0.5, o + sg * 1.6), yb + hh, a0 + u + 0.06));
-        for (const k of [0.25, 0.5, 0.75]) bag.add('gilt_bronze', along ? box(a0 + u - 0.075, yb + hh * k - 0.07, Math.min(o + sg * 0.62, o + sg * 1.48), a0 + u + 0.075, yb + hh * k + 0.07, Math.max(o + sg * 0.62, o + sg * 1.48)) : box(Math.min(o + sg * 0.62, o + sg * 1.48), yb + hh * k - 0.07, a0 + u - 0.075, Math.max(o + sg * 0.62, o + sg * 1.48), yb + hh * k + 0.07, a0 + u + 0.075));
+        if (full) bladeText(bag, FF, f, u, 0.5, 1.6, yb, hh, ['HOTEL', 'CAFE', 'BAR', 'DRUGS', 'BANK', 'CLUB', 'INN', 'SHOES', 'HATS', 'LUNCH'][Math.floor(rand() * 10)], 'gold');
+        else for (const k of [0.25, 0.5, 0.75]) bag.add('gilt_bronze', along ? box(a0 + u - 0.075, yb + hh * k - 0.07, Math.min(o + sg * 0.62, o + sg * 1.48), a0 + u + 0.075, yb + hh * k + 0.07, Math.max(o + sg * 0.62, o + sg * 1.48)) : box(Math.min(o + sg * 0.62, o + sg * 1.48), yb + hh * k - 0.07, a0 + u - 0.075, Math.max(o + sg * 0.62, o + sg * 1.48), yb + hh * k + 0.07, a0 + u + 0.075));
         for (const yy of [yb + 0.15, yb + hh - 0.15]) bag.add('iron', rod(Pt(u, 0.0, yy), Pt(u, 0.5, yy), 0.03, 4));
       }
     }
@@ -253,6 +258,6 @@ function beauxArts(el, { bag, col }) {
 function park(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('granite_grey', box(x0, y - 0.3, z0, x1, y + 0.25, z0 + 1.5)); bag.add('granite_grey', box(x0, y - 0.3, z1 - 1.5, x1, y + 0.25, z1)); }
 registerStyle('artdeco', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, diner, walkup, skyscraper, empire_state: empireState, grand_central: grandCentral, laundry, newsstand, subway_entrance: subwayEntrance, chrysler, beaux_arts: beauxArts, el_track: elTrack, el_train: elTrain, park, turned },
+  elements: { ...STYLES.qing.elements, diner, walkup, skyscraper, empire_state: empireState, grand_central: grandCentral, laundry, newsstand, subway_entrance: subwayEntrance, pavement, curb, chrysler, beaux_arts: beauxArts, el_track: elTrack, el_train: elTrain, park, turned },
   objects: {},
 });

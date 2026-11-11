@@ -1,7 +1,7 @@
 // The blocks' buildings (docs/settlements/new-york.md §5) and the street's life (§5a): the traffic of
 // 1931 on the avenues and cross streets — Checker and Yellow cabs among black, cream and blue
 // motor cars — people on the pavements, lamp posts along the avenues.
-import { RADIUS, AVENUES, STREETS, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity } from './layout.js';
+import { RADIUS, AVENUES, STREETS, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity, frontPoint, pavements } from './layout.js';
 import { entranceOf } from './plan.js';
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
 // settlement's by the style's `turned`, the life of the streets — single placed things — moved and
@@ -96,6 +96,47 @@ function yards() {
   for (const e of out) { const p = e.at ?? e.pole, k = `${Math.floor(p[0] / 150)},${Math.floor(p[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-yards-${k}`, list), center: toCity(i * 150 + 75, j * 150 + 75), near: 300 }; });
 }
+/**
+ * The pavements and what stands on them (docs §1i), in tiles: the flags and curbs of every block, then the street furniture
+ * of the corners (signals on two diagonal corners of every crossing, hydrants, mail boxes, fire alarm boxes, Fifth Avenue's
+ * clocks), manholes in the roadways, and at the shop fronts what each district put out: racks and hand trucks in the garment
+ * district, ash cans and barrels in Murray Hill, sandwich boards on the avenues' cross streets.
+ */
+function pavePlans() {
+  const rand = rng0(7731), items = [], inside = (x, z) => Math.hypot(x, z) < RADIUS - 50;
+  const clear = (x, z, m = 0.5) => inside(x, z) && !inLot(x, z, m) && !inSpecial(x, z, m) && !onElStair(x, z, m + 0.6) && !onBroadway(x, z, m + 1) && !nearStand(x, z, 2.2) && !items.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < 0.9);
+  const put = (k, x, z, rot, extra = {}) => { if (clear(x, z, k === 'manhole' ? 0 : 0.4)) items.push({ k, at: [x, z], y: height(x, z), rot, seed: Math.floor(rand() * 1e6), ...extra }); };
+  for (const [ax, w, name] of AVENUES) for (const [sz, sw] of STREETS) for (const sx of [-1, 1]) for (const szs of [-1, 1]) {
+    const cx = ax + sx * (w / 2 + 0.7), cz = sz + szs * (sw / 2 + 0.7);
+    if (sx === szs && name !== '3rd') put('signal', cx, cz, 0);
+    if (rand() < 0.3) put('hydrant', cx - sx * 0.2, cz + szs * (3 + rand() * 4), 0);
+    if (rand() < 0.22) put('mailbox', cx + sx * 0.1, cz - szs * (1.2 + rand() * 2), 0);
+    if (rand() < 0.12) put('firebox', cx, cz - szs * 4.5, 0);
+    if (rand() < 0.5) put('ashcan', cx - sx * 0.1, cz + szs * (1.6 + rand() * 2), 0);
+  }
+  for (const [ax, w, name] of AVENUES) {
+    if (name === '5th') for (const sg of [-1, 1]) for (let z = -RADIUS + 40; z < RADIUS - 40; z += 38 + rand() * 40) put('clock', ax + sg * (w / 2 + 0.8), z, 0);
+    for (let z = -RADIUS + 20; z < RADIUS - 40; z += 30 + rand() * 30) put('manhole', ax + (rand() - 0.5) * (w - 4), z, 0);
+  }
+  for (const [sz] of STREETS) for (let x = -RADIUS + 20; x < RADIUS - 40; x += 40 + rand() * 40) put('manhole', x, sz + (rand() - 0.5) * 6, 0);
+  // the shop fronts
+  const SPECIALS = ['LUNCH 35', 'HOT COFFEE', 'FRESH PIES', 'SODA', 'OPEN'];
+  for (const l of lots()) {
+    const [x0, z0, x1, z1] = l.rect, L = x1 - x0, f = l.front, garment = x0 < -10, murray = x0 > 60 && z0 > -150, rowish = !!l.row;
+    for (let u = 2.2 + rand() * 4; u < L - 1.2; u += 5 + rand() * 6) {
+      const roll = rand(), [px, pz] = frontPoint(l.rect, f, u, (rowish ? 1.5 : 0.8) + rand() * 0.4);
+      if (garment) { if (roll < 0.28) put('rack', px, pz, 0); else if (roll < 0.5) put('truck', px, pz, rand() < 0.5 ? 0 : Math.PI); else if (roll < 0.62) put('crates', px, pz, 0); else if (roll < 0.72) put('ashcan', px, pz, 0); }
+      else if (murray) { if (roll < 0.28) put('ashcan', px, pz, 0); else if (roll < 0.4) put('barrel', px, pz, 0); else if (roll < 0.5 && !rowish) put('crates', px, pz, 0); }
+      else if (roll < 0.22) put('asign', px, pz, (f === 'n' ? Math.PI / 2 : -Math.PI / 2) + (rand() - 0.5) * 0.3, { text: SPECIALS[Math.floor(rand() * SPECIALS.length)] }); else if (roll < 0.36) put('ashcan', px, pz, 0);
+    }
+  }
+  const { segs, curbs } = pavements(), tiles = new Map(), slot = (p) => `${Math.floor(p[0] / 150)},${Math.floor(p[1] / 150)}`;
+  const tile = (k) => { if (!tiles.has(k)) tiles.set(k, { segs: [], curbs: [], items: [] }); return tiles.get(k); };
+  for (const s of segs) tile(slot([(s[0] + s[2]) / 2, (s[1] + s[3]) / 2])).segs.push(s);
+  for (const c of curbs) tile(slot([(c[0] + c[2]) / 2, (c[1] + c[3]) / 2])).curbs.push(c);
+  for (const it of items) tile(slot(it.at)).items.push(it);
+  return [...tiles].map(([k, t]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-street-${k}`, [{ t: 'pavement', segs: t.segs, curbs: t.curbs }, { t: 'curb', items: t.items }]), center: toCity(i * 150 + 75, j * 150 + 75), near: 320 }; });
+}
 /** The lot of the diner (on 34th Street east of Fifth) and the walk-up (beside it), §1f. */
 const lotAt = ([x, z]) => lots().find((l) => inRect(l.rect, x, z));
 function special(l) {
@@ -125,5 +166,5 @@ export async function buildings() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l) }])));
   const dl = dinerLife(), c = toCity(...DINER_AT);
-  return [...plans, ...streetLife(), ...yards(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
+  return [...plans, ...streetLife(), ...yards(), ...pavePlans(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }

@@ -92,3 +92,30 @@ export function chimneyAt(l) {
   return [x0 + (x1 - x0) * (0.2 + 0.6 * r()), z0 + (z1 - z0) * (0.3 + 0.4 * r())];
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** A point of a lot's street face in the grid's frame: u along the face from the rect's corner (as blocks.js face), d out into the street. */
+export function frontPoint([x0, z0, x1, z1], f, u, d) {
+  const along = f === 'n' || f === 's', a0 = along ? x0 : z0, o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
+  return along ? [a0 + u, o + sg * d] : [o + sg * d, a0 + u];
+}
+/** The pavements: the 3 m between each block's kerb and its lots' fronts, cut into pieces of at most 14 m, with a curb along the kerb side:
+ * { segs: [[x0, z0, x1, z1, yA, yB]], curbs: [[x0, z0, x1, z1, y]] } in the grid's frame — none where a landmark's lot or Broadway lies. */
+export function pavements() {
+  const segs = [], curbs = [], xs = [-460, ...AVENUES.map(([x]) => x), 460], zs = STREETS.map(([z]) => z).sort((a, b) => a - b), T = 3, M = 14;
+  const ok = (x, z) => Math.hypot(x, z) < RADIUS - 30 && !inSpecial(x, z, 1.5) && !onBroadway(x, z, 3);
+  for (let i = 0; i + 1 < xs.length; i++) for (let j = 0; j + 1 < zs.length; j++) {
+    const ai = AVENUES[i - 1], bi = AVENUES[i], kx0 = xs[i] + (ai ? ai[1] / 2 : 0), kx1 = xs[i + 1] - (bi ? bi[1] / 2 : 0), kz0 = zs[j] + 6, kz1 = zs[j + 1] - 6;
+    if (kx1 - kx0 < 12 || kz1 - kz0 < 12) continue;
+    const strips = [[kx0, kz0, kx1, kz0 + T, 'z0'], [kx0, kz1 - T, kx1, kz1, 'z1'], [kx0, kz0 + T, kx0 + T, kz1 - T, 'x0'], [kx1 - T, kz0 + T, kx1, kz1 - T, 'x1']];
+    for (const [a, b, c, d, side] of strips) {
+      const alongX = side === 'z0' || side === 'z1', len = alongX ? c - a : d - b, n = Math.max(1, Math.ceil(len / M));
+      for (let k = 0; k < n; k++) {
+        const r = alongX ? [a + len * k / n, b, a + len * (k + 1) / n, d] : [a, b + len * k / n, c, b + len * (k + 1) / n], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
+        if (!ok(cx, cz) || !ok(r[0], cz) || !ok(r[2], cz) || !ok(cx, r[1]) || !ok(cx, r[3])) continue;
+        segs.push([...r, height(cx, r[1]), height(cx, r[3])]);
+        const cw = 0.2, cy = height(cx, cz), e = side === 'z0' ? [r[0], r[1], r[2], r[1] + cw] : side === 'z1' ? [r[0], r[3] - cw, r[2], r[3]] : side === 'x0' ? [r[0], r[1], r[0] + cw, r[3]] : [r[2] - cw, r[1], r[2], r[3]];
+        curbs.push([...e, cy]);
+      }
+    }
+  }
+  return { segs, curbs };
+}

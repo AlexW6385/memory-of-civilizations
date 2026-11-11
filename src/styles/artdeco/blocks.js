@@ -7,7 +7,7 @@ import { box, rod, lathe } from '../../core/geom.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** The frame of a street face f of a rect: { R(u0, u1, y0, y1, d0, d1) → box, P(u, d, y) → point, L, a0, o, sg, along, ext }. */
-function face([x0, z0, x1, z1], f) {
+export function face([x0, z0, x1, z1], f) {
   const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, a0 = along ? x0 : z0, o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
   const ext = along ? z1 - z0 : x1 - x0;
   const R = (u0, u1, y0, y1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? box(a0 + u0, y0, Math.min(a, b), a0 + u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, a0 + u0, Math.max(a, b), y1, a0 + u1); };
