@@ -56,6 +56,24 @@ Sources added:
 Sources added:
 - [Monumental feasts — English Heritage](https://english-heritage.org.uk/visit/inspire-me/cote-feasts-durrington)
 
+## 1d. The Aubrey Holes (2026-11; `aubrey_holes`, placed in `plan.js`)
+
+- 56 chalk pits on a ring of circumference 271.6 m (about 86 m across), about 5 m inside the bank; on average 1.06 m across and 0.76 m deep; "refilled with freshly excavated chalk rubble soon after digging"; later cremation burials in the upper fills of 25 of the 35 excavated [stated: Wikipedia "Aubrey holes"].
+- Built: 56 patches of white rubble 1.0–1.2 m across, a little proud of the turf, with 5–8 lumps of chalk on each, some with a dark ring of trodden soil, on a ring of radius 43.2 m (jittered 0.35 m) [inferred: appearance, since turf had not yet regrown; the ring is drawn through the entrance causeway].
+
+## 10b. The gathering and the living town (2026-11; `camp_shelter`, `hurdle`, `camp()` in `town.js`, `movers.js`, `fauna.js`, `smoke.js`)
+
+- People and animals came from across Britain: isotopes of 131 animals from four Late Neolithic Wessex sites show pigs raised from the coastal west to the highland east, some possibly from Scotland; tens of thousands of pig remains at Durrington Walls [stated: The Science Breaker summary of Madgwick et al. 2019, https://thesciencebreaker.org/en/breaks/evolution-behaviour/ancient-feasts-drew-people-and-animals-from-across-neolithic-britain]. Cattle are the rest of the bones [stated: EH "Monumental feasts"]. The dossier's own date for the feasts is midwinter (§10a); a summer gathering at the solstice sunrise on the axis is [inferred] and drawn as the same camp.
+- Camp (inferred; no shelters of visitors are preserved): seven clusters either side of the Avenue 60-200 m out, each a fire with pots, three or four hide-covered pole shelters (10 poles leaning to a point and crossing above it, door toward the fire, turf and chalk banked round the foot), a woven hazel hurdle windbreak on the windward side, 4-7 people sitting, squatting or standing.
+- Cattle: a hurdle pen (18 x 11 m, a gate gap) beside the Avenue with nine oxen and two drovers at the gate; eleven oxen loose on the grass beyond, a herder with a staff by some [inferred].
+- Houses, interior detail added: eight hazel rafters from the wall-plate to the apex bound by two withy hoops (the frame of woven hazel and thatch, EH visitor-centre reconstruction), a cooking pot in the embers, a saddle quern by the door, wicker baskets by the beds, a woven hurdle door hung against the wall [stated: frame, pots, beds and hearth as §5a; inferred: quern, baskets, door].
+- Living systems: walkers (men, women, women with pots and baskets on the head, herders, porters, children, in tunics, wraps and hide cloaks) on ways along the Avenue (kept clear of the Heel Stone, through the gap between the entrance stones), round the sarsen circle, to the camps and the pen, and from each house door to the Durrington avenue; smoke from about 45% of the houses' roofs at the meals and from every fire of the feast and camp, steam from their pots; crows over the camp and Durrington, swallows low over the down, small birds on the trodden chalk [inferred; dress: only flax, wool, leather and fur, and bone pins, are known].
+- Houses at Durrington were square (§5a), so they are kept square, not round; round houses belong to later periods.
+
+Sources added:
+- [Aubrey holes - Wikipedia](https://en.wikipedia.org/wiki/Aubrey_holes)
+- [Ancient feasts drew people and animals from across Neolithic Britain - The Science Breaker](https://thesciencebreaker.org/en/breaks/evolution-behaviour/ancient-feasts-drew-people-and-animals-from-across-neolithic-britain)
+
 ## 2. Layout of the settlement (radius 360 m)
 
 | Part | Where (m, +x east, +z south) | Notes |
