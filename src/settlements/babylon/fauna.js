@@ -21,6 +21,9 @@ const flights = [
 const perches = [];
 const spots = [[WAY.x - 5, -330], [WAY.x + 6, -200], [WAY.x - 7, -140], [WAY.x + 4, -90], [PRECINCT[0] + 20, PRECINCT[1] + 14], [60, -30], [-70, 100], [8, 140], [(MARKET[0] + MARKET[2]) / 2, (MARKET[1] + MARKET[3]) / 2], [MARKET[0] + 12, MARKET[1] + 14], [MARKET[2] - 10, MARKET[3] - 12]];
 for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: height(x, z) + 0.12, rot: (x * 7) % 3, range: [1.6, 1.4] });
+// the lanes of the blocks: sparrows on the paving at the crossings, swallows over the roofs
+for (const [x, z] of [[-26, -110], [-26, -50], [-53, -112], [35, -150], [35, -86], [97, -150], [97, -22], [-115, -22], [-115, -150], [160, -90], [35, 270], [-26, 240], [97, 200], [-115, 100]]) perches.push({ kind: 'sparrow', x: x + 0.6, z: z + 0.4, y: 0.1, rot: (x * 5 + z) % 3, range: [1.6, 1.4] });
+flights.push({ kind: 'swallow', n: 5, loop: { c: [60, -100], a: [90, 70], rot: 0.2 }, y: [9, 20], speed: 9 }, { kind: 'swallow', n: 4, loop: { c: [-120, 120], a: [70, 60], rot: -0.3 }, y: [9, 20], speed: 9 }, { kind: 'crow', n: 4, loop: { c: [120, 160], a: [60, 50], rot: 0.5 }, y: [20, 35], speed: 8 });
 for (const z of [-60, 30, 100, 180]) perches.push({ kind: 'sparrow', x: riverX(z) + QUAY.d0 + 6, z, y: QUAY.y + 0.1, rot: z * 0.3, range: [1.6, 1.4] });
 perches.push({ kind: 'heron', x: riverX(160) + QUAY.d0 + 1, z: 160, y: QUAY.y, rot: -Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
 perches.push({ kind: 'egret', x: riverX(-90) + QUAY.d0 + 1, z: -90, y: QUAY.y, rot: -Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 });

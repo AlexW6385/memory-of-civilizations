@@ -4,9 +4,14 @@
 // Euphrates at dawn. The engine part is src/engine/smoke.js (one draw call); positions come from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, ZIGGURAT, ESAGILA, RIVER, QUAY, lots, riverX } from './layout.js';
+import { RADIUS, ZIGGURAT, ESAGILA, RIVER, QUAY, lots, yards, riverX, esagilaChambers } from './layout.js';
 
 const ID = 'babylon';
+/** The turned frame of a lot (u along its front, v in from it): the W of src/styles/babylonian/shop.js frameOf. */
+function frameOf(rect, f) {
+  const [x0, z0, x1, z1] = rect, U = f === 'n' || f === 's' ? x1 - x0 : z1 - z0, V = f === 'n' || f === 's' ? z1 - z0 : x1 - x0;
+  return { U, V, W: (u, v) => (f === 'n' ? [x0 + u, z0 + v] : f === 's' ? [x1 - u, z1 - v] : f === 'w' ? [x0 + v, z1 - u] : [x1 - v, z0 + u]) };
+}
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 
 export function emitters() {
@@ -15,6 +20,21 @@ export function emitters() {
     const [x0, z0, x1, z1] = l.rect, k = r();
     if (k < 0.36) E.push({ p: [x0 + (x1 - x0) * (0.25 + 0.5 * r()), 3.9, z0 + (z1 - z0) * (0.3 + 0.4 * r())], kind: 'kitchen', thr: 0.3 + 0.5 * r(), seed: l.seed + 1 });
   }
+  // the workshops (§13.1): the bakers' ovens and the potters' kilns in the yards of the shops, the smith's forge under its hood, the
+  // clamp of the brickyards and the kilns of the pottery yards, the chimneys of Esagila's kitchen and bakehouse
+  for (const l of lots()) {
+    if (!l.shop) continue;
+    const { U, V, W } = frameOf(l.rect, l.door), yard0 = 6.5, at = (u, v, y, kind, thr, seed) => { const [x, z] = W(u, v); E.push({ p: [x, y, z], kind, thr, seed }); };
+    if (l.shop === 'baker') { at(U * 0.3, yard0 + 1.7, 1.2, 'kitchen', 0.05, l.seed + 3); at(U * 0.3 + 1.7, yard0 + 1.7, 1.2, 'kitchen', 0.1, l.seed + 4); }
+    else if (l.shop === 'potter') at(U * 0.3, yard0 + 2.0, 1.9, 'kitchen', 0.25, l.seed + 5);
+    else if (l.shop === 'smith') at(U - 2.4, 5.2, 3.9, 'kitchen', 0.15, l.seed + 6);
+  }
+  for (const y of yards()) {
+    const { U, V, W } = frameOf(y.rect, y.door), r2 = rng(y.seed);
+    if (y.kind === 'brickyard') { const [x, z] = W(U * 0.55, V - 2.4); E.push({ p: [x, 2.1, z], kind: 'kitchen', thr: 0.1, seed: y.seed + 1 }); }
+    else if (y.kind === 'kiln') for (const [u, v] of [[U * 0.3, V * 0.5], [U * 0.68, V * 0.62]]) { const [x, z] = W(u, v); E.push({ p: [x, 2.0, z], kind: 'kitchen', thr: 0.2 + 0.3 * r2(), seed: y.seed + 2 }); }
+  }
+  for (const c of esagilaChambers(ESAGILA)) if (c.kind === 'kitchen' || c.kind === 'bakehouse') E.push({ p: [(c.r[0] + c.r[2]) / 2, 12.2, (c.r[1] + c.r[3]) / 2], kind: 'kitchen', thr: 0.05, seed: Math.floor(c.r[0] * 31) });
   // Esagila: the great altar in the court, and the incense before the cella (court: x 32…63 from the west side; the middle line)
   const zc = (ESAGILA[1] + ESAGILA[3]) / 2, cx = ESAGILA[0] + 32;
   E.push({ p: [cx + 17, 1.8, zc], kind: 'incense', thr: 0, seed: 11 });

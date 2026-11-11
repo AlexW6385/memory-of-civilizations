@@ -2,7 +2,9 @@
 // seated in his cella; priests in Esagila's court; Babylonians on the Processional Way and the bridge in the dress
 // Herodotus gives them (1.195: a linen tunic to the feet, a woollen one over it, a white mantle; long hair bound
 // with fillets; a carved staff); boatmen standing in the round boats, a live ass in the largest (1.194).
-import { RADIUS, WAY, WALL_Z, ESAGILA, RIVER, BRIDGE, QUAY, MARKET, riverX, lots } from './layout.js';
+import { RADIUS, WAY, WALL_Z, ESAGILA, RIVER, BRIDGE, QUAY, MARKET, riverX, lots, yards, alleys, laneRects, laneProps } from './layout.js';
+import { lifePlans } from './life.js';
+import { height as ground0 } from './layout.js';
 import { QUFFAS } from './plan.js';
 import { esagilaStatue } from '../../styles/babylonian/temple.js';
 
@@ -23,11 +25,12 @@ function people() {
   for (const [dx, dz, pose] of [[4.5, -1.6, 'pray'], [4.5, 1.5, 'pray'], [14, -2.6, 'stand'], [19.5, 2.8, 'talk']]) man([cx + dx, zc + dz], 0.06, face([cx + dx, zc + dz], dx < 10 ? [cx, zc] : [cx + 17, zc]), { pose, cloth: 'linen', cloth2: 'cloth_white', over: 'sash', carry: 'none' });
   // on the Processional Way, in twos and threes, going to and from the gate
   for (let k = 0; k < 9; k++) {
-    const z = WALL_Z + 45 + rand() * 180, x = WAY.x + (rand() - 0.5) * 12, north = rand() < 0.5, rot = north ? Math.PI + (rand() - 0.5) * 0.3 : (rand() - 0.5) * 0.3;
+    const z = WALL_Z + 45 + rand() * 180, x0 = WAY.x + (rand() - 0.5) * 12, x = Math.abs(x0 - WAY.x) < 3.2 ? x0 + (x0 >= WAY.x ? 3.4 : -3.4 - 1.6) : x0,   // (clear of the walking line down the middle)
+    north = rand() < 0.5, rot = north ? Math.PI + (rand() - 0.5) * 0.3 : (rand() - 0.5) * 0.3;
     const n = 1 + Math.floor(rand() * 3);
     for (let i = 0; i < n; i++) (rand() < 0.7 ? man : woman)([x + i * 0.75, z + (rand() - 0.5) * 0.6], 0.12, rot + Math.PI, {});
   }
-  for (let k = 0; k < 6; k++) { const z = WALL_Z - 60 - rand() * 50, x = WAY.x + (rand() - 0.5) * 12; man([x, z], 0.12, Math.PI + (rand() - 0.5) * 0.4); }
+  for (let k = 0; k < 6; k++) { const z = WALL_Z - 60 - rand() * 50, x0 = WAY.x + (rand() - 0.5) * 12, x = Math.abs(x0 - WAY.x) < 2 ? x0 + (x0 >= WAY.x ? 2.2 : -2.2) : x0; man([x, z], 0.12, Math.PI + (rand() - 0.5) * 0.4); }
   // on the bridge and its bridgeheads; a donkey with its driver
   const xr = riverX(BRIDGE.z);
   for (const [dx, dz, east] of [[-20, -2.5, 1], [-17, -1.8, 1], [6, 2.2, 0], [26, -2.6, 0], [38, 1.5, 1]]) (rand() < 0.75 ? man : woman)([xr + dx, BRIDGE.z + dz], BRIDGE.y, east ? -Math.PI / 2 : Math.PI / 2);
@@ -70,9 +73,42 @@ function people() {
   return { id: 'babylon-people', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, -370], facing: 's' }, center: [-60, 0], near: 420 };
 }
 
+/** Standards of Marduk and braziers along the Processional Way, between its paving and the glazed walls. */
+function wayProps() {
+  const P = [];
+  for (const [z0, z1] of [[-368, -318], [-262, -166], [-152, -70]]) for (let z = z0; z <= z1; z += 24) for (const s of [-1, 1]) P.push({ kind: 'standard', at: [WAY.x + s * 9.0, z + (s > 0 ? 6 : 0)], rot: s > 0 ? Math.PI / 2 : -Math.PI / 2, y: 0.12, seed: 1 });
+  for (const [dx, z] of [[-5, -64], [5, -64], [-5, -266], [5, -266], [-5, -322], [5, -322]]) P.push({ kind: 'brazier', at: [WAY.x + dx, z], rot: 0, y: 0.12, seed: 2 });
+  return P;
+}
+/** Shadufs on the west bank, lifting the river to the gardens. */
+function bankProps() {
+  const P = [];
+  for (const z of [-110, -30, 120, 190]) { const x = riverX(z) - 46; P.push({ kind: 'shaduf', at: [x, z], rot: 0, y: ground0(x, z), seed: z }); }
+  return P;
+}
+const storeysOf = (seed) => (rng(seed || 1)() < 0.45 ? 2 : 1);
+const CORE_C = [-40, -70];
 export async function houses() {
-  const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) plans.push(base(`babylon-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'babylon_house', ...l }))));
+  const all = lots(), plans = [], tiles = new Map();
+  // the houses in plans by tile of 150 m (each culls apart), the open ones and the shops of the core in plans of their own
+  for (const l of all) {
+    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, key = `${Math.floor(cx / 150)},${Math.floor(cz / 150)}`;
+    const lite = Math.hypot(cx - CORE_C[0], cz - CORE_C[1]) > 150;
+    const e = l.shop ? { t: 'babylon_shop', rect: l.rect, door: l.door, seed: l.seed, trade: l.shop, shop: true, storeys: 1, front: l.door }
+      : { t: 'babylon_house', rect: l.rect, seed: l.seed, door: l.door, open: !!l.open, school: !!l.school, white: l.open && l.seed % 3 === 0, storeys: l.open ? 1 : storeysOf(l.seed), front: l.door, lite };
+    if (!tiles.has(key)) tiles.set(key, []);
+    tiles.get(key).push(e);
+  }
+  let n = 0;
+  for (const E of tiles.values()) for (let i = 0; i < E.length; i += 120) {
+    const part = E.slice(i, i + 120);
+    plans.push({ ...base(`babylon-houses-${n++}`, part), rooms: part.filter((e) => e.open || e.t === 'babylon_shop').map((e, k) => ({ id: `${e.t === 'babylon_shop' ? e.trade + ' shop' : 'house'} ${n}-${k}`, rect: e.rect, y: 0, kind: 'hall' })) });
+  }
+  // the walled yards of the blocks
+  plans.push(base('babylon-yards', yards().map((y) => ({ t: 'babylon_yard', rect: y.rect, door: y.door, kind: y.kind, seed: y.seed, front: y.door }))));
+  // the paving of the lanes in the core, the alleys' gutters, the street shrines, troughs, benches and water stands
+  plans.push(base('babylon-lanes', [{ t: 'babylon_lanes', rects: laneRects(), alleys: alleys().filter((r) => Math.hypot((r[0] + r[2]) / 2 + 40, (r[1] + r[3]) / 2 + 60) < 250), props: [...laneProps(), ...wayProps(), ...bankProps()] }]));
+  plans.push(...lifePlans(base));
   // the market (a market room: the generic life pass adds to it) and the scribes' mats on the quay
   const z = 103, x = riverX(z) + QUAY.d0 + 6.5;
   plans.push({ ...base('babylon-market', [{ t: 'scribe_kit', at: [x, z - 0.8], y: QUAY.y, rot: Math.PI / 2 }, { t: 'scribe_kit', at: [x, z + 0.8], y: QUAY.y, rot: Math.PI / 2, scroll: true }]), rooms: [{ id: 'market', rect: MARKET, y: 0, kind: 'open', market: true }] });

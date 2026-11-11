@@ -6,7 +6,7 @@
 // (src/engine/movers.js, read in its worker); the ways come from layout.js. No moving boats (the round boats of
 // plan.js lie at the quay or on the stream).
 
-import { RADIUS, WAY, WALL_Z, PALACE, PRECINCT, ESAGILA, BRIDGE, MARKET, QUAY, riverX } from './layout.js';
+import { laneRects, RADIUS, WAY, WALL_Z, PALACE, PRECINCT, ESAGILA, BRIDGE, MARKET, QUAY, riverX } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -26,14 +26,14 @@ export function walkways() {
   links.push({ a: [WAY.x, WALL_Z - 20], b: [WAY.x, WALL_Z + 40], w: 2.2, kind: 'street', weight: 2.2 });
   // the precinct of Etemenanki: the lanes round the tower, the gate on the north (the Way's end) and on the south (to Esagila)
   const [p0, q0, p1, q1] = PRECINCT, zig = 50;
-  rects.push({ r: [p0 + 8, q0 + 6, p1 - 8, q0 + 40], weight: 1.8, market: 0.3, kind: 'street' });
-  rects.push({ r: [p0 + 8, q0 + 40, -zig - 6, q1 - 8], weight: 1.1, market: 0.2, kind: 'street' });
-  rects.push({ r: [zig + 6, q0 + 40, p1 - 8, q1 - 8], weight: 1.1, market: 0.2, kind: 'street' });
-  rects.push({ r: [-zig - 6, q1 - 50, zig + 6, q1 - 8], weight: 1.6, market: 0.3, kind: 'street' });
-  links.push({ a: [WAY.x, WAY.z1 - 2], b: [WAY.x, q0 + 10], w: 3, kind: 'street', weight: 2 });
+  rects.push({ r: [p0 + 22, q0 + 19, p1 - 22, q0 + 40], weight: 1.8, market: 0.3, kind: 'street' });
+  rects.push({ r: [p0 + 22, q0 + 40, -zig - 6, q1 - 22], weight: 1.1, market: 0.2, kind: 'street' });
+  rects.push({ r: [zig + 6, q0 + 40, p1 - 22, q1 - 22], weight: 1.1, market: 0.2, kind: 'street' });
+  rects.push({ r: [-zig - 6, q1 - 50, zig + 6, q1 - 22], weight: 1.6, market: 0.3, kind: 'street' });
+  links.push({ a: [WAY.x, WAY.z1 - 2], b: [WAY.x, q0 + 28], w: 3, kind: 'street', weight: 2 });
   // from the precinct's south gate to Esagila's north gate and into its court (priests, the faithful)
   const ez = (ESAGILA[1] + ESAGILA[3]) / 2, ex = ESAGILA[0] + 32;
-  links.push({ a: [0, q1 - 8], b: [0, ESAGILA[1] + 10], w: 3, kind: 'street', weight: 1.4 });
+  links.push({ a: [0, q1 - 30], b: [0, ESAGILA[1] + 10], w: 3, kind: 'street', weight: 1.4 });
   rects.push({ r: [ex + 2, ez - 14, ex + 28, ez + 14], weight: 1.3, market: 0.1, kind: 'street' });
   links.push({ a: [0, ESAGILA[1] + 10], b: [ex + 6, ez - 8], w: 2.4, kind: 'street', weight: 1.0 });
   // the market at the bridge's east end, the road onto the bridge, the bridge
@@ -52,6 +52,8 @@ export function walkways() {
   // the Southern Palace: the way in at its east gate and the east court
   links.push({ a: [WAY.x - 8, PALACE[1] + 49], b: [PALACE[2] - 14, PALACE[1] + 49], w: 2.2, kind: 'street', weight: 0.9 });
   rects.push({ r: [PALACE[2] - 42, PALACE[1] + 28, PALACE[2] - 16, PALACE[1] + 72], weight: 0.9, market: 0.1, kind: 'street' });
+  // the lanes of the blocks in the core: people going about their errands between the fronts
+  for (const r of laneRects()) if (Math.hypot((r[0] + r[2]) / 2 + 40, (r[1] + r[3]) / 2 + 90) < 190) rects.push({ r, weight: 0.5, market: 0.25, kind: 'street' });
   return { rects, links, clip: RADIUS - 14 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: RADIUS - 18 }; }

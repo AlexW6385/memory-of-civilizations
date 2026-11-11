@@ -2,7 +2,7 @@
 // the Ishtar Gate in the double wall, the Processional Way between glazed walls, the Southern
 // Palace, the river.
 
-import { RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height } from './layout.js';
+import { esagilaChambers, RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height } from './layout.js';
 
 const E = [];
 /** The round boats on the river: z, d (from the river's middle), r, cargo; the boatmen and an ass are placed in town.js. */
@@ -58,6 +58,8 @@ E.push({
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('processional way', [WAY.x - WAY.w / 2, WAY.z0, WAY.x + WAY.w / 2, WAY.z1], 0, 'open'), room('precinct', PRECINCT, 0, 'open'), room('throne court', [pa0 + 28, pb0 + 18, pa0 + 74, pb0 + 72], 0.08, 'open'),
   room('esagila court', [ESAGILA[0] + 32, (ESAGILA[1] + ESAGILA[3]) / 2 - 18.8, ESAGILA[0] + 63.3, (ESAGILA[1] + ESAGILA[3]) / 2 + 18.8], 0.06, 'open'),
+  room('throne room', [pa0 + 30, pb0 + 72 + 2.4, pa0 + 72, pb0 + 72 + 2.4 + 14.6], 0.08, 'hall'),
+  ...esagilaChambers(ESAGILA).map((c) => room(`esagila ${c.kind}`, c.r, 0.06, 'hall')),
   room('cella of marduk', [ESAGILA[0] + 6, (ESAGILA[1] + ESAGILA[3]) / 2 - 12, ESAGILA[0] + 20.5, (ESAGILA[1] + ESAGILA[3]) / 2 + 12], 0.06, 'hall')];
 const walks = [[[WAY.x, -370], [WAY.x, WALL_Z - 20], [WAY.x, WALL_Z + 40], [WAY.x, -80]]];
 walks[0].y0 = 0;
