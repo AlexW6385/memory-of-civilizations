@@ -192,6 +192,7 @@ export class PlanetTerrain {
 
   receive(d) {
     this.pending.delete(d.key);
+    const T = globalThis.__gpuTrace; if (T) { const C = T.tiles ??= { built: 0, fine: 0 }; C.built++; if (d.key.split('/')[1] == MAX_LEVEL) C.fine++; }
     const [f, L, i, j] = d.key.split('/').map(Number);
     this.heights.set(d.key, [d.minH, d.maxH]);
     const g = new THREE.BufferGeometry();

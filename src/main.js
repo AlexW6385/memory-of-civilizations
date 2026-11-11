@@ -130,7 +130,7 @@ async function main() {
 
   // timings of the start, in the console (and kept for the next visit's estimate)
   let T0 = performance.now(), times = {};
-  const mark = (k) => { times[k] = Math.round(performance.now() - T0); };
+  const mark = (k) => { times[k] = Math.round(performance.now() - T0); if (window.__gpuTrace) window.__gpuTrace.marks[k] = Math.round(performance.now()); };
   // any error during the start shows on the loading screen with the step it stopped at
   const onErr = (e) => { if (!window.READY) progress.fail(String(e?.reason?.message || e?.message || e?.reason || e)); };
   addEventListener('error', onErr); addEventListener('unhandledrejection', onErr);
@@ -139,6 +139,8 @@ async function main() {
   if (params.has('perf')) HITCH.enable();
   const R = await new Renderer(canvas).init(settings.quality);
   HITCH.watchRenderer(R.renderer);
+  // the loading screen is up: shaders and pipelines made side by side and awaited at once (renderer.js hold)
+  R.hold(true);
   mark('renderer');
   progress.set('renderer', 1);
   const world = new World(R);
@@ -186,7 +188,7 @@ async function main() {
     const poll = site && report ? setInterval(() => report('build', site.fraction, `${Math.min(site.done | 0, site.expected | 0)}/${site.expected | 0}`), 150) : null;
     try {
       await Promise.all([
-        (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 0.99, 'merging'); return merged(site); }).then(() => { report?.('build', 1); mark('buildings'); }),
+        (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 0.99, 'merging'); return Promise.all([merged(site), lookAhead()]); }).then(() => { report?.('build', 1); mark('buildings'); }),
         world.terrain.readyAt(camPlanet, (f) => report?.('land', f, `${Math.round(f * 100)}%`)).then(() => mark('land')),
       ]);
     } finally { clearInterval(poll); }
@@ -204,6 +206,19 @@ async function main() {
     if (!site?.merging) return Promise.resolve();
     const pump = setInterval(() => world.letUploadsIn(), 40);
     return Promise.race([site.merging, new Promise((r) => setTimeout(r, 90000))]).finally(() => clearInterval(pump));
+  }
+  // the parts are in, the merging begins: a frame drawn each eight ways (held: nothing waits) so
+  // that what only a frame asks for — the shadow passes' pipelines, the far versions, the ground's,
+  // the sky's — is being compiled while the merging goes on, not only in the look round after it
+  async function lookAhead() {
+    if (!R.held) return;
+    const yaw = controls.yaw;
+    for (let k = 0; k < 8; k++) {
+      controls.yaw = yaw + k * Math.PI / 4;
+      frameOnce(0); R.render();
+      await new Promise((r) => setTimeout(r, 0));
+    }
+    controls.yaw = yaw;
   }
   const boot = (stage, f, detail) => progress.set(stage, f, detail);
   // a settlement built before its arrival view is set (goTo, goNear): its progress shown from the
@@ -277,11 +292,16 @@ async function main() {
     const inFrame = () => { world.setAnchor(site.S.frame, site); world.tilt.identity(); };
     inFrame();
     const [lx, lz] = site.S.local.center;
+    // the settlement's chosen arrival (src/planet/arrivals.js): exactly there, facing its view
+    const A = ARRIVALS[site.id];
+    // the ground round the arrival (or the centre) built ahead by its workers while the settlement
+    // is built by its own (terrain.prefetch: after what the frames still ask for; one after the
+    // other, the ground began only once the town was in)
+    const gx = A ? A[0] : lx, gz = A ? A[2] : lz;
+    world.terrain.prefetch(toPlanet(site.S.frame, [gx, (A?.[1] ?? world.collide.terrain(gx, gz)) + 1.7, gz]));
     controls.setPose(lx, 1e4, lz, 0, 0);
     await loadSite(site, report);
     inFrame();
-    // the settlement's chosen arrival (src/planet/arrivals.js): exactly there, facing its view
-    const A = ARRIVALS[site.id];
     if (A) {
       const [ax, ay, az, ayaw, apitch] = A, feet = () => (ay ?? world.collide.terrain(ax, az));
       controls.setPose(ax, feet() + 0.02, az, ayaw, apitch);
@@ -321,7 +341,12 @@ async function main() {
     if (world.byId[p[0]]) {
       const site = world.byId[p[0]], v = p.slice(1).map(Number);
       world.setAnchor(site.S.frame, site);
-      await site.load();
+      // the ground round the pose built by its workers while the settlement is built by its own
+      // (one after the other, the ground began only once the town was in)
+      controls.setPose(v[0], v[1], v[2], v[3] || 0, v[4] || 0);
+      world.place(R.camera);
+      const ground = world.terrain.readyAt(camPlanet, (f) => boot('land', f, `${Math.round(f * 100)}%`));
+      await Promise.all([loadSite(site, boot), ground]);
       controls.setPose(v[0], v[1], v[2], v[3] || 0, v[4] || 0);
       world.place(R.camera);
       await arrive(boot);
@@ -420,6 +445,8 @@ async function main() {
       await new Promise((r) => setTimeout(r, 380));
     }
     T0 = performance.now(); times = {};
+    // the fade is up: compiles side by side, awaited at once (renderer.js hold, warmAround)
+    R.hold(true);
     // the notice counts down what is still being made ready
     const f = { build: 0, land: 0, plants: 0 };
     const report = (stage, v) => {
@@ -439,6 +466,7 @@ async function main() {
       world.preload(peek(nearest(world.here(controls))));
     } catch (e) { error = e; }
     finally {
+      R.hold(false);
       report.over = true; clearTimeout(noticeT);
       busy = false;
       const next = waiting; waiting = null;
@@ -547,19 +575,35 @@ async function main() {
   // onStep(f): how far it has come (0…1), for the loading bar. Between the eight directions the
   // page waits for a frame, so the bar is painted (a plain timeout let the whole look round, seconds
   // of shader building, pass with the bar standing still)
+  // Held (R.hold, the loading screen or a travel's fade up): the look round only asks for the
+  // pipelines (made side by side, the objects not drawn till theirs are there), every compile in
+  // flight is awaited at once (R.settle), and the look round is drawn again with the shadow
+  // cascades redrawn whole — then nothing is left to build, and the hold is let go.
   async function warmAround(onStep = null) {
-    const yaw = controls.yaw;
+    const yaw = controls.yaw, held = R.held;
     const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
-    for (let k = 0; k < 8; k++) {
-      controls.yaw = yaw + k * Math.PI / 4;
-      for (let j = 0; j < 3; j++) frameOnce(0);
-      onStep?.(0.85 * (k + 1) / 9);
+    const round = async (from, to, frames) => {
+      for (let k = 0; k < 8; k++) {
+        controls.yaw = yaw + k * Math.PI / 4;
+        for (let j = 0; j < frames; j++) frameOnce(0);
+        onStep?.(from + (to - from) * (k + 1) / 9);
+        await nextFrame();
+      }
+      controls.yaw = yaw;
+      frameOnce(0);
+      onStep?.(from + (to - from) * 8.5 / 9);
       await nextFrame();
+    };
+    await round(0, held ? 0.25 : 0.85, 3);
+    if (held) {
+      const t = performance.now();
+      await R.settle((n, most) => onStep?.(0.25 + 0.6 * (most ? 1 - n / most : 1)));
+      if (window.__gpuTrace) window.__gpuTrace.marks.settled = Math.round(performance.now());
+      console.info('[memory of civilizations] compiles awaited (ms):', Math.round(performance.now() - t));
+      R.hold(false);
+      R.invalidateShadows();
+      await round(0.85, 0.95, 3);
     }
-    controls.yaw = yaw;
-    frameOnce(0);
-    onStep?.(0.85 * 8.5 / 9);
-    await nextFrame();
     await R.warmup();
     onStep?.(1);
   }

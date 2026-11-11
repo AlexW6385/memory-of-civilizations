@@ -321,8 +321,9 @@ class Settlement {
       group.add(inst);
     }
     HITCH.since('stream meshes', tS);
-    // its shaders compiled before it shows, not in the frame that first draws it (a hitch)
-    await this.world.r.precompile?.(group, { background: this.ahead });
+    // its shaders compiled before it shows, not in the frame that first draws it (a hitch); behind
+    // the loading screen (renderer hold) not waited for here: all of them at once before the view shows
+    await this.world.compile(group, this);
     // and its buffers sent to the GPU in a frame with room for them
     await this.world.uploadSlot(bytesOf(group));
     if (this.ahead()) await this.world.calm(() => !this.ahead());
@@ -367,10 +368,10 @@ class Settlement {
     this.group.add(into);
     // the shapes drawn by distance (merge.js LodSet), their copies chosen with the street life's
     const lods = this.lods = [];
-    const precompile = async (list) => { await this.world.r.precompile?.(list, { background: this.ahead }); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b); };
+    const precompile = async (list) => { await this.world.compile(list, this); let b = 0; for (const m of list) b += bytesOf(m); await this.world.uploadSlot(b); };
     const gentle = { on: () => this.ahead(), wait: () => this.world.calm(() => !this.ahead()) };
     try { await mergeParts(this.parts, into, buildingMesh, { castsShadow, stale: () => gen !== this.gen, lods, precompile, gentle }); } catch (e) { console.warn('merging', this.id, e); }
-    try { await mergeDetail(this.parts, buildingMesh, { stale: () => gen !== this.gen, gentle, precompile: (list) => this.world.r.precompile?.(list, { background: this.ahead }) }); } catch (e) { console.warn('merging detail', this.id, e); }
+    try { await mergeDetail(this.parts, buildingMesh, { stale: () => gen !== this.gen, gentle, precompile: (list) => this.world.compile(list, this) }); } catch (e) { console.warn('merging detail', this.id, e); }
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
 
@@ -482,6 +483,18 @@ export class World {
       };
       ask();
     });
+  }
+
+  /**
+   * Compile what is under `roots` for settlement `site` off the frame (renderer.js precompile).
+   * Awaited, except behind the loading screen or a travel's fade (renderer hold) for the settlement
+   * being entered: there the compiles go on side by side and the arrival awaits them all at once
+   * (renderer settle). Awaited one by one, each ~0.4 s of Metal latency, they made Suzhou's building
+   * and merging take minutes (84 merge groups, ~150 pipelines in a row).
+   */
+  compile(roots, site) {
+    const p = this.r.precompile?.(roots, { background: site.ahead });
+    return this.r.held && !site.ahead() ? undefined : p;
   }
 
   uploadSlot(bytes) {

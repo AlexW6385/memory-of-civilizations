@@ -131,6 +131,7 @@ export async function mergeParts(recs, into, make, { castsShadow, stale = () => 
     const t0 = performance.now();
     await precompile(meshes);
     t += performance.now() - t0;             // (the wait is not this slice's work)
+    const T = globalThis.__gpuTrace; if (T) { const M = T.merge ??= { groups: 0, meshes: 0, waitMs: 0 }; M.groups++; M.meshes += meshes.length; M.waitMs += Math.round(performance.now() - t0); }
   };
   // without workers the coarse versions are made here: when the page is idle, a shape at a time
   const idle = () => new Promise((r) => (globalThis.requestIdleCallback ? requestIdleCallback(() => r(), { timeout: 1000 }) : setTimeout(r, 0)));
