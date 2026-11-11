@@ -79,23 +79,42 @@ function pilaster(bag, B, u, w, y0, y1, v0, v1) {
 // the Egyptian cornice: fillet, torus, the gorge flaring out, the crowning fillet (v from the façade's face, y from its foot)
 const GORGE = [[0, 0], [0.12, 0.03], [0.16, 0.12], [0.12, 0.22], [0.1, 0.27], [0.22, 0.5], [0.42, 0.78], [0.66, 1.02], [0.7, 1.08], [0.7, 1.3]];
 
-export function crowTomb(el, { bag, col: C }) {
+export function crowTomb(el, { bag, col: C, lights }) {
   const [x, z] = el.at, y0 = el.y ?? 0, { P, B } = frame(x, z, el.dir, y0), W = el.w, H = el.h, back = el.back ?? 12, fl = el.flank ?? 1.5;
   const kind = el.kind === 'crowstep' ? 'step' : el.kind, fv = 0.35;                       // the façade stands 0.35 proud of the dressed rock
   const boxTop = el.boxTop ?? H * 0.68, yc = boxTop - 1.3;                                // the cornice's foot
   // the dressed rock the tomb is cut from, its foot below the ground
-  bag.add(R, B(-W / 2 - fl, -back, W / 2 + fl, 0, -2, boxTop));
-  C.segment(P(-W / 2 - fl, (fv - back) / 2), P(W / 2 + fl, (fv - back) / 2), back + fv, y0 - 2, y0 + H);
+  // (hollowed: the door's passage and the chamber behind it, docs §16)
+  const dw0 = Math.max(1.3, Math.min(2.3, W * 0.2)), dh0 = Math.min(4.4, Math.max(2.6, H * 0.3)), cw = Math.max(3.2, Math.min(5.0, W * 0.55)), cd = 4.0, chc = 0.4 + dh0 + 0.7;
+  const voids = [{ u0: -dw0 / 2, v0: -1.2, u1: dw0 / 2, v1: 0, c: 0.4 + dh0 }, { u0: -cw / 2, v0: -cd, u1: cw / 2, v1: -1.2, c: chc }];
+  {
+    const U = [...new Set([-W / 2 - fl, W / 2 + fl, ...voids.flatMap((q) => [q.u0, q.u1])])].sort((a, b) => a - b), V = [...new Set([-back, 0, ...voids.flatMap((q) => [q.v0, q.v1])])].sort((a, b) => a - b);
+    for (let i = 0; i + 1 < U.length; i++) for (let j = 0; j + 1 < V.length; j++) {
+      const cu = (U[i] + U[i + 1]) / 2, cv = (V[j] + V[j + 1]) / 2, q = voids.find((w) => cu > w.u0 && cu < w.u1 && cv > w.v0 && cv < w.v1), ya = q ? q.c : -2;
+      bag.add(R, B(U[i], V[j], U[i + 1], V[j + 1], ya, boxTop));
+      // (the cell's thick segment: its centre line across the cell, its thickness along v; the façade's 0.35 on the front row)
+      const vm = (V[j] + V[j + 1]) / 2 + (V[j + 1] === 0 ? fv / 2 : 0), th = V[j + 1] - V[j] + (V[j + 1] === 0 ? fv : 0);
+      C.segment(P(U[i], vm), P(U[i + 1], vm), th, y0 + ya, y0 + H);
+    }
+  }
   // standing alone (not under a built cliff): the rock above, set back behind the crow-steps
   if (el.top) bag.add(R, B(-W / 2 - fl, -back, W / 2 + fl, -1.4, boxTop, el.top - y0));
   // the plinth and the front, the door's recess left open in it
   const dw = Math.max(1.3, Math.min(2.3, W * 0.2)), dh = Math.min(4.4, Math.max(2.6, H * 0.3)), pl = 0.4;
-  bag.add(R, B(-W / 2 - 0.25, 0, W / 2 + 0.25, fv + 0.25, -0.4, pl));
+  for (const [a, b] of [[-W / 2 - 0.25, -dw / 2], [dw / 2, W / 2 + 0.25]]) bag.add(R, B(a, 0, b, fv + 0.25, -0.4, pl));
   const front = kind === 'hegr' ? yc - 1.1 : yc;
   bag.add(R, B(-W / 2, 0, -dw / 2, fv, pl, front)); bag.add(R, B(dw / 2, 0, W / 2, fv, pl, front));
   bag.add(R, B(-dw / 2, 0, dw / 2, fv, pl + dh, front));
-  bag.add(R, B(-dw / 2, 0, dw / 2, 0.06, pl, pl + dh));                                   // the recess's back, the door in it
-  bag.add(O, B(-dw / 2 + 0.12, 0.06, dw / 2 - 0.12, 0.09, pl, pl + dh - 0.12));
+  // the chamber's floor, a bench along its back and sides, a stone slab on a plinth (a burial), a lamp
+  { const cu = cw / 2, cv = -cd;
+    bag.add('flagstone', B(-cu, cv, cu, -1.2, -0.3, 0.04)); bag.add('flagstone', B(-dw / 2, -1.2, dw / 2, fv + 0.25, -0.3, 0.04));
+    bag.add(R, B(-cu, cv, cu, cv + 0.55, 0.04, 0.42));
+    for (const s of [-1, 1]) bag.add(R, B(s > 0 ? cu - 0.5 : -cu, cv + 0.55, s > 0 ? cu : -cu + 0.5, -1.7, 0.04, 0.42));
+    // loculi: three low rectangular slots in the back wall above the bench, each in a plain frame
+    for (let k = -1; k <= 1; k++) { const u = k * (cw / 3.2); bag.add('opening', B(u - 0.45, cv + 0.55 + 0.01, u + 0.45, cv + 0.55 + 0.03, 0.9, 1.6)); bag.add(R, B(u - 0.6, cv + 0.55, u - 0.45, cv + 0.62, 0.9, 1.7)); bag.add(R, B(u + 0.45, cv + 0.55, u + 0.6, cv + 0.62, 0.9, 1.7)); bag.add(R, B(u - 0.6, cv + 0.55, u + 0.6, cv + 0.62, 1.6, 1.7)); }
+    const [lx, lz] = P(0, cv + 1.0); bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.005], [0.06, 0.025], [0.03, 0.04], [0.001, 0.035]], 10, null, lx, y0 + 0.42, lz)); bag.add('flame', B(-0.01 + 0, cv + 0.97, 0.01, cv + 1.03, 0.45, 0.49));
+    lights.push({ at: [lx, y0 + 0.9, lz], color: '#ffb46b', intensity: 2.2, distance: 8 });
+  }
   // the door's frame: jambs and lintel standing out a little, a sill
   for (const s of [-1, 1]) bag.add(R, B(s * dw / 2, fv, s * (dw / 2 + 0.32), fv + 0.1, pl, pl + dh + 0.32));
   bag.add(R, B(-dw / 2 - 0.32, fv, dw / 2 + 0.32, fv + 0.1, pl + dh, pl + dh + 0.32));
