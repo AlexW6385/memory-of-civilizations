@@ -76,6 +76,9 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
  */
 export const LANE = 3.4, BX = 42, BZ = 38, OX = 1.6, OZ = 38, DEPTH = 10;
 const nearTerrace = (x, z, m) => inRect(TERRACE, x, z, m);
+/** The block of the terrace's south-east corner, south of the dar'ül-hadis (its houses round a yard with the quarter's mescit and its minaret). */
+export const SE_BLOCK = [66, 114, 156, 154];
+export const MESCIT = { rect: [96, 126, 108, 141.5], minaret: [110.4, 128], y: TOP };
 let BLOCKS = null, LOTS = null, YARDS = null;
 /** The blocks of the quarter: { rect (inside the lanes), c }. */
 export function blocks() {
@@ -87,6 +90,7 @@ export function blocks() {
     if (x1 > TERRACE[0] - 6 && x0 < TERRACE[2] + 6 && z1 > TERRACE[1] - 6 && z0 < TERRACE[3] + 6) continue;
     BLOCKS.push({ rect: [x0, z0, x1, z1], c: [cx, cz], i, j });
   }
+  const [a, b, c, d] = SE_BLOCK; BLOCKS.push({ rect: SE_BLOCK, c: [(a + c) / 2, (b + d) / 2], i: 99, j: 99 });
   return BLOCKS;
 }
 /** The lanes (rects) of the grid within the disc, for paving and for the walkers. */

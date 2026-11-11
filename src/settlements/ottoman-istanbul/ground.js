@@ -22,6 +22,7 @@ function planting(x, z) {
     if (Math.abs(x) < 9 || !inRect(PRECINCT, x, z, -5) || inRect([-34, -50, 34, 52], x, z) || inKulliye(x, z, 1.5) || Math.hypot(x, z + 91) < 7) return null;
     return { plane_tree: 0.0045, cypress: 0.004 };
   }
+  if (inYard(x, z) && inRect([90, 118, 116, 146], x, z)) return null;
   if (inYard(x, z)) return { fig: 0.02, cypress: 0.012, stone_pine: 0.004, grass: 20 };
   if (laneAt(x, z, 0.5)) return null;
   if (Math.hypot(x, z) > RADIUS - 6 || inRect(PRECINCT, x, z, 4) || inLot(x, z, 1) || inKulliye(x, z, 1.5)) return null;

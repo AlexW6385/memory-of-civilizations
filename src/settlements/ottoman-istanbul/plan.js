@@ -1,7 +1,7 @@
 // The Süleymaniye about 1560 (docs/settlements/ottoman-istanbul.md §2–§4): the mosque, its outer
 // court's wall, the külliye (medreses, shops, hospital, soup kitchen, bath, dar'ül-hadis), Süleyman's tomb, the terrace's retaining wall to the north.
 
-import { MOSQUE, PRECINCT, MEDRESES, ARASTA, DARUSSIFA, IMARET, HAMAM, DARULHADIS, TERRACE, TOP, TOMB, GRAVES, ROSES, CARSI, CESMES } from './layout.js';
+import { MOSQUE, PRECINCT, MEDRESES, ARASTA, DARUSSIFA, IMARET, HAMAM, DARULHADIS, TERRACE, MESCIT, TOP, TOMB, GRAVES, ROSES, CARSI, CESMES } from './layout.js';
 
 const E = [];
 E.push({ t: 'sinan_mosque', c: MOSQUE.c, d: MOSQUE.d, h: MOSQUE.h, y: TOP, court: 38.1 });
@@ -21,6 +21,20 @@ E.push({ t: 'turbe', c: TOMB.c, r: TOMB.r, h: 7.6, y: TOP, door: 'n' });
 E.push({ t: 'graves', list: GRAVES, roses: ROSES, y: TOP });
 E.push({ t: 'carsi', ...CARSI });
 for (const [x, z, face] of CESMES) E.push({ t: 'cesme', at: [x, z], face, y: TOP });
+// the quarter's mescit with its minaret in the south-east block's yard, and the outer court's furniture
+E.push({ t: 'mescit', rect: MESCIT.rect, y: TOP });
+E.push({ t: 'minaret', c: MESCIT.minaret, y: TOP, h: 24, r: 0.95, balconies: 1 });
+{
+  const benches = [], jars = [], posts = [], lamps = [];
+  for (const sx of [-1, 1]) {
+    for (let z = -86; z <= -52; z += 11) benches.push([sx * 12, z, Math.PI / 2]);
+    for (let z = -44; z <= 50; z += 14) { benches.push([sx * 38, z, 0], [sx * 62, z + 4, 0]); }
+    jars.push([sx * 40, -88, 0], [sx * 70, 40, 0]);
+    posts.push([sx * 5, -96.5], [sx * 5, 91.5]);
+    lamps.push([sx * 7, -93], [sx * 7, 88]);
+  }
+  E.push({ t: 'court_dress', y: TOP, benches, jars, posts, lamps });
+}
 const [t0, u0, t1, u1] = TERRACE;
 E.push({ t: 'block', rect: [t0, u0 - 0.6, t1, u0], y0: 0, y1: TOP + 1, mat: 'limestone' });
 
