@@ -42,6 +42,13 @@ export function life() {
   }
   woman([-11.6, 6], -Math.PI / 2, { y: 0.05, cloth: 'cloth_indigo', cloth2: 'cloth_ochre', pose: 'pray' });
   for (const z of [4.6, 7.4]) L.push({ t: 'pot', kind: 'water_pot', at: [-12.6, z], y: 0.05, n: 1, seed: seed() });
+  // the East Wing's rooms (§4d): the weaver at her loom in the residential hall, a woman seated on the bench, the lapidary at the
+  // bow drill, a workman at the middle table, a boy bringing water
+  woman([36.8, 22.45], Math.PI, { y: 0.03, cloth: 'cloth_red', cloth2: 'cloth_white', pose: 'stand' });
+  woman([28, 21.4], 0, { y: 0.03, cloth: 'cloth_indigo', cloth2: 'cloth_ochre', pose: 'talk' });
+  man([29.2, 29.9], Math.PI, { y: 0.03, pose: 'stand', dress: 'loincloth', cloth: 'cloth_white' });
+  man([33, 32.4], Math.PI, { y: 0.03, pose: 'stand', dress: 'loincloth', cloth: 'cloth_ochre' });
+  man([26.5, 28.6], 0, { y: 0.03, pose: 'stand', dress: 'shendyt', cloth: 'cloth_red' });
   return L;
 }
 

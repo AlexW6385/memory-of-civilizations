@@ -30,7 +30,7 @@ export function lots() {
     const w = 7 + rand() * 4, d = 7 + rand() * 4, cx = x + w / 2, cz = z + d / 2, r = Math.hypot(cx, cz);
     if (r > RADIUS - 35 || inRect(PALACE, cx, cz, 40) || inRect(THEATRAL, cx, cz, 14) || onRoad(cx, cz, 9)) continue;
     if (inRect([-130, -60, -64, 60], cx, cz, 6)) continue;                     // the West Court and its approach
-    if (rand() < 0.25 + 0.5 * smooth(150, 300, r)) continue;
+    if (rand() < 0.08 + 0.55 * smooth(170, 310, r)) continue;
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });
   }
   return LOTS;

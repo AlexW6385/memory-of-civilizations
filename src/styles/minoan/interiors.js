@@ -160,12 +160,13 @@ function hall(el, ctx) {
  */
 function workshop(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, [wx0, wz0, wx1, wz1] = el.well, y = el.y ?? 0, f = y + F0, rand = rng(el.seed || 9), door = el.door ?? [30.5, 32.5];
-  bag.add('lime_plaster', box(x0, y, z0, x1, f, z1)); col.floor(el.rect, f);
+  bag.add('flagstone', box(x0, y, z0, x1, f, z1)); col.floor(el.rect, f);
   bag.add('flagstone', box(wx0, y, wz0, wx1, f, wz1)); col.floor(el.well, f);
   const dado = (r) => bag.add(G, box(r[0], f, r[1], r[2], f + 0.8, r[3]));
   dado([x0, z0, door[0], z0 + 0.05]); dado([door[1], z0, x1 - 0.4, z0 + 0.05]); dado([x0, z1 - 0.05, x1 - 0.4, z1]); dado([x0, z0, x0 + 0.05, z1]);
   pierRow(ctx, x1 - 0.5, z0, z1, f, 3.4);
   // the benches under the north wall, either side of the doorway
+  const dx0 = x0;
   const benches = [[x0 + 0.3, z0 + 0.1, door[0] - 0.4, z0 + 0.95], [door[1] + 0.4, z0 + 0.1, x1 - 1.4, z0 + 0.95]];
   for (const b of benches) table(ctx, b, f, 0.9, 'timber');
   // on the benches: vases at every stage, small tools
@@ -184,8 +185,14 @@ function workshop(el, ctx) {
     bag.add(m, box(x0 + 0.1, f, bz, x0 + 0.1 + w, f + h, bz + d)); col.rect([x0 + 0.1, bz, x0 + 0.1 + w, bz + d], f, f + h);
     if (kind === 1) { bag.add(m, box(x0 + 0.2, f + h, bz + 0.1, x0 + 0.2 + w * 0.6, f + h + 0.35, bz + 0.1 + d * 0.6)); }
   }
+  // the middle table: a long bench with a block half cut, vases beside it, a bowl of sand; a second bench under the south wall
+  table(ctx, [dx0 + 6.0, z0 + 6.2, dx0 + 10.2, z0 + 7.2], f, 0.85, 'timber');
+  bag.add('porphyry', box(dx0 + 6.3, f + 0.85, z0 + 6.35, dx0 + 7.0, f + 1.15, z0 + 7.05)); vase(bag, 'serpentine', RHYTON, dx0 + 7.6, f + 0.85, z0 + 6.7, 1.4); vase(bag, 'limestone', EWER, dx0 + 8.3, f + 0.85, z0 + 6.7, 1.3); vase(bag, 'obsidian', BOWL, dx0 + 9.1, f + 0.85, z0 + 6.7, 1.3); vase(bag, 'serpentine', ROUGH, dx0 + 9.7, f + 0.85, z0 + 6.7, 1.3);
+  table(ctx, [x0 + 6.5, z1 - 0.95, x0 + 12.5, z1 - 0.1], f, 0.85, 'timber');
+  for (let i = 0; i < 6; i++) vase(bag, mats[(i + 2) % 6], stages[i % 6], x0 + 6.9 + i * 0.95, f + 0.85, z1 - 0.55, 1.2);
+  stool(ctx, x0 + 8.0, z1 - 1.5, f, 0.4, 0.2); stool(ctx, dx0 + 8.0, z0 + 8.1, f, 0.4, 0.2);
   // the bow drill: a block with a vase half hollowed held on a low stool, the drill upright in it, the bow lying by
-  const dx = x0 + 6.2, dz = z0 + 5.4;
+  const dx = x0 + 6.2, dz = z0 + 4.0;
   stool(ctx, dx, dz, f, 0.38, 0.28);
   bag.add('serpentine', lathe([[0.001, 0], [0.16, 0], [0.2, 0.15], [0.2, 0.3], [0.14, 0.36], [0.001, 0.36]], 12, null, dx, f + 0.38, dz));
   bag.add('wood_dark', rod([dx, f + 0.6, dz], [dx, f + 1.35, dz], 0.012, 6)); bag.add('bronze', box(dx - 0.012, f + 0.56, dz - 0.012, dx + 0.012, f + 0.66, dz + 0.012));
