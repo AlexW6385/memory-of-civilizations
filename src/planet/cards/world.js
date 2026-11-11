@@ -916,4 +916,22 @@ export const CARDS = {
       "长乐宫、昆明池与太学 —— 大街以东、立于台基上的第二座大宫；为训练水军而开凿的昆明池，岸上有亭，水中泊着一艘楼船；还有传授五经的太学。",
     ],
   },
+  'tang-changan': {
+    en: [
+      "Chang'an, now Xi'an, on the Wei plain, was the capital of the Tang and with a million people the largest city of its world. The year is about 750, under Emperor Xuanzong, the high point of the dynasty and the last years before the An Lushan rebellion. It is the eastern end of the Silk Road: Chinese officials, Buddhist monks, Sogdian and Persian merchants, Korean students and Central Asian dancers share its streets. The city is laid out as a grid of broad avenues between walled wards (fang), shut by their gates at the evening drums. The architecture is Tang: timber halls on rammed-earth platforms with massive bracket sets, red columns, white walls and broad, low roofs whose ridges end in owl tails; the walls, gates and many houses of rammed earth.",
+      "Zhuque Avenue — the city's central axis, here 104 m between the ward walls (in life about 150 m), an earth roadway with a drainage ditch and rows of locust trees on each side, crossed by the broad cross street.",
+      "The Big Wild Goose Pagoda — the seven-storey square tower of buff brick, about 58 m, in Daci'en Temple, where Xuanzang translated the sutras he brought from India; its faces divided by brick pilasters, an arch in every middle bay, the cornices corbelled; the two tablets at its stair, and in the temple the Hall of the Heavenly Kings, the bell and drum pavilions and the main hall with its Buddha and his company.",
+      "The walled wards — squares of earth wall three metres high with timber gates under owl-tailed roofs, cross-shaped lanes inside, courtyard houses of officials and commoners behind their walls; the street drums that close them at dusk.",
+      "The West Market — a walled market of nine blocks round awell-shaped crossing of lanes, rows of open shops under shared eaves with their goods and wine flags, Persian carpets and spices, caravanserais where Bactrian camels are unloaded, the market office with its drum, and a Hu wine shop where a dancer whirls on a round carpet to the lute and drum.",
+      "The Daoist temple — a temple of the Xuandu type with its gate on the great cross street, a court of peach trees and the hall of the Three Pure Ones.",
+    ],
+    zh: [
+      "长安即今西安，位于渭河平原，是唐朝的都城，人口百万，是当时世界上最大的城市。所示约在 750 年玄宗在位时，是唐朝的极盛期，距安史之乱只有几年。这里是丝绸之路的东端：中国官员、佛教僧人、粟特与波斯商人、新罗留学生和中亚舞者共用街巷。城市以宽阔的大街分隔成棋盘，其间是有围墙的坊，晚间听鼓声关闭坊门。建筑为唐式：夯土台基上的木构大殿，斗拱雄大，红柱白墙，屋顶宽缓低平，正脊两端是鸱尾；城墙、坊墙、坊门和许多民宅用夯土筑成。",
+      "朱雀大街 —— 城的中轴，此处两侧坊墙相距 104 米（实际约 150 米），土路两侧各有一道排水沟和成排的槐树，被宽阔的横街截断。",
+      "大雁塔 —— 大慈恩寺内七层方形砖塔，高约 58 米，玄奘在此翻译自印度带回的经卷；塔面以砖砌扁柱分成开间，每面中间一间开券，檐口用砖层层出挑；塔前台阶旁立两通碑；寺内有天王殿、钟鼓亭和供奉佛与诸尊的大殿。",
+      "有墙的坊 —— 三米高的夯土坊墙，坊门是鸱尾屋顶的木构门楼，坊内有十字形街巷，官员与平民的院落宅第各在墙内；街鼓声起，日暮闭坊。",
+      "西市 —— 一座有围墙的市，九块地以井字形巷道分开，成排的店铺共檐，挂着各种货物和酒旗，有波斯地毯与香料，有卸骆驼的客栈，有悬鼓的市署，还有胡姬酒肆，舞者在圆毯上旋转，伴着琵琶与鼓。",
+      "道观 —— 玄都观一类的道观，门开在大横街上，院中桃树成林，主殿供三清。",
+    ],
+  },
 };

@@ -72,5 +72,6 @@ export const MOVER_SITES = {
   'qin-xianyang': () => import('../settlements/qin-xianyang/movers.js'),
   'alexandria': () => import('../settlements/alexandria/movers.js'),
   'han-changan': () => import('../settlements/han-changan/movers.js'),
+  'tang-changan': () => import('../settlements/tang-changan/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
