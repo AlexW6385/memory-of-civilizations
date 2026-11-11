@@ -9,6 +9,7 @@
 import { STYLES } from '../../core/build.js';
 import { box, rod, fromTriangles, lathe } from '../../core/geom.js';
 import './index.js';
+import { openGround } from './shop-interior.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ST0 = 3.3, ST = 2.75;                         // the stone storey (a shop's opening needs height), the upper storeys
@@ -54,8 +55,11 @@ function paris_house(el, { bag, col }) {
   const trade = TRADES[(el.seed >>> 3) % TRADES.length];
 
   // ── the stone storey and the footing
-  { const a = map(-0.1, -0.1), b = map(L + 0.1, D + 0.1); bag.add('limestone', box(Math.min(a[0], b[0]), el.foot - 0.6, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y + ST0, Math.max(a[1], b[1]))); }
-  col.rect([x0, z0, x1, z1], el.foot - 0.6, y + ST0 + (n - 1) * ST);
+  const OPEN = !!el.open && !simple;
+  if (!OPEN) {
+    { const a = map(-0.1, -0.1), b = map(L + 0.1, D + 0.1); bag.add('limestone', box(Math.min(a[0], b[0]), el.foot - 0.6, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y + ST0, Math.max(a[1], b[1]))); }
+    col.rect([x0, z0, x1, z1], el.foot - 0.6, y + ST0 + (n - 1) * ST);
+  } else col.rect([x0, z0, x1, z1], y + ST0, y + ST0 + (n - 1) * ST);
 
   // ── the upper storeys: a plaster mass, each jetted
   let top = ST0;
@@ -92,20 +96,20 @@ function paris_house(el, { bag, col }) {
   // the stone storey: the shop's opening, framed, with its counter board, shutter and sign; the door beside it
   const doorL = rand() < 0.5, ws = Math.max(2.2, Math.min(4.0, L - 1.7)), su = doorL ? L - 0.35 - ws : 0.35, du = doorL ? 0.3 : L - 1.2;
   const lintel = 2.75;
-  B('opening', su, su + ws, 0.12, lintel, -0.03, 0.05);
+  if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: trade.id, seed: el.seed });
+  else B('opening', su, su + ws, 0.12, lintel, -0.03, 0.05);
   for (const u of [su - 0.2, su + ws]) B('timber', u, u + 0.2, 0, lintel + 0.3, -0.14, 0.06);                 // the posts
   B('timber', su - 0.2, su + ws + 0.2, lintel, lintel + 0.32, -0.18, 0.08);                                 // the head beam
   B('limestone', su - 0.35, su + ws + 0.35, 0, 0.18, -0.12, 0.06);                                          // the step/stall-riser
   // the counter: the lower shutter let down, held by two chains; the upper raised as a pent roof
   B('timber', su, su + ws, 0.92, 0.98, -0.78, -0.04);
   for (const u of [su + 0.08, su + ws - 0.08]) R('iron', [u, 2.15, -0.04], [u, 0.98, -0.74], 0.008, 3);
-  B('timber', su - 0.04, su + ws + 0.04, 0.12, 0.92, -0.06, -0.02);                                         // the board's outer face, shut against the riser
+  if (!OPEN) B('timber', su - 0.04, su + ws + 0.04, 0.12, 0.92, -0.06, -0.02);                              // the board's outer face, shut against the riser
   B('wood_dark', su, su + ws, 2.38, 2.45, -0.8, -0.1);
   for (const u of [su + 0.06, su + ws - 0.06]) R('iron', [u, 2.38, -0.8], [u, 2.72, -0.1], 0.008, 3);
   goods(trade.goods, B, R, su, ws, 0.98, rand);
   // the door: boards under a pointed head, an iron ring
-  B('opening', du - 0.02, du + 1.0, 0.0, 2.35, -0.02, 0.05);
-  B('wood_dark', du, du + 0.96, 0.0, 2.3, -0.06, -0.02);
+  if (!OPEN) { B('opening', du - 0.02, du + 1.0, 0.0, 2.35, -0.02, 0.05); B('wood_dark', du, du + 0.96, 0.0, 2.3, -0.06, -0.02); }
   B('limestone', du - 0.12, du + 1.12, 2.3, 2.52, -0.1, 0.06);
   R('iron', [du + 0.78, 1.1, -0.07], [du + 0.78, 1.1, -0.065], 0.07, 8);
   // the sign on its iron bracket from the stone storey's wall, over the door or the shop
@@ -171,6 +175,23 @@ function paris_house(el, { bag, col }) {
       yy += ST;
     }
   }
+  // weathering and eye-level dressing (a separate stream: the house's own draws stay as they were)
+  { const r2 = rng((el.seed || 1) + 5);
+    // rising damp and splash at the foot of the stone storey, soot and rain streaks under the sills and the eaves
+    for (let u = 0.1; u < L - 0.5;) { const w = 0.5 + r2() * 1.1; B('plaster_damp', u, Math.min(L - 0.1, u + w), 0, 0.35 + r2() * 0.4, -0.115, -0.1); u += w + r2() * 0.9; }
+    let yq = ST0;
+    for (let s = 1; s < n; s++) {
+      const jf = jet(s), nw = Math.max(1, Math.floor((L - 0.4) / 2.0)), sp = L / nw;
+      for (let k = 0; k < nw; k++) if (r2() < 0.7) { const uc = (k + 0.5) * sp + (r2() - 0.5) * 0.2; B('plaster_streak', uc - 0.3, uc + 0.3, yq + 0.3, yq + 0.72, -jf - 0.085, -jf - 0.075); }
+      yq += ST;
+    }
+    // the corner lantern on its iron bracket, the stone gargoyle spout at the eaves, a pot of herbs or a cage at a window
+    if (r2() < 0.55) { const u = r2() < 0.5 ? 0.12 : L - 0.12; R('iron', [u, 2.9, -0.1], [u, 2.9, -0.7], 0.014, 4); B('glass_lamp', u - 0.09, u + 0.09, 2.45, 2.85, -0.8, -0.62); B('iron', u - 0.1, u + 0.1, 2.85, 2.9, -0.82, -0.6); }
+    if (r2() < 0.5) { const u = r2() < 0.5 ? 0.3 : L - 0.3; B('limestone', u - 0.08, u + 0.08, ye - 0.38, ye - 0.2, -jt - 0.55, -jt); }
+    if (n > 2 && r2() < 0.45) { const uc = L * (0.3 + r2() * 0.4), ya2 = ST0 + ST + 0.55; B('timber', uc - 0.35, uc + 0.35, ya2, ya2 + 0.18, -jet(1) - 0.34, -jet(1) - 0.08); for (let k = -1; k <= 1; k++) bag.add(['terracotta', 'pottery_dark'][k & 1], lathe([[0.05, 0], [0.08, 0.1], [0.07, 0.17], [0.001, 0.17]], 7, null, ...P(uc + k * 0.2, ya2 + 0.18, -jet(1) - 0.2).map((v, i) => v))); }
+    // the doorstep: a worn stone, and a boot-scraper
+    if (r2() < 0.8) B('limestone', du - 0.1, du + 1.1, 0, 0.1, -0.5, -0.1);
+  }
   // the gable's frame and its attic window, the hoist beam with its pulley
   const gd = -jt - 0.06, gw = Math.min(0.9, L * 0.2);
   B('timber', 0, L, ye, ye + 0.16, gd, -jt + 0.02);
@@ -221,6 +242,7 @@ export function shopPoint(el) {
   const doorL = rand() < 0.5, ws = Math.max(2.2, Math.min(4.0, L - 1.7)), su = doorL ? L - 0.35 - ws : 0.35, u = su + ws / 2, d = -1.45;
   const at = f === 's' ? [x0 + u, z1 - d] : f === 'n' ? [x1 - u, z0 + d] : f === 'e' ? [x1 - d, z0 + u] : [x0 + d, z1 - u];
   const out = f === 's' ? [0, 1] : f === 'n' ? [0, -1] : f === 'e' ? [1, 0] : [-1, 0];
-  return { at, out, trade: TRADES[(el.seed >>> 3) % TRADES.length].id };
+  const di = 1.6, inside = f === 's' ? [x0 + u, z1 - di] : f === 'n' ? [x1 - u, z0 + di] : f === 'e' ? [x1 - di, z0 + u] : [x0 + di, z1 - u];
+  return { at, out, inside, trade: TRADES[(el.seed >>> 3) % TRADES.length].id };
 }
 STYLES.gothic.elements.paris_house = paris_house;

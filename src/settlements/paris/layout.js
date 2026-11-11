@@ -91,3 +91,11 @@ export function inBlock(x, z, m = 0) {
   return BANDS.some(([a, b]) => z > a - m && z < b + m);
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** The ruelles' middle lines (x) within [x0, x1], and the middle z of each row of houses. */
+export function laneCenters(x0, x1) {
+  const out = [];
+  for (let k = Math.floor((x0 + 1000) / LANE_EVERY); k <= Math.floor((x1 + 1000) / LANE_EVERY); k++) { const c = k * LANE_EVERY - 1000 + 31 + ((k * 37) % 11); if (c > x0 && c < x1) out.push(c); }
+  return out;
+}
+export const rowMids = () => rowList().map(([za, zb]) => (za + zb) / 2);
+export const LANE_WIDTH = LANE_W;
