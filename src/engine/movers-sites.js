@@ -88,5 +88,6 @@ export const MOVER_SITES = {
   'kakadu': () => import('../settlements/kakadu/movers.js'),
   'benin-city': () => import('../settlements/benin-city/movers.js'),
   'dogon': () => import('../settlements/dogon/movers.js'),
+  'maya-tikal': () => import('../settlements/maya-tikal/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
