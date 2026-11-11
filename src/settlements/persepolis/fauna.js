@@ -2,6 +2,8 @@
 // terrace, sparrows on the paving of the road, the market and the workshops' yard, crows over the mountain's foot. No water: no fish.
 import { MARKET, ROAD, WORKSHOPS, TERRACE } from './layout.js';
 import { ground } from './ground.js';
+import { lots, STREETS, ARRIVAL, wells } from './layout.js';
+import { houseDoor } from '../../styles/achaemenid/houses-data.js';
 
 const fish = [];
 const flights = [
@@ -17,4 +19,21 @@ const spots = [[-340, rz + 3], [-300, rz - 4], [-260, rz + 3], [-215, rz - 3], [
 for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z), rot: (x * 7) % 3, range: [1.6, 1.4] });
 // on the terrace: sparrows on the paving before the Apadana's stairway and at the gate
 for (const [x, z] of [[-70, -128], [-20, -126], [10, -132], [-130, -128]]) perches.push({ kind: 'sparrow', x, z, y: TERRACE.h, rot: (x * 5) % 3, range: [1.8, 1.4] });
+// more of them, on every street near the arrival (at the doors, by the wells), on the roofs' parapets and along the workshops' wall top
+{
+  let k = 0;
+  for (const l of lots()) {
+    if (Math.hypot(l.rect[0] - ARRIVAL[0], l.rect[1] - ARRIVAL[1]) > 190 || (k++ % 3)) continue;
+    const d = houseDoor(l), [px, pz] = d.p, o = d.out, along = Math.atan2(o[0], -o[1]) + Math.PI / 2;
+    perches.push({ kind: 'sparrow', x: px + o[0] * 2.2 + (l.seed % 5 - 2), z: pz + o[1] * 2.2, y: ground.height(px, pz), rot: along, range: [2.2, 0.8], alert: 5 });
+    if (k % 2) perches.push({ kind: 'sparrow', x: px - o[0] * 0.5 + (l.seed % 7 - 3) * 0.6, z: pz - o[1] * 0.5, y: d.h + 0.54, rot: along, range: [2.6, 0], alert: 5 });   // on the parapet
+  }
+  for (const [x, z] of wells()) perches.push({ kind: 'sparrow', x: x + 1.5, z: z + 1, y: 0, rot: 0.5, range: [1.6, 1.4] });
+  const wx = (WORKSHOPS[0] + WORKSHOPS[2]) / 2;
+  for (const dx of [-20, -8, 10, 22]) perches.push({ kind: 'sparrow', x: wx + dx, z: WORKSHOPS[1] + 0.45, y: 3.9, rot: Math.PI / 2, range: [3, 0], alert: 5 });
+  void STREETS;
+}
+// swallows low over the streets, following the visitor along the road and the cross streets
+flights.push({ kind: 'swallow', n: 4, loop: { c: [-290, -140], a: [60, 16], rot: 0, y: [3, 8] }, y: [3, 9], speed: 9 });
+flights.push({ kind: 'swallow', n: 3, loop: { c: [-250, 20], a: [14, 90], rot: 0.1 }, y: [4, 11], speed: 8 });
 export default { fish, flights, perches };

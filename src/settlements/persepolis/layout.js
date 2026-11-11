@@ -73,7 +73,7 @@ export const inGarden = (x, z, m = 0) => gardens().some((g) => inRect(g.rect, x,
 /** Wells (qanat shafts with a windlass) at the crossings of the streets nearest the market, and the market's own. */
 export function wells() {
   const out = [], xs = [-352, -306, -250, -190], zs = [-40, 60, 150, 240];
-  for (const x of xs) for (const z of zs) if ((Math.round(x / 2) + z / 10) % 2 === 0 && Math.hypot(x, z) < RADIUS - 40) out.push({ at: [x + 3.4, z + 3.4], y: 0 });
+  xs.forEach((x, i) => zs.forEach((z, j) => { if ((i + j) % 2 === 0 && Math.hypot(x, z) < RADIUS - 40) out.push({ at: [x + 1.3, z + 1.3], y: 0 }); }));
   out.push({ at: [(MARKET[0] + MARKET[2]) / 2, (MARKET[1] + MARKET[3]) / 2], y: 0 });
   return out;
 }

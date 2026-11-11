@@ -4,7 +4,7 @@
 // ladders on the roofs; the market's well, carts and buyers. Elements of the `life` style, which instances every piece. Positions come
 // from layout.js (the lots, their doors, the streets); the ones near the arrival first.
 import { lots, wells, MARKET, ROAD, ARRIVAL, STREETS } from './layout.js';
-import { houseDoor } from '../../styles/achaemenid/town.js';
+import { houseDoor } from '../../styles/achaemenid/houses-data.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const rotOut = (o) => Math.atan2(-o[0], -o[1]);          // the rot that faces along o
@@ -58,7 +58,7 @@ export function street() {
     if (Math.hypot(w.at[0] - ARRIVAL[0], w.at[1] - ARRIVAL[1]) > 220) continue;
     const [x, z] = w.at;
     F.push({ t: 'well', kind: 'windlass', at: [x, z], y: 0, rot: 0, mat: 'limestone_persian', seed: seed() });
-    F.push({ t: 'trough', at: [x + 2.2, z + 0.6], rot: 0.3, mat: 'limestone_persian', seed: seed() });
+    F.push({ t: 'trough', at: [x + 1.3, z - 1.4], rot: 0.3, mat: 'limestone_persian', seed: seed() });
     for (let k = 0; k < 3; k++) person([x + Math.cos(k * 2.1 + 0.5) * 1.5, z + Math.sin(k * 2.1 + 0.5) * 1.5], k * 2.1 + 3.6, { woman: k < 2, el: k === 0 ? { carry: 'pot', arms: 'head' } : { pose: 'stand' } });
     F.push({ t: 'animal', kind: 'donkey', at: [x - 2.4, z + 1.8], y: 0, rot: 1.2, seed: seed(), gear: true });
   }

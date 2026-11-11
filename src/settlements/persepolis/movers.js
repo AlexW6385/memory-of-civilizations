@@ -11,7 +11,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 44, night: 4, rain: 0.5, reach: 160, spawnMin: 26, far: 44 },
+  walkers: { day: 64, night: 4, rain: 0.5, reach: 170, spawnMin: 24, far: 52 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -57,6 +57,11 @@ export const WALKERS = [
   // the spearman of the guard: the long robe, a staff upright at his side
   { id: 'guard', weight: 0.6, market: 0.5, el: { dress: 'robe', hat: 'cap', over: 'sash', arms: 'staff', carry: 'staff', beard: 1 },
     c1: [CL.white, CL.ochre], c2: [CL.red], c3: [CL.brown], speed: [0.9, 1.1], stride: 1.4 },
+  // the shopper: a basket on the arm, in no hurry; the water-carrier: two skins on a yoke
+  { id: 'shopper', weight: 1.0, market: 2.2, el: { dress: 'robe', hat: 'veil', over: 'sash', carry: 'basket', arms: 'head', hair: 'bun' }, swing: 0.5,
+    c1: [CL.white, CL.ochre, CL.indigo, CL.red], c2: [CL.white], c3: [CL.white], speed: [0.7, 0.9], stride: 1.1, h: [0.9, 0.97] },
+  { id: 'carrier', weight: 0.6, market: 0.6, el: { dress: 'trousers', hat: 'cap', over: 'belt', carry: 'pails', arms: 'pole', beard: 1 },
+    c1: [CL.brown, CL.ochre, CL.grey], c2: [CL.brown], c3: [CL.brown], speed: [0.8, 1.0], stride: 1.2 },
   { id: 'boy', weight: 0.5, market: 0.7, el: { dress: 'robe', hat: 'none', over: 'none', arms: 'hang', hair: 'short' },
     c1: [CL.white, CL.ochre, CL.brown], c2: [CL.white], c3: [CL.brown], speed: [1.1, 1.5], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
 ];
