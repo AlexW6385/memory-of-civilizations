@@ -26,6 +26,7 @@ export function bouInania(el, { bag, col, lights }) {
   for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2 + 0.39; bag.add('marble_smooth', box((cw0 + cw1) / 2 + Math.cos(a) * 1.5 - 0.15, y, (cz0 + cz1) / 2 + Math.sin(a) * 1.5 - 0.15, (cw0 + cw1) / 2 + Math.cos(a) * 1.5 + 0.15, y + 0.06, (cz0 + cz1) / 2 + Math.sin(a) * 1.5 + 0.15)); }
   const ch = [gx0, cz1, gx1, zH]; bag.add('marble_smooth', box(ch[0], y - 0.5, ch[1], ch[2], y - 0.4, ch[3])); bag.add('water', box(ch[0], y - 0.4, ch[1] + 0.12, ch[2], y - 0.1, ch[3] - 0.12));
   for (const [a, b] of [[ch[0], ch[2]]]) { bag.add('marble_smooth', box(a, y - 0.4, ch[1], b, y, ch[1] + 0.12)); bag.add('marble_smooth', box(a, y - 0.4, ch[3] - 0.12, b, y, ch[3])); }
+  bag.add('marble_smooth', box(cx - 1.7, y - 0.05, cz1, cx + 1.7, y + 0.02, zH + 0.7)); col.floor([cx - 1.7, cz1, cx + 1.7, zH + 0.7], y + 0.02);
   for (const bx of [gx0 + 1.2, gx1 - 2.4]) { bag.add('marble_smooth', box(bx, y - 0.05, cz1, bx + 1.2, y + 0.02, zH)); col.floor([bx, cz1, bx + 1.2, zH], y + 0.02); }
   // ——— the outer walls: brick plastered; the portal in the north wall
   const px = [cx - 1.7, cx + 1.7], ph = 4.3;
@@ -67,7 +68,7 @@ export function bouInania(el, { bag, col, lights }) {
     // two doors in the stucco frames to the rooms either side
     for (const u of [cx - 7.2, cx + 7.2]) { door(bag, f, u - 0.7, u + 0.7, y, 2.6, 0.06); archHead(bag, f, u - 0.7, u + 0.7, y + 2.2, y + 2.8, 0.3, 'lobed', { alfiz: true, side: 'far' }); }
     // the north rooms behind: a mass
-    bag.add('plaster_white', box(gx0, y, z0 + t, gx1, y + H1, zN - 0.5)); col.rect([gx0, z0 + t, gx1, zN - 0.5], y, y + H1);
+    for (const [a, b] of [[gx0, vx0(cx) - 0.4], [vx1(cx) + 0.4, gx1]]) { bag.add('plaster_white', box(a, y, z0 + t, b, y + H1, zN - 0.5)); col.rect([a, z0 + t, b, zN - 0.5], y, y + H1); }
     // (the passage from the portal) opened: the vestibule's floor is cut out of that mass above
   }
   function vx0(c) { return c - 1.7; } function vx1(c) { return c + 1.7; }
@@ -142,7 +143,7 @@ export function bouInania(el, { bag, col, lights }) {
     holedWall(bag, col, 'plaster_white', [hx0, zH, hx1, zH + 0.7], y, y + 5.8, holes, true);
     dado(bag, f, hx0, hx1, y, 1.6, holes); stucco(bag, f, hx0, hx1, y + 2.05, y + 5.8, holes, { cell: 0.4 });
     for (const h of holes.slice(1)) { const g = f.R(0.03, 0.09, h[0], h[1]); bag.add('lattice', box(g[0], h[2], g[1], g[2], h[3], g[3])); }
-    archHead(bag, f, cx - 1.7, cx + 1.7, y + 2.8, y + 3.6, 0.7, 'horseshoe', { alfiz: true, both: true });
+    for (const d of [-0.04]) { const g = f.R(d, d + 0.04, cx - 1.9, cx + 1.9); bag.add('cedar', box(g[0], y + 3.6, g[1], g[2], y + 3.85, g[3])); }
     // inside: the side walls and the south wall with the mihrab
     for (const [at, n] of [[hx0, 1], [hx1, -1]]) { const ff = face('x', at, n); dado(bag, ff, zH + 0.7, hz1, y, 1.5); stucco(bag, ff, zH + 0.7, hz1, y + 1.95, y + 5.7, [], { cell: 0.42 }); }
     const fs = face('z', hz1, -1), mh = [cx - 1.0, cx + 1.0];

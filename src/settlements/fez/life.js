@@ -30,7 +30,7 @@ export function life() {
   for (let k = 0; k < 3; k++) man([b[2] - 8.2, zm - 1.0 + k * 1.1], yb, Math.PI / 2, { pose: 'cross' });
   man([cx - 3.4, zm - 0.7], yb, 1.2, { pose: 'squat', hat: 'cap' });
   man([cx + 2.2, b[3] - 3.6], yb, Math.PI, { pose: 'kneel', arms: 'pray', cloth: 'cloth_white' });
-  man([cx - 1.0, cz0 + 2.0], yb, 0, { pose: 'talk' }); man([cx - 0.1, cz0 + 2.1], yb, Math.PI, { pose: 'talk', cloth: 'cloth_grey' });
+  man([cx - 4.0, cz0 + 4.0], yb, 0, { pose: 'talk' }); man([cx - 3.1, cz0 + 4.1], yb, Math.PI, { pose: 'talk', cloth: 'cloth_grey' });
   // the Qarawiyyin: circles of students round a master in the sahn's gallery, men at prayer in the hall
   const q = SITES.qar, yq = siteY('qar') + 0.05, qn = (q[2] - q[0]) / 14, sahnX = q[0] + qn * 4;
   for (let c = 0; c < 3; c++) { const x = sahnX + 5 + c * 9, z = q[1] + 3.5 + 1.4; man([x, z], yq, Math.PI, { pose: 'cross', hat: 'turban', cloth: 'cloth_white' }); for (let k = 0; k < 4; k++) man([x - 1.6 + k * 1.1, z + 1.5], yq, 0, { pose: 'cross' }); }
