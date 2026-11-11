@@ -42,6 +42,24 @@ E.push({ t: 'ming_hall', rect: [-129, -4, -91, 24], y: T2.y, H: 6, front: 's', f
 E.push({ t: 'kaihua_hall', rect: [-129, -4, -91, 24], y: T2.y });
 E.push({ t: 'ming_hall', rect: [-140.5, 58, -131, 94], y: T1.y, H: 4.4, front: 'e', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
 E.push({ t: 'ming_hall', rect: [-89, 58, -79.5, 94], y: T1.y, H: 4.4, front: 'w', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
+// ---- Kaihua Temple's enclosure round the pagoda's court: a white wall on a grey-brick dado with a tiled coping, a gate in the
+// south (at the head of the stair from the road) and one in the north (at the foot of the stair to the upper terrace)
+{
+  const [wx0, wz0, wx1, wz1] = T1.rect, yT = T1.y, gc = PAGODA.c[0], gw = 3.2;
+  const wall = (a, b) => E.push({ t: 'ming_wall', a, b, y: yT, h: 3.4, th: 0.42 });
+  wall([wx0 + 0.3, wz1 - 1.0], [gc - gw - 1.0, wz1 - 1.0]); wall([gc + gw + 1.0, wz1 - 1.0], [wx1 - 0.3, wz1 - 1.0]);
+  wall([wx0 + 0.3, wz0 + 0.6], [gc - gw - 1.0, wz0 + 0.6]); wall([gc + gw + 1.0, wz0 + 0.6], [wx1 - 0.3, wz0 + 0.6]);
+  wall([wx0 + 0.3, wz0 + 0.6], [wx0 + 0.3, wz1 - 1.0]); wall([wx1 - 0.3, wz0 + 0.6], [wx1 - 0.3, wz1 - 1.0]);
+  E.push({ t: 'temple_gate', c: [gc, wz1 - 1.0], y: yT, w: gw * 2, dir: 's' });
+  E.push({ t: 'temple_gate', c: [gc, wz0 + 0.6], y: yT, w: gw * 2, dir: 'n' });
+  // in the court: the great censer before the stair to the pagoda, the sutra pillars either side of the way
+  E.push({ t: 'court_censer', at: [gc, wz1 - 5.4], y: yT });
+  for (const dx of [-8.5, 8.5]) E.push({ t: 'sutra_pillar', at: [gc + dx, wz1 - 6.4], y: yT });
+}
+// the side halls: the luohan along their back walls; the main hall's coffered ceiling and hangings
+E.push({ t: 'luohan_hall', rect: [-140.5, 58, -131, 94], y: T1.y, side: 'w', n: 16 });
+E.push({ t: 'luohan_hall', rect: [-89, 58, -79.5, 94], y: T1.y, side: 'e', n: 16 });
+E.push({ t: 'hall_ceiling', rect: [-129, -4, -91, 24], y: T2.y, H: 6 });
 // ---- the warehouses by the lock
 for (const r of WAREHOUSES) E.push({ t: 'house_jiangnan', rect: r, y: LEVEL.street, front: 's', storeys: 2, shop: false, seed: r[0] });
 
