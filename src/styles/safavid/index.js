@@ -309,13 +309,15 @@ function cable(bag, pts, r, nrm, mat = Q) {
  * east, +v south-west (toward Mecca) for rot = π/4.
  */
 function lotfInterior(el, { bag, col, lights }, pt, A, H, y) {
-  const [cx, cz] = el.c, rot = el.rot ?? 0, WM = el.wallMat ?? B, a = A - 1, w8 = 2 * a * Math.tan(Math.PI / 8), y0 = y + 1.45, ah = 12;
+  const [cx, cz] = el.c, rot = el.rot ?? 0, WM = el.wallMat ?? B, a = A - 1, w8 = 2 * a * Math.tan(Math.PI / 8), y0 = y + 1.45, IN = el.interior;
+  // the Shah Mosque's sanctuary (docs/settlements/isfahan.md §17) is the same room on a larger scale: a wider door, a bigger mihrab, taller arches
+  const ah = IN.ah ?? 12, KM = IN.mihrab ?? 1, DOOR = IN.door ?? 1.0, DH = IN.doorH ?? 3.2, SC = a / 9.5;
   const vec = (u, v) => [u * Math.cos(rot) - v * Math.sin(rot), u * Math.sin(rot) + v * Math.cos(rot)];
   const mid = [cx, y + 7, cz];
   // ---- the structure: the entrance wall with its door, the qibla wall in two leaves round the mihrab's niche, the corners filled
-  slab(bag, col, WM, pt(-A, -A), pt(-1, -A), y, 2, H); slab(bag, col, WM, pt(1, -A), pt(A, -A), y, 2, H);
-  slab(bag, col, WM, pt(-1, -A), pt(1, -A), y + 3.2, 2, H - 3.2);
-  const MW = 2.2, MH = 4.2, MO = 1.4;
+  slab(bag, col, WM, pt(-A, -A), pt(-DOOR, -A), y, 2, H); slab(bag, col, WM, pt(DOOR, -A), pt(A, -A), y, 2, H);
+  slab(bag, col, WM, pt(-DOOR, -A), pt(DOOR, -A), y + DH, 2, H - DH);
+  const MW = 2.2 * KM, MH = 4.2 * KM, MO = 1.4 * KM;
   arcadeWall(bag, col, pt(-A, A - 0.6), pt(A, A - 0.6), y, H, 0.8, T, [{ at: A, w: MW, h: MH, depth: 0.6, alcove: 'oct', plain: true, sideMat: T, backMat: T, domeMat: T, ribMat: Q, cellMat: 'tile_cream', ribSeg: 3 }], pt(0, A + 100));
   slab(bag, col, WM, pt(-A, A + 0.4), pt(-MO, A + 0.4), y, 1.2, H); slab(bag, col, WM, pt(MO, A + 0.4), pt(A, A + 0.4), y, 1.2, H);
   slab(bag, null, WM, pt(-MO, A + 0.4), pt(MO, A + 0.4), y + MH + 0.15, 1.2, H - MH - 0.15); slab(bag, null, WM, pt(-MO, A + 0.85), pt(MO, A + 0.85), y, 0.3, MH + 0.15);
@@ -353,7 +355,7 @@ function lotfInterior(el, { bag, col, lights }, pt, A, H, y) {
   };
   const lozenge = (f, s, yc, hw, hh, o, m) => { const p = f.F(0, yc, 3); quad(m, p, f.F(s, yc - hh, o), f.F(s + hw, yc, o), f.F(s, yc + hh, o), f.F(s - hw, yc, o)); };
   const flower = (f, s, yc, r, o) => { const p = f.F(s, yc, o + 3); for (const [ds, dy] of [[r, 0], [-r, 0], [0, r], [0, -r]]) lozenge(f, s + ds * 0.6, yc + dy * 0.6, r * 0.45, r * 0.45, o, 'tile_white'); lozenge(f, s, yc, r * 0.3, r * 0.3, o + 0.008, 'glaze_yellow'); void p; };
-  const DOOR = 1.0, DH = 3.2, MF = 1.85, MFH = 6.3;
+  const MF = 1.85 * KM, MFH = 6.3 * KM;
   for (const f of faces) {
     const p = f.F(0, y + 7, 4);
     if (f.wall) {
@@ -474,14 +476,14 @@ function lotfInterior(el, { bag, col, lights }, pt, A, H, y) {
   // ---- the floor, the passage from the portal's vestibule
   const poly = (pts, y0p, y1p, m) => prism(bag, m, pts.map(([u, v]) => pt(u, v)), pts.map(([u, v]) => pt(u, v)), y0p, y1p);
   poly([[-a, -a], [a, -a], [a, a], [-a, a]], y - 0.05, y + 0.04, 'marble_floor');
-  poly([[-1, -A - 1], [1, -A - 1], [1, -a], [-1, -a]], y - 0.05, y + 0.04, 'marble_floor');
+  poly([[-DOOR, -A - 1], [DOOR, -A - 1], [DOOR, -a], [-DOOR, -a]], y - 0.05, y + 0.04, 'marble_floor');
   // the furnishing (docs/settlements/isfahan.md §16): carpets laid toward the qibla, a Qur'an open on its stand by the
   // mihrab with a prayer rug before it, two lamps of glass hung on long chains
   { const vv = vec(0, 1), yawq = Math.atan2(vv[0], vv[1]);
-    for (const [u, v, w, d, k] of [[0, -1.2, 9, 5.5, 'persian'], [0, 4.6, 7, 3.6, 'blue'], [-5.6, 2, 2.2, 6, 'maroon'], [5.6, 2, 2.2, 6, 'maroon']]) { const q = pt(u, v); F.carpet(bag, q[0], y + 0.04, q[1], w, d, yawq, k); }
+    for (const [u, v, w, d, k] of [[0, -1.2, 9, 5.5, 'persian'], [0, 4.6, 7, 3.6, 'blue'], [-5.6, 2, 2.2, 6, 'maroon'], [5.6, 2, 2.2, 6, 'maroon']]) { const q = pt(u * SC, v * SC); F.carpet(bag, q[0], y + 0.04, q[1], w * SC, d * SC, yawq, k); }
     { const q = pt(1.4, A - 2.2); F.rahle(bag, q[0], y + 0.06, q[1], yawq + Math.PI); const r = pt(1.4, A - 2.9); F.prayerRug(bag, r[0], y + 0.062, r[1], yawq + Math.PI, 'persian'); }
-    for (const u of [-3.2, 3.2]) { const q = pt(u, 1.5); F.mosqueLamp(bag, lights, q[0], y + 3.2, q[1], y + 26.2, { k: 1.2, glow: 2.5, reach: 8 }); } }
-  const P = el.interior.passage;
+    for (const u of [-3.2, 3.2]) { const q = pt(u * SC, 1.5 * SC); F.mosqueLamp(bag, lights, q[0], y + 3.2, q[1], y + H + 12.2, { k: 1.2, glow: 2.5, reach: 8 * SC }); } }
+  const P = IN.passage;
   if (P) {
     const W = 2.6, o0 = A + 1, o1 = o0 + W, ow = o1 + 0.3, ch = 4.5, top = 5.5;
     // the vestibule's east face in local terms: v where world x = P.x at a given u
@@ -1162,12 +1164,76 @@ function aliQapu(el, { bag, col, lights }) {
   }
 }
 
+
+/**
+ * qahveh_khaneh: a coffeehouse { rect } with its door on the west (docs/settlements/isfahan.md §18): a vaulted hall
+ * with a central pool and fountain, arched recesses with raised carpeted platforms along the walls ("raised floors
+ * about 1 m high, carpeted and used as benches" — here 0.5 m so they can be climbed), a painted frieze, lamps hung from
+ * the roof, a counter with the coffee pots on a brazier, cups, water pipes (qalyan), a high chair for the poet or
+ * reciter beside the pool.
+ */
+function qahvehKhaneh(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, h = 6.2, th = 0.8, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  const ix0 = x0 + th / 2, ix1 = x1 - th / 2, iz0 = z0 + th / 2, iz1 = z1 - th / 2;
+  const wins = (L, skip = []) => { const a = [], n = Math.floor(L / 3.4); for (let i = 0; i < n; i++) { const at = (i + 0.5) * L / n; if (!skip.some((k) => Math.abs(k - at) < 1.9)) a.push({ at, w: 1.1, h: 1.7, sill: 3.3, depth: 0.5, back: 'lattice' }); } return a; };
+  arcadeWall(bag, col, [x0, z0], [x1, z0], 0, h, th, B, wins(W), [cx, z0 - 50]);
+  arcadeWall(bag, col, [x0, z1], [x1, z1], 0, h, th, B, wins(W), [cx, z1 + 50]);
+  arcadeWall(bag, col, [x1, z0], [x1, z1], 0, h, th, B, wins(D), [x1 + 50, cz]);
+  arcadeWall(bag, col, [x0, z0], [x0, z1], 0, h, th, B, [{ at: D / 2, w: 2.6, h: 3.4, pass: true }, ...wins(D, [D / 2])], [x0 - 50, cz]);
+  // the roof with its painted ceiling and the dome over the pool
+  bag.add(B, box(x0 - 0.3, h, z0 - 0.3, x1 + 0.3, h + 0.35, z1 + 0.3)); col.rect([x0, z0, x1, z1], h, h + 0.35);
+  bag.add('ceiling_painted', box(ix0, h - 0.2, iz0, ix1, h, iz1));
+  bag.add(Q, lathe([[3.6, 0], [3.4, 0.8], [2.5, 1.9], [1.2, 2.6], [0.001, 2.9]], 20, null, cx, h + 0.35, cz));
+  bag.add('gilt_bronze', lathe([[0.05, 0], [0.05, 0.4], [0.001, 0.6]], 6, null, cx, h + 3.2, cz));
+  // the painted frieze round the walls, the floor
+  for (const r of [[ix0, 4.9, iz0, ix1, 5.9, iz0 + 0.04], [ix0, 4.9, iz1 - 0.04, ix1, 5.9, iz1], [ix1 - 0.04, 4.9, iz0, ix1, 5.9, iz1], [ix0, 4.9, iz0, ix0 + 0.04, 5.9, iz1]]) bag.add('ceiling_painted', box(r[0], r[1], r[2], r[3], r[4], r[5]));
+  bag.add('brick_paving', box(ix0, 0, iz0, ix1, 0.03, iz1));
+  // the pool and its fountain
+  const pr = [cx - 2.2, cz - 1.7, cx + 2.2, cz + 1.7];
+  bag.add('marble', box(pr[0], 0, pr[1], pr[2], 0.12, pr[3])); col.rect(pr, 0, 0.4);
+  for (const r of [[pr[0], pr[1], pr[2], pr[1] + 0.3], [pr[0], pr[3] - 0.3, pr[2], pr[3]], [pr[0], pr[1] + 0.3, pr[0] + 0.3, pr[3] - 0.3], [pr[2] - 0.3, pr[1] + 0.3, pr[2], pr[3] - 0.3]]) bag.add('marble', boxR(r, 0.12, 0.4));
+  bag.add('water', box(pr[0] + 0.3, 0.12, pr[1] + 0.3, pr[2] - 0.3, 0.3, pr[3] - 0.3));
+  bag.add('bronze', lathe([[0.07, 0], [0.04, 0.5], [0.001, 0.62]], 8, null, cx, 0.33, cz));
+  // the platforms (sakku) along the north, south and east walls, carpeted, with cushions and bolsters at the wall
+  const P = [[ix0, iz0, ix1, iz0 + 2.4], [ix0, iz1 - 2.4, ix1, iz1], [ix1 - 2.4, iz0 + 2.4, ix1, iz1 - 2.4]];
+  for (const r of P) { bag.add('timber', boxR(r, 0, 0.5)); col.rect(r, 0, 0.5); }
+  const kinds = ['persian', 'maroon', 'blue'];
+  P.forEach((r, k) => {
+    const horiz = k < 2, L = horiz ? r[2] - r[0] : r[3] - r[1], n = Math.floor(L / 3);
+    for (let i = 0; i < n; i++) {
+      const u = (i + 0.5) * L / n, x = horiz ? r[0] + u : (r[0] + r[2]) / 2, z = horiz ? (r[1] + r[3]) / 2 : r[1] + u, yaw = horiz ? 0 : Math.PI / 2;
+      F.carpet(bag, x, 0.5, z, horiz ? L / n - 0.3 : 2.1, horiz ? 2.1 : L / n - 0.3, 0, kinds[(i + k) % 3]);
+      const wx = k === 0 ? x : k === 1 ? x : r[2] - 0.35, wz = k === 0 ? r[1] + 0.35 : k === 1 ? r[3] - 0.35 : z;
+      F.bolster(bag, wx, 0.55, wz, 1.3, 0.13, yaw, i % 2 ? 'cloth_red' : 'cloth_indigo', 'cloth_ochre');
+      F.trayTable(bag, x + (horiz ? 0 : -0.5), 0.5, z + (horiz ? (k === 0 ? 0.5 : -0.5) : 0), { seed: i + k });
+      if (i % 2 === 0) F.hookah(bag, x + (horiz ? 0.7 : -0.4), 0.5, z + (horiz ? (k === 0 ? 0.6 : -0.6) : 0.5), 0);
+    }
+  });
+  // the counter with the coffee pots on their brazier, cups, pipes
+  const cr = [ix0, cz + 2.2, ix0 + 0.9, iz1 - 0.6];
+  bag.add('wood_dark', boxR(cr, 0, 1.05)); col.rect(cr, 0, 1.05);
+  F.brazier(bag, lights, ix0 + 0.45, 1.05, cz + 3.2);
+  for (let i = 0; i < 3; i++) F.ewer(bag, ix0 + 0.45, 1.05, cz + 4.3 + i * 0.5, 0.7, i, 'bronze');
+  for (let i = 0; i < 6; i++) F.cup(bag, ix0 + 0.3 + (i % 2) * 0.3, 1.05, iz1 - 1.6 - i * 0.12, 'glaze_white', 1);
+  F.hookah(bag, ix0 + 0.45, 1.05, iz1 - 0.9, 0);
+  bag.add('timber', box(ix0, 2.0, cz + 2.2, ix0 + 0.25, 2.04, iz1 - 0.6));
+  for (let i = 0; i < 5; i++) F.cup(bag, ix0 + 0.12, 2.04, cz + 2.7 + i * 0.7, i % 2 ? 'glaze_blue' : 'glaze_white', 1.2);
+  // the poet's high chair beside the pool
+  { const px = cx + 3.4, pz = cz;
+    for (const [dx, dz] of [[-0.25, -0.25], [0.25, -0.25], [-0.25, 0.25], [0.25, 0.25]]) bag.add('wood_dark', box(px + dx - 0.03, 0, pz + dz - 0.03, px + dx + 0.03, 1.1, pz + dz + 0.03));
+    bag.add('wood_dark', box(px - 0.28, 1.1, pz - 0.28, px + 0.28, 1.15, pz + 0.28));
+    bag.add('wood_dark', box(px + 0.24, 1.15, pz - 0.28, px + 0.3, 1.9, pz + 0.28));
+    bag.add('cloth_red', box(px - 0.25, 1.15, pz - 0.25, px + 0.2, 1.19, pz + 0.25));
+    col.rect([px - 0.3, pz - 0.3, px + 0.3, pz + 0.3], 0, 1.15); }
+  for (const [x, z] of [[cx - 3.2, cz - 2.4], [cx + 3.2, cz - 2.4], [cx - 3.2, cz + 2.4], [cx + 3.2, cz + 2.4]]) hangingLamp(bag, lights, x, h - 2.2, z, h - 0.2, 4, 9);
+}
+
 registerStyle('safavid', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.mughal.elements,
     square_arcade: squareArcade, portal, dome_chamber: domeChamber, court_arcade: courtArcade,
-    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, khaneh_open: khanehOpen, ali_qapu: aliQapu, sagittarius,
+    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, khaneh_open: khanehOpen, ali_qapu: aliQapu, sagittarius, qahveh_khaneh: qahvehKhaneh,
   },
   objects: {},
 });

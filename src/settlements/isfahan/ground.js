@@ -3,13 +3,14 @@
 // trees by the canal and in the garden, elms and fruit trees here and there in the town; the dry,
 // clear sky of the Iranian plateau.
 
-import { RADIUS, SQUARE, ARCADE, CANAL, GARDEN, inRect, inHouse, inMosque, OPEN_HOUSE } from './layout.js';
+import { RADIUS, SQUARE, ARCADE, CANAL, GARDEN, TEAHOUSE, CHAHAR, CHAHAR_X, inRect, inHouse, inMosque, OPEN_HOUSE } from './layout.js';
 
 const [sx0, sz0, sx1, sz1] = SQUARE;
 const FIELD = [sx0 + CANAL + 2, sz0 + CANAL + 2, sx1 - CANAL - 2, sz1 - CANAL - 2];
 function height() { return 0; }
 function cover(x, z) {
   const c = { sand: 0.3, grass: 0, rock: 0, soil: 0.4, fields: 0, dry: 0.75, warmth: 0.7, red: 0.05, road: 0, snow: 0, forest: 0 };
+  if (inRect(CHAHAR, x, z)) { c.road = 0.5; c.sand = 0.3; return c; }
   if (inRect(SQUARE, x, z)) { c.sand = 0.55; c.soil = 0.45; c.road = inRect(FIELD, x, z) ? 0 : 0.5; return c; }
   if (inRect(GARDEN, x, z)) { c.grass = 0.8; c.soil = 0.2; c.dry = 0.3; return c; }
   if (Math.hypot(x, z) > RADIUS - 26) { c.fields = 0.6; c.grass = 0.2; c.soil = 0.2; return c; }
@@ -22,6 +23,12 @@ function fromWater() { return 1e4; }
 /** Plants per 100 m²: a row of plane trees by the canal (both sides of the square, and the ends), plane trees and grass in the royal garden, a scatter of elms and mulberries in the town's open ground. */
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6) return null;
+  if (inRect(CHAHAR, x, z)) {
+    // the avenue: two rows of plane trees each side of the channel (rows at ±8 and ±14), cypresses between the rows, 8 m apart
+    const dxs = Math.abs(x - CHAHAR_X), row = Math.abs(dxs - 8) < 0.9 ? 'plane_tree' : Math.abs(dxs - 14) < 0.9 ? 'plane_tree' : null;
+    return row && Math.abs(((z + 4) % 9) + (z < 0 ? 9 : 0)) % 9 < 1.2 ? { [row]: 2.4 } : null;
+  }
+  if (inRect(TEAHOUSE, x, z, 8)) return null;
   if (inRect(SQUARE, x, z)) {
     const dx = Math.min(Math.abs(x - (sx0 + CANAL - 2.5)), Math.abs(x - (sx1 - CANAL + 2.5)));
     const dz = Math.min(Math.abs(z - (sz0 + CANAL - 2.5)), Math.abs(z - (sz1 - CANAL + 2.5)));
@@ -40,7 +47,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { plane_tree: 1.8, elm: 0.05, apple: 0.05 },
+  maxDensity: { plane_tree: 2.4, elm: 0.05, apple: 0.05 },
   climate: {
     sun: { az: 150, el: 45, color: [1.0, 0.95, 0.86], intensity: 3.4, lat: 33, dec: 5, hour: 10.5 },
     sky: { turbidity: 2.8, rayleigh: 1.1, mie: 0.004, mieG: 0.8, zenith: [0.1, 0.18, 0.36], horizon: [0.62, 0.64, 0.66] },

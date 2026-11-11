@@ -21,6 +21,9 @@ export const M = (u, v) => [C[0] + U[0] * u + V[0] * v, C[1] + U[1] * u + V[1] *
 export const toMosque = (x, z) => { const dx = x - C[0], dz = z - C[1]; return [dx * U[0] + dz * U[1], dx * V[0] + dz * V[1]]; };
 export const MOSQUE = { u: 48, v0: -48, v1: 72 };     // its footprint in (u, v)
 export const LOTF = { portal: [[80, -29], [80, -51]], c: [103, -32], half: 10.5 };   // the chamber 19 m inside (Archnet)
+export const TEAHOUSE = [17, -332, 35, -316];       // the coffeehouse by the Qeysarieh (docs/settlements/isfahan.md §18)
+export const CHAHAR = [-384, -110, -338, 110];       // the Chahar Bagh avenue west of the royal garden, canal on x = CHAHAR_X
+export const CHAHAR_X = -361;
 export const ALIQAPU = { rect: [-104, -50, -80, -30] };
 
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -44,7 +47,8 @@ export function houses() {
     if (Math.abs(cx) < 13 + w / 2 && cz < -300) continue;                                   // the bazaar
     if (inRect([88, -58, 122, -8], cx, cz, w / 2)) continue;                                // Lotfollah's chamber
     if (Math.abs(cz + 40) < 3 + d / 2 && cx > 0) continue;                                   // the lane east from the square
-    if (rand() < 0.1) continue;
+    const skip = rand() < 0.1;
+    if (skip || inRect(TEAHOUSE, cx, cz, w / 2 + 4) || inRect(CHAHAR, cx, cz, w / 2 + 2)) continue;
     HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6) });
   }
   return HOUSES;

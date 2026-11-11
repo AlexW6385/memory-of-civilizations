@@ -119,6 +119,22 @@ Sources added:
 - [Traditional Persian residential architecture — Wikipedia](https://en.wikipedia.org/wiki/Traditional_Persian_residential_architecture)
 - [Bazaar of Isfahan — Iran Chamber Society](https://www.iranchamber.com/architecture/articles/bazaar_of_isfahan5.php)
 
+## 17. The Shah Mosque's sanctuary inside (fifth pass)
+
+The qibla iwan now opens by a door in its back wall (5 m wide, 6.5 m high, `pass`) into the domed sanctuary, 22.5 m square inside as in §2, built with the Lotfollah's interior builder at its scale: marble dado, eight pointed arches (17 m) with inscription bands and cable mouldings, squinches, a windowed ring, the inner dome of buff brick with rings of lemon-shaped medallions round a sunburst (crown about 39 m), under the outer turquoise dome (52 m): the double shell of the real mosque, the inner dome lower than the outer [stated: §2 sources for the outer dome; the double shell is in Wikipedia's Shah Mosque article]; a larger mihrab (3.2 x 6 m) in the qibla wall, carpets, a Qur'an stand, lamps [inferred: all proportions and furnishing]. The sanctuary's entrance wall abuts the iwan's back wall.
+
+## 18. The coffeehouse (qahveh-khaneh) (fifth pass)
+
+Safavid coffeehouses were "large vaulted buildings with central pools"; along the whitewashed walls arched recesses with raised floors about 1 m high, carpeted, served as benches; lamps hung from the roof; Tavernier saw a vessel of running water in the middle of each room for cleaning pipes; a 1619 hall had "a central fountain with several jets"; poets sat on high chairs at the centre; coffee was the original drink, water pipes were smoked; reciters of Ferdowsi's epic, storytellers and dervishes performed; they clustered round the Maydan-e Shah, the Chehel Sotun and the Chahar Bagh [stated: Encyclopaedia Iranica, "Coffeehouse"]. Ours (`qahveh_khaneh`, `layout.js` TEAHOUSE, 18 x 16 m by the Qeysarieh's east side, door on the west lane): a brick hall with arched lattice windows, a painted ceiling and frieze, a dome on the roof, a marble pool with a fountain, carpeted platforms 0.5 m high (so that they can be climbed) along three walls with bolsters, trays, cups, ewers and pipes, a counter with the coffee pots on a brazier, a high chair for the poet beside the pool, four hanging lamps [inferred: size, siting, the furnishing]. No samovar or tea: the sources give coffee.
+
+## 19. The Chahar Bagh avenue (fifth pass)
+
+At most 48 m wide; water ran down the middle in stone channels, falling in miniature cascades from terrace to terrace; each side lined with plane trees, cypresses, pines and junipers; a pedestrian walk either side of the channel; a latticed pavilion for the harem; a place of recreation with animated social and commercial activity [stated: Encyclopaedia Iranica, "Chahar Bagh"]. Ours (`CHAHAR`, west of the royal garden, 46 x 220 m): brick-paved, a stone channel down the middle with a square stone basin every 44 m and low footbridges, two rows of plane trees each side (8 and 14 m from the channel) [inferred: the spacing; the cypresses, pavilion and the shops left out]. Not built: the caravanserai (the dossier's §16 sources), the movers, fauna and smoke systems.
+
+Sources added:
+- [Coffeehouse — Encyclopaedia Iranica](https://iranicaonline.org/articles/coffeehouse)
+- [Chahar Bagh of Isfahan — Encyclopaedia Iranica](https://www.iranicaonline.org/articles/caharbag-e-esfahan-the-name-of-a-broad-avenue-maximum-width-48-m-52-yards-which-was-a-key-feature-of-the-city-of-i)
+
 ## Sources
 
 - [Naqsh-e Jahan Square — Wikipedia](https://en.wikipedia.org/wiki/Naqsh-e_Jahan_Square)
