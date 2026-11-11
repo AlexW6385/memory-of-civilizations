@@ -8,7 +8,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 30, night: 4, rain: 0.6, reach: 150, spawnMin: 26, far: 42 },
+  walkers: { day: 44, night: 5, rain: 0.6, reach: 150, spawnMin: 26, far: 42 },
   boats: { count: 0, reach: 250, spawnMin: 60, far: 95, speed: [1.0, 1.45], bridgeSpeed: 0.7 },
   water: -100,
 };
@@ -43,6 +43,12 @@ export const WALKERS = [
     c1: [CL.black], c2: [CL.black], c3: [CL.black], speed: [0.8, 1.05], stride: 1.3 },
   { id: 'woman', weight: 1.0, market: 1.1, el: { dress: 'robe', hair: 'bun', over: 'shawl', arms: 'hang' }, swing: 0.7,
     c1: [CL.red, CL.green, CL.indigo, CL.ochre, CL.linen], c2: [CL.white, CL.red, CL.linen], c3: [CL.black], speed: [0.9, 1.15], stride: 1.25, h: [0.9, 0.97] },
+  // the streltsy (musketeers of the guard), in coats of one colour by regiment, a staff (the berdysh stands in for the halberd), a black-trimmed cap; thick at the gates and the square
+  { id: 'strelets', weight: 0.5, market: 1.2, el: { dress: 'robe', hair: 'short', beard: 1, hat: 'cap', hatMat: 'hide_black', over: 'sash', carry: 'staff', arms: 'staff' },
+    c1: [CL.red, CL.indigo, CL.green, CL.red], c2: [CL.white, CL.brown], c3: [CL.black, CL.brown], speed: [0.85, 1.05], stride: 1.4 },
+  // the water carrier with her yoke and two pails, from the wells and the river's stages
+  { id: 'carrier', weight: 0.5, market: 0.3, el: { dress: 'robe', hair: 'bun', over: 'shawl', carry: 'yoke', arms: 'yoke' }, swing: 0.7,
+    c1: [CL.red, CL.linen, CL.green, CL.indigo], c2: [CL.white, CL.linen], c3: [CL.black], speed: [0.85, 1.05], stride: 1.15, h: [0.9, 0.97] },
   { id: 'porter', weight: 0.7, market: 1.0, el: { dress: 'trousers', hair: 'short', beard: 1, hat: 'cap', hatMat: 'hide_brown', carry: 'pole', arms: 'pole' }, swing: 0.75, pole: true,
     c1: [CL.linen, CL.brown, CL.grey], c2: [CL.brown, CL.grey], c3: [CL.black], speed: [1.0, 1.25], stride: 1.1 },
 ];

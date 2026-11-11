@@ -1,5 +1,5 @@
 // The log houses (izby) of the boyars' courts and the posad (docs/settlements/muscovy.md §5).
-import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ } from './layout.js';
+import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, NIKOLSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ } from './layout.js';
 const base = (id, elements) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
 // the gable end of each house turned to the nearer street (the streets of layout.js: x = 42 − 420 + 84k, z = 35 − 420 + 70k)
 function front([x0, z0, x1, z1]) {
@@ -75,7 +75,34 @@ export function people() {
   { const [bx, bz] = BASIL, by = height(bx, bz) + 4.02;
     fig([bx + 1.6, bz], -Math.PI / 2, { y: by, cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cape', hat: 'none', beard: 1, hair: 'long' });
     for (let q = 0; q < 7; q++) { const at = [bx - 0.5 - rand() * 3, bz + (rand() - 0.5) * 4.5]; fig(at, -Math.PI / 2 + (rand() - 0.5) * 0.4, { y: by, pose: 'stand', hat: 'none' }); } }
+  squareLife(L, rand, fig, face);
   return L;
+}
+/**
+ * The open square (docs §5.2): guards at the gates, beggars at St Basil's steps, a holy fool, groups talking, firewood and hay carts with their horses,
+ * pigs and dogs and geese loose among them, scattered over the open middle of Red Square (not on the arrival, the Lobnoye Mesto, the lane or the church).
+ */
+function squareLife(L, rand, fig, face) {
+  const taken = [[40, 20, 7], [LOBNOYE[0], LOBNOYE[1], 18], [LOBNOYE[0], LOBNOYE[1] + 16, 8], [BASIL[0], BASIL[1], 36]];
+  const free = (x, z, r = 1.5) => !taken.some(([a, b, c]) => Math.hypot(x - a, z - b) < c + r) && !(x > -9 && x < 6 && z > -125 && z < 55);
+  const spot = (r) => { for (let k = 0; k < 40; k++) { const x = -8 + rand() * 52, z = -140 + rand() * 235; if (free(x, z, r)) { taken.push([x, z, r]); return [x, z]; } } return null; };
+  const y = (p) => height(p[0], p[1]);
+  // the guards at the gates: pairs of streltsy in coats of one colour, staves in hand, before the Spassky and Nikolsky bridges
+  for (const t of [SPASSKY[1], NIKOLSKY[1]]) { const zb = gateZ(t), xb = wallX(zb) + MOAT.d1 + 6.5, col = t === SPASSKY[1] ? 'cloth_red' : 'cloth_indigo'; for (const e of [-1, 1]) fig([xb, zb + e * 3.2], -Math.PI / 2, { pose: 'stand', cloth: col, cloth2: 'linen', over: 'sash', hat: 'cap', hatMat: 'hide_black', carry: 'staff', beard: 1 }); }
+  // beggars on St Basil's platform steps and a holy fool with his chain and bare feet
+  for (let k = 0; k < 3; k++) { const at = [BASIL[0] - 9 + k * 1.3, BASIL[1] - 17 - (k % 2) * 0.4]; fig(at, Math.PI, { pose: 'sit_low', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'none', hair: 'long', beard: 1, y: y(at) }); }
+  { const at = [24, 60]; fig(at, 2.2, { pose: 'talk', cloth: 'cloth_white', cloth2: 'linen', hat: 'none', hair: 'long', beard: 1, feet: 'bare', over: 'none', y: y(at) }); }
+  // groups of two and three in talk, a wife with her basket, a boy with a dog
+  for (let g = 0; g < 14; g++) { const p = spot(2.6); if (!p) continue; const n = 2 + (rand() < 0.4 ? 1 : 0); for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2 + rand(), at = [p[0] + Math.cos(a) * 0.9, p[1] + Math.sin(a) * 0.9]; fig(at, face(at, p) + (rand() - 0.5) * 0.4, { pose: k ? 'talk' : 'stand', carry: rand() < 0.2 ? 'basket' : 'none', y: y(at) }); } }
+  // carts and sledges with their beasts, parked: firewood, hay, barrels
+  for (let k = 0; k < 7; k++) { const p = spot(4); if (!p) continue; const rot = rand() < 0.5 ? 0 : Math.PI, load = ['hay', 'barrels', 'sacks', 'hay'][k % 4]; L.push({ t: 'cart', kind: 'two', beast: 'horse', load, at: p, y: y(p), rot, seed: 400 + k }); fig([p[0] + 1.2, p[1] + (rot ? 2.0 : -2.0)], rot, { carry: 'staff', over: 'sash', y: y([p[0] + 1.2, p[1]]) }); }
+  for (let k = 0; k < 5; k++) { const p = spot(3); if (!p) continue; L.push({ t: 'firewood', at: p, y: y(p), rot: rand() * 3, seed: 430 + k, len: 2 }); }
+  for (let k = 0; k < 4; k++) { const p = spot(3); if (p) L.push({ t: 'haystack', at: p, y: y(p), rot: rand() * 6, seed: 440 + k }); }
+  for (let k = 0; k < 6; k++) { const p = spot(1.8); if (p) L.push({ t: 'barrel', at: p, y: y(p), rot: 0, seed: 450 + k, n: 1 + (k % 3) }); }
+  for (let k = 0; k < 4; k++) { const p = spot(1.5); if (p) L.push({ t: 'crates', at: p, y: y(p), rot: rand() * 3, seed: 455 + k, n: 3 }); }
+  // the animals loose on the square: dogs, pigs rooting, goats, geese, hens
+  for (const [kind, n] of [['dog', 7], ['pig', 5], ['goat', 5], ['sheep', 4]]) for (let k = 0; k < n; k++) { const p = spot(1.5); if (p) L.push({ t: 'animal', kind, at: p, y: y(p), rot: rand() * 6.28, seed: 500 + k * 7 }); }
+  for (let k = 0; k < 4; k++) { const p = spot(2.2); if (p) L.push({ t: 'chickens', kind: k % 2 ? 'goose' : 'hen', at: p, y: y(p), rot: rand() * 6, n: k % 2 ? 6 : 5, seed: 520 + k }); }
 }
 
 /** The street paving: half-round logs down the middle of every street of the grid, wherever it is not the Kremlin's open ground, the square, the river or a reserved site. */
@@ -89,6 +116,11 @@ function market() {
     L.push({ t: 'stalls', c: [x0 + 2.4, z], n, along: 'z', face: -1, y: height, seed: 40 + z, gap: 0.4 });
     L.push({ t: 'stalls', c: [x0 + 6.0, z], n, along: 'z', face: 1, y: height, seed: 90 + z, gap: 0.4 });
   }
+  // a second market, west of the open middle of the square: two more double rows of booths, the way between them and the Lobnoye Mesto kept clear
+  for (const [z, n] of [[-112, 6], [-64, 6], [-16, 6], [34, 5]]) {
+    L.push({ t: 'stalls', c: [-3.4, z], n, along: 'z', face: -1, y: height, seed: 140 + z, gap: 0.4 });
+    L.push({ t: 'stalls', c: [0.2, z], n, along: 'z', face: 1, y: height, seed: 190 + z, gap: 0.4 });
+  }
   return L;
 }
 
@@ -96,7 +128,7 @@ function market() {
  * The yards (docs §5.3): in the free strip beside each house, within its own cell, a small log building (bania, klet, byre) or a well sweep
  * at the back, and a kitchen garden in the strip on the other side or in the same when there is no room for both.
  */
-function yards(all) {
+export function yards(all) {
   const E = [], rand = rng(1604);
   for (const l of all) {
     const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, d = Math.hypot(cx - 40, cz - 20);
