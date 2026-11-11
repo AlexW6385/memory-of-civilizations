@@ -1031,6 +1031,13 @@ function hzTree(el, { bag, col }) {
   const R = cr * (kind === 'willow' ? 0.75 : 0.9), per = Math.round(kind === 'peach' ? 60 : kind === 'willow' ? 90 : 200 * (R / 3) ** 2 + 60);
   for (const [lx, ly, lz] of lobes) {
     const ry = R * (kind === 'willow' ? 0.8 : 0.85);
+    // a dark underside under each lobe (a disc a little way under its equator, facing down): the collision's top field takes a crown for a roof, and a column through
+    // the lobe's rim has leaf cards on top but no face under them, which made the rim a solid wall to the walker (west lake route 2)
+    {
+      const uy = ly - ry * 0.25, ur = R * 1.15, fan = [];
+      for (let q = 0; q < 10; q++) { const a1 = q * 0.6283, a2 = (q + 1) * 0.6283; fan.push(lx, uy, lz, lx + Math.cos(a1) * ur, uy, lz + Math.sin(a1) * ur, lx + Math.cos(a2) * ur, uy, lz + Math.sin(a2) * ur); }
+      bag.add(kind === 'willow' ? spec.mats[1] : coreMat, fromTriangles(fan));
+    }
     if (kind !== 'willow') bag.add(coreMat, lathe(Array.from({ length: 9 }, (_, q) => { const t = q / 8 * Math.PI; return [Math.max(0.001, Math.sin(t)), -Math.cos(t)]; }), 14).scale(R * 0.8, ry * 0.8, R * 0.8).translate(lx, ly, lz));
     for (let t = 0; t < per; t++) {
       const th = rand() * 6.28, ph = Math.acos(rand() * 1.7 - 0.7);                    // not much of the underside
