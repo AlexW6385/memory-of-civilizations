@@ -37,6 +37,8 @@ export function ponds() {
   if (PONDS) return PONDS;
   PONDS = [];
   const rand = rng(1160);
+  // the ponds inside the enclosure (§19): the grid of roads, ponds and mounds that served the temple
+  for (const rc of ENC_PONDS) PONDS.push({ rect: rc });
   for (let k = 0; k < 16; k++) {
     const a = k / 16 * Math.PI * 2 + rand() * 0.3, r = 275 + rand() * 150, x = Math.cos(a) * r, z = Math.sin(a) * r, w = 12 + rand() * 12, d = 8 + rand() * 7, rc = [x - w / 2, z - d / 2, x + w / 2, z + d / 2];
     if (Math.hypot(Math.abs(x) + w / 2, Math.abs(z) + d / 2) > RADIUS - 28 || (Math.abs(z) < 24 && x < -150) || inRect(MARKET, x, z, 14)) continue;
@@ -44,6 +46,9 @@ export function ponds() {
   }
   return PONDS;
 }
+/** The paths of the enclosure (laterite, 3 m wide) and its ponds (§19): the quarters of the temple's servants lie along them. */
+export const ENC_PATHS = [[-139, -138.5, 197, -135.5], [-139, 135.5, 197, 138.5], [162, -135.5, 165, -8], [162, 8, 165, 135.5], [-139.5, -135.5, -136.5, -8], [-139.5, 8, -136.5, 135.5], [165, -1.5, 200, 1.5]];
+export const ENC_PONDS = [[-100, -128, -80, -118], [50, -128, 76, -118], [150, -126, 160, -116], [-60, 118, -38, 128], [90, 118, 114, 129], [140, 116, 156, 126], [168, -60, 182, -48], [168, 48, 182, 60]];
 export const inPond = (x, z, m = 0) => ponds().some((p) => inRect(p.rect, x, z, m));
 
 let HOUSES = null, STORES = null;
@@ -68,6 +73,22 @@ export function houses() {
   const [r0, s0, r1, s1] = ROAD, off = 10;
   for (let z = s0 + 8; z < s1 - 8; z += 8 + rand() * 4) { place(r0 - off - rand() * 2, z, true, 'e'); place(r1 + off + rand() * 2, z + rand() * 3, true, 'w'); }
   for (let x = r0 + 20; x < r1 - 10; x += 8 + rand() * 4) { place(x, s0 - off - rand() * 2, false, 's'); place(x + rand() * 3, s1 + off + rand() * 2, false, 'n'); }
+  // the quarters of the temple's servants inside the enclosure: along the laterite paths, fronts to the path
+  const inEnc = (x, z, r) => { const m = 5; return x - (r[2] - r[0]) / 2 > ENCLOSURE[0] + m && x + (r[2] - r[0]) / 2 < ENCLOSURE[2] - m && z - (r[3] - r[1]) / 2 > ENCLOSURE[1] + m && z + (r[3] - r[1]) / 2 < ENCLOSURE[3] - m; };
+  const encPlace = (x, z, alongX, front, kind) => {
+    const w = kind === 'big' ? 6 + rand() * 1.5 : 5 + rand() * 1.8, d = kind === 'big' ? 9 + rand() * 1.5 : 7 + rand() * 2, r = alongX ? [x - d / 2, z - w / 2, x + d / 2, z + w / 2] : [x - w / 2, z - d / 2, x + w / 2, z + d / 2];
+    if (!inEnc(x, z, r) || inRect(T.base.rect, x, z, 12) || BASINS.some((b) => inRect(b, x, z, 7)) || LIBRARIES.some((b) => inRect(b, x, z, 8)) || inRect(CAUSEWAY.inner, x, z, 9)) return;
+    if (ENC_PATHS.some((p) => p[0] < r[2] + 0.3 && p[2] > r[0] - 0.3 && p[1] < r[3] + 0.3 && p[3] > r[1] - 0.3)) return;
+    if (ponds().some((p) => p.rect[0] < r[2] + 2 && p.rect[2] > r[0] - 2 && p.rect[1] < r[3] + 2 && p.rect[3] > r[1] - 2) || overlaps(HOUSES, r, 2.6)) return;
+    HOUSES.push({ rect: r, front, seed: Math.floor(rand() * 1e6), kind, enc: true });
+  };
+  const encKind = () => (rand() < 0.35 ? 'big' : 'plain');
+  for (let x = -128; x < 190; x += 13 + rand() * 7) {
+    encPlace(x, -148.5, false, 's', encKind()); encPlace(x, 148.5, false, 'n', encKind());
+    if (rand() < 0.5) encPlace(x + 5, -128.5, false, 'n', encKind());
+    if (rand() < 0.5) encPlace(x + 5, 128.5, false, 's', encKind());
+  }
+  for (let z = -128; z < 128; z += 14 + rand() * 6) { if (Math.abs(z) < 14) continue; encPlace(154.5, z, true, 'e', encKind()); encPlace(172.5, z, true, 'w', encKind()); }
   // the clusters: an inner ring of full ones, an outer ring of lighter ones
   const clusters = [];
   for (let k = 0; k < 30; k++) { const a = k / 30 * Math.PI * 2 + rand() * 0.15, r = 262 + rand() * 80; clusters.push([Math.cos(a) * r, Math.sin(a) * r, 5 + Math.floor(rand() * 6)]); }
@@ -95,3 +116,48 @@ export function stores() {
 }
 export const inHouse = (x, z, m = 0) => houses().some((h) => inRect(h.rect, x, z, m));
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+
+let SHOPS = null;
+const TRADES = ['potter', 'smith', 'sugar', 'mill'];
+/**
+ * The open workshops of the village (§20): { rect, front, trade, seed } on the ground outside the road, fronts to it — one in about every
+ * 38 m of its length, the trades in turn; none among the houses, in a pond, or at the approach and the market.
+ */
+export function shops() {
+  if (SHOPS) return SHOPS;
+  SHOPS = [];
+  const rand = rng(1163), [r0, s0, r1, s1] = ROAD;
+  const put = (x, z, front) => {
+    const alongX = front === 'e' || front === 'w', w = 6.4, d = 5.2, rect = alongX ? [x - d / 2, z - w / 2, x + d / 2, z + w / 2] : [x - w / 2, z - d / 2, x + w / 2, z + d / 2];
+    if (inRect(MARKET, x, z, 16) || (Math.abs(z) < 16 && x < -150) || overlaps(houses(), rect, 3.2) || overlaps(SHOPS, rect, 6) || overlaps(Object.values(stores().granaries).map((g) => ({ rect: [g.at[0] - 2.8, g.at[1] - 2.4, g.at[0] + 2.8, g.at[1] + 2.4] })), rect, 1.5) || ponds().some((p) => p.rect[0] < rect[2] + 3 && p.rect[2] > rect[0] - 3 && p.rect[1] < rect[3] + 3 && p.rect[3] > rect[1] - 3)) return;
+    if (Math.hypot(Math.abs(x) + 4, Math.abs(z) + 4) > RADIUS - 26) return;
+    SHOPS.push({ rect, front, trade: TRADES[SHOPS.length % 4], seed: Math.floor(rand() * 1e6) });
+  };
+  for (let z = s0 + 20; z < s1 - 20; z += 34 + rand() * 10) { for (const dx of [-17, -22, -27]) { const n = SHOPS.length; put(r0 + dx, z, 'e'); if (SHOPS.length > n) break; } for (const dx of [17, 22, 27]) { const n = SHOPS.length; put(r1 + dx, z + 6, 'w'); if (SHOPS.length > n) break; } }
+  for (let x = r0 + 30; x < r1 - 20; x += 36 + rand() * 10) { for (const dz of [-17, -22, -27]) { const n = SHOPS.length; put(x, s0 + dz, 's'); if (SHOPS.length > n) break; } for (const dz of [17, 22, 27]) { const n = SHOPS.length; put(x + 8, s1 + dz, 'n'); if (SHOPS.length > n) break; } }
+  return SHOPS;
+}
+export const inShop = (x, z, m = 0) => shops().some((h) => inRect(h.rect, x, z, m));
+
+let LOTUS = null;
+/** Patches of lotus on the moat's water along both banks (§19), clear of the causeway and the lanes of the boats: { rect }. */
+export function moatLotus() {
+  if (LOTUS) return LOTUS;
+  LOTUS = [];
+  const rand = rng(1164), [a0, b0, a1, b1] = MOAT.outer, [c0, d0, c1, d1] = MOAT.inner;
+  const strips = [[a0 + 0.8, b0 + 0.8, a1 - 0.8, b0 + 5.4], [a0 + 0.8, d0 - 5.4, a1 - 0.8, d0 - 0.8], [a0 + 0.8, d1 + 0.8, a1 - 0.8, d1 + 5.4], [a0 + 0.8, b1 - 5.4, a1 - 0.8, b1 - 0.8], [a0 + 0.8, b0 + 5.4, a0 + 5.4, d0 - 5.4], [a0 + 0.8, d1 + 5.4, a0 + 5.4, b1 - 5.4], [a1 - 5.4, b0 + 5.4, a1 - 0.8, d0 - 5.4], [a1 - 5.4, d1 + 5.4, a1 - 0.8, b1 - 5.4], [c0 - 5.4, d0 + 5.4, c0 - 0.8, -6.5], [c0 - 5.4, 6.5, c0 - 0.8, d1 - 5.4], [c1 + 0.8, d0 + 5.4, c1 + 5.4, d1 - 5.4]];
+  for (const [x0, z0, x1, z1] of strips) {
+    const alongX = x1 - x0 > z1 - z0;
+    for (let s = (alongX ? x0 : z0) + 4 + rand() * 6; s < (alongX ? x1 : z1) - 14; s += 22 + rand() * 30) {
+      const len = 8 + rand() * 9, rc = alongX ? [s, z0, s + len, z1] : [x0, s, x1, s + len];
+      if (rc[0] < CAUSEWAY.outer[2] + 2 && rc[2] > CAUSEWAY.outer[0] - 2 && rc[1] < 8 && rc[3] > -8) continue;
+      LOTUS.push({ rect: rc });
+    }
+  }
+  return LOTUS;
+}
+/** The reaches of the moat the boats ply (middle lines, 3 m wide), the corners crossing so that they turn: for movers.js and the moored boats. */
+export function moatLanes() {
+  const [a0, b0, a1, b1] = MOAT.outer, [c0, d0, c1, d1] = MOAT.inner, xm = (a0 + c0) / 2, xe = (c1 + a1) / 2, zn = (b0 + d0) / 2, zs = (d1 + b1) / 2;
+  return [[a0 + 8, zn - 1.5, a1 - 8, zn + 1.5], [a0 + 8, zs - 1.5, a1 - 8, zs + 1.5], [xm - 1.5, zn - 4, xm + 1.5, -9], [xm - 1.5, 9, xm + 1.5, zs + 4], [xe - 1.5, zn - 4, xe + 1.5, zs + 4]];
+}

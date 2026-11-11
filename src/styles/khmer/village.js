@@ -14,16 +14,16 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 const FRONT = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] };
 
 /** A house's local frame: u across the front, v out of the front; R(u0, u1, v0, v1) the world rectangle, W(u, v) the world point. */
-function frame(rect, front) {
+export function frame(rect, front) {
   const F = FRONT[front] ?? FRONT.e, S = [-F[1], F[0]], cx = (rect[0] + rect[2]) / 2, cz = (rect[1] + rect[3]) / 2;
   const W = (u, v) => [cx + F[0] * v + S[0] * u, cz + F[1] * v + S[1] * u];
   const R = (u0, u1, v0, v1) => { const a = W(u0, v0), b = W(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
   const hF = Math.abs(F[0]) ? (rect[2] - rect[0]) / 2 : (rect[3] - rect[1]) / 2, hS = Math.abs(F[0]) ? (rect[3] - rect[1]) / 2 : (rect[2] - rect[0]) / 2;
   return { F, S, cx, cz, W, R, hF, hS };
 }
-const boxR = (r, y0, y1) => box(r[0], y0, r[1], r[2], y1, r[3]);
+export const boxR = (r, y0, y1) => box(r[0], y0, r[1], r[2], y1, r[3]);
 /** A solid slab of thatch or board, as a box tilted by `drop` over its length along v: a quad prism. */
-function jar(bag, x, z, y, s, mat = 'terracotta') {
+export function jar(bag, x, z, y, s, mat = 'terracotta') {
   bag.add(mat, lathe([[0.001, 0], [0.2 * s, 0.01], [0.3 * s, 0.14 * s], [0.34 * s, 0.34 * s], [0.28 * s, 0.56 * s], [0.2 * s, 0.64 * s], [0.23 * s, 0.68 * s], [0.2 * s, 0.7 * s], [0.15 * s, 0.66 * s]], 12, null, x, y, z));
 }
 

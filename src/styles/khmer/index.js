@@ -20,6 +20,7 @@ import { assembly, placer, tube, slathe } from '../../objects/kit.js';
 import { panel } from './reliefs.js';
 import { sugarPalm, palanquin, parasol } from './life.js';
 import { stiltHouse as stiltHouse2, granary, sala, lotus } from './village.js';
+import { banana, areca, fence, rack, hammock, loom, workshop, bund, offering, banner } from './yard.js';
 
 const S = 'sandstone_khmer', C = 'sandstone_carved';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -877,7 +878,7 @@ registerStyle('khmer', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse2, k_granary: granary, k_sala: sala, k_lotus: lotus, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol,
+    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse2, k_granary: granary, k_sala: sala, k_lotus: lotus, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol, k_banana: banana, k_areca: areca, k_fence: fence, k_rack: rack, k_hammock: hammock, k_loom: loom, k_workshop: workshop, k_bund: bund, k_offering: offering, k_banner: banner,
   },
   objects: {},
 });

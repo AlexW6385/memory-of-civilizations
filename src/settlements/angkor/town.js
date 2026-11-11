@@ -3,6 +3,8 @@
 
 import { RADIUS, LEVEL, MOAT, ROAD, CX, T, CAUSEWAY, ENCLOSURE, MARKET, houses, ponds, stores, inRect, inMoat, inBasin, onRoad, inHouse } from './layout.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
+import { yardPlans, enclosurePlan } from './yards.js';
+import { ENC_PATHS, inShop } from './layout.js';
 
 const base = (id, elements) => ({ id, style: 'khmer', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-206, 0], facing: 'e' } });
 
@@ -22,6 +24,7 @@ function palms() {
     if (r > RADIUS - 12 || inMoat(x, z) || inBasin(x, z) || onRoad(x, z) || inHouse(x, z, 2.5)) return false;
     if (inRect(T.base.rect, x, z, 8) || inRect(CAUSEWAY.inner, x, z, 6) || inRect(CAUSEWAY.outer, x, z, 6) || inRect(MARKET, x, z, 4) || inRect(MOAT.outer, x, z, 3) && !inRect(MOAT.inner, x, z, -3)) return false;
     if (Math.abs(z) < 8 && x < -150) return false;                                  // the approach
+    if (inShop(x, z, 3) || ENC_PATHS.some((p) => inRect(p, x, z, 2))) return false;
     return !E.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < 7);
   };
   const add = (x, z) => { if (ok(x, z)) E.push({ t: 'sugar_palm', at: [x, z], c: [x, z], r: 0.4, y: 0, s: 0.8 + rand() * 0.35, rot: rand() * 6.28, ladder: rand() < 0.25 }); };
@@ -155,5 +158,5 @@ export async function town() {
   const P = palms(), { L, K } = market(), plans = [];
   for (let i = 0; i < P.length; i += 120) plans.push(base(`angkor-palms-${i / 120}`, P.slice(i, i + 120)));
   plans.push(base('angkor-road', K), { ...base('angkor-market', L), style: 'life', center: [-222, 10], near: 260 });
-  return [moat(), ...village(), templeLife(), ...plans];
+  return [moat(), enclosurePlan(), ...village(), templeLife(), ...plans, ...yardPlans()];
 }
