@@ -31,7 +31,7 @@ const rooms = [
   room('college-court', [COLLEGE[0] + 8, COLLEGE[1] + 8, COLLEGE[2] - 8, COLLEGE[3] - 8], PLAT, 'open'),
 ];
 // the way: up the east stair, across the platform past the Pillared Hall to the Bath's south doors, in, round the court to the pool
-const walks = [[[-30, -44], [-47, -44], [-64, -44], [-90, -62], [-149, -62], [-149, -69], [-149, -75], [-149, -86], [-149, -94]]];
+const walks = [[[-30, -44], [-47, -44], [-64, -44], [-67, -48], [-67, -78], [-80, -78], [-114, -78], [-116, -70], [-116, -62], [-147.8, -62], [-147.8, -69], [-147.8, -75], [-147.8, -86], [-147.8, -94]]];
 walks[0].y0 = 0;
 const [bx0, bz0, bx1, bz1] = BATH.outer;
 
