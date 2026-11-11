@@ -23,13 +23,13 @@ export async function town() {
   V.push({ t: 'water_cells', rect: [-RADIUS + 12, 60, RADIUS - 12, 100], y: STREAM.water, cell: 1, inside: (x, z) => inStream(x, z, -0.3) });
   for (const x of [0, -66]) { const z = streamZ(x); V.push({ t: 'slab_bridge', a: [x, z - 5.2], b: [x, z + 5.2], y: 0.1, w: 1.9 }); }
   V.push({ t: 'floor', rect: [YARD[0], YARD[1], YARD[2], YARD[3]], y: 0.04, th: 0.1, mat: 'flagstone', walk: false });
-  V.push({ t: 'floor', rect: [-1.5, YARD[3], 1.5, streamZ(0) - 5.2], y: 0.04, th: 0.1, mat: 'bluestone', walk: false });
-  V.push({ t: 'floor', rect: [-1.5, streamZ(0) + 5.2, 1.5, 150], y: 0.04, th: 0.1, mat: 'bluestone', walk: false });
-  V.push({ t: 'floor', rect: [-1.5, -80, 1.5, -T.R - 0.3], y: 0.04, th: 0.1, mat: 'bluestone', walk: false });
+  V.push({ t: 'track', rect: [-1.6, YARD[1] - 0.5, 1.6, streamZ(0) - 5.2], y: 0.05, mat: 'bluestone' });
+  V.push({ t: 'track', rect: [-1.6, streamZ(0) + 5.2, 1.6, 150], y: 0.05, mat: 'bluestone' });
+  V.push({ t: 'track', rect: [-1.6, -80, 1.6, -T.R - 0.3], y: 0.05, mat: 'bluestone' });
   // props of the drying ground: trays, a handcart, baskets, benches
   const P = [], F = [];
   for (let k = 0; k < 7; k++) {
-    const x = YARD[0] + 2 + (k % 4) * 6.5 + rand() * 1.2, z = YARD[1] + 3 + Math.floor(k / 4) * 9 + rand() * 2;
+    const x = YARD[0] + 3 + (k % 4) * 6.5 + rand() * 1.2, z = YARD[1] + 3 + Math.floor(k / 4) * 9 + rand() * 2;
     P.push({ t: 'drying_tray', at: [x, z], y: 0.05, rot: rand() * 6, seed: k });
   }
   P.push({ t: 'handcart', at: [-12, 52], y: 0.05, rot: 1.2, load: 'baskets' });
@@ -61,7 +61,7 @@ export async function town() {
   man([-1.8, 3.4], 0.35, 0, { pose: 'sit_low', hat: 'cap', cloth: 'cloth_black' }); man([1.6, 2.8], 0.35, Math.PI, { cloth: 'cloth_black', hat: 'cap' });
   for (let k = 0; k < 5; k++) L.push({ t: 'figure', at: [-11 + rand() * 22, 7 + rand() * 3], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: 'cloth_red', cloth2: 'cloth_blue', over: 'none', skin: 'skin_medium', hat: 'none', hair: 'short', h: 0.62 + rand() * 0.12, feet: 'shod' });
   // the drying ground and the road
-  for (let k = 0; k < 8; k++) { const x = YARD[0] + 2 + rand() * 24, z = YARD[1] + 2 + rand() * 20; (k % 2 ? woman : man)([x, z], 0.05, rand() * 6.28, k % 3 === 0 ? { pose: 'squat', carry: 'none' } : { hat: 'straw' }); }
+  for (let k = 0; k < 8; k++) { const x = YARD[0] + 2 + rand() * 24, z = YARD[1] + 2 + rand() * 20; if (Math.abs(x) < 2.6) continue; (k % 2 ? woman : man)([x, z], 0.05, rand() * 6.28, k % 3 === 0 ? { pose: 'squat', carry: 'none' } : { hat: 'straw' }); }
   // the paddy: farmers bent with the hoe, women in straw hats; tea pickers on the upper terraces
   for (let k = 0; k < 14; k++) {
     const x = -80 + rand() * 160, z = 90 + rand() * 40, y = ground.height(x, z);

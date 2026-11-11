@@ -89,3 +89,9 @@ export function slabBridge(el, { bag, col }) {
   col.floor([x - w / 2, z0, x + w / 2, z1], y);
 }
 void rod; void fromTriangles;
+
+/** track: { rect, y, mat } — a paved way (bluestone slabs) laid on level ground; named a "track" so that the engine's street life keeps it clear. */
+export function track(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0.04;
+  bag.add(el.mat ?? 'bluestone', box(Math.min(x0, x1), y - 0.1, Math.min(z0, z1), Math.max(x0, x1), y, Math.max(z0, z1)));
+}

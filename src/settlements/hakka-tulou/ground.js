@@ -30,6 +30,7 @@ function cover(x, z, h) {
   if (inStream(x, z, 1.2)) { c.sand = 0.4; c.soil = 0.3; c.rock = 0.3; c.grass = 0; return c; }
   if (r < T.R + 2 || inFoot(x, z, 0)) { c.soil = 0.8; c.grass = 0.05; c.road = 0.4; return c; }
   if (inRect(YARD, x, z, 1) || inRect(ROAD, x, z, 0.5) && z > 30) { c.road = 1; c.soil = 1; c.grass = 0; return c; }
+  if (z > 58 && z < streamZ(x) - 4 && Math.abs(x) < 118) { c.fields = 0.8; c.grass = 0.2; c.soil = 0.1; return c; }
   const s = slopeH(x, z);
   if (s > 0.6) {
     // the terraces: paddy on the lower, tea on the upper, forest on the steep top
@@ -51,19 +52,20 @@ function planting(x, z) {
   if (r > RADIUS - 6 || inStream(x, z, 0.6) || inFoot(x, z, 1.5)) return null;
   if (inRect(YARD, x, z, 1) || inRect(ROAD, x, z, 1.2)) return null;
   const s = slopeH(x, z), n = vnoise(x * 0.06 + 3, z * 0.06 - 5), g = vnoise(x * 0.15, z * 0.15 + 9);
-  if (Math.abs(z - streamZ(x)) < 8) return { bamboo: 1.2 * sm(0.0, 0.5, n), willow: 0.15, grass: 30 };
-  if (s > 15) return { chinese_fir: 0.35, masson_pine: 0.15, bamboo: 0.6 * sm(-0.2, 0.4, g), grass: 12 };
-  if (s > 8) return { tea: 50 * sm(-0.3, 0.2, g) + 25, grass: 10 };
-  if (s > 0.6) return { rice: 110, grass: 3 };
-  if (z > streamZ(x) + 5 && z < 150) return { rice: 110 };
-  if (Math.abs(x) > 100 && Math.abs(x) < 125 || (z < -55 && z > -105)) return { rice: 100, grass: 4 };
+  if (z > 58 && z < streamZ(x) - 4.5 && Math.abs(x) < 118) return { rice: 90 };
+  if (Math.abs(z - streamZ(x)) < 8) return { bamboo: 1.2 * sm(0.0, 0.5, n), willow: 0.15, grass: 8 };
+  if (s > 15) return { chinese_fir: 0.35, masson_pine: 0.15, bamboo: 0.6 * sm(-0.2, 0.4, g), grass: 3 };
+  if (s > 8) return { tea: 16 * sm(-0.3, 0.2, g) + 6, grass: 3 };
+  if (s > 0.6) return { rice: 70 };
+  if (z > streamZ(x) + 5 && z < 150) return { rice: 90 };
+  if (Math.abs(x) > 100 && Math.abs(x) < 125 || (z < -55 && z > -105)) return { rice: 90 };
   // by the tulou: camphor and a banyan at the front, bamboo clumps at the back, fruit trees about the yards
-  if (z < -34 && Math.hypot(x, z + 55) < 30) return { bamboo: 3.0 * sm(-0.1, 0.4, g), camphor: 0.05, grass: 12 };
-  return { camphor: 0.05, banyan: 0.008, grass: 14 };
+  if (z < -34 && Math.hypot(x, z + 55) < 30) return { bamboo: 3.0 * sm(-0.1, 0.4, g), camphor: 0.05, grass: 4 };
+  return { camphor: 0.05, banyan: 0.008, grass: 5 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { bamboo: 3, willow: 0.15, chinese_fir: 0.35, masson_pine: 0.15, tea: 130, rice: 110, camphor: 0.05, banyan: 0.008, grass: 30 },
+  maxDensity: { bamboo: 3, willow: 0.15, chinese_fir: 0.35, masson_pine: 0.15, tea: 22, rice: 90, camphor: 0.05, banyan: 0.008, grass: 8 },
   climate: {
     waterline: STREAM.water,
     sun: { az: 150, el: 45, color: [1.0, 0.94, 0.84], intensity: 3.0, lat: 24.7, dec: 12, hour: 10 },

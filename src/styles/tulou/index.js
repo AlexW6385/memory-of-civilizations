@@ -4,10 +4,10 @@ import '../qing/index.js';
 import '../../objects/index.js';
 import { tulouRound } from './round.js';
 import { tulouHall } from './hall.js';
-import { tulouSquare, farmhouse, slabBridge } from './village.js';
+import { tulouSquare, farmhouse, slabBridge, track } from './village.js';
 
 registerStyle('tulou', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.life.elements, ...STYLES.qing.elements, tulou_ring: tulouRound, tulou_hall: tulouHall, tulou_enclosure: tulouSquare, farmhouse, slab_bridge: slabBridge },
+  elements: { ...STYLES.life.elements, ...STYLES.qing.elements, tulou_ring: tulouRound, tulou_hall: tulouHall, tulou_enclosure: tulouSquare, farmhouse, slab_bridge: slabBridge, track },
   objects: {},
 });
