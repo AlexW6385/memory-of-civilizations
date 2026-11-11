@@ -24,7 +24,7 @@ const rooms = [
   room('forecourt', [XF - 2, -ZEND, XF + 24, ZEND], 0, 'open'),
 ];
 // from the bridge over the apron to the two caves and the great hall, back, then up the stair to the gallery
-const walks = [[[-40, 0], [-56, 0], [-66, 0], [-68, -11], [-72, -11], [-70, -30], [-74, -30], [-84, -30], [-70, -52], [-76, -52], [-82, -52]]];
+const walks = [[[-40, 0], [-56, 0], [-66, 0], [-74, 0], [-66, 0], [-66, -30], [-74, -30], [-76, -26.5], [-81, -26.8], [-81, -30], [-81, -26.8], [-76, -26.5], [-66, -30], [-66, -52], [-74, -52], [-76.5, -52], [-66, -52], [-66, 45], [-73.5, 45], [-74.2, 46.2]]];
 walks[0].y0 = 0;
 
 export const mogao = {

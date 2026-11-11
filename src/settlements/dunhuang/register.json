@@ -21,6 +21,6 @@
     ]
   },
   "soundscape": "T({ warbler: 0.3, crow: 0.8, dove: 0.4, sparrow: 0.6 }, { animals: { dog: 0.3, donkey: 0.3, camel: 0.2 }, roof: 'flat', bells: 'monastery' })",
-  "lifeRegion": "asia (a Silk Road site: the nearest region name in src/objects/life.js)",
+  "lifeRegion": "east_asia",
   "crop": "wheat"
 }

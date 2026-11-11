@@ -197,7 +197,7 @@ export function pillarCave(ctx, S0) {
     P.rect(PAL.black, 0, 0, L, 0.2, 1); thousandM(P, 0.1, 0.3, L - 0.1, yt - y - 0.4, 2, 90 + Math.round(L), 0.34); P.flush();
   }
   for (const z of [zc - 2.7, zc + 2.7]) oilLamp(ctx, pe + 1.0, y, z, 1.0, 2.6, 10);
-  oilLamp(ctx, px - hp - 1.0, y, zc, 1.0, 2.2, 9);
+  oilLamp(ctx, px - hp - 1.0, y, zc - 1.2, 1.0, 2.2, 9);
   ctx.lights?.push({ at: [x1 - 1.0, y + 2.8, zc], color: '#ffe0b0', intensity: 2.0, distance: 9 });
   bag.add('reed_mat', box(pe + 1.3, y, zc - 1.2, pe + 2.7, y + 0.025, zc + 1.2));
 }
