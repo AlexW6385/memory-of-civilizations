@@ -1,0 +1,26 @@
+{
+  "site": { "id": "manueline-lisbon", "name": { "en": "Manueline Lisbon", "zh": "曼努埃尔里斯本" }, "era": "c. 1520", "region": "iberia", "lat": 38.70, "lon": -9.21, "water": true, "radius": 330 },
+  "arrival": [-206, null, 117, 0.0, 0.3],
+  "arrivalNote": "The Jerónimos' south portal whole across the plaza, the Belém Tower in the river to the left.",
+  "card": {
+    "en": [
+      "Lisbon stands on the north bank of the Tagus estuary, shown about 1520, in the last years of Manuel I the Fortunate. Vasco da Gama's voyage to India in 1497 has made the city the hub of the spice trade between Africa, India and the Far East, and about seventy thousand people live here: Portuguese merchants, foreign traders from Flanders, Italy and Germany, converted Jews, African slaves, sailors and shipwrights. The architecture is Manueline, a late Gothic turned to the sea, in golden lioz limestone carved with twisted rope, armillary spheres, coral and the cross of the Order of Christ, beside plastered, tile-roofed houses. The places, in reality spread along seven kilometres of river, are compressed here in their true order from west to east.",
+      "The Jerónimos church and cloister — the Hieronymite monastery begun in 1501: a hall church of three aisles of equal height under one net vault, carried on tall octagonal columns carved with rope, behind a south portal 32 m high with saints in niches and the statue of Henry the Navigator; a two-storey cloister round an orange garden, its piers carved with spheres and crosses.",
+      "The Belém Tower — Francisco de Arruda's fortress of 1514 to 1519, a four-storey tower on a hexagonal bastion in the river, with gun embrasures, domed corner bartizans, a loggia of seven arches, shields with the cross of the Order of Christ and carved rope.",
+      "The Ribeira palace and the Terreiro do Paço — the royal palace on the riverfront, with its loggia on the open square and the corner Tower of the King that housed the Casa da Índia, the office of the India trade.",
+      "The Ribeira das Naus — the royal shipyard beside the square, with hulls on the stocks, timber stacks, a rope-walk, and carracks and caravels at anchor and at the stone quay.",
+      "The Rua Nova dos Mercadores and the Alfama — the merchants' street of tall shop-fronted houses selling porcelain, silk, spices and parrots, and the old hill quarter of narrow stepped lanes, the cathedral on its foot and São Jorge Castle on the crown."
+    ],
+    "zh": [
+      "里斯本坐落在特茹河口北岸，画面所示约为1520年，曼努埃尔一世（幸运者）在位的最后几年。1497年达·伽马的印度之行使这座城市成为连接非洲、印度与远东的香料贸易中心，城中约有七万居民：葡萄牙商人，来自佛兰德、意大利和德意志的外商，被迫改宗的犹太人，非洲奴隶，水手和造船匠。建筑为曼努埃尔式，即转向大海的晚期哥特：金黄色的利奥兹石灰岩上雕着绞索、浑天仪、珊瑚和基督骑士团十字，旁边是抹灰、铺瓦的民居。现实中沿七公里河岸分布的这些地点，在此按真实的东西次序压缩在一起。",
+      "热罗尼莫斯修道院教堂与回廊 —— 始建于1501年的哲罗姆会修道院：三个等高的通廊式教堂，覆盖一整片网状拱顶，由雕着绞索的高大八角柱承托；南门高32米，龛中立着圣像和航海家亨利的雕像；两层的回廊围着橘园，廊柱上刻着球体和十字。",
+      "贝伦塔 —— 弗朗西斯科·德·阿鲁达1514至1519年所建的要塞，河中六边形棱堡上立着四层塔楼，有炮眼、带圆顶的转角角楼、七拱凉廊、刻着基督骑士团十字的盾牌和绞索纹。",
+      "里贝拉宫与宫廷广场 —— 河岸上的王宫，凉廊面向开阔的广场，转角的国王塔里设有掌管印度贸易的印度府。",
+      "里贝拉造船厂 —— 广场旁的王家船厂，有船坞上的船体、木材堆、制绳棚，以及停泊在锚地和石砌码头旁的克拉克帆船和卡拉维尔帆船。",
+      "新商人街与阿尔法玛 —— 商人街上是临街开店的高大住宅，出售瓷器、丝绸、香料和鹦鹉；阿尔法玛是山坡上的老城区，窄巷层层上升，山脚是主教堂，山顶是圣若热城堡。"
+    ]
+  },
+  "soundscape": "T({ ...MED, gull: 1, kite: 0.3 }, { animals: { donkey: 0.3, dog: 0.4, rooster: 0.3 }, roof: 'tile' })",
+  "lifeRegion": "europe_early_modern",
+  "crop": "wheat"
+}

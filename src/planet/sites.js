@@ -142,7 +142,6 @@ export const PLANNED = [
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, region: 'java', lat: 8.37, lon: 115.45, radius: 180 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },
   { id: 'benin-city', name: { en: 'Benin City', zh: '贝宁城' }, region: 'guinea', lat: 6.34, lon: 5.62, radius: 320 },
-  { id: 'manueline-lisbon', name: { en: 'Manueline Lisbon', zh: '曼努埃尔里斯本' }, region: 'iberia', lat: 38.70, lon: -9.21, radius: 300 },
   { id: 'vienna', name: { en: 'Vienna', zh: '维也纳' }, region: 'danube', lat: 48.21, lon: 16.37, radius: 340 },
   { id: 'bauhaus-dessau', name: { en: 'Bauhaus Dessau', zh: '包豪斯德绍' }, region: 'germany', lat: 51.84, lon: 12.23, radius: 170 },
   { id: 'maya-tikal', name: { en: 'Classic Maya Tikal', zh: '古典玛雅蒂卡尔' }, region: 'yucatan', lat: 17.22, lon: -89.62, radius: 320 },
