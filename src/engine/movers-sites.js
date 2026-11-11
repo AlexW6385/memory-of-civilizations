@@ -10,5 +10,6 @@ export const MOVER_SITES = {
   'granada': () => import('../settlements/granada/movers.js'),
   'venice': () => import('../settlements/venice/movers.js'),
   'joseon-seoul': () => import('../settlements/joseon-seoul/movers.js'),
+  'paris': () => import('../settlements/paris/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
