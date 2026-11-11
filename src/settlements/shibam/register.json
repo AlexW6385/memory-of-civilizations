@@ -1,6 +1,6 @@
 {
   "site": { "id": "shibam", "name": { "en": "Shibam", "zh": "希巴姆" }, "era": "from the 16th c.", "region": "arabia", "lat": 15.93, "lon": 48.63, "radius": 190 },
-  "arrival": [-8, null, -16, -1.47, 0.3],
+  "arrival": [-6, null, -8, -1.264, 0.3],
   "arrivalNote": "the merchant's tower house across the square: seven storeys of brown mud brick, the top two limewashed, white-framed windows, the parapet against the sky, the street door at its foot",
   "card": {
     "en": [
