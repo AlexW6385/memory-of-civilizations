@@ -244,6 +244,21 @@ function openFlat(el, { B, fr, col, F, Hf, wallMat, wy0, du, dw, dado, pot }) {
   B('lacquer_chestnut', T + 0.1, T + 0.2, T + 1.0, T + 0.75, F, F + 0.72, true);
   B('lacquer_chestnut', T + 1.2, T + 0.05, T + 2.0, T + 0.4, F + 0.9, F + 1.0, false);          // a shelf of bowls by the window
   B('timber', T + 0.05, D / 2 - 0.1, T + 0.12, D / 2 + 0.1, F + 1.6, F + 2.0, false);
+  // the rest of the living room: a low square table with two stools on a reed mat, the kitchen god's paper over the stove, a grain bin
+  // and a water vat by the door, strings of chillies and corn from the beams, a lamp on the kang table, a basket of bowls [inferred: after
+  // Shanxi's farmhouses, UNESCO Pingyao guidelines §3.2]
+  const cu = L / 2 - 0.2, cv = D / 2 - 0.1;
+  B('reed_mat', cu - 1.1, cv - 1.0, cu + 1.1, Math.min(cv + 1.0, D - T - 1.95), F + 0.0, F + 0.025);
+  B('lacquer_chestnut', cu - 0.4, cv - 0.4, cu + 0.4, cv + 0.4, F + 0.5, F + 0.56, true);
+  for (const [a, b] of [[-0.36, -0.36], [0.3, -0.36], [-0.36, 0.3], [0.3, 0.3]]) B('lacquer_chestnut', cu + a, cv + b, cu + a + 0.06, cv + b + 0.06, F + 0.025, F + 0.5);
+  for (const sg of [-1, 1]) { B('timber', cu + sg * 0.85 - 0.18, cv - 0.18, cu + sg * 0.85 + 0.18, cv + 0.18, F + 0.3, F + 0.36, true); for (const [a, b] of [[-0.14, -0.14], [0.1, -0.14], [-0.14, 0.1], [0.1, 0.1]]) B('timber', cu + sg * 0.85 + a, cv + b, cu + sg * 0.85 + a + 0.04, cv + b + 0.04, F + 0.025, F + 0.3); }
+  for (const [a, b, m] of [[-0.1, 0.0, 'glaze_green'], [0.2, 0.15, 'paint_ochre']]) B(m, cu + a - 0.07, cv + b - 0.07, cu + a + 0.07, cv + b + 0.07, F + 0.56, F + 0.62);
+  B('paint_ochre', L - T - 1.2, D - T - 0.03, L - T - 0.7, D - T, F + 1.6, F + 2.2, false); B('lacquer_red', L - T - 1.16, D - T - 0.045, L - T - 0.74, D - T - 0.03, F + 1.65, F + 2.15, false);
+  pot('glaze_green', T + 0.5, D / 2 + 0.2, 0.42, 0.9, F);
+  pot('glaze_green', du + 1.25, T + 0.45, 0.35, 0.8, F);
+  for (const [u, sw] of [[T + 2.0, 0.5], [T + 3.2, 0.4], [cu + 1.6, 0.45]]) { B('lacquer_red', u - 0.02, cv - 0.5, u + 0.02, cv - 0.46, top - 0.26 - sw * 1.2, top - 0.26); B('paint_ochre', u + 0.06, cv + 0.3, u + 0.12, cv + 0.34, top - 0.26 - sw * 1.0, top - 0.26); for (let k = 0; k < 4; k++) B('paint_ochre', u - 0.05, cv + 0.6 + k * 0.01, u + 0.05, cv + 0.7 + k * 0.01, top - 0.9 - k * 0.14, top - 0.78 - k * 0.14); }
+  B('timber', T + 0.4, D - T - 0.02, T + 2.4, D - T, F + 1.55, F + 1.6, false);                   // a shelf on the back wall
+  for (let k = 0; k < 4; k++) B(k % 2 ? 'glaze_green' : 'bluestone', T + 0.5 + k * 0.45, D - T - 0.28, T + 0.8 + k * 0.45, D - T - 0.04, F + 1.6, F + 1.78, false);
 }
 
 /**
@@ -404,20 +419,27 @@ export function wutaiGarden(el, { bag, col }) {
  */
 export function wutaiOldTree({ at: [x, z], y, h = 11, seed = 1 }, { bag, col }) {
   const rand = rng(seed + 31), R = 0.85;
-  bag.add('bark_grey', lathe([[0.001, -0.5], [R * 1.5, -0.5], [R * 1.35, 0.2], [R * 1.0, 0.9], [R * 0.92, 2.2], [R * 0.95, 3.0], [R * 0.8, 3.6], [0.001, 3.6]], 14, (th, i) => 1 + (i > 0 && i < 6 ? 0.07 * Math.cos(th * 7 + i) + 0.04 * Math.cos(th * 3) : 0), x, y, z));
-  for (let i = 0; i < 4; i++) { const a = i * 1.57 + rand(); bag.add('bark_grey', tube([[x + Math.cos(a) * R * 1.0, y + 0.1, z + Math.sin(a) * R * 1.0, 0.3], [x + Math.cos(a) * R * 1.9, y - 0.05, z + Math.sin(a) * R * 1.9, 0.1]], 6)); }
-  const limbs = [];
-  for (let i = 0; i < 4; i++) {
-    const a = (i / 4) * 6.28 + rand() * 0.6, up = 5.8 + rand() * 2.8, out = 3.8 + rand() * 2.4;
-    const p = [[x, y + 3.2, z, 0.5], [x + Math.cos(a) * out * 0.3, y + 3.2 + up * 0.35, z + Math.sin(a) * out * 0.3, 0.38], [x + Math.cos(a) * out * 0.7, y + 3.2 + up * 0.75, z + Math.sin(a) * out * 0.7, 0.24], [x + Math.cos(a) * out, y + 3.2 + up, z + Math.sin(a) * out, 0.12]];
-    bag.add('bark_grey', tube(p, 7)); limbs.push(p[3]);
-    // a side branch
-    const m = p[2]; bag.add('bark_grey', tube([[m[0], m[1], m[2], 0.16], [m[0] + Math.cos(a + 0.7) * 2.2, m[1] + 1.3, m[2] + Math.sin(a + 0.7) * 2.2, 0.08], [m[0] + Math.cos(a + 0.7) * 3.4, m[1] + 2.1, m[2] + Math.sin(a + 0.7) * 3.4, 0.05]], 5));
-    limbs.push([m[0] + Math.cos(a + 0.7) * 3.4, m[1] + 2.1, m[2] + Math.sin(a + 0.7) * 3.4]);
+  bag.add('bark_grey', lathe([[0.001, -0.5], [R * 1.5, -0.5], [R * 1.38, 0.2], [R * 1.05, 0.9], [R * 0.96, 1.6], [R * 0.92, 2.2], [R * 0.97, 3.0], [R * 0.8, 3.6], [0.001, 3.6]], 20, (th, i) => 1 + (i > 0 && i < 7 ? 0.1 * Math.cos(th * 7 + i * 0.7) + 0.05 * Math.cos(th * 3 + i) + 0.04 * Math.cos(th * 13 + i * 2.1) : 0), x, y, z));
+  for (let i = 0; i < 7; i++) { const a = i * 0.9 + rand(); bag.add('bark_grey', tube([[x + Math.cos(a) * R * 1.0, y + 0.3, z + Math.sin(a) * R * 1.0, 0.28], [x + Math.cos(a) * R * 1.9, y - 0.02, z + Math.sin(a) * R * 1.9, 0.1], [x + Math.cos(a) * R * 2.8, y - 0.06, z + Math.sin(a) * R * 2.8, 0.04]], 6)); }
+  const limbs = [], tips = [];
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * 6.28 + rand() * 0.6, up = 5.8 + rand() * 2.8, out = 3.8 + rand() * 2.4;
+    const p = [[x, y + 3.2, z, 0.5], [x + Math.cos(a) * out * 0.3, y + 3.2 + up * 0.35, z + Math.sin(a) * out * 0.3, 0.38], [x + Math.cos(a) * out * 0.7, y + 3.2 + up * 0.75, z + Math.sin(a) * out * 0.7, 0.24], [x + Math.cos(a) * out, y + 3.2 + up, z + Math.sin(a) * out, 0.1]];
+    bag.add('bark_grey', tube(p, 8)); limbs.push(p[3]);
+    // side branches, two to a limb, each with its own twigs
+    for (const [f, sd] of [[2, 0.7], [1, -0.8]]) {
+      const m = p[f], b = a + sd, o = 2.2 + rand() * 1.4, e = [m[0] + Math.cos(b) * o * 1.5, m[1] + 1.2 + rand() * 1.2, m[2] + Math.sin(b) * o * 1.5];
+      bag.add('bark_grey', tube([[m[0], m[1], m[2], 0.16], [m[0] + Math.cos(b) * o * 0.8, m[1] + 0.8, m[2] + Math.sin(b) * o * 0.8, 0.09], [e[0], e[1], e[2], 0.04]], 5));
+      limbs.push(e); tips.push(e);
+    }
+    tips.push(p[3]);
   }
-  // the crown: leaf masses on the limb tips and between, the underside flat
-  for (const [lx, ly, lz] of limbs) for (let k = 0; k < 2; k++) bag.add('flax_leaf', blob([lx + (rand() - 0.5) * 1.6, ly + 0.2 + k * 0.9, lz + (rand() - 0.5) * 1.6], 2.4 + rand() * 1.0, 1.4 + rand() * 0.5, 2.4 + rand() * 1.0, 9, 5));
-  bag.add('flax_leaf', blob([x, y + 3.2 + 8.2, z], 3.4, 1.8, 3.4, 10, 5));
+  // the crown: many clusters of leaves at the ends of the limbs and branches, in two layers, each a flattened mass of its own size
+  for (const [lx, ly, lz] of tips) for (let k = 0; k < 5; k++) {
+    const r = 1.0 + rand() * 0.9;
+    bag.add('flax_leaf', blob([lx + (rand() - 0.5) * 3.2, ly - 0.3 + rand() * 2.0, lz + (rand() - 0.5) * 3.2], r * 1.25, r * 0.7, r * 1.25, 8, 4));
+  }
+  for (let k = 0; k < 6; k++) bag.add('flax_leaf', blob([x + (rand() - 0.5) * 4, y + 3.2 + 6.8 + rand() * 2.2, z + (rand() - 0.5) * 4], 1.6, 1.0, 1.6, 8, 4));
   // the seat: a ring of dressed stone with a step, the earth inside trodden hard; red cloths on the low limb
   bag.add('limestone', lathe([[2.0, -0.3], [2.35, -0.3], [2.35, 0.44], [2.0, 0.44]], 18, null, x, y, z));
   bag.add('mud_plaster', lathe([[0.001, -0.3], [2.0, -0.3], [2.0, 0.03], [0.001, 0.03]], 18, null, x, y, z));
@@ -497,20 +519,32 @@ export function wutaiRack({ at: [x, z], y, rot = 0, len = 3.6 }, { bag }) {
   for (let a = -len / 2 + 0.35; a < len / 2 - 0.2; a += 0.32) { bx('paint_ochre', a - 0.07, -0.07, a + 0.07, 0.07, y + 1.4, y + 2.08); }
   for (let a = -len / 2 + 0.5; a < len / 2 - 0.2; a += 0.7) bx('lacquer_red', a - 0.03, -0.03, a + 0.03, 0.03, y + 0.7, y + 1.18);
 }
-/** wutai_pine { at, y, h, seed }: an old Chinese pine (Pinus tabuliformis) of a courtyard bed: the red-scaled, leaning trunk, a crown of flat tiers. */
+/**
+ * wutai_pine { at, y, h, seed }: an old Chinese pine (Pinus tabuliformis) of a courtyard bed: a red-scaled trunk fissured in
+ * plates and leaning a little, root flare, limbs spiralling out and drooping at the tips, each carrying flat pads of needles
+ * in the layered "cloud" crown the species and the temple gardeners give it; a smaller crest.
+ */
 export function wutaiPine({ at: [x, z], y, h = 6, seed = 1 }, { bag, col }) {
-  const rand = rng(seed + 99), lean = (rand() - 0.5) * 0.5, a = rand() * 6.28;
-  const tr = lathe([[0.001, -0.3], [0.38, -0.3], [0.36, 0], [0.27, 1.4], [0.2, h * 0.55], [0.12, h * 0.9], [0.001, h * 0.9]], 10, null, 0, 0, 0);
+  const rand = rng(seed + 99), lean = (rand() - 0.5) * 0.5, a = rand() * 6.28, bend = (t) => lean * t * t * h * 0.35;
+  const at = (t) => [x + Math.cos(a) * bend(t), y + t * h, z + Math.sin(a) * bend(t)];
+  const tr = lathe([[0.001, -0.3], [0.46, -0.3], [0.42, 0.05], [0.31, 0.9], [0.26, h * 0.3], [0.2, h * 0.55], [0.13, h * 0.8], [0.06, h * 0.96], [0.001, h]], 14,
+    (th, i) => 1 + (i > 0 && i < 7 ? 0.09 * Math.cos(th * 5 + i * 0.9) + 0.05 * Math.cos(th * 11 + i * 2) : 0), 0, 0, 0);
   const pos = tr.attributes.position;
-  for (let i = 0; i < pos.count; i++) { const t = Math.max(0, pos.getY(i)) / h; pos.setX(i, pos.getX(i) + Math.cos(a) * lean * t * t * h * 0.35); pos.setZ(i, pos.getZ(i) + Math.sin(a) * lean * t * t * h * 0.35); }
+  for (let i = 0; i < pos.count; i++) { const t = Math.max(0, pos.getY(i)) / h; pos.setX(i, pos.getX(i) + Math.cos(a) * bend(t)); pos.setZ(i, pos.getZ(i) + Math.sin(a) * bend(t)); }
   tr.translate(x, y, z); bag.add('bark_redpine', tr);
-  for (let k = 0; k < 5; k++) {
-    const t = 0.5 + k * 0.1, R = (1.5 + rand() * 0.8) * (1.15 - k * 0.12) * (h / 6), oa = rand() * 6.28, off = R * 0.35 * (k > 0), yy = y + t * h - 0.1;
-    const cx = x + Math.cos(a) * lean * t * t * h * 0.35 + Math.cos(oa) * off, cz = z + Math.sin(a) * lean * t * t * h * 0.35 + Math.sin(oa) * off;
-    bag.add('flax_leaf', lathe([[0.001, -0.35], [R * 0.55, -0.22], [R, 0.0], [R * 0.9, 0.3], [R * 0.55, 0.55], [0.001, 0.68]], 12, null, cx, yy, cz));
-    bag.add('bark_redpine', lathe([[0.001, 0], [0.07, 0], [0.05, R * 0.2], [0.001, R * 0.2]], 5, null, cx, yy - 0.4, cz));
+  // a few surface roots
+  for (let k = 0; k < 4; k++) { const r = a + k * 1.6 + rand(); bag.add('bark_redpine', tube([[x + Math.cos(r) * 0.3, y + 0.1, z + Math.sin(r) * 0.3, 0.12], [x + Math.cos(r) * 0.75, y + 0.02, z + Math.sin(r) * 0.75, 0.06], [x + Math.cos(r) * 1.1, y - 0.04, z + Math.sin(r) * 1.1, 0.025]], 5)); }
+  const scale = h / 6, pad = (cx, cy, cz, r) => bag.add('flax_leaf', blob([cx, cy, cz], r * (0.85 + rand() * 0.3), r * 0.3 * (0.8 + rand() * 0.4), r * (0.85 + rand() * 0.3), 9, 4));
+  for (let k = 0; k < 6; k++) {
+    const t = 0.4 + k * 0.095, base = at(t), ph = k * 2.4 + rand() * 0.8, len = (2.1 - k * 0.22) * scale * (0.85 + rand() * 0.3), c = Math.cos(ph), sn = Math.sin(ph);
+    const end = [base[0] + c * len, base[1] + 0.35 * scale + (rand() - 0.2) * 0.3, base[2] + sn * len];
+    bag.add('bark_redpine', tube([[base[0], base[1], base[2], 0.11 * scale + 0.03], [base[0] + c * len * 0.5, base[1] + 0.35 * scale, base[2] + sn * len * 0.5, 0.07 * scale + 0.02], [end[0], end[1], end[2], 0.03]], 6));
+    const n = 4 + Math.floor(rand() * 3), rr = 0.95 * scale * (1.1 - k * 0.1);
+    for (let i = 0; i < n; i++) { const f = 0.45 + 0.55 * (i / (n - 1)), jx = (rand() - 0.5) * 0.7 * scale, jz = (rand() - 0.5) * 0.7 * scale; pad(base[0] + c * len * f + jx, base[1] + 0.35 * scale * f + 0.12 + (rand() - 0.5) * 0.3, base[2] + sn * len * f + jz, rr * (0.7 + 0.5 * f)); }
   }
-  col.circle(x, z, 0.4, y, y + h * 0.5);
+  const top = at(0.95);
+  for (let i = 0; i < 3; i++) pad(top[0] + (rand() - 0.5) * 0.9 * scale, top[1] - 0.15 - i * 0.2, top[2] + (rand() - 0.5) * 0.9 * scale, (1.0 - i * 0.2) * scale);
+  col.circle(x, z, 0.45, y, y + h * 0.5);
 }
 
 export const villageElements = { wutai_floor: wutaiFloor, wutai_threshing: wutaiThreshing, wutai_garden: wutaiGarden, wutai_oldtree: wutaiOldTree, wutai_temple: wutaiTemple, wutai_shrine: wutaiShrine, wutai_pine: wutaiPine, wutai_house: wutaiHouse, wutai_yard: wutaiYard, wutai_well: wutaiWell, wutai_mill: wutaiMill, wutai_rack: wutaiRack };

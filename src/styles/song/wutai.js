@@ -54,6 +54,26 @@ function tangDharani(el, { bag, col }) {
   bag.add(m, lathe([[0.16 * k, Y(2.86)], [0.26 * k, Y(2.96)], [0.2 * k, Y(3.0)], [0.001, Y(3.0)]], 12, null, x, 0, z));
   petals(bag, m, x, Y(2.86), z, 0.16 * k, 8, 0.15 * k, true, 0.9);
   bag.add(m, lathe(Array.from({ length: 9 }, (_, i) => { const t = i / 8 * Math.PI; return [Math.max(0.001, Math.sin(t) * 0.11 * k), Y(3.0) + (1 - Math.cos(t)) * 0.12 * k]; }), 10, null, x, 0, z));
+  // the record of 857 and the dhāraṇī cut in columns down the faces of the shaft: rows of small incised marks, a few left out
+  {
+    let q = 857;
+    const rnd = () => ((q = (Math.imul(q, 1664525) + 1013904223) >>> 0) / 4294967296);
+    const ap = 0.27 * k * Math.cos(Math.PI / 6);
+    for (let f = 0; f < 6; f++) {
+      const ang = f / 6 * Math.PI * 2;
+      for (let c = -1; c <= 1; c++) {
+        for (let r = 0; r < 19; r++) {
+          if (rnd() < 0.12) continue;
+          const yy = Y(1.0 + r * 0.06), g = box(0, yy, -0.014 * k, 0.007 * k, yy + 0.04 * k * (0.7 + rnd() * 0.6), 0.014 * k * (0.6 + rnd() * 0.8));
+          g.translate(0, 0, c * 0.075 * k); g.rotateY(-ang); g.translate(x + Math.cos(ang) * (ap - 0.002), 0, z + Math.sin(ang) * (ap - 0.002));
+          bag.add('granite_grey', g);
+        }
+      }
+    }
+  }
+  // two courses of stone under the base, square, the lower wider, worn at the edges
+  bag.add('limestone', box(x - 1.2 * k, y - 0.25, z - 1.2 * k, x + 1.2 * k, y + 0.02, z + 1.2 * k));
+  bag.add('limestone', box(x - 1.0 * k, y - 0.1, z - 1.0 * k, x + 1.0 * k, y + 0.07, z + 1.0 * k));
   col.circle(x, z, 0.82 * k, y, y + 3.24 * k);
 }
 
@@ -82,6 +102,37 @@ function zushiPagoda(el, { bag, col }) {
     for (const s of [-1, 1]) { const g = box(-0.07, y + 0.5, -0.06, 0.07, y + 2.0, 0.06); g.rotateY(-ang + Math.PI / 2); const q = Q(s * 0.52, ap + 0.04, 0); g.translate(q[0], 0, q[2]); bag.add(bm, g); }
     bag.add(bm, fromTriangles(t));
   }
+  // the six corner pilasters of brick with their capitals, the blind straight-lattice windows on the other faces [inferred: after
+  // the brick pagodas of the period], the stone steps to the door, moss at the foot of the plinth
+  for (let i = 0; i < 6; i++) {
+    const v = (i + 0.5) / 6 * Math.PI * 2, vx = x + Math.cos(v) * 1.55, vz = z + Math.sin(v) * 1.55;
+    bag.add(bm, hex(0.15, y + 0.5, 0.15, y + 2.55, vx, vz));
+    bag.add(bm, hex(0.2, y + 2.55, 0.2, y + 2.7, vx, vz));
+    bag.add(bm, hex(0.2, y + 0.5, 0.2, y + 0.62, vx, vz));
+    const fa = i / 6 * Math.PI * 2;
+    if (Math.abs((((fa - ang) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) < 0.01 || Math.abs((((fa - ang) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) - 2 * Math.PI) < 0.01) continue;
+    const ap2 = 1.58 * Math.cos(Math.PI / 6), put = (g, off) => { g.rotateY(-fa); g.translate(x + Math.cos(fa) * (ap2 + off), 0, z + Math.sin(fa) * (ap2 + off)); return g; };
+    bag.add('wood_dark', put(box(0, y + 1.15, -0.4, 0.04, y + 1.2, 0.4), 0.0));
+    bag.add('wood_dark', put(box(0, y + 1.95, -0.4, 0.04, y + 2.0, 0.4), 0.0));
+    for (const e of [-0.4, 0.36]) bag.add('wood_dark', put(box(0, y + 1.15, e, 0.04, y + 2.0, e + 0.04), 0.0));
+    for (let j = -3; j <= 3; j++) bag.add('wood_dark', put(box(0, y + 1.2, j * 0.1 - 0.015, 0.03, y + 1.95, j * 0.1 + 0.015), 0.01));
+  }
+  {
+    const dx = Math.cos(ang), dz = Math.sin(ang), stp = (n0, n1, y0, y1, hw) => { const g = box(n0, y0, -hw, n1, y1, hw); g.rotateY(-ang); g.translate(x, 0, z); return g; };
+    bag.add('limestone', stp(1.6, 2.2, y - 0.3, y + 0.12, 0.85));
+    bag.add('limestone', stp(1.45, 1.8, y - 0.3, y + 0.3, 0.7));
+    let q = 534;
+    const rnd = () => ((q = (Math.imul(q, 1664525) + 1013904223) >>> 0) / 4294967296);
+    for (let i = 0; i < 16; i++) {
+      const th = rnd() * Math.PI * 2, rr = 2.15 + rnd() * 0.7, w = 0.25 + rnd() * 0.4;
+      if (Math.cos(th - ang) > 0.8) continue;
+      const g = box(-w / 2, y + 0.03, -0.12, w / 2, y + 0.06 + rnd() * 0.02, 0.12); g.rotateY(-th - Math.PI / 2); g.translate(x + Math.cos(th) * rr, 0, z + Math.sin(th) * rr);
+      bag.add('sod', g); void dx; void dz;
+    }
+  }
+  // a hexagonal apron of dressed bluestone round the foot, edged with a course of limestone, so the pagoda stands on a made floor
+  bag.add('limestone', hex(3.05, y - 0.1, 3.05, y + 0.03, x, z));
+  bag.add('bluestone', hex(2.9, y - 0.1, 2.9, y + 0.045, x, z));
   // the corbelled eave: courses stepping out, the lotus band, courses stepping back
   let yy = y + 2.75;
   for (let i = 0; i < 5; i++) { bag.add(bm, hex(1.6 + i * 0.09, yy, 1.6 + i * 0.09, yy + 0.085, x, z)); yy += 0.085; }

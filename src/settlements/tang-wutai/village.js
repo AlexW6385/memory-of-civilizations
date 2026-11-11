@@ -3,7 +3,7 @@
 // lane; a well and a stone roller mill on the green; the goods and animals of the yards (plan of the `life` style).
 // Elements of the chinese style (src/styles/chinese/village.js). Pure data from layout.js.
 
-import { lots, voids, height, GREEN, GATE_X } from './layout.js';
+import { lots, voids, height, GREEN, GATE_X, LANES, RADIUS, inRect } from './layout.js';
 import { frame, dirOf } from '../../styles/chinese/village.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -43,6 +43,17 @@ export function village() {
     // the gate on the lane side, away from the house's front door
     const gu = L * (0.22 + rand() * 0.2) + (rand() < 0.5 ? L * 0.38 : 0);
     C.push({ t: 'wutai_yard', rect: l.rect, front: l.front, hc: g4(l.rect), gate: [gu, 2.2], seed: l.seed, wall: rand() < 0.6 ? 'earth_wall' : 'mud_plaster' });
+    // peach-wood charms (taofu) nailed to the gate posts, red boards with a black mark, and a strip of red cloth on the lintel [inferred: the Tang
+    // custom of hanging taofu at the gate; the cloth is the ordinary marker of a household's door]
+    {
+      const [qx, qz] = P(gu, 0.2), qy = gh(qx, qz) - 0.05, hwg = 1.1;
+      for (const sdg of [-1, 1]) {
+        const uc = gu + sdg * (hwg + 0.14);
+        C.push({ t: 'block', rect: R(uc - 0.11, -0.14, uc + 0.11, -0.1), y0: qy + 1.35, y1: qy + 2.05, mat: 'lacquer_red', collide: false });
+        C.push({ t: 'block', rect: R(uc - 0.04, -0.15, uc + 0.04, -0.14), y0: qy + 1.55, y1: qy + 1.9, mat: 'lacquer_black', collide: false });
+      }
+      C.push({ t: 'block', rect: R(gu - hwg - 0.3, -0.13, gu + hwg + 0.3, -0.1), y0: qy + 2.52, y1: qy + 2.78, mat: 'cloth_red', collide: false });
+    }
     // the house: by the yard's means — the inner yards richer (brick-arched, three bays), the outer poorer
     const r = rand(), rich = dist < 70 || r < 0.2;
     let kind = open ? 'flat' : rich && r < 0.45 ? 'arch' : r < 0.6 ? 'flat' : r < 0.85 ? 'shed' : 'flat';
@@ -52,6 +63,8 @@ export function village() {
     const hr = R(u0, v0, u0 + Wh, v0 + Dh), hs = [[hr[0], hr[1]], [hr[2], hr[1]], [hr[0], hr[3]], [hr[2], hr[3]]].map(([x, z]) => gh(x, z));
     // the house's front faces the lane, as the yard does
     C.push({ t: 'wutai_house', rect: hr, front: l.front, y: Math.max(...hs), foot: Math.min(...hs), seed: l.seed + 7, kind, nb, ...(open ? { open: true } : {}) });
+    // an oil lamp on the kang table of an open house, the room's only light besides the door (openFlat: the table at L/2 − 0.2, 0.3 from the back wall's inner face)
+    if (open && kind === 'flat') { const [lx, lz] = P(u0 + Wh / 2 - 0.2, v0 + Dh - 0.34 - 1.0); C.push({ t: 'tang_lamp', at: [lx, lz], y: Math.max(...hs) + 0.4 + 0.91, h: 0.22, intensity: 1.4, distance: 6 }); }
     const hy = Math.max(...hs), vf = v0, doorU = u0 + (Math.floor(nb / 2) + 0.5) * bay;
     smoke.push({ p: [...P(u0 + Wh - 0.5, v0 + Dh - 0.6)], y: hy + 0.4 + (kind === 'shed' ? 3.4 : 3.7), r: l.seed });
     // the wing: a lean-to of two rooms along the yard's side wall, facing across the yard
@@ -137,6 +150,36 @@ export function village() {
   vf(gx - 2.2, 5.4, 3.1, 504, { hair: 'bun', hat: 'none' }); vf(gx + 14.6, -5.6, 1.0, 505, { dress: 'trousers', hat: 'straw' }); vf(gx - 4, -4.2, 4.4, 506, { dress: 'trousers', hat: 'straw', carry: 'pole' });
   vf(gx + 4.2, -2.9, 1.6, 507, { pose: 'low' }); vf(gx + 1.6, -3.0, 4.7, 508, { pose: 'low', hat: 'none' }); vf(gx + 9.4, 3.4, 2.5, 509, { pose: 'talk' });
   Lf.push({ t: 'animal', kind: 'donkey', at: [gx + 7.6, 2.9], y: gh(gx + 7.6, 2.9), rot: 1.2, seed: 21 });
+  // the lanes: ruts of cart wheels in two lines, trodden straw, stones, a drain's dark stain, weeds at the walls' feet
+  {
+    const lr = rng(8572), lp = (m, x, z, w, d, hh = 0.02) => { const y = gh(x, z); C.push({ t: 'block', rect: [x - w / 2, z - d / 2, x + w / 2, z + d / 2], y0: y - 0.07, y1: y + hh, mat: m, collide: false }); };
+    for (const [x0, z0, x1, z1] of LANES) {
+      const alongX = x1 - x0 > z1 - z0, len = alongX ? x1 - x0 : z1 - z0, wid = alongX ? z1 - z0 : x1 - x0, cxl = (x0 + x1) / 2, czl = (z0 + z1) / 2;
+      for (let t = 0; t < len; t += 1.9) {
+        const a = alongX ? x0 + t + 0.95 : z0 + t + 0.95;
+        for (const o of [-wid * 0.22, wid * 0.22]) {
+          const [x, z] = alongX ? [a, czl + o + (lr() - 0.5) * 0.15] : [cxl + o + (lr() - 0.5) * 0.15, a];
+          if (Math.hypot(x, z) > RADIUS - 40 || inRect(GREEN, x, z, 1)) continue;
+          if (lr() < 0.85) lp('bark_dark', x, z, alongX ? 2.0 : 0.2, alongX ? 0.2 : 2.0, 0.011);
+        }
+        for (let k = 0; k < 2; k++) {
+          const off = (lr() - 0.5) * wid * 0.9, [x, z] = alongX ? [a + (lr() - 0.5) * 1.6, czl + off] : [cxl + off, a + (lr() - 0.5) * 1.6];
+          if (Math.hypot(x, z) > RADIUS - 40 || inRect(GREEN, x, z, 1)) continue;
+          const r = lr();
+          lp(r < 0.4 ? 'thatch' : r < 0.8 ? 'schist_rubble' : 'sod', x, z, 0.15 + lr() * 0.5, 0.1 + lr() * 0.35, 0.02 + lr() * 0.025);
+        }
+      }
+    }
+  }
+  // the wear of the green and the lane: cart ruts in two lines the whole way, straw trodden into the earth, scattered stones,
+  // weeds at the edges and the old tree's fallen leaves [inferred: what a trodden village green looks like]
+  {
+    const wr = rng(8571), patch = (m, x, z, w, d, hh = 0.02) => { const y = gh(x, z); C.push({ t: 'block', rect: [x - w / 2, z - d / 2, x + w / 2, z + d / 2], y0: y - 0.07, y1: y + hh, mat: m, collide: false }); };
+    for (const zr of [-0.85, 0.85]) for (let x = GATE_X - 6; x > GREEN[0] - 16; x -= 1.6) if (wr() < 0.9) patch('bark_dark', x, zr + (wr() - 0.5) * 0.2, 1.7, 0.2, 0.012);
+    for (let i = 0; i < 70; i++) { const x = GREEN[0] + 1 + wr() * (GREEN[2] - GREEN[0] - 2), z = GREEN[1] + 0.5 + wr() * (GREEN[3] - GREEN[1] - 1); patch(wr() < 0.55 ? 'thatch' : 'schist_rubble', x, z, 0.15 + wr() * 0.5, 0.1 + wr() * 0.3, 0.02 + wr() * 0.03); }
+    for (let i = 0; i < 28; i++) { const x = GREEN[0] + 1 + wr() * (GREEN[2] - GREEN[0] - 2), z = (wr() < 0.5 ? GREEN[1] + 0.2 : GREEN[3] - 0.5) + wr() * 0.3; patch('sod', x, z, 0.5 + wr() * 0.9, 0.3 + wr() * 0.4, 0.03); }
+    for (let i = 0; i < 50; i++) { const a = wr() * 6.283, r = 1.5 + wr() * 4.2; patch('paint_ochre', gx + 3 + Math.cos(a) * r, -5.4 + Math.sin(a) * r, 0.18 + wr() * 0.2, 0.12 + wr() * 0.15, 0.012); }
+  }
   BUILT = { chinese: C, life: Lf, smoke };
   return BUILT;
 }
