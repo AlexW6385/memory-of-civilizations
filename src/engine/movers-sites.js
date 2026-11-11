@@ -7,5 +7,6 @@ export const MOVER_SITES = {
   'song-hangzhou': () => import('../settlements/song-hangzhou/movers.js'),
   'qing-beijing': () => import('../settlements/qing-beijing/movers.js'),
   'florence': () => import('../settlements/florence/movers.js'),
+  'granada': () => import('../settlements/granada/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
