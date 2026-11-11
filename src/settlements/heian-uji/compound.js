@@ -93,3 +93,14 @@ export function pondFeatures() {
   return [base('heian-uji-pier', 'japanese', E, [20, -42, 40, -18], [38, -30]), base('heian-uji-players', 'life', L, [-RADIUS, -RADIUS, RADIUS, RADIUS], [0, 0])];
 }
 export const [pier, players] = pondFeatures();
+
+// ── the temple's precinct wall ───────────────────────────────────────────────
+// Byōdō-in's garden closed by an earthen wall (tsuijibei) with a gate on the south approach, one on the north and one
+// west; the east side stays open to the river (docs/settlements/heian-uji.md §15). Plan data, world coordinates.
+export const precinct = (() => {
+  const x0 = -106, x1 = 64, zn = -87, zs = 87, G = 3.6, gx = -40, E = [];
+  const run = (a, b, ax, fixed) => E.push({ t: 'tsuijibei', a: ax === 'x' ? [a, fixed] : [fixed, a], b: ax === 'x' ? [b, fixed] : [fixed, b], y: 0 });
+  for (const z of [zn, zs]) { run(x0, gx - G / 2, 'x', z); run(gx + G / 2, x1, 'x', z); E.push({ t: 'yakumon', at: [gx, z], y: 0, axis: 'z', w: G - 0.7 }); }
+  run(zn, -G / 2, 'z', x0); run(G / 2, zs, 'z', x0); E.push({ t: 'yakumon', at: [x0, 0], y: 0, axis: 'x', w: G - 0.7 });
+  return base('heian-uji-precinct', 'japanese', E, [x0 - 4, zn - 4, x1 + 4, zs + 4], [gx, zs + 4]);
+})();

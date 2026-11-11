@@ -118,3 +118,13 @@ As for the hall (`docs/buildings/byodo-in-phoenix-hall.md` §9).
 - [ishioki itabuki — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/3709)
 - [Cock-and-dragon boats — Nabunken Japanese Garden Database](https://www.nabunken.go.jp/org/bunka/jgd/pages/CockAndDragonBoats.html)
 - [Byōdō-in — Wikipedia](https://en.wikipedia.org/wiki/By%C5%8Dd%C5%8D-in)
+
+## 15. Deepening pass (street network, trades, market, landing)
+
+- **Streets and fronts.** The village is laid on fifteen runs of lane (`STREETS` in `layout.js`): the road to the Uji Bridge, the south road and the temple approach, the road along the river, cross-lanes; houses stand on both sides with their fronts to the lane, 5.6–12.5 m wide, about 2 m between eaves (filled with wattle fences), no empty cells in the core and thinning toward the rim [inferred: Uji was a river port and post stage on the Kyoto–Nara road; the plan is ours].
+- **Trades.** Farmers, fishers (nets on poles, basket traps; ayu and ajiro fishing are attested for Uji's river, §10), weavers (hemp skeins, indigo vat, a loom inside), potters (jars on a rack), carpenters (planks, logs), porters (carrying poles, bundles), woodmen (brushwood and logs), brewers (rows of lidded jars), each with its eye-level dressing: straw rain cape and hat on pegs, bundles under the eave, plank bench, doorstep stone, damp at the foot and rain streaks on plaster, a lean-to on a third [inferred from Heian-period scrolls and the dossier's §11 sources].
+- **Interiors.** The 90 houses nearest the arrival, the market and the temple's north road are open and furnished by trade; wide ones on the roads are inns with bedding rolls and bundles.
+- **Market (ichi).** Two rows of cloth-roofed stalls and mats of goods on the south approach, sellers and buyers, an ox cart, a well [inferred; markets (ichi) stood at the crossings of the roads].
+- **Landing.** A plank stage on piles on the west bank with mooring posts, a barge and two rowboats, washers kneeling at the water, sacks and baskets, rafts of timber floated down the Uji [inferred].
+- **Precinct.** An earthen wall (tsuijibei) round the garden with gates on the south approach, the north and the west, the east open to the river [inferred].
+- **Planting.** Persimmon and mulberry in the yards behind houses, willows and reeds on the river banks, as before pines and maples in the garden and cedar on the hills.
