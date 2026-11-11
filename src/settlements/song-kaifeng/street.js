@@ -183,10 +183,10 @@ export function streetPlans(base) {
     quay(bank, x + (rand() - 0.5) * 4);
   }
   // the promenade along the water: hawkers' stands under awnings and mats of wares between the quays and the shops, benches facing the river
-  for (const bank of ['n', 's']) for (let x = -300; x < FIELDS_X - 30; x += 9 + rand() * 9) {
+  for (const bank of ['n', 's']) for (let x = -300; x < FIELDS_X - 30; x += (Math.abs(x) < 150 ? 4.5 : 9) + rand() * (Math.abs(x) < 150 ? 5 : 9)) {
     if (Math.abs(x) < 14) continue;
     const n = bank === 'n', d = n ? -1 : 1, z = n ? RIVER.z0 - 4.2 : RIVER.z1 + 4.2, p = [x, z];
-    if (dBridge(x, z) > 240 && rand() < 0.5) continue;
+    if (dBridge(x, z) > 150 && rand() < 0.5) continue;
     if (!spot(x, z, 1.7)) continue;
     claim(x, z, 2);
     const k = rand();

@@ -41,6 +41,34 @@ export const MAJOR = 6;
  * plan.js and town.js read this to pave only what is sourced.
  */
 export const PAVE_R = 190;
+/**
+ * Narrowed paving (the scroll's streets are crowded, not open squares): on the river streets only a WALK of RIVER_WALK m by the shops is paved, the rest to the
+ * water is an earth strip (willows, mooring posts, stalls, loading) crossed by paved landing paths at the stone steps and by the bridge's approach; on the main
+ * street and the two cross shop streets only the middle is paved, the margins by the fronts are beaten earth with the shops' goods standing on them.
+ */
+export const RIVER_WALK = 5;
+export const BRIDGE_APRON = 9;
+export const PAVED_HALF = { 0: 3.8, 1: 3.8, 4: 2.6, 5: 2.6 };
+/** The paved parts of street i (a list of [x0, z0, x1, z1]); the whole rectangle for the streets not narrowed. */
+export function paveRects(i) {
+  const s = STREETS[i];
+  if (i === 2) { const r = [[s[0], s[1], s[2], s[1] + RIVER_WALK], [-BRIDGE_APRON, s[1] + RIVER_WALK, BRIDGE_APRON, s[3]]]; for (const st of STEPS) if (st.bank === 'n') r.push([st.x - 1.6, s[1] + RIVER_WALK, st.x + 1.6, s[3]]); return r; }
+  if (i === 3) { const r = [[s[0], s[3] - RIVER_WALK, s[2], s[3]], [-BRIDGE_APRON, s[1], BRIDGE_APRON, s[3] - RIVER_WALK]]; for (const st of STEPS) if (st.bank === 's') r.push([st.x - 1.6, s[1], st.x + 1.6, s[3] - RIVER_WALK]); return r; }
+  if (PAVED_HALF[i] !== undefined) {
+    const h = PAVED_HALF[i], horiz = s[2] - s[0] > s[3] - s[1];
+    return [horiz ? [s[0], (s[1] + s[3]) / 2 - h, s[2], (s[1] + s[3]) / 2 + h] : [(s[0] + s[2]) / 2 - h, s[1], (s[0] + s[2]) / 2 + h, s[3]]];
+  }
+  return [s];
+}
+/** Is (x, z) laid with paving: on a paved street's paved part within PAVE_R of the bridge (the monastery's approach and court are the plans'). */
+export function isPaved(x, z) {
+  if (Math.hypot(x, z - 76) >= PAVE_R) return false;
+  for (const i of PAVED_IDX) if (inRect(STREETS[i], x, z) && paveRects(i).some((r) => inRect(r, x, z))) return true;
+  return false;
+}
+/** Is (x, z) on a shop street near the bridge but not paved: the earth strip by the water, the margins by the fronts. */
+export const isMargin = (x, z) => Math.hypot(x, z - 76) < PAVE_R && PAVED_IDX.some((i) => inRect(STREETS[i], x, z)) && !isPaved(x, z);
+const PAVED_IDX = [0, 1, 2, 3, 4, 5, 14];
 export const pavedWay = (i, x, z) => (i < MAJOR || i === 14) && Math.hypot(x, z - 76) < PAVE_R;     // the first MAJOR streets (and the one at z = -167) carry the shops
 // the lanes (4 m) through the blocks, to open their middles to houses
 export const LANES = [
