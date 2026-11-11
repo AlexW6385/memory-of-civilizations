@@ -27,7 +27,7 @@ function wallRun(ctx, alongX, c, a, b, t, y, H, doors, mat) {
   seg(u, b, y - 0.6, y + 0.7, 'rubble'); seg(u, b, y + 0.7, y + H, mat);
 }
 /** A range of rooms under one tiled roof pitched both ways, its timber ceiling at y + H. */
-function rangeRoof({ bag }, r, y, H) {
+export function rangeRoof({ bag }, r, y, H) {
   const along = r[2] - r[0] > r[3] - r[1], rise = (along ? r[3] - r[1] : r[2] - r[0]) * 0.28;
   bag.add('timber', box(r[0] + 0.05, y + H - 0.12, r[1] + 0.05, r[2] - 0.05, y + H, r[3] - 0.05));
   bag.add('roof_tile', frustum([r[0] - 0.3, r[1] - 0.3, r[2] + 0.3, r[3] + 0.3], y + H, y + H + rise, along ? 0 : (r[2] - r[0]) / 2 + 0.25, along ? 0 : (r[2] - r[0]) / 2 + 0.25, along ? (r[3] - r[1]) / 2 + 0.25 : 0, along ? (r[3] - r[1]) / 2 + 0.25 : 0));
@@ -36,7 +36,7 @@ function rangeRoof({ bag }, r, y, H) {
 
 // ── the furniture ────────────────────────────────────────────────────────────────────────────
 /** A couch (kline) along u: frame on four legs cut in the "rectangular" manner, the mattress, a striped cover, the cushion at the head (the left end, u0). */
-function kline(bag, col, x0, z0, x1, z1, y, headAtMin, rand) {
+export function kline(bag, col, x0, z0, x1, z1, y, headAtMin, rand) {
   const alongX = x1 - x0 > z1 - z0, H = 0.62;
   for (const [lx, lz] of [[x0 + 0.06, z0 + 0.06], [x1 - 0.12, z0 + 0.06], [x0 + 0.06, z1 - 0.12], [x1 - 0.12, z1 - 0.12]]) {
     bag.add('wood_dark', box(lx, y, lz, lx + 0.06, y + H - 0.14, lz + 0.06));
@@ -59,7 +59,7 @@ function kline(bag, col, x0, z0, x1, z1, y, headAtMin, rand) {
   col.rect([x0, z0, x1, z1], y, y + H + 0.1);
 }
 /** A low three-legged table (trapeza) with cups and a dish of food on it. */
-function trapeza(bag, x, z, y, alongX, rand) {
+export function trapeza(bag, x, z, y, alongX, rand) {
   const w = alongX ? 0.75 : 0.42, d = alongX ? 0.42 : 0.75, h = 0.48;
   bag.add('wood_dark', box(x - w / 2, y + h - 0.04, z - d / 2, x + w / 2, y + h, z + d / 2));
   const legs = alongX ? [[x - w / 2 + 0.06, z], [x + w / 2 - 0.08, z - d / 2 + 0.06], [x + w / 2 - 0.08, z + d / 2 - 0.08]] : [[x, z - d / 2 + 0.06], [x - w / 2 + 0.06, z + d / 2 - 0.08], [x + w / 2 - 0.08, z + d / 2 - 0.08]];
@@ -71,7 +71,7 @@ function trapeza(bag, x, z, y, alongX, rand) {
   bag.add('paint_ochre', lathe([[0.001, 0], [0.05, 0.0], [0.045, 0.03], [0.001, 0.04]], 8, null, x + (alongX ? 0.02 : 0.03), y + h + 0.012, z + (alongX ? 0.03 : 0.02)));
 }
 /** A bell krater on the floor, its ladle; black with a band of red-figure (the clay's red). */
-function krater(bag, col, x, z, y) {
+export function krater(bag, col, x, z, y) {
   bag.add('pottery_dark', lathe([[0.001, 0], [0.13, 0], [0.13, 0.05], [0.08, 0.08], [0.1, 0.12], [0.16, 0.2], [0.2, 0.32], [0.24, 0.46], [0.28, 0.52], [0.27, 0.535], [0.22, 0.48], [0.001, 0.46]], 20, null, x, y, z));
   bag.add('terracotta', lathe([[0.168, 0.22], [0.193, 0.22], [0.219, 0.4], [0.193, 0.4]], 20, null, x, y, z));
   bag.add('water', lathe([[0.001, 0], [0.225, 0], [0.001, 0.001]], 16, null, x, y + 0.44, z));
@@ -79,7 +79,7 @@ function krater(bag, col, x, z, y) {
   col.circle(x, z, 0.28, y, y + 0.54);
 }
 /** A bronze lampstand with an oil lamp burning on its top. */
-function lampstand(ctx, x, z, y, h = 1.2) {
+export function lampstand(ctx, x, z, y, h = 1.2) {
   const { bag, lights } = ctx;
   bag.add('bronze', lathe([[0.001, 0], [0.16, 0], [0.12, 0.05], [0.02, 0.08], [0.015, h - 0.05], [0.07, h - 0.02], [0.08, h], [0.001, h]], 10, null, x, y, z));
   bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.005], [0.055, 0.025], [0.02, 0.04], [0.001, 0.04]], 10, null, x, y + h, z));
@@ -88,7 +88,7 @@ function lampstand(ctx, x, z, y, h = 1.2) {
   lights.push({ at: [x, y + h + 0.25, z], color: '#ffb46b', intensity: 2.2, distance: 6 });
 }
 /** The warp-weighted loom against a wall (facing +z from the wall at z0): two uprights leaning, the cloth beam, the warp, the heddle bar, the row of pyramidal loom weights. */
-function loom(bag, col, x, z0, y, w = 1.6) {
+export function loom(bag, col, x, z0, y, w = 1.6) {
   const lean = 0.35, H = 2.0;
   for (const s of [-1, 1]) bag.add('timber', box(x + s * w / 2 - 0.05, y, z0 + lean - 0.05, x + s * w / 2 + 0.05, y + 0.1, z0 + lean + 0.05).translate(0, 0, 0)), bag.add('timber', (() => { const g = box(-0.04, 0, -0.04, 0.04, H, 0.04); g.rotateX(-Math.atan2(lean - 0.05, H)); g.translate(x + s * w / 2, y, z0 + lean); return g; })());
   bag.add('timber', lathe([[0.05, 0], [0.05, w + 0.3], [0.001, w + 0.3]], 8).rotateZ(Math.PI / 2).translate(x + w / 2 + 0.15, y + H - 0.05, z0 + 0.09));

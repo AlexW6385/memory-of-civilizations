@@ -14,7 +14,7 @@ import './index.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** A local frame on a rectangle whose front faces `front`: u runs along the front (0…L), v from the front back (0…D). */
-function frame(rect, front) {
+export function frame(rect, front) {
   const [x0, z0, x1, z1] = rect, alongX = front === 's' || front === 'n';
   const L = alongX ? x1 - x0 : z1 - z0, D = alongX ? z1 - z0 : x1 - x0;
   const P = (u, v) => (front === 's' ? [x0 + u, z1 - v] : front === 'n' ? [x0 + u, z0 + v] : front === 'e' ? [x1 - v, z0 + u] : [x0 + v, z0 + u]);
@@ -25,7 +25,7 @@ function frame(rect, front) {
   const yaw = front === 's' ? 0 : front === 'n' ? Math.PI : front === 'e' ? Math.PI / 2 : -Math.PI / 2;
   return { L, D, P, R, out, along, alongX, yaw };
 }
-const B = (bag, mat, r, y0, y1) => bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3]));
+export const B = (bag, mat, r, y0, y1) => bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3]));
 
 /** A short Doric entablature over a straight run of columns: local axis from (ua, va) to (ub, vb) (along u or v), its
  *  outer side toward `side` (±1 on the other coordinate); triglyphs over the columns `cols` and between them. */
