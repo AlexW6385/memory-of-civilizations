@@ -101,6 +101,17 @@ Sources (2026-11-11):
 - [Castle Craftsmanship: Stone Walls — MLIT](https://www.mlit.go.jp/tagengo-db/en/R1-00697.html)
 - [Kura: Traditional Japanese Storehouses — web-japan](https://web-japan.org/trends/11_food/jfd202312_kura.html)
 
+### 5.7 Deepening pass (2026-11-11): enterable compounds, civic furniture, life at eye level
+
+- **Samurai compounds are entered.** The gate-house's passage stands open (leaves swung back against its sides), a lintel and the storey over it; the yard, the main house and its reception room (one compound in three) are reachable. Retainers' row house (nagaya) along a side wall, a small side door (kuguri) in the wall opposite the gate on some, a stone gutter along the foot of every wall, trees in the free yard (maple, red pine, sugi, bamboo at the walls) seen over the 2.3 m walls. [inferred: Edo samurai yashiki plan]
+- **Merchants' houses:** a fire wall (udatsu) on each party wall standing over the roofs, capped with tiles; a bamboo fender (inu-yarai) before the lattice on most fronts; reed blinds (sudare) over lattice bays; a back wing behind a small garden court (tsuboniwa: pine, lantern) on deep lots, with a plank fence. Four more trades: paper (washi), fish (tubs and dried fish on a pole), tofu (tank and yoke buckets), cooper (tubs, pails, hoops); shop interiors for the apothecary (chest of drawers, mill), sandals/paper, oil/cooper/dye. One machiya in two is open. [inferred: Edo townsmen's types; JAANUS "machiya"]
+- **Civic furniture:** neighbourhood gates (kido) across the merchants' street, four of them, open in the day; two fire-watch towers (hinomi-yagura: posts, platform, bell under a hipped roof, ladder); notice boards (kōsatsu) under little roofs; roadside Jizō shrines at the lane corners; an Inari shrine with two red torii and stone foxes beside the avenue. [inferred; see sources]
+- **Eye-level life:** firewood, fire tubs, pots, baskets, benches, handcarts before the fronts; cats on the pent roofs, dogs in the street; paper lanterns at each samurai gate, a horse at the hitching post at some; baskets and tubs at the moat landings, a woman kneeling at each landing, fishermen in every other moored boat. [inferred]
+- **The castle:** the lord's residence has three halls open on their south faces with reception rooms (the audience hall 16 m wide); the baileys carry pines, wells, stone lanterns, storehouse rows and flagstone paths; the Sannomaru has storehouse rows either side of the residence and pines along the lane. [inferred]
+- **Planting:** willows along both moats (9 per 100 m²), pines along the avenue, park planting in the inner enclosure. [inferred]
+- **Boats:** six poled flat-bottomed boats (takase-bune style hull) on the moats, covered with a straw awning or loaded with rice bales; the boatman poles from the stern. [inferred]
+- Sources consulted: [hi-no-mi yagura — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/4095), [jishin bansho — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/3665), [Recognizing Design Features in Kyoto's Machiya — nippon.com](https://www.nippon.com/en/guide-to-japan/gu900011/recognizing-design-features-in-kyoto%E2%80%99s-machiya-townhouses.html), [Edo period street — muza-chan](https://muza-chan.net/japan/index.php/blog/edo-period-street).
+
 ## 6. Ground and water
 
 The level plain; the hill rising about 35 m above it; the moats holding water about 2.7 m below the banks. (`ground.js`) [stated: depths, ermakvagus; inferred: the rest]

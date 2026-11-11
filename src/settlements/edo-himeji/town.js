@@ -29,6 +29,9 @@ function life() {
     if (q0 > 1.6) fig([ub - 1.5 + 0.75, Z(q0 + 0.95)], rot, { y: 0.45, pose: 'seiza', cloth: 'cloth_brown', over: 'apron', cloth2: 'cloth_indigo' });
     if (rand() < 0.5) fig([du + 1.4, Z(0.42)], rot, { pose: 'sit', y: 0, cloth: rand() < 0.5 ? 'cloth_maroon' : 'cloth_grey', hair: rand() < 0.5 ? 'bun' : 'topknot' });
   }
+  // the moat's life: a fisherman sitting in every other moored boat, a woman kneeling at each landing washing greens
+  furniture().filter((f) => f.t === 'moat_boat').forEach((f, i) => { if (i % 2 === 0) fig([f.at[0] + 0.4, f.at[1]], Math.PI / 2, { y: LEVEL.water - 0.08 + 0.08, pose: 'sit', hat: 'straw', dress: 'wrap', cloth: 'cloth_indigo', feet: 'bare' }); });
+  furniture().filter((f) => f.t === 'landing').forEach((f, i) => fig([f.x + (i % 2 ? 1 : -1) * 0.6, f.z0 - 0.35], 0, { y: 0.3, pose: 'seiza', hair: 'bun', cloth: i % 2 ? 'cloth_maroon' : 'cloth_indigo', over: 'apron', cloth2: 'cloth_white' }));
   return [base('edo-himeji-street', E), base('edo-himeji-people', P, 'life')];
 }
 
