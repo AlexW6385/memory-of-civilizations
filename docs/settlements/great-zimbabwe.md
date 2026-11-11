@@ -87,6 +87,17 @@ Sources (2026-11-07):
 - [Inside women's traditional space — The Herald](https://www.herald.co.zw/inside-womens-traditional-space/)
 - [Great Zimbabwe — The Met, Heilbrunn Timeline](https://www.metmuseum.org/essays/great-zimbabwe)
 
+## 15. Walls, homesteads and the living valley (2026-11-11)
+
+Sources: Zimbabwe Field Guide, "The Great Enclosure in photographs" (zimfieldguide.com/node/710); Ebsco Research Starters, "Great Zimbabwe Urbanism and Architecture".
+- **Coursing.** Granite "splits fairly easily into parallel face slabs", slabs about 3 to 8 inches thick, laid without mortar, "each layer slightly recessed in comparison to the successive layers below"; the eastern end of the Great Outer Wall has "the most regular stone coursing achieved at Great Zimbabwe" [stated]. Ours: every dry wall's faces step in a little at each 0.42 m course (a stair, not a plane), so the treads take light and shadow; the chevron and dentelle bands follow the stair [recess per course inferred from the total batter].
+- **Drains.** "Six original drainage outlets in the north-east side of the Great Outer Wall", five roofed with stone [stated]. Ours: six outlets along the NE stretch of the outer wall, each a dark opening between jamb stones under a lintel slab.
+- **Weathering.** The field guide notes weathering and loss of the dhaka finishes; lichen is not mentioned [lichen inferred: grey-green and a few yellow-orange crustose patches on the granite, more on the lower courses]. Ours: flat patches on single courses of both faces of every wall.
+- **Homesteads.** Commoners' daga dwellings formed an outer ring round the royal compounds (Ebsco); huts of "pole and dhaka"; Hall's work destroyed "store huts and grain bins" in the enclosure (zimfieldguide) [stated]. Ours: 78 compounds in the valley, each a low rubble wall (about 1.1 m) round a yard with a gate, two to four daga houses on a ring with doors to the yard, a granary on stones between two of them, firewood and two seats; a few houses stand free in the Great Enclosure [form of the compound and granary inferred from later Shona homesteads]. Thatch is bound with two withy rings; open houses gain a daga shelf with bowls over the rukuva [shelf stated: Herald, §14].
+- **Granary.** A plastered drum on a ring of stones and a pole floor, a deep-eaved thatch roof, a small high door with a notched ladder pole [inferred].
+- **Life.** Women with pots and baskets, men in hide capes, herd boys, traders on paths from every gate to the Great Enclosure's entrance, the Valley courts and the Ascent; swallows, crows over the hill, sparrows on the compounds; hearth smoke from a share of the houses at the morning and evening meals [inferred].
+- Not built: the Balcony, the covered stairway, the cave; no new materials were needed (lichen uses plaster_damp and paint_ochre).
+
 ## Sources
 
 - [Great Zimbabwe — Wikipedia](https://en.wikipedia.org/wiki/Great_Zimbabwe)
@@ -95,3 +106,5 @@ Sources (2026-11-07):
 - [Great Zimbabwe — Wikipedia (mirror)](https://wiki.krisyotam.com/content/wikipedia_en_all_nopic_2026-03/Great_Zimbabwe)
 - [The Great Zimbabwe Hill Complex in photographs — Zimbabwe Field Guide](https://mail.zimfieldguide.com/node/709)
 - [Great Zimbabwe — Smarthistory](https://smarthistory.org/great-zimbabwe)
+- [The Great Enclosure in photographs — Zimbabwe Field Guide](https://mail.zimfieldguide.com/node/710)
+- [Great Zimbabwe Urbanism and Architecture — Ebsco](https://www.ebsco.com/research-starters/anthropology/great-zimbabwe-urbanism-and-architecture)
