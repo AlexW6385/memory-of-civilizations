@@ -77,6 +77,18 @@ function songCourt(el, { bag, col }) {
     slab([xa, hz - 1.2, xb, hz + 1.2]);
     kerb([xa, hz - 1.45, xb, hz - 1.2]); kerb([xa, hz + 1.2, xb, hz + 1.45]);
   }
+  // the north court: from the pagoda's apron to the main hall's terrace, flagstones with the brick axis and its worn granite strip, kerbs along the field's sides
+  if (el.north !== undefined) {
+    const zN = el.north, zc = cz - A;
+    { const r = [ax - 30, zN, ax + 30, zc + 1]; bag.add('flagstone', box(r[0], -0.3, r[1], r[2], 0.03, r[3])); col.floor(r, 0.03); }
+    slab([ax - W, zN, ax + W, zc]);
+    bag.add('granite_block', box(ax - 0.9, -0.3, zN, ax + 0.9, PAVE + 0.02, zc));
+    for (const sg of [-1, 1]) { const x0 = sg < 0 ? ax - W - 0.25 : ax + W; kerb([x0, zN, x0 + 0.25, zc]); }
+    for (const sg of [-1, 1]) { const x0 = sg < 0 ? ax - 30 - 0.25 : ax + 30; kerb([x0, zN, x0 + 0.25, zc + 1]); }
+    // raised beds of pines and cypresses either side of the way, as in the south court
+    for (const sg of [-1, 1]) { const xa = sg < 0 ? ax - 22 : ax + 12, xb = xa + 10; bed(bag, col, [xa, zN + 4, xb, zN + 17], rnd, [[3, zN + 10.5, 7.6 + rnd(), 'p'], [8, zN + 7, 6.2, 'c'], [8, zN + 14, 6.6, 'c']].map(([u, v, h, k]) => [xa + u, v, h, k])); }
+    for (let i = 0; i < 10; i++) moss(bag, ax + (rnd() < 0.5 ? -1 : 1) * (W - 0.15 - rnd() * 0.4), PAVE + 0.001, zN + 2 + rnd() * (zc - zN - 4), 0.18 + rnd() * 0.3);
+  }
   // the pagoda's apron: brick inside, a border course of granite, a kerb round
   slab([cx - A, cz - A, cx + A, zA]);
   for (const r of [[cx - A, cz - A, cx + A, cz - A + 1], [cx - A, zA - 1, cx + A, zA], [cx - A, cz - A + 1, cx - A + 1, zA - 1], [cx + A - 1, cz - A + 1, cx + A, zA - 1]]) bag.add('granite_block', box(r[0], -0.3, r[1], r[2], PAVE + 0.025, r[3]));
