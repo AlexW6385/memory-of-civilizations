@@ -11,6 +11,7 @@ import { cairoQaa } from './qaa.js';
 import { baynFront, baynBed } from './bayn.js';
 import { cairoWikala, cairoHammam } from './khan.js';
 import { cairoShop, sharbatStall } from './shops.js';
+import { cairoDress, cairoShopfront, cairoSabat, cairoYard, cairoSquare } from './dress.js';
 import * as FN from '../mughal/furnish.js';
 
 const S = 'limestone_yellow';
@@ -588,6 +589,6 @@ function sabilKuttab(el, { bag, col }) {
 
 registerStyle('mamluk', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, road_wall: roadWall, nasir_minaret: nasirMinaret, suq_covered: suqCovered, cairo_front: cairoFront, sabil_kuttab: sabilKuttab, cairo_qaa: cairoQaa, bayn_front: baynFront, bayn_bed: baynBed, cairo_wikala: cairoWikala, cairo_hammam: cairoHammam, cairo_shop: cairoShop, sharbat_stall: sharbatStall },
+  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, road_wall: roadWall, nasir_minaret: nasirMinaret, suq_covered: suqCovered, cairo_front: cairoFront, sabil_kuttab: sabilKuttab, cairo_qaa: cairoQaa, bayn_front: baynFront, bayn_bed: baynBed, cairo_wikala: cairoWikala, cairo_hammam: cairoHammam, cairo_shop: cairoShop, sharbat_stall: sharbatStall, cairo_dress: cairoDress, cairo_shopfront: cairoShopfront, cairo_sabat: cairoSabat, cairo_yard: cairoYard, cairo_square: cairoSquare },
   objects: {},
 });
