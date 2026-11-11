@@ -251,9 +251,9 @@ function hip(x0, z0, x1, z1, ye, yr, th = 0.12) {
 
 /** pilgrim_hall: the pilgrims' rest house (dharmasala) on a low plinth: two rows of timber posts, tie beams, a hipped thatched roof, stone seat slabs along the back, water pots at one end and mats. { rect, plinth, h } */
 function pilgrimHall(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, pl = el.plinth ?? 0.5, h = el.h ?? 3.0, o = 1.0;
-  bag.add('mudbrick', box(x0, -0.6, z0, x1, pl, z1)); bag.add('sandstone_floor', box(x0 - 0.2, pl - 0.05, z0 - 0.2, x1 + 0.2, pl, z1 + 0.2)); bag.add('sandstone', box(x0 - 0.2, 0, z0 - 0.2, x1 + 0.2, pl * 0.5, z1 + 0.2));
-  col.rect([x0 - 0.2, z0 - 0.2, x1 + 0.2, z1 + 0.2], -0.6, pl * 0.5); col.floor([x0 - 0.1, z0 - 0.1, x1 + 0.1, z1 + 0.1], pl);
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, p0 = el.plinth ?? 0.5, pl = y + p0, h = el.h ?? 3.0, o = 1.0;
+  bag.add('mudbrick', box(x0, y - 0.6, z0, x1, pl, z1)); bag.add('sandstone_floor', box(x0 - 0.2, pl - 0.05, z0 - 0.2, x1 + 0.2, pl, z1 + 0.2)); bag.add('sandstone', box(x0 - 0.2, y, z0 - 0.2, x1 + 0.2, y + p0 * 0.5, z1 + 0.2));
+  col.rect([x0 - 0.2, z0 - 0.2, x1 + 0.2, z1 + 0.2], y - 0.6, y + p0 * 0.5); col.floor([x0 - 0.1, z0 - 0.1, x1 + 0.1, z1 + 0.1], pl);
   const nx = Math.max(3, Math.round((x1 - x0) / 3)), nz = Math.max(2, Math.round((z1 - z0) / 3));
   for (let i = 0; i <= nx; i++) for (let j = 0; j <= nz; j++) {
     if (i > 0 && i < nx && j > 0 && j < nz) continue;

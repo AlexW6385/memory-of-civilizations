@@ -59,6 +59,14 @@ export function extras() {
       E.push({ t: 'block', rect: [xa, z0, xb, z0 + 0.85], y0: top - 1.2, y1: top, mat: 'sandstone', walk: true });
     }
   }
+  // lotus pads in drifts along the tank's shallow margins
+  const rand = rng(77), pts = [];
+  for (let k = 0; k < 800 && pts.length < 150; k++) {
+    const a = rand() * Math.PI * 2, f = 0.8 + rand() * 0.16, x = TANK.c[0] + Math.cos(a) * TANK.r[0] * f, z = TANK.c[1] + Math.sin(a) * TANK.r[1] * f;
+    if (Math.sin(a * 3 + 1) < 0.1 || pts.some(([p, q]) => Math.hypot(p - x, q - z) < 0.9)) continue;
+    pts.push([x, z]);
+  }
+  E.push({ t: 'rite', kind: 'pads', at: [0, 0], y: TANK.level + 0.015, pts, seed: 9 });
   return E;
 }
 
