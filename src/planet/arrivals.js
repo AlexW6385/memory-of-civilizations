@@ -78,4 +78,5 @@ export const ARRIVALS = {
   'delphi': [62, null, 16, 1.25, 0.22],   // on the Temple of Apollo's terrace before the Chians' altar and the Serpent Column: the temple's east front whole, the sacred hill rising behind to the Phaedriades
   'mycenae': [-136, null, 0, -1.5708, 0.2],   // on the approach road west of the citadel: the Lion Gate in its dressed conglomerate front between the bastion and the wall's end, the Cyclopean circuit rising behind it to the palace on the summit
   'qin-xianyang': [175, null, -121, 1.5708, 0.12],   // from the head of the middle ramp, down into the front gallery of Pit 1: the three ranks of archers across the gallery and the first corridors of painted soldiers behind them
+  'sgang-gwaay': [43, null, 5, 1.2, 0.1],   // from the beach top before the row of cedar-plank houses: the landmark house across the street, its frontal pole at the door, the ridge under the cedars and the rain
 };
