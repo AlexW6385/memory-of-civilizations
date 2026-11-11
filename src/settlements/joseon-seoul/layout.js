@@ -46,11 +46,12 @@ export function lots() {
   LOTS = [];
   const rand = rng(1430), S = 26;
   for (let x = -RADIUS; x < RADIUS; x += S) for (let z = -RADIUS; z < RADIUS; z += S) {
-    const w = 16 + rand() * 7, d = 15 + rand() * 7, r = [x + 2, z + 2, x + 2 + w, z + 2 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
+    // lots fill their cell right up to the lanes (2.6 m, the cell's seams): house walls make the street's two sides continuous
+    const w = 20 + rand() * 2.4, d = 19.4 + rand() * 3, x0 = x + 2.8 + rand() * (22.4 - w) * 0.4, z0 = z + 2.8 + rand() * (22.4 - d) * 0.4, r = [x0, z0, x0 + w, z0 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
     if (Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) > RADIUS - 26) continue;
     if (inRect(PALACE, cx, cz, w / 2 + 10) || inRect(AVENUE, cx, cz, w / 2 + 3) || inRect([-160, 346, 160, 376], cx, cz, w / 2 + 2) || MINISTRIES.some((m) => inRect(m, cx, cz, w / 2 + 3))) continue;
     if (inRect(YANGBAN, cx, cz, w / 2 + 2)) continue;
-    if (rand() < 0.08) continue;
+    rand();
     LOTS.push({ rect: r, seed: Math.floor(rand() * 1e6), thatch: Math.hypot(cx, cz) > 300 ? rand() < 0.6 : rand() < 0.2 });
   }
   return LOTS;
@@ -60,6 +61,12 @@ export function inLot(x, z, m = 0) {
   if (!GRID) { GRID = new Map(); for (const h of lots()) for (let i = Math.floor((h.rect[0] - 3) / 26); i <= Math.floor((h.rect[2] + 3) / 26); i++) for (let j = Math.floor((h.rect[1] - 3) / 26); j <= Math.floor((h.rect[3] + 3) / 26); j++) { const k = i + ',' + j; if (!GRID.has(k)) GRID.set(k, []); GRID.get(k).push(h); } }
   const l = GRID.get(Math.floor(x / 26) + ',' + Math.floor(z / 26));
   return !!l && l.some((h) => inRect(h.rect, x, z, m));
+}
+/** The hanok lot whose rectangle holds the point, or null. */
+export function lotAt(x, z, m = 0) {
+  inLot(0, 0);
+  const l = GRID.get(Math.floor(x / 26) + ',' + Math.floor(z / 26));
+  return (l && l.find((h) => inRect(h.rect, x, z, m))) || null;
 }
 /** The lanes between the hanok lots (the 3 m gaps of the 26 m grid), cut where the palace, the ministries, Jongno and the yangban house stand: rectangles [x0, z0, x1, z1]. */
 export function lanes() {

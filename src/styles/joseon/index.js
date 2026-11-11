@@ -112,6 +112,34 @@ function hanok(el, { bag, col }) {
   for (const sx of [-1, 1]) bag.add('timber', box(xc + sx * 1.2 - 0.1, 0, z1 - 0.1, xc + sx * 1.2 + 0.1, 2.5, z1 + 0.1));
   bag.add('timber', box(xc - 1.4, 2.35, z1 - 0.12, xc + 1.4, 2.55, z1 + 0.12));
   roof(bag, [xc - 1.3, z1 - 0.5, xc + 1.3, z1 + 0.5], 2.5, 0.5, thatch ? 'hip' : 'gable', 0.7, mat, false, 'timber');
+  // the gate's two plank leaves (daemun), one swung back against the wall, the other half open, an iron ring on each; a threshold stone
+  {
+    const open = rand() < 0.5, hw = 1.2;
+    bag.add('granite_korea', box(xc - hw, 0, z1 - 0.2, xc + hw, 0.08, z1 + 0.2));
+    bag.add('planks_grey', box(xc - hw - 0.04, 0.1, z1 - 0.9, xc - hw + 0.04, 2.3, z1 - 0.1));
+    if (open) bag.add('planks_grey', box(xc + hw - 0.04, 0.1, z1 - 0.9, xc + hw + 0.04, 2.3, z1 - 0.1));
+    else { bag.add('planks_grey', box(xc + 0.04, 0.1, z1 - 0.05, xc + hw - 0.02, 2.3, z1 + 0.03)); bag.add('iron', box(xc + 0.2, 1.2, z1 + 0.03, xc + 0.3, 1.3, z1 + 0.05)); }
+    bag.add('planks_grey', box(xc - hw + 0.02, 0.1, z1 - 0.05, xc - 0.04, 2.3, z1 + 0.03)); bag.add('iron', box(xc - 0.3, 1.2, z1 + 0.03, xc - 0.2, 1.3, z1 + 0.05));
+    if (!open) col.rect([xc - hw, z1 - 0.1, xc + hw, z1 + 0.1], 0, 2.3);
+  }
+  // a storehouse (gwangchae) against the street wall, west or east of the gate: plastered walls on a stone foot, its own little roof
+  if (rand() < 0.55) {
+    const jxc = x1 - 4.2, west = rand() < 0.5 || xc + 6 > jxc - 1.3, sx0 = west ? xc - 5.8 : xc + 2.2, rr = [sx0, z1 - 2.5, sx0 + 3.6, z1 - 0.3];
+    bag.add('granite_korea', box(rr[0] - 0.1, 0, rr[1] - 0.1, rr[2] + 0.1, 0.35, rr[3]));
+    bag.add('plaster_white', box(rr[0], 0.35, rr[1], rr[2], 2.2, rr[3] - 0.15)); bag.add('plaster_damp', box(rr[0] - 0.01, 0.35, rr[1] - 0.01, rr[2] + 0.01, 0.75, rr[3] - 0.14));
+    bag.add('planks_grey', box(rr[0] + 1.1, 0.35, rr[1] - 0.04, rr[0] + 2.5, 2.0, rr[1])); bag.add('timber', box(rr[0], 2.0, rr[1] - 0.06, rr[2], 2.2, rr[1]));
+    col.rect(rr, 0, 2.3);
+    roof(bag, [rr[0], rr[1], rr[2], rr[3] - 0.1], 2.15, 0.45, thatch ? 'hip' : 'xieshan', 0.8, mat, false, 'timber');
+  }
+  // peppers, corn and persimmons strung under the eave of the main range: red and ochre strings along its veranda
+  {
+    const r = wings[0], zf = r[3] - 0.8 + 0.1, nstr = 3 + Math.floor(rand() * 5);
+    for (let q = 0; q < nstr; q++) {
+      const x = r[0] + 1 + rand() * (r[2] - r[0] - 2), m = ['cloth_red', 'cloth_ochre', 'cloth_red'][Math.floor(rand() * 3)];
+      bag.add('rope_fibre', box(x - 0.01, yb + h - 1.1, zf - 0.01, x + 0.01, yb + h - 0.3, zf + 0.01));
+      for (let k = 0; k < 4; k++) bag.add(m, box(x - 0.05, yb + h - 0.85 + k * 0.15, zf - 0.05, x + 0.05, yb + h - 0.72 + k * 0.15, zf + 0.05));
+    }
+  }
 }
 
 const hanokPal = { wood: 'timber', column: 'timber', soffit: 'timber', lattice: 'shoji', plaster: 'plaster_white', base: 'granite_korea' };
