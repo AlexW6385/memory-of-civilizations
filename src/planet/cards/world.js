@@ -1072,4 +1072,22 @@ export const CARDS = {
       "城与孔林 —— 明代曲阜城的南门“万仞宫墙”，从这里通向孔庙的一条街，两侧是卖香烛、纸张、书籍和碑帖拓片的店铺；城内成排的四合院；北面是孔林边缘的古柏，环绕着孔子墓。",
     ],
   },
+  'shang-yinxu': {
+    en: [
+      "Yinxu, the ruins of Yin near modern Anyang in Henan, was the last capital of the Shang dynasty, shown c. 1200 BC in the reign of Wu Ding's successors. It stands on both banks of the Huan river in a bend of its course, the first Chinese city known from its own writing: tens of thousands of oracle bones, tortoise plastrons and ox shoulder-blades cracked in fire and inscribed with the questions put to the royal ancestors. The architecture is of beaten earth and timber: platforms rammed in thin layers, posts on stone bases, plastered wattle walls under thatch; the wealth is in bronze.",
+      "The ancestral hall of the kings — a hall of nine bays, 36 by 12 m, on a rammed-earth platform 46 by 24 m and 1.5 m high, reached by a stair in the middle bay; a porch of posts on stone bases along the front, three doors, a hipped thatched roof with deep eaves; inside, the altar along the back wall with its row of bronze vessels (ding, gui, jue, gu, zun), the king's mat and the diviners kneeling at their braziers, a frame of stone chimes, a drum and a set of bronze bells. Two smaller halls flank the court, and in it lie the covered sacrificial pits, with the gate and the moat beyond.",
+      "The tomb of Fu Hao — the consort of Wu Ding, a general and priestess, buried under a small hall on a rammed platform with her bronzes, jades and bones in the shaft below; beside it the pits of her chariots, each a chariot and two horses, and one chariot standing by.",
+      "The oracle-bone archive — a long low store of rammed earth under thatch, its shelves stacked with shells and scapulae by the thousand, and before it the diviners' shed where the plastrons are sawn, scraped and drilled over a brazier.",
+      "The bronze foundry — open sheds under thatch: the mould-makers' benches and the clay sections of mould drying in rows in the sun, the crucible furnaces with their bellows, the pouring pit with the assembled moulds, heaps of ore and charcoal, tables of finished vessels, and the casters' pit houses.",
+      "The lineage quarters and the Huan — compounds of the clans, a main house on a rammed foundation beside semi-subterranean pit houses, granaries, storage pits and wells; workshops of bone, jade and pottery; plank bridges over the river, reeds on its banks, millet fields beyond.",
+    ],
+    zh: [
+      "殷墟位于今河南安阳，是商王朝最后的都城，画面所示为约公元前1200年，武丁之后的时代。它跨洹河两岸，坐落在河流转弯处，是中国最早有自身文字可考的城市：数以万计的甲骨——龟甲与牛肩胛骨，经火灼裂，刻着向先王占问的卜辞。建筑以夯土与木构为主：薄层夯筑的台基，立在石础上的木柱，抹泥的编竹墙，覆以茅草；财富则体现在青铜上。",
+      "王室宗庙 —— 九开间的大殿，长36米、进深12米，立于长46米、宽24米、高1.5米的夯土台基上，中间一间前设台阶；前廊柱立石础，设三门，庑殿式茅草屋顶，出檐深远；殿内后墙下是祭台，陈列一排青铜礼器（鼎、簋、爵、觚、尊），有王的席位、跪坐于火盆旁的贞人、一架石磬、一面鼓和一组铜铙。庭院两侧各有一座较小的殿，庭中是盖好的祭祀坑，再往南是城门与壕沟。",
+      "妇好墓 —— 武丁之妃，将军兼祭司，葬于夯土台上的小殿之下，墓坑内是她的青铜器、玉器和骨器；旁边是她的车马坑，每坑一车二马，另有一辆战车停在近旁。",
+      "甲骨档案库 —— 一座夯土为墙、茅草覆顶的狭长低屋，架上成千上万片龟甲与牛骨层层堆放；门前是贞人的棚屋，龟甲在火盆旁被锯开、刮平、钻凿。",
+      "青铜作坊 —— 立柱覆茅的敞棚：制范匠的工作台，成排晾晒的陶范，带皮囊鼓风的坩埚炉，摆着合好范的浇铸坑，成堆的矿石与木炭，陈列成品铜器的案台，以及铸工们的半地穴房屋。",
+      "宗族聚落与洹河 —— 各宗族的院落，夯土台基上的正房与半地穴房屋并立，旁有粮仓、窖穴和水井；骨器、玉器与制陶作坊；洹河上的木板桥，岸边芦苇，远处是粟田。",
+    ],
+  },
 };

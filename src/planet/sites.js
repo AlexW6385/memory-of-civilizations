@@ -111,6 +111,7 @@ export const SITES = [
   { id: 'nalanda', name: { en: 'Nalanda', zh: '那烂陀' }, era: 'c. 640', region: 'india', lat: 25.14, lon: 85.44, radius: 190 },
   { id: 'mohenjo-daro', name: { en: 'Mohenjo-daro', zh: '摩亨佐-达罗' }, era: 'c. 2500 BC', region: 'indus', lat: 27.33, lon: 68.14, radius: 330 },
   { id: 'lu-qufu', name: { en: 'Qufu', zh: '曲阜' }, era: 'Qing, c. 1730', region: 'china', lat: 35.6, lon: 116.99, radius: 330 },
+  { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, era: 'c. 1200 BC', region: 'china', lat: 36.13, lon: 114.32, radius: 330 },
 ];
 
 for (const s of SITES) s.radius ??= 190;
@@ -121,7 +122,7 @@ for (const s of SITES) s.radius ??= 190;
 const CLASS_RADIUS = { L: 520, M: 330, S: 190, P: 90 };
 const CLASS = {
   L: 'song-kaifeng song-hangzhou qing-beijing constantinople ottoman-istanbul mamluk-cairo rome paris venice london versailles babylon tenochtitlan new-york angkor teotihuacan han-changan',
-  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang wei-ye mohenjo-daro lu-qufu',
+  M: 'ming-suzhou florence isfahan granada lhasa joseon-seoul baroque-rome athens madurai amsterdam jerusalem mughal-agra muscovy barcelona djenne nara edo-himeji chichen-itza ur petra persepolis giza cahokia sydney thebes qin-xianyang wei-ye mohenjo-daro lu-qufu shang-yinxu',
   S: 'shaolin heian-uji khajuraho borobudur tang-wutai sanchi knossos conques norse-borgund lalibela kilwa machu-picchu taos great-zimbabwe rapa-nui maori nalanda',
   P: 'stonehenge catalhoyuk',
 };
@@ -137,7 +138,6 @@ export const BLEND = 100;
  * layout keeps room for them, so that building one does not move the others.
  */
 export const PLANNED = [
-  { id: 'shang-yinxu', name: { en: 'Shang Yinxu', zh: '商殷墟' }, region: 'china', lat: 36.13, lon: 114.32, radius: 300 },
   { id: 'bagan', name: { en: 'Bagan', zh: '蒲甘' }, region: 'burma', lat: 21.17, lon: 94.86, radius: 320 },
   { id: 'bali-village', name: { en: 'Balinese temple village', zh: '巴厘岛神庙村落' }, region: 'java', lat: 8.37, lon: 115.45, radius: 180 },
   { id: 'dogon', name: { en: 'Dogon villages', zh: '多贡村落' }, region: 'sahel', lat: 14.35, lon: -3.61, radius: 110 },

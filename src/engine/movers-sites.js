@@ -81,5 +81,6 @@ export const MOVER_SITES = {
   'mohenjo-daro': () => import('../settlements/mohenjo-daro/movers.js'),
   'ayutthaya': () => import('../settlements/ayutthaya/movers.js'),
   'lu-qufu': () => import('../settlements/lu-qufu/movers.js'),
+  'shang-yinxu': () => import('../settlements/shang-yinxu/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
