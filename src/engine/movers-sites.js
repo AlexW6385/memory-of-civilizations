@@ -27,5 +27,6 @@ export const MOVER_SITES = {
   'muscovy': () => import('../settlements/muscovy/movers.js'),
   'babylon': () => import('../settlements/babylon/movers.js'),
   'angkor': () => import('../settlements/angkor/movers.js'),
+  'amsterdam': () => import('../settlements/amsterdam/movers.js'),
   'song-kaifeng': () => import('../settlements/song-kaifeng/movers.js'),
 };
