@@ -232,6 +232,6 @@ export function trellis(el, { bag }) {
     bag.add('palm_leaf', B(u - a / 2, u + a / 2, y + 0.14 + r() * 0.12, y + 0.3 + r() * 0.12, v - b / 2, v + b / 2));
   }
   bag.add('palm_leaf', B(-len / 2 + 0.1, len / 2 - 0.1, y + 0.14, y + 0.2, -w / 2 + 0.1, w / 2 - 0.1));
-  for (let k = 0; k < 5; k++) { const u = -len / 2 + 0.3 + r() * (len - 0.6), v = (r() - 0.5) * w * 0.7, [bx, bz] = alongX ? [x + u, z + v] : [x + v, z + u]; bag.add(k % 2 ? 'glaze_green' : 'cloth_maroon', lathe([[0.001, 0], [0.06, 0.1], [0.07, 0.22], [0.001, 0.3]], 6, null, bx, y - 0.3, bz)); }
+  for (let k = 0; k < 5; k++) { const u = -len / 2 + 0.3 + r() * (len - 0.6), v = (r() - 0.5) * w * 0.7, [bx, bz] = alongX ? [x + u, z + v] : [x + v, z + u]; bag.add(k % 2 ? 'glaze_yellow' : 'cloth_indigo', lathe([[0.001, 0], [0.06, 0.1], [0.07, 0.22], [0.001, 0.3]], 6, null, bx, y - 0.3, bz)); }
 }
 function rngT(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
