@@ -108,3 +108,9 @@ The sanctuary is compressed to the disc: the real Sacred Way, theatre and stadiu
 - Landmark plans: `delphi-temple` (the temple with pronaos, cella, hearth, adyton; the terrace; the Chians' altar, the Serpent Column, the Naxian sphinx column, offerings) and `delphi-sanctuary` (gate and walls, the Sacred Way with seven treasuries and the Athenian Stoa, the stair through the terrace wall, the theatre in its first form, the stadium, the Castalian fountain house, the forecourt stalls).
 - Town: 38 courtyard houses on pads west and east; people of the oracle; goats and donkeys. Movers, fauna and smoke in their own files.
 - Heights: the ground (layout.js) is the hill's profile with the terraces, the graded Way and the pads cut in; everything stands on it.
+
+## 12. Arrival-fix pass (2026-11-12) — what was added and on what ground
+
+- **Arrival.** East end of the temple's terrace; the arrival's paving (3 m) is kept free of dedications now (nothing within 5 m of the first view); the scatter's limit rose from 120 to 150 elements.
+- **The pen of the sacrifice.** A pen of wattle hurdles by the Chians' altar with two goats and a sheep and a boy watching them: before a consultation cold water was sprinkled on a sacrificial goat and Apollo's consent was read in its shudder [stated: The Collector, "Oracle of Delphi", the consultation's preparations; also Plutarch, tradition]. The consultant also paid a fee and offered a sacrificial cake, the pelanos [stated: same].
+- **The mason's yard.** On the terrace's south edge: blocks on rollers, a stele on trestles with its first lines cut, a tool bench, sheerlegs with block and tackle, the chips, a water jar, a cloth for shade, two masons and a boy [inferred: the terrace was filled with dedications and their inscribed bases, and the polygonal wall carries thousands of inscriptions (Wikipedia "Delphi"); the cutters worked on the spot].

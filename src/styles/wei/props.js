@@ -170,6 +170,65 @@ const KINDS = {
   },
   // a stone mounting block and the stone-footed gate-post pair (que stones are the palace's; this is the street's)
   block(p, o) { p.b('bluestone', -0.5, 0, -0.35, 0.5, 0.28, 0.35); p.b('bluestone', -0.4, 0.28, -0.25, 0.4, 0.5, 0.25); p.solid(-0.5, 0, -0.35, 0.5, 0.5, 0.35); },
+
+  // a stone chimera (tianlu / bixie): the winged beast of a stair's or a tomb's way, on its plinth, the chest out, the mouth open
+  beast(p, o) {
+    const s = o.s ?? 1;
+    p.b('limestone', -0.55 * s, 0, -1.0 * s, 0.55 * s, 0.3 * s, 1.0 * s);
+    const body = lathe([[0.001, -0.78], [0.3, -0.62], [0.4, -0.1], [0.34, 0.5], [0.001, 0.66]], 8); body.rotateX(Math.PI / 2); body.scale(s, s * 0.95, s); body.translate(0, 0.78 * s, 0.05 * s);
+    p.g('granite_grey', body);
+    for (const [u, v] of [[-0.24, -0.5], [0.24, -0.5], [-0.22, 0.52], [0.22, 0.52]]) p.b('granite_grey', (u - 0.09) * s, 0.28 * s, (v - 0.09) * s, (u + 0.09) * s, 0.8 * s, (v + 0.09) * s);
+    const chest = lathe([[0.001, 0.0], [0.26, 0.06], [0.3, 0.3], [0.2, 0.52], [0.001, 0.6]], 8); chest.translate(0, 0.98 * s, 0.62 * s); p.g('granite_grey', chest.scale(s, s, s * 0.9));
+    p.b('granite_grey', -0.17 * s, 1.35 * s, 0.6 * s, 0.17 * s, 1.62 * s, 1.0 * s);
+    p.b('granite_black', -0.1 * s, 1.36 * s, 0.9 * s, 0.1 * s, 1.44 * s, 1.02 * s);
+    for (const q of [-1, 1]) {
+      const w = box(-0.03 * s, 0.0, -0.5 * s, 0.03 * s, 0.7 * s, 0.4 * s); w.rotateZ(-q * 0.45); w.translate(q * 0.34 * s, 1.12 * s, -0.1 * s); p.g('granite_grey', w);
+      p.b('granite_grey', q * 0.12 * s - 0.04 * s, 1.55 * s, 0.82 * s, q * 0.12 * s + 0.04 * s, 1.78 * s, 0.9 * s);
+    }
+    p.b('granite_grey', -0.07 * s, 0.9 * s, -0.78 * s, 0.07 * s, 1.0 * s, -0.4 * s);
+    p.solid(-0.55 * s, 0, -1.0 * s, 0.55 * s, 1.7 * s, 1.0 * s);
+  },
+  // a bronze censer (boshanlu): the bowl on a stem and foot, the pierced lid like a mountain, a thread of smoke is the smoke.js's
+  censer(p, o) {
+    const s = o.s ?? 1;
+    p.l('bronze', [[0.3 * s, 0], [0.3 * s, 0.06 * s], [0.08 * s, 0.14 * s], [0.07 * s, 0.7 * s], [0.34 * s, 0.82 * s], [0.4 * s, 1.0 * s], [0.34 * s, 1.14 * s], [0.001, 1.14 * s]], 0, 0, 0, 10);
+    p.l('bronze', [[0.34 * s, 1.14 * s], [0.28 * s, 1.34 * s], [0.14 * s, 1.56 * s], [0.001, 1.72 * s]], 0, 0, 0, 8);
+    p.b('bluestone', -0.45 * s, 0, -0.45 * s, 0.45 * s, 0.14 * s, 0.45 * s);
+    p.round(0, 0, 0.45 * s, 0, 1.2 * s);
+  },
+  // a reed mat on the ground with a low lacquered table, cups, a jar of wine, a guqin or a bundle of bamboo slips: the poets' seat of the garden
+  mat(p, o) {
+    const r = rng(o.seed ?? 5), W = o.w ?? 2.4, D = o.d ?? 1.8;
+    p.b('reed_mat', -W / 2, 0, -D / 2, W / 2, 0.035, D / 2);
+    p.b('cloth_brown', -W / 2 - 0.01, 0.02, -D / 2 - 0.01, -W / 2 + 0.08, 0.06, D / 2 + 0.01); p.b('cloth_brown', W / 2 - 0.08, 0.02, -D / 2 - 0.01, W / 2 + 0.01, 0.06, D / 2 + 0.01);
+    p.b('lacquer_black', -0.45, 0.2, -0.2, 0.45, 0.26, 0.2);
+    for (const [u, v] of [[-0.38, -0.14], [0.38, -0.14], [-0.38, 0.14], [0.38, 0.14]]) p.b('lacquer_red', u - 0.03, 0.035, v - 0.03, u + 0.03, 0.2, v + 0.03);
+    for (let k = 0; k < 3; k++) p.l('bronze', [[0.001, 0.0], [0.05, 0.02], [0.065, 0.07], [0.04, 0.07]], -0.3 + k * 0.17, 0.26, -0.08 + (k % 2) * 0.1, 6);
+    p.l('pottery_dark', [[0.07, 0], [0.12, 0.09], [0.12, 0.2], [0.06, 0.28], [0.001, 0.28]], 0.32, 0.26, 0.05, 8);
+    if (o.zither ?? r() < 0.5) { p.b('wood_dark', -0.55, 0.035, -D / 2 + 0.25, 0.55, 0.075, -D / 2 + 0.45); p.b('lacquer_black', -0.52, 0.075, -D / 2 + 0.29, 0.52, 0.09, -D / 2 + 0.41); }
+    else for (let k = 0; k < 4; k++) p.b('bamboo_culm', 0.5 - k * 0.0, 0.26 + k * 0.025, -0.15, 0.78, 0.285 + k * 0.025, 0.15);
+    p.round(0, 0, 0.5, 0, 0.3);
+  },
+  // a parked carriage (an official's che): two spoked wheels, the low body with its rail, the parasol canopy on a pole, the shafts and the yoke to the front (+z)
+  chariot(p, o) {
+    const cl = o.cloth ?? 'cloth_black', R = 0.62;
+    for (const sg of [-1, 1]) {
+      const wx = sg * 0.82;
+      for (let k = 0; k < 10; k++) { const g = box(-0.05, R - 0.05, -0.19, 0.05, R + 0.05, 0.19); g.rotateX(k / 10 * 6.2832); g.translate(wx, R, 0); p.g('wood_dark', g); }
+      for (let k = 0; k < 4; k++) { const g = box(-0.025, -R + 0.1, -0.025, 0.025, R - 0.1, 0.025); g.rotateX(k / 4 * Math.PI); g.translate(wx, R, 0); p.g('wood_ochre', g); }
+      const hub = lathe([[0.001, -0.1], [0.09, -0.1], [0.1, 0.1], [0.001, 0.1]], 6); hub.rotateZ(Math.PI / 2); hub.translate(wx + sg * 0.06, R, 0); p.g('bronze', hub);
+    }
+    p.b('wood_dark', -0.84, R - 0.03, -0.03, 0.84, R + 0.03, 0.03);
+    p.b('lacquer_red', -0.62, 0.7, -0.55, 0.62, 0.78, 0.55);
+    p.b('lacquer_black', -0.62, 0.78, -0.55, 0.62, 1.2, -0.5); p.b('lacquer_black', -0.62, 0.78, -0.55, -0.57, 1.2, 0.55); p.b('lacquer_black', 0.57, 0.78, -0.55, 0.62, 1.2, 0.55);
+    p.b('lacquer_black', -0.62, 1.0, 0.5, 0.62, 1.06, 0.56);
+    p.b('wood_dark', -0.04, 1.2, -0.06, 0.04, 2.5, 0.06);
+    p.l(cl, [[1.25, 2.28], [0.9, 2.46], [0.4, 2.58], [0.001, 2.68]], 0, 0, 0, 10);
+    p.l('bronze', [[0.001, 2.68], [0.05, 2.7], [0.001, 2.86]], 0, 0, 0, 5);
+    for (const sg of [-1, 1]) { p.b('wood_dark', sg * 0.38 - 0.04, 0.72, 0.1, sg * 0.38 + 0.04, 0.8, 3.1); p.b('wood_dark', sg * 0.38 - 0.04, 0.8, 3.0, sg * 0.38 + 0.04, 1.2, 3.1); }
+    p.b('wood_dark', -0.7, 1.15, 3.05, 0.7, 1.22, 3.15);
+    p.solid(-0.9, 0, -0.6, 0.9, 1.3, 0.6);
+  },
   // a haystack-free field mark: a scarecrow-free watch-hut of straw on four poles (the field-watchers' hut)
   hut(p, o) {
     for (const [u, v] of [[-0.9, -0.9], [0.9, -0.9], [-0.9, 0.9], [0.9, 0.9]]) p.b('timber', u - 0.05, 0, v - 0.05, u + 0.05, 2.0, v + 0.05);

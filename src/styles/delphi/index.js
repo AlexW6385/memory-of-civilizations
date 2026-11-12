@@ -12,6 +12,7 @@ import '../greek/house-interior.js';
 import '../greek/ward.js';
 import './house.js';
 import { DRESS } from './dress.js';
+import { WORK } from './work.js';
 import { human, placed, blob, limb } from '../greek/sculpture.js';
 import { merge } from '../greek/columns.js';
 
@@ -69,6 +70,17 @@ function polygonalWall(el, { bag, col }) {
     y += hgt;
   }
   if (stones.length) bag.add(el.mat ?? 'limestone', merge(stones));
+  // the weather on the face: the damp of the foot where the soil holds the rain, dark runs under the courses' edges, the pale patches where the sun dries it first
+  { const damp = [], run = [], o = th / 2 + 0.115;
+    for (let s = 0.6 + rand() * 1.5; s < L - 0.6; s += 1.6 + rand() * 2.4) {
+      const w = 0.5 + rand() * 1.1, s1 = Math.min(L - 0.2, s + w), yb = y0 + 0.02 + rand() * 0.15, hh = 0.35 + rand() * 0.9;
+      const a = [ax + ux * s + nx * o, az + uz * s + nz * o], b = [ax + ux * s1 + nx * o, az + uz * s1 + nz * o];
+      damp.push(orientedBox(a, b, 0.02, yb, Math.min(y1 - 0.05, yb + hh)));
+      if (rand() < 0.5) { const s2 = s + rand() * Math.max(0.1, w - 0.15), c = [ax + ux * s2 + nx * o, az + uz * s2 + nz * o], d = [ax + ux * (s2 + 0.12) + nx * o, az + uz * (s2 + 0.12) + nz * o], yt = y0 + (y1 - y0) * (0.55 + rand() * 0.4); run.push(orientedBox(c, d, 0.02, Math.max(y0, yt - 1.0 - rand() * 1.2), yt)); }
+    }
+    if (damp.length) bag.add('plaster_damp', merge(damp));
+    if (run.length) bag.add('plaster_streak', merge(run));
+  }
 }
 
 /** adyton: { c: [x, z] (the tripod; the room runs from c.x − 4 west to c.x + 3.6 east and ±4.9 across), y } — the sunken room's furnishings: the omphalos in its net of wool on its base, the Pythia's tripod over the stone-lined cleft under a grating, the gilded Apollo on his base against the west wall, the laurel, the altar of the fire. */
@@ -222,7 +234,7 @@ function hearth(el, { bag, col }) {
 
 export const delphi = {
   ...greek,
-  elements: Object.assign(Object.create(greek.elements), { ribbon, polygonal_wall: polygonalWall, adyton, hearth, serpent_column: serpentColumn, sphinx_column: sphinxColumn, ex_voto: exVoto, kore, stall, ...DRESS }),
+  elements: Object.assign(Object.create(greek.elements), { ribbon, polygonal_wall: polygonalWall, adyton, hearth, serpent_column: serpentColumn, sphinx_column: sphinxColumn, ex_voto: exVoto, kore, stall, ...DRESS, ...WORK }),
   objects: greek.objects,
 };
 registerStyle('delphi', delphi);

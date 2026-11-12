@@ -109,10 +109,10 @@ export function canopy(bag, f, u0, u1, y, out = 0.9, o = {}) {
   const bm = f.R(out - 0.18, out, u0 - 0.05, u1 + 0.05); bag.add('cedar', box(bm[0], y - 0.22, bm[1], bm[2], y + 0.1, bm[3]));
   // the pent roof: a sloping sheet of green tiles from the wall's face down to the beam, with a ridge board
   const t = [], rise = o.rise ?? 0.55, P = (u, d, yy) => f.P(u, yy, d);
-  q4(t, P(u0 - 0.1, out + 0.12, y + 0.1), P(u1 + 0.1, out + 0.12, y + 0.1), P(u1 + 0.1, 0.05, y + 0.1 + rise), P(u0 - 0.1, 0.05, y + 0.1 + rise));
+  q4(t, P(u0 - 0.1, out - 0.02, y + 0.1), P(u1 + 0.1, out - 0.02, y + 0.1), P(u1 + 0.1, 0.05, y + 0.1 + rise), P(u0 - 0.1, 0.05, y + 0.1 + rise));
   const rev = f.ax === 'z' ? f.n > 0 : f.n < 0; // keep the tiles facing up whichever way the face looks
   bag.add('tile_green', dbl(t)); void rev;
-  for (const u of [u0 - 0.1, u1 + 0.1]) { const g = []; g.push(...P(u, out + 0.12, y + 0.1), ...P(u, 0.05, y + 0.1), ...P(u, 0.05, y + 0.1 + rise)); bag.add(SW, dbl(g)); }
+  for (const u of [u0 - 0.1, u1 + 0.1]) { const g = []; g.push(...P(u, out - 0.02, y + 0.1), ...P(u, 0.05, y + 0.1), ...P(u, 0.05, y + 0.1 + rise)); bag.add(SW, dbl(g)); }
 }
 /** A screen of turned cedar spindles (mashrabiya) between two posts: from u0 to u1, y0 to y1, at d on face f. */
 export function screen(bag, col, f, u0, u1, y0, y1, d = 0.1, o = {}) {

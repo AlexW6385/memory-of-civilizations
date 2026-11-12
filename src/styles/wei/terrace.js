@@ -16,21 +16,79 @@ function steps(bag, col, rect, y0, y1, dir, mat, riser, base, mat2) {
   col.ramp(rect, y0, y1, dir);
 }
 
+/** An open storeroom cut into the foot of the terrace: x the face, z its centre; a lined chamber with a timber ceiling, jars of grain and salt, sacks, a shelf and a lamp. */
+function storeroom(bag, col, lights, xf, z, W, D, H, seed) {
+  const r = rng(seed + 11), a = z - W / 2, b = z + W / 2, xb = xf - D;
+  bag.add('bluestone', box(xb, -0.4, a, xf + 0.4, 0.0, b)); col.floor([xb, a, xf + 0.4, b], 0);
+  bag.add('mud_plaster', box(xb, 0.0, a, xf, H - 0.02, a + 0.05)); bag.add('mud_plaster', box(xb, 0.0, b - 0.05, xf, H - 0.02, b)); bag.add('mud_plaster', box(xb, 0.0, a, xb + 0.05, H - 0.02, b));
+  for (let x = xb + 0.4; x < xf; x += 0.9) bag.add('timber', box(x - 0.1, H - 0.2, a, x + 0.1, H - 0.02, b));
+  bag.add('timber_red', box(xf - 0.12, H - 0.02, a - 0.2, xf + 0.1, H + 0.28, b + 0.2));
+  for (const s of [-1, 1]) bag.add('timber_red', box(xf - 0.1, 0, s < 0 ? a - 0.2 : b, xf + 0.1, H, s < 0 ? a : b + 0.2));
+  for (const s of [-1, 1]) bag.add('lacquer_black', box(xf + 0.1, 0, s < 0 ? a - 0.95 : b, xf + 0.18, 2.3, s < 0 ? a : b + 0.95));
+  // jars of grain along the back and the left wall, sacks and a shelf on the right, a lamp on a stand by the door
+  for (let k = 0; k < 4; k++) bag.add(k % 2 ? 'pottery_dark' : 'terracotta', lathe([[0.001, 0], [0.2, 0.03], [0.36, 0.45], [0.3, 0.9], [0.17, 1.12], [0.2, 1.2], [0.001, 1.2]], 8, null, xb + 0.55, 0, a + 0.5 + k * 0.5));
+  for (let k = 0; k < 5; k++) bag.add('sacking', box(xb + 1.1 + (k % 3) * 0.6, 0, b - 0.9 - Math.floor(k / 3) * 0.5, xb + 1.6 + (k % 3) * 0.6, 0.4 + r() * 0.1, b - 0.45 - Math.floor(k / 3) * 0.5));
+  for (const h of [0.5, 1.1, 1.7]) bag.add('timber', box(xb + 0.05, h, b - 0.45, xb + 1.0, h + 0.05, b - 0.05));
+  col.rect([xb + 0.05, a + 0.1, xb + 1.0, a + 2.1], 0, 1.3); col.rect([xb + 1.0, b - 1.4, xb + 2.9, b - 0.05], 0, 0.5);
+  bag.add('wood_dark', box(xf - 0.9, 0, a + 0.2, xf - 0.8, 1.0, a + 0.3)); bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.07], [0.001, 0.07]], 6, null, xf - 0.85, 1.0, a + 0.25));
+  if (lights) lights.push({ at: [xf - 2.0, 2.2, z], color: '#ffc27a', intensity: 3, distance: 8 });
+}
+
 /**
  * wei_terrace: { r: [x0, z0, x1, z1] (the foot), top, batter, lifts, stair: { rect (ascending west), riser }, dais: { r, top } (a raised crown over part),
  *   doors: n (arched storeroom doors on the east face); stair.dir 'w' (up the east face) or 'n' (up the south face) }
  */
 export function terrace(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.r, T = el.top, B = el.batter ?? 2.4, n = el.lifts ?? 4, lh = T / n;
+  // the storerooms that stand open (el.open of the doors, counted from the stair outward): where they are
+  const RW = 2.6, RD = 4.6, RH = 2.7, RZ = [];
+  if (el.doors && el.stair && el.stair.dir !== 'n') {
+    const zc0 = (z0 + z1) / 2, zs0 = [el.stair.rect[1] - 1.5, el.stair.rect[3] + 1.5];
+    for (let k = 0; k < (el.open ?? 0); k++) { const side = k % 2 ? 1 : -1, off = 3 + Math.floor(k / 2) * 5.2, z = side < 0 ? zs0[0] - off : zs0[1] + off; if (z > z0 + 3 && z < z1 - 3) RZ.push(z); }
+    RZ.sort((p, q) => p - q); void zc0;
+  }
   for (let i = 0; i < n; i++) {
     const a = B * i / n, b = B * (i + 1) / n, ya = i * lh, yb = (i + 1) * lh;
     // each lift is inset at its top (the batter); the face between is the sloped face, stood in for by the step of the lift
     const r = [x0 + b, z0 + b, x1 - b, z1 - b];
-    bag.add('earth_wall', box(r[0], i ? ya : -0.4, r[1], r[2], yb, r[3]));
-    col.rect(r, i ? ya : -0.4, yb);
+    if (i === 0 && RZ.length) {
+      // the foot's lift is cut by the open storerooms: the face either side of each, the back, the lintel; a room is RW wide, RD deep, RH to its ceiling
+      const solid = (q, y0, y1) => { bag.add('earth_wall', box(q[0], y0, q[1], q[2], y1, q[3])); col.rect(q, y0, y1); };
+      let zc = r[1];
+      for (const z of RZ) {
+        solid([r[0], zc, r[2], z - RW / 2], -0.4, yb); zc = z + RW / 2;
+        solid([r[0], z - RW / 2, r[2] - RD, z + RW / 2], -0.4, yb);
+        solid([r[2] - RD, z - RW / 2, r[2], z + RW / 2], RH, yb);
+        storeroom(bag, col, ctx.lights, r[2], z, RW, RD, RH, Math.round(Math.abs(z) * 7));
+      }
+      solid([r[0], zc, r[2], r[3]], -0.4, yb);
+    } else {
+      bag.add('earth_wall', box(r[0], i ? ya : -0.4, r[1], r[2], yb, r[3]));
+      col.rect(r, i ? ya : -0.4, yb);
+    }
     // the band of the lift: the plaster of mud at its top edge
     bag.add('mud_plaster', box(r[0] - 0.04, yb - 0.22, r[1] - 0.04, r[2] + 0.04, yb - 0.02, r[3] + 0.04));
     void a;
+  }
+  // weathering of the earthen face: rain streaks running down each lift from its band, the damp stain at the foot, the plaster's patches fallen away
+  {
+    const rr = rng((Math.round(x0) * 31 + Math.round(z0) * 17) | 0 || 5);
+    for (let i = 0; i < n; i++) {
+      const b = B * (i + 1) / n, yb = (i + 1) * lh, r = [x0 + b, z0 + b, x1 - b, z1 - b];
+      for (let z = r[1] + 1.5; z < r[3] - 1.5; z += 3.5 + rr() * 5) {
+        const w = 0.3 + rr() * 0.5, h = lh * (0.35 + rr() * 0.6);
+        if (i === 0 && RZ.some((zz) => Math.abs(z + 0.2 - zz) < RW / 2 + 0.5)) continue;
+        bag.add('plaster_streak', box(r[2] - 0.01, yb - 0.24 - h, z, r[2] + 0.03, yb - 0.24, z + w));
+        if (rr() < 0.3) bag.add('plaster_damp', box(r[2] - 0.01, yb - lh + 0.2, z + w + 0.4, r[2] + 0.05, yb - lh + 0.2 + lh * 0.3, z + w + 0.4 + w * 2.5));
+      }
+      for (let x = r[0] + 3; x < r[2] - 3; x += 7 + rr() * 7) {
+        const w = 0.3 + rr() * 0.5, h = lh * (0.35 + rr() * 0.6);
+        bag.add('plaster_streak', box(x, yb - 0.24 - h, r[3] - 0.01, x + w, yb - 0.24, r[3] + 0.03));
+        if (rr() < 0.5) bag.add('plaster_streak', box(x + 2, yb - 0.24 - h, r[1] - 0.03, x + 2 + w, yb - 0.24, r[1] + 0.01));
+      }
+    }
+    // the foot: a course of dressed stone against the splash, and the weeds of the damp
+    bag.add('bluestone', box(x0 + B * 0.25 - 0.05, -0.4, z0 + B * 0.25 - 0.05, x0 + B * 0.25, 0.01, z1 - B * 0.25 + 0.05));
   }
   const c = [x0 + B, z0 + B, x1 - B, z1 - B];
   bag.add('brick_paving', box(c[0], T - 0.02, c[1], c[2], T + 0.02, c[3]));
@@ -53,6 +111,7 @@ export function terrace(el, ctx) {
     for (let k = 0; k < el.doors; k++) {
       const side = k % 2 ? 1 : -1, off = 3 + Math.floor(k / 2) * 5.2, z = side < 0 ? zs[0] - off : zs[1] + off;
       if (z < z0 + 3 || z > z1 - 3) continue;
+      if (RZ.includes(z)) continue;                                  // an open room: its own frame (storeroom())
       bag.add('lacquer_black', box(x1 - 0.12, 0, z - 1.0, x1 + 0.08, 2.4, z + 1.0));
       bag.add('timber_red', box(x1 - 0.05, 2.4, z - 1.25, x1 + 0.12, 2.65, z + 1.25));
       for (const s of [-1, 1]) bag.add('timber_red', box(x1 - 0.05, 0, z + s * 1.15 - 0.1, x1 + 0.12, 2.4, z + s * 1.15 + 0.1));

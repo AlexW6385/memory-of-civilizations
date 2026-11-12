@@ -23,6 +23,6 @@ export const qar = {
     room('west naves', [q[0] + 1.2, q[1] + 1.2, q[0] + nw * 4, q[1] + 23.5], y, 'hall'),
     room('east naves', [q[0] + nw * 10, q[1] + 1.2, q[2] - 1.2, q[1] + 23.5], y, 'hall'),
   ],
-  walks: [Object.assign([[q[0] - 3, -21], [q[0] + 8, -21], [q[0] + nw * 4 + 2, -21]], { y0: y })],
+  walks: [Object.assign([[q[0] - 3, -21], [q[0] + 8, -21], [q[0] + nw * 4 - 1.6, -21]], { y0: y })],   // (to the west naves' last aisle; beyond it the sahn's roof eave hangs over the line)
 };
 export default qar;

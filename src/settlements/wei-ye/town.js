@@ -1,6 +1,7 @@
 // Round the terraces (docs/settlements/wei-ye.md §2, §6–§7): the palace's walls, gate, corridors and halls; the offices of the court along the avenue;
 // the walled wards with their houses, the Qili ward; the market with its tower and shop rows; the city wall with its gates; the Xuanwu pond; the Zhang River;
 // the people — the court in the Wenchang Hall, the poets on the terrace, the guards, the merchants.
+import { forecourtElements, forecourtLife } from './forecourt.js';
 import { streetElements, marketElements, wallElements, compoundElements, riverElements, farmElements, lifeElements } from './dressing.js';
 import { RADIUS, PALACE, PALACE_WALL, WENCHANG, W_TERRACE, MARKET, MARKET_WALL, WARDS, WARD_WALL, POND, POND_Y, CITY_WALL, WALL, GATES_S, GATES_N, GATE_W, AVENUE_Z, TOWER, SPARROW, ICE, TIGER,
   cityWalls, lots, riverZ, RIVER, stairRect, zOf } from './layout.js';
@@ -136,6 +137,7 @@ export async function town() {
     E.push({ t: 'han_ship', at: [-120, -147.5], y: POND_Y, len: 15, yaw: 0 });
     E.push({ t: 'wei_boat', at: [-97, -142], y: POND_Y, yaw: 1.2, len: 8, kind: 'war' }, { t: 'wei_boat', at: [-104, -153], y: POND_Y, yaw: 0.25, len: 9, kind: 'war' },
       { t: 'wei_boat', at: [-132, -139], y: POND_Y, yaw: 0.5, len: 5, kind: 'skiff' });
+    E.push(...forecourtElements());
     plans.push(base('wei-garden', E));
   }
   // ── the offices along the avenue ──
@@ -181,5 +183,6 @@ export async function town() {
     plans.push({ ...base('wei-life', lifeElements()), style: 'life' });
   }
   plans.push({ ...base('wei-people', people()), style: 'life' });
+  plans.push({ ...base('wei-forecourt', forecourtLife()), style: 'life' });
   return (CACHE = plans);
 }
