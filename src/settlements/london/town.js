@@ -64,6 +64,10 @@ function streetFolk() {
     coster([x + 1.4, z + side * 0.9], side < 0 ? N : S);
     if (rand() < 0.7) fig([x - 1.0, z - side * 0.9], side < 0 ? S : N, { dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'cap', hatMat: 'cloth_white', over: 'shawl', carry: rand() < 0.5 ? 'basket' : 'none' });
   }
+  // a coal cart and a brewer's dray drawn up at the kerbs of Bridge Street, a barrow of the costers on the bridge's Lambeth end
+  if (!inLot(80, BRIDGE.z - 5.4, 3)) L.push({ t: 'cart', at: [80, BRIDGE.z - 5.4], y: GROUND, rot: W, seed: 51, kind: 'two', load: 'sacks', beast: 'horse' });
+  if (!inLot(98, BRIDGE.z + 5.0, 3)) L.push({ t: 'cart', at: [96, BRIDGE.z + 5.0], y: GROUND + 0.4, rot: E, seed: 52, kind: 'two', load: 'baskets', beast: 'horse' });
+  L.push({ t: 'handcart', at: [226, BRIDGE.z - 5.2], y: GROUND + 0.4, rot: N, seed: 53, load: 'baskets' });
   // the coster women with the round willow sieve on the head, walking
   for (const [x, z, rot] of [[76, BRIDGE.z + 5.0, W], [290, BRIDGE.z - 5.2, E]]) fig([x, z], rot, { dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_red', hat: 'none', over: 'shawl', carry: 'basket' });
   // gentlemen in black with their hats, ladies, a clerk hurrying, along both pavements of Bridge Street and Parliament Street
