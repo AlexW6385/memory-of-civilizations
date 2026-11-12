@@ -73,6 +73,14 @@ export async function town() {
   monk([XF + 2.0, 6], y1, -Math.PI / 2, { pose: 'cross', arms: 'pray' });
   for (const z of [-8, 16]) T.push({ t: 'pot', kind: 'water_pot', n: 3, at: [XF + 2.2, z], y: y1, seed: Math.round(z) });
   for (const z of [-44, -10, 29]) T.push({ t: 'basket', at: [XF + 4.6, z], y: y1, rot: z, seed: Math.round(z) });
+  // the path along the gorge floor below the painted caves, seen from the arrival (-42, -4): pilgrims, porters and monks going up the gorge to the stair, women with pots coming down, a monk resting by the way
+  monk([-47.2, -12.5], 0, 0, { pose: 'stand', carry: 'staff' });
+  lay([-46.4, -17.2], 0, 0, { pose: 'stand', carry: 'basket' });
+  woman([-49.1, -9.0], 0, Math.PI, { pose: 'stand', carry: 'pot', arms: 'head' }); woman([-48.0, -7.4], 0, Math.PI, { pose: 'stand', carry: 'basket' });
+  worker([-47.6, -24.5], 0, 0, { pose: 'stand', carry: 'basket' }); worker([-48.6, -27.0], 0, 0, { pose: 'stand', carry: 'basket' });
+  monk([-44.2, -21.5], 0, Math.PI / 2, { pose: 'sit_ground' }); lay([-43.0, -22.4], 0, Math.PI / 2, { pose: 'talk' });
+  T.push({ t: 'pot', kind: 'water_pot', n: 3, at: [-45.2, -14.0], y: 0, seed: 13 }); T.push({ t: 'basket', at: [-44.6, -19.6], y: 0, rot: 1.0, seed: 14 });
+  T.push({ t: 'animal', kind: 'zebu', at: [-44.5, -31.0], y: 0, rot: 2.6, seed: 15, graze: true });
   // the stair's foot and the path: pilgrims coming up, porters with rubble baskets, water carriers
   lay([XF + 9.2, -50], 0.0, 0.0, { pose: 'stand', carry: 'staff' }); monk([-43.5, -49.6], 0.06, Math.PI, { pose: 'sit_ground' });
   lay([-45, -44], 0, Math.PI / 2, { pose: 'talk' }); lay([-43.6, -44.4], 0, -Math.PI / 2, { pose: 'talk' });

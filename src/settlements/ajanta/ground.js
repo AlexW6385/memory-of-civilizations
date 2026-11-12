@@ -56,11 +56,11 @@ export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   maxDensity: { maize: 40, jujube: 0.08, oleander: 0.14, teak: 0.16, neem: 0.12, acacia: 0.05, bamboo: 0.12, fig: 0.04, banyan: 0.012, date_palm: 0.06, reeds: 0.4 },
   climate: {
-    sun: { az: 150, el: 62, color: [1.0, 0.95, 0.85], intensity: 3.6, lat: 20.5, dec: 12, hour: 10 },
+    sun: { az: 150, el: 62, color: [1.0, 0.92, 0.8], intensity: 3.7, lat: 20.5, dec: 12, hour: 10 },
     sky: { turbidity: 4.0, rayleigh: 1.2, mie: 0.006, mieG: 0.8, zenith: [0.1, 0.18, 0.38], horizon: [0.64, 0.64, 0.6] },
-    fog: { color: [0.76, 0.76, 0.7], density: 0.0005, height: 0.012 },
-    exposure: 0.5,
-    damp: 0.5,      // the monsoon: dark streaks on the rock, moss in the gorge's shade
+    fog: { color: [0.8, 0.76, 0.68], density: 0.00035, height: 0.012 },
+    exposure: 0.56,
+    damp: 0.3,      // the monsoon: dark streaks on the rock, moss in the gorge's shade
     wind: [0.3, 0.2],
     weather: [
       { id: 'hazy', weight: 4, clouds: 0.2, cloudDensity: 0.4, sun: 0.95, fog: 1.2 },

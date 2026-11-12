@@ -19,7 +19,7 @@ export const ARRIVALS = {
   'edo-himeji':       [-25, 37.1, -3, 0, 0.36],          // the keep cluster whole on its stone base, from the Honmaru's south edge (from 9 m nearer the top roof was cut)
   'joseon-seoul':     [0, 0.1, 80, 0, 0.15],             // the throne hall across its court and rank stones
   'sanchi':           [0, 22.1, 60, 0, 0.15],            // the Great Stupa, its gateway and Ashoka's pillar
-  'khajuraho':        [-28, null, -98, 2.356, 0.24],     // Kandariya Mahadeva from the north-east, its spires climbing to the sanctum (seen end-on from the east they read as one)
+  'khajuraho':        [2.5, null, -60, 1.5708, 0.22],    // up the pilgrims' approach lane between the shops of flowers and sweets to the stair of Kandariya Mahadeva's terrace, the porch and the climbing spires over the roofs
   'madurai':          [-20, 0.1, 170, 0, 0.3],           // the painted gopuram over the street
   'mughal-agra':      [0, 0.4, 60, 0, 0.1],              // the Taj Mahal down the garden's water channel
   'angkor':           [-178, 1.05, 1.5, -1.5708, 0.08],  // Angkor Wat's towers at the end of the causeway
@@ -87,7 +87,7 @@ export const ARRIVALS = {
   'mycenae': [-136, null, 0, -1.5708, 0.2],   // on the approach road west of the citadel: the Lion Gate in its dressed conglomerate front between the bastion and the wall's end, the Cyclopean circuit rising behind it to the palace on the summit
   'qin-xianyang': [175, null, -121, 1.5708, 0.12],   // from the head of the middle ramp, down into the front gallery of Pit 1: the three ranks of archers across the gallery and the first corridors of painted soldiers behind them
   'wei-ye': [-112, null, -88, 1.5708, 0.1],   // from the Tongque Garden east of the terraces, west up the Bronze Sparrow's stair to the tower on its crown, the Golden Tiger and the Ice Well on either hand
-  'ajanta': [17, null, 19.5, 1.32, 0.2],   // On the east bank's path, looking west over the Waghora at the horseshoe cliff: the rock-cut ledge with the pillared porch of the painted vihara and the great horseshoe window of the chaitya hall, tiers of shrine niches above, the waterfall down the north wing.
+  'ajanta': [-42, null, -4, 0.62, 0.3],   // On the gorge path below the cliff, looking north-west up at the painted vihara's ledge and pillared porch (Cave 1) with the monks on it, the shrine niches above; pilgrims on the path, the waterfall's cliff to the right.
   'mohenjo-daro': [-155, 7.0, -72.5, 0, -0.12],   // from the south edge of the Great Bath's court on the Citadel, north across the paved court to the brick pool with its stairs at both ends, the gallery of stepped piers behind it
   'shang-yinxu': [20, 0.1, -34, 0, 0.1],   // from the court, up the axis: the ancestral hall of the kings whole on its rammed-earth platform, the stair in the middle bay, the flanking halls either side, the rows of covered sacrificial pits across the court
   'manueline-lisbon': [-206, null, 117, 0.0, 0.3],   // The Jerónimos' south portal whole across the plaza, the Belém Tower in the river to the left.

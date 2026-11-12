@@ -34,6 +34,9 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 const LX = [88, 136, 184, 232, 280], LZ = [-86, -38, 58];
 export const STREETS = [
   { id: 'road', axis: 'x', c: 10, w: 8, a: -30, b: 316, kind: 'main', from: -26 },
+  // the pilgrims' approach: a lane along Kandariya's axis from the road's bend to the stair of its terrace, shops of flowers, ghee and sweets on both sides
+  { id: 'approach', axis: 'x', c: -60, w: 5, a: -30, b: 22, kind: 'main', from: -22, lotsTo: -2 },
+  { id: 'ns14', axis: 'z', c: 26, w: 4, a: -62, b: 6, kind: 'lane' },
   { id: 'tankway', axis: 'z', c: 40, w: 4, a: 14, b: 104, kind: 'lane', from: 20 },
   ...LX.map((c) => ({ id: 'ns' + c, axis: 'z', c, w: c === 88 ? 5 : 4, a: -134, b: 106, kind: 'lane' })),
   ...LZ.map((c) => ({ id: 'ew' + c, axis: 'x', c, w: 4, a: 90, b: 294, kind: 'lane' })),
@@ -62,7 +65,7 @@ export function lots() {
   for (const s of STREETS) {
     for (const side of [-1, 1]) {
       let t = Math.max(s.a, s.from ?? s.a) + 1 + rand() * 2;
-      while (t < s.b - 4) {
+      while (t < (s.lotsTo ?? s.b) - 4) {
         const main = s.kind === 'main', r0 = rand();
         const kind = main ? (r0 < 0.58 ? 'shop' : r0 < 0.76 ? 'haveli' : r0 < 0.9 ? 'home' : 'mud') : (r0 < 0.4 ? 'home' : r0 < 0.7 ? 'mud' : r0 < 0.78 ? 'haveli' : r0 < 0.88 ? 'hut' : r0 < 0.95 ? 'shed' : 'shop');
         const w = kind === 'shop' ? 3.6 + rand() * 1.6 : kind === 'haveli' ? 6.5 + rand() * 1.5 : kind === 'shed' ? 5 + rand() * 2 : 4.4 + rand() * 2.4;
