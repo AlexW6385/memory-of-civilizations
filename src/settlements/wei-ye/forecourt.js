@@ -1,7 +1,7 @@
 // The Sparrow's forecourt (docs/settlements/wei-ye.md §6.2): what the visitor stands among on arrival — the garden's paving before the Bronze Sparrow's stair, the
 // stone chimeras and banners at the stair's foot, the censers on the royal way, the officials' carriages waiting with their horses and grooms, the poets
 // on their mats on the lawns either side, the attendants. Pure data; positions derive from layout.js (the stair, the garden's ways).
-import { SPARROW, ICE, TIGER, BATTER, stairRect, zOf, POND } from './layout.js';
+import { SPARROW, ICE, TIGER, BATTER, stairRect, zOf, POND, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const P = (kind, x, z, o = {}) => ({ t: 'wei_prop', kind, at: [x, z], ...o });
@@ -76,6 +76,17 @@ export function forecourtLife() {
       fig([xf - 3.4, z + (k ? 0.5 : -0.5)], 1.2, { cloth: 'cloth_grey', hat: 'none', over: 'belt', dress: 'trousers', top: 'bare', feet: 'bare', carry: 'sack', pose: 'stand' });
     }
     void zc;
+  }
+  // the pond's south bank: two men fishing from the bank on their heels with a basket each, a woman washing at the landing, a boy with a string of carp
+  { const zb = POND[3] + 1.6;
+    for (const [x, o] of [[-127, { cloth: 'cloth_brown', hat: 'straw' }], [-99, { cloth: 'cloth_grey', hat: 'straw' }]]) {
+      fig([x, zb], Math.PI, { y: height(x, zb), pose: 'squat', dress: 'tunic', legs: 'hose', over: 'belt', feet: 'bare', ...o });
+      L.push({ t: 'basket', at: [x + 0.9, zb + 0.2], y: height(x + 0.9, zb), rot: r() * 6.28, s: 0.8, seed: Math.floor(r() * 1e9) });
+    }
+    fig([-116.5, zb - 0.2], Math.PI, { y: height(-116.5, zb), pose: 'squat', cloth: 'cloth_indigo', hat: 'none', hair: 'bun', over: 'none', h: 1.5 });
+    L.push({ t: 'basket', at: [-115.3, zb + 0.1], y: 0, rot: 0.6, s: 0.9, seed: 5 });
+    fig([-105, zb + 1.6], 2.6, { y: height(-105, zb + 1.6), dress: 'tunic', legs: 'hose', cloth: 'cloth_ochre', hat: 'none', over: 'none', feet: 'bare', h: 1.2, pose: 'stand' });
+    for (let k = 0; k < 4; k++) L.push({ t: 'chickens', kind: k % 2 ? 'duck' : 'goose', at: [-132 + k * 9 + r() * 3, zb + 3 + r() * 2], y: 0, rot: r() * 6.28, seed: 90 + k, n: 3 });
   }
   void ax; void az;
   return L;
