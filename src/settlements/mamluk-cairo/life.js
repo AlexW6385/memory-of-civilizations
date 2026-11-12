@@ -93,6 +93,35 @@ export function life() {
   // the Rumayla: horse-copers and buyers, a man with a hawk, children at the trough, more camels kneeling in the fodder
   for (const [x, z] of [[128, -50], [132, -54], [148, 70], [152, 74], [104, -60]]) person([x, z], rand() * 6.28, { man: true, pose: 'talk' });
   for (const [x, z, r] of [[160, -58, 0.5], [163, -26, 2.5], [101, 94, 4]]) L.push({ t: 'animal', kind: 'camel', at: [x - 3, z + 2], y: Y(x, z), rot: r, seed: Math.floor(rand() * 1e9), gear: true });
+  // the Rumayla below the madrasa, in view of the arrival: sellers on mats with their goods (fruit, bread, spices, pots, greens,
+  // baskets), horse-copers with the horses they trade, mamluks with their staves, children running, benches and water jars
+  // against the madrasa's wall; none within 6 m of the arrival (116, 104), the way the view lies
+  {
+    const AR = [116, 104], far = (x, z) => Math.hypot(x - AR[0], z - AR[1]) > 6;
+    const mats = [[96, 86, 0.5, 'baskets'], [101, 92, -0.4, 'bread'], [92, 96, 0.2, 'spice'], [106, 80, 0.9, 'heap'], [99, 76, 0.1, 'pottery'], [110, 88, -0.8, 'greens'], [90, 78, 0.4, 'melons'], [121, 74, -0.3, 'heap']];
+    for (const [x, z, r, goods] of mats) {
+      if (!far(x, z)) continue;
+      L.push({ t: 'goods_mat', at: [x, z], y: Y(x, z), rot: r, goods, seed: Math.floor(rand() * 1e6) });
+      person([x, z], r, { man: true, pose: 'cross', y: Y(x, z), cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_green']) });
+      if (rand() < 0.6) person([x + 0.6 + rand(), z + 1.7 + rand() * 0.5], r + Math.PI, rand() < 0.4 ? { pose: 'talk' } : {});
+    }
+    // horse-copers: the horses held by their lead, a buyer feeling a leg, two mamluks watching with their staves
+    for (const [x, z, r] of [[93, 64, 1.9], [95.4, 65.4, 1.6], [105, 58, 4.4], [107.4, 59, 4.7], [118, 66, 0.4]]) { L.push({ t: 'animal', kind: 'horse', at: [x, z], y: Y(x, z), rot: r, seed: Math.floor(rand() * 1e9), gear: true }); person([x + 1.1, z + 0.4], r + 2.6, { man: true, pose: rand() < 0.5 ? 'talk' : 'stand', cloth: pick(['cloth_white', 'cloth_brown', 'cloth_indigo']) }); }
+    for (const [x, z, r] of [[100, 68, 2.2], [112, 94, 3.6]]) if (far(x, z)) person([x, z], r, { man: true, pose: 'staff', cloth: pick(['cloth_red', 'cloth_green', 'cloth_maroon']), cloth2: 'cloth_ochre', hatMat: 'cloth_red' });
+    // boys chasing a hoop and a girl with a pot, in the open between the mats
+    for (const [x, z, r] of [[104, 100, 1.2], [105.2, 98.6, 4.0], [114, 82, 2.0], [88, 88, 0.3]]) if (far(x, z)) person([x, z], r, { man: true, child: true, cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_brown']), cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white' });
+    person([123, 98], 2.4, { carry: 'pot', pose: 'stand' }); person([97, 104], 5.2, { carry: 'bundle', pose: 'stand' });
+    // along the madrasa's east wall: stone benches with idlers in its shade, water jars, sacks put down by the porters
+    for (const z of [18, 34, 50, 64]) {
+      L.push({ t: 'bench', at: [76.6, z], y: Y(76.6, z), rot: Math.PI / 2, len: 2.6 });
+      person([76.9, z - 0.5], -Math.PI / 2, { man: true, pose: 'sit', y: Y(76.9, z), cloth: pick(['cloth_white', 'cloth_brown', 'cloth_ochre']) });
+      L.push({ t: 'pot', kind: 'water_pot', at: [77.4, z + 2.1], y: Y(77.4, z), n: 3, seed: z });
+    }
+    // the town's dogs asleep in the shade, pigeons pecking at the fodder and the dropped grain
+    for (const [x, z] of [[84, 44], [98, 70], [123, 84]]) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: Y(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
+    for (const [x, z] of [[100, 95], [96, 90], [112, 78], [86, 70], [124, 90]]) L.push({ t: 'chickens', kind: 'pigeon', at: [x, z], y: Y(x, z), rot: rand() * 6.28, n: 5, seed: Math.floor(x * 3 + z) });
+    for (const z of [26, 58]) L.push({ t: 'sacks', at: [78, z], y: Y(78, z), rot: 1.5, n: 4, seed: z + 3 });
+  }
   void BAYN; void lots;
   return L;
 }
