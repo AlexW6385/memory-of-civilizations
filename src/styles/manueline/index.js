@@ -8,11 +8,12 @@ import { cloister } from './cloister.js';
 import { belem } from './belem.js';
 import { manuHouse } from './houses.js';
 import { ship } from './ships.js';
+import { manuYard, orangeTree } from './garden.js';
 import { palace, se, castle, range, pelourinho, fountain, hullOnStocks, timberStack, ropeWalk, crane } from './civic.js';
 
 export const manueline = {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { jeron_church: jeronChurch, cloister, belem_tower: belem, manu_house: manuHouse, ship, quay: HARBOUR.quay, palace, se, castle, range, pelourinho, fountain, hull_stocks: hullOnStocks, timber_stack: timberStack, rope_walk: ropeWalk, crane },
+  elements: { jeron_church: jeronChurch, cloister, belem_tower: belem, manu_house: manuHouse, manu_yard: manuYard, orange_tree: orangeTree, ship, quay: HARBOUR.quay, palace, se, castle, range, pelourinho, fountain, hull_stocks: hullOnStocks, timber_stack: timberStack, rope_walk: ropeWalk, crane },
   objects: {},
 };
 registerStyle('manueline', manueline);

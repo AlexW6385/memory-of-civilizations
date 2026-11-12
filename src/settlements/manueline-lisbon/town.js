@@ -43,7 +43,7 @@ function yard() {
 }
 export async function town() {
   const plans = [harbour(), civic(), yard()];
-  const els = lots().map((l) => ({ t: 'manu_house', rect: l.rect, seed: l.seed, y: l.y, plinth: l.plinth, front: l.front, kind: l.kind }));
+  const els = lots().map((l) => (l.kind === 'yard' ? { t: 'manu_yard', rect: l.rect, seed: l.seed, y: l.y, front: l.front } : { t: 'manu_house', rect: l.rect, seed: l.seed, y: l.y, plinth: l.plinth, front: l.front, kind: l.kind, ...(l.open ? { open: true, use: l.use } : {}) }));
   plans.push(...lodTiles('lisbon-houses', 'manueline', els, { R: RADIUS }));
   plans.push(...streetLife());
   return plans;

@@ -74,16 +74,29 @@ export function lots() {
         if (RESERVED.some((r) => inRect(r, cx, cz, 4) || inRect(r, rect[0], cz, 2) || inRect(r, rect[2], cz, 2))) continue;
         if (Math.hypot(cx, cz) > RADIUS - 72 || Math.hypot(rect[0], cz) > RADIUS - 70 || Math.hypot(rect[2], cz) > RADIUS - 70) continue;
         if (wet(rect[0], z1) < 3 || wet(rect[2], z1) < 3) continue;
-        if (rand() < 0.05) continue;
+        const yardLot = rand() < 0.06;
         const ys = [[rect[0], z0], [rect[2], z0], [rect[0], z1], [rect[2], z1]].map(([a, b]) => height(a, b));
         const lo = Math.min(...ys), hi = Math.max(...ys);
-        if (hi - lo > 5) continue;
+        if (hi - lo > 7.5) continue;
         const kind = alfama ? 'alfama' : cx < -130 ? 'fisher' : 'merchant';
-        LOTS.push({ rect, seed: Math.floor(rand() * 1e6), y: lo, plinth: hi - lo + 0.6, front: face, kind, w, d });
+        LOTS.push({ rect, seed: Math.floor(rand() * 1e6), y: lo, plinth: hi - lo + 0.6, front: face, kind: yardLot ? 'yard' : kind, w, d, nova: rect[1] === 3.5 || rect[3] === -12 });
       }
     }
   }
+  chooseOpen(LOTS);
   return LOTS;
+}
+/** The houses you can walk into: ten merchants' shops on the Rua Nova (one of each trade), the fishermen's homes near the plaza, two Alfama homes. */
+export const TRADES = ['spice', 'porcelain', 'cloth', 'jeweller', 'parrots', 'chandler', 'grocer', 'apothecary', 'tavern', 'spice'];
+function chooseOpen(all) {
+  const ok = (l) => l.plinth < 0.9 && l.kind !== 'yard' && l.w >= 8;
+  const nova = all.filter((l) => l.kind === 'merchant' && l.nova && ok(l) && l.rect[0] > -125 && l.rect[2] < 120).sort((a, b) => a.rect[0] - b.rect[0]);
+  const north = nova.filter((l) => l.front === 'n'), south = nova.filter((l) => l.front === 's'), pickd = [];
+  for (let i = 0; i < 5; i++) { if (north[i * 2]) pickd.push(north[i * 2]); if (south[i * 2 + 1]) pickd.push(south[i * 2 + 1]); }
+  pickd.slice(0, 10).forEach((l, i) => { l.open = true; l.use = TRADES[i]; });
+  const dist = (l, p) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - p[0], (l.rect[1] + l.rect[3]) / 2 - p[1]);
+  all.filter((l) => l.kind === 'fisher' && l.plinth < 0.9 && l.w >= 7 && !l.open).sort((a, b) => dist(a, [-206, 60]) - dist(b, [-206, 60])).slice(0, 3).forEach((l) => { l.open = true; l.use = 'home'; });
+  all.filter((l) => l.kind === 'alfama' && l.plinth < 1.6 && l.w >= 5.5 && !l.open).sort((a, b) => dist(a, [60, -30]) - dist(b, [60, -30])).slice(0, 2).forEach((l) => { l.open = true; l.use = 'home'; });
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 /** The street: the cross streets, the alleys, Rua Nova, the quay walk, the open squares. */
