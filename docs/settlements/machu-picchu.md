@@ -26,6 +26,7 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Houses | in kanchas on the west and east sides | [inferred] |
 | Quarry | between the Sacred Plaza and the Temple of the Sun, west of the Main Plaza | [stated: michaelstephenwills] |
 | Town wall, main gate, dry ditch | across the saddle at z 84–89, the gate at x 2 | the dry ditch "the result of a geographic fault line" parts the urban sector from the agricultural [stated: peru-explorer] |
+| The neck | south of z 79: a strip 68 m wide, x −54…14 (§4.6) | [inferred] |
 | Agricultural sector | south of the ditch: fields, five storehouses, the Guardhouse's knoll under Machu Picchu mountain | [stated: peru-explorer; imachupicchu] |
 
 ## 3. Orientation
@@ -75,6 +76,17 @@ Dry-stone walls of granite — "smooth, seamless walls for elite buildings; roug
 ### 4.5 L3: lichen on the stone (as built)
 
 - The granite of the Sacred Rock is colonised by "a wide variety of biocolonizer species" — lichens, algae, mosses, cyanobacteria — most of which have penetrated the porous stone [stated: ScienceDaily, "Biocolonizer species are putting the conservation of the granite at Machu Picchu at risk" (Univ. of the Basque Country, 2019)]. **Built** (`lichen`, src/styles/inca/index.js): on every Inca wall small crusts 0.1–0.45 m across — pale grey-green, whitish, now and then rust-orange — about one to every eleven square metres of face, more toward the wall's head, laid on the battered face at its lean; on the outer face of houses and temples, on both faces of the kancha walls and the town wall; kept off the openings [inferred: the colours, the density]. The rough stone (`granite_rough`, the rocks and the Sacred Rock) already carries lichen in its material.
+
+### 4.6 Sixth pass (the arrival review): the neck, the gorge and the Guardhouse's yard (as built)
+
+The browser review found the arrival on a flat field with Huayna Picchu a lone cone: the saddle was a 190 × 350 m ellipse, so from its south end the edges lay outside the 98° view and the canyon's walls (60–120 m, 260 m out, faded at the rim) stood below the horizon.
+
+- **The neck.** The site is a narrow spine: "on a narrow saddle between two mountain peaks" [stated: Wikipedia]; the way in, the dry ditch and the agricultural sector follow its crest at the south end [stated: peru-explorer]. Built (`NECK` in layout.js): south of z = 79 the saddle is only 68 m wide (centred on x = −20), its edges cut straight across at the shoulders; the terraces (15 of 2.6 m) fall away on both sides of it, the shoulders' walls run across, and the town wall (now across the neck only, the gate at x = 2) stands over the first. The terrace rings of the ground and of the walls follow the same shape (`outside()`: the ellipse's growth, cut to the neck; plan.js draws the ellipse's arcs, the shoulders' lines and the neck's edges, flights of stones on the long ones). The canal follows the neck's west edge, turns the shoulder's corner and runs along the shoulder to the ellipse. The storehouses moved west into the neck [inferred: places].
+- **The Guardhouse's knoll** is now 17.6 m (eight terraces) so that the arrival stands 19 m over the neck [inferred: the real Guardhouse overlooks the whole site]; the stair up its north face has porters and a woman with a pot on it; maize on the middle of its treads, llamas and a boy herding them.
+- **The gorge.** The far walls of the Urubamba's canyon stand 90–160 m over the town, 210 m out on both flanks, and round Huayna Picchu (two ridges at its shoulders and one behind it), crests rounded, so that the peak stands in a V of mountains from the arrival [inferred: heights compressed to the disc]. Mist emitters in the gorge on both sides of the neck.
+- **The neck's life.** A team of three ploughing a plot with the foot plough, a woman with her hoe facing them, women weeding on the other side of the road, two spearmen at the gate [inferred; the work after the MOT and Rowe sources of §4.4]; the flagged road carried on from the ditch to the knoll's foot.
+- **The yard.** An apacheta — a cairn of flat stones with offerings (a coca bundle, pots, a pole with a red cloth) — a stone brazier, firewood, jars and a seat for the watch [inferred: after the apachetas of the Inca roads].
+- **Roofs and walls.** A third of the houses newly thatched in golden ichu, the rest weathered dark; lichen and damp on the terrace walls' faces as on the houses'.
 
 ## 5. The houses
 
