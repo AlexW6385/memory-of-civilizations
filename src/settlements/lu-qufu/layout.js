@@ -139,7 +139,7 @@ export function lots() {
       if (LANES_X.some((lx) => { const hw = (STREET_W[lx] ?? 8) / 2; return r[0] < lx + hw && r[2] > lx - hw; })) continue;
       if (r[3] > CITY_WALL.z - 6 && r[1] < CITY_WALL.z + 8) continue;
       const near = Math.hypot((r[0] + r[2]) / 2, (r[1] + r[3]) / 2 - 20);
-      LOTS.push({ rect: r, seed: Math.floor(rand() * 1e6), wealth: Math.max(0, 1 - near / 330), lod: near < 150 ? 0 : near < 230 ? 1 : 2 });
+      LOTS.push({ rect: r, seed: Math.floor(rand() * 1e6), wealth: Math.max(0, 1 - near / 330), lod: near < 150 ? 0 : near < 200 ? 1 : 2 });
     }
   }
   return LOTS;
