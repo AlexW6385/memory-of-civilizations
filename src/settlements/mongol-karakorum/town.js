@@ -215,6 +215,8 @@ export async function town() {
   }
   for (const [x, z] of [[62.5, -17.5], [78.4, -19.5], [55, -26], [86.5, -25.5]]) E_animal(T, 'dog', [x, z], 0, rand() * 6.28, seed());
   for (const [x, z, a] of [[60.2, -23.6, 0.6], [61.4, -24.4, 2.2], [59.6, -25.0, 4.0]]) fig([x, z], 0, a, { dress: 'robe', cloth: pick([col.red, col.ochre, col.green]), cloth2: col.white, over: 'sash', child: true, h: 1.05, hat: 'cap', hatMat: 'cloth_red', feet: 'shod', hair: 'bun', pose: 'squat' });
+  // paper lanterns on posts along the flagged way to the hall, lit at night: four a side, their arms over the path
+  for (const z of [-17, -24, -31, -37]) for (const sd of [-1, 1]) T.push({ t: 'lantern', at: [70 + sd * 5.6, z], y: 0, rot: -sd * Math.PI / 2, seed: seed(), kind: 'paper', h: 2.7 });
   // a felt-maker's yard by the west storehouses: the rolled felts, the wool, the beating frame; the aaruul (dried curd) on trays; mare's-milk skins hung from a pole
   T.push({ t: 'goods_mat', at: [28.4, -28.4], y: 0, rot: 0.2, seed: seed(), goods: ['bolts'] }); T.push({ t: 'goods_mat', at: [31.0, -30.0], y: 0, rot: 1.1, seed: seed(), goods: ['bolts'] });
   T.push({ t: 'sacks', at: [26.4, -27.2], y: 0, rot: 0.6, seed: seed(), n: 4 }); mwoman([29.6, -26.4], 0, 3.4, { pose: 'kneel' }); cathay([32.8, -28.8], 0, 2.6, { pose: 'stand', over: 'apron', cloth: col.brown });
