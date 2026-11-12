@@ -6,12 +6,11 @@ import { RADIUS, TANK, STREETS, lots, yards, height, streetRect, inRect, tankD }
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const OUT = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
-/** World point at u along a lot's front (from its left, as the style turns it) and v out (+) / in (−) from the front face. */
+/** World point at u along a lot's front (from its left, as the style turns it) and v in (+) / out (−) from the front face:
+ *  the style's own (u, v) — the verandah and the lane lie at negative v. */
 export function frontPoint(l, u, v) {
   const [x0, z0, x1, z1] = l.rect, f = l.front;
-  // building() maps (u, vIn) with vIn into the lot; outward is −vIn
-  const vi = -v;
-  return f === 's' ? [x1 - u, z1 - vi] : f === 'n' ? [x0 + u, z0 + vi] : f === 'e' ? [x1 - vi, z0 + u] : [x0 + vi, z1 - u];
+  return f === 's' ? [x1 - u, z1 - v] : f === 'n' ? [x0 + u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u];
 }
 const faceDir = ([dx, dz]) => Math.atan2(-dx, -dz), awayDir = ([dx, dz]) => Math.atan2(dx, dz);
 
@@ -27,6 +26,9 @@ export function extras() {
     E.push({ t: 'yard_wall', rect: [x0 - 1, z0 - 1, x1 + 1, z1 + 1], h: 1.2, gaps: [[y.seed % 4, 3, 6], [(y.seed + 2) % 4, 8, 11]] });
   }
   E.push({ t: 'rest_house', rect: [-20, 17, -3, 26], plinth: 0.7, h: 3.2 });
+  E.push(...laneRites());
+  // the forecourt before Kandariya's stair, flagged in sandstone between the lane's end and the flight (a flush slab: it reads as stone, not earth, from the lane)
+  E.push({ t: 'block', rect: [-33.2, -66.4, -24.4, -53.6], y0: -0.3, y1: 0.03, mat: 'sandstone_floor', walk: true });
   // the ghat: steps down the tank's north bank, their tops following the ground, a landing at each end with a kiosk
   const cx = TANK.c[0], rz = TANK.r[1], steps = 7;
   for (const [xa, xb] of [[cx - 4, cx + 4], [cx - 22, cx - 17], [cx + 17, cx + 22]]) {
@@ -41,6 +43,41 @@ export function extras() {
   const zG = TANK.c[1] - rz * Math.sqrt(1 - (12 / TANK.r[0]) ** 2) - 7;
   for (const sx of [-12, 12]) E.push({ t: 'chhatri', c: [cx + sx, zG], w: 2.6, y: 0 });
   E.push({ t: 'sub_shrine', c: [cx - 32, zG + 1], w: 2.4, h: 6, y: 0, face: 's' });
+  return E;
+}
+
+/** The pilgrims' lane at its best (street 'approach'): lamp columns at the foot of the terrace's stair, garlands of jasmine strung across
+ *  between the verandahs' eaves, a brass bell at each shop's door, the lamps and the plates of flowers laid out on the shop platforms.
+ *  `rite` and `lamp_pillar` elements of the style nagara. */
+function laneRites() {
+  const E = [], rand = rng(311), road = STREETS.find((s) => s.id === 'approach'), zc = road.c;
+  const flowers = [['cloth_white'], ['cloth_white', 'cloth_red'], ['cloth_white', 'cloth_white', 'cloth_red']];
+  // the lamp columns flanking the lane's end, 3 m before the first flight of the stair
+  for (const sz of [-1, 1]) E.push({ t: 'lamp_pillar', c: [-29.6, zc + sz * 3.0], h: 3.4, y: 0 });
+  const rows = lots().filter((l) => l.street === 'approach' && !l.farm);
+  const covers = (side, x) => rows.some((l) => (l.rect[1] < zc) === (side < 0) && x > l.rect[0] + 0.6 && x < l.rect[2] - 0.6 && l.kind !== 'hut');
+  // garlands across the lane at every 4.2 m where there is a front on both sides (the camera's 3 m kept clear: arrival x −14)
+  for (let x = -22.5; x < 21; x += 4.2) {
+    if (!covers(-1, x) || !covers(1, x) || (x < -11 && x > -17.2)) continue;
+    const m = flowers[Math.floor(rand() * flowers.length)];
+    E.push({ t: 'rite', kind: 'garland', a: [x, 2.78, zc - 2.5], b: [x, 2.78, zc + 2.5], sag: 0.5, mats: m, r: 0.035 });
+    if (rand() < 0.5) E.push({ t: 'rite', kind: 'garland', a: [x + 0.12, 2.8, zc - 2.5], b: [x + 0.12, 2.8, zc + 2.5], sag: 0.3, mats: ['cloth_red'], r: 0.025 });
+  }
+  for (const l of rows) {
+    if (l.kind !== 'shop') continue;
+    const [x0, z0, x1, z1] = l.rect, Lw = (l.front === 's' || l.front === 'n') ? x1 - x0 : z1 - z0;
+    const P = (u, v) => frontPoint(l, u, v);
+    // the bell over the door, hung from the eave beam (1.1 m out, 2.85 m up)
+    const [bx, bz] = P(Lw / 2 + 0.5, -1.0);
+    E.push({ t: 'rite', kind: 'bell', at: [bx, bz], top: 2.82, drop: 0.5, r: 0.12 });
+    const yP = 0.42;
+    if (l.trade === 'oil' || l.trade === 'potter' || l.trade === 'sweets') {
+      const [ax, az] = P(0.9, -0.55), [cx, cz] = P(Lw - 0.9, -0.55);
+      E.push({ t: 'rite', kind: 'lamps', at: [ax, az], to: [cx, cz], y: yP, count: Math.max(3, Math.floor(Lw * 1.1)), s: 1 });
+    } else if (l.trade === 'flowers') {
+      for (const u of [Lw * 0.28, Lw * 0.5, Lw * 0.72]) { const [px, pz] = P(u, -0.65); E.push({ t: 'rite', kind: 'plate', at: [px, pz], y: yP, s: 1.25, mats: flowers[Math.floor(rand() * 3)] }); }
+    }
+  }
   return E;
 }
 
@@ -60,19 +97,32 @@ export function dressing() {
     // the hanging lamp / cloth banner over a shop; the sign hook at the eave
     if (kind === 'shop') {
       const trade = l.trade;
-      L.push({ t: 'shop_sign', at: P(0.3, 0.05), y: 0.42, rot: rotOut, seed: seed++, h: 2.6, cloth: pickOf(['cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_indigo']), len: 1.0, out: 0.8 });
+      L.push({ t: 'shop_sign', at: P(0.3, -0.05), y: 0.42, rot: rotOut, seed: seed++, h: 2.6, cloth: pickOf(['cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_indigo']), len: 1.0, out: 0.8 });
       if (trade === 'grain') { L.push({ t: 'sacks', at: at(u1, -0.6), y: yPl, rot: rotOut, seed: seed++, n: 4 }); L.push({ t: 'basket', at: at(u2, -0.7), y: yPl, seed: seed++, n: 2, goods: 'cloth_ochre' }); }
       else if (trade === 'potter') { L.push({ t: 'pot', at: at(u1, -1.9), y: 0, rot: rotOut, seed: seed++, kind: 'water_pot', n: 6 }); L.push({ t: 'pot', at: at(u2, -1.9), y: 0, rot: rotOut, seed: seed++, kind: 'dark_pot', n: 4 }); L.push({ t: 'pot', at: at(Lw / 2, -0.7), y: yPl, seed: seed++, kind: 'matka', n: 3 }); }
-      else if (trade === 'cloth') { L.push({ t: 'goods_mat', at: at(Lw / 2, -0.8), y: yPl, rot: faceDir(out), seed: seed++, goods: ['basket'], produce: ['cloth_red', 'cloth_indigo', 'cloth_ochre'] }); L.push({ t: 'wash_line', at: P(0.3, 0), y: 3.2, rot: 0, seed: seed++, len: Math.min(3, Lw - 0.6), drop: 0.6, pole: false }); }
+      else if (trade === 'cloth') { L.push({ t: 'goods_mat', at: at(Lw / 2, -0.8), y: yPl, rot: faceDir(out), seed: seed++, goods: ['basket'], produce: ['cloth_red', 'cloth_indigo', 'cloth_ochre'] }); L.push({ t: 'wash_line', at: P(Lw / 2, -1.3), y: 2.85, rot: (l.front === 'e' || l.front === 'w') ? 1.5708 : 0, seed: seed++, len: Math.min(3.5, Lw - 0.6), drop: 0.8, pole: false }); }
       else if (trade === 'sweets') { L.push({ t: 'tea_table', at: at(u1, -2.1), y: 0, rot: rotOut, seed: seed++ }); L.push({ t: 'pot', at: at(u2, -0.6), y: yPl, seed: seed++, kind: 'dark_pot', n: 3 }); }
       else if (trade === 'smith') { L.push({ t: 'crates', at: at(u1, -0.8), y: yPl, rot: rotOut, seed: seed++, n: 2 }); L.push({ t: 'firewood', at: at(u2, -0.9), y: yPl, rot: rotOut, seed: seed++, len: 1.0 }); }
       else if (trade === 'oil') { L.push({ t: 'pot', at: at(u1, -0.7), y: yPl, seed: seed++, kind: 'pithos', n: 1 }); L.push({ t: 'pot', at: at(u2, -0.7), y: yPl, seed: seed++, kind: 'matka', n: 3 }); }
       else L.push({ t: 'goods_mat', at: at(Lw / 2, -0.9), y: yPl, rot: faceDir(out), seed: seed++, goods: ['heap', 'heap', 'baskets'], produce: ['cloth_white', 'cloth_white', 'cloth_red'] });
-      if (!l.open || rand() < 0.5) F(at(Lw / 2 + (rand() - 0.5), -0.5), yPl, [-out[0], -out[1]], { pose: 'cross', top: 'bare', hat: pickOf(['turban', 'none']), arms: 'hang' });
+      if (!l.open || rand() < 0.5) F(at(Lw / 2 + (rand() - 0.5), -0.5), yPl, out, { pose: 'cross', top: 'bare', hat: pickOf(['turban', 'none']), arms: 'hang' });
       if (rand() < 0.3) F(at(u2, -2.4), 0, [out[1] * 0.5 - out[0] * 0.2, out[0] * 0.5], { carry: pickOf(['basket', 'none']), cloth: pickOf(['cloth_white', 'cloth_ochre']) });
+      // an open shop: the keeper sits inside behind his counter (counters at 0.9–2.2 m in, by trade), looking out at the lane
+      if (l.open) {
+        const kv = { flowers: 2.1, sweets: 2.4, cloth: 2.9, oil: 1.4, potter: 2.2, grain: 2.2, smith: 1.2 }[trade] ?? 2.0, ku = trade === 'oil' ? Lw * 0.2 : trade === 'potter' ? Lw - 0.9 : Lw / 2;   // (the seat in the style's furnish: styles/nagara/village.js)
+        F(at(ku, kv), yPl, out, { pose: 'cross', top: rand() < 0.5 ? 'bare' : undefined, hat: pickOf(['turban', 'none']), arms: 'hang', cloth: pickOf(['cloth_white', 'cloth_ochre']) });
+      }
+      // on the pilgrims' lane a buyer stands before the shop, his basket on the arm, facing it
+      if (l.street === 'approach' && rand() < 0.55) F(at(u1 + 0.6, -2.0), 0, [-out[0], -out[1]], { carry: 'basket', cloth: pickOf(['cloth_white', 'cloth_ochre', 'cloth_white']), hat: pickOf(['turban', 'none']) });
+    } else if (kind === 'haveli') {
+      // the merchant's house: a woman at the balcony of the upper floor, a pot of basil (tulsi) by the door, a dog on the platform
+      const nbal = Math.max(1, Math.floor(Lw / 3.4));
+      if (rand() < 0.6) F(at((0.5 + Math.floor(rand() * nbal)) * Lw / nbal, -0.45), 3.56, out, { pose: 'stand', arms: 'hang', ...(rand() < 0.5 ? { dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 } : { top: 'bare', hat: 'turban' }) });
+      L.push({ t: 'pot', at: at(u1, -0.7), y: yPl, seed: seed++, kind: 'matka', n: 2 });
+      if (rand() < 0.4) L.push({ t: 'animal', kind: 'dog', at: at(u2, -0.8), y: yPl, rot: rotOut + 1.0, seed: seed++ });
+      if (rand() < 0.5) L.push({ t: 'bench', at: at(u2, -0.7), y: 0.0, rot: rotOut + 1.57, seed: seed++, len: 1.4 });
     } else if (kind === 'shed') {
-      L.push({ t: 'animal', kind: 'zebu', at: at(Lw * 0.35, 1.2), y: 0.42, rot: rotOut + 1.57, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) });
-      L.push({ t: 'haystack', at: P(Lw + 1.4, 4), y: 0, kind: 'rick', seed: seed++, rot: 0 });
+      L.push({ t: 'animal', kind: 'zebu', at: at(Lw * 0.35, -0.7), y: 0.42, rot: rotOut + 1.57, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) });
       L.push({ t: 'trough', at: at(Lw * 0.75, -1.0), y: 0, rot: rotOut, seed: seed++ });
     } else {
       // homes: water pots by the door, a stool or a bench on the platform, firewood and dung cakes, a drying tray, hens
@@ -81,10 +131,9 @@ export function dressing() {
       if (rand() < 0.5) L.push({ t: 'firewood', at: P(Lw - 0.2, -0.1), y: yPl, rot: rotOut + 1.57, seed: seed++, len: 0.9 });
       if (rand() < 0.35) L.push({ t: 'drying_tray', at: at(u2, -1.9), y: 0, rot: rotOut, seed: seed++ });
       if (rand() < 0.4) L.push({ t: 'chickens', at: at(Lw / 2, -2.2), y: 0, rot: rotOut, seed: seed++, n: 4 });
-      if (rand() < 0.2) L.push({ t: 'laundry_pole', at: at(Lw / 2, 0), y: 3.3, rot: rotOut, seed: seed++, len: 1.6 });
-      if (rand() < 0.35) F(at(u2, -0.6), yPl, [-out[0], -out[1]], { pose: 'sit_low', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_ochre']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
+      if (rand() < 0.2) L.push({ t: 'laundry_pole', at: at(Lw / 2, -1.3), y: 2.9, rot: rotOut, seed: seed++, len: 1.6 });
+      if (rand() < 0.35) F(at(u2, -0.6), yPl, out, { pose: 'sit_low', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_ochre']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
       if (rand() < 0.15) L.push({ t: 'animal', kind: 'zebu', at: at(u1, -2.6), y: 0, rot: rotOut + 1.0, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey']) });
-      if (kind === 'hut' && rand() < 0.5) L.push({ t: 'haystack', at: P(Lw + 1.3, 3), y: 0, kind: 'rick', seed: seed++, rot: 0 });
     }
   }
   // wells at the crossings of the main lanes, a stone lamp by each
@@ -107,29 +156,33 @@ export function dressing() {
     L.push({ t: 'goods_mat', at: [x + rand() * 2, z], y: 0, rot: faceDir([0, -sz]), seed: seed++, goods: ['heap', 'heap', 'baskets'], produce: ['cloth_white', 'cloth_red', 'cloth_white'] });
     F([x + rand() * 2, z + sz * 0.95], 0, [0, -sz], { pose: 'sit_ground', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
   }
-  // the pilgrims' approach (street 'approach', z = -60) to Kandariya's stair: offering mats and their sellers at the lane's edge,
-  // pilgrims bound for the temple with baskets of flowers and ghee, a family, a priest coming down, a cow in the lane's end, hens and a bench
+  // the pilgrims' approach (street 'approach', z = -60) to Kandariya's stair, the arrival standing at x −14 (src/planet/arrivals.js):
+  // nobody within 5 m of it along the lane. Pilgrims bound for the temple with baskets of flowers and ghee, a family, others coming
+  // down with the temple's flowers, a porter, a boy with his goat, the lane's dogs, the cows of the forecourt
   {
-    const zc = -60, face = ([dx, dz]) => Math.atan2(-dx, -dz);
-    for (let x = -27; x <= -3; x += 4.6) for (const sz of [-1, 1]) {
-      if (rand() < 0.2) continue;
-      const z = zc + sz * 1.85;
-      L.push({ t: 'goods_mat', at: [x + rand(), z], y: 0, rot: face([0, -sz]), seed: seed++, goods: ['heap', 'heap', 'baskets'], produce: pickOf([['cloth_white', 'cloth_red', 'cloth_white'], ['cloth_ochre', 'cloth_white', 'cloth_red']]) });
-      if (rand() < 0.7) F([x + rand(), z + sz * 0.95], 0, [0, -sz], { pose: 'sit_ground', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
+    const zc0 = -60, P = (x, z, o) => F([x, z], 0, [-1, 0.05], o), W = (c1, c2) => ({ dress: 'wrap', cloth: c1, cloth2: c2, hair: 'bun', over: 'shawl', h: 1.5 });
+    P(-19.4, -60.8, { carry: 'basket', cloth: 'cloth_white', hat: 'turban' });
+    P(-20.7, -59.3, { ...W('cloth_red', 'cloth_ochre'), carry: 'pot' });
+    P(-23.1, -60.6, { dress: 'wrap', top: 'bare', hair: 'topknot', over: 'sash', cloth: 'cloth_white', carry: 'none' });
+    P(-25.0, -59.4, { ...W('cloth_green', 'cloth_white'), carry: 'child' });
+    P(-27.2, -60.7, { carry: 'basket', cloth: 'cloth_ochre' });
+    P(-29.3, -59.5, { ...W('cloth_indigo', 'cloth_ochre'), arms: 'pray' });
+    F([-22.0, -61.5], 0, [1, -0.1], { ...W('cloth_indigo', 'cloth_ochre'), carry: 'pot' });
+    F([-24.6, -58.9], 0, [1, 0], { dress: 'wrap', top: 'bare', hair: 'short', hat: 'turban', cloth: 'cloth_white', carry: 'pole', arms: 'pole' });
+    F([-28.0, -61.2], 0, [1, 0.1], { carry: 'basket', cloth: 'cloth_white', hat: 'turban' });
+    F([-31.0, -58.7], 0, [1, 0.05], { ...W('cloth_red', 'cloth_white'), carry: 'basket' });
+    // the forecourt's flower stalls: an awning on four poles, the table laid with jasmine, oleander and lotus buds, the seller behind it
+    for (const [x, z, rot, aw] of [[-27.8, -65.4, 0, 'cloth_white'], [-27.8, -54.6, Math.PI, 'cloth_ochre']]) {
+      L.push({ t: 'stall', at: [x, z], y: 0, rot, seed: seed++, w: 2.6, d: 1.4, awning: aw, goods: ['basket', 'produce'] });
+      F([x, z + (z < zc0 ? -0.9 : 0.9)], 0, [0, z < zc0 ? 1 : -1], { pose: 'sit_ground', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
     }
-    const P = (x, z, o) => F([x, z], 0, [-1, 0.05], o);
-    P(-12, -60.4, { carry: 'basket', cloth: 'cloth_white', hat: 'turban' });
-    P(-13.4, -59.3, { dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, carry: 'pot' });
-    P(-17.5, -60.8, { dress: 'wrap', top: 'bare', hair: 'topknot', over: 'sash', cloth: 'cloth_white', carry: 'none' });
-    P(-22, -59.6, { dress: 'wrap', cloth: 'cloth_green', cloth2: 'cloth_white', hair: 'bun', over: 'shawl', h: 1.5, child: true });
-    P(-24.5, -60.5, { carry: 'basket', cloth: 'cloth_ochre' });
-    F([-9, -59.6], 0, [1, 0], { dress: 'wrap', top: 'bare', hair: 'short', hat: 'turban', cloth: 'cloth_white', carry: 'pole', arms: 'pole' });
-    F([-19, -61.2], 0, [1, -0.1], { dress: 'wrap', cloth: 'cloth_indigo', cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, carry: 'pot' });
-    L.push({ t: 'animal', kind: 'zebu', at: [-26.5, -56.5], y: 0, rot: 1.9, seed: seed++, graze: false, mat: 'hide_white' });
-    L.push({ t: 'animal', kind: 'zebu', at: [-28, -64.5], y: 0, rot: 4.8, seed: seed++, graze: true, mat: 'hide_tan' });
-    L.push({ t: 'chickens', at: [-5, -62.2], y: 0, rot: 0.4, seed: seed++, n: 4 });
-    L.push({ t: 'bench', at: [-17.2, -63.2], y: 0, rot: 0, seed: seed++, len: 1.6 });
-    L.push({ t: 'pot', at: [-9.5, -57.4], y: 0, seed: seed++, kind: 'water_pot', n: 4 });
+    // a boy with his goat, the dogs asleep in the lane's dust
+    F([-21.2, -62.0], 0, [0.4, 1], { dress: 'wrap', top: 'bare', hair: 'short', cloth: 'cloth_white', child: true, h: 1.15 });
+    L.push({ t: 'animal', kind: 'goat', at: [-21.8, -61.5], y: 0, rot: 2.0, seed: seed++, graze: false, mat: 'hide_white' });
+    L.push({ t: 'animal', kind: 'dog', at: [-17.6, -57.8], y: 0, rot: 1.2, seed: seed++ });
+    L.push({ t: 'animal', kind: 'dog', at: [-26.0, -62.0], y: 0, rot: 5.1, seed: seed++ });
+    L.push({ t: 'animal', kind: 'zebu', at: [-35.5, -53.5], y: 0, rot: 1.9, seed: seed++, graze: false, mat: 'hide_white' });
+    L.push({ t: 'animal', kind: 'zebu', at: [-35.8, -67.0], y: 0, rot: 4.8, seed: seed++, graze: true, mat: 'hide_tan' });
   }
   return L;
 }

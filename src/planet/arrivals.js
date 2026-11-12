@@ -19,7 +19,7 @@ export const ARRIVALS = {
   'edo-himeji':       [-25, 37.1, -3, 0, 0.36],          // the keep cluster whole on its stone base, from the Honmaru's south edge (from 9 m nearer the top roof was cut)
   'joseon-seoul':     [0, 0.1, 80, 0, 0.15],             // the throne hall across its court and rank stones
   'sanchi':           [0, 22.1, 60, 0, 0.15],            // the Great Stupa, its gateway and Ashoka's pillar
-  'khajuraho':        [2.5, null, -60, 1.5708, 0.22],    // up the pilgrims' approach lane between the shops of flowers and sweets to the stair of Kandariya Mahadeva's terrace, the porch and the climbing spires over the roofs
+  'khajuraho':        [-14, null, -60, 1.5708, 0.22],    // up the pilgrims' approach lane between the shops of flowers and sweets to the stair of Kandariya Mahadeva's terrace, the porch and the climbing spires over the roofs
   'madurai':          [-20, 0.1, 170, 0, 0.3],           // the painted gopuram over the street
   'mughal-agra':      [0, 0.4, 60, 0, 0.1],              // the Taj Mahal down the garden's water channel
   'angkor':           [-178, 1.05, 1.5, -1.5708, 0.08],  // Angkor Wat's towers at the end of the causeway

@@ -17,13 +17,15 @@ function waterLevel(x, z) { return inTankWater(x, z) ? TANK.level : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, tankD(x, z))); }
 // the arrival's view of Kandariya Mahadeva (src/planet/arrivals.js) kept free of the oleander clumps:
 // the wedge from the arrival point to the temple's two ends, as far as its terrace
-const EYE = [2.5, -60], ENDS = [[-42, -73], [-42, -47]];
+const EYE = [-14, -60], ENDS = [[-42, -73], [-42, -47]];
 const ang = (x, z) => Math.atan2(z - EYE[1], x - EYE[0]);
 const A0 = Math.min(...ENDS.map(([x, z]) => ang(x, z))) - 0.08, A1 = Math.max(...ENDS.map(([x, z]) => ang(x, z))) + 0.08;
 function inView(x, z) { const a = ang(x, z); return a > A0 && a < A1 && Math.hypot(x - EYE[0], z - EYE[1]) < 50; }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inTank(x, z) || nearTemple(x, z, 6) || inLot(x, z, 1)) return null;
   if (inView(x, z)) return { grass: 25 };
+  // neem behind the lane's rows on both sides: canopies over the roofs, framing the sky about the tower
+  if (x > -27 && x < 22 && Math.abs(z + 60) > 14 && Math.abs(z + 60) < 46 && !onStreet(x, z, 2)) return { neem: 0.05, banyan: 0.003, grass: 18 };
   if (onStreet(x, z, 2)) return null;
   const yd = yards().find((y) => inRect(y.rect, x, z, 0));
   if (yd) return { neem: 0.03, banyan: 0.004, grass: 4 };
@@ -38,7 +40,8 @@ export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   maxDensity: { neem: 0.06, banyan: 0.01, date_palm: 0.04, oleander: 0.5, fig: 0.03 },
   climate: {
-    sun: { az: 120, el: 55, color: [1.0, 0.92, 0.8], intensity: 3.6, lat: 25, dec: 8, hour: 9.5 },
+    // late morning (hour 11): the sun well to the south-east, raking across the east-facing front of Kandariya Mahadeva (at 9.5 it stood behind the visitor and lit the front flat)
+    sun: { az: 140, el: 66, color: [1.0, 0.92, 0.8], intensity: 3.6, lat: 25, dec: 8, hour: 11 },
     sky: { turbidity: 4.5, rayleigh: 1.3, mie: 0.006, mieG: 0.8, zenith: [0.1, 0.17, 0.36], horizon: [0.64, 0.62, 0.58] },
     fog: { color: [0.8, 0.75, 0.66], density: 0.00035, height: 0.012 },
     exposure: 0.56,

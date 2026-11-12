@@ -51,6 +51,16 @@ function building(el, ctx) {
     B('earth_wall', T, T, L - T, D - T, fy - 0.1, fy + 0.012); B('timber', T, T, L - T, D - T, top - 0.06, top - 0.02);
     for (let u = T + 0.6; u < L - T; u += 1.0) B('wood_dark', u - 0.07, T, u + 0.07, D - T, top - 0.24, top - 0.06);
     furnish(el.trade && kind === 'shop' ? el.trade : kind === 'haveli' ? 'home' : 'home');
+    if (kind === 'shop') {
+      // the keeper's seat: a white cotton mattress (gaddi) and bolster on the floor behind the counter (the keeper sits there: town.js, dressing());
+      // the potter's keeper sits on a plain mat by the door; on the back wall the picture of the household god with its garland and lamp on a shelf
+      const kv = { flowers: 2.1, sweets: 2.4, cloth: 2.9, oil: 1.4, grain: 2.2 }[el.trade], ku = el.trade === 'oil' ? L * 0.2 : L / 2;
+      if (kv && L > 3.4) { B('cloth_white', ku - 0.75, kv - 0.55, ku + 0.75, kv + 0.55, fy, fy + 0.07); B('cloth_ochre', ku + 0.4, kv - 0.45, ku + 0.7, kv + 0.45, fy + 0.07, fy + 0.2); }
+      const nu = L * 0.5, nb = D - T;
+      B('wood_dark', nu - 0.3, nb - 0.07, nu + 0.3, nb - 0.02, fy + 1.45, fy + 2.1); B('cloth_red', nu - 0.25, nb - 0.09, nu + 0.25, nb - 0.07, fy + 1.5, fy + 2.05);
+      B('cloth_white', nu - 0.32, nb - 0.12, nu + 0.32, nb - 0.07, fy + 1.4, fy + 1.46);
+      B('timber', nu - 0.3, nb - 0.28, nu + 0.3, nb - 0.02, fy + 1.28, fy + 1.32); pot('bronze', nu - 0.12, nb - 0.16, 0.05, 0.08, fy + 1.32); B('flame', nu + 0.1, nb - 0.17, nu + 0.14, nb - 0.13, fy + 1.32, fy + 1.4);
+    }
     // the door leaf standing open inside
     if (!open0) B('timber', du - dw / 2 - 0.02, T, du - dw / 2 + 0.05, T + dw, fy, fy + 2.05);
   }
@@ -210,4 +220,20 @@ function chhatri(el, { bag, col }) {
   bag.add(S, lathe([[0.06, 0], [0.1, 0.1], [0.04, 0.3], [0.001, 0.4]], 8, null, cx, y + 0.35 + h + 1.2, cz));
 }
 
-export const villageElements = { bazaar_house: building, yard_wall: yardWall, rest_house: restHouse, chhatri };
+/** lamp_pillar: a stone lamp column (dīpastambha) at a temple's approach: a moulded base, a slender shaft with rings, and at its head a ring of
+ *  little cups for oil lamps (lit at evening) under a bell-shaped cap. { c, h, y } */
+function lampPillar(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y ?? 0, h = el.h ?? 3.4, S = 'sandstone';
+  bag.add(S, box(cx - 0.42, y - 0.4, cz - 0.42, cx + 0.42, y + 0.3, cz + 0.42));
+  bag.add('sandstone_dressed', box(cx - 0.32, y + 0.3, cz - 0.32, cx + 0.32, y + 0.45, cz + 0.32));
+  col.rect([cx - 0.42, cz - 0.42, cx + 0.42, cz + 0.42], y - 0.4, y + 0.45);
+  bag.add(S, lathe([[0.22, 0], [0.17, 0.12], [0.15, h * 0.2], [0.19, h * 0.22], [0.15, h * 0.26], [0.13, h * 0.7], [0.18, h * 0.72], [0.12, h * 0.75], [0.001, h * 0.75]], 10, null, cx, y + 0.45, cz));
+  col.rect([cx - 0.17, cz - 0.17, cx + 0.17, cz + 0.17], y + 0.45, y + 0.45 + h);
+  const yt = y + 0.45 + h * 0.75;
+  bag.add('sandstone_dressed', box(cx - 0.34, yt, cz - 0.34, cx + 0.34, yt + 0.1, cz + 0.34));
+  for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, px = cx + Math.cos(a) * 0.3, pz = cz + Math.sin(a) * 0.3; bag.add('terracotta', lathe([[0.001, 0], [0.06, 0.01], [0.07, 0.05], [0.05, 0.06], [0.001, 0.05]], 6, null, px, yt + 0.1, pz)); bag.add('flame', box(px - 0.012, yt + 0.15, pz - 0.012, px + 0.012, yt + 0.19, pz + 0.012)); }
+  bag.add('sandstone_dressed', lathe([[0.3, 0], [0.22, 0.12], [0.1, 0.28], [0.001, 0.42]], 10, null, cx, yt + 0.2, cz));
+  bag.add('bronze', lathe([[0.001, 0], [0.04, 0.03], [0.001, 0.14]], 6, null, cx, yt + 0.62, cz));
+}
+
+export const villageElements = { bazaar_house: building, yard_wall: yardWall, rest_house: restHouse, chhatri, lamp_pillar: lampPillar };
