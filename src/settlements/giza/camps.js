@@ -89,3 +89,22 @@ export function haulLife() {
   man([S[0] - d[0] * 6 + pr[0] * 3, S[1] - d[1] * 6 + pr[1] * 3], dir + Math.PI, { carry: 'basket' });
   return L;
 }
+
+/** The masons' yard south of the causeway (casing stones, tools, a shade) and the priests' waiting-place before the causeway's northern doorway. */
+export const YARD = {
+  stacks: [[191, -12, 0.2, 2], [195.6, -9.4, 0, 3], [199.4, -12.6, 0.4, 1], [193, -4.8, 0.1, 2], [198.6, -5.6, 0.3, 1]],
+  masons: [[189.2, -9.6, 0.3], [194, -6.4, 3.3], [198.4, -9.6, 0.2], [196.4, -3.2, 3.4]],
+  shade: [203.5, -6.2, 209.7, -1.4],
+  lane: [[204.6, -2.6, 'bench', 0, 31], [188, -14.6, 'pots', 0.2, 32], [201.4, -14.2, 'basket', 0, 33], [200.2, -3.0, 'wood', 0, 34], [186.4, -7, 'sherds', 0, 35], [177.6, -45.8, 'bench', 0, 36], [172.2, -46.2, 'pots', 0, 37], [183, -47.4, 'basket', 0.3, 38]],
+};
+export function yardLife() {
+  const rand = rng(2577), L = [];
+  const man = (at, rot, o) => L.push({ t: 'figure', at, y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', top: 'bare', cloth: 'cloth_white', skin: 'skin_medium', hat: 'none', hair: 'short', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
+  const woman = (at, rot, o) => L.push({ t: 'figure', at, y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'sheath', cloth: 'cloth_white', skin: 'skin_medium', hat: 'none', hair: 'long', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
+  for (const [x, z, r] of YARD.masons) man([x, z], r, { pose: 'kneel' });
+  man([205.2, -4.2], 3.4, { pose: 'sit', over: 'sash' }); man([200, -7.6], 0.9, { pose: 'talk', over: 'sash' }); man([207.6, -1.6], -0.4, { carry: 'pot' });
+  // before the doorway: two priests with staffs, a bearer with bread and a woman with a beer jar, waiting their turn; a boy sweeping the threshold with a palm-rib broom
+  man([176.4, -47.8], 0.0, { pose: 'staff', carry: 'staff', len: 1.7, over: 'sash', hair: 'shaven' }); man([179.0, -47.4], 0.3, { pose: 'staff', carry: 'staff', len: 1.7, over: 'sash', hair: 'shaven' });
+  man([174.4, -46.6], -0.4, { carry: 'basket' }); woman([181.2, -48.4], 0.2, { carry: 'pot' }); man([177.4, -45.9], 3.1, { pose: 'kneel', child: true, dress: 'loincloth' });
+  return L;
+}
