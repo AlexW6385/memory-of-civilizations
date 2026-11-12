@@ -105,7 +105,34 @@ export function waterworks(height) {
   ];
 }
 
-let HOUSES = null, KWALLS = null, KANCHAS = null;
+
+/**
+ * The town's own terraces: the saddle's top is not one flat field. Round the core (the Sacred sector, the Main Plaza, the kallanka, the
+ * way in from the gate) the ground is at the plaza's level; going out from it each band of BAND m falls STEP m, over a short ramp at the
+ * band's end, three bands to the edge (the first terrace of the ring). Every kancha stands on its own platform, raised RAISE above the
+ * lane's ground and kept level, with a stair up from the lane at its gate [inferred: Machu Picchu's urban sector is built on platforms
+ * stepping down the saddle's flanks, the kanchas on their own levelled terraces — Wright & Valencia, "Machu Picchu: A Civil Engineering Marvel"].
+ */
+export const STEP = 0.85, BAND = 14, LEVELS = 3, RAISE = 0.4;
+const rectDist = (r, x, z) => Math.hypot(Math.max(r[0] - x, 0, x - r[2]), Math.max(r[1] - z, 0, z - r[3]));
+const CORE = [[-62, -66, -10, 50], PLAZA, KALLANKA, ROCK_COURT, [-5, -140, 7, 8], [-3, 6, 7, TOWN_WALL.z + 8]];
+/** Distance (m) from the core of the town. */
+export function coreDist(x, z) { let d = Math.hypot(x - HILL.c[0], z - HILL.c[1]) - (HILL.r + 8); for (const r of CORE) d = Math.min(d, rectDist(r, x, z)); return Math.max(0, d); }
+/** The lanes' ground level at (x, z) inside the saddle (before the kancha platforms): a stair of bands, its ramps 25% of a band, rising again to the town wall. */
+export function laneLevel(x, z) {
+  const s = coreDist(x, z) / BAND, k = Math.floor(s), f = s - k, t = Math.min(LEVELS, k + smooth(0.75, 1, f));
+  return -STEP * t * (1 - smooth(TOWN_WALL.z - 22, TOWN_WALL.z - 4, z));
+}
+let PGRID = null;
+/** The platform at (x, z) (its margin included), or null: the level of the kancha or house standing there. */
+export function platformAt(x, z) {
+  if (!PGRID) { houses(); }
+  const l = PGRID.get(Math.floor(x / 8) + ',' + Math.floor(z / 8));
+  if (l) for (const q of l) if (x >= q.r[0] && x <= q.r[2] && z >= q.r[1] && z <= q.r[3]) return q.lv;
+  return null;
+}
+
+let HOUSES = null, KWALLS = null, KANCHAS = null, PLATS = null;
 /**
  * The houses in their kanchas: "three (or more)" one-room buildings round a patio, the whole walled, a single
  * gateway into it [stated: World History Encyclopedia, "Inca Architecture"]; the kanchas in rows with lanes
@@ -116,7 +143,7 @@ let HOUSES = null, KWALLS = null, KANCHAS = null;
  */
 export function houses() {
   if (HOUSES) return HOUSES;
-  HOUSES = []; KWALLS = []; KANCHAS = [];
+  HOUSES = []; KWALLS = []; KANCHAS = []; PLATS = [];
   const rand = rng(1450), taken = [];
   const clear = (r, m) => {
     const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, cs = [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [cx, r[1]], [cx, r[3]], [r[0], cz], [r[2], cz]];
@@ -127,10 +154,12 @@ export function houses() {
     if (cs.some(([px, pz]) => nearCanal(px, pz, 1.8) || pz > TOWN_WALL.z - 6)) return false;
     return !taken.some((t) => r[0] < t[2] + 2 && r[2] > t[0] - 2 && r[1] < t[3] + 2 && r[3] > t[1] - 2);
   };
-  const th = 0.7;
+  const th = 0.7, MG = 0.9;
+  const platform = (r) => { const lv = Math.round(laneLevel((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) / STEP) * STEP + RAISE; PLATS.push({ r: [r[0] - MG, r[1] - MG, r[2] + MG, r[3] + MG], lv }); return lv; };
   // one kancha in the rectangle r (A across the gate side, D deep), its gate on side `gate` ('e' | 'w')
   const kancha = (r, gate, A, D) => {
     taken.push(r);
+    const lv = platform(r);
     // kancha-local: u across the gate side (along z), v from the gate side (0) to the back (D)
     const gx = gate === 'e' ? r[2] : r[0], sv = gate === 'e' ? -1 : 1;
     const P = (u, v) => [gx + sv * v, r[1] + u];
@@ -138,7 +167,7 @@ export function houses() {
     const bd = 5.6 + rand() * 1, bu0 = 2 + rand() * 2, bu1 = A - 2 - rand() * 2;
     const sl0 = 7 + rand() * 2, sd = 5 + rand() * 0.8, sv1 = D - bd - 1 - rand() * 1.5, sv0 = sv1 - Math.min(sl0, sv1 - 1.1);
     const seed = () => Math.floor(rand() * 1e6);
-    KANCHAS.push({ rect: r, at: P, inward: [sv, 0], A, D, sd, sv0, sv1, bd });
+    KANCHAS.push({ rect: r, lv, at: P, inward: [sv, 0], A, D, sd, sv0, sv1, bd });
     HOUSES.push({ rect: R(bu0, D - bd, bu1, D), front: gate, seed: seed() });
     HOUSES.push({ rect: R(0, sv0, sd, sv1), front: 's', seed: seed() });
     HOUSES.push({ rect: R(A - sd, sv0, A, sv1), front: 'n', seed: seed() });
@@ -177,9 +206,12 @@ export function houses() {
       const w = 6 + rand() * 3, d = 9 + rand() * 3, r = [x, z, x + w, z + d];
       if (!clear(r, 6) || rand() < 0.25) continue;
       taken.push(r);
+      platform(r);
       HOUSES.push({ rect: r, front: rand() < 0.7 ? front : (rand() < 0.5 ? 'n' : 's'), seed: Math.floor(rand() * 1e6) });
     }
   }
+  PGRID = new Map();
+  for (const q of PLATS) for (let i = Math.floor(q.r[0] / 8); i <= Math.floor(q.r[2] / 8); i++) for (let j = Math.floor(q.r[1] / 8); j <= Math.floor(q.r[3] / 8); j++) { const k = i + ',' + j; if (!PGRID.has(k)) PGRID.set(k, []); PGRID.get(k).push(q); }
   return HOUSES;
 }
 /** The kanchas' walls: { a, b, y1 (height), door ({ at, w, h, jamb } along a→b) }. */

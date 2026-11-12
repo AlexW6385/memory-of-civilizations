@@ -51,15 +51,16 @@ export function people() {
   for (const [ki, K] of kanchas().entries()) {
     // the patio's own people: a man at the gate with a load of firewood or a bundle, a child, a dog asleep (every patio but the weavers' skip is by ki)
     { const gate = K.at(K.A / 2 + (ki % 2 ? 2.2 : -2.2), 1.5), rotG = facing(K.inward);
-      if (ki % 3 !== 1) figures.push(man({ at: gate, y: 0, rot: rotG, carry: ki % 2 ? 'bundle' : 'basket', h: 1.6 + rand() * 0.1 }));
+      if (ki % 3 !== 1) figures.push(man({ at: gate, y: ground.height(...gate), rot: rotG, carry: ki % 2 ? 'bundle' : 'basket', h: 1.6 + rand() * 0.1 }));
       const ch = K.at(K.A / 2 + (ki % 2 ? -2.6 : 2.6), Math.min(K.sv0 + 1.2, K.D - K.bd - 2));
-      figures.push((ki % 2 ? woman : man)({ at: ch, y: 0, rot: rand() * 6.28, h: 0.95 + rand() * 0.15, pose: 'stand', over: 'belt' }));
-      if (ki % 2 === 0) { const dg = K.at(K.A / 2 + 1.9, Math.min(K.sv0 + 0.5, 3)); figures.push({ t: 'animal', kind: 'dog', at: dg, y: 0, rot: rand() * 6.28, seed: seed(), graze: false }); } }
+      figures.push((ki % 2 ? woman : man)({ at: ch, y: ground.height(...ch), rot: rand() * 6.28, h: 0.95 + rand() * 0.15, pose: 'stand', over: 'belt' }));
+      if (ki % 2 === 0) { const dg = K.at(K.A / 2 + 1.9, Math.min(K.sv0 + 0.5, 3)); figures.push({ t: 'animal', kind: 'dog', at: dg, y: ground.height(...dg), rot: rand() * 6.28, seed: seed(), graze: false }); } }
     if (ki % 5 === 0 || rand() < 0.3) continue;
     const at = K.at(12 + (rand() - 0.5) * 4, 4.5 + rand() * 2), rot = facing(K.inward), h = 1.5;
-    figures.push(woman({ at, y: 0, rot, h, pose: 'seiza' }));
-    const waist = toPlan(at, 0, rot, h, [0, 0.42, -0.22]), far = [at[0] + K.inward[0] * 2.1, at[1] + K.inward[1] * 2.1];
-    gear.push({ t: 'backstrap_loom', a: [waist[0], waist[1], waist[2]], b: [far[0], 0.8, far[1]], cloth: ['cloth_red', 'cloth_ochre', 'cloth_black'][Math.floor(rand() * 3)], seed: seed() });
+    const yk = ground.height(...at);
+    figures.push(woman({ at, y: yk, rot, h, pose: 'seiza' }));
+    const waist = toPlan(at, yk, rot, h, [0, 0.42, -0.22]), far = [at[0] + K.inward[0] * 2.1, at[1] + K.inward[1] * 2.1];
+    gear.push({ t: 'backstrap_loom', a: [waist[0], waist[1], waist[2]], b: [far[0], yk + 0.8, far[1]], cloth: ['cloth_red', 'cloth_ochre', 'cloth_black'][Math.floor(rand() * 3)], seed: seed() });
   }
 
   // the quarrymen dressing the blocks lined up on the quarry's east side

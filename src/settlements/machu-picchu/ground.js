@@ -4,7 +4,7 @@
 // on the terraces, cloud forest on the slopes; mist and cloud of the eastern Andes.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, SITE, TERRACE, PLAZA, PEAKS, DITCH, FIELDS, STORES, HUT, HILL, KNOLL, hillHeight, inRect, outside, terraceAt, inHouse, paved, ploughed, smooth as sm } from './layout.js';
+import { RADIUS, SITE, TERRACE, PLAZA, PEAKS, DITCH, FIELDS, STORES, HUT, HILL, KNOLL, hillHeight, laneLevel, platformAt, inRect, outside, terraceAt, inHouse, paved, ploughed, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -12,7 +12,7 @@ function vnoise(x, z) {
   const a = hash2(xi, zi), b = hash2(xi + 1, zi), c = hash2(xi, zi + 1), d = hash2(xi + 1, zi + 1);
   return (a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v) * 2 - 1;
 }
-const TOP = -TERRACE.h * TERRACE.n;
+const TOP = -TERRACE.h * TERRACE.n, PLAZA_DEPTH = 3.0;
 /** The far walls of the canyon: { c, rx, rz, h } ellipses of mountain, east and west of the saddle (crests at 60–120 m above the town). */
 const RIDGES = [{ c: [212, -15], rx: 66, rz: 200, h: 160 }, { c: [-214, 20], rx: 66, rz: 190, h: 140 }, { c: [200, 150], rx: 60, rz: 80, h: 100 }, { c: [-210, 140], rx: 60, rz: 70, h: 90 }, { c: [150, -215], rx: 55, rz: 70, h: 135 }, { c: [-155, -210], rx: 55, rz: 70, h: 130 }, { c: [-10, -262], rx: 70, rz: 50, h: 150 }];
 /** The ridge stands 130 m above the open country: its canyon floor comes down to -130 by the rim. */
@@ -24,14 +24,15 @@ function height(x, z) {
   const d = outside(x, z);
   let h;
   if (d < 0) {
-    h = 0;
-    // the plaza sunk 2.4 m, its banks falling over 6 m from its edge (about 30° at the steepest: one
-    // walks down into it and up out of it)
-    if (inRect(PLAZA, x, z)) h = -2.4 * sm(0, 6, Math.min(x - PLAZA[0], PLAZA[2] - x, z - PLAZA[1], PLAZA[3] - z));
+    // the town's terraces: the lanes' ground stepping down from the core by bands, each kancha on its own levelled platform
+    h = laneLevel(x, z);
+    { const pl = platformAt(x, z); if (pl !== null) h = pl; }
+    // the Main Plaza sunk in two tiers of 1.5 m, each with its wall (plan.js), the stairs down at the road, the west and the kallanka
+    if (inRect(PLAZA, x, z)) { const i = Math.min(x - PLAZA[0], PLAZA[2] - x, z - PLAZA[1], PLAZA[3] - z); h = -PLAZA_DEPTH / 2 * (sm(0, 0.7, i) + sm(2.4, 3.1, i)); }
     // the dry ditch across the saddle before the town wall, its west end closed
     { const q = Math.abs(z - DITCH.z); if (q < DITCH.top) h = Math.min(h, -DITCH.depth * (1 - sm(DITCH.bottom, DITCH.top, q)) * sm(DITCH.x0, DITCH.x0 + 5, x)); }
     // the Intihuatana's hill and the Guardhouse's knoll, in terraces
-    h = Math.max(h, hillHeight(HILL, x, z), hillHeight(KNOLL, x, z));
+    { const hh = Math.max(hillHeight(HILL, x, z), hillHeight(KNOLL, x, z)); if (hh > 0) h = Math.max(h, hh); }
   } else {
     const k = terraceAt(d);
     // the terraces, then the slope down into the canyon, its floor
