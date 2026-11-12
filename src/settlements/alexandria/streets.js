@@ -8,6 +8,7 @@ import { houseLayout } from '../../styles/ptolemaic/house.js';
 import { RADIUS, GROUND, SEA, QUAY, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, lots, wet, inRect, inLot } from './layout.js';
 
 const g = GROUND;
+const FIG = [];            // the figures at the quay's work (filled by quayLife, drawn by streetLife)
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (rand, a) => a[Math.floor(rand() * a.length)];
 const base = (id, elements, extra = {}) => ({ id, style: 'ptolemaic', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [100, -86], facing: 'e' }, ...extra });
@@ -37,6 +38,7 @@ function paving() {
 }
 /** The harbour front: goods on the quay, cranes, net racks, mooring gear, shrines and the fountain of the agora. */
 function quayLife() {
+  FIG.length = 0;
   const rand = rng(331), E = [], y = g + 0.04, zq = QUAY[1] + 5.2;
   const kinds = ['amphorae', 'sacks', 'bales', 'logs', 'amphorae', 'crates', 'sacks', 'ingots', 'bales'];
   let i = 0;
@@ -58,6 +60,15 @@ function quayLife() {
   for (const dz of [-5, 5]) E.push({ t: 'stele', at: [AGORA[0] + 12, (AGORA[1] + AGORA[3]) / 2 + dz], y: g + 0.04, rot: 0.2 * dz, h: 2.1 });
   E.push({ t: 'cargo_pile', at: [AGORA[0] + 40, AGORA[1] + 28], y: g + 0.04, rot: 0.3, kind: 'amphorae', n: 3, seed: 8 });
   E.push({ t: 'cargo_pile', at: [AGORA[0] + 14, AGORA[1] + 26], y: g + 0.04, rot: 0, kind: 'sacks', n: 3, seed: 9 });
+  // date palms along the promenade and in the agora, fig trees in the agora's corners
+  for (let x = -200; x < 420; x += 34 + rand() * 10) if (dry(x, -83, 2) && !E.some((e) => e.at && Math.abs(e.at[0] - x) < 6 && Math.abs(e.at[1] + 85) < 3) && Math.abs(x - 100) > 12) E.push({ t: 'ptol_tree', at: [x, -82.8], y, kind: 'palm', h: 5 + rand() * 3, seed: Math.floor(rand() * 1e6) });
+  for (const [dx, dz] of [[2, 2], [AGORA[2] - AGORA[0] - 2, 2], [2, AGORA[3] - AGORA[1] - 2], [AGORA[2] - AGORA[0] - 2, AGORA[3] - AGORA[1] - 2]]) E.push({ t: 'ptol_tree', at: [AGORA[0] + dx, AGORA[1] + dz], y: g + 0.04, kind: 'fig', h: 3.6, seed: dx * 3 + dz });
+  // the quay's workers: sitting at the nets, standing by the cranes, porters with sacks
+  for (const e of E) {
+    if (e.t === 'net_rack') FIG.push({ at: [e.at[0] + 0.8, e.at[1] + 1.4], rot: 0, pose: 'sit_ground', dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', seed: e.seed });
+    else if (e.t === 'crane') for (const dx of [-0.9, 0.9]) FIG.push({ at: [e.at[0] + dx, e.at[1] + 2.4], rot: Math.PI, pose: 'stand', dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', seed: Math.floor(e.at[0]) + dx });
+    else if (e.t === 'cargo_pile' && e.at[1] < -80 && rand() < 0.5) FIG.push({ at: [e.at[0] + 2.0, e.at[1] + 1.3], rot: 1.2, pose: 'stand', dress: 'tunic', cloth: pick(rand, ['cloth_brown', 'linen', 'cloth_ochre']), hat: 'cap', carry: 'sack', skin: 'skin_medium', hair: 'short', seed: e.seed });
+  }
   return base('alexandria-quay', E);
 }
 /** Washing across the alleys between the upper windows. */
@@ -96,6 +107,7 @@ export function streetLife() {
     if (rand() < 0.14) L.push({ t: 'animal', kind: 'cat', at: pt(F.L * rand(), 0.7), y, rot: rand() * 6, seed: Math.floor(rand() * 1e9) });
     if (rand() < 0.1) L.push({ t: 'chickens', n: 3, at: pt(F.L * rand(), 1.2), y, rot: rand() * 6, seed: Math.floor(rand() * 1e9) });
   }
+  for (const f of FIG) L.push({ t: 'figure', y: g + 0.04, ...f });
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`alexandria-streetlife-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 200 }; });

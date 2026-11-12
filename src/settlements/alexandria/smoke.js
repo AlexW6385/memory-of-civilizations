@@ -4,6 +4,7 @@
 
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
+import { houseLayout } from '../../styles/ptolemaic/house.js';
 import { lots, PHAROS, SEROUTE, SEA, GROUND, RADIUS, wet } from './layout.js';
 
 const ID = 'alexandria';
@@ -15,6 +16,12 @@ function emitters() {
     if (rand() > 0.3) continue;
     const [x0, z0, x1, z1] = l.rect;
     E.push({ p: [x0 + (x1 - x0) * (0.3 + 0.4 * rand()), l.y + 4.2 + (l.quarter === 'egyptian' ? 3 : 0), z0 + (z1 - z0) * (0.3 + 0.4 * rand())], kind: 'kitchen', seed: l.seed + 1 });
+  }
+  // the bakers' ovens and the potters' kilns burn all day in the shop lots of their trades
+  for (const l of lots()) {
+    if (l.warehouse || l.quarter === 'egyptian') continue;
+    const K = houseLayout({ rect: l.rect, seed: l.seed, front: l.front });
+    if (K.aShop && (K.trade === 'bread' || K.trade === 'pottery' || K.trade === 'bronze')) { const [x0, z0, x1, z1] = l.rect; E.push({ p: [(x0 + x1) / 2, l.y + K.H + 1.2, (z0 + z1) / 2], kind: 'kitchen', thr: 0, seed: l.seed + 5 }); }
   }
   // the Pharos: its fire's smoke over the lantern (about 104 m up)
   E.push({ p: [PHAROS.c[0], GROUND + 0.66 + 56.5 + 28.7 + 10.4 + 4.6, PHAROS.c[1]], kind: 'kitchen', thr: 0, seed: 77 });

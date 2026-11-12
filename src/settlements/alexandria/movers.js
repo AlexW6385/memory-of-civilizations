@@ -11,7 +11,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 42, night: 6, rain: 0.7, reach: 150, spawnMin: 28, far: 42 },
+  walkers: { day: 50, night: 6, rain: 0.7, reach: 150, spawnMin: 28, far: 42 },
   boats: { count: 8, reach: 260, spawnMin: 60, far: 95, speed: [0.9, 1.4], bridgeSpeed: 0.7 },
   water: SEA,
 };
@@ -71,6 +71,9 @@ export const WALKERS = [
   { id: 'jew', weight: 0.7, market: 1.4, quarter: 'jewish', el: { dress: 'robe', hair: 'short', hat: 'cap', over: 'shawl', arms: 'hang', beard: true }, c1: [CL.white, CL.blue, CL.ochre, CL.linen], c2: [CL.white, CL.blue], c3: [CL.white], speed: [0.9, 1.15], stride: 1.35 },
   { id: 'sailor', weight: 1.0, market: 1.6, quay: 2.5, el: { dress: 'tunic', hair: 'short', hat: 'cap', over: 'belt', arms: 'hang' }, c1: [CL.white, CL.brown, CL.ochre, CL.linen], c2: [CL.brown, CL.red], c3: [CL.red, CL.brown], speed: [1.1, 1.4], stride: 1.45 },
   { id: 'porter', weight: 1.0, market: 1.6, quay: 2.0, el: { dress: 'tunic', hair: 'short', carry: 'sack', over: 'belt' }, c1: [CL.brown, CL.linen, CL.ochre], c2: [CL.brown], c3: [CL.brown], speed: [0.95, 1.2], stride: 1.15 },
+  { id: 'water_carrier', weight: 0.8, market: 0.8, el: { dress: 'sheath', hair: 'long', carry: 'pot', arms: 'hang' }, swing: 0.7, c1: [CL.linen, CL.white, CL.red], c2: [CL.linen], c3: [CL.white], speed: [0.85, 1.05], stride: 1.15, h: [0.9, 0.97] },
+  { id: 'basket_woman', weight: 0.7, market: 1.8, el: { dress: 'robe', hair: 'bun', hat: 'veil', carry: 'basket', over: 'shawl' }, swing: 0.7, c1: [CL.white, CL.ochre, CL.red, CL.green], c2: [CL.white, CL.ochre], c3: [CL.white], speed: [0.85, 1.05], stride: 1.15, h: [0.9, 0.97] },
+  { id: 'priest', weight: 0.4, market: 0.3, el: { dress: 'robe', hair: 'shaven', arms: 'hang', over: 'sash' }, c1: [CL.white, CL.linen], c2: [CL.white], c3: [CL.white], speed: [0.8, 0.95], stride: 1.3 },
   { id: 'soldier', weight: 0.5, market: 0.7, el: { dress: 'tunic', hair: 'short', hat: 'brim', over: 'cape', carry: 'staff', beard: false }, c1: [CL.red, CL.maroon, CL.white], c2: [CL.maroon, CL.red], c3: [CL.brown], speed: [1.0, 1.2], stride: 1.4 },
 ];
 /** The sailor at the steering oar on the stern, and the passenger on the deck. */
