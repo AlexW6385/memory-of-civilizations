@@ -50,7 +50,19 @@ export function shangFoundry(el, { bag, col, lights }) {
   heap('serpentine', -50, 124, 1.9); heap('serpentine', -46, 130, 1.3); heap('granite_black', -56, 146, 2.6); heap('granite_black', -50, 150, 1.6); heap('mud_plaster', -44, 138, 2.0); heap('lead', -122, 164, 1.0);
   for (let r = 0; r < 4; r++) bag.add('log_pine', box(-62, r * 0.28, 160, -56, r * 0.28 + 0.26, 161.8));
   for (let k = 0; k < 6; k++) bag.add('pottery_dark', lathe(JAR(0.24), 9, null, -126 + k * 0.7, 0, 120));
+  // ── the foundry dressed (docs §5c): soot and ash on the ground about the furnaces and the pit, water troughs, a kiln for the moulds, a drying
+  // shed over the field's far rows, fettling benches with their files of stone, broken moulds, the porters' baskets and ladders, tally posts ──
+  for (const [x, z, r] of [[-97, 109, 6.5], [-88, 132, 6.0], [-110, 111, 2.6], [-86, 111, 2.6]]) bag.add('granite_black', frustum([x - r, z - r * 0.7, x + r, z + r * 0.7], 0, 0.02, 0.5, 0.5, 0.5, 0.5, { noBottom: true }));
+  for (const [x, z] of [[-99, 119], [-81, 119]]) { for (const [a, b, c, d] of [[-0.9, -0.35, 0.9, -0.28], [-0.9, 0.28, 0.9, 0.35], [-0.9, -0.35, -0.83, 0.35], [0.83, -0.35, 0.9, 0.35], [-0.9, -0.35, 0.9, 0.35]]) bag.add('planks_grey', box(x + a, a === -0.9 && c === 0.9 && b === -0.35 && d === 0.35 ? 0 : 0, z + b, x + c, b === -0.35 && d === 0.35 ? 0.1 : 0.55, z + d)); bag.add('water', box(x - 0.82, 0.4, z - 0.27, x + 0.82, 0.42, z + 0.27)); col.rect([x - 0.9, z - 0.35, x + 0.9, z + 0.35], 0, 0.55); }
+  { const kx = -62, kz = 136; bag.add('mud_plaster', frustum([kx - 2.4, kz - 2.0, kx + 2.4, kz + 2.0], 0, 1.5, 0.7, 0.7, 0.6, 0.6, { noBottom: true })); col.rect([kx - 2.4, kz - 2.0, kx + 2.4, kz + 2.0], 0, 1.5);
+    for (const dx of [-1.2, 0, 1.2]) bag.add('granite_black', lathe([[0.3, 1.5], [0.26, 1.7], [0.001, 1.72]], 7, null, kx + dx, 0, kz)); bag.add('opening', box(kx - 0.5, 0.1, kz + 1.95, kx + 0.5, 0.8, kz + 2.05)); bag.add('granite_black', box(kx - 1.4, 0, kz + 2.0, kx + 1.4, 0.02, kz + 4.2)); }
+  { const a = -114, b = 138, c = -96, d = 152; for (const x of [a, (a + c) / 2, c]) for (const z of [b, d]) { bag.add('timber', lathe([[0.12, 0], [0.1, 2.6]], 7, null, x, 0, z)); col.circle(x, z, 0.16, 0, 2.6); }
+    bag.add('timber', box(a - 0.1, 2.6, b - 0.1, c + 0.1, 2.75, b + 0.1)); bag.add('timber', box(a - 0.1, 2.6, d - 0.1, c + 0.1, 2.75, d + 0.1)); thatch(bag, [a, b, c, d], 2.75, 1.5, 0.7, false); }
+  for (let i = 0; i < 3; i++) { const x = -120 + i * 9, z = 160; bag.add('timber', box(x, 0.62, z, x + 3, 0.7, z + 0.9)); for (const dx of [0.1, 2.8]) bag.add('timber', box(x + dx, 0, z + 0.4, x + dx + 0.1, 0.62, z + 0.5)); col.rect([x, z, x + 3, z + 0.9], 0, 0.7); for (let k = 0; k < 3; k++) vessel(KINDS[(i + k) % 5], bag, x + 0.6 + k * 0.9, 0.7, z + 0.45, 0.8); bag.add('granite_grey', box(x + 2.6, 0.7, z + 0.2, x + 2.9, 0.76, z + 0.7)); }
+  for (let k = 0; k < 14; k++) { const a = k * 2.399, rr = 0.4 + (k % 6) * 0.3; bag.add('mud_plaster', frustum([-76 + Math.cos(a) * rr - 0.25, 138 + Math.sin(a) * rr * 0.8 - 0.2, -76 + Math.cos(a) * rr + 0.25, 138 + Math.sin(a) * rr * 0.8 + 0.2], 0, 0.1 + (k % 4) * 0.05, 0.05, 0.05, 0.05, 0.05)); }
+  for (const [x, z] of [[-52, 118], [-48, 142], [-130, 130]]) { bag.add('wicker', lathe([[0.3, 0], [0.34, 0.4], [0.3, 0.42], [0.001, 0.42]], 8, null, x, 0, z)); bag.add('serpentine', lathe([[0.3, 0.38], [0.2, 0.5], [0.001, 0.52]], 8, null, x, 0, z)); }
+  for (const [x, z] of [[-143, 140], [-143, 160]]) { bag.add('timber', box(x - 0.06, 0, z - 0.06, x + 0.06, 2.0, z + 0.06)); bag.add('timber', box(x - 0.3, 1.7, z - 0.04, x + 0.3, 1.76, z + 0.04)); bag.add('ivory', box(x - 0.2, 1.3, z - 0.07, x + 0.2, 1.5, z + 0.07)); }
   // the casters' pit houses along the south
-  for (let i = 0; i < 5; i++) pitHouse(frame([x0 + 6 + i * 16, z1 - 14, x0 + 6 + i * 16 + 8, z1 - 2], 'n', bag, col), 1.0, 1.5, 3.6, 4.8, false);
+  for (let i = 0; i < 5; i++) pitHouse(frame([x0 + 6 + i * 16, z1 - 14, x0 + 6 + i * 16 + 8, z1 - 2], 'n', bag, col), 1.0, 1.5, i === 2 ? 5.0 : 3.6, i === 2 ? 5.2 : 4.8, i === 2);
   void W; void D; void F;
 }

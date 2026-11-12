@@ -90,6 +90,38 @@ export function shangHall(el, { bag, col, lights }) {
     const p = M(0, vi0 + 3.5); bag.add('bronze', lathe([[0.001, 0.25], [0.28, 0.28], [0.3, 0.4], [0.001, 0.4]], 10, null, p[0], y + 0.07, p[1]));
     lights.push({ at: [p[0], y + 0.9, p[1]], color: '#ffb468', intensity: 1.6, distance: 10 });
   }
+
+  // ── the weathering and dressing of the hall (docs §4a) ──
+  // inside: the dado of cinnabar to 1.1 m, a frieze of squares in red and black high on the plaster, tie-beams across the roof, the ridge-beam
+  B('kokowai', -BL / 2 + tw, y + 0.04, vi0, BL / 2 - tw, y + 1.1, vi0 + 0.03, false);
+  B('kokowai', -BL / 2 + tw, y + 0.04, vf - 0.03, BL / 2 - tw, y + 1.1, vf, false);
+  for (let k = 0; k < bays * 2; k++) { const c = -BL / 2 + tw + 0.8 + k * ((BL - 2 * tw - 1.6) / (bays * 2 - 1)); B(k % 2 ? 'lacquer_black' : 'kokowai', c - 0.45, y + 2.3, vi0, c + 0.45, y + 2.9, vi0 + 0.035, false); B('ivory', c - 0.25, y + 2.5, vi0 + 0.035, c + 0.25, y + 2.7, vi0 + 0.045, false); }
+  for (let k = 0; k <= bays; k++) B('timber', -BL / 2 + k * bw - 0.13, y + WH + 0.05, vi0, -BL / 2 + k * bw + 0.13, y + WH + 0.38, vf, false);
+  { const hv = vb + (D + Pd - 0.5) / 2, half = Math.max(2, (BL - D - Pd + 0.5) / 2 - 1); B('timber', -half, y + WH + 0.35 + RISE - 0.5, hv - 0.14, half, y + WH + 0.35 + RISE - 0.22, hv + 0.14, false); }
+  // outside: the plinth of rammed earth at the foot of the wall, rain streaks under the eaves, the ridge-bundle, the crossed horns of the gable
+  for (let k = 0; k < bays * 2; k++) { const c = -BL / 2 + 1 + k * (BL - 2) / (bays * 2 - 1); B('plaster_streak', c, y + WH - 1.1, vb - 0.035, c + 0.2, y + WH, vb, false); }
+  { const hv = vb + (D + Pd - 0.5) / 2, top = y + WH + 0.35 + RISE, hlen = Math.abs((BL + 2 * O) / 2 - (D + Pd - 0.5 + 2 * O) / 2);
+    B('roof_ridge', -hlen - 0.3, top - 0.1, hv - 0.2, hlen + 0.3, top + 0.2, hv + 0.2, false);
+    for (const s of [-1, 1]) { const p = M(s * (hlen + 0.3), hv); for (const t of [-1, 1]) { const q = M(s * (hlen + 0.3) + s * 0.9, hv + t * 0.55); bag.add('timber', rod([p[0], top + 0.1, p[1]], [q[0], top + 1.1, q[1]], 0.05, 5)); } } }
+  // the porch: lamps (bronze tripods with a flame) between the posts, banners hung from the front beam, offerings on low stands before the doors
+  if (el.rich) {
+    for (const k of [1, 3, 5, 7]) { const p = M(-BL / 2 + (k + 0.5) * bw, vp + 0.8); bag.add('bronze', lathe([[0.001, 0], [0.15, 0.02], [0.04, 0.5], [0.04, 0.9], [0.14, 1.0], [0.001, 1.02]], 8, null, p[0], y + 0.17, p[1])); bag.add('flame', lathe([[0.001, 0], [0.07, 0.04], [0.001, 0.26]], 6, null, p[0], y + 1.17, p[1])); }
+    for (const k of [0, 2, 4, 6, 8]) B('cloth_red', -BL / 2 + (k + 0.5) * bw - 0.35, y + WH - 1.5, vp + 0.24, -BL / 2 + (k + 0.5) * bw + 0.35, y + WH + 0.02, vp + 0.28, false);
+    for (const k of [2, 6]) { const p = M(-BL / 2 + (k + 0.5) * bw, vp + 2.2); bag.add('granite_grey', lathe([[0.4, 0], [0.36, 0.45], [0.001, 0.46]], 10, null, p[0], y + 0.17, p[1])); vessel('ding', bag, p[0], y + 0.6, p[1], 1.0); col.circle(p[0], p[1], 0.42, y, y + 0.7); }
+    // inside: two rows of mats for the officials, tablets of the ancestors on the altar, wine jars on stands, a second row of tables bearing food vessels
+    for (const s of [-1, 1]) for (let r = 0; r < 3; r++) mat(s * (8 + r * 3.4) - 1.2, vi0 + 8.0, s * (8 + r * 3.4) + 1.2, vi0 + 9.4);
+    for (let k = 0; k < 7; k++) { const uu = -9 + k * 3; B('timber_red', uu - 0.12, y + 0.54, vi0 + 1.7, uu + 0.12, y + 1.15, vi0 + 1.78, false); }
+    for (const s of [-1, 1]) { B('lacquer_black', s * 3.0 - 1.0, y + 0.04, vi0 + 8.4, s * 3.0 + 1.0, y + 0.42, vi0 + 9.2); for (let k = 0; k < 3; k++) { const p = M(s * 3.0 - 0.6 + k * 0.6, vi0 + 8.8); vessel(KINDS[(k + (s > 0 ? 2 : 0)) % 5], bag, p[0], y + 0.42, p[1], 0.9); } }
+    for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { const p = M(s * (BL / 2 - 1.6), vi0 + 2.0 + k * 1.1); bag.add('pottery_dark', lathe([[0.001, 0], [0.2, 0.02], [0.3, 0.3], [0.22, 0.55], [0.12, 0.62], [0.001, 0.62]], 9, null, p[0], y + 0.04, p[1])); col.circle(p[0], p[1], 0.3, y, y + 0.6); }
+    for (let k = 1; k < bays; k += 2) for (const vv of [vb + D * 0.33, vb + D * 0.7]) B('cloth_red', -BL / 2 + k * bw - 0.3, y + 1.4, vv - 0.31, -BL / 2 + k * bw + 0.3, y + 3.3, vv - 0.28, false);
+  } else {
+    for (const s of [-1, 1]) { const p = M(s * 6, vi0 + 3.5); bag.add('bronze', lathe([[0.001, 0.3], [0.3, 0.34], [0.34, 0.5], [0.001, 0.5]], 10, null, p[0], y + 0.04, p[1])); bag.add('flame', lathe([[0.001, 0], [0.1, 0.05], [0.001, 0.3]], 6, null, p[0], y + 0.54, p[1])); col.circle(p[0], p[1], 0.34, y, y + 0.55); }
+    for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { const p = M(s * (BL / 2 - 1.4), vi0 + 1.8 + k * 1.0); bag.add('pottery_dark', lathe([[0.001, 0], [0.2, 0.02], [0.3, 0.3], [0.22, 0.55], [0.001, 0.62]], 9, null, p[0], y + 0.04, p[1])); col.circle(p[0], p[1], 0.3, y, y + 0.6); }
+    for (let k = 0; k <= bays; k++) B('timber', -BL / 2 + k * bw - 0.12, y + WH + 0.05, vi0, -BL / 2 + k * bw + 0.12, y + WH + 0.35, vf, false);
+    B('kokowai', -BL / 2 + tw, y + 0.04, vi0, BL / 2 - tw, y + 1.0, vi0 + 0.03, false);
+    for (let k = 0; k < 4; k++) B('cloth_ochre', -BL / 2 + 2 + k * 3.4, y + 1.6, vi0 + 0.03, -BL / 2 + 3.2 + k * 3.4, y + 2.8, vi0 + 0.06, false);
+    mat(-BL / 4 - 1, vi0 + 6.2, BL / 4 + 1, vi0 + 7.6);
+  }
   void frustum; void rod;
 }
 

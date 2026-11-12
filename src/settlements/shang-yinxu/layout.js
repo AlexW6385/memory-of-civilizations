@@ -81,8 +81,8 @@ const RESERVED = [
 ];
 export const reserved = (x, z, m = 0) => RESERVED.some((r) => inRect(r, x, z, m));
 
-// ── the lineage compounds: cells of 36 × 34 m round the zone, lanes 6 m wide between ──
-export const CELL = [36, 34], ORG = [-324, -170], LANE = 6, ZONE_R = 272;
+// ── the lineage compounds: cells of 34 × 32 m round the zone, lanes 5 m wide between, the lots filling the cells to the lane's edge ──
+export const CELL = [34, 32], ORG = [-323, -168], LANE = 5, ZONE_R = 292;
 const lotOverlapsFixed = (rect) => RESERVED.some((q) => rect[0] < q[2] + 2 && rect[2] > q[0] - 2 && rect[1] < q[3] + 2 && rect[3] > q[1] - 2);
 const bad = (x, z, m) => inRiver(x, z, m) || inMoat(x, z, m) || Math.hypot(x, z) > ZONE_R;
 let LOTS = null;
@@ -102,18 +102,18 @@ export function lots() {
     for (let i = 0; ; i++) {
       const xc = ORG[0] + i * CELL[0] + CELL[0] / 2;
       if (xc > ZONE_R) break;
-      const w = 21 + Math.floor(rand() * 5), d = 19 + Math.floor(rand() * 5);
-      const cx = xc + (rand() - 0.5) * 2, cz = zc + (rand() - 0.5) * 2;
+      const w = 27.4 + Math.floor(rand() * 3) * 0.4, d = 25.4 + Math.floor(rand() * 3) * 0.4;
+      const cx = xc + (rand() - 0.5) * 0.5, cz = zc + (rand() - 0.5) * 0.5;
       const rect = [cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2];
       const seed = Math.floor(rand() * 1e6), r = rand(), front = rand() < 0.5 ? 'n' : 's';
       const near = Math.hypot(cx - AXIS, cz + 30);
       if (lotOverlapsFixed(rect) || [[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]].some(([a, b]) => bad(a, b, 3))) continue;
-      if (near > 215 && r < 0.2) continue;                                           // fields between the clusters
-      let kind = near < 140 ? (r < 0.5 ? 'court' : r < 0.78 ? 'pits' : 'row') : (r < 0.2 ? 'court' : r < 0.65 ? 'pits' : 'row');
+      if (near > 235 && r < 0.12) continue;                                           // fields between the clusters
+      let kind = near < 140 ? (r < 0.5 ? 'court' : r < 0.78 ? 'pits' : 'row') : (r < 0.25 ? 'court' : r < 0.55 ? 'pits' : 'row');
       let trade;
       if (r > 0.9 && near < 220) { kind = 'workshop'; trade = trades[ti++ % trades.length]; }
-      const lot = { rect, front, kind, trade, seed, open: false };
-      if (kind !== 'pits' && (kind === 'workshop' || (near < 200 && furnished++ % 3 === 0))) lot.open = true;
+      const lot = { rect, front, kind, trade, seed, open: false, lod: near > 150 ? 1 : 0, near };
+      if (kind === 'workshop' || kind === 'court' || (near < 235 && furnished++ % 2 === 0)) lot.open = true;
       LOTS.push(lot);
     }
   }
@@ -148,3 +148,27 @@ export const BRIDGES = [
   { a: [-216, riverZ(-216) - 20], b: [-216, riverZ(-216) + 20] },
   { a: [riverX(0) - 20, 0], b: [riverX(0) + 20, 0] },
 ];
+
+// ── a lot's points: (u, v) the metres along the lot's street front and in from it (the frame of src/styles/shang/geo.js) ──
+/** The world point of (u, v) in lot l. */
+export function lotPoint(l, u, v) { const [x0, z0, , z1] = l.rect; return [x0 + u, l.front === 's' ? z1 - v : z0 + v]; }
+/** The direction the lot's front faces, as the yaw that turns an object's +z outward (π: north, 0: south). */
+export const lotRot = (l) => (l.front === 'n' ? Math.PI : 0);
+/** The fixed places of a yard by kind (the builders in src/styles/shang/houses.js put the well, hearth, pen and gate there): { gate, hearth, well, pen, yard, door }. */
+export function spots(kind, W, D) {
+  if (kind === 'court') return { gate: [W / 2, 0.5], hearth: [W / 2 + 4.5, 12.2], well: [W / 2 - 4.6, 11], pen: [W - 3.9, D - 5.3], yard: [W / 2, 8], door: [W / 2, D - 8.6] };
+  if (kind === 'pits') return { gate: [W / 2, 0.5], hearth: [W / 2, D / 2 - 1], well: [4.6, D / 2 - 1], pen: [W - 4.1, 9], yard: [W / 2, D / 2 + 2], door: [W / 2 - 0.7, D - 6.4] };
+  if (kind === 'row') return { gate: [10.1, 0.5], hearth: [W / 2 + 3, 11], well: [W / 2 - 5, 12.4], pen: [W - 3.8, 10.7], yard: [W / 2, 12], door: [W / 2, 0.7] };
+  return { gate: [W / 2, 0.5], hearth: [W / 2, D / 2 - 2], well: [W / 2, 8], pen: [W - 5, 8], yard: [W / 2, 8], door: [W / 2, D - 10] };
+}
+
+// ── the landings on the Huan: a plank stage on piles from the bank into the water, with the boats moored by it ──
+/** { a (bank end), b (water end), n (unit vector bank → water), tang (unit along the bank), rot (yaw of a boat moored along it) } */
+export function landings() {
+  const out = [], H = RIVER.half;
+  for (const x of [-290, -262, -236, -196, -168, -142, -112, -84, -52, -22, 8, 38]) { const z = riverZ(x), s = x % 2 ? 1 : 1; out.push({ a: [x, z + H + 1.2 * s], b: [x, z + H - 4.2], n: [0, -1], tang: [1, 0], rot: Math.PI / 2 }); }
+  for (const x of [-258, -178, -96]) { const z = riverZ(x); out.push({ a: [x, z - H - 1.2], b: [x, z - H + 4.2], n: [0, 1], tang: [1, 0], rot: Math.PI / 2 }); }
+  for (const z of [-34, 8, 52, 96, 134, 178, 222]) { const x = riverX(z); out.push({ a: [x - H - 1.2, z], b: [x - H + 4.2, z], n: [1, 0], tang: [0, 1], rot: 0 }); }
+  for (const z of [-20, 76, 160]) { const x = riverX(z); out.push({ a: [x + H + 1.2, z], b: [x + H - 4.2, z], n: [-1, 0], tang: [0, 1], rot: 0 }); }
+  return out.filter((q) => Math.hypot(q.a[0], q.a[1]) < RADIUS - 24 && !BRIDGES.some((b) => Math.hypot(b.a[0] - q.a[0], b.a[1] - q.a[1]) < 24 || Math.hypot(b.b[0] - q.a[0], b.b[1] - q.a[1]) < 24));
+}

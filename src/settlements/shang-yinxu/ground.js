@@ -24,17 +24,17 @@ function planting(x, z) {
   if (r > RADIUS - 6) return null;
   const dr = riverDist(x, z) - RIVER.half;
   if (dr < -1.2) return null;
-  if (dr < 5) return { reeds: 2.6, willow: 0.12, grass: 18 };
-  if (dr < 12) return { willow: 0.1, poplar: 0.05, bamboo: hash2(x * 0.1, z * 0.1) < 0.3 ? 0.4 : 0, grass: 16 };
+  if (dr < 5) return { reeds: 3.2, willow: 0.2, grass: 18 };
+  if (dr < 14) return { willow: 0.16, poplar: 0.08, elm: 0.04, bamboo: hash2(x * 0.1, z * 0.1) < 0.3 ? 0.5 : 0, reeds: dr < 8 ? 0.8 : 0, grass: 16 };
   if (inRect(COURT, x, z, 3) || reserved(x, z, 1) || inFoundry(x, z, 3) || inMoat(x, z, 2) || onStreet(x, z)) return null;
-  if (inLot(x, z, 0.5)) { const l = lots().find((q) => inRect(q.rect, x, z)); return l && l.kind === 'court' && hash2(x, z) < 0.5 ? { mulberry: 0.5, jujube: 0.3 } : null; }
+  if (inLot(x, z, 0.5)) return null;
   if (r > 150) return { elm: 0.02, mulberry: 0.03, grass_dry: 3 };
-  if (hash2(x * 0.3, z * 0.3) < 0.18) return { elm: 0.05, jujube: 0.06, mulberry: 0.05, grass: 14 };
+  if (hash2(x * 0.3, z * 0.3) < 0.3) return { elm: 0.09, jujube: 0.1, mulberry: 0.1, grass: 14 };
   return { grass: 12 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { reeds: 2.6, willow: 0.12, poplar: 0.05, bamboo: 0.4, mulberry: 0.5, jujube: 0.3, elm: 0.05 },
+  maxDensity: { reeds: 3.2, willow: 0.2, poplar: 0.08, bamboo: 0.5, mulberry: 0.1, jujube: 0.1, elm: 0.09 },
   climate: {
     sun: { az: 150, el: 58, color: [1.0, 0.95, 0.86], intensity: 3.6, lat: 36.1, dec: 10, hour: 10 },
     sky: { turbidity: 3.2, rayleigh: 1.0, mie: 0.006, mieG: 0.8, zenith: [0.1, 0.18, 0.4], horizon: [0.7, 0.7, 0.64] },

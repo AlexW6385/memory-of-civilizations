@@ -2,18 +2,38 @@
 // the bronze vessels of the ritual set, a frame for lots.
 import { box, frustum, lathe, rod } from '../../core/geom.js';
 
-/** A lot's frame: u runs along the street, v from the street into the lot. */
+/**
+ * A lot's frame: u runs along the street, v from the street into the lot. `sub(u0, v0, dir)` is a frame of its own for a building turned
+ * to face another way: local a along its width, b from its door into it; dir 'v' (door toward the street, the house in front of
+ * (u0, v0)), 'back' (door toward the lot's back, the house on the street side of the door line), '+u' (door toward +u, the house at
+ * smaller u), '-u' (door toward -u). `asc` is the world direction of local +b (the way up the steps from the door into the house).
+ */
 export function frame(rect, front, bag, col) {
   const [x0, z0, x1, z1] = rect, zs = front === 's' ? z1 : z0, sg = front === 's' ? -1 : 1, Z = (v) => zs + sg * v;
-  const R = (u0, v0, u1, v1) => { const a = Z(v0), b = Z(v1); return [x0 + u0, Math.min(a, b), x0 + u1, Math.max(a, b)]; };
-  return {
-    W: x1 - x0, D: z1 - z0, X: (u) => x0 + u, Z, R, bag, col, sg, front,
-    b(mat, u0, y0, v0, u1, y1, v1, solid = true) { const r = R(u0, v0, u1, v1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); if (solid) col.rect(r, y0, y1); },
-    lathe(mat, prof, u, y, v, seg = 10) { bag.add(mat, lathe(prof, seg, null, x0 + u, y, Z(v))); },
-    /** A roof (hip or gable) over [u0, v0, u1, v1] with eaves at y, rising `rise`, overhang o. */
-    roof(u0, v0, u1, v1, y, rise, o = 0.6, hip = true, mat = 'thatch') { const r = R(u0, v0, u1, v1); thatch(bag, r, y, rise, o, hip, mat); },
-    post(u, v, y0, y1, r = 0.12) { this.lathe('timber', [[r, 0], [r * 0.9, y1 - y0]], u, y0, v, 7); col.circle(x0 + u, Z(v), r + 0.04, y0, y1); },
+  const baseR = (u0, v0, u1, v1) => { const a = Z(v0), b = Z(v1); return [x0 + Math.min(u0, u1), Math.min(a, b), x0 + Math.max(u0, u1), Math.max(a, b)]; };
+  const mk = (map, W, D) => {
+    const R = (a0, b0, a1, b1) => { const p = map(a0, b0), q = map(a1, b1); return baseR(p[0], p[1], q[0], q[1]); };
+    const o = map(0, 0), e = map(0, 1), du = e[0] - o[0], dv = (e[1] - o[1]) * sg;
+    const F = {
+      W, D, R, bag, col, sg, front,
+      asc: Math.abs(du) > Math.abs(dv) ? (du > 0 ? 'e' : 'w') : (dv > 0 ? 's' : 'n'),
+      X: (a) => x0 + map(a, 0)[0], Z: (b) => Z(map(0, b)[1]),
+      /** The world point of local (a, b). */
+      P: (a, b) => { const p = map(a, b); return [x0 + p[0], Z(p[1])]; },
+      b(mat, a0, y0, b0, a1, y1, b1, solid = true) { const r = R(a0, b0, a1, b1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); if (solid) col.rect(r, y0, y1); },
+      lathe(mat, prof, a, y, b, seg = 10) { const p = F.P(a, b); bag.add(mat, lathe(prof, seg, null, p[0], y, p[1])); },
+      /** A roof (hip or gable) over [a0, b0, a1, b1] with eaves at y, rising `rise`, overhang o. */
+      roof(a0, b0, a1, b1, y, rise, o = 0.6, hip = true, mat = 'thatch') { thatch(bag, R(a0, b0, a1, b1), y, rise, o, hip, mat); },
+      post(a, b, y0, y1, r = 0.12) { const p = F.P(a, b); bag.add('timber', lathe([[r, 0], [r * 0.9, y1 - y0]], 7, null, p[0], y0, p[1])); col.circle(p[0], p[1], r + 0.04, y0, y1); },
+      /** The frame of a building turned to face `dir` at (u0, v0) of this frame (see above); w the width, d the depth. */
+      sub(u0, v0, dir = 'v', w = 0, d = 0) {
+        const m2 = dir === 'v' ? (a, b) => map(u0 + a, v0 + b) : dir === 'back' ? (a, b) => map(u0 - a, v0 - b) : dir === '+u' ? (a, b) => map(u0 - b, v0 + a) : (a, b) => map(u0 + b, v0 + a);
+        return mk(m2, w, d);
+      },
+    };
+    return F;
   };
+  return mk((a, b) => [a, b], x1 - x0, z1 - z0);
 }
 
 /** A thatched roof over the rectangle r = [x0, z0, x1, z1], eaves at y, ridge `rise` above; convex like thatch, two tiers. */
