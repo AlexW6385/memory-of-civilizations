@@ -113,6 +113,14 @@ function colonnade(el, ctx) {
     col.circle(cx, cz, 0.35, y, y + H);
   }
   bag.add('limestone', fbox(o, u, -0.3, L + 0.3, -0.4, 0.4, y + H - 0.3, y + H + 0.4));          // the architrave
+  // a lamp hung from the architrave in the middle of every span, over the walk
+  for (let k = 0; k < n; k++) {
+    const s = (k + 0.5) * step, lx = ax + u[0] * s + (-u[1]) * 0.9 * side, lz = az + u[1] * s + u[0] * 0.9 * side;
+    bag.add('iron', box(lx - 0.006, y + H - 1.5, lz - 0.006, lx + 0.006, y + H - 0.28, lz + 0.006));
+    bag.add('iron', lathe([[0.001, 0], [0.1, 0], [0.12, 0.03], [0.001, 0.03]], 8, null, lx, y + H - 1.62, lz));
+    bag.add('lamp_glass', lathe([[0.001, 0], [0.06, 0.01], [0.09, 0.1], [0.07, 0.2], [0.001, 0.2]], 8, null, lx, y + H - 1.59, lz));
+    bag.add('iron', lathe([[0.1, 0], [0.001, 0.08]], 8, null, lx, y + H - 1.4, lz));
+  }
   if (Sd > 0) {
     // the shops: a front wall with a door to each, party walls, a back wall, flat roofs; the portico roof leans on the front wall
     const f0 = D, f1 = D + 0.6, bk = D + Sd;

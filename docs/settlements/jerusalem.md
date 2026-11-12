@@ -86,6 +86,11 @@ Great ashlar retaining walls; the Aqsa's rows of marble columns under gabled tim
 - Arculf drew the form of the church on a wax tablet for Adomnán, and saw relics in it (the grave cloth) [stated: Wikipedia "De locis sanctis"; the lamps and altars are not in that account].
 - Built [inferred]: the altar under a four-columned canopy with a silver pyramidal roof in the apse; a low chancel screen of marble panels between small columns across the nave, a gate left open; the pulpit (ambo) of marble on four columns with its stair in the nave; sixteen to twenty lamps hung on chains over the nave, aisles and the rotunda's ambulatory; candle stands at the Tomb's porch and at Golgotha; in the atrium a round marble fountain basin (cantharus) under a small tiled canopy on eight columns; priests in black at the altar and the Tomb's door, pilgrims queueing, kneeling and resting; a well in the south yard.
 
+## 1f. The Kidron valley's rock-cut tombs (2026-11-11)
+
+- The Tomb of Absalom (Yad Avshalom) is about 20 m tall: a nearly cubical monolith about 6 m square and 6.4 m high cut from the Mount of Olives slope and surrounded on three sides by passages, with pairs of Ionic half-columns on each face and quarter-columns and pilasters at the corners, a Doric frieze of triglyphs and metopes under an Egyptian cornice; above it a square ashlar block, a round drum with a rope-like decoration, and a concave-sided cone ending in a half-closed lotus; of the 1st century AD [stated: Wikipedia "Yad Avshalom"]. The Tomb of Zechariah, a few metres from it, is a monolith cut from the rock of the valley's eastern escarpment directly across from the Temple Mount: a stepped base (crepidoma), two Ionic columns between two half-columns with pilasters at the corners, an Egyptian cornice carrying a pyramid; only the west façade finely worked; 1st century AD [stated: Wikipedia "Tomb of Zechariah"].
+- Built: both on the valley's east side at the foot of the Mount of Olives (x 288–292, z 58–80), facing west to the Haram; Absalom with columns on three faces; Zechariah's size (5 × 5 m, a pyramid to about 9 m) and the placing along the Haram's wall are ours, the Zechariah's columns shown on the west face only [inferred].
+
 ## 4e. The market street and the lanes (2026-11-11)
 
 - The street from the west gate to the Haram's stair: continuous rows of shops either side (a covered walk 2.6 m deep on columns at 4.5 m, the shops of §4d behind, each floor following the slope's steps), the roadway 9.2 m between; the lots within 14.5 m of the street are left to the shops [inferred: the Cardo's shops continued into the streets that met it; after the conquest the Cardo became an Arab-style market, §4d].
@@ -95,6 +100,8 @@ Great ashlar retaining walls; the Aqsa's rows of marble columns under gabled tim
 
 ## Sources (added 2026-11-11)
 
+- [Yad Avshalom — Wikipedia](https://en.wikipedia.org/wiki/Yad_Avshalom)
+- [Tomb of Zechariah — Wikipedia](https://en.wikipedia.org/wiki/Tomb_of_Zechariah)
 - [Elad, Jerusalem in the Umayyad period (pp. 300–314) — University of Michigan reader](https://courses.lsa.umich.edu/israel-palestine/wp-content/uploads/sites/142/2013/12/075.-Elad-300-314.pdf)
 - [De locis sanctis — Wikipedia](https://en.wikipedia.org/wiki/De_locis_sanctis)
 - [The Cardo (Jerusalem) — Wikipedia](https://en.wikipedia.org/wiki/The_Cardo_(Jerusalem))

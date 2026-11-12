@@ -192,4 +192,48 @@ function laneArch(el, ctx) {
   ctx.bag.add('limestone_carved', box(el.x0, top, el.z - th / 2 - 0.05, el.x1, top + 0.1, el.z + th / 2 + 0.05));
 }
 
-Object.assign(STYLES.islamic.elements, { wall_run: wallRun, lane_arch: laneArch, candelabrum, cantharus, ciborium, templon, ambo, cistern_head: cisternHead, minbar, lamp_chain: lampChain, quran_stand: quranStand, censer, mastaba, bracket_lamp: streetBracket });
+/**
+ * kidron_tomb: { kind ('absalom' | 'zechariah'), at, y (the ground at its foot) } — the rock-cut monuments of the Kidron valley, standing
+ * in the 1st century AD: a cube cut from the slope with Ionic half-columns on its faces, a Doric frieze and an Egyptian cornice; Absalom's
+ * with a square ashlar block, a round drum and a concave cone ending in a lotus (about 20 m), Zechariah's with a pyramid. Facing west, to the Temple Mount.
+ */
+function kidronTomb(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, ab = el.kind !== 'zechariah', S = ab ? 6.0 : 5.0, H = ab ? 6.4 : 5.4, h2 = S / 2, y0 = y - 1.2;
+  const ST = 'limestone_yellow', CUT = 'limestone_carved';
+  if (!ab) for (let k = 0; k < 3; k++) bag.add(ST, box(x - h2 - 0.9 + k * 0.3, y0, z - h2 - 0.9 + k * 0.3, x + h2 + 0.9 - k * 0.3, y + 0.3 * (k + 1) - 0.9 + 0.9, z + h2 + 0.9 - k * 0.3));
+  const b0 = ab ? y : y + 0.9;
+  bag.add(ST, box(x - h2, y0, z - h2, x + h2, b0 + H, z + h2));
+  col.rect([x - h2 - (ab ? 0 : 0.9), z - h2 - (ab ? 0 : 0.9), x + h2 + (ab ? 0 : 0.9), z + h2 + (ab ? 0 : 0.9)], y0, b0 + H + 0.2);
+  // a column on each face's pair and at the corners: the shaft, a base, an Ionic capital with its volutes
+  const colAt = (cx, cz, r) => {
+    bag.add(CUT, lathe([[r * 1.25, 0], [r * 1.25, 0.12], [r, 0.2], [r * 0.9, 0.3]], 12, null, cx, b0 + 0.2, cz));
+    bag.add(CUT, lathe([[r * 0.9, 0], [r * 0.82, H - 1.9]], 12, null, cx, b0 + 0.5, cz));
+    bag.add(CUT, box(cx - r * 1.4, b0 + H - 1.4, cz - r * 1.4, cx + r * 1.4, b0 + H - 1.2, cz + r * 1.4));
+    bag.add(CUT, box(cx - r * 1.5, b0 + H - 1.3, cz - r * 0.9, cx + r * 1.5, b0 + H - 1.0, cz + r * 0.9));
+  };
+  const r = 0.26, ts = ab ? [-1.7, -0.6, 0.6, 1.7] : [-1.5, -0.5, 0.5, 1.5];
+  for (const t of ts) colAt(x - h2 - 0.02, z + t, r);
+  if (ab) for (const t of ts) { colAt(x + t, z - h2 - 0.02, r); colAt(x + t, z + h2 + 0.02, r); }
+  // corner pilasters and the frieze of triglyphs and metopes, then the Egyptian cornice (a flared cavetto)
+  for (const [sx, sz] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) bag.add(CUT, box(x + sx * h2 - (sx > 0 ? 0.3 : 0), b0 + 0.2, z + sz * h2 - (sz > 0 ? 0.3 : 0), x + sx * h2 + (sx < 0 ? 0.3 : 0), b0 + H - 1.4, z + sz * h2 + (sz < 0 ? 0.3 : 0)));
+  bag.add(CUT, box(x - h2 - 0.08, b0 + H - 1.0, z - h2 - 0.08, x + h2 + 0.08, b0 + H - 0.5, z + h2 + 0.08));
+  for (let k = 0; k < 12; k++) for (const [fx, fz] of [[-1, 0], [0, -1], [0, 1]]) { const t = -h2 + 0.25 + k * (S - 0.5) / 11, px = fx ? x + fx * (h2 + 0.1) : x + t, pz = fx ? z + t : z + fz * (h2 + 0.1); bag.add('limestone', box(px - 0.1, b0 + H - 0.5, pz - 0.1, px + 0.1, b0 + H - 0.1, pz + 0.1)); }
+  bag.add(CUT, box(x - h2 - 0.3, b0 + H - 0.1, z - h2 - 0.3, x + h2 + 0.3, b0 + H + 0.3, z + h2 + 0.3));
+  const cap = ab ? 2.0 : 0.0;
+  if (ab) {
+    bag.add(ST, box(x - 2.0, b0 + H + 0.3, z - 2.0, x + 2.0, b0 + H + 2.7, z + 2.0));
+    bag.add(CUT, box(x - 2.15, b0 + H + 2.7, z - 2.15, x + 2.15, b0 + H + 2.9, z + 2.15));
+    bag.add(ST, lathe([[1.9, 0], [1.9, 2.8], [1.75, 2.9], [0.001, 2.9]], 20, null, x, b0 + H + 2.9, z));
+    bag.add('limestone', lathe([[1.94, 0], [1.94, 0.12], [1.9, 0.12]], 20, null, x, b0 + H + 4.2, z));
+    bag.add(CUT, lathe([[2.05, 0], [2.05, 0.25], [1.9, 0.3]], 20, null, x, b0 + H + 5.6, z));
+    const prof = [[1.9, 0]]; for (let k = 1; k <= 8; k++) { const t = k / 8; prof.push([1.9 * (1 - t) ** 1.6 + 0.25 * t, 3.4 * t]); }
+    bag.add(ST, lathe(prof, 20, null, x, b0 + H + 5.9, z));
+    bag.add(CUT, lathe([[0.25, 0], [0.5, 0.25], [0.35, 0.6], [0.18, 0.9], [0.001, 1.1]], 10, null, x, b0 + H + 9.3, z));
+  } else {
+    const prof = [[(S + 0.6) / Math.SQRT2, 0], [0.001, 3.2]];
+    bag.add(ST, lathe(prof, 4, null, x, b0 + H + 0.3, z).rotateY(Math.PI / 4));
+  }
+  void cap;
+}
+
+Object.assign(STYLES.islamic.elements, { kidron_tomb: kidronTomb, wall_run: wallRun, lane_arch: laneArch, candelabrum, cantharus, ciborium, templon, ambo, cistern_head: cisternHead, minbar, lamp_chain: lampChain, quran_stand: quranStand, censer, mastaba, bracket_lamp: streetBracket });

@@ -187,6 +187,15 @@ function bazaar(span) {
   return E;
 }
 
+// ── the rock-cut tombs of the Kidron valley, across from the Haram's east wall (§1f) ─────────────────────
+function kidron() {
+  const at = (x, z) => height(x, z);
+  return [
+    { t: 'kidron_tomb', kind: 'absalom', at: [288, 58], y: at(288, 58) },
+    { t: 'kidron_tomb', kind: 'zechariah', at: [292, 80], y: at(292, 80) },
+  ];
+}
+
 // ── the markets and the people ───────────────────────────────────────────────────────────────────
 function markets() {
   const rand = rng(691), L = [], X = CARDO.x, hr = CARDO.road / 2;
@@ -250,6 +259,7 @@ export function city() {
     plan('jerusalem-sepulchre-life', 'life', sepulchreLife(), { bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
     plan('jerusalem-gardens', 'islamic', [...gardenWalls(), ...laneArchElements()]),
     plan('jerusalem-garden-life', 'life', [...gardenLife(), ...laneLife()]),
+    plan('jerusalem-kidron', 'islamic', kidron()),
     plan('jerusalem-palaces', 'islamic', palaces()),
     ...STREET.spans.map((sp, i) => plan(`jerusalem-bazaar-${i}`, 'islamic', bazaar(sp), { bounds: [sp[0] - 4, -STREET.half - 2, sp[1] + 4, STREET.half + 2] })),
     plan('jerusalem-markets', 'life', markets()),

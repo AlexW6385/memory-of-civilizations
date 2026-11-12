@@ -3,7 +3,7 @@
 // the Holy Sepulchre's atrium and at the Dome of the Rock's doors. The engine part is src/engine/smoke.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, lots, CARDO, SEPULCHRE, SEP_Y, CARDO_Y, height } from './layout.js';
+import { RADIUS, STREET, lots, CARDO, SEPULCHRE, SEP_Y, CARDO_Y, height } from './layout.js';
 
 const ID = 'jerusalem';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -16,6 +16,8 @@ export function emitters() {
     E.push({ p: [x1 - 2.2, l.y + 4.2 + 0.9, z1 - 2.0], kind: 'kitchen', seed: l.seed + 1 });   // the kitchen range's roof vent
   }
   for (let z = -250; z < 260; z += 38 + r() * 30) { if (Math.abs(z) < 12) continue; const s = r() < 0.5 ? -1 : 1; E.push({ p: [CARDO.x + s * (CARDO.road / 2 + CARDO.portico + 2.5), CARDO_Y + 7.2, z], kind: 'steam', thr: r() * 0.3, seed: Math.floor(r() * 1e6) }); }
+  // the bakers' ovens along the market street: steam and smoke from the shop fronts
+  for (let x = -350; x < -184; x += 31 + r() * 22) { if (x > -252 && x < -208) continue; const s = r() < 0.5 ? -1 : 1; E.push({ p: [x, height(x, s * 9) + 6.3, s * (STREET.road + STREET.portico + STREET.shops - 1.5)], kind: 'steam', thr: r() * 0.3, seed: Math.floor(r() * 1e6) }); }
   E.push({ p: [SEPULCHRE[2] - 24, SEP_Y + 1.2, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], kind: 'incense', thr: 0, seed: 31 });
   E.push({ p: [-31, height(-31, -20) + 4 + 1.2, -20], kind: 'incense', thr: 0.1, seed: 32 });
   return E;
