@@ -67,6 +67,9 @@ function dress() {
   cp('pot', 38.2, -9.5, 0, { kind: 'amphora', n: 3 }); cp('pot', 44.6, -9.5, 0, { kind: 'pithos', n: 2 }); cp('sacks', 48.5, -9.4, 0, { n: 4 });
   cp('pot', 56.9, -6.0, 0, { kind: 'pithos', n: 2 }); cp('pot', 56.9, 12.5, 0, { kind: 'water_pot', n: 3 }); cp('basket', 31.5, 4.0, 0, { n: 3 });
   cp('stool', 43.2, 14.8, 0, {}); cp('stool', 44.4, 14.9, 0, {});
+  // offerings at the shaft graves of the circle: jars and bowls at the stelae's feet, a basket of grain
+  for (const [gx, gz] of [[-5.2, -3.4], [0.3, -6.4], [5.0, -1.8], [-2.2, 2.6], [3.6, 5.6], [-6.0, 4.6]]) E.push({ t: 'pot', at: [GCA.x + gx + 0.4, GCA.z + gz + 1.5], y: GCA.y + 0.03, rot: 0, seed: Math.floor(rand() * 1e9), kind: rand() < 0.5 ? 'water_pot' : 'amphora', n: 2 });
+  E.push({ t: 'basket', at: [GCA.x + 6.4, GCA.z - 5.5], y: GCA.y + 0.03, rot: 0, seed: 4, n: 2 });
   return E;
 }
 
