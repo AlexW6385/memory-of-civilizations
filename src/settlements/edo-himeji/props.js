@@ -2,7 +2,7 @@
 // (instances of shared shapes, in tiles of 100 m that cull by distance): firewood, fire tubs, pots, baskets, benches and
 // handcarts before the merchants' fronts, cats on the pent roofs, dogs in the street; at the samurai gates a lantern, a
 // fire tub, a horse at the hitching post; at the moat's landings baskets and tubs.
-import { lots, furniture, STREET, MIDDLE, LEVEL, RADIUS } from './layout.js';
+import { lots, furniture, STREET, MIDDLE, LEVEL, RADIUS, HON, NINO } from './layout.js';
 import { yashikiParts } from '../../styles/edo/yard.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -39,6 +39,14 @@ export function props() {
   for (const f of furniture()) if (f.t === 'landing') {
     E.push({ t: 'basket', at: [f.x - 2.3, f.z0 - 0.7], n: 2, seed: Math.floor(f.x) }, { t: 'rain_tub', at: [f.x + 2.4, f.z0 - 0.8], seed: Math.floor(f.x) + 1 });
   }
+  // the Honmaru and Ninomaru as the visitor arrives: a horse at the wall with its groom, fire tubs by the stair and under the pines,
+  // a bench in the pines' shade, baskets and a pot by the kura (the castle's own stores stand on the Ninomaru)
+  { const h = HON.top, n = NINO.top;
+    E.push({ t: 'animal', kind: 'horse', at: [22.5, -12.2], y: h, rot: Math.PI / 2 + 0.3, seed: 77 });
+    for (const [x, z] of [[-38.2, -24.2], [-23.8, -24.2]]) E.push({ t: 'rain_tub', at: [x, z], y: h, seed: Math.floor(x) });
+    E.push({ t: 'bench', at: [-70.6, -17], y: h, rot: Math.PI / 2, len: 1.6, seed: 5 }, { t: 'rain_tub', at: [-19, -112], y: h, seed: 8 });
+    E.push({ t: 'basket', at: [-92, 12.5], y: n, n: 3, seed: 3 }, { t: 'pot', kind: 'blue_jar', at: [-84, 12.5], y: n, n: 2, seed: 4 }, { t: 'firewood', at: [-100.5, 6], y: n, rot: 0, len: 1.4, seed: 9 });
+    E.push({ t: 'lantern', kind: 'paper', at: [-38.8, -21.2], y: h, h: 2.2, rot: 0, seed: 11 }, { t: 'lantern', kind: 'paper', at: [-23.2, -21.2], y: h, h: 2.2, rot: 0, seed: 12 }); }
   const tiles = new Map();
   for (const e of E) { const k = Math.floor(e.at[0] / 100) + ',' + Math.floor(e.at[1] / 100); if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, elements]) => { const [i, j] = k.split(',').map(Number); return { id: `edo-himeji-props-${k}`, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' }, center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
