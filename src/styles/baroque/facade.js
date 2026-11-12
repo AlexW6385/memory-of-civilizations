@@ -132,6 +132,10 @@ export function stPeterFacade(bag, col, { fx, cz, fw, y, top, open = false }) {
     Lc.box(TR, uc - bw / 2 - 1.3, by + 1.0, d0 + bd - 0.45, uc + bw / 2 + 1.3, by + 1.2, d0 + bd);
     for (const sg of [-1, 1]) Lc.box(TR, uc + sg * (bw / 2 + 1.3) - 0.2, by, d0 + 0.4, uc + sg * (bw / 2 + 1.3) + 0.2, by + 1.2, d0 + bd);
     Lc.box(O, uc - bw / 2, by, d0, uc + bw / 2, by + bh, d0 + 0.06);
+    // on a feast the balconies are hung with red damask (the Loggia of the Blessings most of all), a gilt fringe along its hem
+    { const hy = by - (kind ? 4.6 : 3.6) * s, x0 = uc - bw / 2 - 1.15, x1 = uc + bw / 2 + 1.15;
+      Lc.box('cloth_red', x0, hy, d0 + bd + 0.01, x1, by + 1.05, d0 + bd + 0.07); Lc.box(GB, x0, hy - 0.1, d0 + bd + 0.01, x1, hy, d0 + bd + 0.09);
+      for (const x of [x0, x1 - 0.12]) Lc.box(GB, x, hy, d0 + bd + 0.01, x + 0.12, by + 1.05, d0 + bd + 0.09); }
     for (const sg of [-1, 1]) { const cu = uc + sg * (bw / 2 + 0.55); Lc.add(TR, lathe([[0.36, 0], [0.3, 0.3], [0.27, bh - 0.6], [0.4, bh - 0.3], [0.42, bh]], 10, null, cu, by, d0 + 0.45)); }
     Lc.box(TR, uc - bw / 2 - 1.0, by + bh, d0, uc + bw / 2 + 1.0, by + bh + 0.7, d0 + 0.9);
     const pw = bw / 2 + 1.2, triangular = kind || Math.abs(a) > 20;
