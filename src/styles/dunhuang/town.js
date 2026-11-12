@@ -332,7 +332,7 @@ function furnishOther(ctx, x0, za, x1, zb, zm, k) {
     for (let j = 0; j < 5; j++) jar(x0 + 2.5 + (j % 3) * 0.7, za + 0.7 + Math.floor(j / 3) * 0.7, 0.26, 0.7);
     slab(ctx, 'timber', [x0 + 2.6, zm + 0.5, x0 + 4.2, zm + 1.4], 0, 0.8); for (let j = 0; j < 4; j++) bag.add('hide_tan', lathe([[0.001, 0], [0.14, 0], [0.14, 0.04], [0.001, 0.04]], 8, null, x0 + 2.9 + j * 0.3, 0.8, zm + 0.95));
     for (let j = 0; j < 8; j++) bag.add('log_pine', lathe([[0.07, 0], [0.07, 1.2], [0.001, 1.2]], 6, null, x0 + 3.0 + (j % 4) * 0.2, 0.0, zb - 0.5)), col.circle(x0 + 3.0 + (j % 4) * 0.2, zb - 0.5, 0.08, 0, 1.2);
-    ctx.lights?.push({ at: [x0 + 1.0, 1.2, zm], color: '#ff9a4a', intensity: 2.5, distance: 6 });
+    ctx.lights?.push({ at: [x0 + 1.0, 1.05, zm], color: '#ff9a4a', intensity: 2.5, distance: 6 });
     figure({ at: [x0 + 2.2, zm - 0.9], y: 0.03, rot: -Math.PI / 2, seed: 42, dress: 'tunic', cloth: 'cloth_red', hair: 'bun', hat: 'none', over: 'apron', skin: 'skin_medium', pose: 'stand', feet: 'shod' }, ctx);
   } else if (k === 3) {     // the drivers' room: two kangs with blankets, boots, a saddle and a staff, two sleepers
     kangAt(za + 0.4, zm - 0.1); kangAt(zm + 0.1, zb - 0.4);

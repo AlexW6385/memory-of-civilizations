@@ -255,7 +255,5 @@ export function makeHouse({ frame, gable }) {
       }
       function trestleOut(u0, u1, v0, v1) { B('timber', u0, v0, u1, v1, 0.74, 0.8); for (const [a, b] of [[u0 + 0.05, v0 + 0.05], [u1 - 0.1, v0 + 0.05], [u0 + 0.05, v1 - 0.1], [u1 - 0.1, v1 - 0.1]]) B('timber', a, b, a + 0.05, b + 0.05, 0, 0.74); }
     }
-    // the lights of the interior: one lamp is added above; make the room's light bright enough to read it
-    ctx.lights?.push({ at: [...P(W * 0.5, Dh * 0.5)].flatMap((c, i) => (i === 0 ? [c, HF - 0.6] : [c])), color: '#ffd29a', intensity: 0.9, distance: 6.5 });
   };
 }

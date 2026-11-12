@@ -1,6 +1,7 @@
 // The Mogao cliff (docs/settlements/dunhuang.md §2–§5): the rock with its caves in four tiers, the Great Buddha's
 // hall and the Nine-Storey building at the middle, the apron, the stair and the gallery of the second tier; at the
 // foot the stream with its timber bridge and the monks' halls on the east bank.
+import { LV } from '../../styles/dunhuang/nine.js';
 import { XF, ROCK, ZEND, FLOOR, CAVES, RIVER, riverX, STAIR, GALLERY } from './layout.js';
 
 const E = [];
@@ -25,6 +26,7 @@ const rooms = [
     const d = c.kind === 'hall' ? [7.8, 3] : c.kind === 'pillar' ? [10, 3.5] : [5, 1.6];
     return room(c.id + '-cave', [XF - d[0], c.z - d[1], XF, c.z + d[1]], FLOOR[c.tier], 'hall', true);
   }),
+  ...[1, 2, 3, 4, 6, 8].map((k) => room('nine-' + k, k <= 3 ? [XF + 3.7, 3.2, XF + 4.3, 4.2] : [XF + 0.7, 3.2, XF + 1.3, 4.2], LV[k].y, 'open')),
   room('forecourt', [XF - 2, -ZEND, XF + 24, ZEND], 0, 'open'),
 ];
 // from the bridge over the apron to the two caves and the great hall, back, then up the stair to the gallery
