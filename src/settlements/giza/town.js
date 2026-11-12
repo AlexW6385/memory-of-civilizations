@@ -4,6 +4,7 @@
 
 import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOAT_PITS, SHIP, SPHINX, KHAFRE_VT, KV_Y, KHAFRE_CW, QUARRY, ENCLOSURE, mastabas, slots, furnished, town as townLots } from './layout.js';
 import { ground } from './ground.js';
+import { RAMP, haulRoad } from './works.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -157,6 +158,54 @@ function extras(lots) {
   E.push({ ...base('giza-yard-life', L, TOWN_Y), style: 'life' }, { ...base('giza-mason-life', M), style: 'life' });
   return E;
 }
+/** The works at the plateau's edge in the arrival's view (docs/settlements/giza.md §13): the casing stones hauled up the rubble ramp on their sledges (the ramp half taken down),
+ *  masons dressing and setting the last of the Tura stone, the sleeper road, a procession of priests and bearers going in to the mortuary temple, donkeys with their loads. */
+function worksLife() {
+  const rand = rng(2570), L = [], hr = RAMP.heightAt;
+  const man = (at, rot, o) => L.push({ t: 'figure', at, y: o?.y ?? 0, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', top: 'bare', cloth: 'cloth_white', skin: 'skin_medium', hat: 'none', hair: 'short', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
+  const woman = (at, rot, o) => L.push({ t: 'figure', at, y: o?.y ?? 0, rot, seed: Math.floor(rand() * 1e9), dress: 'sheath', cloth: 'cloth_white', skin: 'skin_medium', hat: 'none', hair: 'long', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
+  const W = -Math.PI / 2 * -1, E = -Math.PI / 2;           // facing west (rot π/2), east (rot −π/2)
+  const rz = RAMP.z;
+  // the gang on the ramp, two by two on the rope, the sledge behind them with its block; the overseer with his staff; a boy pouring water on the sand before the runners
+  for (let k = 0; k < 5; k++) for (const dz of [-0.45, 0.45]) { const x = RAMP.sledge - 6.2 - k * 1.25; man([x, rz + dz + (k % 2) * 0.1], W, { pose: 'pull', carry: 'rope', len: 1.4, y: hr(x) }); }
+  man([RAMP.sledge - 3.2, rz + 2.0], Math.PI * 0.8, { pose: 'staff', carry: 'staff', over: 'sash', len: 1.7, y: hr(RAMP.sledge - 3.2) });
+  man([RAMP.sledge - 4.4, rz - 1.8], W, { carry: 'pot', y: hr(RAMP.sledge - 4.4), child: true, dress: 'loincloth' });
+  // bearers of rubble and water going up and down the ramp's sides
+  for (const [x, dz, r, c] of [[RAMP.x1 - 4, -2.6, W, 'basket'], [RAMP.x1 - 8, 2.5, E, 'basket'], [RAMP.sledge + 5, -2.7, W, 'pot'], [RAMP.sledge + 9, 2.6, E, 'basket']]) man([x, rz + dz], r, { carry: c, y: hr(x) });
+  // masons dressing the casing stones at the stacks: kneeling, the mallet and chisel; a scribe tallying under the shade; a lever-man
+  for (const [x, z, r] of [[214, -74.4, 0.2], [218.6, -76.2, 3.3], [201.6, -75.4, 0.4], [207.2, -75.0, 3.4], [210.6, -54.4, 0.2], [216.4, -54.8, 3.0]]) man([x, z], r, { pose: 'kneel' });
+  man([211.4, -56.1], 1.0, { pose: 'squat' }); man([196.4, -74.6], 2.6, { pose: 'squat' });
+  man([207.0, -85.2], 0.2, { pose: 'sit', over: 'sash' }); man([208.6, -84.6], 3.5, { pose: 'talk', over: 'sash', carry: 'staff', len: 1.7 });
+  man([224.0, -55.4], W, { carry: 'pot' }); woman([220.6, -56.8], E, { carry: 'pot' });
+  // the procession along the plateau to the doorway of the causeway's north wall: priests with staffs and censers, bearers with bread, beer and linen
+  const line = (k) => [233 - k * 2.5, -46.4 + Math.sin(k * 1.3) * 0.5];
+  [['priest', 'staff'], ['priest', 'pot'], ['woman', 'pot'], ['man', 'basket'], ['woman', 'basket'], ['man', 'sack'], ['priest', 'staff'], ['woman', 'pot'], ['man', 'basket'], ['priest', 'pot']].forEach(([kind, carry], k) => {
+    const at = line(k), o = carry === 'staff' ? { pose: 'staff', carry, len: 1.7 } : { carry };
+    if (kind === 'priest') man(at, W, { ...o, over: 'sash', hair: 'shaven' }); else if (kind === 'woman') woman(at, W, o); else man(at, W, o);
+  });
+  // donkeys with their panniers of rubble and sand, led by a boy
+  for (let k = 0; k < 3; k++) L.push({ t: 'animal', kind: 'donkey', at: [206 + k * 2.7, -53.5 - (k % 2) * 0.6], y: 0, rot: Math.PI / 2 + (rand() - 0.5) * 0.2, seed: Math.floor(rand() * 1e9) });
+  man([202.4, -53.2], W, { carry: 'staff', pose: 'staff', len: 1.4, child: true, dress: 'loincloth' });
+  return L;
+}
+function worksPlan() {
+  const [x0, x1, z, w, h] = [RAMP.x0, RAMP.x1, RAMP.z, RAMP.w, RAMP.h], sy = RAMP.heightAt(RAMP.sledge) + 0.06;
+  const stacks = [[214, -77, 0.2, 2], [217.8, -78.4, -0.1, 3], [209.6, -78.6, 0.4, 1], [205.6, -77.4, 0.1, 2], [200.6, -78, 0.0, 3], [195.4, -76.6, 0.3, 2], [214.6, -55, 0.3, 2], [210.2, -55.8, 0, 1], [205, -55.4, 0.5, 3], [219.4, -57.6, 0.1, 1]];
+  const tools = []; for (const [x, zz] of [[214, -74.4], [218.6, -76.2], [201.6, -75.4], [207.2, -75], [210.6, -54.4], [216.4, -54.8]]) tools.push([x + 0.8, 0, zz + 0.5, 'mallet'], [x - 0.7, 0, zz - 0.4, 'pounder'], [x + 0.3, 0, zz + 1.1, 'jar']);
+  tools.push([198.6, 0, -75.2, 'lever']);
+  return base('giza-works', [
+    { t: 'ok_ramp', x0, x1, z, w, h, y: 0 },
+    { t: 'ok_track', pts: haulRoad(), w: 3.4 },
+    { t: 'stone_sledge', at: [RAMP.sledge, RAMP.z], y: sy, rot: Math.PI, w: 1.15, len: 1.7 },
+    { t: 'ok_casing', at: stacks },
+    { t: 'ok_tools', at: tools },
+    { t: 'ok_shade', rect: [204.4, -88, 210.6, -83.2], h: 2.3 },
+    // the gangs' and masons' belongings about the stacks and the road: water jars, bread baskets, sherds, a bench in the shade, the firewood for the noon meal
+    { t: 'ok_lane', items: [[203.6, -86.2, 'bench', 0, 11], [212.4, -72.6, 'pots', 0.3, 12], [199.2, -72.4, 'basket', 0, 13], [219.8, -73.6, 'pots', 0, 14], [208.6, -57.6, 'pots', 0, 15], [213, -52.4, 'basket', 0.4, 16], [203.4, -51.4, 'sherds', 0, 17],
+      [218.2, -52.8, 'ash', 0, 18], [221.6, -55.2, 'wood', 0, 19], [194.6, -55.6, 'pots', 0, 20], [190.4, -73.4, 'basket', 0, 21], [228.4, -68.6, 'pots', 0, 22], [224.6, -58.8, 'sherds', 0, 23], [200.4, -82.4, 'wood', 0, 24]] },
+  ]);
+}
+
 const base = (id, elements, y = 0) => ({ id, style: 'oldkingdom', origin: [0, 0], base: y, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [200, -40], facing: 'w' } });
 
 export async function town() {
@@ -188,6 +237,7 @@ export async function town() {
       { t: 'causeway', a: [d1, az], b: [bx, bz], w, h: 5, ya: KV_Y, yb: KV_Y },
     ]));
   }
+  plans.push(worksPlan(), { ...base('giza-works-life', worksLife()), style: 'life' });
   const Q = quarryWorks();
   plans.push(base('giza-quarry', [{ t: 'ok_quarry', blocks: Q.blocks }, { t: 'ok_track', pts: Q.pts, w: 3.6 }, { t: 'ok_tools', at: Q.toolAt }, { t: 'stone_sledge', at: [116, 122], y: Q.sledgeY + 0.1, rot: 0, w: 1.15, len: 1.7 }]));
   plans.push({ ...base('giza-quarry-life', quarryLife(Q)), style: 'life' });

@@ -119,6 +119,16 @@ function people() {
   }
   // ── the fields: the hoers and the man at the shaduf
   for (const [x, z] of [[22, -30], [26, -40], [24, 30], [27, 42]]) man([x, z], h(x, z), rand() * 6.28, { carry: 'hoe', hair: 'short', dress: 'loincloth', over: 'none' });
+  // ── a procession across the terrace to the door, in the arrival's view: priests with the offerings for the morning rite, bearers behind them, a boy with a goose
+  {
+    const r2 = rng(1257), line = (k) => [-10.5 - k * 2.3, 5.4 + Math.sin(k * 0.9) * 0.7 + (r2() - 0.5) * 0.3];
+    const kinds = [
+      (a) => priest(a, F, Math.PI / 2, { carry: 'staff', pose: 'staff', len: 1.7 }), (a) => priest(a, F, Math.PI / 2, { carry: 'pot' }), (a) => priest(a, F, Math.PI / 2, { carry: 'basket' }),
+      (a) => woman(a, F, Math.PI / 2, { carry: 'pot' }), (a) => man(a, F, Math.PI / 2, { carry: 'basket' }), (a) => woman(a, F, Math.PI / 2, { carry: 'basket' }),
+      (a) => man(a, F, Math.PI / 2, { carry: 'sack' }), (a) => kid(a, F, Math.PI / 2, {}),
+    ];
+    kinds.forEach((f, k) => f(line(k)));
+  }
   return T;
 }
 

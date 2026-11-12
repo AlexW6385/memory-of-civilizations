@@ -4,7 +4,7 @@
 // standing colossi of the Small Temple, Hathor's pillars and Hathor as the cow. Each builder returns { material: [geometry] }
 // in its own frame: the statue faces −z, stands on y = 0, its middle on x = 0, z = 0 (the spine's plane).
 
-import { box, rod, lathe } from '../../core/geom.js';
+import { box, rod, lathe, frustum } from '../../core/geom.js';
 import { loft, ring } from '../egyptian/objects.js';
 
 const X = [1, 0, 0], Zb = [0, 0, -1], Y = [0, 1, 0];
@@ -19,49 +19,91 @@ function ell(c, r, n = 14, m = 8) {
 const add = (o, m, g) => { (o[m] ??= []).push(g); return o; };
 const mirror = (f) => [-1, 1].map(f);
 
+/** Rings stacked along z (for limbs lying toward the front): rows of [z, cx, cy, half-width, half-height]. */
+const along = (R, n = 16, caps) => loft(R.map(([z, cx, cy, a, b]) => ring([cx, cy, z], X, Y, a, b, n)), caps);
+/** A row table's half-width at height y (linear between its rows), for bands laid on a headdress. */
+const widthAt = (R, y) => { for (let i = 0; i + 1 < R.length; i++) if (y <= R[i + 1][0]) { const t = (y - R[i][0]) / (R[i + 1][0] - R[i][0]); return [R[i][2] + (R[i + 1][2] - R[i][2]) * t, R[i][3] + (R[i + 1][3] - R[i][3]) * t, R[i][1] + (R[i + 1][1] - R[i][1]) * t]; } return [R[R.length - 1][2], R[R.length - 1][3], R[R.length - 1][1]]; };
+
 /**
  * The seated colossus of Ramesses II on the Great Temple's front: 20 m with the double crown, the nemes with its lappets,
  * the false beard, the shendyt kilt, the hands flat on the thighs, the shins and feet on the plinth, a back slab to the
- * rock. Origin: the spine's plane, floor level; faces −z.
+ * rock. Painted as such statues were (the skin red-brown, the kilt white, the nemes in blue and gold bands, the crowns red
+ * and white) so that the four read against the pale rock; modelled in rounded limbs, not blocks. Origin: the spine's plane,
+ * floor level; faces −z.
  */
 export function colossus() {
-  const o = {}, S = 'sandstone_dressed';
+  const o = {}, S = 'sandstone_dressed', K = 'paint_robe', W = 'plaster_white', B = 'egyptian_blue', G = 'paint_ochre', RD = 'limewash_red', BK = 'paint_minoan_black';
+  // the ground field behind each figure: a panel leaning back with the façade, darker than the dressed face, so that the figure stands out of it
+  add(o, 'sandstone_relief', frustum([-3.9, 0.5, 3.9, 3.8], 0.5, 21.2, 0, 0, 1.55, 0));
   add(o, S, box(-3.8, 0, -7.6, 3.8, 0.5, 2.0));                                     // the plinth
-  add(o, S, box(-3.5, 0.5, -4.4, 3.5, 5.2, 2.0));                                   // the throne's block between and behind the legs
+  add(o, 'sandstone_floor', box(-3.3, 0.5, -7.1, 3.3, 0.62, -4.6));                  // the step the feet stand on
+  // the throne: the block between and behind the legs, its sides panelled with the sema-tawy (the lungs and trachea tied by lotus and papyrus)
+  add(o, S, box(-3.5, 0.5, -4.4, 3.5, 5.2, 2.0));
+  add(o, S, box(-0.8, 0.5, -5.55, 0.8, 5.2, -4.3));                                  // the web between the shins
   for (const s of [-1, 1]) {
-    const a = Math.min(s * 0.25, s * 2.85), b = Math.max(s * 0.25, s * 2.85);
-    add(o, S, box(a, 5.2, -5.8, b, 6.9, 0.9));                                      // the thigh to the knee
-    add(o, S, box(Math.min(s * 0.45, s * 2.65), 0.5, -5.8, Math.max(s * 0.45, s * 2.65), 5.4, -3.6));   // the shin
-    add(o, S, box(Math.min(s * 0.35, s * 2.75), 0.5, -7.4, Math.max(s * 0.35, s * 2.75), 1.05, -5.7));  // the foot
-    add(o, S, box(Math.min(s * 1.3, s * 2.7), 6.9, -3.8, Math.max(s * 1.3, s * 2.7), 7.4, -2.3));      // the hand flat on the thigh
+    const x = s * 3.5, d = s * 0.07, a = Math.min(x, x + d), b = Math.max(x, x + d);
+    add(o, G, box(a, 1.3, -3.9, b, 4.5, -0.6));                                      // the panel's frame
+    add(o, B, box(Math.min(x, x + 2 * d), 1.55, -3.6, Math.max(x, x + 2 * d), 4.25, -0.9));
+    add(o, W, box(Math.min(x, x + 3 * d), 2.7, -2.6, Math.max(x, x + 3 * d), 3.1, -1.9));  // the tied knot of the sign
+    for (const z of [-3.1, -1.4]) add(o, G, box(Math.min(x, x + 3 * d), 1.7, z - 0.12, Math.max(x, x + 3 * d), 4.1, z + 0.12));   // the two stems
   }
-  add(o, S, box(-1.3, 3.6, -6.0, 1.3, 6.9, -5.55));                                  // the kilt's apron between the knees
-  add(o, S, box(-2.9, 6.9, -5.55, 2.9, 7.1, 0.9));                                   // the kilt over the lap
+  // the legs: round thighs under the kilt, the knees, the shins and calves, the feet with their toes
+  for (const s of [-1, 1]) {
+    const cx = s * 1.85;
+    add(o, K, along([[0.9, cx, 6.0, 1.0, 0.95], [-1.2, cx, 6.05, 1.02, 0.97], [-3.6, cx, 6.1, 0.98, 0.93], [-5.55, cx, 6.0, 0.9, 0.85]], 16));
+    add(o, K, ell([cx, 5.85, -5.5], [0.92, 0.95, 0.7], 14, 7));                       // the knee
+    add(o, K, rows([[5.3, -5.0, 0.85, 0.78, cx], [4.2, -5.05, 0.8, 0.74, cx], [3.0, -5.0, 0.72, 0.68, cx], [1.6, -5.0, 0.6, 0.58, cx], [0.9, -5.0, 0.62, 0.6, cx]], 14));   // the shin and calf
+    add(o, K, ell([cx, 0.85, -6.5], [0.62, 0.32, 1.1], 12, 6));                       // the foot
+    for (let k = 0; k < 5; k++) add(o, K, ell([cx + s * (k - 2) * 0.2 + s * 0.05, 0.72, -7.5 - (k === 1 ? 0.03 : 0) + Math.abs(k - 2) * 0.1], [0.095, 0.1, 0.15], 6, 4));   // the toes
+  }
+  // the kilt: the shendyt over the lap, its apron hanging between the knees, pleated
+  add(o, W, along([[0.9, 0, 6.5, 2.95, 0.62], [-1.5, 0, 6.6, 2.98, 0.6], [-4.0, 0, 6.65, 2.98, 0.58], [-5.75, 0, 6.6, 2.95, 0.55]], 24));
+  add(o, W, box(-0.85, 3.6, -6.05, 0.85, 7.0, -5.55));
+  for (let k = 0; k < 5; k++) add(o, 'plaster_grey', box(-0.72 + k * 0.36, 3.7, -6.09, -0.6 + k * 0.36, 6.9, -6.05));   // the pleats
+  add(o, G, box(-0.95, 3.45, -6.12, 0.95, 3.65, -5.5));                              // the apron's gold hem
   // the torso, from the hips to the shoulders, and the neck
-  add(o, S, rows([[5.2, 0.45, 2.35, 1.5], [6.2, 0.4, 2.3, 1.5], [8.0, 0.35, 2.15, 1.45], [10.0, 0.3, 2.45, 1.5], [11.8, 0.2, 2.9, 1.55], [13.0, 0.15, 3.15, 1.5], [13.7, 0.2, 2.2, 1.3]], 28));
-  add(o, S, rows([[13.4, 0.1, 1.2, 1.15], [14.5, 0.05, 1.05, 1.05]], 16));
-  add(o, S, rows([[7.15, 0.4, 2.45, 1.52], [7.5, 0.4, 2.42, 1.5]], 28));         // the belt
+  add(o, K, rows([[5.2, 0.45, 2.35, 1.5], [6.2, 0.4, 2.3, 1.5], [8.0, 0.35, 2.15, 1.45], [10.0, 0.3, 2.45, 1.5], [11.8, 0.2, 2.9, 1.55], [13.0, 0.15, 3.15, 1.5], [13.7, 0.2, 2.2, 1.3]], 28));
+  add(o, K, rows([[13.4, 0.1, 1.2, 1.15], [14.5, 0.05, 1.05, 1.05]], 16));
+  add(o, G, rows([[7.1, 0.4, 2.47, 1.54], [7.55, 0.4, 2.44, 1.52]], 28));          // the belt
+  add(o, G, rows([[12.15, 0.2, 2.98, 1.6], [12.55, 0.19, 3.08, 1.6], [13.1, 0.16, 3.22, 1.58]], 28));   // the broad collar
+  for (const s of [-1, 1]) add(o, K, ell([s * 1.0, 11.2, -1.0], [0.9, 0.7, 0.5], 12, 6));   // the pectoral
   for (const s of [-1, 1]) {
-    add(o, S, ell([s * 3.1, 12.6, 0.15], [1.15, 1.15, 1.15], 14, 7));              // the shoulder
-    add(o, S, rod([s * 3.1, 12.6, 0.15], [s * 3.3, 8.9, -0.3], 0.95, 14));         // the upper arm
-    add(o, S, ell([s * 3.3, 8.9, -0.3], [0.95, 0.95, 0.95], 12, 6));               // the elbow
-    add(o, S, rod([s * 3.3, 8.9, -0.3], [s * 2.0, 7.55, -2.9], 0.78, 14));         // the forearm to the hand
-    add(o, S, box(Math.min(s * 1.0, s * 3.0), 11.6, -1.0, Math.max(s * 1.0, s * 3.0), 13.9, -0.35)); // the nemes' lappet over the chest
+    add(o, K, ell([s * 3.1, 12.6, 0.15], [1.15, 1.15, 1.15], 14, 7));              // the shoulder
+    add(o, K, rod([s * 3.1, 12.6, 0.15], [s * 3.3, 8.9, -0.3], 0.95, 14));         // the upper arm
+    add(o, G, rod([s * 3.19, 11.2, -0.08], [s * 3.22, 10.5, -0.12], 1.02, 14));    // the armband
+    add(o, K, ell([s * 3.3, 8.9, -0.3], [0.95, 0.95, 0.95], 12, 6));               // the elbow
+    add(o, K, rod([s * 3.3, 8.9, -0.3], [s * 2.0, 7.55, -2.9], 0.78, 14));         // the forearm to the hand
+    add(o, G, rod([s * 2.2, 7.8, -2.5], [s * 2.0, 7.55, -2.9], 0.84, 12));         // the bracelet
+    add(o, K, ell([s * 2.0, 7.38, -3.55], [0.58, 0.24, 1.1], 12, 6));              // the hand flat on the thigh
+    for (let k = 0; k < 4; k++) add(o, 'plaster_grey', box(s * 2.0 - 0.5 + k * 0.28, 7.55, -4.65, s * 2.0 - 0.38 + k * 0.28, 7.6, -3.7));   // the fingers' joints
   }
-  // the head: the nemes cloth, the face, nose, lips, brows, the false beard, the crowns
-  add(o, S, rows([[14.3, 0.35, 1.6, 1.5], [15.2, 0.4, 2.2, 1.9], [16.2, 0.4, 2.35, 2.0], [17.0, 0.4, 2.2, 1.9], [17.6, 0.4, 1.6, 1.5]], 24));
-  add(o, S, ell([0, 15.45, -0.6], [1.12, 1.6, 1.05], 18, 10));
-  add(o, S, ell([0, 15.15, -1.7], [0.3, 0.78, 0.46], 10, 6));                         // the nose
-  add(o, S, ell([0, 14.35, -1.5], [0.58, 0.17, 0.26], 12, 5));                        // the lips
+  // the nemes: the cloth over the head in bands of blue and gold, the two lappets over the chest
+  const NEMES = [[14.3, 0.35, 1.6, 1.5], [15.2, 0.4, 2.2, 1.9], [16.2, 0.4, 2.35, 2.0], [17.0, 0.4, 2.2, 1.9], [17.6, 0.4, 1.6, 1.5]];
+  add(o, B, rows(NEMES, 24));
+  for (const y of [14.8, 15.5, 16.2, 16.9]) { const [a, b, c] = widthAt(NEMES, y); add(o, G, rows([[y, c, a + 0.05, b + 0.05], [y + 0.16, c, a + 0.05, b + 0.05]], 24)); }
   for (const s of [-1, 1]) {
-    add(o, 'sandstone_carved', ell([s * 0.55, 15.8, -1.5], [0.4, 0.12, 0.2], 10, 5)); // the eye
-    add(o, 'sandstone_carved', ell([s * 0.58, 16.1, -1.5], [0.46, 0.06, 0.18], 10, 4)); // the brow
+    const LAP = [[13.9, -0.9, 0.5, 0.4], [12.6, -1.15, 0.55, 0.32], [11.5, -1.25, 0.55, 0.3]], cx = s * 1.55;
+    add(o, B, rows(LAP.map(([y, z, a, b]) => [y, z, a, b, cx]), 12));
+    for (const y of [13.4, 12.8, 12.2, 11.8]) {
+      const i = y > 12.6 ? 0 : 1, t = (LAP[i][0] - y) / (LAP[i][0] - LAP[i + 1][0]), m = (k) => LAP[i][k] + (LAP[i + 1][k] - LAP[i][k]) * t;
+      add(o, G, rows([[y + 0.07, m(1), m(2) + 0.04, m(3) + 0.04, cx], [y - 0.07, m(1), m(2) + 0.04, m(3) + 0.04, cx]], 12));
+    }
   }
-  add(o, S, box(-0.22, 12.5, -1.55, 0.22, 14.2, -1.1));                              // the false beard
-  add(o, S, rows([[17.4, 0.25, 1.2, 1.2], [18.3, 0.25, 1.25, 1.25], [18.85, 0.25, 1.05, 1.05]], 20));   // the red crown
-  add(o, S, rows([[18.75, 0.25, 0.88, 0.72], [19.4, 0.25, 0.8, 0.66], [19.85, 0.25, 0.5, 0.4], [20.0, 0.25, 0.18, 0.16]], 20));   // the white crown inside it
-  add(o, S, box(-0.3, 18.6, 0.75, 0.3, 19.7, 1.05));                                  // the tall back of the red crown
-  add(o, S, ell([0, 17.35, -1.6], [0.18, 0.32, 0.16], 8, 5));                         // the uraeus on the brow
+  // the face: modelled, the nose, the lips in red, the eyes painted (white, a black iris, the black lines of the brow), the ears, the false beard
+  add(o, K, ell([0, 15.45, -0.6], [1.12, 1.6, 1.05], 18, 10));
+  add(o, K, ell([0, 15.15, -1.7], [0.3, 0.78, 0.46], 10, 6));                         // the nose
+  add(o, RD, ell([0, 14.35, -1.5], [0.58, 0.17, 0.26], 12, 5));                        // the lips
+  for (const s of [-1, 1]) {
+    add(o, 'paint_white', ell([s * 0.55, 15.82, -1.5], [0.38, 0.13, 0.15], 10, 5));   // the eye
+    add(o, BK, ell([s * 0.55, 15.83, -1.62], [0.11, 0.11, 0.07], 8, 4));              // the iris
+    add(o, BK, ell([s * 0.58, 16.12, -1.5], [0.5, 0.06, 0.18], 10, 4));               // the brow, painted black
+    add(o, K, ell([s * 1.1, 15.3, -0.4], [0.17, 0.48, 0.22], 8, 5));                   // the ear
+  }
+  add(o, B, box(-0.24, 12.5, -1.6, 0.24, 14.2, -1.12)); add(o, G, box(-0.26, 13.0, -1.62, 0.26, 13.12, -1.1)); add(o, G, box(-0.26, 13.7, -1.62, 0.26, 13.82, -1.1));   // the false beard, banded
+  add(o, RD, rows([[17.4, 0.25, 1.2, 1.2], [18.3, 0.25, 1.25, 1.25], [18.85, 0.25, 1.05, 1.05]], 20));   // the red crown
+  add(o, W, rows([[18.75, 0.25, 0.88, 0.72], [19.4, 0.25, 0.8, 0.66], [19.85, 0.25, 0.5, 0.4], [20.0, 0.25, 0.18, 0.16]], 20));   // the white crown inside it
+  add(o, RD, box(-0.3, 18.6, 0.75, 0.3, 19.7, 1.05));                                  // the tall back of the red crown
+  add(o, G, ell([0, 17.35, -1.6], [0.18, 0.32, 0.16], 8, 5));                         // the uraeus on the brow
   add(o, S, box(-2.0, 0.5, 0.9, 2.0, 13.5, 3.8)); add(o, S, box(-1.5, 13.0, 0.7, 1.5, 20.1, 3.8)); // the back slab to the rock
   return o;
 }

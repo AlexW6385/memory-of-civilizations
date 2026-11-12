@@ -35,6 +35,8 @@ export function walkways() {
   rects.push(way([TOWN[0] + 8, 234.2], [TOWN[2] - 14, 234.2], 2.8, 2.4, 1.4));
   // the storerooms' fronts along the court's north and south walls
   rects.push(way([ENCLOSURE[0] + 16, ENCLOSURE[1] + 10], [ENCLOSURE[2] - 16, ENCLOSURE[1] + 10], 3.0, 0.6, 0.3), way([ENCLOSURE[0] + 16, ENCLOSURE[3] - 10], [ENCLOSURE[2] - 16, ENCLOSURE[3] - 10], 3.0, 0.6, 0.3));
+  // the works on the plateau's east side: the way from the causeway's head east to the haul road, the ramp's top and its foot, the road to the stacks of casing stones
+  rects.push(way([ENCLOSURE[2] + 52, -47], [266, -47], 3.6, 1.6, 0.8), way([184, -64], [236, -64], 3.2, 1.4, 0.7), way([206, -86], [206, -47], 3.0, 1.0, 0.6));
   // the stretch under the Wall of the Crow's south face
   rects.push(way([TOWN[0] + 10, 158.6], [CROW_WALL.b[0], 158.6], 2.4, 1.0, 0.8));
   // the harbour: the quay along the temple's front, and the way south of it to Khafre's valley temple
