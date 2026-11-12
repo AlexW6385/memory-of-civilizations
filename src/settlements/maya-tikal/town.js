@@ -100,13 +100,14 @@ function people() {
   for (let k = 0; k < 34; k++) {
     const x = -32 + rand() * 64, z = -34 + rand() * 68;
     if ((Math.abs(x) > 26 && Math.abs(z) < 9) || (Math.abs(x) < 7 && Math.abs(z) > 30) || Math.abs(z + 37.5) < 3 || [[-10, -20], [10, -20], [-10, 20], [10, 20]].some(([a, b]) => Math.hypot(a - x, b - z) < 2.5)) continue;
-    if (taken.some(([a, b]) => Math.hypot(a - x, b - z) < 1.6) || Math.hypot(x + 18, z - 28) < 9) continue;   // (nobody in the first metres of the arrival's view, (-18, 28))
+    if (taken.some(([a, b]) => Math.hypot(a - x, b - z) < 1.6)) continue;
     taken.push([x, z]);
-    const r = rand();
+    const n0 = L.length, r = rand();
     if (r < 0.28) L.push(person(rand, x, z, 0.04, rand() * 6.28, { woman: true, carry: pick(['pot', 'basket']) }));
     else if (r < 0.5) { const rot = rand() * 6.28; L.push(person(rand, x, z, 0.04, rot, { pose: 'talk' })); L.push(person(rand, x - Math.sin(rot) * 1.1, z - Math.cos(rot) * 1.1, 0.04, rot + Math.PI, { pose: 'stand' })); }
     else if (r < 0.62) L.push(person(rand, x, z, 0.04, rand() * 6.28, { woman: true, child: true, h: 1.1 }));
     else L.push(person(rand, x, z, 0.04, rand() * 6.28, { carry: pick(['none', 'sack', 'none']) }));
+    if (Math.hypot(x + 18, z - 28) < 9) L.length = n0;   // nobody in the first metres of the arrival's view, (-18, 28) (the others keep their places)
   }
   // before the North Acropolis: the rulers' retinue by the stelae
   for (const x of [-24, 24]) L.push(priest(rand, x, -34.4, 0.04, 0, { pose: 'talk' }));
@@ -138,7 +139,7 @@ function plazaLife() {
   // at the foot of Temple I's stair: worshippers kneeling with offerings, copal burning
   for (let k = 0; k < 7; k++) {
     const z = -7 + k * 2.3 + (rand() - 0.5) * 0.6, x = 30.6 + rand() * 1.4;
-    if (Math.abs(z) < 1.5 && k !== 3) continue;
+    if (Math.abs(z) < 2.6) continue;   // (the way to the stair stays clear)
     L.push(person(rand, x, z, Y, E, { woman: k % 2 === 0, pose: 'kneel', over: 'none' }));
     if (k % 2 === 0) L.push({ t: k % 4 === 0 ? 'pot' : 'basket', ...(k % 4 === 0 ? { kind: 'dark_pot', n: 1 } : { n: 1, goods: 'paint_ochre' }), at: [x + 0.7, z], y: Y, seed: 80 + k });
   }
