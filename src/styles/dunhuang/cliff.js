@@ -115,7 +115,7 @@ export function cliff(el, ctx) {
   // the caves
   for (const c of CAVES) {
     const y = FLOOR[c.tier];
-    if (c.kind === 'hall') { hallCave(ctx, { xf: XF, zc: c.z, y, seed: 3 }); porch(ctx, c, y, 3.0, 3.6); }
+    if (c.kind === 'hall') { hallCave(ctx, { xf: XF, zc: c.z, y, seed: c.seed ?? 3 }); porch(ctx, c, y, 3.0, 3.6); }
     else if (c.kind === 'pillar') { pillarCave(ctx, { xf: XF, zc: c.z, y }); porch(ctx, c, y, 3.0, 3.6); }
     else if (c.kind === 'cell') { cellCave(ctx, { xf: XF, zc: c.z, y }); bag.add('lacquer_red', box(XF - 0.02, y, c.z - 1.15, XF + 0.1, y + 2.45, c.z - 1.0)); bag.add('lacquer_red', box(XF - 0.02, y, c.z + 1.0, XF + 0.1, y + 2.45, c.z + 1.15)); bag.add('lacquer_red', box(XF - 0.02, y + 2.3, c.z - 1.15, XF + 0.1, y + 2.45, c.z + 1.15)); }
     else if (c.kind === 'great') greatCave(ctx, c);

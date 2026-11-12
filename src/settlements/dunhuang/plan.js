@@ -21,6 +21,10 @@ const rooms = [
   room('hall-cave', [XF - 7.8, hall.z - 3, XF, hall.z + 3], FLOOR[0], 'hall', true),
   room('pillar-cave', [XF - 10, pil.z - 3.5, XF, pil.z + 3.5], FLOOR[0], 'hall', true),
   room('cell', [XF - 5, cell.z - 1.6, XF, cell.z + 1.6], FLOOR[0], 'hall', true),
+  ...CAVES.filter((c) => !['great', 'recess'].includes(c.kind) && !['hall', 'pillar', 'cell'].includes(c.id)).map((c) => {
+    const d = c.kind === 'hall' ? [7.8, 3] : c.kind === 'pillar' ? [10, 3.5] : [5, 1.6];
+    return room(c.id + '-cave', [XF - d[0], c.z - d[1], XF, c.z + d[1]], FLOOR[c.tier], 'hall', true);
+  }),
   room('forecourt', [XF - 2, -ZEND, XF + 24, ZEND], 0, 'open'),
 ];
 // from the bridge over the apron to the two caves and the great hall, back, then up the stair to the gallery

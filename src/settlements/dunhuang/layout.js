@@ -25,6 +25,14 @@ CAVES.push({ id: 'great', kind: 'great', z: 0, tier: 0, w: 23 });
 CAVES.push({ id: 'hall', kind: 'hall', z: -52, tier: 0, w: 6.0 });
 CAVES.push({ id: 'pillar', kind: 'pillar', z: -30, tier: 0, w: 7.0 });
 CAVES.push({ id: 'cell', kind: 'cell', z: 45, tier: 0, w: 3.2 });
+// more caves to enter (dossier §3): at the apron's level a second hall and pillar cave and two more cells, and off the gallery of tier 1 a hall, a pillar cave and a cell
+CAVES.push({ id: 'hall2', kind: 'hall', z: 26, tier: 0, w: 6.0, seed: 5 });
+CAVES.push({ id: 'pillar2', kind: 'pillar', z: 72, tier: 0, w: 7.0 });
+CAVES.push({ id: 'cell2', kind: 'cell', z: -90, tier: 0, w: 3.2 });
+CAVES.push({ id: 'cell3', kind: 'cell', z: 96, tier: 0, w: 3.2 });
+CAVES.push({ id: 'hall3', kind: 'hall', z: -62, tier: 1, w: 6.0, seed: 8 });
+CAVES.push({ id: 'pillar3', kind: 'pillar', z: 48, tier: 1, w: 7.0 });
+CAVES.push({ id: 'cell4', kind: 'cell', z: 92, tier: 1, w: 3.2 });
 {
   const taken = (z, t, w) => CAVES.some((c) => c.tier === t && Math.abs(c.z - z) < (c.w + w) / 2 + 4);
   const r = rng(850);
