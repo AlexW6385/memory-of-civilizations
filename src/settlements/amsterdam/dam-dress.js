@@ -3,7 +3,7 @@
 // stoops with their tubs, benches, baskets and casks, a maid scrubbing the step, neighbours in talk — and the square is given its small
 // theatre: a quack's stage with its audience, the crier with his staff, the milkmaids with their pails, a beggar at the Weigh House steps,
 // halberdiers at the Town Hall's door, children, dogs and pigeons. Explicit, derived from layout.js; a life plan like damLife's.
-import { RADIUS, GROUND, DAM, HALL, WAAG, lots, inRect } from './layout.js';
+import { RADIUS, GROUND, DAM, HALL, WAAG, NIEUWE_KERK, lots, inLot, inRect } from './layout.js';
 import { faceFrame } from '../../styles/dutch/facade.js';
 import { person, rng } from './town.js';
 
@@ -63,6 +63,25 @@ export function damDress() {
   // burghers in pairs strolling, a boy and his dog, dogs lying in the sun
   for (const [x, z, r] of [[-6, -231, 1.6], [12, -239, -1.3], [27, -219, 3.1], [-2, -214, 0.2], [-19, -245, 2.2]]) { P('burgher', x, z, r, { pose: 'talk' }); P(rand() < 0.5 ? 'lady' : 'wife', x + Math.sin(r + 2) * 1.1, z + Math.cos(r + 2) * 1.1, r + Math.PI * 0.9, { pose: 'talk' }); }
   E.push({ t: 'animal', kind: 'dog', at: [10.5, -214.4], y: Y, rot: 4.2, seed: 91 }, { t: 'animal', kind: 'dog', at: [-26, -236], y: Y, rot: 0.9, seed: 92 }, { t: 'animal', kind: 'cat', at: [-18.6, -203.8], y: Y, rot: 3.1, seed: 93, pose: 'sit' });
+
+  // the little shops built against the Nieuwe Kerk's walls (the Kramen: booksellers, hawkers of ribbons and crockery), their keepers and buyers
+  { const [kx0, kz0, kx1, kz1] = NIEUWE_KERK;
+    const aw = ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_green'], gd = [['bolts', 'baskets'], ['pottery', 'baskets'], ['bread', 'heap'], ['greens', 'basket'], ['bolts', 'pottery']];
+    let k = 0;
+    for (let x = kx0 + 3; x < kx1 - 2; x += 5.6, k++) {                       // along the south wall, their fronts to the south
+      const z = kz1 + 2.4; if (inLot(x, z, 1.5) || inLot(x, z + 3, 1)) continue;
+      E.push({ t: 'stall', at: [x, z], y: Y, rot: 0, seed: 700 + k, awning: aw[k % 4], goods: gd[k % gd.length], w: 2.6, d: 1.3 });
+      P(k % 2 ? 'wife' : 'worker', x + 0.2, z - 1.5, Math.PI);
+      if (rand() < 0.7) P(rand() < 0.5 ? 'lady' : 'burgher', x + (rand() - 0.5), z + 2.4, (rand() - 0.5) * 0.6, { pose: rand() < 0.5 ? 'talk' : 'stand' });
+    }
+    for (let z = kz0 + 6; z < kz1 - 10; z += 6.2, k++) {                      // along the west wall, their fronts to the west (the Dam's side)
+      const x = kx0 - 2.6; if (inLot(x, z, 1.5)) continue;
+      E.push({ t: 'stall', at: [x, z], y: Y, rot: Math.PI / 2, seed: 720 + k, awning: aw[(k + 1) % 4], goods: gd[(k + 2) % gd.length], w: 2.6, d: 1.3 });
+      P(k % 2 ? 'worker' : 'wife', x + 1.5, z, -Math.PI / 2);
+      if (rand() < 0.6) P(rand() < 0.5 ? 'burgher' : 'lady', x - 2.4, z + (rand() - 0.5), Math.PI / 2 + (rand() - 0.5) * 0.5, { pose: 'talk' });
+    }
+    E.push({ t: 'bench', at: [kx0 + 6, kz1 + 0.6], y: Y, rot: 0, len: 1.8, back: true }, { t: 'bench', at: [kx1 - 5, kz1 + 0.6], y: Y, rot: 0, len: 1.8, back: true });
+  }
   // the pigeons of the Dam, about the Weigh House and the Town Hall's steps
   for (const [x, z] of [[-5, -233], [-26, -216], [15, -222], [26, -233], [-14, -222], [34, -214], [3, -240]]) E.push({ t: 'chickens', kind: 'pigeon', n: 8 + Math.floor(rand() * 6), at: [x, z], y: Y, seed: Math.floor(x * 13 - z) });
   return [{ id: 'amsterdam-dam-dress', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: E, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' }, center: [5, -235], near: 230 }];
