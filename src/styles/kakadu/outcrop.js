@@ -213,15 +213,14 @@ export function outcropBlock(acc, B, o = {}) {
           const scars = [], nsc = Math.round(w * (yb - ya) / 7 * (0.5 + rnd()));
           for (let q = 0; q < nsc; q++) { const sw = 0.5 + rnd() * 1.4, sh = 0.3 + rnd() * 0.8, a0 = rnd() * Math.max(0.1, w - sw), b0 = rnd() * Math.max(0.1, yb - ya - sh); scars.push({ a0, a1: a0 + sw, b0, b1: b0 + sh, d: 0.12 + rnd() * 0.3 }); }
           const hon = b.honey ? { k: 1, cell: 0.42 + rnd() * 0.25, depth: 0.16 + rnd() * 0.1, seed: seed + 3, patch: (x, y, z) => noise3(x * 0.33, y * 0.4, z * 0.33, seed) * 0.8 + 0.2 * b.honey - 0.05, lo: 0.05, hi: 0.5 } : null;
-          const C = corners(xa, xb, ya, yb, zf - deep, zf, [[[[0, 0, 0], [0.1, 0.06, 0.14]], [[0, 0.07, 0], [0.1, 0.08, 0.14]]], [[[0, 0, 0], [0.1, 0.06, 0.14]], [[0, 0.07, 0], [0.1, 0.08, 0.14]]]].map((p) => p), rnd);
+          const C = corners(xa, xb, ya, yb, zf - deep, zf, [[[[0, 0, 0], [0.1, 0.12, 0.14]], [[0, 0.14, 0], [0.1, 0.16, 0.14]]], [[[0, 0, 0], [0.1, 0.12, 0.14]], [[0, 0.14, 0], [0.1, 0.16, 0.14]]]].map((p) => p), rnd);
           const sOpt = { res: hon ? 0.2 : res, relief: relief(seed, 0.2, 0.3, scars), honey: hon, pitMat: hon ? PIT[b.mat] ?? 'tuff_red' : null, pitThr: 0.45, edge: 0.3 };
-          const faces = { S: sOpt, T: ledge > 0.15 ? { res: 0.7, relief: relief(seed + 1, 0.05, 0.6), edge: 0.2 } : null };
+          const faces = { S: sOpt, T: ledge > 0.15 && !buried(B, cx, yb + 0.3, zf - 0.3) ? { res: 0.7, relief: relief(seed + 1, 0.05, 0.6), edge: 0.2 } : null };
           const ex = { res: 0.9, relief: relief(seed + 2, 0.12, 0.35) };
           if (!(c.end && buried(B, x1 + 0.25, (ya + yb) / 2, zf - 1))) faces.E = ex;
           else if (!c.end) faces.E = ex;
           if (!(xa === x0 + 0 && buried(B, x0 - 0.25, (ya + yb) / 2, zf - 1)) && (xa - x0 < 0.5 ? !buried(B, x0 - 0.25, (ya + yb) / 2, zf - 1) : true)) faces.W = ex;
-          if (!(S && buried(B, cx, (ya + yb) / 2, zf + 0.3))) hex(acc, b.mat, C, faces);
-          else hex(acc, b.mat, C, { ...faces, S: null });
+          if (!buried(B, cx, (ya + yb) / 2, zf - 1)) hex(acc, b.mat, C, faces);
           void ledge;
         }
       }
