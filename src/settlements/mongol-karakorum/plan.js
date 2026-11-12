@@ -3,7 +3,7 @@
 // door, the dais at the north; the court before it with the khan's great ger and a wagon-house, the nine-tailed banners, the stone tortoise;
 // the storehouses and the cellar for the drinks along the walls.
 
-import { PALACE, HALL, HALL_RECT, TREE, PALACE_GATE, STORES, COURT_GER, COURT_CART, BANNERS, TORTOISE } from './layout.js';
+import { PALACE, HALL, HALL_RECT, TREE, PALACE_GATE, STORES, COURT_GER, COURT_CART, BANNERS, TORTOISE, HOUSEHOLD } from './layout.js';
 
 const E = [];
 const [px0, pz0, px1, pz1] = PALACE;
@@ -20,6 +20,7 @@ E.push({ t: 'ger', c: COURT_GER.c, r: COURT_GER.r, open: true, rich: true, seed:
 E.push({ t: 'ger', c: COURT_CART.c, r: COURT_CART.r, cart: true, rich: true, seed: 12, door: Math.PI / 2 });
 for (const at of BANNERS) E.push({ t: 'tug', at, h: 7.5 });
 E.push({ t: 'tortoise', at: TORTOISE, yaw: 0.4 });
+HOUSEHOLD.forEach((g, i) => E.push({ t: 'ger', c: g.c, r: g.r, rich: g.rich, open: i === 1, seed: 30 + i, door: g.door }));
 // the storehouses (provisions and treasure "in great barns" [stated: Rubruck via UW]) and, on the west, the kitchens and the cellar of the drinks
 STORES.forEach((r, i) => E.push({ t: 'tile_hall', rect: r, y: 0.6, nx: 3, H: 4.0, kind: i < 2 ? 'gable' : 'hip', mat: 'tile_grey', wallMat: 'brick_grey', altar: null, furnish: 'store', seed: 200 + i }));
 // the cellar's mouth: a low brick vault set into the ground north of the hall, from which the drink is carried

@@ -2,7 +2,7 @@
 // forges' smoke in the Cathayan quarter, the cook-fires of the courts. The engine part is src/engine/smoke.js; positions come from layout.js and the camps.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { KILNS, FORGES, LOTS, CAMPS, COURT_GER, RADIUS, SECRETARIES, hearthOf } from './layout.js';
+import { KILNS, FORGES, LOTS, CAMPS, COURT_GER, HOUSEHOLD, RADIUS, SECRETARIES, hearthOf } from './layout.js';
 import { campGers } from './camp.js';
 
 const ID = 'mongol-karakorum';
@@ -15,6 +15,7 @@ export function emitters() {
   CAMPS_E(ger);
   for (const l of LOTS) if (l.kind === 'open') { const [x0, z0, x1, z1] = l.rect; ger([x0 + 4.2, (z0 + z1) / 2], 3.0, Math.round(x0 + z0)); if (r() < 0.5) ger([x0 + 11.6, (z0 + z1) / 2], 3.0, Math.round(x0 * 3 + z0)); }
   E.push({ p: [COURT_GER.c[0], 1.8 + 1.3 + 0.5 + 0.9, COURT_GER.c[1]], kind: 'kitchen', thr: 0.0, seed: 3 });
+  HOUSEHOLD.forEach((g, i) => ger(g.c, g.r, 700 + i));
   // the courts' cook-fires and ovens in the houses
   for (const l of LOTS) if (l.kind === 'house') { const h = hearthOf(l); E.push({ p: [h.p[0], h.y, h.p[1]], kind: 'kitchen', thr: 0.05 + 0.7 * r(), seed: Math.round(l.rect[0] * 3 + l.rect[1]) }); }
   for (const [i, q] of SECRETARIES.entries()) { const h = hearthOf({ rect: q, gate: i ? 'n' : 's', floors: 2 }); E.push({ p: [h.p[0], h.y, h.p[1]], kind: 'kitchen', thr: 0.1, seed: 900 + i }); }

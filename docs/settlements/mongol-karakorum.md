@@ -86,3 +86,11 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **Palace court:** a flagged way from the gate to the hall's steps, hitching rails, store sheds, the cellar's mouth, wine carts with their oxen, kitchens with cauldrons, about thirty courtiers, envoys and retainers in knots [stated: Rubruck: envoys of many nations at the feast].
 - **Planting:** poplar in the courts, willows round the wells, feather-grass tufts (halfa stands in) and tamarisk (for saxaul and sagebrush) on the steppe; the Mediterranean maquis of the first pass is gone [inferred: the Orkhon plain].
 - **Still not built:** the Great Hall's upper storey is shut; no street-level music zone; the minaret is not climbable.
+
+### 12. The first view and the court at eye level (2026-11-12)
+
+- **The arrival is on the court's axis in the gate**, and the court's walkers keep to its two flanks (2.4 m off the axis), so nobody walks through the view.
+- **The khan's household behind the hall:** six gers of his wives and servants (two of them rich, one open) behind the hall and by the east wall, each with its yard, a woman at the work of the day, a child, a dog, a horse tethered at two [inferred: a court lived in gers; Rubruck's great ger stands in the court — §4]. Their hearths smoke at the meals.
+- **The court at eye level:** the yards of the great ger and the wagon-house (dung cakes, the churn, meat drying, washing); the gate guards' bench, fire-wood and barrels inside the gate; dogs asleep in the sun, children at knucklebones by the banners; a felt-maker's yard by the west storehouses (rolled felts, wool, aaruul — dried curd — on trays) [inferred].
+- **Birds:** ravens on the banner staves and the great hall's ridge, doves on the gate hall's eaves, a falcon and a kite over the court.
+- **Ground and planting:** the court's floor trodden along its axis and scuffed and patched with dry grass and dung at the margins, grassy at the foot of the walls; poplars along the walls' feet.

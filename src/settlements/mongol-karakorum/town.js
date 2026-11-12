@@ -4,7 +4,7 @@
 // (the walkers are in movers.js).
 import {
   RADIUS, WALL, WALL_TH, WALL_H, GATES, GATE_W, MAIN, CROSS, PALACE, HALL, HALL_RECT, TREE, GREAT_HALL, KILNS, FORGES, TEMPLES, TEMPLES_NW, WORKSHOPS, MOSQUES, CHURCH,
-  SECRETARIES, SHOPS, shopRect, WELLS, LOTS, CAMPS, PENS, OUTSIDE_WAGONS, COURT_GER, COURT_CART, STORES, height, inBuilt, inTown, inPalace, onStreet,
+  SECRETARIES, SHOPS, shopRect, WELLS, LOTS, CAMPS, PENS, OUTSIDE_WAGONS, COURT_GER, COURT_CART, HOUSEHOLD, STORES, height, inBuilt, inTown, inPalace, onStreet,
 } from './layout.js';
 import { campElements } from './camp.js';
 import { frontFrame } from '../../styles/mongol/local.js';
@@ -219,6 +219,16 @@ export async function town() {
   T.push({ t: 'goods_mat', at: [28.4, -28.4], y: 0, rot: 0.2, seed: seed(), goods: ['bolts'] }); T.push({ t: 'goods_mat', at: [31.0, -30.0], y: 0, rot: 1.1, seed: seed(), goods: ['bolts'] });
   T.push({ t: 'sacks', at: [26.4, -27.2], y: 0, rot: 0.6, seed: seed(), n: 4 }); mwoman([29.6, -26.4], 0, 3.4, { pose: 'kneel' }); cathay([32.8, -28.8], 0, 2.6, { pose: 'stand', over: 'apron', cloth: col.brown });
   for (const [x, z] of [[24, -23], [26.2, -22.4], [112, -33], [114.2, -33.6]]) T.push({ t: 'drying_tray', at: [x, z], y: 0, rot: rand() * 3, seed: seed(), h: 0.9 });
+  // the khan's household behind the hall: each ger with its yard, the women at the work of the day (churning the mare's milk, sewing felt, tending the fire), children, a dog, a horse tethered
+  HOUSEHOLD.forEach((g, i) => {
+    yard(g.c[0], g.c[1], g.r, [1, 2, 3, 5, 6, 3][i]);
+    const sx = g.c[0] + g.r + 1.6, sz = g.c[1] + g.r * 0.5;
+    mwoman([g.c[0] - g.r * 0.5, g.c[1] + g.r + 1.6], 0, rand() * 6.28, { pose: i % 2 ? 'kneel' : 'stand', carry: i % 2 ? 'none' : 'pot' });
+    if (i % 2 === 0) mwoman([sx, sz + 1.4], 0, 1.9, { pose: 'kneel' });
+    fig([sx + 0.6, sz - 1.1], 0, 0.6 + i, { dress: 'robe', cloth: pick([col.red, col.ochre, col.green]), cloth2: col.white, over: 'sash', child: true, h: 1.0, hat: 'cap', hatMat: 'cloth_red', feet: 'shod', hair: 'bun', pose: i % 3 ? 'squat' : 'stand' });
+    E_animal(T, 'dog', [g.c[0] + g.r + 2.4, g.c[1] - g.r], 0, rand() * 6.28, seed());
+    if (i < 2) E_animal(T, 'horse', [g.c[0] + g.r + 3.0, g.c[1] + g.r * 0.2], 0, 1.57, seed());
+  });
   // lone herd-boys, a woman milking mares at the horse lines, tethers
   for (const c of [CAMPS.sw, CAMPS.se]) { mwoman([c[0] + 28, c[1] - 6], height(c[0], c[1]), 1.0, { pose: 'kneel' }); for (let k = 0; k < 4; k++) E_animal(T, 'horse', [c[0] + 30 + (k % 2) * 1.6, c[1] - 4 + k * 1.6], height(c[0], c[1]), 1.57, seed()); }
   // ── the markets at the gates [stated: Rubruck]: horses at the north, sheep and goats at the west, oxen and carts at the south, grain at the east ──
