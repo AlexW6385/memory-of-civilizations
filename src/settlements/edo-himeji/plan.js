@@ -109,6 +109,10 @@ E.push({ t: 'yagura_mon', rect: [-12, MIDDLE.z0 - 9, 12, MIDDLE.z0 - 1], y: 0, p
   const N = NINO.top, H = HON.top;
   [[-95, -100, 7.5], [-95, -60, 8.5], [-96, -20, 7], [-96, 12, 6.5], [-62, 8, 7], [-30, 6, 6], [22, 9, 7.5], [44, -100, 8], [44, -50, 7], [44, -10, 8.5], [-40, -132, 6.5]].forEach(([x, z, h], i) => pine(x, z, N, h, 70 + i));
   [[-70, -60, 8], [-76, -20, 7], [18, -70, 8.5], [22, -20, 7], [-45, -10, 6.5], [-20, -112, 7], [10, -108, 7.5]].forEach(([x, z, h], i) => pine(x, z, H, h, 90 + i));
+  // the Honmaru's south yard, the foreground of the arrival: the guards' hall west of the stair (the lord's reception hall of the Honmaru, after Honda's time) and two plastered storehouses east of it
+  E.push({ t: 'goten', y: H, halls: [[-76, -27, -52, -9]], open: { 0: { face: 'e', W: 12, dq: 7 } } });
+  for (const x of [8, 17]) E.push({ t: 'kura', rect: [x, -28, x + 7, -20], y: H });
+  E.push({ t: 'lane', rect: [-52, -20, -34, -14], y: H + 0.02, mat: 'flagstone' });
   E.push({ t: 'ido', at: [-46, 11], y: N, rot: 0.4 }, { t: 'ido', at: [46, -72], y: N, rot: 1.2 }, { t: 'ido', at: [-72, -14], y: H, rot: 2 });
   for (const [x, z, y] of [[-12, 14, N], [12, 15, N], [-8, -8, H], [24, -4, H], [-25.5, -16, H]]) E.push({ t: 'ishidoro', at: [x, z], y, s: 1.2 });
   for (const x of [-90, -78, -66]) E.push({ t: 'kura', rect: [x, -138, x + 8, -130], y: N });
