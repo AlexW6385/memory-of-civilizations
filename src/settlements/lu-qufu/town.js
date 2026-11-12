@@ -159,8 +159,8 @@ function people() {
   }
   // the temple: pilgrims kneeling at the burners and the altar, scholars before the Kuiwen Pavilion, the guides
   for (const [x, z] of [[-9.5, -44], [9.5, -44], [0, ALTAR.c[1] + 7]]) fig([x + 1.6, z + 0.2], Math.PI / 2, { pose: 'kneel', arms: 'pray', cloth: pick(CL) });
-  for (let k = 0; k < 18; k++) { const at = [-50 + rand() * 100, -96 + rand() * 40]; if (Math.hypot(at[0], at[1] - ALTAR.c[1]) < 10) continue; fig(at, rand() * 6.28, { cloth: pick(['cloth_blue', 'cloth_white', 'cloth_indigo']), pose: rand() < 0.4 ? 'talk' : 'stand' }); }
-  for (let k = 0; k < 12; k++) { const at = [-14 + rand() * 28, -16 + rand() * 40]; fig(at, rand() * 6.28, { cloth: pick(CL), pose: 'stand', carry: rand() < 0.2 ? 'staff' : 'none' }); }
+  for (let k = 0; k < 18; k++) { const at = [-50 + rand() * 100, -96 + rand() * 40]; if (Math.hypot(at[0], at[1] - ALTAR.c[1]) < 10 || Math.abs(at[0]) < 4.5) continue; fig(at, rand() * 6.28, { cloth: pick(['cloth_blue', 'cloth_white', 'cloth_indigo']), pose: rand() < 0.4 ? 'talk' : 'stand' }); }
+  for (let k = 0; k < 12; k++) { const at = [-14 + rand() * 28, -16 + rand() * 40]; if (Math.abs(at[0]) < 4.5) continue; fig(at, rand() * 6.28, { cloth: pick(CL), pose: 'stand', carry: rand() < 0.2 ? 'staff' : 'none' }); }
   // the Duke's household: guards at the mansion's gate, the Duke at his table in the great hall, clerks at their desks, servants in the court
   for (const sx of [-1, 1]) fig([MX + sx * 4.5, 114], Math.PI, { pose: 'staff', carry: 'staff', len: 2.0, cloth: 'cloth_red', over: 'sash' });
   const dt = MANSION_HALLS[3];

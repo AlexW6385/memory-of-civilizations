@@ -58,7 +58,7 @@ function sageRoom(T, [x0, z0, x1, z1], y, rand) {
 }
 function kuiwenRoom(T, ctx, [x0, z0, x1, z1], y, rand) {
   // books of the emperors on shelves along the back and sides; a reading table; a great stele; the lantern
-  for (const [a, b, c, d] of [[x0 + 0.4, z0 + 0.3, x1 - 0.4, z0 + 0.8], [x0 + 0.3, z0 + 1.2, x0 + 0.8, z1 - 2.5], [x1 - 0.8, z0 + 1.2, x1 - 0.3, z1 - 2.5]]) {
+  for (const [a, b, c, d] of [[x0 + 0.4, z0 + 0.3, (x0 + x1) / 2 - 2.4, z0 + 0.8], [(x0 + x1) / 2 + 2.4, z0 + 0.3, x1 - 0.4, z0 + 0.8], [x0 + 0.3, z0 + 1.2, x0 + 0.8, z1 - 2.5], [x1 - 0.8, z0 + 1.2, x1 - 0.3, z1 - 2.5]]) {
     T.B('lacquer_chestnut', a, y, b, c, y + 2.6, d, true);
     const along = c - a > d - b;
     for (let r = 0; r < 4; r++) for (let k = 0; k < Math.floor((along ? c - a : d - b) / 0.22); k++) {
@@ -67,7 +67,7 @@ function kuiwenRoom(T, ctx, [x0, z0, x1, z1], y, rand) {
     }
   }
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-  table(T, cx, y, cz, 2.4, 1.0, 0.8); for (const sx of [-1, 1]) chair(T, cx + sx * 0.7, y, cz - 0.8, 's');
+  table(T, cx - 5.5, y, cz, 2.4, 1.0, 0.8); for (const sx of [-1, 1]) chair(T, cx - 5.5 + sx * 0.7, y, cz - 0.8, 's');
   T.B('granite_black', cx + 5.2, y, cz + 0.3, cx + 6.4, y + 0.4, cz + 2.0, true); T.B('granite_grey', cx + 5.4, y + 0.4, cz + 0.8, cx + 6.2, y + 3.4, cz + 1.0, true);
   lantern(T, cx, y + 3.0, cz); lantern(T, cx - 5, y + 3.0, cz + 1.0); lantern(T, cx + 5, y + 3.0, cz + 1.0);
   void ctx;
