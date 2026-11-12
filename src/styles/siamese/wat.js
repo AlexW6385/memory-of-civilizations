@@ -65,11 +65,17 @@ function watCourt(el, ctx) {
       col.rect([x - 0.55, z - 0.55, x + 0.55, z + 0.55], y, y + 1.7);
     }
   }
+  let k = 0;
   for (const [x, z] of el.flags ?? []) {
     bag.add('bamboo_culm', lathe([[0.06, 0], [0.035, 9]], 5, null, x, y, z)); col.circle(x, z, 0.1, y, y + 3);
-    const t = [], w = 0.55, hh = 5.2, q = (p0, p1, p2, p3) => t.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3, ...p0, ...p2, ...p1, ...p0, ...p3, ...p2);
-    const sw = 0.2 + rand() * 0.2; q([x, y + 8.8, z], [x + 0.02, y + 8.8, z + w], [x + sw, y + 8.8 - hh, z + w], [x + sw, y + 8.8 - hh, z]);
-    bag.add('cloth_white', fromTriangles(t));
+    // a tung: a long pennant hung from a crossbar at the pole's head, its face to the court (north-south), waving a little along the wind, a swallow-tail at the foot
+    const mat = k % 3 === 1 ? 'cloth_red' : k % 3 === 2 ? 'cloth_white' : 'cloth_ochre', top = y + 8.6, len = 4.2, w0 = 0.62, n = 7, ph = rand() * 6.28, t = [];
+    bag.add('bamboo_culm', rod([x, top, z], [x + w0 + 0.1, top, z], 0.025, 5));
+    const pt = (i, side) => { const f = i / n, wx = w0 * (1 - 0.55 * f), px = x + 0.05 + (side ? wx : 0) + Math.sin(f * 4 + ph) * 0.08 * f; return [px, top - f * len, z + 0.03 + Math.sin(f * 5 + ph) * 0.22 * f]; };
+    for (let i = 0; i < n; i++) { const a = pt(i, 0), b = pt(i, 1), c = pt(i + 1, 1), d = pt(i + 1, 0); t.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c); }
+    const L = pt(n, 0), R = pt(n, 1), M = [(L[0] + R[0]) / 2, L[1] + 0.35, (L[2] + R[2]) / 2]; t.push(...L, ...R, ...M, ...L, ...M, ...R);
+    bag.add(mat, fromTriangles(t));
+    k++;
   }
   for (const [x, z, rot] of el.tables ?? []) {
     const g = [];
